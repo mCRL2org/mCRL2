@@ -1,7 +1,7 @@
-// Date: 30-11-2004
+// Date: 01-12-2004
 // This document describes the output format of the GenSpect parser. Here:
-// - <IdString> represents a string of the format '[a-zA-Z_][a-zA-Z0-9_]*'
 // - <NumberString> represents a string of the format '"0"|("-"?[1-9][0-9]*)'
+// - <String> represents an arbitrary string
 // - the other alphabetical strings within angular brackets are non-terminals
 //   that represent all possible branches of their productions
 // - for non-terminal N, N*/N+ represents an ATermList with zero/one or more N's
@@ -11,48 +11,66 @@
 //General
 //-------
 
-//identifier
-<Id>         ::= Id(<IdString>) 
+//sort identifier
+<SortId>     ::= SortId(<String>) 
+
+//data identifier
+<DataId>     ::= DataId(<String>, <SortExpr>) 
+
+//action identifier
+<ActId>      ::= ActId(<String>, <SortExpr>*) 
+
+//process identifier
+<ProcessId>  ::= ProcessId(<String>) 
+
+//data variable
+<DataVar>    ::= DataVar(<String>, <SortExpr>) 
+
+//data id or nil
+<DataIdOrNil>::= <DataId> | Nil() 
+
+//action id or nil
+<ActIdOrNil> ::= <ActId> | Nil() 
 
 //number
 <Number>     ::= Number(<NumberString>) 
-
-//identifier declaration
-<IdDecl>     ::= IdDecl(<Id>, <SortExpr>) 
-
-//id or nil
-<IdOrNil>    ::= <Id> | Nil() 
 
 //Specification
 //-------------
 
 //specification
-<Spec>       ::= Spec(SortSpec(<SortDecl>*), ConsSpec(<IdDecl>*),
-                   MapSpec(<IdDecl>*), EqnSpec(<EqnSect>*),
+<Spec>       ::= Spec(SortSpec(<SortDecl>*), ConsSpec(<DataDecl>*),
+                   MapSpec(<DataDecl>*), EqnSpec(<EqnSect>*),
                    ActSpec(<ActDecl>*), ProcSpec(<ProcDecl>*), Init(<ProcExpr>)
                   )
 
 //sort declaration
-<SortDecl>   ::= SortDeclStandard(<Id>) 
-               | SortDeclRef(<Id>, <SortExpr>) 
+<SortDecl>   ::= SortDeclStandard(<SortId>) 
+               | SortDeclRef(<SortId>, <SortExpr>) 
+
+//data declaration
+<DataDecl>   ::= DataDecl(<DataId>)
 
 //equation section
-<EqnSect>    ::= EqnSect(<IdDecl>*, <EqnDecl>+) 
+<EqnSect>    ::= EqnSect(<DataVarDecl>*, <EqnDecl>+) 
+
+//data variable declaration
+<DataVarDecl>::= DataVarDecl(<DataVar>)
 
 //equation declaration
 <EqnDecl>    ::= EqnDecl(<DataExpr>, <DataExpr>) 
 
 //action declaration
-<ActDecl>    ::= ActDecl(<Id>, <SortExpr>*) 
+<ActDecl>    ::= ActDecl(<ActId>) 
 
 //process declaration
-<ProcDecl>   ::= ProcDecl(<Id>, <IdDecl>*, <ProcExpr>) 
+<ProcDecl>   ::= ProcDecl(<ProcId>, <DataVarDecl>*, <ProcExpr>) 
 
 //Expressions
 //-----------
 
 //sort expression
-<SortExpr>   ::= <Id>
+<SortExpr>   ::= <SortId>
                | SortBool() 
                | SortPos() 
                | SortNat() 
@@ -62,15 +80,17 @@
                | SortBag(<SortExpr>) 
                | SortArrow(<SortExpr>+, <SortExpr>) 
                | SortStruct(<StructCons>+) 
+               | SortUnknown()
+               | SortAny()
 
 //constructor declaration of a structured sort
-<StructCons> ::= StructCons(<Id>, <StructProj>*, <IdOrNil>) 
+<StructCons> ::= StructCons(<DataId>, <StructProj>*, <DataIdOrNil>) 
 
 //projection declaration of a structured sort
-<StructProj> ::= StructProj(<IdOrNil>, <SortExpr>+) 
+<StructProj> ::= StructProj(<DataIdOrNil>, <SortExpr>+) 
 
 //data expression
-<DataExpr>   ::= <Id>
+<DataExpr>   ::= <DataId>
                | <Number>
                | True() 
                | False() 
@@ -78,14 +98,14 @@
                | EmptySetBag() 
                | ListEnum(<DataExpr>+) 
                | SetEnum(<DataExpr>+) 
-               | BagEnum(BagEnumElt+) 
-               | SetBagComp(<IdDecl>, <DataExpr>) 
-               | FuncApp(<DataExpr>, <DataExpr>+) 
+               | BagEnum(<BagEnumElt>+) 
+               | SetBagComp(<DataVarDecl>, <DataExpr>) 
+               | DataAppl(<DataExpr>, <DataExpr>+) 
                | NotOrCompl(<DataExpr>) 
                | Neg(<DataExpr>) 
                | Size(<DataExpr>) 
-               | Forall(<IdDecl>+, <DataExpr>) 
-               | Exists(<IdDecl>+, <DataExpr>) 
+               | Forall(<DataVarDecl>+, <DataExpr>) 
+               | Exists(<DataVarDecl>+, <DataExpr>) 
                | ListAt(<DataExpr>, <DataExpr>) 
                | MultOrIntersect(<DataExpr>, <DataExpr>) 
                | Div(<DataExpr>, <DataExpr>) 
@@ -105,23 +125,23 @@
                | And(<DataExpr>, <DataExpr>) 
                | Or(<DataExpr>, <DataExpr>) 
                | Imp(<DataExpr>, <DataExpr>) 
-               | Lambda(<IdDecl>+, <DataExpr>) 
+               | Lambda(<DataVarDecl>+, <DataExpr>) 
                | Whr(<DataExpr>, <WhrDecl>+) 
 
 //bag enumeration element
 <BagEnumElt> ::= BagEnumElt(<DataExpr>, <DataExpr>) 
 
 //where clause declaration
-<WhrDecl>    ::= WhrDecl(<Id>, <DataExpr>) 
+<WhrDecl>    ::= WhrDecl(<DataVarDecl>, <DataExpr>) 
 
 //process expression
-<ProcExpr>   ::= ActProcRef(<Id>, <DataExpr>*) 
+<ProcExpr>   ::= ActProcRef(<String>, <DataExpr>*) 
                | Delta() 
                | Tau() 
-               | Sum(<IdDecl>+, <ProcExpr>) 
-               | Restrict(<MAId>*, <ProcExpr>) 
-               | Allow(<MAId>*, <ProcExpr>) 
-               | Hide(<MAId>*, <ProcExpr>) 
+               | Sum(<DataVarDecl>+, <ProcExpr>) 
+               | Restrict(<MultActId>*, <ProcExpr>) 
+               | Allow(<MultActId>*, <ProcExpr>) 
+               | Hide(<MultActId>*, <ProcExpr>) 
                | Ren(<RenExpr>*, <ProcExpr>) 
                | Comm(<CommExpr>*, <ProcExpr>) 
                | Sync(<ProcExpr>, <ProcExpr>) 
@@ -134,10 +154,10 @@
                | Choice(<ProcExpr>, <ProcExpr>) 
 
 //multiaction identifier
-<MAId>       ::= MAId(<Id>+) 
+<MultActId>  ::= MultActId(<ActId>+) 
 
 //renaming expression
-<RenExpr>    ::= RenExpr(<Id>, <Id>) 
+<RenExpr>    ::= RenExpr(<ActId>, <ActId>) 
 
 //communication expression
-<CommExpr>   ::= CommExpr(<MAId>, <IdOrNil>) 
+<CommExpr>   ::= CommExpr(<MultActId>, <ActIdOrNil>) 
