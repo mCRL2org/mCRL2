@@ -322,6 +322,9 @@ ATermAppl gsGetSort(ATermAppl DataExpr);
 //Ret: if DataExpr is a DataVarId, OpId, or DataApp, return its sort
 //     return Unknown, otherwise
 
+int gsMaxDomainLength(ATermAppl SortExpr);
+//Pre: SortExpr is a sort expression
+//Ret: the maximum number of sort expressions that can serve as a domain
 
 //Creation of operation identifiers for system defined operations.
 ATermAppl gsMakeOpIdTrue(void);
@@ -750,6 +753,36 @@ ATermAppl gsMakeDataExprInt(char *z);
 //Pre: z is of the form "0 | -? [1-9][0-9]*"
 //Ret: data expression of sort Int that is a representation of z
 
+ATermAppl gsGetDataExprHead(ATermAppl DataExpr);
+//Pre: DataExpr is a data expression
+//ret: the head of a data expression
+
+int gsGetDataExprNrArgs(ATermAppl DataExpr);
+//Pre: DataExpr is a data expression
+//Ret: the number of arguments of the data expression
+
+ATermAppl gsGetDataExprArg(ATermAppl DataExpr, int Index);
+//Pre: DataExpr is a data expression
+//     0 <= Index < gsGetDataExprNrArgs(DataExpr)
+//Ret: argument Index of the data expression
+
+bool gsIsOpIdPrefix(ATermAppl Term);
+//Ret: DataExpr is a prefix operation identifier
+
+bool gsIsOpIdInfix(ATermAppl Term);
+//Ret: DataExpr is an infix operation identifier
+
+int gsPrecOpIdInfix(ATermAppl OpIdInfix);
+//Pre: OpIdInfix is an infix operation identifier
+//Ret: Precedence of the operation itself
+
+int gsPrecOpIdInfixLeft(ATermAppl OpIdInfix);
+//Pre: OpIdInfix is an infix operation identifier
+//Ret: Precedence of the left argument of the operation
+
+int gsPrecOpIdInfixRight(ATermAppl OpIdInfix);
+//Pre: OpIdInfix is an infix operation identifier
+//Ret: Precedence of the right argument of the operation
 
 #ifdef __cplusplus
 }

@@ -1350,6 +1350,17 @@ ATermAppl gsGetSort(ATermAppl DataExpr)
   }
 }
 
+int gsMaxDomainLength(ATermAppl SortExpr)
+{
+  if (gsIsSortArrow(SortExpr)) {
+    return gsMaxDomainLength(ATAgetArgument(SortExpr, 1)) + 1; 
+  } else if (gsIsSortArrowProd(SortExpr)) {
+    return gsMaxDomainLength(ATAgetArgument(SortExpr, 1)) +
+      ATgetLength(ATLgetArgument(SortExpr, 0));
+  } else {
+    return 0;
+  }
+}
 
 //Creation of operation identifiers for system defined operations.
 ATermAppl gsMakeOpIdTrue(void)
@@ -2200,5 +2211,160 @@ ATermAppl gsMakeDataExprInt(char *i)
     return gsMakeDataExprCNeg(gsMakeDataExprPos(i+1));
   } else {
     return gsMakeDataExprCInt(gsMakeDataExprNat(i));
+  }
+}
+
+ATermAppl gsGetDataExprHead(ATermAppl DataExpr)
+{
+  if (gsIsDataAppl(DataExpr) || gsIsDataApplProd(DataExpr)) {
+    return gsGetDataExprHead(ATAgetArgument(DataExpr, 0));
+  } else {
+    return DataExpr;
+  }
+}
+
+int gsGetDataExprNrArgs(ATermAppl DataExpr)
+{
+  if (gsIsDataAppl(DataExpr)) {
+    return gsGetDataExprNrArgs(ATAgetArgument(DataExpr, 0)) + 1; 
+  } else if (gsIsDataApplProd(DataExpr)) {
+    return gsGetDataExprNrArgs(ATAgetArgument(DataExpr, 0)) +
+      ATgetLength(ATLgetArgument(DataExpr, 1));
+  } else {
+    return 0;
+  }
+}
+
+ATermAppl gsGetDataExprArg(ATermAppl DataExpr, int Index)
+{
+  int NrArgs = gsGetDataExprNrArgs(DataExpr);
+  assert(NrArgs > 0);
+  if (gsIsDataAppl(DataExpr)) {
+    if (Index < NrArgs - 1) {
+      return gsGetDataExprArg(ATAgetArgument(DataExpr, 0), Index);
+    } else {
+      //Index == NrArgs - 1,
+      //from Index >= NrArgs - 1 and precondition Index < NrArgs
+      return ATAgetArgument(DataExpr, 1);
+    }
+  } else if (gsIsDataApplProd(DataExpr)) {
+    ATermList Args = ATLgetArgument(DataExpr, 1);
+    int ArgsLength = ATgetLength(Args);
+    if (Index < NrArgs - ArgsLength) {
+      return gsGetDataExprArg(ATAgetArgument(DataExpr, 0), Index);
+    } else {
+      //0 <= Index - (NrArgs - ArgsLength) < ArgsLength,
+      //from Index >= NrArgs - ArgsLength and precondition Index < NrArguments
+      return ATAelementAt(ATLgetArgument(DataExpr, 1),
+        Index - (NrArgs - ArgsLength));
+    }
+  } else {
+    return NULL;
+  }
+}
+
+bool gsIsOpIdPrefix(ATermAppl Term)
+{
+  bool Result = gsIsOpId(Term);
+  if (Result) {
+    ATermAppl OpIdName = ATAgetArgument(Term, 0);
+    Result =
+      (gsMaxDomainLength(ATAgetArgument(Term, 1)) == 1) &&
+      ((OpIdName == gsOpIdNameNot) || (OpIdName == gsOpIdNameNeg));
+  }
+  return Result;
+}
+
+bool gsIsOpIdInfix(ATermAppl Term)
+{
+  bool Result = gsIsOpId(Term);
+  if (Result) {
+    ATermAppl OpIdName = ATAgetArgument(Term, 0);
+    Result =
+      (gsMaxDomainLength(ATAgetArgument(Term, 1)) == 2) &&
+      ((OpIdName == gsOpIdNameImp)  ||
+       (OpIdName == gsOpIdNameAnd)  ||
+       (OpIdName == gsOpIdNameOr)   ||
+       (OpIdName == gsOpIdNameEq)   ||
+       (OpIdName == gsOpIdNameNeq)  ||
+       (OpIdName == gsOpIdNameLT)   ||
+       (OpIdName == gsOpIdNameLTE)  ||
+       (OpIdName == gsOpIdNameGT)   ||
+       (OpIdName == gsOpIdNameGTE)  ||
+       (OpIdName == gsOpIdNameAdd)  ||
+       (OpIdName == gsOpIdNameSubt) ||
+       (OpIdName == gsOpIdNameMult) ||
+       (OpIdName == gsOpIdNameDiv)  ||
+       (OpIdName == gsOpIdNameMod));
+  }
+  return Result;
+}
+
+int gsPrecOpIdInfix(ATermAppl OpIdInfix)
+{
+  ATermAppl OpIdName = ATAgetArgument(OpIdInfix, 0);
+  if (OpIdName == gsOpIdNameImp) {
+    return 2;
+  } else if ((OpIdName == gsOpIdNameAnd) || (OpIdName == gsOpIdNameOr)) {
+    return 3;
+  } else if ((OpIdName == gsOpIdNameEq) || (OpIdName == gsOpIdNameNeq)) {
+    return 4;
+  } else if ((OpIdName == gsOpIdNameLT) || (OpIdName == gsOpIdNameLTE) ||
+      (OpIdName == gsOpIdNameGT) || (OpIdName == gsOpIdNameGTE)) {
+    return 5;
+  } else if ((OpIdName == gsOpIdNameAdd) || (OpIdName == gsOpIdNameSubt)) {
+    return 9;
+  } else if ((OpIdName == gsOpIdNameMult) || (OpIdName == gsOpIdNameDiv) ||
+      (OpIdName == gsOpIdNameMod)) {
+    return 10;
+  } else {
+    //something went wrong
+    return -1;
+  }
+}
+
+int gsPrecOpIdInfixLeft(ATermAppl OpIdInfix)
+{
+  ATermAppl OpIdName = ATAgetArgument(OpIdInfix, 0);
+  if (OpIdName == gsOpIdNameImp) {
+    return 3;
+  } else if ((OpIdName == gsOpIdNameAnd) || (OpIdName == gsOpIdNameOr)) {
+    return 3;
+  } else if ((OpIdName == gsOpIdNameEq) || (OpIdName == gsOpIdNameNeq)) {
+    return 4;
+  } else if ((OpIdName == gsOpIdNameLT) || (OpIdName == gsOpIdNameLTE) ||
+      (OpIdName == gsOpIdNameGT) || (OpIdName == gsOpIdNameGTE)) {
+    return 6;
+  } else if ((OpIdName == gsOpIdNameAdd) || (OpIdName == gsOpIdNameSubt)) {
+    return 9;
+  } else if ((OpIdName == gsOpIdNameMult) || (OpIdName == gsOpIdNameDiv) ||
+      (OpIdName == gsOpIdNameMod)) {
+    return 10;
+  } else {
+    //something went wrong
+    return -1;
+  }
+}
+
+int gsPrecOpIdInfixRight(ATermAppl OpIdInfix)
+{
+  ATermAppl OpIdName = ATAgetArgument(OpIdInfix, 0);
+  if (OpIdName == gsOpIdNameImp) {
+    return 2;
+  } else if ((OpIdName == gsOpIdNameAnd) || (OpIdName == gsOpIdNameOr)) {
+    return 4;
+  } else if ((OpIdName == gsOpIdNameEq) || (OpIdName == gsOpIdNameNeq)) {
+    return 5;
+  } else if ((OpIdName == gsOpIdNameLT) || (OpIdName == gsOpIdNameLTE) ||
+      (OpIdName == gsOpIdNameGT) || (OpIdName == gsOpIdNameGTE)) {
+    return 6;
+  } else if ((OpIdName == gsOpIdNameAdd) || (OpIdName == gsOpIdNameSubt)) {
+    return 10;
+  } else if ((OpIdName == gsOpIdNameMult) || (OpIdName == gsOpIdNameDiv) ||
+      (OpIdName == gsOpIdNameMod)) {
+    return 11;
+  } else {
+    //something went wrong
+    return -1;
   }
 }

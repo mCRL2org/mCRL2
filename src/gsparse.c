@@ -1,5 +1,5 @@
 #define  NAME      "gsparse"
-#define  LVERSION  "0.1.20"
+#define  LVERSION  "0.1.21"
 #define  AUTHOR    "Aad Mathijssen"
 
 #ifdef __cplusplus
