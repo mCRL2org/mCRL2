@@ -8,7 +8,7 @@ AC_PROG_CC
 AC_PROG_LEX
 
 # Check for compatible bison
-AC_PATH_PROG([BISON], [bison], [])
+AC_CHECK_PROG([BISON], [bison], [bison], [])
 if test -z $BISON; then
   AC_MSG_ERROR([cannot find bison])
 fi
