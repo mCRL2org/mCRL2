@@ -284,6 +284,7 @@ ATermAppl gsDeclareDataEqn(ATermAppl Spec, ATermAppl DataEqn)
 ATermAppl gsImplExprs(ATermAppl Spec)
 {
   assert(gsIsSpecV1(Spec));
+  //implement special sort and data expressions occurring in Spec
   ATermList Substs   = ATmakeList0();
   TDataDecls DataDecls;
   DataDecls.Sorts    = ATmakeList0();
@@ -291,6 +292,9 @@ ATermAppl gsImplExprs(ATermAppl Spec)
   DataDecls.Ops      = ATmakeList0();
   DataDecls.DataEqns = ATmakeList0();
   Spec = gsImplExprsPart(Spec, &Substs, &DataDecls);
+  //add declarations for sort Bool
+  DataDecls.Sorts = ATinsert(DataDecls.Sorts, (ATerm) gsMakeSortIdBool());
+  //add new data declarations to Spec
   Spec = gsAddDataDecls(Spec, DataDecls);
   return Spec;
 }
@@ -382,6 +386,34 @@ ATermAppl gsImplExprsPart(ATermAppl Part, ATermList *PSubsts,
     ATermAppl Subst = gsMakeSubst(Part, SortId);
     *PSubsts = gsAddSubstToSubsts(Subst, *PSubsts);
     Part = SortId;
+  } else if (gsIsSortId(Part)) {
+    //Part is a sort identifier; add data declarations for this sort, if it is
+    //a system sort identifier that has not been declared yet
+    if (ATisEqual(Part, gsMakeSortIdInt())) {
+      //add sort Int, if necessary
+      if (ATindexOf(PDataDecls->Sorts, (ATerm) gsMakeSortIdInt(), 0) == -1) {
+        PDataDecls->Sorts =
+          ATinsert(PDataDecls->Sorts, (ATerm) gsMakeSortIdInt());
+      }
+    }
+    if (ATisEqual(Part, gsMakeSortIdNat()) ||
+      ATisEqual(Part, gsMakeSortIdInt()))
+    {
+      //add sort Nat, if necessary
+      if (ATindexOf(PDataDecls->Sorts, (ATerm) gsMakeSortIdNat(), 0) == -1) {
+        PDataDecls->Sorts =
+          ATinsert(PDataDecls->Sorts, (ATerm) gsMakeSortIdNat());
+      }
+    }
+    if (ATisEqual(Part, gsMakeSortIdPos()) ||
+      ATisEqual(Part, gsMakeSortIdNat()) || ATisEqual(Part, gsMakeSortIdInt()))
+    {
+      //add sort Pos, if necessary
+      if (ATindexOf(PDataDecls->Sorts, (ATerm) gsMakeSortIdPos(), 0) == -1) {
+        PDataDecls->Sorts =
+          ATinsert(PDataDecls->Sorts, (ATerm) gsMakeSortIdPos());
+      }
+    }
   } else if (gsIsDataApplProd(Part)) {
     //Part is a product data application; replace by data applications and
     //implement expressions in the arguments
