@@ -141,7 +141,7 @@ int gsyywrap(void) {
 ATermAppl gsParse(FILE *FormStream) {
   ATermAppl Result = NULL;
   gsTree = NULL;
-  ATprotect((ATerm*) &gsTree);
+  ATprotectAppl(&gsTree);
   LineNr = 1;
   ColNr = 1;
   gsyyrestart(FormStream);
@@ -152,6 +152,6 @@ ATermAppl gsParse(FILE *FormStream) {
   Result = gsTree;
   gsTree = NULL;
 finally:
-  ATunprotect((ATerm*) &gsTree);
+  ATunprotectAppl(&gsTree);
   return Result;
 }

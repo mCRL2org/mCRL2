@@ -11,11 +11,28 @@ extern "C" {
 }
 #endif
 
-//Message printing
+//String manipulation
+//-------------------
 
-static bool gsWarning = true;
-static bool gsVerbose = false;
-static bool gsDebug   = false;
+#if !(defined __USE_SVID || defined __USE_BSD || defined __USE_XOPEN_EXTENDED)
+char *strdup(const char *s)
+{
+    size_t len;
+    char *p;
+
+    len = strlen(s);
+    if((p = (char *)malloc(len + 1)) == NULL)
+      return NULL;
+    return strcpy(p, s);
+}
+#endif
+
+//Message printing
+//----------------
+
+static bool gsWarning = true; //indicates if warning should be printed
+static bool gsVerbose = false;//indicates if verbose messages should be printed
+static bool gsDebug   = false;//indicates if debug messages should be printed
 
 void gsSetQuietMsg(void)
 {
@@ -86,76 +103,78 @@ void gsDebugMsgFunc(const char *FuncName, char *Format, ...)
   }
 }
 
-//strdup implementation
-#if !(defined __USE_SVID || defined __USE_BSD || defined __USE_XOPEN_EXTENDED)
-char *strdup(const char *s)
-{
-    size_t len;
-    char *p;
-
-    len = strlen(s);
-    if((p = (char *)malloc(len + 1)) == NULL)
-      return NULL;
-    return strcpy(p, s);
-}
-#endif
-
 //ATerm libary work arounds
+//-------------------------
 
-ATermAppl ATAelementAt(ATermList list, int index)
+ATermAppl ATAelementAt(ATermList List, int Index)
 {
-  return (ATermAppl) ATelementAt(list, index);
+  return (ATermAppl) ATelementAt(List, Index);
 }
 
-ATermList ATLelementAt(ATermList list, int index)
+ATermList ATLelementAt(ATermList List, int Index)
 {
-  return (ATermList) ATelementAt(list, index);
+  return (ATermList) ATelementAt(List, Index);
 }
 
-ATermInt ATIelementAt(ATermList list, int index)
+ATermAppl ATAgetArgument(ATermAppl Appl, int Nr)
 {
-  return (ATermInt) ATelementAt(list, index);
+  return (ATermAppl) ATgetArgument(Appl, Nr);
 }
 
-ATermAppl ATAgetArgument(ATermAppl appl, int nr)
+ATermList ATLgetArgument(ATermAppl Appl, int Nr)
 {
-  return (ATermAppl) ATgetArgument(appl, nr);
+  return (ATermList) ATgetArgument(Appl, Nr);
 }
 
-ATermList ATLgetArgument(ATermAppl appl, int nr)
+ATermAppl ATAgetFirst(ATermList List)
 {
-  return (ATermList) ATgetArgument(appl, nr);
+  return (ATermAppl) ATgetFirst(List);
 }
 
-ATermInt ATIgetArgument(ATermAppl appl, int nr)
+ATermList ATLgetFirst(ATermList List)
 {
-  return (ATermInt) ATgetArgument(appl, nr);
+  return (ATermList) ATgetFirst(List);
 }
 
-ATermAppl ATAgetFirst(ATermList list)
+void ATprotectAppl(ATermAppl *PAppl)
 {
-  return (ATermAppl) ATgetFirst(list);
+  ATprotect((ATerm *) PAppl);
 }
 
-ATermAppl gsGetType(ATermAppl DataExpr)
+void ATprotectList(ATermAppl *PList)
 {
-  if (gsIsDataAppl(DataExpr)) {
-    ATermAppl HeadType = gsGetType(ATAgetArgument(DataExpr, 0));
-    if (gsIsSortArrow(HeadType)) {
-      ATermAppl ResultType = gsGetType(ATAgetArgument(DataExpr, 1));
-      if (!gsIsUnknown(ResultType) &&
-          ATisEqual(ResultType, ATAgetArgument(HeadType, 0))) {
-        return ATAgetArgument(HeadType, 1);
-      } else {
-        return gsMakeSortArrow(HeadType, ResultType);
-      }
-    } else {
-      return gsMakeUnknown();
-    }
-  } else if (gsIsDataVarId(DataExpr) || gsIsOpId(DataExpr)) {
-    return ATAgetArgument(DataExpr, 1);
+  ATprotect((ATerm *) PList);
+}
+
+void ATunprotectAppl(ATermAppl *PAppl)
+{
+  ATunprotect((ATerm *) PAppl);
+}
+
+void ATunprotectList(ATermAppl *PList)
+{
+  ATunprotect((ATerm *) PList);
+}
+
+//Functions for the internal ATerm structure
+//------------------------------------------
+
+ATermAppl gsString2ATermAppl(char *s)
+{
+  if (s != NULL) {
+    return ATmakeAppl0(ATmakeAFun(s, 0, ATtrue));
   } else {
-    return gsMakeUnknown();
+    return gsMakeNil();   
+  }
+}
+
+char *gsATermAppl2String(ATermAppl term)
+{
+  AFun head = ATgetAFun(term);
+  if ((ATgetArity(head) == 0) && (ATisQuoted(head) == ATtrue)) {
+    return ATgetName(head);
+  } else {
+    return NULL;
   }
 }
 
@@ -223,13 +242,13 @@ static AFun gsAFunMultActName;
 static AFun gsAFunRenameExpr;
 static AFun gsAFunCommExpr;
 
-//Constant ATermAppl's for each sort system identifier
+//Constant ATermAppl's for each sort system identifier name
 static ATermAppl gsSortIdNameBool;
 static ATermAppl gsSortIdNamePos;
 static ATermAppl gsSortIdNameNat;
 static ATermAppl gsSortIdNameInt;
 
-//Constant ATermAppl's for each data system identifier name
+//Constant ATermAppl's for each operation system identifier name
 static ATermAppl gsOpIdNameTrue;
 static ATermAppl gsOpIdNameFalse;
 static ATermAppl gsOpIdNameNot;
@@ -248,17 +267,18 @@ static ATermAppl gsOpIdNameZero;
 static ATermAppl gsOpIdNamePosAsNat;
 static ATermAppl gsOpIdNameNegatePos;
 static ATermAppl gsOpIdNameNatAsInt;
-static ATermAppl gsOpIdNameLessThan;
-static ATermAppl gsOpIdNameGreaterThan;
-static ATermAppl gsOpIdNameLessThanOrEqual;
-static ATermAppl gsOpIdNameGreaterThanOrEqual;
+static ATermAppl gsOpIdNameLT;
+static ATermAppl gsOpIdNameGT;
+static ATermAppl gsOpIdNameLTE;
+static ATermAppl gsOpIdNameGTE;
 
+//Indicates if gsEnableConstructorFunctions has been called
 static bool gsConstructorFunctionsEnabled = false;
 
 //Enable constructor functions
 void gsEnableConstructorFunctions(void)
 {
-  //create constructors
+  //create constructor AFun's
   gsAFunSpecV1               = ATmakeAFun("SpecV1", 7, ATfalse);
   gsAFunSortSpec             = ATmakeAFun("SortSpec", 1, ATfalse);
   gsAFunConsSpec             = ATmakeAFun("ConsSpec", 1, ATfalse);
@@ -326,7 +346,7 @@ void gsEnableConstructorFunctions(void)
   gsSortIdNamePos            = gsString2ATermAppl("Pos");
   gsSortIdNameNat            = gsString2ATermAppl("Nat");
   gsSortIdNameInt            = gsString2ATermAppl("Int");
-  //create data system identifier names
+  //create operation system identifier names
   gsOpIdNameTrue             = gsString2ATermAppl("true");
   gsOpIdNameFalse            = gsString2ATermAppl("false");
   gsOpIdNameNot              = gsString2ATermAppl("!");
@@ -345,11 +365,11 @@ void gsEnableConstructorFunctions(void)
   gsOpIdNamePosAsNat         = gsString2ATermAppl("@cPosNat");
   gsOpIdNameNegatePos        = gsString2ATermAppl("@-");
   gsOpIdNameNatAsInt         = gsString2ATermAppl("@cNatInt");
-  gsOpIdNameLessThan         = gsString2ATermAppl("<");
-  gsOpIdNameGreaterThan      = gsString2ATermAppl(">");
-  gsOpIdNameLessThanOrEqual  = gsString2ATermAppl("<=");
-  gsOpIdNameGreaterThanOrEqual = gsString2ATermAppl(">=");
-  //protect constructors
+  gsOpIdNameLT               = gsString2ATermAppl("<");
+  gsOpIdNameGT               = gsString2ATermAppl(">");
+  gsOpIdNameLTE              = gsString2ATermAppl("<=");
+  gsOpIdNameGTE              = gsString2ATermAppl(">=");
+  //protect constructor AFun's
   ATprotectAFun(gsAFunSpecV1);
   ATprotectAFun(gsAFunSortSpec);
   ATprotectAFun(gsAFunConsSpec);
@@ -413,38 +433,37 @@ void gsEnableConstructorFunctions(void)
   ATprotectAFun(gsAFunRenameExpr);
   ATprotectAFun(gsAFunCommExpr);
   //protect sort system identifier names
-  ATprotect((ATerm *) &gsSortIdNameBool);
-  ATprotect((ATerm *) &gsSortIdNamePos);
-  ATprotect((ATerm *) &gsSortIdNameNat);
-  ATprotect((ATerm *) &gsSortIdNameInt);
-  //protect data system identifier names
-  ATprotect((ATerm *) &gsOpIdNameTrue);
-  ATprotect((ATerm *) &gsOpIdNameFalse);
-  ATprotect((ATerm *) &gsOpIdNameNot);
-  ATprotect((ATerm *) &gsOpIdNameAnd);
-  ATprotect((ATerm *) &gsOpIdNameOr);
-  ATprotect((ATerm *) &gsOpIdNameImp);
-  ATprotect((ATerm *) &gsOpIdNameEq);
-  ATprotect((ATerm *) &gsOpIdNameNeq);
-  ATprotect((ATerm *) &gsOpIdNameIf);
-  ATprotect((ATerm *) &gsOpIdNameForall);
-  ATprotect((ATerm *) &gsOpIdNameExists);
-  ATprotect((ATerm *) &gsOpIdNameOne);
-  ATprotect((ATerm *) &gsOpIdNameDoublePos);
-  ATprotect((ATerm *) &gsOpIdNameDoublePosPlusOne);
-  ATprotect((ATerm *) &gsOpIdNameZero);
-  ATprotect((ATerm *) &gsOpIdNamePosAsNat);
-  ATprotect((ATerm *) &gsOpIdNameNegatePos);
-  ATprotect((ATerm *) &gsOpIdNameNatAsInt);
-  ATprotect((ATerm *) &gsOpIdNameLessThan);
-  ATprotect((ATerm *) &gsOpIdNameGreaterThan);
-  ATprotect((ATerm *) &gsOpIdNameLessThanOrEqual);
-  ATprotect((ATerm *) &gsOpIdNameGreaterThanOrEqual);
+  ATprotectAppl(&gsSortIdNameBool);
+  ATprotectAppl(&gsSortIdNamePos);
+  ATprotectAppl(&gsSortIdNameNat);
+  ATprotectAppl(&gsSortIdNameInt);
+  //protect operation system identifier names
+  ATprotectAppl(&gsOpIdNameTrue);
+  ATprotectAppl(&gsOpIdNameFalse);
+  ATprotectAppl(&gsOpIdNameNot);
+  ATprotectAppl(&gsOpIdNameAnd);
+  ATprotectAppl(&gsOpIdNameOr);
+  ATprotectAppl(&gsOpIdNameImp);
+  ATprotectAppl(&gsOpIdNameEq);
+  ATprotectAppl(&gsOpIdNameNeq);
+  ATprotectAppl(&gsOpIdNameIf);
+  ATprotectAppl(&gsOpIdNameForall);
+  ATprotectAppl(&gsOpIdNameExists);
+  ATprotectAppl(&gsOpIdNameOne);
+  ATprotectAppl(&gsOpIdNameDoublePos);
+  ATprotectAppl(&gsOpIdNameDoublePosPlusOne);
+  ATprotectAppl(&gsOpIdNameZero);
+  ATprotectAppl(&gsOpIdNamePosAsNat);
+  ATprotectAppl(&gsOpIdNameNegatePos);
+  ATprotectAppl(&gsOpIdNameNatAsInt);
+  ATprotectAppl(&gsOpIdNameLT);
+  ATprotectAppl(&gsOpIdNameGT);
+  ATprotectAppl(&gsOpIdNameLTE);
+  ATprotectAppl(&gsOpIdNameGTE);
   gsConstructorFunctionsEnabled = true;
 }
 
-//Constructor creators
-
+//Creation of all constructor elements of the internal ATerm structure.
 ATermAppl gsMakeSpecV1(
   ATermAppl SortSpec, ATermAppl ConsSpec, ATermAppl MapSpec,
   ATermAppl DataEqnSpec, ATermAppl ActSpec, ATermAppl ProcEqnSpec,
@@ -835,336 +854,317 @@ ATermAppl gsMakeCommExpr(ATermAppl MultActName, ATermAppl ActName)
   return ATmakeAppl2(gsAFunCommExpr, (ATerm) MultActName, (ATerm) ActName);
 }
 
-//Constructor recognisers
-
-bool gsIsSpecV1(ATermAppl term) {
+//Recognisers of all constructor elements of the internal ATerm structure.
+bool gsIsSpecV1(ATermAppl Term) {
   assert(gsConstructorFunctionsEnabled);
-  return ATgetAFun(term) == gsAFunSpecV1;
+  return ATgetAFun(Term) == gsAFunSpecV1;
 }
 
-bool gsIsSortSpec(ATermAppl term) {
+bool gsIsSortSpec(ATermAppl Term) {
   assert(gsConstructorFunctionsEnabled);
-  return ATgetAFun(term) == gsAFunSortSpec;
+  return ATgetAFun(Term) == gsAFunSortSpec;
 }
 
-bool gsIsConsSpec(ATermAppl term) {
+bool gsIsConsSpec(ATermAppl Term) {
   assert(gsConstructorFunctionsEnabled);
-  return ATgetAFun(term) == gsAFunConsSpec;
+  return ATgetAFun(Term) == gsAFunConsSpec;
 }
 
-bool gsIsMapSpec(ATermAppl term) {
+bool gsIsMapSpec(ATermAppl Term) {
   assert(gsConstructorFunctionsEnabled);
-  return ATgetAFun(term) == gsAFunMapSpec;
+  return ATgetAFun(Term) == gsAFunMapSpec;
 }
 
-bool gsIsDataEqnSpec(ATermAppl term) {
+bool gsIsDataEqnSpec(ATermAppl Term) {
   assert(gsConstructorFunctionsEnabled);
-  return ATgetAFun(term) == gsAFunDataEqnSpec;
+  return ATgetAFun(Term) == gsAFunDataEqnSpec;
 }
 
-bool gsIsActSpec(ATermAppl term) {
+bool gsIsActSpec(ATermAppl Term) {
   assert(gsConstructorFunctionsEnabled);
-  return ATgetAFun(term) == gsAFunActSpec;
+  return ATgetAFun(Term) == gsAFunActSpec;
 }
 
-bool gsIsProcEqnSpec(ATermAppl term) {
+bool gsIsProcEqnSpec(ATermAppl Term) {
   assert(gsConstructorFunctionsEnabled);
-  return ATgetAFun(term) == gsAFunProcEqnSpec;
+  return ATgetAFun(Term) == gsAFunProcEqnSpec;
 }
 
-bool gsIsInit(ATermAppl term) {
+bool gsIsInit(ATermAppl Term) {
   assert(gsConstructorFunctionsEnabled);
-  return ATgetAFun(term) == gsAFunInit;
+  return ATgetAFun(Term) == gsAFunInit;
 }
 
-bool gsIsSortId(ATermAppl term) {
+bool gsIsSortId(ATermAppl Term) {
   assert(gsConstructorFunctionsEnabled);
-  return ATgetAFun(term) == gsAFunSortId;
+  return ATgetAFun(Term) == gsAFunSortId;
 }
 
-bool gsIsSortRef(ATermAppl term) {
+bool gsIsSortRef(ATermAppl Term) {
   assert(gsConstructorFunctionsEnabled);
-  return ATgetAFun(term) == gsAFunSortRef;
+  return ATgetAFun(Term) == gsAFunSortRef;
 }
 
-bool gsIsOpId(ATermAppl term) {
+bool gsIsOpId(ATermAppl Term) {
   assert(gsConstructorFunctionsEnabled);
-  return ATgetAFun(term) == gsAFunOpId;
+  return ATgetAFun(Term) == gsAFunOpId;
 }
 
-bool gsIsDataEqn(ATermAppl term) {
+bool gsIsDataEqn(ATermAppl Term) {
   assert(gsConstructorFunctionsEnabled);
-  return ATgetAFun(term) == gsAFunDataEqn;
+  return ATgetAFun(Term) == gsAFunDataEqn;
 }
 
-bool gsIsDataVarId(ATermAppl term) {
+bool gsIsDataVarId(ATermAppl Term) {
   assert(gsConstructorFunctionsEnabled);
-  return ATgetAFun(term) == gsAFunDataVarId;
+  return ATgetAFun(Term) == gsAFunDataVarId;
 }
 
-bool gsIsNil(ATermAppl term) {
+bool gsIsNil(ATermAppl Term) {
   assert(gsConstructorFunctionsEnabled);
-  return ATgetAFun(term) == gsAFunNil;
+  return ATgetAFun(Term) == gsAFunNil;
 }
 
-bool gsIsActId(ATermAppl term) {
+bool gsIsActId(ATermAppl Term) {
   assert(gsConstructorFunctionsEnabled);
-  return ATgetAFun(term) == gsAFunActId;
+  return ATgetAFun(Term) == gsAFunActId;
 }
 
-bool gsIsProcEqn(ATermAppl term) {
+bool gsIsProcEqn(ATermAppl Term) {
   assert(gsConstructorFunctionsEnabled);
-  return ATgetAFun(term) == gsAFunProcEqn;
+  return ATgetAFun(Term) == gsAFunProcEqn;
 }
 
-bool gsIsProcVarId(ATermAppl term) {
+bool gsIsProcVarId(ATermAppl Term) {
   assert(gsConstructorFunctionsEnabled);
-  return ATgetAFun(term) == gsAFunProcVarId;
+  return ATgetAFun(Term) == gsAFunProcVarId;
 }
 
-bool gsIsSortList(ATermAppl term) {
+bool gsIsSortList(ATermAppl Term) {
   assert(gsConstructorFunctionsEnabled);
-  return ATgetAFun(term) == gsAFunSortList;
+  return ATgetAFun(Term) == gsAFunSortList;
 }
 
-bool gsIsSortSet(ATermAppl term) {
+bool gsIsSortSet(ATermAppl Term) {
   assert(gsConstructorFunctionsEnabled);
-  return ATgetAFun(term) == gsAFunSortSet;
+  return ATgetAFun(Term) == gsAFunSortSet;
 }
 
-bool gsIsSortBag(ATermAppl term) {
+bool gsIsSortBag(ATermAppl Term) {
   assert(gsConstructorFunctionsEnabled);
-  return ATgetAFun(term) == gsAFunSortBag;
+  return ATgetAFun(Term) == gsAFunSortBag;
 }
 
-bool gsIsSortStruct(ATermAppl term) {
+bool gsIsSortStruct(ATermAppl Term) {
   assert(gsConstructorFunctionsEnabled);
-  return ATgetAFun(term) == gsAFunSortStruct;
+  return ATgetAFun(Term) == gsAFunSortStruct;
 }
 
-bool gsIsSortArrowProd(ATermAppl term) {
+bool gsIsSortArrowProd(ATermAppl Term) {
   assert(gsConstructorFunctionsEnabled);
-  return ATgetAFun(term) == gsAFunSortArrowProd;
+  return ATgetAFun(Term) == gsAFunSortArrowProd;
 }
 
-bool gsIsSortArrow(ATermAppl term) {
+bool gsIsSortArrow(ATermAppl Term) {
   assert(gsConstructorFunctionsEnabled);
-  return ATgetAFun(term) == gsAFunSortArrow;
+  return ATgetAFun(Term) == gsAFunSortArrow;
 }
 
-bool gsIsStructCons(ATermAppl term) {
+bool gsIsStructCons(ATermAppl Term) {
   assert(gsConstructorFunctionsEnabled);
-  return ATgetAFun(term) == gsAFunStructCons;
+  return ATgetAFun(Term) == gsAFunStructCons;
 }
 
-bool gsIsStructProj(ATermAppl term) {
+bool gsIsStructProj(ATermAppl Term) {
   assert(gsConstructorFunctionsEnabled);
-  return ATgetAFun(term) == gsAFunStructProj;
+  return ATgetAFun(Term) == gsAFunStructProj;
 }
 
-bool gsIsDataVarIdOpId(ATermAppl term) {
+bool gsIsDataVarIdOpId(ATermAppl Term) {
   assert(gsConstructorFunctionsEnabled);
-  return ATgetAFun(term) == gsAFunDataVarIdOpId;
+  return ATgetAFun(Term) == gsAFunDataVarIdOpId;
 }
 
-bool gsIsDataApplProd(ATermAppl term) {
+bool gsIsDataApplProd(ATermAppl Term) {
   assert(gsConstructorFunctionsEnabled);
-  return ATgetAFun(term) == gsAFunDataApplProd;
+  return ATgetAFun(Term) == gsAFunDataApplProd;
 }
 
-bool gsIsDataAppl(ATermAppl term) {
+bool gsIsDataAppl(ATermAppl Term) {
   assert(gsConstructorFunctionsEnabled);
-  return ATgetAFun(term) == gsAFunDataAppl;
+  return ATgetAFun(Term) == gsAFunDataAppl;
 }
 
-bool gsIsNumber(ATermAppl term) {
+bool gsIsNumber(ATermAppl Term) {
   assert(gsConstructorFunctionsEnabled);
-  return ATgetAFun(term) == gsAFunNumber;
+  return ATgetAFun(Term) == gsAFunNumber;
 }
 
-bool gsIsListEnum(ATermAppl term) {
+bool gsIsListEnum(ATermAppl Term) {
   assert(gsConstructorFunctionsEnabled);
-  return ATgetAFun(term) == gsAFunListEnum;
+  return ATgetAFun(Term) == gsAFunListEnum;
 }
 
-bool gsIsSetEnum(ATermAppl term) {
+bool gsIsSetEnum(ATermAppl Term) {
   assert(gsConstructorFunctionsEnabled);
-  return ATgetAFun(term) == gsAFunSetEnum;
+  return ATgetAFun(Term) == gsAFunSetEnum;
 }
 
-bool gsIsBagEnum(ATermAppl term) {
+bool gsIsBagEnum(ATermAppl Term) {
   assert(gsConstructorFunctionsEnabled);
-  return ATgetAFun(term) == gsAFunBagEnum;
+  return ATgetAFun(Term) == gsAFunBagEnum;
 }
 
-bool gsIsSetBagComp(ATermAppl term) {
+bool gsIsSetBagComp(ATermAppl Term) {
   assert(gsConstructorFunctionsEnabled);
-  return ATgetAFun(term) == gsAFunSetBagComp;
+  return ATgetAFun(Term) == gsAFunSetBagComp;
 }
 
-bool gsIsForall(ATermAppl term) {
+bool gsIsForall(ATermAppl Term) {
   assert(gsConstructorFunctionsEnabled);
-  return ATgetAFun(term) == gsAFunForall;
+  return ATgetAFun(Term) == gsAFunForall;
 }
 
-bool gsIsExists(ATermAppl term) {
+bool gsIsExists(ATermAppl Term) {
   assert(gsConstructorFunctionsEnabled);
-  return ATgetAFun(term) == gsAFunExists;
+  return ATgetAFun(Term) == gsAFunExists;
 }
 
-bool gsIsLambda(ATermAppl term) {
+bool gsIsLambda(ATermAppl Term) {
   assert(gsConstructorFunctionsEnabled);
-  return ATgetAFun(term) == gsAFunLambda;
+  return ATgetAFun(Term) == gsAFunLambda;
 }
 
-bool gsIsWhr(ATermAppl term) {
+bool gsIsWhr(ATermAppl Term) {
   assert(gsConstructorFunctionsEnabled);
-  return ATgetAFun(term) == gsAFunWhr;
+  return ATgetAFun(Term) == gsAFunWhr;
 }
 
-bool gsIsUnknown(ATermAppl term) {
+bool gsIsUnknown(ATermAppl Term) {
   assert(gsConstructorFunctionsEnabled);
-  return ATgetAFun(term) == gsAFunUnknown;
+  return ATgetAFun(Term) == gsAFunUnknown;
 }
 
-bool gsIsBagEnumElt(ATermAppl term) {
+bool gsIsBagEnumElt(ATermAppl Term) {
   assert(gsConstructorFunctionsEnabled);
-  return ATgetAFun(term) == gsAFunBagEnumElt;
+  return ATgetAFun(Term) == gsAFunBagEnumElt;
 }
 
-bool gsIsWhrDecl(ATermAppl term) {
+bool gsIsWhrDecl(ATermAppl Term) {
   assert(gsConstructorFunctionsEnabled);
-  return ATgetAFun(term) == gsAFunWhrDecl;
+  return ATgetAFun(Term) == gsAFunWhrDecl;
 }
 
-bool gsIsActionProcess(ATermAppl term) {
+bool gsIsActionProcess(ATermAppl Term) {
   assert(gsConstructorFunctionsEnabled);
-  return ATgetAFun(term) == gsAFunActionProcess;
+  return ATgetAFun(Term) == gsAFunActionProcess;
 }
 
-bool gsIsAction(ATermAppl term) {
+bool gsIsAction(ATermAppl Term) {
   assert(gsConstructorFunctionsEnabled);
-  return ATgetAFun(term) == gsAFunAction;
+  return ATgetAFun(Term) == gsAFunAction;
 }
 
-bool gsIsProcess(ATermAppl term) {
+bool gsIsProcess(ATermAppl Term) {
   assert(gsConstructorFunctionsEnabled);
-  return ATgetAFun(term) == gsAFunProcess;
+  return ATgetAFun(Term) == gsAFunProcess;
 }
 
-bool gsIsDelta(ATermAppl term) {
+bool gsIsDelta(ATermAppl Term) {
   assert(gsConstructorFunctionsEnabled);
-  return ATgetAFun(term) == gsAFunDelta;
+  return ATgetAFun(Term) == gsAFunDelta;
 }
 
-bool gsIsTau(ATermAppl term) {
+bool gsIsTau(ATermAppl Term) {
   assert(gsConstructorFunctionsEnabled);
-  return ATgetAFun(term) == gsAFunTau;
+  return ATgetAFun(Term) == gsAFunTau;
 }
 
-bool gsIsSum(ATermAppl term) {
+bool gsIsSum(ATermAppl Term) {
   assert(gsConstructorFunctionsEnabled);
-  return ATgetAFun(term) == gsAFunSum;
+  return ATgetAFun(Term) == gsAFunSum;
 }
 
-bool gsIsRestrict(ATermAppl term) {
+bool gsIsRestrict(ATermAppl Term) {
   assert(gsConstructorFunctionsEnabled);
-  return ATgetAFun(term) == gsAFunRestrict;
+  return ATgetAFun(Term) == gsAFunRestrict;
 }
 
-bool gsIsHide(ATermAppl term) {
+bool gsIsHide(ATermAppl Term) {
   assert(gsConstructorFunctionsEnabled);
-  return ATgetAFun(term) == gsAFunHide;
+  return ATgetAFun(Term) == gsAFunHide;
 }
 
-bool gsIsRename(ATermAppl term) {
+bool gsIsRename(ATermAppl Term) {
   assert(gsConstructorFunctionsEnabled);
-  return ATgetAFun(term) == gsAFunRename;
+  return ATgetAFun(Term) == gsAFunRename;
 }
 
-bool gsIsComm(ATermAppl term) {
+bool gsIsComm(ATermAppl Term) {
   assert(gsConstructorFunctionsEnabled);
-  return ATgetAFun(term) == gsAFunComm;
+  return ATgetAFun(Term) == gsAFunComm;
 }
 
-bool gsIsAllow(ATermAppl term) {
+bool gsIsAllow(ATermAppl Term) {
   assert(gsConstructorFunctionsEnabled);
-  return ATgetAFun(term) == gsAFunAllow;
+  return ATgetAFun(Term) == gsAFunAllow;
 }
 
-bool gsIsSync(ATermAppl term) {
+bool gsIsSync(ATermAppl Term) {
   assert(gsConstructorFunctionsEnabled);
-  return ATgetAFun(term) == gsAFunSync;
+  return ATgetAFun(Term) == gsAFunSync;
 }
 
-bool gsIsAtTime(ATermAppl term) {
+bool gsIsAtTime(ATermAppl Term) {
   assert(gsConstructorFunctionsEnabled);
-  return ATgetAFun(term) == gsAFunAtTime;
+  return ATgetAFun(Term) == gsAFunAtTime;
 }
 
-bool gsIsSeq(ATermAppl term) {
+bool gsIsSeq(ATermAppl Term) {
   assert(gsConstructorFunctionsEnabled);
-  return ATgetAFun(term) == gsAFunSeq;
+  return ATgetAFun(Term) == gsAFunSeq;
 }
 
-bool gsIsCond(ATermAppl term) {
+bool gsIsCond(ATermAppl Term) {
   assert(gsConstructorFunctionsEnabled);
-  return ATgetAFun(term) == gsAFunCond;
+  return ATgetAFun(Term) == gsAFunCond;
 }
 
-bool gsIsBInit(ATermAppl term) {
+bool gsIsBInit(ATermAppl Term) {
   assert(gsConstructorFunctionsEnabled);
-  return ATgetAFun(term) == gsAFunBInit;
+  return ATgetAFun(Term) == gsAFunBInit;
 }
 
-bool gsIsMerge(ATermAppl term) {
+bool gsIsMerge(ATermAppl Term) {
   assert(gsConstructorFunctionsEnabled);
-  return ATgetAFun(term) == gsAFunMerge;
+  return ATgetAFun(Term) == gsAFunMerge;
 }
 
-bool gsIsLMerge(ATermAppl term) {
+bool gsIsLMerge(ATermAppl Term) {
   assert(gsConstructorFunctionsEnabled);
-  return ATgetAFun(term) == gsAFunLMerge;
+  return ATgetAFun(Term) == gsAFunLMerge;
 }
 
-bool gsIsChoice(ATermAppl term) {
+bool gsIsChoice(ATermAppl Term) {
   assert(gsConstructorFunctionsEnabled);
-  return ATgetAFun(term) == gsAFunChoice;
+  return ATgetAFun(Term) == gsAFunChoice;
 }
 
-bool gsIsMultActName(ATermAppl term) {
+bool gsIsMultActName(ATermAppl Term) {
   assert(gsConstructorFunctionsEnabled);
-  return ATgetAFun(term) == gsAFunMultActName;
+  return ATgetAFun(Term) == gsAFunMultActName;
 }
 
-bool gsIsRenameExpr(ATermAppl term) {
+bool gsIsRenameExpr(ATermAppl Term) {
   assert(gsConstructorFunctionsEnabled);
-  return ATgetAFun(term) == gsAFunRenameExpr;
+  return ATgetAFun(Term) == gsAFunRenameExpr;
 }
 
-bool gsIsCommExpr(ATermAppl term) {
+bool gsIsCommExpr(ATermAppl Term) {
   assert(gsConstructorFunctionsEnabled);
-  return ATgetAFun(term) == gsAFunCommExpr;
+  return ATgetAFun(Term) == gsAFunCommExpr;
 }
 
-ATermAppl gsString2ATermAppl(char *s)
-{
-  if (s != NULL) {
-    return ATmakeAppl0(ATmakeAFun(s, 0, ATtrue));
-  } else {
-    return gsMakeNil();   
-  }
-}
-
-char *gsATermAppl2String(ATermAppl term)
-{
-  AFun head = ATgetAFun(term);
-  if ((ATgetArity(head) == 0) && (ATisQuoted(head) == ATtrue)) {
-    return ATgetName(head);
-  } else {
-    return NULL;
-  }
-}
 
 //Creation of sort identifiers for system defined sorts.
 ATermAppl gsMakeSortIdBool()
@@ -1191,6 +1191,7 @@ ATermAppl gsMakeSortIdInt()
   return gsMakeSortId(gsSortIdNameInt);
 }
 
+
 //Creation of sort expressions for system defined sorts.
 ATermAppl gsMakeSortExprBool()
 {
@@ -1212,7 +1213,8 @@ ATermAppl gsMakeSortExprInt()
   return gsMakeSortIdInt();
 }
 
-//Auxiliary functions to create sort expressions
+
+//Auxiliary functions concerning sort expressions
 ATermAppl gsMakeSortArrowList(ATermList SortExprDomain,
   ATermAppl SortExprResult)
 {
@@ -1223,6 +1225,29 @@ ATermAppl gsMakeSortArrowList(ATermList SortExprDomain,
   }
   return Result;
 }
+
+ATermAppl gsGetSort(ATermAppl DataExpr)
+{
+  if (gsIsDataAppl(DataExpr)) {
+    ATermAppl HeadSort = gsGetSort(ATAgetArgument(DataExpr, 0));
+    if (gsIsSortArrow(HeadSort)) {
+      ATermAppl ResultSort = gsGetSort(ATAgetArgument(DataExpr, 1));
+      if (!gsIsUnknown(ResultSort) &&
+          ATisEqual(ResultSort, ATAgetArgument(HeadSort, 0))) {
+        return ATAgetArgument(HeadSort, 1);
+      } else {
+        return gsMakeSortArrow(HeadSort, ResultSort);
+      }
+    } else {
+      return gsMakeUnknown();
+    }
+  } else if (gsIsDataVarId(DataExpr) || gsIsOpId(DataExpr)) {
+    return ATAgetArgument(DataExpr, 1);
+  } else {
+    return gsMakeUnknown();
+  }
+}
+
 
 //Creation of operation identifiers for system defined operations.
 ATermAppl gsMakeOpIdTrue(void)
@@ -1353,41 +1378,40 @@ ATermAppl gsMakeOpIdNatAsInt(void)
     gsMakeSortArrow(gsMakeSortIdNat(), gsMakeSortIdInt()));
 } 
 
-ATermAppl gsMakeOpIdLessThan(ATermAppl SortId)
+ATermAppl gsMakeOpIdLT(ATermAppl SortId)
 {
   assert(gsConstructorFunctionsEnabled);
-  return gsMakeOpId(gsOpIdNameLessThan,
+  return gsMakeOpId(gsOpIdNameLT,
     gsMakeSortArrowList(ATmakeList2((ATerm) SortId, (ATerm) SortId),
       gsMakeSortExprBool()));
 }
 
-ATermAppl gsMakeOpIdGreaterThan(ATermAppl SortId)
+ATermAppl gsMakeOpIdGT(ATermAppl SortId)
 {
   assert(gsConstructorFunctionsEnabled);
-  return gsMakeOpId(gsOpIdNameGreaterThan,
+  return gsMakeOpId(gsOpIdNameGT,
     gsMakeSortArrowList(ATmakeList2((ATerm) SortId, (ATerm) SortId),
       gsMakeSortExprBool()));
 }
 
-ATermAppl gsMakeOpIdLessThanOrEqual(ATermAppl SortId)
+ATermAppl gsMakeOpIdLTE(ATermAppl SortId)
 {
   assert(gsConstructorFunctionsEnabled);
-  return gsMakeOpId(gsOpIdNameLessThanOrEqual,
+  return gsMakeOpId(gsOpIdNameLTE,
     gsMakeSortArrowList(ATmakeList2((ATerm) SortId, (ATerm) SortId),
       gsMakeSortExprBool()));
 }
 
-ATermAppl gsMakeOpIdGreaterThanOrEqual(ATermAppl SortId)
+ATermAppl gsMakeOpIdGTE(ATermAppl SortId)
 {
   assert(gsConstructorFunctionsEnabled);
-  return gsMakeOpId(gsOpIdNameGreaterThanOrEqual,
+  return gsMakeOpId(gsOpIdNameGTE,
     gsMakeSortArrowList(ATmakeList2((ATerm) SortId, (ATerm) SortId),
       gsMakeSortExprBool()));
 }
 
 
-//Creation of data expressions for system defined operations. If possible,
-//types are checked.
+//Creation of data expressions for system defined operations.
 ATermAppl gsMakeDataExprTrue(void)
 {
   return gsMakeOpIdTrue();
@@ -1424,16 +1448,16 @@ ATermAppl gsMakeDataExprImp(ATermAppl DataExprLHS, ATermAppl DataExprRHS)
 ATermAppl gsMakeDataExprEq(ATermAppl DataExprLHS, ATermAppl DataExprRHS)
 {
   ATermAppl Result = NULL;
-  ATermAppl ExprType = gsGetType(DataExprLHS);
-  if (gsIsUnknown(ExprType)) {
-    ThrowVM(NULL, "type of data expression %t is unknown", DataExprLHS);
+  ATermAppl ExprSort = gsGetSort(DataExprLHS);
+  if (gsIsUnknown(ExprSort)) {
+    ThrowVM(NULL, "sort of data expression %t is unknown", DataExprLHS);
   }
-  if (!ATisEqual(ExprType, gsGetType(DataExprRHS)))
+  if (!ATisEqual(ExprSort, gsGetSort(DataExprRHS)))
   {
-    ThrowVM(NULL, "expected type %t instead of %t for data expression %t",
-      ExprType, gsGetType(DataExprRHS), DataExprLHS);
+    ThrowVM(NULL, "expected sort %t instead of %t for data expression %t",
+      ExprSort, gsGetSort(DataExprRHS), DataExprLHS);
   }   
-  Result = gsMakeDataApplList(gsMakeOpIdEq(ExprType),
+  Result = gsMakeDataApplList(gsMakeOpIdEq(ExprSort),
     ATmakeList2((ATerm) DataExprLHS, (ATerm) DataExprRHS));
 finally:
   return Result;
@@ -1442,16 +1466,16 @@ finally:
 ATermAppl gsMakeDataExprNeq(ATermAppl DataExprLHS, ATermAppl DataExprRHS)
 {
   ATermAppl Result = NULL;
-  ATermAppl ExprType = gsGetType(DataExprLHS);
-  if (gsIsUnknown(ExprType)) {
-    ThrowVM(NULL, "type of data expression %t is unknown", DataExprLHS);
+  ATermAppl ExprSort = gsGetSort(DataExprLHS);
+  if (gsIsUnknown(ExprSort)) {
+    ThrowVM(NULL, "sort of data expression %t is unknown", DataExprLHS);
   }
-  if (!ATisEqual(ExprType, gsGetType(DataExprRHS)))
+  if (!ATisEqual(ExprSort, gsGetSort(DataExprRHS)))
   {
-    ThrowVM(NULL, "expected type %t instead of %t for data expression %t",
-      ExprType, gsGetType(DataExprRHS), DataExprLHS);
+    ThrowVM(NULL, "expected sort %t instead of %t for data expression %t",
+      ExprSort, gsGetSort(DataExprRHS), DataExprLHS);
   }   
-  Result = gsMakeDataApplList(gsMakeOpIdNeq(ExprType),
+  Result = gsMakeDataApplList(gsMakeOpIdNeq(ExprSort),
     ATmakeList2((ATerm) DataExprLHS, (ATerm) DataExprRHS));
 finally:
   return Result;
@@ -1461,20 +1485,20 @@ ATermAppl gsMakeDataExprIf(ATermAppl DataExprCond, ATermAppl DataExprThen,
   ATermAppl DataExprElse)
 {
   ATermAppl Result = NULL;
-  if (!ATisEqual(gsGetType(DataExprCond), gsMakeSortIdBool())) {
-    ThrowVM(NULL, "data expression %t should be of type %t", DataExprCond,
+  if (!ATisEqual(gsGetSort(DataExprCond), gsMakeSortIdBool())) {
+    ThrowVM(NULL, "data expression %t should be of sort %t", DataExprCond,
       gsMakeSortIdBool());
   }
-  ATermAppl ExprType = gsGetType(DataExprThen);
-  if (gsIsUnknown(ExprType)) {
-    ThrowVM(NULL, "type of data expression %t is unknown", DataExprThen);
+  ATermAppl ExprSort = gsGetSort(DataExprThen);
+  if (gsIsUnknown(ExprSort)) {
+    ThrowVM(NULL, "sort of data expression %t is unknown", DataExprThen);
   }
-  if (!ATisEqual(ExprType, gsGetType(DataExprElse)))
+  if (!ATisEqual(ExprSort, gsGetSort(DataExprElse)))
   {
-    ThrowVM(NULL, "expected type %t instead of %t for data expression %t",
-      ExprType, gsGetType(DataExprElse), DataExprElse);
+    ThrowVM(NULL, "expected sort %t instead of %t for data expression %t",
+      ExprSort, gsGetSort(DataExprElse), DataExprElse);
   }   
-  Result = gsMakeDataApplList(gsMakeOpIdIf(ExprType),
+  Result = gsMakeDataApplList(gsMakeOpIdIf(ExprSort),
     ATmakeList3((ATerm) DataExprCond, (ATerm) DataExprThen,
     (ATerm) DataExprElse));
 finally:
@@ -1516,77 +1540,73 @@ ATermAppl gsMakeDataExprNatAsInt(ATermAppl DataExpr)
   return gsMakeDataAppl(gsMakeOpIdNatAsInt(), DataExpr);
 }
 
-ATermAppl gsMakeDataExprLessThan(ATermAppl DataExprLHS,
-  ATermAppl DataExprRHS)
+ATermAppl gsMakeDataExprLT(ATermAppl DataExprLHS, ATermAppl DataExprRHS)
 {
   ATermAppl Result = NULL;
-  ATermAppl ExprType = gsGetType(DataExprLHS);
-  if (gsIsUnknown(ExprType)) {
-    ThrowVM(NULL, "type of data expression %t is unknown", DataExprLHS);
+  ATermAppl ExprSort = gsGetSort(DataExprLHS);
+  if (gsIsUnknown(ExprSort)) {
+    ThrowVM(NULL, "sort of data expression %t is unknown", DataExprLHS);
   }
-  if (!ATisEqual(ExprType, gsGetType(DataExprRHS)))
+  if (!ATisEqual(ExprSort, gsGetSort(DataExprRHS)))
   {
-    ThrowVM(NULL, "expected type %t instead of %t for data expression %t",
-      ExprType, gsGetType(DataExprRHS), DataExprLHS);
+    ThrowVM(NULL, "expected sort %t instead of %t for data expression %t",
+      ExprSort, gsGetSort(DataExprRHS), DataExprLHS);
   }   
-  Result = gsMakeDataApplList(gsMakeOpIdLessThan(ExprType),
+  Result = gsMakeDataApplList(gsMakeOpIdLT(ExprSort),
     ATmakeList2((ATerm) DataExprLHS, (ATerm) DataExprRHS));
 finally:
   return Result;
 }
 
-ATermAppl gsMakeDataExprGreaterThan(ATermAppl DataExprLHS,
-  ATermAppl DataExprRHS)
+ATermAppl gsMakeDataExprGT(ATermAppl DataExprLHS, ATermAppl DataExprRHS)
 {
   ATermAppl Result = NULL;
-  ATermAppl ExprType = gsGetType(DataExprLHS);
-  if (gsIsUnknown(ExprType)) {
-    ThrowVM(NULL, "type of data expression %t is unknown", DataExprLHS);
+  ATermAppl ExprSort = gsGetSort(DataExprLHS);
+  if (gsIsUnknown(ExprSort)) {
+    ThrowVM(NULL, "sort of data expression %t is unknown", DataExprLHS);
   }
-  if (!ATisEqual(ExprType, gsGetType(DataExprRHS)))
+  if (!ATisEqual(ExprSort, gsGetSort(DataExprRHS)))
   {
-    ThrowVM(NULL, "expected type %t instead of %t for data expression %t",
-      ExprType, gsGetType(DataExprRHS), DataExprLHS);
+    ThrowVM(NULL, "expected sort %t instead of %t for data expression %t",
+      ExprSort, gsGetSort(DataExprRHS), DataExprLHS);
   }   
-  Result = gsMakeDataApplList(gsMakeOpIdGreaterThan(ExprType),
+  Result = gsMakeDataApplList(gsMakeOpIdGT(ExprSort),
     ATmakeList2((ATerm) DataExprLHS, (ATerm) DataExprRHS));
 finally:
   return Result;
 }
 
-ATermAppl gsMakeDataExprLessThanOrEqual(ATermAppl DataExprLHS,
-  ATermAppl DataExprRHS)
+ATermAppl gsMakeDataExprLTE(ATermAppl DataExprLHS, ATermAppl DataExprRHS)
 {
   ATermAppl Result = NULL;
-  ATermAppl ExprType = gsGetType(DataExprLHS);
-  if (gsIsUnknown(ExprType)) {
-    ThrowVM(NULL, "type of data expression %t is unknown", DataExprLHS);
+  ATermAppl ExprSort = gsGetSort(DataExprLHS);
+  if (gsIsUnknown(ExprSort)) {
+    ThrowVM(NULL, "sort of data expression %t is unknown", DataExprLHS);
   }
-  if (!ATisEqual(ExprType, gsGetType(DataExprRHS)))
+  if (!ATisEqual(ExprSort, gsGetSort(DataExprRHS)))
   {
-    ThrowVM(NULL, "expected type %t instead of %t for data expression %t",
-      ExprType, gsGetType(DataExprRHS), DataExprLHS);
+    ThrowVM(NULL, "expected sort %t instead of %t for data expression %t",
+      ExprSort, gsGetSort(DataExprRHS), DataExprLHS);
   }   
-  Result = gsMakeDataApplList(gsMakeOpIdLessThanOrEqual(ExprType),
+  Result = gsMakeDataApplList(gsMakeOpIdLTE(ExprSort),
     ATmakeList2((ATerm) DataExprLHS, (ATerm) DataExprRHS));
 finally:
   return Result;
 }
 
-ATermAppl gsMakeDataExprGreaterThanOrEqual(ATermAppl DataExprLHS,
-  ATermAppl DataExprRHS)
+ATermAppl gsMakeDataExprGTE(ATermAppl DataExprLHS, ATermAppl DataExprRHS)
 {
   ATermAppl Result = NULL;
-  ATermAppl ExprType = gsGetType(DataExprLHS);
-  if (gsIsUnknown(ExprType)) {
-    ThrowVM(NULL, "type of data expression %t is unknown", DataExprLHS);
+  ATermAppl ExprSort = gsGetSort(DataExprLHS);
+  if (gsIsUnknown(ExprSort)) {
+    ThrowVM(NULL, "sort of data expression %t is unknown", DataExprLHS);
   }
-  if (!ATisEqual(ExprType, gsGetType(DataExprRHS)))
+  if (!ATisEqual(ExprSort, gsGetSort(DataExprRHS)))
   {
-    ThrowVM(NULL, "expected type %t instead of %t for data expression %t",
-      ExprType, gsGetType(DataExprRHS), DataExprLHS);
+    ThrowVM(NULL, "expected sort %t instead of %t for data expression %t",
+      ExprSort, gsGetSort(DataExprRHS), DataExprLHS);
   }   
-  Result = gsMakeDataApplList(gsMakeOpIdGreaterThanOrEqual(ExprType),
+  Result = gsMakeDataApplList(gsMakeOpIdGTE(ExprSort),
     ATmakeList2((ATerm) DataExprLHS, (ATerm) DataExprRHS));
 finally:
   return Result;
