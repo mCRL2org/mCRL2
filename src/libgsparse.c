@@ -1,5 +1,5 @@
 #define  NAME      "libgsparse"
-#define  LVERSION  "0.1.23"
+#define  LVERSION  "0.1.24"
 #define  AUTHOR    "Aad Mathijssen"
 
 #ifdef __cplusplus
@@ -373,46 +373,43 @@ void gsPrintPart(FILE *OutStream, const ATermAppl Part, bool ShowSorts,
     gsPrintParts(OutStream, ATLgetArgument(Part, 1), ShowSorts, 2, NULL, " # ");
   } else if (gsIsDataAppl(Part) || gsIsDataApplProd(Part)) {
     //print data application, possibly in prefix or infix notation
-    ATermAppl Head = gsGetDataExprHead(Part);
+    ATermAppl Head;
+    ATermList Args;
+    if (gsIsDataAppl(Part)) {
+      Head = gsGetDataExprHead(Part);
+      Args = gsGetDataExprArgs(Part);
+    } else {
+      Head = ATAgetArgument(Part, 0);
+      Args = ATLgetArgument(Part, 1);
+    }
+    int ArgsLength = ATgetLength(Args);
     if (gsIsOpIdPrefix(Head)) {
-      //print prefix expression
+      //print prefix expression (ArgsLength == 1)
       gsDebugMsg("printing prefix expression\n");
       if (PrecLevel > 11) fprintf(OutStream, "(");
       gsPrintPart(OutStream, Head, ShowSorts, PrecLevel);
-      gsPrintPart(OutStream, gsGetDataExprArg(Part, 0), ShowSorts, 11);
+      gsPrintPart(OutStream, ATAelementAt(Args, 0), ShowSorts, 11);
       if (PrecLevel > 11) fprintf(OutStream, ")");
-    } else if (gsIsOpIdInfix(Head)) {
+    } else if (gsIsOpIdInfix(Head) && ArgsLength == 2) {
       //print infix expression
       gsDebugMsg("printing infix expression\n");
       if (PrecLevel > gsPrecOpIdInfix(Head)) fprintf(OutStream, "(");
-      gsPrintPart(OutStream, gsGetDataExprArg(Part, 0), ShowSorts,
+      gsPrintPart(OutStream, ATAelementAt(Args, 0), ShowSorts,
         gsPrecOpIdInfixLeft(Head));
       fprintf(OutStream, " ");
       gsPrintPart(OutStream, Head, ShowSorts, PrecLevel);
       fprintf(OutStream, " ");
-      gsPrintPart(OutStream, gsGetDataExprArg(Part, 1), ShowSorts,
+      gsPrintPart(OutStream, ATAelementAt(Args, 1), ShowSorts,
         gsPrecOpIdInfixRight(Head));
       if (PrecLevel > gsPrecOpIdInfix(Head)) fprintf(OutStream, ")");
     } else {
       //print data application
       gsDebugMsg("printing data application\n");
       if (PrecLevel > 12) fprintf(OutStream, "(");
-      if (gsIsDataAppl(Part)) {
-        gsPrintPart(OutStream, Head, ShowSorts, 12);
-        fprintf(OutStream, "(");
-        int NrArgs = gsGetDataExprNrArgs(Part);
-        for (int i = 0; i < NrArgs; i++) {
-          if (i > 0) fprintf(OutStream, ", ");
-          gsPrintPart(OutStream, gsGetDataExprArg(Part, i), ShowSorts, 0);
-        }
-        fprintf(OutStream, ")");
-      } else {
-        gsPrintPart(OutStream, ATAgetArgument(Part, 0), ShowSorts, 12);
-        fprintf(OutStream, "(");
-        gsPrintParts(OutStream, ATLgetArgument(Part, 1), ShowSorts, 0,
-          NULL, ", ");
-        fprintf(OutStream, ")");
-      }
+      gsPrintPart(OutStream, Head, ShowSorts, 12);
+      fprintf(OutStream, "(");
+      gsPrintParts(OutStream, Args, ShowSorts, 0, NULL, ", ");
+      fprintf(OutStream, ")");
       if (PrecLevel > 12) fprintf(OutStream, ")");
     }
   } else if (gsIsNumber(Part)) {
@@ -541,8 +538,11 @@ void gsPrintPart(FILE *OutStream, const ATermAppl Part, bool ShowSorts,
     gsPrintPart(OutStream, ATAgetArgument(Part, 0), ShowSorts, 11);
     fprintf(OutStream, " -> ");
     gsPrintPart(OutStream, ATAgetArgument(Part, 1), ShowSorts, 5);
-    fprintf(OutStream, ", ");
-    gsPrintPart(OutStream, ATAgetArgument(Part, 2), ShowSorts, 5);
+    ATermAppl PartElse = ATAgetArgument(Part, 2);
+    if (!gsIsDelta(PartElse)) {
+      fprintf(OutStream, ", ");
+      gsPrintPart(OutStream, PartElse, ShowSorts, 5);
+    }
     if (PrecLevel > 4) fprintf(OutStream, ")");
   } else if (gsIsSeq(Part)) {
     //print sequential composition

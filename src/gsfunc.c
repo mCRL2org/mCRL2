@@ -2223,43 +2223,16 @@ ATermAppl gsGetDataExprHead(ATermAppl DataExpr)
   }
 }
 
-int gsGetDataExprNrArgs(ATermAppl DataExpr)
+ATermList gsGetDataExprArgs(ATermAppl DataExpr)
 {
   if (gsIsDataAppl(DataExpr)) {
-    return gsGetDataExprNrArgs(ATAgetArgument(DataExpr, 0)) + 1; 
+    return ATappend(gsGetDataExprArgs(ATAgetArgument(DataExpr, 0)),
+      ATgetArgument(DataExpr, 1));
   } else if (gsIsDataApplProd(DataExpr)) {
-    return gsGetDataExprNrArgs(ATAgetArgument(DataExpr, 0)) +
-      ATgetLength(ATLgetArgument(DataExpr, 1));
+    return ATconcat(gsGetDataExprArgs(ATAgetArgument(DataExpr, 0)),
+      ATLgetArgument(DataExpr, 1));
   } else {
-    return 0;
-  }
-}
-
-ATermAppl gsGetDataExprArg(ATermAppl DataExpr, int Index)
-{
-  int NrArgs = gsGetDataExprNrArgs(DataExpr);
-  assert(NrArgs > 0);
-  if (gsIsDataAppl(DataExpr)) {
-    if (Index < NrArgs - 1) {
-      return gsGetDataExprArg(ATAgetArgument(DataExpr, 0), Index);
-    } else {
-      //Index == NrArgs - 1,
-      //from Index >= NrArgs - 1 and precondition Index < NrArgs
-      return ATAgetArgument(DataExpr, 1);
-    }
-  } else if (gsIsDataApplProd(DataExpr)) {
-    ATermList Args = ATLgetArgument(DataExpr, 1);
-    int ArgsLength = ATgetLength(Args);
-    if (Index < NrArgs - ArgsLength) {
-      return gsGetDataExprArg(ATAgetArgument(DataExpr, 0), Index);
-    } else {
-      //0 <= Index - (NrArgs - ArgsLength) < ArgsLength,
-      //from Index >= NrArgs - ArgsLength and precondition Index < NrArguments
-      return ATAelementAt(ATLgetArgument(DataExpr, 1),
-        Index - (NrArgs - ArgsLength));
-    }
-  } else {
-    return NULL;
+    return ATmakeList0();
   }
 }
 

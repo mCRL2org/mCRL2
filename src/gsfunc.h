@@ -755,16 +755,11 @@ ATermAppl gsMakeDataExprInt(char *z);
 
 ATermAppl gsGetDataExprHead(ATermAppl DataExpr);
 //Pre: DataExpr is a data expression
-//ret: the head of a data expression
+//ret: the head of the data expression
 
-int gsGetDataExprNrArgs(ATermAppl DataExpr);
+ATermList gsGetDataExprArgs(ATermAppl DataExpr);
 //Pre: DataExpr is a data expression
-//Ret: the number of arguments of the data expression
-
-ATermAppl gsGetDataExprArg(ATermAppl DataExpr, int Index);
-//Pre: DataExpr is a data expression
-//     0 <= Index < gsGetDataExprNrArgs(DataExpr)
-//Ret: argument Index of the data expression
+//Ret: the arguments of the data expression
 
 bool gsIsOpIdPrefix(ATermAppl Term);
 //Ret: DataExpr is a prefix operation identifier
