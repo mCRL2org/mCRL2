@@ -1,5 +1,5 @@
 #define  NAME      "libgsparse"
-#define  LVERSION  "0.1.34"
+#define  LVERSION  "0.1.35"
 #define  AUTHOR    "Aad Mathijssen"
 
 #ifdef __cplusplus
@@ -206,6 +206,9 @@ finally:
 void gsPrintSpecification(FILE *OutStream, const ATermAppl Spec)
 {
   assert(Spec != NULL);
+  //enable constructor functions
+  gsEnableConstructorFunctions();
+  //print Spec to OutStream
   gsPrintPart(OutStream, Spec, false, 0);
 }
 

@@ -1,5 +1,5 @@
 #define  NAME      "gsparse"
-#define  LVERSION  "0.1.35"
+#define  LVERSION  "0.1.0"
 #define  AUTHOR    "Aad Mathijssen"
 
 #ifdef __cplusplus
@@ -20,7 +20,7 @@ extern "C" {
 #endif
 
 #include "aterm2.h"
-#include "gsparse.h"
+#include "gsprint.h"
 #include "gsfunc.h"
 #include "gslowlevel.h"
 #include "libgsparse.h"
@@ -38,33 +38,22 @@ void PrintUsage(FILE* Stream);
 void PrintVersion(FILE* Stream);
 //print version information to stream
 
-bool ParseSpecificationFileName(
-  char *SpecFileName,
-  char *OutFileName,
-  bool Human,
-  bool NoSave);
-/*Pre: SpecFileName is the name of a valid GenSpect specification file from
+bool PrintSpecificationFileName(char *SpecFileName, char *OutFileName);
+/*Pre: SpecFileName is the name of a file from which can be read, and which
+       contains a specification that adheres to the internal format
        which can be read
        OutFileName is the name of a valid file to which can be written, or NULL
-  Post:the specification in SpecFileName is parsed and saved to OutFileName
+  Post:the specification in SpecFileName is printed and saved to OutFileName
        If OutFileName is NULL, stdout is used.
-       If Human, the parsed formula is saved in a human readable format
-       If NoSave, the parsed formula is not saved.
   Ret: true, if everything went ok.
        false, otherwise; appropriate error messages have been shown.
 */ 
 
-bool ParseSpecificationStream(
-  FILE *SpecStream,
-  FILE *OutStream,
-  bool Human,
-  bool NoSave);
-/*Pre: SpecStream is a valid GenSpect specification stream from which can be
-       read
+bool PrintSpecificationStream(FILE *SpecStream, FILE *OutStream);
+/*Pre: SpecStream is a stream from which can be read, and which contains a
+       specification that adheres to the internal format
        OutStream is the name of a valid stream to which can be written
-  Post:the specification in SpecStream is parsed and saved to OutStream
-       If Human, the parsed formula is saved in a human readable format
-       If NoSave, the parsed formula is not saved.
+  Post:the specification in SpecStream is printed and saved to OutStream
   Ret: true, if everything went ok.
        false, otherwise; appropriate error messages have been shown.
 */ 
@@ -76,23 +65,17 @@ int main(int argc, char* argv[]) {
   //declarations for parsing the specification
   char *SpecFileName   = NULL;
   char *OutputFileName = NULL;
-  bool Human           = false;
-  bool NoSave          = false;
   bool MoreInfo        = false;
   //declarations for getopt  
-  #define ShortOptions      "hqvdn"
+  #define ShortOptions      "qvd"
   #define HelpOption        CHAR_MAX + 1
   #define VersionOption     HelpOption + 1
-  #define TestOption        VersionOption + 1
   struct option LongOptions[] = { 
     {"help"      , no_argument,       NULL, HelpOption},
     {"version"   , no_argument,       NULL, VersionOption},
-    {"test"      , no_argument,       NULL, TestOption},
     {"quiet"     , no_argument,       NULL, 'q'},
     {"verbose"   , no_argument,       NULL, 'v'},
     {"debug"     , no_argument,       NULL, 'd'},
-    {"human"     , no_argument,       NULL, 'h'},
-    {"no-save"   , no_argument,       NULL, 'n'},
     {0, 0, 0, 0}
   };
   int Option;
@@ -108,10 +91,6 @@ int main(int argc, char* argv[]) {
         PrintVersion(stdout); 
         ThrowV(0);
         break;
-      case TestOption: 
-        gsTest();
-        ThrowV(0);
-        break;
       case 'q':
         gsSetQuietMsg();
         break;
@@ -120,12 +99,6 @@ int main(int argc, char* argv[]) {
         break;
       case 'd': 
         gsSetDebugMsg();
-        break;
-      case 'h':
-        Human = true;
-        break;
-      case 'n': 
-        NoSave = true;
         break;
       default:
       	MoreInfo = true;
@@ -154,8 +127,8 @@ int main(int argc, char* argv[]) {
   //initialise ATerm library
   ATerm StackBottom;
   ATinit(0, NULL, &StackBottom);
-  //parse specification  
-  if (!ParseSpecificationFileName(SpecFileName, OutputFileName, Human, NoSave))
+  //print specification  
+  if (!PrintSpecificationFileName(SpecFileName, OutputFileName))
   {
     ThrowV(1);  
   }       
@@ -169,8 +142,7 @@ finally:
   return Result;
 }
 
-bool ParseSpecificationFileName(char *SpecFileName, char *OutputFileName,
-  bool Human, bool NoSave)
+bool PrintSpecificationFileName(char *SpecFileName, char *OutputFileName)
 {
   assert(SpecFileName != NULL);
   bool Result           = true;
@@ -179,10 +151,11 @@ bool ParseSpecificationFileName(char *SpecFileName, char *OutputFileName,
   //open specification file for reading
   SpecStream = fopen(SpecFileName, "r");
   if (SpecStream == NULL) {
-    ThrowVM(false, "could not open specification file '%s' for reading (error %d)\n",
+    ThrowVM(false,
+      "could not open specification file '%s' for reading (error %d)\n",
       SpecFileName, errno);
   }
-  gsDebugMsg("formula file %s is opened for reading.\n", SpecFileName);
+  gsDebugMsg("specification file %s is opened for reading.\n", SpecFileName);
   //open output file for writing or set to stdout
   if (OutputFileName == NULL) {
     OutputStream = stdout;
@@ -195,7 +168,7 @@ bool ParseSpecificationFileName(char *SpecFileName, char *OutputFileName,
     }
     gsDebugMsg("output file %s is opened for writing.\n", OutputFileName);
   }
-  if (!ParseSpecificationStream(SpecStream, OutputStream, Human, NoSave))
+  if (!PrintSpecificationStream(SpecStream, OutputStream))
   {
     ThrowV(false);
   }
@@ -210,35 +183,22 @@ finally:
   return Result;
 }
 
-bool ParseSpecificationStream(FILE *SpecStream, FILE *OutputStream,
-  bool Human, bool NoSave)
+bool PrintSpecificationStream(FILE *SpecStream, FILE *OutputStream)
 {
   assert(SpecStream != NULL);
   assert(OutputStream != NULL);
   bool Result;
-  //parse specification save it to Spec
-  ATermAppl Spec = gsParseSpecification(SpecStream);
-  if (Spec != NULL) {
-    if (NoSave) {
-      gsVerboseMsg("do not save specification\n");
-    } else {
-      if (Human) {
-        //save specification in a human readable format
-        if (OutputStream != stdout) gsVerboseMsg(
-          "saving specification to file in a human readable format\n");
-        gsPrintSpecification(OutputStream, Spec);
-      } else {
-        //save specification as an ATerm
-        if (OutputStream != stdout) gsVerboseMsg(
-          "saving specification to file\n");
-        ATwriteToTextFile((ATerm) Spec, OutputStream);
-        fprintf(OutputStream, "\n");
-      }
-    }
-    Result = true;
-  } else {
-    Result = false;
+  //read specification from SpecStream
+  ATermAppl Spec = (ATermAppl) ATreadFromFile(SpecStream);
+  if (Spec == NULL) {
+    ThrowVM(false, "error: could not read specification from stream\n");
   }
+  //print specification to OutputStream
+  if (OutputStream != stdout) gsVerboseMsg(
+    "printing specification to file in a human readable format\n");
+  gsPrintSpecification(OutputStream, Spec);
+  Result = true;
+finally:
   gsDebugMsg("all files are closed; return %s\n", Result?"true":"false");
   return Result;
 }
@@ -246,18 +206,15 @@ bool ParseSpecificationStream(FILE *SpecStream, FILE *OutputStream,
 void PrintUsage(FILE *Stream) {
   fprintf(Stream, 
     "Usage: %s OPTIONS SPECFILE [OUTFILE]\n"
-    "Translate the GenSpect specification in SPECFILE to the ATerm format and\n"
-    "save it to OUTFILE. If OUTFILE is not present, stdout is used.\n"
+    "Print the internal GenSpect specification in SPECFILE to OUTFILE in a human\n"
+    "readable format. If OUTFILE is not present, stdout is used.\n"
     "\n"
     "The OPTIONS that can be used are:\n"
     "    --help               display this help\n"
     "    --version            display version information\n"
-    "    --test               execute test function (will be removed)\n"
     "-q, --quiet              do not display warning messages\n"
     "-v, --verbose            turn on the display of short intermediate messages\n"
-    "-d, --debug              turn on the display of detailed intermediate messages\n"
-    "-h, --human              save the parsed formula in a human readable format\n"
-    "-n, --no-save            do not save the parsed formula\n",
+    "-d, --debug              turn on the display of detailed intermediate messages\n",
     NAME
   );
 }
