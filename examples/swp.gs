@@ -13,7 +13,7 @@
 % instead of a list. This seems to make the specification more
 % compact and insightful. 
 
-map  n: Nat;
+map  n: Pos;
 
 sort D = struct d1 | d2;
      Buf = Nat -> struct data(getdata:D) | empty;
