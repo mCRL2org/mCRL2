@@ -49,8 +49,8 @@ AC_ARG_WITH(
   )
 )
 if test $with_aterm; then
-  ATERM_ROOT="$(cut -d, -f1 <<< $with_aterm,)"
-  ATERM_SUFFIX="$(cut -d, -f2 <<< $with_aterm,)"
+  ATERM_ROOT=$(echo $with_aterm, | cut -d, -f1)
+  ATERM_SUFFIX=$(echo $with_aterm, | cut -d, -f2)
   if test $ATERM_ROOT; then
     if test $ATERM_SUFFIX; then
       ATERM_INCLUDE="$ATERM_ROOT/include/$ATERM_SUFFIX"
