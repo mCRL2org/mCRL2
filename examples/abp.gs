@@ -42,8 +42,9 @@ proc
 
 init
   hide({tau_s3db, tau_s3e, tau_s6b, tau_s6e},
-    restrict({r2, r3, r5, r6, s2, s3, s5, s6},
-      comm({r2|s2, r3|s3, r5|s5, r6|s6},
+    comm({r2|s2, r3|s3, r5|s5, r6|s6},
+      allow({tau_s3db, tau_s3e, tau_s6b, tau_s6e,r1,s4,
+             r2|s2, r3|s3, r5|s5, r6|s6},
         S || K || L || R
       )
     )
