@@ -1,4 +1,4 @@
-// Date: 22-02-2005
+// Date: 04-03-2005
 // This document describes the internal format of the GenSpect language. Here:
 // - three phases of implementation are distinguised, namely type checking (tc),
 //   data implementation (di) and linearisation (lin)
@@ -17,6 +17,8 @@
 //   + the lhs of an element of A should be declared by the LPE
 //   + A may not contain duplicate lhs's
 //   + the lhs's of A should obey the order in which they are declared 
+// - the DataVarId's of the Assignment's of an LPEInit should be identical to the
+//   DataVarId's of the corresponding LPE
 // This description uses the theory of higher-order abstract data types, i.e.
 // we have a higher-order signature Sigma = (B, O), where B is set of basic
 // sorts and O is a set of operations. From the set B, we can generate the set
@@ -96,7 +98,7 @@
 
 //process expressions or data expression
 <Init>        ::= Init(<ProcExpr>)                                       (-lin)
-                | LPEInit(<DataExpr>*)                                   (+lin)
+                | LPEInit(<Assignment>*)                                 (+lin)
 
 //Expressions
 //-----------
