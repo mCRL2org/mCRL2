@@ -2521,9 +2521,11 @@ bool gsIsOpIdPrefix(ATermAppl Term)
   bool Result = gsIsOpId(Term);
   if (Result) {
     ATermAppl OpIdName = ATAgetArgument(Term, 0);
-    Result =
-      (gsMaxDomainLength(ATAgetArgument(Term, 1)) == 1) &&
-      ((OpIdName == gsOpIdNameNot) || (OpIdName == gsOpIdNameNeg));
+    Result = (gsMaxDomainLength(ATAgetArgument(Term, 1)) == 1) && (
+      (OpIdName == gsOpIdNameNot) || (OpIdName == gsOpIdNameNeg) ||
+      (OpIdName == gsOpIdNameListSize) || (OpIdName == gsOpIdNameSetSize) ||
+      (OpIdName == gsOpIdNameBagSize) || (OpIdName == gsOpIdNameSetCompl)
+      );
   }
   return Result;
 }
@@ -2535,20 +2537,36 @@ bool gsIsOpIdInfix(ATermAppl Term)
     ATermAppl OpIdName = ATAgetArgument(Term, 0);
     Result =
       (gsMaxDomainLength(ATAgetArgument(Term, 1)) == 2) &&
-      ((OpIdName == gsOpIdNameImp)  ||
-       (OpIdName == gsOpIdNameAnd)  ||
-       (OpIdName == gsOpIdNameOr)   ||
-       (OpIdName == gsOpIdNameEq)   ||
-       (OpIdName == gsOpIdNameNeq)  ||
-       (OpIdName == gsOpIdNameLT)   ||
-       (OpIdName == gsOpIdNameLTE)  ||
-       (OpIdName == gsOpIdNameGT)   ||
-       (OpIdName == gsOpIdNameGTE)  ||
-       (OpIdName == gsOpIdNameAdd)  ||
-       (OpIdName == gsOpIdNameSubt) ||
-       (OpIdName == gsOpIdNameMult) ||
-       (OpIdName == gsOpIdNameDiv)  ||
-       (OpIdName == gsOpIdNameMod));
+      ((OpIdName == gsOpIdNameImp)          ||
+       (OpIdName == gsOpIdNameAnd)          ||
+       (OpIdName == gsOpIdNameOr)           ||
+       (OpIdName == gsOpIdNameEq)           ||
+       (OpIdName == gsOpIdNameNeq)          ||
+       (OpIdName == gsOpIdNameLT)           ||
+       (OpIdName == gsOpIdNameLTE)          ||
+       (OpIdName == gsOpIdNameGT)           ||
+       (OpIdName == gsOpIdNameGTE)          ||
+       (OpIdName == gsOpIdNameSetIn)        ||
+       (OpIdName == gsOpIdNameBagIn)        ||
+       (OpIdName == gsOpIdNameSubSetEq)     ||
+       (OpIdName == gsOpIdNameSubSet)       ||
+       (OpIdName == gsOpIdNameSubBagEq)     ||
+       (OpIdName == gsOpIdNameSubBag)       ||
+       (OpIdName == gsOpIdNameCons)         ||
+       (OpIdName == gsOpIdNameSnoc)         ||
+       (OpIdName == gsOpIdNameConcat)       ||
+       (OpIdName == gsOpIdNameAdd)          ||
+       (OpIdName == gsOpIdNameSubt)         ||
+       (OpIdName == gsOpIdNameSetUnion)     ||
+       (OpIdName == gsOpIdNameSetDiff)      ||
+       (OpIdName == gsOpIdNameBagUnion)     ||
+       (OpIdName == gsOpIdNameBagDiff)      ||
+       (OpIdName == gsOpIdNameMult)         ||
+       (OpIdName == gsOpIdNameDiv)          ||
+       (OpIdName == gsOpIdNameMod)          ||
+       (OpIdName == gsOpIdNameEltAt)        ||
+       (OpIdName == gsOpIdNameSetIntersect) ||
+       (OpIdName == gsOpIdNameBagIntersect));
   }
   return Result;
 }
@@ -2562,13 +2580,32 @@ int gsPrecOpIdInfix(ATermAppl OpIdInfix)
     return 3;
   } else if ((OpIdName == gsOpIdNameEq) || (OpIdName == gsOpIdNameNeq)) {
     return 4;
-  } else if ((OpIdName == gsOpIdNameLT) || (OpIdName == gsOpIdNameLTE) ||
-      (OpIdName == gsOpIdNameGT) || (OpIdName == gsOpIdNameGTE)) {
+  } else if (
+      (OpIdName == gsOpIdNameLT) || (OpIdName == gsOpIdNameLTE) ||
+      (OpIdName == gsOpIdNameGT) || (OpIdName == gsOpIdNameGTE) ||
+      (OpIdName == gsOpIdNameSetIn) || (OpIdName == gsOpIdNameBagIn) ||
+      (OpIdName == gsOpIdNameSubSetEq) || (OpIdName == gsOpIdNameSubSet) ||
+      (OpIdName == gsOpIdNameSubBagEq) || (OpIdName == gsOpIdNameSubBag)
+      ) {
     return 5;
-  } else if ((OpIdName == gsOpIdNameAdd) || (OpIdName == gsOpIdNameSubt)) {
+  } else if ((OpIdName == gsOpIdNameCons)) {
+    return 6;
+  } else if ((OpIdName == gsOpIdNameSnoc)) {
+    return 7;
+  } else if ((OpIdName == gsOpIdNameConcat)) {
+    return 8;
+  } else if (
+      (OpIdName == gsOpIdNameAdd) || (OpIdName == gsOpIdNameSubt) ||
+      (OpIdName == gsOpIdNameSetUnion) || (OpIdName == gsOpIdNameSetDiff) ||
+      (OpIdName == gsOpIdNameBagUnion) || (OpIdName == gsOpIdNameBagDiff)
+      ) {
     return 9;
-  } else if ((OpIdName == gsOpIdNameMult) || (OpIdName == gsOpIdNameDiv) ||
-      (OpIdName == gsOpIdNameMod)) {
+  } else if (
+      (OpIdName == gsOpIdNameMult) || (OpIdName == gsOpIdNameDiv) ||
+      (OpIdName == gsOpIdNameMod) || (OpIdName == gsOpIdNameEltAt) ||
+      (OpIdName == gsOpIdNameSetIntersect) ||
+      (OpIdName == gsOpIdNameBagIntersect)
+      ){
     return 10;
   } else {
     //something went wrong
@@ -2585,13 +2622,32 @@ int gsPrecOpIdInfixLeft(ATermAppl OpIdInfix)
     return 3;
   } else if ((OpIdName == gsOpIdNameEq) || (OpIdName == gsOpIdNameNeq)) {
     return 4;
-  } else if ((OpIdName == gsOpIdNameLT) || (OpIdName == gsOpIdNameLTE) ||
-      (OpIdName == gsOpIdNameGT) || (OpIdName == gsOpIdNameGTE)) {
+  } else if (
+      (OpIdName == gsOpIdNameLT) || (OpIdName == gsOpIdNameLTE) ||
+      (OpIdName == gsOpIdNameGT) || (OpIdName == gsOpIdNameGTE) ||
+      (OpIdName == gsOpIdNameSetIn) || (OpIdName == gsOpIdNameBagIn) ||
+      (OpIdName == gsOpIdNameSubSetEq) || (OpIdName == gsOpIdNameSubSet) ||
+      (OpIdName == gsOpIdNameSubBagEq) || (OpIdName == gsOpIdNameSubBag)
+      ) {
     return 6;
-  } else if ((OpIdName == gsOpIdNameAdd) || (OpIdName == gsOpIdNameSubt)) {
+  } else if ((OpIdName == gsOpIdNameCons)) {
     return 9;
-  } else if ((OpIdName == gsOpIdNameMult) || (OpIdName == gsOpIdNameDiv) ||
-      (OpIdName == gsOpIdNameMod)) {
+  } else if ((OpIdName == gsOpIdNameSnoc)) {
+    return 7;
+  } else if ((OpIdName == gsOpIdNameConcat)) {
+    return 8;
+  } else if (
+      (OpIdName == gsOpIdNameAdd) || (OpIdName == gsOpIdNameSubt) ||
+      (OpIdName == gsOpIdNameSetUnion) || (OpIdName == gsOpIdNameSetDiff) ||
+      (OpIdName == gsOpIdNameBagUnion) || (OpIdName == gsOpIdNameBagDiff)
+      ) {
+    return 9;
+  } else if (
+      (OpIdName == gsOpIdNameMult) || (OpIdName == gsOpIdNameDiv) ||
+      (OpIdName == gsOpIdNameMod) || (OpIdName == gsOpIdNameEltAt) ||
+      (OpIdName == gsOpIdNameSetIntersect) ||
+      (OpIdName == gsOpIdNameBagIntersect)
+      ){
     return 10;
   } else {
     //something went wrong
@@ -2608,13 +2664,32 @@ int gsPrecOpIdInfixRight(ATermAppl OpIdInfix)
     return 4;
   } else if ((OpIdName == gsOpIdNameEq) || (OpIdName == gsOpIdNameNeq)) {
     return 5;
-  } else if ((OpIdName == gsOpIdNameLT) || (OpIdName == gsOpIdNameLTE) ||
-      (OpIdName == gsOpIdNameGT) || (OpIdName == gsOpIdNameGTE)) {
+  } else if (
+      (OpIdName == gsOpIdNameLT) || (OpIdName == gsOpIdNameLTE) ||
+      (OpIdName == gsOpIdNameGT) || (OpIdName == gsOpIdNameGTE) ||
+      (OpIdName == gsOpIdNameSetIn) || (OpIdName == gsOpIdNameBagIn) ||
+      (OpIdName == gsOpIdNameSubSetEq) || (OpIdName == gsOpIdNameSubSet) ||
+      (OpIdName == gsOpIdNameSubBagEq) || (OpIdName == gsOpIdNameSubBag)
+      ) {
     return 6;
-  } else if ((OpIdName == gsOpIdNameAdd) || (OpIdName == gsOpIdNameSubt)) {
+  } else if ((OpIdName == gsOpIdNameCons)) {
+    return 6;
+  } else if ((OpIdName == gsOpIdNameSnoc)) {
+    return 9;
+  } else if ((OpIdName == gsOpIdNameConcat)) {
+    return 9;
+  } else if (
+      (OpIdName == gsOpIdNameAdd) || (OpIdName == gsOpIdNameSubt) ||
+      (OpIdName == gsOpIdNameSetUnion) || (OpIdName == gsOpIdNameSetDiff) ||
+      (OpIdName == gsOpIdNameBagUnion) || (OpIdName == gsOpIdNameBagDiff)
+      ) {
     return 10;
-  } else if ((OpIdName == gsOpIdNameMult) || (OpIdName == gsOpIdNameDiv) ||
-      (OpIdName == gsOpIdNameMod)) {
+  } else if (
+      (OpIdName == gsOpIdNameMult) || (OpIdName == gsOpIdNameDiv) ||
+      (OpIdName == gsOpIdNameMod) || (OpIdName == gsOpIdNameEltAt) ||
+      (OpIdName == gsOpIdNameSetIntersect) ||
+      (OpIdName == gsOpIdNameBagIntersect)
+      ){
     return 11;
   } else {
     //something went wrong

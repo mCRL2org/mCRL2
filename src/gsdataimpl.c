@@ -512,7 +512,9 @@ ATermAppl gsImplExprsPart(ATermAppl Part, ATermList *PSubsts,
     PDataDecls->DataEqns = ATinsert(PDataDecls->DataEqns, (ATerm)
       gsMakeDataEqn(Vars, gsMakeNil(), gsMakeDataApplList(OpId, Vars), Body));
     //replace Part
-    Part = gsMakeDataApplList(OpId, FreeVars);
+    ATermAppl NewPart = gsMakeDataApplList(OpId, FreeVars);
+    *PSubsts = gsAddSubstToSubsts(gsMakeSubst(Part, NewPart), *PSubsts);
+    Part = NewPart;
   }
   //implement expressions in the arguments of Part
   AFun Head = ATgetAFun(Part);
