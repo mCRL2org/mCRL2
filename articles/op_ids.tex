@@ -723,8 +723,10 @@ The system identifiers for sets are listed in table~\ref{tab:ptc:sets}. Here,
 \begin{tabular}{l|L|l|l}
 Name & \text{Type} & Description & External repr.\\
 \hline
-\verb+@set+    & (S \To \srtbool) \To \fa{Set}{S}
-& set comphrehension & set comprehension\\
+\verb+@set+$^*$& (S \To \srtbool) \To \fa{Set}{S}
+& set comprehension & set comprehension\\
+\verb+Set2Bag+ & \fa{Set}{S} \To \fa{Bag}{S}
+& convert set to bag & functional\\
 \verb+{}+      & \fa{Set}{S}
 & empty set          & constant\\
 \verb+#+       & \fa{Set}{S} \To \srtnat
@@ -743,8 +745,6 @@ Name & \text{Type} & Description & External repr.\\
 & intersection       & infix\\
 \verb+!+       & \fa{Set}{S} \To \fa{Set}{S}
 & complement         & prefix\\
-\verb+Set2Bag+ & \fa{Set}{S} \To \fa{Bag}{S}
-& convert set to bag & functional\\
 \end{tabular}
 \caption{System identifiers for sets}
 \label{tab:ptc:sets}
@@ -760,8 +760,10 @@ The system identifiers for bags are listed in table~\ref{tab:ptc:bags}. Here,
 \begin{tabular}{l|L|l|l}
 Name & \text{Type} & Description & External repr.\\
 \hline
-\verb+@set+    & (S \To \srtbool) \To \fa{Bag}{S}
-& bag comphrehension & bag comprehension\\
+\verb+@bag+$^*$& (S \To \srtbool) \To \fa{Bag}{S}
+& bag comprehension & bag comprehension\\
+\verb+Bag2Set+ & \fa{Bag}{S} \To \fa{Set}{S}
+& convert bag to set & functional\\
 \verb+{}+      & \fa{Bag}{S}
 & empty bag          & constant\\
 \verb+#+       & \fa{Bag}{S} \To \srtnat
@@ -780,8 +782,6 @@ Name & \text{Type} & Description & External repr.\\
 & difference         & infix\\
 \verb+*+       & \fa{Bag}{S} \times \fa{Bag}{S} \To \fa{Bag}{S}
 & intersection       & infix\\
-\verb+Bag2Set+ & \fa{Bag}{S} \To \fa{Set}{S}
-& convert bag to set & functional\\
 \end{tabular}
 \caption{System identifiers for bags}
 \label{tab:ptc:bags}
