@@ -112,6 +112,7 @@ static ATbool ExtensionAdded(char *filename, char *suffix) {
    
 /* PREAMBLE */
 
+static ATermList getsorts(ATermList l);
 static ATermAppl uniqueterm(ATermAppl sort);
 static int occursintermlist(ATermAppl var, ATermList l);
 static int occursinpCRLterm(ATermAppl var, ATermAppl p, int strict);
@@ -358,26 +359,21 @@ static int existsort(ATermAppl sortterm)
   { return existsort(ATAgetArgument(sortterm,0)) && 
              existsort(ATAgetArgument(sortterm,1));
   }
-  if (gsIsSortList(sortterm))
-  { ATerror("SortList is not an implemented sort");
-  }
-  if (gsIsSortSet(sortterm))
-  { ATerror("SortSet is not an implemented sort");
-  }
-  if (gsIsSortBag(sortterm))
-  { ATerror("SortBag is not an implemented sort");
-  }
   if (gsIsSortId(sortterm)) 
   { 
     long n=0;
 
     n=objectIndex(sortterm);
-    if (n<0) return 0;
+    if (n<0) 
+    { 
+      return 0;
+    }
     if (objectdata[n].object==sort) return 1;
     return 0;
   }
+  ATfprintf(stderr,"EEJIJIIJIEJEJE %t\n", sortterm);
   assert(0);
-  ATerror("Internal: Expected a sortterm %t",sortterm);
+  ATerror("Internal: Expected a sortterm (1) %t",sortterm);
   return 0;
 }
 
@@ -392,7 +388,7 @@ static void insertsort(ATermAppl sortterm)
     insertsort(ATAgetArgument(sortterm,1));
     return;
   }
-  if (gsIsSortList(sortterm))
+  /* if (gsIsSortList(sortterm))
   { ATerror("SortList is not an implemented sort");
   }
   if (gsIsSortSet(sortterm))
@@ -400,7 +396,7 @@ static void insertsort(ATermAppl sortterm)
   }
   if (gsIsSortBag(sortterm))
   { ATerror("SortBag is not an implemented sort");
-  }
+  } */
   if (gsIsSortId(sortterm)) 
 
   {
@@ -421,8 +417,7 @@ static void insertsort(ATermAppl sortterm)
     objectdata[n].constructor=0;
     return;
   }
-  ATerror("Internal: Expected a sortterm (1)  %t",sortterm);
-  
+  ATerror("Internal: Expected a sortterm (2)  %t",sortterm);
 }
 
 static long insertConstructorOrFunction(ATermAppl constructor,objecttype type)
@@ -486,16 +481,16 @@ static ATermList getnames(ATermAppl multiAction)
 static ATermList getparameters(ATermAppl multiAction)
 { ATermList result=ATempty;
 
+  assert(gsIsMultAct(multiAction));
   for(ATermList l=ATLgetArgument(multiAction,0) ;
                 l!=ATempty ;
                 l=ATgetNext(l))
   { for(ATermList l1=ATLgetArgument(ATAgetArgument(ATAgetFirst(l),0),1) ;
                   l1!=ATempty ;
                   l1=ATgetNext(l1))
-    { result=ATinsertA(result,
-               gsMakeDataVarId(
-                     fresh_name("a"),
-                     ATAgetFirst(l1)));
+    { result=ATinsertA(
+               result,
+               getfreshvariable("a",ATAgetFirst(l1)));
     }
   }
   return ATreverse(result);
@@ -504,7 +499,6 @@ static ATermList getparameters(ATermAppl multiAction)
 static ATermList getarguments(ATermAppl multiAction)
 { ATermList result=ATempty;
 
-  ATfprintf(stderr,"AAAA %t\n",multiAction);
   for(ATermList l=ATLgetArgument(multiAction,0) ;
                 l!=ATempty ;
                 l=ATgetNext(l))
@@ -524,10 +518,12 @@ static ATermAppl makemultiaction(ATermList actionIds,ATermList args)
   { ATermAppl actionId=ATAgetFirst(l);
     long arity=ATgetLength(ATLgetArgument(actionId,1));
     result=ATinsertA(result,
-               gsMakeAction(ATAgetFirst(l),
-                            ATgetSlice(args,0,arity-1)));
+               gsMakeAction(actionId,
+                            ATgetSlice(args,0,arity)));
     args=ATgetTail(args,arity);
   }
+
+  assert(args==ATempty);
   return gsMakeMultAct(ATreverse(result));
 }
 
@@ -761,7 +757,6 @@ static long insertProcDeclaration(
   objectdata[n].processbody=body;
   objectdata[n].processstatus=s;
   objectdata[n].parameters=parameters;
-  ATfprintf(stderr,"BRRRRR %t\n",procId);
 #ifndef NDEBUG
   { for(ATermList l=ATLgetArgument(procId,1); !ATisEmpty(l); 
                   l=ATgetNext(l))
@@ -1227,7 +1222,6 @@ static ATermAppl fresh_name(char *name)
 
 static int occursinterm(ATermAppl var, ATermAppl t)
 { 
-  ATfprintf(stderr,"BBBBB %t\n",t);
   if (gsIsDataVarId(t))
   { return var==t; }
 
@@ -1243,7 +1237,6 @@ static int occursinterm(ATermAppl var, ATermAppl t)
 
 static int occursintermlist(ATermAppl var, ATermList l)
 { 
-  ATfprintf(stderr,"BBBBBLIST %t\n",l);
   for( ; l!=ATempty ; l=ATgetNext(l))
   { if (occursinterm(var,ATAgetFirst(l)))
     return 1;
@@ -1252,7 +1245,7 @@ static int occursintermlist(ATermAppl var, ATermList l)
 }
 
 static int occursinmultiaction(ATermAppl var, ATermList ma)
-{ ATfprintf(stderr,"LLL %t\n",ma);
+{ 
   for( ; ma!=ATempty ; ma=ATgetNext(ma) )
   { if (occursintermlist(var,ATLgetArgument(ATAgetFirst(ma),1)))
     { return 1; 
@@ -1273,7 +1266,6 @@ static int occursinmultiaction(ATermAppl var, ATermList ma)
 
 static int occursinpCRLterm(ATermAppl var, ATermAppl p, int strict)
 { 
-  ATfprintf(stderr,"DDDD %t\n",p);
   if (gsIsChoice(p))
   { return occursinpCRLterm(var,ATAgetArgument(p,0),strict)||
            occursinpCRLterm(var,ATAgetArgument(p,1),strict);
@@ -1390,7 +1382,8 @@ static ATermAppl substitute_variable_rec(
    { 
 #ifndef NDEBUG
      if (pars!=ATempty) 
-     { ATerror("Non matching vars and pars list");
+     { assert(0);
+       ATerror("Non matching vars and pars list");
      }
 #endif
      return s_term;
@@ -1508,7 +1501,7 @@ static ATermAppl substitute_pCRLproc(
                  ATermList vars, 
                  ATermList pars,
                  ATermAppl p)
-{ ATfprintf(stderr,"SUBSTPCRL %t %t\n",vars,pars);
+{ ATfprintf(stderr,"SUBSTPCRL %t %t\n%t\n\n",vars,pars,p);
   if (gsIsChoice(p))  /* "Choice(<term>,<term>)" */
   { return gsMakeChoice(
                 substitute_pCRLproc(vars,pars,ATAgetArgument(p,0)),
@@ -1605,7 +1598,7 @@ static ATermAppl newprocess(ATermList parameters, ATermAppl body,
              parameters,
              body,
              ps);
-  ATfprintf(stderr,"NEWPROCES %t\n",p);
+  ATfprintf(stderr,"NEWPROCESS %t  %t\n%t\n\n",p,parameters,body);
   return p;
 }
 
@@ -1881,7 +1874,6 @@ static ATermAppl bodytovarheadGNF(
 
     /* make a new process, containing this process */
     newproc=newprocess(freevars,body1,pCRL);
-    ATfprintf(stderr,"AAAAAAA %t\n",newproc);
     return gsMakeProcess(newproc,objectdata[objectIndex(newproc)].parameters);
   }
   
@@ -2117,7 +2109,9 @@ static ATermList extract_names(ATermAppl sequence)
     if (gsIsProcess(first))
     { long n=objectIndex(first);
       if (objectdata[n].canterminate)
-         return ATinsertA(extract_names(sequence),first);
+         return ATinsertA(
+                  extract_names(ATAgetArgument(sequence,1)),
+                  first);
       else return ATinsertA(ATempty,first); 
     } 
   }
@@ -2228,7 +2222,8 @@ static ATermAppl create_regular_invocation(
      args=argscollect(sequence);
   else
      args=ATLgetArgument(new_process,1);
-  return gsMakeProcess(new_process,args);
+  return gsMakeProcess(new_process,
+            objectdata[objectIndex(new_process)].parameters); 
 }
 
 static ATermAppl to_regular_form(
@@ -4036,7 +4031,6 @@ static void create_case_function_on_enumeratedtype(
     }
 
     newsort=gsMakeSortArrow(e->sortId,newsort);
-
     sprintf(scratch1,"C%d-%s",e->size,ATSgetArgument(sort,0));
     casefunction=gsMakeOpId(
                       fresh_name(scratch1),
@@ -4063,6 +4057,9 @@ static enumtype *generate_enumerateddatatype(
                       ATermList gsorts, 
                       specificationbasictype *spec)
 { 
+
+  ATfprintf(stderr,"GGGGGGGGG %t\n%t\n\n",fsorts,gsorts);
+
   enumtype *et=NULL;
   ATermList w=ATempty;
   
@@ -4462,7 +4459,7 @@ static ATermAppl collect_sum_arg_arg_cond(
     auxrename_list=(ATermList)ATgetNext(auxrename_list);
     ATermList auxargs=(ATermList)ATgetNext(auxrename_list);
     auxrename_list=(ATermList)ATgetNext(auxrename_list);
-
+    ATfprintf(stderr,"RRRRR %t\n%t\n\n",auxpars,auxargs);
     auxresult1=substitute_data(auxpars,auxargs,condition); 
     if (equalterm==NULL)
     { equalterm=auxresult1;
@@ -4764,10 +4761,12 @@ static ATermList  cluster_actions(
       { actionsorts=getActionSorts(ATLgetArgument(multiaction,0));
       }
       if (binary==0)
-      { enumeratedtype=generate_enumerateddatatype(n,actionsorts,pars,spec); 
+      { enumeratedtype=generate_enumerateddatatype(
+                      n,actionsorts,getsorts(pars),spec); 
       }
       else 
-      { enumeratedtype=generate_enumerateddatatype(2,actionsorts,pars,spec); 
+      { enumeratedtype=generate_enumerateddatatype(
+                      2,actionsorts,getsorts(pars),spec); 
       }
 
       result=ATinsertA(result,
@@ -6569,10 +6568,12 @@ static ATermAppl split_body(
         gsIsAtTime(t)||
         gsIsSync(t))
     { if (canterminatebody(t,NULL,NULL))
-      { result=newprocess(parameters,gsMakeSeq(t,terminatedProc),pCRL);
+      { ATermAppl p=newprocess(parameters,gsMakeSeq(t,terminatedProc),pCRL);
+        result=gsMakeProcess(p,objectdata[objectIndex(p)].parameters);
       }
       else
-      { result=newprocess(parameters,t,pCRL);
+      { ATermAppl p=newprocess(parameters,t,pCRL);
+        result=gsMakeProcess(p,objectdata[objectIndex(p)].parameters);
       }
     }
     else
