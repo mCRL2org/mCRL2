@@ -288,7 +288,6 @@ void gsPrintPart(FILE *OutStream, const ATermAppl Part, bool ShowSorts,
     if (ATgetLength(Vars) > 0) {
       fprintf(OutStream, "var  ");
       gsPrintDecls(OutStream, Vars, ";\n", "     ");
-      fprintf(OutStream, "\n");
     }
     //print process name and variable declarations
     ATermList VarDecls = ATLgetArgument(Part, 1);
@@ -332,7 +331,6 @@ void gsPrintPart(FILE *OutStream, const ATermAppl Part, bool ShowSorts,
     if (ATgetLength(Vars) > 0) {
       fprintf(OutStream, "var  ");
       gsPrintDecls(OutStream, Vars, ";\n", "     ");
-      fprintf(OutStream, "\n");
     }
     fprintf(OutStream, "init P"); 
     ATermList Args = ATLgetArgument(Part, 1);
