@@ -15,7 +15,7 @@ extern "C" {
 //Functions for the internal ATerm structure
 //------------------------------------------
 
-ATermAppl gsString2ATermAppl(char *s)
+ATermAppl gsString2ATermAppl(const char *s)
 {
   if (s != NULL) {
     return ATmakeAppl0(ATmakeAFun(s, 0, ATtrue));
@@ -34,17 +34,24 @@ char *gsATermAppl2String(ATermAppl term)
   }
 }
 
-ATermAppl gsFreshString2ATermAppl(const char *s, ATerm Term)
+ATermAppl gsFreshString2ATermAppl(const char *s, ATerm Term, bool TryNoSuffix)
 {
   bool found = false;
-  ATermAppl NewTerm;
-  char *Name = (char *) malloc((strlen(s)+NrOfChars(INT_MAX)+1)*sizeof(char));
-  for (int i = 0; i < INT_MAX && !found; i++) {
-    sprintf(Name, "%s%d", s, i);
-    NewTerm = gsString2ATermAppl(Name);
-    if (!gsOccurs((ATerm) NewTerm, Term)) found = true;
+  ATermAppl NewTerm = gsString2ATermAppl(s);
+  if (TryNoSuffix) {
+    //try "s"
+    found = !gsOccurs((ATerm) NewTerm, Term);
   }
-  free(Name);
+  if (!found) {
+    //find "sk" that does not occur in Term
+    char *Name = (char *) malloc((strlen(s)+NrOfChars(INT_MAX)+1)*sizeof(char));
+    for (int i = 0; i < INT_MAX && !found; i++) {
+      sprintf(Name, "%s%d", s, i);
+      NewTerm = gsString2ATermAppl(Name);
+      found = !gsOccurs((ATerm) NewTerm, Term);
+    }
+    free(Name);
+  }
   if (found) {
     return NewTerm;
   } else {
@@ -174,6 +181,8 @@ static ATermAppl gsOpIdNameDiv;
 static ATermAppl gsOpIdNameMod;
 static ATermAppl gsOpIdNameExp;
 static ATermAppl gsOpIdNameEven;
+static ATermAppl gsOpIdNameSetComp;
+static ATermAppl gsOpIdNameBagComp;
 
 //Lists
 static ATermAppl gsOpIdNameEmptyList;
@@ -335,8 +344,6 @@ void gsEnableConstructorFunctions(void)
   gsOpIdNameMod       = gsString2ATermAppl("mod");
   gsOpIdNameExp       = gsString2ATermAppl("exp");
   gsOpIdNameEven      = gsString2ATermAppl("@even");
-
-  //Lists
   gsOpIdNameEmptyList = gsString2ATermAppl("[]");
   gsOpIdNameListSize  = gsString2ATermAppl("#");
   gsOpIdNameInsert    = gsString2ATermAppl("|>");
@@ -347,8 +354,8 @@ void gsEnableConstructorFunctions(void)
   gsOpIdNameLtail     = gsString2ATermAppl("ltail");
   gsOpIdNameRhead     = gsString2ATermAppl("rhead");
   gsOpIdNameRtail     = gsString2ATermAppl("rtail");
-
-  //Sets
+  gsOpIdNameSetComp   = gsString2ATermAppl("@set");
+  gsOpIdNameSet2Bag   = gsString2ATermAppl("Set2Bag");
   gsOpIdNameEmptySet  = gsString2ATermAppl("{}");
   gsOpIdNameSetSize   = gsString2ATermAppl("#");
   gsOpIdNameSetIn     = gsString2ATermAppl("in");
@@ -358,9 +365,8 @@ void gsEnableConstructorFunctions(void)
   gsOpIdNameSetDifference   = gsString2ATermAppl("-");
   gsOpIdNameSetIntersection = gsString2ATermAppl("*");
   gsOpIdNameSetComplement   = gsString2ATermAppl("!");
-  gsOpIdNameSet2Bag   = gsString2ATermAppl("Set2Bag");
-  
-  //Bags
+  gsOpIdNameBagComp   = gsString2ATermAppl("@bag");
+  gsOpIdNameBag2Set   = gsString2ATermAppl("Bag2Set");
   gsOpIdNameEmptyBag  = gsString2ATermAppl("{}");
   gsOpIdNameBagSize   = gsString2ATermAppl("#");
   gsOpIdNameBagIn     = gsString2ATermAppl("in");
@@ -370,7 +376,6 @@ void gsEnableConstructorFunctions(void)
   gsOpIdNameBagUnion  = gsString2ATermAppl("+");
   gsOpIdNameBagDifference   = gsString2ATermAppl("-");
   gsOpIdNameBagIntersection = gsString2ATermAppl("*");
-  gsOpIdNameBag2Set   = gsString2ATermAppl("Bag2Set");
     
   //protect constructor AFun's
   ATprotectAFun(gsAFunSpecV1);
@@ -490,8 +495,6 @@ void gsEnableConstructorFunctions(void)
   ATprotectAppl(&gsOpIdNameMod);
   ATprotectAppl(&gsOpIdNameExp);
   ATprotectAppl(&gsOpIdNameEven);
-
-  //Lists
   ATprotectAppl(&gsOpIdNameEmptyList);
   ATprotectAppl(&gsOpIdNameListSize);
   ATprotectAppl(&gsOpIdNameInsert);
@@ -502,8 +505,8 @@ void gsEnableConstructorFunctions(void)
   ATprotectAppl(&gsOpIdNameLtail);
   ATprotectAppl(&gsOpIdNameRhead);
   ATprotectAppl(&gsOpIdNameRtail);
-
-  //Sets
+  ATprotectAppl(&gsOpIdNameSetComp);
+  ATprotectAppl(&gsOpIdNameSet2Bag);
   ATprotectAppl(&gsOpIdNameEmptySet);
   ATprotectAppl(&gsOpIdNameSetSize);
   ATprotectAppl(&gsOpIdNameSetIn);
@@ -513,9 +516,8 @@ void gsEnableConstructorFunctions(void)
   ATprotectAppl(&gsOpIdNameSetDifference);
   ATprotectAppl(&gsOpIdNameSetIntersection);
   ATprotectAppl(&gsOpIdNameSetComplement);
-  ATprotectAppl(&gsOpIdNameSet2Bag);
-  
-  //Bags
+  ATprotectAppl(&gsOpIdNameBagComp);
+  ATprotectAppl(&gsOpIdNameBag2Set);
   ATprotectAppl(&gsOpIdNameEmptyBag);
   ATprotectAppl(&gsOpIdNameBagSize);
   ATprotectAppl(&gsOpIdNameBagIn);
@@ -525,8 +527,6 @@ void gsEnableConstructorFunctions(void)
   ATprotectAppl(&gsOpIdNameBagUnion);
   ATprotectAppl(&gsOpIdNameBagDifference);
   ATprotectAppl(&gsOpIdNameBagIntersection);
-  ATprotectAppl(&gsOpIdNameBag2Set);
- 
   gsConstructorFunctionsEnabled = true;
 }
 
@@ -1380,24 +1380,62 @@ ATermAppl gsMakeSortArrowList(ATermList SortExprDomain,
 
 ATermAppl gsGetSort(ATermAppl DataExpr)
 {
+  ATermAppl Result;
   if (gsIsDataAppl(DataExpr)) {
+    //DataExpr is a data application; return the result sort of the first
+    //argument
     ATermAppl HeadSort = gsGetSort(ATAgetArgument(DataExpr, 0));
-    if (gsIsSortArrow(HeadSort)) {
-      ATermAppl ResultSort = gsGetSort(ATAgetArgument(DataExpr, 1));
-      if (!gsIsUnknown(ResultSort) &&
-          ATisEqual(ResultSort, ATAgetArgument(HeadSort, 0))) {
-        return ATAgetArgument(HeadSort, 1);
-      } else {
-        return gsMakeSortArrow(HeadSort, ResultSort);
-      }
-    } else {
-      return gsMakeUnknown();
+    if (gsIsSortArrow(HeadSort))
+      Result = ATAgetArgument(HeadSort, 1);
+    else
+      Result = gsMakeUnknown();
+  } else if (gsIsDataVarId(DataExpr) || gsIsOpId(DataExpr) ||
+      gsIsNumber(DataExpr) || gsIsListEnum(DataExpr) ||
+      gsIsSetEnum(DataExpr) || gsIsBagEnum(DataExpr)) {
+    //DataExpr is a data variable, an operation identifier, a number or an
+    //enumeration; return its sort
+    Result = ATAgetArgument(DataExpr, 1);
+  } else if (gsIsDataApplProd(DataExpr)) {
+    //DataExpr is a product data application; return the result sort of the
+    //first argument
+    ATermAppl HeadSort = gsGetSort(ATAgetArgument(DataExpr, 0));
+    if (gsIsSortArrowProd(HeadSort))
+      Result = ATAgetArgument(HeadSort, 1);
+    else
+      Result = gsMakeUnknown();
+  } else if (gsIsSetBagComp(DataExpr)) {
+    //DataExpr is a set of bag comprehension; depending on the sort of the
+    //body, return List(S) or Bag(S), where S is the sort of the variable
+    //declaration
+    ATermAppl Var = ATAgetArgument(DataExpr, 0);
+    ATermAppl SortBody = gsGetSort(ATAgetArgument(DataExpr, 1));
+    if (ATisEqual(SortBody, gsMakeSortExprBool()))
+      Result = gsMakeSortSet(gsGetSort(Var));
+    else if (ATisEqual(SortBody, gsMakeSortExprNat()))
+      Result = gsMakeSortBag(gsGetSort(Var));
+    else
+      Result = gsMakeUnknown();
+  } else if (gsIsForall(DataExpr) || gsIsExists(DataExpr) ||
+      gsIsLambda(DataExpr)) {
+    //DataExpr is a quantification or a lambda abstraction of the form
+    //  Q x0: S0, ..., xn: Sn. e
+    //return S0 -> ... -> Sn -> e
+    Result = gsGetSort(ATAgetArgument(DataExpr, 1));
+    ATermList Vars = ATreverse(ATLgetArgument(DataExpr, 0));
+    while (!ATisEmpty(Vars))
+    {
+      Result = gsMakeSortArrow(gsGetSort(ATAgetFirst(Vars)), Result);
+      Vars = ATgetNext(Vars);
     }
-  } else if (gsIsDataVarId(DataExpr) || gsIsOpId(DataExpr)) {
-    return ATAgetArgument(DataExpr, 1);
+  } else if (gsIsWhr(DataExpr)) {
+    //DataExpr is a where clause; return the sort of the body
+    Result = gsGetSort(ATAgetArgument(DataExpr, 0));
   } else {
-    return gsMakeUnknown();
+    //DataExpr is a data variable or operation identifier of which the sort is
+    //not known; return Unknown
+    Result = gsMakeUnknown();
   }
+  return Result;
 }
 
 int gsMaxDomainLength(ATermAppl SortExpr)
@@ -1729,7 +1767,6 @@ ATermAppl gsMakeOpIdEven(void)
     gsMakeSortArrow(gsMakeSortExprNat(), gsMakeSortExprBool()));
 }
 
-//Lists
 ATermAppl gsMakeOpIdNameEmptyList(ATermAppl Type){
   assert(gsConstructorFunctionsEnabled);
   return gsMakeOpId(gsOpIdNameEmptyList,gsMakeSortList(Type));
@@ -1789,8 +1826,20 @@ ATermAppl gsMakeOpIdNameRtail(ATermAppl Type){
   return gsMakeOpId(gsOpIdNameRtail,
 		    gsMakeSortArrow(gsMakeSortList(Type),gsMakeSortList(Type)));
 }
-	    
-//Sets
+
+ATermAppl gsMakeOpIdSetComp(ATermAppl SortExprDom, ATermAppl SortExprResult)
+{
+  assert(gsConstructorFunctionsEnabled);
+  return gsMakeOpId(gsOpIdNameSetComp, gsMakeSortArrow(
+    gsMakeSortArrow(SortExprDom, gsMakeSortExprBool()), SortExprResult));
+}
+
+ATermAppl gsMakeOpIdNameSet2Bag(ATermAppl Type){
+  assert(gsConstructorFunctionsEnabled);
+  return gsMakeOpId(gsOpIdNameSet2Bag,
+		    gsMakeSortArrow(gsMakeSortSet(Type),gsMakeSortBag(Type)));
+}
+
 ATermAppl gsMakeOpIdNameEmptySet(ATermAppl Type){
   assert(gsConstructorFunctionsEnabled);
   return gsMakeOpId(gsOpIdNameEmptySet,gsMakeSortSet(Type));
@@ -1844,13 +1893,19 @@ ATermAppl gsMakeOpIdNameSetComplement(ATermAppl Type){
 		    gsMakeSortArrow(gsMakeSortSet(Type),gsMakeSortSet(Type)));
 }
 
-ATermAppl gsMakeOpIdNameSet2Bag(ATermAppl Type){
+ATermAppl gsMakeOpIdBagComp(ATermAppl SortExprDom, ATermAppl SortExprResult)
+{
   assert(gsConstructorFunctionsEnabled);
-  return gsMakeOpId(gsOpIdNameSet2Bag,
-		    gsMakeSortArrow(gsMakeSortSet(Type),gsMakeSortBag(Type)));
+  return gsMakeOpId(gsOpIdNameBagComp, gsMakeSortArrow(
+    gsMakeSortArrow(SortExprDom, gsMakeSortExprNat()), SortExprResult));
 }
 
-//Bags
+ATermAppl gsMakeOpIdNameBag2Set(ATermAppl Type){
+  assert(gsConstructorFunctionsEnabled);
+  return gsMakeOpId(gsOpIdNameBag2Set,
+		    gsMakeSortArrow(gsMakeSortBag(Type),gsMakeSortSet(Type)));
+}
+
 ATermAppl gsMakeOpIdNameEmptyBag(ATermAppl Type){
   assert(gsConstructorFunctionsEnabled);
   return gsMakeOpId(gsOpIdNameEmptyBag,gsMakeSortBag(Type));
@@ -1904,12 +1959,6 @@ ATermAppl gsMakeOpIdNameBagIntersection(ATermAppl Type){
 		    gsMakeSortArrow2(gsMakeSortBag(Type),gsMakeSortBag(Type),gsMakeSortBag(Type)));
 }
 
-ATermAppl gsMakeOpIdNameBag2Set(ATermAppl Type){
-  assert(gsConstructorFunctionsEnabled);
-  return gsMakeOpId(gsOpIdNameBag2Set,
-		    gsMakeSortArrow(gsMakeSortBag(Type),gsMakeSortSet(Type)));
-}
-
 //Creation of data expressions for system defined operations.
 ATermAppl gsMakeDataExprTrue(void)
 {
@@ -1946,11 +1995,11 @@ ATermAppl gsMakeDataExprEq(ATermAppl DataExprLHS, ATermAppl DataExprRHS)
   ATermAppl Result = NULL;
   ATermAppl ExprSort = gsGetSort(DataExprLHS);
   if (gsIsUnknown(ExprSort)) {
-    ThrowVM(NULL, "sort of data expression %t is unknown", DataExprLHS);
+    ThrowVM(NULL, "sort of data expression %t is unknown\n", DataExprLHS);
   }
   if (!ATisEqual(ExprSort, gsGetSort(DataExprRHS)))
   {
-    ThrowVM(NULL, "expected sort %t instead of %t for data expression %t",
+    ThrowVM(NULL, "expected sort %t instead of %t for data expression %t\n",
       ExprSort, gsGetSort(DataExprRHS), DataExprLHS);
   }   
   Result = gsMakeDataAppl2(gsMakeOpIdEq(ExprSort), DataExprLHS, DataExprRHS);
@@ -1963,11 +2012,11 @@ ATermAppl gsMakeDataExprNeq(ATermAppl DataExprLHS, ATermAppl DataExprRHS)
   ATermAppl Result = NULL;
   ATermAppl ExprSort = gsGetSort(DataExprLHS);
   if (gsIsUnknown(ExprSort)) {
-    ThrowVM(NULL, "sort of data expression %t is unknown", DataExprLHS);
+    ThrowVM(NULL, "sort of data expression %t is unknown\n", DataExprLHS);
   }
   if (!ATisEqual(ExprSort, gsGetSort(DataExprRHS)))
   {
-    ThrowVM(NULL, "expected sort %t instead of %t for data expression %t",
+    ThrowVM(NULL, "expected sort %t instead of %t for data expression %t\n",
       ExprSort, gsGetSort(DataExprRHS), DataExprLHS);
   }   
   Result = gsMakeDataAppl2(gsMakeOpIdNeq(ExprSort), DataExprLHS, DataExprRHS);
@@ -1980,16 +2029,16 @@ ATermAppl gsMakeDataExprIf(ATermAppl DataExprCond, ATermAppl DataExprThen,
 {
   ATermAppl Result = NULL;
   if (!ATisEqual(gsGetSort(DataExprCond), gsMakeSortIdBool())) {
-    ThrowVM(NULL, "data expression %t should be of sort %t", DataExprCond,
+    ThrowVM(NULL, "data expression %t should be of sort %t\n", DataExprCond,
       gsMakeSortIdBool());
   }
   ATermAppl ExprSort = gsGetSort(DataExprThen);
   if (gsIsUnknown(ExprSort)) {
-    ThrowVM(NULL, "sort of data expression %t is unknown", DataExprThen);
+    ThrowVM(NULL, "sort of data expression %t is unknown\n", DataExprThen);
   }
   if (!ATisEqual(ExprSort, gsGetSort(DataExprElse)))
   {
-    ThrowVM(NULL, "expected sort %t instead of %t for data expression %t",
+    ThrowVM(NULL, "expected sort %t instead of %t for data expression %t\n",
       ExprSort, gsGetSort(DataExprElse), DataExprElse);
   }   
   Result = gsMakeDataAppl3(gsMakeOpIdIf(ExprSort), DataExprCond, DataExprThen,
@@ -2063,10 +2112,10 @@ ATermAppl gsMakeDataExprLTE(ATermAppl DataExprLHS, ATermAppl DataExprRHS)
   ATermAppl Result = NULL;
   ATermAppl ExprSort = gsGetSort(DataExprLHS);
   if (gsIsUnknown(ExprSort)) {
-    ThrowVM(NULL, "sort of data expression %t is unknown", DataExprLHS);
+    ThrowVM(NULL, "sort of data expression %t is unknown\n", DataExprLHS);
   }
   if (!ATisEqual(ExprSort, gsGetSort(DataExprRHS))) {
-    ThrowVM(NULL, "expected sort %t instead of %t for data expression %t",
+    ThrowVM(NULL, "expected sort %t instead of %t for data expression %t\n",
       ExprSort, gsGetSort(DataExprRHS), DataExprLHS);
   }   
   Result = gsMakeDataAppl2(gsMakeOpIdLTE(ExprSort), DataExprLHS, DataExprRHS);
@@ -2079,10 +2128,10 @@ ATermAppl gsMakeDataExprLT(ATermAppl DataExprLHS, ATermAppl DataExprRHS)
   ATermAppl Result = NULL;
   ATermAppl ExprSort = gsGetSort(DataExprLHS);
   if (gsIsUnknown(ExprSort)) {
-    ThrowVM(NULL, "sort of data expression %t is unknown", DataExprLHS);
+    ThrowVM(NULL, "sort of data expression %t is unknown\n", DataExprLHS);
   }
   if (!ATisEqual(ExprSort, gsGetSort(DataExprRHS))) {
-    ThrowVM(NULL, "expected sort %t instead of %t for data expression %t",
+    ThrowVM(NULL, "expected sort %t instead of %t for data expression %t\n",
       ExprSort, gsGetSort(DataExprRHS), DataExprLHS);
   }   
   Result = gsMakeDataAppl2(gsMakeOpIdLT(ExprSort), DataExprLHS, DataExprRHS);
@@ -2095,10 +2144,10 @@ ATermAppl gsMakeDataExprGTE(ATermAppl DataExprLHS, ATermAppl DataExprRHS)
   ATermAppl Result = NULL;
   ATermAppl ExprSort = gsGetSort(DataExprLHS);
   if (gsIsUnknown(ExprSort)) {
-    ThrowVM(NULL, "sort of data expression %t is unknown", DataExprLHS);
+    ThrowVM(NULL, "sort of data expression %t is unknown\n", DataExprLHS);
   }
   if (!ATisEqual(ExprSort, gsGetSort(DataExprRHS))) {
-    ThrowVM(NULL, "expected sort %t instead of %t for data expression %t",
+    ThrowVM(NULL, "expected sort %t instead of %t for data expression %t\n",
       ExprSort, gsGetSort(DataExprRHS), DataExprLHS);
   }   
   Result = gsMakeDataAppl2(gsMakeOpIdGTE(ExprSort), DataExprLHS, DataExprRHS);
@@ -2111,10 +2160,10 @@ ATermAppl gsMakeDataExprGT(ATermAppl DataExprLHS, ATermAppl DataExprRHS)
   ATermAppl Result = NULL;
   ATermAppl ExprSort = gsGetSort(DataExprLHS);
   if (gsIsUnknown(ExprSort)) {
-    ThrowVM(NULL, "sort of data expression %t is unknown", DataExprLHS);
+    ThrowVM(NULL, "sort of data expression %t is unknown\n", DataExprLHS);
   }
   if (!ATisEqual(ExprSort, gsGetSort(DataExprRHS))) {
-    ThrowVM(NULL, "expected sort %t instead of %t for data expression %t",
+    ThrowVM(NULL, "expected sort %t instead of %t for data expression %t\n",
       ExprSort, gsGetSort(DataExprRHS), DataExprLHS);
   }   
   Result = gsMakeDataAppl2(gsMakeOpIdGT(ExprSort), DataExprLHS, DataExprRHS);
@@ -2127,10 +2176,10 @@ ATermAppl gsMakeDataExprMax(ATermAppl DataExprLHS, ATermAppl DataExprRHS)
   ATermAppl Result = NULL;
   ATermAppl ExprSort = gsGetSort(DataExprLHS);
   if (gsIsUnknown(ExprSort)) {
-    ThrowVM(NULL, "sort of data expression %t is unknown", DataExprLHS);
+    ThrowVM(NULL, "sort of data expression %t is unknown\n", DataExprLHS);
   }
   if (!ATisEqual(ExprSort, gsGetSort(DataExprRHS))) {
-    ThrowVM(NULL, "expected sort %t instead of %t for data expression %t",
+    ThrowVM(NULL, "expected sort %t instead of %t for data expression %t\n",
       ExprSort, gsGetSort(DataExprRHS), DataExprLHS);
   }   
   Result = gsMakeDataAppl2(gsMakeOpIdMax(ExprSort), DataExprLHS, DataExprRHS);
@@ -2143,10 +2192,10 @@ ATermAppl gsMakeDataExprMin(ATermAppl DataExprLHS, ATermAppl DataExprRHS)
   ATermAppl Result = NULL;
   ATermAppl ExprSort = gsGetSort(DataExprLHS);
   if (gsIsUnknown(ExprSort)) {
-    ThrowVM(NULL, "sort of data expression %t is unknown", DataExprLHS);
+    ThrowVM(NULL, "sort of data expression %t is unknown\n", DataExprLHS);
   }
   if (!ATisEqual(ExprSort, gsGetSort(DataExprRHS))) {
-    ThrowVM(NULL, "expected sort %t instead of %t for data expression %t",
+    ThrowVM(NULL, "expected sort %t instead of %t for data expression %t\n",
       ExprSort, gsGetSort(DataExprRHS), DataExprLHS);
   }   
   Result = gsMakeDataAppl2(gsMakeOpIdMin(ExprSort), DataExprLHS, DataExprRHS);
@@ -2164,7 +2213,7 @@ ATermAppl gsMakeDataExprNeg(ATermAppl DataExpr)
   ATermAppl Result = NULL;
   ATermAppl ExprSort = gsGetSort(DataExpr);
   if (gsIsUnknown(ExprSort)) {
-    ThrowVM(NULL, "sort of data expression %t is unknown", DataExpr);
+    ThrowVM(NULL, "sort of data expression %t is unknown\n", DataExpr);
   }
   Result = gsMakeDataAppl(gsMakeOpIdNeg(ExprSort), DataExpr);
 finally:
@@ -2176,7 +2225,7 @@ ATermAppl gsMakeDataExprSucc(ATermAppl DataExpr)
   ATermAppl Result = NULL;
   ATermAppl ExprSort = gsGetSort(DataExpr);
   if (gsIsUnknown(ExprSort)) {
-    ThrowVM(NULL, "sort of data expression %t is unknown", DataExpr);
+    ThrowVM(NULL, "sort of data expression %t is unknown\n", DataExpr);
   }
   Result = gsMakeDataAppl(gsMakeOpIdSucc(ExprSort), DataExpr);
 finally:
@@ -2188,7 +2237,7 @@ ATermAppl gsMakeDataExprPred(ATermAppl DataExpr)
   ATermAppl Result = NULL;
   ATermAppl ExprSort = gsGetSort(DataExpr);
   if (gsIsUnknown(ExprSort)) {
-    ThrowVM(NULL, "sort of data expression %t is unknown", DataExpr);
+    ThrowVM(NULL, "sort of data expression %t is unknown\n", DataExpr);
   }
   Result = gsMakeDataAppl(gsMakeOpIdPred(ExprSort), DataExpr);
 finally:
@@ -2200,7 +2249,7 @@ ATermAppl gsMakeDataExprDub(ATermAppl DataExprBit, ATermAppl DataExprNum)
   ATermAppl Result = NULL;
   ATermAppl ExprSort = gsGetSort(DataExprNum);
   if (gsIsUnknown(ExprSort)) {
-    ThrowVM(NULL, "sort of data expression %t is unknown", DataExprNum);
+    ThrowVM(NULL, "sort of data expression %t is unknown\n", DataExprNum);
   }
   Result = gsMakeDataAppl2(gsMakeOpIdDub(ExprSort), DataExprBit, DataExprNum);
 finally:
@@ -2212,10 +2261,10 @@ ATermAppl gsMakeDataExprAdd(ATermAppl DataExprLHS, ATermAppl DataExprRHS)
   ATermAppl Result = NULL;
   ATermAppl ExprSort = gsGetSort(DataExprLHS);
   if (gsIsUnknown(ExprSort)) {
-    ThrowVM(NULL, "sort of data expression %t is unknown", DataExprLHS);
+    ThrowVM(NULL, "sort of data expression %t is unknown\n", DataExprLHS);
   }
   if (!ATisEqual(ExprSort, gsGetSort(DataExprRHS))) {
-    ThrowVM(NULL, "expected sort %t instead of %t for data expression %t",
+    ThrowVM(NULL, "expected sort %t instead of %t for data expression %t\n",
       ExprSort, gsGetSort(DataExprRHS), DataExprLHS);
   }   
   Result = gsMakeDataAppl2(gsMakeOpIdAdd(ExprSort), DataExprLHS, DataExprRHS);
@@ -2235,10 +2284,10 @@ ATermAppl gsMakeDataExprSubt(ATermAppl DataExprLHS, ATermAppl DataExprRHS)
   ATermAppl Result = NULL;
   ATermAppl ExprSort = gsGetSort(DataExprLHS);
   if (gsIsUnknown(ExprSort)) {
-    ThrowVM(NULL, "sort of data expression %t is unknown", DataExprLHS);
+    ThrowVM(NULL, "sort of data expression %t is unknown\n", DataExprLHS);
   }
   if (!ATisEqual(ExprSort, gsGetSort(DataExprRHS))) {
-    ThrowVM(NULL, "expected sort %t instead of %t for data expression %t",
+    ThrowVM(NULL, "expected sort %t instead of %t for data expression %t\n",
       ExprSort, gsGetSort(DataExprRHS), DataExprLHS);
   }   
   Result = gsMakeDataAppl2(gsMakeOpIdSubt(ExprSort), DataExprLHS, DataExprRHS);
@@ -2258,10 +2307,10 @@ ATermAppl gsMakeDataExprMult(ATermAppl DataExprLHS, ATermAppl DataExprRHS)
   ATermAppl Result = NULL;
   ATermAppl ExprSort = gsGetSort(DataExprLHS);
   if (gsIsUnknown(ExprSort)) {
-    ThrowVM(NULL, "sort of data expression %t is unknown", DataExprLHS);
+    ThrowVM(NULL, "sort of data expression %t is unknown\n", DataExprLHS);
   }
   if (!ATisEqual(ExprSort, gsGetSort(DataExprRHS))) {
-    ThrowVM(NULL, "expected sort %t instead of %t for data expression %t",
+    ThrowVM(NULL, "expected sort %t instead of %t for data expression %t\n",
       ExprSort, gsGetSort(DataExprRHS), DataExprLHS);
   }   
   Result = gsMakeDataAppl2(gsMakeOpIdMult(ExprSort), DataExprLHS, DataExprRHS);
@@ -2281,7 +2330,7 @@ ATermAppl gsMakeDataExprDiv(ATermAppl DataExprLHS, ATermAppl DataExprRHS)
   ATermAppl Result = NULL;
   ATermAppl ExprSort = gsGetSort(DataExprLHS);
   if (gsIsUnknown(ExprSort)) {
-    ThrowVM(NULL, "sort of data expression %t is unknown", DataExprLHS);
+    ThrowVM(NULL, "sort of data expression %t is unknown\n", DataExprLHS);
   }
   Result = gsMakeDataAppl2(gsMakeOpIdDiv(ExprSort), DataExprLHS, DataExprRHS);
 finally:
@@ -2293,7 +2342,7 @@ ATermAppl gsMakeDataExprMod(ATermAppl DataExprLHS, ATermAppl DataExprRHS)
   ATermAppl Result = NULL;
   ATermAppl ExprSort = gsGetSort(DataExprLHS);
   if (gsIsUnknown(ExprSort)) {
-    ThrowVM(NULL, "sort of data expression %t is unknown", DataExprLHS);
+    ThrowVM(NULL, "sort of data expression %t is unknown\n", DataExprLHS);
   }
   Result = gsMakeDataAppl2(gsMakeOpIdMod(ExprSort), DataExprLHS, DataExprRHS);
 finally:
@@ -2305,7 +2354,7 @@ ATermAppl gsMakeDataExprExp(ATermAppl DataExprLHS, ATermAppl DataExprRHS)
   ATermAppl Result = NULL;
   ATermAppl ExprSort = gsGetSort(DataExprLHS);
   if (gsIsUnknown(ExprSort)) {
-    ThrowVM(NULL, "sort of data expression %t is unknown", DataExprLHS);
+    ThrowVM(NULL, "sort of data expression %t is unknown\n", DataExprLHS);
   }
   Result = gsMakeDataAppl2(gsMakeOpIdExp(ExprSort), DataExprLHS, DataExprRHS);
 finally:
@@ -2317,6 +2366,49 @@ ATermAppl gsMakeDataExprEven(ATermAppl DataExpr)
   return gsMakeDataAppl(gsMakeOpIdEven(), DataExpr);
 }
 
+ATermAppl gsMakeDataExprSetComp(ATermAppl DataExpr, ATermAppl SortExprResult)
+{
+  ATermAppl Result = NULL;
+  ATermAppl ExprSort = gsGetSort(DataExpr);
+  if (gsIsUnknown(ExprSort)) {
+    ThrowVM(NULL, "sort of data expression %t is unknown\n", DataExpr);
+  }
+  if (!gsIsSortArrow(ExprSort)) {
+    ThrowVM(NULL, "sort of data expression %t is not a function\n", DataExpr);
+  }
+  if (!ATisEqual(ATAgetArgument(ExprSort, 1), gsMakeSortExprBool())) {
+    ThrowVM(NULL,
+      "sort of data expression %t is not a function with result sort Bool\n",
+      DataExpr);
+  }
+  //ExprSort is of the form S -> Bool
+  Result = gsMakeDataAppl(
+    gsMakeOpIdSetComp(ATAgetArgument(ExprSort, 0), SortExprResult), DataExpr);
+finally:
+  return Result;
+}
+
+ATermAppl gsMakeDataExprBagComp(ATermAppl DataExpr, ATermAppl SortExprResult)
+{
+  ATermAppl Result = NULL;
+  ATermAppl ExprSort = gsGetSort(DataExpr);
+  if (gsIsUnknown(ExprSort)) {
+    ThrowVM(NULL, "sort of data expression %t is unknown\n", DataExpr);
+  }
+  if (!gsIsSortArrow(ExprSort)) {
+    ThrowVM(NULL, "sort of data expression %t is not a function\n", DataExpr);
+  }
+  if (!ATisEqual(ATAgetArgument(ExprSort, 1), gsMakeSortExprNat())) {
+    ThrowVM(NULL,
+      "sort of data expression %t is not a function with result sort Nat\n",
+      DataExpr);
+  }
+  //ExprSort is of the form S -> Nat
+  Result = gsMakeDataAppl(
+    gsMakeOpIdBagComp(ATAgetArgument(ExprSort, 0), SortExprResult), DataExpr);
+finally:
+  return Result;
+}
 
 //Auxiliary functions to create data expressions
 ATermAppl gsMakeDataAppl2(ATermAppl DataExpr, ATermAppl DataExprArg1,

@@ -172,6 +172,7 @@ ATermAppl gsParseSpecification (FILE *SpecStream)
   //parse specification using bison
   gsVerboseMsg("parsing specification from stream\n");
   Result = gsParse(SpecStream);
+  //Result = (ATermAppl) ATreadFromFile(SpecStream);
   if (Result == NULL) {
     ThrowM("parsing failed\n");
   }
@@ -1091,6 +1092,4 @@ void gsTest(void)
   ATermAppl t = gsMakeDataExprPos_int(1337);
   int n = gsPosValue_int(t);
   fprintf(stderr, "%d\n", n);
-  ATermAppl u = gsFreshString2ATermAppl("@cDub", (ATerm) t);
-  ATfprintf(stderr, "%t\n", u);
 }
