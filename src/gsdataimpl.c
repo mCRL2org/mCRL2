@@ -193,37 +193,37 @@ ATermAppl gsImplementBool(ATermAppl Spec)
   ATermList bl = ATmakeList1((ATerm) b);
   ATermList bcl = ATmakeList2((ATerm) b, (ATerm) c);
   Spec = gsDeclareDataEqns(Spec, ATmakeList(24,
-      //logical negation
+      //logical negation (Bool -> Bool)
       (ATerm) gsMakeDataEqn(el, nil, gsMakeDataExprNot(t), f),
       (ATerm) gsMakeDataEqn(el, nil, gsMakeDataExprNot(f), t),
       (ATerm) gsMakeDataEqn(bl, nil,
                      gsMakeDataExprNot(gsMakeDataExprNot(b)), b),
-      //conjunction
+      //conjunction (Bool -> Bool -> Bool)
       (ATerm) gsMakeDataEqn(bl, nil, gsMakeDataExprAnd(b, t), b),
       (ATerm) gsMakeDataEqn(bl, nil, gsMakeDataExprAnd(b, f), f),
       (ATerm) gsMakeDataEqn(bl, nil, gsMakeDataExprAnd(t, b), b),
       (ATerm) gsMakeDataEqn(bl, nil, gsMakeDataExprAnd(f, b), f),
-      //disjunction
+      //disjunction (Bool -> Bool -> Bool)
       (ATerm) gsMakeDataEqn(bl, nil, gsMakeDataExprOr(b, t), t),
       (ATerm) gsMakeDataEqn(bl, nil, gsMakeDataExprOr(b, f), b),
       (ATerm) gsMakeDataEqn(bl, nil, gsMakeDataExprOr(t, b), t),
       (ATerm) gsMakeDataEqn(bl, nil, gsMakeDataExprOr(f, b), b),
-      //implication
+      //implication (Bool -> Bool -> Bool)
       (ATerm) gsMakeDataEqn(bl, nil, gsMakeDataExprImp(b, t), t),
       (ATerm) gsMakeDataEqn(bl, nil, gsMakeDataExprImp(b, f),
                                             gsMakeDataExprNot(b)),
       (ATerm) gsMakeDataEqn(bl, nil, gsMakeDataExprImp(t, b), b),
       (ATerm) gsMakeDataEqn(bl, nil, gsMakeDataExprImp(f, b), t),
-      //equality
+      //equality (Bool -> Bool -> Bool)
       (ATerm) gsMakeDataEqn(el, nil, gsMakeDataExprEq(t, t), t),
       (ATerm) gsMakeDataEqn(el, nil, gsMakeDataExprEq(t, f), f),
       (ATerm) gsMakeDataEqn(el, nil, gsMakeDataExprEq(f, t), f),
       (ATerm) gsMakeDataEqn(el, nil, gsMakeDataExprEq(f, f), t),
       (ATerm) gsMakeDataEqn(bl, nil, gsMakeDataExprEq(b, b), t),
-      //inequality
+      //inequality (Bool -> Bool -> Bool)
       (ATerm) gsMakeDataEqn(bcl,nil, gsMakeDataExprNeq(b, c), 
                       gsMakeDataExprNot(gsMakeDataExprEq(b, c))),
-      //conditional
+      //conditional (Bool -> Bool -> Bool -> Bool)
       (ATerm) gsMakeDataEqn(bcl,nil, gsMakeDataExprIf(t, b, c), b),
       (ATerm) gsMakeDataEqn(bcl,nil, gsMakeDataExprIf(f, b, c), c),
       (ATerm) gsMakeDataEqn(bcl,nil, gsMakeDataExprIf(b, c, c), c)
@@ -264,147 +264,291 @@ ATermAppl gsImplementPos(ATermAppl Spec)
   ATermAppl one = gsMakeDataExpr1();
   ATermAppl t = gsMakeDataExprTrue();
   ATermAppl f = gsMakeDataExprFalse();
-  ATermAppl n = gsMakeDataVarId(gsString2ATermAppl("n"), gsMakeSortExprPos());
-  ATermAppl m = gsMakeDataVarId(gsString2ATermAppl("m"), gsMakeSortExprPos());
+  ATermAppl p = gsMakeDataVarId(gsString2ATermAppl("p"), gsMakeSortExprPos());
+  ATermAppl q = gsMakeDataVarId(gsString2ATermAppl("q"), gsMakeSortExprPos());
   ATermAppl b = gsMakeDataVarId(gsString2ATermAppl("b"), gsMakeSortExprBool());
-  ATermList nl = ATmakeList1((ATerm) n);
-  ATermList mnl = ATmakeList2((ATerm) m, (ATerm) n);
-  ATermList bnl = ATmakeList2((ATerm) b, (ATerm) n);
-  Spec = gsDeclareDataEqns(Spec, ATmakeList(51,
-      //equality
+  ATermList pl = ATmakeList1((ATerm) p);
+  ATermList pql = ATmakeList2((ATerm) p, (ATerm) q);
+  ATermList bpl = ATmakeList2((ATerm) b, (ATerm) p);
+  Spec = gsDeclareDataEqns(Spec, ATmakeList(50,
+      //equality (Pos -> Pos -> Bool)
       (ATerm) gsMakeDataEqn(el, nil, gsMakeDataExprEq(one, one), t),
-      (ATerm) gsMakeDataEqn(nl, nil, 
-         gsMakeDataExprEq(one, gsMakeDataExprDot0(n)), f),
-      (ATerm) gsMakeDataEqn(nl, nil, 
-         gsMakeDataExprEq(one, gsMakeDataExprDot1(n)), f),
-      (ATerm) gsMakeDataEqn(nl, nil, 
-         gsMakeDataExprEq(gsMakeDataExprDot0(n), one), f),
-      (ATerm) gsMakeDataEqn(mnl,nil, 
-         gsMakeDataExprEq(gsMakeDataExprDot0(m), gsMakeDataExprDot0(n)),
-         gsMakeDataExprEq(m, n)),
-      (ATerm) gsMakeDataEqn(mnl,nil, 
-         gsMakeDataExprEq(gsMakeDataExprDot0(m), gsMakeDataExprDot1(n)), f),
-      (ATerm) gsMakeDataEqn(nl, nil, 
-         gsMakeDataExprEq(gsMakeDataExprDot1(n), one), f),
-      (ATerm) gsMakeDataEqn(mnl,nil, 
-         gsMakeDataExprEq(gsMakeDataExprDot1(m), gsMakeDataExprDot0(n)), f),
-      (ATerm) gsMakeDataEqn(mnl,nil, 
-         gsMakeDataExprEq(gsMakeDataExprDot1(m), gsMakeDataExprDot1(n)),
-         gsMakeDataExprEq(m, n)),
-      //inequality
-      (ATerm) gsMakeDataEqn(mnl,nil,
-         gsMakeDataExprNeq(m, n), gsMakeDataExprNot(gsMakeDataExprEq(m, n))),
-      //conditional
-      (ATerm) gsMakeDataEqn(mnl,nil, gsMakeDataExprIf(t, m, n), m),
-      (ATerm) gsMakeDataEqn(mnl,nil, gsMakeDataExprIf(f, m, n), n),
-      (ATerm) gsMakeDataEqn(bnl,nil, gsMakeDataExprIf(b, n, n), n),
-      //less than
+      (ATerm) gsMakeDataEqn(pl, nil, 
+         gsMakeDataExprEq(one, gsMakeDataExprDot0(p)), f),
+      (ATerm) gsMakeDataEqn(pl, nil, 
+         gsMakeDataExprEq(one, gsMakeDataExprDot1(p)), f),
+      (ATerm) gsMakeDataEqn(pl, nil, 
+         gsMakeDataExprEq(gsMakeDataExprDot0(p), one), f),
+      (ATerm) gsMakeDataEqn(pql,nil, 
+         gsMakeDataExprEq(gsMakeDataExprDot0(p), gsMakeDataExprDot0(q)),
+         gsMakeDataExprEq(p, q)),
+      (ATerm) gsMakeDataEqn(pql,nil, 
+         gsMakeDataExprEq(gsMakeDataExprDot0(p), gsMakeDataExprDot1(q)), f),
+      (ATerm) gsMakeDataEqn(pl, nil, 
+         gsMakeDataExprEq(gsMakeDataExprDot1(p), one), f),
+      (ATerm) gsMakeDataEqn(pql,nil, 
+         gsMakeDataExprEq(gsMakeDataExprDot1(p), gsMakeDataExprDot0(q)), f),
+      (ATerm) gsMakeDataEqn(pql,nil, 
+         gsMakeDataExprEq(gsMakeDataExprDot1(p), gsMakeDataExprDot1(q)),
+         gsMakeDataExprEq(p, q)),
+      //inequality (Pos -> Pos -> Bool)
+      (ATerm) gsMakeDataEqn(pql,nil,
+         gsMakeDataExprNeq(p, q), gsMakeDataExprNot(gsMakeDataExprEq(p, q))),
+      //conditional (Bool -> Pos -> Pos -> Pos)
+      (ATerm) gsMakeDataEqn(pql,nil, gsMakeDataExprIf(t, p, q), p),
+      (ATerm) gsMakeDataEqn(pql,nil, gsMakeDataExprIf(f, p, q), q),
+      (ATerm) gsMakeDataEqn(bpl,nil, gsMakeDataExprIf(b, p, p), p),
+      //less than (Pos -> Pos -> Bool)
       (ATerm) gsMakeDataEqn(el, nil, gsMakeDataExprLT(one, one), f),
-      (ATerm) gsMakeDataEqn(nl, nil, 
-         gsMakeDataExprLT(one, gsMakeDataExprDot0(n)), t),
-      (ATerm) gsMakeDataEqn(nl, nil, 
-         gsMakeDataExprLT(one, gsMakeDataExprDot1(n)), t),
-      (ATerm) gsMakeDataEqn(nl, nil, 
-         gsMakeDataExprLT(gsMakeDataExprDot0(n), one), f),
-      (ATerm) gsMakeDataEqn(mnl,nil, 
-         gsMakeDataExprLT(gsMakeDataExprDot0(m), gsMakeDataExprDot0(n)),
-         gsMakeDataExprLT(m, n)),
-      (ATerm) gsMakeDataEqn(mnl,nil, 
-         gsMakeDataExprLT(gsMakeDataExprDot0(m), gsMakeDataExprDot1(n)),
-         gsMakeDataExprLTE(m, n)),
-      (ATerm) gsMakeDataEqn(nl, nil, 
-         gsMakeDataExprLT(gsMakeDataExprDot1(n), one), f),
-      (ATerm) gsMakeDataEqn(mnl,nil, 
-         gsMakeDataExprLT(gsMakeDataExprDot1(m), gsMakeDataExprDot0(n)),
-         gsMakeDataExprLT(m, n)),
-      (ATerm) gsMakeDataEqn(mnl,nil, 
-         gsMakeDataExprLT(gsMakeDataExprDot1(m), gsMakeDataExprDot1(n)),
-         gsMakeDataExprLT(m, n)),
-      //greater than
-      (ATerm) gsMakeDataEqn(mnl,nil,
-         gsMakeDataExprGT(m, n), gsMakeDataExprNot(gsMakeDataExprLTE(n, m))),
-      //less than or equal
-      (ATerm) gsMakeDataEqn(nl, nil, gsMakeDataExprLTE(one, n), t),
-      (ATerm) gsMakeDataEqn(nl, nil, 
-         gsMakeDataExprLTE(gsMakeDataExprDot0(n), one), f),
-      (ATerm) gsMakeDataEqn(mnl,nil, 
-         gsMakeDataExprLTE(gsMakeDataExprDot0(m), gsMakeDataExprDot0(n)),
-         gsMakeDataExprLTE(m, n)),
-      (ATerm) gsMakeDataEqn(mnl,nil, 
-         gsMakeDataExprLTE(gsMakeDataExprDot0(m), gsMakeDataExprDot1(n)),
-         gsMakeDataExprLTE(m, n)),
-      (ATerm) gsMakeDataEqn(nl, nil, 
-         gsMakeDataExprLTE(gsMakeDataExprDot1(n), one), f),
-      (ATerm) gsMakeDataEqn(mnl,nil, 
-         gsMakeDataExprLTE(gsMakeDataExprDot1(m), gsMakeDataExprDot0(n)),
-         gsMakeDataExprLT(m, n)),
-      (ATerm) gsMakeDataEqn(mnl,nil, 
-         gsMakeDataExprLTE(gsMakeDataExprDot1(m), gsMakeDataExprDot1(n)),
-         gsMakeDataExprLTE(m, n)),
-      //greater than or equal
-      (ATerm) gsMakeDataEqn(mnl,nil,
-         gsMakeDataExprGTE(m, n), gsMakeDataExprNot(gsMakeDataExprLT(n, m))),
-      //maximum
-      (ATerm) gsMakeDataEqn(mnl,nil, gsMakeDataExprMax(m, n),
-         gsMakeDataExprIf(gsMakeDataExprGTE(m, n), m, n)),
-      //minimum
-      (ATerm) gsMakeDataEqn(mnl,nil, gsMakeDataExprMin(m, n),
-         gsMakeDataExprIf(gsMakeDataExprLTE(m, n), m, n)),
-      //successor
+      (ATerm) gsMakeDataEqn(pl, nil, 
+         gsMakeDataExprLT(one, gsMakeDataExprDot0(p)), t),
+      (ATerm) gsMakeDataEqn(pl, nil, 
+         gsMakeDataExprLT(one, gsMakeDataExprDot1(p)), t),
+      (ATerm) gsMakeDataEqn(pl, nil, 
+         gsMakeDataExprLT(gsMakeDataExprDot0(p), one), f),
+      (ATerm) gsMakeDataEqn(pql,nil, 
+         gsMakeDataExprLT(gsMakeDataExprDot0(p), gsMakeDataExprDot0(q)),
+         gsMakeDataExprLT(p, q)),
+      (ATerm) gsMakeDataEqn(pql,nil, 
+         gsMakeDataExprLT(gsMakeDataExprDot0(p), gsMakeDataExprDot1(q)),
+         gsMakeDataExprLTE(p, q)),
+      (ATerm) gsMakeDataEqn(pl, nil, 
+         gsMakeDataExprLT(gsMakeDataExprDot1(p), one), f),
+      (ATerm) gsMakeDataEqn(pql,nil, 
+         gsMakeDataExprLT(gsMakeDataExprDot1(p), gsMakeDataExprDot0(q)),
+         gsMakeDataExprLT(p, q)),
+      (ATerm) gsMakeDataEqn(pql,nil, 
+         gsMakeDataExprLT(gsMakeDataExprDot1(p), gsMakeDataExprDot1(q)),
+         gsMakeDataExprLT(p, q)),
+      //greater than (Pos -> Pos -> Bool)
+      (ATerm) gsMakeDataEqn(pql,nil,
+         gsMakeDataExprGT(p, q), gsMakeDataExprNot(gsMakeDataExprLTE(q, p))),
+      //less than or equal (Pos -> Pos -> Bool)
+      (ATerm) gsMakeDataEqn(pl, nil, gsMakeDataExprLTE(one, p), t),
+      (ATerm) gsMakeDataEqn(pl, nil, 
+         gsMakeDataExprLTE(gsMakeDataExprDot0(p), one), f),
+      (ATerm) gsMakeDataEqn(pql,nil, 
+         gsMakeDataExprLTE(gsMakeDataExprDot0(p), gsMakeDataExprDot0(q)),
+         gsMakeDataExprLTE(p, q)),
+      (ATerm) gsMakeDataEqn(pql,nil, 
+         gsMakeDataExprLTE(gsMakeDataExprDot0(p), gsMakeDataExprDot1(q)),
+         gsMakeDataExprLTE(p, q)),
+      (ATerm) gsMakeDataEqn(pl, nil, 
+         gsMakeDataExprLTE(gsMakeDataExprDot1(p), one), f),
+      (ATerm) gsMakeDataEqn(pql,nil, 
+         gsMakeDataExprLTE(gsMakeDataExprDot1(p), gsMakeDataExprDot0(q)),
+         gsMakeDataExprLT(p, q)),
+      (ATerm) gsMakeDataEqn(pql,nil, 
+         gsMakeDataExprLTE(gsMakeDataExprDot1(p), gsMakeDataExprDot1(q)),
+         gsMakeDataExprLTE(p, q)),
+      //greater than or equal (Pos -> Pos -> Bool)
+      (ATerm) gsMakeDataEqn(pql,nil,
+         gsMakeDataExprGTE(p, q), gsMakeDataExprNot(gsMakeDataExprLT(q, p))),
+      //maximum (Pos -> Pos -> Pos)
+      (ATerm) gsMakeDataEqn(pql,nil, gsMakeDataExprMax(p, q),
+         gsMakeDataExprIf(gsMakeDataExprGTE(p, q), q, p)),
+      //minimum (Pos -> Pos -> Pos)
+      (ATerm) gsMakeDataEqn(pql,nil, gsMakeDataExprMin(p, q),
+         gsMakeDataExprIf(gsMakeDataExprLTE(p, q), p, q)),
+      //successor (Pos -> Pos)
       (ATerm) gsMakeDataEqn(el,nil,
          gsMakeDataExprSucc(one), gsMakeDataExprDot0(one)),
-      (ATerm) gsMakeDataEqn(nl,nil,
-         gsMakeDataExprSucc(gsMakeDataExprDot0(n)), gsMakeDataExprDot1(n)),
-      (ATerm) gsMakeDataEqn(nl,nil,
-         gsMakeDataExprSucc(gsMakeDataExprDot1(n)),
-         gsMakeDataExprDot0(gsMakeDataExprSucc(n))),
-      //positive predecessor
-      (ATerm) gsMakeDataEqn(el,nil, gsMakeDataExprPredPos(one), one),
-      (ATerm) gsMakeDataEqn(nl,nil,
+      (ATerm) gsMakeDataEqn(pl,nil,
+         gsMakeDataExprSucc(gsMakeDataExprDot0(p)), gsMakeDataExprDot1(p)),
+      (ATerm) gsMakeDataEqn(pl,nil,
+         gsMakeDataExprSucc(gsMakeDataExprDot1(p)),
+         gsMakeDataExprDot0(gsMakeDataExprSucc(p))),
+      //positive predecessor (Pos -> Pos)
+      (ATerm) gsMakeDataEqn(el,nil,
          gsMakeDataExprPredPos(gsMakeDataExprDot0(one)), one),
-      (ATerm) gsMakeDataEqn(nl,nil,
-         gsMakeDataExprPredPos(gsMakeDataExprDot0(gsMakeDataExprDot0(n))),
-         gsMakeDataExprDot1(gsMakeDataExprPredPos(gsMakeDataExprDot0(n)))),
-      (ATerm) gsMakeDataEqn(nl,nil,
-         gsMakeDataExprPredPos(gsMakeDataExprDot0(gsMakeDataExprDot1(n))),
-         gsMakeDataExprDot1(gsMakeDataExprPredPos(gsMakeDataExprDot1(n)))),
-      (ATerm) gsMakeDataEqn(nl,nil,
-         gsMakeDataExprPredPos(gsMakeDataExprDot1(n)), gsMakeDataExprDot0(n)),
-      //addition
-      (ATerm) gsMakeDataEqn(nl, nil,
-         gsMakeDataExprAdd(one, n), gsMakeDataExprSucc(n)),
-      (ATerm) gsMakeDataEqn(nl, nil, 
-         gsMakeDataExprAdd(gsMakeDataExprDot0(n), one),
-         gsMakeDataExprSucc(gsMakeDataExprDot0(n))),
-      (ATerm) gsMakeDataEqn(nl, nil, 
-         gsMakeDataExprAdd(gsMakeDataExprDot1(n), one),
-         gsMakeDataExprDot0(gsMakeDataExprSucc(n))),
-      (ATerm) gsMakeDataEqn(mnl,nil, 
-         gsMakeDataExprAdd(gsMakeDataExprDot0(m), gsMakeDataExprDot0(n)),
-         gsMakeDataExprDot0(gsMakeDataExprAdd(m, n))),
-      (ATerm) gsMakeDataEqn(mnl,nil, 
-         gsMakeDataExprAdd(gsMakeDataExprDot0(m), gsMakeDataExprDot1(n)),
-         gsMakeDataExprDot1(gsMakeDataExprAdd(m, n))),
-      (ATerm) gsMakeDataEqn(mnl,nil, 
-         gsMakeDataExprAdd(gsMakeDataExprDot1(m), gsMakeDataExprDot0(n)),
-         gsMakeDataExprDot1(gsMakeDataExprAdd(m, n))),
-      (ATerm) gsMakeDataEqn(mnl,nil, 
-         gsMakeDataExprAdd(gsMakeDataExprDot1(m), gsMakeDataExprDot1(n)),
-         gsMakeDataExprDot0(gsMakeDataExprSucc(gsMakeDataExprAdd(m, n)))),
-      //multiplication
-      (ATerm) gsMakeDataEqn(nl, nil, gsMakeDataExprMult(one, n), n),
-      (ATerm) gsMakeDataEqn(mnl,nil, 
-         gsMakeDataExprMult(gsMakeDataExprDot0(m), n),
-         gsMakeDataExprDot0(gsMakeDataExprMult(m, n))),
-      (ATerm) gsMakeDataEqn(mnl,nil, 
-         gsMakeDataExprMult(gsMakeDataExprDot1(m), n),
-         gsMakeDataExprAdd(gsMakeDataExprDot0(gsMakeDataExprMult(m, n)), n))
+      (ATerm) gsMakeDataEqn(pl,nil,
+         gsMakeDataExprPredPos(gsMakeDataExprDot0(gsMakeDataExprDot0(p))),
+         gsMakeDataExprDot1(gsMakeDataExprPredPos(gsMakeDataExprDot0(p)))),
+      (ATerm) gsMakeDataEqn(pl,nil,
+         gsMakeDataExprPredPos(gsMakeDataExprDot0(gsMakeDataExprDot1(p))),
+         gsMakeDataExprDot1(gsMakeDataExprPredPos(gsMakeDataExprDot1(p)))),
+      (ATerm) gsMakeDataEqn(pl,nil,
+         gsMakeDataExprPredPos(gsMakeDataExprDot1(p)), gsMakeDataExprDot0(p)),
+      //addition (Pos -> Pos -> Pos)
+      (ATerm) gsMakeDataEqn(pl, nil,
+         gsMakeDataExprAdd(one, p), gsMakeDataExprSucc(p)),
+      (ATerm) gsMakeDataEqn(pl, nil, 
+         gsMakeDataExprAdd(gsMakeDataExprDot0(p), one),
+         gsMakeDataExprSucc(gsMakeDataExprDot0(p))),
+      (ATerm) gsMakeDataEqn(pl, nil, 
+         gsMakeDataExprAdd(gsMakeDataExprDot1(p), one),
+         gsMakeDataExprDot0(gsMakeDataExprSucc(p))),
+      (ATerm) gsMakeDataEqn(pql,nil, 
+         gsMakeDataExprAdd(gsMakeDataExprDot0(p), gsMakeDataExprDot0(q)),
+         gsMakeDataExprDot0(gsMakeDataExprAdd(p, q))),
+      (ATerm) gsMakeDataEqn(pql,nil, 
+         gsMakeDataExprAdd(gsMakeDataExprDot0(p), gsMakeDataExprDot1(q)),
+         gsMakeDataExprDot1(gsMakeDataExprAdd(p, q))),
+      (ATerm) gsMakeDataEqn(pql,nil, 
+         gsMakeDataExprAdd(gsMakeDataExprDot1(p), gsMakeDataExprDot0(q)),
+         gsMakeDataExprDot1(gsMakeDataExprAdd(p, q))),
+      (ATerm) gsMakeDataEqn(pql,nil, 
+         gsMakeDataExprAdd(gsMakeDataExprDot1(p), gsMakeDataExprDot1(q)),
+         gsMakeDataExprDot0(gsMakeDataExprSucc(gsMakeDataExprAdd(p, q)))),
+      //multiplication (Pos -> Pos -> Pos)
+      (ATerm) gsMakeDataEqn(pl, nil, gsMakeDataExprMult(one, p), p),
+      (ATerm) gsMakeDataEqn(pql,nil, 
+         gsMakeDataExprMult(gsMakeDataExprDot0(p), q),
+         gsMakeDataExprDot0(gsMakeDataExprMult(p, q))),
+      (ATerm) gsMakeDataEqn(pql,nil, 
+         gsMakeDataExprMult(gsMakeDataExprDot1(p), q),
+         gsMakeDataExprAdd(gsMakeDataExprDot0(gsMakeDataExprMult(p, q)), q))
     ));
   return Spec;
 }
 
 ATermAppl gsImplementNat(ATermAppl Spec)
 {
+  //Declare sort Nat
+  Spec = gsDeclareSort(Spec, gsMakeSortIdNat());
+  //Declare constructors for sort Nat
+  Spec = gsDeclareConsOps(Spec, ATmakeList2(
+      (ATerm) gsMakeOpId0(),
+      (ATerm) gsMakeOpIdCNat()
+    ));
+  //Declare operations for sort Nat
+  ATermAppl seNat = gsMakeSortExprNat();
+  ATermAppl sePos = gsMakeSortExprPos();
+  Spec = gsDeclareOps(Spec, ATmakeList(19,
+      (ATerm) gsMakeOpIdEq(seNat),
+      (ATerm) gsMakeOpIdNeq(seNat),
+      (ATerm) gsMakeOpIdIf(seNat),
+      (ATerm) gsMakeOpIdPos2Nat(),
+      (ATerm) gsMakeOpIdNat2Pos(),
+      (ATerm) gsMakeOpIdLT(seNat),
+      (ATerm) gsMakeOpIdGT(seNat),
+      (ATerm) gsMakeOpIdLTE(seNat),
+      (ATerm) gsMakeOpIdGTE(seNat),
+      (ATerm) gsMakeOpIdMax(seNat),
+      (ATerm) gsMakeOpIdMin(seNat),
+      (ATerm) gsMakeOpIdSucc(seNat),
+      (ATerm) gsMakeOpIdPred(sePos),
+      (ATerm) gsMakeOpIdAdd(seNat),
+      (ATerm) gsMakeOpIdMult(seNat),
+      (ATerm) gsMakeOpIdDiv(seNat),
+      (ATerm) gsMakeOpIdMod(seNat),
+      (ATerm) gsMakeOpIdExp(sePos),
+      (ATerm) gsMakeOpIdExp(seNat)
+    ));
+  //Declare data equations for sort Nat
+  ATermList el = ATmakeList0();
+  ATermAppl nil = gsMakeNil();
+  ATermAppl one = gsMakeDataExpr1();
+  ATermAppl zero = gsMakeDataExpr0();
+  ATermAppl t = gsMakeDataExprTrue();
+  ATermAppl f = gsMakeDataExprFalse();
+  ATermAppl p = gsMakeDataVarId(gsString2ATermAppl("p"), gsMakeSortExprPos());
+  ATermAppl q = gsMakeDataVarId(gsString2ATermAppl("q"), gsMakeSortExprPos());
+  ATermAppl n = gsMakeDataVarId(gsString2ATermAppl("n"), gsMakeSortExprNat());
+  ATermAppl m = gsMakeDataVarId(gsString2ATermAppl("m"), gsMakeSortExprNat());
+  ATermAppl b = gsMakeDataVarId(gsString2ATermAppl("b"), gsMakeSortExprBool());
+  ATermList pl = ATmakeList1((ATerm) p);
+  ATermList pql = ATmakeList2((ATerm) p, (ATerm) q);
+  ATermList pnl = ATmakeList2((ATerm) p, (ATerm) n);
+  ATermList nl = ATmakeList1((ATerm) n);
+  ATermList mnl = ATmakeList2((ATerm) m, (ATerm) n);
+  ATermList bnl = ATmakeList2((ATerm) b, (ATerm) n);
+  Spec = gsDeclareDataEqns(Spec, ATmakeList(37,
+      //equality (Nat -> Nat -> Bool)
+      (ATerm) gsMakeDataEqn(el, nil, gsMakeDataExprEq(zero, zero), t),
+      (ATerm) gsMakeDataEqn(pl, nil,
+         gsMakeDataExprEq(zero, gsMakeDataExprCNat(p)), f),
+      (ATerm) gsMakeDataEqn(pl, nil,
+         gsMakeDataExprEq(gsMakeDataExprCNat(p), zero), f),
+      (ATerm) gsMakeDataEqn(pql,nil, 
+         gsMakeDataExprEq(gsMakeDataExprCNat(p), gsMakeDataExprCNat(q)),
+         gsMakeDataExprEq(p, q)),
+      //inequality (Nat -> Nat -> Bool)
+      (ATerm) gsMakeDataEqn(mnl,nil,
+         gsMakeDataExprNeq(m, n), gsMakeDataExprNot(gsMakeDataExprEq(m, n))),
+      //conditional (Bool -> Nat -> Nat -> Nat)
+      (ATerm) gsMakeDataEqn(mnl,nil, gsMakeDataExprIf(t, m, n), m),
+      (ATerm) gsMakeDataEqn(mnl,nil, gsMakeDataExprIf(f, m, n), n),
+      (ATerm) gsMakeDataEqn(bnl,nil, gsMakeDataExprIf(b, n, n), n),
+      //convert Pos to Nat (Pos -> Nat)
+      (ATerm) gsMakeDataEqn(pl,nil,
+         gsMakeDataExprPos2Nat(p), gsMakeDataExprCNat(p)),
+      //convert Nat to Pos (Nat -> Pos)
+      (ATerm) gsMakeDataEqn(pl,nil,
+         gsMakeDataExprNat2Pos(gsMakeDataExprCNat(p)), p),
+      //less than (Nat -> Nat -> Bool)
+      (ATerm) gsMakeDataEqn(el, nil, gsMakeDataExprLT(zero, zero), f),
+      (ATerm) gsMakeDataEqn(pl, nil, 
+         gsMakeDataExprLT(zero, gsMakeDataExprCNat(p)), t),
+      (ATerm) gsMakeDataEqn(pl, nil, 
+         gsMakeDataExprLT(gsMakeDataExprCNat(p), zero), f),
+      (ATerm) gsMakeDataEqn(pql,nil, 
+         gsMakeDataExprLT(gsMakeDataExprCNat(p), gsMakeDataExprCNat(q)),
+         gsMakeDataExprLT(p, q)),
+      //greater than (Nat -> Nat -> Bool)
+      (ATerm) gsMakeDataEqn(mnl,nil,
+         gsMakeDataExprGT(m, n), gsMakeDataExprNot(gsMakeDataExprLTE(n, m))),
+      //less than or equal (Nat -> Nat -> Bool)
+      (ATerm) gsMakeDataEqn(nl, nil, gsMakeDataExprLTE(zero, n), t),
+      (ATerm) gsMakeDataEqn(pl, nil,
+         gsMakeDataExprLTE(gsMakeDataExprCNat(p), zero), f),
+      (ATerm) gsMakeDataEqn(pql,nil,
+         gsMakeDataExprLTE(gsMakeDataExprCNat(p), gsMakeDataExprCNat(q)),
+         gsMakeDataExprLTE(p, q)),
+      //greater than or equal (Nat -> Nat -> Bool)
+      (ATerm) gsMakeDataEqn(mnl,nil,
+         gsMakeDataExprGTE(m, n), gsMakeDataExprNot(gsMakeDataExprLT(n, m))),
+      //maximum (Nat -> Nat -> Nat)
+      (ATerm) gsMakeDataEqn(mnl,nil, gsMakeDataExprMax(m, n),
+         gsMakeDataExprIf(gsMakeDataExprGTE(m, n), m, n)),
+      //minimum (Nat -> Nat -> Nat)
+      (ATerm) gsMakeDataEqn(mnl,nil, gsMakeDataExprMin(m, n),
+         gsMakeDataExprIf(gsMakeDataExprLTE(m, n), m, n)),
+      //successor (Nat -> Nat)
+      (ATerm) gsMakeDataEqn(el,nil, gsMakeDataExprSucc(zero), one),
+      (ATerm) gsMakeDataEqn(pl,nil,
+         gsMakeDataExprSucc(gsMakeDataExprCNat(p)), gsMakeDataExprSucc(p)),
+      //predecessor (Pos -> Nat)
+      (ATerm) gsMakeDataEqn(pl,nil, gsMakeDataExprPred(p),
+         gsMakeDataExprIf(gsMakeDataExprEq(p, one), zero,
+           gsMakeDataExprCNat(gsMakeDataExprPredPos(p)))),
+      //addition (Nat -> Nat -> Nat)
+      (ATerm) gsMakeDataEqn(nl, nil, gsMakeDataExprAdd(zero, n), n),
+      (ATerm) gsMakeDataEqn(nl, nil, gsMakeDataExprAdd(n, zero), n),
+      (ATerm) gsMakeDataEqn(pql,nil, 
+         gsMakeDataExprAdd(gsMakeDataExprCNat(p), gsMakeDataExprCNat(q)),
+         gsMakeDataExprCNat(gsMakeDataExprAdd(p, q))),
+      //multiplication (Nat -> Nat -> Nat)
+      (ATerm) gsMakeDataEqn(nl, nil, gsMakeDataExprMult(zero, n), n),
+      (ATerm) gsMakeDataEqn(nl, nil, gsMakeDataExprMult(n, zero), n),
+      (ATerm) gsMakeDataEqn(pql,nil, 
+         gsMakeDataExprMult(gsMakeDataExprCNat(p), gsMakeDataExprCNat(q)),
+         gsMakeDataExprCNat(gsMakeDataExprMult(p, q))),
+      //quotient after division (Nat -> Pos -> Nat)
+      //TODO
+      //remainder after division (Nat -> Pos -> Nat)
+      //TODO
+      //exponentiation (Pos -> Nat -> Pos)
+      (ATerm) gsMakeDataEqn(pl, nil, gsMakeDataExprExp(p, zero), one),
+      (ATerm) gsMakeDataEqn(pl, nil,
+         gsMakeDataExprExp(p, gsMakeDataExprCNat(one)), p),
+      (ATerm) gsMakeDataEqn(pql,nil, 
+         gsMakeDataExprExp(p, gsMakeDataExprCNat(gsMakeDataExprDot0(q))),
+         gsMakeDataExprExp(gsMakeDataExprMult(p, p), gsMakeDataExprCNat(q))),
+      (ATerm) gsMakeDataEqn(pql,nil, 
+         gsMakeDataExprExp(p, gsMakeDataExprCNat(gsMakeDataExprDot1(q))),
+         gsMakeDataExprMult(p,
+           gsMakeDataExprExp(gsMakeDataExprMult(p, p),
+             gsMakeDataExprCNat(q)))),
+      //exponentiation (Nat -> Nat -> Nat)
+      (ATerm) gsMakeDataEqn(el, nil, gsMakeDataExprExp(zero, zero),
+        gsMakeDataExprCNat(one)),
+      (ATerm) gsMakeDataEqn(pl, nil,
+         gsMakeDataExprExp(zero, gsMakeDataExprCNat(p)), zero),
+      (ATerm) gsMakeDataEqn(pnl, nil,
+         gsMakeDataExprExp(gsMakeDataExprCNat(p), n),
+         gsMakeDataExprCNat(gsMakeDataExprExp(p, n)))
+    ));
   return Spec;
 }
 

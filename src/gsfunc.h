@@ -365,14 +365,14 @@ ATermAppl gsMakeOpIdDot1(void);
 ATermAppl gsMakeOpId0(void);
 //Ret: Operation identifier for `0' of sort Nat
 
-ATermAppl gsMakeOpIdPosAsNat(void);
+ATermAppl gsMakeOpIdCNat(void);
 //Ret: Operation identifier for the creation of a natural number from a
 //     positive number
 
-ATermAppl gsMakeOpIdNegatePos(void);
+ATermAppl gsMakeOpIdCNeg(void);
 //Ret: Operation identifier for the negation of a positive number
 
-ATermAppl gsMakeOpIdNatAsInt(void);
+ATermAppl gsMakeOpIdCInt(void);
 //Ret: Operation identifier for the creation of an integer from a natural
 //     number
 
@@ -531,15 +531,15 @@ ATermAppl gsMakeDataExprDot1(ATermAppl DataExpr);
 ATermAppl gsMakeDataExpr0(void);
 //Ret: Data expression for `0' of sort Nat
 
-ATermAppl gsMakeDataExprPosAsNat(ATermAppl DataExpr);
+ATermAppl gsMakeDataExprCNat(ATermAppl DataExpr);
 //Pre: DataExpr is a data expression of sort Pos 
 //Ret: DataExpr as a data expression of sort Nat
 
-ATermAppl gsMakeDataExprNegatePos(ATermAppl DataExpr);
+ATermAppl gsMakeDataExprCNeg(ATermAppl DataExpr);
 //Pre: DataExpr is a data expression of sort Pos 
 //Ret: Data expression for the negation of DataExpr
 
-ATermAppl gsMakeDataExprNatAsInt(ATermAppl DataExpr);
+ATermAppl gsMakeDataExprCInt(ATermAppl DataExpr);
 //Pre: DataExpr is a data expression of sort Nat 
 //Ret: DataExpr as a data expression of sort Int
 
