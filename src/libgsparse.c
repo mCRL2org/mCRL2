@@ -1,5 +1,5 @@
 #define  NAME      "libgsparse"
-#define  LVERSION  "0.1.24"
+#define  LVERSION  "0.1.25"
 #define  AUTHOR    "Aad Mathijssen"
 
 #ifdef __cplusplus
@@ -9,6 +9,7 @@ extern "C" {
 #include <errno.h>
 #include <string.h>
 #include <stdlib.h>
+#include <assert.h>
 
 #ifdef __cplusplus
 }
@@ -24,15 +25,14 @@ extern ATermAppl gsParse(FILE *SpecFile);/* declared in lexer.l */
 
 //local declarations
 ATermAppl gsLinearise(ATermAppl Spec);
-/*Pre: spec represents a specification that adheres to the internal ATerm
- *     structure after the data implementation phase.
- *Post:The processes of spec are linearised.
- *Ret: if the linearisation went ok, an equivalent version spec is
- *     returned that adheres to the internal ATerm structure after
- *     linearisation.
- *     If something went wrong, an appropriate error message is printed and
- *     t
- *     NULL is returned.
+/*Pre:Spec represents a specification that adheres to the internal ATerm
+      structure after the data implementation phase.
+ Post:The processes of spec are linearised.
+ Ret: if the linearisation went ok, an equivalent version spec is
+      returned that adheres to the internal ATerm structure after
+      linearisation.
+      if something went wrong, an appropriate error message is printed and
+      NULL is returned.
  */
 
 void gsPrintPart(FILE *OutStream, const ATermAppl Part, bool ShowSorts,
@@ -68,7 +68,7 @@ void gsPrintDataEqns(FILE *OutStream, const ATermList DataEqns, bool ShowSorts,
 /*Pre: OutStream points to a stream to which can be written
        DataEqns is an ATermList containing data equations from a GenSpect
        specification
-       ShowSorts indicates if sorts should be shown for the part
+       ShowSorts indicates if sorts should be shown for each equation
        PrecLevel indicates the precedence level of the context of the part
        0 <= PrecLevel
   Post:A textual representation of the parts is written to OutStream, in which:
@@ -98,6 +98,16 @@ void gsPrintDecls(FILE *OutStream, const ATermList Decls,
          Terminator
 */
 
+void gsPrintDecl(FILE *OutStream, const ATermAppl Decl, const bool ShowSorts);
+/*Pre: Decl is an ATermAppl that represents a declaration of the form
+       Decl(Name, Sort) from a GenSpect specification
+       ShowSorts indicates if the sort of the declaration should be shown
+  Ret: A textual representation of the declaration, say Decl(x, S), is written
+       to OutStream, i.e.:
+       - "x: S", if ShowSorts
+       - "x", otherwise
+*/
+
 bool gsHasConsistentContext(const ATermTable DataVarDecls,
   const ATermAppl Part);
 /*Pre: DataVarDecls represent the variables from a data equation section,
@@ -119,6 +129,57 @@ bool gsHasConsistentContextList(const ATermTable DataVarDecls,
  *Ret: all operations occurring in Parts are consistent with the variables from
  *     the context
  */
+
+void gsPrintLPESummand(FILE *OutStream, const ATermAppl Summand,
+  bool ShowSorts, int PrecLevel, const ATermTable VarDeclTable);
+/*Pre: OutStream points to a stream to which can be written
+       Summand is an ATermAppl containing an LPE summand of a GenSpect
+       specification
+       ShowSorts indicates if sorts should be shown for each summand
+       PrecLevel indicates the precedence level of the context of the part
+       0 <= PrecLevel
+       VarDeclTable is a hash table representing all variables declared in the
+       context, with natural numbers as keys
+  Post:A textual representation of the summand is written to OutStream, in
+       which PrecLevel, ShowSort and VarDeclsTable are taken into account
+*/
+
+void gsPrintPos(FILE *OutStream, const ATermAppl PosExpr, int PrecLevel);
+/*Pre: OutStream points to a stream to which can be written
+       PosExpr is a data expression of sort Pos
+       PrecLevel indicates the precedence level of the context of the part
+       0 <= PrecLevel
+  Ret: A textual representation of the expression is written to OutStream, in
+       in which:
+       - PrecLevel is taken into account
+       - each constant is represented by its corresponding positive number
+       - each non-constant is of the form cDub(b_1)(...(cDub(b_n)(p))) and is
+         represented by 2^n*p + 2^(n-1)*b_n + ... + b1
+*/
+
+bool gsIsPosConstant(const ATermAppl PosExpr);
+/*Pre: PosExpr is a data expression of sort Pos
+  Ret: PosExpr is built from constructors of sort Pos and Bool only
+*/
+
+char *gsPosValue(const ATermAppl PosExpr);
+/*Pre: PosExpr is a data expression of sort Pos built from constructors of
+       sort Pos and Bool only
+  Ret: The value of PosExpr
+*/
+
+void gsPrintPosMult(FILE *OutStream, const ATermAppl PosExpr, int PrecLevel,
+  char *Mult);
+/*Pre: OutStream points to a stream to which can be written
+       PosExpr is a data expression of sort Pos
+       PrecLevel indicates the precedence level of the context of the part
+       0 <= PrecLevel
+       Mult is the string representation of a natural number
+  Ret: A textual representation of Mult * PosExpr is written to OutStream, i.e.
+       if PosExpr is the form cDub(b_1)(...(cDub(b_n)(p))), then it is
+       represented by (Mult*2^n)*p + (Mult*2^(n-1))*b_n + ... + Mult*b1
+       Also PrecLevel is taken into account
+*/
 
 //implementation
 
@@ -236,11 +297,56 @@ void gsPrintPart(FILE *OutStream, const ATermAppl Part, bool ShowSorts,
       gsPrintParts(OutStream, ProcDecls, ShowSorts, PrecLevel, ";\n", "     ");
       fprintf(OutStream, "\n");
     }
+  } else if (gsIsLPE(Part)) {
+    //print LPE
+    gsDebugMsg("printing LPE\n");
+    //print process name and variable declarations
+    ATermList VarDecls = ATLgetArgument(Part, 0);
+    int VarDeclsLength = ATgetLength(VarDecls);
+    fprintf(OutStream, "proc P");
+    if (VarDeclsLength > 0) {
+      fprintf(OutStream, "(");
+      gsPrintDecls(OutStream, VarDecls, NULL, ", ");
+      fprintf(OutStream, ")");
+    }
+    fprintf(OutStream, " =");
+    //print summations
+    ATermTable VarDeclTable = ATtableCreate(2*VarDeclsLength, 50);
+    for (int i = 0; i < VarDeclsLength; i++) {
+      ATtablePut(VarDeclTable, (ATerm) ATmakeInt(i), ATelementAt(VarDecls, i));
+    }
+    ATermList Summands = ATLgetArgument(Part, 1);
+    int SummandsLength = ATgetLength(Summands);
+    if (SummandsLength == 0) {
+      fprintf(OutStream, " delta\n");
+    } else {
+      //SummandsLength > 0
+      fprintf(OutStream, "\n");
+      for (int i = 0; i < SummandsLength; i++) {
+        fprintf(OutStream, "      %c", (i==0)?' ':'+');
+        gsPrintLPESummand(OutStream, ATAelementAt(Summands, i), ShowSorts,
+          PrecLevel, VarDeclTable);
+        if (i == SummandsLength - 1) fprintf(OutStream, ";");
+        fprintf(OutStream, "\n");
+      }
+    }
+    ATtableDestroy(VarDeclTable);
   } else if (gsIsInit(Part)) {
     //print initialisation
     gsDebugMsg("printing initialisation\n");
     fprintf(OutStream, "init "); 
     gsPrintPart(OutStream, ATAgetArgument(Part, 0), ShowSorts, PrecLevel);
+    fprintf(OutStream, ";\n");
+  } else if (gsIsLPEInit(Part)) {
+    //print LPE initialisation
+    gsDebugMsg("printing LPE initialisation\n");
+    fprintf(OutStream, "init P"); 
+    ATermList Args = ATLgetArgument(Part, 0);
+    if (ATgetLength(Args) > 0) {
+      fprintf(OutStream, "(");
+      gsPrintParts(OutStream, Args, ShowSorts, 0, NULL, ", ");
+      fprintf(OutStream, ")");
+    }
     fprintf(OutStream, ";\n");
   } else if (gsIsSortId(Part)) {
     //print sort identifier
@@ -252,14 +358,6 @@ void gsPrintPart(FILE *OutStream, const ATermAppl Part, bool ShowSorts,
     gsPrintPart(OutStream, ATAgetArgument(Part, 0), ShowSorts, PrecLevel);
     fprintf(OutStream, " = ");
     gsPrintPart(OutStream, ATAgetArgument(Part, 1), ShowSorts, PrecLevel);
-  } else if (gsIsDataVarIdOpId(Part) || gsIsOpId(Part) || gsIsDataVarId(Part)) {
-    //print data variable or operation identifier
-    gsDebugMsg("printing data variable or operation identifier\n");
-    gsPrintPart(OutStream, ATAgetArgument(Part, 0), ShowSorts, PrecLevel);
-    if (!gsIsDataVarIdOpId(Part) && ShowSorts) {
-      fprintf(OutStream, ": ");
-      gsPrintPart(OutStream, ATAgetArgument(Part, 1), ShowSorts, 0);
-    }
   } else if (gsIsDataEqn(Part)) {
     //print data equation (without variables)
     gsDebugMsg("printing data equation\n");
@@ -371,11 +469,12 @@ void gsPrintPart(FILE *OutStream, const ATermAppl Part, bool ShowSorts,
       fprintf(OutStream, ": ");
     }
     gsPrintParts(OutStream, ATLgetArgument(Part, 1), ShowSorts, 2, NULL, " # ");
-  } else if (gsIsDataAppl(Part) || gsIsDataApplProd(Part)) {
-    //print data application, possibly in prefix or infix notation
+  } else if (gsIsDataVarIdOpId(Part) || gsIsOpId(Part) || gsIsDataVarId(Part) ||
+      gsIsDataAppl(Part) || gsIsDataApplProd(Part)) {
+    //print data expression, possibly in the external format
     ATermAppl Head;
     ATermList Args;
-    if (gsIsDataAppl(Part)) {
+    if (!gsIsDataApplProd(Part)) {
       Head = gsGetDataExprHead(Part);
       Args = gsGetDataExprArgs(Part);
     } else {
@@ -383,8 +482,8 @@ void gsPrintPart(FILE *OutStream, const ATermAppl Part, bool ShowSorts,
       Args = ATLgetArgument(Part, 1);
     }
     int ArgsLength = ATgetLength(Args);
-    if (gsIsOpIdPrefix(Head)) {
-      //print prefix expression (ArgsLength == 1)
+    if (gsIsOpIdPrefix(Head) && ArgsLength == 1) {
+      //print prefix expression
       gsDebugMsg("printing prefix expression\n");
       if (PrecLevel > 11) fprintf(OutStream, "(");
       gsPrintPart(OutStream, Head, ShowSorts, PrecLevel);
@@ -402,6 +501,35 @@ void gsPrintPart(FILE *OutStream, const ATermAppl Part, bool ShowSorts,
       gsPrintPart(OutStream, ATAelementAt(Args, 1), ShowSorts,
         gsPrecOpIdInfixRight(Head));
       if (PrecLevel > gsPrecOpIdInfix(Head)) fprintf(OutStream, ")");
+   } else if (ATisEqual(Head, gsMakeOpId1()) ||
+        (ATisEqual(Head, gsMakeOpIdCDub()) && ArgsLength == 2)) {
+      //print positive number
+      gsDebugMsg("printing positive number %t\n", Part);
+      gsPrintPos(OutStream, Part, PrecLevel);
+    } else if (ATisEqual(Head, gsMakeOpId0())) {
+      //print 0
+      fprintf(OutStream, "0");
+    } else if ((ATisEqual(Head, gsMakeOpIdCNat()) ||
+        ATisEqual(Head, gsMakeOpIdCInt())) && ArgsLength == 1) {
+      //print argument (ArgsLength == 1)
+      gsPrintPart(OutStream, ATAelementAt(Args, 0), ShowSorts, PrecLevel);
+    } else if (ATisEqual(Head, gsMakeOpIdCNeg()) && ArgsLength == 1) {
+      //print negation (ArgsLength == 1)
+      gsDebugMsg("printing negation\n");
+      fprintf(OutStream, "-");
+      gsPrintPart(OutStream, ATAelementAt(Args, 0), ShowSorts, 11);
+    } else if (gsIsDataVarIdOpId(Part)) {
+      //print untyped data variable or operation identifier
+      gsDebugMsg("printing untyped data variable or operation identifier\n");
+      gsPrintPart(OutStream, ATAgetArgument(Part, 0), ShowSorts, PrecLevel);
+    } else if (gsIsOpId(Part) || gsIsDataVarId(Part)) {
+      //print data variable or operation identifier
+      gsDebugMsg("printing data variable or operation identifier\n");
+      gsPrintPart(OutStream, ATAgetArgument(Part, 0), ShowSorts, PrecLevel);
+      if (ShowSorts) {
+        fprintf(OutStream, ": ");
+        gsPrintPart(OutStream, ATAgetArgument(Part, 1), ShowSorts, 0);
+      }
     } else {
       //print data application
       gsDebugMsg("printing data application\n");
@@ -432,7 +560,7 @@ void gsPrintPart(FILE *OutStream, const ATermAppl Part, bool ShowSorts,
     //print set/bag comprehension
     gsDebugMsg("printing set/bag comprehension\n");
     fprintf(OutStream, "{ ");
-    gsPrintPart(OutStream, ATAgetArgument(Part, 0), true, PrecLevel);
+    gsPrintDecl(OutStream, ATAgetArgument(Part, 0), true);
     fprintf(OutStream, " | ");
     gsPrintPart(OutStream, ATAgetArgument(Part, 1), ShowSorts, 0);
     fprintf(OutStream, " }");
@@ -805,19 +933,218 @@ void gsPrintDecls(FILE *OutStream, const ATermList Decls,
       //check if sorts of Decls(i) and Decls(i+1) are equal
       if (ATisEqual(ATgetArgument(Decl, 1),
           ATgetArgument(ATelementAt(Decls, i+1), 1))) {
-        gsPrintPart(OutStream, Decl, false, 0);
+        gsPrintDecl(OutStream, Decl, false);
         fprintf(OutStream, ",");
       } else {
-        gsPrintPart(OutStream, Decl, true, 0);
+        gsPrintDecl(OutStream, Decl, true);
         if (Terminator  != NULL) fprintf(OutStream, Terminator);
         if (Separator  != NULL) fprintf(OutStream, Separator);
       }
     }
-    gsPrintPart(OutStream, ATAelementAt(Decls, n-1), true, 0);
+    gsPrintDecl(OutStream, ATAelementAt(Decls, n-1), true);
     if (Terminator  != NULL) fprintf(OutStream, Terminator);
+  }
+}
+
+void gsPrintDecl(FILE *OutStream, const ATermAppl Decl, const bool ShowSorts)
+{
+  gsPrintPart(OutStream, ATAgetArgument(Decl, 0), ShowSorts, 0);
+  if (ShowSorts) {
+    fprintf(OutStream, ": ");
+    gsPrintPart(OutStream, ATAgetArgument(Decl, 1), ShowSorts, 0);
+  }
+}
+
+void gsPrintLPESummand(FILE *OutStream, const ATermAppl Summand, bool ShowSorts,
+  int PrecLevel, const ATermTable VarDeclTable)
+{
+  //print data summations
+  ATermList SumVarDecls = ATLgetArgument(Summand, 0);
+  if (ATgetLength(SumVarDecls) > 0) {
+    fprintf(OutStream, "sum ");
+    gsPrintDecls(OutStream, SumVarDecls, NULL, ",");
+    fprintf(OutStream, ". ");
+  }
+  //print condition
+  ATermAppl Cond = ATAgetArgument(Summand, 1);
+  if (!gsIsNil(Cond)) {
+    gsPrintPart(OutStream, Cond, ShowSorts, 0);
+    fprintf(OutStream, " -> ");
+  }
+  //print multi action and time
+  ATermList MultActs = ATLgetArgument(Summand, 2);
+  int MultActsLength = ATgetLength(MultActs);
+  ATermAppl Time = ATAgetArgument(Summand, 3);
+  bool IsTimed = gsIsNil(Time);
+  if (MultActsLength == 0) {
+    fprintf(OutStream, "tau");
+  } else {
+    //MultActsLength > 0
+    if (IsTimed && MultActsLength == 1) fprintf(OutStream, "(");
+    gsPrintParts(OutStream, MultActs, ShowSorts, PrecLevel, NULL, "|");
+    if (IsTimed && MultActsLength == 1) fprintf(OutStream, ")");
+    if (IsTimed) {
+      fprintf(OutStream, " @ ");
+      gsPrintPart(OutStream, Time, ShowSorts, 11);
+    }
+  }
+  //print process reference
+  ATermList IndexedTerms = ATLgetArgument(Summand, 5);
+  int IndexedTermsLength = ATgetLength(IndexedTerms);
+  fprintf(OutStream, "P");
+  if (IndexedTermsLength > 0) {
+    fprintf(OutStream, "(");
+    for (int i = 0; i < IndexedTermsLength; i++) {
+      if (i > 0) fprintf(OutStream, ", ");
+      ATermAppl IndexedTerm = ATAelementAt(IndexedTerms, i);
+      gsPrintPart(OutStream,
+        ATAtableGet(VarDeclTable, ATgetArgument(IndexedTerm, 0)), ShowSorts,
+        PrecLevel);
+      fprintf(OutStream, " := ");
+      ATermAppl NewValue = ATAgetArgument(IndexedTerm, 0);
+      if (gsIsNil(NewValue)) {
+        fprintf(OutStream, "<DC>");
+      } else {
+        gsPrintPart(OutStream, NewValue, ShowSorts, 0);
+      }
+    }
+    fprintf(OutStream, ")");
+  }
+}
+
+void gsPrintPos(FILE *OutStream, const ATermAppl PosExpr, int PrecLevel)
+{
+  if (gsIsPosConstant(PosExpr)) {
+    char *PosValue = gsPosValue(PosExpr);
+    fprintf(OutStream, PosValue);
+    free(PosValue);
+  } else {
+    gsPrintPosMult(OutStream, PosExpr, PrecLevel, "1");
+  }
+}
+
+bool gsIsPosConstant(const ATermAppl PosExpr)
+{
+  if (gsIsOpId(PosExpr)) {
+    return ATisEqual(PosExpr, gsMakeOpId1());
+  } else if (gsIsDataAppl(PosExpr))  {
+    ATermAppl Head = gsGetDataExprHead(PosExpr);
+    ATermList Args = gsGetDataExprArgs(PosExpr);
+    if (ATisEqual(Head, gsMakeOpIdCDub()) && ATgetLength(Args) == 2) {
+      ATermAppl ArgBool = ATAelementAt(Args, 0);
+      return  
+        (ATisEqual(ArgBool, gsMakeOpIdTrue()) || 
+         ATisEqual(ArgBool, gsMakeOpIdFalse())
+        ) && gsIsPosConstant(ATAelementAt(Args, 1));
+
+    } else {
+      return false;
+    }
+  } else {
+    return false;
+  }
+}
+
+char *gsPosValue(const ATermAppl PosExpr)
+{
+  assert(gsIsPosConstant(PosExpr));
+  char *Result = "";
+  if (gsIsOpId(PosExpr)) {
+    //PosExpr is 1
+    Result = (char *) malloc(2 * sizeof(char));
+    Result[0] = '1';
+    Result[1] = 0;
+  } else {
+    //PosExpr is of the form cDub(b)(p), where b and p are boolean and positive
+    //constants, respectively
+    ATermList Args = gsGetDataExprArgs(PosExpr);
+    int Inc = (ATisEqual(ATAelementAt(Args, 0), gsMakeDataExprTrue()))?1:0;
+    char *PosValue = gsPosValue(ATAelementAt(Args, 1));
+    Result = gsStringDub(PosValue, Inc);
+    free(PosValue);
+  }
+  return Result;
+}
+
+void gsPrintPosMult(FILE *OutStream, const ATermAppl PosExpr, int PrecLevel,
+  char *Mult)
+{
+  ATermAppl Head = gsGetDataExprHead(PosExpr);
+  ATermList Args = gsGetDataExprArgs(PosExpr);
+  if (ATisEqual(PosExpr, gsMakeOpId1())) {
+    //PosExpr is 1; print Mult
+    fprintf(OutStream, Mult);
+  } else if (ATisEqual(Head, gsMakeOpIdCDub())) {
+    //PosExpr is of the form cDub(b,p); print (Mult*2)*v(p) + Mult*v(b)
+    ATermAppl BoolArg = ATAelementAt(Args, 0);
+    ATermAppl PosArg = ATAelementAt(Args, 1);
+    char *NewMult = gsStringDub(Mult, 0);
+    if (ATisEqual(BoolArg, gsMakeDataExprFalse())) {
+      //Mult*v(b) = 0
+      gsPrintPosMult(OutStream, PosArg, PrecLevel, NewMult);
+    } else {
+      //Mult*v(b) > 0
+      if (PrecLevel > gsPrecOpIdInfix(gsMakeOpIdAdd(gsMakeSortExprPos()))) {
+        fprintf(OutStream, "(");
+      }
+      //print (Mult*2)*v(p)
+      gsPrintPosMult(OutStream, PosArg, 
+        gsPrecOpIdInfixLeft(gsMakeOpIdAdd(gsMakeSortExprPos())), NewMult);
+      fprintf(OutStream, " + ");
+      if (ATisEqual(BoolArg, gsMakeDataExprTrue())) {
+        //Mult*v(b) = Mult
+        fprintf(OutStream, Mult);
+      } else if (strcmp(Mult, "1") == 0) {
+        //Mult*v(b) = v(b)
+        gsPrintPart(OutStream, BoolArg, false,
+          gsPrecOpIdInfixRight(gsMakeOpIdAdd(gsMakeSortExprPos())));
+      } else {
+        //print Mult*v(b)
+        fprintf(OutStream, "%s*", Mult);
+        gsPrintPart(OutStream, BoolArg, false,
+          gsPrecOpIdInfixRight(gsMakeOpIdMult(gsMakeSortExprPos())));
+      }
+      if (PrecLevel > gsPrecOpIdInfix(gsMakeOpIdAdd(gsMakeSortExprPos()))) {
+        fprintf(OutStream, ")");
+      }
+    }
+    free(NewMult);
+  } else {
+    //PosExpr is not a Pos constructor
+    if (strcmp(Mult, "1") == 0) {
+      gsPrintPart(OutStream, PosExpr, false, PrecLevel);
+    } else {
+      fprintf(OutStream, "%s*", Mult);
+      gsPrintPart(OutStream, PosExpr, false,
+        gsPrecOpIdInfixRight(gsMakeOpIdMult(gsMakeSortExprPos())));
+    }
   }
 }
 
 void gsTest(void)
 {
+  //gsSetDebugMsg();
+  //initialise ATerm library
+  ATerm StackBottom;
+  ATinit(0, NULL, &StackBottom);
+  //enable constructor functions
+  gsEnableConstructorFunctions();
+  //build positive expression
+  ATermAppl PosExpr = gsMakeDataExprCDub(
+    gsMakeDataVarId(gsString2ATermAppl("b3"), gsMakeSortExprBool()),
+    gsMakeDataExprCDub(
+      gsMakeDataVarId(gsString2ATermAppl("b2"), gsMakeSortExprBool()),
+      gsMakeDataExprCDub(
+        gsMakeDataVarId(gsString2ATermAppl("b1"), gsMakeSortExprBool()),
+        gsMakeDataExprCDub(
+          gsMakeDataVarId(gsString2ATermAppl("b0"), gsMakeSortExprBool()),
+          gsMakeDataVarId(gsString2ATermAppl("p"), gsMakeSortExprPos()))
+        )
+      )
+    );
+  //ATermAppl PosExpr = gsMakeDataExprCDub(gsMakeDataExprFalse(),
+  //  gsMakeDataExprCDub(gsMakeDataExprFalse(), gsMakeDataExpr1()));
+  //print expression
+  gsPrintSpecification(stderr, PosExpr);
+  fprintf(stderr, "\n");
 }

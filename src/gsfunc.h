@@ -127,19 +127,25 @@ ATermAppl gsMakeConsSpec(ATermList OpIds);
 ATermAppl gsMakeMapSpec(ATermList OpIds);
 ATermAppl gsMakeDataEqnSpec(ATermList DataEqns);
 ATermAppl gsMakeActSpec(ATermList ActIds);
-ATermAppl gsMakeProcEqnSpec(ATermList ProcEqns);
-ATermAppl gsMakeInit(ATermAppl ProcExpr);
 ATermAppl gsMakeSortId(ATermAppl Name);
 ATermAppl gsMakeSortRef(ATermAppl Name, ATermAppl SortExpr);
 ATermAppl gsMakeOpId(ATermAppl Name, ATermAppl SortExpr);
-ATermAppl gsMakeDataEqn(ATermList DataVarIds, ATermAppl DataCond,
+ATermAppl gsMakeDataEqn(ATermList DataVarIds, ATermAppl BoolExprOrNil,
   ATermAppl DataExprLHS, ATermAppl DataExprRHS);
 ATermAppl gsMakeDataVarId(ATermAppl Name, ATermAppl SortExpr);
 ATermAppl gsMakeNil();
 ATermAppl gsMakeActId(ATermAppl Name, ATermList SortExprs);
+ATermAppl gsMakeProcEqnSpec(ATermList ProcEqns);
+ATermAppl gsMakeLPE(ATermList DataVarIds, ATermList LPESummands);
 ATermAppl gsMakeProcEqn(ATermAppl ProcVarId, ATermList DataVarIds,
   ATermAppl ProcExp);
 ATermAppl gsMakeProcVarId(ATermAppl Name,ATermList SortExprs);
+ATermAppl gsMakeLPESummand(ATermList DataVarIds, ATermAppl BoolExpr,
+  ATermList MultiAction, ATermAppl TimeExprOrNil, ATermList IndexedTerms);
+ATermAppl gsMakeAction(ATermAppl ActId, ATermList DataExprs);
+ATermAppl gsMakeIndexedTerm(ATermInt Index, ATermAppl DataExprOrNil);
+ATermAppl gsMakeInit(ATermAppl ProcExpr);
+ATermAppl gsMakeLPEInit(ATermList DataExprs);
 ATermAppl gsMakeSortList(ATermAppl SortExpr);
 ATermAppl gsMakeSortSet(ATermAppl SortExpr);
 ATermAppl gsMakeSortBag(ATermAppl SortExpr);
@@ -148,10 +154,8 @@ ATermAppl gsMakeSortArrowProd(ATermList SortExprsDomain,
   ATermAppl SortExprResult);
 ATermAppl gsMakeSortArrow(ATermAppl SortExprDomain, ATermAppl SortExprResult);
 ATermAppl gsMakeStructCons(ATermAppl ConsName, ATermList StructProjs,
-  ATermAppl RecName); 
-//Pre: RecName may be NULL
-ATermAppl gsMakeStructProj(ATermAppl ProjName, ATermList SortExprs);
-//Pre: ProjName may be NULL
+  ATermAppl RecNameOrNil); 
+ATermAppl gsMakeStructProj(ATermAppl ProjNameOrNil, ATermList SortExprs);
 ATermAppl gsMakeDataVarIdOpId(ATermAppl Name);
 ATermAppl gsMakeDataApplProd(ATermAppl DataExpr, ATermList DataArgs);
 ATermAppl gsMakeDataAppl(ATermAppl DataExpr, ATermAppl DataArg);
@@ -168,7 +172,6 @@ ATermAppl gsMakeUnknown();
 ATermAppl gsMakeBagEnumElt(ATermAppl DataExpr, ATermAppl Multiplicity);
 ATermAppl gsMakeWhrDecl(ATermAppl Name, ATermAppl DataExpr);
 ATermAppl gsMakeActionProcess(ATermAppl Name, ATermList DataExprs);
-ATermAppl gsMakeAction(ATermAppl ActId, ATermList DataExprs);
 ATermAppl gsMakeProcess(ATermAppl ProcVarId, ATermList DataExprs);
 ATermAppl gsMakeDelta();
 ATermAppl gsMakeTau();
@@ -179,9 +182,9 @@ ATermAppl gsMakeRename(ATermList RenameExprs, ATermAppl ProcExpr);
 ATermAppl gsMakeComm(ATermList CommExprs, ATermAppl ProcExpr);
 ATermAppl gsMakeAllow(ATermList MultActNames, ATermAppl ProcExpr);
 ATermAppl gsMakeSync(ATermAppl ProcExprLHS, ATermAppl ProcExprRHS);
-ATermAppl gsMakeAtTime(ATermAppl ProcExpr, ATermAppl DataExpr);
+ATermAppl gsMakeAtTime(ATermAppl ProcExpr, ATermAppl TimeExpr);
 ATermAppl gsMakeSeq(ATermAppl ProcExprLHS, ATermAppl ProcExprRHS);
-ATermAppl gsMakeCond(ATermAppl DataExpr, ATermAppl ProcExprThen,
+ATermAppl gsMakeCond(ATermAppl BoolExpr, ATermAppl ProcExprThen,
   ATermAppl ProcExprElse);
 ATermAppl gsMakeBInit(ATermAppl ProcExprLHS, ATermAppl ProcExprRHS);
 ATermAppl gsMakeMerge(ATermAppl ProcExprLHS, ATermAppl ProcExprRHS);
@@ -189,8 +192,7 @@ ATermAppl gsMakeLMerge(ATermAppl ProcExprLHS, ATermAppl ProcExprRHS);
 ATermAppl gsMakeChoice(ATermAppl ProcExprLHS, ATermAppl ProcExprRHS);
 ATermAppl gsMakeMultActName(ATermList ActNames);
 ATermAppl gsMakeRenameExpr(ATermAppl FromName, ATermAppl ToName);
-ATermAppl gsMakeCommExpr(ATermAppl MultActName, ATermAppl ActName);
-//Pre: ActName may be NULL
+ATermAppl gsMakeCommExpr(ATermAppl MultActName, ATermAppl ActNameOrNil);
 
 //Recognisers of all constructor elements of the internal ATerm structure.
 bool gsIsSpecV1(ATermAppl Term);
@@ -199,8 +201,6 @@ bool gsIsConsSpec(ATermAppl Term);
 bool gsIsMapSpec(ATermAppl Term);
 bool gsIsDataEqnSpec(ATermAppl Term);
 bool gsIsActSpec(ATermAppl Term);
-bool gsIsProcEqnSpec(ATermAppl Term);
-bool gsIsInit(ATermAppl Term);
 bool gsIsSortId(ATermAppl Term);
 bool gsIsSortRef(ATermAppl Term);
 bool gsIsOpId(ATermAppl Term);
@@ -208,8 +208,15 @@ bool gsIsDataEqn(ATermAppl Term);
 bool gsIsDataVarId(ATermAppl Term);
 bool gsIsNil(ATermAppl Term);
 bool gsIsActId(ATermAppl Term);
+bool gsIsProcEqnSpec(ATermAppl Term);
+bool gsIsLPE(ATermAppl Term);
 bool gsIsProcEqn(ATermAppl Term);
 bool gsIsProcVarId(ATermAppl Term);
+bool gsIsLPESummand(ATermAppl Term);
+bool gsIsAction(ATermAppl Term);
+bool gsIsIndexedTerm(ATermAppl Term);
+bool gsIsInit(ATermAppl Term);
+bool gsIsLPEInit(ATermAppl Term);
 bool gsIsSortList(ATermAppl Term);
 bool gsIsSortSet(ATermAppl Term);
 bool gsIsSortBag(ATermAppl Term);
@@ -234,7 +241,6 @@ bool gsIsUnknown(ATermAppl Term);
 bool gsIsBagEnumElt(ATermAppl Term);
 bool gsIsWhrDecl(ATermAppl Term);
 bool gsIsActionProcess(ATermAppl Term);
-bool gsIsAction(ATermAppl Term);
 bool gsIsProcess(ATermAppl Term);
 bool gsIsDelta(ATermAppl Term);
 bool gsIsTau(ATermAppl Term);
@@ -778,6 +784,8 @@ int gsPrecOpIdInfixLeft(ATermAppl OpIdInfix);
 int gsPrecOpIdInfixRight(ATermAppl OpIdInfix);
 //Pre: OpIdInfix is an infix operation identifier
 //Ret: Precedence of the right argument of the operation
+
+char *gsStringDub(const char *n, const int inc);
 
 #ifdef __cplusplus
 }
