@@ -1364,9 +1364,11 @@ ATermAppl gsMakeSortArrowList(ATermList SortExprDomain,
   ATermAppl SortExprResult)
 {
   ATermAppl Result = SortExprResult;
-  int n = ATgetLength(SortExprDomain);
-  for (int i = n-1; i >= 0; i--) {
-    Result = gsMakeSortArrow(ATAelementAt(SortExprDomain, i), Result);
+  ATermList l = ATreverse(SortExprDomain);
+  while (!ATisEmpty(l))
+  {
+    Result = gsMakeSortArrow(ATAgetFirst(l), Result);
+    l = ATgetNext(l);
   }
   return Result;
 }
@@ -2017,59 +2019,29 @@ ATermAppl gsMakeDataExprImp(ATermAppl DataExprLHS, ATermAppl DataExprRHS)
 
 ATermAppl gsMakeDataExprEq(ATermAppl DataExprLHS, ATermAppl DataExprRHS)
 {
-  ATermAppl Result = NULL;
   ATermAppl ExprSort = gsGetSort(DataExprLHS);
-  if (gsIsUnknown(ExprSort)) {
-    ThrowVM(NULL, "sort of data expression %t is unknown\n", DataExprLHS);
-  }
-  if (!ATisEqual(ExprSort, gsGetSort(DataExprRHS)))
-  {
-    ThrowVM(NULL, "expected sort %t instead of %t for data expression %t\n",
-      ExprSort, gsGetSort(DataExprRHS), DataExprLHS);
-  }   
-  Result = gsMakeDataAppl2(gsMakeOpIdEq(ExprSort), DataExprLHS, DataExprRHS);
-finally:
-  return Result;
+  assert(!gsIsUnknown(ExprSort));
+  assert(ATisEqual(ExprSort, gsGetSort(DataExprRHS)));
+  return gsMakeDataAppl2(gsMakeOpIdEq(ExprSort), DataExprLHS, DataExprRHS);
 }
 
 ATermAppl gsMakeDataExprNeq(ATermAppl DataExprLHS, ATermAppl DataExprRHS)
 {
-  ATermAppl Result = NULL;
   ATermAppl ExprSort = gsGetSort(DataExprLHS);
-  if (gsIsUnknown(ExprSort)) {
-    ThrowVM(NULL, "sort of data expression %t is unknown\n", DataExprLHS);
-  }
-  if (!ATisEqual(ExprSort, gsGetSort(DataExprRHS)))
-  {
-    ThrowVM(NULL, "expected sort %t instead of %t for data expression %t\n",
-      ExprSort, gsGetSort(DataExprRHS), DataExprLHS);
-  }   
-  Result = gsMakeDataAppl2(gsMakeOpIdNeq(ExprSort), DataExprLHS, DataExprRHS);
-finally:
-  return Result;
+  assert(!gsIsUnknown(ExprSort));
+  assert(ATisEqual(ExprSort, gsGetSort(DataExprRHS)));
+  return gsMakeDataAppl2(gsMakeOpIdNeq(ExprSort), DataExprLHS, DataExprRHS);
 }
 
 ATermAppl gsMakeDataExprIf(ATermAppl DataExprCond, ATermAppl DataExprThen,
   ATermAppl DataExprElse)
 {
-  ATermAppl Result = NULL;
-  if (!ATisEqual(gsGetSort(DataExprCond), gsMakeSortIdBool())) {
-    ThrowVM(NULL, "data expression %t should be of sort %t\n", DataExprCond,
-      gsMakeSortIdBool());
-  }
+  assert(ATisEqual(gsGetSort(DataExprCond), gsMakeSortIdBool())); 
   ATermAppl ExprSort = gsGetSort(DataExprThen);
-  if (gsIsUnknown(ExprSort)) {
-    ThrowVM(NULL, "sort of data expression %t is unknown\n", DataExprThen);
-  }
-  if (!ATisEqual(ExprSort, gsGetSort(DataExprElse)))
-  {
-    ThrowVM(NULL, "expected sort %t instead of %t for data expression %t\n",
-      ExprSort, gsGetSort(DataExprElse), DataExprElse);
-  }   
-  Result = gsMakeDataAppl3(gsMakeOpIdIf(ExprSort), DataExprCond, DataExprThen,
+  assert(!gsIsUnknown(ExprSort));
+  assert(ATisEqual(ExprSort, gsGetSort(DataExprElse)));
+  return gsMakeDataAppl3(gsMakeOpIdIf(ExprSort), DataExprCond, DataExprThen,
     DataExprElse);
-finally:
-  return Result;
 }
 
 ATermAppl gsMakeDataExpr1(void)
@@ -2134,98 +2106,50 @@ ATermAppl gsMakeDataExprInt2Nat(ATermAppl DataExpr)
 
 ATermAppl gsMakeDataExprLTE(ATermAppl DataExprLHS, ATermAppl DataExprRHS)
 {
-  ATermAppl Result = NULL;
   ATermAppl ExprSort = gsGetSort(DataExprLHS);
-  if (gsIsUnknown(ExprSort)) {
-    ThrowVM(NULL, "sort of data expression %t is unknown\n", DataExprLHS);
-  }
-  if (!ATisEqual(ExprSort, gsGetSort(DataExprRHS))) {
-    ThrowVM(NULL, "expected sort %t instead of %t for data expression %t\n",
-      ExprSort, gsGetSort(DataExprRHS), DataExprLHS);
-  }   
-  Result = gsMakeDataAppl2(gsMakeOpIdLTE(ExprSort), DataExprLHS, DataExprRHS);
-finally:
-  return Result;
+  assert(!gsIsUnknown(ExprSort));
+  assert(ATisEqual(ExprSort, gsGetSort(DataExprRHS)));
+  return gsMakeDataAppl2(gsMakeOpIdLTE(ExprSort), DataExprLHS, DataExprRHS);
 }
 
 ATermAppl gsMakeDataExprLT(ATermAppl DataExprLHS, ATermAppl DataExprRHS)
 {
-  ATermAppl Result = NULL;
   ATermAppl ExprSort = gsGetSort(DataExprLHS);
-  if (gsIsUnknown(ExprSort)) {
-    ThrowVM(NULL, "sort of data expression %t is unknown\n", DataExprLHS);
-  }
-  if (!ATisEqual(ExprSort, gsGetSort(DataExprRHS))) {
-    ThrowVM(NULL, "expected sort %t instead of %t for data expression %t\n",
-      ExprSort, gsGetSort(DataExprRHS), DataExprLHS);
-  }   
-  Result = gsMakeDataAppl2(gsMakeOpIdLT(ExprSort), DataExprLHS, DataExprRHS);
-finally:
-  return Result;
+  assert(!gsIsUnknown(ExprSort));
+  assert(ATisEqual(ExprSort, gsGetSort(DataExprRHS)));
+  return gsMakeDataAppl2(gsMakeOpIdLT(ExprSort), DataExprLHS, DataExprRHS);
 }
 
 ATermAppl gsMakeDataExprGTE(ATermAppl DataExprLHS, ATermAppl DataExprRHS)
 {
-  ATermAppl Result = NULL;
   ATermAppl ExprSort = gsGetSort(DataExprLHS);
-  if (gsIsUnknown(ExprSort)) {
-    ThrowVM(NULL, "sort of data expression %t is unknown\n", DataExprLHS);
-  }
-  if (!ATisEqual(ExprSort, gsGetSort(DataExprRHS))) {
-    ThrowVM(NULL, "expected sort %t instead of %t for data expression %t\n",
-      ExprSort, gsGetSort(DataExprRHS), DataExprLHS);
-  }   
-  Result = gsMakeDataAppl2(gsMakeOpIdGTE(ExprSort), DataExprLHS, DataExprRHS);
-finally:
-  return Result;
+  assert(!gsIsUnknown(ExprSort));
+  assert(ATisEqual(ExprSort, gsGetSort(DataExprRHS)));
+  return gsMakeDataAppl2(gsMakeOpIdGTE(ExprSort), DataExprLHS, DataExprRHS);
 }
 
 ATermAppl gsMakeDataExprGT(ATermAppl DataExprLHS, ATermAppl DataExprRHS)
 {
-  ATermAppl Result = NULL;
   ATermAppl ExprSort = gsGetSort(DataExprLHS);
-  if (gsIsUnknown(ExprSort)) {
-    ThrowVM(NULL, "sort of data expression %t is unknown\n", DataExprLHS);
-  }
-  if (!ATisEqual(ExprSort, gsGetSort(DataExprRHS))) {
-    ThrowVM(NULL, "expected sort %t instead of %t for data expression %t\n",
-      ExprSort, gsGetSort(DataExprRHS), DataExprLHS);
-  }   
-  Result = gsMakeDataAppl2(gsMakeOpIdGT(ExprSort), DataExprLHS, DataExprRHS);
-finally:
-  return Result;
+  assert(!gsIsUnknown(ExprSort));
+  assert(ATisEqual(ExprSort, gsGetSort(DataExprRHS)));
+  return gsMakeDataAppl2(gsMakeOpIdGT(ExprSort), DataExprLHS, DataExprRHS);
 }
 
 ATermAppl gsMakeDataExprMax(ATermAppl DataExprLHS, ATermAppl DataExprRHS)
 {
-  ATermAppl Result = NULL;
   ATermAppl ExprSort = gsGetSort(DataExprLHS);
-  if (gsIsUnknown(ExprSort)) {
-    ThrowVM(NULL, "sort of data expression %t is unknown\n", DataExprLHS);
-  }
-  if (!ATisEqual(ExprSort, gsGetSort(DataExprRHS))) {
-    ThrowVM(NULL, "expected sort %t instead of %t for data expression %t\n",
-      ExprSort, gsGetSort(DataExprRHS), DataExprLHS);
-  }   
-  Result = gsMakeDataAppl2(gsMakeOpIdMax(ExprSort), DataExprLHS, DataExprRHS);
-finally:
-  return Result;
+  assert(!gsIsUnknown(ExprSort));
+  assert(ATisEqual(ExprSort, gsGetSort(DataExprRHS)));
+  return gsMakeDataAppl2(gsMakeOpIdMax(ExprSort), DataExprLHS, DataExprRHS);
 }
 
 ATermAppl gsMakeDataExprMin(ATermAppl DataExprLHS, ATermAppl DataExprRHS)
 {
-  ATermAppl Result = NULL;
   ATermAppl ExprSort = gsGetSort(DataExprLHS);
-  if (gsIsUnknown(ExprSort)) {
-    ThrowVM(NULL, "sort of data expression %t is unknown\n", DataExprLHS);
-  }
-  if (!ATisEqual(ExprSort, gsGetSort(DataExprRHS))) {
-    ThrowVM(NULL, "expected sort %t instead of %t for data expression %t\n",
-      ExprSort, gsGetSort(DataExprRHS), DataExprLHS);
-  }   
-  Result = gsMakeDataAppl2(gsMakeOpIdMin(ExprSort), DataExprLHS, DataExprRHS);
-finally:
-  return Result;
+  assert(!gsIsUnknown(ExprSort));
+  assert(ATisEqual(ExprSort, gsGetSort(DataExprRHS)));
+  return gsMakeDataAppl2(gsMakeOpIdMin(ExprSort), DataExprLHS, DataExprRHS);
 }
 
 ATermAppl gsMakeDataExprAbs(ATermAppl DataExpr)
@@ -2235,66 +2159,38 @@ ATermAppl gsMakeDataExprAbs(ATermAppl DataExpr)
 
 ATermAppl gsMakeDataExprNeg(ATermAppl DataExpr)
 {
-  ATermAppl Result = NULL;
   ATermAppl ExprSort = gsGetSort(DataExpr);
-  if (gsIsUnknown(ExprSort)) {
-    ThrowVM(NULL, "sort of data expression %t is unknown\n", DataExpr);
-  }
-  Result = gsMakeDataAppl(gsMakeOpIdNeg(ExprSort), DataExpr);
-finally:
-  return Result;
+  assert(!gsIsUnknown(ExprSort));
+  return gsMakeDataAppl(gsMakeOpIdNeg(ExprSort), DataExpr);
 }
 
 ATermAppl gsMakeDataExprSucc(ATermAppl DataExpr)
 {
-  ATermAppl Result = NULL;
   ATermAppl ExprSort = gsGetSort(DataExpr);
-  if (gsIsUnknown(ExprSort)) {
-    ThrowVM(NULL, "sort of data expression %t is unknown\n", DataExpr);
-  }
-  Result = gsMakeDataAppl(gsMakeOpIdSucc(ExprSort), DataExpr);
-finally:
-  return Result;
+  assert(!gsIsUnknown(ExprSort));
+  return gsMakeDataAppl(gsMakeOpIdSucc(ExprSort), DataExpr);
 }
 
 ATermAppl gsMakeDataExprPred(ATermAppl DataExpr)
 {
-  ATermAppl Result = NULL;
   ATermAppl ExprSort = gsGetSort(DataExpr);
-  if (gsIsUnknown(ExprSort)) {
-    ThrowVM(NULL, "sort of data expression %t is unknown\n", DataExpr);
-  }
-  Result = gsMakeDataAppl(gsMakeOpIdPred(ExprSort), DataExpr);
-finally:
-  return Result;
+  assert(!gsIsUnknown(ExprSort));
+  return gsMakeDataAppl(gsMakeOpIdPred(ExprSort), DataExpr);
 }
 
 ATermAppl gsMakeDataExprDub(ATermAppl DataExprBit, ATermAppl DataExprNum)
 {
-  ATermAppl Result = NULL;
   ATermAppl ExprSort = gsGetSort(DataExprNum);
-  if (gsIsUnknown(ExprSort)) {
-    ThrowVM(NULL, "sort of data expression %t is unknown\n", DataExprNum);
-  }
-  Result = gsMakeDataAppl2(gsMakeOpIdDub(ExprSort), DataExprBit, DataExprNum);
-finally:
-  return Result;
+  assert(!gsIsUnknown(ExprSort));
+  return gsMakeDataAppl2(gsMakeOpIdDub(ExprSort), DataExprBit, DataExprNum);
 }
 
 ATermAppl gsMakeDataExprAdd(ATermAppl DataExprLHS, ATermAppl DataExprRHS)
 {
-  ATermAppl Result = NULL;
   ATermAppl ExprSort = gsGetSort(DataExprLHS);
-  if (gsIsUnknown(ExprSort)) {
-    ThrowVM(NULL, "sort of data expression %t is unknown\n", DataExprLHS);
-  }
-  if (!ATisEqual(ExprSort, gsGetSort(DataExprRHS))) {
-    ThrowVM(NULL, "expected sort %t instead of %t for data expression %t\n",
-      ExprSort, gsGetSort(DataExprRHS), DataExprLHS);
-  }   
-  Result = gsMakeDataAppl2(gsMakeOpIdAdd(ExprSort), DataExprLHS, DataExprRHS);
-finally:
-  return Result;
+  assert(!gsIsUnknown(ExprSort));
+  assert(ATisEqual(ExprSort, gsGetSort(DataExprRHS)));
+  return gsMakeDataAppl2(gsMakeOpIdAdd(ExprSort), DataExprLHS, DataExprRHS);
 }
 
 ATermAppl gsMakeDataExprAddC(ATermAppl DataExprBit, ATermAppl DataExprLHS,
@@ -2306,18 +2202,10 @@ ATermAppl gsMakeDataExprAddC(ATermAppl DataExprBit, ATermAppl DataExprLHS,
 
 ATermAppl gsMakeDataExprSubt(ATermAppl DataExprLHS, ATermAppl DataExprRHS)
 {
-  ATermAppl Result = NULL;
   ATermAppl ExprSort = gsGetSort(DataExprLHS);
-  if (gsIsUnknown(ExprSort)) {
-    ThrowVM(NULL, "sort of data expression %t is unknown\n", DataExprLHS);
-  }
-  if (!ATisEqual(ExprSort, gsGetSort(DataExprRHS))) {
-    ThrowVM(NULL, "expected sort %t instead of %t for data expression %t\n",
-      ExprSort, gsGetSort(DataExprRHS), DataExprLHS);
-  }   
-  Result = gsMakeDataAppl2(gsMakeOpIdSubt(ExprSort), DataExprLHS, DataExprRHS);
-finally:
-  return Result;
+  assert(!gsIsUnknown(ExprSort));
+  assert(ATisEqual(ExprSort, gsGetSort(DataExprRHS)));
+  return gsMakeDataAppl2(gsMakeOpIdSubt(ExprSort), DataExprLHS, DataExprRHS);
 }
 
 ATermAppl gsMakeDataExprSubtB(ATermAppl DataExprBit, ATermAppl DataExprLHS,
@@ -2329,18 +2217,10 @@ ATermAppl gsMakeDataExprSubtB(ATermAppl DataExprBit, ATermAppl DataExprLHS,
 
 ATermAppl gsMakeDataExprMult(ATermAppl DataExprLHS, ATermAppl DataExprRHS)
 {
-  ATermAppl Result = NULL;
   ATermAppl ExprSort = gsGetSort(DataExprLHS);
-  if (gsIsUnknown(ExprSort)) {
-    ThrowVM(NULL, "sort of data expression %t is unknown\n", DataExprLHS);
-  }
-  if (!ATisEqual(ExprSort, gsGetSort(DataExprRHS))) {
-    ThrowVM(NULL, "expected sort %t instead of %t for data expression %t\n",
-      ExprSort, gsGetSort(DataExprRHS), DataExprLHS);
-  }   
-  Result = gsMakeDataAppl2(gsMakeOpIdMult(ExprSort), DataExprLHS, DataExprRHS);
-finally:
-  return Result;
+  assert(!gsIsUnknown(ExprSort));
+  assert(ATisEqual(ExprSort, gsGetSort(DataExprRHS)));
+  return gsMakeDataAppl2(gsMakeOpIdMult(ExprSort), DataExprLHS, DataExprRHS);
 }
 
 ATermAppl gsMakeDataExprMultIR(ATermAppl DataExprBit, ATermAppl DataExprIR,
@@ -2352,38 +2232,23 @@ ATermAppl gsMakeDataExprMultIR(ATermAppl DataExprBit, ATermAppl DataExprIR,
 
 ATermAppl gsMakeDataExprDiv(ATermAppl DataExprLHS, ATermAppl DataExprRHS)
 {
-  ATermAppl Result = NULL;
   ATermAppl ExprSort = gsGetSort(DataExprLHS);
-  if (gsIsUnknown(ExprSort)) {
-    ThrowVM(NULL, "sort of data expression %t is unknown\n", DataExprLHS);
-  }
-  Result = gsMakeDataAppl2(gsMakeOpIdDiv(ExprSort), DataExprLHS, DataExprRHS);
-finally:
-  return Result;
+  assert(!gsIsUnknown(ExprSort));
+  return gsMakeDataAppl2(gsMakeOpIdDiv(ExprSort), DataExprLHS, DataExprRHS);
 }
 
 ATermAppl gsMakeDataExprMod(ATermAppl DataExprLHS, ATermAppl DataExprRHS)
 {
-  ATermAppl Result = NULL;
   ATermAppl ExprSort = gsGetSort(DataExprLHS);
-  if (gsIsUnknown(ExprSort)) {
-    ThrowVM(NULL, "sort of data expression %t is unknown\n", DataExprLHS);
-  }
-  Result = gsMakeDataAppl2(gsMakeOpIdMod(ExprSort), DataExprLHS, DataExprRHS);
-finally:
-  return Result;
+  assert(!gsIsUnknown(ExprSort));
+  return gsMakeDataAppl2(gsMakeOpIdMod(ExprSort), DataExprLHS, DataExprRHS);
 }
 
 ATermAppl gsMakeDataExprExp(ATermAppl DataExprLHS, ATermAppl DataExprRHS)
 {
-  ATermAppl Result = NULL;
   ATermAppl ExprSort = gsGetSort(DataExprLHS);
-  if (gsIsUnknown(ExprSort)) {
-    ThrowVM(NULL, "sort of data expression %t is unknown\n", DataExprLHS);
-  }
-  Result = gsMakeDataAppl2(gsMakeOpIdExp(ExprSort), DataExprLHS, DataExprRHS);
-finally:
-  return Result;
+  assert(!gsIsUnknown(ExprSort));
+  return gsMakeDataAppl2(gsMakeOpIdExp(ExprSort), DataExprLHS, DataExprRHS);
 }
 
 ATermAppl gsMakeDataExprEven(ATermAppl DataExpr)
@@ -2393,46 +2258,24 @@ ATermAppl gsMakeDataExprEven(ATermAppl DataExpr)
 
 ATermAppl gsMakeDataExprSetComp(ATermAppl DataExpr, ATermAppl SortExprResult)
 {
-  ATermAppl Result = NULL;
   ATermAppl ExprSort = gsGetSort(DataExpr);
-  if (gsIsUnknown(ExprSort)) {
-    ThrowVM(NULL, "sort of data expression %t is unknown\n", DataExpr);
-  }
-  if (!gsIsSortArrow(ExprSort)) {
-    ThrowVM(NULL, "sort of data expression %t is not a function\n", DataExpr);
-  }
-  if (!ATisEqual(ATAgetArgument(ExprSort, 1), gsMakeSortExprBool())) {
-    ThrowVM(NULL,
-      "sort of data expression %t is not a function with result sort Bool\n",
-      DataExpr);
-  }
+  assert(!gsIsUnknown(ExprSort));
+  assert(gsIsSortArrow(ExprSort));
+  assert(ATisEqual(ATAgetArgument(ExprSort, 1), gsMakeSortExprBool()));
   //ExprSort is of the form S -> Bool
-  Result = gsMakeDataAppl(
+  return gsMakeDataAppl(
     gsMakeOpIdSetComp(ATAgetArgument(ExprSort, 0), SortExprResult), DataExpr);
-finally:
-  return Result;
 }
 
 ATermAppl gsMakeDataExprBagComp(ATermAppl DataExpr, ATermAppl SortExprResult)
 {
-  ATermAppl Result = NULL;
   ATermAppl ExprSort = gsGetSort(DataExpr);
-  if (gsIsUnknown(ExprSort)) {
-    ThrowVM(NULL, "sort of data expression %t is unknown\n", DataExpr);
-  }
-  if (!gsIsSortArrow(ExprSort)) {
-    ThrowVM(NULL, "sort of data expression %t is not a function\n", DataExpr);
-  }
-  if (!ATisEqual(ATAgetArgument(ExprSort, 1), gsMakeSortExprNat())) {
-    ThrowVM(NULL,
-      "sort of data expression %t is not a function with result sort Nat\n",
-      DataExpr);
-  }
+  assert(!gsIsUnknown(ExprSort));
+  assert(gsIsSortArrow(ExprSort));
+  assert(ATisEqual(ATAgetArgument(ExprSort, 1), gsMakeSortExprNat()));
   //ExprSort is of the form S -> Nat
-  Result = gsMakeDataAppl(
+  return gsMakeDataAppl(
     gsMakeOpIdBagComp(ATAgetArgument(ExprSort, 0), SortExprResult), DataExpr);
-finally:
-  return Result;
 }
 
 //Auxiliary functions to create data expressions
@@ -2463,9 +2306,11 @@ ATermAppl gsMakeDataApplList(ATermAppl DataExpr,
   ATermList DataExprArgs)
 {
   ATermAppl Result = DataExpr;
-  int n = ATgetLength(DataExprArgs);
-  for (int i = 0; i < n; i++) {
-    Result = gsMakeDataAppl(Result, ATAelementAt(DataExprArgs, i));
+  ATermList l = DataExprArgs;
+  while (!ATisEmpty(l))
+  {
+    Result = gsMakeDataAppl(Result, ATAgetFirst(l));
+    l = ATgetNext(l);
   }
   return Result;
 }

@@ -16,13 +16,12 @@ ATermAppl gsParseSpecification(FILE *SpecStream);
        an appropriate error message is printed to stderr.
 */ 
 
-bool gsPrintSpecification(FILE *OutStream, const ATermAppl Spec);
+void gsPrintSpecification(FILE *OutStream, const ATermAppl Spec);
 /*Pre: OutStream points to a stream to which can be written
-       Spec is an ATermAppl containing a GenSpect specification
+       Spec is a specification or a part of it, that adheres to the internal
+       format
   Post:A textual representation of the GenSpect specification is written to
        OutStream.
-  Ret: true is everything went ok.
-       false, otherwise.
 */
 
 void gsTest(void);

@@ -1,5 +1,5 @@
 #define  NAME      "libgsparse"
-#define  LVERSION  "0.1.32"
+#define  LVERSION  "0.1.33"
 #define  AUTHOR    "Aad Mathijssen"
 
 #ifdef __cplusplus
@@ -203,18 +203,10 @@ finally:
   return Result;
 }
 
-bool gsPrintSpecification(FILE *OutStream, const ATermAppl Spec)
+void gsPrintSpecification(FILE *OutStream, const ATermAppl Spec)
 {
-  bool Result = true;
-  //check preconditions
-  if (Spec == NULL) {
-    ThrowVM(false, "specification may not be empty\n");
-  }
-  //print specification
+  assert(Spec != NULL);
   gsPrintPart(OutStream, Spec, false, 0);
-finally:
-  gsDebugMsg("return %s\n", Result?"true":"false");
-  return Result;
 }
 
 ATermAppl gsLinearise(ATermAppl spec)
@@ -763,6 +755,16 @@ void gsPrintPart(FILE *OutStream, const ATermAppl Part, bool ShowSorts,
       fprintf(OutStream, " -> ");
       gsPrintPart(OutStream, CommResult, ShowSorts, PrecLevel);
     }
+  } else if (gsIsNil(Part)) {
+    //print nil
+    gsDebugMsg("printing nil\n");
+    fprintf(OutStream, "nil");
+  } else if (gsIsUnknown(Part)) {
+    //print unknown
+    gsDebugMsg("printing unknown\n");
+    fprintf(OutStream, "unknown");
+  } else {
+    gsErrorMsg("the term %t is not part of the internal format\n", Part);
   }
 }
 
