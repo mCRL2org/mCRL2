@@ -356,21 +356,21 @@ void gsEnableConstructorFunctions(void)
   gsOpIdNameSubSet    = gsString2ATermAppl("<");
   gsOpIdNameSetUnion  = gsString2ATermAppl("+");
   gsOpIdNameSetDifference   = gsString2ATermAppl("-");
-  gsOpIdNameSetIntersection = gsString2ATermAppl("-");
-  gsOpIdNameSetComplement   = gsString2ATermAppl("-");
+  gsOpIdNameSetIntersection = gsString2ATermAppl("*");
+  gsOpIdNameSetComplement   = gsString2ATermAppl("!");
   gsOpIdNameSet2Bag   = gsString2ATermAppl("Set2Bag");
   
   //Bags
   gsOpIdNameEmptyBag  = gsString2ATermAppl("{}");
   gsOpIdNameBagSize   = gsString2ATermAppl("#");
   gsOpIdNameBagIn     = gsString2ATermAppl("in");
-  gsOpIdNameCount         = gsString2ATermAppl("count");
+  gsOpIdNameCount     = gsString2ATermAppl("count");
   gsOpIdNameSubBagEq  = gsString2ATermAppl("<=");
   gsOpIdNameSubBag    = gsString2ATermAppl("<");
   gsOpIdNameBagUnion  = gsString2ATermAppl("+");
   gsOpIdNameBagDifference   = gsString2ATermAppl("-");
-  gsOpIdNameBagIntersection = gsString2ATermAppl("-");
-  gsOpIdNameBag2Set       = gsString2ATermAppl("Bag2Set");
+  gsOpIdNameBagIntersection = gsString2ATermAppl("*");
+  gsOpIdNameBag2Set   = gsString2ATermAppl("Bag2Set");
     
   //protect constructor AFun's
   ATprotectAFun(gsAFunSpecV1);

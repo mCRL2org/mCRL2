@@ -95,7 +95,7 @@ static ATbool gstcEqTypesL(ATermList, ATermList);
 static ATbool gstcReadInSortStruct(ATermAppl);
 static ATbool gstcAddConstant(ATermAppl, ATermAppl, const char*);
 static ATbool gstcAddFunction(ATermAppl, ATermAppl, const char*);
-inline static void gstcAddSystemConstant(ATermAppl);
+static void gstcAddSystemConstant(ATermAppl);
 static void gstcAddSystemFunctionProd(ATermAppl, ATermAppl);
 
 static ATermTable gstcAddVars2Table(ATermTable,ATermList);
@@ -330,6 +330,69 @@ void gstcDataInit(void){
 			    gstcMakeSortArrowProd2(gsMakeSortIdNat(),gsMakeSortIdNat(),gsMakeSortIdNat()));
   gstcAddSystemFunctionProd(gsMakeOpIdExp(gsMakeSortIdNat()),
 			    gstcMakeSortArrowProd2(gsMakeSortIdInt(),gsMakeSortIdNat(),gsMakeSortIdInt()));
+//Lists
+  gstcAddSystemConstant(gsMakeOpIdNameEmptyList(gsMakeUnknown())),
+  gstcAddSystemFunctionProd(gsMakeOpIdNameListSize(gsMakeUnknown()),
+			    gstcMakeSortArrowProd1(gsMakeSortList(gsMakeUnknown()),gsMakeSortExprNat()));
+  gstcAddSystemFunctionProd(gsMakeOpIdNameInsert(gsMakeUnknown()),
+			    gstcMakeSortArrowProd2(gsMakeUnknown(),gsMakeSortList(gsMakeUnknown()),gsMakeSortList(gsMakeUnknown())));
+  gstcAddSystemFunctionProd(gsMakeOpIdNameAppend(gsMakeUnknown()),
+			    gstcMakeSortArrowProd2(gsMakeSortList(gsMakeUnknown()),gsMakeUnknown(),gsMakeSortList(gsMakeUnknown())));
+  gstcAddSystemFunctionProd(gsMakeOpIdNameConcat(gsMakeUnknown()),
+			    gstcMakeSortArrowProd2(gsMakeSortList(gsMakeUnknown()),gsMakeSortList(gsMakeUnknown()),gsMakeSortList(gsMakeUnknown())));
+  gstcAddSystemFunctionProd(gsMakeOpIdNameElementAt(gsMakeUnknown()),
+			    gstcMakeSortArrowProd2(gsMakeSortList(gsMakeUnknown()),gsMakeSortExprNat(),gsMakeUnknown()));
+  gstcAddSystemFunctionProd(gsMakeOpIdNameLhead(gsMakeUnknown()),
+			    gstcMakeSortArrowProd1(gsMakeSortList(gsMakeUnknown()),gsMakeUnknown()));
+  gstcAddSystemFunctionProd(gsMakeOpIdNameLtail(gsMakeUnknown()),
+			    gstcMakeSortArrowProd1(gsMakeSortList(gsMakeUnknown()),gsMakeSortList(gsMakeUnknown())));
+  gstcAddSystemFunctionProd(gsMakeOpIdNameRhead(gsMakeUnknown()),
+			    gstcMakeSortArrowProd1(gsMakeSortList(gsMakeUnknown()),gsMakeUnknown()));
+  gstcAddSystemFunctionProd(gsMakeOpIdNameRtail(gsMakeUnknown()),
+			    gstcMakeSortArrowProd1(gsMakeSortList(gsMakeUnknown()),gsMakeSortList(gsMakeUnknown())));
+	    
+//Sets
+  gstcAddSystemConstant(gsMakeOpIdNameEmptySet(gsMakeUnknown()));
+  gstcAddSystemFunctionProd(gsMakeOpIdNameSetSize(gsMakeUnknown()),
+			    gstcMakeSortArrowProd1(gsMakeSortSet(gsMakeUnknown()),gsMakeSortExprNat()));
+  gstcAddSystemFunctionProd(gsMakeOpIdNameSetIn(gsMakeUnknown()),
+			    gstcMakeSortArrowProd2(gsMakeUnknown(),gsMakeSortSet(gsMakeUnknown()),gsMakeSortExprBool()));
+  gstcAddSystemFunctionProd(gsMakeOpIdNameSubSetEq(gsMakeUnknown()),
+			    gstcMakeSortArrowProd2(gsMakeSortSet(gsMakeUnknown()),gsMakeSortSet(gsMakeUnknown()),gsMakeSortExprBool()));
+  gstcAddSystemFunctionProd(gsMakeOpIdNameSubSet(gsMakeUnknown()),
+			    gstcMakeSortArrowProd2(gsMakeSortSet(gsMakeUnknown()),gsMakeSortSet(gsMakeUnknown()),gsMakeSortExprBool()));
+  gstcAddSystemFunctionProd(gsMakeOpIdNameSetUnion(gsMakeUnknown()),
+			    gstcMakeSortArrowProd2(gsMakeSortSet(gsMakeUnknown()),gsMakeSortSet(gsMakeUnknown()),gsMakeSortSet(gsMakeUnknown())));
+  gstcAddSystemFunctionProd(gsMakeOpIdNameSetDifference(gsMakeUnknown()),
+			    gstcMakeSortArrowProd2(gsMakeSortSet(gsMakeUnknown()),gsMakeSortSet(gsMakeUnknown()),gsMakeSortSet(gsMakeUnknown())));
+  gstcAddSystemFunctionProd(gsMakeOpIdNameSetIntersection(gsMakeUnknown()),
+			    gstcMakeSortArrowProd2(gsMakeSortSet(gsMakeUnknown()),gsMakeSortSet(gsMakeUnknown()),gsMakeSortSet(gsMakeUnknown())));
+  gstcAddSystemFunctionProd(gsMakeOpIdNameSetComplement(gsMakeUnknown()),
+			    gstcMakeSortArrowProd1(gsMakeSortSet(gsMakeUnknown()),gsMakeSortSet(gsMakeUnknown())));
+  gstcAddSystemFunctionProd(gsMakeOpIdNameSet2Bag(gsMakeUnknown()),
+			    gstcMakeSortArrowProd1(gsMakeSortSet(gsMakeUnknown()),gsMakeSortBag(gsMakeUnknown())));
+
+
+//Bags
+  gstcAddSystemConstant(gsMakeOpIdNameEmptyBag(gsMakeUnknown()));
+  gstcAddSystemFunctionProd(gsMakeOpIdNameBagSize(gsMakeUnknown()),
+			    gstcMakeSortArrowProd1(gsMakeSortBag(gsMakeUnknown()),gsMakeSortExprNat()));
+  gstcAddSystemFunctionProd(gsMakeOpIdNameBagIn(gsMakeUnknown()),
+			    gstcMakeSortArrowProd2(gsMakeUnknown(),gsMakeSortBag(gsMakeUnknown()),gsMakeSortExprBool()));
+  gstcAddSystemFunctionProd(gsMakeOpIdNameCount(gsMakeUnknown()),
+			    gstcMakeSortArrowProd2(gsMakeUnknown(),gsMakeSortBag(gsMakeUnknown()),gsMakeSortExprNat()));
+  gstcAddSystemFunctionProd(gsMakeOpIdNameSubBagEq(gsMakeUnknown()),
+			    gstcMakeSortArrowProd2(gsMakeSortBag(gsMakeUnknown()),gsMakeSortBag(gsMakeUnknown()),gsMakeSortExprBool()));
+  gstcAddSystemFunctionProd(gsMakeOpIdNameSubBag(gsMakeUnknown()),
+			    gstcMakeSortArrowProd2(gsMakeSortBag(gsMakeUnknown()),gsMakeSortBag(gsMakeUnknown()),gsMakeSortExprBool()));
+  gstcAddSystemFunctionProd(gsMakeOpIdNameBagUnion(gsMakeUnknown()),
+			    gstcMakeSortArrowProd2(gsMakeSortBag(gsMakeUnknown()),gsMakeSortBag(gsMakeUnknown()),gsMakeSortBag(gsMakeUnknown())));
+  gstcAddSystemFunctionProd(gsMakeOpIdNameBagDifference(gsMakeUnknown()),
+			    gstcMakeSortArrowProd2(gsMakeSortBag(gsMakeUnknown()),gsMakeSortBag(gsMakeUnknown()),gsMakeSortBag(gsMakeUnknown())));
+  gstcAddSystemFunctionProd(gsMakeOpIdNameBagIntersection(gsMakeUnknown()),
+			    gstcMakeSortArrowProd2(gsMakeSortBag(gsMakeUnknown()),gsMakeSortBag(gsMakeUnknown()),gsMakeSortBag(gsMakeUnknown())));
+  gstcAddSystemFunctionProd(gsMakeOpIdNameBag2Set(gsMakeUnknown()),
+			    gstcMakeSortArrowProd1(gsMakeSortBag(gsMakeUnknown()),gsMakeSortSet(gsMakeUnknown())));
 }
 
 void gstcDataDestroy(void){
@@ -469,7 +532,7 @@ static ATermList gstcWriteProcs(void){
 						)
 		    );
   }
-  return ATreverse(Result);
+  return Result;
 }
 
 static ATbool gstcInferTypesData(void){
@@ -670,8 +733,13 @@ static ATbool gstcAddFunction(ATermAppl Name, ATermAppl Sort, const char *msg){
   return Result;
 }
 
-inline static void gstcAddSystemConstant(ATermAppl OpId){
-  ATtablePut(gssystem.constants, (ATerm)ATAgetArgument(OpId,0), (ATerm)ATAgetArgument(OpId,1));
+static void gstcAddSystemConstant(ATermAppl OpId){
+  ATermAppl Name=ATAgetArgument(OpId,0);
+  ATermList Types=ATLtableGet(gssystem.constants, (ATerm)Name);
+
+  if (!Types) Types=ATmakeList0();
+  Types=ATappend(Types,(ATerm)ATAgetArgument(OpId,1));
+  ATtablePut(gssystem.constants,(ATerm)Name,(ATerm)Types);
 }
 
 static void gstcAddSystemFunctionProd(ATermAppl OpId, ATermAppl Type){
@@ -745,6 +813,7 @@ static ATermAppl gstcRewrActProc(ATermAppl ProcTerm){
       Result=gstcMakeActionOrProc(action,Name,ATLgetFirst(ParList),ATLgetArgument(ProcTerm,1));
     }
     else{
+      gsWarningMsg("Ambiguous action %t\n",Name);    
       Result=gstcMakeActionOrProc(action,Name,ATmakeList1((ATerm)gsMakeUnknown()),ATLgetArgument(ProcTerm,1));
       // here later can be [Unknown],ParList
     }
@@ -897,7 +966,10 @@ static ATermAppl gstcTraverseVarConstD(ATermTable Vars, ATermAppl DataTerm){
     if((Type=ATAtableGet(context.constants,(ATerm)Name))) return gsMakeOpId(Name,Type);
     if((ParList=ATLtableGet(gssystem.constants,(ATerm)Name))){
       if(ATgetLength(ParList)==1) return gsMakeOpId(Name,ATAgetFirst(ParList));
-      else return gsMakeOpId(Name,gsMakeUnknown());
+      else{
+	gsWarningMsg("Ambiguous system constant %t\n",Name);    
+	return gsMakeOpId(Name,gsMakeUnknown());
+      }
     }
 
     ATermList ParListS=ATLtableGet(gssystem.functions,(ATerm)Name);
@@ -905,7 +977,12 @@ static ATermAppl gstcTraverseVarConstD(ATermTable Vars, ATermAppl DataTerm){
     if(!ParList) ParList=ParListS;
     else if(ParListS) ParList=ATconcat(ParListS,ParList);
 
-    if(ParList && ATgetLength(ParList)==1) return gsMakeDataVarId(Name,ATAgetFirst(ParList));
+    if(!ParList){
+      gsErrorMsg("Unknown Op %t\n",Name);
+      return NULL;
+    }
+    
+    if(ATgetLength(ParList)==1) return gsMakeDataVarId(Name,ATAgetFirst(ParList));
     else{
       gsWarningMsg("Unknown Op %t\n",Name);    
       return gsMakeOpId(Name,gsMakeUnknown());
@@ -927,12 +1004,18 @@ static ATermAppl gstcTraverseVarConstDN(int nFactPars, ATermTable Vars, ATermApp
       if((Type=ATAtableGet(context.constants,(ATerm)Name))) return gsMakeOpId(Name,Type);
       else{
 	if((ParList=ATLtableGet(gssystem.constants,(ATerm)Name))){
-	  if(ATgetLength(ParList)==1) return gsMakeOpId(Name,ATAgetFirst(ParList));
-	  else return gsMakeOpId(Name,gsMakeUnknown());
+	  if(ATgetLength(ParList)==1){
+	    gsWarningMsg("System constant%t type  %t\n",Name,ParList);    
+	    return gsMakeOpId(Name,ATAgetFirst(ParList));
+	  }
+	  else{
+	    gsWarningMsg("Ambiguous system constant %t\n",Name);    
+	    return gsMakeOpId(Name,gsMakeUnknown());
+	  }
 	}
 	else{
-	  gsWarningMsg("Unknown Op %t\n",Name);
-	  return gsMakeOpId(Name,gsMakeUnknown());
+	  gsErrorMsg("Unknown Op %t\n",Name);
+	  return NULL;
 	}
       }
     }
@@ -943,8 +1026,8 @@ static ATermAppl gstcTraverseVarConstDN(int nFactPars, ATermTable Vars, ATermApp
     else if(ParListS) ParList=ATconcat(ParListS,ParList);
 
     if(!ParList) {
-      gsWarningMsg("Unknown Op %t\n",Name);    
-      return gsMakeOpId(Name,gsMakeUnknown());
+      gsErrorMsg("Unknown Op %t\n",Name);
+      return NULL;
     }
 
     // filter ParList keeping only functions A_0#...#A_nFactPars->A
@@ -959,8 +1042,8 @@ static ATermAppl gstcTraverseVarConstDN(int nFactPars, ATermTable Vars, ATermApp
     }
 
     if(ATisEmpty(ParList)) {
-      gsWarningMsg("Unknown Op %t with %d arguments\n",Name,nFactPars);    
-      return gsMakeOpId(Name,gsMakeUnknown());
+      gsErrorMsg("Unknown Op %t with %d arguments\n",Name,nFactPars);    
+      return NULL;
     }
     
     if(ATgetLength(ParList)==1) return gsMakeDataVarId(Name,ATAgetFirst(ParList));
