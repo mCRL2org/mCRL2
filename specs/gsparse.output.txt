@@ -1,4 +1,4 @@
-// Date: 16-11-2004
+// Date: 30-11-2004
 // This document describes the output format of the GenSpect parser. Here:
 // - <IdString> represents a string of the format '[a-zA-Z_][a-zA-Z0-9_]*'
 // - <NumberString> represents a string of the format '"0"|("-"?[1-9][0-9]*)'
@@ -20,9 +20,6 @@
 //identifier declaration
 <IdDecl>     ::= IdDecl(<Id>, <SortExpr>) 
 
-//declaration of one or more identifiers of the same sort
-<IdsDecl>    ::= IdsDecl(<Id>+, <SortExpr>) 
-
 //id or nil
 <IdOrNil>    ::= <Id> | Nil() 
 
@@ -30,26 +27,26 @@
 //-------------
 
 //specification
-<Spec>       ::= Spec(SortSpec(<SortDecl>*), ConsSpec(<IdsDecl>*),
-                   MapSpec(<IdsDecl>*), EqnSpec(<EqnSect>*),
+<Spec>       ::= Spec(SortSpec(<SortDecl>*), ConsSpec(<IdDecl>*),
+                   MapSpec(<IdDecl>*), EqnSpec(<EqnSect>*),
                    ActSpec(<ActDecl>*), ProcSpec(<ProcDecl>*), Init(<ProcExpr>)
-		 )
+                  )
 
 //sort declaration
-<SortDecl>   ::= SortDeclStandard(<Id>+) 
+<SortDecl>   ::= SortDeclStandard(<Id>) 
                | SortDeclRef(<Id>, <SortExpr>) 
 
 //equation section
-<EqnSect>    ::= EqnSect(<IdsDecl>*, <EqnDecl>+) 
+<EqnSect>    ::= EqnSect(<IdDecl>*, <EqnDecl>+) 
 
 //equation declaration
 <EqnDecl>    ::= EqnDecl(<DataExpr>, <DataExpr>) 
 
 //action declaration
-<ActDecl>    ::= ActDecl(<Id>+, <SortExpr>*) 
+<ActDecl>    ::= ActDecl(<Id>, <SortExpr>*) 
 
 //process declaration
-<ProcDecl>   ::= ProcDecl(<Id>, <IdsDecl>*, <ProcExpr>) 
+<ProcDecl>   ::= ProcDecl(<Id>, <IdDecl>*, <ProcExpr>) 
 
 //Expressions
 //-----------
@@ -87,8 +84,8 @@
                | NotOrCompl(<DataExpr>) 
                | Neg(<DataExpr>) 
                | Size(<DataExpr>) 
-               | Forall(<IdsDecl>+, <DataExpr>) 
-               | Exists(<IdsDecl>+, <DataExpr>) 
+               | Forall(<IdDecl>+, <DataExpr>) 
+               | Exists(<IdDecl>+, <DataExpr>) 
                | ListAt(<DataExpr>, <DataExpr>) 
                | MultOrIntersect(<DataExpr>, <DataExpr>) 
                | Div(<DataExpr>, <DataExpr>) 
@@ -108,7 +105,7 @@
                | And(<DataExpr>, <DataExpr>) 
                | Or(<DataExpr>, <DataExpr>) 
                | Imp(<DataExpr>, <DataExpr>) 
-               | Lambda(<IdsDecl>+, <DataExpr>) 
+               | Lambda(<IdDecl>+, <DataExpr>) 
                | Whr(<DataExpr>, <WhrDecl>+) 
 
 //bag enumeration element
@@ -121,7 +118,7 @@
 <ProcExpr>   ::= ActProcRef(<Id>, <DataExpr>*) 
                | Delta() 
                | Tau() 
-               | Sum(<IdsDecl>+, <ProcExpr>) 
+               | Sum(<IdDecl>+, <ProcExpr>) 
                | Restrict(<MAId>*, <ProcExpr>) 
                | Allow(<MAId>*, <ProcExpr>) 
                | Hide(<MAId>*, <ProcExpr>) 
