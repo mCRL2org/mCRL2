@@ -422,6 +422,42 @@ ATermAppl gsMakeOpIdExp(ATermAppl SortExpr);
 ATermAppl gsMakeOpIdEven();
 //Ret: Operation identifier for 'even' of sort Nat -> Bool
 
+//Lists
+  ATermAppl gsMakeOpIdNameEmptyList(ATermAppl Type);
+  ATermAppl gsMakeOpIdNameListSize(ATermAppl Type);
+  ATermAppl gsMakeOpIdNameInsert(ATermAppl Type);
+  ATermAppl gsMakeOpIdNameAppend(ATermAppl Type);
+  ATermAppl gsMakeOpIdNameConcat(ATermAppl Type);
+  ATermAppl gsMakeOpIdNameElementAt(ATermAppl Type);
+  ATermAppl gsMakeOpIdNameLhead(ATermAppl Type);
+  ATermAppl gsMakeOpIdNameLtail(ATermAppl Type);
+  ATermAppl gsMakeOpIdNameRhead(ATermAppl Type);
+  ATermAppl gsMakeOpIdNameRtail(ATermAppl Type);
+	    
+//Sets
+  ATermAppl gsMakeOpIdNameEmptySet(ATermAppl Type);
+  ATermAppl gsMakeOpIdNameSetSize(ATermAppl Type);
+  ATermAppl gsMakeOpIdNameSetIn(ATermAppl Type);
+  ATermAppl gsMakeOpIdNameSubSetEq(ATermAppl Type);
+  ATermAppl gsMakeOpIdNameSubSet(ATermAppl Type);
+  ATermAppl gsMakeOpIdNameSetUnion(ATermAppl Type);
+  ATermAppl gsMakeOpIdNameSetDifference(ATermAppl Type);
+  ATermAppl gsMakeOpIdNameSetIntersection(ATermAppl Type);
+  ATermAppl gsMakeOpIdNameSetComplement(ATermAppl Type);
+  ATermAppl gsMakeOpIdNameSet2Bag(ATermAppl Type);
+
+
+//Bags
+  ATermAppl gsMakeOpIdNameEmptyBag(ATermAppl Type);
+  ATermAppl gsMakeOpIdNameBagSize(ATermAppl Type);
+  ATermAppl gsMakeOpIdNameBagIn(ATermAppl Type);
+  ATermAppl gsMakeOpIdNameCount(ATermAppl Type);
+  ATermAppl gsMakeOpIdNameSubBagEq(ATermAppl Type);
+  ATermAppl gsMakeOpIdNameSubBag(ATermAppl Type);
+  ATermAppl gsMakeOpIdNameBagUnion(ATermAppl Type);
+  ATermAppl gsMakeOpIdNameBagDifference(ATermAppl Type);
+  ATermAppl gsMakeOpIdNameBagIntersection(ATermAppl Type);
+  ATermAppl gsMakeOpIdNameBag2Set(ATermAppl Type);
 
 //Creation of data expressions for system defined operations.
 ATermAppl gsMakeDataExprTrue(void);
