@@ -80,8 +80,8 @@ ATermAppl gsSpecEltsToSpec(ATermList SpecElts);
 %type <list> acts_decls_scs acts_decl proc_decls_scs data_vars_decls_cs
 %type <list> domain_no_arrow domain_no_arrow_elts_hs struct_constructors_bs
 %type <list> struct_projections_cs whr_decls_cs data_exprs_cs bag_enum_elts_cs
-%type <list> mult_act_names_set mult_act_names_cs ids_bs ren_expr_set
-%type <list> ren_exprs_cs comm_expr_set comm_exprs_cs
+%type <list> act_names_set ren_expr_set ren_exprs_cs comm_expr_set comm_exprs_cs
+%type <list> mult_act_names_set mult_act_names_cs ids_bs
 
 %%
 
@@ -1516,21 +1516,14 @@ act_proc_ref:
 
 //process quantification
 proc_quant:
-  RESTRICT LPAR mult_act_names_set COMMA proc_expr RPAR
+  RESTRICT LPAR act_names_set COMMA proc_expr RPAR
     {
       $$ = gsMakeRestrict($3, $5);
       if (gsDebug) {
         ATprintf("parsed process quantification\n  %t\n", $$);
       }
     }
-  | ALLOW LPAR mult_act_names_set COMMA proc_expr RPAR
-    {
-      $$ = gsMakeAllow($3, $5);
-      if (gsDebug) {
-        ATprintf("parsed process quantification\n  %t\n", $$);
-      }
-    }
-  | HIDE LPAR mult_act_names_set COMMA proc_expr RPAR
+  | HIDE LPAR act_names_set COMMA proc_expr RPAR
     {
       $$ = gsMakeHide($3, $5);
       if (gsDebug) {
@@ -1551,69 +1544,29 @@ proc_quant:
         ATprintf("parsed process quantification\n  %t\n", $$);
       }
     }
+  | ALLOW LPAR mult_act_names_set COMMA proc_expr RPAR
+    {
+      $$ = gsMakeAllow($3, $5);
+      if (gsDebug) {
+        ATprintf("parsed process quantification\n  %t\n", $$);
+      }
+    }
   ;
 
-//set of multi action names
-mult_act_names_set:
+//set of action names
+act_names_set:
   PBRACE
     {
       $$ = ATmakeList0();
       if (gsDebug) {
-        ATprintf("parsed multi action name set\n  %t\n", $$);
+        ATprintf("parsed action name set\n  %t\n", $$);
       }
     }
-  | LBRACE mult_act_names_cs RBRACE
+  | LBRACE ids_cs RBRACE
     {
       $$ = ATreverse($2);
       if (gsDebug) {
-        ATprintf("parsed multi action name set\n  %t\n", $$);
-      }
-    }
-  ;
-
-//one or more multi action names, separated by comma's
-mult_act_names_cs:
-  mult_act_name
-    {
-      $$ = ATmakeList1((ATerm) $1);
-      if (gsDebug) {
-        ATprintf("parsed multi action names\n  %t\n", $$);
-      }
-    }
-  | mult_act_names_cs COMMA mult_act_name
-    {
-      $$ = ATinsert($1, (ATerm) $3);
-      if (gsDebug) {
-        ATprintf("parsed multi action names\n  %t\n", $$);
-      }
-    }
-  ;
-
-//multi action name
-mult_act_name:
-  ids_bs
-    {
-      $$ = gsMakeMultActName(ATreverse($1));
-      if (gsDebug) {
-        ATprintf("parsed multi action name\n  %t\n", $$);
-      }
-    }
-  ;
-
-//one or more id's, separated by bars
-ids_bs:
-  ID
-    {
-      $$ = ATmakeList1((ATerm) $1);
-      if (gsDebug) {
-        ATprintf("parsed id's\n  %t\n", $$);
-      }
-    }
-  | ids_bs BAR ID
-    {
-      $$ = ATinsert($1, (ATerm) $3);
-      if (gsDebug) {
-        ATprintf("parsed id's\n  %t\n", $$);
+        ATprintf("parsed action name set\n  %t\n", $$);
       }
     }
   ;
@@ -1715,6 +1668,71 @@ comm_expr:
       $$ = gsMakeCommExpr($1, $3);
       if (gsDebug) {
         ATprintf("parsed communication expression\n  %t\n", $$);
+      }
+    }
+  ;
+
+//set of multi action names
+mult_act_names_set:
+  PBRACE
+    {
+      $$ = ATmakeList0();
+      if (gsDebug) {
+        ATprintf("parsed multi action name set\n  %t\n", $$);
+      }
+    }
+  | LBRACE mult_act_names_cs RBRACE
+    {
+      $$ = ATreverse($2);
+      if (gsDebug) {
+        ATprintf("parsed multi action name set\n  %t\n", $$);
+      }
+    }
+  ;
+
+//one or more multi action names, separated by comma's
+mult_act_names_cs:
+  mult_act_name
+    {
+      $$ = ATmakeList1((ATerm) $1);
+      if (gsDebug) {
+        ATprintf("parsed multi action names\n  %t\n", $$);
+      }
+    }
+  | mult_act_names_cs COMMA mult_act_name
+    {
+      $$ = ATinsert($1, (ATerm) $3);
+      if (gsDebug) {
+        ATprintf("parsed multi action names\n  %t\n", $$);
+      }
+    }
+  ;
+
+//multi action name
+mult_act_name:
+  ids_bs
+    {
+      $$ = gsMakeMultActName(ATreverse($1));
+      if (gsDebug) {
+        ATprintf("parsed multi action name\n  %t\n", $$);
+      }
+    }
+  ;
+
+//one or more id's, separated by bars
+ids_bs:
+  ID
+    {
+      $$ = ATmakeList1((ATerm) $1);
+      if (gsDebug) {
+        ATprintf("parsed id's\n  %t\n", $$);
+      }
+    }
+  | ids_bs BAR ID
+    {
+      $$ = ATinsert($1, (ATerm) $3);
+      if (gsDebug) {
+        ATprintf("parsed id's\n  %t\n", $$);
       }
     }
   ;

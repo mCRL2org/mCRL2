@@ -633,34 +633,34 @@ ATermAppl gsMakeSum(ATermList DataVarIds, ATermAppl ProcExpr)
   return ATmakeAppl2(gsAFunSum, (ATerm) DataVarIds, (ATerm) ProcExpr);
 }
 
-ATermAppl gsMakeRestrict(ATermList MultActNames, ATermAppl ProcExpr)
+ATermAppl gsMakeRestrict(ATermList ActNames, ATermAppl ProcExpr)
 {
   assert(gsConstructorFunctionsEnabled);
-  return ATmakeAppl2(gsAFunRestrict, (ATerm) MultActNames, (ATerm) ProcExpr);
+  return ATmakeAppl2(gsAFunRestrict, (ATerm) ActNames, (ATerm) ProcExpr);
+}
+
+ATermAppl gsMakeHide(ATermList ActNames, ATermAppl ProcExpr)
+{
+  assert(gsConstructorFunctionsEnabled);
+  return ATmakeAppl2(gsAFunHide, (ATerm) ActNames, (ATerm) ProcExpr);
+}
+
+ATermAppl gsMakeRename(ATermList RenameExprs, ATermAppl ProcExpr)
+{
+  assert(gsConstructorFunctionsEnabled);
+  return ATmakeAppl2(gsAFunRename, (ATerm) RenameExprs, (ATerm) ProcExpr);
+}
+
+ATermAppl gsMakeComm(ATermList CommExprs, ATermAppl ProcExpr)
+{
+  assert(gsConstructorFunctionsEnabled);
+  return ATmakeAppl2(gsAFunComm, (ATerm) CommExprs, (ATerm) ProcExpr);
 }
 
 ATermAppl gsMakeAllow(ATermList MultActNames, ATermAppl ProcExpr)
 {
   assert(gsConstructorFunctionsEnabled);
   return ATmakeAppl2(gsAFunAllow, (ATerm) MultActNames, (ATerm) ProcExpr);
-}
-
-ATermAppl gsMakeHide(ATermList MultActNames, ATermAppl ProcExpr)
-{
-  assert(gsConstructorFunctionsEnabled);
-  return ATmakeAppl2(gsAFunHide, (ATerm) MultActNames, (ATerm) ProcExpr);
-}
-
-ATermAppl gsMakeRename(ATermList RenameExprSet, ATermAppl ProcExpr)
-{
-  assert(gsConstructorFunctionsEnabled);
-  return ATmakeAppl2(gsAFunRename, (ATerm) RenameExprSet, (ATerm) ProcExpr);
-}
-
-ATermAppl gsMakeComm(ATermList CommExprSet, ATermAppl ProcExpr)
-{
-  assert(gsConstructorFunctionsEnabled);
-  return ATmakeAppl2(gsAFunComm, (ATerm) CommExprSet, (ATerm) ProcExpr);
 }
 
 ATermAppl gsMakeSync(ATermAppl ProcExprLHS, ATermAppl ProcExprRHS)
@@ -967,11 +967,6 @@ bool gsIsRestrict(ATermAppl term) {
   return ATgetAFun(term) == gsAFunRestrict;
 }
 
-bool gsIsAllow(ATermAppl term) {
-  assert(gsConstructorFunctionsEnabled);
-  return ATgetAFun(term) == gsAFunAllow;
-}
-
 bool gsIsHide(ATermAppl term) {
   assert(gsConstructorFunctionsEnabled);
   return ATgetAFun(term) == gsAFunHide;
@@ -985,6 +980,11 @@ bool gsIsRename(ATermAppl term) {
 bool gsIsComm(ATermAppl term) {
   assert(gsConstructorFunctionsEnabled);
   return ATgetAFun(term) == gsAFunComm;
+}
+
+bool gsIsAllow(ATermAppl term) {
+  assert(gsConstructorFunctionsEnabled);
+  return ATgetAFun(term) == gsAFunAllow;
 }
 
 bool gsIsSync(ATermAppl term) {
