@@ -742,6 +742,49 @@ ATermAppl gsImplSortStruct(ATermAppl SortStruct, ATermList *PSubsts,
   //add substitution for this identifier
   ATermAppl Subst = gsMakeSubst(SortStruct, SortId);
   *PSubsts = gsAddSubstToSubsts(Subst, *PSubsts);
+  //store constructor, projection and recogniser operations for this identifier
+  ATermList ConsOps = ATmakeList0();
+  ATermList ProjOps = ATmakeList0();
+  ATermList RecOps = ATmakeList0();
+  ATermList StructConss = ATLgetArgument(SortStruct, 0);
+  while (!ATisEmpty(StructConss))
+  {
+    ATermAppl StructCons = ATAgetFirst(StructConss);
+    ATermAppl ConsName = ATAgetArgument(StructCons, 0);
+    ATermList StructProjs = ATLgetArgument(StructCons, 1);
+    ATermAppl RecName = ATAgetArgument(StructCons, 2);
+    //store recogniser in RecOps
+    if (!gsIsNil(RecName)) {
+      RecOps = ATinsert(RecOps, (ATerm)
+        gsMakeOpId(RecName, gsMakeSortArrow(SortId, gsMakeSortExprBool())));
+    }
+    ATermList StructConsSorts = ATmakeList0();
+    //store projection operations in ProjOps and store the implementations of
+    //the sorts in StructConsSorts
+    while (!ATisEmpty(StructProjs))
+    {
+      ATermAppl StructProj = ATAgetFirst(StructProjs);
+      ATermAppl ProjName = ATAgetArgument(StructProj, 0);
+      ATermAppl ProjSort = gsImplExprsPart(ATAgetArgument(StructProj, 1),
+        PSubsts, PDataDecls);
+      StructConsSorts = ATinsert(StructConsSorts, (ATerm) ProjSort);
+      //store projection operation in ProjOps
+      if (!gsIsNil(ProjName)) {
+        ProjOps = ATinsert(ProjOps, (ATerm)
+          gsMakeOpId(ProjName, gsMakeSortArrow(SortId, ProjSort)));
+      }
+      StructProjs = ATgetNext(StructProjs);
+    }
+    StructConsSorts = ATreverse(StructConsSorts);
+    //store constructor operation in ConsOps
+    ConsOps = ATinsert(ConsOps, (ATerm)
+      gsMakeOpId(ConsName, gsMakeSortArrowList(StructConsSorts, SortId)));
+    StructConss = ATgetNext(StructConss);
+  }
+  //add declarations for the constructo, projection and recogniser operations
+  PDataDecls->ConsOps = ATconcat(ATreverse(ConsOps), PDataDecls->ConsOps);
+  PDataDecls->Ops = ATconcat(ATconcat(ATreverse(ProjOps), ATreverse(RecOps)),
+    PDataDecls->Ops);
   return SortId;
 }
 
