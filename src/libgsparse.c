@@ -976,11 +976,14 @@ void gsPrintDecl(FILE *OutStream, const ATermAppl Decl, const bool ShowSorts)
 {
   gsPrintPart(OutStream, ATAgetArgument(Decl, 0), ShowSorts, 0);
   if (ShowSorts) {
-    fprintf(OutStream, ": ");
     if (gsIsActId(Decl)) {
-      gsPrintParts(OutStream, ATLgetArgument(Decl, 1), ShowSorts, 2,
-        NULL, " # ");
+      ATermList SortExprs = ATLgetArgument(Decl, 1);
+      if (ATgetLength(SortExprs) > 0) {
+        fprintf(OutStream, ": ");
+        gsPrintParts(OutStream, SortExprs, ShowSorts, 2, NULL, " # ");
+      }
     } else {
+      fprintf(OutStream, ": ");
       gsPrintPart(OutStream, ATAgetArgument(Decl, 1), ShowSorts, 0);
     }
   }
