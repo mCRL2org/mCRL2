@@ -9,8 +9,12 @@ act
 
 proc
   P_ik(b:Bag(Nat)) = 
-    sum n:Nat. put_i(n) . P(i,j,b + {n:1}) +
-    sum n:Nat. (n in b) -> get_k(n) . P(b - {n:1});
+    sum n:Nat. put_i(n) . P_ik(b + {n:1}) +
+    sum n:Nat. (n in b) -> get_k(n) . P_ik(b - {n:1});
+
+  P_kj(b:Bag(Nat)) = 
+    sum n:Nat. put_k(n) . P_kj(b + {n:1}) +
+    sum n:Nat. (n in b) -> get_j(n) . P_kj(b - {n:1});
 
   P2 = 
     hide({pass_k},
