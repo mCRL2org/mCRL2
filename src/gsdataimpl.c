@@ -282,7 +282,7 @@ ATermAppl gsImplExprsPart(ATermAppl Part, ATermList *PSubsts,
     //this sort
     ATermAppl SortId = gsMakeFreshListSortId((ATerm) PDataDecls->Sorts);
     PDataDecls->Sorts = ATinsert(PDataDecls->Sorts, (ATerm) SortId);
-    ATermAppl Subst = gsMakeSubst(Part, SortId);
+    ATermAppl Subst = gsMakeSubst_Appl(Part, SortId);
     *PSubsts = gsAddSubstToSubsts(Subst, *PSubsts);
     Part = SortId;
   } else if (gsIsSortSet(Part)) {
@@ -290,7 +290,7 @@ ATermAppl gsImplExprsPart(ATermAppl Part, ATermList *PSubsts,
     //this sort
     ATermAppl SortId = gsMakeFreshSetSortId((ATerm) PDataDecls->Sorts);
     PDataDecls->Sorts = ATinsert(PDataDecls->Sorts, (ATerm) SortId);
-    ATermAppl Subst = gsMakeSubst(Part, SortId);
+    ATermAppl Subst = gsMakeSubst_Appl(Part, SortId);
     *PSubsts = gsAddSubstToSubsts(Subst, *PSubsts);
     Part = SortId;
   } else if (gsIsSortBag(Part)) {
@@ -298,7 +298,7 @@ ATermAppl gsImplExprsPart(ATermAppl Part, ATermList *PSubsts,
     //this sort
     ATermAppl SortId = gsMakeFreshBagSortId((ATerm) PDataDecls->Sorts);
     PDataDecls->Sorts = ATinsert(PDataDecls->Sorts, (ATerm) SortId);
-    ATermAppl Subst = gsMakeSubst(Part, SortId);
+    ATermAppl Subst = gsMakeSubst_Appl(Part, SortId);
     *PSubsts = gsAddSubstToSubsts(Subst, *PSubsts);
     Part = SortId;
   } else if (gsIsSortId(Part)) {
@@ -440,7 +440,7 @@ ATermAppl gsImplExprsPart(ATermAppl Part, ATermList *PSubsts,
       gsMakeDataEqn(Vars, gsMakeNil(), gsMakeDataApplList(OpId, Vars), Body));
     //replace Part
     ATermAppl NewPart = gsMakeDataApplList(OpId, FreeVars);
-    *PSubsts = gsAddSubstToSubsts(gsMakeSubst(Part, NewPart), *PSubsts);
+    *PSubsts = gsAddSubstToSubsts(gsMakeSubst_Appl(Part, NewPart), *PSubsts);
     Part = NewPart;
     Recursive = false;
   } else if (gsIsWhr(Part)) {
@@ -643,7 +643,7 @@ ATermAppl gsImplSortStruct(ATermAppl SortStruct, ATermList *PSubsts,
   ATermAppl SortId = gsMakeFreshStructSortId((ATerm) PDataDecls->Sorts);
   PDataDecls->Sorts = ATinsert(PDataDecls->Sorts, (ATerm) SortId);
   //add substitution for this identifier
-  ATermAppl Subst = gsMakeSubst(SortStruct, SortId);
+  ATermAppl Subst = gsMakeSubst_Appl(SortStruct, SortId);
   *PSubsts = gsAddSubstToSubsts(Subst, *PSubsts);
   //store constructor, projection and recogniser operations for this identifier
   ATermList ConsOps = ATmakeList0();
@@ -1484,9 +1484,9 @@ ATermAppl gsImplSortRefs(ATermAppl Spec)
     if (gsIsStructSortId(RHS) || gsIsListSortId(RHS) || gsIsSetSortId(RHS) ||
       gsIsBagSortId(RHS))
     {
-      Subst = gsMakeSubst(RHS, LHS);
+      Subst = gsMakeSubst_Appl(RHS, LHS);
     } else {
-      Subst = gsMakeSubst(LHS, RHS);
+      Subst = gsMakeSubst_Appl(LHS, RHS);
     }
     Substs = ATinsert(Substs, (ATerm) Subst);
     //perform substitution on the remaining elements of SortRefs

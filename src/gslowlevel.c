@@ -207,10 +207,19 @@ void ATunprotectList(ATermList *PList)
 //Substitutions on ATerm's
 //------------------------
 
-ATermAppl gsMakeSubst(ATermAppl OldValue, ATermAppl NewValue)
+ATermAppl gsMakeSubst(ATerm OldValue, ATerm NewValue)
 {
-  return ATmakeAppl2(ATmakeAFun("subst", 2, ATfalse),
-    (ATerm) OldValue, (ATerm) NewValue);
+  return ATmakeAppl2(ATmakeAFun("subst", 2, ATfalse), OldValue, NewValue);
+}
+
+ATermAppl gsMakeSubst_Appl(ATermAppl OldValue, ATermAppl NewValue)
+{
+  return gsMakeSubst((ATerm) OldValue, (ATerm) NewValue);
+}
+
+ATermAppl gsMakeSubst_List(ATermList OldValue, ATermList NewValue)
+{
+  return gsMakeSubst((ATerm) OldValue, (ATerm) NewValue);
 }
 
 ATerm gsSubstValues(ATermList Substs, ATerm Term, bool Recursive)
@@ -218,8 +227,7 @@ ATerm gsSubstValues(ATermList Substs, ATerm Term, bool Recursive)
   ATermList l = Substs;
   while (!ATisEmpty(l)) {
     ATermAppl Subst = ATAgetFirst(l);
-    ATerm OldValue = ATgetArgument(Subst, 0);
-    if (ATisEqual(OldValue, Term))
+    if (ATisEqual(ATgetArgument(Subst, 0), Term))
     {
       Term = ATgetArgument(Subst, 1);
       Recursive = false;

@@ -114,8 +114,14 @@ void      ATunprotectList(ATermList *PList);
 //Substitutions on ATerm's
 //------------------------
 
-ATermAppl gsMakeSubst(ATermAppl OldValue, ATermAppl NewValue);
+ATermAppl gsMakeSubst(ATerm OldValue, ATerm NewValue);
 //Ret: a substitution, i.e. an ATermAppl of the form 'subst(OldValue, NewValue)'
+
+ATermAppl gsMakeSubst_Appl(ATermAppl OldValue, ATermAppl NewValue);
+//ATermAppl variant of gsMakeSubst
+
+ATermAppl gsMakeSubst_List(ATermList OldValue, ATermList NewValue);
+//ATermList variant of gsMakeSubst
 
 ATerm gsSubstValues(ATermList Substs, ATerm Term, bool Recursive);
 //Pre: Substs is a list containing substitutions only

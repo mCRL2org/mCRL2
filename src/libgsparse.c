@@ -1087,7 +1087,7 @@ void gsTest(void)
   int k = gsIntValue_int(ATAelementAt(t, 2));
   fprintf(stderr, "%d + %d = %d\n", n, m, k);
   ATermList Substs = ATmakeList1((ATerm)
-    gsMakeSubst(gsMakeDataExprFalse(), gsMakeDataExprTrue()));
+    gsMakeSubst_Appl(gsMakeDataExprFalse(), gsMakeDataExprTrue()));
   t = (ATermList) gsSubstValues(Substs, (ATerm) t, false);
   n = gsIntValue_int(ATAelementAt(t, 0));
   m = gsIntValue_int(ATAelementAt(t, 1));
