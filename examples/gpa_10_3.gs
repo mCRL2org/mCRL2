@@ -14,7 +14,7 @@ proc
 
   Dim = allow({r_dup | s_mul},
           comm({s_dup1 | r_mul1, s_dup2 | r_inc, s_inc | r_mul2},
-            Dup || Mul || Dim
+            Dup || Inc || Mul
           )
         );
 

@@ -19,7 +19,7 @@ proc
 
   DSqr_ij =
     hide({put,get},
-      allow({get_i,put,get,put_j},
+      allow({get_i|put,put_j|get},
         comm({put_k|put_k -> put, get_l|get_l -> get},
            Sqr_ik || P_kl({}) || Sqr_lj
         )
