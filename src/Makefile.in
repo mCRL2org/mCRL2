@@ -41,12 +41,19 @@ LINEARISER_NAME     = linearise
 LINEARISER_OBJECTS  = linearise.o
 LINEARISER_LDFLAGS  = -lgsparse -lATerm -lm
 
+#Rewriter definitions
+LIBREWR_NAME        = libgsrewrite.a
+LIBREWR_OBJECTS     = libgsrewrite.o gsrewr_inner.o
+LIBREWR_LDFLAGS     = -lATerm -lm
+REWR_NAME     = rewr
+REWR_OBJECTS  = rewr.o
+REWR_LDFLAGS  = -lgsparse -lgsrewrite -lATerm -lm
 
 #Make rules
 .PHONY: all install clean
 .PRECIOUS: gsparser.c gslexer.c
 
-all : $(LIB_NAME) $(PARSER_NAME) $(PRINTER_NAME) $(LINEARISER_NAME) Makefile
+all : $(LIB_NAME) $(LIBREWR_NAME) $(PARSER_NAME) $(PRINTER_NAME) $(LINEARISER_NAME) $(REWR_NAME) Makefile
 
 install : $(PARSER_NAME) $(PRINTER_NAME)
 	$(INSTALL) $(PARSER_NAME) $(bindir)
@@ -64,6 +71,12 @@ $(PRINTER_NAME) : $(PRINTER_OBJECTS) $(LIB_NAME) Makefile
 $(LINEARISER_NAME) : $(LINEARISER_OBJECTS) $(LIB_NAME) Makefile
 	$(CC) -o $@ $(LINEARISER_OBJECTS) $(LDFLAGS) $(LINEARISER_LDFLAGS)
 
+$(LIBREWR_NAME) : $(LIBREWR_OBJECTS) Makefile
+	$(AR) $(ARFLAGS) $@ $(LIBREWR_OBJECTS)
+
+$(REWR_NAME) : $(REWR_OBJECTS) $(LIB_NAME) Makefile
+	$(CC) -o $@ $(REWR_OBJECTS) $(LDFLAGS) $(REWR_LDFLAGS)
+
 gslexer.o      : gslexer.h gsparser.h gsfunc.h gslowlevel.h
 gsparser.o     : gsfunc.h gslowlevel.h
 gsfunc.o       : gsfunc.h gslowlevel.h
@@ -73,6 +86,9 @@ libgsparse.o   : libgsparse.h gslexer.h gstypecheck.h gsdataimpl.h gsfunc.h gslo
 gsparse.o      : gsparse.h libgsparse.h gsfunc.h gslowlevel.h
 gsprint.o      : gsprint.h libgsparse.h gsfunc.h gslowlevel.h
 linearise.o    : libgsparse.h gsfunc.h gslowlevel.h
+gsrewr_inner.o : gslowlevel.h gsfunc.h gsrewr_inner.h
+libgsrewrite.o : gslowlevel.h gsfunc.h libgsrewrite.h gsrewr_inner.h
+rewr.o         : gslowlevel.h gsfunc.h libgsparse.h libgsrewrite.h 
 
 %.c : %.y
 	$(BISON) $(BFLAGS) -o $@ $<
