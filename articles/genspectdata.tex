@@ -35,10 +35,9 @@
 
 % column types that change column types l,c,r from math mode to LR
 % and the other way round
-\newcolumntype{L}{>{$}l<{$}}
-\newcolumntype{C}{>{$}c<{$}}
-\newcolumntype{R}{>{$}r<{$}}
-
+\newcolumntype{L}{>{$}l<{$}}%stopzone%stopzone%stopzone
+\newcolumntype{C}{>{$}c<{$}}%stopzone%stopzone%stopzone
+\newcolumntype{R}{>{$}r<{$}}%stopzone%stopzone%stopzone
 
 % Environments
 % ------------
@@ -493,10 +492,11 @@
 % GenSpect keywords
 \newcommand{\kwsort}{{\bf sort}}
 \newcommand{\kwcons}{{\bf cons}}
-\newcommand{\kwmap}{{\bf op}}
+\newcommand{\kwmap}{{\bf map}}
 \newcommand{\kwvar}{{\bf var}}
 \newcommand{\kweqn}{{\bf eqn}}
 \newcommand{\kwact}{{\bf act}}
+\newcommand{\kwstruct}{{\bf struct}}
 \newcommand{\kwwhr}{{\bf whr}}
 \newcommand{\kwend}{{\bf end}}
 
@@ -569,32 +569,63 @@
 \maketitle
 
 \noindent
-We provide a syntax for the standard data types of the GenSpect language. This syntax is intended to be a fruitful mix between standard mathematical notation and the syntax of specification languages and programming languages.
+We provide a syntax for the standard data types of the GenSpect language. This
+syntax is intended to be a fruitful mix between standard mathematical notation
+and the syntax of specification languages and programming languages.
 
 \section{Basic formalism}
 
-The underlying theory of the GenSpect data types is abstract data types. Abstract data types consist of:
+The underlying theory of the GenSpect data types is abstract data types.
+Abstract data types consist of:
 \begin{tdefinitions}{-}
 \item sorts and operations on these sorts;
-\item equations on terms made up from operations and variables, where the terms are of the same sort.
+\item equations on terms made up from operations and variables, where the terms
+      are of the same sort.
 \end{tdefinitions}
 
 \noindent
-Sorts are declared using the keyword \frm{\kwsort}, operations using the keyword \frm{\kwmap} and equations using the keyword \frm{\kweqn}. Variables that are used in the equations need to be declared using the keyword \frm{\kwvar}. To distinguish constructor operations from normal operations the former may be declared using the keyword \frm{\kwcons}. However, the use of these constructors is strongly discouraged, because in practise they are implicitly defined via the concrete data types. With the keyword \frm{\kwsort}, also abbreviations for sort expressions may be introduced.
+Sorts are declared using the keyword \frm{\kwsort}, operations using the
+keyword \frm{\kwmap} and equations using the keyword \frm{\kweqn}. Variables
+that are used in the equations need to be declared using the keyword
+\frm{\kwvar}. To distinguish constructor operations from normal operations the
+former may be declared using the keyword \frm{\kwcons}. However, the use of
+these constructors is strongly discouraged, because in practise they are
+implicitly defined via the concrete data types. With the keyword \frm{\kwsort},
+also abbreviations for sort expressions may be introduced.
 
 \subsection{Expressions}
 
-There are three kind of expressions in GenSpect, namely expressions over sorts, over data and over processes. Sort expressions are names of existing sorts, extended with the constructs of section~\ref{sec:TypeConstructors}. Data expressions are terms constructed from operations and variables. These data expressions are in the standard functional notation, but in the next sections also mixfix notation is introduced. To increase readability of the operation declarations in the following sections, the sorts are left implicit and underscores indicate the placement of the parameters.
+There are three kind of expressions in GenSpect, namely expressions over sorts,
+over data and over processes. Sort expressions are made up from existing sort
+names and from representations of predefined data types and type constructors.
+Data expressions are terms constructed from operations and variables. These
+data expressions are in the standard functional notation, but in the next
+sections also mixfix notation is introduced. To increase readability of the
+operation declarations in the following sections, the sorts are left implicit
+and underscores indicate the placement of the parameters.
 
-\emph{Where clauses} may be used as an abbreviation mechanism in data expressions. A where clause is of the form \frm{\kwwhr\ a_{0} = e_{0}, \ldots a_{n} = a_{n}\ \kwend}, with \frm{n \in \nat}. For all \frm{i} with \frm{0 \leq i \leq n}, \frm{a_{i}} is an identifier, \frm{e_{i}} is a data expression and \frm{a_{i} = e_{i}} is called a \emph{definition}. A where clause should be read from left to right, which means that for each data expression \frm{e_{i}}, the identifiers \frm{a_{j}}, \frm{0 \leq j < i} may occur. A data expression equipped with a where clause may use all identifiers introduced in the where clause. 
+\emph{Where clauses} may be used as an abbreviation mechanism in data
+expressions. A where clause is of the form \frm{e\ \kwwhr\ a_{0} = e_{0},
+\ldots a_{n} = a_{n}\ \kwend}, with \frm{n \in \nat}. Here, \frm{e} is a data
+expression and, for all \frm{i}, \frm{0 \leq i \leq n}, \frm{a_{i}} is an
+identifier and \frm{e_{i}} is a data expression. Expression \frm{e} is called
+the body and each equation \frm{a_{i} = e_{i}} is called a \emph{definition}.
+Each identifier \frm{a_{i}} is used as an abbreviation for \frm{e_{i}} in
+\frm{e}, even if \frm{a_{i}} is already defined in the context. Also, an
+identifier \frm{a_{i}} may not occur in another expression \frm{e_{j}}, where
+\frm{j \neq i}. As a consequence, the order in which expressions occur is
+irrelevant.
 
 \section{Predefined data types}
+\label{sec:StandardTypes}
 
-A number of predefined data types are provided. For each data types a sort is provided together with a number of predefined operations.
+A number of predefined data types are provided. For each data types a sort is
+provided together with a number of predefined operations.
 
 \subsection{Booleans}
 
-The boolean type is represented by the sort \frm{\srtbool}. For this sort, we have the following operations.
+The boolean type is represented by the sort \frm{\srtbool}. For this sort, we
+have the following operations.
 
 \bigskip
 \begin{tabular}{|l@{\qquad}L@{\qquad}l|}
@@ -611,24 +642,30 @@ existential quantification & \exists \_ {:} \_ . \_ & \verb+exists _:_._+\\
 \hline
 \end{tabular}\bigskip
 
-We have operations that express the equality and disequality of two terms of the same sort. Also we have an operation that expresses the conditional. These operations are available for any predefined sort, and are automatically generated for user defined sorts.
+We have operations that express the equality and inequality of two terms of the
+same sort. Also we have an operation that expresses the conditional. These
+operations are available for any predefined sort, and are automatically
+generated for user defined sorts.
 
 \bigskip
 \begin{tabular}{|l@{\qquad}L@{\qquad}l|}
 \hline
 Operator                   & \textit{Rich}          & \verb+Plain+\\\hline
-equality                   & \_ == \_                & \verb+_ == _+\\
-disequality                & \_ \not = \_           & \verb+_ != _+\\
-conditional                & \faaa{if}{\_}{\_}{\_} & \verb+if(_,_,_)+\\
+equality                   & \_ == \_               & \verb+_ == _+\\
+inequality                 & \_ \not = \_           & \verb+_ != _+\\
+conditional                & \faaa{if}{\_}{\_}{\_}  & \verb+if(_,_,_)+\\
 \hline
 \end{tabular}\bigskip
 
 \noindent
-For sort \frm{\srtbool}, we have that equality is bi-implication, and that disequality is exclusive-or.
+For sort \frm{\srtbool}, we have that equality is bi-implication, and that
+disequality is exclusive-or.
 
 \subsection{Numbers}
 
-Positive numbers, natural numbers and integers are represented by the sorts \frm{\srtpos}, \frm{\srtnat} and \frm{\srtint}. For these sorts, we have the following operations, where \frm{A,B \in \set{\srtpos, \srtnat, \srtint}}:
+Positive numbers, natural numbers and integers are represented by the sorts
+\frm{\srtpos}, \frm{\srtnat} and \frm{\srtint}. For these sorts, we have the
+following operations, where \frm{A,B \in \set{\srtpos, \srtnat, \srtint}}:
 
 \bigskip
 \begin{tabular}{|l@{\qquad}L@{\qquad}l|}
@@ -636,7 +673,8 @@ Positive numbers, natural numbers and integers are represented by the sorts \frm
 Operator                   & \textit{Rich}              & \verb+Plain+\\\hline
 positive numbers           & 1,2,3,\ldots               & \verb+1,2,3,...+\\
 natural numbers            & 0,1,2,\ldots               & \verb+0,1,2,...+\\
-integers                   & \ldots, -2,-1,0,1,2,\ldots & \verb+...,-2,-1,0,1,2,...+\\
+integers                   & \ldots, -2,-1,0,1,2,\ldots
+                                              & \verb+...,-2,-1,0,1,2,...+\\
 negation                   & - \_                       & \verb+-_+\\
 addition                   & \_ + \_                    & \verb-_ + _-\\
 subtraction                & \_ - \_                    & \verb+_ - _+\\
@@ -658,7 +696,9 @@ conversion                 & \fa{A2B}{\_}               & \verb+A2B(_)+\\
 \end{tabular}\bigskip
 
 \noindent
-Explicit type conversions can be done using the conversion operation \frm{\f{A2B}}. The other operations perform implicit type conversions, when needed.
+Explicit type conversions can be done using the conversion operation
+\frm{\f{A2B}}. The other operations perform implicit type conversions, when
+needed.
 
 \subsection{Extensions}
 
@@ -671,16 +711,21 @@ Other desirable predefined data types could be the following:
 \end{tdefinitions}
 
 \noindent
-These data types will be provided when the need arises. However, for the rational and real numbers, a suitable representation has not yet been found.
+These data types will be provided when the need arises. However, for the
+rational and real numbers, a suitable representation has not yet been found.
 
 \section{Type constructors}
 \label{sec:TypeConstructors}
 
-Type constructors are predefined operations on sorts with which we can construct sorts. For each sort that is constructed this way a number of operations are provided.
+Type constructors are predefined operations on sorts with which we can
+construct sorts. For each sort that is constructed this way a number of
+operations are provided.
 
 \subsection{Lists}
 
-Lists, where all elements are of sort \frm{A}, are declared by the sort expression \frm{\fa{List}{A}}. The following operations are provided for this sort.
+Lists, where all elements are of sort \frm{A}, are declared by the sort
+expression \frm{\fa{List}{A}}. The following operations are provided for this
+sort.
 
 \bigskip
 \begin{tabular}{|l@{\qquad}L@{\qquad}l|}
@@ -703,129 +748,190 @@ list without its last element  & \fa{rtail}{\_}         & \verb+rtail(_)+\\
 Remarks:
 \begin{tdefinitions}{-}
 \item the empty list is an empty list construction, i.e.\ \frm{\el}
-\item the lists \frm{\lst{a,b}}, \frm{a \cons \lst{b}} and \frm{\lst{a} \snoc b} are equal.
+\item the lists \frm{\lst{a,b}}, \frm{a \cons \lst{b}} and \frm{\lst{a} \snoc
+b} are equal.
 \end{tdefinitions}
 
 \subsection{Sets and bags}
 
-Possibly infinite sets and bags where all elements are of sort \frm{A} are declared by the sort expressions \frm{\fa{Set}{A}} and \frm{\fa{Bag}{A}}, respectively. The following operations are provided for these sorts.
+Possibly infinite sets and bags where all elements are of sort \frm{A} are
+declared by the sort expressions \frm{\fa{Set}{A}} and \frm{\fa{Bag}{A}},
+respectively. The following operations are provided for these sorts.
 
 \bigskip
 \begin{tabular}{|l@{\qquad}L@{\qquad}l|}
 \hline
-Operator                       & \textit{Rich}                          & \verb+Plain+\\\hline
-set enumeration                & \set{\_\,,\ldots,\_}                   & \verb+{ _,...,_ }+\\
-bag enumeration                & \bag{{\_:\_}\,,\ldots,{\_:\_}}         & \verb+{ _:_,...,_:_}+\\
-comprehension                  & \scompr{\_:\_}{\_}                     & \verb+{ _:_ | _ }+\\
-size (cardinality)             & \# \_                                  & \verb+#_+\\
-element test                   & \_ \in \_                              & \verb+_ in _+\\
-bag multiplicity               & \faa{count}{\_}{\_}                    & \verb+count(_,_)+\\
-subset/subbag                  & \_ \subseteq \_                        & \verb+_ <= _+\\
-proper subset/subbag           & \_ \subset \_                          & \verb+_ < _+\\
-union                          & \_ \cup \_                             & \verb-_ + _-\\
-intersection                   & \_ \cap \_                             & \verb+_ * _+\\
-difference                     & \_ \backslash \_                       & \verb+_ \ _+\\
-set complement                 & \stack[1.3ex]{\_}{\_}                  & \verb+!_+\\
+Operator                       & \textit{Rich}           & \verb+Plain+\\\hline
+set enumeration                & \set{\_\,,\ldots,\_}    & \verb+{ _,...,_ }+\\
+bag enumeration                & \bag{{\_:\_}\,,\ldots,{\_:\_}}
+                                                      & \verb+{ _:_,...,_:_}+\\
+comprehension                  & \scompr{\_:\_}{\_}      & \verb+{ _:_ | _ }+\\
+size (cardinality)             & \# \_                   & \verb+#_+\\
+element test                   & \_ \in \_               & \verb+_ in _+\\
+bag multiplicity               & \faa{count}{\_}{\_}     & \verb+count(_,_)+\\
+subset/subbag                  & \_ \subseteq \_         & \verb+_ <= _+\\
+proper subset/subbag           & \_ \subset \_           & \verb+_ < _+\\
+union                          & \_ \cup \_              & \verb-_ + _-\\
+difference                     & \_ - \_                 & \verb+_ - _+\\
+intersection                   & \_ \cap \_              & \verb+_ * _+\\
+set complement                 & \stack[1.3ex]{\_}{\_}   & \verb+!_+\\
 \hline
 \end{tabular}\bigskip
 
 \noindent
-The empty set of bag is represented by an empty enumeration, i.e.\ \frm{\set{}}. Note that a set enumeration declares a set, not a bag. So e.g.\ \frm{\set{a,b,c}} declares the same set as \frm{\set{a,b,c,c,a,c}}. In a bag enumeration the number of times an element occurs has to declared explicitly. So e.g.\ \frm{\bag{a:2,b:1}} declares a bag consisting of two \frm{a}'s and one \frm{b}. Also \frm{\bag{a:1,b:1,a:1}} declares the same bag. A set comprehension \frm{\scompr{x:A}{\fa{P}{x}}} declares the set consisting of all elements \frm{x} of sort \frm{A} for which predicate \frm{\fa{P}{x}} holds, i.e.\ \frm{\fa{P}{x}} is an expression of sort \frm{\srtbool}. A bag comprehension \frm{\scompr{x:A}{\fa{f}{x}}} declares the bag in which each element \frm{x} occurs \frm{\fa{f}{x}} times, i.e.\ \frm{\fa{f}{x}} is an expression of sort \frm{\srtnat}. Note that functions \frm{P} and \frm{f} have to be total.
+The empty set of bag is represented by an empty enumeration, i.e.\
+\frm{\set{}}. Note that a set enumeration declares a set, not a bag. So e.g.\
+\frm{\set{a,b,c}} declares the same set as \frm{\set{a,b,c,c,a,c}}. In a bag
+enumeration the number of times an element occurs has to declared explicitly.
+So e.g.\ \frm{\bag{a:2,b:1}} declares a bag consisting of two \frm{a}'s and one
+\frm{b}. Also \frm{\bag{a:1,b:1,a:1}} declares the same bag. A set
+comprehension \frm{\scompr{x:A}{\fa{P}{x}}} declares the set consisting of all
+elements \frm{x} of sort \frm{A} for which predicate \frm{\fa{P}{x}} holds,
+i.e.\ \frm{\fa{P}{x}} is an expression of sort \frm{\srtbool}. A bag
+comprehension \frm{\scompr{x:A}{\fa{f}{x}}} declares the bag in which each
+element \frm{x} occurs \frm{\fa{f}{x}} times, i.e.\ \frm{\fa{f}{x}} is an
+expression of sort \frm{\srtnat}. Note that functions \frm{P} and \frm{f} have
+to be total.
 
 \subsection{Function types}
 
-A function type of total functions from \frm{X_{0} \times \ldots \times X_{n}} to \frm{Y} is declared by the sort expression \frm{X_{0} \times \ldots \times X_{n} \To Y}. The following operations are provided for these sorts.
+A function type of total functions from \frm{X_{0} \times \ldots \times X_{n}}
+to \frm{Y} is declared by the sort expression \frm{X_{0} \times \ldots \times
+X_{n} \To Y}. The following operations are provided for these sorts.
 
 \bigskip
 \begin{tabular}{|l@{\qquad}L@{\qquad}l|}
 \hline
 Operator                   & \textit{Rich}          & \verb+Plain+\\\hline
 function application       & \_(\_,\ldots,\_)       & \verb+_(_,...,_)+\\
-lambda abstraction         & \lambda {\_,\ldots,\_ {:} X_{0},\ldots,.X_{n}}.\_ & \verb+lambda _,...,_:X0,...,Xn._+\\
-\hline
-\end{tabular}
-
-\subsection{Structured types}
-
-Structured types consist of \emph{sum} types and \emph{product} types. A structured type is declared as follows, where \frm{n \in \pos} and \frm{k_{i} \in \nat} with \frm{1 \leq i \leq n}:
-\begin{genspect}
-sort & A & = & \f{Struct}
-    &c_{1}(\f{pr}_{1,1}: A_{1,1}, & \ldots & , \f{pr}_{1,k_{1}}: A_{1,k_{1}}) 
-      & ?\f{is\_c_{1}}\\
-&&&\hfill |&c_{2}(\f{pr}_{2,1}: A_{2,1}, & \ldots & , \f{pr}_{2,k_{2}}: A_{2,k_{2}}) 
-      & ?\f{is\_c_{2}}\\
-&&&                               & \multicolumn{1}{c}{\vdots}\\
-&&&\hfill |&c_{n}(\f{pr}_{n,1}: A_{n,1}, & \ldots & , \f{pr}_{n,k_{n}}: A_{n,k_{n}})
-      & ?\f{is\_c_{n}}
-\end{genspect}
-
-\noindent
-From this declaration it can be seen that at least \frm{1} summation has to be specified and a summation may consists of \frm{0} products. Each summation \frm{i} is labelled by a \emph{constructor} \frm{c_{i}} and a \emph{recogniser} \frm{\f{is\_c_{i}}}. To determine if a term of sort \frm{A} is constructed with \frm{c_{i}}, recogniser \frm{\f{is\_c_{i}}} can be used. Each product \frm{(i,j)} is labelled by a \emph{projection} \frm{\f{pr}_{i,j}}.
-
-If a summation \frm{i} does not have any products, it is written as \frm{c_{i}?\f{is\_c_{i}}} instead of \frm{c_{i}()?\f{is\_c_{i}}}. All labels have to be distinct. The projection and recogniser labels are optional. If such a label is left out, the corresponding \frm{:} or \frm{?} is left out, and the corresponding default name of the above definition is used. Each sort \frm{A_{i,j}} has to be a valid sort expression, in which forward references to sort labels may occur. This means that it is allowed to specify systems of equations of structured types.
-
-The following operations are generated for the above sort. If specified, the labels provided by the user are used.
-
-\bigskip
-\begin{tabular}{|l@{\qquad}L@{\qquad}l|}
-\hline
-Operator                              & \textit{Rich}             & \verb+Plain+\\\hline
-constructor of summation \frm{i}      & \fa{c_{i}}{\_,\ldots,\_}  & \verb+ci(_,...,_)+\\
-recogniser for constructor \frm{i}    & \fa{is\_c_{i}}{\_}        & \verb+is_ci(_)+\\
-projection \frm{(i,j)}, if declared   & \fa{\f{pr}_{i,j}}{\_}     & \verb+prij(_)+\\
+lambda abstraction         & \lambda {\_,\ldots,\_ {:} X_{0},\ldots,.X_{n}}.\_
+                                          & \verb+lambda _,...,_:X0,...,Xn._+\\
 \hline
 \end{tabular}\bigskip
 
 \noindent
-Note that a projection operation is only generated when its corresponding projection label is declared.
+Function types may be nested. To make this unambiguous, function arrow
+\frm{\To} is right associative, which may be overridden by using parentheses.
+Also it is not allowed to have sort expressions with \frm{\To} as its head at
+the left hand side of a function type. If this is needed, parentheses need to
+be used.
 
-We give a few examples. For finite \frm{n \in \nat}, an enumerated type can be declared by
+
+\subsection{Structured types}
+
+Structured types consist of \emph{sum} types and \emph{product} types. A
+structured type is declared by the following sort expression, where \frm{n \in
+\pos} and \frm{k_{i} \in \nat} with \frm{1 \leq i \leq n}:
 \begin{genspect}
-sort & Enum & = & \f{Struct}\ \f{enum}_{0} \ |\ \ldots\ |\ \f{enum}_{n}
+& \kwstruct
+    &c_{1}(\f{pr}_{1,1}: A_{1,1}, & \ldots & , \f{pr}_{1,k_{1}}: A_{1,k_{1}}) 
+      ?\f{is\_c_{1}}\\
+&\hfill |
+    &c_{2}(\f{pr}_{2,1}: A_{2,1}, & \ldots & , \f{pr}_{2,k_{2}}: A_{2,k_{2}})
+      ?\f{is\_c_{2}}\\
+&                                 & \multicolumn{1}{c}{\vdots}\\
+&\hfill |
+    &c_{n}(\f{pr}_{n,1}: A_{n,1}, & \ldots & , \f{pr}_{n,k_{n}}: A_{n,k_{n}})
+      ?\f{is\_c_{n}}
 \end{genspect}
 
 \noindent
-This generates constructor operations \frm{\f{enum}_{i} : \f{Enum}}, \frm{0 \leq i \leq n}. For each term of sort \emph{Enum} we can find out if it is constructed using constructor \frm{\f{enum}_{i}}, by using the operation \frm{\f{is\_enum}_{i}: \f{Enum} \To \srtbool}.
+From this declaration it can be seen that at least \frm{1} summation has to be
+specified and a summation may consists of \frm{0} products. Each summation
+\frm{i} is labelled by a \emph{constructor} \frm{c_{i}} and a \emph{recogniser}
+\frm{\f{is\_c_{i}}}. To determine if a term of the above sort is constructed
+with \frm{c_{i}}, recogniser \frm{\f{is\_c_{i}}} can be used. If a summation
+\frm{i} does not have any products, it is written as \frm{c_{i}?\f{is\_c_{i}}}
+instead of \frm{c_{i}()?\f{is\_c_{i}}}.  Each product \frm{(i,j)} is labelled
+by a \emph{projection} \frm{\f{pr}_{i,j}}.
+
+All labels have to be distinct. The projection and recogniser labels are
+optional. If such a label is left out, the corresponding \frm{:} or \frm{?} is
+left out, and the corresponding default name from the above definition is used.
+Each sort \frm{A_{i,j}} has to be a valid sort expression, in which forward
+references to sort labels may occur. This means that it is allowed to specify
+systems of equations of structured types.
+
+The following operations are generated for the above sort. If specified, the
+labels provided by the user are used.
+
+\bigskip
+\begin{tabular}{|l@{\qquad}L@{\qquad}l|}
+\hline
+Operator                            & \textit{Rich}      & \verb+Plain+\\\hline
+constructor of summation \frm{i}    & \fa{c_{i}}{\_,\ldots,\_} 
+                                                         & \verb+ci(_,...,_)+\\
+recogniser for constructor \frm{i}  & \fa{is\_c_{i}}{\_}    & \verb+is_ci(_)+\\
+projection \frm{(i,j)}, if declared & \fa{\f{pr}_{i,j}}{\_}  & \verb+prij(_)+\\
+\hline
+\end{tabular}\bigskip
+
+\noindent
+Note that a projection operation is only generated when its corresponding
+projection label is declared.
+
+We give a few examples. For finite \frm{n \in \nat}, an enumerated type can be
+declared by
+\begin{genspect}
+sort & Enum & = & \kwstruct\ \f{enum}_{0} \ |\ \ldots\ |\ \f{enum}_{n}
+\end{genspect}
+
+\noindent
+This generates constructor operations \frm{\f{enum}_{i} : \f{Enum}}, \frm{0
+\leq i \leq n}. For each term of sort \emph{Enum} we can find out if it is
+constructed using constructor \frm{\f{enum}_{i}}, by using the operation
+\frm{\f{is\_enum}_{i}: \f{Enum} \To \srtbool}.
 
 Pairs of elements of sort \frm{A} and \frm{B} can be declared as follows:
 \begin{genspect}
-sort & \f{ABPair} & = & \f{Struct}\ \faa{pair}{\f{fst}: A}{\f{snd}: B}
+sort & \f{ABPair} & = & \kwstruct\ \faa{pair}{\f{fst}: A}{\f{snd}: B}
 \end{genspect}
 
 \noindent
-Except for constructor operation \frm{\f{pair}: A \times B \To \f{ABPair}} and the (superfluous) membership operation \frm{\f{is\_pair}: \f{ABPair} \To \srtbool}, the projection operations \frm{\f{fst}: \f{ABPair} \To A} and \frm{\f{snd}: \f{ABPair} \To B} are generated.
+Except for constructor operation \frm{\f{pair}: A \times B \To \f{ABPair}} and
+the (superfluous) membership operation \frm{\f{is\_pair}: \f{ABPair} \To
+\srtbool}, the projection operations \frm{\f{fst}: \f{ABPair} \To A} and
+\frm{\f{snd}: \f{ABPair} \To B} are generated.
 
-Binary trees where all leaves and nodes are labelled with elements of sort \frm{A} can be declared as follows:
+Binary trees where all leaves and nodes are labelled with elements of sort
+\frm{A} can be declared as follows:
 Example:
 \begin{genspect}
-sort & \f{BATree} & = & \f{Struct}\ \fa{leaf}{A} \  | \  \faaa{node}{BATree}{A}{BATree}
+sort & \f{BATree} & = 
+  & \kwstruct\ \fa{leaf}{A} \  | \  \faaa{node}{BATree}{A}{BATree}
 \end{genspect}
 \noindent
 Or, with labels for all sorts:
 \begin{genspect}
-sort & \f{BATree} & = & \f{Struct}\ \fa{leaf}{\f{lval}: A} \  | \  
-                        \faaa{node}{\f{left}: \f{BATree}}{\f{nval}: A}{\f{right}: \f{BATree}}
+sort & \f{BATree} & = 
+  & \kwstruct\ \fa{leaf}{\f{lval}: A} \  | \  
+    \faaa{node}{\f{left}: \f{BATree}}{\f{nval}: A}{\f{right}: \f{BATree}}
 \end{genspect}
 \noindent
-The quantification of an associative operation \frm{f: A \times A \To A} over all labels in a \frm{\f{BATree}}, can be defined in the same way for both declarations of the tree:
+The quantification of an associative operation \frm{f: A \times A \To A} over
+all labels in a \frm{\f{BATree}}, can be defined in the same way for both
+declarations of the tree:
 \begin{genspect}
-op   & \f{quantf}: \f{BATree} \To A\\
+map  & \f{qf}: \f{BATree} \To A\\
 var  & t,u: \f{BATree}\\
      & a: A\\
-eqn  & \fa{quantf}{\fa{leaf}{a}}         & = & a\\
-     & \fa{quantf}{\faaa{node}{t}{a}{u}} & = & \faa{f}{\fa{quantf}{t}}{\faa{f}{a}{\fa{quantf}{u}}}\\
+eqn  & \fa{qf}{\fa{leaf}{a}}         & = & a\\
+     & \fa{qf}{\faaa{node}{t}{a}{u}} & =
+       & \faa{f}{\fa{qf}{t}}{\faa{f}{a}{\fa{qf}{u}}}\\
 \end{genspect}
 \noindent
-The last definition of sort \frm{\f{BATree}} also allows the definition of operation \frm{\f{quantf}} without pattern matching:
+The last definition of sort \frm{\f{BATree}} also allows the definition of
+operation \frm{\f{qf}} without pattern matching:
 \begin{genspect}
-var  & \multicolumn{2}{L}{t: \f{BATree}}\\
-eqn  & \fa{quantf}{t} & = & \faaa{if}{\fa{is\_leaf}{t}}{\fa{lval}{t}}{
-         \faa{f}{\fa{quantf}{\fa{left}{t}}}{\faa{f}{\fa{nval}{t}}{\fa{quantf}{\fa{right}{t}}}}}\\
+var  & \multicolumn{3}{L}{t: \f{BATree}}\\
+eqn  & \fa{qf}{t} & = & \faaa{if}{\fa{is\_leaf}{t}}{\fa{lval}{t}}{
+         \faa{f}{\fa{qf}{\fa{left}{t}}}{
+           \faa{f}{\fa{nval}{t}}{\fa{qf}{\fa{right}{t}}}}}\\
 \end{genspect}
 
 \subsection{Extensions}
 
-Other desirable type constructors could be the following
+Other desirable type constructors could be the following:
 \begin{tdefinitions}{-}
 \item natural numbers modulo \frm{n}, for finite \frm{n \in \nat}
 \item (infinite) tables, arrays
@@ -834,61 +940,10 @@ Other desirable type constructors could be the following
 \end{tdefinitions}
 
 \noindent
-These type constructors will be provided when the need arises. Note that most of these type constructors can be easily constructed using function types and structured types. However, for reasons of standardisation and better syntax, it might be important to add these to the language.
-
-\section{Relation with \mCRL}
-
-In order to place the introduced data types in the context of \mCRL, the introduced concepts can be depicted hierarchically as follows:
-
-\begin{center}
-\renewcommand{\arraystretch}{2.5}
-\begin{tabular}{|p{2em}|c|c|c|c|c|c|p{2em}|}
-\hline
-\multicolumn{8}{|c|}{User defined data types}\\\cline{2-7}
-& Numbers & Lists & \multicolumn{2}{c|}{Booleans} & Sets & Bags &\\\hline
-\multicolumn{4}{|p{13em}|}{\centering Structured types} & \multicolumn{4}{c|}{Function types}\\\hline
-\multicolumn{8}{|c|}{\mCRL data types}\\
-\hline
-\end{tabular}
-\end{center}
-
-\section{Process declarations}
-
-Processes are defined by means of process equations. There are three possible representations. The first one resembles \mCRL, except for that references to processes only show the changed variables. Here all variables ocurring in the right hand side are declared in the left hand side. Pattern matching in the left hand side is not allowed. E.g., where \frm{T} stands for \frm{\f{BATree}}:
-\begin{genspect}
-proc & \fa{P}{t: T} & = &
-    \fa{is\_leaf}{t} &\To& \multicolumn{3}{@{}L}{\fa{get}{\fa{lval}{t}}.\delta\ +}\\
-&&& \fa{is\_node}{t} &\To& \fa{get}{\fa{nval}{t}}.(\fa{P}{\fa{left}{t}} + \fa{P}{\fa{right}{t}})\\
-\end{genspect}
-
-\noindent
-However, we can mimic this as follows\footnote{It has to be investigated whether the current tools are able to handle this in the right way. If this is not the case, this should be added.}:
-\begin{genspect}
-proc & \fa{P}{t: T} & = &
-    \sum_{a:A}         & (t & = & \fa{leaf}{a}) \To \fa{get}{a}.\delta\\
-&&& \sum_{a:A, u,v: T} & (t & = & \faaa{node}{u}{a}{v}) \To \fa{get}{a}.(\fa{P}{u} + \fa{P}{v})\\
-\end{genspect}
-
-\noindent
-In the second variant pattern matching is allowed. E.g.:
-\begin{genspect}
-proc & \fa{P}{\fa{leaf}{a: A}}               & = & \fa{get}{a}.\delta\\
-     & \fa{P}{\faaa{node}{t: T}{a: A}{u: T}} & = & 
-       \fa{get}{a}.(\fa{snd}{d}.\faaa{P}{t}{d}{e} + \fa{snd}{e}.\faaa{P}{u}{d}{e})
-\end{genspect}
-
-\noindent
-In the third variant the variable declarations are separated from the process declarations and a type declaration for the process has been added. E.g.:
-\begin{genspect}
-proc & P: T\\
-var  & a: A\\
-     & t,u: T\\
-pdef & \fa{P}{\fa{leaf}{a}}         & = & \fa{get}{a}.\delta\\
-     & \fa{P}{\faaa{node}{t}{a}{u}} & = & 
-       \fa{get}{a}.(\fa{snd}{d}.\faaa{P}{t}{d}{e} + \fa{snd}{e}.\faaa{P}{u}{d}{e})    
-\end{genspect}
-\noindent
-This last variant is the most close to the definition of data operations.
+These type constructors will be provided when the need arises. Note that most
+of these type constructors can be easily constructed using function types and
+structured types. However, for reasons of standardisation and better syntax, it
+might be important to add these to the language.
 
 \section{Parsing issues}
 
@@ -898,67 +953,158 @@ This last variant is the most close to the definition of data operations.
 Data terms occur in relation to processes in the following ways:
 \begin{tdefinitions}{-}
 \item action parameters
-\item process declarations (representations 2 and 3)
 \item arguments of a process reference
-\item left argument of conditional process terms (\frm{b \To p})
+\item left argument of conditional process terms (\frm{b \To p,q})
 \item right argument of a timed process term (\frm{p @ t})
 \end{tdefinitions}
 
 \noindent
-These last two are ambiguous or hard to read for quantifications and infix operations. For this reason, these operations need to be parenthesized.
+These last two are ambiguous or hard to read for where clauses, quantifications
+and infix operations. For this reason, these operations need to be
+parenthesized.
 
 \subsection{Type inference}
 
-Numbers, sets, bags and lists are ambiguous, namely \frm{1} can be parsed as a term of sort \frm{\srtpos}, \frm{\srtnat} or \frm{\srtint}, and \frm{\set{}} can be parsed as a term of an arbitrary set or bag sort. For overloaded operations, we have similar problems. This requires the implementation of a type inference system.
+Data expressions involving numbers, sets, bags or lists may be ambiguous. E.g.\
+namely \frm{1} can be parsed as a term of sort \frm{\srtpos}, \frm{\srtnat} or
+\frm{\srtint}, and \frm{\set{}} can be parsed as a term of an arbitrary set or
+bag sort. For overloaded operations, we have similar problems. This requires
+the implementation of a type inference system.
 
-\subsection{Priorities}
+\subsection{Priorities and associativity}
 
-The prefix operators together with universal and existential quantification have the highest priority, followed by the binary operators, followed by the lambda operator, followed by the where clause. Table~\ref{tab:precedence} lists the binary operators by decreasing priority. The symbols are shown in plain text format and may represent multiple rich text symbols. Operators on the same line have the same precedence.
+The prefix operators together with universal and existential quantification
+have the highest priority, followed by the binary operators, followed by the
+lambda operator, followed by the where clause. Table~\ref{tab:precedence} lists
+the binary operators by decreasing priority. The symbols are shown in plain
+text format and may represent multiple rich text symbols. Operators on the same
+line have the same precedence. Also table~\ref{tab:precedence} lists the
+associativity of operators with the same precedence. Here, list operations
+\frm{\cons}, \frm{\concat} and \frm{\snoc} may only interfere in the following
+way:
+\begin{equation}
+b \cons \dots \cons c \cons s \concat \dots \concat t \snoc d \snoc \dots
+\snoc e
+\label{eq:listassociativity}
+\end{equation}
+ 
 \begin{table}[h!bt]
 \centering
-\begin{tabular}{|l|}
+\begin{tabular}{|ll|}
 \hline
-\verb+*+, \verb+div+, \verb+mod+, \verb+\+ \verb+.+\\
-\verb-+-, \verb+-+\\
-\verb+<+, \verb+>+, \verb+<=+, \verb+>=+, \verb+<|+, \verb+|>+, \verb-++-, \verb+in+\\
-\verb+==+, \verb+!=+\\
-\verb+&&+, \verb+||+\\
-\verb+=>+\\\hline
+operators                                           & associativity\\\hline
+\verb+*+, \verb+div+, \verb+mod+, \verb+.+          & left\\
+\verb-+-, \verb+-+                                  & left\\
+\verb+|>+, \verb-++-, \verb+<|+                     & mixed
+                                       (see \eqref{eq:listassociativity})\\
+\verb+<+, \verb+>+, \verb+<=+, \verb+>=+, \verb+in+ & none\\
+\verb+==+, \verb+!=+                                & left\\
+\verb+&&+, \verb+||+                                & left\\
+\verb+=>+                                           & right\\\hline
 \end{tabular}
 \caption{Precedence of binary operators}
 \label{tab:precedence}
 \end{table}
 
-\subsection{Associativity}
+\subsection{Design decisions}
 
-We conclude with the definition of the associativity of a number of binary operators. These operators are listed in table~\ref{tab:associativity}. Again the symbols are shown in plain text format and may represent multiple rich text symbols. The other binary operators do not have any associativity.
-\begin{table}[h!bt]
-\centering
-\begin{tabular}{|ll|}
-\hline
-operator        & associativity\\\hline
-\verb+*+        & left/right\\
-\verb+++        & left/right\\
-\verb+|>+       & right\\
-\verb+<|+       & left\\
-\verb++++       & left/right\\
-\verb+==+       & left/right\\
-\verb+!=+       & left/right\\
-\verb+&&+       & left/right\\
-\verb+||+       & left/right\\\hline
-\end{tabular}
-\caption{Associative binary operators}
-\label{tab:associativity}
-\end{table}
+In the development of the language, a number of design decisions were taken.
+The most important ones are listed here:
+\begin{tdefinitions}{-}
+\item Layout may not have any effect on the semantics of the language.
+\item Declarations have to be terminated by a semicolon. If this was not
+required the language would be ambiguous. E.g.\ consider the following
+operation declarations:
+\begin{genspect}
+& X   & = & \fa{f}{g}\\
+& (k) & = & Y\\
+\end{genspect}
+From the layout it is clear that \frm{X} is equal to \frm{\fa{f}{g}} and
+\frm{Y} to \frm{(k)}. However, since layout may not have any effect on the
+semantics of the language, it is also possible that \frm{X} is equal to
+\frm{f} and \frm{Y} to \frm{fa{(g)}{k}}.
+\end{tdefinitions}
 
 \section{Remarks}
 
-Based on the remarks by Jan Friso Groote and Jaco van de Pol, these issues are still open:
+Based on the remarks by Jan Friso Groote and Jaco van de Pol, these issues are
+still open:
 \begin{tdefinitions}{-}
 \item It should investigated if the current bag notation is appropriate.
 \item It should be possible to use unnamed product types in sort expressions.
-\item Instead of having sort conversion operations, it should be possible to explicitly state the sort of a data expression, e.g.\ \frm{1: \f{Nat}}
-\item The \emph{if-then-else} construct should be in mixfix notation instead of function notation.
+\item Instead of having sort conversion operations, it should be possible to
+explicitly state the sort of a data expression, e.g.\ \frm{1: \f{Nat}}
+\item The \emph{if-then-else} construct should be in mixfix notation instead of
+function notation.
 \end{tdefinitions}
+
+\section{Relation with \mCRL}
+
+In order to place the introduced data types in the context of \mCRL, the
+introduced concepts can be depicted hierarchically as follows:
+
+\begin{center}
+\renewcommand{\arraystretch}{2.5}
+\begin{tabular}{|p{2em}|c|c|c|c|c|c|p{2em}|}
+\hline
+\multicolumn{8}{|c|}{User defined data types}\\\cline{2-7}
+& Numbers & Lists & \multicolumn{2}{c|}{Booleans} & Sets & Bags &\\\hline
+\multicolumn{4}{|p{13em}|}{\centering Structured types}
+  & \multicolumn{4}{c|}{Function types}\\\hline
+\multicolumn{8}{|c|}{\mCRL data types}\\
+\hline
+\end{tabular}
+\end{center}
+
+\section{Process declarations}
+
+Processes are defined by means of process equations. There are three possible
+representations. The first one resembles \mCRL, except for that references to
+processes only show the changed variables. Here all variables ocurring in the
+right hand side are declared in the left hand side. Pattern matching in the
+left hand side is not allowed. E.g., where \frm{T} stands for \frm{\f{BATree}}:
+\begin{genspect}
+proc & \fa{P}{t: T} & = &
+    \fa{is\_leaf}{t} & \To
+    & \multicolumn{3}{@{}L}{\fa{get}{\fa{lval}{t}}.\delta\ +}\\
+&&& \fa{is\_node}{t} & \To
+    & \fa{get}{\fa{nval}{t}}.(\fa{P}{\fa{left}{t}} + \fa{P}{\fa{right}{t}})\\
+\end{genspect}
+
+\noindent
+However, we can mimic this as follows\footnote{It has to be investigated
+whether the current tools are able to handle this in the right way. If this is
+not the case, this should be added.}:
+\begin{genspect}
+proc & \fa{P}{t: T} & = &
+    \sum_{a:A}         
+    & (t & = & \fa{leaf}{a}) \To \fa{get}{a}.\delta\\
+&&& \sum_{a:A, u,v: T}
+    & (t & = & \faaa{node}{u}{a}{v}) \To \fa{get}{a}.(\fa{P}{u} + \fa{P}{v})\\
+\end{genspect}
+
+\noindent
+In the second variant pattern matching is allowed. E.g.:
+\begin{genspect}
+proc & \fa{P}{\fa{leaf}{a: A}}               & = & \fa{get}{a}.\delta\\
+     & \fa{P}{\faaa{node}{t: T}{a: A}{u: T}} & = & 
+       \fa{get}{a}.(\fa{snd}{d}.\faaa{P}{t}{d}{e} +
+       \fa{snd}{e}.\faaa{P}{u}{d}{e})
+\end{genspect}
+
+\noindent
+In the third variant the variable declarations are separated from the process
+declarations and a type declaration for the process has been added. E.g.:
+\begin{genspect}
+proc & P: T\\
+var  & a: A\\
+     & t,u: T\\
+pdef & \fa{P}{\fa{leaf}{a}}         & = & \fa{get}{a}.\delta\\
+     & \fa{P}{\faaa{node}{t}{a}{u}} & = & 
+       \fa{get}{a}.(\fa{snd}{d}.\faaa{P}{t}{d}{e} +
+       \fa{snd}{e}.\faaa{P}{u}{d}{e})    
+\end{genspect}
+\noindent
+This last variant is the most close to the definition of data operations.
 
 \end{document}
