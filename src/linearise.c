@@ -16,6 +16,9 @@
 #endif
 #define MAIN
 #include "linearise.h"
+#include "libgsparse.h"
+#include "gstypecheck.h"
+#include "gsdataimpl.h"
 
 int to_toolbusfile=0;
 int to_stdout=0;
@@ -38,7 +41,7 @@ FILE *infile;
 
 void usage(void)
 {
-  ATerror("Use mcrl -help for options");
+  ATerror("Use mcrl -help for options\n");
 }
 
 void version(void)
@@ -112,7 +115,13 @@ static ATbool ExtensionAdded(char *filename, char *suffix) {
    
 /* PREAMBLE */
 
+static int canterminatebody(
+              ATermAppl t,
+              int *stable,
+              ATermIndexedSet visited,
+              int allowrecursion);
 static ATermList getsorts(ATermList l);
+static ATermList sortActionLabels(ATermList actionlabels);
 static ATermAppl uniqueterm(ATermAppl sort);
 static int occursintermlist(ATermAppl var, ATermList l);
 static int occursinpCRLterm(ATermAppl var, ATermAppl p, int strict);
@@ -203,7 +212,7 @@ static void newobject(int n)
                  malloc(newsize*sizeof(objectdatatype)):
                  realloc(objectdata,newsize*sizeof(objectdatatype)));
     if (objectdata==NULL)
-    { ATerror("Fail to resize objectdata to %d",2*maxobject); }
+    { ATerror("Fail to resize objectdata to %d\n",2*maxobject); }
     
     for(long i=maxobject ; i<newsize ; i++)
     { objectdata[i].objectname=NULL;
@@ -308,7 +317,19 @@ static long addObject(ATermAppl o, ATbool *isnew)
 }
 
 static long objectIndex(ATermAppl o)
-{ return ATindexedSetGetIndex(objectIndexTable,(ATerm)o);
+{ long result=ATindexedSetGetIndex(objectIndexTable,(ATerm)o);
+  assert(result>=0); /* object index must always return the index
+                        of an existing object, because at the
+                        places where objectIndex is used, no
+                        checks take place */
+  return result;
+}
+
+static long existsObjectIndex(ATermAppl o)
+{ /* returns negative number if object does not exists,
+     otherwise a number >=0, indicating the index of the 
+     object */
+  return ATindexedSetGetIndex(objectIndexTable,(ATerm)o);
 }
 
 static void removeObject(ATermAppl o)
@@ -363,7 +384,7 @@ static int existsort(ATermAppl sortterm)
   { 
     long n=0;
 
-    n=objectIndex(sortterm);
+    n=existsObjectIndex(sortterm);
     if (n<0) 
     { 
       return 0;
@@ -371,7 +392,7 @@ static int existsort(ATermAppl sortterm)
     if (objectdata[n].object==sort) return 1;
     return 0;
   }
-  ATerror("Internal: Expected a sortterm (1) %t",sortterm);
+  ATerror("Internal: Expected a sortterm (1) %t\n",sortterm);
   return 0;
 }
 
@@ -387,13 +408,13 @@ static void insertsort(ATermAppl sortterm)
     return;
   }
   /* if (gsIsSortList(sortterm))
-  { ATerror("SortList is not an implemented sort");
+  { ATerror("SortList is not an implemented sort\n");
   }
   if (gsIsSortSet(sortterm))
-  { ATerror("SortSet is not an implemented sort");
+  { ATerror("SortSet is not an implemented sort\n");
   }
   if (gsIsSortBag(sortterm))
-  { ATerror("SortBag is not an implemented sort");
+  { ATerror("SortBag is not an implemented sort\n");
   } */
   if (gsIsSortId(sortterm)) 
 
@@ -406,7 +427,7 @@ static void insertsort(ATermAppl sortterm)
     n=addObject(sortterm,&isnew);
  
     if (isnew==0)
-    { ATerror("Sort %t is added twice",sortterm); }
+    { ATerror("Sort %t is added twice\n",sortterm); }
  
     newobject(n);
 
@@ -415,7 +436,7 @@ static void insertsort(ATermAppl sortterm)
     objectdata[n].constructor=0;
     return;
   }
-  ATerror("Internal: Expected a sortterm (2)  %t",sortterm);
+  ATerror("Internal: Expected a sortterm (2)  %t\n",sortterm);
 }
 
 static long insertConstructorOrFunction(ATermAppl constructor,objecttype type)
@@ -426,7 +447,7 @@ static long insertConstructorOrFunction(ATermAppl constructor,objecttype type)
   long n=0;
 
   if (!gsIsOpId(constructor)) 
-  { ATerror("Internal: Expect operation declaration %t",constructor);
+  { ATerror("Internal: Expect operation declaration %t\n",constructor);
   };
 
   str=ATSgetArgument(constructor,0);
@@ -438,7 +459,7 @@ static long insertConstructorOrFunction(ATermAppl constructor,objecttype type)
   n=addObject(constructor,&isnew);
 
   if (isnew==0)
-  { ATerror("Function %t is added twice",constructor); }
+  { ATerror("Function %t is added twice\n",constructor); }
 
   newobject(n);
 
@@ -548,7 +569,7 @@ static long addMultiAction(ATermAppl multiAction, ATbool *isnew)
 / * Delivers -1 if the variable does not exists. 
    Otherwise a number>=0 is returned,
    indicating the index of the variable * /
-{ long n=objectIndex(var);
+{ long n=existsObjectIndex(var);
   if (n<0) return -1;
   if (objectdata[n].object==variable) return n;
   return -1;
@@ -562,7 +583,7 @@ static void insertvariable(ATermAppl var)
   char *str=NULL;
 
   if (!gsIsDataVarId(var))
-  { ATerror("Expect variable declaration %t",var);
+  { ATerror("Expect variable declaration %t\n",var);
   };
 
   str=ATSgetArgument(var,0);
@@ -573,7 +594,7 @@ static void insertvariable(ATermAppl var)
   n=addObject(var,&isnew);
 
   if (isnew==0)
-  { ATerror("Variable %t already exists",var); }
+  { ATerror("Variable %t already exists\n",var); }
 
   newobject(n);
 
@@ -582,16 +603,16 @@ static void insertvariable(ATermAppl var)
 
 #ifndef NDEBUG
   if (existsort(ATAgetArgument(var,1))<0)
-  { ATerror("Variable %t has unknown sort",var); }
+  { ATerror("Variable %t has unknown sort\n",var); }
 #endif
 } 
 
 static void removevariable(ATermAppl var)
-{ long n=objectIndex(var);
+{ long n=existsObjectIndex(var);
   if (n<0) 
-  { ATerror("Cannot remove a non existing variable %t",var); }
+  { ATerror("Cannot remove a non existing variable %t\n",var); }
   if (objectdata[n].object!=variable) 
-  { ATerror("Data structure is confused %t",var); }
+  { ATerror("Data structure is confused %t\n",var); }
   objectdata[n].object=none;
   removeObject(var);
 }
@@ -660,7 +681,7 @@ static long insertAction(ATermAppl actionId)
   char *str=NULL;
 
   if (isnew==0)
-  { ATerror("Action %t is added twice",actionId); }
+  { ATerror("Action %t is added twice\n",actionId); }
 
   str=ATSgetArgument(actionId,0);
   addString(str);
@@ -676,7 +697,7 @@ static long insertAction(ATermAppl actionId)
                   l=ATgetNext(l))
     { 
       if (existsort(ATAgetFirst(l))<0)
-      { ATerror("The term %t is not a sort in the declaration of actionId %t",
+      { ATerror("The term %t is not a sort in the declaration of actionId %t\n",
                               ATgetFirst(l),actionId); }
     }
   }
@@ -691,23 +712,26 @@ static void storeact(ATermList acts)
   { insertAction(ATAgetFirst(acts)); }
 } 
 
-/************ read_internal_format  **********************************/
+/************ read_input_file  **********************************/
 
-static specificationbasictype *read_internal_format(char *filename) 
+static specificationbasictype *read_input_file(char *filename) 
 { FILE *inputfile;
-  ATerm t=NULL;
+  ATermAppl t=NULL;
   specificationbasictype *spec=malloc(sizeof(specificationbasictype));
   
   if (spec==NULL)
-  { ATerror("Cannot allocate memory for elementary operations"); }
+  { ATerror("Cannot allocate memory for elementary operations\n"); }
 
   inputfile=fopen(filename,"r");
   if (inputfile==NULL)
-     ATerror("Fail to open inputfile %s",filename);
+     ATerror("Fail to open inputfile %s\n",filename);
 
-  t=ATreadFromFile(inputfile);
+  t=gsParseSpecification(inputfile);
+  if (t==NULL)
+  { ATerror("Parse error\n");
+  }
   
-  if (!ATmatch(t,"SpecV1(SortSpec(<term>),ConsSpec(<term>),MapSpec(<term>),DataEqnSpec(<term>),ActSpec(<term>),ProcEqnSpec(<term>),Init(<term>))",
+  if (!ATmatch((ATerm)t,"SpecV1(SortSpec(<term>),ConsSpec(<term>),MapSpec(<term>),DataEqnSpec(<term>),ActSpec(<term>),ProcEqnSpec(<term>),Init(<term>))",
         &spec->sorts,
         &spec->funcs,
         &spec->maps,
@@ -715,7 +739,7 @@ static specificationbasictype *read_internal_format(char *filename)
         &spec->acts,
         &spec->procs,
         &spec->init))
-  { ATerror("ATerm in %s does not have the expected format: %t",filename,t); 
+  { ATerror("ATerm in %s does not have the expected format: %t\n",filename,t); 
   }
 
   return spec;
@@ -729,13 +753,14 @@ static long insertProcDeclaration(
                   ATermAppl procId,
                   ATermList parameters,
                   ATermAppl body,
-                  processstatustype s)
+                  processstatustype s,
+                  int canterminate)
 { ATbool isnew=0;
   long n=0;
   char *str=NULL;
 
   if (!gsIsProcVarId(procId)) 
-  { ATerror("Expect process declaration %t",procId);
+  { ATerror("Expect process declaration %t\n",procId);
   }
 
   str=ATSgetArgument(procId,0);
@@ -744,13 +769,14 @@ static long insertProcDeclaration(
   n=addObject(procId,&isnew);
 
   if (isnew==0)
-  { ATerror("Process %t is added twice",procId); }
+  { ATerror("Process %t is added twice\n",procId); }
 
   newobject(n);
 
   objectdata[n].objectname=procId;
   objectdata[n].object=proc;
   objectdata[n].processbody=body;
+  objectdata[n].canterminate=canterminate;
   objectdata[n].processstatus=s;
   objectdata[n].parameters=parameters;
 #ifndef NDEBUG
@@ -758,7 +784,7 @@ static long insertProcDeclaration(
                   l=ATgetNext(l))
     { 
       if (existsort(ATAgetFirst(l))<0)
-      { ATerror("The term %t is not a sort in the declaration of action %t",
+      { ATerror("The term %t is not a sort in the declaration of action %t\n",
                               ATgetFirst(l),procId); }
     }
   }
@@ -775,7 +801,7 @@ static void storeprocs(ATermList procs)
             ATAgetArgument(p,0),
             ATLgetArgument(p,1),
             ATAgetArgument(p,2),
-            unknown); 
+            unknown,0); 
   }
 } 
 
@@ -789,18 +815,18 @@ static ATermAppl storeinit(ATermAppl init)
   ATermAppl initprocess=gsMakeProcVarId(
                          gsString2ATermAppl("init"),ATempty);
   insertProcDeclaration(
-           initprocess,ATempty,init,unknown);
+           initprocess,ATempty,init,unknown,0);
   return initprocess;
 }
 
 /********** basic symbols and local term constructors *****************/
 
 static AFun /* summand_symbol=0,  noTime_symbol=0, */
-       terminated_symbol=0, /* delta_symbol=0, */
-       initprocspec_symbol=0, multiAction_symbol=0,
+       /* terminated_symbol=0, delta_symbol=0, */
+       initprocspec_symbol=0, /* multiAction_symbol=0, */
        triple_symbol=0;
 /* static ATermAppl noTime=NULL; */
-static ATermList terminated=NULL;
+/* static ATermList terminated=NULL; */
 /* static ATermList delta=NULL; */
 static ATermAppl terminationAction=NULL;
 static ATermAppl terminatedProc=NULL; 
@@ -809,33 +835,23 @@ static void initialize_symbols(void)
 { 
   triple_symbol=ATmakeAFun("triple",3,ATfalse);
   ATprotectAFun(triple_symbol);
-  multiAction_symbol=ATmakeAFun("multiAction",1,ATfalse);
-  ATprotectAFun(multiAction_symbol);
+  /* multiAction_symbol=ATmakeAFun("multiAction",1,ATfalse);
+  ATprotectAFun(multiAction_symbol); */
   initprocspec_symbol=ATmakeAFun("initprocspec",3,ATfalse);
   ATprotectAFun(initprocspec_symbol);
-  /* summand_symbol=ATmakeAFun("smd",5,ATfalse);
-  ATprotectAFun(summand_symbol); */
-  /* noTime_symbol=ATmakeAFun("noTime",0,ATfalse);
-  ATprotectAFun(noTime_symbol);
-  ATprotect((ATerm *)&noTime);
-  noTime=ATmakeAppl0(noTime_symbol); */
-  terminated_symbol=ATmakeAFun("terminated",0,ATfalse);
+  /* terminated_symbol=ATmakeAFun("terminated",0,ATfalse);
   ATprotectAFun(terminated_symbol);
-  ATprotect((ATerm *)&terminated); 
-  /* delta=(ATermList)ATmakeAppl0(delta_symbol);
-  delta_symbol=ATmakeAFun("delta",0,ATfalse);
-  ATprotectAFun(delta_symbol);
-  ATprotect((ATerm *)&delta);
-  delta=(ATermList)ATmakeAppl0(delta_symbol); */
+  ATprotect((ATerm *)&terminated); */
   ATprotect((ATerm *)&terminationAction);
-  terminationAction=gsMakeActId(gsString2ATermAppl("Terminate"),ATempty);
+  terminationAction=gsMakeMultAct(
+           ATinsertA(ATempty,gsMakeActId(gsString2ATermAppl("Terminate"),ATempty)));
   ATprotect((ATerm *)&terminatedProc);
   terminatedProc=gsMakeProcVarId(gsString2ATermAppl("Terminated**"),ATempty);
   insertProcDeclaration(
            terminatedProc,
            ATempty,
            gsMakeSeq(terminationAction,gsMakeDelta()),
-           pCRL);
+           pCRL,0);
 }
 
 static ATermAppl linMakeTriple(
@@ -992,31 +1008,31 @@ static processstatustype determine_process_statusterm(
 
   if (gsIsChoice(body))
   { if (status==multiAction) 
-    { ATerror("Choice operator occurs in a multi-action");
+    { ATerror("Choice operator occurs in a multi-action\n");
     }
     s1=determine_process_statusterm(ATAgetArgument(body,0),pCRL);
     s2=determine_process_statusterm(ATAgetArgument(body,1),pCRL);
     if ((s1==mCRL)||(s2==mCRL))
-    { ATerror("mCRL operators occur within the scope of a choice operator");
+    { ATerror("mCRL operators occur within the scope of a choice operator\n");
     }
     return pCRL;
   }
 
   if (gsIsSeq(body))
   { if (status==multiAction) 
-    { ATerror("Sequential operator occurs in a multi-action");
+    { ATerror("Sequential operator occurs in a multi-action\n");
     }
     s1=determine_process_statusterm(ATAgetArgument(body,0),pCRL);
     s2=determine_process_statusterm(ATAgetArgument(body,1),pCRL);
     if ((s1==mCRL)||(s2==mCRL))
-    { ATerror("mCRL operators occur within the scope of a sequential operator");
+    { ATerror("mCRL operators occur within the scope of a sequential operator\n");
     }
     return pCRL;
   }
 
   if (gsIsMerge(body))
   { if (status!=mCRL)
-    { ATerror("The parallel operator occurs in the scope of pCRL operators");
+    { ATerror("The parallel operator occurs in the scope of pCRL operators\n");
     }
     s1=determine_process_statusterm(ATAgetArgument(body,0),mCRL);
     s2=determine_process_statusterm(ATAgetArgument(body,1),mCRL);
@@ -1024,51 +1040,51 @@ static processstatustype determine_process_statusterm(
   }
 
   if (gsIsLMerge(body))
-  { ATerror("Cannot linearize because the specification contains a leftmerge");
+  { ATerror("Cannot linearize because the specification contains a leftmerge\n");
   }
 
   if (gsIsCond(body))  
   { if (status==multiAction) 
-    { ATerror("If-then(-else) occurs in a multi-action");
+    { ATerror("If-then(-else) occurs in a multi-action\n");
     }
     s1=determine_process_statusterm(ATAgetArgument(body,1),pCRL);
     s2=determine_process_statusterm(ATAgetArgument(body,2),pCRL);
     if ((s1==mCRL)||(s2==mCRL))
-    { ATerror("mCRL operators occur in the scope of the if-then-else operator");
+    { ATerror("mCRL operators occur in the scope of the if-then-else operator\n");
     }
     return pCRL;
   }
 
   if (gsIsSum(body)) 
   { if (status==multiAction)
-    { ATerror("Sum operator occurs within a multi-action");
+    { ATerror("Sum operator occurs within a multi-action\n");
     }
     s1=determine_process_statusterm(ATAgetArgument(body,1),pCRL);
     if (s1==mCRL)
-    { ATerror("mCRL operators occur in the scope of the sum operator");
+    { ATerror("mCRL operators occur in the scope of the sum operator\n");
     }
     return pCRL;
   }
 
   if (gsIsComm(body))
   { if (status!=mCRL)
-    { ATerror("The communication operator occurs in the scope of pCRL operators");
+    { ATerror("The communication operator occurs in the scope of pCRL operators\n");
     }
     s2=determine_process_statusterm(ATAgetArgument(body,1),mCRL);
     return mCRL;
   }
 
   if (gsIsBInit(body))
-  { ATerror("Cannot linearize a specification with the bounded initialization operator");
+  { ATerror("Cannot linearize a specification with the bounded initialization operator\n");
   }
 
   if (gsIsAtTime(body)) 
   { if (status==multiAction)
-    { ATerror("A time operator occurs in a multi-action");
+    { ATerror("A time operator occurs in a multi-action\n");
     }
     s1=determine_process_statusterm(ATAgetArgument(body,0),pCRL);
     if ((s1==mCRL)||(s2==mCRL))
-    { ATerror("A mCRL operator occurs in the scope of a time operator");
+    { ATerror("A mCRL operator occurs in the scope of a time operator\n");
     }
     return pCRL;
   }
@@ -1078,7 +1094,7 @@ static processstatustype determine_process_statusterm(
     s1=determine_process_statusterm(ATAgetArgument(body,1),pCRL);
     s2=determine_process_statusterm(ATAgetArgument(body,2),pCRL);
     if ((s1!=multiAction)||(s2!=multiAction))
-    { ATerror("Other objects than multi-actions occur in the scope of a synch operator");
+    { ATerror("Other objects than multi-actions occur in the scope of a synch operator\n");
     }
     return multiAction;
   }
@@ -1102,7 +1118,7 @@ static processstatustype determine_process_statusterm(
 
   if (gsIsHide(body))
   { if (status!=mCRL) 
-    { ATerror("A hide operator occurs in the scope of pCRL operators");
+    { ATerror("A hide operator occurs in the scope of pCRL operators\n");
     }
     s1=determine_process_statusterm(ATAgetArgument(body,1),mCRL);
     return mCRL;
@@ -1110,7 +1126,7 @@ static processstatustype determine_process_statusterm(
 
   if (gsIsRename(body))
   { if (status!=mCRL) 
-    { ATerror("A rename operator occurs in the scope of pCRL operators");
+    { ATerror("A rename operator occurs in the scope of pCRL operators\n");
     }
     s1=determine_process_statusterm(ATAgetArgument(body,1),mCRL);
     return mCRL;
@@ -1118,7 +1134,7 @@ static processstatustype determine_process_statusterm(
 
   if (gsIsAllow(body))
   { if (status!=mCRL) 
-    { ATerror("An allow operator occurs in the scope of pCRL operators");
+    { ATerror("An allow operator occurs in the scope of pCRL operators\n");
     }
     s1=determine_process_statusterm(ATAgetArgument(body,1),mCRL);
     return mCRL;
@@ -1126,13 +1142,13 @@ static processstatustype determine_process_statusterm(
 
   if (gsIsRestrict(body))
   { if (status!=mCRL) 
-    { ATerror("A restrict operator occurs in the scope of pCRL operators");
+    { ATerror("A restrict operator occurs in the scope of pCRL operators\n");
     }
     s1=determine_process_statusterm(ATAgetArgument(body,1),mCRL);
     return mCRL;
   }
 
-  ATerror("Internal error: Process has unexpected format %t",body);
+  ATerror("Internal error: Process has unexpected format %t\n",body);
   return error;
 } 
 
@@ -1250,16 +1266,6 @@ static int occursinmultiaction(ATermAppl var, ATermList ma)
   return 0;
 }
 
-/* static int occursinvar(char *s, ATerm l)
-{ char *string1=NULL;
-  if (l==emv_term) return 0;
-  if (ATmatch(l,"ins(<str>,<str>,<term>)",&string1,&dummystring,&l))
-     { if (streq(s,string1)) return 1;
-       return occursinvar(s,l); }
-  ATerror("Expect a variablelist %t", l);
-  return 0;
-} */
-
 static int occursinpCRLterm(ATermAppl var, ATermAppl p, int strict)
 { 
   if (gsIsChoice(p))
@@ -1299,7 +1305,7 @@ static int occursinpCRLterm(ATermAppl var, ATermAppl p, int strict)
    { return 0; }
   if (gsIsTau(p))
    { return 0; }
-  ATerror("Internal: Unexpected process format in occursinCRLterm %t",p);
+  ATerror("Internal: Unexpected process format in occursinCRLterm %t\n",p);
   return 0;
 }
 
@@ -1374,7 +1380,7 @@ static ATermAppl substitute_variable_rec(
    { 
 #ifndef NDEBUG
      if (pars!=ATempty) 
-     { ATerror("Non matching vars and pars list");
+     { ATerror("Non matching vars and pars list\n");
      }
 #endif
      return s_term;
@@ -1543,7 +1549,7 @@ static ATermAppl substitute_pCRLproc(
 
   }
 
-  ATerror("Expect a pCRL process %t",p);
+  ATerror("Expect a pCRL process %t\n",p);
   return NULL;
 }
 
@@ -1570,7 +1576,7 @@ static ATermList parameters_that_occur_in_body(
   
   variable=ATAgetFirst(parameters);
   if (!gsIsDataVarId(variable))
-         ATerror("Expect variable list %t",parameters);
+         ATerror("Expect variable list %t\n",parameters);
 
   parameters=parameters_that_occur_in_body(ATgetNext(parameters),body);
   if (occursinpCRLterm(variable,body,0))
@@ -1578,9 +1584,8 @@ static ATermList parameters_that_occur_in_body(
   return parameters; 
 }        
 
-
 static ATermAppl newprocess(ATermList parameters, ATermAppl body,
-              processstatustype ps)
+              processstatustype ps, int canterminate)
 { 
   parameters=parameters_that_occur_in_body(parameters, body);
   ATermAppl p=gsMakeProcVarId(fresh_name("P"),linGetSorts(parameters));
@@ -1588,7 +1593,8 @@ static ATermAppl newprocess(ATermList parameters, ATermAppl body,
              p,
              parameters,
              body,
-             ps);
+             ps,
+             canterminate);
   return p;
 }
 
@@ -1631,7 +1637,7 @@ static ATermAppl wraptime(
 
   if (gsIsAtTime(body))
   { /* make a new process */
-    ATermAppl newproc=newprocess(freevars,body,pCRL);
+    ATermAppl newproc=newprocess(freevars,body,pCRL,canterminatebody(body,NULL,NULL,0));
     return gsMakeAtTime(
               gsMakeProcess(
                  newproc,
@@ -1647,7 +1653,7 @@ static ATermAppl wraptime(
   { return gsMakeAtTime(body,time);
   }
 
-  ATerror("Internal: Expect pCRL process in wraptime %t",body);
+  ATerror("Internal: Expect pCRL process in wraptime %t\n",body);
   return NULL;
 }
 
@@ -1675,7 +1681,7 @@ static ATermList make_pars(ATermList sortlist)
   assert(gsIsSortId(sort));
   if (gsIsSortId(sort))
   { s=ATSgetArgument(sort,0); }
-  else ATerror("Unexpected sort encountered %t",sort);
+  else ATerror("Unexpected sort encountered %t\n",sort);
 
   return ATinsertA(
             make_pars(ATgetNext(sortlist)),
@@ -1701,12 +1707,13 @@ static ATermAppl bodytovarheadGNF(
 
   if (gsIsChoice(body)) 
    { if (alt>=s)
-      { return gsMakeChoice(
-                  bodytovarheadGNF(ATAgetArgument(body,0),alt,freevars,first),
-                  bodytovarheadGNF(ATAgetArgument(body,1),alt,freevars,first));
+      { 
+        ATermAppl body1=bodytovarheadGNF(ATAgetArgument(body,0),alt,freevars,first);
+        ATermAppl body2=bodytovarheadGNF(ATAgetArgument(body,1),alt,freevars,first);
+        return gsMakeChoice(body1,body2);
       }  
      body=bodytovarheadGNF(body,alt,freevars,first);
-     newproc=newprocess(freevars,body,pCRL);
+     newproc=newprocess(freevars,body,pCRL,canterminatebody(body,NULL,NULL,0));
      return gsMakeProcess(newproc,objectdata[objectIndex(newproc)].parameters);
    }
 
@@ -1722,7 +1729,7 @@ static ATermAppl bodytovarheadGNF(
       return gsMakeSum(sumvars,body1);
     }
     body=bodytovarheadGNF(body,alt,freevars,first);
-    newproc=newprocess(freevars,body1,pCRL);
+    newproc=newprocess(freevars,body1,pCRL,canterminatebody(body1,NULL,NULL,0));
     return gsMakeProcess(newproc,objectdata[objectIndex(newproc)].parameters);
   }
   
@@ -1758,7 +1765,7 @@ static ATermAppl bodytovarheadGNF(
                 gsMakeDelta()));
     }     
     body=bodytovarheadGNF(body,alt,freevars,first);
-    newproc=newprocess(freevars,body,pCRL);
+    newproc=newprocess(freevars,body,pCRL,canterminatebody(body,NULL,NULL,0));
     return gsMakeProcess(newproc,objectdata[objectIndex(newproc)].parameters);
   } 
 
@@ -1772,7 +1779,7 @@ static ATermAppl bodytovarheadGNF(
       return gsMakeSeq(body1,body2);
     } 
     body1=bodytovarheadGNF(body,alt,freevars,first);
-    newproc=newprocess(freevars,body1,pCRL);
+    newproc=newprocess(freevars,body1,pCRL,canterminatebody(body1,NULL,NULL,0));
     return gsMakeProcess(newproc,objectdata[objectIndex(newproc)].parameters);
   }
 
@@ -1793,7 +1800,7 @@ static ATermAppl bodytovarheadGNF(
       objectdata[n].targetsort=newprocess(
                                   objectdata[n].parameters,
                                   objectdata[n].processbody,
-                                  GNF);
+                                  GNF,1);
     }
     return gsMakeProcess(objectdata[n].targetsort,getarguments(ma)); 
   }  
@@ -1820,7 +1827,7 @@ static ATermAppl bodytovarheadGNF(
       objectdata[n].targetsort=newprocess(
                                   objectdata[n].parameters,
                                   objectdata[n].processbody,
-                                  GNF);
+                                  GNF,1);
     }
     return gsMakeProcess(objectdata[n].targetsort,getarguments(ma));
  
@@ -1841,7 +1848,7 @@ static ATermAppl bodytovarheadGNF(
     }
 
     /* make a new process, containing this process */
-    newproc=newprocess(freevars,body1,pCRL);
+    newproc=newprocess(freevars,body1,pCRL,canterminatebody(body1,NULL,NULL,0));
     return gsMakeProcess(newproc,objectdata[objectIndex(newproc)].parameters);
   }
   
@@ -1853,7 +1860,7 @@ static ATermAppl bodytovarheadGNF(
   { if (v==first) 
        return gsMakeMultAct(ATempty); 
     if (tau_process==NULL)
-    { tau_process=newprocess(ATempty,gsMakeMultAct(ATempty),pCRL);
+    { tau_process=newprocess(ATempty,gsMakeMultAct(ATempty),pCRL,1);
     }
     return gsMakeProcess(tau_process,ATempty); 
   }
@@ -1862,11 +1869,11 @@ static ATermAppl bodytovarheadGNF(
   { if (v==first) 
        return body; 
     if (delta_process==NULL)
-       delta_process=newprocess(ATempty,body,pCRL);
+       delta_process=newprocess(ATempty,body,pCRL,0);
     return gsMakeProcess(delta_process,ATempty); 
   }
 
-  ATerror("Internal: Unexpected process format in bodytovarheadGNF %t",body);
+  ATerror("Internal: Unexpected process format in bodytovarheadGNF %t\n",body);
   return NULL;
 }
 
@@ -1928,7 +1935,7 @@ static ATermAppl putbehind(ATermAppl body1, ATermAppl body2)
   
   if (gsIsAction(body1))
   { /* return gsMakeSeq(body1,body2); */
-    ATerror("Internal: expect only multiactions, no single actions");
+    ATerror("Internal: expect only multiactions, no single actions\n");
   }
 
   if (gsIsMultAct(body1))
@@ -1945,10 +1952,10 @@ static ATermAppl putbehind(ATermAppl body1, ATermAppl body2)
   
   if (gsIsTau(body1))
   { /* return gsMakeSeq(body1,body2); */
-    ATerror("Internal: expect only multiactions, not a tau");
+    ATerror("Internal: expect only multiactions, not a tau\n");
   }
 
-  ATerror("Internal: Unexpected process format in putbehind %t",body1);
+  ATerror("Internal: Unexpected process format in putbehind %t\n",body1);
   return NULL;
 }
 
@@ -2002,7 +2009,7 @@ static ATermAppl distribute_condition(
   { return gsMakeCond(condition,body1,gsMakeDelta());
   }
 
-  ATerror("Internal: Unexpected process format in distribute condition %t",body1);
+  ATerror("Internal: Unexpected process format in distribute condition %t\n",body1);
   return NULL;
 }
 
@@ -2032,7 +2039,7 @@ static ATermAppl distribute_sum(ATermList sumvars,ATermAppl body1)
   { return body1;
   }
 
-  ATerror("Internal: Unexpected process format in distribute_sum %t",body1);
+  ATerror("Internal: Unexpected process format in distribute_sum %t\n",body1);
   return NULL;
 }
 
@@ -2052,7 +2059,7 @@ static ATermAppl exists_variable_for_sequence(
     return NULL;  
   }
   
-  for(walker=seq_varnames; (walker!=NULL);
+  for(walker=seq_varnames; (walker!=ATempty);
          walker=ATgetNext(walker))
   { ATermAppl process=ATAgetFirst(walker);
     if (process_body==
@@ -2074,7 +2081,7 @@ static ATermList extract_names(ATermAppl sequence)
   if (gsIsSeq(sequence))
   { ATermAppl first=ATAgetArgument(sequence,0);
     if (gsIsProcess(first))
-    { long n=objectIndex(first);
+    { long n=objectIndex(ATAgetArgument(first,0));
       if (objectdata[n].canterminate)
          return ATinsertA(
                   extract_names(ATAgetArgument(sequence,1)),
@@ -2083,7 +2090,7 @@ static ATermList extract_names(ATermAppl sequence)
     } 
   }
 
-  ATerror("Expect sequence of process names (1) %t",sequence);
+  ATerror("Expect sequence of process names (1) %t\n",sequence);
   return NULL;
 }
 
@@ -2117,7 +2124,7 @@ static ATermList parscollect(ATermAppl oldbody, ATermAppl *newbody)
     }
   }
 
-  ATerror("Expect a sequence of process names (2) %t",oldbody);
+  ATerror("Expect a sequence of process names (2) %t\n",oldbody);
   return NULL;
 }
 
@@ -2132,7 +2139,7 @@ static ATermList argscollect(ATermAppl t)
     return ATconcat(ATLgetArgument(firstproc,1),argscollect(t));
   }
 
-  ATerror("Expect a sequence of process names (3) %t",t);
+  ATerror("Expect a sequence of process names (3) %t\n",t);
   return NULL;      
 }
 
@@ -2146,7 +2153,6 @@ static ATermAppl create_regular_invocation(
 
   /* Sequence consists of a sequence of process references, 
      concatenated with the sequential composition operator */
-
   process_names=extract_names(sequence);
   assert(process_names!=ATempty);
 
@@ -2156,7 +2162,7 @@ static ATermAppl create_regular_invocation(
        return sequence;
     if (gsIsSeq(sequence))
        return ATAgetArgument(sequence,0);
-    ATerror("Expect a sequence of process names %t",sequence);
+    ATerror("Expect a sequence of process names %t\n",sequence);
   }
   /* There is more than one process name in the sequence,
      so, we must replace them by a single name */
@@ -2172,12 +2178,13 @@ static ATermAppl create_regular_invocation(
     ATermAppl newbody=NULL;   
     if (regular2)
     { ATermList pars=parscollect(sequence,&newbody);
-      new_process=newprocess(pars,newbody,pCRL);
+      new_process=newprocess(pars,newbody,pCRL,canterminatebody(newbody,NULL,NULL,0));
       objectdata[objectIndex(new_process)].representedprocesses=
                    (ATerm)process_names;
     }
     else 
-    { new_process=newprocess(freevars,sequence,pCRL);
+    { new_process=newprocess(freevars,sequence,pCRL,
+                        canterminatebody(sequence,NULL,NULL,0));
       objectdata[objectIndex(new_process)].representedprocess=
                    (ATerm)sequence;
     }
@@ -2203,9 +2210,9 @@ static ATermAppl to_regular_form(
    on the todo list, to be transformed to regular form also. */
 { 
   if (gsIsChoice(t)) 
-  { return gsMakeChoice( 
-              to_regular_form(ATAgetArgument(t,0),todo,freevars),
-              to_regular_form(ATAgetArgument(t,1),todo,freevars));
+  { ATermAppl t1=to_regular_form(ATAgetArgument(t,0),todo,freevars);
+    ATermAppl t2=to_regular_form(ATAgetArgument(t,1),todo,freevars);
+    return gsMakeChoice(t1,t2); 
   } 
   
   if (gsIsSeq(t)) 
@@ -2241,7 +2248,7 @@ static ATermAppl to_regular_form(
   { return t;    
   }
   
-  else ATerror("To regular form expects GNF %t",t);
+  else ATerror("To regular form expects GNF %t\n",t);
   return NULL;
 }
 
@@ -2302,7 +2309,7 @@ static ATermAppl distributeTime(
   { return gsMakeAtTime(body,time);
   }
 
-  ATerror("Internal: Expect pCRL process in distributeTime %t",body);
+  ATerror("Internal: Expect pCRL process in distributeTime %t\n",body);
   return NULL;
 }
 
@@ -2339,15 +2346,15 @@ static ATermAppl procstorealGNFbody(
   }
 
   if (gsIsSync(body))
-  { ATerror("Internal: Sync operator cannot occur here.");
+  { ATerror("Internal: Sync operator cannot occur here.\n");
   }
 
   if (gsIsChoice(body)) 
-  { return gsMakeChoice(
-             procstorealGNFbody(ATAgetArgument(body,0),first,todo,
-                     regular,mode,freevars),
-             procstorealGNFbody(ATAgetArgument(body,1),first,todo,
-                     regular,mode,freevars));
+  { ATermAppl body1=procstorealGNFbody(ATAgetArgument(body,0),first,todo,
+                     regular,mode,freevars);
+    ATermAppl body2=procstorealGNFbody(ATAgetArgument(body,1),first,todo,
+                     regular,mode,freevars);
+    return gsMakeChoice(body1,body2);
   }
 
   if (gsIsSeq(body))     
@@ -2378,7 +2385,7 @@ static ATermAppl procstorealGNFbody(
   }
   
   if (gsIsAction(body))
-  { ATerror("Internal: Expect only multiactions at this point");
+  { ATerror("Internal: Expect only multiactions at this point\n");
   }
  
   if (gsIsMultAct(body))
@@ -2398,7 +2405,7 @@ static ATermAppl procstorealGNFbody(
       return body;
     }
 
-    n=objectIndex(body);
+    n=objectIndex(ATAgetArgument(body,0));
     if (objectdata[n].processstatus==mCRL)
     { *todo=ATinsertA(*todo,t);
       return NULL; 
@@ -2421,7 +2428,7 @@ static ATermAppl procstorealGNFbody(
   
   if (gsIsTau(body))
   { /* return body; */
-    ATerror("Only expect multiactions, no tau");
+    ATerror("Only expect multiactions, no tau\n");
   }
   
   if (gsIsMerge(body)) 
@@ -2442,7 +2449,7 @@ static ATermAppl procstorealGNFbody(
     return NULL;
   }
 
-  ATerror("Internal: Unexpected process format in procstorealGNF %t",body);
+  ATerror("Internal: Unexpected process format in procstorealGNF %t\n",body);
   return NULL;
 }
 
@@ -2467,7 +2474,7 @@ static void procstorealGNFrec(
     t=procstorealGNFbody(objectdata[n].processbody,first,
               todo,regular,pCRL,objectdata[n].parameters);
     if (objectdata[n].processstatus!=GNFbusy)
-            ATerror("Something wrong with recursion");
+            ATerror("Something wrong with recursion\n");
     objectdata[n].processbody=t;
     objectdata[n].processstatus=GNF;
     return;
@@ -2485,7 +2492,7 @@ static void procstorealGNFrec(
   }
 
   if ((objectdata[n].processstatus==GNFbusy) && (v==first))
-  { ATerror("Unguarded recursion in process %t",procIdDecl);
+  { ATerror("Unguarded recursion in process %t\n",procIdDecl);
   }
 
   if ((objectdata[n].processstatus==GNFbusy)||
@@ -2495,10 +2502,10 @@ static void procstorealGNFrec(
   }
 
   if (objectdata[n].processstatus==mCRLbusy)
-  { ATerror("Unguarded recursion without pCRL operators");
+  { ATerror("Unguarded recursion without pCRL operators\n");
   }
   
-  ATerror("Strange process type");  
+  ATerror("Strange process type\n");  
 }
 
 static void procstorealGNF(ATermAppl procsIdDecl, int regular)
@@ -2506,7 +2513,8 @@ static void procstorealGNF(ATermAppl procsIdDecl, int regular)
 
   todo=ATinsertA(todo,procsIdDecl);
   for(; (todo!=ATempty) ; )
-    { procsIdDecl=ATAgetFirst(todo);
+    { 
+      procsIdDecl=ATAgetFirst(todo);
       todo=ATgetNext(todo);
       procstorealGNFrec(procsIdDecl,first,&todo,regular);
     }
@@ -2525,9 +2533,8 @@ static void procstorealGNF(ATermAppl procsIdDecl, int regular)
 
 /**************** Make pCRL procs  ******************************/
 
-static ATermList pCRLprocs=NULL;
 
-static int alreadyinpCRLprocs(ATermAppl procIdDecl)
+static int alreadyinpCRLprocs(ATermAppl procIdDecl,ATermList pCRLprocs)
 { ATermList walker=pCRLprocs;
   for(walker=pCRLprocs ; walker!=ATempty ; walker=ATgetNext(walker))
   { if (ATAgetFirst(walker)==procIdDecl) return 1; 
@@ -2535,24 +2542,28 @@ static int alreadyinpCRLprocs(ATermAppl procIdDecl)
   return 0;
 }
 
-static void makepCRLprocs(ATermAppl t)
+static ATermList LocalpCRLprocs=NULL;
+
+static void makepCRLprocs_rec(ATermAppl t)
 { 
   if (gsIsChoice(t)||gsIsSeq(t))
-  { makepCRLprocs(ATAgetArgument(t,0));
-    makepCRLprocs(ATAgetArgument(t,1)); 
-    return; 
+  { makepCRLprocs_rec(ATAgetArgument(t,0));
+    makepCRLprocs_rec(ATAgetArgument(t,1)); 
+    return;
   }
 
   if (gsIsCond(t)||gsIsSum(t))
-  { makepCRLprocs(ATAgetArgument(t,1)); 
-    return; 
+  { makepCRLprocs_rec(ATAgetArgument(t,1)); 
+    return;
   }
 
   if (gsIsProcess(t)) 
   { t=ATAgetArgument(t,0); /* get procId */
-    if (alreadyinpCRLprocs(t)) return;
-    pCRLprocs=ATinsertA(pCRLprocs,t);
-    makepCRLprocs(objectdata[objectIndex(t)].processbody);
+    if (alreadyinpCRLprocs(t,LocalpCRLprocs)) 
+    { return;
+    }
+    LocalpCRLprocs=ATinsertA(LocalpCRLprocs,t);
+    makepCRLprocs_rec(objectdata[objectIndex(t)].processbody);
     return;
   }
 
@@ -2560,9 +2571,15 @@ static void makepCRLprocs(ATermAppl t)
   { return; 
   }
 
-  ATerror("unexpected process format %t",t);
+  ATerror("unexpected process format %t\n",t);
 }
 
+static ATermList makepCRLprocs(ATermAppl t, ATermList pCRLprocs)
+{ 
+  LocalpCRLprocs=pCRLprocs;
+  makepCRLprocs_rec(t);
+  return LocalpCRLprocs;
+}
 /**************** Collectparameterlist ******************************/
 
 static int alreadypresent(ATermAppl *var,ATermList vl,int n)
@@ -2575,7 +2592,7 @@ static int alreadypresent(ATermAppl *var,ATermList vl,int n)
   var1=ATAgetFirst(vl);
 
   if (!gsIsDataVarId(var1))
-  { ATerror("Expect variablelist %t",vl);
+  { ATerror("Expect variablelist %t\n",vl);
   }
 
   if (*var==var1)
@@ -2602,7 +2619,7 @@ static ATermList joinparameters(ATermList par1,ATermList par2,int n)
   return ATinsertA(joinparameters(par1,par2,n),var2);
 }
 
-static ATermList collectparameterlist(void)
+static ATermList collectparameterlist(ATermList pCRLprocs)
 { ATermList walker=NULL;
   ATermList parameters=ATempty;
   for (walker=pCRLprocs ; walker!=ATempty ; walker=ATgetNext(walker))
@@ -2639,14 +2656,14 @@ static ATermList localequationvariables=NULL;
 static void declare_equation_variables(ATermList t1)
 { 
   if (localequationvariables!=NULL)
-  { ATerror("Cannot declare variables as section is not yet closed %t",
+  { ATerror("Cannot declare variables as section is not yet closed %t\n",
                 localequationvariables);}
   localequationvariables=t1;
 }
 
 static void end_equation_section(void)
 { if (localequationvariables==NULL)
-     ATerror("Cannot open an non ended equation section",NULL);
+     ATerror("Cannot open an non ended equation section\n",NULL);
   
   localequationvariables=NULL;
 }
@@ -2658,12 +2675,12 @@ static void newequation(
                 specificationbasictype *spec)
 { 
   if (localequationvariables==NULL)
-     ATerror("Variables must be declared first! %t",t2);
+     ATerror("Variables must be declared first! %t\n",t2);
   
   spec->eqns=ATinsertA(spec->eqns,
                   gsMakeDataEqn(
                      localequationvariables,
-                     condition,
+                     ((condition==NULL)?gsMakeNil():condition),
                      t2,
                      t3));
 }
@@ -2800,7 +2817,7 @@ stacklisttype *new_stack(
   
   stack=malloc(sizeof(stacklisttype));
   if (stack==NULL)
-     ATerror("Cannot allocate memory for stack data");
+     ATerror("Cannot allocate memory for stack data\n");
   stack->parameterlist=ATempty; 
   ATprotect((ATerm *)&stack->parameterlist); 
   stack->parameterlist=parameterlist;
@@ -2838,7 +2855,7 @@ stacklisttype *new_stack(
     { /* stack->opns == NULL */
       stack->opns=malloc(sizeof(stackoperations));
       if (stack->opns==NULL)
-          ATerror("Cannot allocate memory for stack operations");
+          ATerror("Cannot allocate memory for stack operations\n");
 
       stack->opns->sorts=ATempty;
       ATprotect((ATerm *)&(stack->opns->sorts));
@@ -3136,7 +3153,7 @@ static ATermAppl adapt_term_to_stack(
             adapt_term_to_stack(ATAgetArgument(t,1),stack,vars));
   }
               
-  ATerror("Expect a term");
+  ATerror("Expect a term\n");
   return NULL;
 }
 
@@ -3232,9 +3249,6 @@ static ATermList findarguments(
   { return t2; 
   }
 
-  /* if (ATmatch(parlist,
-        "ins(<term>,<term>,<term>)",
-                 &string1term,&string2term,&parlist)) */
   string1term=ATAgetFirst(parlist);
   parlist=ATgetNext(parlist);
 
@@ -3296,10 +3310,10 @@ static ATermList make_procargs(
   if (gsIsSeq(t))   
            /*  ,"Seq(name(<str>,<int>,<term>),<term>)",&string1,&n,&t1,&t2)) */
   { if (regular)
-         ATerror("Process is not regular, as it has stacking vars %t",t);
+         ATerror("Process is not regular, as it has stacking vars %t\n",t);
     process=ATAgetArgument(t,0);
     t2=ATAgetArgument(t,1);
-    assert(gsIsProcess(procId)); 
+    assert(gsIsProcess(process)); 
     procId=ATAgetArgument(process,0);
     t1=ATLgetArgument(process,1);
     assert(gsIsProcVarId(procId));
@@ -3358,51 +3372,13 @@ static ATermList make_procargs(
     return ATinsertA(ATempty,ATAgetFirst(t3));
   }
   
-  ATerror("Expect seq or name %t",t);
+  ATerror("Expect seq or name %t\n",t);
   return NULL;
 }
 
 static int occursin(ATermAppl name,ATermList pars)
 { return (ATindexOf(pars,(ATerm)name,0)>=0);
-
-  /* ATerm string1term=NULL, string2term=NULL; */
-
-  /* for ( ; ATmatch(pars,"ins(<term>,<term>,<term>)",
-                   &string1term,&string2term,&pars) ; ) * /
-  for ( ; (ATgetAFun(pars)==ins3_symbol) ; )
-    { 
-      if (ATgetArgument(pars,0)==name) 
-                return ATgetArgument(pars,1); 
-      pars=ATgetArgument(pars,2);
-    }
-  return NULL; */
 }
-
-/* static ATermAppl uniquetermrec(ATermAppl, int l);
-
-static ATermAppl  uniquetermlistrec(ATermList arg, int l)
-{ ATerm t1=NULL, t2=NULL, t3=NULL;
-  if (arg==NULL) 
-     t3=emt_term;
-  else
-   { if (l>=3)
-        t3=NULL;
-        ATerror("Cannot find a limited size ATerm  of sort %t",
-
-         ATmake("<str>",sortdata[arg->n].sortname->s)); 
-     else 
-      { t1=uniquetermrec(arg->n,l);
-        if (t1==NULL) 
-           t3=NULL;
-        else
-         { t2=uniquetermlistrec(arg->next,l);
-           if (t2==NULL) 
-              t3=NULL;
-           else t3=ATmake("ins(<term>,<term>)",t1,t2);
-   }  }  }
-   
-  return t3;
-} */
 
 static ATermAppl uniquetermrec(ATermAppl targetsort, int l)
 { int i;
@@ -3440,7 +3416,7 @@ static ATermAppl uniquetermrec(ATermAppl targetsort, int l)
     }
   } */
   
-  ATerror("Fail to generate unique term of sort %t\nGeneration of constant terms has only partly been implemented",targetsort);
+  ATerror("Fail to generate unique term of sort %t\nGeneration of constant terms has only partly been implemented\n",targetsort);
   return NULL;
 }
 
@@ -3449,7 +3425,7 @@ static ATermAppl uniqueterm(ATermAppl sort)
   int n;
   n=existsort(sort);
   if (n<=0) 
-   { ATerror("Sort `%t' does not exist",sort);
+   { ATerror("Sort `%t' does not exist\n",sort);
    }
   return uniquetermrec(sort,0);
 } 
@@ -3460,8 +3436,6 @@ static ATermList pushdummyrec(
                      stacklisttype *stack, 
                      int regular)
 { 
-  ATermAppl par=NULL;
-  
   if (totalpars==ATempty)
   { if (regular)
     { return ATempty;
@@ -3469,7 +3443,7 @@ static ATermList pushdummyrec(
     return ATinsertA(ATempty,stack->opns->emptystack);
   }
   
-  par=ATAgetFirst(totalpars);
+  ATermAppl par=ATAgetFirst(totalpars);
   totalpars=ATgetNext(totalpars);
 
   if (!occursin(par,pars))
@@ -3573,9 +3547,6 @@ static ATermList insert_summand(
   for(newsumlist=ATempty ;
         sumlist!=ATempty ; sumlist=ATgetNext(sumlist) )
   {
-    /* (ATmatch(sumlist,"ins(smd(<term>,<str>,<term>,<term>,<term>),<term>)",
-         &sumvars1,&actionId1,&actargs1,
-                    &procargs1,&condition1,&sumlist));  */
     ATermAppl summand=ATAgetFirst(sumlist);
     ATermAppl multiAction1=linGetMultiAction(summand);
 
@@ -3588,8 +3559,7 @@ static ATermList insert_summand(
       if (variablesequal(sumvars,sumvars1, 
                     &renamingvariablelist,&renamingtermlist))
       { ATermList procargs1=linGetNextState(summand);
-        ATermList procargs2=NULL;
-        procargs2=substitute_datalist(renamingvariablelist,
+        ATermList procargs2=substitute_datalist(renamingvariablelist,
                                         renamingtermlist,
                                         procargs);
         if (procargs1==procargs2)
@@ -3623,7 +3593,7 @@ static ATermList insert_summand(
                                          multiAction1,
                                          actTime1,
                                          procargs1));
-    }  } } } }
+    } } } } }
     newsumlist=ATinsertA(newsumlist,summand);
   } 
 
@@ -3751,13 +3721,17 @@ static void add_summands(
   else if (gsIsAction(summandterm))
   { multiAction=gsMakeMultAct(ATinsertA(ATempty,summandterm));
   } 
-  else 
-  { multiAction=ATAgetArgument(summandterm,0);
+  else if (gsIsMultAct(summandterm))
+  { multiAction=summandterm;
   } 
+  else ATerror("Internal: Expected multiaction %t\n",summandterm);
                  
   if (regular)
-  { sumlist=insert_summand(sumlist,
-                   sumvars,condition1,multiAction,atTime,terminated);
+  { ATerror("Internal: with the flag regular terminating processes should not exist\n");
+        sumlist=insert_summand(sumlist,
+                   sumvars,condition1,multiAction,atTime,NULL);
+     /* Ik weet nu niet of terminated hier hoort, moet dit geen terminated
+     process zijn? */
     return;
   }
 
@@ -3785,7 +3759,7 @@ static void add_summands(
   if (canterminate==1)
   { condition2=gsMakeDataExprAnd(emptypops,condition1); 
     sumlist=insert_summand(sumlist,sumvars,condition2,
-                  multiAction,atTime,terminated);
+                  multiAction,atTime,NULL);
   }
  
   return;
@@ -3800,16 +3774,17 @@ static void collectsumlistterm(
                  int canterminate,
                  int regular,
                  int singlestate,
-                 specificationbasictype *spec)
+                 specificationbasictype *spec,
+                 ATermList pCRLprocs)
 { 
   if (gsIsChoice(body))
   { ATermAppl t1=ATAgetArgument(body,0);
     ATermAppl t2=ATAgetArgument(body,1);
 
     collectsumlistterm(procId,t1,pars,stack,
-                 canterminate,regular,singlestate,spec);
+                 canterminate,regular,singlestate,spec,pCRLprocs);
     collectsumlistterm(procId,t2,pars,stack,
-                 canterminate,regular,singlestate,spec);
+                 canterminate,regular,singlestate,spec,pCRLprocs);
     return;
   }
   else 
@@ -3840,7 +3815,8 @@ static ATermList collectsumlist(
               (canterminate&&objectdata[objectIndex(procId)].canterminate),
               regular,
               singlestate,
-              spec);
+              spec,
+              pCRLprocs);
   }
   
   return sumlist;
@@ -3888,7 +3864,7 @@ static enumeratedtype *create_enumeratedtype
         ATermAppl v=getfreshvariable("v_enum",w->sortId);
 
         declare_equation_variables(ATinsertA(ATempty,v));
-        newequation(gsMakeDataExprTrue(),
+        newequation(NULL,
                     gsMakeDataExprEq(v,v),
                     gsMakeDataExprTrue(),spec);
         for(l1=w->elementnames ; l1!=ATempty ; l1=ATgetNext(l1))
@@ -3896,7 +3872,7 @@ static enumeratedtype *create_enumeratedtype
           { ATermAppl el1=ATAgetFirst(l1);
             ATermAppl el2=ATAgetFirst(l2);
             if (el1!=el2)
-            { newequation(gsMakeDataExprTrue(),
+            { newequation(NULL,
                           gsMakeDataExprEq(el1,el2),
                           gsMakeDataExprFalse(),spec);
             }
@@ -3920,7 +3896,8 @@ static ATermAppl find_case_function(enumeratedtype *e, ATermAppl sort)
     if (objectdata[objectIndex(w1)].targetsort==sort)
     return w1;
   };
-  ATerror("Internal: Searching for nonexisting case function on sort %t",sort);
+assert(0);
+  ATerror("Internal: Searching for nonexisting case function on sort %t\n",sort);
   return NULL;
 }
 
@@ -3948,7 +3925,7 @@ static void define_equations_for_case_function(
       C(e,x,x,x,...x)=x for a variable x. */
   v=getfreshvariable("e",e->sortId);
   declare_equation_variables( ATinsertA(ATinsertA(ATempty,v),v1));
-  newequation(gsMakeDataExprTrue(),
+  newequation(NULL,
               makeApplTerm(functionname,ATinsertA(xxxterm,v)),
               v1,
               spec);
@@ -3960,7 +3937,7 @@ static void define_equations_for_case_function(
   for(w=e->elementnames; w!=ATempty ; w=ATgetNext(w))
   { 
     newequation(
-           gsMakeDataExprTrue(),
+           NULL,
            makeApplTerm(functionname,ATinsertA(args,ATAgetFirst(w))),
            ATAgetFirst(auxvars),
            spec);
@@ -4023,7 +4000,6 @@ static enumtype *generate_enumerateddatatype(
                       ATermList gsorts, 
                       specificationbasictype *spec)
 { 
-
   enumtype *et=NULL;
   ATermList w=ATempty;
   
@@ -4194,7 +4170,6 @@ static ATermList merge_var(
 
   result=v2;
   for( ; v1!=ATempty ; v1=ATgetNext(v1))
-         /*  (ATmatch(v1,"ins(<str>,<str>,<term>)",&var,&sort,&v1)) ; ) */
   { ATermAppl var=ATAgetFirst(v1);
     if (!mergeoccursin(&var,v2,
             &matchinglist,&renamingpars,&renamingargs))
@@ -4203,8 +4178,6 @@ static ATermList merge_var(
       *conditionlist=extend_conditions(var,*conditionlist);
     }
   }
-  /* ATfprintf(stderr,"Matchinglist: %t\nConditionlist %t\n",
-                   matchinglist,*conditionlist); */
   *conditionlist=addcondition(matchinglist,*conditionlist);
   *renamings=ATinsert(ATinsert(*renamings,
                                (ATerm)renamingpars),
@@ -4821,13 +4794,15 @@ static ATermAppl generateLPEpCRL(ATermAppl procId, int canterminate,
 /* A pair of initial state and linear process equation must be extracted
    from the underlying GNF */
 { ATermList parameters=NULL,sums=NULL,initial=NULL;
+  ATermList pCRLprocs=NULL;
   stacklisttype *stack=NULL;
   int singlecontrolstate=0;
   int n=objectIndex(procId);
+   
 
   pCRLprocs=ATinsertA(ATempty,procId);
 
-  makepCRLprocs(objectdata[n].processbody);
+  pCRLprocs=makepCRLprocs(objectdata[n].processbody,pCRLprocs);
   /* now pCRLprocs contains a list of all process id's in this
      pCRL process */
  
@@ -4836,7 +4811,7 @@ static ATermAppl generateLPEpCRL(ATermAppl procId, int canterminate,
   if (ATgetLength(pCRLprocs)==1)
   { singlecontrolstate=1;
   }
-  parameters=collectparameterlist();
+  parameters=collectparameterlist(pCRLprocs);
   alphaconversion(procId,parameters);
   if ((!singlecontrolstate)||(!regular)) 
          declare_control_state(spec,pCRLprocs);
@@ -4977,10 +4952,78 @@ static ATermAppl hidecomposition(ATermList hidelist, ATermAppl ips)
 
 /**************** allow  *************************************/
 
+static ATermList sortMultiActionLabels(ATermList l)
+{
+  ATermList result=ATempty;
+  for( ; l!=ATempty ; l=ATgetNext(l))
+  { result=ATinsert(
+             result,
+             (ATerm)sortActionLabels(ATLgetArgument(ATAgetFirst(l),0)));
+  }
+
+  return result;
+}
+
+static int allow(ATermList allowlist, ATermAppl multiaction)
+{ 
+  if (gsIsDelta(multiaction))
+  { return 0; }
+
+  for( ; allowlist!=ATempty ; allowlist=ATgetNext(allowlist))
+  { ATermList localallowlist=ATLgetFirst(allowlist);
+    for (ATermList walker=ATLgetArgument(multiaction,0);
+              walker!=ATempty ; walker=ATgetNext(walker) )
+    { 
+      ATermAppl action=ATAgetFirst(walker);
+      if (ATisEmpty(localallowlist))
+      { return 0;
+      }
+      if (strcmp(ATgetName(ATgetAFun(ATgetFirst(localallowlist))),
+                 ATgetName(ATgetAFun(ATgetArgument(ATgetArgument(action,0),0))))!=0)
+      { return 0;
+      }
+      localallowlist=ATgetNext(localallowlist);
+    }
+
+    if (localallowlist==ATempty)
+    { return 1;
+    }
+  }
+  return 0;
+}
+
 static ATermAppl allowcomposition(ATermList allowlist, ATermAppl ips)
 {
-  ATerror("The allow composition function still needs to be implemented");
-  return NULL;
+  ATermList resultsumlist=ATempty;
+  ATermList sourcesumlist=linGetSums(ips);
+  allowlist=sortMultiActionLabels(allowlist);
+
+  for( ; sourcesumlist!=ATempty ; sourcesumlist=ATgetNext(sourcesumlist))
+  { ATermAppl summand=ATAgetFirst(sourcesumlist);
+    ATermList sumvars=linGetSumVars(summand);
+    ATermAppl multiaction=linGetMultiAction(summand);
+    ATermAppl actiontime=linGetActionTime(summand);
+    ATermAppl condition=linGetCondition(summand);
+    ATermList nextstate=linGetNextState(summand);
+
+    if (allow(allowlist,multiaction))
+    { resultsumlist=ATinsertA(
+                    resultsumlist,
+                    summand); }
+    else
+    if (!gsIsNil(actiontime))
+    { resultsumlist=ATinsertA(
+                    resultsumlist,
+                    gsMakeLPESummand(
+                           sumvars,
+                           condition,
+                           gsMakeDelta(),
+                           actiontime,
+                           nextstate));
+    }
+  }
+  return linMakeInitProcSpec(
+             linGetInit(ips),linGetParameters(ips),resultsumlist);
 }
 
 
@@ -5141,59 +5184,6 @@ static int sumelimination(
   return result;
 }
 
-/* static int equalargs(
-               ATermList t1, 
-               ATermList t2, 
-               ATermList *sumlist, 
-               ATerm *condition, 
-               ATermList *subargs, 
-               ATermList *subpars)
-{  / * 
-      returns 0 if types of terms or length do not match
-      returns 1 if result is a valid ATerm  in t3, and condition defined.
-      returns 2 if condition is not defined, but result is valid * /
-
-  int n1=0,n2=0,n3=0;
-  
-  if ((t1==ATempty) && (t2==ATempty))
-  { return 2;
-  }
-
-  ATermAppl u1=ATAgetFirst(t1);
-  ATermAppl u2=ATAgetFirst(t2);
-      / * if ((ATmatch (t1,"ins(<term>,<term>)",&u1,&t1))&&
-             (ATmatch (t2,"ins(<term>,<term>)",&u2,&t2))) * /
-  if ((welltyped1(u1,&n1)) && (welltyped1(u2,&n2)))
-  { if (n1==n2)
-    { n1=equalargs (t1,t2,sumlist,condition,subargs,subpars);
-      if (n1==0) 
-      { return 0; 
-      }
-
-      / * check whether u1 or u2 is a variable, for which
-         the sum elimination theorem can be applied * /
-      if (sumelimination(u1,u2,sumlist,subargs,subpars)>0)
-             n3=n1;
-           else 
-           { t2=gsMakeDataExprEq(u1,u2);
-             if (n1==2)
-             { *condition=t2;
-               n3=1; 
-             }
-             else
-             { *condition=gsMakeDataExprAnd(t2,*condition);
-               n3=1; 
-             }
-          } 
-   }
-    else 
-    { return 0; / * different types * / 
-    }
-  }
-  ATerror("Typing wrong");
-  return NULL;
-} */
-
 /********************** construct renaming **************************/
 
 static ATermList construct_renaming(
@@ -5279,6 +5269,7 @@ static ATermList insertActionLabel(
   }
 
   ATermAppl firstAction=ATAgetFirst(actionlabels);
+
 
   if (strcmp(gsATermAppl2String(action),
                gsATermAppl2String(firstAction))<0)
@@ -5561,18 +5552,12 @@ static ATermAppl communicationcomposition(
          the original multiaction is delivered, with condition
          true. */
 
-  /* ATfprintf(stderr,"RRRRRRRA  %t %t ",
-        commExpr,actionlabels); */
-        
       ATermList multiactionconditionlist=
                      makeMultiActionConditionList(
                               actionlabels,
                               targetaction,
                               multiaction);
 
-  /* ATfprintf(stderr,"  %d  %t\n",
-        ATgetLength(multiactionconditionlist),
-        multiactionconditionlist); */
       for( ; multiactionconditionlist!=ATempty ;
                multiactionconditionlist=ATgetNext(multiactionconditionlist) )
       { ATermAppl multiactioncondition=ATAgetFirst(multiactionconditionlist);
@@ -5667,16 +5652,18 @@ static ATermList combinesumlist(
 
   /* first we enumerate the summands of t1 */
 
+  ATermAppl realsort=gsMakeSortId(gsString2ATermAppl("Real"));
+  if (!existsort(gsMakeSortId(gsString2ATermAppl("Real"))))
+  { realsort=gsMakeSortId(gsString2ATermAppl("Pos"));
+  }
   ATermAppl timevar=getfreshvariable(
-                       "timevariable",
-                       gsMakeSortId(gsString2ATermAppl("Real")));
+                       "timevariable",realsort);
   ATermAppl ultimatedelaycondition=
                    getUltimateDelayCondition(sumlist2,timevar);
 
   for (ATermList walker1=sumlist1; (walker1!=ATempty); 
                         walker1=ATgetNext(walker1)) 
   { ATermAppl summand1=ATAgetFirst(walker1);
-    /* ATfprintf(stderr,"SUMMAND1: %t \n",summand1); */
 
     ATermList sumvars1=linGetSumVars(summand1);
     ATermList sumvars1new=ATempty;
@@ -6025,7 +6012,7 @@ static ATermAppl generateLPEmCRLterm(
     return communicationcomposition(ATLgetArgument(t,0),t1);
   }
    
-  else ATerror("Expect mCRL term %t",t);
+  else ATerror("Expect mCRL term %t\n",t);
 
   return NULL;
 }
@@ -6045,7 +6032,7 @@ static ATermAppl generateLPEmCRL(
 
 */
   long n=objectIndex(procIdDecl);
-  
+
   if ((objectdata[n].processstatus==GNF)||
       (objectdata[n].processstatus==pCRL)||
       (objectdata[n].processstatus==GNFalpha))
@@ -6063,7 +6050,7 @@ static ATermAppl generateLPEmCRL(
              regular); 
   }
 
-  ATerror("Internal error. Laststatus: %d",objectdata[n].processstatus);
+  ATerror("Internal error. Laststatus: %d\n",objectdata[n].processstatus);
   return NULL;
 }
 
@@ -6207,7 +6194,7 @@ static ATermAppl alphaconversionterm(
     return NULL;
   }  
   
-  ATerror("Internal: Unexpected process format in alphaconversionterm %t",t);
+  ATerror("Internal: Unexpected process format in alphaconversionterm %t\n",t);
   return NULL;
 }
 
@@ -6230,7 +6217,7 @@ static void alphaconversion(ATermAppl procId, ATermList parameters)
   else 
   if (objectdata[n].processstatus==GNFalpha)
      return;
-  else ATerror("Unknown type %d in alphaconversion of %t",
+  else ATerror("Unknown type %d in alphaconversion of %t\n",
                        objectdata[n].processstatus,procId); 
   return;
 }
@@ -6245,63 +6232,71 @@ static int canterminate_rec(
 static int canterminatebody(
               ATermAppl t,
               int *stable,
-              ATermIndexedSet visited)
+              ATermIndexedSet visited,
+              int allowrecursion)
 { 
   if (gsIsMerge(t))
   { /* the construction below is needed to guarantee that 
        both subterms are recursively investigated */
-    int r1=canterminatebody(ATAgetArgument(t,0),stable,visited);
-    int r2=canterminatebody(ATAgetArgument(t,1),stable,visited);
+    int r1=canterminatebody(ATAgetArgument(t,0),stable,visited,allowrecursion);
+    int r2=canterminatebody(ATAgetArgument(t,1),stable,visited,allowrecursion);
     return r1&&r2;
   }
 
   if (gsIsProcess(t))
-  { return (canterminate_rec(ATAgetArgument(t,0),stable,visited));
+  { if (allowrecursion)
+    { return (canterminate_rec(ATAgetArgument(t,0),stable,visited));
+    }
+    return objectdata[objectIndex(ATAgetArgument(t,0))].canterminate;
   }
 
   if (gsIsHide(t)) 
-  { return (canterminatebody(ATAgetArgument(t,1),stable,visited));
+  { return (canterminatebody(ATAgetArgument(t,1),stable,visited,allowrecursion));
   }
 
   if (gsIsRename(t))
-  { return (canterminatebody(ATAgetArgument(t,1),stable,visited));
+  { return (canterminatebody(ATAgetArgument(t,1),stable,visited,allowrecursion));
   }
 
   if (gsIsAllow(t))
-  { return (canterminatebody(ATAgetArgument(t,1),stable,visited));
+  { return (canterminatebody(ATAgetArgument(t,1),stable,visited,allowrecursion));
   }
 
   if (gsIsRestrict(t))
-  { return (canterminatebody(ATAgetArgument(t,1),stable,visited));
+  { return (canterminatebody(ATAgetArgument(t,1),stable,visited,allowrecursion));
   }
 
   if (gsIsComm(t))
-  { return (canterminatebody(ATAgetArgument(t,1),stable,visited));
+  { return (canterminatebody(ATAgetArgument(t,1),stable,visited,allowrecursion));
   }
 
   if (gsIsChoice(t)) 
-  { int r1=canterminatebody(ATAgetArgument(t,0),stable,visited);
-    int r2=canterminatebody(ATAgetArgument(t,1),stable,visited);
+  { int r1=canterminatebody(ATAgetArgument(t,0),stable,visited,allowrecursion);
+    int r2=canterminatebody(ATAgetArgument(t,1),stable,visited,allowrecursion);
     return r1||r2;
   }
 
   if (gsIsSeq(t))
-  { int r1=canterminatebody(ATAgetArgument(t,0),stable,visited);
-    int r2=canterminatebody(ATAgetArgument(t,1),stable,visited);
+  { int r1=canterminatebody(ATAgetArgument(t,0),stable,visited,allowrecursion);
+    int r2=canterminatebody(ATAgetArgument(t,1),stable,visited,allowrecursion);
     return r1&&r2;
   }
 
   if (gsIsCond(t))
-  { int r1=canterminatebody(ATAgetArgument(t,1),stable,visited);
-    int r2=canterminatebody(ATAgetArgument(t,2),stable,visited);
+  { int r1=canterminatebody(ATAgetArgument(t,1),stable,visited,allowrecursion);
+    int r2=canterminatebody(ATAgetArgument(t,2),stable,visited,allowrecursion);
     return r1||r2;
   }
 
   if (gsIsSum(t))
-  { return (canterminatebody(ATAgetArgument(t,1),stable,visited));
+  { return (canterminatebody(ATAgetArgument(t,1),stable,visited,allowrecursion));
   }
 
   if (gsIsAction(t)) 
+  { return 1;
+  }
+
+  if (gsIsMultAct(t)) 
   { return 1;
   }
 
@@ -6314,16 +6309,16 @@ static int canterminatebody(
   }
 
   if (gsIsAtTime(t))
-  { return canterminatebody(ATAgetArgument(t,0),stable,visited);
+  { return canterminatebody(ATAgetArgument(t,0),stable,visited,allowrecursion);
   }
 
   if (gsIsSync(t))
-  { int r1=canterminatebody(ATAgetArgument(t,0),stable,visited);
-    int r2=canterminatebody(ATAgetArgument(t,1),stable,visited);
+  { int r1=canterminatebody(ATAgetArgument(t,0),stable,visited,allowrecursion);
+    int r2=canterminatebody(ATAgetArgument(t,1),stable,visited,allowrecursion);
     return r1&&r2;
   }
 
-  ATerror("Internal Error. Unexpected process format in canterminate%t",t);
+  ATerror("Internal Error. Unexpected process format in canterminate%t\n",t);
   return 0;
 }
 
@@ -6338,7 +6333,7 @@ static int canterminate_rec(
   { ATindexedSetPut(visited,(ATerm)procId,&new);
   }
   if (new)
-  { int ct=canterminatebody(objectdata[n].processbody,stable,visited); 
+  { int ct=canterminatebody(objectdata[n].processbody,stable,visited,1); 
     if (objectdata[n].canterminate!=ct)
     { objectdata[n].canterminate=ct;
       if (stable!=NULL) 
@@ -6375,7 +6370,7 @@ static ATermAppl split_process(ATermAppl procId, ATermTable visited)
 
   if (result!=NULL)
   { if (objectdata[n].processstatus==mCRL)
-    { ATerror("Unguarded recursion in the mCRL part of the input");
+    { ATerror("Unguarded recursion in the mCRL part of the input\n");
     }
     assert((objectdata[n].processstatus==pCRL) ||
            (objectdata[n].processstatus==multiAction));
@@ -6402,7 +6397,7 @@ static ATermAppl split_process(ATermAppl procId, ATermTable visited)
                 split_body(objectdata[n].processbody,
                            visited,
                            objectdata[n].parameters),
-                mCRL);
+                mCRL,0);
     return newProcId;
   }
 
@@ -6411,7 +6406,7 @@ static ATermAppl split_process(ATermAppl procId, ATermTable visited)
                 newProcId,
                 objectdata[n].parameters,
                 gsMakeSeq(objectdata[n].processbody,terminatedProc),
-                pCRL);
+                pCRL,canterminatebody(objectdata[n].processbody,NULL,NULL,0)); 
     return newProcId;
   }
   return procId;
@@ -6478,17 +6473,17 @@ static ATermAppl split_body(
         gsIsTau(t)||
         gsIsAtTime(t)||
         gsIsSync(t))
-    { if (canterminatebody(t,NULL,NULL))
-      { ATermAppl p=newprocess(parameters,gsMakeSeq(t,terminatedProc),pCRL);
+    { if (canterminatebody(t,NULL,NULL,0))
+      { ATermAppl p=newprocess(parameters,gsMakeSeq(t,terminatedProc),pCRL,0);
         result=gsMakeProcess(p,objectdata[objectIndex(p)].parameters);
       }
       else
-      { ATermAppl p=newprocess(parameters,t,pCRL);
+      { ATermAppl p=newprocess(parameters,t,pCRL,0);
         result=gsMakeProcess(p,objectdata[objectIndex(p)].parameters);
       }
     }
     else
-    ATerror("Internal Error. Unexpected process format in split process %t",t);
+    ATerror("Internal Error. Unexpected process format in split process %t\n",t);
   }
 
   ATtablePut(visited,(ATerm)t,(ATerm)ATgetArgument(result,0));
@@ -6522,7 +6517,7 @@ static ATermAppl transform(
   splitmCRLandpCRLprocsAndAddTerminatedAction(init);
 
   if (pcrlprocesslist==ATempty) 
-  { ATerror("There are no pCRL processes to be linearized"); }
+  { ATerror("There are no pCRL processes to be linearized\n"); }
 
   /* Second, transform into GNF with possibly variables as a head,
      but no actions in the tail */
@@ -6564,7 +6559,7 @@ static int main2(int argc, char *argv[],ATerm *stack_bottom)
       help(); exit(0);
     } else if (strequal(argv[i], "-tbfile") || strequal(argv[i], "-tbf")){
       if (to_stdout==1)
-         ATerror("Options -tbfile and -stdout cannot be used together");
+         ATerror("Options -tbfile and -stdout cannot be used together\n");
       to_toolbusfile=1;
     } else if(strequal(argv[i], "-stdout")){
       to_toolbusfile=0;
@@ -6610,7 +6605,7 @@ static int main2(int argc, char *argv[],ATerm *stack_bottom)
      (regular || nocluster || cluster || binary || !oldstate)) 
       to_toolbusfile=1; 
   if (!oldstate && !regular && !regular2)
-    ATerror("Option -newstate can only be used with -regular or -regular2");
+    ATerror("Option -newstate can only be used with -regular or -regular2\n");
 
   ATinit(argc,argv,stack_bottom);
   ATprotect((ATerm *)&result);
@@ -6621,19 +6616,19 @@ static int main2(int argc, char *argv[],ATerm *stack_bottom)
   strcpy(iname, sname);
   infile=fopen(iname,"r");
   if (infile==NULL) { 
-     if (ExtensionAdded(iname, ".test")) {
+     if (ExtensionAdded(iname, ".gs")) {
            infile=fopen(iname,"r");
           }
      }
   if (infile==NULL)
-        ATerror ("Cannot open input file `%s'", iname);
+        ATerror ("Cannot open input file `%s'\n", iname);
   fclose(infile);
   if (to_toolbusfile)
    { sprintf(messagebuffer,"%s.tbf",oname);
      toolbusfile=fopen(messagebuffer,"w");
      if (toolbusfile==NULL)
-        ATerror("Cannot open file for output"); }
-    spec=read_internal_format(iname); 
+        ATerror("Cannot open file for output\n"); }
+    spec=read_input_file(iname); 
                           /* if this terminates ok,  */
     initial_process=storedata(spec);
     if ((to_toolbusfile)||(to_stdout))
@@ -6650,7 +6645,7 @@ static int main2(int argc, char *argv[],ATerm *stack_bottom)
                  gsMakeLPEInit(ATLgetArgument(result,0))),
                  to_stdout?stdout:toolbusfile);
     }
-  else ATfprintf(stderr,"Input appears to be correct mCRL2");  
+  else ATfprintf(stderr,"Input appears to be correct mCRL2\n");  
   return 0;
 }
 
