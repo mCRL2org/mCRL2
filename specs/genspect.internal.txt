@@ -114,7 +114,7 @@
 <StructCons>  ::= StructCons(<String>, <StructProj>*, <StringOrNil>)
 
 //projection declaration of a structured sort
-<StructProj>  ::= StructProj(<StringOrNil>, <SortExpr>+)
+<StructProj>  ::= StructProj(<StringOrNil>, <SortExpr>)
 
 //string or nil
 <StringOrNil> ::= <String>

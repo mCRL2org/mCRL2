@@ -494,7 +494,7 @@ void gsPrintPart(FILE *OutStream, const ATermAppl Part, bool ShowSorts,
       gsPrintPart(OutStream, Projection, ShowSorts, PrecLevel);
       fprintf(OutStream, ": ");
     }
-    gsPrintParts(OutStream, ATLgetArgument(Part, 1), ShowSorts, 2, NULL, " # ");
+    gsPrintPart(OutStream, ATAgetArgument(Part, 1), ShowSorts, 0);
   } else if (gsIsDataVarIdOpId(Part) || gsIsOpId(Part) || gsIsDataVarId(Part) ||
       gsIsDataAppl(Part) || gsIsDataApplProd(Part)) {
     //print data expression, possibly in the external format

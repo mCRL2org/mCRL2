@@ -157,7 +157,7 @@ ATermAppl gsMakeSortArrowProd(ATermList SortExprsDomain,
 ATermAppl gsMakeSortArrow(ATermAppl SortExprDomain, ATermAppl SortExprResult);
 ATermAppl gsMakeStructCons(ATermAppl ConsName, ATermList StructProjs,
   ATermAppl RecNameOrNil); 
-ATermAppl gsMakeStructProj(ATermAppl ProjNameOrNil, ATermList SortExprs);
+ATermAppl gsMakeStructProj(ATermAppl ProjNameOrNil, ATermAppl SortExpr);
 ATermAppl gsMakeDataVarIdOpId(ATermAppl Name);
 ATermAppl gsMakeDataApplProd(ATermAppl DataExpr, ATermList DataArgs);
 ATermAppl gsMakeDataAppl(ATermAppl DataExpr, ATermAppl DataArg);

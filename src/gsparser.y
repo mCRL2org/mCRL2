@@ -585,12 +585,12 @@ struct_projections_cs:
 
 //structured sort projection
 struct_projection:
-  domain
+  sort_expr
     {
       $$ = gsMakeStructProj(gsMakeNil(), $1);
       gsDebugMsg("parsed structured sort projection\n  %t\n", $$);
     }
-  | ID COLON domain
+  | ID COLON sort_expr
     {
       $$ = gsMakeStructProj($1, $3);
       gsDebugMsg("parsed structured sort projection\n  %t\n", $$);

@@ -788,11 +788,11 @@ ATermAppl gsMakeStructCons(ATermAppl ConsName, ATermList StructProjs,
     (ATerm) RecNameOrNil);
 }
 
-ATermAppl gsMakeStructProj(ATermAppl ProjNameOrNil, ATermList SortExprs)
+ATermAppl gsMakeStructProj(ATermAppl ProjNameOrNil, ATermAppl SortExpr)
 {
   assert(gsConstructorFunctionsEnabled);
   return ATmakeAppl2(gsAFunStructProj, (ATerm) ProjNameOrNil,
-    (ATerm) SortExprs);
+    (ATerm) SortExpr);
 }
 
 ATermAppl gsMakeDataVarIdOpId(ATermAppl Name)
