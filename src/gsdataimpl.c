@@ -466,6 +466,29 @@ ATermAppl gsImplExprsPart(ATermAppl Part, ATermList *PSubsts,
     else //sort of Part is wrong
       gsWarningMsg("%t can not be implemented because its sort differs from "
         "Pos, Nat or Int\n", Part);
+  } else if (gsIsListEnum(Part)) {
+    //Part is a list enumeration; replace by its internal representation
+    ATermList Elts = ATLgetArgument(Part, 0);
+    ATermAppl Sort = ATAgetArgument(Part, 1);
+    if (ATgetLength(Elts) == 0) {
+      //enumeration consists of 0 elements
+      gsWarningMsg(
+        "%t can not be implemented because it has 0 elements\n", Part);
+    } else if (!gsIsSortList(Sort)) {
+      //sort of the enumeration is wrong
+      gsWarningMsg(
+        "%t can not be implemented because its sort is not a list sort\n",
+        Part);
+    } else {
+      //make cons list
+      Elts = ATreverse(Elts);
+      Part = gsMakeDataExprEmptyList(Sort);
+      while (!ATisEmpty(Elts))
+      {
+        Part = gsMakeDataExprCons(ATAgetFirst(Elts), Part);
+        Elts = ATgetNext(Elts);
+      }
+    }
   } else if (gsIsSetEnum(Part) || gsIsBagEnum(Part)) {
     //Part is a set/bag enumeration; replace by a set/bag comprehension
     ATermList Elts = ATLgetArgument(Part, 0);
@@ -535,6 +558,32 @@ ATermAppl gsImplExprsPart(ATermAppl Part, ATermList *PSubsts,
     *PSubsts = gsAddSubstToSubsts(gsMakeSubst(Part, NewPart), *PSubsts);
     Part = NewPart;
     Recursive = false;
+  } else if (gsIsWhr(Part)) {
+    //Part is a where clause; replace by its corresponding lambda expression
+    ATermAppl Body = ATAgetArgument(Part, 0);
+    ATermList WhrDecls = ATLgetArgument(Part, 1);
+    if (ATgetLength(WhrDecls) == 0) {
+      //where clause consists of 0 where clause declarations
+      gsWarningMsg("%t can not be implemented because it has 0 where clause "
+         "declarations\n", Part);
+    } else {
+      //make list of variables and where expressions
+      WhrDecls = ATreverse(WhrDecls);
+      ATermList Vars = ATmakeList0();
+      ATermList Exprs = ATmakeList0();
+      while (!ATisEmpty(WhrDecls))
+      {
+        ATermAppl WhrDecl = ATAgetFirst(WhrDecls);
+        ATermAppl VarName = ATAgetArgument(WhrDecl, 0);
+        ATermAppl Expr = ATAgetArgument(WhrDecl, 1);
+        Vars = ATinsert(Vars,
+          (ATerm) gsMakeDataVarId(VarName, gsGetSort(Expr)));
+        Exprs = ATinsert(Exprs, (ATerm) Expr);
+        WhrDecls = ATgetNext(WhrDecls);
+      }
+      //replace Part
+      Part = gsMakeDataApplList(gsMakeLambda(Vars, Body), Exprs);
+    }
   }
   //implement expressions in the arguments of Part
   if (Recursive) {
