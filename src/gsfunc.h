@@ -235,7 +235,8 @@ ATermAppl gsMakeSortExprNat(void);
 ATermAppl gsMakeSortExprInt(void);
 
 //Auxiliary functions to create sort expressions
-ATermAppl gsMakeSortArrowList(ATermList SortExprDomain, ATermList SortExprResult);
+ATermAppl gsMakeSortArrowList(ATermList SortExprDomain,
+  ATermAppl SortExprResult);
 
 //Creation of operation identifiers for system defined operations.
 ATermAppl gsMakeOpIdTrue(void);
