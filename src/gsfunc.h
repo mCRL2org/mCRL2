@@ -141,7 +141,7 @@ ATermAppl gsMakeProcEqn(ATermAppl ProcVarId, ATermList DataVarIds,
   ATermAppl ProcExp);
 ATermAppl gsMakeProcVarId(ATermAppl Name,ATermList SortExprs);
 ATermAppl gsMakeLPESummand(ATermList DataVarIds, ATermAppl BoolExpr,
-  ATermList MultActOrDelta, ATermAppl TimeExprOrNil, ATermList Assignments);
+  ATermAppl MultActOrDelta, ATermAppl TimeExprOrNil, ATermList Assignments);
 ATermAppl gsMakeMultAct(ATermList Actions);
 ATermAppl gsMakeDelta();
 ATermAppl gsMakeAction(ATermAppl ActId, ATermList DataExprs);

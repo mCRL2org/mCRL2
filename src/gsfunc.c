@@ -697,7 +697,7 @@ ATermAppl gsMakeProcVarId(ATermAppl Name, ATermList SortExprs)
 }
 
 ATermAppl gsMakeLPESummand(ATermList DataVarIds, ATermAppl BoolExpr,
-  ATermList MultiAction, ATermAppl TimeExprOrNil, ATermList Assignments)
+  ATermAppl MultiAction, ATermAppl TimeExprOrNil, ATermList Assignments)
 {
   assert(gsConstructorFunctionsEnabled);
   return ATmakeAppl5(gsAFunLPESummand, (ATerm) DataVarIds, (ATerm) BoolExpr,
