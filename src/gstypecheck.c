@@ -177,6 +177,8 @@ static ATermList gstcTypeMatchL(ATermList TypeList, ATermList PosTypeList);
 static ATbool gstcHasUnknown(ATermAppl Type);
 static ATermAppl gstcExpandPosTypes(ATermAppl Type);
 static ATermAppl gstcMinType(ATermList TypeList);
+static ATermList gstcMActPut(ATermList MActs, ATermList NewMAct, ATbool *new);
+static ATbool gstcMActEq(ATermList MAct1, ATermList MAct2);
 
 // Main function
 ATermAppl gsTypeCheck (ATermAppl input){	
@@ -202,8 +204,8 @@ ATermAppl gsTypeCheck (ATermAppl input){
   if(!gstcTransformActProcVarConst()){throw;}
   gsDebugMsg ("type checking transform ActProc+VarConst phase finished\n");
 
-  if(!gstcInferTypesData()) {throw;} //names and # of arguments
-  if(!gstcInferTypesProc()) {throw;} //names and # of arguments
+  //if(!gstcInferTypesData()) {throw;} //names and # of arguments
+  //if(!gstcInferTypesProc()) {throw;} //names and # of arguments
 
   Result=ATsetArgument(input,(ATerm)gsMakeDataEqnSpec(body.equations),3);
   Result=ATsetArgument(Result,(ATerm)gsMakeProcEqnSpec(gstcWriteProcs()),5);
@@ -919,6 +921,121 @@ static ATermAppl gstcTraverseActProcVarConstP(ATermTable Vars, ATermAppl ProcTer
 
   if(gsIsRestrict(ProcTerm) || gsIsHide(ProcTerm) || 
      gsIsRename(ProcTerm) || gsIsComm(ProcTerm) || gsIsAllow(ProcTerm)){
+
+    //restrict & hide
+    if(gsIsRestrict(ProcTerm) || gsIsHide(ProcTerm)){
+      char *msg=gsIsRestrict(ProcTerm)?"Restricting":"Hiding";
+      ATermList ActList=ATLgetArgument(ProcTerm,0);
+      if(ATisEmpty(ActList)) gsWarningMsg("%s empty set of actions (typechecking %t)\n",msg,ProcTerm);
+
+      ATermIndexedSet Acts=ATindexedSetCreate(63,50);
+      for(;!ATisEmpty(ActList);ActList=ATgetNext(ActList)){
+	ATermAppl Act=ATAgetFirst(ActList);
+	
+	//Actions must be declared
+	if(!ATtableGet(context.actions,(ATerm)Act)) {ThrowM("%s an undefined action %t (typechecking %t)\n",msg,Act,ProcTerm);}
+	ATbool new;
+	ATindexedSetPut(Acts,(ATerm)Act,&new);
+	if(!new) gsWarningMsg("%s action %t twice (typechecking %t)\n",msg,Act,ProcTerm);
+      }
+      ATindexedSetDestroy(Acts);
+    }
+
+    //rename
+    if(gsIsRename(ProcTerm)){
+      ATermList RenList=ATLgetArgument(ProcTerm,0);
+
+      if(ATisEmpty(RenList)) gsWarningMsg("Renaming empty set of actions (typechecking %t)\n",ProcTerm);
+
+      ATermIndexedSet ActsFrom=ATindexedSetCreate(63,50);
+
+      for(;!ATisEmpty(RenList);RenList=ATgetNext(RenList)){
+	ATermAppl Ren=ATAgetFirst(RenList);
+	ATermAppl ActFrom=ATAgetArgument(Ren,0);
+	ATermAppl ActTo=ATAgetArgument(Ren,0);
+	
+	if(ATisEqual(ActFrom,ActTo)) gsWarningMsg("Renaming action %t into itself (typechecking %t)\n",ActFrom,ProcTerm);
+	
+	//Actions must be declared and of the same types
+	ATermList TypesFrom,TypesTo;
+	if(!(TypesFrom=ATLtableGet(context.actions,(ATerm)ActFrom)))
+	  {ThrowM("Renaming an undefined action %t (typechecking %t)\n",ActFrom,ProcTerm);}
+	if(!(TypesTo=ATLtableGet(context.actions,(ATerm)ActTo)))
+	  {ThrowM("Renaming into an undefined action %t (typechecking %t)\n",ActTo,ProcTerm);}
+
+	ATbool new;
+	ATindexedSetPut(ActsFrom,(ATerm)ActFrom,&new);
+	if(!new) {ThrowM("Renaming action %t twice (typechecking %t)\n",ActFrom,ProcTerm);}
+
+	ATermList Types=gstcTypesIntersect(TypesFrom,TypesTo);
+	if(!Types || ATisEmpty(Types))
+	  {ThrowM("Renaming action %t into action %t: these two have no common type (typechecking %t)\n",ActTo,ActFrom,ProcTerm);}
+      }
+      ATindexedSetDestroy(ActsFrom);
+    }
+
+/*     //comm: like renaming multiactions (with the same parameters) to action/tau */
+/*     if(gsIsComm(ProcTerm)){ */
+/*       ATermList CommList=ATLgetArgument(ProcTerm,0); */
+
+/*       if(ATisEmpty(CommList)) gsWarningMsg("Synchronizing empty set of (multi)actions (typechecking %t)\n",ProcTerm); */
+/*       else{ */
+
+/* 	ATermIndexedSet ActListsFrom=ATindexedSetCreate(63,50); */
+
+/* 	for(;!ATisEmpty(RenList);RenList=ATgetNext(RenList)){ */
+/* 	  ATermAppl Ren=ATAgetFirst(RenList); */
+/* 	  ATermAppl ActFrom=ATAgetArgument(Ren,0); */
+/* 	  ATermAppl ActTo=ATAgetArgument(Ren,0); */
+	  
+/* 	  if(ATisEqual(ActFrom,ActTo)) gsWarningMsg("Renaming action %t into itself (typechecking %t)\n",ActFrom,ProcTerm); */
+	  
+/* 	  //Actions must be declared */
+/* 	  ATermList TypesFrom,TypesTo; */
+/* 	  if(!(TypesFrom=ATtableGet(context.actions,(ATerm)ActFrom))) */
+/* 	    {ThrowM("Renaming an undefined action %t (typechecking %t)\n"ActFrom,ProcTerm);} */
+/* 	  if(!(TypesTo=ATtableGet(context.actions,(ATerm)ActTo))) */
+/* 	    {ThrowM("Renaming into an undefined action %t (typechecking %t)\n"ActTo,ProcTerm);} */
+	  
+/* 	  ATbool new; */
+/* 	  ATindexedSetPut(ActsFrom,(ATerm)Act,&new); */
+/* 	  if(!new) {ThrowM("Renaming action %t twise (typechecking %t)\n",Act,ProcTerm);} */
+	  
+/* 	  ATermList Types=gstcIntersectTypes(TypeFrom,TypeTo); */
+/* 	  if(!Types || ATisEmpty(Types)) */
+/* 	    {ThrowM("Renaming action %t into action %t: these two have no common type (typechecking %t)\n"ActTo,ActFrom,ProcTerm);} */
+/* 	} */
+/* 	ATindexedSetDestroy(ActsFrom); */
+/*       } */
+/*     } */
+
+    //allow
+    if(gsIsAllow(ProcTerm)){
+      ATermList MActList=ATLgetArgument(ProcTerm,0);
+
+      if(ATisEmpty(MActList)) gsWarningMsg("Allowing empty set of (multi) actions (typechecking %t)\n",ProcTerm);
+      else{
+	ATermList MActs=ATmakeList0();
+	
+	for(;!ATisEmpty(MActList);MActList=ATgetNext(MActList)){
+	  ATermList MAct=ATLgetArgument(ATAgetFirst(MActList),0);
+
+	  //Actions must be declared
+	  for(;!ATisEmpty(MAct);MAct=ATgetNext(MAct)){
+	    ATermAppl Act=ATAgetFirst(MAct);
+	    if(!ATLtableGet(context.actions,(ATerm)Act))
+	      {ThrowM("Allowing an undefined action %t in (multi)action %t (typechecking %t)\n",Act,MAct,ProcTerm);}
+	  }	
+
+	  ATbool new;
+	  MAct=ATLgetArgument(ATAgetFirst(MActList),0);
+	  MActs=gstcMActPut(MActs,MAct,&new);
+	  if(!new) gsWarningMsg("Allowing (multi)action %t twice (typechecking %t)\n",MAct,ProcTerm);
+	}
+      }
+    }
+
+
     ATermAppl NewProc=gstcTraverseActProcVarConstP(Vars,ATAgetArgument(ProcTerm,1));
     if(!NewProc) {throw;}
     return ATsetArgument(ProcTerm,(ATerm)NewProc,1);
@@ -928,7 +1045,7 @@ static ATermAppl gstcTraverseActProcVarConstP(ATermTable Vars, ATermAppl ProcTer
      gsIsMerge(ProcTerm) || gsIsLMerge(ProcTerm) || gsIsChoice(ProcTerm)){
     ATermAppl NewLeft=gstcTraverseActProcVarConstP(Vars,ATAgetArgument(ProcTerm,0));
  
-   if(!NewLeft) {throw;}
+    if(!NewLeft) {throw;}
     ATermAppl NewRight=gstcTraverseActProcVarConstP(Vars,ATAgetArgument(ProcTerm,1));
     if(!NewRight) {throw;}
     return ATsetArgument(ATsetArgument(ProcTerm,(ATerm)NewLeft,0),(ATerm)NewRight,1);
@@ -1503,8 +1620,8 @@ static ATermAppl gstcTypeMatchA(ATermAppl Type, ATermAppl PosType){
   //PosType is a normal type
   //if(!gstcHasUnknown(Type)) return NULL;
 
-  if(!gsIsSortId(Type)) Type=gstcUnwindType(Type);
-  if(!gsIsSortId(PosType)) PosType=gstcUnwindType(PosType);
+  if(gsIsSortId(Type)) Type=gstcUnwindType(Type);
+  if(gsIsSortId(PosType)) PosType=gstcUnwindType(PosType);
 
   if(gsIsSortList(Type)){
     if(!gsIsSortList(PosType)) return NULL;
@@ -1666,11 +1783,15 @@ static ATermAppl gstcExpandPosTypes(ATermAppl Type){
   if(gsIsSortStruct(Type)) return Type;
 
   if(gsIsSortArrowProd(Type)){
-    //only the argument types
+    //the argument types, and if the resulting type is SortArrowProd -- recursively
     ATermList NewTypeList=ATmakeList0();
     for(ATermList TypeList=ATLgetArgument(Type,0);!ATisEmpty(TypeList);TypeList=ATgetNext(TypeList))
-      NewTypeList=ATinsert(NewTypeList,(ATerm)gstcExpandPosTypes(ATAgetFirst(TypeList)));
-    return ATsetArgument(Type,(ATerm)ATreverse(NewTypeList),0);
+      NewTypeList=ATinsert(NewTypeList,(ATerm)gstcExpandPosTypes(gstcUnwindType(ATAgetFirst(TypeList))));
+    ATermAppl ResultType=ATAgetArgument(Type,1);
+    if(!gsIsSortArrowProd(ResultType))
+      return ATsetArgument(Type,(ATerm)ATreverse(NewTypeList),0);
+    else 
+      return gsMakeSortArrowProd(ATreverse(NewTypeList),gstcExpandPosTypes(gstcUnwindType(ResultType)));
   } 
   
   return Type;
@@ -1678,4 +1799,41 @@ static ATermAppl gstcExpandPosTypes(ATermAppl Type){
 
 static ATermAppl gstcMinType(ATermList TypeList){
   return ATAgetFirst(TypeList);
+}
+
+
+// =========================== MultiActions
+static ATermList gstcMActPut(ATermList MActs, ATermList NewMAct, ATbool *new){
+  //if MAct is not in the list MActs, add and new=1
+  //else return MActs, new=0
+  *new=ATfalse;
+  ATermList Result=MActs;
+  for(;!ATisEmpty(MActs);MActs=ATgetNext(MActs)){
+    ATermList MAct=ATLgetFirst(MActs);
+    if(gstcMActEq(MAct,NewMAct)) return Result;
+  }
+  *new=ATtrue;
+  return ATinsert(Result,(ATerm)NewMAct);
+}
+
+static ATbool gstcMActEq(ATermList MAct1, ATermList MAct2){
+  if(ATgetLength(MAct1)!=ATgetLength(MAct2)) return ATfalse;
+  if(ATisEmpty(MAct1)) return ATtrue;
+  ATermAppl Act1=ATAgetFirst(MAct1);
+  MAct1=ATgetNext(MAct1);
+
+  //remove Act1 once from MAct2. if not there -- return ATfalse.
+  ATermList NewMAct2=ATmakeList0();
+  for(;!ATisEmpty(MAct2);MAct2=ATgetNext(MAct2)){
+    ATermAppl Act2=ATAgetFirst(MAct2);
+    if(ATisEqual(Act1,Act2)) {
+      MAct2=ATconcat(ATreverse(NewMAct2),ATgetNext(MAct2)); goto gstcMActEq_found;
+    }
+    else{
+      NewMAct2=ATinsert(NewMAct2,(ATerm)Act2);
+    }
+  }
+  return ATfalse;
+ gstcMActEq_found:
+  return gstcMActEq(MAct1,MAct2);
 }
