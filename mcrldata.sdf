@@ -151,11 +151,12 @@ exports
     Action-or-ProcessCall-term                         -> Process-term
     MAction-term                                       -> Process-term
 
+%%    New operations
+
     "comm" "(" "{" { Communication "," }+ "}" ","         
                                       Process-term ")" -> Process-term
     "restrict" "(" "{" MName-list "}" "," Process-term ")" 
                                                        -> Process-term
-    
     { Domain "," }+                                    -> MName-list
     Domain "->" Name                                   -> Communication
     Domain 	                                       -> Communication
