@@ -1,7 +1,6 @@
 /*Id: main.c,v 1.2 2004/11/23 12:36:17 uid523 Exp $ */
 
 /* TODO:
- * Laat de actie Terminate goed communiceren
  * Verwerk vrije procesvariabelen op correcte wijze.
  * Apply sum elimination.
  * Apply rewriting.
@@ -1164,7 +1163,7 @@ static processstatustype determine_process_statusterm(
     return mCRL;
   }
 
-  ATerror("Internal error: Process has unexpected format %t\n",body);
+  ATerror("Internal error: Process has unexpected format (2) %t\n",body);
   return error;
 } 
 
@@ -1746,6 +1745,13 @@ static ATermAppl substitute_pCRLproc(
                 substitute_datalist(terms,vars,ATLgetArgument(p,1)));
   }
 
+  if (gsIsAtTime(p))
+  { 
+    return gsMakeAtTime(
+               substitute_pCRLproc(terms,vars,ATAgetArgument(p,0)),
+               substitute_data(terms,vars,ATAgetArgument(p,1)));
+  }
+
   if (gsIsDelta(p))
      { return p; }
 
@@ -2188,6 +2194,10 @@ static ATermAppl putbehind(ATermAppl body1, ATermAppl body2)
   { /* return gsMakeSeq(body1,body2); */
     ATerror("Internal: expect only multiactions, not a tau\n");
   }
+  
+  if (gsIsAtTime(body1))
+  { return gsMakeSeq(body1,body2); 
+  }
 
   ATerror("Internal: Unexpected process format in putbehind %t\n",body1);
   return NULL;
@@ -2450,7 +2460,7 @@ static ATermAppl to_regular_form(
   
   if (gsIsSeq(t)) 
   { ATermAppl firstact=ATAgetArgument(t,0);
-    assert(gsIsMultAct(firstact));
+    assert(gsIsMultAct(firstact)||gsIsAtTime(firstact));
     /* the sequence of variables in 
                the second argument must be replaced */
     return gsMakeSeq(
@@ -2802,11 +2812,12 @@ static void makepCRLprocs_rec(ATermAppl t)
     return;
   }
 
-  if (gsIsMultAct(t)||gsIsDelta(t))
-  { return; 
+  if (gsIsMultAct(t)||gsIsDelta(t)||gsIsAtTime(t))
+  { 
+    return; 
   }
 
-  ATerror("unexpected process format %t\n",t);
+  ATerror("Internal: Unexpected process format %t in makepCRLprocs_rec\n",t);
 }
 
 static ATermList makepCRLprocs(ATermAppl t, ATermList pCRLprocs)
@@ -4969,7 +4980,6 @@ static ATermList  cluster_actions(
       The remaining summands are stored in w2. */
       
   ATermList result=ATempty;
-
   for( ; (sums!=ATempty) ; )
   { ATermList w1=ATempty;
     ATermList w2=ATempty;
@@ -5699,7 +5709,6 @@ static ATermList phi(ATermList m,
      and C contains a list of multiaction action pairs indicating
      possible commmunications */
 
-
   if (n==ATempty)
   { ATermAppl c=can_communicate(m,C); /* returns NULL if no communication
                                          is possible */
@@ -5724,6 +5733,7 @@ static ATermList phi(ATermList m,
                 T,
                 phi(m,d,ATappend(w,(ATerm)firstaction),o,C));
 }
+
 
 static ATermAppl makeNegatedConjunction(ATermList S)
 { ATermAppl result=gsMakeDataExprTrue();
@@ -5907,46 +5917,47 @@ static ATermList combinesumlist(
     ATermAppl condition1=linGetCondition(summand1);
     ATermList nextstate1=linGetNextState(summand1); 
 
-    if (actiontime1==gsMakeNil())
-    { if (ultimatedelaycondition!=gsMakeDataExprTrue())
-      { actiontime1=timevar;
-        sumvars1=ATinsertA(sumvars1,timevar);
+    if (multiaction1!=terminationAction)
+    { if (actiontime1==gsMakeNil())
+      { if (ultimatedelaycondition!=gsMakeDataExprTrue())
+        { actiontime1=timevar;
+          sumvars1=ATinsertA(sumvars1,timevar);
+          condition1=gsMakeDataExprAnd(ultimatedelaycondition,condition1);
+        }
+      }
+      else
+      { /* actiontime1!=nil. Substitute the time expression for
+           timevar in ultimatedelaycondition, and extend the condition */
+        ultimatedelaycondition=
+                substitute_data(
+                   ATinsertA(ATempty,actiontime1),
+                   ATinsertA(ATempty,timevar),
+                   ultimatedelaycondition);
         condition1=gsMakeDataExprAnd(ultimatedelaycondition,condition1);
       }
-    }
-    else
-    { /* actiontime1!=nil. Substitute the time expression for
-         timevar in ultimatedelaycondition, and extend the condition */
-      ultimatedelaycondition=
-              substitute_data(
-                 ATinsertA(ATempty,actiontime1),
-                 ATinsertA(ATempty,timevar),
-                 ultimatedelaycondition);
-      condition1=gsMakeDataExprAnd(ultimatedelaycondition,condition1);
-    }
+  
+      rename1_list=construct_renaming(
+                       allpars,
+                       sumvars1,
+                       &sumvars1new,
+                       &sums1renaming);
 
-    rename1_list=construct_renaming(
-                     allpars,
-                     sumvars1,
-                     &sumvars1new,
-                     &sums1renaming);
-
-    resultsumlist=
-      ATinsertA(
-        resultsumlist,
-        gsMakeLPESummand(
-           sumvars1new,
-           substitute_data(rename1_list,sums1renaming,condition1),
-           substitute_multiaction(rename1_list,sums1renaming,multiaction1), 
-           substitute_time(rename1_list,sums1renaming,actiontime1),
-           substitute_assignmentlist(
-                           rename1_list,
-                           sums1renaming,
-                           nextstate1,
-                           par1,
-                           0)));
+      resultsumlist=
+        ATinsertA(
+          resultsumlist,
+          gsMakeLPESummand(
+             sumvars1new,
+             substitute_data(rename1_list,sums1renaming,condition1),
+             substitute_multiaction(rename1_list,sums1renaming,multiaction1), 
+             substitute_time(rename1_list,sums1renaming,actiontime1),
+             substitute_assignmentlist(
+                             rename1_list,
+                             sums1renaming,
+                             nextstate1,
+                             par1,
+                             0)));
+    }
   }
-
   /* second we enumerate the summands of sumlist2 */
 
   ultimatedelaycondition=
@@ -5963,53 +5974,55 @@ static ATermList combinesumlist(
     ATermAppl condition2=linGetCondition(summand2);
     ATermList nextstate2=linGetNextState(summand2); 
 
-    if (actiontime2==gsMakeNil())
-    { if (ultimatedelaycondition!=gsMakeDataExprTrue())
-      { actiontime2=timevar;
-        sumvars2=ATinsertA(sumvars2,timevar);
+    if (multiaction2!=terminationAction)
+    { if (actiontime2==gsMakeNil())
+      { if (ultimatedelaycondition!=gsMakeDataExprTrue())
+        { actiontime2=timevar;
+          sumvars2=ATinsertA(sumvars2,timevar);
+          condition2=gsMakeDataExprAnd(ultimatedelaycondition,condition2);
+        }
+      }
+      else
+      { /* actiontime1!=gsMakeNil(). Substitute the time expression for
+           timevar in ultimatedelaycondition, and extend the condition */
+        ultimatedelaycondition=
+                substitute_data(
+                   ATinsertA(ATempty,actiontime2),
+                   ATinsertA(ATempty,timevar),
+                   ultimatedelaycondition);
         condition2=gsMakeDataExprAnd(ultimatedelaycondition,condition2);
       }
+  
+      rename2_list=construct_renaming(
+                           allpars,
+                           sumvars2,
+                           &sumvars2new,
+                           &sums2renaming);
+
+      resultsumlist=
+        ATinsertA(
+          resultsumlist,
+          gsMakeLPESummand(
+             sumvars2new,
+             substitute_data(rename_list,par2,
+                 substitute_data(rename2_list,sums2renaming,condition2)),
+             substitute_multiaction(rename_list,par2,
+                 substitute_multiaction(rename2_list,sums2renaming,multiaction2)), 
+             substitute_time(rename_list,par2,
+                 substitute_time(rename2_list,sums2renaming,actiontime2)),
+             substitute_assignmentlist(
+                       rename2_list,
+                       sums2renaming,
+                       substitute_assignmentlist(
+                             rename_list,
+                             par2,
+                             nextstate2,
+                             par3,
+                             1),
+                       par3,
+                       0)));
+  
     }
-    else
-    { /* actiontime1!=gsMakeNil(). Substitute the time expression for
-         timevar in ultimatedelaycondition, and extend the condition */
-      ultimatedelaycondition=
-              substitute_data(
-                 ATinsertA(ATempty,actiontime2),
-                 ATinsertA(ATempty,timevar),
-                 ultimatedelaycondition);
-      condition2=gsMakeDataExprAnd(ultimatedelaycondition,condition2);
-    }
-
-    rename2_list=construct_renaming(
-                         allpars,
-                         sumvars2,
-                         &sumvars2new,
-                         &sums2renaming);
-
-    resultsumlist=
-      ATinsertA(
-        resultsumlist,
-        gsMakeLPESummand(
-           sumvars2new,
-           substitute_data(rename_list,par2,
-               substitute_data(rename2_list,sums2renaming,condition2)),
-           substitute_multiaction(rename_list,par2,
-               substitute_multiaction(rename2_list,sums2renaming,multiaction2)), 
-           substitute_time(rename_list,par2,
-               substitute_time(rename2_list,sums2renaming,actiontime2)),
-           substitute_assignmentlist(
-                     rename2_list,
-                     sums2renaming,
-                     substitute_assignmentlist(
-                           rename_list,
-                           par2,
-                           nextstate2,
-                           par3,
-                           1),
-                     par3,
-                     0)));
-
   }
 
   /* thirdly we enumerate all communications */
@@ -6056,71 +6069,78 @@ static ATermList combinesumlist(
                ATconcat(sumvars1new,allpars),
                sumvars2,&sumvars2new,&sums2renaming);
       
-      ATermAppl multiaction3=
-        linMergeMultiAction(
-           multiaction1,
-           substitute_multiaction(rename_list,par2,
-              substitute_multiaction(
-                           rename2_list,
-                           sums2renaming,
-                           multiaction2)));
-      ATermList allsums=ATconcat(sumvars1new,sumvars2new);
-      actiontime2=substitute_time(rename_list,par2,
-              substitute_time(rename2_list,sums2renaming,actiontime2));
-
-      condition2=substitute_data(rename_list,par2,
-              substitute_data(rename2_list,sums2renaming,condition2));
-      ATermAppl condition3= gsMakeDataExprAnd(condition1,condition2);
-
-      ATermAppl actiontime3=NULL;
-
-      if (actiontime1==gsMakeNil())
-      { if (actiontime2==gsMakeNil())
-        { actiontime3=gsMakeNil();
+      if ((multiaction1==terminationAction)==(multiaction2==terminationAction))
+      { ATermAppl multiaction3=NULL;
+        if ((multiaction1==terminationAction)&&(multiaction2==terminationAction))
+        { multiaction3=terminationAction;
+        }
+        else 
+        { multiaction3=linMergeMultiAction(
+                             multiaction1,
+                             substitute_multiaction(rename_list,par2,
+                                substitute_multiaction(
+                                             rename2_list,
+                                             sums2renaming,
+                                             multiaction2)));
+        }
+        ATermList allsums=ATconcat(sumvars1new,sumvars2new);
+        actiontime2=substitute_time(rename_list,par2,
+                substitute_time(rename2_list,sums2renaming,actiontime2));
+  
+        condition2=substitute_data(rename_list,par2,
+                substitute_data(rename2_list,sums2renaming,condition2));
+        ATermAppl condition3= gsMakeDataExprAnd(condition1,condition2);
+  
+        ATermAppl actiontime3=NULL;
+  
+        if (actiontime1==gsMakeNil())
+        { if (actiontime2==gsMakeNil())
+          { actiontime3=gsMakeNil();
+          }
+          else
+          { /* actiontime2!=gsMakeNil() */
+            actiontime3=actiontime2;
+          }
         }
         else
-        { /* actiontime2!=gsMakeNil() */
-          actiontime3=actiontime2;
-        }
+        { /* actiontime1!=gsMakeNil() */
+          if (actiontime2==gsMakeNil())
+          { actiontime3=actiontime1;
+          }
+          else
+          { /* actiontime1!=gsMakeNil() && actiontime2!=gsMakeNil() */
+            actiontime3=actiontime1;
+            condition3=gsMakeDataExprAnd(
+                          condition3,
+                          gsMakeDataExprEq(actiontime1,actiontime2));
+          }
+        }                         
+  
+        nextstate2=substitute_assignmentlist(
+                     rename2_list,
+                     sums2renaming,
+                     substitute_assignmentlist(
+                          rename_list,
+                          par2,
+                          nextstate2,
+                          par3,
+                          1),
+                     par3,
+                     0);
+  
+        ATermList nextstate3=ATconcat(nextstate1,nextstate2);
+        
+        resultsumlist=
+          ATinsertA(
+            resultsumlist,
+            gsMakeLPESummand(
+             allsums,
+             condition3,
+             multiaction3,
+             actiontime3,
+             nextstate3));
+  
       }
-      else
-      { /* actiontime1!=gsMakeNil() */
-        if (actiontime2==gsMakeNil())
-        { actiontime3=actiontime1;
-        }
-        else
-        { /* actiontime1!=gsMakeNil() && actiontime2!=gsMakeNil() */
-          actiontime3=actiontime1;
-          condition3=gsMakeDataExprAnd(
-                        condition3,
-                        gsMakeDataExprEq(actiontime1,actiontime2));
-        }
-      }                         
-
-      nextstate2=substitute_assignmentlist(
-                   rename2_list,
-                   sums2renaming,
-                   substitute_assignmentlist(
-                        rename_list,
-                        par2,
-                        nextstate2,
-                        par3,
-                        1),
-                   par3,
-                   0);
-
-      ATermList nextstate3=ATconcat(nextstate1,nextstate2);
-      
-      resultsumlist=
-        ATinsertA(
-          resultsumlist,
-          gsMakeLPESummand(
-           allsums,
-           condition3,
-           multiaction3,
-           actiontime3,
-           nextstate3));
-
     }
   }
 
@@ -6816,7 +6836,7 @@ static ATermAppl split_body(
     ATerror("Internal Error. Unexpected process format in split process %t\n",t);
   }
 
-  ATtablePut(visited,(ATerm)t,(ATerm)ATgetArgument(result,0));
+  ATtablePut(visited,(ATerm)t,(ATerm)result);
   return result;
 }
 
