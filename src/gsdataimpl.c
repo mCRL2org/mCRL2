@@ -150,6 +150,17 @@ void gsGetFreeVars_List(ATermList DataExprs, ATermList BoundVars,
 //Post:*PFreeVars is extended with the free variables in DataExprs that did not
 //     already occur in *PFreeVars or BoundVars
 
+ATermAppl gsImplSortStruct(ATermAppl SortStruct, ATermList *PSubsts,
+  TDataDecls *PDataDecls);
+//Pre: SortStruct is a structured sort
+//     PSubsts is a pointer to a list of substitutions induced by the context
+//     of SortStruct
+//     PDataDecls represents a pointer to new data declarations, induced by
+//     the context of SortStruct
+//Post:an implementation of SortStruct is added to *PDataDecls and new induced
+//     substitutions are added *PSubsts
+//Ret: a sort identifier which is the implementation of SortStruct
+
 ATermAppl gsImplSetBagEnum(ATermList Elts, ATermAppl SortExpr);
 //Pre: Elts is a list containing 1 or more data expressions, all of the same
 //     sort
@@ -398,11 +409,7 @@ ATermAppl gsImplExprsPart(ATermAppl Part, ATermList *PSubsts,
   } else if (gsIsSortStruct(Part)) {
     //Part is a structured sort; replace by a new sort and add data
     //declarations for this sort
-    ATermAppl SortId = gsMakeFreshStructSortId((ATerm) PDataDecls->Sorts);
-    PDataDecls->Sorts = ATinsert(PDataDecls->Sorts, (ATerm) SortId);
-    ATermAppl Subst = gsMakeSubst(Part, SortId);
-    *PSubsts = gsAddSubstToSubsts(Subst, *PSubsts);
-    Part = SortId;
+    Part = gsImplSortStruct(Part, PSubsts, PDataDecls);
   } else if (gsIsSortList(Part)) {
     //Part is a list sort; replace by a new sort and add data declarations for
     //this sort
@@ -723,6 +730,19 @@ void gsGetFreeVars_List(ATermList DataExprs, ATermList BoundVars,
     gsGetFreeVars_Appl(ATAgetFirst(DataExprs), BoundVars, PFreeVars);
     DataExprs = ATgetNext(DataExprs);
   }
+}
+
+ATermAppl gsImplSortStruct(ATermAppl SortStruct, ATermList *PSubsts,
+  TDataDecls *PDataDecls)
+{
+  assert(gsIsSortStruct(SortStruct));
+  //declare fresh sort identifier for SortStruct
+  ATermAppl SortId = gsMakeFreshStructSortId((ATerm) PDataDecls->Sorts);
+  PDataDecls->Sorts = ATinsert(PDataDecls->Sorts, (ATerm) SortId);
+  //add substitution for this identifier
+  ATermAppl Subst = gsMakeSubst(SortStruct, SortId);
+  *PSubsts = gsAddSubstToSubsts(Subst, *PSubsts);
+  return SortId;
 }
 
 ATermAppl gsImplSetBagEnum(ATermList Elts, ATermAppl SortExpr)

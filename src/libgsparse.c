@@ -1,5 +1,5 @@
 #define  NAME      "libgsparse"
-#define  LVERSION  "0.1.35"
+#define  LVERSION  "0.1.36"
 #define  AUTHOR    "Aad Mathijssen"
 
 #ifdef __cplusplus
@@ -390,7 +390,7 @@ void gsPrintPart(FILE *OutStream, const ATermAppl Part, bool ShowSorts,
     //print time
     if (IsTimed) {
       fprintf(OutStream, " @ ");
-      gsPrintPart(OutStream, ATAgetArgument(Part, 3), ShowSorts, 11);
+      gsPrintPart(OutStream, ATAgetArgument(Part, 3), ShowSorts, 12);
     }
     fprintf(OutStream, " . ");
     //print process reference
@@ -508,10 +508,10 @@ void gsPrintPart(FILE *OutStream, const ATermAppl Part, bool ShowSorts,
     if (gsIsOpIdPrefix(Head) && ArgsLength == 1) {
       //print prefix expression
       gsDebugMsg("printing prefix expression\n");
-      if (PrecLevel > 11) fprintf(OutStream, "(");
+      if (PrecLevel > 12) fprintf(OutStream, "(");
       gsPrintPart(OutStream, Head, ShowSorts, PrecLevel);
-      gsPrintPart(OutStream, ATAelementAt(Args, 0), ShowSorts, 11);
-      if (PrecLevel > 11) fprintf(OutStream, ")");
+      gsPrintPart(OutStream, ATAelementAt(Args, 0), ShowSorts, 12);
+      if (PrecLevel > 12) fprintf(OutStream, ")");
     } else if (gsIsOpIdInfix(Head) && ArgsLength == 2) {
       //print infix expression
       gsDebugMsg("printing infix expression\n");
@@ -540,7 +540,7 @@ void gsPrintPart(FILE *OutStream, const ATermAppl Part, bool ShowSorts,
       //print negation (ArgsLength == 1)
       gsDebugMsg("printing negation\n");
       fprintf(OutStream, "-");
-      gsPrintPart(OutStream, ATAelementAt(Args, 0), ShowSorts, 11);
+      gsPrintPart(OutStream, ATAelementAt(Args, 0), ShowSorts, 12);
     } else if (gsIsDataVarIdOpId(Part)) {
       //print untyped data variable or operation identifier
       gsDebugMsg("printing untyped data variable or operation identifier\n");
@@ -556,12 +556,12 @@ void gsPrintPart(FILE *OutStream, const ATermAppl Part, bool ShowSorts,
     } else {
       //print data application
       gsDebugMsg("printing data application\n");
-      if (PrecLevel > 12) fprintf(OutStream, "(");
-      gsPrintPart(OutStream, Head, ShowSorts, 12);
+      if (PrecLevel > 13) fprintf(OutStream, "(");
+      gsPrintPart(OutStream, Head, ShowSorts, 13);
       fprintf(OutStream, "(");
       gsPrintParts(OutStream, Args, ShowSorts, 0, NULL, ", ");
       fprintf(OutStream, ")");
-      if (PrecLevel > 12) fprintf(OutStream, ")");
+      if (PrecLevel > 13) fprintf(OutStream, ")");
     }
   } else if (gsIsNumber(Part)) {
     //print number
@@ -590,12 +590,12 @@ void gsPrintPart(FILE *OutStream, const ATermAppl Part, bool ShowSorts,
   } else if (gsIsForall(Part) || gsIsExists(Part)) {
     //print universal/existential quantification
     gsDebugMsg("printing universal/existential quantification\n");
-    if (PrecLevel > 11) fprintf(OutStream, "(");
+    if (PrecLevel > 12) fprintf(OutStream, "(");
     fprintf(OutStream, (gsIsForall(Part))?"forall ":"exists ");
     gsPrintDecls(OutStream, ATLgetArgument(Part, 0), NULL, ", ");
     fprintf(OutStream, ". ");
-    gsPrintPart(OutStream, ATAgetArgument(Part, 1), ShowSorts, 11);
-    if (PrecLevel > 11) fprintf(OutStream, ")");
+    gsPrintPart(OutStream, ATAgetArgument(Part, 1), ShowSorts, 12);
+    if (PrecLevel > 12) fprintf(OutStream, ")");
   } else if (gsIsLambda(Part)) {
     //print lambda abstraction
     gsDebugMsg("printing lambda abstraction\n");
@@ -686,7 +686,7 @@ void gsPrintPart(FILE *OutStream, const ATermAppl Part, bool ShowSorts,
     //print conditional
     gsDebugMsg("printing conditional\n");
     if (PrecLevel > 4) fprintf(OutStream, "(");
-    gsPrintPart(OutStream, ATAgetArgument(Part, 0), ShowSorts, 11);
+    gsPrintPart(OutStream, ATAgetArgument(Part, 0), ShowSorts, 12);
     fprintf(OutStream, " -> ");
     gsPrintPart(OutStream, ATAgetArgument(Part, 1), ShowSorts, 5);
     ATermAppl PartElse = ATAgetArgument(Part, 2);
@@ -709,7 +709,7 @@ void gsPrintPart(FILE *OutStream, const ATermAppl Part, bool ShowSorts,
     if (PrecLevel > 6) fprintf(OutStream, "(");
     gsPrintPart(OutStream, ATAgetArgument(Part, 0), ShowSorts, 6);
     fprintf(OutStream, " @ ");
-    gsPrintPart(OutStream, ATAgetArgument(Part, 1), ShowSorts, 11);
+    gsPrintPart(OutStream, ATAgetArgument(Part, 1), ShowSorts, 12);
     if (PrecLevel > 6) fprintf(OutStream, ")");
   } else if (gsIsSync(Part)) {
     //print sync

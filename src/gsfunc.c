@@ -2593,9 +2593,9 @@ bool gsIsOpIdInfix(ATermAppl Term)
        (OpIdName == gsOpIdNameSetDiff)      ||
        (OpIdName == gsOpIdNameBagUnion)     ||
        (OpIdName == gsOpIdNameBagDiff)      ||
-       (OpIdName == gsOpIdNameMult)         ||
        (OpIdName == gsOpIdNameDiv)          ||
        (OpIdName == gsOpIdNameMod)          ||
+       (OpIdName == gsOpIdNameMult)         ||
        (OpIdName == gsOpIdNameEltAt)        ||
        (OpIdName == gsOpIdNameSetIntersect) ||
        (OpIdName == gsOpIdNameBagIntersect));
@@ -2632,13 +2632,14 @@ int gsPrecOpIdInfix(ATermAppl OpIdInfix)
       (OpIdName == gsOpIdNameBagUnion) || (OpIdName == gsOpIdNameBagDiff)
       ) {
     return 9;
+  } else if ((OpIdName == gsOpIdNameDiv) || (OpIdName == gsOpIdNameMod)) {
+    return 10;
   } else if (
-      (OpIdName == gsOpIdNameMult) || (OpIdName == gsOpIdNameDiv) ||
-      (OpIdName == gsOpIdNameMod) || (OpIdName == gsOpIdNameEltAt) ||
+      (OpIdName == gsOpIdNameMult) || (OpIdName == gsOpIdNameEltAt) ||
       (OpIdName == gsOpIdNameSetIntersect) ||
       (OpIdName == gsOpIdNameBagIntersect)
       ){
-    return 10;
+    return 11;
   } else {
     //something went wrong
     return -1;
@@ -2674,13 +2675,14 @@ int gsPrecOpIdInfixLeft(ATermAppl OpIdInfix)
       (OpIdName == gsOpIdNameBagUnion) || (OpIdName == gsOpIdNameBagDiff)
       ) {
     return 9;
+  } else if ((OpIdName == gsOpIdNameDiv) || (OpIdName == gsOpIdNameMod)) {
+    return 10;
   } else if (
-      (OpIdName == gsOpIdNameMult) || (OpIdName == gsOpIdNameDiv) ||
-      (OpIdName == gsOpIdNameMod) || (OpIdName == gsOpIdNameEltAt) ||
+      (OpIdName == gsOpIdNameMult) || (OpIdName == gsOpIdNameEltAt) ||
       (OpIdName == gsOpIdNameSetIntersect) ||
       (OpIdName == gsOpIdNameBagIntersect)
       ){
-    return 10;
+    return 11;
   } else {
     //something went wrong
     return -1;
@@ -2716,13 +2718,14 @@ int gsPrecOpIdInfixRight(ATermAppl OpIdInfix)
       (OpIdName == gsOpIdNameBagUnion) || (OpIdName == gsOpIdNameBagDiff)
       ) {
     return 10;
+  } else if ((OpIdName == gsOpIdNameDiv) || (OpIdName == gsOpIdNameMod)) {
+    return 11;
   } else if (
-      (OpIdName == gsOpIdNameMult) || (OpIdName == gsOpIdNameDiv) ||
-      (OpIdName == gsOpIdNameMod) || (OpIdName == gsOpIdNameEltAt) ||
+      (OpIdName == gsOpIdNameMult) || (OpIdName == gsOpIdNameEltAt) ||
       (OpIdName == gsOpIdNameSetIntersect) ||
       (OpIdName == gsOpIdNameBagIntersect)
       ){
-    return 11;
+    return 12;
   } else {
     //something went wrong
     return -1;

@@ -68,7 +68,7 @@ ATermAppl gsSpecEltsToSpec(ATermList SpecElts);
 %type <appl> sort_constant sort_constructor data_expr data_expr_whr whr_decl
 %type <appl> data_expr_lambda data_expr_imp data_expr_and data_expr_eq
 %type <appl> data_expr_rel data_expr_cons data_expr_snoc data_expr_concat
-%type <appl> data_expr_add data_expr_mult data_expr_quant_prefix
+%type <appl> data_expr_add data_expr_div data_expr_mult data_expr_quant_prefix
 %type <appl> data_expr_postfix data_expr_primary data_constant data_enumeration
 %type <appl> bag_enum_elt data_comprehension data_var_decl proc_expr
 %type <appl> proc_expr_choice proc_expr_sum proc_expr_merge proc_expr_binit
@@ -851,17 +851,17 @@ data_expr_concat:
 
 //addition and subtraction
 data_expr_add:
-  data_expr_mult
+  data_expr_div
     {
       $$ = $1;
     }
-  | data_expr_add PLUS data_expr_mult
+  | data_expr_add PLUS data_expr_div
     {
       $$ = gsMakeDataApplProd(gsMakeDataVarIdOpId($2),
         ATmakeList2((ATerm) $1, (ATerm) $3));
       gsDebugMsg("parsed addition or set union\n  %t\n", $$);
     }
-  | data_expr_add MINUS data_expr_mult
+  | data_expr_add MINUS data_expr_div
     {
       $$ = gsMakeDataApplProd(gsMakeDataVarIdOpId($2),
         ATmakeList2((ATerm) $1, (ATerm) $3));
@@ -869,7 +869,27 @@ data_expr_add:
     }
   ;
 
-//multiplication and division
+//division
+data_expr_div:
+  data_expr_mult
+    {
+      $$ = $1;
+    }
+  | data_expr_div DIV data_expr_mult
+    {
+      $$ = gsMakeDataApplProd(gsMakeDataVarIdOpId($2),
+        ATmakeList2((ATerm) $1, (ATerm) $3));
+      gsDebugMsg("parsed div expression\n  %t\n", $$);
+    }
+  | data_expr_div MOD data_expr_mult
+    {
+      $$ = gsMakeDataApplProd(gsMakeDataVarIdOpId($2),
+        ATmakeList2((ATerm) $1, (ATerm) $3));
+      gsDebugMsg("parsed mod expression\n  %t\n", $$);
+    }
+  ;
+
+//multiplication and list at
 data_expr_mult:
   data_expr_quant_prefix
     {
@@ -880,18 +900,6 @@ data_expr_mult:
       $$ = gsMakeDataApplProd(gsMakeDataVarIdOpId($2),
         ATmakeList2((ATerm) $1, (ATerm) $3));
       gsDebugMsg("parsed multiplication or set intersection\n  %t\n", $$);
-    }
-  | data_expr_mult DIV data_expr_quant_prefix
-    {
-      $$ = gsMakeDataApplProd(gsMakeDataVarIdOpId($2),
-        ATmakeList2((ATerm) $1, (ATerm) $3));
-      gsDebugMsg("parsed div expression\n  %t\n", $$);
-    }
-  | data_expr_mult MOD data_expr_quant_prefix
-    {
-      $$ = gsMakeDataApplProd(gsMakeDataVarIdOpId($2),
-        ATmakeList2((ATerm) $1, (ATerm) $3));
-      gsDebugMsg("parsed mod expression\n  %t\n", $$);
     }
   | data_expr_mult DOT data_expr_quant_prefix
     {
