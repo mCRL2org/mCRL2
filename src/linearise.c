@@ -1,5 +1,5 @@
 
-/* $Id: main.c,v 1.2 2004/11/23 12:36:17 uid523 Exp $ */
+/*Id: main.c,v 1.2 2004/11/23 12:36:17 uid523 Exp $ */
 
 /* TODO:
  * Include time.
@@ -352,6 +352,13 @@ static ATermAppl getTargetSort(ATermAppl sortterm)
   return NULL;
 }
 
+static ATermList linGetSorts(ATermList l)
+{ if (l==ATempty) return ATempty;
+
+  return ATinsertA(linGetSorts(ATgetNext(l)),
+                   gsGetSort(ATAgetFirst(l)));
+}
+
 static int existsort(ATermAppl sortterm)
 /* Delivers 0 if sort does not exists. Otherwise 1 
    indicating that the sort exists */
@@ -382,7 +389,8 @@ static int existsort(ATermAppl sortterm)
     if (objectdata[n].object==sort) return 1;
     return 0;
   }
-  gsErrorMsg("Internal: Expected a sortterm %t",sortterm);
+  assert(0);
+  ATerror("Internal: Expected a sortterm %t",sortterm);
   return 0;
 }
 
@@ -500,7 +508,7 @@ static ATermList getparameters(ATermAppl multiAction)
     { result=ATinsertA(result,
                gsMakeDataVarId(
                      fresh_name("a"),
-                     ATAgetArgument(ATAgetFirst(l1),1)));
+                     ATAgetFirst(l1)));
     }
   }
   return ATreverse(result);
@@ -509,7 +517,8 @@ static ATermList getparameters(ATermAppl multiAction)
 static ATermList getarguments(ATermAppl multiAction)
 { ATermList result=ATempty;
 
-  for(ATermList l=ATLgetArgument(multiAction,1) ;
+  ATfprintf(stderr,"AAAA %t\n",multiAction);
+  for(ATermList l=ATLgetArgument(multiAction,0) ;
                 l!=ATempty ;
                 l=ATgetNext(l))
   { for(ATermList l1=ATLgetArgument(ATAgetFirst(l),1) ;
@@ -535,10 +544,10 @@ static ATermAppl makemultiaction(ATermList actionIds,ATermList args)
   return linMakeMultiAction(ATreverse(result));
 }
 
-
 static long addMultiAction(ATermAppl multiAction, ATbool *isnew)
 {
   ATermList actionnames=getnames(multiAction);
+  ATfprintf(stderr,"GETNAMES %t\n",actionnames);
   long n=addObject((ATermAppl)actionnames,isnew);
   
   
@@ -546,6 +555,7 @@ static long addMultiAction(ATermAppl multiAction, ATbool *isnew)
   { 
     newobject(n);
     objectdata[n].parameters=getparameters(multiAction);
+    ATfprintf(stderr,"GETPARAMETERS %t\n",objectdata[n].parameters);
     objectdata[n].objectname=(ATermAppl)actionnames;
     objectdata[n].object=multiact;
     objectdata[n].processbody=
@@ -764,6 +774,7 @@ static long insertProcDeclaration(
   objectdata[n].processbody=body;
   objectdata[n].processstatus=s;
   objectdata[n].parameters=parameters;
+  ATfprintf(stderr,"BRRRRR %t\n",procId);
 #ifndef NDEBUG
   { for(ATermList l=ATLgetArgument(procId,1); !ATisEmpty(l); 
                   l=ATgetNext(l))
@@ -1265,6 +1276,7 @@ static ATermAppl fresh_name(char *name)
 
 static int occursinterm(ATermAppl var, ATermAppl t)
 { 
+  ATfprintf(stderr,"BBBBB %t\n",t);
   if (gsIsDataVarId(t))
   { return var==t; }
 
@@ -1280,6 +1292,7 @@ static int occursinterm(ATermAppl var, ATermAppl t)
 
 static int occursintermlist(ATermAppl var, ATermList l)
 { 
+  ATfprintf(stderr,"BBBBBLIST %t\n",l);
   for( ; l!=ATempty ; l=ATgetNext(l))
   { if (occursinterm(var,ATAgetFirst(l)))
     return 1;
@@ -1309,6 +1322,7 @@ static int occursinmultiaction(ATermAppl var, ATermList ma)
 
 static int occursinpCRLterm(ATermAppl var, ATermAppl p, int strict)
 { 
+  ATfprintf(stderr,"DDDD %t\n",p);
   if (gsIsChoice(p))
   { return occursinpCRLterm(var,ATAgetArgument(p,0),strict)||
            occursinpCRLterm(var,ATAgetArgument(p,1),strict);
@@ -1361,6 +1375,8 @@ static void alphaconvert(
      or occurterms. It extends rename_vars and rename 
      terms to rename the replaced variables to new ones. */
   ATermList newsumvars=ATempty;
+
+  ATfprintf(stderr,"ALPHA %t    %t\n",occurvars,occurterms);
 
   for(ATermList l=*sumvars ; l!=ATempty ; l=ATgetNext(l))
   { ATermAppl var=ATAgetFirst(l);
@@ -1496,7 +1512,7 @@ static ATermAppl substitute_pCRLproc(
                  ATermList vars, 
                  ATermList pars,
                  ATermAppl p)
-{ 
+{ ATfprintf(stderr,"SUBSTPCRL %t %t\n",vars,pars);
   if (gsIsChoice(p))  /* "Choice(<term>,<term>)" */
   { return gsMakeChoice(
                 substitute_pCRLproc(vars,pars,ATAgetArgument(p,0)),
@@ -1552,22 +1568,6 @@ static ATermAppl substitute_pCRLproc(
   return NULL;
 }
 
-/* ATerm substitute_parlist(char *arg, char *par,ATerm l)
-{ char *s1=NULL, *s2=NULL;
-  ATerm t3=NULL;
-  if (ATmatch(l,"ins(<str>,<str>,<term>)",&s1,&s2,&l))
-   { if (strequal(par,s1))
-        t3=ATmake("ins(<str>,<str>,<term>)",arg,s2,l);
-     else t3=ATmake("ins(<str>,<str>,<term>)",s1,s2,
-          substitute_parlist(arg,par,l));
-   }
-  else if (l==emv_term) 
-        t3=l;
-  else ATerror("Expect variablelist %t",l);
-  
-  return t3;
-} */
-
 /********************************************************************/
 /*                                                                  */
 /*   BELOW THE PROCEDURES ARE GIVEN TO TRANFORM PROCESSES TO        */
@@ -1576,8 +1576,6 @@ static ATermAppl substitute_pCRLproc(
 /*                                                                  */
 /*                                                                  */
 /********************************************************************/
-
-
 
 typedef enum { first, later } variableposition;
 
@@ -1606,12 +1604,13 @@ static ATermAppl newprocess(ATermList parameters, ATermAppl body,
               processstatustype ps)
 { 
   parameters=parameters_that_occur_in_body(parameters, body);
-  ATermAppl p=gsMakeProcVarId(fresh_name("P"),parameters);
+  ATermAppl p=gsMakeProcVarId(fresh_name("P"),linGetSorts(parameters));
   insertProcDeclaration(
              p,
              parameters,
              body,
              ps);
+  ATfprintf(stderr,"NEWPROCES %t\n",p);
   return p;
 }
 
@@ -1658,7 +1657,7 @@ static ATermAppl wraptime(
     return gsMakeAtTime(
               gsMakeProcess(
                  newproc,
-                 ATLgetArgument(newproc,1)),
+                 objectdata[objectIndex(newproc)].parameters),
               time);
   }
 
@@ -1749,7 +1748,7 @@ static ATermAppl bodytovarheadGNF(
       }  
      body=bodytovarheadGNF(body,alt,freevars,first);
      newproc=newprocess(freevars,body,pCRL);
-     return gsMakeProcess(newproc,ATLgetArgument(newproc,1));
+     return gsMakeProcess(newproc,objectdata[objectIndex(newproc)].parameters);
    }
 
   if (gsIsSum(body)) 
@@ -1765,7 +1764,7 @@ static ATermAppl bodytovarheadGNF(
     }
     body=bodytovarheadGNF(body,alt,freevars,first);
     newproc=newprocess(freevars,body1,pCRL);
-    return gsMakeProcess(newproc,ATLgetArgument(newproc,1));
+    return gsMakeProcess(newproc,objectdata[objectIndex(newproc)].parameters);
   }
   
   if (gsIsCond(body))
@@ -1801,7 +1800,7 @@ static ATermAppl bodytovarheadGNF(
     }     
     body=bodytovarheadGNF(body,alt,freevars,first);
     newproc=newprocess(freevars,body,pCRL);
-    return gsMakeProcess(newproc,ATLgetArgument(newproc,1));
+    return gsMakeProcess(newproc,objectdata[objectIndex(newproc)].parameters);
   } 
 
   if (gsIsSeq(body))
@@ -1815,17 +1814,21 @@ static ATermAppl bodytovarheadGNF(
     } 
     body1=bodytovarheadGNF(body,alt,freevars,first);
     newproc=newprocess(freevars,body1,pCRL);
-    return gsMakeProcess(newproc,ATLgetArgument(newproc,1));
+    return gsMakeProcess(newproc,objectdata[objectIndex(newproc)].parameters);
   }
 
   if (gsIsAction(body))
   { ATbool isnew=0;
+    ATfprintf(stderr,"BODY %t\n",body);
     ATermAppl ma=linMakeMultiAction(ATinsertA(ATempty,body)); 
     if ((s==multiaction)||(v==first))
     { return ma;
     }
     
     long n=addMultiAction(ma,&isnew); 
+  
+    ATfprintf(stderr,"MA %t\n",ma);
+    
     
     if (objectdata[n].targetsort==NULL)
     { /* this action does not yet have a corresponding process, which
@@ -1840,7 +1843,8 @@ static ATermAppl bodytovarheadGNF(
   }  
 
   if (gsIsSync(body))
-  { ATbool isnew=0;
+  { 
+    ATbool isnew=0;
     ATermAppl body1=ATAgetArgument(body,0);
     ATermAppl body2=ATAgetArgument(body,1);
     ATermAppl ma=linMergeMultiAction(
@@ -1883,7 +1887,7 @@ static ATermAppl bodytovarheadGNF(
     /* make a new process, containing this process */
     newproc=newprocess(freevars,body1,pCRL);
     ATfprintf(stderr,"AAAAAAA %t\n",newproc);
-    return gsMakeProcess(newproc,ATLgetArgument(newproc,1));
+    return gsMakeProcess(newproc,objectdata[objectIndex(newproc)].parameters);
   }
   
   if (gsIsProcess(body))
@@ -1960,11 +1964,11 @@ static ATermAppl putbehind(ATermAppl body1, ATermAppl body2)
     ATermList terms=ATempty;
     alphaconvert(&sumvars,&vars,&terms,ATempty,ATinsertA(ATempty,body2));
     return gsMakeSum(
-          sumvars,
-          putbehind(substitute_pCRLproc(
-                       vars,
-                       terms,
-                       ATAgetArgument(body1,1)),
+               sumvars,
+               putbehind(substitute_pCRLproc(
+                            vars,
+                            terms,
+                            ATAgetArgument(body1,1)),
                     body2));
   }
   
@@ -2058,7 +2062,7 @@ static ATermAppl distribute_sum(ATermList sumvars,ATermAppl body1)
   
   if (gsIsSeq(body1)||
       gsIsCond(body1)||
-      gsIsAction(body1)||
+      linIsMultiAction(body1)||
       gsIsProcess(body1))
   { return gsMakeSum(sumvars,body1);
   }
@@ -2276,7 +2280,7 @@ static ATermAppl to_regular_form(
                     ATconcat(sumvars,freevars)));
   }
   
-  if (gsIsAction(t)||gsIsDelta(t)||gsIsTau(t)) 
+  if (linIsMultiAction(t)||gsIsDelta(t)||gsIsTau(t)) 
   { return t;    
   }
   
@@ -2361,7 +2365,7 @@ static ATermAppl procstorealGNFbody(
    GNF where one action is always followed by a
    variable. */
 { 
-
+  ATfprintf(stderr,"proctoREAL %t\n",body);
   if (gsIsAtTime(body))
   { ATermAppl timecondition=NULL;
     ATermAppl body1=procstorealGNFbody(
@@ -2446,9 +2450,10 @@ static ATermAppl procstorealGNFbody(
     /* The variable is a pCRL process and v==first, so,
        we must now substitute */
     procstorealGNFrec(ATAgetArgument(body,0),first,todo,regular);
+    ATfprintf(stderr,"Processbody %t\n",body);
     t3=substitute_pCRLproc(
          ATLgetArgument(body,1),
-         ATLgetArgument(t,1),
+         objectdata[objectIndex(t)].parameters,
          objectdata[objectIndex(t)].processbody);
     if (regular)
              t3=to_regular_form(t3,todo,freevars);
@@ -2663,30 +2668,6 @@ static ATermAppl makenewsort(
   spec->sorts=ATinsertA(spec->sorts,newSort); 
   return newSort;
 }
-
-
-/* static ATermAppl makenewobject(
-                   char *s, 
-                   ATermList argsorts, 
-                   ATermAppl targetsort, 
-                   objecttype o,
-                   specificationbasictype *spec, 
-                   int exactstring)
-{ 
-  if (!exactstring) 
-     s=fresh_name(s);
-  
-  insertobject(s,args,n,o);
-  if (o==func)
-   { spec->funcs=ATmake(
-            "ins(f(<str>,<term>,<str>),<term>)",s,args,target,spec->funcs);
-   }
-  if (o==map)
-   { spec->maps=ATmake(
-            "ins(f(<str>,<term>,<str>),<term>)",s,args,target,spec->maps);
-   }
-  return s;
-} */
 
 /****************  Declare local datatypes  ******************************/
 
