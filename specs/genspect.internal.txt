@@ -1,5 +1,10 @@
-// Date: 09-02-2005
+// Date: 18-02-2005
 // This document describes the internal format of the GenSpect language. Here:
+// - three phases of implementation are distinguised, namely type checking (tc),
+//   data implementation (di) and linearisation (lin)
+// - (+p)/(-p) at the end of a branch means that this branch is added/removed at
+//   the end of phase p 
+// - <Int> is an ATermInt
 // - <String> is an arbitrary non-empty string
 // - <NumberString> is a string of the format '"0"|("-"?[1-9][0-9]*)'
 // - <String> and <NumberString> are represented by a quoted ATermAppl constant
@@ -30,36 +35,40 @@
 //-------------
 
 //specification
-<Spec>        ::= SpecV1(SortSpec(<SortDecl>*), ConsSpec(<OpId>*),
-                    MapSpec(<OpId>*), DataEqnSpec(<DataEqn>*),
-                    ActSpec(<ActId>*), ProcEqnSpec(<ProcEqn>*), Init(<ProcExpr>)
-                  )
+<Spec>         ::= SpecV1(SortSpec(<SortDecl>*), ConsSpec(<OpId>*),
+                     MapSpec(<OpId>*), DataEqnSpec(<DataEqn>*),
+                     ActSpec(<ActId>*), <ProcEqnSpec>, <Init>)
 
 //sort declaration
-<SortDecl>    ::= <SortId>
-                | <SortRef>                                               (- di)
+<SortDecl>     ::= <SortId>
+                 | <SortRef>                                             (- di)
 
 //sort identifier
-<SortId>      ::= SortId(<String>)
+<SortId>       ::= SortId(<String>)
 
 //sort reference
-<SortRef>     ::= SortRef(<String>, <SortExpr>)                           (- di)
+<SortRef>      ::= SortRef(<String>, <SortExpr>)
 
 //operation identifier
-<OpId>        ::= OpId(<String>, <SortExpr>)
+<OpId>         ::= OpId(<String>, <SortExpr>)
 
 //data equation
-<DataEqn>     ::= DataEqn(<DataVarId>*, <DataCond>, <DataExpr>, <DataExpr>)
+<DataEqn>      ::= DataEqn(<DataVarId>*, <DataExprOrNil>,
+                     <DataExpr>, <DataExpr>)
 
 //data variable identifier
-<DataVarId>   ::= DataVarId(<String>, <SortExpr>)
+<DataVarId>    ::= DataVarId(<String>, <SortExpr>)
 
-//data condition
-<DataCond>    ::= <DataExpr>
-                | Nil
+//data expression or nil
+<DataExprOrNil>::= <DataExpr>
+                 | Nil
 
 //action identifier
-<ActId>       ::= ActId(<String>, <SortExpr>*)
+<ActId>        ::= ActId(<String>, <SortExpr>*)
+
+//process equations or LPE
+<ProcEqnSpec>  ::= ProcEqnSpec(<ProcEqn>*)                               (-lin)
+                 | LPE(<DataVarId>*, <LPESummand>*)                      (+lin)
 
 //process equation
 <ProcEqn>     ::= ProcEqn(<ProcVarId>, <DataVarId>*, <ProcExpr>)
@@ -67,59 +76,73 @@
 //process identifier
 <ProcVarId>   ::= ProcVarId(<String>, <SortExpr>*)
 
+//LPE summand
+<LPESummand>  ::= LPESummand(<DataVarId>*, <DataExpr>, <Action>*,
+                    <DataExprOrNil>, <IndexedTerm>*)
+
+//Action
+<Action>      ::= Action(<ActId>, <DataExpr>*)
+
+//Indexed term
+<IndexedTerm> ::= IndexedTerm(<Int>, <DataExprOrNil>)
+
+//process expressions or data expression
+<Init>        ::= Init(<ProcExpr>)                                       (-lin)
+                | LPEInit(<DataExpr>*)                                   (+lin)
+
 //Expressions
 //-----------
 
 //sort expression
 <SortExpr>    ::= <SortId>
-                | SortList(<SortExpr>)                                    (- di)
-                | SortSet(<SortExpr>)                                     (- di)
-                | SortBag(<SortExpr>)                                     (- di)
-                | SortStruct(<StructCons>+)                               (- di)
-                | SortArrowProd(<SortExpr>+, <SortExpr>)                  (- di)
-                | SortArrow(<SortExpr>, <SortExpr>)                       (+ di)
+                | SortList(<SortExpr>)                                   (- di)
+                | SortSet(<SortExpr>)                                    (- di)
+                | SortBag(<SortExpr>)                                    (- di)
+                | SortStruct(<StructCons>+)                              (- di)
+                | SortArrowProd(<SortExpr>+, <SortExpr>)                 (- di)
+                | SortArrow(<SortExpr>, <SortExpr>)                      (+ di)
 
 //constructor declaration of a structured sort
-<StructCons>  ::= StructCons(<String>, <StructProj>*, <StringOrNil>)      (- di)
+<StructCons>  ::= StructCons(<String>, <StructProj>*, <StringOrNil>)
 
 //projection declaration of a structured sort
-<StructProj>  ::= StructProj(<StringOrNil>, <SortExpr>+)                  (- di)
+<StructProj>  ::= StructProj(<StringOrNil>, <SortExpr>+)
 
 //string or nil
 <StringOrNil> ::= <String>
                 | Nil
 
 //data expression
-<DataExpr>    ::= DataVarIdOpId(<String>)                                 (- tc)
-                | <DataVarId>                                             (+ tc)
-                | <OpId>                                                  (+ tc)
-                | DataApplProd(<DataExpr>, <DataExpr>+)                   (- di)
-                | DataAppl(<DataExpr>, <DataExpr>)                        (+ di)
-                | Number(<NumberString>, <SortExprOrUnknown>)             (- di)
-                | ListEnum(<DataExpr>+, <SortExprOrUnknown>)              (- di)
-                | SetEnum(<DataExpr>+, <SortExprOrUnknown>)               (- di)
-                | BagEnum(<BagEnumElt>+, <SortExprOrUnknown>)             (- di)
-                | SetBagComp(<DataVarId>, <DataExpr>)                     (- di)
-                | Forall(<DataVarId>+, <DataExpr>)                        (- di)
-                | Exists(<DataVarId>+, <DataExpr>)                        (- di)
-                | Lambda(<DataVarId>+, <DataExpr>)                        (- di)
-                | Whr(<DataExpr>, <WhrDecl>+)                             (- di)
+<DataExpr>    ::= DataVarIdOpId(<String>)                                (- tc)
+                | <DataVarId>                                            (+ tc)
+                | <OpId>                                                 (+ tc)
+                | DataApplProd(<DataExpr>, <DataExpr>+)                  (- di)
+                | DataAppl(<DataExpr>, <DataExpr>)                       (+ di)
+                | Number(<NumberString>, <SortExprOrUnknown>)            (- di)
+                | ListEnum(<DataExpr>+, <SortExprOrUnknown>)             (- di)
+                | SetEnum(<DataExpr>+, <SortExprOrUnknown>)              (- di)
+                | BagEnum(<BagEnumElt>+, <SortExprOrUnknown>)            (- di)
+                | SetBagComp(<DataVarId>, <DataExpr>)                    (- di)
+                | Forall(<DataVarId>+, <DataExpr>)                       (- di)
+                | Exists(<DataVarId>+, <DataExpr>)                       (- di)
+                | Lambda(<DataVarId>+, <DataExpr>)                       (- di)
+                | Whr(<DataExpr>, <WhrDecl>+)                            (- di)
 
 //sort expression or unknown
 <SortExprOrUnknown>
               ::= <SortExpr> 
-                | Unknown                                                 (- tc)
+                | Unknown                                                (- tc)
 
 //bag enumeration element
-<BagEnumElt>  ::= BagEnumElt(<DataExpr>, <DataExpr>)                      (- di)
+<BagEnumElt>  ::= BagEnumElt(<DataExpr>, <DataExpr>)
 
 //where clause declaration
-<WhrDecl>     ::= WhrDecl(<String>, <DataExpr>)                           (- di)
+<WhrDecl>     ::= WhrDecl(<String>, <DataExpr>)
 
 //process expression
-<ProcExpr>    ::= ActionProcess(<String>, <DataExpr>*)                    (- tc)
-                | Action(<ActId>, <DataExpr>*)                            (+ tc)
-                | Process(<ProcVarId>, <DataExpr>*)                       (+ tc)
+<ProcExpr>    ::= ActionProcess(<String>, <DataExpr>*)                   (- tc)
+                | <Action>                                               (+ tc)
+                | Process(<ProcVarId>, <DataExpr>*)                      (+ tc)
                 | Delta
                 | Tau 
                 | Sum(<DataVarId>+, <ProcExpr>) 
