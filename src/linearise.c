@@ -5291,7 +5291,6 @@ static ATermAppl allowcomposition(ATermList allowlist, ATermAppl ips)
   ATermList sourcesumlist=linGetSums(ips);
   allowlist=sortMultiActionLabels(allowlist);
 
-
   for( ; sourcesumlist!=ATempty ; sourcesumlist=ATgetNext(sourcesumlist))
   { ATermAppl summand=ATAgetFirst(sourcesumlist);
     ATermList sumvars=linGetSumVars(summand);
@@ -5632,11 +5631,13 @@ static ATermList addActionCondition(
                      ATermAppl condition,
                      ATermList L,
                      ATermList S)
-{ for( ; L!=ATempty ; L=ATgetNext(L))
+{ 
+  /* if firstaction==NULL, it should not be added */
+  for( ; L!=ATempty ; L=ATgetNext(L))
   { ATermAppl firsttuple=ATAgetFirst(L);
     S=ATinsertA(S,
         linMakeTuple(
-          (firstaction?
+          ((firstaction!=NULL)?
                ATinsertA(ATLgetArgument(firsttuple,0), firstaction):
                ATLgetArgument(firsttuple,0)),
           gsMakeDataExprAnd(ATAgetArgument(firsttuple,1),condition)));
@@ -5651,7 +5652,6 @@ static ATermAppl can_communicate(ATermList m,ATermList C)
      otherwise the resulting action is the result. If the
      resulting action is tau, or nil, the result is nil. */
   
-//  ATfprintf(stderr,"CAN_COMMUNICATE\nm: %t\nC: %t\n",m,C);
   for( ; C!=ATempty ; C=ATgetNext(C))
   { ATermAppl commExpr=ATAgetFirst(C);
     assert(gsIsCommExpr(commExpr));
@@ -5659,7 +5659,7 @@ static ATermAppl can_communicate(ATermList m,ATermList C)
     int canCommunicate=1;
     ATermList mwalker=m;
     for( ; ((lhs!=ATempty) && (mwalker!=ATempty)) ; lhs=ATgetNext(lhs))
-    { // ATfprintf(stderr,"ASASSA %t\n%t\n\n",mwalker,lhs);
+    { 
       ATermAppl actionname=ATAgetArgument(ATAgetArgument(ATAgetFirst(mwalker),0),0);
       ATermAppl commname=ATAgetFirst(lhs);
       if (actionname!=commname)
@@ -5670,14 +5670,12 @@ static ATermAppl can_communicate(ATermList m,ATermList C)
     }
     if ((canCommunicate) && (mwalker==ATempty) && (lhs==ATempty))
     { ATermAppl rhs=ATAgetArgument(commExpr,1);
-      // ATfprintf(stderr,"YEYSYESYESYES\n\n");
       if (rhs==gsMakeTau())
       { return gsMakeNil();
       }
       return rhs;
     }
   }
-  // ATfprintf(stderr,"NONONONONON\n\n");
   return NULL;
 }
   
@@ -5701,7 +5699,6 @@ static ATermList phi(ATermList m,
      and C contains a list of multiaction action pairs indicating
      possible commmunications */
 
-  // ATfprintf(stderr,"PHI m: %t\nd: %t\nw: %t\nn: %t\nC: %t\n\n",m,d,w,n,C);
 
   if (n==ATempty)
   { ATermAppl c=can_communicate(m,C); /* returns NULL if no communication
@@ -5709,7 +5706,7 @@ static ATermList phi(ATermList m,
     if (c!=NULL)
     { ATermList T=makeMultiActionConditionList(w,C);
       return addActionCondition(
-                   gsMakeAction(c,d),
+                   ((c==gsMakeNil())?NULL:gsMakeAction(c,d)),
                    gsMakeDataExprTrue(),
                    T,
                    ATempty);
@@ -5783,9 +5780,9 @@ static ATermAppl communicationcomposition(
   communications=resultingCommunications;
 
   
-  ATermList resultsumlist=linGetSums(ips);
+  ATermList resultsumlist=ATempty;
 
-  for(ATermList sourcesumlist=resultsumlist ;
+  for(ATermList sourcesumlist=linGetSums(ips) ;
                 sourcesumlist!=ATempty ; 
                 sourcesumlist=ATgetNext(sourcesumlist))
   { ATermAppl summand=ATAgetFirst(sourcesumlist);
