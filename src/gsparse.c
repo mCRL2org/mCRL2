@@ -1,5 +1,5 @@
 #define  NAME      "gsparse"
-#define  LVERSION  "0.1.13"
+#define  LVERSION  "0.1.14"
 #define  AUTHOR    "Aad Mathijssen"
 
 #ifdef __cplusplus
@@ -66,13 +66,12 @@ bool ParseSpecificationStream(
 //implementation
 
 int main(int argc, char* argv[]) {
-  int   Result                 = 0;
+  int  Result          = 0;
   //declarations for parsing the specification
-  char  *SpecFileName      = NULL;
-  char  *OutputFileName    = NULL;
-  int VbLevel              = 1;
-  bool  NoSave            = false;
-  bool  MoreInfo          = false;
+  char *SpecFileName   = NULL;
+  char *OutputFileName = NULL;
+  bool NoSave          = false;
+  bool MoreInfo        = false;
   //declarations for getopt  
   #define ShortOptions      "qvdn"
   #define HelpOption        CHAR_MAX + 1

@@ -1,5 +1,5 @@
 #define  NAME      "libgsparse"
-#define  LVERSION  "0.1.13"
+#define  LVERSION  "0.1.14"
 #define  AUTHOR    "Aad Mathijssen"
 
 #ifdef __cplusplus
@@ -228,7 +228,6 @@ bool gsPrintPart(FILE *OutStream, ATermAppl Part, int PrecLevel)
   } else if (gsIsSortRef(Part)) {
     //print sort reference
     gsDebugMsg("printing sort reference declaration\n");
-    ATermList Ids = ATLgetArgument(Part, 0);
     ATfprintf(OutStream, "%t = %t", ATgetArgument(Part, 0),
       ATgetArgument(Part, 1));
     Result = true;
@@ -251,7 +250,6 @@ bool gsPrintPart(FILE *OutStream, ATermAppl Part, int PrecLevel)
       }
     }
   }
-finally:
   return Result;
 }
 

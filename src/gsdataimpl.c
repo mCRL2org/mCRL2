@@ -194,13 +194,14 @@ ATermAppl gsImplementBool(ATermAppl Spec)
       (ATerm) gsMakeDataEqn(el, nil, gsMakeDataExprEq(t, f), f),
       (ATerm) gsMakeDataEqn(el, nil, gsMakeDataExprEq(f, t), f),
       (ATerm) gsMakeDataEqn(el, nil, gsMakeDataExprEq(f, f), t),
-      (ATerm) gsMakeDataEqn(el, nil, gsMakeDataExprEq(b, b), t),
-      (ATerm) gsMakeDataEqn(el, nil, gsMakeDataExprNeq(b, c), 
+      (ATerm) gsMakeDataEqn(bl, nil, gsMakeDataExprEq(b, b), t),
+      (ATerm) gsMakeDataEqn(bcl,nil, gsMakeDataExprNeq(b, c), 
                       gsMakeDataExprNot(gsMakeDataExprNeq(b, c))),
-      (ATerm) gsMakeDataEqn(el, nil, gsMakeDataExprIf(t, b, c), b),
-      (ATerm) gsMakeDataEqn(el, nil, gsMakeDataExprIf(f, b, c), c),
-      (ATerm) gsMakeDataEqn(el, nil, gsMakeDataExprIf(b, c, c), c)
+      (ATerm) gsMakeDataEqn(bcl,nil, gsMakeDataExprIf(t, b, c), b),
+      (ATerm) gsMakeDataEqn(bcl, nil, gsMakeDataExprIf(f, b, c), c),
+      (ATerm) gsMakeDataEqn(bcl, nil, gsMakeDataExprIf(b, c, c), c)
     ));
+  return Spec;
 }
 
 ATermAppl gsImplementData(ATermAppl Spec)

@@ -1,5 +1,5 @@
 AC_PREREQ(2.57)
-AC_INIT([GenSpect parser], [0.1.2], [A.H.J.Mathijssen@tue.nl])
+AC_INIT([GenSpect parser], [0.1.14], [A.H.J.Mathijssen@tue.nl])
 AC_PREFIX_DEFAULT([$HOME])
 AC_CONFIG_SRCDIR([gslexer.l])
 
@@ -20,7 +20,7 @@ else
 fi
 
 # Set flags
-CFLAGS="$CFLAGS -std=c99"
+CFLAGS="$CFLAGS -std=c99 -Wall -pedantic"
 LDFLAGS="-L. $LDFLAGS"
 
 # Check for C99 standard
