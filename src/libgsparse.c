@@ -815,10 +815,12 @@ void gsPrintDataEqns(FILE *OutStream, const ATermList DataEqns, bool ShowSorts,
         //declarations of DataEqns starting at StartPrefix. Print this prefix
         //and the corresponding equations,and if necessary, update StartPrefix
         //and reset VarDeclTable.
-        fprintf(OutStream, "var  ");
-        gsPrintDecls(OutStream,
-          gsGroupDeclsBySort(ATreverse(ATtableValues(VarDeclTable))),
-          ";\n", "     ");
+        ATermList VarDecls = ATtableValues(VarDeclTable);
+        if (ATgetLength(VarDecls) > 0) {
+          fprintf(OutStream, "var  ");
+          gsPrintDecls(OutStream, gsGroupDeclsBySort(ATreverse(VarDecls)),
+            ";\n", "     ");
+        }
         fprintf(OutStream, "eqn  ");
         gsPrintParts(OutStream,
           ATgetSlice(DataEqns, StartPrefix, i), ShowSorts, PrecLevel,
