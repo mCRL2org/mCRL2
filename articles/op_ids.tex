@@ -573,17 +573,18 @@ Operation identifiers are used in data expressions. They may be system defined
 or user defined. An identifier is called user defined if the user supplied a
 declaration. It is called system defined if it is defined in this document.
 
-System identifiers are created during the parsing phase and the data removal
-phase. After the parsing phase the types of system identifiers are not known;
-these are determined in the type check phase. More precisely, after parsing
-system identifiers are available as \f{DataVarOpId}'s. During the type checking
-phase these system identifiers are translated to \f{OpId}'s with the correct
-type. System identifiers created in the data removal phase are not yet treated.
+System identifiers are created during the parsing phase and the data
+implementation phase. After the parsing phase the types of system identifiers
+are not known; these are determined in the type check phase. More precisely,
+after parsing system identifiers are available as \f{DataVarOpId}'s. During the
+type checking phase these system identifiers are translated to \f{OpId}'s with
+the correct type. System identifiers created in the data implementation phase
+are marked by a \frm{^*} sign.
 
 In the following, tables are provided that list the name, type, description and
 external representation of each system identifier. This last column indicates
 how the identifier is used as a data expression by the user. We have system
-identifiers for booleans, numbers, lists, sets and bags.
+identifiers for booleans, numbers, lists, sets, bags and lambda expressions.
 
 \subsection*{Booleans}
 
@@ -593,27 +594,31 @@ Here, \frm{S} stands for an arbitrary sort expression.
 \begin{table}[!htb]
 \centering
 \begin{tabular}{l|L|l|l}
-Name         & \text{Type}                      & Description & External repr.\\
+Name          & \text{Type}                     & Description & External repr.\\
 \hline
-\verb+true+  & \srtbool                              & true         & constant\\
-\verb+false+ & \srtbool                              & false        & constant\\
-\verb+!+     & \srtbool \To \srtbool                 & logical negation
-                                                                    & prefix\\
-\verb+&&+    & \srtbool \times \srtbool \To \srtbool & conjunction  & infix\\
-\verb+||+    & \srtbool \times \srtbool \To \srtbool & disjunction  & infix\\
-\verb+=>+    & \srtbool \times \srtbool \To \srtbool & implication  & infix\\
-\verb+==+    & \srtbool \times \srtbool \To \srtbool & equality     & infix\\
-\verb+!=+    & \srtbool \times \srtbool \To \srtbool & inequality   & infix\\
-\verb+if+    & \srtbool \times S \times S \To S
+\verb+true+   & \srtbool                              & true         & constant\\
+\verb+false+  & \srtbool                              & false        & constant\\
+\verb+!+      & \srtbool \To \srtbool                 & logical negation
+                                                                     & prefix\\
+\verb+&&+     & \srtbool \times \srtbool \To \srtbool & conjunction  & infix\\
+\verb+||+     & \srtbool \times \srtbool \To \srtbool & disjunction  & infix\\
+\verb+=>+     & \srtbool \times \srtbool \To \srtbool & implication  & infix\\
+\verb+==+     & S \times S \To \srtbool               & equality     & infix\\
+\verb+!=+     & S \times S \To \srtbool               & inequality   & infix\\
+\verb+if+     & \srtbool \times S \times S \To S
 & conditional of sort \frm{S} & functional\\
+\verb+forall+$^*$ & (S \To \srtbool) \To \srtbool
+& universal quantification over \frm{S} & functional\\
+\verb+exists+$^*$ & (S \To \srtbool) \To \srtbool
+& existential quantification over \frm{S} & functional\\
 \end{tabular}
 \caption{System identifiers for booleans}
 \label{tab:ptc:booleans}
 \end{table}
-
+\newpage
 \subsection*{Numbers}
 
-The system identifiers for positive numbers, natural numbers and integers, are
+The system identifiers for positive numbers, natural numbers and integers are
 listed in table~\ref{tab:ptc:numbers}. Here, \frm{A,B \in \set{\srtpos,
 \srtnat, \srtint}} and \frm{C} is the bigger type of \frm{A} and \frm{B}:
 
@@ -622,6 +627,13 @@ listed in table~\ref{tab:ptc:numbers}. Here, \frm{A,B \in \set{\srtpos,
 \begin{tabular}{l|L|l|l}
 Name        & \text{Type}                  & Description      & External repr.\\
 \hline
+\verb+@1+$^*$       & \srtpos              & one                  & number\\
+\verb+@0.+$^*$      & \srtpos \To \srtpos  & double positive      & number\\
+\verb+@1.+$^*$      & \srtpos \To \srtpos  & double positive plus one & number\\
+\verb+@0+$^*$       & \srtnat              & zero                 & number\\
+\verb+@cPosNat+$^*$ & \srtpos \To \srtnat  & positive as natural  & number\\
+\verb+@-+$^*$       & \srtpos \To \srtint  & negate positive      & number\\
+\verb+@cNatInt+$^*$ & \srtnat \To \srtint  & natural as integer   & number\\
 \verb+-+    & A \To \srtint                & negation             & prefix\\
 \verb-+-    & A \times B \To C             & addition             & infix\\
 \verb+-+    & A \times B \To \srtint       & subtraction          & infix\\
@@ -658,7 +670,7 @@ Name        & \text{Type}                  & Description      & External repr.\\
 \caption{System identifiers for numbers}
 \label{tab:ptc:numbers}
 \end{table}
-
+\newpage
 \subsection*{Lists}
 
 The system identifiers for lists are listed in table~\ref{tab:ptc:lists}. Here,
@@ -704,6 +716,8 @@ The system identifiers for sets are listed in table~\ref{tab:ptc:sets}. Here,
 \begin{tabular}{l|L|l|l}
 Name & \text{Type} & Description & External repr.\\
 \hline
+\verb+@set+    & (S \To \srtbool) \To \fa{Set}{S}
+& set comphrehension & set comprehension\\
 \verb+{}+      & \fa{Set}{S}
 & empty set          & constant\\
 \verb+#+       & \fa{Set}{S} \To \srtnat
@@ -728,7 +742,7 @@ Name & \text{Type} & Description & External repr.\\
 \caption{System identifiers for sets}
 \label{tab:ptc:sets}
 \end{table}
-
+\newpage
 \subsection*{Bags}
 
 The system identifiers for bags are listed in table~\ref{tab:ptc:bags}. Here,
@@ -739,6 +753,8 @@ The system identifiers for bags are listed in table~\ref{tab:ptc:bags}. Here,
 \begin{tabular}{l|L|l|l}
 Name & \text{Type} & Description & External repr.\\
 \hline
+\verb+@set+    & (S \To \srtbool) \To \fa{Bag}{S}
+& bag comphrehension & bag comprehension\\
 \verb+{}+      & \fa{Bag}{S}
 & empty bag          & constant\\
 \verb+#+       & \fa{Bag}{S} \To \srtnat
@@ -763,5 +779,20 @@ Name & \text{Type} & Description & External repr.\\
 \caption{System identifiers for bags}
 \label{tab:ptc:bags}
 \end{table}
+
+\subsection*{Lambda expressions}
+
+A lambda expression is of the form
+\begin{equation}
+\lambda x_{0}{:}S_{0}, \ldots, x_{n}{:}S_{n}.e,
+\label{eq:lambda}
+\end{equation}
+with context variables \frm{x_{-m}{:}S_{-m}, \ldots, x_{-1}{:}S_{-1}} occurring
+in \frm{e}. A system identifier for this expression is \verb+lambda@k+$^*$, of
+type \frm{S_{-m} \times \cdots \times S_{-1} \To S_{0} \To \cdots \To S_{n} \To
+S}. Here, \frm{S} is the type of \frm{e} and \frm{k} is a natural number that
+ensures the uniqueness of the identifier. Expression~\eqref{eq:lambda} is
+implemented by an application of \verb+lambda@k+ to terms of sort \frm{S_{-m},
+\ldots, S_{-1}}, respectively.
 
 \end{document}
