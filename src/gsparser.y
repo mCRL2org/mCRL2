@@ -1175,21 +1175,21 @@ data_constant:
     }
   | NUMBER
     {
-      $$ = gsMakeNumber($1);
+      $$ = gsMakeNumber($1, gsMakeUnknown());
       if (gsDebug) {
         ATprintf("parsed data constant\n  %t\n", $$);
       }
     }
   | PBRACK
     {
-      $$ = gsMakeEmptyList();
+      $$ = gsMakeEmptyList(gsMakeUnknown());
       if (gsDebug) {
         ATprintf("parsed data constant\n  %t\n", $$);
       }
     }
   | PBRACE
     {
-      $$ = gsMakeEmptySetBag();
+      $$ = gsMakeEmptySetBag(gsMakeUnknown());
       if (gsDebug) {
         ATprintf("parsed data constant\n  %t\n", $$);
       }
@@ -1200,21 +1200,21 @@ data_constant:
 data_enumeration:
   LBRACK data_exprs_cs RBRACK
     {
-      $$ = gsMakeListEnum(ATreverse($2));
+      $$ = gsMakeListEnum(ATreverse($2), gsMakeUnknown());
       if (gsDebug) {
         ATprintf("parsed data enumeration\n  %t\n", $$);
       }
     }
   | LBRACE data_exprs_cs RBRACE
     {
-      $$ = gsMakeSetEnum(ATreverse($2));
+      $$ = gsMakeSetEnum(ATreverse($2), gsMakeUnknown());
       if (gsDebug) {
         ATprintf("parsed data enumeration\n  %t\n", $$);
       }
     }
   | LBRACE bag_enum_elts_cs RBRACE
     {
-      $$ = gsMakeBagEnum(ATreverse($2));
+      $$ = gsMakeBagEnum(ATreverse($2), gsMakeUnknown());
       if (gsDebug) {
         ATprintf("parsed data enumeration\n  %t\n", $$);
       }

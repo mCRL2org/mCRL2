@@ -74,9 +74,10 @@ ATermAppl gsMakeDataVar(ATermAppl Name, ATermAppl SortExprOrUnknown)
     (ATerm) SortExprOrUnknown);
 }
 
-ATermAppl gsMakeNumber(ATermAppl NumberString)
+ATermAppl gsMakeNumber(ATermAppl NumberString, ATermAppl SortExprOrUnknown)
 {
-  return ATmakeAppl1(ATmakeAFun("Number", 1, ATfalse), (ATerm) NumberString);
+  return ATmakeAppl2(ATmakeAFun("Number", 2, ATfalse), (ATerm) NumberString,
+    (ATerm) SortExprOrUnknown);
 }
 
 ATermAppl gsMakeSpec(ATermAppl SortSpec, ATermAppl ConsSpec, ATermAppl MapSpec,
@@ -271,19 +272,22 @@ ATermAppl gsMakeWhrDecl(ATermAppl Name, ATermAppl DataExpr)
     (ATerm) DataExpr);
 }
 
-ATermAppl gsMakeListEnum(ATermList DataExprs)
+ATermAppl gsMakeListEnum(ATermList DataExprs, ATermAppl SortExprOrUnknown)
 {
-  return ATmakeAppl1(ATmakeAFun("ListEnum", 1, ATfalse), (ATerm) DataExprs);
+  return ATmakeAppl2(ATmakeAFun("ListEnum", 2, ATfalse), (ATerm) DataExprs,
+    (ATerm) SortExprOrUnknown);
 }
 
-ATermAppl gsMakeSetEnum(ATermList DataExprs)
+ATermAppl gsMakeSetEnum(ATermList DataExprs, ATermAppl SortExprOrUnknown)
 {
-  return ATmakeAppl1(ATmakeAFun("SetEnum", 1, ATfalse), (ATerm) DataExprs);
+  return ATmakeAppl2(ATmakeAFun("SetEnum", 2, ATfalse), (ATerm) DataExprs,
+    (ATerm) SortExprOrUnknown);
 }
 
-ATermAppl gsMakeBagEnum(ATermList BagEnumElts)
+ATermAppl gsMakeBagEnum(ATermList BagEnumElts, ATermAppl SortExprOrUnknown)
 {
-  return ATmakeAppl1(ATmakeAFun("BagEnum", 1, ATfalse), (ATerm) BagEnumElts);
+  return ATmakeAppl2(ATmakeAFun("BagEnum", 2, ATfalse), (ATerm) BagEnumElts,
+    (ATerm) SortExprOrUnknown);
 }
 
 ATermAppl gsMakeBagEnumElt(ATermAppl DataExpr, ATermAppl Multiplicity)
@@ -298,14 +302,16 @@ ATermAppl gsMakeSetBagComp(ATermAppl IdDecl, ATermAppl DataExpr)
     (ATerm) DataExpr);
 }
 
-ATermAppl gsMakeEmptyList()
+ATermAppl gsMakeEmptyList(ATermAppl SortExprOrUnknown)
 {
-  return ATmakeAppl0(ATmakeAFun("EmptyList", 0, ATfalse));
+  return ATmakeAppl1(ATmakeAFun("EmptyList", 1, ATfalse),
+    (ATerm) SortExprOrUnknown);
 }
 
-ATermAppl gsMakeEmptySetBag()
+ATermAppl gsMakeEmptySetBag(ATermAppl SortExprOrUnknown)
 {
-  return ATmakeAppl0(ATmakeAFun("EmptySetBag", 0, ATfalse));
+  return ATmakeAppl1(ATmakeAFun("EmptySetBag", 1, ATfalse),
+    (ATerm) SortExprOrUnknown);
 }
 
 ATermAppl gsMakeTrue()
