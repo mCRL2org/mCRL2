@@ -575,12 +575,12 @@ identifiers in that they have a special use. This document describes all system
 identifiers and their use.
 
 In the following sections, we treat system identifiers for sorts, operations,
-variables, actions and processes, respectively. In each section, a table is
-provided which lists the name, description and external representation of each
-identifier.  Because system identifiers can be generated from other system or
-user identifiers, we frequently use variables to represent these identifiers.
-In the external representation columns, occurring variables denote the external
-representations of the substitutable terms.
+variables, actions and processes, respectively. In each section a table is
+provided which lists the name, arity, description and external representation
+of each identifier.  Because system identifiers can be generated from other
+system or user identifiers, we frequently use variables to represent these
+identifiers.  In the external representation columns, occurring variables
+denote the external representations of the substitutable terms.
 
 \section{Sorts}
 
@@ -607,8 +607,13 @@ Arrow  & \geq 2 & function sort    & \_ \times \cdots \times \_ \To \_\\
 
 \section{Operations}
 
-For operations, we have the following system identifiers, where \frm{S} is an
-arbitrary sort expression:
+For operations, we have system identifiers for booleans, numbers, lists, sets,
+bags, lambda expressions and structured sort expressions.
+
+\subsection{Booleans}
+
+For boolean operations, we have the following system identifiers, where \frm{S}
+is an arbitrary sort expression:
 
 \begin{table}[!htb]
 \centering
@@ -626,13 +631,122 @@ Forall\_S & 1      & universal quantification over terms of sort \frm{S}
 Exists\_S & 1      & existential quantification over terms of sort \frm{S}
 & \exists x:S.\_\\
 Eq        & 2      & equality                   & \_ == \_\\
-Neq       & 2      & inequality                 & \_ != \_\\
+Neq       & 2      & inequality                 & \_ \neq \_\\
 If\_S     & 3      & conditional over terms of sort \frm{S}
 & \faaa{if}{\_}{\_}{\_}\\
 \end{tabular}
-\caption{System identifiers for operations}
-\label{tab:sid:operations}
+\caption{System identifiers for boolean operations}
+\label{tab:sid:operations:booleans}
 \end{table}
+
+\subsection{Numbers}
+
+For positive numbers, natural numbers and integers, we have the following
+system identifiers, where \frm{p}, \frm{n} and \frm{i} are arbitrary positives,
+naturals or integers, respectively, \frm{A,B \in \set{\srtpos, \srtnat, \srtint}}, \frm{C
+\in \set{\srtpos, \srtnat}}:
+
+\begin{table}[!htb]
+\centering
+\begin{tabular}{l|R|l|L}
+Name & \text{Arity} & Description & \text{External repr.}\\
+\hline
+Pos\frm{p}  & 0 & positive number \frm{p}    & p\\
+Nat\frm{n}  & 0 & natural number \frm{n}     & n\\
+Int\frm{i}  & 0 & integer \frm{i}            & i\\
+Neg\#A      & 1 & negation                   & - \_\\
+Add\#A\#B   & 2 & addition                   & \_ + \_\\
+Subt\#A\#B  & 2 & subtraction                & \_ - \_\\
+Mult\#A\#B  & 2 & multiplication             & \_ * \_\\
+Div\#A\#Pos & 2 & quotient after division    & \_ \div \_\\
+Mod\#A\#Pos & 2 & remainder after division   & \_ \mod \_\\
+Exp\#A\#C   & 2 & exponentation              & \faa{exp}{\_}{\_}\\
+Succ\#A     & 1 & successor                  & \fa{succ}{\_}\\
+Pred\#A     & 1 & predecessor                & \fa{pred}{\_}\\
+Abs\#A      & 1 & absolute value             & \fa{abs}{\_}\\
+Max\#A\#B   & 2 & maximum                    & \faa{max}{\_}{\_}\\
+Min\#A\#B   & 2 & minimum                    & \faa{min}{\_}{\_}\\
+LT\#A\#B    & 2 & less than                  & \_ < \_\\
+GT\#A\#B    & 2 & greater than               & \_ > \_\\
+LTE\#A\#B   & 2 & less than or equal         & \_ \leq \_\\
+GTE\#A\#B   & 2 & greater than or equal      & \_ \geq \_\\
+AToB\#A     & 1 & convert number \frm{A} to \frm{B}
+                                             & \fa{A2B}{\_}\\
+\end{tabular}
+\caption{System identifiers for numbers}
+\label{tab:sid:operations:numbers}
+\end{table}
+
+\subsection{Lists}
+
+For each declared list of sort \frm{S}, we have the following system
+identifiers:
+
+\begin{table}[!htb]
+\centering
+\begin{tabular}{l|R|l|L}
+Name & \text{Arity} & Description & \text{External repr.}\\
+\hline
+List\#S            & \geq 0 & list of with elements of sort \frm{S} 
+                                                 & \lst{\_, \ldots, \_}\\
+Cons\#S\#List(S)   & 2 & element at the head of a list  & \_ \cons \_\\
+Snoc\#List(S)\#S   & 2 & element at the tail of a list  & \_ \snoc \_\\
+Concat\#List(S)\#List(S) & 2 & concatenation            & \_ \concat \_\\
+ListAt\#List(S)\#S & 2 & element at position            & \_ . \_\\
+LHead\#List(S)     & 1 & first element of a list        & \fa{lhead}{\_}\\
+LTail\#List(S)     & 1 & list without its first element & \fa{ltail}{\_}\\
+RHead\#List(S)     & 1 & last element of a list         & \fa{rhead}{\_}\\
+RTail\#List(S)     & 1 & list without its last element  & \fa{rtail}{\_}\\
+\end{tabular}
+\caption{System identifiers for lists}
+\label{tab:sid:operations:lists}
+\end{table}
+
+\subsection{Sets and bags}
+
+\ldots
+%TODO
+
+\subsection{Lambda expressions}
+
+For each lambda abstraction \frm{\lambda x_{0}{:}S_{0}, \ldots, x_{n}{:}S_{n}.
+t} occurring in the original specification, there exists a unary operation with
+system identifier \frm{\text{Lambda}\#S_{0}\#\ldots\#S_{n}:k} as its head,
+where \frm{k} is a natural number that ensures uniqueness of the corresponding
+operation with respect to the above lambda term.
+
+Function applications do not need any system identifiers, because they are
+represented by the \emph{DataApp} data expression. 
+
+\subsection{Structured sort expressions}
+
+\ldots
+%TODO
+
+\subsection{Remarks}
+
+First of all, it should be noted that for a large number of operation system
+identifiers, equations are defined in such a way that they disappear after one
+rewrite step. It may be rewarding to add this information to the tables in this
+section.
+
+Furthermore, the following things are still open regarding the
+names of system identifiers of operations:
+\begin{itemize}
+\item System identifiers of most operations are composed from their names,
+suffixed with their domain sorts. It is not clear whether it is necessary to
+add the result sort to this suffix.
+\item It seems better to me that system identifiers for operations are split up
+into a name part and a sort part. This can be accomplished by changing the
+system identifier from
+\begin{verbatim}
+  <SID> ::= SId(<SIdString>)
+\end{verbatim}
+to
+\begin{verbatim}
+  <SID> ::= SId(<SIdString>, <SortExpr>)
+\end{verbatim}
+\end{itemize}
 
 \section{Variables}
 
