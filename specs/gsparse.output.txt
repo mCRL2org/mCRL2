@@ -34,7 +34,7 @@
 <StringOrNil>::= <String> | Nil() 
 
 //number
-<Number>     ::= Number(<NumberString>) 
+<Number>     ::= Number(<NumberString>)                 (removed in dr phase)
 
 //Specification
 //-------------
@@ -50,13 +50,13 @@
                | SortDeclRef(<String>, <SortExpr>)      (removed in ?? phase)
 
 //operation declaration
-<OpDecl>     ::= OpDecl(<String>, <SortExprOrUnknown>)
+<OpDecl>     ::= OpDecl(<String>, <SortExpr>)
 
 //equation section
 <EqnSect>    ::= EqnSect(<DataVarDecl>*, <EqnDecl>+) 
 
 //data variable declaration
-<DataVarDecl>::= DataVarDecl(<String>, <SortExprOrUnknown>)
+<DataVarDecl>::= DataVarDecl(<String>, <SortExpr>)
 
 //equation declaration
 <EqnDecl>    ::= EqnDecl(<DataExpr>, <DataExpr>) 
