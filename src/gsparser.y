@@ -1117,8 +1117,6 @@ proc_expr_sum:
     }
   ;
 
-
-
 //merge (associative) and left merge (left associative)
 proc_expr_merge:
   proc_expr_binit

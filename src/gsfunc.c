@@ -1433,7 +1433,7 @@ ATermAppl gsMakeOpIdCDub(void)
 ATermAppl gsMakeOpId0(void)
 {
   assert(gsConstructorFunctionsEnabled);
-  return gsMakeOpId(gsOpIdName1, gsMakeSortExprNat());
+  return gsMakeOpId(gsOpIdName0, gsMakeSortExprNat());
 } 
 
 ATermAppl gsMakeOpIdCNat(void)

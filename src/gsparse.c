@@ -1,5 +1,5 @@
 #define  NAME      "gsparse"
-#define  LVERSION  "0.1.17"
+#define  LVERSION  "0.1.18"
 #define  AUTHOR    "Aad Mathijssen"
 
 #ifdef __cplusplus
@@ -39,12 +39,14 @@ void PrintVersion(FILE* Stream);
 bool ParseSpecificationFileName(
   char *SpecFileName,
   char *OutFileName,
+  bool Human,
   bool NoSave);
 /*Pre: SpecFileName is the name of a valid GenSpect specification file from
        which can be read
        OutFileName is the name of a valid file to which can be written, or NULL
   Post:the specification in SpecFileName is parsed and saved to OutFileName
        If OutFileName is NULL, stdout is used.
+       If Human, the parsed formula is saved in a human readable format
        If NoSave, the parsed formula is not saved.
   Ret: true, if everything went ok.
        false, otherwise; appropriate error messages have been shown.
@@ -53,11 +55,13 @@ bool ParseSpecificationFileName(
 bool ParseSpecificationStream(
   FILE *SpecStream,
   FILE *OutStream,
+  bool Human,
   bool NoSave);
 /*Pre: SpecStream is a valid GenSpect specification stream from which can be
        read
        OutStream is the name of a valid stream to which can be written
   Post:the specification in SpecStream is parsed and saved to OutStream
+       If Human, the parsed formula is saved in a human readable format
        If NoSave, the parsed formula is not saved.
   Ret: true, if everything went ok.
        false, otherwise; appropriate error messages have been shown.
@@ -70,10 +74,11 @@ int main(int argc, char* argv[]) {
   //declarations for parsing the specification
   char *SpecFileName   = NULL;
   char *OutputFileName = NULL;
+  bool Human           = false;
   bool NoSave          = false;
   bool MoreInfo        = false;
   //declarations for getopt  
-  #define ShortOptions      "qvdn"
+  #define ShortOptions      "hqvdn"
   #define HelpOption        CHAR_MAX + 1
   #define VersionOption     HelpOption + 1
   #define TestOption        VersionOption + 1
@@ -84,6 +89,7 @@ int main(int argc, char* argv[]) {
     {"quiet"     , no_argument,       NULL, 'q'},
     {"verbose"   , no_argument,       NULL, 'v'},
     {"debug"     , no_argument,       NULL, 'd'},
+    {"human"     , no_argument,       NULL, 'h'},
     {"no-save"   , no_argument,       NULL, 'n'},
     {0, 0, 0, 0}
   };
@@ -104,7 +110,7 @@ int main(int argc, char* argv[]) {
         gsTest();
         ThrowV(0);
         break;
-      case 'q': 
+      case 'q':
         gsSetQuietMsg();
         break;
       case 'v': 
@@ -112,6 +118,9 @@ int main(int argc, char* argv[]) {
         break;
       case 'd': 
         gsSetDebugMsg();
+        break;
+      case 'h':
+        Human = true;
         break;
       case 'n': 
         NoSave = true;
@@ -144,7 +153,7 @@ int main(int argc, char* argv[]) {
   ATerm StackBottom;
   ATinit(0, NULL, &StackBottom);
   //parse specification  
-  if (!ParseSpecificationFileName(SpecFileName, OutputFileName, NoSave))
+  if (!ParseSpecificationFileName(SpecFileName, OutputFileName, Human, NoSave))
   {
     ThrowV(1);  
   }       
@@ -159,7 +168,7 @@ finally:
 }
 
 bool ParseSpecificationFileName(char *SpecFileName, char *OutputFileName,
-  bool NoSave)
+  bool Human, bool NoSave)
 {
   bool Result           = true;
   FILE *SpecStream      = NULL;
@@ -186,7 +195,7 @@ bool ParseSpecificationFileName(char *SpecFileName, char *OutputFileName,
     }
     gsDebugMsg("output file %s is opened for writing.\n", OutputFileName);
   }
-  if (!ParseSpecificationStream(SpecStream, OutputStream, NoSave))
+  if (!ParseSpecificationStream(SpecStream, OutputStream, Human, NoSave))
   {
     ThrowV(false);
   }
@@ -202,7 +211,7 @@ finally:
 }
 
 bool ParseSpecificationStream(FILE *SpecStream, FILE *OutputStream,
-  bool NoSave)
+  bool Human, bool NoSave)
 {
   bool Result;
   ATermAppl Spec = NULL;
@@ -219,11 +228,18 @@ bool ParseSpecificationStream(FILE *SpecStream, FILE *OutputStream,
     if (NoSave) {
       gsVerboseMsg("do not save specification\n");
     } else {
-      if (OutputStream != stdout) {
-        gsVerboseMsg("saving specification to file\n");
+      if (Human) {
+        //save specification in a human readable format
+        if (OutputStream != stdout) gsVerboseMsg(
+          "saving specification to file in a human readable format\n");
+        gsPrintSpecification(OutputStream, Spec);
+      } else {
+        //save specification as an ATerm
+        if (OutputStream != stdout) gsVerboseMsg(
+          "saving specification to file\n");
+        ATwriteToTextFile((ATerm) Spec, OutputStream);
+        fprintf(OutputStream, "\n");
       }
-      ATwriteToTextFile((ATerm) Spec, OutputStream);
-      fprintf(OutputStream, "\n");
     }
     Result = true;
   } else {
@@ -247,6 +263,7 @@ void PrintUsage(FILE *Stream) {
     "-q, --quiet              do not display warning messages\n"
     "-v, --verbose            turn on the display of short intermediate messages\n"
     "-d, --debug              turn on the display of detailed intermediate messages\n"
+    "-h, --human              save the parsed formula in a human readable format\n"
     "-n, --no-save            do not save the parsed formula\n",
     NAME
   );

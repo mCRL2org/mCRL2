@@ -236,9 +236,8 @@ ATermAppl gsImplementPos(ATermAppl Spec)
   //Declare sort Pos
   Spec = gsDeclareSort(Spec, gsMakeSortIdPos());
   //Declare constructors for sort Pos
-  Spec = gsDeclareConsOps(Spec, ATmakeList3(
+  Spec = gsDeclareConsOps(Spec, ATmakeList2(
       (ATerm) gsMakeOpId1(),
-      (ATerm) gsMakeOpIdCDub(),
       (ATerm) gsMakeOpIdCDub()
     ));
   //Declare operations for sort Pos
@@ -637,7 +636,7 @@ ATermAppl gsImplementInt(ATermAppl Spec)
   ATermList mnl = ATmakeList2((ATerm) m, (ATerm) n);
   ATermList bxl = ATmakeList2((ATerm) b, (ATerm) x);
   ATermList xyl = ATmakeList2((ATerm) x, (ATerm) y);
-  Spec = gsDeclareDataEqns(Spec, ATmakeList(62,
+  Spec = gsDeclareDataEqns(Spec, ATmakeList(66,
       //equality (Int -> Int -> Bool)
       (ATerm) gsMakeDataEqn(mnl,nil, 
          gsMakeDataExprEq(gsMakeDataExprCInt(m), gsMakeDataExprCInt(n)),
@@ -817,9 +816,21 @@ ATermAppl gsImplementInt(ATermAppl Spec)
          gsMakeDataExprMult(gsMakeDataExprCNeg(p), gsMakeDataExprCNeg(q)),
          gsMakeDataExprCNeg(gsMakeDataExprMult(p, q))),
       //quotient after division (Int -> Pos -> Int)
-      //TODO
+      (ATerm) gsMakeDataEqn(pnl, nil,
+         gsMakeDataExprDiv(gsMakeDataExprCInt(n), p),
+         gsMakeDataExprDiv(n, p)),
+      (ATerm) gsMakeDataEqn(pql, nil,
+         gsMakeDataExprDiv(gsMakeDataExprCNeg(p), q),
+         gsMakeDataExprCNeg(gsMakeDataExprSucc(
+           gsMakeDataExprDiv(gsMakeDataExprPred(p), q)))),
       //remainder after division (Int -> Pos -> Int)
-      //TODO
+      (ATerm) gsMakeDataEqn(pnl, nil,
+         gsMakeDataExprMod(gsMakeDataExprCInt(n), p),
+         gsMakeDataExprMod(n, p)),
+      (ATerm) gsMakeDataEqn(pql, nil,
+         gsMakeDataExprMod(gsMakeDataExprCNeg(p), q),
+         gsMakeDataExprInt2Nat(gsMakeDataExprSubt(q, gsMakeDataExprSucc(
+           gsMakeDataExprMod(gsMakeDataExprPred(p), q))))),
       //exponentiation (Int -> Nat -> Int)
       (ATerm) gsMakeDataEqn(mnl,nil,
          gsMakeDataExprExp(gsMakeDataExprCInt(m), n),
