@@ -109,7 +109,7 @@
 <BagEnumElt> ::= BagEnumElt(<DataExpr>, <DataExpr>) 
 
 //where clause declaration
-<WhrDecl>    ::= WhrDecl(<DataVarDecl>, <DataExpr>) 
+<WhrDecl>    ::= WhrDecl(<String>, <DataExpr>) 
 
 //process expression
 <ProcExpr>   ::= ActProcRef(<String>, <DataExpr>*)      (removed in tc phase)
