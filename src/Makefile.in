@@ -1,38 +1,50 @@
-#ATerm definitions
-ATERM_ROOT      = /home/amathijs/asfsdf
-ATERM_INCLUDE   = $(ATERM_ROOT)/include
-ATERM_LIB_PATH  = $(ATERM_ROOT)/lib
-
-#Redefine default definitions
-CC              = gcc
-CFLAGS          = -std=c99 -I$(ATERM_INCLUDE)
+#Redefine default definitions using autoconf
+CC              = @CC@
+CFLAGS          = @CFLAGS@
+CPP             = @CPP@
+CPPFLAGS        = @CPPFLAGS@
+LDFLAGS         = @LDFLAGS@
 ARFLAGS         = crs
-LEX             = flex
+INSTALL         = install
+LEX             = @LEX@
 LFLAGS          = -I -Pgsyy
-YACC            = bison
-YFLAGS          = -d -pgsyy
+BISON           = @BISON@
+BFLAGS          = -d -pgsyy
+
+#installation directories
+prefix          = @prefix@
+exec_prefix     = @exec_prefix@
+bindir          = @bindir@
+libdir          = @libdir@
+datadir         = @datadir@
+includedir      = @includedir@
+infodir         = @infodir@
+mandir          = @mandir@
 
 #Library definitions
 LIB_NAME        = libgsparse.a
 LIB_OBJECTS     = libgsparse.o gsfunc.o gsparser.o gslexer.o
-LIB_LDFLAGS     = -L$(ATERM_LIB_PATH) -lATerm
+LIB_LDFLAGS     = -lATerm
 
 #Parser definitions
 PARSER_NAME     = gsparse
 PARSER_OBJECTS  = gsparse.o
-PARSER_LDFLAGS  = -L. -L$(ATERM_LIB_PATH) -lgsparse -lATerm
+PARSER_LDFLAGS  = -lgsparse -lATerm
 
 #Make rules
-.PHONY: all clean
+.PHONY: all install clean
 .PRECIOUS: gsparser.c gslexer.c
 
 all : $(LIB_NAME) $(PARSER_NAME) Makefile
+
+install : all
+	$(INSTALL) $(PARSER_NAME) $(bindir)
 
 $(LIB_NAME) : $(LIB_OBJECTS) Makefile
 	$(AR) $(ARFLAGS) $@ $(LIB_OBJECTS)
 
 $(PARSER_NAME) : $(PARSER_OBJECTS) $(LIB_NAME) Makefile
-	$(CC) -o $@ $(PARSER_OBJECTS) $(PARSER_LDFLAGS)
+	$(CC) -o $@ $(PARSER_OBJECTS) $(LDFLAGS) $(PARSER_LDFLAGS)
 
 gslexer.o      : gslexer.h gsparser.h gsfunc.h
 gsparser.o     : gsfunc.h
@@ -41,13 +53,14 @@ libgsparse.o   : libgsparse.h gslexer.h gsfunc.h
 gsparse.o      : gsparse.h libgsparse.h gsfunc.h
 
 %.c : %.y
-	$(YACC) $(YFLAGS) -o $@ $<
+	$(BISON) $(BFLAGS) -o $@ $<
 
 %.c : %.l
 	$(LEX) $(LFLAGS) -o$@ $<
 
 clean :
-	$(RM) $(LIB_NAME) $(PARSER_NAME) *.o gslexer.c gsparser.c gsparser.h gsparser.output *~ core core.*
+	$(RM) $(LIB_NAME) $(PARSER_NAME) *.o gslexer.c gsparser.c gsparser.h\
+        gsparser.output config.status config.log *~ core core.*
 
 #Note: to make a shared version of the gsparse library instead of a static one, do the following:
 #- add the option `-fpic' to CFLAGS
