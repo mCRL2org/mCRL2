@@ -67,6 +67,7 @@ the thesis).
 
 \appendix
 
+\newpage
 \section{ATerm representation format for MTLPEs}
 A MTLPE is stored as an ATerm with the following functions. The sort
 of stored MTLPE is $\nm{MTLPE}$.
@@ -142,6 +143,37 @@ parameters as the second argument, and the list of summands as the
 third parameter. The last parameter of $\mathsf{cmd}$ is the boolean term
 representing the condition.
 
+\newpage
+\section{ATerm representation format for input muCRL (for \mcrl\ v1)}
+An LPE is stored as an ATerm with the following functions. The sort
+of stored LPE is $\nm{LPE}$.
+
+\begin{gather*}
+\afunc{spec2gen}{\nm{DataTypes}\x\nm{InitProcSpec}}{\nm{LPE}}\\
+\afunc{initprocspec}{\nm{Term}^*\x\nm{Variable}^*\x\nm{Summand}^*}{\nm{InitProcSpec}}\\
+\afunc{smd}{\nm{Variable}^*\x\nm{String}\x\nm{Term}^*\x\nm{NextState}\x\nm{Term}}{\nm{Summand}}\\
+\afunc{terminated}{}{\nm{NextState}}\\
+\afunc{i}{\nm{Term}^*}{\nm{NextState}}\\
+\afunc{d}{\nm{Signature}\x\nm{Equation}^*}{\nm{DataTypes}}\\
+\afunc{e}{\nm{Variable}^*\x\nm{Term}\x\nm{Term}}{\nm{Equation}}\\
+\afunc{v}{\nm{String}\x\nm{String}}{\nm{Variable}}\\
+\afunc{s}{\nm{String}^*\x\nm{Function}^*\x\nm{Function}^*}{\nm{Signature}}\\
+\afunc{f}{\nm{String}\x\nm{String}^{*}\x\nm{String}}{\nm{Function}}
+\end{gather*}
+The sort $\nm{Term}$ consists of arbitrary ATerm terms where all function
+symbols must be quoted. The sort $\nm{String}$ consists of quoted constants,
+i.e.\ function symbols of arity 0. The list
+of elements of sort $D$ is denoted by $D^{*}$.
+
+The first parameter of $\mathsf{v}$ is the variable name, appended with '\#'.
+The first parameter of $\mathsf{f}$ is the function name, appended 
+with its parameter types list, separated by '\#' (for constants only '\#' is appended).
+
+The constructor of sort $\nm{InitProcSpec}$ contains the actual LPE
+parameters (from \texttt{init}) as the first parameter, the formal LPE
+parameters as the second argument, and the list of summands as the
+third parameter. The last parameter of $\mathsf{cmd}$ is the boolean term
+representing the condition.
 
 %\bibliographystyle{plain}
 %\bibliography{genspect}

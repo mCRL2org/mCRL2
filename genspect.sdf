@@ -38,7 +38,7 @@ exports
   lexical syntax
     [\ \t\n\r]                        -> LAYOUT                 %% whitespace
     "%" ~[\n]* "\n"                   -> LAYOUT                 %% comments
-    [a-zA-Z\_] [a-zA-Z0-9\_]*         -> Id                     %% identifiers
+    [a-zA-Z\_] [a-zA-Z0-9\_]*         -> Id {avoid}             %% identifiers
     %% Data expressions
     "true" | "false"                  -> DataExpr {prefer}      %% true, false
     "0" | ("-"? [1-9] [0-9]*)         -> DataExpr {prefer}      %% numbers
@@ -217,8 +217,6 @@ exports
   context-free start-symbols
     Spec                                                    %% start with a specification
   
-  lexical restrictions
-    Id -/- [a-zA-Z0-9\_]                                    %% match longest identifier
-  
   context-free restrictions
+    Id -/- [a-zA-Z0-9\_]                                    %% match longest identifier
     LAYOUT? -/- [\ \t\n\r]                                  %% match longest whitespace
