@@ -98,10 +98,18 @@ ATermAppl ATAgetFirst(ATermList List);
 ATermList ATLgetFirst(ATermList List);
 ATermAppl ATAtableGet(ATermTable Table, ATerm Key);
 ATermList ATLtableGet(ATermTable Table, ATerm Key);
+#ifndef ATprotectAppl
 void      ATprotectAppl(ATermAppl *PAppl);
+#endif
+#ifndef ATprotectList
 void      ATprotectList(ATermList *PList);
+#endif
+#ifndef ATunprotectAppl
 void      ATunprotectAppl(ATermAppl *PAppl);
+#endif
+#ifndef ATunprotectList
 void      ATunprotectList(ATermList *PList);
+#endif
 
 //Substitutions on ATerm's
 //------------------------

@@ -176,25 +176,33 @@ ATermList ATLtableGet(ATermTable Table, ATerm Key)
   return (ATermList) Result;
 }
 
+#ifndef ATprotectAppl
 void ATprotectAppl(ATermAppl *PAppl)
 {
   ATprotect((ATerm *) PAppl);
 }
+#endif
 
+#ifndef ATprotectList
 void ATprotectList(ATermList *PList)
 {
   ATprotect((ATerm *) PList);
 }
+#endif
 
+#ifndef ATunprotectAppl
 void ATunprotectAppl(ATermAppl *PAppl)
 {
   ATunprotect((ATerm *) PAppl);
 }
+#endif
 
+#ifndef ATunprotectList
 void ATunprotectList(ATermList *PList)
 {
   ATunprotect((ATerm *) PList);
 }
+#endif
 
 //Substitutions on ATerm's
 //------------------------
