@@ -651,11 +651,10 @@ Name        & \text{Type}                  & Description      & External repr.\\
 \verb+succ+       & \srtnat \To \srtpos    & successor            & functional\\
 \verb+succ+       & \srtint \To \srtint    & successor            & functional\\
 \verb+pred+       & \srtpos \To \srtnat    & predecessor          & functional\\
+\verb+pred+       & \srtnat \To \srtint    & predecessor          & functional\\
 \verb+pred+       & \srtint \To \srtint    & predecessor          & functional\\
-\verb+@pred+$^*$  & \srtpos \To \srtpos    & positive predecessor & functional\\
 \verb-+-          & A \times A \To A       & addition             & infix\\
-\verb+-+          & \srtint \times \srtint \To \srtint&subtraction& infix\\
-\verb+@-+$^*$     & \srtpos \times \srtpos \To \srtint&subtraction& infix\\
+\verb+-+          & A \times A \To \srtint & subtraction          & infix\\
 \verb+@double+$^*$& \srtint \To \srtint    & double               & infix\\
 \verb+*+          & A \times A \To A       & multiplication       & infix\\
 \verb+div+        & \srtnat \times \srtpos \To \srtnat & quotient after division
