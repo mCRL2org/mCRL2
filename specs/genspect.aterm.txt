@@ -30,7 +30,7 @@
 <Domain>         ::= Dom(<SortExpr>+) 
 
 //constructor declaration of a structured sort declaration
-<StructDeclCons> ::= StructDeclCons(<Id>, <ProjDecl>*, <IdOrNil>) 
+<StructDeclCons> ::= StructDeclCons(<Id>, <StructDeclProj>*, <IdOrNil>) 
 
 //projection declaration of a structured sort declaration
 <StructDeclProj> ::= StructDeclProj(<IdOrNil>, <Domain>) 
@@ -43,7 +43,7 @@
 <IdDecl>         ::= IdDecl(<Id>, <SortExpr>) 
 
 //declaration of one or more identifiers of the same sort
-<IdDecls>        ::= IdsDecl(<Id>+, <SortExpr>) 
+<IdsDecl>        ::= IdsDecl(<Id>+, <SortExpr>) 
 
 //bag enumeration element
 <BagEnumElt>     ::= BagEnumElt(<DataExpr>, <DataExpr>) 
@@ -96,7 +96,7 @@
                    | Or(<DataExpr>, <DataExpr>) 
                    | Imp(<DataExpr>, <DataExpr>) 
                    | Lambda(<IdDecl>, <DataExpr>) 
-                   | Whr(<DataExpr>+) 
+                   | Whr(<DataExpr>, <DataExpr>+) 
 
 //process expression
 <ProcExpr>       ::= ActProcRef(<Id>, <DataExpr>*) 
@@ -126,17 +126,11 @@
                    | SortDeclStruct(<Id>, <ConstrDecl>+) 
 
 //operation specification
-<OpSpec>         ::= ConsSpec(<OpDecl>+) 
-                   | MapSpec(<OpDecl>+) 
-
-//operation declaration
-<OpDecl>         ::= <IdDecls>
+<OpSpec>         ::= ConsSpec(<IdsDecl>+) 
+                   | MapSpec(<IdsDecl>+) 
 
 //equation specification
-<EqnSpec>        ::= EqnSpec(<EqnVar>*, <EqnDecl>+) 
-
-//equation variable
-<EqnVar>         ::= <IdDecls>
+<EqnSpec>        ::= EqnSpec(<IdsDecl>*, <EqnDecl>+) 
 
 //equation declaration
 <EqnDecl>        ::= EqnDecl(<DataExpr>, <DataExpr>) 
@@ -155,10 +149,7 @@
 <ProcSpec>       ::= ProcSpec(<ProcDecl>+) 
 
 //process declaration
-<ProcDecl>       ::= ProcDecl(<Id>, <ProcVar>*, <ProcExpr>) 
-
-//process variable
-<ProcVar>        ::= <IdDecls>
+<ProcDecl>       ::= ProcDecl(<Id>, <IdsDecl>*, <ProcExpr>) 
 
 //initialisation
 <Init>           ::= Init(<ProcExpr>) 
