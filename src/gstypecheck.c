@@ -49,8 +49,8 @@ static Context context;
 typedef struct { 
   ATermList equations;	
   ATermTable proc_pars;	        //name#type -> List(Vars)
-  ATermTable proc_bodies;	//name#type -> rhs
-  ATermAppl init;		
+  ATermTable proc_bodies;	//name#type -> rhs 
+  //ATermAppl init;             //in the hash tables proc_pars and proc_bodies with key "init#[]" (beware when writing)
 } Body;
 static Body body;
 
@@ -60,7 +60,7 @@ void gstcDataDestroy(void);
 static ATbool gstcReadInSorts (ATermList);
 static ATbool gstcReadInFuncs(ATermList);
 static ATbool gstcReadInActs (ATermList);
-static ATbool gstcReadInProcs (ATermList);
+static ATbool gstcReadInProcsAndInit (ATermList, ATermAppl);
 static ATermList gstcWriteProcs(void);
 
 static ATbool gstcCheckNamesData(void);
@@ -81,6 +81,7 @@ static ATermTable gstcMakeVarsTable(ATermList);
 static ATermAppl gstcRewrActProc(ATermAppl);
 static ATermAppl gstcTraverseActProc(ATermAppl);
 
+#define INIT_KEY gsMakeProcVarId(ATmakeAppl0(ATmakeAFun("init",0,ATtrue)),ATmakeList0())
 
 // Main function
 ATermAppl gsTypeCheck (ATermAppl input){	
@@ -96,8 +97,7 @@ ATermAppl gsTypeCheck (ATermAppl input){
 			       ATLgetArgument(ATAgetArgument(input,2),0)))) {throw;}
   body.equations=ATLgetArgument(ATAgetArgument(input,3),0);
   if(!gstcReadInActs(ATLgetArgument(ATAgetArgument(input,4),0))) {throw;}
-  if(!gstcReadInProcs(ATLgetArgument(ATAgetArgument(input,5),0))) {throw;}
-  body.init=ATAgetArgument(ATAgetArgument(input,6),0);
+  if(!gstcReadInProcsAndInit(ATLgetArgument(ATAgetArgument(input,5),0),ATAgetArgument(ATAgetArgument(input,6),0))) {throw;}
   gsDebugMsg ("type checking read-in phase finished\n");
   
   gsDebugMsg ("type checking transform ActProc+VarConst phase started\n");
@@ -107,15 +107,10 @@ ATermAppl gsTypeCheck (ATermAppl input){
 
   if(!gstcCheckNamesData()) {throw;} //names and # of arguments
   if(!gstcCheckNamesProc()) {throw;} //names and # of arguments
-  {
-    ATermTable Vars=ATtableCreate(63,50);
-    if(!gstcCheckNamesP(Vars, body.init)) {throw;} //names and # of arguments
-    ATtableDestroy(Vars);
-  }
 
   Result=ATsetArgument(input,(ATerm)gsMakeDataEqnSpec(body.equations),3);
   Result=ATsetArgument(Result,(ATerm)gsMakeProcEqnSpec(gstcWriteProcs()),5);
-  Result=ATsetArgument(Result,(ATerm)gsMakeInit(body.init),6);
+  Result=ATsetArgument(Result,(ATerm)gsMakeInit(ATAtableGet(body.proc_bodies,(ATerm)INIT_KEY)),6);
 
   gsVerboseMsg ("type checking phase finished\n");
  finally:
@@ -141,7 +136,6 @@ void gstcDataInit(void){
   ATprotect((ATerm* )&body.equations);
   ATprotect((ATerm* )&body.proc_pars);
   ATprotect((ATerm* )&body.proc_bodies);
-  ATprotect((ATerm* )&body.init);
 
   context.basic_sorts=ATindexedSetCreate(63,50);
   context.defined_sorts=ATtableCreate(63,50);
@@ -247,7 +241,7 @@ static ATbool gstcReadInActs (ATermList Acts){
   return Result;
 }
 
-static ATbool gstcReadInProcs (ATermList Procs){
+static ATbool gstcReadInProcsAndInit (ATermList Procs, ATermAppl Init){
   ATbool Result=ATtrue;
   for(;!ATisEmpty(Procs);Procs=ATgetNext(Procs)){
     ATermAppl Proc=ATAgetFirst(Procs);
@@ -277,6 +271,8 @@ static ATbool gstcReadInProcs (ATermList Procs){
     ATtablePut(body.proc_pars,(ATerm)ATAgetArgument(Proc,0),(ATerm)ATLgetArgument(Proc,1));
     ATtablePut(body.proc_bodies,(ATerm)ATAgetArgument(Proc,0),(ATerm)ATAgetArgument(Proc,2));
   }
+  ATtablePut(body.proc_pars,(ATerm)INIT_KEY,(ATerm)ATmakeList0());
+  ATtablePut(body.proc_bodies,(ATerm)INIT_KEY,(ATerm)Init);
  finally:
   return Result;
 } 
@@ -285,6 +281,7 @@ static ATermList gstcWriteProcs(void){
   ATermList Result=ATmakeList0();
   for(ATermList ProcVars=ATtableKeys(body.proc_pars);!ATisEmpty(ProcVars);ProcVars=ATgetNext(ProcVars)){
     ATermAppl ProcVar=ATAgetFirst(ProcVars);
+    if(ProcVar==INIT_KEY) continue;
     Result=ATinsert(Result,(ATerm)gsMakeProcEqn(ProcVar,
 						ATLtableGet(body.proc_pars,(ATerm)ProcVar),
 						ATAtableGet(body.proc_bodies,(ATerm)ProcVar)
@@ -406,12 +403,12 @@ static ATermAppl gstcRewrActProc(ATermAppl ProcTerm){
   ATermAppl Result=NULL;
   ATermAppl Name=ATAgetArgument(ProcTerm,0);
   if(ATtableGet(context.actions,(ATerm)Name)){
-    gsWarningMsg("recognized action %t\n",Name); 
+    //gsWarningMsg("recognized action %t\n",Name); 
     Result=gsMakeAction(gsMakeActId(Name,ATmakeList1((ATerm)gsMakeUnknown())),ATLgetArgument(ProcTerm,1));
   }
   else  
     if(ATtableGet(context.processes,(ATerm)Name)){
-      gsWarningMsg("recognized process %t\n",Name); 
+      //gsWarningMsg("recognized process %t\n",Name); 
       Result=gsMakeProcess(gsMakeProcVarId(Name,ATmakeList1((ATerm)gsMakeUnknown())),ATLgetArgument(ProcTerm,1));
     }
     else{
