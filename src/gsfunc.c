@@ -38,9 +38,12 @@ ATermAppl gsMakeNumber(char *s)
     (ATerm) ATmakeAppl0(ATmakeAFun(s, 0, ATfalse)));
 }
 
-ATermAppl gsMakeSpec(ATermList SpecElts)
+ATermAppl gsMakeSpec(ATermAppl SortSpec, ATermAppl ConsSpec, ATermAppl MapSpec,
+  ATermAppl EqnSpec, ATermAppl ActSpec, ATermAppl ProcSpec, ATermAppl Init)
 {
-  return ATmakeAppl1(ATmakeAFun("Spec", 1, ATfalse), (ATerm) SpecElts);
+  return ATmakeAppl(ATmakeAFun("Spec", 7, ATfalse), (ATerm) SortSpec,
+    (ATerm) ConsSpec, (ATerm) MapSpec, (ATerm) EqnSpec, (ATerm) ActSpec,
+    (ATerm) ProcSpec, (ATerm) Init);
 }
 
 ATermAppl gsMakeSortSpec(ATermList SortDecls)
@@ -53,9 +56,9 @@ ATermAppl gsMakeSortDeclStandard(ATermList Ids)
   return ATmakeAppl1(ATmakeAFun("SortDeclStandard", 1, ATfalse), (ATerm) Ids);
 }
 
-ATermAppl gsMakeSortDeclRef(ATermList Ids, ATermAppl SortExpr)
+ATermAppl gsMakeSortDeclRef(ATermAppl Id, ATermAppl SortExpr)
 {
-  return ATmakeAppl2(ATmakeAFun("SortDeclRef", 2, ATfalse), (ATerm) Ids,
+  return ATmakeAppl2(ATmakeAFun("SortDeclRef", 2, ATfalse), (ATerm) Id,
     (ATerm) SortExpr);
 }
 
@@ -77,15 +80,10 @@ ATermAppl gsMakeNil()
   return ATmakeAppl0(ATmakeAFun("Nil", 0, ATfalse));
 }
 
-ATermAppl gsMakeStructDeclProj(ATermAppl NilOrId, ATermAppl Domain)
+ATermAppl gsMakeStructDeclProj(ATermAppl NilOrId, ATermList SortExprs)
 {
   return ATmakeAppl2(ATmakeAFun("StructDeclProj", 2, ATfalse), (ATerm) NilOrId,
-    (ATerm) Domain);
-}
-
-ATermAppl gsMakeDomain(ATermList SortExprs)
-{
-  return ATmakeAppl1(ATmakeAFun("Dom", 1, ATfalse), (ATerm) SortExprs);
+    (ATerm) SortExprs);
 }
 
 ATermAppl gsMakeIds(ATermList Ids)
@@ -115,9 +113,14 @@ ATermAppl gsMakeIdDecl(ATermAppl Id, ATermAppl SortExpr)
     (ATerm) SortExpr);
 }
 
-ATermAppl gsMakeEqnSpec(ATermList EqnVars, ATermList EqnDecls)
+ATermAppl gsMakeEqnSpec(ATermList EqnSects)
 {
-  return ATmakeAppl2(ATmakeAFun("EqnSpec", 2, ATfalse), (ATerm) EqnVars,
+  return ATmakeAppl1(ATmakeAFun("EqnSpec", 1, ATfalse), (ATerm) EqnSects);
+}
+
+ATermAppl gsMakeEqnSect(ATermList EqnVars, ATermList EqnDecls)
+{
+  return ATmakeAppl2(ATmakeAFun("EqnSect", 2, ATfalse), (ATerm) EqnVars,
     (ATerm) EqnDecls);
 }
 
@@ -132,10 +135,10 @@ ATermAppl gsMakeActSpec(ATermList ActDecls)
   return ATmakeAppl1(ATmakeAFun("ActSpec", 1, ATfalse), (ATerm) ActDecls);
 }
 
-ATermAppl gsMakeActDecl(ATermList Ids, ATermAppl ActDomain)
+ATermAppl gsMakeActDecl(ATermList Ids, ATermList SortExprs)
 {
   return ATmakeAppl2(ATmakeAFun("ActDecl", 2, ATfalse), (ATerm) Ids,
-    (ATerm) ActDomain);
+    (ATerm) SortExprs);
 }
 
 ATermAppl gsMakeProcSpec(ATermList ProcDecls)
@@ -189,12 +192,7 @@ ATermAppl gsMakeSortBag(ATermAppl SortExpr)
   return ATmakeAppl1(ATmakeAFun("SortBag", 1, ATfalse), (ATerm) SortExpr);
 }
 
-ATermAppl gsMakeSortRef(ATermAppl Id)
-{
-  return ATmakeAppl1(ATmakeAFun("SortRef", 1, ATfalse), (ATerm) Id);
-}
-
-ATermAppl gsMakeSortArrow(ATermAppl Domain, ATermAppl SortExpr)
+ATermAppl gsMakeSortArrow(ATermList Domain, ATermAppl SortExpr)
 {
   return ATmakeAppl2(ATmakeAFun("SortArrow", 2, ATfalse), (ATerm) Domain,
     (ATerm) SortExpr);
@@ -394,10 +392,16 @@ ATermAppl gsMakeLambda(ATermAppl IdDecl, ATermAppl DataExpr)
     (ATerm) DataExpr);
 }
 
-ATermAppl gsMakeWhr(ATermAppl DataExpr, ATermList DataExprs)
+ATermAppl gsMakeWhr(ATermAppl DataExpr, ATermList WhrDecls)
 {
   return ATmakeAppl2(ATmakeAFun("Whr", 2, ATfalse), (ATerm) DataExpr,
-    (ATerm) DataExprs);
+    (ATerm) WhrDecls);
+}
+
+ATermAppl gsMakeWhrDecl(ATermAppl Id, ATermAppl DataExpr)
+{
+  return ATmakeAppl2(ATmakeAFun("WhrDecl", 2, ATfalse), (ATerm) Id,
+    (ATerm) DataExpr);
 }
 
 ATermAppl gsMakeBagEnumElt(ATermAppl DataExpr, ATermAppl Multiplicity)
@@ -590,11 +594,6 @@ bool gsIsStructDeclProj(char *s)
   return strcmp(s, "StructDeclProj") == 0;
 }
 
-bool gsIsDomain(char *s)
-{
-  return strcmp(s, "Dom") == 0;
-}
-
 bool gsIsIds(char *s)
 {
   return strcmp(s, "Ids") == 0;
@@ -623,6 +622,11 @@ bool gsIsIdDecl(char *s)
 bool gsIsEqnSpec(char *s)
 {
   return strcmp(s, "EqnSpec") == 0;
+}
+
+bool gsIsEqnSect(char *s)
+{
+  return strcmp(s, "EqnSect") == 0;
 }
 
 bool gsIsEqnDecl(char *s)
@@ -688,11 +692,6 @@ bool gsIsSortSet(char *s)
 bool gsIsSortBag(char *s)
 {
   return strcmp(s, "SortBag") == 0;
-}
-
-bool gsIsSortRef(char *s)
-{
-  return strcmp(s, "SortRef") == 0;
 }
 
 bool gsIsSortArrow(char *s)
@@ -873,6 +872,11 @@ bool gsIsLambda(char *s)
 bool gsIsWhr(char *s)
 {
   return strcmp(s, "Whr") == 0;
+}
+
+bool gsIsWhrDecl(char *s)
+{
+  return strcmp(s, "WhrDecl") == 0;
 }
 
 bool gsIsBagEnumElt(char *s)
