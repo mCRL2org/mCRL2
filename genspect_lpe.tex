@@ -101,6 +101,10 @@ sort $\nm{Time}$ representing the time at which the multiaction
 happens.  The last parameter of $\mathsf{cmd}$ is the boolean term
 representing the condition.
 
+The first parameter of $\mathsf{v}$ is the variable name, appended with '\#'.
+The first parameter of $\mathsf{f}$ is the function name, appended 
+with its parameter types list, separated by '\#' (for constants only '\#' is appended).
+
 If the delta summand of the TLPE is present, $\delta$ has to be
 represented by the ATerm string \texttt{"Delta"}, and actions with
 this name should not be allowed.  An alternative is in using a special
@@ -127,6 +131,10 @@ The sort $\nm{Term}$ consists of arbitrary ATerm terms where all function
 symbols must be quoted. The sort $\nm{String}$ consists of quoted constants,
 i.e.\ function symbols of arity 0. The list
 of elements of sort $D$ is denoted by $D^{*}$.
+
+The first parameter of $\mathsf{v}$ is the variable name, appended with '\#'.
+The first parameter of $\mathsf{f}$ is the function name, appended 
+with its parameter types list, separated by '\#' (for constants only '\#' is appended).
 
 The constructor of sort $\nm{InitProcSpec}$ contains the actual LPE
 parameters (from \texttt{init}) as the first parameter, the formal LPE
