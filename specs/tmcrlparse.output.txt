@@ -1,0 +1,70 @@
+// Date: 29-11-2004
+// This document describes the output format of the timed muCRL parser. Here:
+// - <IdString> represents a string of the format '[a-zA-Z_][a-zA-Z0-9_]*'
+// - the other alphabetical strings within angular brackets are non-terminals
+//   that represent all possible branches of their productions
+// - for non-terminal N, N*/N+ represents an ATermList with zero/one or more N's
+// - each c(a_0, ..., a_n), where c is an alphabetical string, represents an
+//   ATermAppl with c as its unquoted head and a_0, ..., a_n as its arguments
+// We try to keep the format as close as possible to the genspect format.
+// Comm section is introduced and a lot of irrelevant information is removed. 
+
+//General
+//-------
+//identifier
+<Id>         ::= Id(<IdString>) 
+
+//declaration of one or more identifiers of the same sort
+<IdsDecl>    ::= IdsDecl(<Id>+, <SortExpr>) 
+
+//Specification
+//-------------
+//specification
+<Spec>       ::= Spec(SortSpec(<SortDecl>*), ConsSpec(<IdsDecl>*),
+                   MapSpec(<IdsDecl>*), EqnSpec(<EqnSect>*),
+                   ActSpec(<ActDecl>*), CommSpec(<CommDecl>*), 
+                   ProcSpec(<ProcDecl>*), Init(<ProcExpr>)
+		 )
+//sort declaration
+<SortDecl>   ::= SortDeclStandard(<Id>+) 
+
+//equation section
+<EqnSect>    ::= EqnSect(<IdsDecl>*, <EqnDecl>+) 
+
+//equation declaration
+<EqnDecl>    ::= EqnDecl(<DataExpr>, <DataExpr>) 
+
+//action declaration
+<ActDecl>    ::= ActDecl(<Id>+, <SortExpr>*) 
+
+//comm declaration
+<CommDecl>   ::= CommDecl(<Id>,<Id>,<Id>) 
+
+//process declaration
+<ProcDecl>   ::= ProcDecl(<Id>, <IdsDecl>*, <ProcExpr>) 
+
+//Expressions
+//-----------
+//data expression
+<DataExpr>   ::= <Id>
+               | FuncApp(<Id>, <DataExpr>+) 
+
+//process expression
+<ProcExpr>   ::= ActProcRef(<Id>, <DataExpr>*) 
+               | Delta() 
+               | Tau() 
+               | Sum(<IdsDecl>+, <ProcExpr>) 
+               | Restrict(<Id>*, <ProcExpr>) 
+               | Hide(<Id>*, <ProcExpr>) 
+               | Ren(<RenExpr>*, <ProcExpr>) 
+               | Sync(<ProcExpr>, <ProcExpr>) 
+               | AtTime(<ProcExpr>, <DataExpr>) 
+               | Seq(<ProcExpr>, <ProcExpr>) 
+               | Cond(<DataExpr>, <ProcExpr>, <ProcExpr>) 
+               | BInit(<ProcExpr>, <ProcExpr>) 
+               | Merge(<ProcExpr>, <ProcExpr>) 
+               | LMerge(<ProcExpr>, <ProcExpr>) 
+               | Choice(<ProcExpr>, <ProcExpr>) 
+
+//renaming expression
+<RenExpr>    ::= RenExpr(<Id>, <Id>) 
