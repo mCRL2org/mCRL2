@@ -127,6 +127,12 @@ ATermList gsImplExprsParts(ATermList Parts, ATermList *PSubsts,
 //     - each substituted element is implemented, where the new data
 //       declarations are stored in *PDataDecls
 
+ATermAppl gsImplSetBagEnum(ATermList Elts, ATermAppl SortExpr);
+//Pre: Elts is a list containing 1 or more data expressions, all of the same
+//     sort
+//     SortExpr is a set or a bag sort
+//Ret: Implementation of an enumeration of elements from Elts of sort SortExpr
+
 void gsSplitSortDecls(ATermList SortDecls, ATermList *PSortIds,
   ATermList *PSortRefs);
 //Pre: SortDecls is a list of SortId's and SortRef's
@@ -346,7 +352,8 @@ ATermAppl gsImplExprsPart(ATermAppl Part, ATermList *PSubsts,
   bool Recursive = true;
   //perform substitutions from *PSubsts on Part
   Part = gsSubstValues_Appl(*PSubsts, Part, false);
-  //replace Part by an implementation if the head of Part is a special expression
+  //replace Part by an implementation if the head of Part is a special
+  //expression
   if (gsIsSortArrowProd(Part)) {
     //Part is a product arrow sort; replace by arrow sorts and implement
     //expressions in the arguments
@@ -426,46 +433,49 @@ ATermAppl gsImplExprsPart(ATermAppl Part, ATermList *PSubsts,
     else if (ATisEqual(Sort, gsMakeSortExprInt()))
       Part = gsMakeDataExprInt(gsATermAppl2String(Number));
     else //sort of Part is wrong
-      gsWarningMsg(
-        "%t can not be implemented because its sort differs from Pos, Nat or Int\n",
-        Part);
-  } else if (gsIsSetEnum(Part)) {
-    //Part is a set enumeration; replace by a set comprehension
+      gsWarningMsg("%t can not be implemented because its sort differs from "
+        "Pos, Nat or Int\n", Part);
+  } else if (gsIsSetEnum(Part) || gsIsBagEnum(Part)) {
+    //Part is a set/bag enumeration; replace by a set/bag comprehension
     ATermList Elts = ATLgetArgument(Part, 0);
     ATermAppl Sort = ATAgetArgument(Part, 1);
     if (ATgetLength(Elts) == 0) {
       //enumeration consists of 0 elements
       gsWarningMsg(
         "%t can not be implemented because it has 0 elements\n", Part);
-    } else if (!gsIsSortSet(Sort)) {
+    } else if ((gsIsSetEnum(Part) && !gsIsSortSet(Sort)) ||
+               (gsIsBagEnum(Part) && !gsIsSortBag(Sort))) {
       //sort of the enumeration is wrong
       gsWarningMsg(
-        "%t can not be implemented because its sort is not a set sort\n", Part);
+        "%t can not be implemented because its sort is not a %s sort\n", Part,
+        gsIsSetEnum(Part)?"set":"bag");
     } else {
-      //introduce a fresh variable
-      ATermAppl Domain = ATAgetArgument(Sort, 0);
-      ATermAppl Var =
-        gsMakeDataVarId(gsFreshString2ATermAppl("x", (ATerm) Elts, false), Domain);
-      //introduce equalities 'x == e' for all elements e
-      ATermList Eqs = ATmakeList0();
-      while (!ATisEmpty(Elts))
-      {
-        Eqs = ATinsert(Eqs, (ATerm) gsMakeDataExprEq(Var, ATAgetFirst(Elts)));
-        Elts = ATgetNext(Elts);
+      Part = gsImplSetBagEnum(Elts, Sort);
+      Part = gsImplExprsPart(Part, PSubsts, PDataDecls);
+      Recursive = false;
+    }
+  } else if (gsIsSetBagComp(Part)) {
+    //Part is a set/bag comprehension; replace by its implementation
+    ATermAppl Var = ATAgetArgument(Part, 0);
+    ATermAppl Body = ATAgetArgument(Part, 1);
+    ATermAppl BodySort = gsGetSort(Body);
+    ATermAppl VarSort = gsGetSort(Var);
+    if (!(ATisEqual(BodySort, gsMakeSortIdBool()) ||
+        ATisEqual(BodySort, gsMakeSortIdNat()))) {
+      //sort of the comprehension is wrong
+      gsWarningMsg("%t can not be implemented because the body is of sort %t "
+        "instead of Bool or Nat\n", Part, BodySort);
+    } else {
+      if (ATisEqual(BodySort, gsMakeSortIdBool())) {
+        //Part is a set comprehension
+        Part = gsMakeDataExprSetComp(gsMakeLambda(ATmakeList1((ATerm) Var),
+          Body), gsMakeSortSet(VarSort));
+      } else {
+        //Part is a bag comprehension
+        Part = gsMakeDataExprBagComp(gsMakeLambda(ATmakeList1((ATerm) Var),
+          Body), gsMakeSortBag(VarSort));
       }
-      //make body for the lambda abstraction
-      ATermAppl Result = ATAgetFirst(Eqs);
-      Eqs = ATgetNext(Eqs);
-      while (!ATisEmpty(Eqs))
-      {
-        Result = gsMakeDataExprOr(ATAgetFirst(Eqs), Result);
-        Eqs = ATgetNext(Eqs);
-      }
-      //make lambda abstraction
-      Result = gsMakeLambda(ATmakeList1((ATerm) Var), Result);
-      //make set enumeration
-      Result = gsMakeDataExprSetComp(Result, Sort);
-      Part = gsImplExprsPart(Result, PSubsts, PDataDecls);
+      Part = gsImplExprsPart(Part, PSubsts, PDataDecls);
       Recursive = false;
     }
   }
@@ -478,9 +488,11 @@ ATermAppl gsImplExprsPart(ATermAppl Part, ATermList *PSubsts,
       for (int i = 0; i < NrArgs; i++) {
         ATerm Arg = ATgetArgument(Part, i);
         if (ATgetType(Arg) == AT_APPL)
-          Args[i] = (ATerm) gsImplExprsPart((ATermAppl) Arg, PSubsts, PDataDecls);
+          Args[i] = (ATerm) gsImplExprsPart((ATermAppl) Arg, PSubsts,
+            PDataDecls);
         else //ATgetType(Arg) == AT_LIST
-          Args[i] = (ATerm) gsImplExprsParts((ATermList) Arg, PSubsts, PDataDecls);
+          Args[i] = (ATerm) gsImplExprsParts((ATermList) Arg, PSubsts,
+            PDataDecls);
       }
       Part = ATmakeApplArray(Head, Args);
     }
@@ -498,6 +510,44 @@ ATermList gsImplExprsParts(ATermList Parts, ATermList *PSubsts,
       gsImplExprsPart((ATermAppl) ATgetFirst(Parts), PSubsts, PDataDecls));
   }
   return ATreverse(Result);
+}
+
+ATermAppl gsImplSetBagEnum(ATermList Elts, ATermAppl SortExpr)
+{
+  assert(ATgetLength(Elts) > 0);
+  assert(gsIsSortSet(SortExpr) || gsIsSortBag(SortExpr));
+  ATermAppl Result;
+  //introduce a fresh variable
+  ATermAppl Var =
+    gsMakeDataVarId(gsFreshString2ATermAppl("x", (ATerm) Elts, true),
+      ATAgetArgument(SortExpr, 0));
+  //make body for the lambda abstraction
+  Elts = ATreverse(Elts);
+  if (gsIsSortSet(SortExpr)) {
+    Result = gsMakeDataExprEq(Var, ATAgetFirst(Elts));
+    Elts = ATgetNext(Elts);
+  } else { //gsIsSortBag(SortExpr)
+    Result = gsMakeDataExpr0();
+  }
+  while (!ATisEmpty(Elts))
+  {
+    ATermAppl Elt = ATAgetFirst(Elts);
+    if (gsIsSortSet(SortExpr))
+      Result = gsMakeDataExprOr(gsMakeDataExprEq(Var, Elt), Result);
+    else //gsIsSortBag(SortExpr)
+      Result = gsMakeDataExprIf(gsMakeDataExprEq(Var, ATAgetArgument(Elt, 0)),
+        ATAgetArgument(Elt, 1), Result);
+    Elts = ATgetNext(Elts);
+  }
+  //make lambda abstraction
+  Result = gsMakeLambda(ATmakeList1((ATerm) Var), Result);
+  //make set/bag enumeration
+  if (gsIsSortSet(SortExpr))
+    Result = gsMakeDataExprSetComp(Result, SortExpr);
+  else //gsIsSortBag(SortExpr)
+    Result = gsMakeDataExprBagComp(Result, SortExpr);
+  //return Result
+  return Result;
 }
 
 ATermAppl gsImplSortRefs(ATermAppl Spec)
@@ -562,22 +612,22 @@ void gsSplitSortDecls(ATermList SortDecls, ATermList *PSortIds,
 
 ATermAppl gsMakeFreshStructSortId(ATerm Term)
 {
-  return gsMakeSortId(gsFreshString2ATermAppl(gsStructPrefix, Term, true));
+  return gsMakeSortId(gsFreshString2ATermAppl(gsStructPrefix, Term, false));
 }
  
 ATermAppl gsMakeFreshListSortId(ATerm Term)
 {
-  return gsMakeSortId(gsFreshString2ATermAppl(gsListPrefix, Term, true));
+  return gsMakeSortId(gsFreshString2ATermAppl(gsListPrefix, Term, false));
 }
 
 ATermAppl gsMakeFreshSetSortId(ATerm Term)
 {
-  return gsMakeSortId(gsFreshString2ATermAppl(gsSetPrefix, Term, true));
+  return gsMakeSortId(gsFreshString2ATermAppl(gsSetPrefix, Term, false));
 }
 
 ATermAppl gsMakeFreshBagSortId(ATerm Term)
 {
-  return gsMakeSortId(gsFreshString2ATermAppl(gsBagPrefix, Term, true));
+  return gsMakeSortId(gsFreshString2ATermAppl(gsBagPrefix, Term, false));
 }
 
 bool gsIsStructSortId(ATermAppl SortExpr)
