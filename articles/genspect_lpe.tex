@@ -1,7 +1,7 @@
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 %%%  MTLPEs                                                    %%%
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-\documentclass[twoside,fleqn,a4paper,dvips]{article}
+\documentclass[fleqn,a4paper,dvips]{article}
 \usepackage{textcomp,amsmath,amssymb,amsthm,stmaryrd}
 \usepackage{geometry}
 \usepackage[ps2pdf]{hyperref} % remove for printing
@@ -12,7 +12,9 @@
 
 \def\YSU{\texttt{ YSU: TODO :USY\marginpar{!!!} }}
 \def\JFG{\texttt{ JFG: TODO :GFJ\marginpar{!!!} }}
-\newcommand{\afunc}[3]{\mathsf{#1}:#2\rightarrow#3}
+
+\newcommand{\aterm}[1]{\mathsf{#1}}
+\newcommand{\afunc}[3]{\aterm{#1}:#2\rightarrow#3}
 
 \newcommand{\Sig}{\nm{Sig}}
 \newcommand{\Fun}{\nm{Fun}}
@@ -29,6 +31,7 @@
 
 \begin{document}
 \maketitle
+\tableofcontents
 
 \section{LPE definitions}
 
@@ -93,26 +96,371 @@ validity of all static semantic requirements can efficiently be decided for any
 specification.
 
 A specification is well formed, if it satisfies the static semantic requirements,
-the symmetric closure of the communication function is associative, there are no
-empty sorts and the sorts $\Bool$ and $\Time$ are appropriately defined. We
-only give an operational semantics to well formed specifications.
-\subsection{The signature of a specification}
-\begin{defn}
-The signature $\Sig(E)$ of a {\tt Specification} $E$ consists of a
-seven-tuple \[(\Sort,\Fun,\Map,\Act,\Comm,\Proc,\Init)\] where
-each component is a set containing all elements of a main syntactical category
-declared in $E$.
-The signature $\Sig(E)$ of $E$ is inductively defined as follows:
-\newcommand{\fd}{{\it fd}}
-\newcommand{\md}{{\it md}}
-\newcommand{\pe}{{\it pe}}
-\newcommand{\ad}{{\it ad}}
+there are no empty sorts and the sort $\Time$ is appropriately defined. We
+only give an operational semantics to well-formed specifications.
+
+\subsection{Static semantics}
+A {\tt Specification} must be internally consistent. This means
+that all objects that are used must be declared exactly once and 
+are used such that the sorts are correct. It also means that action,
+process, constant and variable names cannot be confused.
+Furthermore, it means that communications are specified in a functional
+way and that it is guaranteed that the terms used in an equation are well-typed.
+Because all these properties can be statically decided, a
+specification that is internally consistent is called SSC
+({\em Statically Semantically Correct}). All next definitions
+culminate in Definition \ref{SSC-mCRL}.
+
+\subsubsection{SSC of \texttt{Specification}}
+We assume that the specification has the form 
+$\aterm{spec}(\nm{sortspec?},\nm{opspec?},\nm{eqnspec?},\nm{actspec?},\nm{proscpec?},\nm{init})$
+(an easy transformation of the input aterm brings it to this form).
+All of the parameters are optional except the last one (the minimal specification is 
+$\aterm{spec}(\aterm{init}(\aterm{tau}())))$.
+Sometimes part of the specification is not used. For example, any sort specification is useless 
+unless some functions are defined for them. And also functions specifications are useless if they do not
+occur in expressions. Such specifications are still considered SSC, although an implementation of the checker 
+may issue a warning in such cases.
+
+Let $Sig$ be a signature and $\NV$ be a set of variables over $Sig$. We
+define the predicate `is SSC wrt.\ $Sig$'
+inductively over the syntax of a {\tt Specification}.
+\paragraph{Sorts}
+Sort declarations:
 \begin{itemize}
 \item
-If $E\equiv \sortkw~n_1\cdots n_m$ with $m\geq 1$,
-then
-$\Sig(E)\wor(\{n_1,\ldots,n_m\},\emptyset,\emptyset,\emptyset,
-\emptyset,\emptyset,\emptyset).$
+  A {\tt SortSpec}
+  $\aterm{SortSpec}([\nm{sspec}_1,\dots,\nm{sspec}_m])$ with $m\geq 1$
+  is SSC wrt.\ $Sig$ iff 
+  \begin{itemize}
+  \item all $\nm{sspec}_1,\dots,\nm{sspec}_m$ are SSC wrt.\ $Sig$.
+  \item Defined sort names are different: for all $i<j$, $\nm{defined\_sorts}(\nm{sspec}_i)\neq\nm{defined\_sorts}(\nm{sspec}_j)$.
+  \end{itemize}
+\item 
+  A {\tt SortDecl}
+  $\aterm{SortDeclStandard}([n_1\cdots n_m])$ with $m\geq 1$
+  is SSC wrt.\ $Sig$ iff all $n_1,\ldots,n_m$ are pairwise
+  different.
+\item
+  A {\tt SortDecl}
+  $\aterm{SortDeclRef}(n,s)$ with $m\geq 1$
+  is SSC wrt.\ $Sig$ iff the \emph{sort expression} $s$ is SSC w.r.t $Sig\setminus [n_1\cdots n_m]$.
+  Here we note that no recursive sort references are allowed.
+\item
+  A {\tt SortDecl}
+  $\aterm{SortDeclStruct}(n,[\nm{cons}_1\dots,\nm{cons}_m])$ with $m\geq 1$
+  is SSC wrt.\ $Sig$ iff all \emph{constructor expressions} $\nm{cons}$ are SSC w.r.t $Sig$.
+\item 
+  A {\tt ConstDecl}
+  $\aterm{StructDeclCons}(n,[\nm{proj}_1\dots,\nm{proj}_m]),k)$ with $m\geq 0$
+  is SSC wrt.\ $Sig$ iff 
+  \begin{itemize}
+  \item both $n$ and $k$ are not declared as function or map (or $k==nil()$)
+  \item all \emph{projection expressions} $\nm{proj}$ are SSC w.r.t $Sig$.
+  \end{itemize}
+\item 
+  A {\tt ProjDecl}
+  $\aterm{StructDeclProj}(n,\aterm{Dom}([s_1\cdots s_m]))$ with $m\geq 1$
+  is SSC wrt.\ $Sig$ iff 
+  \begin{itemize}
+  \item both $n$ is not declared as function or map (or $n==nil()$)
+  \item \emph{sort expressions} $s$ are SSC w.r.t $Sig$
+  \end{itemize}
+\end{itemize}
+
+\paragraph{Data types}
+\begin{itemize}
+\item
+  A {\tt OpSpec}\\
+  $\aterm{ConsSpec}([IdDecls([n_{11},\dots,n_{1l_1}],s_1),\dots,IdDecls([n_{m1},\dots,n_{ml_m}],s_m)])$ 
+  or\\
+  $\aterm{MapSpec}([IdDecls([n_{11},\dots,n_{1l_1}],s_1),\dots,IdDecls([n_{m1},\dots,n_{ml_m}],s_m)])$ 
+  with $m\geq 1$, $l_i\geq 1$, $k_i\geq 0$ for $1\leq i\leq m$
+  is SSC wrt.\ $Sig$ iff 
+  \begin{itemize}
+  \item
+    for all $1\leq i\leq m$  $n_{i1},\ldots,n_{il_i}$ are
+    pairwise different,
+  \item
+    for all $1\leq i\leq m$ it holds that $s_i$ is SSC wrt.\ $Sig$.
+  \item
+    for all $1\leq i<j\leq m$ it holds that
+    if $n_{ik}\equiv n_{jk'}$ for some $1\leq k\leq l_i$ and $1\leq
+    k'\leq l_j$, then $\nm{type}_{Sig}(s_i)\neq\nm{type}_{Sig}(s_j)$,
+  \end{itemize}
+\item
+  A {\tt EqnSpec} of the form:\\
+\begin{gather}
+  \aterm{EqnSpec}([IdDecls([n_{11},\ldots,n_{1l_1}],s_1),\dots,IdDecls([n_{m1},\ldots,n_{ml_m}],s_m)],\\
+  [\aterm{EqnSpec}(d_1,d_1')\dots\aterm{EqnSpec}(d_k,d_k')])
+\end{gather}
+  with $m\geq 1$, $l_i\geq 1$, $k_i\geq 0$ for $1\leq i\leq m$
+  is SSC wrt.\ $Sig$ iff 
+  \begin{itemize}
+  \item
+    for all $1\leq i,j\leq m$  $n_{ij}$ are pairwise different,
+  \item
+    for all $1\leq i\leq m$ it holds that $s_i$ is SSC wrt.\ $Sig$.
+  \item
+    for all $1\leq j\leq k$ it holds that $d_i$ and $d_i'$ is SSC wrt.\ $Sig+ns$.
+  \item
+    for all $1\leq j\leq k$ it holds that the types of $d_i$ and $d_i'$ are uniquly compatible (wrt. $Sig$).
+  \end{itemize}
+\end{itemize}
+
+\paragraph{Actions}
+  A {\tt ActSpec} of the form:\\
+$\aterm{ActSpec}([\aterm{ActDecl}([n_{11},\dots,n_{1l_1}],d_1)\dots\aterm{ActDecl}([n_{m1},\dots,n_{ml_m}],d_m)])$
+with $m\geq 1$ is SSC wrt. $Sig$ iff
+\begin{itemize}
+\item for all $1\leq i\leq m$ all $n_{ij}$ are pairwise different.
+\item none of them are in $\Sig.\Fun\cup\Sig.\Map$
+\item $d_i$ is $\nm{Nil}()$ or $d_i$ is $\nm{Dom}([s_1,\dots,s_n])$, and all $s_j$ are SSC wrt.\ $\Sig$.
+\end{itemize}
+
+\paragraph{Processes}
+\begin{itemize}
+\item
+  A {\tt ProcSpec} 
+  $\aterm{ProcSpec}([\aterm{ProcDecl}(n_1,\nm{vars}_1,p_1),\dots,\aterm{ProcDecl}(n_m,\nm{vars}_m,p_m)])$
+  with $m\geq 1$ is SSC wrt.\ $Sig$ iff
+  \begin{itemize}
+  \item
+    for each $1\leq i<j\leq m$:
+    if $\nm{type}(\nm{vars}_i)=\nm{type}(\nm{vars}_j)$, then $n_i\neq n_j$,
+  \item none of them are in $\Sig.\Fun\cup\Sig.\Map\cup\Sig.\Act$
+  \item
+    for each {\tt Name} $S'$ it holds that $n\ap S_{1}\times\cdots\times
+    S_{k}\rightarrow S'\notin \Sig.\Fun\cup\Sig.\Map$,
+  \item the {\tt Name}s $x_{1},\ldots,x_{k}$ are pairwise different
+    and $\{\langle x_{j}\ap S_{j}\rangle\mid 1\leq j\leq k\}$ is a set
+    of variables over $Sig$,
+  \item $p$ is SSC wrt.\ $Sig$ and $\{\langle
+    x_{j}\ap S_{j}\rangle\mid 1\leq j\leq k\}$.
+  \end{itemize}
+\item
+  A {\tt Init} of the form $\aterm{Init}(p)$ is SSC wrt.\ $\Sig$ 
+  iff $p$ SSC wrt.\ to $\Sig$ and $\emptyset$.
+\end{itemize}
+
+\begin{defn}\label{def:SSC-mCRL}
+  Let $E$ be a {\tt Specification}. We say that $E$ is SSC iff $E$ is SSC
+  wrt.\ $\Sig(E)$.
+\end{defn}
+
+
+\subsubsection{Process and Data Terms. (Sub-)Typing}
+
+\paragraph{Process terms}
+Let $\Sig$ be a signature and $\NV$ be a set of variables over $\Sig$.
+We say that a {\tt Process-term} $p$ is {\it SSC wrt.\ to $\Sig$ and
+$\NV$} iff one of the following hold:
+\begin{itemize}
+\item
+  $p\equiv p_1+p_2$, 
+  $p\equiv p_1\parallel p_2$, $p\equiv p_1\leftm p_2$, $p\equiv p_1\mid
+  p_2$,
+  $p\equiv p_1 {\cdot} p_2$ or $p\equiv p_1\tb p_2$ and both $p_1$ and $p_2$ are SSC wrt.\ $Sig$ and $\NV$,
+\item
+  $p\equiv p_1\triangleleft t \triangleright p_2$ and
+  \begin{itemize}
+  \item
+    $p_1$ and $p_2$ are SSC wrt.\ $Sig$ and $\NV$,
+  \item
+    $t$ is SSC wrt.\ $Sig$ and $\NV$ and $sort_{Sig,\NV}(t)=\seq{\Bool}$.
+  \end{itemize}
+\item
+  $p\equiv p_1\at{t}$ and 
+  \begin{itemize}
+\item
+  $p_1$ is SSC wrt.\ $Sig$ and $\NV$
+\item
+  $t$ is SSC wrt.\ $Sig$ and $\NV$ and $sort_{Sig,\NV}(t)=\Time$.
+\end{itemize}
+\item
+  $p\equiv \delta$ or $p\equiv\tau$.
+\item
+  $p\equiv\partial_{\{n_1,\ldots,n_m\}}p_1$ or
+  $p\equiv \tau_{\{n_1,\ldots,n_m\}}p_1$ with $m\geq 1$ and
+  \begin{itemize}
+\item
+  for all $1\leq i\neq j \leq m$ $n_i\not\sqsubseteq n_j$,
+\item
+  for $1\leq i\leq m$, if $n_i=n_{i,1}\comm\dots\comm n_{i,k}$, then $n_{i,j}\in \Sig.\nm{ActNames}$.
+\item
+  $p_1$ is SSC wrt.\ $Sig$ and $\NV$.
+\end{itemize}
+\item
+  $p\equiv\nabla_{\{n_1,\ldots,n_m\}}p_1$ with $m\geq 1$ and
+  \begin{itemize}
+  \item
+    for all $1\leq i< j \leq m$ $n_i\not\equiv n_j$,
+  \item
+    for $1\leq i\leq m$, if $n_i=n_{i,1}\comm\dots\comm n_{i,k}$, then $n_{i,j}\in \Sig.\nm{ActNames}$.
+  \item 
+    $p_1$ is SSC wrt.\ $Sig$ and $\NV$.
+\end{itemize}
+\item
+  $p\equiv\rho_{\{n_1\rightarrow n_1',\ldots,n_m\rightarrow
+    n_m'\}}p_1$ and
+  \begin{itemize}
+  \item 
+    for $1\leq i\leq m$ both $n_i,n_i'\in \Sig.\nm{ActNames}$.
+  \item
+    for each $1\leq i<j\leq m$ it holds that $n_i\not\equiv n_j$,
+  \item
+    for $1\leq i\leq m$, the types of $n_i$ and $n_i'$ are the same in $Sig$.
+  \item
+    $p_1$ is SSC wrt.\ $Sig$ and $\NV$.
+  \end{itemize}
+  $p\equiv\Gamma_{\{n_1\rightarrow n_1',\ldots,n_m\rightarrow
+    n_m'\}}p_1$ and
+  \begin{itemize}
+  \item
+    for $1\leq i\leq m$, if $n_i=n_{i,1}\comm\dots\comm n_{i,k}$, then $n_{i,j}\in \Sig.\nm{ActNames}$.
+  \item 
+    for $1\leq i\leq m$ either $n'_i\in \Sig.\nm{ActNames}$ or $n'_i=\tau$.
+  \item
+    for each $1\leq i\neq j\leq m$ it holds that $n_i\not\sqsubseteq n_j$,
+  \item
+    for $1\leq i\leq m$ it holds that, if $n_i=n_{i,1}\comm\dots\comm n_{i,k}$, then the types of all
+    $n_{i,j}$ and $n'_i$ are the same in $Sig$.
+  \item
+    $p_1$ is SSC wrt.\ $Sig$ and $\NV$.
+  \end{itemize}
+\item
+  $p\equiv \Sigma_{x\ap S}p_1$ and
+  iff
+  \begin{itemize}
+\item
+  $(\NV\backslash\{\langle x\ap S'\rangle \mid S'
+  \mbox{ is a {\tt Name}}\})\cup\{\langle x\ap S\rangle\}$
+  is a set of variables over $Sig$,
+\item
+  $p_1$ is SSC wrt.\ $Sig$ and
+  $(\NV\backslash\{\langle x\ap S'\rangle \mid S'\mbox{ is a
+    {\tt Name}}\})\cup\{\langle x\ap S\rangle\}$.
+\end{itemize}
+\item
+  $p\equiv n$ and 
+  $n=p'\in \Sig.\Proc$ for some {\tt Process-term} $p'$, or $n\in
+  \Sig.\Act$.
+\item
+  $p\equiv n(t_1,\ldots,t_m)$
+  with $m\geq 1$ and
+  \begin{itemize}
+  \item
+    $n(x_1\ap sort_{Sig,\NV}(t_1),\ldots,x_m\ap sort_{Sig,\NV}(t_m))=p'\in
+    \Sig.\Proc$ for {\tt Name}s $x_1,\ldots,x_m$ and\\ {\tt Process-term} $p'$,
+    or
+    $n\ap sort_{Sig,\NV}(t_1)\times \cdots\times sort_{Sig,\NV}(t_m)\in
+    \Sig.\Act$,
+  \item
+    for $1\leq i\leq m$ the {\tt Data-term}
+    $t_i$ is SSC wrt.\ $Sig$ and $\NV$.
+  \end{itemize}
+\end{itemize}
+
+\paragraph{Sort expressions}
+\begin{itemize}
+\item
+  A {\tt SortExpr}
+  $\aterm{SortBool}(),\aterm{SortPos}(),\aterm{SortNat}(),\aterm{SortInt}()$ are SSC.
+\item 
+  A {\tt SortExpr}
+  $\aterm{SortList}(s),\aterm{SortSet}(s),\aterm{SortBag}(s)$ are SSC wrt.\ $Sig$ iff 
+  sort expression $s$ is SSC wrt.\ $Sig$.
+\item
+  A {\tt SortExpr}
+  $\aterm{SortRef}(n)$ is SSC wrt.\ $Sig$ iff $n\in\nm{Sorts}(Sig)$.
+\item
+  A {\tt SortExpr}
+  $\aterm{SortArrow}(\aterm{Dom}([n_1,\dots,n_m]),n)$ with $m\geq 1$
+  is SSC wrt.\ $Sig$ iff all \emph{sort expressions} $n$ are SSC w.r.t $Sig$.
+\end{itemize}
+Any sort expression that is SCC is also well-typed. I.e. it is impossible to specify
+an incorrectly typed sort.
+
+\paragraph{Data Terms}
+Let $\Sig$ be a signature, and let $\NV$ be a set of variables over
+$\Sig$.
+A {\tt Data-term} $t$ is called SSC wrt.\ $\Sig$ and $\NV$ iff one of
+the following holds
+\begin{itemize}
+\item
+  $t\equiv n$ with $n$ a {\tt Name} and
+  $\langle n\ap S\rangle\in \NV$ for some $S$, or
+  $n\ap  \rightarrow sort_{Sig,\NV}(n)\in \Sig.\Fun\cup\Sig.\Map$.
+\item
+  $t\equiv n(t_1,\ldots,t_m)$ ($m\geq 1$) and
+  $n\ap sort_{Sig,\NV}(t_1)\times\cdots\times sort_{Sig,\NV}(t_m)
+  \rightarrow sort_{Sig,\NV}(n(t_1,\ldots,t_m))\in \Sig.\Fun\cup\Sig.\Map$ and
+  all
+  $t_i$ ($1\leq i\leq m$) are SSC wrt.\ $Sig$ and $\NV$.
+\end{itemize}
+
+\aterm{Id}(n) & & \nm{type}(n)
+\aterm{Number}(n) & & \PNI
+\aterm{True}() & & \Bool 
+\aterm{False}() & & \Bool 
+\aterm{EmptyList}() & & \List(\seq{}) 
+\aterm{EmptySetBag}() & & \SB(\seq{})
+\aterm{ListEnum}(<DataExpr>+) &\text{argument types are compatible} & \List(Copmat(args))
+\aterm{SetEnum}(<DataExpr>+) & \text{similar}&
+\aterm{BagEnum}(BagEnumElt+) & \text{..} &
+\aterm{SetBagComp}(<IdDecl>, <DataExpr>) & type(arg2)=\Bool, arg2 in arg1 & \SB{type(target arg1)}
+\aterm{FuncApp}(<DataExpr>, <DataExpr>*) & types(arg2) are compat source(arg1), & target(arg1) 
+\aterm{NotOrCompl}(<DataExpr>) & &
+\aterm{Neg}(<DataExpr>) & &
+\aterm{Size}(<DataExpr>) 
+\aterm{Forall}(<IdDecl>, <DataExpr>) 
+\aterm{Exists}(<IdDecl>, <DataExpr>) 
+\aterm{ListAt}(<DataExpr>, <DataExpr>) 
+\aterm{MultOrIntersect}(<DataExpr>, <DataExpr>) 
+\aterm{Div}(<DataExpr>, <DataExpr>) 
+\aterm{Mod}(<DataExpr>, <DataExpr>) 
+\aterm{AddOrUnion}(<DataExpr>, <DataExpr>) 
+\aterm{SubtOrDiff}(<DataExpr>, <DataExpr>) 
+\aterm{LTOrPropSubset}(<DataExpr>, <DataExpr>) 
+\aterm{GT}(<DataExpr>, <DataExpr>) 
+\aterm{LTEOrSubset}(<DataExpr>, <DataExpr>) 
+\aterm{GTE}(<DataExpr>, <DataExpr>) 
+\aterm{In}(<DataExpr>, <DataExpr>) 
+\aterm{Cons}(<DataExpr>, <DataExpr>) 
+\aterm{Snoc}(<DataExpr>, <DataExpr>) 
+\aterm{Concat}(<DataExpr>, <DataExpr>) 
+\aterm{Eq}(<DataExpr>, <DataExpr>) 
+\aterm{Neq}(<DataExpr>, <DataExpr>) 
+\aterm{And}(<DataExpr>, <DataExpr>) 
+\aterm{Or}(<DataExpr>, <DataExpr>) 
+\aterm{Imp}(<DataExpr>, <DataExpr>) 
+\aterm{Lambda}(<IdDecl>, <DataExpr>) 
+\aterm{Whr}(<DataExpr>, <DataExpr>+) 
+
+
+
+
+
+
+
+
+\subsection{The signature of a specification}
+\begin{defn}
+  The signature $\Sig(E)$ of a {\tt Specification} $E$ consists of a
+  seven-tuple \[(\Sort,\Fun,\Map,\Act,\Comm,\Proc,\Init)\] where
+  each component is a set containing all elements of a main syntactical category
+  declared in $E$.
+  The signature $\Sig(E)$ of $E$ is inductively defined as follows:
+  \newcommand{\fd}{{\it fd}}
+  \newcommand{\md}{{\it md}}
+  \newcommand{\pe}{{\it pe}}
+  \newcommand{\ad}{{\it ad}}
+  \begin{itemize}
+  \item
+    If $E\equiv \sortkw~n_1\cdots n_m$ with $m\geq 1$,
+    then
+    $\Sig(E)\wor(\{n_1,\ldots,n_m\},\emptyset,\emptyset,\emptyset,
+    \emptyset,\emptyset,\emptyset).$
 \item
 If $E\equiv
 \func~\fd_1\cdots \fd_m$ with $m\geq 1$,
@@ -259,9 +607,13 @@ Let $t$ be a {\tt data-term} and $Sig$ a signature. Let $\NV$ be a set
 of variables over $Sig$. We define:
 \[sort_{Sig,\NV}(t)\wor\left\{
 \begin{array}{ll}
-S&\mbox{if~}t\equiv x\mbox{ and }\langle x\ap S\rangle \in \NV,\\
-S&\mbox{if $t\equiv n$, $n\ap \rightarrow S\in
-\Sig.\Fun\cup\Sig.\Map$}\\
+\seq{S}&\mbox{if~}t\equiv x\mbox{ and }\langle x\ap S\rangle \in \NV,\\
+\seq{S}&\mbox{if $t\equiv n$, $n\ap \rightarrow S\in
+\Sig.\Fun\cup\Sig.\Map$ or in constructors.}\\
+\seq{\nm{Pos},\nm{Nat},\nm{Int}}&\mbox{if $t\equiv\aterm{Number}(n)$, $n>0$}\\
+\seq{\nm{Nat},\nm{Int}}&\mbox{if $t\equiv\aterm{Number}(0)$}\\
+\seq{\nm{Int}}&\mbox{if $t\equiv\aterm{Number}(n)$, $n<0$}\\
+\seq{\nm{Bool}}&\mbox{if $t\equiv\aterm{True}()$ or $t\equiv\aterm{False}()$}\\
 &\hspace*{0.5cm}\mbox{and for no $S'\not\equiv S$}~n\ap \rightarrow
 S'\in\Sig.\Fun\cup\Sig.\Map,\\
 S&\mbox{if $t\equiv n(t_1,\ldots,t_m)$,}\\
@@ -298,430 +650,7 @@ for any {\tt data-term} $t$. If $\perp\in \Var_{\Sig,\NV}(t)$, then
 due  to some missing or inappropriate declaration 
 it can not be determined what the variables of $t$ are on basis of
 $\Sig$ and $\NV$.
-\subsection{Static semantics}
-A {\tt Specification} must be internally consistent. This means
-that all objects that are used must be declared exactly once and 
-are used such that the sorts are correct. It also means that action,
-process, constant and variable names cannot be confused.
-Furthermore, it means that communications are specified in a functional
-way and that it is guaranteed that the terms used in an equation are well-typed.
-Because all these properties can be statically decided, a
-specification that is internally consistent is called SSC
-({\em Statically Semantically Correct}). All next definitions
-culminate in Definition \ref{SSC-mCRL}.
 
-\begin{defn}[\tt Data-term]
-Let $\Sig$ be a signature, and let $\NV$ be a set of variables over
-$\Sig$.
-A {\tt Data-term} $t$ is called SSC wrt.\ $\Sig$ and $\NV$ iff one of
-the following holds
-\begin{itemize}
-\item
-$t\equiv n$ with $n$ a {\tt Name} and
-$\langle n\ap S\rangle\in \NV$ for some $S$, or
-$n\ap  \rightarrow sort_{Sig,\NV}(n)\in \Sig.\Fun\cup\Sig.\Map$.
-\item
-$t\equiv n(t_1,\ldots,t_m)$ ($m\geq 1$) and
-$n\ap sort_{Sig,\NV}(t_1)\times\cdots\times sort_{Sig,\NV}(t_m)
-\rightarrow sort_{Sig,\NV}(n(t_1,\ldots,t_m))\in \Sig.\Fun\cup\Sig.\Map$ and
-all
-$t_i$ ($1\leq i\leq m$) are SSC wrt.\ $Sig$ and $\NV$.
-\end{itemize}
-\end{defn}
-
-\begin{defn}[\tt Equation-section]
-Let $\Sig$ be a signature and $\NV$ be a set of variables over $\Sig$. An {\tt
-Equation-section}
-$\rewkw~rw_1\cdots rw_m$
-with $m\geq 1$ is SSC wrt.\ $\Sig$ and $\NV$ iff for all
-$1\leq i\leq m $ if $rw_i\equiv t_1=t_2$,
-both $t_1$ and $t_2$ are SSC wrt.\ $\Sig$ and $\NV$ and
-$sort_{\Sig,\NV}(t_1)=sort_{Sig,\NV}(t_2)$.
-\end{defn}
-
-\begin{defn}[\tt Variable-declaration]
-A {\tt Variable-declaration} {\it vd} is SSC wrt.\ a signature
-$Sig$ iff one of the following holds.
-\begin{itemize}
-\item
-{\it vd} is empty.
-\item
-${\it vd}\equiv\varkw$
-\begin{minipage}[t]{7cm}
-$n_{11},\ldots,n_{1k_1}\ap  S_1$\\
-$\vdots$\\
-$n_{m1},\ldots,n_{mk_m}\ap  S_m$\vspace{2ex}
-\end{minipage}\\
-with $m\geq 1$, $k_i\geq 1$ for $1\leq i\leq m$ and
-\begin{itemize}
-\item
-$n_{ij}\not\equiv n_{i'j'}$ whenever $i\neq i'$ or 
-$j\neq j'$ for $1\leq i\leq m$, $1\leq i'\leq m$,
-$1\leq j\leq k_i$ and $1\leq j'\leq k_{i'}$,
-\item
-the set $\Vars(\varkw~n_{11},\ldots,n_{1k_1}: 
-S_1\cdots n_{m1},\ldots,n_{mk_m}:
-S_m)$ is a set of variables
-over $Sig$.
-\end{itemize}
-\end{itemize}
-\end{defn}
-
-\begin{defn}[\tt Process-term]
-Let $\Sig$ be a signature and $\NV$ be a set of variables over $\Sig$.
-We say that a {\tt Process-term} $p$ is {\it SSC wrt.\ to $\Sig$ and
-$E$} iff one of the following hold:
-\begin{itemize}
-\item
-$p\equiv p_1+p_2$, 
-$p\equiv p_1\parallel p_2$, $p\equiv p_1\leftm p_2$, $p\equiv p_1\mid
-p_2$,
-$p\equiv p_1 {\cdot} p_2$ or $p\equiv p_1\tb p_2$ and
-\begin{itemize}
-\item
-$p_1$ is SSC wrt.\ $Sig$ and $\NV$,
-\item
-$p_2$ is SSC wrt.\ $Sig$ and $\NV$.
-\end{itemize}
-\item
-$p\equiv p_1\triangleleft t \triangleright p_2$ and
-\begin{itemize}
-\item
-$p_1$ is SSC wrt.\ $Sig$ and $\NV$,
-\item
-$p_2$ is SSC wrt.\ $Sig$ and $\NV$,
-\item
-$t$ is SSC wrt.\ $Sig$ and $\NV$ and $sort_{Sig,\NV}(t)=\Bool$.
-\end{itemize}
-\item
-$p\equiv p_1\at{t}$ and 
-\begin{itemize}
-\item
-$p_1$ is SSC wrt.\ $Sig$ and $\NV$
-\item
-$t$ is SSC wrt.\ $Sig$ and $\NV$ and $sort_{Sig,\NV}(t)=\Time$.
-\end{itemize}
-\item
-$p\equiv \delta$ or $p\equiv\tau$.
-\item
-$p\equiv\partial_{\{n_1,\ldots,n_m\}}p_1$ or
-$p\equiv \tau_{\{n_1,\ldots,n_m\}}p_1$ with $m\geq 1$ and
-\begin{itemize}
-\item
-for all $1\leq i< j \leq m$ $n_i\not\equiv n_j$,
-\item
-for $1\leq i\leq m$ either $n_i\in \Sig.\Act$ or
-$n_i\ap S_1\times \cdots\times S_k\in
-\Sig.\Act$ for some $k\geq 1$ and {\tt Name}s $S_1,\ldots,S_k$,
-\item
-$p_1$ is SSC wrt.\ $Sig$ and $\NV$.
-\end{itemize}
-\item
-$p\equiv\rho_{\{n_1\rightarrow n_1',\ldots,n_m\rightarrow
-n_m'\}}p_1$ and
-\begin{itemize}
-\item
-for $1\leq i\leq m$ either $n_i\in \Sig.\Act$ or
-$n_i\ap S_1\times \cdots\times S_k\in
-\Sig.\Act$ for some $k\geq 1$ and {\tt Name}s $S_1,\ldots,S_k$,
-\item
-for each $1\leq i<j\leq m$ it holds that $n_i\not\equiv n_j$,
-\item
-for $1\leq i\leq m$, $k\geq 1$ and {\tt Name}s $S_1,..,S_k$ it holds
-that if $n_i\ap S_1\times\cdots\times S_k\in \Sig.\Act$, then also
-$n_i'\ap S_1\times\cdots\times S_k\in \Sig.\Act$,
-\item
-for $1\leq i\leq m$ it holds that if $n_i\in \Sig.\Act$, then also
-$n_i'\in \Sig.\Act$,
-\item
-$p_1$ is SSC wrt.\ $Sig$ and $\NV$.
-\end{itemize}
-\item
-$p\equiv \Sigma_{x\ap S}p_1$ and
-iff
-\begin{itemize}
-\item
-$(\NV\backslash\{\langle x\ap S'\rangle \mid S'
-\mbox{ is a {\tt Name}}\})\cup\{\langle x\ap S\rangle\}$
-is a set of variables over $Sig$,
-\item
-$p_1$ is SSC wrt.\ $Sig$ and
-$(\NV\backslash\{\langle x\ap S'\rangle \mid S'\mbox{ is a
-{\tt Name}}\})\cup\{\langle x\ap S\rangle\}$.
-\end{itemize}
-\item
-$p\equiv n$ and 
-$n=p'\in \Sig.\Proc$ for some {\tt Process-term} $p'$, or $n\in
-\Sig.\Act$.
-\item
-$p\equiv n(t_1,\ldots,t_m)$
-with $m\geq 1$ and
-\begin{itemize}
-\item
-$n(x_1\ap sort_{Sig,\NV}(t_1),\ldots,x_m\ap sort_{Sig,\NV}(t_m))=p'\in
-\Sig.\Proc$ for {\tt Name}s $x_1,\ldots,x_m$ and\\ {\tt Process-term} $p'$,
-or
-$n\ap sort_{Sig,\NV}(t_1)\times \cdots\times sort_{Sig,\NV}(t_m)\in
-\Sig.\Act$,
-\item
-for $1\leq i\leq m$ the {\tt Data-term}
-$t_i$ is SSC wrt.\ $Sig$ and $\NV$.
-\end{itemize}
-\end{itemize}
-\end{defn}
-
-\begin{defn}[\tt Action-declaration]
-Let $\Sig$ be a signature.
-An {\tt Action-declaration} ${\it ad}$ is SSC wrt.\ $Sig$ iff one of the following
-hold:
-\begin{itemize}
-\item
-${\it ad}\equiv n$ and
-for each {\tt Name} $S'$ it holds that $n\ap \rightarrow S' \notin
-\Sig.\Fun\cup\Sig.\Map$.
-\item
-An {\tt Action-declaration} $n_1,\ldots,n_m\ap S_1\times \cdots \times
-S_k$ with $k,m\geq 1$ is SSC wrt. $Sig$ iff
-\begin{itemize}
-\item
-for all $1\leq i<j\leq m$ it holds that $n_i\not\equiv n_j$,
-\item
-for all $1\leq i\leq k$ it holds that $S_i\in \Sig.Sort$,
-\item for all $1\leq i\leq m$ and for each
-{\tt Name} $S'$
-it holds that $n_i\ap S_1\times\cdots\times S_k\rightarrow S'\notin
-\Sig.\Fun\cup\Sig.\Map$.
-\end{itemize}
-\end{itemize}
-\end{defn}
-
-\begin{defn}[\tt Specification]
-Let $Sig$ be a signature and $\NV$ be a set of variables over $Sig$. We
-define the predicate `is SSC wrt.\ $Sig$'
-inductively over the syntax of a {\tt Specification}.
-\begin{itemize}
-\item
-A {\tt Specification}
-$\sortkw~n_1\cdots n_m$ with $m\geq 1$
-is SSC wrt.\ $Sig$ iff all $n_1,\ldots,n_m$ are pairwise
-different.
-\item
-A {\tt Specification}
-$\funckw$
-\begin{minipage}[t]{7cm}
-$n_{11},\ldots,n_{1l_1}\ap S_{11}\times \cdots\times S_{1k_1}\rightarrow
-S_1$\\
-$\vdots$\\
-$n_{m1},\ldots,n_{ml_m}\ap S_{m1}\times \cdots\times S_{mk_m}\rightarrow
-S_m$\vspace{2ex}
-\end{minipage}\\
-with $m\geq 1$, $l_i\geq 1$, $k_i\geq 0$ for $1\leq i\leq m$
-is SSC wrt.\ $Sig$ iff 
-\begin{itemize}
-\item
-for all $1\leq i\leq m$  $n_{i1},\ldots,n_{il_i}$ are
-pairwise different,
-\item
-for all $1\leq i<j\leq m$ it holds that
-if $n_{ik}\equiv n_{jk'}$ for some $1\leq k\leq l_i$ and $1\leq
-k'\leq l_j$, then either $k_i\neq k_j$, or $S_{il}\not\equiv
-S_{jl}$ for some $1\leq l\leq k_i$,
-\item
-for all $1\leq i\leq m$ and $1\leq j\leq k_i$ it holds that
-$S_{ij}\in \Sig.Sort$ and $S_i\in \Sig.Sort$.
-\end{itemize}
-\item
-A {\tt Specification}
-$\mapkw$
-\begin{minipage}[t]{7cm}
-$n_{11},\ldots,n_{1l_1}\ap S_{11}\times \cdots\times S_{1k_1}\rightarrow
-S_1$\\
-$\vdots$\\
-$n_{m1},\ldots,n_{ml_m}\ap S_{m1}\times \cdots\times S_{mk_m}\rightarrow
-S_m$\vspace{2ex}
-\end{minipage}\\
-with $m\geq 1$, $l_i\geq 1$, $k_i\geq 0$ for $1\leq i\leq m$
-is SSC wrt.\ $Sig$ iff 
-\begin{itemize}
-\item
-for all $1\leq i\leq m$  $n_{i1},\ldots,n_{il_i}$ are
-pairwise different,
-\item
-for all $1\leq i<j\leq m$ it holds that
-if $n_{ik}\equiv n_{jk'}$ for some $1\leq k\leq l_i$ and $1\leq
-k'\leq l_j$, then either $k_i\neq k_j$, or $S_{il}\not\equiv
-S_{jl}$ for some $1\leq l\leq k_i$,
-\item
-for all $1\leq i\leq m$ and $1\leq j\leq k_i$ it holds that
-$S_{ij}\in \Sig.Sort$ and $S_i\in \Sig.Sort$.
-\end{itemize}
-\item
-A {\tt Specification} of the form:
-$\begin{minipage}[t]{7cm}
-{\it var-dec}\\
-{\it rew-rul}\vspace{2ex}
-\end{minipage}$\\
-where {\it var-dec} is a {\tt Variable-declaration}
-and {\it rew-rul} is a {\it Equation-section}
-is SSC wrt.\ $Sig$ iff
-\begin{itemize}
-\item
-{\it var-dec} is SSC wrt.\ $Sig$,
-\item
-{\it rew-rul} is SSC wrt.\ $Sig$ and $\Vars(\mbox{\it var-dec})$.
-\end{itemize}
-\item
-A {\tt Specification} $\act~ad_1\cdots ad_m$
-with $m\geq 1$ is SSC wrt. $Sig$ iff
-\begin{itemize}
-\item for all $1\leq i\leq m$ the {\tt Action-declaration}
-$ad_i$ is SSC wrt.  $\Sig$,
-\item for all $1\leq i<j\leq m$ it holds that
-$\Sig(\act~ad_i).\Act\cap \Sig(\act~ad_j).\Act=\emptyset$.
-\end{itemize}
-\item
-A {\tt Specification}
-$\comm~n_{11}| n_{12}= n_{13}\cdots n_{m1}|
-n_{m2}= n_{m3}$ with $m\geq 1$ is SSC wrt.\ $Sig$ iff
-\begin{itemize}
-\item
-for each $1\leq i<j\leq m$ it is not the case that $n_{i1}\equiv n_{j1}$
-and $n_{i2}\equiv n_{j2}$, or $n_{i1}\equiv n_{j2}$ and $n_{i2}\equiv
-n_{j1}$,
-\item
-for each $1\leq i\leq m$ either $n_{i1}\in \Sig.\Act$ or there is a 
-$k\geq 1$ such that $n_{i1}\ap S_1\times \cdots \times S_k\in \Sig.\Act$,
-\item
-for each $1\leq i\leq m$, $k\geq 1$ and {\tt Name}s $S_1,\ldots,S_k$ it
-holds
-that if $n_{i1}\ap S_1\times\cdots\times S_k\in \Sig.\Act$ then
-$n_{i2}\ap S_1\times\cdots\times
-S_k\in \Sig.\Act$ and $n_{i3}\ap S_1\times\cdots\times S_k\in \Sig.\Act$,
-\item
-for each $1\leq i\leq m$, $k\geq 1$ and {\tt Name}s $S_1,\ldots,S_k$ it
-holds
-that if $n_{i2}\ap S_1\times\cdots\times S_k\in \Sig.\Act$ then
-$n_{i1}\ap S_1\times\cdots\times
-S_k\in \Sig.\Act$ and $n_{i3}\ap S_1\times\cdots\times S_k\in \Sig.\Act$,
-\item
-for each $1\leq i\leq m$ it holds
-that if $n_{i1}\in \Sig.\Act$ then
-$n_{i2}\in \Sig.\Act$ and $n_{i3}\in \Sig.\Act$,
-\item
-for each $1\leq i\leq m$ it holds
-that if $n_{i2}\in \Sig.\Act$ then
-$n_{i1}\in \Sig.\Act$ and $n_{i3}\in \Sig.\Act$.
-\end{itemize}
-\item
-A {\tt specification} 
-$\prockw~pd_1\cdots pd_m$
-with $m\geq 1$ is SSC wrt.\ $Sig$ iff
-\begin{itemize}
-\item
-for each $1\leq i<j\leq m$:
-\begin{itemize}
-\item
-if $pd_i\equiv n=p$ and $pd_j\equiv n'=p'$ then $n\not\equiv
-n'$,
-\item
-if for some $k\geq1$ it holds that $pd_i\equiv
-n(x_1\ap S_1,\ldots,x_k\ap S_k)=p$
-and\\ $pd_j\equiv n'(x_1'\ap S_1,\ldots,x_k'\ap S_k)=p'$ then $n\not\equiv
-n'$,
-\end{itemize}
-\item
-if $pd_i\equiv n=p$ ($1\leq i\leq m$), then 
-\begin{itemize}
-\item
-$n\not\in
-\Sig.\Act$ and $p$ is SSC wrt.\ $Sig$ and $\emptyset$, and
-\item
-for each {\tt Name} $S'$ it holds that $n\ap \rightarrow S'\notin
-\Sig.\Fun\cup\Sig.\Map$,
-\end{itemize}
-\item
-if $pd_i\equiv n(x_{1}\ap S_{1},\ldots,x_{k}\ap S_{k})=p$
-($1\leq i\leq m$), then
-\begin{itemize}
-\item $n\ap S_{1}\times\cdots\times S_{k}\not\in \Sig.\Act$,
-\item
-for each {\tt Name} $S'$ it holds that $n\ap S_{1}\times\cdots\times
-S_{k}\rightarrow S'\notin \Sig.\Fun\cup\Sig.\Map$,
-\item the {\tt Name}s $x_{1},\ldots,x_{k}$ are pairwise different
-and $\{\langle x_{j}\ap S_{j}\rangle\mid 1\leq j\leq k\}$ is a set
-of variables over $Sig$,
-\item $p$ is SSC wrt.\ $Sig$ and $\{\langle
-x_{j}\ap S_{j}\rangle\mid 1\leq j\leq k\}$.
-\end{itemize}
-\end{itemize}
-\item
-A {\tt Specification} of the form $\initkw~p$ is SSC wrt.\ $\Sig$ 
-iff $p$ SSC wrt.\ to $\Sig$ and $\emptyset$.
-\item
-A {\tt specification} $E_1~E_2$ is SSC wrt.\ $Sig$ iff 
-\begin{itemize}
-\item
-$E_1$ and $E_2$ are SSC wrt.\ $Sig$,
-\item
-$\Sig(E_1).Sort \cap \Sig(E_2).Sort=\emptyset$,
-\item
-if $n\ap S_1\times \cdots\times S_m\rightarrow S \in \Sig(E_1).\Fun\cup
-\Sig(E_1).\Map$ for some
-$m\geq 0$ then
-$n\ap S_1\times\cdots\times S_m\rightarrow S'\notin \Sig(E_2).\Fun\cup
-\Sig(E_2).\Map$ for any {\tt Name} $S'$,
-\item
-$\Sig(E_1).\Act \cap \Sig(E_2).\Act=\emptyset$,
-\item
-if $n_1| n_2=n_3\in \Sig(E_1).\Comm$ then for any {\tt Name}s $n_3'$
-and $n_3''$ $n_1| n_2=n_3'\notin
-\Sig(E_2).\Comm$ and $n_2| n_1=n_3''\notin \Sig(E_2).\Comm$, 
-\item
-if $pd_1\in \Sig(E_1).\Proc$ and $pd_2\in \Sig(E_2).\Proc$, then
-\begin{itemize}
-\item
-if $pd_1\equiv n_1=p_1$ and $pd_2\equiv n_2=p_2$, then $n_1\not\equiv
-n_2$,
-\item
-if for some $m\geq 1$ $pd_1\equiv n_1(x_1\ap S_1,\ldots,x_m\ap S_m)=p_1$
-and 
-$pd_2\equiv n_2(x_1'\ap S_1,\ldots,x_m'\ap S_m)=p_2$, then $n_1\not\equiv
-n_2$,
-\end{itemize}
-\item
-$\Sig(E_1).\Init=\emptyset$ or $\Sig(E_2).\Init=\emptyset$.
-\end{itemize}
-\end{itemize}
-\end{defn}
-\begin{defn}\label{def:SSC-mCRL}
-Let $E$ be a {\tt Specification}. We say that $E$ is SSC iff $E$ is SSC
-wrt.\ $\Sig(E)$.
-\end{defn}
-
-\subsection{The communication function}
-The following definition helps us in guaranteeing that the
-communication function is commutative and associative. This implies
-that the merge is also commutative and associative which allows us to
-write parallel processes without brackets. 
-\begin{defn}
-Let $Sig$ be a signature. The set $\Sig.\Comm^*$ is defined by:
-\[\begin{array}{rcl}
-\Sig.\Comm^*&\wor&\{n_1| n_2=n_3,~ n_2| n_1=n_3 \mid
-n_1| n_2=n_3\in \Sig.\Comm\}.
-\end{array}\]
-So, in $\Sig.\Comm^*$ communication is always commutative. A
-{\it specification} $E$ is {\it communication-associative} iff
-\[
-\begin{array}{l}
-n_1| n_2= n,~ n| n_3=n'\in
-\Sig(E).\Comm^*~\Rightarrow\\
-\hspace*{3cm}\exists n''\ap ~n_2| n_3=n'',
-n_1| n''= n' \in \Sig(E).\Comm^*.
-\end{array}
-\]
-\end{defn}
-With the condition that $E$ is SSC
-this exactly implies that communication is associative.
 
 \subsection{Well-formed \mcrl\ specifications}
 We define what well-formed specifications are. We only provide
@@ -745,19 +674,13 @@ empty.
 \begin{defn}
 Let $E$ be a {\tt Specification}. $E$ is called {\it well-formed} iff 
 \begin{itemize}
-\item
-$E$ is SSC, 
-\item
-$E$ is communication-associative,
-\item
-$E$ has no empty constructor sorts,
-\item
-$\Bool\in \Sig(E).Sort$, $T\ap \rightarrow\Bool\in \Sig(E).\Fun$ and
-$F\ap \rightarrow\Bool\in \Sig(E).\Fun$,
-\item
-If $\Time\in\Sig(E).\Sort$, then $\nul\ap \rightarrow\Time\in \Sig(E).\Fun\cup
-\Sig(E).\Map$ and $\leq\ap \Time\times\Time\rightarrow\Bool\in
-\Sig(E).\Map$. 
+\item $E$ is SSC, 
+\item $E$ has no empty constructor sorts,
+\item There is no indirect set, bag, or list recursion. A=Set(B), B=Ref(A).
+\item There is no empty sort due to nonterminating struct recursion.
+  C=struct(leaf(C),node(C,C))
+\item If $\Time\in\Sig(E).\Sort$, then $\nul\ap \rightarrow\Time\in\Sig(E).\Fun\cup \Sig(E).\Map$
+  and $\leq\ap\Time\times\Time\rightarrow\Bool\in \Sig(E).\Map$.
 \end{itemize}
 \end{defn}
 
