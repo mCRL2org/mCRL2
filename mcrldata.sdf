@@ -119,7 +119,7 @@ exports
                                       Process-term ")" -> Process-term
     "sum" "(" Variable "," Process-term ")"            -> Process-term
 %%    Name "(" { Complex-dt "," }+ ")"                   -> Process-term
-%%    Name                                               -> Process-term
+    Name                                               -> Process-term
     "(" Process-term ")"                               -> Process-term {bracket}
     Name "->" Name                                     -> Renaming
     "proc" Process-declaration+                        -> Process-specification
@@ -142,25 +142,26 @@ exports
 
 %%  Genspect part
 
-%%    Multiactions
-
-    Name "(" { Complex-dt "," }+ ")"                   -> Action-or-ProcessCall-term
-    Name                                               -> Action-or-ProcessCall-term
-  
-    "[" { Action-or-ProcessCall-term "," }+ "]"        -> MAction-term
-    Action-or-ProcessCall-term                         -> Process-term
-    MAction-term                                       -> Process-term
-
 %%    New operations
 
-    "comm" "(" "{" { Communication "," }+ "}" ","         
-                                      Process-term ")" -> Process-term
+    "comm" "(" "{" { Communication "," }+ "}" "," Process-term ")" 
+                                                       -> Process-term
     "restrict" "(" "{" MName-list "}" "," Process-term ")" 
                                                        -> Process-term
-    { Domain "," }+                                    -> MName-list
-    Domain "->" Name                                   -> Communication
-    Domain 	                                       -> Communication
-    
+    "allow" "(" "{" MName-list "}" "," Process-term ")" 
+                                                       -> Process-term
+    { Name "|" }+                                      -> MName
+    { MName "," }+                                     -> MName-list
+    MName "->" Name                                    -> Communication
+    MName 	                                       -> Communication
+
+%%    Syntactic Sugar
+    Complex-dt "->" Process-term                       -> Process-term
+    Complex-dt | "_"                                   -> PlaceBased-assignment
+    Name ":="  Complex-dt                              -> NameBased-assignment
+    Name "(" { PlaceBased-assignment "," }+ ")"        -> Process-term
+    Name "(" { NameBased-assignment "," }+ ")"         -> Process-term
+
   context-free priorities
     { non-assoc: "forall" Variable "." Complex-dt -> Complex-dt
                  "exists" Variable "." Complex-dt -> Complex-dt } >
@@ -186,15 +187,16 @@ exports
     Complex-dt "=>"  Complex-dt -> Complex-dt >
     "lambda" Variable "." Complex-dt -> Complex-dt, 
 
+    Process-term "|" Process-term -> Process-term > 
     Process-term "@" Data-term -> Process-term >
-    Process-term "." Process-term -> Process-term >
+    { assoc: Process-term "." Process-term -> Process-term
+             Complex-dt "->" Process-term  -> Process-term } >
     Process-term "<<" Process-term -> Process-term >
     { non-assoc: Process-term "||" Process-term -> Process-term 
-                 Process-term "|" Process-term -> Process-term 
                  Process-term "||_" Process-term -> Process-term } >
     Process-term "<|" Complex-dt "|>" Process-term -> Process-term >
     Process-term "+" Process-term -> Process-term
-  
+
   context-free start-symbols
     Specification
   
