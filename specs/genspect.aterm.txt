@@ -40,6 +40,12 @@
                    | SortDeclRef(<Id>, <SortExpr>) 
                    | SortDeclStruct(<Id>, <StructDeclCons>+) 
 
+//constructor declaration of a structured sort declaration
+<StructDeclCons> ::= StructDeclCons(<Id>, <StructDeclProj>*, <IdOrNil>) 
+
+//projection declaration of a structured sort declaration
+<StructDeclProj> ::= StructDeclProj(<IdOrNil>, <SortExpr>+) 
+
 //equation section
 <EqnSect>        ::= EqnSect(<IdsDecl>*, <EqnDecl>+) 
 
@@ -65,12 +71,6 @@
                    | SortSet(<SortExpr>) 
                    | SortBag(<SortExpr>) 
                    | SortArrow(<SortExpr>+, <SortExpr>) 
-
-//constructor declaration of a structured sort declaration
-<StructDeclCons> ::= StructDeclCons(<Id>, <StructDeclProj>*, <IdOrNil>) 
-
-//projection declaration of a structured sort declaration
-<StructDeclProj> ::= StructDeclProj(<IdOrNil>, <SortExpr>+) 
 
 //data expression
 <DataExpr>       ::= <Id>
