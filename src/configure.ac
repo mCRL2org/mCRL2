@@ -6,9 +6,17 @@ AC_CONFIG_SRCDIR([gslexer.l])
 # Checks for programs.
 AC_PROG_CC
 AC_PROG_LEX
+
+# Check for compatible bison
 AC_PATH_PROG([BISON], [bison], [])
-if test -z "$BISON"; then
+if test -z $BISON; then
   AC_MSG_ERROR([cannot find bison])
+fi
+AC_MSG_CHECKING([whether bison option %glr-parser is available])
+if $BISON test.y -o/dev/null &> /dev/null; then
+  AC_MSG_RESULT([yes]);
+else
+  AC_MSG_ERROR([bison option %glr-parser not available]);
 fi
 
 # Set flags

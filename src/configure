@@ -2391,6 +2391,8 @@ _ACEOF
 fi
 
 fi
+
+# Check for compatible bison
 # Extract the first word of "bison", so it can be a program name with args.
 set dummy bison; ac_word=$2
 echo "$as_me:$LINENO: checking for $ac_word" >&5
@@ -2430,10 +2432,20 @@ else
 echo "${ECHO_T}no" >&6
 fi
 
-if test -z "$BISON"; then
+if test -z $BISON; then
   { { echo "$as_me:$LINENO: error: cannot find bison" >&5
 echo "$as_me: error: cannot find bison" >&2;}
    { (exit 1); exit 1; }; }
+fi
+echo "$as_me:$LINENO: checking whether bison option %glr-parser is available" >&5
+echo $ECHO_N "checking whether bison option %glr-parser is available... $ECHO_C" >&6
+if $BISON test.y -o/dev/null &> /dev/null; then
+  echo "$as_me:$LINENO: result: yes" >&5
+echo "${ECHO_T}yes" >&6;
+else
+  { { echo "$as_me:$LINENO: error: bison option %glr-parser not available" >&5
+echo "$as_me: error: bison option %glr-parser not available" >&2;}
+   { (exit 1); exit 1; }; };
 fi
 
 # Set flags

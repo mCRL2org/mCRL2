@@ -1,0 +1,5 @@
+%glr-parser
+%%
+test:
+    ;
+%% 
