@@ -1,0 +1,6 @@
+% A simple process to test whether terminating processes are handled
+% well in the parallel composition.
+
+act a;
+
+init a||a;
