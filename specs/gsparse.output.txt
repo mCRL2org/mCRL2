@@ -1,5 +1,5 @@
-// Date: 06-12-2004
-// This document describes the output format of the GenSpect parser. Here:
+// Date: 08-12-2004
+// This document describes the output format of the GenSpect language. Here:
 // - <NumberString> represents a string of the format '"0"|("-"?[1-9][0-9]*)'
 // - <String> represents an arbitrary string
 // - the other alphabetical strings within angular brackets are non-terminals
@@ -7,6 +7,23 @@
 // - for non-terminal N, N*/N+ represents an ATermList with zero/one or more N's
 // - each c(a_0, ..., a_n), where c is an alphabetical string, represents an
 //   ATermAppl with c as its unquoted head and a_0, ..., a_n as its arguments
+
+// This description uses the theory of higher-order abstract data types, i.e.
+// we have a higher-order signature Sigma = (B, O), where B is set of basic
+// sorts and O is a set of operations. From the set B, we can generate the set
+// of higher-order sorts as follows:
+// - the set of basic sorts B is in B->;
+// - for all s_0, ..., s_n, s in B->, (s_0 # ... # s_n -> s) is in B->.
+// The set O is a B->-sorted set of operations, where each O_s contains
+// constants of sort s, for all s in B->.
+// The higher-order signature Sigma determines a first-order signature
+// Sigma-> = (B->, O extended with Appl), where Appl is the set of operation
+// applications.  This set contains the operation apply: (w -> s) # w -> s for
+// every w,s in B-> where w = s_0, ..., s_n.
+// Because we modelled the set Appl by the data expression DataAppl, the
+// description of the data types below is essentially first-order. Also, we
+// only use finite subsets of the infinite set of sorts B-> and the infinite
+// set of operations O.
 
 //Specification
 //-------------
@@ -19,7 +36,7 @@
 
 //sort declaration
 <SortDecl>    ::= SortDeclStandard(<String>)
-                | SortDeclRef(<String>, <SortExpr>)                       (- ??)
+                | SortDeclRef(<String>, <SortExpr>)
 
 //operation declaration
 <OpDecl>      ::= OpDecl(<String>, <SortExpr>)
@@ -52,13 +69,13 @@
                 | SortSet(<SortExpr>)
                 | SortBag(<SortExpr>)
                 | SortArrow(<SortExpr>+, <SortExpr>)
-                | SortStruct(<StructCons>+)                               (- ??)
+                | SortStruct(<StructCons>+)                               (- dr)
 
 //constructor declaration of a structured sort
-<StructCons>  ::= StructCons(<String>, <StructProj>*, <StringOrNil>)      (- ??)
+<StructCons>  ::= StructCons(<String>, <StructProj>*, <StringOrNil>)      (- dr)
 
 //projection declaration of a structured sort
-<StructProj>  ::= StructProj(<StringOrNil>, <SortExpr>+)                  (- ??)
+<StructProj>  ::= StructProj(<StringOrNil>, <SortExpr>+)                  (- dr)
 
 //string or nil
 <StringOrNil> ::= <String>
@@ -70,8 +87,6 @@
                 | OpId(<String>, <SortExprOrUnknown>)                     (+ tc)
                 | DataAppl(<DataExpr>, <DataExpr>+) 
                 | Number(<NumberString>, <SortExprOrUnknown>)             (- dr)
-                | EmptyList(<SortExprOrUnknown>)                          (- dr)
-                | EmptySetBag(<SortExprOrUnknown>)                        (- dr)
                 | ListEnum(<DataExpr>+, <SortExprOrUnknown>)              (- dr)
                 | SetEnum(<DataExpr>+, <SortExprOrUnknown>)               (- dr)
                 | BagEnum(<BagEnumElt>+, <SortExprOrUnknown>)             (- dr)
@@ -79,7 +94,7 @@
                 | Forall(<DataVarDecl>+, <DataExpr>)                      (- dr)
                 | Exists(<DataVarDecl>+, <DataExpr>)                      (- dr)
                 | Lambda(<DataVarDecl>+, <DataExpr>)                      (- dr)
-                | Whr(<DataExpr>, <WhrDecl>+)                             (- ??)
+                | Whr(<DataExpr>, <WhrDecl>+)                             (- dr)
 
 //sort expression or unknown
 <SortExprOrUnknown>
