@@ -181,44 +181,38 @@ static ATermAppl gsOpIdNameDiv;
 static ATermAppl gsOpIdNameMod;
 static ATermAppl gsOpIdNameExp;
 static ATermAppl gsOpIdNameEven;
-static ATermAppl gsOpIdNameSetComp;
-static ATermAppl gsOpIdNameBagComp;
-
-//Lists
 static ATermAppl gsOpIdNameEmptyList;
 static ATermAppl gsOpIdNameListSize;
-static ATermAppl gsOpIdNameInsert;
-static ATermAppl gsOpIdNameAppend;
+static ATermAppl gsOpIdNameCons;
+static ATermAppl gsOpIdNameSnoc;
 static ATermAppl gsOpIdNameConcat;
-static ATermAppl gsOpIdNameElementAt;
+static ATermAppl gsOpIdNameEltAt;
 static ATermAppl gsOpIdNameLHead;
 static ATermAppl gsOpIdNameLTail;
 static ATermAppl gsOpIdNameRHead;
 static ATermAppl gsOpIdNameRTail;
-
-//Sets
+static ATermAppl gsOpIdNameSetComp;
+static ATermAppl gsOpIdNameSet2Bag;
 static ATermAppl gsOpIdNameEmptySet;
-static ATermAppl   gsOpIdNameSetSize;
-static ATermAppl   gsOpIdNameSetIn;
-static ATermAppl   gsOpIdNameSubSetEq;
-static ATermAppl   gsOpIdNameSubSet;
-static ATermAppl   gsOpIdNameSetUnion;
-static ATermAppl   gsOpIdNameSetDiff;
-static ATermAppl   gsOpIdNameSetIntersect;
-static ATermAppl   gsOpIdNameSetCompl;
-static ATermAppl   gsOpIdNameSet2Bag;
-  
-  //Bags
-static ATermAppl   gsOpIdNameEmptyBag;
-static ATermAppl   gsOpIdNameBagSize;
-static ATermAppl   gsOpIdNameBagIn;
-static ATermAppl   gsOpIdNameCount;
-static ATermAppl   gsOpIdNameSubBagEq;
-static ATermAppl   gsOpIdNameSubBag;
-static ATermAppl   gsOpIdNameBagUnion;
-static ATermAppl   gsOpIdNameBagDiff;
-static ATermAppl   gsOpIdNameBagIntersect;
-static ATermAppl   gsOpIdNameBag2Set;
+static ATermAppl gsOpIdNameSetSize;
+static ATermAppl gsOpIdNameSetIn;
+static ATermAppl gsOpIdNameSubSetEq;
+static ATermAppl gsOpIdNameSubSet;
+static ATermAppl gsOpIdNameSetUnion;
+static ATermAppl gsOpIdNameSetDiff;
+static ATermAppl gsOpIdNameSetIntersect;
+static ATermAppl gsOpIdNameSetCompl;
+static ATermAppl gsOpIdNameBagComp;
+static ATermAppl gsOpIdNameBag2Set;
+static ATermAppl gsOpIdNameEmptyBag;
+static ATermAppl gsOpIdNameBagSize;
+static ATermAppl gsOpIdNameBagIn;
+static ATermAppl gsOpIdNameCount;
+static ATermAppl gsOpIdNameSubBagEq;
+static ATermAppl gsOpIdNameSubBag;
+static ATermAppl gsOpIdNameBagUnion;
+static ATermAppl gsOpIdNameBagDiff;
+static ATermAppl gsOpIdNameBagIntersect;
 
 //Indicates if gsEnableConstructorFunctions has been called
 static bool gsConstructorFunctionsEnabled = false;
@@ -227,156 +221,155 @@ static bool gsConstructorFunctionsEnabled = false;
 void gsEnableConstructorFunctions(void)
 {
   //create constructor AFun's
-  gsAFunSpecV1        = ATmakeAFun("SpecV1", 7, ATfalse);
-  gsAFunSortSpec      = ATmakeAFun("SortSpec", 1, ATfalse);
-  gsAFunConsSpec      = ATmakeAFun("ConsSpec", 1, ATfalse);
-  gsAFunMapSpec       = ATmakeAFun("MapSpec", 1, ATfalse);
-  gsAFunDataEqnSpec   = ATmakeAFun("DataEqnSpec", 1, ATfalse);
-  gsAFunActSpec       = ATmakeAFun("ActSpec", 1, ATfalse);
-  gsAFunSortId        = ATmakeAFun("SortId", 1, ATfalse);
-  gsAFunSortRef       = ATmakeAFun("SortRef", 2, ATfalse);
-  gsAFunOpId          = ATmakeAFun("OpId", 2, ATfalse);
-  gsAFunDataEqn       = ATmakeAFun("DataEqn", 4, ATfalse);
-  gsAFunDataVarId     = ATmakeAFun("DataVarId", 2, ATfalse);
-  gsAFunNil           = ATmakeAFun("Nil", 0, ATfalse);
-  gsAFunActId         = ATmakeAFun("ActId", 2, ATfalse);
-  gsAFunProcEqnSpec   = ATmakeAFun("ProcEqnSpec", 1, ATfalse);
-  gsAFunLPE           = ATmakeAFun("LPE", 2, ATfalse);
-  gsAFunProcEqn       = ATmakeAFun("ProcEqn", 3, ATfalse);
-  gsAFunProcVarId     = ATmakeAFun("ProcVarId", 2, ATfalse);
-  gsAFunLPESummand    = ATmakeAFun("LPESummand", 5, ATfalse);
-  gsAFunMultAct       = ATmakeAFun("MultAct", 1, ATfalse);
-  gsAFunDelta         = ATmakeAFun("Delta", 0, ATfalse);
-  gsAFunAction        = ATmakeAFun("Action", 2, ATfalse);
-  gsAFunAssignment    = ATmakeAFun("Assignment", 2, ATfalse);
-  gsAFunInit          = ATmakeAFun("Init", 1, ATfalse);
-  gsAFunLPEInit       = ATmakeAFun("LPEInit", 1, ATfalse);
-  gsAFunSortList      = ATmakeAFun("SortList", 1, ATfalse);
-  gsAFunSortSet       = ATmakeAFun("SortSet", 1, ATfalse);
-  gsAFunSortBag       = ATmakeAFun("SortBag", 1, ATfalse);
-  gsAFunSortStruct    = ATmakeAFun("SortStruct", 1, ATfalse);
-  gsAFunSortArrowProd = ATmakeAFun("SortArrowProd", 2, ATfalse);
-  gsAFunSortArrow     = ATmakeAFun("SortArrow", 2, ATfalse);
-  gsAFunStructCons    = ATmakeAFun("StructCons", 3, ATfalse);
-  gsAFunStructProj    = ATmakeAFun("StructProj", 2, ATfalse);
-  gsAFunDataVarIdOpId = ATmakeAFun("DataVarIdOpId", 1, ATfalse);
-  gsAFunDataApplProd  = ATmakeAFun("DataApplProd", 2, ATfalse);
-  gsAFunDataAppl      = ATmakeAFun("DataAppl", 2, ATfalse);
-  gsAFunNumber        = ATmakeAFun("Number", 2, ATfalse);
-  gsAFunListEnum      = ATmakeAFun("ListEnum", 2, ATfalse);
-  gsAFunSetEnum       = ATmakeAFun("SetEnum", 2, ATfalse);
-  gsAFunBagEnum       = ATmakeAFun("BagEnum", 2, ATfalse);
-  gsAFunSetBagComp    = ATmakeAFun("SetBagComp", 2, ATfalse);
-  gsAFunForall        = ATmakeAFun("Forall", 2, ATfalse);
-  gsAFunExists        = ATmakeAFun("Exists", 2, ATfalse);
-  gsAFunLambda        = ATmakeAFun("Lambda", 2, ATfalse);
-  gsAFunWhr           = ATmakeAFun("Whr", 2, ATfalse);
-  gsAFunUnknown       = ATmakeAFun("Unknown", 0, ATfalse);
-  gsAFunBagEnumElt    = ATmakeAFun("BagEnumElt", 2, ATfalse);
-  gsAFunWhrDecl       = ATmakeAFun("WhrDecl", 2, ATfalse);
-  gsAFunActionProcess = ATmakeAFun("ActionProcess", 2, ATfalse);
-  gsAFunProcess       = ATmakeAFun("Process", 2, ATfalse);
-  gsAFunTau           = ATmakeAFun("Tau", 0, ATfalse);
-  gsAFunSum           = ATmakeAFun("Sum", 2, ATfalse);
-  gsAFunRestrict      = ATmakeAFun("Restrict", 2, ATfalse);
-  gsAFunAllow         = ATmakeAFun("Allow", 2, ATfalse);
-  gsAFunHide          = ATmakeAFun("Hide", 2, ATfalse);
-  gsAFunRename        = ATmakeAFun("Rename", 2, ATfalse);
-  gsAFunComm          = ATmakeAFun("Comm", 2, ATfalse);
-  gsAFunSync          = ATmakeAFun("Sync", 2, ATfalse);
-  gsAFunAtTime        = ATmakeAFun("AtTime", 2, ATfalse);
-  gsAFunSeq           = ATmakeAFun("Seq", 2, ATfalse);
-  gsAFunCond          = ATmakeAFun("Cond", 3, ATfalse);
-  gsAFunBInit         = ATmakeAFun("BInit", 2, ATfalse);
-  gsAFunMerge         = ATmakeAFun("Merge", 2, ATfalse);
-  gsAFunLMerge        = ATmakeAFun("LMerge", 2, ATfalse);
-  gsAFunChoice        = ATmakeAFun("Choice", 2, ATfalse);
-  gsAFunMultActName   = ATmakeAFun("MultActName", 1, ATfalse);
-  gsAFunRenameExpr    = ATmakeAFun("RenameExpr", 2, ATfalse);
-  gsAFunCommExpr      = ATmakeAFun("CommExpr", 2, ATfalse);
+  gsAFunSpecV1           = ATmakeAFun("SpecV1", 7, ATfalse);
+  gsAFunSortSpec         = ATmakeAFun("SortSpec", 1, ATfalse);
+  gsAFunConsSpec         = ATmakeAFun("ConsSpec", 1, ATfalse);
+  gsAFunMapSpec          = ATmakeAFun("MapSpec", 1, ATfalse);
+  gsAFunDataEqnSpec      = ATmakeAFun("DataEqnSpec", 1, ATfalse);
+  gsAFunActSpec          = ATmakeAFun("ActSpec", 1, ATfalse);
+  gsAFunSortId           = ATmakeAFun("SortId", 1, ATfalse);
+  gsAFunSortRef          = ATmakeAFun("SortRef", 2, ATfalse);
+  gsAFunOpId             = ATmakeAFun("OpId", 2, ATfalse);
+  gsAFunDataEqn          = ATmakeAFun("DataEqn", 4, ATfalse);
+  gsAFunDataVarId        = ATmakeAFun("DataVarId", 2, ATfalse);
+  gsAFunNil              = ATmakeAFun("Nil", 0, ATfalse);
+  gsAFunActId            = ATmakeAFun("ActId", 2, ATfalse);
+  gsAFunProcEqnSpec      = ATmakeAFun("ProcEqnSpec", 1, ATfalse);
+  gsAFunLPE              = ATmakeAFun("LPE", 2, ATfalse);
+  gsAFunProcEqn          = ATmakeAFun("ProcEqn", 3, ATfalse);
+  gsAFunProcVarId        = ATmakeAFun("ProcVarId", 2, ATfalse);
+  gsAFunLPESummand       = ATmakeAFun("LPESummand", 5, ATfalse);
+  gsAFunMultAct          = ATmakeAFun("MultAct", 1, ATfalse);
+  gsAFunDelta            = ATmakeAFun("Delta", 0, ATfalse);
+  gsAFunAction           = ATmakeAFun("Action", 2, ATfalse);
+  gsAFunAssignment       = ATmakeAFun("Assignment", 2, ATfalse);
+  gsAFunInit             = ATmakeAFun("Init", 1, ATfalse);
+  gsAFunLPEInit          = ATmakeAFun("LPEInit", 1, ATfalse);
+  gsAFunSortList         = ATmakeAFun("SortList", 1, ATfalse);
+  gsAFunSortSet          = ATmakeAFun("SortSet", 1, ATfalse);
+  gsAFunSortBag          = ATmakeAFun("SortBag", 1, ATfalse);
+  gsAFunSortStruct       = ATmakeAFun("SortStruct", 1, ATfalse);
+  gsAFunSortArrowProd    = ATmakeAFun("SortArrowProd", 2, ATfalse);
+  gsAFunSortArrow        = ATmakeAFun("SortArrow", 2, ATfalse);
+  gsAFunStructCons       = ATmakeAFun("StructCons", 3, ATfalse);
+  gsAFunStructProj       = ATmakeAFun("StructProj", 2, ATfalse);
+  gsAFunDataVarIdOpId    = ATmakeAFun("DataVarIdOpId", 1, ATfalse);
+  gsAFunDataApplProd     = ATmakeAFun("DataApplProd", 2, ATfalse);
+  gsAFunDataAppl         = ATmakeAFun("DataAppl", 2, ATfalse);
+  gsAFunNumber           = ATmakeAFun("Number", 2, ATfalse);
+  gsAFunListEnum         = ATmakeAFun("ListEnum", 2, ATfalse);
+  gsAFunSetEnum          = ATmakeAFun("SetEnum", 2, ATfalse);
+  gsAFunBagEnum          = ATmakeAFun("BagEnum", 2, ATfalse);
+  gsAFunSetBagComp       = ATmakeAFun("SetBagComp", 2, ATfalse);
+  gsAFunForall           = ATmakeAFun("Forall", 2, ATfalse);
+  gsAFunExists           = ATmakeAFun("Exists", 2, ATfalse);
+  gsAFunLambda           = ATmakeAFun("Lambda", 2, ATfalse);
+  gsAFunWhr              = ATmakeAFun("Whr", 2, ATfalse);
+  gsAFunUnknown          = ATmakeAFun("Unknown", 0, ATfalse);
+  gsAFunBagEnumElt       = ATmakeAFun("BagEnumElt", 2, ATfalse);
+  gsAFunWhrDecl          = ATmakeAFun("WhrDecl", 2, ATfalse);
+  gsAFunActionProcess    = ATmakeAFun("ActionProcess", 2, ATfalse);
+  gsAFunProcess          = ATmakeAFun("Process", 2, ATfalse);
+  gsAFunTau              = ATmakeAFun("Tau", 0, ATfalse);
+  gsAFunSum              = ATmakeAFun("Sum", 2, ATfalse);
+  gsAFunRestrict         = ATmakeAFun("Restrict", 2, ATfalse);
+  gsAFunAllow            = ATmakeAFun("Allow", 2, ATfalse);
+  gsAFunHide             = ATmakeAFun("Hide", 2, ATfalse);
+  gsAFunRename           = ATmakeAFun("Rename", 2, ATfalse);
+  gsAFunComm             = ATmakeAFun("Comm", 2, ATfalse);
+  gsAFunSync             = ATmakeAFun("Sync", 2, ATfalse);
+  gsAFunAtTime           = ATmakeAFun("AtTime", 2, ATfalse);
+  gsAFunSeq              = ATmakeAFun("Seq", 2, ATfalse);
+  gsAFunCond             = ATmakeAFun("Cond", 3, ATfalse);
+  gsAFunBInit            = ATmakeAFun("BInit", 2, ATfalse);
+  gsAFunMerge            = ATmakeAFun("Merge", 2, ATfalse);
+  gsAFunLMerge           = ATmakeAFun("LMerge", 2, ATfalse);
+  gsAFunChoice           = ATmakeAFun("Choice", 2, ATfalse);
+  gsAFunMultActName      = ATmakeAFun("MultActName", 1, ATfalse);
+  gsAFunRenameExpr       = ATmakeAFun("RenameExpr", 2, ATfalse);
+  gsAFunCommExpr         = ATmakeAFun("CommExpr", 2, ATfalse);
   //create sort system identifier names
-  gsSortIdNameBool    = gsString2ATermAppl("Bool");
-  gsSortIdNamePos     = gsString2ATermAppl("Pos");
-  gsSortIdNameNat     = gsString2ATermAppl("Nat");
-  gsSortIdNameInt     = gsString2ATermAppl("Int");
+  gsSortIdNameBool       = gsString2ATermAppl("Bool");
+  gsSortIdNamePos        = gsString2ATermAppl("Pos");
+  gsSortIdNameNat        = gsString2ATermAppl("Nat");
+  gsSortIdNameInt        = gsString2ATermAppl("Int");
   //create operation system identifier names
-  gsOpIdNameTrue      = gsString2ATermAppl("true");
-  gsOpIdNameFalse     = gsString2ATermAppl("false");
-  gsOpIdNameNot       = gsString2ATermAppl("!");
-  gsOpIdNameAnd       = gsString2ATermAppl("&&");
-  gsOpIdNameOr        = gsString2ATermAppl("||");
-  gsOpIdNameImp       = gsString2ATermAppl("=>");
-  gsOpIdNameEq        = gsString2ATermAppl("==");
-  gsOpIdNameNeq       = gsString2ATermAppl("!=");
-  gsOpIdNameIf        = gsString2ATermAppl("if");
-  gsOpIdNameForall    = gsString2ATermAppl("forall");
-  gsOpIdNameExists    = gsString2ATermAppl("exists");
-  gsOpIdName1         = gsString2ATermAppl("@1");
-  gsOpIdNameCDub      = gsString2ATermAppl("@cDub");
-  gsOpIdName0         = gsString2ATermAppl("@0");
-  gsOpIdNameCNat      = gsString2ATermAppl("@cNat");
-  gsOpIdNameCNeg      = gsString2ATermAppl("@cNeg");
-  gsOpIdNameCInt      = gsString2ATermAppl("@cInt");
-  gsOpIdNamePos2Nat   = gsString2ATermAppl("Pos2Nat");
-  gsOpIdNamePos2Int   = gsString2ATermAppl("Pos2Int");
-  gsOpIdNameNat2Pos   = gsString2ATermAppl("Nat2Pos");
-  gsOpIdNameNat2Int   = gsString2ATermAppl("Nat2Int");
-  gsOpIdNameInt2Pos   = gsString2ATermAppl("Int2Pos");
-  gsOpIdNameInt2Nat   = gsString2ATermAppl("Int2Nat");
-  gsOpIdNameLTE       = gsString2ATermAppl("<=");
-  gsOpIdNameLT        = gsString2ATermAppl("<");
-  gsOpIdNameGTE       = gsString2ATermAppl(">=");
-  gsOpIdNameGT        = gsString2ATermAppl(">");
-  gsOpIdNameMax       = gsString2ATermAppl("max");
-  gsOpIdNameMin       = gsString2ATermAppl("min");
-  gsOpIdNameAbs       = gsString2ATermAppl("abs");
-  gsOpIdNameNeg       = gsString2ATermAppl("-");
-  gsOpIdNameSucc      = gsString2ATermAppl("succ");
-  gsOpIdNamePred      = gsString2ATermAppl("pred");
-  gsOpIdNameDub       = gsString2ATermAppl("@dub");
-  gsOpIdNameAdd       = gsString2ATermAppl("+");
-  gsOpIdNameAddC      = gsString2ATermAppl("@addc");
-  gsOpIdNameSubt      = gsString2ATermAppl("-");
-  gsOpIdNameSubtB     = gsString2ATermAppl("@subtb");
-  gsOpIdNameMult      = gsString2ATermAppl("*");
-  gsOpIdNameMultIR    = gsString2ATermAppl("@multir");
-  gsOpIdNameDiv       = gsString2ATermAppl("div");
-  gsOpIdNameMod       = gsString2ATermAppl("mod");
-  gsOpIdNameExp       = gsString2ATermAppl("exp");
-  gsOpIdNameEven      = gsString2ATermAppl("@even");
-  gsOpIdNameEmptyList = gsString2ATermAppl("[]");
-  gsOpIdNameListSize  = gsString2ATermAppl("#");
-  gsOpIdNameInsert    = gsString2ATermAppl("|>");
-  gsOpIdNameAppend    = gsString2ATermAppl("<|");
-  gsOpIdNameConcat    = gsString2ATermAppl("++");
-  gsOpIdNameElementAt = gsString2ATermAppl(".");
-  gsOpIdNameLHead     = gsString2ATermAppl("lhead");
-  gsOpIdNameLTail     = gsString2ATermAppl("ltail");
-  gsOpIdNameRHead     = gsString2ATermAppl("rhead");
-  gsOpIdNameRTail     = gsString2ATermAppl("rtail");
-  gsOpIdNameSetComp   = gsString2ATermAppl("@set");
-  gsOpIdNameSet2Bag   = gsString2ATermAppl("Set2Bag");
-  gsOpIdNameEmptySet  = gsString2ATermAppl("{}");
-  gsOpIdNameSetSize   = gsString2ATermAppl("#");
-  gsOpIdNameSetIn     = gsString2ATermAppl("in");
-  gsOpIdNameSubSetEq  = gsString2ATermAppl("<=");
-  gsOpIdNameSubSet    = gsString2ATermAppl("<");
-  gsOpIdNameSetUnion  = gsString2ATermAppl("+");
-  gsOpIdNameSetDiff   = gsString2ATermAppl("-");
+  gsOpIdNameTrue         = gsString2ATermAppl("true");
+  gsOpIdNameFalse        = gsString2ATermAppl("false");
+  gsOpIdNameNot          = gsString2ATermAppl("!");
+  gsOpIdNameAnd          = gsString2ATermAppl("&&");
+  gsOpIdNameOr           = gsString2ATermAppl("||");
+  gsOpIdNameImp          = gsString2ATermAppl("=>");
+  gsOpIdNameEq           = gsString2ATermAppl("==");
+  gsOpIdNameNeq          = gsString2ATermAppl("!=");
+  gsOpIdNameIf           = gsString2ATermAppl("if");
+  gsOpIdNameForall       = gsString2ATermAppl("forall");
+  gsOpIdNameExists       = gsString2ATermAppl("exists");
+  gsOpIdName1            = gsString2ATermAppl("@1");
+  gsOpIdNameCDub         = gsString2ATermAppl("@cDub");
+  gsOpIdName0            = gsString2ATermAppl("@0");
+  gsOpIdNameCNat         = gsString2ATermAppl("@cNat");
+  gsOpIdNameCNeg         = gsString2ATermAppl("@cNeg");
+  gsOpIdNameCInt         = gsString2ATermAppl("@cInt");
+  gsOpIdNamePos2Nat      = gsString2ATermAppl("Pos2Nat");
+  gsOpIdNamePos2Int      = gsString2ATermAppl("Pos2Int");
+  gsOpIdNameNat2Pos      = gsString2ATermAppl("Nat2Pos");
+  gsOpIdNameNat2Int      = gsString2ATermAppl("Nat2Int");
+  gsOpIdNameInt2Pos      = gsString2ATermAppl("Int2Pos");
+  gsOpIdNameInt2Nat      = gsString2ATermAppl("Int2Nat");
+  gsOpIdNameLTE          = gsString2ATermAppl("<=");
+  gsOpIdNameLT           = gsString2ATermAppl("<");
+  gsOpIdNameGTE          = gsString2ATermAppl(">=");
+  gsOpIdNameGT           = gsString2ATermAppl(">");
+  gsOpIdNameMax          = gsString2ATermAppl("max");
+  gsOpIdNameMin          = gsString2ATermAppl("min");
+  gsOpIdNameAbs          = gsString2ATermAppl("abs");
+  gsOpIdNameNeg          = gsString2ATermAppl("-");
+  gsOpIdNameSucc         = gsString2ATermAppl("succ");
+  gsOpIdNamePred         = gsString2ATermAppl("pred");
+  gsOpIdNameDub          = gsString2ATermAppl("@dub");
+  gsOpIdNameAdd          = gsString2ATermAppl("+");
+  gsOpIdNameAddC         = gsString2ATermAppl("@addc");
+  gsOpIdNameSubt         = gsString2ATermAppl("-");
+  gsOpIdNameSubtB        = gsString2ATermAppl("@subtb");
+  gsOpIdNameMult         = gsString2ATermAppl("*");
+  gsOpIdNameMultIR       = gsString2ATermAppl("@multir");
+  gsOpIdNameDiv          = gsString2ATermAppl("div");
+  gsOpIdNameMod          = gsString2ATermAppl("mod");
+  gsOpIdNameExp          = gsString2ATermAppl("exp");
+  gsOpIdNameEven         = gsString2ATermAppl("@even");
+  gsOpIdNameEmptyList    = gsString2ATermAppl("[]");
+  gsOpIdNameListSize     = gsString2ATermAppl("#");
+  gsOpIdNameCons         = gsString2ATermAppl("|>");
+  gsOpIdNameSnoc         = gsString2ATermAppl("<|");
+  gsOpIdNameConcat       = gsString2ATermAppl("++");
+  gsOpIdNameEltAt        = gsString2ATermAppl(".");
+  gsOpIdNameLHead        = gsString2ATermAppl("lhead");
+  gsOpIdNameLTail        = gsString2ATermAppl("ltail");
+  gsOpIdNameRHead        = gsString2ATermAppl("rhead");
+  gsOpIdNameRTail        = gsString2ATermAppl("rtail");
+  gsOpIdNameSetComp      = gsString2ATermAppl("@set");
+  gsOpIdNameSet2Bag      = gsString2ATermAppl("Set2Bag");
+  gsOpIdNameEmptySet     = gsString2ATermAppl("{}");
+  gsOpIdNameSetSize      = gsString2ATermAppl("#");
+  gsOpIdNameSetIn        = gsString2ATermAppl("in");
+  gsOpIdNameSubSetEq     = gsString2ATermAppl("<=");
+  gsOpIdNameSubSet       = gsString2ATermAppl("<");
+  gsOpIdNameSetUnion     = gsString2ATermAppl("+");
+  gsOpIdNameSetDiff      = gsString2ATermAppl("-");
   gsOpIdNameSetIntersect = gsString2ATermAppl("*");
-  gsOpIdNameSetCompl   = gsString2ATermAppl("!");
-  gsOpIdNameBagComp   = gsString2ATermAppl("@bag");
-  gsOpIdNameBag2Set   = gsString2ATermAppl("Bag2Set");
-  gsOpIdNameEmptyBag  = gsString2ATermAppl("{}");
-  gsOpIdNameBagSize   = gsString2ATermAppl("#");
-  gsOpIdNameBagIn     = gsString2ATermAppl("in");
-  gsOpIdNameCount     = gsString2ATermAppl("count");
-  gsOpIdNameSubBagEq  = gsString2ATermAppl("<=");
-  gsOpIdNameSubBag    = gsString2ATermAppl("<");
-  gsOpIdNameBagUnion  = gsString2ATermAppl("+");
-  gsOpIdNameBagDiff   = gsString2ATermAppl("-");
+  gsOpIdNameSetCompl     = gsString2ATermAppl("!");
+  gsOpIdNameBagComp      = gsString2ATermAppl("@bag");
+  gsOpIdNameBag2Set      = gsString2ATermAppl("Bag2Set");
+  gsOpIdNameEmptyBag     = gsString2ATermAppl("{}");
+  gsOpIdNameBagSize      = gsString2ATermAppl("#");
+  gsOpIdNameBagIn        = gsString2ATermAppl("in");
+  gsOpIdNameCount        = gsString2ATermAppl("count");
+  gsOpIdNameSubBagEq     = gsString2ATermAppl("<=");
+  gsOpIdNameSubBag       = gsString2ATermAppl("<");
+  gsOpIdNameBagUnion     = gsString2ATermAppl("+");
+  gsOpIdNameBagDiff      = gsString2ATermAppl("-");
   gsOpIdNameBagIntersect = gsString2ATermAppl("*");
-    
   //protect constructor AFun's
   ATprotectAFun(gsAFunSpecV1);
   ATprotectAFun(gsAFunSortSpec);
@@ -497,10 +490,10 @@ void gsEnableConstructorFunctions(void)
   ATprotectAppl(&gsOpIdNameEven);
   ATprotectAppl(&gsOpIdNameEmptyList);
   ATprotectAppl(&gsOpIdNameListSize);
-  ATprotectAppl(&gsOpIdNameInsert);
-  ATprotectAppl(&gsOpIdNameAppend);
+  ATprotectAppl(&gsOpIdNameCons);
+  ATprotectAppl(&gsOpIdNameSnoc);
   ATprotectAppl(&gsOpIdNameConcat);
-  ATprotectAppl(&gsOpIdNameElementAt);
+  ATprotectAppl(&gsOpIdNameEltAt);
   ATprotectAppl(&gsOpIdNameLHead);
   ATprotectAppl(&gsOpIdNameLTail);
   ATprotectAppl(&gsOpIdNameRHead);
@@ -1767,64 +1760,74 @@ ATermAppl gsMakeOpIdEven(void)
     gsMakeSortArrow(gsMakeSortExprNat(), gsMakeSortExprBool()));
 }
 
-ATermAppl gsMakeOpIdNameEmptyList(ATermAppl Type){
+ATermAppl gsMakeOpIdNameEmptyList(ATermAppl SortExpr)
+{
   assert(gsConstructorFunctionsEnabled);
-  return gsMakeOpId(gsOpIdNameEmptyList,gsMakeSortList(Type));
+  return gsMakeOpId(gsOpIdNameEmptyList, SortExpr);
 }
 
-ATermAppl gsMakeOpIdNameListSize(ATermAppl Type){
+ATermAppl gsMakeOpIdNameListSize(ATermAppl SortExpr)
+{
   assert(gsConstructorFunctionsEnabled);
   return gsMakeOpId(gsOpIdNameListSize,
-		    gsMakeSortArrow(gsMakeSortList(Type),gsMakeSortExprNat()));
+    gsMakeSortArrow(SortExpr, gsMakeSortExprNat()));
 }
 
-ATermAppl gsMakeOpIdNameInsert(ATermAppl Type){
+ATermAppl gsMakeOpIdNameCons(ATermAppl SortExprLHS, ATermAppl SortExprRHS)
+{
   assert(gsConstructorFunctionsEnabled);
-  return gsMakeOpId(gsOpIdNameInsert,
-		    gsMakeSortArrow2(Type,gsMakeSortList(Type),gsMakeSortList(Type)));
+  return gsMakeOpId(gsOpIdNameCons,
+    gsMakeSortArrow2(SortExprLHS, SortExprRHS, SortExprRHS));
 
 }
 
-ATermAppl gsMakeOpIdNameAppend(ATermAppl Type){
+ATermAppl gsMakeOpIdNameSnoc(ATermAppl SortExprLHS, ATermAppl SortExprRHS)
+{
   assert(gsConstructorFunctionsEnabled);
-  return gsMakeOpId(gsOpIdNameAppend,
-		    gsMakeSortArrow2(gsMakeSortList(Type),Type,gsMakeSortList(Type)));
+  return gsMakeOpId(gsOpIdNameSnoc,
+    gsMakeSortArrow2(SortExprLHS, SortExprRHS, SortExprLHS));
 }
 
-ATermAppl gsMakeOpIdNameConcat(ATermAppl Type){
+ATermAppl gsMakeOpIdNameConcat(ATermAppl SortExpr)
+{
   assert(gsConstructorFunctionsEnabled);
   return gsMakeOpId(gsOpIdNameConcat,
-		    gsMakeSortArrow2(gsMakeSortList(Type),gsMakeSortList(Type),gsMakeSortList(Type)));
+    gsMakeSortArrow2(SortExpr, SortExpr, SortExpr));
 }
 
-ATermAppl gsMakeOpIdNameElementAt(ATermAppl Type){
+ATermAppl gsMakeOpIdNameEltAt(ATermAppl SortExprDom, ATermAppl SortExprResult)
+{
   assert(gsConstructorFunctionsEnabled);
-  return gsMakeOpId(gsOpIdNameElementAt,
-		    gsMakeSortArrow2(gsMakeSortList(Type),gsMakeSortExprNat(),Type));
+  return gsMakeOpId(gsOpIdNameEltAt,
+    gsMakeSortArrow2(SortExprDom, gsMakeSortExprNat(), SortExprResult));
 }
 
-ATermAppl gsMakeOpIdNameLHead(ATermAppl Type){
+ATermAppl gsMakeOpIdNameLHead(ATermAppl SortExprDom, ATermAppl SortExprResult)
+{
   assert(gsConstructorFunctionsEnabled);
   return gsMakeOpId(gsOpIdNameLHead,
-		    gsMakeSortArrow(gsMakeSortList(Type),Type));
+    gsMakeSortArrow(SortExprDom, SortExprResult));
 }
 
-ATermAppl gsMakeOpIdNameLTail(ATermAppl Type){
+ATermAppl gsMakeOpIdNameLTail(ATermAppl SortExpr)
+{
   assert(gsConstructorFunctionsEnabled);
   return gsMakeOpId(gsOpIdNameLTail,
-		    gsMakeSortArrow(gsMakeSortList(Type),gsMakeSortList(Type)));
+    gsMakeSortArrow(SortExpr, SortExpr));
 }
 
-ATermAppl gsMakeOpIdNameRHead(ATermAppl Type){
+ATermAppl gsMakeOpIdNameRHead(ATermAppl SortExprDom, ATermAppl SortExprResult)
+{
   assert(gsConstructorFunctionsEnabled);
   return gsMakeOpId(gsOpIdNameRHead,
-		    gsMakeSortArrow(gsMakeSortList(Type),Type));
+    gsMakeSortArrow(SortExprDom, SortExprResult));
 }
 
-ATermAppl gsMakeOpIdNameRTail(ATermAppl Type){
+ATermAppl gsMakeOpIdNameRTail(ATermAppl SortExpr)
+{
   assert(gsConstructorFunctionsEnabled);
   return gsMakeOpId(gsOpIdNameRTail,
-		    gsMakeSortArrow(gsMakeSortList(Type),gsMakeSortList(Type)));
+    gsMakeSortArrow(SortExpr, SortExpr));
 }
 
 ATermAppl gsMakeOpIdSetComp(ATermAppl SortExprDom, ATermAppl SortExprResult)
@@ -1834,63 +1837,74 @@ ATermAppl gsMakeOpIdSetComp(ATermAppl SortExprDom, ATermAppl SortExprResult)
     gsMakeSortArrow(SortExprDom, gsMakeSortExprBool()), SortExprResult));
 }
 
-ATermAppl gsMakeOpIdNameSet2Bag(ATermAppl SortExpr){
+ATermAppl gsMakeOpIdNameSet2Bag(ATermAppl SortExprDom,
+  ATermAppl SortExprResult)
+{
   assert(gsConstructorFunctionsEnabled);
   return gsMakeOpId(gsOpIdNameSet2Bag,
-		    gsMakeSortArrow(gsMakeSortSet(SortExpr),gsMakeSortBag(SortExpr)));
+    gsMakeSortArrow(SortExprDom, SortExprResult));
 }
 
-ATermAppl gsMakeOpIdNameEmptySet(ATermAppl SortExpr){
+ATermAppl gsMakeOpIdNameEmptySet(ATermAppl SortExpr)
+{
   assert(gsConstructorFunctionsEnabled);
-  return gsMakeOpId(gsOpIdNameEmptySet,gsMakeSortSet(SortExpr));
+  return gsMakeOpId(gsOpIdNameEmptySet, SortExpr);
 }
 
-ATermAppl gsMakeOpIdNameSetSize(ATermAppl SortExpr){
+ATermAppl gsMakeOpIdNameSetSize(ATermAppl SortExpr)
+{
   assert(gsConstructorFunctionsEnabled);
   return gsMakeOpId(gsOpIdNameSetSize,
-		    gsMakeSortArrow(gsMakeSortSet(SortExpr),gsMakeSortExprNat()));
+    gsMakeSortArrow(SortExpr, gsMakeSortExprNat()));
 }
 
-ATermAppl gsMakeOpIdNameSetIn(ATermAppl SortExpr){
+ATermAppl gsMakeOpIdNameSetIn(ATermAppl SortExprLHS, ATermAppl SortExprRHS)
+{
   assert(gsConstructorFunctionsEnabled);
   return gsMakeOpId(gsOpIdNameSetIn,
-		    gsMakeSortArrow2(SortExpr,gsMakeSortSet(SortExpr),gsMakeSortExprBool()));
+    gsMakeSortArrow2(SortExprLHS, SortExprRHS, gsMakeSortExprBool()));
 }
 
-ATermAppl gsMakeOpIdNameSubSetEq(ATermAppl SortExpr){
+ATermAppl gsMakeOpIdNameSubSetEq(ATermAppl SortExpr)
+{
   assert(gsConstructorFunctionsEnabled);
   return gsMakeOpId(gsOpIdNameSubSetEq,
-		    gsMakeSortArrow2(gsMakeSortSet(SortExpr),gsMakeSortSet(SortExpr),gsMakeSortExprBool()));
+    gsMakeSortArrow2(SortExpr, SortExpr, gsMakeSortExprBool()));
 }
 
-ATermAppl gsMakeOpIdNameSubSet(ATermAppl SortExpr){
+ATermAppl gsMakeOpIdNameSubSet(ATermAppl SortExpr)
+{
   assert(gsConstructorFunctionsEnabled);
   return gsMakeOpId(gsOpIdNameSubSet,
-		    gsMakeSortArrow2(gsMakeSortSet(SortExpr),gsMakeSortSet(SortExpr),gsMakeSortExprBool()));
+    gsMakeSortArrow2(SortExpr, SortExpr, gsMakeSortExprBool()));
 }
 
-ATermAppl gsMakeOpIdNameSetUnion(ATermAppl SortExpr){
+ATermAppl gsMakeOpIdNameSetUnion(ATermAppl SortExpr)
+{
   assert(gsConstructorFunctionsEnabled);
   return gsMakeOpId(gsOpIdNameSetUnion,
-		    gsMakeSortArrow2(gsMakeSortSet(SortExpr),gsMakeSortSet(SortExpr),gsMakeSortSet(SortExpr)));
+    gsMakeSortArrow2(SortExpr, SortExpr, SortExpr));
 }
 
-ATermAppl gsMakeOpIdNameSetDiff(ATermAppl SortExpr){
+ATermAppl gsMakeOpIdNameSetDiff(ATermAppl SortExpr)
+{
   assert(gsConstructorFunctionsEnabled);
   return gsMakeOpId(gsOpIdNameSetDiff,
-		    gsMakeSortArrow2(gsMakeSortSet(SortExpr),gsMakeSortSet(SortExpr),gsMakeSortSet(SortExpr)));
+    gsMakeSortArrow2(SortExpr, SortExpr, SortExpr));
 }
 
-ATermAppl gsMakeOpIdNameSetIntersect(ATermAppl SortExpr){
+ATermAppl gsMakeOpIdNameSetIntersect(ATermAppl SortExpr)
+{
   assert(gsConstructorFunctionsEnabled);
   return gsMakeOpId(gsOpIdNameSetIntersect,
-		    gsMakeSortArrow2(gsMakeSortSet(SortExpr),gsMakeSortSet(SortExpr),gsMakeSortSet(SortExpr)));
+    gsMakeSortArrow2(SortExpr, SortExpr, SortExpr));
 }
 
-ATermAppl gsMakeOpIdNameSetCompl(ATermAppl SortExpr){
+ATermAppl gsMakeOpIdNameSetCompl(ATermAppl SortExpr)
+{
   assert(gsConstructorFunctionsEnabled);
   return gsMakeOpId(gsOpIdNameSetCompl,
-		    gsMakeSortArrow(gsMakeSortSet(SortExpr),gsMakeSortSet(SortExpr)));
+    gsMakeSortArrow(SortExpr, SortExpr));
 }
 
 ATermAppl gsMakeOpIdBagComp(ATermAppl SortExprDom, ATermAppl SortExprResult)
@@ -1900,63 +1914,74 @@ ATermAppl gsMakeOpIdBagComp(ATermAppl SortExprDom, ATermAppl SortExprResult)
     gsMakeSortArrow(SortExprDom, gsMakeSortExprNat()), SortExprResult));
 }
 
-ATermAppl gsMakeOpIdNameBag2Set(ATermAppl SortExpr){
+ATermAppl gsMakeOpIdNameBag2Set(ATermAppl SortExprDom,
+  ATermAppl SortExprResult)
+{
   assert(gsConstructorFunctionsEnabled);
   return gsMakeOpId(gsOpIdNameBag2Set,
-		    gsMakeSortArrow(gsMakeSortBag(SortExpr),gsMakeSortSet(SortExpr)));
+    gsMakeSortArrow(SortExprDom, SortExprResult));
 }
 
-ATermAppl gsMakeOpIdNameEmptyBag(ATermAppl SortExpr){
+ATermAppl gsMakeOpIdNameEmptyBag(ATermAppl SortExpr)
+{
   assert(gsConstructorFunctionsEnabled);
-  return gsMakeOpId(gsOpIdNameEmptyBag,gsMakeSortBag(SortExpr));
+  return gsMakeOpId(gsOpIdNameEmptyBag, SortExpr);
 }
 
-ATermAppl gsMakeOpIdNameBagSize(ATermAppl SortExpr){
+ATermAppl gsMakeOpIdNameBagSize(ATermAppl SortExpr)
+{
   assert(gsConstructorFunctionsEnabled);
   return gsMakeOpId(gsOpIdNameBagSize,
-		    gsMakeSortArrow(gsMakeSortBag(SortExpr),gsMakeSortExprNat()));
+    gsMakeSortArrow(SortExpr, gsMakeSortExprNat()));
 }
 
-ATermAppl gsMakeOpIdNameBagIn(ATermAppl SortExpr){
+ATermAppl gsMakeOpIdNameBagIn(ATermAppl SortExprLHS, ATermAppl SortExprRHS)
+{
   assert(gsConstructorFunctionsEnabled);
   return gsMakeOpId(gsOpIdNameBagIn,
-		    gsMakeSortArrow2(SortExpr,gsMakeSortBag(SortExpr),gsMakeSortExprBool()));
+    gsMakeSortArrow2(SortExprLHS, SortExprRHS, gsMakeSortExprBool()));
 }
 
-ATermAppl gsMakeOpIdNameCount(ATermAppl SortExpr){
+ATermAppl gsMakeOpIdNameCount(ATermAppl SortExprLHS, ATermAppl SortExprRHS)
+{
   assert(gsConstructorFunctionsEnabled);
   return gsMakeOpId(gsOpIdNameCount,
-		    gsMakeSortArrow2(SortExpr,gsMakeSortBag(SortExpr),gsMakeSortExprNat()));
+    gsMakeSortArrow2(SortExprLHS, SortExprRHS, gsMakeSortExprNat()));
 }
 
-ATermAppl gsMakeOpIdNameSubBagEq(ATermAppl SortExpr){
+ATermAppl gsMakeOpIdNameSubBagEq(ATermAppl SortExpr)
+{
   assert(gsConstructorFunctionsEnabled);
   return gsMakeOpId(gsOpIdNameSubBagEq,
-		    gsMakeSortArrow2(gsMakeSortBag(SortExpr),gsMakeSortBag(SortExpr),gsMakeSortExprBool()));
+    gsMakeSortArrow2(SortExpr, SortExpr, gsMakeSortExprBool()));
 }
 
-ATermAppl gsMakeOpIdNameSubBag(ATermAppl SortExpr){
+ATermAppl gsMakeOpIdNameSubBag(ATermAppl SortExpr)
+{
   assert(gsConstructorFunctionsEnabled);
   return gsMakeOpId(gsOpIdNameSubBag,
-		    gsMakeSortArrow2(gsMakeSortBag(SortExpr),gsMakeSortBag(SortExpr),gsMakeSortExprBool()));
+    gsMakeSortArrow2(SortExpr, SortExpr, gsMakeSortExprBool()));
 }
 
-ATermAppl gsMakeOpIdNameBagUnion(ATermAppl SortExpr){
+ATermAppl gsMakeOpIdNameBagUnion(ATermAppl SortExpr)
+{
   assert(gsConstructorFunctionsEnabled);
   return gsMakeOpId(gsOpIdNameBagUnion,
-		    gsMakeSortArrow2(gsMakeSortBag(SortExpr),gsMakeSortBag(SortExpr),gsMakeSortBag(SortExpr)));
+    gsMakeSortArrow2(SortExpr, SortExpr, SortExpr));
 }
 
-ATermAppl gsMakeOpIdNameBagDiff(ATermAppl SortExpr){
+ATermAppl gsMakeOpIdNameBagDiff(ATermAppl SortExpr)
+{
   assert(gsConstructorFunctionsEnabled);
   return gsMakeOpId(gsOpIdNameBagDiff,
-		    gsMakeSortArrow2(gsMakeSortBag(SortExpr),gsMakeSortBag(SortExpr),gsMakeSortBag(SortExpr)));
+    gsMakeSortArrow2(SortExpr, SortExpr, SortExpr));
 }
 
-ATermAppl gsMakeOpIdNameBagIntersect(ATermAppl SortExpr){
+ATermAppl gsMakeOpIdNameBagIntersect(ATermAppl SortExpr)
+{
   assert(gsConstructorFunctionsEnabled);
   return gsMakeOpId(gsOpIdNameBagIntersect,
-		    gsMakeSortArrow2(gsMakeSortBag(SortExpr),gsMakeSortBag(SortExpr),gsMakeSortBag(SortExpr)));
+    gsMakeSortArrow2(SortExpr, SortExpr, SortExpr));
 }
 
 //Creation of data expressions for system defined operations.

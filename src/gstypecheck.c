@@ -331,68 +331,68 @@ void gstcDataInit(void){
   gstcAddSystemFunctionProd(gsMakeOpIdExp(gsMakeSortIdNat()),
 			    gstcMakeSortArrowProd2(gsMakeSortIdInt(),gsMakeSortIdNat(),gsMakeSortIdInt()));
 //Lists
-  gstcAddSystemConstant(gsMakeOpIdNameEmptyList(gsMakeUnknown())),
-  gstcAddSystemFunctionProd(gsMakeOpIdNameListSize(gsMakeUnknown()),
+  gstcAddSystemConstant(gsMakeOpIdNameEmptyList(gsMakeSortList(gsMakeUnknown()))),
+  gstcAddSystemFunctionProd(gsMakeOpIdNameListSize(gsMakeSortList(gsMakeUnknown())),
 			    gstcMakeSortArrowProd1(gsMakeSortList(gsMakeUnknown()),gsMakeSortExprNat()));
-  gstcAddSystemFunctionProd(gsMakeOpIdNameInsert(gsMakeUnknown()),
+  gstcAddSystemFunctionProd(gsMakeOpIdNameCons(gsMakeUnknown(), gsMakeSortList(gsMakeUnknown())),
 			    gstcMakeSortArrowProd2(gsMakeUnknown(),gsMakeSortList(gsMakeUnknown()),gsMakeSortList(gsMakeUnknown())));
-  gstcAddSystemFunctionProd(gsMakeOpIdNameAppend(gsMakeUnknown()),
+  gstcAddSystemFunctionProd(gsMakeOpIdNameSnoc(gsMakeSortList(gsMakeUnknown()), gsMakeUnknown()),
 			    gstcMakeSortArrowProd2(gsMakeSortList(gsMakeUnknown()),gsMakeUnknown(),gsMakeSortList(gsMakeUnknown())));
-  gstcAddSystemFunctionProd(gsMakeOpIdNameConcat(gsMakeUnknown()),
+  gstcAddSystemFunctionProd(gsMakeOpIdNameConcat(gsMakeSortList(gsMakeUnknown())),
 			    gstcMakeSortArrowProd2(gsMakeSortList(gsMakeUnknown()),gsMakeSortList(gsMakeUnknown()),gsMakeSortList(gsMakeUnknown())));
-  gstcAddSystemFunctionProd(gsMakeOpIdNameElementAt(gsMakeUnknown()),
+  gstcAddSystemFunctionProd(gsMakeOpIdNameEltAt(gsMakeSortList(gsMakeUnknown()), gsMakeUnknown()),
 			    gstcMakeSortArrowProd2(gsMakeSortList(gsMakeUnknown()),gsMakeSortExprNat(),gsMakeUnknown()));
-  gstcAddSystemFunctionProd(gsMakeOpIdNameLHead(gsMakeUnknown()),
-			    gstcMakeSortArrowProd1(gsMakeSortList(gsMakeUnknown()),gsMakeUnknown()));
-  gstcAddSystemFunctionProd(gsMakeOpIdNameLTail(gsMakeUnknown()),
+  gstcAddSystemFunctionProd(gsMakeOpIdNameLHead(gsMakeSortList(gsMakeUnknown()), gsMakeUnknown()),
+			    gstcMakeSortArrowProd1(gsMakeSortList(gsMakeUnknown()), gsMakeUnknown()));
+  gstcAddSystemFunctionProd(gsMakeOpIdNameLTail(gsMakeSortList(gsMakeUnknown())),
 			    gstcMakeSortArrowProd1(gsMakeSortList(gsMakeUnknown()),gsMakeSortList(gsMakeUnknown())));
-  gstcAddSystemFunctionProd(gsMakeOpIdNameRHead(gsMakeUnknown()),
+  gstcAddSystemFunctionProd(gsMakeOpIdNameRHead(gsMakeSortList(gsMakeUnknown()), gsMakeUnknown()),
 			    gstcMakeSortArrowProd1(gsMakeSortList(gsMakeUnknown()),gsMakeUnknown()));
-  gstcAddSystemFunctionProd(gsMakeOpIdNameRTail(gsMakeUnknown()),
+  gstcAddSystemFunctionProd(gsMakeOpIdNameRTail(gsMakeSortList(gsMakeUnknown())),
 			    gstcMakeSortArrowProd1(gsMakeSortList(gsMakeUnknown()),gsMakeSortList(gsMakeUnknown())));
 	    
 //Sets
-  gstcAddSystemConstant(gsMakeOpIdNameEmptySet(gsMakeUnknown()));
-  gstcAddSystemFunctionProd(gsMakeOpIdNameSetSize(gsMakeUnknown()),
-			    gstcMakeSortArrowProd1(gsMakeSortSet(gsMakeUnknown()),gsMakeSortExprNat()));
-  gstcAddSystemFunctionProd(gsMakeOpIdNameSetIn(gsMakeUnknown()),
-			    gstcMakeSortArrowProd2(gsMakeUnknown(),gsMakeSortSet(gsMakeUnknown()),gsMakeSortExprBool()));
-  gstcAddSystemFunctionProd(gsMakeOpIdNameSubSetEq(gsMakeUnknown()),
-			    gstcMakeSortArrowProd2(gsMakeSortSet(gsMakeUnknown()),gsMakeSortSet(gsMakeUnknown()),gsMakeSortExprBool()));
-  gstcAddSystemFunctionProd(gsMakeOpIdNameSubSet(gsMakeUnknown()),
-			    gstcMakeSortArrowProd2(gsMakeSortSet(gsMakeUnknown()),gsMakeSortSet(gsMakeUnknown()),gsMakeSortExprBool()));
-  gstcAddSystemFunctionProd(gsMakeOpIdNameSetUnion(gsMakeUnknown()),
-			    gstcMakeSortArrowProd2(gsMakeSortSet(gsMakeUnknown()),gsMakeSortSet(gsMakeUnknown()),gsMakeSortSet(gsMakeUnknown())));
-  gstcAddSystemFunctionProd(gsMakeOpIdNameSetDiff(gsMakeUnknown()),
-			    gstcMakeSortArrowProd2(gsMakeSortSet(gsMakeUnknown()),gsMakeSortSet(gsMakeUnknown()),gsMakeSortSet(gsMakeUnknown())));
-  gstcAddSystemFunctionProd(gsMakeOpIdNameSetIntersect(gsMakeUnknown()),
-			    gstcMakeSortArrowProd2(gsMakeSortSet(gsMakeUnknown()),gsMakeSortSet(gsMakeUnknown()),gsMakeSortSet(gsMakeUnknown())));
-  gstcAddSystemFunctionProd(gsMakeOpIdNameSetCompl(gsMakeUnknown()),
-			    gstcMakeSortArrowProd1(gsMakeSortSet(gsMakeUnknown()),gsMakeSortSet(gsMakeUnknown())));
-  gstcAddSystemFunctionProd(gsMakeOpIdNameSet2Bag(gsMakeUnknown()),
+  gstcAddSystemFunctionProd(gsMakeOpIdNameSet2Bag(gsMakeSortSet(gsMakeUnknown()), gsMakeSortBag(gsMakeUnknown())),
 			    gstcMakeSortArrowProd1(gsMakeSortSet(gsMakeUnknown()),gsMakeSortBag(gsMakeUnknown())));
+  gstcAddSystemConstant(gsMakeOpIdNameEmptySet(gsMakeSortSet(gsMakeUnknown())));
+  gstcAddSystemFunctionProd(gsMakeOpIdNameSetSize(gsMakeSortSet(gsMakeUnknown())),
+			    gstcMakeSortArrowProd1(gsMakeSortSet(gsMakeUnknown()),gsMakeSortExprNat()));
+  gstcAddSystemFunctionProd(gsMakeOpIdNameSetIn(gsMakeUnknown(), gsMakeSortSet(gsMakeUnknown())),
+			    gstcMakeSortArrowProd2(gsMakeUnknown(),gsMakeSortSet(gsMakeUnknown()),gsMakeSortExprBool()));
+  gstcAddSystemFunctionProd(gsMakeOpIdNameSubSetEq(gsMakeSortSet(gsMakeUnknown())),
+			    gstcMakeSortArrowProd2(gsMakeSortSet(gsMakeUnknown()),gsMakeSortSet(gsMakeUnknown()),gsMakeSortExprBool()));
+  gstcAddSystemFunctionProd(gsMakeOpIdNameSubSet(gsMakeSortSet(gsMakeUnknown())),
+			    gstcMakeSortArrowProd2(gsMakeSortSet(gsMakeUnknown()),gsMakeSortSet(gsMakeUnknown()),gsMakeSortExprBool()));
+  gstcAddSystemFunctionProd(gsMakeOpIdNameSetUnion(gsMakeSortSet(gsMakeUnknown())),
+			    gstcMakeSortArrowProd2(gsMakeSortSet(gsMakeUnknown()),gsMakeSortSet(gsMakeUnknown()),gsMakeSortSet(gsMakeUnknown())));
+  gstcAddSystemFunctionProd(gsMakeOpIdNameSetDiff(gsMakeSortSet(gsMakeUnknown())),
+			    gstcMakeSortArrowProd2(gsMakeSortSet(gsMakeUnknown()),gsMakeSortSet(gsMakeUnknown()),gsMakeSortSet(gsMakeUnknown())));
+  gstcAddSystemFunctionProd(gsMakeOpIdNameSetIntersect(gsMakeSortSet(gsMakeUnknown())),
+			    gstcMakeSortArrowProd2(gsMakeSortSet(gsMakeUnknown()),gsMakeSortSet(gsMakeUnknown()),gsMakeSortSet(gsMakeUnknown())));
+  gstcAddSystemFunctionProd(gsMakeOpIdNameSetCompl(gsMakeSortSet(gsMakeUnknown())),
+			    gstcMakeSortArrowProd1(gsMakeSortSet(gsMakeUnknown()),gsMakeSortSet(gsMakeUnknown())));
 
 
 //Bags
-  gstcAddSystemConstant(gsMakeOpIdNameEmptyBag(gsMakeUnknown()));
-  gstcAddSystemFunctionProd(gsMakeOpIdNameBagSize(gsMakeUnknown()),
-			    gstcMakeSortArrowProd1(gsMakeSortBag(gsMakeUnknown()),gsMakeSortExprNat()));
-  gstcAddSystemFunctionProd(gsMakeOpIdNameBagIn(gsMakeUnknown()),
-			    gstcMakeSortArrowProd2(gsMakeUnknown(),gsMakeSortBag(gsMakeUnknown()),gsMakeSortExprBool()));
-  gstcAddSystemFunctionProd(gsMakeOpIdNameCount(gsMakeUnknown()),
-			    gstcMakeSortArrowProd2(gsMakeUnknown(),gsMakeSortBag(gsMakeUnknown()),gsMakeSortExprNat()));
-  gstcAddSystemFunctionProd(gsMakeOpIdNameSubBagEq(gsMakeUnknown()),
-			    gstcMakeSortArrowProd2(gsMakeSortBag(gsMakeUnknown()),gsMakeSortBag(gsMakeUnknown()),gsMakeSortExprBool()));
-  gstcAddSystemFunctionProd(gsMakeOpIdNameSubBag(gsMakeUnknown()),
-			    gstcMakeSortArrowProd2(gsMakeSortBag(gsMakeUnknown()),gsMakeSortBag(gsMakeUnknown()),gsMakeSortExprBool()));
-  gstcAddSystemFunctionProd(gsMakeOpIdNameBagUnion(gsMakeUnknown()),
-			    gstcMakeSortArrowProd2(gsMakeSortBag(gsMakeUnknown()),gsMakeSortBag(gsMakeUnknown()),gsMakeSortBag(gsMakeUnknown())));
-  gstcAddSystemFunctionProd(gsMakeOpIdNameBagDiff(gsMakeUnknown()),
-			    gstcMakeSortArrowProd2(gsMakeSortBag(gsMakeUnknown()),gsMakeSortBag(gsMakeUnknown()),gsMakeSortBag(gsMakeUnknown())));
-  gstcAddSystemFunctionProd(gsMakeOpIdNameBagIntersect(gsMakeUnknown()),
-			    gstcMakeSortArrowProd2(gsMakeSortBag(gsMakeUnknown()),gsMakeSortBag(gsMakeUnknown()),gsMakeSortBag(gsMakeUnknown())));
-  gstcAddSystemFunctionProd(gsMakeOpIdNameBag2Set(gsMakeUnknown()),
+  gstcAddSystemFunctionProd(gsMakeOpIdNameBag2Set(gsMakeSortBag(gsMakeUnknown()), gsMakeSortSet(gsMakeUnknown())),
 			    gstcMakeSortArrowProd1(gsMakeSortBag(gsMakeUnknown()),gsMakeSortSet(gsMakeUnknown())));
+  gstcAddSystemConstant(gsMakeOpIdNameEmptyBag(gsMakeSortBag(gsMakeUnknown())));
+  gstcAddSystemFunctionProd(gsMakeOpIdNameBagSize(gsMakeSortBag(gsMakeUnknown())),
+			    gstcMakeSortArrowProd1(gsMakeSortBag(gsMakeUnknown()),gsMakeSortExprNat()));
+  gstcAddSystemFunctionProd(gsMakeOpIdNameBagIn(gsMakeUnknown(), gsMakeSortBag(gsMakeUnknown())),
+			    gstcMakeSortArrowProd2(gsMakeUnknown(),gsMakeSortBag(gsMakeUnknown()),gsMakeSortExprBool()));
+  gstcAddSystemFunctionProd(gsMakeOpIdNameCount(gsMakeUnknown(), gsMakeSortBag(gsMakeUnknown())),
+			    gstcMakeSortArrowProd2(gsMakeUnknown(),gsMakeSortBag(gsMakeUnknown()),gsMakeSortExprNat()));
+  gstcAddSystemFunctionProd(gsMakeOpIdNameSubBagEq(gsMakeSortBag(gsMakeUnknown())),
+			    gstcMakeSortArrowProd2(gsMakeSortBag(gsMakeUnknown()),gsMakeSortBag(gsMakeUnknown()),gsMakeSortExprBool()));
+  gstcAddSystemFunctionProd(gsMakeOpIdNameSubBag(gsMakeSortBag(gsMakeUnknown())),
+			    gstcMakeSortArrowProd2(gsMakeSortBag(gsMakeUnknown()),gsMakeSortBag(gsMakeUnknown()),gsMakeSortExprBool()));
+  gstcAddSystemFunctionProd(gsMakeOpIdNameBagUnion(gsMakeSortBag(gsMakeUnknown())),
+			    gstcMakeSortArrowProd2(gsMakeSortBag(gsMakeUnknown()),gsMakeSortBag(gsMakeUnknown()),gsMakeSortBag(gsMakeUnknown())));
+  gstcAddSystemFunctionProd(gsMakeOpIdNameBagDiff(gsMakeSortBag(gsMakeUnknown())),
+			    gstcMakeSortArrowProd2(gsMakeSortBag(gsMakeUnknown()),gsMakeSortBag(gsMakeUnknown()),gsMakeSortBag(gsMakeUnknown())));
+  gstcAddSystemFunctionProd(gsMakeOpIdNameBagIntersect(gsMakeSortBag(gsMakeUnknown())),
+			    gstcMakeSortArrowProd2(gsMakeSortBag(gsMakeUnknown()),gsMakeSortBag(gsMakeUnknown()),gsMakeSortBag(gsMakeUnknown())));
 }
 
 void gstcDataDestroy(void){
