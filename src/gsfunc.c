@@ -57,13 +57,33 @@ ATermInt ATIgetArgument(ATermAppl appl, int nr)
   return (ATermInt) ATgetArgument(appl, nr);
 }
 
-static ATermAppl gsGetType(ATermAppl DataExpr)
-//Pre: DataExpr is a data expression
-//Ret: if the type of DataExpr is known, return this type
-//     else return Unknown
+ATermAppl ATAgetFirst(ATermList list)
 {
-  //TODO implementation
-  return gsMakeUnknown();
+  return (ATermAppl) ATgetFirst(list);
+}
+
+static ATermAppl gsGetType(ATermAppl term)
+//Ret: if term is a DataVarId, OpId, or DataApp, return its type
+//     return Unknown, otherwise
+{
+  if (gsIsDataAppl(term)) {
+    ATermAppl HeadType = gsGetType(ATAgetArgument(term, 0));
+    if (gsIsSortArrow(HeadType)) {
+      ATermAppl ResultType = gsGetType(ATAgetArgument(term, 1));
+      if (!gsIsUnknown(ResultType) &&
+          ATisEqual(ResultType, ATAgetArgument(HeadType, 0))) {
+        return ATAgetArgument(HeadType, 1);
+      } else {
+        return gsMakeSortArrow(HeadType, ResultType);
+      }
+    } else {
+      return gsMakeUnknown();
+    }
+  } else if (gsIsDataVarId(term) || gsIsOpId(term)) {
+    return ATAgetArgument(term, 1);
+  } else {
+    return gsMakeUnknown();
+  }
 }
 
 //Constant AFun's for each constructor element of the internal ATerm structure.
@@ -1051,6 +1071,16 @@ ATermAppl gsString2ATermAppl(char *s)
   }
 }
 
+char *gsATermAppl2String(ATermAppl term)
+{
+  AFun head = ATgetAFun(term);
+  if ((ATgetArity(head) == 0) && (ATisQuoted(head) == ATtrue)) {
+    return ATgetName(head);
+  } else {
+    return NULL;
+  }
+}
+
 //Creation of sort identifiers for system defined sorts.
 ATermAppl gsMakeSortIdBool()
 {
@@ -1278,7 +1308,7 @@ ATermAppl gsMakeDataExprEq(ATermAppl DataExprLHS, ATermAppl DataExprRHS)
   ATermAppl Result = NULL;
   ATermAppl ExprType = gsGetType(DataExprLHS);
   if (gsIsUnknown(ExprType)) {
-    ThrowVM1(NULL, "unknown type of data expression %t", DataExprLHS);
+    ThrowVM1(NULL, "type of data expression %t is unknown", DataExprLHS);
   }
   if (!ATisEqual(ExprType, gsGetType(DataExprRHS)))
   {
@@ -1296,7 +1326,7 @@ ATermAppl gsMakeDataExprNeq(ATermAppl DataExprLHS, ATermAppl DataExprRHS)
   ATermAppl Result = NULL;
   ATermAppl ExprType = gsGetType(DataExprLHS);
   if (gsIsUnknown(ExprType)) {
-    ThrowVM1(NULL, "unknown type of data expression %t", DataExprLHS);
+    ThrowVM1(NULL, "type of data expression %t is unknown", DataExprLHS);
   }
   if (!ATisEqual(ExprType, gsGetType(DataExprRHS)))
   {
@@ -1319,7 +1349,7 @@ ATermAppl gsMakeDataExprIf(ATermAppl DataExprCond, ATermAppl DataExprThen,
   }
   ATermAppl ExprType = gsGetType(DataExprThen);
   if (gsIsUnknown(ExprType)) {
-    ThrowVM1(NULL, "unknown type of data expression %t", DataExprThen);
+    ThrowVM1(NULL, "type of data expression %t is unknown", DataExprThen);
   }
   if (!ATisEqual(ExprType, gsGetType(DataExprElse)))
   {
@@ -1380,23 +1410,31 @@ ATermAppl gsMakeDataApplList(ATermAppl DataExpr,
   return Result;
 }
 
-ATermAppl gsMakeDataExprPos(char *p)
-//Pre: p is of the form "[1-9][0-9]*"
-//Ret: data expression of sort Pos that is a representation of p
+ATermAppl gsMakeDataExprPos(char *s)
+//Pre: s is of the form "[1-9][0-9]*"
+//Ret: data expression of sort Pos that is a representation of s
+{
+//  ATermAppl Result = NULL;
+//  long p = strtol(s, NULL, 10);
+//  if (p <= 0) {
+//    ThrowV1(NULL, "character %s is not of the form [1-9][0-9]*", s);
+//  if (p == 1) {
+//    Result = //TODO;
+//finally:
+//  return Result;
+  return NULL;
+}
+
+ATermAppl gsMakeDataExprNat(char *s)
+//Pre: s is of the form "0 | [1-9][0-9]*"
+//Ret: data expression of sort Nat that is a representation of s
 {
   return NULL;
 }
 
-ATermAppl gsMakeDataExprNat(char *n)
-//Pre: n is of the form "0 | [1-9][0-9]*"
-//Ret: data expression of sort Nat that is a representation of n
-{
-  return NULL;
-}
-
-ATermAppl gsMakeDataExprInt(char *z)
-//Pre: z is of the form "0 | -? [1-9][0-9]*"
-//Ret: data expression of sort Int that is a representation of z
+ATermAppl gsMakeDataExprInt(char *s)
+//Pre: s is of the form "0 | -? [1-9][0-9]*"
+//Ret: data expression of sort Int that is a representation of s
 {
   return NULL;
 }

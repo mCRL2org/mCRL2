@@ -59,10 +59,7 @@ ATermInt  ATIelementAt(ATermList list, int index);
 ATermAppl ATAgetArgument(ATermAppl appl, int nr);
 ATermList ATLgetArgument(ATermAppl appl, int nr);
 ATermInt  ATIgetArgument(ATermAppl appl, int nr);
-char *ATSgetArgument(ATermAppl appl, int nr);
 ATermAppl ATAgetFirst(ATermList list);
-ATermList ATLgetNext(ATermList list);
-ATermList ATinsertA(ATermList list, ATermAppl appl);
 
 //Initialisation of constructor functions
 void gsEnableConstructorFunctions(void);
@@ -221,6 +218,10 @@ bool gsIsCommExpr(ATermAppl term);
 ATermAppl gsString2ATermAppl(char *s);
 //Ret: quoted constant s, if s != NULL
 //     unquoted constant Nil, if s == NULL
+
+char *gsATermAppl2String(ATermAppl term);
+//Ret: string s, if term is a quoted constant s
+//     NULL, otherwise
 
 //Creation of sort identifiers for system defined sorts.
 ATermAppl gsMakeSortIdBool(void);
