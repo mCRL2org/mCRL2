@@ -304,14 +304,12 @@ ATermAppl gsMakeSetBagComp(ATermAppl IdDecl, ATermAppl DataExpr)
 
 ATermAppl gsMakeEmptyList(ATermAppl SortExprOrUnknown)
 {
-  return ATmakeAppl1(ATmakeAFun("EmptyList", 1, ATfalse),
-    (ATerm) SortExprOrUnknown);
+  return gsMakeDataVarOpId(ATmakeAppl0(ATmakeAFun("[]", 0, ATtrue)));
 }
 
 ATermAppl gsMakeEmptySetBag(ATermAppl SortExprOrUnknown)
 {
-  return ATmakeAppl1(ATmakeAFun("EmptySetBag", 1, ATfalse),
-    (ATerm) SortExprOrUnknown);
+  return gsMakeDataVarOpId(ATmakeAppl0(ATmakeAFun("{}", 0, ATtrue)));
 }
 
 ATermAppl gsMakeTrue()
@@ -760,16 +758,6 @@ bool gsIsWhrDecl(char *s)
   return strcmp(s, "WhrDecl") == 0;
 }
 
-bool gsIsEmptyList(char *s)
-{
-  return strcmp(s, "EmptyList") == 0;
-}
-
-bool gsIsEmptySetBag(char *s)
-{
-  return strcmp(s, "EmptySetBag") == 0;
-}
-
 bool gsIsListEnum(char *s)
 {
   return strcmp(s, "ListEnum") == 0;
@@ -803,6 +791,16 @@ bool gsIsTrue(char *s)
 bool gsIsFalse(char *s)
 {
   return strcmp(s, "false") == 0;
+}
+
+bool gsIsEmptyList(char *s)
+{
+  return strcmp(s, "[]") == 0;
+}
+
+bool gsIsEmptySetBag(char *s)
+{
+  return strcmp(s, "{}") == 0;
 }
 
 bool gsIsExclam(char *s)

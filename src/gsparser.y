@@ -1182,14 +1182,14 @@ data_constant:
     }
   | PBRACK
     {
-      $$ = gsMakeEmptyList(gsMakeUnknown());
+      $$ = gsMakeEmptyList();
       if (gsDebug) {
         ATprintf("parsed data constant\n  %t\n", $$);
       }
     }
   | PBRACE
     {
-      $$ = gsMakeEmptySetBag(gsMakeUnknown());
+      $$ = gsMakeEmptySetBag();
       if (gsDebug) {
         ATprintf("parsed data constant\n  %t\n", $$);
       }
