@@ -284,6 +284,21 @@ ATermAppl gsMakeSortExprInt(void);
 
 
 //Auxiliary functions concerning sort expressions
+ATermAppl gsMakeSortArrow2(ATermAppl SortExprDom1, ATermAppl SortExprDom2,
+  ATermAppl SortExprResult);
+//Pre: SortExprDom1, SortExprDom2 and SortExprResult are sort expressions
+//Ret: Internal representation of the sort expression
+//     SortExprDom1 -> SortExprDom2 -> SortExprResult, where -> is right
+//     associative.
+
+ATermAppl gsMakeSortArrow3(ATermAppl SortExprDom1, ATermAppl SortExprDom2,
+  ATermAppl SortExprDom3, ATermAppl SortExprResult);
+//Pre: SortExprDom1, SortExprDom2, SortExprDom3 and SortExprResult are sort
+//     expressions
+//Ret: Internal representation of the sort expression
+//     SortExprDom1 -> SortExprDom2 -> SortExprDom3 -> SortExprResult,
+//     where -> is right associative.
+
 ATermAppl gsMakeSortArrowList(ATermList SortExprDomain,
   ATermAppl SortExprResult);
 //Pre: SortExprDomain is of the form [e_0, ..., e_n], where n is a natural
@@ -338,16 +353,16 @@ ATermAppl gsMakeOpIdExists(ATermAppl SortExpr);
 //Ret: Operation identifier for the existential quantification over sort
 //     SortExpr
 
-ATermAppl gsMakeOpIdOne(void);
+ATermAppl gsMakeOpId1(void);
 //Ret: Operation identifier for `1' of sort Pos
 
-ATermAppl gsMakeOpIdDoublePos(void);
+ATermAppl gsMakeOpIdDot0(void);
 //Ret: Operation identifier for `.0', i.e. double a positive number
 
-ATermAppl gsMakeOpIdDoublePosPlusOne(void);
+ATermAppl gsMakeOpIdDot1(void);
 //Ret: Operation identifier for `.1', i.e. double a positive number and add `1'
 
-ATermAppl gsMakeOpIdZero(void);
+ATermAppl gsMakeOpId0(void);
 //Ret: Operation identifier for `0' of sort Nat
 
 ATermAppl gsMakeOpIdPosAsNat(void);
@@ -361,21 +376,105 @@ ATermAppl gsMakeOpIdNatAsInt(void);
 //Ret: Operation identifier for the creation of an integer from a natural
 //     number
 
-ATermAppl gsMakeOpIdLT(ATermAppl SortId);
-//Pre: SortId is Pos, Nat or Int
-//Ret: Operation identifier for `less than' on SortId
+ATermAppl gsMakeOpIdPos2Nat(void);
+//Ret: Operation identifier for the conversion of Pos to Nat
 
-ATermAppl gsMakeOpIdGT(ATermAppl SortId);
-//Pre: SortId is Pos, Nat or Int
-//Ret: Operation identifier for `greater than' on SortId
+ATermAppl gsMakeOpIdPos2Int(void);
+//Ret: Operation identifier for the conversion of Pos to Int
 
-ATermAppl gsMakeOpIdLTE(ATermAppl SortId);
-//Pre: SortId is Pos, Nat or Int
-//Ret: Operation identifier for `less than or equal' on SortId
+ATermAppl gsMakeOpIdNat2Pos(void);
+//Ret: Operation identifier for the conversion of Nat to Pos
 
-ATermAppl gsMakeOpIdGTE(ATermAppl SortId);
-//Pre: SortId is Pos, Nat or Int
-//Ret: Operation identifier for `greater than or equal' on SortId
+ATermAppl gsMakeOpIdNat2Int(void);
+//Ret: Operation identifier for the conversion of Nat to Int
+
+ATermAppl gsMakeOpIdInt2Pos(void);
+//Ret: Operation identifier for the conversion of Int to Pos
+
+ATermAppl gsMakeOpIdInt2Nat(void);
+//Ret: Operation identifier for the conversion of Int to Nat
+
+ATermAppl gsMakeOpIdLT(ATermAppl SortExpr);
+//Pre: SortExpr is Pos, Nat or Int
+//Ret: Operation identifier for `less than' on SortExpr
+
+ATermAppl gsMakeOpIdGT(ATermAppl SortExpr);
+//Pre: SortExpr is Pos, Nat or Int
+//Ret: Operation identifier for `greater than' on SortExpr
+
+ATermAppl gsMakeOpIdLTE(ATermAppl SortExpr);
+//Pre: SortExpr is Pos, Nat or Int
+//Ret: Operation identifier for `less than or equal' on SortExpr
+
+ATermAppl gsMakeOpIdGTE(ATermAppl SortExpr);
+//Pre: SortExpr is Pos, Nat or Int
+//Ret: Operation identifier for `greater than or equal' on SortExpr
+
+ATermAppl gsMakeOpIdMax(ATermAppl SortExpr);
+//Pre: SortExpr is Pos, Nat or Int
+//Ret: Operation identifier for `maximum' on SortExpr
+
+ATermAppl gsMakeOpIdMin(ATermAppl SortExpr);
+//Pre: SortExpr is Pos, Nat or Int
+//Ret: Operation identifier for `minimum' on SortExpr
+
+ATermAppl gsMakeOpIdAbs(void);
+//Ret: Operation identifier for `absolute value' of sort Int -> Nat
+
+ATermAppl gsMakeOpIdNeg(void);
+//Ret: Operation identifier for negation, which has sort Int -> Int
+
+ATermAppl gsMakeOpIdSucc(ATermAppl SortExpr);
+//Pre: SortExpr is Pos, Nat or Int
+//Ret: Operation identifier for the successor with argument sort SortExpr
+//     The corresponding result sort is:
+//     - Pos, if SortExpr is Pos
+//     - Pos, if SortExpr is Nat
+//     - Int, if SortExpr is Int
+
+ATermAppl gsMakeOpIdPred(ATermAppl SortExpr);
+//Pre: SortExpr is Pos or Int
+//Ret: Operation identifier for the predecessor with argument sort SortExpr
+//     The corresponding result sort is:
+//     - Nat, if SortExpr is Pos
+//     - Int, if SortExpr is Int
+
+ATermAppl gsMakeOpIdPredPos(void);
+//Ret: Operation identifier for the positive predecessor, i.e. a predecessor
+//     function of sort Pos -> Pos
+
+ATermAppl gsMakeOpIdAdd(ATermAppl SortExpr);
+//Pre: SortExpr is Pos, Nat or Int
+//Ret: Operation identifier for addition on SortExpr
+
+ATermAppl gsMakeOpIdSubt(void);
+//Ret: Operation identifier for subtraction, which has sort Int -> Int -> Int
+
+ATermAppl gsMakeOpIdSubtAux(void);
+//Ret: Operation identifier for the auxiliary subtraction function of sort
+//     Pos -> Pos -> Int
+
+ATermAppl gsMakeOpIdDouble(void);
+//Ret: Operation identifier for `double', which has sort Int -> Int
+
+ATermAppl gsMakeOpIdMult(ATermAppl SortExpr);
+//Pre: SortExpr is Pos, Nat or Int
+//Ret: Operation identifier for multiplication on SortExpr
+
+ATermAppl gsMakeOpIdDiv(ATermAppl SortExpr);
+//Pre: SortExpr is Nat or Int
+//Ret: Operation identifier for `quotient after division', which has sort
+//     e -> Pos -> e, where e stands for SortExpr
+
+ATermAppl gsMakeOpIdMod(ATermAppl SortExpr);
+//Pre: SortExpr is Nat or Int
+//Ret: Operation identifier for `remainder after division', which has sort
+//     e -> Pos -> Nat, where e stands for SortExpr
+
+ATermAppl gsMakeOpIdExp(ATermAppl SortExpr);
+//Pre: SortExpr is Pos, Nat or Int
+//Ret: Operation identifier for exponentiation, which has sort s -> Nat -> s,
+//     where s stands for SortExpr
 
 
 //Creation of data expressions for system defined operations.
@@ -418,18 +517,18 @@ ATermAppl gsMakeDataExprIf(ATermAppl DataExprCond, ATermAppl DataExprThen,
 //     must be different from Unknown
 //Ret: Data expression for `if(DataExprCond, DataExprThen, DataExprIf)'
 
-ATermAppl gsMakeDataExprOne(void);
+ATermAppl gsMakeDataExpr1(void);
 //Ret: Data expression for `1' of sort Pos
 
-ATermAppl gsMakeDataExprDoublePos(ATermAppl DataExpr);
+ATermAppl gsMakeDataExprDot0(ATermAppl DataExpr);
 //Pre: DataExpr is a data expression of sort Pos, which we denote by e 
 //Ret: Data expression for `.0(e)', i.e. double positive number e
 
-ATermAppl gsMakeDataExprDoublePosPlusOne(ATermAppl DataExpr);
+ATermAppl gsMakeDataExprDot1(ATermAppl DataExpr);
 //Pre: DataExpr is a data expression of sort Pos, which we denote by e 
 //Ret: Data expression for `.1(e)', i.e. double positive number e and add `1'
 
-ATermAppl gsMakeDataExprZero(void);
+ATermAppl gsMakeDataExpr0(void);
 //Ret: Data expression for `0' of sort Nat
 
 ATermAppl gsMakeDataExprPosAsNat(ATermAppl DataExpr);
@@ -443,6 +542,30 @@ ATermAppl gsMakeDataExprNegatePos(ATermAppl DataExpr);
 ATermAppl gsMakeDataExprNatAsInt(ATermAppl DataExpr);
 //Pre: DataExpr is a data expression of sort Nat 
 //Ret: DataExpr as a data expression of sort Int
+
+ATermAppl gsMakeDataExprPos2Nat(ATermAppl DataExpr);
+//Pre: DataExpr is a data expression of sort Pos 
+//Ret: Data expression for the conversion of DataExpr to Nat
+
+ATermAppl gsMakeDataExprPos2Int(ATermAppl DataExpr);
+//Pre: DataExpr is a data expression of sort Pos 
+//Ret: Data expression for the conversion of DataExpr to Int
+
+ATermAppl gsMakeDataExprNat2Pos(ATermAppl DataExpr);
+//Pre: DataExpr is a data expression of sort Nat 
+//Ret: Data expression for the conversion of DataExpr to Pos
+
+ATermAppl gsMakeDataExprNat2Int(ATermAppl DataExpr);
+//Pre: DataExpr is a data expression of sort Nat 
+//Ret: Data expression for the conversion of DataExpr to Int
+
+ATermAppl gsMakeDataExprInt2Pos(ATermAppl DataExpr);
+//Pre: DataExpr is a data expression of sort Int 
+//Ret: Data expression for the conversion of DataExpr to Pos
+
+ATermAppl gsMakeDataExprInt2Nat(ATermAppl DataExpr);
+//Pre: DataExpr is a data expression of sort Int 
+//Ret: Data expression for the conversion of DataExpr to Nat
 
 ATermAppl gsMakeDataExprLT(ATermAppl DataExprLHS, ATermAppl DataExprRHS);
 //Pre: DataExprLHS and DataExprRHS are both data expressions of sort Pos, Nat
@@ -466,8 +589,100 @@ ATermAppl gsMakeDataExprGTE(ATermAppl DataExprLHS, ATermAppl DataExprRHS);
 //Ret: Data expression for the `greater than or equal' of DataExprLHS and
 //     DataExprRHS
 
+ATermAppl gsMakeDataExprMax(ATermAppl DataExprLHS, ATermAppl DataExprRHS);
+//Pre: DataExprLHS and DataExprRHS are both data expressions of sort Pos, Nat
+//     or Int
+//Ret: Data expression for the maximum of DataExprLHS and DataExprRHS
+
+ATermAppl gsMakeDataExprMin(ATermAppl DataExprLHS, ATermAppl DataExprRHS);
+//Pre: DataExprLHS and DataExprRHS are both data expressions of sort Pos, Nat
+//     or Int
+//Ret: Data expression for the minimum of DataExprLHS and DataExprRHS
+
+ATermAppl gsMakeDataExprAbs(ATermAppl DataExpr);
+//Pre: DataExpr is a data expression of sort Int 
+//Ret: Data expression for the absolute value of DataExpr, which has sort Nat
+
+ATermAppl gsMakeDataExprNeg(ATermAppl DataExpr);
+//Pre: DataExpr is a data expression of sort Int 
+//Ret: Data expression for the negation of DataExpr, which has sort Int
+
+ATermAppl gsMakeDataExprSucc(ATermAppl DataExpr);
+//Pre: DataExpr is a data expression of sort Pos, Nat or Int
+//Ret: Data expression for the successor of DataExpr
+//     The result has sort:
+//     - Pos, if DataExpr has sort Pos
+//     - Pos, if DataExpr has sort Nat
+//     - Int, if DataExpr has sort Int
+
+ATermAppl gsMakeDataExprPred(ATermAppl DataExpr);
+//Pre: DataExpr is a data expression of sort Pos or Int
+//Ret: Data expression for the predecessor of DataExpr
+//     The result has sort:
+//     - Nat, if DataExpr has sort Pos
+//     - Int, if DataExpr has sort Int
+
+ATermAppl gsMakeDataExprPredPos(ATermAppl DataExpr);
+//Pre: DataExpr is a data expression of sort Pos
+//Ret: Data expression for the positive predecessor function of DataExpr,
+//     which means that the result is of sort Pos
+
+ATermAppl gsMakeDataExprAdd(ATermAppl DataExprLHS, ATermAppl DataExprRHS);
+//Pre: DataExprLHS and DataExprRHS are both data expressions of sort Pos, Nat
+//     or Int
+//Ret: Data expression for the addition of DataExprLHS and DataExprRHS
+
+ATermAppl gsMakeDataExprSubt(ATermAppl DataExprLHS, ATermAppl DataExprRHS);
+//Pre: DataExprLHS and DataExprRHS are both data expressions of sort Int
+//Ret: Data expression for the subtraction of DataExprLHS and DataExprRHS,
+//     which is of sort Int
+
+ATermAppl gsMakeDataExprSubtAux(ATermAppl DataExprLHS, ATermAppl DataExprRHS);
+//Pre: DataExprLHS and DataExprRHS are both data expressions of sort Pos
+//Ret: Data expression for the subtraction of DataExprLHS and DataExprRHS,
+//     which is of sort Int
+
+ATermAppl gsMakeDataExprDouble(ATermAppl DataExpr);
+//Pre: DataExpr is a data expression of sort Int
+//Ret: Data expression for the double of DataExpr, which is of sort Int
+
+ATermAppl gsMakeDataExprMult(ATermAppl DataExprLHS, ATermAppl DataExprRHS);
+//Pre: DataExprLHS and DataExprRHS are both data expressions of sort Pos, Nat
+//     or Int
+//Ret: Data expression for the multiplication of DataExprLHS and DataExprRHS
+
+ATermAppl gsMakeDataExprDiv(ATermAppl DataExprLHS, ATermAppl DataExprRHS);
+//Pre: DataExprLHS is a data expression of sort Nat or Int
+//     DataExprRHS is a data expression of sort Pos
+//Ret: Data expression for the quotient after division of DataExprLHS and
+//     DataExprRHS, of which the sort is equal to that of DataExprLHS
+
+ATermAppl gsMakeDataExprMod(ATermAppl DataExprLHS, ATermAppl DataExprRHS);
+//Pre: DataExprLHS is a data expression of sort Pos, Nat or Int
+//     DataExprRHS is a data expression of sort Nat
+//Ret: Data expression for the remainder after division of DataExprLHS and
+//     DataExprRHS, which is of sort Nat
+
+ATermAppl gsMakeDataExprExp(ATermAppl DataExprLHS, ATermAppl DataExprRHS);
+//Pre: DataExprLHS is a data expression of sort Nat or Int
+//     DataExprRHS is a data expression of sort Pos
+//Ret: Data expression for the exponentiation of DataExprLHS and DataExprRHS
+
 
 //Auxiliary functions concerning data expressions 
+ATermAppl gsMakeDataAppl2(ATermAppl DataExpr, ATermAppl DataExprArg1,
+  ATermAppl DataExprArg2);
+//Pre: DataExpr, DataExprArg1 and DataExprArg2 are data expressions
+//Ret: Internal representation of the data expression
+//     DataExpr(DataExprArg1)(DataExprArg2)
+
+ATermAppl gsMakeDataAppl3(ATermAppl DataExpr, ATermAppl DataExprArg1,
+  ATermAppl DataExprArg2, ATermAppl DataExprArg3);
+//Pre: DataExpr, DataExprArg1, DataExprArg2 and DataExprArg3 are data
+//     expressions
+//Ret: Internal representation of the data expression
+//     DataExpr(DataExprArg1)(DataExprArg2)(DataExprArg3)
+
 ATermAppl gsMakeDataApplList(ATermAppl DataExpr, ATermList DataExprArgs);
 //Pre: DataExpr is a data expression, which we denote by e.
 //     DataExprArgs is of the form [e_0, ..., e_n], where n is a natural
