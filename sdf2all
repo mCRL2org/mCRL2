@@ -1,9 +1,0 @@
-#! /bin/sh
-name=${1%.*}
-pack-sdf -i $1 -o ${name}.def
-
-#| asfix-yield -o ${name}.def
-sdf2table -i ${name}.def -o ${name}.tbl -m ${name} -bv
-#sdf-to-sig -i ${name}.def
-#ppgen -i ${name}.def -o ${name}.pp
-
