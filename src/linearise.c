@@ -143,6 +143,8 @@ static int canterminatebody(
               int *stable,
               ATermIndexedSet visited,
               int allowrecursion);
+static ATermAppl storeinit(ATermAppl init);
+static void storeprocs(ATermList procs);
 static ATermList getsorts(ATermList l);
 static ATermList sortActionLabels(ATermList actionlabels);
 static ATermAppl dummyterm(ATermAppl sort,specificationbasictype *spec);
@@ -500,6 +502,7 @@ static long insertconstructor(
                ATermAppl constructor, 
                specificationbasictype *spec)
 { spec->funcs=ATinsertA(spec->funcs,constructor);
+  ATfprintf(stderr,"Insert constructor %t\n",constructor);
   return insertConstructorOrFunction(constructor,func); 
 }
 
@@ -668,33 +671,6 @@ static int upperpowerof2(int i)
   return n;
 }
 
-/************ storesig ****************************************************/
-
-static void storesig(specificationbasictype *spec)
-{ 
-  ATermList sorts=spec->sorts;
-  ATermList constr=spec->funcs; 
-  ATermList maps=spec->maps;
-
-
-/* First store the sorts */
-  
-  for( ; sorts!=ATempty ; sorts=ATgetNext(sorts) )
-  { insertsort(ATAgetFirst(sorts)); 
-  }
-          
-/* Now store the constructors */
-  for( ; !ATisEmpty(constr) ; constr=ATgetNext(constr) )
-  { insertconstructor(ATAgetFirst(constr),spec); 
-  }
-
-                 
-/* Finally store the functions */
-  for( ; !ATisEmpty(maps) ; maps=ATgetNext(maps) )
-  { insertmapping(ATAgetFirst(maps),spec); 
-  }
-}
-
 /************ storeact ****************************************************/
 
 static long insertAction(ATermAppl actionId)
@@ -756,15 +732,42 @@ static specificationbasictype *read_input_file(char *filename)
   gsRewriteInit(t,GS_REWR_INNER);
 
   assert(gsIsSpecV1(t));
-  spec->sorts=ATLgetArgument(ATAgetArgument(t,0),0);
-  spec->funcs=ATLgetArgument(ATAgetArgument(t,1),0);
-  spec->maps=ATLgetArgument(ATAgetArgument(t,2),0);
+
+/* First store the sorts */
+  
+  spec->sorts=ATempty;
+  for(ATermList sorts=ATLgetArgument(ATAgetArgument(t,0),0) ; 
+      sorts!=ATempty ; 
+      sorts=ATgetNext(sorts) )
+  { insertsort(ATAgetFirst(sorts)); 
+  }
+          
+  spec->funcs=ATempty;
+/* Now store the constructors */
+  for(ATermList constr=ATLgetArgument(ATAgetArgument(t,1),0) ; 
+      !ATisEmpty(constr) ; 
+      constr=ATgetNext(constr) )
+  { ATfprintf(stderr,"AAA %t\n\n",constr);
+    insertconstructor(ATAgetFirst(constr),spec); 
+  }
+
+  spec->maps=ATempty;
+/* Finally store the functions */
+  for(ATermList maps=ATLgetArgument(ATAgetArgument(t,2),0) ; 
+      !ATisEmpty(maps) ; 
+      maps=ATgetNext(maps) )
+  { insertmapping(ATAgetFirst(maps),spec); 
+  }
+
+
   spec->eqns=ATLgetArgument(ATAgetArgument(t,3),0);
   spec->acts=ATLgetArgument(ATAgetArgument(t,4),0);
+  storeact(spec->acts);
   spec->procdatavars=ATempty;
   spec->procs=ATLgetArgument(ATAgetArgument(t,5),0);
+  storeprocs(spec->procs);
   spec->initdatavars=ATLgetArgument(ATAgetArgument(t,6),0);
-  spec->init=ATAgetArgument(ATAgetArgument(t,6),1);
+  spec->init=storeinit(ATAgetArgument(ATAgetArgument(t,6),1));
 
   return spec;
 
@@ -1308,16 +1311,6 @@ static ATermList collectPcrlProcesses(
   return localpcrlprocesses;
 }
 
-/************ ssc ****************************************************/
-
-static ATermAppl storedata(specificationbasictype *spec)
-{   
-  storesig(spec);    
-  storeact(spec->acts);
-  storeprocs(spec->procs);
-  return storeinit(spec->init);
-}
-
 /************ correctopenterm ********************************************/ 
 
 
@@ -1531,7 +1524,7 @@ static ATermAppl substitute_data_rec(
                  ATLgetArgument(t,0),
                  substitute_data_rec(terms,vars,ATAgetArgument(t,1)));
                    
-  }
+  } 
 
   if (gsIsForall(t))
   { ATfprintf(stderr,"Warning: no renaming of variable in forall\n");
@@ -1539,7 +1532,7 @@ static ATermAppl substitute_data_rec(
                  ATLgetArgument(t,0),
                  substitute_data_rec(terms,vars,ATAgetArgument(t,1)));
                    
-  }
+  } 
 
   assert(gsIsOpId(t));
   return t; 
@@ -5896,15 +5889,16 @@ static ATermAppl makesingleultimatedelaycondition(
 { /* ATfprintf(stderr,"AA\nsumvars: %t\ntimevariable: %t\nactiontime %t\n", 
                    sumvars,timevariable,actiontime); */
   ATermAppl result=gsMakeDataExprLT(timevariable,actiontime);
+  ATermList variables=ATempty;
 
-  /* for ( ; sumvars!=ATempty ; sumvars=ATgetNext(sumvars) )
+  for ( ; sumvars!=ATempty ; sumvars=ATgetNext(sumvars) )
   { ATermAppl sumvar=ATAgetFirst(sumvars);
     if (occursinterm(sumvar,actiontime))
-    { result=gsMakeExists(sumvar,result);
-      / * XXXXXXXXXXX te vervangen door gsMakeExists(sumvar,result); * /
+    { variables=ATinsertA(variables,sumvar);
     }
-  } */
-  return gsMakeExists(sumvars,result);
+  } 
+ 
+  return gsMakeExists(variables,result);
 }
 
 static ATermAppl getUltimateDelayCondition(
@@ -7068,7 +7062,7 @@ static int main2(int argc, char *argv[],ATerm *stack_bottom)
         ATerror("Cannot open file for output\n"); }
     spec=read_input_file(iname); 
 
-    initial_process=storedata(spec);
+    initial_process=spec->init;
     initialize_symbols(); /* This must be done after storing the data,
                              to avoid a possible name conflict with action
                              Terminate */
