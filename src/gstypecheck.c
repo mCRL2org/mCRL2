@@ -60,7 +60,6 @@ gstcReadIn (ATermAppl input)
 	ATermAppl Result = input;
 	gsDebugMsg ("type checking read-in fase started\n");
 	
-	Result=NULL;
 	
 	gsDebugMsg ("type checking read-in fase finished\n");
 finally:
