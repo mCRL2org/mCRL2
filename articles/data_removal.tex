@@ -576,21 +576,127 @@ identifiers and data applications are removed. Also structured sorts are
 removed. In this document we show how this is done. To increase readability, we
 only show expressions in the external format instead of the internal format.
 
+\subsection{Structured sorts}
+
+A structured sorts is of the form
+\begin{genspect}
+& \kwstruct
+    &c_{1}(\f{pr}_{1,1}: A_{1,1}, & \ldots & , \f{pr}_{1,k_{1}}: A_{1,k_{1}})
+      ?\f{is\_c_{1}}\\
+&\hfill |
+    &c_{2}(\f{pr}_{2,1}: A_{2,1}, & \ldots & , \f{pr}_{2,k_{2}}: A_{2,k_{2}})
+      ?\f{is\_c_{2}}\\
+&                                 & \multicolumn{1}{c}{\vdots}\\
+&\hfill |
+    &c_{n}(\f{pr}_{n,1}: A_{n,1}, & \ldots & , \f{pr}_{n,k_{n}}: A_{n,k_{n}})
+      ?\f{is\_c_{n}},
+\end{genspect}
+\noindent
+where \frm{n \in \pos} and \frm{k_{i} \in \nat} with \frm{1 \leq i \leq n}.
+All projections \frm{\f{pr}_{i,j}} and recognisers \frm{\f{is\_c_{i}}} are
+optional.
+
+For each constructor \frm{c_{i}} the following constructor operation is
+declared, where
+\frm{S} is the type of the structured sort:
+\[c_{i}: A_{i,1} \times A_{i,k_{i}} \To S\]
+For each defined projection \frm{p_{i,j}} the following operation is declared:
+\[p_{i,j}: S \To A_{i,j}\]
+For each defined recogniser \frm{\f{is\_c}_{i}} the following operation is
+generated:
+\[\f{is\_c}_{i}: S \To \srtbool\]
+
 \subsection{Numerical constants}
+
+For the types \frm{\srtpos}, \frm{\srtnat} and \frm{\srtint}, the following
+constructors are provided:
+
+\begin{genspect}
+&@1:       & \srtpos             & \text{one}\\
+&@0.:      & \srtpos \To \srtpos & \text{double the argument}\\
+&@1.:      & \srtpos \To \srtpos & \text{double the argument and add one}\\
+\\
+&@0 :      & \srtnat             & \text{zero}\\
+&@cPosNat: & \srtpos \To \srtnat & \text{positive number}\\
+\\
+&@-:       & \srtpos \To \srtint & \text{negation of a positive number}\\
+&@cNatInt  & \srtnat \To \srtint & \text{natural number}\\
+\end{genspect}
+
+\noindent
+Each numerical constant \frm{p} of type \frm{\srtpos} is implemented as a term
+build from constructor symbols of type \frm{\srtpos} as follows:
+\begin{tdefinitions}{-}
+\item if \frm{p} is \frm{1}, use \frm{@1};
+\item if \frm{p} is not \frm{1}, use \frm{\fa{@b.}{p'}}, where
+\frm{b = p \mod 2} and \frm{p'} is the implementation of \frm{p \div 2}.
+\end{tdefinitions}
+
+\noindent
+Each constant \frm{n} of type \frm{\srtnat} is implemented as follows:
+\begin{tdefinitions}{-}
+\item if \frm{n} is \frm{0}, use \frm{@0};
+\item if \frm{n} is not \frm{0}, use \frm{\fa{@cPosNat}{n'}}, where \frm{n'} is
+the implementation of the \emph{positive} number \frm{n}.
+\end{tdefinitions}
+
+\noindent
+Each constant \frm{i} of type \frm{\srtint} is implemented as follows:
+\begin{tdefinitions}{-}
+\item if \frm{i} starts with \frm{-}, use \frm{\fa{@-}{i'}}, where \frm{i'} is
+the implementation of the \emph{positive} number \frm{i} ;
+\item if \frm{i} does not start with \frm{-}, use \frm{\fa{@cNatInt}{i'}}, where
+\frm{i'} is the implementation of the \emph{natural} number \frm{i}.
+\end{tdefinitions}
 
 \subsection{List enumerations}
 
 A list enumeration is of the form
 \[[e_{0}, \dots, e_{n}]\]
-where \frm{n \in \nat} and all \frm{e_{i}} are of the same type. This
-enumeration is translated to the implementation of the following expression:
-\[e_{0} \cons \ldots \cons e_{n} \cons \el\]
+where \frm{n \in \nat} and all \frm{e_{i}} are of the same type, say \frm{S}.
+This enumeration is translated to the implementation of the following
+expression:
+\[e_{0} \cons \cdots \cons e_{n} \cons \el\]
+Here, \frm{\el} is of type \frm{S}.
 
 \subsection{Set enumerations}
 
+A set enumeration is of the form
+\[\set{e_{0}, \dots, e_{n}}\]
+where \frm{n \in \nat} and all \frm{e_{i}}, \frm{0 \leq i \leq n} are of the
+same type, say \frm{S}.  This is translated to the implementation of the
+following expression:
+\[\fa{@set}{\lambda x{:}S.\ (x == e_{0})\ \lor\ \cdots\ \lor\ (x == e_{n})}\]
+Here, \frm{\f{@set}} is an operation system identifier of type \frm{S \To
+\srtbool \To \fa{Set}{S}}, and \frm{x} is a variable that does not occur free
+in \frm{e_{i}}, \frm{0 \leq i \leq n}.
+
 \subsection{Bag enumerations}
 
+A bag enumeration is of the form
+\[\set{e_{0}: c_{0}, \dots, e_{n}: c_{n}}\]
+where \frm{n \in \nat}, all \frm{e_{i}}, \frm{0 \leq i \leq n} are of the same
+type, say \frm{S}, and all \frm{c_{i}} are of type \frm{\srtnat}.  This is
+translated to the implementation of the following expression:
+\[\fa{@bag}{\lambda x{:}S.\ (\faaa{if}{x == e_{0}}{c_{0}}{\faaa{if}{x ==
+e_{1}}{c_{1}}{\ldots \faaa{if}{x == e_{n}}{c_{n}}{0}}})}\]
+Here, \frm{\f{@bag}} is an operation system identifier of type \frm{(S \To
+\srtnat) \To \fa{Bag}{S}}, and \frm{x} is a variable that does not occur free
+in \frm{e_{i}} or \frm{c_{i}}, \frm{0 \leq i \leq n}.
+
 \subsection{Set and bag comprehensions}
+
+A set comprehension is of the form
+\[\scompr{x{:}S}{\fa{f}{x}},\]
+where \frm{\fa{f}{x}} is an expression of type \frm{\srtbool} in which \frm{x}
+may occur. This is translated to the implementation of the following
+expression:
+\[\fa{@set}{\lambda x{:}S.\ \fa{f}{x}}\]
+Here, \frm{\f{@set}} is an operation system identifier of type \frm{(S \To
+\srtbool) \To \fa{Set}{S}}.
+
+Bags are implemented in the same way with the exception that all occurrences of
+type \frm{\srtbool} in the above are replaced by type \frm{\srtnat}.
 
 \subsection{Quantifications}
 
@@ -601,7 +707,7 @@ where \frm{p} is an expression of type \frm{\srtbool}.
 This expression is translated to the implementation of the following
 expression:
 \[\fa{forall}{\lambda x_{0}{:}S_{0}, \ldots, x_{n}{:}S_{n}. p}\]
-Here \frm{\f{forall}} is an operation system identifier of type type
+Here, \frm{\f{forall}} is an operation system identifier of type
 \frm{(S_{0} \To \cdots \To S_{n} \To \srtbool) \To \srtbool}. The
 implementation of the lambda abstraction is shown in
 subsection~\ref{subsec:lambda}.
@@ -621,12 +727,12 @@ S_{-1}}, respectively, where \frm{m \in \nat}.
 
 This expression is translated to the implementation of the following
 expression:
-\[\fa{klambda}{x_{-m}, \ldots, x_{-1}},\]
-where \emph{klambda} is an operation system identifier of which the prefix
-\frm{k} is a unique natural number. It has type \frm{S_{-m} \times \cdots
-\times S_{-1} \To S_{0} \To \cdots \To S_{n} \To T}, where \frm{T} is the type
-of expression \frm{e}. For \emph{klambda} we have the following property:
-\[\mathit{klambda}(x_{-m}, \ldots, x_{-1})(x_{0})\cdots(x_{n}) = e\]
+\[\fa{lambda@k}{x_{-m}, \ldots, x_{-1}},\]
+Here, \frm{\f{lambda@k}} is an operation system identifier of where \frm{k} is
+a unique natural number. It has type \frm{S_{-m} \times \cdots \times S_{-1}
+\To S_{0} \To \cdots \To S_{n} \To T}, where \frm{T} is the type of expression
+\frm{e}. For \emph{klambda} we have the following property:
+\[\mathit{lambda@k}(x_{-m}, \ldots, x_{-1})(x_{0})\cdots(x_{n}) = e\]
 
 \subsection{Where clauses}
 
@@ -636,7 +742,5 @@ This expression is translated to the implementation of a the following
 expression, where \frm{S_{i}} represents the type of \frm{e_{i}}, \frm{0 \leq i
 \leq n}:
 \[(\lambda x_{0}{:}S_{0}, \ldots, x_{n}{:}S_{n}. e)(e_{0})\cdots(e_{n})\]
-
-\subsection{Structured sorts}
 
 \end{document}
