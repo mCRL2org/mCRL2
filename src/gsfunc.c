@@ -26,22 +26,63 @@ char *strdup(const char *s)
 
 //ATmake extensions
 
-ATermAppl gsMakeId(char *s)
+ATermAppl gsMakeIdString(char *s)
 {
-  return ATmakeAppl1(ATmakeAFun("Id", 1, ATfalse),
-    (ATerm) ATmakeAppl0(ATmakeAFun(s, 0, ATtrue)));
+  return ATmakeAppl0(ATmakeAFun(s, 0, ATtrue));
 }
 
-ATermAppl gsMakeNumber(char *s)
+ATermAppl gsMakeNumberString(char *s)
 {
-  return ATmakeAppl1(ATmakeAFun("Number", 1, ATfalse),
-    (ATerm) ATmakeAppl0(ATmakeAFun(s, 0, ATtrue)));
+  return ATmakeAppl0(ATmakeAFun(s, 0, ATtrue));
+}
+
+ATermAppl gsMakeNil()
+{
+  return ATmakeAppl0(ATmakeAFun("Nil", 0, ATfalse));
+}
+
+ATermAppl gsMakeUnknown()
+{
+  return ATmakeAppl0(ATmakeAFun("Unknown", 0, ATfalse));
+}
+
+ATermAppl gsMakeSortId(ATermAppl Name)
+{
+  return ATmakeAppl1(ATmakeAFun("SortId", 1, ATfalse), (ATerm) Name);
+}
+
+ATermAppl gsMakeOpId(ATermAppl Name, ATermAppl SortExprOrUnknown)
+{
+  return ATmakeAppl2(ATmakeAFun("OpId", 2, ATfalse), (ATerm) Name,
+    (ATerm) SortExprOrUnknown);
+}
+
+ATermAppl gsMakeActId(ATermAppl Name, ATermList SortExprOrUnknowns)
+{
+  return ATmakeAppl2(ATmakeAFun("ActId", 2, ATfalse), (ATerm) Name,
+    (ATerm) SortExprOrUnknowns);
+}
+
+ATermAppl gsMakeProcId(ATermAppl Name)
+{
+  return ATmakeAppl1(ATmakeAFun("ProcId", 1, ATfalse), (ATerm) Name);
+}
+
+ATermAppl gsMakeDataVar(ATermAppl Name, ATermAppl SortExprOrUnknown)
+{
+  return ATmakeAppl2(ATmakeAFun("DataVar", 2, ATfalse), (ATerm) Name,
+    (ATerm) SortExprOrUnknown);
+}
+
+ATermAppl gsMakeNumber(ATermAppl NumberString)
+{
+  return ATmakeAppl1(ATmakeAFun("Number", 1, ATfalse), (ATerm) NumberString);
 }
 
 ATermAppl gsMakeSpec(ATermAppl SortSpec, ATermAppl ConsSpec, ATermAppl MapSpec,
   ATermAppl EqnSpec, ATermAppl ActSpec, ATermAppl ProcSpec, ATermAppl Init)
 {
-  return ATmakeAppl(ATmakeAFun("Spec", 7, ATfalse), (ATerm) SortSpec,
+  return ATmakeAppl(ATmakeAFun("SpecV1", 7, ATfalse), (ATerm) SortSpec,
     (ATerm) ConsSpec, (ATerm) MapSpec, (ATerm) EqnSpec, (ATerm) ActSpec,
     (ATerm) ProcSpec, (ATerm) Init);
 }
@@ -51,14 +92,14 @@ ATermAppl gsMakeSortSpec(ATermList SortDecls)
   return ATmakeAppl1(ATmakeAFun("SortSpec", 1, ATfalse), (ATerm) SortDecls);
 }
 
-ATermAppl gsMakeSortDeclStandard(ATermAppl Id)
+ATermAppl gsMakeSortDeclStandard(ATermAppl Name)
 {
-  return ATmakeAppl1(ATmakeAFun("SortDeclStandard", 1, ATfalse), (ATerm) Id);
+  return ATmakeAppl1(ATmakeAFun("SortDeclStandard", 1, ATfalse), (ATerm) Name);
 }
 
-ATermAppl gsMakeSortDeclRef(ATermAppl Id, ATermAppl SortExpr)
+ATermAppl gsMakeSortDeclRef(ATermAppl Name, ATermAppl SortExpr)
 {
-  return ATmakeAppl2(ATmakeAFun("SortDeclRef", 2, ATfalse), (ATerm) Id,
+  return ATmakeAppl2(ATmakeAFun("SortDeclRef", 2, ATfalse), (ATerm) Name,
     (ATerm) SortExpr);
 }
 
@@ -72,9 +113,9 @@ ATermAppl gsMakeMapSpec(ATermList OpDecls)
   return ATmakeAppl1(ATmakeAFun("MapSpec", 1, ATfalse), (ATerm) OpDecls);
 }
 
-ATermAppl gsMakeIdDecl(ATermAppl Id, ATermAppl SortExpr)
+ATermAppl gsMakeOpDecl(ATermAppl Name, ATermAppl SortExpr)
 {
-  return ATmakeAppl2(ATmakeAFun("IdDecl", 2, ATfalse), (ATerm) Id,
+  return ATmakeAppl2(ATmakeAFun("OpDecl", 2, ATfalse), (ATerm) Name,
     (ATerm) SortExpr);
 }
 
@@ -83,10 +124,16 @@ ATermAppl gsMakeEqnSpec(ATermList EqnSects)
   return ATmakeAppl1(ATmakeAFun("EqnSpec", 1, ATfalse), (ATerm) EqnSects);
 }
 
-ATermAppl gsMakeEqnSect(ATermList EqnVars, ATermList EqnDecls)
+ATermAppl gsMakeEqnSect(ATermList DataVarDecls, ATermList EqnDecls)
 {
-  return ATmakeAppl2(ATmakeAFun("EqnSect", 2, ATfalse), (ATerm) EqnVars,
+  return ATmakeAppl2(ATmakeAFun("EqnSect", 2, ATfalse), (ATerm) DataVarDecls,
     (ATerm) EqnDecls);
+}
+
+ATermAppl gsMakeDataVarDecl(ATermAppl Name, ATermAppl SortExpr)
+{
+  return ATmakeAppl2(ATmakeAFun("DataVarDecl", 2, ATfalse), (ATerm) Name,
+    (ATerm) SortExpr);
 }
 
 ATermAppl gsMakeEqnDecl(ATermAppl DataExprLHS, ATermAppl DataExprRHS)
@@ -100,9 +147,9 @@ ATermAppl gsMakeActSpec(ATermList ActDecls)
   return ATmakeAppl1(ATmakeAFun("ActSpec", 1, ATfalse), (ATerm) ActDecls);
 }
 
-ATermAppl gsMakeActDecl(ATermAppl Id, ATermList SortExprs)
+ATermAppl gsMakeActDecl(ATermAppl Name, ATermList SortExprs)
 {
-  return ATmakeAppl2(ATmakeAFun("ActDecl", 2, ATfalse), (ATerm) Id,
+  return ATmakeAppl2(ATmakeAFun("ActDecl", 2, ATfalse), (ATerm) Name,
     (ATerm) SortExprs);
 }
 
@@ -111,10 +158,11 @@ ATermAppl gsMakeProcSpec(ATermList ProcDecls)
   return ATmakeAppl1(ATmakeAFun("ProcSpec", 1, ATfalse), (ATerm) ProcDecls);
 }
 
-ATermAppl gsMakeProcDecl(ATermAppl Id, ATermList ProcVars, ATermAppl ProcExpr)
+ATermAppl gsMakeProcDecl(ATermAppl Name, ATermList DataVarDecls,
+  ATermAppl ProcExpr)
 {
-  return ATmakeAppl3(ATmakeAFun("ProcDecl", 3, ATfalse), (ATerm) Id,
-    (ATerm) ProcVars, (ATerm) ProcExpr);
+  return ATmakeAppl3(ATmakeAFun("ProcDecl", 3, ATfalse), (ATerm) Name,
+    (ATerm) DataVarDecls, (ATerm) ProcExpr);
 }
 
 ATermAppl gsMakeInit(ATermAppl ProcExpr)
@@ -169,22 +217,28 @@ ATermAppl gsMakeSortStruct(ATermList StructConss)
     (ATerm) StructConss);
 }
 
-ATermAppl gsMakeStructCons(ATermAppl ConsId, ATermList StructProjs,
-  ATermAppl NilOrId)
+ATermAppl gsMakeStructCons(ATermAppl ConsName, ATermList StructProjs,
+  ATermAppl RecNameOrNil)
 {
-  return ATmakeAppl3(ATmakeAFun("StructCons", 3, ATfalse), (ATerm) ConsId,
-    (ATerm) StructProjs, (ATerm) NilOrId);
+  return ATmakeAppl3(ATmakeAFun("StructCons", 3, ATfalse), (ATerm) ConsName,
+    (ATerm) StructProjs, (ATerm) RecNameOrNil);
 }
 
-ATermAppl gsMakeNil()
+ATermAppl gsMakeStructProj(ATermAppl ProjNameOrNil, ATermList SortExprs)
 {
-  return ATmakeAppl0(ATmakeAFun("Nil", 0, ATfalse));
+  return ATmakeAppl2(ATmakeAFun("StructProj", 2, ATfalse),
+    (ATerm) ProjNameOrNil, (ATerm) SortExprs);
 }
 
-ATermAppl gsMakeStructProj(ATermAppl NilOrId, ATermList SortExprs)
+ATermAppl gsMakeDataVarOpId(ATermAppl Name)
 {
-  return ATmakeAppl2(ATmakeAFun("StructProj", 2, ATfalse), (ATerm) NilOrId,
-    (ATerm) SortExprs);
+  return ATmakeAppl1(ATmakeAFun("DataVarOpId", 1, ATfalse), (ATerm) Name);
+}
+
+ATermAppl gsMakeDataAppl(ATermAppl DataExpr, ATermList DataArgs)
+{
+  return ATmakeAppl2(ATmakeAFun("DataAppl", 2, ATfalse), (ATerm) DataExpr,
+    (ATerm) DataArgs);
 }
 
 ATermAppl gsMakeTrue()
@@ -226,12 +280,6 @@ ATermAppl gsMakeSetBagComp(ATermAppl IdDecl, ATermAppl DataExpr)
 {
   return ATmakeAppl2(ATmakeAFun("SetBagComp", 2, ATfalse), (ATerm) IdDecl,
     (ATerm) DataExpr);
-}
-
-ATermAppl gsMakeFuncApp(ATermAppl DataExpr, ATermList FuncArgs)
-{
-  return ATmakeAppl2(ATmakeAFun("FuncApp", 2, ATfalse), (ATerm) DataExpr,
-    (ATerm) FuncArgs);
 }
 
 ATermAppl gsMakeNotOrCompl(ATermAppl DataExpr)
@@ -387,9 +435,9 @@ ATermAppl gsMakeWhr(ATermAppl DataExpr, ATermList WhrDecls)
     (ATerm) WhrDecls);
 }
 
-ATermAppl gsMakeWhrDecl(ATermAppl Id, ATermAppl DataExpr)
+ATermAppl gsMakeWhrDecl(ATermAppl Name, ATermAppl DataExpr)
 {
-  return ATmakeAppl2(ATmakeAFun("WhrDecl", 2, ATfalse), (ATerm) Id,
+  return ATmakeAppl2(ATmakeAFun("WhrDecl", 2, ATfalse), (ATerm) Name,
     (ATerm) DataExpr);
 }
 
@@ -421,21 +469,21 @@ ATermAppl gsMakeSum(ATermList IdsDecls, ATermAppl ProcExpr)
     (ATerm) ProcExpr);
 }
 
-ATermAppl gsMakeRestrict(ATermList MAIdSet, ATermAppl ProcExpr)
+ATermAppl gsMakeRestrict(ATermList MultActNames, ATermAppl ProcExpr)
 {
-  return ATmakeAppl2(ATmakeAFun("Restrict", 2, ATfalse), (ATerm) MAIdSet,
+  return ATmakeAppl2(ATmakeAFun("Restrict", 2, ATfalse), (ATerm) MultActNames,
     (ATerm) ProcExpr);
 }
 
-ATermAppl gsMakeAllow(ATermList MAIdSet, ATermAppl ProcExpr)
+ATermAppl gsMakeAllow(ATermList MultActNames, ATermAppl ProcExpr)
 {
-  return ATmakeAppl2(ATmakeAFun("Allow", 2, ATfalse), (ATerm) MAIdSet,
+  return ATmakeAppl2(ATmakeAFun("Allow", 2, ATfalse), (ATerm) MultActNames,
     (ATerm) ProcExpr);
 }
 
-ATermAppl gsMakeHide(ATermList MAIdSet, ATermAppl ProcExpr)
+ATermAppl gsMakeHide(ATermList MultActNames, ATermAppl ProcExpr)
 {
-  return ATmakeAppl2(ATmakeAFun("Hide", 2, ATfalse), (ATerm) MAIdSet,
+  return ATmakeAppl2(ATmakeAFun("Hide", 2, ATfalse), (ATerm) MultActNames,
     (ATerm) ProcExpr);
 }
 
@@ -499,43 +547,58 @@ ATermAppl gsMakeChoice(ATermAppl OpLeft, ATermAppl OpRight)
     (ATerm) OpRight);
 }
 
-ATermAppl gsMakeMAId(ATermList Ids)
+ATermAppl gsMakeMultActName(ATermList ActNames)
 {
-  return ATmakeAppl1(ATmakeAFun("MAId", 1, ATfalse), (ATerm) Ids);
+  return ATmakeAppl1(ATmakeAFun("MultActName", 1, ATfalse), (ATerm) ActNames);
 }
 
-ATermAppl gsMakeMAIdSet(ATermList MAIds)
+ATermAppl gsMakeCommExpr(ATermAppl MultActName, ATermAppl ActNameOrNil)
 {
-  return ATmakeAppl1(ATmakeAFun("MAIdSet", 1, ATfalse), (ATerm) MAIds);
+  return ATmakeAppl2(ATmakeAFun("CommExpr", 2, ATfalse), (ATerm) MultActName,
+    (ATerm) ActNameOrNil);
 }
 
-ATermAppl gsMakeCommExpr(ATermAppl MAId, ATermAppl TauOrId)
+ATermAppl gsMakeRenExpr(ATermAppl FromName, ATermAppl ToName)
 {
-  return ATmakeAppl2(ATmakeAFun("CommExpr", 2, ATfalse), (ATerm) MAId,
-    (ATerm) TauOrId);
-}
-
-ATermAppl gsMakeCommExprSet(ATermList CommExprs)
-{
-  return ATmakeAppl1(ATmakeAFun("CommExprSet", 1, ATfalse), (ATerm) CommExprs);
-}
-
-ATermAppl gsMakeRenExpr(ATermAppl FromId, ATermAppl ToId)
-{
-  return ATmakeAppl2(ATmakeAFun("RenExpr", 2, ATfalse), (ATerm) FromId,
-    (ATerm) ToId);
-}
-
-ATermAppl gsMakeRenExprSet(ATermList RenExprs)
-{
-  return ATmakeAppl1(ATmakeAFun("RenExprSet", 1, ATfalse), (ATerm) RenExprs);
+  return ATmakeAppl2(ATmakeAFun("RenExpr", 2, ATfalse), (ATerm) FromName,
+    (ATerm) ToName);
 }
 
 //strcmp extensions
 
-bool gsIsId(char *s)
+bool gsIsNil(char *s)
 {
-  return strcmp(s, "Id") == 0;
+  return strcmp(s, "Nil") == 0;
+}
+
+bool gsIsUnknown(char *s)
+{
+  return strcmp(s, "StructUnknown") == 0;
+}
+
+bool gsIsSortId(char *s)
+{
+  return strcmp(s, "SortId") == 0;
+}
+
+bool gsIsOpId(char *s)
+{
+  return strcmp(s, "OpId") == 0;
+}
+
+bool gsIsActId(char *s)
+{
+  return strcmp(s, "ActId") == 0;
+}
+
+bool gsIsProcId(char *s)
+{
+  return strcmp(s, "ProcId") == 0;
+}
+
+bool gsIsDataVar(char *s)
+{
+  return strcmp(s, "DataVar") == 0;
 }
 
 bool gsIsNumber(char *s)
@@ -545,7 +608,7 @@ bool gsIsNumber(char *s)
 
 bool gsIsSpec(char *s)
 {
-  return strcmp(s, "Spec") == 0;
+  return strcmp(s, "SpecV1") == 0;
 }
 
 bool gsIsSortSpec(char *s)
@@ -668,11 +731,6 @@ bool gsIsStructCons(char *s)
   return strcmp(s, "StructCons") == 0;
 }
 
-bool gsIsNil(char *s)
-{
-  return strcmp(s, "Nil") == 0;
-}
-
 bool gsIsStructProj(char *s)
 {
   return strcmp(s, "StructProj") == 0;
@@ -718,9 +776,9 @@ bool gsIsSetBagComp(char *s)
   return strcmp(s, "SetBagComp") == 0;
 }
 
-bool gsIsFuncApp(char *s)
+bool gsIsDataAppl(char *s)
 {
-  return strcmp(s, "FuncApp") == 0;
+  return strcmp(s, "DataAppl") == 0;
 }
 
 bool gsIsNotOrCompl(char *s)
@@ -948,14 +1006,9 @@ bool gsIsChoice(char *s)
   return strcmp(s, "Choice") == 0;
 }
 
-bool gsIsMAId(char *s)
+bool gsIsMultActName(char *s)
 {
-  return strcmp(s, "MAId") == 0;
-}
-
-bool gsIsMAIdSet(char *s)
-{
-  return strcmp(s, "MAIdSet") == 0;
+  return strcmp(s, "MultActName") == 0;
 }
 
 bool gsIsCommExpr(char *s)
@@ -963,19 +1016,9 @@ bool gsIsCommExpr(char *s)
   return strcmp(s, "CommExpr") == 0;
 }
 
-bool gsIsCommExprSet(char *s)
-{
-  return strcmp(s, "CommExprSet") == 0;
-}
-
 bool gsIsRenExpr(char *s)
 {
   return strcmp(s, "RenExpr") == 0;
-}
-
-bool gsIsRenExprSet(char *s)
-{
-  return strcmp(s, "RenExprSet") == 0;
 }
 
 //ATerm libary work arounds
