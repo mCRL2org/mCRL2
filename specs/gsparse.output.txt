@@ -130,7 +130,7 @@
                | Sync(<ProcExpr>, <ProcExpr>) 
                | AtTime(<ProcExpr>, <DataExpr>) 
                | Seq(<ProcExpr>, <ProcExpr>) 
-               | Cond(<DataExpr>, <ProcExpr>) 
+               | Cond(<DataExpr>, <ProcExpr>, <ProcExpr>) 
                | BInit(<ProcExpr>, <ProcExpr>) 
                | Merge(<ProcExpr>, <ProcExpr>) 
                | LMerge(<ProcExpr>, <ProcExpr>) 
