@@ -882,7 +882,7 @@ static ATermAppl gstcRewrActProc(ATermTable Vars, ATermAppl ProcTerm){
 	PosTypeList=ATgetNext(PosTypeList)){
     ATermAppl Par=ATAgetFirst(Pars);
     ATermAppl NewPosType=gstcTraverseVarConsTypeD(Vars,&Par,ATAgetFirst(PosTypeList));
-    if(!NewPosType) {throw;}
+    if(!NewPosType) {Result=NULL; throw;}
     NewPars=ATinsert(NewPars,(ATerm)Par);
     NewPosTypeList=ATinsert(NewPosTypeList,(ATerm)NewPosType);
   }
@@ -1227,7 +1227,7 @@ static ATermAppl gstcTraverseVarConsTypeD(ATermTable Vars, ATermAppl *DataTerm, 
     ATermAppl Data=ATAgetArgument(*DataTerm,0);
     ATermAppl NewType=gstcTraverseVarConsTypeDN(nArguments,Vars,
 						&Data,gsMakeSortArrowProd(ArgumentTypes,PosType));
-    if(!NewType) {throw;}
+    if(!NewType) {ThrowM("(The type error above occurred in DataTerm %t while trying to cast it to type %t)\n",gsMakeDataApplProd(Data,Arguments),PosType);}
     
     //it is possible that:
     //1) a cast has happened

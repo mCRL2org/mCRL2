@@ -71,7 +71,7 @@
 \color[rgb]{0,.4,.3}{\LARGE possible developments}\\
 \color[rgb]{0,.4,.3}{\LARGE place in the context}}
 \author{\Large\color[rgb]{0,.4,0}{Yaroslav S. Usenko}}
-\date{\large\color[rgb]{.4,.4,0}{18 November 2004}}
+\date{\large\color[rgb]{.4,.4,0}{26 January 2005}}
 
 %\leftfooter{Y.S. Usenko}
 %\MyLogo{}
@@ -93,7 +93,7 @@
         {\left[
                 {#1}
         \right]_{#2}}
-
+\newcommand{\superpos}[1]    {\mathop{\underset{#1}{\bigoplus}}}
 
 \begin{document}
 \begin{slide}
@@ -252,8 +252,40 @@ Two-phase transition systems have to be saturated to satisfy the last 2 properti
 \begin{itemize}
 \item[+] no saturations: easier bisimulation and parallel composition definition
 \item[+] relatively easy branching bisimulation definition
-\item[-] more infinite transition systems.
+\item[-] sometimes more infinite transition systems.
 \end{itemize}
+%###################################################
+%###################################################
+\newslide\section*{Timed \mcrl: Crucial Axioms}
+\vspace{-1.5ex}
+\begin{footnotesize}
+  \begin{align}
+&  x\id \sum_{t\ap\Time}x\at t\tag{AT1}\label{eq:AT1}\\ %at
+&  b\at t\seqc y\id b\at t\seqc t\ti y\tag{AT2}\label{eq:AT2}\\ %at2
+%  (b\at t)\seqc y\id (b\at t)\seqc(t\tii y)\tag{AT3}\label{eq:AT3}\\ %at3
+&  x\at t\at u\id x\at t\lcond t=u\rcond\daz+\udd(x)\at\nm{min}(t,u)\tag{ATA1$'$}\label{eq:ATA1'}\\ %ata1
+&  (b\at t\seqc x)\leftm y\id (b\at t\tb y)\seqc((t\ti x)\parc y)\tag{CM3T}\label{eq:CM3T}\\
+&  (x\comm y)\at t\id x\at t\comm y\tag{ATA7}\label{eq:ATA7}\\
+&  x\tb(y\at t)\id \sum_{u\ap\Time}(x\tb y)\at u\lcond u\leq t\rcond\daz\tag{ATC11}\label{eq:ATC11}\\ %atc11
+&  \delta\tb x\id \udd(x)\tag{ATCC0}\label{eq:ATCC0} %atcc0
+  \end{align}
+\end{footnotesize}
+%###################################################
+%###################################################
+\newslide\section*{Timed \mcrl: Synchronization}
+\vspace{-1.5ex}
+\begin{footnotesize}
+  \begin{align*}
+&  \encap{\set{\act{a},\act{\_a}}} ((\act{a}\seqc x+\act{\_b}\seqc y)\parc \act{\_a}\seqc z)\id\\
+&  \quad\act{\_\_a}\seqc (x\parc z)+\act{\_b}\seqc\encap{\set{\act{a},\act{\_a}}} (y\parc\act{\_a}\seqc z)\\
+&  \\
+&  \encap{\set{\act{a},\act{\_a}}} ((\act{a}\at 3\seqc x+\act{\_b}\at 5\seqc y)\parc \act{\_a}\at 3\seqc z)\id\\
+&  \quad\act{\_\_a}\at 3\seqc (x\parc z)\\ 
+&  \\
+&  \encap{\set{\act{empty},\act{stop},\act{\_empty},\act{\_stop}}} ((\sum_{t\ap\Time}\act{empty}\at t\seqc x\lcond t<5\rcond\daz+\act{\_stop}\at 5\seqc y)\parc\\
+&\t4 (\sum_{t\ap\Time}\act{stop}\at t\seqc z'\lcond t<5\rcond\daz+\act{\_empty}\at 5\seqc z)\id\delta\at 5 
+  \end{align*}
+\end{footnotesize}
 %###################################################
 %###################################################
 \newslide\section*{Timed \mcrl: status}
@@ -262,7 +294,7 @@ Current:
 \item Soundness and completeness results w.r.t. strong bisimulation (GRWvdZ 2002)
 \item Branching bisimulation definition (vdZwaag 2001)
 \item Translation from timed automata (Willemse, 2003)
-\item Linearization; TLPE$\to$LPE (RU 2002)
+\item Linearization; TLPE$\to$LPE (RU 2002,2005), Implementation (JFG 2005)
 \end{itemize}
 \pause
 Future:
@@ -375,6 +407,17 @@ Future:
 
 \[(\tpref{\varphi}{t}\seqc x+\tpref{\psi}{u}\seqc y)\parc^A_{\pi(\varphi)}\tpref{\varphi}{t}\seqc z\id \tpref{\varphi}{t}\seqc (x\parc^A_{\pi(\varphi)} z)\]
 \[\varphi\vee\psi\csins(\varphi\cond\delay{t}(x)+\psi\cond\delay{u}(y))\parc\varphi\csins\delay{t}(z)\id \varphi\csins\delay{t}(x\parc z)\] 
+%###################################################
+%###################################################
+\newslide\section*{BHPC and Binders}
+\begin{itemize}
+\item $\superpos{\varphi\ap\Phi}\tpref{\varphi}{}\seqc \pr{Y}(\varphi)$
+\item Difficult to give SOS rules and axioms.
+\item $\pr{A}=\superpos{\varphi\ap\Time}\tpref{\varphi}{}\seqc\act{a}(\varphi)$ 
+and $\pr{B}=\superpos{\psi\ap\Time}\tpref{\psi}{}\seqc\act{b}(\psi)$
+\item $\pr{A}\parc\pr{B}=\superpos{\chi\ap\Time}\tpref{\chi}{}\seqc(\act{a}(\varphi)\seqc\superpos{\psi\ap\Time}\tpref{\psi}{}\seqc\act{b}(\psi)+\act{b}(\varphi)\seqc\superpos{\varphi\ap\Time}\tpref{\varphi}{}\seqc\act{a}(\varphi))$
+\end{itemize}
+
 %###################################################
 %###################################################
 \newslide\section*{Hybrid Systems: status}
