@@ -83,7 +83,7 @@
                | SetEnum(<DataExpr>+) 
                | BagEnum(BagEnumElt+) 
                | SetBagComp(<IdDecl>, <DataExpr>) 
-               | FuncApp(<DataExpr>, <DataExpr>*) 
+               | FuncApp(<DataExpr>, <DataExpr>+) 
                | NotOrCompl(<DataExpr>) 
                | Neg(<DataExpr>) 
                | Size(<DataExpr>) 
