@@ -7,7 +7,7 @@ extern "C" {
 
 //Global precondition: the ATerm library has been initialised
 
-ATermAppl gsParse(FILE *formStream);
+ATermAppl gsParse(FILE *FormStream);
 /*Pre: FormStream is a valid formula stream from which can be read       
   Post:the GenSpect specification in formStream is parsed
   Ret: the parsed formula, if everything went ok

@@ -4,6 +4,7 @@ ATERM_INCLUDE   = $(ATERM_ROOT)/include
 ATERM_LIB_PATH  = $(ATERM_ROOT)/lib
 
 #Redefine default definitions
+CC              = gcc
 CFLAGS          = -std=c99 -I$(ATERM_INCLUDE)
 ARFLAGS         = crs
 LEX             = flex
@@ -19,7 +20,7 @@ LIB_LDFLAGS     = -L$(ATERM_LIB_PATH) -lATerm
 #Parser definitions
 PARSER_NAME     = gsparse
 PARSER_OBJECTS  = gsparse.o
-PARSER_LDFLAGS  = -L. -lgsparse -lATerm
+PARSER_LDFLAGS  = -L. -L$(ATERM_LIB_PATH) -lgsparse -lATerm
 
 #Make rules
 .PHONY: all clean

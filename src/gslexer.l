@@ -7,137 +7,145 @@
 //Global precondition: the ATerm library has been initialised
 
 //global declarations
-ATermAppl GStree = NULL;         /* the parse tree */
+ATermAppl gsTree = NULL;         /* the parse tree */
 
 //external declarations
-int GSyyparse(void);             /* declared in gsparser.c */
-extern YYSTYPE GSyylval;         /* declared in gsparser.c */
+int gsyyparse(void);             /* declared in gsparser.c */
+extern YYSTYPE gsyylval;         /* declared in gsparser.c */
 extern int fileno(FILE *stream); /* declared in stdio.h (forgotten by lex) */
 
 //local declarations
-int lineno = 1;                  /* line number in source file */
-int colno  = 1;                  /* column number in source file */
-void GSyyerror(char *s);         /* display error message (needed by yacc) */
-int GSyywrap(void);              /* action taken after an EOF (needed by yacc) */
+int LineNr = 1;                  /* line number in source file */
+int ColNr  = 1;                  /* column number in source file */
+void gsyyerror(char *s);         /* display error message (needed by yacc) */
+int gsyywrap(void);              /* action taken after an EOF (needed by yacc) */
 
 %}
-id       [a-zA-Z\_][a-zA-Z0-9\_]*
-number   "0"|("-"?[1-9][0-9]*) 
+Id       [a-zA-Z\_][a-zA-Z0-9\_]*
+Number   "0"|("-"?[1-9][0-9]*) 
 
 %%
 
-[ \t]    { colno += GSyyleng; /* whitespace */ }
+[ \t]    { ColNr += gsyyleng; /* whitespace */ }
 
-\r?\n    { lineno++; colno = 1; /* newline */ }
+\r?\n    { LineNr++; ColNr = 1; /* newline */ }
 
-"%".*    { colno += MCyyleng; /* comment */ }
+"%".*    { ColNr += gsyyleng; /* comment */ }
 
-"||_"    { colno += GSyyleng; return LMERGE; }
-"->"     { colno += GSyyleng; return ARROW; }
-"<="     { colno += GSyyleng; return LTE; }
-">="     { colno += GSyyleng; return GTE; }
-"|>"     { colno += GSyyleng; return CONS; }
-"<|"     { colno += GSyyleng; return SNOC; }
-"++"     { colno += GSyyleng; return CONCAT; }
-"=="     { colno += GSyyleng; return EQ; }
-"!="     { colno += GSyyleng; return NEQ; }
-"&&"     { colno += GSyyleng; return AND; }
-"||"     { colno += GSyyleng; return BARS; }
-"=>"     { colno += GSyyleng; return IMP; }
-"<<"     { colno += GSyyleng; return BINIT; }
-"*"      { colno += GSyyleng; return STAR; }
-"+"      { colno += GSyyleng; return PLUS; }
-"-"      { colno += GSyyleng; return MINUS; }
-"="      { colno += GSyyleng; return EQUALS; }
-"."      { colno += GSyyleng; return DOT; }
-","      { colno += GSyyleng; return COMMA; }
-":"      { colno += GSyyleng; return COLON; }
-";"      { colno += GSyyleng; return SEMICOLON; }
-"?"      { colno += GSyyleng; return QMARK; }
-"!"      { colno += GSyyleng; return EXCLAM; }
-"@"      { colno += GSyyleng; return AT; }
-"#"      { colno += GSyyleng; return HASH; }
-"|"      { colno += GSyyleng; return BAR; }
-"("      { colno += GSyyleng; return LPAR; }
-")"      { colno += GSyyleng; return RPAR; }
-"[]"     { colno += GSyyleng; return PBRACK; }
-"["      { colno += GSyyleng; return LBRACK; }
-"]"      { colno += GSyyleng; return RBRACK; }
-"<"      { colno += GSyyleng; return LANG; }
-">"      { colno += GSyyleng; return RANG; }
-"{}"     { colno += GSyyleng; return PBRACE; }
-"{"      { colno += GSyyleng; return LBRACE; }
-"}"      { colno += GSyyleng; return RBRACE; }
+"||_"    { ColNr += gsyyleng; return LMERGE; }
+"->"     { ColNr += gsyyleng; return ARROW; }
+"<="     { ColNr += gsyyleng; return LTE; }
+">="     { ColNr += gsyyleng; return GTE; }
+"|>"     { ColNr += gsyyleng; return CONS; }
+"<|"     { ColNr += gsyyleng; return SNOC; }
+"++"     { ColNr += gsyyleng; return CONCAT; }
+"=="     { ColNr += gsyyleng; return EQ; }
+"!="     { ColNr += gsyyleng; return NEQ; }
+"&&"     { ColNr += gsyyleng; return AND; }
+"||"     { ColNr += gsyyleng; return BARS; }
+"=>"     { ColNr += gsyyleng; return IMP; }
+"<<"     { ColNr += gsyyleng; return BINIT; }
+"*"      { ColNr += gsyyleng; return STAR; }
+"+"      { ColNr += gsyyleng; return PLUS; }
+"-"      { ColNr += gsyyleng; return MINUS; }
+"="      { ColNr += gsyyleng; return EQUALS; }
+"."      { ColNr += gsyyleng; return DOT; }
+","      { ColNr += gsyyleng; return COMMA; }
+":"      { ColNr += gsyyleng; return COLON; }
+";"      { ColNr += gsyyleng; return SEMICOLON; }
+"?"      { ColNr += gsyyleng; return QMARK; }
+"!"      { ColNr += gsyyleng; return EXCLAM; }
+"@"      { ColNr += gsyyleng; return AT; }
+"#"      { ColNr += gsyyleng; return HASH; }
+"|"      { ColNr += gsyyleng; return BAR; }
+"("      { ColNr += gsyyleng; return LPAR; }
+")"      { ColNr += gsyyleng; return RPAR; }
+"[]"     { ColNr += gsyyleng; return PBRACK; }
+"["      { ColNr += gsyyleng; return LBRACK; }
+"]"      { ColNr += gsyyleng; return RBRACK; }
+"<"      { ColNr += gsyyleng; return LANG; }
+">"      { ColNr += gsyyleng; return RANG; }
+"{}"     { ColNr += gsyyleng; return PBRACE; }
+"{"      { ColNr += gsyyleng; return LBRACE; }
+"}"      { ColNr += gsyyleng; return RBRACE; }
 
-sort     { colno += GSyyleng; return SORT; }
-cons     { colno += GSyyleng; return CONS; }
-map      { colno += GSyyleng; return MAP; }
-var      { colno += GSyyleng; return VAR; }
-eqn      { colno += GSyyleng; return EQN; }
-act      { colno += GSyyleng; return ACT; }
-proc     { colno += GSyyleng; return PROC; }
-init     { colno += GSyyleng; return INIT; }
-Bool     { colno += GSyyleng; return BOOL; }
-Pos      { colno += GSyyleng; return POS; }
-Nat      { colno += GSyyleng; return NAT; }
-Int      { colno += GSyyleng; return INT; }
-List     { colno += GSyyleng; return LIST; }
-Set      { colno += GSyyleng; return SET; }
-Bag      { colno += GSyyleng; return BAG; }
-Struct   { colno += GSyyleng; return STRUCT; }
-true     { colno += GSyyleng; return TRUE; }
-false    { colno += GSyyleng; return FALSE; }
-whr      { colno += GSyyleng; return WHR; }
-end      { colno += GSyyleng; return END; }
-lambda   { colno += GSyyleng; return LAMBDA; }
-forall   { colno += GSyyleng; return FORALL; }
-exists   { colno += GSyyleng; return EXISTS; }
-div      { colno += GSyyleng; return DIV; }
-mod      { colno += GSyyleng; return MOD; }
-in       { colno += GSyyleng; return IN; }
-delta    { colno += GSyyleng; return DELTA; }
-tau      { colno += GSyyleng; return TAU; }
-sum      { colno += GSyyleng; return SUM; }
-restrict { colno += GSyyleng; return RESTRICT; }
-allow    { colno += GSyyleng; return ALLOW; }
-hide     { colno += GSyyleng; return HIDE; }
-rename   { colno += GSyyleng; return RENAME; }
-comm     { colno += GSyyleng; return COMM; }
+sort     { ColNr += gsyyleng; return SORT; }
+cons     { ColNr += gsyyleng; return CONS; }
+map      { ColNr += gsyyleng; return MAP; }
+var      { ColNr += gsyyleng; return VAR; }
+eqn      { ColNr += gsyyleng; return EQN; }
+act      { ColNr += gsyyleng; return ACT; }
+proc     { ColNr += gsyyleng; return PROC; }
+init     { ColNr += gsyyleng; return INIT; }
+Bool     { ColNr += gsyyleng; return BOOL; }
+Pos      { ColNr += gsyyleng; return POS; }
+Nat      { ColNr += gsyyleng; return NAT; }
+Int      { ColNr += gsyyleng; return INT; }
+List     { ColNr += gsyyleng; return LIST; }
+Set      { ColNr += gsyyleng; return SET; }
+Bag      { ColNr += gsyyleng; return BAG; }
+Struct   { ColNr += gsyyleng; return STRUCT; }
+true     { ColNr += gsyyleng; return TRUE; }
+false    { ColNr += gsyyleng; return FALSE; }
+whr      { ColNr += gsyyleng; return WHR; }
+end      { ColNr += gsyyleng; return END; }
+lambda   { ColNr += gsyyleng; return LAMBDA; }
+forall   { ColNr += gsyyleng; return FORALL; }
+exists   { ColNr += gsyyleng; return EXISTS; }
+div      { ColNr += gsyyleng; return DIV; }
+mod      { ColNr += gsyyleng; return MOD; }
+in       { ColNr += gsyyleng; return IN; }
+delta    { ColNr += gsyyleng; return DELTA; }
+tau      { ColNr += gsyyleng; return TAU; }
+sum      { ColNr += gsyyleng; return SUM; }
+restrict { ColNr += gsyyleng; return RESTRICT; }
+allow    { ColNr += gsyyleng; return ALLOW; }
+hide     { ColNr += gsyyleng; return HIDE; }
+rename   { ColNr += gsyyleng; return RENAME; }
+comm     { ColNr += gsyyleng; return COMM; }
 
-{id}     { colno += GSyyleng; return ID; /* identifier (not a keyword) */ }
+{Id}     { /* identifier (not a keyword) */
+           ColNr += gsyyleng;
+           gsyylval.appl = gsMakeId(gsyytext);
+	   return ID;
+	 }
 
-{number} { colno += GSyyleng; return NUMBER; /* number */ }
+{Number} { /* number */
+           ColNr += gsyyleng;
+	   gsyylval.appl = gsMakeNumber(gsyytext);
+           return NUMBER;
+	 }
 
-.        { colno += GSyyleng; GSyyerror("unknown character"); /* remaining characters */ }
+.        { ColNr += gsyyleng; gsyyerror("unknown character"); /* remaining characters */ }
 
 %%
 
-void GSyyerror(char *s) {
-  int oldcolno = colno - GSyyleng;
-  if (oldcolno < 0) {
-    oldcolno = 0;
+void gsyyerror(char *s) {
+  int oldColNr = ColNr - gsyyleng;
+  if (oldColNr < 0) {
+    oldColNr = 0;
   }
-  fprintf(stderr, "token '%s' at position %d, %d caused the following error: %s\n", GSyytext, lineno, oldcolno, s); 
+  fprintf(stderr, "token '%s' at position %d, %d caused the following error: %s\n", gsyytext, LineNr, oldColNr, s); 
 }
 
-int GSyywrap(void) {
+int gsyywrap(void) {
   return 1;
 }
 
-ATermAppl GSparse(FILE *formStream) {
-  ATermAppl result = NULL;
-  GStree = NULL;
-  ATprotect((ATerm*) &GStree);
-  lineno = 1;
-  colno = 1;
-  GSyyrestart(formStream);
-  if (GSyyparse() != 0) {
-    throwV(NULL);
+ATermAppl gsParse(FILE *FormStream) {
+  ATermAppl Result = NULL;
+  gsTree = NULL;
+  ATprotect((ATerm*) &gsTree);
+  LineNr = 1;
+  ColNr = 1;
+  gsyyrestart(FormStream);
+  if (gsyyparse() != 0) {
+    ThrowV(NULL);
   }
-  //GStree contains the parsed formula
-  result = GStree;
-  GStree = NULL;
+  //gsTree contains the parsed formula
+  Result = gsTree;
+  gsTree = NULL;
 finally:
-  ATunprotect((ATerm*) &GStree);
-  return result;
+  ATunprotect((ATerm*) &gsTree);
+  return Result;
 }

@@ -15,6 +15,7 @@ extern "C" {
 #endif
 
 #include "libgsparse.h"
+#include "gsfunc.h"
 
 //global declarations
 bool gsDebug = false;	                 /* print debug information, if true */
@@ -29,10 +30,10 @@ ATermAppl gsParseSpecification (FILE *SpecStream, int VbLevel)
   ATermAppl Result = NULL;
   //check preconditions
   if (VbLevel < 0 || VbLevel > 3) {
-    throwVM0(NULL, "error: illegal value for the level of verbosity\n");
+    ThrowVM0(NULL, "error: illegal value for the level of verbosity\n");
   }
   if (SpecStream == NULL) {
-    throwVM0(NULL, "error: formula stream may not be empty\n");
+    ThrowVM0(NULL, "error: formula stream may not be empty\n");
   }
   //set global debug flag
   gsDebug = (VbLevel == 3);
