@@ -1,4 +1,4 @@
-// Date: 06-01-2005
+// Date: 10-01-2005
 // This document describes the internal format of the GenSpect language. Here:
 // - <String> is an arbitrary non-empty string
 // - <NumberString> is a string of the format '"0"|("-"?[1-9][0-9]*)'
@@ -123,11 +123,11 @@
                 | Delta
                 | Tau 
                 | Sum(<DataVarId>+, <ProcExpr>) 
-                | Restrict(<MultActName>*, <ProcExpr>)
-                | Allow(<MultActName>*, <ProcExpr>)
-                | Hide(<MultActName>*, <ProcExpr>)
+                | Restrict(<String>*, <ProcExpr>)
+                | Hide(<String>*, <ProcExpr>)
                 | Rename(<RenameExpr>*, <ProcExpr>)
                 | Comm(<CommExpr>*, <ProcExpr>)
+                | Allow(<MultActName>*, <ProcExpr>)
                 | Sync(<ProcExpr>, <ProcExpr>)
                 | AtTime(<ProcExpr>, <DataExpr>)
                 | Seq(<ProcExpr>, <ProcExpr>)
