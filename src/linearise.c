@@ -1,6 +1,8 @@
 /*Id: main.c,v 1.2 2004/11/23 12:36:17 uid523 Exp $ */
 
 /* TODO:
+ * Laat de actie Terminate goed communiceren
+ * Verwerk vrije procesvariabelen op correcte wijze.
  * Apply sum elimination.
  * Apply rewriting.
  * Put renaming, hiding, encapsulation, and visibility
@@ -17,19 +19,18 @@
 #include "libgsparse.h"
 #include "gstypecheck.h"
 #include "gsdataimpl.h"
+#define STRINGLENGTH 256
 
-int to_toolbusfile=0;
-int to_stdout=0;
-int newtbf = 1;
-int regular=0;
-int regular2=0;
-int cluster=0;
-int nocluster=0;
-int binary=0;
-int oldstate=1;
-int statenames=0;
-
-int cid=0;
+static int to_toolbusfile=0;
+static int to_stdout=0;
+static int regular=0;
+static int regular2=0;
+static int cluster=0;
+static int nocluster=0;
+static int binary=0;
+static int oldstate=1;
+static int statenames=0;
+static int allowFreeDataVariablesInProcesses=1;
 
 FILE *outfile;
 FILE *toolbusfile;
@@ -79,6 +80,8 @@ P("           By default (i.e. without -newstate), the functions");
 P("           one, x2p1 and x2p0 will be used.");
 P("-statenames: mcrl will use meaningful names for the state variables,");
 P("           derived from the specification.");
+P("-nofreevars: the lineariser will not introduce free data variables in");
+P("           processes, but instead use arbitrary constants.");
 P("-help:     yields this message");
 P("-version:  get a version of the lineariser");
 P("");
@@ -113,6 +116,28 @@ static ATbool ExtensionAdded(char *filename, char *suffix) {
    
 /* PREAMBLE */
 
+typedef struct specificationbasictype {
+            ATermList sorts;     /* storage place for sorts */
+            ATermList funcs;     /* storage place for functions */
+            ATermList maps;      /* storage place for constructors */
+            ATermList eqns;      /* storage place for equations */
+            ATermList acts;      /* storage place for actions */
+            ATermList procdatavars; /* storage place for free variables occurring
+                                      in processes ranging over data */
+            ATermList procs;     /* storage place for processes,
+                                         uses alt, seq, par, lmer, cond,sum,
+                                         com, bound, at, name, delta,
+                                         tau, hide, rename, encap */
+            ATermList initdatavars; /* storage place for free variables in
+                                       init clause */
+            ATermAppl init;      /* storage place for initial process */
+} specificationbasictype;
+
+
+typedef struct string {
+  char s[STRINGLENGTH];
+  struct string *next; } string;
+
 static int canterminatebody(
               ATermAppl t,
               int *stable,
@@ -141,7 +166,7 @@ extern FILE *outfile;
 int time_operators_used=0;
 static ATermList seq_varnames=NULL;
 
-char scratch1[ERRORLENGTH];
+char scratch1[STRINGLENGTH];
 
 /* Below we provide the basic functions to store and retrieve
    information about the signature of a datatype */
@@ -288,7 +313,7 @@ static string *emptystringlist =NULL;
   
   c->next = emptystringlist;
   emptystringlist = c;
-  strncpy(&c->s[0],"",MAXLEN);
+  strncpy(&c->s[0],"",STRINGLENGTH);
 } */
 
 static string *new_string(char *s)
@@ -303,7 +328,7 @@ static string *new_string(char *s)
     emptystringlist = emptystringlist->next;
   }
   c->next=NULL;
-  strncpy(&c->s[0],s,MAXLEN);
+  strncpy(&c->s[0],s,STRINGLENGTH);
   return c;
 }
 
@@ -390,6 +415,7 @@ static int existsort(ATermAppl sortterm)
     if (objectdata[n].object==sort) return 1;
     return 0;
   }
+  assert(0);
   ATerror("Internal: Expected a sortterm (1) %t\n",sortterm);
   return 0;
 }
@@ -733,8 +759,10 @@ static specificationbasictype *read_input_file(char *filename)
   spec->maps=ATLgetArgument(ATAgetArgument(t,2),0);
   spec->eqns=ATLgetArgument(ATAgetArgument(t,3),0);
   spec->acts=ATLgetArgument(ATAgetArgument(t,4),0);
+  spec->procdatavars=ATempty;
   spec->procs=ATLgetArgument(ATAgetArgument(t,5),0);
-  spec->init=ATAgetArgument(ATAgetArgument(t,6),0);
+  spec->initdatavars=ATLgetArgument(ATAgetArgument(t,6),0);
+  spec->init=ATAgetArgument(ATAgetArgument(t,6),1);
 
   return spec;
 
@@ -791,11 +819,12 @@ static long insertProcDeclaration(
 static void storeprocs(ATermList procs)
 { 
   for( ; !ATisEmpty(procs) ; procs=ATgetNext(procs))
-  { ATermAppl p=ATAgetFirst(procs);
+  { 
+    ATermAppl p=ATAgetFirst(procs);
     insertProcDeclaration(
-            ATAgetArgument(p,0),
-            ATLgetArgument(p,1),
-            ATAgetArgument(p,2),
+            ATAgetArgument(p,1),
+            ATLgetArgument(p,2),
+            ATAgetArgument(p,3),
             unknown,0); 
   }
 } 
@@ -816,48 +845,37 @@ static ATermAppl storeinit(ATermAppl init)
 
 /********** basic symbols and local term constructors *****************/
 
-static AFun /* summand_symbol=0,  noTime_symbol=0, */
-       /* terminated_symbol=0, delta_symbol=0, */
-       initprocspec_symbol=0, /* multiAction_symbol=0, */
-       triple_symbol=0;
-/* static ATermAppl noTime=NULL; */
-/* static ATermList terminated=NULL; */
-/* static ATermList delta=NULL; */
+static AFun initprocspec_symbol=0, tuple_symbol=0;
 static ATermAppl terminationAction=NULL;
-static ATermAppl terminatedProc=NULL; 
+static ATermAppl terminatedProcId=NULL; 
 
 static void initialize_symbols(void)
 { 
-  triple_symbol=ATmakeAFun("triple",3,ATfalse);
-  ATprotectAFun(triple_symbol);
-  /* multiAction_symbol=ATmakeAFun("multiAction",1,ATfalse);
-  ATprotectAFun(multiAction_symbol); */
+  tuple_symbol=ATmakeAFun("tuple",2,ATfalse);
+  ATprotectAFun(tuple_symbol);
   initprocspec_symbol=ATmakeAFun("initprocspec",3,ATfalse);
   ATprotectAFun(initprocspec_symbol);
-  /* terminated_symbol=ATmakeAFun("terminated",0,ATfalse);
-  ATprotectAFun(terminated_symbol);
-  ATprotect((ATerm *)&terminated); */
   ATprotect((ATerm *)&terminationAction);
   terminationAction=gsMakeMultAct(
-           ATinsertA(ATempty,gsMakeActId(gsString2ATermAppl("Terminate"),ATempty)));
-  ATprotect((ATerm *)&terminatedProc);
-  terminatedProc=gsMakeProcVarId(gsString2ATermAppl("Terminated**"),ATempty);
+             ATinsertA(
+               ATempty,
+               gsMakeAction(gsMakeActId(fresh_name("Terminate"),ATempty),ATempty)));
+  ATprotect((ATerm *)&terminatedProcId);
+  terminatedProcId=gsMakeProcVarId(gsString2ATermAppl("Terminated**"),ATempty);
   insertProcDeclaration(
-           terminatedProc,
+           terminatedProcId,
            ATempty,
            gsMakeSeq(terminationAction,gsMakeDelta()),
            pCRL,0);
 }
 
-static ATermAppl linMakeTriple(
-                    ATermList left, 
-                    ATermList middle, 
-                    ATermAppl right)
-{ return ATmakeAppl3(
-             triple_symbol,
-             (ATerm)left,
-             (ATerm) middle, 
-             (ATerm)right);
+static ATermAppl linMakeTuple(
+                    ATermList first, 
+                    ATermAppl last)
+{ return ATmakeAppl2(
+             tuple_symbol,
+             (ATerm)first,
+             (ATerm)last);
 }
 
 static int actioncompare(ATermAppl a1, ATermAppl a2)
@@ -1051,7 +1069,10 @@ static processstatustype determine_process_statusterm(
   }
 
   if (gsIsSum(body)) 
-  { if (status==multiAction)
+  { /* insert the variable names of variables, to avoid
+       that this variable name will be reused later on */
+    insertvariables(ATLgetArgument(body,0),0);
+    if (status==multiAction)
     { ATerror("Sum operator occurs within a multi-action\n");
     }
     s1=determine_process_statusterm(ATAgetArgument(body,1),pCRL);
@@ -1086,8 +1107,8 @@ static processstatustype determine_process_statusterm(
 
   if (gsIsSync(body))
   { 
-    s1=determine_process_statusterm(ATAgetArgument(body,1),pCRL);
-    s2=determine_process_statusterm(ATAgetArgument(body,2),pCRL);
+    s1=determine_process_statusterm(ATAgetArgument(body,0),pCRL);
+    s2=determine_process_statusterm(ATAgetArgument(body,1),pCRL);
     if ((s1!=multiAction)||(s2!=multiAction))
     { ATerror("Other objects than multi-actions occur in the scope of a synch operator\n");
     }
@@ -1196,6 +1217,94 @@ static ATermList determine_process_status(
   return determine_process_status_rec(initprocess,status);
 }
 
+/***********  collect pcrlprocessen **********************************/
+
+static void collectPcrlProcesses_rec(ATermAppl procDecl, ATermIndexedSet visited);
+
+static void collectPcrlProcesses_term(ATermAppl body, ATermIndexedSet visited)
+
+{ 
+  if (gsIsCond(body))  
+  { 
+    collectPcrlProcesses_term(ATAgetArgument(body,1),visited);
+    collectPcrlProcesses_term(ATAgetArgument(body,2),visited);
+    return;
+  }
+
+  if ((gsIsChoice(body))||
+      (gsIsSeq(body))||
+      (gsIsMerge(body))||
+      (gsIsSync(body)))
+  { 
+    collectPcrlProcesses_term(ATAgetArgument(body,0),visited);
+    collectPcrlProcesses_term(ATAgetArgument(body,1),visited);
+    return ;
+  }
+
+  if (gsIsSum(body)) 
+  { 
+    collectPcrlProcesses_term(ATAgetArgument(body,1),visited);
+    return;
+  }
+
+  if (gsIsAtTime(body)) 
+  { 
+    collectPcrlProcesses_term(ATAgetArgument(body,0),visited);
+    return;
+  }
+
+  if (gsIsProcess(body))
+  { collectPcrlProcesses_rec(ATAgetArgument(body,0),visited);
+    return;
+  }
+
+  if ((gsIsHide(body))||
+      (gsIsRename(body))||
+      (gsIsAllow(body))||
+      (gsIsComm(body))||
+      (gsIsRestrict(body)))
+  { 
+    collectPcrlProcesses_term(ATAgetArgument(body,1),visited);
+    return;
+  }
+
+  if ((gsIsDelta(body))||
+      (gsIsTau(body))||
+      (gsIsMultAct(body))||
+      (gsIsAction(body)))
+  { return;
+  }
+
+  ATerror("Internal error: Process has unexpected format (1) %t\n",body);
+} 
+
+static ATermList localpcrlprocesses=NULL;
+
+static void collectPcrlProcesses_rec(
+                   ATermAppl procDecl,
+                   ATermIndexedSet visited)
+{ ATbool new=0;
+  ATindexedSetPut(visited,(ATerm)procDecl,&new);
+
+  if (new)
+  { int n=objectIndex(procDecl);
+    assert(n>=0); /* if this fails, the process does not exist */
+
+    if (objectdata[n].processstatus==pCRL)
+    { localpcrlprocesses=ATinsertA(localpcrlprocesses,procDecl); 
+    }
+    collectPcrlProcesses_term(objectdata[n].processbody,visited);
+  }
+}
+
+static ATermList collectPcrlProcesses(
+               ATermAppl initprocess)
+{ localpcrlprocesses=ATempty;
+  ATermIndexedSet visited=ATindexedSetCreate(128,50);
+  collectPcrlProcesses_rec(initprocess,visited);
+  ATindexedSetDestroy(visited);
+  return localpcrlprocesses;
+}
 
 /************ ssc ****************************************************/
 
@@ -1219,7 +1328,7 @@ static ATermAppl fresh_name(char *name)
   int i;
   str=new_string(name);
   for( i=0 ; (existsString(str->s)) ; i++)
-    { sprintf(str->s,"%s%d",name,i); }
+    { snprintf(str->s,STRINGLENGTH,"%s%d",name,i); }
   /* check that name does not already exist, otherwise,
      add some suffix and check again */
   return gsString2ATermAppl(str->s);
@@ -1398,9 +1507,10 @@ static ATermAppl substitute_data_rec(
                  ATermList vars,
                  ATermAppl t)
 { 
-  if (gsIsNil(t))
+  /* if (gsIsNil(t)), dont care terms do not exist anymore. Therefore,
+                      Nil is no valid term.
   { return t;
-  }
+  } */
 
   if (gsIsDataAppl(t))
   { 
@@ -1605,6 +1715,11 @@ static ATermAppl substitute_pCRLproc(
                 substitute_pCRLproc(terms,vars,ATAgetArgument(p,0)),
                 substitute_pCRLproc(terms,vars,ATAgetArgument(p,1)));
   }
+  if (gsIsSync(p))
+  { return gsMakeSync(
+                substitute_pCRLproc(terms,vars,ATAgetArgument(p,0)),
+                substitute_pCRLproc(terms,vars,ATAgetArgument(p,1)));
+  }
   if (gsIsCond(p))
   { return gsMakeCond(
                 substitute_data(terms,vars,ATAgetArgument(p,0)),
@@ -1645,7 +1760,7 @@ static ATermAppl substitute_pCRLproc(
 
   }
 
-  ATerror("Expect a pCRL process %t\n",p);
+  ATerror("Internal error: Expect a pCRL process %t\n",p);
   return NULL;
 }
 
@@ -1901,6 +2016,27 @@ static ATermAppl bodytovarheadGNF(
     return gsMakeProcess(objectdata[n].targetsort,getarguments(ma)); 
   }  
 
+  if (gsIsMultAct(body))
+  { ATbool isnew=0;
+    if ((s==multiaction)||(v==first))
+    { return body;
+    }
+
+    long n=addMultiAction(body,&isnew);
+   
+    if (objectdata[n].targetsort==NULL)
+    { /* this action does not yet have a corresponding process, which
+         must be constructed. The resulting process is stored in 
+         the variable targetsort in objectdata. */
+      objectdata[n].targetsort=newprocess(
+                                  objectdata[n].parameters,
+                                  objectdata[n].processbody,
+                                  GNF,1);
+    }
+    return gsMakeProcess(objectdata[n].targetsort,getarguments(body));
+  } 
+
+
   if (gsIsSync(body))
   { 
     ATbool isnew=0;
@@ -1954,7 +2090,9 @@ static ATermAppl bodytovarheadGNF(
   
   if (gsIsTau(body))
   { if (v==first) 
-       return gsMakeMultAct(ATempty); 
+    {  
+      return gsMakeMultAct(ATempty); 
+    }
     if (tau_process==NULL)
     { tau_process=newprocess(ATempty,gsMakeMultAct(ATempty),pCRL,1);
     }
@@ -2083,7 +2221,8 @@ static ATermAppl distribute_condition(
     ATermList sumvars=ATLgetArgument(body1,0);
     ATermList vars=ATempty;
     ATermList terms=ATempty;
-    alphaconvertprocess(&sumvars,&vars,&terms,condition);
+    alphaconvert(&sumvars,&vars,&terms,ATempty,
+                       ATinsertA(ATempty,condition));
     return gsMakeSum(
              sumvars,
              distribute_condition(ATAgetArgument(body1,1),condition));
@@ -2322,7 +2461,7 @@ static ATermAppl to_regular_form(
   if (gsIsCond(t))
   { assert(gsIsDelta(ATAgetArgument(t,2)));
     return gsMakeCond(
-              t,
+              ATAgetArgument(t,0),
               to_regular_form(ATAgetArgument(t,1),todo,freevars),
               gsMakeDelta());
 
@@ -2523,7 +2662,7 @@ static ATermAppl procstorealGNFbody(
   
   if (gsIsTau(body))
   { /* return body; */
-    ATerror("Only expect multiactions, no tau\n");
+    ATerror("Internal: Only expect multiactions, no tau\n");
   }
   
   if (gsIsMerge(body)) 
@@ -2592,7 +2731,8 @@ static void procstorealGNFrec(
 
   if ((objectdata[n].processstatus==GNFbusy)||
       (objectdata[n].processstatus==GNF)||
-      (objectdata[n].processstatus==mCRLdone))
+      (objectdata[n].processstatus==mCRLdone)||
+      (objectdata[n].processstatus==multiAction))
   { return;
   }
 
@@ -2600,7 +2740,7 @@ static void procstorealGNFrec(
   { ATerror("Unguarded recursion without pCRL operators\n");
   }
   
-  ATerror("Strange process type\n");  
+  ATerror("Internal: Strange process type %d\n",objectdata[n].processstatus);  
 }
 
 static void procstorealGNF(ATermAppl procsIdDecl, int regular)
@@ -2974,7 +3114,7 @@ stacklisttype *new_stack(
         stack->opns->sorts=ATinsertA(
                   stack->opns->sorts,
                   sort);
-        sprintf(scratch1,"get%s",ATSgetArgument(par,0));
+        snprintf(scratch1,STRINGLENGTH,"get%s",ATSgetArgument(par,0));
 
         getmap=gsMakeOpId(fresh_name(scratch1),
                    gsMakeSortArrow(stack->opns->stacksort,sort));
@@ -3128,7 +3268,7 @@ static ATermList processencoding(
                      stacklisttype *stack)
 {
   if (oldstate)
-  { sprintf(scratch1,"%d",i);
+  { snprintf(scratch1,STRINGLENGTH,"%d",i);
     return ATinsertA(t,gsMakeDataExprPos(scratch1));
     /* return ATmake("ins(<term>,<term>)",processencoding_rec(i),t); */
   }
@@ -3334,7 +3474,8 @@ static ATermAppl find(
   { result=(ATermAppl)ATelementAt(args,n);
   }
   else
-  { result=((regular)?gsMakeNil():dummyterm(ATAgetArgument(s,1),spec));
+  { result=dummyterm(ATAgetArgument(s,1),spec); 
+  /*result=((regular)?newProcDataVar(ATAgetArgument(s,1),spec):dummyterm(ATAgetArgument(s,1),spec));  */
   }
  
   if (regular)
@@ -3498,11 +3639,17 @@ static ATermAppl dummyterm(
      First, it tries to find a constant constructor. If it cannot
      be found, a constant mapping is sought. If this cannot be
      found a new dummy constant mapping of the requested sort is made. */
-  int i;
+
+  if (allowFreeDataVariablesInProcesses)
+  { ATermAppl newVariable=gsMakeDataVarId(fresh_name("freevar"),targetsort);
+    spec->procdatavars=ATinsertA(spec->procdatavars,newVariable);
+    insertvariable(newVariable,1);
+    return newVariable;
+  }
   
   /* First search for a constant constructor */
 
-  for (i=0 ; (i<maxobject) ; i++ )
+  for (int i=0 ; (i<maxobject) ; i++ )
   { if ((objectdata[i].object==func)&&
         (ATAgetArgument(objectdata[i].objectname,1)==targetsort))
     { return objectdata[i].objectname;
@@ -3511,7 +3658,7 @@ static ATermAppl dummyterm(
 
   /* Second search for a constant mapping */
 
-  for (i=0 ; (i<maxobject) ; i++ )
+  for (int i=0 ; (i<maxobject) ; i++ )
   { if ((objectdata[i].object==map)&&
         (ATAgetArgument(objectdata[i].objectname,1)==targetsort))
     { return objectdata[i].objectname;
@@ -3520,7 +3667,7 @@ static ATermAppl dummyterm(
 
   /* Third construct a new constant, and yield it. */
 
-  sprintf(scratch1,"dummy%s",gsATermAppl2String(ATAgetArgument(targetsort,0)));
+  snprintf(scratch1,STRINGLENGTH,"dummy%s",gsATermAppl2String(ATAgetArgument(targetsort,0)));
   ATermAppl dummymapping=gsMakeOpId(fresh_name(scratch1),targetsort);
   insertmapping(dummymapping,spec);
   return dummymapping;
@@ -3560,7 +3707,8 @@ static ATermList pushdummyrec(
      with stacks is made, then yield a default `unique' term. */
   return ATinsertA(
              pushdummyrec(totalpars,pars,stack,regular,spec),
-             ((regular)?gsMakeNil():dummyterm(ATAgetArgument(par,1),spec))); 
+             /* ((regular)?gsMakeNil():dummyterm(ATAgetArgument(par,1),spec))); */
+                                    dummyterm(ATAgetArgument(par,1),spec)); 
 }
 
 static ATermList pushdummy(
@@ -3603,6 +3751,14 @@ static ATermList make_initialstate(
 }
 
 /*************************  Routines for summands  **************************/
+
+static ATermList dummyparameterlist(stacklisttype *stack, ATbool singlestate)
+{ if (singlestate)
+  { return stack->parameterlist;
+  }
+
+  return ATinsertA(stack->parameterlist,stack->stackvar);
+}
 
 static int identicalActionIds_rec(ATermList ma1, ATermList ma2)
 {
@@ -3651,6 +3807,9 @@ static ATermList insert_summand(
      equal to NULL. */
 
   ATermList newsumlist=ATempty; 
+  if (gsIsDelta(multiAction) && gsIsNil(actTime))
+  { return sumlist;
+  }
 
   for(newsumlist=ATempty ;
         sumlist!=ATempty ; sumlist=ATgetNext(sumlist) )
@@ -3737,6 +3896,7 @@ static void add_summands(
   ATermAppl condition1=NULL,condition2=NULL;
   ATermAppl emptypops=NULL, notemptypops=NULL;
 
+
   /* remove the sum operators; collect the sum variables in the
      list sumvars */
   for( ; gsIsSum(summandterm) ; )
@@ -3746,27 +3906,34 @@ static void add_summands(
   
   /* translate the condition */       
   
-  if (gsIsCond(summandterm))
-  { condition1=ATAgetArgument(summandterm,0);
-    assert(gsIsDelta(ATAgetArgument(summandterm,2)));
-    summandterm=ATAgetArgument(summandterm,1);
-    if (!((regular)&&(singlestate)))
-    { condition1=gsMakeDataExprAnd(
-                     correctstatecond(procId,pCRLprocs,stack,regular,spec),
-                     ((regular)?condition1:      
-                                adapt_term_to_stack(condition1,
-                                                    stack,
-                                                    sumvars)));
-    }
+
+  if ((regular)&&(singlestate))
+  { condition1=gsMakeDataExprTrue();
   }
   else 
-  { if ((regular)&&(singlestate))
-    { condition1=gsMakeDataExprTrue();
-    }
-    else 
-    { condition1=correctstatecond(procId,pCRLprocs,stack,regular,spec);
-    }
+  { condition1=correctstatecond(procId,pCRLprocs,stack,regular,spec);
   }
+  
+  for( ; (gsIsCond(summandterm)) ; )
+  { 
+    ATermAppl localcondition=ATAgetArgument(summandterm,0);
+    if (!((regular)&&(singlestate)))
+    { condition1=gsMakeDataExprAnd(
+                     condition1,
+                     ((regular)?localcondition:      
+                                adapt_term_to_stack(
+                                       localcondition,
+                                       stack,
+                                       sumvars)));
+    }
+    else
+    { /* regular and singlestate */
+      condition1=gsMakeDataExprAnd(localcondition,condition1);
+    }
+    assert(gsIsDelta(ATAgetArgument(summandterm,2)));
+    summandterm=ATAgetArgument(summandterm,1);
+  }
+
 
   if (gsIsSeq(summandterm)) 
   { /* only one summand is needed */
@@ -3833,13 +4000,13 @@ static void add_summands(
   { multiAction=summandterm;
   } 
   else ATerror("Internal: Expected multiaction %t\n",summandterm);
-                 
+
   if (regular)
-  { ATerror("Internal: with the flag regular terminating processes should not exist\n");
-        sumlist=insert_summand(sumlist,
-                   sumvars,condition1,multiAction,atTime,NULL);
-     /* Ik weet nu niet of terminated hier hoort, moet dit geen terminated
-     process zijn? */
+  { if (!gsIsDelta(multiAction))
+    { ATerror("Internal: with the flag regular terminating processes should not exist\n");
+    }
+    sumlist=insert_summand(sumlist,
+                   sumvars,condition1,multiAction,atTime,dummyparameterlist(stack,singlestate));
     return;
   }
 
@@ -3867,7 +4034,7 @@ static void add_summands(
   if (canterminate==1)
   { condition2=gsMakeDataExprAnd(emptypops,condition1); 
     sumlist=insert_summand(sumlist,sumvars,condition2,
-                  multiAction,atTime,NULL);
+                  multiAction,atTime,NULL); 
   }
  
   return;
@@ -3952,14 +4119,14 @@ static enumeratedtype *create_enumeratedtype
                            gsMakeDataExprFalse()),gsMakeDataExprTrue());
     }
     else 
-    { sprintf(scratch1,"Enum%d",n);
+    { snprintf(scratch1,STRINGLENGTH,"Enum%d",n);
       w->sortId=makenewsort(fresh_name(scratch1),spec); 
       w->elementnames=ATempty;
       /* enumeratedtypes[i].elements=ATmake("ems"); */
       for(j=0 ; (j<n) ; j++)
       { /* Maak hier een naamlijst van sort elementen. */
         ATermAppl constructor=NULL;
-        sprintf(scratch1,"e%d-%d",j,n);
+        snprintf(scratch1,STRINGLENGTH,"e%d-%d",j,n);
         constructor=gsMakeOpId(fresh_name(scratch1),w->sortId);
         insertconstructor(constructor,spec);
         w->elementnames=ATinsertA(w->elementnames,constructor);
@@ -4001,8 +4168,12 @@ static ATermAppl find_case_function(enumeratedtype *e, ATermAppl sort)
   for(ATermList w=e->functions; w!=ATempty; w=ATgetNext(w))
   { 
     ATermAppl w1=ATAgetFirst(w);
-    if (objectdata[objectIndex(w1)].targetsort==sort)
-    return w1;
+    ATermAppl wsort=
+               ATAgetArgument(
+                 ATAgetArgument(ATAgetArgument(w1,1),1),0);
+    if (wsort==sort)
+    { return w1;
+    }
   };
 assert(0);
   ATerror("Internal: Searching for nonexisting case function on sort %t\n",sort);
@@ -4082,7 +4253,8 @@ static void create_case_function_on_enumeratedtype(
     }
 
     newsort=gsMakeSortArrow(e->sortId,newsort);
-    sprintf(scratch1,"C%d-%s",e->size,ATSgetArgument(sort,0));
+    snprintf(scratch1,STRINGLENGTH,"C%d-%s",e->size,
+         ((gsIsSortArrow(newsort))?"fun":ATSgetArgument(sort,0)));
     casefunction=gsMakeOpId(
                       fresh_name(scratch1),
                       newsort);
@@ -4797,7 +4969,7 @@ static ATermList  cluster_actions(
       The remaining summands are stored in w2. */
       
   ATermList result=ATempty;
-  
+
   for( ; (sums!=ATempty) ; )
   { ATermList w1=ATempty;
     ATermList w2=ATempty;
@@ -4936,6 +5108,7 @@ static ATermAppl generateLPEpCRL(ATermAppl procId, int canterminate,
   sums=collectsumlist(pCRLprocs,parameters,stack,
            (canterminate&&objectdata[n].canterminate),regular,
                singlecontrolstate,spec);
+
 
   if (regular)
   { if (!nocluster) 
@@ -5415,43 +5588,6 @@ static ATermList sortActionLabels(ATermList actionlabels)
   return result;
 }
 
-static ATermList insertConditionInTriples(
-                    ATermAppl condition,
-                    ATermList triples,
-                    ATermList result)
-{ 
-  for( ; triples!=ATempty ; triples=ATgetNext(triples))
-  { ATermAppl triple=ATAgetFirst(triples);
-    result=ATinsertA(result,
-                     linMakeTriple( 
-                        ATLgetArgument(triple,0),
-                        ATLgetArgument(triple,1),
-                        gsMakeDataExprAnd(
-                          condition,
-                          ATAgetArgument(triple,2))));
-  }
-  return result;
-}
-
-
-static ATermList insertMultiActionInTriples(
-                       ATermAppl multiaction,
-                       ATermList triples,
-                       ATermList result)
-{ 
-  for( ; triples!=ATempty ; triples=ATgetNext(triples))
-  { ATermAppl triple=ATAgetFirst(triples);
-    result=ATinsertA(result,
-              linMakeTriple(
-                 linInsertActionInMultiActionList(
-                       multiaction,
-                       ATLgetArgument(triple,0)),
-                 ATLgetArgument(triple,1),
-                 ATAgetArgument(triple,2)));
-  }
-  return result;
-}
-
 static ATermList getsorts(ATermList l)
 { if (l==ATempty) return ATempty;
 
@@ -5491,150 +5627,167 @@ static ATermAppl pairwiseMatch(ATermList l1, ATermList l2)
             result);
 }
 
-
-static ATermList makeMultiActionConditionList_rec(
-                   ATermList actionlabels,
-                   ATermAppl targetaction,
-                   ATermList multiaction,
-                   ATermList equalterms)
-{ /* This procedure tries to find a matching set
-     of actionlabels in the multiaction, and replaces
-     it with the targetaction. If no match can be
-     found, the result is ATempty. There are more
-     matches possible, for instance a|b->c in
-     a(x)|a(y)|b(z) should yield c(x)|a(y) under 
-     the condition that x=z and a(x)|c(y) under the
-     condition that x!=y and y=z. The pairs of actions
-     and conditions are returned in a list. equalterms are
-     the variables to which the arguments of communicating
-     action must be equal, and its value must be set if the 
-     result is not empty.  */
-
-  ATermList result=ATempty;
-
-  if (actionlabels==ATempty)
-  { /* a match has been found, insert the targetaction
-       in the multiaction, under condition true. */
-    assert(equalterms!=NULL);
-    if (gsIsNil(targetaction))
-    { return ATinsertA(ATempty,
-              linMakeTriple(
-                 multiaction,
-                 equalterms,
-                 gsMakeDataExprTrue()));
-    }
-    return ATinsertA(ATempty,
-              linMakeTriple(
-                 linInsertActionInMultiActionList(
-                    gsMakeAction(
-                       gsMakeActId(
-                          targetaction,
-                          getsorts(equalterms)),
-                       equalterms),
-                    multiaction),
-                 equalterms,
-                 gsMakeDataExprTrue()));
+static ATermList addActionCondition(
+                     ATermAppl firstaction,
+                     ATermAppl condition,
+                     ATermList L,
+                     ATermList S)
+{ for( ; L!=ATempty ; L=ATgetNext(L))
+  { ATermAppl firsttuple=ATAgetFirst(L);
+    S=ATinsertA(S,
+        linMakeTuple(
+          (firstaction?
+               ATinsertA(ATLgetArgument(firsttuple,0), firstaction):
+               ATLgetArgument(firsttuple,0)),
+          gsMakeDataExprAnd(ATAgetArgument(firsttuple,1),condition)));
   }
+  return S;
+}
 
-  if (multiaction==ATempty) /* and actionlabels!=ATempty */
-  { /* no match has been found, return the emptylist */
+static ATermAppl can_communicate(ATermList m,ATermList C)
+{ /* this function indicates whether the actions in m
+     consisting of actions and data occur in C, such that
+     a communication can take place. If not NULL is delivered,
+     otherwise the resulting action is the result. If the
+     resulting action is tau, or nil, the result is nil. */
+  
+//  ATfprintf(stderr,"CAN_COMMUNICATE\nm: %t\nC: %t\n",m,C);
+  for( ; C!=ATempty ; C=ATgetNext(C))
+  { ATermAppl commExpr=ATAgetFirst(C);
+    assert(gsIsCommExpr(commExpr));
+    ATermList lhs=ATLgetArgument(ATAgetArgument(commExpr,0),0);
+    int canCommunicate=1;
+    ATermList mwalker=m;
+    for( ; ((lhs!=ATempty) && (mwalker!=ATempty)) ; lhs=ATgetNext(lhs))
+    { // ATfprintf(stderr,"ASASSA %t\n%t\n\n",mwalker,lhs);
+      ATermAppl actionname=ATAgetArgument(ATAgetArgument(ATAgetFirst(mwalker),0),0);
+      ATermAppl commname=ATAgetFirst(lhs);
+      if (actionname!=commname)
+      { canCommunicate=0;
+        break;
+      }
+      mwalker=ATgetNext(mwalker);
+    }
+    if ((canCommunicate) && (mwalker==ATempty) && (lhs==ATempty))
+    { ATermAppl rhs=ATAgetArgument(commExpr,1);
+      // ATfprintf(stderr,"YEYSYESYESYES\n\n");
+      if (rhs==gsMakeTau())
+      { return gsMakeNil();
+      }
+      return rhs;
+    }
+  }
+  // ATfprintf(stderr,"NONONONONON\n\n");
+  return NULL;
+}
+  
+
+static ATermList makeMultiActionConditionList(
+                   ATermList multiaction,
+                   ATermList communications);
+
+static ATermList phi(ATermList m,
+                     ATermList d,
+                     ATermList w,
+                     ATermList n,
+                     ATermList C)
+{ /* phi is a function that yields a list of pairs
+     indicating how the actions in m|w|n can communicate.
+     The pairs contain the resulting multi action and
+     a condition on data indicating when communication
+     can take place. In the communication all actions of
+     m, none of w and a subset of n can take part in the
+     communication. d is the data parameter of the communication
+     and C contains a list of multiaction action pairs indicating
+     possible commmunications */
+
+  // ATfprintf(stderr,"PHI m: %t\nd: %t\nw: %t\nn: %t\nC: %t\n\n",m,d,w,n,C);
+
+  if (n==ATempty)
+  { ATermAppl c=can_communicate(m,C); /* returns NULL if no communication
+                                         is possible */
+    if (c!=NULL)
+    { ATermList T=makeMultiActionConditionList(w,C);
+      return addActionCondition(
+                   gsMakeAction(c,d),
+                   gsMakeDataExprTrue(),
+                   T,
+                   ATempty);
+    }
+    /* c==NULL, actions in m cannot communicate */
     return ATempty;
   }
+  /* if n=[a(f)] \oplus o */
+  ATermAppl firstaction=ATAgetFirst(n);
+  ATermList o=ATgetNext(n);
+  ATermList T=phi(ATappend(m,(ATerm)firstaction),d,w,o,C);
+  return addActionCondition(
+                NULL,
+                pairwiseMatch(d,ATLgetArgument(firstaction,1)),
+                T,
+                phi(m,d,ATappend(w,(ATerm)firstaction),o,C));
+}
 
-  ATermAppl firstaction=ATAgetFirst(actionlabels);
-  ATermAppl firstmultiaction=ATAgetFirst(multiaction);
-  if (firstaction==ATAgetArgument(ATAgetArgument(firstmultiaction,0),0))
-  { /* The labels of the first action and multiaction match.
-       First we handle the case where we assume that the first
-       action indeed matches with this first multiaction */
-    if (equalterms!=NULL)
-    { /* there are already actions in the multiaction that took part in
-         the communication */
-      ATermAppl condition=pairwiseMatch(
-                            equalterms,
-                            ATLgetArgument(firstmultiaction,1));
-      ATermList tempresult=makeMultiActionConditionList_rec(
-                                ATgetNext(actionlabels),
-                                targetaction,
-                                ATgetNext(multiaction),
-                                equalterms);
-                                
-      if (tempresult!=ATempty)
-      { result=insertConditionInTriples(condition,tempresult,result);
-      }
-    }
-    else 
-    { /* *equalvar==NULL */
-      equalterms=ATLgetArgument(firstmultiaction,1);
-      ATermList tempresult=makeMultiActionConditionList_rec(
-                                ATgetNext(actionlabels),
-                                targetaction,
-                                ATgetNext(multiaction),
-                                equalterms);
-                                
-      result=ATconcat(tempresult,result);
-    }
-
-    /* Here we handle the case where the action and the 
-     * multiaction can match, but we do not let them match */
-
-    ATermList tempresult=makeMultiActionConditionList_rec(
-                              actionlabels,
-                              targetaction,
-                              ATgetNext(multiaction),
-                              equalterms);
-    if (tempresult!=ATempty)
-    { /* There is a communication possible, with dataparameters
-         in equalterms */
-      ATermAppl inversecondition=pairwiseMatch(
-                            equalterms,
-                            ATLgetArgument(firstmultiaction,1));
-      result=insertConditionInTriples(
-                       gsMakeDataExprNot(inversecondition),
-                       tempresult,
-                       result);
-    }
+static ATermAppl makeNegatedConjunction(ATermList S)
+{ ATermAppl result=gsMakeDataExprTrue();
+  for( ; S!=ATempty ; S=ATgetNext(S) )
+  { result=gsMakeDataExprAnd(ATAgetArgument(ATAgetFirst(S),1),result);
   }
-  else 
-  { /* the first action in the actionlabels does not match with
-       the first multiaction */
-
-    ATermList tempresult=makeMultiActionConditionList_rec(
-                          actionlabels,
-                          targetaction,
-                          ATgetNext(multiaction),
-                          equalterms);
-    
-    result=insertMultiActionInTriples(
-                  ATAgetFirst(multiaction),tempresult,result);
-  }
-
-  return result;
+  return result; 
 }
 
 static ATermList makeMultiActionConditionList(
-                   ATermList actionlabels,
-                   ATermAppl targetaction,
-                   ATermAppl multiaction)
-{ 
-  assert(gsIsMultAct(multiaction));
-  ATermList result=makeMultiActionConditionList_rec(
-                   actionlabels,
-                   targetaction,
-                   ATLgetArgument(multiaction,0),
-                   NULL);
-  return result;
-}
+                   ATermList multiaction,
+                   ATermList communications)
+{ /* This is the function gamma(m,C) provided
+     by Muck van Weerdenburg in Calculation of 
+     Communication with open terms [1]. */
 
+  if (multiaction==ATempty)
+  { return ATinsertA(ATempty,linMakeTuple(ATempty,gsMakeDataExprTrue()));
+  }
+
+  ATermAppl firstaction=ATAgetFirst(multiaction);
+  ATermList remainingmultiaction=ATgetNext(multiaction); /* This is m in [1] */
+
+  ATermList S=phi(ATinsertA(ATempty,firstaction),
+                  ATLgetArgument(firstaction,1),
+                  ATempty,
+                  remainingmultiaction,
+                  communications);
+  ATermList T=makeMultiActionConditionList(
+                  remainingmultiaction,
+                  communications);
+  ATermAppl b=makeNegatedConjunction(S);
+  S=addActionCondition(firstaction,b,T,S);
+  return S;
+
+}
 
 static ATermAppl communicationcomposition(
                       ATermList communications,
                       ATermAppl ips)
-{ 
-  ATermList resultsumlist=ATempty;
-  ATermList sourcesumlist=linGetSums(ips);
+{ /* We follow the implementation of Muck van Weerdenburg, described in 
+     a note: Calculation of communication with open terms. */
 
-  for( ; sourcesumlist!=ATempty ; sourcesumlist=ATgetNext(sourcesumlist))
+  /* first we sort the multiactions in communications */
+
+  ATermList resultingCommunications=ATempty;
+  for( ; communications!=ATempty ; communications=ATgetNext(communications))
+  { ATermAppl commExpr=ATAgetFirst(communications);
+    ATermList source=ATLgetArgument(ATAgetArgument(commExpr,0),0);
+    ATermAppl target=ATAgetArgument(commExpr,1);
+    resultingCommunications=ATinsertA(resultingCommunications,
+               gsMakeCommExpr(gsMakeMultActName(sortActionLabels(source)),target));
+  }
+  communications=resultingCommunications;
+
+  
+  ATermList resultsumlist=linGetSums(ips);
+
+  for(ATermList sourcesumlist=resultsumlist ;
+                sourcesumlist!=ATempty ; 
+                sourcesumlist=ATgetNext(sourcesumlist))
   { ATermAppl summand=ATAgetFirst(sourcesumlist);
     ATermList sumvars=linGetSumVars(summand);
     ATermAppl multiaction=linGetMultiAction(summand);
@@ -5642,47 +5795,33 @@ static ATermAppl communicationcomposition(
     ATermAppl condition=linGetCondition(summand);
     ATermList nextstate=linGetNextState(summand);
 
-    ATbool communicationapplied=0;
-    for(ATermList commwalker=communications ; commwalker!=ATempty ; 
-                    commwalker=ATgetNext(commwalker))
-    { ATermAppl commExpr=ATAgetFirst(commwalker);
-      ATermList actionlabels=ATLgetArgument(ATAgetArgument(commExpr,0),0);
-      ATermAppl targetaction=ATAgetArgument(commExpr,1);
-      
-      actionlabels=sortActionLabels(actionlabels);
-
       /* the multiactionconditionlist is a list containing
-         triples, with a multiaction and the condition,
+         tuples, with a multiaction and the condition,
          expressing whether the multiaction can happen. All
          conditions exclude each other. Furthermore, the list
          is not empty. If no communications can take place,
          the original multiaction is delivered, with condition
          true. */
 
-      ATermList multiactionconditionlist=
+    ATermList multiactionconditionlist=
                      makeMultiActionConditionList(
-                              actionlabels,
-                              targetaction,
-                              multiaction);
+                              ATLgetArgument(multiaction,0),
+                              communications);
 
-      for( ; multiactionconditionlist!=ATempty ;
+    assert(multiactionconditionlist!=ATempty);
+    for( ; multiactionconditionlist!=ATempty ;
                multiactionconditionlist=ATgetNext(multiactionconditionlist) )
-      { ATermAppl multiactioncondition=ATAgetFirst(multiactionconditionlist);
-        communicationapplied=1;
-        resultsumlist=ATinsertA(
+    { ATermAppl multiactioncondition=ATAgetFirst(multiactionconditionlist);
+      resultsumlist=ATinsertA(
                     resultsumlist,
                     gsMakeLPESummand(
                            sumvars,
                            gsMakeDataExprAnd(
                              condition,
-                             ATAgetArgument(multiactioncondition,2)),
+                             ATAgetArgument(multiactioncondition,1)),
                            gsMakeMultAct(ATLgetArgument(multiactioncondition,0)),
                            actiontime,
                            nextstate));
-      }
-    }
-    if (!communicationapplied)
-    {  resultsumlist=ATinsertA(resultsumlist,summand);
     }
   }
   return linMakeInitProcSpec(
@@ -5850,6 +5989,7 @@ static ATermList combinesumlist(
                          sumvars2,
                          &sumvars2new,
                          &sums2renaming);
+
     resultsumlist=
       ATinsertA(
         resultsumlist,
@@ -6219,7 +6359,8 @@ static ATermAppl generateLPEmCRL(
 
   if ((objectdata[n].processstatus==GNF)||
       (objectdata[n].processstatus==pCRL)||
-      (objectdata[n].processstatus==GNFalpha))
+      (objectdata[n].processstatus==GNFalpha)||
+      (objectdata[n].processstatus==multiAction))
   { ATermAppl t3=generateLPEpCRL(procIdDecl,
         (canterminate&&objectdata[n].canterminate),spec,regular);
     t3=replaceArgumentsByAssignmentsIPS(t3); 
@@ -6257,7 +6398,6 @@ static void initialize_data(void)
   ATprotect((ATerm *)&sumlist);
   ATprotect((ATerm *)&localequationvariables);
   
-  initialize_symbols();
 }
 
 /**************** alphaconversion ********************************/
@@ -6387,7 +6527,8 @@ static void alphaconversion(ATermAppl procId, ATermList parameters)
 { 
   long n=objectIndex(procId);
 
-  if (objectdata[n].processstatus==GNF)
+  if ((objectdata[n].processstatus==GNF)||
+      (objectdata[n].processstatus==multiAction))
    { objectdata[n].processstatus=GNFalpha;
      objectdata[n].processbody=
        alphaconversionterm(objectdata[n].processbody,
@@ -6572,10 +6713,10 @@ static ATermAppl split_process(ATermAppl procId, ATermTable visited)
               fresh_name(gsATermAppl2String(ATAgetArgument(procId,0))),
               ATLgetArgument(procId,1));
   
-  ATtablePut(visited,(ATerm)procId,(ATerm)newProcId);  
 
   if (objectdata[n].processstatus==mCRL)
   { 
+    ATtablePut(visited,(ATerm)procId,(ATerm)newProcId);  
     insertProcDeclaration(
                 newProcId,
                 objectdata[n].parameters,
@@ -6587,13 +6728,16 @@ static ATermAppl split_process(ATermAppl procId, ATermTable visited)
   }
 
   if (objectdata[n].canterminate)
-  { insertProcDeclaration(
+  { ATtablePut(visited,(ATerm)procId,(ATerm)newProcId);
+    insertProcDeclaration(
                 newProcId,
                 objectdata[n].parameters,
-                gsMakeSeq(objectdata[n].processbody,terminatedProc),
+                gsMakeSeq(objectdata[n].processbody,
+                          gsMakeProcess(terminatedProcId,ATempty)),
                 pCRL,canterminatebody(objectdata[n].processbody,NULL,NULL,0)); 
     return newProcId;
   }
+  ATtablePut(visited,(ATerm)procId,(ATerm)procId);
   return procId;
 }
 
@@ -6658,8 +6802,12 @@ static ATermAppl split_body(
         gsIsTau(t)||
         gsIsAtTime(t)||
         gsIsSync(t))
-    { if (canterminatebody(t,NULL,NULL,0))
-      { ATermAppl p=newprocess(parameters,gsMakeSeq(t,terminatedProc),pCRL,0);
+    { 
+      if (canterminatebody(t,NULL,NULL,0))
+      { ATermAppl p=newprocess(parameters,
+                               gsMakeSeq(t,gsMakeProcess(terminatedProcId,ATempty)),
+                               pCRL,
+                               0);
         result=gsMakeProcess(p,objectdata[objectIndex(p)].parameters);
       }
       else
@@ -6687,6 +6835,26 @@ static ATermAppl splitmCRLandpCRLprocsAndAddTerminatedAction(ATermAppl procId)
 
 }
 
+/**************** AddTerminationActionIfNecessary ****************/
+
+static void AddTerminationActionIfNecessary(
+                 specificationbasictype *spec,
+                 ATermAppl ips)
+{ ATermList summands=ATLgetArgument(ips,2);
+
+  for ( ; summands!=ATempty ; summands=ATgetNext(summands))
+  { ATermAppl summand=ATAgetFirst(summands);
+    ATermAppl multiaction=ATAgetArgument(summand,2);
+    if (multiaction==terminationAction)
+    { spec->acts=ATinsertA(spec->acts,
+          ATAgetArgument(
+            ATAgetFirst(ATLgetArgument(terminationAction,0)),
+            0));
+      return;
+    }
+  }
+}
+
 /**************** transform **************************************/
 
 static ATermAppl transform(
@@ -6697,9 +6865,10 @@ static ATermAppl transform(
 
   /* Then select the BPA processes, and check that the others
      are proper parallel processes */
-  pcrlprocesslist=determine_process_status(init,mCRL);
+  determine_process_status(init,mCRL);
   determinewhetherprocessescanterminate(init);
-  splitmCRLandpCRLprocsAndAddTerminatedAction(init);
+  init=splitmCRLandpCRLprocsAndAddTerminatedAction(init);
+  pcrlprocesslist=collectPcrlProcesses(init);
 
   if (pcrlprocesslist==ATempty) 
   { ATerror("There are no pCRL processes to be linearized\n"); }
@@ -6719,6 +6888,8 @@ static ATermAppl transform(
            regular);
   if (cluster)
      t3=clusterfinalresult(t3,spec);
+
+  AddTerminationActionIfNecessary(spec,t3);
   return t3;
 }
 
@@ -6729,10 +6900,10 @@ static int main2(int argc, char *argv[],ATerm *stack_bottom)
   int i = 1;
   char *sname = NULL, *oname = NULL;
   specificationbasictype *spec;
-  char messagebuffer[1024]="Unitialized messagebuffer";
+  char messagebuffer[STRINGLENGTH]="Unitialized messagebuffer";
   ATermAppl initial_process=NULL;
   ATermAppl result=NULL;
-  char fname[1024], iname[1024];
+  char fname[STRINGLENGTH], iname[STRINGLENGTH];
   
   fname[0]='\0';
   to_toolbusfile=0;
@@ -6764,6 +6935,8 @@ static int main2(int argc, char *argv[],ATerm *stack_bottom)
       binary=1;
     } else if(strequal(argv[i], "-newstate")){
       oldstate=0;
+    } else if(strequal(argv[i], "-nofreevars")){
+      allowFreeDataVariablesInProcesses=0;
     } else if(strequal(argv[i], "-statenames")){
       statenames=1;
     } else if(strequal(argv[i], "-at-termtable")){
@@ -6809,13 +6982,16 @@ static int main2(int argc, char *argv[],ATerm *stack_bottom)
         ATerror ("Cannot open input file `%s'\n", iname);
   fclose(infile);
   if (to_toolbusfile)
-   { sprintf(messagebuffer,"%s.lpo",oname);
+   { snprintf(messagebuffer,STRINGLENGTH,"%s.lpo",oname);
      toolbusfile=fopen(messagebuffer,"w");
      if (toolbusfile==NULL)
         ATerror("Cannot open file for output\n"); }
     spec=read_input_file(iname); 
 
     initial_process=storedata(spec);
+    initialize_symbols(); /* This must be done after storing the data,
+                             to avoid a possible name conflict with action
+                             Terminate */
     if ((to_toolbusfile)||(to_stdout))
     { result=transform(initial_process,spec);
       ATwriteToTextFile(
@@ -6825,8 +7001,8 @@ static int main2(int argc, char *argv[],ATerm *stack_bottom)
                  gsMakeMapSpec(spec->maps),
                  gsMakeDataEqnSpec(spec->eqns),
                  gsMakeActSpec(spec->acts),
-                 gsMakeLPE(ATmakeList0(), ATLgetArgument(result,1),ATLgetArgument(result,2)),
-                 gsMakeLPEInit(ATmakeList0(), ATLgetArgument(result,0))),
+                 gsMakeLPE(spec->procdatavars, ATLgetArgument(result,1),ATLgetArgument(result,2)),
+                 gsMakeLPEInit(spec->procdatavars, ATLgetArgument(result,0))),
                  to_stdout?stdout:toolbusfile);
     }
   else ATfprintf(stderr,"The file %s contains a correctly typed mCRL2 specification\n",
