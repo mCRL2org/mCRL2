@@ -29,13 +29,13 @@ char *strdup(const char *s)
 ATermAppl gsMakeId(char *s)
 {
   return ATmakeAppl1(ATmakeAFun("Id", 1, ATfalse),
-    (ATerm) ATmakeAppl0(ATmakeAFun(s, 0, ATfalse)));
+    (ATerm) ATmakeAppl0(ATmakeAFun(s, 0, ATtrue)));
 }
 
 ATermAppl gsMakeNumber(char *s)
 {
   return ATmakeAppl1(ATmakeAFun("Number", 1, ATfalse),
-    (ATerm) ATmakeAppl0(ATmakeAFun(s, 0, ATfalse)));
+    (ATerm) ATmakeAppl0(ATmakeAFun(s, 0, ATtrue)));
 }
 
 ATermAppl gsMakeSpec(ATermAppl SortSpec, ATermAppl ConsSpec, ATermAppl MapSpec,
@@ -51,20 +51,15 @@ ATermAppl gsMakeSortSpec(ATermList SortDecls)
   return ATmakeAppl1(ATmakeAFun("SortSpec", 1, ATfalse), (ATerm) SortDecls);
 }
 
-ATermAppl gsMakeSortDeclStandard(ATermList Ids)
+ATermAppl gsMakeSortDeclStandard(ATermAppl Id)
 {
-  return ATmakeAppl1(ATmakeAFun("SortDeclStandard", 1, ATfalse), (ATerm) Ids);
+  return ATmakeAppl1(ATmakeAFun("SortDeclStandard", 1, ATfalse), (ATerm) Id);
 }
 
 ATermAppl gsMakeSortDeclRef(ATermAppl Id, ATermAppl SortExpr)
 {
   return ATmakeAppl2(ATmakeAFun("SortDeclRef", 2, ATfalse), (ATerm) Id,
     (ATerm) SortExpr);
-}
-
-ATermAppl gsMakeIds(ATermList Ids)
-{
-  return ATmakeAppl1(ATmakeAFun("Ids", 1, ATfalse), (ATerm) Ids);
 }
 
 ATermAppl gsMakeConsSpec(ATermList OpDecls)
@@ -75,12 +70,6 @@ ATermAppl gsMakeConsSpec(ATermList OpDecls)
 ATermAppl gsMakeMapSpec(ATermList OpDecls)
 {
   return ATmakeAppl1(ATmakeAFun("MapSpec", 1, ATfalse), (ATerm) OpDecls);
-}
-
-ATermAppl gsMakeIdsDecl(ATermList Ids, ATermAppl SortExpr)
-{
-  return ATmakeAppl2(ATmakeAFun("IdsDecl", 2, ATfalse), (ATerm) Ids,
-    (ATerm) SortExpr);
 }
 
 ATermAppl gsMakeIdDecl(ATermAppl Id, ATermAppl SortExpr)
@@ -111,9 +100,9 @@ ATermAppl gsMakeActSpec(ATermList ActDecls)
   return ATmakeAppl1(ATmakeAFun("ActSpec", 1, ATfalse), (ATerm) ActDecls);
 }
 
-ATermAppl gsMakeActDecl(ATermList Ids, ATermList SortExprs)
+ATermAppl gsMakeActDecl(ATermAppl Id, ATermList SortExprs)
 {
-  return ATmakeAppl2(ATmakeAFun("ActDecl", 2, ATfalse), (ATerm) Ids,
+  return ATmakeAppl2(ATmakeAFun("ActDecl", 2, ATfalse), (ATerm) Id,
     (ATerm) SortExprs);
 }
 
@@ -574,11 +563,6 @@ bool gsIsSortDeclRef(char *s)
   return strcmp(s, "SortDeclRef") == 0;
 }
 
-bool gsIsIds(char *s)
-{
-  return strcmp(s, "Ids") == 0;
-}
-
 bool gsIsConsSpec(char *s)
 {
   return strcmp(s, "ConsSpec") == 0;
@@ -587,11 +571,6 @@ bool gsIsConsSpec(char *s)
 bool gsIsMapSpec(char *s)
 {
   return strcmp(s, "MapSpec") == 0;
-}
-
-bool gsIsIdsDecl(char *s)
-{
-  return strcmp(s, "IdsDecl") == 0;
 }
 
 bool gsIsIdDecl(char *s)
