@@ -1080,9 +1080,9 @@ static ATermAppl gstcTraverseActProcVarConstP(ATermTable Vars, ATermAppl ProcTer
     ATermAppl NewProc=gstcTraverseActProcVarConstP(Vars,ATAgetArgument(ProcTerm,0));
     if(!NewProc) {throw;}
     ATermAppl Time=ATAgetArgument(ProcTerm,1);
-    ATermAppl NewTime=gstcTraverseVarConsTypeD(Vars,&Time,gsMakeSortIdNat());
-    if(!NewTime) {throw;}
-    return gsMakeAtTime(NewProc,NewTime);
+    ATermAppl NewType=gstcTraverseVarConsTypeD(Vars,&Time,gsMakeSortIdNat());
+    if(!NewType) {throw;}
+    return gsMakeAtTime(NewProc,Time);
   }
 
   if(gsIsCond(ProcTerm)){
