@@ -1,0 +1,649 @@
+\documentclass[a4paper,fleqn]{article}
+
+% title and author
+\title{System Identifiers for GenSpect}
+\author{Aad Mathijssen} 
+
+% packages
+\usepackage[english]{babel}
+\usepackage[final]{graphics}
+\usepackage{amsmath}
+\usepackage{amsfonts}
+\usepackage{array}
+\usepackage{calc}
+\usepackage{xspace}
+
+% General layout
+% --------------
+
+%add headings
+\pagestyle{headings}
+
+% increase pagewidth
+\addtolength{\textwidth}{20mm}
+\addtolength{\oddsidemargin}{-10mm}
+\addtolength{\evensidemargin}{10mm}
+
+% set the indentation of the math environment to 10mm
+\setlength{\mathindent}{10mm}
+
+% equations are unique up to their section
+\renewcommand{\theequation}{\arabic{equation}}
+
+% do not put subsubsections in the table of contents
+\addtocounter{tocdepth}{-1}
+
+% column types that change column types l,c,r from math mode to LR
+% and the other way round
+\newcolumntype{L}{>{$}l<{$}}%stopzone%stopzone%stopzone
+\newcolumntype{C}{>{$}c<{$}}%stopzone%stopzone%stopzone
+\newcolumntype{R}{>{$}r<{$}}%stopzone%stopzone%stopzone
+
+% Environments
+% ------------
+
+% equations: eqnarray environment with no outer column spacing and tighter
+% intercolumn spacing
+\newenvironment{equations}
+  {\setlength{\arraycolsep}{2pt}%
+   \begin{array}{@{}lll@{}}%
+  }
+  {\end{array}%
+  }
+
+% tightarray: array with no outcolumn spacing and tighter intercolumn spacing
+\newenvironment{tightarray}[1]
+  {\setlength{\arraycolsep}{2pt}%
+   \begin{array}{@{}#1@{}}%
+  }
+  {\end{array}%
+  }
+
+% definitions: list of definitions where:
+% - the optional argument denotes the space between successive items
+%   (default 0.15em)
+% - items are horizontally aligned at the math indent
+\newenvironment{definitions}[1][0.15em]
+  {\begin{list}%
+    {}%
+    {\setlength{\parsep}{0pt}%
+     \setlength{\itemsep}{#1}%
+     \setlength{\leftmargin}{\mathindent}%
+     \setlength{\labelwidth}{\mathindent - \labelsep}%
+    }
+  }
+  {\end{list}}
+
+% tdefinitions: list of tagged definitions where:
+% - the optional argument denotes the space between successive items
+%   (default 0.15em)
+% - items are horizontally aligned at the math indent
+% - each item is tagged with the mandatory argument
+\newenvironment{tdefinitions}[2][0.15em]
+  {\begin{list}%
+    {#2}%
+    {\setlength{\parsep}{0pt}%
+     \setlength{\itemsep}{#1}%
+     \setlength{\leftmargin}{\mathindent}%
+     \setlength{\labelwidth}{\mathindent - \labelsep}%
+    }
+  }
+  {\end{list}}
+
+% edefinitions: list of enumerated definitions where:
+% - the optional argument denotes the space between successive items
+%   (default 0.15em);
+% - items are horizontally aligned at the math indent;
+% - each item is numbered with a parenthesized roman numeral.
+\newcounter{edefinitioncount}
+\newenvironment{edefinitions}[1][0.15em]
+  {\begin{list}%
+    {(\roman{edefinitioncount})}%
+    {\renewcommand{\theenumi}{\roman{enumi}}%
+     \renewcommand{\labelenumi}{(\theenumi)}%
+     \usecounter{edefinitioncount}%
+     \setlength{\parsep}{0pt}%
+     \setlength{\itemsep}{#1}%
+     \setlength{\leftmargin}{\mathindent}%
+     \setlength{\labelwidth}{\mathindent - \labelsep}%
+    }
+  }
+  {\end{list}}
+  
+% entry: list of entries where:
+% - the optional argument denotes the space between successive items
+%   (default 0.15em);
+% - items are horizontally aligned at the math indent;
+% - each item is labelled.
+\newenvironment{entry}[2][0.15em]%
+  {\begin{list}{}%
+    {\renewcommand{\makelabel}[1]{\textsf{##1:}\hfil}%
+     \settowidth{\labelwidth}{\textsf{#2:}}%
+     \setlength{\leftmargin}{\labelwidth+\labelsep}%     
+     \setlength{\parsep}{0pt}%
+     \setlength{\itemsep}{#1}%
+    }%
+  }%
+  {\end{list}}
+
+% derivation: calculational derivation where expressions (\expr) are related by
+% means of transformations (\tran). A transformation is denoted by a symbol and
+% a hint. Expressions and transformations can be broken into several lines
+% using \breakexpr and \breaktran.
+\newenvironment{derivation}
+{\par\addtolength{\baselineskip}{1mm}\begin{tabbing}\hspace{5mm}\=\hspace{5mm}\=\hspace{5mm}\=\kill}
+{\end{tabbing}\par}
+\newcommand{\expr}[1]{\>\>$#1$}
+\newcommand{\tran}[2]{\\*\>$#1$\>\>\{ #2 \}\\}
+\newcommand{\breakexpr}{$\\*\>\>$}
+\newcommand{\breaktran}{\\*\>\>\>\hspace{8pt}}
+
+% Theorem-like environments that are numbered as s.n, where:
+% - s is the section number
+% - n is the number of occurrences of all theorem-like environments in s
+% We have the following environments:
+% - definition
+% - theorem
+% - lemma
+% - corollary
+% - property
+% - example
+% - remark
+% - convention
+% - specification
+% - declaration
+
+\newtheorem{thdefinition}{Definition}[section]
+\newenvironment{definition}
+  {\begin{thdefinition}\em}
+  {\end{thdefinition}}
+
+\newtheorem{ththeorem}[thdefinition]{Theorem}
+\newenvironment{theorem}
+  {\begin{ththeorem}\em}
+  {\end{ththeorem}}
+
+\newtheorem{thcorollary}[thdefinition]{Corollary}
+\newenvironment{corollary}
+  {\begin{thcorollary}\em}
+  {\end{thcorollary}}
+
+\newtheorem{thlemma}[thdefinition]{Lemma}
+\newenvironment{lemma}
+  {\begin{thlemma}\em}
+  {\end{thlemma}}
+
+\newtheorem{thproperty}[thdefinition]{Property}
+\newenvironment{property}
+  {\begin{thproperty}\em}
+  {\end{thproperty}}
+
+\newtheorem{thexample}[thdefinition]{Example}
+\newenvironment{example}
+  {\begin{thexample}\em}
+  {\end{thexample}}
+
+\newtheorem{thremark}[thdefinition]{Remark}
+\newenvironment{remark}
+  {\begin{thremark}\em}
+  {\end{thremark}}
+
+\newtheorem{thconvention}[thdefinition]{Convention}
+\newenvironment{convention}
+  {\begin{thconvention}\em}
+  {\end{thconvention}}
+
+\newtheorem{thspecification}[thdefinition]{Specification}
+\newenvironment{specification}
+  {\begin{thspecification}\em}
+  {\end{thspecification}}
+
+\newtheorem{thdeclaration}[thdefinition]{Declaration}
+\newenvironment{declaration}
+  {\begin{thdeclaration}\em}
+  {\end{thdeclaration}}
+
+% proof: proof of a theorem
+\newenvironment{proof}
+  {\textbf{Proof}}
+  {\frm{\Box}
+   \vspace{1ex}%
+  }
+
+
+% Commands
+% --------
+% --------
+
+
+% math mode
+% ---------
+
+% improvement to $ ... $ such that mathematical formulas cannot be cramped
+\newcommand{\frm}[1]{\mbox{\ensuremath{#1}}}
+
+% frm with extra spacing
+\newcommand{\for}[1]{\frm{\,#1\,}}
+
+
+% functions and constants
+% -----------------------
+
+% constant
+\newcommand{\f}[1]{\ensuremath{\mathit{#1}}}
+
+% function application with 1 argument: f(arg0)
+\newcommand{\fa}[2]{\ensuremath{\f{#1}(#2)}}
+
+% function application with 2 arguments: f(arg0, arg1)
+\newcommand{\faa}[3]{\ensuremath{\f{#1}(#2, #3)}}
+
+% function application with 3 arguments: f(arg0, arg1, arg2)
+\newcommand{\faaa}[4]{\ensuremath{\f{#1}(#2, #3, #4)}}
+
+% function application with 4 arguments: f(arg0, arg1, arg2, arg3)
+\newcommand{\faaaa}[5]{\ensuremath{\f{#1}(#2, #3, #4, #5)}}
+
+
+% functions and types
+% -------------------
+
+% to: ->
+\newcommand{\To}{\ensuremath{\rightarrow}}
+
+% function application symbol: .
+\newcommand{\fap}{\ensuremath{\!\cdot\!}}
+
+% composition: 0
+\newcommand{\comp}{\ensuremath{\circ}}
+
+% function composition: o
+\newcommand{\fcomp}{\ensuremath{%
+  \hspace{0.08em}\mbox{\small\ensuremath{\circ}}\hspace{0.08em}}}
+  
+% function mapping
+\newcommand{\fmap}{
+  \hspace{0.08em}\raisebox{0.2ex}{%
+  \tiny\ensuremath{\bullet}}\hspace{0.08em}}
+
+
+% lambda calculus
+% ---------------
+
+% abstraction in the typed lambda calculus
+\newcommand{\labst}[3]{\ensuremath{\lambda #1\!:\!#2.#3}}
+
+% application in the typed lambda calculus
+\newcommand{\lappl}[2]{\ensuremath{#1\ #2}}
+
+% abstraction in the pure (untyped) lambda calculus
+\newcommand{\pabst}[2]{\ensuremath{\lambda #1.#2}}
+
+% application in the pure (untyped) lambda calculus
+\newcommand{\pappl}[2]{\ensuremath{#1\ #2}}
+
+% sets
+% ----
+
+% set of elements: {e}
+\newcommand{\set}[1]{\ensuremath{\{\,#1\,\}}}
+
+% bag of elements: {e}
+\newcommand{\bag}[1]{\ensuremath{\set{#1}}}
+
+% set difference: s \ t
+\newcommand{\sdiff}[2]{\ensuremath{#1\ \backslash\ #2}}
+
+% set comprehension: { e | c }, where e is an expression or a binding and c is
+% a condition
+\newcommand{\scompr}[2]{\ensuremath{\set{#1\ |\ #2}}}
+
+% powerset: P(s)
+\newcommand{\pow}[1]{\ensuremath{\fa{\mathcal{P}}{#1}}}
+
+
+% tuples
+% ------
+
+% tuple of elements: <e>
+\newcommand{\tpl}[1]{\ensuremath{\langle\,#1\,\rangle}}
+
+% pair of elements: <e0,e1>
+\newcommand{\pair}[2]{\ensuremath{\tpl{#1\hspace{0.08em},#2}}}
+
+
+% lists
+% -----
+
+% list of a certain type: L(t)
+\newcommand{\List}[1]{\ensuremath{\mathcal{L}{\I{#1}}}}
+
+% list of elements: [e]
+\newcommand{\lst}[1]{\ensuremath{[\,#1\,]}}
+
+% empty list
+\newcommand{\el}{\ensuremath{[\,]}}
+
+% cons: |>
+\newcommand{\cons}{\ensuremath{\hspace{0.12em}\triangleright\hspace{0.08em}}}
+  
+% snoc: <|
+\newcommand{\snoc}{\ensuremath{\hspace{0.08em}\triangleleft\hspace{0.12em}}}
+
+% concatenation: ++
+\newcommand{\concat}{\frm{+\!+}}
+
+% take
+\newcommand{\take}{\ensuremath{\lceil}}
+
+% drop
+\newcommand{\drop}{\ensuremath{\lfloor}}
+
+
+% logic
+% -----
+
+% boolean type: B
+\newcommand{\bool}{\ensuremath{\mathbb{B}}}
+
+% true
+\newcommand{\true}{\ensuremath{\f{true}}}
+
+% false
+\newcommand{\false}{\ensuremath{\f{false}}}
+
+% implies: =>
+\newcommand{\limp}{\ensuremath{\Rightarrow}}
+
+% follows: =>
+\newcommand{\lfol}{\ensuremath{\Leftarrow}}
+
+% bi-implies: <=>
+\newcommand{\lbimp}{\ensuremath{\Leftrightarrow}}
+
+% not with extra spacing
+\newcommand{\Lnot}{\ensuremath{\ \lnot\ }}
+
+% and with extra spacing
+\newcommand{\Land}{\ensuremath{\ \land\ }}
+
+% or with extra spacing
+\newcommand{\Lor}{\ensuremath{\ \lor\ }}
+
+% implies with extra spacing
+\newcommand{\Limp}{\ensuremath{\ \limp\ }}
+
+% bi-implies with extra spacing
+\newcommand{\Lbimp}{\ensuremath{\ \lbimp\ }}
+
+% quantification in Dijkstra notation: <Q x : y : z>
+\newcommand{\quantD}[4]{\ensuremath{\langle\,{#1} {#2} : #3 : {#4}\,\rangle}}
+
+% universal quantification in Dijkstra notation: <forall x : y : z>
+\newcommand{\forallD}[3]{\ensuremath{\quantD{\forall}{#1}{#2}{#3}}}
+
+% existential quantification in Dijkstra notation: <exists x : y : z>
+\newcommand{\existsD}[3]{\ensuremath{\quantD{\exists}{#1}{#2}{#3}}}
+
+% derivable in #1: |-_#1
+\newcommand{\derivable}[1]{\ensuremath{\vdash_{_{#1}}}}
+
+% valid in #1: |=_#1
+\newcommand{\valid}[1]{\ensuremath{\models_{_{#1}}}}
+
+%inference rule with 0 premises and 1 conclusion
+\newcommand{\infC}[1]{\ensuremath{
+  \begin{array}{c} 
+    \\\hline 
+    #1 
+  \end{array}
+}}
+
+%inference rule with 1 premise and 1 conclusion
+\newcommand{\infPC}[2]{\ensuremath{
+  \begin{array}{c} 
+    #1 \\\hline 
+    #2 
+  \end{array}
+}}
+
+% inference rule with 2 premises and 1 conclusion
+\newcommand{\infPPC}[3]{\ensuremath{
+  \begin{array}{c@{\hspace{2em}}c}
+    #1 & #2 \\\hline
+    \multicolumn{2}{c}{#3}
+  \end{array}
+}}
+
+%inference rule with 3 premises and 1 conclusion
+\newcommand{\infPPPC}[4]{\ensuremath{
+  \begin{array}{c@{\hspace{2em}}c@{\hspace{2em}}c}
+    #1 & #2 & #3\\\hline
+    \multicolumn{3}{c}{#4}
+  \end{array}
+}}
+
+% arithmetic
+% ----------
+
+% natural type: N
+\newcommand{\nat}{\ensuremath{\mathbb{N}}}
+
+% positive type: N+
+\newcommand{\pos}{\ensuremath{\mathbb{N}^{+}}}
+
+% integral type: Z
+\newcommand{\tint}{\ensuremath{\mathbb{Z}}}
+
+% integer division: "div"
+\renewcommand{\div}{\ensuremath{\ \mathbf{div}\ }}
+
+% integer remainder: "mod"
+\renewcommand{\mod}{\ensuremath{\ \mathbf{mod}\ }}
+
+
+% miscellaneous
+% -------------
+
+% language of a signature Sigma: L(Sigma)
+\newcommand{\lang}[1]{\ensuremath{\fa{\mathcal{L}}{\f{#1}}}}
+
+% meaning of a syntactic element
+\newcommand{\mean}[1]{%
+  [\hspace{-.15em}[\hspace{.15em}#1\hspace{.15em}]\hspace{-.15em}]%
+}
+
+% alternative choice
+\newcommand{\alt}{\ensuremath{[\hspace{-0.04em}]}}
+
+% bullet
+\newcommand{\bul}{\mbox{\small\ensuremath{\bullet}}}
+
+% complexity according to expression: O(e)
+\newcommand{\bigo}[1]{\ensuremath{\mathcal{O}(#1)}}
+
+% print #2 inside #3, where #2 is raised by #1
+\newlength{\insidewd}%                        Define length command
+\newcommand{\inside}[3][0pt]{%		      Definition of inside:
+   \settowidth{\insidewd}{#3}%                - Save width of #3
+   \raisebox{#1}[0pt]{%                       - Raise #2 by #1
+     \makebox[0pt]{\hspace{\insidewd}#2}}%    - Print #2 centered
+   #3}%				              - Print #3
+
+% stack #2 on #3, where #2 is raised by #1
+\newlength{\stackht}%                         Define length commands
+\newcommand{\stack}[3][0pt]{%		      Definition of stack:
+   \settoheight{\stackht}{#3}%                - Save height of #3
+   \addtolength{\stackht}{#1}%                - Add to #1 to heigth
+   \inside[\stackht]{#2}{#3}}%                - Print #2 in #3 at height #3 + #1
+
+% abbreviations
+% -------------
+
+% mCRL
+\newcommand{\mCRL}{\frm{\mu}CRL\xspace}
+
+% Miscellaneous local definitions
+% -------------------------------
+
+% temporary lengths
+\newlength{\tlength}
+
+% GenSpect keywords
+\newcommand{\kwsort}{{\bf sort}}
+\newcommand{\kwcons}{{\bf cons}}
+\newcommand{\kwmap}{{\bf map}}
+\newcommand{\kwvar}{{\bf var}}
+\newcommand{\kweqn}{{\bf eqn}}
+\newcommand{\kwact}{{\bf act}}
+\newcommand{\kwstruct}{{\bf struct}}
+\newcommand{\kwwhr}{{\bf whr}}
+\newcommand{\kwend}{{\bf end}}
+
+
+% mCRL Sorts
+\newcommand{\srtbool}{\f{Bool}}
+\newcommand{\srtpos}{\f{Pos}}
+\newcommand{\srtnat}{\f{Nat}}
+\newcommand{\srtint}{\f{Int}}
+
+% mCRL Operations
+\newcommand{\opzeronat}{{0n}}
+\newcommand{\oponenat}{{1}}
+\newcommand{\optwonat}{{2}}
+\newcommand{\opzeroint}{{0i}}
+\newcommand{\opposint}{\ensuremath{\f{pos}}}
+\newcommand{\opnegint}{\ensuremath{\f{neg}}}
+\newcommand{\opnot}{\ensuremath{\f{not}}}
+\newcommand{\opand}{\ensuremath{\f{and}}}
+\newcommand{\opor}{\ensuremath{\f{or}}}
+\newcommand{\opforall}{\ensuremath{\f{forall}}}
+\newcommand{\opexists}{\ensuremath{\f{exists}}}
+\newcommand{\opsucc}{\ensuremath{\f{succ}}}
+\newcommand{\oppred}{\ensuremath{\f{pred}}}
+\newcommand{\opadd}{\ensuremath{\f{add}}}
+\newcommand{\opminus}{\ensuremath{\f{minus}}}
+\newcommand{\opmonus}{\ensuremath{\f{monus}}}
+\newcommand{\optimes}{\ensuremath{\f{times}}}
+\newcommand{\opdiv}{\ensuremath{\f{div}}}
+\newcommand{\opmod}{\ensuremath{\f{mod}}}
+\newcommand{\oppower}{\ensuremath{\f{power}}}
+\newcommand{\opdouble}{\ensuremath{\f{double}}}
+\newcommand{\opif}{\ensuremath{\f{if}}}
+\newcommand{\opeq}{\ensuremath{\f{eq}}}
+\newcommand{\opneq}{\ensuremath{\f{neq}}}
+\newcommand{\opgrt}{\ensuremath{\f{grt}}}
+\newcommand{\opsmt}{\ensuremath{\f{smt}}}
+\newcommand{\opgreq}{\ensuremath{\f{greq}}}
+\newcommand{\opsmeq}{\ensuremath{\f{smeq}}}
+\newcommand{\opint}{\ensuremath{\f{int}}}
+\newcommand{\opnat}{\ensuremath{\f{nat}}}
+\newcommand{\oplambda}[1]{\ensuremath{\f{lambda\_#1}}}
+\newcommand{\opappl}[1]{\ensuremath{\f{appl\_#1}}}
+\newcommand{\opsubst}[2]{\ensuremath{\f{subst\_#1\_#2}}}
+\newcommand{\opindex}[1]{\ensuremath{\f{index\_#1}}}
+\newcommand{\opproj}[2]{\ensuremath{\f{proj_{#1}^{#2}}}}
+\newcommand{\opheadsymbol}{\ensuremath{\f{opheadsymbol}}}
+
+\newcommand{\Time}{{\bf Time}}
+\newcommand{\Bool}{{\bf Bool}}
+\newcommand{\sft}{{\sf t}}
+\newcommand{\sff}{{\sf f}}
+\newcommand{\nul}{{\bf 0}}
+\font \aap cmmi10        
+\newcommand{\at}[1]{\mbox{\aap ,} #1}
+\newcommand{\before}{\mbox{\footnotesize{\frm{\ll}}}}
+\newcommand{\ap}{{:}}
+\newcommand{\qed}{\hfill\ensuremath{\quad\Box}}
+\newcommand{\leftmerge}{\underline {\parallel}}
+
+\newenvironment{genspect}%
+{\par\bigskip\noindent%
+ \begin{tabular}{@{}>{\bf}p{2.3em}L@{\ }L@{\ }L@{\ }L@{\ }L@{\ }L@{\ }L@{\ }L}%
+}%
+{\end{tabular}\bigskip\par%
+}
+
+\begin{document}
+
+\maketitle
+
+\noindent
+System identifiers are identifiers that are generated by the system, in both
+declarations and expressions. System identifiers are different from user
+identifiers in that they have a special use. This document describes all system
+identifiers and their use.
+
+In the following sections, we treat system identifiers for sorts, operations,
+variables, actions and processes, respectively. In each section, a table is
+provided which lists the name, description and external representation of each
+identifier.  Because system identifiers can be generated from other system or
+user identifiers, we frequently use variables to represent these identifiers.
+In the external representation columns, occurring variables denote the external
+representations of the substitutable terms.
+
+\section{Sorts}
+
+For sorts, we have the following system identifiers:
+
+\begin{table}[!htb]
+\centering
+\begin{tabular}{l|R|l|L}
+Name & \text{Arity} & Description & \text{External repr.}\\
+\hline
+Bool   & 0      & booleans         & \srtbool\\
+Pos    & 0      & positive numbers & \srtnat\\
+Nat    & 0      & natural numbers  & \srtnat\\
+Int    & 0      & integers         & \srtnat\\
+List   & 1      & lists            & \fa{List}{\_}\\
+Set    & 1      & sets             & \fa{Set}{\_}\\
+Bag    & 1      & bags             & \fa{Bag}{\_}\\
+Struct & 1      & structured sort  & \_ = \textbf{struct} \ldots\\
+Arrow  & \geq 2 & function sort    & \_ \times \cdots \times \_ \To \_\\
+\end{tabular}
+\caption{System identifiers for sorts}
+\label{tab:sid:sorts}
+\end{table}
+
+\section{Operations}
+
+For operations, we have the following system identifiers, where \frm{S} is an
+arbitrary sort expression:
+
+\begin{table}[!htb]
+\centering
+\begin{tabular}{l|R|l|L}
+Name & \text{Arity} & Description & \text{External repr.}\\
+\hline
+True      & 0      & true                       & \true\\
+False     & 0      & false                      & \false\\
+Not       & 1      & logical negation           & \lnot \_\\
+And       & 2      & conjunction                & \_ \land \_\\
+Or        & 2      & disjunction                & \_ \lor \_\\
+Imp       & 2      & implication                & \_ \limp \_\\
+Forall\_S & 1      & universal quantification over terms of sort \frm{S}
+& \forall x:S.\_\\
+Exists\_S & 1      & existential quantification over terms of sort \frm{S}
+& \exists x:S.\_\\
+Eq        & 2      & equality                   & \_ == \_\\
+Neq       & 2      & inequality                 & \_ != \_\\
+If\_S     & 3      & conditional over terms of sort \frm{S}
+& \faaa{if}{\_}{\_}{\_}\\
+\end{tabular}
+\caption{System identifiers for operations}
+\label{tab:sid:operations}
+\end{table}
+
+\section{Variables}
+
+For variables, we do not need system identifiers yet.
+
+\section{Actions}
+
+For sorts, we do not need system identifiers yet.
+
+\section{Processes}
+
+For processes, we do not need system identifiers yet.
+
+\end{document}
