@@ -48,18 +48,19 @@ ATermAppl gsMakeDataVarId(ATermAppl Name, ATermAppl SortExpr);
 ATermAppl gsMakeNil();
 ATermAppl gsMakeActId(ATermAppl Name, ATermList SortExprs);
 ATermAppl gsMakeProcEqnSpec(ATermList ProcEqns);
-ATermAppl gsMakeLPE(ATermList DataVarIds, ATermList LPESummands);
-ATermAppl gsMakeProcEqn(ATermAppl ProcVarId, ATermList DataVarIds,
-  ATermAppl ProcExp);
+ATermAppl gsMakeLPE(ATermList GlobDataVarIds, ATermList ProcDataVarIds,
+  ATermList LPESummands);
+ATermAppl gsMakeProcEqn(ATermList GlobDataVarIds, ATermAppl ProcVarId,
+  ATermList ProcDataVarIds, ATermAppl ProcExp);
 ATermAppl gsMakeProcVarId(ATermAppl Name,ATermList SortExprs);
 ATermAppl gsMakeLPESummand(ATermList DataVarIds, ATermAppl BoolExpr,
   ATermAppl MultActOrDelta, ATermAppl TimeExprOrNil, ATermList Assignments);
 ATermAppl gsMakeMultAct(ATermList Actions);
 ATermAppl gsMakeDelta();
 ATermAppl gsMakeAction(ATermAppl ActId, ATermList DataExprs);
-ATermAppl gsMakeAssignment(ATermAppl DataVarId, ATermAppl DataExprOrNil);
-ATermAppl gsMakeInit(ATermAppl ProcExpr);
-ATermAppl gsMakeLPEInit(ATermList DataExprs);
+ATermAppl gsMakeAssignment(ATermAppl DataVarId, ATermAppl DataExpr);
+ATermAppl gsMakeInit(ATermList GlobDataVarIds, ATermAppl ProcExpr);
+ATermAppl gsMakeLPEInit(ATermList GlobDataVarIds, ATermList DataExprs);
 ATermAppl gsMakeSortList(ATermAppl SortExpr);
 ATermAppl gsMakeSortSet(ATermAppl SortExpr);
 ATermAppl gsMakeSortBag(ATermAppl SortExpr);

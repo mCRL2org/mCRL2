@@ -200,7 +200,7 @@ ATermAppl gsTypeCheck (ATermAppl input){
   body.equations=ATLgetArgument(ATAgetArgument(input,3),0);
   if(!gstcReadInActs(ATLgetArgument(ATAgetArgument(input,4),0))) {throw;}
   if(!gstcReadInProcsAndInit(ATLgetArgument(ATAgetArgument(input,5),0),
-			     ATAgetArgument(ATAgetArgument(input,6),0))) {throw;}
+			     ATAgetArgument(ATAgetArgument(input,6),1))) {throw;}
   gsDebugMsg ("type checking read-in phase finished\n");
   
   gsDebugMsg ("type checking transform ActProc+VarConst phase started\n");
@@ -213,7 +213,8 @@ ATermAppl gsTypeCheck (ATermAppl input){
 
   Result=ATsetArgument(input,(ATerm)gsMakeDataEqnSpec(body.equations),3);
   Result=ATsetArgument(Result,(ATerm)gsMakeProcEqnSpec(gstcWriteProcs()),5);
-  Result=ATsetArgument(Result,(ATerm)gsMakeInit(ATAtableGet(body.proc_bodies,(ATerm)INIT_KEY())),6);
+  Result=ATsetArgument(Result,(ATerm)gsMakeInit(ATmakeList0(),
+    ATAtableGet(body.proc_bodies,(ATerm)INIT_KEY())),6);
 
   gsVerboseMsg ("type checking phase finished\n");
  finally:
@@ -543,13 +544,13 @@ static ATbool gstcReadInProcsAndInit (ATermList Procs, ATermAppl Init){
   ATbool Result=ATtrue;
   for(;!ATisEmpty(Procs);Procs=ATgetNext(Procs)){
     ATermAppl Proc=ATAgetFirst(Procs);
-    ATermAppl ProcName=ATAgetArgument(ATAgetArgument(Proc,0),0);
+    ATermAppl ProcName=ATAgetArgument(ATAgetArgument(Proc,1),0);
     
     if(ATLtableGet(context.actions, (ATerm)ProcName)){
       ThrowMF("Declaration of both process and action %t\n", ProcName);
     }	
 
-    ATermList ProcType=ATLgetArgument(ATAgetArgument(Proc,0),1);
+    ATermList ProcType=ATLgetArgument(ATAgetArgument(Proc,1),1);
     ATermList Types=ATLtableGet(context.processes,(ATerm)ProcName);
     if(!Types){
       Types=ATmakeList1((ATerm)ProcType);
@@ -566,8 +567,8 @@ static ATbool gstcReadInProcsAndInit (ATermList Procs, ATermAppl Init){
       }
     }
     ATtablePut(context.processes,(ATerm)ProcName,(ATerm)Types);
-    ATtablePut(body.proc_pars,(ATerm)ATAgetArgument(Proc,0),(ATerm)ATLgetArgument(Proc,1));
-    ATtablePut(body.proc_bodies,(ATerm)ATAgetArgument(Proc,0),(ATerm)ATAgetArgument(Proc,2));
+    ATtablePut(body.proc_pars,(ATerm)ATAgetArgument(Proc,1),(ATerm)ATLgetArgument(Proc,2));
+    ATtablePut(body.proc_bodies,(ATerm)ATAgetArgument(Proc,1),(ATerm)ATAgetArgument(Proc,3));
     gsDebugMsg("Read-in Proc Name %t, Types %t\n",ProcName,Types);    
   }
   ATtablePut(body.proc_pars,(ATerm)INIT_KEY(),(ATerm)ATmakeList0());
@@ -581,7 +582,8 @@ static ATermList gstcWriteProcs(void){
   for(ATermList ProcVars=ATtableKeys(body.proc_pars);!ATisEmpty(ProcVars);ProcVars=ATgetNext(ProcVars)){
     ATermAppl ProcVar=ATAgetFirst(ProcVars);
     if(ProcVar==INIT_KEY()) continue;
-    Result=ATinsert(Result,(ATerm)gsMakeProcEqn(ProcVar,
+    Result=ATinsert(Result,(ATerm)gsMakeProcEqn(ATmakeList0(),
+                                                ProcVar,
 						ATLtableGet(body.proc_pars,(ATerm)ProcVar),
 						ATAtableGet(body.proc_bodies,(ATerm)ProcVar)
 						)

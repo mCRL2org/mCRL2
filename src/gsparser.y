@@ -422,7 +422,8 @@ proc_decls_scs:
 proc_decl:
   ID EQUALS proc_expr
     {
-      $$ = gsMakeProcEqn(gsMakeProcVarId($1, ATmakeList0()), ATmakeList0(), $3);
+      $$ = gsMakeProcEqn(
+        ATmakeList0(), gsMakeProcVarId($1, ATmakeList0()), ATmakeList0(), $3);
       gsDebugMsg("parsed process declaration\n  %t\n", $$);
     }
   | ID LPAR data_vars_decls_cs RPAR EQUALS proc_expr
@@ -432,7 +433,8 @@ proc_decl:
       for (int i = 0; i < n; i++) {
         SortExprs = ATinsert(SortExprs, ATgetArgument(ATAelementAt($3, i), 1));
       }      
-      $$ = gsMakeProcEqn(gsMakeProcVarId($1, ATreverse(SortExprs)), $3, $6);
+      $$ = gsMakeProcEqn(
+        ATmakeList0(), gsMakeProcVarId($1, ATreverse(SortExprs)), $3, $6);
       gsDebugMsg("parsed process declaration\n  %t\n", $$);
     }
   ;
@@ -456,7 +458,7 @@ data_vars_decls_cs:
 initialisation:
   KWINIT proc_expr SEMICOLON
     {
-      $$ = gsMakeInit($2);
+      $$ = gsMakeInit(ATmakeList0(), $2);
       gsDebugMsg("parsed initialisation\n  %t\n", $$);
     }
   ;

@@ -1,5 +1,5 @@
 #define  NAME      "libgsparse"
-#define  LVERSION  "0.1.36"
+#define  LVERSION  "0.1.37"
 #define  AUTHOR    "Aad Mathijssen"
 
 #ifdef __cplusplus
@@ -65,17 +65,32 @@ void gsPrintParts(FILE *OutStream, const ATermList Parts, bool ShowSorts,
        - two successive parts are separated by Separator, if it is not NULL
 */
 
-void gsPrintDataEqns(FILE *OutStream, const ATermList DataEqns, bool ShowSorts,
+void gsPrintEqns(FILE *OutStream, const ATermList DataEqns, bool ShowSorts,
   int PrecLevel);
 /*Pre: OutStream points to a stream to which can be written
-       DataEqns is an ATermList containing data equations from a GenSpect
+       Eqns is an ATermList containing equations from a GenSpect specification
+       ShowSorts indicates if sorts should be shown for each equation
+       PrecLevel indicates the precedence level of the context of the equations
+       0 <= PrecLevel
+  Post:A textual representation of the equations is written to OutStream, in
+       which:
+       - equations are grouped in equation sections, i.e. variable declarations
+         apply to groups of equations
+       - PrecLevel and ShowSort are distributed over the equations
+*/
+
+void gsPrintProcEqns(FILE *OutStream, const ATermList ProcEqns, bool ShowSorts,
+  int PrecLevel);
+/*Pre: OutStream points to a stream to which can be written
+       ProcEqns is an ATermList containing process equations from a GenSpect
        specification
        ShowSorts indicates if sorts should be shown for each equation
-       PrecLevel indicates the precedence level of the context of the part
+       PrecLevel indicates the precedence level of the context of the equations
        0 <= PrecLevel
-  Post:A textual representation of the parts is written to OutStream, in which:
-       - data equations are grouped in data equation sections, i.e. variable
-         declarations apply to groups of equations
+  Post:A textual representation of the process equations is written to
+       OutStream, in which:
+       - process equations are grouped in process equation sections, i.e.
+         variable declarations apply to groups of equations
        - PrecLevel and ShowSort are distributed over the equations
 */
 
@@ -112,22 +127,22 @@ void gsPrintDecl(FILE *OutStream, const ATermAppl Decl, const bool ShowSorts);
 
 bool gsHasConsistentContext(const ATermTable DataVarDecls,
   const ATermAppl Part);
-/*Pre: DataVarDecls represent the variables from a data equation section,
- *     where the keys are the variable names and the values are the
- *     corresponding variables
- *     Part is an ATermAppl containing a data equation of a GenSpect
- *     specification, or the elements it consists of
+/*Pre: DataVarDecls represents the variables from an equation section, where
+ *     the keys are the variable names and the values are the corresponding
+ *     variables
+ *     Part is an ATermAppl containing an equation of a GenSpect specification,
+ *     or the elements it consists of
  *Ret: all operations occurring in Part are consistent with the variables from
  *     the context
  */
 
 bool gsHasConsistentContextList(const ATermTable DataVarDecls,
   const ATermList Parts);
-/*Pre: DataVarDecls represent the variables from a data equation section,
- *     where the keys are the variable names and the values are the
+/*Pre: DataVarDecls represents the variables from an equation section, where
+ *     the keys are the variable names and the values are the
  *     corresponding variables
- *     Parts is an ATermList containing elements of a data equation of a
- *     GenSpect specification
+ *     Parts is an ATermList containing elements of an equation of a GenSpect
+ *     specification
  *Ret: all operations occurring in Parts are consistent with the variables from
  *     the context
  */
@@ -251,7 +266,7 @@ void gsPrintPart(FILE *OutStream, const ATermAppl Part, bool ShowSorts,
   } else if (gsIsDataEqnSpec(Part)) {
     //print equation specification
     gsDebugMsg("printing equation specification\n");
-    gsPrintDataEqns(OutStream, ATLgetArgument(Part, 0), ShowSorts, PrecLevel);
+    gsPrintEqns(OutStream, ATLgetArgument(Part, 0), ShowSorts, PrecLevel);
   } else if (gsIsActSpec(Part)) {
     //print action specification
     gsDebugMsg("printing action specification\n");
@@ -264,17 +279,19 @@ void gsPrintPart(FILE *OutStream, const ATermAppl Part, bool ShowSorts,
   } else if (gsIsProcEqnSpec(Part)) {
     //print process specification
     gsDebugMsg("printing process specification\n");
-    ATermList ProcDecls = ATLgetArgument(Part, 0);
-    if (ATgetLength(ProcDecls) > 0) {
-      fprintf(OutStream, "proc ");
-      gsPrintParts(OutStream, ProcDecls, ShowSorts, PrecLevel, ";\n", "     ");
-      fprintf(OutStream, "\n");
-    }
+    gsPrintEqns(OutStream, ATLgetArgument(Part, 0), ShowSorts, PrecLevel);
   } else if (gsIsLPE(Part)) {
     //print LPE
     gsDebugMsg("printing LPE\n");
+    //print global variables
+    ATermList Vars = ATLgetArgument(Part, 0);
+    if (ATgetLength(Vars) > 0) {
+      fprintf(OutStream, "var  ");
+      gsPrintDecls(OutStream, Vars, ";\n", "     ");
+      fprintf(OutStream, "\n");
+    }
     //print process name and variable declarations
-    ATermList VarDecls = ATLgetArgument(Part, 0);
+    ATermList VarDecls = ATLgetArgument(Part, 1);
     int VarDeclsLength = ATgetLength(VarDecls);
     fprintf(OutStream, "proc P");
     if (VarDeclsLength > 0) {
@@ -284,7 +301,7 @@ void gsPrintPart(FILE *OutStream, const ATermAppl Part, bool ShowSorts,
     }
     fprintf(OutStream, " =");
     //print summations
-    ATermList Summands = ATLgetArgument(Part, 1);
+    ATermList Summands = ATLgetArgument(Part, 2);
     int SummandsLength = ATgetLength(Summands);
     if (SummandsLength == 0) {
       fprintf(OutStream, " delta\n");
@@ -299,14 +316,26 @@ void gsPrintPart(FILE *OutStream, const ATermAppl Part, bool ShowSorts,
   } else if (gsIsInit(Part)) {
     //print initialisation
     gsDebugMsg("printing initialisation\n");
+    ATermList Vars = ATLgetArgument(Part, 0);
+    if (ATgetLength(Vars) > 0) {
+      fprintf(OutStream, "var  ");
+      gsPrintDecls(OutStream, Vars, ";\n", "     ");
+      fprintf(OutStream, "\n");
+    }
     fprintf(OutStream, "init "); 
-    gsPrintPart(OutStream, ATAgetArgument(Part, 0), ShowSorts, PrecLevel);
+    gsPrintPart(OutStream, ATAgetArgument(Part, 1), ShowSorts, PrecLevel);
     fprintf(OutStream, ";\n");
   } else if (gsIsLPEInit(Part)) {
     //print LPE initialisation
     gsDebugMsg("printing LPE initialisation\n");
+    ATermList Vars = ATLgetArgument(Part, 0);
+    if (ATgetLength(Vars) > 0) {
+      fprintf(OutStream, "var  ");
+      gsPrintDecls(OutStream, Vars, ";\n", "     ");
+      fprintf(OutStream, "\n");
+    }
     fprintf(OutStream, "init P"); 
-    ATermList Args = ATLgetArgument(Part, 0);
+    ATermList Args = ATLgetArgument(Part, 1);
     if (ATgetLength(Args) > 0) {
       fprintf(OutStream, "(");
       gsPrintParts(OutStream, Args, ShowSorts, 0, NULL, ", ");
@@ -346,17 +375,17 @@ void gsPrintPart(FILE *OutStream, const ATermAppl Part, bool ShowSorts,
       }
     }
   } else if (gsIsProcEqn(Part)) {
-    //print process equation
+    //print process equation (without free variables)
     gsDebugMsg("printing process equation\n");
-    gsPrintPart(OutStream, ATAgetArgument(Part, 0), ShowSorts, PrecLevel);
-    ATermList DataVarIds = ATLgetArgument(Part, 1);
+    gsPrintPart(OutStream, ATAgetArgument(Part, 1), ShowSorts, PrecLevel);
+    ATermList DataVarIds = ATLgetArgument(Part, 2);
     if (ATgetLength(DataVarIds) > 0) {
       fprintf(OutStream, "(");
       gsPrintDecls(OutStream, DataVarIds, NULL, ", ");
       fprintf(OutStream, ")");
     }
     fprintf(OutStream, " = ");
-    gsPrintPart(OutStream, ATAgetArgument(Part, 2), ShowSorts, 0);
+    gsPrintPart(OutStream, ATAgetArgument(Part, 3), ShowSorts, 0);
   } else if (gsIsProcVarId(Part)) {
     //print process variable
     gsDebugMsg("printing process variable\n");
@@ -420,12 +449,7 @@ void gsPrintPart(FILE *OutStream, const ATermAppl Part, bool ShowSorts,
     gsDebugMsg("printing assignment\n");
     gsPrintPart(OutStream, ATAgetArgument(Part, 0), ShowSorts, PrecLevel);
     fprintf(OutStream, " := ");
-    ATermAppl NewValue = ATAgetArgument(Part, 1);
-    if (gsIsNil(NewValue)) {
-      fprintf(OutStream, "<DC>");
-    } else {
-      gsPrintPart(OutStream, NewValue, ShowSorts, 0);
-    }
+    gsPrintPart(OutStream, ATAgetArgument(Part, 1), ShowSorts, 0);
   } else if (gsIsSortList(Part)) {
     //print list sort
     gsDebugMsg("printing list sort\n");
@@ -774,19 +798,24 @@ void gsPrintPart(FILE *OutStream, const ATermAppl Part, bool ShowSorts,
 void gsPrintParts(FILE *OutStream, const ATermList Parts, bool ShowSorts,
   int PrecLevel, const char *Terminator, const char *Separator)
 {
-  int n = ATgetLength(Parts);
-  for (int i = 0; i < n; i++) {
-    if (i > 0 && Separator != NULL) fprintf(OutStream, Separator);
-    gsPrintPart(OutStream, ATAelementAt(Parts, i), ShowSorts, PrecLevel);
-    if (Terminator != NULL) fprintf(OutStream, Terminator);
+  ATermList l = Parts;
+  while (!ATisEmpty(l)) {
+    if (!ATisEqual(l, Parts) && Separator != NULL) {
+      fprintf(OutStream, Separator);
+    }
+    gsPrintPart(OutStream, ATAgetFirst(l), ShowSorts, PrecLevel);
+    if (Terminator != NULL) {
+      fprintf(OutStream, Terminator);
+    }
+    l = ATgetNext(l);
   }
 }
 
-void gsPrintDataEqns(FILE *OutStream, const ATermList DataEqns, bool ShowSorts,
+void gsPrintEqns(FILE *OutStream, const ATermList Eqns, bool ShowSorts,
   int PrecLevel)
 {
-  int DataEqnsLength = ATgetLength(DataEqns);
-  if (DataEqnsLength > 0) {
+  int EqnsLength = ATgetLength(Eqns);
+  if (EqnsLength > 0) {
     int StartPrefix = 0;
     ATermTable VarDeclTable = ATtableCreate(63, 50);
     //VarDeclTable is a hash table with variable declarations as values, where
@@ -794,18 +823,18 @@ void gsPrintDataEqns(FILE *OutStream, const ATermList DataEqns, bool ShowSorts,
     //Note that the hash table will be increased if at least 32 values are added,
     //This can be avoided by increasing the initial size.
     int i = 0;
-    while (i < DataEqnsLength) {
+    while (i < EqnsLength) {
       //StartPrefix represents the start index of the maximum consistent prefix
-      //of variable declarations in DataEqns to which DataEqns(i) belongs
-      //VarDeclTable represents the variable declarations of DataEqns
-      //from StartPrefix up to i.
-      //Check consistency of DataEqns(i) with VarDeclTable and add newly
-      //declared variables to VarDeclTable.
-      ATermAppl DataEqn = ATAelementAt(DataEqns, i);
-      bool Consistent = gsHasConsistentContext(VarDeclTable, DataEqn);
+      //of variable declarations in Eqns to which Eqns(i) belongs
+      //VarDeclTable represents the variable declarations of Eqns from
+      //StartPrefix up to i.
+      //Check consistency of Eqns(i) with VarDeclTable and add newly declared
+      //variables to VarDeclTable.
+      ATermAppl Eqn = ATAelementAt(Eqns, i);
+      bool Consistent = gsHasConsistentContext(VarDeclTable, Eqn);
       if (Consistent) {
-        //add new variables from DataEqns(i) to VarDeclTable
-        ATermList VarDecls = ATLgetArgument(DataEqn, 0);
+        //add new variables from Eqns(i) to VarDeclTable
+        ATermList VarDecls = ATLgetArgument(Eqn, 0);
         int VarDeclsLength = ATgetLength(VarDecls);
         for (int j = 0; j < VarDeclsLength; j++) {
           ATermAppl VarDecl = ATAelementAt(VarDecls, j);
@@ -816,9 +845,75 @@ void gsPrintDataEqns(FILE *OutStream, const ATermList DataEqns, bool ShowSorts,
         }
         i++;
       }
-      if (!Consistent || (i == DataEqnsLength)) {
+      if (!Consistent || (i == EqnsLength)) {
         //VarDeclTable represents the maximum consistent prefix of variable
-        //declarations of DataEqns starting at StartPrefix. Print this prefix
+        //declarations of Eqns starting at StartPrefix. Print this prefixa and
+        //the corresponding equations,and if necessary, update StartPrefix and
+        //reset VarDeclTable.
+        ATermList VarDecls = ATtableValues(VarDeclTable);
+        if (ATgetLength(VarDecls) > 0) {
+          fprintf(OutStream, "var  ");
+          gsPrintDecls(OutStream, gsGroupDeclsBySort(ATreverse(VarDecls)),
+            ";\n", "     ");
+        }
+        if (gsIsDataEqn(Eqn)) {
+          fprintf(OutStream, "eqn  ");
+        } else { //gsIsProcEqn(Eqn)
+          fprintf(OutStream, "proc ");
+        }
+        gsPrintParts(OutStream,
+          ATgetSlice(Eqns, StartPrefix, i), ShowSorts, PrecLevel,
+            ";\n", "     ");
+        if (i < EqnsLength) {
+          fprintf(OutStream, "\n");
+          StartPrefix = i;
+          ATtableReset(VarDeclTable);
+        }
+      }
+    }
+    //finalisation after printing all (>0) equations
+    fprintf(OutStream, "\n");
+    ATtableDestroy(VarDeclTable);
+  }
+}
+
+void gsPrintProcEqns(FILE *OutStream, const ATermList ProcEqns, bool ShowSorts,
+  int PrecLevel)
+{
+  int ProcEqnsLength = ATgetLength(ProcEqns);
+  if (ProcEqnsLength > 0) {
+    int StartPrefix = 0;
+    ATermTable VarDeclTable = ATtableCreate(63, 50);
+    //VarDeclTable is a hash table with variable declarations as values, where
+    //the name of each variable declaration is used a key.
+    //Note that the hash table will be increased if at least 32 values are added,
+    //This can be avoided by increasing the initial size.
+    int i = 0;
+    while (i < ProcEqnsLength) {
+      //StartPrefix represents the start index of the maximum consistent prefix
+      //of variable declarations in ProcEqns to which ProcEqns(i) belongs
+      //VarDeclTable represents the variable declarations of ProcEqns
+      //from StartPrefix up to i.
+      //Check consistency of ProcEqns(i) with VarDeclTable and add newly
+      //declared variables to VarDeclTable.
+      ATermAppl ProcEqn = ATAelementAt(ProcEqns, i);
+      bool Consistent = gsHasConsistentContext(VarDeclTable, ProcEqn);
+      if (Consistent) {
+        //add new variables from ProcEqns(i) to VarDeclTable
+        ATermList VarDecls = ATLgetArgument(ProcEqn, 0);
+        int VarDeclsLength = ATgetLength(VarDecls);
+        for (int j = 0; j < VarDeclsLength; j++) {
+          ATermAppl VarDecl = ATAelementAt(VarDecls, j);
+          ATermAppl VarDeclName = ATAgetArgument(VarDecl, 0);
+          if (ATtableGet(VarDeclTable, (ATerm) VarDeclName) == NULL) {
+            ATtablePut(VarDeclTable, (ATerm) VarDeclName, (ATerm) VarDecl);
+          }
+        }
+        i++;
+      }
+      if (!Consistent || (i == ProcEqnsLength)) {
+        //VarDeclTable represents the maximum consistent prefix of variable
+        //declarations of ProcEqns starting at StartPrefix. Print this prefix
         //and the corresponding equations,and if necessary, update StartPrefix
         //and reset VarDeclTable.
         ATermList VarDecls = ATtableValues(VarDeclTable);
@@ -829,22 +924,22 @@ void gsPrintDataEqns(FILE *OutStream, const ATermList DataEqns, bool ShowSorts,
         }
         fprintf(OutStream, "eqn  ");
         gsPrintParts(OutStream,
-          ATgetSlice(DataEqns, StartPrefix, i), ShowSorts, PrecLevel,
+          ATgetSlice(ProcEqns, StartPrefix, i), ShowSorts, PrecLevel,
           ";\n", "     ");
-        if (i < DataEqnsLength) {
+        if (i < ProcEqnsLength) {
           fprintf(OutStream, "\n");
           StartPrefix = i;
           ATtableReset(VarDeclTable);
         }
       }
     }
-    //finalisation after printing all (>0) data equations
+    //finalisation after printing all (>0) process equations
     fprintf(OutStream, "\n");
     ATtableDestroy(VarDeclTable);
   }
 }
 
-bool gsHasConsistentContext(const ATermTable DataVarDecls,
+bool gsHasConsistentContextOld(const ATermTable DataVarDecls,
   const ATermAppl Part)
 {
   if (gsIsDataEqn(Part)) {
@@ -911,13 +1006,52 @@ bool gsHasConsistentContext(const ATermTable DataVarDecls,
   }
 }
 
+bool gsHasConsistentContext(const ATermTable DataVarDecls,
+  const ATermAppl Part)
+{
+  bool Result = true;
+  if (gsIsDataEqn(Part) || gsIsProcEqn(Part)) {
+    //check consistency of DataVarDecls with the variable declarations
+    ATermList VarDecls = ATLgetArgument(Part, 0);
+    int n = ATgetLength(VarDecls);
+    for (int i = 0; i < n && Result; i++) {
+      //check consistency of variable VarDecls(j) with VarDeclTable
+      ATermAppl VarDecl = ATAelementAt(VarDecls, i);
+      ATermAppl CorVarDecl =
+        ATAtableGet(DataVarDecls, ATgetArgument(VarDecl, 0));
+      if (CorVarDecl != NULL) {
+        //check consistency of VarDecl with CorVarDecl
+        Result = (ATisEqual(VarDecl, CorVarDecl) == ATtrue);
+      }
+    }
+  } else if (gsIsOpId(Part) || gsIsDataVarIdOpId(Part))  {
+    //Part may be an operation; check that its name does not occur in
+    //DataVarDecls
+    Result = (ATtableGet(DataVarDecls, ATgetArgument(Part, 0)) == NULL);
+  }
+  //check consistency in the arguments of Part
+  if (Result) {
+    AFun Head = ATgetAFun(Part);
+    int NrArgs = ATgetArity(Head);      
+    for (int i = 0; i < NrArgs && Result; i++) {
+      ATerm Arg = ATgetArgument(Part, i);
+      if (ATgetType(Arg) == AT_APPL)
+        Result = gsHasConsistentContext(DataVarDecls, (ATermAppl) Arg);
+      else //ATgetType(Arg) == AT_LIST
+        Result = gsHasConsistentContextList(DataVarDecls, (ATermList) Arg);
+    }
+  }
+  return Result;
+}
+
 bool gsHasConsistentContextList(const ATermTable DataVarDecls,
   const ATermList Parts)
 {
   bool Result = true;
-  int n = ATgetLength(Parts);
-  for (int i = 0; i < n && Result; i++) {
-    Result = gsHasConsistentContext(DataVarDecls, ATAelementAt(Parts, i));
+  ATermList l = Parts;
+  while (!ATisEmpty(l) && Result) {
+    Result = gsHasConsistentContext(DataVarDecls, ATAgetFirst(l));
+    l = ATgetNext(l);
   }
   return Result;
 }

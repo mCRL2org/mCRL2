@@ -1,4 +1,4 @@
-// Date: 04-03-2005
+// Date: 21-03-2005
 // This document describes the internal format of the GenSpect language. Here:
 // - three phases of implementation are distinguised, namely type checking (tc),
 //   data implementation (di) and linearisation (lin)
@@ -73,10 +73,10 @@
 
 //process equations or LPE
 <ProcEqnSpec>  ::= ProcEqnSpec(<ProcEqn>*)                               (-lin)
-                 | LPE(<DataVarId>*, <LPESummand>*)                      (+lin)
+                 | LPE(<DataVarId>*, <DataVarId>*, <LPESummand>*)        (+lin)
 
 //process equation
-<ProcEqn>     ::= ProcEqn(<ProcVarId>, <DataVarId>*, <ProcExpr>)
+<ProcEqn>     ::= ProcEqn(<DataVarId>*, <ProcVarId>, <DataVarId>*, <ProcExpr>)
 
 //process identifier
 <ProcVarId>   ::= ProcVarId(<String>, <SortExpr>*)
@@ -94,11 +94,11 @@
 <Action>      ::= Action(<ActId>, <DataExpr>*)
 
 //Assignment
-<Assignment>  ::= Assignment(<DataVarId>, <DataExprOrNil>)
+<Assignment>  ::= Assignment(<DataVarId>, <DataExpr>)
 
 //process expressions or data expression
-<Init>        ::= Init(<ProcExpr>)                                       (-lin)
-                | LPEInit(<Assignment>*)                                 (+lin)
+<Init>        ::= Init(<DataVarId>*, <ProcExpr>)                         (-lin)
+                | LPEInit(<DataVarId>*, <Assignment>*)                   (+lin)
 
 //Expressions
 //-----------

@@ -236,16 +236,16 @@ void gsEnableConstructorFunctions(void)
     gsAFunNil              = ATmakeAFun("Nil", 0, ATfalse);
     gsAFunActId            = ATmakeAFun("ActId", 2, ATfalse);
     gsAFunProcEqnSpec      = ATmakeAFun("ProcEqnSpec", 1, ATfalse);
-    gsAFunLPE              = ATmakeAFun("LPE", 2, ATfalse);
-    gsAFunProcEqn          = ATmakeAFun("ProcEqn", 3, ATfalse);
+    gsAFunLPE              = ATmakeAFun("LPE", 3, ATfalse);
+    gsAFunProcEqn          = ATmakeAFun("ProcEqn", 4, ATfalse);
     gsAFunProcVarId        = ATmakeAFun("ProcVarId", 2, ATfalse);
     gsAFunLPESummand       = ATmakeAFun("LPESummand", 5, ATfalse);
     gsAFunMultAct          = ATmakeAFun("MultAct", 1, ATfalse);
     gsAFunDelta            = ATmakeAFun("Delta", 0, ATfalse);
     gsAFunAction           = ATmakeAFun("Action", 2, ATfalse);
     gsAFunAssignment       = ATmakeAFun("Assignment", 2, ATfalse);
-    gsAFunInit             = ATmakeAFun("Init", 1, ATfalse);
-    gsAFunLPEInit          = ATmakeAFun("LPEInit", 1, ATfalse);
+    gsAFunInit             = ATmakeAFun("Init", 2, ATfalse);
+    gsAFunLPEInit          = ATmakeAFun("LPEInit", 2, ATfalse);
     gsAFunSortList         = ATmakeAFun("SortList", 1, ATfalse);
     gsAFunSortSet          = ATmakeAFun("SortSet", 1, ATfalse);
     gsAFunSortBag          = ATmakeAFun("SortBag", 1, ATfalse);
@@ -617,18 +617,20 @@ ATermAppl gsMakeProcEqnSpec(ATermList ProcEqns)
   return ATmakeAppl1(gsAFunProcEqnSpec, (ATerm) ProcEqns);
 }
 
-ATermAppl gsMakeLPE(ATermList DataVarIds, ATermList LPESummands)
+ATermAppl gsMakeLPE(ATermList GlobDataVarIds, ATermList ProcDataVarIds,
+  ATermList LPESummands)
 {
   assert(gsConstructorFunctionsEnabled);
-  return ATmakeAppl2(gsAFunLPE, (ATerm) DataVarIds, (ATerm) LPESummands);
+  return ATmakeAppl3(gsAFunLPE, (ATerm) GlobDataVarIds, (ATerm) ProcDataVarIds,
+    (ATerm) LPESummands);
 }
 
-ATermAppl gsMakeProcEqn(ATermAppl ProcVarId, ATermList DataVarIds,
-  ATermAppl ProcExpr)
+ATermAppl gsMakeProcEqn(ATermList GlobDataVarIds, ATermAppl ProcVarId,
+  ATermList ProcDataVarIds, ATermAppl ProcExpr)
 {
   assert(gsConstructorFunctionsEnabled);
-  return ATmakeAppl3(gsAFunProcEqn, (ATerm) ProcVarId, (ATerm) DataVarIds,
-    (ATerm) ProcExpr);
+  return ATmakeAppl4(gsAFunProcEqn, (ATerm) GlobDataVarIds, (ATerm) ProcVarId,
+    (ATerm) ProcDataVarIds, (ATerm) ProcExpr);
 }
 
 ATermAppl gsMakeProcVarId(ATermAppl Name, ATermList SortExprs)
@@ -663,23 +665,22 @@ ATermAppl gsMakeAction(ATermAppl ActId, ATermList DataExprs)
   return ATmakeAppl2(gsAFunAction, (ATerm) ActId, (ATerm) DataExprs);
 }
 
-ATermAppl gsMakeAssignment(ATermAppl DataVarId, ATermAppl DataExprOrNil)
+ATermAppl gsMakeAssignment(ATermAppl DataVarId, ATermAppl DataExpr)
 {
   assert(gsConstructorFunctionsEnabled);
-  return ATmakeAppl2(gsAFunAssignment, (ATerm) DataVarId,
-    (ATerm) DataExprOrNil);
+  return ATmakeAppl2(gsAFunAssignment, (ATerm) DataVarId, (ATerm) DataExpr);
 }
 
-ATermAppl gsMakeInit(ATermAppl ProcExpr)
+ATermAppl gsMakeInit(ATermList GlobDataVarIds, ATermAppl ProcExpr)
 {
   assert(gsConstructorFunctionsEnabled);
-  return ATmakeAppl1(gsAFunInit, (ATerm) ProcExpr);
+  return ATmakeAppl2(gsAFunInit, (ATerm) GlobDataVarIds, (ATerm) ProcExpr);
 }
 
-ATermAppl gsMakeLPEInit(ATermList DataExprs)
+ATermAppl gsMakeLPEInit(ATermList GlobDataVarIds, ATermList DataExprs)
 {
   assert(gsConstructorFunctionsEnabled);
-  return ATmakeAppl1(gsAFunLPEInit, (ATerm) DataExprs);
+  return ATmakeAppl2(gsAFunLPEInit, (ATerm) GlobDataVarIds, (ATerm) DataExprs);
 }
 
 ATermAppl gsMakeSortList(ATermAppl SortExpr)

@@ -6825,8 +6825,8 @@ static int main2(int argc, char *argv[],ATerm *stack_bottom)
                  gsMakeMapSpec(spec->maps),
                  gsMakeDataEqnSpec(spec->eqns),
                  gsMakeActSpec(spec->acts),
-                 gsMakeLPE(ATLgetArgument(result,1),ATLgetArgument(result,2)),
-                 gsMakeLPEInit(ATLgetArgument(result,0))),
+                 gsMakeLPE(ATmakeList0(), ATLgetArgument(result,1),ATLgetArgument(result,2)),
+                 gsMakeLPEInit(ATmakeList0(), ATLgetArgument(result,0))),
                  to_stdout?stdout:toolbusfile);
     }
   else ATfprintf(stderr,"The file %s contains a correctly typed mCRL2 specification\n",
