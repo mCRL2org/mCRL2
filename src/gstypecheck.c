@@ -6,6 +6,7 @@ extern "C"
 #include <string.h>
 #include <stdlib.h>
 #include <assert.h>
+#include <ctype.h>
 
 #ifdef __cplusplus
 }
@@ -79,7 +80,7 @@ static ATbool gstcReadInFuncs(ATermList);
 static ATbool gstcReadInActs (ATermList);
 static ATbool gstcReadInProcsAndInit (ATermList, ATermAppl);
 
-static ATbool gstcTransformVarConstData(void);
+static ATbool gstcTransformVarConsTypeData(void);
 static ATbool gstcTransformActProcVarConst(void);
 
 static ATbool gstcInferTypesData(void);
@@ -87,9 +88,9 @@ static ATbool gstcInferTypesProc(void);
 
 static ATermList gstcWriteProcs(void);
 
-static inline ATbool gstcInTypesA(ATermAppl, ATermList);
+static ATbool gstcInTypesA(ATermAppl, ATermList);
 static ATbool gstcEqTypesA(ATermAppl, ATermAppl);
-static inline ATbool gstcInTypesL(ATermList, ATermList);
+static ATbool gstcInTypesL(ATermList, ATermList);
 static ATbool gstcEqTypesL(ATermList, ATermList);
 
 static ATbool gstcReadInSortStruct(ATermAppl);
@@ -99,19 +100,22 @@ static void gstcAddSystemConstant(ATermAppl);
 static void gstcAddSystemFunctionProd(ATermAppl, ATermAppl);
 
 static ATermTable gstcAddVars2Table(ATermTable,ATermList);
-static ATermAppl gstcRewrActProc(ATermAppl);
+static ATermAppl gstcRewrActProc(ATermTable, ATermAppl);
 static inline ATermAppl gstcMakeActionOrProc(ATbool, ATermAppl, ATermList, ATermList);
 static ATermAppl gstcTraverseActProcVarConstP(ATermTable, ATermAppl);
-static ATermAppl gstcTraverseVarConstD(ATermTable, ATermAppl);
-static ATermAppl gstcTraverseVarConstDN(int, ATermTable, ATermAppl);
+static ATermAppl gstcTraverseVarConsTypeD(ATermTable, ATermAppl *, ATermAppl);
+static ATermAppl gstcTraverseVarConsTypeDN(int, ATermTable, ATermAppl* , ATermAppl);
 static ATermList gstcTraverseVarConstL(ATermTable, ATermList);
 static ATermList gstcTraverseVarConstLL(ATermTable, ATermList);
 
 static ATbool gstcInferTypesP(ATermTable, ATermAppl);
 static ATbool gstcInferTypesD(ATermTable, ATermAppl);
 
-static inline ATbool gstcIsPos(ATermAppl Number) {return (atoi(ATgetName(ATgetAFun(Number)))>0);}
-static inline ATbool gstcIsNat(ATermAppl Number) {return (atoi(ATgetName(ATgetAFun(Number)))>=0);}
+static ATermList gstcGetNotInferredList(ATermList TypeListList);
+static ATermList gstcInsertType(ATermList TypeList, ATermAppl Type);
+
+static inline ATbool gstcIsPos(ATermAppl Number) {char c=ATgetName(ATgetAFun(Number))[0]; return (isdigit(c) && c>'0');}
+static inline ATbool gstcIsNat(ATermAppl Number) {return isdigit(ATgetName(ATgetAFun(Number))[0]);}
 
 static inline ATermAppl gstcMakeSortArrowProd1(ATermAppl Source, ATermAppl Target){
   return gsMakeSortArrowProd(ATmakeList1((ATerm)Source),Target);
@@ -125,7 +129,19 @@ static inline ATermAppl gstcMakeSortArrowProd3(ATermAppl Source1, ATermAppl Sour
   return gsMakeSortArrowProd(ATmakeList3((ATerm)Source1,(ATerm)Source2,(ATerm)Source3),Target);
 }
 
-inline ATermAppl INIT_KEY(void){return gsMakeProcVarId(ATmakeAppl0(ATmakeAFun("init",0,ATtrue)),ATmakeList0());}
+static inline ATermAppl INIT_KEY(void){return gsMakeProcVarId(ATmakeAppl0(ATmakeAFun("init",0,ATtrue)),ATmakeList0());}
+static inline ATermAppl gstcMakeNotInferred(ATermList PossibleTypes){
+  assert(PossibleTypes);
+  return ATmakeAppl1(ATmakeAFun("notInferred",1,ATtrue),(ATerm)PossibleTypes);
+}
+static inline bool gstcIsNotInferred(ATermAppl SortTerm){
+  return (ATgetAFun(SortTerm)==ATmakeAFun("notInferred",1,ATtrue));
+}
+static ATermList gstcGetNotInferredList(ATermList TypeListList);
+static ATermList gstcAdjustNotInferredList(ATermList TypeList, ATermList TypeListList);
+static ATbool gstcIsNotInferredL(ATermList TypeListList);
+static ATbool gstcIsTypeAllowed(ATermList PosTypeList, ATermList TypeList);
+static ATermAppl gstcUnwindType(ATermAppl Type);
 
 // Main function
 ATermAppl gsTypeCheck (ATermAppl input){	
@@ -147,7 +163,7 @@ ATermAppl gsTypeCheck (ATermAppl input){
   gsDebugMsg ("type checking read-in phase finished\n");
   
   gsDebugMsg ("type checking transform ActProc+VarConst phase started\n");
-  if(!gstcTransformVarConstData()){throw;}
+  if(!gstcTransformVarConsTypeData()){throw;}
   if(!gstcTransformActProcVarConst()){throw;}
   gsDebugMsg ("type checking transform ActProc+VarConst phase finished\n");
 
@@ -566,7 +582,7 @@ static ATbool gstcInferTypesProc(void){
   return Result;
 }
 
-static ATbool gstcTransformVarConstData(void){
+static ATbool gstcTransformVarConsTypeData(void){
   ATbool Result=ATtrue;
   ATermTable Vars=ATtableCreate(63,50);
   
@@ -578,11 +594,12 @@ static ATbool gstcTransformVarConstData(void){
       Vars=gstcAddVars2Table(Vars,VarList);
       if(!Vars){ThrowF;}
       ATermAppl Cond=ATAgetArgument(Eqn,1);
-      if(!gsIsNil(Cond) && !(Cond=gstcTraverseVarConstD(Vars,Cond))){ThrowF;}
+      if(!gsIsNil(Cond) && !(gstcTraverseVarConsTypeD(Vars,&Cond,gsMakeSortIdBool()))){ThrowF;}
       ATermAppl Left=ATAgetArgument(Eqn,2);
-      if(!(Left=gstcTraverseVarConstD(Vars,Left))){ThrowF;}
+      ATermAppl LeftType;
+      if(!(LeftType=gstcTraverseVarConsTypeD(Vars,&Left,gsMakeUnknown()))){ThrowF;}
       ATermAppl Right=ATAgetArgument(Eqn,3);
-      if(!(Right=gstcTraverseVarConstD(Vars,Right))){ThrowF;}
+      if(!(gstcTraverseVarConsTypeD(Vars,&Right,LeftType))){ThrowF;}
       NewEqns=ATinsert(NewEqns,(ATerm)gsMakeDataEqn(VarList,Cond,Left,Right));
   }
   body.equations=ATreverse(NewEqns);
@@ -613,24 +630,33 @@ static ATbool gstcTransformActProcVarConst(void){
 }
 
 // ======== Auxiliary functions
-static inline ATbool gstcInTypesA(ATermAppl Type, ATermList Types){
+static ATbool gstcInTypesA(ATermAppl Type, ATermList Types){
   for(;!ATisEmpty(Types);Types=ATgetNext(Types))
-    if(gstcEqTypesA(ATAgetFirst(Types),Type)) return ATtrue;
+    if(gstcEqTypesA(Type,ATAgetFirst(Types))) return ATtrue;
   return ATfalse;
 }
 
 static ATbool gstcEqTypesA(ATermAppl Type1, ATermAppl Type2){
-  return ATisEqual(Type1, Type2);
+  if(ATisEqual(Type1, Type2)) return ATtrue;
+
+  if(!Type1 || !Type2) return ATfalse;
+
+  return ATisEqual(gstcUnwindType(Type1),gstcUnwindType(Type2));
 }
 
-static inline ATbool gstcInTypesL(ATermList Type, ATermList Types){
+static ATbool gstcInTypesL(ATermList Type, ATermList Types){
   for(;!ATisEmpty(Types);Types=ATgetNext(Types))
-    if(gstcEqTypesL(ATLgetFirst(Types),Type)) return ATtrue;
+    if(gstcEqTypesL(Type,ATLgetFirst(Types))) return ATtrue;
   return ATfalse;
 }
 
 static ATbool gstcEqTypesL(ATermList Type1, ATermList Type2){
-  return ATisEqual(Type1, Type2);
+  if(ATisEqual(Type1, Type2)) return ATtrue;
+  if(!Type1 || !Type2) return ATfalse;
+  if(ATgetLength(Type1)!=ATgetLength(Type2)) return ATfalse;
+  for(;!ATisEmpty(Type1);Type1=ATgetNext(Type1),Type2=ATgetNext(Type2))
+    if(!gstcEqTypesA(ATAgetFirst(Type1),ATAgetFirst(Type2))) return ATfalse;
+  return ATtrue;
 }
 
 static ATbool gstcReadInSortStruct(ATermAppl SortExpr){
@@ -772,7 +798,7 @@ static ATermTable gstcAddVars2Table(ATermTable Vars, ATermList VarDecls){
     return Vars;
 }
 
-static ATermAppl gstcRewrActProc(ATermAppl ProcTerm){
+static ATermAppl gstcRewrActProc(ATermTable Vars, ATermAppl ProcTerm){
   ATermAppl Result=NULL;
   ATermAppl Name=ATAgetArgument(ProcTerm,0);
   ATermList ParList;
@@ -805,19 +831,46 @@ static ATermAppl gstcRewrActProc(ATermAppl ProcTerm){
     ParList=ATreverse(NewParList);
   }
  
-  if(ATisEmpty(ParList)){
-    ThrowM("No %s %t with %d parameter is declared (while typechecking %t)\n", msg, Name, nFactPars, ProcTerm);     
+  if(ATisEmpty(ParList)) {
+    ThrowM("No %s %t with %d parameters is declared (while typechecking %t)\n", msg, Name, nFactPars, ProcTerm);     
+  }
+
+  if(ATgetLength(ParList)==1){
+    Result=gstcMakeActionOrProc(action,Name,ATLgetFirst(ParList),ATLgetArgument(ProcTerm,1));
   }
   else{
-    if(ATgetLength(ParList)==1){
-      Result=gstcMakeActionOrProc(action,Name,ATLgetFirst(ParList),ATLgetArgument(ProcTerm,1));
-    }
-    else{
-      gsWarningMsg("Ambiguous action %t\n",Name);    
-      Result=gstcMakeActionOrProc(action,Name,ATmakeList1((ATerm)gsMakeUnknown()),ATLgetArgument(ProcTerm,1));
-      // here later can be [Unknown],ParList
-    }
+    // we need typechecking to find the correct type of the action.
+    // make the list of possible types for the parameters
+    Result=gstcMakeActionOrProc(action,Name,gstcGetNotInferredList(ParList),ATLgetArgument(ProcTerm,1));
   }
+
+  //process the arguments
+
+  //possible types for the arguments of the action. (not inferred if ambiguous action).
+  ATermList PosTypeList=ATLgetArgument(ATAgetArgument(Result,0),1);
+  
+  ATermList NewPars=ATmakeList0();
+  ATermList NewPosTypeList=ATmakeList0();
+  for(ATermList Pars=ATLgetArgument(ProcTerm,1);!ATisEmpty(Pars);Pars=ATgetNext(Pars),
+	PosTypeList=ATgetNext(PosTypeList)){
+    ATermAppl Par=ATAgetFirst(Pars);
+    ATermAppl NewPosType=gstcTraverseVarConsTypeD(Vars,&Par,ATAgetFirst(PosTypeList));
+    if(!NewPosType) {throw;}
+    NewPars=ATinsert(NewPars,(ATerm)Par);
+    NewPosTypeList=ATinsert(NewPosTypeList,(ATerm)NewPosType);
+  }
+  NewPars=ATreverse(NewPars);
+  NewPosTypeList=ATreverse(NewPosTypeList);
+
+  PosTypeList=gstcAdjustNotInferredList(NewPosTypeList,ParList);
+  if(!PosTypeList) {Result=NULL; ThrowM("No %s %t with type %t is declared (while typechecking %t)",msg,Name,NewPosTypeList,ProcTerm);}
+  
+  if(gstcIsNotInferredL(PosTypeList)){
+    gsWarningMsg("Ambiguous %s %t\n",msg,Name);
+  }
+    
+  Result=gstcMakeActionOrProc(action,Name,PosTypeList,NewPars);
+
   gsDebugMsg("recognized %s %t\n",msg,Result);    
  finally:
   return Result;
@@ -836,16 +889,7 @@ static ATermAppl gstcTraverseActProcVarConstP(ATermTable Vars, ATermAppl ProcTer
   if(n==0) return ProcTerm;
 
   if(gsIsActionProcess(ProcTerm)){
-    if(!(ProcTerm=gstcRewrActProc(ProcTerm))) {throw;}
-    
-    //parameters
-    ATermList NewPars=ATmakeList0();
-    for(ATermList Pars=ATLgetArgument(ProcTerm,1);!ATisEmpty(Pars);Pars=ATgetNext(Pars)){
-      ATermAppl NewPar=gstcTraverseVarConstD(Vars,ATAgetFirst(Pars));
-      if(!NewPar) {throw;}
-      NewPars=ATinsert(NewPars,(ATerm)NewPar);
-    }
-    return ATsetArgument(ProcTerm,(ATerm)ATreverse(NewPars),1);
+    return gstcRewrActProc(Vars,ProcTerm);
   }
 
   if(gsIsRestrict(ProcTerm) || gsIsHide(ProcTerm) || 
@@ -858,7 +902,8 @@ static ATermAppl gstcTraverseActProcVarConstP(ATermTable Vars, ATermAppl ProcTer
   if(gsIsSync(ProcTerm) || gsIsSeq(ProcTerm) || gsIsBInit(ProcTerm) ||
      gsIsMerge(ProcTerm) || gsIsLMerge(ProcTerm) || gsIsChoice(ProcTerm)){
     ATermAppl NewLeft=gstcTraverseActProcVarConstP(Vars,ATAgetArgument(ProcTerm,0));
-    if(!NewLeft) {throw;}
+ 
+   if(!NewLeft) {throw;}
     ATermAppl NewRight=gstcTraverseActProcVarConstP(Vars,ATAgetArgument(ProcTerm,1));
     if(!NewRight) {throw;}
     return ATsetArgument(ATsetArgument(ProcTerm,(ATerm)NewLeft,0),(ATerm)NewRight,1);
@@ -867,19 +912,21 @@ static ATermAppl gstcTraverseActProcVarConstP(ATermTable Vars, ATermAppl ProcTer
   if(gsIsAtTime(ProcTerm)){
     ATermAppl NewProc=gstcTraverseActProcVarConstP(Vars,ATAgetArgument(ProcTerm,0));
     if(!NewProc) {throw;}
-    ATermAppl NewTime=gstcTraverseVarConstD(Vars,ATAgetArgument(ProcTerm,1));
+    ATermAppl Time=ATAgetArgument(ProcTerm,1);
+    ATermAppl NewTime=gstcTraverseVarConsTypeD(Vars,&Time,gsMakeSortIdNat());
     if(!NewTime) {throw;}
     return gsMakeAtTime(NewProc,NewTime);
   }
 
   if(gsIsCond(ProcTerm)){
-    ATermAppl NewCond=gstcTraverseVarConstD(Vars,ATAgetArgument(ProcTerm,0));
-    if(!NewCond) {throw;}
+    ATermAppl Cond=ATAgetArgument(ProcTerm,0);
+    ATermAppl NewType=gstcTraverseVarConsTypeD(Vars,&Cond,gsMakeSortIdBool());
+    if(!NewType) {throw;}
     ATermAppl NewLeft=gstcTraverseActProcVarConstP(Vars,ATAgetArgument(ProcTerm,1));
     if(!NewLeft) {throw;}
     ATermAppl NewRight=gstcTraverseActProcVarConstP(Vars,ATAgetArgument(ProcTerm,2));
     if(!NewRight) {throw;}
-    return gsMakeCond(NewCond,NewLeft,NewRight);
+    return gsMakeCond(Cond,NewLeft,NewRight);
   }
 
   if(gsIsSum(ProcTerm)){
@@ -895,80 +942,116 @@ static ATermAppl gstcTraverseActProcVarConstP(ATermTable Vars, ATermAppl ProcTer
   return Result;
 }
 
-static ATermAppl gstcTraverseVarConstD(ATermTable Vars, ATermAppl DataTerm){
+static ATermAppl gstcTraverseVarConsTypeD(ATermTable Vars, ATermAppl *DataTerm, ATermAppl PosType){
   ATermAppl Result=NULL;
  
-  if(gsIsNumber(DataTerm)){
-    ATermAppl Number=ATAgetArgument(DataTerm,0);
+  if(gsIsNumber(*DataTerm)){
+    ATermAppl Number=ATAgetArgument(*DataTerm,0);
     ATermAppl Sort;
     if(gstcIsPos(Number)) Sort=gsMakeSortIdPos();
     else if(gstcIsNat(Number)) Sort=gsMakeSortIdNat(); 
     else Sort=gsMakeSortIdInt(); 
-    
-    return ATsetArgument(DataTerm,(ATerm)Sort,1);
+    *DataTerm=ATsetArgument(*DataTerm,(ATerm)Sort,1);
+    return Sort;
   }
 
-  if(gsIsSetBagComp(DataTerm)){
-    ATermTable NewVars=gstcAddVars2Table(Vars,ATmakeList1((ATerm)ATAgetArgument(DataTerm,0)));
+  if(gsIsSetBagComp(*DataTerm)){
+    ATermTable NewVars=gstcAddVars2Table(Vars,ATmakeList1((ATerm)ATAgetArgument(*DataTerm,0)));
     if(!NewVars) {throw;}
-    ATermAppl NewData=gstcTraverseVarConstD(NewVars,ATAgetArgument(DataTerm,1));
-    if(!NewData) {throw;}
-    return ATsetArgument(DataTerm,(ATerm)NewData,1);
+    ATermAppl Data=ATAgetArgument(*DataTerm,1);
+    ATermAppl NewType=PosType; //gstcUnSetBag(PosType);
+    if(!NewType) {throw;}
+    NewType=gstcTraverseVarConsTypeD(NewVars,&Data,NewType);
+    if(!NewType) {throw;}
+    *DataTerm=ATsetArgument(*DataTerm,(ATerm)Data,1);
+    return gsMakeSortBag(NewType);
   }
 
-  if(gsIsForall(DataTerm) || gsIsExists(DataTerm) || gsIsLambda(DataTerm)){
-    ATermTable NewVars=gstcAddVars2Table(Vars,ATLgetArgument(DataTerm,0));
+  if(gsIsForall(*DataTerm) || gsIsExists(*DataTerm) || gsIsLambda(*DataTerm)){
+    ATermTable NewVars=gstcAddVars2Table(Vars,ATLgetArgument(*DataTerm,0));
     if(!NewVars) {throw;}
-    ATermAppl NewData=gstcTraverseVarConstD(NewVars,ATAgetArgument(DataTerm,1));
-    if(!NewData) {throw;}
-    return ATsetArgument(DataTerm,(ATerm)NewData,1);
+    ATermAppl Data=ATAgetArgument(*DataTerm,1);
+    ATermAppl NewType=gstcTraverseVarConsTypeD(NewVars,&Data,PosType);
+    if(!NewType) {throw;}
+    *DataTerm=ATsetArgument(*DataTerm,(ATerm)Data,1);
+    return NewType;
   }
   
-  if(gsIsWhr(DataTerm)){
+  if(gsIsWhr(*DataTerm)){
     ATermList WhereVarList=ATmakeList0();
-    for(ATermList WhereList=ATLgetArgument(DataTerm,1);!ATisEmpty(WhereList);WhereList=ATgetNext(WhereList)){
+    for(ATermList WhereList=ATLgetArgument(*DataTerm,1);!ATisEmpty(WhereList);WhereList=ATgetNext(WhereList)){
       ATermAppl WhereElem=ATAgetFirst(WhereList);
-      WhereVarList=ATinsert(WhereVarList, (ATerm)gsMakeDataVarId(ATAgetArgument(WhereElem,0),gsMakeUnknown()));
+      ATermAppl WhereTerm=ATAgetArgument(WhereElem,1);
+      ATermAppl WhereType=gstcTraverseVarConsTypeD(Vars,&WhereTerm,gsMakeUnknown());
+      if(!WhereType) {throw;}
+      WhereVarList=ATinsert(WhereVarList, (ATerm)gsMakeDataVarId(ATAgetArgument(WhereElem,0),WhereType));
+      
     }
     ATermTable NewVars=gstcAddVars2Table(Vars,ATreverse(WhereVarList));
     if(!NewVars) {throw;}
-    ATermAppl NewData=gstcTraverseVarConstD(NewVars,ATAgetArgument(DataTerm,0));
-    if(!NewData) {throw;}
-    return ATsetArgument(DataTerm,(ATerm)NewData,0);
+    ATermAppl Data=ATAgetArgument(*DataTerm,0);
+    ATermAppl NewType=gstcTraverseVarConsTypeD(NewVars,&Data,PosType);
+    if(!NewType) {throw;}
+    *DataTerm=ATsetArgument(*DataTerm,(ATerm)Data,0);
+    return NewType;
   }
 
-  if(gsIsListEnum(DataTerm) || gsIsSetEnum(DataTerm)){
-    ATermList NewData=gstcTraverseVarConstL(Vars,ATLgetArgument(DataTerm,0));
+  if(gsIsListEnum(*DataTerm) || gsIsSetEnum(*DataTerm)){
+    ATermList NewData=gstcTraverseVarConstL(Vars,ATLgetArgument(*DataTerm,0));
     if(!NewData) {throw;}
-    return ATsetArgument(DataTerm,(ATerm)NewData,0);
+    *DataTerm=ATsetArgument(*DataTerm,(ATerm)NewData,0);
+    //here
+    return gsMakeUnknown();
   }  
 
-  if(gsIsBagEnum(DataTerm)){
-    ATermList NewData=gstcTraverseVarConstLL(Vars,ATLgetArgument(DataTerm,0));
+  if(gsIsBagEnum(*DataTerm)){
+    ATermList NewData=gstcTraverseVarConstLL(Vars,ATLgetArgument(*DataTerm,0));
     if(!NewData) {throw;}
-    return ATsetArgument(DataTerm,(ATerm)NewData,0);
+    *DataTerm=ATsetArgument(*DataTerm,(ATerm)NewData,0);
+    return gsMakeUnknown();
   }  
 
-  if(gsIsDataApplProd(DataTerm)){
-    ATermAppl NewData=gstcTraverseVarConstDN(ATgetLength(ATLgetArgument(DataTerm,1)),Vars,ATAgetArgument(DataTerm,0));
-    if(!NewData) {throw;}
-    ATermList NewDatas=gstcTraverseVarConstL(Vars,ATLgetArgument(DataTerm,1));
+  if(gsIsDataApplProd(*DataTerm)){
+    ATermAppl Data=ATAgetArgument(*DataTerm,0);
+    ATermAppl NewType=gstcTraverseVarConsTypeDN(ATgetLength(ATLgetArgument(*DataTerm,1)),
+						Vars,&Data,PosType);
+    if(!NewType) {throw;}
+
+    ATermList NewDatas=gstcTraverseVarConstL(Vars,ATLgetArgument(*DataTerm,1));
+    
     if(!NewDatas) {throw;}
-    return gsMakeDataApplProd(NewData,NewDatas);
+    *DataTerm=gsMakeDataApplProd(Data,NewDatas);
+    
+    if(gsIsSortArrowProd(gstcUnwindType(NewType))){
+      return ATAgetArgument(gstcUnwindType(NewType),1);
+    }
+
+    return NewType;
   }  
 
-  if(gsIsDataVarIdOpId(DataTerm)){
-    ATermAppl Name=ATAgetArgument(DataTerm,0);
+  if(gsIsDataVarIdOpId(*DataTerm)){
+    ATermAppl Name=ATAgetArgument(*DataTerm,0);
     ATermAppl Type=ATAtableGet(Vars,(ATerm)Name);
-    if(Type) return gsMakeDataVarId(Name,Type);
+    if(Type){
+      *DataTerm=gsMakeDataVarId(Name,Type);
+      return Type;
+    }
     ATermList ParList;
 
-    if((Type=ATAtableGet(context.constants,(ATerm)Name))) return gsMakeOpId(Name,Type);
+    if((Type=ATAtableGet(context.constants,(ATerm)Name))){
+      *DataTerm=gsMakeOpId(Name,Type);
+      return Type;
+    }
     if((ParList=ATLtableGet(gssystem.constants,(ATerm)Name))){
-      if(ATgetLength(ParList)==1) return gsMakeOpId(Name,ATAgetFirst(ParList));
+      if(ATgetLength(ParList)==1){
+	Type=ATAgetFirst(ParList);
+	*DataTerm=gsMakeOpId(Name,Type);
+	return Type;
+      }
       else{
 	gsWarningMsg("Ambiguous system constant %t\n",Name);    
-	return gsMakeOpId(Name,gsMakeUnknown());
+	*DataTerm=gsMakeOpId(Name,gsMakeUnknown());
+	return gsMakeUnknown();
       }
     }
 
@@ -982,10 +1065,15 @@ static ATermAppl gstcTraverseVarConstD(ATermTable Vars, ATermAppl DataTerm){
       return NULL;
     }
     
-    if(ATgetLength(ParList)==1) return gsMakeDataVarId(Name,ATAgetFirst(ParList));
+    if(ATgetLength(ParList)==1){ 
+      ATermAppl Type=ATAgetFirst(ParList);
+      *DataTerm=gsMakeDataVarId(Name,Type);
+      return Type;
+    }
     else{
       gsWarningMsg("Unknown Op %t\n",Name);    
-      return gsMakeOpId(Name,gsMakeUnknown());
+      *DataTerm=gsMakeOpId(Name,gsMakeUnknown());
+      return gsMakeUnknown();
     }
   }  
   assert(0);
@@ -993,11 +1081,14 @@ static ATermAppl gstcTraverseVarConstD(ATermTable Vars, ATermAppl DataTerm){
   return Result;
 }
     
-static ATermAppl gstcTraverseVarConstDN(int nFactPars, ATermTable Vars, ATermAppl DataTerm){
-  if(gsIsDataVarIdOpId(DataTerm)){
-    ATermAppl Name=ATAgetArgument(DataTerm,0);
+static ATermAppl gstcTraverseVarConsTypeDN(int nFactPars, ATermTable Vars, ATermAppl *DataTerm, ATermAppl PosType){
+  if(gsIsDataVarIdOpId(*DataTerm)){
+    ATermAppl Name=ATAgetArgument(*DataTerm,0);
     ATermAppl Type=ATAtableGet(Vars,(ATerm)Name);
-    if(Type) return gsMakeDataVarId(Name,Type);
+    if(Type){
+      *DataTerm=gsMakeDataVarId(Name,Type);
+      return Type;
+    }
     ATermList ParList;
     
     if(!nFactPars){
@@ -1005,12 +1096,14 @@ static ATermAppl gstcTraverseVarConstDN(int nFactPars, ATermTable Vars, ATermApp
       else{
 	if((ParList=ATLtableGet(gssystem.constants,(ATerm)Name))){
 	  if(ATgetLength(ParList)==1){
-	    gsWarningMsg("System constant%t type  %t\n",Name,ParList);    
-	    return gsMakeOpId(Name,ATAgetFirst(ParList));
+	    ATermAppl Type=ATAgetFirst(ParList);
+	    *DataTerm=gsMakeOpId(Name,Type);
+	    return Type;
 	  }
 	  else{
 	    gsWarningMsg("Ambiguous system constant %t\n",Name);    
-	    return gsMakeOpId(Name,gsMakeUnknown());
+	    *DataTerm=gsMakeOpId(Name,gsMakeUnknown());
+	    return Type;
 	  }
 	}
 	else{
@@ -1046,13 +1139,18 @@ static ATermAppl gstcTraverseVarConstDN(int nFactPars, ATermTable Vars, ATermApp
       return NULL;
     }
     
-    if(ATgetLength(ParList)==1) return gsMakeDataVarId(Name,ATAgetFirst(ParList));
+    if(ATgetLength(ParList)==1){
+      ATermAppl Type=ATAgetFirst(ParList);
+      *DataTerm=gsMakeOpId(Name,Type);
+      return Type;
+    }
     else{
       gsWarningMsg("Ambiguous Op %t\n",Name);    
-      return gsMakeOpId(Name,gsMakeUnknown());
+      *DataTerm=gsMakeOpId(Name,gsMakeUnknown());
+      return gsMakeUnknown();
     }
   }
-  else return gstcTraverseVarConstD(Vars, DataTerm);
+  else return gstcTraverseVarConsTypeD(Vars,DataTerm,PosType);
 }
 
 
@@ -1061,9 +1159,10 @@ static ATermList gstcTraverseVarConstL(ATermTable Vars, ATermList DataTermList){
   ATermList NewDataTermList=ATmakeList0();
 
   for(;!ATisEmpty(DataTermList);DataTermList=ATgetNext(DataTermList)){
-    ATermAppl NewDataTerm=gstcTraverseVarConstD(Vars, ATAgetFirst(DataTermList));
-    if(!NewDataTerm) {throw;}
-    NewDataTermList=ATinsert(NewDataTermList,(ATerm)NewDataTerm);
+    ATermAppl DataTerm=ATAgetFirst(DataTermList);
+    ATermAppl Type=gstcTraverseVarConsTypeD(Vars,&DataTerm,gsMakeUnknown());
+    if(!Type) {throw;}
+    NewDataTermList=ATinsert(NewDataTermList,(ATerm)DataTerm);
   }
   return ATreverse(NewDataTermList);
  finally:
@@ -1076,11 +1175,13 @@ static ATermList gstcTraverseVarConstLL(ATermTable Vars, ATermList DataTermList2
 
   for(;!ATisEmpty(DataTermList2);DataTermList2=ATgetNext(DataTermList2)){
     ATermAppl DataTerm2=ATAgetFirst(DataTermList2);
-    ATermAppl NewDataTerm0=gstcTraverseVarConstD(Vars, ATAgetArgument(DataTerm2,0));
-    if(!NewDataTerm0) {throw;}
-    ATermAppl NewDataTerm1=gstcTraverseVarConstD(Vars, ATAgetArgument(DataTerm2,1));
-    if(!NewDataTerm1) {throw;}
-    NewDataTermList2=ATinsert(NewDataTermList2,(ATerm)gsMakeBagEnumElt(NewDataTerm0,NewDataTerm1));
+    ATermAppl DataTerm0=ATAgetArgument(DataTerm2,0);
+    ATermAppl Type0=gstcTraverseVarConsTypeD(Vars,&DataTerm0,gsMakeUnknown());
+    if(!Type0) {throw;}
+    ATermAppl DataTerm1=ATAgetArgument(DataTerm2,1);
+    ATermAppl Type1=gstcTraverseVarConsTypeD(Vars,&DataTerm1,gsMakeUnknown());
+    if(!Type1) {throw;}
+    NewDataTermList2=ATinsert(NewDataTermList2,(ATerm)gsMakeBagEnumElt(DataTerm0,DataTerm1));
   }
   return ATreverse(NewDataTermList2);
  finally:
@@ -1092,6 +1193,7 @@ static ATermList gstcTraverseVarConstLL(ATermTable Vars, ATermList DataTermList2
 // ================================================================================
 static ATbool gstcInferTypesP(ATermTable Vars, ATermAppl ProcTerm){
   ATbool Result=ATtrue;
+
  finally:
   return Result;
 }
@@ -1100,4 +1202,97 @@ static ATbool gstcInferTypesD(ATermTable Vars, ATermAppl DataTerm){
   ATbool Result=ATtrue;
  finally:
   return Result;
+}
+
+static ATermList gstcGetNotInferredList(ATermList TypeListList){
+  //we get: List of Lists of SortExpressions
+  //Outer list: possible parameter types 0..nPosParsVectors-1
+  //inner lists: parameter types vectors 0..nFormPars-1
+
+  //we constuct 1 vector (list) of sort expressions (NotInferred if ambiguous)
+  //0..nFormPars-1
+  
+  ATermList Result=ATmakeList0();
+  int nFormPars=ATgetLength(ATgetFirst(TypeListList));
+  DECLA(ATermList,Pars,nFormPars);
+  for(int i=0;i<nFormPars;i++){
+    Pars[i]=ATmakeList0();
+  }
+
+  for(;!ATisEmpty(TypeListList);TypeListList=ATgetNext(TypeListList)){
+    ATermList TypeList=ATLgetFirst(TypeListList);
+    for(int i=0;i<nFormPars;TypeList=ATgetNext(TypeList),i++){
+      Pars[i]=gstcInsertType(Pars[i],ATAgetFirst(TypeList));
+    }
+  }
+  
+  for(int i=nFormPars-1;i>=0;i--) Result=ATinsert(Result,(ATerm)gstcMakeNotInferred(ATreverse(Pars[i])));
+  return Result;
+}
+
+static ATermList gstcInsertType(ATermList TypeList, ATermAppl Type){
+  for(ATermList OldTypeList=TypeList;!ATisEmpty(OldTypeList);OldTypeList=ATgetNext(OldTypeList)){
+    if(gstcEqTypesA(ATAgetFirst(OldTypeList),Type)) return TypeList;
+  }
+  return ATinsert(TypeList,(ATerm)Type);
+}
+
+static ATermList gstcAdjustNotInferredList(ATermList PosTypeList, ATermList TypeListList){
+  // PosTypeList -- List of Sortexpressions (possibly NotInferred(List Sortexpr))
+  // TypeListList -- List of (Lists of Types)
+  // returns: PosTypeList, adjusted to the elements of TypeListList
+  // NULL if cannot be ajusted.
+
+  gsDebugMsg("gstcAdjustNotInferredList: PosTypeList %t;    TypeListList:%t \n",PosTypeList,TypeListList);
+
+  //if PosTypeList has only normal types -- check if it is in TypeListList, 
+  //if so return PosTypeList, otherwise return NULL
+  if(!gstcIsNotInferredL(PosTypeList)){
+    if(gstcInTypesL(PosTypeList,TypeListList)) return PosTypeList;
+    else return NULL;
+  }
+ 
+  //Filter TypeListList to contain only compatible with TypeList lists of parameters.
+  ATermList NewTypeListList=ATmakeList0();
+  for(;!ATisEmpty(TypeListList);TypeListList=ATgetNext(TypeListList)){
+    ATermList TypeList=ATLgetFirst(TypeListList);
+    if(gstcIsTypeAllowed(PosTypeList,TypeList))
+      NewTypeListList=ATinsert(NewTypeListList,(ATerm)TypeList);
+  }
+  if(ATisEmpty(NewTypeListList)) return NULL;
+  if(ATgetLength(NewTypeListList)==1) return ATLgetFirst(NewTypeListList);
+
+  // otherwise return not inferred.
+  return gstcGetNotInferredList(ATreverse(NewTypeListList));
+}
+  
+static ATbool gstcIsTypeAllowed(ATermList PosTypeList, ATermList TypeList){
+  gsDebugMsg("gstcIsTypeAllowed: PosTypeList %t;    TypeList:%t \n",PosTypeList,TypeList);
+  for(;!ATisEmpty(TypeList);TypeList=ATgetNext(TypeList),PosTypeList=ATgetNext(PosTypeList)){
+    ATermAppl PosType=ATAgetFirst(PosTypeList);
+    if(gsIsUnknown(PosType)) continue;
+    if(gstcIsNotInferred(PosType)){
+      if(!gstcInTypesA(ATAgetFirst(TypeList),ATLgetArgument(PosType,0))) return ATfalse;
+      else continue;
+    }
+    //PosType is a notmal type
+    if(!gstcEqTypesA(PosType,ATAgetFirst(TypeList))) return ATfalse;
+  }
+  gsDebugMsg("gstcIsTypeAllowed: True:  PosTypeList %t;    TypeList:%t \n",PosTypeList,TypeList);
+  return ATtrue;
+}
+
+static ATbool gstcIsNotInferredL(ATermList TypeList){
+  for(;!ATisEmpty(TypeList);TypeList=ATgetNext(TypeList)){
+    ATermAppl Type=ATAgetFirst(TypeList);
+    if(gstcIsNotInferred(Type)||gsIsUnknown(Type)) return ATtrue;
+  }
+  return ATfalse;
+}
+
+static ATermAppl gstcUnwindType(ATermAppl Type){
+  if(!gsIsSortId(Type)) return Type;
+  ATermAppl Value=ATAtableGet(context.defined_sorts,(ATerm)ATAgetArgument(Type,0));
+  if(!Value) Value=Type;
+  return Value;
 }
