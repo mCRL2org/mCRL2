@@ -30,6 +30,7 @@ extern "C"
 
 #include "gstypecheck.h"
 #include "gsfunc.h"
+#include "gssystem.h"
 
 #define ThrowF            {ThrowV(ATfalse);}
 //store ATfalse in result and throw an exception
@@ -97,6 +98,9 @@ static ATbool gstcCheckNamesD(ATermTable, ATermAppl);
 
 static ATbool gstcAddConstant(ATermAppl, ATermAppl, const char*);
 static ATbool gstcAddFunction(ATermAppl, ATermAppl, const char*);
+inline static void gstcAddSystemConstant(ATermAppl);
+static void gstcAddSystemFunction(ATermAppl);
+
 static ATermTable gstcAddVars2Table(ATermTable,ATermList);
 static ATermAppl gstcRewrActProc(ATermAppl);
 static inline ATermAppl gstcMakeActionOrProc(ATbool, ATermAppl, ATermList, ATermList);
@@ -106,6 +110,9 @@ static ATermAppl gstcTraverseVarConstD(ATermTable, ATermAppl);
 static ATermAppl gstcTraverseVarConstDN(int, ATermTable, ATermAppl);
 static ATermList gstcTraverseVarConstL(ATermTable, ATermList);
 static ATermList gstcTraverseVarConstLL(ATermTable, ATermList);
+
+static inline ATbool gstcIsPos(ATermAppl Number) {return (atoi(ATgetName(ATgetAFun(Number)))>0);}
+static inline ATbool gstcIsNat(ATermAppl Number) {return (atoi(ATgetName(ATgetAFun(Number)))>=0);}
 
 #define INIT_KEY gsMakeProcVarId(ATmakeAppl0(ATmakeAFun("init",0,ATtrue)),ATmakeList0())
 
@@ -155,6 +162,8 @@ ATermAppl gsTypeCheck (ATermAppl input){
 // ============ Static functions
 // ========= main processing functions
 void gstcDataInit(void){
+  ATprotect((ATerm* )&gssystem.constants);
+  ATprotect((ATerm* )&gssystem.functions);
   ATprotect((ATerm* )&context.basic_sorts);
   ATprotect((ATerm* )&context.defined_sorts);	
   ATprotect((ATerm* )&context.constants);
@@ -165,6 +174,8 @@ void gstcDataInit(void){
   ATprotect((ATerm* )&body.proc_pars);
   ATprotect((ATerm* )&body.proc_bodies);
 
+  gssystem.constants=ATtableCreate(63,50);
+  gssystem.functions=ATtableCreate(63,50);
   context.basic_sorts=ATindexedSetCreate(63,50);
   context.defined_sorts=ATtableCreate(63,50);
   context.constants=ATtableCreate(63,50);
@@ -173,9 +184,83 @@ void gstcDataInit(void){
   context.processes=ATtableCreate(63,50);
   body.proc_pars=ATtableCreate(63,50);
   body.proc_bodies=ATtableCreate(63,50);
+
+  //Creation of operation identifiers for system defined operations.
+  // Bool
+  gstcAddSystemConstant(gsMakeOpIdTrue());
+  gstcAddSystemConstant(gsMakeOpIdFalse());
+  gstcAddSystemFunction(gsMakeOpIdNot());
+  gstcAddSystemFunction(gsMakeOpIdAnd());
+  gstcAddSystemFunction(gsMakeOpIdOr());
+  gstcAddSystemFunction(gsMakeOpIdImp());
+  gstcAddSystemFunction(gsMakeOpIdEq(gsMakeUnknown()));
+  gstcAddSystemFunction(gsMakeOpIdNeq(gsMakeUnknown()));
+  gstcAddSystemFunction(gsMakeOpIdIf(gsMakeUnknown()));
+  //Numbers
+  //gstcAddSystemFunction(gsMakeOpIdPos2Nat());
+  //gstcAddSystemFunction(gsMakeOpIdPos2Int());
+  //gstcAddSystemFunction(gsMakeOpIdNat2Pos());
+  //gstcAddSystemFunction(gsMakeOpIdNat2Int());
+  //gstcAddSystemFunction(gsMakeOpIdInt2Pos());
+  //gstcAddSystemFunction(gsMakeOpIdInt2Nat());
+  gstcAddSystemFunction(gsMakeOpIdLTE(gsMakeSortIdPos()));
+  gstcAddSystemFunction(gsMakeOpIdLTE(gsMakeSortIdNat()));
+  gstcAddSystemFunction(gsMakeOpIdLTE(gsMakeSortIdInt()));
+  //more
+  gstcAddSystemFunction(gsMakeOpIdLT(gsMakeSortIdPos()));
+  gstcAddSystemFunction(gsMakeOpIdLT(gsMakeSortIdNat()));
+  gstcAddSystemFunction(gsMakeOpIdLT(gsMakeSortIdInt()));
+  //more
+  gstcAddSystemFunction(gsMakeOpIdGTE(gsMakeSortIdPos()));
+  gstcAddSystemFunction(gsMakeOpIdGTE(gsMakeSortIdNat()));
+  gstcAddSystemFunction(gsMakeOpIdGTE(gsMakeSortIdInt()));
+  //more
+  gstcAddSystemFunction(gsMakeOpIdGT(gsMakeSortIdPos()));
+  gstcAddSystemFunction(gsMakeOpIdGT(gsMakeSortIdNat()));
+  gstcAddSystemFunction(gsMakeOpIdGT(gsMakeSortIdInt()));
+  //more
+  gstcAddSystemFunction(gsMakeOpIdMax(gsMakeSortIdPos()));
+  gstcAddSystemFunction(gsMakeOpIdMax(gsMakeSortIdNat()));
+  gstcAddSystemFunction(gsMakeOpIdMax(gsMakeSortIdInt()));
+  //more
+  gstcAddSystemFunction(gsMakeOpIdMin(gsMakeSortIdPos()));
+  gstcAddSystemFunction(gsMakeOpIdMin(gsMakeSortIdNat()));
+  gstcAddSystemFunction(gsMakeOpIdMin(gsMakeSortIdInt()));
+  //more
+  gstcAddSystemFunction(gsMakeOpIdAbs());
+  //more
+  gstcAddSystemFunction(gsMakeOpIdNeg(gsMakeSortIdPos()));
+  gstcAddSystemFunction(gsMakeOpIdNeg(gsMakeSortIdNat()));
+  gstcAddSystemFunction(gsMakeOpIdNeg(gsMakeSortIdInt()));
+  gstcAddSystemFunction(gsMakeOpIdSucc(gsMakeSortIdPos()));
+  gstcAddSystemFunction(gsMakeOpIdSucc(gsMakeSortIdNat()));
+  gstcAddSystemFunction(gsMakeOpIdSucc(gsMakeSortIdInt()));
+  gstcAddSystemFunction(gsMakeOpIdPred(gsMakeSortIdPos()));
+  gstcAddSystemFunction(gsMakeOpIdPred(gsMakeSortIdNat()));
+  gstcAddSystemFunction(gsMakeOpIdPred(gsMakeSortIdInt()));
+  gstcAddSystemFunction(gsMakeOpIdAdd(gsMakeSortIdPos()));
+  gstcAddSystemFunction(gsMakeOpIdAdd(gsMakeSortIdNat()));
+  gstcAddSystemFunction(gsMakeOpIdAdd(gsMakeSortIdInt()));
+  //more
+  gstcAddSystemFunction(gsMakeOpIdSubt(gsMakeSortIdPos()));
+  gstcAddSystemFunction(gsMakeOpIdSubt(gsMakeSortIdNat()));
+  gstcAddSystemFunction(gsMakeOpIdSubt(gsMakeSortIdInt()));
+  gstcAddSystemFunction(gsMakeOpIdMult(gsMakeSortIdPos()));
+  gstcAddSystemFunction(gsMakeOpIdMult(gsMakeSortIdNat()));
+  gstcAddSystemFunction(gsMakeOpIdMult(gsMakeSortIdInt()));
+  //more
+  gstcAddSystemFunction(gsMakeOpIdDiv(gsMakeSortIdNat()));
+  gstcAddSystemFunction(gsMakeOpIdDiv(gsMakeSortIdInt()));
+  gstcAddSystemFunction(gsMakeOpIdMod(gsMakeSortIdNat()));
+  gstcAddSystemFunction(gsMakeOpIdMod(gsMakeSortIdInt()));
+  gstcAddSystemFunction(gsMakeOpIdExp(gsMakeSortIdPos()));
+  gstcAddSystemFunction(gsMakeOpIdExp(gsMakeSortIdInt()));
+  gstcAddSystemFunction(gsMakeOpIdExp(gsMakeSortIdNat()));
 }
 
 void gstcDataDestroy(void){
+  ATtableDestroy(gssystem.constants);
+  ATtableDestroy(gssystem.functions);
   ATindexedSetDestroy(context.basic_sorts);
   ATtableDestroy(context.defined_sorts);
   ATtableDestroy(context.constants);
@@ -439,13 +524,13 @@ static ATbool gstcReadInSortStruct(ATermAppl SortExpr){
       // recognizer -- if present -- a function from SortExpr to Bool
       ATermAppl Name=ATAgetArgument(Constr,2);
       if(!gsIsNil(Name) && 
-	 !gstcAddFunction(Name,gsMakeSortArrowProd(ATmakeList1((ATerm)Constr),gsMakeSortExprBool()),"recognizer")) {ThrowF;}
+	 !gstcAddFunction(Name,gsMakeSortArrowProd(ATmakeList1((ATerm)SortExpr),gsMakeSortExprBool()),"recognizer")) {ThrowF;}
       
       // constructor type and projections
       ATermList Projs=ATLgetArgument(Constr,1);
       Name=ATAgetArgument(Constr,0);
       if(ATisEmpty(Projs)){
-	if(!gstcAddConstant(Name,Constr,"constructor constant")){ThrowF;}
+	if(!gstcAddConstant(Name,SortExpr,"constructor constant")){ThrowF;}
 	else continue;
       }
       
@@ -457,11 +542,12 @@ static ATbool gstcReadInSortStruct(ATermAppl SortExpr){
 	// not to forget, recursive call for ProjSort ;-)
 	if(!gstcReadInSortStruct(ProjSort)) {ThrowF;}
 
-	if(!gsIsNil(Proj) &&
-	   !gstcAddFunction(ATAgetArgument(Proj,0),gsMakeSortArrowProd(ATmakeList1((ATerm)Constr),ProjSort),"projection")) {ThrowF;}
+	ATermAppl ProjName=ATAgetArgument(Proj,0);
+	if(!gsIsNil(ProjName) &&
+	   !gstcAddFunction(ProjName,gsMakeSortArrowProd(ATmakeList1((ATerm)SortExpr),ProjSort),"projection")) {ThrowF;}
 	ConstructorType=ATinsert(ConstructorType,(ATerm)ProjSort);
       }
-      if(!gstcAddFunction(Name,gsMakeSortArrowProd(ATreverse(ConstructorType),Constr),"constructor")) {ThrowF;}
+      if(!gstcAddFunction(Name,gsMakeSortArrowProd(ATreverse(ConstructorType),SortExpr),"constructor")) {ThrowF;}
     }
     return ATtrue;
   }
@@ -469,13 +555,17 @@ static ATbool gstcReadInSortStruct(ATermAppl SortExpr){
   assert(0);
  finally:
   return Result;
-} 
+}
 
 static ATbool gstcAddConstant(ATermAppl Name, ATermAppl Sort, const char* msg){
   ATbool Result=ATtrue;
 
   if(ATAtableGet(context.constants, (ATerm)Name) || ATLtableGet(context.functions, (ATerm)Name)){
     ThrowMF("Double declaration of %s %t\n", msg, Name);
+  }
+
+  if(ATAtableGet(gssystem.constants, (ATerm)Name) || ATLtableGet(gssystem.functions, (ATerm)Name)){
+    ThrowMF("Attempt to redeclare the system identifier with %s %t\n", msg, Name);
   }
   
   ATtablePut(context.constants, (ATerm)Name, (ATerm)Sort);
@@ -488,6 +578,10 @@ static ATbool gstcAddFunction(ATermAppl Name, ATermAppl Sort, const char *msg){
 
   if(ATAtableGet(context.constants, (ATerm)Name)){
     ThrowMF("Double declaration of constant and %s %t\n", msg, Name);
+  }
+
+  if(ATAtableGet(gssystem.constants, (ATerm)Name) || ATLtableGet(gssystem.functions, (ATerm)Name)){
+    ThrowMF("Attempt to redeclare the system identifier with %s %t\n", msg, Name);
   }
 
   ATermList Types=ATLtableGet(context.functions, (ATerm)Name);
@@ -505,6 +599,19 @@ static ATbool gstcAddFunction(ATermAppl Name, ATermAppl Sort, const char *msg){
   gsDebugMsg("Read-in %s %t Type %t\n",msg,Name,Types);    
  finally:
   return Result;
+}
+
+inline static void gstcAddSystemConstant(ATermAppl OpId){
+  ATtablePut(gssystem.constants, (ATerm)ATAgetArgument(OpId,0), (ATerm)ATAgetArgument(OpId,1));
+}
+
+static void gstcAddSystemFunction(ATermAppl OpId){
+  ATermAppl Name=ATAgetArgument(OpId,0);
+  ATermList Types=ATLtableGet(gssystem.functions, (ATerm)Name);
+
+  if (!Types) Types=ATmakeList0();
+  Types=ATappend(Types,(ATerm)ATAgetArgument(OpId,1));
+  ATtablePut(gssystem.functions,(ATerm)Name,(ATerm)Types);
 }
 
 static ATbool gstcCheckNamesP(ATermTable Vars, ATermAppl ProcTerm){
@@ -698,7 +805,15 @@ static ATermAppl gstcTraverseVarConstP(ATermTable Vars, ATermAppl ProcTerm){
 static ATermAppl gstcTraverseVarConstD(ATermTable Vars, ATermAppl DataTerm){
   ATermAppl Result=NULL;
  
-  if(gsIsNumber(DataTerm)) return DataTerm;
+  if(gsIsNumber(DataTerm)){
+    ATermAppl Number=ATAgetArgument(DataTerm,0);
+    ATermAppl Sort;
+    if(gstcIsPos(Number)) Sort=gsMakeSortIdPos();
+    else if(gstcIsNat(Number)) Sort=gsMakeSortIdNat(); 
+    else Sort=gsMakeSortIdInt(); 
+    
+    return ATsetArgument(DataTerm,(ATerm)Sort,1);
+  }
 
   if(gsIsSetBagComp(DataTerm)){
     ATermTable NewVars=gstcAddVars2Table(Vars,ATmakeList1((ATerm)ATAgetArgument(DataTerm,0)));
@@ -753,13 +868,22 @@ static ATermAppl gstcTraverseVarConstD(ATermTable Vars, ATermAppl DataTerm){
     ATermAppl Name=ATAgetArgument(DataTerm,0);
     ATermAppl Type=ATAtableGet(Vars,(ATerm)Name);
     if(Type) return gsMakeDataVarId(Name,Type);
-    
+    ATermList ParList;
+
     if((Type=ATAtableGet(context.constants,(ATerm)Name))) return gsMakeOpId(Name,Type);
-    
-    ATermList ParList=ATLtableGet(context.functions,(ATerm)Name);
+    if((ParList=ATLtableGet(gssystem.constants,(ATerm)Name))){
+      if(ATgetLength(ParList)==1) return gsMakeOpId(Name,ATAgetFirst(ParList));
+      else return gsMakeOpId(Name,gsMakeUnknown());
+    }
+
+    ATermList ParListS=ATLtableGet(gssystem.functions,(ATerm)Name);
+    ParList=ATLtableGet(context.functions,(ATerm)Name);
+    if(!ParList) ParList=ParListS;
+    else if(ParListS) ParList=ATconcat(ParListS,ParList);
+
     if(ParList && ATgetLength(ParList)==1) return gsMakeDataVarId(Name,ATAgetFirst(ParList));
     else{
-      gsDebugMsg("Unknown Op %t\n",DataTerm);    
+      gsWarningMsg("Unknown Op %t\n",DataTerm);    
       return gsMakeOpId(Name,gsMakeUnknown());
     }
   }  
@@ -773,22 +897,34 @@ static ATermAppl gstcTraverseVarConstDN(int nFactPars, ATermTable Vars, ATermApp
     ATermAppl Name=ATAgetArgument(DataTerm,0);
     ATermAppl Type=ATAtableGet(Vars,(ATerm)Name);
     if(Type) return gsMakeDataVarId(Name,Type);
+    ATermList ParList;
     
     if(!nFactPars){
       if((Type=ATAtableGet(context.constants,(ATerm)Name))) return gsMakeOpId(Name,Type);
       else{
-	gsDebugMsg("Unknown Op %t\n",DataTerm);
-	return gsMakeOpId(Name,Type);
+	if((ParList=ATLtableGet(gssystem.constants,(ATerm)Name))){
+	  if(ATgetLength(ParList)==1) return gsMakeOpId(Name,ATAgetFirst(ParList));
+	  else return gsMakeOpId(Name,gsMakeUnknown());
+	}
+	else{
+	  gsWarningMsg("Unknown Op %t\n",DataTerm);
+	  return gsMakeOpId(Name,gsMakeUnknown());
+	}
       }
     }
     
-    ATermList ParList=ATLtableGet(context.functions,(ATerm)Name);
+    ATermList ParListS=ATLtableGet(gssystem.functions,(ATerm)Name);
+    ParList=ATLtableGet(context.functions,(ATerm)Name);
+    if(!ParList) ParList=ParListS;
+    else if(ParListS) ParList=ATconcat(ParListS,ParList);
+
     // filter ParList keeping only functions A_0#...#A_nFactPars->A
     if(ParList){
       ATermList NewParList=ATmakeList0();
       for(;!ATisEmpty(ParList);ParList=ATgetNext(ParList)){
 	ATermAppl Par=ATAgetFirst(ParList);
-	if(gsIsSortArrowProd(Par) && ATgetLength(ATLgetArgument(Par,0))==nFactPars) NewParList=ATinsert(NewParList,(ATerm)Par);
+	if(gsIsSortArrowProd(Par) && ATgetLength(ATLgetArgument(Par,0))==nFactPars) 
+	  NewParList=ATinsert(NewParList,(ATerm)Par);
       }
       ParList=ATreverse(NewParList);
     }
@@ -833,3 +969,4 @@ static ATermList gstcTraverseVarConstLL(ATermTable Vars, ATermList DataTermList2
  finally:
   return Result;
 }
+
