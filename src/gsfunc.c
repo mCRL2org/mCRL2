@@ -2017,6 +2017,24 @@ ATermAppl gsMakeDataExprImp(ATermAppl DataExprLHS, ATermAppl DataExprRHS)
   return gsMakeDataAppl2(gsMakeOpIdImp(), DataExprLHS, DataExprRHS);
 }
 
+ATermAppl gsMakeDataExprForall(ATermAppl DataExpr)
+{
+  ATermAppl ExprSort = gsGetSort(DataExpr);
+  assert(gsIsSortArrow(ExprSort));
+  assert(ATisEqual(ATAgetArgument(ExprSort, 1), gsMakeSortExprBool()));
+  return gsMakeDataAppl(gsMakeOpIdForall(ATAgetArgument(ExprSort, 0)),
+    DataExpr);
+}
+
+ATermAppl gsMakeDataExprExists(ATermAppl DataExpr)
+{
+  ATermAppl ExprSort = gsGetSort(DataExpr);
+  assert(gsIsSortArrow(ExprSort));
+  assert(ATisEqual(ATAgetArgument(ExprSort, 1), gsMakeSortExprBool()));
+  return gsMakeDataAppl(gsMakeOpIdExists(ATAgetArgument(ExprSort, 0)),
+    DataExpr);
+}
+
 ATermAppl gsMakeDataExprEq(ATermAppl DataExprLHS, ATermAppl DataExprRHS)
 {
   ATermAppl ExprSort = gsGetSort(DataExprLHS);

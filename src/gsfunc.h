@@ -603,6 +603,14 @@ ATermAppl gsMakeDataExprImp(ATermAppl DataExprLHS, ATermAppl DataExprRHS);
 //Pre: DataExprLHS and DataExprRHS are data expressions
 //Ret: Data expression for `DataExprLHS implies DataExprRHS'
 
+ATermAppl gsMakeDataExprForall(ATermAppl DataExpr);
+//Pre: DataExpr is a data expression of sort S -> Bool
+//Ret: Data expression for the universal quantification over DataExpr
+
+ATermAppl gsMakeDataExprExists(ATermAppl DataExpr);
+//Pre: DataExpr is a data expression of sort S -> Bool
+//Ret: Data expression for the existential quantification over DataExpr
+
 ATermAppl gsMakeDataExprEq(ATermAppl DataExprLHS, ATermAppl DataExprRHS);
 //Pre: DataExprLHS and DataExprRHS are data expressions of the same sort, and
 //     must be different from Unknown

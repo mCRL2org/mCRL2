@@ -528,6 +528,19 @@ ATermAppl gsImplExprsPart(ATermAppl Part, ATermList *PSubsts,
           Body), gsMakeSortBag(VarSort));
       }
     }
+  } else if (gsIsForall(Part) || gsIsExists(Part)) {
+    //Part is a quantification; replace by its implementation
+    ATermList Vars = ATreverse(ATLgetArgument(Part, 0));
+    bool IsForall = gsIsForall(Part);
+    Part = gsMakeLambda(ATmakeList1(ATgetFirst(Vars)), ATAgetArgument(Part, 1));
+    Part = IsForall?gsMakeDataExprForall(Part):gsMakeDataExprExists(Part);
+    Vars = ATgetNext(Vars);
+    while (!ATisEmpty(Vars))
+    {
+      Part = gsMakeLambda(ATmakeList1(ATgetFirst(Vars)), Part);
+      Part = IsForall?gsMakeDataExprForall(Part):gsMakeDataExprExists(Part);
+      Vars = ATgetNext(Vars);      
+    }
   } else if (gsIsLambda(Part)) {
     //Part is a lambda abstraction; replace by a named function
     //implement the body, the bound variables and the free variables
