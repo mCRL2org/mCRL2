@@ -29,18 +29,16 @@ act
 
 proc
   S            = S(b0).S(b1).S;
-  S(b:Bit)     = sum(d:D, r1(d).S(d,b));
+  S(b:Bit)     = sum d:D. r1(d).S(d,b);
   S(d:D,b:Bit) = s2(d,b).((r6(invert(b))+r6(e)).S(d,b)+r6(b));
 
   R            = R(b1).R(b0).R;
-  R(b:Bit)     = (sum(d:D, r3(d,b))+r3(e)).s5(b).R(b) +
-                 sum(d:D, r3(d,invert(b)).s4(d).s5(invert(b)));
+  R(b:Bit)     = (sum d:D. r3(d,b) + r3(e)).s5(b).R(b) +
+                 sum d:D. r3(d,invert(b)).s4(d).s5(invert(b));
 
-  K            = sum(d:D, sum(b:Bit, 
-                   r2(d,b).(tau_s3db.s3(d,b)+tau_s3e.s3(e))
-                 )).K;
+  K            = sum d:D,b:Bit. r2(d,b).(tau_s3db.s3(d,b)+tau_s3e.s3(e)).K;
 
-  L            = sum(b:Bit,r5(b).(tau_s6b.s6(b)+tau_s6e.s6(e))).L;
+  L            = sum b:Bit. r5(b).(tau_s6b.s6(b)+tau_s6e.s6(e)).L;
 
 init
   hide({tau_s3db, tau_s3e, tau_s6b, tau_s6e},

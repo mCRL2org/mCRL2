@@ -3,11 +3,11 @@
 
 proc 
   Sqr(i:Nat, j:Nat) =
-    sum(n:Nat, _get(i,n) | _put(j,n*n)) . Sqr(i,j);
+    sum n:Nat. _get(i,n) | _put(j,n*n) . Sqr(i,j);
 
   P(i:Nat, j:Nat, b:Bag(Nat)) =
-    sum(n:Nat, put(i,n) . P(i,j,put(n,b))) +
-    sum(n:Nat, (n in b) -> get(j,n) . P(take(n,b)));
+    sum n:Nat. put(i,n) . P(i,j,put(n,b)) +
+    sum n:Nat. (n in b) -> get(j,n) . P(take(n,b));
 
   DSqr(i:Nat, j:Nat, b:Bag(Nat)) =
     hide({__put,__get},

@@ -16,11 +16,8 @@
 map  n: Nat;
 
 sort D = struct d1 | d2;
-     extD = struct data(getdata:D) | empty?isEmpty;
-     Buf = Nat -> extD ;
-     % Kan Niet: Buf = Nat -> struct data(getdata:D) | empty?isEmpty; 
-     % Wel gewenst. De sort extD is verder geheel irrelevant.
-map  emptyBuf : Buf;
+     Buf = Nat -> struct data(getdata:D) | empty;
+map  emptyBuf: Buf;
      insert: D#Nat#Buf -> Buf;
      remove: Nat#Buf -> Buf;
      release: Nat#Nat#Buf -> Buf;
@@ -42,23 +39,20 @@ act  sA,rA,sD,rD: D;
      sE,rE,cE,sF,rF,cF: Nat;
      j;
 
-proc S(l,m:Nat,q:Buf)=
-        sum(d:D, inWindow(l,m,(l+n) mod 2*n) -> 
-                rA(d).S(l,(m+1) mod 2*n,insert(d,m,q)))+
-        sum(k:Nat, (q(k)!=empty) -> sB(q(k)).S(l,m,q))+
-        sum(k:Nat, rF(k).S(k,m,release(l,k,q)));
+proc S(l,m:Nat,q:Buf) =
+        sum d:D. inWindow(l,m,(l+n) mod 2*n) -> 
+                rA(d).S(l,(m+1) mod 2*n,insert(d,m,q))+
+        sum k:Nat. (q(k)!=empty) -> sB(q(k)).S(l,m,q)+
+        sum k:Nat. rF(k).S(k,m,release(l,k,q));
 
-     R(l:Nat,q:Buf)=
-        sum(d:D, sum(k:Nat, rC(d,k).
-           (inWindow(l,k,(l+n) mod 2*n) -> R(l,k,q)+
-            !inWindow(l,k,(l+n) mod 2*n) -> R(l,q))))+
-% Brrr. Ik moet hier de conditie twee keer formuleren.
+     R(l:Nat,q:Buf) =
+        sum d:D,k:Nat. rC(d,k).(inWindow(l,k,(l+n) mod 2*n) -> R(l,k,q),R(l,q))+
         (q(l)!=empty) -> sD(q(l)).R((l+1) mod 2*n,remove(l,q))+
         sE(nextempty(l,q)).R(l,q);
 
-     K= sum(d:D,sum(k:Nat,rB(d,k).(j.sC(d,k)+j))).K;
+     K = sum d:D,k:Nat. rB(d,k).(j.sC(d,k)+j).K;
 
-     L = sum(k:Nat, rE(k).(j.sF(k)+j)).L;
+     L = sum k:Nat. rE(k).(j.sF(k)+j).L;
 
 init allow({cB,cC,cE,cF,j,rA,sD},
         comm({rB|sB->cB, rC|sC->cC, rE|sE->cE, rF|sF->cF},

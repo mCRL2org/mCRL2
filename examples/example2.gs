@@ -3,8 +3,8 @@
 
 proc
   P(i:Nat, j:Nat, b:Bag(Nat)) = 
-    sum(n:N, put(i,n) . P(i,j,{n} + b)) +
-    sum(n:Nat, get(j,n) . (n in b) -> P(b - {n}));
+    sum n:Nat. put(i,n) . P(i,j,{n} + b) +
+    sum n:Nat. get(j,n) . ((n in b) -> P(b - {n}));
 
   P2 = 
     hide({__pass},
@@ -13,7 +13,7 @@ proc
 	  P(i,k,emptyBag) || P(k,j,emptyBag)
         )
       )
-    )
+    );
 
 init
   P2;
