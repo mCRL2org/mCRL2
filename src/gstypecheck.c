@@ -484,12 +484,20 @@ static ATbool gstcReadInConstructors(){
 } 
 
 static ATbool gstcReadInFuncs(ATermList Funcs){
-  gsDebugMsg("Star Read-in Func\n");    
+  gsDebugMsg("Start Read-in Func\n");    
   ATbool Result=ATtrue;
   for(;!ATisEmpty(Funcs);Funcs=ATgetNext(Funcs)){
     ATermAppl Func=ATAgetFirst(Funcs);
     ATermAppl FuncName=ATAgetArgument(Func,0);
     ATermAppl FuncType=ATAgetArgument(Func,1);
+    
+    //if FuncType is a defined function sort, unwind it
+    { ATermAppl NewFuncType;
+      if(gsIsSortId(FuncType) 
+	 && (NewFuncType=ATAtableGet(context.defined_sorts,(ATerm)ATAgetArgument(FuncType,0))) 
+	 && gsIsSortArrowProd(NewFuncType))
+	FuncType=NewFuncType;
+    }
     
     if(gsIsSortArrowProd(FuncType)){
       if(!gstcAddFunction(FuncName,FuncType,"function")) {ThrowF;}
@@ -1390,7 +1398,7 @@ static ATermAppl gstcTraverseVarConsTypeDN(int nFactPars, ATermTable Vars, ATerm
 	  }
 	}
 	else{
-	  gsErrorMsg("Unknown Op %t\n",Name);
+	  gsErrorMsg("Unknown constant %t\n",Name);
 	  return NULL;
 	}
       }
@@ -1402,12 +1410,13 @@ static ATermAppl gstcTraverseVarConsTypeDN(int nFactPars, ATermTable Vars, ATerm
     else if(ParListS) ParList=ATconcat(ParListS,ParList);
 
     if(!ParList) {
-      gsErrorMsg("Unknown Op %t\n",Name);
+      gsErrorMsg("Unknown Op %t with %d parameters\n",Name,nFactPars);
       return NULL;
     }
+    gsDebugMsg("Possible types for Op %t with %d arguments are (ParList: %t; PosType: %t)\n",Name,nFactPars,ParList,PosType);
 
     { // filter ParList keeping only functions A_0#...#A_nFactPars->A
-      ATermList NewParList=ATmakeList0();
+      ATermList NewParList=ATmakeList0(); 
       for(;!ATisEmpty(ParList);ParList=ATgetNext(ParList)){
 	ATermAppl Par=ATAgetFirst(ParList);
 	if(!gsIsSortArrowProd(Par)) continue;
@@ -1433,7 +1442,7 @@ static ATermAppl gstcTraverseVarConsTypeDN(int nFactPars, ATermTable Vars, ATerm
 	//and get the list. Then we take the min of the list.
 	
 	ParList=BackupParList;
-	gsDebugMsg("Trying casting for Op %t with %d arguments\n",Name,nFactPars);
+	gsDebugMsg("Trying casting for Op %t with %d arguments (ParList: %t; PosType: %t)\n",Name,nFactPars,ParList,PosType);
 	PosType=gstcExpandPosTypes(PosType);
 	for(;!ATisEmpty(ParList);ParList=ATgetNext(ParList)){
 	  ATermAppl Par=ATAgetFirst(ParList);
@@ -1459,7 +1468,7 @@ static ATermAppl gstcTraverseVarConsTypeDN(int nFactPars, ATermTable Vars, ATerm
       return Type;
     }
     else{
-      gsWarningMsg("Ambiguous Op %t\n",Name);    
+      gsWarningMsg("Ambiguous Op %t with %d parameters\n",Name,nFactPars);    
       *DataTerm=gsMakeOpId(Name,gsMakeUnknown());
       return gsMakeUnknown();
     }
