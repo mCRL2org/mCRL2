@@ -695,7 +695,7 @@ whr_decls_cs:
 
 //where clause declaration
 whr_decl:
-  ID EQ data_expr
+  ID EQUALS data_expr
     {
       $$ = gsMakeWhrDecl($1, $3);
       gsDebugMsg("parsed where clause declaration\n  %t\n", $$);
