@@ -1,0 +1,16 @@
+sort Bool
+func T,F:->Bool
+
+map  and:Bool#Bool->Bool
+
+var  b:Bool
+rew  and(b,T)=b
+     and(b,b)=b
+
+sort nat
+func zero:->nat S:nat->nat
+
+act a,b:nat
+proc X(n:nat)=restrict({b#a},comm({a#b},sum(m:nat,[a(m),b(n)].X(S(n)))))
+
+init X(zero)

@@ -1,0 +1,1 @@
+summary("sglr","small1.mcrl",[error("Parse error",[localized("character '\n' unexpected",area-in-file("small1.mcrl",area(2,0,2,0,1,0)))])])

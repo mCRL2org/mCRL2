@@ -1,0 +1,22 @@
+#!/bin/sh
+
+if [[ $# -eq 0 ]] || [[ $1 == "-h" ]] || [[ $1 == "--help" ]]
+then
+echo -ne 'Usage: '$0' FILE*\n'
+echo -ne '\tThis is a script for converting given mcrl sprcification[s]\n'
+echo -ne '\tto abstract sintax w.r.t. mCRL grammar table.\n'
+exit 1
+fi
+
+if [[ ! -r mCRLt.tbl ]]
+then
+echo -ne '\tERROR: file mCRLt.tbl should be in this directory\n'
+exit 1
+fi
+
+for i in $* #`ls $1 -1`
+do 
+sglr -2tA -vp mCRLt.tbl -i $i -o ${i%.*}.tmp
+implode-asfix -i ${i%.*}.tmp -o ${i%.*}.trm
+rm ${i%.*}.tmp
+done
