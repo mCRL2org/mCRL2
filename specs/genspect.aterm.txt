@@ -1,9 +1,15 @@
 // Date: 08-11-2004
 // This document describes the ATerm format of GenSpect specifications. Here:
-// - <IdString> represents a string of the format '[a-zA-Z_][a-zA-Z0-9_]*';
-// - <NumberString> represents a string of the format '"0"|("-"?[1-9][0-9]*) ';
-// - <A>* represents an ATermList with zero or more <A>'s;
-// - <A>+ represents an ATermList with one or more <A>'s.
+// - <IdString> represents a string of the format '[a-zA-Z_][a-zA-Z0-9_]*'
+// - <NumberString> represents a string of the format '"0"|("-"?[1-9][0-9]*)'
+// - the other alphabetical strings within angular brackets are non-terminals
+//   that represent all possible branches of their productions
+// - for non-terminal N, N*/N+ represents an ATermList with zero/one or more N's
+// - each c(a_0, ..., a_n), where c is an alphabetical string, represents an
+//   ATermAppl with c as its unquoted head and a_0, ..., a_n as its arguments
+
+//General
+//-------
 
 //identifier
 <Id>             ::= Id(<IdString>) 
@@ -11,40 +17,43 @@
 //number
 <Number>         ::= Number(<NumberString>) 
 
-//multiaction identifier
-<MAId>           ::= MAId(<Id>+) 
-
-//communication expression
-<CommExpr>       ::= CommExpr(<MAId>, <IdOrTau>) 
-
-//id or tau
-<IdOrTau>        ::= <Id>
-                   | Tau() 
-
-//renaming expression
-<RenExpr>        ::= RenExpr(<Id>, <Id>) 
-
-//constructor declaration of a structured sort declaration
-<StructDeclCons> ::= StructDeclCons(<Id>, <StructDeclProj>*, <IdOrNil>) 
-
-//projection declaration of a structured sort declaration
-<StructDeclProj> ::= StructDeclProj(<IdOrNil>, <SortExpr>+) 
-
-//id or nil
-<IdOrNil>        ::= <Id>
-                   | Nil() 
-
 //identifier declaration
 <IdDecl>         ::= IdDecl(<Id>, <SortExpr>) 
 
 //declaration of one or more identifiers of the same sort
 <IdsDecl>        ::= IdsDecl(<Id>+, <SortExpr>) 
 
-//bag enumeration element
-<BagEnumElt>     ::= BagEnumElt(<DataExpr>, <DataExpr>) 
+//id or nil
+<IdOrNil>        ::= <Id> | Nil() 
 
-//where clause declaration
-<WhrDecl>        ::= WhrDecl(<Id>, <DataExpr>) 
+//Specification
+//-------------
+
+//specification
+<Spec>           ::= Spec(SortSpec(<SortDecl>*), ConsSpec(<IdsDecl>*),
+                          MapSpec(<IdsDecl>*), EqnSpec(<EqnSect>*),
+                          ActSpec(<ActDecl>*), ProcSpec(<ProcDecl>*),
+                          Init(<ProcExpr>)) 
+
+//sort declaration
+<SortDecl>       ::= SortDeclStandard(<Id>+) 
+                   | SortDeclRef(<Id>, <SortExpr>) 
+                   | SortDeclStruct(<Id>, <StructDeclCons>+) 
+
+//equation section
+<EqnSect>        ::= EqnSect(<IdsDecl>*, <EqnDecl>+) 
+
+//equation declaration
+<EqnDecl>        ::= EqnDecl(<DataExpr>, <DataExpr>) 
+
+//action declaration
+<ActDecl>        ::= ActDecl(<Id>+, <SortExpr>*) 
+
+//process declaration
+<ProcDecl>       ::= ProcDecl(<Id>, <IdsDecl>*, <ProcExpr>) 
+
+//Expressions
+//-----------
 
 //sort expression
 <SortExpr>       ::= <Id>
@@ -56,6 +65,12 @@
                    | SortSet(<SortExpr>) 
                    | SortBag(<SortExpr>) 
                    | SortArrow(<SortExpr>+, <SortExpr>) 
+
+//constructor declaration of a structured sort declaration
+<StructDeclCons> ::= StructDeclCons(<Id>, <StructDeclProj>*, <IdOrNil>) 
+
+//projection declaration of a structured sort declaration
+<StructDeclProj> ::= StructDeclProj(<IdOrNil>, <SortExpr>+) 
 
 //data expression
 <DataExpr>       ::= <Id>
@@ -96,6 +111,12 @@
                    | Lambda(<IdDecl>, <DataExpr>) 
                    | Whr(<DataExpr>, <WhrDecl>+) 
 
+//bag enumeration element
+<BagEnumElt>     ::= BagEnumElt(<DataExpr>, <DataExpr>) 
+
+//where clause declaration
+<WhrDecl>        ::= WhrDecl(<Id>, <DataExpr>) 
+
 //process expression
 <ProcExpr>       ::= ActProcRef(<Id>, <DataExpr>*) 
                    | Delta() 
@@ -115,30 +136,11 @@
                    | LMerge(<ProcExpr>, <ProcExpr>) 
                    | Choice(<ProcExpr>, <ProcExpr>) 
 
-//sort declaration
-<SortDecl>       ::= SortDeclStandard(<Id>+) 
-                   | SortDeclRef(<Id>, <SortExpr>) 
-                   | SortDeclStruct(<Id>, <StructDeclCons>+) 
+//multiaction identifier
+<MAId>           ::= MAId(<Id>+) 
 
-//equation section
-<EqnSect>        ::= EqnSect(<IdsDecl>*, <EqnDecl>+) 
+//renaming expression
+<RenExpr>        ::= RenExpr(<Id>, <Id>) 
 
-//equation declaration
-<EqnDecl>        ::= EqnDecl(<DataExpr>, <DataExpr>) 
-
-//action declaration
-<ActDecl>        ::= ActDecl(<Id>+, <SortExpr>*) 
-
-//process declaration
-<ProcDecl>       ::= ProcDecl(<Id>, <IdsDecl>*, <ProcExpr>) 
-
-//specification
-<Spec>           ::= Spec(
-                       SortSpec(<SortDecl>*) ,
-                       ConsSpec(<IdsDecl>*) ,
-                       MapSpec(<IdsDecl>*) ,
-                       EqnSpec(<EqnSect>*) ,
-                       ActSpec(<ActDecl>*) ,
-                       ProcSpec(<ProcDecl>*) ,
-                       Init(<ProcExpr>) 
-                     ) 
+//communication expression
+<CommExpr>       ::= CommExpr(<MAId>, <IdOrNil>) 
