@@ -123,7 +123,7 @@ exports
     "(" Process-term ")"                               -> Process-term {bracket}
     Name "->" Name                                     -> Renaming
     "proc" Process-declaration+                        -> Process-specification
-    Name "(" { Variables"," }+ ")" "=" Process-term    -> Process-declaration
+    Name "(" { Variable"," }+ ")" "=" Process-term    -> Process-declaration
     Name "=" Process-term                              -> Process-declaration
     "act" Action-declaration+                          -> Action-specification
     Name-list ":" Domain                               -> Action-declaration
