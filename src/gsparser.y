@@ -1090,7 +1090,7 @@ proc_expr_choice:
     {
       $$ = $1;
     }
-  | proc_expr_choice PLUS proc_expr_sum
+  | proc_expr_sum PLUS proc_expr_choice
     {
       $$ = gsMakeChoice($1, $3);
       gsDebugMsg("parsed choice expression\n  %t\n", $$);
@@ -1116,12 +1116,12 @@ proc_expr_merge:
     {
       $$ = $1;
     }
-  | proc_expr_merge BARS proc_expr_binit
+  | proc_expr_binit BARS proc_expr_merge
     {
       $$ = gsMakeMerge($1, $3);
       gsDebugMsg("parsed merge expression\n  %t\n", $$);
     }
-  | proc_expr_merge LMERGE proc_expr_binit
+  | proc_expr_binit LMERGE proc_expr_merge
     {
       $$ = gsMakeLMerge($1, $3);
       gsDebugMsg("parsed left merge expression\n  %t\n", $$);
@@ -1134,7 +1134,7 @@ proc_expr_binit:
     {
       $$ = $1;
     }
-  | proc_expr_binit BINIT proc_expr_cond
+  | proc_expr_cond BINIT proc_expr_binit
     {
       $$ = gsMakeBInit($1, $3);
       gsDebugMsg("parsed bounded initialisation expression\n  %t\n", $$);
@@ -1166,7 +1166,7 @@ proc_expr_seq:
     {
       $$ = $1;
     }
-  | proc_expr_seq DOT proc_expr_at
+  | proc_expr_at DOT proc_expr_seq
     {
       $$ = gsMakeSeq($1, $3);
       gsDebugMsg("parsed sequential expression\n  %t\n", $$);
@@ -1192,7 +1192,7 @@ proc_expr_sync:
     {
       $$ = $1;
     }
-  | proc_expr_sync BAR proc_expr_primary
+  | proc_expr_primary BAR proc_expr_sync
     {
       $$ = gsMakeSync($1, $3);
       gsDebugMsg("parsed sync expression\n  %t\n", $$);

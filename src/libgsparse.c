@@ -646,9 +646,9 @@ void gsPrintPart(FILE *OutStream, const ATermAppl Part, bool ShowSorts,
     //print choice
     gsDebugMsg("printing choice\n");
     if (PrecLevel > 0) fprintf(OutStream, "(");
-    gsPrintPart(OutStream, ATAgetArgument(Part, 0), ShowSorts, 0);
+    gsPrintPart(OutStream, ATAgetArgument(Part, 0), ShowSorts, 1);
     fprintf(OutStream, " + ");
-    gsPrintPart(OutStream, ATAgetArgument(Part, 1), ShowSorts, 1);
+    gsPrintPart(OutStream, ATAgetArgument(Part, 1), ShowSorts, 0);
     if (PrecLevel > 0) fprintf(OutStream, ")");
   } else if (gsIsSum(Part)) {
     //print summation
@@ -663,21 +663,21 @@ void gsPrintPart(FILE *OutStream, const ATermAppl Part, bool ShowSorts,
     //print merge of left merge
     gsDebugMsg("printing merge or left merge\n");
     if (PrecLevel > 2) fprintf(OutStream, "(");
-    gsPrintPart(OutStream, ATAgetArgument(Part, 0), ShowSorts, 2);
+    gsPrintPart(OutStream, ATAgetArgument(Part, 0), ShowSorts, 3);
     if (gsIsMerge(Part)) {
       fprintf(OutStream, " || ");
     } else {
       fprintf(OutStream, " ||_ ");
     }
-    gsPrintPart(OutStream, ATAgetArgument(Part, 1), ShowSorts, 3);
+    gsPrintPart(OutStream, ATAgetArgument(Part, 1), ShowSorts, 2);
     if (PrecLevel > 2) fprintf(OutStream, ")");
   } else if (gsIsBInit(Part)) {
     //print bounded initialisation
     gsDebugMsg("printing bounded initialisation\n");
     if (PrecLevel > 3) fprintf(OutStream, "(");
-    gsPrintPart(OutStream, ATAgetArgument(Part, 0), ShowSorts, 3);
+    gsPrintPart(OutStream, ATAgetArgument(Part, 0), ShowSorts, 4);
     fprintf(OutStream, " << ");
-    gsPrintPart(OutStream, ATAgetArgument(Part, 1), ShowSorts, 4);
+    gsPrintPart(OutStream, ATAgetArgument(Part, 1), ShowSorts, 3);
     if (PrecLevel > 3) fprintf(OutStream, ")");
   } else if (gsIsCond(Part)) {
     //print conditional
@@ -696,9 +696,9 @@ void gsPrintPart(FILE *OutStream, const ATermAppl Part, bool ShowSorts,
     //print sequential composition
     gsDebugMsg("printing sequential composition\n");
     if (PrecLevel > 5) fprintf(OutStream, "(");
-    gsPrintPart(OutStream, ATAgetArgument(Part, 0), ShowSorts, 5);
+    gsPrintPart(OutStream, ATAgetArgument(Part, 0), ShowSorts, 6);
     fprintf(OutStream, " . ");
-    gsPrintPart(OutStream, ATAgetArgument(Part, 1), ShowSorts, 6);
+    gsPrintPart(OutStream, ATAgetArgument(Part, 1), ShowSorts, 5);
     if (PrecLevel > 5) fprintf(OutStream, ")");
   } else if (gsIsAtTime(Part)) {
     //print at expression
@@ -712,9 +712,9 @@ void gsPrintPart(FILE *OutStream, const ATermAppl Part, bool ShowSorts,
     //print sync
     gsDebugMsg("printing sync\n");
     if (PrecLevel > 7) fprintf(OutStream, "(");
-    gsPrintPart(OutStream, ATAgetArgument(Part, 0), ShowSorts, 7);
+    gsPrintPart(OutStream, ATAgetArgument(Part, 0), ShowSorts, 8);
     fprintf(OutStream, " | ");
-    gsPrintPart(OutStream, ATAgetArgument(Part, 1), ShowSorts, 8);
+    gsPrintPart(OutStream, ATAgetArgument(Part, 1), ShowSorts, 7);
     if (PrecLevel > 7) fprintf(OutStream, ")");
   } else if (gsIsRestrict(Part) || gsIsHide(Part) || gsIsRename(Part) ||
       gsIsComm(Part) || gsIsAllow(Part)) {
