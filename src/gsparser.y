@@ -1,3 +1,12 @@
+//Remarks
+//-------
+//
+//For reasons of efficiency recursive grammar rules are left-recursive if
+//possible. This implies that lists are parsed from right to left. For the
+//efficient use of the ATerm library parsed lists are stored in an ATermList
+//in reverse order. When the lists are completely parsed they are reversed
+//once.
+
 %{
 
 #include <stdio.h>
@@ -67,7 +76,7 @@ extern bool gsDebug;            /* declared in libgsparse.c */
 spec:
   spec_elts
     {
-      $$ = gsMakeSpec($1);
+      $$ = gsMakeSpec(ATreverse($1));
       if (gsDebug) {
         ATprintf( "parsed specification\n  %t\n", $$);
       }
@@ -143,7 +152,7 @@ spec_elt:
 sort_spec:
   SORT sort_decls
     {
-      $$ = gsMakeSortSpec($2);
+      $$ = gsMakeSortSpec(ATreverse($2));
       if (gsDebug) {
         ATprintf( "parsed sort specification\n  %t\n", $$);
       }
@@ -170,23 +179,23 @@ sort_decls:
 
 //sort declaration
 sort_decl:
-  ids SEMICOLON                                     //standard sort
+  ids SEMICOLON
     {
-      $$ = gsMakeSortDeclStandard($1);
+      $$ = gsMakeSortDeclStandard(ATreverse($1));
       if (gsDebug) {
         ATprintf( "parsed standard sort declaration\n  %t\n", $$);
       }
     }
-  | ids EQUALS sort_expr SEMICOLON                  //sort reference
+  | ids EQUALS sort_expr SEMICOLON
     {
-      $$ = gsMakeSortDeclRef($1, $3);
+      $$ = gsMakeSortDeclRef(ATreverse($1), $3);
       if (gsDebug) {
         ATprintf( "parsed reference sort declaration\n  %t\n", $$);
       }
     }
-  | ID EQUALS STRUCT constr_decls SEMICOLON          //structured sort
+  | ID EQUALS STRUCT constr_decls SEMICOLON
     {
-      $$ = gsMakeSortDeclStruct($1, $4);
+      $$ = gsMakeSortDeclStruct($1, ATreverse($4));
       if (gsDebug) {
         ATprintf( "parsed structured sort declaration\n  %t\n", $$);
       }
@@ -240,7 +249,7 @@ constr_decl:
     }
   | ID LPAR proj_decls RPAR recog_decl
     {
-      $$ = gsMakeStructDeclCons($1, $3, $5);
+      $$ = gsMakeStructDeclCons($1, ATreverse($3), $5);
       if (gsDebug) {
         ATprintf( "parsed constructor declaration\n  %t\n", $$);
       }
@@ -322,14 +331,14 @@ domain:
 op_spec:
   CONS op_decls
     {
-      $$ = gsMakeConsSpec($2);
+      $$ = gsMakeConsSpec(ATreverse($2));
       if (gsDebug) {
         ATprintf( "parsed operation specification\n  %t\n", $$);
       }
     }
   | MAP op_decls
     {
-      $$ = gsMakeMapSpec($2);
+      $$ = gsMakeMapSpec(ATreverse($2));
       if (gsDebug) {
         ATprintf( "parsed operation specification\n  %t\n", $$);
       }
@@ -369,7 +378,7 @@ op_decl:
 ids_decl:
   ids COLON sort_expr
     {
-      $$ = gsMakeIdsDecl($1, $3);
+      $$ = gsMakeIdsDecl(ATreverse($1), $3);
       if (gsDebug) {
         ATprintf( "parsed identifiers declaration\n  %t\n", $$);
       }
@@ -380,14 +389,14 @@ ids_decl:
 eqn_spec:
   EQN eqn_decls
     {
-      $$ = gsMakeEqnSpec(ATmakeList0(), $2);
+      $$ = gsMakeEqnSpec(ATmakeList0(), ATreverse($2));
       if (gsDebug) {
         ATprintf( "parsed equation specification\n  %t\n", $$);
       }
     }
   | VAR eqn_var_decls EQN eqn_decls
     {
-      $$ = gsMakeEqnSpec($2, $4);
+      $$ = gsMakeEqnSpec(ATreverse($2), ATreverse($4));
       if (gsDebug) {
         ATprintf( "parsed equation specification\n  %t\n", $$);
       }
@@ -456,7 +465,7 @@ eqn_decl:
 act_spec:
   ACT act_decls
     {
-      $$ = gsMakeActSpec($2);
+      $$ = gsMakeActSpec(ATreverse($2));
       if (gsDebug) {
         ATprintf( "parsed action specification\n  %t\n", $$);
       }
@@ -485,14 +494,14 @@ act_decls:
 act_decl:
   ids SEMICOLON
     {
-      $$ = gsMakeActDecl($1, gsMakeDomain(ATmakeList0()));
+      $$ = gsMakeActDecl(ATreverse($1), gsMakeDomain(ATmakeList0()));
       if (gsDebug) {
         ATprintf( "parsed action declaration\n  %t\n", $$);
       }
     }
   | ids COLON domain SEMICOLON
     {
-      $$ = gsMakeActDecl($1, $3);
+      $$ = gsMakeActDecl(ATreverse($1), $3);
       if (gsDebug) {
         ATprintf( "parsed action declaration\n  %t\n", $$);
       }
@@ -503,7 +512,7 @@ act_decl:
 proc_spec:
   PROC proc_decls
     {
-      $$ = gsMakeProcSpec($2);
+      $$ = gsMakeProcSpec(ATreverse($2));
       if (gsDebug) {
         ATprintf( "parsed process specification\n  %t\n", $$);
       }
@@ -539,7 +548,7 @@ proc_decl:
     }
   | ID LPAR proc_var_decls RPAR EQUALS proc_expr SEMICOLON
     {
-      $$ = gsMakeProcDecl($1, $3, $6);
+      $$ = gsMakeProcDecl($1, ATreverse($3), $6);
       if (gsDebug) {
         ATprintf( "parsed process declaration\n  %t\n", $$);
       }
@@ -605,7 +614,7 @@ sort_expr_arrow:
     }
   | domain_no_arrow ARROW sort_expr_arrow
     {
-      $$ = $1;
+      $$ = gsMakeSortArrow($1, $3);
       if (gsDebug) {
         ATprintf( "parsed arrow sort\n  %t\n", $$);
       }
@@ -616,7 +625,7 @@ sort_expr_arrow:
 domain_no_arrow:
   domain_no_arrow_elts
     {
-      $$ = gsMakeDomain($1);
+      $$ = gsMakeDomain(ATreverse($1));
       if (gsDebug) {
         ATprintf("parsed non-arrow domain\n  %t\n", $$);
       }
@@ -734,7 +743,7 @@ data_expr_whr:
     }
   | data_expr_whr WHR data_exprs END
     {
-      $$ = gsMakeWhr($1, $3);
+      $$ = gsMakeWhr($1, ATreverse($3));
       if (gsDebug) {
         ATprintf( "parsed where clause\n  %t\n", $$);
       }
@@ -1049,7 +1058,7 @@ data_expr_postfix:
     }
   | data_expr_postfix LPAR data_exprs RPAR
     {
-      $$ = gsMakeFuncApp($1, $3);
+      $$ = gsMakeFuncApp($1, ATreverse($3));
       if (gsDebug) {
         ATprintf( "parsed postfix data expression\n  %t\n", $$);
       }
@@ -1126,21 +1135,21 @@ data_constant:
 data_enumeration:
   LBRACK data_exprs RBRACK
     {
-      $$ = gsMakeListEnum($2);
+      $$ = gsMakeListEnum(ATreverse($2));
       if (gsDebug) {
         ATprintf( "parsed data enumeration\n  %t\n", $$);
       }
     }
   | LBRACE data_exprs RBRACE
     {
-      $$ = gsMakeSetEnum($2);
+      $$ = gsMakeSetEnum(ATreverse($2));
       if (gsDebug) {
         ATprintf( "parsed data enumeration\n  %t\n", $$);
       }
     }
   | LBRACE bag_enum_elts RBRACE
     {
-      $$ = gsMakeBagEnum($2);
+      $$ = gsMakeBagEnum(ATreverse($2));
       if (gsDebug) {
         ATprintf( "parsed data enumeration\n  %t\n", $$);
       }
@@ -1359,7 +1368,7 @@ proc_ref:
     }
   | ID LPAR data_exprs RPAR
     {
-      $$ = gsMakeActProcRef($1, $3);
+      $$ = gsMakeActProcRef($1, ATreverse($3));
       if (gsDebug) {
         ATprintf( "parsed action or process reference\n  %t\n", $$);
       }
@@ -1423,7 +1432,7 @@ ma_ids_set:
     }
   | LBRACE ma_ids RBRACE
     {
-      $$ = $2;
+      $$ = ATreverse($2);
       if (gsDebug) {
         ATprintf( "parsed multi action identifier set\n  %t\n", $$);
       }
@@ -1452,7 +1461,7 @@ ma_ids:
 ma_id:
   ma_id_elts
     {
-      $$ = gsMakeMAId($1);
+      $$ = gsMakeMAId(ATreverse($1));
       if (gsDebug) {
         ATprintf( "parsed multi action\n  %t\n", $$);
       }
@@ -1488,7 +1497,7 @@ ren_expr_set:
     }
   | LBRACE ren_exprs RBRACE
     {
-      $$ = $2;
+      $$ = ATreverse($2);
       if (gsDebug) {
         ATprintf( "parsed renaming expression set\n  %t\n", $$);
       }
@@ -1535,7 +1544,7 @@ comm_expr_set:
     }
   | LBRACE comm_exprs RBRACE
     {
-      $$ = $2;
+      $$ = ATreverse($2);
       if (gsDebug) {
         ATprintf( "parsed communication expression set\n  %t\n", $$);
       }
