@@ -23,7 +23,7 @@ mandir          = @mandir@
 
 #Library definitions
 LIB_NAME        = libgsparse.a
-LIB_OBJECTS     = libgsparse.o gsparser.o gslexer.o gsdataimpl.o gsfunc.o
+LIB_OBJECTS     = libgsparse.o gsparser.o gslexer.o gstypecheck.o gsdataimpl.o gsfunc.o
 LIB_LDFLAGS     = -lATerm
 
 #Parser definitions
@@ -49,8 +49,9 @@ $(PARSER_NAME) : $(PARSER_OBJECTS) $(LIB_NAME) Makefile
 gslexer.o      : gslexer.h gsparser.h gsfunc.h
 gsparser.o     : gsfunc.h
 gsfunc.o       : gsfunc.h
+gstypecheck.o  : gstypecheck.h gsfunc.h
 gsdataimpl.o   : gsdataimpl.h gsfunc.h
-libgsparse.o   : libgsparse.h gslexer.h gsdataimpl.h gsfunc.h 
+libgsparse.o   : libgsparse.h gslexer.h gstypecheck.h gsdataimpl.h gsfunc.h 
 gsparse.o      : gsparse.h libgsparse.h gsfunc.h
 
 %.c : %.y

@@ -15,6 +15,7 @@ extern "C" {
 #endif
 
 #include "libgsparse.h"
+#include "gstypecheck.h"
 #include "gsdataimpl.h"
 #include "gsfunc.h"
 
@@ -22,16 +23,6 @@ extern "C" {
 extern ATermAppl gsParse(FILE *SpecFile);/* declared in lexer.l */
 
 //local declarations
-ATermAppl gsTypeCheck(ATermAppl Spec);
-/*Pre: spec represents a specification that adheres to the initial internal
- *     ATerm structure.
- *Post:spec is type checked.
- *Ret: if the type checking went ok, an equivalent version of spec is returned
- *     that adheres to the internal ATerm structure after type checking.
- *     if something went wrong, an appriopriate error message is printed and
- *     NULL is returned.
- */
-
 ATermAppl gsLinearise(ATermAppl Spec);
 /*Pre: spec represents a specification that adheres to the internal ATerm
  *     structure after the data implementation phase.
@@ -185,12 +176,6 @@ bool gsPrintSpecification(FILE *OutStream, const ATermAppl Spec)
 finally:
   gsDebugMsg("return %s\n", Result?"true":"false");
   return Result;
-}
-
-ATermAppl gsTypeCheck(ATermAppl spec)
-{
-  gsVerboseMsg("type checking is not yet implemented\n");
-  return spec;
 }
 
 ATermAppl gsLinearise(ATermAppl spec)
