@@ -482,23 +482,25 @@ static ATermAppl gstcRewrActProc(ATermAppl ProcTerm){
   char *msg=(action)?"action":"process";
   
   //filter the list of lists ParList to keep only the lists of lenth nFactPars
-  ATermList NewParList=ATmakeList0();
-  for(;!ATisEmpty(ParList);ParList=ATgetNext(ParList)){
-    ATermList Par=ATLgetFirst(ParList);
-    if(ATgetLength(Par)==nFactPars) NewParList=ATinsert(NewParList,(ATerm)Par);
+  {
+    ATermList NewParList=ATmakeList0();
+    for(;!ATisEmpty(ParList);ParList=ATgetNext(ParList)){
+      ATermList Par=ATLgetFirst(ParList);
+      if(ATgetLength(Par)==nFactPars) NewParList=ATinsert(NewParList,(ATerm)Par);
+    }
+    ParList=ATreverse(NewParList);
   }
-  NewParList=ATreverse(NewParList);
-  
-  if(ATisEmpty(NewParList)){
+ 
+  if(ATisEmpty(ParList)){
     ThrowM("No %s %t with %d parameter is declared (while typechecking %t)\n", msg, Name, nFactPars, ProcTerm);     
   }
   else{
-    if(ATgetLength(NewParList)==1){
-      Result=gstcMakeActionOrProc(action,Name,ATLgetFirst(NewParList),ATLgetArgument(ProcTerm,1));
+    if(ATgetLength(ParList)==1){
+      Result=gstcMakeActionOrProc(action,Name,ATLgetFirst(ParList),ATLgetArgument(ProcTerm,1));
     }
     else{
       Result=gstcMakeActionOrProc(action,Name,ATmakeList1((ATerm)gsMakeUnknown()),ATLgetArgument(ProcTerm,1));
-      // here later can be [Unknown],NewParList
+      // here later can be [Unknown],ParList
     }
   }
   gsDebugMsg("recognized %s %t\n",msg,Result);    
@@ -660,7 +662,7 @@ static ATermAppl gstcTraverseVarConstD(ATermTable Vars, ATermAppl DataTerm){
     ATermList ParList=ATLtableGet(context.functions,(ATerm)Name);
     if(ParList && ATgetLength(ParList)==1) return gsMakeDataVarId(Name,ATAgetFirst(ParList));
     else{
-      //gsWarningMsg("Unknown Op %t\n",DataTerm);    
+      gsWarningMsg("Unknown Op %t\n",DataTerm);    
       return gsMakeOpId(Name,gsMakeUnknown());
     }
   }  
@@ -675,12 +677,28 @@ static ATermAppl gstcTraverseVarConstDN(int nFactPars, ATermTable Vars, ATermApp
     ATermAppl Type=ATAtableGet(Vars,(ATerm)Name);
     if(Type) return gsMakeDataVarId(Name,Type);
     
-    if((Type=ATAtableGet(context.constants,(ATerm)Name))) return gsMakeOpId(Name,Type);
+    if(!nFactPars){
+      if((Type=ATAtableGet(context.constants,(ATerm)Name))) return gsMakeOpId(Name,Type);
+      else{
+	gsWarningMsg("Unknown Op %t\n",DataTerm);
+	return gsMakeOpId(Name,Type);
+      }
+    }
     
     ATermList ParList=ATLtableGet(context.functions,(ATerm)Name);
+    // filter ParList keeping only functions A_0#...#A_nFactPars->A
+    if(ParList){
+      ATermList NewParList=ATmakeList0();
+      for(;!ATisEmpty(ParList);ParList=ATgetNext(ParList)){
+	ATermAppl Par=ATAgetFirst(ParList);
+	if(gsIsSortArrowProd(Par) && ATgetLength(ATLgetArgument(Par,0))==nFactPars) NewParList=ATinsert(NewParList,(ATerm)Par);
+      }
+      ParList=ATreverse(NewParList);
+    }
+    
     if(ParList && ATgetLength(ParList)==1) return gsMakeDataVarId(Name,ATAgetFirst(ParList));
     else{
-      //gsWarningMsg("Unknown Op %t\n",DataTerm);    
+      gsWarningMsg("Unknown Op %t\n",DataTerm);    
       return gsMakeOpId(Name,gsMakeUnknown());
     }
   }
