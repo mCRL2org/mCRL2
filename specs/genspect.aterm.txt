@@ -94,7 +94,7 @@
                    | Or(<DataExpr>, <DataExpr>) 
                    | Imp(<DataExpr>, <DataExpr>) 
                    | Lambda(<IdDecl>, <DataExpr>) 
-                   | Whr(<DataExpr>, <WhereDecl>+) 
+                   | Whr(<DataExpr>, <WhrDecl>+) 
 
 //process expression
 <ProcExpr>       ::= ActProcRef(<Id>, <DataExpr>*) 
