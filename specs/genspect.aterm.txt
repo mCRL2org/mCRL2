@@ -1,0 +1,162 @@
+//--------------------------------------------------------------------//
+// This document describes the ATerm format of GenSpect specifications.
+//
+// id is a quoted ATermAppl with a function symbol in the format '[a-zA-Z_][a-zA-Z0-9_]*'.
+// number is an unquoted constant ATermAppl, with a function symbol in the format '-?\d+'.
+//
+// An expression of the form f(A+) represents an ATermAppl f with one or more arguments of type A.
+// An expression of the form f(A?) represents an ATermAppl f with zero or one arguments of type A.
+// An expression of the form f(A*) represents an ATermAppl f with zero or more arguments of type A.
+//
+// These shorthand notations may be combined. For example, f(A?, B+) represents an ATermAppl f
+// with zero or one A arguments, followed by one ore more B arguments.
+//--------------------------------------------------------------------//
+
+//comma-separated list of identifiers
+Ids          ::= ids(Id+) 
+
+//multiaction identifier
+MAId         ::= maid(Id+) 
+
+//set of multiaction identifiers
+MAIdSet      ::= maidset(MAId*) 
+
+//communication expression
+CommExpr     ::= commexp(MAId, Id?) 
+
+//set of communication expressions
+CommExprSet  ::= commexpset(CommExpr*) 
+
+//renaming expression
+RenExpr      ::= renexp(Id, Id) 
+
+//set of renaming expressions
+RenExprSet   ::= renexpset(RenExpr*) 
+
+//domain
+Domain       ::= dom(SortExpr+) 
+
+//constructor declaration
+ConstrDecl   ::= consdecl(Id, ProjDecl*, Id?) 
+
+//projection declaration
+ProjDecl     ::= projdecl(Id?, Domain) 
+
+//identifier declaration
+IdDecl       ::= iddecl(Id, SortExpr) 
+
+//declaration of 1 or more identifiers of the same sort
+IdDecls      ::= iddecls(Ids, SortExpr) 
+
+//bag enumeration element
+BagEnumElt   ::= bagenumelt(DataExpr, DataExpr) 
+
+//sort expression
+SortExpr     ::= bool()                                  //booleans
+               | pos()                                   //positive numbers
+               | nat()                                   //natural numbers
+               | int()                                   //integers
+               | list(SortExpr)                          //list sort
+               | set(SortExpr)                           //set sort
+               | bag(SortExpr)                           //bag sort
+               | sortref(Id)                             //sort reference
+               | hsort(Domain, SortExpr)                 //higher-order sort
+
+//data expression
+DataExpr     ::= id()                                    //identifier
+               | number()                                //number
+               | true()                                  //true
+               | false()                                 //false
+               | emptylist()                             //empty list
+               | emptyset()                              //empty set/bag
+               | listenum(DataExpr+)                     //list enumeration
+               | setenum(DataExpr+)                      //set enumeration
+               | bagenum(BagEnumElt+)                    //bag enumeration 
+               | setbagcomp(IdDecl, DataExpr)            //set/bag comprehension
+               | funcapp(DataExpr, funcargs(DataExpr*) ) //function application
+               | not(DataExpr)                           //logical negation, set complement
+               | neg(DataExpr)                           //arithmetic negation
+               | size(DataExpr)                          //list/set/bag size
+               | forall(IdDecl, DataExpr)                //universal quantification
+               | exists(IdDecl, DataExpr)                //existential quantification
+               | listat(DataExpr, DataExpr)              //list element at position
+               | mult(DataExpr, DataExpr)                //multiplication, set intersection (associative) 
+               | div(DataExpr, DataExpr)                 //integer div
+               | mod(DataExpr, DataExpr)                 //integer mod
+               | add(DataExpr, DataExpr)                 //addition, set union (associative) 
+               | subt(DataExpr, DataExpr)                //subtraction, set difference
+               | lt(DataExpr, DataExpr)                  //less than, proper subset/subbag
+               | gt(DataExpr, DataExpr)                  //greater than
+               | lte(DataExpr, DataExpr)                 //less than or equal, subset/subbag
+               | gte(DataExpr, DataExpr)                 //greater than or equal
+               | in(DataExpr, DataExpr)                  //element test
+               | cons(DataExpr, DataExpr)                //list cons (right associative) 
+               | snoc(DataExpr, DataExpr)                //list snoc (left associative) 
+               | concat(DataExpr, DataExpr)              //list concatenation (associative) 
+               | eq(DataExpr, DataExpr)                  //equality (associative) 
+               | neq(DataExpr, DataExpr)                 //disequality (associative) 
+               | and(DataExpr, DataExpr)                 //conjunction (associative) 
+               | or(DataExpr, DataExpr)                  //disjunction (associative) 
+               | imp(DataExpr, DataExpr)                 //implication
+               | lambda(IdDecl, DataExpr)                //lambda abstraction
+               | whr(DataExpr+)                          //where clause
+
+//process expression
+ProcExpr     ::= actprocref(Id, actprocargs(DataExpr+) ) //action or process reference
+               | delta()                                 //deadlock
+               | tau()                                   //internal action
+               | sum(IdDecl, ProcExpr)                   //summation
+               | restrict(MAIdSet, ProcExpr)             //restriction AKA encapsulation
+               | allow(MAIdSet, ProcExpr)                //allow AKA nabla 
+               | hide(MAIdSet, ProcExpr)                 //hiding
+               | ren(RenExprSet, ProcExpr)               //renaming
+               | comm(CommExprSet, ProcExpr)             //communication
+               | sync(ProcExpr, ProcExpr)                //synchronisation (associative) 
+               | attime(ProcExpr, DataExpr)              //timed expression
+               | seq(ProcExpr, ProcExpr)                 //sequential (associative) 
+               | cond(DataExpr, ProcExpr)                //conditional
+               | binit(ProcExpr, ProcExpr)               //bounded initialisation (left associative) 
+               | par(ProcExpr, ProcExpr)                 //parallel (associative) 
+               | lmerge(ProcExpr, ProcExpr)              //left merge (left associative) 
+               | choice(ProcExpr, ProcExpr)              //choice (associative) 
+
+//sort specification
+SortSpec     ::= sortspec(SortDecl+) 
+
+//sort declaration
+SortDecl     ::= ssort(Ids)                              //standard sort
+               | sortrefdecl(Ids, SortExpr)              //sort reference declaration
+               | struct(Id, ConstrDecl+)                 //structured sort
+
+//operation specification
+OpSpec       ::= cons(OpDecl+) 
+               | map(OpDecl+) 
+
+//operation declaration
+OpDecl       ::= IdDecls
+
+//equation specification
+EqnSpec      ::= eqnspec(eqnvars(IdDecls+) , eqndecls(EqnDecl+) ) 
+
+//equation declaration
+EqnDecl      ::= eqndecl(DataExpr, DataExpr) 
+
+//action specification
+ActSpec      ::= actspec(ActDecl+) 
+
+//action declaration
+ActDecl      ::= actdecl(Ids, Domain?) 
+
+//process specification
+ProcSpec     ::= procspec(ProcDecl+) 
+
+//process declaration
+ProcDecl     ::= procdecl(Id, procvars(IdDecls+) , ProcExpr) 
+
+//initialisation
+Init         ::= init(ProcExpr) 
+
+//specification
+SpecElt      ::= SortSpec | OpSpec | EqnSpec | ActSpec | ProcSpec | Init
+Spec         ::= spec(SpecElt+) 
+

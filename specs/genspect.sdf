@@ -1,0 +1,227 @@
+module genspect
+
+exports
+  sorts
+    Id                                                          %% identifier
+    Ids                                                         %% identifiers
+    MAId                                                        %% multiaction identifier
+    MAIdsSet                                                    %% set of multiaction identifiers
+    CommExpr                                                    %% communication expression
+    CommExprSet                                                 %% set of communication expressions
+    RenExpr                                                     %% renaming expression
+    RenExprSet                                                  %% set of renaming expressions
+    ConstrDecl                                                  %% constructor declaration
+    ProjDecl                                                    %% projection declaration
+    ProjDecls                                                   %% projection declarations
+    IdDecl                                                      %% identifier declaration
+    IdDecls                                                     %% identifier declarations
+    DataArg                                                     %% argument of a data expression
+    BagEnumElt                                                  %% bag enumeration element
+    BagEnumElts                                                 %% bag enumeration elements
+    SortExpr                                                    %% sort expression
+    DataExpr                                                    %% data expression
+    CDataExpr                                                   %% complex data expression
+    CDataExprs                                                  %% complex data expressions
+    ProcExpr                                                    %% process expression
+    SortSpec                                                    %% sort specification
+    SortDecl                                                    %% sort declaration
+    OpSpec                                                      %% operation specification
+    OpDecl                                                      %% operation declaration
+    EqnSpec                                                     %% equation specification
+    EqnDecl                                                     %% equation declaration
+    ActSpec                                                     %% action specification
+    ActDecl                                                     %% action declaration
+    ProcSpec                                                    %% process specification
+    ProcDecl                                                    %% process declaration
+    Init                                                        %% initialisation
+    Spec                                                        %% specification
+    Keyword
+  lexical syntax
+    [\ \t\n\r]                        -> LAYOUT                 %% whitespace
+    "%" ~[\n]* "\n"                   -> LAYOUT                 %% comments
+    [a-zA-Z\_][a-zA-Z0-9\_]*          -> Id                     %% identifiers
+    %% Data expressions
+    "true" | "false"                  -> DataExpr {prefer}      %% true, false
+    "0" | ("-"? [1-9] [0-9]*)         -> DataExpr {prefer}      %% numbers
+    %% Sort expressions
+    "Bool" | "Pos" | "Nat" | "Int"    -> SortExpr {prefer}      %% predefined sorts
+    %% Process expressions
+    "delta" | "tau"                   -> ProcExpr {prefer}      %% deadlock, internal action
+  context-free syntax
+    %% Preliminaries
+    {Id ","}+                         -> Ids                    %% comma-separated list of identifiers
+    Id ":" SortExpr                   -> IdDecl                 %% declaration of an identifier
+    Ids ":" SortExpr                  -> IdDecls                %% declaration of 1 or more identifiers
+    {Id "|"}+                         -> MAId                   %% multiaction identifier
+    "{" {MAId ","}* "}"               -> MAIdsSet               %% set of multiaction identifiers
+    MAId ("->" Id)?	              -> CommExpr               %% communication expression
+    "{" {CommExpr ","}* "}"           -> CommExprSet            %% set of communication expressions
+    Id "->" Id                        -> RenExpr                %% renaming expression
+    "{" {RenExpr ","}* "}"            -> RenExprSet             %% set of renaming expressions
+    Id ("(" ProjDecls ")")? ("?" Id)? -> ConstrDecl             %% constructor declaration
+    (Id ":")? {SortExpr "#"}+         -> ProjDecl               %% projection declaration
+    {ProjDecl ","}+                   -> ProjDecls              %% projection declarations
+    {CDataExpr ","}+                  -> CDataExprs             %% comma-separated list of complex data expressions
+    "(" CDataExprs ")"                -> DataArg                %% argument of a data expression
+    CDataExpr ":" CDataExpr           -> BagEnumElt             %% bag enumeration element
+    {BagEnumElt ","}+                 -> BagEnumElts            %% comma-separated list of bag enumeration elements
+
+    %% Sort expressions
+    "List" "(" SortExpr ")"           -> SortExpr               %% list sort
+    "Set" "(" SortExpr ")"            -> SortExpr               %% set sort
+    "Bag" "(" SortExpr ")"            -> SortExpr               %% bag sort
+    Id                                -> SortExpr               %% declared sort
+    {SortExpr "#"}+ "->" SortExpr     -> SortExpr               %% higher-order sort
+    "(" SortExpr ")"                  -> SortExpr {bracket}     %% parenthesized sort expression
+
+    %% Data expressions
+    Id DataArg*                                    -> DataExpr  %% function application (possibly higher-order)
+    "[" "]"                                        -> DataExpr  %% empty list
+    "[" CDataExprs "]"                             -> DataExpr  %% list enumeration
+    "{" "}"                                        -> DataExpr  %% empty set/bag
+    "{" CDataExprs "}"                             -> DataExpr  %% set enumeration
+    "{" BagEnumElts "}"                            -> DataExpr  %% bag enumeration 
+    "{" IdDecl "|" CDataExpr "}"                   -> DataExpr  %% set/bag comprehension
+    "(" CDataExpr ")"                              -> DataExpr  %% parenthesized complex data expression
+    "(" "lambda" IdDecl "." CDataExpr ")" DataArg+ -> DataExpr  %% lambda abstraction plus application
+    "(" CDataExpr "." CDataExpr ")" DataArg+       -> DataExpr  %% list element at position plus application
+    %% Note: the above three lines could also have been replaced by the following:
+    %%   "(" CDataExpr ")" DataArg* -> DataExpr
+    %% We did not do this, because the above is more restrictive and suffices for the moment.
+    "!" DataExpr                                   -> DataExpr  %% logical negation, set complement
+    "-" DataExpr                                   -> DataExpr  %% arithmetic negation
+    "#" DataExpr                                   -> DataExpr  %% list/set/bag size
+
+    %% Complex data expressions
+    DataExpr                          -> CDataExpr              %% data expression
+    CDataExpr "whr" CDataExprs "end"  -> CDataExpr              %% where clause
+    "lambda" IdDecl "." CDataExpr     -> CDataExpr              %% lambda abstraction
+    "forall" IdDecl "." CDataExpr     -> CDataExpr              %% universal quantification
+    "exists" IdDecl "." CDataExpr     -> CDataExpr              %% existential quantification
+    CDataExpr "."   CDataExpr         -> CDataExpr {non-assoc}  %% list element at position
+    CDataExpr "*"   CDataExpr         -> CDataExpr {assoc}      %% multiplication, set intersection
+    CDataExpr "div" CDataExpr         -> CDataExpr {non-assoc}  %% integer div
+    CDataExpr "mod" CDataExpr         -> CDataExpr {non-assoc}  %% integer mod
+    CDataExpr "\\"  CDataExpr         -> CDataExpr {non-assoc}  %% set difference
+    CDataExpr "+"   CDataExpr         -> CDataExpr {assoc}      %% addition, set union
+    CDataExpr "-"   CDataExpr         -> CDataExpr {non-assoc}  %% subtraction
+    CDataExpr "<"   CDataExpr         -> CDataExpr {non-assoc}  %% less than, proper subset/subbag
+    CDataExpr ">"   CDataExpr         -> CDataExpr {non-assoc}  %% greater than
+    CDataExpr "<="  CDataExpr         -> CDataExpr {non-assoc}  %% less than or equal, subset/subbag
+    CDataExpr ">="  CDataExpr         -> CDataExpr {non-assoc}  %% greater than or equal
+    CDataExpr "in"  CDataExpr         -> CDataExpr {non-assoc}  %% element test
+    CDataExpr "|>"  CDataExpr         -> CDataExpr {right}      %% list cons
+    CDataExpr "<|"  CDataExpr         -> CDataExpr {left}       %% list snoc
+    CDataExpr "++"  CDataExpr         -> CDataExpr {assoc}      %% list concatenation
+    CDataExpr "=="  CDataExpr         -> CDataExpr {assoc}      %% equality
+    CDataExpr "!="  CDataExpr         -> CDataExpr {assoc}      %% disequality
+    CDataExpr "&&"  CDataExpr         -> CDataExpr {assoc}      %% conjunction
+    CDataExpr "||"  CDataExpr         -> CDataExpr {assoc}      %% disjunction
+    CDataExpr "=>"  CDataExpr         -> CDataExpr {non-assoc}  %% implication
+    "(" CDataExpr ")"                 -> CDataExpr {bracket}    %% parenthesized complex data expression
+
+    %% Process expressions
+    Id DataArg?                              -> ProcExpr        %% action or process reference
+    "sum" "(" IdDecl "," ProcExpr ")"        -> ProcExpr        %% summation
+    "restrict" "(" MAIdsSet "," ProcExpr ")" -> ProcExpr        %% restriction AKA encapsulation
+    "allow" "(" MAIdsSet "," ProcExpr ")"    -> ProcExpr        %% allow AKA nabla 
+    "hide" "(" MAIdsSet "," ProcExpr ")"     -> ProcExpr        %% hiding
+    "rename" "(" RenExprSet "," ProcExpr ")" -> ProcExpr        %% renaming
+    "comm" "(" CommExprSet "," ProcExpr ")"  -> ProcExpr        %% communication
+    ProcExpr "|" ProcExpr             -> ProcExpr  {assoc}      %% synchronisation
+    ProcExpr "@" DataExpr             -> ProcExpr               %% timed expression
+    ProcExpr "." ProcExpr             -> ProcExpr  {assoc}      %% sequential
+    ProcExpr "<<" ProcExpr            -> ProcExpr  {left}       %% bounded initialisation
+    ProcExpr "||" ProcExpr            -> ProcExpr  {assoc}      %% parallel
+    ProcExpr "||_" ProcExpr           -> ProcExpr  {left}       %% left merge
+    DataExpr "->" ProcExpr            -> ProcExpr               %% conditional
+    ProcExpr "+" ProcExpr             -> ProcExpr  {assoc}      %% choice
+    "(" ProcExpr ")"                  -> ProcExpr  {bracket}    %% parenthesized process expression
+
+    %% Sort specifications
+    "sort" SortDecl+                  -> SortSpec
+
+    %% Sort declarations
+    Id                                -> SortDecl               %% standard sort
+    Id "=" SortExpr                   -> SortDecl               %% sort expression
+    Id "=" ConstrDecl "|" {ConstrDecl "|"}+          -> SortDecl               %% structured sort
+    %% TODO remove ambiguity in the above two rules
+
+    %% Operation specifications
+    ("cons" | "map") OpDecl+                    -> OpSpec
+
+    %% Operation declarations
+    IdDecls                                     -> OpDecl
+
+    %% Equation specifications
+    "eqn" EqnDecl+                              -> EqnSpec
+    "var" IdDecls+ "eqn" EqnDecl+               -> EqnSpec
+
+    %% Equation declarations
+    CDataExpr "=" CDataExpr                     -> EqnDecl
+
+    %% Action specifications
+    "act" ActDecl+                              -> ActSpec
+
+    %% Action declarations
+    Ids ( ":" {SortExpr "#"}+ )?                -> ActDecl
+
+    %% Process specifications
+    "proc" ProcDecl+                            -> ProcSpec
+    
+    %% Process declarations
+    Id ("(" { IdDecls "," }+ ")")? "=" ProcExpr -> ProcDecl
+
+    %% Initialisations
+    "init" ProcExpr                             -> Init
+    
+    %% Specifications
+    SortSpec                                    -> Spec         %% sorts
+    OpSpec                                      -> Spec         %% operations
+    EqnSpec                                     -> Spec         %% equations
+    ActSpec                                     -> Spec         %% actions
+    ProcSpec                                    -> Spec         %% processes
+    Init                                        -> Spec         %% initialisation
+    Spec Spec                                   -> Spec {assoc} %% specifications
+    
+  context-free priorities
+    { non-assoc: "forall" IdDecl "." CDataExpr -> CDataExpr
+                 "exists" IdDecl "." CDataExpr -> CDataExpr } >
+    { non-assoc: CDataExpr "."   CDataExpr -> CDataExpr
+                 CDataExpr "*"   CDataExpr -> CDataExpr
+                 CDataExpr "div" CDataExpr -> CDataExpr
+                 CDataExpr "mod" CDataExpr -> CDataExpr
+                 CDataExpr "\\"  CDataExpr -> CDataExpr } >    
+    { non-assoc: CDataExpr "+"   CDataExpr -> CDataExpr
+                 CDataExpr "-"   CDataExpr -> CDataExpr } >
+    { non-assoc: CDataExpr "<"   CDataExpr -> CDataExpr
+                 CDataExpr ">"   CDataExpr -> CDataExpr
+                 CDataExpr "<="  CDataExpr -> CDataExpr
+                 CDataExpr ">="  CDataExpr -> CDataExpr
+                 CDataExpr "in"  CDataExpr -> CDataExpr
+                 CDataExpr "|>"  CDataExpr -> CDataExpr 
+                 CDataExpr "<|"  CDataExpr -> CDataExpr 
+                 CDataExpr "++"  CDataExpr -> CDataExpr } >
+    { non-assoc: CDataExpr "=="  CDataExpr -> CDataExpr
+                 CDataExpr "!="  CDataExpr -> CDataExpr } >
+    { non-assoc: CDataExpr "&&"  CDataExpr -> CDataExpr
+                 CDataExpr "||"  CDataExpr -> CDataExpr } >
+    CDataExpr "=>"  CDataExpr -> CDataExpr >
+    "lambda" IdDecl "." CDataExpr -> CDataExpr > 
+    CDataExpr "whr" CDataExprs "end" -> CDataExpr, 
+
+    ProcExpr "|" ProcExpr -> ProcExpr >
+    ProcExpr "@" DataExpr -> ProcExpr >
+    ProcExpr "." ProcExpr -> ProcExpr >
+    ProcExpr "<<" ProcExpr -> ProcExpr >
+    { non-assoc: ProcExpr "||" ProcExpr -> ProcExpr 
+                 ProcExpr "||_" ProcExpr -> ProcExpr } >
+    DataExpr "->" ProcExpr -> ProcExpr >
+    ProcExpr "+" ProcExpr -> ProcExpr
+  
+  context-free start-symbols
+    Spec                                                       %% start with a specification
+  
+  context-free restrictions
+    LAYOUT? -/- [\ \t\n\r]                                     %% match longest whitespace
+    Id -/- [a-zA-Z0-9\_]                                       %% match longest identifier

@@ -1,0 +1,191 @@
+//This is an EBNF description for the syntax of the GenSpect language.
+//In this description:
+//- the symbols <Whitespace> and <Comment> are layout symbols and may occur
+//  between every other EBNF element;
+//- the symbol <Keyword> lists all the keywords that are used in the
+//  description and that may never be used as an identifier;
+//- the symbol <Spec> is the start symbol.
+
+//Lexical part
+//------------
+
+//whitespace
+Whitespace   ::= "\s"
+
+//comment
+Comment      ::= "%"~[\n]*"\n"
+
+//keywords
+Keyword      ::= kwSpec | kwProcExpr | kwSortExpr | kwDataExpr
+kwSpec       ::= "sort" | "cons" | "map" | "var" | "eqn" | "act" | "proc" | "init"
+kwProcExpr   ::= "delta" | "tau" | "sum" | "restrict" | "allow" | "hide" | "rename" | "comm"
+kwSortExpr   ::= "Bool" | "Pos" | "Nat" | "Int" | "List" | "Set" | "Bag" | "Struct"
+kwDataExpr   ::= "true" | "false" | "whr" | "end" | "lambda" | "forall" | "exists" | "div" | "mod" | "in"
+
+//identifier (not a keyword)
+Id           ::= [a-zA-Z_][a-zA-Z0-9_]*
+
+//number
+Number       ::= "0"|("-"?[1-9][0-9]*)
+
+//Context-free part
+//-----------------
+
+//comma-separated list of identifiers
+Ids          ::= Id ("," Id)*
+
+//multiaction identifier
+MAId         ::= Id ("|" Id)*
+
+//set of multiaction identifiers
+MAIdSet      ::= "{" ( MAId ("," MAId)* )? "}"
+
+//communication expression
+CommExpr     ::= MAId ("->" Id)?
+
+//set of communication expressions
+CommExprSet  ::= "{" ( CommExpr ("," CommExpr)* )? "}"
+
+//renaming expression
+RenExpr      ::= Id "->" Id
+
+//set of renaming expressions
+RenExprSet   ::= "{" ( RenExpr ("," RenExpr)* )? "}"
+
+//domain
+Domain       ::= SortExpr ("#" SortExpr)*
+
+//constructor declaration
+ConstrDecl   ::= Id ("(" ProjDecls ")")? ("?" Id)?
+
+//projection declaration
+ProjDecl     ::= (Id ":")? Domain 
+
+//comma-separated list of projection declarations
+ProjDecls    ::= ProjDecl ("," ProjDecl)*
+
+//identifier declaration
+IdDecl       ::= Id ":" SortExpr
+
+//declaration of 1 or more identifiers of the same sort
+IdDecls      ::= Ids ":" SortExpr
+
+//comma-separated list of complex data expressions
+DataExprs   ::= DataExpr ("," DataExpr)*
+
+//argument of a data expression
+DataArg      ::= "(" DataExprs ")"
+
+//bag enumeration element
+BagEnumElt   ::= DataExpr ":" DataExpr
+
+//comma-separated list of bag enumeration elements
+BagEnumElts  ::= BagEnumElt ("," BagEnumElt)*
+
+//sort expression
+SortExpr     ::= "Bool" | "Pos" | "Nat" | "Int"           //predefined sort
+               | "List" "(" SortExpr ")"                  //list sort
+               | "Set" "(" SortExpr ")"                   //set sort
+               | "Bag" "(" SortExpr ")"                   //bag sort
+               | Id                                       //sort reference
+               | "(" SortExpr ")"                         //parenthesized sort expression
+               | Domain "->" SortExpr                     //higher-order sort
+
+//data expression
+DataExpr     ::= Id                                       //identifier
+               | Number                                   //number
+               | "true" | "false"                         //true,false
+               | "[]"                                     //empty list
+               | "{}"                                     //empty set/bag
+               | "[" DataExprs "]"                        //list enumeration
+               | "{" DataExprs "}"                        //set enumeration
+               | "{" BagEnumElts "}"                      //bag enumeration 
+               | "{" IdDecl "|" DataExpr "}"              //set/bag comprehension
+               | "(" DataExpr ")"                         //parenthesized data expression
+               | DataExpr "(" DataExprs ")"               //function application
+               | "!" DataExpr                             //logical negation, set complement
+               | "-" DataExpr                             //arithmetic negation
+               | "#" DataExpr                             //list/set/bag size
+               | "forall" IdDecl "." DataExpr             //universal quantification
+               | "exists" IdDecl "." DataExpr             //existential quantification
+               | DataExpr "." DataExpr                    //list element at position
+               | DataExpr "*"   DataExpr                  //multiplication, set intersection (associative)
+               | DataExpr "div" DataExpr                  //integer div
+               | DataExpr "mod" DataExpr                  //integer mod
+               | DataExpr "+"   DataExpr                  //addition, set union (associative)
+               | DataExpr "-"   DataExpr                  //subtraction, set difference
+               | DataExpr "<"   DataExpr                  //less than, proper subset/subbag
+               | DataExpr ">"   DataExpr                  //greater than
+               | DataExpr "<="  DataExpr                  //less than or equal, subset/subbag
+               | DataExpr ">="  DataExpr                  //greater than or equal
+               | DataExpr "in"  DataExpr                  //element test
+               | DataExpr "|>"  DataExpr                  //list cons (right associative)
+               | DataExpr "<|"  DataExpr                  //list snoc (left associative)
+               | DataExpr "++"  DataExpr                  //list concatenation (associative)
+               | DataExpr "=="  DataExpr                  //equality (associative)
+               | DataExpr "!="  DataExpr                  //disequality (associative)
+               | DataExpr "&&"  DataExpr                  //conjunction (associative)
+               | DataExpr "||"  DataExpr                  //disjunction (associative)
+               | DataExpr "=>"  DataExpr                  //implication
+               | "lambda" IdDecl "." DataExpr             //lambda abstraction
+               | DataExpr "whr" DataExprs "end"           //where clause
+
+//process expression
+ProcExpr     ::= Id                                       //action of process reference with 0...
+               | Id "(" DataExprs ")"                     //and 1 or more arguments
+               | "delta"                                  //deadlock
+               | "tau"                                    //internal action
+               | "sum" "(" IdDecl "," ProcExpr ")"        //summation
+               | "restrict" "(" MAIdSet "," ProcExpr ")"  //restriction AKA encapsulation
+               | "allow" "(" MAIdSet "," ProcExpr ")"     //allow AKA nabla 
+               | "hide" "(" MAIdSet "," ProcExpr ")"      //hiding
+               | "rename" "(" RenExprSet "," ProcExpr ")" //renaming
+               | "comm" "(" CommExprSet "," ProcExpr ")"  //communication
+               | "(" ProcExpr ")"                         //parenthesized process expression
+               | ProcExpr "|" ProcExpr                    //synchronisation (associative)
+               | ProcExpr "@" DataExpr                    //timed expression
+               | ProcExpr "." ProcExpr                    //sequential (associative)
+               | DataExpr "->" ProcExpr                   //conditional
+               | ProcExpr "<<" ProcExpr                   //bounded initialisation (left associative)
+               | ProcExpr "||" ProcExpr                   //parallel (associative)
+               | ProcExpr "||_" ProcExpr                  //left merge (left associative)
+               | ProcExpr "+" ProcExpr                    //choice (associative)
+
+//sort specification
+SortSpec     ::= "sort" SortDecl+
+
+//sort declaration
+SortDecl     ::= Ids                                      //standard sort
+               | Ids "=" SortExpr                         //sort expression
+               | Ids "=" "Struct" ConstrDecl ("|" ConstrDecl)* //structured sort
+
+//operation specification
+OpSpec       ::= ("cons" | "map") OpDecl+
+
+//operation declaration
+OpDecl       ::= IdDecls
+
+//equation specification
+EqnSpec      ::= "eqn" EqnDecl+
+               | "var" IdDecls+ "eqn" EqnDecl+
+
+//equation declaration
+EqnDecl      ::= DataExpr "=" DataExpr
+
+//action specification
+ActSpec      ::= "act" ActDecl+
+
+//action declaration
+ActDecl      ::= Ids (":" Domain)?
+
+//process specification
+ProcSpec     ::= "proc" ProcDecl+
+
+//process declaration
+ProcDecl     ::= Id ("(" IdDecls ("," IdDecls)* ")")? "=" ProcExpr
+
+//initialisation
+Init         ::= "init" ProcExpr
+
+//specification
+Spec         ::= (SortSpec | OpSpec | EqnSpec | ActSpec | ProcSpec | Init)+

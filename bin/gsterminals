@@ -1,0 +1,2 @@
+#! /bin/sh
+echo $(grep -o '; return [A-Z]*' ../src/gslexer.l | cut -c 10-)

@@ -1,0 +1,2 @@
+#! /bin/sh
+echo $(grep ^[a-zA-Z_]*: ../src/gsparser.y | cut -d : -f 1)
