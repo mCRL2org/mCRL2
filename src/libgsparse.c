@@ -1,5 +1,5 @@
 #define  NAME      "libgsparse"
-#define  LVERSION  "0.1.12"
+#define  LVERSION  "0.1.13"
 #define  AUTHOR    "Aad Mathijssen"
 
 #ifdef __cplusplus
@@ -15,6 +15,7 @@ extern "C" {
 #endif
 
 #include "libgsparse.h"
+#include "gsdataimpl.h"
 #include "gsfunc.h"
 
 //external declarations
@@ -28,18 +29,6 @@ ATermAppl gsTypeCheck(ATermAppl Spec);
  *Ret: if the type checking went ok, an equivalent version of spec is returned
  *     that adheres to the internal ATerm structure after type checking.
  *     if something went wrong, an appriopriate error message is printed and
- *     NULL is returned.
- */
-
-ATermAppl gsImplementData(ATermAppl Spec);
-/*Pre: spec represents a specification that adheres to the internal ATerm
- *     structure after the type checking phase.
- *Post:The datatypes of spec are implemented as higher-order abstract data
- *     types.
- *Ret: if the data implementation went ok, an equivalent version spec is
- *     returned that adheres to the internal ATerm structure after data
- *     implementation.
- *     If something went wrong, an appropriate error message is printed and
  *     NULL is returned.
  */
 
@@ -131,12 +120,6 @@ finally:
 ATermAppl gsTypeCheck(ATermAppl spec)
 {
   gsVerboseMsg("type checking is not yet implemented\n");
-  return spec;
-}
-
-ATermAppl gsImplementData(ATermAppl spec)
-{
-  gsVerboseMsg("data implementation is not yet implemented\n");
   return spec;
 }
 

@@ -11,7 +11,8 @@ extern "C" {
 }
 #endif
 
-//debugging
+//Message printing
+
 static bool gsWarning = true;
 static bool gsVerbose = false;
 static bool gsDebug   = false;
