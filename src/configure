@@ -2446,7 +2446,7 @@ fi
 
 # Set flags
 CFLAGS="$CFLAGS -std=c99 -Wall -pedantic"
-LDFLAGS="-L. $LDFLAGS"
+LDFLAGS="-L. -lm $LDFLAGS"
 
 # Check for C99 standard
 echo "$as_me:$LINENO: checking for C99 standard" >&5

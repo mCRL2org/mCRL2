@@ -751,13 +751,63 @@ ATermAppl gsMakeDataExprPos(char *p);
 //Pre: p is of the form "[1-9][0-9]*"
 //Ret: data expression of sort Pos that is a representation of p
 
+ATermAppl gsMakeDataExprPos_int(int p);
+//Pre: p > 0
+//Ret: data expression of sort Pos that is a representation of p
+
 ATermAppl gsMakeDataExprNat(char *n);
 //Pre: n is of the form "0 | [1-9][0-9]*"
+//Ret: data expression of sort Nat that is a representation of n
+
+ATermAppl gsMakeDataExprNat_int(int n);
+//Pre: n >= 0
 //Ret: data expression of sort Nat that is a representation of n
 
 ATermAppl gsMakeDataExprInt(char *z);
 //Pre: z is of the form "0 | -? [1-9][0-9]*"
 //Ret: data expression of sort Int that is a representation of z
+
+ATermAppl gsMakeDataExprInt_int(int z);
+//Ret: data expression of sort Int that is a representation of z
+
+bool gsIsPosConstant(const ATermAppl PosExpr);
+//Pre: PosExpr is a data expression of sort Pos
+//Ret: PosExpr is built from constructors only
+
+char *gsPosValue(const ATermAppl PosConstant);
+//Pre: PosConstant is a data expression of sort Pos built from constructors only
+//Ret: The value of PosExpr
+//     Note that the result is created with malloc, so it has to be freed
+
+int gsPosValue_int(const ATermAppl PosConstant);
+//Pre: PosConstant is a data expression of sort Pos built from constructors only
+//Ret: The value of PosExpr
+
+bool gsIsNatConstant(const ATermAppl NatExpr);
+//Pre: NatExpr is a data expression of sort Nat
+//Ret: NatExpr is built from constructors only
+
+char *gsNatValue(const ATermAppl NatConstant);
+//Pre: NatConstant is a data expression of sort Nat built from constructors only
+//Ret: The value of NatExpr
+//     Note that the result is created with malloc, so it has to be freed
+
+int gsNatValue_int(const ATermAppl NatConstant);
+//Pre: NatConstant is a data expression of sort Nat built from constructors only
+//Ret: The value of NatExpr
+
+bool gsIsIntConstant(const ATermAppl IntExpr);
+//Pre: IntExpr is a data expression of sort Int
+//Ret: IntExpr is built from constructors only
+
+char *gsIntValue(const ATermAppl IntConstant);
+//Pre: IntConstant is a data expression of sort Int built from constructors only
+//Ret: The value of IntExpr
+//     Note that the result is created with malloc, so it has to be freed
+
+int gsIntValue_int(const ATermAppl IntConstant);
+//Pre: IntConstant is a data expression of sort Int built from constructors only
+//Ret: The value of IntExpr
 
 ATermAppl gsGetDataExprHead(ATermAppl DataExpr);
 //Pre: DataExpr is a data expression
@@ -785,7 +835,23 @@ int gsPrecOpIdInfixRight(ATermAppl OpIdInfix);
 //Pre: OpIdInfix is an infix operation identifier
 //Ret: Precedence of the right argument of the operation
 
+//low level functions
+//-------------------
+
+char *gsStringDiv2(const char *n);
+//Pre: n is of the form "0 | [1-9][0-9]*"
+//Ret: the smallest string representation of n div 2
+//     Note that the result is created with malloc, so it has to be freed
+     
+int gsStringMod2(const char *n);
+//Pre: n is of the form "0 | [1-9][0-9]*"
+//Ret: the value of n mod 2
+
 char *gsStringDub(const char *n, const int inc);
+//Pre: n is of the form "0 | [1-9][0-9]*"
+//     0 <= inc <= 1
+//Ret: the smallest string representation of 2*n + inc,
+//     Note that the result is created with malloc, so it has to be freed
 
 #ifdef __cplusplus
 }

@@ -1,15 +1,15 @@
-#include "gsfunc.h"
-#include <string.h>
-#include <stdlib.h>
-#include <assert.h>
-
 #ifdef __cplusplus
 extern "C" {
 #endif
-
+#include <string.h>
+#include <stdlib.h>
+#include <assert.h>
+#include <math.h>
 #ifdef __cplusplus
 }
 #endif
+
+#include "gsfunc.h"
 
 //String manipulation
 //-------------------
@@ -2184,7 +2184,7 @@ ATermAppl gsMakeDataApplList(ATermAppl DataExpr,
 }
 
 inline int gsChar2Int(char c)
-//Pre: c is in {'0', ..., '9'}
+//Pre: '0' <= c < '9'
 //Ret: integer value corresponding to c
 {
   assert(c >= '0' && c <= '9');
@@ -2200,10 +2200,6 @@ inline char gsInt2Char(int n)
 }
 
 char *gsStringDiv2(const char *n)
-//Pre: n is of the form "0 | [1-9][0-9]*"
-//Ret: the string representation of n div 2
-//     Note that the resulting string is created with malloc, so it has to be
-//     freed
 {
   assert(strlen(n) > 0);
   int l = strlen(n); //length of n
@@ -2221,25 +2217,17 @@ char *gsStringDiv2(const char *n)
     j = j+1;
   }
   //terminate string
-  r[j] = 0;
+  r[j] = '\0';
   return r;
 }
 
 int gsStringMod2(const char *n)
-//Pre: n is of the form "0 | [1-9][0-9]*"
-//Ret: the value of n mod 2
 {
   assert(strlen(n) > 0);
   return gsChar2Int(n[strlen(n)-1]) % 2;
 }
 
 char *gsStringDub(const char *n, const int inc)
-/*Pre: n is of the form "0 | [1-9][0-9]*"
-       0 <= inc <= 1
-  Ret: the string representation of 2*n + inc,
-       Note that the resulting string is created with malloc, so it has to be
-       freed
-*/
 {
   assert(strlen(n) > 0);
   int l = strlen(n); //length of n
@@ -2260,13 +2248,21 @@ char *gsStringDub(const char *n, const int inc)
   r[j] = gsInt2Char(2*(gsChar2Int(n[l-1])%5) + inc);
   j = j+1;
   //terminate string
-  r[j] = 0;
+  r[j] = '\0';
   return r;
 }
 
+int NrOfChars(int n) {
+//Ret: the number of characters of the decimal representation of n
+  if (n > 0)
+    return ceil(log10(n));
+  else if (n == 0)
+    return 1;
+  else //n < 0
+    return ceil(log10(abs(n))) + 1;
+}
+
 ATermAppl gsMakeDataExprPos(char *p)
-//Pre: p is of the form "[1-9][0-9]*"
-//Ret: data expression of sort Pos that is a representation of p
 {
   assert(strlen(p) > 0);
   if (!strcmp(p, "1")) {
@@ -2282,9 +2278,15 @@ ATermAppl gsMakeDataExprPos(char *p)
   }
 }
 
+ATermAppl gsMakeDataExprPos_int(int p)
+{
+  assert(p > 0);  
+  char s[NrOfChars(p)+1];
+  sprintf(s, "%d", p);
+  return gsMakeDataExprPos(s);
+}
+
 ATermAppl gsMakeDataExprNat(char *n)
-//Pre: n is of the form "0 | [1-9][0-9]*"
-//Ret: data expression of sort Nat that is a representation of n
 {
   if (!strcmp(n, "0")) {
     return gsMakeDataExpr0();
@@ -2293,15 +2295,153 @@ ATermAppl gsMakeDataExprNat(char *n)
   }
 }
 
-ATermAppl gsMakeDataExprInt(char *i)
-//Pre: i is of the form "0 | -? [1-9][0-9]*"
-//Ret: data expression of sort Int that is a representation of i
+ATermAppl gsMakeDataExprNat_int(int n)
 {
-  if (!strncmp(i, "-", 1)) {
-    return gsMakeDataExprCNeg(gsMakeDataExprPos(i+1));
+  assert(n >= 0);  
+  char s[NrOfChars(n)+1];
+  sprintf(s, "%d", n);
+  return gsMakeDataExprNat(s);
+}
+
+ATermAppl gsMakeDataExprInt(char *z)
+{
+  if (!strncmp(z, "-", 1)) {
+    return gsMakeDataExprCNeg(gsMakeDataExprPos(z+1));
   } else {
-    return gsMakeDataExprCInt(gsMakeDataExprNat(i));
+    return gsMakeDataExprCInt(gsMakeDataExprNat(z));
   }
+}
+
+ATermAppl gsMakeDataExprInt_int(int z)
+{
+  char s[NrOfChars(z)+1];
+  sprintf(s, "%d", z);
+  return gsMakeDataExprInt(s);
+}
+
+bool gsIsPosConstant(const ATermAppl PosExpr)
+{
+  if (gsIsOpId(PosExpr)) {
+    return ATisEqual(PosExpr, gsMakeOpId1());
+  } else if (gsIsDataAppl(PosExpr))  {
+    ATermAppl Head = gsGetDataExprHead(PosExpr);
+    ATermList Args = gsGetDataExprArgs(PosExpr);
+    if (ATisEqual(Head, gsMakeOpIdCDub()) && ATgetLength(Args) == 2) {
+      ATermAppl ArgBool = ATAelementAt(Args, 0);
+      return  
+        (ATisEqual(ArgBool, gsMakeOpIdTrue()) || 
+         ATisEqual(ArgBool, gsMakeOpIdFalse())
+        ) && gsIsPosConstant(ATAelementAt(Args, 1));
+    } else return false;
+  } else return false;
+}
+
+bool gsIsNatConstant(const ATermAppl NatExpr)
+{
+  if (gsIsOpId(NatExpr)) {
+    return ATisEqual(NatExpr, gsMakeOpId0());
+  } else if (gsIsDataAppl(NatExpr)) {
+    ATermAppl Head = gsGetDataExprHead(NatExpr);
+    ATermList Args = gsGetDataExprArgs(NatExpr);
+    if (ATisEqual(Head, gsMakeOpIdCNat()) && ATgetLength(Args) == 1) {
+      return gsIsPosConstant(ATAelementAt(Args, 0));
+    } else return false;
+  } else return false;
+}
+
+bool gsIsIntConstant(const ATermAppl IntExpr)
+{
+  if (gsIsDataAppl(IntExpr)) {
+    ATermAppl Head = gsGetDataExprHead(IntExpr);
+    ATermList Args = gsGetDataExprArgs(IntExpr);
+    if (ATgetLength(Args) == 1) {
+      if (ATisEqual(Head, gsMakeOpIdCInt())) {
+        return gsIsNatConstant(ATAelementAt(Args, 0));
+      } else if (ATisEqual(Head, gsMakeOpIdCNeg())) {
+        return gsIsPosConstant(ATAelementAt(Args, 0));
+      } else return false;
+    } else return false;
+  } else return false;
+}
+
+char *gsPosValue(const ATermAppl PosConstant)
+{
+  assert(gsIsPosConstant(PosConstant));
+  char *Result = "";
+  if (gsIsOpId(PosConstant)) {
+    //PosConstant is 1
+    Result = (char *) malloc(2 * sizeof(char));
+    Result[0] = '1';
+    Result[1] = '\0';
+  } else {
+    //PosConstant is of the form cDub(b)(p), where b and p are boolean and
+    //positive constants, respectively
+    ATermList Args = gsGetDataExprArgs(PosConstant);
+    int Inc = (ATisEqual(ATAelementAt(Args, 0), gsMakeDataExprTrue()))?1:0;
+    char *PosValue = gsPosValue(ATAelementAt(Args, 1));
+    Result = gsStringDub(PosValue, Inc);
+    free(PosValue);
+  }
+  return Result;
+}
+
+int gsPosValue_int(const ATermAppl PosConstant)
+{
+  char *s = gsPosValue(PosConstant);
+  int n = strtod(s, NULL);
+  free(s);
+  return n;
+}
+
+char *gsNatValue(const ATermAppl NatConstant)
+{
+  assert(gsIsNatConstant(NatConstant));
+  char *Result = "";
+  if (gsIsOpId(NatConstant)) {
+    //NatConstant is 0
+    Result = (char *) malloc(2 * sizeof(char));
+    Result[0] = '0';
+    Result[1] = '\0';
+  } else {
+    //NatConstant is a positive constant
+    Result = gsPosValue(ATAgetArgument(NatConstant, 1));
+  }
+  return Result;
+}
+
+int gsNatValue_int(const ATermAppl NatConstant)
+{
+  char *s = gsNatValue(NatConstant);
+  int n = strtod(s, NULL);
+  free(s);
+  return n;
+}
+
+char *gsIntValue(const ATermAppl IntConstant)
+{
+  assert(gsIsIntConstant(IntConstant));
+  char *Result = "";
+  if (ATisEqual(ATAgetArgument(IntConstant, 0), gsMakeOpIdCInt())) {
+    //IntExpr is a natural number
+    Result = gsNatValue(ATAgetArgument(IntConstant, 1));
+  } else {
+    //IntExpr is the negation of a positive number
+    char *PosValue = gsPosValue(ATAgetArgument(IntConstant, 1));    
+    Result = (char *) malloc((strlen(PosValue)+2) * sizeof(char));
+    Result[0] = '-';
+    Result[1] = '\0';
+    Result = strcat(Result, PosValue);
+    free(PosValue);
+  }
+  return Result;
+}
+
+int gsIntValue_int(const ATermAppl IntConstant)
+{
+  char *s = gsIntValue(IntConstant);
+  int n = strtod(s, NULL);
+  free(s);
+  return n;
 }
 
 ATermAppl gsGetDataExprHead(ATermAppl DataExpr)

@@ -1,5 +1,5 @@
 #define  NAME      "libgsparse"
-#define  LVERSION  "0.1.25"
+#define  LVERSION  "0.1.26"
 #define  AUTHOR    "Aad Mathijssen"
 
 #ifdef __cplusplus
@@ -10,6 +10,7 @@ extern "C" {
 #include <string.h>
 #include <stdlib.h>
 #include <assert.h>
+#include <math.h>
 
 #ifdef __cplusplus
 }
@@ -86,8 +87,8 @@ ATermList gsGroupDeclsBySort(const ATermList Decls);
 
 void gsPrintDecls(FILE *OutStream, const ATermList Decls,
   const char *Terminator, const char *Separator);
-/*Pre: Decls is an ATermList containing declarations of the form
-       Decl(Name, Sort) from a GenSpect specification
+/*Pre: Decls is an ATermList containing action, operation, or variable
+       declarations from a GenSpect specification
   Ret: A textual representation of the declarations is written to OutStream,
        in which:
        - of two consecutive declarations Decl(x, S) and Decl(y, T), the first
@@ -99,8 +100,8 @@ void gsPrintDecls(FILE *OutStream, const ATermList Decls,
 */
 
 void gsPrintDecl(FILE *OutStream, const ATermAppl Decl, const bool ShowSorts);
-/*Pre: Decl is an ATermAppl that represents a declaration of the form
-       Decl(Name, Sort) from a GenSpect specification
+/*Pre: Decl is an ATermAppl that represents an action, operation, or variable
+       declaration from a GenSpect specification
        ShowSorts indicates if the sort of the declaration should be shown
   Ret: A textual representation of the declaration, say Decl(x, S), is written
        to OutStream, i.e.:
@@ -155,17 +156,6 @@ void gsPrintPos(FILE *OutStream, const ATermAppl PosExpr, int PrecLevel);
        - each constant is represented by its corresponding positive number
        - each non-constant is of the form cDub(b_1)(...(cDub(b_n)(p))) and is
          represented by 2^n*p + 2^(n-1)*b_n + ... + b1
-*/
-
-bool gsIsPosConstant(const ATermAppl PosExpr);
-/*Pre: PosExpr is a data expression of sort Pos
-  Ret: PosExpr is built from constructors of sort Pos and Bool only
-*/
-
-char *gsPosValue(const ATermAppl PosExpr);
-/*Pre: PosExpr is a data expression of sort Pos built from constructors of
-       sort Pos and Bool only
-  Ret: The value of PosExpr
 */
 
 void gsPrintPosMult(FILE *OutStream, const ATermAppl PosExpr, int PrecLevel,
@@ -323,13 +313,14 @@ void gsPrintPart(FILE *OutStream, const ATermAppl Part, bool ShowSorts,
       //SummandsLength > 0
       fprintf(OutStream, "\n");
       for (int i = 0; i < SummandsLength; i++) {
-        fprintf(OutStream, "      %c", (i==0)?' ':'+');
+        fprintf(OutStream, "     %c ", (i==0)?' ':'+');
         gsPrintLPESummand(OutStream, ATAelementAt(Summands, i), ShowSorts,
           PrecLevel, VarDeclTable);
         if (i == SummandsLength - 1) fprintf(OutStream, ";");
         fprintf(OutStream, "\n");
       }
     }
+    fprintf(OutStream, "\n");
     ATtableDestroy(VarDeclTable);
   } else if (gsIsInit(Part)) {
     //print initialisation
@@ -951,7 +942,12 @@ void gsPrintDecl(FILE *OutStream, const ATermAppl Decl, const bool ShowSorts)
   gsPrintPart(OutStream, ATAgetArgument(Decl, 0), ShowSorts, 0);
   if (ShowSorts) {
     fprintf(OutStream, ": ");
-    gsPrintPart(OutStream, ATAgetArgument(Decl, 1), ShowSorts, 0);
+    if (gsIsActId(Decl)) {
+      gsPrintParts(OutStream, ATLgetArgument(Decl, 1), ShowSorts, 2,
+        NULL, " # ");
+    } else {
+      gsPrintPart(OutStream, ATAgetArgument(Decl, 1), ShowSorts, 0);
+    }
   }
 }
 
@@ -975,7 +971,7 @@ void gsPrintLPESummand(FILE *OutStream, const ATermAppl Summand, bool ShowSorts,
   ATermList MultActs = ATLgetArgument(Summand, 2);
   int MultActsLength = ATgetLength(MultActs);
   ATermAppl Time = ATAgetArgument(Summand, 3);
-  bool IsTimed = gsIsNil(Time);
+  bool IsTimed = !gsIsNil(Time);
   if (MultActsLength == 0) {
     fprintf(OutStream, "tau");
   } else {
@@ -988,8 +984,9 @@ void gsPrintLPESummand(FILE *OutStream, const ATermAppl Summand, bool ShowSorts,
       gsPrintPart(OutStream, Time, ShowSorts, 11);
     }
   }
+  fprintf(OutStream, " . ");
   //print process reference
-  ATermList IndexedTerms = ATLgetArgument(Summand, 5);
+  ATermList IndexedTerms = ATLgetArgument(Summand, 4);
   int IndexedTermsLength = ATgetLength(IndexedTerms);
   fprintf(OutStream, "P");
   if (IndexedTermsLength > 0) {
@@ -1001,7 +998,7 @@ void gsPrintLPESummand(FILE *OutStream, const ATermAppl Summand, bool ShowSorts,
         ATAtableGet(VarDeclTable, ATgetArgument(IndexedTerm, 0)), ShowSorts,
         PrecLevel);
       fprintf(OutStream, " := ");
-      ATermAppl NewValue = ATAgetArgument(IndexedTerm, 0);
+      ATermAppl NewValue = ATAgetArgument(IndexedTerm, 1);
       if (gsIsNil(NewValue)) {
         fprintf(OutStream, "<DC>");
       } else {
@@ -1021,49 +1018,6 @@ void gsPrintPos(FILE *OutStream, const ATermAppl PosExpr, int PrecLevel)
   } else {
     gsPrintPosMult(OutStream, PosExpr, PrecLevel, "1");
   }
-}
-
-bool gsIsPosConstant(const ATermAppl PosExpr)
-{
-  if (gsIsOpId(PosExpr)) {
-    return ATisEqual(PosExpr, gsMakeOpId1());
-  } else if (gsIsDataAppl(PosExpr))  {
-    ATermAppl Head = gsGetDataExprHead(PosExpr);
-    ATermList Args = gsGetDataExprArgs(PosExpr);
-    if (ATisEqual(Head, gsMakeOpIdCDub()) && ATgetLength(Args) == 2) {
-      ATermAppl ArgBool = ATAelementAt(Args, 0);
-      return  
-        (ATisEqual(ArgBool, gsMakeOpIdTrue()) || 
-         ATisEqual(ArgBool, gsMakeOpIdFalse())
-        ) && gsIsPosConstant(ATAelementAt(Args, 1));
-
-    } else {
-      return false;
-    }
-  } else {
-    return false;
-  }
-}
-
-char *gsPosValue(const ATermAppl PosExpr)
-{
-  assert(gsIsPosConstant(PosExpr));
-  char *Result = "";
-  if (gsIsOpId(PosExpr)) {
-    //PosExpr is 1
-    Result = (char *) malloc(2 * sizeof(char));
-    Result[0] = '1';
-    Result[1] = 0;
-  } else {
-    //PosExpr is of the form cDub(b)(p), where b and p are boolean and positive
-    //constants, respectively
-    ATermList Args = gsGetDataExprArgs(PosExpr);
-    int Inc = (ATisEqual(ATAelementAt(Args, 0), gsMakeDataExprTrue()))?1:0;
-    char *PosValue = gsPosValue(ATAelementAt(Args, 1));
-    Result = gsStringDub(PosValue, Inc);
-    free(PosValue);
-  }
-  return Result;
 }
 
 void gsPrintPosMult(FILE *OutStream, const ATermAppl PosExpr, int PrecLevel,
@@ -1123,28 +1077,13 @@ void gsPrintPosMult(FILE *OutStream, const ATermAppl PosExpr, int PrecLevel,
 
 void gsTest(void)
 {
-  //gsSetDebugMsg();
   //initialise ATerm library
   ATerm StackBottom;
   ATinit(0, NULL, &StackBottom);
   //enable constructor functions
   gsEnableConstructorFunctions();
-  //build positive expression
-  ATermAppl PosExpr = gsMakeDataExprCDub(
-    gsMakeDataVarId(gsString2ATermAppl("b3"), gsMakeSortExprBool()),
-    gsMakeDataExprCDub(
-      gsMakeDataVarId(gsString2ATermAppl("b2"), gsMakeSortExprBool()),
-      gsMakeDataExprCDub(
-        gsMakeDataVarId(gsString2ATermAppl("b1"), gsMakeSortExprBool()),
-        gsMakeDataExprCDub(
-          gsMakeDataVarId(gsString2ATermAppl("b0"), gsMakeSortExprBool()),
-          gsMakeDataVarId(gsString2ATermAppl("p"), gsMakeSortExprPos()))
-        )
-      )
-    );
-  //ATermAppl PosExpr = gsMakeDataExprCDub(gsMakeDataExprFalse(),
-  //  gsMakeDataExprCDub(gsMakeDataExprFalse(), gsMakeDataExpr1()));
-  //print expression
-  gsPrintSpecification(stderr, PosExpr);
-  fprintf(stderr, "\n");
+  //build positive constant
+  ATermAppl t = gsMakeDataExprInt_int(1337);
+  int n = gsIntValue_int(t);
+  fprintf(stderr, "%d\n", n);
 }

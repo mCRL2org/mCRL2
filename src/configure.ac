@@ -21,7 +21,7 @@ fi
 
 # Set flags
 CFLAGS="$CFLAGS -std=c99 -Wall -pedantic"
-LDFLAGS="-L. $LDFLAGS"
+LDFLAGS="-L. -lm $LDFLAGS"
 
 # Check for C99 standard
 AC_MSG_CHECKING([for C99 standard])
