@@ -7,7 +7,7 @@ act
 
 proc
   X = a.X;
-  Y = a.Y;
+  Y = b.Y;
 
 init
   allow({c},comm({a|b->c},X||Y));
