@@ -75,10 +75,6 @@ static AFun gsAFunNil;
 static AFun gsAFunActId;
 static AFun gsAFunProcEqn;
 static AFun gsAFunProcVarId;
-static AFun gsAFunSortBool;
-static AFun gsAFunSortPos;
-static AFun gsAFunSortNat;
-static AFun gsAFunSortInt;
 static AFun gsAFunSortList;
 static AFun gsAFunSortSet;
 static AFun gsAFunSortBag;
@@ -147,10 +143,6 @@ void gsEnableConstructorFunctions(void)
   gsAFunActId         = ATmakeAFun("ActId", 2, ATfalse);
   gsAFunProcEqn       = ATmakeAFun("ProcEqn", 3, ATfalse);
   gsAFunProcVarId     = ATmakeAFun("ProcVarId", 2, ATfalse);
-  gsAFunSortBool      = ATmakeAFun("SortBool", 0, ATfalse);
-  gsAFunSortPos       = ATmakeAFun("SortPos", 0, ATfalse);
-  gsAFunSortNat       = ATmakeAFun("SortNat", 0, ATfalse);
-  gsAFunSortInt       = ATmakeAFun("SortInt", 0, ATfalse);
   gsAFunSortList      = ATmakeAFun("SortList", 1, ATfalse);
   gsAFunSortSet       = ATmakeAFun("SortSet", 1, ATfalse);
   gsAFunSortBag       = ATmakeAFun("SortBag", 1, ATfalse);
@@ -213,10 +205,6 @@ void gsEnableConstructorFunctions(void)
   ATprotectAFun(gsAFunActId);
   ATprotectAFun(gsAFunProcEqn);
   ATprotectAFun(gsAFunProcVarId);
-  ATprotectAFun(gsAFunSortBool);
-  ATprotectAFun(gsAFunSortPos);
-  ATprotectAFun(gsAFunSortNat);
-  ATprotectAFun(gsAFunSortInt);
   ATprotectAFun(gsAFunSortList);
   ATprotectAFun(gsAFunSortSet);
   ATprotectAFun(gsAFunSortBag);
@@ -387,30 +375,6 @@ ATermAppl gsMakeProcVarId(ATermAppl Name, ATermList SortExprs)
 {
   assert(gsConstructorFunctionsEnabled);
   return ATmakeAppl2(gsAFunProcVarId, (ATerm) Name, (ATerm) SortExprs);
-}
-
-ATermAppl gsMakeSortBool()
-{
-  assert(gsConstructorFunctionsEnabled);
-  return ATmakeAppl0(gsAFunSortBool);
-}
-
-ATermAppl gsMakeSortPos()
-{
-  assert(gsConstructorFunctionsEnabled);
-  return ATmakeAppl0(gsAFunSortPos);
-}
-
-ATermAppl gsMakeSortNat()
-{
-  assert(gsConstructorFunctionsEnabled);
-  return ATmakeAppl0(gsAFunSortNat);
-}
-
-ATermAppl gsMakeSortInt()
-{
-  assert(gsConstructorFunctionsEnabled);
-  return ATmakeAppl0(gsAFunSortInt);
 }
 
 ATermAppl gsMakeSortList(ATermAppl SortExpr)
@@ -779,26 +743,6 @@ bool gsIsProcVarId(ATermAppl term) {
   return ATgetAFun(term) == gsAFunProcVarId;
 }
 
-bool gsIsSortBool(ATermAppl term) {
-  assert(gsConstructorFunctionsEnabled);
-  return ATgetAFun(term) == gsAFunSortBool;
-}
-
-bool gsIsSortPos(ATermAppl term) {
-  assert(gsConstructorFunctionsEnabled);
-  return ATgetAFun(term) == gsAFunSortPos;
-}
-
-bool gsIsSortNat(ATermAppl term) {
-  assert(gsConstructorFunctionsEnabled);
-  return ATgetAFun(term) == gsAFunSortNat;
-}
-
-bool gsIsSortInt(ATermAppl term) {
-  assert(gsConstructorFunctionsEnabled);
-  return ATgetAFun(term) == gsAFunSortInt;
-}
-
 bool gsIsSortList(ATermAppl term) {
   assert(gsConstructorFunctionsEnabled);
   return ATgetAFun(term) == gsAFunSortList;
@@ -1023,20 +967,3 @@ bool gsIsCommExpr(ATermAppl term) {
   assert(gsConstructorFunctionsEnabled);
   return ATgetAFun(term) == gsAFunCommExpr;
 }
-
-//Creation of data expressions for system defined operations. If possible,
-//types are checked.
-//ATermAppl gsMakeDataExprTrue();
-//ATermAppl gsMakeDataExprFalse();
-//ATermAppl gsMakeDataExprNot(ATermAppl DataExpr);
-//ATermAppl gsMakeDataExprAnd(ATermAppl DataExprLHS, ATermAppl DataExprRHS);
-//ATermAppl gsMakeDataExprOr(ATermAppl DataExprLHS, ATermAppl DataExprRHS);
-//ATermAppl gsMakeDataExprImp(ATermAppl DataExprLHS, ATermAppl DataExprRHS);
-//ATermAppl gsMakeDataExprEq(ATermAppl DataExprLHS, ATermAppl DataExprRHS);
-//ATermAppl gsMakeDataExprNeq(ATermAppl DataExprLHS, ATermAppl DataExprRHS);
-//ATermAppl gsMakeDataExprIf(ATermAppl DataExprCond, ATermAppl DataExprThen,
-//ATermAppl DataExprIf);
-
-//ATermAppl gsMakeDataExprPos(char *p);
-//ATermAppl gsMakeDataExprNat(char *n);
-//ATermAppl gsMakeDataExprInt(char *z);

@@ -758,19 +758,19 @@ sort_expr_primary:
 sort_constant:
   BOOL
     {
-      $$ = gsMakeSortBool();
+      $$ = gsMakeSortId($1);
     }
   | POS
     {
-      $$ = gsMakeSortPos();
+      $$ = gsMakeSortId($1);
     }
   | NAT
     {
-      $$ = gsMakeSortNat();
+      $$ = gsMakeSortId($1);
     }
   | INT
     {
-      $$ = gsMakeSortInt();
+      $$ = gsMakeSortId($1);
     }
   ;
 

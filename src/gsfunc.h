@@ -97,10 +97,6 @@ ATermAppl gsMakeActId(ATermAppl Name, ATermList SortExprs);
 ATermAppl gsMakeProcEqn(ATermAppl ProcVarId, ATermList DataVarIds,
   ATermAppl ProcExp);
 ATermAppl gsMakeProcVarId(ATermAppl Name,ATermList SortExprs);
-ATermAppl gsMakeSortBool();
-ATermAppl gsMakeSortPos();
-ATermAppl gsMakeSortNat();
-ATermAppl gsMakeSortInt();
 ATermAppl gsMakeSortList(ATermAppl SortExpr);
 ATermAppl gsMakeSortSet(ATermAppl SortExpr);
 ATermAppl gsMakeSortBag(ATermAppl SortExpr);
@@ -176,10 +172,6 @@ bool gsIsNil(ATermAppl term);
 bool gsIsActId(ATermAppl term);
 bool gsIsProcEqn(ATermAppl term);
 bool gsIsProcVarId(ATermAppl term);
-bool gsIsSortBool(ATermAppl term);
-bool gsIsSortPos(ATermAppl term);
-bool gsIsSortNat(ATermAppl term);
-bool gsIsSortInt(ATermAppl term);
 bool gsIsSortList(ATermAppl term);
 bool gsIsSortSet(ATermAppl term);
 bool gsIsSortBag(ATermAppl term);
@@ -230,6 +222,18 @@ ATermAppl gsString2ATermAppl(char *s);
 //Ret: quoted constant s, if s != NULL
 //     unquoted constant Nil, if s == NULL
 
+//Creation of sort expressions for system defined sorts.
+ATermAppl gsMakeSortExprBool();
+ATermAppl gsMakeSortExprPos();
+ATermAppl gsMakeSortExprNat();
+ATermAppl gsMakeSortExprInt();
+
+//Recognition of sort expressions for system defined sorts.
+bool gsIsSortExprBool(ATermAppl term);
+bool gsIsSortExprPos(ATermAppl term);
+bool gsIsSortExprNat(ATermAppl term);
+bool gsIsSortExprInt(ATermAppl term);
+
 //Creation of data expressions for system defined operations. If possible,
 //types are checked.
 ATermAppl gsMakeDataExprTrue();
@@ -254,6 +258,20 @@ ATermAppl gsMakeDataExprNat(char *n);
 ATermAppl gsMakeDataExprInt(char *z);
 //Pre: z is of the form "0 | -? [1-9][0-9]*"
 //Ret: data expression of sort Int that is a representation of z
+
+//Recognition of data expressions for system defined sorts.
+bool gsIsDataExprTrue(ATermAppl term);
+bool gsIsDataExprFalse(ATermAppl term);
+bool gsIsDataExprNot(ATermAppl term);
+bool gsIsDataExprAnd(ATermAppl term);
+bool gsIsDataExprOr(ATermAppl term);
+bool gsIsDataExprImp(ATermAppl term);
+bool gsIsDataExprEq(ATermAppl term);
+bool gsIsDataExprNeq(ATermAppl term);
+bool gsIsDataExprIf(ATermAppl term);
+bool gsIsDataExprPos(ATermAppl term);
+bool gsIsDataExprNat(ATermAppl term);
+bool gsIsDataExprInt(ATermAppl term);
 
 #ifdef __cplusplus
 }
