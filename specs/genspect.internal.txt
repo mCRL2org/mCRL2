@@ -1,10 +1,9 @@
-// Date: 18-02-2005
+// Date: 21-02-2005
 // This document describes the internal format of the GenSpect language. Here:
 // - three phases of implementation are distinguised, namely type checking (tc),
 //   data implementation (di) and linearisation (lin)
 // - (+p)/(-p) at the end of a branch means that this branch is added/removed at
 //   the end of phase p 
-// - <Int> is an ATermInt
 // - <String> is an arbitrary non-empty string
 // - <NumberString> is a string of the format '"0"|("-"?[1-9][0-9]*)'
 // - <String> and <NumberString> are represented by a quoted ATermAppl constant
@@ -13,7 +12,11 @@
 // - for non-terminal N, N*/N+ represents an ATermList with zero/one or more N's
 // - each c(a_0, ..., a_n), where c is an alphabetical string, represents an
 //   ATermAppl with c as its unquoted head and a_0, ..., a_n as its arguments
-
+// - a number of restrictions apply to the Assignment's, which we denote by A,
+//   of an LPESummand:
+//   + the lhs of an element of A should be declared by the LPE
+//   + A may not contain duplicate lhs's
+//   + the lhs's of A should obey the order in which they are declared 
 // This description uses the theory of higher-order abstract data types, i.e.
 // we have a higher-order signature Sigma = (B, O), where B is set of basic
 // sorts and O is a set of operations. From the set B, we can generate the set
@@ -78,13 +81,13 @@
 
 //LPE summand
 <LPESummand>  ::= LPESummand(<DataVarId>*, <DataExpr>, <Action>*,
-                    <DataExprOrNil>, <IndexedTerm>*)
+                    <DataExprOrNil>, <Assignment>*)
 
 //Action
 <Action>      ::= Action(<ActId>, <DataExpr>*)
 
-//Indexed term
-<IndexedTerm> ::= IndexedTerm(<Int>, <DataExprOrNil>)
+//Assignment
+<Assignment>  ::= Assignment(<DataVarId>, <DataExprOrNil>)
 
 //process expressions or data expression
 <Init>        ::= Init(<ProcExpr>)                                       (-lin)
