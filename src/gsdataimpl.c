@@ -66,6 +66,11 @@ ATermAppl gsDeclareDataEqn(ATermAppl Spec, ATermAppl DataEqn);
 
 //local declarations
 
+ATermAppl gsImplementExprs(ATermAppl Spec);
+//Pre: Spec is a specification that adheres to the internal syntax after
+//     type checking
+//Ret: Spec in which all expressions are implemented
+
 ATermAppl gsImplementBool(ATermAppl Spec);
 //Pre: Spec is a specification that adheres to the internal syntax after type
 //     checking

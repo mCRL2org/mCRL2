@@ -141,9 +141,9 @@ ATermAppl gsMakeProcEqn(ATermAppl ProcVarId, ATermList DataVarIds,
   ATermAppl ProcExp);
 ATermAppl gsMakeProcVarId(ATermAppl Name,ATermList SortExprs);
 ATermAppl gsMakeLPESummand(ATermList DataVarIds, ATermAppl BoolExpr,
-  ATermList MultiAction, ATermAppl TimeExprOrNil, ATermList IndexedTerms);
+  ATermList MultiAction, ATermAppl TimeExprOrNil, ATermList Assignments);
 ATermAppl gsMakeAction(ATermAppl ActId, ATermList DataExprs);
-ATermAppl gsMakeIndexedTerm(ATermInt Index, ATermAppl DataExprOrNil);
+ATermAppl gsMakeAssignment(ATermAppl DataVarId, ATermAppl DataExprOrNil);
 ATermAppl gsMakeInit(ATermAppl ProcExpr);
 ATermAppl gsMakeLPEInit(ATermList DataExprs);
 ATermAppl gsMakeSortList(ATermAppl SortExpr);
@@ -214,7 +214,7 @@ bool gsIsProcEqn(ATermAppl Term);
 bool gsIsProcVarId(ATermAppl Term);
 bool gsIsLPESummand(ATermAppl Term);
 bool gsIsAction(ATermAppl Term);
-bool gsIsIndexedTerm(ATermAppl Term);
+bool gsIsAssignment(ATermAppl Term);
 bool gsIsInit(ATermAppl Term);
 bool gsIsLPEInit(ATermAppl Term);
 bool gsIsSortList(ATermAppl Term);

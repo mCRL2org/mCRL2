@@ -1,5 +1,5 @@
 #define  NAME      "libgsparse"
-#define  LVERSION  "0.1.26"
+#define  LVERSION  "0.1.27"
 #define  AUTHOR    "Aad Mathijssen"
 
 #ifdef __cplusplus
@@ -130,20 +130,6 @@ bool gsHasConsistentContextList(const ATermTable DataVarDecls,
  *Ret: all operations occurring in Parts are consistent with the variables from
  *     the context
  */
-
-void gsPrintLPESummand(FILE *OutStream, const ATermAppl Summand,
-  bool ShowSorts, int PrecLevel, const ATermTable VarDeclTable);
-/*Pre: OutStream points to a stream to which can be written
-       Summand is an ATermAppl containing an LPE summand of a GenSpect
-       specification
-       ShowSorts indicates if sorts should be shown for each summand
-       PrecLevel indicates the precedence level of the context of the part
-       0 <= PrecLevel
-       VarDeclTable is a hash table representing all variables declared in the
-       context, with natural numbers as keys
-  Post:A textual representation of the summand is written to OutStream, in
-       which PrecLevel, ShowSort and VarDeclsTable are taken into account
-*/
 
 void gsPrintPos(FILE *OutStream, const ATermAppl PosExpr, int PrecLevel);
 /*Pre: OutStream points to a stream to which can be written
@@ -301,27 +287,18 @@ void gsPrintPart(FILE *OutStream, const ATermAppl Part, bool ShowSorts,
     }
     fprintf(OutStream, " =");
     //print summations
-    ATermTable VarDeclTable = ATtableCreate(2*VarDeclsLength, 50);
-    for (int i = 0; i < VarDeclsLength; i++) {
-      ATtablePut(VarDeclTable, (ATerm) ATmakeInt(i), ATelementAt(VarDecls, i));
-    }
     ATermList Summands = ATLgetArgument(Part, 1);
     int SummandsLength = ATgetLength(Summands);
     if (SummandsLength == 0) {
       fprintf(OutStream, " delta\n");
     } else {
       //SummandsLength > 0
-      fprintf(OutStream, "\n");
-      for (int i = 0; i < SummandsLength; i++) {
-        fprintf(OutStream, "     %c ", (i==0)?' ':'+');
-        gsPrintLPESummand(OutStream, ATAelementAt(Summands, i), ShowSorts,
-          PrecLevel, VarDeclTable);
-        if (i == SummandsLength - 1) fprintf(OutStream, ";");
-        fprintf(OutStream, "\n");
-      }
+      fprintf(OutStream, "\n       ");
+      gsPrintParts(OutStream, Summands, ShowSorts, PrecLevel,
+        NULL, "\n     + ");
+      fprintf(OutStream, ";\n");
     }
     fprintf(OutStream, "\n");
-    ATtableDestroy(VarDeclTable);
   } else if (gsIsInit(Part)) {
     //print initialisation
     gsDebugMsg("printing initialisation\n");
@@ -393,6 +370,60 @@ void gsPrintPart(FILE *OutStream, const ATermAppl Part, bool ShowSorts,
         fprintf(OutStream, ": ");
         gsPrintParts(OutStream, SortExprs, ShowSorts, 2, NULL, " # ");
       }
+    }
+  } else if (gsIsLPESummand(Part)) {
+    //print LPE summand
+    gsDebugMsg("printing LPE summand\n");
+    //print data summations
+    ATermList SumVarDecls = ATLgetArgument(Part, 0);
+    if (ATgetLength(SumVarDecls) > 0) {
+      fprintf(OutStream, "sum ");
+      gsPrintDecls(OutStream, SumVarDecls, NULL, ",");
+      fprintf(OutStream, ". ");
+    }
+    //print condition
+    ATermAppl Cond = ATAgetArgument(Part, 1);
+    if (!gsIsNil(Cond)) {
+      gsPrintPart(OutStream, Cond, ShowSorts, 0);
+      fprintf(OutStream, " -> ");
+    }
+    //print multi action and time
+    ATermList MultActs = ATLgetArgument(Part, 2);
+    int MultActsLength = ATgetLength(MultActs);
+    ATermAppl Time = ATAgetArgument(Part, 3);
+    bool IsTimed = !gsIsNil(Time);
+    if (MultActsLength == 0) {
+      fprintf(OutStream, "tau");
+    } else {
+      //MultActsLength > 0
+      if (IsTimed && MultActsLength == 1) fprintf(OutStream, "(");
+      gsPrintParts(OutStream, MultActs, ShowSorts, PrecLevel, NULL, "|");
+      if (IsTimed && MultActsLength == 1) fprintf(OutStream, ")");
+      if (IsTimed) {
+        fprintf(OutStream, " @ ");
+        gsPrintPart(OutStream, Time, ShowSorts, 11);
+      }
+    }
+    fprintf(OutStream, " . ");
+    //print process reference
+    ATermList Assignments = ATLgetArgument(Part, 4);
+    int AssignmentsLength = ATgetLength(Assignments);
+    fprintf(OutStream, "P");
+    if (AssignmentsLength > 0) {
+      fprintf(OutStream, "(");
+      gsPrintParts(OutStream, Assignments, ShowSorts, PrecLevel, NULL, ", ");
+      fprintf(OutStream, ")");
+    }
+  } else if (gsIsAssignment(Part)) {
+    //print assignment
+    gsDebugMsg("printing assignment\n");
+    gsPrintPart(OutStream, ATAgetArgument(Part, 0), ShowSorts, PrecLevel);
+    fprintf(OutStream, " := ");
+    ATermAppl NewValue = ATAgetArgument(Part, 1);
+    if (gsIsNil(NewValue)) {
+      fprintf(OutStream, "<DC>");
+    } else {
+      gsPrintPart(OutStream, NewValue, ShowSorts, 0);
     }
   } else if (gsIsSortList(Part)) {
     //print list sort
@@ -948,64 +979,6 @@ void gsPrintDecl(FILE *OutStream, const ATermAppl Decl, const bool ShowSorts)
     } else {
       gsPrintPart(OutStream, ATAgetArgument(Decl, 1), ShowSorts, 0);
     }
-  }
-}
-
-void gsPrintLPESummand(FILE *OutStream, const ATermAppl Summand, bool ShowSorts,
-  int PrecLevel, const ATermTable VarDeclTable)
-{
-  //print data summations
-  ATermList SumVarDecls = ATLgetArgument(Summand, 0);
-  if (ATgetLength(SumVarDecls) > 0) {
-    fprintf(OutStream, "sum ");
-    gsPrintDecls(OutStream, SumVarDecls, NULL, ",");
-    fprintf(OutStream, ". ");
-  }
-  //print condition
-  ATermAppl Cond = ATAgetArgument(Summand, 1);
-  if (!gsIsNil(Cond)) {
-    gsPrintPart(OutStream, Cond, ShowSorts, 0);
-    fprintf(OutStream, " -> ");
-  }
-  //print multi action and time
-  ATermList MultActs = ATLgetArgument(Summand, 2);
-  int MultActsLength = ATgetLength(MultActs);
-  ATermAppl Time = ATAgetArgument(Summand, 3);
-  bool IsTimed = !gsIsNil(Time);
-  if (MultActsLength == 0) {
-    fprintf(OutStream, "tau");
-  } else {
-    //MultActsLength > 0
-    if (IsTimed && MultActsLength == 1) fprintf(OutStream, "(");
-    gsPrintParts(OutStream, MultActs, ShowSorts, PrecLevel, NULL, "|");
-    if (IsTimed && MultActsLength == 1) fprintf(OutStream, ")");
-    if (IsTimed) {
-      fprintf(OutStream, " @ ");
-      gsPrintPart(OutStream, Time, ShowSorts, 11);
-    }
-  }
-  fprintf(OutStream, " . ");
-  //print process reference
-  ATermList IndexedTerms = ATLgetArgument(Summand, 4);
-  int IndexedTermsLength = ATgetLength(IndexedTerms);
-  fprintf(OutStream, "P");
-  if (IndexedTermsLength > 0) {
-    fprintf(OutStream, "(");
-    for (int i = 0; i < IndexedTermsLength; i++) {
-      if (i > 0) fprintf(OutStream, ", ");
-      ATermAppl IndexedTerm = ATAelementAt(IndexedTerms, i);
-      gsPrintPart(OutStream,
-        ATAtableGet(VarDeclTable, ATgetArgument(IndexedTerm, 0)), ShowSorts,
-        PrecLevel);
-      fprintf(OutStream, " := ");
-      ATermAppl NewValue = ATAgetArgument(IndexedTerm, 1);
-      if (gsIsNil(NewValue)) {
-        fprintf(OutStream, "<DC>");
-      } else {
-        gsPrintPart(OutStream, NewValue, ShowSorts, 0);
-      }
-    }
-    fprintf(OutStream, ")");
   }
 }
 

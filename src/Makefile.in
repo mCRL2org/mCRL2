@@ -71,8 +71,8 @@ linearise.o    : libgsparse.h gsfunc.h
 	$(LEX) $(LFLAGS) -o$@ $<
 
 clean :
-	$(RM) $(LIB_NAME) $(PARSER_NAME) *.o gslexer.c gsparser.c gsparser.h\
-gsparser.output config.status config.log *~ core core.*
+	$(RM) $(LIB_NAME) $(PARSER_NAME) $(LINEARISER_NAME) *.o gslexer.c\
+gsparser.c gsparser.h gsparser.output config.status config.log *~ core core.*
 
 #Note: to make a shared version of the gsparse library instead of a static one, do the following:
 #- add the option `-fpic' to CFLAGS

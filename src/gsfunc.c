@@ -208,7 +208,7 @@ static AFun gsAFunProcEqn;
 static AFun gsAFunProcVarId;
 static AFun gsAFunLPESummand;
 static AFun gsAFunAction;
-static AFun gsAFunIndexedTerm;
+static AFun gsAFunAssignment;
 static AFun gsAFunInit;
 static AFun gsAFunLPEInit;
 static AFun gsAFunSortList;
@@ -334,7 +334,7 @@ void gsEnableConstructorFunctions(void)
   gsAFunProcVarId     = ATmakeAFun("ProcVarId", 2, ATfalse);
   gsAFunLPESummand    = ATmakeAFun("LPESummand", 5, ATfalse);
   gsAFunAction        = ATmakeAFun("Action", 2, ATfalse);
-  gsAFunIndexedTerm   = ATmakeAFun("IndexedTerm", 2, ATfalse);
+  gsAFunAssignment    = ATmakeAFun("Assignment", 2, ATfalse);
   gsAFunInit          = ATmakeAFun("Init", 1, ATfalse);
   gsAFunLPEInit       = ATmakeAFun("LPEInit", 1, ATfalse);
   gsAFunSortList      = ATmakeAFun("SortList", 1, ATfalse);
@@ -451,7 +451,7 @@ void gsEnableConstructorFunctions(void)
   ATprotectAFun(gsAFunProcVarId);
   ATprotectAFun(gsAFunLPESummand);
   ATprotectAFun(gsAFunAction);
-  ATprotectAFun(gsAFunIndexedTerm);
+  ATprotectAFun(gsAFunAssignment);
   ATprotectAFun(gsAFunInit);
   ATprotectAFun(gsAFunLPEInit);
   ATprotectAFun(gsAFunSortList);
@@ -664,11 +664,11 @@ ATermAppl gsMakeProcVarId(ATermAppl Name, ATermList SortExprs)
 }
 
 ATermAppl gsMakeLPESummand(ATermList DataVarIds, ATermAppl BoolExpr,
-  ATermList MultiAction, ATermAppl TimeExprOrNil, ATermList IndexedTerms)
+  ATermList MultiAction, ATermAppl TimeExprOrNil, ATermList Assignments)
 {
   assert(gsConstructorFunctionsEnabled);
   return ATmakeAppl5(gsAFunLPESummand, (ATerm) DataVarIds, (ATerm) BoolExpr,
-    (ATerm) MultiAction, (ATerm) TimeExprOrNil, (ATerm) IndexedTerms);
+    (ATerm) MultiAction, (ATerm) TimeExprOrNil, (ATerm) Assignments);
 }
 
 ATermAppl gsMakeAction(ATermAppl ActId, ATermList DataExprs)
@@ -677,10 +677,11 @@ ATermAppl gsMakeAction(ATermAppl ActId, ATermList DataExprs)
   return ATmakeAppl2(gsAFunAction, (ATerm) ActId, (ATerm) DataExprs);
 }
 
-ATermAppl gsMakeIndexedTerm(ATermInt Index, ATermAppl DataExprOrNil)
+ATermAppl gsMakeAssignment(ATermAppl DataVarId, ATermAppl DataExprOrNil)
 {
   assert(gsConstructorFunctionsEnabled);
-  return ATmakeAppl2(gsAFunIndexedTerm, (ATerm) Index, (ATerm) DataExprOrNil);
+  return ATmakeAppl2(gsAFunAssignment, (ATerm) DataVarId,
+    (ATerm) DataExprOrNil);
 }
 
 ATermAppl gsMakeInit(ATermAppl ProcExpr)
@@ -1066,9 +1067,9 @@ bool gsIsAction(ATermAppl Term) {
   return ATgetAFun(Term) == gsAFunAction;
 }
 
-bool gsIsIndexedTerm(ATermAppl Term) {
+bool gsIsAssignment(ATermAppl Term) {
   assert(gsConstructorFunctionsEnabled);
-  return ATgetAFun(Term) == gsAFunIndexedTerm;
+  return ATgetAFun(Term) == gsAFunAssignment;
 }
 
 bool gsIsInit(ATermAppl Term) {
