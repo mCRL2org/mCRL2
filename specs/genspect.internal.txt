@@ -1,4 +1,4 @@
-// Date: 10-01-2005
+// Date: 09-02-2005
 // This document describes the internal format of the GenSpect language. Here:
 // - <String> is an arbitrary non-empty string
 // - <NumberString> is a string of the format '"0"|("-"?[1-9][0-9]*)'
@@ -99,10 +99,10 @@
                 | ListEnum(<DataExpr>+, <SortExprOrUnknown>)              (- di)
                 | SetEnum(<DataExpr>+, <SortExprOrUnknown>)               (- di)
                 | BagEnum(<BagEnumElt>+, <SortExprOrUnknown>)             (- di)
-                | SetBagComp(<DataVarIdDecl>, <DataExpr>)                 (- di)
-                | Forall(<DataVarIdDecl>+, <DataExpr>)                    (- di)
-                | Exists(<DataVarIdDecl>+, <DataExpr>)                    (- di)
-                | Lambda(<DataVarIdDecl>+, <DataExpr>)                    (- di)
+                | SetBagComp(<DataVarId>, <DataExpr>)                     (- di)
+                | Forall(<DataVarId>+, <DataExpr>)                        (- di)
+                | Exists(<DataVarId>+, <DataExpr>)                        (- di)
+                | Lambda(<DataVarId>+, <DataExpr>)                        (- di)
                 | Whr(<DataExpr>, <WhrDecl>+)                             (- di)
 
 //sort expression or unknown
