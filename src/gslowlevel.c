@@ -196,6 +196,105 @@ void ATunprotectList(ATermAppl *PList)
   ATunprotect((ATerm *) PList);
 }
 
+//Substitutions on ATerm's
+//------------------------
+
+ATermAppl gsMakeSubst(ATermAppl OldValue, ATermAppl NewValue)
+{
+  return ATmakeAppl2(ATmakeAFun("subst", 2, ATfalse),
+    (ATerm) OldValue, (ATerm) NewValue);
+}
+
+ATerm gsSubstValues(ATermList Substs, ATerm Term, bool Recursive)
+{
+  ATermList l = Substs;
+  while (!ATisEmpty(l)) {
+    ATermAppl Subst = ATAgetFirst(l);
+    ATerm OldValue = ATgetArgument(Subst, 0);
+    if (ATisEqual(OldValue, Term))
+    {
+      Term = ATgetArgument(Subst, 1);
+      Recursive = false;
+    }
+    l = ATgetNext(l);
+  }
+  if (!Recursive) {
+    return Term;
+  } else {
+    //Recursive; distribute substitutions over the arguments/elements of Term
+    if (ATgetType(Term) == AT_APPL) {
+      //Term is an ATermAppl; distribute substitutions over the arguments
+      AFun Head = ATgetAFun((ATermAppl) Term);
+      int NrArgs = ATgetArity(Head);
+      if (NrArgs > 0) {
+        ATerm Args[NrArgs];
+        for (int i = 0; i < NrArgs; i++) {
+          Args[i] = gsSubstValues(Substs, ATgetArgument((ATermAppl) Term, i),
+            Recursive);
+        }
+        return (ATerm) ATmakeApplArray(Head, Args);
+      } else {
+        return Term;
+      }
+    } else if (ATgetType(Term) == AT_LIST) {
+      //Term is an ATermList; distribute substitutions over the elements
+      ATermList Result = ATmakeList0();
+      while (!ATisEmpty((ATermList) Term)) {
+        Result = ATinsert(Result,
+          gsSubstValues(Substs, ATgetFirst((ATermList) Term), Recursive));
+        Term = (ATerm) ATgetNext((ATermList) Term);
+      }
+      return (ATerm) ATreverse(Result);
+    } else {
+      return NULL;
+    }
+  }
+}
+
+ATermAppl gsSubstValues_Appl(ATermList Substs, ATermAppl Appl, bool Recursive)
+{
+  return (ATermAppl) gsSubstValues(Substs, (ATerm) Appl, Recursive);
+}
+
+ATermList gsSubstValues_List(ATermList Substs, ATermList List, bool Recursive)
+{
+  return (ATermList) gsSubstValues(Substs, (ATerm) List, Recursive);
+}
+
+ATermList gsAddSubstToSubsts(ATermAppl Subst, ATermList Substs)
+{
+  return ATinsert(
+    gsSubstValues_List(ATmakeList1((ATerm) Subst), Substs, true),
+    (ATerm) Subst);
+}
+
+//Occurrences of ATerm's
+//----------------------
+
+bool gsOccurs(ATerm Elt, ATerm Term)
+{
+  bool Result = false;
+  if (ATisEqual(Elt, Term)) {
+    Result = true;
+  } else {
+    //check occurrences of Elt in the arguments/elements of Term
+    if (ATgetType(Term) == AT_APPL) {
+      AFun Head = ATgetAFun((ATermAppl) Term);
+      int NrArgs = ATgetArity(Head);
+      for (int i = 0; i < NrArgs && !Result; i++) {
+        Result = gsOccurs(Elt, ATgetArgument((ATermAppl) Term, i));
+      }
+    } else { //ATgetType(Term) == AT_LIST
+      while (!ATisEmpty((ATermList) Term) && !Result)
+      {
+        Result = gsOccurs(Elt, ATgetFirst((ATermList) Term));
+        Term = (ATerm) ATgetNext((ATermList) Term);
+      }
+    }
+  }
+  return Result;
+}
+
 //String representations of numbers
 //---------------------------------
 

@@ -124,6 +124,13 @@ ATermList gsSubstValues_List(ATermList Substs, ATermList List,
   bool Recursive);
 //ATermList variant of gsSubstValues
 
+ATermList gsAddSubstToSubsts(ATermAppl Subst, ATermList Substs);
+//Pre: Subst is a substitution
+//     Substs is a list of substitions
+//Ret: a list of substitutions with:
+//     - Subst as the head
+//     - Substs, in which Subst is performed, as the tail
+
 //Occurrences of ATerm's
 //----------------------
 

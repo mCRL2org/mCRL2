@@ -93,6 +93,14 @@ typedef struct {
 //The type TDataDecls represents data declarations, i.e. sort, constructor,
 //operation and data equation declarations
 
+bool gsDataDeclsIsInitialised(TDataDecls DataDecls);
+//Ret: indicates whether the elements of DataDecls are initialised
+
+ATermAppl gsAddDataDecls(ATermAppl Spec, TDataDecls DataDecls);
+//Pre: Spec is a specification that adheres to the internal syntax of an
+//     arbitary phase
+//Ret: Spec in which the data declarations from DataDecls are added
+
 ATermAppl gsImplExprsPart(ATermAppl Part, ATermList *PSubsts,
   TDataDecls *PDataDecls);
 //Pre: Part is a part of a specification that adheres to the internal syntax
@@ -125,9 +133,42 @@ void gsSplitSortDecls(ATermList SortDecls, ATermList *PSortIds,
 //Post:*PSortIds and *PSortRefs contain the SortId's and SortRef's from
 //     SortDecls, in the same order
 
-bool gsIsStructImpl(ATermAppl SortExpr);
+static const char *gsStructPrefix = "Struct@";
+static const char *gsListPrefix   = "List@";
+static const char *gsSetPrefix    = "Set@";
+static const char *gsBagPrefix    = "Bag@";
+
+ATermAppl gsMakeFreshStructSortId(ATerm Term);
+//Pre: Term is not NULL
+//Ret: fresh sort identifier for the implementation of a structured sort
+
+ATermAppl gsMakeFreshListSortId(ATerm Term);
+//Pre: Term is not NULL
+//Ret: fresh sort identifier for the implementation of a list sort
+
+ATermAppl gsMakeFreshSetSortId(ATerm Term);
+//Pre: Term is not NULL
+//Ret: fresh sort identifier for the implementation of a set sort
+
+ATermAppl gsMakeFreshBagSortId(ATerm Term);
+//Pre: Term is not NULL
+//Ret: fresh sort identifier for the implementation of a bag sort
+
+bool gsIsStructSortId(ATermAppl SortExpr);
 //Pre: SortExpr is sort expression
 //Ret: SortExpr is the implementation of a structured sort
+
+bool gsIsListSortId(ATermAppl SortExpr);
+//Pre: SortExpr is sort expression
+//Ret: SortExpr is the implementation of a list sort
+
+bool gsIsSetSortId(ATermAppl SortExpr);
+//Pre: SortExpr is sort expression
+//Ret: SortExpr is the implementation of a set sort
+
+bool gsIsBagSortId(ATermAppl SortExpr);
+//Pre: SortExpr is sort expression
+//Ret: SortExpr is the implementation of a bag sort
 
 ATermAppl gsImplExprsOld(ATermAppl Part, ATermList *PSubsts,
   TDataDecls *PDataDecls);
@@ -242,14 +283,55 @@ ATermAppl gsDeclareDataEqn(ATermAppl Spec, ATermAppl DataEqn)
 
 ATermAppl gsImplExprs(ATermAppl Spec)
 {
-  //return (ATermAppl) gsImplExprsOld((ATerm) Spec);
+  assert(gsIsSpecV1(Spec));
   ATermList Substs   = ATmakeList0();
   TDataDecls DataDecls;
   DataDecls.Sorts    = ATmakeList0();
   DataDecls.ConsOps  = ATmakeList0();
   DataDecls.Ops      = ATmakeList0();
   DataDecls.DataEqns = ATmakeList0();
-  return gsImplExprsPart(Spec, &Substs, &DataDecls);
+  Spec = gsImplExprsPart(Spec, &Substs, &DataDecls);
+  Spec = gsAddDataDecls(Spec, DataDecls);
+  return Spec;
+}
+
+bool gsDataDeclsIsInitialised(TDataDecls DataDecls)
+{
+  return
+    DataDecls.Sorts != NULL && DataDecls.ConsOps  != NULL &&
+    DataDecls.Ops   != NULL && DataDecls.DataEqns != NULL;
+}
+
+ATermAppl gsAddDataDecls(ATermAppl Spec, TDataDecls DataDecls)
+{
+  assert(gsIsSpecV1(Spec));
+  assert(gsDataDeclsIsInitialised(DataDecls));
+  //add sort declarations
+  ATermAppl SortSpec  = ATAgetArgument(Spec, 0);
+  ATermList SortDecls = ATLgetArgument(SortSpec, 0);
+  SortDecls = ATconcat(DataDecls.Sorts, SortDecls);
+  SortSpec = ATsetArgument(SortSpec, (ATerm) SortDecls, 0);  
+  Spec = ATsetArgument(Spec, (ATerm) SortSpec, 0);
+  //add constructor operation declarations
+  ATermAppl ConsSpec  = ATAgetArgument(Spec, 1);
+  ATermList ConsDecls = ATLgetArgument(ConsSpec, 0);
+  ConsDecls = ATconcat(DataDecls.ConsOps, ConsDecls);
+  ConsSpec = ATsetArgument(ConsSpec, (ATerm) ConsDecls, 0);  
+  Spec = ATsetArgument(Spec, (ATerm) ConsSpec, 1);
+  //add operation declarations
+  ATermAppl MapSpec  = ATAgetArgument(Spec, 2);
+  ATermList MapDecls = ATLgetArgument(MapSpec, 0);
+  MapDecls = ATconcat(DataDecls.Ops, MapDecls);
+  MapSpec = ATsetArgument(MapSpec, (ATerm) MapDecls, 0);  
+  Spec = ATsetArgument(Spec, (ATerm) MapSpec, 2);
+  //add data equation declarations
+  ATermAppl DataEqnSpec  = ATAgetArgument(Spec, 3);
+  ATermList DataEqnDecls = ATLgetArgument(DataEqnSpec, 0);
+  DataEqnDecls = ATconcat(DataDecls.DataEqns, DataEqnDecls);
+  DataEqnSpec = ATsetArgument(DataEqnSpec, (ATerm) DataEqnDecls, 0);  
+  Spec = ATsetArgument(Spec, (ATerm) DataEqnSpec, 3);
+  //return the new specification
+  return Spec;
 }
 
 ATermAppl gsImplExprsPart(ATermAppl Part, ATermList *PSubsts,
@@ -258,16 +340,7 @@ ATermAppl gsImplExprsPart(ATermAppl Part, ATermList *PSubsts,
   //perform substitutions from *PSubsts on Part
   Part = gsSubstValues_Appl(*PSubsts, Part, false);
   //replace Part by an implementation if the head of Part is a special expression
-  if (gsIsDataApplProd(Part)) {
-    //Part is a product data application; replace by data applications and
-    //implement expressions in the arguments
-    ATermList Args = ATLgetArgument(Part, 1);
-    int ArgsLength = ATgetLength(Args);
-    Part = ATAgetArgument(Part, 0);
-    for (int i = 0; i < ArgsLength; i++) {
-      Part = gsMakeDataAppl(Part, ATAelementAt(Args, i));
-    }
-  } else if (gsIsSortArrowProd(Part)) {
+  if (gsIsSortArrowProd(Part)) {
     //Part is a product arrow sort; replace by arrow sorts and implement
     //expressions in the arguments
     ATermList Domain = ATLgetArgument(Part, 0);
@@ -277,6 +350,61 @@ ATermAppl gsImplExprsPart(ATermAppl Part, ATermList *PSubsts,
       Part = gsMakeSortArrow(
         gsImplExprsPart(ATAelementAt(Domain, i), PSubsts, PDataDecls), Part);
     }
+  } else if (gsIsSortStruct(Part)) {
+    //Part is a structured sort; replace by a new sort and add data
+    //declarations for this sort
+    ATermAppl SortId = gsMakeFreshStructSortId((ATerm) PDataDecls->Sorts);
+    PDataDecls->Sorts = ATinsert(PDataDecls->Sorts, (ATerm) SortId);
+    ATermAppl Subst = gsMakeSubst(Part, SortId);
+    *PSubsts = gsAddSubstToSubsts(Subst, *PSubsts);
+    Part = SortId;
+  } else if (gsIsSortList(Part)) {
+    //Part is a list sort; replace by a new sort and add data declarations for
+    //this sort
+    ATermAppl SortId = gsMakeFreshListSortId((ATerm) PDataDecls->Sorts);
+    PDataDecls->Sorts = ATinsert(PDataDecls->Sorts, (ATerm) SortId);
+    ATermAppl Subst = gsMakeSubst(Part, SortId);
+    *PSubsts = gsAddSubstToSubsts(Subst, *PSubsts);
+    Part = SortId;
+  } else if (gsIsSortSet(Part)) {
+    //Part is a set sort; replace by a new sort and add data declarations for
+    //this sort
+    ATermAppl SortId = gsMakeFreshSetSortId((ATerm) PDataDecls->Sorts);
+    PDataDecls->Sorts = ATinsert(PDataDecls->Sorts, (ATerm) SortId);
+    ATermAppl Subst = gsMakeSubst(Part, SortId);
+    *PSubsts = gsAddSubstToSubsts(Subst, *PSubsts);
+    Part = SortId;
+  } else if (gsIsSortBag(Part)) {
+    //Part is a bag sort; replace by a new sort and add data declarations for
+    //this sort
+    ATermAppl SortId = gsMakeFreshBagSortId((ATerm) PDataDecls->Sorts);
+    PDataDecls->Sorts = ATinsert(PDataDecls->Sorts, (ATerm) SortId);
+    ATermAppl Subst = gsMakeSubst(Part, SortId);
+    *PSubsts = gsAddSubstToSubsts(Subst, *PSubsts);
+    Part = SortId;
+  } else if (gsIsDataApplProd(Part)) {
+    //Part is a product data application; replace by data applications and
+    //implement expressions in the arguments
+    ATermList Args = ATLgetArgument(Part, 1);
+    int ArgsLength = ATgetLength(Args);
+    Part = ATAgetArgument(Part, 0);
+    for (int i = 0; i < ArgsLength; i++) {
+      Part = gsMakeDataAppl(Part, ATAelementAt(Args, i));
+    }
+  } else if (gsIsNumber(Part)) {
+    //Part is a number; replace by its internal representation
+    ATermAppl Number = ATAgetArgument(Part, 0);
+    ATermAppl Sort = ATAgetArgument(Part, 1);
+    if (ATisEqual(Sort, gsMakeSortExprPos()))
+      Part = gsMakeDataExprPos(gsATermAppl2String(Number));
+    else if (ATisEqual(Sort, gsMakeSortExprNat()))
+      Part = gsMakeDataExprNat(gsATermAppl2String(Number));
+    else if (ATisEqual(Sort, gsMakeSortExprInt()))
+      Part = gsMakeDataExprInt(gsATermAppl2String(Number));
+    else //sort of Part is wrong
+      gsWarningMsg(
+        "%t can not be implemented because its sort differs from Pos, Nat or Int",
+        Part);
   }
   //implement expressions in the arguments of Part
   AFun Head = ATgetAFun(Part);
@@ -330,8 +458,14 @@ ATermAppl gsImplSortRefs(ATermAppl Spec)
     ATermAppl RHS = ATAgetArgument(SortRef, 1);
     //if RHS is the first occurrence of an implementation of a structured sort
     //at the rhs of a sort reference, add RHS := LHS; otherwise add LHS := RHS
-    ATermAppl Subst =
-      (gsIsStructImpl(RHS))?gsMakeSubst(RHS, LHS):gsMakeSubst(LHS, RHS);
+    ATermAppl Subst;
+    if (gsIsStructSortId(RHS) || gsIsListSortId(RHS) || gsIsSetSortId(RHS) ||
+      gsIsBagSortId(RHS))
+    {
+      Subst = gsMakeSubst(RHS, LHS);
+    } else {
+      Subst = gsMakeSubst(LHS, RHS);
+    }
     Substs = ATinsert(Substs, (ATerm) Subst);
     //perform substitution on the remaining elements of SortRefs
     SortRefs = ATgetNext(SortRefs);    
@@ -361,118 +495,69 @@ void gsSplitSortDecls(ATermList SortDecls, ATermList *PSortIds,
   *PSortRefs = ATreverse(SortRefs);
 }
 
-ATermAppl gsMakeSubst(ATermAppl OldValue, ATermAppl NewValue)
+ATermAppl gsMakeFreshStructSortId(ATerm Term)
 {
-  return ATmakeAppl2(ATmakeAFun("subst", 2, ATfalse),
-    (ATerm) OldValue, (ATerm) NewValue);
+  return gsMakeSortId(gsFreshString2ATermAppl(gsStructPrefix, Term));
+}
+ 
+ATermAppl gsMakeFreshListSortId(ATerm Term)
+{
+  return gsMakeSortId(gsFreshString2ATermAppl(gsListPrefix, Term));
 }
 
-ATerm gsSubstValues(ATermList Substs, ATerm Term, bool Recursive)
+ATermAppl gsMakeFreshSetSortId(ATerm Term)
 {
-  ATermList l = Substs;
-  while (!ATisEmpty(l)) {
-    ATermAppl Subst = ATAgetFirst(l);
-    ATerm OldValue = ATgetArgument(Subst, 0);
-    if (ATisEqual(OldValue, Term))
-    {
-      Term = ATgetArgument(Subst, 1);
-      Recursive = false;
-    }
-    l = ATgetNext(l);
-  }
-  if (!Recursive) {
-    return Term;
-  } else {
-    //Recursive; distribute substitutions over the arguments/elements of Term
-    if (ATgetType(Term) == AT_APPL) {
-      //Term is an ATermAppl; distribute substitutions over the arguments
-      AFun Head = ATgetAFun((ATermAppl) Term);
-      int NrArgs = ATgetArity(Head);
-      if (NrArgs > 0) {
-        ATerm Args[NrArgs];
-        for (int i = 0; i < NrArgs; i++) {
-          Args[i] = gsSubstValues(Substs, ATgetArgument((ATermAppl) Term, i),
-            Recursive);
-        }
-        return (ATerm) ATmakeApplArray(Head, Args);
-      } else {
-        return Term;
-      }
-    } else if (ATgetType(Term) == AT_LIST) {
-      //Term is an ATermList; distribute substitutions over the elements
-      ATermList Result = ATmakeList0();
-      while (!ATisEmpty((ATermList) Term)) {
-        Result = ATinsert(Result,
-          gsSubstValues(Substs, ATgetFirst((ATermList) Term), Recursive));
-        Term = (ATerm) ATgetNext((ATermList) Term);
-      }
-      return (ATerm) ATreverse(Result);
-    } else {
-      return NULL;
-    }
-  }
+  return gsMakeSortId(gsFreshString2ATermAppl(gsSetPrefix, Term));
 }
 
-ATermAppl gsSubstValues_Appl(ATermList Substs, ATermAppl Appl, bool Recursive)
+ATermAppl gsMakeFreshBagSortId(ATerm Term)
 {
-  return (ATermAppl) gsSubstValues(Substs, (ATerm) Appl, Recursive);
+  return gsMakeSortId(gsFreshString2ATermAppl(gsBagPrefix, Term));
 }
 
-ATermList gsSubstValues_List(ATermList Substs, ATermList List, bool Recursive)
-{
-  return (ATermList) gsSubstValues(Substs, (ATerm) List, Recursive);
-}
-
-ATermAppl gsFreshString2ATermAppl(const char *s, ATerm Term)
-{
-  bool found = false;
-  ATermAppl NewTerm;
-  char *Name = (char *) malloc((strlen(s)+NrOfChars(INT_MAX)+1)*sizeof(char));
-  for (int i = 0; i < INT_MAX && !found; i++) {
-    sprintf(Name, "%s%d", s, i);
-    NewTerm = gsString2ATermAppl(Name);
-    if (!gsOccurs((ATerm) NewTerm, Term)) found = true;
-  }
-  free(Name);
-  if (found) {
-    return NewTerm;
-  } else {
-    //there is no fresh ATermAppl "si", with 0 <= i < INT_MAX
-    gsErrorMsg("cannot generate fresh ATermAppl with prefix %s", s);
-    return NULL;
-  }
-}
-
-bool gsOccurs(ATerm Elt, ATerm Term)
-{
-  bool Result = false;
-  if (ATisEqual(Elt, Term)) {
-    Result = true;
-  } else {
-    //check occurrences of Elt in the arguments/elements of Term
-    if (ATgetType(Term) == AT_APPL) {
-      AFun Head = ATgetAFun((ATermAppl) Term);
-      int NrArgs = ATgetArity(Head);
-      for (int i = 0; i < NrArgs && !Result; i++) {
-        Result = gsOccurs(Elt, ATgetArgument((ATermAppl) Term, i));
-      }
-    } else { //ATgetType(Term) == AT_LIST
-      while (!ATisEmpty((ATermList) Term) && !Result)
-      {
-        Result = gsOccurs(Elt, ATgetFirst((ATermList) Term));
-        Term = (ATerm) ATgetNext((ATermList) Term);
-      }
-    }
-  }
-  return Result;
-}
-
-bool gsIsStructImpl(ATermAppl SortExpr)
+bool gsIsStructSortId(ATermAppl SortExpr)
 {
   if (gsIsSortId(SortExpr)) {
-    return
-      strncmp("struct@", ATgetName(ATgetAFun(ATAgetArgument(SortExpr, 0))), 7)
-        == 0;
+    return strncmp(
+      gsStructPrefix,
+      ATgetName(ATgetAFun(ATAgetArgument(SortExpr, 0))),
+      strlen(gsStructPrefix)) == 0;
+  } else {
+    return false;
+  }
+}
+
+bool gsIsListSortId(ATermAppl SortExpr)
+{
+  if (gsIsSortId(SortExpr)) {
+    return strncmp(
+      gsListPrefix,
+      ATgetName(ATgetAFun(ATAgetArgument(SortExpr, 0))),
+      strlen(gsListPrefix)) == 0;
+  } else {
+    return false;
+  }
+}
+
+bool gsIsSetSortId(ATermAppl SortExpr)
+{
+  if (gsIsSortId(SortExpr)) {
+    return strncmp(
+      gsSetPrefix,
+      ATgetName(ATgetAFun(ATAgetArgument(SortExpr, 0))),
+      strlen(gsSetPrefix)) == 0;
+  } else {
+    return false;
+  }
+}
+
+bool gsIsBagSortId(ATermAppl SortExpr)
+{
+  if (gsIsSortId(SortExpr)) {
+    return strncmp(
+      gsBagPrefix,
+      ATgetName(ATgetAFun(ATAgetArgument(SortExpr, 0))),
+      strlen(gsBagPrefix)) == 0;
   } else {
     return false;
   }
@@ -1271,7 +1356,7 @@ ATermAppl gsImplementInt(ATermAppl Spec)
 ATermAppl gsImplementData(ATermAppl Spec)
 {
   Spec = gsImplExprs(Spec);
-  //Spec = gsImplSortRefs(Spec);
+  Spec = gsImplSortRefs(Spec);
   //Spec = gsImplementInt(Spec);
   //Spec = gsImplementNat(Spec);
   //Spec = gsImplementPos(Spec);

@@ -4,6 +4,7 @@ extern "C" {
 #include <string.h>
 #include <stdlib.h>
 #include <assert.h>
+#include <limits.h>
 #ifdef __cplusplus
 }
 #endif
@@ -29,6 +30,26 @@ char *gsATermAppl2String(ATermAppl term)
   if ((ATgetArity(head) == 0) && (ATisQuoted(head) == ATtrue)) {
     return ATgetName(head);
   } else {
+    return NULL;
+  }
+}
+
+ATermAppl gsFreshString2ATermAppl(const char *s, ATerm Term)
+{
+  bool found = false;
+  ATermAppl NewTerm;
+  char *Name = (char *) malloc((strlen(s)+NrOfChars(INT_MAX)+1)*sizeof(char));
+  for (int i = 0; i < INT_MAX && !found; i++) {
+    sprintf(Name, "%s%d", s, i);
+    NewTerm = gsString2ATermAppl(Name);
+    if (!gsOccurs((ATerm) NewTerm, Term)) found = true;
+  }
+  free(Name);
+  if (found) {
+    return NewTerm;
+  } else {
+    //there is no fresh ATermAppl "si", with 0 <= i < INT_MAX
+    gsErrorMsg("cannot generate fresh ATermAppl with prefix %s", s);
     return NULL;
   }
 }
