@@ -30,6 +30,7 @@ exports
     "%" ~[\n]* "\n"                               -> LAYOUT
     [a-zA-Z0-9\^\_\'\-]+                          -> Name
   context-free syntax
+    "rew"						-> Name (reject)
     { Name ","}+                                  -> Name-list
     { Name "#"}+                                  -> Domain    
     "sort" Name+                                  -> Sort-specification
