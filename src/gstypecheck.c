@@ -134,6 +134,12 @@ static inline ATermAppl gstcMakeOpIdPos2Nat(void){
 		       1);
 }
 
+static inline ATermAppl gstcMakeOpIdPos2Int(void){
+  return ATsetArgument(gsMakeOpIdPos2Int(),
+		       (ATerm)gstcMakeSortArrowProd1(gsMakeSortIdPos(),gsMakeSortIdInt()),
+		       1);
+}
+
 static inline ATermAppl gstcMakeOpIdNat2Int(void){
   return ATsetArgument(gsMakeOpIdNat2Int(),
 		       (ATerm)gstcMakeSortArrowProd1(gsMakeSortIdNat(),gsMakeSortIdInt()),
@@ -1038,7 +1044,7 @@ static ATermAppl gstcTraverseVarConsTypeD(ATermTable Vars, ATermAppl *DataTerm, 
       ATermAppl WhereType=gstcTraverseVarConsTypeD(Vars,&WhereTerm,gsMakeUnknown());
       if(!WhereType) {throw;}
       WhereVarList=ATinsert(WhereVarList,(ATerm)gsMakeDataVarId(ATAgetArgument(WhereElem,0),WhereType));
-      NewWhereList=ATinsert(NewWhereList,(ATerm)gsMakeWhrDecl(WhereTerm,WhereType));
+      NewWhereList=ATinsert(NewWhereList,(ATerm)ATsetArgument(WhereElem,(ATerm)WhereTerm,1));
     }
     NewWhereList=ATreverse(NewWhereList);
     ATermTable NewVars=gstcAddVars2Table(Vars,ATreverse(WhereVarList));
@@ -1103,13 +1109,59 @@ static ATermAppl gstcTraverseVarConsTypeD(ATermTable Vars, ATermAppl *DataTerm, 
     ATermAppl NewType=gstcTraverseVarConsTypeDN(nArguments,Vars,
 						&Data,gsMakeSortArrowProd(ArgumentTypes,PosType));
     if(!NewType) {throw;}
+    
+    //it is possible that:
+    //1) a cast has happened
+    //2) some parameter Types became sharper.
+    //we do the arguments again with the types.
 
+    if(gsIsSortArrowProd(gstcUnwindType(NewType))){
+      ATermList NeededArgumentTypes=ATLgetArgument(gstcUnwindType(NewType),0);
+     
+      //arguments again
+      ATermList NewArgumentTypes=ATmakeList0();
+      ATermList NewArguments=ATmakeList0();
+      for(;!ATisEmpty(Arguments);Arguments=ATgetNext(Arguments),
+	    ArgumentTypes=ATgetNext(ArgumentTypes),NeededArgumentTypes=ATgetNext(NeededArgumentTypes)){
+	ATermAppl Arg=ATAgetFirst(Arguments);
+	ATermAppl NeededType=ATAgetFirst(NeededArgumentTypes);
+	ATermAppl Type=ATAgetFirst(ArgumentTypes);
+	if(!gstcEqTypesA(NeededType,Type)){
+	  if(gstcTypeMatchA(Type,gsMakeSortIdPos())){
+	    if(gstcTypeMatchA(NeededType,gsMakeSortIdNat())){
+	      Type=gsMakeSortIdNat();
+	      Arg=gsMakeDataApplProd(gstcMakeOpIdPos2Nat(),ATmakeList1((ATerm)Arg));
+	    }
+	    else 
+	      if(gstcTypeMatchA(NeededType,gsMakeSortIdInt())){
+		Type=gsMakeSortIdInt();
+		Arg=gsMakeDataApplProd(gstcMakeOpIdPos2Int(),ATmakeList1((ATerm)Arg));
+	      }
+	  }
+	  else 
+	    if(gstcTypeMatchA(Type,gsMakeSortIdNat()) && gstcTypeMatchA(NeededType,gsMakeSortIdInt())){
+	      Type=gsMakeSortIdInt();
+	      Arg=gsMakeDataApplProd(gstcMakeOpIdNat2Int(),ATmakeList1((ATerm)Arg));
+	    }
+	    else{
+	      gsWarningMsg("Doind again on %t, Type: %t, Needed type: %t\n",Arg,Type,NeededType);
+	      Type=gstcTraverseVarConsTypeD(Vars,&Arg,Type);
+	      if(!Type) {throw;}
+	    }
+	}
+	NewArguments=ATinsert(NewArguments,(ATerm)Arg);
+	NewArgumentTypes=ATinsert(NewArgumentTypes,(ATerm)Type);
+      }
+      Arguments=ATreverse(NewArguments);
+      ArgumentTypes=ATreverse(NewArgumentTypes);     
+    } 
+    
     *DataTerm=gsMakeDataApplProd(Data,Arguments);
     
     if(gsIsSortArrowProd(gstcUnwindType(NewType))){
       return ATAgetArgument(gstcUnwindType(NewType),1);
     }
-
+  
     return gstcUnArrowProd(ArgumentTypes,NewType);
   }  
 
@@ -1247,7 +1299,7 @@ static ATermAppl gstcTraverseVarConsTypeDN(int nFactPars, ATermTable Vars, ATerm
 	//and get the list. Then we take the min of the list.
 	
 	ParList=BackupParList;
-	gsWarningMsg("Trying casting for Op %t with %d arguments\n",Name,nFactPars);
+	gsDebugMsg("Trying casting for Op %t with %d arguments\n",Name,nFactPars);
 	PosType=gstcExpandPosTypes(PosType);
 	for(;!ATisEmpty(ParList);ParList=ATgetNext(ParList)){
 	  ATermAppl Par=ATAgetFirst(ParList);
@@ -1255,7 +1307,7 @@ static ATermAppl gstcTraverseVarConsTypeDN(int nFactPars, ATermTable Vars, ATerm
 	  NewParList=ATinsert(NewParList,(ATerm)Par);
 	}
 	NewParList=ATreverse(NewParList);
-	gsWarningMsg("The result of casting is %t\n",NewParList);
+	gsDebugMsg("The result of casting is %t\n",NewParList);
 	if(ATgetLength(NewParList)>1) ParList=ATmakeList1((ATerm)gstcMinType(NewParList));
 	else ParList=NewParList;
       }
