@@ -30,6 +30,7 @@ extern "C"
 
 #include "gstypecheck.h"
 #include "gsfunc.h"
+#include "gslowlevel.h"
 
 #define ThrowF            {ThrowV(ATfalse);}
 //store ATfalse in result and throw an exception

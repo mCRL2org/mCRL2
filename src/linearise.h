@@ -29,6 +29,7 @@
 #include <string.h>
 #include "aterm2.h"
 #include "gsfunc.h"
+#include "gslowlevel.h"
 
 #define MAXLEN 200  /* maximum length of the name of a variable */
 /* ERRORLENGTH gives the maximum length of an errormessage.

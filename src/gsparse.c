@@ -1,5 +1,5 @@
 #define  NAME      "gsparse"
-#define  LVERSION  "0.1.29"
+#define  LVERSION  "0.1.30"
 #define  AUTHOR    "Aad Mathijssen"
 
 #ifdef __cplusplus
@@ -21,6 +21,7 @@ extern "C" {
 #include "aterm2.h"
 #include "gsparse.h"
 #include "gsfunc.h"
+#include "gslowlevel.h"
 #include "libgsparse.h"
 
 //local declarations

@@ -3,6 +3,7 @@
 #include "gslexer.h"
 #include "gsparser.h"
 #include "gsfunc.h"
+#include "gslowlevel.h"
 
 //Global precondition: the ATerm library has been initialised
 

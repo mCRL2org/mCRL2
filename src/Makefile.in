@@ -23,7 +23,7 @@ mandir          = @mandir@
 
 #Library definitions
 LIB_NAME        = libgsparse.a
-LIB_OBJECTS     = libgsparse.o gsparser.o gslexer.o gstypecheck.o gsdataimpl.o gsfunc.o
+LIB_OBJECTS     = libgsparse.o gsparser.o gslexer.o gstypecheck.o gsdataimpl.o gsfunc.o gslowlevel.o
 LIB_LDFLAGS     = -lATerm -lm
 
 #Parser definitions
@@ -55,14 +55,14 @@ $(PARSER_NAME) : $(PARSER_OBJECTS) $(LIB_NAME) Makefile
 $(LINEARISER_NAME) : $(LINEARISER_OBJECTS) $(LIB_NAME) Makefile
 	$(CC) -o $@ $(LINEARISER_OBJECTS) $(LDFLAGS) $(LINEARISER_LDFLAGS)
 
-gslexer.o      : gslexer.h gsparser.h gsfunc.h
-gsparser.o     : gsfunc.h
-gsfunc.o       : gsfunc.h
-gstypecheck.o  : gstypecheck.h gsfunc.h
-gsdataimpl.o   : gsdataimpl.h gsfunc.h
-libgsparse.o   : libgsparse.h gslexer.h gstypecheck.h gsdataimpl.h gsfunc.h 
-gsparse.o      : gsparse.h libgsparse.h gsfunc.h
-linearise.o    : libgsparse.h gsfunc.h
+gslexer.o      : gslexer.h gsparser.h gsfunc.h gslowlevel.h
+gsparser.o     : gsfunc.h gslowlevel.h
+gsfunc.o       : gsfunc.h gslowlevel.h
+gstypecheck.o  : gstypecheck.h gsfunc.h gslowlevel.h
+gsdataimpl.o   : gsdataimpl.h gsfunc.h gslowlevel.h
+libgsparse.o   : libgsparse.h gslexer.h gstypecheck.h gsdataimpl.h gsfunc.h gslowlevel.h
+gsparse.o      : gsparse.h libgsparse.h gsfunc.h gslowlevel.h
+linearise.o    : libgsparse.h gsfunc.h gslowlevel.h
 
 %.c : %.y
 	$(BISON) $(BFLAGS) -o $@ $<

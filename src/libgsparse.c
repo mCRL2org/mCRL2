@@ -1,5 +1,5 @@
 #define  NAME      "libgsparse"
-#define  LVERSION  "0.1.29"
+#define  LVERSION  "0.1.30"
 #define  AUTHOR    "Aad Mathijssen"
 
 #ifdef __cplusplus
@@ -20,6 +20,7 @@ extern "C" {
 #include "gstypecheck.h"
 #include "gsdataimpl.h"
 #include "gsfunc.h"
+#include "gslowlevel.h"
 
 //external declarations
 extern ATermAppl gsParse(FILE *SpecFile);/* declared in lexer.l */
@@ -1055,6 +1056,11 @@ void gsPrintPosMult(FILE *OutStream, const ATermAppl PosExpr, int PrecLevel,
   }
 }
 
+void f(ATermList *pl)
+{
+  *pl = ATconcat(*pl, *pl);
+}
+
 void gsTest(void)
 {
   //initialise ATerm library
@@ -1063,7 +1069,26 @@ void gsTest(void)
   //enable constructor functions
   gsEnableConstructorFunctions();
   //build positive constant
-  ATermAppl t = gsMakeDataExprInt_int(1337);
-  int n = gsIntValue_int(t);
+/*
+  ATermList t = ATmakeList3(
+    (ATerm) gsMakeDataExprInt_int(1337),
+    (ATerm) gsMakeDataExprInt_int(7331),
+    (ATerm) gsMakeDataExprInt_int(8668));
+  int n = gsIntValue_int(ATAelementAt(t, 0));
+  int m = gsIntValue_int(ATAelementAt(t, 1));
+  int k = gsIntValue_int(ATAelementAt(t, 2));
+  fprintf(stderr, "%d + %d = %d\n", n, m, k);
+  ATermList Substs = ATmakeList1((ATerm)
+    gsMakeSubst(gsMakeDataExprFalse(), gsMakeDataExprTrue()));
+  t = (ATermList) gsSubstValues(Substs, (ATerm) t, false);
+  n = gsIntValue_int(ATAelementAt(t, 0));
+  m = gsIntValue_int(ATAelementAt(t, 1));
+  k = gsIntValue_int(ATAelementAt(t, 2));
+  fprintf(stderr, "%d + %d = %d\n", n, m, k);
+*/
+  ATermAppl t = gsMakeDataExprPos_int(1337);
+  int n = gsPosValue_int(t);
   fprintf(stderr, "%d\n", n);
+  ATermAppl u = gsFreshString2ATermAppl("@cDub", (ATerm) t);
+  ATfprintf(stderr, "%t\n", u);
 }
