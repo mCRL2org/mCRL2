@@ -14,7 +14,7 @@ proc
     sum n:Nat. get_l(n) | put_j(n*n) . Sqr_lj;
 
   P_kl(b:Bag(Nat)) =
-    sum n:Nat. put_k(i,n) . P_kl(b + {n:1}) +
+    sum n:Nat. put_k(n) . P_kl(b + {n:1}) +
     sum n:Nat. (n in b) -> get_l(n) . P_kl(b - {n:1});
 
   DSqr_ij =
