@@ -8,7 +8,7 @@ proc
 
   P2 = 
     hide({__pass},
-      restrict({get, put, __pass},
+      allow({get, put, __pass},
         comm({get | put -> __pass},
 	  P(i,k,emptyBag) || P(k,j,emptyBag)
         )

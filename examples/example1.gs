@@ -11,7 +11,7 @@ proc
 
   DSqr(i:Nat, j:Nat, b:Bag(Nat)) =
     hide({__put,__get},
-      restrict({_get,_put,__get,__put},
+      allow({_get,_put,__get,__put},
         comm({get|_get -> __get, put|_put -> __put},
            Sqr(i,k) || P(k,l,{}) || Sqr(l,j)
         )

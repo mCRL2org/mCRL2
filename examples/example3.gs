@@ -8,7 +8,7 @@ proc
 
   Mul = sum x,y:Real. _r_dup(x) | _r_inc(y) | _s_mult(x*y) . Mul;
 
-  Dim = restrict({_r_dup | _s_mul},
+  Dim = allow({_r_dup | _s_mul},
           comm({_s_dup1 | _r_mul, _s_dup2 | _r_inc, _s_inc | _r_mul},
             Dup || Mul || Dim
           )
