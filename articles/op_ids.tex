@@ -628,43 +628,45 @@ listed in table~\ref{tab:ptc:numbers}. Here, \frm{A,B \in \set{\srtpos,
 \begin{tabular}{l|L|l|l}
 Name        & \text{Type}                  & Description      & External repr.\\
 \hline
-\verb+@1+$^*$       & \srtpos              & one                  & number\\
-\verb+@.0+$^*$      & \srtpos \To \srtpos  & double positive      & number\\
-\verb+@.1+$^*$      & \srtpos \To \srtpos  & double positive plus one & number\\
-\verb+@0+$^*$       & \srtnat              & zero                 & number\\
-\verb+@cPosNat+$^*$ & \srtpos \To \srtnat  & positive as natural  & number\\
-\verb+@-+$^*$       & \srtpos \To \srtint  & negate positive      & number\\
-\verb+@cNatInt+$^*$ & \srtnat \To \srtint  & natural as integer   & number\\
-\verb+-+    & \srtint \To \srtint          & negation             & prefix\\
-\verb-+-    & A \times A \To A             & addition             & infix\\
-\verb+-+    & \srtint \times \srtint \To \srtint & subtraction    & infix\\
-\verb+@double+$^*$  & \srtint \To \srtint  & double               & infix\\
-\verb+@-+$^*$ & \srtpos \times \srtpos \To \srtint & subtraction  & infix\\
-\verb+*+    & A \times A \To A             & multiplication       & infix\\
-\verb+div+  & \srtnat \times \srtpos \To \srtnat & quotient after division
-                                                                  & infix\\
-\verb+div+  & \srtint \times \srtpos \To \srtint & quotient after division
-                                                                  & infix\\
-\verb+mod+  & \srtnat \times \srtpos \To \srtnat & remainder after division
-                                                                  & infix\\
-\verb+mod+  & \srtint \times \srtpos \To \srtnat & remainder after division
-                                                                  & infix\\
-\verb+exp+  & A \times \srtnat \To A       & exponentation        & functional\\
-\verb+succ+ & \srtpos \To \srtpos          & successor            & functional\\
-\verb+succ+ & \srtnat \To \srtpos          & successor            & functional\\
-\verb+succ+ & \srtint \To \srtint          & successor            & functional\\
-\verb+pred+ & \srtpos \To \srtnat          & predecessor          & functional\\
-\verb+pred+ & \srtint \To \srtint          & predecessor          & functional\\
-\verb+@pred+$^*$ & \srtpos \To \srtpos     & predecessor          & functional\\
-\verb+abs+  & \srtint \To \srtnat          & absolute value       & functional\\
-\verb+max+  & A \times A \To A             & maximum              & functional\\
-\verb+min+  & A \times A \To A             & minimum              & functional\\
-\verb-<-    & A \times A \To \srtbool      & less than            & infix\\
-\verb->-    & A \times A \To \srtbool      & greater than         & infix\\
-\verb+<=+   & A \times A \To \srtbool      & less than or equal   & infix\\
-\verb+>=+   & A \times A \To \srtbool      & greater than or equal& infix\\
-\verb+A2B+  & A \To B                      & convert \frm{A} to \frm{B}
+\verb+@1+$^*$     & \srtpos                & 1                    & number\\
+\verb+@.0+$^*$    & \srtpos \To \srtpos    & double and add 0     & number\\
+\verb+@.1+$^*$    & \srtpos \To \srtpos    & double and add 1     & number\\
+\verb+@0+$^*$     & \srtnat                & 0                    & number\\
+\verb+@cNat+$^*$  & \srtpos \To \srtnat    & create natural from positive
+                                                                  & number\\
+\verb+@cNeg+$^*$  & \srtpos \To \srtint    & negate positive      & number\\
+\verb+@cInt+$^*$  & \srtnat \To \srtint    & create integer from natural
+                                                                  & number\\
+\verb+A2B+        & A \To B                & convert \frm{A} to \frm{B}
                                                                   & functional\\
+\verb-<-          & A \times A \To \srtbool& less than            & infix\\
+\verb->-          & A \times A \To \srtbool& greater than         & infix\\
+\verb+<=+         & A \times A \To \srtbool& less than or equal   & infix\\
+\verb+>=+         & A \times A \To \srtbool& greater than or equal& infix\\
+\verb+max+        & A \times A \To A       & maximum              & functional\\
+\verb+min+        & A \times A \To A       & minimum              & functional\\
+\verb+abs+        & \srtint \To \srtnat    & absolute value       & functional\\
+\verb+-+          & \srtint \To \srtint    & negation             & prefix\\
+\verb+succ+       & \srtpos \To \srtpos    & successor            & functional\\
+\verb+succ+       & \srtnat \To \srtpos    & successor            & functional\\
+\verb+succ+       & \srtint \To \srtint    & successor            & functional\\
+\verb+pred+       & \srtpos \To \srtnat    & predecessor          & functional\\
+\verb+pred+       & \srtint \To \srtint    & predecessor          & functional\\
+\verb+@pred+$^*$  & \srtpos \To \srtpos    & positive predecessor & functional\\
+\verb-+-          & A \times A \To A       & addition             & infix\\
+\verb+-+          & \srtint \times \srtint \To \srtint&subtraction& infix\\
+\verb+@-+$^*$     & \srtpos \times \srtpos \To \srtint&subtraction& infix\\
+\verb+@double+$^*$& \srtint \To \srtint    & double               & infix\\
+\verb+*+          & A \times A \To A       & multiplication       & infix\\
+\verb+div+        & \srtnat \times \srtpos \To \srtnat & quotient after division
+                                                                  & infix\\
+\verb+div+        & \srtint \times \srtpos \To \srtint & quotient after division
+                                                                  & infix\\
+\verb+mod+        & \srtnat \times \srtpos \To \srtnat & remainder after division
+                                                                  & infix\\
+\verb+mod+        & \srtint \times \srtpos \To \srtnat & remainder after division
+                                                                  & infix\\
+\verb+exp+        & A \times \srtnat \To A & exponentation        & functional\\
 \end{tabular}
 \caption{System identifiers for numbers}
 \label{tab:ptc:numbers}
