@@ -342,13 +342,13 @@ void gstcDataInit(void){
 			    gstcMakeSortArrowProd2(gsMakeSortList(gsMakeUnknown()),gsMakeSortList(gsMakeUnknown()),gsMakeSortList(gsMakeUnknown())));
   gstcAddSystemFunctionProd(gsMakeOpIdNameElementAt(gsMakeUnknown()),
 			    gstcMakeSortArrowProd2(gsMakeSortList(gsMakeUnknown()),gsMakeSortExprNat(),gsMakeUnknown()));
-  gstcAddSystemFunctionProd(gsMakeOpIdNameLhead(gsMakeUnknown()),
+  gstcAddSystemFunctionProd(gsMakeOpIdNameLHead(gsMakeUnknown()),
 			    gstcMakeSortArrowProd1(gsMakeSortList(gsMakeUnknown()),gsMakeUnknown()));
-  gstcAddSystemFunctionProd(gsMakeOpIdNameLtail(gsMakeUnknown()),
+  gstcAddSystemFunctionProd(gsMakeOpIdNameLTail(gsMakeUnknown()),
 			    gstcMakeSortArrowProd1(gsMakeSortList(gsMakeUnknown()),gsMakeSortList(gsMakeUnknown())));
-  gstcAddSystemFunctionProd(gsMakeOpIdNameRhead(gsMakeUnknown()),
+  gstcAddSystemFunctionProd(gsMakeOpIdNameRHead(gsMakeUnknown()),
 			    gstcMakeSortArrowProd1(gsMakeSortList(gsMakeUnknown()),gsMakeUnknown()));
-  gstcAddSystemFunctionProd(gsMakeOpIdNameRtail(gsMakeUnknown()),
+  gstcAddSystemFunctionProd(gsMakeOpIdNameRTail(gsMakeUnknown()),
 			    gstcMakeSortArrowProd1(gsMakeSortList(gsMakeUnknown()),gsMakeSortList(gsMakeUnknown())));
 	    
 //Sets
@@ -363,11 +363,11 @@ void gstcDataInit(void){
 			    gstcMakeSortArrowProd2(gsMakeSortSet(gsMakeUnknown()),gsMakeSortSet(gsMakeUnknown()),gsMakeSortExprBool()));
   gstcAddSystemFunctionProd(gsMakeOpIdNameSetUnion(gsMakeUnknown()),
 			    gstcMakeSortArrowProd2(gsMakeSortSet(gsMakeUnknown()),gsMakeSortSet(gsMakeUnknown()),gsMakeSortSet(gsMakeUnknown())));
-  gstcAddSystemFunctionProd(gsMakeOpIdNameSetDifference(gsMakeUnknown()),
+  gstcAddSystemFunctionProd(gsMakeOpIdNameSetDiff(gsMakeUnknown()),
 			    gstcMakeSortArrowProd2(gsMakeSortSet(gsMakeUnknown()),gsMakeSortSet(gsMakeUnknown()),gsMakeSortSet(gsMakeUnknown())));
-  gstcAddSystemFunctionProd(gsMakeOpIdNameSetIntersection(gsMakeUnknown()),
+  gstcAddSystemFunctionProd(gsMakeOpIdNameSetIntersect(gsMakeUnknown()),
 			    gstcMakeSortArrowProd2(gsMakeSortSet(gsMakeUnknown()),gsMakeSortSet(gsMakeUnknown()),gsMakeSortSet(gsMakeUnknown())));
-  gstcAddSystemFunctionProd(gsMakeOpIdNameSetComplement(gsMakeUnknown()),
+  gstcAddSystemFunctionProd(gsMakeOpIdNameSetCompl(gsMakeUnknown()),
 			    gstcMakeSortArrowProd1(gsMakeSortSet(gsMakeUnknown()),gsMakeSortSet(gsMakeUnknown())));
   gstcAddSystemFunctionProd(gsMakeOpIdNameSet2Bag(gsMakeUnknown()),
 			    gstcMakeSortArrowProd1(gsMakeSortSet(gsMakeUnknown()),gsMakeSortBag(gsMakeUnknown())));
@@ -387,9 +387,9 @@ void gstcDataInit(void){
 			    gstcMakeSortArrowProd2(gsMakeSortBag(gsMakeUnknown()),gsMakeSortBag(gsMakeUnknown()),gsMakeSortExprBool()));
   gstcAddSystemFunctionProd(gsMakeOpIdNameBagUnion(gsMakeUnknown()),
 			    gstcMakeSortArrowProd2(gsMakeSortBag(gsMakeUnknown()),gsMakeSortBag(gsMakeUnknown()),gsMakeSortBag(gsMakeUnknown())));
-  gstcAddSystemFunctionProd(gsMakeOpIdNameBagDifference(gsMakeUnknown()),
+  gstcAddSystemFunctionProd(gsMakeOpIdNameBagDiff(gsMakeUnknown()),
 			    gstcMakeSortArrowProd2(gsMakeSortBag(gsMakeUnknown()),gsMakeSortBag(gsMakeUnknown()),gsMakeSortBag(gsMakeUnknown())));
-  gstcAddSystemFunctionProd(gsMakeOpIdNameBagIntersection(gsMakeUnknown()),
+  gstcAddSystemFunctionProd(gsMakeOpIdNameBagIntersect(gsMakeUnknown()),
 			    gstcMakeSortArrowProd2(gsMakeSortBag(gsMakeUnknown()),gsMakeSortBag(gsMakeUnknown()),gsMakeSortBag(gsMakeUnknown())));
   gstcAddSystemFunctionProd(gsMakeOpIdNameBag2Set(gsMakeUnknown()),
 			    gstcMakeSortArrowProd1(gsMakeSortBag(gsMakeUnknown()),gsMakeSortSet(gsMakeUnknown())));

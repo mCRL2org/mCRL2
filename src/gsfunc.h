@@ -424,39 +424,39 @@ ATermAppl gsMakeOpIdExp(ATermAppl SortExpr);
 ATermAppl gsMakeOpIdEven();
 //Ret: Operation identifier for 'even' of sort Nat -> Bool
 
-//Lists
 ATermAppl gsMakeOpIdNameEmptyList(ATermAppl SortExpr);
 ATermAppl gsMakeOpIdNameListSize(ATermAppl SortExpr);
 ATermAppl gsMakeOpIdNameInsert(ATermAppl SortExpr);
 ATermAppl gsMakeOpIdNameAppend(ATermAppl SortExpr);
 ATermAppl gsMakeOpIdNameConcat(ATermAppl SortExpr);
 ATermAppl gsMakeOpIdNameElementAt(ATermAppl SortExpr);
-ATermAppl gsMakeOpIdNameLhead(ATermAppl SortExpr);
-ATermAppl gsMakeOpIdNameLtail(ATermAppl SortExpr);
-ATermAppl gsMakeOpIdNameRhead(ATermAppl SortExpr);
-ATermAppl gsMakeOpIdNameRtail(ATermAppl SortExpr);
+ATermAppl gsMakeOpIdNameLHead(ATermAppl SortExpr);
+ATermAppl gsMakeOpIdNameLTail(ATermAppl SortExpr);
+ATermAppl gsMakeOpIdNameRHead(ATermAppl SortExpr);
+ATermAppl gsMakeOpIdNameRTail(ATermAppl SortExpr);
 
 ATermAppl gsMakeOpIdSetComp(ATermAppl SortExprDom, ATermAppl SortExprResult);
 //Pre: SortExprDom and SortExprResult are sort expressions
 //Ret: Operation identifier for set comprehension of sort (S -> Bool) -> T,
 //     where S and T stand for SortExprDom and SortExprResult
      
+ATermAppl gsMakeOpIdNameSet2Bag(ATermAppl SortExpr);
 ATermAppl gsMakeOpIdNameEmptySet(ATermAppl SortExpr);
 ATermAppl gsMakeOpIdNameSetSize(ATermAppl SortExpr);
 ATermAppl gsMakeOpIdNameSetIn(ATermAppl SortExpr);
 ATermAppl gsMakeOpIdNameSubSetEq(ATermAppl SortExpr);
 ATermAppl gsMakeOpIdNameSubSet(ATermAppl SortExpr);
 ATermAppl gsMakeOpIdNameSetUnion(ATermAppl SortExpr);
-ATermAppl gsMakeOpIdNameSetDifference(ATermAppl SortExpr);
-ATermAppl gsMakeOpIdNameSetIntersection(ATermAppl SortExpr);
-ATermAppl gsMakeOpIdNameSetComplement(ATermAppl SortExpr);
-ATermAppl gsMakeOpIdNameSet2Bag(ATermAppl SortExpr);
+ATermAppl gsMakeOpIdNameSetDiff(ATermAppl SortExpr);
+ATermAppl gsMakeOpIdNameSetIntersect(ATermAppl SortExpr);
+ATermAppl gsMakeOpIdNameSetCompl(ATermAppl SortExpr);
 
 ATermAppl gsMakeOpIdBagComp(ATermAppl SortExprDom, ATermAppl SortExprResult);
 //Pre: SortExprDom and SortExprResult are sort expressions
 //Ret: Operation identifier for bag comprehension of sort (S -> Nat) -> T,
 //     where S and T stand for SortExprDom and SortExprResult
 
+ATermAppl gsMakeOpIdNameBag2Set(ATermAppl SortExpr);
 ATermAppl gsMakeOpIdNameEmptyBag(ATermAppl SortExpr);
 ATermAppl gsMakeOpIdNameBagSize(ATermAppl SortExpr);
 ATermAppl gsMakeOpIdNameBagIn(ATermAppl SortExpr);
@@ -464,9 +464,8 @@ ATermAppl gsMakeOpIdNameCount(ATermAppl SortExpr);
 ATermAppl gsMakeOpIdNameSubBagEq(ATermAppl SortExpr);
 ATermAppl gsMakeOpIdNameSubBag(ATermAppl SortExpr);
 ATermAppl gsMakeOpIdNameBagUnion(ATermAppl SortExpr);
-ATermAppl gsMakeOpIdNameBagDifference(ATermAppl SortExpr);
-ATermAppl gsMakeOpIdNameBagIntersection(ATermAppl SortExpr);
-ATermAppl gsMakeOpIdNameBag2Set(ATermAppl SortExpr);
+ATermAppl gsMakeOpIdNameBagDiff(ATermAppl SortExpr);
+ATermAppl gsMakeOpIdNameBagIntersect(ATermAppl SortExpr);
 
 //Creation of data expressions for system defined operations.
 ATermAppl gsMakeDataExprTrue(void);
