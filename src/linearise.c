@@ -356,10 +356,10 @@ static int existsort(ATermAppl sortterm)
 /* Delivers 0 if sort does not exists. Otherwise 1 
    indicating that the sort exists */
 { 
-  if (sortterm==gsMakeSortExprBool()) return 1;
-  if (sortterm==gsMakeSortExprInt()) return 1;
-  if (sortterm==gsMakeSortExprNat()) return 1;
-  if (sortterm==gsMakeSortExprPos()) return 1;
+  /* if (sortterm==gsMakeSortExprBool()) return 1;
+     if (sortterm==gsMakeSortExprInt()) return 1;
+     if (sortterm==gsMakeSortExprNat()) return 1;
+     if (sortterm==gsMakeSortExprPos()) return 1; */
   if (gsIsSortArrow(sortterm))
   { return existsort(ATAgetArgument(sortterm,0)) && 
              existsort(ATAgetArgument(sortterm,1));
@@ -388,10 +388,10 @@ static int existsort(ATermAppl sortterm)
 
 static void insertsort(ATermAppl sortterm)
 { 
-  if (sortterm==gsMakeSortExprBool()) return;
-  if (sortterm==gsMakeSortExprInt()) return;
-  if (sortterm==gsMakeSortExprNat()) return;
-  if (sortterm==gsMakeSortExprPos()) return;
+  /* if (sortterm==gsMakeSortExprBool()) return;
+     if (sortterm==gsMakeSortExprInt()) return;
+     if (sortterm==gsMakeSortExprNat()) return;
+     if (sortterm==gsMakeSortExprPos()) return; */
   if (gsIsSortArrow(sortterm))
   { insertsort(ATAgetArgument(sortterm,0));
     insertsort(ATAgetArgument(sortterm,1));
@@ -426,7 +426,8 @@ static void insertsort(ATermAppl sortterm)
     objectdata[n].constructor=0;
     return;
   }
-  ATerror("Expected a sortterm %t",sortterm);
+  ATerror("Internal: Expected a sortterm (1)  %t",sortterm);
+  
 }
 
 static long insertConstructorOrFunction(ATermAppl constructor,objecttype type)
@@ -436,12 +437,13 @@ static long insertConstructorOrFunction(ATermAppl constructor,objecttype type)
   long m=0;
   long n=0;
 
-  if (!gsIsOpId(constructor)) /* ,"OpId(<str>,<term>)",&str,&t)) */
+  if (!gsIsOpId(constructor)) 
   { ATerror("Internal: Expect operation declaration %t",constructor);
   };
 
   str=ATSgetArgument(constructor,0);
   t=ATAgetArgument(constructor,1);
+  assert(existsort(t));
 
   addString(str);
  
@@ -454,11 +456,10 @@ static long insertConstructorOrFunction(ATermAppl constructor,objecttype type)
 
   objectdata[n].objectname=constructor;
   objectdata[n].targetsort=getTargetSort(t);
-  m=objectIndex(getTargetSort(ATAgetArgument(constructor,1)));
+  m=objectIndex(objectdata[n].targetsort);
   assert(objectdata[m].object==sort);
   if (type==func) objectdata[m].constructor=1;
   objectdata[n].object=type;
-  assert(existsort(ATAgetArgument(constructor,1)));
   return n;
 }
 
@@ -517,7 +518,7 @@ static ATermList getarguments(ATermAppl multiAction)
     { result=ATinsertA(result,ATAgetFirst(l1));
     }
   }
-  ATreverse(result);
+  return ATreverse(result);
 }
 
 static ATermAppl makemultiaction(ATermList actionIds,ATermList args)
@@ -1276,11 +1277,22 @@ static int occursinterm(ATermAppl var, ATermAppl t)
          occursinterm(var,ATAgetArgument(t,1));
 }
 
+
 static int occursintermlist(ATermAppl var, ATermList l)
 { 
   for( ; l!=ATempty ; l=ATgetNext(l))
   { if (occursinterm(var,ATAgetFirst(l)))
     return 1;
+  }
+  return 0;
+}
+
+static int occursinmultiaction(ATermAppl var, ATermList ma)
+{ ATfprintf(stderr,"LLL %t\n",ma);
+  for( ; ma!=ATempty ; ma=ATgetNext(ma) )
+  { if (occursintermlist(var,ATLgetArgument(ATAgetFirst(ma),1)))
+    { return 1; 
+    }
   }
   return 0;
 }
@@ -1326,6 +1338,9 @@ static int occursinpCRLterm(ATermAppl var, ATermAppl p, int strict)
   }
   if (gsIsAction(p)) 
   { return occursintermlist(var,ATLgetArgument(p,1));
+  }
+  if (linIsMultiAction(p)) 
+  { return occursinmultiaction(var,ATLgetArgument(p,0));
   }
   if (gsIsDelta(p))
    { return 0; }
@@ -1590,10 +1605,10 @@ static ATermList parameters_that_occur_in_body(
 static ATermAppl newprocess(ATermList parameters, ATermAppl body,
               processstatustype ps)
 { 
-  ATermAppl p=NULL;
   parameters=parameters_that_occur_in_body(parameters, body);
+  ATermAppl p=gsMakeProcVarId(fresh_name("P"),parameters);
   insertProcDeclaration(
-             gsMakeProcVarId(fresh_name("P"),parameters),
+             p,
              parameters,
              body,
              ps);
@@ -1867,6 +1882,7 @@ static ATermAppl bodytovarheadGNF(
 
     /* make a new process, containing this process */
     newproc=newprocess(freevars,body1,pCRL);
+    ATfprintf(stderr,"AAAAAAA %t\n",newproc);
     return gsMakeProcess(newproc,ATLgetArgument(newproc,1));
   }
   
@@ -5398,7 +5414,7 @@ static ATermAppl pairwiseMatch(ATermList l1, ATermList l2)
   ATermAppl t1=ATAgetFirst(l1);
   ATermAppl t2=ATAgetFirst(l2);
 
-  if (gsGetType(t1)!=gsGetType(t2))
+  if (gsGetSort(t1)!=gsGetSort(t2))
   { return gsMakeDataExprFalse();
   }
 
@@ -5617,7 +5633,7 @@ static ATermAppl makesingleultimatedelaycondition(
                      ATermList sumvars,
                      ATermAppl timevariable,
                      ATermAppl actiontime)
-{ ATermAppl result=gsMakeDataExprLessThan(timevariable,actiontime);
+{ ATermAppl result=gsMakeDataExprLT(timevariable,actiontime);
 
   /* for ( ; sumvars!=ATempty ; sumvars=ATgetNext(sumvars) )
   { ATermAppl sumvar=ATAgetFirst(sumvars);
