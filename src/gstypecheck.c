@@ -31,6 +31,14 @@ extern "C"
 #include "gstypecheck.h"
 #include "gsfunc.h"
 
+#define ThrowF            ThrowV(ATfalse)
+//store ATfalse in result and throw an exception
+
+#define ThrowMF(...)      ThrowVM(ATfalse, __VA_ARGS__)
+//print error message supplied by the first parameter with the remaining
+//store ATfalse in result and throw an exception
+
+
 // Static data 
 // the static context of the spec will be chacked and used, not transformed
 typedef struct { 
@@ -77,11 +85,13 @@ static ATbool gstcEqTypesL(ATermList, ATermList);
 static ATbool gstcCheckNamesP(ATermTable, ATermAppl);
 static ATbool gstcCheckNamesD(ATermTable, ATermAppl);
 
-static ATermTable gstcMakeVarsTable(ATermList);
+static ATermTable gstcAddVars2Table(ATermTable,ATermList);
 static ATermAppl gstcRewrActProc(ATermAppl);
 static ATermAppl gstcTraverseActProc(ATermAppl);
 static ATermAppl gstcTraverseVarConstP(ATermTable, ATermAppl);
 static ATermAppl gstcTraverseVarConstD(ATermTable, ATermAppl);
+static ATermList gstcTraverseVarConstL(ATermTable, ATermList);
+static ATermList gstcTraverseVarConstLL(ATermTable, ATermList);
 
 #define INIT_KEY gsMakeProcVarId(ATmakeAppl0(ATmakeAFun("init",0,ATtrue)),ATmakeList0())
 
@@ -296,10 +306,10 @@ static ATermList gstcWriteProcs(void){
 
 static ATbool gstcCheckNamesData(void){
   ATbool Result=ATtrue;
-  ATermTable Vars=NULL;
+  ATermTable Vars=ATtableCreate(63,50);
   for(ATermList Eqns=body.equations;!ATisEmpty(Eqns);Eqns=ATgetNext(Eqns)){
     ATermAppl Eqn=ATAgetFirst(Eqns);
-    Vars=gstcMakeVarsTable(ATLgetArgument(Eqn,0));
+    Vars=gstcAddVars2Table(Vars,ATLgetArgument(Eqn,0));
     if(!Vars){ThrowF;}
     ATermAppl Cond=ATAgetArgument(Eqn,1);
     if(!gsIsNil(Cond) && !gstcCheckNamesD(Vars,Cond)){ThrowF;}
@@ -313,10 +323,10 @@ static ATbool gstcCheckNamesData(void){
 
 static ATbool gstcCheckNamesProc(void){
   ATbool Result=ATtrue;
-  ATermTable Vars=NULL;
+  ATermTable Vars=ATtableCreate(63,50);
   for(ATermList ProcVars=ATtableKeys(body.proc_pars);!ATisEmpty(ProcVars);ProcVars=ATgetNext(ProcVars)){
     ATermAppl ProcVar=ATAgetFirst(ProcVars);
-    Vars=gstcMakeVarsTable(ATLtableGet(body.proc_pars,(ATerm)ProcVar));
+    Vars=gstcAddVars2Table(Vars,ATLtableGet(body.proc_pars,(ATerm)ProcVar));
     if(!Vars){ThrowF;}
     if(!gstcCheckNamesP(Vars,ATAtableGet(body.proc_bodies,(ATerm)ProcVar))){ATtableDestroy(Vars);ThrowF;}
   } 
@@ -340,7 +350,7 @@ static ATbool gstcTransformActProc(void){
 
 static ATbool gstcTransformVarConst(void){
   ATbool Result=ATtrue;
-  ATermTable Vars=NULL;
+  ATermTable Vars=ATtableCreate(63,50);
   
   //data terms in equations
   {
@@ -348,7 +358,7 @@ static ATbool gstcTransformVarConst(void){
     for(ATermList Eqns=body.equations;!ATisEmpty(Eqns);Eqns=ATgetNext(Eqns)){
       ATermAppl Eqn=ATAgetFirst(Eqns);
       ATermList VarList=ATLgetArgument(Eqn,0);
-      Vars=gstcMakeVarsTable(VarList);
+      Vars=gstcAddVars2Table(Vars,VarList);
       if(!Vars){ThrowF;}
       ATermAppl Cond=ATAgetArgument(Eqn,1);
       if(!gsIsNil(Cond) && !(Cond=gstcTraverseVarConstD(Vars,Cond))){ThrowF;}
@@ -364,8 +374,8 @@ static ATbool gstcTransformVarConst(void){
   //data terms in processes and init
   for(ATermList ProcVars=ATtableKeys(body.proc_pars);!ATisEmpty(ProcVars);ProcVars=ATgetNext(ProcVars)){
     ATermAppl ProcVar=ATAgetFirst(ProcVars);
-    ATtableDestroy(Vars);
-    Vars=gstcMakeVarsTable(ATLtableGet(body.proc_pars,(ATerm)ProcVar));
+    ATtableReset(Vars);
+    Vars=gstcAddVars2Table(Vars,ATLtableGet(body.proc_pars,(ATerm)ProcVar));
     if(!Vars){ThrowF;}
     ATermAppl NewProcTerm=gstcTraverseVarConstP(Vars,ATAtableGet(body.proc_bodies,(ATerm)ProcVar));
     if(!NewProcTerm){ThrowF;}
@@ -409,9 +419,8 @@ static ATbool gstcCheckNamesD(ATermTable Vars, ATermAppl DataTerm){
   return Result;
 }
     
-static ATermTable gstcMakeVarsTable(ATermList VarDecls){
+static ATermTable gstcAddVars2Table(ATermTable Vars, ATermList VarDecls){
   ATbool Result=ATtrue;
-  ATermTable Vars=ATtableCreate(63,50);
 
   for(;!ATisEmpty(VarDecls);VarDecls=ATgetNext(VarDecls)){
     ATermAppl VarDecl=ATAgetFirst(VarDecls);
@@ -477,16 +486,162 @@ static ATermAppl gstcTraverseActProc(ATermAppl ProcTerm){
   return ATmakeApplArray(ProcSymbol,args);
 }
 
-static ATermAppl gstcTraverseVarConstP(ATermTable Vars,ATermAppl ProcTerm){
+static ATermAppl gstcTraverseVarConstP(ATermTable Vars, ATermAppl ProcTerm){
   ATermAppl Result=NULL;
-  Result=ProcTerm;
+  AFun ProcSymbol=ATgetAFun(ProcTerm);
+  int n = ATgetArity(ProcSymbol);
+  if(n==0) return ProcTerm;
+
+  if(gsIsAction(ProcTerm) || gsIsProcess(ProcTerm)){
+    ATermList NewPars=ATmakeList0();
+    for(ATermList Pars=ATLgetArgument(ProcTerm,1);!ATisEmpty(Pars);Pars=ATgetNext(Pars)){
+      ATermAppl NewPar=gstcTraverseVarConstD(Vars,ATAgetFirst(Pars));
+      if(!NewPar) {throw;}
+      NewPars=ATinsert(NewPars,(ATerm)NewPar);
+    }
+    return ATsetArgument(ProcTerm,(ATerm)ATreverse(NewPars),1);
+  }
+
+  if(gsIsRestrict(ProcTerm) || gsIsHide(ProcTerm) || 
+     gsIsRename(ProcTerm) || gsIsComm(ProcTerm) || gsIsAllow(ProcTerm)){
+    ATermAppl NewProc=gstcTraverseVarConstP(Vars,ATAgetArgument(ProcTerm,1));
+    if(!NewProc) {throw;}
+    return ATsetArgument(ProcTerm,(ATerm)NewProc,1);
+  }
+
+  if(gsIsSync(ProcTerm) || gsIsSeq(ProcTerm) || gsIsBInit(ProcTerm) ||
+     gsIsMerge(ProcTerm) || gsIsLMerge(ProcTerm) || gsIsChoice(ProcTerm)){
+    ATermAppl NewLeft=gstcTraverseVarConstP(Vars,ATAgetArgument(ProcTerm,0));
+    if(!NewLeft) {throw;}
+    ATermAppl NewRight=gstcTraverseVarConstP(Vars,ATAgetArgument(ProcTerm,1));
+    if(!NewRight) {throw;}
+    return ATsetArgument(ATsetArgument(ProcTerm,(ATerm)NewLeft,0),(ATerm)NewRight,1);
+  }
+
+  if(gsIsAtTime(ProcTerm)){
+    ATermAppl NewProc=gstcTraverseVarConstP(Vars,ATAgetArgument(ProcTerm,0));
+    if(!NewProc) {throw;}
+    ATermAppl NewTime=gstcTraverseVarConstD(Vars,ATAgetArgument(ProcTerm,1));
+    if(!NewTime) {throw;}
+    return gsMakeAtTime(NewProc,NewTime);
+  }
+
+  if(gsIsCond(ProcTerm)){
+    ATermAppl NewCond=gstcTraverseVarConstD(Vars,ATAgetArgument(ProcTerm,0));
+    if(!NewCond) {throw;}
+    ATermAppl NewLeft=gstcTraverseVarConstP(Vars,ATAgetArgument(ProcTerm,1));
+    if(!NewLeft) {throw;}
+    ATermAppl NewRight=gstcTraverseVarConstP(Vars,ATAgetArgument(ProcTerm,2));
+    if(!NewRight) {throw;}
+    return gsMakeCond(NewCond,NewLeft,NewRight);
+  }
+
+  if(gsIsSum(ProcTerm)){
+    ATermTable NewVars=gstcAddVars2Table(Vars,ATLgetArgument(ProcTerm,0));
+    if(!NewVars) {throw;}
+    ATermAppl NewProc=gstcTraverseVarConstP(NewVars,ATAgetArgument(ProcTerm,1));
+    if(!NewProc) {throw;}
+    return ATsetArgument(ProcTerm,(ATerm)NewProc,1);
+  }
+  
+  assert(0);
  finally:
   return Result;
 }
 
-static ATermAppl gstcTraverseVarConstD(ATermTable Vars,ATermAppl DataTerm){
+static ATermAppl gstcTraverseVarConstD(ATermTable Vars, ATermAppl DataTerm){
   ATermAppl Result=NULL;
-  Result=DataTerm;
+ 
+  if(gsIsNumber(DataTerm)) return DataTerm;
+
+  if(gsIsSetBagComp(DataTerm)){
+    ATermTable NewVars=gstcAddVars2Table(Vars,ATmakeList1((ATerm)ATAgetArgument(DataTerm,0)));
+    if(!NewVars) {throw;}
+    ATermAppl NewData=gstcTraverseVarConstD(NewVars,ATAgetArgument(DataTerm,1));
+    if(!NewData) {throw;}
+    return ATsetArgument(DataTerm,(ATerm)NewData,1);
+  }
+
+  if(gsIsForall(DataTerm) || gsIsExists(DataTerm) || gsIsLambda(DataTerm)){
+    ATermTable NewVars=gstcAddVars2Table(Vars,ATLgetArgument(DataTerm,0));
+    if(!NewVars) {throw;}
+    ATermAppl NewData=gstcTraverseVarConstD(NewVars,ATAgetArgument(DataTerm,1));
+    if(!NewData) {throw;}
+    return ATsetArgument(DataTerm,(ATerm)NewData,1);
+  }
+  
+  if(gsIsWhr(DataTerm)){
+    ATermList WhereVarList=ATmakeList0();
+    for(ATermList WhereList=ATLgetArgument(DataTerm,1);!ATisEmpty(WhereList);WhereList=ATgetNext(WhereList)){
+      ATermAppl WhereElem=ATAgetFirst(WhereList);
+      WhereVarList=ATinsert(WhereVarList, (ATerm)gsMakeDataVarId(ATAgetArgument(WhereElem,0),gsMakeUnknown()));
+    }
+    ATermTable NewVars=gstcAddVars2Table(Vars,ATreverse(WhereVarList));
+    if(!NewVars) {throw;}
+    ATermAppl NewData=gstcTraverseVarConstD(NewVars,ATAgetArgument(DataTerm,0));
+    if(!NewData) {throw;}
+    return ATsetArgument(DataTerm,(ATerm)NewData,0);
+  }
+
+  if(gsIsListEnum(DataTerm) || gsIsSetEnum(DataTerm)){
+    ATermList NewData=gstcTraverseVarConstL(Vars,ATLgetArgument(DataTerm,0));
+    if(!NewData) {throw;}
+    return ATsetArgument(DataTerm,(ATerm)NewData,0);
+  }  
+
+  if(gsIsBagEnum(DataTerm)){
+    ATermList NewData=gstcTraverseVarConstLL(Vars,ATLgetArgument(DataTerm,0));
+    if(!NewData) {throw;}
+    return ATsetArgument(DataTerm,(ATerm)NewData,0);
+  }  
+
+  if(gsIsDataApplProd(DataTerm)){
+    ATermAppl NewData=gstcTraverseVarConstD(Vars,ATAgetArgument(DataTerm,0));
+    if(!NewData) {throw;}
+    ATermList NewDatas=gstcTraverseVarConstL(Vars,ATLgetArgument(DataTerm,1));
+    if(!NewDatas) {throw;}
+    return gsMakeDataApplProd(NewData,NewDatas);
+  }  
+
+  if(gsIsDataVarIdOpId(DataTerm)){
+    ATermAppl Name=ATAgetArgument(DataTerm,0);
+    ATermAppl Type=ATAtableGet(Vars,(ATerm)Name);
+    if(Type) return gsMakeDataVarId(Name,Type);
+    return gsMakeOpId(Name,gsMakeUnknown());
+  }  
+
+  assert(0);
+ finally:
+  return Result;
+}
+    
+static ATermList gstcTraverseVarConstL(ATermTable Vars, ATermList DataTermList){
+  ATermList Result=NULL;
+  ATermList NewDataTermList=ATmakeList0();
+
+  for(;!ATisEmpty(DataTermList);DataTermList=ATgetNext(DataTermList)){
+    ATermAppl NewDataTerm=gstcTraverseVarConstD(Vars, ATAgetFirst(DataTermList));
+    if(!NewDataTerm) {throw;}
+    NewDataTermList=ATinsert(NewDataTermList,(ATerm)NewDataTerm);
+  }
+  return ATreverse(NewDataTermList);
+ finally:
+  return Result;
+}
+
+static ATermList gstcTraverseVarConstLL(ATermTable Vars, ATermList DataTermList2){
+  ATermList Result=NULL;
+  ATermList NewDataTermList2=ATmakeList0();
+
+  for(;!ATisEmpty(DataTermList2);DataTermList2=ATgetNext(DataTermList2)){
+    ATermAppl DataTerm2=ATAgetFirst(DataTermList2);
+    ATermAppl NewDataTerm0=gstcTraverseVarConstD(Vars, ATAgetArgument(DataTerm2,0));
+    if(!NewDataTerm0) {throw;}
+    ATermAppl NewDataTerm1=gstcTraverseVarConstD(Vars, ATAgetArgument(DataTerm2,1));
+    if(!NewDataTerm1) {throw;}
+    NewDataTermList2=ATinsert(NewDataTermList2,(ATerm)gsMakeBagEnumElt(NewDataTerm0,NewDataTerm1));
+  }
+  return ATreverse(NewDataTermList2);
  finally:
   return Result;
 }
