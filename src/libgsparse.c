@@ -224,5 +224,5 @@ finally:
 }
 
 void gsTest(void)
-{  
+{
 }

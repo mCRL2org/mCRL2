@@ -1410,31 +1410,97 @@ ATermAppl gsMakeDataApplList(ATermAppl DataExpr,
   return Result;
 }
 
-ATermAppl gsMakeDataExprPos(char *s)
-//Pre: s is of the form "[1-9][0-9]*"
-//Ret: data expression of sort Pos that is a representation of s
+inline int gsChar2Int(char c)
+//Pre: c is in {'0', ..., '9'}
+//Ret: integer value corresponding to c
 {
-//  ATermAppl Result = NULL;
-//  long p = strtol(s, NULL, 10);
-//  if (p <= 0) {
-//    ThrowV1(NULL, "character %s is not of the form [1-9][0-9]*", s);
-//  if (p == 1) {
-//    Result = //TODO;
-//finally:
-//  return Result;
-  return NULL;
+  assert(c >= '0' && c <= '9');
+  return c - '0';
 }
 
-ATermAppl gsMakeDataExprNat(char *s)
-//Pre: s is of the form "0 | [1-9][0-9]*"
-//Ret: data expression of sort Nat that is a representation of s
+inline char gsInt2Char(int n)
+//Pre: 0 <= n <= 9
+//Ret: character corresponding to the value of n
 {
-  return NULL;
+  assert(n >= 0 && n <= 9);
+  return n + '0';
 }
 
-ATermAppl gsMakeDataExprInt(char *s)
-//Pre: s is of the form "0 | -? [1-9][0-9]*"
-//Ret: data expression of sort Int that is a representation of s
+char *gsStringDiv2(char *n)
+//Pre: n is of the form "[1-9][0-9]*"
+//Ret: the string representation of n div 2
+//     Note that the resulting string is created with malloc, so it has to be
+//     freed
 {
-  return NULL;
+  assert(strlen(n) > 0);
+  int l   = strlen(n); //length of n
+
+  char *r = (char *) 
+    malloc((l - (((l>0)&&(n[0]=='1'))?1:0) + 1) * sizeof(char)); //result char*
+  //calculate r[0]
+  r[0] = gsInt2Char(gsChar2Int(n[0])/2);
+  //declare counter for the elements of r
+  int j = (r[0] == '0')?0:1;
+  //calculate remaining indices of r
+  for (int i=1; i<l; i++)
+  {
+    //r[j] = 5*(n[i-1] mod 2) + n[i] div 2
+    r[j] = gsInt2Char(5*(gsChar2Int(n[i-1])%2) + gsChar2Int(n[i])/2);
+    //update j
+    j = j+1;
+  }
+  //terminate string
+  r[j] = 0;
+  return r;
+}
+
+int gsStringMod2(char *n)
+//Pre: n is of the form "[1-9][0-9]*"
+//Ret: the value of n mod 2
+{
+  assert(strlen(n) > 0);
+  return gsChar2Int(n[strlen(n)-1]) % 2;
+}
+
+ATermAppl gsMakeDataExprPos(char *p)
+//Pre: p is of the form "[1-9][0-9]*"
+//Ret: data expression of sort Pos that is a representation of p
+{
+  assert(strlen(p) > 0);
+  ATermAppl Result = NULL;
+  if (!strcmp(p, "1")) {
+    return gsMakeDataExprOne();
+  } else {
+    char *d = gsStringDiv2(p);
+    if (gsStringMod2(p) == 0) {
+      Result = gsMakeDataExprDoublePos(gsMakeDataExprPos(d));
+    } else {
+      Result = gsMakeDataExprDoublePosPlusOne(gsMakeDataExprPos(d));
+    }
+    free(d);
+  }
+finally:
+  return Result;
+}
+
+ATermAppl gsMakeDataExprNat(char *n)
+//Pre: n is of the form "0 | [1-9][0-9]*"
+//Ret: data expression of sort Nat that is a representation of n
+{
+  if (!strcmp(n, "0")) {
+    return gsMakeDataExprZero();
+  } else {
+    return gsMakeDataExprPosAsNat(gsMakeDataExprPos(n));
+  }
+}
+
+ATermAppl gsMakeDataExprInt(char *i)
+//Pre: i is of the form "0 | -? [1-9][0-9]*"
+//Ret: data expression of sort Int that is a representation of i
+{
+  if (!strncmp(i, "-", 1)) {
+    return gsMakeDataExprNegatePos(gsMakeDataExprPos(i+1));
+  } else {
+    return gsMakeDataExprNatAsInt(gsMakeDataExprNat(i));
+  }
 }
