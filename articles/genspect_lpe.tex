@@ -21,6 +21,19 @@
 \newcommand{\nul}{{\bf 0}}
 \newcommand{\wor}{\stackrel{\mathrm{def}}{=}}
 \newcommand{\NV}{{\cal V}}
+\newcommand{\type}{\mathbb{T}}
+\newcommand{\PNI}{\nm{PNI}}
+\newcommand{\PN}{\nm{PN}}
+\newcommand{\SB}{\nm{SB}}
+\newcommand{\LSB}{\nm{LSB}}
+\newcommand{\List}{\nm{List}}
+\newcommand{\Set}{\nm{Set}}
+\newcommand{\Bag}{\nm{Bag}}
+\newcommand{\TypeAny}{\nm{TypeAny}}
+\newcommand{\typecompat}{\equiv_t}
+\newcommand{\wt}{\nm{wt}}
+\newcommand{\Int}{\nm{Int}}
+\newcommand{\Pos}{\nm{Pos}}
 
 \newcommand{\Vars}{\mbox{\em Vars}}
 
@@ -381,6 +394,32 @@ $\NV$} iff one of the following hold:
 Any sort expression that is SCC is also well-typed. I.e. it is impossible to specify
 an incorrectly typed sort.
 
+
+\section{Context Information}
+The context consists of two parts. The static part corresponds to the
+global information in the specification. The dynamic part contains the
+definitions of the variables, and can change depending on the scope.
+Given a context of a specification $\kappa$, we denote the static context as 
+$\nm{Sig(\kappa)}$ and the dynamic part as $\nm{Vars}(\kappa)$. 
+The static context is a tupple 
+$(\nm{BasicSorts},\nm{DefinedSorts},\nm{Operations},\nm{Actions},\nm{Processes})$
+which represents the names and types of the sorts, operations, actions and processes 
+defined in the specification.
+The types of the context operatinos are defined below:
+\begin{align*}
+\nm{BasicSorts}=\set{\String}\\
+\func{\nm{DefinedSorts}}{\String}{\Type}\\
+\func{\nm{Operations}}{\String}{\Type}\\
+\func{\nm{Actions}}{\String}{\Type}\\
+\func{\nm{Processes}}{\String}{\Type}
+\end{align*} 
+The sort $\Type$ is a sort expression containing defined sorts, a list
+of such expressions, or the empty type (unit type).  It can be also
+unknown.  The function $\func{\nm{basicType}{\Type}{\Type}$ unfolds
+all occurrences of derived sort names in a type expression.
+
+The variables 
+
 \paragraph{Data Terms}
 Let $\Sig$ be a signature, and let $\NV$ be a set of variables over
 $\Sig$.
@@ -399,50 +438,80 @@ the following holds
   $t_i$ ($1\leq i\leq m$) are SSC wrt.\ $Sig$ and $\NV$.
 \end{itemize}
 
-\aterm{Id}(n) & & \nm{type}(n)
-\aterm{Number}(n) & & \PNI
-\aterm{True}() & & \Bool 
-\aterm{False}() & & \Bool 
-\aterm{EmptyList}() & & \List(\seq{}) 
-\aterm{EmptySetBag}() & & \SB(\seq{})
-\aterm{ListEnum}(<DataExpr>+) &\text{argument types are compatible} & \List(Copmat(args))
-\aterm{SetEnum}(<DataExpr>+) & \text{similar}&
-\aterm{BagEnum}(BagEnumElt+) & \text{..} &
-\aterm{SetBagComp}(<IdDecl>, <DataExpr>) & type(arg2)=\Bool, arg2 in arg1 & \SB{type(target arg1)}
-\aterm{FuncApp}(<DataExpr>, <DataExpr>*) & types(arg2) are compat source(arg1), & target(arg1) 
-\aterm{NotOrCompl}(<DataExpr>) & &
-\aterm{Neg}(<DataExpr>) & &
-\aterm{Size}(<DataExpr>) 
-\aterm{Forall}(<IdDecl>, <DataExpr>) 
-\aterm{Exists}(<IdDecl>, <DataExpr>) 
-\aterm{ListAt}(<DataExpr>, <DataExpr>) 
-\aterm{MultOrIntersect}(<DataExpr>, <DataExpr>) 
-\aterm{Div}(<DataExpr>, <DataExpr>) 
-\aterm{Mod}(<DataExpr>, <DataExpr>) 
-\aterm{AddOrUnion}(<DataExpr>, <DataExpr>) 
-\aterm{SubtOrDiff}(<DataExpr>, <DataExpr>) 
-\aterm{LTOrPropSubset}(<DataExpr>, <DataExpr>) 
-\aterm{GT}(<DataExpr>, <DataExpr>) 
-\aterm{LTEOrSubset}(<DataExpr>, <DataExpr>) 
-\aterm{GTE}(<DataExpr>, <DataExpr>) 
-\aterm{In}(<DataExpr>, <DataExpr>) 
-\aterm{Cons}(<DataExpr>, <DataExpr>) 
-\aterm{Snoc}(<DataExpr>, <DataExpr>) 
-\aterm{Concat}(<DataExpr>, <DataExpr>) 
-\aterm{Eq}(<DataExpr>, <DataExpr>) 
-\aterm{Neq}(<DataExpr>, <DataExpr>) 
-\aterm{And}(<DataExpr>, <DataExpr>) 
-\aterm{Or}(<DataExpr>, <DataExpr>) 
-\aterm{Imp}(<DataExpr>, <DataExpr>) 
-\aterm{Lambda}(<IdDecl>, <DataExpr>) 
-\aterm{Whr}(<DataExpr>, <DataExpr>+) 
+The typing rules of the built-in data types can be defined as follows:
+As for the sort and process expressions we introduce the following functions for data
+expressions: $\nm{is\_well\_named}$ -- all ids are defined, $\nm{id\_vars}$ to identify 
+the variables, $\nm{types}$ -- all possible types the term can be, 
+$\nm{is\_well\_typed}$ -- is the term well-typed?
 
+The function $\type_\kappa$ is defined defined as (well-namedness of the arguments is assumed):
+\begin{displaymath}
+\begin{array}{lll}
+\aterm{DataVar}(\nm{String})         &                                                            & \nm{type}(\kappa,\nm{String})\\
+\aterm{OpId}(\nm{String})            &                                                            & \nm{type}(\kappa,\nm{String})\\
+\aterm{Number}(\nm{NumberString})    &                                                            & \PNI(\nm{NumberString})\\
+\aterm{ListEnum}(d_0,\dots, d_n)     & \forall i\in\overline{0,n}~\type(d_i)\typecompat\type(d_0) & \List(\nm{minC}(\type(d_0),\dots,\type(d_n)))\\
+\aterm{SetEnum}(d_0,\dots, d_n)      & \forall i\in\overline{0,n}~\type(d_i)\typecompat\type(d_0) & \Set(\nm{minC}(\type(d_0),\dots,\type(d_n)))\\ 
+\aterm{BagEnum}(\aterm{BagEnumElt}(d_0,d_0'),\\
+\t2\dots,\aterm{BagEnumElt}(d_n,d_n'))
+                                     & \forall i\in\overline{0,n}~\left(\type(d_i)\typecompat\type(d_0)\land\type(d_i')\typecompat\PN\right) 
+                                                                                                  & \Bag(\nm{minC}(\type(d_0),\dots,\type(d_n)))\\ 
+\aterm{SetBagComp}(\aterm{IdDecl}(v,s),d) 
+                                     & \wt(\kappa+(v,s),d)\land                                   & \Set(s)~\text{if}~\type_{\kappa'}(d)=\Bool \\
+                                     &\t1(\type_{\kappa'}(d)=\Bool\lor\type_{\kappa'}(d)\typecompat\PN)               & \Bag(s)~\text{if}~\type_{\kappa'}(d)\typecompat\PN\\ 
+\aterm{DataApp}(d, d_0,\dots,d_n)    & \type(d)=A_0 \dots A_n\to B\land\\
+                                     & \t1\type(d_0)\typecompat A_0\land\dots\land\type(d_n)\typecompat A_n & B\\
+\aterm{Forall}([\aterm{IdsDecl}(\vect{v_0},s_0),\
+                                     &  \wt(\kappa+(\vect{v_0},s_0,\dots,\vect{v_n},s_n),d)       & \Bool\\
+\t2\dots,\aterm{IdsDecl}(\vect{v_n},s_n)], d)
+                                     & \t1\land\type_{\kappa'}(d)=\Bool                                     &\\
+\aterm{Exists}([\aterm{IdsDecl}(\vect{v_0},s_0),
+                                     & \wt(\kappa+(\vect{v_0},s_0,\dots,\vect{v_n},s_n),d)        & \Bool\\
+\t2\dots,\aterm{IdsDecl}(\vect{v_n},s_n)], d)        
+                                     & \t1\land\type_{\kappa'}(d)=\Bool                                     &\\
+                   & \Bool\\
+\aterm{Lambda}([\aterm{IdsDecl}(\vect{v_0},s_0),\\
+\t2\dots,\aterm{IdsDecl}(\vect{v_n},s_n)], d)
+                                    & \wt(\kappa+(\vect{v_0},s_0,\dots,\vect{v_n},s_n),d)         & s_0^{\nm{len}(\vect{v_0})},\dots,s_n^{\nm{len}(\vect{v_n})}\to\type_{\kappa'}(d)\\
+\aterm{Whr}(d,[v_0,d_0,\dots,v_n,d_n])& \wt(\kappa+(v_0,\type(d_0),\dots,v_n,\type(d_n)),d)       & \type_{\kappa'}(d)
+\end{array}
+\end{displaymath}
 
+The following internal, or system, identifiers have the corresponding (polymorphic) types:
+\begin{displaymath}
+\begin{array}{lll}
+\aterm{EmptyList}()                  &                                                            & \List(\TypeAny)\\
+\aterm{EmptySetBag}()                &                                                            & \SB(\TypeAny)\\
+\aterm{NotOrCompl}(d)                & \type(d)=\Bool\lor\type(d)\typecompat\SB(\TypeAny)         & \type(d)\\
+\aterm{Neg}(d)                       & \type(d)\typecompat\PNI                                    & \Int\\
+\aterm{Size}(d)                      & \type(d)\typecompat\LSB(\TypeAny)                          & \Nat\\
+\aterm{ListAt}(d, d')                & \type(d)\typecompat\List(\TypeAny)\land\type(d')\typecompat\PN & \nm{ListArg}(d)\\
+\aterm{Div}(d, d')                   & \type(d)\typecompat\PNI\typecompat\type(d')                & \nm{div}(\PNI)\\
+\aterm{Mod}(d, d')                   & \type(d)\typecompat\PNI\land\type(d')\typecompat\Pos       & \nm{mod}(\PNI)\\
+\aterm{MultOrIntersect}(d, d')       & (\type(d)\typecompat\PNI\lor\type(d)\typecompat\SB(\TypeAny))
+                                                                                                  & \nm{maxMoI}(\type(d),\type(d'))\\
+\aterm{AddOrUnion}(d, d')            & \t2\land\type(d)\typecompat\type(d')                          &\\
+\aterm{SubtOrDiff}(d, d')            &                                                            &\\
+\aterm{LTOrPropSubset}(d, d')        &                                                            & \Bool\\
+\aterm{GTOrPropSupset}(d, d')        &                                                            & \Bool\\
+\aterm{LTEOrSubset}(d, d')           &                                                            & \Bool\\
+\aterm{GTEOrSupSet}(d, d')           &                                                            & \Bool\\
+\aterm{In}(d, d')                    & \LSB(\type(d))\typecompat\type(d')                         & \Bool\\
+\aterm{Cons}(d, d')                  & \List(\type(d))\typecompat\type(d')                        & \nm{max}(\List(\type(d)),\type(d'))\\
+\aterm{Snoc}(d, d')                  & \List(\type(d'))\typecompat\type(d)                        & \nm{max}(\List(\type(d')),\type(d))\\
+\aterm{Concat}(d, d')                & \type(d)\typecompat\List(\TypeAny)\typecompat\type(d')     & \List(\nm{max}(\type(d),\type(d')))\\
+\aterm{EqNeq}(d, d')                 & \type(d)\typecompat\type(d')                               & \Bool
+\end{array}
+\end{displaymath}
 
-
-
-
-
+\begin{displaymath}
+\begin{array}{lll}
+\aterm{True}()                       &                                                            & \Bool\\
+\aterm{False}()                      &                                                            & \Bool\\
+\aterm{Imp}(d, d')                   & \type(d)\typecompat\type(d')=\Bool                         &\\
+\aterm{And}(d, d')                   & \type(d)\typecompat\type(d')=\Bool                         &
+\end{array}
+\end{displaymath}
 
 \subsection{The signature of a specification}
 \begin{defn}
