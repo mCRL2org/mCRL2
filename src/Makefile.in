@@ -31,11 +31,17 @@ PARSER_NAME     = gsparse
 PARSER_OBJECTS  = gsparse.o
 PARSER_LDFLAGS  = -lgsparse -lATerm
 
+#lineariser definitions
+LINEARISER_NAME     = linearise
+LINEARISER_OBJECTS  = linearise.o
+LINEARISER_LDFLAGS  = -lgsparse -lATerm
+
+
 #Make rules
 .PHONY: all install clean
 .PRECIOUS: gsparser.c gslexer.c
 
-all : $(LIB_NAME) $(PARSER_NAME) Makefile
+all : $(LIB_NAME) $(PARSER_NAME) $(LINEARISER_NAME) Makefile
 
 install : all
 	$(INSTALL) $(PARSER_NAME) $(bindir)
@@ -45,6 +51,11 @@ $(LIB_NAME) : $(LIB_OBJECTS) Makefile
 
 $(PARSER_NAME) : $(PARSER_OBJECTS) $(LIB_NAME) Makefile
 	$(CC) -o $@ $(PARSER_OBJECTS) $(LDFLAGS) $(PARSER_LDFLAGS)
+
+$(LINEARISER_NAME) : $(LINEARISER_OBJECTS) $(LIB_NAME) Makefile
+	$(CC) -o $@ $(LINEARISER_OBJECTS) $(LDFLAGS) $(LINEARISER_LDFLAGS)
+                                                                                          
+
 
 gslexer.o      : gslexer.h gsparser.h gsfunc.h
 gsparser.o     : gsfunc.h
