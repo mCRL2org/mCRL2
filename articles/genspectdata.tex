@@ -331,7 +331,8 @@
 \newcommand{\snoc}{\ensuremath{\hspace{0.08em}\triangleleft\hspace{0.12em}}}
 
 % concatenation: ++
-\newcommand{\concat}{\frm{+\!+}}
+\newcommand{\concat}{\ensuremath{\hspace{0.12em}\raisebox{0.2ex}
+{\text{\scriptsize+}\!\text{\scriptsize+}}\hspace{0.12em}}}
 
 % take
 \newcommand{\take}{\ensuremath{\lceil}}
@@ -1004,19 +1005,20 @@ the implementation of a type inference system.
 \subsection{Priorities and associativity}
 
 The prefix operators together with universal and existential quantification
-have the highest priority, followed by the binary operators, followed by the
+have the highest priority, followed by the infix operators, followed by the
 lambda operator, followed by the where clause. Table~\ref{tab:precedence} lists
-the binary operators by decreasing priority. The symbols are shown in plain
-text format and may represent multiple rich text symbols. Operators on the same
-line have the same precedence. Also table~\ref{tab:precedence} lists the
-associativity of operators with the same precedence. Here, list operations
-\frm{\cons}, \frm{\concat} and \frm{\snoc} may only interfere in the following
-way:
-\begin{equation}
+the infix operators by decreasing priority. The symbols are shown in plain text
+format and may represent multiple rich text symbols. Operators on the same line
+have the same priority and associativity. Note that the list operations
+\frm{\cons}, \frm{\snoc} and \frm{\concat} are split into three priority levels
+such that expressions with one of these operations as their head symbol are
+allowed if and only if they match the following pattern, where \frm{b, \ldots,
+c}, \frm{d, \ldots, e} and \frm{s, \ldots, t} are expressions with a priority
+level greater than \frm{\concat}:
+\[
 b \cons \dots \cons c \cons s \concat \dots \concat t \snoc d \snoc \dots
 \snoc e
-\label{eq:listassociativity}
-\end{equation}
+\]
  
 \begin{table}[h!bt]
 \centering
@@ -1025,14 +1027,15 @@ b \cons \dots \cons c \cons s \concat \dots \concat t \snoc d \snoc \dots
 operators                                           & associativity\\\hline
 \verb+*+, \verb+div+, \verb+mod+, \verb+.+          & left\\
 \verb-+-, \verb+-+                                  & left\\
-\verb+|>+, \verb-++-, \verb+<|+                     & mixed
-                                       (see \eqref{eq:listassociativity})\\
+\verb+|>+                                           & right\\
+\verb+<|+                                           & left\\
+\verb-++-                                           & left\\
 \verb+<+, \verb+>+, \verb+<=+, \verb+>=+, \verb+in+ & none\\
 \verb+==+, \verb+!=+                                & left\\
 \verb+&&+, \verb+||+                                & left\\
 \verb+=>+                                           & right\\\hline
 \end{tabular}
-\caption{Precedence of binary operators}
+\caption{Precedence of infix operators}
 \label{tab:precedence}
 \end{table}
 
