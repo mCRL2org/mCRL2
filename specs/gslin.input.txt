@@ -85,7 +85,7 @@
 
 //sort expression
 <SortExpr>   ::= <Id>
-               | SortApp(<SortExpr>, <SortArgs>)
+               | SortApp(<SId>, <SortArgs>)
 
 //arguments consisting of one or more sort expressions
 <SortArgs>   ::= <SortExpr>
