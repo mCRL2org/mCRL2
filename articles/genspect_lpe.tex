@@ -14,6 +14,14 @@
 \def\JFG{\texttt{ JFG: TODO :GFJ\marginpar{!!!} }}
 \newcommand{\afunc}[3]{\mathsf{#1}:#2\rightarrow#3}
 
+\newcommand{\Sig}{\nm{Sig}}
+\newcommand{\Fun}{\nm{Fun}}
+\newcommand{\nul}{{\bf 0}}
+\newcommand{\wor}{\stackrel{\mathrm{def}}{=}}
+\newcommand{\NV}{{\cal V}}
+
+\newcommand{\Vars}{\mbox{\em Vars}}
+
 \title{LPE definitions and an ATerm representation format for \mcrl\ 
   with multiactions and time}
   
@@ -67,6 +75,8 @@ the thesis).
 
 \appendix
 \newpage
+\section{Aterm format for genspect after parsing}
+
 \section{Static Semantics and Well-formedness}
 \label{section:SSC} 
 In this section it is defined when a specification is correctly defined.
@@ -99,7 +109,7 @@ The signature $\Sig(E)$ of $E$ is inductively defined as follows:
 \newcommand{\ad}{{\it ad}}
 \begin{itemize}
 \item
-If $E\equiv \sort~n_1\cdots n_m$ with $m\geq 1$,
+If $E\equiv \sortkw~n_1\cdots n_m$ with $m\geq 1$,
 then
 $\Sig(E)\wor(\{n_1,\ldots,n_m\},\emptyset,\emptyset,\emptyset,
 \emptyset,\emptyset,\emptyset).$
@@ -124,7 +134,7 @@ m, 1\leq j\leq l_i\}.
 \]
 \item
 If $E\equiv
-\map~\md_1\cdots \md_m$ with $m\geq 1$,
+\mapkw~\md_1\cdots \md_m$ with $m\geq 1$,
 then
 $\Sig(E)\wor(\emptyset,\emptyset,\Map, \emptyset,\emptyset,
 \emptyset,\emptyset),$
@@ -163,20 +173,20 @@ m, 1\leq j\leq l_i\}.
 \]
 \item
 If $E\equiv
-\comm~cd_1\cdots cd_m$ with $m\geq 1$,
+\commkw~cd_1\cdots cd_m$ with $m\geq 1$,
 then
 $\Sig(E)\wor(\emptyset,\emptyset,\emptyset,\emptyset,
 \{cd_i\mid 1\leq
 i\leq m\}, \emptyset,\emptyset).$
 \item
 If $E\equiv
-\proc~pd_1\cdots pd_m$ with $m\geq 1$,
+\prockw~pd_1\cdots pd_m$ with $m\geq 1$,
 then
 $\Sig(E)\wor(\emptyset,\emptyset,\emptyset,\emptyset,\emptyset,
 \{pd_i\mid 1\leq i\leq m\},\emptyset).$
 \item
 If $E\equiv
-\init~\pe$ then $\Sig(E)\wor(\emptyset,\emptyset,\emptyset,\emptyset,\emptyset,
+\initkw~\pe$ then $\Sig(E)\wor(\emptyset,\emptyset,\emptyset,\emptyset,\emptyset,
 \emptyset,\{\pe\}).$
 \item
 If $E\equiv E_1~E_2$
@@ -209,7 +219,7 @@ says given a specification $E$, which elements from {\tt Name} can play the
 role of a variable without confusion with
 defined constants. Moreover, variables must have an unambiguous and
 declared sort.
-\begin{Dn}
+\begin{defn}
 Let $Sig$ be a signature. A set $\NV$ containing 
 pairs
 $\langle x\ap S\rangle$ with $x$ and $S$ from {\tt Name}, 
@@ -226,8 +236,8 @@ $S\in \Sig.Sort$,
 for each {\tt Name} $S'$ such that $S'\not\equiv S$ it holds
 that $\langle x\ap S'\rangle\not\in \NV$.
 \end{itemize}
-\end{Dn}
-\begin{Dn}
+\end{defn}
+\begin{defn}
 \newcommand{\vd}{{\it vd}}
 Let $\vd$ be a {\tt Variable-declaration}.
 The function $\Vars$ is defined by:
@@ -238,13 +248,13 @@ The function $\Vars$ is defined by:
 \phantom{\{\langle x_i\ap S_{ij}\rangle\mid }\hspace*{1mm}1\leq j\leq
 l_i\}&
 \mbox{if}~\vd\equiv
-\var~x_{11},\ldots,x_{1l_1}\ap  S_1~\ldots~x_{m1},\ldots,x_{ml_m}\ap S_m.
+\varkw~x_{11},\ldots,x_{1l_1}\ap  S_1~\ldots~x_{m1},\ldots,x_{ml_m}\ap S_m.
 \end{array}\right.\]
-\end{Dn}
+\end{defn}
 In the following definitions we give functions yielding the sort of and the 
 variables in a
 {\tt Data-term} $t$. 
-\begin{Dn}
+\begin{defn}
 Let $t$ be a {\tt data-term} and $Sig$ a signature. Let $\NV$ be a set
 of variables over $Sig$. We define:
 \[sort_{Sig,\NV}(t)\wor\left\{
@@ -263,10 +273,10 @@ no}~S'\not\equiv S~n\ap sort_{Sig,\NV}(t_1)\times \cdots
 &\hspace*{0.5cm}S' \in \Sig.\Fun\cup\Sig.\Map,\\
 \perp&\mbox{otherwise}.
 \end{array}\right.\]
-\end{Dn}
+\end{defn}
 If a variable or a function is not or inappropriately declared 
 no answer can be obtained. In this case $\perp$ results.
-\begin{Dn}
+\begin{defn}
 Let $Sig$ be a signature, $\NV$ a set of
 variables over $Sig$ and let $t$ be a {\tt Data-term}.
 \[\Var_{Sig,\NV}(t)\wor
@@ -280,7 +290,7 @@ x\ap S\rangle\in \NV,\\
 n(t_1,\ldots,t_m),\\
 \{\perp\}&\mbox{otherwise}.
 \end{array}\right.\]
-\end{Dn}
+\end{defn}
 We call a {\tt Data-term} $t$ {\em closed} wrt.\ a signature
 $Sig$ and a set of variables $\NV$ iff $\Var_{Sig,\NV}(t)=
 \emptyset$. Note that $\Var_{Sig,\NV}(t)\subseteq\NV\cup\{\perp\}$
@@ -300,7 +310,7 @@ specification that is internally consistent is called SSC
 ({\em Statically Semantically Correct}). All next definitions
 culminate in Definition \ref{SSC-mCRL}.
 
-\begin{Dn-arg}{{\tt Data-term}}
+\begin{defn}[\tt Data-term]
 Let $\Sig$ be a signature, and let $\NV$ be a set of variables over
 $\Sig$.
 A {\tt Data-term} $t$ is called SSC wrt.\ $\Sig$ and $\NV$ iff one of
@@ -317,26 +327,26 @@ $n\ap sort_{Sig,\NV}(t_1)\times\cdots\times sort_{Sig,\NV}(t_m)
 all
 $t_i$ ($1\leq i\leq m$) are SSC wrt.\ $Sig$ and $\NV$.
 \end{itemize}
-\end{Dn-arg}
+\end{defn}
 
-\begin{Dn-arg}{{\tt Equation-section}}
+\begin{defn}[\tt Equation-section]
 Let $\Sig$ be a signature and $\NV$ be a set of variables over $\Sig$. An {\tt
 Equation-section}
-$\rew~rw_1\cdots rw_m$
+$\rewkw~rw_1\cdots rw_m$
 with $m\geq 1$ is SSC wrt.\ $\Sig$ and $\NV$ iff for all
 $1\leq i\leq m $ if $rw_i\equiv t_1=t_2$,
 both $t_1$ and $t_2$ are SSC wrt.\ $\Sig$ and $\NV$ and
 $sort_{\Sig,\NV}(t_1)=sort_{Sig,\NV}(t_2)$.
-\end{Dn-arg}
+\end{defn}
 
-\begin{Dn-arg}{{\tt Variable-declaration}}
+\begin{defn}[\tt Variable-declaration]
 A {\tt Variable-declaration} {\it vd} is SSC wrt.\ a signature
 $Sig$ iff one of the following holds.
 \begin{itemize}
 \item
 {\it vd} is empty.
 \item
-${\it vd}\equiv\var$
+${\it vd}\equiv\varkw$
 \begin{minipage}[t]{7cm}
 $n_{11},\ldots,n_{1k_1}\ap  S_1$\\
 $\vdots$\\
@@ -349,24 +359,24 @@ $n_{ij}\not\equiv n_{i'j'}$ whenever $i\neq i'$ or
 $j\neq j'$ for $1\leq i\leq m$, $1\leq i'\leq m$,
 $1\leq j\leq k_i$ and $1\leq j'\leq k_{i'}$,
 \item
-the set $\Vars(\var~n_{11},\ldots,n_{1k_1}: 
+the set $\Vars(\varkw~n_{11},\ldots,n_{1k_1}: 
 S_1\cdots n_{m1},\ldots,n_{mk_m}:
 S_m)$ is a set of variables
 over $Sig$.
 \end{itemize}
 \end{itemize}
-\end{Dn-arg}
+\end{defn}
 
-\begin{Dn-arg}{{\tt Process-term}}
+\begin{defn}[\tt Process-term]
 Let $\Sig$ be a signature and $\NV$ be a set of variables over $\Sig$.
 We say that a {\tt Process-term} $p$ is {\it SSC wrt.\ to $\Sig$ and
 $E$} iff one of the following hold:
 \begin{itemize}
 \item
 $p\equiv p_1+p_2$, 
-$p\equiv p_1\parallel p_2$, $p\equiv p_1\leftmerge p_2$, $p\equiv p_1\mid
+$p\equiv p_1\parallel p_2$, $p\equiv p_1\leftm p_2$, $p\equiv p_1\mid
 p_2$,
-$p\equiv p_1 {\cdot} p_2$ or $p\equiv p_1\before p_2$ and
+$p\equiv p_1 {\cdot} p_2$ or $p\equiv p_1\tb p_2$ and
 \begin{itemize}
 \item
 $p_1$ is SSC wrt.\ $Sig$ and $\NV$,
@@ -458,9 +468,9 @@ for $1\leq i\leq m$ the {\tt Data-term}
 $t_i$ is SSC wrt.\ $Sig$ and $\NV$.
 \end{itemize}
 \end{itemize}
-\end{Dn-arg}
+\end{defn}
 
-\begin{Dn-arg}{{\tt Action-declaration}}
+\begin{defn}[\tt Action-declaration]
 Let $\Sig$ be a signature.
 An {\tt Action-declaration} ${\it ad}$ is SSC wrt.\ $Sig$ iff one of the following
 hold:
@@ -483,21 +493,21 @@ it holds that $n_i\ap S_1\times\cdots\times S_k\rightarrow S'\notin
 \Sig.\Fun\cup\Sig.\Map$.
 \end{itemize}
 \end{itemize}
-\end{Dn-arg}
+\end{defn}
 
-\begin{Dn-arg}{{\tt Specification}}
+\begin{defn}[\tt Specification]
 Let $Sig$ be a signature and $\NV$ be a set of variables over $Sig$. We
 define the predicate `is SSC wrt.\ $Sig$'
 inductively over the syntax of a {\tt Specification}.
 \begin{itemize}
 \item
 A {\tt Specification}
-$\sort~n_1\cdots n_m$ with $m\geq 1$
+$\sortkw~n_1\cdots n_m$ with $m\geq 1$
 is SSC wrt.\ $Sig$ iff all $n_1,\ldots,n_m$ are pairwise
 different.
 \item
 A {\tt Specification}
-$\func$
+$\funckw$
 \begin{minipage}[t]{7cm}
 $n_{11},\ldots,n_{1l_1}\ap S_{11}\times \cdots\times S_{1k_1}\rightarrow
 S_1$\\
@@ -522,7 +532,7 @@ $S_{ij}\in \Sig.Sort$ and $S_i\in \Sig.Sort$.
 \end{itemize}
 \item
 A {\tt Specification}
-$\map$
+$\mapkw$
 \begin{minipage}[t]{7cm}
 $n_{11},\ldots,n_{1l_1}\ap S_{11}\times \cdots\times S_{1k_1}\rightarrow
 S_1$\\
@@ -604,7 +614,7 @@ $n_{i1}\in \Sig.\Act$ and $n_{i3}\in \Sig.\Act$.
 \end{itemize}
 \item
 A {\tt specification} 
-$\proc~pd_1\cdots pd_m$
+$\prockw~pd_1\cdots pd_m$
 with $m\geq 1$ is SSC wrt.\ $Sig$ iff
 \begin{itemize}
 \item
@@ -645,7 +655,7 @@ x_{j}\ap S_{j}\rangle\mid 1\leq j\leq k\}$.
 \end{itemize}
 \end{itemize}
 \item
-A {\tt Specification} of the form $\init~p$ is SSC wrt.\ $\Sig$ 
+A {\tt Specification} of the form $\initkw~p$ is SSC wrt.\ $\Sig$ 
 iff $p$ SSC wrt.\ to $\Sig$ and $\emptyset$.
 \item
 A {\tt specification} $E_1~E_2$ is SSC wrt.\ $Sig$ iff 
@@ -682,17 +692,18 @@ n_2$,
 $\Sig(E_1).\Init=\emptyset$ or $\Sig(E_2).\Init=\emptyset$.
 \end{itemize}
 \end{itemize}
-\end{Dn-arg}
-\begin{Dn}\llabel{SSC-mCRL}
+\end{defn}
+\begin{defn}\label{def:SSC-mCRL}
 Let $E$ be a {\tt Specification}. We say that $E$ is SSC iff $E$ is SSC
 wrt.\ $\Sig(E)$.
-\end{Dn}
+\end{defn}
+
 \subsection{The communication function}
 The following definition helps us in guaranteeing that the
 communication function is commutative and associative. This implies
 that the merge is also commutative and associative which allows us to
 write parallel processes without brackets. 
-\begin{Dn}
+\begin{defn}
 Let $Sig$ be a signature. The set $\Sig.\Comm^*$ is defined by:
 \[\begin{array}{rcl}
 \Sig.\Comm^*&\wor&\{n_1| n_2=n_3,~ n_2| n_1=n_3 \mid
@@ -708,19 +719,20 @@ n_1| n_2= n,~ n| n_3=n'\in
 n_1| n''= n' \in \Sig(E).\Comm^*.
 \end{array}
 \]
-\end{Dn}
+\end{defn}
 With the condition that $E$ is SSC
 this exactly implies that communication is associative.
-\subsection{Well-formed $\mCRL$ specifications}
+
+\subsection{Well-formed \mcrl\ specifications}
 We define what well-formed specifications are. We only provide
 well-formed {\tt Specification}s with a semantics. Well-formedness
 is a decidable property.
-\begin{Dn}
+\begin{defn}
 Let $\Sig$ be a signature. We call a {\tt Name} $S$ a {\it constructor sort}
 iff $S\in\Sig.\Sort$ and there exists {\tt Name}s $S_1,\ldots, S_k, f$ ($k\geq 0$)
 such that $f\ap S_1\times \cdots\times S_k\rightarrow S\in \Sig.\Fun$.
-\end{Dn}
-\begin{Dn}
+\end{defn}
+\begin{defn}
 Let $E$ be a {\tt Specification} that is SSC. 
 We inductively define which sorts are {\it non empty constructor sorts} in $E$.
 A constructor sort $S$ is called {\it non empty} iff there is a function
@@ -729,8 +741,8 @@ that for all $1\leq i\leq k$ if $S_i$ is a constructor sort, it is non empty.
 We say
 that $E$ has {\em no empty constructor sorts} iff each constructor sort is non
 empty.
-\end{Dn}
-\begin{Dn}
+\end{defn}
+\begin{defn}
 Let $E$ be a {\tt Specification}. $E$ is called {\it well-formed} iff 
 \begin{itemize}
 \item
@@ -747,7 +759,7 @@ If $\Time\in\Sig(E).\Sort$, then $\nul\ap \rightarrow\Time\in \Sig(E).\Fun\cup
 \Sig(E).\Map$ and $\leq\ap \Time\times\Time\rightarrow\Bool\in
 \Sig(E).\Map$. 
 \end{itemize}
-\end{Dn}
+\end{defn}
 
 \newpage
 \section{ATerm representation format for MTLPEs}
