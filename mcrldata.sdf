@@ -123,7 +123,7 @@ exports
     "(" Process-term ")"                               -> Process-term {bracket}
     Name "->" Name                                     -> Renaming
     "proc" Process-declaration+                        -> Process-specification
-    Name "(" { Variable "," }+ ")" "=" Process-term    -> Process-declaration
+    Name "(" { Variables"," }+ ")" "=" Process-term    -> Process-declaration
     Name "=" Process-term                              -> Process-declaration
     "act" Action-declaration+                          -> Action-specification
     Name-list ":" Domain                               -> Action-declaration
@@ -158,7 +158,7 @@ exports
 %%    Syntactic Sugar
     Complex-dt "->" Process-term                       -> Process-term
     Complex-dt | "_"                                   -> PlaceBased-assignment
-    Name ":="  Complex-dt                              -> NameBased-assignment
+    Name ":="  PlaceBased-assignment                   -> NameBased-assignment
     Name "(" { PlaceBased-assignment "," }+ ")"        -> Process-term
     Name "(" { NameBased-assignment "," }+ ")"         -> Process-term
 
