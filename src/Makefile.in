@@ -24,17 +24,17 @@ mandir          = @mandir@
 #Library definitions
 LIB_NAME        = libgsparse.a
 LIB_OBJECTS     = libgsparse.o gsparser.o gslexer.o gstypecheck.o gsdataimpl.o gsfunc.o
-LIB_LDFLAGS     = -lATerm
+LIB_LDFLAGS     = -lATerm -lm
 
 #Parser definitions
 PARSER_NAME     = gsparse
 PARSER_OBJECTS  = gsparse.o
-PARSER_LDFLAGS  = -lgsparse -lATerm
+PARSER_LDFLAGS  = -lgsparse -lATerm -lm
 
 #lineariser definitions
 LINEARISER_NAME     = linearise
 LINEARISER_OBJECTS  = linearise.o
-LINEARISER_LDFLAGS  = -lgsparse -lATerm
+LINEARISER_LDFLAGS  = -lgsparse -lATerm -lm
 
 
 #Make rules

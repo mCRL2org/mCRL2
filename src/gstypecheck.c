@@ -87,6 +87,7 @@ static ATbool gstcCheckNamesD(ATermTable, ATermAppl);
 
 static ATermTable gstcAddVars2Table(ATermTable,ATermList);
 static ATermAppl gstcRewrActProc(ATermAppl);
+static inline ATermAppl gstcMakeActionOrProc(ATbool, ATermAppl, ATermList, ATermList);
 static ATermAppl gstcTraverseActProc(ATermAppl);
 static ATermAppl gstcTraverseVarConstP(ATermTable, ATermAppl);
 static ATermAppl gstcTraverseVarConstD(ATermTable, ATermAppl);
@@ -217,7 +218,7 @@ static ATbool gstcReadInFuncs(ATermList Funcs){
       }
       else{
 	if (!Types) Types=ATmakeList0();
-	Types=ATinsert(Types,(ATerm)FuncType);
+	Types=ATappend(Types,(ATerm)FuncType);
 	ATtablePut(context.functions,(ATerm)FuncName,(ATerm)Types);
       }
     }	
@@ -245,7 +246,7 @@ static ATbool gstcReadInActs (ATermList Acts){
 	ThrowMF("Double declaration of action %t\n", ActName);
       }
       else{
-	Types=ATinsert(Types,(ATerm)ActType);
+	Types=ATappend(Types,(ATerm)ActType);
       }
     }
     ATtablePut(context.actions,(ATerm)ActName,(ATerm)Types);
@@ -277,12 +278,13 @@ static ATbool gstcReadInProcsAndInit (ATermList Procs, ATermAppl Init){
 	ThrowMF("Double declaration of process %t\n", ProcName);
       }
       else{
-	Types=ATinsert(Types,(ATerm)ProcType);
+	Types=ATappend(Types,(ATerm)ProcType);
       }
     }
     ATtablePut(context.processes,(ATerm)ProcName,(ATerm)Types);
     ATtablePut(body.proc_pars,(ATerm)ATAgetArgument(Proc,0),(ATerm)ATLgetArgument(Proc,1));
     ATtablePut(body.proc_bodies,(ATerm)ATAgetArgument(Proc,0),(ATerm)ATAgetArgument(Proc,2));
+    gsDebugMsg("Read-in Proc Name %t, Types %t\n",ProcName,Types);    
   }
   ATtablePut(body.proc_pars,(ATerm)INIT_KEY,(ATerm)ATmakeList0());
   ATtablePut(body.proc_bodies,(ATerm)INIT_KEY,(ATerm)Init);
@@ -301,7 +303,7 @@ static ATermList gstcWriteProcs(void){
 						)
 		    );
   }
-  return Result;
+  return ATreverse(Result);
 }
 
 static ATbool gstcCheckNamesData(void){
@@ -445,23 +447,67 @@ static ATbool gstcMatchRewrActProc(ATermAppl ProcTerm){
   else return ATfalse;
 }
 
+//typedef struct make_list_filter_int {
+// int n;
+// ATbool length_is_n(ATerm List);
+//
+///*{
+//  assert(ATgetType(List)==AT_LIST);
+//  return (ATgetLength(List)==n);
+//  }*/
+//} Make_List_Filter_Int;
+
 static ATermAppl gstcRewrActProc(ATermAppl ProcTerm){
   ATermAppl Result=NULL;
   ATermAppl Name=ATAgetArgument(ProcTerm,0);
-  if(ATtableGet(context.actions,(ATerm)Name)){
-    //gsWarningMsg("recognized action %t\n",Name); 
-    Result=gsMakeAction(gsMakeActId(Name,ATmakeList1((ATerm)gsMakeUnknown())),ATLgetArgument(ProcTerm,1));
+  ATermList ParList;
+
+  ATbool action;
+
+  if((ParList=ATLtableGet(context.actions,(ATerm)Name))){
+    action=ATtrue;
   }
-  else  
-    if(ATtableGet(context.processes,(ATerm)Name)){
-      //gsWarningMsg("recognized process %t\n",Name); 
-      Result=gsMakeProcess(gsMakeProcVarId(Name,ATmakeList1((ATerm)gsMakeUnknown())),ATLgetArgument(ProcTerm,1));
+  else{
+    if((ParList=ATLtableGet(context.processes,(ATerm)Name))){
+      action=ATfalse;
     }
     else{
- 	ThrowM("Action or process %t not declared\n", Name);
+      ThrowM("Action or process %t not declared\n", Name);
     }
+  }
+  assert(!ATisEmpty(ParList));
+  
+  int nFactPars=ATgetLength(ATLgetArgument(ProcTerm,1));
+  char *msg=(action)?"action":"process";
+  
+  //filter the list of lists ParList to keep only the lists of lenth nFactPars
+  ATermList NewParList=ATmakeList0();
+  for(;!ATisEmpty(ParList);ParList=ATgetNext(ParList)){
+    ATermAppl Par=ATAgetFirst(ParList);
+    if(ATgetLength(Par)==nFactPars) NewParList=ATinsert(NewParList,(ATerm)Par);
+  }
+  NewParList=ATreverse(NewParList);
+  
+  if(ATisEmpty(NewParList)){
+    ThrowM("No %s %t with %d parameter is declared (while typechecking %t)\n", msg, Name, nFactPars, ProcTerm);     
+  }
+  else{
+    if(ATgetLength(NewParList)==1){
+      Result=gstcMakeActionOrProc(action,Name,ATLgetFirst(NewParList),ATLgetArgument(ProcTerm,1));
+    }
+    else{
+      Result=gstcMakeActionOrProc(action,Name,ATmakeList1((ATerm)gsMakeUnknown()),ATLgetArgument(ProcTerm,1));
+      // here later can be [Unknown],NewParList
+    }
+  }
+  gsDebugMsg("recognized %s %t\n",msg,Result);    
  finally:
   return Result;
+}
+
+static inline ATermAppl gstcMakeActionOrProc(ATbool action, ATermAppl Name, ATermList FormParList, ATermList FactParList){
+  return (action)?gsMakeAction(gsMakeActId(Name,FormParList),FactParList)
+    :gsMakeProcess(gsMakeProcVarId(Name,FormParList),FactParList);
 }
 
 static ATermAppl gstcTraverseActProc(ATermAppl ProcTerm){
