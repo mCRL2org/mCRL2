@@ -2,7 +2,7 @@
 " Language:    ASF+SDF
 " Extension:   asf, sdf
 " Maintainer:  Aad Mathijssen <A.H.J.Mathijssen@tue.nl>
-" Last Change: 2004-10-20
+" Last Change: 04-11-2004
 
 syntax clear
 

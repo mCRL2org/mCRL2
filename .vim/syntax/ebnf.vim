@@ -2,7 +2,7 @@
 " Language:    EBNF
 " Extension:   bnf,ebnf
 " Maintainer:  Aad Mathijssen <A.H.J.Mathijssen@tue.nl>
-" Last Change: 1.0
+" Last Change: 04-11-2004
 
 syntax clear
 

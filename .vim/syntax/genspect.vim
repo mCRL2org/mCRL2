@@ -2,8 +2,7 @@
 " Language:   GenSpect
 " Extension:  gs
 " Maintainer: Aad Mathijssen <A.H.J.Mathijssen@tue.nl>
-" Version:    1.0
-" Date:       2004-10-15
+" Date:       04-11-2004
 
 syntax clear
 
