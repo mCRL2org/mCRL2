@@ -241,24 +241,34 @@ ATermAppl gsMakeDataAppl(ATermAppl DataExpr, ATermList DataArgs)
     (ATerm) DataArgs);
 }
 
-ATermAppl gsMakeTrue()
+ATermAppl gsMakeLambda(ATermList IdsDecls, ATermAppl DataExpr)
 {
-  return ATmakeAppl0(ATmakeAFun("True", 0, ATfalse));
+  return ATmakeAppl2(ATmakeAFun("Lambda", 2, ATfalse), (ATerm) IdsDecls,
+    (ATerm) DataExpr);
 }
 
-ATermAppl gsMakeFalse()
+ATermAppl gsMakeForall(ATermList IdsDecls, ATermAppl DataExpr)
 {
-  return ATmakeAppl0(ATmakeAFun("False", 0, ATfalse));
+  return ATmakeAppl2(ATmakeAFun("Forall", 2, ATfalse), (ATerm) IdsDecls,
+    (ATerm) DataExpr);
 }
 
-ATermAppl gsMakeEmptyList()
+ATermAppl gsMakeExists(ATermList IdsDecls, ATermAppl DataExpr)
 {
-  return ATmakeAppl0(ATmakeAFun("EmptyList", 0, ATfalse));
+  return ATmakeAppl2(ATmakeAFun("Exists", 2, ATfalse), (ATerm) IdsDecls,
+    (ATerm) DataExpr);
 }
 
-ATermAppl gsMakeEmptySetBag()
+ATermAppl gsMakeWhr(ATermAppl DataExpr, ATermList WhrDecls)
 {
-  return ATmakeAppl0(ATmakeAFun("EmptySetBag", 0, ATfalse));
+  return ATmakeAppl2(ATmakeAFun("Whr", 2, ATfalse), (ATerm) DataExpr,
+    (ATerm) WhrDecls);
+}
+
+ATermAppl gsMakeWhrDecl(ATermAppl Name, ATermAppl DataExpr)
+{
+  return ATmakeAppl2(ATmakeAFun("WhrDecl", 2, ATfalse), (ATerm) Name,
+    (ATerm) DataExpr);
 }
 
 ATermAppl gsMakeListEnum(ATermList DataExprs)
@@ -276,181 +286,159 @@ ATermAppl gsMakeBagEnum(ATermList BagEnumElts)
   return ATmakeAppl1(ATmakeAFun("BagEnum", 1, ATfalse), (ATerm) BagEnumElts);
 }
 
-ATermAppl gsMakeSetBagComp(ATermAppl IdDecl, ATermAppl DataExpr)
-{
-  return ATmakeAppl2(ATmakeAFun("SetBagComp", 2, ATfalse), (ATerm) IdDecl,
-    (ATerm) DataExpr);
-}
-
-ATermAppl gsMakeNotOrCompl(ATermAppl DataExpr)
-{
-  return ATmakeAppl1(ATmakeAFun("NotOrCompl", 1, ATfalse), (ATerm) DataExpr);
-}
-
-ATermAppl gsMakeNeg(ATermAppl DataExpr)
-{
-  return ATmakeAppl1(ATmakeAFun("Neg", 1, ATfalse), (ATerm) DataExpr);
-}
-
-ATermAppl gsMakeSize(ATermAppl DataExpr)
-{
-  return ATmakeAppl1(ATmakeAFun("Size", 1, ATfalse), (ATerm) DataExpr);
-}
-
-ATermAppl gsMakeForall(ATermList IdsDecls, ATermAppl DataExpr)
-{
-  return ATmakeAppl2(ATmakeAFun("Forall", 2, ATfalse), (ATerm) IdsDecls,
-    (ATerm) DataExpr);
-}
-
-ATermAppl gsMakeExists(ATermList IdsDecls, ATermAppl DataExpr)
-{
-  return ATmakeAppl2(ATmakeAFun("Exists", 2, ATfalse), (ATerm) IdsDecls,
-    (ATerm) DataExpr);
-}
-
-ATermAppl gsMakeListAt(ATermAppl OpLeft, ATermAppl OpRight)
-{
-  return ATmakeAppl2(ATmakeAFun("ListAt", 2, ATfalse), (ATerm) OpLeft,
-    (ATerm) OpRight);
-}
-
-ATermAppl gsMakeMultOrIntersect(ATermAppl OpLeft, ATermAppl OpRight)
-{
-  return ATmakeAppl2(ATmakeAFun("MultOrIntersect", 2, ATfalse), (ATerm) OpLeft,
-    (ATerm) OpRight);
-}
-
-ATermAppl gsMakeDiv(ATermAppl OpLeft, ATermAppl OpRight)
-{
-  return ATmakeAppl2(ATmakeAFun("Div", 2, ATfalse), (ATerm) OpLeft,
-    (ATerm) OpRight);
-}
-
-ATermAppl gsMakeMod(ATermAppl OpLeft, ATermAppl OpRight)
-{
-  return ATmakeAppl2(ATmakeAFun("Mod", 2, ATfalse), (ATerm) OpLeft,
-    (ATerm) OpRight);
-}
-
-ATermAppl gsMakeAddOrUnion(ATermAppl OpLeft, ATermAppl OpRight)
-{
-  return ATmakeAppl2(ATmakeAFun("AddOrUnion", 2, ATfalse), (ATerm) OpLeft,
-    (ATerm) OpRight);
-}
-
-ATermAppl gsMakeSubtOrDiff(ATermAppl OpLeft, ATermAppl OpRight)
-{
-  return ATmakeAppl2(ATmakeAFun("SubtOrDiff", 2, ATfalse), (ATerm) OpLeft,
-    (ATerm) OpRight);
-}
-
-ATermAppl gsMakeLTOrPropSubset(ATermAppl OpLeft, ATermAppl OpRight)
-{
-  return ATmakeAppl2(ATmakeAFun("LTOrPropSubset", 2, ATfalse), (ATerm) OpLeft,
-    (ATerm) OpRight);
-}
-
-ATermAppl gsMakeGT(ATermAppl OpLeft, ATermAppl OpRight)
-{
-  return ATmakeAppl2(ATmakeAFun("GT", 2, ATfalse), (ATerm) OpLeft,
-    (ATerm) OpRight);
-}
-
-ATermAppl gsMakeLTEOrSubset(ATermAppl OpLeft, ATermAppl OpRight)
-{
-  return ATmakeAppl2(ATmakeAFun("LTEOrSubset", 2, ATfalse), (ATerm) OpLeft,
-    (ATerm) OpRight);
-}
-
-ATermAppl gsMakeGTE(ATermAppl OpLeft, ATermAppl OpRight)
-{
-  return ATmakeAppl2(ATmakeAFun("GTE", 2, ATfalse), (ATerm) OpLeft,
-    (ATerm) OpRight);
-}
-
-ATermAppl gsMakeIn(ATermAppl OpLeft, ATermAppl OpRight)
-{
-  return ATmakeAppl2(ATmakeAFun("In", 2, ATfalse), (ATerm) OpLeft,
-    (ATerm) OpRight);
-}
-
-ATermAppl gsMakeCons(ATermAppl OpLeft, ATermAppl OpRight)
-{
-  return ATmakeAppl2(ATmakeAFun("Cons", 2, ATfalse), (ATerm) OpLeft,
-    (ATerm) OpRight);
-}
-
-ATermAppl gsMakeSnoc(ATermAppl OpLeft, ATermAppl OpRight)
-{
-  return ATmakeAppl2(ATmakeAFun("Snoc", 2, ATfalse), (ATerm) OpLeft,
-    (ATerm) OpRight);
-}
-
-ATermAppl gsMakeConcat(ATermAppl OpLeft, ATermAppl OpRight)
-{
-  return ATmakeAppl2(ATmakeAFun("Concat", 2, ATfalse), (ATerm) OpLeft,
-    (ATerm) OpRight);
-}
-
-ATermAppl gsMakeEq(ATermAppl OpLeft, ATermAppl OpRight)
-{
-  return ATmakeAppl2(ATmakeAFun("Eq", 2, ATfalse), (ATerm) OpLeft,
-    (ATerm) OpRight);
-}
-
-ATermAppl gsMakeNeq(ATermAppl OpLeft, ATermAppl OpRight)
-{
-  return ATmakeAppl2(ATmakeAFun("Neq", 2, ATfalse), (ATerm) OpLeft,
-    (ATerm) OpRight);
-}
-
-ATermAppl gsMakeAnd(ATermAppl OpLeft, ATermAppl OpRight)
-{
-  return ATmakeAppl2(ATmakeAFun("And", 2, ATfalse), (ATerm) OpLeft,
-    (ATerm) OpRight);
-}
-
-ATermAppl gsMakeOr(ATermAppl OpLeft, ATermAppl OpRight)
-{
-  return ATmakeAppl2(ATmakeAFun("Or", 2, ATfalse), (ATerm) OpLeft,
-    (ATerm) OpRight);
-}
-
-ATermAppl gsMakeImp(ATermAppl OpLeft, ATermAppl OpRight)
-{
-  return ATmakeAppl2(ATmakeAFun("Imp", 2, ATfalse), (ATerm) OpLeft,
-    (ATerm) OpRight);
-}
-
-ATermAppl gsMakeLambda(ATermList IdsDecls, ATermAppl DataExpr)
-{
-  return ATmakeAppl2(ATmakeAFun("Lambda", 2, ATfalse), (ATerm) IdsDecls,
-    (ATerm) DataExpr);
-}
-
-ATermAppl gsMakeWhr(ATermAppl DataExpr, ATermList WhrDecls)
-{
-  return ATmakeAppl2(ATmakeAFun("Whr", 2, ATfalse), (ATerm) DataExpr,
-    (ATerm) WhrDecls);
-}
-
-ATermAppl gsMakeWhrDecl(ATermAppl Name, ATermAppl DataExpr)
-{
-  return ATmakeAppl2(ATmakeAFun("WhrDecl", 2, ATfalse), (ATerm) Name,
-    (ATerm) DataExpr);
-}
-
 ATermAppl gsMakeBagEnumElt(ATermAppl DataExpr, ATermAppl Multiplicity)
 {
   return ATmakeAppl2(ATmakeAFun("BagEnumElt", 2, ATfalse), (ATerm) DataExpr,
     (ATerm) Multiplicity);
 }
 
-ATermAppl gsMakeActProcRef(ATermAppl Id, ATermList ActProcArgs)
+ATermAppl gsMakeSetBagComp(ATermAppl IdDecl, ATermAppl DataExpr)
 {
-  return ATmakeAppl2(ATmakeAFun("ActProcRef", 2, ATfalse), (ATerm) Id,
-    (ATerm) ActProcArgs);
+  return ATmakeAppl2(ATmakeAFun("SetBagComp", 2, ATfalse), (ATerm) IdDecl,
+    (ATerm) DataExpr);
+}
+
+ATermAppl gsMakeEmptyList()
+{
+  return ATmakeAppl0(ATmakeAFun("EmptyList", 0, ATfalse));
+}
+
+ATermAppl gsMakeEmptySetBag()
+{
+  return ATmakeAppl0(ATmakeAFun("EmptySetBag", 0, ATfalse));
+}
+
+ATermAppl gsMakeTrue()
+{
+  return gsMakeDataVarOpId(ATmakeAppl0(ATmakeAFun("true", 0, ATtrue)));
+}
+
+ATermAppl gsMakeFalse()
+{
+  return gsMakeDataVarOpId(ATmakeAppl0(ATmakeAFun("false", 0, ATtrue)));
+}
+
+ATermAppl gsMakeExclam()
+{
+  return gsMakeDataVarOpId(ATmakeAppl0(ATmakeAFun("!", 0, ATtrue)));
+}
+
+ATermAppl gsMakeMinus()
+{
+  return gsMakeDataVarOpId(ATmakeAppl0(ATmakeAFun("-", 0, ATtrue)));
+}
+
+ATermAppl gsMakeHash()
+{
+  return gsMakeDataVarOpId(ATmakeAppl0(ATmakeAFun("#", 0, ATtrue)));
+}
+
+ATermAppl gsMakeDot()
+{
+  return gsMakeDataVarOpId(ATmakeAppl0(ATmakeAFun(".", 0, ATtrue)));
+}
+
+ATermAppl gsMakeStar()
+{
+  return gsMakeDataVarOpId(ATmakeAppl0(ATmakeAFun("*", 0, ATtrue)));
+}
+
+ATermAppl gsMakeDiv()
+{
+  return gsMakeDataVarOpId(ATmakeAppl0(ATmakeAFun("div", 0, ATtrue)));
+}
+
+ATermAppl gsMakeMod()
+{
+  return gsMakeDataVarOpId(ATmakeAppl0(ATmakeAFun("mod", 0, ATtrue)));
+}
+
+ATermAppl gsMakePlus()
+{
+  return gsMakeDataVarOpId(ATmakeAppl0(ATmakeAFun("+", 0, ATtrue)));
+}
+
+ATermAppl gsMakeLT()
+{
+  return gsMakeDataVarOpId(ATmakeAppl0(ATmakeAFun("<", 0, ATtrue)));
+}
+
+ATermAppl gsMakeGT()
+{
+  return gsMakeDataVarOpId(ATmakeAppl0(ATmakeAFun(">", 0, ATtrue)));
+}
+
+ATermAppl gsMakeLTE()
+{
+  return gsMakeDataVarOpId(ATmakeAppl0(ATmakeAFun("<=", 0, ATtrue)));
+}
+
+ATermAppl gsMakeGTE()
+{
+  return gsMakeDataVarOpId(ATmakeAppl0(ATmakeAFun(">=", 0, ATtrue)));
+}
+
+ATermAppl gsMakeIn()
+{
+  return gsMakeDataVarOpId(ATmakeAppl0(ATmakeAFun("in", 0, ATtrue)));
+}
+
+ATermAppl gsMakeCons()
+{
+  return gsMakeDataVarOpId(ATmakeAppl0(ATmakeAFun("|>", 0, ATtrue)));
+}
+
+ATermAppl gsMakeSnoc()
+{
+  return gsMakeDataVarOpId(ATmakeAppl0(ATmakeAFun("<|", 0, ATtrue)));
+}
+
+ATermAppl gsMakeConcat()
+{
+  return gsMakeDataVarOpId(ATmakeAppl0(ATmakeAFun("++", 0, ATtrue)));
+}
+
+ATermAppl gsMakeEq()
+{
+  return gsMakeDataVarOpId(ATmakeAppl0(ATmakeAFun("==", 0, ATtrue)));
+}
+
+ATermAppl gsMakeNeq()
+{
+  return gsMakeDataVarOpId(ATmakeAppl0(ATmakeAFun("!=", 0, ATtrue)));
+}
+
+ATermAppl gsMakeAnd()
+{
+  return gsMakeDataVarOpId(ATmakeAppl0(ATmakeAFun("&&", 0, ATtrue)));
+}
+
+ATermAppl gsMakeOr()
+{
+  return gsMakeDataVarOpId(ATmakeAppl0(ATmakeAFun("||", 0, ATtrue)));
+}
+
+ATermAppl gsMakeImp()
+{
+  return gsMakeDataVarOpId(ATmakeAppl0(ATmakeAFun("=>", 0, ATtrue)));
+}
+
+ATermAppl gsMakeActProcRef(ATermAppl Name, ATermList DataExprs)
+{
+  return ATmakeAppl2(ATmakeAFun("ActProcRef", 2, ATfalse), (ATerm) Name,
+    (ATerm) DataExprs);
+}
+
+ATermAppl gsMakeAct(ATermAppl ActId, ATermList DataExprs)
+{
+  return ATmakeAppl2(ATmakeAFun("Act", 2, ATfalse), (ATerm) ActId,
+    (ATerm) DataExprs);
+}
+
+ATermAppl gsMakeProcRef(ATermAppl ProcId, ATermList DataExprs)
+{
+  return ATmakeAppl2(ATmakeAFun("ProcRef", 2, ATfalse), (ATerm) ProcId,
+    (ATerm) DataExprs);
 }
 
 ATermAppl gsMakeDelta()
@@ -736,14 +724,34 @@ bool gsIsStructProj(char *s)
   return strcmp(s, "StructProj") == 0;
 }
 
-bool gsIsTrue(char *s)
+bool gsIsDataAppl(char *s)
 {
-  return strcmp(s, "True") == 0;
+  return strcmp(s, "DataAppl") == 0;
 }
 
-bool gsIsFalse(char *s)
+bool gsIsLambda(char *s)
 {
-  return strcmp(s, "False") == 0;
+  return strcmp(s, "Lambda") == 0;
+}
+
+bool gsIsForall(char *s)
+{
+  return strcmp(s, "Forall") == 0;
+}
+
+bool gsIsExists(char *s)
+{
+  return strcmp(s, "Exists") == 0;
+}
+
+bool gsIsWhr(char *s)
+{
+  return strcmp(s, "Whr") == 0;
+}
+
+bool gsIsWhrDecl(char *s)
+{
+  return strcmp(s, "WhrDecl") == 0;
 }
 
 bool gsIsEmptyList(char *s)
@@ -771,154 +779,129 @@ bool gsIsBagEnum(char *s)
   return strcmp(s, "BagEnum") == 0;
 }
 
+bool gsIsBagEnumElt(char *s)
+{
+  return strcmp(s, "BagEnumElt") == 0;
+}
+
 bool gsIsSetBagComp(char *s)
 {
   return strcmp(s, "SetBagComp") == 0;
 }
 
-bool gsIsDataAppl(char *s)
+bool gsIsTrue(char *s)
 {
-  return strcmp(s, "DataAppl") == 0;
+  return strcmp(s, "true") == 0;
 }
 
-bool gsIsNotOrCompl(char *s)
+bool gsIsFalse(char *s)
 {
-  return strcmp(s, "NotOrCompl") == 0;
+  return strcmp(s, "false") == 0;
 }
 
-bool gsIsNeg(char *s)
+bool gsIsExclam(char *s)
 {
-  return strcmp(s, "Neg") == 0;
+  return strcmp(s, "!") == 0;
 }
 
-bool gsIsSize(char *s)
+bool gsIsMinus(char *s)
 {
-  return strcmp(s, "Size") == 0;
+  return strcmp(s, "-") == 0;
 }
 
-bool gsIsForall(char *s)
+bool gsIsHash(char *s)
 {
-  return strcmp(s, "Forall") == 0;
+  return strcmp(s, "#") == 0;
 }
 
-bool gsIsExists(char *s)
+bool gsIsDot(char *s)
 {
-  return strcmp(s, "Exists") == 0;
+  return strcmp(s, ".") == 0;
 }
 
-bool gsIsListAt(char *s)
+bool gsIsStar(char *s)
 {
-  return strcmp(s, "ListAt") == 0;
-}
-
-bool gsIsMultOrIntersect(char *s)
-{
-  return strcmp(s, "MultOrIntersect") == 0;
+  return strcmp(s, "*") == 0;
 }
 
 bool gsIsDiv(char *s)
 {
-  return strcmp(s, "Div") == 0;
+  return strcmp(s, "div") == 0;
 }
 
 bool gsIsMod(char *s)
 {
-  return strcmp(s, "Mod") == 0;
+  return strcmp(s, "mod") == 0;
 }
 
-bool gsIsAddOrUnion(char *s)
+bool gsIsPlus(char *s)
 {
-  return strcmp(s, "AddOrUnion") == 0;
+  return strcmp(s, "+") == 0;
 }
 
-bool gsIsSubtOrDiff(char *s)
+bool gsIsLT(char *s)
 {
-  return strcmp(s, "SubtOrDiff") == 0;
-}
-
-bool gsIsLTOrPropSubset(char *s)
-{
-  return strcmp(s, "LTOrPropSubset") == 0;
+  return strcmp(s, "<") == 0;
 }
 
 bool gsIsGT(char *s)
 {
-  return strcmp(s, "GT") == 0;
+  return strcmp(s, ">") == 0;
 }
 
-bool gsIsLTEOrSubset(char *s)
+bool gsIsLTE(char *s)
 {
-  return strcmp(s, "LTEOrSubset") == 0;
+  return strcmp(s, "<=") == 0;
 }
 
 bool gsIsGTE(char *s)
 {
-  return strcmp(s, "GTE") == 0;
+  return strcmp(s, ">=") == 0;
 }
 
 bool gsIsIn(char *s)
 {
-  return strcmp(s, "In") == 0;
+  return strcmp(s, "in") == 0;
 }
 
 bool gsIsCons(char *s)
 {
-  return strcmp(s, "Cons") == 0;
+  return strcmp(s, "|>") == 0;
 }
 
 bool gsIsSnoc(char *s)
 {
-  return strcmp(s, "Snoc") == 0;
+  return strcmp(s, "<|") == 0;
 }
 
 bool gsIsConcat(char *s)
 {
-  return strcmp(s, "Concat") == 0;
+  return strcmp(s, "++") == 0;
 }
 
 bool gsIsEq(char *s)
 {
-  return strcmp(s, "Eq") == 0;
+  return strcmp(s, "==") == 0;
 }
 
 bool gsIsNeq(char *s)
 {
-  return strcmp(s, "Neq") == 0;
+  return strcmp(s, "!=") == 0;
 }
 
 bool gsIsAnd(char *s)
 {
-  return strcmp(s, "And") == 0;
+  return strcmp(s, "&&") == 0;
 }
 
 bool gsIsOr(char *s)
 {
-  return strcmp(s, "Or") == 0;
+  return strcmp(s, "||") == 0;
 }
 
 bool gsIsImp(char *s)
 {
-  return strcmp(s, "Imp") == 0;
-}
-
-bool gsIsLambda(char *s)
-{
-  return strcmp(s, "Lambda") == 0;
-}
-
-bool gsIsWhr(char *s)
-{
-  return strcmp(s, "Whr") == 0;
-}
-
-bool gsIsWhrDecl(char *s)
-{
-  return strcmp(s, "WhrDecl") == 0;
-}
-
-bool gsIsBagEnumElt(char *s)
-{
-  return strcmp(s, "BagEnumElt") == 0;
+  return strcmp(s, "=>") == 0;
 }
 
 bool gsIsActProcRef(char *s)

@@ -849,7 +849,7 @@ data_expr_imp:
     }
   | data_expr_and IMP data_expr_imp
     {
-      $$ = gsMakeImp($1, $3);
+      $$ = gsMakeDataAppl(gsMakeImp(), ATmakeList2((ATerm) $1, (ATerm) $3));
       if (gsDebug) {
         ATprintf("parsed implication\n  %t\n", $$);
       }
@@ -864,14 +864,14 @@ data_expr_and:
     }
   | data_expr_and AND data_expr_eq
     {
-      $$ = gsMakeAnd($1, $3);
+      $$ = gsMakeDataAppl(gsMakeAnd(), ATmakeList2((ATerm) $1, (ATerm) $3));
       if (gsDebug) {
         ATprintf("parsed conjunction\n  %t\n", $$);
       }
     }
   | data_expr_and BARS data_expr_eq
     {
-      $$ = gsMakeOr($1, $3);
+      $$ = gsMakeDataAppl(gsMakeOr(), ATmakeList2((ATerm) $1, (ATerm) $3));
       if (gsDebug) {
         ATprintf("parsed disjunction\n  %t\n", $$);
       }
@@ -886,14 +886,14 @@ data_expr_eq:
     }
   | data_expr_eq EQ data_expr_rel
     {
-      $$ = gsMakeEq($1, $3);
+      $$ = gsMakeDataAppl(gsMakeEq(), ATmakeList2((ATerm) $1, (ATerm) $3));
       if (gsDebug) {
         ATprintf("parsed equality expression\n  %t\n", $$);
       }
     }
   | data_expr_eq NEQ data_expr_rel
     {
-      $$ = gsMakeNeq($1, $3);
+      $$ = gsMakeDataAppl(gsMakeNeq(), ATmakeList2((ATerm) $1, (ATerm) $3));
       if (gsDebug) {
         ATprintf("parsed equality expression\n  %t\n", $$);
       }
@@ -908,35 +908,35 @@ data_expr_rel:
     }
   | data_expr_cons GTE data_expr_cons
     {
-      $$ = gsMakeGTE($1, $3);
+      $$ = gsMakeDataAppl(gsMakeGTE(), ATmakeList2((ATerm) $1, (ATerm) $3));
       if (gsDebug) {
         ATprintf("parsed relational expression\n  %t\n", $$);
       }
     }
   | data_expr_cons LTE data_expr_cons
     {
-      $$ = gsMakeLTEOrSubset($1, $3);
+      $$ = gsMakeDataAppl(gsMakeLTE(), ATmakeList2((ATerm) $1, (ATerm) $3));
       if (gsDebug) {
         ATprintf("parsed relational expression\n  %t\n", $$);
       }
     }
   | data_expr_cons RANG data_expr_cons
     {
-      $$ = gsMakeGT($1, $3);
+      $$ = gsMakeDataAppl(gsMakeGT(), ATmakeList2((ATerm) $1, (ATerm) $3));
       if (gsDebug) {
         ATprintf("parsed relational expression\n  %t\n", $$);
       }
     }
   | data_expr_cons LANG data_expr_cons
     {
-      $$ = gsMakeLTOrPropSubset($1, $3);
+      $$ = gsMakeDataAppl(gsMakeLT(), ATmakeList2((ATerm) $1, (ATerm) $3));
       if (gsDebug) {
         ATprintf("parsed relational expression\n  %t\n", $$);
       }
     }
   | data_expr_cons IN data_expr_cons
     {
-      $$ = gsMakeIn($1, $3);
+      $$ = gsMakeDataAppl(gsMakeIn(), ATmakeList2((ATerm) $1, (ATerm) $3));
       if (gsDebug) {
         ATprintf("parsed relational expression\n  %t\n", $$);
       }
@@ -951,7 +951,7 @@ data_expr_cons:
     }
   | data_expr_add CONS data_expr_cons
     {
-      $$ = gsMakeCons($1, $3);
+      $$ = gsMakeDataAppl(gsMakeCons(), ATmakeList2((ATerm) $1, (ATerm) $3));
       if (gsDebug) {
         ATprintf("parsed list cons expression\n  %t\n", $$);
       }
@@ -966,7 +966,7 @@ data_expr_snoc:
     }
   | data_expr_snoc SNOC data_expr_add
     {
-      $$ = gsMakeSnoc($1, $3);
+      $$ = gsMakeDataAppl(gsMakeSnoc(), ATmakeList2((ATerm) $1, (ATerm) $3));
       if (gsDebug) {
         ATprintf("parsed list snoc expression\n  %t\n", $$);
       }
@@ -981,7 +981,7 @@ data_expr_concat:
     }
   | data_expr_concat CONCAT data_expr_add
     {
-      $$ = gsMakeConcat($1, $3);
+      $$ = gsMakeDataAppl(gsMakeConcat(), ATmakeList2((ATerm) $1, (ATerm) $3));
       if (gsDebug) {
         ATprintf("parsed list concat expression\n  %t\n", $$);
       }
@@ -996,14 +996,14 @@ data_expr_add:
     }
   | data_expr_add PLUS data_expr_mult
     {
-      $$ = gsMakeAddOrUnion($1, $3);
+      $$ = gsMakeDataAppl(gsMakePlus(), ATmakeList2((ATerm) $1, (ATerm) $3));
       if (gsDebug) {
         ATprintf("parsed addition or set union\n  %t\n", $$);
       }
     }
   | data_expr_add MINUS data_expr_mult
     {
-      $$ = gsMakeSubtOrDiff($1, $3);
+      $$ = gsMakeDataAppl(gsMakeMinus(), ATmakeList2((ATerm) $1, (ATerm) $3));
       if (gsDebug) {
         ATprintf("parsed subtraction or set difference\n  %t\n", $$);
       }
@@ -1018,28 +1018,28 @@ data_expr_mult:
     }
   | data_expr_mult STAR data_expr_quant
     {
-      $$ = gsMakeMultOrIntersect($1, $3);
+      $$ = gsMakeDataAppl(gsMakeStar(), ATmakeList2((ATerm) $1, (ATerm) $3));
       if (gsDebug) {
         ATprintf("parsed multiplication or set intersection\n  %t\n", $$);
       }
     }
   | data_expr_mult DIV data_expr_quant
     {
-      $$ = gsMakeDiv($1, $3);
+      $$ = gsMakeDataAppl(gsMakeDiv(), ATmakeList2((ATerm) $1, (ATerm) $3));
       if (gsDebug) {
         ATprintf("parsed div expression\n  %t\n", $$);
       }
     }
   | data_expr_mult MOD data_expr_quant
     {
-      $$ = gsMakeMod($1, $3);
+      $$ = gsMakeDataAppl(gsMakeMod(), ATmakeList2((ATerm) $1, (ATerm) $3));
       if (gsDebug) {
         ATprintf("parsed mod expression\n  %t\n", $$);
       }
     }
   | data_expr_mult DOT data_expr_quant
     {
-      $$ = gsMakeListAt($1, $3);
+      $$ = gsMakeDataAppl(gsMakeDot(), ATmakeList2((ATerm) $1, (ATerm) $3));
       if (gsDebug) {
         ATprintf("parsed list at expression\n  %t\n", $$);
       }
@@ -1076,21 +1076,21 @@ data_expr_prefix:
     }
   | EXCLAM data_expr_prefix
     {
-      $$ = gsMakeNotOrCompl($2);
+      $$ = gsMakeDataAppl(gsMakeExclam(), ATmakeList1((ATerm) $2));
       if (gsDebug) {
         ATprintf("parsed prefix data expression\n  %t\n", $$);
       }
     }
-  | MINUS data_expr_prefix                 //arithmetic negation
+  | MINUS data_expr_prefix
     {
-      $$ = gsMakeNeg($2);
+      $$ = gsMakeDataAppl(gsMakeMinus(), ATmakeList1((ATerm) $2));
       if (gsDebug) {
         ATprintf("parsed prefix data expression\n  %t\n", $$);
       }
     }
-  | HASH data_expr_prefix                  //list/set/bag size
+  | HASH data_expr_prefix
     {
-      $$ = gsMakeSize($2);
+      $$ = gsMakeDataAppl(gsMakeHash(), ATmakeList1((ATerm) $2));
       if (gsDebug) {
         ATprintf("parsed prefix data expression\n  %t\n", $$);
       }
