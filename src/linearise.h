@@ -21,8 +21,6 @@
 #ifndef __TMCRL_H__
 #define __TMCRL_H__
 
-/* #include <TB.h> */
-
 #include <assert.h>
 #include <stdio.h>
 #include <stdlib.h>
@@ -31,38 +29,7 @@
 #include "gsfunc.h"
 #include "gslowlevel.h"
 
-#define MAXLEN 200  /* maximum length of the name of a variable */
-/* ERRORLENGTH gives the maximum length of an errormessage.
-   PRINTEDTERMLENGTH gives the length of a ATerm in an errormessage.
-   it should be substantially less than half ERRORLENGTH */
-#define ERRORLENGTH 250
-#define PRINTEDTERMLENGTH 80
-
-#define LINEBREAKLIMIT 70
 #define VERSION "0.0.0"
-
-/* #define number long */
-
-typedef struct specificationbasictype {
-            ATermList sorts;     /* storage place for sorts */
-            ATermList funcs;     /* storage place for functions */
-            ATermList maps;      /* storage place for constructors */
-            ATermList eqns;      /* storage place for equations */          
-            ATermList acts;      /* storage place for actions */
-            ATermList procs;     /* storage place for processes,
-                                         uses alt, seq, par, lmer, cond,sum,
-                                         com, bound, at, name, delta,
-                                         tau, hide, rename, encap */
-            ATermAppl init;      /* storage place for initial process */       
-} specificationbasictype;
-
-  
-typedef struct string {
-  char s[MAXLEN];  
-  struct string *next; } string;  
-  
-/* void initializefmts(void);
-   void finalizefmts(void); */
 
 #endif /* __TMCRL_H__ */
 
