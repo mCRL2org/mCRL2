@@ -1,9 +1,7 @@
-// Date: 18-11-2004
+// Date: 30-11-2004
 // This document describes the input format of the GenSpect lineariser. Here:
-// - <UIdString> represents a user identifier by means of a string of the
-//   format '[a-zA-Z_][a-zA-Z0-9_]*', where keywords are excluded
-// - <SIdString> represents a system identifier by means of a string; possible
-//   values are described in the articles/sids.tex
+// - <IdString> represents the name of an identifier by means of a string of
+//   the format '[a-zA-Z_][a-zA-Z0-9_]*', where keywords are excluded
 // - the other alphabetical strings within angular brackets are non-terminals
 //   that represent all possible branches of their productions
 // - for non-terminal N, N*/N+ represents an ATermList with zero/one or more N's
@@ -20,81 +18,91 @@
 // The set O is a B->-sorted set of operations, where each O_s contains
 // constants of sort s, for all s in B->.
 // The higher-order signature Sigma determines a first-order signature
-// Sigma-> = (B->, O extended with Appl), where Appl is the set operation
+// Sigma-> = (B->, O extended with Appl), where Appl is the set of operation
 // applications.  This set contains the operation apply: (w -> s) # w -> s for
 // every w,s in B-> where w = s_0, ..., s_n.
-// Because we modelled the set Appl operations by the data expression DataAppl,
-// the description of the data types below is essentially first-order. Also,
-// we only use a finite subsets of the infinite set of sorts B-> and set of
-// operations O.
+// Because we modelled the set Appl by the data expression DataAppl, the
+// description of the data types below is essentially first-order. Also, we
+// only use finite subsets of the infinite set of sorts B-> and the infinite set
+// of operations O.
 
 //General
 //-------
 
-//user identifier
-<UId>        ::= UId(<UIdString>) 
+//sort identifier
+<SortId>      ::= SortId(<IdString>, <Status>)
 
-//system identifier
-<SId>        ::= SId(<SIdString>) 
+//data identifier
+<DataId>      ::= DataId(<IdString>, <SortExpr>, <DataStatus>)
 
-//identifier
-<Id>         ::= <UId> | <SId>
+//data variable
+<DataVar>     ::= DataVar(<IdString>, <SortExpr>, <DataStatus>)
 
-//user variable occurrence
-<UVar>        ::= UVar(<UIdString>)
+//action identifier
+<ActId>       ::= ActId(<IdString>, <Domain>, <Status>)
 
-//system variable occurrence
-<SVar>        ::= SVar(<SIdString>)
+//domain consisting of zero or more sort expressions
+<Domain>      ::= Domain(<SortExpr>, ..., <SortExpr>)
 
-//variable occurrence
-<Var>         ::= <UVar> | <SVar>
+//process identifier
+<ProcId>      ::= ProcId(<IdString>, <Status>)
+
+//identifier status
+<Status>      ::= StatUser()
+                | StatSystem()
+
+//data identifier status
+<DataStatus>  ::= <Status>
+                | StatLambda()
 
 //Specification
 //-------------
 
 //specification
-<Spec>       ::= Spec(SortSpec(<SortExpr>*), ConsSpec(<OpDecl>*),
-                   MapSpec(<OpDecl>*), EqnSpec(<EqnSect>*),
-                   ActSpec(<ActDecl>*), ProcSpec(<ProcDecl>*), Init(<ProcExpr>)
-                 )
+<Spec>        ::= Spec(SortSpec(<SortExpr>*), ConsSpec(<OpDecl>*),
+                    MapSpec(<OpDecl>*), EqnSpec(<EqnSect>*),
+                    ActSpec(<ActDecl>*), ProcSpec(<ProcDecl>*), Init(<ProcExpr>)
+                  )
 
 //operation declaration
-<OpDecl>     ::= OpDecl(<Id>, <SortExpr>) 
+<OpDecl>      ::= OpDecl(<DataId>) 
 
 //equation section
-<EqnSect>    ::= EqnSect(<VarDecl>*, <EqnDecl>+) 
+<EqnSect>     ::= EqnSect(<DataVarDecl>*, <EqnDecl>+) 
 
-//variable declaration
-<VarDecl>    ::= VarDecl(<Id>, <SortExpr>)
+//data variable declaration
+<DataVarDecl> ::= DataVarDecl(<DataVar>)
 
 //equation declaration
-<EqnDecl>    ::= EqnDecl(<DataExpr>, <DataExpr>) 
+<EqnDecl>     ::= EqnDecl(<DataExpr>, <DataExpr>, <Status>) 
 
 //action declaration
-<ActDecl>    ::= ActDecl(<Id>, <Domain>?)
-
-//domain consisting of one or more sort expressions
-<Domain>     ::= <SortExpr>
-               | <Domain>, <SortExpr>
+<ActDecl>     ::= ActDecl(<ActId>)
 
 //process declaration
-<ProcDecl>   ::= ProcDecl(<Id>, <VarDecl>*, <ProcExpr>) 
+<ProcDecl>    ::= ProcDecl(<ProcId>, <DataVarDecl>*, <ProcExpr>)
 
 //Expressions
 //-----------
 
 //sort expression
-<SortExpr>   ::= <Id>
-               | SortApp(<SId>, <SortArgs>)
-
-//arguments consisting of one or more sort expressions
-<SortArgs>   ::= <SortExpr>
-               | <SortArgs>, <SortExpr>
+<SortExpr>   ::= <SortId>
+               | SortBool()
+               | SortPos()
+               | SortNat()
+               | SortInt()
+               | SortList(<SortExpr>)
+               | SortSet(<SortExpr>)
+               | SortBag(<SortExpr>)
+               | SortArrow(<SortExpr>+, <SortExpr>)
+               | SortStruct(<Id>)
+               | SortUnknown()
+               | SortAny()
 
 //data expression
-<DataExpr>   ::= <Id>
-               | <Var>
-               | DataApp(<DataExpr>, <DataArgs>) 
+<DataExpr>   ::= <DataId>
+               | <DataVar>
+               | DataAppl(<DataExpr>, <DataArgs>) 
                | Whr(<DataExpr>, <WhrDecl>+) 
 
 //arguments consisting of one or more data expressions
@@ -102,11 +110,11 @@
                | <DataArgs>, <DataExpr>
 
 //where clause declaration
-<WhrDecl>    ::= WhrDecl(<Id>, <DataExpr>) 
+<WhrDecl>    ::= WhrDecl(<DataId>, <DataExpr>) 
 
 //process expression
-<ProcExpr>   ::= Action(<Id>, <Arguments>?)
-               | ProcRef(<Id>, <Arguments>?) 
+<ProcExpr>   ::= Action(<ActId>, <Arguments>?)
+               | ProcRef(<ProcId>, <Arguments>?) 
                | Delta() 
                | Tau() 
                | Sum(<VarDecl>+, <ProcExpr>) 
@@ -125,13 +133,13 @@
                | Choice(<ProcExpr>, <ProcExpr>) 
 
 //multiaction identifier
-<MAId>       ::= MAId(<Id>+) 
+<MAId>       ::= MAId(<ActId>+) 
 
 //renaming expression
-<RenExpr>    ::= RenExpr(<Id>, <Id>) 
+<RenExpr>    ::= RenExpr(<ActId>, <ActId>) 
 
 //communication expression
-<CommExpr>   ::= CommExpr(<MAId>, <IdOrNil>) 
+<CommExpr>   ::= CommExpr(<MAId>, <ActIdOrNil>) 
 
-//id or nil
-<IdOrNil>    ::= <Id> | Nil() 
+//action identifier or nil
+<ActIdOrNil>    ::= <ActId> | Nil() 
