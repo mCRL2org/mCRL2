@@ -31,10 +31,10 @@ extern "C"
 #include "gstypecheck.h"
 #include "gsfunc.h"
 
-#define ThrowF            ThrowV(ATfalse)
+#define ThrowF            {ThrowV(ATfalse);}
 //store ATfalse in result and throw an exception
 
-#define ThrowMF(...)      ThrowVM(ATfalse, __VA_ARGS__)
+#define ThrowMF(...)      {ThrowVM(ATfalse, __VA_ARGS__);}
 //print error message supplied by the first parameter with the remaining
 //store ATfalse in result and throw an exception
 
@@ -453,6 +453,10 @@ static ATbool gstcReadInSortStruct(ATermAppl SortExpr){
       for(;!ATisEmpty(Projs);Projs=ATgetNext(Projs)){
 	ATermAppl Proj=ATAgetFirst(Projs);
 	ATermAppl ProjSort=ATAgetArgument(Proj,1);
+	
+	// not to forget, recursive call for ProjSort ;-)
+	if(!gstcReadInSortStruct(ProjSort)) {ThrowF;}
+
 	if(!gsIsNil(Proj) &&
 	   !gstcAddFunction(ATAgetArgument(Proj,0),gsMakeSortArrowProd(ATmakeList1((ATerm)Constr),ProjSort),"projection")) {ThrowF;}
 	ConstructorType=ATinsert(ConstructorType,(ATerm)ProjSort);
