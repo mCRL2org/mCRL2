@@ -142,6 +142,11 @@ static ATermList gstcAdjustNotInferredList(ATermList TypeList, ATermList TypeLis
 static ATbool gstcIsNotInferredL(ATermList TypeListList);
 static ATbool gstcIsTypeAllowed(ATermList PosTypeList, ATermList TypeList);
 static ATermAppl gstcUnwindType(ATermAppl Type);
+static ATermAppl gstcUnSetBag(ATermAppl PosType);
+static ATermAppl gstcUnDataAppl(ATermAppl PosType);
+static ATermAppl gstcMakeNotInferredSetBag(ATermAppl Type);
+static ATermAppl gstcAdjustPosTypesA(ATermAppl NewType, ATermAppl PosType);
+static ATermList gstcTypesIntersect(ATermList TypeList1, ATermList TypeList2);
 
 // Main function
 ATermAppl gsTypeCheck (ATermAppl input){	
@@ -189,18 +194,6 @@ ATermAppl gsTypeCheck (ATermAppl input){
 // ============ Static functions
 // ========= main processing functions
 void gstcDataInit(void){
-  ATprotect((ATerm* )&gssystem.constants);
-  ATprotect((ATerm* )&gssystem.functions);
-  ATprotect((ATerm* )&context.basic_sorts);
-  ATprotect((ATerm* )&context.defined_sorts);	
-  ATprotect((ATerm* )&context.constants);
-  ATprotect((ATerm* )&context.functions);
-  ATprotect((ATerm* )&context.actions);	
-  ATprotect((ATerm* )&context.processes);
-  ATprotect((ATerm* )&body.equations);
-  ATprotect((ATerm* )&body.proc_pars);
-  ATprotect((ATerm* )&body.proc_bodies);
-
   gssystem.constants=ATtableCreate(63,50);
   gssystem.functions=ATtableCreate(63,50);
   context.basic_sorts=ATindexedSetCreate(63,50);
@@ -959,19 +952,34 @@ static ATermAppl gstcTraverseVarConsTypeD(ATermTable Vars, ATermAppl *DataTerm, 
     ATermTable NewVars=gstcAddVars2Table(Vars,ATmakeList1((ATerm)ATAgetArgument(*DataTerm,0)));
     if(!NewVars) {throw;}
     ATermAppl Data=ATAgetArgument(*DataTerm,1);
-    ATermAppl NewType=PosType; //gstcUnSetBag(PosType);
+    ATermAppl NewType=gstcUnSetBag(PosType);
     if(!NewType) {throw;}
     NewType=gstcTraverseVarConsTypeD(NewVars,&Data,NewType);
     if(!NewType) {throw;}
     *DataTerm=ATsetArgument(*DataTerm,(ATerm)Data,1);
-    return gsMakeSortBag(NewType);
+    NewType=gstcMakeNotInferredSetBag(NewType);
+    NewType=gstcAdjustPosTypesA(NewType,PosType);
+    return NewType;
   }
 
-  if(gsIsForall(*DataTerm) || gsIsExists(*DataTerm) || gsIsLambda(*DataTerm)){
+  if(gsIsForall(*DataTerm) || gsIsExists(*DataTerm)){
     ATermTable NewVars=gstcAddVars2Table(Vars,ATLgetArgument(*DataTerm,0));
     if(!NewVars) {throw;}
     ATermAppl Data=ATAgetArgument(*DataTerm,1);
-    ATermAppl NewType=gstcTraverseVarConsTypeD(NewVars,&Data,PosType);
+    if(!gstcAdjustPosTypesA(gsMakeSortIdBool(),PosType)) {throw;}
+    ATermAppl NewType=gstcTraverseVarConsTypeD(NewVars,&Data,gsMakeSortIdBool());
+    if(!NewType) {throw;}
+    if(!gstcAdjustPosTypesA(gsMakeSortIdBool(),NewType)) {throw;}
+    *DataTerm=ATsetArgument(*DataTerm,(ATerm)Data,1);
+    return gsMakeSortIdBool();
+  }
+
+  if(gsIsLambda(*DataTerm)){
+    ATermTable NewVars=gstcAddVars2Table(Vars,ATLgetArgument(*DataTerm,0));
+    if(!NewVars) {throw;}
+    ATermAppl Data=ATAgetArgument(*DataTerm,1);
+    ATermAppl NewType=gstcUnDataAppl(PosType);
+    NewType=gstcTraverseVarConsTypeD(NewVars,&Data,NewType);
     if(!NewType) {throw;}
     *DataTerm=ATsetArgument(*DataTerm,(ATerm)Data,1);
     return NewType;
@@ -1237,6 +1245,43 @@ static ATermList gstcInsertType(ATermList TypeList, ATermAppl Type){
   return ATinsert(TypeList,(ATerm)Type);
 }
 
+static ATermAppl gstcAdjustPosTypesA(ATermAppl NewType, ATermAppl PosType){
+  //PosType: possible types (normally obtained from above)
+  //NewType: possible types (normally obtained from below)
+  //return: Part of PosType that 'conforms' NewType.
+
+  if(gsIsUnknown(NewType) || gstcEqTypesA(NewType,PosType)) return PosType;
+
+  if(gsIsUnknown(PosType)) return NewType;
+
+  if(!gstcIsNotInferred(NewType)){
+    if(!gstcIsNotInferred(PosType)) return NULL; 
+    else if(gstcInTypesA(NewType,ATLgetArgument(PosType,0))) return NewType;
+    else return NULL; 
+  }
+  
+  if(!gstcIsNotInferred(PosType)){
+    if(gstcInTypesA(PosType,ATLgetArgument(NewType,0))) return PosType;
+    else return NULL; 
+  }
+
+  ATermList Types=gstcTypesIntersect(ATLgetArgument(NewType,0),ATLgetArgument(PosType,0));
+  if(!Types || ATisEmpty(Types)) return NULL;
+  if(ATgetLength(Types)==1) return ATAgetFirst(Types);
+  else return gstcMakeNotInferred(Types);
+}
+
+static ATermList gstcTypesIntersect(ATermList TypeList1, ATermList TypeList2){
+  // returns the intersection of the 2 type lists 
+  ATermList Result=ATmakeList0();
+
+  for(;!ATisEmpty(TypeList2);TypeList2=ATgetNext(TypeList2)){
+    ATermAppl Type2=ATAgetFirst(TypeList2);
+    if(gstcInTypesA(Type2,TypeList1)) Result=ATinsert(Result,(ATerm)Type2);
+  }
+  return ATreverse(Result);
+}
+
 static ATermList gstcAdjustNotInferredList(ATermList PosTypeList, ATermList TypeListList){
   // PosTypeList -- List of Sortexpressions (possibly NotInferred(List Sortexpr))
   // TypeListList -- List of (Lists of Types)
@@ -1295,4 +1340,47 @@ static ATermAppl gstcUnwindType(ATermAppl Type){
   ATermAppl Value=ATAtableGet(context.defined_sorts,(ATerm)ATAgetArgument(Type,0));
   if(!Value) Value=Type;
   return Value;
+}
+
+static ATermAppl gstcUnSetBag(ATermAppl PosType){
+  //select Set(Type), and Bag(Type), elements, return their list of arguments.
+  if(gsIsSortId(PosType)) PosType=gstcUnwindType(PosType);
+  if(gsIsSortSet(PosType) || gsIsSortSet(PosType)) return ATAgetArgument(PosType,0);
+  if(gsIsUnknown(PosType)) return PosType;
+
+  ATermList NewPosTypes=ATmakeList0();
+  if(gstcIsNotInferred(PosType)){
+    for(ATermList PosTypes=ATLgetArgument(PosType,1);!ATisEmpty(PosTypes);PosTypes=ATgetNext(PosTypes)){
+      ATermAppl NewPosType=ATAgetFirst(PosTypes);
+      if(gsIsSortId(NewPosType)) NewPosType=gstcUnwindType(NewPosType);
+      if(gsIsSortSet(NewPosType) || gsIsSortSet(NewPosType)) NewPosType=ATAgetArgument(NewPosType,0);
+      else if(!gsIsUnknown(NewPosType)) continue;
+      NewPosTypes=ATinsert(NewPosTypes,(ATerm)NewPosType);
+    }
+    NewPosTypes=ATreverse(NewPosTypes);
+    return gstcMakeNotInferred(NewPosTypes);
+  }
+  return NULL;
+}
+
+static ATermAppl gstcMakeNotInferredSetBag(ATermAppl Type){
+  //Type: any type (possibly Unknown or NotInferred)
+  //Returns: Not inferred type with Set(Type), Bag(Type)...
+
+  ATermList Types=ATmakeList0();
+  if(!gstcIsNotInferred(Type)){
+    Types=ATmakeList2((ATerm)gsMakeSortSet(Type),(ATerm)gsMakeSortBag(Type));
+  }
+  else{
+    for(ATermList PosTypes=ATLgetArgument(Type,0);!ATisEmpty(PosTypes);PosTypes=ATgetNext(PosTypes)){
+      ATermAppl PosType=ATAgetFirst(PosTypes);
+      Types=ATconcat(Types,ATmakeList2((ATerm)gsMakeSortSet(PosType),(ATerm)gsMakeSortBag(PosType)));
+    }
+  }
+
+  return gstcMakeNotInferred(Types);
+}
+
+static ATermAppl gstcUnDataAppl(ATermAppl PosType){
+
 }
