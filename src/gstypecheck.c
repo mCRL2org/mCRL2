@@ -91,6 +91,7 @@ static inline ATermAppl gstcMakeActionOrProc(ATbool, ATermAppl, ATermList, ATerm
 static ATermAppl gstcTraverseActProc(ATermAppl);
 static ATermAppl gstcTraverseVarConstP(ATermTable, ATermAppl);
 static ATermAppl gstcTraverseVarConstD(ATermTable, ATermAppl);
+static ATermAppl gstcTraverseVarConstDN(int, ATermTable, ATermAppl);
 static ATermList gstcTraverseVarConstL(ATermTable, ATermList);
 static ATermList gstcTraverseVarConstLL(ATermTable, ATermList);
 
@@ -483,7 +484,7 @@ static ATermAppl gstcRewrActProc(ATermAppl ProcTerm){
   //filter the list of lists ParList to keep only the lists of lenth nFactPars
   ATermList NewParList=ATmakeList0();
   for(;!ATisEmpty(ParList);ParList=ATgetNext(ParList)){
-    ATermAppl Par=ATAgetFirst(ParList);
+    ATermList Par=ATLgetFirst(ParList);
     if(ATgetLength(Par)==nFactPars) NewParList=ATinsert(NewParList,(ATerm)Par);
   }
   NewParList=ATreverse(NewParList);
@@ -642,7 +643,7 @@ static ATermAppl gstcTraverseVarConstD(ATermTable Vars, ATermAppl DataTerm){
   }  
 
   if(gsIsDataApplProd(DataTerm)){
-    ATermAppl NewData=gstcTraverseVarConstD(Vars,ATAgetArgument(DataTerm,0));
+    ATermAppl NewData=gstcTraverseVarConstDN(ATgetLength(ATLgetArgument(DataTerm,1)),Vars,ATAgetArgument(DataTerm,0));
     if(!NewData) {throw;}
     ATermList NewDatas=gstcTraverseVarConstL(Vars,ATLgetArgument(DataTerm,1));
     if(!NewDatas) {throw;}
@@ -653,14 +654,40 @@ static ATermAppl gstcTraverseVarConstD(ATermTable Vars, ATermAppl DataTerm){
     ATermAppl Name=ATAgetArgument(DataTerm,0);
     ATermAppl Type=ATAtableGet(Vars,(ATerm)Name);
     if(Type) return gsMakeDataVarId(Name,Type);
-    return gsMakeOpId(Name,gsMakeUnknown());
+    
+    if((Type=ATAtableGet(context.constants,(ATerm)Name))) return gsMakeOpId(Name,Type);
+    
+    ATermList ParList=ATLtableGet(context.functions,(ATerm)Name);
+    if(ParList && ATgetLength(ParList)==1) return gsMakeDataVarId(Name,ATAgetFirst(ParList));
+    else{
+      //gsWarningMsg("Unknown Op %t\n",DataTerm);    
+      return gsMakeOpId(Name,gsMakeUnknown());
+    }
   }  
-
   assert(0);
  finally:
   return Result;
 }
     
+static ATermAppl gstcTraverseVarConstDN(int nFactPars, ATermTable Vars, ATermAppl DataTerm){
+  if(gsIsDataVarIdOpId(DataTerm)){
+    ATermAppl Name=ATAgetArgument(DataTerm,0);
+    ATermAppl Type=ATAtableGet(Vars,(ATerm)Name);
+    if(Type) return gsMakeDataVarId(Name,Type);
+    
+    if((Type=ATAtableGet(context.constants,(ATerm)Name))) return gsMakeOpId(Name,Type);
+    
+    ATermList ParList=ATLtableGet(context.functions,(ATerm)Name);
+    if(ParList && ATgetLength(ParList)==1) return gsMakeDataVarId(Name,ATAgetFirst(ParList));
+    else{
+      //gsWarningMsg("Unknown Op %t\n",DataTerm);    
+      return gsMakeOpId(Name,gsMakeUnknown());
+    }
+  }
+  else return gstcTraverseVarConstD(Vars, DataTerm);
+}
+
+
 static ATermList gstcTraverseVarConstL(ATermTable Vars, ATermList DataTermList){
   ATermList Result=NULL;
   ATermList NewDataTermList=ATmakeList0();
