@@ -866,10 +866,6 @@ projection \frm{(i,j)}, if declared & \fa{\f{pr}_{i,j}}{\_}  & \verb+prij(_)+\\
 \hline
 \end{tabular}\bigskip
 
-\noindent
-Note that a projection operation is only generated when its corresponding
-projection label is declared.
-
 We give a few examples. For finite \frm{n \in \nat}, an enumerated type can be
 declared by
 \begin{genspect}
@@ -929,14 +925,19 @@ eqn  & \fa{qf}{t} & = & \faaa{if}{\fa{is\_leaf}{t}}{\fa{lval}{t}}{
            \faa{f}{\fa{nval}{t}}{\fa{qf}{\fa{right}{t}}}}}\\
 \end{genspect}
 
-\subsubsection{Process declarations}
+\subsubsection{Pattern matching versus projections and recognisers}
 
-Process declarations do not allow pattern matching of the left hand side of the
-equation. However, we can use pattern matching indirectly through the use of
-summations in the right hand side. As an example, take the following process
-declaration without pattern matching, where \frm{T} stands for \frm{\f{BATree}}:
+When defining \emph{data equations}, it is often the case that pattern matching
+on the constructors of a structured type is more elegant than using projection
+and recogniser operations. The last example is a typical instance of this.
+
+When defining \emph{process equations}, pattern matching can not be applied
+directly on the left hand side of the equation. However, we can apply it
+indirectly through the use of the summation and conditional operators in the
+right hand side. As an example, take the following process declaration without
+pattern matching:
 \begin{genspect}
-proc & \fa{P}{t: T} & = &
+proc & \fa{P}{t: \f{BATree}} & = &
     \fa{is\_leaf}{t} & \To
     & \multicolumn{3}{@{}L}{\fa{get}{\fa{lval}{t}}.\delta\ +}\\
 &&& \fa{is\_node}{t} & \To
@@ -947,16 +948,16 @@ proc & \fa{P}{t: T} & = &
 This declaration is equivalent to the following declaration, which uses pattern
 matching:
 \begin{genspect}
-proc & \fa{P}{t: T} & = &
+proc & \fa{P}{t: \f{BATree}} & = &
     \sum_{a:A}         
     & (t & == & \fa{leaf}{a}) \To \fa{get}{a}.\delta\ +\\
-&&& \sum_{a:A, u,v: T}
+&&& \sum_{a:A, u,v: \f{BATree}}
     & (t & == & \faaa{node}{u}{a}{v}) \To \fa{get}{a}.(\fa{P}{u} + \fa{P}{v})\\
 \end{genspect}
 
 \noindent
-Note that is has to be investigated whether the current tools are able to
-handle this in the right way. If this is not the case, this should be added.
+As can be seen from the above example, it is arguable what is the most elegant
+way to specify process equations.
 
 \subsection{Extensions}
 
