@@ -1,0 +1,100 @@
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+%%%  Veni proposal                                             %%%
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+\documentclass[twoside,fleqn,a4paper,dvips]{article}
+\usepackage{textcomp,amsmath,amssymb,amsthm,stmaryrd}
+\usepackage{geometry}
+\usepackage[ps2pdf]{hyperref} % remove for printing
+%\usepackage[active]{srcltx}
+\usepackage{mymath,mythm,mcrl}
+  
+\setlength{\mathindent}{0.5em}
+
+\def\YSU{\texttt{ YSU: TODO :USY\marginpar{!!!} }}
+\def\JFG{\texttt{ JFG: TODO :GFJ\marginpar{!!!} }}
+\newcommand{\afunc}[3]{\mathsf{#1}:#2\rightarrow#3}
+
+\title{LPE definitions and an ATerm representation format for \mcrl\ with multiactions and time}
+  
+\author{Jan Friso Groote \and Yaroslav S. Usenko}
+
+\begin{document}
+\maketitle
+
+\section{LPE definitions}
+
+The equation below represents a Linear Process Equation for \mcrl\ 
+with multiactions and time (MTLPE).
+\begin{gather}
+\begin{split}
+\pr{X}(\vect{d\ap D})=&\sum_{i\in I}\sum_{\vect{e_i\ap E_i}} c_i(\vect{d,e_i})\to\act{a}^0_i(\vect{f_{i,0}}(\vect{d,e_i}))\comm\dots\comm\act{a}^{n(i)}_i(\vect{f_{i,n(i)}}(\vect{d,e_i}))\at t_i(\vect{d,e_i})\seqc
+\pr{X}_i(\vect{g_i}(\vect{d,e_i}))\notag\\
+&+\sum_{j\in J}\sum_{\vect{e_j\ap E_j}} c_j(\vect{d,e_j})\to\act{a}^0_j(\vect{f_{j,0}}(\vect{d,e_j}))\comm\dots\comm\act{a}^{n(j)}_j(\vect{f_{j,n(j)}}(\vect{d,e_j}))\at t_j(\vect{d,e_j})\\
+&+\sum_{\vect{e_\delta\ap E_\delta}} c_\delta(\vect{d,e_\delta})\to\delta\at t_\delta(\vect{d,e_\delta})
+\end{split}
+\end{gather}
+where $I$ and $J$ are disjoint.
+
+It is possible to translate multiactions to regular \mcrl\ actions
+(with longer parameter lists).  In this way a MTLPE can be translated
+to a TLPE, preserving equivalence.  The TLPE that
+corresponds to the above MTLPE is defined in the following way.
+\begin{gather}
+\begin{split}
+\pr{X}(\vect{d\ap D})=&\sum_{i\in I}\sum_{\vect{e_i\ap E_i}} c_i(\vect{d,e_i})\to\act{a}^0_i\_\act{a}^1_i\_\dots\_\act{a}^{n(i)}_i(\vect{f_{i,0}}(\vect{d,e_i}),\dots,\vect{f_{i,n(i)}}(\vect{d,e_i}))\at t_i(\vect{d,e_i})\seqc
+\pr{X}_i(\vect{g_i}(\vect{d,e_i}))\notag\\
+&+\sum_{j\in J}\sum_{\vect{e_j\ap E_j}} c_j(\vect{d,e_j})\to\act{a}^0_j\_\act{a}^1_j\_\dots\_\act{a}^{n(j)}_j(\vect{f_{j,0}}(\vect{d,e_j}),\dots,\vect{f_{j,n(j)}}(\vect{d,e_j}))\at t_j(\vect{d,e_j})\\
+&+\sum_{\vect{e_\delta\ap E_\delta}} c_\delta(\vect{d,e_\delta})\to\delta\at t_\delta(\vect{d,e_\delta})
+\end{split}
+\end{gather}
+where $I$ and $J$ are disjoint, and
+$\act{a}^0_i\_\act{a}^1_i\_\dots\_\act{a}^{n(i)}_i$ and
+$\act{a}^0_j\_\act{a}^1_j\_\dots\_\act{a}^{n(j)}_j$ are new actions
+(for each $i$ and $j$), parameterized by the concatenation of the
+parameter lists of the contained actions.
+
+\YSU formalize below
+
+\begin{thm}
+  Given 
+  $\mathrm{MTLPE1}=(\mathrm{genspect})=\mathrm{MTLPE2}$,\\
+  $\mathrm{TLPE(MTLPE1)}=(\mathrm{timed\ mcrl})=\mathrm{TLPE(MTLPE2)}$.
+\end{thm}
+
+Time can be eliminated from TLPEs in a similar way (see
+page 106 of the thesis).
+
+\appendix
+
+\section{ATerm representation format for MTLPEs}
+A MTLPE is stored as an ATerm with the following functions.
+The sort of stored MTLPE is $\nm{MTLPE}$.
+
+\begin{gather*}
+\afunc{spec2gen}{\nm{DataTypes}\x\nm{ActionSpec}^*\x\nm{InitProcSpec}}{\nm{MTLPE}}\\
+\afunc{actspec}{\nm{String}\x\nm{String}^*}{\nm{ActionSpec}}\\
+\afunc{initprocspec}{\nm{Term}^*\x\nm{Variable}^*\x\nm{Summand}^*}{\nm{InitProcSpec}}\\
+\afunc{smd}{\nm{Variable}^*\x\nm{Action}^*\x\nm{Term}\x\nm{NextState}\x\nm{Term}}{\nm{Summand}}\\
+\afunc{act}{\nm{String}\x\nm{Term}^*}{\nm{Action}}\\
+\afunc{terminated}{}{\nm{NextState}}\\
+\afunc{i}{\nm{IndexedTerm}^*}{\nm{NextState}}
+\end{gather*}
+
+\JFG please copy the rest of the constructors and the last 3 lines from the PBES document.
+
+The constructor of sort $\nm{InitProcSpec}$ contains the actual LPE
+parameters (from \texttt{init}) as the first parameter, the formal LPE
+parameters as the second argument, and the list of summands as the
+third parameter. The third parameter of $\mathsf{cmd}$ is the term of
+sort $\nm{Time}$ representing the time at which the multiaction
+happens.  The last parameter of $\mathsf{cmd}$ is the boolean term
+representing the condition. 
+
+If the delta summand of the TLPE is present, $\delta$ 
+has to be represented by the ATerm string \texttt{"Delta"}, and actions with this name should not be allowed.
+An alternative is in using a special summand construction.
+
+%\bibliographystyle{plain}
+%\bibliography{genspect}
+
+\end{document}

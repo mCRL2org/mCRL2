@@ -1,3 +1,5 @@
+definition
+
 module mCRLt
 exports
 sorts 
@@ -86,18 +88,19 @@ context-free syntax
 
 	Specification+					-> MCRLtSpecification {cons("Spec")}
 
-context-free start-symbols
-	Specification
+%%context-free start-symbols
+%%	Specification
 
-context-free priorities
-	  Process-term "@" Data-term -> Process-term  {cons("at")}
-	> Process-term "." Process-term -> Process-term {cons("seq"),right}
-	> Process-term "<<" Process-term -> Process-term {cons("bef"),left}
-	>
-	{
-		Process-term "||" Process-term -> Process-term {cons("par"),right}
-		Process-term "|" Process-term -> Process-term {cons("comm"),right}
-		Process-term "||_" Process-term -> Process-term {cons("mrg")} 
-	}
-	> Process-term "<|" Data-term "|>" Process-term -> Process-term {cons("if")}
-	> Process-term "+" Process-term -> Process-term {cons("plus"),right}
+%%context-free priorities
+%%	  Process-term "@" Data-term -> Process-term  {cons("at")}
+%%	> Process-term "." Process-term -> Process-term {cons("seq"),right}
+%%	> Process-term "<<" Process-term -> Process-term {cons("bef"),left}
+%%	>
+%%	{
+%%		Process-term "||" Process-term -> Process-term {cons("par"),right}
+%%		Process-term "|" Process-term -> Process-term {cons("comm"),right}
+%%		Process-term "||_" Process-term -> Process-term {cons("mrg")} 
+%%	}
+%%	> Process-term "<|" Data-term "|>" Process-term -> Process-term {cons("if")}
+%%	> Process-term "+" Process-term -> Process-term {cons("plus"),right}
+
