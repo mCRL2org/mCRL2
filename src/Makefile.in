@@ -39,7 +39,7 @@ PRINTER_LDFLAGS  = -lgsparse -lATerm -lm
 #Lineariser definitions
 LINEARISER_NAME     = linearise
 LINEARISER_OBJECTS  = linearise.o
-LINEARISER_LDFLAGS  = -lgsparse -lATerm -lm
+LINEARISER_LDFLAGS  = -lgsparse -lATerm -lm -lgsrewrite
 
 #Rewriter definitions
 LIBREWR_NAME        = libgsrewrite.a
