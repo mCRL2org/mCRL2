@@ -56,9 +56,8 @@ P("");
 P("Usage: mcrl [options] [file]");
 P("");
 P("The following options can be used:");
-P("-tbfile:   an LPO of the input file in toolbus term format file is ");
-P("           written to file.tbf");
-P("-tbf:      has the same effect as -tbfile");
+P("-stack:    an LPO of the input file in toolbus term format file is ");
+P("           translated using stack datatypes. Result in written to file.lpo.");
 P("-stdout:   an LPO in toolbus term format is generated, and written");
 P("           to stdout");
 P("-regular:  it is assumed that the input file is regular, and the");
@@ -3237,9 +3236,21 @@ stacklisttype *new_stack(
   return stack;
 }
 
-static ATermAppl getvar(ATermAppl var,stacklisttype *stack)
+static ATermAppl getvar(ATermAppl var,stacklisttype *stack, specificationbasictype *spec)
 { ATermList walker=NULL; 
   ATermList getmappings=stack->opns->get;
+  
+
+  /* first search whether the variable is a free process variable */  
+
+  for(walker=spec->procdatavars ;
+               walker!=ATempty ; walker=ATgetNext(walker))
+  { if (ATAgetFirst(walker)==var)
+    { return var;
+    }
+  }
+
+  /* otherwise find out whether the variable matches a parameter */
 
   for(walker=stack->parameterlist ;
         walker!=ATempty ; walker=ATgetNext(walker))
@@ -3387,7 +3398,8 @@ static ATermAppl correctstatecond(
 static ATermAppl adapt_term_to_stack(
                  ATermAppl t, 
                  stacklisttype *stack,
-                 ATermList vars)
+                 ATermList vars,
+                 specificationbasictype *spec)
 { 
   if (gsIsOpId(t)) return t;
 
@@ -3397,12 +3409,12 @@ static ATermAppl adapt_term_to_stack(
          from the stack */
       return t;
     }
-    else return getvar(t,stack); }
+    else return getvar(t,stack,spec); }
 
   if (gsIsDataAppl(t))
   { return gsMakeDataAppl(
-            adapt_term_to_stack(ATAgetArgument(t,0),stack,vars),
-            adapt_term_to_stack(ATAgetArgument(t,1),stack,vars));
+            adapt_term_to_stack(ATAgetArgument(t,0),stack,vars,spec),
+            adapt_term_to_stack(ATAgetArgument(t,1),stack,vars,spec));
   }
               
   ATerror("Expect a term\n");
@@ -3412,21 +3424,23 @@ static ATermAppl adapt_term_to_stack(
 static ATermList adapt_termlist_to_stack(
                   ATermList tl, 
                   stacklisttype *stack, 
-                  ATermList vars)
+                  ATermList vars,
+                  specificationbasictype *spec)
 { 
   if (tl==ATempty)
   { return ATempty;
   }
 
   return ATinsertA(
-          adapt_termlist_to_stack(ATgetNext(tl),stack,vars),
-          adapt_term_to_stack(ATAgetFirst(tl),stack,vars));
+          adapt_termlist_to_stack(ATgetNext(tl),stack,vars,spec),
+          adapt_term_to_stack(ATAgetFirst(tl),stack,vars,spec));
 }
 
 static ATermList adapt_multiaction_to_stack_rec(
                    ATermList multiAction,
                    stacklisttype *stack,
-                   ATermList vars)
+                   ATermList vars,
+                   specificationbasictype *spec)
 { ATermAppl action=NULL;
   if (multiAction==ATempty)
   { return ATempty;
@@ -3436,19 +3450,20 @@ static ATermList adapt_multiaction_to_stack_rec(
   assert(gsIsAction(action));
 
   return ATinsertA(
-            adapt_multiaction_to_stack_rec(ATgetNext(multiAction),stack,vars),
+            adapt_multiaction_to_stack_rec(ATgetNext(multiAction),stack,vars,spec),
             gsMakeAction(
                   ATAgetArgument(action,0),
                   adapt_termlist_to_stack(
                            ATLgetArgument(action,1),
                            stack,
-                           vars)));
+                           vars,spec)));
 }
 
 ATermAppl adapt_multiaction_to_stack(
                    ATermAppl multiAction,
                    stacklisttype *stack,
-                   ATermList vars)
+                   ATermList vars,
+                   specificationbasictype *spec)
 {
   if (multiAction==gsMakeDelta())
   { return multiAction;
@@ -3459,7 +3474,7 @@ ATermAppl adapt_multiaction_to_stack(
            adapt_multiaction_to_stack_rec(
                ATLgetArgument(multiAction,0),
                stack,
-               vars));
+               vars,spec));
 }
 
 static ATermAppl find(
@@ -3493,7 +3508,7 @@ static ATermAppl find(
   { 
     return result;
   }
-  return adapt_term_to_stack(result,stack,vars);
+  return adapt_term_to_stack(result,stack,vars,spec);
 }
 
 
@@ -3935,7 +3950,7 @@ static void add_summands(
                                 adapt_term_to_stack(
                                        localcondition,
                                        stack,
-                                       sumvars)));
+                                       sumvars,spec)));
     }
     else
     { /* regular and singlestate */
@@ -3976,11 +3991,11 @@ static void add_summands(
     if (!regular)
     { if (!gsIsDelta(multiAction))
       { multiAction=adapt_multiaction_to_stack(
-                      multiAction,stack,sumvars);          
+                      multiAction,stack,sumvars,spec);          
       }
       if (!gsIsNil(atTime))
       { atTime=adapt_term_to_stack(
-                      atTime,stack,sumvars);
+                      atTime,stack,sumvars,spec);
       }
     }            
     sumlist=insert_summand(sumlist,
@@ -4036,7 +4051,7 @@ static void add_summands(
   }
   else condition2=condition1;
 
-  multiAction=adapt_multiaction_to_stack(multiAction,stack,sumvars);
+  multiAction=adapt_multiaction_to_stack(multiAction,stack,sumvars,spec);
   procargs=ATinsertA(ATempty,gsMakeDataAppl(stack->opns->pop,stack->stackvar));
 
   sumlist=insert_summand(sumlist,
@@ -5262,13 +5277,17 @@ static ATermList sortMultiActionLabels(ATermList l)
 }
 
 static int allowsingleaction(ATermList allowaction, ATermAppl multiaction)
-{ for (ATermList walker=ATLgetArgument(multiaction,0);
+{ 
+  for (ATermList walker=ATLgetArgument(multiaction,0);
               walker!=ATempty ; walker=ATgetNext(walker) )
   { 
     ATermAppl action=ATAgetFirst(walker);
+    
     if (ATisEmpty(allowaction))
     { return 0;
     }
+    assert(gsIsAction(action));
+    assert(gsIsActId(ATAgetArgument(action,0)));
     if (strcmp(ATgetName(ATgetAFun(ATgetFirst(allowaction))),
                  ATgetName(ATgetAFun(ATgetArgument(ATgetArgument(action,0),0))))!=0)
     { return 0;
@@ -5683,7 +5702,7 @@ static ATermAppl can_communicate(ATermList m,ATermList C)
       if (rhs==gsMakeTau())
       { return gsMakeNil();
       }
-      return rhs;
+      return gsMakeActId(rhs,ATLgetArgument(ATAgetFirst(m),1));
     }
   }
   return NULL;
@@ -6930,9 +6949,9 @@ static int main2(int argc, char *argv[],ATerm *stack_bottom)
       version(); exit(0);
     } else if(strequal(argv[i], "-help")){
       help(); exit(0);
-    } else if (strequal(argv[i], "-tbfile") || strequal(argv[i], "-tbf")){
+    } else if (strequal(argv[i], "-stack")){
       if (to_stdout==1)
-         ATerror("Options -tbfile and -stdout cannot be used together\n");
+         ATerror("Options -stack and -stdout cannot be used together\n");
       to_toolbusfile=1;
     } else if(strequal(argv[i], "-stdout")){
       to_toolbusfile=0;
