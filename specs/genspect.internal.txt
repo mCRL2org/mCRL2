@@ -1,4 +1,4 @@
-// Date: 03-01-2005
+// Date: 04-01-2005
 // This document describes the internal format of the GenSpect language. Here:
 // - <NumberString> represents a string of the format '"0"|("-"?[1-9][0-9]*)'
 // - <String> represents an arbitrary string
@@ -61,10 +61,10 @@
 <ActId>       ::= ActId(<String>, <SortExpr>*)
 
 //process equation
-<ProcEqn>     ::= ProcEqn(<ProcId>, <DataVarId>*, <ProcExpr>)
+<ProcEqn>     ::= ProcEqn(<ProcVarId>, <DataVarId>*, <ProcExpr>)
 
 //process identifier
-<ProcId>      ::= ProcId(<String>, <SortExpr>*)
+<ProcVarId>      ::= ProcVarId(<String>, <SortExpr>*)
 
 //Expressions
 //-----------
@@ -122,7 +122,7 @@
 //process expression
 <ProcExpr>    ::= ActProc(<String>, <DataExpr>*)                          (- tc)
                 | Action(<ActId>, <DataExpr>*)                            (+ tc)
-                | Process(<ProcId>, <DataExpr>*)                          (+ tc)
+                | Process(<ProcVarId>, <DataExpr>*)                          (+ tc)
                 | Delta
                 | Tau 
                 | Sum(<DataVarId>+, <ProcExpr>) 
