@@ -85,9 +85,9 @@ inline void gsDebugMsgFunc(const char *FuncName, char *Format, ...);
 //ATerm library work arounds
 //--------------------------
 //
-//To eliminate ridiculous type casts in the rest of the code, we introduce
-//wrappers around functions ATelementAt and ATgetArgument.
-//This is caused by a bad interface design of the ATerm library
+//To eliminate downcasts in the rest of the code, we introduce wrappers around
+//ATerm library functions.
+//This is caused by a bad interface design of the ATerm library.
 
 ATermAppl ATAelementAt(ATermList List, int Index);
 ATermList ATLelementAt(ATermList List, int Index);

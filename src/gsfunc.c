@@ -106,44 +106,74 @@ void gsDebugMsgFunc(const char *FuncName, char *Format, ...)
 //ATerm libary work arounds
 //-------------------------
 
+bool      ATisApplOrNull(ATerm t)
+//Ret: t is NULL or an ATermAppl
+{
+  if (t == NULL) return true;
+  else return ATgetType(t) == AT_APPL;
+}
+
+bool      ATisListOrNull(ATerm t)
+//Ret: t is NULL or an ATermList
+{
+  if (t == NULL) return true;
+  else return ATgetType(t) == AT_LIST;
+}
+
 ATermAppl ATAelementAt(ATermList List, int Index)
 {
-  return (ATermAppl) ATelementAt(List, Index);
+  ATerm Result = ATelementAt(List, Index);
+  assert(ATisApplOrNull(Result));
+  return (ATermAppl) Result;
 }
 
 ATermList ATLelementAt(ATermList List, int Index)
 {
-  return (ATermList) ATelementAt(List, Index);
+  ATerm Result = ATelementAt(List, Index);
+  assert(ATisListOrNull(Result));
+  return (ATermList) Result;
 }
 
 ATermAppl ATAgetArgument(ATermAppl Appl, int Nr)
 {
-  return (ATermAppl) ATgetArgument(Appl, Nr);
+  ATerm Result = ATgetArgument(Appl, Nr);
+  assert(ATisApplOrNull(Result));
+  return (ATermAppl) Result;
 }
 
 ATermList ATLgetArgument(ATermAppl Appl, int Nr)
 {
-  return (ATermList) ATgetArgument(Appl, Nr);
+  ATerm Result = ATgetArgument(Appl, Nr);
+  assert(ATisListOrNull(Result));
+  return (ATermList) Result;
 }
 
 ATermAppl ATAgetFirst(ATermList List)
 {
-  return (ATermAppl) ATgetFirst(List);
+  ATerm Result = ATgetFirst(List);
+  assert(ATisApplOrNull(Result));
+  return (ATermAppl) Result;
 }
 
 ATermList ATLgetFirst(ATermList List)
 {
-  return (ATermList) ATgetFirst(List);
+  ATerm Result = ATgetFirst(List);
+  assert(ATisListOrNull(Result));
+  return (ATermList) Result;
 }
 
 ATermAppl ATAtableGet(ATermTable Table, ATerm Key)
 {
-  return (ATermAppl) ATtableGet(Table, Key);
+  ATerm Result = ATtableGet(Table, Key);
+  assert(ATisApplOrNull(Result));
+  return (ATermAppl) Result;
 }
 
 ATermList ATLtableGet(ATermTable Table, ATerm Key)
 {
-  return (ATermList) ATtableGet(Table, Key);
+  ATerm Result = ATtableGet(Table, Key);
+  assert(ATisListOrNull(Result));
+  return (ATermList) Result;
 }
 
 void ATprotectAppl(ATermAppl *PAppl)
@@ -2372,8 +2402,7 @@ char *gsPosValue(const ATermAppl PosConstant)
   if (gsIsOpId(PosConstant)) {
     //PosConstant is 1
     Result = (char *) malloc(2 * sizeof(char));
-    Result[0] = '1';
-    Result[1] = '\0';
+    Result = strcpy(Result, "1");
   } else {
     //PosConstant is of the form cDub(b)(p), where b and p are boolean and
     //positive constants, respectively
@@ -2389,7 +2418,7 @@ char *gsPosValue(const ATermAppl PosConstant)
 int gsPosValue_int(const ATermAppl PosConstant)
 {
   char *s = gsPosValue(PosConstant);
-  int n = strtod(s, NULL);
+  int n = strtol(s, NULL, 10);
   free(s);
   return n;
 }
@@ -2401,8 +2430,7 @@ char *gsNatValue(const ATermAppl NatConstant)
   if (gsIsOpId(NatConstant)) {
     //NatConstant is 0
     Result = (char *) malloc(2 * sizeof(char));
-    Result[0] = '0';
-    Result[1] = '\0';
+    Result = strcpy(Result, "0");
   } else {
     //NatConstant is a positive constant
     Result = gsPosValue(ATAgetArgument(NatConstant, 1));
@@ -2413,7 +2441,7 @@ char *gsNatValue(const ATermAppl NatConstant)
 int gsNatValue_int(const ATermAppl NatConstant)
 {
   char *s = gsNatValue(NatConstant);
-  int n = strtod(s, NULL);
+  int n = strtol(s, NULL, 10);
   free(s);
   return n;
 }
@@ -2429,8 +2457,7 @@ char *gsIntValue(const ATermAppl IntConstant)
     //IntExpr is the negation of a positive number
     char *PosValue = gsPosValue(ATAgetArgument(IntConstant, 1));    
     Result = (char *) malloc((strlen(PosValue)+2) * sizeof(char));
-    Result[0] = '-';
-    Result[1] = '\0';
+    Result = strcpy(Result, "-");
     Result = strcat(Result, PosValue);
     free(PosValue);
   }
@@ -2440,7 +2467,7 @@ char *gsIntValue(const ATermAppl IntConstant)
 int gsIntValue_int(const ATermAppl IntConstant)
 {
   char *s = gsIntValue(IntConstant);
-  int n = strtod(s, NULL);
+  int n = strtol(s, NULL, 10);
   free(s);
   return n;
 }
