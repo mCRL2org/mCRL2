@@ -1,16 +1,22 @@
-% This is the GenSpect example from Section 10.2 of the TU/e Computer Science
-% master's thesis titled 'GenSpect Process Algebra' by Muck van Weerdenburg.
+% This is based on the GenSpect example from Section 10.2 of the TU/e Computer
+% Science master's thesis titled 'GenSpect Process Algebra' by Muck van
+% Weerdenburg.
+
+act
+  put_i, get_k: Nat;
+  put_k, get_j: Nat;
+  pass_k: Nat;
 
 proc
-  P(i:Nat, j:Nat, b:Bag(Nat)) = 
-    sum n:Nat. put(i,n) . P(i,j,{n} + b) +
-    sum n:Nat. get(j,n) . ((n in b) -> P(b - {n}));
+  P_ik(b:Bag(Nat)) = 
+    sum n:Nat. put_i(n) . P(i,j,b + {n:1}) +
+    sum n:Nat. (n in b) -> get_k(n) . P(b - {n:1});
 
   P2 = 
-    hide({__pass},
-      allow({get, put, __pass},
-        comm({get | put -> __pass},
-	  P(i,k,emptyBag) || P(k,j,emptyBag)
+    hide({pass_k},
+      allow({put_i, pass_k, get_j},
+        comm({get_k | put_k -> pass_k},
+	  P_ik({}) || P_kj({})
         )
       )
     );
