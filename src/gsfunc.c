@@ -62,30 +62,6 @@ ATermAppl gsMakeSortDeclRef(ATermAppl Id, ATermAppl SortExpr)
     (ATerm) SortExpr);
 }
 
-ATermAppl gsMakeSortDeclStruct(ATermAppl Id, ATermList ConstrDecls)
-{
-  return ATmakeAppl2(ATmakeAFun("SortDeclStruct", 2, ATfalse), (ATerm) Id,
-    (ATerm) ConstrDecls);
-}
-
-ATermAppl gsMakeStructDeclCons(ATermAppl ConsId, ATermList ProjDecls,
-  ATermAppl NilOrId)
-{
-  return ATmakeAppl3(ATmakeAFun("StructDeclCons", 3, ATfalse), (ATerm) ConsId,
-    (ATerm) ProjDecls, (ATerm) NilOrId);
-}
-
-ATermAppl gsMakeNil()
-{
-  return ATmakeAppl0(ATmakeAFun("Nil", 0, ATfalse));
-}
-
-ATermAppl gsMakeStructDeclProj(ATermAppl NilOrId, ATermList SortExprs)
-{
-  return ATmakeAppl2(ATmakeAFun("StructDeclProj", 2, ATfalse), (ATerm) NilOrId,
-    (ATerm) SortExprs);
-}
-
 ATermAppl gsMakeIds(ATermList Ids)
 {
   return ATmakeAppl1(ATmakeAFun("Ids", 1, ATfalse), (ATerm) Ids);
@@ -198,6 +174,30 @@ ATermAppl gsMakeSortArrow(ATermList Domain, ATermAppl SortExpr)
     (ATerm) SortExpr);
 }
 
+ATermAppl gsMakeSortStruct(ATermList StructConss)
+{
+  return ATmakeAppl1(ATmakeAFun("SortStruct", 1, ATfalse),
+    (ATerm) StructConss);
+}
+
+ATermAppl gsMakeStructCons(ATermAppl ConsId, ATermList StructProjs,
+  ATermAppl NilOrId)
+{
+  return ATmakeAppl3(ATmakeAFun("StructCons", 3, ATfalse), (ATerm) ConsId,
+    (ATerm) StructProjs, (ATerm) NilOrId);
+}
+
+ATermAppl gsMakeNil()
+{
+  return ATmakeAppl0(ATmakeAFun("Nil", 0, ATfalse));
+}
+
+ATermAppl gsMakeStructProj(ATermAppl NilOrId, ATermList SortExprs)
+{
+  return ATmakeAppl2(ATmakeAFun("StructProj", 2, ATfalse), (ATerm) NilOrId,
+    (ATerm) SortExprs);
+}
+
 ATermAppl gsMakeTrue()
 {
   return ATmakeAppl0(ATmakeAFun("True", 0, ATfalse));
@@ -260,15 +260,15 @@ ATermAppl gsMakeSize(ATermAppl DataExpr)
   return ATmakeAppl1(ATmakeAFun("Size", 1, ATfalse), (ATerm) DataExpr);
 }
 
-ATermAppl gsMakeForall(ATermAppl IdDecl, ATermAppl DataExpr)
+ATermAppl gsMakeForall(ATermList IdsDecls, ATermAppl DataExpr)
 {
-  return ATmakeAppl2(ATmakeAFun("Forall", 2, ATfalse), (ATerm) IdDecl,
+  return ATmakeAppl2(ATmakeAFun("Forall", 2, ATfalse), (ATerm) IdsDecls,
     (ATerm) DataExpr);
 }
 
-ATermAppl gsMakeExists(ATermAppl IdDecl, ATermAppl DataExpr)
+ATermAppl gsMakeExists(ATermList IdsDecls, ATermAppl DataExpr)
 {
-  return ATmakeAppl2(ATmakeAFun("Exists", 2, ATfalse), (ATerm) IdDecl,
+  return ATmakeAppl2(ATmakeAFun("Exists", 2, ATfalse), (ATerm) IdsDecls,
     (ATerm) DataExpr);
 }
 
@@ -386,9 +386,9 @@ ATermAppl gsMakeImp(ATermAppl OpLeft, ATermAppl OpRight)
     (ATerm) OpRight);
 }
 
-ATermAppl gsMakeLambda(ATermAppl IdDecl, ATermAppl DataExpr)
+ATermAppl gsMakeLambda(ATermList IdsDecls, ATermAppl DataExpr)
 {
-  return ATmakeAppl2(ATmakeAFun("Lambda", 2, ATfalse), (ATerm) IdDecl,
+  return ATmakeAppl2(ATmakeAFun("Lambda", 2, ATfalse), (ATerm) IdsDecls,
     (ATerm) DataExpr);
 }
 
@@ -426,9 +426,9 @@ ATermAppl gsMakeTau()
   return ATmakeAppl0(ATmakeAFun("Tau", 0, ATfalse));
 }
 
-ATermAppl gsMakeSum(ATermAppl IdDecl, ATermAppl ProcExpr)
+ATermAppl gsMakeSum(ATermList IdsDecls, ATermAppl ProcExpr)
 {
-  return ATmakeAppl2(ATmakeAFun("Sum", 2, ATfalse), (ATerm) IdDecl,
+  return ATmakeAppl2(ATmakeAFun("Sum", 2, ATfalse), (ATerm) IdsDecls,
     (ATerm) ProcExpr);
 }
 
@@ -480,10 +480,10 @@ ATermAppl gsMakeSeq(ATermAppl OpLeft, ATermAppl OpRight)
     (ATerm) OpRight);
 }
 
-ATermAppl gsMakeCond(ATermAppl DataExpr, ATermAppl ProcExpr)
+ATermAppl gsMakeCond(ATermAppl DataExpr, ATermAppl PEThen, ATermAppl PEElse)
 {
-  return ATmakeAppl2(ATmakeAFun("Cond", 2, ATfalse), (ATerm) DataExpr,
-    (ATerm) ProcExpr);
+  return ATmakeAppl3(ATmakeAFun("Cond", 3, ATfalse), (ATerm) DataExpr,
+    (ATerm) PEThen, (ATerm) PEElse);
 }
 
 ATermAppl gsMakeBInit(ATermAppl OpLeft, ATermAppl OpRight)
@@ -572,26 +572,6 @@ bool gsIsSortDeclStandard(char *s)
 bool gsIsSortDeclRef(char *s)
 {
   return strcmp(s, "SortDeclRef") == 0;
-}
-
-bool gsIsSortDeclStruct(char *s)
-{
-  return strcmp(s, "SortDeclStruct") == 0;
-}
-
-bool gsIsStructDeclCons(char *s)
-{
-  return strcmp(s, "StructDeclCons") == 0;
-}
-
-bool gsIsNil(char *s)
-{
-  return strcmp(s, "Nil") == 0;
-}
-
-bool gsIsStructDeclProj(char *s)
-{
-  return strcmp(s, "StructDeclProj") == 0;
 }
 
 bool gsIsIds(char *s)
@@ -697,6 +677,26 @@ bool gsIsSortBag(char *s)
 bool gsIsSortArrow(char *s)
 {
   return strcmp(s, "SortArrow") == 0;
+}
+
+bool gsIsSortStruct(char *s)
+{
+  return strcmp(s, "SortStruct") == 0;
+}
+
+bool gsIsStructCons(char *s)
+{
+  return strcmp(s, "StructCons") == 0;
+}
+
+bool gsIsNil(char *s)
+{
+  return strcmp(s, "Nil") == 0;
+}
+
+bool gsIsStructProj(char *s)
+{
+  return strcmp(s, "StructProj") == 0;
 }
 
 bool gsIsTrue(char *s)

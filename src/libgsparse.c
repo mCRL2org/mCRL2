@@ -1,5 +1,5 @@
 #define  NAME      "libgsparse"
-#define  LVERSION   "0.1.1"
+#define  LVERSION   "0.1.2"
 #define  AUTHOR    "Aad Mathijssen"
 
 #ifdef __cplusplus
@@ -222,7 +222,7 @@ bool gsPrintPart(FILE *OutStream, ATermAppl Part, int PrecLevel)
         fprintf(OutStream, ";\n");
       }
     }
-  } else if (gsIsSortDeclStruct(HeadName)) {
+  } else if (gsIsSortStruct(HeadName)) {
     //print structured sort declaration
     if (gsDebug) { printf("(gsPrintPart): printing structured sort declaration\n"); }
     Result = gsPrintPart(OutStream, ATAgetArgument(Part, 0), 0);
