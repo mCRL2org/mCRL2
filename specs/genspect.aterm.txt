@@ -13,14 +13,8 @@
 //number
 <Number>         ::= Number(<NumberString>) 
 
-//comma-separated list of identifiers
-<Ids>            ::= Ids(<Id>+) 
-
 //multiaction identifier
 <MAId>           ::= MAId(<Id>+) 
-
-//set of multiaction identifiers
-<MAIdSet>        ::= MAIdSet(<MAId>*) 
 
 //communication expression
 <CommExpr>       ::= CommExpr(<MAId>, <IdOrTau>) 
@@ -29,14 +23,8 @@
 <IdOrTau>        ::= <Id>
                    | Tau() 
 
-//set of communication expressions
-<CommExprSet>    ::= CommExprSet(<CommExpr>*) 
-
 //renaming expression
 <RenExpr>        ::= RenExpr(<Id>, <Id>) 
-
-//set of renaming expressions
-<RenExprSet>     ::= RenExprSet(<RenExpr>*) 
 
 //domain
 <Domain>         ::= Dom(<SortExpr>+) 
@@ -55,7 +43,7 @@
 <IdDecl>         ::= IdDecl(<Id>, <SortExpr>) 
 
 //declaration of one or more identifiers of the same sort
-<IdDecls>        ::= IdDecls(<Ids>, <SortExpr>) 
+<IdDecls>        ::= IdsDecl(<Id>+, <SortExpr>) 
 
 //bag enumeration element
 <BagEnumElt>     ::= BagEnumElt(<DataExpr>, <DataExpr>) 
@@ -115,17 +103,17 @@
                    | Delta() 
                    | Tau() 
                    | Sum(<IdDecl>, <ProcExpr>) 
-                   | Restrict(<MAIdSet>, <ProcExpr>) 
-                   | Allow(<MAIdSet>, <ProcExpr>) 
-                   | Hide(<MAIdSet>, <ProcExpr>) 
-                   | Ren(<RenExprSet>, <ProcExpr>) 
-                   | Comm(<CommExprSet>, <ProcExpr>) 
+                   | Restrict(<MAId>*, <ProcExpr>) 
+                   | Allow(<MAId>*, <ProcExpr>) 
+                   | Hide(<MAId>*, <ProcExpr>) 
+                   | Ren(<RenExpr>*, <ProcExpr>) 
+                   | Comm(<CommExpr>*, <ProcExpr>) 
                    | Sync(<ProcExpr>, <ProcExpr>) 
                    | AtTime(<ProcExpr>, <DataExpr>) 
                    | Seq(<ProcExpr>, <ProcExpr>) 
                    | Cond(<DataExpr>, <ProcExpr>) 
                    | BInit(<ProcExpr>, <ProcExpr>) 
-                   | Par(<ProcExpr>, <ProcExpr>) 
+                   | Merge(<ProcExpr>, <ProcExpr>) 
                    | LMerge(<ProcExpr>, <ProcExpr>) 
                    | Choice(<ProcExpr>, <ProcExpr>) 
 
@@ -133,8 +121,8 @@
 <SortSpec>       ::= SortSpec(<SortDecl>+) 
 
 //sort declaration
-<SortDecl>       ::= SortDeclStandard(<Ids>) 
-                   | SortDeclRef(<Ids>, <SortExpr>) 
+<SortDecl>       ::= SortDeclStandard(<Id>+) 
+                   | SortDeclRef(<Id>+, <SortExpr>) 
                    | SortDeclStruct(<Id>, <ConstrDecl>+) 
 
 //operation specification
@@ -157,7 +145,7 @@
 <ActSpec>        ::= ActSpec(<ActDecl>+) 
 
 //action declaration
-<ActDecl>        ::= ActDecl(<Ids>, <DomainOrNil>) 
+<ActDecl>        ::= ActDecl(<Id>+, <DomainOrNil>) 
 
 //domain or nil
 <DomainOrNil>    ::= <Domain>
@@ -176,7 +164,12 @@
 <Init>           ::= Init(<ProcExpr>) 
 
 //specification element
-<SpecElt>        ::= <SortSpec> | <OpSpec> | <EqnSpec> | <ActSpec> | <ProcSpec> | <Init>
+<SpecElt>        ::= <SortSpec> 
+                   | <OpSpec>
+                   | <EqnSpec>
+                   | <ActSpec>
+                   | <ProcSpec>
+                   | <Init>
 
 //specification
 <Spec>           ::= Spec(<SpecElt>+) 
