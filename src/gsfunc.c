@@ -1023,3 +1023,20 @@ bool gsIsCommExpr(ATermAppl term) {
   assert(gsConstructorFunctionsEnabled);
   return ATgetAFun(term) == gsAFunCommExpr;
 }
+
+//Creation of data expressions for system defined operations. If possible,
+//types are checked.
+//ATermAppl gsMakeDataExprTrue();
+//ATermAppl gsMakeDataExprFalse();
+//ATermAppl gsMakeDataExprNot(ATermAppl DataExpr);
+//ATermAppl gsMakeDataExprAnd(ATermAppl DataExprLHS, ATermAppl DataExprRHS);
+//ATermAppl gsMakeDataExprOr(ATermAppl DataExprLHS, ATermAppl DataExprRHS);
+//ATermAppl gsMakeDataExprImp(ATermAppl DataExprLHS, ATermAppl DataExprRHS);
+//ATermAppl gsMakeDataExprEq(ATermAppl DataExprLHS, ATermAppl DataExprRHS);
+//ATermAppl gsMakeDataExprNeq(ATermAppl DataExprLHS, ATermAppl DataExprRHS);
+//ATermAppl gsMakeDataExprIf(ATermAppl DataExprCond, ATermAppl DataExprThen,
+//ATermAppl DataExprIf);
+
+//ATermAppl gsMakeDataExprPos(char *p);
+//ATermAppl gsMakeDataExprNat(char *n);
+//ATermAppl gsMakeDataExprInt(char *z);

@@ -1,5 +1,5 @@
 #define  NAME      "libgsparse"
-#define  LVERSION   "0.1.8"
+#define  LVERSION   "0.1.9"
 #define  AUTHOR    "Aad Mathijssen"
 
 #ifdef __cplusplus

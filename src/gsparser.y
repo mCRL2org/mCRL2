@@ -315,7 +315,7 @@ ops_decl:
 eqn_spec:
   eqn_sect    
     {
-      $$ = gsMakeDataEqnSpec(ATmakeList1((ATerm) $1));
+      $$ = gsMakeDataEqnSpec($1);
       if (gsDebug) {
         ATprintf("parsed equation specification\n  %t\n", $$);
       }

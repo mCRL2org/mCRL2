@@ -243,16 +243,16 @@ ATermAppl gsMakeDataExprNeq(ATermAppl DataExprLHS, ATermAppl DataExprRHS);
 ATermAppl gsMakeDataExprIf(ATermAppl DataExprCond, ATermAppl DataExprThen,
   ATermAppl DataExprIf);
 
-ATermAppl gsMakeDataExprPos(int p);
-//Pre: p > 0
+ATermAppl gsMakeDataExprPos(char *p);
+//Pre: p is of the form "[1-9][0-9]*"
 //Ret: data expression of sort Pos that is a representation of p
 
-ATermAppl gsMakeDataExprNat(int n);
-//Pre: n >= 0
+ATermAppl gsMakeDataExprNat(char *n);
+//Pre: n is of the form "0 | [1-9][0-9]*"
 //Ret: data expression of sort Nat that is a representation of n
 
-ATermAppl gsMakeDataExprInt(int z);
-//Pre: true
+ATermAppl gsMakeDataExprInt(char *z);
+//Pre: z is of the form "0 | -? [1-9][0-9]*"
 //Ret: data expression of sort Int that is a representation of z
 
 #ifdef __cplusplus
