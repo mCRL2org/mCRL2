@@ -90,8 +90,9 @@
 <StructProj> ::= StructProj(<StringOrNil>, <SortExpr>+) (removed in ?? phase)
 
 //data expression
-<DataExpr>   ::= <DataVar>                              (created in tc phase)
-               | <OpId>
+<DataExpr>   ::= DataVarOpId(<String>)                  (removed in tc phase)
+               | <DataVar>                              (created in tc phase)
+               | <OpId>                                 (created in tc phase)
                | DataAppl(<DataExpr>, <DataExpr>+) 
                | <Number>                               (removed in dr phase)
                | EmptyList()                            (removed in dr phase)
