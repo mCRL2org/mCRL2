@@ -106,7 +106,6 @@ static ATermAppl gstcTraverseActProcVarConstP(ATermTable, ATermAppl);
 static ATermAppl gstcTraverseVarConsTypeD(ATermTable, ATermAppl *, ATermAppl);
 static ATermAppl gstcTraverseVarConsTypeDN(int, ATermTable, ATermAppl* , ATermAppl);
 static ATermList gstcTraverseVarConstL(ATermTable, ATermList);
-static ATermList gstcTraverseVarConstLL(ATermTable, ATermList);
 
 static ATbool gstcInferTypesP(ATermTable, ATermAppl);
 static ATbool gstcInferTypesD(ATermTable, ATermAppl);
@@ -127,6 +126,24 @@ static inline ATermAppl gstcMakeSortArrowProd2(ATermAppl Source1, ATermAppl Sour
 
 static inline ATermAppl gstcMakeSortArrowProd3(ATermAppl Source1, ATermAppl Source2,ATermAppl Source3, ATermAppl Target){
   return gsMakeSortArrowProd(ATmakeList3((ATerm)Source1,(ATerm)Source2,(ATerm)Source3),Target);
+}
+
+static inline ATermAppl gstcMakeOpIdPos2Nat(void){
+  return ATsetArgument(gsMakeOpIdPos2Nat(),
+		       (ATerm)gstcMakeSortArrowProd1(gsMakeSortIdPos(),gsMakeSortIdNat()),
+		       1);
+}
+
+static inline ATermAppl gstcMakeOpIdNat2Int(void){
+  return ATsetArgument(gsMakeOpIdNat2Int(),
+		       (ATerm)gstcMakeSortArrowProd1(gsMakeSortIdNat(),gsMakeSortIdInt()),
+		       1);
+}
+
+static inline ATermAppl gstcMakeOpIdSet2Bag(ATermAppl Type){
+  return ATsetArgument(gsMakeOpIdNameSet2Bag(Type,Type),
+		       (ATerm)gstcMakeSortArrowProd1(gsMakeSortSet(Type),gsMakeSortBag(Type)),
+		       1);
 }
 
 static inline ATermAppl INIT_KEY(void){return gsMakeProcVarId(ATmakeAppl0(ATmakeAFun("init",0,ATtrue)),ATmakeList0());}
@@ -944,7 +961,22 @@ static ATermAppl gstcTraverseVarConsTypeD(ATermTable Vars, ATermAppl *DataTerm, 
     if(gstcIsPos(Number)) Sort=gsMakeSortIdPos();
     else if(gstcIsNat(Number)) Sort=gsMakeSortIdNat(); 
     else Sort=gsMakeSortIdInt(); 
+    
     *DataTerm=ATsetArgument(*DataTerm,(ATerm)Sort,1);
+    
+    if(!gstcAdjustPosTypesA(Sort,PosType) && Sort==gsMakeSortIdPos()){
+      Sort=gsMakeSortIdNat();
+      *DataTerm=gsMakeDataApplProd(gstcMakeOpIdPos2Nat(),ATmakeList1((ATerm)*DataTerm));
+    }
+    
+    if(!gstcAdjustPosTypesA(Sort,PosType) && Sort==gsMakeSortIdNat()){
+      Sort=gsMakeSortIdInt();
+      *DataTerm=gsMakeDataApplProd(gstcMakeOpIdNat2Int(),ATmakeList1((ATerm)*DataTerm));
+    }
+    
+    if(!gstcAdjustPosTypesA(Sort,PosType) && Sort==gsMakeSortIdInt()){
+      ThrowM("A number type is not in this list of alowed types: %t (while typechecking %t)",PosType,*DataTerm);
+    }
     return Sort;
   }
 
@@ -1013,11 +1045,27 @@ static ATermAppl gstcTraverseVarConsTypeD(ATermTable Vars, ATermAppl *DataTerm, 
   }  
 
   if(gsIsBagEnum(*DataTerm)){
-    ATermList NewData=gstcTraverseVarConstLL(Vars,ATLgetArgument(*DataTerm,0));
-    if(!NewData) {throw;}
-    *DataTerm=ATsetArgument(*DataTerm,(ATerm)NewData,0);
-    return gsMakeUnknown();
-  }  
+    ATermList DataTermList2=ATLgetArgument(*DataTerm,0);
+    ATermAppl Type;
+    ATermList NewDataTermList2=ATmakeList0();
+    for(;!ATisEmpty(DataTermList2);DataTermList2=ATgetNext(DataTermList2)){
+      ATermAppl DataTerm2=ATAgetFirst(DataTermList2);
+      ATermAppl DataTerm0=ATAgetArgument(DataTerm2,0);
+      ATermAppl Type0=gstcTraverseVarConsTypeD(Vars,&DataTerm0,gsMakeUnknown());
+      if(!Type0) {throw;}
+      ATermAppl DataTerm1=ATAgetArgument(DataTerm2,1);
+      ATermAppl Type1=gstcTraverseVarConsTypeD(Vars,&DataTerm1,gsMakeSortIdNat());
+      if(!Type1) {throw;}
+      NewDataTermList2=ATinsert(NewDataTermList2,(ATerm)gsMakeBagEnumElt(DataTerm0,DataTerm1));
+      Type=Type0;
+    }
+    DataTermList2=ATreverse(NewDataTermList2);
+
+    Type=gsMakeSortBag(Type);
+
+    *DataTerm=gsMakeBagEnum(DataTermList2,Type);
+    return Type;
+  }
 
   if(gsIsDataApplProd(*DataTerm)){
     ATermAppl Data=ATAgetArgument(*DataTerm,0);
@@ -1173,25 +1221,6 @@ static ATermList gstcTraverseVarConstL(ATermTable Vars, ATermList DataTermList){
     NewDataTermList=ATinsert(NewDataTermList,(ATerm)DataTerm);
   }
   return ATreverse(NewDataTermList);
- finally:
-  return Result;
-}
-
-static ATermList gstcTraverseVarConstLL(ATermTable Vars, ATermList DataTermList2){
-  ATermList Result=NULL;
-  ATermList NewDataTermList2=ATmakeList0();
-
-  for(;!ATisEmpty(DataTermList2);DataTermList2=ATgetNext(DataTermList2)){
-    ATermAppl DataTerm2=ATAgetFirst(DataTermList2);
-    ATermAppl DataTerm0=ATAgetArgument(DataTerm2,0);
-    ATermAppl Type0=gstcTraverseVarConsTypeD(Vars,&DataTerm0,gsMakeUnknown());
-    if(!Type0) {throw;}
-    ATermAppl DataTerm1=ATAgetArgument(DataTerm2,1);
-    ATermAppl Type1=gstcTraverseVarConsTypeD(Vars,&DataTerm1,gsMakeUnknown());
-    if(!Type1) {throw;}
-    NewDataTermList2=ATinsert(NewDataTermList2,(ATerm)gsMakeBagEnumElt(DataTerm0,DataTerm1));
-  }
-  return ATreverse(NewDataTermList2);
  finally:
   return Result;
 }
