@@ -49,11 +49,16 @@ REWR_NAME     = rewr
 REWR_OBJECTS  = rewr.o
 REWR_LDFLAGS  = -lgsparse -lgsrewrite -lATerm -lm
 
+#Rewriter definitions
+PNML2GS_NAME     = pnml2gs
+PNML2GS_OBJECTS  = pnml2gs.o
+PNML2GS_LDFLAGS  = -lgsparse -lATerm -lxml2 -lm
+
 #Make rules
 .PHONY: all install clean
 .PRECIOUS: gsparser.c gslexer.c
 
-all : $(LIB_NAME) $(LIBREWR_NAME) $(PARSER_NAME) $(PRINTER_NAME) $(LINEARISER_NAME) $(REWR_NAME) Makefile
+all : $(LIB_NAME) $(LIBREWR_NAME) $(PARSER_NAME) $(PRINTER_NAME) $(LINEARISER_NAME) $(REWR_NAME) $(PNML2GS_NAME) Makefile
 
 install : $(PARSER_NAME) $(PRINTER_NAME)
 	$(INSTALL) $(PARSER_NAME) $(bindir)
@@ -77,6 +82,9 @@ $(LIBREWR_NAME) : $(LIBREWR_OBJECTS) Makefile
 $(REWR_NAME) : $(REWR_OBJECTS) $(LIB_NAME) Makefile
 	$(CC) -o $@ $(REWR_OBJECTS) $(LDFLAGS) $(REWR_LDFLAGS)
 
+$(PNML2GS_NAME) : $(PNML2GS_OBJECTS) $(LIB_NAME) Makefile
+	$(CC) -o $@ $(PNML2GS_OBJECTS) $(LDFLAGS) $(PNML2GS_LDFLAGS)
+
 gslexer.o      : gslexer.h gsparser.h gsfunc.h gslowlevel.h
 gsparser.o     : gsfunc.h gslowlevel.h
 gsfunc.o       : gsfunc.h gslowlevel.h
@@ -89,6 +97,7 @@ linearise.o    : libgsparse.h gsfunc.h gslowlevel.h
 gsrewr_inner.o : gslowlevel.h gsfunc.h gsrewr_inner.h
 libgsrewrite.o : gslowlevel.h gsfunc.h libgsrewrite.h gsrewr_inner.h
 rewr.o         : gslowlevel.h gsfunc.h libgsparse.h libgsrewrite.h 
+pnml2gs.o      : gslowlevel.h gsfunc.h libgsparse.h
 
 %.c : %.y
 	$(BISON) $(BFLAGS) -o $@ $<
@@ -97,7 +106,7 @@ rewr.o         : gslowlevel.h gsfunc.h libgsparse.h libgsrewrite.h
 	$(LEX) $(LFLAGS) -o$@ $<
 
 clean :
-	$(RM) $(LIB_NAME) $(PARSER_NAME) $(PRINTER_NAME) $(LINEARISER_NAME) *.o gslexer.c\
+	$(RM) $(LIB_NAME) $(PARSER_NAME) $(PRINTER_NAME) $(LINEARISER_NAME) $(REWR_NAME) $(PNML2GS_NAME) *.o gslexer.c\
 gsparser.c gsparser.h gsparser.output config.status config.log *~ core core.*
 
 #Note: to make a shared version of the gsparse library instead of a static one, do the following:
