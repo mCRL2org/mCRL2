@@ -1,4 +1,4 @@
-// Date: 05-11-2004
+// Date: 08-11-2004
 // This document describes the ATerm format of GenSpect specifications. Here:
 // - <IdString> represents a string of the format '[a-zA-Z_][a-zA-Z0-9_]*';
 // - <NumberString> represents a string of the format '"0"|("-"?[1-9][0-9]*) ';
