@@ -55,8 +55,8 @@ typedef struct {
 static Body body;
 
 // Static function declarations
-void gstcDataInit(void);
-void gstcDataDestroy(void);
+static void gstcDataInit(void);
+static void gstcDataDestroy(void);
 static ATbool gstcReadInSorts (ATermList);
 static ATbool gstcReadInFuncs(ATermList);
 static ATbool gstcReadInActs (ATermList);
@@ -80,6 +80,8 @@ static ATbool gstcCheckNamesD(ATermTable, ATermAppl);
 static ATermTable gstcMakeVarsTable(ATermList);
 static ATermAppl gstcRewrActProc(ATermAppl);
 static ATermAppl gstcTraverseActProc(ATermAppl);
+static ATermAppl gstcTraverseVarConstP(ATermTable, ATermAppl);
+static ATermAppl gstcTraverseVarConstD(ATermTable, ATermAppl);
 
 #define INIT_KEY gsMakeProcVarId(ATmakeAppl0(ATmakeAFun("init",0,ATtrue)),ATmakeList0())
 
@@ -97,7 +99,8 @@ ATermAppl gsTypeCheck (ATermAppl input){
 			       ATLgetArgument(ATAgetArgument(input,2),0)))) {throw;}
   body.equations=ATLgetArgument(ATAgetArgument(input,3),0);
   if(!gstcReadInActs(ATLgetArgument(ATAgetArgument(input,4),0))) {throw;}
-  if(!gstcReadInProcsAndInit(ATLgetArgument(ATAgetArgument(input,5),0),ATAgetArgument(ATAgetArgument(input,6),0))) {throw;}
+  if(!gstcReadInProcsAndInit(ATLgetArgument(ATAgetArgument(input,5),0),
+			     ATAgetArgument(ATAgetArgument(input,6),0))) {throw;}
   gsDebugMsg ("type checking read-in phase finished\n");
   
   gsDebugMsg ("type checking transform ActProc+VarConst phase started\n");
@@ -293,30 +296,32 @@ static ATermList gstcWriteProcs(void){
 
 static ATbool gstcCheckNamesData(void){
   ATbool Result=ATtrue;
+  ATermTable Vars=NULL;
   for(ATermList Eqns=body.equations;!ATisEmpty(Eqns);Eqns=ATgetNext(Eqns)){
     ATermAppl Eqn=ATAgetFirst(Eqns);
-    ATermTable Vars=gstcMakeVarsTable(ATLgetArgument(Eqn,0));
+    Vars=gstcMakeVarsTable(ATLgetArgument(Eqn,0));
     if(!Vars){ThrowF;}
     ATermAppl Cond=ATAgetArgument(Eqn,1);
     if(!gsIsNil(Cond) && !gstcCheckNamesD(Vars,Cond)){ThrowF;}
     if(!gstcCheckNamesD(Vars,ATAgetArgument(Eqn,2))){ThrowF;}
     if(!gstcCheckNamesD(Vars,ATAgetArgument(Eqn,3))){ThrowF;}
-    ATtableDestroy(Vars);
   }
  finally:
+  ATtableDestroy(Vars);
   return Result;
 }
 
 static ATbool gstcCheckNamesProc(void){
   ATbool Result=ATtrue;
+  ATermTable Vars=NULL;
   for(ATermList ProcVars=ATtableKeys(body.proc_pars);!ATisEmpty(ProcVars);ProcVars=ATgetNext(ProcVars)){
     ATermAppl ProcVar=ATAgetFirst(ProcVars);
-    ATermTable Vars=gstcMakeVarsTable(ATLtableGet(body.proc_pars,(ATerm)ProcVar));
+    Vars=gstcMakeVarsTable(ATLtableGet(body.proc_pars,(ATerm)ProcVar));
     if(!Vars){ThrowF;}
-    if(!gstcCheckNamesP(Vars,ATAtableGet(body.proc_bodies,(ATerm)ProcVar))){ThrowF;}
-    ATtableDestroy(Vars);
+    if(!gstcCheckNamesP(Vars,ATAtableGet(body.proc_bodies,(ATerm)ProcVar))){ATtableDestroy(Vars);ThrowF;}
   } 
  finally:
+  ATtableDestroy(Vars);
   return Result;
 }
 
@@ -335,7 +340,39 @@ static ATbool gstcTransformActProc(void){
 
 static ATbool gstcTransformVarConst(void){
   ATbool Result=ATtrue;
+  ATermTable Vars=NULL;
+  
+  //data terms in equations
+  {
+    ATermList NewEqns=ATmakeList0();
+    for(ATermList Eqns=body.equations;!ATisEmpty(Eqns);Eqns=ATgetNext(Eqns)){
+      ATermAppl Eqn=ATAgetFirst(Eqns);
+      ATermList VarList=ATLgetArgument(Eqn,0);
+      Vars=gstcMakeVarsTable(VarList);
+      if(!Vars){ThrowF;}
+      ATermAppl Cond=ATAgetArgument(Eqn,1);
+      if(!gsIsNil(Cond) && !(Cond=gstcTraverseVarConstD(Vars,Cond))){ThrowF;}
+      ATermAppl Left=ATAgetArgument(Eqn,2);
+      if(!(Left=gstcTraverseVarConstD(Vars,Left))){ThrowF;}
+      ATermAppl Right=ATAgetArgument(Eqn,3);
+      if(!(Right=gstcTraverseVarConstD(Vars,Right))){ThrowF;}
+      NewEqns=ATinsert(NewEqns,(ATerm)gsMakeDataEqn(VarList,Cond,Left,Right));
+    }
+    body.equations=ATreverse(NewEqns);
+  }
+  
+  //data terms in processes and init
+  for(ATermList ProcVars=ATtableKeys(body.proc_pars);!ATisEmpty(ProcVars);ProcVars=ATgetNext(ProcVars)){
+    ATermAppl ProcVar=ATAgetFirst(ProcVars);
+    ATtableDestroy(Vars);
+    Vars=gstcMakeVarsTable(ATLtableGet(body.proc_pars,(ATerm)ProcVar));
+    if(!Vars){ThrowF;}
+    ATermAppl NewProcTerm=gstcTraverseVarConstP(Vars,ATAtableGet(body.proc_bodies,(ATerm)ProcVar));
+    if(!NewProcTerm){ThrowF;}
+    ATtablePut(body.proc_bodies,(ATerm)ProcVar,(ATerm)NewProcTerm);
+  } 
  finally:
+  ATtableDestroy(Vars);
   return Result;
 }
 
@@ -372,7 +409,7 @@ static ATbool gstcCheckNamesD(ATermTable Vars, ATermAppl DataTerm){
   return Result;
 }
     
-ATermTable gstcMakeVarsTable(ATermList VarDecls){
+static ATermTable gstcMakeVarsTable(ATermList VarDecls){
   ATbool Result=ATtrue;
   ATermTable Vars=ATtableCreate(63,50);
 
@@ -418,7 +455,7 @@ static ATermAppl gstcRewrActProc(ATermAppl ProcTerm){
   return Result;
 }
 
-ATermAppl gstcTraverseActProc(ATermAppl ProcTerm){
+static ATermAppl gstcTraverseActProc(ATermAppl ProcTerm){
   // if maches -- apply
   if(gstcMatchRewrActProc(ProcTerm))
     return gstcRewrActProc(ProcTerm);
@@ -438,4 +475,18 @@ ATermAppl gstcTraverseActProc(ATermAppl ProcTerm){
     } 
   }
   return ATmakeApplArray(ProcSymbol,args);
+}
+
+static ATermAppl gstcTraverseVarConstP(ATermTable Vars,ATermAppl ProcTerm){
+  ATermAppl Result=NULL;
+  Result=ProcTerm;
+ finally:
+  return Result;
+}
+
+static ATermAppl gstcTraverseVarConstD(ATermTable Vars,ATermAppl DataTerm){
+  ATermAppl Result=NULL;
+  Result=DataTerm;
+ finally:
+  return Result;
 }

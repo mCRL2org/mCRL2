@@ -39,13 +39,6 @@ extern char *strdup(const char *s);
 //print error message supplied by the first parameter with the remaining
 //parameters as arguments, and throw an exception with value x
 
-#define ThrowF            ThrowV(ATfalse)
-//store ATfalse in result and throw an exception
-
-#define ThrowMF(...)      ThrowVM(ATfalse, __VA_ARGS__)
-//print error message supplied by the first parameter with the remaining
-//store ATfalse in result and throw an exception
-
 //Message printing
 //----------------
 
