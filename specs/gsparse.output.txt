@@ -1,4 +1,4 @@
-// Date: 02-12-2004
+// Date: 06-12-2004
 // This document describes the output format of the GenSpect parser. Here:
 // - <NumberString> represents a string of the format '"0"|("-"?[1-9][0-9]*)'
 // - <String> represents an arbitrary string
@@ -12,74 +12,74 @@
 //-------
 
 //sort identifier
-<SortId>     ::= SortId(<String>) 
+<SortId>      ::= SortId(<String>)
 
-//data identifier
-<OpId>       ::= OpId(<String>, <SortExprOrUnknown>) 
+//operation identifier
+<OpId>        ::= OpId(<String>, <SortExprOrUnknown>) 
 
 //action identifier
-<ActId>      ::= ActId(<String>, <SortExprOrUnknown>*) 
+<ActId>       ::= ActId(<String>, <SortExprOrUnknown>*) 
 
 //process identifier
-<ProcessId>  ::= ProcessId(<String>) 
+<ProcId>      ::= ProcId(<String>)
 
 //data variable
-<DataVar>    ::= DataVar(<String>, <SortExprOrUnknown>) 
+<DataVar>     ::= DataVar(<String>, <SortExprOrUnknown>) 
 
 //sort expression or unknown
 <SortExprOrUnknown> ::= <SortExpr> 
                       | Unknown()                       (removed in tc phase)
 
 //string or nil
-<StringOrNil>::= <String> | Nil() 
+<StringOrNil> ::= <String> | Nil()
 
 //number
-<Number>     ::= Number(<NumberString>)                 (removed in dr phase)
+<Number>      ::= Number(<NumberString>)                 (removed in dr phase)
 
 //Specification
 //-------------
 
 //specification
-<Spec>       ::= SpecV1(SortSpec(<SortDecl>*), ConsSpec(<OpDecl>*),
+<Spec>        ::= SpecV1(SortSpec(<SortDecl>*), ConsSpec(<OpDecl>*),
                    MapSpec(<OpDecl>*), EqnSpec(<EqnSect>*), ActSpec(<ActDecl>*),
                    ProcSpec(<ProcDecl>*), Init(<ProcExpr>)
-                 )
+                  )
 
 //sort declaration
-<SortDecl>   ::= SortDeclStandard(<String>) 
-               | SortDeclRef(<String>, <SortExpr>)      (removed in ?? phase)
+<SortDecl>    ::= SortDeclStandard(<String>)
+                | SortDeclRef(<String>, <SortExpr>)      (removed in ?? phase)
 
 //operation declaration
-<OpDecl>     ::= OpDecl(<String>, <SortExpr>)
+<OpDecl>      ::= OpDecl(<String>, <SortExpr>)
 
 //equation section
-<EqnSect>    ::= EqnSect(<DataVarDecl>*, <EqnDecl>+) 
+<EqnSect>     ::= EqnSect(<DataVarDecl>*, <EqnDecl>+) 
 
 //data variable declaration
-<DataVarDecl>::= DataVarDecl(<String>, <SortExpr>)
+<DataVarDecl> ::= DataVarDecl(<String>, <SortExpr>)
 
 //equation declaration
-<EqnDecl>    ::= EqnDecl(<DataExpr>, <DataExpr>) 
+<EqnDecl>     ::= EqnDecl(<DataExpr>, <DataExpr>) 
 
 //action declaration
-<ActDecl>    ::= ActDecl(<String>, <SortExpr>*) 
+<ActDecl>     ::= ActDecl(<String>, <SortExpr>*)
 
 //process declaration
-<ProcDecl>   ::= ProcDecl(<String>, <DataVarDecl>*, <ProcExpr>) 
+<ProcDecl>    ::= ProcDecl(<String>, <DataVarDecl>*, <ProcExpr>)
 
 //Expressions
 //-----------
 
 //sort expression
 <SortExpr>   ::= <SortId>
-               | SortBool() 
-               | SortPos() 
-               | SortNat() 
-               | SortInt() 
-               | SortList(<SortExpr>) 
-               | SortSet(<SortExpr>) 
-               | SortBag(<SortExpr>) 
-               | SortArrow(<SortExpr>+, <SortExpr>) 
+               | SortBool()
+               | SortPos()
+               | SortNat()
+               | SortInt()
+               | SortList(<SortExpr>)
+               | SortSet(<SortExpr>)
+               | SortBag(<SortExpr>)
+               | SortArrow(<SortExpr>+, <SortExpr>)
                | SortStruct(<StructCons>+)              (removed in ?? phase) 
 
 //constructor declaration of a structured sort
