@@ -166,22 +166,34 @@ static const char *gsStructPrefix = "Struct@";
 static const char *gsListPrefix   = "List@";
 static const char *gsSetPrefix    = "Set@";
 static const char *gsBagPrefix    = "Bag@";
+static const char *gsLambdaPrefix = "lambda@";
 
 ATermAppl gsMakeFreshStructSortId(ATerm Term);
 //Pre: Term is not NULL
-//Ret: fresh sort identifier for the implementation of a structured sort
+//Ret: sort identifier for the implementation of a structured sort with prefix
+//     gsStructPrefix, that does not occur in Term
 
 ATermAppl gsMakeFreshListSortId(ATerm Term);
 //Pre: Term is not NULL
-//Ret: fresh sort identifier for the implementation of a list sort
+//Ret: fresh sort identifier for the implementation of a list sort with prefix
+//     gsListPrefix, that does not occur in Term
 
 ATermAppl gsMakeFreshSetSortId(ATerm Term);
 //Pre: Term is not NULL
-//Ret: fresh sort identifier for the implementation of a set sort
+//Ret: fresh sort identifier for the implementation of a set sort with prefix
+//     gsSetPrefix, that does not occur in Term
 
 ATermAppl gsMakeFreshBagSortId(ATerm Term);
 //Pre: Term is not NULL
-//Ret: fresh sort identifier for the implementation of a bag sort
+//Ret: fresh sort identifier for the implementation of a bag sort with prefix
+//     gsBagPrefix, that does not occur in Term
+
+ATermAppl gsMakeFreshLambdaOpId(ATermAppl SortExpr, ATerm Term);
+//Pre: SortExpr is a sort expression
+//     Term is not NULL
+//Ret: operation identifier OpId(n, s) for the implementation of a lambda
+//     abstraction, where s is SortExpr and n is a name with prefix
+//     gsLambdaPrefix, that does not occur in Term
 
 bool gsIsStructSortId(ATermAppl SortExpr);
 //Pre: SortExpr is sort expression
@@ -198,6 +210,11 @@ bool gsIsSetSortId(ATermAppl SortExpr);
 bool gsIsBagSortId(ATermAppl SortExpr);
 //Pre: SortExpr is sort expression
 //Ret: SortExpr is the implementation of a bag sort
+
+bool gsIsLambdaOpId(ATermAppl DataExpr);
+//Pre: DataExpr is a data expression
+//Ret: DataExpr is an operation identifier for the implementation of a lambda
+//     abstraction
 
 ATermAppl gsImplementBool(ATermAppl Spec);
 //Pre: Spec is a specification that adheres to the internal syntax after type
@@ -364,6 +381,7 @@ ATermAppl gsAddDataDecls(ATermAppl Spec, TDataDecls DataDecls)
 ATermAppl gsImplExprsPart(ATermAppl Part, ATermList *PSubsts,
   TDataDecls *PDataDecls)
 {
+  bool Recursive = true;
   //perform substitutions from *PSubsts on Part
   Part = gsSubstValues_Appl(*PSubsts, Part, false);
   //replace Part by an implementation if the head of Part is a special
@@ -489,13 +507,15 @@ ATermAppl gsImplExprsPart(ATermAppl Part, ATermList *PSubsts,
     }
   } else if (gsIsLambda(Part)) {
     //Part is a lambda abstraction; replace by a named function
-    ATermList BoundVars = ATLgetArgument(Part, 0);
-    ATermAppl Body = ATAgetArgument(Part, 1);
-    ATermList FreeVars = gsGetFreeVars(Part);
+    //implement the body, the bound variables and the free variables
+    ATermList BoundVars = gsImplExprsParts(ATLgetArgument(Part, 0),
+      PSubsts, PDataDecls);
+    ATermAppl Body = gsImplExprsPart(ATAgetArgument(Part, 1),
+      PSubsts, PDataDecls);
+    ATermList FreeVars = gsImplExprsParts(gsGetFreeVars(Part),
+      PSubsts, PDataDecls);
     ATermList Vars = ATconcat(FreeVars, BoundVars);
-    //create fresh operation identifier
-    ATermAppl OpIdName =
-      gsFreshString2ATermAppl("lambda@", (ATerm) PDataDecls->Ops, false);
+    //create sort for the new operation identifier
     ATermAppl OpIdSort = gsGetSort(Body);
     ATermList l = ATreverse(Vars);
     while (!ATisEmpty(l))
@@ -503,34 +523,36 @@ ATermAppl gsImplExprsPart(ATermAppl Part, ATermList *PSubsts,
       OpIdSort = gsMakeSortArrow(ATAgetArgument(ATAgetFirst(l), 1), OpIdSort);
       l = ATgetNext(l);
     }
-    ATermAppl OpId = gsMakeOpId(OpIdName, OpIdSort);
-    //add operation identifier to operation declarations
+    //create new operation identifier
+    ATermAppl OpId = gsMakeFreshLambdaOpId(OpIdSort, (ATerm) PDataDecls->Ops);
+    //add operation identifier to the data declarations
     PDataDecls->Ops = ATinsert(PDataDecls->Ops, (ATerm) OpId);
-    //implement body
-    Body = gsImplExprsPart(Body, PSubsts, PDataDecls);
-    //add data equation for the operation
+    //add data equation for the operation to the data declarations
     PDataDecls->DataEqns = ATinsert(PDataDecls->DataEqns, (ATerm)
       gsMakeDataEqn(Vars, gsMakeNil(), gsMakeDataApplList(OpId, Vars), Body));
     //replace Part
     ATermAppl NewPart = gsMakeDataApplList(OpId, FreeVars);
     *PSubsts = gsAddSubstToSubsts(gsMakeSubst(Part, NewPart), *PSubsts);
     Part = NewPart;
+    Recursive = false;
   }
   //implement expressions in the arguments of Part
-  AFun Head = ATgetAFun(Part);
-  int NrArgs = ATgetArity(Head);      
-  if (NrArgs > 0) {
-    ATerm Args[NrArgs];
-    for (int i = 0; i < NrArgs; i++) {
-      ATerm Arg = ATgetArgument(Part, i);
-      if (ATgetType(Arg) == AT_APPL)
-        Args[i] = (ATerm) gsImplExprsPart((ATermAppl) Arg, PSubsts,
-          PDataDecls);
-      else //ATgetType(Arg) == AT_LIST
-        Args[i] = (ATerm) gsImplExprsParts((ATermList) Arg, PSubsts,
-          PDataDecls);
+  if (Recursive) {
+    AFun Head = ATgetAFun(Part);
+    int NrArgs = ATgetArity(Head);      
+    if (NrArgs > 0) {
+      ATerm Args[NrArgs];
+      for (int i = 0; i < NrArgs; i++) {
+        ATerm Arg = ATgetArgument(Part, i);
+        if (ATgetType(Arg) == AT_APPL)
+          Args[i] = (ATerm) gsImplExprsPart((ATermAppl) Arg, PSubsts,
+            PDataDecls);
+        else //ATgetType(Arg) == AT_LIST
+          Args[i] = (ATerm) gsImplExprsParts((ATermList) Arg, PSubsts,
+            PDataDecls);
+      }
+      Part = ATmakeApplArray(Head, Args);
     }
-    Part = ATmakeApplArray(Head, Args);
   }
   return Part;
 }
@@ -759,6 +781,12 @@ ATermAppl gsMakeFreshBagSortId(ATerm Term)
   return gsMakeSortId(gsFreshString2ATermAppl(gsBagPrefix, Term, false));
 }
 
+ATermAppl gsMakeFreshLambdaOpId(ATermAppl SortExpr, ATerm Term)
+{
+  return gsMakeOpId(gsFreshString2ATermAppl(gsLambdaPrefix, Term, false),
+    SortExpr);
+}
+
 bool gsIsStructSortId(ATermAppl SortExpr)
 {
   if (gsIsSortId(SortExpr)) {
@@ -802,6 +830,18 @@ bool gsIsBagSortId(ATermAppl SortExpr)
       gsBagPrefix,
       ATgetName(ATgetAFun(ATAgetArgument(SortExpr, 0))),
       strlen(gsBagPrefix)) == 0;
+  } else {
+    return false;
+  }
+}
+
+bool gsIsLambdaOpId(ATermAppl DataExpr)
+{
+  if (gsIsOpId(DataExpr)) {
+    return strncmp(
+      gsLambdaPrefix,
+      ATgetName(ATgetAFun(ATAgetArgument(DataExpr, 0))),
+      strlen(gsLambdaPrefix)) == 0;
   } else {
     return false;
   }
