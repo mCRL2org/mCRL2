@@ -1313,6 +1313,7 @@ static ATermAppl gstcTraverseVarConsTypeD(ATermTable Vars, ATermAppl *DataTerm, 
     ATermAppl Name=ATAgetArgument(*DataTerm,0);
     ATermAppl Type=ATAtableGet(Vars,(ATerm)Name);
     if(Type){
+      gsDebugMsg("Recognised variable %t, Type: %t\n",Name,Type);
       if(!(Type=gstcTypeMatchA(Type,PosType))) {ThrowM("No variable %t with type %t",*DataTerm,PosType);}
       *DataTerm=gsMakeDataVarId(Name,Type);
       return Type;
@@ -1359,7 +1360,7 @@ static ATermAppl gstcTraverseVarConsTypeD(ATermTable Vars, ATermAppl *DataTerm, 
     
     if(ATgetLength(ParList)==1){ 
       ATermAppl Type=ATAgetFirst(ParList);
-      *DataTerm=gsMakeDataVarId(Name,Type);
+      *DataTerm=gsMakeOpId(Name,Type);
       return Type;
     }
     else{
