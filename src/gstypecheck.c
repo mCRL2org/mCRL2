@@ -40,7 +40,14 @@ extern "C"
 
 
 // Static data 
-// the static context of the spec will be chacked and used, not transformed
+// system constants and functions 
+typedef struct { 
+  ATermTable constants;		//name -> Set(sort expression)
+  ATermTable functions;		//name -> Set(sort expression)
+} gsSystem;
+static gsSystem gssystem;
+
+// the static context of the spec will be checked and used, not transformed
 typedef struct { 
   ATermIndexedSet basic_sorts;	
   ATermTable defined_sorts;	//name -> sort expression
@@ -66,6 +73,7 @@ static Body body;
 static void gstcDataInit(void);
 static void gstcDataDestroy(void);
 static ATbool gstcReadInSorts (ATermList);
+static ATbool gstcReadInConstructors();
 static ATbool gstcReadInFuncs(ATermList);
 static ATbool gstcReadInActs (ATermList);
 static ATbool gstcReadInProcsAndInit (ATermList, ATermAppl);
@@ -82,9 +90,13 @@ static ATbool gstcEqTypesA(ATermAppl, ATermAppl);
 static inline ATbool gstcInTypesL(ATermList, ATermList);
 static ATbool gstcEqTypesL(ATermList, ATermList);
 
+static ATbool gstcReadInSortStruct(ATermAppl);
+
 static ATbool gstcCheckNamesP(ATermTable, ATermAppl);
 static ATbool gstcCheckNamesD(ATermTable, ATermAppl);
 
+static ATbool gstcAddConstant(ATermAppl, ATermAppl, const char*);
+static ATbool gstcAddFunction(ATermAppl, ATermAppl, const char*);
 static ATermTable gstcAddVars2Table(ATermTable,ATermList);
 static ATermAppl gstcRewrActProc(ATermAppl);
 static inline ATermAppl gstcMakeActionOrProc(ATbool, ATermAppl, ATermList, ATermList);
@@ -107,6 +119,7 @@ ATermAppl gsTypeCheck (ATermAppl input){
   if(!gstcReadInSorts(ATLgetArgument(ATAgetArgument(input,0),0))) {throw;}
   // Check soorts for loops
   // Unwind sorts to enable equiv and subtype relations
+  if(!gstcReadInConstructors()) {throw;}
   if(!gstcReadInFuncs(ATconcat(ATLgetArgument(ATAgetArgument(input,1),0),
 			       ATLgetArgument(ATAgetArgument(input,2),0)))) {throw;}
   body.equations=ATLgetArgument(ATAgetArgument(input,3),0);
@@ -185,44 +198,37 @@ static ATbool gstcReadInSorts (ATermList Sorts){
     }				
     if(gsIsSortId(Sort)) ATindexedSetPut(context.basic_sorts, (ATerm)SortName, &new);
     else
-      if(gsIsSortRef(Sort)) ATtablePut(context.defined_sorts, (ATerm)SortName, (ATerm)ATAgetArgument(Sort,1));
+      if(gsIsSortRef(Sort)){
+	ATtablePut(context.defined_sorts, (ATerm)SortName, (ATerm)ATAgetArgument(Sort,1));
+	gsDebugMsg("recognized %t %t\n",SortName,(ATerm)ATAgetArgument(Sort,1));    	
+      }
       else assert(0);
   }
  finally:
   return Result;
 }  
 
+static ATbool gstcReadInConstructors(){
+  for(ATermList Sorts=ATtableKeys(context.defined_sorts);!ATisEmpty(Sorts);Sorts=ATgetNext(Sorts))
+    if(!gstcReadInSortStruct(ATAtableGet(context.defined_sorts,ATgetFirst(Sorts)))) return ATfalse;
+  return ATtrue;
+} 
+
 static ATbool gstcReadInFuncs(ATermList Funcs){
+  gsDebugMsg("Star Read-in Func\n");    
   ATbool Result=ATtrue;
   for(;!ATisEmpty(Funcs);Funcs=ATgetNext(Funcs)){
     ATermAppl Func=ATAgetFirst(Funcs);
     ATermAppl FuncName=ATAgetArgument(Func,0);
     ATermAppl FuncType=ATAgetArgument(Func,1);
-    bool is_constant=!gsIsSortArrowProd(FuncType);
     
-    if(ATAtableGet(context.constants, (ATerm)FuncName)){
-      ThrowMF("Double declaration of constant %t\n", FuncName);
-    }
-    ATermList Types=ATLtableGet(context.functions, (ATerm)FuncName);
-    if(is_constant && Types){
-      ThrowMF("Double declaration of constant %t\n", FuncName);
-    }
-    if(is_constant){
-      ATtablePut(context.constants, (ATerm)FuncName, (ATerm)FuncType);
+    if(gsIsSortArrowProd(FuncType)){
+      if(!gstcAddFunction(FuncName,FuncType,"function")) {ThrowF;}
     }
     else{
-      // the table context.functions contains a list of types for each
-      // function name. We need to check if there is already such a type 
-      // in the list. If so -- error, otherwise -- add
-      if (Types && gstcInTypesA(FuncType, Types)){
-	ThrowMF("Double declaration of constant %t\n", FuncName);
-      }
-      else{
-	if (!Types) Types=ATmakeList0();
-	Types=ATappend(Types,(ATerm)FuncType);
-	ATtablePut(context.functions,(ATerm)FuncName,(ATerm)Types);
-      }
-    }	
+      if(!gstcAddConstant(FuncName,FuncType,"constant")) {ThrowMF("Could not add constant\n");}
+    }
+    gsDebugMsg("Read-in Func %t, Types %t\n",FuncName,FuncType);    
   }
  finally:
   return Result;
@@ -410,6 +416,93 @@ static ATbool gstcEqTypesL(ATermList Type1, ATermList Type2){
   return ATisEqual(Type1, Type2);
 }
 
+static ATbool gstcReadInSortStruct(ATermAppl SortExpr){
+  ATbool Result=ATtrue;
+
+  if(gsIsSortId(SortExpr)) return ATtrue;
+
+  if(gsIsSortList(SortExpr) || gsIsSortSet(SortExpr) || gsIsSortBag(SortExpr))
+    return gstcReadInSortStruct(ATAgetArgument(SortExpr,0));
+
+  if(gsIsSortArrowProd(SortExpr)){
+    if(!gstcReadInSortStruct(ATAgetArgument(SortExpr,1))) return ATfalse;
+    for(ATermList Sorts=ATLgetArgument(SortExpr,0);!ATisEmpty(Sorts);Sorts=ATgetNext(Sorts)){
+      if(!gstcReadInSortStruct(ATAgetFirst(Sorts))) return ATfalse;
+    }
+    return ATtrue;
+  }
+  
+  if(gsIsSortStruct(SortExpr)){
+    for(ATermList Constrs=ATLgetArgument(SortExpr,0);!ATisEmpty(Constrs);Constrs=ATgetNext(Constrs)){
+      ATermAppl Constr=ATAgetFirst(Constrs);
+    
+      // recognizer -- if present -- a function from SortExpr to Bool
+      ATermAppl Name=ATAgetArgument(Constr,2);
+      if(!gsIsNil(Name) && 
+	 !gstcAddFunction(Name,gsMakeSortArrowProd(ATmakeList1((ATerm)Constr),gsMakeSortExprBool()),"recognizer")) {ThrowF;}
+      
+      // constructor type and projections
+      ATermList Projs=ATLgetArgument(Constr,1);
+      Name=ATAgetArgument(Constr,0);
+      if(ATisEmpty(Projs)){
+	if(!gstcAddConstant(Name,Constr,"constructor constant")){ThrowF;}
+	else continue;
+      }
+      
+      ATermList ConstructorType=ATmakeList0();
+      for(;!ATisEmpty(Projs);Projs=ATgetNext(Projs)){
+	ATermAppl Proj=ATAgetFirst(Projs);
+	ATermAppl ProjSort=ATAgetArgument(Proj,1);
+	if(!gsIsNil(Proj) &&
+	   !gstcAddFunction(ATAgetArgument(Proj,0),gsMakeSortArrowProd(ATmakeList1((ATerm)Constr),ProjSort),"projection")) {ThrowF;}
+	ConstructorType=ATinsert(ConstructorType,(ATerm)ProjSort);
+      }
+      if(!gstcAddFunction(Name,gsMakeSortArrowProd(ATreverse(ConstructorType),Constr),"constructor")) {ThrowF;}
+    }
+    return ATtrue;
+  }
+  
+  assert(0);
+ finally:
+  return Result;
+} 
+
+static ATbool gstcAddConstant(ATermAppl Name, ATermAppl Sort, const char* msg){
+  ATbool Result=ATtrue;
+
+  if(ATAtableGet(context.constants, (ATerm)Name) || ATLtableGet(context.functions, (ATerm)Name)){
+    ThrowMF("Double declaration of %s %t\n", msg, Name);
+  }
+  
+  ATtablePut(context.constants, (ATerm)Name, (ATerm)Sort);
+ finally:
+  return Result;
+}
+
+static ATbool gstcAddFunction(ATermAppl Name, ATermAppl Sort, const char *msg){
+  ATbool Result=ATtrue;
+
+  if(ATAtableGet(context.constants, (ATerm)Name)){
+    ThrowMF("Double declaration of constant and %s %t\n", msg, Name);
+  }
+
+  ATermList Types=ATLtableGet(context.functions, (ATerm)Name);
+  // the table context.functions contains a list of types for each
+  // function name. We need to check if there is already such a type 
+  // in the list. If so -- error, otherwise -- add
+  if (Types && gstcInTypesA(Sort, Types)){
+    ThrowMF("Double declaration of %s %t\n", msg, Name);
+  }
+  else{
+    if (!Types) Types=ATmakeList0();
+    Types=ATappend(Types,(ATerm)Sort);
+    ATtablePut(context.functions,(ATerm)Name,(ATerm)Types);
+  }
+  gsDebugMsg("Read-in %s %t Type %t\n",msg,Name,Types);    
+ finally:
+  return Result;
+}
+
 static ATbool gstcCheckNamesP(ATermTable Vars, ATermAppl ProcTerm){
   ATbool Result=ATtrue;
  finally:
@@ -443,7 +536,7 @@ static ATermTable gstcAddVars2Table(ATermTable Vars, ATermList VarDecls){
 }
 
 static ATbool gstcMatchRewrActProc(ATermAppl ProcTerm){
-  //gsWarningMsg("matching %t, %d\n",ProcTerm, gsIsActionProcess(ProcTerm)); 
+  gsDebugMsg("matching %t, %d\n",ProcTerm, gsIsActionProcess(ProcTerm)); 
   if(gsIsActionProcess(ProcTerm)) return ATtrue;
   else return ATfalse;
 }
@@ -662,7 +755,7 @@ static ATermAppl gstcTraverseVarConstD(ATermTable Vars, ATermAppl DataTerm){
     ATermList ParList=ATLtableGet(context.functions,(ATerm)Name);
     if(ParList && ATgetLength(ParList)==1) return gsMakeDataVarId(Name,ATAgetFirst(ParList));
     else{
-      gsWarningMsg("Unknown Op %t\n",DataTerm);    
+      gsDebugMsg("Unknown Op %t\n",DataTerm);    
       return gsMakeOpId(Name,gsMakeUnknown());
     }
   }  
@@ -680,7 +773,7 @@ static ATermAppl gstcTraverseVarConstDN(int nFactPars, ATermTable Vars, ATermApp
     if(!nFactPars){
       if((Type=ATAtableGet(context.constants,(ATerm)Name))) return gsMakeOpId(Name,Type);
       else{
-	gsWarningMsg("Unknown Op %t\n",DataTerm);
+	gsDebugMsg("Unknown Op %t\n",DataTerm);
 	return gsMakeOpId(Name,Type);
       }
     }
@@ -698,7 +791,7 @@ static ATermAppl gstcTraverseVarConstDN(int nFactPars, ATermTable Vars, ATermApp
     
     if(ParList && ATgetLength(ParList)==1) return gsMakeDataVarId(Name,ATAgetFirst(ParList));
     else{
-      gsWarningMsg("Unknown Op %t\n",DataTerm);    
+      gsDebugMsg("Unknown Op %t\n",DataTerm);    
       return gsMakeOpId(Name,gsMakeUnknown());
     }
   }
