@@ -2,7 +2,7 @@
 " Language:   GenSpect
 " Extension:  gs
 " Maintainer: Aad Mathijssen <A.H.J.Mathijssen@tue.nl>
-" Date:       05-11-2004
+" Date:       08-11-2004
 
 syntax clear
 
@@ -20,7 +20,7 @@ syntax keyword gsTodo       contained TODO FIXME XXX
 syntax region gsComment     start=/%/ end='$' contains=gsTodo
 
 syntax match gsIdentifier   /[a-zA-Z_][a-zA-Z0-9_]*/
-syntax match gsOperator     /[.+|<>:;=#@(){}\[\],!*?\\\-]/
+syntax match gsOperator     /[.+|&<>:;=#@(){}\[\],!*?\\\-]/
 syntax match gsOperator     /||_/
 syntax match gsOperator     /->/
 syntax match gsNumber       /0/
