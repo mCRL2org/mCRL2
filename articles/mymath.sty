@@ -1,0 +1,52 @@
+% Extension for Mathematics 
+
+% List of Definitions
+\newenvironment{dlist}%
+  {\begin{trivlist}\begin{small}}{\end{small}\end{trivlist}}
+\newenvironment{axioms}%
+  {\hrule\begin{footnotesize}}{\end{footnotesize}\hrule}
+\newenvironment{eqproof}%
+  {\begin{footnotesize}}{\end{footnotesize}}
+
+% Tabulation to use in Definitions
+\def\t#1{\hbox to #1em{}}
+
+% Name (use to have multiletter variable names)
+\newcommand{\nm}[1]{\mathit{#1}}
+\newcommand{\mt}[1]{\mathbf{#1}}
+
+% Identity symbol 
+\newcommand{\id}{\approx}
+
+% TUPPLES, ETC.
+\newcommand{\tup}[1]{< \!\!#1 \!\!>}
+\newcommand{\emptyseq}{\langle\,\rangle}
+\newcommand{\x}{\times}
+\newcommand{\func}[3]{#1:#2\rightarrow#3}
+\newcommand{\syntder}[2]{\{#1\}\vdash#2}
+\newcommand{\syntderBA}[2]{\{#1\}\eBA#2}
+\newcommand{\syntderG}[3]{\{#1\}\cup#2\vdash#3}
+\newcommand{\notsyntderG}[3]{\{#1\}\cup#2\not\vdash#3}
+\newcommand{\semder}[2]{\{#1\}\vddash#2}
+\newcommand{\set}[1]{\{#1\}}
+\newcommand{\mset}[1]{\{#1\}}
+\newcommand{\sem}[1]{\llbracket #1\rrbracket}
+\newcommand{\seq}[1]{\langle #1\rangle}
+\newcommand{\suchthat}{{~|~}}
+\newcommand{\powerset}[1]{2^{#1}}
+\newcommand{\fcomp}{\circ}
+\newcommand{\vect}[1]{\overrightarrow{#1}}
+\newcommand{\N}{\mathbb{N}}
+\newcommand{\B}{\mathbb{B}}
+\newcommand{\Z}{\mathbb{Z}}
+\newcommand{\cons}{\mathbin{\text{\scriptsize \&}}} % Addition of an element to list's end 
+\newcommand{\conc}{\mathbin{^\frown}} % List concatenation
+\newcommand{\Land}{\mathbin{\bigwedge}}
+\newcommand{\Lor}{\mathbin{\bigvee}}
+\newcommand{\dom}[1]{\mathcal{D}_{#1}}
+\newcommand{\bydef}{\stackrel{\vartriangle}=}
+\newcommand{\eBA}{\vdash_{\!\!\nm{eBA}}}
+
+% SYNTAX (BNF)
+\newcommand{\syntor}{\mathbin{~|~}} 
+\newcommand{\syntdef}{\mathbin{\,::=\,}} 

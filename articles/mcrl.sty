@@ -1,0 +1,97 @@
+% muCRL Style File
+%\RequirePackage{stmaryrd}
+
+% Name
+%\newcommand{\textmu}{$\mu$}
+\newcommand{\mcrl}{\textit{\textmu}CRL}
+%\newcommand{\mcrl}{\texorpdfstring{$\mu$CRL}{\textmu CRL}}
+\newcommand{\mmcrl}{\mu\mathrm{CRL}}
+
+% Operators
+\newcommand{\seqc}{\mathbin{\cdot}}
+\newcommand{\parc}{\mathbin{\parallel}}
+%\newcommand{\leftm}{\mathbin{\mathrel{\lfloor\hspace*{-.25em}\lfloor}}}
+%\newcommand{\leftm}{\mathbin{\mathrel{\lfloor\:\!\!\!\lfloor}}}
+\newcommand{\leftm}{\mathbin{\mathrel{\llfloor}}} % \RequirePackage{stmaryrd}
+%\DeclareMathSymbol{\leftm}{\mathop}{largesymbolsA}{"1C}
+\newcommand{\comm}{\mathbin{\mid}}
+\newcommand{\lcond}{\lhd}
+\newcommand{\rcond}{\rhd}
+\newcommand{\encap}[1]{\partial_{#1}}
+\newcommand{\hide}[1]{\tau_{#1}}
+\newcommand{\ren}[1]{\rho_{#1}}
+
+% Action, Process
+\newcommand{\act}[1]{\mathsf{#1}}
+\newcommand{\pr}[1]{\mathsf{#1}}
+\newcommand{\ap}{{:}}
+
+% Solution of Rec. Equation
+\newcommand{\rec}[2]{\langle {#1} \vert {#2} \rangle}
+
+% Keywords
+\newcommand{\Init}{\nm{Init}}
+\newcommand{\Proc}{\nm{Proc}}
+\newcommand{\Comm}{\nm{Comm}}
+\newcommand{\Sort}{\nm{Sort}}
+\newcommand{\Func}{\nm{Func}}
+\newcommand{\Var}{\nm{Var}}
+\newcommand{\Rew}{\nm{Rew}}
+\newcommand{\Map}{\nm{Map}}
+\newcommand{\Act}{\nm{Act}}
+
+\newcommand{\sortkw}{\mathbf{sort}}
+\newcommand{\commkw}{\mathbf{comm}}
+\newcommand{\actkw}{\mathbf{act}}
+\newcommand{\prockw}{\mathbf{proc}}
+\newcommand{\initkw}{\mathbf{init}}
+\newcommand{\varkw}{\mathbf{var}}
+\newcommand{\funckw}{\mathbf{func}}
+\newcommand{\mapkw}{\mathbf{map}}
+\newcommand{\rewkw}{\mathbf{rew}}
+
+% Data Type Specific (for pretty printing)
+\newcommand{\T}{\mathbf{t}}
+\newcommand{\F}{\mathbf{f}}
+\newcommand{\Nat}{\nm{Nat}}
+\newcommand{\Bool}{\nm{Bool}}
+\newcommand{\Not}{\lnot}
+\newcommand{\Eq}[2]{#1=#2}
+\newcommand{\NEq}[2]{#1\neq#2}
+\newcommand{\Gt}[2]{#1>#2}  % Greater  
+%\newcommand{\LAnd}[2]{#1\wedge#2} %Logical And 
+\newcommand{\Acc}[2]{#1[#2]} %Access Array
+\newcommand{\ABI}{\nm{ABI}} %Bool Array
+\newcommand{\LM}{\nm{LM}} %Bool Array
+\newcommand{\ML}{\nm{ML}} %Bool Array
+\newcommand{\Empty}{\langle\rangle} %Empty list
+
+% (Conditionaly) Implies and Equivalent
+\newcommand{\Impl}{\mathbin{\Rightarrow}}
+\newcommand{\CondImpl}{\mathbin{\stackrel{\nm{cond}}{\Rightarrow}}}
+\newcommand{\CondImplR}{\mathbin{\stackrel{\nm{cond}}{\Leftarrow}}}
+\newcommand{\IndImpl}{\mathbin{\stackrel{\nm{ind}}{\Rightarrow}}}
+\newcommand{\IndImplR}{\mathbin{\stackrel{\nm{ind}}{\Leftarrow}}}
+\newcommand{\CondEq}{\mathbin{\stackrel{\nm{cond}}{=}}}
+\newcommand{\IndEq}{\mathbin{\stackrel{\nm{ind}}{=}}}
+
+% Timed muCRL
+\font \aap cmmi10\newcommand{\at}{\mathbin{\mbox{\aap ,}}}
+%\newcommand{\at}{\mathbin{\scriptscriptstyle{\mathsf{c}}}}
+\newcommand{\ti}{\mathbin{\gg}}
+\newcommand{\tii}{\mathbin{\ggg}}
+\newcommand{\tb}{\mathbin{\ll}}
+\newcommand{\tzero}{\mathbf{0}}
+\newcommand{\daz}{\delta\!\at\!\tzero} % delta at zero
+\newcommand{\Time}{\nm{Time}}
+\newcommand{\udd}{{\partial\mathcal{U}}}
+
+% BPA
+\newcommand{\BPA}{\mathrm{BPA}}
+\newcommand{\algb}[1]{\mathcal{#1}}
+\newcommand{\prb}[1]{\pr{#1}}
+\newcommand{\actb}[1]{\act{#1}}
+\newcommand{\vectb}[1]{\vec{#1}}
+
+% TRANSITION SYSTEMS
+\newcommand{\trans}[1]{\stackrel{#1}{\to}}

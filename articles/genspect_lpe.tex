@@ -34,6 +34,8 @@
 \newcommand{\wt}{\nm{wt}}
 \newcommand{\Int}{\nm{Int}}
 \newcommand{\Pos}{\nm{Pos}}
+\newcommand{\Type}{\nm{Type}}
+\newcommand{\String}{\nm{String}}
 
 \newcommand{\Vars}{\mbox{\em Vars}}
 
@@ -402,23 +404,24 @@ definitions of the variables, and can change depending on the scope.
 Given a context of a specification $\kappa$, we denote the static context as 
 $\nm{Sig(\kappa)}$ and the dynamic part as $\nm{Vars}(\kappa)$. 
 The static context is a tupple 
-$(\nm{BasicSorts},\nm{DefinedSorts},\nm{Operations},\nm{Actions},\nm{Processes})$
+\[(\nm{BasicSorts},\nm{DefinedSorts},\nm{Operations},\nm{Actions},\nm{Processes})\]
 which represents the names and types of the sorts, operations, actions and processes 
 defined in the specification.
 The types of the context operatinos are defined below:
 \begin{align*}
 \nm{BasicSorts}=\set{\String}\\
 \func{\nm{DefinedSorts}}{\String}{\Type}\\
-\func{\nm{Operations}}{\String}{\Type}\\
-\func{\nm{Actions}}{\String}{\Type}\\
+\nm{Operations}\in\String\x\Type\\
+\nm{Actions}\in\String\x\Type\\
 \func{\nm{Processes}}{\String}{\Type}
-\end{align*} 
+\end{align*}
 The sort $\Type$ is a sort expression containing defined sorts, a list
 of such expressions, or the empty type (unit type).  It can be also
-unknown.  The function $\func{\nm{basicType}{\Type}{\Type}$ unfolds
+unknown.  The function $\func{\nm{basicType}}{\Type}{\Type}$ unfolds
 all occurrences of derived sort names in a type expression.
 
-The variables 
+The variables are defined as a function from Variable name to a variable type
+$\func{\nm{Variables}}{\String}{\Type}$.
 
 \paragraph{Data Terms}
 Let $\Sig$ be a signature, and let $\NV$ be a set of variables over
