@@ -612,9 +612,9 @@ identifier and \frm{e_{i}} is a data expression. Expression \frm{e} is called
 the body and each equation \frm{a_{i} = e_{i}} is called a \emph{definition}.
 Each identifier \frm{a_{i}} is used as an abbreviation for \frm{e_{i}} in
 \frm{e}, even if \frm{a_{i}} is already defined in the context. Also, an
-identifier \frm{a_{i}} may not occur in another expression \frm{e_{j}}, where
-\frm{j \neq i}. As a consequence, the order in which expressions occur is
-irrelevant.
+identifier \frm{a_{i}} may not occur in any of the expressions \frm{e_{j}},
+\frm{0 \leq j \leq n}. As a consequence, the order in which expressions occur
+is irrelevant.
 
 \section{Predefined data types}
 \label{sec:StandardTypes}
@@ -675,23 +675,23 @@ positive numbers           & 1,2,3,\ldots               & \verb+1,2,3,...+\\
 natural numbers            & 0,1,2,\ldots               & \verb+0,1,2,...+\\
 integers                   & \ldots, -2,-1,0,1,2,\ldots
                                               & \verb+...,-2,-1,0,1,2,...+\\
+conversion                 & \fa{A2B}{\_}               & \verb+A2B(_)+\\
+less than or equal         & \_ \leq \_                 & \verb+_ <= _+\\
+less than                  & \_ < \_                    & \verb+_ < _+\\
+greater than or equal      & \_ \geq \_                 & \verb+_ >= _+\\
+greater than               & \_ > \_                    & \verb+_ > _+\\
+maximum                    & \faa{max}{\_\,}{\_}        & \verb+max(_,_)+\\
+minimum                    & \faa{min}{\_\,}{\_}        & \verb+min(_,_)+\\
+absolute value             & \fa{abs}{\_}               & \verb+abs(_)+\\
 negation                   & - \_                       & \verb+-_+\\
+successor                  & \fa{succ}{\_}              & \verb+succ(_)+\\
+predecessor                & \fa{pred}{\_}              & \verb+pred(_)+\\
 addition                   & \_ + \_                    & \verb-_ + _-\\
 subtraction                & \_ - \_                    & \verb+_ - _+\\
 multiplication             & \_ * \_                    & \verb+_ * _+\\
 integer div                & \_ \div \_                 & \verb+_ div _+\\
 integer mod                & \_ \mod \_                 & \verb+_ mod _+\\
 exponentiation             & \faa{exp}{\_\,}{\_}        & \verb+exp(_,_)+\\
-successor                  & \fa{succ}{\_}              & \verb+succ(_)+\\
-predecessor                & \fa{pred}{\_}              & \verb+pred(_)+\\
-absolute value             & \fa{abs}{\_}               & \verb+abs(_)+\\
-maximum                    & \faa{max}{\_\,}{\_}        & \verb+max(_,_)+\\
-minimum                    & \faa{min}{\_\,}{\_}        & \verb+min(_,_)+\\
-less than                  & \_ < \_                    & \verb+_ < _+\\
-greater than               & \_ > \_                    & \verb+_ > _+\\
-less than or equal         & \_ \leq \_                 & \verb+_ <= _+\\
-greater than or equal      & \_ \geq \_                 & \verb+_ >= _+\\
-conversion                 & \fa{A2B}{\_}               & \verb+A2B(_)+\\
 \hline
 \end{tabular}\bigskip
 
@@ -929,6 +929,35 @@ eqn  & \fa{qf}{t} & = & \faaa{if}{\fa{is\_leaf}{t}}{\fa{lval}{t}}{
            \faa{f}{\fa{nval}{t}}{\fa{qf}{\fa{right}{t}}}}}\\
 \end{genspect}
 
+\subsubsection{Process declarations}
+
+Process declarations do not allow pattern matching of the left hand side of the
+equation. However, we can use pattern matching indirectly through the use of
+summations in the right hand side. As an example, take the following process
+declaration without pattern matching, where \frm{T} stands for \frm{\f{BATree}}:
+\begin{genspect}
+proc & \fa{P}{t: T} & = &
+    \fa{is\_leaf}{t} & \To
+    & \multicolumn{3}{@{}L}{\fa{get}{\fa{lval}{t}}.\delta\ +}\\
+&&& \fa{is\_node}{t} & \To
+    & \fa{get}{\fa{nval}{t}}.(\fa{P}{\fa{left}{t}} + \fa{P}{\fa{right}{t}})\\
+\end{genspect}
+
+\noindent
+This declaration is equivalent to the following declaration, which uses pattern
+matching:
+\begin{genspect}
+proc & \fa{P}{t: T} & = &
+    \sum_{a:A}         
+    & (t & == & \fa{leaf}{a}) \To \fa{get}{a}.\delta\ +\\
+&&& \sum_{a:A, u,v: T}
+    & (t & == & \faaa{node}{u}{a}{v}) \To \fa{get}{a}.(\fa{P}{u} + \fa{P}{v})\\
+\end{genspect}
+
+\noindent
+Note that is has to be investigated whether the current tools are able to
+handle this in the right way. If this is not the case, this should be added.
+
 \subsection{Extensions}
 
 Other desirable type constructors could be the following:
@@ -1055,56 +1084,5 @@ introduced concepts can be depicted hierarchically as follows:
 \hline
 \end{tabular}
 \end{center}
-
-\section{Process declarations}
-
-Processes are defined by means of process equations. There are three possible
-representations. The first one resembles \mCRL, except for that references to
-processes only show the changed variables. Here all variables ocurring in the
-right hand side are declared in the left hand side. Pattern matching in the
-left hand side is not allowed. E.g., where \frm{T} stands for \frm{\f{BATree}}:
-\begin{genspect}
-proc & \fa{P}{t: T} & = &
-    \fa{is\_leaf}{t} & \To
-    & \multicolumn{3}{@{}L}{\fa{get}{\fa{lval}{t}}.\delta\ +}\\
-&&& \fa{is\_node}{t} & \To
-    & \fa{get}{\fa{nval}{t}}.(\fa{P}{\fa{left}{t}} + \fa{P}{\fa{right}{t}})\\
-\end{genspect}
-
-\noindent
-However, we can mimic this as follows\footnote{It has to be investigated
-whether the current tools are able to handle this in the right way. If this is
-not the case, this should be added.}:
-\begin{genspect}
-proc & \fa{P}{t: T} & = &
-    \sum_{a:A}         
-    & (t & = & \fa{leaf}{a}) \To \fa{get}{a}.\delta\\
-&&& \sum_{a:A, u,v: T}
-    & (t & = & \faaa{node}{u}{a}{v}) \To \fa{get}{a}.(\fa{P}{u} + \fa{P}{v})\\
-\end{genspect}
-
-\noindent
-In the second variant pattern matching is allowed. E.g.:
-\begin{genspect}
-proc & \fa{P}{\fa{leaf}{a: A}}               & = & \fa{get}{a}.\delta\\
-     & \fa{P}{\faaa{node}{t: T}{a: A}{u: T}} & = & 
-       \fa{get}{a}.(\fa{snd}{d}.\faaa{P}{t}{d}{e} +
-       \fa{snd}{e}.\faaa{P}{u}{d}{e})
-\end{genspect}
-
-\noindent
-In the third variant the variable declarations are separated from the process
-declarations and a type declaration for the process has been added. E.g.:
-\begin{genspect}
-proc & P: T\\
-var  & a: A\\
-     & t,u: T\\
-pdef & \fa{P}{\fa{leaf}{a}}         & = & \fa{get}{a}.\delta\\
-     & \fa{P}{\faaa{node}{t}{a}{u}} & = & 
-       \fa{get}{a}.(\fa{snd}{d}.\faaa{P}{t}{d}{e} +
-       \fa{snd}{e}.\faaa{P}{u}{d}{e})    
-\end{genspect}
-\noindent
-This last variant is the most close to the definition of data operations.
 
 \end{document}
