@@ -659,7 +659,7 @@ conditional                & \faaa{if}{\_}{\_}{\_}  & \verb+if(_,_,_)+\\
 
 \noindent
 For sort \frm{\srtbool}, we have that equality is bi-implication, and that
-disequality is exclusive-or.
+inequality is exclusive-or.
 
 \subsection{Numbers}
 
@@ -745,12 +745,9 @@ list without its last element  & \fa{rtail}{\_}         & \verb+rtail(_)+\\
 \end{tabular}\bigskip
 
 \noindent
-Remarks:
-\begin{tdefinitions}{-}
-\item the empty list is an empty list construction, i.e.\ \frm{\el}
-\item the lists \frm{\lst{a,b}}, \frm{a \cons \lst{b}} and \frm{\lst{a} \snoc
-b} are equal.
-\end{tdefinitions}
+The empty list is represented by an empty list construction, i.e.\ \frm{\el}.
+Also note that the lists \frm{\lst{a,b}}, \frm{a \cons \lst{b}} and
+\frm{\lst{a} \snoc b} are all equivalent.
 
 \subsection{Sets and bags}
 
@@ -775,6 +772,8 @@ union                          & \_ \cup \_              & \verb-_ + _-\\
 difference                     & \_ - \_                 & \verb+_ - _+\\
 intersection                   & \_ \cap \_              & \verb+_ * _+\\
 set complement                 & \stack[1.3ex]{\_}{\_}   & \verb+!_+\\
+convert set to bag             & \fa{Set2Bag}{\_}        & \verb+Set2Bag(_)+\\
+convert bag to set             & \fa{Bag2Set}{\_}        & \verb+Bag2Set(_)+\\
 \hline
 \end{tabular}\bigskip
 
@@ -782,7 +781,7 @@ set complement                 & \stack[1.3ex]{\_}{\_}   & \verb+!_+\\
 The empty set of bag is represented by an empty enumeration, i.e.\
 \frm{\set{}}. Note that a set enumeration declares a set, not a bag. So e.g.\
 \frm{\set{a,b,c}} declares the same set as \frm{\set{a,b,c,c,a,c}}. In a bag
-enumeration the number of times an element occurs has to declared explicitly.
+enumeration the number of times an element occurs has to be declared explicitly.
 So e.g.\ \frm{\bag{a:2,b:1}} declares a bag consisting of two \frm{a}'s and one
 \frm{b}. Also \frm{\bag{a:1,b:1,a:1}} declares the same bag. A set
 comprehension \frm{\scompr{x:A}{\fa{P}{x}}} declares the set consisting of all
@@ -804,8 +803,8 @@ X_{n} \To Y}. The following operations are provided for these sorts.
 \hline
 Operator                   & \textit{Rich}          & \verb+Plain+\\\hline
 function application       & \_(\_,\ldots,\_)       & \verb+_(_,...,_)+\\
-lambda abstraction         & \lambda {\_,\ldots,\_ {:} X_{0},\ldots,.X_{n}}.\_
-                                          & \verb+lambda _,...,_:X0,...,Xn._+\\
+lambda abstraction         & \lambda \_{:}X_{0}, \ldots, \_{:}X_{n}.\_
+                                          & \verb+lambda _:X0,...,_:Xn._+\\
 \hline
 \end{tabular}\bigskip
 
@@ -838,22 +837,23 @@ structured type is declared by the following sort expression, where \frm{n \in
 \noindent
 From this declaration it can be seen that at least \frm{1} summation has to be
 specified and a summation may consists of \frm{0} products. Each summation
-\frm{i} is labelled by a \emph{constructor} \frm{c_{i}} and a \emph{recogniser}
-\frm{\f{is\_c_{i}}}. To determine if a term of the above sort is constructed
-with \frm{c_{i}}, recogniser \frm{\f{is\_c_{i}}} can be used. If a summation
-\frm{i} does not have any products, it is written as \frm{c_{i}?\f{is\_c_{i}}}
-instead of \frm{c_{i}()?\f{is\_c_{i}}}.  Each product \frm{(i,j)} is labelled
-by a \emph{projection} \frm{\f{pr}_{i,j}}.
+\frm{i} is labelled by a \emph{constructor} \frm{c_{i}} and optionally by a
+\emph{recogniser} \frm{\f{is\_c_{i}}}. Recogniser \frm{\f{is\_c_{i}}} is used
+to determine if a term of the above sort is constructed with \frm{c_{i}}. If a
+recogniser label is left out, the corresponding \frm{?} is also left out.  Each
+product \frm{(i,j)} is optionally labelled by a \emph{projection}
+\frm{\f{pr}_{i,j}}. With this projection, the \frm{j}'th element of summation
+\frm{i} can be obtained. If a projection label is left out, the corresponding
+\frm{:} is left out. If a summation \frm{i} does not have any products, it is
+written as \frm{c_{i}?\f{is\_c_{i}}} instead of \frm{c_{i}()?\f{is\_c_{i}}}.  
 
-All labels have to be distinct. The projection and recogniser labels are
-optional. If such a label is left out, the corresponding \frm{:} or \frm{?} is
-left out, and the corresponding default name from the above definition is used.
-Each sort \frm{A_{i,j}} has to be a valid sort expression, in which forward
-references to sort labels may occur. This means that it is allowed to specify
-systems of equations of structured types.
+All labels have to be chosen such that no ambiguity can arise. Each sort
+\frm{A_{i,j}} has to be a valid sort expression, in which forward references to
+sort labels may occur. This means that it is allowed to specify systems of
+equations of structured types.
 
-The following operations are generated for the above sort. If specified, the
-labels provided by the user are used.
+The following operations are generated for the above sort. Projection and
+recogniser operations are only generated if the user specified them.
 
 \bigskip
 \begin{tabular}{|l@{\qquad}L@{\qquad}l|}
@@ -873,14 +873,14 @@ projection label is declared.
 We give a few examples. For finite \frm{n \in \nat}, an enumerated type can be
 declared by
 \begin{genspect}
-sort & Enum & = & \kwstruct\ \f{enum}_{0} \ |\ \ldots\ |\ \f{enum}_{n}
+sort & Enum & = & \kwstruct\ \f{enum}_{0}?\f{is\_enum}_{0}\ |\ \ldots\ |\
+\f{enum}_{n}?\f{is\_enum}_{n}
 \end{genspect}
 
 \noindent
-This generates constructor operations \frm{\f{enum}_{i} : \f{Enum}}, \frm{0
-\leq i \leq n}. For each term of sort \emph{Enum} we can find out if it is
-constructed using constructor \frm{\f{enum}_{i}}, by using the operation
-\frm{\f{is\_enum}_{i}: \f{Enum} \To \srtbool}.
+This generates constructor operations \frm{\f{enum}_{i} : \f{Enum}}, together
+with recogniser operations \frm{\f{is\_enum}_{i}: \f{Enum} \To \srtbool}, with
+\frm{0 \leq i \leq n}.
 
 Pairs of elements of sort \frm{A} and \frm{B} can be declared as follows:
 \begin{genspect}
@@ -888,9 +888,8 @@ sort & \f{ABPair} & = & \kwstruct\ \faa{pair}{\f{fst}: A}{\f{snd}: B}
 \end{genspect}
 
 \noindent
-Except for constructor operation \frm{\f{pair}: A \times B \To \f{ABPair}} and
-the (superfluous) membership operation \frm{\f{is\_pair}: \f{ABPair} \To
-\srtbool}, the projection operations \frm{\f{fst}: \f{ABPair} \To A} and
+For this declaration, constructor operation \frm{\f{pair}: A \times B \To
+\f{ABPair}} and projection operations \frm{\f{fst}: \f{ABPair} \To A} and
 \frm{\f{snd}: \f{ABPair} \To B} are generated.
 
 Binary trees where all leaves and nodes are labelled with elements of sort
@@ -901,11 +900,12 @@ sort & \f{BATree} & =
   & \kwstruct\ \fa{leaf}{A} \  | \  \faaa{node}{BATree}{A}{BATree}
 \end{genspect}
 \noindent
-Or, with labels for all sorts:
+Or, with projection and recogniser labels:
 \begin{genspect}
 sort & \f{BATree} & = 
-  & \kwstruct\ \fa{leaf}{\f{lval}: A} \  | \  
-    \faaa{node}{\f{left}: \f{BATree}}{\f{nval}: A}{\f{right}: \f{BATree}}
+  & \kwstruct & \fa{leaf}{\f{lval}: A}?\f{is\_leaf}\\
+&&& \hfill |  & \faaa{node}{
+    \f{left}: \f{BATree}}{\f{nval}: A}{\f{right}:\f{BATree}}?\f{is\_node}
 \end{genspect}
 \noindent
 The quantification of an associative operation \frm{f: A \times A \To A} over
