@@ -1,4 +1,4 @@
-// Date: 21-02-2005
+// Date: 22-02-2005
 // This document describes the internal format of the GenSpect language. Here:
 // - three phases of implementation are distinguised, namely type checking (tc),
 //   data implementation (di) and linearisation (lin)
@@ -80,8 +80,13 @@
 <ProcVarId>   ::= ProcVarId(<String>, <SortExpr>*)
 
 //LPE summand
-<LPESummand>  ::= LPESummand(<DataVarId>*, <DataExpr>, <Action>*,
+<LPESummand>  ::= LPESummand(<DataVarId>*, <DataExpr>, <MultActOrDelta>,
                     <DataExprOrNil>, <Assignment>*)
+
+//multiaction or delta
+<MultActOrDelta>
+              ::= MultAct(<Action>*)
+                | Delta
 
 //Action
 <Action>      ::= Action(<ActId>, <DataExpr>*)
