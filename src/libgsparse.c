@@ -1,5 +1,5 @@
 #define  NAME      "libgsparse"
-#define  LVERSION  "0.1.18"
+#define  LVERSION  "0.1.19"
 #define  AUTHOR    "Aad Mathijssen"
 
 #ifdef __cplusplus
@@ -43,16 +43,68 @@ ATermAppl gsLinearise(ATermAppl Spec);
  *     NULL is returned.
  */
 
-void gsPrintPart(FILE *OutStream, ATermAppl Part, int PrecLevel);
+void gsPrintPart(FILE *OutStream, const ATermAppl Part, bool ShowSorts,
+  int PrecLevel);
 /*Pre: OutStream points to a stream to which can be written
-       Spec is an ATermAppl containing a part of a GenSpect specification
-       PrecLevel indicates the precedence level of the context of Part
+       Part is an ATermAppl containing a part of a GenSpect specification
+       ShowSorts indicates if sorts should be shown for the part
+       PrecLevel indicates the precedence level of the context of the part
        0 <= PrecLevel
   Post:A textual representation of the part is written to OutStream. In this
-       textual representation, the top level symbol is parenthesized if its
-       precedence level is lower than PrecLevel. 
+       textual representation:
+       - the top level symbol is parenthesized if PrecLevel is greater than its
+         precedence level
+       - sorts are shown for all elements, if ShowSorts is true;
+         otherwise, sorts are only shown when necessary
 */
 
+void gsPrintParts(FILE *OutStream, const ATermList Parts, bool ShowSorts,
+  int PrecLevel, const char *Terminator, const char *Separator);
+/*Pre: OutStream points to a stream to which can be written
+       Parts is an ATermList containing parts of a GenSpect specification
+       ShowSorts indicates if sorts should be shown for the part
+       PrecLevel indicates the precedence level of the context of the parts
+       0 <= PrecLevel
+  Post:A textual representation of the parts is written to OutStream, in which:
+       - PrecLevel and ShowSort are distributed over the parts
+       - each part is terminated by Terminator, if it is not NULL
+       - two successive parts are separated by Separator, if it is not NULL
+*/
+
+void gsPrintDataEqns(FILE *OutStream, const ATermList DataEqns, bool ShowSorts,
+  int PrecLevel);
+/*Pre: OutStream points to a stream to which can be written
+       DataEqns is an ATermList containing data equations from a GenSpect
+       specification
+       ShowSorts indicates if sorts should be shown for the part
+       PrecLevel indicates the precedence level of the context of the part
+       0 <= PrecLevel
+  Post:A textual representation of the parts is written to OutStream, in which:
+       - data equations are grouped in data equation sections, i.e. variable
+         declarations apply to groups of equations
+       - PrecLevel and ShowSort are distributed over the equations
+*/
+
+ATermList gsGroupDeclsBySort(const ATermList Decls);
+/*Pre: Decls is an ATermList containing declarations of the form
+       Decl(Name, Sort) from a GenSpect specification
+  Ret: a list containing the declarations from Decls, where declarations of the
+       same sort are placed in sequence
+*/
+
+void gsPrintDecls(FILE *OutStream, const ATermList Decls,
+  const char *Terminator, const char *Separator);
+/*Pre: Decls is an ATermList containing declarations of the form
+       Decl(Name, Sort) from a GenSpect specification
+  Ret: A textual representation of the declarations is written to OutStream,
+       in which:
+       - of two consecutive declarations Decl(x, S) and Decl(y, T), the first
+         is printed as:
+         + "x,", if S = T
+         + "x: S", followed by Terminator and Separator, if S != T
+       - the last declaration Decl(x, S) is printed as "x: S", followed by
+         Terminator
+*/
 
 //implementation
 
@@ -98,7 +150,7 @@ finally:
   return Result;
 }
 
-bool gsPrintSpecification(FILE *OutStream, ATermAppl Spec)
+bool gsPrintSpecification(FILE *OutStream, const ATermAppl Spec)
 {
   bool Result = true;
   //check preconditions
@@ -106,7 +158,7 @@ bool gsPrintSpecification(FILE *OutStream, ATermAppl Spec)
     ThrowVM(false, "specification may not be empty\n");
   }
   //print specification
-  gsPrintPart(OutStream, Spec, 0);
+  gsPrintPart(OutStream, Spec, false, 0);
 finally:
   gsDebugMsg("return %s\n", Result?"true":"false");
   return Result;
@@ -124,7 +176,8 @@ ATermAppl gsLinearise(ATermAppl spec)
   return spec;
 }
 
-void gsPrintPart(FILE *OutStream, ATermAppl Part, int PrecLevel)
+void gsPrintPart(FILE *OutStream, const ATermAppl Part, bool ShowSorts,
+  int PrecLevel)
 {
   if (ATisQuoted(ATgetAFun(Part)) == ATtrue) {
     //print string
@@ -133,328 +186,221 @@ void gsPrintPart(FILE *OutStream, ATermAppl Part, int PrecLevel)
     //print specification
     gsDebugMsg("printing specification\n");
     for (int i = 0; i < 7; i++) {
-      gsPrintPart(OutStream, ATAgetArgument(Part, i), 0);
+      gsPrintPart(OutStream, ATAgetArgument(Part, i), ShowSorts, PrecLevel);
     }
   } else if (gsIsSortSpec(Part)) {
     //print sort specification
     gsDebugMsg("printing sort specification\n");
     ATermList SortDecls = ATLgetArgument(Part, 0);
-    int n = ATgetLength(SortDecls);
-    if (n > 0) {
-      for (int i = 0; i < n; i++) {
-        fprintf(OutStream, "%s ", (i == 0)?"sort":"    ");
-        gsPrintPart(OutStream, ATAelementAt(SortDecls, i), 0);
-        fprintf(OutStream, ";\n");
-      }
+    if (ATgetLength(SortDecls) > 0) {
+      fprintf(OutStream, "sort ");
+      gsPrintParts(OutStream, SortDecls, ShowSorts, PrecLevel, ";\n", "     ");
       fprintf(OutStream, "\n");
     }
-  } else if (gsIsConsSpec(Part)) {
-    //print constructor operation specification
-    gsDebugMsg("printing constructor operation specification\n");
-    ATermList ConsDecls = ATLgetArgument(Part, 0);
-    int n = ATgetLength(ConsDecls);
-    if (n > 0) {
-      for (int i = 0; i < n; i++) {
-        ATermAppl OpId = ATAelementAt(ConsDecls, i);
-        fprintf(OutStream, "%s ", (i == 0)?"cons":"    ");
-        gsPrintPart(OutStream, ATAgetArgument(OpId, 0), 0);
-        fprintf(OutStream, ": ");
-        gsPrintPart(OutStream, ATAgetArgument(OpId, 1), 0);
-        fprintf(OutStream, ";\n");
-      }
-      fprintf(OutStream, "\n");
-    }
-  } else if (gsIsMapSpec(Part)) {
+  } else if (gsIsConsSpec(Part) || gsIsMapSpec(Part)) {
     //print operation specification
     gsDebugMsg("printing operation specification\n");
-    ATermList MapDecls = ATLgetArgument(Part, 0);
-    int n = ATgetLength(MapDecls);
-    if (n > 0) {
-      for (int i = 0; i < n; i++) {
-        ATermAppl OpId = ATAelementAt(MapDecls, i);
-        fprintf(OutStream, "%s ", (i == 0)?"map ":"    ");
-        gsPrintPart(OutStream, ATAgetArgument(OpId, 0), 0);
-        fprintf(OutStream, ": ");
-        gsPrintPart(OutStream, ATAgetArgument(OpId, 1), 0);
-        fprintf(OutStream, ";\n");
-      }
+    ATermList OpIds = ATLgetArgument(Part, 0);
+    if (ATgetLength(OpIds) > 0) {
+      fprintf(OutStream, gsIsConsSpec(Part)?"cons ":"map  ");
+      gsPrintDecls(OutStream, OpIds, ";\n", "     ");
       fprintf(OutStream, "\n");
     }
   } else if (gsIsDataEqnSpec(Part)) {
     //print equation specification
     gsDebugMsg("printing equation specification\n");
-    ATermList DataEqns = ATLgetArgument(Part, 0);
-    int n = ATgetLength(DataEqns);
-    if (n > 0) {
-      for (int i = 0; i < n; i++) {
-        gsPrintPart(OutStream, ATAelementAt(DataEqns, i), 0);
-      }
-      fprintf(OutStream, "\n");
-    }
+    gsPrintDataEqns(OutStream, ATLgetArgument(Part, 0), ShowSorts, PrecLevel);
   } else if (gsIsActSpec(Part)) {
     //print action specification
     gsDebugMsg("printing action specification\n");
-    ATermList ActDecls = ATLgetArgument(Part, 0);
-    int n = ATgetLength(ActDecls);
-    if (n > 0) {
-      for (int i = 0; i < n; i++) {
-        ATermAppl ActId = ATAelementAt(ActDecls, i);
-        fprintf(OutStream, "%s ", (i == 0)?"act ":"    ");
-        gsPrintPart(OutStream, ATAgetArgument(ActId, 0), 0);
-        ATermList SortExprs = ATLgetArgument(ActId, 1);
-        int m = ATgetLength(SortExprs);
-        if (m > 0) {
-          fprintf(OutStream, ": ");
-          for (int j = 0; j < m; j++) {
-            if (j > 0) ATfprintf(OutStream, " # ");
-            gsPrintPart(OutStream, ATAelementAt(SortExprs, j), 0);
-          }
-        }
-        fprintf(OutStream, ";\n");
-      }
+    ATermList ActIds = ATLgetArgument(Part, 0);
+    if (ATgetLength(ActIds) > 0) {
+      fprintf(OutStream, "act  ");
+      gsPrintDecls(OutStream, ActIds, ";\n", "     ");
       fprintf(OutStream, "\n");
     }
   } else if (gsIsProcEqnSpec(Part)) {
     //print process specification
     gsDebugMsg("printing process specification\n");
     ATermList ProcDecls = ATLgetArgument(Part, 0);
-    int n = ATgetLength(ProcDecls);
-    if (n > 0) {
-      for (int i = 0; i < n; i++) {
-        fprintf(OutStream, "%s ", (i == 0)?"proc":"    ");
-        gsPrintPart(OutStream, ATAelementAt(ProcDecls, i), 0);
-        fprintf(OutStream, ";\n");
-      }
+    if (ATgetLength(ProcDecls) > 0) {
+      fprintf(OutStream, "proc ");
+      gsPrintParts(OutStream, ProcDecls, ShowSorts, PrecLevel, ";\n", "     ");
       fprintf(OutStream, "\n");
     }
   } else if (gsIsInit(Part)) {
     //print initialisation
     gsDebugMsg("printing initialisation\n");
     fprintf(OutStream, "init "); 
-    gsPrintPart(OutStream, ATAgetArgument(Part, 0), 0);
+    gsPrintPart(OutStream, ATAgetArgument(Part, 0), ShowSorts, PrecLevel);
     fprintf(OutStream, ";\n");
   } else if (gsIsSortId(Part)) {
     //print sort identifier
     gsDebugMsg("printing standard sort identifier\n");
-    gsPrintPart(OutStream, ATAgetArgument(Part, 0), 0);
+    gsPrintPart(OutStream, ATAgetArgument(Part, 0), ShowSorts, PrecLevel);
   } else if (gsIsSortRef(Part)) {
     //print sort reference
     gsDebugMsg("printing sort reference declaration\n");
-    gsPrintPart(OutStream, ATAgetArgument(Part, 0), 0);
+    gsPrintPart(OutStream, ATAgetArgument(Part, 0), ShowSorts, PrecLevel);
     fprintf(OutStream, " = ");
-    gsPrintPart(OutStream, ATAgetArgument(Part, 1), 0);
-  } else if (gsIsOpId(Part)) {
-    //print operation identifier
-    gsDebugMsg("printing operation identifier\n");
-    gsPrintPart(OutStream, ATAgetArgument(Part, 0), 0);
-  } else if (gsIsDataEqn(Part)) {
-    //print data equation
-    gsDebugMsg("printing data equation\n");
-    ATermList DataVarIds = ATLgetArgument(Part, 0);
-    int n = ATgetLength(DataVarIds);
-    for (int i = 0; i < n; i++) {
-      ATermAppl DataVarId = ATAelementAt(DataVarIds, i);
-      fprintf(OutStream, "%s ", (i == 0)?"var ":"    ");
-      gsPrintPart(OutStream, ATAgetArgument(DataVarId, 0), 0);
+    gsPrintPart(OutStream, ATAgetArgument(Part, 1), ShowSorts, PrecLevel);
+  } else if (gsIsDataVarIdOpId(Part) || gsIsOpId(Part) || gsIsDataVarId(Part)) {
+    //print data variable or operation identifier
+    gsDebugMsg("printing data variable or operation identifier\n");
+    gsPrintPart(OutStream, ATAgetArgument(Part, 0), ShowSorts, PrecLevel);
+    if (!gsIsDataVarIdOpId(Part) && ShowSorts) {
       fprintf(OutStream, ": ");
-      gsPrintPart(OutStream, ATAgetArgument(DataVarId, 1), 0);
-      fprintf(OutStream, ";\n");
+      gsPrintPart(OutStream, ATAgetArgument(Part, 1), ShowSorts, 0);
     }
-    fprintf(OutStream, "eqn  ");
+  } else if (gsIsDataEqn(Part)) {
+    //print data equation (without variables)
+    gsDebugMsg("printing data equation\n");
     ATermAppl Condition = ATAgetArgument(Part, 1);
     if (!gsIsNil(Condition)) {
-      gsPrintPart(OutStream, Condition, 0);
+      gsPrintPart(OutStream, Condition, ShowSorts, 0);
       fprintf(OutStream, " -> ");
     }
-    gsPrintPart(OutStream, ATAgetArgument(Part, 2), 0);
+    gsPrintPart(OutStream, ATAgetArgument(Part, 2), ShowSorts, 0);
     fprintf(OutStream, " = ");
-    gsPrintPart(OutStream, ATAgetArgument(Part, 3), 0);
-    fprintf(OutStream, ";\n");
-  } else if (gsIsDataVarId(Part)) {
-    //print data variable
-    gsDebugMsg("printing data variable\n");
-    gsPrintPart(OutStream, ATAgetArgument(Part, 0), 0);
+    gsPrintPart(OutStream, ATAgetArgument(Part, 3), ShowSorts, 0);
   } else if (gsIsActId(Part)) {
     //print action identifier
     gsDebugMsg("printing action identifier\n");
-    gsPrintPart(OutStream, ATAgetArgument(Part, 0), 0);
+    gsPrintPart(OutStream, ATAgetArgument(Part, 0), ShowSorts, PrecLevel);
+    if (ShowSorts) {
+      ATermList SortExprs = ATLgetArgument(Part, 1);
+      if (ATgetLength(SortExprs) > 0) {
+        fprintf(OutStream, ": ");
+        gsPrintParts(OutStream, SortExprs, ShowSorts, 2, NULL, " # ");
+      }
+    }
   } else if (gsIsProcEqn(Part)) {
     //print process equation
     gsDebugMsg("printing process equation\n");
-    gsPrintPart(OutStream, ATAgetArgument(Part, 0), 0);
+    gsPrintPart(OutStream, ATAgetArgument(Part, 0), ShowSorts, PrecLevel);
     ATermList DataVarIds = ATLgetArgument(Part, 1);
-    int n = ATgetLength(DataVarIds);
-    if (n > 0) {
+    if (ATgetLength(DataVarIds) > 0) {
       fprintf(OutStream, "(");
-      for (int i = 0; i < n; i++) {
-        if (i > 0) fprintf(OutStream, ", ");
-        ATermAppl DataVarId = ATAelementAt(DataVarIds, i);
-        gsPrintPart(OutStream, ATAgetArgument(DataVarId, 0), 0);
-        fprintf(OutStream, ": ");
-        gsPrintPart(OutStream, ATAgetArgument(DataVarId, 1), 0);
-      }
+      gsPrintDecls(OutStream, DataVarIds, NULL, ", ");
       fprintf(OutStream, ")");
     }
     fprintf(OutStream, " = ");
-    gsPrintPart(OutStream, ATAgetArgument(Part, 2), 0);
+    gsPrintPart(OutStream, ATAgetArgument(Part, 2), ShowSorts, 0);
   } else if (gsIsProcVarId(Part)) {
     //print process variable
     gsDebugMsg("printing process variable\n");
-    gsPrintPart(OutStream, ATAgetArgument(Part, 0), 0);
+    gsPrintPart(OutStream, ATAgetArgument(Part, 0), ShowSorts, PrecLevel);
+    if (ShowSorts) {
+      ATermList SortExprs = ATLgetArgument(Part, 1);
+      if (ATgetLength(SortExprs) > 0) {
+        fprintf(OutStream, ": ");
+        gsPrintParts(OutStream, SortExprs, ShowSorts, 2, NULL, " # ");
+      }
+    }
   } else if (gsIsSortList(Part)) {
     //print list sort
     gsDebugMsg("printing list sort\n");
     fprintf(OutStream, "List(");
-    gsPrintPart(OutStream, ATAgetArgument(Part, 0), 0);
+    gsPrintPart(OutStream, ATAgetArgument(Part, 0), ShowSorts, 0);
     fprintf(OutStream, ")");
   } else if (gsIsSortSet(Part)) {
     //print set sort
     gsDebugMsg("printing set sort\n");
     fprintf(OutStream, "Set(");
-    gsPrintPart(OutStream, ATAgetArgument(Part, 0), 0);
+    gsPrintPart(OutStream, ATAgetArgument(Part, 0), ShowSorts, 0);
     fprintf(OutStream, ")");
   } else if (gsIsSortBag(Part)) {
     //print bag sort
     gsDebugMsg("printing bag sort\n");
     fprintf(OutStream, "Bag(");
-    gsPrintPart(OutStream, ATAgetArgument(Part, 0), 0);
+    gsPrintPart(OutStream, ATAgetArgument(Part, 0), ShowSorts, 0);
     fprintf(OutStream, ")");
   } else if (gsIsSortStruct(Part)) {
     //print structured sort
     gsDebugMsg("printing structured sort\n");
     if (PrecLevel > 2) fprintf(OutStream, "(");
     fprintf(OutStream, "struct ");
-    ATermList StructConss = ATLgetArgument(Part, 0);
-    int n = ATgetLength(StructConss);
-    for (int i = 0; i < n; i++) {
-      if (i > 0) fprintf(OutStream, " | ");
-      gsPrintPart(OutStream, ATAelementAt(StructConss, i), 0);
-    }
+    gsPrintParts(OutStream, ATLgetArgument(Part, 0), ShowSorts, PrecLevel,
+      NULL, " | ");
     if (PrecLevel > 2) fprintf(OutStream, ")");
   } else if (gsIsSortArrowProd(Part)) {
     //print product arrow sort
     gsDebugMsg("printing product arrow sort\n");
     if (PrecLevel > 1) fprintf(OutStream, "(");
-    ATermList Domain = ATLgetArgument(Part, 0);
-    int n = ATgetLength(Domain);
-    for (int i = 0; i < n; i++) {
-      if (i > 0) fprintf(OutStream, " # ");
-      gsPrintPart(OutStream, ATAelementAt(Domain, i), 2);
-    }
+    gsPrintParts(OutStream, ATLgetArgument(Part, 0), ShowSorts, 2, NULL, " # ");
     fprintf(OutStream, " -> ");
-    gsPrintPart(OutStream, ATAgetArgument(Part, 1), 1);
+    gsPrintPart(OutStream, ATAgetArgument(Part, 1), ShowSorts, 1);
     if (PrecLevel > 1) fprintf(OutStream, ")");
   } else if (gsIsSortArrow(Part)) {
-    //print product arrow sort
+    //print arrow sort
     gsDebugMsg("printing arrow sort\n");
     if (PrecLevel > 1) fprintf(OutStream, "(");
-    gsPrintPart(OutStream, ATAgetArgument(Part, 0), 2);
+    gsPrintPart(OutStream, ATAgetArgument(Part, 0), ShowSorts, 2);
     fprintf(OutStream, " -> ");
-    gsPrintPart(OutStream, ATAgetArgument(Part, 1), 1);
+    gsPrintPart(OutStream, ATAgetArgument(Part, 1), ShowSorts, 1);
     if (PrecLevel > 1) fprintf(OutStream, ")");
   } else if (gsIsStructCons(Part)) {
     //print structured sort constructor
     gsDebugMsg("printing structured sort constructor\n");
-    gsPrintPart(OutStream, ATAgetArgument(Part, 0), 0);
+    gsPrintPart(OutStream, ATAgetArgument(Part, 0), ShowSorts, PrecLevel);
     ATermList StructProjs = ATLgetArgument(Part, 1);
-    int n = ATgetLength(StructProjs);
-    if (n > 0) {
+    if (ATgetLength(StructProjs) > 0) {
       fprintf(OutStream, "(");
-      for (int i = 0; i < n; i++) {
-        if (i > 0) fprintf(OutStream, ", ");
-        gsPrintPart(OutStream, ATAelementAt(StructProjs, i), 0);
-      }
+      gsPrintParts(OutStream, StructProjs, ShowSorts, PrecLevel, NULL, ", ");
       fprintf(OutStream, ")");
     }
     ATermAppl Recogniser = ATAgetArgument(Part, 2);
     if (!gsIsNil(Recogniser)) {
       fprintf(OutStream, "?");
-      gsPrintPart(OutStream, Recogniser, 0);
+      gsPrintPart(OutStream, Recogniser, ShowSorts, PrecLevel);
     }
   } else if (gsIsStructProj(Part)) {
     //print structured sort projection
     gsDebugMsg("printing structured sort projection\n");
     ATermAppl Projection = ATAgetArgument(Part, 0);
     if (!gsIsNil(Projection)) {
-      gsPrintPart(OutStream, Projection, 0);
+      gsPrintPart(OutStream, Projection, ShowSorts, PrecLevel);
       fprintf(OutStream, ": ");
     }
-    ATermList Domain = ATLgetArgument(Part, 1);
-    int n = ATgetLength(Domain);
-    for (int i = 0; i < n; i++) {
-      if (i > 0) fprintf(OutStream, " # ");
-      gsPrintPart(OutStream, ATAelementAt(Domain, i), 2);
-    }
-  } else if (gsIsDataVarIdOpId(Part)) {
-    //print data variable or operation id
-    gsDebugMsg("printing data variable or operation identifier\n");
-    gsPrintPart(OutStream, ATAgetArgument(Part, 0), 0);
+    gsPrintParts(OutStream, ATLgetArgument(Part, 1), ShowSorts, 2, NULL, " # ");
   } else if (gsIsDataApplProd(Part)) {
     //print product data application
     gsDebugMsg("printing product data application\n");
-    gsPrintPart(OutStream, ATAgetArgument(Part, 0), 0);
-    ATermList Args = ATLgetArgument(Part, 1);
-    int n = ATgetLength(Args);
+    gsPrintPart(OutStream, ATAgetArgument(Part, 0), ShowSorts, PrecLevel);
     fprintf(OutStream, "(");
-    for (int i = 0; i < n; i++) {
-      if (i > 0) fprintf(OutStream, ", ");
-      gsPrintPart(OutStream, ATAelementAt(Args, i), 0);
-    }
+    gsPrintParts(OutStream, ATLgetArgument(Part, 1), ShowSorts, PrecLevel,
+      NULL, ", ");
     fprintf(OutStream, ")");
   } else if (gsIsDataAppl(Part)) {
     //print data application
     gsDebugMsg("printing data application\n");
-    gsPrintPart(OutStream, ATAgetArgument(Part, 0), 0);
+    gsPrintPart(OutStream, ATAgetArgument(Part, 0), ShowSorts, PrecLevel);
     fprintf(OutStream, "(");
-    gsPrintPart(OutStream, ATAgetArgument(Part, 1), 0);
+    gsPrintPart(OutStream, ATAgetArgument(Part, 1), ShowSorts, PrecLevel);
     fprintf(OutStream, ")");
   } else if (gsIsNumber(Part)) {
     //print number
     gsDebugMsg("printing number\n");
-    gsPrintPart(OutStream, ATAgetArgument(Part, 0), 0);
+    gsPrintPart(OutStream, ATAgetArgument(Part, 0), ShowSorts, PrecLevel);
   } else if (gsIsListEnum(Part)) {
     //print list enumeration
     gsDebugMsg("printing list enumeration\n");
-    ATermList Elts = ATLgetArgument(Part, 0);
-    int n = ATgetLength(Elts);
     fprintf(OutStream, "[");
-    for (int i = 0; i < n; i++) {
-      if (i > 0) fprintf(OutStream, ", ");
-      gsPrintPart(OutStream, ATAelementAt(Elts, i), 0);
-    }
+    gsPrintParts(OutStream, ATLgetArgument(Part, 0), ShowSorts, 0, NULL, ", ");
     fprintf(OutStream, "]");
-  } else if (gsIsSetEnum(Part)) {
-    //print set enumeration
-    gsDebugMsg("printing set enumeration\n");
-    ATermList Elts = ATLgetArgument(Part, 0);
-    int n = ATgetLength(Elts);
+  } else if (gsIsSetEnum(Part) || gsIsBagEnum(Part)) {
+    //print set/bag enumeration
+    gsDebugMsg("printing set/bag enumeration\n");
     fprintf(OutStream, "{");
-    for (int i = 0; i < n; i++) {
-      if (i > 0) fprintf(OutStream, ", ");
-      gsPrintPart(OutStream, ATAelementAt(Elts, i), 0);
-    }
-    fprintf(OutStream, "}");
-  } else if (gsIsBagEnum(Part)) {
-    //print bag enumeration
-    gsDebugMsg("printing bag enumeration\n");
-    ATermList Elts = ATLgetArgument(Part, 0);
-    int n = ATgetLength(Elts);
-    fprintf(OutStream, "{");
-    for (int i = 0; i < n; i++) {
-      if (i > 0) fprintf(OutStream, ", ");
-      gsPrintPart(OutStream, ATAelementAt(Elts, i), 0);
-    }
+    gsPrintParts(OutStream, ATLgetArgument(Part, 0), ShowSorts, 0, NULL, ", ");
     fprintf(OutStream, "}");
   } else if (gsIsSetBagComp(Part)) {
     //print set/bag comprehension
     gsDebugMsg("printing set/bag comprehension\n");
     fprintf(OutStream, "{ ");
-    ATermAppl DataVarId = ATAgetArgument(Part, 0);
-    gsPrintPart(OutStream, ATAgetArgument(DataVarId, 0), 0);
-    fprintf(OutStream, ": ");
-    gsPrintPart(OutStream, ATAgetArgument(DataVarId, 1), 0);
+    gsPrintPart(OutStream, ATAgetArgument(Part, 0), true, PrecLevel);
     fprintf(OutStream, " | ");
-    gsPrintPart(OutStream, ATAgetArgument(Part, 1), 0);
+    gsPrintPart(OutStream, ATAgetArgument(Part, 1), ShowSorts, 0);
     fprintf(OutStream, " }");
   } else if (gsIsForall(Part) || gsIsExists(Part) || gsIsLambda(Part)) {
     //print universal/existential quantification or lambda abstraction
@@ -468,56 +414,40 @@ void gsPrintPart(FILE *OutStream, ATermAppl Part, int PrecLevel)
     } else {
       fprintf(OutStream, "lambda ");
     }
-    ATermList DataVarIds = ATLgetArgument(Part, 0);
-    int n = ATgetLength(DataVarIds);
-    for (int i = 0; i < n; i++) {
-      if (i > 0) fprintf(OutStream, ", ");
-      ATermAppl DataVarId = ATAelementAt(DataVarIds, i);
-      gsPrintPart(OutStream, ATAgetArgument(DataVarId, 0), 0);
-      fprintf(OutStream, ": ");
-      gsPrintPart(OutStream, ATAgetArgument(DataVarId, 1), 0);
-    }
+    gsPrintDecls(OutStream, ATLgetArgument(Part, 0), NULL, ", ");
     fprintf(OutStream, ". ");
-    gsPrintPart(OutStream, ATAgetArgument(Part, 1), 2);
+    gsPrintPart(OutStream, ATAgetArgument(Part, 1), ShowSorts, 2);
     if (PrecLevel > 2) fprintf(OutStream, ")");
   } else if (gsIsWhr(Part)) {
     //print where clause
     gsDebugMsg("printing where clause\n");
     if (PrecLevel > 1) fprintf(OutStream, "(");
-    gsPrintPart(OutStream, ATAgetArgument(Part, 0), 2);
-    ATermList WhrDecls = ATLgetArgument(Part, 1);
-    int n = ATgetLength(WhrDecls);
+    gsPrintPart(OutStream, ATAgetArgument(Part, 0), ShowSorts, 2);
     fprintf(OutStream, " whr ");
-    for (int i = 0; i < n; i++) {
-      if (i > 0) fprintf(OutStream, ", ");
-      gsPrintPart(OutStream, ATAelementAt(WhrDecls, i), 0);
-    }
+    gsPrintParts(OutStream, ATLgetArgument(Part, 1), ShowSorts, PrecLevel,
+      NULL, ", ");
     fprintf(OutStream, " end");
     if (PrecLevel > 1) fprintf(OutStream, ")");
   } else if (gsIsBagEnumElt(Part)) {
     //print bag enumeration element
     gsDebugMsg("printing bag enumeration element\n");
-    gsPrintPart(OutStream, ATAgetArgument(Part, 0), 0);
+    gsPrintPart(OutStream, ATAgetArgument(Part, 0), ShowSorts, 0);
     fprintf(OutStream, ": ");
-    gsPrintPart(OutStream, ATAgetArgument(Part, 1), 0);
+    gsPrintPart(OutStream, ATAgetArgument(Part, 1), ShowSorts, 0);
   } else if (gsIsWhrDecl(Part)) {
     //print where declaration element
     gsDebugMsg("printing where declaration\n");
-    gsPrintPart(OutStream, ATAgetArgument(Part, 0), 0);
+    gsPrintPart(OutStream, ATAgetArgument(Part, 0), ShowSorts, PrecLevel);
     fprintf(OutStream, " = ");
-    gsPrintPart(OutStream, ATAgetArgument(Part, 1), 0);
+    gsPrintPart(OutStream, ATAgetArgument(Part, 1), ShowSorts, 0);
   } else if (gsIsActionProcess(Part) || gsIsAction(Part) || gsIsProcess(Part)) {
     //print action or process reference
     gsDebugMsg("printing action or process reference\n");
-    gsPrintPart(OutStream, ATAgetArgument(Part, 0), 0);
+    gsPrintPart(OutStream, ATAgetArgument(Part, 0), ShowSorts, PrecLevel);
     ATermList Args = ATLgetArgument(Part, 1);
-    int n = ATgetLength(Args);
-    if (n > 0) {
+    if (ATgetLength(Args) > 0) {
       fprintf(OutStream, "(");
-      for (int i = 0; i < n; i++) {
-        if (i > 0) fprintf(OutStream, ", ");
-        gsPrintPart(OutStream, ATAelementAt(Args, i), 0);
-      }
+      gsPrintParts(OutStream, Args, ShowSorts, 0, NULL, ", ");
       fprintf(OutStream, ")");
     }
   } else if (gsIsDelta(Part)) {
@@ -532,80 +462,72 @@ void gsPrintPart(FILE *OutStream, ATermAppl Part, int PrecLevel)
     //print choice
     gsDebugMsg("printing choice\n");
     if (PrecLevel > 1) fprintf(OutStream, "(");
-    gsPrintPart(OutStream, ATAgetArgument(Part, 0), 1);
+    gsPrintPart(OutStream, ATAgetArgument(Part, 0), ShowSorts, 1);
     fprintf(OutStream, " + ");
-    gsPrintPart(OutStream, ATAgetArgument(Part, 1), 2);
+    gsPrintPart(OutStream, ATAgetArgument(Part, 1), ShowSorts, 2);
     if (PrecLevel > 1) fprintf(OutStream, ")");
   } else if (gsIsSum(Part)) {
     //print summation
     gsDebugMsg("printing summation\n");
     if (PrecLevel > 2) fprintf(OutStream, "(");
     fprintf(OutStream, "sum ");
-    ATermList DataVarIds = ATLgetArgument(Part, 0);
-    int n = ATgetLength(DataVarIds);
-    for (int i = 0; i < n; i++) {
-      if (i > 0) fprintf(OutStream, ", ");
-      ATermAppl DataVarId = ATAelementAt(DataVarIds, i);
-      gsPrintPart(OutStream, ATAgetArgument(DataVarId, 0), 0);
-      fprintf(OutStream, ": ");
-      gsPrintPart(OutStream, ATAgetArgument(DataVarId, 1), 0);
-    }
+    gsPrintDecls(OutStream, ATLgetArgument(Part, 0), NULL, ", ");
     fprintf(OutStream, ". ");
-    gsPrintPart(OutStream, ATAgetArgument(Part, 1), 2);
+    gsPrintPart(OutStream, ATAgetArgument(Part, 1), ShowSorts, 2);
     if (PrecLevel > 2) fprintf(OutStream, ")");
   } else if (gsIsMerge(Part) || gsIsLMerge(Part)) {
     //print merge of left merge
     gsDebugMsg("printing merge or left merge\n");
     if (PrecLevel > 3) fprintf(OutStream, "(");
-    gsPrintPart(OutStream, ATAgetArgument(Part, 0), 3);
+    gsPrintPart(OutStream, ATAgetArgument(Part, 0), ShowSorts, 3);
     if (gsIsMerge(Part)) {
       fprintf(OutStream, " || ");
     } else {
       fprintf(OutStream, " ||_ ");
     }
-    gsPrintPart(OutStream, ATAgetArgument(Part, 1), 4);
+    gsPrintPart(OutStream, ATAgetArgument(Part, 1), ShowSorts, 4);
     if (PrecLevel > 3) fprintf(OutStream, ")");
   } else if (gsIsBInit(Part)) {
     //print bounded initialisation
     gsDebugMsg("printing bounded initialisation\n");
     if (PrecLevel > 4) fprintf(OutStream, "(");
-    gsPrintPart(OutStream, ATAgetArgument(Part, 0), 4);
+    gsPrintPart(OutStream, ATAgetArgument(Part, 0), ShowSorts, 4);
     fprintf(OutStream, " << ");
-    gsPrintPart(OutStream, ATAgetArgument(Part, 1), 5);
+    gsPrintPart(OutStream, ATAgetArgument(Part, 1), ShowSorts, 5);
     if (PrecLevel > 4) fprintf(OutStream, ")");
   } else if (gsIsCond(Part)) {
     //print conditional
     gsDebugMsg("printing conditional\n");
     if (PrecLevel > 5) fprintf(OutStream, "(");
-    gsPrintPart(OutStream, ATAgetArgument(Part, 0), 0);
+    gsPrintPart(OutStream, ATAgetArgument(Part, 0), ShowSorts, 0);
     fprintf(OutStream, " -> ");
-    gsPrintPart(OutStream, ATAgetArgument(Part, 1), 6);
+    gsPrintPart(OutStream, ATAgetArgument(Part, 1), ShowSorts, 6);
     fprintf(OutStream, ", ");
-    gsPrintPart(OutStream, ATAgetArgument(Part, 2), 6);
+    gsPrintPart(OutStream, ATAgetArgument(Part, 2), ShowSorts, 6);
     if (PrecLevel > 5) fprintf(OutStream, ")");
   } else if (gsIsSeq(Part)) {
     //print sequential composition
     gsDebugMsg("printing sequential composition\n");
     if (PrecLevel > 6) fprintf(OutStream, "(");
-    gsPrintPart(OutStream, ATAgetArgument(Part, 0), 6);
+    gsPrintPart(OutStream, ATAgetArgument(Part, 0), ShowSorts, 6);
     fprintf(OutStream, " . ");
-    gsPrintPart(OutStream, ATAgetArgument(Part, 1), 7);
+    gsPrintPart(OutStream, ATAgetArgument(Part, 1), ShowSorts, 7);
     if (PrecLevel > 6) fprintf(OutStream, ")");
   } else if (gsIsAtTime(Part)) {
     //print at expression
     gsDebugMsg("printing at expression\n");
     if (PrecLevel > 7) fprintf(OutStream, "(");
-    gsPrintPart(OutStream, ATAgetArgument(Part, 0), 7);
+    gsPrintPart(OutStream, ATAgetArgument(Part, 0), ShowSorts, 7);
     fprintf(OutStream, " @ ");
-    gsPrintPart(OutStream, ATAgetArgument(Part, 1), 0);
+    gsPrintPart(OutStream, ATAgetArgument(Part, 1), ShowSorts, 0);
     if (PrecLevel > 7) fprintf(OutStream, ")");
   } else if (gsIsSync(Part)) {
     //print sync
     gsDebugMsg("printing sync\n");
     if (PrecLevel > 8) fprintf(OutStream, "(");
-    gsPrintPart(OutStream, ATAgetArgument(Part, 0), 8);
+    gsPrintPart(OutStream, ATAgetArgument(Part, 0), ShowSorts, 8);
     fprintf(OutStream, " | ");
-    gsPrintPart(OutStream, ATAgetArgument(Part, 1), 0);
+    gsPrintPart(OutStream, ATAgetArgument(Part, 1), ShowSorts, 0);
     if (PrecLevel > 8) fprintf(OutStream, ")");
   } else if (gsIsRestrict(Part) || gsIsHide(Part) || gsIsRename(Part) ||
       gsIsComm(Part) || gsIsAllow(Part)) {
@@ -623,39 +545,175 @@ void gsPrintPart(FILE *OutStream, ATermAppl Part, int PrecLevel)
       fprintf(OutStream, "allow");
     }
     fprintf(OutStream, "({");
-    ATermList Elts = ATLgetArgument(Part, 0);
-    int n = ATgetLength(Elts);
-    for (int i = 0; i < n; i++) {
-      if (i > 0) fprintf(OutStream, ", ");
-      gsPrintPart(OutStream, ATAelementAt(Elts, i), 0);
-    }
+    gsPrintParts(OutStream, ATLgetArgument(Part, 0), ShowSorts, 0, NULL, ", ");
     fprintf(OutStream, "}, ");
-    gsPrintPart(OutStream, ATAgetArgument(Part, 1), 0);
+    gsPrintPart(OutStream, ATAgetArgument(Part, 1), ShowSorts, 0);
     fprintf(OutStream, ")");
   } else if (gsIsMultActName(Part)) {
     //print multi action name
     gsDebugMsg("printing multi action name\n");
-    ATermList ActNames = ATLgetArgument(Part, 0);
-    int n = ATgetLength(ActNames);
-    for (int i = 0; i < n; i++) {
-      if (i > 0) fprintf(OutStream, " | ");
-      gsPrintPart(OutStream, ATAelementAt(ActNames, i), 0);
-    }
+    gsPrintParts(OutStream, ATLgetArgument(Part, 0), ShowSorts, 0, NULL, " | ");
   } else if (gsIsRenameExpr(Part)) {
     //print renaming expression
     gsDebugMsg("printing renaming expression\n");
-    gsPrintPart(OutStream, ATAgetArgument(Part, 0), 0);
+    gsPrintPart(OutStream, ATAgetArgument(Part, 0), ShowSorts, PrecLevel);
     fprintf(OutStream, " -> ");
-    gsPrintPart(OutStream, ATAgetArgument(Part, 1), 0);
+    gsPrintPart(OutStream, ATAgetArgument(Part, 1), ShowSorts, PrecLevel);
   } else if (gsIsCommExpr(Part)) {
     //print communication expression
     gsDebugMsg("printing communication expression\n");
-    gsPrintPart(OutStream, ATAgetArgument(Part, 0), 0);
+    gsPrintPart(OutStream, ATAgetArgument(Part, 0), ShowSorts, PrecLevel);
     ATermAppl CommResult = ATAgetArgument(Part, 1);
     if (!gsIsNil(CommResult)) {
       fprintf(OutStream, " -> ");
-      gsPrintPart(OutStream, CommResult, 0);
+      gsPrintPart(OutStream, CommResult, ShowSorts, PrecLevel);
     }
+  }
+}
+
+void gsPrintParts(FILE *OutStream, const ATermList Parts, bool ShowSorts,
+  int PrecLevel, const char *Terminator, const char *Separator)
+{
+  int n = ATgetLength(Parts);
+  for (int i = 0; i < n; i++) {
+    if (i > 0 && Separator != NULL) fprintf(OutStream, Separator);
+    gsPrintPart(OutStream, ATAelementAt(Parts, i), ShowSorts, PrecLevel);
+    if (Terminator != NULL) fprintf(OutStream, Terminator);
+  }
+}
+
+void gsPrintDataEqns(FILE *OutStream, const ATermList DataEqns, bool ShowSorts,
+  int PrecLevel)
+{
+  int DataEqnsLength = ATgetLength(DataEqns);
+  if (DataEqnsLength > 0) {
+    int StartPrefix = 0;
+    ATermTable VarDeclTable = ATtableCreate(63, 50);
+    //VarDeclTable is a hash table with variable declarations as values, where
+    //the name of each variable declaration is used a key.
+    //Note that the hash table will be increased if at least 32 values are added,
+    //This can be avoided by increasing the initial size.
+    int i = 0;
+    while (i < DataEqnsLength) {
+      //StartPrefix represents the start index of the maximum consistent prefix
+      //of variable declarations in DataEqns to which DataEqns(i) belongs
+      //VarDeclTable represents the variable declarations of DataEqns
+      //from StartPrefix up to i.
+      //Check consistency of the variables from DataEqns(i) with VarDeclTable
+      //and, if so, add them to VarDeclTable.
+      ATermAppl DataEqn = ATAelementAt(DataEqns, i);
+      ATermList VarDecls = ATLgetArgument(DataEqn, 0);
+      int VarDeclsLength = ATgetLength(VarDecls);
+      bool Consistent = true;
+      ATermList NewVarDecls = ATmakeList0();
+      for (int j = 0; j < VarDeclsLength && Consistent; j++) {
+        //check consistency of variable VarDecls(j) with VarDeclTable
+        ATermAppl VarDecl = ATAelementAt(VarDecls, j);
+        ATermAppl CorVarDecl =
+          ATAtableGet(VarDeclTable, ATgetArgument(VarDecl, 0));
+        if (CorVarDecl != NULL) {
+          //check consistency of VarDecl with CorVarDecl
+          Consistent = (VarDecl == CorVarDecl);
+        } else {
+          //add VarDecl to VarDeclTable if all variables from VarDecls are
+          //consistent
+          NewVarDecls = ATappend(NewVarDecls, (ATerm) VarDecl);
+        }
+      }
+      //Consistent indicates if all variables from VarDecls are consistent with
+      //those in VarDeclTable.
+      if (Consistent) {
+        //add the variables from DataEqns(i) to VarDeclTable
+        int NewVarDeclsLength = ATgetLength(NewVarDecls);
+        for (int j = 0; j < NewVarDeclsLength; j++) {
+          ATermAppl NewVarDecl = ATAelementAt(NewVarDecls, j);
+          ATtablePut(VarDeclTable, ATgetArgument(NewVarDecl, 0),
+            (ATerm) NewVarDecl);
+        }
+        i++;
+      }
+      if (!Consistent || (i == DataEqnsLength)) {
+        //VarDeclTable represents the maximum consistent prefix of variable
+        //declarations of DataEqns starting at StartPrefix. Print this prefix
+        //and the corresponding equations,and if necessary, update StartPrefix
+        //and reset VarDeclTable.
+        fprintf(OutStream, "var  ");
+        gsPrintDecls(OutStream,
+          gsGroupDeclsBySort(ATreverse(ATtableValues(VarDeclTable))),
+          ";\n", "     ");
+        fprintf(OutStream, "eqn  ");
+        gsPrintParts(OutStream,
+          ATgetSlice(DataEqns, StartPrefix, i), ShowSorts, PrecLevel,
+          ";\n", "     ");
+        if (i < DataEqnsLength) {
+          fprintf(OutStream, "\n");
+          StartPrefix = i;
+          ATtableReset(VarDeclTable);
+        }
+      }
+    }
+    //finalisation after printing all (>0) data equations
+    fprintf(OutStream, "\n");
+    ATtableDestroy(VarDeclTable);
+  }
+}
+
+ATermList gsGroupDeclsBySort(const ATermList Decls)
+{
+  int DeclsLength = ATgetLength(Decls);
+  if (DeclsLength > 0) {
+    ATermTable SortDeclsTable = ATtableCreate(2*DeclsLength, 50);
+    //Add all variable declarations from Decls to hash table
+    //SortDeclsTable
+    for (int i = 0; i < DeclsLength; i++) {
+      ATermAppl Decl = ATAelementAt(Decls, i);
+      ATermAppl DeclSort = ATAgetArgument(Decl, 1);
+      ATermList CorDecls = ATLtableGet(SortDeclsTable,
+        (ATerm) DeclSort);
+      if (CorDecls == NULL) {
+        ATtablePut(SortDeclsTable, (ATerm) DeclSort,
+          (ATerm) ATmakeList1((ATerm) Decl));
+      } else {
+        ATtablePut(SortDeclsTable, (ATerm) DeclSort,
+          (ATerm) ATappend(CorDecls, (ATerm) Decl));
+      }
+    }
+    //Return the hash table as a list of variable declarations
+    ATermList Result = ATmakeList0();
+    ATermList DeclSorts = ATtableKeys(SortDeclsTable);
+    int DeclSortsLength = ATgetLength(DeclSorts);
+    for (int i = 0; i < DeclSortsLength; i++) {
+      Result = ATconcat(
+        ATLtableGet(SortDeclsTable, ATelementAt(DeclSorts, i)), Result);
+    }
+    ATtableDestroy(SortDeclsTable);
+    return Result;
+  } else {
+    //Decls is empty
+    return Decls;
+  }
+}
+
+void gsPrintDecls(FILE *OutStream, const ATermList Decls,
+  const char *Terminator, const char *Separator)
+{
+  int n = ATgetLength(Decls);
+  if (n > 0) {
+    for (int i = 0; i < n-1; i++) {
+      ATermAppl Decl = ATAelementAt(Decls, i);
+      //check if sorts of Decls(i) and Decls(i+1) are equal
+      if (ATisEqual(ATgetArgument(Decl, 1),
+          ATgetArgument(ATelementAt(Decls, i+1), 1))) {
+        gsPrintPart(OutStream, Decl, false, 0);
+        fprintf(OutStream, ",");
+      } else {
+        gsPrintPart(OutStream, Decl, true, 0);
+        if (Terminator  != NULL) fprintf(OutStream, Terminator);
+        if (Separator  != NULL) fprintf(OutStream, Separator);
+      }
+    }
+    gsPrintPart(OutStream, ATAelementAt(Decls, n-1), true, 0);
+    if (Terminator  != NULL) fprintf(OutStream, Terminator);
   }
 }
 

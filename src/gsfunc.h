@@ -95,6 +95,8 @@ ATermAppl ATAgetArgument(ATermAppl Appl, int Nr);
 ATermList ATLgetArgument(ATermAppl Appl, int Nr);
 ATermAppl ATAgetFirst(ATermList List);
 ATermList ATLgetFirst(ATermList List);
+ATermAppl ATAtableGet(ATermTable Table, ATerm Key);
+ATermList ATLtableGet(ATermTable Table, ATerm Key);
 void      ATprotectAppl(ATermAppl *PAppl);
 void      ATprotectList(ATermAppl *PList);
 void      ATunprotectAppl(ATermAppl *PAppl);

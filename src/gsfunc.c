@@ -136,6 +136,16 @@ ATermList ATLgetFirst(ATermList List)
   return (ATermList) ATgetFirst(List);
 }
 
+ATermAppl ATAtableGet(ATermTable Table, ATerm Key)
+{
+  return (ATermAppl) ATtableGet(Table, Key);
+}
+
+ATermList ATLtableGet(ATermTable Table, ATerm Key)
+{
+  return (ATermList) ATtableGet(Table, Key);
+}
+
 void ATprotectAppl(ATermAppl *PAppl)
 {
   ATprotect((ATerm *) PAppl);

@@ -16,7 +16,7 @@ ATermAppl gsParseSpecification(FILE *SpecStream);
        an appropriate error message is printed to stderr.
 */ 
 
-bool gsPrintSpecification(FILE *OutStream, ATermAppl Spec);
+bool gsPrintSpecification(FILE *OutStream, const ATermAppl Spec);
 /*Pre: OutStream points to a stream to which can be written
        Spec is an ATermAppl containing a GenSpect specification
   Post:A textual representation of the GenSpect specification is written to
