@@ -1,5 +1,5 @@
 // Date: 08-12-2004
-// This document describes the output format of the GenSpect language. Here:
+// This document describes the internal format of the GenSpect language. Here:
 // - <NumberString> represents a string of the format '"0"|("-"?[1-9][0-9]*)'
 // - <String> represents an arbitrary string
 // - the other alphabetical strings within angular brackets are non-terminals
