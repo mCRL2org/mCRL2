@@ -454,7 +454,7 @@ ATermAppl gsImplSortRefs(ATermAppl Spec)
   while (!ATisEmpty(SortRefs))
   {
     ATermAppl SortRef = ATAgetFirst(SortRefs);
-    ATermAppl LHS = ATAgetArgument(SortRef, 0);
+    ATermAppl LHS = gsMakeSortId(ATAgetArgument(SortRef, 0));
     ATermAppl RHS = ATAgetArgument(SortRef, 1);
     //if RHS is the first occurrence of an implementation of a structured sort
     //at the rhs of a sort reference, add RHS := LHS; otherwise add LHS := RHS
