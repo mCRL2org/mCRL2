@@ -803,7 +803,7 @@ void gsImplSortPos(TDataDecls *PDataDecls)
   ATermList bpql = ATmakeList3((ATerm) b, (ATerm) p, (ATerm) q);
   ATermList bcpql = ATmakeList4((ATerm) b, (ATerm) c, (ATerm) p, (ATerm) q);
   ATermList bpqrl = ATmakeList4((ATerm) b, (ATerm) p, (ATerm) q, (ATerm) r);
-  PDataDecls->DataEqns = ATconcat(ATmakeList(42,
+  PDataDecls->DataEqns = ATconcat(ATmakeList(43,
       //equality (Pos -> Pos -> Bool)
       (ATerm) gsMakeDataEqn(el, nil, gsMakeDataExprEq(one, one), t),
       (ATerm) gsMakeDataEqn(bpl, nil, 
@@ -819,6 +819,7 @@ void gsImplSortPos(TDataDecls *PDataDecls)
       (ATerm) gsMakeDataEqn(pql,nil,
          gsMakeDataExprEq(gsMakeDataExprCDub(t, p), gsMakeDataExprCDub(f, q)),
          f),
+      (ATerm) gsMakeDataEqn(pl, nil, gsMakeDataExprEq(p, p), t),
       //inequality (Pos -> Pos -> Bool)
       (ATerm) gsMakeDataEqn(pql,nil,
          gsMakeDataExprNeq(p, q), gsMakeDataExprNot(gsMakeDataExprEq(p, q))),
@@ -977,7 +978,7 @@ void gsImplSortNat(TDataDecls *PDataDecls)
   ATermList nl = ATmakeList1((ATerm) n);
   ATermList mnl = ATmakeList2((ATerm) m, (ATerm) n);
   ATermList bnl = ATmakeList2((ATerm) b, (ATerm) n);
-  PDataDecls->DataEqns = ATconcat(ATmakeList(44,
+  PDataDecls->DataEqns = ATconcat(ATmakeList(45,
       //equality (Nat -> Nat -> Bool)
       (ATerm) gsMakeDataEqn(el, nil, gsMakeDataExprEq(zero, zero), t),
       (ATerm) gsMakeDataEqn(pl, nil,
@@ -987,6 +988,7 @@ void gsImplSortNat(TDataDecls *PDataDecls)
       (ATerm) gsMakeDataEqn(pql,nil, 
          gsMakeDataExprEq(gsMakeDataExprCNat(p), gsMakeDataExprCNat(q)),
          gsMakeDataExprEq(p, q)),
+      (ATerm) gsMakeDataEqn(nl, nil, gsMakeDataExprEq(n, n), t),
       //inequality (Nat -> Nat -> Bool)
       (ATerm) gsMakeDataEqn(mnl,nil,
          gsMakeDataExprNeq(m, n), gsMakeDataExprNot(gsMakeDataExprEq(m, n))),
@@ -1159,8 +1161,9 @@ void gsImplSortInt(TDataDecls *PDataDecls)
   ATermList pnl = ATmakeList2((ATerm) p, (ATerm) n);
   ATermList mnl = ATmakeList2((ATerm) m, (ATerm) n);
   ATermList bxl = ATmakeList2((ATerm) b, (ATerm) x);
+  ATermList xl  = ATmakeList1((ATerm) x);
   ATermList xyl = ATmakeList2((ATerm) x, (ATerm) y);
-  PDataDecls->DataEqns = ATconcat(ATmakeList(66,
+  PDataDecls->DataEqns = ATconcat(ATmakeList(67,
       //equality (Int -> Int -> Bool)
       (ATerm) gsMakeDataEqn(mnl,nil, 
          gsMakeDataExprEq(gsMakeDataExprCInt(m), gsMakeDataExprCInt(n)),
@@ -1172,6 +1175,7 @@ void gsImplSortInt(TDataDecls *PDataDecls)
       (ATerm) gsMakeDataEqn(pql,nil, 
          gsMakeDataExprEq(gsMakeDataExprCNeg(p), gsMakeDataExprCNeg(q)),
          gsMakeDataExprEq(p, q)),
+      (ATerm) gsMakeDataEqn(xl, nil, gsMakeDataExprEq(x, x), t),
       //inequality (Int -> Int -> Bool)
       (ATerm) gsMakeDataEqn(xyl,nil,
          gsMakeDataExprNeq(x, y), gsMakeDataExprNot(gsMakeDataExprEq(x, y))),
