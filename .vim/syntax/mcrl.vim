@@ -2,7 +2,7 @@
 " Language:   mCRL
 " Extension:  mcrl
 " Maintainer: Aad Mathijssen <A.H.J.Mathijssen@tue.nl>
-" Date:       04-11-2004
+" Date:       05-01-2005
 
 syntax clear
 
@@ -16,7 +16,7 @@ syntax keyword mcrlTodo       contained TODO FIXME XXX
 syntax region mcrlComment     start=/%/ end='$' contains=mcrlTodo
 
 syntax match mcrlIdentifier   /[a-zA-Z0-9^'_\-]\+/
-syntax match mcrlOperator     /[.+|<>:=#@(),]/
+syntax match mcrlOperator     /[.+|<>:=#@(){},]/
 syntax match mcrlOperator     /|_/
 syntax match mcrlOperator     /->/
 
