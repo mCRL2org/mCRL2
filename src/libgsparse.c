@@ -1,5 +1,5 @@
 #define  NAME      "libgsparse"
-#define  LVERSION  "0.1.28"
+#define  LVERSION  "0.1.29"
 #define  AUTHOR    "Aad Mathijssen"
 
 #ifdef __cplusplus
@@ -387,22 +387,13 @@ void gsPrintPart(FILE *OutStream, const ATermAppl Part, bool ShowSorts,
       gsPrintPart(OutStream, Cond, ShowSorts, 0);
       fprintf(OutStream, " -> ");
     }
-    //print multi action and time
-    ATermList MultActs = ATLgetArgument(Part, 2);
-    int MultActsLength = ATgetLength(MultActs);
-    ATermAppl Time = ATAgetArgument(Part, 3);
-    bool IsTimed = !gsIsNil(Time);
-    if (MultActsLength == 0) {
-      fprintf(OutStream, "tau");
-    } else {
-      //MultActsLength > 0
-      if (IsTimed && MultActsLength == 1) fprintf(OutStream, "(");
-      gsPrintParts(OutStream, MultActs, ShowSorts, PrecLevel, NULL, "|");
-      if (IsTimed && MultActsLength == 1) fprintf(OutStream, ")");
-      if (IsTimed) {
-        fprintf(OutStream, " @ ");
-        gsPrintPart(OutStream, Time, ShowSorts, 11);
-      }
+    //print multiaction
+    bool IsTimed = !gsIsNil(ATAgetArgument(Part, 3));
+    gsPrintPart(OutStream, ATAgetArgument(Part, 2), ShowSorts, (IsTimed)?6:5);
+    //print time
+    if (IsTimed) {
+      fprintf(OutStream, " @ ");
+      gsPrintPart(OutStream, ATAgetArgument(Part, 3), ShowSorts, 11);
     }
     fprintf(OutStream, " . ");
     //print process reference
@@ -413,6 +404,19 @@ void gsPrintPart(FILE *OutStream, const ATermAppl Part, bool ShowSorts,
       fprintf(OutStream, "(");
       gsPrintParts(OutStream, Assignments, ShowSorts, PrecLevel, NULL, ", ");
       fprintf(OutStream, ")");
+    }
+  } else if (gsIsMultAct(Part)) {
+    //print multiaction
+    gsDebugMsg("printing multiaction\n");
+    ATermList Actions = ATLgetArgument(Part, 0);
+    int ActionsLength = ATgetLength(Actions);
+    if (ActionsLength == 0) {
+      fprintf(OutStream, "tau");
+    } else {
+      //ActionsLength > 0
+      if (PrecLevel > 7) fprintf(OutStream, "(");
+      gsPrintParts(OutStream, Actions, ShowSorts, PrecLevel, NULL, "|");
+      if (PrecLevel > 7) fprintf(OutStream, ")");
     }
   } else if (gsIsAssignment(Part)) {
     //print assignment

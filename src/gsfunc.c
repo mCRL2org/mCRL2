@@ -237,6 +237,8 @@ static AFun gsAFunLPE;
 static AFun gsAFunProcEqn;
 static AFun gsAFunProcVarId;
 static AFun gsAFunLPESummand;
+static AFun gsAFunMultAct;
+static AFun gsAFunDelta;
 static AFun gsAFunAction;
 static AFun gsAFunAssignment;
 static AFun gsAFunInit;
@@ -266,7 +268,6 @@ static AFun gsAFunBagEnumElt;
 static AFun gsAFunWhrDecl;
 static AFun gsAFunActionProcess;
 static AFun gsAFunProcess;
-static AFun gsAFunDelta;
 static AFun gsAFunTau;
 static AFun gsAFunSum;
 static AFun gsAFunRestrict;
@@ -363,6 +364,8 @@ void gsEnableConstructorFunctions(void)
   gsAFunProcEqn       = ATmakeAFun("ProcEqn", 3, ATfalse);
   gsAFunProcVarId     = ATmakeAFun("ProcVarId", 2, ATfalse);
   gsAFunLPESummand    = ATmakeAFun("LPESummand", 5, ATfalse);
+  gsAFunMultAct       = ATmakeAFun("MultAct", 1, ATfalse);
+  gsAFunDelta         = ATmakeAFun("Delta", 0, ATfalse);
   gsAFunAction        = ATmakeAFun("Action", 2, ATfalse);
   gsAFunAssignment    = ATmakeAFun("Assignment", 2, ATfalse);
   gsAFunInit          = ATmakeAFun("Init", 1, ATfalse);
@@ -392,7 +395,6 @@ void gsEnableConstructorFunctions(void)
   gsAFunWhrDecl       = ATmakeAFun("WhrDecl", 2, ATfalse);
   gsAFunActionProcess = ATmakeAFun("ActionProcess", 2, ATfalse);
   gsAFunProcess       = ATmakeAFun("Process", 2, ATfalse);
-  gsAFunDelta         = ATmakeAFun("Delta", 0, ATfalse);
   gsAFunTau           = ATmakeAFun("Tau", 0, ATfalse);
   gsAFunSum           = ATmakeAFun("Sum", 2, ATfalse);
   gsAFunRestrict      = ATmakeAFun("Restrict", 2, ATfalse);
@@ -480,6 +482,8 @@ void gsEnableConstructorFunctions(void)
   ATprotectAFun(gsAFunProcEqn);
   ATprotectAFun(gsAFunProcVarId);
   ATprotectAFun(gsAFunLPESummand);
+  ATprotectAFun(gsAFunMultAct);
+  ATprotectAFun(gsAFunDelta);
   ATprotectAFun(gsAFunAction);
   ATprotectAFun(gsAFunAssignment);
   ATprotectAFun(gsAFunInit);
@@ -509,7 +513,6 @@ void gsEnableConstructorFunctions(void)
   ATprotectAFun(gsAFunWhrDecl);
   ATprotectAFun(gsAFunActionProcess);
   ATprotectAFun(gsAFunProcess);
-  ATprotectAFun(gsAFunDelta);
   ATprotectAFun(gsAFunTau);
   ATprotectAFun(gsAFunSum);
   ATprotectAFun(gsAFunRestrict);
@@ -701,6 +704,18 @@ ATermAppl gsMakeLPESummand(ATermList DataVarIds, ATermAppl BoolExpr,
     (ATerm) MultiAction, (ATerm) TimeExprOrNil, (ATerm) Assignments);
 }
 
+ATermAppl gsMakeMultAct(ATermList Actions)
+{
+  assert(gsConstructorFunctionsEnabled);
+  return ATmakeAppl1(gsAFunMultAct, (ATerm) Actions);
+}
+
+ATermAppl gsMakeDelta()
+{
+  assert(gsConstructorFunctionsEnabled);
+  return ATmakeAppl0(gsAFunDelta);
+}
+
 ATermAppl gsMakeAction(ATermAppl ActId, ATermList DataExprs)
 {
   assert(gsConstructorFunctionsEnabled);
@@ -883,12 +898,6 @@ ATermAppl gsMakeProcess(ATermAppl ProcId, ATermList DataExprs)
 {
   assert(gsConstructorFunctionsEnabled);
   return ATmakeAppl2(gsAFunProcess, (ATerm) ProcId, (ATerm) DataExprs);
-}
-
-ATermAppl gsMakeDelta()
-{
-  assert(gsConstructorFunctionsEnabled);
-  return ATmakeAppl0(gsAFunDelta);
 }
 
 ATermAppl gsMakeTau()
@@ -1092,6 +1101,16 @@ bool gsIsLPESummand(ATermAppl Term) {
   return ATgetAFun(Term) == gsAFunLPESummand;
 }
 
+bool gsIsMultAct(ATermAppl Term) {
+  assert(gsConstructorFunctionsEnabled);
+  return ATgetAFun(Term) == gsAFunMultAct;
+}
+
+bool gsIsDelta(ATermAppl Term) {
+  assert(gsConstructorFunctionsEnabled);
+  return ATgetAFun(Term) == gsAFunDelta;
+}
+
 bool gsIsAction(ATermAppl Term) {
   assert(gsConstructorFunctionsEnabled);
   return ATgetAFun(Term) == gsAFunAction;
@@ -1235,11 +1254,6 @@ bool gsIsActionProcess(ATermAppl Term) {
 bool gsIsProcess(ATermAppl Term) {
   assert(gsConstructorFunctionsEnabled);
   return ATgetAFun(Term) == gsAFunProcess;
-}
-
-bool gsIsDelta(ATermAppl Term) {
-  assert(gsConstructorFunctionsEnabled);
-  return ATgetAFun(Term) == gsAFunDelta;
 }
 
 bool gsIsTau(ATermAppl Term) {
