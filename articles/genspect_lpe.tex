@@ -1,0 +1,863 @@
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+%%%  MTLPEs                                                    %%%
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+\documentclass[twoside,fleqn,a4paper,dvips]{article}
+\usepackage{textcomp,amsmath,amssymb,amsthm,stmaryrd}
+\usepackage{geometry}
+\usepackage[ps2pdf]{hyperref} % remove for printing
+%\usepackage[active]{srcltx}
+\usepackage{mymath,mythm,mcrl}
+  
+\setlength{\mathindent}{0.5em}
+
+\def\YSU{\texttt{ YSU: TODO :USY\marginpar{!!!} }}
+\def\JFG{\texttt{ JFG: TODO :GFJ\marginpar{!!!} }}
+\newcommand{\afunc}[3]{\mathsf{#1}:#2\rightarrow#3}
+
+\title{LPE definitions and an ATerm representation format for \mcrl\ 
+  with multiactions and time}
+  
+\author{Jan Friso Groote \and Yaroslav S. Usenko}
+
+\begin{document}
+\maketitle
+
+\section{LPE definitions}
+
+The equation below represents a Linear Process Equation for \mcrl\ 
+with multiactions and time (MTLPE).
+\begin{gather}
+\begin{split}
+\pr{X}(\vect{d\ap D})=&\sum_{i\in I}\sum_{\vect{e_i\ap E_i}} c_i(\vect{d,e_i})\to\act{a}^0_i(\vect{f_{i,0}}(\vect{d,e_i}))\comm\dots\comm\act{a}^{n(i)}_i(\vect{f_{i,n(i)}}(\vect{d,e_i}))\at t_i(\vect{d,e_i})\seqc
+\pr{X}_i(\vect{g_i}(\vect{d,e_i}))\notag\\
+&+\sum_{j\in J}\sum_{\vect{e_j\ap E_j}} c_j(\vect{d,e_j})\to\act{a}^0_j(\vect{f_{j,0}}(\vect{d,e_j}))\comm\dots\comm\act{a}^{n(j)}_j(\vect{f_{j,n(j)}}(\vect{d,e_j}))\at t_j(\vect{d,e_j})\\
+&+\sum_{\vect{e_\delta\ap E_\delta}} c_\delta(\vect{d,e_\delta})\to\delta\at t_\delta(\vect{d,e_\delta})
+\end{split}
+\end{gather}
+where $I$ and $J$ are disjoint.
+
+It is possible to translate multiactions to regular \mcrl\ actions
+(with longer parameter lists).  In this way a MTLPE can be translated
+to a TLPE, preserving equivalence.  The TLPE that corresponds to the
+above MTLPE is defined in the following way.
+\begin{gather}
+\begin{split}
+\pr{X}(\vect{d\ap D})=&\sum_{i\in I}\sum_{\vect{e_i\ap E_i}} c_i(\vect{d,e_i})\to\act{a}^0_i\_\act{a}^1_i\_\dots\_\act{a}^{n(i)}_i(\vect{f_{i,0}}(\vect{d,e_i}),\dots,\vect{f_{i,n(i)}}(\vect{d,e_i}))\at t_i(\vect{d,e_i})\seqc
+\pr{X}_i(\vect{g_i}(\vect{d,e_i}))\notag\\
+&+\sum_{j\in J}\sum_{\vect{e_j\ap E_j}} c_j(\vect{d,e_j})\to\act{a}^0_j\_\act{a}^1_j\_\dots\_\act{a}^{n(j)}_j(\vect{f_{j,0}}(\vect{d,e_j}),\dots,\vect{f_{j,n(j)}}(\vect{d,e_j}))\at t_j(\vect{d,e_j})\\
+&+\sum_{\vect{e_\delta\ap E_\delta}} c_\delta(\vect{d,e_\delta})\to\delta\at t_\delta(\vect{d,e_\delta})
+\end{split}
+\end{gather}
+where $I$ and $J$ are disjoint, and
+$\act{a}^0_i\_\act{a}^1_i\_\dots\_\act{a}^{n(i)}_i$ and
+$\act{a}^0_j\_\act{a}^1_j\_\dots\_\act{a}^{n(j)}_j$ are new actions
+(for each $i$ and $j$), parameterized by the concatenation of the
+parameter lists of the contained actions.
+
+\YSU formalize below
+
+\begin{thm}
+  Given 
+  $\mathrm{MTLPE1}=(\mathrm{genspect})=\mathrm{MTLPE2}$,\\
+  $\mathrm{TLPE(MTLPE1)}=(\mathrm{timed\ mcrl})=\mathrm{TLPE(MTLPE2)}$.
+\end{thm}
+
+Time can be eliminated from TLPEs in a similar way (see page 106 of
+the thesis).
+
+\appendix
+\newpage
+\section{Static Semantics and Well-formedness}
+\label{section:SSC} 
+In this section it is defined when a specification is correctly defined.
+We use the syntactical categories from the previous section (in teletype
+font) to refer to items in a specification. If we denote a
+concrete part of a specification, we prefer using the latex symbols, to
+increase readability. The definitions below are an adapted copy from those in
+\cite{GroPo94a}.
+
+In
+essence the static semantics says that functions and terms are well
+typed, and some sorts and functions are present in the specification. The
+validity of all static semantic requirements can efficiently be decided for any
+specification.
+
+A specification is well formed, if it satisfies the static semantic requirements,
+the symmetric closure of the communication function is associative, there are no
+empty sorts and the sorts $\Bool$ and $\Time$ are appropriately defined. We
+only give an operational semantics to well formed specifications.
+\subsection{The signature of a specification}
+\begin{defn}
+The signature $\Sig(E)$ of a {\tt Specification} $E$ consists of a
+seven-tuple \[(\Sort,\Fun,\Map,\Act,\Comm,\Proc,\Init)\] where
+each component is a set containing all elements of a main syntactical category
+declared in $E$.
+The signature $\Sig(E)$ of $E$ is inductively defined as follows:
+\newcommand{\fd}{{\it fd}}
+\newcommand{\md}{{\it md}}
+\newcommand{\pe}{{\it pe}}
+\newcommand{\ad}{{\it ad}}
+\begin{itemize}
+\item
+If $E\equiv \sort~n_1\cdots n_m$ with $m\geq 1$,
+then
+$\Sig(E)\wor(\{n_1,\ldots,n_m\},\emptyset,\emptyset,\emptyset,
+\emptyset,\emptyset,\emptyset).$
+\item
+If $E\equiv
+\func~\fd_1\cdots \fd_m$ with $m\geq 1$,
+then
+$\Sig(E)\wor(\emptyset,\Fun,
+\emptyset,\emptyset,
+\emptyset,\emptyset,\emptyset),$
+where \[\begin{array}{lll}
+\Fun &\wor&
+\{n_{ij}\ap \rightarrow S_i\mid \fd_i\equiv
+n_{i1},\ldots,n_{il_i}\ap \rightarrow S_i, 1\leq i\leq m, 1\leq j\leq
+l_i\}\\
+&\cup&\{n_{ij}\ap S_{i1}\times\cdots\times S_{ik_i}\rightarrow S_i\mid\\
+&&~~~~~\fd_i\equiv
+n_{i1},\ldots,n_{il_i}\ap S_{i1}\times\cdots\times S_{ik_i}\rightarrow
+S_i, 1\leq i\leq
+m, 1\leq j\leq l_i\}.
+\end{array}
+\]
+\item
+If $E\equiv
+\map~\md_1\cdots \md_m$ with $m\geq 1$,
+then
+$\Sig(E)\wor(\emptyset,\emptyset,\Map, \emptyset,\emptyset,
+\emptyset,\emptyset),$
+where \[\begin{array}{lll}
+\Map &\wor&
+\{n_{ij}\ap \rightarrow S_i\mid \md_i\equiv
+n_{i1},\ldots,n_{il_i}\ap \rightarrow S_i, 1\leq i\leq m, 1\leq j\leq
+l_i\}\\
+&\cup&\{n_{ij}\ap S_{i1}\times\cdots\times S_{ik_i}\rightarrow S_i\mid\\
+&&~~~~~\md_i\equiv
+n_{i1},\ldots,n_{il_i}\ap S_{i1}\times\cdots\times S_{ik_i}\rightarrow
+S_i, 1\leq i\leq
+m, 1\leq j\leq l_i\}.
+\end{array}
+\]
+\item
+If $E$ is a {\tt Equation-specification},
+then
+$\Sig(E)\wor(\emptyset,\emptyset,\emptyset,\emptyset,\emptyset,\emptyset,\emptyset)$.
+\item
+If $E\equiv
+\act~\ad_1\cdots \ad_m$ with $m\geq 1$,
+then
+$\Sig(E)\wor(\emptyset,\emptyset,\emptyset,\Act,
+\emptyset,\emptyset,
+\emptyset)$, where
+\[\begin{array}{lll}
+\Act&\wor&
+\{n_{i}\mid ad_i\equiv
+n_{i}, 1\leq i\leq m \}\\
+&\cup&\{n_{ij}\ap S_{i1}\times\cdots\times S_{ik_i}\mid\\
+&&~~~~~ad_i\equiv
+n_{i1},\ldots,n_{il_i}\ap S_{i1}\times\cdots\times S_{ik_i}, 1\leq i\leq
+m, 1\leq j\leq l_i\}.
+\end{array}
+\]
+\item
+If $E\equiv
+\comm~cd_1\cdots cd_m$ with $m\geq 1$,
+then
+$\Sig(E)\wor(\emptyset,\emptyset,\emptyset,\emptyset,
+\{cd_i\mid 1\leq
+i\leq m\}, \emptyset,\emptyset).$
+\item
+If $E\equiv
+\proc~pd_1\cdots pd_m$ with $m\geq 1$,
+then
+$\Sig(E)\wor(\emptyset,\emptyset,\emptyset,\emptyset,\emptyset,
+\{pd_i\mid 1\leq i\leq m\},\emptyset).$
+\item
+If $E\equiv
+\init~\pe$ then $\Sig(E)\wor(\emptyset,\emptyset,\emptyset,\emptyset,\emptyset,
+\emptyset,\{\pe\}).$
+\item
+If $E\equiv E_1~E_2$
+with $\Sig(E_i)=(Sort_{i},\Fun_{i},\Map_i,
+\Act_{i},\Comm_{i},\Proc_{i},\Init_i)$ for $i=1,2$, then
+\[\begin{array}{l}
+\Sig(E)\wor(Sort_{1}\cup Sort_{2},\Fun_{1}\cup \Fun_{2},
+\Map_1\cup\Map_2,\\
+\hspace{8em}\Act_{1}\cup \Act_{2},\Comm_{1}\cup \Comm_{2},\Proc_{1}\cup
+\Proc_{2},
+\Init_1\cup\Init_2).
+\end{array}\]
+\end{itemize}
+\end{defn}
+\begin{defn}
+Let $Sig=(Sort,\Fun,\Map,\Act,\Comm,\Proc,\Init)$ be a signature. We write
+\[\begin{array}{llll}
+\Sig.Sort~\mbox{for}~Sort,&
+\Sig.\Fun~\mbox{for}~\Fun,&
+\Sig.\Map~{\rm for}~\Map,&
+\Sig.\Act~\mbox{for}~\Act,\\
+\Sig.\Comm~\mbox{for}~\Comm,&
+\Sig.\Proc~\mbox{for}~\Proc,&
+\Sig.\Init~\mbox{for}~\Init.
+\end{array}\]
+\end{defn}
+\subsection{Variables}
+Variables play an important role in specifications. The next definition
+says given a specification $E$, which elements from {\tt Name} can play the
+role of a variable without confusion with
+defined constants. Moreover, variables must have an unambiguous and
+declared sort.
+\begin{Dn}
+Let $Sig$ be a signature. A set $\NV$ containing 
+pairs
+$\langle x\ap S\rangle$ with $x$ and $S$ from {\tt Name}, 
+is called a {\it set of variables} over $Sig$ iff for each $\langle
+x\ap S\rangle\in \NV$:
+\begin{itemize}
+\item
+for each {\tt Name} $S'$ and {\tt Process-term} $p$ it holds that
+$x\ap \rightarrow S'\notin \Sig.\Fun\cup\Sig.\Map$, 
+$x\notin\Sig.\Act$ and $x=p\notin\Sig.\Proc$,
+\item
+$S\in \Sig.Sort$,
+\item
+for each {\tt Name} $S'$ such that $S'\not\equiv S$ it holds
+that $\langle x\ap S'\rangle\not\in \NV$.
+\end{itemize}
+\end{Dn}
+\begin{Dn}
+\newcommand{\vd}{{\it vd}}
+Let $\vd$ be a {\tt Variable-declaration}.
+The function $\Vars$ is defined by:
+\[\Vars(\vd)\wor\left\{
+\begin{array}{ll}
+\emptyset&\mbox{if $\vd$ is empty},\\
+\{\langle x_{ij}\ap S_i\rangle\mid 1\leq i\leq m,\\
+\phantom{\{\langle x_i\ap S_{ij}\rangle\mid }\hspace*{1mm}1\leq j\leq
+l_i\}&
+\mbox{if}~\vd\equiv
+\var~x_{11},\ldots,x_{1l_1}\ap  S_1~\ldots~x_{m1},\ldots,x_{ml_m}\ap S_m.
+\end{array}\right.\]
+\end{Dn}
+In the following definitions we give functions yielding the sort of and the 
+variables in a
+{\tt Data-term} $t$. 
+\begin{Dn}
+Let $t$ be a {\tt data-term} and $Sig$ a signature. Let $\NV$ be a set
+of variables over $Sig$. We define:
+\[sort_{Sig,\NV}(t)\wor\left\{
+\begin{array}{ll}
+S&\mbox{if~}t\equiv x\mbox{ and }\langle x\ap S\rangle \in \NV,\\
+S&\mbox{if $t\equiv n$, $n\ap \rightarrow S\in
+\Sig.\Fun\cup\Sig.\Map$}\\
+&\hspace*{0.5cm}\mbox{and for no $S'\not\equiv S$}~n\ap \rightarrow
+S'\in\Sig.\Fun\cup\Sig.\Map,\\
+S&\mbox{if $t\equiv n(t_1,\ldots,t_m)$,}\\
+&\mbox{$\hspace{0.5cm}n\ap sort_{Sig,\NV}(t_1)\times \cdots
+\times sort_{Sig,\NV}(t_m)\rightarrow S \in \Sig.\Fun\cup\Sig.\Map$}\\
+&\hspace{0.5cm}\mbox{and for
+no}~S'\not\equiv S~n\ap sort_{Sig,\NV}(t_1)\times \cdots
+\times sort_{Sig,\NV}(t_m)\rightarrow\\
+&\hspace*{0.5cm}S' \in \Sig.\Fun\cup\Sig.\Map,\\
+\perp&\mbox{otherwise}.
+\end{array}\right.\]
+\end{Dn}
+If a variable or a function is not or inappropriately declared 
+no answer can be obtained. In this case $\perp$ results.
+\begin{Dn}
+Let $Sig$ be a signature, $\NV$ a set of
+variables over $Sig$ and let $t$ be a {\tt Data-term}.
+\[\Var_{Sig,\NV}(t)\wor
+\left\{
+\begin{array}{ll}
+\{\langle x\ap S\rangle\}&\mbox{if }t\equiv x\mbox{ and }\langle
+x\ap S\rangle\in \NV,\\
+\emptyset&\mbox{if~}t\equiv n\mbox{ and }n\ap \rightarrow S\in
+\Sig.\Fun\cup\Sig.\Map,\\
+\bigcup_{1\leq i\leq m} \Var_{Sig,\NV}(t_i)&\mbox{if~}t\equiv 
+n(t_1,\ldots,t_m),\\
+\{\perp\}&\mbox{otherwise}.
+\end{array}\right.\]
+\end{Dn}
+We call a {\tt Data-term} $t$ {\em closed} wrt.\ a signature
+$Sig$ and a set of variables $\NV$ iff $\Var_{Sig,\NV}(t)=
+\emptyset$. Note that $\Var_{Sig,\NV}(t)\subseteq\NV\cup\{\perp\}$
+for any {\tt data-term} $t$. If $\perp\in \Var_{\Sig,\NV}(t)$, then
+due  to some missing or inappropriate declaration 
+it can not be determined what the variables of $t$ are on basis of
+$\Sig$ and $\NV$.
+\subsection{Static semantics}
+A {\tt Specification} must be internally consistent. This means
+that all objects that are used must be declared exactly once and 
+are used such that the sorts are correct. It also means that action,
+process, constant and variable names cannot be confused.
+Furthermore, it means that communications are specified in a functional
+way and that it is guaranteed that the terms used in an equation are well-typed.
+Because all these properties can be statically decided, a
+specification that is internally consistent is called SSC
+({\em Statically Semantically Correct}). All next definitions
+culminate in Definition \ref{SSC-mCRL}.
+
+\begin{Dn-arg}{{\tt Data-term}}
+Let $\Sig$ be a signature, and let $\NV$ be a set of variables over
+$\Sig$.
+A {\tt Data-term} $t$ is called SSC wrt.\ $\Sig$ and $\NV$ iff one of
+the following holds
+\begin{itemize}
+\item
+$t\equiv n$ with $n$ a {\tt Name} and
+$\langle n\ap S\rangle\in \NV$ for some $S$, or
+$n\ap  \rightarrow sort_{Sig,\NV}(n)\in \Sig.\Fun\cup\Sig.\Map$.
+\item
+$t\equiv n(t_1,\ldots,t_m)$ ($m\geq 1$) and
+$n\ap sort_{Sig,\NV}(t_1)\times\cdots\times sort_{Sig,\NV}(t_m)
+\rightarrow sort_{Sig,\NV}(n(t_1,\ldots,t_m))\in \Sig.\Fun\cup\Sig.\Map$ and
+all
+$t_i$ ($1\leq i\leq m$) are SSC wrt.\ $Sig$ and $\NV$.
+\end{itemize}
+\end{Dn-arg}
+
+\begin{Dn-arg}{{\tt Equation-section}}
+Let $\Sig$ be a signature and $\NV$ be a set of variables over $\Sig$. An {\tt
+Equation-section}
+$\rew~rw_1\cdots rw_m$
+with $m\geq 1$ is SSC wrt.\ $\Sig$ and $\NV$ iff for all
+$1\leq i\leq m $ if $rw_i\equiv t_1=t_2$,
+both $t_1$ and $t_2$ are SSC wrt.\ $\Sig$ and $\NV$ and
+$sort_{\Sig,\NV}(t_1)=sort_{Sig,\NV}(t_2)$.
+\end{Dn-arg}
+
+\begin{Dn-arg}{{\tt Variable-declaration}}
+A {\tt Variable-declaration} {\it vd} is SSC wrt.\ a signature
+$Sig$ iff one of the following holds.
+\begin{itemize}
+\item
+{\it vd} is empty.
+\item
+${\it vd}\equiv\var$
+\begin{minipage}[t]{7cm}
+$n_{11},\ldots,n_{1k_1}\ap  S_1$\\
+$\vdots$\\
+$n_{m1},\ldots,n_{mk_m}\ap  S_m$\vspace{2ex}
+\end{minipage}\\
+with $m\geq 1$, $k_i\geq 1$ for $1\leq i\leq m$ and
+\begin{itemize}
+\item
+$n_{ij}\not\equiv n_{i'j'}$ whenever $i\neq i'$ or 
+$j\neq j'$ for $1\leq i\leq m$, $1\leq i'\leq m$,
+$1\leq j\leq k_i$ and $1\leq j'\leq k_{i'}$,
+\item
+the set $\Vars(\var~n_{11},\ldots,n_{1k_1}: 
+S_1\cdots n_{m1},\ldots,n_{mk_m}:
+S_m)$ is a set of variables
+over $Sig$.
+\end{itemize}
+\end{itemize}
+\end{Dn-arg}
+
+\begin{Dn-arg}{{\tt Process-term}}
+Let $\Sig$ be a signature and $\NV$ be a set of variables over $\Sig$.
+We say that a {\tt Process-term} $p$ is {\it SSC wrt.\ to $\Sig$ and
+$E$} iff one of the following hold:
+\begin{itemize}
+\item
+$p\equiv p_1+p_2$, 
+$p\equiv p_1\parallel p_2$, $p\equiv p_1\leftmerge p_2$, $p\equiv p_1\mid
+p_2$,
+$p\equiv p_1 {\cdot} p_2$ or $p\equiv p_1\before p_2$ and
+\begin{itemize}
+\item
+$p_1$ is SSC wrt.\ $Sig$ and $\NV$,
+\item
+$p_2$ is SSC wrt.\ $Sig$ and $\NV$.
+\end{itemize}
+\item
+$p\equiv p_1\triangleleft t \triangleright p_2$ and
+\begin{itemize}
+\item
+$p_1$ is SSC wrt.\ $Sig$ and $\NV$,
+\item
+$p_2$ is SSC wrt.\ $Sig$ and $\NV$,
+\item
+$t$ is SSC wrt.\ $Sig$ and $\NV$ and $sort_{Sig,\NV}(t)=\Bool$.
+\end{itemize}
+\item
+$p\equiv p_1\at{t}$ and 
+\begin{itemize}
+\item
+$p_1$ is SSC wrt.\ $Sig$ and $\NV$
+\item
+$t$ is SSC wrt.\ $Sig$ and $\NV$ and $sort_{Sig,\NV}(t)=\Time$.
+\end{itemize}
+\item
+$p\equiv \delta$ or $p\equiv\tau$.
+\item
+$p\equiv\partial_{\{n_1,\ldots,n_m\}}p_1$ or
+$p\equiv \tau_{\{n_1,\ldots,n_m\}}p_1$ with $m\geq 1$ and
+\begin{itemize}
+\item
+for all $1\leq i< j \leq m$ $n_i\not\equiv n_j$,
+\item
+for $1\leq i\leq m$ either $n_i\in \Sig.\Act$ or
+$n_i\ap S_1\times \cdots\times S_k\in
+\Sig.\Act$ for some $k\geq 1$ and {\tt Name}s $S_1,\ldots,S_k$,
+\item
+$p_1$ is SSC wrt.\ $Sig$ and $\NV$.
+\end{itemize}
+\item
+$p\equiv\rho_{\{n_1\rightarrow n_1',\ldots,n_m\rightarrow
+n_m'\}}p_1$ and
+\begin{itemize}
+\item
+for $1\leq i\leq m$ either $n_i\in \Sig.\Act$ or
+$n_i\ap S_1\times \cdots\times S_k\in
+\Sig.\Act$ for some $k\geq 1$ and {\tt Name}s $S_1,\ldots,S_k$,
+\item
+for each $1\leq i<j\leq m$ it holds that $n_i\not\equiv n_j$,
+\item
+for $1\leq i\leq m$, $k\geq 1$ and {\tt Name}s $S_1,..,S_k$ it holds
+that if $n_i\ap S_1\times\cdots\times S_k\in \Sig.\Act$, then also
+$n_i'\ap S_1\times\cdots\times S_k\in \Sig.\Act$,
+\item
+for $1\leq i\leq m$ it holds that if $n_i\in \Sig.\Act$, then also
+$n_i'\in \Sig.\Act$,
+\item
+$p_1$ is SSC wrt.\ $Sig$ and $\NV$.
+\end{itemize}
+\item
+$p\equiv \Sigma_{x\ap S}p_1$ and
+iff
+\begin{itemize}
+\item
+$(\NV\backslash\{\langle x\ap S'\rangle \mid S'
+\mbox{ is a {\tt Name}}\})\cup\{\langle x\ap S\rangle\}$
+is a set of variables over $Sig$,
+\item
+$p_1$ is SSC wrt.\ $Sig$ and
+$(\NV\backslash\{\langle x\ap S'\rangle \mid S'\mbox{ is a
+{\tt Name}}\})\cup\{\langle x\ap S\rangle\}$.
+\end{itemize}
+\item
+$p\equiv n$ and 
+$n=p'\in \Sig.\Proc$ for some {\tt Process-term} $p'$, or $n\in
+\Sig.\Act$.
+\item
+$p\equiv n(t_1,\ldots,t_m)$
+with $m\geq 1$ and
+\begin{itemize}
+\item
+$n(x_1\ap sort_{Sig,\NV}(t_1),\ldots,x_m\ap sort_{Sig,\NV}(t_m))=p'\in
+\Sig.\Proc$ for {\tt Name}s $x_1,\ldots,x_m$ and\\ {\tt Process-term} $p'$,
+or
+$n\ap sort_{Sig,\NV}(t_1)\times \cdots\times sort_{Sig,\NV}(t_m)\in
+\Sig.\Act$,
+\item
+for $1\leq i\leq m$ the {\tt Data-term}
+$t_i$ is SSC wrt.\ $Sig$ and $\NV$.
+\end{itemize}
+\end{itemize}
+\end{Dn-arg}
+
+\begin{Dn-arg}{{\tt Action-declaration}}
+Let $\Sig$ be a signature.
+An {\tt Action-declaration} ${\it ad}$ is SSC wrt.\ $Sig$ iff one of the following
+hold:
+\begin{itemize}
+\item
+${\it ad}\equiv n$ and
+for each {\tt Name} $S'$ it holds that $n\ap \rightarrow S' \notin
+\Sig.\Fun\cup\Sig.\Map$.
+\item
+An {\tt Action-declaration} $n_1,\ldots,n_m\ap S_1\times \cdots \times
+S_k$ with $k,m\geq 1$ is SSC wrt. $Sig$ iff
+\begin{itemize}
+\item
+for all $1\leq i<j\leq m$ it holds that $n_i\not\equiv n_j$,
+\item
+for all $1\leq i\leq k$ it holds that $S_i\in \Sig.Sort$,
+\item for all $1\leq i\leq m$ and for each
+{\tt Name} $S'$
+it holds that $n_i\ap S_1\times\cdots\times S_k\rightarrow S'\notin
+\Sig.\Fun\cup\Sig.\Map$.
+\end{itemize}
+\end{itemize}
+\end{Dn-arg}
+
+\begin{Dn-arg}{{\tt Specification}}
+Let $Sig$ be a signature and $\NV$ be a set of variables over $Sig$. We
+define the predicate `is SSC wrt.\ $Sig$'
+inductively over the syntax of a {\tt Specification}.
+\begin{itemize}
+\item
+A {\tt Specification}
+$\sort~n_1\cdots n_m$ with $m\geq 1$
+is SSC wrt.\ $Sig$ iff all $n_1,\ldots,n_m$ are pairwise
+different.
+\item
+A {\tt Specification}
+$\func$
+\begin{minipage}[t]{7cm}
+$n_{11},\ldots,n_{1l_1}\ap S_{11}\times \cdots\times S_{1k_1}\rightarrow
+S_1$\\
+$\vdots$\\
+$n_{m1},\ldots,n_{ml_m}\ap S_{m1}\times \cdots\times S_{mk_m}\rightarrow
+S_m$\vspace{2ex}
+\end{minipage}\\
+with $m\geq 1$, $l_i\geq 1$, $k_i\geq 0$ for $1\leq i\leq m$
+is SSC wrt.\ $Sig$ iff 
+\begin{itemize}
+\item
+for all $1\leq i\leq m$  $n_{i1},\ldots,n_{il_i}$ are
+pairwise different,
+\item
+for all $1\leq i<j\leq m$ it holds that
+if $n_{ik}\equiv n_{jk'}$ for some $1\leq k\leq l_i$ and $1\leq
+k'\leq l_j$, then either $k_i\neq k_j$, or $S_{il}\not\equiv
+S_{jl}$ for some $1\leq l\leq k_i$,
+\item
+for all $1\leq i\leq m$ and $1\leq j\leq k_i$ it holds that
+$S_{ij}\in \Sig.Sort$ and $S_i\in \Sig.Sort$.
+\end{itemize}
+\item
+A {\tt Specification}
+$\map$
+\begin{minipage}[t]{7cm}
+$n_{11},\ldots,n_{1l_1}\ap S_{11}\times \cdots\times S_{1k_1}\rightarrow
+S_1$\\
+$\vdots$\\
+$n_{m1},\ldots,n_{ml_m}\ap S_{m1}\times \cdots\times S_{mk_m}\rightarrow
+S_m$\vspace{2ex}
+\end{minipage}\\
+with $m\geq 1$, $l_i\geq 1$, $k_i\geq 0$ for $1\leq i\leq m$
+is SSC wrt.\ $Sig$ iff 
+\begin{itemize}
+\item
+for all $1\leq i\leq m$  $n_{i1},\ldots,n_{il_i}$ are
+pairwise different,
+\item
+for all $1\leq i<j\leq m$ it holds that
+if $n_{ik}\equiv n_{jk'}$ for some $1\leq k\leq l_i$ and $1\leq
+k'\leq l_j$, then either $k_i\neq k_j$, or $S_{il}\not\equiv
+S_{jl}$ for some $1\leq l\leq k_i$,
+\item
+for all $1\leq i\leq m$ and $1\leq j\leq k_i$ it holds that
+$S_{ij}\in \Sig.Sort$ and $S_i\in \Sig.Sort$.
+\end{itemize}
+\item
+A {\tt Specification} of the form:
+$\begin{minipage}[t]{7cm}
+{\it var-dec}\\
+{\it rew-rul}\vspace{2ex}
+\end{minipage}$\\
+where {\it var-dec} is a {\tt Variable-declaration}
+and {\it rew-rul} is a {\it Equation-section}
+is SSC wrt.\ $Sig$ iff
+\begin{itemize}
+\item
+{\it var-dec} is SSC wrt.\ $Sig$,
+\item
+{\it rew-rul} is SSC wrt.\ $Sig$ and $\Vars(\mbox{\it var-dec})$.
+\end{itemize}
+\item
+A {\tt Specification} $\act~ad_1\cdots ad_m$
+with $m\geq 1$ is SSC wrt. $Sig$ iff
+\begin{itemize}
+\item for all $1\leq i\leq m$ the {\tt Action-declaration}
+$ad_i$ is SSC wrt.  $\Sig$,
+\item for all $1\leq i<j\leq m$ it holds that
+$\Sig(\act~ad_i).\Act\cap \Sig(\act~ad_j).\Act=\emptyset$.
+\end{itemize}
+\item
+A {\tt Specification}
+$\comm~n_{11}| n_{12}= n_{13}\cdots n_{m1}|
+n_{m2}= n_{m3}$ with $m\geq 1$ is SSC wrt.\ $Sig$ iff
+\begin{itemize}
+\item
+for each $1\leq i<j\leq m$ it is not the case that $n_{i1}\equiv n_{j1}$
+and $n_{i2}\equiv n_{j2}$, or $n_{i1}\equiv n_{j2}$ and $n_{i2}\equiv
+n_{j1}$,
+\item
+for each $1\leq i\leq m$ either $n_{i1}\in \Sig.\Act$ or there is a 
+$k\geq 1$ such that $n_{i1}\ap S_1\times \cdots \times S_k\in \Sig.\Act$,
+\item
+for each $1\leq i\leq m$, $k\geq 1$ and {\tt Name}s $S_1,\ldots,S_k$ it
+holds
+that if $n_{i1}\ap S_1\times\cdots\times S_k\in \Sig.\Act$ then
+$n_{i2}\ap S_1\times\cdots\times
+S_k\in \Sig.\Act$ and $n_{i3}\ap S_1\times\cdots\times S_k\in \Sig.\Act$,
+\item
+for each $1\leq i\leq m$, $k\geq 1$ and {\tt Name}s $S_1,\ldots,S_k$ it
+holds
+that if $n_{i2}\ap S_1\times\cdots\times S_k\in \Sig.\Act$ then
+$n_{i1}\ap S_1\times\cdots\times
+S_k\in \Sig.\Act$ and $n_{i3}\ap S_1\times\cdots\times S_k\in \Sig.\Act$,
+\item
+for each $1\leq i\leq m$ it holds
+that if $n_{i1}\in \Sig.\Act$ then
+$n_{i2}\in \Sig.\Act$ and $n_{i3}\in \Sig.\Act$,
+\item
+for each $1\leq i\leq m$ it holds
+that if $n_{i2}\in \Sig.\Act$ then
+$n_{i1}\in \Sig.\Act$ and $n_{i3}\in \Sig.\Act$.
+\end{itemize}
+\item
+A {\tt specification} 
+$\proc~pd_1\cdots pd_m$
+with $m\geq 1$ is SSC wrt.\ $Sig$ iff
+\begin{itemize}
+\item
+for each $1\leq i<j\leq m$:
+\begin{itemize}
+\item
+if $pd_i\equiv n=p$ and $pd_j\equiv n'=p'$ then $n\not\equiv
+n'$,
+\item
+if for some $k\geq1$ it holds that $pd_i\equiv
+n(x_1\ap S_1,\ldots,x_k\ap S_k)=p$
+and\\ $pd_j\equiv n'(x_1'\ap S_1,\ldots,x_k'\ap S_k)=p'$ then $n\not\equiv
+n'$,
+\end{itemize}
+\item
+if $pd_i\equiv n=p$ ($1\leq i\leq m$), then 
+\begin{itemize}
+\item
+$n\not\in
+\Sig.\Act$ and $p$ is SSC wrt.\ $Sig$ and $\emptyset$, and
+\item
+for each {\tt Name} $S'$ it holds that $n\ap \rightarrow S'\notin
+\Sig.\Fun\cup\Sig.\Map$,
+\end{itemize}
+\item
+if $pd_i\equiv n(x_{1}\ap S_{1},\ldots,x_{k}\ap S_{k})=p$
+($1\leq i\leq m$), then
+\begin{itemize}
+\item $n\ap S_{1}\times\cdots\times S_{k}\not\in \Sig.\Act$,
+\item
+for each {\tt Name} $S'$ it holds that $n\ap S_{1}\times\cdots\times
+S_{k}\rightarrow S'\notin \Sig.\Fun\cup\Sig.\Map$,
+\item the {\tt Name}s $x_{1},\ldots,x_{k}$ are pairwise different
+and $\{\langle x_{j}\ap S_{j}\rangle\mid 1\leq j\leq k\}$ is a set
+of variables over $Sig$,
+\item $p$ is SSC wrt.\ $Sig$ and $\{\langle
+x_{j}\ap S_{j}\rangle\mid 1\leq j\leq k\}$.
+\end{itemize}
+\end{itemize}
+\item
+A {\tt Specification} of the form $\init~p$ is SSC wrt.\ $\Sig$ 
+iff $p$ SSC wrt.\ to $\Sig$ and $\emptyset$.
+\item
+A {\tt specification} $E_1~E_2$ is SSC wrt.\ $Sig$ iff 
+\begin{itemize}
+\item
+$E_1$ and $E_2$ are SSC wrt.\ $Sig$,
+\item
+$\Sig(E_1).Sort \cap \Sig(E_2).Sort=\emptyset$,
+\item
+if $n\ap S_1\times \cdots\times S_m\rightarrow S \in \Sig(E_1).\Fun\cup
+\Sig(E_1).\Map$ for some
+$m\geq 0$ then
+$n\ap S_1\times\cdots\times S_m\rightarrow S'\notin \Sig(E_2).\Fun\cup
+\Sig(E_2).\Map$ for any {\tt Name} $S'$,
+\item
+$\Sig(E_1).\Act \cap \Sig(E_2).\Act=\emptyset$,
+\item
+if $n_1| n_2=n_3\in \Sig(E_1).\Comm$ then for any {\tt Name}s $n_3'$
+and $n_3''$ $n_1| n_2=n_3'\notin
+\Sig(E_2).\Comm$ and $n_2| n_1=n_3''\notin \Sig(E_2).\Comm$, 
+\item
+if $pd_1\in \Sig(E_1).\Proc$ and $pd_2\in \Sig(E_2).\Proc$, then
+\begin{itemize}
+\item
+if $pd_1\equiv n_1=p_1$ and $pd_2\equiv n_2=p_2$, then $n_1\not\equiv
+n_2$,
+\item
+if for some $m\geq 1$ $pd_1\equiv n_1(x_1\ap S_1,\ldots,x_m\ap S_m)=p_1$
+and 
+$pd_2\equiv n_2(x_1'\ap S_1,\ldots,x_m'\ap S_m)=p_2$, then $n_1\not\equiv
+n_2$,
+\end{itemize}
+\item
+$\Sig(E_1).\Init=\emptyset$ or $\Sig(E_2).\Init=\emptyset$.
+\end{itemize}
+\end{itemize}
+\end{Dn-arg}
+\begin{Dn}\llabel{SSC-mCRL}
+Let $E$ be a {\tt Specification}. We say that $E$ is SSC iff $E$ is SSC
+wrt.\ $\Sig(E)$.
+\end{Dn}
+\subsection{The communication function}
+The following definition helps us in guaranteeing that the
+communication function is commutative and associative. This implies
+that the merge is also commutative and associative which allows us to
+write parallel processes without brackets. 
+\begin{Dn}
+Let $Sig$ be a signature. The set $\Sig.\Comm^*$ is defined by:
+\[\begin{array}{rcl}
+\Sig.\Comm^*&\wor&\{n_1| n_2=n_3,~ n_2| n_1=n_3 \mid
+n_1| n_2=n_3\in \Sig.\Comm\}.
+\end{array}\]
+So, in $\Sig.\Comm^*$ communication is always commutative. A
+{\it specification} $E$ is {\it communication-associative} iff
+\[
+\begin{array}{l}
+n_1| n_2= n,~ n| n_3=n'\in
+\Sig(E).\Comm^*~\Rightarrow\\
+\hspace*{3cm}\exists n''\ap ~n_2| n_3=n'',
+n_1| n''= n' \in \Sig(E).\Comm^*.
+\end{array}
+\]
+\end{Dn}
+With the condition that $E$ is SSC
+this exactly implies that communication is associative.
+\subsection{Well-formed $\mCRL$ specifications}
+We define what well-formed specifications are. We only provide
+well-formed {\tt Specification}s with a semantics. Well-formedness
+is a decidable property.
+\begin{Dn}
+Let $\Sig$ be a signature. We call a {\tt Name} $S$ a {\it constructor sort}
+iff $S\in\Sig.\Sort$ and there exists {\tt Name}s $S_1,\ldots, S_k, f$ ($k\geq 0$)
+such that $f\ap S_1\times \cdots\times S_k\rightarrow S\in \Sig.\Fun$.
+\end{Dn}
+\begin{Dn}
+Let $E$ be a {\tt Specification} that is SSC. 
+We inductively define which sorts are {\it non empty constructor sorts} in $E$.
+A constructor sort $S$ is called {\it non empty} iff there is a function
+$f\ap S_1\times\cdots\times S_k\rightarrow S\in \Sig.\Fun$ ($k\geq 0$) such
+that for all $1\leq i\leq k$ if $S_i$ is a constructor sort, it is non empty.
+We say
+that $E$ has {\em no empty constructor sorts} iff each constructor sort is non
+empty.
+\end{Dn}
+\begin{Dn}
+Let $E$ be a {\tt Specification}. $E$ is called {\it well-formed} iff 
+\begin{itemize}
+\item
+$E$ is SSC, 
+\item
+$E$ is communication-associative,
+\item
+$E$ has no empty constructor sorts,
+\item
+$\Bool\in \Sig(E).Sort$, $T\ap \rightarrow\Bool\in \Sig(E).\Fun$ and
+$F\ap \rightarrow\Bool\in \Sig(E).\Fun$,
+\item
+If $\Time\in\Sig(E).\Sort$, then $\nul\ap \rightarrow\Time\in \Sig(E).\Fun\cup
+\Sig(E).\Map$ and $\leq\ap \Time\times\Time\rightarrow\Bool\in
+\Sig(E).\Map$. 
+\end{itemize}
+\end{Dn}
+
+\newpage
+\section{ATerm representation format for MTLPEs}
+A MTLPE is stored as an ATerm with the following functions. The sort
+of stored MTLPE is $\nm{MTLPE}$.
+
+\begin{gather*}
+\afunc{spec2gen}{\nm{DataTypes}\x\nm{ActionSpec}^*\x\nm{InitProcSpec}}{\nm{MTLPE}}\\
+\afunc{actspec}{\nm{String}\x\nm{String}^*}{\nm{ActionSpec}}\\
+\afunc{initprocspec}{\nm{Term}^*\x\nm{Variable}^*\x\nm{Summand}^*}{\nm{InitProcSpec}}\\
+\afunc{smd}{\nm{Variable}^*\x\nm{Action}^*\x\nm{Term}\x\nm{NextState}\x\nm{Term}}{\nm{Summand}}\\
+\afunc{act}{\nm{String}\x\nm{Term}^*}{\nm{Action}}\\
+\afunc{terminated}{}{\nm{NextState}}\\
+\afunc{i}{\nm{IndexedTerm}^*}{\nm{NextState}}\\
+\afunc{d}{\nm{Signature}\x\nm{Equation}^*}{\nm{DataTypes}}\\
+\afunc{e}{\nm{Variable}^*\x\nm{Term}\x\nm{Term}}{\nm{Equation}}\\
+\afunc{v}{\nm{String}\x\nm{String}}{\nm{Variable}}\\
+\afunc{it}{\Nat\x\nm{Term}}{\nm{IndexedTerm}}\\
+\afunc{dc}{\Nat}{\nm{IndexedTerm}}\\
+\afunc{s}{\nm{String}^*\x\nm{Function}^*\x\nm{Function}^*}{\nm{Signature}}\\
+\afunc{f}{\nm{String}\x\nm{String}^{*}\x\nm{String}}{\nm{Function}}
+\end{gather*}
+The sort $\nm{Term}$ consists of arbitrary ATerm terms where all function
+symbols must be quoted. The sort $\nm{String}$ consists of quoted constants,
+i.e.\ function symbols of arity 0. The sort $\Nat$ is the built in
+sort of natural numbers in the ATerm library. The list
+of elements of sort $D$ is denoted by $D^{*}$.
+
+The constructor of sort $\nm{InitProcSpec}$ contains the actual LPE
+parameters (from \texttt{init}) as the first parameter, the formal LPE
+parameters as the second argument, and the list of summands as the
+third parameter. The third parameter of $\mathsf{cmd}$ is the term of
+sort $\nm{Time}$ representing the time at which the multiaction
+happens.  The last parameter of $\mathsf{cmd}$ is the boolean term
+representing the condition.
+
+The first parameter of $\mathsf{v}$ is the variable name, appended with '\#'.
+The first parameter of $\mathsf{f}$ is the function name, appended 
+with its parameter types list, separated by '\#' (for constants only '\#' is appended).
+
+If the delta summand of the TLPE is present, $\delta$ has to be
+represented by the ATerm string \texttt{"Delta"}, and actions with
+this name should not be allowed.  An alternative is in using a special
+summand construction.
+
+\newpage
+\section{ATerm representation format for LPEs (for \mcrl\ v1)}
+An LPE is stored as an ATerm with the following functions. The sort
+of stored LPE is $\nm{LPE}$.
+
+\begin{gather*}
+\afunc{spec2gen}{\nm{DataTypes}\x\nm{InitProcSpec}}{\nm{LPE}}\\
+\afunc{initprocspec}{\nm{Term}^*\x\nm{Variable}^*\x\nm{Summand}^*}{\nm{InitProcSpec}}\\
+\afunc{smd}{\nm{Variable}^*\x\nm{String}\x\nm{Term}^*\x\nm{NextState}\x\nm{Term}}{\nm{Summand}}\\
+\afunc{terminated}{}{\nm{NextState}}\\
+\afunc{i}{\nm{Term}^*}{\nm{NextState}}\\
+\afunc{d}{\nm{Signature}\x\nm{Equation}^*}{\nm{DataTypes}}\\
+\afunc{e}{\nm{Variable}^*\x\nm{Term}\x\nm{Term}}{\nm{Equation}}\\
+\afunc{v}{\nm{String}\x\nm{String}}{\nm{Variable}}\\
+\afunc{s}{\nm{String}^*\x\nm{Function}^*\x\nm{Function}^*}{\nm{Signature}}\\
+\afunc{f}{\nm{String}\x\nm{String}^{*}\x\nm{String}}{\nm{Function}}
+\end{gather*}
+The sort $\nm{Term}$ consists of arbitrary ATerm terms where all function
+symbols must be quoted. The sort $\nm{String}$ consists of quoted constants,
+i.e.\ function symbols of arity 0. The list
+of elements of sort $D$ is denoted by $D^{*}$.
+
+The first parameter of $\mathsf{v}$ is the variable name, appended with '\#'.
+The first parameter of $\mathsf{f}$ is the function name, appended 
+with its parameter types list, separated by '\#' (for constants only '\#' is appended).
+
+The constructor of sort $\nm{InitProcSpec}$ contains the actual LPE
+parameters (from \texttt{init}) as the first parameter, the formal LPE
+parameters as the second argument, and the list of summands as the
+third parameter. The last parameter of $\mathsf{cmd}$ is the boolean term
+representing the condition.
+
+\newpage
+\section{ATerm representation format for input muCRL (for \mcrl\ v1)}
+An LPE is stored as an ATerm with the following functions. The sort
+of stored LPE is $\nm{LPE}$.
+
+\begin{gather*}
+\afunc{spec2gen}{\nm{DataTypes}\x\nm{InitProcSpec}}{\nm{LPE}}\\
+\afunc{initprocspec}{\nm{Term}^*\x\nm{Variable}^*\x\nm{Summand}^*}{\nm{InitProcSpec}}\\
+\afunc{smd}{\nm{Variable}^*\x\nm{String}\x\nm{Term}^*\x\nm{NextState}\x\nm{Term}}{\nm{Summand}}\\
+\afunc{terminated}{}{\nm{NextState}}\\
+\afunc{i}{\nm{Term}^*}{\nm{NextState}}\\
+\afunc{d}{\nm{Signature}\x\nm{Equation}^*}{\nm{DataTypes}}\\
+\afunc{e}{\nm{Variable}^*\x\nm{Term}\x\nm{Term}}{\nm{Equation}}\\
+\afunc{v}{\nm{String}\x\nm{String}}{\nm{Variable}}\\
+\afunc{s}{\nm{String}^*\x\nm{Function}^*\x\nm{Function}^*}{\nm{Signature}}\\
+\afunc{f}{\nm{String}\x\nm{String}^{*}\x\nm{String}}{\nm{Function}}
+\end{gather*}
+The sort $\nm{Term}$ consists of arbitrary ATerm terms where all function
+symbols must be quoted. The sort $\nm{String}$ consists of quoted constants,
+i.e.\ function symbols of arity 0. The list
+of elements of sort $D$ is denoted by $D^{*}$.
+
+The first parameter of $\mathsf{v}$ is the variable name, appended with '\#'.
+The first parameter of $\mathsf{f}$ is the function name, appended 
+with its parameter types list, separated by '\#' (for constants only '\#' is appended).
+
+The constructor of sort $\nm{InitProcSpec}$ contains the actual LPE
+parameters (from \texttt{init}) as the first parameter, the formal LPE
+parameters as the second argument, and the list of summands as the
+third parameter. The last parameter of $\mathsf{cmd}$ is the boolean term
+representing the condition.
+
+%\bibliographystyle{plain}
+%\bibliography{genspect}
+
+\end{document}

@@ -1,0 +1,187 @@
+\documentclass[fleqn]{llncs}
+\usepackage{textcomp,amsmath}
+\usepackage{mcrl,mymath}
+
+
+\title{A rewriting-strategies-based tool for transforming process-algebraic equations}
+\author{Sergey V. Goncharov\inst{1}\and Arseniy Y. Rudich\inst{1}\and Yaroslav S. Usenko\inst{2}}
+
+\institute{
+  Department of Theoretical Cybernetics, \\
+  National Taras Shevchenko University of Kyiv, Ukraine 
+  \and
+  Laboratory for Quality Software, \\
+  Technical University of Eindhoven, The Netherlands }
+
+\newcommand{\stratego}{\textsc{Stratego}}
+
+\begin{document}
+
+\maketitle
+
+\section{Introduction}
+
+In this abstract we describe an attempt to implement a
+\emph{linearization} algorithm~\cite{Use02} for micro Common
+Representation Language (\mcrl)~\cite{GP94a}.
+
+This algorithm allows transforming specifications in \mcrl\ to
+``simpler'' ones, containing just one Linear Process Equation (LPE).
+For the implementation we use the program-transformation system
+\stratego~\cite{Vis01} that is based on \emph{rewriting strategies}.
+\stratego\ allows to specify complex term-rewriting systems and their
+application strategies, and to generate efficient C code from them,
+which can be further compiled and executed. The implementation has
+been tested on a set of examples of \mcrl\ specifications, and the
+results were compared with an existing implementation of \mcrl\ 
+linearization in C~\cite{Wou01}.
+
+\mcrl\ is an algebraic specification language based of ACP style
+process algebra~\cite{BK84b}. A distinct feature of \mcrl\ in
+comparison with many other process algebras is that it offers a
+uniform equational framework for specification of data and processes.
+Data are specified by equational specifications: one can declare sorts
+and functions on these sorts, and describe the meaning of these
+functions by equational axioms. Processes are described using
+data-parametric systems of equations that describe process behavior
+using process-algebraic operations extended with constructs for
+conditional composition and data-parametric choice.
+
+Linear Process Equations (LPE) is an interesting subclass of systems
+of recursive equations, which contain only one linear equation of
+special form. As it turns out, the restriction to LPE format still
+yields an expressive setting. For instance, in the design and
+construction of verification tools for \mcrl, LPEs establish a basic
+and convenient format that can be seen as a symbolic representation of
+Labeled Transition Systems (LTSs).
+
+The algorithms for reducing \mcrl\ specifications to the linear form
+are described in details in~\cite{Use02}. Each particular algorithm
+consists of a chain of transformation steps that yield an equivalent
+\mcrl\ specification with a form coming closer to the desired linear
+one. Each transformation step is, in essence, an equivalent
+transformation of a system of process equations.  The steps are
+formally described using term rewriting systems and different forms of
+their extensions to equation rewriting systems. In some steps extra
+equations or data types are added to the original \mcrl\ 
+specification.
+
+For the implementation of the linearization algorithm we chose
+\stratego~\cite{Vis01}. \stratego is a system for the specification of
+fully automatic program transformation systems based on the rewriting
+strategies paradigm. Its language, aimed to operate with terms, is
+based on rewriting concepts~\cite{BN99}. It has clear and well
+thought-out syntax and semantics, and a very efficient implementation.
+\stratego\ is based on ATerm library~\cite{BJKO00} for term
+representation, which supports maximal sharing and efficient automatic
+garbage collection. Parsing of input programs to ATerms is done using
+the SDF toolset~\cite{Vis97}, which generates parsers for an extension
+of context-free grammars. All that makes writing clear, manageable and
+efficient programs transformation programs easy, and therefore
+motivates our choice of the implementation framework, in comparison
+with implementation in plain C.
+
+\section{Details of Implementation}
+The basic concept of \stratego\ is a notion of rewriting strategy that
+is a rule specifying how to apply given term rewriting system to a
+term. Every program in \stratego\ contains the main strategy that, in
+fact, transforms the input term into the output one.  This main
+strategy is normally defined as a composition (nondeterministic
+choice, sequential composition, congruent closure and others) of
+simpler strategies.
+
+For each linearization step described in~\cite{Use02}, we generate a
+separate rewriting step (rewriting strategy), and then the main
+strategy is, in essence, a sequential composition of these steps.
+
+\section{Associative-Commutative Rewriting}
+In SDF grammar it is possible to specify that certain operations are
+commutative, associative, and/or idempotent; and the generated parser
+will use lists, bags, or sets to represent the groups of operations.
+For example, in \mcrl, alternative composition (+) is an associative,
+commutative and idempotent operation, and sequential composition (.)
+is an associative operation (there are more of such operations). In
+the parse tree these operations will be represented by sets and lists,
+respectively. However, to perform term rewriting module AC, we need to
+adopt the rewrite rules to be able to deal with list and sets. As an
+example, if the following rewrite rules
+\begin{align*}
+\act{a}+\act{b}\seqc \act{c}&\to \act{a}\seqc\act{c}+\act{b}\seqc\act{c}\\
+\act{a}+0&\to \act{a}\\
+0\seqc \act{a}&\to 0
+\end{align*}
+have to be applied modulo associativity and commutativity, then the
+corresponding list operations will have the following form:
+\begin{gather*}
+\seq{\act{a}_1, \act{a}_2,\dots, \act{a}_n, [\act{b}_1, \act{b}_2,\dots,\act{b}_k],\act{a}_{n+2},\dots, \act{a}_m} \to\\
+\t2\seq{\act{a}_1, \act{a}_2, \dots, \act{a}_n, [\seq{\act{b}_1, \act{a}_n,\dots,\act{a}_m},\seq{\act{b}_2,\act{a}_n,\dots,\act{a}_m},\dots,\seq{\act{b}_k,\act{a}_n,\dots,\act{a}_m}]}\\
+[\act{a}_1, \act{a}_2,\dots,\act{a}_n, 0,\act{a}_{n+2},\dots,\act{a}_m] \to 
+[\act{a}_1, \act{a}_2, \dots, \act{a}_m]\\
+\seq{\act{a}_1, \act{a}_2,\dots, \act{a}_n, 0,\act{a}_{n+2},\dots,\act{a}_m} \to 
+\seq{\act{a}_1, \act{a}_2, \dots \act{a}_n}
+\end{gather*}
+
+A procedure to obtain such lifting rules is rather straightforward.
+Whenever we have a binary associative operation in the left-hand-side
+of a rewrite rule, we consider its extension to $n$ terms, not just
+$2$. Such a transformation was sufficient for the case of our
+implementation; however it is not clear whether it can be applied in
+more general cases.
+
+\section{Efficient Implementation of Simple Rewriting}
+One of the steps in linearization procedure consists of an application
+of a set of simple term rewrite rules. It turns out that all terms in
+the left-hand-sides of these rules have \emph{depth} not bigger than
+2. Experiment shows that in this case the standard \emph{innermost}
+rewriting strategy is suboptimal.  To improve on this, a custom
+strategy, called \emph{double-traversal}, is used instead.
+
+To use this strategy we split the set of rewrite rules in two. The
+rules from one set are used when the rewriting process traverses the
+term \emph{down}, and the other set is used when the process traverses
+\emph{up}. Initially, the process traverses down from the top (as in
+the outermost strategy) and once a rule is applied, the process
+traverses one step up, and repeats itself recursively. The process
+stops, when it reaches all bottom (leaf) nodes and no rule can be
+applied any longer.
+
+An interesting question is whether this strategy can be used with a
+wider class of the rewrite systems.
+
+\section{Experimental Results and Future Work}
+At this point most of the linearization steps from~\cite{Use02} have
+been implemented. Certain optimization steps, like ``regular
+linearization'' and ``operations on LPEs'', have still to be
+implemented. We tested our linearization procedure on the examples
+available in the \mcrl\ Toolset distribution~\cite{Wou01}.
+
+A good sign is that both the implementation in the \mcrl\ Toolset
+distribution and the ours produce LPEs that lead to \emph{bisimilar}
+transition systems. This was checked automatically using the
+bisimilarity checker from the \mcrl\ Toolset. Another good sign is
+that the performance of the new implementation is approximately the
+same as of the existing one. However, we have still to try out more
+realistic examples to compare the performances of the two
+implementations.
+
+The number of generated states and transitions from the LPEs produced
+by our implementation is sometimes substantially larger than in the
+original implementation. This has still to be investigated.  It can be
+due to the fact that not all optimization steps have been implemented
+yet.
+
+In the future we plan to implement all optimization steps that are
+described in the literature. It is also interesting to extend the
+implementation to cover the case of timed \mcrl.  Trying larger
+examples may lead to a need for optimization of the rewriting
+procedures.
+
+\paragraph{Acknowledgments}
+The initial idea of the implementation is due to Jaco van de Pol and
+Eelco Visser back in summer of 2001. Eelco has also helped us with
+\stratego. An earlier attempt to implement the linearization algorithm
+in \stratego was done by Konstantin O.  Savenkov in~\cite{Sav02}.
+
+\bibliographystyle{plain}
+\bibliography{lin}
+\end{document}

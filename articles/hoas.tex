@@ -1,0 +1,918 @@
+\documentclass[a4paper,fleqn]{article}
+
+% title and author
+\title{Higher-Order Algebraic Specifications}
+\author{Aad Mathijssen} 
+
+% packages
+\usepackage[english]{babel}
+\usepackage[final]{graphics}
+\usepackage{amsmath}
+\usepackage{amsfonts}
+\usepackage{array}
+\usepackage{calc}
+\usepackage{xspace}
+
+% General layout
+% --------------
+
+%add headings
+\pagestyle{headings}
+
+% increase pagewidth
+\addtolength{\textwidth}{10mm}
+\addtolength{\oddsidemargin}{-5mm}
+\addtolength{\evensidemargin}{5mm}
+
+% set the indentation of the math environment to 10mm
+\setlength{\mathindent}{10mm}
+
+% equations are unique up to their section
+\renewcommand{\theequation}{\arabic{equation}}
+
+% do not put subsubsections in the table of contents
+\addtocounter{tocdepth}{-1}
+
+% column types that change column types l,c,r from math mode to LR
+% and the other way round
+\newcolumntype{L}{>{$}l<{$}}
+\newcolumntype{C}{>{$}c<{$}}
+\newcolumntype{R}{>{$}r<{$}}
+
+
+% Environments
+% ------------
+
+% equations: eqnarray environment with no outer column spacing and tighter
+% intercolumn spacing
+\newenvironment{equations}
+  {\setlength{\arraycolsep}{2pt}%
+   \begin{array}{@{}lll@{}}%
+  }
+  {\end{array}%
+  }
+
+% tightarray: array with no outcolumn spacing and tighter intercolumn spacing
+\newenvironment{tightarray}[1]
+  {\setlength{\arraycolsep}{2pt}%
+   \begin{array}{@{}#1@{}}%
+  }
+  {\end{array}%
+  }
+
+% definitions: list of definitions where:
+% - the optional argument denotes the space between successive items
+%   (default 0.15em)
+% - items are horizontally aligned at the math indent
+\newenvironment{definitions}[1][0.15em]
+  {\begin{list}%
+    {}%
+    {\setlength{\parsep}{0pt}%
+     \setlength{\itemsep}{#1}%
+     \setlength{\leftmargin}{\mathindent}%
+     \setlength{\labelwidth}{\mathindent - \labelsep}%
+    }
+  }
+  {\end{list}}
+
+% tdefinitions: list of tagged definitions where:
+% - the optional argument denotes the space between successive items
+%   (default 0.15em)
+% - items are horizontally aligned at the math indent
+% - each item is tagged with the mandatory argument
+\newenvironment{tdefinitions}[2][0.15em]
+  {\begin{list}%
+    {#2}%
+    {\setlength{\parsep}{0pt}%
+     \setlength{\itemsep}{#1}%
+     \setlength{\leftmargin}{\mathindent}%
+     \setlength{\labelwidth}{\mathindent - \labelsep}%
+    }
+  }
+  {\end{list}}
+
+% edefinitions: list of enumerated definitions where:
+% - the optional argument denotes the space between successive items
+%   (default 0.15em);
+% - items are horizontally aligned at the math indent;
+% - each item is numbered with a parenthesized roman numeral.
+\newcounter{edefinitioncount}
+\newenvironment{edefinitions}[1][0.15em]
+  {\begin{list}%
+    {(\roman{edefinitioncount})}%
+    {\renewcommand{\theenumi}{\roman{enumi}}%
+     \renewcommand{\labelenumi}{(\theenumi)}%
+     \usecounter{edefinitioncount}%
+     \setlength{\parsep}{0pt}%
+     \setlength{\itemsep}{#1}%
+     \setlength{\leftmargin}{\mathindent}%
+     \setlength{\labelwidth}{\mathindent - \labelsep}%
+    }
+  }
+  {\end{list}}
+  
+% entry: list of entries where:
+% - the optional argument denotes the space between successive items
+%   (default 0.15em);
+% - items are horizontally aligned at the math indent;
+% - each item is labelled.
+\newenvironment{entry}[2][0.15em]%
+  {\begin{list}{}%
+    {\renewcommand{\makelabel}[1]{\textsf{##1:}\hfil}%
+     \settowidth{\labelwidth}{\textsf{#2:}}%
+     \setlength{\leftmargin}{\labelwidth+\labelsep}%     
+     \setlength{\parsep}{0pt}%
+     \setlength{\itemsep}{#1}%
+    }%
+  }%
+  {\end{list}}
+
+% derivation: calculational derivation where expressions (\expr) are related by
+% means of transformations (\tran). A transformation is denoted by a symbol and
+% a hint. Expressions and transformations can be broken into several lines
+% using \breakexpr and \breaktran.
+\newenvironment{derivation}
+{\par\addtolength{\baselineskip}{1mm}\begin{tabbing}\hspace{5mm}\=\hspace{5mm}\=\hspace{5mm}\=\kill}
+{\end{tabbing}\par}
+\newcommand{\expr}[1]{\>\>$#1$}
+\newcommand{\tran}[2]{\\*\>$#1$\>\>\{ #2 \}\\}
+\newcommand{\breakexpr}{$\\*\>\>$}
+\newcommand{\breaktran}{\\*\>\>\>\hspace{8pt}}
+
+% Theorem-like environments that are numbered as s.n, where:
+% - s is the section number
+% - n is the number of occurrences of all theorem-like environments in s
+% We have the following environments:
+% - definition
+% - theorem
+% - lemma
+% - corollary
+% - property
+% - example
+% - remark
+% - convention
+% - specification
+% - declaration
+
+\newtheorem{thdefinition}{Definition}[section]
+\newenvironment{definition}
+  {\begin{thdefinition}\em}
+  {\end{thdefinition}}
+
+\newtheorem{ththeorem}[thdefinition]{Theorem}
+\newenvironment{theorem}
+  {\begin{ththeorem}\em}
+  {\end{ththeorem}}
+
+\newtheorem{thcorollary}[thdefinition]{Corollary}
+\newenvironment{corollary}
+  {\begin{thcorollary}\em}
+  {\end{thcorollary}}
+
+\newtheorem{thlemma}[thdefinition]{Lemma}
+\newenvironment{lemma}
+  {\begin{thlemma}\em}
+  {\end{thlemma}}
+
+\newtheorem{thproperty}[thdefinition]{Property}
+\newenvironment{property}
+  {\begin{thproperty}\em}
+  {\end{thproperty}}
+
+\newtheorem{thexample}[thdefinition]{Example}
+\newenvironment{example}
+  {\begin{thexample}\em}
+  {\end{thexample}}
+
+\newtheorem{thremark}[thdefinition]{Remark}
+\newenvironment{remark}
+  {\begin{thremark}\em}
+  {\end{thremark}}
+
+\newtheorem{thconvention}[thdefinition]{Convention}
+\newenvironment{convention}
+  {\begin{thconvention}\em}
+  {\end{thconvention}}
+
+\newtheorem{thspecification}[thdefinition]{Specification}
+\newenvironment{specification}
+  {\begin{thspecification}\em}
+  {\end{thspecification}}
+
+\newtheorem{thdeclaration}[thdefinition]{Declaration}
+\newenvironment{declaration}
+  {\begin{thdeclaration}\em}
+  {\end{thdeclaration}}
+
+% proof: proof of a theorem
+\newenvironment{proof}
+  {\textbf{Proof}}
+  {\frm{\Box}
+   \vspace{1ex}%
+  }
+
+
+% Commands
+% --------
+% --------
+
+
+% math mode
+% ---------
+
+% improvement to $ ... $ such that mathematical formulas cannot be cramped
+\newcommand{\frm}[1]{\mbox{\ensuremath{#1}}}
+
+% frm with extra spacing
+\newcommand{\for}[1]{\frm{\,#1\,}}
+
+
+% functions and constants
+% -----------------------
+
+% constant
+\newcommand{\f}[1]{\ensuremath{\mathit{#1}}}
+
+% function application with 1 argument: f(arg0)
+\newcommand{\fa}[2]{\ensuremath{\f{#1}(#2)}}
+
+% function application with 2 arguments: f(arg0, arg1)
+\newcommand{\faa}[3]{\ensuremath{\f{#1}(#2, #3)}}
+
+% function application with 3 arguments: f(arg0, arg1, arg2)
+\newcommand{\faaa}[4]{\ensuremath{\f{#1}(#2, #3, #4)}}
+
+% function application with 4 arguments: f(arg0, arg1, arg2, arg3)
+\newcommand{\faaaa}[5]{\ensuremath{\f{#1}(#2, #3, #4, #5)}}
+
+
+% functions and types
+% -------------------
+
+% to: ->
+\newcommand{\To}{\ensuremath{\rightarrow}}
+
+% function application symbol: .
+\newcommand{\fap}{\ensuremath{\!\cdot\!}}
+
+% composition: 0
+\newcommand{\comp}{\ensuremath{\circ}}
+
+% function composition: o
+\newcommand{\fcomp}{\ensuremath{%
+  \hspace{0.08em}\mbox{\small\ensuremath{\circ}}\hspace{0.08em}}}
+  
+% function mapping
+\newcommand{\fmap}{
+  \hspace{0.08em}\raisebox{0.2ex}{%
+  \tiny\ensuremath{\bullet}}\hspace{0.08em}}
+
+
+% lambda calculus
+% ---------------
+
+% abstraction in the typed lambda calculus
+\newcommand{\labst}[3]{\ensuremath{\lambda #1\!:\!#2.#3}}
+
+% application in the typed lambda calculus
+\newcommand{\lappl}[2]{\ensuremath{#1\ #2}}
+
+% abstraction in the pure (untyped) lambda calculus
+\newcommand{\pabst}[2]{\ensuremath{\lambda #1.#2}}
+
+% application in the pure (untyped) lambda calculus
+\newcommand{\pappl}[2]{\ensuremath{#1\ #2}}
+
+% sets
+% ----
+
+% set of elements: {e}
+\newcommand{\set}[1]{\ensuremath{\{\,#1\,\}}}
+
+% bag of elements: {e}
+\newcommand{\bag}[1]{\ensuremath{\set{#1}}}
+
+% set difference: s \ t
+\newcommand{\sdiff}[2]{\ensuremath{#1\ \backslash\ #2}}
+
+% set comprehension: { e | c }, where e is an expression or a binding and c is
+% a condition
+\newcommand{\scompr}[2]{\ensuremath{\set{#1\ |\ #2}}}
+
+% powerset: P(s)
+\newcommand{\pow}[1]{\ensuremath{\fa{\mathcal{P}}{#1}}}
+
+
+% tuples
+% ------
+
+% tuple of elements: <e>
+\newcommand{\tpl}[1]{\ensuremath{\langle\,#1\,\rangle}}
+
+% pair of elements: <e0,e1>
+\newcommand{\pair}[2]{\ensuremath{\tpl{#1\hspace{0.08em},#2}}}
+
+
+% lists
+% -----
+
+% list of a certain type: L(t)
+\newcommand{\List}[1]{\ensuremath{\mathcal{L}{\I{#1}}}}
+
+% list of elements: [e]
+\newcommand{\lst}[1]{\ensuremath{[\,#1\,]}}
+
+% empty list
+\newcommand{\el}{\ensuremath{[\,]}}
+
+% cons: |>
+\newcommand{\cons}{\ensuremath{\hspace{0.12em}\triangleright\hspace{0.08em}}}
+  
+% snoc: <|
+\newcommand{\snoc}{\ensuremath{\hspace{0.08em}\triangleleft\hspace{0.12em}}}
+
+% concatenation: ++
+\newcommand{\concat}{\frm{+\!+}}
+
+% take
+\newcommand{\take}{\ensuremath{\lceil}}
+
+% drop
+\newcommand{\drop}{\ensuremath{\lfloor}}
+
+
+% logic
+% -----
+
+% boolean type: B
+\newcommand{\bool}{\ensuremath{\mathbb{B}}}
+
+% true
+\newcommand{\true}{\ensuremath{\f{true}}}
+
+% false
+\newcommand{\false}{\ensuremath{\f{false}}}
+
+% implies: =>
+\newcommand{\limp}{\ensuremath{\Rightarrow}}
+
+% follows: =>
+\newcommand{\lfol}{\ensuremath{\Leftarrow}}
+
+% bi-implies: <=>
+\newcommand{\lbimp}{\ensuremath{\Leftrightarrow}}
+
+% not with extra spacing
+\newcommand{\Lnot}{\ensuremath{\ \lnot\ }}
+
+% and with extra spacing
+\newcommand{\Land}{\ensuremath{\ \land\ }}
+
+% or with extra spacing
+\newcommand{\Lor}{\ensuremath{\ \lor\ }}
+
+% implies with extra spacing
+\newcommand{\Limp}{\ensuremath{\ \limp\ }}
+
+% bi-implies with extra spacing
+\newcommand{\Lbimp}{\ensuremath{\ \lbimp\ }}
+
+% quantification in Dijkstra notation: <Q x : y : z>
+\newcommand{\quantD}[4]{\ensuremath{\langle\,{#1} {#2} : #3 : {#4}\,\rangle}}
+
+% universal quantification in Dijkstra notation: <forall x : y : z>
+\newcommand{\forallD}[3]{\ensuremath{\quantD{\forall}{#1}{#2}{#3}}}
+
+% existential quantification in Dijkstra notation: <exists x : y : z>
+\newcommand{\existsD}[3]{\ensuremath{\quantD{\exists}{#1}{#2}{#3}}}
+
+% derivable in #1: |-_#1
+\newcommand{\derivable}[1]{\ensuremath{\vdash_{_{#1}}}}
+
+% valid in #1: |=_#1
+\newcommand{\valid}[1]{\ensuremath{\models_{_{#1}}}}
+
+%inference rule with 0 premises and 1 conclusion
+\newcommand{\infC}[1]{\ensuremath{
+  \begin{array}{c} 
+    \\\hline 
+    #1 
+  \end{array}
+}}
+
+%inference rule with 1 premise and 1 conclusion
+\newcommand{\infPC}[2]{\ensuremath{
+  \begin{array}{c} 
+    #1 \\\hline 
+    #2 
+  \end{array}
+}}
+
+% inference rule with 2 premises and 1 conclusion
+\newcommand{\infPPC}[3]{\ensuremath{
+  \begin{array}{c@{\hspace{2em}}c}
+    #1 & #2 \\\hline
+    \multicolumn{2}{c}{#3}
+  \end{array}
+}}
+
+%inference rule with 3 premises and 1 conclusion
+\newcommand{\infPPPC}[4]{\ensuremath{
+  \begin{array}{c@{\hspace{2em}}c@{\hspace{2em}}c}
+    #1 & #2 & #3\\\hline
+    \multicolumn{3}{c}{#4}
+  \end{array}
+}}
+
+% arithmetic
+% ----------
+
+% natural type: N
+\newcommand{\nat}{\ensuremath{\mathbb{N}}}
+
+% positive type: N+
+\newcommand{\pos}{\ensuremath{\mathbb{N}^{+}}}
+
+% integral type: Z
+\newcommand{\tint}{\ensuremath{\mathbb{Z}}}
+
+% integer division: "div"
+\renewcommand{\div}{\ensuremath{\ \mathbf{div}\ }}
+
+% integer remainder: "mod"
+\renewcommand{\mod}{\ensuremath{\ \mathbf{mod}\ }}
+
+
+% miscellaneous
+% -------------
+
+% qed
+\newcommand{\qed}{\hfill\frm{\Box}}
+
+% language of a signature Sigma: L(Sigma)
+\newcommand{\lang}[1]{\ensuremath{\fa{\mathcal{L}}{\f{#1}}}}
+
+% meaning of a syntactic element
+\newcommand{\mean}[1]{%
+  [\hspace{-.15em}[\hspace{.15em}#1\hspace{.15em}]\hspace{-.15em}]%
+}
+
+% alternative choice
+\newcommand{\alt}{\ensuremath{[\hspace{-0.04em}]}}
+
+% bullet
+\newcommand{\bul}{\mbox{\small\ensuremath{\bullet}}}
+
+% complexity according to expression: O(e)
+\newcommand{\bigo}[1]{\ensuremath{\mathcal{O}(#1)}}
+
+% print #2 inside #3, where #2 is raised by #1
+\newlength{\insidewd}%                        Define length command
+\newcommand{\inside}[3][0pt]{%		      Definition of inside:
+   \settowidth{\insidewd}{#3}%                - Save width of #3
+   \raisebox{#1}[0pt]{%                       - Raise #2 by #1
+     \makebox[0pt]{\hspace{\insidewd}#2}}%    - Print #2 centered
+   #3}%				              - Print #3
+
+% stack #2 on #3, where #2 is raised by #1
+\newlength{\stackht}%                         Define length commands
+\newcommand{\stack}[3][0pt]{%		      Definition of stack:
+   \settoheight{\stackht}{#3}%                - Save height of #3
+   \addtolength{\stackht}{#1}%                - Add to #1 to heigth
+   \inside[\stackht]{#2}{#3}}%                - Print #2 in #3 at height #3 + #1
+
+% abbreviations
+% -------------
+
+% higher-order sorts: S^->
+\newcommand{\hos}[1]{\ensuremath{#1^{\To}}}
+
+% operations: Omega
+\newcommand{\ops}{\frm{\Omega}}
+
+% operation: omega
+\newcommand{\op}{\frm{\omega}}
+
+% meaning of an ADT element according to an algebra
+\newcommand{\amean}[2]{\ensuremath{\fa{#2}{#1}}}
+
+% meaning of an ADT element according to an algebra and a valuation
+\newcommand{\ameanv}[3]{\ensuremath{\amean{#1}{\fa{#2}{#3}}}}
+
+% terms over a signature: T_Sigma
+\newcommand{\term}[1]{\ensuremath{\f{T}_{#1}}}
+
+% terms over a signature and an associated set of variables: T_Sigma(X)
+\newcommand{\termv}[2]{\ensuremath{\f{T}_{\fa{#1}{#2}}}}
+
+% terms over a signature, an associated set of variables and a sort: T_Sigma(X),s
+\newcommand{\termvs}[3]{\ensuremath{\f{T}_{\fa{#1}{#2},#3}}}
+
+% terms over a signature and a sort: T Sigma,s
+\newcommand{\terms}[2]{\ensuremath{\f{T}_{#1,#2}}}
+
+% terms over signature Sigma, variables X and a sort: T_Sigma(X),s
+\newcommand{\tsx}[1]{\ensuremath{\termvs{\Sigma}{X}{#1}}}
+
+% terms over signature Sigma and a sort: T Sigma,s
+\newcommand{\ts}[1]{\ensuremath{\terms{\Sigma}{#1}}}
+
+% valid in EL: |=_EL
+\newcommand{\vEL}{\ensuremath{\valid{\mathrm{EL}}}}
+
+% model in EL: Mod_EL(e)
+\newcommand{\mEL}[1]{\ensuremath{\textit{Mod}_{_{\mathrm{EL}}}(#1)}}
+
+% set of formulas of equational logic: EL(Sigma)
+\newcommand{\ELs}{\ensuremath{\fa{EL}{\Sigma}}}
+
+% the label of the root node of the tree t: label(t)
+% can also be used for sequents of trees
+\newcommand{\tlabel}[1]{\ensuremath{\fa{lab}{#1}}}
+
+% the subtrees of the tree t: sub(t)
+\newcommand{\tsub}[1]{\ensuremath{\fa{sub}{#1}}}
+
+% inference rule of EC: Inf_{EC}
+\newcommand{\infEC}{\ensuremath{\f{Inf}_{_{\mathrm{EC}}}}}
+
+% match of a sequence of equations s and an equation e with an inference rule 
+% and a set of formulas E in calculus EC: match_{EC}(s,e,E)
+\newcommand{\matchEC}[2]{\ensuremath{\faa{\f{match}_{_{\mathrm{EC}}}}{#1}{#2}}}
+
+% t is a derivation in the equational calculus EC from the set of equations E:
+% Der_{EC}(E,t)
+\newcommand{\derivationEC}[1]{\ensuremath{\fa{\f{D}_{_{\mathrm{EC}}}}{#1}}}
+
+% derivable in EC: |- EC
+\newcommand{\dEC}{\ensuremath{\derivable{\mathrm{EC}}}}
+
+% sort Id
+\newcommand{\sid}{\ensuremath{\f{Id}}}
+
+% sort Form
+\newcommand{\sform}{\ensuremath{\mathbb{F}}}
+
+% operation new
+\newcommand{\onew}{\ensuremath{\f{new}}}
+
+% operation next
+\newcommand{\onext}{\ensuremath{\f{next}}}
+
+% operation prop
+\newcommand{\oprop}{\ensuremath{\f{prop}}}
+
+% mapping of an identifier to a variable of a certain sort
+\newcommand{\var}[2]{\ensuremath{\underline{#2}_{#1}}}
+
+% occurrence of a variable of a certain sort in a term
+\newcommand{\occ}[3]{\ensuremath{\faa{occ_{#1}}{#2}{#3}}}
+
+% identifier of a fresh variable with respect to 2 terms
+\newcommand{\fresh}[2]{\ensuremath{\faa{fresh}{#1}{#2}}}
+
+% identifier of a fresh variable with respect to an identifier and 2 terms
+\newcommand{\gfresh}[3]{\ensuremath{\faaa{gfresh}{#1}{#2}{#3}}}
+
+% "=_{s}", where s is a sort
+\newcommand{\is}[1]{\ensuremath{=_{#1}}}
+
+% valid in FOL: |=_FOL
+\newcommand{\vFOL}{\ensuremath{\valid{\mathrm{FOL}}}}
+
+% model in FOL: Mod_EL(phi)
+\newcommand{\mFOL}[1]{\ensuremath{\textit{Mod}_{_{\mathrm{FOL}}}(#1)}}
+
+% inference rule of ND: Inf_{ND}
+\newcommand{\infND}{\ensuremath{\f{Inf}_{_{\mathrm{ND}}}}}
+
+% match of a sequence s and an element e with an inference rule 
+% in the calculus ND: match_{ND}(s,e)
+\newcommand{\matchND}[2]{\ensuremath{\faa{\f{match}_{_{\mathrm{ND}}}}{#1}{#2}}}
+
+% t is a derivation in the calculus ND: Der_{ND}(t)
+\newcommand{\derivationND}[1]{\ensuremath{\fa{\f{D}_{_{\mathrm{ND}}}}{#1}}}
+
+% derivable in ND: |- ND
+\newcommand{\dND}{\ensuremath{\derivable{\mathrm{ND}}}}
+
+% set of formulas of first-order logic: FOL(Sigma_0)
+\newcommand{\FOLs}{\ensuremath{\fa{FOL}{\Sigma_{b}}}}
+
+% translation of x, where x is a variable
+\newcommand{\trv}[1]{\ensuremath{\tilde{#1}}}
+
+% translation of p, where p is a predicate
+\newcommand{\trp}[1]{\ensuremath{\tilde{#1}}}
+
+% translation of t, where t is a term
+\newcommand{\trt}[1]{\ensuremath{\overline{#1}}}
+
+% translation of phi, where phi is a formula
+\newcommand{\trf}[1]{\ensuremath{\overline{#1}}}
+
+% translation of Gamma, where Gamma is a sequent
+\newcommand{\trs}[1]{\ensuremath{\overline{#1}}}
+
+% meaning of a formula according to a model
+\newcommand{\lmean}[2]{%
+  \ensuremath{\mean{#1}^{#2}}%
+}
+
+% meaning of a formula according to a model and a valuation
+\newcommand{\lmeanv}[3]{%
+  \ensuremath{\mean{#1}^{#2}_{#3}}%
+}
+
+% mCRL
+\newcommand{\mCRL}{\frm{\mu}CRL\xspace}
+
+% mCRL implementation of the abstraction in the typed lambda calculus
+\newcommand{\mabst}[3]{\ensuremath{\lambda #1\!:\!#2.#3}}
+
+% mCRL implementation of the application in the typed lambda calculus
+\newcommand{\mappl}[2]{\ensuremath{#1\,!\,#2}}
+
+% mCRL implementation of the universal quantification
+\newcommand{\mforall}[3]{\ensuremath{\f{forall}\ #1\!:\!#2.#3}}
+
+% mCRL implementation of the existential quantification
+\newcommand{\mexists}[3]{\ensuremath{\f{exists}\ #1\!:\!#2.#3}}
+
+% De Bruijn index in lambda upsilon
+\newcommand{\uindex}[1]{\ensuremath{\underline{#1}}}
+
+% abstraction in lambda upsilon
+\newcommand{\uabst}[1]{\ensuremath{\lambda #1}}
+
+% application in lambda upsilon
+\newcommand{\uappl}[2]{\ensuremath{#1\ #2}}
+
+% closure in lambda upsilon
+\newcommand{\uclose}[2]{\ensuremath{#1[#2]}}
+
+% slash in lambda upsilon
+\newcommand{\uslash}[1]{\ensuremath{#1/}}
+
+% lift in lambda upsilon
+\newcommand{\ulift}[1]{\ensuremath{\Uparrow\!(#1)}}
+
+% shift in lambda upsilon
+\newcommand{\ushift}{\ensuremath{\uparrow}}
+
+% Miscellaneous local definitions
+% -------------------------------
+
+% temporary lengths
+\newlength{\tlength}
+
+\begin{document}
+
+\maketitle
+
+\section{Introduction}
+
+Algebraic specifications describe properties of abstract data types. The underlying notion of an abstract data type is a \emph{many-sorted algebra}. The properties are described by means of a logic.
+
+Usually the operations of algebraic specifications are of first order: functions cannot occur as parameters nor as results of other functions. In higher-order specifications, this restriction is lifted: functions are treated as first-class citizens. In the next sections, we focus on this more general formalism.
+
+\section{Many-sorted algebras}
+
+Many-sorted algebras are mathematical models of data types. We describe the syntax and semantics of these algebras.
+
+\subsection{Signatures and algebras}
+
+A signature \frm{\Sigma} is a structure \frm{(S, \ops)}, where \frm{S} is a set of \emph{sorts} and \frm{\ops} a set of \emph{operations}. A sort denotes a type and an operation denotes a function. From the given set of sorts \frm{S}, we can generate the set \frm{\hos{S}} of \emph{higher-order sorts}. This set is inductively defined as follows:
+\begin{edefinitions}
+\item \frm{S \subseteq \hos{S}};
+\item if \frm{s_{0}, \ldots, s_{k}, s \in \hos{S}} with \frm{k \geq 0}, then \frm{(s_{0} \times \cdots \times s_{k} \To s) \in \hos{S}}.
+\end{edefinitions}
+
+\noindent
+To increase readability, the outer parentheses of a sort \frm{s \in \hos{S}} may be dropped. The number of parentheses may be further reduced by making \frm{\To} right-associative, i.e.\ \frm{s \To t \To u} should be read as \frm{s \To (t \To u)}. To distinguish the two parts of the above definition of higher-order sorts, we will call \frm{S} the set of \emph{basic} sorts, and \frm{\sdiff{\hos{S}}{S}} the set of \emph{function} sorts.
+
+An operation is a pair \frm{n: s}, where \frm{s \in \hos{S}}. Here \frm{n} is called the operation name, and \frm{s} its sort. If no ambiguity arises, we will write \frm{n} instead of \frm{n: s}. Note that in contrast to first-order algebraic specifications, each operation is a constant. Also note that each constant \frm{n: \To s} from first-order specifications is written as \frm{n: s} in higher-order specifications.
+
+A many-sorted algebra assigns a meaning to a signature. A total algebra \frm{A} for a signature \frm{\Sigma = (S,\ops)} assigns a carrier set \frm{\amean{s}{A}} to each sort \frm{s \in \hos{S}} and a total function \frm{\amean{n: s}{A}}, yielding an element of type \frm{\amean{s}{A}}, to each operation \frm{n: s \in \ops}. This algebra is also called a \frm{\Sigma}-algebra. Carrier sets for purely higher-order sorts are required to behave as monotonic functions. For this purpose, we introduce function \frm{\mean{\_}^{A}_{s}} for each \frm{s \in \hos{S}}. For these functions, we have the following requirements:
+\begin{edefinitions}
+\item for \frm{s \in S}, function \frm{\mean{\_}^{A}_{s}: \amean{s}{A} \To \amean{s}{A}} is the identity.
+\item for \frm{q = (s_{0} \times \cdots \times s_{n} \To s) \in \hos{S}}, function \frm{\mean{\_}^{A}_{q}: \amean{q}{A} \To ((\amean{s_{0}}{A} \times \cdots \times \amean{s_{n}}{A}) \To \amean{s}{A})} is an order-embedding. This means that the domain of \frm{\mean{\_}^{A}_{q}}, viz.\ \frm{\amean{q}{A}}, is isomorphic to its range, and that this range is a subset of the set of monotonic functions from \frm{\amean{s_{0}}{A} \times \cdots \times \amean{s_{n}}{A}} to \frm{\amean{s}{A}}.
+\end{edefinitions}
+
+\noindent
+Note that the definition of \frm{\mean{\_}^{A}_{q}} becomes trivial when \frm{q} is given the usual semantics, i.e.\ \frm{\amean{q}{A} = \amean{s_{0}}{A} \times \cdots \times \amean{s_{n}}{A} \To \amean{s}{A}}. Then the condition for \frm{\mean{\_}^{A}_{q}} is trivially satisfied by the identity.
+
+\begin{example}
+Suppose we have a signature \frm{\Sigma = (S, \ops)}, with sorts \frm{S = \set{\f{Nat}}} and operations \frm{\ops = \set{\f{zero}: \f{Nat}, \f{succ}: \f{Nat} \To \f{Nat}, \f{add}: \f{Nat} \times \f{Nat} \To \f{Nat}}}. We give semantics to this by \frm{\Sigma}-algebra \frm{A}, where:
+\[\begin{tightarray}{lll@{\qquad}lll}
+\amean{\f{Nat}}{A}                            & = & \nat
+& \amean{\f{zero}}{A} & = & 0\\
+\amean{\f{Nat} \To \f{Nat}}{A}                & = & \nat \To \nat
+& \amean{\f{succ}}{A} & = & \labst{n}{\nat}{(n+1)}\\
+\amean{\f{Nat} \times \f{Nat} \To \f{Nat}}{A} & = & \nat \times \nat \To \nat
+& \amean{\f{add}}{A} & = & \labst{(m,n)}{\nat \times \nat}{(m+n)}\\
+\end{tightarray}\]
+
+\noindent
+Because we gave the usual interpretations to the sorts of \frm{\f{succ}} and \frm{\f{add}}, all relevant \frm{\mean{\_}^{A}} are chosen to be the identity.
+
+Note that we could also have chosen the following interpretation for \frm{\f{Nat} \times \f{Nat} \To \f{Nat}} and \frm{\f{add}}:
+\[\begin{tightarray}{lll@{\qquad}lll}
+\amean{\f{Nat} \times \f{Nat} \To \f{Nat}}{A} & = & \nat \To (\nat \To \nat)
+& \amean{\f{add}}{A} & = & \labst{m}{\nat}{\labst{n}{\nat}{(m+n)}}\\
+\end{tightarray}\]
+The corresponding \frm{\mean{\_}^{A}} function may still be the identity, because \frm{\nat \To (\nat \To \nat)} is isomorphic to \frm{\nat \times \nat \To \nat}. \qed
+\end{example}
+
+\noindent
+\frm{\Sigma}-algebras can be mapped to each other by means of \emph{homomorphisms}. A homomorphism is a mapping from the carrier sets of a \frm{\Sigma}-algebra \frm{A} to the carrier sets of a \frm{\Sigma}-algebra \frm{B}, that respects the functions of \frm{A}. For signature \frm{\Sigma = (S, \ops)}, a homomorphism \frm{h: A \To B} is a family \frm{h = (h_{s})_{s \in \hos{S}}} of monotonic functions \frm{h_{s} : \amean{s}{A} \To \amean{s}{B}} such that the following conditions hold:
+\begin{edefinitions}
+\item for all \frm{f \in \amean{q}{A}} and \frm{x_{i} \in \amean{s_{i}}{A}}, with \frm{s_{i} \in \hos{S}}, \frm{0 \leq i \leq n} and \frm{q = \frm{s_{0} \times \cdots \times s_{n} \To s}}, we have
+\[\fa{h_{s}}{\fa{\mean{f}^{A}_{q}}{x_{0}, \ldots, x_{n}}} = \fa{\mean{\fa{h_{q}}{f}}^{B}_{q}}{\fa{h_{s_{0}}}{x_{0}}, \ldots, \fa{h_{s_{n}}}{x_{n}}}\]
+\item for all \frm{\op \in \ops} of sort \frm{s}, we have
+\[\fa{h_{s}}{\amean{\op}{A}} = \amean{\op}{B}\]
+\end{edefinitions}
+
+An \emph{isomorphism} is a bijective homomorphism, i.e.\ a homomorphism of which all functions are bijective. If there exists an isomorphism from \frm{\Sigma}-algebra \frm{A} to \frm{B}, then \frm{A} and \frm{B} are called isomorphic. This will be written as \frm{A \simeq B}.
+
+Finally, an \emph{abstract data type} is a class of \frm{\Sigma}-algebras that is closed under isomorphism. This means that if \frm{A} is an algebra of this class and \frm{A \simeq B}, then \frm{B} should also be in this class.
+
+\subsection{Variables and terms}
+
+To a signature \frm{\Sigma = (S, \ops)} we can associate a set \frm{X} of \emph{variables}. The subset of variables of sort \frm{s \in \hos{S}} is denoted by \frm{X_{s}}. We assume that all sets \frm{X_{s}} are disjoint and that variables in \frm{X} are different from operation names of \frm{\ops}.
+
+From a signature and a set of variables, we can construct \emph{terms}. The set of terms over a signature \frm{\Sigma = (S, \ops)} and an associated set of variables \frm{X} is a family of sets \frm{\termv{\Sigma}{X} = (\tsx{s})_{s \in \hos{S}}}. Each set \frm{\tsx{s}} is called the set of terms of sort \frm{s}. It is inductively defined as follows:
+\begin{edefinitions}
+\item \frm{X_{s} \subseteq \tsx{s}};
+\item if \frm{n: s \in \ops}, then \frm{n \in \tsx{s}};
+\item if \frm{t_{1}, \ldots, t_{k}} with \frm{k \geq 1} are terms of sorts \frm{s_{1}, \ldots, s_{k}}, respectively, and \frm{f} is a term of sort \frm{(s_{1} \times \cdots \times s_{k} \To s)}, then \frm{f(t_{1}, \ldots, t_{k}) \in \tsx{s}}.
+\end{edefinitions}
+
+\noindent
+The set \frm{\termv{\Sigma}{\emptyset}} is called the set of \emph{ground terms}. We will write this as \frm{\term{\Sigma}}. A signature \frm{\Sigma} is called \emph{sensible} if \frm{\terms{\Sigma}{s}} contains at least one element, for every \frm{s \in S}. In the sequel, we assume that every signature is sensible. For notational convenience, we denote the variables of a term \frm{t \in \termv{\Sigma}{X}} by the set \frm{\fa{Var}{t}}. Note that if \frm{\fa{Var}{t} = \emptyset}, then \frm{t \in \term{\Sigma}}.
+
+In order to define the semantics of terms, we introduce the notion of an \emph{assignment}. An assignment of \frm{X} for a \frm{\Sigma}-algebra \frm{A} is a family \frm{\alpha = (\alpha_{s})_{s \in S}} of total functions \frm{\alpha_{s}: X_{s} \To \amean{s}{A}}. We denote this by \frm{\alpha: X \To A}.
+
+A meaning is given to a term \frm{t \in \termv{\Sigma}{X}} using a \frm{\Sigma}-algebra \frm{A} and an assignment \frm{\alpha: X \To A}. It is called the \emph{value} of \frm{t} for \frm{\alpha} and it is denoted by \frm{\ameanv{t}{A}{\alpha}}. We define this notion inductively on the structure of \frm{t}:
+\begin{edefinitions}
+\item \frm{\ameanv{x}{A}{\alpha} = \alpha_{s}(x)}, 
+  where \frm{x \in \frm{X_{s}}} and \frm{s \in S};
+\item \frm{\ameanv{c}{A}{\alpha} = \amean{\op}{A}}, where \frm{\op = (c: \To s) \in \ops};
+\item \frm{\ameanv{f(t_{1}, \ldots, t_{k})}{A}{\alpha} 
+  = \amean{\op}{A}(\ameanv{t_{1}}{A}{\alpha}, \ldots,  \ameanv{t_{k}}{A}{\alpha})},\\
+  where \frm{\op = (f: s_{1} \times \cdots \times s_{k} \To s) \in \ops}, \frm{k \geq 1}
+  and \frm{t_{i} \in \tsx{s_{i}}}, for \frm{1 \leq i \leq k}.
+\end{edefinitions}
+
+To increase the readibility of terms, we allow operations to be written in \emph{infix} and \emph{mixfix} notation. In the definition of operations in these notations, we use underscores to indicate the placement of parameters. The number of parentheses can be reduced by allowing the use of \emph{priorities}. Note that we do not add these concepts to the theory, but only use them to increase readability.
+
+We conclude our treatment of many-sorted algebras with the syntactic notion of \emph{substitutions}. For a signature \frm{\Sigma = (S, \ops)} and associated sets of variables \frm{X} and \frm{Y}, a substitution is a family \frm{\sigma = (\sigma_{s})_{s \in S}} of functions \frm{\sigma_{s}: X_{s} \To \termvs{\Sigma}{Y}{s}}. We denote this by \frm{\sigma: X \To \termv{\Sigma}{Y}}. If \frm{Y} is empty, then the substitution is called a \emph{ground} substitution. The application of a substitution \frm{\sigma} to a term is defined inductively as follows:
+\begin{edefinitions}
+\item \frm{x\sigma = \fa{\sigma_{s}}{x}}, where \frm{x \in \frm{X_{s}}} and \frm{s \in S};
+\item \frm{c\sigma = c}, where \frm{c: \To s \in \ops};
+\item \frm{f(t_{1}, \ldots, t_{k})\sigma = f(t_{1}\sigma, \ldots, t_{k}\sigma)}, 
+  where \frm{f: s_{1} \times \cdots \times s_{k} \To s \in \ops}, \frm{t_{i} \in \tsx{s_{i}}} and \frm{s_{i} \in S}, for \frm{1 \leq i \leq k} and \frm{k \geq 1}.
+\end{edefinitions}
+If \frm{\sigma} is the identity except for one variable \frm{x}, we may denote \frm{\sigma} by \frm{[x := \fa{\sigma}{x}]}.
+
+The syntactic notion of substitution is closely related to the semantic notion of assignments, i.e.\ assignments may simulate substitutions. For all signatures \frm{\Sigma}, associated sets of variables \frm{X} and \frm{Y}, substitutions \frm{\sigma: X \To \termv{\Sigma}{Y}}, \frm{\Sigma}-algebras \frm{A}, assignments \frm{\beta: Y \To A}, and terms \frm{t \in \termv{\Sigma}{X}}, we have:
+\[\ameanv{t\sigma}{A}{\beta} = \ameanv{t}{A}{\alpha}\]
+where assignment \frm{\alpha: X \To A} is defined by \frm{\fa{\alpha}{x} = \ameanv{\fa{\sigma}{x}}{A}{\beta}}, for all \frm{x \in X}.
+
+\section{Equational logic}
+
+Many-sorted algebras are characterised by means of equational logic. First we describe the syntax and semantics of formulas in the equational logic. After that we introduce the notions of logical consequence and logic calculus with which formulas can be related.
+
+\subsubsection{Formulae and satisfaction}
+
+The formulas of equational logic are determined by the signature of many-sorted algebras. For each signature \frm{\Sigma = (S, \ops)} and associated set of variables \frm{X}, the set of formulas \frm{\ELs} is:
+\[\scompr{t = u}{\text{\frm{t,u \in \tsx{s}} and \frm{s \in S}}}\]
+A formula \frm{t = u} is usually called a \emph{\frm{\Sigma}-equation}. If \frm{t} and \frm{u} are ground terms, then it is also called a \emph{ground equation}.
+
+The semantics of a formula is expressed by a \emph{satisfaction} relation. For a \frm{\Sigma}-algebra \frm{A}, a sort \frm{s \in S} and terms \frm{t,u \in \tsx{s}}, the satisfaction relation \frm{\vEL} is defined by:
+\[\begin{tightarray}{l@{\hspace{2em}}L@{\hspace{2em}}l}
+  A \vEL t = u & iff & \ameanv{t}{A}{\alpha} = \ameanv{u}{A}{\alpha}
+  \textrm{, for all assignments \frm{\alpha: X \To A}}
+\end{tightarray}\]
+If \frm{A \vEL t = u}, we say that \frm{t = u} is \emph{valid} in \frm{A}.
+
+For a set of equations \frm{E \subseteq \ELs}, a \frm{\Sigma}-algebra \frm{A} is called a \emph{model} of \frm{E}, if \frm{A \vEL e}, for all \frm{e \in E}. The class of all models of \frm{E} is written as \frm{\mEL{E}}.
+
+An equation \frm{e \in \ELs} is called a \emph{logical consequence} of a set of equations \frm{E}, if \frm{e} is valid in all models of \frm{E}. This is denoted by \frm{E \vEL e}. More formally:
+\[\begin{tightarray}{l@{\hspace{2em}}L@{\hspace{2em}}L}
+  E \vEL e & iff & \frm{A \vEL e}, for all \frm{A \in \mEL{E}}
+\end{tightarray}\]
+
+\subsection{Logic calculus}
+
+We define a calculus \emph{EC} for equational logic. In the definitions, we will use notation from predicate logic to express properties of the calculus. In this notation, quantifications may have ranges and the scopes of quantifications are delimited by \frm{\langle} and \frm{\rangle}.
+
+The underlying notions of the calculus are sequences and trees. A \emph{finite sequence} is a totally ordered finite set. Besides the ordinary set notation, we use some additional notation. The length of a sequence \frm{s} is denoted by \frm{\#s}. The \frm{i}'th element of a sequence \frm{s}, where \frm{1 \leq i \leq \#s}, is denoted by \frm{s[i]}. Then the \frm{=}-relation on sequences can be expressed as follows, for sequences \frm{s} and \frm{t}:
+\[\begin{tightarray}{l@{\qquad}L@{\qquad}l}
+s = t & iff & (\#s = \#t)\ \land\ \forallD{i}{1 \leq i \leq \#s}{s[i] = t[i]}
+\end{tightarray}\]
+It is easy to see that the \frm{=}-relation is an equivalence relation. The set of sequences of length \frm{n}, where all elements are from set \frm{S}, is denoted by \frm{S_{n}}.
+
+An \emph{ordered labelled tree} is a connected, undirected, acyclic graph, where every node has a label. There is a notion of a root node and we can talk about the parent and the subtrees of a node. Because the tree is ordered, the set of subtrees of a node is a sequence. We introduce some notation on our trees. The label of the root node of a tree \frm{t} is denoted by \frm{\tlabel{t}}. This notion is extended to sequences of trees, i.e.\ for a sequence of trees \frm{s} the sequence of labels of the root nodes of \frm{s} is denoted by \frm{\tlabel{s}}. The sequence of subtrees of the root node of a tree \frm{t} is denoted by \frm{\tsub{t}}. The set of trees in which all labels are from the set \frm{S} is denoted by \frm{\fa{Tree}{S}}.
+
+The calculus \emph{EC} consists of a finite set of \emph{inference rules}, which we denote by \frm{\infEC}. Each inference rule is a decidable subset of pairs of sequences of equations and equations, i.e.\ \frm{\ELs_{n} \times \ELs}, for some \frm{n \geq 0}. If \frm{n = 0}, then it is usually called an \emph{axiom}. An inference rule is of the form \frm{\scompr{(p,c)}{\faa{cond}{p}{c}}}, where \frm{p \in \ELs_{n}}, \frm{c \in \ELs} and \frm{\faa{cond}{p}{c}} a condition on \frm{p} and \frm{c}. It is usually written as:
+\[\infPPPC{p[1]\ }{\ldots}{p[n]}{c} \quad \faa{cond}{p}{c}\]
+Each element of \frm{p} is called a \emph{premise} and \frm{c} is called the \emph{conclusion}. An element of an inference rule is called an \emph{instance}.
+
+Using the inference rules, we define the notions of a \emph{match}, a \emph{derivation} and \emph{derivability}. For a sequence of equations \frm{s \in \ELs_{n}} and an equation \frm{e \in \ELs}, a match of the pair \frm{(s,e)} in the calculus \emph{EC} means that \frm{(s,e)} is an instance of an inference rule from \frm{\infEC}. It is defined as follows:
+\[\begin{tightarray}{l@{\quad\ }L@{\quad\ }l}
+\matchEC{s}{e} & iff & \existsD{r \in \infEC}{}{(s, e) \in r}
+\end{tightarray}\]
+A derivation shows how we can infer an equation \frm{\ELs} from the set of inference rules \frm{\infEC}. It is most accurately represented by an ordered labelled tree, where all labels are equations from the set \frm{\ELs}. To determine whether a tree \frm{t \in \fa{Tree}{\ELs}} is a derivation from \frm{\infEC}, we introduce the predicate \frm{\derivationEC{t}} that states that every node of \frm{t} and its subnodes \frm{\tsub{t}} match an instance of \frm{\infEC}. It is defined inductively on the structure of \frm{t}:
+\[\begin{tightarray}{l@{\quad\ }L@{\quad\ }l}
+\derivationEC{t}
+& iff & \forallD{u \in \tsub{t}}{}{\derivationEC{u}}\ \land\ \matchEC{\tlabel{\tsub{t}}}{\tlabel{t}}
+\end{tightarray}\]
+Finally, the notion of derivability expresses the ability to derive an equation \frm{e \in \ELs} from the set of inference rules \frm{\infEC}. It is denoted by \frm{\dEC e} and it is defined as follows:
+\[\begin{tightarray}{l@{\qquad}L@{\quad}l}
+\dEC e
+& iff & \existsD{t \in \fa{Tree}{S}}{}{\derivationEC{t}\ \land\ (\tlabel{t} = e)}
+\end{tightarray}\]
+There are many possibilities in defining the set of inference rules \frm{\infEC} for equational logic. We choose the following set of six inference rules for signature \frm{\Sigma}, associated sets of variables \frm{X} and \frm{Y}, and a fixed set of equations \frm{E \subseteq \ELs}:
+\setlength{\extrarowheight}{1mm}
+\setlength{\mathindent}{3mm}
+\[\begin{tightarray}{Ll@{\hspace{1.5em}}L}
+  (axiom)
+    & \infC{\,e\,}
+      & \frm{e \in E}\\    
+  (reflexivity)  
+    & \infC{t = t}
+      & \frm{t \in \termv{\Sigma}{X}}\\
+  (symmetry)     
+    & \infPC{t = u}{u = t}
+      & \frm{t,u \in \termv{\Sigma}{X}}\\
+  (transitivity) 
+    & \infPPC{t = u}{u = v}{t = v}
+      & \frm{t,u,v \in \termv{\Sigma}{X}}\\
+  (substitution) 
+    & \infPC{t = u}{t\sigma = u\sigma}
+      & \frm{t,u \in \termv{\Sigma}{X}} and \frm{\sigma:X \To \termv{\Sigma}{Y}}\\
+  (congruence)   
+    & \infPC{t = u}{v[y := t] = v[y := u]} 
+      & \frm{t,u \in \termv{\Sigma}{X}}, \frm{v \in \termv{\Sigma}{X \cup \{y\}}} and 
+        \frm{y \not \in X}
+\end{tightarray}\]
+\setlength{\extrarowheight}{0mm}
+\setlength{\mathindent}{10mm}
+
+\noindent
+The set \frm{E} serves the same purpose as in the logical consequence \frm{E \vEL e}. For this reason, we write \frm{\dEC e} as \frm{E \dEC e}. This is pronounced as `\frm{e} is derivable from \frm{E}'.
+
+\begin{remark}
+From the notion of derivability, we can see that our congruence rule is a harmless restriction of the congruence rule of~\cite{Loeckx:1996}, which has \frm{k} premises instead of 1, with \frm{k \geq 1}. We can always simulate this general rule by \frm{m} applications of our rule and \frm{n} applications of the substitution rule, for certain \frm{m,n} with \frm{m+n=k}. \frm{\Box}
+\end{remark}
+
+\noindent
+We often show the derivability of an equation in a \emph{calculational style}. Such a derivation has the following form, where \frm{t_{i} \in \termv{\Sigma}{X}} with \frm{0 \leq i \leq n}:
+\begin{derivation}
+  \expr{t_{0}}
+  \tran{=}{hint why \frm{E \dEC t_{0} = t_{1}}}
+  \expr{t_{1}}
+  \\*\>$=$\\\>\ \vdots\\\>$=$\\
+  \expr{t_{n-1}}
+  \tran{=}{hint why \frm{E \dEC t_{n-1} = t_{n}}}
+  \expr{t_{n}}
+\end{derivation}
+
+\noindent
+The goal of this derivation is to show \frm{E \dEC t_{0} = t_{n}}. This is done as follows. Each hint explains why \frm{E \dEC t_{i} = t_{i+1}}, for all \frm{i} with \frm{0 \leq i < n}. Then we can derive \frm{t_{0} = t_{n}} by applying the transitivity rule \frm{n-1} times. 
+
+In order to control the size of derivations, the applications of the reflexivity, symmetry, substitution and congruence rules are left implicit in the hints. We also allow multiple applications of the transitivity rule in one derivation step.
+
+\subsection{Soundness and completeness}
+
+Logical consequence and derivability are closely related. This is expressed by the notions of \emph{soundness} and \emph{completeness}. Soundness states that every \frm{\Sigma}-equation that can be derived from a set of \frm{\Sigma}-equations is also a logical consequence of this set.
+
+\begin{theorem}
+\label{th:soundess}
+For all equations \frm{e \in \ELs} and sets of equations \frm{E \subseteq \ELs}, we have:
+\[\begin{tightarray}{L@{\quad}l@{\quad}L@{\quad}l}
+  if & E \dEC e & then & E \vEL e
+\end{tightarray}\]
+\end{theorem}
+\begin{proof}
+See the proof of theorem~5.67 of~\cite{Loeckx:1996}.
+\end{proof}
+
+\noindent
+Completeness states the opposite, namely that every \frm{\Sigma}-equation that is a logical consequence of a set of \frm{\Sigma}-equations can also be derived from that set.
+\begin{theorem}
+\label{th:completeness}
+For all equations \frm{e \in \ELs} and sets of equations \frm{E \subseteq \ELs}, we have:
+\[\begin{tightarray}{L@{\quad}l@{\quad}L@{\quad}l}
+  if & E \vEL e & then & E \dEC e
+\end{tightarray}\]
+\end{theorem}
+\begin{proof}
+See the proof of theorem~5.68 of~\cite{Loeckx:1996}.
+\end{proof}
+
+\bibliographystyle{alpha}
+\bibliography{hoas}
+
+\end{document}
