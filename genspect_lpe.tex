@@ -1,5 +1,5 @@
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-%%%  Veni proposal                                             %%%
+%%%  MTLPEs                                                    %%%
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 \documentclass[twoside,fleqn,a4paper,dvips]{article}
 \usepackage{textcomp,amsmath,amssymb,amsthm,stmaryrd}
@@ -14,7 +14,8 @@
 \def\JFG{\texttt{ JFG: TODO :GFJ\marginpar{!!!} }}
 \newcommand{\afunc}[3]{\mathsf{#1}:#2\rightarrow#3}
 
-\title{LPE definitions and an ATerm representation format for \mcrl\ with multiactions and time}
+\title{LPE definitions and an ATerm representation format for \mcrl\ 
+  with multiactions and time}
   
 \author{Jan Friso Groote \and Yaroslav S. Usenko}
 
@@ -37,8 +38,8 @@ where $I$ and $J$ are disjoint.
 
 It is possible to translate multiactions to regular \mcrl\ actions
 (with longer parameter lists).  In this way a MTLPE can be translated
-to a TLPE, preserving equivalence.  The TLPE that
-corresponds to the above MTLPE is defined in the following way.
+to a TLPE, preserving equivalence.  The TLPE that corresponds to the
+above MTLPE is defined in the following way.
 \begin{gather}
 \begin{split}
 \pr{X}(\vect{d\ap D})=&\sum_{i\in I}\sum_{\vect{e_i\ap E_i}} c_i(\vect{d,e_i})\to\act{a}^0_i\_\act{a}^1_i\_\dots\_\act{a}^{n(i)}_i(\vect{f_{i,0}}(\vect{d,e_i}),\dots,\vect{f_{i,n(i)}}(\vect{d,e_i}))\at t_i(\vect{d,e_i})\seqc
@@ -61,14 +62,14 @@ parameter lists of the contained actions.
   $\mathrm{TLPE(MTLPE1)}=(\mathrm{timed\ mcrl})=\mathrm{TLPE(MTLPE2)}$.
 \end{thm}
 
-Time can be eliminated from TLPEs in a similar way (see
-page 106 of the thesis).
+Time can be eliminated from TLPEs in a similar way (see page 106 of
+the thesis).
 
 \appendix
 
 \section{ATerm representation format for MTLPEs}
-A MTLPE is stored as an ATerm with the following functions.
-The sort of stored MTLPE is $\nm{MTLPE}$.
+A MTLPE is stored as an ATerm with the following functions. The sort
+of stored MTLPE is $\nm{MTLPE}$.
 
 \begin{gather*}
 \afunc{spec2gen}{\nm{DataTypes}\x\nm{ActionSpec}^*\x\nm{InitProcSpec}}{\nm{MTLPE}}\\
@@ -77,10 +78,20 @@ The sort of stored MTLPE is $\nm{MTLPE}$.
 \afunc{smd}{\nm{Variable}^*\x\nm{Action}^*\x\nm{Term}\x\nm{NextState}\x\nm{Term}}{\nm{Summand}}\\
 \afunc{act}{\nm{String}\x\nm{Term}^*}{\nm{Action}}\\
 \afunc{terminated}{}{\nm{NextState}}\\
-\afunc{i}{\nm{IndexedTerm}^*}{\nm{NextState}}
+\afunc{i}{\nm{IndexedTerm}^*}{\nm{NextState}}\\
+\afunc{d}{\nm{Signature}\x\nm{Equation}^*}{\nm{DataTypes}}\\
+\afunc{e}{\nm{Variable}^*\x\nm{Term}\x\nm{Term}}{\nm{Equation}}\\
+\afunc{v}{\nm{String}\x\nm{String}}{\nm{Variable}}\\
+\afunc{it}{\Nat\x\nm{Term}}{\nm{IndexedTerm}}\\
+\afunc{dc}{\Nat}{\nm{IndexedTerm}}\\
+\afunc{s}{\nm{String}^*\x\nm{Function}^*\x\nm{Function}^*}{\nm{Signature}}\\
+\afunc{f}{\nm{String}\x\nm{String}^{*}\x\nm{String}}{\nm{Function}}
 \end{gather*}
-
-\JFG please copy the rest of the constructors and the last 3 lines from the PBES document.
+The sort $\nm{Term}$ consists of arbitrary ATerm terms where all function
+symbols must be quoted. The sort $\nm{String}$ consists of quoted constants,
+i.e.\ function symbols of arity 0. The sort $\Nat$ is the built in
+sort of natural numbers in the ATerm library. The list
+of elements of sort $D$ is denoted by $D^{*}$.
 
 The constructor of sort $\nm{InitProcSpec}$ contains the actual LPE
 parameters (from \texttt{init}) as the first parameter, the formal LPE
@@ -88,11 +99,41 @@ parameters as the second argument, and the list of summands as the
 third parameter. The third parameter of $\mathsf{cmd}$ is the term of
 sort $\nm{Time}$ representing the time at which the multiaction
 happens.  The last parameter of $\mathsf{cmd}$ is the boolean term
-representing the condition. 
+representing the condition.
 
-If the delta summand of the TLPE is present, $\delta$ 
-has to be represented by the ATerm string \texttt{"Delta"}, and actions with this name should not be allowed.
-An alternative is in using a special summand construction.
+If the delta summand of the TLPE is present, $\delta$ has to be
+represented by the ATerm string \texttt{"Delta"}, and actions with
+this name should not be allowed.  An alternative is in using a special
+summand construction.
+
+\newpage
+\section{ATerm representation format for LPEs (for \mcrl\ v1)}
+An LPE is stored as an ATerm with the following functions. The sort
+of stored LPE is $\nm{LPE}$.
+
+\begin{gather*}
+\afunc{spec2gen}{\nm{DataTypes}\x\nm{InitProcSpec}}{\nm{LPE}}\\
+\afunc{initprocspec}{\nm{Term}^*\x\nm{Variable}^*\x\nm{Summand}^*}{\nm{InitProcSpec}}\\
+\afunc{smd}{\nm{Variable}^*\x\nm{String}\x\nm{Term}^*\x\nm{NextState}\x\nm{Term}}{\nm{Summand}}\\
+\afunc{terminated}{}{\nm{NextState}}\\
+\afunc{i}{\nm{Term}^*}{\nm{NextState}}\\
+\afunc{d}{\nm{Signature}\x\nm{Equation}^*}{\nm{DataTypes}}\\
+\afunc{e}{\nm{Variable}^*\x\nm{Term}\x\nm{Term}}{\nm{Equation}}\\
+\afunc{v}{\nm{String}\x\nm{String}}{\nm{Variable}}\\
+\afunc{s}{\nm{String}^*\x\nm{Function}^*\x\nm{Function}^*}{\nm{Signature}}\\
+\afunc{f}{\nm{String}\x\nm{String}^{*}\x\nm{String}}{\nm{Function}}
+\end{gather*}
+The sort $\nm{Term}$ consists of arbitrary ATerm terms where all function
+symbols must be quoted. The sort $\nm{String}$ consists of quoted constants,
+i.e.\ function symbols of arity 0. The list
+of elements of sort $D$ is denoted by $D^{*}$.
+
+The constructor of sort $\nm{InitProcSpec}$ contains the actual LPE
+parameters (from \texttt{init}) as the first parameter, the formal LPE
+parameters as the second argument, and the list of summands as the
+third parameter. The last parameter of $\mathsf{cmd}$ is the boolean term
+representing the condition.
+
 
 %\bibliographystyle{plain}
 %\bibliography{genspect}
