@@ -1,5 +1,5 @@
 #define  NAME      "libgsparse"
-#define  LVERSION  "0.1.22"
+#define  LVERSION  "0.1.23"
 #define  AUTHOR    "Aad Mathijssen"
 
 #ifdef __cplusplus
@@ -266,10 +266,10 @@ void gsPrintPart(FILE *OutStream, const ATermAppl Part, bool ShowSorts,
     ATermAppl Condition = ATAgetArgument(Part, 1);
     if (!gsIsNil(Condition)) {
       gsPrintPart(OutStream, Condition, ShowSorts, 0);
-      fprintf(OutStream, " -> ");
+      fprintf(OutStream, "  ->  ");
     }
     gsPrintPart(OutStream, ATAgetArgument(Part, 2), ShowSorts, 0);
-    fprintf(OutStream, " = ");
+    fprintf(OutStream, "  =  ");
     gsPrintPart(OutStream, ATAgetArgument(Part, 3), ShowSorts, 0);
   } else if (gsIsActId(Part)) {
     //print action identifier
@@ -397,15 +397,22 @@ void gsPrintPart(FILE *OutStream, const ATermAppl Part, bool ShowSorts,
       //print data application
       gsDebugMsg("printing data application\n");
       if (PrecLevel > 12) fprintf(OutStream, "(");
-      gsPrintPart(OutStream, ATAgetArgument(Part, 0), ShowSorts, 12);
-      fprintf(OutStream, "(");
       if (gsIsDataAppl(Part)) {
-        gsPrintPart(OutStream, ATAgetArgument(Part, 1), ShowSorts, 0);
+        gsPrintPart(OutStream, Head, ShowSorts, 12);
+        fprintf(OutStream, "(");
+        int NrArgs = gsGetDataExprNrArgs(Part);
+        for (int i = 0; i < NrArgs; i++) {
+          if (i > 0) fprintf(OutStream, ", ");
+          gsPrintPart(OutStream, gsGetDataExprArg(Part, i), ShowSorts, 0);
+        }
+        fprintf(OutStream, ")");
       } else {
-        gsPrintParts(OutStream, ATLgetArgument(Part, 1), ShowSorts, PrecLevel,
+        gsPrintPart(OutStream, ATAgetArgument(Part, 0), ShowSorts, 12);
+        fprintf(OutStream, "(");
+        gsPrintParts(OutStream, ATLgetArgument(Part, 1), ShowSorts, 0,
           NULL, ", ");
+        fprintf(OutStream, ")");
       }
-      fprintf(OutStream, ")");
       if (PrecLevel > 12) fprintf(OutStream, ")");
     }
   } else if (gsIsNumber(Part)) {
