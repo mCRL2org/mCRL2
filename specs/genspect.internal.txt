@@ -1,7 +1,8 @@
-// Date: 04-01-2005
+// Date: 06-01-2005
 // This document describes the internal format of the GenSpect language. Here:
-// - <String> represents an arbitrary non-empty string
-// - <NumberString> represents a string of the format '"0"|("-"?[1-9][0-9]*)'
+// - <String> is an arbitrary non-empty string
+// - <NumberString> is a string of the format '"0"|("-"?[1-9][0-9]*)'
+// - <String> and <NumberString> are represented by a quoted ATermAppl constant
 // - the other alphabetical strings within angular brackets are non-terminals
 //   that represent all possible branches of their productions
 // - for non-terminal N, N*/N+ represents an ATermList with zero/one or more N's
@@ -71,10 +72,6 @@
 
 //sort expression
 <SortExpr>    ::= <SortId>
-                | SortBool                                                (- di)
-                | SortPos                                                 (- di)
-                | SortNat                                                 (- di)
-                | SortInt                                                 (- di)
                 | SortList(<SortExpr>)                                    (- di)
                 | SortSet(<SortExpr>)                                     (- di)
                 | SortBag(<SortExpr>)                                     (- di)
