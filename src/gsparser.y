@@ -67,7 +67,7 @@ ATermAppl gsSpecEltsToSpec(ATermList SpecElts);
 %type <appl> sort_constant sort_constructor data_expr data_expr_whr whr_decl
 %type <appl> data_expr_lambda data_expr_imp data_expr_and data_expr_eq
 %type <appl> data_expr_rel data_expr_cons data_expr_snoc data_expr_concat
-%type <appl> data_expr_add data_expr_mult data_expr_quant data_expr_prefix
+%type <appl> data_expr_add data_expr_mult data_expr_quant_prefix
 %type <appl> data_expr_postfix data_expr_primary data_constant data_enumeration
 %type <appl> bag_enum_elt data_comprehension data_var_decl proc_expr
 %type <appl> proc_expr_choice proc_expr_sum proc_expr_merge proc_expr_binit
@@ -870,29 +870,29 @@ data_expr_add:
 
 //multiplication and division
 data_expr_mult:
-  data_expr_quant
+  data_expr_quant_prefix
     {
       $$ = $1;
     }
-  | data_expr_mult STAR data_expr_quant
+  | data_expr_mult STAR data_expr_quant_prefix
     {
       $$ = gsMakeDataApplProd(gsMakeDataVarIdOpId($2),
         ATmakeList2((ATerm) $1, (ATerm) $3));
       gsDebugMsg("parsed multiplication or set intersection\n  %t\n", $$);
     }
-  | data_expr_mult DIV data_expr_quant
+  | data_expr_mult DIV data_expr_quant_prefix
     {
       $$ = gsMakeDataApplProd(gsMakeDataVarIdOpId($2),
         ATmakeList2((ATerm) $1, (ATerm) $3));
       gsDebugMsg("parsed div expression\n  %t\n", $$);
     }
-  | data_expr_mult MOD data_expr_quant
+  | data_expr_mult MOD data_expr_quant_prefix
     {
       $$ = gsMakeDataApplProd(gsMakeDataVarIdOpId($2),
         ATmakeList2((ATerm) $1, (ATerm) $3));
       gsDebugMsg("parsed mod expression\n  %t\n", $$);
     }
-  | data_expr_mult DOT data_expr_quant
+  | data_expr_mult DOT data_expr_quant_prefix
     {
       $$ = gsMakeDataApplProd(gsMakeDataVarIdOpId($2),
         ATmakeList2((ATerm) $1, (ATerm) $3));
@@ -900,46 +900,38 @@ data_expr_mult:
     }
   ;
 
-//universal and existential quantification
-data_expr_quant:
-  data_expr_prefix
-    {
-      $$ = $1;
-    }
-  | FORALL data_vars_decls_cs DOT data_expr_quant
-    {
-      $$ = gsMakeForall($2, $4);
-      gsDebugMsg("parsed quantification\n  %t\n", $$);
-    }
-  | EXISTS data_vars_decls_cs DOT data_expr_quant
-    {
-      $$ = gsMakeExists($2, $4);
-      gsDebugMsg("parsed quantification\n  %t\n", $$);
-    }
-  ;
-
-//prefix data expression
-data_expr_prefix:
+//universal and existential quantification or prefix data expression
+data_expr_quant_prefix:
   data_expr_postfix
     {
       $$ = $1;
     }
-  | EXCLAM data_expr_prefix
+  | FORALL data_vars_decls_cs DOT data_expr_quant_prefix
+    {
+      $$ = gsMakeForall($2, $4);
+      gsDebugMsg("parsed quantification\n  %t\n", $$);
+    }
+  | EXISTS data_vars_decls_cs DOT data_expr_quant_prefix
+    {
+      $$ = gsMakeExists($2, $4);
+      gsDebugMsg("parsed quantification\n  %t\n", $$);
+    }
+  | EXCLAM data_expr_quant_prefix
     {
       $$ = gsMakeDataApplProd(gsMakeDataVarIdOpId($1), ATmakeList1((ATerm) $2));
       gsDebugMsg("parsed prefix data expression\n  %t\n", $$);
     }
-  | MINUS data_expr_prefix
+  | MINUS data_expr_quant_prefix
     {
       $$ = gsMakeDataApplProd(gsMakeDataVarIdOpId($1), ATmakeList1((ATerm) $2));
       gsDebugMsg("parsed prefix data expression\n  %t\n", $$);
     }
-  | HASH data_expr_prefix
+  | HASH data_expr_quant_prefix
     {
       $$ = gsMakeDataApplProd(gsMakeDataVarIdOpId($1), ATmakeList1((ATerm) $2));
       gsDebugMsg("parsed prefix data expression\n  %t\n", $$);
     }
-  ;  
+  ;
 
 //postfix data expression
 data_expr_postfix:
@@ -1154,12 +1146,12 @@ proc_expr_cond:
     {
       $$ = $1;
     }
-  | data_expr_prefix ARROW proc_expr_seq
+  | data_expr_quant_prefix ARROW proc_expr_seq
     {
       $$ = gsMakeCond($1, $3, gsMakeDelta());
       gsDebugMsg("parsed conditional expression\n  %t\n", $$);
     }
-  | data_expr_prefix ARROW proc_expr_seq COMMA proc_expr_seq
+  | data_expr_quant_prefix ARROW proc_expr_seq COMMA proc_expr_seq
     {
       $$ = gsMakeCond($1, $3, $5);
       gsDebugMsg("parsed conditional expression\n  %t\n", $$);
@@ -1186,7 +1178,7 @@ proc_expr_at:
     {
       $$ = $1;
     }
-  | proc_expr_at AT data_expr_prefix
+  | proc_expr_at AT data_expr_quant_prefix
     {
       $$ = gsMakeAtTime($1, $3);
       gsDebugMsg("parsed at time expression\n  %t\n", $$);
