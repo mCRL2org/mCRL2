@@ -71,6 +71,11 @@ ATermAppl gsImplementExprs(ATermAppl Spec);
 //     type checking
 //Ret: Spec in which all expressions are implemented
 
+ATerm gsImplementExprsPart(ATerm Part);
+//Pre: Part is a part of a specification that adheres to the internal syntax
+//     after type checking
+//Ret: Part in which all expressions are implemented
+
 ATermAppl gsImplementBool(ATermAppl Spec);
 //Pre: Spec is a specification that adheres to the internal syntax after type
 //     checking
@@ -167,6 +172,54 @@ ATermAppl gsDeclareDataEqn(ATermAppl Spec, ATermAppl DataEqn)
   DataEqnDecls = ATinsert(DataEqnDecls, (ATerm) DataEqn);
   DataEqnSpec = ATsetArgument(DataEqnSpec, (ATerm) DataEqnDecls, 0);  
   return ATsetArgument(Spec, (ATerm) DataEqnSpec, 3);
+}
+
+ATermAppl gsImplementExprs(ATermAppl Spec)
+{
+  return (ATermAppl) gsImplementExprsPart((ATerm) Spec);
+}
+
+ATerm gsImplementExprsPart(ATerm Part)
+{
+  if (ATgetType(Part) == AT_APPL) {
+    ATermAppl Result = NULL;
+    ATermAppl APart = (ATermAppl) Part;
+    if (gsIsDataApplProd(APart)) {
+      ATermList Args = ATLgetArgument(APart, 1);
+      int ArgsLength = ATgetLength(Args);
+      Result = (ATermAppl) gsImplementExprsPart(ATgetArgument(APart, 0));
+      for (int i = 0; i < ArgsLength; i++) {
+        Result = gsMakeDataAppl(Result,
+          (ATermAppl) gsImplementExprsPart(ATelementAt(Args, i)));
+      }
+    } else if (gsIsSortArrowProd(APart)) {
+      ATermList Domain = ATLgetArgument(APart, 0);
+      int DomainLength = ATgetLength(Domain);
+      Result = (ATermAppl) gsImplementExprsPart(ATgetArgument(APart, 1));
+      for (int i = DomainLength - 1; i >= 0; i--) {
+        Result = gsMakeSortArrow(
+          (ATermAppl) gsImplementExprsPart(ATelementAt(Domain, i)), Result);
+      }
+    } else {
+      AFun Head = ATgetAFun(APart);
+      int NrArgs = ATgetArity(Head);      
+      ATerm Args[NrArgs];
+      for (int i = 0; i < NrArgs; i++) {
+        Args[i] = gsImplementExprsPart(ATgetArgument(Part, i));
+      }
+      Result = ATmakeApplArray(Head, Args);
+    }
+    return (ATerm) Result;
+  } else { //(ATisGetType(Part) == AT_LIST)
+    ATermList Result = ATmakeList0();
+    ATermList LPart = (ATermList) Part;
+    int LPartLength = ATgetLength(LPart);
+    for (int i = 0; i < LPartLength; i++) {
+      Result = ATinsert(Result, gsImplementExprsPart(ATelementAt(LPart, i)));
+    }
+    Result = ATreverse(Result);
+    return (ATerm) Result;
+  }
 }
 
 ATermAppl gsImplementBool(ATermAppl Spec)
@@ -851,6 +904,7 @@ ATermAppl gsImplementInt(ATermAppl Spec)
 
 ATermAppl gsImplementData(ATermAppl Spec)
 {
+  Spec = gsImplementExprs(Spec);
   Spec = gsImplementInt(Spec);
   Spec = gsImplementNat(Spec);
   Spec = gsImplementPos(Spec);
