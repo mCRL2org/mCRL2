@@ -764,32 +764,39 @@ of stored MTLPE is $\nm{MTLPE}$.
 \begin{gather*}
 \afunc{spec2gen}{\nm{DataTypes}\x\nm{ActionSpec}^*\x\nm{InitProcSpec}}{\nm{MTLPE}}\\
 \afunc{actspec}{\nm{String}\x\nm{String}^*}{\nm{ActionSpec}}\\
-\afunc{initprocspec}{\nm{Term}^*\x\nm{Variable}^*\x\nm{Summand}^*}{\nm{InitProcSpec}}\\
-\afunc{smd}{\nm{Variable}^*\x\nm{Action}^*\x\nm{Term}\x\nm{NextState}\x\nm{Term}}{\nm{Summand}}\\
-\afunc{act}{\nm{String}\x\nm{Term}^*}{\nm{Action}}\\
-\afunc{terminated}{}{\nm{NextState}}\\
-\afunc{i}{\nm{IndexedTerm}^*}{\nm{NextState}}\\
-\afunc{d}{\nm{Signature}\x\nm{Equation}^*}{\nm{DataTypes}}\\
-\afunc{e}{\nm{Variable}^*\x\nm{Term}\x\nm{Term}}{\nm{Equation}}\\
-\afunc{v}{\nm{String}\x\nm{String}}{\nm{Variable}}\\
-\afunc{it}{\Nat\x\nm{Term}}{\nm{IndexedTerm}}\\
+\afunc{initprocspec}{\nm{TermAppl}\x\nm{Variable}^*\x\nm{Summand}^*}{\nm{InitProcSpec}}\\
+\afunc{smd}{\nm{Variable}^*\x\nm{Action}^*\x\nm{Time}\x\nm{IndexedTerm}^*\x\nm{TermAppl}}{\nm{Summand}}\\
+\afunc{act}{\nm{String}\x\nm{TermAppl}}{\nm{Action}}\\
+%\afunc{terminated}{}{\nm{NextState}}\\
+%\afunc{i}{\nm{IndexedTerm}^*}{\nm{NextState}}\\
+\afunc{time}{\nm{TermAppl}}{\nm{Time}}\\
+\afunc{notime}{}{\nm{Time}}\\
+\afunc{it}{\Nat\x\nm{TermAppl}}{\nm{IndexedTerm}}\\
 \afunc{dc}{\Nat}{\nm{IndexedTerm}}\\
+\afunc{d}{\nm{Signature}\x\nm{Equation}^*}{\nm{DataTypes}}\\
+\afunc{e}{\nm{Variable}^*\x\nm{TermAppl}\x\nm{TermAppl}\x\nm{TermAppl}}{\nm{Equation}}\\
+\afunc{v}{\nm{String}\x\nm{String}}{\nm{Variable}}\\
 \afunc{s}{\nm{String}^*\x\nm{Function}^*\x\nm{Function}^*}{\nm{Signature}}\\
 \afunc{f}{\nm{String}\x\nm{String}^{*}\x\nm{String}}{\nm{Function}}
 \end{gather*}
-The sort $\nm{Term}$ consists of arbitrary ATerm terms where all function
-symbols must be quoted. The sort $\nm{String}$ consists of quoted constants,
-i.e.\ function symbols of arity 0. The sort $\Nat$ is the built in
-sort of natural numbers in the ATerm library. The list
-of elements of sort $D$ is denoted by $D^{*}$.
+The sort $\nm{TermAppl}$ consists of ATerm terms of the form
+$\nm{TermAppl}(f,t)$ or constant/variable symbols. The sort
+$\nm{String}$ consists of quoted constants, i.e.\ function symbols of
+arity 0. The sort $\Nat$ is the built-in sort of natural numbers in
+the ATerm library. The list of elements of sort $D$ is denoted by
+$D^{*}$.
 
 The constructor of sort $\nm{InitProcSpec}$ contains the actual LPE
 parameters (from \texttt{init}) as the first parameter, the formal LPE
 parameters as the second argument, and the list of summands as the
-third parameter. The third parameter of $\mathsf{cmd}$ is the term of
+third parameter. The third parameter of $\mathsf{smd}$ is the term of
 sort $\nm{Time}$ representing the time at which the multiaction
-happens.  The last parameter of $\mathsf{cmd}$ is the boolean term
-representing the condition.
+happens, or $\mathsf{notime}$, indicating that no time info is given.
+The last parameter of $\mathsf{smd}$ is the boolean term representing
+the condition.
+
+The second parameter of $\mathsf{e}$ is the boolean condition used for
+conditional term rewriting.
 
 The first parameter of $\mathsf{v}$ is the variable name, appended with '\#'.
 The first parameter of $\mathsf{f}$ is the function name, appended 
