@@ -4,6 +4,6 @@
 act
   a,b: Nat;
 proc
-  X(n : Nat) = sum (m: Nat, a(n).b(m).X(n+1));
+  X(n: Nat) = sum(m: Nat, a(n).b(m).X(n+1));
 init
   X(0);

@@ -6,9 +6,9 @@
 % facilitate simulation.
 
 sort
-  D     = d1 | d2;
-  Error = e;
-  Bit   = b0 | b1;
+  D     = Struct d1 | d2;
+  Error = Struct e;
+  Bit   = Struct b0 | b1;
 
 map
   invert: Bit -> Bit;
