@@ -42,48 +42,44 @@ extern char *strdup(const char *s);
 //Debugging
 //-------
 
-bool gsSetQuietMsg(void);
+void gsSetQuietMsg(void);
 //Post: Printing of warnings, verbose information and extended debugging
 //      information during program execution is disabled.
 
-bool gsSetNormalMsg(void);
+void gsSetNormalMsg(void);
 //Post: Printing of warnings during program execution is enabled. Printing of
 //      verbose information and extended debugging information is disabled.
 
-bool gsSetVerboseMsg(void);
+void gsSetVerboseMsg(void);
 //Post: Printing of warnings and verbose information during program execution
 //      is enabled. Printing of extended debugging information is disabled.
 
-bool gsSetDebugMsg(void);
+void gsSetDebugMsg(void);
 //Post: Printing of warnings, verbose information and extended debugging
 //      information during program executation is enabled.
 
 inline void gsErrorMsg(char *Format, ...);
-//Pre:  The ATerm library is initialised
-//Post: Format is printed to stderr, with the remaining parameters as
-//      arguments.
+//Post: "error: " + Format is printed to stderr, with the remaining parameters
+//      as ATprintf arguments to Format.
 
 inline void gsWarningMsg(char *Format, ...);
-//Pre:  The ATerm library is initialised
-//Post: If the printing of warning messages is enabled, Format is printed to
-//      stderr, with the remaining parameters as arguments.
+//Post: If the printing of warning messages is enabled, "warning: " + Format is
+//      printed to stderr, with the remaining parameters as ATprintf arguments
+//      to Format.
 
 inline void gsVerboseMsg(char *Format, ...);
-//Pre:  The ATerm library is initialised
 //Post: If the printing of verbose information is enabled, Format is printed to
-//      stderr, with the remaining parameters as arguments.
+//      stderr, with the remaining parameters as ATprintf arguments to Format.
 
 #define gsDebugMsg(...)   gsDebugMsgFunc(__func__, __VA_ARGS__)
-//Pre:  The ATerm library is initialised.
 //Post: If the printing of debug messages is enabled, the name of the current
 //      function is printed to stderr, followed by the first parameter with the
-//      remaining parameters as arguments.
+//      remaining parameters as ATprintf arguments.
 
-inline void gsDebugMsgFunc(const char *FuncName, ...);
-//Pre:  The ATerm library is initialised
+inline void gsDebugMsgFunc(const char *FuncName, char *Format, ...);
 //Post: If the printing of debug messages is enabled, the name of FuncName is
-//      printed to stderr, followed by the first parameter with the remaining
-//      parameters as arguments.
+//      printed to stderr, followed by Format with the remaining parameters as
+//      ATprintf arguments to Format.
 
 //ATerm library work arounds
 //--------------------------

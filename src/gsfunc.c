@@ -17,28 +17,28 @@ static bool gsWarning = true;
 static bool gsVerbose = false;
 static bool gsDebug   = false;
 
-bool gsSetQuietMsg(void)
+void gsSetQuietMsg(void)
 {
   gsWarning = false;
   gsVerbose = false;
   gsDebug   = false;
 }
 
-bool gsSetNormalMsg(void)
+void gsSetNormalMsg(void)
 {
   gsWarning = true;
   gsVerbose = false;
   gsDebug   = false;
 }
 
-bool gsSetVerboseMsg(void)
+void gsSetVerboseMsg(void)
 {
   gsWarning = true;
   gsVerbose = true;
   gsDebug   = false;
 }
 
-bool gsSetDebugMsg(void)
+void gsSetDebugMsg(void)
 {
   gsWarning = true;
   gsVerbose = true;
@@ -75,13 +75,12 @@ void gsVerboseMsg(char *Format, ...)
   }
 }
 
-void gsDebugMsgFunc(const char *FuncName, ...)
+void gsDebugMsgFunc(const char *FuncName, char *Format, ...)
 {
   if (gsDebug) {
     fprintf(stderr, "(%s): ", FuncName);
     va_list Args;
-    va_start(Args, FuncName);
-    char *Format = va_arg(Args, char *);
+    va_start(Args, Format);
     ATvfprintf(stderr, Format, Args);
     va_end(Args);
   }
@@ -1542,20 +1541,17 @@ ATermAppl gsMakeDataExprPos(char *p)
 //Ret: data expression of sort Pos that is a representation of p
 {
   assert(strlen(p) > 0);
-  ATermAppl Result = NULL;
   if (!strcmp(p, "1")) {
     return gsMakeDataExprOne();
   } else {
     char *d = gsStringDiv2(p);
     if (gsStringMod2(p) == 0) {
-      Result = gsMakeDataExprDoublePos(gsMakeDataExprPos(d));
+      return gsMakeDataExprDoublePos(gsMakeDataExprPos(d));
     } else {
-      Result = gsMakeDataExprDoublePosPlusOne(gsMakeDataExprPos(d));
+      return gsMakeDataExprDoublePosPlusOne(gsMakeDataExprPos(d));
     }
     free(d);
   }
-finally:
-  return Result;
 }
 
 ATermAppl gsMakeDataExprNat(char *n)
