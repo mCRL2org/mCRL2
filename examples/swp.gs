@@ -42,11 +42,12 @@ act  sA,rA,sD,rD: D;
 proc S(l,m:Nat,q:Buf) =
         sum d:D. inWindow(l,m,(l+n) mod 2*n) -> 
                 rA(d).S(l,(m+1) mod 2*n,insert(d,m,q))+
-        sum k:Nat. (q(k)!=empty) -> sB(q(k)).S(l,m,q)+
+        sum k:Nat. (q(k)!=empty) -> sB(q(k),k).S(l,m,q)+
         sum k:Nat. rF(k).S(k,m,release(l,k,q));
 
      R(l:Nat,q:Buf) =
-        sum d:D,k:Nat. rC(d,k).(inWindow(l,k,(l+n) mod 2*n) -> R(l,k,q),R(l,q))+
+        sum d:D,k:Nat. rC(d,k).
+                (inWindow(l,k,(l+n) mod 2*n) -> R(l,insert(d,k,q)),R(l,q))+
         (q(l)!=empty) -> sD(q(l)).R((l+1) mod 2*n,remove(l,q))+
         sE(nextempty(l,q)).R(l,q);
 
