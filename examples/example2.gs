@@ -3,7 +3,7 @@
 
 proc
   P(i:Nat, j:Nat, b:Bag(Nat)) = 
-    sum(n:N, put(i,n) . P(i,j,{n} + b))) +
+    sum(n:N, put(i,n) . P(i,j,{n} + b)) +
     sum(n:Nat, get(j,n) . (n in b) -> P(b - {n}));
 
   P2 = 

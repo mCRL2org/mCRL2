@@ -3,13 +3,13 @@
 
 proc 
   Sqr(i:Nat, j:Nat) =
-    sum(n:Nat, _get(i,n)|_put(j,n*n)) . Sqr(i,j);
+    sum(n:Nat, _get(i,n) | _put(j,n*n)) . Sqr(i,j);
 
-  P(i:Nat, j:Nat, b:Bag) =
-    sum(n:N, put(i,n) . P(i,j,put(n,b))) +
-    sum(n:Nat, in(n,b) -> get(j,n).P(take(n,b)));
+  P(i:Nat, j:Nat, b:Bag(Nat)) =
+    sum(n:Nat, put(i,n) . P(i,j,put(n,b))) +
+    sum(n:Nat, (n in b) -> get(j,n) . P(take(n,b)));
 
-  DSqr(i:Nat, j:Nat, b:Bag) =
+  DSqr(i:Nat, j:Nat, b:Bag(Nat)) =
     hide({__put,__get},
       restrict({_get,_put,__get,__put},
         comm({get|_get -> __get, put|_put -> __put},
