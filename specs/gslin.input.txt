@@ -23,7 +23,7 @@
 // Sigma-> = (B->, O extended with Appl), where Appl is the set operation
 // applications.  This set contains the operation apply: (w -> s) # w -> s for
 // every w,s in B-> where w = s_0, ..., s_n.
-// Because we modelled the set Appl operations by the data expression FuncAppl,
+// Because we modelled the set Appl operations by the data expression DataAppl,
 // the description of the data types below is essentially first-order. Also,
 // we only use a finite subsets of the infinite set of sorts B-> and set of
 // operations O.
@@ -85,17 +85,21 @@
 
 //sort expression
 <SortExpr>   ::= <Id>
-               | SortArrow(<Domain>, <SortExpr>)
+               | SortApp(<SortExpr>, <SortArgs>)
+
+//arguments consisting of one or more sort expressions
+<SortArgs>   ::= <SortExpr>
+               | <SortArgs>, <SortExpr>
 
 //data expression
 <DataExpr>   ::= <Id>
                | <Var>
-               | FuncApp(<DataExpr>, <Arguments>) 
+               | DataApp(<DataExpr>, <DataArgs>) 
                | Whr(<DataExpr>, <WhrDecl>+) 
 
 //arguments consisting of one or more data expressions
-<Arguments>  ::= <DataExpr>
-               | <Arguments>, <DataExpr>
+<DataArgs>   ::= <DataExpr>
+               | <DataArgs>, <DataExpr>
 
 //where clause declaration
 <WhrDecl>    ::= WhrDecl(<Id>, <DataExpr>) 
