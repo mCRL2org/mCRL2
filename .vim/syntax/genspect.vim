@@ -13,7 +13,7 @@ syntax keyword gsSpecKW     sort cons map var eqn act proc init
 syntax keyword gsProcCKW    delta tau
 syntax keyword gsProcKW     sum restrict allow hide rename comm
 syntax keyword gsSortCKW    Bool Pos Nat Int
-syntax keyword gsSortKW     List Set Bag
+syntax keyword gsSortKW     List Set Bag Struct
 syntax keyword gsDataCKW    true false
 syntax keyword gsDataKW     whr end lambda forall exists div mod in
 syntax keyword gsTodo       contained TODO FIXME XXX
