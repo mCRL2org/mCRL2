@@ -1,0 +1,421 @@
+%------------------------------------------------------------
+%                          LaTeX slides file
+%                               ---
+%                              Usenko
+%                            LaQuSo, TUE
+%                         October 1, 2004
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+%
+%-----------------------------------------------------------------------------------------------------------------
+% Use slifonts.
+\PassOptionsToPackage{coloremph,colormath,colorhighlight,lightbackground}{texpower}
+\RequirePackage{tpslifonts}
+
+% Input the generic preamble.
+
+\input{__TPpreamble}
+\hypersetup{pdftitle={texpower highlighting example}}
+
+% The package soul is needed for \highlighttext to work.
+
+\usepackage{soul}
+
+%\backgroundstyle{vgradient}
+
+%-----------------------------------------------------------------------------------------------------------------
+%
+
+%\documentclass[fleqn,17pt]{article}
+%\RequirePackage[T1]{fontenc}
+%\usepackage[usenames]{color}
+%\usepackage[screen,sectionbreak]{pdfscreen}
+\usepackage{amsmath,amsfonts,amssymb}
+%\usepackage{textcomp,txfonts}
+\usepackage{textcomp,stmaryrd}
+%\usepackage[usenames]{color}
+%\usepackage{fixseminar}
+%\usepackage[ps2pdf]{hyperref} % remove for printing
+\usepackage{graphicx}
+
+%\usepackage{tpslifonts}
+%\usepackage{geometry}
+\usepackage{mymath,mcrl}
+
+\hypersetup{
+  pdfauthor={Yaroslav S. Usenko},
+  pdftitle={Timed Extensions of muCRL},
+  pdfsubject={Timed Extensions of muCRL},
+  pdfkeywords={algebraic specification, real time, verification},
+  pdfpagemode={FullScreen}
+}
+
+%\bottombuttons
+%\margins{2ex}{2ex}{2ex}{2ex}
+%\screensize{6.25in}{8in}
+%\pagenumbering
+%\overlay{tuebgkuk}
+
+%\usepackage[display,coloremph,colormath,colorhighlight]{texpower}
+%\usepackage{tpslifonts}
+
+\DeclarePanel{bottom}{\hfill\thepage}
+\backgroundstyle{plain}
+
+%\renewcommand{\slideleftmargin}{.5cm}
+%\renewcommand{\sliderightmargin}{.5cm}
+%\renewcommand{\slidetopmargin}{.5cm}
+%\mklength{\slidetopmargin}{\bottompanelheight*\ratio{.2cm}{\semcm}+.5cm}
+
+\title{{\large *}{\Huge Real{\large *}-time-based extensions of \mcrl:}\\[.3ex]
+\color[rgb]{0,.4,.3}{\LARGE current status}\\
+\color[rgb]{0,.4,.3}{\LARGE possible developments}\\
+\color[rgb]{0,.4,.3}{\LARGE place in the context}}
+\author{\Large\color[rgb]{0,.4,0}{Yaroslav S. Usenko}}
+\date{\large\color[rgb]{.4,.4,0}{18 November 2004}}
+
+%\leftfooter{Y.S. Usenko}
+%\MyLogo{}
+%\rightfooter{\thepage}
+
+%\setlength{\mathindent}{0.5em}
+%\setlength{\parindent}{0em}
+
+
+\newcommand{\xto}[1]{\xrightarrow{#1}}
+\newcommand{\restrict}{\upharpoonright}
+\newcommand{\tshift}{\mathbin{\uparrow}}
+\newcommand{\timeshift}[2]{{#1}\tshift{#2}}
+\newcommand{\superps}{\oplus}
+\newcommand{\csins}{\mathbin{\mathop{^\curvearrowright}}}
+\newcommand{\delay}[1]{\mathop{\sigma_{\!\!\nm{rel}}^{#1}}}
+\newcommand{\cond}{\mathbin{\mathop{:\rightarrow}}}
+\newcommand{\tpref}[2]
+        {\left[
+                {#1}
+        \right]_{#2}}
+
+
+\begin{document}
+\begin{slide}
+%###################################################
+%###################################################
+\phantom{}
+\vspace{3ex}
+
+\maketitle
+%%###################################################
+%\newslide
+%\tableofcontents
+
+%###################################################
+\newslide\section*{Motivation}
+\begin{itemize}
+\item A large number of modeling formalisms
+  \begin{itemize}
+  \item PA: CSP, CCS, ACP, LOTOS, \mcrl
+  \item Time: timed versions of each, TA
+  \item Stochastic: Spades, IMC, IGSMP, MoDeST
+  \item Hybrid: HyPA, ACP$^{srt}_{hs}$, BHPC, hybrid $\chi$
+  \end{itemize}
+\item Each formalism requires learning
+\item Little compatibility 
+  \begin{itemize}
+  \item little reuse of algorithms
+  \item difficult to compare the results
+  \end{itemize}
+\end{itemize}
+%###################################################
+%###################################################
+\newslide\section*{Labeled Transition Systems}
+Labeled Transition System (LTS): directed graph; 
+vertexes -- states, arcs -- actions.
+\pause
+\begin{center}
+\includegraphics[width=\textwidth]{LTSs}
+\end{center}
+\pause
+Properties of LTSs are expressed in temporal logics.
+%###################################################
+%###################################################
+\newslide\section*{\mcrl\ Language}
+\mcrl\ based on ACP and abstract data types.
+\pause
+Process expressions:
+\begin{gather*}
+p\syntdef\act{a}(\vect{t})\syntor\delta\syntor\pr{Y}(\vect{t})\syntor p+p\syntor p\seqc p\syntor p\parc p\syntor\sum_{d\ap D}p\syntor\\[-1ex]
+p\lcond c\rcond p\syntor\hide{I}(p)\syntor\encap{H}(p)\syntor\ren{R}(p)
+\end{gather*}
+\pause
+Value-passing communication:\\
+$\quad\act{a}(5)\comm\sum_{n\ap\Nat}\act{b}(n)~\id~\sum_{n\ap\Nat}\act{c}(n)\lcond n=5\rcond\delta~\id~\act{c}(5)$
+\pause
+Process equations: $\pr{X}(n\ap\Nat)=\act{a}(n)\seqc\pr{X}(succ(n))+\act{b}(n)$
+%###################################################
+%###################################################
+\newslide\section*{Crucial Axioms}
+\vspace{-1.5ex}
+\begin{footnotesize}
+  \begin{align}
+    +&\text{ is CAI, }\delta\text{ is a 0 element}\notag\\
+    (x+y)\seqc z&\id x\seqc z+ y\seqc z\tag{A4}\label{eq:A4}\\
+    (x\seqc y)\seqc z&\id x\seqc (y\seqc z)\tag{A5}\label{eq:A5}\\
+    \delta\seqc x&\id \delta\tag{A7}\label{eq:A7}%\\[1.8ex]
+  \end{align}
+  \begin{align}
+    x\parc y&\id (x\leftm y+y\leftm x)+x\comm y\tag{CM1}\label{eq:CM1}\\
+    b\leftm x&\id b\seqc x\tag{CM2}\label{eq:CM2}\\
+    (b\seqc x)\leftm y&\id b\seqc(x\parc y)\tag{CM3}\label{eq:CM3}\\
+    (b\seqc x)\comm(b'\seqc y)&\id (b\comm b')\seqc(x\parc y)\tag{CM7}\label{eq:CM7}\\
+    \act{a}(\vect{d})\comm \act{a'}(\vect{d'})&\id \gamma(\act{a},\act{a'})(\vect{d})\lcond
+    \vect{d}=\vect{d'}\rcond\delta\quad\text{if}~\gamma(\act{a},\act{a'})~\text{is defined}\tag{CF1}\label{eq:CF1}\\
+    \act{a}(\vect{d})\comm \act{a'}(\vect{d'})&\id \delta\quad\text{otherwise}\tag{CF2}\label{eq:CF2}
+  \end{align}
+\end{footnotesize}
+%%###################################################
+%###################################################
+\newslide\section*{Linear Process Equations}
+Linear Process Equation (LPE): 
+\begin{itemize}
+\item a restricted form of \mcrl\ equation
+\item a symbolic representation of LTS.
+\end{itemize}
+\pause
+Form ($I$ and $J$ are disjoint finite sets of indexes):
+\begin{gather*}
+\begin{split}
+\pr{X}(\vect{d\ap D})=&\sum_{i\in I}\sum_{\vect{e_i\ap E_i}} \act{a}_i(\vect{f_i}(\vect{d,e_i}))\seqc
+\pr{X}(\vect{g_i}(\vect{d,e_i}))\lcond c_i(\vect{d,e_i})\rcond\delta\\
+&+\sum_{j\in J}\sum_{\vect{e_j\ap E_j}} \act{a}_j(\vect{f_j}(\vect{d,e_j}))\lcond c_j(\vect{d,e_j})\rcond\delta
+\end{split}
+\end{gather*}   
+%###################################################
+%###################################################
+\newslide\section*{Overview of the \mcrl\ Toolset}
+\begin{center}
+\includegraphics[width=\textwidth]{toolset}
+\end{center}
+%###################################################
+%###################################################
+\newslide\section*{Discrete time in \mcrl: a simple approach}
+\begin{itemize}
+\item Passage of time: $\act{tick}$ action (one time unit passed)
+\item \emph{All} processes synchronize to $\act{tick}$ 
+\pause
+\item Technically: use \emph{renaming} and \emph{multi-party} communication:
+$\gamma(\act{tick},\act{tick})=\act{\_tick}$ and 
+\end{itemize}
+\vspace{-2ex}
+\begin{gather*}
+\begin{split}
+S=\encap{\set{\act{tick}}}(\pr{P}_0\parc&\ren{\set{\act{\_tick}->\act{tick}}}(\encap{\set{\act{tick}}}(\pr{P}_1\parc\\
+&\ren{\set{\act{\_tick}->\act{tick}}}(\encap{\set{\act{tick}}}(\pr{P}_2\parc\pr{P}_3)))))
+\end{split}
+\end{gather*}
+\pause
+\begin{itemize}
+\item Many advantages: reuse of \mcrl\ Toolset, untimed formalism, relative time, etc
+\item One disadvantage: \emph{fixed} time progress only
+\end{itemize}
+%###################################################
+%###################################################
+\newslide\section*{Time Transition Systems}
+Can be classified by 3 criteria:
+\begin{itemize}
+\item discrete vs. real time ($\act{a}\at{1}\seqc\act{b}\at{100}$ vs $\act{a}\at{1.34}\seqc\act{b}\at{54.5}$)
+\item absolute vs. relative time
+\item time-stamped vs. two-phase models ($\act{a}\at{1}\seqc\act{b}\at{100}$ vs. $\sigma^1(\act{a})\seqc\sigma^{99}(\act{b})$)
+\end{itemize}
+\pause
+\begin{center}
+\includegraphics[width=.9\textwidth]{TLTSs}
+\end{center}
+%###################################################
+%###################################################
+\newslide\section*{Properties of Time Transition Systems}
+\begin{itemize}
+\item \emph{time determinism}: if $B \to_t B_1$ and $B \to_t B_2$, then $B_1\equiv B_2$
+\item \emph{time interpolation}: if $B \to_t B_1$ and $B_1 \to_u B_2$, then $B \to_{t+u}B_2$;
+\item \emph{time additivity}: if $B \to_{t+u} B_1$, then there is a closed term $B'$ such that $B\to_{t} B'$ and $B'\to_{u} B_1$
+\end{itemize}
+\pause
+Two-phase transition systems have to be saturated to satisfy the last 2 properties.
+%###################################################
+%###################################################
+\newslide\section*{Timed \mcrl: design choices and operations}
+\begin{itemize}
+\item Choice: absolute time, time-stamped model, *arbitrary* time domain; variable time progress
+\item Time domain: must have $0$ and total order $\leq$
+\item Main operation: ``at''-operation $x\at t$
+\end{itemize}
+\pause
+\subsection*{Advantages and disadvantages}
+\begin{itemize}
+\item[+] no saturations: easier bisimulation and parallel composition definition
+\item[+] relatively easy branching bisimulation definition
+\item[-] more infinite transition systems.
+\end{itemize}
+%###################################################
+%###################################################
+\newslide\section*{Timed \mcrl: status}
+Current:
+\begin{itemize}
+\item Soundness and completeness results w.r.t. strong bisimulation (GRWvdZ 2002)
+\item Branching bisimulation definition (vdZwaag 2001)
+\item Translation from timed automata (Willemse, 2003)
+\item Linearization; TLPE$\to$LPE (RU 2002)
+\end{itemize}
+\pause
+Future:
+\begin{itemize}
+\item ADT for zones and regions (replace sort Time)
+\item General abstract interpretation for sort Time
+\end{itemize}
+%###################################################
+%###################################################
+\newslide\section*{Stochastic transition systems}
+\begin{itemize}
+\item Discrete case: several definitions (Bartels, Sokolova and de Vink, TCS, 2004: co-algebraic comparison).
+\pause
+\item Continuous probabilistic transition systems (all time models -- two-phase)
+  \begin{itemize}
+  \item PTS and Timed PTS -- d'Argenio, 
+  \item ISTTS (Interactive Stochastic Timed TS) -- Bravetti's. Weak bisimulation. Parallel composition and hiding.
+  \item PTTS (Probabilistic Timed TS): Bravetti and d'Argenio
+  \end{itemize}
+\end{itemize}
+%###################################################
+%###################################################
+\newslide\section*{Continuous Probabilistic Transition Systems}
+$S$ -- states. ${\cal F}\subseteq 2^S$ -- $\sigma$-algebra of sets of states. 
+
+A PTS is a structure $(S, {\cal F}, L, \to)$ such that:
+\begin{itemize}
+\item $\to\subseteq S\x L\x(\algb{F}\to[0,1])$
+\item for any $s\in S$ and $a\in L$, if $(s,a,P)\in\to$, then $P$ is a probability measure on $(S,\algb{F})$.
+%\item for any $\sigma\in\algb{F}$, $a\in L$ 
+%and $p\in[0,1]$, we have 
+%\[\set{s\suchthat \exists P ~~ (s,a,P)\in\to~\land~P(\sigma)=p}\in\algb{F} \] 
+\end{itemize}
+\pause
+\begin{center}
+\includegraphics[width=.5\textwidth]{PTSs}
+\end{center}
+%###################################################
+%###################################################
+\newslide\section*{Bisimulation for Continuous PTSs}
+Let $T=(S,\algb{F}, L, \to)$ be a PTS. An equivalence relation\\
+$R$ on $S$, compatible with $\algb{F}$, is a probabilistic bisimulation on $T$ if:
+\[ (s R t\land s\trans{a} P) \to \exists Q~(t\trans{a} Q \land P \equiv_R Q) \]
+\pause
+$P$ and $Q$ are \emph{equal up to} $R$ (notation $P\equiv_R Q$) if 
+for any set $S'\in\algb{F}$ such that 
+\[\forall s_1,s_2\in S~~s_1 R s_2 \to (s_1\in S'\leftrightarrow s_2\in S')\]
+we have $P(S')=Q(S')$. ($S'$ are \emph{arbitrary} unions of the equivalence classes of $R$)
+%###################################################
+%###################################################
+\newslide\section*{Stochastic Systems: status}
+Current:
+\begin{itemize}
+\item Definition of LTS and strong bisimulation 
+\item Ongoing work on weak and branching bisimulation definition (with d'Argenio, Hermanns, Stoelinga)
+\end{itemize}
+\pause
+Future:
+\begin{itemize}
+\item Branching bisimulation for time-stamped PTS.
+\item Operations, axiomatization, LPE format, linearization.
+\end{itemize}
+%###################################################
+%###################################################
+\newslide\section*{Hybride Transition Systems Ingredients}
+\begin{itemize}
+\item Discrete actions vs. continious trajectories
+\item Trajectory: mapping from (port) names to real-valued functions
+\pause
+\item Trajectory determinism vs. time determinism
+  \begin{center}
+  \input{superpos.tex}
+  \end{center}
+\item Superposition does not preserve abstraction of trajectory ports
+\end{itemize}
+%\begin{enumerate}
+%\item if $B \xto{\varphi}_t B_1$ and $B \xto{\varphi}_t B_2$, then $B_1\equiv B_2$;
+%\item if $B \xto{\varphi}_t B_1$ and $B_1 \xto{\psi}_u B_2$, then $B \xto{\varphi;\psi}_{t+u}B_2$;
+%\item if $B \xto{\varphi}_{t+u} B_1$, then there is a closed term $B'$ such that $B\xto{\varphi\restrict t}_{t} B'$ and $B'\xto{\timeshift{\varphi}{u}}_{u} B_1$.
+%\end{enumerate}
+%###################################################
+%###################################################
+\newslide\section*{Hybride Transition Systems models}
+\begin{itemize}
+\item ACP$^{srt}_{hs}$:
+  \begin{itemize}
+  \item time: two-phase, hybrid trajectories are state-based in the calculus
+  \item operations: \emph{continuous signal insertion operator} ($\varphi\csins x$),
+    \emph{relative time delay} ($\delay{r}(x)$)
+  \item crucial axiom: $\varphi\csins x+\psi\csins y\id \varphi\wedge\psi\csins(x+y)$
+  \end{itemize}
+\pause
+\item BHPC: 
+  \begin{itemize}
+  \item two-phase, relative time 
+  \item operations: \emph{traj. prefix} $\tpref{\varphi}{t}\seqc x$, \emph{superposition} $\superps$
+  \item crucial axiom: $\tpref{\varphi}{t}\seqc x\superps \tpref{\varphi}{t}\seqc y\id \tpref{\varphi}{t}\seqc (x\superps y)$
+  \end{itemize}
+\end{itemize}
+%###################################################
+%###################################################
+\newslide\section*{Connection between ACP$^{srt}_{hs}$ and BHPC}
+\begin{itemize}
+\item trajectories $\varphi$ and $\psi$ are different on the entire interval $(0,t]$ for some $t$
+\item consider $\tpref{\varphi}{t}\seqc x+\tpref{\psi}{u}\seqc y$
+\item can we translate it as $\varphi\csins\delay{t}(x)+\psi\csins\delay{u}(y)$ ?
+\pause
+\item or as $\varphi\vee\psi\csins(\varphi\cond\delay{t}(x)+\psi\cond\delay{u}(y))$ ?
+\end{itemize}
+
+\[(\tpref{\varphi}{t}\seqc x+\tpref{\psi}{u}\seqc y)\parc^A_{\pi(\varphi)}\tpref{\varphi}{t}\seqc z\id \tpref{\varphi}{t}\seqc (x\parc^A_{\pi(\varphi)} z)\]
+\[\varphi\vee\psi\csins(\varphi\cond\delay{t}(x)+\psi\cond\delay{u}(y))\parc\varphi\csins\delay{t}(z)\id \varphi\csins\delay{t}(x\parc z)\] 
+%###################################################
+%###################################################
+\newslide\section*{Hybrid Systems: status}
+Current:
+\begin{itemize}
+\item A transition system model becomes clear. (2 calculi with a similar semantic model)
+\item None of them really compatible with timed \mcrl
+\item Other models (HyPA, hybrid-$\chi$)
+\end{itemize}
+\pause
+Future:
+\begin{itemize}
+\item Try to come-up with a timed stamped HTS definition
+\item Equivalences, operations, axiomatization, LPE format, linearization
+\item Try to combine with stochastic TSs
+\end{itemize}
+%###################################################
+%###################################################
+\newslide\section*{Embedding \mcrl\ into a software development process}
+\begin{itemize}
+\item Extension with multi-actions (to connect to Petri-Nets)
+\item Extensions with disrupts and priorities to connect to LOTOS and UML
+\item Combine with some refinement-based technique (RAISE/Z, maybe CASL) on top (frontend)
+\item Combine/design a code generation framework (may be via PROMELA) at bottom (backend)
+\end{itemize}
+%###################################################
+%###################################################
+\newslide\section*{Conclusions}
+\begin{itemize}
+\item We attempt to define an action-based transition system formalism 
+where real-time, stochastic and hybrid systems can be specified,
+and that is compatible with the current \mcrl\ Toolset.
+\pause
+\item There are still open ends with respect to the design choices 
+and open fundamental semantic questions.
+\pause
+\item We need characteristic case studies to justify the design choices 
+and focus attention to particular aspects.
+\end{itemize}
+%###################################################
+
+
+\end{slide}
+\end{document}
