@@ -17,6 +17,8 @@ extern int fileno(FILE *stream); /* declared in stdio.h (forgotten by lex) */
 //local declarations
 int LineNr = 1;                  /* line number in source file */
 int ColNr  = 1;                  /* column number in source file */
+void gsProcessString(void);      /* default action to be taken when a string is
+                                    scanned */
 void gsyyerror(char *s);         /* display error message (needed by yacc) */
 int gsyywrap(void);              /* action taken after an EOF (needed by yacc) */
 
@@ -32,89 +34,81 @@ Number     "0"|("-"?[1-9][0-9]*)
 
 "%".*      { ColNr += gsyyleng; /* comment */ }
 
-"||_"      { ColNr += gsyyleng; return LMERGE; }
-"->"       { ColNr += gsyyleng; return ARROW; }
-"<="       { ColNr += gsyyleng; return LTE; }
-">="       { ColNr += gsyyleng; return GTE; }
-"|>"       { ColNr += gsyyleng; return CONS; }
-"<|"       { ColNr += gsyyleng; return SNOC; }
-"++"       { ColNr += gsyyleng; return CONCAT; }
-"=="       { ColNr += gsyyleng; return EQ; }
-"!="       { ColNr += gsyyleng; return NEQ; }
-"&&"       { ColNr += gsyyleng; return AND; }
-"||"       { ColNr += gsyyleng; return BARS; }
-"=>"       { ColNr += gsyyleng; return IMP; }
-"<<"       { ColNr += gsyyleng; return BINIT; }
-"*"        { ColNr += gsyyleng; return STAR; }
-"+"        { ColNr += gsyyleng; return PLUS; }
-"-"        { ColNr += gsyyleng; return MINUS; }
-"="        { ColNr += gsyyleng; return EQUALS; }
-"."        { ColNr += gsyyleng; return DOT; }
-","        { ColNr += gsyyleng; return COMMA; }
-":"        { ColNr += gsyyleng; return COLON; }
-";"        { ColNr += gsyyleng; return SEMICOLON; }
-"?"        { ColNr += gsyyleng; return QMARK; }
-"!"        { ColNr += gsyyleng; return EXCLAM; }
-"@"        { ColNr += gsyyleng; return AT; }
-"#"        { ColNr += gsyyleng; return HASH; }
-"|"        { ColNr += gsyyleng; return BAR; }
-"("        { ColNr += gsyyleng; return LPAR; }
-")"        { ColNr += gsyyleng; return RPAR; }
-"[]"       { ColNr += gsyyleng; return PBRACK; }
-"["        { ColNr += gsyyleng; return LBRACK; }
-"]"        { ColNr += gsyyleng; return RBRACK; }
-"<"        { ColNr += gsyyleng; return LANG; }
-">"        { ColNr += gsyyleng; return RANG; }
-"{}"       { ColNr += gsyyleng; return PBRACE; }
-"{"        { ColNr += gsyyleng; return LBRACE; }
-"}"        { ColNr += gsyyleng; return RBRACE; }
+"||_"      { gsProcessString(); return LMERGE; }
+"->"       { gsProcessString(); return ARROW; }
+"<="       { gsProcessString(); return LTE; }
+">="       { gsProcessString(); return GTE; }
+"|>"       { gsProcessString(); return CONS; }
+"<|"       { gsProcessString(); return SNOC; }
+"++"       { gsProcessString(); return CONCAT; }
+"=="       { gsProcessString(); return EQ; }
+"!="       { gsProcessString(); return NEQ; }
+"&&"       { gsProcessString(); return AND; }
+"||"       { gsProcessString(); return BARS; }
+"=>"       { gsProcessString(); return IMP; }
+"<<"       { gsProcessString(); return BINIT; }
+"*"        { gsProcessString(); return STAR; }
+"+"        { gsProcessString(); return PLUS; }
+"-"        { gsProcessString(); return MINUS; }
+"="        { gsProcessString(); return EQUALS; }
+"."        { gsProcessString(); return DOT; }
+","        { gsProcessString(); return COMMA; }
+":"        { gsProcessString(); return COLON; }
+";"        { gsProcessString(); return SEMICOLON; }
+"?"        { gsProcessString(); return QMARK; }
+"!"        { gsProcessString(); return EXCLAM; }
+"@"        { gsProcessString(); return AT; }
+"#"        { gsProcessString(); return HASH; }
+"|"        { gsProcessString(); return BAR; }
+"("        { gsProcessString(); return LPAR; }
+")"        { gsProcessString(); return RPAR; }
+"[]"       { gsProcessString(); return PBRACK; }
+"["        { gsProcessString(); return LBRACK; }
+"]"        { gsProcessString(); return RBRACK; }
+"<"        { gsProcessString(); return LANG; }
+">"        { gsProcessString(); return RANG; }
+"{}"       { gsProcessString(); return PBRACE; }
+"{"        { gsProcessString(); return LBRACE; }
+"}"        { gsProcessString(); return RBRACE; }
 
-sort       { ColNr += gsyyleng; return SORT; }
-cons       { ColNr += gsyyleng; return CONS; }
-map        { ColNr += gsyyleng; return MAP; }
-var        { ColNr += gsyyleng; return VAR; }
-eqn        { ColNr += gsyyleng; return EQN; }
-act        { ColNr += gsyyleng; return ACT; }
-proc       { ColNr += gsyyleng; return PROC; }
-init       { ColNr += gsyyleng; return INIT; }
-struct     { ColNr += gsyyleng; return STRUCT; }
-Bool       { ColNr += gsyyleng; return BOOL; }
-Pos        { ColNr += gsyyleng; return POS; }
-Nat        { ColNr += gsyyleng; return NAT; }
-Int        { ColNr += gsyyleng; return INT; }
-List       { ColNr += gsyyleng; return LIST; }
-Set        { ColNr += gsyyleng; return SET; }
-Bag        { ColNr += gsyyleng; return BAG; }
-true       { ColNr += gsyyleng; return TRUE; }
-false      { ColNr += gsyyleng; return FALSE; }
-whr        { ColNr += gsyyleng; return WHR; }
-end        { ColNr += gsyyleng; return END; }
-lambda     { ColNr += gsyyleng; return LAMBDA; }
-forall     { ColNr += gsyyleng; return FORALL; }
-exists     { ColNr += gsyyleng; return EXISTS; }
-div        { ColNr += gsyyleng; return DIV; }
-mod        { ColNr += gsyyleng; return MOD; }
-in         { ColNr += gsyyleng; return IN; }
-delta      { ColNr += gsyyleng; return DELTA; }
-tau        { ColNr += gsyyleng; return TAU; }
-sum        { ColNr += gsyyleng; return SUM; }
-restrict   { ColNr += gsyyleng; return RESTRICT; }
-allow      { ColNr += gsyyleng; return ALLOW; }
-hide       { ColNr += gsyyleng; return HIDE; }
-rename     { ColNr += gsyyleng; return RENAME; }
-comm       { ColNr += gsyyleng; return COMM; }
+sort       { gsProcessString(); return KWSORT; }
+cons       { gsProcessString(); return KWCONS; }
+map        { gsProcessString(); return KWMAP; }
+var        { gsProcessString(); return KWVAR; }
+eqn        { gsProcessString(); return KWEQN; }
+act        { gsProcessString(); return KWACT; }
+proc       { gsProcessString(); return KWPROC; }
+init       { gsProcessString(); return KWINIT; }
+struct     { gsProcessString(); return KWSTRUCT; }
+Bool       { gsProcessString(); return BOOL; }
+Pos        { gsProcessString(); return POS; }
+Nat        { gsProcessString(); return NAT; }
+Int        { gsProcessString(); return INT; }
+List       { gsProcessString(); return LIST; }
+Set        { gsProcessString(); return SET; }
+Bag        { gsProcessString(); return BAG; }
+true       { gsProcessString(); return TRUE; }
+false      { gsProcessString(); return FALSE; }
+whr        { gsProcessString(); return WHR; }
+end        { gsProcessString(); return END; }
+lambda     { gsProcessString(); return LAMBDA; }
+forall     { gsProcessString(); return FORALL; }
+exists     { gsProcessString(); return EXISTS; }
+div        { gsProcessString(); return DIV; }
+mod        { gsProcessString(); return MOD; }
+in         { gsProcessString(); return IN; }
+delta      { gsProcessString(); return DELTA; }
+tau        { gsProcessString(); return TAU; }
+sum        { gsProcessString(); return SUM; }
+restrict   { gsProcessString(); return RESTRICT; }
+allow      { gsProcessString(); return ALLOW; }
+hide       { gsProcessString(); return HIDE; }
+rename     { gsProcessString(); return RENAME; }
+comm       { gsProcessString(); return COMM; }
 
-{Id}       { /* identifier (not a keyword) */
-             ColNr += gsyyleng;
-             gsyylval.appl = gsMakeIdString(gsyytext);
-	     return ID;
-	   }
+{Id}       { gsProcessString(); return ID; }
 
-{Number}   { /* number */
-             ColNr += gsyyleng;
-	     gsyylval.appl = gsMakeNumberString(gsyytext);
-             return NUMBER;
-	   }
+{Number}   { gsProcessString(); return NUMBER; }
 
 .          { 
              ColNr += gsyyleng; gsyyerror("unknown character");
@@ -122,6 +116,11 @@ comm       { ColNr += gsyyleng; return COMM; }
 	   }
 
 %%
+
+void gsProcessString(void) {
+  ColNr += gsyyleng;
+  gsyylval.appl = gsString2ATermAppl(gsyytext);
+}
 
 void gsyyerror(char *s) {
   int oldColNr = ColNr - gsyyleng;

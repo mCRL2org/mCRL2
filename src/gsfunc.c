@@ -1,6 +1,7 @@
 #include "gsfunc.h"
 #include <string.h>
 #include <stdlib.h>
+#include <assert.h>
 
 #ifdef __cplusplus
 extern "C" {
@@ -23,990 +24,6 @@ char *strdup(const char *s)
     return strcpy(p, s);
 }
 #endif
-
-//ATmake extensions
-
-ATermAppl gsMakeIdString(char *s)
-{
-  return ATmakeAppl0(ATmakeAFun(s, 0, ATtrue));
-}
-
-ATermAppl gsMakeNumberString(char *s)
-{
-  return ATmakeAppl0(ATmakeAFun(s, 0, ATtrue));
-}
-
-ATermAppl gsMakeNil()
-{
-  return ATmakeAppl0(ATmakeAFun("Nil", 0, ATfalse));
-}
-
-ATermAppl gsMakeUnknown()
-{
-  return ATmakeAppl0(ATmakeAFun("Unknown", 0, ATfalse));
-}
-
-ATermAppl gsMakeSortId(ATermAppl Name)
-{
-  return ATmakeAppl1(ATmakeAFun("SortId", 1, ATfalse), (ATerm) Name);
-}
-
-ATermAppl gsMakeOpId(ATermAppl Name, ATermAppl SortExprOrUnknown)
-{
-  return ATmakeAppl2(ATmakeAFun("OpId", 2, ATfalse), (ATerm) Name,
-    (ATerm) SortExprOrUnknown);
-}
-
-ATermAppl gsMakeActId(ATermAppl Name, ATermList SortExprOrUnknowns)
-{
-  return ATmakeAppl2(ATmakeAFun("ActId", 2, ATfalse), (ATerm) Name,
-    (ATerm) SortExprOrUnknowns);
-}
-
-ATermAppl gsMakeProcId(ATermAppl Name)
-{
-  return ATmakeAppl1(ATmakeAFun("ProcId", 1, ATfalse), (ATerm) Name);
-}
-
-ATermAppl gsMakeDataVar(ATermAppl Name, ATermAppl SortExprOrUnknown)
-{
-  return ATmakeAppl2(ATmakeAFun("DataVar", 2, ATfalse), (ATerm) Name,
-    (ATerm) SortExprOrUnknown);
-}
-
-ATermAppl gsMakeNumber(ATermAppl NumberString, ATermAppl SortExprOrUnknown)
-{
-  return ATmakeAppl2(ATmakeAFun("Number", 2, ATfalse), (ATerm) NumberString,
-    (ATerm) SortExprOrUnknown);
-}
-
-ATermAppl gsMakeSpec(ATermAppl SortSpec, ATermAppl ConsSpec, ATermAppl MapSpec,
-  ATermAppl EqnSpec, ATermAppl ActSpec, ATermAppl ProcSpec, ATermAppl Init)
-{
-  return ATmakeAppl(ATmakeAFun("SpecV1", 7, ATfalse), (ATerm) SortSpec,
-    (ATerm) ConsSpec, (ATerm) MapSpec, (ATerm) EqnSpec, (ATerm) ActSpec,
-    (ATerm) ProcSpec, (ATerm) Init);
-}
-
-ATermAppl gsMakeSortSpec(ATermList SortDecls)
-{
-  return ATmakeAppl1(ATmakeAFun("SortSpec", 1, ATfalse), (ATerm) SortDecls);
-}
-
-ATermAppl gsMakeSortDeclStandard(ATermAppl Name)
-{
-  return ATmakeAppl1(ATmakeAFun("SortDeclStandard", 1, ATfalse), (ATerm) Name);
-}
-
-ATermAppl gsMakeSortDeclRef(ATermAppl Name, ATermAppl SortExpr)
-{
-  return ATmakeAppl2(ATmakeAFun("SortDeclRef", 2, ATfalse), (ATerm) Name,
-    (ATerm) SortExpr);
-}
-
-ATermAppl gsMakeConsSpec(ATermList OpDecls)
-{
-  return ATmakeAppl1(ATmakeAFun("ConsSpec", 1, ATfalse), (ATerm) OpDecls);
-}
-
-ATermAppl gsMakeMapSpec(ATermList OpDecls)
-{
-  return ATmakeAppl1(ATmakeAFun("MapSpec", 1, ATfalse), (ATerm) OpDecls);
-}
-
-ATermAppl gsMakeOpDecl(ATermAppl Name, ATermAppl SortExpr)
-{
-  return ATmakeAppl2(ATmakeAFun("OpDecl", 2, ATfalse), (ATerm) Name,
-    (ATerm) SortExpr);
-}
-
-ATermAppl gsMakeEqnSpec(ATermList EqnSects)
-{
-  return ATmakeAppl1(ATmakeAFun("EqnSpec", 1, ATfalse), (ATerm) EqnSects);
-}
-
-ATermAppl gsMakeEqnSect(ATermList DataVarDecls, ATermList EqnDecls)
-{
-  return ATmakeAppl2(ATmakeAFun("EqnSect", 2, ATfalse), (ATerm) DataVarDecls,
-    (ATerm) EqnDecls);
-}
-
-ATermAppl gsMakeDataVarDecl(ATermAppl Name, ATermAppl SortExpr)
-{
-  return ATmakeAppl2(ATmakeAFun("DataVarDecl", 2, ATfalse), (ATerm) Name,
-    (ATerm) SortExpr);
-}
-
-ATermAppl gsMakeEqnDecl(ATermAppl DataExprLHS, ATermAppl DataExprRHS)
-{
-  return ATmakeAppl2(ATmakeAFun("EqnDecl", 2, ATfalse), (ATerm) DataExprLHS,
-    (ATerm) DataExprRHS);
-}
-
-ATermAppl gsMakeActSpec(ATermList ActDecls)
-{
-  return ATmakeAppl1(ATmakeAFun("ActSpec", 1, ATfalse), (ATerm) ActDecls);
-}
-
-ATermAppl gsMakeActDecl(ATermAppl Name, ATermList SortExprs)
-{
-  return ATmakeAppl2(ATmakeAFun("ActDecl", 2, ATfalse), (ATerm) Name,
-    (ATerm) SortExprs);
-}
-
-ATermAppl gsMakeProcSpec(ATermList ProcDecls)
-{
-  return ATmakeAppl1(ATmakeAFun("ProcSpec", 1, ATfalse), (ATerm) ProcDecls);
-}
-
-ATermAppl gsMakeProcDecl(ATermAppl Name, ATermList DataVarDecls,
-  ATermAppl ProcExpr)
-{
-  return ATmakeAppl3(ATmakeAFun("ProcDecl", 3, ATfalse), (ATerm) Name,
-    (ATerm) DataVarDecls, (ATerm) ProcExpr);
-}
-
-ATermAppl gsMakeInit(ATermAppl ProcExpr)
-{
-  return ATmakeAppl1(ATmakeAFun("Init", 1, ATfalse), (ATerm) ProcExpr);
-}
-
-ATermAppl gsMakeSortBool()
-{
-  return ATmakeAppl0(ATmakeAFun("SortBool", 0, ATfalse));
-}
-
-ATermAppl gsMakeSortPos()
-{
-  return ATmakeAppl0(ATmakeAFun("SortPos", 0, ATfalse));
-}
-
-ATermAppl gsMakeSortNat()
-{
-  return ATmakeAppl0(ATmakeAFun("SortNat", 0, ATfalse));
-}
-
-ATermAppl gsMakeSortInt()
-{
-  return ATmakeAppl0(ATmakeAFun("SortInt", 0, ATfalse));
-}
-
-ATermAppl gsMakeSortList(ATermAppl SortExpr)
-{
-  return ATmakeAppl1(ATmakeAFun("SortList", 1, ATfalse), (ATerm) SortExpr);
-}
-
-ATermAppl gsMakeSortSet(ATermAppl SortExpr)
-{
-  return ATmakeAppl1(ATmakeAFun("SortSet", 1, ATfalse), (ATerm) SortExpr);
-}
-
-ATermAppl gsMakeSortBag(ATermAppl SortExpr)
-{
-  return ATmakeAppl1(ATmakeAFun("SortBag", 1, ATfalse), (ATerm) SortExpr);
-}
-
-ATermAppl gsMakeSortArrow(ATermList Domain, ATermAppl SortExpr)
-{
-  return ATmakeAppl2(ATmakeAFun("SortArrow", 2, ATfalse), (ATerm) Domain,
-    (ATerm) SortExpr);
-}
-
-ATermAppl gsMakeSortStruct(ATermList StructConss)
-{
-  return ATmakeAppl1(ATmakeAFun("SortStruct", 1, ATfalse),
-    (ATerm) StructConss);
-}
-
-ATermAppl gsMakeStructCons(ATermAppl ConsName, ATermList StructProjs,
-  ATermAppl RecNameOrNil)
-{
-  return ATmakeAppl3(ATmakeAFun("StructCons", 3, ATfalse), (ATerm) ConsName,
-    (ATerm) StructProjs, (ATerm) RecNameOrNil);
-}
-
-ATermAppl gsMakeStructProj(ATermAppl ProjNameOrNil, ATermList SortExprs)
-{
-  return ATmakeAppl2(ATmakeAFun("StructProj", 2, ATfalse),
-    (ATerm) ProjNameOrNil, (ATerm) SortExprs);
-}
-
-ATermAppl gsMakeDataVarOpId(ATermAppl Name)
-{
-  return ATmakeAppl1(ATmakeAFun("DataVarOpId", 1, ATfalse), (ATerm) Name);
-}
-
-ATermAppl gsMakeDataAppl(ATermAppl DataExpr, ATermList DataArgs)
-{
-  return ATmakeAppl2(ATmakeAFun("DataAppl", 2, ATfalse), (ATerm) DataExpr,
-    (ATerm) DataArgs);
-}
-
-ATermAppl gsMakeLambda(ATermList IdsDecls, ATermAppl DataExpr)
-{
-  return ATmakeAppl2(ATmakeAFun("Lambda", 2, ATfalse), (ATerm) IdsDecls,
-    (ATerm) DataExpr);
-}
-
-ATermAppl gsMakeForall(ATermList IdsDecls, ATermAppl DataExpr)
-{
-  return ATmakeAppl2(ATmakeAFun("Forall", 2, ATfalse), (ATerm) IdsDecls,
-    (ATerm) DataExpr);
-}
-
-ATermAppl gsMakeExists(ATermList IdsDecls, ATermAppl DataExpr)
-{
-  return ATmakeAppl2(ATmakeAFun("Exists", 2, ATfalse), (ATerm) IdsDecls,
-    (ATerm) DataExpr);
-}
-
-ATermAppl gsMakeWhr(ATermAppl DataExpr, ATermList WhrDecls)
-{
-  return ATmakeAppl2(ATmakeAFun("Whr", 2, ATfalse), (ATerm) DataExpr,
-    (ATerm) WhrDecls);
-}
-
-ATermAppl gsMakeWhrDecl(ATermAppl Name, ATermAppl DataExpr)
-{
-  return ATmakeAppl2(ATmakeAFun("WhrDecl", 2, ATfalse), (ATerm) Name,
-    (ATerm) DataExpr);
-}
-
-ATermAppl gsMakeListEnum(ATermList DataExprs, ATermAppl SortExprOrUnknown)
-{
-  return ATmakeAppl2(ATmakeAFun("ListEnum", 2, ATfalse), (ATerm) DataExprs,
-    (ATerm) SortExprOrUnknown);
-}
-
-ATermAppl gsMakeSetEnum(ATermList DataExprs, ATermAppl SortExprOrUnknown)
-{
-  return ATmakeAppl2(ATmakeAFun("SetEnum", 2, ATfalse), (ATerm) DataExprs,
-    (ATerm) SortExprOrUnknown);
-}
-
-ATermAppl gsMakeBagEnum(ATermList BagEnumElts, ATermAppl SortExprOrUnknown)
-{
-  return ATmakeAppl2(ATmakeAFun("BagEnum", 2, ATfalse), (ATerm) BagEnumElts,
-    (ATerm) SortExprOrUnknown);
-}
-
-ATermAppl gsMakeBagEnumElt(ATermAppl DataExpr, ATermAppl Multiplicity)
-{
-  return ATmakeAppl2(ATmakeAFun("BagEnumElt", 2, ATfalse), (ATerm) DataExpr,
-    (ATerm) Multiplicity);
-}
-
-ATermAppl gsMakeSetBagComp(ATermAppl IdDecl, ATermAppl DataExpr)
-{
-  return ATmakeAppl2(ATmakeAFun("SetBagComp", 2, ATfalse), (ATerm) IdDecl,
-    (ATerm) DataExpr);
-}
-
-ATermAppl gsMakeEmptyList(ATermAppl SortExprOrUnknown)
-{
-  return gsMakeDataVarOpId(ATmakeAppl0(ATmakeAFun("[]", 0, ATtrue)));
-}
-
-ATermAppl gsMakeEmptySetBag(ATermAppl SortExprOrUnknown)
-{
-  return gsMakeDataVarOpId(ATmakeAppl0(ATmakeAFun("{}", 0, ATtrue)));
-}
-
-ATermAppl gsMakeTrue()
-{
-  return gsMakeDataVarOpId(ATmakeAppl0(ATmakeAFun("true", 0, ATtrue)));
-}
-
-ATermAppl gsMakeFalse()
-{
-  return gsMakeDataVarOpId(ATmakeAppl0(ATmakeAFun("false", 0, ATtrue)));
-}
-
-ATermAppl gsMakeExclam()
-{
-  return gsMakeDataVarOpId(ATmakeAppl0(ATmakeAFun("!", 0, ATtrue)));
-}
-
-ATermAppl gsMakeMinus()
-{
-  return gsMakeDataVarOpId(ATmakeAppl0(ATmakeAFun("-", 0, ATtrue)));
-}
-
-ATermAppl gsMakeHash()
-{
-  return gsMakeDataVarOpId(ATmakeAppl0(ATmakeAFun("#", 0, ATtrue)));
-}
-
-ATermAppl gsMakeDot()
-{
-  return gsMakeDataVarOpId(ATmakeAppl0(ATmakeAFun(".", 0, ATtrue)));
-}
-
-ATermAppl gsMakeStar()
-{
-  return gsMakeDataVarOpId(ATmakeAppl0(ATmakeAFun("*", 0, ATtrue)));
-}
-
-ATermAppl gsMakeDiv()
-{
-  return gsMakeDataVarOpId(ATmakeAppl0(ATmakeAFun("div", 0, ATtrue)));
-}
-
-ATermAppl gsMakeMod()
-{
-  return gsMakeDataVarOpId(ATmakeAppl0(ATmakeAFun("mod", 0, ATtrue)));
-}
-
-ATermAppl gsMakePlus()
-{
-  return gsMakeDataVarOpId(ATmakeAppl0(ATmakeAFun("+", 0, ATtrue)));
-}
-
-ATermAppl gsMakeLT()
-{
-  return gsMakeDataVarOpId(ATmakeAppl0(ATmakeAFun("<", 0, ATtrue)));
-}
-
-ATermAppl gsMakeGT()
-{
-  return gsMakeDataVarOpId(ATmakeAppl0(ATmakeAFun(">", 0, ATtrue)));
-}
-
-ATermAppl gsMakeLTE()
-{
-  return gsMakeDataVarOpId(ATmakeAppl0(ATmakeAFun("<=", 0, ATtrue)));
-}
-
-ATermAppl gsMakeGTE()
-{
-  return gsMakeDataVarOpId(ATmakeAppl0(ATmakeAFun(">=", 0, ATtrue)));
-}
-
-ATermAppl gsMakeIn()
-{
-  return gsMakeDataVarOpId(ATmakeAppl0(ATmakeAFun("in", 0, ATtrue)));
-}
-
-ATermAppl gsMakeCons()
-{
-  return gsMakeDataVarOpId(ATmakeAppl0(ATmakeAFun("|>", 0, ATtrue)));
-}
-
-ATermAppl gsMakeSnoc()
-{
-  return gsMakeDataVarOpId(ATmakeAppl0(ATmakeAFun("<|", 0, ATtrue)));
-}
-
-ATermAppl gsMakeConcat()
-{
-  return gsMakeDataVarOpId(ATmakeAppl0(ATmakeAFun("++", 0, ATtrue)));
-}
-
-ATermAppl gsMakeEq()
-{
-  return gsMakeDataVarOpId(ATmakeAppl0(ATmakeAFun("==", 0, ATtrue)));
-}
-
-ATermAppl gsMakeNeq()
-{
-  return gsMakeDataVarOpId(ATmakeAppl0(ATmakeAFun("!=", 0, ATtrue)));
-}
-
-ATermAppl gsMakeAnd()
-{
-  return gsMakeDataVarOpId(ATmakeAppl0(ATmakeAFun("&&", 0, ATtrue)));
-}
-
-ATermAppl gsMakeOr()
-{
-  return gsMakeDataVarOpId(ATmakeAppl0(ATmakeAFun("||", 0, ATtrue)));
-}
-
-ATermAppl gsMakeImp()
-{
-  return gsMakeDataVarOpId(ATmakeAppl0(ATmakeAFun("=>", 0, ATtrue)));
-}
-
-ATermAppl gsMakeActProcRef(ATermAppl Name, ATermList DataExprs)
-{
-  return ATmakeAppl2(ATmakeAFun("ActProcRef", 2, ATfalse), (ATerm) Name,
-    (ATerm) DataExprs);
-}
-
-ATermAppl gsMakeAct(ATermAppl ActId, ATermList DataExprs)
-{
-  return ATmakeAppl2(ATmakeAFun("Act", 2, ATfalse), (ATerm) ActId,
-    (ATerm) DataExprs);
-}
-
-ATermAppl gsMakeProcRef(ATermAppl ProcId, ATermList DataExprs)
-{
-  return ATmakeAppl2(ATmakeAFun("ProcRef", 2, ATfalse), (ATerm) ProcId,
-    (ATerm) DataExprs);
-}
-
-ATermAppl gsMakeDelta()
-{
-  return ATmakeAppl0(ATmakeAFun("Delta", 0, ATfalse));
-}
-
-ATermAppl gsMakeTau()
-{
-  return ATmakeAppl0(ATmakeAFun("Tau", 0, ATfalse));
-}
-
-ATermAppl gsMakeSum(ATermList IdsDecls, ATermAppl ProcExpr)
-{
-  return ATmakeAppl2(ATmakeAFun("Sum", 2, ATfalse), (ATerm) IdsDecls,
-    (ATerm) ProcExpr);
-}
-
-ATermAppl gsMakeRestrict(ATermList MultActNames, ATermAppl ProcExpr)
-{
-  return ATmakeAppl2(ATmakeAFun("Restrict", 2, ATfalse), (ATerm) MultActNames,
-    (ATerm) ProcExpr);
-}
-
-ATermAppl gsMakeAllow(ATermList MultActNames, ATermAppl ProcExpr)
-{
-  return ATmakeAppl2(ATmakeAFun("Allow", 2, ATfalse), (ATerm) MultActNames,
-    (ATerm) ProcExpr);
-}
-
-ATermAppl gsMakeHide(ATermList MultActNames, ATermAppl ProcExpr)
-{
-  return ATmakeAppl2(ATmakeAFun("Hide", 2, ATfalse), (ATerm) MultActNames,
-    (ATerm) ProcExpr);
-}
-
-ATermAppl gsMakeRename(ATermList RenExprSet, ATermAppl ProcExpr)
-{
-  return ATmakeAppl2(ATmakeAFun("Rename", 2, ATfalse), (ATerm) RenExprSet,
-    (ATerm) ProcExpr);
-}
-
-ATermAppl gsMakeComm(ATermList CommExprSet, ATermAppl ProcExpr)
-{
-  return ATmakeAppl2(ATmakeAFun("Comm", 2, ATfalse), (ATerm) CommExprSet,
-    (ATerm) ProcExpr);
-}
-
-ATermAppl gsMakeSync(ATermAppl OpLeft, ATermAppl OpRight)
-{
-  return ATmakeAppl2(ATmakeAFun("Sync", 2, ATfalse), (ATerm) OpLeft,
-    (ATerm) OpRight);
-}
-
-ATermAppl gsMakeAtTime(ATermAppl ProcExpr, ATermAppl DataExpr)
-{
-  return ATmakeAppl2(ATmakeAFun("AtTime", 2, ATfalse), (ATerm) ProcExpr,
-    (ATerm) DataExpr);
-}
-
-ATermAppl gsMakeSeq(ATermAppl OpLeft, ATermAppl OpRight)
-{
-  return ATmakeAppl2(ATmakeAFun("Seq", 2, ATfalse), (ATerm) OpLeft,
-    (ATerm) OpRight);
-}
-
-ATermAppl gsMakeCond(ATermAppl DataExpr, ATermAppl PEThen, ATermAppl PEElse)
-{
-  return ATmakeAppl3(ATmakeAFun("Cond", 3, ATfalse), (ATerm) DataExpr,
-    (ATerm) PEThen, (ATerm) PEElse);
-}
-
-ATermAppl gsMakeBInit(ATermAppl OpLeft, ATermAppl OpRight)
-{
-  return ATmakeAppl2(ATmakeAFun("BInit", 2, ATfalse), (ATerm) OpLeft,
-    (ATerm) OpRight);
-}
-
-ATermAppl gsMakeMerge(ATermAppl OpLeft, ATermAppl OpRight)
-{
-  return ATmakeAppl2(ATmakeAFun("Merge", 2, ATfalse), (ATerm) OpLeft,
-    (ATerm) OpRight);
-}
-
-ATermAppl gsMakeLMerge(ATermAppl OpLeft, ATermAppl OpRight)
-{
-  return ATmakeAppl2(ATmakeAFun("LMerge", 2, ATfalse), (ATerm) OpLeft,
-    (ATerm) OpRight);
-}
-
-ATermAppl gsMakeChoice(ATermAppl OpLeft, ATermAppl OpRight)
-{
-  return ATmakeAppl2(ATmakeAFun("Choice", 2, ATfalse), (ATerm) OpLeft,
-    (ATerm) OpRight);
-}
-
-ATermAppl gsMakeMultActName(ATermList ActNames)
-{
-  return ATmakeAppl1(ATmakeAFun("MultActName", 1, ATfalse), (ATerm) ActNames);
-}
-
-ATermAppl gsMakeCommExpr(ATermAppl MultActName, ATermAppl ActNameOrNil)
-{
-  return ATmakeAppl2(ATmakeAFun("CommExpr", 2, ATfalse), (ATerm) MultActName,
-    (ATerm) ActNameOrNil);
-}
-
-ATermAppl gsMakeRenExpr(ATermAppl FromName, ATermAppl ToName)
-{
-  return ATmakeAppl2(ATmakeAFun("RenExpr", 2, ATfalse), (ATerm) FromName,
-    (ATerm) ToName);
-}
-
-//strcmp extensions
-
-bool gsIsNil(char *s)
-{
-  return strcmp(s, "Nil") == 0;
-}
-
-bool gsIsUnknown(char *s)
-{
-  return strcmp(s, "StructUnknown") == 0;
-}
-
-bool gsIsSortId(char *s)
-{
-  return strcmp(s, "SortId") == 0;
-}
-
-bool gsIsOpId(char *s)
-{
-  return strcmp(s, "OpId") == 0;
-}
-
-bool gsIsActId(char *s)
-{
-  return strcmp(s, "ActId") == 0;
-}
-
-bool gsIsProcId(char *s)
-{
-  return strcmp(s, "ProcId") == 0;
-}
-
-bool gsIsDataVar(char *s)
-{
-  return strcmp(s, "DataVar") == 0;
-}
-
-bool gsIsNumber(char *s)
-{
-  return strcmp(s, "Number") == 0;
-}
-
-bool gsIsSpec(char *s)
-{
-  return strcmp(s, "SpecV1") == 0;
-}
-
-bool gsIsSortSpec(char *s)
-{
-  return strcmp(s, "SortSpec") == 0;
-}
-
-bool gsIsSortDeclStandard(char *s)
-{
-  return strcmp(s, "SortDeclStandard") == 0;
-}
-
-bool gsIsSortDeclRef(char *s)
-{
-  return strcmp(s, "SortDeclRef") == 0;
-}
-
-bool gsIsConsSpec(char *s)
-{
-  return strcmp(s, "ConsSpec") == 0;
-}
-
-bool gsIsMapSpec(char *s)
-{
-  return strcmp(s, "MapSpec") == 0;
-}
-
-bool gsIsIdDecl(char *s)
-{
-  return strcmp(s, "IdDecl") == 0;
-}
-
-bool gsIsEqnSpec(char *s)
-{
-  return strcmp(s, "EqnSpec") == 0;
-}
-
-bool gsIsEqnSect(char *s)
-{
-  return strcmp(s, "EqnSect") == 0;
-}
-
-bool gsIsEqnDecl(char *s)
-{
-  return strcmp(s, "EqnDecl") == 0;
-}
-
-bool gsIsActSpec(char *s)
-{
-  return strcmp(s, "ActSpec") == 0;
-}
-
-bool gsIsActDecl(char *s)
-{
-  return strcmp(s, "ActDecl") == 0;
-}
-
-bool gsIsProcSpec(char *s)
-{
-  return strcmp(s, "ProcSpec") == 0;
-}
-
-bool gsIsProcDecl(char *s)
-{
-  return strcmp(s, "ProcDecl") == 0;
-}
-
-bool gsIsInit(char *s)
-{
-  return strcmp(s, "Init") == 0;
-}
-
-bool gsIsSortBool(char *s)
-{
-  return strcmp(s, "SortBool") == 0;
-}
-
-bool gsIsSortPos(char *s)
-{
-  return strcmp(s, "SortPos") == 0;
-}
-
-bool gsIsSortNat(char *s)
-{
-  return strcmp(s, "SortNat") == 0;
-}
-
-bool gsIsSortInt(char *s)
-{
-  return strcmp(s, "SortInt") == 0;
-}
-
-bool gsIsSortList(char *s)
-{
-  return strcmp(s, "SortList") == 0;
-}
-
-bool gsIsSortSet(char *s)
-{
-  return strcmp(s, "SortSet") == 0;
-}
-
-bool gsIsSortBag(char *s)
-{
-  return strcmp(s, "SortBag") == 0;
-}
-
-bool gsIsSortArrow(char *s)
-{
-  return strcmp(s, "SortArrow") == 0;
-}
-
-bool gsIsSortStruct(char *s)
-{
-  return strcmp(s, "SortStruct") == 0;
-}
-
-bool gsIsStructCons(char *s)
-{
-  return strcmp(s, "StructCons") == 0;
-}
-
-bool gsIsStructProj(char *s)
-{
-  return strcmp(s, "StructProj") == 0;
-}
-
-bool gsIsDataAppl(char *s)
-{
-  return strcmp(s, "DataAppl") == 0;
-}
-
-bool gsIsLambda(char *s)
-{
-  return strcmp(s, "Lambda") == 0;
-}
-
-bool gsIsForall(char *s)
-{
-  return strcmp(s, "Forall") == 0;
-}
-
-bool gsIsExists(char *s)
-{
-  return strcmp(s, "Exists") == 0;
-}
-
-bool gsIsWhr(char *s)
-{
-  return strcmp(s, "Whr") == 0;
-}
-
-bool gsIsWhrDecl(char *s)
-{
-  return strcmp(s, "WhrDecl") == 0;
-}
-
-bool gsIsListEnum(char *s)
-{
-  return strcmp(s, "ListEnum") == 0;
-}
-
-bool gsIsSetEnum(char *s)
-{
-  return strcmp(s, "SetEnum") == 0;
-}
-
-bool gsIsBagEnum(char *s)
-{
-  return strcmp(s, "BagEnum") == 0;
-}
-
-bool gsIsBagEnumElt(char *s)
-{
-  return strcmp(s, "BagEnumElt") == 0;
-}
-
-bool gsIsSetBagComp(char *s)
-{
-  return strcmp(s, "SetBagComp") == 0;
-}
-
-bool gsIsTrue(char *s)
-{
-  return strcmp(s, "true") == 0;
-}
-
-bool gsIsFalse(char *s)
-{
-  return strcmp(s, "false") == 0;
-}
-
-bool gsIsEmptyList(char *s)
-{
-  return strcmp(s, "[]") == 0;
-}
-
-bool gsIsEmptySetBag(char *s)
-{
-  return strcmp(s, "{}") == 0;
-}
-
-bool gsIsExclam(char *s)
-{
-  return strcmp(s, "!") == 0;
-}
-
-bool gsIsMinus(char *s)
-{
-  return strcmp(s, "-") == 0;
-}
-
-bool gsIsHash(char *s)
-{
-  return strcmp(s, "#") == 0;
-}
-
-bool gsIsDot(char *s)
-{
-  return strcmp(s, ".") == 0;
-}
-
-bool gsIsStar(char *s)
-{
-  return strcmp(s, "*") == 0;
-}
-
-bool gsIsDiv(char *s)
-{
-  return strcmp(s, "div") == 0;
-}
-
-bool gsIsMod(char *s)
-{
-  return strcmp(s, "mod") == 0;
-}
-
-bool gsIsPlus(char *s)
-{
-  return strcmp(s, "+") == 0;
-}
-
-bool gsIsLT(char *s)
-{
-  return strcmp(s, "<") == 0;
-}
-
-bool gsIsGT(char *s)
-{
-  return strcmp(s, ">") == 0;
-}
-
-bool gsIsLTE(char *s)
-{
-  return strcmp(s, "<=") == 0;
-}
-
-bool gsIsGTE(char *s)
-{
-  return strcmp(s, ">=") == 0;
-}
-
-bool gsIsIn(char *s)
-{
-  return strcmp(s, "in") == 0;
-}
-
-bool gsIsCons(char *s)
-{
-  return strcmp(s, "|>") == 0;
-}
-
-bool gsIsSnoc(char *s)
-{
-  return strcmp(s, "<|") == 0;
-}
-
-bool gsIsConcat(char *s)
-{
-  return strcmp(s, "++") == 0;
-}
-
-bool gsIsEq(char *s)
-{
-  return strcmp(s, "==") == 0;
-}
-
-bool gsIsNeq(char *s)
-{
-  return strcmp(s, "!=") == 0;
-}
-
-bool gsIsAnd(char *s)
-{
-  return strcmp(s, "&&") == 0;
-}
-
-bool gsIsOr(char *s)
-{
-  return strcmp(s, "||") == 0;
-}
-
-bool gsIsImp(char *s)
-{
-  return strcmp(s, "=>") == 0;
-}
-
-bool gsIsActProcRef(char *s)
-{
-  return strcmp(s, "ActProcRef") == 0;
-}
-
-bool gsIsDelta(char *s)
-{
-  return strcmp(s, "Delta") == 0;
-}
-
-bool gsIsTau(char *s)
-{
-  return strcmp(s, "Tau") == 0;
-}
-
-bool gsIsSum(char *s)
-{
-  return strcmp(s, "Sum") == 0;
-}
-
-bool gsIsRestrict(char *s)
-{
-  return strcmp(s, "Restrict") == 0;
-}
-
-bool gsIsAllow(char *s)
-{
-  return strcmp(s, "Allow") == 0;
-}
-
-bool gsIsHide(char *s)
-{
-  return strcmp(s, "Hide") == 0;
-}
-
-bool gsIsRename(char *s)
-{
-  return strcmp(s, "Rename") == 0;
-}
-
-bool gsIsComm(char *s)
-{
-  return strcmp(s, "Comm") == 0;
-}
-
-bool gsIsSync(char *s)
-{
-  return strcmp(s, "Sync") == 0;
-}
-
-bool gsIsAtTime(char *s)
-{
-  return strcmp(s, "AtTime") == 0;
-}
-
-bool gsIsSeq(char *s)
-{
-  return strcmp(s, "Seq") == 0;
-}
-
-bool gsIsCond(char *s)
-{
-  return strcmp(s, "Cond") == 0;
-}
-
-bool gsIsBInit(char *s)
-{
-  return strcmp(s, "BInit") == 0;
-}
-
-bool gsIsMerge(char *s)
-{
-  return strcmp(s, "Merge") == 0;
-}
-
-bool gsIsLMerge(char *s)
-{
-  return strcmp(s, "LMerge") == 0;
-}
-
-bool gsIsChoice(char *s)
-{
-  return strcmp(s, "Choice") == 0;
-}
-
-bool gsIsMultActName(char *s)
-{
-  return strcmp(s, "MultActName") == 0;
-}
-
-bool gsIsCommExpr(char *s)
-{
-  return strcmp(s, "CommExpr") == 0;
-}
-
-bool gsIsRenExpr(char *s)
-{
-  return strcmp(s, "RenExpr") == 0;
-}
 
 //ATerm libary work arounds
 
@@ -1038,4 +55,971 @@ ATermList ATLgetArgument(ATermAppl appl, int nr)
 ATermInt ATIgetArgument(ATermAppl appl, int nr)
 {
   return (ATermInt) ATgetArgument(appl, nr);
+}
+
+//Constant AFun's for each constructor element of the internal ATerm structure.
+static AFun gsAFunSpecV1;
+static AFun gsAFunSortSpec;
+static AFun gsAFunConsSpec;
+static AFun gsAFunMapSpec;
+static AFun gsAFunDataEqnSpec;
+static AFun gsAFunActSpec;
+static AFun gsAFunProcEqnSpec;
+static AFun gsAFunInit;
+static AFun gsAFunSortId;
+static AFun gsAFunSortRef;
+static AFun gsAFunOpId;
+static AFun gsAFunDataEqn;
+static AFun gsAFunDataVarId;
+static AFun gsAFunNil;
+static AFun gsAFunActId;
+static AFun gsAFunProcEqn;
+static AFun gsAFunProcVarId;
+static AFun gsAFunSortBool;
+static AFun gsAFunSortPos;
+static AFun gsAFunSortNat;
+static AFun gsAFunSortInt;
+static AFun gsAFunSortList;
+static AFun gsAFunSortSet;
+static AFun gsAFunSortBag;
+static AFun gsAFunSortStruct;
+static AFun gsAFunSortArrowProd;
+static AFun gsAFunSortArrow;
+static AFun gsAFunStructCons;
+static AFun gsAFunStructProj;
+static AFun gsAFunDataVarIdOpId;
+static AFun gsAFunDataApplProd;
+static AFun gsAFunDataAppl;
+static AFun gsAFunNumber;
+static AFun gsAFunListEnum;
+static AFun gsAFunSetEnum;
+static AFun gsAFunBagEnum;
+static AFun gsAFunSetBagComp;
+static AFun gsAFunForall;
+static AFun gsAFunExists;
+static AFun gsAFunLambda;
+static AFun gsAFunWhr;
+static AFun gsAFunUnknown;
+static AFun gsAFunBagEnumElt;
+static AFun gsAFunWhrDecl;
+static AFun gsAFunActionProcess;
+static AFun gsAFunAction;
+static AFun gsAFunProcess;
+static AFun gsAFunDelta;
+static AFun gsAFunTau;
+static AFun gsAFunSum;
+static AFun gsAFunRestrict;
+static AFun gsAFunAllow;
+static AFun gsAFunHide;
+static AFun gsAFunRename;
+static AFun gsAFunComm;
+static AFun gsAFunSync;
+static AFun gsAFunAtTime;
+static AFun gsAFunSeq;
+static AFun gsAFunCond;
+static AFun gsAFunBInit;
+static AFun gsAFunMerge;
+static AFun gsAFunLMerge;
+static AFun gsAFunChoice;
+static AFun gsAFunMultActName;
+static AFun gsAFunRenameExpr;
+static AFun gsAFunCommExpr;
+
+static bool gsConstructorFunctionsEnabled = false;
+
+//Enable constructor functions
+void gsEnableConstructorFunctions(void)
+{
+  gsAFunSpecV1        = ATmakeAFun("SpecV1", 7, ATfalse);
+  gsAFunSortSpec      = ATmakeAFun("SortSpec", 1, ATfalse);
+  gsAFunConsSpec      = ATmakeAFun("ConsSpec", 1, ATfalse);
+  gsAFunMapSpec       = ATmakeAFun("MapSpec", 1, ATfalse);
+  gsAFunDataEqnSpec   = ATmakeAFun("DataEqnSpec", 1, ATfalse);
+  gsAFunActSpec       = ATmakeAFun("ActSpec", 1, ATfalse);
+  gsAFunProcEqnSpec   = ATmakeAFun("ProcEqnSpec", 1, ATfalse);
+  gsAFunInit          = ATmakeAFun("Init", 1, ATfalse);
+  gsAFunSortId        = ATmakeAFun("SortId", 1, ATfalse);
+  gsAFunSortRef       = ATmakeAFun("SortRef", 2, ATfalse);
+  gsAFunOpId          = ATmakeAFun("OpId", 2, ATfalse);
+  gsAFunDataEqn       = ATmakeAFun("DataEqn", 4, ATfalse);
+  gsAFunDataVarId     = ATmakeAFun("DataVarId", 2, ATfalse);
+  gsAFunNil           = ATmakeAFun("Nil", 0, ATfalse);
+  gsAFunActId         = ATmakeAFun("ActId", 2, ATfalse);
+  gsAFunProcEqn       = ATmakeAFun("ProcEqn", 3, ATfalse);
+  gsAFunProcVarId     = ATmakeAFun("ProcVarId", 2, ATfalse);
+  gsAFunSortBool      = ATmakeAFun("SortBool", 0, ATfalse);
+  gsAFunSortPos       = ATmakeAFun("SortPos", 0, ATfalse);
+  gsAFunSortNat       = ATmakeAFun("SortNat", 0, ATfalse);
+  gsAFunSortInt       = ATmakeAFun("SortInt", 0, ATfalse);
+  gsAFunSortList      = ATmakeAFun("SortList", 1, ATfalse);
+  gsAFunSortSet       = ATmakeAFun("SortSet", 1, ATfalse);
+  gsAFunSortBag       = ATmakeAFun("SortBag", 1, ATfalse);
+  gsAFunSortStruct    = ATmakeAFun("SortStruct", 1, ATfalse);
+  gsAFunSortArrowProd = ATmakeAFun("SortArrowProd", 2, ATfalse);
+  gsAFunSortArrow     = ATmakeAFun("SortArrow", 2, ATfalse);
+  gsAFunStructCons    = ATmakeAFun("StructCons", 3, ATfalse);
+  gsAFunStructProj    = ATmakeAFun("StructProj", 2, ATfalse);
+  gsAFunDataVarIdOpId = ATmakeAFun("DataVarIdOpId", 1, ATfalse);
+  gsAFunDataApplProd  = ATmakeAFun("DataApplProd", 2, ATfalse);
+  gsAFunDataAppl      = ATmakeAFun("DataAppl", 2, ATfalse);
+  gsAFunNumber        = ATmakeAFun("Number", 2, ATfalse);
+  gsAFunListEnum      = ATmakeAFun("ListEnum", 2, ATfalse);
+  gsAFunSetEnum       = ATmakeAFun("SetEnum", 2, ATfalse);
+  gsAFunBagEnum       = ATmakeAFun("BagEnum", 2, ATfalse);
+  gsAFunSetBagComp    = ATmakeAFun("SetBagComp", 2, ATfalse);
+  gsAFunForall        = ATmakeAFun("Forall", 2, ATfalse);
+  gsAFunExists        = ATmakeAFun("Exists", 2, ATfalse);
+  gsAFunLambda        = ATmakeAFun("Lambda", 2, ATfalse);
+  gsAFunWhr           = ATmakeAFun("Whr", 2, ATfalse);
+  gsAFunUnknown       = ATmakeAFun("Unknown", 0, ATfalse);
+  gsAFunBagEnumElt    = ATmakeAFun("BagEnumElt", 2, ATfalse);
+  gsAFunWhrDecl       = ATmakeAFun("WhrDecl", 2, ATfalse);
+  gsAFunActionProcess = ATmakeAFun("ActionProcess", 2, ATfalse);
+  gsAFunAction        = ATmakeAFun("Action", 2, ATfalse);
+  gsAFunProcess       = ATmakeAFun("Process", 2, ATfalse);
+  gsAFunDelta         = ATmakeAFun("Delta", 0, ATfalse);
+  gsAFunTau           = ATmakeAFun("Tau", 0, ATfalse);
+  gsAFunSum           = ATmakeAFun("Sum", 2, ATfalse);
+  gsAFunRestrict      = ATmakeAFun("Restrict", 2, ATfalse);
+  gsAFunAllow         = ATmakeAFun("Allow", 2, ATfalse);
+  gsAFunHide          = ATmakeAFun("Hide", 2, ATfalse);
+  gsAFunRename        = ATmakeAFun("Rename", 2, ATfalse);
+  gsAFunComm          = ATmakeAFun("Comm", 2, ATfalse);
+  gsAFunSync          = ATmakeAFun("Sync", 2, ATfalse);
+  gsAFunAtTime        = ATmakeAFun("AtTime", 2, ATfalse);
+  gsAFunSeq           = ATmakeAFun("Seq", 2, ATfalse);
+  gsAFunCond          = ATmakeAFun("Cond", 3, ATfalse);
+  gsAFunBInit         = ATmakeAFun("BInit", 2, ATfalse);
+  gsAFunMerge         = ATmakeAFun("Merge", 2, ATfalse);
+  gsAFunLMerge        = ATmakeAFun("LMerge", 2, ATfalse);
+  gsAFunChoice        = ATmakeAFun("Choice", 2, ATfalse);
+  gsAFunMultActName   = ATmakeAFun("MultActName", 1, ATfalse);
+  gsAFunRenameExpr    = ATmakeAFun("RenameExpr", 2, ATfalse);
+  gsAFunCommExpr      = ATmakeAFun("CommExpr", 2, ATfalse);
+  ATprotectAFun(gsAFunSpecV1);
+  ATprotectAFun(gsAFunSortSpec);
+  ATprotectAFun(gsAFunConsSpec);
+  ATprotectAFun(gsAFunMapSpec);
+  ATprotectAFun(gsAFunDataEqnSpec);
+  ATprotectAFun(gsAFunActSpec);
+  ATprotectAFun(gsAFunProcEqnSpec);
+  ATprotectAFun(gsAFunInit);
+  ATprotectAFun(gsAFunSortId);
+  ATprotectAFun(gsAFunSortRef);
+  ATprotectAFun(gsAFunOpId);
+  ATprotectAFun(gsAFunDataEqn);
+  ATprotectAFun(gsAFunDataVarId);
+  ATprotectAFun(gsAFunNil);
+  ATprotectAFun(gsAFunActId);
+  ATprotectAFun(gsAFunProcEqn);
+  ATprotectAFun(gsAFunProcVarId);
+  ATprotectAFun(gsAFunSortBool);
+  ATprotectAFun(gsAFunSortPos);
+  ATprotectAFun(gsAFunSortNat);
+  ATprotectAFun(gsAFunSortInt);
+  ATprotectAFun(gsAFunSortList);
+  ATprotectAFun(gsAFunSortSet);
+  ATprotectAFun(gsAFunSortBag);
+  ATprotectAFun(gsAFunSortStruct);
+  ATprotectAFun(gsAFunSortArrowProd);
+  ATprotectAFun(gsAFunSortArrow);
+  ATprotectAFun(gsAFunStructCons);
+  ATprotectAFun(gsAFunStructProj);
+  ATprotectAFun(gsAFunDataVarIdOpId);
+  ATprotectAFun(gsAFunDataApplProd);
+  ATprotectAFun(gsAFunDataAppl);
+  ATprotectAFun(gsAFunNumber);
+  ATprotectAFun(gsAFunListEnum);
+  ATprotectAFun(gsAFunSetEnum);
+  ATprotectAFun(gsAFunBagEnum);
+  ATprotectAFun(gsAFunSetBagComp);
+  ATprotectAFun(gsAFunForall);
+  ATprotectAFun(gsAFunExists);
+  ATprotectAFun(gsAFunLambda);
+  ATprotectAFun(gsAFunWhr);
+  ATprotectAFun(gsAFunUnknown);
+  ATprotectAFun(gsAFunBagEnumElt);
+  ATprotectAFun(gsAFunWhrDecl);
+  ATprotectAFun(gsAFunActionProcess);
+  ATprotectAFun(gsAFunAction);
+  ATprotectAFun(gsAFunProcess);
+  ATprotectAFun(gsAFunDelta);
+  ATprotectAFun(gsAFunTau);
+  ATprotectAFun(gsAFunSum);
+  ATprotectAFun(gsAFunRestrict);
+  ATprotectAFun(gsAFunAllow);
+  ATprotectAFun(gsAFunHide);
+  ATprotectAFun(gsAFunRename);
+  ATprotectAFun(gsAFunComm);
+  ATprotectAFun(gsAFunSync);
+  ATprotectAFun(gsAFunAtTime);
+  ATprotectAFun(gsAFunSeq);
+  ATprotectAFun(gsAFunCond);
+  ATprotectAFun(gsAFunBInit);
+  ATprotectAFun(gsAFunMerge);
+  ATprotectAFun(gsAFunLMerge);
+  ATprotectAFun(gsAFunChoice);
+  ATprotectAFun(gsAFunMultActName);
+  ATprotectAFun(gsAFunRenameExpr);
+  ATprotectAFun(gsAFunCommExpr);
+  gsConstructorFunctionsEnabled = true;
+}
+
+//ATmake extensions
+
+ATermAppl gsString2ATermAppl(char *s)
+{
+  if (s != NULL) {
+    return ATmakeAppl0(ATmakeAFun(s, 0, ATtrue));
+  } else {
+    return gsMakeNil();   
+  }
+}
+
+//Constructor creators
+
+ATermAppl gsMakeSpecV1(
+  ATermAppl SortSpec, ATermAppl ConsSpec, ATermAppl MapSpec,
+  ATermAppl DataEqnSpec, ATermAppl ActSpec, ATermAppl ProcEqnSpec,
+  ATermAppl Init)
+{
+  assert(gsConstructorFunctionsEnabled);
+  return ATmakeAppl(gsAFunSpecV1, (ATerm) SortSpec, (ATerm) ConsSpec,
+    (ATerm) MapSpec, (ATerm) DataEqnSpec, (ATerm) ActSpec, (ATerm) ProcEqnSpec,
+    (ATerm) Init);
+}
+
+ATermAppl gsMakeSortSpec(ATermList SortDecls)
+{
+  assert(gsConstructorFunctionsEnabled);
+  return ATmakeAppl1(gsAFunSortSpec, (ATerm) SortDecls);
+}
+
+ATermAppl gsMakeConsSpec(ATermList OpIds)
+{
+  assert(gsConstructorFunctionsEnabled);
+  return ATmakeAppl1(gsAFunConsSpec, (ATerm) OpIds);
+}
+
+ATermAppl gsMakeMapSpec(ATermList OpIds)
+{
+  assert(gsConstructorFunctionsEnabled);
+  return ATmakeAppl1(gsAFunMapSpec, (ATerm) OpIds);
+}
+
+ATermAppl gsMakeDataEqnSpec(ATermList DataEqns)
+{
+  assert(gsConstructorFunctionsEnabled);
+  return ATmakeAppl1(gsAFunDataEqnSpec, (ATerm) DataEqns);
+}
+
+ATermAppl gsMakeActSpec(ATermList ActIds)
+{
+  assert(gsConstructorFunctionsEnabled);
+  return ATmakeAppl1(gsAFunActSpec, (ATerm) ActIds);
+}
+
+ATermAppl gsMakeProcEqnSpec(ATermList ProcEqns)
+{
+  assert(gsConstructorFunctionsEnabled);
+  return ATmakeAppl1(gsAFunProcEqnSpec, (ATerm) ProcEqns);
+}
+
+ATermAppl gsMakeInit(ATermAppl ProcExpr)
+{
+  assert(gsConstructorFunctionsEnabled);
+  return ATmakeAppl1(gsAFunInit, (ATerm) ProcExpr);
+}
+
+ATermAppl gsMakeSortId(ATermAppl Name)
+{
+  assert(gsConstructorFunctionsEnabled);
+  return ATmakeAppl1(gsAFunSortId, (ATerm) Name);
+}
+
+ATermAppl gsMakeSortRef(ATermAppl Name, ATermAppl SortExpr)
+{
+  assert(gsConstructorFunctionsEnabled);
+  return ATmakeAppl2(gsAFunSortRef, (ATerm) Name, (ATerm) SortExpr);
+}
+
+ATermAppl gsMakeOpId(ATermAppl Name, ATermAppl SortExpr)
+{
+  assert(gsConstructorFunctionsEnabled);
+  return ATmakeAppl2(gsAFunOpId, (ATerm) Name, (ATerm) SortExpr);
+}
+
+ATermAppl gsMakeDataEqn(ATermList DataVarIds, ATermAppl DataExprCond,
+  ATermAppl DataExprLHS, ATermAppl DataExprRHS)
+{
+  assert(gsConstructorFunctionsEnabled);
+  return ATmakeAppl4(gsAFunDataEqn, (ATerm) DataVarIds, (ATerm) DataExprCond,
+    (ATerm) DataExprLHS, (ATerm) DataExprRHS);
+}
+
+ATermAppl gsMakeDataVarId(ATermAppl Name, ATermAppl SortExpr)
+{
+  assert(gsConstructorFunctionsEnabled);
+  return ATmakeAppl2(gsAFunDataVarId, (ATerm) Name, (ATerm) SortExpr);
+}
+
+ATermAppl gsMakeNil()
+{
+  assert(gsConstructorFunctionsEnabled);
+  return ATmakeAppl0(gsAFunNil);
+}
+
+ATermAppl gsMakeActId(ATermAppl Name, ATermList SortExprs)
+{
+  assert(gsConstructorFunctionsEnabled);
+  return ATmakeAppl2(gsAFunActId, (ATerm) Name, (ATerm) SortExprs);
+}
+
+ATermAppl gsMakeProcEqn(ATermAppl ProcVarId, ATermList DataVarIds,
+  ATermAppl ProcExpr)
+{
+  assert(gsConstructorFunctionsEnabled);
+  return ATmakeAppl3(gsAFunProcEqn, (ATerm) ProcVarId, (ATerm) DataVarIds,
+    (ATerm) ProcExpr);
+}
+
+ATermAppl gsMakeProcVarId(ATermAppl Name, ATermList SortExprs)
+{
+  assert(gsConstructorFunctionsEnabled);
+  return ATmakeAppl2(gsAFunProcVarId, (ATerm) Name, (ATerm) SortExprs);
+}
+
+ATermAppl gsMakeSortBool()
+{
+  assert(gsConstructorFunctionsEnabled);
+  return ATmakeAppl0(gsAFunSortBool);
+}
+
+ATermAppl gsMakeSortPos()
+{
+  assert(gsConstructorFunctionsEnabled);
+  return ATmakeAppl0(gsAFunSortPos);
+}
+
+ATermAppl gsMakeSortNat()
+{
+  assert(gsConstructorFunctionsEnabled);
+  return ATmakeAppl0(gsAFunSortNat);
+}
+
+ATermAppl gsMakeSortInt()
+{
+  assert(gsConstructorFunctionsEnabled);
+  return ATmakeAppl0(gsAFunSortInt);
+}
+
+ATermAppl gsMakeSortList(ATermAppl SortExpr)
+{
+  assert(gsConstructorFunctionsEnabled);
+  return ATmakeAppl1(gsAFunSortList, (ATerm) SortExpr);
+}
+
+ATermAppl gsMakeSortSet(ATermAppl SortExpr)
+{
+  assert(gsConstructorFunctionsEnabled);
+  return ATmakeAppl1(gsAFunSortSet, (ATerm) SortExpr);
+}
+
+ATermAppl gsMakeSortBag(ATermAppl SortExpr)
+{
+  assert(gsConstructorFunctionsEnabled);
+  return ATmakeAppl1(gsAFunSortBag, (ATerm) SortExpr);
+}
+
+ATermAppl gsMakeSortStruct(ATermList StructConss)
+{
+  assert(gsConstructorFunctionsEnabled);
+  return ATmakeAppl1(gsAFunSortStruct, (ATerm) StructConss);
+}
+
+ATermAppl gsMakeSortArrowProd(ATermList SortExprsDomain,
+  ATermAppl SortExprResult)
+{
+  assert(gsConstructorFunctionsEnabled);
+  return ATmakeAppl2(gsAFunSortArrowProd, (ATerm) SortExprsDomain,
+    (ATerm) SortExprResult);
+}
+
+ATermAppl gsMakeSortArrow(ATermAppl SortExprDomain, ATermAppl SortExprResult)
+{
+  assert(gsConstructorFunctionsEnabled);
+  return ATmakeAppl2(gsAFunSortArrow, (ATerm) SortExprDomain,
+    (ATerm) SortExprResult);
+}
+
+ATermAppl gsMakeStructCons(ATermAppl ConsName, ATermList StructProjs,
+  ATermAppl RecName)
+{
+  assert(gsConstructorFunctionsEnabled);
+  return ATmakeAppl3(gsAFunStructCons, (ATerm) ConsName, (ATerm) StructProjs,
+    (ATerm) RecName);
+}
+
+ATermAppl gsMakeStructProj(ATermAppl ProjName, ATermList SortExprs)
+{
+  assert(gsConstructorFunctionsEnabled);
+  return ATmakeAppl2(gsAFunStructProj, (ATerm) ProjName, (ATerm) SortExprs);
+}
+
+ATermAppl gsMakeDataVarIdOpId(ATermAppl Name)
+{
+  assert(gsConstructorFunctionsEnabled);
+  return ATmakeAppl1(gsAFunDataVarIdOpId, (ATerm) Name);
+}
+
+ATermAppl gsMakeDataApplProd(ATermAppl DataExpr, ATermList DataArgs)
+{
+  assert(gsConstructorFunctionsEnabled);
+  return ATmakeAppl2(gsAFunDataApplProd, (ATerm) DataExpr, (ATerm) DataArgs);
+}
+
+ATermAppl gsMakeDataAppl(ATermAppl DataExpr, ATermAppl DataArg)
+{
+  assert(gsConstructorFunctionsEnabled);
+  return ATmakeAppl2(gsAFunDataAppl, (ATerm) DataExpr, (ATerm) DataArg);
+}
+
+ATermAppl gsMakeNumber(ATermAppl Number, ATermAppl SortExprOrUnknown)
+{
+  assert(gsConstructorFunctionsEnabled);
+  return ATmakeAppl2(gsAFunNumber, (ATerm) Number, (ATerm) SortExprOrUnknown);
+}
+
+ATermAppl gsMakeListEnum(ATermList DataExprs, ATermAppl SortExprOrUnknown)
+{
+  assert(gsConstructorFunctionsEnabled);
+  return ATmakeAppl2(gsAFunListEnum, (ATerm) DataExprs,
+    (ATerm) SortExprOrUnknown);
+}
+
+ATermAppl gsMakeSetEnum(ATermList DataExprs, ATermAppl SortExprOrUnknown)
+{
+  assert(gsConstructorFunctionsEnabled);
+  return ATmakeAppl2(gsAFunSetEnum, (ATerm) DataExprs,
+    (ATerm) SortExprOrUnknown);
+}
+
+ATermAppl gsMakeBagEnum(ATermList BagEnumElts, ATermAppl SortExprOrUnknown)
+{
+  assert(gsConstructorFunctionsEnabled);
+  return ATmakeAppl2(gsAFunBagEnum, (ATerm) BagEnumElts,
+    (ATerm) SortExprOrUnknown);
+}
+
+ATermAppl gsMakeSetBagComp(ATermAppl DataVarId, ATermAppl DataExpr)
+{
+  assert(gsConstructorFunctionsEnabled);
+  return ATmakeAppl2(gsAFunSetBagComp, (ATerm) DataVarId, (ATerm) DataExpr);
+}
+
+ATermAppl gsMakeForall(ATermList DataVarIds, ATermAppl DataExpr)
+{
+  assert(gsConstructorFunctionsEnabled);
+  return ATmakeAppl2(gsAFunForall, (ATerm) DataVarIds, (ATerm) DataExpr);
+}
+
+ATermAppl gsMakeExists(ATermList DataVarIds, ATermAppl DataExpr)
+{
+  assert(gsConstructorFunctionsEnabled);
+  return ATmakeAppl2(gsAFunExists, (ATerm) DataVarIds, (ATerm) DataExpr);
+}
+
+ATermAppl gsMakeLambda(ATermList DataVarIds, ATermAppl DataExpr)
+{
+  assert(gsConstructorFunctionsEnabled);
+  return ATmakeAppl2(gsAFunLambda, (ATerm) DataVarIds, (ATerm) DataExpr);
+}
+
+ATermAppl gsMakeWhr(ATermAppl DataExpr, ATermList WhrDecls)
+{
+  assert(gsConstructorFunctionsEnabled);
+  return ATmakeAppl2(gsAFunWhr, (ATerm) DataExpr, (ATerm) WhrDecls);
+}
+
+ATermAppl gsMakeUnknown()
+{
+  assert(gsConstructorFunctionsEnabled);
+  return ATmakeAppl0(gsAFunUnknown);
+}
+
+ATermAppl gsMakeBagEnumElt(ATermAppl DataExpr, ATermAppl Multiplicity)
+{
+  assert(gsConstructorFunctionsEnabled);
+  return ATmakeAppl2(gsAFunBagEnumElt, (ATerm) DataExpr, (ATerm) Multiplicity);
+}
+
+ATermAppl gsMakeWhrDecl(ATermAppl Name, ATermAppl DataExpr)
+{
+  assert(gsConstructorFunctionsEnabled);
+  return ATmakeAppl2(gsAFunWhrDecl, (ATerm) Name, (ATerm) DataExpr);
+}
+
+ATermAppl gsMakeActionProcess(ATermAppl Name, ATermList DataExprs)
+{
+  assert(gsConstructorFunctionsEnabled);
+  return ATmakeAppl2(gsAFunActionProcess, (ATerm) Name, (ATerm) DataExprs);
+}
+
+ATermAppl gsMakeAction(ATermAppl ActId, ATermList DataExprs)
+{
+  assert(gsConstructorFunctionsEnabled);
+  return ATmakeAppl2(gsAFunAction, (ATerm) ActId, (ATerm) DataExprs);
+}
+
+ATermAppl gsMakeProcess(ATermAppl ProcId, ATermList DataExprs)
+{
+  assert(gsConstructorFunctionsEnabled);
+  return ATmakeAppl2(gsAFunProcess, (ATerm) ProcId, (ATerm) DataExprs);
+}
+
+ATermAppl gsMakeDelta()
+{
+  assert(gsConstructorFunctionsEnabled);
+  return ATmakeAppl0(gsAFunDelta);
+}
+
+ATermAppl gsMakeTau()
+{
+  assert(gsConstructorFunctionsEnabled);
+  return ATmakeAppl0(gsAFunTau);
+}
+
+ATermAppl gsMakeSum(ATermList DataVarIds, ATermAppl ProcExpr)
+{
+  assert(gsConstructorFunctionsEnabled);
+  return ATmakeAppl2(gsAFunSum, (ATerm) DataVarIds, (ATerm) ProcExpr);
+}
+
+ATermAppl gsMakeRestrict(ATermList MultActNames, ATermAppl ProcExpr)
+{
+  assert(gsConstructorFunctionsEnabled);
+  return ATmakeAppl2(gsAFunRestrict, (ATerm) MultActNames, (ATerm) ProcExpr);
+}
+
+ATermAppl gsMakeAllow(ATermList MultActNames, ATermAppl ProcExpr)
+{
+  assert(gsConstructorFunctionsEnabled);
+  return ATmakeAppl2(gsAFunAllow, (ATerm) MultActNames, (ATerm) ProcExpr);
+}
+
+ATermAppl gsMakeHide(ATermList MultActNames, ATermAppl ProcExpr)
+{
+  assert(gsConstructorFunctionsEnabled);
+  return ATmakeAppl2(gsAFunHide, (ATerm) MultActNames, (ATerm) ProcExpr);
+}
+
+ATermAppl gsMakeRename(ATermList RenameExprSet, ATermAppl ProcExpr)
+{
+  assert(gsConstructorFunctionsEnabled);
+  return ATmakeAppl2(gsAFunRename, (ATerm) RenameExprSet, (ATerm) ProcExpr);
+}
+
+ATermAppl gsMakeComm(ATermList CommExprSet, ATermAppl ProcExpr)
+{
+  assert(gsConstructorFunctionsEnabled);
+  return ATmakeAppl2(gsAFunComm, (ATerm) CommExprSet, (ATerm) ProcExpr);
+}
+
+ATermAppl gsMakeSync(ATermAppl ProcExprLHS, ATermAppl ProcExprRHS)
+{
+  assert(gsConstructorFunctionsEnabled);
+  return ATmakeAppl2(gsAFunSync, (ATerm) ProcExprLHS, (ATerm) ProcExprRHS);
+}
+
+ATermAppl gsMakeAtTime(ATermAppl ProcExpr, ATermAppl DataExpr)
+{
+  assert(gsConstructorFunctionsEnabled);
+  return ATmakeAppl2(gsAFunAtTime, (ATerm) ProcExpr, (ATerm) DataExpr);
+}
+
+ATermAppl gsMakeSeq(ATermAppl ProcExprLHS, ATermAppl ProcExprRHS)
+{
+  assert(gsConstructorFunctionsEnabled);
+  return ATmakeAppl2(gsAFunSeq, (ATerm) ProcExprLHS, (ATerm) ProcExprRHS);
+}
+
+ATermAppl gsMakeCond(ATermAppl DataExpr, ATermAppl PEThen, ATermAppl PEElse)
+{
+  assert(gsConstructorFunctionsEnabled);
+  return ATmakeAppl3(gsAFunCond, (ATerm) DataExpr, (ATerm) PEThen,
+    (ATerm) PEElse);
+}
+
+ATermAppl gsMakeBInit(ATermAppl ProcExprLHS, ATermAppl ProcExprRHS)
+{
+  assert(gsConstructorFunctionsEnabled);
+  return ATmakeAppl2(gsAFunBInit, (ATerm) ProcExprLHS, (ATerm) ProcExprRHS);
+}
+
+ATermAppl gsMakeMerge(ATermAppl ProcExprLHS, ATermAppl ProcExprRHS)
+{
+  assert(gsConstructorFunctionsEnabled);
+  return ATmakeAppl2(gsAFunMerge, (ATerm) ProcExprLHS, (ATerm) ProcExprRHS);
+}
+
+ATermAppl gsMakeLMerge(ATermAppl ProcExprLHS, ATermAppl ProcExprRHS)
+{
+  assert(gsConstructorFunctionsEnabled);
+  return ATmakeAppl2(gsAFunLMerge, (ATerm) ProcExprLHS, (ATerm) ProcExprRHS);
+}
+
+ATermAppl gsMakeChoice(ATermAppl ProcExprLHS, ATermAppl ProcExprRHS)
+{
+  assert(gsConstructorFunctionsEnabled);
+  return ATmakeAppl2(gsAFunChoice, (ATerm) ProcExprLHS, (ATerm) ProcExprRHS);
+}
+
+ATermAppl gsMakeMultActName(ATermList ActNames)
+{
+  assert(gsConstructorFunctionsEnabled);
+  return ATmakeAppl1(gsAFunMultActName, (ATerm) ActNames);
+}
+
+ATermAppl gsMakeRenameExpr(ATermAppl FromName, ATermAppl ToName)
+{
+  assert(gsConstructorFunctionsEnabled);
+  return ATmakeAppl2(gsAFunRenameExpr, (ATerm) FromName, (ATerm) ToName);
+}
+
+ATermAppl gsMakeCommExpr(ATermAppl MultActName, ATermAppl ActName)
+{
+  assert(gsConstructorFunctionsEnabled);
+  return ATmakeAppl2(gsAFunCommExpr, (ATerm) MultActName, (ATerm) ActName);
+}
+
+//Constructor recognisers
+
+bool gsIsSpecV1(ATermAppl term) {
+  assert(gsConstructorFunctionsEnabled);
+  return ATgetAFun(term) == gsAFunSpecV1;
+}
+
+bool gsIsSortSpec(ATermAppl term) {
+  assert(gsConstructorFunctionsEnabled);
+  return ATgetAFun(term) == gsAFunSortSpec;
+}
+
+bool gsIsConsSpec(ATermAppl term) {
+  assert(gsConstructorFunctionsEnabled);
+  return ATgetAFun(term) == gsAFunConsSpec;
+}
+
+bool gsIsMapSpec(ATermAppl term) {
+  assert(gsConstructorFunctionsEnabled);
+  return ATgetAFun(term) == gsAFunMapSpec;
+}
+
+bool gsIsDataEqnSpec(ATermAppl term) {
+  assert(gsConstructorFunctionsEnabled);
+  return ATgetAFun(term) == gsAFunDataEqnSpec;
+}
+
+bool gsIsActSpec(ATermAppl term) {
+  assert(gsConstructorFunctionsEnabled);
+  return ATgetAFun(term) == gsAFunActSpec;
+}
+
+bool gsIsProcEqnSpec(ATermAppl term) {
+  assert(gsConstructorFunctionsEnabled);
+  return ATgetAFun(term) == gsAFunProcEqnSpec;
+}
+
+bool gsIsInit(ATermAppl term) {
+  assert(gsConstructorFunctionsEnabled);
+  return ATgetAFun(term) == gsAFunInit;
+}
+
+bool gsIsSortId(ATermAppl term) {
+  assert(gsConstructorFunctionsEnabled);
+  return ATgetAFun(term) == gsAFunSortId;
+}
+
+bool gsIsSortRef(ATermAppl term) {
+  assert(gsConstructorFunctionsEnabled);
+  return ATgetAFun(term) == gsAFunSortRef;
+}
+
+bool gsIsOpId(ATermAppl term) {
+  assert(gsConstructorFunctionsEnabled);
+  return ATgetAFun(term) == gsAFunOpId;
+}
+
+bool gsIsDataEqn(ATermAppl term) {
+  assert(gsConstructorFunctionsEnabled);
+  return ATgetAFun(term) == gsAFunDataEqn;
+}
+
+bool gsIsDataVarId(ATermAppl term) {
+  assert(gsConstructorFunctionsEnabled);
+  return ATgetAFun(term) == gsAFunDataVarId;
+}
+
+bool gsIsNil(ATermAppl term) {
+  assert(gsConstructorFunctionsEnabled);
+  return ATgetAFun(term) == gsAFunNil;
+}
+
+bool gsIsActId(ATermAppl term) {
+  assert(gsConstructorFunctionsEnabled);
+  return ATgetAFun(term) == gsAFunActId;
+}
+
+bool gsIsProcEqn(ATermAppl term) {
+  assert(gsConstructorFunctionsEnabled);
+  return ATgetAFun(term) == gsAFunProcEqn;
+}
+
+bool gsIsProcVarId(ATermAppl term) {
+  assert(gsConstructorFunctionsEnabled);
+  return ATgetAFun(term) == gsAFunProcVarId;
+}
+
+bool gsIsSortBool(ATermAppl term) {
+  assert(gsConstructorFunctionsEnabled);
+  return ATgetAFun(term) == gsAFunSortBool;
+}
+
+bool gsIsSortPos(ATermAppl term) {
+  assert(gsConstructorFunctionsEnabled);
+  return ATgetAFun(term) == gsAFunSortPos;
+}
+
+bool gsIsSortNat(ATermAppl term) {
+  assert(gsConstructorFunctionsEnabled);
+  return ATgetAFun(term) == gsAFunSortNat;
+}
+
+bool gsIsSortInt(ATermAppl term) {
+  assert(gsConstructorFunctionsEnabled);
+  return ATgetAFun(term) == gsAFunSortInt;
+}
+
+bool gsIsSortList(ATermAppl term) {
+  assert(gsConstructorFunctionsEnabled);
+  return ATgetAFun(term) == gsAFunSortList;
+}
+
+bool gsIsSortSet(ATermAppl term) {
+  assert(gsConstructorFunctionsEnabled);
+  return ATgetAFun(term) == gsAFunSortSet;
+}
+
+bool gsIsSortBag(ATermAppl term) {
+  assert(gsConstructorFunctionsEnabled);
+  return ATgetAFun(term) == gsAFunSortBag;
+}
+
+bool gsIsSortStruct(ATermAppl term) {
+  assert(gsConstructorFunctionsEnabled);
+  return ATgetAFun(term) == gsAFunSortStruct;
+}
+
+bool gsIsSortArrowProd(ATermAppl term) {
+  assert(gsConstructorFunctionsEnabled);
+  return ATgetAFun(term) == gsAFunSortArrowProd;
+}
+
+bool gsIsSortArrow(ATermAppl term) {
+  assert(gsConstructorFunctionsEnabled);
+  return ATgetAFun(term) == gsAFunSortArrow;
+}
+
+bool gsIsStructCons(ATermAppl term) {
+  assert(gsConstructorFunctionsEnabled);
+  return ATgetAFun(term) == gsAFunStructCons;
+}
+
+bool gsIsStructProj(ATermAppl term) {
+  assert(gsConstructorFunctionsEnabled);
+  return ATgetAFun(term) == gsAFunStructProj;
+}
+
+bool gsIsDataVarIdOpId(ATermAppl term) {
+  assert(gsConstructorFunctionsEnabled);
+  return ATgetAFun(term) == gsAFunDataVarIdOpId;
+}
+
+bool gsIsDataApplProd(ATermAppl term) {
+  assert(gsConstructorFunctionsEnabled);
+  return ATgetAFun(term) == gsAFunDataApplProd;
+}
+
+bool gsIsDataAppl(ATermAppl term) {
+  assert(gsConstructorFunctionsEnabled);
+  return ATgetAFun(term) == gsAFunDataAppl;
+}
+
+bool gsIsNumber(ATermAppl term) {
+  assert(gsConstructorFunctionsEnabled);
+  return ATgetAFun(term) == gsAFunNumber;
+}
+
+bool gsIsListEnum(ATermAppl term) {
+  assert(gsConstructorFunctionsEnabled);
+  return ATgetAFun(term) == gsAFunListEnum;
+}
+
+bool gsIsSetEnum(ATermAppl term) {
+  assert(gsConstructorFunctionsEnabled);
+  return ATgetAFun(term) == gsAFunSetEnum;
+}
+
+bool gsIsBagEnum(ATermAppl term) {
+  assert(gsConstructorFunctionsEnabled);
+  return ATgetAFun(term) == gsAFunBagEnum;
+}
+
+bool gsIsSetBagComp(ATermAppl term) {
+  assert(gsConstructorFunctionsEnabled);
+  return ATgetAFun(term) == gsAFunSetBagComp;
+}
+
+bool gsIsForall(ATermAppl term) {
+  assert(gsConstructorFunctionsEnabled);
+  return ATgetAFun(term) == gsAFunForall;
+}
+
+bool gsIsExists(ATermAppl term) {
+  assert(gsConstructorFunctionsEnabled);
+  return ATgetAFun(term) == gsAFunExists;
+}
+
+bool gsIsLambda(ATermAppl term) {
+  assert(gsConstructorFunctionsEnabled);
+  return ATgetAFun(term) == gsAFunLambda;
+}
+
+bool gsIsWhr(ATermAppl term) {
+  assert(gsConstructorFunctionsEnabled);
+  return ATgetAFun(term) == gsAFunWhr;
+}
+
+bool gsIsUnknown(ATermAppl term) {
+  assert(gsConstructorFunctionsEnabled);
+  return ATgetAFun(term) == gsAFunUnknown;
+}
+
+bool gsIsBagEnumElt(ATermAppl term) {
+  assert(gsConstructorFunctionsEnabled);
+  return ATgetAFun(term) == gsAFunBagEnumElt;
+}
+
+bool gsIsWhrDecl(ATermAppl term) {
+  assert(gsConstructorFunctionsEnabled);
+  return ATgetAFun(term) == gsAFunWhrDecl;
+}
+
+bool gsIsActionProcess(ATermAppl term) {
+  assert(gsConstructorFunctionsEnabled);
+  return ATgetAFun(term) == gsAFunActionProcess;
+}
+
+bool gsIsAction(ATermAppl term) {
+  assert(gsConstructorFunctionsEnabled);
+  return ATgetAFun(term) == gsAFunAction;
+}
+
+bool gsIsProcess(ATermAppl term) {
+  assert(gsConstructorFunctionsEnabled);
+  return ATgetAFun(term) == gsAFunProcess;
+}
+
+bool gsIsDelta(ATermAppl term) {
+  assert(gsConstructorFunctionsEnabled);
+  return ATgetAFun(term) == gsAFunDelta;
+}
+
+bool gsIsTau(ATermAppl term) {
+  assert(gsConstructorFunctionsEnabled);
+  return ATgetAFun(term) == gsAFunTau;
+}
+
+bool gsIsSum(ATermAppl term) {
+  assert(gsConstructorFunctionsEnabled);
+  return ATgetAFun(term) == gsAFunSum;
+}
+
+bool gsIsRestrict(ATermAppl term) {
+  assert(gsConstructorFunctionsEnabled);
+  return ATgetAFun(term) == gsAFunRestrict;
+}
+
+bool gsIsAllow(ATermAppl term) {
+  assert(gsConstructorFunctionsEnabled);
+  return ATgetAFun(term) == gsAFunAllow;
+}
+
+bool gsIsHide(ATermAppl term) {
+  assert(gsConstructorFunctionsEnabled);
+  return ATgetAFun(term) == gsAFunHide;
+}
+
+bool gsIsRename(ATermAppl term) {
+  assert(gsConstructorFunctionsEnabled);
+  return ATgetAFun(term) == gsAFunRename;
+}
+
+bool gsIsComm(ATermAppl term) {
+  assert(gsConstructorFunctionsEnabled);
+  return ATgetAFun(term) == gsAFunComm;
+}
+
+bool gsIsSync(ATermAppl term) {
+  assert(gsConstructorFunctionsEnabled);
+  return ATgetAFun(term) == gsAFunSync;
+}
+
+bool gsIsAtTime(ATermAppl term) {
+  assert(gsConstructorFunctionsEnabled);
+  return ATgetAFun(term) == gsAFunAtTime;
+}
+
+bool gsIsSeq(ATermAppl term) {
+  assert(gsConstructorFunctionsEnabled);
+  return ATgetAFun(term) == gsAFunSeq;
+}
+
+bool gsIsCond(ATermAppl term) {
+  assert(gsConstructorFunctionsEnabled);
+  return ATgetAFun(term) == gsAFunCond;
+}
+
+bool gsIsBInit(ATermAppl term) {
+  assert(gsConstructorFunctionsEnabled);
+  return ATgetAFun(term) == gsAFunBInit;
+}
+
+bool gsIsMerge(ATermAppl term) {
+  assert(gsConstructorFunctionsEnabled);
+  return ATgetAFun(term) == gsAFunMerge;
+}
+
+bool gsIsLMerge(ATermAppl term) {
+  assert(gsConstructorFunctionsEnabled);
+  return ATgetAFun(term) == gsAFunLMerge;
+}
+
+bool gsIsChoice(ATermAppl term) {
+  assert(gsConstructorFunctionsEnabled);
+  return ATgetAFun(term) == gsAFunChoice;
+}
+
+bool gsIsMultActName(ATermAppl term) {
+  assert(gsConstructorFunctionsEnabled);
+  return ATgetAFun(term) == gsAFunMultActName;
+}
+
+bool gsIsRenameExpr(ATermAppl term) {
+  assert(gsConstructorFunctionsEnabled);
+  return ATgetAFun(term) == gsAFunRenameExpr;
+}
+
+bool gsIsCommExpr(ATermAppl term) {
+  assert(gsConstructorFunctionsEnabled);
+  return ATgetAFun(term) == gsAFunCommExpr;
 }

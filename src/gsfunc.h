@@ -46,212 +46,10 @@ extern char *strdup(const char *s);
 //print message s with argument a1, a2 and a3,  and throw an exception with
 //value x
 
-//ATmake extensions
-//-----------------
-//
-//Implements the making of all elements of the structure of ATerms to improve 
-//readability and to minimise type casts in the rest of the code
-
-ATermAppl gsMakeIdString(char *s);
-ATermAppl gsMakeNumberString(char *s);
-ATermAppl gsMakeNil();
-ATermAppl gsMakeUnknown();
-ATermAppl gsMakeSortId(ATermAppl Name);
-ATermAppl gsMakeOpId(ATermAppl Name, ATermAppl SortExprOrUnknown);
-ATermAppl gsMakeActId(ATermAppl Name, ATermList SortExprOrUnknowns);
-ATermAppl gsMakeProcId(ATermAppl Name);
-ATermAppl gsMakeDataVar(ATermAppl Name, ATermAppl SortExprOrUnknown);
-ATermAppl gsMakeNumber(ATermAppl NumberString, ATermAppl SortExprOrUnknown);
-ATermAppl gsMakeSpec(ATermAppl SortSpec, ATermAppl ConsSpec, ATermAppl MapSpec,
-  ATermAppl EqnSpec, ATermAppl ActSpec, ATermAppl ProcSpec, ATermAppl Init);
-ATermAppl gsMakeSortSpec(ATermList SortDecls);
-ATermAppl gsMakeSortDeclStandard(ATermAppl Name);
-ATermAppl gsMakeSortDeclRef(ATermAppl Name, ATermAppl SortExpr);
-ATermAppl gsMakeConsSpec(ATermList OpDecls);
-ATermAppl gsMakeMapSpec(ATermList OpDecls);
-ATermAppl gsMakeOpDecl(ATermAppl Name, ATermAppl SortExpr);
-ATermAppl gsMakeEqnSpec(ATermList EqnSects);
-ATermAppl gsMakeEqnSect(ATermList DataVarDecls, ATermList EqnDecls);
-ATermAppl gsMakeDataVarDecl(ATermAppl Name, ATermAppl SortExpr);
-ATermAppl gsMakeEqnDecl(ATermAppl DataExprLHS, ATermAppl DataExprRHS);
-ATermAppl gsMakeActSpec(ATermList ActDecls);
-ATermAppl gsMakeActDecl(ATermAppl Name, ATermList SortExprs);
-ATermAppl gsMakeProcSpec(ATermList ProcDecls);
-ATermAppl gsMakeProcDecl(ATermAppl Name, ATermList DataVarDecls, ATermAppl ProcExpr);
-ATermAppl gsMakeInit(ATermAppl ProcExpr);
-ATermAppl gsMakeSortBool();
-ATermAppl gsMakeSortPos();
-ATermAppl gsMakeSortNat();
-ATermAppl gsMakeSortInt();
-ATermAppl gsMakeSortList(ATermAppl SortExpr);
-ATermAppl gsMakeSortSet(ATermAppl SortExpr);
-ATermAppl gsMakeSortBag(ATermAppl SortExpr);
-ATermAppl gsMakeSortArrow(ATermList Domain, ATermAppl SortExpr);
-ATermAppl gsMakeSortStruct(ATermList StructConss);
-ATermAppl gsMakeStructCons(ATermAppl ConsName, ATermList StructProjs,
-  ATermAppl RecNameOrNil);
-ATermAppl gsMakeStructProj(ATermAppl ProjNameOrNil, ATermList SortExprs);
-ATermAppl gsMakeDataVarOpId(ATermAppl Name);
-ATermAppl gsMakeDataAppl(ATermAppl DataExpr, ATermList DataArgs);
-ATermAppl gsMakeLambda(ATermList IdsDecls, ATermAppl DataExpr);
-ATermAppl gsMakeForall(ATermList IdsDecls, ATermAppl DataExpr);
-ATermAppl gsMakeExists(ATermList IdsDecls, ATermAppl DataExpr);
-ATermAppl gsMakeWhr(ATermAppl DataExpr, ATermList WhrDecls);
-ATermAppl gsMakeWhrDecl(ATermAppl Name, ATermAppl DataExpr);
-ATermAppl gsMakeListEnum(ATermList DataExprs, ATermAppl SortExprOrUnknown);
-ATermAppl gsMakeSetEnum(ATermList DataExprs, ATermAppl SortExprOrUnknown);
-ATermAppl gsMakeBagEnum(ATermList BagEnumElts, ATermAppl SortExprOrUnknown);
-ATermAppl gsMakeBagEnumElt(ATermAppl DataExpr, ATermAppl Multiplicity);
-ATermAppl gsMakeSetBagComp(ATermAppl IdDecl, ATermAppl DataExpr);
-ATermAppl gsMakeTrue();
-ATermAppl gsMakeFalse();
-ATermAppl gsMakeEmptyList();
-ATermAppl gsMakeEmptySetBag();
-ATermAppl gsMakeExclam();
-ATermAppl gsMakeHash();
-ATermAppl gsMakeDot();
-ATermAppl gsMakeStar();
-ATermAppl gsMakeDiv();
-ATermAppl gsMakeMod();
-ATermAppl gsMakePlus();
-ATermAppl gsMakeMinus();
-ATermAppl gsMakeLT();
-ATermAppl gsMakeGT();
-ATermAppl gsMakeLTE();
-ATermAppl gsMakeGTE();
-ATermAppl gsMakeIn();
-ATermAppl gsMakeCons();
-ATermAppl gsMakeSnoc();
-ATermAppl gsMakeConcat();
-ATermAppl gsMakeEq();
-ATermAppl gsMakeNeq();
-ATermAppl gsMakeAnd();
-ATermAppl gsMakeOr();
-ATermAppl gsMakeImp();
-ATermAppl gsMakeActProcRef(ATermAppl Name, ATermList DataExprs);
-ATermAppl gsMakeAct(ATermAppl ActId, ATermList DataExprs);
-ATermAppl gsMakeProcRef(ATermAppl ProcId, ATermList DataExprs);
-ATermAppl gsMakeDelta();
-ATermAppl gsMakeTau();
-ATermAppl gsMakeSum(ATermList IdsDecls, ATermAppl ProcExpr);
-ATermAppl gsMakeRestrict(ATermList MultActNames, ATermAppl ProcExpr);
-ATermAppl gsMakeAllow(ATermList MultActNames, ATermAppl ProcExpr);
-ATermAppl gsMakeHide(ATermList MultActNames, ATermAppl ProcExpr);
-ATermAppl gsMakeRename(ATermList RenExprSet, ATermAppl ProcExpr);
-ATermAppl gsMakeComm(ATermList CommExprSet, ATermAppl ProcExpr);
-ATermAppl gsMakeSync(ATermAppl OpLeft, ATermAppl OpRight);
-ATermAppl gsMakeAtTime(ATermAppl ProcExpr, ATermAppl DataExpr);
-ATermAppl gsMakeSeq(ATermAppl OpLeft, ATermAppl OpRight);
-ATermAppl gsMakeCond(ATermAppl DataExpr, ATermAppl PEThen, ATermAppl PEElse);
-ATermAppl gsMakeBInit(ATermAppl OpLeft, ATermAppl OpRight);
-ATermAppl gsMakeMerge(ATermAppl OpLeft, ATermAppl OpRight);
-ATermAppl gsMakeLMerge(ATermAppl OpLeft, ATermAppl OpRight);
-ATermAppl gsMakeChoice(ATermAppl OpLeft, ATermAppl OpRight);
-ATermAppl gsMakeMultActName(ATermList ActNames);
-ATermAppl gsMakeCommExpr(ATermAppl MultActName, ATermAppl ActNameOrNil);
-ATermAppl gsMakeRenExpr(ATermAppl FromName, ATermAppl ToName);
-
-//strcmp extensions
-//------------------
-//
-//Implements the comparison of the function names of all elements of the 
-//structure of ATerms to improve readability
-
-bool gsIsNil(char *s);
-bool gsIsUnknown(char *s);
-bool gsIsSortId(char *s);
-bool gsIsOpId(char *s);
-bool gsIsActId(char *s);
-bool gsIsProcId(char *s);
-bool gsIsDataVar(char *s);
-bool gsIsNumber(char *s);
-bool gsIsSpec(char *s);
-bool gsIsSortSpec(char *s);
-bool gsIsSortDeclStandard(char *s);
-bool gsIsSortDeclRef(char *s);
-bool gsIsConsSpec(char *s);
-bool gsIsMapSpec(char *s);
-bool gsIsOpDecl(char *s);
-bool gsIsEqnSpec(char *s);
-bool gsIsDataVarDecl(char *s);
-bool gsIsEqnDecl(char *s);
-bool gsIsActSpec(char *s);
-bool gsIsActDecl(char *s);
-bool gsIsProcSpec(char *s);
-bool gsIsProcDecl(char *s);
-bool gsIsInit(char *s);
-bool gsIsSortBool(char *s);
-bool gsIsSortPos(char *s);
-bool gsIsSortNat(char *s);
-bool gsIsSortInt(char *s);
-bool gsIsSortList(char *s);
-bool gsIsSortSet(char *s);
-bool gsIsSortBag(char *s);
-bool gsIsSortArrow(char *s);
-bool gsIsSortStruct(char *s);
-bool gsIsStructCons(char *s);
-bool gsIsStructProj(char *s);
-bool gsIsDataAppl(char *s);
-bool gsIsLambda(char *s);
-bool gsIsForall(char *s);
-bool gsIsExists(char *s);
-bool gsIsWhr(char *s);
-bool gsIsWhrDecl(char *s);
-bool gsIsListEnum(char *s);
-bool gsIsSetEnum(char *s);
-bool gsIsBagEnum(char *s);
-bool gsIsBagEnumElt(char *s);
-bool gsIsSetBagComp(char *s);
-bool gsIsTrue(char *s);
-bool gsIsFalse(char *s);
-bool gsIsEmptyList(char *s);
-bool gsIsEmptySetBag(char *s);
-bool gsIsExclam(char *s);
-bool gsIsHash(char *s);
-bool gsIsDot(char *s);
-bool gsIsStar(char *s);
-bool gsIsDiv(char *s);
-bool gsIsMod(char *s);
-bool gsIsPlus(char *s);
-bool gsIsMinus(char *s);
-bool gsIsLT(char *s);
-bool gsIsGT(char *s);
-bool gsIsLTE(char *s);
-bool gsIsGTE(char *s);
-bool gsIsIn(char *s);
-bool gsIsCons(char *s);
-bool gsIsSnoc(char *s);
-bool gsIsConcat(char *s);
-bool gsIsEq(char *s);
-bool gsIsNeq(char *s);
-bool gsIsAnd(char *s);
-bool gsIsOr(char *s);
-bool gsIsImp(char *s);
-bool gsIsActProcRef(char *s);
-bool gsIsDelta(char *s);
-bool gsIsTau(char *s);
-bool gsIsSum(char *s);
-bool gsIsRestrict(char *s);
-bool gsIsAllow(char *s);
-bool gsIsHide(char *s);
-bool gsIsRename(char *s);
-bool gsIsComm(char *s);
-bool gsIsSync(char *s);
-bool gsIsAtTime(char *s);
-bool gsIsSeq(char *s);
-bool gsIsCond(char *s);
-bool gsIsBInit(char *s);
-bool gsIsMerge(char *s);
-bool gsIsLMerge(char *s);
-bool gsIsChoice(char *s);
-bool gsIsMultActName(char *s);
-bool gsIsCommExpr(char *s);
-bool gsIsRenExpr(char *s);
-
 //ATerm library work arounds
 //--------------------------
 //
-//To eliminate ridiculous type casts in the rest of the code, we introducde
+//To eliminate ridiculous type casts in the rest of the code, we introduce
 //wrappers around functions ATelementAt and ATgetArgument.
 //This is caused by a bad interface design of the ATerm library
 
@@ -261,6 +59,201 @@ ATermInt  ATIelementAt(ATermList list, int index);
 ATermAppl ATAgetArgument(ATermAppl appl, int nr);
 ATermList ATLgetArgument(ATermAppl appl, int nr);
 ATermInt  ATIgetArgument(ATermAppl appl, int nr);
+char *ATSgetArgument(ATermAppl appl, int nr);
+ATermAppl ATAgetFirst(ATermList list);
+ATermList ATLgetNext(ATermList list);
+ATermList ATinsertA(ATermList list, ATermAppl appl);
+
+//Initialisation of constructor functions
+void gsEnableConstructorFunctions(void);
+//Pre : the ATerm has been initialised
+//Post: the constructor creator and recogniser functions are enabled
+
+//Constructor creators
+//--------------------
+//
+//The creation of all constructor elements of the internal ATerm structure to
+//improve readability and to minimise type casts in the rest of the code
+
+ATermAppl gsMakeSpecV1(
+  ATermAppl SortSpec, ATermAppl ConsSpec, ATermAppl MapSpec,
+  ATermAppl DataEqnSpec, ATermAppl ActSpec, ATermAppl ProcEqnSpec,
+  ATermAppl Init);
+ATermAppl gsMakeSortSpec(ATermList SortDecls);
+ATermAppl gsMakeConsSpec(ATermList OpIds);
+ATermAppl gsMakeMapSpec(ATermList OpIds);
+ATermAppl gsMakeDataEqnSpec(ATermList DataEqns);
+ATermAppl gsMakeActSpec(ATermList ActIds);
+ATermAppl gsMakeProcEqnSpec(ATermList ProcEqns);
+ATermAppl gsMakeInit(ATermAppl ProcExpr);
+ATermAppl gsMakeSortId(ATermAppl Name);
+ATermAppl gsMakeSortRef(ATermAppl Name, ATermAppl SortExpr);
+ATermAppl gsMakeOpId(ATermAppl Name, ATermAppl SortExpr);
+ATermAppl gsMakeDataEqn(ATermList DataVarIds, ATermAppl DataCond,
+  ATermAppl DataExprLHS, ATermAppl DataExprRHS);
+ATermAppl gsMakeDataVarId(ATermAppl Name, ATermAppl SortExpr);
+ATermAppl gsMakeNil();
+ATermAppl gsMakeActId(ATermAppl Name, ATermList SortExprs);
+ATermAppl gsMakeProcEqn(ATermAppl ProcVarId, ATermList DataVarIds,
+  ATermAppl ProcExp);
+ATermAppl gsMakeProcVarId(ATermAppl Name,ATermList SortExprs);
+ATermAppl gsMakeSortBool();
+ATermAppl gsMakeSortPos();
+ATermAppl gsMakeSortNat();
+ATermAppl gsMakeSortInt();
+ATermAppl gsMakeSortList(ATermAppl SortExpr);
+ATermAppl gsMakeSortSet(ATermAppl SortExpr);
+ATermAppl gsMakeSortBag(ATermAppl SortExpr);
+ATermAppl gsMakeSortStruct(ATermList StructConss);
+ATermAppl gsMakeSortArrowProd(ATermList SortExprsDomain,
+  ATermAppl SortExprResult);
+ATermAppl gsMakeSortArrow(ATermAppl SortExprDomain, ATermAppl SortExprResult);
+ATermAppl gsMakeStructCons(ATermAppl ConsName, ATermList StructProjs,
+  ATermAppl RecName);
+//RecName may be NULL
+ATermAppl gsMakeStructProj(ATermAppl ProjName, ATermList SortExprs);
+//ProjName may be NULL
+ATermAppl gsMakeDataVarIdOpId(ATermAppl Name);
+ATermAppl gsMakeDataApplProd(ATermAppl DataExpr, ATermList DataArgs);
+ATermAppl gsMakeDataAppl(ATermAppl DataExpr, ATermAppl DataArg);
+ATermAppl gsMakeNumber(ATermAppl Number, ATermAppl SortExprOrUnknown);
+ATermAppl gsMakeListEnum(ATermList DataExprs, ATermAppl SortExprOrUnknown);
+ATermAppl gsMakeSetEnum(ATermList DataExprs, ATermAppl SortExprOrUnknown);
+ATermAppl gsMakeBagEnum(ATermList BagEnumElts, ATermAppl SortExprOrUnknown);
+ATermAppl gsMakeSetBagComp(ATermAppl DataVarId, ATermAppl DataExpr);
+ATermAppl gsMakeForall(ATermList DataVarIds, ATermAppl DataExpr);
+ATermAppl gsMakeExists(ATermList DataVarIds, ATermAppl DataExpr);
+ATermAppl gsMakeLambda(ATermList DataVarIds, ATermAppl DataExpr);
+ATermAppl gsMakeWhr(ATermAppl DataExpr, ATermList WhrDecls);
+ATermAppl gsMakeUnknown();
+ATermAppl gsMakeBagEnumElt(ATermAppl DataExpr, ATermAppl Multiplicity);
+ATermAppl gsMakeWhrDecl(ATermAppl Name, ATermAppl DataExpr);
+ATermAppl gsMakeActionProcess(ATermAppl Name, ATermList DataExprs);
+ATermAppl gsMakeAction(ATermAppl ActId, ATermList DataExprs);
+ATermAppl gsMakeProcess(ATermAppl ProcVarId, ATermList DataExprs);
+ATermAppl gsMakeDelta();
+ATermAppl gsMakeTau();
+ATermAppl gsMakeSum(ATermList DataVarIds, ATermAppl ProcExpr);
+ATermAppl gsMakeRestrict(ATermList MultActNames, ATermAppl ProcExpr);
+ATermAppl gsMakeAllow(ATermList MultActNames, ATermAppl ProcExpr);
+ATermAppl gsMakeHide(ATermList MultActNames, ATermAppl ProcExpr);
+ATermAppl gsMakeRename(ATermList RenameExprSet, ATermAppl ProcExpr);
+ATermAppl gsMakeComm(ATermList CommExprSet, ATermAppl ProcExpr);
+ATermAppl gsMakeSync(ATermAppl ProcExprLHS, ATermAppl ProcExprRHS);
+ATermAppl gsMakeAtTime(ATermAppl ProcExpr, ATermAppl DataExpr);
+ATermAppl gsMakeSeq(ATermAppl ProcExprLHS, ATermAppl ProcExprRHS);
+ATermAppl gsMakeCond(ATermAppl DataExpr, ATermAppl ProcExprThen,
+  ATermAppl ProcExprElse);
+ATermAppl gsMakeBInit(ATermAppl ProcExprLHS, ATermAppl ProcExprRHS);
+ATermAppl gsMakeMerge(ATermAppl ProcExprLHS, ATermAppl ProcExprRHS);
+ATermAppl gsMakeLMerge(ATermAppl ProcExprLHS, ATermAppl ProcExprRHS);
+ATermAppl gsMakeChoice(ATermAppl ProcExprLHS, ATermAppl ProcExprRHS);
+ATermAppl gsMakeMultActName(ATermList ActNames);
+ATermAppl gsMakeRenameExpr(ATermAppl FromName, ATermAppl ToName);
+ATermAppl gsMakeCommExpr(ATermAppl MultActName, ATermAppl ActName);
+//ActName may be NULL
+
+//Constructor recognisers
+//-----------------------
+//
+//Implements the comparison of the function names of all constructor elements
+//of the internal ATerm structure to improve readability
+
+bool gsIsSpecV1(ATermAppl term);
+bool gsIsSortSpec(ATermAppl term);
+bool gsIsConsSpec(ATermAppl term);
+bool gsIsMapSpec(ATermAppl term);
+bool gsIsDataEqnSpec(ATermAppl term);
+bool gsIsActSpec(ATermAppl term);
+bool gsIsProcEqnSpec(ATermAppl term);
+bool gsIsInit(ATermAppl term);
+bool gsIsSortId(ATermAppl term);
+bool gsIsSortRef(ATermAppl term);
+bool gsIsOpId(ATermAppl term);
+bool gsIsDataEqn(ATermAppl term);
+bool gsIsDataVarId(ATermAppl term);
+bool gsIsNil(ATermAppl term);
+bool gsIsActId(ATermAppl term);
+bool gsIsProcEqn(ATermAppl term);
+bool gsIsProcVarId(ATermAppl term);
+bool gsIsSortBool(ATermAppl term);
+bool gsIsSortPos(ATermAppl term);
+bool gsIsSortNat(ATermAppl term);
+bool gsIsSortInt(ATermAppl term);
+bool gsIsSortList(ATermAppl term);
+bool gsIsSortSet(ATermAppl term);
+bool gsIsSortBag(ATermAppl term);
+bool gsIsSortStruct(ATermAppl term);
+bool gsIsSortArrowProd(ATermAppl term);
+bool gsIsSortArrow(ATermAppl term);
+bool gsIsStructCons(ATermAppl term);
+bool gsIsStructProj(ATermAppl term);
+bool gsIsDataVarIdOpId(ATermAppl term);
+bool gsIsDataApplProd(ATermAppl term);
+bool gsIsDataAppl(ATermAppl term);
+bool gsIsNumber(ATermAppl term);
+bool gsIsListEnum(ATermAppl term);
+bool gsIsSetEnum(ATermAppl term);
+bool gsIsBagEnum(ATermAppl term);
+bool gsIsSetBagComp(ATermAppl term);
+bool gsIsForall(ATermAppl term);
+bool gsIsExists(ATermAppl term);
+bool gsIsLambda(ATermAppl term);
+bool gsIsWhr(ATermAppl term);
+bool gsIsUnknown(ATermAppl term);
+bool gsIsBagEnumElt(ATermAppl term);
+bool gsIsWhrDecl(ATermAppl term);
+bool gsIsActionProcess(ATermAppl term);
+bool gsIsAction(ATermAppl term);
+bool gsIsProcess(ATermAppl term);
+bool gsIsDelta(ATermAppl term);
+bool gsIsTau(ATermAppl term);
+bool gsIsSum(ATermAppl term);
+bool gsIsRestrict(ATermAppl term);
+bool gsIsAllow(ATermAppl term);
+bool gsIsHide(ATermAppl term);
+bool gsIsRename(ATermAppl term);
+bool gsIsComm(ATermAppl term);
+bool gsIsSync(ATermAppl term);
+bool gsIsAtTime(ATermAppl term);
+bool gsIsSeq(ATermAppl term);
+bool gsIsCond(ATermAppl term);
+bool gsIsBInit(ATermAppl term);
+bool gsIsMerge(ATermAppl term);
+bool gsIsLMerge(ATermAppl term);
+bool gsIsChoice(ATermAppl term);
+bool gsIsMultActName(ATermAppl term);
+bool gsIsRenameExpr(ATermAppl term);
+bool gsIsCommExpr(ATermAppl term);
+
+ATermAppl gsString2ATermAppl(char *s);
+//Ret: quoted constant s, if s != NULL
+//     unquoted constant Nil, if s == NULL
+
+//Creation of data expressions for system defined operations. If possible,
+//types are checked.
+ATermAppl gsMakeDataExprTrue();
+ATermAppl gsMakeDataExprFalse();
+ATermAppl gsMakeDataExprNot(ATermAppl DataExpr);
+ATermAppl gsMakeDataExprAnd(ATermAppl DataExprLHS, ATermAppl DataExprRHS);
+ATermAppl gsMakeDataExprOr(ATermAppl DataExprLHS, ATermAppl DataExprRHS);
+ATermAppl gsMakeDataExprImp(ATermAppl DataExprLHS, ATermAppl DataExprRHS);
+ATermAppl gsMakeDataExprEq(ATermAppl DataExprLHS, ATermAppl DataExprRHS);
+ATermAppl gsMakeDataExprNeq(ATermAppl DataExprLHS, ATermAppl DataExprRHS);
+ATermAppl gsMakeDataExprIf(ATermAppl DataExprCond, ATermAppl DataExprThen,
+  ATermAppl DataExprIf);
+
+ATermAppl gsMakeDataExprPos(int p);
+//Pre: p > 0
+//Ret: data expression of sort Pos that is a representation of p
+
+ATermAppl gsMakeDataExprNat(int n);
+//Pre: n >= 0
+//Ret: data expression of sort Nat that is a representation of n
+
+ATermAppl gsMakeDataExprInt(int z);
+//Pre: true
+//Ret: data expression of sort Int that is a representation of z
 
 #ifdef __cplusplus
 }

@@ -1,5 +1,5 @@
 #define  NAME      "libgsparse"
-#define  LVERSION   "0.1.7"
+#define  LVERSION   "0.1.8"
 #define  AUTHOR    "Aad Mathijssen"
 
 #ifdef __cplusplus
@@ -50,6 +50,8 @@ ATermAppl gsParseSpecification (FILE *SpecStream, int VbLevel)
   }
   //set global debug flag
   gsDebug = (VbLevel == 3);
+  //enable constructor functions
+  gsEnableConstructorFunctions();
   //parse specification using bison
   if (VbLevel > 1) {
     printf("parsing specification from stream\n");
@@ -96,13 +98,10 @@ finally:
   return Result;
 }
 
-
 bool gsPrintPart(FILE *OutStream, ATermAppl Part, int PrecLevel)
 {
   bool Result = true;
-  AFun Head = ATgetAFun(Part);
-  char *HeadName = ATgetName(Head);
-  if (gsIsSpec(HeadName)) {
+  if (gsIsSpecV1(Part)) {
     //print specification
     if (gsDebug) { printf("(gsPrintPart): printing specification\n"); }
     ATermList SpecElts = ATLgetArgument(Part, 0);
@@ -113,7 +112,7 @@ bool gsPrintPart(FILE *OutStream, ATermAppl Part, int PrecLevel)
       }
       Result = gsPrintPart(OutStream, ATAelementAt(SpecElts, i), 0);
     }
-  } else if (gsIsSortSpec(HeadName)) {
+  } else if (gsIsSortSpec(Part)) {
     //print sort specification
     if (gsDebug) { printf("(gsPrintPart): printing sort specification\n"); }
     ATermList SortDecls = ATLgetArgument(Part, 0);
@@ -123,17 +122,7 @@ bool gsPrintPart(FILE *OutStream, ATermAppl Part, int PrecLevel)
       fprintf(OutStream, "  "); 
       Result = gsPrintPart(OutStream, ATAelementAt(SortDecls, i), 0);
     }
-  } else if (gsIsActSpec(HeadName)) {
-    //print action specification
-    if (gsDebug) { printf("(gsPrintPart): printing action specification\n"); }
-    ATermList ActDecls = ATLgetArgument(Part, 0);
-    int n = ATgetLength(ActDecls);
-    fprintf(OutStream, "act\n"); 
-    for (int i = 0; i < n && Result; i++) {
-      fprintf(OutStream, "  "); 
-      Result = gsPrintPart(OutStream, ATAelementAt(ActDecls, i), 0);
-    }
-  } else if (gsIsConsSpec(HeadName)) {
+  } else if (gsIsConsSpec(Part)) {
     //print constructor operation specification
     if (gsDebug) { printf("(gsPrintPart): printing constructor operation specification\n"); }
     ATermList ConsDecls = ATLgetArgument(Part, 0);
@@ -143,7 +132,7 @@ bool gsPrintPart(FILE *OutStream, ATermAppl Part, int PrecLevel)
       fprintf(OutStream, "  "); 
       Result = gsPrintPart(OutStream, ATAelementAt(ConsDecls, i), 0);
     }
-  } else if (gsIsMapSpec(HeadName)) {
+  } else if (gsIsMapSpec(Part)) {
     //print operation specification
     if (gsDebug) { printf("(gsPrintPart): printing operation specification\n"); }
     ATermList MapDecls = ATLgetArgument(Part, 0);
@@ -153,7 +142,7 @@ bool gsPrintPart(FILE *OutStream, ATermAppl Part, int PrecLevel)
       fprintf(OutStream, "  "); 
       Result = gsPrintPart(OutStream, ATAelementAt(MapDecls, i), 0);
     }
-  } else if (gsIsEqnSpec(HeadName)) {
+  } else if (gsIsDataEqnSpec(Part)) {
     //print equation specification
     if (gsDebug) { printf("(gsPrintPart): printing equation specification\n"); }
     ATermList VarDecls = ATLgetArgument(Part, 0);
@@ -174,7 +163,17 @@ bool gsPrintPart(FILE *OutStream, ATermAppl Part, int PrecLevel)
         Result = gsPrintPart(OutStream, ATAelementAt(EqnDecls, i), 0);
       }
     }
-  } else if (gsIsProcSpec(HeadName)) {
+  } else if (gsIsActSpec(Part)) {
+    //print action specification
+    if (gsDebug) { printf("(gsPrintPart): printing action specification\n"); }
+    ATermList ActDecls = ATLgetArgument(Part, 0);
+    int n = ATgetLength(ActDecls);
+    fprintf(OutStream, "act\n"); 
+    for (int i = 0; i < n && Result; i++) {
+      fprintf(OutStream, "  "); 
+      Result = gsPrintPart(OutStream, ATAelementAt(ActDecls, i), 0);
+    }
+  } else if (gsIsProcEqnSpec(Part)) {
     //print process specification
     if (gsDebug) { printf("(gsPrintPart): printing process specification\n"); }
     ATermList ProcDecls = ATLgetArgument(Part, 0);
@@ -184,45 +183,24 @@ bool gsPrintPart(FILE *OutStream, ATermAppl Part, int PrecLevel)
       fprintf(OutStream, "  "); 
       Result = gsPrintPart(OutStream, ATAelementAt(ProcDecls, i), 0);
     }
-  } else if (gsIsInit(HeadName)) {
+  } else if (gsIsInit(Part)) {
     //print initialisation
     if (gsDebug) { printf("(gsPrintPart): printing initialisation\n"); }
     fprintf(OutStream, "init\n"); 
     fprintf(OutStream, "  "); 
     Result = gsPrintPart(OutStream, ATAgetArgument(Part, 0), 0);
-  } else if (gsIsSortDeclStandard(HeadName)) {
-    //print standard sort declaration
+  } else if (gsIsSortId(Part)) {
+    //print sort identifier
     if (gsDebug) { printf("(gsPrintPart): printing standard sort declaration\n"); }
-    ATermList Ids = ATLgetArgument(Part, 0);
-    int n = ATgetLength(Ids);
-    for (int i = 0; i < n && Result; i++) {
-      if (i > 0) {
-	fprintf(OutStream, ", ");
-      }
-      Result = gsPrintPart(OutStream, ATAelementAt(Ids, i), 0);
-    }
-    if (Result) {
-      fprintf(OutStream, ";\n");
-    }
-  } else if (gsIsSortDeclRef(HeadName)) {
-    //print sort reference declaration
+    ATfprintf(OutStream, "%t", ATgetArgument(Part, 0));
+    Result = true;
+  } else if (gsIsSortRef(Part)) {
+    //print sort reference
     if (gsDebug) { printf("(gsPrintPart): printing sort reference declaration\n"); }
     ATermList Ids = ATLgetArgument(Part, 0);
-    int n = ATgetLength(Ids);
-    for (int i = 0; i < n && Result; i++) {
-      if (i > 0) {
-	fprintf(OutStream, ", ");
-      }
-      Result = gsPrintPart(OutStream, ATAelementAt(Ids, i), 0);
-    }
-    if (Result) {
-      fprintf(OutStream, " = ");
-      Result = gsPrintPart(OutStream, ATAgetArgument(Part, 1), 0);
-      if (Result) {
-        fprintf(OutStream, ";\n");
-      }
-    }
-  } else if (gsIsSortStruct(HeadName)) {
+    ATfprintf(OutStream, "%t = %t", ATgetArgument(Part, 0), ATgetArgument(Part, 1));
+    Result = true;
+  } else if (gsIsSortStruct(Part)) {
     //print structured sort declaration
     if (gsDebug) { printf("(gsPrintPart): printing structured sort declaration\n"); }
     Result = gsPrintPart(OutStream, ATAgetArgument(Part, 0), 0);
