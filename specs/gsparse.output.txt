@@ -42,7 +42,7 @@
 <Spec>       ::= Spec(SortSpec(<SortDecl>*), ConsSpec(<DataDecl>*),
                    MapSpec(<DataDecl>*), EqnSpec(<EqnSect>*),
                    ActSpec(<ActDecl>*), ProcSpec(<ProcDecl>*), Init(<ProcExpr>)
-                  )
+                 )
 
 //sort declaration
 <SortDecl>   ::= SortDeclStandard(<SortId>) 
