@@ -1,5 +1,5 @@
 #define  NAME      "gsparse"
-#define  LVERSION  "0.1.11"
+#define  LVERSION  "0.1.12"
 #define  AUTHOR    "Aad Mathijssen"
 
 #ifdef __cplusplus
@@ -39,15 +39,12 @@ void PrintVersion(FILE* Stream);
 bool ParseSpecificationFileName(
   char *SpecFileName,
   char *OutFileName,
-  int VbLevel,
   bool NoSave);
 /*Pre: SpecFileName is the name of a valid GenSpect specification file from
        which can be read
        OutFileName is the name of a valid file to which can be written, or NULL
-       0 <= VbLevel <= 3
   Post:the specification in SpecFileName is parsed and saved to OutFileName
        If OutFileName is NULL, stdout is used.
-       The display of messages is controlled by the value of VbLevel.
        If NoSave, the parsed formula is not saved.
   Ret: true, if everything went ok.
        false, otherwise; appropriate error messages have been shown.
@@ -56,14 +53,11 @@ bool ParseSpecificationFileName(
 bool ParseSpecificationStream(
   FILE *SpecStream,
   FILE *OutStream,
-  int VbLevel,
   bool NoSave);
 /*Pre: SpecStream is a valid GenSpect specification stream from which can be
        read
        OutStream is the name of a valid stream to which can be written
-       0 <= VbLevel <= 3
   Post:the specification in SpecStream is parsed and saved to OutStream
-       The display of messages is controlled by the value of VbLevel.
        If NoSave, the parsed formula is not saved.
   Ret: true, if everything went ok.
        false, otherwise; appropriate error messages have been shown.
@@ -112,13 +106,13 @@ int main(int argc, char* argv[]) {
         ThrowV(0);
         break;
       case 'q': 
-        VbLevel = 0;
+        gsSetQuietMsg();
         break;
       case 'v': 
-        VbLevel = 2;
+        gsSetVerboseMsg();
         break;
       case 'd': 
-        VbLevel = 3;
+        gsSetDebugMsg();
         break;
       case 'n': 
         NoSave = true;
@@ -134,10 +128,12 @@ int main(int argc, char* argv[]) {
   NoArgc = argc - optind;
   if (NoArgc <= 0) {
     MoreInfo = true;
-    ThrowVM1(1,"%s: too few arguments\n", NAME);
+    fprintf(stderr, "%s: too few arguments\n", NAME);
+    ThrowV(1);
   } else if (NoArgc > 2) {
     MoreInfo = true;
-    ThrowVM1(1,"%s: too many arguments\n", NAME);
+    fprintf(stderr, "%s: too many arguments\n", NAME);
+    ThrowV(1);
   } else {
     //NoArgc > 0 && NoArgc <= 2
     SpecFileName = strdup(argv[optind]);
@@ -149,8 +145,7 @@ int main(int argc, char* argv[]) {
   ATerm StackBottom;
   ATinit(0, NULL, &StackBottom);
   //parse specification  
-  if (!ParseSpecificationFileName(SpecFileName, OutputFileName, VbLevel,
-    NoSave))
+  if (!ParseSpecificationFileName(SpecFileName, OutputFileName, NoSave))
   {
     ThrowV(1);  
   }       
@@ -160,47 +155,39 @@ finally:
   }
   free(SpecFileName);
   free(OutputFileName);
-  if (VbLevel == 3) {
-    printf("(main): all objects are freed; return %d.\n", Result);
-  }
+  gsDebugMsg("all objects are freed; return %d.\n", Result);
   return Result;
 }
 
 bool ParseSpecificationFileName(char *SpecFileName, char *OutputFileName,
-  int VbLevel, bool NoSave)
+  bool NoSave)
 {
   bool Result           = true;
   FILE *SpecStream      = NULL;
   FILE *OutputStream    = NULL;
   if (SpecFileName == NULL) {
-    ThrowVM0(false, "error: formula file may not be NULL\n");
+    ThrowVM(false, "error: formula file may not be NULL\n");
   }
   //open specification file for reading
   SpecStream = fopen(SpecFileName, "r");
   if (SpecStream == NULL) {
-    ThrowVM2(false, "error: could not open formula file '%s' for reading (error %d)\n", 
+    ThrowVM(false, "could not open formula file '%s' for reading (error %d)\n", 
       SpecFileName, errno);
   }
-  if (VbLevel == 3) {  
-    printf("formula file %s is opened for reading.\n", SpecFileName);
-  }
+  gsDebugMsg("formula file %s is opened for reading.\n", SpecFileName);
   //open output file for writing or set to stdout
   if (OutputFileName == NULL) {
     OutputStream = stdout;
-    if (VbLevel == 3) {
-      printf("output to stdout.\n");
-    }
+    gsDebugMsg("output to stdout.\n");
   } else {  
     OutputStream = fopen(OutputFileName, "w");
     if (!OutputStream) {
-      ThrowVM2(false, "error: could not open output file '%s' for writing (error %d)\n", 
+      ThrowVM(false, "could not open output file '%s' for writing (error %d)\n", 
         OutputFileName, errno);
     }
-    if (VbLevel == 3) {
-      printf("output file %s is opened for writing.\n", OutputFileName);
-    }
+    gsDebugMsg("output file %s is opened for writing.\n", OutputFileName);
   }
-  if (!ParseSpecificationStream(SpecStream, OutputStream, VbLevel, NoSave))
+  if (!ParseSpecificationStream(SpecStream, OutputStream, NoSave))
   {
     ThrowV(false);
   }
@@ -211,35 +198,30 @@ finally:
   if (OutputStream != NULL && OutputStream != stdout) {
     fclose(OutputStream);
   }
-  if (VbLevel == 3) {
-    printf("(parseSpecificationFileName): all files are closed; return %s\n",
-      Result?"true":"false");
-  }
+  gsDebugMsg("all files are closed; return %s\n", Result?"true":"false");
   return Result;
 }
 
 bool ParseSpecificationStream(FILE *SpecStream, FILE *OutputStream,
-  int VbLevel, bool NoSave)
+  bool NoSave)
 {
   bool Result;
   ATermAppl Spec = NULL;
   //check preconditions
   if (SpecStream == NULL) {
-    ThrowVM0(false, "error: formula stream may not be empty\n");
+    ThrowVM(false, "error: formula stream may not be empty\n");
   }
   if (OutputStream == NULL) {
-    ThrowVM0(false, "error: output stream may not be empty\n");
+    ThrowVM(false, "error: output stream may not be empty\n");
   }
   //parse specification save it to Spec
-  Spec = gsParseSpecification(SpecStream, VbLevel);
+  Spec = gsParseSpecification(SpecStream);
   if (Spec != NULL) {
     if (NoSave) {
-      if (VbLevel > 1) {
-        printf("do not save specification\n");
-      }
+      gsVerboseMsg("do not save specification\n");
     } else {
-      if (VbLevel > 1 && OutputStream != stdout) {
-        printf("saving specification to file\n");
+      if (OutputStream != stdout) {
+        gsVerboseMsg("saving specification to file\n");
       }
       ATwriteToTextFile((ATerm) Spec, OutputStream);
       fprintf(OutputStream, "\n");
@@ -249,10 +231,7 @@ bool ParseSpecificationStream(FILE *SpecStream, FILE *OutputStream,
     Result = false;
   }
 finally:
-  if (VbLevel == 3) {
-    printf("(ParseSpecificationStream): all files are closed; return %s\n",
-      Result?"true":"false");
-  }
+  gsDebugMsg("all files are closed; return %s\n", Result?"true":"false");
   return Result;
 }
 

@@ -11,6 +11,81 @@ extern "C" {
 }
 #endif
 
+//debugging
+static bool gsWarning = true;
+static bool gsVerbose = false;
+static bool gsDebug   = false;
+
+bool gsSetQuietMsg(void)
+{
+  gsWarning = false;
+  gsVerbose = false;
+  gsDebug   = false;
+}
+
+bool gsSetNormalMsg(void)
+{
+  gsWarning = true;
+  gsVerbose = false;
+  gsDebug   = false;
+}
+
+bool gsSetVerboseMsg(void)
+{
+  gsWarning = true;
+  gsVerbose = true;
+  gsDebug   = false;
+}
+
+bool gsSetDebugMsg(void)
+{
+  gsWarning = true;
+  gsVerbose = true;
+  gsDebug   = true;
+}
+
+void gsErrorMsg(char *Format, ...)
+{
+  fprintf(stderr, "error: ");
+  va_list Args;
+  va_start(Args, Format);
+  ATvfprintf(stderr, Format, Args);
+  va_end(Args);
+}
+
+void gsWarningMsg(char *Format, ...)
+{
+  if (gsWarning) {
+    fprintf(stderr, "warning: ");
+    va_list Args;
+    va_start(Args, Format);
+    ATvfprintf(stderr, Format, Args);
+    va_end(Args);
+  }
+}
+
+void gsVerboseMsg(char *Format, ...)
+{
+  if (gsVerbose) {
+    va_list Args;
+    va_start(Args, Format);
+    ATvfprintf(stderr, Format, Args);
+    va_end(Args);
+  }
+}
+
+void gsDebugMsgFunc(const char *FuncName, ...)
+{
+  if (gsDebug) {
+    fprintf(stderr, "(%s): ", FuncName);
+    va_list Args;
+    va_start(Args, FuncName);
+    char *Format = va_arg(Args, char *);
+    ATvfprintf(stderr, Format, Args);
+    va_end(Args);
+  }
+}
+
 //strdup implementation
 #if !(defined __USE_SVID || defined __USE_BSD || defined __USE_XOPEN_EXTENDED)
 char *strdup(const char *s)
@@ -1308,11 +1383,11 @@ ATermAppl gsMakeDataExprEq(ATermAppl DataExprLHS, ATermAppl DataExprRHS)
   ATermAppl Result = NULL;
   ATermAppl ExprType = gsGetType(DataExprLHS);
   if (gsIsUnknown(ExprType)) {
-    ThrowVM1(NULL, "type of data expression %t is unknown", DataExprLHS);
+    ThrowVM(NULL, "type of data expression %t is unknown", DataExprLHS);
   }
   if (!ATisEqual(ExprType, gsGetType(DataExprRHS)))
   {
-    ThrowVM3(NULL, "expected type %t instead of %t for data expression %t",
+    ThrowVM(NULL, "expected type %t instead of %t for data expression %t",
       ExprType, gsGetType(DataExprRHS), DataExprLHS);
   }   
   Result = gsMakeDataApplList(gsMakeOpIdEq(ExprType),
@@ -1326,11 +1401,11 @@ ATermAppl gsMakeDataExprNeq(ATermAppl DataExprLHS, ATermAppl DataExprRHS)
   ATermAppl Result = NULL;
   ATermAppl ExprType = gsGetType(DataExprLHS);
   if (gsIsUnknown(ExprType)) {
-    ThrowVM1(NULL, "type of data expression %t is unknown", DataExprLHS);
+    ThrowVM(NULL, "type of data expression %t is unknown", DataExprLHS);
   }
   if (!ATisEqual(ExprType, gsGetType(DataExprRHS)))
   {
-    ThrowVM3(NULL, "expected type %t instead of %t for data expression %t",
+    ThrowVM(NULL, "expected type %t instead of %t for data expression %t",
       ExprType, gsGetType(DataExprRHS), DataExprLHS);
   }   
   Result = gsMakeDataApplList(gsMakeOpIdNeq(ExprType),
@@ -1344,16 +1419,16 @@ ATermAppl gsMakeDataExprIf(ATermAppl DataExprCond, ATermAppl DataExprThen,
 {
   ATermAppl Result = NULL;
   if (!ATisEqual(gsGetType(DataExprCond), gsMakeSortIdBool())) {
-    ThrowVM2(NULL, "data expression %t should be of type %t", DataExprCond,
+    ThrowVM(NULL, "data expression %t should be of type %t", DataExprCond,
       gsMakeSortIdBool());
   }
   ATermAppl ExprType = gsGetType(DataExprThen);
   if (gsIsUnknown(ExprType)) {
-    ThrowVM1(NULL, "type of data expression %t is unknown", DataExprThen);
+    ThrowVM(NULL, "type of data expression %t is unknown", DataExprThen);
   }
   if (!ATisEqual(ExprType, gsGetType(DataExprElse)))
   {
-    ThrowVM3(NULL, "expected type %t instead of %t for data expression %t",
+    ThrowVM(NULL, "expected type %t instead of %t for data expression %t",
       ExprType, gsGetType(DataExprElse), DataExprElse);
   }   
   Result = gsMakeDataApplList(gsMakeOpIdIf(ExprType),
@@ -1433,8 +1508,7 @@ char *gsStringDiv2(char *n)
 //     freed
 {
   assert(strlen(n) > 0);
-  int l   = strlen(n); //length of n
-
+  int l = strlen(n); //length of n
   char *r = (char *) 
     malloc((l - (((l>0)&&(n[0]=='1'))?1:0) + 1) * sizeof(char)); //result char*
   //calculate r[0]

@@ -1,5 +1,5 @@
 #define  NAME      "libgsparse"
-#define  LVERSION  "0.1.11"
+#define  LVERSION  "0.1.12"
 #define  AUTHOR    "Aad Mathijssen"
 
 #ifdef __cplusplus
@@ -17,13 +17,43 @@ extern "C" {
 #include "libgsparse.h"
 #include "gsfunc.h"
 
-//global declarations
-bool gsDebug = false;	                 /* print debug information, if true */
-
 //external declarations
 extern ATermAppl gsParse(FILE *SpecFile);/* declared in lexer.l */
 
 //local declarations
+ATermAppl gsTypeCheck(ATermAppl Spec);
+/*Pre: spec represents a specification that adheres to the initial internal
+ *     ATerm structure.
+ *Post:spec is type checked.
+ *Ret: if the type checking went ok, an equivalent version of spec is returned
+ *     that adheres to the internal ATerm structure after type checking.
+ *     if something went wrong, an appriopriate error message is printed and
+ *     NULL is returned.
+ */
+
+ATermAppl gsImplementData(ATermAppl Spec);
+/*Pre: spec represents a specification that adheres to the internal ATerm
+ *     structure after the type checking phase.
+ *Post:The datatypes of spec are implemented as higher-order abstract data
+ *     types.
+ *Ret: if the data implementation went ok, an equivalent version spec is
+ *     returned that adheres to the internal ATerm structure after data
+ *     implementation.
+ *     If something went wrong, an appropriate error message is printed and
+ *     NULL is returned.
+ */
+
+ATermAppl gsLinearise(ATermAppl Spec);
+/*Pre: spec represents a specification that adheres to the internal ATerm
+ *     structure after the data implementation phase.
+ *Post:The processes of spec are linearised.
+ *Ret: if the linearisation went ok, an equivalent version spec is
+ *     returned that adheres to the internal ATerm structure after
+ *     linearisation.
+ *     If something went wrong, an appropriate error message is printed and
+ *     NULL is returned.
+ */
+
 bool gsPrintPart(FILE *OutStream, ATermAppl Part, int PrecLevel);
 /*Pre: OutStream points to a stream to which can be written
        Spec is an ATermAppl containing a part of a GenSpect specification
@@ -38,64 +68,82 @@ bool gsPrintPart(FILE *OutStream, ATermAppl Part, int PrecLevel);
 
 //implementation
 
-ATermAppl gsParseSpecification (FILE *SpecStream, int VbLevel)
+ATermAppl gsParseSpecification (FILE *SpecStream)
 {
   ATermAppl Result = NULL;
   //check preconditions
-  if (VbLevel < 0 || VbLevel > 3) {
-    ThrowVM0(NULL, "error: illegal value for the level of verbosity\n");
-  }
   if (SpecStream == NULL) {
-    ThrowVM0(NULL, "error: formula stream may not be empty\n");
+    ThrowVM(NULL, "formula stream may not be empty\n");
   }
-  //set global debug flag
-  gsDebug = (VbLevel == 3);
   //enable constructor functions
   gsEnableConstructorFunctions();
   //parse specification using bison
-  if (VbLevel > 1) {
-    printf("parsing specification from stream\n");
-  }
+  gsVerboseMsg("parsing specification from stream\n");
   Result = gsParse(SpecStream);
   if (Result == NULL) {
-    ThrowM0("error: parsing failed\n");
+    ThrowM("parsing failed\n");
+  }
+  //type check specification
+  gsVerboseMsg("type checking specification\n");
+  Result = gsTypeCheck(Result);
+  if (Result == NULL) {
+    ThrowM("type checking failed\n");
+  }
+  //implement standard data types and type constructors
+  gsVerboseMsg("implementing standard data types and type constructors\n");
+  Result = gsImplementData(Result);
+  if (Result == NULL) {
+    ThrowM("data implementation failed\n");
+  }
+  //linearise processes
+  gsVerboseMsg("linearising processes\n");
+  Result = gsLinearise(Result);
+  if (Result == NULL) {
+    ThrowM("linearisation failed\n");
   }
 finally:
-  if (gsDebug) {
-    if (Result != NULL) {
-      ATprintf("(gsParseSpecification): return %t\n", Result);
-    } else {
-      ATprintf("(gsParseSpecification): return NULL\n");
-    }
+  if (Result != NULL) {
+    gsDebugMsg("return %t\n", Result);
+  } else {
+    gsDebugMsg("return NULL\n");
   }
   return Result;
 }
 
-bool gsPrintSpecification(FILE *OutStream, ATermAppl Spec, int VbLevel)
+bool gsPrintSpecification(FILE *OutStream, ATermAppl Spec)
 {
   bool Result = false;
   //check preconditions
-  if (VbLevel < 0 || VbLevel > 3) {
-    ThrowVM0(NULL, "error: illegal value for the level of verbosity\n");
-  }
   if (Spec == NULL) {
-    ThrowVM0(NULL, "error: specification may not be empty\n");
+    ThrowVM(NULL, "specification may not be empty\n");
   }
-  //set global debug flag
-  gsDebug = (VbLevel == 3);
   //print specification
-  if (VbLevel > 1) {
-    printf("printing specification to stream\n");
-  }
+  gsVerboseMsg("printing specification to stream\n");
   Result = gsPrintPart(OutStream, Spec, 0);
   if (!Result) {
-    ThrowM0("error: printing failed\n");
+    ThrowM("printing failed\n");
   }
 finally:
-  if (gsDebug) {
-    printf("(gsPrintSpecification): return %s\n", Result?"true":"false");
-  }
+  gsDebugMsg("return %s\n", Result?"true":"false");
   return Result;
+}
+
+ATermAppl gsTypeCheck(ATermAppl spec)
+{
+  gsVerboseMsg("type checking is not yet implemented\n");
+  return spec;
+}
+
+ATermAppl gsImplementData(ATermAppl spec)
+{
+  gsVerboseMsg("data implementation is not yet implemented\n");
+  return spec;
+}
+
+ATermAppl gsLinearise(ATermAppl spec)
+{
+  gsVerboseMsg("linearisation is not yet implemented\n");
+  return spec;
 }
 
 bool gsPrintPart(FILE *OutStream, ATermAppl Part, int PrecLevel)
@@ -103,7 +151,7 @@ bool gsPrintPart(FILE *OutStream, ATermAppl Part, int PrecLevel)
   bool Result = true;
   if (gsIsSpecV1(Part)) {
     //print specification
-    if (gsDebug) { printf("(gsPrintPart): printing specification\n"); }
+    gsDebugMsg("printing specification\n");
     ATermList SpecElts = ATLgetArgument(Part, 0);
     int n = ATgetLength(SpecElts);
     for (int i = 0; i < n && Result; i++) {
@@ -114,7 +162,7 @@ bool gsPrintPart(FILE *OutStream, ATermAppl Part, int PrecLevel)
     }
   } else if (gsIsSortSpec(Part)) {
     //print sort specification
-    if (gsDebug) { printf("(gsPrintPart): printing sort specification\n"); }
+    gsDebugMsg("printing sort specification\n");
     ATermList SortDecls = ATLgetArgument(Part, 0);
     int n = ATgetLength(SortDecls);
     fprintf(OutStream, "sort\n"); 
@@ -124,7 +172,7 @@ bool gsPrintPart(FILE *OutStream, ATermAppl Part, int PrecLevel)
     }
   } else if (gsIsConsSpec(Part)) {
     //print constructor operation specification
-    if (gsDebug) { printf("(gsPrintPart): printing constructor operation specification\n"); }
+    gsDebugMsg("printing constructor operation specification\n");
     ATermList ConsDecls = ATLgetArgument(Part, 0);
     int n = ATgetLength(ConsDecls);
     fprintf(OutStream, "cons\n"); 
@@ -134,7 +182,7 @@ bool gsPrintPart(FILE *OutStream, ATermAppl Part, int PrecLevel)
     }
   } else if (gsIsMapSpec(Part)) {
     //print operation specification
-    if (gsDebug) { printf("(gsPrintPart): printing operation specification\n"); }
+    gsDebugMsg("printing operation specification\n");
     ATermList MapDecls = ATLgetArgument(Part, 0);
     int n = ATgetLength(MapDecls);
     fprintf(OutStream, "map\n"); 
@@ -144,7 +192,7 @@ bool gsPrintPart(FILE *OutStream, ATermAppl Part, int PrecLevel)
     }
   } else if (gsIsDataEqnSpec(Part)) {
     //print equation specification
-    if (gsDebug) { printf("(gsPrintPart): printing equation specification\n"); }
+    gsDebugMsg("printing equation specification\n");
     ATermList VarDecls = ATLgetArgument(Part, 0);
     int n = ATgetLength(VarDecls);
     if (n > 0) {
@@ -165,7 +213,7 @@ bool gsPrintPart(FILE *OutStream, ATermAppl Part, int PrecLevel)
     }
   } else if (gsIsActSpec(Part)) {
     //print action specification
-    if (gsDebug) { printf("(gsPrintPart): printing action specification\n"); }
+    gsDebugMsg("printing action specification\n");
     ATermList ActDecls = ATLgetArgument(Part, 0);
     int n = ATgetLength(ActDecls);
     fprintf(OutStream, "act\n"); 
@@ -175,7 +223,7 @@ bool gsPrintPart(FILE *OutStream, ATermAppl Part, int PrecLevel)
     }
   } else if (gsIsProcEqnSpec(Part)) {
     //print process specification
-    if (gsDebug) { printf("(gsPrintPart): printing process specification\n"); }
+    gsDebugMsg("printing process specification\n");
     ATermList ProcDecls = ATLgetArgument(Part, 0);
     int n = ATgetLength(ProcDecls);
     fprintf(OutStream, "proc\n"); 
@@ -185,24 +233,25 @@ bool gsPrintPart(FILE *OutStream, ATermAppl Part, int PrecLevel)
     }
   } else if (gsIsInit(Part)) {
     //print initialisation
-    if (gsDebug) { printf("(gsPrintPart): printing initialisation\n"); }
+    gsDebugMsg("printing initialisation\n");
     fprintf(OutStream, "init\n"); 
     fprintf(OutStream, "  "); 
     Result = gsPrintPart(OutStream, ATAgetArgument(Part, 0), 0);
   } else if (gsIsSortId(Part)) {
     //print sort identifier
-    if (gsDebug) { printf("(gsPrintPart): printing standard sort declaration\n"); }
+    gsDebugMsg("printing standard sort declaration\n");
     ATfprintf(OutStream, "%t", ATgetArgument(Part, 0));
     Result = true;
   } else if (gsIsSortRef(Part)) {
     //print sort reference
-    if (gsDebug) { printf("(gsPrintPart): printing sort reference declaration\n"); }
+    gsDebugMsg("printing sort reference declaration\n");
     ATermList Ids = ATLgetArgument(Part, 0);
-    ATfprintf(OutStream, "%t = %t", ATgetArgument(Part, 0), ATgetArgument(Part, 1));
+    ATfprintf(OutStream, "%t = %t", ATgetArgument(Part, 0),
+      ATgetArgument(Part, 1));
     Result = true;
   } else if (gsIsSortStruct(Part)) {
     //print structured sort declaration
-    if (gsDebug) { printf("(gsPrintPart): printing structured sort declaration\n"); }
+    gsDebugMsg("printing structured sort declaration\n");
     Result = gsPrintPart(OutStream, ATAgetArgument(Part, 0), 0);
     if (Result) {
       fprintf(OutStream, " = struct ");

@@ -1,4 +1,5 @@
 #include <stdbool.h>
+#include <stdarg.h>
 #include "aterm2.h"
 
 #ifdef __cplusplus
@@ -24,27 +25,65 @@ extern char *strdup(const char *s);
 //If a message, should be printed, the message has to be able to be used by
 //function printf.
 
-#define throw                      goto finally
+#define throw             goto finally
 //model C++ throw by a 'goto finally' statement
 
-#define ThrowV(x)                  Result = x; throw
+#define ThrowV(x)         Result = x; throw
 //store x in result and throw an exception
 
-#define ThrowM0(s)                 ATfprintf(stderr, s); throw
-//print message s and throw an exception
+#define ThrowM(...)       gsErrorMsg(__VA_ARGS__); throw
+//print error message supplied by the first parameter with the remaining
+//parameters as arguments
 
-#define ThrowVM0(x, s)             ATfprintf(stderr, s); ThrowV(x)
-//print message s and throw an exception with value x
+#define ThrowVM(x, ...)   gsErrorMsg(__VA_ARGS__); ThrowV(x)
+//print error message supplied by the first parameter with the remaining
+//parameters as arguments, and throw an exception with value x
 
-#define ThrowVM1(x, s, a1)         ATfprintf(stderr, s, a1); ThrowV(x)
-//print message s with argument a1, and throw an exception with value x
+//Debugging
+//-------
 
-#define ThrowVM2(x, s, a1, a2)     ATfprintf(stderr, s, a1, a2); ThrowV(x)
-//print message s with argument a1 and a2,  and throw an exception with value x
+bool gsSetQuietMsg(void);
+//Post: Printing of warnings, verbose information and extended debugging
+//      information during program execution is disabled.
 
-#define ThrowVM3(x, s, a1, a2, a3) ATfprintf(stderr, s, a1, a2, a3); ThrowV(x)
-//print message s with argument a1, a2 and a3,  and throw an exception with
-//value x
+bool gsSetNormalMsg(void);
+//Post: Printing of warnings during program execution is enabled. Printing of
+//      verbose information and extended debugging information is disabled.
+
+bool gsSetVerboseMsg(void);
+//Post: Printing of warnings and verbose information during program execution
+//      is enabled. Printing of extended debugging information is disabled.
+
+bool gsSetDebugMsg(void);
+//Post: Printing of warnings, verbose information and extended debugging
+//      information during program executation is enabled.
+
+inline void gsErrorMsg(char *Format, ...);
+//Pre:  The ATerm library is initialised
+//Post: Format is printed to stderr, with the remaining parameters as
+//      arguments.
+
+inline void gsWarningMsg(char *Format, ...);
+//Pre:  The ATerm library is initialised
+//Post: If the printing of warning messages is enabled, Format is printed to
+//      stderr, with the remaining parameters as arguments.
+
+inline void gsVerboseMsg(char *Format, ...);
+//Pre:  The ATerm library is initialised
+//Post: If the printing of verbose information is enabled, Format is printed to
+//      stderr, with the remaining parameters as arguments.
+
+#define gsDebugMsg(...)   gsDebugMsgFunc(__func__, __VA_ARGS__)
+//Pre:  The ATerm library is initialised.
+//Post: If the printing of debug messages is enabled, the name of the current
+//      function is printed to stderr, followed by the first parameter with the
+//      remaining parameters as arguments.
+
+inline void gsDebugMsgFunc(const char *FuncName, ...);
+//Pre:  The ATerm library is initialised
+//Post: If the printing of debug messages is enabled, the name of FuncName is
+//      printed to stderr, followed by the first parameter with the remaining
+//      parameters as arguments.
 
 //ATerm library work arounds
 //--------------------------
