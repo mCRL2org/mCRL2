@@ -171,14 +171,18 @@ static ATermAppl gstcUnArrowProd(ATermList ArgTypes, ATermAppl PosType);
 static ATermAppl gstcMakeNotInferredSetBag(ATermAppl Type);
 static ATermAppl gstcAdjustPosTypesA(ATermAppl NewType, ATermAppl PosType);
 static ATermList gstcTypesIntersect(ATermList TypeList1, ATermList TypeList2);
+static ATermList gstcTypeListsIntersect(ATermList TypeListList1, ATermList TypeListList2);
 static ATermList gstcGetVarTypes(ATermList VarDecls);
 static ATermAppl gstcTypeMatchA(ATermAppl Type, ATermAppl PosType);
 static ATermList gstcTypeMatchL(ATermList TypeList, ATermList PosTypeList);
 static ATbool gstcHasUnknown(ATermAppl Type);
 static ATermAppl gstcExpandPosTypes(ATermAppl Type);
 static ATermAppl gstcMinType(ATermList TypeList);
-static ATermList gstcMActPut(ATermList MActs, ATermList NewMAct, ATbool *new);
+static ATbool gstcMActIn(ATermList MAct, ATermList MActs);
+static ATbool gstcMActInSubEq(ATermList MAct, ATermList MActs);
 static ATbool gstcMActEq(ATermList MAct1, ATermList MAct2);
+static ATbool gstcMActSubEq(ATermList MAct1, ATermList MAct2);
+
 
 // Main function
 ATermAppl gsTypeCheck (ATermAppl input){	
@@ -952,7 +956,7 @@ static ATermAppl gstcTraverseActProcVarConstP(ATermTable Vars, ATermAppl ProcTer
       for(;!ATisEmpty(RenList);RenList=ATgetNext(RenList)){
 	ATermAppl Ren=ATAgetFirst(RenList);
 	ATermAppl ActFrom=ATAgetArgument(Ren,0);
-	ATermAppl ActTo=ATAgetArgument(Ren,0);
+	ATermAppl ActTo=ATAgetArgument(Ren,1);
 	
 	if(ATisEqual(ActFrom,ActTo)) gsWarningMsg("Renaming action %t into itself (typechecking %t)\n",ActFrom,ProcTerm);
 	
@@ -963,52 +967,64 @@ static ATermAppl gstcTraverseActProcVarConstP(ATermTable Vars, ATermAppl ProcTer
 	if(!(TypesTo=ATLtableGet(context.actions,(ATerm)ActTo)))
 	  {ThrowM("Renaming into an undefined action %t (typechecking %t)\n",ActTo,ProcTerm);}
 
+	TypesTo=gstcTypeListsIntersect(TypesFrom,TypesTo);
+	if(!TypesTo || ATisEmpty(TypesTo))
+	  {ThrowM("Renaming action %t into action %t: these two have no common type (typechecking %t)\n",ActTo,ActFrom,ProcTerm);}
+ 
 	ATbool new;
 	ATindexedSetPut(ActsFrom,(ATerm)ActFrom,&new);
 	if(!new) {ThrowM("Renaming action %t twice (typechecking %t)\n",ActFrom,ProcTerm);}
-
-	ATermList Types=gstcTypesIntersect(TypesFrom,TypesTo);
-	if(!Types || ATisEmpty(Types))
-	  {ThrowM("Renaming action %t into action %t: these two have no common type (typechecking %t)\n",ActTo,ActFrom,ProcTerm);}
-      }
+     }
       ATindexedSetDestroy(ActsFrom);
     }
 
-/*     //comm: like renaming multiactions (with the same parameters) to action/tau */
-/*     if(gsIsComm(ProcTerm)){ */
-/*       ATermList CommList=ATLgetArgument(ProcTerm,0); */
+    //comm: like renaming multiactions (with the same parameters) to action/tau
+    if(gsIsComm(ProcTerm)){
+      ATermList CommList=ATLgetArgument(ProcTerm,0);
 
-/*       if(ATisEmpty(CommList)) gsWarningMsg("Synchronizing empty set of (multi)actions (typechecking %t)\n",ProcTerm); */
-/*       else{ */
+      if(ATisEmpty(CommList)) gsWarningMsg("Synchronizing empty set of (multi)actions (typechecking %t)\n",ProcTerm);
+      else{
+	ATermList MActsFrom=ATmakeList0();
 
-/* 	ATermIndexedSet ActListsFrom=ATindexedSetCreate(63,50); */
+	for(;!ATisEmpty(CommList);CommList=ATgetNext(CommList)){
+	  ATermAppl Comm=ATAgetFirst(CommList);
+	  ATermList MActFrom=ATLgetArgument(ATAgetArgument(Comm,0),0);
+	  ATermList BackupMActFrom=MActFrom;
+	  assert(!ATisEmpty(MActFrom));
+	  ATermAppl ActTo=ATAgetArgument(Comm,1);
+	  
+	  if(ATgetLength(MActFrom)==1)
+	    gsWarningMsg("Using Syncronization as Renaming (hiding) of action %t into %t (typechecking %t)\n",
+			 ATgetFirst(MActFrom),ActTo,ProcTerm);
+	  
+	  //Actions must be declared
+	  ATermList ResTypes=NULL;
 
-/* 	for(;!ATisEmpty(RenList);RenList=ATgetNext(RenList)){ */
-/* 	  ATermAppl Ren=ATAgetFirst(RenList); */
-/* 	  ATermAppl ActFrom=ATAgetArgument(Ren,0); */
-/* 	  ATermAppl ActTo=ATAgetArgument(Ren,0); */
-	  
-/* 	  if(ATisEqual(ActFrom,ActTo)) gsWarningMsg("Renaming action %t into itself (typechecking %t)\n",ActFrom,ProcTerm); */
-	  
-/* 	  //Actions must be declared */
-/* 	  ATermList TypesFrom,TypesTo; */
-/* 	  if(!(TypesFrom=ATtableGet(context.actions,(ATerm)ActFrom))) */
-/* 	    {ThrowM("Renaming an undefined action %t (typechecking %t)\n"ActFrom,ProcTerm);} */
-/* 	  if(!(TypesTo=ATtableGet(context.actions,(ATerm)ActTo))) */
-/* 	    {ThrowM("Renaming into an undefined action %t (typechecking %t)\n"ActTo,ProcTerm);} */
-	  
-/* 	  ATbool new; */
-/* 	  ATindexedSetPut(ActsFrom,(ATerm)Act,&new); */
-/* 	  if(!new) {ThrowM("Renaming action %t twise (typechecking %t)\n",Act,ProcTerm);} */
-	  
-/* 	  ATermList Types=gstcIntersectTypes(TypeFrom,TypeTo); */
-/* 	  if(!Types || ATisEmpty(Types)) */
-/* 	    {ThrowM("Renaming action %t into action %t: these two have no common type (typechecking %t)\n"ActTo,ActFrom,ProcTerm);} */
-/* 	} */
-/* 	ATindexedSetDestroy(ActsFrom); */
-/*       } */
-/*     } */
+	  if(!gsIsNil(ActTo)){
+	    ResTypes=ATLtableGet(context.actions,(ATerm)ActTo);
+	    if(!ResTypes) 
+	      {ThrowM("Synchronizing to an undefined action %t (typechecking %t)\n",ActTo,ProcTerm);}
+	  }
 
+	  for(;!ATisEmpty(MActFrom);MActFrom=ATgetNext(MActFrom)){
+	    ATermAppl Act=ATAgetFirst(MActFrom);
+	    ATermList Types=ATLtableGet(context.actions,(ATerm)Act);
+	    if(!Types)
+	      {ThrowM("Synchronizing an undefined action %t in (multi)action %t (typechecking %t)\n",Act,MActFrom,ProcTerm);}
+	    ResTypes=(ResTypes)?gstcTypeListsIntersect(ResTypes,Types):Types;
+	    if(!Types || ATisEmpty(Types))
+	      {ThrowM("Synchronizing action %t from (multi)action into action %t: these have no common type (typechecking %t)\n",
+		      Act,BackupMActFrom,ActTo,ProcTerm);}
+	  }
+	  MActFrom=BackupMActFrom;
+
+	  if(gstcMActInSubEq(MActFrom,MActsFrom))
+	    {ThrowM("Synchronizing (multi)action %t twice (typechecking %t)\n",MActFrom,ProcTerm);}
+	  else MActsFrom=ATinsert(MActsFrom,(ATerm)MActFrom);
+	}
+      }
+    }
+    
     //allow
     if(gsIsAllow(ProcTerm)){
       ATermList MActList=ATLgetArgument(ProcTerm,0);
@@ -1027,14 +1043,13 @@ static ATermAppl gstcTraverseActProcVarConstP(ATermTable Vars, ATermAppl ProcTer
 	      {ThrowM("Allowing an undefined action %t in (multi)action %t (typechecking %t)\n",Act,MAct,ProcTerm);}
 	  }	
 
-	  ATbool new;
 	  MAct=ATLgetArgument(ATAgetFirst(MActList),0);
-	  MActs=gstcMActPut(MActs,MAct,&new);
-	  if(!new) gsWarningMsg("Allowing (multi)action %t twice (typechecking %t)\n",MAct,ProcTerm);
+	  if(gstcMActIn(MAct,MActs))
+	    gsWarningMsg("Allowing (multi)action %t twice (typechecking %t)\n",MAct,ProcTerm);
+	  else MActs=ATinsert(MActs,(ATerm)MAct);
 	}
       }
     }
-
 
     ATermAppl NewProc=gstcTraverseActProcVarConstP(Vars,ATAgetArgument(ProcTerm,1));
     if(!NewProc) {throw;}
@@ -1543,12 +1558,29 @@ static ATermAppl gstcAdjustPosTypesA(ATermAppl NewType, ATermAppl PosType){
 }
 
 static ATermList gstcTypesIntersect(ATermList TypeList1, ATermList TypeList2){
-  // returns the intersection of the 2 type lists 
+  // returns the intersection of the 2 type lists
+  
+  gsDebugMsg("gstcTypesIntersect:  TypeList1 %t;    TypeList2: %t\n",TypeList1,TypeList2);
+
   ATermList Result=ATmakeList0();
 
   for(;!ATisEmpty(TypeList2);TypeList2=ATgetNext(TypeList2)){
     ATermAppl Type2=ATAgetFirst(TypeList2);
     if(gstcInTypesA(Type2,TypeList1)) Result=ATinsert(Result,(ATerm)Type2);
+  }
+  return ATreverse(Result);
+}
+
+static ATermList gstcTypeListsIntersect(ATermList TypeListList1, ATermList TypeListList2){
+  // returns the intersection of the 2 type list lists
+  
+  gsDebugMsg("gstcTypesIntersect:  TypeListList1 %t;    TypeListList2: %t\n",TypeListList1,TypeListList2);
+
+  ATermList Result=ATmakeList0();
+
+  for(;!ATisEmpty(TypeListList2);TypeListList2=ATgetNext(TypeListList2)){
+    ATermList TypeList2=ATLgetFirst(TypeListList2);
+    if(gstcInTypesL(TypeList2,TypeListList1)) Result=ATinsert(Result,(ATerm)TypeList2);
   }
   return ATreverse(Result);
 }
@@ -1583,7 +1615,7 @@ static ATermList gstcAdjustNotInferredList(ATermList PosTypeList, ATermList Type
 }
   
 static ATbool gstcIsTypeAllowedL(ATermList TypeList, ATermList PosTypeList){
-  //Checks if TypeList is alowed by PosTypeList (each respective element)
+  //Checks if TypeList is allowed by PosTypeList (each respective element)
   assert(ATgetLength(TypeList)==ATgetLength(PosTypeList));
   for(;!ATisEmpty(TypeList);TypeList=ATgetNext(TypeList),PosTypeList=ATgetNext(PosTypeList))
     if(!gstcIsTypeAllowedA(ATAgetFirst(TypeList),ATAgetFirst(PosTypeList))) return ATfalse;
@@ -1803,20 +1835,24 @@ static ATermAppl gstcMinType(ATermList TypeList){
 
 
 // =========================== MultiActions
-static ATermList gstcMActPut(ATermList MActs, ATermList NewMAct, ATbool *new){
-  //if MAct is not in the list MActs, add and new=1
-  //else return MActs, new=0
-  *new=ATfalse;
-  ATermList Result=MActs;
-  for(;!ATisEmpty(MActs);MActs=ATgetNext(MActs)){
-    ATermList MAct=ATLgetFirst(MActs);
-    if(gstcMActEq(MAct,NewMAct)) return Result;
-  }
-  *new=ATtrue;
-  return ATinsert(Result,(ATerm)NewMAct);
+static ATbool gstcMActIn(ATermList MAct, ATermList MActs){
+  //returns true if MAct is in MActs
+  for(;!ATisEmpty(MActs);MActs=ATgetNext(MActs))
+    if(gstcMActEq(MAct,ATLgetFirst(MActs))) return ATtrue;
+       
+  return ATfalse;
+}
+
+static ATbool gstcMActInSubEq(ATermList MAct, ATermList MActs){
+  //returns true if a supermultiaction of MAct is in MActs
+  for(;!ATisEmpty(MActs);MActs=ATgetNext(MActs))
+    if(gstcMActSubEq(MAct,ATLgetFirst(MActs))) return ATtrue;
+       
+  return ATfalse;
 }
 
 static ATbool gstcMActEq(ATermList MAct1, ATermList MAct2){
+  //returns true if the two multiactions are equal.
   if(ATgetLength(MAct1)!=ATgetLength(MAct2)) return ATfalse;
   if(ATisEmpty(MAct1)) return ATtrue;
   ATermAppl Act1=ATAgetFirst(MAct1);
@@ -1836,4 +1872,27 @@ static ATbool gstcMActEq(ATermList MAct1, ATermList MAct2){
   return ATfalse;
  gstcMActEq_found:
   return gstcMActEq(MAct1,MAct2);
+}
+
+static ATbool gstcMActSubEq(ATermList MAct1, ATermList MAct2){
+  //returns true if MAct1 is a submultiaction of MAct2.
+  if(ATgetLength(MAct1)>ATgetLength(MAct2)) return ATfalse;
+  if(ATisEmpty(MAct1)) return ATtrue;
+  ATermAppl Act1=ATAgetFirst(MAct1);
+  MAct1=ATgetNext(MAct1);
+
+  //remove Act1 once from MAct2. if not there -- return ATfalse.
+  ATermList NewMAct2=ATmakeList0();
+  for(;!ATisEmpty(MAct2);MAct2=ATgetNext(MAct2)){
+    ATermAppl Act2=ATAgetFirst(MAct2);
+    if(ATisEqual(Act1,Act2)) {
+      MAct2=ATconcat(ATreverse(NewMAct2),ATgetNext(MAct2)); goto gstcMActSubEqMA_found;
+    }
+    else{
+      NewMAct2=ATinsert(NewMAct2,(ATerm)Act2);
+    }
+  }
+  return ATfalse;
+ gstcMActSubEqMA_found:
+  return gstcMActSubEq(MAct1,MAct2);
 }
