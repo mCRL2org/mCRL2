@@ -290,16 +290,16 @@ void gstcDataInit(void){
   gstcAddSystemFunctionProd(gsMakeOpIdGTE(gsMakeSortIdPos()),
 			    gstcMakeSortArrowProd2(gsMakeSortIdPos(),gsMakeSortIdPos(),gsMakeSortIdBool()));
   gstcAddSystemFunctionProd(gsMakeOpIdGTE(gsMakeSortIdNat()),
-			    gstcMakeSortArrowProd2(gsMakeSortIdPos(),gsMakeSortIdPos(),gsMakeSortIdBool()));
+			    gstcMakeSortArrowProd2(gsMakeSortIdNat(),gsMakeSortIdNat(),gsMakeSortIdBool()));
   gstcAddSystemFunctionProd(gsMakeOpIdGTE(gsMakeSortIdInt()),
-			    gstcMakeSortArrowProd2(gsMakeSortIdPos(),gsMakeSortIdPos(),gsMakeSortIdBool()));
+			    gstcMakeSortArrowProd2(gsMakeSortIdInt(),gsMakeSortIdInt(),gsMakeSortIdBool()));
   //more
   gstcAddSystemFunctionProd(gsMakeOpIdGT(gsMakeSortIdPos()),
 			    gstcMakeSortArrowProd2(gsMakeSortIdPos(),gsMakeSortIdPos(),gsMakeSortIdBool()));
   gstcAddSystemFunctionProd(gsMakeOpIdGT(gsMakeSortIdNat()),
-			    gstcMakeSortArrowProd2(gsMakeSortIdPos(),gsMakeSortIdPos(),gsMakeSortIdBool()));
+			    gstcMakeSortArrowProd2(gsMakeSortIdNat(),gsMakeSortIdNat(),gsMakeSortIdBool()));
   gstcAddSystemFunctionProd(gsMakeOpIdGT(gsMakeSortIdInt()),
-			    gstcMakeSortArrowProd2(gsMakeSortIdPos(),gsMakeSortIdPos(),gsMakeSortIdBool()));
+			    gstcMakeSortArrowProd2(gsMakeSortIdInt(),gsMakeSortIdInt(),gsMakeSortIdBool()));
   //more
   gstcAddSystemFunctionProd(gsMakeOpIdMax(gsMakeSortIdPos()),
 			    gstcMakeSortArrowProd2(gsMakeSortIdPos(),gsMakeSortIdInt(),gsMakeSortIdPos()));
@@ -1134,7 +1134,7 @@ static ATermAppl gstcTraverseVarConsTypeD(ATermTable Vars, ATermAppl *DataTerm, 
     }
     
     if(!gstcAdjustPosTypesA(Sort,PosType) && Sort==gsMakeSortIdInt()){
-      ThrowM("A number type is not in this list of alowed types: %t (while typechecking %t)",PosType,*DataTerm);
+      ThrowM("A number type is not in this list of allowed types: %t (while typechecking %t)",PosType,*DataTerm);
     }
     return Sort;
   }
@@ -1314,8 +1314,30 @@ static ATermAppl gstcTraverseVarConsTypeD(ATermTable Vars, ATermAppl *DataTerm, 
     ATermAppl Type=ATAtableGet(Vars,(ATerm)Name);
     if(Type){
       gsDebugMsg("Recognised variable %t, Type: %t\n",Name,Type);
-      if(!(Type=gstcTypeMatchA(Type,PosType))) {ThrowM("No variable %t with type %t",*DataTerm,PosType);}
       *DataTerm=gsMakeDataVarId(Name,Type);
+ 
+      ATermAppl NewType=gstcTypeMatchA(Type,PosType);
+      if(NewType) Type=NewType;
+      else {
+	if(gstcTypeMatchA(Type,gsMakeSortIdPos())){
+	  if(gstcTypeMatchA(PosType,gsMakeSortIdNat())){
+	    Type=gsMakeSortIdNat();
+	    *DataTerm=gsMakeDataApplProd(gstcMakeOpIdPos2Nat(),ATmakeList1((ATerm)*DataTerm));
+	  }
+	  else 
+	    if(gstcTypeMatchA(PosType,gsMakeSortIdInt())){
+	      Type=gsMakeSortIdInt();
+	      *DataTerm=gsMakeDataApplProd(gstcMakeOpIdPos2Int(),ATmakeList1((ATerm)*DataTerm));
+	    }
+	}
+	else 
+	  if(gstcTypeMatchA(Type,gsMakeSortIdNat()) && gstcTypeMatchA(PosType,gsMakeSortIdInt())){
+	    Type=gsMakeSortIdInt();
+	    *DataTerm=gsMakeDataApplProd(gstcMakeOpIdNat2Int(),ATmakeList1((ATerm)*DataTerm));
+	  }
+	  else{ThrowM("No variable %t with type %t",*DataTerm,PosType);}
+      }
+      
       return Type;
     }
     ATermList ParList;
