@@ -1,7 +1,6 @@
-// Date: 30-11-2004
+// Date: 06-12-2004
 // This document describes the input format of the GenSpect lineariser. Here:
-// - <IdString> represents the name of an identifier by means of a string of
-//   the format '[a-zA-Z_][a-zA-Z0-9_]*', where keywords are excluded
+// - <String> represents an arbitrary non-empty string
 // - the other alphabetical strings within angular brackets are non-terminals
 //   that represent all possible branches of their productions
 // - for non-terminal N, N*/N+ represents an ATermList with zero/one or more N's
@@ -30,57 +29,53 @@
 //-------
 
 //sort identifier
-<SortId>      ::= SortId(<IdString>, <Status>)
+<SortId>      ::= SortId(<String>)
 
-//data identifier
-<DataId>      ::= DataId(<IdString>, <SortExpr>, <DataStatus>)
-
-//data variable
-<DataVar>     ::= DataVar(<IdString>, <SortExpr>, <DataStatus>)
+//operation identifier
+<OpId>        ::= OpId(<String>, <SortExpr>)
 
 //action identifier
-<ActId>       ::= ActId(<IdString>, <Domain>, <Status>)
-
-//domain consisting of zero or more sort expressions
-<Domain>      ::= Domain(<SortExpr>, ..., <SortExpr>)
+<ActId>       ::= ActId(<String>, <SortExpr>*)
 
 //process identifier
-<ProcId>      ::= ProcId(<IdString>, <Status>)
+<ProcId>      ::= ProcId(<String>)
 
-//identifier status
-<Status>      ::= StatUser()
-                | StatSystem()
+//data variable
+<DataVar>     ::= DataVar(<String>, <SortExpr>)
 
-//data identifier status
-<DataStatus>  ::= <Status>
-                | StatLambda()
+//string or nil
+<StringOrNil> ::= <String> | Nil()
 
 //Specification
 //-------------
 
 //specification
-<Spec>        ::= Spec(SortSpec(<SortExpr>*), ConsSpec(<OpDecl>*),
-                    MapSpec(<OpDecl>*), EqnSpec(<EqnSect>*),
-                    ActSpec(<ActDecl>*), ProcSpec(<ProcDecl>*), Init(<ProcExpr>)
+<Spec>        ::= SpecV1(SortSpec(<SortDecl>*), ConsSpec(<OpDecl>*),
+                   MapSpec(<OpDecl>*), EqnSpec(<EqnSect>*), ActSpec(<ActDecl>*),
+                   ProcSpec(<ProcDecl>*), Init(<ProcExpr>)
                   )
 
+//sort declaration
+<SortDecl>    ::= SortDeclStandard(<String>)
+                | SortDeclRef(<String>, <SortExpr>)  (remove?)
+
 //operation declaration
-<OpDecl>      ::= OpDecl(<DataId>) 
+<OpDecl>      ::= OpDecl(<String>, <SortExpr>)
 
 //equation section
 <EqnSect>     ::= EqnSect(<DataVarDecl>*, <EqnDecl>+) 
 
 //data variable declaration
-<DataVarDecl> ::= DataVarDecl(<DataVar>)
+<DataVarDecl> ::= DataVarDecl(<String>, <SortExpr>)
 
 //equation declaration
-<EqnDecl>     ::= EqnDecl(<DataExpr>, <DataExpr>, <Status>) 
+<EqnDecl>     ::= EqnDecl(<DataExpr>, <DataExpr>) 
 
 //action declaration
-<ActDecl>     ::= ActDecl(<ActId>)
+<ActDecl>     ::= ActDecl(<String>, <SortExpr>*)
 
 //process declaration
-<ProcDecl>    ::= ProcDecl(<ProcId>, <DataVarDecl>*, <ProcExpr>)
+<ProcDecl>    ::= ProcDecl(<String>, <DataVarDecl>*, <ProcExpr>)
 
 //Expressions
 //-----------
@@ -95,51 +90,42 @@
                | SortSet(<SortExpr>)
                | SortBag(<SortExpr>)
                | SortArrow(<SortExpr>+, <SortExpr>)
-               | SortStruct(<Id>)
-               | SortUnknown()
-               | SortAny()
+               | SortStruct(<String>)
 
 //data expression
-<DataExpr>   ::= <DataId>
-               | <DataVar>
-               | DataAppl(<DataExpr>, <DataArgs>) 
-               | Whr(<DataExpr>, <WhrDecl>+) 
-
-//arguments consisting of one or more data expressions
-<DataArgs>   ::= <DataExpr>
-               | <DataArgs>, <DataExpr>
+<DataExpr>   ::= <DataVar>
+               | <OpId>
+               | DataAppl(<DataExpr>, <DataExpr>+) 
+               | Whr(<DataExpr>, <WhrDecl>+)        (remove?)
 
 //where clause declaration
-<WhrDecl>    ::= WhrDecl(<DataId>, <DataExpr>) 
+<WhrDecl>    ::= WhrDecl(<String>, <DataExpr>) 
 
 //process expression
-<ProcExpr>   ::= Action(<ActId>, <Arguments>?)
-               | ProcRef(<ProcId>, <Arguments>?) 
+<ProcExpr>   ::= Act(<ActId>, <DataExpr>*)
+               | ProcRef(<ProcId>, <DataExpr>*) 
                | Delta() 
                | Tau() 
-               | Sum(<VarDecl>+, <ProcExpr>) 
-               | Restrict(<MAId>*, <ProcExpr>) 
-               | Allow(<MAId>*, <ProcExpr>) 
-               | Hide(<MAId>*, <ProcExpr>) 
-               | Ren(<RenExpr>*, <ProcExpr>) 
-               | Comm(<CommExpr>*, <ProcExpr>) 
-               | Sync(<ProcExpr>, <ProcExpr>) 
-               | AtTime(<ProcExpr>, <DataExpr>) 
-               | Seq(<ProcExpr>, <ProcExpr>) 
+               | Sum(<DataVarDecl>+, <ProcExpr>) 
+               | Restrict(<MultActName>*, <ProcExpr>)
+               | Allow(<MultActName>*, <ProcExpr>)
+               | Hide(<MultActName>*, <ProcExpr>)
+               | Ren(<RenExpr>*, <ProcExpr>)
+               | Comm(<CommExpr>*, <ProcExpr>)
+               | Sync(<ProcExpr>, <ProcExpr>)
+               | AtTime(<ProcExpr>, <DataExpr>)
+               | Seq(<ProcExpr>, <ProcExpr>)
                | Cond(<DataExpr>, <ProcExpr>, <ProcExpr>) 
-               | BInit(<ProcExpr>, <ProcExpr>) 
-               | Merge(<ProcExpr>, <ProcExpr>) 
-               | LMerge(<ProcExpr>, <ProcExpr>) 
-               | Choice(<ProcExpr>, <ProcExpr>) 
+               | BInit(<ProcExpr>, <ProcExpr>)
+               | Merge(<ProcExpr>, <ProcExpr>)
+               | LMerge(<ProcExpr>, <ProcExpr>)
+               | Choice(<ProcExpr>, <ProcExpr>)
 
 //multiaction identifier
-<MAId>       ::= MAId(<ActId>+) 
+<MultActName>::= MultActName(<String>+) 
 
 //renaming expression
-<RenExpr>    ::= RenExpr(<ActId>, <ActId>) 
+<RenExpr>    ::= RenExpr(<String>, <String>) 
 
 //communication expression
-<CommExpr>   ::= CommExpr(<MAId>, <ActIdOrNil>) 
-
-//action identifier or nil
-<ActIdOrNil>    ::= <ActId> | Nil() 
+<CommExpr>   ::= CommExpr(<MultActName>, <StringOrNil>) 
