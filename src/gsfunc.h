@@ -298,6 +298,10 @@ ATermAppl gsMakeOpIdZero(void);
 ATermAppl gsMakeOpIdPosAsNat(void);
 ATermAppl gsMakeOpIdNegatePos(void);
 ATermAppl gsMakeOpIdNatAsInt(void);
+ATermAppl gsMakeOpIdLessThan(ATermAppl SortId);
+ATermAppl gsMakeOpIdGreaterThan(ATermAppl SortId);
+ATermAppl gsMakeOpIdLessThanOrEqual(ATermAppl SortId);
+ATermAppl gsMakeOpIdGreaterThanOrEqual(ATermAppl SortId);
 
 //Creation of data expressions for system defined operations. If possible,
 //types are checked.
@@ -318,8 +322,16 @@ ATermAppl gsMakeDataExprZero(void);
 ATermAppl gsMakeDataExprPosAsNat(ATermAppl DataExpr);
 ATermAppl gsMakeDataExprNegatePos(ATermAppl DataExpr);
 ATermAppl gsMakeDataExprNatAsInt(ATermAppl DataExpr);
+ATermAppl gsMakeDataExprLessThan(ATermAppl DataExprLHS,
+  ATermAppl DataExprRHS);
+ATermAppl gsMakeDataExprGreaterThan(ATermAppl DataExprLHS,
+  ATermAppl DataExprRHS);
+ATermAppl gsMakeDataExprLessThanOrEqual(ATermAppl DataExprLHS,
+  ATermAppl DataExprRHS);
+ATermAppl gsMakeDataExprGreaterThanOrEqual(ATermAppl DataExprLHS,
+  ATermAppl DataExprRHS);
 
-//Auxiliary function to create data expressions 
+//Auxiliary functions to create data expressions 
 ATermAppl gsMakeDataApplList(ATermAppl DataExpr, ATermList DataExprArgs);
 
 ATermAppl gsMakeDataExprPos(char *p);
@@ -333,6 +345,13 @@ ATermAppl gsMakeDataExprNat(char *n);
 ATermAppl gsMakeDataExprInt(char *z);
 //Pre: z is of the form "0 | -? [1-9][0-9]*"
 //Ret: data expression of sort Int that is a representation of z
+
+//Auxiliary functions to recognise types of data expressions
+
+ATermAppl gsGetType(ATermAppl DataExpr);
+//Pre: DataExpr is a data expression
+//Ret: if term is a DataVarId, OpId, or DataApp, return its type
+//     return Unknown, otherwise
 
 #ifdef __cplusplus
 }

@@ -137,14 +137,12 @@ ATermAppl ATAgetFirst(ATermList list)
   return (ATermAppl) ATgetFirst(list);
 }
 
-static ATermAppl gsGetType(ATermAppl term)
-//Ret: if term is a DataVarId, OpId, or DataApp, return its type
-//     return Unknown, otherwise
+ATermAppl gsGetType(ATermAppl DataExpr)
 {
-  if (gsIsDataAppl(term)) {
-    ATermAppl HeadType = gsGetType(ATAgetArgument(term, 0));
+  if (gsIsDataAppl(DataExpr)) {
+    ATermAppl HeadType = gsGetType(ATAgetArgument(DataExpr, 0));
     if (gsIsSortArrow(HeadType)) {
-      ATermAppl ResultType = gsGetType(ATAgetArgument(term, 1));
+      ATermAppl ResultType = gsGetType(ATAgetArgument(DataExpr, 1));
       if (!gsIsUnknown(ResultType) &&
           ATisEqual(ResultType, ATAgetArgument(HeadType, 0))) {
         return ATAgetArgument(HeadType, 1);
@@ -154,8 +152,8 @@ static ATermAppl gsGetType(ATermAppl term)
     } else {
       return gsMakeUnknown();
     }
-  } else if (gsIsDataVarId(term) || gsIsOpId(term)) {
-    return ATAgetArgument(term, 1);
+  } else if (gsIsDataVarId(DataExpr) || gsIsOpId(DataExpr)) {
+    return ATAgetArgument(DataExpr, 1);
   } else {
     return gsMakeUnknown();
   }
@@ -250,6 +248,10 @@ static ATermAppl gsOpIdNameZero;
 static ATermAppl gsOpIdNamePosAsNat;
 static ATermAppl gsOpIdNameNegatePos;
 static ATermAppl gsOpIdNameNatAsInt;
+static ATermAppl gsOpIdNameLessThan;
+static ATermAppl gsOpIdNameGreaterThan;
+static ATermAppl gsOpIdNameLessThanOrEqual;
+static ATermAppl gsOpIdNameGreaterThanOrEqual;
 
 static bool gsConstructorFunctionsEnabled = false;
 
@@ -343,6 +345,10 @@ void gsEnableConstructorFunctions(void)
   gsOpIdNamePosAsNat         = gsString2ATermAppl("@cPosNat");
   gsOpIdNameNegatePos        = gsString2ATermAppl("@-");
   gsOpIdNameNatAsInt         = gsString2ATermAppl("@cNatInt");
+  gsOpIdNameLessThan         = gsString2ATermAppl("<");
+  gsOpIdNameGreaterThan      = gsString2ATermAppl(">");
+  gsOpIdNameLessThanOrEqual  = gsString2ATermAppl("<=");
+  gsOpIdNameGreaterThanOrEqual = gsString2ATermAppl(">=");
   //protect constructors
   ATprotectAFun(gsAFunSpecV1);
   ATprotectAFun(gsAFunSortSpec);
@@ -430,6 +436,10 @@ void gsEnableConstructorFunctions(void)
   ATprotect((ATerm *) &gsOpIdNamePosAsNat);
   ATprotect((ATerm *) &gsOpIdNameNegatePos);
   ATprotect((ATerm *) &gsOpIdNameNatAsInt);
+  ATprotect((ATerm *) &gsOpIdNameLessThan);
+  ATprotect((ATerm *) &gsOpIdNameGreaterThan);
+  ATprotect((ATerm *) &gsOpIdNameLessThanOrEqual);
+  ATprotect((ATerm *) &gsOpIdNameGreaterThanOrEqual);
   gsConstructorFunctionsEnabled = true;
 }
 
@@ -1343,6 +1353,39 @@ ATermAppl gsMakeOpIdNatAsInt(void)
     gsMakeSortArrow(gsMakeSortIdNat(), gsMakeSortIdInt()));
 } 
 
+ATermAppl gsMakeOpIdLessThan(ATermAppl SortId)
+{
+  assert(gsConstructorFunctionsEnabled);
+  return gsMakeOpId(gsOpIdNameLessThan,
+    gsMakeSortArrowList(ATmakeList2((ATerm) SortId, (ATerm) SortId),
+      gsMakeSortExprBool()));
+}
+
+ATermAppl gsMakeOpIdGreaterThan(ATermAppl SortId)
+{
+  assert(gsConstructorFunctionsEnabled);
+  return gsMakeOpId(gsOpIdNameGreaterThan,
+    gsMakeSortArrowList(ATmakeList2((ATerm) SortId, (ATerm) SortId),
+      gsMakeSortExprBool()));
+}
+
+ATermAppl gsMakeOpIdLessThanOrEqual(ATermAppl SortId)
+{
+  assert(gsConstructorFunctionsEnabled);
+  return gsMakeOpId(gsOpIdNameLessThanOrEqual,
+    gsMakeSortArrowList(ATmakeList2((ATerm) SortId, (ATerm) SortId),
+      gsMakeSortExprBool()));
+}
+
+ATermAppl gsMakeOpIdGreaterThanOrEqual(ATermAppl SortId)
+{
+  assert(gsConstructorFunctionsEnabled);
+  return gsMakeOpId(gsOpIdNameGreaterThanOrEqual,
+    gsMakeSortArrowList(ATmakeList2((ATerm) SortId, (ATerm) SortId),
+      gsMakeSortExprBool()));
+}
+
+
 //Creation of data expressions for system defined operations. If possible,
 //types are checked.
 ATermAppl gsMakeDataExprTrue(void)
@@ -1472,6 +1515,83 @@ ATermAppl gsMakeDataExprNatAsInt(ATermAppl DataExpr)
 {
   return gsMakeDataAppl(gsMakeOpIdNatAsInt(), DataExpr);
 }
+
+ATermAppl gsMakeDataExprLessThan(ATermAppl DataExprLHS,
+  ATermAppl DataExprRHS)
+{
+  ATermAppl Result = NULL;
+  ATermAppl ExprType = gsGetType(DataExprLHS);
+  if (gsIsUnknown(ExprType)) {
+    ThrowVM(NULL, "type of data expression %t is unknown", DataExprLHS);
+  }
+  if (!ATisEqual(ExprType, gsGetType(DataExprRHS)))
+  {
+    ThrowVM(NULL, "expected type %t instead of %t for data expression %t",
+      ExprType, gsGetType(DataExprRHS), DataExprLHS);
+  }   
+  Result = gsMakeDataApplList(gsMakeOpIdLessThan(ExprType),
+    ATmakeList2((ATerm) DataExprLHS, (ATerm) DataExprRHS));
+finally:
+  return Result;
+}
+
+ATermAppl gsMakeDataExprGreaterThan(ATermAppl DataExprLHS,
+  ATermAppl DataExprRHS)
+{
+  ATermAppl Result = NULL;
+  ATermAppl ExprType = gsGetType(DataExprLHS);
+  if (gsIsUnknown(ExprType)) {
+    ThrowVM(NULL, "type of data expression %t is unknown", DataExprLHS);
+  }
+  if (!ATisEqual(ExprType, gsGetType(DataExprRHS)))
+  {
+    ThrowVM(NULL, "expected type %t instead of %t for data expression %t",
+      ExprType, gsGetType(DataExprRHS), DataExprLHS);
+  }   
+  Result = gsMakeDataApplList(gsMakeOpIdGreaterThan(ExprType),
+    ATmakeList2((ATerm) DataExprLHS, (ATerm) DataExprRHS));
+finally:
+  return Result;
+}
+
+ATermAppl gsMakeDataExprLessThanOrEqual(ATermAppl DataExprLHS,
+  ATermAppl DataExprRHS)
+{
+  ATermAppl Result = NULL;
+  ATermAppl ExprType = gsGetType(DataExprLHS);
+  if (gsIsUnknown(ExprType)) {
+    ThrowVM(NULL, "type of data expression %t is unknown", DataExprLHS);
+  }
+  if (!ATisEqual(ExprType, gsGetType(DataExprRHS)))
+  {
+    ThrowVM(NULL, "expected type %t instead of %t for data expression %t",
+      ExprType, gsGetType(DataExprRHS), DataExprLHS);
+  }   
+  Result = gsMakeDataApplList(gsMakeOpIdLessThanOrEqual(ExprType),
+    ATmakeList2((ATerm) DataExprLHS, (ATerm) DataExprRHS));
+finally:
+  return Result;
+}
+
+ATermAppl gsMakeDataExprGreaterThanOrEqual(ATermAppl DataExprLHS,
+  ATermAppl DataExprRHS)
+{
+  ATermAppl Result = NULL;
+  ATermAppl ExprType = gsGetType(DataExprLHS);
+  if (gsIsUnknown(ExprType)) {
+    ThrowVM(NULL, "type of data expression %t is unknown", DataExprLHS);
+  }
+  if (!ATisEqual(ExprType, gsGetType(DataExprRHS)))
+  {
+    ThrowVM(NULL, "expected type %t instead of %t for data expression %t",
+      ExprType, gsGetType(DataExprRHS), DataExprLHS);
+  }   
+  Result = gsMakeDataApplList(gsMakeOpIdGreaterThanOrEqual(ExprType),
+    ATmakeList2((ATerm) DataExprLHS, (ATerm) DataExprRHS));
+finally:
+  return Result;
+}
+
 
 //Auxiliary functions to create data expressions
 ATermAppl gsMakeDataApplList(ATermAppl DataExpr,
