@@ -99,9 +99,9 @@ ATermList ATLgetFirst(ATermList List);
 ATermAppl ATAtableGet(ATermTable Table, ATerm Key);
 ATermList ATLtableGet(ATermTable Table, ATerm Key);
 void      ATprotectAppl(ATermAppl *PAppl);
-void      ATprotectList(ATermAppl *PList);
+void      ATprotectList(ATermList *PList);
 void      ATunprotectAppl(ATermAppl *PAppl);
-void      ATunprotectList(ATermAppl *PList);
+void      ATunprotectList(ATermList *PList);
 
 //Substitutions on ATerm's
 //------------------------

@@ -181,7 +181,7 @@ void ATprotectAppl(ATermAppl *PAppl)
   ATprotect((ATerm *) PAppl);
 }
 
-void ATprotectList(ATermAppl *PList)
+void ATprotectList(ATermList *PList)
 {
   ATprotect((ATerm *) PList);
 }
@@ -191,7 +191,7 @@ void ATunprotectAppl(ATermAppl *PAppl)
   ATunprotect((ATerm *) PAppl);
 }
 
-void ATunprotectList(ATermAppl *PList)
+void ATunprotectList(ATermList *PList)
 {
   ATunprotect((ATerm *) PList);
 }
