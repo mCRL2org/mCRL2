@@ -571,7 +571,8 @@
 \noindent
 Operation identifiers are used in data expressions. They may be system defined
 or user defined. An identifier is called user defined if the user supplied a
-declaration. It is called system defined if it is defined in this document.
+declaration for it. It is called system defined if it is defined in this
+document.
 
 System identifiers are created during the parsing phase and the data
 implementation phase. After the parsing phase the types of system identifiers
@@ -620,7 +621,7 @@ Name          & \text{Type}                     & Description & External repr.\\
 
 The system identifiers for positive numbers, natural numbers and integers are
 listed in table~\ref{tab:ptc:numbers}. Here, \frm{A,B \in \set{\srtpos,
-\srtnat, \srtint}} and \frm{C} is the bigger type of \frm{A} and \frm{B}:
+\srtnat, \srtint}} with \frm{A \neq B}:
 
 \begin{table}[!htb]
 \centering
@@ -628,42 +629,40 @@ listed in table~\ref{tab:ptc:numbers}. Here, \frm{A,B \in \set{\srtpos,
 Name        & \text{Type}                  & Description      & External repr.\\
 \hline
 \verb+@1+$^*$       & \srtpos              & one                  & number\\
-\verb+@0.+$^*$      & \srtpos \To \srtpos  & double positive      & number\\
-\verb+@1.+$^*$      & \srtpos \To \srtpos  & double positive plus one & number\\
+\verb+@.0+$^*$      & \srtpos \To \srtpos  & double positive      & number\\
+\verb+@.1+$^*$      & \srtpos \To \srtpos  & double positive plus one & number\\
 \verb+@0+$^*$       & \srtnat              & zero                 & number\\
 \verb+@cPosNat+$^*$ & \srtpos \To \srtnat  & positive as natural  & number\\
 \verb+@-+$^*$       & \srtpos \To \srtint  & negate positive      & number\\
 \verb+@cNatInt+$^*$ & \srtnat \To \srtint  & natural as integer   & number\\
-\verb+-+    & A \To \srtint                & negation             & prefix\\
-\verb-+-    & A \times B \To C             & addition             & infix\\
-\verb+-+    & A \times B \To \srtint       & subtraction          & infix\\
-\verb+*+    & A \times B \To C             & multiplication       & infix\\
-\verb+div+  & \srtpos \times \srtpos \To \srtnat & quotient after division
-                                                                  & infix\\
+\verb+-+    & \srtint \To \srtint          & negation             & prefix\\
+\verb-+-    & A \times A \To A             & addition             & infix\\
+\verb+-+    & \srtint \times \srtint \To \srtint & subtraction    & infix\\
+\verb+@double+$^*$  & \srtint \To \srtint  & double               & infix\\
+\verb+@-+$^*$ & \srtpos \times \srtpos \To \srtint & subtraction  & infix\\
+\verb+*+    & A \times A \To A             & multiplication       & infix\\
 \verb+div+  & \srtnat \times \srtpos \To \srtnat & quotient after division
                                                                   & infix\\
 \verb+div+  & \srtint \times \srtpos \To \srtint & quotient after division
                                                                   & infix\\
-\verb+mod+  & A \times \srtpos \To \srtnat & remainder after division
+\verb+mod+  & \srtnat \times \srtpos \To \srtnat & remainder after division
                                                                   & infix\\
-\verb+exp+  & \srtpos \times \srtnat \To \srtnat & exponentation  & functional\\
-\verb+exp+  & \srtnat \times \srtnat \To \srtnat & exponentation  & functional\\
-\verb+exp+  & \srtint \times \srtnat \To \srtint & exponentation  & functional\\
+\verb+mod+  & \srtint \times \srtpos \To \srtnat & remainder after division
+                                                                  & infix\\
+\verb+exp+  & A \times \srtnat \To A       & exponentation        & functional\\
 \verb+succ+ & \srtpos \To \srtpos          & successor            & functional\\
 \verb+succ+ & \srtnat \To \srtpos          & successor            & functional\\
 \verb+succ+ & \srtint \To \srtint          & successor            & functional\\
 \verb+pred+ & \srtpos \To \srtnat          & predecessor          & functional\\
-\verb+pred+ & \srtnat \To \srtint          & predecessor          & functional\\
 \verb+pred+ & \srtint \To \srtint          & predecessor          & functional\\
-\verb+abs+  & \srtpos \To \srtpos          & absolute value       & functional\\
-\verb+abs+  & \srtnat \To \srtnat          & absolute value       & functional\\
+\verb+@pred+$^*$ & \srtpos \To \srtpos     & predecessor          & functional\\
 \verb+abs+  & \srtint \To \srtnat          & absolute value       & functional\\
-\verb+max+  & A \times B \To C             & maximum              & functional\\
-\verb+min+  & A \times B \To C             & minimum              & functional\\
-\verb-<-    & A \times B \To \srtbool      & less than            & infix\\
-\verb->-    & A \times B \To \srtbool      & greater than         & infix\\
-\verb+<=+   & A \times B \To \srtbool      & less than or equal   & infix\\
-\verb+>=+   & A \times B \To \srtbool      & greater than or equal& infix\\
+\verb+max+  & A \times A \To A             & maximum              & functional\\
+\verb+min+  & A \times A \To A             & minimum              & functional\\
+\verb-<-    & A \times A \To \srtbool      & less than            & infix\\
+\verb->-    & A \times A \To \srtbool      & greater than         & infix\\
+\verb+<=+   & A \times A \To \srtbool      & less than or equal   & infix\\
+\verb+>=+   & A \times A \To \srtbool      & greater than or equal& infix\\
 \verb+A2B+  & A \To B                      & convert \frm{A} to \frm{B}
                                                                   & functional\\
 \end{tabular}
