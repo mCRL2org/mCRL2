@@ -1,5 +1,5 @@
 #define  NAME      "libgsparse"
-#define  LVERSION  "0.1.19"
+#define  LVERSION  "0.1.20"
 #define  AUTHOR    "Aad Mathijssen"
 
 #ifdef __cplusplus
@@ -40,6 +40,7 @@ ATermAppl gsLinearise(ATermAppl Spec);
  *     returned that adheres to the internal ATerm structure after
  *     linearisation.
  *     If something went wrong, an appropriate error message is printed and
+ *     t
  *     NULL is returned.
  */
 
@@ -105,6 +106,28 @@ void gsPrintDecls(FILE *OutStream, const ATermList Decls,
        - the last declaration Decl(x, S) is printed as "x: S", followed by
          Terminator
 */
+
+bool gsHasConsistentContext(const ATermTable DataVarDecls,
+  const ATermAppl Part);
+/*Pre: DataVarDecls represent the variables from a data equation section,
+ *     where the keys are the variable names and the values are the
+ *     corresponding variables
+ *     Part is an ATermAppl containing a data equation of a GenSpect
+ *     specification, or the elements it consists of
+ *Ret: all operations occurring in Part are consistent with the variables from
+ *     the context
+ */
+
+bool gsHasConsistentContextList(const ATermTable DataVarDecls,
+  const ATermList Parts);
+/*Pre: DataVarDecls represent the variables from a data equation section,
+ *     where the keys are the variable names and the values are the
+ *     corresponding variables
+ *     Parts is an ATermList containing elements of a data equation of a
+ *     GenSpect specification
+ *Ret: all operations occurring in Parts are consistent with the variables from
+ *     the context
+ */
 
 //implementation
 
@@ -599,36 +622,20 @@ void gsPrintDataEqns(FILE *OutStream, const ATermList DataEqns, bool ShowSorts,
       //of variable declarations in DataEqns to which DataEqns(i) belongs
       //VarDeclTable represents the variable declarations of DataEqns
       //from StartPrefix up to i.
-      //Check consistency of the variables from DataEqns(i) with VarDeclTable
-      //and, if so, add them to VarDeclTable.
+      //Check consistency of DataEqns(i) with VarDeclTable and add newly
+      //declared variables to VarDeclTable.
       ATermAppl DataEqn = ATAelementAt(DataEqns, i);
-      ATermList VarDecls = ATLgetArgument(DataEqn, 0);
-      int VarDeclsLength = ATgetLength(VarDecls);
-      bool Consistent = true;
-      ATermList NewVarDecls = ATmakeList0();
-      for (int j = 0; j < VarDeclsLength && Consistent; j++) {
-        //check consistency of variable VarDecls(j) with VarDeclTable
-        ATermAppl VarDecl = ATAelementAt(VarDecls, j);
-        ATermAppl CorVarDecl =
-          ATAtableGet(VarDeclTable, ATgetArgument(VarDecl, 0));
-        if (CorVarDecl != NULL) {
-          //check consistency of VarDecl with CorVarDecl
-          Consistent = (VarDecl == CorVarDecl);
-        } else {
-          //add VarDecl to VarDeclTable if all variables from VarDecls are
-          //consistent
-          NewVarDecls = ATappend(NewVarDecls, (ATerm) VarDecl);
-        }
-      }
-      //Consistent indicates if all variables from VarDecls are consistent with
-      //those in VarDeclTable.
+      bool Consistent = gsHasConsistentContext(VarDeclTable, DataEqn);
       if (Consistent) {
-        //add the variables from DataEqns(i) to VarDeclTable
-        int NewVarDeclsLength = ATgetLength(NewVarDecls);
-        for (int j = 0; j < NewVarDeclsLength; j++) {
-          ATermAppl NewVarDecl = ATAelementAt(NewVarDecls, j);
-          ATtablePut(VarDeclTable, ATgetArgument(NewVarDecl, 0),
-            (ATerm) NewVarDecl);
+        //add new variables from DataEqns(i) to VarDeclTable
+        ATermList VarDecls = ATLgetArgument(DataEqn, 0);
+        int VarDeclsLength = ATgetLength(VarDecls);
+        for (int j = 0; j < VarDeclsLength; j++) {
+          ATermAppl VarDecl = ATAelementAt(VarDecls, j);
+          ATermAppl VarDeclName = ATAgetArgument(VarDecl, 0);
+          if (ATtableGet(VarDeclTable, (ATerm) VarDeclName) == NULL) {
+            ATtablePut(VarDeclTable, (ATerm) VarDeclName, (ATerm) VarDecl);
+          }
         }
         i++;
       }
@@ -656,6 +663,84 @@ void gsPrintDataEqns(FILE *OutStream, const ATermList DataEqns, bool ShowSorts,
     fprintf(OutStream, "\n");
     ATtableDestroy(VarDeclTable);
   }
+}
+
+bool gsHasConsistentContext(const ATermTable DataVarDecls,
+  const ATermAppl Part)
+{
+  if (gsIsDataEqn(Part)) {
+    //check consistency of DataVarDecls with the variable declarations, the
+    //condition and the lhs and rhs of the data equation
+    bool Result = true;
+    ATermList VarDecls = ATLgetArgument(Part, 0);
+    int n = ATgetLength(VarDecls);
+    for (int i = 0; i < n && Result; i++) {
+      //check consistency of variable VarDecls(j) with VarDeclTable
+      ATermAppl VarDecl = ATAelementAt(VarDecls, i);
+      ATermAppl CorVarDecl =
+        ATAtableGet(DataVarDecls, ATgetArgument(VarDecl, 0));
+      if (CorVarDecl != NULL) {
+        //check consistency of VarDecl with CorVarDecl
+        Result = (ATisEqual(VarDecl, CorVarDecl) == ATtrue);
+      }
+    }
+    if (Result) {
+      Result = 
+        gsHasConsistentContext(DataVarDecls, ATAgetArgument(Part, 1)) &&
+        gsHasConsistentContext(DataVarDecls, ATAgetArgument(Part, 2)) &&
+        gsHasConsistentContext(DataVarDecls, ATAgetArgument(Part, 3));
+    }
+    return Result;
+  } else if (gsIsOpId(Part) || gsIsDataVarIdOpId(Part))  {
+    //Part may be an operation; check that its name does not occur in
+    //DataVarDecls
+    return (ATtableGet(DataVarDecls, ATgetArgument(Part, 0)) == NULL);
+  } else if (gsIsDataApplProd(Part)) {
+    //check consistency of the head and all arguments
+    return
+      gsHasConsistentContext(DataVarDecls, ATAgetArgument(Part, 0)) &&
+      gsHasConsistentContextList(DataVarDecls, ATLgetArgument(Part, 1));
+  } else if (gsIsDataAppl(Part)) {
+    //check consistency of the head and the argument
+    return
+      gsHasConsistentContext(DataVarDecls, ATAgetArgument(Part, 0)) &&
+      gsHasConsistentContext(DataVarDecls, ATAgetArgument(Part, 1));
+  } else if (gsIsListEnum(Part) || gsIsSetEnum(Part) || gsIsBagEnum(Part)) {
+    //check consistency of all elements
+    return gsHasConsistentContextList(DataVarDecls, ATLgetArgument(Part, 0));
+  } else if (gsIsSetBagComp(Part) || gsIsForall(Part) || gsIsExists(Part) ||
+      gsIsLambda(Part)) {
+    //check consistency of the body
+    return gsHasConsistentContext(DataVarDecls, ATAgetArgument(Part, 1));
+  } else if (gsIsWhr(Part)) {
+    //check consistency of the body and the where clauses
+    return
+      gsHasConsistentContext(DataVarDecls, ATAgetArgument(Part, 0)) &&
+      gsHasConsistentContextList(DataVarDecls, ATLgetArgument(Part, 1));
+  } else if (gsIsBagEnumElt(Part)) {
+    //check consistency of the element and the multiplicity
+    return
+      gsHasConsistentContext(DataVarDecls, ATAgetArgument(Part, 0)) &&
+      gsHasConsistentContext(DataVarDecls, ATAgetArgument(Part, 1));
+  } else if (gsIsWhrDecl(Part)) {
+    //check consistency of the rhs
+    return
+      gsHasConsistentContext(DataVarDecls, ATAgetArgument(Part, 1));
+  } else {
+    //Part is a variable, a number or nil
+    return true;
+  }
+}
+
+bool gsHasConsistentContextList(const ATermTable DataVarDecls,
+  const ATermList Parts)
+{
+  bool Result = true;
+  int n = ATgetLength(Parts);
+  for (int i = 0; i < n && Result; i++) {
+    Result = gsHasConsistentContext(DataVarDecls, ATAelementAt(Parts, i));
+  }
+  return Result;
 }
 
 ATermList gsGroupDeclsBySort(const ATermList Decls)
