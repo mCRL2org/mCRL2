@@ -30,19 +30,19 @@ extern char *strdup(const char *s);
 #define ThrowV(x)                  Result = x; throw
 //store x in result and throw an exception
 
-#define ThrowM0(s)                 fprintf(stderr, s); throw
+#define ThrowM0(s)                 ATfprintf(stderr, s); throw
 //print message s and throw an exception
 
-#define ThrowVM0(x, s)             fprintf(stderr, s); ThrowV(x)
+#define ThrowVM0(x, s)             ATfprintf(stderr, s); ThrowV(x)
 //print message s and throw an exception with value x
 
-#define ThrowVM1(x, s, a1)         fprintf(stderr, s, a1); ThrowV(x)
+#define ThrowVM1(x, s, a1)         ATfprintf(stderr, s, a1); ThrowV(x)
 //print message s with argument a1, and throw an exception with value x
 
-#define ThrowVM2(x, s, a1, a2)     fprintf(stderr, s, a1, a2); ThrowV(x)
+#define ThrowVM2(x, s, a1, a2)     ATfprintf(stderr, s, a1, a2); ThrowV(x)
 //print message s with argument a1 and a2,  and throw an exception with value x
 
-#define ThrowVM3(x, s, a1, a2, a3) fprintf(stderr, s, a1, a2, a3); ThrowV(x)
+#define ThrowVM3(x, s, a1, a2, a3) ATfprintf(stderr, s, a1, a2, a3); ThrowV(x)
 //print message s with argument a1, a2 and a3,  and throw an exception with
 //value x
 
@@ -222,22 +222,50 @@ ATermAppl gsString2ATermAppl(char *s);
 //Ret: quoted constant s, if s != NULL
 //     unquoted constant Nil, if s == NULL
 
-//Creation of sort expressions for system defined sorts.
-ATermAppl gsMakeSortExprBool();
-ATermAppl gsMakeSortExprPos();
-ATermAppl gsMakeSortExprNat();
-ATermAppl gsMakeSortExprInt();
+//Creation of sort identifiers for system defined sorts.
+ATermAppl gsMakeSortIdBool(void);
+ATermAppl gsMakeSortIdPos(void);
+ATermAppl gsMakeSortIdNat(void);
+ATermAppl gsMakeSortIdInt(void);
 
-//Recognition of sort expressions for system defined sorts.
-bool gsIsSortExprBool(ATermAppl term);
-bool gsIsSortExprPos(ATermAppl term);
-bool gsIsSortExprNat(ATermAppl term);
-bool gsIsSortExprInt(ATermAppl term);
+//Creation of sort expressions for system defined sorts.
+ATermAppl gsMakeSortExprBool(void);
+ATermAppl gsMakeSortExprPos(void);
+ATermAppl gsMakeSortExprNat(void);
+ATermAppl gsMakeSortExprInt(void);
+
+//Auxiliary functions to create sort expressions
+ATermAppl gsMakeSortArrowList(ATermList SortExprDomain, ATermList SortExprResult);
+
+//Creation of operation identifiers for system defined operations.
+ATermAppl gsMakeOpIdTrue(void);
+ATermAppl gsMakeOpIdFalse(void);
+ATermAppl gsMakeOpIdNot(void);
+ATermAppl gsMakeOpIdAnd(void);
+ATermAppl gsMakeOpIdOr(void);
+ATermAppl gsMakeOpIdImp(void);
+ATermAppl gsMakeOpIdEq(ATermAppl SortExpr);
+//Equality over terms of sort SortExpr
+ATermAppl gsMakeOpIdNeq(ATermAppl SortExpr);
+//Inequality over terms of sort SortExpr
+ATermAppl gsMakeOpIdIf(ATermAppl SortExpr);
+//Conditional of terms of sort SortExpr
+ATermAppl gsMakeOpIdForall(ATermAppl SortExpr);
+//Universal quantification over sort SortExpr
+ATermAppl gsMakeOpIdExists(ATermAppl SortExpr);
+//Existential quantification over sort SortExpr
+ATermAppl gsMakeOpIdOne(void);
+ATermAppl gsMakeOpIdDoublePos(void);
+ATermAppl gsMakeOpIdDoublePosPlusOne(void);
+ATermAppl gsMakeOpIdZero(void);
+ATermAppl gsMakeOpIdPosAsNat(void);
+ATermAppl gsMakeOpIdNegatePos(void);
+ATermAppl gsMakeOpIdNatAsInt(void);
 
 //Creation of data expressions for system defined operations. If possible,
 //types are checked.
-ATermAppl gsMakeDataExprTrue();
-ATermAppl gsMakeDataExprFalse();
+ATermAppl gsMakeDataExprTrue(void);
+ATermAppl gsMakeDataExprFalse(void);
 ATermAppl gsMakeDataExprNot(ATermAppl DataExpr);
 ATermAppl gsMakeDataExprAnd(ATermAppl DataExprLHS, ATermAppl DataExprRHS);
 ATermAppl gsMakeDataExprOr(ATermAppl DataExprLHS, ATermAppl DataExprRHS);
@@ -246,6 +274,16 @@ ATermAppl gsMakeDataExprEq(ATermAppl DataExprLHS, ATermAppl DataExprRHS);
 ATermAppl gsMakeDataExprNeq(ATermAppl DataExprLHS, ATermAppl DataExprRHS);
 ATermAppl gsMakeDataExprIf(ATermAppl DataExprCond, ATermAppl DataExprThen,
   ATermAppl DataExprIf);
+ATermAppl gsMakeDataExprOne(void);
+ATermAppl gsMakeDataExprDoublePos(ATermAppl DataExpr);
+ATermAppl gsMakeDataExprDoublePosPlusOne(ATermAppl DataExpr);
+ATermAppl gsMakeDataExprZero(void);
+ATermAppl gsMakeDataExprPosAsNat(ATermAppl DataExpr);
+ATermAppl gsMakeDataExprNegatePos(ATermAppl DataExpr);
+ATermAppl gsMakeDataExprNatAsInt(ATermAppl DataExpr);
+
+//Auxiliary function to create data expressions 
+ATermAppl gsMakeDataApplList(ATermAppl DataExpr, ATermList DataExprArgs);
 
 ATermAppl gsMakeDataExprPos(char *p);
 //Pre: p is of the form "[1-9][0-9]*"
@@ -258,20 +296,6 @@ ATermAppl gsMakeDataExprNat(char *n);
 ATermAppl gsMakeDataExprInt(char *z);
 //Pre: z is of the form "0 | -? [1-9][0-9]*"
 //Ret: data expression of sort Int that is a representation of z
-
-//Recognition of data expressions for system defined sorts.
-bool gsIsDataExprTrue(ATermAppl term);
-bool gsIsDataExprFalse(ATermAppl term);
-bool gsIsDataExprNot(ATermAppl term);
-bool gsIsDataExprAnd(ATermAppl term);
-bool gsIsDataExprOr(ATermAppl term);
-bool gsIsDataExprImp(ATermAppl term);
-bool gsIsDataExprEq(ATermAppl term);
-bool gsIsDataExprNeq(ATermAppl term);
-bool gsIsDataExprIf(ATermAppl term);
-bool gsIsDataExprPos(ATermAppl term);
-bool gsIsDataExprNat(ATermAppl term);
-bool gsIsDataExprInt(ATermAppl term);
 
 #ifdef __cplusplus
 }
