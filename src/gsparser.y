@@ -1633,7 +1633,7 @@ comm_exprs:
 comm_expr:
   ma_id
     {
-      $$ = gsMakeCommExpr($1, gsMakeTau());
+      $$ = gsMakeCommExpr($1, gsMakeNil());
       if (gsDebug) {
         ATprintf("parsed communication expression\n  %t\n", $$);
       }
