@@ -1,6 +1,6 @@
-/* $Id: rewr.c,v 1.2 2005/03/09 15:46:00 muck Exp $ */
+/* $Id: gsrewr.c,v 1.2 2005/03/09 15:46:00 muck Exp $ */
 
-#define NAME "rewr"
+#define NAME "gsrewr"
 
 #include <stdio.h>
 #include <stdlib.h>

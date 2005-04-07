@@ -7,6 +7,7 @@
 #include <string.h>
 #include <getopt.h>
 #include "aterm2.h"
+#include "libgsparse.h"
 #include "gslowlevel.h"
 #include "gsfunc.h"
 

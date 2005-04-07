@@ -1,88 +1,89 @@
 #Redefine default definitions using autoconf
-CC              = @CC@
-CFLAGS          = @CFLAGS@
-CPP             = @CPP@
-CPPFLAGS        = @CPPFLAGS@
-LDFLAGS         = @LDFLAGS@
-ARFLAGS         = crs
-INSTALL         = install
-LEX             = @LEX@
-LFLAGS          = -I -Pgsyy
-BISON           = @BISON@
-BFLAGS          = -d -pgsyy
+CC                 = @CC@
+CFLAGS             = @CFLAGS@
+CPP                = @CPP@
+CPPFLAGS           = @CPPFLAGS@
+LDFLAGS            = @LDFLAGS@
+ARFLAGS            = crs
+INSTALL            = install
+LEX                = @LEX@
+LFLAGS             = -I -Pgsyy
+BISON              = @BISON@
+BFLAGS             = -d -pgsyy
 
 #installation directories
-prefix          = @prefix@
-exec_prefix     = @exec_prefix@
-bindir          = @bindir@
-libdir          = @libdir@
-datadir         = @datadir@
-includedir      = @includedir@
-infodir         = @infodir@
-mandir          = @mandir@
-
-#Library definitions
-LIB_NAME        = libgsparse.a
-LIB_OBJECTS     = libgsparse.o gsparser.o gslexer.o gstypecheck.o gsdataimpl.o gsfunc.o gslowlevel.o
-LIB_LDFLAGS     = -lATerm -lm
+prefix             = @prefix@
+exec_prefix        = @exec_prefix@
+bindir             = @bindir@
+libdir             = @libdir@
+datadir            = @datadir@
+includedir         = @includedir@
+infodir            = @infodir@
+mandir             = @mandir@
 
 #Parser definitions
-PARSER_NAME     = gsparse
-PARSER_OBJECTS  = gsparse.o
-PARSER_LDFLAGS  = -lgsparse -lATerm -lm
+LIBPARSER_NAME     = libgsparse.a
+LIBPARSER_OBJECTS  = libgsparse.o gsparser.o gslexer.o gstypecheck.o gsdataimpl.o gsfunc.o gslowlevel.o
+LIBPARSER_LDFLAGS  = -lATerm -lm
+PARSER_NAME        = gsparse
+PARSER_OBJECTS     = gsparse.o
+PARSER_LDFLAGS     = -lgsparse -lATerm -lm
 
 #Printer definitions
-PRINTER_NAME     = gsprint
-PRINTER_OBJECTS  = gsprint.o
-PRINTER_LDFLAGS  = -lgsparse -lATerm -lm
+PRINTER_NAME       = gsprint
+PRINTER_OBJECTS    = gsprint.o
+PRINTER_LDFLAGS    = -lgsparse -lATerm -lm
 
 #Lineariser definitions
-LINEARISER_NAME     = linearise
-LINEARISER_OBJECTS  = linearise.o
-LINEARISER_LDFLAGS  = -lgsparse -lATerm -lm -lgsrewrite
+LINEARISER_NAME    = linearise
+LINEARISER_OBJECTS = linearise.o
+LINEARISER_LDFLAGS = -lgsparse -lgsrewrite -lATerm -lm
 
 #Rewriter definitions
-LIBREWR_NAME        = libgsrewrite.a
-LIBREWR_OBJECTS     = libgsrewrite.o gsrewr_inner.o
-LIBREWR_LDFLAGS     = -lATerm -lm
-REWR_NAME     = rewr
-REWR_OBJECTS  = rewr.o
-REWR_LDFLAGS  = -lgsparse -lgsrewrite -lATerm -lm
+LIBREWR_NAME       = libgsrewrite.a
+LIBREWR_OBJECTS    = libgsrewrite.o gsrewr_inner.o gsfunc.o gslowlevel.o
+LIBREWR_LDFLAGS    = -lATerm -lm
+REWR_NAME          = gsrewr
+REWR_OBJECTS       = gsrewr.o
+REWR_LDFLAGS       = -lgsrewrite -lgsparse -lATerm -lm
 
 #Rewriter definitions
-PNML2GS_NAME     = pnml2gs
-PNML2GS_OBJECTS  = pnml2gs.o
-PNML2GS_LDFLAGS  = -lgsparse -lATerm -lxml2 -lm
+PNML2GS_NAME       = pnml2gs
+PNML2GS_OBJECTS    = pnml2gs.o
+PNML2GS_LDFLAGS    = -lgsparse -lATerm -lxml2 -lm
+
+#Group definitions
+EXE_NAMES          = $(PARSER_NAME) $(PRINTER_NAME) $(LINEARISER_NAME) $(REWR_NAME) $(PNML2GS_NAME)
+LIB_NAMES          = $(LIBPARSER_NAME) $(LIBREWR_NAME)
 
 #Make rules
 .PHONY: all install clean
 .PRECIOUS: gsparser.c gslexer.c
 
-all : $(LIB_NAME) $(LIBREWR_NAME) $(PARSER_NAME) $(PRINTER_NAME) $(LINEARISER_NAME) $(REWR_NAME) $(PNML2GS_NAME) Makefile
+all : $(EXE_NAMES) Makefile
 
-install : $(PARSER_NAME) $(PRINTER_NAME)
-	$(INSTALL) $(PARSER_NAME) $(bindir)
-	$(INSTALL) $(PRINTER_NAME) $(bindir)
+install : $(EXE_NAMES) Makefile
+	$(INSTALL) $(EXE_NAMES) $(bindir)
 
-$(LIB_NAME) : $(LIB_OBJECTS) Makefile
-	$(AR) $(ARFLAGS) $@ $(LIB_OBJECTS)
+$(LIBPARSER_NAME) : $(LIBPARSER_OBJECTS) Makefile
+	$(AR) $(ARFLAGS) $@ $(LIBPARSER_OBJECTS)
 
-$(PARSER_NAME) : $(PARSER_OBJECTS) $(LIB_NAME) Makefile
+$(PARSER_NAME) : $(PARSER_OBJECTS) $(LIBPARSER_NAME) Makefile
 	$(CC) -o $@ $(PARSER_OBJECTS) $(LDFLAGS) $(PARSER_LDFLAGS)
 
-$(PRINTER_NAME) : $(PRINTER_OBJECTS) $(LIB_NAME) Makefile
+$(PRINTER_NAME) : $(PRINTER_OBJECTS) $(LIBPARSER_NAME) Makefile
 	$(CC) -o $@ $(PRINTER_OBJECTS) $(LDFLAGS) $(PRINTER_LDFLAGS)
 
-$(LINEARISER_NAME) : $(LINEARISER_OBJECTS) $(LIB_NAME) Makefile
+$(LINEARISER_NAME) : $(LINEARISER_OBJECTS) $(LIBPARSER_NAME) $(LIBREWR_NAME) Makefile
 	$(CC) -o $@ $(LINEARISER_OBJECTS) $(LDFLAGS) $(LINEARISER_LDFLAGS)
 
 $(LIBREWR_NAME) : $(LIBREWR_OBJECTS) Makefile
 	$(AR) $(ARFLAGS) $@ $(LIBREWR_OBJECTS)
 
-$(REWR_NAME) : $(REWR_OBJECTS) $(LIB_NAME) Makefile
+$(REWR_NAME) : $(REWR_OBJECTS) $(LIBPARSER_NAME) $(LIBREWR_NAME) Makefile
 	$(CC) -o $@ $(REWR_OBJECTS) $(LDFLAGS) $(REWR_LDFLAGS)
 
-$(PNML2GS_NAME) : $(PNML2GS_OBJECTS) $(LIB_NAME) Makefile
+$(PNML2GS_NAME) : $(PNML2GS_OBJECTS) $(LIBPARSER_NAME) Makefile
 	$(CC) -o $@ $(PNML2GS_OBJECTS) $(LDFLAGS) $(PNML2GS_LDFLAGS)
 
 gslexer.o      : gslexer.h gsparser.h gsfunc.h gslowlevel.h
@@ -93,10 +94,10 @@ gsdataimpl.o   : gsdataimpl.h gsfunc.h gslowlevel.h
 libgsparse.o   : libgsparse.h gslexer.h gstypecheck.h gsdataimpl.h gsfunc.h gslowlevel.h
 gsparse.o      : gsparse.h libgsparse.h gsfunc.h gslowlevel.h
 gsprint.o      : gsprint.h libgsparse.h gsfunc.h gslowlevel.h
-linearise.o    : libgsparse.h gsfunc.h gslowlevel.h
+linearise.o    : libgsparse.h libgsrewrite.h gsfunc.h gslowlevel.h
 gsrewr_inner.o : gslowlevel.h gsfunc.h gsrewr_inner.h
 libgsrewrite.o : gslowlevel.h gsfunc.h libgsrewrite.h gsrewr_inner.h
-rewr.o         : gslowlevel.h gsfunc.h libgsparse.h libgsrewrite.h 
+gsrewr.o       : gslowlevel.h gsfunc.h libgsparse.h libgsrewrite.h 
 pnml2gs.o      : gslowlevel.h gsfunc.h libgsparse.h
 
 %.c : %.y
@@ -106,12 +107,12 @@ pnml2gs.o      : gslowlevel.h gsfunc.h libgsparse.h
 	$(LEX) $(LFLAGS) -o$@ $<
 
 clean :
-	$(RM) $(LIB_NAME) $(PARSER_NAME) $(PRINTER_NAME) $(LINEARISER_NAME) $(REWR_NAME) $(PNML2GS_NAME) *.o gslexer.c\
-gsparser.c gsparser.h gsparser.output config.status config.log *~ core core.*
+	$(RM) $(EXE_NAMES) $(LIB_NAMES) *.o gslexer.c gsparser.c gsparser.h\
+gsparser.output config.status config.log *~ core core.*
 
 #Note: to make a shared version of the gsparse library instead of a static one, do the following:
 #- add the option `-fpic' to CFLAGS
-#- change the `a' suffix to `so' in LIB_NAME
-#- in the rule with target $(LIB_NAME), replace the command by
-#    $(CC) -shared -o $@ $(LIB_OBJECTS) $(LIB_LDFLAGS)
+#- change the `a' suffix to `so' in LIBPARSER_NAME
+#- in the rule with target $(LIBPARSER_NAME), replace the command by
+#    $(CC) -shared -o $@ $(LIBPARSER_OBJECTS) $(LIBPARSER_LDFLAGS)
 #- extend the environment variable LD_LIBRARY_PATH with `.'
