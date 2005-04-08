@@ -41,7 +41,7 @@ LINEARISER_LDFLAGS = -lgsparse -lgsrewrite -lATerm -lm
 
 #Rewriter definitions
 LIBREWR_NAME       = libgsrewrite.a
-LIBREWR_OBJECTS    = libgsrewrite.o gsrewr_inner.o gsfunc.o gslowlevel.o
+LIBREWR_OBJECTS    = libgsrewrite.o gsrewr_inner.o gsrewr_inner2.o gsrewr_inner3.o gsfunc.o gslowlevel.o
 LIBREWR_LDFLAGS    = -lATerm -lm
 REWR_NAME          = gsrewr
 REWR_OBJECTS       = gsrewr.o

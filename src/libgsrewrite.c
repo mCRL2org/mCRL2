@@ -1,6 +1,6 @@
-/* $Id: libgsrewrite.c,v 1.3 2005/03/22 13:26:16 muck Exp $ */
+/* $Id: libgsrewrite.c,v 1.5 2005/04/08 12:33:51 muck Exp $ */
 
-#define NAME "rewr"
+#define NAME "libgsrewrite"
 
 #include <stdio.h>
 #include <stdlib.h>
@@ -10,20 +10,22 @@
 #include "libgsrewrite.h"
 
 #include "gsrewr_inner.h"
+#include "gsrewr_inner2.h"
+#include "gsrewr_inner3.h"
 
 static int strategy;
 
 ATermList opid_eqns;
 ATermList dataappl_eqns;
 
-void gsRewriteInit(ATermAppl Spec, int strat)
+void gsRewriteInit(ATermAppl Eqns, int strat)
 {
 	ATermList eqns;
 
 	ATprotectList(&opid_eqns);
 	ATprotectList(&dataappl_eqns);
 
-	eqns = ATLgetArgument(ATAgetArgument(Spec,3),0);
+	eqns = ATLgetArgument(Eqns,0);
 	opid_eqns = ATmakeList0();
 	dataappl_eqns = ATmakeList0();
 
@@ -44,9 +46,82 @@ void gsRewriteInit(ATermAppl Spec, int strat)
 
 	switch ( strategy )
 	{
+		case GS_REWR_INNER2:
+			rewrite_init_inner2();
+			break;
+		case GS_REWR_INNER3:
+			rewrite_init_inner3();
+			break;
 		case GS_REWR_INNER:
 		default:
 			rewrite_init_inner();
+			break;
+	}
+}
+
+void gsRewriteAddEqn(ATermAppl Eqn)
+{
+	if ( gsIsOpId(ATAgetArgument(Eqn,2)) )
+	{
+		opid_eqns = ATappend(opid_eqns, (ATerm) Eqn);
+	} else {
+		dataappl_eqns = ATappend(dataappl_eqns, (ATerm) Eqn);
+	}
+
+	switch ( strategy )
+	{
+		case GS_REWR_INNER2:
+			rewrite_add_inner2(Eqn);
+			break;
+		case GS_REWR_INNER3:
+			rewrite_add_inner3(Eqn);
+			break;
+		case GS_REWR_INNER:
+		default:
+			rewrite_add_inner(Eqn);
+			break;
+	}
+}
+
+void gsRewriteRemoveEqn(ATermAppl Eqn)
+{
+	ATermList l;
+
+	if ( gsIsOpId(ATAgetArgument(Eqn,2)) )
+	{
+		l = ATmakeList0();
+		for (; !ATisEmpty(opid_eqns); opid_eqns=ATgetNext(opid_eqns));
+		{
+			if ( !ATisEqual(Eqn,ATgetFirst(opid_eqns)) )
+			{
+				l = ATinsert(l, ATgetFirst(opid_eqns));
+			}
+		}
+		opid_eqns = ATreverse(l);
+	} else {
+		l = ATmakeList0();
+		for (; !ATisEmpty(dataappl_eqns); dataappl_eqns=ATgetNext(dataappl_eqns));
+		{
+			if ( !ATisEqual(Eqn,ATgetFirst(dataappl_eqns)) )
+			{
+				l = ATinsert(l, ATgetFirst(dataappl_eqns));
+			}
+		}
+		dataappl_eqns = ATreverse(l);
+	}
+
+	switch ( strategy )
+	{
+		case GS_REWR_INNER2:
+			rewrite_remove_inner2(Eqn);
+			break;
+		case GS_REWR_INNER3:
+			rewrite_remove_inner3(Eqn);
+			break;
+		case GS_REWR_INNER:
+		default:
+			rewrite_remove_inner(Eqn);
+			break;
 	}
 }
 
@@ -54,9 +129,13 @@ ATerm gsRewriteTermGen(ATerm Term, int *b)
 {
 	switch ( strategy )
 	{
+		case GS_REWR_INNER2:
+			return rewrite_inner2(Term,b);
+		case GS_REWR_INNER3:
+			return rewrite_inner3(Term,b);
 		case GS_REWR_INNER:
 		default:
-			return rewrite_inner(Term,b,ATmakeList0());
+			return rewrite_inner(Term,b);
 	}
 }
 

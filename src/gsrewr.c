@@ -1,4 +1,4 @@
-/* $Id: gsrewr.c,v 1.2 2005/03/09 15:46:00 muck Exp $ */
+/* $Id: gsrewr.c,v 1.2 2005/04/08 12:33:51 muck Exp $ */
 
 #define NAME "gsrewr"
 
@@ -27,7 +27,7 @@ static ATermAppl rewrite_proc(ATermAppl p)
 	} else if ( gsIsAtTime(p) )
 	{
 		return ATmakeAppl2(ATgetAFun(p),ATgetArgument(p,0),(ATerm) gsRewriteTerm(ATAgetArgument(p,1)));
-	} else if ( gsIsSum(p) )
+	} else if ( gsIsSum(p) || gsIsAllow(p) || gsIsRestrict(p) || gsIsHide(p) || gsIsRename(p) || gsIsComm(p) )
 	{
 		return ATmakeAppl2(ATgetAFun(p),ATgetArgument(p,0),(ATerm) rewrite_proc(ATAgetArgument(p,1)));
 	} else if ( gsIsCond(p) )
@@ -127,9 +127,13 @@ void print_help(FILE *f)
 	          "\n"
 	          "The OPTIONS that can be used are:\n"
 	          "-h, --help               display this help message\n"
+	          "-b, --benchmark [num]    rewrites specification num times\n"
+	          "                         (default is 1000 times)\n"
 	          "-r, --read-aterm         SPECFILE is an ATerm\n"
 	          "-w, --write-aterm        OUTFILE should be an ATerm\n"
 	          "-i, --inner              Use innermost rewriter (default)\n"
+	          "-2, --inner2             Use another innermost rewriter\n"
+	          "-3, --inner3             Use yet another innermost rewriter\n"
 	       );
 }
 
@@ -138,18 +142,23 @@ int main(int argc, char **argv)
 	FILE *SpecStream, *OutStream;
 	ATerm stackbot;
 	ATermAppl Spec;
-	#define sopts "hawi"
+	#define sopts "hbawi23"
 	struct option lopts[] = {
 		{ "help",		no_argument,	NULL,	'h' },
+		{ "benchmark",		no_argument,	NULL,	'b' },
 		{ "read-aterm",		no_argument,	NULL,	'a' },
 		{ "write-aterm",	no_argument,	NULL,	'w' },
 		{ "inner",		no_argument,	NULL,	'i' },
+		{ "inner2",		no_argument,	NULL,	'2' },
+		{ "inner3",		no_argument,	NULL,	'3' },
 		{ 0, 0, 0, 0 }
 	};
-	int opt,read_aterm,write_aterm,strat;
+	int opt,read_aterm,write_aterm,strat,benchmark,i,bench_times;
 
 	ATinit(argc,argv,&stackbot);
 
+	benchmark = 0;
+	bench_times = 1000;
 	read_aterm = 0;
 	write_aterm = 0;
 	strat = GS_REWR_INNER;
@@ -160,6 +169,16 @@ int main(int argc, char **argv)
 			case 'h':
 				print_help(stderr);
 				return 0;
+			case 'b':
+				benchmark = 1;
+				// XXX optional argument hack
+				// optional_argument doesn't seem to work
+				if ( argv[optind] != NULL && (argv[optind][0] >= '0') && (argv[optind][0] <= '9') )
+				{
+					bench_times = strtoul(argv[optind],NULL,0);
+					optind++;
+				}
+				break;
 			case 'a':
 				read_aterm = 1;
 				break;
@@ -169,11 +188,18 @@ int main(int argc, char **argv)
 			case 'i':
 				strat = GS_REWR_INNER;
 				break;
+			case '2':
+				strat = GS_REWR_INNER2;
+				break;
+			case '3':
+				strat = GS_REWR_INNER3;
+				break;
 			default:
 				break;
 		}
 	}
 
+	SpecStream = stdin;
 	if ( optind < argc && strcmp(argv[optind],"-") )
 	{
 		if ( (SpecStream = fopen(argv[optind],"r")) == NULL )
@@ -181,19 +207,19 @@ int main(int argc, char **argv)
 			perror(NAME);
 			return 1;
 		}
-	} else {
-		SpecStream = stdin;
 	}
 
-	if ( optind+1 < argc )
+	OutStream = stdout;
+	if ( !benchmark )
 	{
-		if ( (OutStream = fopen(argv[optind+1],"w")) == NULL )
+		if ( optind+1 < argc )
 		{
-			perror(NAME);
-			return 1;
+			if ( (OutStream = fopen(argv[optind+1],"w")) == NULL )
+			{
+				perror(NAME);
+				return 1;
+			}
 		}
-	} else {
-		OutStream = stdout;
 	}
 
 	if ( read_aterm )
@@ -205,19 +231,40 @@ int main(int argc, char **argv)
 		fclose(SpecStream);
 	}
 
-	gsRewriteInit(Spec,strat);
+	gsRewriteInit(ATAgetArgument(Spec,3),strat);
 
-	if ( gsIsLPESpec(Spec) )
-	{
-		Spec = rewrite_lpe(Spec);
-	} else {
-		Spec = rewrite_nolpe(Spec);
-	}
 
-	if ( write_aterm )
+	if ( benchmark )
 	{
-		ATwriteToTextFile((ATerm) Spec,OutStream);
+		if ( gsIsLPESpec(Spec) )
+		{
+			for(i=0; i<bench_times; i++)
+			{
+				rewrite_lpe(Spec);
+			}
+		} else {
+			for(i=0; i<bench_times; i++)
+			{
+				rewrite_nolpe(Spec);
+			}
+		}
 	} else {
-		gsPrintSpecification(OutStream,Spec);
+		if ( gsIsLPESpec(Spec) )
+		{
+			Spec = rewrite_lpe(Spec);
+		} else {
+			Spec = rewrite_nolpe(Spec);
+		}
+
+		if ( write_aterm )
+		{
+			ATwriteToTextFile((ATerm) Spec,OutStream);
+		} else {
+			gsPrintSpecification(OutStream,Spec);
+		}
+		if ( OutStream != stdout )
+		{
+			fclose(OutStream);
+		}
 	}
 }

@@ -1,4 +1,4 @@
-/* $Id: libgsrewrite.c,v 1.3 2005/03/22 13:26:16 muck Exp $ */
+/* $Id: gsrewr_inner.h,v 1.2 2005/04/08 12:33:51 muck Exp $ */
 
 #include <stdio.h>
 #include <stdlib.h>
@@ -8,4 +8,7 @@
 
 void rewrite_init_inner();
 
-ATerm rewrite_inner(ATerm Term, int *b, ATermList vars);
+void rewrite_add_inner(ATermAppl eqn);
+void rewrite_remove_inner(ATermAppl eqn);
+
+ATerm rewrite_inner(ATerm Term, int *b);
