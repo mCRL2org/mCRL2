@@ -63,6 +63,7 @@ LIB_NAMES          = $(LIBPARSER_NAME) $(LIBREWR_NAME)
 all : $(EXE_NAMES) Makefile
 
 install : $(EXE_NAMES) Makefile
+	$(INSTALL) -d $(bindir)
 	$(INSTALL) $(EXE_NAMES) $(bindir)
 
 $(LIBPARSER_NAME) : $(LIBPARSER_OBJECTS) Makefile
