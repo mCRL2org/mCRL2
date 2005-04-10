@@ -732,6 +732,24 @@ static specificationbasictype *read_input_file(char *filename)
 { FILE *inputfile;
   ATermAppl t=NULL;
   specificationbasictype *spec=malloc(sizeof(specificationbasictype));
+  spec->sorts=NULL;
+  ATprotect((ATerm *)&(spec->sorts));
+  spec->funcs=NULL;
+  ATprotect((ATerm *)&(spec->funcs));
+  spec->maps=NULL;
+  ATprotect((ATerm *)&(spec->maps));
+  spec->eqns=NULL;
+  ATprotect((ATerm *)&(spec->eqns));
+  spec->acts=NULL;
+  ATprotect((ATerm *)&(spec->acts));
+  spec->procdatavars=NULL;
+  ATprotect((ATerm *)&(spec->procdatavars));
+  spec->procs=NULL;
+  ATprotect((ATerm *)&(spec->procs));
+  spec->initdatavars=NULL;
+  ATprotect((ATerm *)&(spec->initdatavars));
+  spec->init=NULL;
+  ATprotect((ATerm *)&(spec->init));
   
   if (spec==NULL)
   { ATerror("Cannot allocate memory for elementary operations\n"); }
@@ -1546,6 +1564,7 @@ static ATermAppl substitute_data_rec(
   { return substitute_variable_rec(terms,vars,t);
   }
 
+  /* Exists en forall do not occur in terms.
   if (gsIsExists(t))
   { ATfprintf(stderr,"Warning: no renaming of variable in exists\n");
     return gsMakeExists(
@@ -1560,7 +1579,7 @@ static ATermAppl substitute_data_rec(
                  ATLgetArgument(t,0),
                  substitute_data_rec(terms,vars,ATAgetArgument(t,1)));
                    
-  } 
+  } */
 
   assert(gsIsOpId(t));
   return t; 
@@ -4191,6 +4210,13 @@ static enumeratedtype *create_enumeratedtype
                 w=w->next){};
   if (w==NULL)
   { w=malloc(sizeof(enumeratedtype));
+    w->sortId=NULL;
+    ATprotect((ATerm *)&(w->sortId));
+    w->elementnames=NULL;
+    ATprotect((ATerm *)&(w->elementnames));
+    w->functions=NULL;
+    ATprotect((ATerm *)&(w->functions));
+
     w->size=n;
     if (n==2)
     { w->sortId=gsMakeSortExprBool(); 
@@ -4226,7 +4252,8 @@ static enumeratedtype *create_enumeratedtype
           { ATermAppl el1=ATAgetFirst(l1);
             ATermAppl el2=ATAgetFirst(l2);
             if (el1!=el2)
-            { newequation(NULL,
+            { 
+              newequation(NULL,
                           gsMakeDataExprEq(el1,el2),
                           gsMakeDataExprFalse(),spec);
             }
@@ -4363,6 +4390,8 @@ static enumtype *generate_enumerateddatatype(
   ATermList w=ATempty;
   
   et=malloc(sizeof(enumtype));
+  et->var=NULL;
+  ATprotect((ATerm *)&(et->var));
   et->next=enumeratedtypes;
   enumeratedtypes=et;
   et->etype=create_enumeratedtype(n,spec);
@@ -5787,7 +5816,7 @@ static ATermList phi(ATermList m,
     if (c!=NULL)
     { ATermList T=makeMultiActionConditionList(w,C);
       return addActionCondition(
-                   ((c==gsMakeNil())?NULL:gsMakeAction(c,d)),
+                   ((ATAgetArgument(c,0)==gsMakeNil())?NULL:gsMakeAction(c,d)),
                    gsMakeDataExprTrue(),
                    T,
                    ATempty);
@@ -5810,7 +5839,8 @@ static ATermList phi(ATermList m,
 static ATermAppl makeNegatedConjunction(ATermList S)
 { ATermAppl result=gsMakeDataExprTrue();
   for( ; S!=ATempty ; S=ATgetNext(S) )
-  { result=gsMakeDataExprAnd(ATAgetArgument(ATAgetFirst(S),1),result);
+  { result=gsMakeDataExprAnd(
+             gsMakeDataExprNot(ATAgetArgument(ATAgetFirst(S),1)),result);
   }
   return result; 
 }
@@ -5891,16 +5921,16 @@ static ATermAppl communicationcomposition(
     for( ; multiactionconditionlist!=ATempty ;
                multiactionconditionlist=ATgetNext(multiactionconditionlist) )
     { ATermAppl multiactioncondition=ATAgetFirst(multiactionconditionlist);
-      condition=RewriteTerm(
+      ATermAppl freshcondition=RewriteTerm(
                     gsMakeDataExprAnd(
                     condition,
                     ATAgetArgument(multiactioncondition,1)));
-      if (condition!=gsMakeDataExprFalse())
+      if (freshcondition!=gsMakeDataExprFalse())
       { resultsumlist=ATinsertA(
                     resultsumlist,
                     gsMakeLPESummand(
                            sumvars,
-                           condition,
+                           freshcondition,
                            gsMakeMultAct(ATLgetArgument(multiactioncondition,0)),
                            actiontime,
                            nextstate));
@@ -5917,8 +5947,7 @@ static ATermAppl makesingleultimatedelaycondition(
                      ATermAppl timevariable,
                      ATermAppl actiontime,
                      specificationbasictype *spec)
-{ /* ATfprintf(stderr,"AA\nsumvars: %t\ntimevariable: %t\nactiontime %t\n", 
-                   sumvars,timevariable,actiontime); */
+{ 
   ATermAppl result=gsMakeDataExprLT(timevariable,actiontime);
   ATermList variables=ATinsertA(ATempty,timevariable);
 
