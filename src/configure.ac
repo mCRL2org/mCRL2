@@ -63,6 +63,8 @@ if test $with_aterm; then
     LDFLAGS="-L$ATERM_LIB $LDFLAGS"
   fi
 fi
+XML_ROOT="/usr/include/libxml2"
+CPPFLAGS="-I$XML_ROOT $CPPFLAGS"
 # debug: AC_MSG_RESULT([CPPFLAGS=$CPPFLAGS])
 # debug: AC_MSG_RESULT([LDFLAGS=$LDFLAGS])
 
