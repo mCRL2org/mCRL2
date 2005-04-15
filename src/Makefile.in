@@ -10,6 +10,8 @@ LEX                = @LEX@
 LFLAGS             = -I -Pgsyy
 BISON              = @BISON@
 BFLAGS             = -d -pgsyy
+MAKEDEP            = @MAKEDEP@
+USE_XML2           = @USE_XML2@
 
 #installation directories
 prefix             = @prefix@
@@ -54,52 +56,62 @@ PNML2GS_LDFLAGS    = -lgsparse -lATerm -lxml2 -lm
 
 #Group definitions
 EXE_NAMES          = $(PARSER_NAME) $(PRINTER_NAME) $(LINEARISER_NAME) $(REWR_NAME) $(PNML2GS_NAME)
+CUR_EXE_NAMES      = $(foreach s,$(EXE_NAMES),$(shell if test -f $s; then echo -n $s; fi))
 LIB_NAMES          = $(LIBPARSER_NAME) $(LIBREWR_NAME)
 
 #Make rules
-.PHONY: all install clean
+.PHONY: all install clean depend
 .PRECIOUS: gsparser.c gslexer.c
 
-all : $(EXE_NAMES) Makefile
+all : $(EXE_NAMES)
 
-install : $(EXE_NAMES) Makefile
+install :
 	$(INSTALL) -d $(bindir)
-	$(INSTALL) $(EXE_NAMES) $(bindir)
+	$(INSTALL) $(CUR_EXE_NAMES) $(bindir)
 
-$(LIBPARSER_NAME) : $(LIBPARSER_OBJECTS) Makefile
+#for s in $(EXE_NAMES);\
+#do if test -f s; then $(INSTALL) s $(bindir); fi;\
+#done
+#CUR_EXE_NAMES=$(foreach s,$(EXE_NAMES),$(shell if test -f $s; then echo -n $s; fi))
+#$(INSTALL) $(CUR_EXE_NAMES) $(bindir)
+
+ifdef MAKEDEP
+depend :
+	$(MAKEDEP) -- $(CPPFLAGS) *.c *.y *.l 2> /dev/null
+else
+depend :
+	@echo dependencies could not be generated
+endif
+
+clean :
+	$(RM) $(EXE_NAMES) $(LIB_NAMES) *.o gslexer.c gsparser.c gsparser.h\
+gsparser.output config.status config.log *~ core core.*
+
+$(LIBPARSER_NAME) : $(LIBPARSER_OBJECTS)
 	$(AR) $(ARFLAGS) $@ $(LIBPARSER_OBJECTS)
 
-$(PARSER_NAME) : $(PARSER_OBJECTS) $(LIBPARSER_NAME) Makefile
+$(PARSER_NAME) : $(PARSER_OBJECTS) $(LIBPARSER_NAME)
 	$(CC) -o $@ $(PARSER_OBJECTS) $(LDFLAGS) $(PARSER_LDFLAGS)
 
-$(PRINTER_NAME) : $(PRINTER_OBJECTS) $(LIBPARSER_NAME) Makefile
+$(PRINTER_NAME) : $(PRINTER_OBJECTS) $(LIBPARSER_NAME)
 	$(CC) -o $@ $(PRINTER_OBJECTS) $(LDFLAGS) $(PRINTER_LDFLAGS)
 
-$(LINEARISER_NAME) : $(LINEARISER_OBJECTS) $(LIBPARSER_NAME) $(LIBREWR_NAME) Makefile
+$(LINEARISER_NAME) : $(LINEARISER_OBJECTS) $(LIBPARSER_NAME) $(LIBREWR_NAME)
 	$(CC) -o $@ $(LINEARISER_OBJECTS) $(LDFLAGS) $(LINEARISER_LDFLAGS)
 
-$(LIBREWR_NAME) : $(LIBREWR_OBJECTS) Makefile
+$(LIBREWR_NAME) : $(LIBREWR_OBJECTS)
 	$(AR) $(ARFLAGS) $@ $(LIBREWR_OBJECTS)
 
-$(REWR_NAME) : $(REWR_OBJECTS) $(LIBPARSER_NAME) $(LIBREWR_NAME) Makefile
+$(REWR_NAME) : $(REWR_OBJECTS) $(LIBPARSER_NAME) $(LIBREWR_NAME)
 	$(CC) -o $@ $(REWR_OBJECTS) $(LDFLAGS) $(REWR_LDFLAGS)
 
-$(PNML2GS_NAME) : $(PNML2GS_OBJECTS) $(LIBPARSER_NAME) Makefile
+ifdef USE_XML2
+$(PNML2GS_NAME) : $(PNML2GS_OBJECTS) $(LIBPARSER_NAME)
 	$(CC) -o $@ $(PNML2GS_OBJECTS) $(LDFLAGS) $(PNML2GS_LDFLAGS)
-
-gslexer.o      : gslexer.h gsparser.h gsfunc.h gslowlevel.h
-gsparser.o     : gsfunc.h gslowlevel.h
-gsfunc.o       : gsfunc.h gslowlevel.h
-gstypecheck.o  : gstypecheck.h gsfunc.h gslowlevel.h
-gsdataimpl.o   : gsdataimpl.h gsfunc.h gslowlevel.h
-libgsparse.o   : libgsparse.h gslexer.h gstypecheck.h gsdataimpl.h gsfunc.h gslowlevel.h
-gsparse.o      : gsparse.h libgsparse.h gsfunc.h gslowlevel.h
-gsprint.o      : gsprint.h libgsparse.h gsfunc.h gslowlevel.h
-linearise.o    : libgsparse.h libgsrewrite.h gsfunc.h gslowlevel.h
-gsrewr_inner.o : gslowlevel.h gsfunc.h gsrewr_inner.h
-libgsrewrite.o : gslowlevel.h gsfunc.h libgsrewrite.h gsrewr_inner.h
-gsrewr.o       : gslowlevel.h gsfunc.h libgsparse.h libgsrewrite.h 
-pnml2gs.o      : gslowlevel.h gsfunc.h libgsparse.h
+else
+$(PNML2GS_NAME) :
+	@echo cannot make target $@ because the xml2 library cannot be used
+endif
 
 %.c : %.y
 	$(BISON) $(BFLAGS) -o $@ $<
@@ -107,9 +119,7 @@ pnml2gs.o      : gslowlevel.h gsfunc.h libgsparse.h
 %.c : %.l
 	$(LEX) $(LFLAGS) -o$@ $<
 
-clean :
-	$(RM) $(EXE_NAMES) $(LIB_NAMES) *.o gslexer.c gsparser.c gsparser.h\
-gsparser.output config.status config.log *~ core core.*
+*.* : Makefile
 
 #Note: to make a shared version of the gsparse library instead of a static one, do the following:
 #- add the option `-fpic' to CFLAGS
@@ -117,3 +127,4 @@ gsparser.output config.status config.log *~ core core.*
 #- in the rule with target $(LIBPARSER_NAME), replace the command by
 #    $(CC) -shared -o $@ $(LIBPARSER_OBJECTS) $(LIBPARSER_LDFLAGS)
 #- extend the environment variable LD_LIBRARY_PATH with `.'
+

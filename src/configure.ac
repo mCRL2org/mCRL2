@@ -1,11 +1,14 @@
 AC_PREREQ(2.57)
-AC_INIT([GenSpect parser], [0.1.14], [A.H.J.Mathijssen@tue.nl])
+AC_INIT([GenSpect parser], [0.1], [A.H.J.Mathijssen@tue.nl])
 AC_PREFIX_DEFAULT([$HOME])
 AC_CONFIG_SRCDIR([gslexer.l])
 
 # Checks for programs.
 AC_PROG_CC
 AC_PROG_LEX
+
+# Check for makedepend
+AC_CHECK_PROG([MAKEDEP], [makedepend], [makedepend], [])
 
 # Check for compatible bison
 AC_CHECK_PROG([BISON], [bison], [bison], [])
@@ -63,18 +66,37 @@ if test $with_aterm; then
     LDFLAGS="-L$ATERM_LIB $LDFLAGS"
   fi
 fi
-XML_ROOT="/usr/include/libxml2"
-CPPFLAGS="-I$XML_ROOT $CPPFLAGS"
 # debug: AC_MSG_RESULT([CPPFLAGS=$CPPFLAGS])
 # debug: AC_MSG_RESULT([LDFLAGS=$LDFLAGS])
-
-# Checks for libraries
 AC_CHECK_LIB([ATerm], [ATinit], , [AC_MSG_ERROR([cannot find ATerm library])])
+AC_CHECK_HEADERS([aterm2.h], , [AC_MSG_ERROR([cannot find ATerm headers])])
+
+# Check for xml2 library and header files
+AC_ARG_WITH(
+  [xml2],
+  AC_HELP_STRING(
+    [--with-xml2-header=dir],
+    [use xml2 headers from dir/libxml; defaults to /usr/include/libxml2]
+  )  
+)
+if test $with_xml2_header; then
+  xml_h_dir=$with_xml2_header
+else
+  xml_h_dir=/usr/include/libxml2
+fi
+CPPFLAGS="-I$xml_h_dir $CPPFLAGS"
+AC_CHECK_LIB([xml2], [xmlParseFile], [have_libxml2=1])
+AC_CHECK_HEADERS([libxml/parser.h], [have_headerxml2=1])
+if test $have_libxml2; then
+  if test $have_headerxml2; then
+    USE_XML2=1
+  fi
+fi
+AC_SUBST([USE_XML2],[])
 
 # Checks for header files.
 AC_HEADER_STDC
 AC_CHECK_HEADERS([limits.h stdlib.h string.h])
-AC_CHECK_HEADERS([aterm2.h], , [AC_MSG_ERROR([cannot find ATerm headers])])
 
 # Checks for typedefs, structures, and compiler characteristics.
 AC_HEADER_STDBOOL
