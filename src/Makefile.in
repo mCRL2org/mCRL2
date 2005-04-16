@@ -56,7 +56,7 @@ PNML2GS_LDFLAGS    = -lgsparse -lATerm -lxml2 -lm
 
 #Group definitions
 EXE_NAMES          = $(PARSER_NAME) $(PRINTER_NAME) $(LINEARISER_NAME) $(REWR_NAME) $(PNML2GS_NAME)
-CUR_EXE_NAMES      = $(foreach s,$(EXE_NAMES),$(shell if test -f $s; then echo -n $s; fi))
+CUR_EXE_NAMES      = $(strip $(foreach s,$(EXE_NAMES),$(shell if test -f $s; then echo -n $s; fi)))
 LIB_NAMES          = $(LIBPARSER_NAME) $(LIBREWR_NAME)
 
 #Make rules
@@ -66,26 +66,23 @@ LIB_NAMES          = $(LIBPARSER_NAME) $(LIBREWR_NAME)
 all : $(EXE_NAMES)
 
 install :
+ifneq ($(CUR_EXE_NAMES),)
 	$(INSTALL) -d $(bindir)
 	$(INSTALL) $(CUR_EXE_NAMES) $(bindir)
+else
+	@echo there aren\'t any executables to be installed
+endif
 
-#for s in $(EXE_NAMES);\
-#do if test -f s; then $(INSTALL) s $(bindir); fi;\
-#done
-#CUR_EXE_NAMES=$(foreach s,$(EXE_NAMES),$(shell if test -f $s; then echo -n $s; fi))
-#$(INSTALL) $(CUR_EXE_NAMES) $(bindir)
-
-ifdef MAKEDEP
 depend :
+ifdef MAKEDEP
 	$(MAKEDEP) -- $(CPPFLAGS) *.c *.y *.l 2> /dev/null
 else
-depend :
 	@echo dependencies could not be generated
 endif
 
 clean :
 	$(RM) $(EXE_NAMES) $(LIB_NAMES) *.o gslexer.c gsparser.c gsparser.h\
-gsparser.output config.status config.log *~ core core.*
+gsparser.output config.status config.log *~ *.bak core core.*
 
 $(LIBPARSER_NAME) : $(LIBPARSER_OBJECTS)
 	$(AR) $(ARFLAGS) $@ $(LIBPARSER_OBJECTS)
