@@ -7,9 +7,6 @@ AC_CONFIG_SRCDIR([gslexer.l])
 AC_PROG_CC
 AC_PROG_LEX
 
-# Check for makedepend
-AC_CHECK_PROG([MAKEDEP], [makedepend], [makedepend], [])
-
 # Check for compatible bison
 AC_CHECK_PROG([BISON], [bison], [bison], [])
 if test -z $BISON; then

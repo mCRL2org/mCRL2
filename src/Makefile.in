@@ -10,7 +10,6 @@ LEX                = @LEX@
 LFLAGS             = -I -Pgsyy
 BISON              = @BISON@
 BFLAGS             = -d -pgsyy
-MAKEDEP            = @MAKEDEP@
 USE_XML2           = @USE_XML2@
 
 #installation directories
@@ -60,7 +59,7 @@ CUR_EXE_NAMES      = $(strip $(foreach s,$(EXE_NAMES),$(shell if test -f $s; the
 LIB_NAMES          = $(LIBPARSER_NAME) $(LIBREWR_NAME)
 
 #Make rules
-.PHONY: all install clean depend
+.PHONY: all install clean
 .PRECIOUS: gsparser.c gslexer.c
 
 all : $(EXE_NAMES)
@@ -73,16 +72,9 @@ else
 	@echo there aren\'t any executables to be installed
 endif
 
-depend :
-ifdef MAKEDEP
-	$(MAKEDEP) -- $(CPPFLAGS) *.c *.y *.l 2> /dev/null
-else
-	@echo dependencies could not be generated
-endif
-
 clean :
-	$(RM) $(EXE_NAMES) $(LIB_NAMES) *.o gslexer.c gsparser.c gsparser.h\
-gsparser.output config.status config.log *~ *.bak core core.*
+	$(RM) $(EXE_NAMES) $(LIB_NAMES) *.o *.d gslexer.c gsparser.c gsparser.h\
+gsparser.output config.status config.log *~ core core.*
 
 $(LIBPARSER_NAME) : $(LIBPARSER_OBJECTS)
 	$(AR) $(ARFLAGS) $@ $(LIBPARSER_OBJECTS)
@@ -117,6 +109,15 @@ endif
 	$(LEX) $(LFLAGS) -o$@ $<
 
 *.* : Makefile
+
+%.d : %.c
+	@echo generating dependencies for $<
+	@$(CC) -MM $(CPPFLAGS) $< > $@.$$$$; \
+	sed 's,\($*\)\.o[ :]*,\1.o $@ : ,g' < $@.$$$$ > $@; \
+	$(RM) $@.$$$$
+
+-include $(patsubst %.c,%.d,$(wildcard *.c))
+
 
 #Note: to make a shared version of the gsparse library instead of a static one, do the following:
 #- add the option `-fpic' to CFLAGS
