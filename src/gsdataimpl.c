@@ -648,7 +648,9 @@ ATermAppl gsImplSortStruct(ATermAppl SortStruct, ATermList *PSubsts,
   //store constructor, projection and recogniser operations for this identifier
   ATermList ConsOps = ATmakeList0();
   ATermList ProjOps = ATmakeList0();
+  ATermList Projs = ATmakeList0();
   ATermList RecOps = ATmakeList0();
+  ATermList Recs = ATmakeList0();
   ATermList StructConss = ATLgetArgument(SortStruct, 0);
   while (!ATisEmpty(StructConss))
   {
@@ -660,10 +662,12 @@ ATermAppl gsImplSortStruct(ATermAppl SortStruct, ATermList *PSubsts,
     if (!gsIsNil(RecName)) {
       RecOps = ATinsert(RecOps, (ATerm)
         gsMakeOpId(RecName, gsMakeSortArrow(SortId, gsMakeSortExprBool())));
+      Recs = ATinsert(Recs, (ATerm) ATmakeList2(ATgetFirst(RecOps),(ATerm) ConsName));
     }
     ATermList StructConsSorts = ATmakeList0();
     //store projection operations in ProjOps and store the implementations of
     //the sorts in StructConsSorts
+    int i = 0;
     while (!ATisEmpty(StructProjs))
     {
       ATermAppl StructProj = ATAgetFirst(StructProjs);
@@ -675,8 +679,10 @@ ATermAppl gsImplSortStruct(ATermAppl SortStruct, ATermList *PSubsts,
       if (!gsIsNil(ProjName)) {
         ProjOps = ATinsert(ProjOps, (ATerm)
           gsMakeOpId(ProjName, gsMakeSortArrow(SortId, ProjSort)));
+        Projs = ATinsert(Projs, (ATerm) ATmakeList3(ATgetFirst(ProjOps),(ATerm) ConsName,(ATerm) ATmakeInt(i)));
       }
       StructProjs = ATgetNext(StructProjs);
+      i++;
     }
     StructConsSorts = ATreverse(StructConsSorts);
     //store constructor operation in ConsOps
@@ -688,6 +694,206 @@ ATermAppl gsImplSortStruct(ATermAppl SortStruct, ATermList *PSubsts,
   PDataDecls->ConsOps = ATconcat(ATreverse(ConsOps), PDataDecls->ConsOps);
   PDataDecls->Ops = ATconcat(ATconcat(ATreverse(ProjOps), ATreverse(RecOps)),
     PDataDecls->Ops);
+  //Declare standard structured sorts operations
+  PDataDecls->Ops = ATconcat(ATmakeList(3,
+      (ATerm) gsMakeOpIdEq(SortId),
+      (ATerm) gsMakeOpIdNeq(SortId),
+      (ATerm) gsMakeOpIdIf(SortId)
+    ), PDataDecls->Ops);
+  //Declare data equations for structured sort
+  ATermList OpEqns = ATmakeList0();
+  ATermList el = ATmakeList0();
+  ATermAppl nil = gsMakeNil();
+  ATermAppl t = gsMakeDataExprTrue();
+  ATermAppl f = gsMakeDataExprFalse();
+  ATermAppl b = gsMakeDataVarId(gsString2ATermAppl("b"), gsMakeSortExprBool());
+  // XXX more intelligent variable names would be nice
+  ATermAppl s1 = gsMakeDataVarId(gsString2ATermAppl("s"), SortId);
+  ATermAppl s2 = gsMakeDataVarId(gsString2ATermAppl("t"), SortId);
+  ATermList ssl = ATmakeList2((ATerm) s1, (ATerm) s2);
+  ATermList bssl = ATmakeList3((ATerm) b, (ATerm) s1, (ATerm) s2);
+  ATermList vars = bssl;
+  ATermList rhsv;
+  ATermList lhsv;
+  int varcount = 0;
+  char varstr[10];
+  //store equations for projections in OpEqns
+  for (; !ATisEmpty(Projs); Projs=ATgetNext(Projs))
+  {
+    ATermList l = ATLgetFirst(Projs);
+    ATermAppl s = ATAgetFirst(ATgetNext(l));
+    int i = ATgetInt((ATermInt) ATgetFirst(ATgetNext(ATgetNext(l))));
+    ATermAppl t = NULL;
+    for (ATermList m=ConsOps; !ATisEmpty(m); m=ATgetNext(m))
+    {
+      if ( ATisEqual(ATAgetArgument(ATAgetFirst(m),0),s) )
+      {
+        t = ATAgetFirst(m);
+        break;
+      }
+    }
+    ATermAppl sort = ATAgetArgument(t,1);
+    lhsv = el;
+    ATermList tmpvars = vars;
+    while ( gsIsSortArrow(sort) )
+    {
+      ATermAppl v = NULL;
+      for (ATermList n=tmpvars; !ATisEmpty(n); n=ATgetNext(n))
+      {
+        if ( ATisEqual(ATgetArgument(ATAgetFirst(n),1),ATgetArgument(sort,0)) )
+        {
+          v = ATAgetFirst(n);
+          tmpvars = ATremoveElement(tmpvars,(ATerm) v);
+          break;
+        }
+      }
+      if ( v == NULL )
+      {
+        sprintf(varstr,"v%i",varcount++);
+        v = gsMakeDataVarId(gsString2ATermAppl(varstr),ATAgetArgument(sort,0));
+        vars = ATinsert(vars,(ATerm) v);
+      }
+      lhsv = ATinsert(lhsv,(ATerm) v);
+      t = gsMakeDataAppl(t,v);
+      sort = ATAgetArgument(sort,1);
+    }
+    t = gsMakeDataAppl(ATAgetFirst(l),t);
+    OpEqns = ATinsert(OpEqns, (ATerm) gsMakeDataEqn(lhsv, nil, t, (ATermAppl) ATelementAt(lhsv,i)));
+  }
+  //store equations for recognition in OpEqns
+  for (; !ATisEmpty(Recs); Recs=ATgetNext(Recs))
+  {
+    ATermList l = ATLgetFirst(Recs);
+    ATermAppl s = ATAgetFirst(ATgetNext(l));
+    ATermAppl t;
+    for (ATermList m=ConsOps; !ATisEmpty(m); m=ATgetNext(m))
+    {
+      t = ATAgetFirst(m);
+      ATermAppl sort = ATAgetArgument(t,1);
+      lhsv = el;
+      ATermList tmpvars = vars;
+      while ( gsIsSortArrow(sort) )
+      {
+        ATermAppl v = NULL;
+        for (ATermList n=tmpvars; !ATisEmpty(n); n=ATgetNext(n))
+        {
+          if ( ATisEqual(ATgetArgument(ATAgetFirst(n),1),ATgetArgument(sort,0)) )
+          {
+            v = ATAgetFirst(n);
+            tmpvars = ATremoveElement(tmpvars,(ATerm) v);
+            break;
+          }
+        }
+        if ( v == NULL )
+        {
+          sprintf(varstr,"v%i",varcount++);
+          v = gsMakeDataVarId(gsString2ATermAppl(varstr),ATAgetArgument(sort,0));
+          vars = ATinsert(vars,(ATerm) v);
+        }
+        lhsv = ATinsert(lhsv,(ATerm) v);
+        t = gsMakeDataAppl(t,v);
+        sort = ATAgetArgument(sort,1);
+      }
+      t = gsMakeDataAppl(ATAgetFirst(l),t);
+      if ( ATisEqual(ATAgetArgument(ATAgetFirst(m),0),s) )
+      {
+        OpEqns = ATinsert(OpEqns, (ATerm) gsMakeDataEqn(lhsv, nil, t, gsMakeDataExprTrue()));
+      } else {
+        OpEqns = ATinsert(OpEqns, (ATerm) gsMakeDataEqn(lhsv, nil, t, gsMakeDataExprFalse()));
+      }
+    }
+  }
+  //store equations for (in)equalities in OpEqns
+  for (ATermList l=ConsOps; !ATisEmpty(l); l=ATgetNext(l))
+  {
+    for (ATermList m=ConsOps; !ATisEmpty(m); m=ATgetNext(m))
+    {
+      ATermAppl t,u,r;
+      ATermList vs;
+      ATermAppl sort;
+      t = ATAgetFirst(l);
+      sort = ATAgetArgument(t,1);
+      lhsv = el;
+      ATermList tmpvars = vars;
+      while ( gsIsSortArrow(sort) )
+      {
+        ATermAppl v = NULL;
+        for (ATermList n=tmpvars; !ATisEmpty(n); n=ATgetNext(n))
+        {
+          if ( ATisEqual(ATgetArgument(ATAgetFirst(n),1),ATgetArgument(sort,0)) )
+          {
+            v = ATAgetFirst(n);
+            tmpvars = ATremoveElement(tmpvars,(ATerm) v);
+            break;
+          }
+        }
+        if ( v == NULL )
+        {
+          sprintf(varstr,"v%i",varcount++);
+          v = gsMakeDataVarId(gsString2ATermAppl(varstr),ATAgetArgument(sort,0));
+          vars = ATinsert(vars,(ATerm) v);
+        }
+        lhsv = ATinsert(lhsv,(ATerm) v);
+        t = gsMakeDataAppl(t,v);
+        sort = ATAgetArgument(sort,1);
+      }
+      u = ATAgetFirst(m);
+      sort = ATAgetArgument(u,1);
+      rhsv = el;
+      while ( gsIsSortArrow(sort) )
+      {
+        ATermAppl v = NULL;
+        for (ATermList n=tmpvars; !ATisEmpty(n); n=ATgetNext(n))
+        {
+          if ( ATisEqual(ATgetArgument(ATAgetFirst(n),1),ATgetArgument(sort,0)) )
+          {
+            v = ATAgetFirst(n);
+            tmpvars = ATremoveElement(tmpvars,(ATerm) v);
+            break;
+          }
+        }
+        if ( v == NULL )
+        {
+          sprintf(varstr,"v%i",varcount++);
+          v = gsMakeDataVarId(gsString2ATermAppl(varstr),ATAgetArgument(sort,0));
+          vars = ATinsert(vars,(ATerm) v);
+        }
+        rhsv = ATinsert(rhsv,(ATerm) v);
+        u = gsMakeDataAppl(u,v);
+        sort = ATAgetArgument(sort,1);
+      }
+      vs = ATconcat(lhsv,rhsv);
+      if ( ATisEqual(ATgetFirst(l),ATgetFirst(m)) )
+      {
+        r = NULL;
+        for (; !ATisEmpty(lhsv); lhsv=ATgetNext(lhsv),rhsv=ATgetNext(rhsv))
+        {
+          if ( r == NULL )
+          {
+            r = gsMakeDataExprEq(ATAgetFirst(lhsv),ATAgetFirst(rhsv));
+          } else {
+            r = gsMakeDataExprAnd(r,gsMakeDataExprEq(ATAgetFirst(lhsv),ATAgetFirst(rhsv)));
+          }
+        }
+        if ( r == NULL )
+        {
+          r = gsMakeDataExprTrue();
+        }
+      } else {
+        r = gsMakeDataExprFalse();
+      }
+      OpEqns = ATinsert(OpEqns, (ATerm) gsMakeDataEqn(vs,nil,gsMakeDataExprEq(t,u),r));
+    }
+  }
+  OpEqns = ATinsert(OpEqns, (ATerm) gsMakeDataEqn(ssl, nil, gsMakeDataExprNeq(s1,s2), gsMakeDataExprNot(gsMakeDataExprEq(s1,s2))));
+  //store equations for 'if' in OpEqns
+  OpEqns = ATconcat(ATmakeList(3,
+      (ATerm) gsMakeDataEqn(ssl, nil, gsMakeDataExprIf(t,s1,s2),s1),
+      (ATerm) gsMakeDataEqn(ssl, nil, gsMakeDataExprIf(f,s1,s2),s2),
+      (ATerm) gsMakeDataEqn(bssl, nil, gsMakeDataExprIf(b,s1,s1),s1)
+    ), OpEqns);
+  //Add OpEqns to DataEqns
+  PDataDecls->DataEqns = ATconcat(PDataDecls->DataEqns,OpEqns);
   return SortId;
 }
 
