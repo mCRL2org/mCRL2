@@ -907,12 +907,12 @@ static void initialize_symbols(void)
   ATprotectAFun(tuple_symbol);
   initprocspec_symbol=ATmakeAFun("initprocspec",3,ATfalse);
   ATprotectAFun(initprocspec_symbol);
-  ATprotectAppl(terminationAction);
+  ATprotectAppl(&terminationAction);
   terminationAction=gsMakeMultAct(
              ATinsertA(
                ATempty,
                gsMakeAction(gsMakeActId(fresh_name("Terminate"),ATempty),ATempty)));
-  ATprotectAppl(terminatedProcId);
+  ATprotectAppl(&terminatedProcId);
   terminatedProcId=gsMakeProcVarId(gsString2ATermAppl("Terminated**"),ATempty);
   insertProcDeclaration(
            terminatedProcId,
@@ -6547,7 +6547,7 @@ static ATermAppl generateLPEmCRL(
 
 static void initialize_data(void)
 { 
-  ATprotectList(pcrlprocesses);
+  ATprotectList(&pcrlprocesses);
   pcrlprocesses=ATempty;
   gsEnableConstructorFunctions();
   objectIndexTable=ATindexedSetCreate(1024,75);
@@ -6558,8 +6558,8 @@ static void initialize_data(void)
   enumeratedtypes=NULL;
   enumeratedtypelist=NULL;
   stacklist=NULL;
-  ATprotectList(sumlist);
-  ATprotectList(localequationvariables);
+  ATprotectList(&sumlist);
+  ATprotectList(&localequationvariables);
   
 }
 
@@ -7131,7 +7131,7 @@ static int main2(int argc, char *argv[],ATerm *stack_bottom)
     ATerror("Option -newstate can only be used with -regular or -regular2\n");
 
   ATinit(argc,argv,stack_bottom);
-  ATprotectAppl(result);
+  ATprotectAppl(&result);
   if (((argc < 2)||(sname==NULL)))
       usage();
   initialize_data();
