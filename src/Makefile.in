@@ -48,13 +48,23 @@ REWR_NAME          = gsrewr
 REWR_OBJECTS       = gsrewr.o
 REWR_LDFLAGS       = -lgsrewrite -lgsparse -lATerm -lm
 
-#Rewriter definitions
+#pnml2gs definitions
 PNML2GS_NAME       = pnml2gs
 PNML2GS_OBJECTS    = pnml2gs.o
 PNML2GS_LDFLAGS    = -lgsparse -lATerm -lxml2 -lm
 
+#Instantiator definitions
+INSTAN_NAME       = gsinstantiate
+INSTAN_OBJECTS    = gsinstantiate.o libgsnextstate.o libgsprover.o
+INSTAN_LDFLAGS    = -lgsrewrite -lgsparse -lATerm -lm
+
+#Simulator definitions
+SIM_NAME       = sim
+SIM_OBJECTS    = sim.o libgsnextstate.o libgsprover.o
+SIM_LDFLAGS    = -lgsrewrite -lgsparse -lATerm -lm
+
 #Group definitions
-EXE_NAMES          = $(PARSER_NAME) $(PRINTER_NAME) $(LINEARISER_NAME) $(REWR_NAME) $(PNML2GS_NAME)
+EXE_NAMES          = $(PARSER_NAME) $(PRINTER_NAME) $(LINEARISER_NAME) $(REWR_NAME) $(PNML2GS_NAME) $(INSTAN_NAME) $(SIM_NAME)
 CUR_EXE_NAMES      = $(strip $(foreach s,$(EXE_NAMES),$(shell if test -f $s; then echo -n $s; fi)))
 LIB_NAMES          = $(LIBPARSER_NAME) $(LIBREWR_NAME)
 
@@ -101,6 +111,12 @@ else
 $(PNML2GS_NAME) :
 	@echo cannot make target $@ because the xml2 library cannot be used
 endif
+
+$(INSTAN_NAME) : $(INSTAN_OBJECTS) $(LIBPARSER_NAME) $(LIBINSTAN_NAME)
+	$(CC) -o $@ $(INSTAN_OBJECTS) $(LDFLAGS) $(INSTAN_LDFLAGS)
+
+$(SIM_NAME) : $(SIM_OBJECTS) $(LIBPARSER_NAME) $(LIBSIM_NAME)
+	$(CC) -o $@ $(SIM_OBJECTS) $(LDFLAGS) $(SIM_LDFLAGS)
 
 %.c : %.y
 	$(BISON) $(BFLAGS) -o $@ $<
