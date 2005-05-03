@@ -5388,6 +5388,10 @@ static int allow(ATermList allowlist, ATermAppl multiaction)
   if (gsIsDelta(multiaction))
   { return 0; }
 
+  /* The empty multiaction, i.e. tau, is never blocked by allow */
+  if (ATgetArgument(multiaction,0)==ATempty)
+  { return 1; }
+
   for( ; allowlist!=ATempty ; allowlist=ATgetNext(allowlist))
   { if (allowsingleaction(ATLgetFirst(allowlist),multiaction))
     { 
