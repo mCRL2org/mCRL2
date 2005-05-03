@@ -104,6 +104,27 @@ void gsGetFreeVars_List(ATermList DataExprs, ATermList BoundVars,
 //Post:*PFreeVars is extended with the free variables in DataExprs that did not
 //     already occur in *PFreeVars or BoundVars
 
+
+static ATermAppl gsApplyOpIdToVars(ATermAppl OpId, ATermList *PArgs,
+                                   ATermList *PVars, ATerm Context);
+//Pre: OpId is an operation identifier
+//     PArgs points to a list
+//     PVars points to a list, possibly containing DataVarIds
+//     Context is some term
+//Post:*PArgs contains a subset of *PVars
+//     *PVars is extended with newly introduced variables (which do not occur
+//     in Context
+//Ret: OpId applied to as much variables as possible, which are listed (in
+//     order) in *PArgs
+
+static ATermList gsMergeList(ATermList L, ATermList M);
+//Pre: L and M are two lists without duplicates
+//Ret: a list with all elements of L and M precisely once
+
+static ATermList gsSubstractList(ATermList L, ATermList M);
+//Pre: L and M are two lists
+//Ret: a copy of L without elements that occur in M
+
 ATermAppl gsImplSortStruct(ATermAppl SortStruct, ATermList *PSubsts,
   TDataDecls *PDataDecls);
 //Pre: SortStruct is a structured sort
@@ -635,6 +656,67 @@ void gsGetFreeVars_List(ATermList DataExprs, ATermList BoundVars,
   }
 }
 
+static ATermAppl gsApplyOpIdToVars(ATermAppl OpId, ATermList *PArgs,
+                                   ATermList *PVars, ATerm Context)
+{
+  ATermAppl t = OpId;
+  ATermAppl sort = ATAgetArgument(t,1);
+  *PArgs = ATmakeList0();
+  ATermList tmpvars = *PVars; // We only use variables once in a term
+  while ( gsIsSortArrow(sort) )
+  {
+    // Find a variabele with the right sort...
+    ATermAppl v = NULL;
+    for (ATermList n=tmpvars; !ATisEmpty(n); n=ATgetNext(n))
+    {
+      if ( ATisEqual(ATgetArgument(ATAgetFirst(n),1),ATgetArgument(sort,0)) )
+      {
+        v = ATAgetFirst(n);
+        tmpvars = ATremoveElement(tmpvars,(ATerm) v);
+        break;
+      }
+    }
+    // ...or create a new one
+    if ( v == NULL )
+    {
+      v = gsMakeDataVarId(gsFreshString2ATermAppl("v",
+            (ATerm) ATmakeList2((ATerm) (*PVars),Context),false),
+                      ATAgetArgument(sort,0));
+      // Add it to *PVars
+      *PVars = ATinsert(*PVars,(ATerm) v);
+    }
+    // Apply t to v and add v to *PArgs
+    t = gsMakeDataAppl(t,v);
+    *PArgs = ATinsert(*PArgs,(ATerm) v);
+    // Next
+    sort = ATAgetArgument(sort,1);
+  }
+  return t;
+}
+
+static ATermList gsMergeList(ATermList L, ATermList M)
+{
+  for (; !ATisEmpty(M); M=ATgetNext(M))
+  {
+    if ( ATindexOf(L,ATgetFirst(M),0) == -1 )
+    {
+      ATinsert(L,ATgetFirst(M));
+    }
+  }
+
+  return L;
+}
+
+static ATermList gsSubstractList(ATermList L, ATermList M)
+{
+  for (; !ATisEmpty(M); M=ATgetNext(M))
+  {
+    L = ATremoveAll(L,ATgetFirst(M));
+  }
+
+  return L;
+}
+
 ATermAppl gsImplSortStruct(ATermAppl SortStruct, ATermList *PSubsts,
   TDataDecls *PDataDecls)
 {
@@ -658,11 +740,12 @@ ATermAppl gsImplSortStruct(ATermAppl SortStruct, ATermList *PSubsts,
     ATermAppl ConsName = ATAgetArgument(StructCons, 0);
     ATermList StructProjs = ATLgetArgument(StructCons, 1);
     ATermAppl RecName = ATAgetArgument(StructCons, 2);
-    //store recogniser in RecOps
+    //store recogniser in RecOps and Recs
     if (!gsIsNil(RecName)) {
       RecOps = ATinsert(RecOps, (ATerm)
         gsMakeOpId(RecName, gsMakeSortArrow(SortId, gsMakeSortExprBool())));
-      Recs = ATinsert(Recs, (ATerm) ATmakeList2(ATgetFirst(RecOps),(ATerm) ConsName));
+      Recs = ATinsert(Recs,
+        (ATerm) ATmakeList2(ATgetFirst(RecOps),(ATerm) ConsName));
     }
     ATermList StructConsSorts = ATmakeList0();
     //store projection operations in ProjOps and store the implementations of
@@ -675,11 +758,12 @@ ATermAppl gsImplSortStruct(ATermAppl SortStruct, ATermList *PSubsts,
       ATermAppl ProjSort = gsImplExprsPart(ATAgetArgument(StructProj, 1),
         PSubsts, PDataDecls);
       StructConsSorts = ATinsert(StructConsSorts, (ATerm) ProjSort);
-      //store projection operation in ProjOps
+      //store projection operation in ProjOps and Projs
       if (!gsIsNil(ProjName)) {
         ProjOps = ATinsert(ProjOps, (ATerm)
           gsMakeOpId(ProjName, gsMakeSortArrow(SortId, ProjSort)));
-        Projs = ATinsert(Projs, (ATerm) ATmakeList3(ATgetFirst(ProjOps),(ATerm) ConsName,(ATerm) ATmakeInt(i)));
+        Projs = ATinsert(Projs, (ATerm) ATmakeList3(
+          ATgetFirst(ProjOps),(ATerm) ConsName,(ATerm) ATmakeInt(i)));
       }
       StructProjs = ATgetNext(StructProjs);
       i++;
@@ -702,7 +786,6 @@ ATermAppl gsImplSortStruct(ATermAppl SortStruct, ATermList *PSubsts,
     ), PDataDecls->Ops);
   //Declare data equations for structured sort
   ATermList OpEqns = ATmakeList0();
-  ATermList el = ATmakeList0();
   ATermAppl nil = gsMakeNil();
   ATermAppl t = gsMakeDataExprTrue();
   ATermAppl f = gsMakeDataExprFalse();
@@ -715,14 +798,17 @@ ATermAppl gsImplSortStruct(ATermAppl SortStruct, ATermList *PSubsts,
   ATermList vars = bssl;
   ATermList rhsv;
   ATermList lhsv;
-  int varcount = 0;
-  char varstr[10];
+  ATermList IdCtx = ATconcat(PDataDecls->Sorts,
+                      ATconcat(PDataDecls->Ops,PDataDecls->ConsOps));
   //store equations for projections in OpEqns
   for (; !ATisEmpty(Projs); Projs=ATgetNext(Projs))
   {
     ATermList l = ATLgetFirst(Projs);
+    // Name of constructor
     ATermAppl s = ATAgetFirst(ATgetNext(l));
+    // Number of projected argument
     int i = ATgetInt((ATermInt) ATgetFirst(ATgetNext(ATgetNext(l))));
+    // Find the constructor operation
     ATermAppl t = NULL;
     for (ATermList m=ConsOps; !ATisEmpty(m); m=ATgetNext(m))
     {
@@ -732,69 +818,31 @@ ATermAppl gsImplSortStruct(ATermAppl SortStruct, ATermList *PSubsts,
         break;
       }
     }
-    ATermAppl sort = ATAgetArgument(t,1);
-    lhsv = el;
-    ATermList tmpvars = vars;
-    while ( gsIsSortArrow(sort) )
-    {
-      ATermAppl v = NULL;
-      for (ATermList n=tmpvars; !ATisEmpty(n); n=ATgetNext(n))
-      {
-        if ( ATisEqual(ATgetArgument(ATAgetFirst(n),1),ATgetArgument(sort,0)) )
-        {
-          v = ATAgetFirst(n);
-          tmpvars = ATremoveElement(tmpvars,(ATerm) v);
-          break;
-        }
-      }
-      if ( v == NULL )
-      {
-        sprintf(varstr,"v%i",varcount++);
-        v = gsMakeDataVarId(gsString2ATermAppl(varstr),ATAgetArgument(sort,0));
-        vars = ATinsert(vars,(ATerm) v);
-      }
-      lhsv = ATinsert(lhsv,(ATerm) v);
-      t = gsMakeDataAppl(t,v);
-      sort = ATAgetArgument(sort,1);
-    }
+    // Apply constructor t to (fresh) variables and store its
+    // arguments in lhsv
+    t = gsApplyOpIdToVars(t,&lhsv,&vars,(ATerm) IdCtx);
+    // Apply projection function to t
     t = gsMakeDataAppl(ATAgetFirst(l),t);
+    // Add equation
     OpEqns = ATinsert(OpEqns, (ATerm) gsMakeDataEqn(lhsv, nil, t, (ATermAppl) ATelementAt(lhsv,i)));
   }
   //store equations for recognition in OpEqns
   for (; !ATisEmpty(Recs); Recs=ATgetNext(Recs))
   {
     ATermList l = ATLgetFirst(Recs);
+    // Name of constructor
     ATermAppl s = ATAgetFirst(ATgetNext(l));
     ATermAppl t;
+    // Add equation for every constructor
     for (ATermList m=ConsOps; !ATisEmpty(m); m=ATgetNext(m))
     {
       t = ATAgetFirst(m);
-      ATermAppl sort = ATAgetArgument(t,1);
-      lhsv = el;
-      ATermList tmpvars = vars;
-      while ( gsIsSortArrow(sort) )
-      {
-        ATermAppl v = NULL;
-        for (ATermList n=tmpvars; !ATisEmpty(n); n=ATgetNext(n))
-        {
-          if ( ATisEqual(ATgetArgument(ATAgetFirst(n),1),ATgetArgument(sort,0)) )
-          {
-            v = ATAgetFirst(n);
-            tmpvars = ATremoveElement(tmpvars,(ATerm) v);
-            break;
-          }
-        }
-        if ( v == NULL )
-        {
-          sprintf(varstr,"v%i",varcount++);
-          v = gsMakeDataVarId(gsString2ATermAppl(varstr),ATAgetArgument(sort,0));
-          vars = ATinsert(vars,(ATerm) v);
-        }
-        lhsv = ATinsert(lhsv,(ATerm) v);
-        t = gsMakeDataAppl(t,v);
-        sort = ATAgetArgument(sort,1);
-      }
+      // Apply constructor t to (fresh) variables and store its
+      // arguments in lhsv
+      t = gsApplyOpIdToVars(t,&lhsv,&vars,(ATerm) IdCtx);
+      // Apply rqcognition function to t
       t = gsMakeDataAppl(ATAgetFirst(l),t);
+      // Add right equation to OpEqns
       if ( ATisEqual(ATAgetArgument(ATAgetFirst(m),0),s) )
       {
         OpEqns = ATinsert(OpEqns, (ATerm) gsMakeDataEqn(lhsv, nil, t, gsMakeDataExprTrue()));
@@ -803,68 +851,30 @@ ATermAppl gsImplSortStruct(ATermAppl SortStruct, ATermList *PSubsts,
       }
     }
   }
-  //store equations for (in)equalities in OpEqns
+  //store equations for equalities in OpEqns
+  //one equation for every pair of constructors
   for (ATermList l=ConsOps; !ATisEmpty(l); l=ATgetNext(l))
   {
     for (ATermList m=ConsOps; !ATisEmpty(m); m=ATgetNext(m))
     {
       ATermAppl t,u,r;
-      ATermList vs;
-      ATermAppl sort;
-      t = ATAgetFirst(l);
-      sort = ATAgetArgument(t,1);
-      lhsv = el;
-      ATermList tmpvars = vars;
-      while ( gsIsSortArrow(sort) )
-      {
-        ATermAppl v = NULL;
-        for (ATermList n=tmpvars; !ATisEmpty(n); n=ATgetNext(n))
-        {
-          if ( ATisEqual(ATgetArgument(ATAgetFirst(n),1),ATgetArgument(sort,0)) )
-          {
-            v = ATAgetFirst(n);
-            tmpvars = ATremoveElement(tmpvars,(ATerm) v);
-            break;
-          }
-        }
-        if ( v == NULL )
-        {
-          sprintf(varstr,"v%i",varcount++);
-          v = gsMakeDataVarId(gsString2ATermAppl(varstr),ATAgetArgument(sort,0));
-          vars = ATinsert(vars,(ATerm) v);
-        }
-        lhsv = ATinsert(lhsv,(ATerm) v);
-        t = gsMakeDataAppl(t,v);
-        sort = ATAgetArgument(sort,1);
-      }
-      u = ATAgetFirst(m);
-      sort = ATAgetArgument(u,1);
-      rhsv = el;
-      while ( gsIsSortArrow(sort) )
-      {
-        ATermAppl v = NULL;
-        for (ATermList n=tmpvars; !ATisEmpty(n); n=ATgetNext(n))
-        {
-          if ( ATisEqual(ATgetArgument(ATAgetFirst(n),1),ATgetArgument(sort,0)) )
-          {
-            v = ATAgetFirst(n);
-            tmpvars = ATremoveElement(tmpvars,(ATerm) v);
-            break;
-          }
-        }
-        if ( v == NULL )
-        {
-          sprintf(varstr,"v%i",varcount++);
-          v = gsMakeDataVarId(gsString2ATermAppl(varstr),ATAgetArgument(sort,0));
-          vars = ATinsert(vars,(ATerm) v);
-        }
-        rhsv = ATinsert(rhsv,(ATerm) v);
-        u = gsMakeDataAppl(u,v);
-        sort = ATAgetArgument(sort,1);
-      }
+      ATermList vs,tmpvars;
+      // Save vars list
+      // Apply constructor in l to (fresh) variables and store its
+      // arguments in lhsv
+      t = gsApplyOpIdToVars(ATAgetFirst(l),&lhsv,&vars,(ATerm) IdCtx);
+      // Apply constructor in m to (fresh) variables and store its
+      // arguments in rhsv (making sure we don't use the vars that occur in t)
+      tmpvars = gsSubstractList(vars,lhsv);
+      u = gsApplyOpIdToVars(ATAgetFirst(m),&rhsv,&tmpvars,(ATerm) ATconcat(lhsv,IdCtx));
+      // Update vars
+      vars = gsMergeList(vars,rhsv);
+      // Combine variable lists of lhs and rhs
       vs = ATconcat(lhsv,rhsv);
+      // Create right result
       if ( ATisEqual(ATgetFirst(l),ATgetFirst(m)) )
       {
+        // Constructors are the same, so match all variables
         r = NULL;
         for (; !ATisEmpty(lhsv); lhsv=ATgetNext(lhsv),rhsv=ATgetNext(rhsv))
         {
@@ -880,12 +890,16 @@ ATermAppl gsImplSortStruct(ATermAppl SortStruct, ATermList *PSubsts,
           r = gsMakeDataExprTrue();
         }
       } else {
+        // Different constructor, so not equal
         r = gsMakeDataExprFalse();
       }
+      // Add equation to OpIds
       OpEqns = ATinsert(OpEqns, (ATerm) gsMakeDataEqn(vs,nil,gsMakeDataExprEq(t,u),r));
     }
   }
-  OpEqns = ATinsert(OpEqns, (ATerm) gsMakeDataEqn(ssl, nil, gsMakeDataExprNeq(s1,s2), gsMakeDataExprNot(gsMakeDataExprEq(s1,s2))));
+  //store equation for inequality in OpEqns
+  OpEqns = ATinsert(OpEqns, (ATerm) gsMakeDataEqn(ssl, nil,
+    gsMakeDataExprNeq(s1,s2), gsMakeDataExprNot(gsMakeDataExprEq(s1,s2))));
   //store equations for 'if' in OpEqns
   OpEqns = ATconcat(ATmakeList(3,
       (ATerm) gsMakeDataEqn(ssl, nil, gsMakeDataExprIf(t,s1,s2),s1),
@@ -894,6 +908,7 @@ ATermAppl gsImplSortStruct(ATermAppl SortStruct, ATermList *PSubsts,
     ), OpEqns);
   //Add OpEqns to DataEqns
   PDataDecls->DataEqns = ATconcat(PDataDecls->DataEqns,OpEqns);
+
   return SortId;
 }
 
