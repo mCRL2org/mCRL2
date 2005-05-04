@@ -41,7 +41,7 @@ static ATermList gsGetDomain(ATermAppl sort)
 
 static ATermList calcNext(ATermList l)
 {
-	ATermList a1,a2,m,r,s,d;
+	ATermList a1,a2,m,r,s,d,na1;
 	ATermAppl a3,var,sort,e,t;
 
 	a1 = ATLgetFirst(l);
@@ -61,19 +61,20 @@ static ATermList calcNext(ATermList l)
 	{
 		if ( ATisEqual(gsGetResult(ATAgetArgument(ATAgetFirst(m),1)),sort) )
 		{
+			na1 = a1;
 			d = gsGetDomain(ATAgetArgument(ATAgetFirst(m),1));
 			t = ATAgetFirst(m);
 			for (; !ATisEmpty(d); d=ATgetNext(d))
 			{
-				ATermAppl v = gsMakeDataVarId(gsFreshString2ATermAppl("s",(ATerm) a1,false),ATAgetFirst(d));
-				a1 = ATappend(a1,(ATerm) v);
+				ATermAppl v = gsMakeDataVarId(gsFreshString2ATermAppl("s",(ATerm) na1,false),ATAgetFirst(d));
+				na1 = ATappend(na1,(ATerm) v);
 				t = gsMakeDataAppl(t,v);
 			}
 			s = ATmakeList1((ATerm) gsMakeSubst((ATerm) var,(ATerm) t));
 			e = gsRewriteTerm((ATermAppl) gsSubstValues(s,(ATerm) a3,true));
 			if ( !ATisEqual(e,gsProverFalse) )
 			{
-				r = ATinsert(r,(ATerm) ATmakeList3((ATerm) a1,gsSubstValues(s,(ATerm) a2,true),(ATerm) e));
+				r = ATinsert(r,(ATerm) ATmakeList3((ATerm) na1,gsSubstValues(s,(ATerm) a2,true),(ATerm) e));
 			}
 		}
 	}
