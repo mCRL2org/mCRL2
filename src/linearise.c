@@ -1979,6 +1979,7 @@ static ATermAppl bodytovarheadGNF(
 { /* it is assumed that we only receive processes with
      operators alt, seq, sum, cond, name, delta, tau, sync, AtTime in it */
 
+
   ATermAppl newproc=NULL;
 
   if (gsIsChoice(body)) 
@@ -1994,10 +1995,11 @@ static ATermAppl bodytovarheadGNF(
    }
 
   if (gsIsSum(body)) 
-  { ATermList sumvars=ATLgetArgument(body,0);
-    ATermAppl body1=ATAgetArgument(body,1);
+  { 
     if (sum>=s)
     { ATermList renamevars=ATempty;
+      ATermList sumvars=ATLgetArgument(body,0);
+      ATermAppl body1=ATAgetArgument(body,1);
       ATermList renameterms=ATempty;
       alphaconvert(&sumvars,&renamevars,&renameterms,freevars,ATempty);
       body1=substitute_pCRLproc(renameterms,renamevars,body1);
@@ -2005,7 +2007,7 @@ static ATermAppl bodytovarheadGNF(
       return gsMakeSum(sumvars,body1);
     }
     body=bodytovarheadGNF(body,alt,freevars,first);
-    newproc=newprocess(freevars,body1,pCRL,canterminatebody(body1,NULL,NULL,0));
+    newproc=newprocess(freevars,body,pCRL,canterminatebody(body,NULL,NULL,0));
     return gsMakeProcess(newproc,objectdata[objectIndex(newproc)].parameters);
   }
   
@@ -2298,6 +2300,10 @@ static ATermAppl distribute_condition(
    }
   
   if (gsIsAction(body1))
+   { return gsMakeCond(condition,body1,gsMakeDelta());
+   }
+  
+  if (gsIsMultAct(body1))
    { return gsMakeCond(condition,body1,gsMakeDelta());
    }
   
@@ -2631,6 +2637,7 @@ static ATermAppl procstorealGNFbody(
    GNF where one action is always followed by a
    variable. */
 { 
+
   if (gsIsAtTime(body))
   { ATermAppl timecondition=NULL;
     ATermAppl body1=procstorealGNFbody(
@@ -2771,6 +2778,7 @@ static void procstorealGNFrec(
 
 { long n=objectIndex(procIdDecl);
   ATermAppl t=NULL;
+
 
   if (objectdata[n].processstatus==pCRL)
   { objectdata[n].processstatus=GNFbusy;
@@ -5389,7 +5397,7 @@ static int allow(ATermList allowlist, ATermAppl multiaction)
   { return 0; }
 
   /* The empty multiaction, i.e. tau, is never blocked by allow */
-  if (ATgetArgument(multiaction,0)==ATempty)
+  if (ATLgetArgument(multiaction,0)==ATempty)
   { return 1; }
 
   for( ; allowlist!=ATempty ; allowlist=ATgetNext(allowlist))
@@ -5921,6 +5929,7 @@ static ATermAppl communicationcomposition(
                      makeMultiActionConditionList(
                               ATLgetArgument(multiaction,0),
                               communications);
+    // ATfprintf(stderr,"Multiactionlist: %t\n",multiactionconditionlist);
 
     assert(multiactionconditionlist!=ATempty);
     for( ; multiactionconditionlist!=ATempty ;
