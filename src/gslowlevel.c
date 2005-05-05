@@ -14,7 +14,7 @@ extern "C" {
 //String manipulation
 //-------------------
 
-#if !(defined __USE_SVID || defined __USE_BSD || defined __USE_XOPEN_EXTENDED)
+#if !(defined __USE_SVID || defined __USE_BSD || defined __USE_XOPEN_EXTENDED|| defined __APPLE__)
 char *strdup(const char *s)
 {
     size_t len;
@@ -24,7 +24,7 @@ char *strdup(const char *s)
     if((p = (char *)malloc(len + 1)) == NULL)
       return NULL;
     return strcpy(p, s);
-}
+} 
 #endif
 
 //Message printing
