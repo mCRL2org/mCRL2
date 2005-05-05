@@ -5,6 +5,7 @@ AC_CONFIG_SRCDIR([gslexer.l])
 
 # Checks for programs.
 AC_PROG_CC
+AC_PROG_CXX
 AC_PROG_LEX
 
 # Check for compatible bison
@@ -21,6 +22,7 @@ fi
 
 # Set flags
 CFLAGS="$CFLAGS -std=c99 -Wall -pedantic"
+CXXFLAGS="$CXXFLAGS -Wall"
 LDFLAGS="-L. $LDFLAGS"
 
 # Check for C99 standard
@@ -90,6 +92,26 @@ if test $have_libxml2; then
   fi
 fi
 AC_SUBST([USE_XML2],[])
+
+# Check for wxWidgets
+AC_ARG_WITH(
+  [wx],
+  AC_HELP_STRING(
+    [--with-wx=dir],
+    [use wxWidgets configuration program wx-config in dir]
+  )
+)
+if test $with_wx; then
+  AC_CHECK_PROG([WX_CONFIG],[wx-config],[$with_wx/wx-config],[],[$with_wx])
+else 
+  AC_CHECK_PROG([WX_CONFIG],[wx-config],[wx-config])
+fi
+if test $WX_CONFIG; then
+  USE_WX=1
+  CXXFLAGS="$($WX_CONFIG --cxxflags) $CXXFLAGS"
+  LDFLAGS="$($WX_CONFIG --libs) $LDFLAGS"
+fi
+AC_SUBST([USE_WX],[])
 
 # Checks for header files.
 AC_HEADER_STDC

@@ -3,6 +3,8 @@ CC                 = @CC@
 CFLAGS             = @CFLAGS@
 CPP                = @CPP@
 CPPFLAGS           = @CPPFLAGS@
+CXX                = @CXX@
+CXXFLAGS           = @CXXFLAGS@
 LDFLAGS            = @LDFLAGS@
 ARFLAGS            = crs
 INSTALL            = install
@@ -11,6 +13,7 @@ LFLAGS             = -I -Pgsyy
 BISON              = @BISON@
 BFLAGS             = -d -pgsyy
 USE_XML2           = @USE_XML2@
+USE_WX             = @USE_WX@
 
 #installation directories
 prefix             = @prefix@
@@ -62,9 +65,12 @@ INSTAN_LDFLAGS    = -lgsrewrite -lgsparse -lATerm -lm
 SIM_NAME       = sim
 SIM_OBJECTS    = sim.o libgsnextstate.o libgsprover.o
 SIM_LDFLAGS    = -lgsrewrite -lgsparse -lATerm -lm
+XSIM_NAME       = xsim
+XSIM_OBJECTS    = xsim.o xsimtrace.o libgsnextstate.o libgsprover.o
+XSIM_LDFLAGS    = -lgsrewrite -lgsparse -lATerm -lm
 
 #Group definitions
-EXE_NAMES          = $(PARSER_NAME) $(PRINTER_NAME) $(LINEARISER_NAME) $(REWR_NAME) $(PNML2GS_NAME) $(INSTAN_NAME) $(SIM_NAME)
+EXE_NAMES          = $(PARSER_NAME) $(PRINTER_NAME) $(LINEARISER_NAME) $(REWR_NAME) $(PNML2GS_NAME) $(INSTAN_NAME) $(SIM_NAME) $(XSIM_NAME)
 CUR_EXE_NAMES      = $(strip $(foreach s,$(EXE_NAMES),$(shell if test -f $s; then echo -n $s; fi)))
 LIB_NAMES          = $(LIBPARSER_NAME) $(LIBREWR_NAME)
 
@@ -112,11 +118,19 @@ $(PNML2GS_NAME) :
 	@echo cannot make target $@ because the xml2 library cannot be used
 endif
 
-$(INSTAN_NAME) : $(INSTAN_OBJECTS) $(LIBPARSER_NAME) $(LIBINSTAN_NAME)
+$(INSTAN_NAME) : $(INSTAN_OBJECTS) $(LIBPARSER_NAME) $(LIBREWR_NAME)
 	$(CC) -o $@ $(INSTAN_OBJECTS) $(LDFLAGS) $(INSTAN_LDFLAGS)
 
-$(SIM_NAME) : $(SIM_OBJECTS) $(LIBPARSER_NAME) $(LIBSIM_NAME)
+$(SIM_NAME) : $(SIM_OBJECTS) $(LIBPARSER_NAME) $(LIBREWR_NAME)
 	$(CC) -o $@ $(SIM_OBJECTS) $(LDFLAGS) $(SIM_LDFLAGS)
+
+ifdef USE_WX
+$(XSIM_NAME): $(XSIM_OBJECTS) $(LIBPARSER_NAME) $(LIBREWR_NAME)
+	$(CXX) -o $@ $(XSIM_OBJECTS) $(LDFLAGS) $(XSIM_LDFLAGS)
+else
+$(XSIM_NAME):
+	@echo cannot make target $@ because the wxWidgets library cannot be used
+endif
 
 %.c : %.y
 	$(BISON) $(BFLAGS) -o $@ $<
