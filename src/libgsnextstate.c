@@ -4,6 +4,7 @@
 #include "gslowlevel.h"
 #include "gsfunc.h"
 #include "libgsprover.h"
+#include "libgsrewrite.h"
 
 bool ATisList(ATerm a)
 {
@@ -158,6 +159,22 @@ static ATermList makeNewState(ATermList old, ATermList vars, ATermList assigns, 
 	return new;
 }
 
+ATermAppl rewrActionArgs(ATermAppl act)
+{
+	ATermList l = ATLgetArgument(act,0);
+	ATermList m = ATmakeList0();
+
+	for (; !ATisEmpty(l); l=ATgetNext(l))
+	{
+		ATermAppl a = ATAgetFirst(l);
+		a = gsMakeAction(ATAgetArgument(a,0),gsRewriteTerms(ATLgetArgument(a,1)));
+		m = ATinsert(m,(ATerm) a);
+	}
+	m = ATreverse(m);
+
+	return gsMakeMultAct(m);
+}
+
 ATermList gsNextState(ATermList State)
 {
 	ATermList sums,states,l,m,params;
@@ -182,7 +199,7 @@ ATermList gsNextState(ATermList State)
 		{
 			states = ATinsert(states, (ATerm)
 					ATmakeList2(
-						gsSubstValues(ATLgetFirst(l),ATgetArgument(sum,2),true),
+						(ATerm) rewrActionArgs((ATermAppl) gsSubstValues(ATLgetFirst(l),ATgetArgument(sum,2),true)),
 						(ATerm) makeNewState(State,ATLgetArgument(ATAgetArgument(current_spec,5),1),ATLgetArgument(sum,4),ATLgetFirst(l))
 						)
 					);

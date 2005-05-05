@@ -129,7 +129,7 @@ void print_help(FILE *f)
 	          "-h, --help               display this help message\n"
 	          "-b, --benchmark [num]    rewrites specification num times\n"
 	          "                         (default is 1000 times)\n"
-	          "-r, --read-aterm         SPECFILE is an ATerm\n"
+	          "-a, --read-aterm         SPECFILE is an ATerm\n"
 	          "-w, --write-aterm        OUTFILE should be an ATerm\n"
 	          "-i, --inner              Use innermost rewriter (default)\n"
 	          "-2, --inner2             Use another innermost rewriter\n"
