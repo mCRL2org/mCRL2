@@ -13,8 +13,8 @@
 #include "gslowlevel.h"
 #include "gsfunc.h"
 
-extern "C" void gsPrintPart(FILE *f, ATerm a, int b, int c);
-extern "C" void gsPrintParts(FILE *f, ATerm a, int b, int c, char *s, char *t);
+extern "C" void gsPrintPart(FILE *f, ATerm a, bool b, int c);
+extern "C" void gsPrintParts(FILE *f, ATerm a, bool b, int c, char *s, char *t);
 
 //------------------------------------------------------------------------------
 // XSimMain
@@ -64,9 +64,12 @@ void XSimTrace::Reset(ATermList state)
 	traceview->InsertItem(0,wxT("0"));
 	traceview->SetItem(0,1,wxT(""));
 	f = fopen("xsim.tmp","w+");
-	gsPrintParts(f,(ATerm) state,0,0,"",",");
+	gsPrintParts(f,(ATerm) state,false,0,NULL,",");
 	rewind(f);
-	fgets(s,1000,f);
+	if ( fgets(s,1000,f) == NULL )
+	{
+		s[0] = 0;
+	}
 	fclose(f);
 	traceview->SetItem(0,2,wxT(s));
 	traceview->SetColumnWidth(2,wxLIST_AUTOSIZE);
@@ -87,15 +90,21 @@ void XSimTrace::SetNext(ATermList transition)
 	current_pos++;
 	traceview->InsertItem(current_pos,wxString::Format("%i",current_pos));
 	f = fopen("xsim.tmp","w+");
-	gsPrintPart(f,ATgetFirst(transition),0,0);
+	gsPrintPart(f,ATgetFirst(transition),false,0);
 	rewind(f);
-	fgets(s,1000,f);
+	if ( fgets(s,1000,f) == NULL )
+	{
+		s[0] = 0;
+	}
 	fclose(f);
 	traceview->SetItem(current_pos,1,wxT(s));
 	f = fopen("xsim.tmp","w+");
-	gsPrintParts(f,ATgetFirst(ATgetNext(transition)),0,0,"",",");
+	gsPrintParts(f,ATgetFirst(ATgetNext(transition)),false,0,NULL,",");
 	rewind(f);
-	fgets(s,1000,f);
+	if ( fgets(s,1000,f) == NULL )
+	{
+		s[0] = 0;
+	}
 	fclose(f);
 	traceview->SetItem(current_pos,2,wxT(s));
 	traceview->SetColumnWidth(2,wxLIST_AUTOSIZE);

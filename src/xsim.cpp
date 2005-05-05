@@ -14,8 +14,8 @@
 #include "gsfunc.h"
 #include "libgsnextstate.h"
 
-extern "C" void gsPrintPart(FILE *f, ATerm a, int b, int c);
-extern "C" void gsPrintParts(FILE *f, ATerm a, int b, int c, char *s, char *t);
+extern "C" void gsPrintPart(FILE *f, ATerm a, bool b, int c);
+extern "C" void gsPrintParts(FILE *f, ATerm a, bool b, int c, char *s, char *t);
 
 //------------------------------------------------------------------------------
 // XSimMain
@@ -39,7 +39,6 @@ XSimMain::XSimMain( wxWindow *parent, wxWindowID id, const wxString &title,
     const wxPoint &position, const wxSize& size, long style ) :
     wxFrame( parent, id, title, position, size, style )
 {
-    // XXX Easy hack... should be separated from XSimMain
     tracewin = new XSimTrace(this,-1,wxT("XSim Trace"),wxDefaultPosition,wxSize(300,400));
     tracewin->SetSimulator(this);
     //tracewin->Show(FALSE); // default, so not needed
@@ -331,9 +330,12 @@ void XSimMain::SetCurrentState(ATermList state, bool showchange)
 	for (int i=0; !ATisEmpty(state); state=ATgetNext(state), old=ATgetNext(old), i++)
 	{
 		f = fopen("xsim.tmp","w+");
-		gsPrintPart(f,ATgetFirst(state),0,0);
+		gsPrintPart(f,ATgetFirst(state),false,0);
 		rewind(f);
-		fgets(s,1000,f);
+		if ( fgets(s,1000,f) == NULL )
+		{
+			s[0] = 0;
+		}
 		fclose(f);
 		stateview->SetItem(i,1,wxT(s));
 		if ( showchange && !ATisEqual(ATgetFirst(state),ATgetFirst(old)) )
@@ -360,9 +362,12 @@ void XSimMain::UpdateTransitions()
 	for (ATermList l=next_states; !ATisEmpty(l); l=ATgetNext(l), i++)
 	{
 		f = fopen("xsim.tmp","w+");
-		gsPrintPart(f,ATgetFirst(ATLgetFirst(l)),0,0);
+		gsPrintPart(f,ATgetFirst(ATLgetFirst(l)),false,0);
 		rewind(f);
-		fgets(s,1000,f);
+		if ( fgets(s,1000,f) == NULL )
+		{
+			s[0] = 0;
+		}
 		fclose(f);
 		transview->InsertItem(i,wxT(s));
 		f = fopen("xsim.tmp","w+");
@@ -380,13 +385,16 @@ void XSimMain::UpdateTransitions()
 				} else {
 					comma = true;
 				}
-				gsPrintPart(f,ATgetFirst(o),0,0);
+				gsPrintPart(f,ATgetFirst(o),false,0);
 				fprintf(f," := ");
-				gsPrintPart(f,ATgetFirst(n),0,0);
+				gsPrintPart(f,ATgetFirst(n),false,0);
 			}
 		}
 		rewind(f);
-		fgets(s,1000,f);
+		if ( fgets(s,1000,f) == NULL )
+		{
+			s[0] = 0;
+		}
 		fclose(f);
 		transview->SetItem(i,1,wxT(s));
 	}
@@ -432,8 +440,6 @@ XSim::XSim()
 
 bool XSim::OnInit()
 {
-//    ATinit(0,0,(ATerm *)0xbffffffc); // XXX Awful hack
-
     XSimMain *frame = new XSimMain( NULL, -1, wxT("XSim"), wxPoint(-1,-1), wxSize(500,400) );
     frame->Show( TRUE );
     
