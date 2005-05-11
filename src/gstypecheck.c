@@ -93,6 +93,7 @@ static ATbool gstcEqTypesA(ATermAppl, ATermAppl);
 static ATbool gstcInTypesL(ATermList, ATermList);
 static ATbool gstcEqTypesL(ATermList, ATermList);
 
+static ATbool gstcIsSortDeclared(ATermAppl SortName);
 static ATbool gstcReadInSortStruct(ATermAppl);
 static ATbool gstcAddConstant(ATermAppl, ATermAppl, const char*);
 static ATbool gstcAddFunction(ATermAppl, ATermAppl, const char*);
@@ -700,13 +701,21 @@ static ATbool gstcEqTypesL(ATermList Type1, ATermList Type2){
   return ATtrue;
 }
 
+static ATbool gstcIsSortDeclared(ATermAppl SortName){
+  if(ATisEqual(gsMakeSortIdPos(),gsMakeSortId(SortName))) return ATtrue;
+  if(ATisEqual(gsMakeSortIdNat(),gsMakeSortId(SortName))) return ATtrue;
+  if(ATisEqual(gsMakeSortIdInt(),gsMakeSortId(SortName))) return ATtrue;
+  if(ATAtableGet(context.defined_sorts,(ATerm)SortName)) return ATtrue;
+  if(ATAtableGet(context.basic_sorts,(ATerm)SortName)) return ATtrue;
+  return ATfalse;
+}
+
 static ATbool gstcReadInSortStruct(ATermAppl SortExpr){
   ATbool Result=ATtrue;
 
   if(gsIsSortId(SortExpr)){ 
     ATermAppl SortName=ATAgetArgument(SortExpr,0);
-    if(!ATAtableGet(context.defined_sorts,(ATerm)SortName) &&
-       !ATAtableGet(context.basic_sorts,(ATerm)SortName))
+    if(!gstcIsSortDeclared(SortName))
       {ThrowMF("Basic or defined sort %t is not declared\n",SortName);}
     return ATtrue;
   }
@@ -1129,17 +1138,17 @@ static ATermAppl gstcTraverseVarConsTypeD(ATermTable Vars, ATermAppl *DataTerm, 
     
     *DataTerm=ATsetArgument(*DataTerm,(ATerm)Sort,1);
     
-    if(!gstcAdjustPosTypesA(Sort,PosType) && Sort==gsMakeSortIdPos()){
+    if(!gstcAdjustPosTypesA(Sort,PosType) && ATisEqual(Sort,gsMakeSortIdPos())){
       Sort=gsMakeSortIdNat();
       *DataTerm=gsMakeDataApplProd(gstcMakeOpIdPos2Nat(),ATmakeList1((ATerm)*DataTerm));
     }
     
-    if(!gstcAdjustPosTypesA(Sort,PosType) && Sort==gsMakeSortIdNat()){
+    if(!gstcAdjustPosTypesA(Sort,PosType) && ATisEqual(Sort,gsMakeSortIdNat())){
       Sort=gsMakeSortIdInt();
       *DataTerm=gsMakeDataApplProd(gstcMakeOpIdNat2Int(),ATmakeList1((ATerm)*DataTerm));
     }
     
-    if(!gstcAdjustPosTypesA(Sort,PosType) && Sort==gsMakeSortIdInt()){
+    if(!gstcAdjustPosTypesA(Sort,PosType) && ATisEqual(Sort,gsMakeSortIdInt())){
       ThrowM("A number type is not in this list of allowed types: %t (while typechecking %t)",PosType,*DataTerm);
     }
     return Sort;
@@ -1182,7 +1191,7 @@ static ATermAppl gstcTraverseVarConsTypeD(ATermTable Vars, ATermAppl *DataTerm, 
     NewType=gstcTraverseVarConsTypeD(NewVars,&Data,NewType);
     if(!NewType) {throw;}
     *DataTerm=ATsetArgument(*DataTerm,(ATerm)Data,1);
-    return NewType;
+    return gsMakeSortArrowProd(ArgTypes,NewType);
   }
   
   if(gsIsWhr(*DataTerm)){
