@@ -41,20 +41,8 @@ proc
   L            = sum b:Bit. r5(b).(tau_s6b.s6(b)+tau_s6e.s6(e)).L;
 
 init
-  hide({tau_s3db, tau_s3e, tau_s6b, tau_s6e},
+  allow({r1,s4,tau_s3db, tau_s3e, tau_s6b, tau_s6e},
     comm({r2|s2, r3|s3, r5|s5, r6|s6},
-      allow({tau_s3db, tau_s3e, tau_s6b, tau_s6e,r1,s4,
-             r2|s2, r3|s3, r5|s5, r6|s6},
         S || K || L || R
-      )
     )
   );
-
-% This expression is equivalent to the following:
-%  allow({r1, s4, r1|s4},
-%    hide({tau_s3db, tau_s3e, tau_s6b, tau_s6e},
-%      comm({r2|s2, r3|s3, r5|s5, r6|s6},
-%        S || K || L || R
-%      }    
-%    )
-%  );
