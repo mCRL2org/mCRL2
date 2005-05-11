@@ -1177,7 +1177,7 @@ static ATermAppl gstcTraverseVarConsTypeD(ATermTable Vars, ATermAppl *DataTerm, 
     if(!NewVars) {throw;}
     ATermList ArgTypes=gstcGetVarTypes(VarList);
     ATermAppl NewType=gstcUnArrowProd(ArgTypes,PosType);
-
+    if(!NewType) {ThrowM("No functions with arguments %t among %t (while typechecking %t)\n", ArgTypes,PosType,*DataTerm);}
     ATermAppl Data=ATAgetArgument(*DataTerm,1);
     NewType=gstcTraverseVarConsTypeD(NewVars,&Data,NewType);
     if(!NewType) {throw;}
@@ -1794,6 +1794,9 @@ static ATermAppl gstcMakeNotInferredSetBag(ATermAppl Type){
 static ATermAppl gstcUnArrowProd(ATermList ArgTypes, ATermAppl PosType){
   //Filter PosType to contain only functions ArgTypes -> TypeX
   //return TypeX if unique, the set of TypeX as NotInferred if many, NULL otherwise
+
+  gsDebugMsg("gstcUnArrowProd: ArgTypes %t with PosType %t\n",ArgTypes,PosType);    
+
   if(gsIsSortId(PosType)) PosType=gstcUnwindType(PosType);
   if(gsIsSortArrowProd(PosType)){
     ATermList PosArgTypes=ATLgetArgument(PosType,0);
