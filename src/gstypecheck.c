@@ -94,6 +94,8 @@ static ATbool gstcInTypesL(ATermList, ATermList);
 static ATbool gstcEqTypesL(ATermList, ATermList);
 
 static ATbool gstcIsSortDeclared(ATermAppl SortName);
+static ATbool gstcIsSortExprDeclared(ATermAppl SortExpr);
+static ATbool gstcIsSortExprListDeclared(ATermList SortExprList);
 static ATbool gstcReadInSortStruct(ATermAppl);
 static ATbool gstcAddConstant(ATermAppl, ATermAppl, const char*);
 static ATbool gstcAddFunction(ATermAppl, ATermAppl, const char*);
@@ -463,6 +465,18 @@ static ATbool gstcReadInSorts (ATermList Sorts){
   for(;!ATisEmpty(Sorts);Sorts=ATgetNext(Sorts)){
     ATermAppl Sort=ATAgetFirst(Sorts);
     ATermAppl SortName=ATAgetArgument(Sort,0);
+    if(ATisEqual(gsMakeSortIdBool(),gsMakeSortId(SortName))){
+      ThrowMF("Attempt to redeclare sort Bool\n");
+    }				
+    if(ATisEqual(gsMakeSortIdPos(),gsMakeSortId(SortName))){
+      ThrowMF("Attempt to redeclare sort Pos\n");
+    }				
+    if(ATisEqual(gsMakeSortIdNat(),gsMakeSortId(SortName))){
+      ThrowMF("Attempt to redeclare sort Nat\n");
+    }				
+    if(ATisEqual(gsMakeSortIdInt(),gsMakeSortId(SortName))){
+      ThrowMF("Attempt to redeclare sort Int\n");
+    }				
     if(ATindexedSetGetIndex(context.basic_sorts, (ATerm)SortName)>=0 
        || ATAtableGet(context.defined_sorts, (ATerm)SortName)){
       ThrowMF("Double declaration of sort %t\n", SortName);
@@ -480,8 +494,11 @@ static ATbool gstcReadInSorts (ATermList Sorts){
 }  
 
 static ATbool gstcReadInConstructors(){
-  for(ATermList Sorts=ATtableKeys(context.defined_sorts);!ATisEmpty(Sorts);Sorts=ATgetNext(Sorts))
-    if(!gstcReadInSortStruct(ATAtableGet(context.defined_sorts,ATgetFirst(Sorts)))) return ATfalse;
+  for(ATermList Sorts=ATtableKeys(context.defined_sorts);!ATisEmpty(Sorts);Sorts=ATgetNext(Sorts)){
+    ATermAppl SortExpr=ATAtableGet(context.defined_sorts,ATgetFirst(Sorts));
+    if(!gstcIsSortExprDeclared(SortExpr)) return ATfalse;
+    if(!gstcReadInSortStruct(SortExpr)) return ATfalse;
+  }
   return ATtrue;
 } 
 
@@ -493,6 +510,7 @@ static ATbool gstcReadInFuncs(ATermList Funcs){
     ATermAppl FuncName=ATAgetArgument(Func,0);
     ATermAppl FuncType=ATAgetArgument(Func,1);
     
+    if(!gstcIsSortExprDeclared(FuncType)) {ThrowF;}
     //if FuncType is a defined function sort, unwind it
     { ATermAppl NewFuncType;
       if(gsIsSortId(FuncType) 
@@ -520,6 +538,8 @@ static ATbool gstcReadInActs (ATermList Acts){
     ATermAppl ActName=ATAgetArgument(Act,0);
     ATermList ActType=ATLgetArgument(Act,1);
     
+    if(!gstcIsSortExprListDeclared(ActType)) {ThrowF;}
+
     ATermList Types=ATLtableGet(context.actions, (ATerm)ActName);
     if(!Types){
       Types=ATmakeList1((ATerm)ActType);
@@ -552,6 +572,9 @@ static ATbool gstcReadInProcsAndInit (ATermList Procs, ATermAppl Init){
     }	
 
     ATermList ProcType=ATLgetArgument(ATAgetArgument(Proc,1),1);
+
+    if(!gstcIsSortExprListDeclared(ProcType)) {ThrowF;}
+
     ATermList Types=ATLtableGet(context.processes,(ATerm)ProcName);
     if(!Types){
       Types=ATmakeList1((ATerm)ProcType);
@@ -702,6 +725,7 @@ static ATbool gstcEqTypesL(ATermList Type1, ATermList Type2){
 }
 
 static ATbool gstcIsSortDeclared(ATermAppl SortName){
+  if(ATisEqual(gsMakeSortIdBool(),gsMakeSortId(SortName))) return ATtrue;
   if(ATisEqual(gsMakeSortIdPos(),gsMakeSortId(SortName))) return ATtrue;
   if(ATisEqual(gsMakeSortIdNat(),gsMakeSortId(SortName))) return ATtrue;
   if(ATisEqual(gsMakeSortIdInt(),gsMakeSortId(SortName))) return ATtrue;
@@ -709,6 +733,53 @@ static ATbool gstcIsSortDeclared(ATermAppl SortName){
   if(ATAtableGet(context.basic_sorts,(ATerm)SortName)) return ATtrue;
   return ATfalse;
 }
+
+static ATbool gstcIsSortExprDeclared(ATermAppl SortExpr){
+  ATbool Result=ATtrue;
+
+  if(gsIsSortId(SortExpr)){ 
+    ATermAppl SortName=ATAgetArgument(SortExpr,0);
+    if(!gstcIsSortDeclared(SortName))
+      {ThrowMF("Basic or defined sort %t is not declared\n",SortName);}
+    return ATtrue;
+  }
+
+  if(gsIsSortList(SortExpr) || gsIsSortSet(SortExpr) || gsIsSortBag(SortExpr))
+    return gstcIsSortExprDeclared(ATAgetArgument(SortExpr,0));
+  
+  if(gsIsSortArrowProd(SortExpr)){
+    if(!gstcIsSortExprDeclared(ATAgetArgument(SortExpr,1))) return ATfalse;
+    if(!gstcIsSortExprListDeclared(ATLgetArgument(SortExpr,0))) return ATfalse;
+    return ATtrue;
+  }
+  
+  if(gsIsSortStruct(SortExpr)){
+    for(ATermList Constrs=ATLgetArgument(SortExpr,0);!ATisEmpty(Constrs);Constrs=ATgetNext(Constrs)){
+      ATermAppl Constr=ATAgetFirst(Constrs);
+    
+      ATermList Projs=ATLgetArgument(Constr,1);
+      for(;!ATisEmpty(Projs);Projs=ATgetNext(Projs)){
+	ATermAppl Proj=ATAgetFirst(Projs);
+	ATermAppl ProjSort=ATAgetArgument(Proj,1);
+	
+	// not to forget, recursive call for ProjSort ;-)
+	if(!gstcIsSortExprDeclared(ProjSort)) {ThrowF;}
+      }
+    }
+    return ATtrue;
+  }
+  
+  assert(0);
+ finally:
+  return Result;
+}
+
+static ATbool gstcIsSortExprListDeclared(ATermList SortExprList){
+  for(;!ATisEmpty(SortExprList);SortExprList=ATgetNext(SortExprList))
+    if(!gstcIsSortExprDeclared(ATAgetFirst(SortExprList))) return ATfalse; 
+  return ATtrue;
+}
+
 
 static ATbool gstcReadInSortStruct(ATermAppl SortExpr){
   ATbool Result=ATtrue;
