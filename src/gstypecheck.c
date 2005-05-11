@@ -703,7 +703,13 @@ static ATbool gstcEqTypesL(ATermList Type1, ATermList Type2){
 static ATbool gstcReadInSortStruct(ATermAppl SortExpr){
   ATbool Result=ATtrue;
 
-  if(gsIsSortId(SortExpr)) return ATtrue;
+  if(gsIsSortId(SortExpr)){ 
+    ATermAppl SortName=ATAgetArgument(SortExpr,0);
+    if(!ATAtableGet(context.defined_sorts,(ATerm)SortName) &&
+       !ATAtableGet(context.basic_sorts,(ATerm)SortName))
+      {ThrowMF("Basic or defined sort %t is not declared\n",SortName);}
+    return ATtrue;
+  }
 
   if(gsIsSortList(SortExpr) || gsIsSortSet(SortExpr) || gsIsSortBag(SortExpr))
     return gstcReadInSortStruct(ATAgetArgument(SortExpr,0));
