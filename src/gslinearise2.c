@@ -24,6 +24,7 @@ ATermList list_minus(ATermList l1, ATermList l2);
 ATermList merge_list(ATermList l1, ATermList l2);
 ATermList mactl_comm(ATermList mal, ATermList C);
 ATermAppl synch_reduce(ATermAppl ma);
+int proc_id(ATermAppl a);
 
 
 /* Auxiliary ATerm functions */
@@ -634,7 +635,7 @@ ATbool has_bounded_var(ATermAppl a) //XXX
 	gsErrorMsg("invalid data expr (%t)\n",a);
 	exit(1);
 }
-ATerm replace_data_with_vars_gen(ATerm a, ATermList *v, ATermList *d)
+ATerm replace_data_with_vars_gen(ATerm a, ATermList *v, ATermList *d, ATermAppl namebase)
 {
 	ATermList l,m;
 	ATermAppl var;
@@ -658,27 +659,46 @@ ATerm replace_data_with_vars_gen(ATerm a, ATermList *v, ATermList *d)
 					}*/
 					return a;
 				} else {
-					var = get_new_var(gsMakeDataVarId(gsString2ATermAppl("d"),gsGetSort((ATermAppl) a)),v);
+					if ( namebase == NULL )
+					{
+						var = get_new_var(gsMakeDataVarId(gsString2ATermAppl("d"),gsGetSort((ATermAppl) a)),v);
+					} else {
+						var = get_new_var(namebase,v);
+					}
 					*d = ATappend(*d,a);
 					return (ATerm) var;
 				}
 /*			}*/
 		} else {
-			l = ATgetArguments((ATermAppl) a);
-			m = ATmakeList0();
-			for (; !ATisEmpty(l); l=ATgetNext(l))
+			if ( gsIsProcess((ATermAppl) a) && (proc_id((ATermAppl) a) >= 0) )
 			{
-				m = ATinsert(m,replace_data_with_vars_gen(ATgetFirst(l),v,d));
+				ATermList vars = ATLelementAt(ATLelementAt(processes,proc_id((ATermAppl) a)),1);
+
+				l = ATLgetArgument((ATermAppl) a,1);
+				m = ATmakeList0();
+				for (; !ATisEmpty(l); l=ATgetNext(l),vars=ATgetNext(vars))
+				{
+					m = ATinsert(m,replace_data_with_vars_gen(ATgetFirst(l),v,d,ATAgetFirst(vars)));
+				}
+				m = ATreverse(m);
+				return (ATerm) ATsetArgument((ATermAppl) a,(ATerm) m,1);
+			} else {
+				l = ATgetArguments((ATermAppl) a);
+				m = ATmakeList0();
+				for (; !ATisEmpty(l); l=ATgetNext(l))
+				{
+					m = ATinsert(m,replace_data_with_vars_gen(ATgetFirst(l),v,d,namebase));
+				}
+				m = ATreverse(m);
+				return (ATerm) ATmakeApplList(ATgetAFun((ATermAppl) a),m);
 			}
-			m = ATreverse(m);
-			return (ATerm) ATmakeApplList(ATgetAFun((ATermAppl) a),m);
 		}
 	} else if ( ATisList(a) ) {
 			l = (ATermList) a;
 			m = ATmakeList0();
 			for (; !ATisEmpty(l); l=ATgetNext(l))
 			{
-				m = ATinsert(m,replace_data_with_vars_gen(ATgetFirst(l),v,d));
+				m = ATinsert(m,replace_data_with_vars_gen(ATgetFirst(l),v,d,namebase));
 			}
 			return (ATerm) ATreverse(m);
 	}
@@ -688,10 +708,9 @@ ATerm replace_data_with_vars_gen(ATerm a, ATermList *v, ATermList *d)
 }
 ATermAppl replace_data_with_vars(ATermAppl a, ATermList *v, ATermList *d)
 {
-	return (ATermAppl) replace_data_with_vars_gen((ATerm) a,v,d);
+	return (ATermAppl) replace_data_with_vars_gen((ATerm) a,v,d,NULL);
 }
 static ATermAppl initial_process;
-int proc_id(ATermAppl a);
 int add_init(ATermAppl i)
 {
 	ATermAppl name;

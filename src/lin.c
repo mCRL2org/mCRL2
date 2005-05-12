@@ -13,50 +13,56 @@
 
 void print_help(FILE *f)
 {
-	fprintf(f,"Usage: %s OPTIONS SPECFILE\n",NAME);
-	fprintf(f,"Linearises SPECFILE and writes the result to stdout.\n"
+	fprintf(f,"Usage: %s OPTIONS SPECFILE [OUTFILE]\n",NAME);
+	fprintf(f,"Linearises SPECFILE and writes the result to OUTFILE. If\n"
+		  "OUTFILE is not specified, SPECFILE with its extension\n"
+		  "replaced by 'lpe' is assumed. If OUTFILE is -, stdout is\n"
+		  "used.\n"
 		  "The default is to generate a LPE.\n"
 	          "\n"
 	          "The OPTIONS that can be used are:\n"
 	          "    --help               display this help message\n"
 	          "-c, --nocluster          Do not cluster the LPE\n"
-	          "-h, --human              Do not write a LPE but a linear\n"
+	          "-l, --linear             Do not write a LPE but a linear\n"
 		  "                         specification\n"
-	          "-2, --human2             Same as -h, but substitute\n"
+	          "-2, --linear2            Same as -l, but substitute\n"
 		  "                         processes if possible\n"
 	          "-r, --reuse-cycles       Improves result of -2 but can take\n"
 		  "                         longer to calculate\n"
 	          "-a, --read-aterm         SPECFILE is an ATerm\n"
-	          "-w, --write-aterm        Write the result as an ATerm\n"
+	          "-h, --human              Write the result in human readable\n"
+		  "                         format\n"
 	       );
 }
 
 int main(int argc, char **argv)
 {
-	FILE *SpecStream;
+	FILE *SpecStream,*OutFile;
 	ATerm stackbot;
 	ATermAppl Spec;
-	#define sopts "ch2raw"
+	#define sopts "cl2rah"
 	#define HelpOption 1
 	struct option lopts[] = {
 		{ "help",		no_argument,	NULL,	HelpOption },
 		{ "nocluster",		no_argument,	NULL,	'c' },
-		{ "human",		no_argument,	NULL,	'h' },
-		{ "human2",		no_argument,	NULL,	'2' },
+		{ "linear",		no_argument,	NULL,	'l' },
+		{ "linear2",		no_argument,	NULL,	'2' },
 		{ "reuse-cycles",	no_argument,	NULL,	'r' },
 		{ "read-aterm",		no_argument,	NULL,	'a' },
-		{ "write-aterm",	no_argument,	NULL,	'w' },
+		{ "human",		no_argument,	NULL,	'h' },
 		{ 0, 0, 0, 0 }
 	};
-	int opt,cluster,human,reuse,read_aterm,write_aterm;
+	int opt;
+	bool cluster,linear,linear2,reuse,read_aterm,human;
 
 	ATinit(argc,argv,&stackbot);
 
-	cluster = 1;
-	human = 0;
-	reuse = 0;
-	read_aterm = 0;
-	write_aterm = 0;
+	cluster = true;
+	linear = false;
+	linear2 = false;
+	reuse = false;
+	read_aterm = false;
+	human = false;
 	while ( (opt = getopt_long(argc,argv,sopts,lopts,NULL)) != -1 )
 	{
 		switch ( opt )
@@ -65,22 +71,22 @@ int main(int argc, char **argv)
 				print_help(stderr);
 				return 0;
 			case 'c':
-				cluster = 0;
+				cluster = false;
 				break;
-			case 'h':
-				human = 1;
+			case 'l':
+				linear = true;
 				break;
 			case '2':
-				human = 2;
+				linear2 = true;
 				break;
 			case 'r':
-				reuse = 1;
+				reuse = true;
 				break;
 			case 'a':
-				read_aterm = 1;
+				read_aterm = true;
 				break;
-			case 'w':
-				write_aterm = 1;
+			case 'h':
+				human = true;
 				break;
 			default:
 				break;
@@ -89,6 +95,7 @@ int main(int argc, char **argv)
 
 	if ( argc-optind < 1 )
 	{
+		printf("%i\n",argc-optind);
 		print_help(stderr);
 		return 0;
 	}
@@ -107,23 +114,68 @@ int main(int argc, char **argv)
 		fclose(SpecStream);
 	}
 
-	switch ( human )
+	if ( argc-optind > 1 )
 	{
-		case 1:
-			Spec = gsLinearise2_nolpe(Spec);
-			break;
-		case 2:
-			Spec = gsLinearise2_nolpe_subst(Spec,reuse);
-			break;
-		case 0:
-			Spec = gsLinearise2(Spec,cluster);
-			break;
+		if ( !strcmp("-",argv[optind+1]) )
+		{
+			OutFile = stdout;
+		} else {
+			if ( (OutFile = fopen(argv[optind+1],"w")) == NULL )
+			{
+				perror(NAME);
+				return 1;
+			}
+		}
+	} else {
+		char s[100];
+		bool b;
+
+		strncpy(s,argv[optind],95);
+		s[95] = 0;
+		b = false;
+		for (int i=strlen(s); i>=0; i--)
+		{
+			if ( s[i] == '.' )
+			{
+				s[++i] = 'l';
+				s[++i] = 'p';
+				s[++i] = 'e';
+				s[++i] = 0;
+				b = true;
+				break;
+			}
+		}
+		if ( !b )
+		{
+			int i = strlen(s)-1;
+			s[++i] = '.';
+			s[++i] = 'l';
+			s[++i] = 'p';
+			s[++i] = 'e';
+			s[++i] = 0;
+		}
+
+		if ( (OutFile = fopen(s,"w")) == NULL )
+		{
+			perror(NAME);
+			return 1;
+		}
 	}
 
-	if ( write_aterm )
+	if ( linear )
 	{
-		ATwriteToTextFile((ATerm) Spec,stdout);
+		Spec = gsLinearise2_nolpe(Spec);
+	} else if ( linear2 )
+	{
+		Spec = gsLinearise2_nolpe_subst(Spec,reuse);
 	} else {
-		gsPrintSpecification(stdout,Spec);
+		Spec = gsLinearise2(Spec,cluster);
+	}
+
+	if ( human )
+	{
+		gsPrintSpecification(OutFile,Spec);
+	} else {
+		ATwriteToTextFile((ATerm) Spec,OutFile);
 	}
 }
