@@ -11,10 +11,6 @@
 
 class XSim: public wxApp
 {
-private:
-    wxListCtrl *stateview;
-    wxListCtrl *transview;
-
 public:
     XSim();
     

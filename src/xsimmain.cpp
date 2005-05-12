@@ -87,26 +87,26 @@ void XSimMain::CreateMenu()
     menu = new wxMenuBar;
 
     wxMenu *file = new wxMenu;
-    file->Append( wxID_OPEN, wxT("&Open...	ALT-o"), wxT("") );
+    file->Append( wxID_OPEN, wxT("&Open...	CTRL-o"), wxT("") );
     file->AppendSeparator();
-    file->Append( wxID_EXIT, wxT("&Quit	ALT-q"), wxT("") );
+    file->Append( wxID_EXIT, wxT("&Quit	CTRL-q"), wxT("") );
     menu->Append( file, wxT("&File") );
 
     wxMenu *edit = new wxMenu;
-    undo = edit->Append( ID_UNDO, wxT("&Undo	ALT-LEFT"), wxT("") );
+    undo = edit->Append( ID_UNDO, wxT("&Undo	CTRL-LEFT"), wxT("") );
     undo->Enable(false);
-    redo = edit->Append( ID_REDO, wxT("Re&do	ALT-RIGHT"), wxT("") );
+    redo = edit->Append( ID_REDO, wxT("Re&do	CTRL-RIGHT"), wxT("") );
     redo->Enable(false);
-    edit->Append( ID_RESET, wxT("&Reset	ALT-r"), wxT("") );
+    edit->Append( ID_RESET, wxT("&Reset	CTRL-r"), wxT("") );
     edit->AppendSeparator();
-    edit->Append( ID_MENU, wxT("&Load trace...	ALT-l"), wxT("") )->Enable(false);
-    edit->Append( ID_MENU, wxT("&Save trace...	ALT-s"), wxT("") )->Enable(false);
+    edit->Append( ID_MENU, wxT("&Load trace...	CTRL-l"), wxT("") )->Enable(false);
+    edit->Append( ID_MENU, wxT("&Save trace...	CTRL-s"), wxT("") )->Enable(false);
     edit->AppendSeparator();
-    edit->Append( ID_FITCS, wxT("F&it to Current State	F3"), wxT("") );
+    edit->Append( ID_FITCS, wxT("F&it to Current State	CTRL-f"), wxT("") );
     menu->Append( edit, wxT("&Edit") );
     
     wxMenu *views = new wxMenu;
-    views->Append( ID_TRACE, wxT("&Trace"), wxT("") );
+    views->Append( ID_TRACE, wxT("&Trace	CTRL-t"), wxT("") );
     views->Append( ID_MENU, wxT("&Graph"), wxT("") )->Enable(false);
     views->Append( ID_TRACELOAD, wxT("&Load Dynamic..."), wxT("") );
     menu->Append( views, wxT("&Views") );
@@ -467,11 +467,11 @@ void XSimMain::OnTraceLoad( wxCommandEvent &event )
 		    {
 		    	f(this);
 		    } else {
-			    wxMessageDialog msg(this, wxT("DLL does not appear to contain a View."), wxT("Error"), wxOK);
+			    wxMessageDialog msg(this, wxT("DLL does not appear to contain a View."), wxT("Error"), wxOK|wxICON_ERROR);
 			    msg.ShowModal();
 		    }
 	    } else {
-		    wxMessageDialog msg(this, wxT("Failed to open DLL."), wxT("Error"), wxOK);
+		    wxMessageDialog msg(this, wxT("Failed to open DLL."), wxT("Error"), wxOK|wxICON_ERROR);
 		    msg.ShowModal();
 	    }
     }
@@ -506,7 +506,7 @@ void XSimMain::LoadFile(wxString filename)
     if ( (f = fopen(filename.c_str(),"r")) == NULL )
     {
 	    wxMessageDialog msg(this, wxT("Failed to open file."),
-		wxT("Error"), wxOK);
+		wxT("Error"), wxOK|wxICON_ERROR);
 	    msg.ShowModal();
 	    return;
     }
