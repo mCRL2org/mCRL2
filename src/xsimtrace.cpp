@@ -1,5 +1,5 @@
 #if defined(__GNUG__) && !defined(NO_GCC_PRAGMA)
-    #pragma implementation "xsim.h"
+    #pragma implementation "xsimtrace.h"
 #endif
 
 #include "wx/wxprec.h"
@@ -27,17 +27,32 @@ BEGIN_EVENT_TABLE(XSimTrace,wxFrame)
     EVT_LIST_ITEM_ACTIVATED(ID_LISTVIEW,XSimTrace::OnListItemActivated)
 END_EVENT_TABLE()
 
-XSimTrace::XSimTrace( wxWindow *parent, wxWindowID id, const wxString &title,
-    const wxPoint &position, const wxSize& size, long style ) :
-    wxFrame( parent, id, title, position, size, style )
+static void PrintState(FILE *f ,ATermList state)
 {
-    // XXX Easy hack... should be separated from XSimMain
+	for (; !ATisEmpty(state); state=ATgetNext(state))
+	{
+		if ( gsIsDataVarId(ATAgetFirst(state)) )
+		{
+			fprintf(f,"_");
+		} else {
+			gsPrintPart(f,ATgetFirst(state),false,0);
+		}
+		if ( !ATisEmpty(ATgetNext(state)) )
+		{
+			fprintf(f,", ");
+		}
+	}
+}
+
+XSimTrace::XSimTrace( wxWindow *parent ) :
+    wxFrame( parent, -1, wxT("XSim Trace"), wxDefaultPosition, wxSize(300,400), wxDEFAULT_FRAME_STYLE )
+{
     wxPanel *panel = new wxPanel(this,-1);
     wxBoxSizer *sizer = new wxBoxSizer(wxVERTICAL);
     wxStaticBox *box = new wxStaticBox(panel,-1,wxT("Transitions"));
     wxStaticBoxSizer *boxsizer = new wxStaticBoxSizer(box,wxVERTICAL);
     traceview = new wxListView(panel,ID_LISTVIEW,wxDefaultPosition,wxSize(0,0),wxLC_REPORT|wxSUNKEN_BORDER|wxLC_HRULES|wxLC_VRULES|wxLC_SINGLE_SEL);
-    traceview->InsertColumn(0,wxT(""));
+    traceview->InsertColumn(0,wxT("#"));
     traceview->InsertColumn(1,wxT("Action"));
     traceview->InsertColumn(2,wxT("State"));
     traceview->SetColumnWidth(0,30);
@@ -50,12 +65,58 @@ XSimTrace::XSimTrace( wxWindow *parent, wxWindowID id, const wxString &title,
     current_pos = -1;
 }
 
-void XSimTrace::SetSimulator(SimulatorInterface *sim)
+
+void XSimTrace::Registered(SimulatorInterface *Simulator)
 {
-	simulator = sim;
+	simulator = Simulator;
 }
 
-void XSimTrace::Reset(ATermList state)
+void XSimTrace::Unregistered()
+{
+	simulator = NULL;
+	current_pos = -1;
+	traceview->DeleteAllItems();
+}
+
+void XSimTrace::StateChanged(ATermAppl Transition, ATermList State, ATermList NextStates)
+{
+	if ( Transition != NULL )
+	{
+		char s[1000];
+		FILE *f;
+		int l = traceview->GetItemCount()-1;
+
+		while ( l > current_pos )
+		{
+			traceview->DeleteItem(l);
+			l--;
+		}
+		current_pos++;
+		traceview->InsertItem(current_pos,wxString::Format("%i",current_pos));
+		f = fopen("xsim.tmp","w+");
+		gsPrintPart(f,(ATerm) Transition,false,0);
+		rewind(f);
+		if ( fgets(s,1000,f) == NULL )
+		{
+			s[0] = 0;
+		}
+		fclose(f);
+		traceview->SetItem(current_pos,1,wxT(s));
+		f = fopen("xsim.tmp","w+");
+		PrintState(f,State);
+//		gsPrintParts(f,(ATerm) State,false,0,NULL,",");
+		rewind(f);
+		if ( fgets(s,1000,f) == NULL )
+		{
+			s[0] = 0;
+		}
+		fclose(f);
+		traceview->SetItem(current_pos,2,wxT(s));
+		traceview->SetColumnWidth(2,wxLIST_AUTOSIZE);
+	}
+}
+
+void XSimTrace::Reset(ATermList State)
 {
 	char s[1000];
 	FILE *f;
@@ -64,7 +125,8 @@ void XSimTrace::Reset(ATermList state)
 	traceview->InsertItem(0,wxT("0"));
 	traceview->SetItem(0,1,wxT(""));
 	f = fopen("xsim.tmp","w+");
-	gsPrintParts(f,(ATerm) state,false,0,NULL,",");
+	PrintState(f,State);
+//	gsPrintParts(f,(ATerm) State,false,0,NULL,",");
 	rewind(f);
 	if ( fgets(s,1000,f) == NULL )
 	{
@@ -76,65 +138,62 @@ void XSimTrace::Reset(ATermList state)
 	current_pos = 0;
 }
 
-void XSimTrace::SetNext(ATermList transition)
+void XSimTrace::Undo(int Count)
 {
-	char s[1000];
-	FILE *f;
-	int l = traceview->GetItemCount();
+	while ( Count > 0 )
+	{
+		wxColor col(245,245,245);
+		traceview->SetItemBackgroundColour(current_pos,col);
+		current_pos--;
+		Count--;
+	}
+}
 
-	while ( l > current_pos )
+void XSimTrace::Redo(int Count)
+{
+	while ( Count > 0 )
+	{
+		wxColor col(255,255,255);
+		current_pos++;
+		traceview->SetItemBackgroundColour(current_pos,col);
+		Count--;
+	}
+}
+
+void XSimTrace::TraceChanged(ATermList Trace, int From)
+{
+	int l = traceview->GetItemCount()-1;
+	
+	while ( l >= From )
 	{
 		traceview->DeleteItem(l);
 		l--;
 	}
-	current_pos++;
-	traceview->InsertItem(current_pos,wxString::Format("%i",current_pos));
-	f = fopen("xsim.tmp","w+");
-	gsPrintPart(f,ATgetFirst(transition),false,0);
-	rewind(f);
-	if ( fgets(s,1000,f) == NULL )
+
+	for (; !ATisEmpty(Trace); Trace=ATgetNext(Trace))
 	{
-		s[0] = 0;
+		if ( From == 0 )
+		{
+			Reset(ATLgetFirst(ATgetNext(ATLgetFirst(Trace))));
+		} else {
+			StateChanged(ATAgetFirst(ATLgetFirst(Trace)),ATLgetFirst(ATgetNext(ATLgetFirst(Trace))),NULL);
+		}
+		From++;
 	}
-	fclose(f);
-	traceview->SetItem(current_pos,1,wxT(s));
-	f = fopen("xsim.tmp","w+");
-	gsPrintParts(f,ATgetFirst(ATgetNext(transition)),false,0,NULL,",");
-	rewind(f);
-	if ( fgets(s,1000,f) == NULL )
-	{
-		s[0] = 0;
-	}
-	fclose(f);
-	traceview->SetItem(current_pos,2,wxT(s));
-	traceview->SetColumnWidth(2,wxLIST_AUTOSIZE);
 }
 
-void XSimTrace::Undo()
+void XSimTrace::TracePosChanged(ATermAppl Transition, ATermList State, int Index)
 {
-	wxColor col(245,245,245);
-	traceview->SetItemBackgroundColour(current_pos,col);
-	current_pos--;
-}
-
-void XSimTrace::Redo()
-{
-	wxColor col(255,255,255);
-	current_pos++;
-	traceview->SetItemBackgroundColour(current_pos,col);
-}
-
-void XSimTrace::Goto(int pos)
-{
-	while ( current_pos > pos )
+	while ( current_pos > Index )
 	{
-		Undo();
+		Undo(1);
 	}
-	while ( current_pos < pos )
+	while ( current_pos < Index )
 	{
-		Redo();
+		Redo(1);
 	}
 }
+
 
 void XSimTrace::OnCloseWindow( wxCloseEvent &event )
 {
@@ -151,6 +210,6 @@ void XSimTrace::OnListItemActivated( wxListEvent &event )
 {
 	if ( simulator != NULL )
 	{
-		simulator->GotoTracePos(event.GetIndex());
+		simulator->SetTracePos(event.GetIndex());
 	}
 }

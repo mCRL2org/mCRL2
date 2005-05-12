@@ -2,7 +2,7 @@
 #define __xsimtrace_H__
 
 #if defined(__GNUG__) && !defined(NO_GCC_PRAGMA)
-    #pragma interface "xsim.h"
+    #pragma interface "xsimtrace.h"
 #endif
 
 // Include wxWindows' headers
@@ -11,35 +11,34 @@
     #include <wx/wx.h>
 #endif
 
+#include "xsimbase.h"
 #include <wx/listctrl.h>
 #include "aterm2.h"
-
-class SimulatorInterface
-{
-public:
-	virtual void GotoTracePos(int pos) = 0;
-};
-
 
 //----------------------------------------------------------------------------
 // XSimTrace
 //----------------------------------------------------------------------------
 
-class XSimTrace: public wxFrame
+class XSimTrace: public wxFrame, public SimulatorViewInterface
 {
 public:
     // constructors and destructors
-    XSimTrace( wxWindow *parent, wxWindowID id, const wxString &title,
+    XSimTrace( wxWindow *parent );
+/*    XSimTrace( wxWindow *parent, wxWindowID id, const wxString &title,
         const wxPoint& pos = wxDefaultPosition,
         const wxSize& size = wxDefaultSize,
-        long style = wxDEFAULT_FRAME_STYLE );
-    void SetSimulator(SimulatorInterface *Sim);
-    void Reset(ATermList state);
-    void SetNext(ATermList trans);
-    void Undo();
-    void Redo();
-    void Goto(int pos);
-    
+        long style = wxDEFAULT_FRAME_STYLE ) : XSimTrace(parent);*/
+
+    // SimulatorViewInterface
+    virtual void Registered(SimulatorInterface *Simulator);
+    virtual void Unregistered();
+    virtual void StateChanged(ATermAppl Transition, ATermList State, ATermList NextStates);
+    virtual void Reset(ATermList State);
+    virtual void Undo(int Count);
+    virtual void Redo(int Count);
+    virtual void TraceChanged(ATermList Trace, int From);
+    virtual void TracePosChanged(ATermAppl Transition, ATermList State, int Index);
+
 private:
     // WDR: method declarations for XSimMain
     

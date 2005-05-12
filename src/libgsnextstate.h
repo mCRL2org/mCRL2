@@ -4,7 +4,7 @@
 extern "C" {
 #endif
 
-ATermList gsNextStateInit(ATermAppl Spec);
+ATermList gsNextStateInit(ATermAppl Spec, bool AllowFreeVars);
 ATermList gsNextState(ATermList State);
 
 #ifdef __cplusplus

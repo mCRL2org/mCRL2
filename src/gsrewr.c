@@ -77,7 +77,7 @@ static ATermAppl rewrite_lpe(ATermAppl Spec)
 	for (; !ATisEmpty(l); l=ATgetNext(l))
 	{
 		a = ATAgetArgument(ATAgetFirst(l),1);
-		a = rewrite_proc(a);
+		a = gsRewriteTerm(a);
 		b = ATAgetArgument(ATAgetFirst(l),2);
 		if ( gsIsMultAct(b) )
 		{

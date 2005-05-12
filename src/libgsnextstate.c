@@ -11,27 +11,78 @@ bool ATisList(ATerm a)
 	return (ATgetType(a) == AT_LIST);
 }
 
+static ATermAppl gsGetResult(ATermAppl sort)
+{
+	while ( gsIsSortArrow(sort) )
+	{
+		sort = ATAgetArgument(sort,1);
+	}
+
+	return sort;
+}
+
+static ATermList gsGetDomain(ATermAppl sort)
+{
+	ATermList l;
+
+	l = ATmakeList0();
+	while ( gsIsSortArrow(sort) )
+	{
+		l = ATinsert(l,ATgetArgument(sort,0));
+		sort = ATAgetArgument(sort,1);
+	}
+	l = ATreverse(l);
+
+	return l;
+}
+
+
 static ATermAppl current_spec;
+
 
 ATermAppl FindDummy(ATermAppl sort)
 {
 	ATermList l;
 
+	if ( gsIsSortArrow(sort) )
+	{
+		gsErrorMsg("cannot generate dummies for function sorts (%t)\n",sort);
+		exit(1);
+	}
+
 	l = ATLgetArgument(ATAgetArgument(current_spec,1),0);
 	for (; !ATisEmpty(l); l=ATgetNext(l))
 	{
-		if ( ATisEqual(ATAgetArgument(ATAgetFirst(l),1),sort) )
+		ATermAppl conssort = ATAgetArgument(ATAgetFirst(l),1);
+		if ( ATisEqual(gsGetResult(conssort),sort) )
 		{
-			return ATAgetFirst(l);
+			ATermList domain = gsGetDomain(conssort);
+			ATermAppl t = ATAgetFirst(l);
+
+			for (; !ATisEmpty(domain); domain=ATgetNext(domain))
+			{
+				t = gsMakeDataAppl(t,FindDummy(ATAgetFirst(domain)));
+			}
+
+			return t;
 		}
 	}
 
 	l = ATLgetArgument(ATAgetArgument(current_spec,2),0);
 	for (; !ATisEmpty(l); l=ATgetNext(l))
 	{
-		if ( ATisEqual(ATAgetArgument(ATAgetFirst(l),1),sort) )
+		ATermAppl mapsort = ATAgetArgument(ATAgetFirst(l),1);
+		if ( ATisEqual(gsGetResult(mapsort),sort) )
 		{
-			return ATAgetFirst(l);
+			ATermList domain = gsGetDomain(mapsort);
+			ATermAppl t = ATAgetFirst(l);
+
+			for (; !ATisEmpty(domain); domain=ATgetNext(domain))
+			{
+				t = gsMakeDataAppl(t,FindDummy(ATAgetFirst(domain)));
+			}
+
+			return t;
 		}
 	}
 
@@ -39,9 +90,16 @@ ATermAppl FindDummy(ATermAppl sort)
 	exit(1);
 }
 
+static bool usedummies;
+
 ATerm SetVars(ATerm a)
 {
 	ATermList l,m;
+
+	if ( !usedummies )
+	{
+		return a;
+	}
 
 	if ( ATisList(a) )
 	{
@@ -96,12 +154,13 @@ ATermAppl smd_subst_vars(ATermAppl smd, ATermList vars)
 	return gsMakeLPESummand(a1,a2,a3,a4,a5);
 }
 
-ATermList gsNextStateInit(ATermAppl Spec)
+ATermList gsNextStateInit(ATermAppl Spec, bool AllowFreeVars)
 {
 	ATermList l,m,n,state;
 	bool set;
 
 	current_spec = Spec;
+	usedummies = !AllowFreeVars;
 
 	l = ATLgetArgument(ATAgetArgument(Spec,5),1);
 	m = ATLgetArgument(ATAgetArgument(Spec,6),1);

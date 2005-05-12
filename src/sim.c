@@ -1,4 +1,4 @@
-/* $Id: rewr.c,v 1.2 2005/03/09 15:46:00 muck Exp $ */
+/* $Id: sim.c,v 1.1 2005/05/03 15:44:47 muck Exp $ */
 
 #define NAME "sim"
 
@@ -12,24 +12,47 @@
 #include "libgsparse.h"
 #include "libgsnextstate.h"
 
+static void PrintState(ATermList state)
+{
+	for (; !ATisEmpty(state); state=ATgetNext(state))
+	{
+		if ( gsIsDataVarId(ATAgetFirst(state)) )
+		{
+			ATprintf("_");
+		} else {
+			gsPrintPart(stdout,ATgetFirst(state),0,0);
+		}
+		if ( !ATisEmpty(ATgetNext(state)) )
+		{
+			ATprintf(", ");
+		}
+	}
+}
+
 int main(int argc, char **argv)
 {
 	FILE *SpecStream;
 	ATerm stackbot;
 	ATermAppl Spec;
 	ATermList state, states, l;
-	#define sopts ""
+	#define sopts "d"
 	struct option lopts[] = {
+		{ "dummy",	no_argument,	NULL,	'd' },
 		{ 0, 0, 0, 0 }
 	};
 	int opt, i, r;
+	bool usedummy;
 
 	ATinit(argc,argv,&stackbot);
 
+	usedummy = false;
 	while ( (opt = getopt_long(argc,argv,sopts,lopts,NULL)) != -1 )
 	{
 		switch ( opt )
 		{
+			case 'd':
+				usedummy = true;
+				break;
 			default:
 				break;
 		}
@@ -49,11 +72,10 @@ int main(int argc, char **argv)
 	gsEnableConstructorFunctions();
 	Spec = (ATermAppl) ATreadFromFile(SpecStream);
 
-	state = gsNextStateInit(Spec);
+	state = gsNextStateInit(Spec,!usedummy);
 
-//	ATprintf("initial state: %t\n\n",state);
 	ATprintf("initial state: [ ");
-	gsPrintParts(stdout,state,0,0,"",", ");
+	PrintState(state);
 	ATprintf(" ]\n\n");
 
 	while ( 1 )
@@ -65,11 +87,10 @@ int main(int argc, char **argv)
 		}
 		for (l=states,i=0; !ATisEmpty(l); l=ATgetNext(l), i++)
 		{
-//			ATprintf("%i: %t  ->  %t\n\n",i,ATgetFirst(ATLgetFirst(l)),ATgetFirst(ATgetNext(ATLgetFirst(l))));
 			ATprintf("%i: ",i);
 			gsPrintPart(stdout,ATgetFirst(ATLgetFirst(l)),0,0);
 			ATprintf("  ->  [ ");
-			gsPrintParts(stdout,ATgetFirst(ATgetNext(ATLgetFirst(l))),0,0,"",", ");
+			PrintState(ATLgetFirst(ATgetNext(ATLgetFirst(l))));
 			ATprintf(" ]\n\n");
 		}
 harm:
@@ -94,9 +115,8 @@ harm:
 		gsPrintPart(stdout,ATgetFirst(ATLelementAt(states,i)),0,0);
 		ATprintf("\n\n");
 		state = ATLgetFirst(ATgetNext(ATLelementAt(states,i)));
-//	ATprintf("current state: %t\n\n",state);
 		ATprintf("current state: [ ");
-		gsPrintParts(stdout,state,0,0,"",", ");
+		PrintState(state);
 		ATprintf(" ]\n\n");
 	}
 }

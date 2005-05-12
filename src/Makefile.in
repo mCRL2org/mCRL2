@@ -2,10 +2,10 @@
 CC                 = @CC@
 CFLAGS             = @CFLAGS@
 CPP                = @CPP@
-CPPFLAGS           = @CPPFLAGS@
+CPPFLAGS           = -fpic @CPPFLAGS@
 CXX                = @CXX@
-CXXFLAGS           = @CXXFLAGS@
-LDFLAGS            = @LDFLAGS@
+CXXFLAGS           = -fpic @CXXFLAGS@
+LDFLAGS            = -Wl,-rpath,$(libdir) -Wl,--as-needed @LDFLAGS@
 ARFLAGS            = crs
 INSTALL            = install
 LEX                = @LEX@
@@ -69,13 +69,14 @@ SIM_NAME       = sim
 SIM_OBJECTS    = sim.o libgsnextstate.o libgsprover.o
 SIM_LDFLAGS    = -lgsrewrite -lgsparse -lATerm -lm
 XSIM_NAME       = xsim
-XSIM_OBJECTS    = xsim.o xsimtrace.o libgsnextstate.o libgsprover.o
-XSIM_LDFLAGS    = -lgsrewrite -lgsparse -lATerm -lm
+XSIM_OBJECTS    = xsim.o xsimbase.o xsimmain.o xsimtrace.o libgsnextstate.o libgsprover.o
+XSIM_LDFLAGS    = -lgsrewrite -lgsparse -lATerm -lm -ldl
 
 #Group definitions
 EXE_NAMES          = $(PARSER_NAME) $(PRINTER_NAME) $(LINEARISER_NAME) $(LIN_NAME) $(REWR_NAME) $(PNML2GS_NAME) $(INSTAN_NAME) $(SIM_NAME) $(XSIM_NAME)
 CUR_EXE_NAMES      = $(strip $(foreach s,$(EXE_NAMES),$(shell if test -f $s; then echo -n $s; fi)))
 LIB_NAMES          = $(LIBPARSER_NAME) $(LIBREWR_NAME)
+CUR_LIB_NAMES      = $(strip $(foreach s,$(LIB_NAMES),$(shell if test -f $s; then echo -n $s; fi)))
 
 #Make rules
 .PHONY: all install clean
@@ -87,6 +88,8 @@ install : all
 ifneq ($(CUR_EXE_NAMES),)
 	$(INSTALL) -d $(bindir)
 	$(INSTALL) $(CUR_EXE_NAMES) $(bindir)
+#	$(INSTALL) -d $(libdir)
+#	$(INSTALL) $(CUR_LIB_NAMES) $(libdir)
 else
 	@echo there aren\'t any executables to be installed
 endif
@@ -97,6 +100,7 @@ gsparser.output config.status config.log *~ core core.*
 
 $(LIBPARSER_NAME) : $(LIBPARSER_OBJECTS)
 	$(AR) $(ARFLAGS) $@ $(LIBPARSER_OBJECTS)
+#	$(CC) -shared -o $@ $(LIBPARSER_OBJECTS)
 
 $(PARSER_NAME) : $(PARSER_OBJECTS) $(LIBPARSER_NAME)
 	$(CC) -o $@ $(PARSER_OBJECTS) $(LDFLAGS) $(PARSER_LDFLAGS)
@@ -112,6 +116,7 @@ $(LIN_NAME) : $(LIN_OBJECTS) $(LIBPARSER_NAME)
 
 $(LIBREWR_NAME) : $(LIBREWR_OBJECTS)
 	$(AR) $(ARFLAGS) $@ $(LIBREWR_OBJECTS)
+#	$(CC) -shared -o $@ $(LIBREWR_OBJECTS)
 
 $(REWR_NAME) : $(REWR_OBJECTS) $(LIBPARSER_NAME) $(LIBREWR_NAME)
 	$(CC) -o $@ $(REWR_OBJECTS) $(LDFLAGS) $(REWR_LDFLAGS)

@@ -1,4 +1,4 @@
-/* $Id: rewr.c,v 1.2 2005/03/09 15:46:00 muck Exp $ */
+/* $Id: gsinstantiate.c,v 1.1 2005/05/03 15:44:47 muck Exp $ */
 
 #define NAME "gsinstantiate"
 
@@ -12,6 +12,25 @@
 #include "libgsparse.h"
 #include "libgsnextstate.h"
 
+static ATermList SetDCs(ATermList l)
+{
+	ATermList m;
+
+	m = ATmakeList0();
+	for (; !ATisEmpty(l); l=ATgetNext(l))
+	{
+		if ( gsIsDataVarId(ATAgetFirst(l)) )
+		{
+			m = ATinsert(m,(ATerm) gsMakeNil());
+		} else {
+			m = ATinsert(m,ATgetFirst(l));
+		}
+	}
+	m = ATreverse(m);
+
+	return m;
+}
+
 int main(int argc, char **argv)
 {
 	FILE *SpecStream,*aut;
@@ -20,18 +39,24 @@ int main(int argc, char **argv)
 	ATermList state, l, curr, next;
 	ATermTable states;
 	unsigned int num_states, curr_num, trans;
-	#define sopts ""
+	#define sopts "d"
 	struct option lopts[] = {
+		{ "dummy", 	no_argument,	NULL,	'd' },
 		{ 0, 0, 0, 0 }
 	};
 	int opt;
+	bool usedummies;
 
 	ATinit(argc,argv,&stackbot);
 
+	usedummies = false;
 	while ( (opt = getopt_long(argc,argv,sopts,lopts,NULL)) != -1 )
 	{
 		switch ( opt )
 		{
+			case 'd':
+				usedummies = true;
+				break;
 			default:
 				break;
 		}
@@ -62,9 +87,9 @@ int main(int argc, char **argv)
 	
 	fprintf(aut,"des (0,0,0)                   \n");
 
-	state = gsNextStateInit(Spec);
+	state = gsNextStateInit(Spec,!usedummies);
 
-	ATtablePut(states,(ATerm) state,(ATerm) ATmakeInt(num_states++));
+	ATtablePut(states,(ATerm) SetDCs(state),(ATerm) ATmakeInt(num_states++));
 
 	curr = ATmakeList1((ATerm) state);
 	while ( !ATisEmpty(curr) )
@@ -73,7 +98,7 @@ int main(int argc, char **argv)
 		for (; !ATisEmpty(curr); curr=ATgetNext(curr))
 		{
 			state = ATLgetFirst(curr);
-			curr_num = ATgetInt((ATermInt) ATtableGet(states,(ATerm) state));
+			curr_num = ATgetInt((ATermInt) ATtableGet(states,(ATerm) SetDCs(state)));
 			l = gsNextState(state);
 			for (; !ATisEmpty(l); l=ATgetNext(l))
 			{
@@ -81,11 +106,11 @@ int main(int argc, char **argv)
 				ATermList e = ATLgetFirst(ATgetNext(ATLgetFirst(l)));
 				int i;
 		
-				if ( (s = ATtableGet(states,(ATerm) e)) == NULL )
+				if ( (s = ATtableGet(states,(ATerm) SetDCs(e))) == NULL )
 				{
 					i = num_states;
 					s = (ATerm) ATmakeInt(num_states++);
-					ATtablePut(states,(ATerm) e,s);
+					ATtablePut(states,(ATerm) SetDCs(e),s);
 					next = ATinsert(next,(ATerm) e);
 				} else {
 					i = ATgetInt((ATermInt) s);

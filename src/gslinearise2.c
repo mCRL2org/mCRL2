@@ -1,6 +1,4 @@
-/* $Id: gslinearise2.c,v 1.20 2005/05/04 22:30:41 muck Exp $ */
-
-#define NAME "gslinearise2"
+/* $Id: gslinearise2.c,v 1.21 2005/05/12 09:34:11 muck Exp $ */
 
 #include <stdio.h>
 #include <stdlib.h>
@@ -112,7 +110,7 @@ ATermAppl get_new_sort_name(ATermAppl s, ATermList o)
 	{
 		if ( i == INT_MAX )
 		{
-			fprintf(stderr,"%s: cannot create a fresh data variable\n",NAME);
+			gsErrorMsg("cannot create a fresh data variable\n");
 			exit(1);
 		}
 		sprintf(name,"dummy%i",i);
@@ -188,7 +186,7 @@ ATermAppl fresh_var_name()
 			j++;
 		}
 	}
-	fprintf(stderr,"%s: cannot create a fresh process variable\n",NAME);
+	gsErrorMsg("cannot create a fresh process variable\n");
 	exit(1);
 }
 
@@ -234,7 +232,7 @@ ATerm annotate_context(ATerm a, ATermList c)
 		}
 		return (ATerm) ATreverse(m);
 	} else {
-		ATfprintf(stderr,"%s: term to annotate is not a ATermAppl or a ATermList\n",NAME);
+		gsErrorMsg("term to annotate is not a ATermAppl or a ATermList\n");
 		exit(1);
 	}
 }
@@ -281,7 +279,7 @@ ATerm increase_index_bnd(ATerm a, int n, int b)
 		}
 		return (ATerm) ATreverse(m);
 	} else {
-		ATfprintf(stderr,"%s: term to increase indices of is not a ATermAppl or a ATermList\n",NAME);
+		gsErrorMsg("term to increase indices of is not a ATermAppl or a ATermList\n");
 		exit(1);
 	}
 }
@@ -305,7 +303,7 @@ ATermAppl get_new_var(ATermAppl a, ATermList *t)
 	{
 		if ( i == INT_MAX )
 		{
-			fprintf(stderr,"%s: cannot create a fresh data variable\n",NAME);
+			gsErrorMsg("cannot create a fresh data variable\n");
 			exit(1);
 		}
 		snprintf(name,99,"%s%i",gsATermAppl2String(ATAgetArgument(a,0)),i);
@@ -355,7 +353,7 @@ ATerm subst_new_var(ATerm a, int n, ATermAppl v)
 		}
 		return (ATerm) ATreverse(m);
 	} else {
-		ATfprintf(stderr,"%s: term to substitute variable in is not a ATermAppl or a ATermList\n",NAME);
+		gsErrorMsg("term to substitute variable in is not a ATermAppl or a ATermList\n");
 		exit(1);
 //		return a; XXX why was this here?
 	}
@@ -418,7 +416,7 @@ ATerm remove_indices_context(ATerm a, ATerm *b, ATermList *t)
 		}
 		return (ATerm) ATreverse(m);
 	} else {
-		ATfprintf(stderr,"%s: term to remove indices from is not a ATermAppl or a ATermList\n",NAME);
+		gsErrorMsg("term to remove indices from is not a ATermAppl or a ATermList\n");
 		exit(1);
 //		return a; XXX why was this here?
 	}
@@ -503,7 +501,7 @@ ATerm substitute_vars(ATerm a, ATermList v, ATermList s)
 		}
 		return (ATerm) ATreverse(m);
 	} else {
-		ATfprintf(stderr,"%s: term to substitute variables in is not a ATermAppl or a ATermList\n",NAME);
+		gsErrorMsg("term to substitute variables in is not a ATermAppl or a ATermList\n");
 		exit(1);
 	}
 }
@@ -574,7 +572,7 @@ ATermList get_vars(ATermAppl a)
 	// XXX Special case to compensate for unfinished data implementation
 	else
 	{
-		ATfprintf(stderr,"%s: unknown process or data expression (%t); trying to compensate\n",NAME,a);
+		gsWarningMsg("unknown process or data expression (%t); trying to compensate\n",a);
 		if ( ATisList((ATerm) a) )
 		{
 			m = (ATermList) a;
@@ -589,7 +587,7 @@ ATermList get_vars(ATermAppl a)
 		return l;
 	}
 	
-	ATfprintf(stderr,"%s: unknown process or data expression (%t)\n",NAME,a);
+	gsWarningMsg("unknown process or data expression (%t)\n",a);
 	return ATmakeList0();
 }
 //XXX
@@ -633,7 +631,7 @@ ATbool has_bounded_var(ATermAppl a) //XXX
 		return ATfalse;
 	}
 
-	ATfprintf(stderr,"%s: invalid data expr (%t)\n",NAME,a);
+	gsErrorMsg("invalid data expr (%t)\n",a);
 	exit(1);
 }
 ATerm replace_data_with_vars_gen(ATerm a, ATermList *v, ATermList *d)
@@ -685,7 +683,7 @@ ATerm replace_data_with_vars_gen(ATerm a, ATermList *v, ATermList *d)
 			return (ATerm) ATreverse(m);
 	}
 
-	ATfprintf(stderr,"%s: unknown data expression to generalise (%t)\n",NAME,a);
+	gsWarningMsg("unknown data expression to generalise (%t)\n",a);
 	return a;
 }
 ATermAppl replace_data_with_vars(ATermAppl a, ATermList *v, ATermList *d)
@@ -832,7 +830,7 @@ ATermList synch2actl(ATermAppl ma)
 	{
 		return ATconcat(synch2actl(ATAgetArgument(ma,0)),synch2actl(ATAgetArgument(ma,1)));
 	} else {
-		ATfprintf(stderr,"%s: invalid multiaction supplied to synch2actl (%t)\n",NAME,ma);
+		gsErrorMsg("invalid multiaction supplied to synch2actl (%t)\n",ma);
 		exit(1);
 	}
 }
@@ -899,7 +897,7 @@ ATbool synch_cap(ATermAppl ma, ATermList H)
 	{
 		return synch_cap(ATAgetArgument(ma,0),H) || synch_cap(ATAgetArgument(ma,1),H);
 	} else {
-		ATfprintf(stderr,"%s: invalid multiaction supplied to synch_cap (%t)\n",NAME,ma);
+		gsErrorMsg("invalid multiaction supplied to synch_cap (%t)\n",ma);
 		exit(1);
 	}
 }
@@ -933,7 +931,7 @@ ATermAppl synch_hide(ATermAppl ma, ATermList I)
 			return gsMakeSync(a,b);
 		}
 	} else {
-		ATfprintf(stderr,"%s: invalid multiaction supplied to synch_hide (%t)\n",NAME,ma);
+		gsErrorMsg("invalid multiaction supplied to synch_hide (%t)\n",ma);
 		exit(1);
 	}
 }
@@ -959,7 +957,7 @@ ATermAppl synch_rename(ATermAppl ma, ATermList R)
 	{
 		return gsMakeSync(synch_rename(ATAgetArgument(ma,0),R),synch_rename(ATAgetArgument(ma,1),R));
 	} else {
-		ATfprintf(stderr,"%s: invalid multiaction supplied to synch_rename (%t)\n",NAME,ma);
+		gsErrorMsg("invalid multiaction supplied to synch_rename (%t)\n",ma);
 		exit(1);
 	}
 }
@@ -976,7 +974,7 @@ ATermList synch2list(ATermAppl ma)
 	{
 		return ATconcat(synch2list(ATAgetArgument(ma,0)),synch2list(ATAgetArgument(ma,1)));
 	} else {
-		ATfprintf(stderr,"%s: invalid multiaction supplied to synch2list (%t)\n",NAME,ma);
+		gsErrorMsg("invalid multiaction supplied to synch2list (%t)\n",ma);
 		exit(1);
 	}
 }
@@ -1002,7 +1000,7 @@ ATermAppl make_xi(ATermList l)
 
 	if ( ATisEmpty(l) )
 	{
-		ATfprintf(stderr,"%s: multiaction supplied to make_xi should not be empty\n",NAME);
+		gsWarningMsg("multiaction supplied to make_xi should not be empty\n");
 		return gsMakeDataExprTrue();
 	} else {
 		a = ATLgetArgument(ATAgetFirst(l),1);
@@ -1306,7 +1304,7 @@ ATermAppl synch_reduce(ATermAppl ma)
 			return gsMakeSync(ma1,ma2);
 		}
 	} else {
-		ATfprintf(stderr,"%s: invalid multiaction supplied to synch_reduce (%t)\n",NAME,ma);
+		gsErrorMsg("invalid multiaction supplied to synch_reduce (%t)\n",ma);
 		exit(1);
 	}
 }
@@ -1424,7 +1422,7 @@ ATbool match_data(ATermAppl a, ATermAppl m, ATermList l, ATermTable r)
 		return ATtrue;
 	}
 	
-	ATfprintf(stderr,"%s: unknown data expression (%t)\n",NAME,a);
+	gsWarningMsg("unknown data expression (%t)\n",a);
 	return ATfalse;
 }
 
@@ -1500,7 +1498,7 @@ ATbool match_proc(ATermAppl a, ATermAppl m, ATermList l, ATermTable r)
 		}
 	}
 	
-	ATfprintf(stderr,"%s: unknown process (%t)\n",NAME,a);
+	gsWarningMsg("unknown process (%t)\n",a);
 	return ATfalse;
 }
 
@@ -1608,7 +1606,7 @@ ATermAppl get_proc_call(ATermAppl a, ATermList c)
 	add_to_stack(ATgetLength(processes)-1);
 	if ( !match(a,t,&m) )
 	{
-		ATfprintf(stderr,"%s: introduced process does not match with original (%t , %t)\n",NAME,t,a);
+		gsErrorMsg("introduced process does not match with original (%t , %t)\n",t,a);
 		exit(1);
 	}
 	m = (ATermList) gsSubstValues(s,(ATerm) m,true);
@@ -1876,7 +1874,7 @@ ATermList get_firsts(ATermAppl t)
 		return ATconcat(l,m);
 	}
 
-	ATfprintf(stderr,"%s: unknown process (%t)\n",NAME,t);
+	gsWarningMsg("unknown process (%t)\n",t);
 	return ATmakeList0();
 }
 
@@ -2027,7 +2025,7 @@ ATermAppl subst_procs(ATermAppl a, ATermList nosubst)
 		return ATmakeAppl2(ATgetAFun(a),ATgetArgument(a,0),(ATerm) subst_procs(ATAgetArgument(a,1),nosubst));
 	}
 
-	ATfprintf(stderr,"%s: invalid process parameter (%t)\n",NAME,a);
+	gsErrorMsg("invalid process parameter (%t)\n",a);
 	exit(1);
 }
 
@@ -2251,7 +2249,7 @@ ATermAppl make_lpe(ATermAppl Spec, int init_id)
 		{
 			if ( gsIsNil(ATAelementAt(ATLgetFirst(m),2)) )
 			{
-				fprintf(stderr,"%s: cannot create LPE of terminating processes\n",NAME);
+				gsErrorMsg("cannot create LPE of terminating processes\n");
 				exit(1);
 			} else {
 				o = ATLelementAt(ATLelementAt(processes,proc_id(ATAelementAt(ATLgetFirst(m),2))),1);
@@ -2306,6 +2304,8 @@ ATermAppl make_lpe(ATermAppl Spec, int init_id)
 	Spec = ATsetArgument(Spec,(ATerm) gsMakeLPE(vars,args,sums),5);
 
 	vars = ATmakeList0();
+	m = ATLelementAt(ATLelementAt(processes,proc_id(initial_process)),1);
+	n = ATLgetArgument(initial_process,1);
 	if ( singleton )
 	{
 		l = ATmakeList0();
@@ -2314,7 +2314,10 @@ ATermAppl make_lpe(ATermAppl Spec, int init_id)
 	}
 	for (j=(singleton?0:1); j<ATgetLength(args); j++)
 	{
-		l = ATappend(l,(ATerm) gsMakeAssignment(ATAelementAt(args,j),get_new_var(ATAelementAt(args,j),&vars)));
+		if ( ATindexOf(m,ATelementAt(args,j),0) == -1 )
+			l = ATappend(l,(ATerm) gsMakeAssignment(ATAelementAt(args,j),get_new_var(ATAelementAt(args,j),&vars)));
+		else
+			l = ATappend(l,(ATerm) gsMakeAssignment(ATAelementAt(args,j),ATAelementAt(n,ATindexOf(m,ATelementAt(args,j),0))));
 	}
 	
 //	Spec = ATsetArgument(Spec,(ATerm) gsMakeMapSpec(maps),2);
@@ -2325,7 +2328,7 @@ ATermAppl make_lpe(ATermAppl Spec, int init_id)
 
 ATermAppl cluster_lpe(ATermAppl spec)
 {
-	ATfprintf(stderr,"%s: clustering not yet implemented\n",NAME);
+	gsWarningMsg("clustering not yet implemented\n");
 	return spec;
 /*	ATermList sums = ATLgetArgument(ATAgetArgument(spec,4),1);
 	ATermList cluster, newsums;
@@ -2384,7 +2387,6 @@ int main_linearisation(ATermAppl Spec)
 
 	if ( !init_used )
 	{
-		init = ATAelementAt(ATLelementAt(processes,init_id),2);
 		i = 0;
 		for (l=processes; !ATisEmpty(l); l=ATgetNext(l))
 		{
