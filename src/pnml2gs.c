@@ -17,23 +17,23 @@
 // the static context of the spec will be checked and used, not transformed
 typedef struct {
   //read-in
-  ATermTable place_names;	//id -> name
-  ATermTable place_mark;	//id -> Nat
-  ATermTable trans_name;	//id -> name
-  ATermTable arc_in;	        //id -> trans_id x place_id
-  ATermTable arc_out;	        //id -> place_id x trans_id
+  ATermTable place_name;	//place_id -> name
+  ATermTable place_mark;	//place_id -> Nat
+  ATermTable trans_name;	//trans_id -> name
+  ATermTable arc_in;	        //arc_id -> trans_id x place_id
+  ATermTable arc_out;	        //arc_id -> place_id x trans_id
   //generate
-  ATermTable place_in;	        //id -> List(arc_id) (arc_in)
-  ATermTable trans_in;	        //id -> List(arc_id) (arc_out)
-  ATermTable place_out;	        //id -> List(arc_id) (arc_out)
-  ATermTable trans_out;	        //id -> List(arc_id) (arc_in)
+  ATermTable place_in;	        //place_id -> List(arc_id) (arc_in)
+  ATermTable trans_in;	        //trans_id -> List(arc_id) (arc_out)
+  ATermTable place_out;	        //place_id -> List(arc_id) (arc_out)
+  ATermTable trans_out;	        //trans_id -> List(arc_id) (arc_in)
 } Context;
 static Context context;
 
 //==================================================
 // retrieve_text gets the contents of a child <text> element of cur
 //==================================================
-static ATerm * retrieve_text(xmlNodePtr cur) {
+static ATerm retrieve_text(xmlNodePtr cur) {
   // input: a pointer to the current element
   // output: the contents of the first child <text> attribute 
   //         of the current element
@@ -42,9 +42,9 @@ static ATerm * retrieve_text(xmlNodePtr cur) {
   cur=cur->xmlChildrenNode;
   while (cur != NULL) {
     if (!xmlNodeIsText(cur)) {
-      if (!xmlStrcmp(cur->name, (const xmlChar *) "text")) {
+      if (!xmlStrcmp(cur->name, (const xmlChar *)"text")) {
 	RV = xmlNodeGetContent(cur);
-	return ATparse(RV);
+	return ATparse((const char *)RV);
       }
     }
     cur=cur->next;
@@ -62,7 +62,7 @@ static ATermAppl pnml2aterm_place(xmlNodePtr cur) {
 
   fprintf(stderr, "> Start examining a place...  \n");
   // first, we want to retrieve the id of the place
-  ATerm Aid = ATparse(xmlGetProp(cur, (const xmlChar *) "id"));
+  ATerm Aid = ATparse((const char *)xmlGetProp(cur, (const xmlChar *)"id"));
   fprintf(stderr, ATwriteToString(Aid));
   fprintf(stderr, "\n");
 
@@ -83,54 +83,60 @@ static ATermAppl pnml2aterm_place(xmlNodePtr cur) {
     // <name>  -  <initialMarking>  -  <type>
     // all other elements will be ignored in the translation
     
-    if (!xmlStrcmp(cur->name, (const xmlChar *) "name")) {
+    if (!xmlStrcmp(cur->name, (const xmlChar *)"name")) {
       // the place contains a <name> element
       // a <name> element contains a childelement <text> which contains the name of the place
       // the name is retrieved below and assigned to Aname
-      fprintf(stderr, "    name: ");
       if (!(Aname=retrieve_text(cur))) {
 	Aname = ATparse("default_name");
       }
-      fprintf(stderr, "|[");
+      fprintf(stderr, "    name: '");
       fprintf(stderr, ATwriteToString(Aname));
-      fprintf(stderr, "]| \n");
-    } else if (!xmlStrcmp(cur->name, (const xmlChar *) "initialMarking")) {
+      fprintf(stderr, "' \n");
+    } else if (!xmlStrcmp(cur->name, (const xmlChar *)"initialMarking")) {
       // the place contains an <initialMarking> element
       // this element contains a childelement <text> which contains the initial marking of the place
       // this marking is retrieved below and assigned to AinitialMarking
-      fprintf(stderr, "    initialMarking: ");
+
       if (!(AinitialMarking=retrieve_text(cur))) {
 	AinitialMarking = ATparse("0");
       }
       if (atoi(ATwriteToString(AinitialMarking)) < 0) {
 	// if the initial marking is less than zero, it is resetted to zero
 	AinitialMarking = ATparse("0");
-	fprintf(stderr, "Initial marking is less than 0, resetting initial marking to 0! \n");
+	fprintf(stderr, "Place with id '");
+	fprintf(stderr, ATwriteToString(Aid));
+	fprintf(stderr, "' has initial marking is less than 0, resetting initial marking to 0! \n");
       }
-      fprintf(stderr, "|[");
+      fprintf(stderr, "    initialMarking: '");
       fprintf(stderr, ATwriteToString(AinitialMarking));
-      fprintf(stderr, "]| \n");
-    } else if (!xmlStrcmp(cur->name, (const xmlChar *) "type")) {
+      fprintf(stderr, "' \n");
+    } else if (!xmlStrcmp(cur->name, (const xmlChar *)"type")) {
       // the place contains an <type> element
       // this element contains a childelement <text> which contains the type of the place
-      fprintf(stderr, "    type: ");
+
       if (!(Atype=retrieve_text(cur))) {
 	Atype = ATparse("channel");
       }
-      fprintf(stderr, "|[");
-      fprintf(stderr, ATwriteToString(Atype));
-      fprintf(stderr, "]| \n");
       if (!ATisEqual(Atype, ATparse("channel"))) {
 	// the type should either be omitted or have the value "channel"
 	// otherwise the place does not need to be translated!
-	fprintf(stderr, "Type is not 'channel'! \n");
+	fprintf(stderr, "Place with id '");
+	fprintf(stderr, ATwriteToString(Aid));
+	fprintf(stderr, "' has type '");
+	fprintf(stderr, ATwriteToString(Atype));
+	fprintf(stderr, "' and will not be translated. \n");
 	return NULL;
       }
+      fprintf(stderr, "    type: '");
+      fprintf(stderr, ATwriteToString(Atype));
+      fprintf(stderr, "' \n");
+
     } else if (xmlNodeIsText(cur)) {
     } else {
-      fprintf(stderr, "    ignore ");
-      fprintf(stderr, cur->name);
-      fprintf(stderr, "\n");
+      fprintf(stderr, "    Ignore an element named '");
+      fprintf(stderr, (const char *)cur->name);
+      fprintf(stderr, "'.\n");
     }
     cur = cur->next;
   }
@@ -149,7 +155,7 @@ static ATermAppl pnml2aterm_transition(xmlNodePtr cur) {
 
   fprintf(stderr, "> Start examining a transition...  \n");
   // first, we want to retrieve the id of the transition
-  ATerm Aid = ATparse(xmlGetProp(cur, (const xmlChar *) "id"));
+  ATerm Aid = ATparse((const char *)xmlGetProp(cur, (const xmlChar *)"id"));
   fprintf(stderr, ATwriteToString(Aid));
   fprintf(stderr, "\n");
 
@@ -169,7 +175,7 @@ static ATermAppl pnml2aterm_transition(xmlNodePtr cur) {
     // <name>  -  <type>
     // all other elements will be ignored in the translation
     
-    if (!xmlStrcmp(cur->name, (const xmlChar *) "name")) {
+    if (!xmlStrcmp(cur->name, (const xmlChar *)"name")) {
       // the transition contains a <name> element
       // a <name> element contains a childelement <text> which contains the name of the transition
       // the name is retrieved below and assigned to Aname
@@ -180,7 +186,7 @@ static ATermAppl pnml2aterm_transition(xmlNodePtr cur) {
       fprintf(stderr, "|[");
       fprintf(stderr, ATwriteToString(Aname));
       fprintf(stderr, "]| \n");
-    } else if (!xmlStrcmp(cur->name, (const xmlChar *) "type")) {
+    } else if (!xmlStrcmp(cur->name, (const xmlChar *)"type")) {
       // the transition contains an <type> element
       // this element contains a childelement <text> which contains the type of the transition
       fprintf(stderr, "    type: ");
@@ -199,7 +205,7 @@ static ATermAppl pnml2aterm_transition(xmlNodePtr cur) {
     } else if (xmlNodeIsText(cur)) {
     } else {
       fprintf(stderr, "    ignore ");
-      fprintf(stderr, cur->name);
+      fprintf(stderr, (const char *)cur->name);
       fprintf(stderr, "\n");
     }
     cur = cur->next;
@@ -219,16 +225,16 @@ static ATermAppl pnml2aterm_arc(xmlNodePtr cur) {
 
   fprintf(stderr, "> Start examining an arc...  \n");
   // first, we want to retrieve the id of the arc
-  ATerm Aid = ATparse(xmlGetProp(cur, (const xmlChar *) "id"));
+  ATerm Aid = ATparse((const char *)xmlGetProp(cur, (const xmlChar *)"id"));
   fprintf(stderr, ATwriteToString(Aid));
   fprintf(stderr, "\n");
 
   // second, we want to retrieve the source and the target of the arc
-  ATerm Asource = ATparse(xmlGetProp(cur, (const xmlChar *) "source"));
+  ATerm Asource = ATparse((const char *)xmlGetProp(cur, (const xmlChar *)"source"));
   fprintf(stderr, ATwriteToString(Asource));
   fprintf(stderr, "\n");
 
-  ATerm Atarget = ATparse(xmlGetProp(cur, (const xmlChar *) "target"));
+  ATerm Atarget = ATparse((const char *)xmlGetProp(cur, (const xmlChar *)"target"));
   fprintf(stderr, ATwriteToString(Atarget));
   fprintf(stderr, "\n");
 
@@ -246,7 +252,7 @@ static ATermAppl pnml2aterm_arc(xmlNodePtr cur) {
     // <type>
     // all other elements will be ignored in the translation
     
-    if (!xmlStrcmp(cur->name, (const xmlChar *) "type")) {
+    if (!xmlStrcmp(cur->name, (const xmlChar *)"type")) {
       // the arc contains a <type> element
       // this element contains a childelement <text> which contains the type of the transition
       fprintf(stderr, "    type: ");
@@ -265,7 +271,7 @@ static ATermAppl pnml2aterm_arc(xmlNodePtr cur) {
     } else if (xmlNodeIsText(cur)) {
     } else {
       fprintf(stderr, "    ignore ");
-      fprintf(stderr, cur->name);
+      fprintf(stderr, (const char *)cur->name);
       fprintf(stderr, "\n");
     }
     cur = cur->next;
@@ -291,7 +297,7 @@ static ATermAppl pnml2aterm(xmlDocPtr doc) {
     fprintf(stderr, "File is empty. \n");
     return NULL;
   }
-  if (xmlStrcmp(cur->name, (const xmlChar *) "pnml")) {
+  if (xmlStrcmp(cur->name, (const xmlChar *)"pnml")) {
     fprintf(stderr, "File is not a PNML file!  \n");
     return NULL;
   }
@@ -299,31 +305,41 @@ static ATermAppl pnml2aterm(xmlDocPtr doc) {
 
   cur = cur->xmlChildrenNode;
   // the first <net>element, if any present, is selected by cur
-  while (cur != NULL && xmlStrcmp(cur->name, (const xmlChar *) "net")) {
+  while (cur != NULL && xmlStrcmp(cur->name, (const xmlChar *)"net")) {
     if (!xmlNodeIsText(cur)) {
       fprintf(stderr, "Element: ");
-      fprintf(stderr, cur->name);
-      fprintf(stderr, " is not a petri net and will be ignored in the translation (including it's sub-elements).   \n");
+      fprintf(stderr, (const char *)cur->name);
+      fprintf(stderr, " is not a Petri net and will be ignored in the translation (including it's sub-elements).   \n");
     }
     cur = cur->next;
   }
   if (cur == NULL) {
-    fprintf(stderr, "File does not contain a petri net. \n");
+    fprintf(stderr, "File does not contain a Petri net. \n");
     return NULL;
   }   
 
   // cur now points to the first <net>element
   fprintf(stderr, "\n");
-  fprintf(stderr, "Start converting the petri net to an ATerm...  \n");
+  fprintf(stderr, "Start converting the Petri net to an ATerm...  \n");
   fprintf(stderr, "\n");
 
   //==================================================
   // actual translation starts here
   //==================================================
-  ATerm ANetID = ATparse(xmlGetProp(cur, (const xmlChar *) "id"));
+  // retrieve the ID of the Petri net
+  ATerm ANetID;
+  if (!xmlGetProp(cur, (const xmlChar *)"id")) {
+    ANetID = ATparse("Petri_net");
+    fprintf(stderr, "NO NET-ID FOUND!\n");
+  } else {
+    ANetID = ATparse((const char *)xmlGetProp(cur, (const xmlChar *)"id"));
+  }
+  fprintf(stderr, "NetID = ");
+  fprintf(stderr, ATwriteToString(ANetID));
+  fprintf(stderr, "\n");
 
   cur = cur->xmlChildrenNode;
-  // cur now points to the first element in the petri net
+  // cur now points to the first element in the Petri net
 
   // lists of the places, transitions and arcs that will be translated
   ATermList APlaces=ATmakeList0();
@@ -347,64 +363,44 @@ static ATermAppl pnml2aterm(xmlDocPtr doc) {
     // <place>  -  <transition>  -  <arc>
     // all other elements will be ignored in the translation
     
-    if (!xmlStrcmp(cur->name, (const xmlChar *) "place")) {
+    if (!xmlStrcmp(cur->name, (const xmlChar *)"place")) {
       if (!(ACurrentPlace=pnml2aterm_place(cur))) {
-	fprintf(stderr, "This place will not be translated \n");
+	// pnml2aterm_place returns NULL, no translation needed.
       } else {
-	APlaces = ATinsert(APlaces, ACurrentPlace);
+	APlaces = ATinsert(APlaces, (ATerm)ACurrentPlace);
 	fprintf(stderr, "Translate this place: ");
-	fprintf(stderr, ATwriteToString(ACurrentPlace));
+	fprintf(stderr, ATwriteToString((ATerm)ACurrentPlace));
 	fprintf(stderr, "\n");
       }
-   } else if (!xmlStrcmp(cur->name, (const xmlChar *) "transition")) {
+   } else if (!xmlStrcmp(cur->name, (const xmlChar *)"transition")) {
       if(!(ACurrentTransition=pnml2aterm_transition(cur))) {
 	fprintf(stderr, "This transition will not be translated \n");
       } else {
-	ATransitions = ATinsert(ATransitions, ACurrentTransition);
+	ATransitions = ATinsert(ATransitions, (ATerm)ACurrentTransition);
 	fprintf(stderr, "Translate this transition: ");
-	fprintf(stderr, ATwriteToString(ACurrentTransition));
+	fprintf(stderr, ATwriteToString((ATerm)ACurrentTransition));
 	fprintf(stderr, "\n");
       }
-   } else if (!xmlStrcmp(cur->name, (const xmlChar *) "arc")) {
+   } else if (!xmlStrcmp(cur->name, (const xmlChar *)"arc")) {
       if(!(ACurrentArc=pnml2aterm_arc(cur))) {
 	fprintf(stderr, "This arc will not be translated \n");
       } else {
-	AArcs = ATinsert(AArcs, ACurrentArc);
+	AArcs = ATinsert(AArcs, (ATerm)ACurrentArc);
 	fprintf(stderr, "Translate this arc: ");
-	fprintf(stderr, ATwriteToString(ACurrentArc));
+	fprintf(stderr, ATwriteToString((ATerm)ACurrentArc));
 	fprintf(stderr, "\n");
       }
    } else if (xmlNodeIsText(cur)) {
    } else {
      fprintf(stderr, "> An element named ");
-     fprintf(stderr, cur->name);
+     fprintf(stderr, (const char *)cur->name);
      fprintf(stderr, " will be ignored in the translation (including it's sub-elements).  \n");
    };
    cur = cur->next;
   };
 
-  // argument order of returnvalue is places - transitions - arcs  
-  return ATmakeAppl3(ATmakeAFun(ATwriteToString(ANetID), 3, ATfalse), APlaces, ATransitions, AArcs);
-}
-
-//==================================================
-// ATtableContainsKey checks if a specified key is already present in the given table.
-//==================================================
-static ATbool ATtableContainsKey(ATermTable table, ATerm key){
-  // input: an ATermTable table and an ATerm key
-  // output: ATtrue if key is a key in table
-  //         ATfalse if key is not a key in table
-
-  ATermList KeysList = ATtableKeys(table); 
-  while (ATisEmpty(KeysList) == ATfalse) {
-    // this loop itterates through all keys
-    if (ATgetLast(KeysList) == key) {
-      return ATtrue;
-    }
-    // remove the entry from the list
-    KeysList = ATgetPrefix(KeysList);
-  }
-  return ATfalse;
+  // argument order of returnvalue is places - transitions - arcs 
+  return ATmakeAppl3(ATmakeAFun(ATwriteToString(ANetID), 3, ATtrue), (ATerm)ATreverse(APlaces), (ATerm)ATreverse(ATransitions), (ATerm)ATreverse(AArcs));
 }
 
 //==================================================
@@ -420,6 +416,8 @@ static ATermAppl do_pnml2gs(ATermAppl Spec){
   //==================================================
   fprintf(stderr, "\n");
   fprintf(stderr, "====================\n");
+  fprintf(stderr, ATwriteToString((ATerm)Spec));
+  fprintf(stderr, "\n====================\n");
   fprintf(stderr, "\n");
 
   ATerm ANetID = ATparse(ATgetName(ATgetAFun(Spec)));
@@ -428,25 +426,24 @@ static ATermAppl do_pnml2gs(ATermAppl Spec){
   fprintf(stderr, "\n");
 
   // put the places, transitions and arcs in the lists again
-  ATermList APlaces = ATgetArgument(Spec, 0);
-  ATermList ATransitions = ATgetArgument(Spec, 1);
-  ATermList AArcs = ATgetArgument(Spec, 2);
+  ATermList APlaces = (ATermList)ATgetArgument(Spec, 0);
+  ATermList ATransitions = (ATermList)ATgetArgument(Spec, 1);
+  ATermList AArcs = (ATermList)ATgetArgument(Spec, 2);
 
   // temporary variable to store the current key
   // used for Places, Transitions and Arcs!!!
   ATerm CurrentKey;
 
-  // create table with the necessary data from the places
-  // maximum concurrency is calculated and inserted later!
-  ATermTable TablePlaces = ATtableCreate(10, 80);
   while (ATisEmpty(APlaces) == ATfalse) {
     // this loop itterates all places that will be translated
-    fprintf(stderr, ATwriteToString(ATgetLast(APlaces)));
+    fprintf(stderr, ATwriteToString(ATgetFirst(APlaces)));
     fprintf(stderr, "\n");
 
-    CurrentKey = ATgetArgument(ATgetLast(APlaces), 0);
+    CurrentKey = ATgetArgument(ATgetFirst(APlaces), 0);
     
-    if (ATtableContainsKey(TablePlaces, CurrentKey) == ATtrue) {
+    // it is sufficient to check whether a key appears in place_name OR place_mark
+    // since a value is inserted in both tables at the same time!
+    if (ATtableGet(context.place_name, CurrentKey)) {
       // the ID of the current places appears more than once in the places.
       // this is an error in the input, and thus termination takes place!
       fprintf(stderr, "The id: ");
@@ -454,38 +451,42 @@ static ATermAppl do_pnml2gs(ATermAppl Spec){
       fprintf(stderr, " appears more than once! \n");
       return NULL;
     } else {
-      // insert the data into TablePlaces
+      // insert the data into context.place_name
       // key = id
-      // value = place(name, initialMarking)
-      ATtablePut(TablePlaces, CurrentKey , ATmakeAppl2(ATmakeAFun("place", 2, ATfalse), ATgetArgument(ATgetLast(APlaces), 1),ATgetArgument(ATgetLast(APlaces),2)));
+      // value = name
+      ATtablePut(context.place_name, CurrentKey , ATgetArgument(ATgetFirst(APlaces), 1));
+
+      // insert the data into context.place_mark
+      // key = id
+      // value = initialMarking
+      ATtablePut(context.place_mark, CurrentKey , ATgetArgument(ATgetFirst(APlaces), 2));
     }
 
     // remove the entry from the list
-    APlaces = ATgetPrefix(APlaces);
+    APlaces = ATgetNext(APlaces);
   }
-  fprintf(stderr, ATwriteToString(APlaces));
+  fprintf(stderr, ATwriteToString((ATerm)APlaces));
   fprintf(stderr, "\n");
-  fprintf(stderr, ATwriteToString(ATtableKeys(TablePlaces)));
+  fprintf(stderr, ATwriteToString((ATerm)ATtableKeys(context.place_name)));
+  fprintf(stderr, "\n");
+  fprintf(stderr, ATwriteToString((ATerm)ATtableKeys(context.place_mark)));
   fprintf(stderr, "\n");
 
-
-  // create table with the necessary data from the transitions
-  ATermTable TableTransitions = ATtableCreate(10, 80);
   while (ATisEmpty(ATransitions) == ATfalse) {
     // this loop itterates all transitions that will be translated
-    fprintf(stderr, ATwriteToString(ATgetLast(ATransitions)));
+    fprintf(stderr, ATwriteToString(ATgetFirst(ATransitions)));
     fprintf(stderr, "\n");
 
-    CurrentKey = ATgetArgument(ATgetLast(ATransitions), 0);
+    CurrentKey = ATgetArgument(ATgetFirst(ATransitions), 0);
     
-    if (ATtableContainsKey(TablePlaces, CurrentKey) == ATtrue) {
+    if (ATtableGet(context.place_name, CurrentKey)) {
       // the ID of the current transition appeared already in the places.
       // this is an error in the input, and thus termination takes place!
       fprintf(stderr, "The id: ");
       fprintf(stderr, ATwriteToString(CurrentKey));
       fprintf(stderr, " appears more than once! \n");
       return NULL;
-    } else if (ATtableContainsKey(TableTransitions, CurrentKey) == ATtrue) {
+    } else if (ATtableGet(context.trans_name, CurrentKey)) {
       // the ID of the current transition appears more than once in the transitions.
       // this is an error in the input, and thus termination takes place!
       fprintf(stderr, "The id: ");
@@ -493,103 +494,95 @@ static ATermAppl do_pnml2gs(ATermAppl Spec){
       fprintf(stderr, " appears more than once! \n");
       return NULL;
     } else {
-      // insert the data into TableTransitions
+      // insert the data into context.trans_name
       // key = id
-      // value = transition(name)
-      ATtablePut(TableTransitions, CurrentKey , ATmakeAppl1(ATmakeAFun("transition", 1, ATfalse), ATgetArgument(ATgetLast(ATransitions), 1)));
+      // value = name
+      ATtablePut(context.trans_name, CurrentKey , ATgetArgument(ATgetFirst(ATransitions), 1));
     }
     // remove the entry from the list ATransitions
-    ATransitions = ATgetPrefix(ATransitions);
+    ATransitions = ATgetNext(ATransitions);
   }
-  fprintf(stderr, ATwriteToString(ATransitions));
+  fprintf(stderr, ATwriteToString((ATerm)ATransitions));
   fprintf(stderr, "\n");
-  fprintf(stderr, ATwriteToString(ATtableKeys(TableTransitions)));
+  fprintf(stderr, ATwriteToString((ATerm)ATtableKeys(context.trans_name)));
   fprintf(stderr, "\n");
 
   // temporary variables to store the current source and target
   ATerm CurrentSource;
   ATerm CurrentTarget;
-  // create table with the necessary data from the arcs
-  // also check the source and the target from the arc!
-  ATermTable TableArcs = ATtableCreate(20, 80);
   while (ATisEmpty(AArcs) == ATfalse) {
     // this loop itterates all arcs that will be translated
-    fprintf(stderr, ATwriteToString(ATgetLast(AArcs)));
+    fprintf(stderr, ATwriteToString(ATgetFirst(AArcs)));
     fprintf(stderr, "\n");
 
-    CurrentKey = ATgetArgument(ATgetLast(AArcs), 0);
+    CurrentKey = ATgetArgument(ATgetFirst(AArcs), 0);
     
-    if (ATtableContainsKey(TablePlaces, CurrentKey) == ATtrue) {
+    if (ATtableGet(context.place_name, CurrentKey)) {
       // the ID of the current arc appeared already in the places.
       // this is an error in the input, and thus termination takes place!
       fprintf(stderr, "The id: ");
       fprintf(stderr, ATwriteToString(CurrentKey));
       fprintf(stderr, " appears more than once! \n");
       return NULL;
-    } else if (ATtableContainsKey(TableTransitions, CurrentKey) == ATtrue) {
+    } else if (ATtableGet(context.trans_name, CurrentKey)) {
       // the ID of the current arc appeared already in the transitions.
       // this is an error in the input, and thus termination takes place!
       fprintf(stderr, "The id: ");
       fprintf(stderr, ATwriteToString(CurrentKey));
       fprintf(stderr, " appears more than once! \n");
       return NULL;
-    } else if (ATtableContainsKey(TableArcs, CurrentKey) == ATtrue) {
-      // the ID of the current arc appears more than once in the arcs.
+    } else if (ATtableGet(context.arc_in, CurrentKey)) {
+      // the ID of the current arc appeared already in the in_arcs.
+      // this is an error in the input, and thus termination takes place!
+      fprintf(stderr, "The id: ");
+      fprintf(stderr, ATwriteToString(CurrentKey));
+      fprintf(stderr, " appears more than once! \n");
+      return NULL;
+    } else if (ATtableGet(context.arc_out, CurrentKey)) {
+      // the ID of the current arc appeared already in the out_arcs.
       // this is an error in the input, and thus termination takes place!
       fprintf(stderr, "The id: ");
       fprintf(stderr, ATwriteToString(CurrentKey));
       fprintf(stderr, " appears more than once! \n");
       return NULL;
     } else {
-      // the arc's ID is correct
+      // the arc's ID did not appear in the transitions, places or arcs that will be translated
       // check the source and the target from the arc to see if the arc is used in the translation!
-      CurrentSource = ATgetArgument(ATgetLast(AArcs),1);
-      CurrentTarget = ATgetArgument(ATgetLast(AArcs),2);
-
-      if ((ATtableContainsKey(TablePlaces, CurrentSource) == ATtrue) && (ATtableContainsKey(TableTransitions, CurrentTarget) == ATtrue)) {
-	// The arc goes from a place to a transition
-
-	// insert the data into the TableArcs
+      CurrentSource = ATgetArgument(ATgetFirst(AArcs),1);
+      CurrentTarget = ATgetArgument(ATgetFirst(AArcs),2);
+      if (ATtableGet(context.place_name, CurrentSource) && ATtableGet(context.trans_name, CurrentTarget)) {
+	// The arc is an arc_out; it goes from a place to a transition
+	// insert the data into context.arc_out
 	// key = id
-	// value = arc(source, target)
-	ATtablePut(TableArcs, CurrentKey, ATmakeAppl2(ATmakeAFun("arc",2,ATfalse),CurrentSource,CurrentTarget));
-
-	/* update MC */
-	
-      } else if ((ATtableContainsKey(TablePlaces, CurrentTarget) == ATtrue) && (ATtableContainsKey(TableTransitions, CurrentSource) == ATtrue)) {
-	// The arc goes from a transition to a place
-
-	// insert the data into the TableArcs
+	// value = arc_out(source, target)
+	ATtablePut(context.arc_out, CurrentKey, (ATerm)ATmakeAppl2(ATmakeAFun("arc_out",2,ATfalse),CurrentSource,CurrentTarget));
+      } else if (ATtableGet(context.place_name, CurrentTarget) && ATtableGet(context.trans_name, CurrentSource)) {
+	// The arc is an arc_in; it goes from a transition to a place
+	// insert the data into context.arc_in
 	// key = id
-	// value = arc(source, target)
-	ATtablePut(TableArcs, CurrentKey, ATmakeAppl2(ATmakeAFun("arc",2,ATfalse),CurrentSource,CurrentTarget));
-
-	/* update MC */
-	
+	// value = arc_in(source, target)
+	ATtablePut(context.arc_in, CurrentKey, (ATerm)ATmakeAppl2(ATmakeAFun("arc",2,ATfalse),CurrentSource,CurrentTarget));
       } else {
 	// either the source or the target (or both) of the arc will not be translated
 	// therefore the arc will not be translated either!
-	
       }
     }
     // remove the entry from the list ATransitions
-    AArcs = ATgetPrefix(AArcs);
+    AArcs = ATgetNext(AArcs);
   }
 
-  fprintf(stderr, ATwriteToString(AArcs));
+  fprintf(stderr, ATwriteToString((ATerm)AArcs));
   fprintf(stderr, "\n");
-  fprintf(stderr, ATwriteToString(ATtableKeys(TableArcs)));
+  fprintf(stderr, ATwriteToString((ATerm)ATtableKeys(context.arc_in)));
+  fprintf(stderr, "\n");
+  fprintf(stderr, ATwriteToString((ATerm)ATtableKeys(context.arc_out)));
   fprintf(stderr, "\n");
 
 
-  
+
+  /* GENERATE context.place_in - context.trans_in - context.place_out - context.trans_out */
 
 
-
-
-
-
-  /* CALCULATE MAXIMUM CONCURRENCY */
 
   fprintf(stderr, "\n");
   fprintf(stderr, "====================\n");
@@ -608,8 +601,9 @@ int main(int argc, char **argv){
   
   #define sopts "ai"
   struct option lopts[] = {
-    { "read-aterm",		no_argument,	NULL,	'a' },
-    { 0, 0, 0, 0 }
+    {"read-aterm"  , no_argument,      NULL, 'a'},
+    {"debug"       , no_argument,      NULL, 'd'},
+    {0, 0, 0, 0}
   };
   int opt,read_aterm;
   
@@ -618,6 +612,9 @@ int main(int argc, char **argv){
     switch ( opt ){
     case 'a':
       read_aterm = 1;
+      break;
+    case 'd': 
+      gsSetDebugMsg();
       break;
     default:
       break;
@@ -650,7 +647,7 @@ int main(int argc, char **argv){
     return 1;
   }
 
-  context.place_names=ATtableCreate(63,50);
+  context.place_name=ATtableCreate(63,50);
   context.place_mark=ATtableCreate(63,50); 
   context.trans_name=ATtableCreate(63,50); 
   context.arc_in=ATtableCreate(63,50);  
@@ -663,7 +660,7 @@ int main(int argc, char **argv){
 
   Spec=do_pnml2gs(Spec);
 
-  ATtableDestroy(context.place_names);
+  ATtableDestroy(context.place_name);
   ATtableDestroy(context.place_mark); 
   ATtableDestroy(context.trans_name); 
   ATtableDestroy(context.arc_in);  
@@ -679,7 +676,8 @@ int main(int argc, char **argv){
     return 1;
   }
   fprintf(stderr, "\n");  
-
+  fprintf(stderr, ATwriteToString((ATerm)Spec));
+  fprintf(stderr, "\n \n");  
   gsPrintSpecification(stdout,Spec);        
   return 0;
 }
