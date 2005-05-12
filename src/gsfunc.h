@@ -429,17 +429,17 @@ ATermAppl gsMakeOpIdEmptyList(ATermAppl SortExpr);
 //Pre: SortExpr is a sort expression
 //Ret: Operation identifier for the empty list of sort SortExpr
 
-ATermAppl gsMakeOpIdListSize(ATermAppl SortExpr);
-//Pre: SortExpr is a sort expression
-//Ret: Operation identifier for list size of sort SortExpr -> Nat
-
 ATermAppl gsMakeOpIdCons(ATermAppl SortExprLHS, ATermAppl SortExprRHS);
 //Pre: SortExprLHS and SortExprRHS are sort expressions
 //Ret: Operation identifier for 'list cons (element at the head of a list)' of
 //     sort S -> T -> T, where S and T stand for SortExprLHS and SortExprRHS
 
-ATermAppl gsMakeOpIdSnoc(ATermAppl SortExprLHS, ATermAppl SortExprRHS);
+ATermAppl gsMakeOpIdListSize(ATermAppl SortExpr);
 //Pre: SortExpr is a sort expression
+//Ret: Operation identifier for list size of sort SortExpr -> Nat
+
+ATermAppl gsMakeOpIdSnoc(ATermAppl SortExprLHS, ATermAppl SortExprRHS);
+//Pre: SortExprLHS and SortExprRHS are a sort expressions
 //Ret: Operation identifier for 'list snoc (element at the tail of a list' of
 //     sort S -> T -> S, where S and T stand for SortExprLHS and SortExprRHS
 
@@ -805,6 +805,42 @@ ATermAppl gsMakeDataExprEmptyList(ATermAppl SortExpr);
 ATermAppl gsMakeDataExprCons(ATermAppl DataExprLHS, ATermAppl DataExprRHS);
 //Pre: DataExprLHS and DataExprRHS are data expressions
 //Ret: Data expression for the list cons of DataExprLHS and DataExprRHS
+
+ATermAppl gsMakeDataExprListSize(ATermAppl DataExpr);
+//Pre: DataExpr is a data expression
+//Ret: Data expression for the list size of DataExpr
+
+ATermAppl gsMakeDataExprSnoc(ATermAppl DataExprLHS, ATermAppl DataExprRHS);
+//Pre: DataExprLHS and DataExprRHS are data expressions
+//Ret: Data expression for the list snoc of DataExprLHS and DataExprRHS
+
+ATermAppl gsMakeDataExprConcat(ATermAppl DataExprLHS, ATermAppl DataExprRHS);
+//Pre: DataExpr is a sort expression
+//Ret: Data expression for the list concatenation of DataExprLHS and DataExprRHS
+
+ATermAppl gsMakeDataExprEltAt(ATermAppl DataExprLHS, ATermAppl DataExprRHS,
+  ATermAppl SortExpr);
+//Pre: DataExprLHS and DataExprRHS are data expressions, of which the latter is
+//     of sort Nat
+//     SortExpr is a sort expression
+//Ret: Data expression for the 'element at position' of DataExprLHS and
+//     DataExprRHS with result sort SortExpr
+     
+ATermAppl gsMakeDataExprLHead(ATermAppl DataExpr, ATermAppl SortExpr);
+//Pre: DataExpr is a data expression and SortExpr is a sort expression
+//Ret: Data expression for the left head of DataExpr of result sort SortExpr
+
+ATermAppl gsMakeDataExprLTail(ATermAppl DataExpr);
+//Pre: DataExpr is a data expression
+//Ret: Data expression for the left tail of DataExpr
+
+ATermAppl gsMakeDataExprRHead(ATermAppl DataExpr, ATermAppl SortExpr);
+//Pre: DataExpr is a data expression and SortExpr is a sort expression
+//Ret: Data expression for the right head of DataExpr of result sort SortExpr
+
+ATermAppl gsMakeDataExprRTail(ATermAppl DataExpr);
+//Pre: DataExpr is a data expression
+//Ret: Data expression for the right tail of DataExpr
 
 ATermAppl gsMakeDataExprSetComp(ATermAppl DataExpr, ATermAppl SortExprResult);
 //Pre: DataExpr is a data expression of sort S -> Bool

@@ -2289,6 +2289,57 @@ ATermAppl gsMakeDataExprCons(ATermAppl DataExprLHS, ATermAppl DataExprRHS)
     DataExprLHS, DataExprRHS);
 }
 
+ATermAppl gsMakeDataExprListSize(ATermAppl DataExpr)
+{
+  return gsMakeDataAppl(gsMakeOpIdListSize(gsGetSort(DataExpr)), DataExpr);
+}
+
+ATermAppl gsMakeDataExprSnoc(ATermAppl DataExprLHS, ATermAppl DataExprRHS)
+{
+  return gsMakeDataAppl2(
+    gsMakeOpIdSnoc(gsGetSort(DataExprLHS), gsGetSort(DataExprRHS)),
+    DataExprLHS, DataExprRHS);
+}
+
+ATermAppl gsMakeDataExprConcat(ATermAppl DataExprLHS, ATermAppl DataExprRHS)
+{
+  return gsMakeDataAppl2(
+    gsMakeOpIdConcat(gsGetSort(DataExprLHS)), DataExprLHS, DataExprRHS);
+}
+
+ATermAppl gsMakeDataExprEltAt(ATermAppl DataExprLHS, ATermAppl DataExprRHS,
+  ATermAppl SortExpr)
+{
+  assert(ATisEqual(gsGetSort(DataExprRHS), gsMakeSortExprNat()));
+  return gsMakeDataAppl2(
+    gsMakeOpIdEltAt(gsGetSort(DataExprLHS), SortExpr),
+    DataExprLHS, DataExprRHS);
+}
+
+ATermAppl gsMakeDataExprLHead(ATermAppl DataExpr, ATermAppl SortExpr)
+{
+  return gsMakeDataAppl(
+    gsMakeOpIdLHead(gsGetSort(DataExpr), SortExpr), DataExpr);
+}
+
+ATermAppl gsMakeDataExprLTail(ATermAppl DataExpr)
+{
+  return gsMakeDataAppl(
+    gsMakeOpIdLTail(gsGetSort(DataExpr)), DataExpr);
+}
+
+ATermAppl gsMakeDataExprRHead(ATermAppl DataExpr, ATermAppl SortExpr)
+{
+  return gsMakeDataAppl(
+    gsMakeOpIdRHead(gsGetSort(DataExpr), SortExpr), DataExpr);
+}
+
+ATermAppl gsMakeDataExprRTail(ATermAppl DataExpr)
+{
+  return gsMakeDataAppl(
+    gsMakeOpIdRTail(gsGetSort(DataExpr)), DataExpr);
+}
+
 ATermAppl gsMakeDataExprSetComp(ATermAppl DataExpr, ATermAppl SortExprResult)
 {
   ATermAppl ExprSort = gsGetSort(DataExpr);

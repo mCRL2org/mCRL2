@@ -1013,7 +1013,8 @@ ATermList gsGroupDeclsBySort(const ATermList Decls)
     int DeclSortsLength = ATgetLength(DeclSorts);
     for (int i = 0; i < DeclSortsLength; i++) {
       Result = ATconcat(
-        ATLtableGet(SortDeclsTable, ATelementAt(DeclSorts, i)), Result);
+        ATreverse(ATLtableGet(SortDeclsTable, ATelementAt(DeclSorts, i))),
+        Result);
     }
     ATtableDestroy(SortDeclsTable);
     return Result;
