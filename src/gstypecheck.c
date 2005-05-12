@@ -83,9 +83,6 @@ static ATbool gstcReadInProcsAndInit (ATermList, ATermAppl);
 static ATbool gstcTransformVarConsTypeData(void);
 static ATbool gstcTransformActProcVarConst(void);
 
-static ATbool gstcInferTypesData(void);
-static ATbool gstcInferTypesProc(void);
-
 static ATermList gstcWriteProcs(void);
 
 static ATbool gstcInTypesA(ATermAppl, ATermList);
@@ -109,9 +106,6 @@ static ATermAppl gstcTraverseActProcVarConstP(ATermTable, ATermAppl);
 static ATermAppl gstcTraverseVarConsTypeD(ATermTable, ATermAppl *, ATermAppl);
 static ATermAppl gstcTraverseVarConsTypeDN(int, ATermTable, ATermAppl* , ATermAppl);
 static ATermList gstcTraverseVarConstL(ATermTable, ATermList);
-
-static ATbool gstcInferTypesP(ATermTable, ATermAppl);
-static ATbool gstcInferTypesD(ATermTable, ATermAppl);
 
 static ATermList gstcGetNotInferredList(ATermList TypeListList);
 static ATermList gstcInsertType(ATermList TypeList, ATermAppl Type);
@@ -616,37 +610,6 @@ static ATermList gstcWriteProcs(void){
   return Result;
 }
 
-static ATbool gstcInferTypesData(void){
-  ATbool Result=ATtrue;
-  ATermTable Vars=ATtableCreate(63,50);
-  for(ATermList Eqns=body.equations;!ATisEmpty(Eqns);Eqns=ATgetNext(Eqns)){
-    ATermAppl Eqn=ATAgetFirst(Eqns);
-    Vars=gstcAddVars2Table(Vars,ATLgetArgument(Eqn,0));
-    if(!Vars){ThrowF;}
-    ATermAppl Cond=ATAgetArgument(Eqn,1);
-    if(!gsIsNil(Cond) && !gstcInferTypesD(Vars,Cond)){ThrowF;}
-    if(!gstcInferTypesD(Vars,ATAgetArgument(Eqn,2))){ThrowF;}
-    if(!gstcInferTypesD(Vars,ATAgetArgument(Eqn,3))){ThrowF;}
-  }
- finally:
-  ATtableDestroy(Vars);
-  return Result;
-}
-
-static ATbool gstcInferTypesProc(void){
-  ATbool Result=ATtrue;
-  ATermTable Vars=ATtableCreate(63,50);
-  for(ATermList ProcVars=ATtableKeys(body.proc_pars);!ATisEmpty(ProcVars);ProcVars=ATgetNext(ProcVars)){
-    ATermAppl ProcVar=ATAgetFirst(ProcVars);
-    Vars=gstcAddVars2Table(Vars,ATLtableGet(body.proc_pars,(ATerm)ProcVar));
-    if(!Vars){ThrowF;}
-    if(!gstcInferTypesP(Vars,ATAtableGet(body.proc_bodies,(ATerm)ProcVar))){ATtableDestroy(Vars);ThrowF;}
-  } 
- finally:
-  ATtableDestroy(Vars);
-  return Result;
-}
-
 static ATbool gstcTransformVarConsTypeData(void){
   ATbool Result=ATtrue;
   ATermTable Vars=ATtableCreate(63,50);
@@ -725,12 +688,15 @@ static ATbool gstcEqTypesL(ATermList Type1, ATermList Type2){
 }
 
 static ATbool gstcIsSortDeclared(ATermAppl SortName){
+
+  gsDebugMsg("gstcIsSortDeclared: SortName %t\n",SortName);    
+
   if(ATisEqual(gsMakeSortIdBool(),gsMakeSortId(SortName))) return ATtrue;
   if(ATisEqual(gsMakeSortIdPos(),gsMakeSortId(SortName))) return ATtrue;
   if(ATisEqual(gsMakeSortIdNat(),gsMakeSortId(SortName))) return ATtrue;
   if(ATisEqual(gsMakeSortIdInt(),gsMakeSortId(SortName))) return ATtrue;
+  if(ATindexedSetGetIndex(context.basic_sorts, (ATerm)SortName)>=0) return ATtrue;
   if(ATAtableGet(context.defined_sorts,(ATerm)SortName)) return ATtrue;
-  if(ATAtableGet(context.basic_sorts,(ATerm)SortName)) return ATtrue;
   return ATfalse;
 }
 
@@ -916,6 +882,8 @@ static ATermTable gstcAddVars2Table(ATermTable Vars, ATermList VarDecls){
     // if variable name is a constant name -- it has more priority (other options -- warning, error)
     ATtablePut(Vars, (ATerm)VarName, (ATerm)VarType);
   } 
+
+  goto finally;
  finally:
   if (!Result) {
     ATtableDestroy(Vars);
@@ -1296,7 +1264,7 @@ static ATermAppl gstcTraverseVarConsTypeD(ATermTable Vars, ATermAppl *DataTerm, 
 
   if(gsIsBagEnum(*DataTerm)){
     ATermList DataTermList2=ATLgetArgument(*DataTerm,0);
-    ATermAppl Type;
+    ATermAppl Type=NULL;
     ATermList NewDataTermList2=ATmakeList0();
     for(;!ATisEmpty(DataTermList2);DataTermList2=ATgetNext(DataTermList2)){
       ATermAppl DataTerm2=ATAgetFirst(DataTermList2);
@@ -1605,19 +1573,6 @@ static ATermList gstcTraverseVarConstL(ATermTable Vars, ATermList DataTermList){
 // ================================================================================
 // Phase 2 -- type inference
 // ================================================================================
-static ATbool gstcInferTypesP(ATermTable Vars, ATermAppl ProcTerm){
-  ATbool Result=ATtrue;
-
- finally:
-  return Result;
-}
-
-static ATbool gstcInferTypesD(ATermTable Vars, ATermAppl DataTerm){
-  ATbool Result=ATtrue;
- finally:
-  return Result;
-}
-
 static ATermList gstcGetNotInferredList(ATermList TypeListList){
   //we get: List of Lists of SortExpressions
   //Outer list: possible parameter types 0..nPosParsVectors-1
