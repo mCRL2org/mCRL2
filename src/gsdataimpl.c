@@ -865,6 +865,8 @@ ATermAppl gsImplSortStruct(ATermAppl SortStruct, ATermList *PSubsts,
   }
   //store equations for equalities in OpEqns
   //one equation for every pair of constructors
+  OpEqns = ATinsert(OpEqns,
+    (ATerm) gsMakeDataEqn(ATmakeList1((ATerm) s1), nil, gsMakeDataExprEq(s1, s1), t));
   for (ATermList l=ConsOps; !ATisEmpty(l); l=ATgetNext(l))
   {
     for (ATermList m=ConsOps; !ATisEmpty(m); m=ATgetNext(m))
@@ -981,6 +983,24 @@ ATermAppl gsImplSortList(ATermAppl SortList, ATermList *PSubsts,
   ATermList dsnl = ATmakeList3((ATerm) dSortElt, (ATerm) sSortId, (ATerm) n);
   ATermList bsl = ATmakeList2((ATerm) b, (ATerm) sSortId);
   PDataDecls->DataEqns = ATconcat(ATmakeList(23,
+      //equality (SortId -> SortId -> Bool)
+      (ATerm) gsMakeDataEqn(el, nil, gsMakeDataExprEq(elSortId, elSortId), t),
+      (ATerm) gsMakeDataEqn(dsl, nil, gsMakeDataExprEq(elSortId, ds), f),
+      (ATerm) gsMakeDataEqn(dsl, nil, gsMakeDataExprEq(ds, elSortId), f),
+      (ATerm) gsMakeDataEqn(destl, nil,
+        gsMakeDataExprEq(ds, et),
+        gsMakeDataExprAnd(
+          gsMakeDataExprEq(dSortElt, eSortElt),
+          gsMakeDataExprEq(sSortId, tSortId))),
+      (ATerm) gsMakeDataEqn(sl, nil, gsMakeDataExprEq(sSortId, sSortId), t),
+      //inequality (SortId -> SortId -> Bool)
+      (ATerm) gsMakeDataEqn(stl,nil,
+        gsMakeDataExprNeq(sSortId, tSortId), 
+        gsMakeDataExprNot(gsMakeDataExprEq(sSortId, tSortId))),
+      //conditional (Bool -> SortId -> SortId -> SortId)
+      (ATerm) gsMakeDataEqn(stl,nil, gsMakeDataExprIf(t, sSortId, tSortId), sSortId),
+      (ATerm) gsMakeDataEqn(stl,nil, gsMakeDataExprIf(f, sSortId, tSortId), tSortId),
+      (ATerm) gsMakeDataEqn(bsl,nil, gsMakeDataExprIf(b, sSortId, sSortId), sSortId),
       //list size (SortId -> Nat)
       (ATerm) gsMakeDataEqn(el, nil,
         gsMakeDataExprListSize(elSortId),
@@ -1032,25 +1052,7 @@ ATermAppl gsImplSortList(ATermAppl SortList, ATermList *PSubsts,
         gsMakeDataExprRTail(gsMakeDataExprCons(dSortElt,
           gsMakeDataExprCons(eSortElt, sSortId))),
         gsMakeDataExprCons(dSortElt,
-          gsMakeDataExprRTail(gsMakeDataExprCons(eSortElt, sSortId)))),
-      //equality (SortId -> SortId -> Bool)
-      (ATerm) gsMakeDataEqn(el, nil, gsMakeDataExprEq(elSortId, elSortId), t),
-      (ATerm) gsMakeDataEqn(dsl, nil, gsMakeDataExprEq(elSortId, ds), f),
-      (ATerm) gsMakeDataEqn(dsl, nil, gsMakeDataExprEq(ds, elSortId), f),
-      (ATerm) gsMakeDataEqn(destl, nil,
-        gsMakeDataExprEq(ds, et),
-        gsMakeDataExprAnd(
-          gsMakeDataExprEq(dSortElt, eSortElt),
-          gsMakeDataExprEq(sSortId, tSortId))),
-      (ATerm) gsMakeDataEqn(sl, nil, gsMakeDataExprEq(sSortId, sSortId), t),
-      //inequality (SortId -> SortId -> Bool)
-      (ATerm) gsMakeDataEqn(stl,nil,
-        gsMakeDataExprNeq(sSortId, tSortId), 
-        gsMakeDataExprNot(gsMakeDataExprEq(sSortId, tSortId))),
-      //conditional (Bool -> SortId -> SortId -> SortId)
-      (ATerm) gsMakeDataEqn(stl,nil, gsMakeDataExprIf(t, sSortId, tSortId), sSortId),
-      (ATerm) gsMakeDataEqn(stl,nil, gsMakeDataExprIf(f, sSortId, tSortId), tSortId),
-      (ATerm) gsMakeDataEqn(bsl,nil, gsMakeDataExprIf(b, sSortId, sSortId), sSortId)
+          gsMakeDataExprRTail(gsMakeDataExprCons(eSortElt, sSortId))))
     ), PDataDecls->DataEqns);
   return SortId;
 }
