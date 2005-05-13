@@ -1,10 +1,6 @@
 #ifndef __xsimtrace_H__
 #define __xsimtrace_H__
 
-#ifdef __cplusplus
-extern "C" {
-#endif
-
 #if defined(__GNUG__) && !defined(NO_GCC_PRAGMA)
     #pragma interface "xsimtrace.h"
 #endif
@@ -63,9 +59,5 @@ private:
 private:
     DECLARE_EVENT_TABLE()
 };
-
-#ifdef __cplusplus
-}
-#endif
 
 #endif

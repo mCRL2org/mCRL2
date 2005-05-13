@@ -1,10 +1,6 @@
 #ifndef __xsim_H__
 #define __xsim_H__
 
-#ifdef __cplusplus
-extern "C" {
-#endif
-
 #if defined(__GNUG__) && !defined(NO_GCC_PRAGMA)
     #pragma interface "xsim.h"
 #endif
@@ -21,9 +17,5 @@ public:
     virtual bool OnInit();
     virtual int OnExit();
 };
-
-#ifdef __cplusplus
-}
-#endif
 
 #endif
