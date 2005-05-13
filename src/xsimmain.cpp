@@ -47,6 +47,7 @@ XSimMain::XSimMain( wxWindow *parent, wxWindowID id, const wxString &title,
     CreateContent();
 
     ATprotectList(&state_vars);
+    ATprotectList(&state_varnames);
     ATprotectList(&initial_state);
     ATprotectList(&current_state);
     ATprotectList(&next_states);
@@ -54,6 +55,7 @@ XSimMain::XSimMain( wxWindow *parent, wxWindowID id, const wxString &title,
     ATprotectList(&ecart);
 
     state_vars = ATmakeList0();
+    state_varnames = ATmakeList0();
     initial_state = ATmakeList0();
     current_state = ATmakeList0();
     next_states = ATmakeList0();
@@ -75,6 +77,7 @@ XSimMain::~XSimMain()
 	delete tracewin;
 
 	ATunprotectList(&state_vars);
+	ATunprotectList(&state_varnames);
 	ATunprotectList(&initial_state);
 	ATunprotectList(&current_state);
 	ATunprotectList(&next_states);
@@ -530,13 +533,16 @@ void XSimMain::LoadFile(wxString filename)
 
     ATermList l = ATLgetArgument(ATAgetArgument(Spec,5),1);
     ATermList m = ATmakeList0();
+    ATermList n = ATmakeList0();
     stateview->DeleteAllItems();
     for (int i=0; !ATisEmpty(l); l=ATgetNext(l), i++)
     {
 	    stateview->InsertItem(i,wxT(ATgetName(ATgetAFun(ATAgetArgument(ATAgetFirst(l),0)))));
 	    m = ATinsert(m,ATgetArgument(ATAgetFirst(l),0));
+	    n = ATinsert(n,ATgetFirst(l));
     }
-    state_vars = ATreverse(m);
+    state_varnames = ATreverse(m);
+    state_vars = ATreverse(n);
     initial_state = gsNextStateInit(Spec,true);
 
     InitialiseViews();
@@ -608,7 +614,7 @@ void XSimMain::UpdateTransitions()
 		f = fopen("xsim.tmp","w+");
 		ATermList m = current_state;
 		ATermList n = ATLgetFirst(ATgetNext(ATLgetFirst(l)));
-		ATermList o = state_vars;
+		ATermList o = state_varnames;
 		bool comma = false;
 		for (; !ATisEmpty(n); n=ATgetNext(n),m=ATgetNext(m),o=ATgetNext(o))
 		{

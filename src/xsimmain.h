@@ -77,6 +77,7 @@ private:
 private:
     // WDR: member variable declarations for XSimMain
     ATermList state_vars;
+    ATermList state_varnames;
     ATermList initial_state;
     ATermList current_state;
     ATermList next_states;
