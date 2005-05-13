@@ -78,6 +78,10 @@ void XSimTrace::Unregistered()
 	traceview->DeleteAllItems();
 }
 
+void XSimTrace::Initialise(ATermList Pars)
+{
+}
+
 void XSimTrace::StateChanged(ATermAppl Transition, ATermList State, ATermList NextStates)
 {
 	if ( Transition != NULL )

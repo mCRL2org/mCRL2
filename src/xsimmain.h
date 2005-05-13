@@ -49,6 +49,7 @@ public:
     virtual void Register(SimulatorViewInterface *View);
     virtual void Unregister(SimulatorViewInterface *View);
     virtual wxWindow *MainWindow();
+    virtual ATermList GetParameters();
     virtual void Reset();
     virtual void Reset(ATermList State);
     virtual bool Undo();
@@ -61,6 +62,7 @@ public:
     virtual bool SetTracePos(int pos);
     virtual ATermList GetTrace();
     virtual bool SetTrace(ATermList Trace, int From);
+    virtual void InitialiseViews();
     
 private:
     // WDR: method declarations for XSimMain

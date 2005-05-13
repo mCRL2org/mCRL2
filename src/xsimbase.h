@@ -1,3 +1,31 @@
+/* To make a new view one has to make a new class derived from
+ * the SimulatorViewInterface below. Views are registered at
+ * the actual Simulator with the Register(View) which will
+ * result in the calling of Registered of the view and possibly
+ * some of the other functions to initialise the view to the
+ * current state.
+ *
+ * Objects that are communicated between the simulator and
+ * views are the following:
+ *
+ * - Parameters
+ *   This is an ATermList containing a sequence of DataVarIds
+ *   that describe the name and sort of the process parameters.
+ * - States
+ *   An ATermList containing a sequence of DataExprs that are
+ *   the values of the above parameters in a state.
+ * - Transitions
+ *   A MultiAct that describes some transitiion.
+ * - NextStates
+ *   An ATermList that consist of a sequence of pairs (or
+ *   actually a ATermList of length 2) of a transition and a
+ *   state that describe enabled mulitaction and the resulting
+ *   state.
+ *
+ * Note that states may contain DataVarIds. These are free
+ * variables.
+ */
+
 #ifndef __xsimbase_H__
 #define __xsimbase_H__
 
@@ -43,6 +71,9 @@ public:
 	virtual bool Redo() = 0;
 	/* Dual of Undo(). */
 
+	virtual ATermList GetParameters() = 0;
+	/* Returns the parameter names that correspond to the
+	 * elements in states. */
 	virtual ATermList GetState() = 0;
 	/* Returns the current state. */
 	virtual ATermList GetNextStates() = 0;
@@ -77,6 +108,11 @@ public:
 	/* Is called when this View is removed from the Simulator it
 	 * was previously added to. */
 
+	virtual void Initialise(ATermList Pars) = 0;
+	/* Is called whenever a (new) simulation is started.
+	 * Pars contains the process parameters that correspond to
+	 * the elements in states. */
+
 	virtual void StateChanged(ATermAppl Transition, ATermList State, ATermList NextStates) = 0;
 	/* Is called whenever the current state in the simulator is
 	 * changed.
@@ -88,7 +124,7 @@ public:
 	 * and the resulting states.
 	 * Note that this function is always called when the state
 	 * changes, even when, for example, Reset() has already
-	 * been callad. */
+	 * been called. */
 
 	virtual void Reset(ATermList State) = 0;
 	/* Is called whenever the current trace is reset to the

@@ -171,9 +171,10 @@ void XSimMain::Register(SimulatorViewInterface *View)
 {
 	views.push_back(View);
 	View->Registered(this);
-	View->TraceChanged(GetTrace(),0);
 	if ( !ATisEmpty(trace) )
 	{
+		View->Initialise(state_vars);
+		View->TraceChanged(GetTrace(),0);
 		View->TracePosChanged(ATAgetFirst(ATLgetFirst(trace)),current_state,ATgetLength(trace)-1);
 	}
 }
@@ -187,6 +188,11 @@ void XSimMain::Unregister(SimulatorViewInterface *View)
 wxWindow *XSimMain::MainWindow()
 {
 	return this;
+}
+
+ATermList XSimMain::GetParameters()
+{
+	return state_vars;
 }
 
 void XSimMain::Reset()
@@ -378,6 +384,14 @@ bool XSimMain::SetTrace(ATermList Trace, int From)
 }
 
 
+void XSimMain::InitialiseViews()
+{
+	for (viewlist::iterator i = views.begin(); i != views.end(); i++)
+	{
+		(*i)->Initialise(state_vars);
+	}
+}
+
 
 void XSimMain::traceReset(ATermList state)
 {
@@ -525,6 +539,7 @@ void XSimMain::LoadFile(wxString filename)
     state_vars = ATreverse(m);
     initial_state = gsNextStateInit(Spec,true);
 
+    InitialiseViews();
     Reset(initial_state);
 }
 
