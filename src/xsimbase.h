@@ -29,6 +29,10 @@
 #ifndef __xsimbase_H__
 #define __xsimbase_H__
 
+#ifdef __cplusplus
+extern "C" {
+#endif
+
 #if defined(__GNUG__) && !defined(NO_GCC_PRAGMA)
     #pragma interface "xsimbase.h"
 #endif
@@ -175,5 +179,9 @@ private:
 	list<SimulatorInterface *> sims;
 	list<SimulatorViewDLLInterface *> views;
 };
+
+#ifdef __cplusplus
+}
+#endif
 
 #endif

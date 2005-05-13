@@ -21,6 +21,10 @@
 #ifndef __TMCRL_H__
 #define __TMCRL_H__
 
+#ifdef __cplusplus
+extern "C" {
+#endif
+
 #include <assert.h>
 #include <stdio.h>
 #include <stdlib.h>
@@ -30,6 +34,10 @@
 #include "gslowlevel.h"
 
 #define VERSION "0.0.0"
+
+#ifdef __cplusplus
+}
+#endif
 
 #endif /* __TMCRL_H__ */
 

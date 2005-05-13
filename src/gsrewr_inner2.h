@@ -1,4 +1,7 @@
 /* $Id: gsrewr_inner2.h,v 1.1 2005/04/08 09:49:58 muck Exp $ */
+#ifdef __cplusplus
+extern "C" {
+#endif
 
 #include <stdio.h>
 #include <stdlib.h>
@@ -12,3 +15,7 @@ void rewrite_add_inner2(ATermAppl eqn);
 void rewrite_remove_inner2(ATermAppl eqn);
 
 ATerm rewrite_inner2(ATerm Term, int *b);
+
+#ifdef __cplusplus
+}
+#endif

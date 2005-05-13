@@ -1,6 +1,10 @@
 #ifndef __xsimmain_H__
 #define __xsimmain_H__
 
+#ifdef __cplusplus
+extern "C" {
+#endif
+
 #if defined(__GNUG__) && !defined(NO_GCC_PRAGMA)
     #pragma interface "xsimmain.h"
 #endif
@@ -123,5 +127,9 @@ private:
 private:
     DECLARE_EVENT_TABLE()
 };
+
+#ifdef __cplusplus
+}
+#endif
 
 #endif

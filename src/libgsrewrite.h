@@ -1,4 +1,7 @@
 /* $Id: libgsrewrite.h,v 1.3 2005/04/08 09:49:58 muck Exp $ */
+#ifdef __cplusplus
+extern "C" {
+#endif
 
 #include "aterm2.h"
 
@@ -13,3 +16,7 @@ void gsRewriteRemoveEqn(ATermAppl Eqn);
 
 ATermAppl gsRewriteTerm(ATermAppl Term);
 ATermList gsRewriteTerms(ATermList Terms);
+
+#ifdef __cplusplus
+}
+#endif
