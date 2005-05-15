@@ -1221,10 +1221,10 @@ void gsImplSortPos(TDataDecls *PDataDecls)
          gsMakeDataExprLT(p, q)),
       //greater than or equal (Pos -> Pos -> Bool)
       (ATerm) gsMakeDataEqn(pql,nil,
-         gsMakeDataExprGTE(p, q), gsMakeDataExprNot(gsMakeDataExprLT(q, p))),
+         gsMakeDataExprGTE(p, q), gsMakeDataExprLTE(q, p)),
       //greater than (Pos -> Pos -> Bool)
       (ATerm) gsMakeDataEqn(pql,nil,
-         gsMakeDataExprGT(p, q), gsMakeDataExprNot(gsMakeDataExprLTE(q, p))),
+         gsMakeDataExprGT(p, q), gsMakeDataExprLT(q, p)),
       //maximum (Pos -> Pos -> Pos)
       (ATerm) gsMakeDataEqn(pql,nil, gsMakeDataExprMax(p, q),
          gsMakeDataExprIf(gsMakeDataExprGTE(p, q), q, p)),
@@ -1383,10 +1383,10 @@ void gsImplSortNat(TDataDecls *PDataDecls)
          gsMakeDataExprLT(p, q)),
       //greater than or equal (Nat -> Nat -> Bool)
       (ATerm) gsMakeDataEqn(mnl,nil,
-         gsMakeDataExprGTE(m, n), gsMakeDataExprNot(gsMakeDataExprLT(n, m))),
+         gsMakeDataExprGTE(m, n), gsMakeDataExprLTE(n, m)),
       //greater than (Nat -> Nat -> Bool)
       (ATerm) gsMakeDataEqn(mnl,nil,
-         gsMakeDataExprGT(m, n), gsMakeDataExprNot(gsMakeDataExprLTE(n, m))),
+         gsMakeDataExprGT(m, n), gsMakeDataExprLT(n, m)),
       //maximum (Nat -> Nat -> Nat)
       (ATerm) gsMakeDataEqn(mnl,nil, gsMakeDataExprMax(m, n),
          gsMakeDataExprIf(gsMakeDataExprLTE(m, n), n, m)),
@@ -1584,10 +1584,10 @@ void gsImplSortInt(TDataDecls *PDataDecls)
          gsMakeDataExprLT(q, p)),
       //greater than or equal (Int -> Int -> Bool)
       (ATerm) gsMakeDataEqn(xyl,nil,
-         gsMakeDataExprGTE(x, y), gsMakeDataExprNot(gsMakeDataExprLT(y, x))),
+         gsMakeDataExprGTE(x, y), gsMakeDataExprLTE(y, x)),
       //greater than (Int -> Int -> Bool)
       (ATerm) gsMakeDataEqn(xyl,nil,
-         gsMakeDataExprGT(x, y), gsMakeDataExprNot(gsMakeDataExprLTE(y, x))),
+         gsMakeDataExprGT(x, y), gsMakeDataExprLT(y, x)),
       //maximum (Int -> Int -> Int)
       (ATerm) gsMakeDataEqn(xyl,nil, gsMakeDataExprMax(x, y),
          gsMakeDataExprIf(gsMakeDataExprLTE(x, y), y, x)),

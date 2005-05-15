@@ -148,17 +148,20 @@ static bool FindEquality(ATermAppl t, ATermList vars, ATermAppl *v, ATermAppl *e
 			s = ATinsert(s,(ATerm) a2);
 			s = ATinsert(s,(ATerm) a1);
 		} else if ( gsIsDataExprEq(a,&a1,&a2) ) {
-			if ( gsIsDataVarId(a1) && (ATindexOf(vars,(ATerm) a1,0) >= 0) )
+			if ( !ATisEqual(a1,a2) )
 			{
-				*v = a1;
-				*e = a2;
-				return true;
-			}
-			if ( gsIsDataVarId(a2) && (ATindexOf(vars,(ATerm) a2,0) >= 0) )
-			{
-				*v = a2;
-				*e = a1;
-				return true;
+				if ( gsIsDataVarId(a1) && (ATindexOf(vars,(ATerm) a1,0) >= 0) )
+				{
+					*v = a1;
+					*e = a2;
+					return true;
+				}
+				if ( gsIsDataVarId(a2) && (ATindexOf(vars,(ATerm) a2,0) >= 0) )
+				{
+					*v = a2;
+					*e = a1;
+					return true;
+				}
 			}
 		}
 	}
@@ -177,11 +180,13 @@ static ATermList EliminateVars(ATermList l)
 	l = ATgetNext(l);
 	t = ATAgetFirst(l);
 
+	t = gsRewriteTerm(t);
 	while ( !ATisEmpty(vars) && FindEquality(t,vars,&v,&e) )
 	{
 		vars = ATremoveElement(vars,(ATerm) v);
 		vals = (ATermList) gsSubstValues(ATmakeList1((ATerm) gsMakeSubst((ATerm) v,(ATerm) e)),(ATerm) vals,true);
 		t = (ATermAppl) gsSubstValues(ATmakeList1((ATerm) gsMakeSubst((ATerm) v,(ATerm) e)),(ATerm) t,true);
+	t = gsRewriteTerm(t);
 	}
 
 	return ATmakeList3((ATerm) vars, (ATerm) gsRewriteTerms(vals), (ATerm) gsRewriteTerm(t));
