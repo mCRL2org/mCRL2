@@ -636,7 +636,7 @@ static ATbool gstcTransformVarConsTypeData(void){
     if(!gstcEqTypesA(LeftType,RightType)){
       gsDebugMsg("Doing again for the equation %t, LeftType: %t, RightType: %t\n",Eqn,LeftType,RightType);
       ATermAppl Type=gstcTypeMatchA(LeftType,RightType);
-      if(!Type){ThrowMF("Types of the left- and right-hand-sides of the equation %t do not match",Eqn);}
+      if(!Type){ThrowMF("Types of the left- (%t) and right-hand-sides (%t) of the equation %t do not match\n",LeftType,RightType,Eqn);}
       
       Left=ATAgetArgument(Eqn,2);
       LeftType=gstcTraverseVarConsTypeD(Vars,&Left,Type);
@@ -1390,8 +1390,9 @@ static ATermAppl gstcTraverseVarConsTypeD(ATermTable Vars, ATermAppl *DataTerm, 
 	  }
 	  else{
 	    gsDebugMsg("Doing again on %t, Type: %t, Needed type: %t\n",Arg,Type,NeededType);
-	    Type=gstcTypeMatchA(NeededType,Type);
-	    if(!Type){ThrowMF("Needed type %t does not match possible type %t (while typechecking %t)",NeededType,Type,*DataTerm);}
+	    ATermAppl NewType=gstcTypeMatchA(NeededType,Type);
+	    if(!NewType){ThrowMF("Needed type %t does not match possible type %t (while typechecking %t in %t)\n",NeededType,Type,Arg,*DataTerm);}
+	    Type=NewType;
 	    Type=gstcTraverseVarConsTypeD(Vars,&Arg,Type);
 	    if(!Type) {throw;}
 	  }
@@ -1401,7 +1402,7 @@ static ATermAppl gstcTraverseVarConsTypeD(ATermTable Vars, ATermAppl *DataTerm, 
       }
       Arguments=ATreverse(NewArguments);
       ArgumentTypes=ATreverse(NewArgumentTypes);     
-    } 
+    }
     
     *DataTerm=gsMakeDataApplProd(Data,Arguments);
     
@@ -1604,9 +1605,14 @@ static ATermAppl gstcTraverseVarConsTypeDN(int nFactPars, ATermTable Vars, ATerm
 	//gsWarningMsg("Here..................... Type %t, DataTerm1: %t, PosType %t\n",Type,ATAgetArgument(*DataTerm,1),PosType);    
 	Type=gstcTypeMatchA(Type,ATAgetArgument(*DataTerm,1));
       }
-      if(gstcHasUnknown(Type) && ATisEqual(ATAgetArgument(gsMakeOpIdIf(gsMakeUnknown()),0),ATAgetArgument(*DataTerm,0))){
+      if(ATisEqual(ATAgetArgument(gsMakeOpIdIf(gsMakeUnknown()),0),ATAgetArgument(*DataTerm,0))){
 	gsDebugMsg("Doing if matching Type %t, PosType %t\n",Type,PosType);    
-	Type=gstcMatchIf(Type);
+	ATermAppl NewType=gstcMatchIf(Type);
+	if(!NewType){
+	  gsErrorMsg("The function if has incompartible argument types %t (while typechecking %t)\n",Type,*DataTerm);
+	  return NULL;
+	}
+	Type=NewType;
       }
       *DataTerm=gsMakeOpId(Name,Type);
       return Type;
@@ -2045,18 +2051,26 @@ static ATbool gstcMActSubEq(ATermList MAct1, ATermList MAct2){
 
 
 static ATermAppl gstcMatchIf(ATermAppl Type){
-  //tries to sort out the type for if.
+  //tries to sort out the types for if.
+  //If some of the parameters are Pos,Nat, or Int, 
+
   assert(gsIsSortArrowProd(Type));
   ATermList Args=ATLgetArgument(Type,0);
   ATermAppl Res=ATAgetArgument(Type,1);
   assert((ATgetLength(Args)==3));
   //assert(gsIsBool(ATAgetFirst(Args)));
   Args=ATgetNext(Args);
-  gstcTypeMatchA(Res,ATAgetFirst(Args));
-  if(!Res) return NULL;
+
+  ATermAppl NewRes=gstcTypeMatchA(Res,gstcExpandPosTypes(ATAgetFirst(Args)));
+  if(!NewRes) NewRes=gstcTypeMatchA(ATAgetFirst(Args),gstcExpandPosTypes(Res));
+  if(!NewRes) return NULL;
+  Res=NewRes;
   Args=ATgetNext(Args);
-  gstcTypeMatchA(Res,ATAgetFirst(Args));
-  if(!Res) return NULL;
+
+  NewRes=gstcTypeMatchA(Res,gstcExpandPosTypes(ATAgetFirst(Args)));
+  if(!NewRes) NewRes=gstcTypeMatchA(ATAgetFirst(Args),gstcExpandPosTypes(Res));
+  if(!NewRes) return NULL;
+  Res=NewRes;
 
   return gsMakeSortArrowProd(ATmakeList3((ATerm)gsMakeSortIdBool(),(ATerm)Res,(ATerm)Res),Res);
 }
