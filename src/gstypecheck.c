@@ -182,6 +182,7 @@ static ATbool gstcMActInSubEq(ATermList MAct, ATermList MActs);
 static ATbool gstcMActEq(ATermList MAct1, ATermList MAct2);
 static ATbool gstcMActSubEq(ATermList MAct1, ATermList MAct2);
 static ATermAppl gstcMatchIf(ATermAppl Type);
+static ATermAppl gstcMatchEqNeq(ATermAppl Type);
 
 // Main function
 ATermAppl gsTypeCheck (ATermAppl input){	
@@ -1605,6 +1606,7 @@ static ATermAppl gstcTraverseVarConsTypeDN(int nFactPars, ATermTable Vars, ATerm
 	//gsWarningMsg("Here..................... Type %t, DataTerm1: %t, PosType %t\n",Type,ATAgetArgument(*DataTerm,1),PosType);    
 	Type=gstcTypeMatchA(Type,ATAgetArgument(*DataTerm,1));
       }
+
       if(ATisEqual(ATAgetArgument(gsMakeOpIdIf(gsMakeUnknown()),0),ATAgetArgument(*DataTerm,0))){
 	gsDebugMsg("Doing if matching Type %t, PosType %t\n",Type,PosType);    
 	ATermAppl NewType=gstcMatchIf(Type);
@@ -1614,6 +1616,18 @@ static ATermAppl gstcTraverseVarConsTypeDN(int nFactPars, ATermTable Vars, ATerm
 	}
 	Type=NewType;
       }
+
+      if(ATisEqual(ATAgetArgument(gsMakeOpIdEq(gsMakeUnknown()),0),ATAgetArgument(*DataTerm,0))||
+	 ATisEqual(ATAgetArgument(gsMakeOpIdNeq(gsMakeUnknown()),0),ATAgetArgument(*DataTerm,0))){
+	gsDebugMsg("Doing == or != matching Type %t, PosType %t\n",Type,PosType);    
+	ATermAppl NewType=gstcMatchEqNeq(Type);
+	if(!NewType){
+	  gsErrorMsg("The function == or != has incompartible argument types %t (while typechecking %t)\n",Type,*DataTerm);
+	  return NULL;
+	}
+	Type=NewType;
+      }
+
       *DataTerm=gsMakeOpId(Name,Type);
       return Type;
     }
@@ -2052,7 +2066,7 @@ static ATbool gstcMActSubEq(ATermList MAct1, ATermList MAct2){
 
 static ATermAppl gstcMatchIf(ATermAppl Type){
   //tries to sort out the types for if.
-  //If some of the parameters are Pos,Nat, or Int, 
+  //If some of the parameters are Pos,Nat, or Int do upcasting 
 
   assert(gsIsSortArrowProd(Type));
   ATermList Args=ATLgetArgument(Type,0);
@@ -2073,4 +2087,23 @@ static ATermAppl gstcMatchIf(ATermAppl Type){
   Res=NewRes;
 
   return gsMakeSortArrowProd(ATmakeList3((ATerm)gsMakeSortIdBool(),(ATerm)Res,(ATerm)Res),Res);
+}
+
+static ATermAppl gstcMatchEqNeq(ATermAppl Type){
+  //tries to sort out the types for == or !=.
+  //If some of the parameters are Pos,Nat, or Int do upcasting.
+
+  assert(gsIsSortArrowProd(Type));
+  //assert(gsIsBool(ATAgetArgument(Type,1)));
+  ATermList Args=ATLgetArgument(Type,0);
+  assert((ATgetLength(Args)==2));
+  ATermAppl Arg1=ATAgetFirst(Args);
+  Args=ATgetNext(Args);
+  ATermAppl Arg2=ATAgetFirst(Args);
+  
+  ATermAppl Arg=gstcTypeMatchA(Arg1,gstcExpandPosTypes(Arg2));
+  if(!Arg) Arg=gstcTypeMatchA(Arg2,gstcExpandPosTypes(Arg1));
+  if(!Arg) return NULL;
+
+  return gsMakeSortArrowProd(ATmakeList2((ATerm)Arg,(ATerm)Arg),gsMakeSortIdBool());
 }
