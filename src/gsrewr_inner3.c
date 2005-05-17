@@ -17,6 +17,7 @@ static ATermTable term2int;
 static unsigned int num_opids;
 static ATermAppl *int2term;
 static ATermList *inner3_eqns;
+static ATermInt trueint;
 
 static bool ATisList(ATerm a)
 {
@@ -26,6 +27,16 @@ static bool ATisList(ATerm a)
 static bool ATisInt(ATerm a)
 {
 	return (ATgetType(a) == AT_INT);
+}
+
+static bool is_nil(ATerm t)
+{
+	if ( ATisList(t) )
+	{
+		return false;
+	} else {
+		return gsIsNil((ATermAppl) t);
+	}
 }
 
 static ATerm OpId2Int(ATermAppl Term, bool add_opids)
@@ -124,11 +135,13 @@ void rewrite_init_inner3()
 	tmp_eqns = ATtableCreate(100,100); // XXX would be nice to know the number op OpIds
 	term2int = ATtableCreate(100,100);
 
+	trueint = OpId2Int(gsMakeDataExprTrue(),true);
+
 	l = opid_eqns;
 	for (; !ATisEmpty(l); l=ATgetNext(l))
 	{
 		// XXX only adds the last rule where lhs is an opid; this might go "wrong" if this rule is removed later
-		ATtablePut(tmp_eqns,OpId2Int(ATAgetArgument(ATAgetFirst(l),2),true),(ATerm) ATmakeList1((ATerm) ATmakeList4((ATerm) ATmakeList0(),ATgetArgument(ATAgetFirst(l),1),(ATerm) ATmakeList0(),toInner(ATAgetArgument(ATAgetFirst(l),3),true))));
+		ATtablePut(tmp_eqns,OpId2Int(ATAgetArgument(ATAgetFirst(l),2),true),(ATerm) ATmakeList1((ATerm) ATmakeList4((ATerm) ATmakeList0(),toInner(ATAgetArgument(ATAgetFirst(l),1),true),(ATerm) ATmakeList0(),toInner(ATAgetArgument(ATAgetFirst(l),3),true))));
 	}
 
 	l = dataappl_eqns;
@@ -139,7 +152,7 @@ void rewrite_init_inner3()
 		{
 			n = ATmakeList0();
 		}
-		n = ATinsert(n,(ATerm) ATmakeList4(ATgetArgument(ATAgetFirst(l),0),ATgetArgument(ATAgetFirst(l),1),(ATerm) ATgetNext(m),toInner(ATAgetArgument(ATAgetFirst(l),3),true)));
+		n = ATinsert(n,(ATerm) ATmakeList4(ATgetArgument(ATAgetFirst(l),0),toInner(ATAgetArgument(ATAgetFirst(l),1),true),(ATerm) ATgetNext(m),toInner(ATAgetArgument(ATAgetFirst(l),3),true)));
 		ATtablePut(tmp_eqns,ATgetFirst(m),(ATerm) n);
 	}
 
@@ -175,11 +188,11 @@ void rewrite_add_inner3(ATermAppl eqn)
 	if ( gsIsOpId(a) )
 	{
 		j = (ATermInt) OpId2Int(a,true);
-		m = ATmakeList4((ATerm) ATmakeList0(),ATgetArgument(eqn,1),(ATerm) ATmakeList0(),toInner(ATAgetArgument(eqn,3),true));
+		m = ATmakeList4((ATerm) ATmakeList0(),toInner(ATAgetArgument(eqn,1),true),(ATerm) ATmakeList0(),toInner(ATAgetArgument(eqn,3),true));
 	} else {
 		l = (ATermList) toInner(a,true);
 		j = (ATermInt) ATgetFirst(l);
-		m = ATmakeList4(ATgetArgument(eqn,0),ATgetArgument(eqn,1),(ATerm) ATgetNext(l),toInner(ATAgetArgument(eqn,3),true));
+		m = ATmakeList4(ATgetArgument(eqn,0),toInner(ATAgetArgument(eqn,1),true),(ATerm) ATgetNext(l),toInner(ATAgetArgument(eqn,3),true));
 	}
 
 	l = ATtableKeys(term2int);
@@ -210,11 +223,11 @@ void rewrite_remove_inner3(ATermAppl eqn)
 	if ( gsIsOpId(a) )
 	{
 		t = OpId2Int(a,false);
-		m = ATmakeList4((ATerm) ATmakeList0(),ATgetArgument(eqn,1),(ATerm) ATmakeList0(),toInner(ATAgetArgument(eqn,3),true));
+		m = ATmakeList4((ATerm) ATmakeList0(),toInner(ATAgetArgument(eqn,1),true),(ATerm) ATmakeList0(),toInner(ATAgetArgument(eqn,3),true));
 	} else {
 		l = (ATermList) toInner(a,false);
 		t = ATgetFirst(l);
-		m = ATmakeList4(ATgetArgument(eqn,0),ATgetArgument(eqn,1),(ATerm) ATgetNext(l),toInner(ATAgetArgument(eqn,3),true));
+		m = ATmakeList4(ATgetArgument(eqn,0),toInner(ATAgetArgument(eqn,1),true),(ATerm) ATgetNext(l),toInner(ATAgetArgument(eqn,3),true));
 	}
 
 	if ( ATisInt(t) )
@@ -334,7 +347,7 @@ static ATerm rewrite(ATerm Term, int *b, ATermList vars)
 	ATerm t;
 	ATermList l,l2,m,m2,n,o,o2,p;
 //	ATermAppl v,s,t;
-	int i,len,c,d;
+	int i,len,c,d,e;
 	bool x;
 
 //ATfprintf(stderr,"rewrite(%t)\n\n",Term);
@@ -369,9 +382,9 @@ static ATerm rewrite(ATerm Term, int *b, ATermList vars)
 				l = ATconcat(ATgetNext((ATermList) t),l);
 				t = ATgetFirst((ATermList) t);
 			}
+			Term = (ATerm) ATinsert(l,t);
 			if ( !ATisInt(t) || (m = inner3_eqns[ATgetInt((ATermInt) t)]) == NULL )
 			{
-				Term = (ATerm) ATinsert(l,t);
 				break;
 			}
 			o = ATmakeList0();
@@ -396,7 +409,8 @@ static ATerm rewrite(ATerm Term, int *b, ATermList vars)
 					p = ATLgetFirst(o);
 					if ( ATisEmpty(ATLelementAt(ATLgetFirst(m),2)) )
 					{
-						if ( gsIsNil(ATAelementAt(ATLgetFirst(m),1)) || ATisEqual(subst_values(p,ATelementAt(ATLgetFirst(m),1)),gsMakeDataExprTrue()) )
+						// XXX check ATisEmpty(l)
+						if ( is_nil(ATelementAt(ATLgetFirst(m),1)) || ATisEqual(rewrite(subst_values(p,ATelementAt(ATLgetFirst(m),1)),&e,ATmakeList0()),trueint) )
 						{
 //ATfprintf(stderr,"apply %t\n\n",ATgetFirst(m));
 							*b = 1;
@@ -447,7 +461,7 @@ static ATerm rewrite(ATerm Term, int *b, ATermList vars)
 			{
 				if ( ATisEmpty(ATLelementAt(ATLgetFirst(m),2)) )
 				{
-					if ( gsIsNil(ATAelementAt(ATLgetFirst(m),1)) || ATisEqual(ATelementAt(ATLgetFirst(m),1),gsMakeDataExprTrue()) )
+					if ( is_nil(ATelementAt(ATLgetFirst(m),1)) || ATisEqual(rewrite(ATelementAt(ATLgetFirst(m),1),&e,ATmakeList0()),trueint) )
 					{
 						*b = 1;
 //ATfprintf(stderr,"return: %t\n\n",ATelementAt(ATLgetFirst(m),3));

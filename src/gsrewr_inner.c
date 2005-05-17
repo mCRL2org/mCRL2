@@ -118,7 +118,7 @@ void rewrite_remove_inner(ATermAppl eqn)
 ATerm rewrite_inner(ATerm Term, int *b)
 {
 	ATermList l,m;
-	int c,d;
+	int c,d,e;
 
 	if ( ATisAppl(Term) )
 	{
@@ -133,7 +133,7 @@ ATerm rewrite_inner(ATerm Term, int *b)
 			{
 				if ( ATisEqual(Term,ATAgetArgument(ATAgetFirst(l),2)) )
 				{
-					if ( gsIsNil(ATAgetArgument(ATAgetFirst(l),1)) || ATisEqual(ATAgetArgument(ATAgetFirst(l),1),gsMakeDataExprTrue()) )
+					if ( gsIsNil(ATAgetArgument(ATAgetFirst(l),1)) || ATisEqual(rewrite_inner(ATgetArgument(ATAgetFirst(l),1),&e),gsMakeDataExprTrue()) )
 					{
 						*b = 1;
 						return ATgetArgument(ATAgetFirst(l),3);
@@ -162,7 +162,7 @@ ATerm rewrite_inner(ATerm Term, int *b)
 					m = ATmakeList0();
 					if ( match(Term,ATgetArgument(ATAgetFirst(l),2),&m) )
 					{
-						if ( gsIsNil(ATAgetArgument(ATAgetFirst(l),1)) || ATisEqual(gsSubstValues(m,ATgetArgument(ATAgetFirst(l),1),1),gsMakeDataExprTrue()) )
+						if ( gsIsNil(ATAgetArgument(ATAgetFirst(l),1)) || ATisEqual(rewrite_inner(gsSubstValues(m,ATgetArgument(ATAgetFirst(l),1),1),&e),gsMakeDataExprTrue()) )
 						{
 							*b = 1;
 							c = 1;
@@ -178,7 +178,7 @@ ATerm rewrite_inner(ATerm Term, int *b)
 				{
 					if ( ATisEqual(Term,ATAgetArgument(ATAgetFirst(l),2)) )
 					{
-						if ( gsIsNil(ATAgetArgument(ATAgetFirst(l),1)) || ATisEqual(ATAgetArgument(ATAgetFirst(l),1),gsMakeDataExprTrue()) )
+						if ( gsIsNil(ATAgetArgument(ATAgetFirst(l),1)) || ATisEqual(rewrite_inner(ATgetArgument(ATAgetFirst(l),1),&e),gsMakeDataExprTrue()) )
 						{
 							return ATgetArgument(ATAgetFirst(l),3);
 						}

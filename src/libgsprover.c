@@ -10,7 +10,7 @@ static ATermAppl gsProverTrue, gsProverFalse;
 void gsProverInit(ATermAppl Spec)
 {
 	current_spec = Spec;
-	gsRewriteInit(ATAgetArgument(Spec,3),GS_REWR_INNER);
+	gsRewriteInit(ATAgetArgument(Spec,3),GS_REWR_INNER3);
 	gsProverTrue = gsMakeDataExprTrue();
 	gsProverFalse = gsMakeDataExprFalse();
 }
@@ -258,7 +258,8 @@ ATermList FindSolutions(ATermList Vars, ATermAppl Expr)
 					} else {
 						if ( !ATisEqual(ATgetFirst(ATgetNext(o)),gsProverFalse) )
 						{
-							ATfprintf(stderr,"Term does not evaluate to true or false (%t)\n",ATgetFirst(ATgetNext(o)));
+//							ATfprintf(stderr,"Term does not evaluate to true or false (%t)\n",ATgetFirst(ATgetNext(o)));
+							ATfprintf(stderr,"Term does not evaluate to true or false (");gsPrintPart(stderr,ATgetFirst(ATgetNext(o)),0,0);ATfprintf(stderr,")\n");
 						}
 					}
 				} else {
