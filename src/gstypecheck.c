@@ -181,7 +181,7 @@ static ATbool gstcMActIn(ATermList MAct, ATermList MActs);
 static ATbool gstcMActInSubEq(ATermList MAct, ATermList MActs);
 static ATbool gstcMActEq(ATermList MAct1, ATermList MAct2);
 static ATbool gstcMActSubEq(ATermList MAct1, ATermList MAct2);
-
+static ATermAppl gstcMatchIf(ATermAppl Type);
 
 // Main function
 ATermAppl gsTypeCheck (ATermAppl input){	
@@ -621,16 +621,37 @@ static ATbool gstcTransformVarConsTypeData(void){
   for(ATermList Eqns=body.equations;!ATisEmpty(Eqns);Eqns=ATgetNext(Eqns)){
     ATermAppl Eqn=ATAgetFirst(Eqns);
     ATermList VarList=ATLgetArgument(Eqn,0);
-      Vars=gstcAddVars2Table(Vars,VarList);
-      if(!Vars){ThrowF;}
-      ATermAppl Cond=ATAgetArgument(Eqn,1);
-      if(!gsIsNil(Cond) && !(gstcTraverseVarConsTypeD(Vars,&Cond,gsMakeSortIdBool()))){ThrowF;}
-      ATermAppl Left=ATAgetArgument(Eqn,2);
-      ATermAppl LeftType;
-      if(!(LeftType=gstcTraverseVarConsTypeD(Vars,&Left,gsMakeUnknown()))){ThrowF;}
-      ATermAppl Right=ATAgetArgument(Eqn,3);
-      if(!(gstcTraverseVarConsTypeD(Vars,&Right,LeftType))){ThrowF;}
-      NewEqns=ATinsert(NewEqns,(ATerm)gsMakeDataEqn(VarList,Cond,Left,Right));
+    Vars=gstcAddVars2Table(Vars,VarList);
+    if(!Vars){ThrowF;}
+    ATermAppl Cond=ATAgetArgument(Eqn,1);
+    if(!gsIsNil(Cond) && !(gstcTraverseVarConsTypeD(Vars,&Cond,gsMakeSortIdBool()))){ThrowF;}
+    ATermAppl Left=ATAgetArgument(Eqn,2);
+    ATermAppl LeftType=gstcTraverseVarConsTypeD(Vars,&Left,gsMakeUnknown());
+    if(!LeftType){ThrowF;}
+    ATermAppl Right=ATAgetArgument(Eqn,3);
+    ATermAppl RightType=gstcTraverseVarConsTypeD(Vars,&Right,LeftType);
+    if(!RightType){ThrowF;}
+
+    //If the types are not uniquly the same now: do once more:
+    if(!gstcEqTypesA(LeftType,RightType)){
+      gsDebugMsg("Doing again for the equation %t, LeftType: %t, RightType: %t\n",Eqn,LeftType,RightType);
+      ATermAppl Type=gstcTypeMatchA(LeftType,RightType);
+      if(!Type){ThrowMF("Types of the left- and right-hand-sides of the equation %t do not match",Eqn);}
+      
+      Left=ATAgetArgument(Eqn,2);
+      LeftType=gstcTraverseVarConsTypeD(Vars,&Left,Type);
+      if(!LeftType){ThrowF;}
+    
+      Right=ATAgetArgument(Eqn,3);
+      RightType=gstcTraverseVarConsTypeD(Vars,&Right,LeftType);
+      if(!RightType){ThrowF;}
+      
+      Type=gstcTypeMatchA(LeftType,RightType);
+      if(!Type){ThrowMF("Types of the left- and right-hand-sides of the equation %t do not match",Eqn);}
+      if(gstcHasUnknown(Type)){ThrowMF("Types of the left- and right-hand-sides of the equation %t cannot be uniquily determined",Eqn);}
+    }
+    ATtableReset(Vars);
+    NewEqns=ATinsert(NewEqns,(ATerm)gsMakeDataEqn(VarList,Cond,Left,Right));
   }
   body.equations=ATreverse(NewEqns);
   
@@ -1355,27 +1376,25 @@ static ATermAppl gstcTraverseVarConsTypeD(ATermTable Vars, ATermAppl *DataTerm, 
 	ATermAppl NeededType=ATAgetFirst(NeededArgumentTypes);
 	ATermAppl Type=ATAgetFirst(ArgumentTypes);
 	if(!gstcEqTypesA(NeededType,Type)){
-	  if(gstcTypeMatchA(Type,gsMakeSortIdPos())){
-	    if(gstcTypeMatchA(NeededType,gsMakeSortIdNat())){
-	      Type=gsMakeSortIdNat();
-	      Arg=gsMakeDataApplProd(gstcMakeOpIdPos2Nat(),ATmakeList1((ATerm)Arg));
-	    }
-	    else 
-	      if(gstcTypeMatchA(NeededType,gsMakeSortIdInt())){
-		Type=gsMakeSortIdInt();
-		Arg=gsMakeDataApplProd(gstcMakeOpIdPos2Int(),ATmakeList1((ATerm)Arg));
-	      }
+	  if(gstcTypeMatchA(Type,gsMakeSortIdPos()) && gstcTypeMatchA(NeededType,gsMakeSortIdNat())){
+	    Type=gsMakeSortIdNat();
+	    Arg=gsMakeDataApplProd(gstcMakeOpIdPos2Nat(),ATmakeList1((ATerm)Arg));
 	  }
-	  else 
-	    if(gstcTypeMatchA(Type,gsMakeSortIdNat()) && gstcTypeMatchA(NeededType,gsMakeSortIdInt())){
-	      Type=gsMakeSortIdInt();
-	      Arg=gsMakeDataApplProd(gstcMakeOpIdNat2Int(),ATmakeList1((ATerm)Arg));
-	    }
-	    else{
-	      gsWarningMsg("Doind again on %t, Type: %t, Needed type: %t\n",Arg,Type,NeededType);
-	      Type=gstcTraverseVarConsTypeD(Vars,&Arg,Type);
-	      if(!Type) {throw;}
-	    }
+	  else if(gstcTypeMatchA(Type,gsMakeSortIdPos()) && gstcTypeMatchA(NeededType,gsMakeSortIdInt())){
+	    Type=gsMakeSortIdInt();
+	    Arg=gsMakeDataApplProd(gstcMakeOpIdPos2Int(),ATmakeList1((ATerm)Arg));
+	  }
+	  else if(gstcTypeMatchA(Type,gsMakeSortIdNat()) && gstcTypeMatchA(NeededType,gsMakeSortIdInt())){
+	    Type=gsMakeSortIdInt();
+	    Arg=gsMakeDataApplProd(gstcMakeOpIdNat2Int(),ATmakeList1((ATerm)Arg));
+	  }
+	  else{
+	    gsDebugMsg("Doing again on %t, Type: %t, Needed type: %t\n",Arg,Type,NeededType);
+	    Type=gstcTypeMatchA(NeededType,Type);
+	    if(!Type){ThrowMF("Needed type %t does not match possible type %t (while typechecking %t)",NeededType,Type,*DataTerm);}
+	    Type=gstcTraverseVarConsTypeD(Vars,&Arg,Type);
+	    if(!Type) {throw;}
+	  }
 	}
 	NewArguments=ATinsert(NewArguments,(ATerm)Arg);
 	NewArgumentTypes=ATinsert(NewArgumentTypes,(ATerm)Type);
@@ -1393,7 +1412,7 @@ static ATermAppl gstcTraverseVarConsTypeD(ATermTable Vars, ATermAppl *DataTerm, 
     return gstcUnArrowProd(ArgumentTypes,NewType);
   }  
 
-  if(gsIsDataVarIdOpId(*DataTerm)){
+  if(gsIsDataVarIdOpId(*DataTerm)||gsIsOpId(*DataTerm)){
     ATermAppl Name=ATAgetArgument(*DataTerm,0);
     ATermAppl Type=ATAtableGet(Vars,(ATerm)Name);
     if(Type){
@@ -1474,7 +1493,12 @@ static ATermAppl gstcTraverseVarConsTypeD(ATermTable Vars, ATermAppl *DataTerm, 
       *DataTerm=gsMakeOpId(Name,gsMakeUnknown());
       return gsMakeUnknown();
     }
-  }  
+  }
+
+  if(gsIsDataVarId(*DataTerm)){
+    return ATAgetArgument(*DataTerm,1);
+  }
+
   assert(0);
  finally:
   return Result;
@@ -1482,7 +1506,7 @@ static ATermAppl gstcTraverseVarConsTypeD(ATermTable Vars, ATermAppl *DataTerm, 
     
 static ATermAppl gstcTraverseVarConsTypeDN(int nFactPars, ATermTable Vars, ATermAppl *DataTerm, ATermAppl PosType){
   gsDebugMsg("gstcTraverseVarConsTypeDN: DataTerm %t with PosType %t, nFactPars %d\n",*DataTerm,PosType,nFactPars);    
-  if(gsIsDataVarIdOpId(*DataTerm)){
+  if(gsIsDataVarIdOpId(*DataTerm)||gsIsOpId(*DataTerm)){
     ATermAppl Name=ATAgetArgument(*DataTerm,0);
     ATermAppl Type=ATAtableGet(Vars,(ATerm)Name);
     if(Type){
@@ -1573,6 +1597,17 @@ static ATermAppl gstcTraverseVarConsTypeDN(int nFactPars, ATermTable Vars, ATerm
     
     if(ATgetLength(ParList)==1){
       ATermAppl Type=ATAgetFirst(ParList);
+      if(gstcHasUnknown(Type)){
+	Type=gstcTypeMatchA(PosType,Type);
+      }
+      if(gstcHasUnknown(Type) && gsIsOpId(*DataTerm)){
+	//gsWarningMsg("Here..................... Type %t, DataTerm1: %t, PosType %t\n",Type,ATAgetArgument(*DataTerm,1),PosType);    
+	Type=gstcTypeMatchA(Type,ATAgetArgument(*DataTerm,1));
+      }
+      if(gstcHasUnknown(Type) && ATisEqual(ATAgetArgument(gsMakeOpIdIf(gsMakeUnknown()),0),ATAgetArgument(*DataTerm,0))){
+	gsDebugMsg("Doing if matching Type %t, PosType %t\n",Type,PosType);    
+	Type=gstcMatchIf(Type);
+      }
       *DataTerm=gsMakeOpId(Name,Type);
       return Type;
     }
@@ -1792,7 +1827,10 @@ static ATermAppl gstcTypeMatchA(ATermAppl Type, ATermAppl PosType){
 }
 
 static ATermList gstcTypeMatchL(ATermList TypeList, ATermList PosTypeList){
-  assert(ATgetLength(TypeList)==ATgetLength(PosTypeList));
+  gsDebugMsg("gstcTypeMatchL TypeList: %t;    PosTypeList: %t \n",TypeList,PosTypeList);
+
+  if(ATgetLength(TypeList)!=ATgetLength(PosTypeList)) return NULL;
+
   ATermList Result=ATmakeList0();
   for(;!ATisEmpty(TypeList);TypeList=ATgetNext(TypeList),PosTypeList=ATgetNext(PosTypeList)){
     ATermAppl Type=gstcTypeMatchA(ATAgetFirst(TypeList),ATAgetFirst(PosTypeList));
@@ -2003,4 +2041,22 @@ static ATbool gstcMActSubEq(ATermList MAct1, ATermList MAct2){
   return ATfalse;
  gstcMActSubEqMA_found:
   return gstcMActSubEq(MAct1,MAct2);
+}
+
+
+static ATermAppl gstcMatchIf(ATermAppl Type){
+  //tries to sort out the type for if.
+  assert(gsIsSortArrowProd(Type));
+  ATermList Args=ATLgetArgument(Type,0);
+  ATermAppl Res=ATAgetArgument(Type,1);
+  assert((ATgetLength(Args)==3));
+  //assert(gsIsBool(ATAgetFirst(Args)));
+  Args=ATgetNext(Args);
+  gstcTypeMatchA(Res,ATAgetFirst(Args));
+  if(!Res) return NULL;
+  Args=ATgetNext(Args);
+  gstcTypeMatchA(Res,ATAgetFirst(Args));
+  if(!Res) return NULL;
+
+  return gsMakeSortArrowProd(ATmakeList3((ATerm)gsMakeSortIdBool(),(ATerm)Res,(ATerm)Res),Res);
 }
