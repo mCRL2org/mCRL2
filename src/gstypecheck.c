@@ -319,7 +319,7 @@ void gstcDataInit(void){
 			    gstcMakeSortArrowProd2(gsMakeSortIdInt(),gsMakeSortIdInt(),gsMakeSortIdInt()));
   //more
   gstcAddSystemFunctionProd(gsMakeOpIdAbs(),
-			    gstcMakeSortArrowProd2(gsMakeSortIdInt(),gsMakeSortIdInt(),gsMakeSortIdInt()));
+			    gstcMakeSortArrowProd1(gsMakeSortIdInt(),gsMakeSortIdNat()));
   //more
   gstcAddSystemFunctionProd(gsMakeOpIdNeg(gsMakeSortIdPos()),
 			    gstcMakeSortArrowProd1(gsMakeSortIdPos(),gsMakeSortIdInt()));
