@@ -16,6 +16,7 @@
 
 // the static context of the spec will be checked and used, not transformed
 typedef struct {
+  ATbool Abort;                 //if an element has no ID, this boolean is used to grant abortion of the conversion
   //read-in
   ATermTable place_name;	//place_id -> name
   ATermTable place_mark;	//place_id -> Nat
@@ -60,11 +61,17 @@ static ATermAppl pnml2aterm_place(xmlNodePtr cur) {
   // output: a usable translation of the place,
   //         if the place needs to be translated
 
-  fprintf(stderr, "> Start examining a place...  \n");
+  gsDebugMsg("> Start examining a place...  \n");
   // first, we want to retrieve the id of the place
-  ATerm Aid = ATparse((const char *)xmlGetProp(cur, (const xmlChar *)"id"));
-  fprintf(stderr, ATwriteToString(Aid));
-  fprintf(stderr, "\n");
+  ATerm Aid;
+  if (!xmlGetProp(cur, (const xmlChar *)"id")) {
+    // the place has NO id, so translation should be aborted!
+    context.Abort = ATtrue;
+    return NULL;
+  } else {
+    Aid = ATparse((const char *)xmlGetProp(cur, (const xmlChar *)"id"));
+  }
+  gsDebugMsg("    id: '%t'\n", Aid); 
 
   // second, we want to retrieve the necessary attributes of the place
   cur = cur->xmlChildrenNode;
@@ -90,9 +97,7 @@ static ATermAppl pnml2aterm_place(xmlNodePtr cur) {
       if (!(Aname=retrieve_text(cur))) {
 	Aname = ATparse("default_name");
       }
-      fprintf(stderr, "    name: '");
-      fprintf(stderr, ATwriteToString(Aname));
-      fprintf(stderr, "' \n");
+      gsDebugMsg("    name: '%t'\n", Aname);
     } else if (!xmlStrcmp(cur->name, (const xmlChar *)"initialMarking")) {
       // the place contains an <initialMarking> element
       // this element contains a childelement <text> which contains the initial marking of the place
@@ -104,13 +109,10 @@ static ATermAppl pnml2aterm_place(xmlNodePtr cur) {
       if (atoi(ATwriteToString(AinitialMarking)) < 0) {
 	// if the initial marking is less than zero, it is resetted to zero
 	AinitialMarking = ATparse("0");
-	fprintf(stderr, "Place with id '");
-	fprintf(stderr, ATwriteToString(Aid));
-	fprintf(stderr, "' has initial marking is less than 0, resetting initial marking to 0! \n");
+	
+	gsWarningMsg("Place with id '%t' has initial marking is less than 0, resetting initial marking to 0! \n", Aid);
       }
-      fprintf(stderr, "    initialMarking: '");
-      fprintf(stderr, ATwriteToString(AinitialMarking));
-      fprintf(stderr, "' \n");
+      gsDebugMsg("    initialMarking: '%t'\n", AinitialMarking);
     } else if (!xmlStrcmp(cur->name, (const xmlChar *)"type")) {
       // the place contains an <type> element
       // this element contains a childelement <text> which contains the type of the place
@@ -121,22 +123,13 @@ static ATermAppl pnml2aterm_place(xmlNodePtr cur) {
       if (!ATisEqual(Atype, ATparse("channel"))) {
 	// the type should either be omitted or have the value "channel"
 	// otherwise the place does not need to be translated!
-	fprintf(stderr, "Place with id '");
-	fprintf(stderr, ATwriteToString(Aid));
-	fprintf(stderr, "' has type '");
-	fprintf(stderr, ATwriteToString(Atype));
-	fprintf(stderr, "' and will not be translated. \n");
+	gsWarningMsg("Place with id '%t' has type '%t' and will not be translated.\n", Aid, Atype);
 	return NULL;
       }
-      fprintf(stderr, "    type: '");
-      fprintf(stderr, ATwriteToString(Atype));
-      fprintf(stderr, "' \n");
-
+      gsDebugMsg("    type: '%t'\n", Atype);
     } else if (xmlNodeIsText(cur)) {
     } else {
-      fprintf(stderr, "    Ignore an element named '");
-      fprintf(stderr, (const char *)cur->name);
-      fprintf(stderr, "'.\n");
+      gsWarningMsg("Ignore an element named '%s'.\n", (const char *)cur->name);
     }
     cur = cur->next;
   }
@@ -153,11 +146,17 @@ static ATermAppl pnml2aterm_transition(xmlNodePtr cur) {
   // output: a usable translation of the transition,
   //         if the transition needs to be translated
 
-  fprintf(stderr, "> Start examining a transition...  \n");
+  gsDebugMsg("> Start examining a transition...  \n");
   // first, we want to retrieve the id of the transition
-  ATerm Aid = ATparse((const char *)xmlGetProp(cur, (const xmlChar *)"id"));
-  fprintf(stderr, ATwriteToString(Aid));
-  fprintf(stderr, "\n");
+  ATerm Aid;
+  if (!xmlGetProp(cur, (const xmlChar *)"id")) {
+    // the transition has NO id, so translation should be aborted!
+    context.Abort = ATtrue;
+    return NULL;
+  } else {
+    Aid = ATparse((const char *)xmlGetProp(cur, (const xmlChar *)"id"));
+  }
+  gsDebugMsg("    id: '%t'\n", Aid); 
 
   // second, we want to retrieve the necessary attributes of the transition
   cur = cur->xmlChildrenNode;
@@ -179,34 +178,26 @@ static ATermAppl pnml2aterm_transition(xmlNodePtr cur) {
       // the transition contains a <name> element
       // a <name> element contains a childelement <text> which contains the name of the transition
       // the name is retrieved below and assigned to Aname
-      fprintf(stderr, "    name: ");
       if (!(Aname=retrieve_text(cur))) {
 	Aname = ATparse("default_name");
       }
-      fprintf(stderr, "|[");
-      fprintf(stderr, ATwriteToString(Aname));
-      fprintf(stderr, "]| \n");
+      gsDebugMsg("    name: '%t'\n", Aname);
     } else if (!xmlStrcmp(cur->name, (const xmlChar *)"type")) {
       // the transition contains an <type> element
       // this element contains a childelement <text> which contains the type of the transition
-      fprintf(stderr, "    type: ");
       if (!(Atype=retrieve_text(cur))) {
 	Atype = ATparse("AND");
       }
-      fprintf(stderr, "|[");
-      fprintf(stderr, ATwriteToString(Atype));
-      fprintf(stderr, "]| \n");
       if (!ATisEqual(Atype, ATparse("AND"))) {
 	// the type should either be omitted or have the value "AND"
 	// otherwise the place does not need to be translated!
-	fprintf(stderr, "Type is not 'AND'! \n");
+	gsWarningMsg("Transition with id '%t' has type '%t' and will not be translated.\n", Aid, Atype);
 	return NULL;
       }
+      gsDebugMsg("    type: '%t'\n", Atype);
     } else if (xmlNodeIsText(cur)) {
     } else {
-      fprintf(stderr, "    ignore ");
-      fprintf(stderr, (const char *)cur->name);
-      fprintf(stderr, "\n");
+      gsWarningMsg("Ignore an element named '%s'.\n", (const char *)cur->name);
     }
     cur = cur->next;
   }
@@ -223,20 +214,38 @@ static ATermAppl pnml2aterm_arc(xmlNodePtr cur) {
   // output: a usable translation of the arc,
   //         if the arc needs to be translated
 
-  fprintf(stderr, "> Start examining an arc...  \n");
+  gsDebugMsg("> Start examining an arc...  \n");
   // first, we want to retrieve the id of the arc
-  ATerm Aid = ATparse((const char *)xmlGetProp(cur, (const xmlChar *)"id"));
-  fprintf(stderr, ATwriteToString(Aid));
-  fprintf(stderr, "\n");
+  ATerm Aid;
+  if (!xmlGetProp(cur, (const xmlChar *)"id")) {
+    // the arc has NO id, so translation should be aborted!
+    context.Abort = ATtrue;
+    return NULL;
+  } else {
+    Aid = ATparse((const char *)xmlGetProp(cur, (const xmlChar *)"id"));
+  }
+  gsDebugMsg("    id: '%t'\n", Aid); 
 
   // second, we want to retrieve the source and the target of the arc
-  ATerm Asource = ATparse((const char *)xmlGetProp(cur, (const xmlChar *)"source"));
-  fprintf(stderr, ATwriteToString(Asource));
-  fprintf(stderr, "\n");
+  ATerm Asource;
+  if (!xmlGetProp(cur, (const xmlChar *)"source")) {
+    // the arc has NO source, so the arc will not be translated!
+    gsWarningMsg("Arc with id '%t' has no source and will not be translated.\n", Aid);
+    return NULL;
+  } else {
+    Asource = ATparse((const char *)xmlGetProp(cur, (const xmlChar *)"source"));
+  }
+  gsDebugMsg("    source: '%t'\n", Asource);
 
-  ATerm Atarget = ATparse((const char *)xmlGetProp(cur, (const xmlChar *)"target"));
-  fprintf(stderr, ATwriteToString(Atarget));
-  fprintf(stderr, "\n");
+  ATerm Atarget;
+  if (!xmlGetProp(cur, (const xmlChar *)"target")) {
+    // the arc has NO target, so the arc will not be translated!
+    gsWarningMsg("Arc with id '%t' has no target and will not be translated.\n", Aid);
+    return NULL;
+  } else {
+    Atarget = ATparse((const char *)xmlGetProp(cur, (const xmlChar *)"target"));
+  }
+  gsDebugMsg("    target: '%t'\n", Atarget);
 
   // third, we want to verify the arc needs translation (thus is of the correct type)
   cur = cur->xmlChildrenNode;
@@ -255,24 +264,20 @@ static ATermAppl pnml2aterm_arc(xmlNodePtr cur) {
     if (!xmlStrcmp(cur->name, (const xmlChar *)"type")) {
       // the arc contains a <type> element
       // this element contains a childelement <text> which contains the type of the transition
-      fprintf(stderr, "    type: ");
+
       if (!(Atype=retrieve_text(cur))) {
 	Atype = ATparse("some_strange`type=that n0b0dy u5e5...");
       }
-      fprintf(stderr, "|[");
-      fprintf(stderr, ATwriteToString(Atype));
-      fprintf(stderr, "]| \n");
       if (!ATisEqual(Atype, ATparse("some_strange`type=that n0b0dy u5e5..."))) {
 	// the type should be omitted
 	// otherwise the arc does not need to be translated!
-	fprintf(stderr, "Arc has a type, and thus does not need translation! \n");
+	gsWarningMsg("Arc with id '%t' has type '%t' and will not be translated.\n", Aid, Atype);
 	return NULL;
       }
+      gsDebugMsg("    type: '%t'\n", Atype);
     } else if (xmlNodeIsText(cur)) {
     } else {
-      fprintf(stderr, "    ignore ");
-      fprintf(stderr, (const char *)cur->name);
-      fprintf(stderr, "\n");
+      gsWarningMsg("Ignore an element named '%s'.\n", (const char *)cur->name);
     }
     cur = cur->next;
   }
@@ -294,11 +299,11 @@ static ATermAppl pnml2aterm(xmlDocPtr doc) {
   //==================================================
   xmlNodePtr cur = xmlDocGetRootElement(doc);
   if (cur == NULL) {
-    fprintf(stderr, "File is empty. \n");
+    gsErrorMsg("File is empty. \n");
     return NULL;
   }
   if (xmlStrcmp(cur->name, (const xmlChar *)"pnml")) {
-    fprintf(stderr, "File is not a PNML file!  \n");
+    gsErrorMsg("File is not a PNML file!  \n");
     return NULL;
   }
   // cur now points to the <pnml>element
@@ -307,21 +312,17 @@ static ATermAppl pnml2aterm(xmlDocPtr doc) {
   // the first <net>element, if any present, is selected by cur
   while (cur != NULL && xmlStrcmp(cur->name, (const xmlChar *)"net")) {
     if (!xmlNodeIsText(cur)) {
-      fprintf(stderr, "Element: ");
-      fprintf(stderr, (const char *)cur->name);
-      fprintf(stderr, " is not a Petri net and will be ignored in the translation (including it's sub-elements).   \n");
+      gsWarningMsg("Element '%s' is not a Petri net and will be ignored (including it's sub-elements).\n",(const char *)cur->name);
     }
     cur = cur->next;
   }
   if (cur == NULL) {
-    fprintf(stderr, "File does not contain a Petri net. \n");
+    gsErrorMsg("File does not contain a Petri net. \n");
     return NULL;
   }   
 
   // cur now points to the first <net>element
-  fprintf(stderr, "\n");
-  fprintf(stderr, "Start converting the Petri net to an ATerm...  \n");
-  fprintf(stderr, "\n");
+  gsDebugMsg("\nStart converting the Petri net to an ATerm...  \n \n");
 
   //==================================================
   // actual translation starts here
@@ -330,13 +331,11 @@ static ATermAppl pnml2aterm(xmlDocPtr doc) {
   ATerm ANetID;
   if (!xmlGetProp(cur, (const xmlChar *)"id")) {
     ANetID = ATparse("Petri_net");
-    fprintf(stderr, "NO NET-ID FOUND!\n");
+    gsWarningMsg("NO NET-ID FOUND!\n");
   } else {
     ANetID = ATparse((const char *)xmlGetProp(cur, (const xmlChar *)"id"));
   }
-  fprintf(stderr, "NetID = ");
-  fprintf(stderr, ATwriteToString(ANetID));
-  fprintf(stderr, "\n");
+  gsDebugMsg("NetID = '%t'\n",ANetID);
 
   cur = cur->xmlChildrenNode;
   // cur now points to the first element in the Petri net
@@ -356,6 +355,10 @@ static ATermAppl pnml2aterm(xmlDocPtr doc) {
   // so this data can be inserted in AArcs
   ATermAppl ACurrentArc;
 
+  // if an element has no ID, Abort is set to ATtrue
+  // if Abort == ATtrue, the translation is aborted!
+  context.Abort = ATfalse;
+
   // this loop goes through all the children of the <net>element
   // these children will be translated or ignored, this depends on the element name
   while (cur != NULL) {
@@ -365,39 +368,54 @@ static ATermAppl pnml2aterm(xmlDocPtr doc) {
     
     if (!xmlStrcmp(cur->name, (const xmlChar *)"place")) {
       if (!(ACurrentPlace=pnml2aterm_place(cur))) {
-	// pnml2aterm_place returns NULL, no translation needed.
+	// pnml2aterm_place returns NULL, so the place will not be translated.
+	if (context.Abort == ATtrue) {
+	  // pnml2aterm_place has set context.Abort to ATtrue
+	  // this means the place had no ID
+	  // therefor the translation will be aborted!
+	  gsErrorMsg("A place has no ID. \n");
+	  return NULL;
+	}
       } else {
 	APlaces = ATinsert(APlaces, (ATerm)ACurrentPlace);
-	fprintf(stderr, "Translate this place: ");
-	fprintf(stderr, ATwriteToString((ATerm)ACurrentPlace));
-	fprintf(stderr, "\n");
+	gsDebugMsg("  Translate this place: %t\n", (ATerm)ACurrentPlace);
       }
    } else if (!xmlStrcmp(cur->name, (const xmlChar *)"transition")) {
       if(!(ACurrentTransition=pnml2aterm_transition(cur))) {
-	fprintf(stderr, "This transition will not be translated \n");
+	// pnml2aterm_transition returns NULL, so the transition will not be translated.
+	if (context.Abort == ATtrue) {
+	  // pnml2aterm_transition has set context.Abort to ATtrue
+	  // this means the transition had no ID
+	  // therefor the translation will be aborted!
+	  gsErrorMsg("A transition has no ID. \n");
+	  return NULL;
+	}
       } else {
 	ATransitions = ATinsert(ATransitions, (ATerm)ACurrentTransition);
-	fprintf(stderr, "Translate this transition: ");
-	fprintf(stderr, ATwriteToString((ATerm)ACurrentTransition));
-	fprintf(stderr, "\n");
+	gsDebugMsg("  Translate this transition: %t\n", (ATerm)ACurrentTransition);
       }
    } else if (!xmlStrcmp(cur->name, (const xmlChar *)"arc")) {
       if(!(ACurrentArc=pnml2aterm_arc(cur))) {
-	fprintf(stderr, "This arc will not be translated \n");
+	// pnml2aterm_arc returns NULL, so the arc will not be translated.
+	if (context.Abort == ATtrue) {
+	  // pnml2aterm_arc has set context.Abort to ATtrue
+	  // this means the arc had no ID
+	  // therefor the translation will be aborted!
+	  gsErrorMsg("An arc has no ID. \n");
+	  return NULL;
+	}
       } else {
 	AArcs = ATinsert(AArcs, (ATerm)ACurrentArc);
-	fprintf(stderr, "Translate this arc: ");
-	fprintf(stderr, ATwriteToString((ATerm)ACurrentArc));
-	fprintf(stderr, "\n");
+	gsDebugMsg("  Translate this arc: %t\n", (ATerm)ACurrentArc);
       }
    } else if (xmlNodeIsText(cur)) {
    } else {
-     fprintf(stderr, "> An element named ");
-     fprintf(stderr, (const char *)cur->name);
-     fprintf(stderr, " will be ignored in the translation (including it's sub-elements).  \n");
+      gsWarningMsg("An element named '%s' will be ignored in the translation (including it's sub-elements).\n",(const char *)cur->name);
    };
    cur = cur->next;
   };
+
+  gsDebugMsg("\nConversion of PNML to ATerm succesfully completed. \n");
 
   // argument order of returnvalue is places - transitions - arcs 
   return ATmakeAppl3(ATmakeAFun(ATwriteToString(ANetID), 3, ATtrue), (ATerm)ATreverse(APlaces), (ATerm)ATreverse(ATransitions), (ATerm)ATreverse(AArcs));
@@ -414,16 +432,11 @@ static ATermAppl do_pnml2gs(ATermAppl Spec){
   //==================================================
   // initializations of tables and some initial checks.
   //==================================================
-  fprintf(stderr, "\n");
-  fprintf(stderr, "====================\n");
-  fprintf(stderr, ATwriteToString((ATerm)Spec));
-  fprintf(stderr, "\n====================\n");
-  fprintf(stderr, "\n");
+ 
+  gsDebugMsg("\n====================\n\nStart generating the necessary data. \n \n");
 
   ATerm ANetID = ATparse(ATgetName(ATgetAFun(Spec)));
-  
-  fprintf(stderr, ATwriteToString(ANetID));
-  fprintf(stderr, "\n");
+  gsDebugMsg("NetID = '%t'\n", ANetID);
 
   // put the places, transitions and arcs in the lists again
   ATermList APlaces = (ATermList)ATgetArgument(Spec, 0);
@@ -434,21 +447,17 @@ static ATermAppl do_pnml2gs(ATermAppl Spec){
   // used for Places, Transitions and Arcs!!!
   ATerm CurrentKey;
 
+  gsDebugMsg("> Insert the data of places that will be translated into tables...  \n");
   while (ATisEmpty(APlaces) == ATfalse) {
     // this loop itterates all places that will be translated
-    fprintf(stderr, ATwriteToString(ATgetFirst(APlaces)));
-    fprintf(stderr, "\n");
-
+    gsDebugMsg("    examining %t\n", ATgetFirst(APlaces));
     CurrentKey = ATgetArgument(ATgetFirst(APlaces), 0);
-    
     // it is sufficient to check whether a key appears in place_name OR place_mark
     // since a value is inserted in both tables at the same time!
     if (ATtableGet(context.place_name, CurrentKey)) {
       // the ID of the current places appears more than once in the places.
       // this is an error in the input, and thus termination takes place!
-      fprintf(stderr, "The id: ");
-      fprintf(stderr, ATwriteToString(CurrentKey));
-      fprintf(stderr, " appears more than once! \n");
+      gsErrorMsg("The id: '%t' appears more than once!\n", CurrentKey);
       return NULL;
     } else {
       // insert the data into context.place_name
@@ -465,33 +474,24 @@ static ATermAppl do_pnml2gs(ATermAppl Spec){
     // remove the entry from the list
     APlaces = ATgetNext(APlaces);
   }
-  fprintf(stderr, ATwriteToString((ATerm)APlaces));
-  fprintf(stderr, "\n");
-  fprintf(stderr, ATwriteToString((ATerm)ATtableKeys(context.place_name)));
-  fprintf(stderr, "\n");
-  fprintf(stderr, ATwriteToString((ATerm)ATtableKeys(context.place_mark)));
-  fprintf(stderr, "\n");
+  gsDebugMsg("\n  Places that are not inserted into the tables: %t\n", (ATerm)APlaces);
+  gsDebugMsg("  ID's of the two read-in place tables.\n  THESE TWO LISTS SHOULD BE EXACTLY THE SAME!\n  ");
+  gsDebugMsg("%t \n  %t \n", (ATerm)ATtableKeys(context.place_name), (ATerm)ATtableKeys(context.place_mark));
 
+  gsDebugMsg("> Insert the the data of transitions that will be translated into tables...  \n");
   while (ATisEmpty(ATransitions) == ATfalse) {
     // this loop itterates all transitions that will be translated
-    fprintf(stderr, ATwriteToString(ATgetFirst(ATransitions)));
-    fprintf(stderr, "\n");
-
+    gsDebugMsg("    examining %t\n", ATgetFirst(ATransitions));
     CurrentKey = ATgetArgument(ATgetFirst(ATransitions), 0);
-    
     if (ATtableGet(context.place_name, CurrentKey)) {
       // the ID of the current transition appeared already in the places.
       // this is an error in the input, and thus termination takes place!
-      fprintf(stderr, "The id: ");
-      fprintf(stderr, ATwriteToString(CurrentKey));
-      fprintf(stderr, " appears more than once! \n");
+      gsErrorMsg("The id: '%t' appears more than once!\n", CurrentKey);
       return NULL;
     } else if (ATtableGet(context.trans_name, CurrentKey)) {
       // the ID of the current transition appears more than once in the transitions.
       // this is an error in the input, and thus termination takes place!
-      fprintf(stderr, "The id: ");
-      fprintf(stderr, ATwriteToString(CurrentKey));
-      fprintf(stderr, " appears more than once! \n");
+      gsErrorMsg("The id: '%t' appears more than once!\n", CurrentKey);
       return NULL;
     } else {
       // insert the data into context.trans_name
@@ -502,48 +502,36 @@ static ATermAppl do_pnml2gs(ATermAppl Spec){
     // remove the entry from the list ATransitions
     ATransitions = ATgetNext(ATransitions);
   }
-  fprintf(stderr, ATwriteToString((ATerm)ATransitions));
-  fprintf(stderr, "\n");
-  fprintf(stderr, ATwriteToString((ATerm)ATtableKeys(context.trans_name)));
-  fprintf(stderr, "\n");
+  gsDebugMsg("\n  Transitions that are not inserted into the tables: %t\n", (ATerm)ATransitions);
+  gsDebugMsg("  ID's of the read-in transition table.\n  %t\n", (ATerm)ATtableKeys(context.trans_name));
 
   // temporary variables to store the current source and target
   ATerm CurrentSource;
   ATerm CurrentTarget;
+  gsDebugMsg("> Insert the data of the arcs that will be translated into tables...  \n");
   while (ATisEmpty(AArcs) == ATfalse) {
     // this loop itterates all arcs that will be translated
-    fprintf(stderr, ATwriteToString(ATgetFirst(AArcs)));
-    fprintf(stderr, "\n");
-
+    gsDebugMsg("    examining %t\n", ATgetFirst(AArcs));
     CurrentKey = ATgetArgument(ATgetFirst(AArcs), 0);
-    
     if (ATtableGet(context.place_name, CurrentKey)) {
       // the ID of the current arc appeared already in the places.
       // this is an error in the input, and thus termination takes place!
-      fprintf(stderr, "The id: ");
-      fprintf(stderr, ATwriteToString(CurrentKey));
-      fprintf(stderr, " appears more than once! \n");
+      gsErrorMsg("The id: '%t' appears more than once!\n", CurrentKey);
       return NULL;
     } else if (ATtableGet(context.trans_name, CurrentKey)) {
       // the ID of the current arc appeared already in the transitions.
       // this is an error in the input, and thus termination takes place!
-      fprintf(stderr, "The id: ");
-      fprintf(stderr, ATwriteToString(CurrentKey));
-      fprintf(stderr, " appears more than once! \n");
+      gsErrorMsg("The id: '%t' appears more than once!\n", CurrentKey);
       return NULL;
     } else if (ATtableGet(context.arc_in, CurrentKey)) {
       // the ID of the current arc appeared already in the in_arcs.
       // this is an error in the input, and thus termination takes place!
-      fprintf(stderr, "The id: ");
-      fprintf(stderr, ATwriteToString(CurrentKey));
-      fprintf(stderr, " appears more than once! \n");
+      gsErrorMsg("The id: '%t' appears more than once!\n", CurrentKey);
       return NULL;
     } else if (ATtableGet(context.arc_out, CurrentKey)) {
       // the ID of the current arc appeared already in the out_arcs.
       // this is an error in the input, and thus termination takes place!
-      fprintf(stderr, "The id: ");
-      fprintf(stderr, ATwriteToString(CurrentKey));
-      fprintf(stderr, " appears more than once! \n");
+      gsErrorMsg("The id: '%t' appears more than once!\n", CurrentKey);
       return NULL;
     } else {
       // the arc's ID did not appear in the transitions, places or arcs that will be translated
@@ -561,33 +549,122 @@ static ATermAppl do_pnml2gs(ATermAppl Spec){
 	// insert the data into context.arc_in
 	// key = id
 	// value = arc_in(source, target)
-	ATtablePut(context.arc_in, CurrentKey, (ATerm)ATmakeAppl2(ATmakeAFun("arc",2,ATfalse),CurrentSource,CurrentTarget));
+	ATtablePut(context.arc_in, CurrentKey, (ATerm)ATmakeAppl2(ATmakeAFun("arc_in",2,ATfalse),CurrentSource,CurrentTarget));
       } else {
 	// either the source or the target (or both) of the arc will not be translated
 	// therefore the arc will not be translated either!
+	gsWarningMsg("The source or target of arc with id '%t' will not be translated, and thus this arc will not be translated either.\n", CurrentKey);
       }
     }
     // remove the entry from the list ATransitions
     AArcs = ATgetNext(AArcs);
   }
+  gsDebugMsg("\n  Arcs that are not inserted into the tables: %t\n", (ATerm)AArcs);
 
-  fprintf(stderr, ATwriteToString((ATerm)AArcs));
-  fprintf(stderr, "\n");
-  fprintf(stderr, ATwriteToString((ATerm)ATtableKeys(context.arc_in)));
-  fprintf(stderr, "\n");
-  fprintf(stderr, ATwriteToString((ATerm)ATtableKeys(context.arc_out)));
-  fprintf(stderr, "\n");
+  gsDebugMsg("  ID's of the two read-in arc tables. The first list contains the in-arcs, the second one the out-arcs. \n");
+  gsDebugMsg("  NO TWO ID'S SHOULD BE IN BOTH TABLES!\n");
+  gsDebugMsg("%t\n  %t\n\n", (ATerm)ATtableKeys(context.arc_in), (ATerm)ATtableKeys(context.arc_out));
 
+  // Temporary variables used for generations
+  ATermList Arcs;
+  ATerm CurrentArc;
+  ATerm CurrentPlace;
+  ATerm CurrentTrans;
+  ATermList ArcValueList;
 
+  // Generate context.place_in - context.trans_out
+  Arcs = ATtableKeys(context.arc_in);
+  while (ATisEmpty(Arcs) == ATfalse) {
+    CurrentArc = ATgetFirst(Arcs);
+    CurrentPlace = ATgetArgument(ATtableGet(context.arc_in, CurrentArc), 1);
+    CurrentTrans = ATgetArgument(ATtableGet(context.arc_in, CurrentArc), 0);
+    // insert CurrentPlace and CurrentArc in context.place_in
+    if (!(ATtableGet(context.place_in, CurrentPlace))) {
+      // if the CurrentPlace was not yet present in context.place_in, insert it
+      // key = CurrentPlace.id
+      // value = [CurrentArc.id]
+      ATtablePut(context.place_in, CurrentPlace, (ATerm)ATmakeList1(CurrentArc));
+    } else {
+      // if the CurrentPlace was already present in context.place_in, insert CurrentArc.id in the value-list
+      ArcValueList = (ATermList)ATtableGet(context.place_in, CurrentPlace);
+      ArcValueList = ATinsert(ArcValueList, CurrentArc);
+      ATtablePut(context.place_in, CurrentPlace, (ATerm)ArcValueList);
+    }
 
-  /* GENERATE context.place_in - context.trans_in - context.place_out - context.trans_out */
+    // insert CurrentTrans and CurrentArc in context.trans_out
+    if (!(ATtableGet(context.trans_out, CurrentTrans))) {
+      // if the CurrentTrans was not yet present in context.trans_out, insert it
+      // key = CurrentTrans.id
+      // value = [CurrentArc.id]
+      ATtablePut(context.trans_out, CurrentTrans, (ATerm)ATmakeList1(CurrentArc));
+    } else {
+      // if the CurrentTrans was already present in context.trans_out, insert CurrentArc.id in the value-list
+      ArcValueList = (ATermList)ATtableGet(context.trans_out, CurrentTrans);
+      ArcValueList = ATinsert(ArcValueList, CurrentArc);
+      ATtablePut(context.trans_out, CurrentTrans, (ATerm)ArcValueList);
+    }
+    Arcs = ATgetNext(Arcs);
+  }
+  Arcs = ATtableKeys(context.place_in);
+  gsDebugMsg("context.place_in contains the following keys: %t\n", Arcs);
+  while (ATisEmpty(Arcs) == ATfalse) {
+    gsDebugMsg("Place '%t' has the following incoming arcs: %t\n", ATgetFirst(Arcs), ATtableGet(context.place_in, ATgetFirst(Arcs)));
+    Arcs = ATgetNext(Arcs);
+  }
+  Arcs = ATtableKeys(context.trans_out);
+  gsDebugMsg("context.trans_out contains the following keys: %t\n", Arcs);
+  while (ATisEmpty(Arcs) == ATfalse) {
+    gsDebugMsg("Transition '%t' has the following outgoing arcs: %t\n", ATgetFirst(Arcs), ATtableGet(context.trans_out, ATgetFirst(Arcs)));
+    Arcs = ATgetNext(Arcs);
+  }
 
+  // Generate context.trans_in - context.place_out
+  Arcs = ATtableKeys(context.arc_out);
+  while (ATisEmpty(Arcs) == ATfalse) {
+    CurrentArc = ATgetFirst(Arcs);
+    CurrentPlace = ATgetArgument(ATtableGet(context.arc_out, CurrentArc), 0);
+    CurrentTrans = ATgetArgument(ATtableGet(context.arc_out, CurrentArc), 1);
+    // insert CurrentPlace and CurrentArc in context.place_out
+    if (!(ATtableGet(context.place_out, CurrentPlace))) {
+      // if the CurrentPlace was not yet present in context.place_out, insert it
+      // key = CurrentPlace.id
+      // value = [CurrentArc.id]
+      ATtablePut(context.place_out, CurrentPlace, (ATerm)ATmakeList1(CurrentArc));
+    } else {
+      // if the CurrentPlace was already present in context.place_out, insert CurrentArc.id in the value-list
+      ArcValueList = (ATermList)ATtableGet(context.place_out, CurrentPlace);
+      ArcValueList = ATinsert(ArcValueList, CurrentArc);
+      ATtablePut(context.place_out, CurrentPlace, (ATerm)ArcValueList);
+    }
 
+    // insert CurrentTrans and CurrentArc in context.trans_in
+    if (!(ATtableGet(context.trans_in, CurrentTrans))) {
+      // if the CurrentTrans was not yet present in context.trans_in, insert it
+      // key = CurrentTrans.id
+      // value = [CurrentArc.id]
+      ATtablePut(context.trans_in, CurrentTrans, (ATerm)ATmakeList1(CurrentArc));
+    } else {
+      // if the CurrentTrans was already present in context.trans_in, insert CurrentArc.id in the value-list
+      ArcValueList = (ATermList)ATtableGet(context.trans_in, CurrentTrans);
+      ArcValueList = ATinsert(ArcValueList, CurrentArc);
+      ATtablePut(context.trans_in, CurrentTrans, (ATerm)ArcValueList);
+    }
+    Arcs = ATgetNext(Arcs);
+  }
+  Arcs = ATtableKeys(context.place_out);
+  gsDebugMsg("context.place_out contains the following keys: %t\n", Arcs);
+  while (ATisEmpty(Arcs) == ATfalse) {
+    gsDebugMsg("Place '%t' has the following outgoing arcs: %t\n", ATgetFirst(Arcs), ATtableGet(context.place_out, ATgetFirst(Arcs)));
+    Arcs = ATgetNext(Arcs);
+  }
+  Arcs = ATtableKeys(context.trans_in);
+  gsDebugMsg("context.trans_in contains the following keys: %t\n", Arcs);
+  while (ATisEmpty(Arcs) == ATfalse) {
+    gsDebugMsg("Transition '%t' has the following incoming arcs: %t\n", ATgetFirst(Arcs), ATtableGet(context.trans_in, ATgetFirst(Arcs)));
+    Arcs = ATgetNext(Arcs);
+  }
 
-  fprintf(stderr, "\n");
-  fprintf(stderr, "====================\n");
-  fprintf(stderr, "\n");
-
+  gsDebugMsg("\n====================\n\n");
   return Spec;	
 }
 
@@ -631,11 +708,9 @@ int main(int argc, char **argv){
     }
   }
   
-  fprintf(stderr,"\n");
-
   xmlDocPtr doc = xmlParseFile(SpecStream);
   if(!doc) {
-    fprintf(stderr,"Document not parsed succesfully. \n");
+    gsErrorMsg("Document not parsed succesfully. \n");
     return 1;
   }
   
@@ -643,7 +718,7 @@ int main(int argc, char **argv){
   xmlFreeDoc(doc);
 
   if(!Spec){	
-    fprintf(stderr, "Error while converting PNML to ATerm, conversion stopped!  \n");
+    gsErrorMsg("Error while converting PNML to ATerm, conversion stopped!  \n");
     return 1;
   }
 
@@ -672,12 +747,9 @@ int main(int argc, char **argv){
   ATtableDestroy(context.trans_out);
  
   if(!Spec) {
-    fprintf(stderr, "Error while converting PNML ATerm to GenSpect ATerm, conversion stopped!  \n");
+    gsErrorMsg("Error while converting PNML ATerm to GenSpect ATerm, conversion stopped!  \n");
     return 1;
   }
-  fprintf(stderr, "\n");  
-  fprintf(stderr, ATwriteToString((ATerm)Spec));
-  fprintf(stderr, "\n \n");  
   gsPrintSpecification(stdout,Spec);        
   return 0;
 }
