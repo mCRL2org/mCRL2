@@ -417,8 +417,20 @@ static ATermAppl pnml2aterm(xmlDocPtr doc) {
 
   gsDebugMsg("\nConversion of PNML to ATerm succesfully completed. \n");
 
+
+  /* CORRECT PASSING OF PARAMETER! */
+  /* TYPE SHOULD BE <string> */
+
   // argument order of returnvalue is places - transitions - arcs 
   return ATmakeAppl3(ATmakeAFun(ATwriteToString(ANetID), 3, ATtrue), (ATerm)ATreverse(APlaces), (ATerm)ATreverse(ATransitions), (ATerm)ATreverse(AArcs));
+}
+
+static ATermList pngsGenerateActions(void){
+  return ATmakeList0();
+}
+
+static ATermList pngsGenerateProcEqns(void){
+  return ATmakeList0();
 }
 
 //==================================================
@@ -434,9 +446,6 @@ static ATermAppl do_pnml2gs(ATermAppl Spec){
   //==================================================
  
   gsDebugMsg("\n====================\n\nStart generating the necessary data. \n \n");
-
-  ATerm ANetID = ATparse(ATgetName(ATgetAFun(Spec)));
-  gsDebugMsg("NetID = '%t'\n", ANetID);
 
   // put the places, transitions and arcs in the lists again
   ATermList APlaces = (ATermList)ATgetArgument(Spec, 0);
@@ -565,6 +574,10 @@ static ATermAppl do_pnml2gs(ATermAppl Spec){
   gsDebugMsg("  NO TWO ID'S SHOULD BE IN BOTH TABLES!\n");
   gsDebugMsg("%t\n  %t\n\n", (ATerm)ATtableKeys(context.arc_in), (ATerm)ATtableKeys(context.arc_out));
 
+  //==================================================
+  // generation of some necessary data
+  //==================================================
+ 
   // Temporary variables used for generations
   ATermList Arcs;
   ATerm CurrentArc;
@@ -665,6 +678,58 @@ static ATermAppl do_pnml2gs(ATermAppl Spec){
   }
 
   gsDebugMsg("\n====================\n\n");
+
+  //==================================================
+  // creation of GenSpect ATerms
+  //==================================================
+
+  /* FUNCTIONS TO CREATE */
+  /* List of ActID - pngsGenerateActions()
+     List of ProcEqn - pngsGenerateProcEqns() */
+
+
+  return gsMakeSpecV1(gsMakeSortSpec(ATmakeList0()), gsMakeConsSpec(ATmakeList0()), gsMakeMapSpec(ATmakeList0()), gsMakeDataEqnSpec(ATmakeList0()), gsMakeActSpec(pngsGenerateActions()), gsMakeProcEqnSpec(pngsGenerateProcEqns()), gsMakeInit(ATmakeList0(),gsMakeProcess(gsMakeProcVarId(ATAgetArgument(Spec, 3), ATmakeList0()), ATmakeList0())));
+
+
+  /* THE PART BELOW SHOULD BE IN THE FUNCTIONS NAMED ABOVE */
+
+  // first, we create all the possible actions and store them in ActionsSpec
+  // #actions = 3x #arcs + 1x #transitions
+  //ATermAppl ActionsSpec;
+
+  // the possible actions will be stored in ActionList
+  //ATermList ActionsList = ATmakeList0();
+  
+  // the possible actions are
+  // for each arc:                                  arcid     >-<     _arcid     >-<     __arcid
+  // for each transition (if a name is present):    t_transid_transname
+  // for each transition (if no name is present):   t_transid
+
+  // variables to store the Current Action to be inserted into ActionsList
+  //ATermAppl CurrentAction; 
+  char * Name;
+
+  // variable to go through all the arc_in-ids, the arc_out-ids and the transition-ids
+  ATermList Ids;
+
+  Ids = ATtableKeys(context.arc_in);
+  fprintf(stderr, "\n");
+  while (ATisEmpty(Ids) == ATfalse) {
+    Name = ATwriteToString(ATgetFirst(Ids));
+
+    fprintf(stderr, ATwriteToString(ATparse(Name)));
+    fprintf(stderr, "\n");
+    Name = strcat("_", Name);
+    fprintf(stderr, Name);
+    fprintf(stderr, "\n");
+    Name = strcat("_", Name);
+    fprintf(stderr, Name);
+    fprintf(stderr, "\n");
+
+
+    Ids = ATgetNext(Ids);
+  }
+
   return Spec;	
 }
 
