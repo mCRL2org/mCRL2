@@ -856,9 +856,10 @@ static ATbool gstcAddConstant(ATermAppl Name, ATermAppl Sort, const char* msg){
 static ATbool gstcAddFunction(ATermAppl Name, ATermAppl Sort, const char *msg){
   ATbool Result=ATtrue;
 
-  if(ATAtableGet(context.constants, (ATerm)Name)){
-    ThrowMF("Double declaration of constant and %s %t\n", msg, Name);
-  }
+  //constants and functions can have the same names
+  //  if(ATAtableGet(context.constants, (ATerm)Name)){
+  //    ThrowMF("Double declaration of constant and %s %t\n", msg, Name);
+  //  }
 
   if(ATAtableGet(gssystem.constants, (ATerm)Name) || ATLtableGet(gssystem.functions, (ATerm)Name)){
     ThrowMF("Attempt to redeclare the system identifier with %s %t\n", msg, Name);
