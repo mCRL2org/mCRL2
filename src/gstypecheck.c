@@ -1915,10 +1915,19 @@ static ATbool gstcIsNotInferredL(ATermList TypeList){
 }
 
 static ATermAppl gstcUnwindType(ATermAppl Type){
-  if(!gsIsSortId(Type)) return Type;
-  ATermAppl Value=ATAtableGet(context.defined_sorts,(ATerm)ATAgetArgument(Type,0));
-  if(!Value) Value=Type;
-  return Value;
+  //gsDebugMsg("gstcUnwindType Type: %t\n",Type);
+
+  if(gsIsSortList(Type)) return gsMakeSortList(gstcUnwindType(ATAgetArgument(Type,0)));
+  if(gsIsSortSet(Type)) return gsMakeSortSet(gstcUnwindType(ATAgetArgument(Type,0)));
+  if(gsIsSortBag(Type)) return gsMakeSortBag(gstcUnwindType(ATAgetArgument(Type,0)));
+  
+  if(gsIsSortId(Type)){
+    ATermAppl Value=ATAtableGet(context.defined_sorts,(ATerm)ATAgetArgument(Type,0));
+    if(!Value) return Type;
+    return gstcUnwindType(Value);
+  } 
+  
+  return Type;
 }
 
 static ATermAppl gstcUnSetBag(ATermAppl PosType){
