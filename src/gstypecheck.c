@@ -107,7 +107,6 @@ static inline ATermAppl gstcMakeActionOrProc(ATbool, ATermAppl, ATermList, ATerm
 static ATermAppl gstcTraverseActProcVarConstP(ATermTable, ATermAppl);
 static ATermAppl gstcTraverseVarConsTypeD(ATermTable, ATermAppl *, ATermAppl);
 static ATermAppl gstcTraverseVarConsTypeDN(int, ATermTable, ATermAppl* , ATermAppl);
-static ATermList gstcTraverseVarConstL(ATermTable, ATermList);
 
 static ATermList gstcGetNotInferredList(ATermList TypeListList);
 static ATermList gstcInsertType(ATermList TypeList, ATermAppl Type);
@@ -181,8 +180,14 @@ static ATbool gstcMActIn(ATermList MAct, ATermList MActs);
 static ATbool gstcMActInSubEq(ATermList MAct, ATermList MActs);
 static ATbool gstcMActEq(ATermList MAct1, ATermList MAct2);
 static ATbool gstcMActSubEq(ATermList MAct1, ATermList MAct2);
+static ATermAppl gstcUnifyMinType(ATermAppl Type1, ATermAppl Type2);
 static ATermAppl gstcMatchIf(ATermAppl Type);
 static ATermAppl gstcMatchEqNeq(ATermAppl Type);
+static ATermAppl gstcMatchListOpCons(ATermAppl Type);
+static ATermAppl gstcMatchListOpSnoc(ATermAppl Type);
+static ATermAppl gstcMatchListOpHead(ATermAppl Type);
+static ATermAppl gstcMatchListOpTail(ATermAppl Type);
+
 
 // Main function
 ATermAppl gsTypeCheck (ATermAppl input){	
@@ -1307,21 +1312,32 @@ static ATermAppl gstcTraverseVarConsTypeD(ATermTable Vars, ATermAppl *DataTerm, 
   }
 
   if(gsIsListEnum(*DataTerm) || gsIsSetEnum(*DataTerm)){
-    ATermList NewData=gstcTraverseVarConstL(Vars,ATLgetArgument(*DataTerm,0));
-    if(!NewData) {throw;}
-    *DataTerm=ATsetArgument(*DataTerm,(ATerm)NewData,0);
-    //here
-    return gsMakeUnknown();
+    ATermList DataTermList=ATLgetArgument(*DataTerm,0);
+    ATermAppl Type=gsMakeUnknown();
+    ATermList NewDataTermList=ATmakeList0();
+    for(;!ATisEmpty(DataTermList);DataTermList=ATgetNext(DataTermList)){
+      ATermAppl DataTerm=ATAgetFirst(DataTermList);
+      ATermAppl Type0=gstcTraverseVarConsTypeD(Vars,&DataTerm,Type);
+      if(!Type0) {throw;}
+      NewDataTermList=ATinsert(NewDataTermList,(ATerm)DataTerm);
+      Type=Type0;
+    }
+    DataTermList=ATreverse(NewDataTermList);
+
+    Type=(gsIsListEnum(*DataTerm))?gsMakeSortList(Type):gsMakeSortSet(Type);
+    
+    *DataTerm=(gsIsListEnum(*DataTerm))?gsMakeListEnum(DataTermList,Type):gsMakeSetEnum(DataTermList,Type);
+    return Type;
   }  
 
   if(gsIsBagEnum(*DataTerm)){
     ATermList DataTermList2=ATLgetArgument(*DataTerm,0);
-    ATermAppl Type=NULL;
+    ATermAppl Type=gsMakeUnknown();
     ATermList NewDataTermList2=ATmakeList0();
     for(;!ATisEmpty(DataTermList2);DataTermList2=ATgetNext(DataTermList2)){
       ATermAppl DataTerm2=ATAgetFirst(DataTermList2);
       ATermAppl DataTerm0=ATAgetArgument(DataTerm2,0);
-      ATermAppl Type0=gstcTraverseVarConsTypeD(Vars,&DataTerm0,gsMakeUnknown());
+      ATermAppl Type0=gstcTraverseVarConsTypeD(Vars,&DataTerm0,Type);
       if(!Type0) {throw;}
       ATermAppl DataTerm1=ATAgetArgument(DataTerm2,1);
       ATermAppl Type1=gstcTraverseVarConsTypeD(Vars,&DataTerm1,gsMakeSortIdNat());
@@ -1628,6 +1644,48 @@ static ATermAppl gstcTraverseVarConsTypeDN(int nFactPars, ATermTable Vars, ATerm
 	Type=NewType;
       }
 
+      if(ATisEqual(ATAgetArgument(gsMakeOpIdCons(gsMakeUnknown(),gsMakeSortList(gsMakeUnknown())),0),ATAgetArgument(*DataTerm,0))){
+	gsDebugMsg("Doing List insertion matching Type %t, PosType %t\n",Type,PosType);    
+	ATermAppl NewType=gstcMatchListOpCons(Type);
+	if(!NewType){
+	  gsErrorMsg("The function |> has incompartible argument types %t (while typechecking %t)\n",Type,*DataTerm);
+	  return NULL;
+	}
+	Type=NewType;
+      }
+
+      if(ATisEqual(ATAgetArgument(gsMakeOpIdSnoc(gsMakeSortList(gsMakeUnknown()), gsMakeUnknown()),0),ATAgetArgument(*DataTerm,0))){
+	gsDebugMsg("Doing List insertion matching Type %t, PosType %t\n",Type,PosType);    
+	ATermAppl NewType=gstcMatchListOpSnoc(Type);
+	if(!NewType){
+	  gsErrorMsg("The function <| has incompartible argument types %t (while typechecking %t)\n",Type,*DataTerm);
+	  return NULL;
+	}
+	Type=NewType;
+      }
+      
+      if(ATisEqual(ATAgetArgument(gsMakeOpIdLHead(gsMakeSortList(gsMakeUnknown()), gsMakeUnknown()),0),ATAgetArgument(*DataTerm,0))||
+	 ATisEqual(ATAgetArgument(gsMakeOpIdRHead(gsMakeSortList(gsMakeUnknown()), gsMakeUnknown()),0),ATAgetArgument(*DataTerm,0))){
+	gsDebugMsg("Doing List insertion matching Type %t, PosType %t\n",Type,PosType);    
+	ATermAppl NewType=gstcMatchListOpHead(Type);
+	if(!NewType){
+	  gsErrorMsg("The function <| has incompartible argument types %t (while typechecking %t)\n",Type,*DataTerm);
+	  return NULL;
+	}
+	Type=NewType;
+      }
+
+      if(ATisEqual(ATAgetArgument(gsMakeOpIdLTail(gsMakeSortList(gsMakeUnknown())),0),ATAgetArgument(*DataTerm,0))||
+	 ATisEqual(ATAgetArgument(gsMakeOpIdRTail(gsMakeSortList(gsMakeUnknown())),0),ATAgetArgument(*DataTerm,0))){
+	gsDebugMsg("Doing List insertion matching Type %t, PosType %t\n",Type,PosType);    
+	ATermAppl NewType=gstcMatchListOpTail(Type);
+	if(!NewType){
+	  gsErrorMsg("The function <| has incompartible argument types %t (while typechecking %t)\n",Type,*DataTerm);
+	  return NULL;
+	}
+	Type=NewType;
+      }
+
       *DataTerm=gsMakeOpId(Name,Type);
       return Type;
     }
@@ -1638,21 +1696,6 @@ static ATermAppl gstcTraverseVarConsTypeDN(int nFactPars, ATermTable Vars, ATerm
     }
   }
   else return gstcTraverseVarConsTypeD(Vars,DataTerm,PosType);
-}
-
-static ATermList gstcTraverseVarConstL(ATermTable Vars, ATermList DataTermList){
-  ATermList Result=NULL;
-  ATermList NewDataTermList=ATmakeList0();
-
-  for(;!ATisEmpty(DataTermList);DataTermList=ATgetNext(DataTermList)){
-    ATermAppl DataTerm=ATAgetFirst(DataTermList);
-    ATermAppl Type=gstcTraverseVarConsTypeD(Vars,&DataTerm,gsMakeUnknown());
-    if(!Type) {throw;}
-    NewDataTermList=ATinsert(NewDataTermList,(ATerm)DataTerm);
-  }
-  return ATreverse(NewDataTermList);
- finally:
-  return Result;
 }
 
 // ================================================================================
@@ -1817,7 +1860,9 @@ static ATermAppl gstcTypeMatchA(ATermAppl Type, ATermAppl PosType){
 
   if(gsIsSortList(Type)){
     if(!gsIsSortList(PosType)) return NULL;
-    else return gsMakeSortList(gstcTypeMatchA(ATAgetArgument(Type,0),ATAgetArgument(PosType,0)));
+    ATermAppl NewType=gstcTypeMatchA(ATAgetArgument(Type,0),ATAgetArgument(PosType,0));
+    if(!NewType) return NULL;
+    return gsMakeSortList(gstcTypeMatchA(ATAgetArgument(Type,0),ATAgetArgument(PosType,0)));
   }
 
   if(gsIsSortSet(Type)){
@@ -2063,6 +2108,12 @@ static ATbool gstcMActSubEq(ATermList MAct1, ATermList MAct2){
   return gstcMActSubEq(MAct1,MAct2);
 }
 
+static ATermAppl gstcUnifyMinType(ATermAppl Type1, ATermAppl Type2){
+  //Find the minimal type that Unifies the 2. If not possible, return NULL.
+  ATermAppl Res=gstcTypeMatchA(Type1,gstcExpandPosTypes(Type2));
+  if(!Res) Res=gstcTypeMatchA(Type2,gstcExpandPosTypes(Type1));
+  return Res;
+}
 
 static ATermAppl gstcMatchIf(ATermAppl Type){
   //tries to sort out the types for if.
@@ -2075,16 +2126,9 @@ static ATermAppl gstcMatchIf(ATermAppl Type){
   //assert(gsIsBool(ATAgetFirst(Args)));
   Args=ATgetNext(Args);
 
-  ATermAppl NewRes=gstcTypeMatchA(Res,gstcExpandPosTypes(ATAgetFirst(Args)));
-  if(!NewRes) NewRes=gstcTypeMatchA(ATAgetFirst(Args),gstcExpandPosTypes(Res));
-  if(!NewRes) return NULL;
-  Res=NewRes;
+  if(!(Res=gstcUnifyMinType(Res,ATAgetFirst(Args)))) return NULL;
   Args=ATgetNext(Args);
-
-  NewRes=gstcTypeMatchA(Res,gstcExpandPosTypes(ATAgetFirst(Args)));
-  if(!NewRes) NewRes=gstcTypeMatchA(ATAgetFirst(Args),gstcExpandPosTypes(Res));
-  if(!NewRes) return NULL;
-  Res=NewRes;
+  if(!(Res=gstcUnifyMinType(Res,ATAgetFirst(Args)))) return NULL;
 
   return gsMakeSortArrowProd(ATmakeList3((ATerm)gsMakeSortIdBool(),(ATerm)Res,(ATerm)Res),Res);
 }
@@ -2101,9 +2145,105 @@ static ATermAppl gstcMatchEqNeq(ATermAppl Type){
   Args=ATgetNext(Args);
   ATermAppl Arg2=ATAgetFirst(Args);
   
-  ATermAppl Arg=gstcTypeMatchA(Arg1,gstcExpandPosTypes(Arg2));
-  if(!Arg) Arg=gstcTypeMatchA(Arg2,gstcExpandPosTypes(Arg1));
+  ATermAppl Arg=gstcUnifyMinType(Arg1,Arg2);
   if(!Arg) return NULL;
 
   return gsMakeSortArrowProd(ATmakeList2((ATerm)Arg,(ATerm)Arg),gsMakeSortIdBool());
 }
+
+static ATermAppl gstcMatchListOpCons(ATermAppl Type){
+  //tries to sort out the types of Cons operations (SxList(S)->List(S))
+  //If some of the parameters are Pos,Nat, or Int do upcasting.
+
+  assert(gsIsSortArrowProd(Type));
+  ATermAppl Res=ATAgetArgument(Type,1);
+  if(gsIsSortId(Res)) Res=gstcUnwindType(Res);
+  assert(gsIsSortList(gstcUnwindType(Res)));
+  Res=ATAgetArgument(Res,0);
+  ATermList Args=ATLgetArgument(Type,0);
+  assert((ATgetLength(Args)==2));
+  ATermAppl Arg1=ATAgetFirst(Args);
+  Args=ATgetNext(Args);
+  ATermAppl Arg2=ATAgetFirst(Args);
+  if(gsIsSortId(Arg2)) Arg2=gstcUnwindType(Arg2);
+  assert(gsIsSortList(gstcUnwindType(Arg2)));
+  Arg2=ATAgetArgument(Arg2,0);
+  
+  Res=gstcUnifyMinType(Res,Arg1);
+  if(!Res) return NULL;
+
+  Res=gstcUnifyMinType(Res,Arg2);
+  if(!Res) return NULL;
+
+  return gsMakeSortArrowProd(ATmakeList2((ATerm)Res,(ATerm)gsMakeSortList(Res)),gsMakeSortList(Res));
+}
+
+static ATermAppl gstcMatchListOpSnoc(ATermAppl Type){
+  //tries to sort out the types of Cons operations (SxList(S)->List(S))
+  //If some of the parameters are Pos,Nat, or Int do upcasting.
+
+  assert(gsIsSortArrowProd(Type));
+  ATermAppl Res=ATAgetArgument(Type,1);
+  if(gsIsSortId(Res)) Res=gstcUnwindType(Res);
+  assert(gsIsSortList(Res));
+  Res=ATAgetArgument(Res,0);
+  ATermList Args=ATLgetArgument(Type,0);
+  assert((ATgetLength(Args)==2));
+  ATermAppl Arg1=ATAgetFirst(Args);
+  if(gsIsSortId(Arg1)) Arg1=gstcUnwindType(Arg1);
+  assert(gsIsSortList(Arg1));
+  Arg1=ATAgetArgument(Arg1,0);
+
+  Args=ATgetNext(Args);
+  ATermAppl Arg2=ATAgetFirst(Args);
+  
+  Res=gstcUnifyMinType(Res,Arg1);
+  if(!Res) return NULL;
+
+  Res=gstcUnifyMinType(Res,Arg2);
+  if(!Res) return NULL;
+
+  return gsMakeSortArrowProd(ATmakeList2((ATerm)gsMakeSortList(Res),(ATerm)Res),gsMakeSortList(Res));
+}
+
+static ATermAppl gstcMatchListOpHead(ATermAppl Type){
+  //tries to sort out the types of Cons operations (SxList(S)->List(S))
+  //If some of the parameters are Pos,Nat, or Int do upcasting.
+
+  assert(gsIsSortArrowProd(Type));
+  ATermAppl Res=ATAgetArgument(Type,1);
+  ATermList Args=ATLgetArgument(Type,0);
+  assert((ATgetLength(Args)==1));
+  ATermAppl Arg=ATAgetFirst(Args);
+  if(gsIsSortId(Arg)) Arg=gstcUnwindType(Arg);
+  assert(gsIsSortList(Arg));
+  Arg=ATAgetArgument(Arg,0);
+
+  Res=gstcUnifyMinType(Res,Arg);
+  if(!Res) return NULL;
+
+  return gsMakeSortArrowProd(ATmakeList1((ATerm)gsMakeSortList(Res)),Res);
+}
+
+static ATermAppl gstcMatchListOpTail(ATermAppl Type){
+  //tries to sort out the types of Cons operations (SxList(S)->List(S))
+  //If some of the parameters are Pos,Nat, or Int do upcasting.
+
+  assert(gsIsSortArrowProd(Type));
+  ATermAppl Res=ATAgetArgument(Type,1);
+  if(gsIsSortId(Res)) Res=gstcUnwindType(Res);
+  assert(gsIsSortList(Res));
+  Res=ATAgetArgument(Res,0);
+  ATermList Args=ATLgetArgument(Type,0);
+  assert((ATgetLength(Args)==1));
+  ATermAppl Arg=ATAgetFirst(Args);
+  if(gsIsSortId(Arg)) Arg=gstcUnwindType(Arg);
+  assert(gsIsSortList(Arg));
+  Arg=ATAgetArgument(Arg,0);
+
+  Res=gstcUnifyMinType(Res,Arg);
+  if(!Res) return NULL;
+
+  return gsMakeSortArrowProd(ATmakeList1((ATerm)gsMakeSortList(Res)),gsMakeSortList(Res));
+}
+
