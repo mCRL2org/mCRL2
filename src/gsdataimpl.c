@@ -1683,7 +1683,7 @@ void gsImplSortInt(TDataDecls *PDataDecls)
          gsMakeDataExprDub(gsMakeDataExprNot(b), gsMakeDataExprSubtB(t, p, q))),
       (ATerm) gsMakeDataEqn(bpql, nil,
          gsMakeDataExprSubtB(b, gsMakeDataExprCDub(t, p),
-           gsMakeDataExprCDub(t, q)),
+           gsMakeDataExprCDub(f, q)),
          gsMakeDataExprDub(gsMakeDataExprNot(b), gsMakeDataExprSubtB(f, p, q))),
       //subtraction (Nat -> Nat -> Int)
       (ATerm) gsMakeDataEqn(nl, nil,
