@@ -259,7 +259,7 @@ ATermList FindSolutions(ATermList Vars, ATermAppl Expr)
 						if ( !ATisEqual(ATgetFirst(ATgetNext(o)),gsProverFalse) )
 						{
 //							ATfprintf(stderr,"Term does not evaluate to true or false (%t)\n",ATgetFirst(ATgetNext(o)));
-							ATfprintf(stderr,"Term does not evaluate to true or false (");gsPrintPart(stderr,ATgetFirst(ATgetNext(o)),0,0);ATfprintf(stderr,")\n");
+							ATfprintf(stderr,"Term does not evaluate to true or false: ");gsPrintPart(stderr,ATgetFirst(ATgetNext(o)),0,0);ATfprintf(stderr,"\n");
 						}
 					}
 				} else {

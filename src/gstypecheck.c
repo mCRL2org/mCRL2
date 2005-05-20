@@ -191,6 +191,95 @@ static ATermAppl gstcMatchListOpHead(ATermAppl Type);
 static ATermAppl gstcMatchListOpTail(ATermAppl Type);
 
 
+static ATermTable revsorts;
+static ATerm gstcFold(ATerm t);
+static ATermAppl gstcFoldSpec(ATermAppl s);
+
+ATerm gstcFold(ATerm t)
+{
+	if ( ATgetType(t) == AT_LIST )
+	{
+		ATermList l,m;
+
+		l = (ATermList) t;
+		m = ATmakeList0();
+		for (;!ATisEmpty(l);l=ATgetNext(l))
+		{
+			m = ATinsert(m,gstcFold(ATgetFirst(l)));
+		}
+		m = ATreverse(m);
+
+		// Shouldn't be necessary
+		/*if ( ATtableGet(revsorts,(ATerm) m) != NULL )
+		{
+			m = (ATermList) ATtableGet(revsorts,(ATerm) m);
+		}*/
+
+		return (ATerm) m;
+	} else {
+		ATermAppl a;
+		ATermList l;
+		ATerm u;
+
+		a = (ATermAppl) t;
+		l = ATgetArguments(a);
+		l = (ATermList) gstcFold((ATerm) l);
+		a = ATmakeApplList(ATgetAFun(a),l);
+		
+		if ( (u = ATtableGet(revsorts,(ATerm) a)) != NULL )
+		{
+			a = (ATermAppl) u;
+		}
+
+		return (ATerm) a;
+	}
+}
+
+ATermAppl gstcFoldSpec(ATermAppl s)
+{
+	ATermAppl SortDecl = ATAgetArgument(s,0);
+	ATermList Sorts = ATLgetArgument(SortDecl,0);
+	ATermList l;
+
+	revsorts = ATtableCreate(100,50);
+	l = ATreverse(ATtableKeys(context.defined_sorts));
+	for (; !ATisEmpty(l); l=ATgetNext(l))
+	{
+		ATerm t = ATtableGet(context.defined_sorts,ATgetFirst(l));
+		
+		if ( gsIsSortId((ATermAppl) t) )
+		{
+			ATtablePut(revsorts,(ATerm) gsMakeSortId(ATAgetFirst(l)),t);
+		} else {
+			ATtablePut(revsorts,t,(ATerm) gsMakeSortId(ATAgetFirst(l)));
+		}
+	}
+
+	l = ATmakeList0();
+	for (; !ATisEmpty(Sorts); Sorts=ATgetNext(Sorts))
+	{
+		ATermAppl sort = ATAgetArgument(ATAgetFirst(Sorts),0);
+		ATermAppl def = ATgetArgument(ATAgetFirst(Sorts),1);
+		ATermAppl t = (ATermAppl) gstcFold(def);
+
+		if ( ATisEqual(gsMakeSortId(sort),t) )
+		{
+			l = ATinsert(l,(ATerm) gsMakeSortRef(sort,def));
+		} else {
+			l = ATinsert(l,(ATerm) gsMakeSortRef(sort,t));
+		}
+	}
+	Sorts = ATreverse(l);
+
+	s = (ATermAppl) gstcFold((ATerm) s);
+	SortDecl = ATsetArgument(SortDecl,(ATerm) Sorts,0);
+	s = ATsetArgument(s,(ATerm) SortDecl,0);
+
+	ATtableDestroy(revsorts);
+
+	return s;
+}
+
 // Main function
 ATermAppl gsTypeCheck (ATermAppl input){	
   ATermAppl Result=NULL;
@@ -222,6 +311,8 @@ ATermAppl gsTypeCheck (ATermAppl input){
   Result=ATsetArgument(Result,(ATerm)gsMakeProcEqnSpec(gstcWriteProcs()),5);
   Result=ATsetArgument(Result,(ATerm)gsMakeInit(ATmakeList0(),
     ATAtableGet(body.proc_bodies,(ATerm)INIT_KEY())),6);
+
+  Result=gstcFoldSpec(Result);
 
   gsVerboseMsg ("type checking phase finished\n");
  finally:

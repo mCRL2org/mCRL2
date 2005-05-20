@@ -95,7 +95,6 @@ int main(int argc, char **argv)
 
 	if ( argc-optind < 1 )
 	{
-		printf("%i\n",argc-optind);
 		print_help(stderr);
 		return 0;
 	}
