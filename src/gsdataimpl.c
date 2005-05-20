@@ -379,11 +379,6 @@ ATermAppl gsImplExprsPart(ATermAppl Part, ATermList *PSubsts,
       //enumeration consists of 0 elements
       gsWarningMsg(
         "%t can not be implemented because it has 0 elements\n", Part);
-    } else if (!gsIsSortList(Sort)) {
-      //sort of the enumeration is wrong
-      gsWarningMsg(
-        "%t can not be implemented because its sort is not a list sort\n",
-        Part);
     } else {
       //make cons list
       Elts = ATreverse(Elts);
@@ -402,12 +397,6 @@ ATermAppl gsImplExprsPart(ATermAppl Part, ATermList *PSubsts,
       //enumeration consists of 0 elements
       gsWarningMsg(
         "%t can not be implemented because it has 0 elements\n", Part);
-    } else if ((gsIsSetEnum(Part) && !gsIsSortSet(Sort)) ||
-               (gsIsBagEnum(Part) && !gsIsSortBag(Sort))) {
-      //sort of the enumeration is wrong
-      gsWarningMsg(
-        "%t can not be implemented because its sort is not a %s sort\n", Part,
-        gsIsSetEnum(Part)?"set":"bag");
     } else {
       Part = gsImplSetBagEnum(Elts, Sort);
     }
