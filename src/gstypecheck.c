@@ -259,8 +259,8 @@ ATermAppl gstcFoldSpec(ATermAppl s)
 	for (; !ATisEmpty(Sorts); Sorts=ATgetNext(Sorts))
 	{
 		ATermAppl sort = ATAgetArgument(ATAgetFirst(Sorts),0);
-		ATermAppl def = ATgetArgument(ATAgetFirst(Sorts),1);
-		ATermAppl t = (ATermAppl) gstcFold(def);
+		ATermAppl def = ATAgetArgument(ATAgetFirst(Sorts),1);
+		ATermAppl t = (ATermAppl) gstcFold((ATerm) def);
 
 		if ( ATisEqual(gsMakeSortId(sort),t) )
 		{

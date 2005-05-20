@@ -135,7 +135,7 @@ void rewrite_init_inner3()
 	tmp_eqns = ATtableCreate(100,100); // XXX would be nice to know the number op OpIds
 	term2int = ATtableCreate(100,100);
 
-	trueint = OpId2Int(gsMakeDataExprTrue(),true);
+	trueint = (ATermInt) OpId2Int(gsMakeDataExprTrue(),true);
 
 	l = opid_eqns;
 	for (; !ATisEmpty(l); l=ATgetNext(l))
