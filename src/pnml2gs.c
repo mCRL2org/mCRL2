@@ -28,13 +28,16 @@ typedef struct {
   ATermTable trans_in;	        //trans_id -> List(arc_id) (arc_out)
   ATermTable place_out;	        //place_id -> List(arc_id) (arc_out)
   ATermTable trans_out;	        //trans_id -> List(arc_id) (arc_in)
+  //translate
+  ATermList pn2gsActions;       //store all the GenSpect Actions
+  ATermList pn2gsProcEqns;      //store all the GenSpect Process Equations
 } Context;
 static Context context;
 
 //==================================================
-// retrieve_text gets the contents of a child <text> element of cur
+// pn2gsRetrieve_text gets the contents of a child <text> element of cur
 //==================================================
-static ATerm retrieve_text(xmlNodePtr cur) {
+static ATerm pn2gsRetrieve_text(xmlNodePtr cur) {
   // input: a pointer to the current element
   // output: the contents of the first child <text> attribute 
   //         of the current element
@@ -54,9 +57,9 @@ static ATerm retrieve_text(xmlNodePtr cur) {
 }
 
 //==================================================
-// pnml2aterm_place converts a pnml-place to a usable ATerm
+// pn2gsAterm_place converts a pnml-place to a usable ATerm
 //==================================================
-static ATermAppl pnml2aterm_place(xmlNodePtr cur) {
+static ATermAppl pn2gsAterm_place(xmlNodePtr cur) {
   // input: a pointer to the current place
   // output: a usable translation of the place,
   //         if the place needs to be translated
@@ -94,7 +97,7 @@ static ATermAppl pnml2aterm_place(xmlNodePtr cur) {
       // the place contains a <name> element
       // a <name> element contains a childelement <text> which contains the name of the place
       // the name is retrieved below and assigned to Aname
-      if (!(Aname=retrieve_text(cur))) {
+      if (!(Aname=pn2gsRetrieve_text(cur))) {
 	Aname = ATparse("default_name");
       }
       gsDebugMsg("    name: '%t'\n", Aname);
@@ -103,7 +106,7 @@ static ATermAppl pnml2aterm_place(xmlNodePtr cur) {
       // this element contains a childelement <text> which contains the initial marking of the place
       // this marking is retrieved below and assigned to AinitialMarking
 
-      if (!(AinitialMarking=retrieve_text(cur))) {
+      if (!(AinitialMarking=pn2gsRetrieve_text(cur))) {
 	AinitialMarking = ATparse("0");
       }
       if (atoi(ATwriteToString(AinitialMarking)) < 0) {
@@ -117,7 +120,7 @@ static ATermAppl pnml2aterm_place(xmlNodePtr cur) {
       // the place contains an <type> element
       // this element contains a childelement <text> which contains the type of the place
 
-      if (!(Atype=retrieve_text(cur))) {
+      if (!(Atype=pn2gsRetrieve_text(cur))) {
 	Atype = ATparse("channel");
       }
       if (!ATisEqual(Atype, ATparse("channel"))) {
@@ -139,9 +142,9 @@ static ATermAppl pnml2aterm_place(xmlNodePtr cur) {
 }
 
 //==================================================
-// pnml2aterm_transition converts a pnml-transition to a usable ATerm
+// pn2gsAterm_transition converts a pnml-transition to a usable ATerm
 //==================================================
-static ATermAppl pnml2aterm_transition(xmlNodePtr cur) {
+static ATermAppl pn2gsAterm_transition(xmlNodePtr cur) {
   // input: a pointer to the current transition
   // output: a usable translation of the transition,
   //         if the transition needs to be translated
@@ -178,14 +181,14 @@ static ATermAppl pnml2aterm_transition(xmlNodePtr cur) {
       // the transition contains a <name> element
       // a <name> element contains a childelement <text> which contains the name of the transition
       // the name is retrieved below and assigned to Aname
-      if (!(Aname=retrieve_text(cur))) {
+      if (!(Aname=pn2gsRetrieve_text(cur))) {
 	Aname = ATparse("default_name");
       }
       gsDebugMsg("    name: '%t'\n", Aname);
     } else if (!xmlStrcmp(cur->name, (const xmlChar *)"type")) {
       // the transition contains an <type> element
       // this element contains a childelement <text> which contains the type of the transition
-      if (!(Atype=retrieve_text(cur))) {
+      if (!(Atype=pn2gsRetrieve_text(cur))) {
 	Atype = ATparse("AND");
       }
       if (!ATisEqual(Atype, ATparse("AND"))) {
@@ -207,9 +210,9 @@ static ATermAppl pnml2aterm_transition(xmlNodePtr cur) {
 }
 
 //==================================================
-// pnml2aterm_arc converts a pnml-arc to a usable ATerm
+// pn2gsAterm_arc converts a pnml-arc to a usable ATerm
 //==================================================
-static ATermAppl pnml2aterm_arc(xmlNodePtr cur) {
+static ATermAppl pn2gsAterm_arc(xmlNodePtr cur) {
   // input: a pointer to the current arc
   // output: a usable translation of the arc,
   //         if the arc needs to be translated
@@ -265,7 +268,7 @@ static ATermAppl pnml2aterm_arc(xmlNodePtr cur) {
       // the arc contains a <type> element
       // this element contains a childelement <text> which contains the type of the transition
 
-      if (!(Atype=retrieve_text(cur))) {
+      if (!(Atype=pn2gsRetrieve_text(cur))) {
 	Atype = ATparse("some_strange`type=that n0b0dy u5e5...");
       }
       if (!ATisEqual(Atype, ATparse("some_strange`type=that n0b0dy u5e5..."))) {
@@ -287,9 +290,9 @@ static ATermAppl pnml2aterm_arc(xmlNodePtr cur) {
 }
 
 //==================================================
-// pnml2aterm converts the pnml-input to a usable ATerm
+// pn2gsAterm converts the pnml-input to a usable ATerm
 //==================================================
-static ATermAppl pnml2aterm(xmlDocPtr doc) {
+static ATermAppl pn2gsAterm(xmlDocPtr doc) {
   // input: a pointer of the type xmlDocPtr which points to the parsed XML-file
   // output: an ATermAppl, translated from the XML-file,
   //         in which only relevant elements/attributes are concluded
@@ -328,12 +331,12 @@ static ATermAppl pnml2aterm(xmlDocPtr doc) {
   // actual translation starts here
   //==================================================
   // retrieve the ID of the Petri net
-  ATerm ANetID;
+  ATermAppl ANetID;
   if (!xmlGetProp(cur, (const xmlChar *)"id")) {
-    ANetID = ATparse("Petri_net");
+    ANetID = ATmakeAppl0(ATmakeAFun("Petri_net", 0, ATtrue));
     gsWarningMsg("NO NET-ID FOUND!\n");
   } else {
-    ANetID = ATparse((const char *)xmlGetProp(cur, (const xmlChar *)"id"));
+    ANetID = ATmakeAppl0(ATmakeAFun(((const char *)xmlGetProp(cur, (const xmlChar *)"id")), 0, ATtrue));
   }
   gsDebugMsg("NetID = '%t'\n",ANetID);
 
@@ -367,10 +370,10 @@ static ATermAppl pnml2aterm(xmlDocPtr doc) {
     // all other elements will be ignored in the translation
     
     if (!xmlStrcmp(cur->name, (const xmlChar *)"place")) {
-      if (!(ACurrentPlace=pnml2aterm_place(cur))) {
-	// pnml2aterm_place returns NULL, so the place will not be translated.
+      if (!(ACurrentPlace=pn2gsAterm_place(cur))) {
+	// pn2gsAterm_place returns NULL, so the place will not be translated.
 	if (context.Abort == ATtrue) {
-	  // pnml2aterm_place has set context.Abort to ATtrue
+	  // pn2gsAterm_place has set context.Abort to ATtrue
 	  // this means the place had no ID
 	  // therefor the translation will be aborted!
 	  gsErrorMsg("A place has no ID. \n");
@@ -381,10 +384,10 @@ static ATermAppl pnml2aterm(xmlDocPtr doc) {
 	gsDebugMsg("  Translate this place: %t\n", (ATerm)ACurrentPlace);
       }
    } else if (!xmlStrcmp(cur->name, (const xmlChar *)"transition")) {
-      if(!(ACurrentTransition=pnml2aterm_transition(cur))) {
-	// pnml2aterm_transition returns NULL, so the transition will not be translated.
+      if(!(ACurrentTransition=pn2gsAterm_transition(cur))) {
+	// pn2gsAterm_transition returns NULL, so the transition will not be translated.
 	if (context.Abort == ATtrue) {
-	  // pnml2aterm_transition has set context.Abort to ATtrue
+	  // pn2gsAterm_transition has set context.Abort to ATtrue
 	  // this means the transition had no ID
 	  // therefor the translation will be aborted!
 	  gsErrorMsg("A transition has no ID. \n");
@@ -395,10 +398,10 @@ static ATermAppl pnml2aterm(xmlDocPtr doc) {
 	gsDebugMsg("  Translate this transition: %t\n", (ATerm)ACurrentTransition);
       }
    } else if (!xmlStrcmp(cur->name, (const xmlChar *)"arc")) {
-      if(!(ACurrentArc=pnml2aterm_arc(cur))) {
-	// pnml2aterm_arc returns NULL, so the arc will not be translated.
+      if(!(ACurrentArc=pn2gsAterm_arc(cur))) {
+	// pn2gsAterm_arc returns NULL, so the arc will not be translated.
 	if (context.Abort == ATtrue) {
-	  // pnml2aterm_arc has set context.Abort to ATtrue
+	  // pn2gsAterm_arc has set context.Abort to ATtrue
 	  // this means the arc had no ID
 	  // therefor the translation will be aborted!
 	  gsErrorMsg("An arc has no ID. \n");
@@ -417,26 +420,129 @@ static ATermAppl pnml2aterm(xmlDocPtr doc) {
 
   gsDebugMsg("\nConversion of PNML to ATerm succesfully completed. \n");
 
-
-  /* CORRECT PASSING OF PARAMETER! */
-  /* TYPE SHOULD BE <string> */
-
-  // argument order of returnvalue is places - transitions - arcs 
-  return ATmakeAppl3(ATmakeAFun(ATwriteToString(ANetID), 3, ATtrue), (ATerm)ATreverse(APlaces), (ATerm)ATreverse(ATransitions), (ATerm)ATreverse(AArcs));
+  // argument order of returnvalue is places - transitions - arcs - NetID
+  return ATmakeAppl4(ATmakeAFun("PetriNet", 4, ATtrue), (ATerm)ATreverse(APlaces), (ATerm)ATreverse(ATransitions), (ATerm)ATreverse(AArcs), (ATerm)ANetID);
 }
 
-static ATermList pngsGenerateActions(void){
-  return ATmakeList0();
+//==================================================
+// pn2gsGenerateActions generates all the GenSpect actions
+//==================================================
+static ATermList pn2gsGenerateActions(void){
+  // input: access to the context
+  // output: an ATermList of <ActID>'s
+
+  // #actions = 3x #arcs + 1x #transitions
+  // the possible actions will be stored in ActionList
+  ATermList ActionsList = ATmakeList0();
+  
+  // the possible actions are
+  // for each arc:                                  arcid     >-<     _arcid     >-<     __arcid
+  // for each transition (if a name is present):    t_transid_transname
+  // for each transition (if no name is present):   t_transid
+
+  // variables to store the Current Action to be inserted into ActionsList
+  ATermAppl CurrentAction; 
+  char * Name;
+
+  // variable to go through all the arc_in-ids, the arc_out-ids and the transition-ids
+  ATermList Ids;
+
+  // create actions from context.arc_in
+  Ids = ATtableKeys(context.arc_in);
+  while (ATisEmpty(Ids) == ATfalse) {
+    // make the action: arcID
+    Name = ATwriteToString(ATgetFirst(Ids));
+    CurrentAction = ATmakeAppl0(ATmakeAFun(Name, 0, ATtrue));
+    ActionsList = ATinsert(ActionsList, (ATerm)gsMakeActId(CurrentAction, ATmakeList0()));
+    fprintf(stderr, ATwriteToString((ATerm)CurrentAction));
+    fprintf(stderr, "\n");
+    // make the action: _arcID
+    char Underscore1[255]="_";     
+    Name = strcat(Underscore1, Name);
+    CurrentAction = ATmakeAppl0(ATmakeAFun(Name, 0, ATtrue));
+    ActionsList = ATinsert(ActionsList, (ATerm)gsMakeActId(CurrentAction, ATmakeList0()));
+    fprintf(stderr, ATwriteToString((ATerm)CurrentAction));
+    fprintf(stderr, "\n");
+    // make the action: __arcID
+    char Underscore2[255]="_";
+    Name = strcat(Underscore2, Name);
+    CurrentAction = ATmakeAppl0(ATmakeAFun(Name, 0, ATtrue));
+    ActionsList = ATinsert(ActionsList, (ATerm)gsMakeActId(CurrentAction, ATmakeList0()));
+    fprintf(stderr, ATwriteToString((ATerm)CurrentAction));
+    fprintf(stderr, "\n");
+
+    Ids = ATgetNext(Ids);
+  }
+
+  fprintf(stderr, ATwriteToString((ATerm)ActionsList));
+
+  // create actions from context.arc_out
+  Ids = ATtableKeys(context.arc_out);
+  while (ATisEmpty(Ids) == ATfalse) {
+    // make the action: arcID
+    Name = ATwriteToString(ATgetFirst(Ids));
+    CurrentAction = ATmakeAppl0(ATmakeAFun(Name, 0, ATtrue));
+    ActionsList = ATinsert(ActionsList, (ATerm)gsMakeActId(CurrentAction, ATmakeList0()));
+    fprintf(stderr, ATwriteToString((ATerm)CurrentAction));
+    fprintf(stderr, "\n");
+    // make the action: _arcID
+    char Underscore1[255]="_";     
+    Name = strcat(Underscore1, Name);
+    CurrentAction = ATmakeAppl0(ATmakeAFun(Name, 0, ATtrue));
+    ActionsList = ATinsert(ActionsList, (ATerm)gsMakeActId(CurrentAction, ATmakeList0()));
+    fprintf(stderr, ATwriteToString((ATerm)CurrentAction));
+    fprintf(stderr, "\n");
+    // make the action: __arcID
+    char Underscore2[255]="_";
+    Name = strcat(Underscore2, Name);
+    CurrentAction = ATmakeAppl0(ATmakeAFun(Name, 0, ATtrue));
+    ActionsList = ATinsert(ActionsList, (ATerm)gsMakeActId(CurrentAction, ATmakeList0()));
+    fprintf(stderr, ATwriteToString((ATerm)CurrentAction));
+    fprintf(stderr, "\n");
+
+    Ids = ATgetNext(Ids);
+  }
+
+  fprintf(stderr, ATwriteToString((ATerm)ActionsList));
+
+  // create actions from the transitions
+  // All transitions have a name. If no name is defined in PNML, it is "default_name"
+  Ids = ATtableKeys(context.trans_name);
+  while (ATisEmpty(Ids) == ATfalse) {
+    if (strcmp(ATwriteToString(ATtableGet(context.trans_name, ATgetFirst(Ids))), "default_name")) {
+      // name of the transition is not "default_name"
+      // name of the transition needs to be used
+
+    } else {
+      // name of the transition is "default_name"
+      // name of the transition does not need to be used
+
+    }
+
+
+
+    Ids = ATgetNext(Ids);
+  }
+
+
+
+
+
+
+  return ActionsList;
 }
 
-static ATermList pngsGenerateProcEqns(void){
+//==================================================
+// pn2gsGenerateProcEqns generates all the GenSpect Process Equations
+//==================================================
+static ATermList pn2gsGenerateProcEqns(void){
   return ATmakeList0();
 }
 
 //==================================================
-// do_pnml2gs converts the ATerm delivered by pnml2aterm to a GenSpect ATerm.
+// pn2gsTranslate converts the ATerm delivered by pn2gsAterm to a GenSpect ATerm.
 //==================================================
-static ATermAppl do_pnml2gs(ATermAppl Spec){
+static ATermAppl pn2gsTranslate(ATermAppl Spec){
   // input: an ATermAppl that contains the translated PNML-file
   // output: another ATermAppl, which is the GenSpect translation
   //         of the PNML-ATerm.
@@ -683,56 +789,11 @@ static ATermAppl do_pnml2gs(ATermAppl Spec){
   // creation of GenSpect ATerms
   //==================================================
 
-  /* FUNCTIONS TO CREATE */
-  /* List of ActID - pngsGenerateActions()
-     List of ProcEqn - pngsGenerateProcEqns() */
+  context.pn2gsActions = pn2gsGenerateActions();
+  context.pn2gsProcEqns = pn2gsGenerateProcEqns();
 
-
-  return gsMakeSpecV1(gsMakeSortSpec(ATmakeList0()), gsMakeConsSpec(ATmakeList0()), gsMakeMapSpec(ATmakeList0()), gsMakeDataEqnSpec(ATmakeList0()), gsMakeActSpec(pngsGenerateActions()), gsMakeProcEqnSpec(pngsGenerateProcEqns()), gsMakeInit(ATmakeList0(),gsMakeProcess(gsMakeProcVarId(ATAgetArgument(Spec, 3), ATmakeList0()), ATmakeList0())));
-
-
-  /* THE PART BELOW SHOULD BE IN THE FUNCTIONS NAMED ABOVE */
-
-  // first, we create all the possible actions and store them in ActionsSpec
-  // #actions = 3x #arcs + 1x #transitions
-  //ATermAppl ActionsSpec;
-
-  // the possible actions will be stored in ActionList
-  //ATermList ActionsList = ATmakeList0();
-  
-  // the possible actions are
-  // for each arc:                                  arcid     >-<     _arcid     >-<     __arcid
-  // for each transition (if a name is present):    t_transid_transname
-  // for each transition (if no name is present):   t_transid
-
-  // variables to store the Current Action to be inserted into ActionsList
-  //ATermAppl CurrentAction; 
-  char * Name;
-
-  // variable to go through all the arc_in-ids, the arc_out-ids and the transition-ids
-  ATermList Ids;
-
-  Ids = ATtableKeys(context.arc_in);
-  fprintf(stderr, "\n");
-  while (ATisEmpty(Ids) == ATfalse) {
-    Name = ATwriteToString(ATgetFirst(Ids));
-
-    fprintf(stderr, ATwriteToString(ATparse(Name)));
-    fprintf(stderr, "\n");
-    Name = strcat("_", Name);
-    fprintf(stderr, Name);
-    fprintf(stderr, "\n");
-    Name = strcat("_", Name);
-    fprintf(stderr, Name);
-    fprintf(stderr, "\n");
-
-
-    Ids = ATgetNext(Ids);
-  }
-
-  return Spec;	
+  return gsMakeSpecV1(gsMakeSortSpec(ATmakeList0()), gsMakeConsSpec(ATmakeList0()), gsMakeMapSpec(ATmakeList0()), gsMakeDataEqnSpec(ATmakeList0()), gsMakeActSpec(context.pn2gsActions), gsMakeProcEqnSpec(context.pn2gsProcEqns), gsMakeInit(ATmakeList0(),gsMakeProcess(gsMakeProcVarId(ATAgetArgument(Spec, 3), ATmakeList0()), ATmakeList0())));
 }
-
 
 //==================================================
 // main
@@ -779,7 +840,7 @@ int main(int argc, char **argv){
     return 1;
   }
   
-  ATermAppl Spec=pnml2aterm(doc);
+  ATermAppl Spec=pn2gsAterm(doc);
   xmlFreeDoc(doc);
 
   if(!Spec){	
@@ -798,7 +859,7 @@ int main(int argc, char **argv){
   context.place_out=ATtableCreate(63,50);  
   context.trans_out=ATtableCreate(63,50);  
 
-  Spec=do_pnml2gs(Spec);
+  Spec=pn2gsTranslate(Spec);
 
   ATtableDestroy(context.place_name);
   ATtableDestroy(context.place_mark); 
