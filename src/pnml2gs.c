@@ -2,6 +2,13 @@
 
 #define NAME "pnml2gs"
 
+#define PlaceChars 6          // defines the number of characters added to a place (in actions and processes)
+#define TransChars 6          // defines the number of characters added to a transition (in actions and processes)
+#define ArcChars 2            // defines the number of characters added to an arc (in actions and processes)
+
+/* MaxIDlength should be at least (1 + max(PlaceChars, TransChars, ArcChars)) */
+#define MaxIDlength 255       // defines the maximum length of an ID! 
+
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
@@ -14,23 +21,22 @@
 #include "gsfunc.h"
 #include "libgsparse.h"
 
-// the static context of the spec will be checked and used, not transformed
 typedef struct {
-  ATbool Abort;                 //if an element has no ID, this boolean is used to grant abortion of the conversion
+  ATbool Abort;                 // if an element has no ID, this boolean is used to grant abortion of the conversion
   //read-in
-  ATermTable place_name;	//place_id -> name
-  ATermTable place_mark;	//place_id -> Nat
-  ATermTable trans_name;	//trans_id -> name
-  ATermTable arc_in;	        //arc_id -> trans_id x place_id
-  ATermTable arc_out;	        //arc_id -> place_id x trans_id
+  ATermTable place_name;	// place_id -> name
+  ATermTable place_mark;	// place_id -> Nat
+  ATermTable trans_name;	// trans_id -> name
+  ATermTable arc_in;	        // arc_id -> trans_id x place_id
+  ATermTable arc_out;	        // arc_id -> place_id x trans_id
   //generate
-  ATermTable place_in;	        //place_id -> List(arc_id) (arc_in)
-  ATermTable trans_in;	        //trans_id -> List(arc_id) (arc_out)
-  ATermTable place_out;	        //place_id -> List(arc_id) (arc_out)
-  ATermTable trans_out;	        //trans_id -> List(arc_id) (arc_in)
+  ATermTable place_in;	        // place_id -> List(arc_id) (arc_in)
+  ATermTable trans_in;	        // trans_id -> List(arc_id) (arc_out)
+  ATermTable place_out;	        // place_id -> List(arc_id) (arc_out)
+  ATermTable trans_out;	        // trans_id -> List(arc_id) (arc_in)
   //translate
-  ATermList pn2gsActions;       //store all the GenSpect Actions
-  ATermList pn2gsProcEqns;      //store all the GenSpect Process Equations
+  ATermList pn2gsActions;       // store all the GenSpect Actions
+  ATermList pn2gsProcEqns;      // store all the GenSpect Process Equations
 } Context;
 static Context context;
 
@@ -70,9 +76,18 @@ static ATermAppl pn2gsAterm_place(xmlNodePtr cur) {
   if (!xmlGetProp(cur, (const xmlChar *)"id")) {
     // the place has NO id, so translation should be aborted!
     context.Abort = ATtrue;
+    gsErrorMsg("A place has no ID. \n");
     return NULL;
   } else {
+    // the place has an id, put it in Aid
     Aid = ATparse((const char *)xmlGetProp(cur, (const xmlChar *)"id"));
+
+    if (strlen((const char *)xmlGetProp(cur, (const xmlChar *)"id")) > (MaxIDlength - PlaceChars)) {
+      // check if the ID is not too long
+      context.Abort = ATtrue;
+      gsErrorMsg("The id: '%t' is too long! \n", Aid);
+      return NULL;
+    }
   }
   gsDebugMsg("    id: '%t'\n", Aid); 
 
@@ -155,9 +170,18 @@ static ATermAppl pn2gsAterm_transition(xmlNodePtr cur) {
   if (!xmlGetProp(cur, (const xmlChar *)"id")) {
     // the transition has NO id, so translation should be aborted!
     context.Abort = ATtrue;
+    gsErrorMsg("A transition has no ID. \n");
     return NULL;
   } else {
+    // the transition has an id, put it in Aid
     Aid = ATparse((const char *)xmlGetProp(cur, (const xmlChar *)"id"));
+
+    if (strlen((const char *)xmlGetProp(cur, (const xmlChar *)"id")) > (MaxIDlength - TransChars)) {
+      // check if the ID is not too long
+      context.Abort = ATtrue;
+      gsErrorMsg("The id: '%t' is too long! \n", Aid);
+      return NULL;
+    }
   }
   gsDebugMsg("    id: '%t'\n", Aid); 
 
@@ -223,9 +247,18 @@ static ATermAppl pn2gsAterm_arc(xmlNodePtr cur) {
   if (!xmlGetProp(cur, (const xmlChar *)"id")) {
     // the arc has NO id, so translation should be aborted!
     context.Abort = ATtrue;
+    gsErrorMsg("An arc has no ID. \n");
     return NULL;
   } else {
+    // the arc has an id, put it in Aid
     Aid = ATparse((const char *)xmlGetProp(cur, (const xmlChar *)"id"));
+
+    if (strlen((const char *)xmlGetProp(cur, (const xmlChar *)"id")) > (MaxIDlength - ArcChars)) {
+      // check if the ID is not too long
+      context.Abort = ATtrue;
+      gsErrorMsg("The id: '%t' is too long! \n", Aid);
+      return NULL;
+    }
   }
   gsDebugMsg("    id: '%t'\n", Aid); 
 
@@ -333,10 +366,21 @@ static ATermAppl pn2gsAterm(xmlDocPtr doc) {
   // retrieve the ID of the Petri net
   ATermAppl ANetID;
   if (!xmlGetProp(cur, (const xmlChar *)"id")) {
-    ANetID = ATmakeAppl0(ATmakeAFun("Petri_net", 0, ATtrue));
+    ANetID = ATmakeAppl0(ATmakeAFun("Net_Petri_net", 0, ATtrue));
     gsWarningMsg("NO NET-ID FOUND!\n");
   } else {
-    ANetID = ATmakeAppl0(ATmakeAFun(((const char *)xmlGetProp(cur, (const xmlChar *)"id")), 0, ATtrue));
+    // the net has an id, put it in ANetID
+    char * NetID;
+    NetID = (const char *)xmlGetProp(cur, (const xmlChar *)"id");
+    char Prefix[MaxIDlength]="Net_";     
+    NetID = strcat(Prefix, NetID);
+    ANetID = ATmakeAppl0(ATmakeAFun(NetID, 0, ATtrue));
+    if (strlen(NetID) > MaxIDlength) {
+      // check if the ID is not too long
+      context.Abort = ATtrue;
+      gsErrorMsg("The id: '%t' is too long! \n", ANetID);
+      return NULL;
+    }
   }
   gsDebugMsg("NetID = '%t'\n",ANetID);
 
@@ -374,9 +418,8 @@ static ATermAppl pn2gsAterm(xmlDocPtr doc) {
 	// pn2gsAterm_place returns NULL, so the place will not be translated.
 	if (context.Abort == ATtrue) {
 	  // pn2gsAterm_place has set context.Abort to ATtrue
-	  // this means the place had no ID
+	  // this means the place had no ID or the ID is too long (> MaxIDlength - 6)
 	  // therefor the translation will be aborted!
-	  gsErrorMsg("A place has no ID. \n");
 	  return NULL;
 	}
       } else {
@@ -388,9 +431,8 @@ static ATermAppl pn2gsAterm(xmlDocPtr doc) {
 	// pn2gsAterm_transition returns NULL, so the transition will not be translated.
 	if (context.Abort == ATtrue) {
 	  // pn2gsAterm_transition has set context.Abort to ATtrue
-	  // this means the transition had no ID
+	  // this means the transition had no ID or the ID is too long (> MaxIDlength - 6)
 	  // therefor the translation will be aborted!
-	  gsErrorMsg("A transition has no ID. \n");
 	  return NULL;
 	}
       } else {
@@ -402,9 +444,8 @@ static ATermAppl pn2gsAterm(xmlDocPtr doc) {
 	// pn2gsAterm_arc returns NULL, so the arc will not be translated.
 	if (context.Abort == ATtrue) {
 	  // pn2gsAterm_arc has set context.Abort to ATtrue
-	  // this means the arc had no ID
+	  // this means the arc had no ID or the ID is too long (> MaxIDlength - 6)
 	  // therefor the translation will be aborted!
-	  gsErrorMsg("An arc has no ID. \n");
 	  return NULL;
 	}
       } else {
@@ -437,106 +478,239 @@ static ATermList pn2gsGenerateActions(void){
   
   // the possible actions are
   // for each arc:                                  arcid     >-<     _arcid     >-<     __arcid
-  // for each transition (if a name is present):    t_transid_transname
-  // for each transition (if no name is present):   t_transid
+  // for each transition (if a name is present):    t_transid_transname_mon
+  // for each transition (if no name is present):   t_transid_mon
 
   // variables to store the Current Action to be inserted into ActionsList
   ATermAppl CurrentAction; 
-  char * Name;
+  char * CurrentId;
 
   // variable to go through all the arc_in-ids, the arc_out-ids and the transition-ids
   ATermList Ids;
 
+  //==================================================
   // create actions from context.arc_in
+  //==================================================
   Ids = ATtableKeys(context.arc_in);
   while (ATisEmpty(Ids) == ATfalse) {
     // make the action: arcID
-    Name = ATwriteToString(ATgetFirst(Ids));
-    CurrentAction = ATmakeAppl0(ATmakeAFun(Name, 0, ATtrue));
+    CurrentId = ATgetName(ATgetAFun(ATgetFirst(Ids)));
+    CurrentAction = ATmakeAppl0(ATmakeAFun(CurrentId, 0, ATtrue));
     ActionsList = ATinsert(ActionsList, (ATerm)gsMakeActId(CurrentAction, ATmakeList0()));
-    fprintf(stderr, ATwriteToString((ATerm)CurrentAction));
-    fprintf(stderr, "\n");
+    gsDebugMsg("Action: '%t' created.\n", CurrentAction);
     // make the action: _arcID
-    char Underscore1[255]="_";     
-    Name = strcat(Underscore1, Name);
-    CurrentAction = ATmakeAppl0(ATmakeAFun(Name, 0, ATtrue));
+    char Underscore1[MaxIDlength] = "_";     
+    CurrentId = strcat(Underscore1, CurrentId);
+    CurrentAction = ATmakeAppl0(ATmakeAFun(CurrentId, 0, ATtrue));
     ActionsList = ATinsert(ActionsList, (ATerm)gsMakeActId(CurrentAction, ATmakeList0()));
-    fprintf(stderr, ATwriteToString((ATerm)CurrentAction));
-    fprintf(stderr, "\n");
+    gsDebugMsg("Action: '%t' created.\n", CurrentAction);
     // make the action: __arcID
-    char Underscore2[255]="_";
-    Name = strcat(Underscore2, Name);
-    CurrentAction = ATmakeAppl0(ATmakeAFun(Name, 0, ATtrue));
+    char Underscore2[MaxIDlength] = "_";
+    CurrentId = strcat(Underscore2, CurrentId);
+    CurrentAction = ATmakeAppl0(ATmakeAFun(CurrentId, 0, ATtrue));
     ActionsList = ATinsert(ActionsList, (ATerm)gsMakeActId(CurrentAction, ATmakeList0()));
-    fprintf(stderr, ATwriteToString((ATerm)CurrentAction));
-    fprintf(stderr, "\n");
+    gsDebugMsg("Action: '%t' created.\n", CurrentAction);
 
     Ids = ATgetNext(Ids);
   }
 
-  fprintf(stderr, ATwriteToString((ATerm)ActionsList));
-
+  //==================================================
   // create actions from context.arc_out
+  //==================================================
   Ids = ATtableKeys(context.arc_out);
   while (ATisEmpty(Ids) == ATfalse) {
     // make the action: arcID
-    Name = ATwriteToString(ATgetFirst(Ids));
-    CurrentAction = ATmakeAppl0(ATmakeAFun(Name, 0, ATtrue));
+    CurrentId = ATgetName(ATgetAFun(ATgetFirst(Ids)));
+    CurrentAction = ATmakeAppl0(ATmakeAFun(CurrentId, 0, ATtrue));
     ActionsList = ATinsert(ActionsList, (ATerm)gsMakeActId(CurrentAction, ATmakeList0()));
-    fprintf(stderr, ATwriteToString((ATerm)CurrentAction));
-    fprintf(stderr, "\n");
+    gsDebugMsg("Action: '%t' created.\n", CurrentAction);
     // make the action: _arcID
-    char Underscore1[255]="_";     
-    Name = strcat(Underscore1, Name);
-    CurrentAction = ATmakeAppl0(ATmakeAFun(Name, 0, ATtrue));
+    char Underscore1[MaxIDlength] = "_";     
+    CurrentId = strcat(Underscore1, CurrentId);
+    CurrentAction = ATmakeAppl0(ATmakeAFun(CurrentId, 0, ATtrue));
     ActionsList = ATinsert(ActionsList, (ATerm)gsMakeActId(CurrentAction, ATmakeList0()));
-    fprintf(stderr, ATwriteToString((ATerm)CurrentAction));
-    fprintf(stderr, "\n");
+    gsDebugMsg("Action: '%t' created.\n", CurrentAction);
     // make the action: __arcID
-    char Underscore2[255]="_";
-    Name = strcat(Underscore2, Name);
-    CurrentAction = ATmakeAppl0(ATmakeAFun(Name, 0, ATtrue));
+    char Underscore2[MaxIDlength] = "_";
+    CurrentId = strcat(Underscore2, CurrentId);
+    CurrentAction = ATmakeAppl0(ATmakeAFun(CurrentId, 0, ATtrue));
     ActionsList = ATinsert(ActionsList, (ATerm)gsMakeActId(CurrentAction, ATmakeList0()));
-    fprintf(stderr, ATwriteToString((ATerm)CurrentAction));
-    fprintf(stderr, "\n");
+    gsDebugMsg("Action: '%t' created.\n", CurrentAction);
 
     Ids = ATgetNext(Ids);
   }
 
-  fprintf(stderr, ATwriteToString((ATerm)ActionsList));
-
+  //==================================================
   // create actions from the transitions
+  //==================================================
   // All transitions have a name. If no name is defined in PNML, it is "default_name"
+  char * CurrentName;
   Ids = ATtableKeys(context.trans_name);
   while (ATisEmpty(Ids) == ATfalse) {
-    if (strcmp(ATwriteToString(ATtableGet(context.trans_name, ATgetFirst(Ids))), "default_name")) {
-      // name of the transition is not "default_name"
-      // name of the transition needs to be used
 
+    CurrentName = ATgetName(ATgetAFun(ATtableGet(context.trans_name, ATgetFirst(Ids))));
+    CurrentId = ATgetName(ATgetAFun(ATgetFirst(Ids)));
+    char Trans[MaxIDlength] = "t_";
+    if (strcmp(CurrentName, "default_name")) {
+      // name of the transition is not "default_name"
+      // name of the transition may be used
+      if ((strlen(CurrentName) + strlen(CurrentId)) > (MaxIDlength - (TransChars + 1))) {
+	// name + id are too long; only use the id
+	// make the action: t_transid_mon
+	gsWarningMsg("The combination of ID: '%s' and name: '%s' is too long, so the name is left out.\n", CurrentId, CurrentName);
+	CurrentId = strcat(strcat(Trans, CurrentId), "_mon");
+      } else {
+	// name + id are of good length; use both
+	// make the action: t_transid_transname_mon
+	CurrentId = strcat(strcat(strcat(strcat(Trans, CurrentId), "_"), CurrentName), "_mon");
+      }
     } else {
       // name of the transition is "default_name"
-      // name of the transition does not need to be used
+      // name of the transition will not be used
 
+      // make the action: t_transid_mon
+      CurrentId = strcat(strcat(Trans, CurrentId), "_mon");
     }
-
-
-
+    CurrentAction = ATmakeAppl0(ATmakeAFun(CurrentId, 0, ATtrue));
+    ActionsList = ATinsert(ActionsList, (ATerm)gsMakeActId(CurrentAction, ATmakeList0()));
+    gsDebugMsg("Action: '%t' created.\n", CurrentAction);
     Ids = ATgetNext(Ids);
   }
-
-
-
-
-
-
   return ActionsList;
 }
 
 //==================================================
 // pn2gsGenerateProcEqns generates all the GenSpect Process Equations
 //==================================================
-static ATermList pn2gsGenerateProcEqns(void){
-  return ATmakeList0();
+static ATermList pn2gsGenerateProcEqns(ATermAppl NetID){
+  // input: access to the context and the ID of the Petri net
+  // output: an ATermList of <ProcEqn>'s
+
+  // #processes = 5x #places + 3x #transitions + ~3
+  // the actual number of processes might be less than the number stated here. 
+  // the possible processes will be stored in ProcessList
+  ATermList ProcessList = ATmakeList0();
+
+  // variable to go through all the transition-ids and place-ids
+  ATermList Ids;
+
+  //==================================================
+  // first, we generate the transition processes.
+  //==================================================
+
+  // In the comment below, ti will refer to 'transid' or to 'transid_transname'.
+  // This depends on whether or not a transition has a name, and if it does, if it's not too long.
+
+  // Each transition creates the following processes:
+  // T_ti     = T_ti_in | T_ti_out | t_ti_mon;
+  // T_ti_in  = "incoming arcs"
+  // T_ti_out = "outgoing arcs"
+
+  // If there are no incoming or outgoing arcs, T_ti_in respectively T_ti_out are left out!
+
+  // variables to store temporary information
+  char * CurrentTransId;
+  char * CurrentTransName;
+
+  Ids = ATtableKeys(context.trans_name);
+  while (ATisEmpty(Ids) == ATfalse) {
+
+    CurrentTransName = ATgetName(ATgetAFun(ATtableGet(context.trans_name, ATgetFirst(Ids))));
+    CurrentTransId = ATgetName(ATgetAFun(ATgetFirst(Ids)));
+
+    // variables to store the process names
+    ATermAppl CurrentTrans;
+    ATermAppl CurrentTransIn;
+    ATermAppl CurrentTransOut;
+    char Trans[MaxIDlength] = "T_";
+
+    // retrieve the process names
+    if (strcmp(CurrentTransName, "default_name")) {
+      // name of the transition is not "default_name"
+      // name of the transition may be used
+      if ((strlen(CurrentTransName) + strlen(CurrentTransId)) > (MaxIDlength - (TransChars + 1))) {
+	// name + id are too long; only use the id
+	gsWarningMsg("The combination of ID: '%s' and name: '%s' is too long, so the name is left out.\n", CurrentTransId, CurrentTransName);
+	// make the processes: T_transid     >-<     T_transid_in     >-<     T_transid_out
+	CurrentTrans = ATmakeAppl0(ATmakeAFun(strcat(Trans, CurrentTransId), 0, ATtrue));
+	CurrentTransIn = ATmakeAppl0(ATmakeAFun(strcat(strcat(Trans, CurrentTransId), "_in"), 0, ATtrue));
+	CurrentTransOut = ATmakeAppl0(ATmakeAFun(strcat(strcat(Trans, CurrentTransId), "_out"), 0, ATtrue));
+      } else {
+	// name + id are of good length; use both
+	// make the processes: T_transid     >-<     T_transid_in     >-<     T_transid_out
+	CurrentTrans = ATmakeAppl0(ATmakeAFun(strcat(strcat(strcat(Trans, CurrentTransId), "_"), CurrentTransName), 0, ATtrue));
+	CurrentTransIn = ATmakeAppl0(ATmakeAFun(strcat(strcat(strcat(strcat(Trans, CurrentTransId), "_"), CurrentTransName), "_in"), 0, ATtrue));
+	CurrentTransOut = ATmakeAppl0(ATmakeAFun(strcat(strcat(strcat(strcat(Trans, CurrentTransId), "_"), CurrentTransName), "_out"), 0, ATtrue));
+      }
+    } else {
+      // name of the transition is "default_name"
+      // name of the transition will not be used
+      // make the processes: T_transid     >-<     T_transid_in     >-<     T_transid_out
+      CurrentTrans = ATmakeAppl0(ATmakeAFun(strcat(Trans, CurrentTransId), 0, ATtrue));
+      CurrentTransIn = ATmakeAppl0(ATmakeAFun(strcat(strcat(Trans, CurrentTransId), "_in"), 0, ATtrue));
+      CurrentTransOut = ATmakeAppl0(ATmakeAFun(strcat(strcat(Trans, CurrentTransId), "_out"), 0, ATtrue));
+    }
+
+
+    if (!(ATtableGet(context.trans_in, ATgetFirst(Ids))) && !(ATtableGet(context.trans_out, ATgetFirst(Ids)))) {
+      // Transition has no incoming arcs and no outgoing arcs
+
+      fprintf(stderr, "No in and no out for trans: ");
+      fprintf(stderr, ATwriteToString((ATerm)CurrentTrans));
+      fprintf(stderr, "\n");
+
+    } else if (ATtableGet(context.trans_in, ATgetFirst(Ids)) && !(ATtableGet(context.trans_out, ATgetFirst(Ids)))) {
+      // Transition has incoming arcs but no outgoing arcs
+
+      fprintf(stderr, "In and no out for trans: ");
+      fprintf(stderr, ATwriteToString((ATerm)CurrentTrans));
+      fprintf(stderr, "\n");
+
+    } else if (!(ATtableGet(context.trans_in, ATgetFirst(Ids))) && ATtableGet(context.trans_out, ATgetFirst(Ids))) {
+      // Transition has outgoing arcs but no incoming arcs
+
+      fprintf(stderr, "Out and no in for trans: ");
+      fprintf(stderr, ATwriteToString((ATerm)CurrentTrans));
+      fprintf(stderr, "\n");
+
+    } else if (ATtableGet(context.trans_in, ATgetFirst(Ids)) && ATtableGet(context.trans_out, ATgetFirst(Ids))) {
+      // Transition has incoming arcs and outgoing arcs
+
+      fprintf(stderr, "In and out for trans: ");
+      fprintf(stderr, ATwriteToString((ATerm)CurrentTrans));
+      fprintf(stderr, "\n");
+
+    }
+
+
+    ProcessList = ATinsert(ProcessList, (ATerm)gsMakeProcEqn(ATmakeList0(), gsMakeProcVarId(CurrentTrans, ATmakeList0()), ATmakeList0(), /*remove gsMakeTau() here; only used for temporary inspection! */ gsMakeTau()/* <ProcExpr> */ ));
+    gsDebugMsg("Process: '%t' created.\n", CurrentTrans);
+
+
+
+
+
+
+    Ids = ATgetNext(Ids);
+  }
+
+  //==================================================
+  // second, we generate the place processes.
+  //==================================================
+
+
+
+
+
+  //==================================================
+  // third, we generate the general Petri net processes.
+  //==================================================
+
+
+
+
+
+  return ProcessList;
 }
 
 //==================================================
@@ -790,7 +964,7 @@ static ATermAppl pn2gsTranslate(ATermAppl Spec){
   //==================================================
 
   context.pn2gsActions = pn2gsGenerateActions();
-  context.pn2gsProcEqns = pn2gsGenerateProcEqns();
+  context.pn2gsProcEqns = pn2gsGenerateProcEqns(ATAgetArgument(Spec, 3));
 
   return gsMakeSpecV1(gsMakeSortSpec(ATmakeList0()), gsMakeConsSpec(ATmakeList0()), gsMakeMapSpec(ATmakeList0()), gsMakeDataEqnSpec(ATmakeList0()), gsMakeActSpec(context.pn2gsActions), gsMakeProcEqnSpec(context.pn2gsProcEqns), gsMakeInit(ATmakeList0(),gsMakeProcess(gsMakeProcVarId(ATAgetArgument(Spec, 3), ATmakeList0()), ATmakeList0())));
 }
@@ -858,6 +1032,8 @@ int main(int argc, char **argv){
   context.trans_in=ATtableCreate(63,50);   
   context.place_out=ATtableCreate(63,50);  
   context.trans_out=ATtableCreate(63,50);  
+
+  gsEnableConstructorFunctions();
 
   Spec=pn2gsTranslate(Spec);
 
