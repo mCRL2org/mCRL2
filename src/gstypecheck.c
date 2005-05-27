@@ -230,15 +230,20 @@ ATermAppl gstcFoldSpec(ATermAppl s)
 	l = ATmakeList0();
 	for (; !ATisEmpty(Sorts); Sorts=ATgetNext(Sorts))
 	{
-		ATermAppl sort = ATAgetArgument(ATAgetFirst(Sorts),0);
-		ATermAppl def = ATAgetArgument(ATAgetFirst(Sorts),1);
-		ATermAppl t = (ATermAppl) gstcFold((ATerm) def);
-
-		if ( ATisEqual(gsMakeSortId(sort),t) )
+		if ( gsIsSortRef(ATAgetFirst(Sorts)) )
 		{
-			l = ATinsert(l,(ATerm) gsMakeSortRef(sort,def));
+			ATermAppl sort = ATAgetArgument(ATAgetFirst(Sorts),0);
+			ATermAppl def = ATAgetArgument(ATAgetFirst(Sorts),1);
+			ATermAppl t = (ATermAppl) gstcFold((ATerm) def);
+
+			if ( ATisEqual(gsMakeSortId(sort),t) )
+			{
+				l = ATinsert(l,(ATerm) gsMakeSortRef(sort,def));
+			} else {
+				l = ATinsert(l,(ATerm) gsMakeSortRef(sort,t));
+			}
 		} else {
-			l = ATinsert(l,(ATerm) gsMakeSortRef(sort,t));
+			l = ATinsert(l,ATgetFirst(Sorts));
 		}
 	}
 	Sorts = ATreverse(l);

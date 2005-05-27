@@ -21,6 +21,7 @@ static unsigned int num_opids;
 static ATermAppl *int2term;
 static ATermList *inner3_eqns;
 static ATermInt trueint;
+static bool protected = false;
 
 static bool ATisList(ATerm a)
 {
@@ -139,6 +140,10 @@ void rewrite_init_inner3()
 	term2int = ATtableCreate(100,100);
 
 	trueint = (ATermInt) OpId2Int(gsMakeDataExprTrue(),true);
+	if ( !protected )
+	{
+		ATprotectInt(&trueint);
+	}
 
 	l = opid_eqns;
 	for (; !ATisEmpty(l); l=ATgetNext(l))
@@ -175,7 +180,15 @@ void rewrite_init_inner3()
 		}
 	}
 
+	if ( !protected )
+	{
+		ATprotectArray((ATerm *) int2term,num_opids);
+		ATprotectArray((ATerm *) inner3_eqns,num_opids);
+	}
+
 	ATtableDestroy(tmp_eqns);
+
+	protected = true;
 }
 
 void rewrite_add_inner3(ATermAppl eqn)
@@ -354,7 +367,7 @@ static ATerm rewrite(ATerm Term, int *b, ATermList vars)
 	bool x;
 
 //ATfprintf(stderr,"rewrite(%t)\n\n",Term);
-//ATfprintf(stderr,"rewrite(");gsPrintPart(stderr,fromInner(Term),false,0);ATfprintf(stderr,")\n\n");
+//ATfprintf(stderr,"rewrite(");gsPrintPart(stderr,fromInner(Term),false,0);ATfprintf(stderr,") %p\n\n",&t);
 
 	l2 = NULL;
 

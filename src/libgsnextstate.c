@@ -164,6 +164,7 @@ ATermList gsNextStateInit(ATermAppl Spec, bool AllowFreeVars)
 	bool set;
 
 	current_spec = Spec;
+	ATprotectAppl(&current_spec);
 	usedummies = !AllowFreeVars;
 
 	l = ATLgetArgument(ATAgetArgument(Spec,5),1);
@@ -254,16 +255,19 @@ ATermList gsNextState(ATermList State)
 
 	sums = ATLgetArgument(ATAgetArgument(current_spec,5),2);
 	states = ATmakeList0();
+	ATermList pars = ATLgetArgument(ATAgetArgument(current_spec,5),1);
 	for (; !ATisEmpty(sums); sums=ATgetNext(sums))
 	{
 		sum = smd_subst_vars(ATAgetFirst(sums),params);
+		ATerm act = ATgetArgument(sum,2);
+		ATermList newstate = ATLgetArgument(sum,4);
 		l = FindSolutions(ATLgetArgument(sum,0),ATAgetArgument(sum,1));
 		for (; !ATisEmpty(l); l=ATgetNext(l))
 		{
 			states = ATinsert(states, (ATerm)
 					ATmakeList2(
-						(ATerm) rewrActionArgs((ATermAppl) gsSubstValues(ATLgetFirst(l),ATgetArgument(sum,2),true)),
-						(ATerm) makeNewState(State,ATLgetArgument(ATAgetArgument(current_spec,5),1),ATLgetArgument(sum,4),ATLgetFirst(l))
+						(ATerm) rewrActionArgs((ATermAppl) gsSubstValues(ATLgetFirst(l),act,true)),
+						(ATerm) makeNewState(State,pars,newstate,ATLgetFirst(l))
 						)
 					);
 		}

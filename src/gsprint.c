@@ -167,7 +167,6 @@ bool PrintSpecificationFileName(char *SpecFileName, char *OutputFileName)
       Result = false;
     }
   }
-finally:
   if (SpecStream != NULL) {
     fclose(SpecStream);
   }

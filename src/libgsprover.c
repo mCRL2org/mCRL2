@@ -15,9 +15,12 @@ static ATermAppl gsProverTrue, gsProverFalse;
 void gsProverInit(ATermAppl Spec)
 {
 	current_spec = Spec;
+	ATprotectAppl(&current_spec);
 	gsRewriteInit(ATAgetArgument(Spec,3),GS_REWR_INNER3);
 	gsProverTrue = gsMakeDataExprTrue();
+	ATprotectAppl(&gsProverTrue);
 	gsProverFalse = gsMakeDataExprFalse();
+	ATprotectAppl(&gsProverFalse);
 }
 
 static ATermAppl gsGetResult(ATermAppl sort)
@@ -155,13 +158,13 @@ static bool FindEquality(ATermAppl t, ATermList vars, ATermAppl *v, ATermAppl *e
 		} else if ( gsIsDataExprEq(a,&a1,&a2) ) {
 			if ( !ATisEqual(a1,a2) )
 			{
-				if ( gsIsDataVarId(a1) && (ATindexOf(vars,(ATerm) a1,0) >= 0) )
+				if ( gsIsDataVarId(a1) && (ATindexOf(vars,(ATerm) a1,0) >= 0) && !gsOccurs((ATerm) a1,(ATerm) a2) )
 				{
 					*v = a1;
 					*e = a2;
 					return true;
 				}
-				if ( gsIsDataVarId(a2) && (ATindexOf(vars,(ATerm) a2,0) >= 0) )
+				if ( gsIsDataVarId(a2) && (ATindexOf(vars,(ATerm) a2,0) >= 0) && !gsOccurs((ATerm) a2,(ATerm) a1) )
 				{
 					*v = a2;
 					*e = a1;

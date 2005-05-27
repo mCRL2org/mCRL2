@@ -69,7 +69,7 @@ extern bool gsWarning;
 extern bool gsVerbose;
 extern bool gsDebug;
 
-inline void gsErrorMsg(char *Format, ...)
+inline static void gsErrorMsg(char *Format, ...)
 //Post: "error: " is printed to stderr followed by Format, where the remaining
 //      parameters are used as ATprintf arguments to Format.
 {
@@ -80,7 +80,7 @@ inline void gsErrorMsg(char *Format, ...)
   va_end(Args);
 }
 
-inline void gsWarningMsg(char *Format, ...)
+inline static void gsWarningMsg(char *Format, ...)
 //Post: If the printing of warning messages is enabled, "warning: " is printed
 //      to stderr followed by Format, where the remaining parameters are used
 //      as ATprintf arguments to Format.
@@ -94,7 +94,7 @@ inline void gsWarningMsg(char *Format, ...)
   }
 }
 
-inline void gsVerboseMsg(char *Format, ...)
+inline static void gsVerboseMsg(char *Format, ...)
 //Post: If the printing of verbose information is enabled, Format is printed to
 //      stderr, where the remaining parameters are used as ATprintf arguments
 //      to Format.
@@ -117,7 +117,7 @@ inline void gsVerboseMsg(char *Format, ...)
   }
 
 #ifdef _MSC_VER
-inline void gsDebugMsg(char *Format,...)
+inline static void gsDebugMsg(char *Format,...)
 {
 	GS_DEBUG_MSG_FUNC("unknown",Format)
 }
@@ -128,7 +128,7 @@ inline void gsDebugMsg(char *Format,...)
 //      function is printed to stderr, followed by the first parameter with the
 //      remaining parameters as ATprintf arguments.
 
-inline void gsDebugMsgFunc(const char *FuncName, char *Format, ...)
+inline static void gsDebugMsgFunc(const char *FuncName, char *Format, ...)
 //Post: If the printing of debug messages is enabled, the name of FuncName is
 //      printed to stderr, followed by Format where  the remaining parameters
 //      are used as ATprintf arguments to Format.

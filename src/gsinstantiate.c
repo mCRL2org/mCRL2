@@ -39,7 +39,7 @@ int main(int argc, char **argv)
 	FILE *SpecStream,*aut;
 	ATerm stackbot;
 	ATermAppl Spec;
-	ATermList state, l, curr, next;
+	ATermList state, l, curr, currdc, next, nextdc;
 	ATermTable states;
 	unsigned int num_states, curr_num, trans;
 	#define sopts "d"
@@ -95,26 +95,30 @@ int main(int argc, char **argv)
 	ATtablePut(states,(ATerm) SetDCs(state),(ATerm) ATmakeInt(num_states++));
 
 	curr = ATmakeList1((ATerm) state);
+	currdc = ATmakeList1((ATerm) SetDCs(state));
 	while ( !ATisEmpty(curr) )
 	{
 		next = ATmakeList0();
-		for (; !ATisEmpty(curr); curr=ATgetNext(curr))
+		nextdc = ATmakeList0();
+		for (; !ATisEmpty(curr); curr=ATgetNext(curr),currdc=ATgetNext(currdc))
 		{
 			state = ATLgetFirst(curr);
-			curr_num = ATgetInt((ATermInt) ATtableGet(states,(ATerm) SetDCs(state)));
-			l = gsNextState(state);
+			curr_num = ATgetInt((ATermInt) ATtableGet(states,ATgetFirst(currdc)));
+			l = gsNextState(ATLgetFirst(curr));
 			for (; !ATisEmpty(l); l=ATgetNext(l))
 			{
 				ATerm s;
 				ATermList e = ATLgetFirst(ATgetNext(ATLgetFirst(l)));
+				ATermList edc = SetDCs(e);
 				int i;
 		
-				if ( (s = ATtableGet(states,(ATerm) SetDCs(e))) == NULL )
+				if ( (s = ATtableGet(states,(ATerm) edc)) == NULL )
 				{
 					i = num_states;
 					s = (ATerm) ATmakeInt(num_states++);
-					ATtablePut(states,(ATerm) SetDCs(e),s);
+					ATtablePut(states,(ATerm) edc,s);
 					next = ATinsert(next,(ATerm) e);
+					nextdc = ATinsert(nextdc,(ATerm) edc);
 				} else {
 					i = ATgetInt((ATermInt) s);
 				}
@@ -126,6 +130,7 @@ int main(int argc, char **argv)
 			}
 		}
 		curr = ATreverse(next);
+		currdc = ATreverse(nextdc);
 	}
 
 	rewind(aut);
