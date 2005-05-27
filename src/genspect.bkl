@@ -2,15 +2,26 @@
 <bakefile>
 
   <set var="LIB_DIR">/home/muck/gs/lib</set>
+  
+  <subproject id="aterm">
+    <dir>aterm</dir>
+    <dependency-of>all</dependency-of>
+  </subproject>
+  
+  <subproject id="nt">
+    <dir>nt</dir>
+    <dependency-of>all</dependency-of>
+  </subproject>
 
   <template id="c">
     <!--cflags>-g -O2 -std=c99 -Wall -pedantic</cflags-->
-    <include>../aterm/aterm</include>
+    <cflags>/TP</cflags>
+    <include>aterm</include>
     <include>nt</include>
     <include>"C:\Program Files\Microsoft Visual C++ Toolkit 2003\include"</include>
     <include>"C:\Program Files\Microsoft SDK\include"</include>
     <lib-path>nt</lib-path>
-    <lib-path>../aterm/aterm</lib-path>
+    <lib-path>aterm</lib-path>
     <lib-path>"C:\Program Files\Microsoft Visual C++ Toolkit 2003\lib"</lib-path>
     <lib-path>"C:\Program Files\Microsoft SDK\lib"</lib-path>
     <sys-lib>ATerm</sys-lib>
@@ -26,10 +37,19 @@
   </template>
 
   <template id="cxx">
-    <cxxflags>-I/home/muck/tmp/wx/wxGTK-2.6.0/lib/wx/include/gtk2-ansi-debug-2.6 -I/home/muck/tmp/wx/wxGTK-2.6.0/include -I/home/muck/tmp/wx/wxGTK-2.6.0/contrib/include -D__WXDEBUG__ -D__WXGTK__ -D_FILE_OFFSET_BITS=64 -D_LARGE_FILES -D_LARGEFILE_SOURCE=1 -g -O2 -Wall</cxxflags>
-    <ldflags>-Wl,-rpath,$(LIB_DIR) -Wl,--as-needed -L/home/muck/tmp/wx/wxGTK-2.6.0/lib -pthread   -L/usr/X11R6/lib  -Wl,-rpath,/home/muck/tmp/wx/wxGTK-2.6.0/lib -lwx_gtk2d_xrc-2.6 -lwx_gtk2d_qa-2.6 -lwx_gtk2d_html-2.6 -lwx_gtk2d_adv-2.6 -lwx_gtk2d_core-2.6 -lwx_based_xml-2.6 -lwx_based_net-2.6 -lwx_based-2.6  -L.</ldflags>
+    <cxxflags> /D_WINDOWS /DNOPCH /GR  /EHsc -Ic:\wxWidgets-2.6.0\lib\vc_lib\msw -Ic:\wxWidgets-2.6.0\include -Ic:\wxWidgets-2.6.0\contrib\include -D__WXMSW__ -O2 -W4</cxxflags>
+    <cflags>/TP /DNOPCH /GR  /EHsc</cflags>
+    <include>aterm</include>
+    <include>nt</include>
+    <include>"C:\Program Files\Microsoft Visual C++ Toolkit 2003\include"</include>
+    <include>"C:\Program Files\Microsoft SDK\include"</include>
+    <ldflags>/LIBPATH:c:\wxWidgets-2.6.0\lib\vc_lib wxmsw26_xrc.lib wxmsw26_html.lib wxmsw26_adv.lib wxmsw26_core.lib wxbase26_xml.lib wxbase26_net.lib wxbase26.lib wxexpat.lib wxregex.lib wxzlib.lib wxjpeg.lib wxtiff.lib wxpng.lib /LIBPATH:. kernel32.lib user32.lib gdi32.lib comdlg32.lib winspool.lib winmm.lib shell32.lib comctl32.lib ole32.lib oleaut32.lib uuid.lib rpcrt4.lib advapi32.lib wsock32.lib oleacc.lib odbc32.lib</ldflags>
+    <lib-path>nt</lib-path>
+    <lib-path>aterm</lib-path>
+    <lib-path>"C:\Program Files\Microsoft Visual C++ Toolkit 2003\lib"</lib-path>
+    <lib-path>"C:\Program Files\Microsoft SDK\lib"</lib-path>
     <sys-lib>ATerm</sys-lib>
-    <sys-lib>m</sys-lib>
+    <sys-lib>ntutil</sys-lib>
   </template>
 
   <template id="cxxexe" template="cxx">

@@ -36,8 +36,10 @@ LDFLAGS =
 
 ### Variables: ###
 
-GSPARSE_CFLAGS = /MD /DWIN32 /I..\aterm\aterm /Int /I"C:\Program Files\Microsoft \
-	Visual C++ Toolkit 2003\include" /I"C:\Program Files\Microsoft SDK\include" \
+MAKEARGS = CC="$(CC)" CXX="$(CXX)" CFLAGS="$(CFLAGS)" CXXFLAGS="$(CXXFLAGS)" \
+	CPPFLAGS="$(CPPFLAGS)" LDFLAGS="$(LDFLAGS)"
+GSPARSE_CFLAGS = /MD /DWIN32 /Iaterm /Int /I"C:\Program Files\Microsoft Visual C++ \
+	Toolkit 2003\include" /I"C:\Program Files\Microsoft SDK\include" /TP \
 	$(CPPFLAGS) $(CFLAGS)
 GSPARSE_OBJECTS =  \
 	gsparse_libgsparse.obj \
@@ -47,9 +49,9 @@ GSPARSE_OBJECTS =  \
 	gsparse_gsfunc.obj \
 	gsparse_gslowlevel.obj \
 	gsparse_gslexer.obj
-GSREWRITE_CFLAGS = /MD /DWIN32 /I..\aterm\aterm /Int /I"C:\Program \
-	Files\Microsoft Visual C++ Toolkit 2003\include" /I"C:\Program Files\Microsoft \
-	SDK\include" $(CPPFLAGS) $(CFLAGS)
+GSREWRITE_CFLAGS = /MD /DWIN32 /Iaterm /Int /I"C:\Program Files\Microsoft Visual \
+	C++ Toolkit 2003\include" /I"C:\Program Files\Microsoft SDK\include" /TP \
+	$(CPPFLAGS) $(CFLAGS)
 GSREWRITE_OBJECTS =  \
 	gsrewrite_libgsrewrite.obj \
 	gsrewrite_gsrewr_inner.obj \
@@ -57,56 +59,54 @@ GSREWRITE_OBJECTS =  \
 	gsrewrite_gsrewr_inner3.obj \
 	gsrewrite_gsfunc.obj \
 	gsrewrite_gslowlevel.obj
-PARSER_CFLAGS = /MD /DWIN32 /I..\aterm\aterm /Int /I"C:\Program Files\Microsoft \
-	Visual C++ Toolkit 2003\include" /I"C:\Program Files\Microsoft SDK\include" \
+PARSER_CFLAGS = /MD /DWIN32 /Iaterm /Int /I"C:\Program Files\Microsoft Visual C++ \
+	Toolkit 2003\include" /I"C:\Program Files\Microsoft SDK\include" /TP \
 	$(CPPFLAGS) $(CFLAGS)
 PARSER_OBJECTS =  \
 	parser_gsparse.obj
-GSPRINT_CFLAGS = /MD /DWIN32 /I..\aterm\aterm /Int /I"C:\Program Files\Microsoft \
-	Visual C++ Toolkit 2003\include" /I"C:\Program Files\Microsoft SDK\include" \
+GSPRINT_CFLAGS = /MD /DWIN32 /Iaterm /Int /I"C:\Program Files\Microsoft Visual C++ \
+	Toolkit 2003\include" /I"C:\Program Files\Microsoft SDK\include" /TP \
 	$(CPPFLAGS) $(CFLAGS)
 GSPRINT_OBJECTS =  \
 	gsprint_gsprint.obj
-LINEARISE_CFLAGS = /MD /DWIN32 /I..\aterm\aterm /Int /I"C:\Program \
-	Files\Microsoft Visual C++ Toolkit 2003\include" /I"C:\Program Files\Microsoft \
-	SDK\include" $(CPPFLAGS) $(CFLAGS)
+LINEARISE_CFLAGS = /MD /DWIN32 /Iaterm /Int /I"C:\Program Files\Microsoft Visual \
+	C++ Toolkit 2003\include" /I"C:\Program Files\Microsoft SDK\include" /TP \
+	$(CPPFLAGS) $(CFLAGS)
 LINEARISE_OBJECTS =  \
 	linearise_linearise.obj
-LIN_CFLAGS = /MD /DWIN32 /I..\aterm\aterm /Int /I"C:\Program Files\Microsoft \
-	Visual C++ Toolkit 2003\include" /I"C:\Program Files\Microsoft SDK\include" \
+LIN_CFLAGS = /MD /DWIN32 /Iaterm /Int /I"C:\Program Files\Microsoft Visual C++ \
+	Toolkit 2003\include" /I"C:\Program Files\Microsoft SDK\include" /TP \
 	$(CPPFLAGS) $(CFLAGS)
 LIN_OBJECTS =  \
 	lin_lin.obj \
 	lin_gslinearise2.obj
-GSREWR_CFLAGS = /MD /DWIN32 /I..\aterm\aterm /Int /I"C:\Program Files\Microsoft \
-	Visual C++ Toolkit 2003\include" /I"C:\Program Files\Microsoft SDK\include" \
+GSREWR_CFLAGS = /MD /DWIN32 /Iaterm /Int /I"C:\Program Files\Microsoft Visual C++ \
+	Toolkit 2003\include" /I"C:\Program Files\Microsoft SDK\include" /TP \
 	$(CPPFLAGS) $(CFLAGS)
 GSREWR_OBJECTS =  \
 	gsrewr_gsrewr.obj
-GSINSTANTIATE_CFLAGS = /MD /DWIN32 /I..\aterm\aterm /Int /I"C:\Program \
-	Files\Microsoft Visual C++ Toolkit 2003\include" /I"C:\Program Files\Microsoft \
-	SDK\include" $(CPPFLAGS) $(CFLAGS)
+GSINSTANTIATE_CFLAGS = /MD /DWIN32 /Iaterm /Int /I"C:\Program Files\Microsoft \
+	Visual C++ Toolkit 2003\include" /I"C:\Program Files\Microsoft SDK\include" /TP \
+	$(CPPFLAGS) $(CFLAGS)
 GSINSTANTIATE_OBJECTS =  \
 	gsinstantiate_gsinstantiate.obj \
 	gsinstantiate_libgsnextstate.obj \
 	gsinstantiate_libgsprover.obj
-SIM_CFLAGS = /MD /DWIN32 /I..\aterm\aterm /Int /I"C:\Program Files\Microsoft \
-	Visual C++ Toolkit 2003\include" /I"C:\Program Files\Microsoft SDK\include" \
+SIM_CFLAGS = /MD /DWIN32 /Iaterm /Int /I"C:\Program Files\Microsoft Visual C++ \
+	Toolkit 2003\include" /I"C:\Program Files\Microsoft SDK\include" /TP \
 	$(CPPFLAGS) $(CFLAGS)
 SIM_OBJECTS =  \
 	sim_sim.obj \
 	sim_libgsnextstate.obj \
 	sim_libgsprover.obj
-XSIM_CFLAGS =  /MD /DWIN32 /I..\aterm\aterm /Int /I"C:\Program Files\Microsoft \
-	Visual C++ Toolkit 2003\include" /I"C:\Program Files\Microsoft SDK\include" \
-  $(CPPFLAGS) $(CFLAGS)
-XSIM_CXXFLAGS = /MD /DWIN32 /GR /EHsc \
-	/IC:\wxWidgets-2.6.0\include /I..\aterm\aterm /Int \
-	/IC:\wxWidgets-2.6.0\lib\vc_lib\msw \
-	/IC:\wxWidgets-2.6.0\contrib\include /D__WIN32__ /D__WXMSW__ /D_WINDOWS /DWINVER=0x0400 \
-	-O2 -W4 /DNOPCH\
-	$(CPPFLAGS) $(CXXFLAGS)
-#	/D_FILE_OFFSET_BITS=64 /D_LARGE_FILES /D_LARGEFILE_SOURCE=1 -g -O2 -Wall /DNOPCH\
+XSIM_CFLAGS = /MD /DWIN32 /Iaterm /Int /I"C:\Program Files\Microsoft Visual C++ \
+	Toolkit 2003\include" /I"C:\Program Files\Microsoft SDK\include" /TP /DNOPCH \
+	/GR /EHsc $(CPPFLAGS) $(CFLAGS)
+XSIM_CXXFLAGS = /MD /DWIN32 /Iaterm /Int /I"C:\Program Files\Microsoft Visual C++ \
+	Toolkit 2003\include" /I"C:\Program Files\Microsoft SDK\include" /GR /EHsc \
+	/D_WINDOWS /DNOPCH /GR /EHsc -Ic:\wxWidgets-2.6.0\lib\vc_lib\msw \
+	-Ic:\wxWidgets-2.6.0\include -Ic:\wxWidgets-2.6.0\contrib\include \
+	-D__WXMSW__ -O2 -W4 $(CPPFLAGS) $(CXXFLAGS)
 XSIM_OBJECTS =  \
 	xsim_xsim.obj \
 	xsim_xsimbase.obj \
@@ -121,12 +121,18 @@ XSIM_OBJECTS =  \
 
 ### Targets: ###
 
-all: gsparse.lib gsrewrite.lib gsparse.exe gsprint.exe linearise.exe lin.exe gsrewr.exe gsinstantiate.exe sim.exe xsim.exe
+all: sub_aterm sub_nt gsparse.lib gsrewrite.lib gsparse.exe gsprint.exe linearise.exe lin.exe gsrewr.exe gsinstantiate.exe sim.exe xsim.exe
 
 clean: 
 	-if exist .\*.obj del .\*.obj
 	-if exist .\*.res del .\*.res
 	-if exist .\*.pch del .\*.pch
+	cd aterm
+	$(MAKE) -f makefile.vc $(MAKEARGS) clean
+	cd $(MAKEDIR)
+	cd nt
+	$(MAKE) -f makefile.vc $(MAKEARGS) clean
+	cd $(MAKEDIR)
 	-if exist gsparse.lib del gsparse.lib
 	-if exist gsrewrite.lib del gsrewrite.lib
 	-if exist gsparse.exe del gsparse.exe
@@ -154,6 +160,16 @@ clean:
 	-if exist xsim.ilk del xsim.ilk
 	-if exist xsim.pdb del xsim.pdb
 
+sub_aterm: 
+	cd aterm
+	$(MAKE) -f makefile.vc $(MAKEARGS) all
+	cd "$(MAKEDIR)"
+
+sub_nt: 
+	cd nt
+	$(MAKE) -f makefile.vc $(MAKEARGS) all
+	cd "$(MAKEDIR)"
+
 gsparse.lib: $(GSPARSE_OBJECTS)
 	if exist $@ del $@
 	lib /NOLOGO /OUT:$@ @<<
@@ -167,119 +183,119 @@ gsrewrite.lib: $(GSREWRITE_OBJECTS)
 <<
 
 gsparse.exe: $(PARSER_OBJECTS) gsparse.lib
-	link /NOLOGO /OUT:$@ $(LDFLAGS) /LIBPATH:nt /LIBPATH:..\aterm\aterm /LIBPATH:"C:\Program Files\Microsoft Visual C++ Toolkit 2003\lib" /LIBPATH:"C:\Program Files\Microsoft SDK\lib" @<<
+	link /NOLOGO /OUT:$@ $(LDFLAGS) /LIBPATH:nt /LIBPATH:aterm /LIBPATH:"C:\Program Files\Microsoft Visual C++ Toolkit 2003\lib" /LIBPATH:"C:\Program Files\Microsoft SDK\lib" @<<
 	$(PARSER_OBJECTS)  ATerm.lib ntutil.lib gsparse.lib
 <<
 
 gsprint.exe: $(GSPRINT_OBJECTS) gsparse.lib
-	link /NOLOGO /OUT:$@ $(LDFLAGS) /LIBPATH:nt /LIBPATH:..\aterm\aterm /LIBPATH:"C:\Program Files\Microsoft Visual C++ Toolkit 2003\lib" /LIBPATH:"C:\Program Files\Microsoft SDK\lib" @<<
+	link /NOLOGO /OUT:$@ $(LDFLAGS) /LIBPATH:nt /LIBPATH:aterm /LIBPATH:"C:\Program Files\Microsoft Visual C++ Toolkit 2003\lib" /LIBPATH:"C:\Program Files\Microsoft SDK\lib" @<<
 	$(GSPRINT_OBJECTS)  ATerm.lib ntutil.lib gsparse.lib
 <<
 
 linearise.exe: $(LINEARISE_OBJECTS) gsparse.lib gsrewrite.lib
-	link /NOLOGO /OUT:$@ $(LDFLAGS) /LIBPATH:nt /LIBPATH:..\aterm\aterm /LIBPATH:"C:\Program Files\Microsoft Visual C++ Toolkit 2003\lib" /LIBPATH:"C:\Program Files\Microsoft SDK\lib" @<<
+	link /NOLOGO /OUT:$@ $(LDFLAGS) /LIBPATH:nt /LIBPATH:aterm /LIBPATH:"C:\Program Files\Microsoft Visual C++ Toolkit 2003\lib" /LIBPATH:"C:\Program Files\Microsoft SDK\lib" @<<
 	$(LINEARISE_OBJECTS)  ATerm.lib ntutil.lib gsparse.lib gsrewrite.lib
 <<
 
 lin.exe: $(LIN_OBJECTS) gsparse.lib
-	link /NOLOGO /OUT:$@ $(LDFLAGS) /LIBPATH:nt /LIBPATH:..\aterm\aterm /LIBPATH:"C:\Program Files\Microsoft Visual C++ Toolkit 2003\lib" /LIBPATH:"C:\Program Files\Microsoft SDK\lib" @<<
+	link /NOLOGO /OUT:$@ $(LDFLAGS) /LIBPATH:nt /LIBPATH:aterm /LIBPATH:"C:\Program Files\Microsoft Visual C++ Toolkit 2003\lib" /LIBPATH:"C:\Program Files\Microsoft SDK\lib" @<<
 	$(LIN_OBJECTS)  ATerm.lib ntutil.lib gsparse.lib
 <<
 
 gsrewr.exe: $(GSREWR_OBJECTS) gsparse.lib gsrewrite.lib
-	link /NOLOGO /OUT:$@ $(LDFLAGS) /LIBPATH:nt /LIBPATH:..\aterm\aterm /LIBPATH:"C:\Program Files\Microsoft Visual C++ Toolkit 2003\lib" /LIBPATH:"C:\Program Files\Microsoft SDK\lib" @<<
+	link /NOLOGO /OUT:$@ $(LDFLAGS) /LIBPATH:nt /LIBPATH:aterm /LIBPATH:"C:\Program Files\Microsoft Visual C++ Toolkit 2003\lib" /LIBPATH:"C:\Program Files\Microsoft SDK\lib" @<<
 	$(GSREWR_OBJECTS)  ATerm.lib ntutil.lib gsparse.lib gsrewrite.lib
 <<
 
 gsinstantiate.exe: $(GSINSTANTIATE_OBJECTS) gsparse.lib gsrewrite.lib
-	link /NOLOGO /OUT:$@ $(LDFLAGS) /LIBPATH:nt /LIBPATH:..\aterm\aterm /LIBPATH:"C:\Program Files\Microsoft Visual C++ Toolkit 2003\lib" /LIBPATH:"C:\Program Files\Microsoft SDK\lib" @<<
+	link /NOLOGO /OUT:$@ $(LDFLAGS) /LIBPATH:nt /LIBPATH:aterm /LIBPATH:"C:\Program Files\Microsoft Visual C++ Toolkit 2003\lib" /LIBPATH:"C:\Program Files\Microsoft SDK\lib" @<<
 	$(GSINSTANTIATE_OBJECTS)  ATerm.lib ntutil.lib gsparse.lib gsrewrite.lib
 <<
 
 sim.exe: $(SIM_OBJECTS) gsparse.lib gsrewrite.lib
-	link /NOLOGO /OUT:$@ $(LDFLAGS) /LIBPATH:nt /LIBPATH:..\aterm\aterm /LIBPATH:"C:\Program Files\Microsoft Visual C++ Toolkit 2003\lib" /LIBPATH:"C:\Program Files\Microsoft SDK\lib" @<<
+	link /NOLOGO /OUT:$@ $(LDFLAGS) /LIBPATH:nt /LIBPATH:aterm /LIBPATH:"C:\Program Files\Microsoft Visual C++ Toolkit 2003\lib" /LIBPATH:"C:\Program Files\Microsoft SDK\lib" @<<
 	$(SIM_OBJECTS)  ATerm.lib ntutil.lib gsparse.lib gsrewrite.lib
 <<
 
 xsim.exe: $(XSIM_OBJECTS) gsparse.lib gsrewrite.lib
-	link /NOLOGO /OUT:$@ $(LDFLAGS) /LIBPATH:"C:\Program Files\Microsoft Visual C++ Toolkit 2003\lib" /LIBPATH:"C:\Program Files\Microsoft SDK\lib" /LIBPATH:..\aterm\aterm /LIBPATH:C:\wxWidgets-2.6.0\lib\vc_lib wxmsw26_xrc.lib wxmsw26_html.lib wxmsw26_adv.lib wxmsw26_core.lib wxbase26_xml.lib wxbase26_net.lib wxbase26.lib  /LIBPATH:. @<<
-	$(XSIM_OBJECTS)  ATerm.lib gsparse.lib gsrewrite.lib kernel32.lib user32.lib gdi32.lib comdlg32.lib winspool.lib winmm.lib shell32.lib comctl32.lib ole32.lib oleaut32.lib uuid.lib rpcrt4.lib advapi32.lib wsock32.lib oleacc.lib odbc32.lib
+	link /NOLOGO /OUT:$@ $(LDFLAGS) /LIBPATH:c:\wxWidgets-2.6.0\lib\vc_lib wxmsw26_xrc.lib wxmsw26_html.lib wxmsw26_adv.lib wxmsw26_core.lib wxbase26_xml.lib wxbase26_net.lib wxbase26.lib wxexpat.lib wxregex.lib wxzlib.lib wxjpeg.lib wxtiff.lib wxpng.lib /LIBPATH:. kernel32.lib user32.lib gdi32.lib comdlg32.lib winspool.lib winmm.lib shell32.lib comctl32.lib ole32.lib oleaut32.lib uuid.lib rpcrt4.lib advapi32.lib wsock32.lib oleacc.lib odbc32.lib /LIBPATH:nt /LIBPATH:aterm /LIBPATH:"C:\Program Files\Microsoft Visual C++ Toolkit 2003\lib" /LIBPATH:"C:\Program Files\Microsoft SDK\lib" @<<
+	$(XSIM_OBJECTS)  ATerm.lib ntutil.lib gsparse.lib gsrewrite.lib
 <<
 
 gsparse_libgsparse.obj: .\libgsparse.c
-	$(CC) /c /nologo /TP /Fo$@ $(GSPARSE_CFLAGS) $**
+	$(CC) /c /nologo /TC /Fo$@ $(GSPARSE_CFLAGS) $**
 
 gsparse_gsparser.obj: .\gsparser.c
-	$(CC) /c /nologo /TP /Fo$@ $(GSPARSE_CFLAGS) $**
+	$(CC) /c /nologo /TC /Fo$@ $(GSPARSE_CFLAGS) $**
 
 gsparse_gstypecheck.obj: .\gstypecheck.c
-	$(CC) /c /nologo /TP /Fo$@ $(GSPARSE_CFLAGS) $**
+	$(CC) /c /nologo /TC /Fo$@ $(GSPARSE_CFLAGS) $**
 
 gsparse_gsdataimpl.obj: .\gsdataimpl.c
-	$(CC) /c /nologo /TP /Fo$@ $(GSPARSE_CFLAGS) $**
+	$(CC) /c /nologo /TC /Fo$@ $(GSPARSE_CFLAGS) $**
 
 gsparse_gsfunc.obj: .\gsfunc.c
-	$(CC) /c /nologo /TP /Fo$@ $(GSPARSE_CFLAGS) $**
+	$(CC) /c /nologo /TC /Fo$@ $(GSPARSE_CFLAGS) $**
 
 gsparse_gslowlevel.obj: .\gslowlevel.c
-	$(CC) /c /nologo /TP /Fo$@ $(GSPARSE_CFLAGS) $**
+	$(CC) /c /nologo /TC /Fo$@ $(GSPARSE_CFLAGS) $**
 
 gsparse_gslexer.obj: .\gslexer.c
-	$(CC) /c /nologo /TP /Fo$@ $(GSPARSE_CFLAGS) $**
+	$(CC) /c /nologo /TC /Fo$@ $(GSPARSE_CFLAGS) $**
 
 gsrewrite_libgsrewrite.obj: .\libgsrewrite.c
-	$(CC) /c /nologo /TP /Fo$@ $(GSREWRITE_CFLAGS) $**
+	$(CC) /c /nologo /TC /Fo$@ $(GSREWRITE_CFLAGS) $**
 
 gsrewrite_gsrewr_inner.obj: .\gsrewr_inner.c
-	$(CC) /c /nologo /TP /Fo$@ $(GSREWRITE_CFLAGS) $**
+	$(CC) /c /nologo /TC /Fo$@ $(GSREWRITE_CFLAGS) $**
 
 gsrewrite_gsrewr_inner2.obj: .\gsrewr_inner2.c
-	$(CC) /c /nologo /TP /Fo$@ $(GSREWRITE_CFLAGS) $**
+	$(CC) /c /nologo /TC /Fo$@ $(GSREWRITE_CFLAGS) $**
 
 gsrewrite_gsrewr_inner3.obj: .\gsrewr_inner3.c
-	$(CC) /c /nologo /TP /Fo$@ $(GSREWRITE_CFLAGS) $**
+	$(CC) /c /nologo /TC /Fo$@ $(GSREWRITE_CFLAGS) $**
 
 gsrewrite_gsfunc.obj: .\gsfunc.c
-	$(CC) /c /nologo /TP /Fo$@ $(GSREWRITE_CFLAGS) $**
+	$(CC) /c /nologo /TC /Fo$@ $(GSREWRITE_CFLAGS) $**
 
 gsrewrite_gslowlevel.obj: .\gslowlevel.c
-	$(CC) /c /nologo /TP /Fo$@ $(GSREWRITE_CFLAGS) $**
+	$(CC) /c /nologo /TC /Fo$@ $(GSREWRITE_CFLAGS) $**
 
 parser_gsparse.obj: .\gsparse.c
-	$(CC) /c /nologo /TP /Fo$@ $(PARSER_CFLAGS) $**
+	$(CC) /c /nologo /TC /Fo$@ $(PARSER_CFLAGS) $**
 
 gsprint_gsprint.obj: .\gsprint.c
-	$(CC) /c /nologo /TP /Fo$@ $(GSPRINT_CFLAGS) $**
+	$(CC) /c /nologo /TC /Fo$@ $(GSPRINT_CFLAGS) $**
 
 linearise_linearise.obj: .\linearise.c
-	$(CC) /c /nologo /TP /Fo$@ $(LINEARISE_CFLAGS) $**
+	$(CC) /c /nologo /TC /Fo$@ $(LINEARISE_CFLAGS) $**
 
 lin_lin.obj: .\lin.c
-	$(CC) /c /nologo /TP /Fo$@ $(LIN_CFLAGS) $**
+	$(CC) /c /nologo /TC /Fo$@ $(LIN_CFLAGS) $**
 
 lin_gslinearise2.obj: .\gslinearise2.c
-	$(CC) /c /nologo /TP /Fo$@ $(LIN_CFLAGS) $**
+	$(CC) /c /nologo /TC /Fo$@ $(LIN_CFLAGS) $**
 
 gsrewr_gsrewr.obj: .\gsrewr.c
-	$(CC) /c /nologo /TP /Fo$@ $(GSREWR_CFLAGS) $**
+	$(CC) /c /nologo /TC /Fo$@ $(GSREWR_CFLAGS) $**
 
 gsinstantiate_gsinstantiate.obj: .\gsinstantiate.c
-	$(CC) /c /nologo /TP /Fo$@ $(GSINSTANTIATE_CFLAGS) $**
+	$(CC) /c /nologo /TC /Fo$@ $(GSINSTANTIATE_CFLAGS) $**
 
 gsinstantiate_libgsnextstate.obj: .\libgsnextstate.c
-	$(CC) /c /nologo /TP /Fo$@ $(GSINSTANTIATE_CFLAGS) $**
+	$(CC) /c /nologo /TC /Fo$@ $(GSINSTANTIATE_CFLAGS) $**
 
 gsinstantiate_libgsprover.obj: .\libgsprover.c
-	$(CC) /c /nologo /TP /Fo$@ $(GSINSTANTIATE_CFLAGS) $**
+	$(CC) /c /nologo /TC /Fo$@ $(GSINSTANTIATE_CFLAGS) $**
 
 sim_sim.obj: .\sim.c
-	$(CC) /c /nologo /TP /Fo$@ $(SIM_CFLAGS) $**
+	$(CC) /c /nologo /TC /Fo$@ $(SIM_CFLAGS) $**
 
 sim_libgsnextstate.obj: .\libgsnextstate.c
-	$(CC) /c /nologo /TP /Fo$@ $(SIM_CFLAGS) $**
+	$(CC) /c /nologo /TC /Fo$@ $(SIM_CFLAGS) $**
 
 sim_libgsprover.obj: .\libgsprover.c
-	$(CC) /c /nologo /TP /Fo$@ $(SIM_CFLAGS) $**
+	$(CC) /c /nologo /TC /Fo$@ $(SIM_CFLAGS) $**
 
 xsim_xsim.obj: .\xsim.cpp
 	$(CXX) /c /nologo /TP /Fo$@ $(XSIM_CXXFLAGS) $**
@@ -294,8 +310,8 @@ xsim_xsimtrace.obj: .\xsimtrace.cpp
 	$(CXX) /c /nologo /TP /Fo$@ $(XSIM_CXXFLAGS) $**
 
 xsim_libgsnextstate.obj: .\libgsnextstate.c
-	$(CC) /c /nologo /TP /Fo$@ $(XSIM_CFLAGS) $**
+	$(CC) /c /nologo /TC /Fo$@ $(XSIM_CFLAGS) $**
 
 xsim_libgsprover.obj: .\libgsprover.c
-	$(CC) /c /nologo /TP /Fo$@ $(XSIM_CFLAGS) $**
+	$(CC) /c /nologo /TC /Fo$@ $(XSIM_CFLAGS) $**
 

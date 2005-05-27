@@ -21,7 +21,7 @@ static unsigned int num_opids;
 static ATermAppl *int2term;
 static ATermList *inner3_eqns;
 static ATermInt trueint;
-static bool protected = false;
+static bool isprotected = false;
 
 static bool ATisList(ATerm a)
 {
@@ -140,7 +140,7 @@ void rewrite_init_inner3()
 	term2int = ATtableCreate(100,100);
 
 	trueint = (ATermInt) OpId2Int(gsMakeDataExprTrue(),true);
-	if ( !protected )
+	if ( !isprotected )
 	{
 		ATprotectInt(&trueint);
 	}
@@ -180,7 +180,7 @@ void rewrite_init_inner3()
 		}
 	}
 
-	if ( !protected )
+	if ( !isprotected )
 	{
 		ATprotectArray((ATerm *) int2term,num_opids);
 		ATprotectArray((ATerm *) inner3_eqns,num_opids);
@@ -188,7 +188,7 @@ void rewrite_init_inner3()
 
 	ATtableDestroy(tmp_eqns);
 
-	protected = true;
+	isprotected = true;
 }
 
 void rewrite_add_inner3(ATermAppl eqn)
