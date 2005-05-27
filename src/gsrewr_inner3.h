@@ -5,7 +5,7 @@ extern "C" {
 
 #include <stdio.h>
 #include <stdlib.h>
-#include "aterm2.h"
+#include <aterm2.h>
 #include "gslowlevel.h"
 #include "gsfunc.h"
 

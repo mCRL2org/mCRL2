@@ -2,10 +2,10 @@
 CC                 = @CC@
 CFLAGS             = @CFLAGS@
 CPP                = @CPP@
-CPPFLAGS           = -fpic @CPPFLAGS@
+CPPFLAGS           = @CPPFLAGS@
 CXX                = @CXX@
-CXXFLAGS           = -fpic @CXXFLAGS@
-LDFLAGS            = -Wl,-rpath,$(libdir) -Wl,--as-needed @LDFLAGS@
+CXXFLAGS           = @CXXFLAGS@
+LDFLAGS            = -Wl,-rpath,$(libdir) @LDFLAGS@
 ARFLAGS            = crs
 INSTALL            = install
 LEX                = @LEX@
@@ -14,6 +14,7 @@ BISON              = @BISON@
 BFLAGS             = -d -pgsyy
 USE_XML2           = @USE_XML2@
 USE_WX             = @USE_WX@
+WX_LIBS            = @WX_LIBS@
 
 #installation directories
 prefix             = @prefix@
@@ -42,9 +43,9 @@ PRINTER_LDFLAGS    = -lgsparse -lATerm -lm
 LINEARISER_NAME    = linearise
 LINEARISER_OBJECTS = linearise.o
 LINEARISER_LDFLAGS = -lgsparse -lgsrewrite -lATerm -lm
-LIN_NAME    = lin
-LIN_OBJECTS = lin.o gslinearise2.o
-LIN_LDFLAGS = -lgsparse -lATerm -lm
+LIN_NAME           = lin
+LIN_OBJECTS        = lin.o gslinearise2.o
+LIN_LDFLAGS        = -lgsparse -lATerm -lm
 
 #Rewriter definitions
 LIBREWR_NAME       = libgsrewrite.a
@@ -60,23 +61,23 @@ PNML2GS_OBJECTS    = pnml2gs.o
 PNML2GS_LDFLAGS    = -lgsparse -lATerm -lxml2 -lm
 
 #Instantiator definitions
-INSTAN_NAME       = gsinstantiate
-INSTAN_OBJECTS    = gsinstantiate.o libgsnextstate.o libgsprover.o
-INSTAN_LDFLAGS    = -lgsrewrite -lgsparse -lATerm -lm
+INSTAN_NAME        = gsinstantiate
+INSTAN_OBJECTS     = gsinstantiate.o libgsnextstate.o libgsprover.o
+INSTAN_LDFLAGS     = -lgsrewrite -lgsparse -lATerm -lm
 
 #Simulator definitions
-SIM_NAME       = sim
-SIM_OBJECTS    = sim.o libgsnextstate.o libgsprover.o
-SIM_LDFLAGS    = -lgsrewrite -lgsparse -lATerm -lm
-XSIM_NAME       = xsim
-XSIM_OBJECTS    = xsim.o xsimbase.o xsimmain.o xsimtrace.o libgsnextstate.o libgsprover.o
-XSIM_LDFLAGS    = -lgsrewrite -lgsparse -lATerm -lm -ldl
+SIM_NAME           = sim
+SIM_OBJECTS        = sim.o libgsnextstate.o libgsprover.o
+SIM_LDFLAGS        = -lgsrewrite -lgsparse -lATerm -lm
+XSIM_NAME          = xsim
+XSIM_OBJECTS       = xsim.o xsimbase.o xsimmain.o xsimtrace.o libgsnextstate.o libgsprover.o
+XSIM_LDFLAGS       = -lgsrewrite -lgsparse -lATerm -lm $(WX_LIBS)
 
 #Group definitions
-EXE_NAMES          = $(PARSER_NAME) $(PRINTER_NAME) $(LINEARISER_NAME) $(LIN_NAME) $(REWR_NAME) $(PNML2GS_NAME) $(INSTAN_NAME) $(SIM_NAME) $(XSIM_NAME)
-CUR_EXE_NAMES      = $(strip $(foreach s,$(EXE_NAMES),$(shell if test -f $s; then echo -n $s; fi)))
-LIB_NAMES          = $(LIBPARSER_NAME) $(LIBREWR_NAME)
-CUR_LIB_NAMES      = $(strip $(foreach s,$(LIB_NAMES),$(shell if test -f $s; then echo -n $s; fi)))
+EXE_NAMES          =  $(PARSER_NAME) $(PRINTER_NAME) $(LINEARISER_NAME) $(LIN_NAME) $(REWR_NAME) $(PNML2GS_NAME) $(INSTAN_NAME) $(SIM_NAME) $(XSIM_NAME)
+CUR_EXE_NAMES      ?= $(strip $(foreach s,$(EXE_NAMES),$(shell if test -f $s; then echo -n $s; fi)))
+LIB_NAMES          =  $(LIBPARSER_NAME) $(LIBREWR_NAME)
+CUR_LIB_NAMES      ?= $(strip $(foreach s,$(LIB_NAMES),$(shell if test -f $s; then echo -n $s; fi)))
 
 #Make rules
 .PHONY: all install clean

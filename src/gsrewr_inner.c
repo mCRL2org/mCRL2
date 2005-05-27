@@ -1,10 +1,13 @@
 /* $Id: gsrewr_inner.c,v 1.2 2005/04/08 12:33:51 muck Exp $ */
+#ifdef __cplusplus
+extern "C" {
+#endif
 
 #define NAME "rewr_inner"
 
 #include <stdio.h>
 #include <stdlib.h>
-#include "aterm2.h"
+#include <aterm2.h>
 #include "gslowlevel.h"
 #include "gsfunc.h"
 #include "gsrewr_inner.h"
@@ -15,11 +18,11 @@ extern ATermList dataappl_eqns;
 
 static ATbool ATisAppl(ATerm a)
 {
-	return (ATgetType(a) == AT_APPL);
+	return (ATbool) (ATgetType(a) == AT_APPL);
 }
 static ATbool ATisList(ATerm a)
 {
-	return (ATgetType(a) == AT_LIST);
+	return (ATbool) (ATgetType(a) == AT_LIST);
 }
 
 static ATbool match(ATerm a, ATerm m, ATermList *l)
@@ -208,3 +211,7 @@ ATerm rewrite_inner(ATerm Term, int *b)
 	ATfprintf(stderr,"%s: term is not a ATermAppl or ATermList (%t)\n",NAME,Term);
 	exit(1);
 }
+
+#ifdef __cplusplus
+}
+#endif

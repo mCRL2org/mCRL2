@@ -13,7 +13,7 @@
 #include <string.h>
 #include <stdbool.h>
 
-#include "aterm2.h"
+#include <aterm2.h>
 #include "gsfunc.h"
 #include "gslowlevel.h"
 
@@ -24,6 +24,11 @@ extern ATermAppl gsTree;        /* declared in gslexer.l */
 extern void gsyyerror(char *s); /* declared in gslexer.l */
 extern int gsyylex(void);       /* declared in gslexer.c */
 extern bool gsDebug;            /* declared in libgsparse.c */
+
+#ifdef _MSC_VER
+#define yyfalse 0
+#define yytrue 1
+#endif
 
 //local declarations
 ATermAppl gsSpecEltsToSpec(ATermList SpecElts);
@@ -1450,7 +1455,8 @@ ATermAppl gsSpecEltsToSpec(ATermList SpecElts)
         Init = SpecElt;
       } else {
         //Init != NULL
-        ThrowM("parse error: multiple initialisations\n");
+        gsErrorMsg("parse error: multiple initialisations\n");
+        return NULL;
       }
     } else {
       ATermList SpecEltArg0 = ATLgetArgument(SpecElt, 0);
@@ -1471,7 +1477,8 @@ ATermAppl gsSpecEltsToSpec(ATermList SpecElts)
   }
   //check whether an initialisation is present
   if (Init == NULL) {
-    ThrowM("parse error: missing initialisation\n");
+    gsErrorMsg("parse error: missing initialisation\n");
+    return NULL;
   }
   Result = gsMakeSpecV1(
     gsMakeSortSpec(SortDecls),
@@ -1482,6 +1489,5 @@ ATermAppl gsSpecEltsToSpec(ATermList SpecElts)
     gsMakeProcEqnSpec(ProcEqnDecls),
     Init
   );
-finally:
   return Result;
 }

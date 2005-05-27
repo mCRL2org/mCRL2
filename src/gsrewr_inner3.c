@@ -1,10 +1,13 @@
 /* $Id: gsrewr_inner3.c,v 1.2 2005/04/08 12:33:51 muck Exp $ */
+#ifdef __cplusplus
+extern "C" {
+#endif
 
 #define NAME "rewr_inner3"
 
 #include <stdio.h>
 #include <stdlib.h>
-#include "aterm2.h"
+#include <aterm2.h>
 #include "gslowlevel.h"
 #include "gsfunc.h"
 #include "gsrewr_inner3.h"
@@ -501,3 +504,7 @@ ATerm rewrite_inner3(ATerm Term, int *b)
 
 	return (ATerm) fromInner(rewrite(toInner((ATermAppl) Term,false),b,ATmakeList0()));
 }
+
+#ifdef __cplusplus
+}
+#endif

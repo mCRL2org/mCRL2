@@ -15,11 +15,7 @@ extern "C" {
 #include <stdbool.h>
 #include <assert.h>
 
-#ifdef __cplusplus
-}
-#endif
-
-#include "aterm2.h"
+#include <aterm2.h>
 #include "gsprint.h"
 #include "gsfunc.h"
 #include "gslowlevel.h"
@@ -37,6 +33,9 @@ void PrintUsage(FILE* Stream);
 
 void PrintVersion(FILE* Stream);
 //print version information to stream
+
+void PrintMoreInfo(FILE* Stream);
+//print --help suggestion to stream
 
 bool PrintSpecificationFileName(char *SpecFileName, char *OutFileName);
 /*Pre: SpecFileName is the name of a file from which can be read, and which
@@ -65,7 +64,6 @@ int main(int argc, char* argv[]) {
   //declarations for parsing the specification
   char *SpecFileName   = NULL;
   char *OutputFileName = NULL;
-  bool MoreInfo        = false;
   //declarations for getopt  
   #define ShortOptions      "qvd"
   #define HelpOption        CHAR_MAX + 1
@@ -85,12 +83,10 @@ int main(int argc, char* argv[]) {
     switch (Option) {
       case HelpOption: 
         PrintUsage(stdout);
-        ThrowV(0); 
-        break;
+        return 0; 
       case VersionOption: 
         PrintVersion(stdout); 
-        ThrowV(0);
-        break;
+        return 0;
       case 'q':
         gsSetQuietMsg();
         break;
@@ -101,22 +97,21 @@ int main(int argc, char* argv[]) {
         gsSetDebugMsg();
         break;
       default:
-      	MoreInfo = true;
-      	ThrowV(1);
-        break;
+      	PrintMoreInfo(stderr);
+      	return 1;
     }
     Option = getopt_long(argc, argv, ShortOptions, LongOptions, NULL);
   }
   int NoArgc; //non-option argument count
   NoArgc = argc - optind;
   if (NoArgc <= 0) {
-    MoreInfo = true;
     fprintf(stderr, "%s: too few arguments\n", NAME);
-    ThrowV(1);
+   	PrintMoreInfo(stderr);
+   	return 1;
   } else if (NoArgc > 2) {
-    MoreInfo = true;
     fprintf(stderr, "%s: too many arguments\n", NAME);
-    ThrowV(1);
+   	PrintMoreInfo(stderr);
+   	return 1;
   } else {
     //NoArgc > 0 && NoArgc <= 2
     SpecFileName = strdup(argv[optind]);
@@ -130,12 +125,8 @@ int main(int argc, char* argv[]) {
   //print specification  
   if (!PrintSpecificationFileName(SpecFileName, OutputFileName))
   {
-    ThrowV(1);  
+    Result = 1;  
   }       
-finally:
-  if (MoreInfo) {
-    fprintf(stderr, "Try \'%s --help\' for more information.\n", NAME);
-  }
   free(SpecFileName);
   free(OutputFileName);
   gsDebugMsg("all objects are freed; return %d.\n", Result);
@@ -151,26 +142,30 @@ bool PrintSpecificationFileName(char *SpecFileName, char *OutputFileName)
   //open specification file for reading
   SpecStream = fopen(SpecFileName, "r");
   if (SpecStream == NULL) {
-    ThrowVM(false,
+    gsErrorMsg(
       "could not open specification file '%s' for reading (error %d)\n",
       SpecFileName, errno);
-  }
-  gsDebugMsg("specification file %s is opened for reading.\n", SpecFileName);
-  //open output file for writing or set to stdout
-  if (OutputFileName == NULL) {
-    OutputStream = stdout;
-    gsDebugMsg("output to stdout.\n");
-  } else {  
-    OutputStream = fopen(OutputFileName, "w");
-    if (!OutputStream) {
-      ThrowVM(false, "could not open output file '%s' for writing (error %d)\n", 
-        OutputFileName, errno);
+    Result = false;
+  } else {
+    gsDebugMsg("specification file %s is opened for reading.\n", SpecFileName);
+    //open output file for writing or set to stdout
+    if (OutputFileName == NULL) {
+      OutputStream = stdout;
+      gsDebugMsg("output to stdout.\n");
+    } else {  
+      OutputStream = fopen(OutputFileName, "w");
+      if (!OutputStream) {
+        gsErrorMsg("could not open output file '%s' for writing (error %d)\n", 
+          OutputFileName, errno);
+        Result = false;
+      } else {
+        gsDebugMsg("output file %s is opened for writing.\n", OutputFileName);
+      }
     }
-    gsDebugMsg("output file %s is opened for writing.\n", OutputFileName);
-  }
-  if (!PrintSpecificationStream(SpecStream, OutputStream))
-  {
-    ThrowV(false);
+    if (Result && !PrintSpecificationStream(SpecStream, OutputStream))
+    {
+      Result = false;
+    }
   }
 finally:
   if (SpecStream != NULL) {
@@ -191,14 +186,15 @@ bool PrintSpecificationStream(FILE *SpecStream, FILE *OutputStream)
   //read specification from SpecStream
   ATermAppl Spec = (ATermAppl) ATreadFromFile(SpecStream);
   if (Spec == NULL) {
-    ThrowVM(false, "error: could not read specification from stream\n");
+    gsErrorMsg("error: could not read specification from stream\n");
+    Result = false;
+  } else {
+    //print specification to OutputStream
+    if (OutputStream != stdout) gsVerboseMsg(
+      "printing specification to file in a human readable format\n");
+    gsPrintSpecification(OutputStream, Spec);
+    Result = true;
   }
-  //print specification to OutputStream
-  if (OutputStream != stdout) gsVerboseMsg(
-    "printing specification to file in a human readable format\n");
-  gsPrintSpecification(OutputStream, Spec);
-  Result = true;
-finally:
   gsDebugMsg("all files are closed; return %s\n", Result?"true":"false");
   return Result;
 }
@@ -223,3 +219,11 @@ void PrintVersion(FILE *Stream) {
   fprintf(Stream, "%s %s\nWritten by %s.\n", 
     NAME, LVERSION, AUTHOR);  
 }
+
+void PrintMoreInfo(FILE *Stream) {
+  fprintf(Stream, "Try \'%s --help\' for more information.\n", NAME);
+}
+
+#ifdef __cplusplus
+}
+#endif

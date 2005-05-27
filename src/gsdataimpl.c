@@ -7,10 +7,6 @@ extern "C" {
 #include <assert.h>
 #include <limits.h>
 
-#ifdef __cplusplus
-}
-#endif
-
 #include "gsdataimpl.h"
 #include "gsfunc.h"
 #include "gslowlevel.h"
@@ -497,7 +493,7 @@ ATermAppl gsImplExprsPart(ATermAppl Part, ATermList *PSubsts,
     AFun Head = ATgetAFun(Part);
     int NrArgs = ATgetArity(Head);      
     if (NrArgs > 0) {
-      ATerm Args[NrArgs];
+      DECL_A(Args,ATerm,NrArgs);
       for (int i = 0; i < NrArgs; i++) {
         ATerm Arg = ATgetArgument(Part, i);
         if (ATgetType(Arg) == AT_APPL)
@@ -508,6 +504,7 @@ ATermAppl gsImplExprsPart(ATermAppl Part, ATermList *PSubsts,
             PDataDecls);
       }
       Part = ATmakeApplArray(Head, Args);
+      FREE_A(Args);
     }
   }
   return Part;
@@ -1878,3 +1875,7 @@ ATermAppl gsImplementData(ATermAppl Spec)
   Spec = gsImplSortRefs(Spec);
   return Spec;
 }
+
+#ifdef __cplusplus
+}
+#endif

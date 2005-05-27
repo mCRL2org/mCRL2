@@ -1,0 +1,97 @@
+<?xml version="1.0"?>
+<bakefile>
+
+  <set var="LIB_DIR">/home/muck/gs/lib</set>
+
+  <template id="c">
+    <!--cflags>-g -O2 -std=c99 -Wall -pedantic</cflags-->
+    <include>../aterm/aterm</include>
+    <include>nt</include>
+    <include>"C:\Program Files\Microsoft Visual C++ Toolkit 2003\include"</include>
+    <include>"C:\Program Files\Microsoft SDK\include"</include>
+    <lib-path>nt</lib-path>
+    <lib-path>../aterm/aterm</lib-path>
+    <lib-path>"C:\Program Files\Microsoft Visual C++ Toolkit 2003\lib"</lib-path>
+    <lib-path>"C:\Program Files\Microsoft SDK\lib"</lib-path>
+    <sys-lib>ATerm</sys-lib>
+    <sys-lib>ntutil</sys-lib>
+  </template>
+
+  <template id="cexe" template="c">
+    <install-to>/home/muck/gs/bin</install-to>
+  </template>
+
+  <template id="clib" template="c">
+    <!--install-to>/home/muck/gs/lib</install-to-->
+  </template>
+
+  <template id="cxx">
+    <cxxflags>-I/home/muck/tmp/wx/wxGTK-2.6.0/lib/wx/include/gtk2-ansi-debug-2.6 -I/home/muck/tmp/wx/wxGTK-2.6.0/include -I/home/muck/tmp/wx/wxGTK-2.6.0/contrib/include -D__WXDEBUG__ -D__WXGTK__ -D_FILE_OFFSET_BITS=64 -D_LARGE_FILES -D_LARGEFILE_SOURCE=1 -g -O2 -Wall</cxxflags>
+    <ldflags>-Wl,-rpath,$(LIB_DIR) -Wl,--as-needed -L/home/muck/tmp/wx/wxGTK-2.6.0/lib -pthread   -L/usr/X11R6/lib  -Wl,-rpath,/home/muck/tmp/wx/wxGTK-2.6.0/lib -lwx_gtk2d_xrc-2.6 -lwx_gtk2d_qa-2.6 -lwx_gtk2d_html-2.6 -lwx_gtk2d_adv-2.6 -lwx_gtk2d_core-2.6 -lwx_based_xml-2.6 -lwx_based_net-2.6 -lwx_based-2.6  -L.</ldflags>
+    <sys-lib>ATerm</sys-lib>
+    <sys-lib>m</sys-lib>
+  </template>
+
+  <template id="cxxexe" template="cxx">
+    <install-to>/home/muck/gs/bin</install-to>
+  </template>
+
+  <lib id="gsparse" template="clib">
+    <sources>libgsparse.c gsparser.c gstypecheck.c gsdataimpl.c gsfunc.c gslowlevel.c gslexer.c</sources>
+  </lib>
+
+  <lib id="gsrewrite" template="clib">
+    <sources>libgsrewrite.c gsrewr_inner.c gsrewr_inner2.c gsrewr_inner3.c gsfunc.c gslowlevel.c</sources>
+  </lib>
+
+  <exe id="parser" template="cexe">
+    <exename>gsparse</exename>
+    <sources>gsparse.c</sources>
+    <library>gsparse</library>
+  </exe>
+
+  <exe id="gsprint" template="cexe">
+    <sources>gsprint.c</sources>
+    <library>gsparse</library>
+  </exe>
+
+  <exe id="linearise" template="cexe">
+    <sources>linearise.c</sources>
+    <library>gsparse</library>
+    <library>gsrewrite</library>
+  </exe>
+
+  <exe id="lin" template="cexe">
+    <sources>lin.c</sources>
+    <sources>gslinearise2.c</sources>
+    <library>gsparse</library>
+  </exe>
+
+  <exe id="gsrewr" template="cexe">
+    <sources>gsrewr.c</sources>
+    <library>gsparse</library>
+    <library>gsrewrite</library>
+  </exe>
+
+  <exe id="gsinstantiate" template="cexe">
+    <sources>gsinstantiate.c</sources>
+    <sources>libgsnextstate.c libgsprover.c</sources>
+    <library>gsparse</library>
+    <library>gsrewrite</library>
+  </exe>
+
+  <exe id="sim" template="cexe">
+    <sources>sim.c</sources>
+    <sources>libgsnextstate.c libgsprover.c</sources>
+    <library>gsparse</library>
+    <library>gsrewrite</library>
+  </exe>
+
+  <exe id="xsim" template="cxxexe">
+    <sources>xsim.cpp</sources>
+    <sources>xsimbase.cpp xsimmain.cpp xsimtrace.cpp libgsnextstate.c libgsprover.c</sources>
+    <library>gsparse</library>
+    <library>gsrewrite</library>
+  </exe>
+
+</bakefile>

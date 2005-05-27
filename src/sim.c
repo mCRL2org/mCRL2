@@ -1,4 +1,7 @@
 /* $Id: sim.c,v 1.1 2005/05/03 15:44:47 muck Exp $ */
+#ifdef __cplusplus
+extern "C" {
+#endif
 
 #define NAME "sim"
 
@@ -6,7 +9,7 @@
 #include <stdlib.h>
 #include <string.h>
 #include <getopt.h>
-#include "aterm2.h"
+#include <aterm2.h>
 #include "gslowlevel.h"
 #include "gsfunc.h"
 #include "libgsparse.h"
@@ -20,7 +23,7 @@ static void PrintState(ATermList state)
 		{
 			ATprintf("_");
 		} else {
-			gsPrintPart(stdout,ATgetFirst(state),0,0);
+			gsPrintPart(stdout,ATAgetFirst(state),0,0);
 		}
 		if ( !ATisEmpty(ATgetNext(state)) )
 		{
@@ -88,7 +91,7 @@ int main(int argc, char **argv)
 		for (l=states,i=0; !ATisEmpty(l); l=ATgetNext(l), i++)
 		{
 			ATprintf("%i: ",i);
-			gsPrintPart(stdout,ATgetFirst(ATLgetFirst(l)),0,0);
+			gsPrintPart(stdout,ATAgetFirst(ATLgetFirst(l)),0,0);
 			ATprintf("  ->  [ ");
 			PrintState(ATLgetFirst(ATgetNext(ATLgetFirst(l))));
 			ATprintf(" ]\n\n");
@@ -112,7 +115,7 @@ harm:
 			goto harm;
 		}
 		ATprintf("\ntransition: ");
-		gsPrintPart(stdout,ATgetFirst(ATLelementAt(states,i)),0,0);
+		gsPrintPart(stdout,ATAgetFirst(ATLelementAt(states,i)),0,0);
 		ATprintf("\n\n");
 		state = ATLgetFirst(ATgetNext(ATLelementAt(states,i)));
 		ATprintf("current state: [ ");
@@ -120,3 +123,7 @@ harm:
 		ATprintf(" ]\n\n");
 	}
 }
+
+#ifdef __cplusplus
+}
+#endif

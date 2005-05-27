@@ -1,13 +1,11 @@
 #ifdef __cplusplus
 extern "C" {
 #endif
+
 #include <string.h>
 #include <stdlib.h>
 #include <assert.h>
 #include <limits.h>
-#ifdef __cplusplus
-}
-#endif
 
 #include "gsfunc.h"
 #include "gslowlevel.h"
@@ -2418,9 +2416,11 @@ ATermAppl gsMakeDataExprPos(char *p)
 ATermAppl gsMakeDataExprPos_int(int p)
 {
   assert(p > 0);  
-  char s[NrOfChars(p)+1];
+  DECL_A(s,char,NrOfChars(p)+1);
   sprintf(s, "%d", p);
-  return gsMakeDataExprPos(s);
+  ATermAppl a = gsMakeDataExprPos(s);
+  FREE_A(s);
+  return a;
 }
 
 ATermAppl gsMakeDataExprNat(char *n)
@@ -2435,9 +2435,11 @@ ATermAppl gsMakeDataExprNat(char *n)
 ATermAppl gsMakeDataExprNat_int(int n)
 {
   assert(n >= 0);  
-  char s[NrOfChars(n)+1];
+  DECL_A(s,char,NrOfChars(n)+1);
   sprintf(s, "%d", n);
-  return gsMakeDataExprNat(s);
+  ATermAppl a = gsMakeDataExprNat(s);
+  FREE_A(s);
+  return a;
 }
 
 ATermAppl gsMakeDataExprInt(char *z)
@@ -2451,9 +2453,11 @@ ATermAppl gsMakeDataExprInt(char *z)
 
 ATermAppl gsMakeDataExprInt_int(int z)
 {
-  char s[NrOfChars(z)+1];
+  DECL_A(s,char,NrOfChars(z)+1);
   sprintf(s, "%d", z);
-  return gsMakeDataExprInt(s);
+  ATermAppl a = gsMakeDataExprInt(s);
+  FREE_A(s);
+  return a;
 }
 
 bool gsIsPosConstant(const ATermAppl PosExpr)
@@ -2783,3 +2787,7 @@ int gsPrecOpIdInfixRight(ATermAppl OpIdInfix)
     return -1;
   }
 }
+
+#ifdef __cplusplus
+}
+#endif

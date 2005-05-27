@@ -9,11 +9,9 @@
     #include <wx/wx.h>
 #endif
 
-using namespace std;
-
 #include <wx/splitter.h>
 #include <wx/listctrl.h>
-#include "aterm2.h"
+#include <aterm2.h>
 
 #include "xsimbase.h"
 #include "xsimtrace.h"

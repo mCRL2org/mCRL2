@@ -2,7 +2,7 @@
 extern "C" {
 #endif
 
-#include "aterm2.h"
+#include <aterm2.h>
 
 void gsProverInit(ATermAppl Spec);
 

@@ -109,9 +109,10 @@ fi
 if test $WX_CONFIG; then
   USE_WX=1
   CXXFLAGS="$($WX_CONFIG --cxxflags) $CXXFLAGS"
-  LDFLAGS="$($WX_CONFIG --libs) $LDFLAGS"
+  WX_LIBS="$($WX_CONFIG --libs)"
 fi
 AC_SUBST([USE_WX],[])
+AC_SUBST([WX_LIBS],[])
 
 # Checks for header files.
 AC_HEADER_STDC

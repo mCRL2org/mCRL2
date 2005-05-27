@@ -11,9 +11,9 @@
     #include <wx/wx.h>
 #endif
 
-#include "xsimbase.h"
 #include <wx/listctrl.h>
-#include "aterm2.h"
+#include <aterm2.h>
+#include "xsimbase.h"
 
 //----------------------------------------------------------------------------
 // XSimTrace

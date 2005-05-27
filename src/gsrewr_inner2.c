@@ -1,10 +1,13 @@
 /* $Id: gsrewr_inner2.c,v 1.2 2005/04/08 12:33:51 muck Exp $ */
+#ifdef __cplusplus
+extern "C" {
+#endif
 
 #define NAME "rewr_inner2"
 
 #include <stdio.h>
 #include <stdlib.h>
-#include "aterm2.h"
+#include <aterm2.h>
 #include "gslowlevel.h"
 #include "gsfunc.h"
 #include "gsrewr_inner2.h"
@@ -17,7 +20,7 @@ static ATermTable inner2_eqns;
 
 static ATbool ATisList(ATerm a)
 {
-	return (ATgetType(a) == AT_LIST);
+	return (ATbool) (ATgetType(a) == AT_LIST);
 }
 
 static bool is_nil(ATerm t)
@@ -420,3 +423,7 @@ ATerm rewrite_inner2(ATerm Term, int *b)
 
 	return (ATerm) fromInner(rewrite(toInner((ATermAppl) Term),b,ATmakeList0()));
 }
+
+#ifdef __cplusplus
+}
+#endif

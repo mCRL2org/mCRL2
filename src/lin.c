@@ -1,4 +1,7 @@
 /* $Id: lin.c,v 1.8 2005/05/05 16:59:02 muck Exp $ */
+#ifdef __cplusplus
+extern "C" {
+#endif
 
 #define NAME "lin"
 
@@ -6,7 +9,7 @@
 #include <stdlib.h>
 #include <string.h>
 #include <getopt.h>
-#include "aterm2.h"
+#include <aterm2.h>
 #include "gsfunc.h"
 #include "libgsparse.h"
 #include "gslinearise2.h"
@@ -178,3 +181,6 @@ int main(int argc, char **argv)
 		ATwriteToTextFile((ATerm) Spec,OutFile);
 	}
 }
+#ifdef __cplusplus
+}
+#endif

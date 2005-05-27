@@ -1,4 +1,7 @@
 /*Id: main.c,v 1.2 2004/11/23 12:36:17 uid523 Exp $ */
+#ifdef __cplusplus
+extern "C" {
+#endif
 
 /* TODO:
  * Verwerk vrije procesvariabelen op correcte wijze.
@@ -246,7 +249,7 @@ static void newobject(int n)
   if (n>=maxobject)
   { int newsize=(n>=2*maxobject?
                   (n<1024?1024:(n+1)):2*maxobject);
-    objectdata=(maxobject==0?
+    objectdata=(objectdatatype *) (maxobject==0?
                  malloc(newsize*sizeof(objectdatatype)):
                  realloc(objectdata,newsize*sizeof(objectdatatype)));
     if (objectdata==NULL)
@@ -280,7 +283,7 @@ static void newobject(int n)
                                     this action. */
   objectdata[n].processbody=NULL;
   objectdata[n].parameters=NULL;
-  objectdata[n].processstatus=-1;
+  objectdata[n].processstatus=unknown; // XXX was -1
   objectdata[n].object=none;
   objectdata[n].canterminate=0;
 
@@ -379,7 +382,7 @@ static void addString(char *str)
 }
 
 static ATbool existsString(char *str)
-{ return ATindexedSetGetIndex(stringTable,ATmake("<str>",str))>=0;
+{ return (ATbool) (ATindexedSetGetIndex(stringTable,ATmake("<str>",str))>=0);
 }
 
 static ATermAppl getTargetSort(ATermAppl sortterm)
@@ -459,7 +462,7 @@ static void insertsort(ATermAppl sortterm)
 
   {
     long n=0;
-    ATbool isnew=0;
+    ATbool isnew=ATfalse;
     char *str=ATSgetArgument(sortterm,0);
     addString(str);
  
@@ -479,7 +482,7 @@ static void insertsort(ATermAppl sortterm)
 }
 
 static long insertConstructorOrFunction(ATermAppl constructor,objecttype type)
-{ ATbool isnew=0;
+{ ATbool isnew=ATfalse;
   ATermAppl t=NULL;
   char *str=NULL;
   long m=0;
@@ -616,7 +619,7 @@ static long addMultiAction(ATermAppl multiAction, ATbool *isnew)
 
 static void insertvariable(ATermAppl var, ATbool mustbenew)
 { 
-  ATbool isnew=0;
+  ATbool isnew=ATfalse;
   long n=0;
   ATermAppl t=NULL;
   char *str=NULL;
@@ -691,7 +694,7 @@ static ATermAppl RewriteTerm(ATermAppl t)
 /************ storeact ****************************************************/
 
 static long insertAction(ATermAppl actionId)
-{ ATbool isnew=0;
+{ ATbool isnew=ATfalse;
   long n=addObject(actionId,&isnew);
   char *str=NULL;
 
@@ -732,7 +735,7 @@ static void storeact(ATermList acts)
 static specificationbasictype *read_input_file(char *filename) 
 { FILE *inputfile;
   ATermAppl t=NULL;
-  specificationbasictype *spec=malloc(sizeof(specificationbasictype));
+  specificationbasictype *spec=(specificationbasictype *) malloc(sizeof(specificationbasictype));
   spec->sorts=NULL;
   ATprotect((ATerm *)&(spec->sorts));
   spec->funcs=NULL;
@@ -829,7 +832,7 @@ static long insertProcDeclaration(
                   ATermAppl body,
                   processstatustype s,
                   int canterminate)
-{ ATbool isnew=0;
+{ ATbool isnew=ATfalse;
   long n=0;
   char *str=NULL;
 
@@ -853,7 +856,7 @@ static long insertProcDeclaration(
   objectdata[n].canterminate=canterminate;
   objectdata[n].processstatus=s;
   objectdata[n].parameters=parameters;
-  insertvariables(parameters,0);
+  insertvariables(parameters,ATfalse);
 #ifndef NDEBUG
   { for(ATermList l=ATLgetArgument(procId,1); !ATisEmpty(l); 
                   l=ATgetNext(l))
@@ -1123,7 +1126,7 @@ static processstatustype determine_process_statusterm(
   if (gsIsSum(body)) 
   { /* insert the variable names of variables, to avoid
        that this variable name will be reused later on */
-    insertvariables(ATLgetArgument(body,0),0);
+    insertvariables(ATLgetArgument(body,0),ATfalse);
     if (status==multiAction)
     { ATerror("Sum operator occurs within a multi-action\n");
     }
@@ -1335,10 +1338,10 @@ static ATermList localpcrlprocesses=NULL;
 static void collectPcrlProcesses_rec(
                    ATermAppl procDecl,
                    ATermIndexedSet visited)
-{ ATbool new=0;
-  ATindexedSetPut(visited,(ATerm)procDecl,&new);
+{ ATbool nnew=ATfalse;
+  ATindexedSetPut(visited,(ATerm)procDecl,&nnew);
 
-  if (new)
+  if (nnew)
   { int n=objectIndex(procDecl);
     assert(n>=0); /* if this fails, the process does not exist */
 
@@ -1938,7 +1941,7 @@ typedef enum { alt, sum, /* cond,*/ seq, name, multiaction } state;
 static ATermAppl getfreshvariable(char *s, ATermAppl sort)
 { ATermAppl variable=NULL;
   variable=gsMakeDataVarId(fresh_name(s),sort);
-  insertvariable(variable,1);
+  insertvariable(variable,ATtrue);
   return variable; 
 }
 
@@ -2062,7 +2065,7 @@ static ATermAppl bodytovarheadGNF(
   }
 
   if (gsIsAction(body))
-  { ATbool isnew=0;
+  { ATbool isnew=ATfalse;
     ATermAppl ma=gsMakeMultAct(ATinsertA(ATempty,body)); 
     if ((s==multiaction)||(v==first))
     { return ma;
@@ -2084,7 +2087,7 @@ static ATermAppl bodytovarheadGNF(
   }  
 
   if (gsIsMultAct(body))
-  { ATbool isnew=0;
+  { ATbool isnew=ATfalse;
     if ((s==multiaction)||(v==first))
     { return body;
     }
@@ -2106,7 +2109,7 @@ static ATermAppl bodytovarheadGNF(
 
   if (gsIsSync(body))
   { 
-    ATbool isnew=0;
+    ATbool isnew=ATfalse;
     ATermAppl body1=ATAgetArgument(body,0);
     ATermAppl body2=ATAgetArgument(body,1);
     ATermAppl ma=linMergeMultiAction(
@@ -3131,7 +3134,7 @@ stacklisttype *new_stack(
 
   s3 = (statenames ? ATSgetArgument(ATAgetFirst(last),0) : "s");
   
-  stack=malloc(sizeof(stacklisttype));
+  stack=(stacklisttype *) malloc(sizeof(stacklisttype));
   if (stack==NULL)
      ATerror("Cannot allocate memory for stack data\n");
   stack->parameterlist=ATempty; 
@@ -3145,7 +3148,7 @@ stacklisttype *new_stack(
     for( ; i>0 ; i--)
     { ATermAppl name=gsMakeDataVarId(fresh_name("bst"),
                                      gsMakeSortExprBool());
-      insertvariable(name,1);
+      insertvariable(name,ATtrue);
       stack->booleanStateVariables=
            ATinsertA(stack->booleanStateVariables,name);
     }
@@ -3156,7 +3159,7 @@ stacklisttype *new_stack(
   { stack->opns=NULL;
     stack->stackvar=gsMakeDataVarId(fresh_name(s3),
                                     gsMakeSortExprPos());
-    insertvariable(stack->stackvar,1);
+    insertvariable(stack->stackvar,ATtrue);
   }
   else  
   { stack->opns=find_suitable_stack_operations(parameterlist,stacklist);
@@ -3165,11 +3168,11 @@ stacklisttype *new_stack(
     if (stack->opns!=NULL)
     { stack->stackvar=gsMakeDataVarId(fresh_name(s3),
                                       stack->opns->stacksort);
-      insertvariable(stack->stackvar,1);
+      insertvariable(stack->stackvar,ATtrue);
     }
     else 
     { /* stack->opns == NULL */
-      stack->opns=malloc(sizeof(stackoperations));
+      stack->opns=(stackoperations *) malloc(sizeof(stackoperations));
       if (stack->opns==NULL)
           ATerror("Cannot allocate memory for stack operations\n");
 
@@ -3180,7 +3183,7 @@ stacklisttype *new_stack(
       stack->opns->stacksort=makenewsort(fresh_name("Stack"),spec);
       stack->stackvar=gsMakeDataVarId(fresh_name(s3),
                                       stack->opns->stacksort);
-      insertvariable(stack->stackvar,1);
+      insertvariable(stack->stackvar,ATtrue);
       stack->opns->sorts=ATempty;
       stack->opns->get=ATempty;
       for( walker=parameterlist ; 
@@ -3738,7 +3741,7 @@ static ATermAppl dummyterm(
   if (allowFreeDataVariablesInProcesses)
   { ATermAppl newVariable=gsMakeDataVarId(fresh_name("freevar"),targetsort);
     spec->procdatavars=ATinsertA(spec->procdatavars,newVariable);
-    insertvariable(newVariable,1);
+    insertvariable(newVariable,ATtrue);
     return newVariable;
   }
   
@@ -4105,7 +4108,7 @@ static void add_summands(
                    RewriteTerm(condition1),
                    multiAction,
                    atTime,
-                   dummyparameterlist(stack,singlestate));
+                   dummyparameterlist(stack,(ATbool) singlestate));
     return;
   }
 
@@ -4218,7 +4221,7 @@ static enumeratedtype *create_enumeratedtype
   for(w=enumeratedtypelist; ((w!=NULL)&&(w->size!=n));
                 w=w->next){};
   if (w==NULL)
-  { w=malloc(sizeof(enumeratedtype));
+  { w=(enumeratedtype *) malloc(sizeof(enumeratedtype));
     w->sortId=NULL;
     ATprotect((ATerm *)&(w->sortId));
     w->elementnames=NULL;
@@ -4398,7 +4401,7 @@ static enumtype *generate_enumerateddatatype(
   enumtype *et=NULL;
   ATermList w=ATempty;
   
-  et=malloc(sizeof(enumtype));
+  et=(enumtype *) malloc(sizeof(enumtype));
   et->var=NULL;
   ATprotect((ATerm *)&(et->var));
   et->next=enumeratedtypes;
@@ -4406,7 +4409,7 @@ static enumtype *generate_enumerateddatatype(
   et->etype=create_enumeratedtype(n,spec);
   
   et->var=gsMakeDataVarId(fresh_name("e"),et->etype->sortId);
-  insertvariable(et->var,1);
+  insertvariable(et->var,ATtrue);
   
   for(w=fsorts; w!=ATempty; w=ATgetNext(w))
   { create_case_function_on_enumeratedtype(
@@ -4494,7 +4497,7 @@ static int mergeoccursin(
                     ATSgetArgument(var1,0)))
        { *var=getfreshvariable(ATSgetArgument(*var,0),
                                ATAgetArgument(*var,1));
-         insertvariable(*var,1);
+         insertvariable(*var,ATtrue);
          *pars=ATinsertA(*pars,var1); 
          *args=ATinsertA(*args,*var); 
          v=ATempty;
@@ -5638,7 +5641,7 @@ static ATermList construct_renaming(
                         fresh_name(ATSgetArgument(var2,0)),
                         ATAgetArgument(var2,1)); 
 
-      insertvariable(var3,1);
+      insertvariable(var3,ATtrue);
       t1=ATinsertA(construct_renaming(pars1,pars2,&t,&t2),var3);
           
       *pars4=ATinsertA(t2,var2);
@@ -6829,12 +6832,12 @@ static int canterminate_rec(
               int *stable,
               ATermIndexedSet visited)
 { long n=objectIndex(procId);
-  ATbool new=0;
+  ATbool nnew=ATfalse;
  
   if (visited!=NULL)
-  { ATindexedSetPut(visited,(ATerm)procId,&new);
+  { ATindexedSetPut(visited,(ATerm)procId,&nnew);
   }
-  if (new)
+  if (nnew)
   { int ct=canterminatebody(objectdata[n].processbody,stable,visited,1); 
     if (objectdata[n].canterminate!=ct)
     { objectdata[n].canterminate=ct;
@@ -7194,3 +7197,6 @@ int main(int argc, char *argv[])
   return main2(argc,argv,&stack_bottom);
 }
 
+#ifdef __cplusplus
+}
+#endif

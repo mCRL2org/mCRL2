@@ -4,7 +4,7 @@ extern "C" {
 
 #include <stdio.h>
 #include <stdbool.h>
-#include "aterm2.h"
+#include <aterm2.h>
 
 //Global preconditions:
 //- the ATerm library has been initialised
@@ -24,6 +24,11 @@ void gsPrintSpecification(FILE *OutStream, const ATermAppl Spec);
        OutStream.
 */
 
+void gsPrintPart(FILE *OutStream, const ATermAppl Part, bool ShowSorts,
+  int PrecLevel);
+void gsPrintParts(FILE *OutStream, const ATermList Parts, bool ShowSorts,
+  int PrecLevel, const char *Terminator, const char *Separator);  
+  
 void gsTest(void);
 //will be removed in the final version
 

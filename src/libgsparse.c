@@ -12,9 +12,6 @@ extern "C" {
 #include <assert.h>
 #include <math.h>
 
-#ifdef __cplusplus
-}
-#endif
 
 #include "libgsparse.h"
 #include "gstypecheck.h"
@@ -180,36 +177,39 @@ ATermAppl gsParseSpecification (FILE *SpecStream)
   ATermAppl Result = NULL;
   //check preconditions
   if (SpecStream == NULL) {
-    ThrowVM(NULL, "formula stream may not be empty\n");
+    gsErrorMsg("formula stream may not be empty\n");
+  } else {
+    //enable constructor functions
+    gsEnableConstructorFunctions();
+    //parse specification using bison
+    gsVerboseMsg("parsing specification from stream\n");
+    Result = gsParse(SpecStream);
+    //Result = (ATermAppl) ATreadFromFile(SpecStream);
+    if (Result == NULL) {
+      gsErrorMsg("parsing failed\n");
+    } else {
+      //type check specification
+      gsVerboseMsg("type checking specification\n");
+      Result = gsTypeCheck(Result);
+      if (Result == NULL) {
+        gsErrorMsg("type checking failed\n");
+      } else {
+        //implement standard data types and type constructors
+        gsVerboseMsg("implementing standard data types and type constructors\n");
+        Result = gsImplementData(Result);
+        if (Result == NULL) {
+          gsErrorMsg("data implementation failed\n");
+        } else {
+          //linearise processes
+          gsVerboseMsg("linearising processes\n");
+          Result = gsLinearise(Result);
+          if (Result == NULL) {
+            gsErrorMsg("linearisation failed\n");
+          }
+        }
+      }
+    }
   }
-  //enable constructor functions
-  gsEnableConstructorFunctions();
-  //parse specification using bison
-  gsVerboseMsg("parsing specification from stream\n");
-  Result = gsParse(SpecStream);
-  //Result = (ATermAppl) ATreadFromFile(SpecStream);
-  if (Result == NULL) {
-    ThrowM("parsing failed\n");
-  }
-  //type check specification
-  gsVerboseMsg("type checking specification\n");
-  Result = gsTypeCheck(Result);
-  if (Result == NULL) {
-    ThrowM("type checking failed\n");
-  }
-  //implement standard data types and type constructors
-  gsVerboseMsg("implementing standard data types and type constructors\n");
-  Result = gsImplementData(Result);
-  if (Result == NULL) {
-    ThrowM("data implementation failed\n");
-  }
-  //linearise processes
-  gsVerboseMsg("linearising processes\n");
-  Result = gsLinearise(Result);
-  if (Result == NULL) {
-    ThrowM("linearisation failed\n");
-  }
-finally:
   if (Result != NULL) {
     gsDebugMsg("return %t\n", Result);
   } else {
@@ -1164,3 +1164,7 @@ void gsTest(void)
   int n = gsPosValue_int(t);
   fprintf(stderr, "%d\n", n);
 }
+
+#ifdef __cplusplus
+}
+#endif

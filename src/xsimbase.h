@@ -38,7 +38,7 @@
 #endif
 
 #include <list>
-#include "aterm2.h"
+#include <aterm2.h>
 
 using namespace std;
 

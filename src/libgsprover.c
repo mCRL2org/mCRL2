@@ -1,7 +1,12 @@
+#ifdef __cplusplus
+extern "C" {
+#endif
+
 #include <stdlib.h>
-#include "aterm2.h"
+#include <aterm2.h>
 #include "gslowlevel.h"
 #include "gsfunc.h"
+#include "libgsparse.h"
 #include "libgsrewrite.h"
 
 static ATermAppl current_spec;
@@ -259,7 +264,7 @@ ATermList FindSolutions(ATermList Vars, ATermAppl Expr)
 						if ( !ATisEqual(ATgetFirst(ATgetNext(o)),gsProverFalse) )
 						{
 //							ATfprintf(stderr,"Term does not evaluate to true or false (%t)\n",ATgetFirst(ATgetNext(o)));
-							ATfprintf(stderr,"Term does not evaluate to true or false: ");gsPrintPart(stderr,ATgetFirst(ATgetNext(o)),0,0);ATfprintf(stderr,"\n");
+							ATfprintf(stderr,"Term does not evaluate to true or false: ");gsPrintPart(stderr,ATAgetFirst(ATgetNext(o)),false,0);ATfprintf(stderr,"\n");
 						}
 					}
 				} else {
@@ -272,3 +277,7 @@ ATermList FindSolutions(ATermList Vars, ATermAppl Expr)
 
 	return m;
 }
+
+#ifdef __cplusplus
+}
+#endif

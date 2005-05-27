@@ -29,7 +29,7 @@ extern "C" {
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
-#include "aterm2.h"
+#include <aterm2.h>
 #include "gsfunc.h"
 #include "gslowlevel.h"
 

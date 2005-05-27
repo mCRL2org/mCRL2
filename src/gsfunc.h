@@ -1,9 +1,9 @@
-#include <stdbool.h>
-#include "aterm2.h"
-
 #ifdef __cplusplus
 extern "C" {
 #endif
+
+#include <stdbool.h>
+#include <aterm2.h>
 
 //Global precondition: the ATerm library has been initialised
 

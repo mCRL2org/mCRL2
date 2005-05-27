@@ -13,7 +13,9 @@ ATermAppl gsTree = NULL;         /* the parse tree */
 //external declarations
 int gsyyparse(void);             /* declared in gsparser.c */
 extern YYSTYPE gsyylval;         /* declared in gsparser.c */
+#ifndef _MSC_VER
 extern int fileno(FILE *stream); /* declared in stdio.h (forgotten by lex) */
+#endif
 
 //local declarations
 int LineNr = 1;                  /* line number in source file */
@@ -21,7 +23,7 @@ int ColNr  = 1;                  /* column number in source file */
 void gsProcessString(void);      /* default action to be taken when a string is
                                     scanned */
 void gsyyerror(char *s);         /* display error message (needed by yacc) */
-int gsyywrap(void);              /* action taken after an EOF (needed by yacc) */
+extern "C" int gsyywrap(void);   /* action taken after an EOF (needed by yacc) */
 
 %}
 Id         [a-zA-Z\_][a-zA-Z0-9\_]*
@@ -147,12 +149,13 @@ ATermAppl gsParse(FILE *FormStream) {
   ColNr = 1;
   gsyyrestart(FormStream);
   if (gsyyparse() != 0) {
-    ThrowV(NULL);
+    Result = NULL;
+  } else {
+    //gsTree contains the parsed formula
+    Result = gsTree;
+    gsTree = NULL;
   }
-  //gsTree contains the parsed formula
-  Result = gsTree;
-  gsTree = NULL;
-finally:
+
   ATunprotectAppl(&gsTree);
   return Result;
 }

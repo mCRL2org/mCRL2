@@ -1,11 +1,17 @@
-#include <stdbool.h>
-#include <stdarg.h>
-#include "aterm2.h"
+#ifndef __LOWLEVEL_H
+#define __LOWLEVEL_H
 
 #ifdef __cplusplus
 extern "C" {
 #endif
 
+#include <stdbool.h>
+#include <stdarg.h>
+#include <aterm2.h>
+
+#ifdef _MSC_VER
+#include <nt.h>
+#endif
 
 //Global precondition: the ATerm library has been initialised
 
@@ -13,32 +19,32 @@ extern "C" {
 //-------------------
 //
 //Re-implementation of strdup (because it is not part of the C99 standard)
-#if !(defined __USE_SVID || defined __USE_BSD || defined __USE_XOPEN_EXTENDED)
+#if !(defined __USE_SVID || defined __USE_BSD || defined __USE_XOPEN_EXTENDED || defined __APPLE__ || defined _MSC_VER)
 extern char *strdup(const char *s);
 #endif
 
-//Exception handling macro's
-//--------------------------
+//General definitions
+//-------------------
 //
-//When these are used the label 'finally' should be declared.
-//If a value 'x' should be returned, the variable 'result' has to be declared, 
-//and the type of 'x' should be convertible to that of 'result'.
-//If a message, should be printed, the message has to be able to be used by
-//function printf.
 
-#define throw             goto finally
-//model C++ throw by a 'goto finally' statement
+//Declare a local array NAME of type TYPE and SIZE elements (where SIZE
+//is not a constant value)
+#ifdef _MSC_VER
+#define DECL_A(NAME,TYPE,SIZE)  TYPE *NAME = (TYPE *) malloc((SIZE)*sizeof(TYPE))
+#define FREE_A(NAME)            free(NAME);
+#else
+#define DECL_A(NAME,TYPE,SIZE)  TYPE NAME[SIZE]
+#define FREE_A(NAME)            
+#endif
 
-#define ThrowV(x)         Result = x; throw
-//store x in result and throw an exception
-
-#define ThrowM(...)       gsErrorMsg(__VA_ARGS__); throw
-//print error message supplied by the first parameter with the remaining
-//parameters as arguments
-
-#define ThrowVM(x, ...)   gsErrorMsg(__VA_ARGS__); ThrowV(x)
-//print error message supplied by the first parameter with the remaining
-//parameters as arguments, and throw an exception with value x
+//Make sure __func__ works (as well as possible)
+#ifndef __func__
+#ifdef __FUNCTION__
+#define __func__ __FILE__
+#else
+#define __func__ __FILE__
+#endif
+#endif
 
 //Message printing
 //----------------
@@ -59,29 +65,76 @@ void gsSetDebugMsg(void);
 //Post: Printing of warnings, verbose information and extended debugging
 //      information during program executation is enabled.
 
-inline void gsErrorMsg(char *Format, ...);
+extern bool gsWarning;
+extern bool gsVerbose;
+extern bool gsDebug;
+
+inline void gsErrorMsg(char *Format, ...)
 //Post: "error: " is printed to stderr followed by Format, where the remaining
 //      parameters are used as ATprintf arguments to Format.
+{
+  fprintf(stderr, "error: ");
+  va_list Args;
+  va_start(Args, Format);
+  ATvfprintf(stderr, Format, Args);
+  va_end(Args);
+}
 
-inline void gsWarningMsg(char *Format, ...);
+inline void gsWarningMsg(char *Format, ...)
 //Post: If the printing of warning messages is enabled, "warning: " is printed
 //      to stderr followed by Format, where the remaining parameters are used
 //      as ATprintf arguments to Format.
+{
+  if (gsWarning) {
+    fprintf(stderr, "warning: ");
+    va_list Args;
+    va_start(Args, Format);
+    ATvfprintf(stderr, Format, Args);
+    va_end(Args);
+  }
+}
 
-inline void gsVerboseMsg(char *Format, ...);
+inline void gsVerboseMsg(char *Format, ...)
 //Post: If the printing of verbose information is enabled, Format is printed to
 //      stderr, where the remaining parameters are used as ATprintf arguments
 //      to Format.
+{
+  if (gsVerbose) {
+    va_list Args;
+    va_start(Args, Format);
+    ATvfprintf(stderr, Format, Args);
+    va_end(Args);
+  }
+}
 
-#define gsDebugMsg(...)   gsDebugMsgFunc(__func__, __VA_ARGS__)
+#define GS_DEBUG_MSG_FUNC(FuncName,Format) \
+  if (gsDebug) { \
+    fprintf(stderr, "(%s): ", FuncName); \
+    va_list Args; \
+    va_start(Args, Format); \
+    ATvfprintf(stderr, Format, Args); \
+    va_end(Args); \
+  }
+
+#ifdef _MSC_VER
+inline void gsDebugMsg(char *Format,...)
+{
+	GS_DEBUG_MSG_FUNC("unknown",Format)
+}
+#else
+#define gsDebugMsg(...)        gsDebugMsgFunc(__func__, __VA_ARGS__)
+#endif
 //Post: If the printing of debug messages is enabled, the name of the current
 //      function is printed to stderr, followed by the first parameter with the
 //      remaining parameters as ATprintf arguments.
 
-inline void gsDebugMsgFunc(const char *FuncName, char *Format, ...);
+inline void gsDebugMsgFunc(const char *FuncName, char *Format, ...)
 //Post: If the printing of debug messages is enabled, the name of FuncName is
 //      printed to stderr, followed by Format where  the remaining parameters
 //      are used as ATprintf arguments to Format.
+{
+  GS_DEBUG_MSG_FUNC(FuncName,Format)
+}
 
 //ATerm library work arounds
 //--------------------------
@@ -175,4 +228,6 @@ int NrOfChars(int n);
 
 #ifdef __cplusplus
 }
+#endif
+
 #endif

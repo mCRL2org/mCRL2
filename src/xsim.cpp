@@ -2,15 +2,15 @@
     #pragma implementation "xsim.h"
 #endif
 
-#include "wx/wxprec.h"
+#include <wx/wxprec.h>
 
 #ifdef __BORLANDC__
     #pragma hdrstop
 #endif
 
+#include <aterm2.h>
 #include "xsim.h"
 #include "xsimmain.h"
-#include "aterm2.h"
 #include "gsfunc.h"
 
 //------------------------------------------------------------------------------
@@ -47,6 +47,19 @@ int XSim::OnExit()
 IMPLEMENT_APP_NO_MAIN(XSim)
 IMPLEMENT_WX_THEME_SUPPORT
 
+#ifdef __WINDOWS__
+extern "C" int WINAPI WinMain(HINSTANCE hInstance,                    
+                                  HINSTANCE hPrevInstance,                
+                                  wxCmdLineArgType lpCmdLine,             
+                                  int nCmdShow)                           
+    {                                                                     
+        ATerm bot;
+
+        ATinit(NULL,NULL,&bot); // XXX args?
+
+        return wxEntry(hInstance, hPrevInstance, lpCmdLine, nCmdShow);    
+    }
+#else
 int main(int argc, char **argv)
 {
 	ATerm bot;
@@ -55,3 +68,4 @@ int main(int argc, char **argv)
 
 	return wxEntry(argc, argv);
 }
+#endif

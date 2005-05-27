@@ -3,7 +3,7 @@
 extern "C" {
 #endif
 
-#include "aterm2.h"
+#include <aterm2.h>
 
 ATermAppl gsLinearise2_nolpe(ATermAppl Spec);
 ATermAppl gsLinearise2_nolpe_subst(ATermAppl Spec, int reuse_cycles);

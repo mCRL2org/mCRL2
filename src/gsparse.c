@@ -15,11 +15,7 @@ extern "C" {
 #include <stdbool.h>
 #include <assert.h>
 
-#ifdef __cplusplus
-}
-#endif
-
-#include "aterm2.h"
+#include <aterm2.h>
 #include "gsparse.h"
 #include "gsfunc.h"
 #include "gslowlevel.h"
@@ -37,6 +33,9 @@ void PrintUsage(FILE* Stream);
 
 void PrintVersion(FILE* Stream);
 //print version information to stream
+
+void PrintMoreInfo(FILE* Stream);
+//print --help suggestion to stream
 
 bool ParseSpecificationFileName(
   char *SpecFileName,
@@ -78,7 +77,6 @@ int main(int argc, char* argv[]) {
   char *OutputFileName = NULL;
   bool Human           = false;
   bool NoSave          = false;
-  bool MoreInfo        = false;
   //declarations for getopt  
   #define ShortOptions      "hqvdn"
   #define HelpOption        CHAR_MAX + 1
@@ -102,16 +100,13 @@ int main(int argc, char* argv[]) {
     switch (Option) {
       case HelpOption: 
         PrintUsage(stdout);
-        ThrowV(0); 
-        break;
+        return 0; 
       case VersionOption: 
         PrintVersion(stdout); 
-        ThrowV(0);
-        break;
+        return 0;
       case TestOption: 
         gsTest();
-        ThrowV(0);
-        break;
+        return 0;
       case 'q':
         gsSetQuietMsg();
         break;
@@ -128,22 +123,21 @@ int main(int argc, char* argv[]) {
         NoSave = true;
         break;
       default:
-      	MoreInfo = true;
-      	ThrowV(1);
-        break;
+      	PrintMoreInfo(stderr);
+      	return 1;
     }
     Option = getopt_long(argc, argv, ShortOptions, LongOptions, NULL);
   }
   int NoArgc; //non-option argument count
   NoArgc = argc - optind;
   if (NoArgc <= 0) {
-    MoreInfo = true;
     fprintf(stderr, "%s: too few arguments\n", NAME);
-    ThrowV(1);
+   	PrintMoreInfo(stderr);
+   	return 1;
   } else if (NoArgc > 2) {
-    MoreInfo = true;
     fprintf(stderr, "%s: too many arguments\n", NAME);
-    ThrowV(1);
+   	PrintMoreInfo(stderr);
+   	return 1;
   } else {
     //NoArgc > 0 && NoArgc <= 2
     SpecFileName = strdup(argv[optind]);
@@ -157,12 +151,8 @@ int main(int argc, char* argv[]) {
   //parse specification  
   if (!ParseSpecificationFileName(SpecFileName, OutputFileName, Human, NoSave))
   {
-    ThrowV(1);  
+    Result = 1;  
   }       
-finally:
-  if (MoreInfo) {
-    fprintf(stderr, "Try \'%s --help\' for more information.\n", NAME);
-  }
   free(SpecFileName);
   free(OutputFileName);
   gsDebugMsg("all objects are freed; return %d.\n", Result);
@@ -179,27 +169,30 @@ bool ParseSpecificationFileName(char *SpecFileName, char *OutputFileName,
   //open specification file for reading
   SpecStream = fopen(SpecFileName, "r");
   if (SpecStream == NULL) {
-    ThrowVM(false, "could not open specification file '%s' for reading (error %d)\n",
+    gsErrorMsg("could not open specification file '%s' for reading (error %d)\n",
       SpecFileName, errno);
-  }
-  gsDebugMsg("formula file %s is opened for reading.\n", SpecFileName);
-  //open output file for writing or set to stdout
-  if (OutputFileName == NULL) {
-    OutputStream = stdout;
-    gsDebugMsg("output to stdout.\n");
-  } else {  
-    OutputStream = fopen(OutputFileName, "w");
-    if (!OutputStream) {
-      ThrowVM(false, "could not open output file '%s' for writing (error %d)\n", 
-        OutputFileName, errno);
+    Result = false;
+  } else {
+    gsDebugMsg("formula file %s is opened for reading.\n", SpecFileName);
+    //open output file for writing or set to stdout
+    if (OutputFileName == NULL) {
+      OutputStream = stdout;
+      gsDebugMsg("output to stdout.\n");
+    } else {  
+      OutputStream = fopen(OutputFileName, "w");
+      if (!OutputStream) {
+        gsErrorMsg("could not open output file '%s' for writing (error %d)\n", 
+          OutputFileName, errno);
+        Result = false;
+      } else {
+        gsDebugMsg("output file %s is opened for writing.\n", OutputFileName);
+      }
     }
-    gsDebugMsg("output file %s is opened for writing.\n", OutputFileName);
+    if ( Result && !ParseSpecificationStream(SpecStream, OutputStream, Human, NoSave))
+    {
+      Result = false;
+    }
   }
-  if (!ParseSpecificationStream(SpecStream, OutputStream, Human, NoSave))
-  {
-    ThrowV(false);
-  }
-finally:
   if (SpecStream != NULL) {
     fclose(SpecStream);
   }
@@ -266,3 +259,11 @@ void PrintVersion(FILE *Stream) {
   fprintf(Stream, "%s %s\nWritten by %s.\n", 
     NAME, LVERSION, AUTHOR);  
 }
+
+void PrintMoreInfo(FILE *Stream) {
+  fprintf(Stream, "Try \'%s --help\' for more information.\n", NAME);
+}
+
+#ifdef __cplusplus
+}
+#endif

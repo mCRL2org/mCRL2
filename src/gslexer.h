@@ -3,7 +3,7 @@ extern "C" {
 #endif
 
 #include <stdio.h>
-#include "aterm2.h"
+#include <aterm2.h>
 
 //Global precondition: the ATerm library has been initialised
 

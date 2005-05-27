@@ -312,7 +312,7 @@ ac_includes_default="\
 # include <unistd.h>
 #endif"
 
-ac_subst_vars='SHELL PATH_SEPARATOR PACKAGE_NAME PACKAGE_TARNAME PACKAGE_VERSION PACKAGE_STRING PACKAGE_BUGREPORT exec_prefix prefix program_transform_name bindir sbindir libexecdir datadir sysconfdir sharedstatedir localstatedir libdir includedir oldincludedir infodir mandir build_alias host_alias target_alias DEFS ECHO_C ECHO_N ECHO_T LIBS CC CFLAGS LDFLAGS CPPFLAGS ac_ct_CC EXEEXT OBJEXT CXX CXXFLAGS ac_ct_CXX LEX LEXLIB LEX_OUTPUT_ROOT BISON CPP EGREP USE_XML2 WX_CONFIG USE_WX LIBOBJS LTLIBOBJS'
+ac_subst_vars='SHELL PATH_SEPARATOR PACKAGE_NAME PACKAGE_TARNAME PACKAGE_VERSION PACKAGE_STRING PACKAGE_BUGREPORT exec_prefix prefix program_transform_name bindir sbindir libexecdir datadir sysconfdir sharedstatedir localstatedir libdir includedir oldincludedir infodir mandir build_alias host_alias target_alias DEFS ECHO_C ECHO_N ECHO_T LIBS CC CFLAGS LDFLAGS CPPFLAGS ac_ct_CC EXEEXT OBJEXT CXX CXXFLAGS ac_ct_CXX LEX LEXLIB LEX_OUTPUT_ROOT BISON CPP EGREP USE_XML2 WX_CONFIG USE_WX WX_LIBS LIBOBJS LTLIBOBJS'
 ac_subst_files=''
 
 # Initialize some variables set by options.
@@ -4050,7 +4050,7 @@ fi
 if test $WX_CONFIG; then
   USE_WX=1
   CXXFLAGS="$($WX_CONFIG --cxxflags) $CXXFLAGS"
-  LDFLAGS="$($WX_CONFIG --libs) $LDFLAGS"
+  WX_LIBS="$($WX_CONFIG --libs)"
 fi
 
 
@@ -5689,6 +5689,7 @@ s,@EGREP@,$EGREP,;t t
 s,@USE_XML2@,$USE_XML2,;t t
 s,@WX_CONFIG@,$WX_CONFIG,;t t
 s,@USE_WX@,$USE_WX,;t t
+s,@WX_LIBS@,$WX_LIBS,;t t
 s,@LIBOBJS@,$LIBOBJS,;t t
 s,@LTLIBOBJS@,$LTLIBOBJS,;t t
 CEOF

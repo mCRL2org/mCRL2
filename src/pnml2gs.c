@@ -1,4 +1,7 @@
 /* $Id: pnml2gs.c,v 1.0 2005/03/09 15:46:00 ysu Exp $ */
+#ifdef __cplusplus
+extern "C" {
+#endif
 
 #define NAME "pnml2gs"
 
@@ -15,7 +18,7 @@
 #include <getopt.h>
 #include <libxml/xmlmemory.h>
 #include <libxml/parser.h>
-#include "aterm2.h"
+#include <aterm2.h>
 #include "libgsparse.h"
 #include "gslowlevel.h"
 #include "gsfunc.h"
@@ -1056,3 +1059,6 @@ int main(int argc, char **argv){
   return 0;
 }
 
+#ifdef __cplusplus
+}
+#endif

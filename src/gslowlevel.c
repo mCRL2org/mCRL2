@@ -1,20 +1,18 @@
 #ifdef __cplusplus
 extern "C" {
 #endif
+
 #include <string.h>
 #include <stdlib.h>
 #include <assert.h>
 #include <math.h>
-#ifdef __cplusplus
-}
-#endif
 
 #include "gslowlevel.h"
 
 //String manipulation
 //-------------------
 
-#if !(defined __USE_SVID || defined __USE_BSD || defined __USE_XOPEN_EXTENDED|| defined __APPLE__)
+#if !(defined __USE_SVID || defined __USE_BSD || defined __USE_XOPEN_EXTENDED || defined __APPLE__ || defined _MSC_VER)
 char *strdup(const char *s)
 {
     size_t len;
@@ -30,9 +28,9 @@ char *strdup(const char *s)
 //Message printing
 //----------------
 
-static bool gsWarning = true; //indicates if warning should be printed
-static bool gsVerbose = false;//indicates if verbose messages should be printed
-static bool gsDebug   = false;//indicates if debug messages should be printed
+bool gsWarning = true; //indicates if warning should be printed
+bool gsVerbose = false;//indicates if verbose messages should be printed
+bool gsDebug   = false;//indicates if debug messages should be printed
 
 void gsSetQuietMsg(void)
 {
@@ -60,47 +58,6 @@ void gsSetDebugMsg(void)
   gsWarning = true;
   gsVerbose = true;
   gsDebug   = true;
-}
-
-void gsErrorMsg(char *Format, ...)
-{
-  fprintf(stderr, "error: ");
-  va_list Args;
-  va_start(Args, Format);
-  ATvfprintf(stderr, Format, Args);
-  va_end(Args);
-}
-
-void gsWarningMsg(char *Format, ...)
-{
-  if (gsWarning) {
-    fprintf(stderr, "warning: ");
-    va_list Args;
-    va_start(Args, Format);
-    ATvfprintf(stderr, Format, Args);
-    va_end(Args);
-  }
-}
-
-void gsVerboseMsg(char *Format, ...)
-{
-  if (gsVerbose) {
-    va_list Args;
-    va_start(Args, Format);
-    ATvfprintf(stderr, Format, Args);
-    va_end(Args);
-  }
-}
-
-void gsDebugMsgFunc(const char *FuncName, char *Format, ...)
-{
-  if (gsDebug) {
-    fprintf(stderr, "(%s): ", FuncName);
-    va_list Args;
-    va_start(Args, Format);
-    ATvfprintf(stderr, Format, Args);
-    va_end(Args);
-  }
 }
 
 //ATerm libary work arounds
@@ -243,12 +200,14 @@ ATerm gsSubstValues(ATermList Substs, ATerm Term, bool Recursive)
       AFun Head = ATgetAFun((ATermAppl) Term);
       int NrArgs = ATgetArity(Head);
       if (NrArgs > 0) {
-        ATerm Args[NrArgs];
+      	DECL_A(Args,ATerm,NrArgs);
         for (int i = 0; i < NrArgs; i++) {
           Args[i] = gsSubstValues(Substs, ATgetArgument((ATermAppl) Term, i),
             Recursive);
         }
-        return (ATerm) ATmakeApplArray(Head, Args);
+        ATerm a = (ATerm) ATmakeApplArray(Head, Args);
+        FREE_A(Args);
+        return a;
       } else {
         return Term;
       }
@@ -386,9 +345,13 @@ char *gsStringDub(const char *n, const int inc)
 int NrOfChars(int n)
 {
   if (n > 0)
-    return ceil(log10(n));
+    return ceil(log10((double) n));
   else if (n == 0)
     return 1;
   else //n < 0
-    return ceil(log10(abs(n))) + 1;
+    return ceil(log10((double) abs(n))) + 1;
 }
+
+#ifdef __cplusplus
+}
+#endif

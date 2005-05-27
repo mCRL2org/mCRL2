@@ -1,10 +1,13 @@
 /* $Id: libgsrewrite.c,v 1.5 2005/04/08 12:33:51 muck Exp $ */
+#ifdef __cplusplus
+extern "C" {
+#endif
 
 #define NAME "libgsrewrite"
 
 #include <stdio.h>
 #include <stdlib.h>
-#include "aterm2.h"
+#include <aterm2.h>
 #include "gslowlevel.h"
 #include "gsfunc.h"
 #include "libgsrewrite.h"
@@ -152,3 +155,7 @@ ATermList gsRewriteTerms(ATermList Terms)
 
 	return (ATermList) gsRewriteTermGen((ATerm) Terms, &b);
 }
+
+#ifdef __cplusplus
+}
+#endif

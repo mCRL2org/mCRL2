@@ -1,0 +1,10 @@
+<?xml version="1.0"?>
+<bakefile>
+  <template id="c">
+  
+  </template>
+  
+  <lib id="ATerm" template="c">
+    <sources>afun.c aterm.c bafio.c byteio.c gc.c hash.c list.c make.c md5c.c memory.c tafio.c version.c</sources>
+  </lib>
+</bakefile>

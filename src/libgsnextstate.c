@@ -1,3 +1,7 @@
+#ifdef __cplusplus
+extern "C" {
+#endif
+
 #include <stdio.h>
 #include <stdlib.h>
 #include <aterm2.h>
@@ -191,10 +195,10 @@ ATermList gsNextStateInit(ATermAppl Spec, bool AllowFreeVars)
 
 static ATermList makeNewState(ATermList old, ATermList vars, ATermList assigns, ATermList substs)
 {
-	ATermList new,l;
+	ATermList nnew,l;
 	bool set;
 
-	new = ATmakeList0();
+	nnew = ATmakeList0();
 	for (; !ATisEmpty(vars); vars=ATgetNext(vars),old=ATgetNext(old))
 	{
 		set = false;
@@ -203,19 +207,19 @@ static ATermList makeNewState(ATermList old, ATermList vars, ATermList assigns, 
 		{
 			if ( ATisEqual(ATgetArgument(ATAgetFirst(l),0),ATgetFirst(vars)) )
 			{
-				new = ATinsert(new,gsSubstValues(substs,ATgetArgument(ATAgetFirst(l),1),true));
+				nnew = ATinsert(nnew,gsSubstValues(substs,ATgetArgument(ATAgetFirst(l),1),true));
 				set = true;
 				break;
 			}
 		}
 		if ( !set )
 		{
-			new = ATinsert(new,ATgetFirst(old));
+			nnew = ATinsert(nnew,ATgetFirst(old));
 		}
 	}
-	new = gsRewriteTerms((ATermList) SetVars((ATerm) ATreverse(new)));
+	nnew = gsRewriteTerms((ATermList) SetVars((ATerm) ATreverse(nnew)));
 
-	return new;
+	return nnew;
 }
 
 ATermAppl rewrActionArgs(ATermAppl act)
@@ -268,3 +272,7 @@ ATermList gsNextState(ATermList State)
 
 	return states;
 }
+
+#ifdef __cplusplus
+}
+#endif

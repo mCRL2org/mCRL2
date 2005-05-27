@@ -3,7 +3,7 @@
 extern "C" {
 #endif
 
-#include "aterm2.h"
+#include <aterm2.h>
 
 #define GS_REWR_INNER	0
 #define GS_REWR_INNER2	1

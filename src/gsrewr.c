@@ -1,4 +1,7 @@
 /* $Id: gsrewr.c,v 1.2 2005/04/08 12:33:51 muck Exp $ */
+#ifdef __cplusplus
+extern "C" {
+#endif
 
 #define NAME "gsrewr"
 
@@ -6,7 +9,7 @@
 #include <stdlib.h>
 #include <string.h>
 #include <getopt.h>
-#include "aterm2.h"
+#include <aterm2.h>
 #include "gslowlevel.h"
 #include "gsfunc.h"
 #include "libgsparse.h"
@@ -268,3 +271,7 @@ int main(int argc, char **argv)
 		}
 	}
 }
+
+#ifdef __cplusplus
+}
+#endif

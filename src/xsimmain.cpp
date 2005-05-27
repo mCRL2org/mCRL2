@@ -2,22 +2,20 @@
     #pragma implementation "xsimmain.h"
 #endif
 
-#include "wx/wxprec.h"
+#include <wx/wxprec.h>
 
 #ifdef __BORLANDC__
     #pragma hdrstop
 #endif
 
-#include <dlfcn.h>
+//#include <dlfcn.h>
+#include <aterm2.h>
 #include "xsimbase.h"
 #include "xsimmain.h"
-#include "aterm2.h"
 #include "gslowlevel.h"
 #include "gsfunc.h"
+#include "libgsparse.h"
 #include "libgsnextstate.h"
-
-extern "C" void gsPrintPart(FILE *f, ATerm a, bool b, int c);
-extern "C" void gsPrintParts(FILE *f, ATerm a, bool b, int c, char *s, char *t);
 
 //------------------------------------------------------------------------------
 // XSimMain
@@ -105,7 +103,11 @@ void XSimMain::CreateMenu()
     edit->Append( ID_MENU, wxT("&Load trace...	CTRL-l"), wxT("") )->Enable(false);
     edit->Append( ID_MENU, wxT("&Save trace...	CTRL-s"), wxT("") )->Enable(false);
     edit->AppendSeparator();
+#ifdef __WINDOWS__
+    edit->Append( ID_FITCS, wxT("F&it to Current State	CTRL-f"), wxT("") )->Enable(false);
+#else
     edit->Append( ID_FITCS, wxT("F&it to Current State	CTRL-f"), wxT("") );
+#endif
     menu->Append( edit, wxT("&Edit") );
     
     wxMenu *views = new wxMenu;
@@ -384,6 +386,7 @@ ATermList XSimMain::GetTrace()
 bool XSimMain::SetTrace(ATermList Trace, int From)
 {
 	// XXX
+	return false;
 }
 
 
@@ -429,7 +432,7 @@ void XSimMain::OnOpen( wxCommandEvent &event )
     wxFileDialog dialog( this, wxT("Select a LPE file..."));
     if ( dialog.ShowModal() == wxID_OK )
     {
-	    LoadFile(dialog.GetFilename());
+	    LoadFile(dialog.GetPath());
     }
 }
 
@@ -455,11 +458,13 @@ void XSimMain::OnReset( wxCommandEvent &event )
 
 void XSimMain::OnFitCurrentState( wxCommandEvent &event )
 {
+#ifndef __WINDOWS__
     int w,h,n;
 
     n = stateview->GetViewRect().GetHeight()+stateview->m_headerHeight;
     stateview->GetClientSize(&w,&h);
     split->SetSashPosition(split->GetSashPosition()+n-h);
+#endif
 }
 
 void XSimMain::OnTrace( wxCommandEvent &event )
@@ -469,7 +474,7 @@ void XSimMain::OnTrace( wxCommandEvent &event )
 
 void XSimMain::OnTraceLoad( wxCommandEvent &event )
 {
-    wxFileDialog dialog( this, wxT("Select a View DLL..."), wxT(""), wxT(""), wxT("Shared Object Files (*.so)|*.so|All Files|*.*"));
+/*    wxFileDialog dialog( this, wxT("Select a View DLL..."), wxT(""), wxT(""), wxT("Shared Object Files (*.so)|*.so|All Files|*.*"));
     if ( dialog.ShowModal() == wxID_OK )
     {
 	    void *h;
@@ -491,7 +496,7 @@ void XSimMain::OnTraceLoad( wxCommandEvent &event )
 		    wxMessageDialog msg(this, wxT("Failed to open DLL."), wxT("Error"), wxOK|wxICON_ERROR);
 		    msg.ShowModal();
 	    }
-    }
+    }*/
 }
 
 void XSimMain::OnAbout( wxCommandEvent &event )
@@ -570,7 +575,7 @@ void XSimMain::SetCurrentState(ATermList state, bool showchange)
 		{
 			fprintf(f,"_");
 		} else {
-			gsPrintPart(f,ATgetFirst(state),false,0);
+			gsPrintPart(f,ATAgetFirst(state),false,0);
 		}
 		rewind(f);
 		if ( fgets(s,1000,f) == NULL )
@@ -603,7 +608,7 @@ void XSimMain::UpdateTransitions()
 	for (ATermList l=next_states; !ATisEmpty(l); l=ATgetNext(l), i++)
 	{
 		f = fopen("xsim.tmp","w+");
-		gsPrintPart(f,ATgetFirst(ATLgetFirst(l)),false,0);
+		gsPrintPart(f,ATAgetFirst(ATLgetFirst(l)),false,0);
 		rewind(f);
 		if ( fgets(s,1000,f) == NULL )
 		{
@@ -626,13 +631,13 @@ void XSimMain::UpdateTransitions()
 				} else {
 					comma = true;
 				}
-				gsPrintPart(f,ATgetFirst(o),false,0);
+				gsPrintPart(f,ATAgetFirst(o),false,0);
 				fprintf(f," := ");
 				if ( gsIsDataVarId(ATAgetFirst(n)) )
 				{
 					fprintf(f,"_");
 				} else {
-					gsPrintPart(f,ATgetFirst(n),false,0);
+					gsPrintPart(f,ATAgetFirst(n),false,0);
 				}
 			}
 		}

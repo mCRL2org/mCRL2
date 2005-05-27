@@ -1,4 +1,7 @@
 /* $Id: gsinstantiate.c,v 1.1 2005/05/03 15:44:47 muck Exp $ */
+#ifdef __cplusplus
+extern "C" {
+#endif
 
 #define NAME "gsinstantiate"
 
@@ -6,7 +9,7 @@
 #include <stdlib.h>
 #include <string.h>
 #include <getopt.h>
-#include "aterm2.h"
+#include <aterm2.h>
 #include "gslowlevel.h"
 #include "gsfunc.h"
 #include "libgsparse.h"
@@ -117,7 +120,7 @@ int main(int argc, char **argv)
 				}
 
 				fprintf(aut,"(%i,\"",curr_num);
-				gsPrintPart(aut,ATgetFirst(ATLgetFirst(l)),0,0);
+				gsPrintPart(aut,ATAgetFirst(ATLgetFirst(l)),false,0);
 				fprintf(aut,"\",%i)\n",i);
 				trans++;
 			}
@@ -129,3 +132,7 @@ int main(int argc, char **argv)
 	fprintf(aut,"des (0,%i,%i)",trans,num_states);
 	fclose(aut);
 }
+
+#ifdef __cplusplus
+}
+#endif

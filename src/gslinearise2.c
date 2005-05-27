@@ -1,10 +1,13 @@
 /* $Id: gslinearise2.c,v 1.21 2005/05/12 09:34:11 muck Exp $ */
+#ifdef __cplusplus
+extern "C" {
+#endif
 
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
 #include <limits.h>
-#include "aterm2.h"
+#include <aterm2.h>
 #include "gsfunc.h"
 #include "gslowlevel.h"
 #include "libgsparse.h"
@@ -31,17 +34,17 @@ int proc_id(ATermAppl a);
 
 ATbool ATisList(ATerm a)
 {
-	return (ATgetType(a) == AT_LIST);
+	return (ATbool) (ATgetType(a) == AT_LIST);
 }
 
 ATbool ATisAppl(ATerm a)
 {
-	return (ATgetType(a) == AT_APPL);
+	return (ATbool) (ATgetType(a) == AT_APPL);
 }
 
 ATbool ATisAnnotated(ATerm a)
 {
-	return (ATgetAnnotation(a,debruijn) != NULL);
+	return (ATbool) (ATgetAnnotation(a,debruijn) != NULL);
 }
 
 
@@ -626,7 +629,7 @@ ATbool has_bounded_var(ATermAppl a) //XXX
 		return ATisAnnotated((ATerm) a);
 	} else if ( gsIsDataAppl(a) )
 	{
-		return has_bounded_var(ATAgetArgument(a,0)) || has_bounded_var(ATAgetArgument(a,1));
+		return (ATbool) (has_bounded_var(ATAgetArgument(a,0)) || has_bounded_var(ATAgetArgument(a,1)));
 	} else if ( gsIsOpId(a) )
 	{
 		return ATfalse;
@@ -914,7 +917,7 @@ ATbool synch_cap(ATermAppl ma, ATermList H)
 		}
 	} else if ( gsIsSync(ma) )
 	{
-		return synch_cap(ATAgetArgument(ma,0),H) || synch_cap(ATAgetArgument(ma,1),H);
+		return (ATbool) (synch_cap(ATAgetArgument(ma,0),H) || synch_cap(ATAgetArgument(ma,1),H));
 	} else {
 		gsErrorMsg("invalid multiaction supplied to synch_cap (%t)\n",ma);
 		exit(1);
@@ -2466,3 +2469,7 @@ ATermAppl gsLinearise2(ATermAppl Spec, int cluster)
 
 	return Spec;
 }
+
+#ifdef __cplusplus
+}
+#endif
