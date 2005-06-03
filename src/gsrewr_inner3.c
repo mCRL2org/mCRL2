@@ -3,6 +3,8 @@
 extern "C" {
 #endif
 
+//#define GS_CHECK_NFS
+
 #define NAME "rewr_inner3"
 
 #include <stdio.h>
@@ -103,7 +105,11 @@ static ATermAppl fromInner(ATerm Term)
 		{
 			return int2term[ATgetInt((ATermInt) Term)];
 		} else {
+#ifdef GS_CHECK_NFS
+			return (ATermAppl) ATremoveAnnotation(Term,gsMakeNil());
+#else
 			return (ATermAppl) Term;
+#endif
 		}
 	}
 
@@ -114,7 +120,11 @@ static ATermAppl fromInner(ATerm Term)
 	}
 	
 	l = (ATermList) Term;
+#ifdef GS_CHECK_NFS
+	t = ATremoveAnnotation(ATgetFirst(l),gsMakeNil());
+#else
 	t = ATgetFirst(l);
+#endif
 	if ( ATisInt(t) )
 	{
 		a = int2term[ATgetInt((ATermInt) t)];
@@ -139,7 +149,12 @@ void rewrite_init_inner3()
 	tmp_eqns = ATtableCreate(100,100); // XXX would be nice to know the number op OpIds
 	term2int = ATtableCreate(100,100);
 
+
+#ifdef GS_CHECK_NFS
+	trueint = (ATermInt) ATsetAnnotation(OpId2Int(gsMakeDataExprTrue(),true),gsMakeNil(),gsMakeNil());
+#else
 	trueint = (ATermInt) OpId2Int(gsMakeDataExprTrue(),true);
+#endif
 	if ( !isprotected )
 	{
 		ATprotectInt(&trueint);
@@ -272,6 +287,9 @@ static ATerm subst_values(ATermList s, ATerm t)
 	ATermList l,m;
 
 	h = NULL;
+#ifdef GS_CHECK_NFS
+	ATremoveAnnotation(t,gsMakeNil());
+#endif
 
 	if ( ATisList(t) )
 	{
@@ -337,7 +355,11 @@ static bool match_inner(ATerm t, ATerm p, ATermList *vars)
 		return false;
 	} else if ( ATisInt(p) || gsIsOpId((ATermAppl) p) )
 	{
+#ifdef GS_CHECK_NFS
+		return ATisEqualModuloAnnotations(t,p);
+#else
 		return ATisEqual(t,p);
+#endif
 	} else /* if ( gsIsDataVarId((ATermAppl) p) ) */ {
 		if ( ATindexOf(*vars,(ATerm) gsMakeSubst(p,t),0) >=0 )
 		{
@@ -347,7 +369,11 @@ static bool match_inner(ATerm t, ATerm p, ATermList *vars)
 			l = *vars;
 			for (; !ATisEmpty(l); l=ATgetNext(l))
 			{
+#ifdef GS_CHECK_NFS
+				if ( ATisEqualModuloAnnotations(p,ATgetArgument(ATAgetFirst(l),0)) )
+#else
 				if ( ATisEqual(p,ATgetArgument(ATAgetFirst(l),0)) )
+#endif
 				{
 					return false;
 				}
@@ -358,6 +384,18 @@ static bool match_inner(ATerm t, ATerm p, ATermList *vars)
 	}
 }
 
+#ifdef GS_CHECK_NFS
+static ATerm setnormal(ATerm Term)
+{
+	return ATsetAnnotation(Term,(ATerm) gsMakeNil(),(ATerm) gsMakeNil());
+}
+
+static bool isnormal(ATerm Term)
+{
+	return ATgetAnnotation(Term,(ATerm) gsMakeNil()) != NULL;
+}
+#endif
+
 static ATerm rewrite(ATerm Term, int *b, ATermList vars)
 {
 	ATerm t;
@@ -365,6 +403,11 @@ static ATerm rewrite(ATerm Term, int *b, ATermList vars)
 //	ATermAppl v,s,t;
 	int i,len,c,d,e;
 	bool x;
+
+#ifdef GS_CHECK_NFS
+	if ( isnormal(Term) )
+		return Term;
+#endif
 
 //ATfprintf(stderr,"rewrite(%t)\n\n",Term);
 //ATfprintf(stderr,"rewrite(");gsPrintPart(stderr,fromInner(Term),false,0);ATfprintf(stderr,") %p\n\n",&t);
@@ -468,7 +511,11 @@ static ATerm rewrite(ATerm Term, int *b, ATermList vars)
 		}
 //ATfprintf(stderr,"return: %t\n\n",Term);
 //ATfprintf(stderr,"return: ");gsPrintPart(stderr,fromInner(Term),false,0);ATfprintf(stderr,"\n\n");
+#ifdef GS_CHECK_NFS
+		return setnormal(Term);
+#else
 		return Term;
+#endif
 	} else if ( ATisInt(Term) )
 	{
 		if ( (m = inner3_eqns[ATgetInt((ATermInt) Term)]) != NULL )
@@ -482,7 +529,11 @@ static ATerm rewrite(ATerm Term, int *b, ATermList vars)
 						*b = 1;
 //ATfprintf(stderr,"return: %t\n\n",ATelementAt(ATLgetFirst(m),3));
 //ATfprintf(stderr,"return: ");gsPrintPart(stderr,fromInner(ATelementAt(ATLgetFirst(m),3)),false,0);ATfprintf(stderr,"\n\n");
+#ifdef GS_CHECK_NFS
+						return setnormal(ATelementAt(ATLgetFirst(m),3));
+#else
 						return ATelementAt(ATLgetFirst(m),3);
+#endif
 					}		
 					
 				}
@@ -490,11 +541,19 @@ static ATerm rewrite(ATerm Term, int *b, ATermList vars)
 		}
 //ATfprintf(stderr,"return: %t\n\n",Term);
 //ATfprintf(stderr,"return: ");gsPrintPart(stderr,fromInner(Term),false,0);ATfprintf(stderr,"\n\n");
+#ifdef GS_CHECK_NFS
+		return setnormal(Term);
+#else
 		return Term;
+#endif
 	} else {
 //ATfprintf(stderr,"return: %t\n\n",Term);
 //ATfprintf(stderr,"return: ");gsPrintPart(stderr,fromInner(Term),false,0);ATfprintf(stderr,"\n\n");
+#ifdef GS_CHECK_NFS
+		return setnormal(Term);
+#else
 		return Term;
+#endif
 	}
 }
 
@@ -502,7 +561,7 @@ ATerm rewrite_inner3(ATerm Term, int *b)
 {
 	ATermList l;
 	int c;
-
+//ATfprintf(stderr,"input: %t\n",Term);
 	if ( ATisList(Term) )
 	{
 		l = ATmakeList0();
