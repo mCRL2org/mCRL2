@@ -47,7 +47,7 @@ extern "C" {
   /*                                 */
   /*                                 */
   /* Functions for the read-in phase */
-  /*                                 */  
+  /*                                 */
   /*                                 */
   /*                                 */
 
@@ -333,6 +333,14 @@ extern "C" {
     return ATmakeAppl3(ATmakeAFun("arc", 3, ATfalse), Aid, Asource, Atarget);
   }
   
+  /*                        */
+  /*                        */
+  /*                        */
+  /* Read-in phase function */
+  /*                        */
+  /*                        */
+  /*                        */
+
   //==================================================
   // pn2gsAterm converts the pnml-input to a usable ATerm
   //==================================================
@@ -484,7 +492,6 @@ extern "C" {
   /*                                    */
   /*                                    */
 
-
   //==================================================
   // pn2gsGenerateAction_trans generates the action t_..._mon for a given transition
   //==================================================
@@ -606,45 +613,39 @@ extern "C" {
   }
 
   //==================================================
-  // pn2gsSyncArcsIn creates the GenSpect syncronistation of all elements of the list
+  // pn2gsSyncIn creates the GenSpect syncronistation of all elements of the list
   //==================================================
-  static ATermAppl pn2gsSyncArcsIn(ATermList ArcIds){
-    // input: a not-empty list with the ID's of arcs
+  static ATermAppl pn2gsSyncIn(ATermList Ids){
+    // input: a not-empty list with the ID's
     // output: an AtermAppl that is the SYNC of all the ID's in the input-list
 
     ATermAppl sync;
-    char * CurrentArc = ATgetName(ATgetAFun(ATgetFirst(ArcIds)));
-
-    if (ATgetLength(ArcIds) > 1) {
-      
-      sync = gsMakeSync(pn2gsSyncArcsIn(ATgetNext(ArcIds)), gsMakeActionProcess(ATmakeAppl0(ATmakeAFun(CurrentArc, 0, ATtrue)), ATmakeList0()));
-
+    char * CurrentElement = ATgetName(ATgetAFun(ATgetFirst(Ids)));
+    if (ATgetLength(Ids) > 1) {
+      sync = gsMakeSync(pn2gsSyncIn(ATgetNext(Ids)), gsMakeActionProcess(ATmakeAppl0(ATmakeAFun(CurrentElement, 0, ATtrue)), ATmakeList0()));
     } else {
-      // ATgetLength(ArcIds) == 1, since the input-list is not-empty!
-      sync = gsMakeActionProcess(ATmakeAppl0(ATmakeAFun(CurrentArc, 0, ATtrue)), ATmakeList0());
+      // ATgetLength(Ids) == 1, since the input-list is not-empty!
+      sync = gsMakeActionProcess(ATmakeAppl0(ATmakeAFun(CurrentElement, 0, ATtrue)), ATmakeList0());
     }
     return sync;
   }
 
   //==================================================
-  // pn2gsSyncArcsOut creates the GenSpect syncronistation of all elements of the list, preceded by an underscore
+  // pn2gsSyncOut creates the GenSpect syncronistation of all elements of the list, preceded by an underscore
   //==================================================
-  static ATermAppl pn2gsSyncArcsOut(ATermList ArcIds){
-    // input: a not-empty list with the ID's of arcs
+  static ATermAppl pn2gsSyncOut(ATermList Ids){
+    // input: a not-empty list with the ID's
     // output: an AtermAppl that is the SYNC of all the ID's in the input-list, each ID preceded by an underscore
 
     ATermAppl sync;
     char Underscore[global_MaxIDlength] = "_";     
-    char * CurrentArc = ATgetName(ATgetAFun(ATgetFirst(ArcIds)));
-    CurrentArc = strcat(Underscore, CurrentArc);
-
-    if (ATgetLength(ArcIds) > 1) {
-      
-      sync = gsMakeSync(pn2gsSyncArcsOut(ATgetNext(ArcIds)), gsMakeActionProcess(ATmakeAppl0(ATmakeAFun(CurrentArc, 0, ATtrue)), ATmakeList0()));
-
+    char * CurrentElement = ATgetName(ATgetAFun(ATgetFirst(Ids)));
+    CurrentElement = strcat(Underscore, CurrentElement);
+    if (ATgetLength(Ids) > 1) {
+      sync = gsMakeSync(pn2gsSyncOut(ATgetNext(Ids)), gsMakeActionProcess(ATmakeAppl0(ATmakeAFun(CurrentElement, 0, ATtrue)), ATmakeList0()));
     } else {
-      // ATgetLength(ArcIds) == 1, since the input-list is not-empty!
-      sync = gsMakeActionProcess(ATmakeAppl0(ATmakeAFun(CurrentArc, 0, ATtrue)), ATmakeList0());
+      // ATgetLength(Ids) == 1, since the input-list is not-empty!
+      sync = gsMakeActionProcess(ATmakeAppl0(ATmakeAFun(CurrentElement, 0, ATtrue)), ATmakeList0());
     }
     return sync;
   }
@@ -723,7 +724,7 @@ extern "C" {
       EquationList = ATinsert(EquationList, (ATerm)gsMakeProcEqn(ATmakeList0(), gsMakeProcVarId(CurrentTrans, ATmakeList0()), ATmakeList0(), Process));
       gsDebugMsg("Process: %t created.\n", CurrentTrans);
       // create T_ti_in
-      Process = pn2gsSyncArcsIn((ATermList)ATtableGet(context.trans_in, TransID));
+      Process = pn2gsSyncIn((ATermList)ATtableGet(context.trans_in, TransID));
       EquationList = ATinsert(EquationList, (ATerm)gsMakeProcEqn(ATmakeList0(), gsMakeProcVarId(CurrentTransIn, ATmakeList0()), ATmakeList0(), Process));
       gsDebugMsg("Process: %t created.\n", CurrentTransIn);
       
@@ -735,7 +736,7 @@ extern "C" {
       EquationList = ATinsert(EquationList, (ATerm)gsMakeProcEqn(ATmakeList0(), gsMakeProcVarId(CurrentTrans, ATmakeList0()), ATmakeList0(), Process));
       gsDebugMsg("Process: %t created.\n", CurrentTrans);
       // create T_ti_out
-      Process = pn2gsSyncArcsOut((ATermList)ATtableGet(context.trans_out, TransID));
+      Process = pn2gsSyncOut((ATermList)ATtableGet(context.trans_out, TransID));
       EquationList = ATinsert(EquationList, (ATerm)gsMakeProcEqn(ATmakeList0(), gsMakeProcVarId(CurrentTransOut, ATmakeList0()), ATmakeList0(), Process));
       gsDebugMsg("Process: %t created.\n", CurrentTransOut);
       
@@ -747,11 +748,11 @@ extern "C" {
       EquationList = ATinsert(EquationList, (ATerm)gsMakeProcEqn(ATmakeList0(), gsMakeProcVarId(CurrentTrans, ATmakeList0()), ATmakeList0(), Process));
       gsDebugMsg("Process: %t created.\n", CurrentTrans);
       // create T_ti_in
-      Process = pn2gsSyncArcsIn((ATermList)ATtableGet(context.trans_in, TransID));
+      Process = pn2gsSyncIn((ATermList)ATtableGet(context.trans_in, TransID));
       EquationList = ATinsert(EquationList, (ATerm)gsMakeProcEqn(ATmakeList0(), gsMakeProcVarId(CurrentTransIn, ATmakeList0()), ATmakeList0(), Process));
       gsDebugMsg("Process: %t created.\n", CurrentTransIn);
       // create T_ti_out
-      Process = pn2gsSyncArcsOut((ATermList)ATtableGet(context.trans_out, TransID));
+      Process = pn2gsSyncOut((ATermList)ATtableGet(context.trans_out, TransID));
       EquationList = ATinsert(EquationList, (ATerm)gsMakeProcEqn(ATmakeList0(), gsMakeProcVarId(CurrentTransOut, ATmakeList0()), ATmakeList0(), Process));
       gsDebugMsg("Process: %t created.\n", CurrentTransOut);
     }
@@ -759,71 +760,82 @@ extern "C" {
   }
 
   //==================================================
-  // pn2gsChoiceArcsIn creates the GenSpect choice of all elements of the list
+  // pn2gsChoiceIn creates the GenSpect choice of all elements of the list
   //==================================================
-  static ATermAppl pn2gsChoiceArcsIn(ATermList ArcIds){
-    // input: a not-empty list with the ID's of arcs
+  static ATermAppl pn2gsChoiceIn(ATermList Ids){
+    // input: a not-empty list with the ID's
     // output: an AtermAppl that is the CHOICE of all the ID's in the input-list
 
     ATermAppl choice;
-    char * CurrentArc = ATgetName(ATgetAFun(ATgetFirst(ArcIds)));
-
-    if (ATgetLength(ArcIds) > 1) {
-      
-      choice = gsMakeChoice(pn2gsChoiceArcsIn(ATgetNext(ArcIds)), gsMakeActionProcess(ATmakeAppl0(ATmakeAFun(CurrentArc, 0, ATtrue)), ATmakeList0()));
-
+    char * CurrentElement = ATgetName(ATgetAFun(ATgetFirst(Ids)));
+    if (ATgetLength(Ids) > 1) {
+      choice = gsMakeChoice(pn2gsChoiceIn(ATgetNext(Ids)), gsMakeActionProcess(ATmakeAppl0(ATmakeAFun(CurrentElement, 0, ATtrue)), ATmakeList0()));
     } else {
-      // ATgetLength(ArcIds) == 1, since the input-list is not-empty!
-      choice = gsMakeActionProcess(ATmakeAppl0(ATmakeAFun(CurrentArc, 0, ATtrue)), ATmakeList0());
+      // ATgetLength(Ids) == 1, since the input-list is not-empty!
+      choice = gsMakeActionProcess(ATmakeAppl0(ATmakeAFun(CurrentElement, 0, ATtrue)), ATmakeList0());
     }
     return choice;
   }
 
   //==================================================
-  // pn2gsChoiceArcsOut creates the GenSpect choice of all elements of the list, preceded by an underscore
+  // pn2gsChoiceOut creates the GenSpect choice of all elements of the list, preceded by an underscore
   //==================================================
-  static ATermAppl pn2gsChoiceArcsOut(ATermList ArcIds){
-    // input: a not-empty list with the ID's of arcs
+  static ATermAppl pn2gsChoiceOut(ATermList Ids){
+    // input: a not-empty list with the ID's
     // output: an AtermAppl that is the CHOICE of all the ID's in the input-list, each ID preceded by an underscore
 
     ATermAppl choice;
-    char Underscore[global_MaxIDlength] = "_";     
-    char * CurrentArc = ATgetName(ATgetAFun(ATgetFirst(ArcIds)));
-    CurrentArc = strcat(Underscore, CurrentArc);
-
-    if (ATgetLength(ArcIds) > 1) {
-      
-      choice = gsMakeChoice(pn2gsChoiceArcsOut(ATgetNext(ArcIds)), gsMakeActionProcess(ATmakeAppl0(ATmakeAFun(CurrentArc, 0, ATtrue)), ATmakeList0()));
-
+    char Underscore[global_MaxIDlength] = "_";
+    char * CurrentElement = ATgetName(ATgetAFun(ATgetFirst(Ids)));
+    CurrentElement = strcat(Underscore, CurrentElement);
+    if (ATgetLength(Ids) > 1) {
+      choice = gsMakeChoice(pn2gsChoiceOut(ATgetNext(Ids)), gsMakeActionProcess(ATmakeAppl0(ATmakeAFun(CurrentElement, 0, ATtrue)), ATmakeList0()));
     } else {
-      // ATgetLength(ArcIds) == 1, since the input-list is not-empty!
-      choice = gsMakeActionProcess(ATmakeAppl0(ATmakeAFun(CurrentArc, 0, ATtrue)), ATmakeList0());
+      // ATgetLength(Ids) == 1, since the input-list is not-empty!
+      choice = gsMakeActionProcess(ATmakeAppl0(ATmakeAFun(CurrentElement, 0, ATtrue)), ATmakeList0());
     }
     return choice;
   }
 
   //==================================================
-  // pn2gsRestrictIn creates the GenSpect restrict of all elements of the list synchronized with itself
+  // ATmakeAFunInt functions as ATmakeAFun, except that the name is an int and not a (char *)
   //==================================================
-  static ATermList pn2gsRestrictIn(ATermList ArcIds){
-    // input: a not-empty list with the ID's of arcs
-    // output: an AtermAppl that is the RESTRICT of all the ID's in the input-list SYNC with itself
+  static AFun ATmakeAFunInt(int name, int arity, ATbool quoted) {
+    // input: an integer name, it's arity and whether it is quoted or not
+    // output: an AFun, as in ATmakeAFun, but now with a name from an integer value
 
-    ATermList restr = ATmakeList0();
-    char * CurrentArc;
-    ATermAppl CurrentRestr;
-
-    while (ATisEmpty(ArcIds) == ATfalse) {
-      CurrentArc = ATgetName(ATgetAFun(ATgetFirst(ArcIds)));
-      CurrentRestr = gsMakeSync(gsMakeActionProcess(ATmakeAppl0(ATmakeAFun(CurrentArc, 0, ATtrue)), ATmakeList0()), gsMakeActionProcess(ATmakeAppl0(ATmakeAFun(CurrentArc, 0, ATtrue)), ATmakeList0()));
-      restr = ATinsert(restr, (ATerm)CurrentRestr);
-      ArcIds = ATgetNext(ArcIds);    
-    }
-    return restr;
+    char buf[10];
+    sprintf(buf, "%d" , name);
+    return ATmakeAFun(buf, arity, quoted);
   }
 
+  //==================================================
+  // pn2gsPlaceParameterNat generates the parameter for a given place, of type Nat
+  //==================================================
+  static ATermAppl pn2gsPlaceParameterNat(char * PlaceName) {
+    // input: the name of a place
+    // output: the parameter of that place, or type Nat
+    //         named: pm_PlaceName
 
+    ATermAppl CurrentParameter;
+    char Param[global_MaxIDlength] = "pm_";
+    CurrentParameter = gsMakeDataVarId(ATmakeAppl0(ATmakeAFun(strcat(Param, PlaceName), 0, ATtrue)), gsMakeSortIdNat());
+    return CurrentParameter;
+  }
 
+  //==================================================
+  // pn2gsPlaceParameterPos generates the parameter for a given place, of type Pos
+  //==================================================
+  static ATermAppl pn2gsPlaceParameterPos(char * PlaceName) {
+    // input: the name of a place
+    // output: the parameter of that place, or type Pos
+    //         named: pm_PlaceName
+
+    ATermAppl CurrentParameter;
+    char Param[global_MaxIDlength] = "pm_";
+    CurrentParameter = gsMakeDataVarId(ATmakeAppl0(ATmakeAFun(strcat(Param, PlaceName), 0, ATtrue)), gsMakeSortIdPos());
+    return CurrentParameter;
+  }
 
   //==================================================
   // pn2gsGeneratePlace generates the GenSpect Process Equations belonging to one place
@@ -833,7 +845,7 @@ extern "C" {
     // output: an updated list of the processes: the processes belonging to the place added to the list
 
     // variables to store the name and id of the place
-    char * CurrentPlaceId = ATgetName(ATgetAFun(PlaceID)) ;
+    char * CurrentPlaceId = ATgetName(ATgetAFun(PlaceID));
     char * CurrentPlaceName = ATgetName(ATgetAFun(ATtableGet(context.place_name, PlaceID)));
 
     // variables to store the process names
@@ -898,125 +910,268 @@ extern "C" {
     } else {
       MaxConcIn_int = ATgetLength((ATermList)ATtableGet(context.place_in, PlaceID));
     }
-    //ATermAppl MaxConcIn;
-    //MaxConcIn = gsMakeNumber(ATmakeAppl0(ATmakeAFun(/*MaxConcIn_int*/, 0, ATtrue)), gsMakeUnknown());
-    //if (gsIsNumber(MaxConcIn)) {
-    // gsDebugMsg("Parameter %t is a Number\n", MaxConcIn);
-    //} else {
-    //  gsDebugMsg("Parameter %t is not a Number\n", MaxConcIn);
-    //}
+    ATermAppl MaxConcIn;
+    MaxConcIn = gsMakeNumber(ATmakeAppl0(ATmakeAFunInt(MaxConcIn_int, 0, ATtrue)), gsMakeSortIdNat());
+    if (gsIsNumber(MaxConcIn)) {
+     gsDebugMsg("Parameter %t is a Number\n", MaxConcIn);
+    } else {
+      gsDebugMsg("Parameter %t is not a Number\n", MaxConcIn);
+    }
+
     int MaxConcOut_int;
     if (!(ATtableGet(context.place_out, PlaceID))) {
       MaxConcOut_int = 0;
     } else {
       MaxConcOut_int = ATgetLength((ATermList)ATtableGet(context.place_out, PlaceID));
     }
-    //ATermAppl MaxConcOut = gsMakeNumber(ATmakeAppl0(ATmakeAFun(/*MaxConcOut_int*/, 0, ATtrue)), gsMakeUnknown());
-    //if (gsIsNumber(MaxConcIn)) {
-    //  gsDebugMsg("Parameter %t is a Number\n", MaxConcOut);
-    //} else {
-    //  gsDebugMsg("Parameter %t is not a Number\n", MaxConcOut);
-    //}
+    ATermAppl MaxConcOut;
+    MaxConcOut = gsMakeNumber(ATmakeAppl0(ATmakeAFunInt(MaxConcOut_int, 0, ATtrue)), gsMakeSortIdNat());
+    if (gsIsNumber(MaxConcIn)) {
+      gsDebugMsg("Parameter %t is a Number\n", MaxConcOut);
+    } else {
+      gsDebugMsg("Parameter %t is not a Number\n", MaxConcOut);
+    }
     gsDebugMsg("Place %t has maximum concurrency in: '%d' and out: '%d'\n", PlaceID, MaxConcIn_int, MaxConcOut_int);
-    //gsDebugMsg("Place %t has maximum concurrency in: '%t' and out: '%t'\n", PlaceID, MaxConcIn, MaxConcOut);
+    gsDebugMsg("Place %t has maximum concurrency in: '%t' and out: '%t'\n", PlaceID, MaxConcIn, MaxConcOut);
 
     //==================================================
     // generate the processes
     //==================================================
-    ATermAppl ProcVar;
-    ATermAppl Process;
-    ATermAppl SubProcess0;
-    //ATermAppl SubProcess1;
-    //ATermAppl SubProcess2;
-    ATermAppl SumVar0 = gsMakeDataVarId(ATmakeAppl0(ATmakeAFun("y", 0, ATtrue)), gsMakeSortIdPos());
-    ATermAppl SumVar1 = gsMakeDataVarId(ATmakeAppl0(ATmakeAFun("z", 0, ATtrue)), gsMakeSortIdPos());
-    ATermList SumVars;
-    gsDebugMsg("Parameter %t is %d a DataVarId\n", SumVar0, gsIsDataVarId(SumVar0));
-    gsDebugMsg("Parameter %t is %d a DataVarId\n", SumVar1, gsIsDataVarId(SumVar1));
+    {
+      /* Creation of P_pi */
+      ATermAppl ProcVar;
+      ATermAppl Process;
+      ATermAppl SubProcess0;
+      ATermAppl CondIf0;
+      ATermAppl CondThan0;
+      ATermAppl SubProcess1;
+      ATermAppl CondIf1;
+      ATermAppl CondThan1;
+      ATermAppl SubProcess2;
+      ATermAppl CondIf2;
+      ATermAppl CondThan2;
+      ATermAppl SumVar0 = gsMakeDataVarId(ATmakeAppl0(ATmakeAFun("y", 0, ATtrue)), gsMakeSortIdPos());
+      ATermAppl SumVar1 = gsMakeDataVarId(ATmakeAppl0(ATmakeAFun("z", 0, ATtrue)), gsMakeSortIdPos());
+      ATermList SumVars;
+      gsDebugMsg("Parameter %t is %d a DataVarId\n", SumVar0, gsIsDataVarId(SumVar0));
+      gsDebugMsg("Parameter %t is %d a DataVarId\n", SumVar1, gsIsDataVarId(SumVar1));
 
+      // create P_pi parameter
+      ProcVar = pn2gsPlaceParameterNat(gsATermAppl2String(CurrentPlace));
+      gsDebugMsg("Parameter %t is %d a DataVarId\n", ProcVar, gsIsDataVarId(ProcVar));
 
-    /* Creation of P_pi */
-    // create P_pi parameter
-    ProcVar =  gsMakeDataVarId(ATmakeAppl0(ATmakeAFun("X", 0, ATtrue)), gsMakeSortIdNat());;
-    gsDebugMsg("Parameter %t is %d a DataVarId\n", ProcVar, gsIsDataVarId(ProcVar));
+      // create first sum-sub-process
+      SumVars = ATmakeList1((ATerm)SumVar0);
+      CondIf0 = gsMakeDataExprLTE(gsMakeDataExprPos2Nat(SumVar0), MaxConcIn);
+      CondThan0 = gsMakeSeq(gsMakeActionProcess(CurrentPlaceAdd, ATmakeList1((ATerm)SumVar0)), gsMakeActionProcess(CurrentPlace, ATmakeList1((ATerm)gsMakeDataExprAdd(gsMakeDataExprPos2Nat(SumVar0), ProcVar))));
+      SubProcess0 = gsMakeSum(SumVars, gsMakeCond(CondIf0, CondThan0, gsMakeDelta()));
+      gsDebugMsg("Parameter %t is %d a Sum\n", SubProcess0, gsIsSum(SubProcess0));
 
-    // create first sum-sub-process
-    SumVars = ATmakeList1((ATerm)SumVar0);
+      // create second sum-sub-process
+      SumVars = ATmakeList1((ATerm)SumVar1);
+      CondIf1 = gsMakeDataExprLTE(gsMakeDataExprPos2Nat(SumVar1), gsMakeDataExprMin(MaxConcOut, ProcVar));
+      CondThan1 = gsMakeSeq(gsMakeActionProcess(CurrentPlaceRem, ATmakeList1((ATerm)SumVar1)), gsMakeActionProcess(CurrentPlace, ATmakeList1((ATerm)gsMakeDataExprMax(gsMakeNumber(ATmakeAppl0(ATmakeAFun("0", 0, ATtrue)), gsMakeSortIdInt()), gsMakeDataExprSubt(ProcVar, gsMakeDataExprPos2Nat(SumVar1))))));
+      SubProcess1 = gsMakeSum(SumVars, gsMakeCond(CondIf1, CondThan1, gsMakeDelta()));
+      gsDebugMsg("Parameter %t is %d a Sum\n", SubProcess1, gsIsSum(SubProcess1));
 
-    SubProcess0 = gsMakeSum(SumVars, gsMakeCond(gsMakeDataExprLTE(SumVar0, /*MaxConcIn, not SumVar */SumVar0 /* */), gsMakeSeq(gsMakeActionProcess(CurrentPlaceAdd, ATmakeList1((ATerm)SumVar0)), gsMakeActionProcess(CurrentPlace, ATmakeList1((ATerm)gsMakeDataExprAdd(gsMakeDataExprPos2Nat(SumVar0), ProcVar)))), gsMakeDelta()));
+      // create third sum-sub-process
+      SumVars = ATmakeList2((ATerm)SumVar0, (ATerm)SumVar1);
+      CondIf2 = gsMakeDataExprAnd(CondIf0, CondIf1);
+      CondThan2 = gsMakeSeq(gsMakeSync(gsMakeActionProcess(CurrentPlaceAdd, ATmakeList1((ATerm)SumVar0)), gsMakeActionProcess(CurrentPlaceRem, ATmakeList1((ATerm)SumVar1))), gsMakeActionProcess(CurrentPlace, ATmakeList1((ATerm)gsMakeDataExprMax(gsMakeNumber(ATmakeAppl0(ATmakeAFun("0", 0, ATtrue)), gsMakeSortIdInt()), gsMakeDataExprSubt(gsMakeDataExprAdd(gsMakeDataExprPos2Nat(SumVar0),ProcVar), gsMakeDataExprPos2Nat(SumVar1))))));
+      SubProcess2 = gsMakeSum(SumVars, gsMakeCond(CondIf2, CondThan2, gsMakeDelta()));
+      gsDebugMsg("Parameter %t is %d a Sum\n", SubProcess2, gsIsSum(SubProcess2));
 
-    gsDebugMsg("Parameter %t is %d a Sum\n", SubProcess0, gsIsSum(SubProcess0));
-
-    // create second sum-sub-process
-    SumVars = ATmakeList1((ATerm)SumVar1);
-
-
-    // create third sum-sub-process
-    SumVars = ATmakeList2((ATerm)SumVar0, (ATerm)SumVar1);
-
-
-
-
-
-    // create P_pi
-    //Process = gsMakeChoice(gsMakeChoice(SubProcess0, SubProcess1), SubProcess2);
-    //EquationList = ATinsert(EquationList, (ATerm)gsMakeProcEqn(ATmakeList0(), gsMakeProcVarId(CurrentPlace, ATmakeList0()), /*hier ipv ATmakeList0 een parameter */ATmakeList0() /* */, Process));
-    gsDebugMsg("Process: %t created.\n", CurrentPlace);
-
-
-
-    /* Creation of P_pi_add */
-    ATermList RestrVars;
-    if (!(ATtableGet(context.place_in, PlaceID))) {
-      RestrVars = ATmakeList0();
-    } else {
-      RestrVars = pn2gsRestrictIn((ATermList)ATtableGet(context.place_in, PlaceID));
+      // create P_pi
+      Process = gsMakeChoice(gsMakeChoice(SubProcess0, SubProcess1), SubProcess2);
+      EquationList = ATinsert(EquationList, (ATerm)gsMakeProcEqn(ATmakeList0(), gsMakeProcVarId(CurrentPlace, ATmakeList0()), ATmakeList1((ATerm)ProcVar), Process));
+      gsDebugMsg("Process: %t created.\n", CurrentPlace);
     }
-    gsDebugMsg("Restrict the following %t\n", RestrVars);
-    ProcVar = gsMakeDataVarId(ATmakeAppl0(ATmakeAFun("y", 0, ATtrue)), gsMakeSortIdPos());
 
-    ATermAppl CondIf = gsMakeDataExprGT(ProcVar, gsMakeNumber(ATmakeAppl0(ATmakeAFun("1", 0, ATtrue)), gsMakeSortIdPos()));
-
-    ATermAppl CondThan = gsMakeSync(gsMakeActionProcess(CurrentPlaceIn, ATmakeList0()), gsMakeActionProcess(CurrentPlaceAdd, ATmakeList1((ATerm)gsMakeDataExprMax(gsMakeNumber(ATmakeAppl0(ATmakeAFun("1", 0, ATtrue)), gsMakeSortIdInt()), gsMakeDataExprSubt(ProcVar, gsMakeNumber(ATmakeAppl0(ATmakeAFun("1", 0, ATtrue)), gsMakeSortIdPos()))))));
-
-    ATermAppl CondElse = gsMakeActionProcess(CurrentPlaceIn, ATmakeList0());
-
-    Process = gsMakeRestrict(RestrVars, gsMakeCond(CondIf, CondThan, CondElse));
-
-    EquationList = ATinsert(EquationList, (ATerm)gsMakeProcEqn(ATmakeList0(), gsMakeProcVarId(CurrentPlaceAdd, ATmakeList0()), ATmakeList1((ATerm)ProcVar), Process));
-    gsDebugMsg("Process: %t created.\n", CurrentPlaceAdd);
-
-
-
-    /* Creation of P_pi_in */
-    if (MaxConcIn_int == 0) {
-      Process = gsMakeTau();
-    } else {
-      Process = pn2gsChoiceArcsIn((ATermList)ATtableGet(context.place_in, PlaceID));
+    {
+      /* Creation of P_pi_add */
+      ATermAppl ProcVar = pn2gsPlaceParameterPos(gsATermAppl2String(CurrentPlaceAdd));
+      ATermAppl CondIf = gsMakeDataExprGT(ProcVar, gsMakeNumber(ATmakeAppl0(ATmakeAFun("1", 0, ATtrue)), gsMakeSortIdPos()));
+      ATermAppl CondThan = gsMakeSync(gsMakeActionProcess(CurrentPlaceIn, ATmakeList0()), gsMakeActionProcess(CurrentPlaceAdd, ATmakeList1((ATerm)gsMakeDataExprMax(gsMakeNumber(ATmakeAppl0(ATmakeAFun("1", 0, ATtrue)), gsMakeSortIdInt()), gsMakeDataExprSubt(ProcVar, gsMakeNumber(ATmakeAppl0(ATmakeAFun("1", 0, ATtrue)), gsMakeSortIdPos()))))));
+      ATermAppl CondElse = gsMakeActionProcess(CurrentPlaceIn, ATmakeList0());
+      ATermAppl Process = gsMakeCond(CondIf, CondThan, CondElse);
+      EquationList = ATinsert(EquationList, (ATerm)gsMakeProcEqn(ATmakeList0(), gsMakeProcVarId(CurrentPlaceAdd, ATmakeList0()), ATmakeList1((ATerm)ProcVar), Process));
+      gsDebugMsg("Process: %t created.\n", CurrentPlaceAdd);
     }
-    EquationList = ATinsert(EquationList, (ATerm)gsMakeProcEqn(ATmakeList0(), gsMakeProcVarId(CurrentPlaceIn, ATmakeList0()), ATmakeList0(), Process));
-    gsDebugMsg("Process: %t created.\n", CurrentPlaceIn);
 
-    /* Creation of P_pi_rem */
-
-
-
-
-
-
-
-
-
-    /* Creation of P_pi_out */
-    if (MaxConcOut_int == 0) {
-      Process = gsMakeTau();
-    } else {
-      Process = pn2gsChoiceArcsOut((ATermList)ATtableGet(context.place_out, PlaceID));
+    {
+      /* Creation of P_pi_in */
+      ATermAppl Process;
+      if (MaxConcIn_int == 0) {
+	Process = gsMakeTau();
+      } else {
+	Process = pn2gsChoiceIn((ATermList)ATtableGet(context.place_in, PlaceID));
+      }
+      EquationList = ATinsert(EquationList, (ATerm)gsMakeProcEqn(ATmakeList0(), gsMakeProcVarId(CurrentPlaceIn, ATmakeList0()), ATmakeList0(), Process));
+      gsDebugMsg("Process: %t created.\n", CurrentPlaceIn);
     }
-    EquationList = ATinsert(EquationList, (ATerm)gsMakeProcEqn(ATmakeList0(), gsMakeProcVarId(CurrentPlaceOut, ATmakeList0()), ATmakeList0(), Process));
-    gsDebugMsg("Process: %t created.\n", CurrentPlaceOut);
 
+    {
+      /* Creation of P_pi_rem */
+      ATermAppl ProcVar = pn2gsPlaceParameterPos(gsATermAppl2String(CurrentPlaceRem));
+      ATermAppl CondIf = gsMakeDataExprGT(ProcVar, gsMakeNumber(ATmakeAppl0(ATmakeAFun("1", 0, ATtrue)), gsMakeSortIdPos()));
+      ATermAppl CondThan = gsMakeSync(gsMakeActionProcess(CurrentPlaceOut, ATmakeList0()), gsMakeActionProcess(CurrentPlaceRem, ATmakeList1((ATerm)gsMakeDataExprMax(gsMakeNumber(ATmakeAppl0(ATmakeAFun("1", 0, ATtrue)), gsMakeSortIdInt()), gsMakeDataExprSubt(ProcVar, gsMakeNumber(ATmakeAppl0(ATmakeAFun("1", 0, ATtrue)), gsMakeSortIdPos()))))));
+      ATermAppl CondElse = gsMakeActionProcess(CurrentPlaceOut, ATmakeList0());
+      ATermAppl Process = gsMakeCond(CondIf, CondThan, CondElse);
+      EquationList = ATinsert(EquationList, (ATerm)gsMakeProcEqn(ATmakeList0(), gsMakeProcVarId(CurrentPlaceRem, ATmakeList0()), ATmakeList1((ATerm)ProcVar), Process));
+      gsDebugMsg("Process: %t created.\n", CurrentPlaceRem);
+    }
+
+    {
+      /* Creation of P_pi_out */
+      ATermAppl Process;
+      if (MaxConcOut_int == 0) {
+	Process = gsMakeTau();
+      } else {
+	Process = pn2gsChoiceOut((ATermList)ATtableGet(context.place_out, PlaceID));
+      }
+      EquationList = ATinsert(EquationList, (ATerm)gsMakeProcEqn(ATmakeList0(), gsMakeProcVarId(CurrentPlaceOut, ATmakeList0()), ATmakeList0(), Process));
+      gsDebugMsg("Process: %t created.\n", CurrentPlaceOut);
+    }
+
+    // return the updated list of the processes: the processes belonging to the place added to the input-list
     return EquationList;
+  }
+
+  //==================================================
+  // pn2gsHideList generates a list with all the actions that should be hidden
+  //==================================================
+  static ATermList pn2gsHideList(ATermList List0, ATermList List1) {
+    // input: two lists, each containing different elements
+    // output: a list in which all the elements of both inputed lists are present, preceded by two underscores.
+
+    ATermList ReturnList = ATmakeList0();
+    char * CurrentId;
+    while (ATisEmpty(List0) == ATfalse) {
+      CurrentId = ATgetName(ATgetAFun(ATgetFirst(List0)));
+      char Underscores[global_MaxIDlength] = "__";
+      CurrentId = strcat(Underscores, CurrentId);
+      ReturnList = ATinsert(ReturnList, (ATerm)gsMakeActId(ATmakeAppl0(ATmakeAFun(CurrentId, 0, ATtrue)), ATmakeList0()));
+      List0 = ATgetNext(List0);
+    }
+    while (ATisEmpty(List1) == ATfalse) {
+      CurrentId = ATgetName(ATgetAFun(ATgetFirst(List1)));
+      char Underscores[global_MaxIDlength] = "__";
+      CurrentId = strcat(Underscores, CurrentId);
+      ReturnList = ATinsert(ReturnList, (ATerm)gsMakeActId(ATmakeAppl0(ATmakeAFun(CurrentId, 0, ATtrue)), ATmakeList0()));
+      List1 = ATgetNext(List1);
+    }
+    return ReturnList;
+  }
+
+  //==================================================
+  // pn2gsRestrictList generates a list with all the actions that should be restricted
+  //==================================================
+  static ATermList pn2gsRestrictList(ATermList List0, ATermList List1) {
+    // input: two lists, each containing different elements
+    // output: a list in which all the elements of both inputed lists are present twice, once preceded by an underscore.
+
+    ATermList ReturnList = ATmakeList0();
+    char * CurrentId;
+    while (ATisEmpty(List0) == ATfalse) {
+      CurrentId = ATgetName(ATgetAFun(ATgetFirst(List0)));
+      ReturnList = ATinsert(ReturnList, (ATerm)gsMakeActId(ATmakeAppl0(ATmakeAFun(CurrentId, 0, ATtrue)), ATmakeList0()));
+      char Underscores[global_MaxIDlength] = "_";
+      CurrentId = strcat(Underscores, CurrentId);
+      ReturnList = ATinsert(ReturnList, (ATerm)gsMakeActId(ATmakeAppl0(ATmakeAFun(CurrentId, 0, ATtrue)), ATmakeList0()));
+      List0 = ATgetNext(List0);
+    }
+    while (ATisEmpty(List1) == ATfalse) {
+      CurrentId = ATgetName(ATgetAFun(ATgetFirst(List1)));
+      ReturnList = ATinsert(ReturnList, (ATerm)gsMakeActId(ATmakeAppl0(ATmakeAFun(CurrentId, 0, ATtrue)), ATmakeList0()));
+      char Underscores[global_MaxIDlength] = "_";
+      CurrentId = strcat(Underscores, CurrentId);
+      ReturnList = ATinsert(ReturnList, (ATerm)gsMakeActId(ATmakeAppl0(ATmakeAFun(CurrentId, 0, ATtrue)), ATmakeList0()));
+      List1 = ATgetNext(List1);
+    }
+    return ReturnList;
+  }
+
+  //==================================================
+  // pn2gsCommList generates a list with all the actions that communicate
+  //==================================================
+  static ATermList pn2gsCommList(ATermList List0, ATermList List1) {
+    // input: two lists, each containing different elements
+    // output: a list in which all the elements of both inputed lists 
+    //         communicate with itself, once preceded by an underscore
+    //         to itself, preceded by two underscores.
+
+    ATermList ReturnList = ATmakeList0();
+    char * CurrentId;
+    while (ATisEmpty(List0) == ATfalse) {
+      CurrentId = ATgetName(ATgetAFun(ATgetFirst(List0)));
+      char Underscore[global_MaxIDlength] = "_";
+      char Underscores[global_MaxIDlength] = "__";
+      ATermAppl CommExpr = gsMakeCommExpr(gsMakeMultActName(ATmakeList2((ATerm)gsString2ATermAppl(CurrentId), (ATerm)gsString2ATermAppl(strcat(Underscore, CurrentId)))), gsString2ATermAppl(strcat(Underscores, CurrentId)));
+      ReturnList = ATinsert(ReturnList, (ATerm)CommExpr);
+      List0 = ATgetNext(List0);
+    }
+    while (ATisEmpty(List1) == ATfalse) {
+      CurrentId = ATgetName(ATgetAFun(ATgetFirst(List1)));
+      char Underscore[global_MaxIDlength] = "_";
+      char Underscores[global_MaxIDlength] = "__";
+      ATermAppl CommExpr = gsMakeCommExpr(gsMakeMultActName(ATmakeList2((ATerm)gsString2ATermAppl(CurrentId), (ATerm)gsString2ATermAppl(strcat(Underscore, CurrentId)))), gsString2ATermAppl(strcat(Underscores, CurrentId)));
+      ReturnList = ATinsert(ReturnList, (ATerm)CommExpr);
+      List1 = ATgetNext(List1);
+    }
+    return ReturnList;
+  }
+
+  //==================================================
+  // pn2gsPlacesParameters generates a list of all the parameters of the places
+  //==================================================
+  static ATermList pn2gsPlacesParameters(ATermList Places) {
+    // input: a list containg all the places
+    // output: a list in which all the elements of the inputed list
+    //         are preceded by "pm_"
+
+    ATermList ReturnList = ATmakeList0();
+    while (ATisEmpty(Places) == ATfalse) {
+      ReturnList = ATinsert(ReturnList, (ATerm)pn2gsPlaceParameterNat(ATgetName(ATgetAFun(ATgetFirst(Places)))));
+      Places = ATgetNext(Places);
+    }
+    return ReturnList;
+  }
+
+  //==================================================
+  // pn2gsMerge creates the GenSpect merge of all elements of the list, with a parameter!
+  //==================================================
+  static ATermAppl pn2gsMerge(ATermList Ids) {
+    // input: a not-empty list with the ID's
+    // output: an AtermAppl that is the MERGE of all the ID's in the input-list, each with its parameter!
+
+    ATermAppl merge;
+    char * CurrentElement = ATgetName(ATgetAFun(ATgetFirst(Ids)));
+    if (ATgetLength(Ids) > 1) {
+      merge = gsMakeMerge(pn2gsMerge(ATgetNext(Ids)), gsMakeActionProcess(ATmakeAppl0(ATmakeAFun(CurrentElement, 0, ATtrue)), ATmakeList1((ATerm)pn2gsPlaceParameterNat(CurrentElement))));
+    } else {
+      // ATgetLength(Ids) == 1, since the input-list is not-empty!
+      merge = gsMakeActionProcess(ATmakeAppl0(ATmakeAFun(CurrentElement, 0, ATtrue)), ATmakeList1((ATerm)pn2gsPlaceParameterNat(CurrentElement)));
+    }
+    return merge;
+  }
+
+  //==================================================
+  // pn2gsInitialMarkings creates a list with all the initial markings
+  //==================================================
+  static ATermList pn2gsInitialMarkings(ATermList Places, ATermTable Markings) {
+    // input: a list with the places and a table with the markings
+    // output: a list which contains all the initial markings of the places
+
+    ATermList ReturnList = ATmakeList0();
+    while (ATisEmpty(Places) == ATfalse) {
+      ATerm MarkingUnQuoted = ATtableGet(Markings, ATgetFirst(Places));
+      gsDebugMsg("Initial Marking unquoted = %t\n", MarkingUnQuoted);
+      ATermAppl MarkingQuoted = ATmakeAppl0(ATmakeAFun(ATwriteToString(MarkingUnQuoted), 0, ATtrue));
+      gsDebugMsg("Initial Marking quoted= %t\n", MarkingQuoted);
+      ReturnList = ATinsert(ReturnList, (ATerm)gsMakeNumber(MarkingQuoted, gsMakeSortIdNat()));
+      Places = ATgetNext(Places);
+    }
+    return ATreverse(ReturnList);
   }
 
   //==================================================
@@ -1095,16 +1250,59 @@ extern "C" {
     }
 
     //==================================================
-    // third, we generate the general Petri net processes.
+    // third, we generate the three general Petri net processes.
     //==================================================
+
+    gsDebugMsg("\n\nStart creation of general processes.\n\n");
+
+    // Trans =  "..." . Trans
+    // "..." is the choice of all transitions. This guarantees interleaving.
+
+    // If no interleaving is desired, instead of a choice of all transitions,
+    // this should be the parallelisation of all transitions.
+    // Also, the transition-processes should be extended with: " . T_ti "
+    if (ATisEmpty(context.transitions) == ATtrue) {
+      // there are no transitions
+      ProcessList = ATinsert(ProcessList, (ATerm)gsMakeProcEqn(ATmakeList0(), gsMakeProcVarId(gsString2ATermAppl("Trans"), ATmakeList0()), ATmakeList0(), gsMakeDelta()));
+    } else {
+      // there are transitions
+      ProcessList = ATinsert(ProcessList, (ATerm)gsMakeProcEqn(ATmakeList0(), gsMakeProcVarId(gsString2ATermAppl("Trans"), ATmakeList0()), ATmakeList0(), gsMakeSeq(pn2gsChoiceIn(context.transitions), gsMakeProcVarId(gsString2ATermAppl("Trans"), ATmakeList0()))));
+    }
+    gsDebugMsg("Process Trans created.\n");
     
-    
-    
-    
-    
+    // PetriNet("...") = hide(I, restrict(H, comm(C, ("..." || Trans))));
+    // the first "..." are the parameters of PetriNet; one for every place
+    // the second "..." is the parallelisation of all the places in the PetriNet
+    ATermList ParameterList;
+    ATermAppl Process;
+      
+    ParameterList = pn2gsPlacesParameters(context.places);
+    Process = gsMakeHide(pn2gsHideList(ATtableKeys(context.arc_in), ATtableKeys(context.arc_out)), gsMakeRestrict(pn2gsRestrictList(ATtableKeys(context.arc_in), ATtableKeys(context.arc_out)), gsMakeComm(pn2gsCommList(ATtableKeys(context.arc_in), ATtableKeys(context.arc_out)), gsMakeMerge(pn2gsMerge(context.places), gsMakeProcVarId(gsString2ATermAppl("Trans"), ATmakeList0())))));
+
+    ProcessList = ATinsert(ProcessList, (ATerm)gsMakeProcEqn(ATmakeList0(), gsMakeProcVarId(gsString2ATermAppl("PetriNet"), ATmakeList0()), ParameterList, Process));
+    gsDebugMsg("Process PetriNet created.\n");
+
+    // reminder: NetID == "Net_'ID of the Petri net'"
+    // the Net_ is preceded to the ID of the Petri net to prevent that two processes would have the same name!
+    //
+    // NetID = PetriNet("...")
+    // "..." is the initial marking of all places
+
+    Process = gsMakeActionProcess(gsString2ATermAppl("PetriNet"), pn2gsInitialMarkings(ATtableKeys(context.place_mark), context.place_mark));
+    ProcessList = ATinsert(ProcessList, (ATerm)gsMakeProcEqn(ATmakeList0(), gsMakeProcVarId(NetID, ATmakeList0()), ATmakeList0(), Process));
+    gsDebugMsg("Process %t created.\n", NetID);
+
     return ProcessList;
   }
-  
+
+  /*                           */
+  /*                           */
+  /*                           */
+  /* Generation-phase function */
+  /*                           */
+  /*                           */
+  /*                           */
+
   //==================================================
   // pn2gsTranslate converts the ATerm delivered by pn2gsAterm to a GenSpect ATerm.
   //==================================================
@@ -1361,8 +1559,21 @@ extern "C" {
     Actions = pn2gsGenerateActions();
     ProcEqns = pn2gsGenerateProcEqns(ATAgetArgument(Spec, 3));
     
+    gsDebugMsg("\n\n====================\n\n");
+    gsDebugMsg("Conversion Succesful!");
+    gsDebugMsg("\n\n====================\n\n");
+
     return gsMakeSpecV1(gsMakeSortSpec(ATmakeList0()), gsMakeConsSpec(ATmakeList0()), gsMakeMapSpec(ATmakeList0()), gsMakeDataEqnSpec(ATmakeList0()), gsMakeActSpec(Actions), gsMakeProcEqnSpec(ProcEqns), gsMakeInit(ATmakeList0(),gsMakeProcess(gsMakeProcVarId(ATAgetArgument(Spec, 3), ATmakeList0()), ATmakeList0())));
   }
+
+  /*               */
+  /*               */
+  /*               */
+  /* Main function */
+  /*               */
+  /*               */
+  /*               */
+
   
   //==================================================
   // main
