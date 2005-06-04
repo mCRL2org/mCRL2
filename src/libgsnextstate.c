@@ -166,6 +166,8 @@ ATermList gsNextStateInit(ATermAppl Spec, bool AllowFreeVars)
 	current_spec = Spec;
 	ATprotectAppl(&current_spec);
 	usedummies = !AllowFreeVars;
+	
+	gsProverInit(Spec);
 
 	l = ATLgetArgument(ATAgetArgument(Spec,5),1);
 	m = ATLgetArgument(ATAgetArgument(Spec,6),1);
@@ -178,7 +180,7 @@ ATermList gsNextStateInit(ATermAppl Spec, bool AllowFreeVars)
 		{
 			if ( ATisEqual(ATAgetArgument(ATAgetFirst(n),0),ATAgetFirst(l)) )
 			{
-				state = ATinsert(state,SetVars(ATgetArgument(ATAgetFirst(n),1)));
+				state = ATinsert(state,(ATerm) gsRewriteTerm((ATermAppl) SetVars(ATgetArgument(ATAgetFirst(n),1))));
 				set = true;
 				break;
 			}
@@ -188,8 +190,6 @@ ATermList gsNextStateInit(ATermAppl Spec, bool AllowFreeVars)
 			state = ATinsert(state,SetVars(ATgetFirst(l)));
 		}
 	}
-
-	gsProverInit(Spec);
 
 	return ATreverse(state);
 }

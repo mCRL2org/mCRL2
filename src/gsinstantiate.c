@@ -83,6 +83,10 @@ int main(int argc, char **argv)
 	}
 	gsEnableConstructorFunctions();
 	Spec = (ATermAppl) ATreadFromFile(SpecStream);
+	if ( Spec == NULL )
+	{
+		return 1;
+	}
 
 	states = ATtableCreate(10000,50);
 	num_states = 0;

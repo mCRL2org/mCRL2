@@ -115,6 +115,10 @@ int main(int argc, char **argv)
 		Spec = gsParseSpecification(SpecStream);
 		fclose(SpecStream);
 	}
+	if ( Spec == NULL )
+	{
+		return 1;
+	}
 
 	if ( argc-optind > 1 )
 	{

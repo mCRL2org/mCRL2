@@ -233,6 +233,10 @@ int main(int argc, char **argv)
 		Spec = gsParseSpecification(SpecStream);
 		fclose(SpecStream);
 	}
+	if ( Spec == NULL )
+	{
+		return 1;
+	}
 
 	gsRewriteInit(ATAgetArgument(Spec,3),strat);
 

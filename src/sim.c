@@ -74,6 +74,10 @@ int main(int argc, char **argv)
 	}
 	gsEnableConstructorFunctions();
 	Spec = (ATermAppl) ATreadFromFile(SpecStream);
+	if ( Spec == NULL )
+	{
+		return 1;
+	}
 
 	state = gsNextStateInit(Spec,!usedummy);
 
