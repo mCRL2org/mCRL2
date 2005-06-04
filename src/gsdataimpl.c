@@ -993,7 +993,8 @@ ATermAppl gsImplSortList(ATermAppl SortList, ATermList *PSubsts,
         gsMakeDataExpr0()),
       (ATerm) gsMakeDataEqn(dsl, nil,
         gsMakeDataExprListSize(ds),
-        gsMakeDataExprSucc(gsMakeDataExprListSize(sSortId))),
+        gsMakeDataExprCNat(
+          gsMakeDataExprSucc(gsMakeDataExprListSize(sSortId)))),
       //list snoc (SortId -> SortElt -> SortId)
       (ATerm) gsMakeDataEqn(dl, nil,
         gsMakeDataExprSnoc(elSortId, dSortElt),
