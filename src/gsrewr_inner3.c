@@ -3,8 +3,6 @@
 extern "C" {
 #endif
 
-#define GS_CHECK_NFS
-
 #define NAME "rewr_inner3"
 
 #include <stdio.h>
@@ -23,7 +21,6 @@ static unsigned int num_opids;
 static ATermAppl *int2term;
 static ATermList *inner3_eqns;
 static ATermInt trueint;
-static ATerm gsnil;
 static int max_vars;
 static bool isprotected = false;
 
@@ -107,11 +104,7 @@ static ATermAppl fromInner(ATerm Term)
 		{
 			return int2term[ATgetInt((ATermInt) Term)];
 		} else {
-#ifdef GS_CHECK_NFS
-			return (ATermAppl) ATremoveAnnotation(Term,gsnil);
-#else
 			return (ATermAppl) Term;
-#endif
 		}
 	}
 
@@ -122,11 +115,7 @@ static ATermAppl fromInner(ATerm Term)
 	}
 	
 	l = (ATermList) Term;
-#ifdef GS_CHECK_NFS
-	t = ATremoveAnnotation(ATgetFirst(l),gsnil);
-#else
 	t = ATgetFirst(l);
-#endif
 	if ( ATisInt(t) )
 	{
 		a = int2term[ATgetInt((ATermInt) t)];
@@ -151,19 +140,9 @@ void rewrite_init_inner3()
 	tmp_eqns = ATtableCreate(100,100); // XXX would be nice to know the number op OpIds
 	term2int = ATtableCreate(100,100);
 
-	gsnil = (ATerm) gsMakeNil();
-	if ( !isprotected )
-	{
-		ATprotect(&gsnil);
-	}
-
 	max_vars = 0;
 
-#ifdef GS_CHECK_NFS
-	trueint = (ATermInt) ATsetAnnotation(OpId2Int(gsMakeDataExprTrue(),true),gsnil,gsnil);
-#else
 	trueint = (ATermInt) OpId2Int(gsMakeDataExprTrue(),true);
-#endif
 	if ( !isprotected )
 	{
 		ATprotectInt(&trueint);
@@ -300,9 +279,6 @@ static ATerm subst_values(ATermAppl *vars, ATerm *vals, int len, ATerm t)
 	ATermList l,m;
 
 	h = NULL;
-#ifdef GS_CHECK_NFS
-	ATremoveAnnotation(t,gsnil);
-#endif
 
 	if ( ATisList(t) )
 	{
@@ -348,7 +324,6 @@ static ATerm subst_values(ATermAppl *vars, ATerm *vals, int len, ATerm t)
 static bool match_inner(ATerm t, ATerm p, ATermAppl *vars, ATerm *vals, int *len)
 {
 	bool b;
-	ATermList l;
 
 //ATfprintf(stderr,"match_inner(  %t  ,  %t  ,  %t   )\n\n",t,p,*vars);
 	if ( ATisList(p) )
@@ -368,11 +343,7 @@ static bool match_inner(ATerm t, ATerm p, ATermAppl *vars, ATerm *vals, int *len
 		return false;
 	} else if ( ATisInt(p) || gsIsOpId((ATermAppl) p) )
 	{
-#ifdef GS_CHECK_NFS
-		return ATisEqualModuloAnnotations(t,p);
-#else
 		return ATisEqual(t,p);
-#endif
 	} else /* if ( gsIsDataVarId((ATermAppl) p) ) */ {
 		for (int i=0; i<*len; i++)
 		{
@@ -390,273 +361,189 @@ static bool match_inner(ATerm t, ATerm p, ATermAppl *vars, ATerm *vals, int *len
 		vals[*len] = t;
 		(*len)++;
 		return true;
-/*		l = *vars;
-		for (; !ATisEmpty(l); l=ATgetNext(l))
-		{
-			if ( ATisEqual(p,ATgetArgument(ATAgetFirst(l),0)) )
-			{
-//#ifdef GS_CHECK_NFS
-//				if ( ATisEqualModuloAnnotations(t,ATgetArgument(ATAgetFirst(l),1)) )
-//#else
-				if ( ATisEqual(t,ATgetArgument(ATAgetFirst(l),1)) )
-//#endif
-				{
-					return true;
-				} else {
-					return false;
-				}
-			}
-		}
-		*vars = ATinsert(*vars,(ATerm) gsMakeSubst(p,t));
-		return true;*/
 	}
 }
 
-#ifdef GS_CHECK_NFS
-#define setnormal(x) ATsetAnnotation(x,gsnil,gsnil)
-#define isnormal(x) (ATgetAnnotation(x,gsnil) != NULL)
-#endif
+static ATerm rewrite_func(ATermInt op, ATermList args, int *b);
+static ATerm rewrite(ATerm Term, int *b);
 
-static ATerm rewrite(ATerm Term, int *b)
+static ATerm build(ATerm Term, int buildargs, ATermAppl *vars, ATerm *vals, int len)
 {
-	ATerm t;
-	ATermList l,l2,m,m2/*,n,o,o2,p*/;
-//	ATermAppl v,s,t;
-	int i,len,c,d,e;
-	bool x;
-
-#ifdef GS_CHECK_NFS
-	if ( isnormal(Term) )
-		return Term;
-#endif
-
-//ATfprintf(stderr,"rewrite(%t)\n\n",Term);
-//ATfprintf(stderr,"rewrite(");gsPrintPart(stderr,fromInner(Term),false,0);ATfprintf(stderr,") %p\n\n",&t);
-
-	l2 = NULL;
+	int b;
+//ATfprintf(stderr,"build(%t,%i)\n\n",Term,buildargs);
 
 	if ( ATisList(Term) )
 	{
-		x = true;
-		while ( x )
+		ATerm head = ATgetFirst((ATermList) Term);
+		ATermList args = ATgetNext((ATermList) Term);
+		ATermList l;
+
+		if ( buildargs == -1 )
 		{
-//ATfprintf(stderr,"loop: %t\n\n",Term);
-//ATfprintf(stderr,"loop: ");gsPrintPart(stderr,fromInner(Term),false,0);ATfprintf(stderr,"\n\n");
-			x = false;
-			d = 0;
-			t = rewrite(ATgetFirst((ATermList) Term),&d);
-			l = ATgetNext((ATermList) Term);
-			m = ATmakeList0();
-			for (; !ATisEmpty(l); l=ATgetNext(l))
-			{
-				m = ATinsert(m,rewrite(ATgetFirst(l),&c));
-				d |= c;
-			}
-			l = ATreverse(m);
-			if ( d ) 
-			{
-				*b = 1;
-			}
-			if ( ATisList(t) )
-			{
-				l = ATconcat(ATgetNext((ATermList) t),l);
-				t = ATgetFirst((ATermList) t);
-			}
-			Term = (ATerm) ATinsert(l,t);
-			if ( !ATisInt(t) || (m = inner3_eqns[ATgetInt((ATermInt) t)]) == NULL )
-			{
-				break;
-			}
-			//o = ATmakeList0();
+			buildargs = ATgetLength(args);
+		}
 
-			DECL_A(vars,ATermAppl,max_vars);
-			DECL_A(vals,ATerm,max_vars);
-			int pos;
-			for (; !ATisEmpty(m); m=ATgetNext(m))
-			{
-				ATermList rule = ATgetNext(ATLgetFirst(m));
-				ATerm cond = ATgetFirst(rule); rule=ATgetNext(rule);
-				ATermList args = ATLgetFirst(rule); rule=ATgetNext(rule);
-				ATerm rslt = ATgetFirst(rule);
-				ATermList l2 = l;
+		l = ATmakeList0();
+		for (int i=0; i<buildargs; i++)
+		{
+			l = ATinsert(l,build(ATgetFirst(args),-1,vars,vals,len));
+			args = ATgetNext(args);
+		}
+		for (;!ATisEmpty(args);args=ATgetNext(args))
+		{
+			l = ATinsert(l,ATgetFirst(args));
+		}
+		args = ATreverse(l);
 
-				bool match = true;
-				pos = 0;
-				while ( !ATisEmpty(args) )
+		b = 1;
+		while ( !ATisInt(head) && b )
+		{
+			b = 0;
+			for (int i=0; i<len; i++)
+			{
+				if ( ATisEqual(head,vars[i]) )
 				{
-					if ( ATisEmpty(l2) )
+					if ( ATisList(vals[i]) )
 					{
-						match = false;
-						break;
+						head = ATgetFirst((ATermList) vals[i]);
+						args = ATconcat(ATgetNext((ATermList) vals[i]),args);
+					} else {
+						head = vals[i];
 					}
-
-					if ( !match_inner(ATgetFirst(l2),ATgetFirst(args),vars,vals,&pos) )
-					{
-						match = false;
-						break;
-					}
-
-					args = ATgetNext(args);
-					l2 = ATgetNext(l2);
+					b = 1;
+					break;
 				}
-				if ( match )
+			}
+		}
+		if ( ATisInt(head) )
+		{
+			return rewrite_func((ATermInt) head,args,&b);
+		} else {
+			return (ATerm) ATinsert(args,head);
+		}
+	} else if ( ATisInt(Term) ) {
+		return rewrite_func((ATermInt) Term, ATmakeList0(), &b);
+	} else {
+		for (int i=0; i<len; i++)
+		{
+			if ( ATisEqual(Term,vars[i]) )
+			{
+				return vals[i];
+			}
+		}
+		return Term;
+	}
+}
+
+static ATerm rewrite_func(ATermInt op, ATermList args, int *b)
+{
+	ATermList m;
+	DECL_A(vars,ATermAppl,max_vars);
+	DECL_A(vals,ATerm,max_vars);
+	int pos;
+//ATfprintf(stderr,"rewrite_func(%t,%t)\n\n",op,args);
+
+	if ( (m = inner3_eqns[ATgetInt(op)]) != NULL )
+	{
+		for (; !ATisEmpty(m); m=ATgetNext(m))
+		{
+			ATermList rule = ATgetNext(ATLgetFirst(m));
+			ATerm cond = ATgetFirst(rule); rule=ATgetNext(rule);
+			ATermList rargs = ATLgetFirst(rule); rule=ATgetNext(rule);
+			ATerm rslt = ATgetFirst(rule);
+			ATermList l2 = args;
+	
+			bool match = true;
+			pos = 0;
+			while ( !ATisEmpty(rargs) )
+			{
+				if ( ATisEmpty(l2) )
 				{
-					if ( is_nil(cond) || ATisEqual(rewrite(subst_values(vars,vals,pos,cond),&e),trueint) )
+					match = false;
+					break;
+				}
+	
+				if ( !match_inner(ATgetFirst(l2),ATgetFirst(rargs),vars,vals,&pos) )
+				{
+					match = false;
+					break;
+				}
+	
+				rargs = ATgetNext(rargs);
+				l2 = ATgetNext(l2);
+			}
+			if ( match )
+			{
+				if ( is_nil(cond) || ATisEqual(build(cond,-1,vars,vals,pos),trueint) )
+				{
+					*b = 1;
+					int rslt_len;
+					if ( ATisList(rslt) )
 					{
-						*b = 1;
-						Term = subst_values(vars,vals,pos,rslt);
+						rslt_len = ATgetLength(rslt)-1;
 						if ( !ATisEmpty(l2) )
 						{
-							if ( ATisList(Term) )
-							{
-								Term = (ATerm) ATconcat((ATermList) Term,l2);
-							} else {
-								Term = (ATerm) ATinsert(l2,Term);
-							}
+							rslt = (ATerm) ATconcat((ATermList) rslt,l2);
 						}
-						if ( ATisList(Term) )
+					} else {
+						rslt_len = 0;
+						if ( !ATisEmpty(l2) )
 						{
-							x = true;
-						} else {
-							Term = rewrite(Term,&c);
-						}
-						break;
-					}		
-				}
-			}
-
-/*			len = ATgetLength(m);
-			DECL_A(a_m1,ATerm,len);
-			DECL_A(a_m2,ATermList,len);
-			DECL_A(a_m3,ATerm,len);
-			DECL_A(a_o,ATermList,len);
-			for (i=0; i<len; i++)
-			{
-				ATermList a_m = ATgetNext(ATLgetFirst(m)); m = ATgetNext(m);
-				a_m1[i] = ATgetFirst(a_m); a_m = ATgetNext(a_m);
-				a_m2[i] = ATLgetFirst(a_m); a_m = ATgetNext(a_m);
-				a_m3[i] = ATgetFirst(a_m);
-				a_o[i] = ATmakeList0();
-			//	o = ATinsert(o,(ATerm) ATmakeList0());
-			}
-//ATfprintf(stderr,"Trying %t...\n\n",Term);
-			while ( len > 0 )
-			{
-//ATfprintf(stderr,"%t matches? %t\n\n",l,m);
-				if ( !ATisEmpty(l) )
-				{
-					t = ATgetFirst(l);
-					l2 = ATgetNext(l);
-				}
-//				n = ATmakeList0();
-//				o2 = ATmakeList0();
-//				for (; !ATisEmpty(m); m=ATgetNext(m),o=ATgetNext(o))
-				int end = 0;
-				for (int i = 0; i < len; i++)
-				{
-//					p = ATLgetFirst(o);
-//					if ( ATisEmpty(ATLelementAt(ATLgetFirst(m),2)) )
-					if ( ATisEmpty(a_m2[i]) )
-					{
-						// XXX check ATisEmpty(l)
-						if ( is_nil(a_m1[i]) || ATisEqual(rewrite(subst_values(a_o[i],a_m1[i]),&e),trueint) )
-						{
-//ATfprintf(stderr,"apply %t\n\n",ATgetFirst(m));
-							*b = 1;
-							Term = subst_values(a_o[i],a_m3[i]);
-							if ( !ATisEmpty(l) )
-							{
-								if ( ATisList(Term) )
-								{
-									Term = (ATerm) ATconcat((ATermList) Term,l);
-								} else {
-									Term = (ATerm) ATinsert(l,Term);
-								}
-							}
-							if ( ATisList(Term) )
-							{
-								x = true;
-							} else {
-								Term = rewrite(Term,&c,vars);
-							}
-//							n = ATmakeList0();
-							len = 0;
-							break;
-						}		
-					} else if ( !ATisEmpty(l) ) {
-						m2 = a_m2[i];
-						if ( match_inner(t,ATgetFirst(m2),&(a_o[i])) )
-						{
-//							n = ATinsert(n,(ATerm) ATreplace(ATLgetFirst(m),(ATerm) ATgetNext(m2),2));
-							a_m1[end] = a_m1[i];
-							a_m2[end] = ATgetNext(m2);
-							a_m3[end] = a_m3[i];
-//							o2 = ATinsert(o2,(ATerm) p);
-							a_o[end] = a_o[i];
-							end++;
+							rslt = (ATerm) ATinsert(l2,rslt);
 						}
 					}
-				}
-				len = end;
-//				m = n;
-//				o = o2;
-//				m = ATreverse(n);
-//				o = ATreverse(o2);
-				if ( !ATisEmpty(l) ) 
-				{
-					l = l2;
-				}
+					ATerm t = build(rslt,rslt_len,vars,vals,pos);
+					FREE_A(vals)
+					FREE_A(vars)
+					return t;
+				}		
 			}
-			FREE_A(a_o);
-			FREE_A(a_m3);
-			FREE_A(a_m2);
-			FREE_A(a_m1);*/
 		}
-//ATfprintf(stderr,"return: %t\n\n",Term);
-//ATfprintf(stderr,"return: ");gsPrintPart(stderr,fromInner(Term),false,0);ATfprintf(stderr,"\n\n");
-#ifdef GS_CHECK_NFS
-		return setnormal(Term);
-#else
+	}
+
+	FREE_A(vals)
+	FREE_A(vars)
+
+	if ( ATisEmpty(args) )
+	{
+		return (ATerm) op;
+	} else {
+		return (ATerm) ATinsert(args,(ATerm) op);
+	}
+}
+
+static ATerm rewrite(ATerm Term, int *b)
+{
+///ATfprintf(stderr,"rewrite(%t)\n\n",Term);
+	if ( ATisList(Term) )
+	{
+		ATermList l = ATgetNext((ATermList) Term);
+		ATermList m;
+		int c,d;
+
+		m = ATmakeList0();
+		d = 0;
+		for (; !ATisEmpty(l); l=ATgetNext(l))
+		{
+			m = ATinsert(m,rewrite(ATgetFirst(l),&c));
+			d|=c;
+		}
+		l = ATreverse(m);
+
+		if ( ATisInt(ATgetFirst((ATermList) Term)) )
+		{
+			Term = rewrite_func((ATermInt) ATgetFirst((ATermList) Term), l, b);
+			*b |= d;
+		} else {
+			Term = (ATerm) ATinsert(l,ATgetFirst((ATermList) Term));
+		}
+
 		return Term;
-#endif
 	} else if ( ATisInt(Term) )
 	{
-		if ( (m = inner3_eqns[ATgetInt((ATermInt) Term)]) != NULL )
-		{
-			for (; !ATisEmpty(m); m=ATgetNext(m))
-			{
-				if ( ATisEmpty(ATLelementAt(ATLgetFirst(m),2)) )
-				{
-					if ( is_nil(ATelementAt(ATLgetFirst(m),1)) || ATisEqual(rewrite(ATelementAt(ATLgetFirst(m),1),&e),trueint) )
-					{
-						*b = 1;
-//ATfprintf(stderr,"return: %t\n\n",ATelementAt(ATLgetFirst(m),3));
-//ATfprintf(stderr,"return: ");gsPrintPart(stderr,fromInner(ATelementAt(ATLgetFirst(m),3)),false,0);ATfprintf(stderr,"\n\n");
-#ifdef GS_CHECK_NFS
-						return setnormal(ATelementAt(ATLgetFirst(m),3));
-#else
-						return ATelementAt(ATLgetFirst(m),3);
-#endif
-					}		
-					
-				}
-			}
-		}
-//ATfprintf(stderr,"return: %t\n\n",Term);
-//ATfprintf(stderr,"return: ");gsPrintPart(stderr,fromInner(Term),false,0);ATfprintf(stderr,"\n\n");
-#ifdef GS_CHECK_NFS
-		return setnormal(Term);
-#else
-		return Term;
-#endif
+		return rewrite_func((ATermInt) Term, ATmakeList0(),b);
 	} else {
-//ATfprintf(stderr,"return: %t\n\n",Term);
-//ATfprintf(stderr,"return: ");gsPrintPart(stderr,fromInner(Term),false,0);ATfprintf(stderr,"\n\n");
-#ifdef GS_CHECK_NFS
-		return setnormal(Term);
-#else
 		return Term;
-#endif
 	}
 }
 
