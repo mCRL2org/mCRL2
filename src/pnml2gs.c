@@ -17,6 +17,7 @@ extern "C" {
 #include <stdlib.h>
 #include <string.h>
 #include <getopt.h>
+#include <assert.h>
 #include <libxml/xmlmemory.h>
 #include <libxml/parser.h>
 #include <aterm2.h>
@@ -664,7 +665,9 @@ extern "C" {
       gsDebugMsg("Action: %t created.\n", CurrentAction);
       Ids = ATgetNext(Ids);
     }
-    return ActionsList;
+
+    //now reverse the whole thing
+    return ATreverse(ActionsList);
   }
 
   //==================================================
@@ -709,7 +712,7 @@ extern "C" {
   // pn2gsGenerateTransition generates the GenSpect Process Equations belonging to one transition
   //==================================================
   static ATermList pn2gsGenerateTransition(ATerm TransID){
-    // input: ID of the transtion
+    // input: access to the context; ID of the transtion
     // output: an updated list of the processes: the processes belonging to the transition added to the list
 
     ATermList EquationList=ATmakeList0();
@@ -854,17 +857,75 @@ extern "C" {
     return choice;
   }
 
+  //====================================
+  //ADDED BY YARICK: AFun extensions.
+  //====================================
+
+
   //==================================================
   // ATmakeAFunInt functions as ATmakeAFun, except that the name is an int and not a (char *)
   //==================================================
   static AFun ATmakeAFunInt(int name, int arity, ATbool quoted) {
-    // input: an integer name, it's arity and whether it is quoted or not
+    // input: an integer value (name), it's arity and whether it is quoted or not
     // output: an AFun, as in ATmakeAFun, but now with a name from an integer value
 
-    char buf[10];
-    sprintf(buf, "%d" , name);
+    // on 128 bit architecture int cannot ocupy more than 128/3+1=43 8-ary digits, even less 10-ary
+    char buf[50];
+    sprintf(buf, "%d", name);
     return ATmakeAFun(buf, arity, quoted);
   }
+
+  //==================================================
+  // ATmakeAFunInt0 functions as ATmakeAFunInt(name,0,ATtrue)
+  //==================================================
+  static inline AFun ATmakeAFunInt0(int name){
+    return ATmakeAFunInt(name, 0, ATtrue);
+  }
+
+  //==================================================
+  // ATprependAFun functions as ATmakeAFun 
+  //==================================================
+  static AFun ATprependAFun(const char *str, AFun id) {
+    // input: an AFun
+    // output: an AFun prepended with str
+
+    char *name=ATgetName(id);
+    char *buf=malloc(strlen(str)+strlen(name)+1);
+    assert(buf);
+    
+    strcpy(buf,str);
+    strcat(buf,name);
+
+    AFun Res=ATmakeAFun(buf, ATgetArity(id), ATisQuoted(id));
+    free(buf);
+
+    return Res;
+  }
+
+  //==================================================
+  // ATappendAFun functions as ATmakeAFun
+  //==================================================
+  static AFun ATappendAFun(AFun id, const char *str) {
+    // input: an AFun
+    // output: an AFun appended with str
+
+    char *name=ATgetName(id);
+    char *buf=malloc(strlen(str)+strlen(name)+1);
+    assert(buf);
+    
+    strcpy(buf,name);
+    strcat(buf,str);
+
+    AFun Res=ATmakeAFun(buf, ATgetArity(id), ATisQuoted(id));
+    free(buf);
+
+    return Res;
+  }
+
+  //====================================
+  //End ADDED BY YARICK: AFun extensions.
+  //====================================
+
 
   //==================================================
   // pn2gsPlaceParameterNat generates the parameter for a given place, of type Nat
@@ -898,7 +959,7 @@ extern "C" {
   // pn2gsGeneratePlace generates the GenSpect Process Equations belonging to one place
   //==================================================
   static ATermList pn2gsGeneratePlace(ATerm PlaceID){
-    // input: ID of the place
+    // input: access to the context; ID of the place
     // output: an updated list of the processes: the processes belonging to the place added to the list
 
     ATermList EquationList=ATmakeList0();
@@ -970,7 +1031,7 @@ extern "C" {
       MaxConcIn_int = ATgetLength((ATermList)ATtableGet(context.place_in, PlaceID));
     }
     ATermAppl MaxConcIn;
-    MaxConcIn = gsMakeNumber(ATmakeAppl0(ATmakeAFunInt(MaxConcIn_int, 0, ATtrue)), gsMakeSortIdNat());
+    MaxConcIn = gsMakeNumber(ATmakeAppl0(ATmakeAFunInt0(MaxConcIn_int)), gsMakeSortIdNat());
     if (gsIsNumber(MaxConcIn)) {
      gsDebugMsg("Parameter %t is a Number\n", MaxConcIn);
     } else {
@@ -984,7 +1045,7 @@ extern "C" {
       MaxConcOut_int = ATgetLength((ATermList)ATtableGet(context.place_out, PlaceID));
     }
     ATermAppl MaxConcOut;
-    MaxConcOut = gsMakeNumber(ATmakeAppl0(ATmakeAFunInt(MaxConcOut_int, 0, ATtrue)), gsMakeSortIdNat());
+    MaxConcOut = gsMakeNumber(ATmakeAppl0(ATmakeAFunInt0(MaxConcOut_int)), gsMakeSortIdNat());
     if (gsIsNumber(MaxConcIn)) {
       gsDebugMsg("Parameter %t is a Number\n", MaxConcOut);
     } else {
@@ -1261,7 +1322,7 @@ extern "C" {
 
     gsDebugMsg("\n\nStart creation of processes belonging to transitions.\n\n");
     for(ATermList Ids = ATtableKeys(context.trans_name);!ATisEmpty(Ids);Ids = ATgetNext(Ids))
-      ProcessList = ATconcat(ProcessList,ATreverse(pn2gsGenerateTransition(ATgetFirst(Ids))));
+      ProcessList = ATconcat(pn2gsGenerateTransition(ATgetFirst(Ids)),ProcessList);
 
     //==================================================
     // second, we generate the place processes.
@@ -1293,7 +1354,7 @@ extern "C" {
 
     gsDebugMsg("\n\nStart creation of processes belonging to places.\n\n");
     for(ATermList Ids = ATtableKeys(context.place_name);!ATisEmpty(Ids);Ids = ATgetNext(Ids)) 
-      ProcessList = ATconcat(ProcessList,ATreverse(pn2gsGeneratePlace(ATgetFirst(Ids))));
+      ProcessList = ATconcat(pn2gsGeneratePlace(ATgetFirst(Ids)),ProcessList);
 
     //==================================================
     // third, we generate the three general Petri net processes.
@@ -1337,7 +1398,8 @@ extern "C" {
     ProcessList = ATinsert(ProcessList, (ATerm)gsMakeProcEqn(ATmakeList0(), gsMakeProcVarId(NetID, ATmakeList0()), ATmakeList0(), Process));
     gsDebugMsg("Process %t created.\n", NetID);
 
-    return ProcessList;
+    //Now reverse the whole thing
+    return ATreverse(ProcessList);
   }
 
   /*                           */
