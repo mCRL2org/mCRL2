@@ -12,6 +12,7 @@ extern "C" {
   /* global_MaxIDlength should be at least (1 + max(global_PlaceChars, global_TransChars, global_ArcChars)) */
 #define global_MaxIDlength 255       // defines the maximum length of an ID! 
   
+#include <ctype.h>
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
@@ -52,6 +53,60 @@ extern "C" {
   /*                                 */
 
   //==================================================
+  // pn2gsCheckString checks if a string is of the format [a-zA-Z_][a-zA-Z0-9_]*
+  //==================================================
+  static char * pn2gsCheckString(char * String) {
+    // input: a string
+    // output: a string of the format [a-zA-Z_][a-zA-Z0-9_]*
+    //         If the input-string is already of this format, it is returned unchanged.
+    //         If a string is of a different format, all characters that do not follow the format are replaced with an _
+
+    if (String == NULL) {
+      return NULL;
+    }
+
+    // check if the first character is of format [a-zA-Z_]
+    if(!(isalpha(String[0])||String[0]=='_')) {
+      // first character does not follow the format
+      // put 'c_' in front of the String
+      char Underscore[global_MaxIDlength] = "c_";
+      String = strcat(Underscore, String);  
+    }
+
+    for(int i=0; i<strlen(String); i++){
+      if(!(isalnum(String[i]))) {
+	// if a character in the string is not [a-zA-Z0-9_], replace it by an '_'
+	String[i]='_';
+      }
+    }
+
+    return String;
+  }
+
+  //==================================================
+  // pn2gsRetrieveTextWithCheck gets the contents of a child <text> element of cur, and checks it to format [a-zA-Z_][a-zA-Z0-9_]*
+  //==================================================
+  static ATerm pn2gsRetrieveTextWithCheck(xmlNodePtr cur) {
+    // input: a pointer to the current element
+    // output: the contents of the first child <text> attribute 
+    //         of the current element, following format [a-zA-Z_][a-zA-Z0-9_]*
+    
+    char * RV;
+    cur=cur->xmlChildrenNode;
+    while (cur != NULL) {
+      if (!xmlNodeIsText(cur)) {
+	if (!xmlStrcmp(cur->name, (const xmlChar *)"text")) {
+	  RV = pn2gsCheckString((char *)xmlNodeGetContent(cur));
+	  //	  return (ATerm)ATmakeAppl0(ATmakeAFun(RV,0,ATfalse));
+	  return ATparse(RV);
+	}
+      }
+      cur=cur->next;
+    }
+    return NULL;
+  }
+
+  //==================================================
   // pn2gsRetrieveText gets the contents of a child <text> element of cur
   //==================================================
   static ATerm pn2gsRetrieveText(xmlNodePtr cur) {
@@ -59,13 +114,13 @@ extern "C" {
     // output: the contents of the first child <text> attribute 
     //         of the current element
     
-    xmlChar * RV;
+    char * RV;
     cur=cur->xmlChildrenNode;
     while (cur != NULL) {
       if (!xmlNodeIsText(cur)) {
 	if (!xmlStrcmp(cur->name, (const xmlChar *)"text")) {
-	  RV = xmlNodeGetContent(cur);
-	  return ATparse((const char *)RV);
+	  RV = (char *)xmlNodeGetContent(cur);
+	  return ATparse(RV);
 	}
       }
       cur=cur->next;
@@ -91,7 +146,7 @@ extern "C" {
       return NULL;
     } else {
       // the place has an id, put it in Aid
-      Aid = ATparse((const char *)xmlGetProp(cur, (const xmlChar *)"id"));
+      Aid = ATparse(pn2gsCheckString((const char *)xmlGetProp(cur, (const xmlChar *)"id")));
       
       if (strlen((const char *)xmlGetProp(cur, (const xmlChar *)"id")) > (global_MaxIDlength - global_PlaceChars)) {
 	// check if the ID is not too long
@@ -123,7 +178,7 @@ extern "C" {
 	// the place contains a <name> element
 	// a <name> element contains a childelement <text> which contains the name of the place
 	// the name is retrieved below and assigned to Aname
-	if (!(Aname=pn2gsRetrieveText(cur))) {
+	if (!(Aname=pn2gsRetrieveTextWithCheck(cur))) {
 	  Aname = ATparse("default_name");
 	}
 	gsDebugMsg("    name: '%t'\n", Aname);
@@ -185,7 +240,7 @@ extern "C" {
       return NULL;
     } else {
       // the transition has an id, put it in Aid
-      Aid = ATparse((const char *)xmlGetProp(cur, (const xmlChar *)"id"));
+      Aid = ATparse(pn2gsCheckString((const char *)xmlGetProp(cur, (const xmlChar *)"id")));
       
       if (strlen((const char *)xmlGetProp(cur, (const xmlChar *)"id")) > (global_MaxIDlength - global_TransChars)) {
 	// check if the ID is not too long
@@ -216,7 +271,7 @@ extern "C" {
 	// the transition contains a <name> element
 	// a <name> element contains a childelement <text> which contains the name of the transition
 	// the name is retrieved below and assigned to Aname
-	if (!(Aname=pn2gsRetrieveText(cur))) {
+	if (!(Aname=pn2gsRetrieveTextWithCheck(cur))) {
 	  Aname = ATparse("default_name");
 	}
 	gsDebugMsg("    name: '%t'\n", Aname);
@@ -262,7 +317,7 @@ extern "C" {
       return NULL;
     } else {
       // the arc has an id, put it in Aid
-      Aid = ATparse((const char *)xmlGetProp(cur, (const xmlChar *)"id"));
+      Aid = ATparse(pn2gsCheckString((const char *)xmlGetProp(cur, (const xmlChar *)"id")));
       
       if (strlen((const char *)xmlGetProp(cur, (const xmlChar *)"id")) > (global_MaxIDlength - global_ArcChars)) {
 	// check if the ID is not too long
@@ -280,7 +335,7 @@ extern "C" {
       gsWarningMsg("Arc with id '%t' has no source and will not be translated.\n", Aid);
       return NULL;
     } else {
-      Asource = ATparse((const char *)xmlGetProp(cur, (const xmlChar *)"source"));
+      Asource = ATparse(pn2gsCheckString((const char *)xmlGetProp(cur, (const xmlChar *)"source")));
     }
     gsDebugMsg("    source: '%t'\n", Asource);
     
@@ -290,7 +345,7 @@ extern "C" {
       gsWarningMsg("Arc with id '%t' has no target and will not be translated.\n", Aid);
       return NULL;
     } else {
-      Atarget = ATparse((const char *)xmlGetProp(cur, (const xmlChar *)"target"));
+      Atarget = ATparse(pn2gsCheckString((const char *)xmlGetProp(cur, (const xmlChar *)"target")));
     }
     gsDebugMsg("    target: '%t'\n", Atarget);
     
@@ -390,7 +445,7 @@ extern "C" {
     } else {
       // the net has an id, put it in ANetID
       char * NetID;
-      NetID = (const char *)xmlGetProp(cur, (const xmlChar *)"id");
+      NetID = pn2gsCheckString((const char *)xmlGetProp(cur, (const xmlChar *)"id"));
       char Prefix[global_MaxIDlength]="Net_";     
       NetID = strcat(Prefix, NetID);
       ANetID = ATmakeAppl0(ATmakeAFun(NetID, 0, ATtrue));
@@ -1619,6 +1674,8 @@ extern "C" {
       gsErrorMsg("Document not parsed succesfully. \n");
       return 1;
     }
+
+    gsEnableConstructorFunctions();
     
     ATermAppl Spec=pn2gsAterm(doc);
     xmlFreeDoc(doc);
@@ -1641,8 +1698,6 @@ extern "C" {
 
     context.transitions=ATmakeList0();
     context.places=ATmakeList0();
-    
-    gsEnableConstructorFunctions();
     
     Spec=pn2gsTranslate(Spec);
     
