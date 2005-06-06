@@ -146,7 +146,7 @@ extern "C" {
       return NULL;
     } else {
       // the place has an id, put it in Aid
-      Aid = ATparse(pn2gsCheckString((const char *)xmlGetProp(cur, (const xmlChar *)"id")));
+      Aid = ATparse(pn2gsCheckString((char *)xmlGetProp(cur, (const xmlChar *)"id")));
       
       if (strlen((const char *)xmlGetProp(cur, (const xmlChar *)"id")) > (global_MaxIDlength - global_PlaceChars)) {
 	// check if the ID is not too long
@@ -240,7 +240,7 @@ extern "C" {
       return NULL;
     } else {
       // the transition has an id, put it in Aid
-      Aid = ATparse(pn2gsCheckString((const char *)xmlGetProp(cur, (const xmlChar *)"id")));
+      Aid = ATparse(pn2gsCheckString((char *)xmlGetProp(cur, (const xmlChar *)"id")));
       
       if (strlen((const char *)xmlGetProp(cur, (const xmlChar *)"id")) > (global_MaxIDlength - global_TransChars)) {
 	// check if the ID is not too long
@@ -317,7 +317,7 @@ extern "C" {
       return NULL;
     } else {
       // the arc has an id, put it in Aid
-      Aid = ATparse(pn2gsCheckString((const char *)xmlGetProp(cur, (const xmlChar *)"id")));
+      Aid = ATparse(pn2gsCheckString((char *)xmlGetProp(cur, (const xmlChar *)"id")));
       
       if (strlen((const char *)xmlGetProp(cur, (const xmlChar *)"id")) > (global_MaxIDlength - global_ArcChars)) {
 	// check if the ID is not too long
@@ -335,7 +335,7 @@ extern "C" {
       gsWarningMsg("Arc with id '%t' has no source and will not be translated.\n", Aid);
       return NULL;
     } else {
-      Asource = ATparse(pn2gsCheckString((const char *)xmlGetProp(cur, (const xmlChar *)"source")));
+      Asource = ATparse(pn2gsCheckString((char *)xmlGetProp(cur, (const xmlChar *)"source")));
     }
     gsDebugMsg("    source: '%t'\n", Asource);
     
@@ -345,7 +345,7 @@ extern "C" {
       gsWarningMsg("Arc with id '%t' has no target and will not be translated.\n", Aid);
       return NULL;
     } else {
-      Atarget = ATparse(pn2gsCheckString((const char *)xmlGetProp(cur, (const xmlChar *)"target")));
+      Atarget = ATparse(pn2gsCheckString((char *)xmlGetProp(cur, (const xmlChar *)"target")));
     }
     gsDebugMsg("    target: '%t'\n", Atarget);
     
@@ -445,7 +445,7 @@ extern "C" {
     } else {
       // the net has an id, put it in ANetID
       char * NetID;
-      NetID = pn2gsCheckString((const char *)xmlGetProp(cur, (const xmlChar *)"id"));
+      NetID = pn2gsCheckString((char *)xmlGetProp(cur, (const xmlChar *)"id"));
       char Prefix[global_MaxIDlength]="Net_";     
       NetID = strcat(Prefix, NetID);
       ANetID = ATmakeAppl0(ATmakeAFun(NetID, 0, ATtrue));
