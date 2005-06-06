@@ -45,6 +45,82 @@ extern "C" {
   } Context;
   static Context context;
 
+  //====================================
+  //ADDED BY YARICK: AFun extensions.
+  //====================================
+
+  //==================================================
+  // ATmakeAFunInt functions as ATmakeAFun, except that the name is an int and not a (char *)
+  //==================================================
+  static AFun ATmakeAFunInt(int name, int arity, ATbool quoted) {
+    // input: an integer value (name), it's arity and whether it is quoted or not
+    // output: an AFun, as in ATmakeAFun, but now with a name from an integer value
+
+    // on 128 bit architecture int cannot ocupy more than 128/3+1=43 8-ary digits, even less 10-ary
+    char buf[50];
+    sprintf(buf, "%d", name);
+    return ATmakeAFun(buf, arity, quoted);
+  }
+
+  //==================================================
+  // ATmakeAFunInt0 functions as ATmakeAFunInt(name,0,ATtrue)
+  //==================================================
+  static inline AFun ATmakeAFunInt0(int name){
+    return ATmakeAFunInt(name, 0, ATtrue);
+  }
+
+  //==================================================
+  // ATmakeAFunId functions as ATmakeAFun(name,0,ATtrue)
+  //==================================================
+  static inline AFun ATmakeAFunId(char *name){
+    return ATmakeAFun(name, 0, ATtrue);
+  }
+
+  //==================================================
+  // ATprependAFun functions as ATmakeAFun 
+  //==================================================
+  static AFun ATprependAFun(const char *str, AFun id) {
+    // input: an AFun
+    // output: an AFun prepended with str
+
+    char *name=ATgetName(id);
+    char *buf=malloc(strlen(str)+strlen(name)+1);
+    assert(buf);
+    
+    strcpy(buf,str);
+    strcat(buf,name);
+
+    AFun Res=ATmakeAFun(buf, ATgetArity(id), ATisQuoted(id));
+    free(buf);
+
+    return Res;
+  }
+
+  //==================================================
+  // ATappendAFun functions as ATmakeAFun
+  //==================================================
+  static AFun ATappendAFun(AFun id, const char *str) {
+    // input: an AFun
+    // output: an AFun appended with str
+
+    char *name=ATgetName(id);
+    char *buf=malloc(strlen(str)+strlen(name)+1);
+    assert(buf);
+    
+    strcpy(buf,name);
+    strcat(buf,str);
+
+    AFun Res=ATmakeAFun(buf, ATgetArity(id), ATisQuoted(id));
+    free(buf);
+
+    return Res;
+  }
+
+  //====================================
+  //End ADDED BY YARICK: AFun extensions.
+  //====================================
+
+
   /*                                 */
   /*                                 */
   /*                                 */
@@ -56,23 +132,22 @@ extern "C" {
   //==================================================
   // pn2gsCheckString checks if a string is of the format [a-zA-Z_][a-zA-Z0-9_]*
   //==================================================
-  static char * pn2gsCheckString(char * String) {
-    // input: a string
-    // output: a string of the format [a-zA-Z_][a-zA-Z0-9_]*
+  static AFun pn2gsCheckAFun(AFun id) {
+    // input: an AFun
+    // output: an AFun with the string of the format [a-zA-Z_][a-zA-Z0-9_]*
     //         If the input-string is already of this format, it is returned unchanged.
     //         If a string is of a different format, all characters that do not follow the format are replaced with an _
-
-    if (String == NULL) {
-      return NULL;
-    }
+    
+    char *String=ATgetName(id);
 
     // check if the first character is of format [a-zA-Z_]
     if(!(isalpha(String[0])||String[0]=='_')) {
       // first character does not follow the format
       // put 'c_' in front of the String
-      char Underscore[global_MaxIDlength] = "c_";
-      String = strcat(Underscore, String);  
+      id=ATprependAFun("c_",id);
     }
+
+    String=strdup(ATgetName(id));
 
     for(int i=0; i<strlen(String); i++){
       if(!(isalnum(String[i]))) {
@@ -81,25 +156,23 @@ extern "C" {
       }
     }
 
-    return String;
+    return ATmakeAFun(String,ATgetArity(id),ATisQuoted(id));
   }
 
   //==================================================
   // pn2gsRetrieveTextWithCheck gets the contents of a child <text> element of cur, and checks it to format [a-zA-Z_][a-zA-Z0-9_]*
   //==================================================
-  static ATerm pn2gsRetrieveTextWithCheck(xmlNodePtr cur) {
+  static ATermAppl pn2gsRetrieveTextWithCheck(xmlNodePtr cur) {
     // input: a pointer to the current element
     // output: the contents of the first child <text> attribute 
     //         of the current element, following format [a-zA-Z_][a-zA-Z0-9_]*
     
-    char * RV;
     cur=cur->xmlChildrenNode;
     while (cur != NULL) {
       if (!xmlNodeIsText(cur)) {
 	if (!xmlStrcmp(cur->name, (const xmlChar *)"text")) {
-	  RV = pn2gsCheckString((char *)xmlNodeGetContent(cur));
+	  return ATmakeAppl0(pn2gsCheckAFun(ATmakeAFunId((char *)xmlNodeGetContent(cur))));
 	  //	  return (ATerm)ATmakeAppl0(ATmakeAFun(RV,0,ATfalse));
-	  return ATparse(RV);
 	}
       }
       cur=cur->next;
@@ -139,7 +212,7 @@ extern "C" {
     
     gsDebugMsg("> Start examining a place...  \n");
     // first, we want to retrieve the id of the place
-    ATerm Aid;
+    ATermAppl Aid;
     if (!xmlGetProp(cur, (const xmlChar *)"id")) {
       // the place has NO id, so translation should be aborted!
       context.Abort = ATtrue;
@@ -147,7 +220,7 @@ extern "C" {
       return NULL;
     } else {
       // the place has an id, put it in Aid
-      Aid = ATparse(pn2gsCheckString((char *)xmlGetProp(cur, (const xmlChar *)"id")));
+      Aid = ATmakeAppl0((pn2gsCheckAFun(ATmakeAFunId((char *)xmlGetProp(cur, (const xmlChar *)"id")))));
       
       if (strlen((const char *)xmlGetProp(cur, (const xmlChar *)"id")) > (global_MaxIDlength - global_PlaceChars)) {
 	// check if the ID is not too long
@@ -179,7 +252,7 @@ extern "C" {
 	// the place contains a <name> element
 	// a <name> element contains a childelement <text> which contains the name of the place
 	// the name is retrieved below and assigned to Aname
-	if (!(Aname=pn2gsRetrieveTextWithCheck(cur))) {
+	if (!(Aname=(ATerm)pn2gsRetrieveTextWithCheck(cur))) {
 	  Aname = ATparse("default_name");
 	}
 	gsDebugMsg("    name: '%t'\n", Aname);
@@ -220,7 +293,7 @@ extern "C" {
     }
     
     // argument order of returnvalue is id - name - initialMarking 
-    return ATmakeAppl3(ATmakeAFun("place", 3, ATfalse), Aid, Aname, AinitialMarking);
+    return ATmakeAppl3(ATmakeAFun("place", 3, ATfalse), (ATerm)Aid, Aname, AinitialMarking);
   }
   
   //==================================================
@@ -233,7 +306,7 @@ extern "C" {
     
     gsDebugMsg("> Start examining a transition...  \n");
     // first, we want to retrieve the id of the transition
-    ATerm Aid;
+    ATermAppl Aid;
     if (!xmlGetProp(cur, (const xmlChar *)"id")) {
       // the transition has NO id, so translation should be aborted!
       context.Abort = ATtrue;
@@ -241,7 +314,7 @@ extern "C" {
       return NULL;
     } else {
       // the transition has an id, put it in Aid
-      Aid = ATparse(pn2gsCheckString((char *)xmlGetProp(cur, (const xmlChar *)"id")));
+      Aid = ATmakeAppl0(pn2gsCheckAFun(ATmakeAFunId((char *)xmlGetProp(cur, (const xmlChar *)"id"))));
       
       if (strlen((const char *)xmlGetProp(cur, (const xmlChar *)"id")) > (global_MaxIDlength - global_TransChars)) {
 	// check if the ID is not too long
@@ -272,7 +345,7 @@ extern "C" {
 	// the transition contains a <name> element
 	// a <name> element contains a childelement <text> which contains the name of the transition
 	// the name is retrieved below and assigned to Aname
-	if (!(Aname=pn2gsRetrieveTextWithCheck(cur))) {
+	if (!(Aname=(ATerm)pn2gsRetrieveTextWithCheck(cur))) {
 	  Aname = ATparse("default_name");
 	}
 	gsDebugMsg("    name: '%t'\n", Aname);
@@ -297,7 +370,7 @@ extern "C" {
     }
     
     // argument order of returnvalue is id - name  
-    return ATmakeAppl2(ATmakeAFun("transition", 2, ATfalse), Aid, Aname);
+    return ATmakeAppl2(ATmakeAFun("transition", 2, ATfalse), (ATerm)Aid, Aname);
   }
   
   //==================================================
@@ -310,7 +383,7 @@ extern "C" {
     
     gsDebugMsg("> Start examining an arc...  \n");
     // first, we want to retrieve the id of the arc
-    ATerm Aid;
+    ATermAppl Aid;
     if (!xmlGetProp(cur, (const xmlChar *)"id")) {
       // the arc has NO id, so translation should be aborted!
       context.Abort = ATtrue;
@@ -318,7 +391,7 @@ extern "C" {
       return NULL;
     } else {
       // the arc has an id, put it in Aid
-      Aid = ATparse(pn2gsCheckString((char *)xmlGetProp(cur, (const xmlChar *)"id")));
+      Aid = ATmakeAppl0((pn2gsCheckAFun(ATmakeAFunId((char *)xmlGetProp(cur, (const xmlChar *)"id")))));
       
       if (strlen((const char *)xmlGetProp(cur, (const xmlChar *)"id")) > (global_MaxIDlength - global_ArcChars)) {
 	// check if the ID is not too long
@@ -330,23 +403,23 @@ extern "C" {
     gsDebugMsg("    id: '%t'\n", Aid); 
     
     // second, we want to retrieve the source and the target of the arc
-    ATerm Asource;
+    ATermAppl Asource;
     if (!xmlGetProp(cur, (const xmlChar *)"source")) {
       // the arc has NO source, so the arc will not be translated!
       gsWarningMsg("Arc with id '%t' has no source and will not be translated.\n", Aid);
       return NULL;
     } else {
-      Asource = ATparse(pn2gsCheckString((char *)xmlGetProp(cur, (const xmlChar *)"source")));
+      Asource = ATmakeAppl0((pn2gsCheckAFun(ATmakeAFunId((char *)xmlGetProp(cur, (const xmlChar *)"source")))));
     }
     gsDebugMsg("    source: '%t'\n", Asource);
     
-    ATerm Atarget;
+    ATermAppl Atarget;
     if (!xmlGetProp(cur, (const xmlChar *)"target")) {
       // the arc has NO target, so the arc will not be translated!
       gsWarningMsg("Arc with id '%t' has no target and will not be translated.\n", Aid);
       return NULL;
     } else {
-      Atarget = ATparse(pn2gsCheckString((char *)xmlGetProp(cur, (const xmlChar *)"target")));
+      Atarget = ATmakeAppl0(pn2gsCheckAFun(ATmakeAFunId((char *)xmlGetProp(cur, (const xmlChar *)"target"))));
     }
     gsDebugMsg("    target: '%t'\n", Atarget);
     
@@ -386,7 +459,7 @@ extern "C" {
     }
     
     // argument order of returnvalue is id - source - target
-    return ATmakeAppl3(ATmakeAFun("arc", 3, ATfalse), Aid, Asource, Atarget);
+    return ATmakeAppl3(ATmakeAFun("arc", 3, ATfalse), (ATerm)Aid, (ATerm)Asource, (ATerm)Atarget);
   }
   
   /*                        */
@@ -445,17 +518,9 @@ extern "C" {
       gsWarningMsg("NO NET-ID FOUND!\n");
     } else {
       // the net has an id, put it in ANetID
-      char * NetID;
-      NetID = pn2gsCheckString((char *)xmlGetProp(cur, (const xmlChar *)"id"));
-      char Prefix[global_MaxIDlength]="Net_";     
-      NetID = strcat(Prefix, NetID);
-      ANetID = ATmakeAppl0(ATmakeAFun(NetID, 0, ATtrue));
-      if (strlen(NetID) > global_MaxIDlength) {
-	// check if the ID is not too long
-	context.Abort = ATtrue;
-	gsErrorMsg("The id: '%t' is too long! \n", ANetID);
-	return NULL;
-      }
+      AFun NetID = pn2gsCheckAFun(ATmakeAFunId((char *)xmlGetProp(cur, (const xmlChar *)"id")));
+      NetID = ATprependAFun("Net_",NetID);
+      ANetID = ATmakeAppl0(NetID);
     }
     gsDebugMsg("NetID = '%t'\n",ANetID);
     
@@ -856,76 +921,6 @@ extern "C" {
     }
     return choice;
   }
-
-  //====================================
-  //ADDED BY YARICK: AFun extensions.
-  //====================================
-
-
-  //==================================================
-  // ATmakeAFunInt functions as ATmakeAFun, except that the name is an int and not a (char *)
-  //==================================================
-  static AFun ATmakeAFunInt(int name, int arity, ATbool quoted) {
-    // input: an integer value (name), it's arity and whether it is quoted or not
-    // output: an AFun, as in ATmakeAFun, but now with a name from an integer value
-
-    // on 128 bit architecture int cannot ocupy more than 128/3+1=43 8-ary digits, even less 10-ary
-    char buf[50];
-    sprintf(buf, "%d", name);
-    return ATmakeAFun(buf, arity, quoted);
-  }
-
-  //==================================================
-  // ATmakeAFunInt0 functions as ATmakeAFunInt(name,0,ATtrue)
-  //==================================================
-  static inline AFun ATmakeAFunInt0(int name){
-    return ATmakeAFunInt(name, 0, ATtrue);
-  }
-
-  //==================================================
-  // ATprependAFun functions as ATmakeAFun 
-  //==================================================
-  static AFun ATprependAFun(const char *str, AFun id) {
-    // input: an AFun
-    // output: an AFun prepended with str
-
-    char *name=ATgetName(id);
-    char *buf=malloc(strlen(str)+strlen(name)+1);
-    assert(buf);
-    
-    strcpy(buf,str);
-    strcat(buf,name);
-
-    AFun Res=ATmakeAFun(buf, ATgetArity(id), ATisQuoted(id));
-    free(buf);
-
-    return Res;
-  }
-
-  //==================================================
-  // ATappendAFun functions as ATmakeAFun
-  //==================================================
-  static AFun ATappendAFun(AFun id, const char *str) {
-    // input: an AFun
-    // output: an AFun appended with str
-
-    char *name=ATgetName(id);
-    char *buf=malloc(strlen(str)+strlen(name)+1);
-    assert(buf);
-    
-    strcpy(buf,name);
-    strcat(buf,str);
-
-    AFun Res=ATmakeAFun(buf, ATgetArity(id), ATisQuoted(id));
-    free(buf);
-
-    return Res;
-  }
-
-  //====================================
-  //End ADDED BY YARICK: AFun extensions.
-  //====================================
-
 
   //==================================================
   // pn2gsPlaceParameterNat generates the parameter for a given place, of type Nat
