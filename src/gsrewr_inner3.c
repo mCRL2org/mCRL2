@@ -454,7 +454,7 @@ static ATerm rewrite(ATerm Term, int *b, ATermList vars)
 			DECL_A(a_o,ATermList,len);
 			for (i=0; i<len; i++)
 			{
-				ATermList a_m = ATLgetFirst(m); m = ATgetNext(m);
+				ATermList a_m = ATgetNext(ATLgetFirst(m)); m = ATgetNext(m);
 				a_m1[i] = ATgetFirst(a_m); a_m = ATgetNext(a_m);
 				a_m2[i] = ATLgetFirst(a_m); a_m = ATgetNext(a_m);
 				a_m3[i] = ATgetFirst(a_m);
