@@ -708,9 +708,11 @@ extern "C" {
   //==================================================
   // pn2gsGenerateTransition generates the GenSpect Process Equations belonging to one transition
   //==================================================
-  static ATermList pn2gsGenerateTransition(ATermList EquationList, ATerm TransID){
-    // input: access to the context, the list of current processes and the ID of the transtion
+  static ATermList pn2gsGenerateTransition(ATerm TransID){
+    // input: ID of the transtion
     // output: an updated list of the processes: the processes belonging to the transition added to the list
+
+    ATermList EquationList=ATmakeList0();
 
     // variables to store the name and id of the transition
     char * CurrentTransId = ATgetName(ATgetAFun(TransID)) ;
@@ -895,9 +897,11 @@ extern "C" {
   //==================================================
   // pn2gsGeneratePlace generates the GenSpect Process Equations belonging to one place
   //==================================================
-  static ATermList pn2gsGeneratePlace(ATermList EquationList, ATerm PlaceID){
-    // input: access to the context, the list of current processes and the ID of the place
+  static ATermList pn2gsGeneratePlace(ATerm PlaceID){
+    // input: ID of the place
     // output: an updated list of the processes: the processes belonging to the place added to the list
+
+    ATermList EquationList=ATmakeList0();
 
     // variables to store the name and id of the place
     char * CurrentPlaceId = ATgetName(ATgetAFun(PlaceID));
@@ -1241,9 +1245,6 @@ extern "C" {
     // the possible processes will be stored in ProcessList
     ATermList ProcessList = ATmakeList0();
     
-    // variable to go through all the transition-ids and place-ids
-    ATermList Ids;
-    
     //==================================================
     // first, we generate the transition processes.
     //==================================================
@@ -1259,13 +1260,8 @@ extern "C" {
     // If there are no incoming or outgoing arcs, T_ti_in respectively T_ti_out are left out!
 
     gsDebugMsg("\n\nStart creation of processes belonging to transitions.\n\n");
-    Ids = ATtableKeys(context.trans_name);
-    while (ATisEmpty(Ids) == ATfalse) {
- 
-      ProcessList = pn2gsGenerateTransition(ProcessList, ATgetFirst(Ids));
-
-      Ids = ATgetNext(Ids);
-    }
+    for(ATermList Ids = ATtableKeys(context.trans_name);!ATisEmpty(Ids);Ids = ATgetNext(Ids))
+      ProcessList = ATconcat(ProcessList,ATreverse(pn2gsGenerateTransition(ATgetFirst(Ids))));
 
     //==================================================
     // second, we generate the place processes.
@@ -1296,20 +1292,14 @@ extern "C" {
     // For ease of implementation, the parts in between " " will be defined as tau.
 
     gsDebugMsg("\n\nStart creation of processes belonging to places.\n\n");
-    Ids = ATtableKeys(context.place_name);
-    while (ATisEmpty(Ids) == ATfalse) {
- 
-      ProcessList = pn2gsGeneratePlace(ProcessList, ATgetFirst(Ids));
-
-      Ids = ATgetNext(Ids);
-    }
+    for(ATermList Ids = ATtableKeys(context.place_name);!ATisEmpty(Ids);Ids = ATgetNext(Ids)) 
+      ProcessList = ATconcat(ProcessList,ATreverse(pn2gsGeneratePlace(ATgetFirst(Ids))));
 
     //==================================================
     // third, we generate the three general Petri net processes.
     //==================================================
 
     gsDebugMsg("\n\nStart creation of general processes.\n\n");
-
     // Trans =  "..." . Trans
     // "..." is the choice of all transitions. This guarantees interleaving.
 
