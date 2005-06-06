@@ -3,7 +3,7 @@
 extern "C" {
 #endif
 
-//#define GS_CHECK_NFS
+#define GS_CHECK_NFS
 
 #define NAME "rewr_inner3"
 
@@ -378,7 +378,7 @@ static bool match_inner(ATerm t, ATerm p, ATermList *vars)
 					return false;
 				}
 			}
-			*vars = ATappend(*vars,(ATerm) gsMakeSubst(p,t));
+			*vars = ATinsert(*vars,(ATerm) gsMakeSubst(p,t));
 			return true;
 		}
 	}
@@ -446,14 +446,18 @@ static ATerm rewrite(ATerm Term, int *b, ATermList vars)
 			{
 				break;
 			}
-			o = ATmakeList0();
+			//o = ATmakeList0();
 			len = ATgetLength(m);
+			DECL_A(a_m,ATermList,len);
+			DECL_A(a_o,ATermList,len);
 			for (i=0; i<len; i++)
 			{
-				o = ATinsert(o,(ATerm) ATmakeList0());
+				a_m[i] = ATgetFirst(m); m=ATgetNext(m);
+				a_o[i] = ATmakeList0();
+			//	o = ATinsert(o,(ATerm) ATmakeList0());
 			}
 //ATfprintf(stderr,"Trying %t...\n\n",Term);
-			while ( !ATisEmpty(m) )
+			while ( len > 0 /*!ATisEmpty(m)*/ )
 			{
 //ATfprintf(stderr,"%t matches? %t\n\n",l,m);
 				if ( !ATisEmpty(l) )
@@ -461,19 +465,22 @@ static ATerm rewrite(ATerm Term, int *b, ATermList vars)
 					t = ATgetFirst(l);
 					l2 = ATgetNext(l);
 				}
-				n = ATmakeList0();
-				o2 = ATmakeList0();
-				for (; !ATisEmpty(m); m=ATgetNext(m),o=ATgetNext(o))
+//				n = ATmakeList0();
+//				o2 = ATmakeList0();
+//				for (; !ATisEmpty(m); m=ATgetNext(m),o=ATgetNext(o))
+				int end = 0;
+				for (int i = 0; i < len; i++)
 				{
-					p = ATLgetFirst(o);
-					if ( ATisEmpty(ATLelementAt(ATLgetFirst(m),2)) )
+//					p = ATLgetFirst(o);
+//					if ( ATisEmpty(ATLelementAt(ATLgetFirst(m),2)) )
+					if ( ATisEmpty(ATLelementAt(a_m[i],2)) )
 					{
 						// XXX check ATisEmpty(l)
-						if ( is_nil(ATelementAt(ATLgetFirst(m),1)) || ATisEqual(rewrite(subst_values(p,ATelementAt(ATLgetFirst(m),1)),&e,ATmakeList0()),trueint) )
+						if ( is_nil(ATelementAt(a_m[i],1)) || ATisEqual(rewrite(subst_values(a_o[i],ATelementAt(a_m[i],1)),&e,ATmakeList0()),trueint) )
 						{
 //ATfprintf(stderr,"apply %t\n\n",ATgetFirst(m));
 							*b = 1;
-							Term = subst_values(p,ATelementAt(ATLgetFirst(m),3));
+							Term = subst_values(a_o[i],ATelementAt(a_m[i],3));
 							if ( !ATisEmpty(l) )
 							{
 								if ( ATisList(Term) )
@@ -489,20 +496,27 @@ static ATerm rewrite(ATerm Term, int *b, ATermList vars)
 							} else {
 								Term = rewrite(Term,&c,vars);
 							}
-							n = ATmakeList0();
+//							n = ATmakeList0();
+							len = 0;
 							break;
 						}		
 					} else if ( !ATisEmpty(l) ) {
-						m2 = ATLelementAt(ATLgetFirst(m),2);
-						if ( match_inner(t,ATgetFirst(m2),&p) )
+						m2 = ATLelementAt(a_m[i],2);
+						if ( match_inner(t,ATgetFirst(m2),&(a_o[i])) )
 						{
-							n = ATinsert(n,(ATerm) ATreplace(ATLgetFirst(m),(ATerm) ATgetNext(m2),2));
-							o2 = ATinsert(o2,(ATerm) p);
+//							n = ATinsert(n,(ATerm) ATreplace(ATLgetFirst(m),(ATerm) ATgetNext(m2),2));
+							a_m[end] = ATreplace(a_m[i],(ATerm) ATgetNext(m2),2);
+//							o2 = ATinsert(o2,(ATerm) p);
+							a_o[end] = a_o[i];
+							end++;
 						}
 					}
 				}
-				m = ATreverse(n);
-				o = ATreverse(o2);
+				len = end;
+//				m = n;
+//				o = o2;
+//				m = ATreverse(n);
+//				o = ATreverse(o2);
 				if ( !ATisEmpty(l) ) 
 				{
 					l = l2;
