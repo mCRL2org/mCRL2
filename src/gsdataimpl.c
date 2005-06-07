@@ -593,7 +593,7 @@ void gsGetFreeVars_Appl(ATermAppl DataExpr, ATermList BoundVars,
   } else if (gsIsListEnum(DataExpr) || gsIsSetEnum(DataExpr) ||
       gsIsBagEnum(DataExpr)) {
     //DataExpr is an enumeration; get free variables from the elements
-    gsGetFreeVars_List(ATLgetArgument(DataExpr, 1), BoundVars, PFreeVars);
+    gsGetFreeVars_List(ATLgetArgument(DataExpr, 0), BoundVars, PFreeVars);
   } else if (gsIsSetBagComp(DataExpr)) {
     //DataExpr is a set of bag comprehension; get free variables from the body
     //where BoundVars is extended with the variable declaration
