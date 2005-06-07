@@ -156,7 +156,9 @@ extern "C" {
       }
     }
 
-    return ATmakeAFun(String,ATgetArity(id),ATisQuoted(id));
+    id=ATmakeAFun(String,ATgetArity(id),ATisQuoted(id));
+    free(String);
+    return id;
   }
 
   //==================================================
@@ -1766,6 +1768,210 @@ extern "C" {
     gsPrintSpecification(stdout,Spec);        
     return 0;
   }
+
+
+  // Added by Yarick: alternative generation of Places:
+  static ATermList pn2gsGeneratePlaceAlternative(ATerm PlaceID);
+  static ATermAppl pn2gsGenerateP_pi_ar(int in, int out, ATermList In, ATermList Out);
+  static ATermList pn2gsGetActionLists(int n, ATermList ActList);
+
+  //==================================================
+  // pn2gsGeneratePlaceAlternative generates the GenSpect Process Equations belonging to one place
+  // without recursive parallelism
+  //==================================================
+  static ATermList pn2gsGeneratePlaceAlternative(ATerm PlaceID){
+    // input: access to the context; ID of the place
+    // output: an updated list of the processes: the processes belonging to the place added to the list
+
+    //==================================================
+    // retrieve the maximum concurrency
+    //==================================================
+    int n=0;
+    ATermList ActsIn=ATLtableGet(context.place_in, PlaceID);
+    if (ActsIn) n=ATgetLength(ActsIn);
+
+    int m=0;
+    ATermList ActsOut=ATLtableGet(context.place_out, PlaceID);
+    if (ActsOut) m=ATgetLength(ActsOut);
+
+    gsDebugMsg("Place %t has maximum concurrency in: '%d' and out: '%d'\n", PlaceID, n,m);
+
+    //==================================================
+    // generate the processes
+    //==================================================
+
+    //==================================================
+    // second, we generate the place processes.
+    //==================================================
+    
+    // In the comment below, pi will refer to 'placeid' or to 'placeid_placename'.
+    // This depends on whether or not a place has a name, and if it does, if it's not too long.
+    
+    // Each place creates the following processes:
+    
+    // the values n and m indicate the maximum in/out concurrency of the place
+    // we can add 0 to n tokens and remove 0 to min(m,X) token at one time.
+    // we don't know X at generation time, so we have to generate for 0 to m possibilities.
+    //  
+    // P_pi(x:Nat)     = 
+    //                    0<=x ->(0,0 case we skip
+    //                   (skip)  +P_pi_ar_1_0.P_pi(max(x+1-0,0)) we skip max and -0.
+    //                           +P_pi_ar_2_0.P_pi(max(x+2-0,0))
+    //                           ...
+    //                           +P_pi_ar_n_0.P_pi(max(x+n-0,0))
+    //                           )
+    //                   +1<=x ->(P_pi_ar_0_1.P_pi(max(x+0-1,0))
+    //                           +P_pi_ar_1_1.P_pi(max(x+1-1,0))
+    //                           +P_pi_ar_2_1.P_pi(max(x+2-1,0))
+    //                           ...
+    //                           +P_pi_ar_n_1.P_pi(max(x+n-1,0))
+    //                           )
+    //                   +
+    //                   ....
+    //                   +m<=x ->(P_pi_ar_0_m.P_pi(max(x+0-m,0))
+    //                           +P_pi_ar_1_m.P_pi(max(x+1-m,0))
+    //                           +P_pi_ar_2_m.P_pi(max(x+2-m,0))
+    //                           ...
+    //                           +P_pi_ar_n_m.P_pi(max(x+n-m,0))
+    //                           )
+    //
+    // P_pi_ar_i_j = all possible multiactions with i incoming and j outgoing arcs.
+    // need to be generated for all 0=<i<=n,0<=j<=m,i+j>0.
+    // variables to store the name and id of the place
+
+    //Calculate the name of the process 
+    AFun CurrentPlaceId = ATgetAFun(PlaceID);
+
+    {
+      char * CurrentPlaceName = ATgetName(ATgetAFun(ATtableGet(context.place_name, PlaceID)));
+      
+      if(strcmp(CurrentPlaceName, "default_name"))
+	// name of the place is not "default_name"
+	// name of the place may be used
+	CurrentPlaceId=ATappendAFun(ATappendAFun(CurrentPlaceId,"_"),CurrentPlaceName);
+
+      //Prepend "P_"
+      CurrentPlaceId=ATprependAFun("P_",CurrentPlaceId);
+    }
+    // variables to store the process names
+    ATermAppl CurrentPlace=ATmakeAppl0(CurrentPlaceId);
+    AFun CurrentPlaceARId=ATappendAFun(CurrentPlaceId,"_ar");
+    //ATermAppl CurrentPlaceAdd=ATmakeAppl0(ATappendAFun(CurrentPlaceId,"_add"));
+    //ATermAppl CurrentPlaceIn=ATmakeAppl0(ATappendAFun(CurrentPlaceId,"_in"));
+    //ATermAppl CurrentPlaceRem=ATmakeAppl0(ATappendAFun(CurrentPlaceId,"_rem"));
+    //ATermAppl CurrentPlaceOut=ATmakeAppl0(ATappendAFun(CurrentPlaceId,"_out"));
+    
+    // insert the name of the process P_pi into context.places
+    // this is needed for the generation of the general process PetriNet
+    context.places = ATinsert(context.places, (ATerm)CurrentPlace);
+    gsDebugMsg("context.places now contains the following places: %t\n", context.places);
+    
+    
+    ATermList EquationList=ATmakeList0();
+    {
+      //generate the main process
+      ATermAppl VarX=ATmakeAppl0(ATmakeAFunId("x"));
+      AFun CurrentPlaceARId=ATappendAFun(CurrentPlaceId,"_ar");
+      ATermAppl Body=NULL;
+      for(int j=m;j>-1;j--){
+	ATermAppl Summand=NULL;
+	for(int i=n;i>-1;i--){
+	  if(j==0 && i==0) continue;
+	  ATermAppl Left=ATermAppl0(CurrentPlaceARId);//make name P_pi_ar_i_j
+	  ATermAppl Right=0;//make P_pi(max(X+i-j,0))
+	  ATermAppl Sec=gsMakeSeq(Left,Right);
+	  if(Summand) Summand=gsMakeChoice(Sec,Summand);
+	  else Summand=Sec; 
+
+	  //generate the additional process
+	  EquationList = ATinsert(EquationList, 
+				  (ATerm)gsMakeProcEqn(ATmakeList0(), 
+						       gsMakeProcVarId(Left, ATmakeList0()), 
+						       ATmakeList0(), 
+						       pn2gsGenerateP_pi_ar(i,j,ActsIn,ActsOut)));
+	}
+	
+	if(j>0){ //generate the condition
+	  ATermAppl Cond=gsMakeDataExprLTE(gsMakeDataExprPos2Nat(ATmakeAppl0(ATmakeAFunInt0(j))),VarX);//make j<=x
+	  Summand=gsMakeCond(Cond,Summand,gsMakeDelta());
+	}
+	
+	if(Body) Body=gsMakeChoice(Summand,Body);
+	else Body=Summand;
+      }
+
+      // handle the case m+n=0.
+      if(!Body) Body=gsMakeDelta();
+
+      //make process P_pi and add it
+      EquationList = ATinsert(EquationList, 
+			      (ATerm)gsMakeProcEqn(ATmakeList0(), 
+						   gsMakeProcVarId(CurrentPlace, 
+								   ATmakeList1((ATerm)gsMakeSortIdNat())), 
+						   ATmakeList1((ATerm)gsMakeDataVarId(VarX,
+										      gsMakeSortIdNat())), 
+						   Body));
+    }
+    
+  }
+
+  static ATermAppl pn2gsGenerateP_pi_ar(int in, int out, ATermList In, ATermList Out){
+    //input: the exact numbers of in and out actions, the sets of these actions (as lists).
+    //output: a process that is the choice of all multiactions (order not important)
+
+    ATermList ResList=ATmakeList0();
+    {
+      ATermList InActionLists=pn2gsGetActionLists(in,In);
+      ATermList OutActionLists=pn2gsGetActionLists(out,Out);
+      //pairwise merge the elements of the 2 lists into 1 big list. 
+      for(;!ATisEmpty(InActionLists);InActionLists=ATgetNext(InActionLists)){
+	ATermList CurInActList=ATLgetFirst(InActionLists);
+	for(;!ATisEmpty(OutActionLists);OutActionLists=ATgetNext(OutActionLists)){
+	  ATermList CurOutActList=ATLgetFirst(InActionLists);
+	  ResList=ATinsert(ResList,(ATerm)ATconcat(CurInActList,CurOutActList));
+	}
+      }
+      //ResList=ATreverse(ResList);
+    }
+    //make a sum of multi-actions out of the merged list-of-lists and returm it
+    
+  }
+
+  static ATermList pn2gsGetActionLists(int n, ATermList ActList){
+    //returns all sublists (not necessarily consecutive) of length n
+    
+    //cannot
+    if(n>ATgetLength(ActList)) return ATmakeList0();
+    
+    //one way
+    if(n==ATgetLength(ActList)) return ATmakeList1((ATerm)ActList);
+    
+    //the only sublist of length 0 is []
+    if(!n) return ATmakeList1((ATerm)ATmakeList0());
+
+    //0<n<len(list); therefore len(list) > 0: 2 possibilities: 
+    //- take the first element, get the recursive possibilities with n-1, combine.
+    ATermAppl FirstAction=ATAgetFirst(ActList);
+    ActList=ATgetNext(ActList);
+
+    ATermList RestN1=pn2gsGetActionLists(n-1,ActList);
+
+    //- not take the first element, get the recursive possibilities with n.
+    ATermList RestN=pn2gsGetActionLists(n,ActList);
+    
+    //add the first Action to all the elements of RestN1
+    {
+      ATermList NewRestN1=ATmakeList0();
+      for(;!ATisEmpty(RestN1);RestN1=ATgetNext(RestN1)){
+	ATermList CurAList=ATLgetFirst(RestN1);
+	CurAList=ATinsert(CurAList,(ATerm)FirstAction);
+	NewRestN1=ATinsert(NewRestN1,(ATerm)CurAList);
+      }
+      RestN1=ATreverse(NewRestN1);
+    }
+    return ATconcat(RestN1,RestN);
+  }
+
   
 #ifdef __cplusplus
 }

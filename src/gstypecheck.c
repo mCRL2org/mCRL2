@@ -714,28 +714,28 @@ static ATbool gstcTransformVarConsTypeData(void){
     if(!gsIsNil(Cond) && !(gstcTraverseVarConsTypeD(Vars,&Cond,gsMakeSortIdBool()))){ b = false; break; }
     ATermAppl Left=ATAgetArgument(Eqn,2);
     ATermAppl LeftType=gstcTraverseVarConsTypeD(Vars,&Left,gsMakeUnknown());
-    if(!LeftType){ b = false; break; }
+    if(!LeftType){ b = false; gsErrorMsg("The previous error occured while typechecking %t as left hand side of equation %t\n",Left,Eqn); break;}
     ATermAppl Right=ATAgetArgument(Eqn,3);
     ATermAppl RightType=gstcTraverseVarConsTypeD(Vars,&Right,LeftType);
-    if(!RightType){ b = false; break; }
+    if(!RightType){ b = false; gsErrorMsg("The previous error occured while typechecking %t as left hand side of equation %t\n",Right,Eqn); break; }
 
     //If the types are not uniquly the same now: do once more:
     if(!gstcEqTypesA(LeftType,RightType)){
       gsDebugMsg("Doing again for the equation %t, LeftType: %t, RightType: %t\n",Eqn,LeftType,RightType);
       ATermAppl Type=gstcTypeMatchA(LeftType,RightType);
-      if(!Type){gsErrorMsg("Types of the left- (%t) and right-hand-sides (%t) of the equation %t do not match\n",LeftType,RightType,Eqn); b = false; break; }
+      if(!Type){gsErrorMsg("Types of the left- (%t) and right- (%t) hand-sides of the equation %t do not match\n",LeftType,RightType,Eqn); b = false; break; }
       
       Left=ATAgetArgument(Eqn,2);
       LeftType=gstcTraverseVarConsTypeD(Vars,&Left,Type);
-      if(!LeftType){ b = false; break; }
+      if(!LeftType){ b = false; gsErrorMsg("Types of the left- (%t) and right- (%t) hand-sides of the equation %t do not match\n",LeftType,RightType,Eqn); break; }
     
       Right=ATAgetArgument(Eqn,3);
       RightType=gstcTraverseVarConsTypeD(Vars,&Right,LeftType);
-      if(!RightType){ b = false; break; }
+      if(!RightType){ b = false; gsErrorMsg("Types of the left- (%t) and right- (%t) hand-sides of the equation %t do not match\n",LeftType,RightType,Eqn); break; }
       
       Type=gstcTypeMatchA(LeftType,RightType);
-      if(!Type){gsErrorMsg("Types of the left- and right-hand-sides of the equation %t do not match",Eqn); b = false; break; }
-      if(gstcHasUnknown(Type)){gsErrorMsg("Types of the left- and right-hand-sides of the equation %t cannot be uniquily determined",Eqn); b = false; break; }
+      if(!Type){gsErrorMsg("Types of the left- (%t) and right- (%t) hand-sides of the equation %t do not match\n",LeftType,RightType,Eqn); b = false; break; }
+      if(gstcHasUnknown(Type)){gsErrorMsg("Types of the left- (%t) and right- (%t) hand-sides of the equation %t cannot be uniquily determined\n",LeftType,RightType,Eqn); b = false; break; }
     }
     ATtableReset(Vars);
     NewEqns=ATinsert(NewEqns,(ATerm)gsMakeDataEqn(VarList,Cond,Left,Right));
@@ -1395,7 +1395,7 @@ static ATermAppl gstcTraverseVarConsTypeD(ATermTable Vars, ATermAppl *DataTerm, 
   if(gsIsListEnum(*DataTerm) || gsIsSetEnum(*DataTerm)){
     ATermList DataTermList=ATLgetArgument(*DataTerm,0);
     ATermAppl Type=(gsIsListEnum(*DataTerm))?gstcUnList(PosType):gstcUnSetBag(PosType);
-    if(!Type) return NULL;
+    if(!Type) {gsErrorMsg("Not possible to cast %s to %t (while typechecking %t)\n", (gsIsListEnum(*DataTerm))?"list":"set", PosType,*DataTerm);  return NULL;}
     ATermList NewDataTermList=ATmakeList0();
     for(;!ATisEmpty(DataTermList);DataTermList=ATgetNext(DataTermList)){
       ATermAppl DataTerm=ATAgetFirst(DataTermList);
