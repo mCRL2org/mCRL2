@@ -144,6 +144,20 @@ bool gsHasConsistentContextList(const ATermTable DataVarDecls,
  *     the context
  */
 
+bool gsIsListEnumImpl(ATermAppl DataExpr);
+//Ret: DataExpr is the implementation of a list enumeration
+
+void gsPrintListEnumElts(FILE *OutStream, const ATermAppl DataExpr,
+  bool ShowSorts);
+/*Pre: OutStream points to a stream to which can be written
+ *     DataExpr is the implementation of a list enumeration
+ *     ShowSorts indicates if the sorts of DataExpr should be shown
+ *Post:A textual representation of the expression is written to OutStream, in
+ *     which:
+ *     - ShowSorts is taken into account
+ *     - the elements of the list are printed as a comma-separated list
+ */
+
 void gsPrintPos(FILE *OutStream, const ATermAppl PosExpr, int PrecLevel);
 /*Pre: OutStream points to a stream to which can be written
        PosExpr is a data expression of sort Pos
@@ -516,7 +530,7 @@ void gsPrintPart(FILE *OutStream, const ATermAppl Part, bool ShowSorts,
     gsPrintPart(OutStream, ATAgetArgument(Part, 1), ShowSorts, 0);
   } else if (gsIsDataVarIdOpId(Part) || gsIsOpId(Part) || gsIsDataVarId(Part) ||
       gsIsDataAppl(Part) || gsIsDataApplProd(Part)) {
-    //print data expression, possibly in the external format
+    //print data expression, if possible in the external format
     ATermAppl Head;
     ATermList Args;
     if (!gsIsDataApplProd(Part)) {
@@ -527,7 +541,11 @@ void gsPrintPart(FILE *OutStream, const ATermAppl Part, bool ShowSorts,
       Args = ATLgetArgument(Part, 1);
     }
     int ArgsLength = ATgetLength(Args);
-    if (gsIsOpIdPrefix(Head) && ArgsLength == 1) {
+    if (gsIsListEnumImpl(Part)) {
+      fprintf(OutStream, "[");
+      gsPrintListEnumElts(OutStream, Part, ShowSorts);
+      fprintf(OutStream, "]");
+    } else if (gsIsOpIdPrefix(Head) && ArgsLength == 1) {
       //print prefix expression
       gsDebugMsg("printing prefix expression\n");
       if (PrecLevel > 12) fprintf(OutStream, "(");
@@ -1060,6 +1078,38 @@ void gsPrintDecl(FILE *OutStream, const ATermAppl Decl, const bool ShowSorts)
     } else {
       fprintf(OutStream, ": ");
       gsPrintPart(OutStream, ATAgetArgument(Decl, 1), ShowSorts, 0);
+    }
+  }
+}
+
+bool gsIsListEnumImpl(ATermAppl DataExpr) {
+  if (!gsIsDataAppl(DataExpr) && !gsIsOpId(DataExpr)) return false;
+  ATermAppl HeadName = ATAgetArgument(gsGetDataExprHead(DataExpr), 0);
+  if (ATisEqual(HeadName, gsMakeOpIdNameCons())) {
+    ATermList Args = gsGetDataExprArgs(DataExpr);
+    if (ATgetLength(Args) == 2) {
+      return gsIsListEnumImpl(ATAelementAt(Args, 1));
+    } else {
+      return false;
+    }
+  } else {
+    return ATisEqual(HeadName, gsMakeOpIdNameEmptyList());
+  }
+}
+
+void gsPrintListEnumElts(FILE *OutStream, const ATermAppl DataExpr,
+  bool ShowSorts)
+{
+  ATermAppl HeadName = ATAgetArgument(gsGetDataExprHead(DataExpr), 0);
+  if (ATisEqual(HeadName, gsMakeOpIdNameCons())) {
+    ATermList Args = gsGetDataExprArgs(DataExpr);
+    gsPrintPart(OutStream, ATAelementAt(Args, 0), ShowSorts, 0);
+    ATermAppl Arg1 = ATAelementAt(Args, 1);
+    if (ATisEqual(ATAgetArgument(gsGetDataExprHead(Arg1), 0),
+      gsMakeOpIdNameCons()))
+    {
+      fprintf(OutStream, ", ");
+      gsPrintListEnumElts(OutStream, Arg1, ShowSorts);
     }
   }
 }
