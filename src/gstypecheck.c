@@ -137,6 +137,7 @@ static ATbool gstcIsTypeAllowedA(ATermAppl Type, ATermAppl PosType);
 static ATbool gstcIsTypeAllowedL(ATermList TypeList, ATermList PosTypeList);
 static ATermAppl gstcUnwindType(ATermAppl Type);
 static ATermAppl gstcUnSetBag(ATermAppl PosType);
+static ATermAppl gstcUnList(ATermAppl PosType);
 static ATermAppl gstcUnArrowProd(ATermList ArgTypes, ATermAppl PosType);
 static ATermAppl gstcMakeNotInferredSetBag(ATermAppl Type);
 static ATermAppl gstcAdjustPosTypesA(ATermAppl NewType, ATermAppl PosType);
@@ -1386,19 +1387,20 @@ static ATermAppl gstcTraverseVarConsTypeD(ATermTable Vars, ATermAppl *DataTerm, 
     ATermAppl Data=ATAgetArgument(*DataTerm,0);
     ATermAppl NewType=gstcTraverseVarConsTypeD(NewVars,&Data,PosType);
     ATtableDestroy(CopyVars); 
-    if(!NewType) {return NULL;}
+    if(!NewType) return NULL;
     *DataTerm=gsMakeWhr(Data,NewWhereList);
     return NewType;
   }
 
   if(gsIsListEnum(*DataTerm) || gsIsSetEnum(*DataTerm)){
     ATermList DataTermList=ATLgetArgument(*DataTerm,0);
-    ATermAppl Type=gsMakeUnknown();
+    ATermAppl Type=(gsIsListEnum(*DataTerm))?gstcUnList(PosType):gstcUnSetBag(PosType);
+    if(!Type) return NULL;
     ATermList NewDataTermList=ATmakeList0();
     for(;!ATisEmpty(DataTermList);DataTermList=ATgetNext(DataTermList)){
       ATermAppl DataTerm=ATAgetFirst(DataTermList);
       ATermAppl Type0=gstcTraverseVarConsTypeD(Vars,&DataTerm,Type);
-      if(!Type0) {return NULL;}
+      if(!Type0) return NULL;
       NewDataTermList=ATinsert(NewDataTermList,(ATerm)DataTerm);
       Type=Type0;
     }
@@ -1488,7 +1490,8 @@ static ATermAppl gstcTraverseVarConsTypeD(ATermTable Vars, ATermAppl *DataTerm, 
 	  else{
 	    gsDebugMsg("Doing again on %t, Type: %t, Needed type: %t\n",Arg,Type,NeededType);
 	    ATermAppl NewType=gstcTypeMatchA(NeededType,Type);
-	    if(!NewType){gsErrorMsg("Needed type %t does not match possible type %t (while typechecking %t in %t)\n",NeededType,Type,Arg,*DataTerm);return NULL;}
+	    if(!NewType) NewType=gstcTypeMatchA(NeededType,gstcExpandPosTypes(Type));
+	    if(!NewType) {gsErrorMsg("Needed type %t does not match possible type %t (while typechecking %t in %t)\n",NeededType,Type,Arg,*DataTerm);return NULL;}
 	    Type=NewType;
 	    Type=gstcTraverseVarConsTypeD(Vars,&Arg,Type);
 	    if(!Type) {return NULL;}
@@ -2035,7 +2038,7 @@ static ATermAppl gstcUnwindType(ATermAppl Type){
 static ATermAppl gstcUnSetBag(ATermAppl PosType){
   //select Set(Type), and Bag(Type), elements, return their list of arguments.
   if(gsIsSortId(PosType)) PosType=gstcUnwindType(PosType);
-  if(gsIsSortSet(PosType) || gsIsSortSet(PosType)) return ATAgetArgument(PosType,0);
+  if(gsIsSortSet(PosType) || gsIsSortBag(PosType)) return ATAgetArgument(PosType,0);
   if(gsIsUnknown(PosType)) return PosType;
 
   ATermList NewPosTypes=ATmakeList0();
@@ -2043,7 +2046,28 @@ static ATermAppl gstcUnSetBag(ATermAppl PosType){
     for(ATermList PosTypes=ATLgetArgument(PosType,1);!ATisEmpty(PosTypes);PosTypes=ATgetNext(PosTypes)){
       ATermAppl NewPosType=ATAgetFirst(PosTypes);
       if(gsIsSortId(NewPosType)) NewPosType=gstcUnwindType(NewPosType);
-      if(gsIsSortSet(NewPosType) || gsIsSortSet(NewPosType)) NewPosType=ATAgetArgument(NewPosType,0);
+      if(gsIsSortSet(NewPosType) || gsIsSortBag(NewPosType)) NewPosType=ATAgetArgument(NewPosType,0);
+      else if(!gsIsUnknown(NewPosType)) continue;
+      NewPosTypes=ATinsert(NewPosTypes,(ATerm)NewPosType);
+    }
+    NewPosTypes=ATreverse(NewPosTypes);
+    return gstcMakeNotInferred(NewPosTypes);
+  }
+  return NULL;
+}
+
+static ATermAppl gstcUnList(ATermAppl PosType){
+  //select List(Type), elements, return their list of arguments.
+  if(gsIsSortId(PosType)) PosType=gstcUnwindType(PosType);
+  if(gsIsSortList(PosType)) return ATAgetArgument(PosType,0);
+  if(gsIsUnknown(PosType)) return PosType;
+
+  ATermList NewPosTypes=ATmakeList0();
+  if(gstcIsNotInferred(PosType)){
+    for(ATermList PosTypes=ATLgetArgument(PosType,1);!ATisEmpty(PosTypes);PosTypes=ATgetNext(PosTypes)){
+      ATermAppl NewPosType=ATAgetFirst(PosTypes);
+      if(gsIsSortId(NewPosType)) NewPosType=gstcUnwindType(NewPosType);
+      if(gsIsSortList(NewPosType)) NewPosType=ATAgetArgument(NewPosType,0);
       else if(!gsIsUnknown(NewPosType)) continue;
       NewPosTypes=ATinsert(NewPosTypes,(ATerm)NewPosType);
     }
