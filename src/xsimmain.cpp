@@ -9,6 +9,7 @@
 #endif
 
 //#include <dlfcn.h>
+#include <wx/dynarray.h>
 #include <aterm2.h>
 #include "xsimbase.h"
 #include "xsimmain.h"
@@ -429,7 +430,7 @@ ATermList XSimMain::traceRedo()
 
 void XSimMain::OnOpen( wxCommandEvent &event )
 {
-    wxFileDialog dialog( this, wxT("Select a LPE file..."));
+    wxFileDialog dialog( this, wxT("Select a LPE file..."), wxT(""), wxT(""), wxT("LPEs/LPOs (*.lpe,*.lpo)|*.lpe;*.lpo|All files|*"));
     if ( dialog.ShowModal() == wxID_OK )
     {
 	    LoadFile(dialog.GetPath());
@@ -518,7 +519,7 @@ void XSimMain::stateOnListItemSelected( wxListEvent &event )
 
 void XSimMain::transOnListItemActivated( wxListEvent &event )
 {
-	ChooseTransition(event.GetIndex());
+	ChooseTransition(event.GetData());
 }
 
 void XSimMain::LoadFile(wxString filename)
@@ -596,10 +597,42 @@ void XSimMain::SetCurrentState(ATermList state, bool showchange)
 	stateview->SetColumnWidth(1,wxLIST_AUTOSIZE);
 }
 
+static void sort_transitions(wxArrayString &actions, wxArrayString &statechanges, wxArrayInt &indices)
+{
+	int len = indices.GetCount();
+
+	for (int i=1; i<len; i++)
+	{
+		int j = i;
+		while ( (j > 0) && ( (actions[j] < actions[j-1]) || ((actions[j] == actions[j-1]) && (statechanges[j] < statechanges[j-1])) ) )
+		{
+			wxString s;
+			int h;
+			
+			s = actions[j];
+			actions[j] = actions[j-1];
+			actions[j-1] = s;
+
+			s = statechanges[j];
+			statechanges[j] = statechanges[j-1];
+			statechanges[j-1] = s;
+
+			h = indices[j];
+			indices[j] = indices[j-1];
+			indices[j-1] = h;
+
+			j--;
+		}
+	}
+}
+
 void XSimMain::UpdateTransitions()
 {
 	char s[1000];
 	FILE *f;
+	wxArrayString actions;
+	wxArrayString statechanges;
+	wxArrayInt indices;
 
 	next_states = gsNextState(current_state);
 
@@ -615,7 +648,10 @@ void XSimMain::UpdateTransitions()
 			s[0] = 0;
 		}
 		fclose(f);
-		transview->InsertItem(i,wxT(s));
+//		transview->InsertItem(i,wxT(s));
+		actions.Add(wxT(s));
+		indices.Add(i);
+//		transview->SetItemData(i,i);
 		f = fopen("xsim.tmp","w+");
 		ATermList m = current_state;
 		ATermList n = ATLgetFirst(ATgetNext(ATLgetFirst(l)));
@@ -647,7 +683,16 @@ void XSimMain::UpdateTransitions()
 			s[0] = 0;
 		}
 		fclose(f);
-		transview->SetItem(i,1,wxT(s));
+//		transview->SetItem(i,1,wxT(s));
+		statechanges.Add(wxT(s));
+	}
+
+	sort_transitions(actions,statechanges,indices);
+	for (unsigned int i=0; i<indices.GetCount(); i++)
+	{
+		transview->InsertItem(i,actions[i]);
+		transview->SetItem(i,1,statechanges[i]);
+		transview->SetItemData(i,indices[i]);
 	}
 
 	if ( !ATisEmpty(next_states) )
