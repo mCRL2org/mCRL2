@@ -1877,7 +1877,7 @@ extern "C" {
 	ATermAppl Summand=NULL;
 	for(int i=n;i>-1;i--){
 	  if(j==0 && i==0) continue;
-	  ATermAppl Left=ATermAppl0(CurrentPlaceARId);//make name P_pi_ar_i_j
+	  ATermAppl Left=ATmakeAppl0(CurrentPlaceARId);//make name P_pi_ar_i_j
 	  ATermAppl Right=0;//make P_pi(max(X+i-j,0))
 	  ATermAppl Sec=gsMakeSeq(Left,Right);
 	  if(Summand) Summand=gsMakeChoice(Sec,Summand);

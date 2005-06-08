@@ -8,7 +8,8 @@
     #pragma hdrstop
 #endif
 
-//#include <dlfcn.h>
+#include <wx/dynlib.h>
+#include <wx/config.h>
 #include <wx/dynarray.h>
 #include <aterm2.h>
 #include "xsimbase.h"
@@ -64,6 +65,21 @@ XSimMain::XSimMain( wxWindow *parent, wxWindowID id, const wxString &title,
     tracewin = new XSimTrace(this);
     Register(tracewin);
     //tracewin->Show(FALSE); // default, so not needed
+    
+    wxConfig config(wxT("xsimrc"));
+    if ( config.HasGroup(wxT("LoadLibrary")) )
+    {
+	    config.SetPath(wxT("/LoadLibrary"));
+
+	    wxString s;
+	    long i;
+	    bool b = config.GetFirstEntry(s,i);
+	    while ( b )
+	    {
+		    LoadDLL(config.Read(s,wxT("")));
+		    b = config.GetNextEntry(s,i);
+	    }
+    }
 }
 
 XSimMain::~XSimMain()
@@ -172,6 +188,62 @@ void XSimMain::CreateContent()
     transview->SetFocus();
 }
 
+void XSimMain::LoadFile(const wxString &filename)
+{
+    FILE *f;
+    
+    if ( (f = fopen(filename.c_str(),"r")) == NULL )
+    {
+	    wxMessageDialog msg(this, wxT("Failed to open file."),
+		wxT("Error"), wxOK|wxICON_ERROR);
+	    msg.ShowModal();
+	    return;
+    }
+
+    ATermAppl Spec = (ATermAppl) ATreadFromFile(f);
+    fclose(f);
+
+    ATermList l = ATLgetArgument(ATAgetArgument(Spec,5),1);
+    ATermList m = ATmakeList0();
+    ATermList n = ATmakeList0();
+    stateview->DeleteAllItems();
+    for (int i=0; !ATisEmpty(l); l=ATgetNext(l), i++)
+    {
+	    stateview->InsertItem(i,wxT(ATgetName(ATgetAFun(ATAgetArgument(ATAgetFirst(l),0)))));
+	    m = ATinsert(m,ATgetArgument(ATAgetFirst(l),0));
+	    n = ATinsert(n,ATgetFirst(l));
+    }
+    state_varnames = ATreverse(m);
+    state_vars = ATreverse(n);
+    initial_state = gsNextStateInit(Spec,true);
+
+    InitialiseViews();
+    Reset(initial_state);
+}
+
+void XSimMain::LoadDLL(const wxString &filename)
+{
+	wxDynamicLibrary lib(filename);
+
+	if ( lib.IsLoaded() )
+	{
+		void (*f)(SimulatorInterface *);
+
+		f = (void (*)(SimulatorInterface *)) lib.GetSymbol(wxT("SimulatorViewDLLAddView"));
+		if ( f != NULL )
+		{
+			f(this);
+			lib.Detach(); //XXX
+		} else {
+			wxMessageDialog msg(this, wxT("DLL does not appear to contain a View."), wxT("Error"), wxOK|wxICON_ERROR);
+			msg.ShowModal();
+		}
+	} else {
+		/*wxMessageDialog msg(this, wxT("Failed to open DLL."), wxT("Error"), wxOK|wxICON_ERROR);
+		msg.ShowModal();*/
+       }
+ }
+ 
 
 void XSimMain::Register(SimulatorViewInterface *View)
 {
@@ -475,29 +547,11 @@ void XSimMain::OnTrace( wxCommandEvent &event )
 
 void XSimMain::OnTraceLoad( wxCommandEvent &event )
 {
-/*    wxFileDialog dialog( this, wxT("Select a View DLL..."), wxT(""), wxT(""), wxT("Shared Object Files (*.so)|*.so|All Files|*.*"));
+    wxFileDialog dialog( this, wxT("Select a View DLL..."), wxT(""), wxT(""), wxT("Dynamic Libraries (*.so,*.dll)|*.so;*.dll|All Files|*.*"));
     if ( dialog.ShowModal() == wxID_OK )
     {
-	    void *h;
-
-	    h = dlopen(dialog.GetFilename().c_str(),RTLD_LAZY);
-	    if ( h != NULL )
-	    {
-		    void (*f)(SimulatorInterface *);
-
-		    f = (void (*)(SimulatorInterface *))dlsym(h,"SimulatorViewDLLAddView");
-		    if ( f != NULL )
-		    {
-		    	f(this);
-		    } else {
-			    wxMessageDialog msg(this, wxT("DLL does not appear to contain a View."), wxT("Error"), wxOK|wxICON_ERROR);
-			    msg.ShowModal();
-		    }
-	    } else {
-		    wxMessageDialog msg(this, wxT("Failed to open DLL."), wxT("Error"), wxOK|wxICON_ERROR);
-		    msg.ShowModal();
-	    }
-    }*/
+	    LoadDLL(dialog.GetPath());
+    }
 }
 
 void XSimMain::OnAbout( wxCommandEvent &event )
@@ -520,39 +574,6 @@ void XSimMain::stateOnListItemSelected( wxListEvent &event )
 void XSimMain::transOnListItemActivated( wxListEvent &event )
 {
 	ChooseTransition(event.GetData());
-}
-
-void XSimMain::LoadFile(wxString filename)
-{
-    FILE *f;
-    
-    if ( (f = fopen(filename.c_str(),"r")) == NULL )
-    {
-	    wxMessageDialog msg(this, wxT("Failed to open file."),
-		wxT("Error"), wxOK|wxICON_ERROR);
-	    msg.ShowModal();
-	    return;
-    }
-
-    ATermAppl Spec = (ATermAppl) ATreadFromFile(f);
-    fclose(f);
-
-    ATermList l = ATLgetArgument(ATAgetArgument(Spec,5),1);
-    ATermList m = ATmakeList0();
-    ATermList n = ATmakeList0();
-    stateview->DeleteAllItems();
-    for (int i=0; !ATisEmpty(l); l=ATgetNext(l), i++)
-    {
-	    stateview->InsertItem(i,wxT(ATgetName(ATgetAFun(ATAgetArgument(ATAgetFirst(l),0)))));
-	    m = ATinsert(m,ATgetArgument(ATAgetFirst(l),0));
-	    n = ATinsert(n,ATgetFirst(l));
-    }
-    state_varnames = ATreverse(m);
-    state_vars = ATreverse(n);
-    initial_state = gsNextStateInit(Spec,true);
-
-    InitialiseViews();
-    Reset(initial_state);
 }
 
 void XSimMain::SetCurrentState(ATermList state, bool showchange)

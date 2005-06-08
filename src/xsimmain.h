@@ -41,7 +41,8 @@ public:
         long style = wxDEFAULT_FRAME_STYLE );
     ~XSimMain();
     void SetViews(wxListCtrl *state, wxListCtrl *trans);
-    void LoadFile(wxString filename);
+    void LoadFile(const wxString &filename);
+    void LoadDLL(const wxString &filename);
 
     // SimulatorInterface methods
     virtual void Register(SimulatorViewInterface *View);

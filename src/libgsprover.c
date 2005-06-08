@@ -194,10 +194,10 @@ static ATermList EliminateVars(ATermList l)
 		vars = ATremoveElement(vars,(ATerm) v);
 		vals = (ATermList) gsSubstValues(ATmakeList1((ATerm) gsMakeSubst((ATerm) v,(ATerm) e)),(ATerm) vals,true);
 		t = (ATermAppl) gsSubstValues(ATmakeList1((ATerm) gsMakeSubst((ATerm) v,(ATerm) e)),(ATerm) t,true);
-	t = gsRewriteTerm(t);
+		t = gsRewriteTerm(t);
 	}
 
-	return ATmakeList3((ATerm) vars, (ATerm) gsRewriteTerms(vals), (ATerm) gsRewriteTerm(t));
+	return ATmakeList3((ATerm) vars, (ATerm) gsRewriteTerms(vals), (ATerm) t);
 }
 
 static ATermList makeSubsts(ATermList vars, ATermList exprs)

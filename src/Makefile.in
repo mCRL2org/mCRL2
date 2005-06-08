@@ -71,33 +71,40 @@ SIM_OBJECTS        = sim.o libgsnextstate.o libgsprover.o
 SIM_LDFLAGS        = -lgsrewrite -lgsparse -lATerm -lm
 XSIM_NAME          = xsim
 XSIM_OBJECTS       = xsim.o xsimbase.o xsimmain.o xsimtrace.o libgsnextstate.o libgsprover.o
-XSIM_LDFLAGS       = -lgsrewrite -lgsparse -lATerm -lm $(WX_LIBS)
+XSIM_LDFLAGS       = -lgsrewrite -lgsparse -lATerm -lm $(WX_LIBS) -rdynamic
+XSIMTRACE_NAME     = xsimtrace.so
+XSIMTRACE_OBJECTS  = xsimtracedll.o
+XSIMTRACE_LDFLAGS  = -shared
 
 #Group definitions
 EXE_NAMES          =  $(PARSER_NAME) $(PRINTER_NAME) $(LINEARISER_NAME) $(LIN_NAME) $(REWR_NAME) $(PNML2GS_NAME) $(INSTAN_NAME) $(SIM_NAME) $(XSIM_NAME)
 CUR_EXE_NAMES      ?= $(strip $(foreach s,$(EXE_NAMES),$(shell if test -f $s; then echo -n $s; fi)))
-LIB_NAMES          =  $(LIBPARSER_NAME) $(LIBREWR_NAME)
+LIB_NAMES          =  $(XSIMTRACE_NAME)
 CUR_LIB_NAMES      ?= $(strip $(foreach s,$(LIB_NAMES),$(shell if test -f $s; then echo -n $s; fi)))
 
 #Make rules
 .PHONY: all install clean
 .PRECIOUS: gsparser.c gslexer.c
 
-all : $(EXE_NAMES)
+all : $(EXE_NAMES) $(LIB_NAMES)
 
 install : all
 ifneq ($(CUR_EXE_NAMES),)
 	$(INSTALL) -d $(bindir)
 	$(INSTALL) $(CUR_EXE_NAMES) $(bindir)
-#	$(INSTALL) -d $(libdir)
-#	$(INSTALL) $(CUR_LIB_NAMES) $(libdir)
+else
+	@echo there aren\'t any executables to be installed
+endif
+ifneq ($(CUR_LIB_NAMES),)
+	$(INSTALL) -d $(libdir)
+	$(INSTALL) $(CUR_LIB_NAMES) $(libdir)
 else
 	@echo there aren\'t any executables to be installed
 endif
 
 clean :
-	$(RM) $(EXE_NAMES) $(LIB_NAMES) *.o *.d gslexer.c gsparser.c gsparser.h\
-gsparser.output config.status config.log *~ core core.*
+	$(RM) $(EXE_NAMES) $(LIB_NAMES) *.o *.a *.d gslexer.c gsparser.c \
+	gsparser.h gsparser.output config.status config.log *~ core core.*
 
 $(LIBPARSER_NAME) : $(LIBPARSER_OBJECTS)
 	$(AR) $(ARFLAGS) $@ $(LIBPARSER_OBJECTS)
@@ -139,8 +146,14 @@ $(SIM_NAME) : $(SIM_OBJECTS) $(LIBPARSER_NAME) $(LIBREWR_NAME)
 ifdef USE_WX
 $(XSIM_NAME): $(XSIM_OBJECTS) $(LIBPARSER_NAME) $(LIBREWR_NAME)
 	$(CXX) -o $@ $(XSIM_OBJECTS) $(LDFLAGS) $(XSIM_LDFLAGS)
+
+$(XSIMTRACE_NAME): $(XSIMTRACE_OBJECTS) $(LIBPARSER_NAME) $(LIBREWR_NAME)
+	$(CXX) -o $@ $(XSIMTRACE_OBJECTS) $(LDFLAGS) $(XSIMTRACE_LDFLAGS)
 else
 $(XSIM_NAME):
+	@echo cannot make target $@ because the wxWidgets library cannot be used
+
+$(XSIMTRACE_NAME):
 	@echo cannot make target $@ because the wxWidgets library cannot be used
 endif
 
