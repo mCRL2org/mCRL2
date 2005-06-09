@@ -48,6 +48,7 @@ extern "C" {
 
   static ATbool rec_par=ATtrue;
   static ATermList pn2gsGeneratePlaceAlternative(ATerm PlaceID);
+  static ATermList pn2gsGenerateTransitionAlternative(ATerm TransID);
   static ATermList pn2gsListNNats(int n);
   static inline ATermAppl pn2gsMakeDataApplProd2(ATermAppl Op, ATermAppl Left, ATermAppl Right){
     return gsMakeDataApplProd(Op,ATmakeList2((ATerm)Left,(ATerm)Right));
@@ -627,31 +628,42 @@ extern "C" {
   //==================================================
   // pn2gsGenerateAction_trans generates the action t_..._mon for a given transition
   //==================================================
-  static ATermAppl pn2gsGenerateAction_trans(char * CurrentId, char * CurrentName){
+  static ATermAppl pn2gsGenerateAction_trans(AFun CurrentId, AFun CurrentName){
     // input: access to the context + id and name of the transition
     // output: the action t_transid_mon or t_transid_transname_mon
 
-      char Trans[global_MaxIDlength] = "t_";
-      if (strcmp(CurrentName, "default_name")) {
-	// name of the transition is not "default_name"
-	// name of the transition may be used
-	if ((strlen(CurrentName) + strlen(CurrentId)) > (global_MaxIDlength - (global_TransChars + 1))) {
-	  // name + id are too long; only use the id
-	  // make the action: t_transid_mon
-	  CurrentId = strcat(strcat(Trans, CurrentId), "_mon");
-	} else {
-	  // name + id are of good length; use both
-	  // make the action: t_transid_transname_mon
-	  CurrentId = strcat(strcat(strcat(strcat(Trans, CurrentId), "_"), CurrentName), "_mon");
-	}
-      } else {
-	// name of the transition is "default_name"
-	// name of the transition will not be used
+    AFun ResAFun=ATprependAFun("t_",CurrentId);
+    char * CurrentNameString=ATgetName(CurrentName);
+
+    if (strcmp(CurrentNameString, "default_name")){
+      // name of the transition is not "default_name" 
+      // name of the transition may be used 
+      ResAFun=ATappendAFun(ATappendAFun(ResAFun,"_"),CurrentNameString);
+    }
+
+    return ATmakeAppl0(ATappendAFun(ResAFun,"_mon"));
+
+/*       char Trans[global_MaxIDlength] = "t_"; */
+/*       if (strcmp(CurrentName, "default_name")) { */
+/* 	// name of the transition is not "default_name" */
+/* 	// name of the transition may be used */
+/* 	if ((strlen(CurrentName) + strlen(CurrentId)) > (global_MaxIDlength - (global_TransChars + 1))) { */
+/* 	  // name + id are too long; only use the id */
+/* 	  // make the action: t_transid_mon */
+/* 	  CurrentId = strcat(strcat(Trans, CurrentId), "_mon"); */
+/* 	} else { */
+/* 	  // name + id are of good length; use both */
+/* 	  // make the action: t_transid_transname_mon */
+/* 	  CurrentId = strcat(strcat(strcat(strcat(Trans, CurrentId), "_"), CurrentName), "_mon"); */
+/* 	} */
+/*       } else { */
+/* 	// name of the transition is "default_name" */
+/* 	// name of the transition will not be used */
 	
-	// make the action: t_transid_mon
-	CurrentId = strcat(strcat(Trans, CurrentId), "_mon");
-      }
-      return ATmakeAppl0(ATmakeAFun(CurrentId, 0, ATtrue));
+/* 	// make the action: t_transid_mon */
+/* 	CurrentId = strcat(strcat(Trans, CurrentId), "_mon"); */
+/*       } */
+/*       return ATmakeAppl0(ATmakeAFun(CurrentId, 0, ATtrue)); */
   }
   
   //==================================================
@@ -736,7 +748,7 @@ extern "C" {
     Ids = ATtableKeys(context.trans_name);
     while (ATisEmpty(Ids) == ATfalse) {
       
-      CurrentAction = pn2gsGenerateAction_trans(ATgetName(ATgetAFun(ATgetFirst(Ids))), ATgetName(ATgetAFun(ATtableGet(context.trans_name, ATgetFirst(Ids)))));
+      CurrentAction = pn2gsGenerateAction_trans(ATgetAFun(ATgetFirst(Ids)), ATgetAFun(ATtableGet(context.trans_name, ATgetFirst(Ids))));
       ActionsList = ATinsert(ActionsList, (ATerm)gsMakeActId(CurrentAction, ATmakeList0()));
       gsDebugMsg("Action: %t created.\n", CurrentAction);
       Ids = ATgetNext(Ids);
@@ -843,7 +855,7 @@ extern "C" {
     // generate the processes
     //==================================================
     ATermAppl Process;
-    ATermAppl MonitorAction = pn2gsGenerateAction_trans(CurrentTransId, CurrentTransName);
+    ATermAppl MonitorAction = pn2gsGenerateAction_trans(ATmakeAFunId(CurrentTransId), ATmakeAFunId(CurrentTransName));
     if (!(ATtableGet(context.trans_in, TransID)) && !(ATtableGet(context.trans_out, TransID))) {
       // Transition has no incoming arcs and no outgoing arcs
       gsDebugMsg("No in and no out for trans: %t\n", (ATerm)CurrentTrans);
@@ -1338,9 +1350,15 @@ extern "C" {
     // If there are no incoming or outgoing arcs, T_ti_in respectively T_ti_out are left out!
 
     gsDebugMsg("\n\nStart creation of processes belonging to transitions.\n\n");
-    for(ATermList Ids = ATtableKeys(context.trans_name);!ATisEmpty(Ids);Ids = ATgetNext(Ids))
-      ProcessList = ATconcat(pn2gsGenerateTransition(ATgetFirst(Ids)),ProcessList);
-
+    if(rec_par){
+      for(ATermList Ids = ATtableKeys(context.trans_name);!ATisEmpty(Ids);Ids = ATgetNext(Ids))
+	ProcessList = ATconcat(pn2gsGenerateTransition(ATgetFirst(Ids)),ProcessList);
+    }
+    else{
+      for(ATermList Ids = ATtableKeys(context.trans_name);!ATisEmpty(Ids);Ids = ATgetNext(Ids))
+	ProcessList = ATconcat(pn2gsGenerateTransitionAlternative(ATgetFirst(Ids)),ProcessList);
+    }     
+    
     //==================================================
     // second, we generate the place processes.
     //==================================================
@@ -1809,6 +1827,7 @@ extern "C" {
   static ATermAppl pn2gsGenerateP_pi_ar(int in, int out, ATermList In, ATermList Out);
   static ATermList pn2gsGetActionLists(int n, ATermList ActList);
   static ATermAppl pn2gsMakeMultiAction(ATermList ActionList);
+  static ATermList pn2gsMakeSendActions(ATermList ReadActions);
 
   //==================================================
   // pn2gsGeneratePlaceAlternative generates the GenSpect Process Equations belonging to one place
@@ -1829,17 +1848,8 @@ extern "C" {
     int m=0;
     ATermList ActsOut=ATLtableGet(context.place_out, PlaceID);
     if(!ActsOut) ActsOut=ATmakeList0();
+    else ActsOut=pn2gsMakeSendActions(ActsOut);
     if (ActsOut) m=ATgetLength(ActsOut);
-    //prepend all of these actions with "-".
-    {
-      ATermList NewActsOut=ATmakeList0();
-      for(;!ATisEmpty(ActsOut);ActsOut=ATgetNext(ActsOut)){
-	ATermAppl Act=ATAgetFirst(ActsOut);
-	Act=ATmakeAppl0(ATprependAFun("_",ATgetAFun(Act)));
-	NewActsOut=ATinsert(NewActsOut,(ATerm)Act);
-      }
-      ActsOut=ATreverse(NewActsOut);
-    }
 
     gsDebugMsg("Place %t has maximum concurrency in: '%d' and out: '%d'\n", PlaceID, n,m);
 
@@ -1916,12 +1926,13 @@ extern "C" {
     {
       //generate the main process
       ATermAppl VarX=gsMakeDataVarId(ATmakeAppl0(ATmakeAFunId("x")),gsMakeSortIdNat());;
-      ATermAppl Number0=gsMakeNumber(gsString2ATermAppl("0"),gsMakeSortIdNat());
+      //ATermAppl Number0=gsMakeNumber(gsString2ATermAppl("0"),gsMakeSortIdNat());
       AFun CurrentPlaceARId=ATappendAFun(CurrentPlaceId,"_ar_");
       ATermAppl OpAdd=gsMakeDataVarIdOpId(gsMakeOpIdNameAdd());
       ATermAppl OpSubt=gsMakeDataVarIdOpId(gsMakeOpIdNameSubt());
-      ATermAppl OpMax=gsMakeDataVarIdOpId(gsMakeOpIdNameMax());
+      //ATermAppl OpMax=gsMakeDataVarIdOpId(gsMakeOpIdNameMax());
       ATermAppl OpLTE=gsMakeDataVarIdOpId(gsMakeOpIdNameLTE());
+      ATermAppl OpInt2Nat=gsMakeDataVarIdOpId(gsMakeOpIdNameInt2Nat());
 
       ATermAppl Body=NULL;
       for(int j=m;j>-1;j--){
@@ -1941,7 +1952,7 @@ extern "C" {
 	  {
 	    int d=i-j;
 	    if(d>0) RightExpr=pn2gsMakeDataApplProd2(OpAdd,RightExpr,gsMakeNumber(ATmakeAppl0(ATmakeAFunInt0(d)),gsMakeSortIdPos()));//RightExpr=RightExpr+d;
-	    else if(d<0) RightExpr=pn2gsMakeDataApplProd2(OpMax,Number0,pn2gsMakeDataApplProd2(OpSubt,RightExpr,gsMakeNumber(ATmakeAppl0(ATmakeAFunInt0(-d)),gsMakeSortIdPos())));//RightExpr=max(RightExpr-d,0);
+	    else if(d<0) RightExpr=gsMakeDataApplProd(OpInt2Nat,ATmakeList1((ATerm)pn2gsMakeDataApplProd2(OpSubt,RightExpr,gsMakeNumber(ATmakeAppl0(ATmakeAFunInt0(-d)),gsMakeSortIdPos()))));//RightExpr=max(RightExpr-d,0);
 	  }
 	  ATermAppl Right=gsMakeActionProcess(CurrentPlace,ATmakeList1((ATerm)RightExpr));//make P_pi(max(x+i-j,0))
 	  ATermAppl Sec=gsMakeSeq(Left,Right);
@@ -1992,10 +2003,13 @@ extern "C" {
     ATermList InActionLists=pn2gsGetActionLists(in,In);
     ATermList OutActionLists=pn2gsGetActionLists(out,Out);
 
+    //gsWarningMsg("pn2gsGenerateP_pi_ar: in %d; out %d; In %t; Out %t;\n InActionLists %t; OutActionLists %t\n",in,out,In,Out,InActionLists,OutActionLists);
+
     //pairwise merge the elements of the 2 lists into 1 big list. 
+    ATermList TmpOutActionLists=OutActionLists;
     for(;!ATisEmpty(InActionLists);InActionLists=ATgetNext(InActionLists)){
       ATermList CurInActList=ATLgetFirst(InActionLists);
-      for(;!ATisEmpty(OutActionLists);OutActionLists=ATgetNext(OutActionLists)){
+      for(OutActionLists=TmpOutActionLists;!ATisEmpty(OutActionLists);OutActionLists=ATgetNext(OutActionLists)){
 	ATermList CurOutActList=ATLgetFirst(OutActionLists);
 	ATermAppl Res=pn2gsMakeMultiAction(ATconcat(CurInActList,CurOutActList));
 	if(Body) Body=gsMakeChoice(Res,Body);
@@ -2062,6 +2076,62 @@ extern "C" {
     for(int i=0;i<n;i++) Res=ATinsert(Res,(ATerm)SortNat);
     return Res;
   }
+
+  //==================================================
+  // pn2gsGenerateTransitionAlternative generates the GenSpect Process Equations belonging to one transition
+  //==================================================
+  static ATermList pn2gsGenerateTransitionAlternative(ATerm TransID){
+    // input: access to the context; ID of the transtion
+    // output: an updated list of the processes: the processes belonging to the transition added to the list
+
+    //Calculate the name of the process 
+    AFun CurrentTransId = ATgetAFun(TransID);
+    {    
+      char * CurrentTransName = ATgetName(ATgetAFun(ATtableGet(context.trans_name, TransID)));
+      
+      if(strcmp(CurrentTransName, "default_name")){
+	// name of the trans is not "default_name"
+	// name of the trans may be used
+	CurrentTransId=ATappendAFun(ATappendAFun(CurrentTransId,"_"),CurrentTransName);
+      }
+    }
+    
+    // variables to store the process names
+    ATermAppl CurrentTrans=ATmakeAppl0(ATprependAFun("T_",CurrentTransId));
+    
+    // insert the name of the process T_ti into context.transs
+    // this is needed for the generation of the general process PetriNet
+    context.transitions = ATinsert(context.transitions, (ATerm)CurrentTrans);
+    gsDebugMsg("context.trans now contains the following trans: %t\n", context.transitions);
+    
+    //==================================================
+    // generate the processes
+    //==================================================
+    ATermList Actions = ATmakeList1((ATerm)ATmakeAppl0(ATappendAFun(ATprependAFun("t_",CurrentTransId),"_mon"))); //MonitorAction
+    {
+      ATermList MoreActions=ATLtableGet(context.trans_in, TransID);
+      if(MoreActions) Actions=ATconcat(Actions,MoreActions);
+
+      MoreActions=ATLtableGet(context.trans_out, TransID);
+      if(MoreActions) Actions=ATconcat(Actions,pn2gsMakeSendActions(MoreActions));
+    }
+
+    return ATmakeList1((ATerm)gsMakeProcEqn(ATmakeList0(), gsMakeProcVarId(CurrentTrans, ATmakeList0()), ATmakeList0(), pn2gsMakeMultiAction(Actions)));    
+  }
+
+  static ATermList pn2gsMakeSendActions(ATermList ReadActions){
+    //prepend all of these actions with "_".
+    ATermList SendActions=ATmakeList0();
+    for(;!ATisEmpty(ReadActions);ReadActions=ATgetNext(ReadActions)){
+      ATermAppl Act=ATAgetFirst(ReadActions);
+      Act=ATmakeAppl0(ATprependAFun("_",ATgetAFun(Act)));
+      SendActions=ATinsert(SendActions,(ATerm)Act);
+    }
+    return ATreverse(SendActions);
+  }
+
+
+
 
 #ifdef __cplusplus
 }
