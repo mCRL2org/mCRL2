@@ -1988,13 +1988,9 @@ extern "C" {
     if(!in) In=ATmakeList0();
     if(!out) Out=ATmakeList0();
 
-    gsWarningMsg("pn2gsGenerateP_pi_ar : in %d, out %d, In %t, Out %t\n", in, out, In, Out);
-
     ATermAppl Body=NULL;
     ATermList InActionLists=pn2gsGetActionLists(in,In);
     ATermList OutActionLists=pn2gsGetActionLists(out,Out);
-
-    gsWarningMsg("pn2gsGenerateP_pi_ar : InActionLists %t, OutActionLists %t\n", InActionLists, OutActionLists);
 
     //pairwise merge the elements of the 2 lists into 1 big list. 
     for(;!ATisEmpty(InActionLists);InActionLists=ATgetNext(InActionLists)){
