@@ -137,6 +137,7 @@ void print_help(FILE *f)
 	          "-i, --inner              Use innermost rewriter (default)\n"
 	          "-2, --inner2             Use another innermost rewriter\n"
 	          "-3, --inner3             Use yet another innermost rewriter\n"
+	          "-c, --innerc             Use compiling innermost rewriter\n"
 	       );
 }
 
@@ -145,7 +146,7 @@ int main(int argc, char **argv)
 	FILE *SpecStream, *OutStream;
 	ATerm stackbot;
 	ATermAppl Spec;
-	#define sopts "hbawi23"
+	#define sopts "hbawi23c"
 	struct option lopts[] = {
 		{ "help",		no_argument,	NULL,	'h' },
 		{ "benchmark",		no_argument,	NULL,	'b' },
@@ -154,6 +155,7 @@ int main(int argc, char **argv)
 		{ "inner",		no_argument,	NULL,	'i' },
 		{ "inner2",		no_argument,	NULL,	'2' },
 		{ "inner3",		no_argument,	NULL,	'3' },
+		{ "innerc",		no_argument,	NULL,	'c' },
 		{ 0, 0, 0, 0 }
 	};
 	int opt,read_aterm,write_aterm,strat,benchmark,i,bench_times;
@@ -164,7 +166,7 @@ int main(int argc, char **argv)
 	bench_times = 1000;
 	read_aterm = 0;
 	write_aterm = 0;
-	strat = GS_REWR_INNER;
+	strat = GS_REWR_INNER3;
 	while ( (opt = getopt_long(argc,argv,sopts,lopts,NULL)) != -1 )
 	{
 		switch ( opt )
@@ -196,6 +198,9 @@ int main(int argc, char **argv)
 				break;
 			case '3':
 				strat = GS_REWR_INNER3;
+				break;
+			case 'c':
+				strat = GS_REWR_INNERC;
 				break;
 			default:
 				break;

@@ -15,6 +15,7 @@ extern "C" {
 #include "gsrewr_inner.h"
 #include "gsrewr_inner2.h"
 #include "gsrewr_inner3.h"
+#include "gsrewr_innerc.h"
 
 static int strategy;
 
@@ -49,15 +50,18 @@ void gsRewriteInit(ATermAppl Eqns, int strat)
 
 	switch ( strategy )
 	{
+		case GS_REWR_INNER:
+			rewrite_init_inner();
+			break;
 		case GS_REWR_INNER2:
 			rewrite_init_inner2();
 			break;
-		case GS_REWR_INNER3:
-			rewrite_init_inner3();
+		case GS_REWR_INNERC:
+			rewrite_init_innerc();
 			break;
-		case GS_REWR_INNER:
+		case GS_REWR_INNER3:
 		default:
-			rewrite_init_inner();
+			rewrite_init_inner3();
 			break;
 	}
 }
@@ -73,15 +77,18 @@ void gsRewriteAddEqn(ATermAppl Eqn)
 
 	switch ( strategy )
 	{
+		case GS_REWR_INNER:
+			rewrite_add_inner(Eqn);
+			break;
 		case GS_REWR_INNER2:
 			rewrite_add_inner2(Eqn);
 			break;
-		case GS_REWR_INNER3:
-			rewrite_add_inner3(Eqn);
+		case GS_REWR_INNERC:
+			rewrite_add_innerc(Eqn);
 			break;
-		case GS_REWR_INNER:
+		case GS_REWR_INNER3:
 		default:
-			rewrite_add_inner(Eqn);
+			rewrite_add_inner3(Eqn);
 			break;
 	}
 }
@@ -115,15 +122,18 @@ void gsRewriteRemoveEqn(ATermAppl Eqn)
 
 	switch ( strategy )
 	{
+		case GS_REWR_INNER:
+			rewrite_remove_inner(Eqn);
+			break;
 		case GS_REWR_INNER2:
 			rewrite_remove_inner2(Eqn);
 			break;
-		case GS_REWR_INNER3:
-			rewrite_remove_inner3(Eqn);
+		case GS_REWR_INNERC:
+			rewrite_remove_innerc(Eqn);
 			break;
-		case GS_REWR_INNER:
+		case GS_REWR_INNER3:
 		default:
-			rewrite_remove_inner(Eqn);
+			rewrite_remove_inner3(Eqn);
 			break;
 	}
 }
@@ -132,13 +142,15 @@ ATerm gsRewriteTermGen(ATerm Term, int *b)
 {
 	switch ( strategy )
 	{
+		case GS_REWR_INNER:
+			return rewrite_inner(Term,b);
 		case GS_REWR_INNER2:
 			return rewrite_inner2(Term,b);
+		case GS_REWR_INNERC:
+			return rewrite_innerc(Term,b);
 		case GS_REWR_INNER3:
-			return rewrite_inner3(Term,b);
-		case GS_REWR_INNER:
 		default:
-			return rewrite_inner(Term,b);
+			return rewrite_inner3(Term,b);
 	}
 }
 

@@ -8,6 +8,7 @@ extern "C" {
 #define GS_REWR_INNER	0
 #define GS_REWR_INNER2	1
 #define GS_REWR_INNER3	2
+#define GS_REWR_INNERC	3
 
 void gsRewriteInit(ATermAppl Eqns, int strat);
 

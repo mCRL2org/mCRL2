@@ -5,7 +5,7 @@ CPP                = @CPP@
 CPPFLAGS           = @CPPFLAGS@
 CXX                = @CXX@
 CXXFLAGS           = @CXXFLAGS@
-LDFLAGS            = -Wl,-rpath,$(libdir) @LDFLAGS@
+LDFLAGS            = -Wl,-rpath,$(libdir) -rdynamic @LDFLAGS@
 ARFLAGS            = crs
 INSTALL            = install
 LEX                = @LEX@
@@ -42,18 +42,18 @@ PRINTER_LDFLAGS    = -lgsparse -lATerm -lm
 #Lineariser definitions
 LINEARISER_NAME    = linearise
 LINEARISER_OBJECTS = linearise.o
-LINEARISER_LDFLAGS = -lgsparse -lgsrewrite -lATerm -lm
+LINEARISER_LDFLAGS = -lgsparse -lgsrewrite -lATerm -lm -ldl
 LIN_NAME           = lin
 LIN_OBJECTS        = lin.o gslinearise2.o
 LIN_LDFLAGS        = -lgsparse -lATerm -lm
 
 #Rewriter definitions
 LIBREWR_NAME       = libgsrewrite.a
-LIBREWR_OBJECTS    = libgsrewrite.o gsrewr_inner.o gsrewr_inner2.o gsrewr_inner3.o gsfunc.o gslowlevel.o
+LIBREWR_OBJECTS    = libgsrewrite.o gsrewr_inner.o gsrewr_inner2.o gsrewr_inner3.o gsrewr_innerc.o gsfunc.o gslowlevel.o
 LIBREWR_LDFLAGS    = -lATerm -lm
 REWR_NAME          = gsrewr
 REWR_OBJECTS       = gsrewr.o
-REWR_LDFLAGS       = -lgsrewrite -lgsparse -lATerm -lm
+REWR_LDFLAGS       = -lgsrewrite -lgsparse -lATerm -lm -ldl
 
 #pnml2gs definitions
 PNML2GS_NAME       = pnml2gs
@@ -63,15 +63,15 @@ PNML2GS_LDFLAGS    = -lgsparse -lATerm -lxml2 -lm
 #Instantiator definitions
 INSTAN_NAME        = gsinstantiate
 INSTAN_OBJECTS     = gsinstantiate.o libgsnextstate.o libgsprover.o
-INSTAN_LDFLAGS     = -lgsrewrite -lgsparse -lATerm -lm
+INSTAN_LDFLAGS     = -lgsrewrite -lgsparse -lATerm -lm -ldl
 
 #Simulator definitions
 SIM_NAME           = sim
 SIM_OBJECTS        = sim.o libgsnextstate.o libgsprover.o
-SIM_LDFLAGS        = -lgsrewrite -lgsparse -lATerm -lm
+SIM_LDFLAGS        = -lgsrewrite -lgsparse -lATerm -lm -ldl
 XSIM_NAME          = xsim
 XSIM_OBJECTS       = xsim.o xsimbase.o xsimmain.o xsimtrace.o libgsnextstate.o libgsprover.o
-XSIM_LDFLAGS       = -lgsrewrite -lgsparse -lATerm -lm $(WX_LIBS) -rdynamic
+XSIM_LDFLAGS       = -lgsrewrite -lgsparse -lATerm -lm -ldl $(WX_LIBS)
 XSIMTRACE_NAME     = xsimtrace.so
 XSIMTRACE_OBJECTS  = xsimtracedll.o
 XSIMTRACE_LDFLAGS  = -shared
