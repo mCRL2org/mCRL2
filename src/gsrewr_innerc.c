@@ -406,7 +406,6 @@ void rewrite_init_innerc()
 	term2int = ATtableCreate(100,100);
 
 	true_num = ATgetInt((ATermInt) OpId2Int(gsMakeDataExprTrue(),true));
-	ATprotectInt(&true_num);
 
 	l = opid_eqns;
 	for (; !ATisEmpty(l); l=ATgetNext(l))
@@ -428,8 +427,10 @@ void rewrite_init_innerc()
 	}
 
 	int2term = (ATermAppl *) malloc(num_opids*sizeof(ATermAppl));
+//	memset(int2term,0,num_opids*sizeof(ATermAppl));
 	ATprotectArray((ATerm *) int2term,num_opids);
 	innerc_eqns = (ATermList *) malloc(num_opids*sizeof(ATermList));
+//	memset(innerc_eqns,0,num_opids*sizeof(ATermAppl));
 	ATprotectArray((ATerm *) innerc_eqns,num_opids);
 
 	l = ATtableKeys(term2int);
@@ -498,7 +499,7 @@ void rewrite_init_innerc()
 
 //			"ATfprintf(stderr,\"rewr_%i(%%t,%%i)\\n\\n\",args,len);\n"
 
-			"  for (i=0; i<len; i++)\n"
+/*			"  for (i=0; i<len; i++)\n"
 			"  {\n"
 			"    a[i] = ATgetFirst(args);\n"
 			"    rest[i] = args;\n"
@@ -508,7 +509,10 @@ void rewrite_init_innerc()
 			"\n"
 			"  switch ( len )\n"
 			"  {\n"
-			"    default:\n",
+			"    default:\n",*/
+
+			"  rest[0] = args;\n"
+			"\n",
 
 //			j,
 
@@ -527,10 +531,28 @@ void rewrite_init_innerc()
 					max = ATgetLength(ATLelementAt(ATLgetFirst(l),2));
 				}
 			}
-			for (; max>=0; max-- )
+//			for (; max>=0; max-- )
+			int tmpmax = max;
+			for (max = 0; max <= tmpmax; max++ )
 			{
-	fprintf(f,	"    case %i:\n",max);
+//	fprintf(f,	"    case %i:\n",max);
+	if ( max > 0 )
+	{
+	fprintf(f,	"    if ( %i <= len )\n"
+			"    {\n"
+			"      a[%i] = ATgetFirst(rest[%i]);\n"
+			"      rest[%i] = ATgetNext(rest[%i]);\n"
+			"\n",
 
+			max,
+			max-1,
+			max-1,
+			max,
+			max-1
+		);
+	} else {
+	fprintf(f,	"    {\n");
+	}
 //	fprintf(f,	"fprintf(stderr,\"case %i\\n\\n\");\n",max);
 
 				l = innerc_eqns[j];
@@ -744,12 +766,13 @@ void rewrite_init_innerc()
 	fprintf(f,	"     }\n");
 					}
 				}
+	fprintf(f,	"    }\n");
 			}
 			//
 			// Finish up function
 			//
-	fprintf(f,	"      break;\n"
-			"  }\n"
+	fprintf(f,//	"      break;\n"
+//			"  }\n"
 
 //			"ATfprintf(stderr,\"(%i)return %%t\\n\\n\",ATinsert(rest[0],int2ATerm[%i]));\n"
 
@@ -770,12 +793,14 @@ void rewrite_init_innerc()
 			"\n"
 	       );
 	fprintf(f,	"  int2ATerm = (ATerm *) malloc(%i*sizeof(ATerm));\n"
+//			"  memset(int2ATerm,0,%i*sizeof(ATerm));\n"
+			"  ATprotectArray(int2ATerm,%i);\n"
 			"  for (i=0; i<%i; i++)\n"
 			"  {\n"
 			"    int2ATerm[i] = (ATerm) ATmakeInt(i);\n"
 			"  }\n"
 			"\n",
-			num_opids,num_opids
+			num_opids,num_opids,num_opids//,num_opids
 	       );
 	fprintf(f,	"  int2func = (ftype *) malloc(%i*sizeof(ftype));\n",num_opids+100);
 	for (j=0;j<num_opids;j++)
@@ -861,9 +886,9 @@ void rewrite_init_innerc()
 	}
 //fprintf(stderr,"%s\n",dlerror());
 //fprintf(stderr,"b %p\n",h);
-	so_rewr_init = dlsym(h,"rewrite_init");
+	so_rewr_init = (void (*)()) dlsym(h,"rewrite_init");
 //fprintf(stderr,"%s\n",dlerror());
-	so_rewr = dlsym(h,"rewrite");
+	so_rewr = (ATerm (*)(ATerm)) dlsym(h,"rewrite");
 //fprintf(stderr,"%s\n",dlerror());
 //fprintf(stderr,"c %p %p\n",so_rewr_init,so_rewr);
 	so_rewr_init();
