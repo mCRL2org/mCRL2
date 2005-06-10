@@ -147,6 +147,13 @@ void ATprotectList(ATermList *PList)
 }
 #endif
 
+#ifndef ATprotectInt
+void ATprotectInt(ATermInt *PInt)
+{
+  ATprotect((ATerm *) PInt);
+}
+#endif
+
 #ifndef ATunprotectAppl
 void ATunprotectAppl(ATermAppl *PAppl)
 {
@@ -158,6 +165,13 @@ void ATunprotectAppl(ATermAppl *PAppl)
 void ATunprotectList(ATermList *PList)
 {
   ATunprotect((ATerm *) PList);
+}
+#endif
+
+#ifndef ATunprotectInt
+void ATunprotectInt(ATermInt *PInt)
+{
+  ATunprotect((ATerm *) PInt);
 }
 #endif
 

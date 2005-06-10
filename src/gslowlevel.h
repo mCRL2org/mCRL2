@@ -157,11 +157,17 @@ void      ATprotectAppl(ATermAppl *PAppl);
 #ifndef ATprotectList
 void      ATprotectList(ATermList *PList);
 #endif
+#ifndef ATprotectInt
+void      ATprotectInt(ATermInt *PInt);
+#endif
 #ifndef ATunprotectAppl
 void      ATunprotectAppl(ATermAppl *PAppl);
 #endif
 #ifndef ATunprotectList
 void      ATunprotectList(ATermList *PList);
+#endif
+#ifndef ATunprotectInt
+void      ATunprotectInt(ATermInt *PInt);
 #endif
 
 //Substitutions on ATerm's
