@@ -26,61 +26,81 @@ includedir         = @includedir@
 infodir            = @infodir@
 mandir             = @mandir@
 
+#All objects that are used
+OBJECTS            =
+
 #Parser definitions
 LIBPARSER_NAME     = libgsparse.a
 LIBPARSER_OBJECTS  = libgsparse.o gsparser.o gslexer.o gstypecheck.o gsdataimpl.o gsfunc.o gslowlevel.o
+OBJECTS           += $(LIBPARSER_OBJECTS)
 LIBPARSER_LDFLAGS  = -lATerm -lm
 PARSER_NAME        = gsparse
 PARSER_OBJECTS     = gsparse.o
+OBJECTS           += $(PARSER_OBJECTS)
 PARSER_LDFLAGS     = -lgsparse -lATerm -lm
 
 #Printer definitions
 PRINTER_NAME       = gsprint
 PRINTER_OBJECTS    = gsprint.o
+OBJECTS           += $(PRINTER_OBJECTS)
 PRINTER_LDFLAGS    = -lgsparse -lATerm -lm
 
 #Lineariser definitions
 LINEARISER_NAME    = linearise
 LINEARISER_OBJECTS = linearise.o
+OBJECTS           += $(LINEARISER_OBJECTS)
 LINEARISER_LDFLAGS = -lgsparse -lgsrewrite -lATerm -lm -ldl
 LIN_NAME           = lin
 LIN_OBJECTS        = lin.o gslinearise2.o
+OBJECTS           += $(LIN_OBJECTS)
 LIN_LDFLAGS        = -lgsparse -lATerm -lm
 
 #Rewriter definitions
 LIBREWR_NAME       = libgsrewrite.a
 LIBREWR_OBJECTS    = libgsrewrite.o gsrewr_inner.o gsrewr_inner2.o gsrewr_inner3.o gsrewr_innerc.o gsfunc.o gslowlevel.o
+OBJECTS           += $(LIBREWR_OBJECTS)
 LIBREWR_LDFLAGS    = -lATerm -lm
 REWR_NAME          = gsrewr
 REWR_OBJECTS       = gsrewr.o
+OBJECTS           += $(REWR_OBJECTS)
 REWR_LDFLAGS       = -lgsrewrite -lgsparse -lATerm -lm -ldl
 
 #pnml2gs definitions
 PNML2GS_NAME       = pnml2gs
 PNML2GS_OBJECTS    = pnml2gs.o
+ifdef USE_XML2
+OBJECTS           += $(PNML2GS_OBJECTS)
+endif
 PNML2GS_LDFLAGS    = -lgsparse -lATerm -lxml2 -lm
 
 #Instantiator definitions
 INSTAN_NAME        = gsinstantiate
 INSTAN_OBJECTS     = gsinstantiate.o libgsnextstate.o libgsprover.o
+OBJECTS           += $(INSTAN_OBJECTS)
 INSTAN_LDFLAGS     = -lgsrewrite -lgsparse -lATerm -lm -ldl
 
 #Simulator definitions
 SIM_NAME           = sim
 SIM_OBJECTS        = sim.o libgsnextstate.o libgsprover.o
+OBJECTS           += $(SIM_OBJECTS)
 SIM_LDFLAGS        = -lgsrewrite -lgsparse -lATerm -lm -ldl
 XSIM_NAME          = xsim
 XSIM_OBJECTS       = xsim.o xsimbase.o xsimmain.o xsimtrace.o libgsnextstate.o libgsprover.o
+ifdef USE_WX
+OBJECTS           += $(XSIM_OBJECTS)
+endif
 XSIM_LDFLAGS       = -lgsrewrite -lgsparse -lATerm -lm -ldl $(WX_LIBS)
 XSIMTRACE_NAME     = xsimtrace.so
 XSIMTRACE_OBJECTS  = xsimtracedll.o
+ifdef USE_WX
+OBJECTS           += $(XSIMTRACE_OBJECTS)
+endif
 XSIMTRACE_LDFLAGS  = -shared
 
 #Group definitions
 EXE_NAMES          =  $(PARSER_NAME) $(PRINTER_NAME) $(LINEARISER_NAME) $(LIN_NAME) $(REWR_NAME) $(PNML2GS_NAME) $(INSTAN_NAME) $(SIM_NAME) $(XSIM_NAME)
-CUR_EXE_NAMES      ?= $(strip $(foreach s,$(EXE_NAMES),$(shell if test -f $s; then echo -n $s; fi)))
 LIB_NAMES          =  $(XSIMTRACE_NAME)
-CUR_LIB_NAMES      ?= $(strip $(foreach s,$(LIB_NAMES),$(shell if test -f $s; then echo -n $s; fi)))
+OBJECTS            := $(sort $(OBJECTS))
 
 #Make rules
 .PHONY: all install clean
@@ -88,23 +108,27 @@ CUR_LIB_NAMES      ?= $(strip $(foreach s,$(LIB_NAMES),$(shell if test -f $s; th
 
 all : $(EXE_NAMES) $(LIB_NAMES)
 
-install : all
-ifneq ($(CUR_EXE_NAMES),)
+install: all
 	$(INSTALL) -d $(bindir)
-	$(INSTALL) $(CUR_EXE_NAMES) $(bindir)
-else
-	@echo there aren\'t any executables to be installed
-endif
-ifneq ($(CUR_LIB_NAMES),)
+	@for f in $(EXE_NAMES); do\
+	  if test -f $$f; then\
+	    c="$(INSTALL) $$f $(bindir)";\
+	    echo $$c;\
+	    $$c;\
+	  fi;\
+	done
 	$(INSTALL) -d $(libdir)
-	$(INSTALL) $(CUR_LIB_NAMES) $(libdir)
-else
-	@echo there aren\'t any executables to be installed
-endif
+	@for f in $(LIB_NAMES); do\
+	  if test -f $$f; then\
+	    c="$(INSTALL) $$f $(libdir)";\
+	    echo $$c;\
+	    $$c;\
+	  fi;\
+	done
 
 clean :
-	$(RM) $(EXE_NAMES) $(LIB_NAMES) *.o *.a *.d gslexer.c gsparser.c \
-	gsparser.h gsparser.output config.status config.log *~ core core.*
+	$(RM) $(EXE_NAMES) $(LIB_NAMES) *.o *.a *.d *.dpp\
+        gslexer.c gsparser.c gsparser.h gsparser.output config.status config.log *~ core core.*
 
 $(LIBPARSER_NAME) : $(LIBPARSER_OBJECTS)
 	$(AR) $(ARFLAGS) $@ $(LIBPARSER_OBJECTS)
@@ -171,8 +195,16 @@ endif
 	sed 's,\($*\)\.o[ :]*,\1.o $@ : ,g' < $@.$$$$ > $@; \
 	$(RM) $@.$$$$
 
--include $(patsubst %.c,%.d,$(wildcard *.c))
+%.dpp : %.cpp
+	@echo generating dependencies for $<
+	@$(CXX) -MM $(CPPFLAGS) $< > $@.$$$$; \
+	sed 's,\($*\)\.o[ :]*,\1.o $@ : ,g' < $@.$$$$ > $@; \
+	$(RM) $@.$$$$
 
+ifneq ($(MAKECMDGOALS),clean)
+-include $(foreach s,$(OBJECTS),$(shell if test -f $(basename $s).c; then echo -n $(basename $s).d; fi))
+-include $(foreach s,$(OBJECTS),$(shell if test -f $(basename $s).cpp; then echo -n $(basename $s).dpp; fi))
+endif
 
 #Note: to make a shared version of the gsparse library instead of a static one, do the following:
 #- add the option `-fpic' to CFLAGS

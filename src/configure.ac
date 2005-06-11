@@ -1,7 +1,6 @@
-AC_PREREQ(2.57)
-AC_INIT([GenSpect parser], [0.1], [A.H.J.Mathijssen@tue.nl])
+AC_INIT([mCRL2 toolset], [0.2], [A.H.J.Mathijssen@tue.nl])
 AC_PREFIX_DEFAULT([$HOME])
-AC_CONFIG_SRCDIR([gslexer.l])
+AC_CONFIG_SRCDIR([gslowlevel.h])
 
 # Checks for programs.
 AC_PROG_CC
@@ -108,7 +107,7 @@ else
 fi
 if test $WX_CONFIG; then
   USE_WX=1
-  CXXFLAGS="$($WX_CONFIG --cxxflags) $CXXFLAGS"
+  CPPFLAGS="$($WX_CONFIG --cppflags) $CPPFLAGS"
   WX_LIBS="$($WX_CONFIG --libs)"
 fi
 AC_SUBST([USE_WX],[])
