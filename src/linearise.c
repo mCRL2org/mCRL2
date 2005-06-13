@@ -46,7 +46,7 @@ FILE *infile;
 
 void usage(void)
 {
-  ATerror("Use mcrl -help for options\n");
+  ATerror("Use linearise -help for options\n");
 }
 
 void version(void)
@@ -57,10 +57,10 @@ void version(void)
 void help(void)
 {
 P("");
-P("Timed mCRL parser and (untimed) LPO generator");
-P("=============================================");
+P("Timed mCRL2 parser and LPE generator");
+P("====================================");
 P("");
-P("Usage: mcrl [options] [file]");
+P("Usage: linearise [options] [file]");
 P("");
 P("The following options can be used:");
 P("-stack:    an LPO of the input file in toolbus term format file is ");
@@ -77,13 +77,13 @@ P("-nocluster:no actions are clustered, not even in intermediate LPOs");
 P("-binary:   use binary, instead of n-ary, case functions when clustering.");
 P("           In the presence of -newstate, state variables use binary encoding.");
 P("-multi     Write the term before the final composition of LPOs");
-P("-newstate: mcrl will encode state variables using enumerated types.");
+P("-newstate: linearise will encode state variables using enumerated types.");
 P("           -newstate is only allowed in the presence of -regular or -regular2.");
-P("           Using the flag -binary in addition will lead mcrl to encode");
+P("           Using the flag -binary in addition will lead linearise to encode");
 P("           the state by a vector of boolean variables.");
 P("           By default (i.e. without -newstate), the functions");
 P("           one, x2p1 and x2p0 will be used.");
-P("-statenames: mcrl will use meaningful names for the state variables,");
+P("-statenames: linearise will use meaningful names for the state variables,");
 P("           derived from the specification.");
 P("-no-rewrite: do not use a rewriter while linearising. If the rewrite system");
 P("           does not terminate, the lineariser will only terminate, if the");
@@ -4710,9 +4710,14 @@ static int summandsCanBeClustered(
 
   ATermList multiactionlist1=ATLgetArgument(multiaction1,0);
   ATermList multiactionlist2=ATLgetArgument(multiaction2,0);
+
   for( ; multiactionlist1!=ATempty ; 
               multiactionlist1=ATgetNext(multiactionlist1) )
-  { if (ATAgetArgument(ATAgetFirst(multiactionlist1),0)!=
+  { if (multiactionlist2==ATempty)
+    { return 0;
+    }
+
+    if (ATAgetArgument(ATAgetFirst(multiactionlist1),0)!=
            ATAgetArgument(ATAgetFirst(multiactionlist2),0))
     { return 0;
     }
