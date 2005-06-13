@@ -221,7 +221,7 @@ int main(int argc, char **argv)
 				ATerm s;
 				ATermList e = ATLgetFirst(ATgetNext(ATLgetFirst(l)));
 				ATermList edc = SetDCs(e);
-				int i = 0;
+				int i = -1;
 		
 				if ( (s = ATtableGet(states,(ATerm) edc)) == NULL )
 				{
@@ -244,7 +244,7 @@ int main(int argc, char **argv)
 					i = ATgetInt((ATermInt) s);
 				}
 
-				if ( i > 0 )
+				if ( i >= 0 )
 				{
 					fprintf(aut,"(%i,\"",curr_num);
 					gsPrintPart(aut,ATAgetFirst(ATLgetFirst(l)),false,0);

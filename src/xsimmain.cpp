@@ -203,6 +203,14 @@ void XSimMain::LoadFile(const wxString &filename)
     ATermAppl Spec = (ATermAppl) ATreadFromFile(f);
     fclose(f);
 
+    if ( Spec == NULL )
+    {
+	    wxMessageDialog msg(this, wxT("Invalid file."),
+		wxT("Error"), wxOK|wxICON_ERROR);
+	    msg.ShowModal();
+	    return;
+    }
+
     ATermList l = ATLgetArgument(ATAgetArgument(Spec,5),1);
     ATermList m = ATmakeList0();
     ATermList n = ATmakeList0();
