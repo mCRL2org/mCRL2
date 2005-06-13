@@ -43,6 +43,7 @@ extern "C" {
     // needed for the creation of general GenSpect processes
     ATermList transitions;      // store all the GenSpect processes (involving transitions) needed for the Trans-process
     ATermList places;           // store all the GenSpect processes (involving places) needed for the PetriNet-process
+    ATermTable place_process_name; // place_id -> name of the corresponding process
   } Context;
   static Context context;
 
@@ -1037,6 +1038,10 @@ extern "C" {
     // insert the name of the process P_pi into context.places
     // this is needed for the generation of the general process PetriNet
     context.places = ATinsert(context.places, (ATerm)CurrentPlace);
+
+    //added by Yarick: we need a table to relate PlaceId and CurrentPlace.
+    ATtablePut(context.place_process_name,PlaceID,(ATerm)CurrentPlace);
+
     gsDebugMsg("context.places now contains the following places: %t\n", context.places);
 
     //==================================================
@@ -1189,25 +1194,18 @@ extern "C" {
   //==================================================
   // pn2gsHideList generates a list with all the actions that should be hidden
   //==================================================
-  static ATermList pn2gsHideList(ATermList List0, ATermList List1) {
+  static ATermList pn2gsHideList(ATermList List) {
     // input: two lists, each containing different elements
     // output: a list in which all the elements of both inputed lists are present, preceded by two underscores.
 
     ATermList ReturnList = ATmakeList0();
     char * CurrentId;
-    while (ATisEmpty(List0) == ATfalse) {
-      CurrentId = ATgetName(ATgetAFun(ATgetFirst(List0)));
+    while (ATisEmpty(List) == ATfalse) {
+      CurrentId = ATgetName(ATgetAFun(ATgetFirst(List)));
       char Underscores[global_MaxIDlength] = "__";
       CurrentId = strcat(Underscores, CurrentId);
       ReturnList = ATinsert(ReturnList, (ATerm)ATmakeAppl0(ATmakeAFun(CurrentId, 0, ATtrue)));
-      List0 = ATgetNext(List0);
-    }
-    while (ATisEmpty(List1) == ATfalse) {
-      CurrentId = ATgetName(ATgetAFun(ATgetFirst(List1)));
-      char Underscores[global_MaxIDlength] = "__";
-      CurrentId = strcat(Underscores, CurrentId);
-      ReturnList = ATinsert(ReturnList, (ATerm)ATmakeAppl0(ATmakeAFun(CurrentId, 0, ATtrue)));
-      List1 = ATgetNext(List1);
+      List = ATgetNext(List);
     }
     return ReturnList;
   }
@@ -1215,27 +1213,19 @@ extern "C" {
   //==================================================
   // pn2gsRestrictList generates a list with all the actions that should be restricted
   //==================================================
-  static ATermList pn2gsRestrictList(ATermList List0, ATermList List1) {
+  static ATermList pn2gsRestrictList(ATermList List) {
     // input: two lists, each containing different elements
     // output: a list in which all the elements of both inputed lists are present twice, once preceded by an underscore.
 
     ATermList ReturnList = ATmakeList0();
     char * CurrentId;
-    while (ATisEmpty(List0) == ATfalse) {
-      CurrentId = ATgetName(ATgetAFun(ATgetFirst(List0)));
+    while (ATisEmpty(List) == ATfalse) {
+      CurrentId = ATgetName(ATgetAFun(ATgetFirst(List)));
       ReturnList = ATinsert(ReturnList, (ATerm)ATmakeAppl0(ATmakeAFun(CurrentId, 0, ATtrue)));
       char Underscores[global_MaxIDlength] = "_";
       CurrentId = strcat(Underscores, CurrentId);
       ReturnList = ATinsert(ReturnList, (ATerm)ATmakeAppl0(ATmakeAFun(CurrentId, 0, ATtrue)));
-      List0 = ATgetNext(List0);
-    }
-    while (ATisEmpty(List1) == ATfalse) {
-      CurrentId = ATgetName(ATgetAFun(ATgetFirst(List1)));
-      ReturnList = ATinsert(ReturnList, (ATerm)ATmakeAppl0(ATmakeAFun(CurrentId, 0, ATtrue)));
-      char Underscores[global_MaxIDlength] = "_";
-      CurrentId = strcat(Underscores, CurrentId);
-      ReturnList = ATinsert(ReturnList, (ATerm)ATmakeAppl0(ATmakeAFun(CurrentId, 0, ATtrue)));
-      List1 = ATgetNext(List1);
+      List = ATgetNext(List);
     }
     return ReturnList;
   }
@@ -1243,7 +1233,7 @@ extern "C" {
   //==================================================
   // pn2gsCommList generates a list with all the actions that communicate
   //==================================================
-  static ATermList pn2gsCommList(ATermList List0, ATermList List1) {
+  static ATermList pn2gsCommList(ATermList List) {
     // input: two lists, each containing different elements
     // output: a list in which all the elements of both inputed lists 
     //         communicate with itself, once preceded by an underscore
@@ -1251,21 +1241,13 @@ extern "C" {
 
     ATermList ReturnList = ATmakeList0();
     char * CurrentId;
-    while (ATisEmpty(List0) == ATfalse) {
-      CurrentId = ATgetName(ATgetAFun(ATgetFirst(List0)));
+    while (ATisEmpty(List) == ATfalse) {
+      CurrentId = ATgetName(ATgetAFun(ATgetFirst(List)));
       char Underscore[global_MaxIDlength] = "_";
       char Underscores[global_MaxIDlength] = "__";
       ATermAppl CommExpr = gsMakeCommExpr(gsMakeMultActName(ATmakeList2((ATerm)gsString2ATermAppl(CurrentId), (ATerm)gsString2ATermAppl(strcat(Underscore, CurrentId)))), gsString2ATermAppl(strcat(Underscores, CurrentId)));
       ReturnList = ATinsert(ReturnList, (ATerm)CommExpr);
-      List0 = ATgetNext(List0);
-    }
-    while (ATisEmpty(List1) == ATfalse) {
-      CurrentId = ATgetName(ATgetAFun(ATgetFirst(List1)));
-      char Underscore[global_MaxIDlength] = "_";
-      char Underscores[global_MaxIDlength] = "__";
-      ATermAppl CommExpr = gsMakeCommExpr(gsMakeMultActName(ATmakeList2((ATerm)gsString2ATermAppl(CurrentId), (ATerm)gsString2ATermAppl(strcat(Underscore, CurrentId)))), gsString2ATermAppl(strcat(Underscores, CurrentId)));
-      ReturnList = ATinsert(ReturnList, (ATerm)CommExpr);
-      List1 = ATgetNext(List1);
+      List = ATgetNext(List);
     }
     return ReturnList;
   }
@@ -1420,16 +1402,52 @@ extern "C" {
     // PetriNet("...") = hide(I, restrict(H, comm(C, ("..." || Trans))));
     // the first "..." are the parameters of PetriNet; one for every place
     // the second "..." is the parallelisation of all the places in the PetriNet
-    ATermList ParameterList;
     ATermAppl Process;
       
-    ParameterList = pn2gsPlacesParameters(context.places);
-    Process = gsMakeHide(pn2gsHideList(ATtableKeys(context.arc_in), ATtableKeys(context.arc_out)), gsMakeRestrict(pn2gsRestrictList(ATtableKeys(context.arc_in), ATtableKeys(context.arc_out)), gsMakeComm(pn2gsCommList(ATtableKeys(context.arc_in), ATtableKeys(context.arc_out)), gsMakeMerge(pn2gsMerge(context.places), gsMakeActionProcess(gsString2ATermAppl("Trans"), ATmakeList0())))));
+    //Added by Yarick: alternative main process.
+    if(rec_par){
+      ATermList AllArcs=ATconcat(ATtableKeys(context.arc_in), ATtableKeys(context.arc_out));
+      Process = gsMakeHide(pn2gsHideList(AllArcs), 
+			   gsMakeRestrict(pn2gsRestrictList(AllArcs),
+					  gsMakeComm(pn2gsCommList(AllArcs),
+						     gsMakeMerge(pn2gsMerge(context.places), 
+								 gsMakeActionProcess(gsString2ATermAppl("Trans"), 
+										     ATmakeList0())))));
+    }
+    else{
+      //hide(In,restric(Hn,comm(Cn,
+      //....
+      //  hide(I2,restrict(H2,comm(C2,
+      //    hide(I1,restrict(H1,comm(C1,Trans||P1)))||P2)))||...Pn)))
+      Process=gsMakeActionProcess(gsString2ATermAppl("Trans"), ATmakeList0());
+      for(ATermList Places=ATtableKeys(context.place_process_name);!ATisEmpty(Places);Places=ATgetNext(Places)){
+	ATermAppl PlaceID=ATAgetFirst(Places);
+	ATermAppl Place=ATAtableGet(context.place_process_name,(ATerm)PlaceID);
+	Process=gsMakeMerge(Process,gsMakeActionProcess(Place,ATmakeList1((ATerm)pn2gsPlaceParameterNat(ATgetName(ATgetAFun(Place))))));
 
+	ATermList AssocArcs=ATmakeList0(); // in and out arcs of the place
+	{
+	  ATermList MoreArcs=ATLtableGet(context.place_in,(ATerm)PlaceID);
+	  if(MoreArcs) AssocArcs=ATconcat(AssocArcs,MoreArcs);
+
+	  MoreArcs=ATLtableGet(context.place_out,(ATerm)PlaceID);
+	  if(MoreArcs) AssocArcs=ATconcat(AssocArcs,MoreArcs);
+	}
+
+	if(ATisEmpty(AssocArcs)) continue;
+
+	Process=gsMakeHide(pn2gsHideList(AssocArcs), 
+			   gsMakeRestrict(pn2gsRestrictList(AssocArcs), 
+					  gsMakeComm(pn2gsCommList(AssocArcs), 
+						     Process)));
+      }
+    }
+
+    ATermList ParameterList = pn2gsPlacesParameters(context.places);
     ProcessList = ATinsert(ProcessList, (ATerm)gsMakeProcEqn(ATmakeList0(),gsMakeProcVarId(gsString2ATermAppl("PetriNet"),pn2gsListNNats(ATgetLength(ParameterList))), ParameterList, Process));
     gsDebugMsg("Process PetriNet created.\n");
 
-    // reminder: NetID == "Net_'ID of the Petri net'"
+    // remainder: NetID == "Net_'ID of the Petri net'"
     // the Net_ is preceded to the ID of the Petri net to prevent that two processes would have the same name!
     //
     // NetID = PetriNet("...")
@@ -1701,11 +1719,8 @@ extern "C" {
     // creation of GenSpect ATerms
     //==================================================
 
-    ATermList Actions;       // store all the GenSpect Actions
-    ATermList ProcEqns;      // store all the GenSpect Process Equations
-    
-    Actions = pn2gsGenerateActions();
-    ProcEqns = pn2gsGenerateProcEqns(ATAgetArgument(Spec, 3));
+    ATermList Actions=pn2gsGenerateActions();       // store all the GenSpect Actions
+    ATermList ProcEqns=pn2gsGenerateProcEqns(ATAgetArgument(Spec, 3));      // store all the GenSpect Process Equations
     
     gsDebugMsg("\n\n====================\n\n");
     gsDebugMsg("Conversion Succesful!");
@@ -1795,6 +1810,7 @@ extern "C" {
 
     context.transitions=ATmakeList0();
     context.places=ATmakeList0();
+    context.place_process_name=ATtableCreate(63,50);  
     
     Spec=pn2gsTranslate(Spec);
     
@@ -1808,6 +1824,7 @@ extern "C" {
     ATtableDestroy(context.trans_in);   
     ATtableDestroy(context.place_out);  
     ATtableDestroy(context.trans_out);
+    ATtableDestroy(context.place_process_name);
     
     if(!Spec) {
       gsErrorMsg("Error while converting PNML ATerm to GenSpect ATerm, conversion stopped!  \n");
@@ -1921,7 +1938,10 @@ extern "C" {
     // this is needed for the generation of the general process PetriNet
     context.places = ATinsert(context.places, (ATerm)CurrentPlace);
     gsDebugMsg("context.places now contains the following places: %t\n", context.places);
-    
+
+    //added by Yarick: we need a table to relate PlaceId and CurrentPlace.
+    ATtablePut(context.place_process_name,PlaceID,(ATerm)CurrentPlace);
+   
     ATermList EquationList=ATmakeList0();
     {
       //generate the main process
