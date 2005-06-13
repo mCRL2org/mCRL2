@@ -34,31 +34,91 @@ static ATermList SetDCs(ATermList l)
 	return m;
 }
 
+void print_help(FILE *f)
+{
+	fprintf(f,"Usage: %s OPTIONS LPEFILE OUTFILE\n",NAME);
+	fprintf(f,"Generate state space of LPEFILE and save the result to\n"
+	          "OUTFILE (in the aut format).\n"
+	          "\n"
+	          "The OPTIONS that can be used are:\n"
+	          "-h, --help               Display this help message\n"
+		  "-y, --dummy              Find dummy values instead of using\n"
+		  "                         free variables\n"
+	          "-l, --max num            Explore at most num states\n"
+	          "-d, --deadlock           Write traces to each deadlock to a\n"
+		  "                         file\n"
+	          "-m, --monitor            Print status of generation\n"
+	          "-e, --explore            As --monitor, but with deadlock\n"
+		  "                         detection\n"
+	       );
+}
+
 int main(int argc, char **argv)
 {
 	FILE *SpecStream,*aut;
 	ATerm stackbot;
 	ATermAppl Spec;
 	ATermList state, l, curr, currdc, next, nextdc;
-	ATermTable states;
+	ATermTable states,backpointers;
 	unsigned int num_states, curr_num, trans;
-	#define sopts "d"
+	#define sopts "hyldme"
 	struct option lopts[] = {
-		{ "dummy", 	no_argument,	NULL,	'd' },
+		{ "help", 	no_argument,		NULL,	'h' },
+		{ "dummy", 	no_argument,		NULL,	'y' },
+		{ "max", 	required_argument,	NULL,	'l' },
+		{ "deadlock", 	no_argument,		NULL,	'd' },
+		{ "monitor", 	no_argument,		NULL,	'm' },
+		{ "explore", 	no_argument,		NULL,	'e' },
 		{ 0, 0, 0, 0 }
 	};
-	int opt;
-	bool usedummies;
+	int opt,max_states;
+	bool usedummies,trace,trace_deadlock,monitor,explore;
 
 	ATinit(argc,argv,&stackbot);
 
 	usedummies = false;
+	max_states = 0;
+	trace = false;
+	trace_deadlock = false;
+	monitor = false;
+	explore = false;
 	while ( (opt = getopt_long(argc,argv,sopts,lopts,NULL)) != -1 )
 	{
 		switch ( opt )
 		{
-			case 'd':
+			case 'h':
+				print_help(stderr);
+				return 0;
+			case 'y':
 				usedummies = true;
+				break;
+			case 'l':
+				if ( optarg == NULL )
+				{
+					// XXX argument hack
+					// argument doesn't seem to work for short options
+					if ( (argv[optind][0] >= '0') && (argv[optind][0] <= '9') )
+					{
+						max_states = strtoul(argv[optind],NULL,0);
+						optind++;
+					}
+				} else {
+					if ( (optarg[0] >= '0') && (optarg[0] <= '9') )
+					{
+						max_states = strtoul(optarg,NULL,0);
+					}
+				}
+				break;
+			case 'd':
+				trace = true;
+				trace_deadlock = true;
+				break;
+			case 'm':
+				monitor = true;
+				break;
+			case 'e':
+				monitor = true;
+				explore = true;
 				break;
 			default:
 				break;
@@ -91,6 +151,12 @@ int main(int argc, char **argv)
 	states = ATtableCreate(10000,50);
 	num_states = 0;
 	trans = 0;
+	if ( trace )
+	{
+		backpointers = ATtableCreate(10000,50);
+	} else {
+		backpointers = NULL;
+	}
 	
 	fprintf(aut,"des (0,0,0)                   \n");
 
@@ -98,8 +164,15 @@ int main(int argc, char **argv)
 
 	ATtablePut(states,(ATerm) SetDCs(state),(ATerm) ATmakeInt(num_states++));
 
-	curr = ATmakeList1((ATerm) state);
-	currdc = ATmakeList1((ATerm) SetDCs(state));
+	if ( max_states != 1 )
+	{
+		curr = ATmakeList1((ATerm) state);
+		currdc = ATmakeList1((ATerm) SetDCs(state));
+	} else {
+		curr = ATmakeList0();
+		currdc = ATmakeList0();
+	}
+	int level = 1;
 	while ( !ATisEmpty(curr) )
 	{
 		next = ATmakeList0();
@@ -109,37 +182,91 @@ int main(int argc, char **argv)
 			state = ATLgetFirst(curr);
 			curr_num = ATgetInt((ATermInt) ATtableGet(states,ATgetFirst(currdc)));
 			l = gsNextState(ATLgetFirst(curr));
+			if ( ATisEmpty(l) )
+			{
+				if ( explore )
+				{
+					printf("explore: Deadlock found.\n");
+				}
+				if ( trace_deadlock )
+				{
+					ATermList s = state;
+					ATermList ns;
+					ATermList tr = ATmakeList0();
+
+					while ( (ns = (ATermList) ATtableGet(backpointers,(ATerm) s)) != NULL )
+					{
+						tr = ATinsert(tr,(ATerm) s);
+						s = ns;
+					}
+
+					for (; !ATisEmpty(tr); tr=ATgetNext(tr))
+					{
+						ATermList l = gsNextState(s);
+						for (; !ATisEmpty(l); l=ATgetNext(l))
+						{
+							if ( ATisEqual(ATgetFirst(ATgetNext(ATLgetFirst(l))),ATgetFirst(tr)) );
+							{
+								gsPrintPart(stdout,ATAgetFirst(ATLgetFirst(l)),false,0);
+								printf("\n");
+								break;
+							}
+						}
+						s = ATLgetFirst(tr);
+					}
+				}
+			}
 			for (; !ATisEmpty(l); l=ATgetNext(l))
 			{
 				ATerm s;
 				ATermList e = ATLgetFirst(ATgetNext(ATLgetFirst(l)));
 				ATermList edc = SetDCs(e);
-				int i;
+				int i = 0;
 		
 				if ( (s = ATtableGet(states,(ATerm) edc)) == NULL )
 				{
-					i = num_states;
-					s = (ATerm) ATmakeInt(num_states++);
-					ATtablePut(states,(ATerm) edc,s);
-					next = ATinsert(next,(ATerm) e);
-					nextdc = ATinsert(nextdc,(ATerm) edc);
+					if ( (max_states == 0) || (num_states < max_states) )
+					{
+						i = num_states;
+						s = (ATerm) ATmakeInt(num_states++);
+						ATtablePut(states,(ATerm) edc,s);
+						if ( trace )
+						{
+							ATtablePut(backpointers,(ATerm) e,(ATerm) state);
+						}
+						if ( (max_states == 0) || (num_states < max_states) )
+						{
+							next = ATinsert(next,(ATerm) e);
+							nextdc = ATinsert(nextdc,(ATerm) edc);
+						}
+					}
 				} else {
 					i = ATgetInt((ATermInt) s);
 				}
 
-				fprintf(aut,"(%i,\"",curr_num);
-				gsPrintPart(aut,ATAgetFirst(ATLgetFirst(l)),false,0);
-				fprintf(aut,"\",%i)\n",i);
-				trans++;
+				if ( i > 0 )
+				{
+					fprintf(aut,"(%i,\"",curr_num);
+					gsPrintPart(aut,ATAgetFirst(ATLgetFirst(l)),false,0);
+					fprintf(aut,"\",%i)\n",i);
+					trans++;
+				}
 			}
 		}
 		curr = ATreverse(next);
 		currdc = ATreverse(nextdc);
+		if ( monitor )
+		{
+			printf("monitor: Level %i done. Currently %i states and %i transitions explored.\n",level,num_states,trans);
+		}
+		level++;
 	}
 
 	rewind(aut);
 	fprintf(aut,"des (0,%i,%i)",trans,num_states);
 	fclose(aut);
+
+	printf("Done with state space generation (%i levels, %i states and %i transitions).\n",level-1,num_states,trans);
 }
 
 #ifdef __cplusplus
