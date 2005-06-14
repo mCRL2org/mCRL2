@@ -258,7 +258,7 @@ int main(int argc, char **argv)
 		currdc = ATreverse(nextdc);
 		if ( monitor )
 		{
-			printf("monitor: Level %i done. Currently %i states visited and %i states and %i transitions explored.\n",level,num_states,trans);
+			printf("monitor: Level %i done. Currently %i states visited and %i states and %i transitions explored.\n",level,num_states,num_states-ATgetLength(curr),trans);
 		}
 		level++;
 	}
