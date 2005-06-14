@@ -466,7 +466,8 @@ void rewrite_init_innerc()
 	//
 	//  Print includes and defs
 	//
-	fprintf(f,	"#include \"aterm2.h\"\n"
+	fprintf(f,	"#include <stdlib.h>\n"
+			"#include \"aterm2.h\"\n"
 			"\n"
 			"#define ATisList(x) (ATgetType(x) == AT_LIST)\n"
 			"#define ATisInt(x) (ATgetType(x) == AT_INT)\n"
@@ -798,7 +799,7 @@ void rewrite_init_innerc()
 		}
 	}
 
-	fprintf(f,	"ATerm rewrite_init()\n"
+	fprintf(f,	"void rewrite_init()\n"
 			"{\n"
 			"  int i;\n"
 			"\n"
@@ -883,9 +884,9 @@ void rewrite_init_innerc()
 
 	fclose(f);
 
-	sprintf(t,"gcc %s -O3 -rdynamic -c %s.c",INNERC_CFLAGS,s);
+	sprintf(t,"gcc %s -Wno-unused -O3 -rdynamic -c %s.c",INNERC_CFLAGS,s);
 	system(t);
-	sprintf(t,"gcc %s -shared -o %s.so %s.o",INNERC_LDFLAGS,s,s);
+	sprintf(t,"gcc %s -Wno-unused -shared -o %s.so %s.o",INNERC_LDFLAGS,s,s);
 	system(t);
 
 	sprintf(t,"./%s.so",s);
