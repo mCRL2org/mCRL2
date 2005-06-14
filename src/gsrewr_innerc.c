@@ -16,6 +16,9 @@
 #ifndef INNERC_CFLAGS
 #define INNERC_CFLAGS	""
 #endif
+#ifndef INNERC_CPPFLAGS
+#define INNERC_CPPFLAGS	""
+#endif
 #ifndef INNERC_LDFLAGS
 #define INNERC_LDFLAGS	""
 #endif
@@ -884,7 +887,7 @@ void rewrite_init_innerc()
 
 	fclose(f);
 
-	sprintf(t,"gcc %s -Wno-unused -O3 -rdynamic -c %s.c",INNERC_CFLAGS,s);
+	sprintf(t,"gcc %s %s -Wno-unused -O3 -rdynamic -c %s.c",INNERC_CFLAGS,INNERC_CPPFLAGS,s);
 	system(t);
 	sprintf(t,"gcc %s -Wno-unused -shared -o %s.so %s.o",INNERC_LDFLAGS,s,s);
 	system(t);
