@@ -42,14 +42,15 @@ void print_help(FILE *f)
 	          "\n"
 	          "The OPTIONS that can be used are:\n"
 	          "-h, --help               Display this help message\n"
-		  "-y, --dummy              Find dummy values instead of using\n"
-		  "                         free variables\n"
+		  "-y, --dummy              Replace free variables in states\n"
+		  "                         with dummy values.\n"
 	          "-l, --max num            Explore at most num states\n"
-	          "-d, --deadlock           Write traces to each deadlock to a\n"
-		  "                         file\n"
+	          "    --deadlock           Synonym for --deadlock-detect\n"
+	          "-d, --deadlock-detect    Detect deadlocks (i.e. for every\n"
+		  "                         deadlock a message is printed)\n"
+	          "-e, --deadlock-trace     Write trace to each deadlock state\n"
+		  "                         to a file\n"
 	          "-m, --monitor            Print status of generation\n"
-	          "-e, --explore            As --monitor, but with deadlock\n"
-		  "                         detection\n"
 	       );
 }
 
@@ -61,14 +62,15 @@ int main(int argc, char **argv)
 	ATermList state, l, curr, currdc, next, nextdc;
 	ATermTable states,backpointers;
 	unsigned int num_states, curr_num, trans;
-	#define sopts "hyldme"
+	#define sopts "hyldem"
 	struct option lopts[] = {
-		{ "help", 	no_argument,		NULL,	'h' },
-		{ "dummy", 	no_argument,		NULL,	'y' },
-		{ "max", 	required_argument,	NULL,	'l' },
-		{ "deadlock", 	no_argument,		NULL,	'd' },
-		{ "monitor", 	no_argument,		NULL,	'm' },
-		{ "explore", 	no_argument,		NULL,	'e' },
+		{ "help", 		no_argument,		NULL,	'h' },
+		{ "dummy", 		no_argument,		NULL,	'y' },
+		{ "max", 		required_argument,	NULL,	'l' },
+		{ "deadlock", 		no_argument,		NULL,	'd' },
+		{ "deadlock-detect", 	no_argument,		NULL,	'd' },
+		{ "deadlock-trace", 	no_argument,		NULL,	'e' },
+		{ "monitor", 		no_argument,		NULL,	'm' },
 		{ 0, 0, 0, 0 }
 	};
 	int opt,max_states;
@@ -110,15 +112,14 @@ int main(int argc, char **argv)
 				}
 				break;
 			case 'd':
+				explore = true;
+				break;
+			case 'e':
 				trace = true;
 				trace_deadlock = true;
 				break;
 			case 'm':
 				monitor = true;
-				break;
-			case 'e':
-				monitor = true;
-				explore = true;
 				break;
 			default:
 				break;
@@ -257,7 +258,7 @@ int main(int argc, char **argv)
 		currdc = ATreverse(nextdc);
 		if ( monitor )
 		{
-			printf("monitor: Level %i done. Currently %i states and %i transitions explored.\n",level,num_states,trans);
+			printf("monitor: Level %i done. Currently %i states visited and %i states and %i transitions explored.\n",level,num_states,trans);
 		}
 		level++;
 	}

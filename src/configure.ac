@@ -1,6 +1,27 @@
 AC_INIT([mCRL2 toolset], [0.2], [A.H.J.Mathijssen@tue.nl])
+AC_CANONICAL_HOST
 AC_PREFIX_DEFAULT([$HOME])
 AC_CONFIG_SRCDIR([gslowlevel.h])
+
+# Setting host OS
+case $host in
+  *-*-msdos* | *-*-go32* | *-*-mingw32* | *-*-cygwin* | *-*-windows*)
+    HOST_OS="WINDOWS"
+    ;;
+  *-*-linux*)
+    HOST_OS="LINUX"
+    ;;
+  *-*-*bsd*)
+    HOST_OS="BSD"
+    ;;
+  *-*-darwin)
+    HOST_OS="MACOSX"
+    ;;
+  *)
+    HOST_OS="UNKNOWN"
+    ;;
+esac
+AC_SUBST([HOST_OS])
 
 # Checks for programs.
 AC_PROG_CC
@@ -126,5 +147,5 @@ AC_TYPE_SIZE_T
 AC_FUNC_MALLOC
 AC_CHECK_FUNCS([strdup])
 
-AC_CONFIG_FILES([Makefile])
+AC_CONFIG_FILES([Makefile gsrewr_innerc_aux.h])
 AC_OUTPUT

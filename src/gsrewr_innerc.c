@@ -11,6 +11,16 @@
 #include "gsfunc.h"
 #include "gsrewr_innerc.h"
 #include "libgsparse.h"
+#include "gsrewr_innerc_aux.h"
+
+#ifndef INNERC_CFLAGS
+#define INNERC_CFLAGS	""
+#endif
+#ifndef INNERC_LDFLAGS
+#define INNERC_LDFLAGS	""
+#endif
+
+#define ATXgetArgument(x,y) ((unsigned int) ATgetArgument(x,y))
 
 extern ATermList opid_eqns;
 extern ATermList dataappl_eqns;
@@ -188,17 +198,17 @@ void checkListArg(FILE *f, ATermList l, ATermList *n, int *d, int *ls)
 		} else {
 			if ( ATindexOf(*n,ATgetFirst(l),0) >= 0 )
 			{
-	fprintf(f,	"       %svar_%s = ATgetFirst(l%i);\n"
+	fprintf(f,	"       %svar_%s_%x = ATgetFirst(l%i);\n"
 			"       %sl%i = ATgetNext(l%i);\n",
-			whitespace((*d)*2),ATgetName(ATgetAFun(ATAgetArgument(ATAgetFirst(l),0))),l_ls-1,
+			whitespace((*d)*2),ATgetName(ATgetAFun(ATAgetArgument(ATAgetFirst(l),0))),ATXgetArgument(ATAgetFirst(l),1),l_ls-1,
 			whitespace((*d)*2),l_ls-1,l_ls-1
 	       );
 				*n = ATremoveAll(*n,ATgetFirst(l));
 			} else {
-	fprintf(f,	"       %sif ( ATisEqual(var_%s,ATgetFirst(l%i)) )\n"
+	fprintf(f,	"       %sif ( ATisEqual(var_%s_%x,ATgetFirst(l%i)) )\n"
 			"       %s{\n"
 			"       %s  l%i = ATgetNext(l%i);\n",
-			whitespace((*d)*2),ATgetName(ATgetAFun(ATAgetArgument(ATAgetFirst(l),0))),l_ls-1,
+			whitespace((*d)*2),ATgetName(ATgetAFun(ATAgetArgument(ATAgetFirst(l),0))),ATXgetArgument(ATAgetFirst(l),1),l_ls-1,
 			whitespace((*d)*2),
 			whitespace((*d)*2),l_ls-1,l_ls-1
 	       );
@@ -296,22 +306,22 @@ void calcList(FILE *f, ATermList l, int d, int ls, bool incl_rest, int incl_num)
 		{
 			if ( 0 && ATisEmpty(ATgetNext(l)) )
 			{
-	fprintf(f,	"       %sif ( ATisList(var_%s) )\n"
+	fprintf(f,	"       %sif ( ATisList(var_%s_%x) )\n"
 			"       %s{\n"
-			"       %s  l%i = ATconcat((ATermList) var_%s,l%i);\n"
+			"       %s  l%i = ATconcat((ATermList) var_%s_%x,l%i);\n"
 			"       %s} else {\n"
-			"       %s  l%i = ATinsert(l%i,var_%s);\n"
+			"       %s  l%i = ATinsert(l%i,var_%s_%x);\n"
 			"       %s}\n",
-			whitespace(d*2),ATgetName(ATgetAFun(ATAgetArgument(ATAgetFirst(l),0))),
+			whitespace(d*2),ATgetName(ATgetAFun(ATAgetArgument(ATAgetFirst(l),0))),ATXgetArgument(ATAgetFirst(l),1),
 			whitespace(d*2),
-			whitespace(d*2),ls-1,ATgetName(ATgetAFun(ATAgetArgument(ATAgetFirst(l),0))),ls-1,
+			whitespace(d*2),ls-1,ATgetName(ATgetAFun(ATAgetArgument(ATAgetFirst(l),0))),ATXgetArgument(ATAgetFirst(l),1),ls-1,
 			whitespace(d*2),
-			whitespace(d*2),ls-1,ls-1,ATgetName(ATgetAFun(ATAgetArgument(ATAgetFirst(l),0))),
+			whitespace(d*2),ls-1,ls-1,ATgetName(ATgetAFun(ATAgetArgument(ATAgetFirst(l),0))),ATXgetArgument(ATAgetFirst(l),1),
 			whitespace(d*2)
 	       );
 			} else {
-	fprintf(f,	"       %sl%i = ATinsert(l%i,var_%s);\n",
-			whitespace(d*2),ls-1,ls-1,ATgetName(ATgetAFun(ATAgetArgument(ATAgetFirst(l),0)))
+	fprintf(f,	"       %sl%i = ATinsert(l%i,var_%s_%x);\n",
+			whitespace(d*2),ls-1,ls-1,ATgetName(ATgetAFun(ATAgetArgument(ATAgetFirst(l),0))),ATXgetArgument(ATAgetFirst(l),1)
 	       );
 			}
 		}
@@ -336,12 +346,12 @@ void calcList(FILE *f, ATermList l, int d, int ls, bool incl_rest, int incl_num)
 	fprintf(f,	"       %s{\n"
 			"       %s  ATerm a;\n"
 			"\n"
-			"       %s  if ( ATisList(var_%s) )\n"
+			"       %s  if ( ATisList(var_%s_%x) )\n"
 			"       %s  {\n"
-			"       %s    a = ATgetFirst((ATermList) var_%s);\n"
-			"       %s    l%i = ATconcat(ATgetNext((ATermList) var_%s),l%i);\n"
+			"       %s    a = ATgetFirst((ATermList) var_%s_%x);\n"
+			"       %s    l%i = ATconcat(ATgetNext((ATermList) var_%s_%x),l%i);\n"
 			"       %s  } else {\n"
-			"       %s    a = var_%s;\n"
+			"       %s    a = var_%s_%x;\n"
 			"       %s  }\n"
 
 //			"ATfprintf(stderr,\"--> %%t\\n\\n\",var_%s);\n"
@@ -355,12 +365,12 @@ void calcList(FILE *f, ATermList l, int d, int ls, bool incl_rest, int incl_num)
 			"       %s}\n",
 			whitespace(d*2),
 			whitespace(d*2),
-			whitespace(d*2),ATgetName(ATgetAFun(ATAgetArgument((ATermAppl) a,0))),
+			whitespace(d*2),ATgetName(ATgetAFun(ATAgetArgument((ATermAppl) a,0))),ATXgetArgument((ATermAppl) a,1),
 			whitespace(d*2),
-			whitespace(d*2),ATgetName(ATgetAFun(ATAgetArgument((ATermAppl) a,0))),
-			whitespace(d*2),ls-1,ATgetName(ATgetAFun(ATAgetArgument((ATermAppl) a,0))),ls-1,
+			whitespace(d*2),ATgetName(ATgetAFun(ATAgetArgument((ATermAppl) a,0))),ATXgetArgument((ATermAppl) a,1),
+			whitespace(d*2),ls-1,ATgetName(ATgetAFun(ATAgetArgument((ATermAppl) a,0))),ATXgetArgument((ATermAppl) a,1),ls-1,
 			whitespace(d*2),
-			whitespace(d*2),ATgetName(ATgetAFun(ATAgetArgument((ATermAppl) a,0))),
+			whitespace(d*2),ATgetName(ATgetAFun(ATAgetArgument((ATermAppl) a,0))),ATXgetArgument((ATermAppl) a,1),
 			whitespace(d*2),
 
 //			ATgetName(ATgetAFun(ATAgetArgument((ATermAppl) a,0))),
@@ -568,7 +578,8 @@ void rewrite_init_innerc()
 	fprintf(f,	"     {\n");
 						for (; !ATisEmpty(m); m=ATgetNext(m))
 						{
-	fprintf(f,	"       ATerm var_%s;\n",ATgetName(ATgetAFun(ATAgetArgument(ATAgetFirst(m),0))));
+							if ( ATindexOf(ATgetNext(m),ATgetFirst(m),0) < 0 ) // XXX to avoid doubles in list
+	fprintf(f,	"       ATerm var_%s_%x;\n",ATgetName(ATgetAFun(ATAgetArgument(ATAgetFirst(m),0))),ATXgetArgument(ATAgetFirst(m),1));
 						}
 	fprintf(f,	"\n");
 						//
@@ -604,12 +615,12 @@ void rewrite_init_innerc()
 							} else {
 								if ( ATindexOf(n,ATgetFirst(m),0) >= 0 )
 								{
-	fprintf(f,	"       %svar_%s = a[%i];\n",whitespace(d*2),ATgetName(ATgetAFun(ATAgetArgument(ATAgetFirst(m),0))),k);
+	fprintf(f,	"       %svar_%s_%x = a[%i];\n",whitespace(d*2),ATgetName(ATgetAFun(ATAgetArgument(ATAgetFirst(m),0))),ATXgetArgument(ATAgetFirst(m),1),k);
 									n = ATremoveAll(n,ATgetFirst(m));
 								} else {
-	fprintf(f,	"       %sif ( ATisEqual(var_%s,a[%i]) )\n"
+	fprintf(f,	"       %sif ( ATisEqual(var_%s_%x,a[%i]) )\n"
 			"       %s{\n",
-			whitespace(d*2),ATgetName(ATgetAFun(ATAgetArgument(ATAgetFirst(m),0))),k,whitespace(d*2)
+			whitespace(d*2),ATgetName(ATgetAFun(ATAgetArgument(ATAgetFirst(m),0))),ATXgetArgument(ATAgetFirst(m),1),k,whitespace(d*2)
 	       );
 									d++;
 								}
@@ -666,9 +677,9 @@ void rewrite_init_innerc()
 							ls++;
 						} else if ( !gsIsNil(ATAelementAt(ATLgetFirst(l),1)) )
 						{
-	fprintf(f,	"       %sif ( ATisInt(var_%s) && (ATgetInt((ATermInt) var_%s) == %i) )\n"
+	fprintf(f,	"       %sif ( ATisInt(var_%s_%x) && (ATgetInt((ATermInt) var_%s_%x) == %i) )\n"
 			"       %s{\n",
-			whitespace(d*2),ATgetName(ATgetAFun(ATAgetArgument(ATAelementAt(ATLgetFirst(l),1),0))),ATgetName(ATgetAFun(ATAgetArgument(ATAelementAt(ATLgetFirst(l),1),0))),true_num,whitespace(d*2)
+			whitespace(d*2),ATgetName(ATgetAFun(ATAgetArgument(ATAelementAt(ATLgetFirst(l),1),0))),ATXgetArgument(ATAelementAt(ATLgetFirst(l),1),1),ATgetName(ATgetAFun(ATAgetArgument(ATAelementAt(ATLgetFirst(l),1),0))),ATXgetArgument(ATAelementAt(ATLgetFirst(l),1),1),true_num,whitespace(d*2)
 	       );
 							d++;
 						}
@@ -729,29 +740,29 @@ void rewrite_init_innerc()
 	       );
 						} else if ( !gsIsNil(ATAelementAt(ATLgetFirst(l),3)) )
 						{
-	fprintf(f,	"       %sif ( ATisList(var_%s) )\n"
+	fprintf(f,	"       %sif ( ATisList(var_%s_%x) )\n"
 			"       %s{\n"
 
 //			"ATfprintf(stderr,\"(%i)return %%t\\n\\n\",ATconcat((ATermList) var_%s,rest[%i]));\n"
 
-			"       %s  return ATconcat((ATermList) var_%s,rest[%i]);\n"
+			"       %s  return ATconcat((ATermList) var_%s_%x,rest[%i]);\n"
 			"       %s} else {\n"
 
 //			"ATfprintf(stderr,\"(%i)return %%t\\n\\n\",ATinsert(rest[%i],var_%s));\n"
 
-			"       %s  return ATinsert(rest[%i],var_%s);\n"
+			"       %s  return ATinsert(rest[%i],var_%s_%x);\n"
 			"       %s}\n",
-			whitespace(d*2),ATgetName(ATgetAFun(ATAgetArgument(ATAelementAt(ATLgetFirst(l),3),0))),
+			whitespace(d*2),ATgetName(ATgetAFun(ATAgetArgument(ATAelementAt(ATLgetFirst(l),3),0))),ATXgetArgument(ATAelementAt(ATLgetFirst(l),3),1),
 			whitespace(d*2),
 
 //			j,ATgetName(ATgetAFun(ATAgetArgument(ATAelementAt(ATLgetFirst(l),3),0))),max,
 
-			whitespace(d*2),ATgetName(ATgetAFun(ATAgetArgument(ATAelementAt(ATLgetFirst(l),3),0))),max,
+			whitespace(d*2),ATgetName(ATgetAFun(ATAgetArgument(ATAelementAt(ATLgetFirst(l),3),0))),ATXgetArgument(ATAelementAt(ATLgetFirst(l),3),1),max,
 			whitespace(d*2),
 
 //			j,max,ATgetName(ATgetAFun(ATAgetArgument(ATAelementAt(ATLgetFirst(l),3),0))),
 
-			whitespace(d*2),max,ATgetName(ATgetAFun(ATAgetArgument(ATAelementAt(ATLgetFirst(l),3),0))),
+			whitespace(d*2),max,ATgetName(ATgetAFun(ATAgetArgument(ATAelementAt(ATLgetFirst(l),3),0))),ATXgetArgument(ATAelementAt(ATLgetFirst(l),3),1),
 			whitespace(d*2)
 	       );
 						}
@@ -872,9 +883,9 @@ void rewrite_init_innerc()
 
 	fclose(f);
 
-	sprintf(t,"gcc -O3 -rdynamic -c %s.c",s);
+	sprintf(t,"gcc %s -O3 -rdynamic -c %s.c",INNERC_CFLAGS,s);
 	system(t);
-	sprintf(t,"gcc -shared -o %s.so %s.o",s,s);
+	sprintf(t,"gcc %s -shared -o %s.so %s.o",INNERC_LDFLAGS,s,s);
 	system(t);
 
 	sprintf(t,"./%s.so",s);

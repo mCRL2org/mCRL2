@@ -1,4 +1,5 @@
 #Redefine default definitions using autoconf
+HOST_OS            = @HOST_OS@
 CC                 = @CC@
 CFLAGS             = @CFLAGS@
 CPP                = @CPP@
