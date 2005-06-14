@@ -462,7 +462,7 @@ void rewrite_init_innerc()
 	ATtableDestroy(tmp_eqns);
 
 	s = "innerc_XXXXXX"; // XXX
-	t = (char *) malloc(100);
+	t = (char *) malloc(100+strlen(INNERC_LDFLAGS)+strlen(INNERC_CFLAGS)+strlen(INNERC_CPPFLAGS));
 	sprintf(t,"%s.c",s);
 	f = fopen(t,"w");
 
@@ -887,7 +887,7 @@ void rewrite_init_innerc()
 
 	fclose(f);
 
-	sprintf(t,"gcc %s %s -Wno-unused -O3 -rdynamic -c %s.c",INNERC_CFLAGS,INNERC_CPPFLAGS,s);
+	sprintf(t,"gcc -c %s %s -Wno-unused -O3 -rdynamic %s.c",INNERC_CPPFLAGS,INNERC_CFLAGS,s);
 	system(t);
 	sprintf(t,"gcc %s -Wno-unused -shared -o %s.so %s.o",INNERC_LDFLAGS,s,s);
 	system(t);
