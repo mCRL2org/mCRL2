@@ -188,6 +188,7 @@ int main(int argc, char **argv)
 				if ( explore )
 				{
 					printf("explore: Deadlock found.\n");
+					fflush(stdout);
 				}
 				if ( trace_deadlock )
 				{
@@ -206,7 +207,7 @@ int main(int argc, char **argv)
 						ATermList l = gsNextState(s);
 						for (; !ATisEmpty(l); l=ATgetNext(l))
 						{
-							if ( ATisEqual(ATgetFirst(ATgetNext(ATLgetFirst(l))),ATgetFirst(tr)) );
+							if ( ATisEqual(ATgetFirst(ATgetNext(ATLgetFirst(l))),ATgetFirst(tr)) )
 							{
 								gsPrintPart(stdout,ATAgetFirst(ATLgetFirst(l)),false,0);
 								printf("\n");
@@ -215,6 +216,7 @@ int main(int argc, char **argv)
 						}
 						s = ATLgetFirst(tr);
 					}
+					fflush(stdout);
 				}
 			}
 			for (; !ATisEmpty(l); l=ATgetNext(l))
@@ -259,6 +261,7 @@ int main(int argc, char **argv)
 		if ( monitor )
 		{
 			printf("monitor: Level %i done. Currently %i states visited and %i states and %i transitions explored.\n",level,num_states,num_states-ATgetLength(curr),trans);
+			fflush(stdout);
 		}
 		level++;
 	}
