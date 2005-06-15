@@ -31,6 +31,12 @@ includedir         = @includedir@
 infodir            = @infodir@
 mandir             = @mandir@
 
+#Environment variable for Mac
+ifeq ($(HOST_OS),MACOSX)
+MACOSX_DEPLOYMENT_TARGET = 10.3
+export MACOSX_DEPLOYMENT_TARGET
+endif
+
 #All objects that are used
 OBJECTS            =
 
@@ -127,6 +133,19 @@ install: all
 	    $$c;\
 	  fi;\
 	done
+ifdef USE_WX
+ifeq ($(HOST_OS),MACOSX)
+	/Developer/Tools/Rez -t APPL -o xsim sample.r
+	/Developer/Tools/SetFile -a C xsim   
+	mkdir -p $(bindir)/xsim.app/Contents
+	mkdir -p $(bindir)/xsim.app/Contents/MacOS
+	mkdir -p $(bindir)/xsim.app/Contents/Resources
+	cp xsim.plist $(bindir)xsim.app/Contents/Info.plist
+	echo -n "APPL????" > $(bindir)/xsim.app/Contents/PkgInfo
+	ln -f $(bindir)/xsim $(bindir)/xsim.app/Contents/MacOS/xsim
+	cp -f xsim.icns $(bindir)/xsim.app/Contents/Resources/xsim.icns
+endif
+endif
 	$(INSTALL) -d $(libdir)
 	@for f in $(LIB_NAMES); do\
 	  if test -f $$f; then\
@@ -178,28 +197,11 @@ $(SIM_NAME) : $(SIM_OBJECTS) $(LIBPARSER_NAME) $(LIBREWR_NAME)
 	$(CC) -o $@ $(SIM_OBJECTS) $(LDFLAGS) $(SIM_LDFLAGS)
 
 ifdef USE_WX
-ifeq ($(HOST_OS),MACOSX)
 $(XSIM_NAME): $(XSIM_OBJECTS) $(LIBPARSER_NAME) $(LIBREWR_NAME)
 	$(CXX) -o $@ $(XSIM_OBJECTS) $(LDFLAGS) $(XSIM_LDFLAGS)
 
 $(XSIMTRACE_NAME): $(XSIMTRACE_OBJECTS) $(LIBPARSER_NAME) $(LIBREWR_NAME)
 	$(CXX) -o $@ $(XSIMTRACE_OBJECTS) $(LDFLAGS) $(XSIMTRACE_LDFLAGS)
-	/Developer/Tools/Rez -t APPL -o xsim sample.r
-	/Developer/Tools/SetFile -a C xsim   
-	mkdir -p xsim.app/Contents
-	mkdir -p xsim.app/Contents/MacOS
-	mkdir -p xsim.app/Contents/Resources
-	cp xsim.plist xsim.app/Contents/Info.plist
-	echo -n "APPL????" >xsim.app/Contents/PkgInfo
-	ln -f xsim xsim.app/Contents/MacOS/xsim
-	cp -f xsim.icns xsim.app/Contents/Resources/xsim.icns
-else
-$(XSIM_NAME): $(XSIM_OBJECTS) $(LIBPARSER_NAME) $(LIBREWR_NAME)
-	$(CXX) -o $@ $(XSIM_OBJECTS) $(LDFLAGS) $(XSIM_LDFLAGS)
-
-$(XSIMTRACE_NAME): $(XSIMTRACE_OBJECTS) $(LIBPARSER_NAME) $(LIBREWR_NAME)
-	$(CXX) -o $@ $(XSIMTRACE_OBJECTS) $(LDFLAGS) $(XSIMTRACE_LDFLAGS)
-endif
 else
 $(XSIM_NAME):
 	@echo cannot make target $@ because the wxWidgets library cannot be used
