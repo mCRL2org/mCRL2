@@ -6,7 +6,11 @@ CPP                = @CPP@
 CPPFLAGS           = @CPPFLAGS@
 CXX                = @CXX@
 CXXFLAGS           = @CXXFLAGS@
+ifeq ($(HOST_OS),MACOSX)
+LDFLAGS            = @LDFLAGS@
+else
 LDFLAGS            = -Wl,-rpath,$(libdir) -rdynamic @LDFLAGS@
+endif
 ARFLAGS            = crs
 INSTALL            = install
 LEX                = @LEX@
@@ -96,7 +100,12 @@ XSIMTRACE_OBJECTS  = xsimtracedll.o
 ifdef USE_WX
 OBJECTS           += $(XSIMTRACE_OBJECTS)
 endif
-XSIMTRACE_LDFLAGS  = -shared
+
+ifeq ($(HOST_OS),MACOSX)
+  XSIMTRACE_LDFLAGS  = -bundle -undefined dynamic_lookup
+else
+  XSIMTRACE_LDFLAGS  = -shared
+endif
 
 #Group definitions
 EXE_NAMES          =  $(PARSER_NAME) $(PRINTER_NAME) $(LINEARISER_NAME) $(LIN_NAME) $(REWR_NAME) $(PNML2GS_NAME) $(INSTAN_NAME) $(SIM_NAME) $(XSIM_NAME)
@@ -169,11 +178,28 @@ $(SIM_NAME) : $(SIM_OBJECTS) $(LIBPARSER_NAME) $(LIBREWR_NAME)
 	$(CC) -o $@ $(SIM_OBJECTS) $(LDFLAGS) $(SIM_LDFLAGS)
 
 ifdef USE_WX
+ifeq ($(HOST_OS),MACOSX)
 $(XSIM_NAME): $(XSIM_OBJECTS) $(LIBPARSER_NAME) $(LIBREWR_NAME)
 	$(CXX) -o $@ $(XSIM_OBJECTS) $(LDFLAGS) $(XSIM_LDFLAGS)
 
 $(XSIMTRACE_NAME): $(XSIMTRACE_OBJECTS) $(LIBPARSER_NAME) $(LIBREWR_NAME)
 	$(CXX) -o $@ $(XSIMTRACE_OBJECTS) $(LDFLAGS) $(XSIMTRACE_LDFLAGS)
+	/Developer/Tools/Rez -t APPL -o xsim sample.r
+	/Developer/Tools/SetFile -a C xsim   
+	mkdir -p xsim.app/Contents
+	mkdir -p xsim.app/Contents/MacOS
+	mkdir -p xsim.app/Contents/Resources
+	cp xsim.plist xsim.app/Contents/Info.plist
+	echo -n "APPL????" >xsim.app/Contents/PkgInfo
+	ln -f xsim xsim.app/Contents/MacOS/xsim
+	cp -f xsim.icns xsim.app/Contents/Resources/xsim.icns
+else
+$(XSIM_NAME): $(XSIM_OBJECTS) $(LIBPARSER_NAME) $(LIBREWR_NAME)
+	$(CXX) -o $@ $(XSIM_OBJECTS) $(LDFLAGS) $(XSIM_LDFLAGS)
+
+$(XSIMTRACE_NAME): $(XSIMTRACE_OBJECTS) $(LIBPARSER_NAME) $(LIBREWR_NAME)
+	$(CXX) -o $@ $(XSIMTRACE_OBJECTS) $(LDFLAGS) $(XSIMTRACE_LDFLAGS)
+endif
 else
 $(XSIM_NAME):
 	@echo cannot make target $@ because the wxWidgets library cannot be used
