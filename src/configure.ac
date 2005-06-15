@@ -14,7 +14,7 @@ case $host in
   *-*-*bsd*)
     HOST_OS="BSD"
     ;;
-  *-*-darwin)
+  *-*-darwin*)
     HOST_OS="MACOSX"
     ;;
   *)
