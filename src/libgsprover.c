@@ -9,6 +9,8 @@ extern "C" {
 #include "libgsparse.h"
 #include "libgsrewrite.h"
 
+bool FindSolutionsError;
+
 static ATermAppl current_spec;
 static ATermAppl gsProverTrue, gsProverFalse;
 
@@ -218,12 +220,21 @@ ATermList FindSolutions(ATermList Vars, ATermAppl Expr)
 {
 	ATermList l,t,m,n,o;
 
+	FindSolutionsError = false;
+
 	if ( ATisEmpty(Vars) )
 	{
-		if ( ATisEqual(gsRewriteTerm(Expr),gsProverTrue) )
+		Expr = gsRewriteTerm(Expr);
+		if ( ATisEqual(Expr,gsProverTrue) )
 		{
 			return ATmakeList1((ATerm) ATmakeList0());
 		} else {
+			if ( !ATisEqual(Expr,gsProverFalse) )
+			{
+//				gsWarningMsg("term does not evaluate to true or false (%t)\n",ATgetFirst(ATgetNext(o)));
+				ATfprintf(stderr,"Term does not evaluate to true or false: ");gsPrintPart(stderr,Expr,false,0);ATfprintf(stderr,"\n");
+				FindSolutionsError = true;
+			}
 			return ATmakeList0();
 		}
 	}
@@ -239,7 +250,9 @@ ATermList FindSolutions(ATermList Vars, ATermAppl Expr)
 		} else {
 			if ( !ATisEqual(ATgetFirst(ATgetNext(o)),gsProverFalse) )
 			{
-				gsWarningMsg("term does not evaluate to true or false (%t)\n",ATgetFirst(ATgetNext(o)));
+//				gsWarningMsg("term does not evaluate to true or false (%t)\n",ATgetFirst(ATgetNext(o)));
+				ATfprintf(stderr,"Term does not evaluate to true or false: ");gsPrintPart(stderr,ATAgetFirst(ATgetNext(o)),false,0);ATfprintf(stderr,"\n");
+				FindSolutionsError = true;
 			}
 			return ATmakeList0();
 		}
@@ -268,6 +281,7 @@ ATermList FindSolutions(ATermList Vars, ATermAppl Expr)
 						{
 //							ATfprintf(stderr,"Term does not evaluate to true or false (%t)\n",ATgetFirst(ATgetNext(o)));
 							ATfprintf(stderr,"Term does not evaluate to true or false: ");gsPrintPart(stderr,ATAgetFirst(ATgetNext(o)),false,0);ATfprintf(stderr,"\n");
+							FindSolutionsError = true;
 						}
 					}
 				} else {

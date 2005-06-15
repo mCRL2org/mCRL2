@@ -10,6 +10,8 @@ extern "C" {
 #include "libgsprover.h"
 #include "libgsrewrite.h"
 
+bool NextStateError;
+
 bool ATisList(ATerm a)
 {
 	return (ATgetType(a) == AT_LIST);
@@ -243,7 +245,9 @@ ATermList gsNextState(ATermList State)
 {
 	ATermList sums,states,l,m,params;
 	ATermAppl sum;
-	
+
+	NextStateError = false;
+
 	l = ATLgetArgument(ATAgetArgument(current_spec,5),1);
 	m = State;
 	params = ATmakeList0();
@@ -262,6 +266,7 @@ ATermList gsNextState(ATermList State)
 		ATerm act = ATgetArgument(sum,2);
 		ATermList newstate = ATLgetArgument(sum,4);
 		l = FindSolutions(ATLgetArgument(sum,0),ATAgetArgument(sum,1));
+		NextStateError |= FindSolutionsError;
 		for (; !ATisEmpty(l); l=ATgetNext(l))
 		{
 			states = ATinsert(states, (ATerm)

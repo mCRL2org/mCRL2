@@ -174,6 +174,7 @@ int main(int argc, char **argv)
 		currdc = ATmakeList0();
 	}
 	int level = 1;
+	bool err = false;
 	while ( !ATisEmpty(curr) )
 	{
 		next = ATmakeList0();
@@ -183,6 +184,13 @@ int main(int argc, char **argv)
 			state = ATLgetFirst(curr);
 			curr_num = ATgetInt((ATermInt) ATtableGet(states,ATgetFirst(currdc)));
 			l = gsNextState(ATLgetFirst(curr));
+			if ( NextStateError )
+			{
+				next = ATmakeList0();
+				nextdc = ATmakeList0();
+				err = true;
+				break;
+			}
 			if ( ATisEmpty(l) )
 			{
 				if ( explore )
@@ -258,7 +266,7 @@ int main(int argc, char **argv)
 		}
 		curr = ATreverse(next);
 		currdc = ATreverse(nextdc);
-		if ( monitor )
+		if ( monitor && !err )
 		{
 			printf("monitor: Level %i done. Currently %i states visited and %i states and %i transitions explored.\n",level,num_states,num_states-ATgetLength(curr),trans);
 			fflush(stdout);
@@ -270,7 +278,10 @@ int main(int argc, char **argv)
 	fprintf(aut,"des (0,%i,%i)",trans,num_states);
 	fclose(aut);
 
-	printf("Done with state space generation (%i levels, %i states and %i transitions).\n",level-1,num_states,trans);
+	if ( !err )
+	{
+		printf("Done with state space generation (%i levels, %i states and %i transitions).\n",level-1,num_states,trans);
+	}
 }
 
 #ifdef __cplusplus

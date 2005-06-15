@@ -4,6 +4,8 @@ extern "C" {
 
 #include <aterm2.h>
 
+extern bool FindSolutionsError;
+
 void gsProverInit(ATermAppl Spec);
 
 ATermList FindSolutions(ATermList Vars, ATermAppl Expr);
