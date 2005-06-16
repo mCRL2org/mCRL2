@@ -64,7 +64,7 @@ P("Usage: linearise [options] [file]");
 P("");
 P("The following options can be used:");
 P("-stack:    an LPO of the input file in toolbus term format file is ");
-P("           translated using stack datatypes. Result in written to file.lpo.");
+P("           translated using stack datatypes. Result in written to file.lpe.");
 P("-stdout:   an LPO in toolbus term format is generated, and written");
 P("           to stdout");
 P("-regular:  it is assumed that the input file is regular, and the");
@@ -7168,7 +7168,7 @@ static int main2(int argc, char *argv[],ATerm *stack_bottom)
         ATerror ("Cannot open input file `%s'\n", iname);
   fclose(infile);
   if (to_toolbusfile)
-   { snprintf(messagebuffer,STRINGLENGTH,"%s.lpo",oname);
+   { snprintf(messagebuffer,STRINGLENGTH,"%s.lpe",oname);
      toolbusfile=fopen(messagebuffer,"w");
      if (toolbusfile==NULL)
         ATerror("Cannot open file for output\n"); }
