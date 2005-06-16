@@ -4,14 +4,7 @@ extern "C" {
 #endif
 
 #define NAME "pnml2gs"
-  
-#define global_PlaceChars 6          // defines the number of characters added to a place (in actions and processes)
-#define global_TransChars 6          // defines the number of characters added to a transition (in actions and processes)
-#define global_ArcChars 2            // defines the number of characters added to an arc (in actions and processes)
-  
-  /* global_MaxIDlength should be at least (1 + max(global_PlaceChars, global_TransChars, global_ArcChars)) */
-#define global_MaxIDlength 255       // defines the maximum length of an ID! 
-  
+
 #include <ctype.h>
 #include <stdio.h>
 #include <stdlib.h>
@@ -179,6 +172,8 @@ extern "C" {
     // input: a pointer to the current element
     // output: the contents of the first child <text> attribute 
     //         of the current element, following format [a-zA-Z_][a-zA-Z0-9_]*
+
+    // this function is used for the retrieval of names and ids
     
     cur=cur->xmlChildrenNode;
     while (cur != NULL) {
@@ -200,6 +195,8 @@ extern "C" {
     // input: a pointer to the current element
     // output: the contents of the first child <text> attribute 
     //         of the current element
+
+    // this function is used for the retrieval of types, initial markings, etc.
     
     char * RV;
     cur=cur->xmlChildrenNode;
@@ -234,13 +231,6 @@ extern "C" {
     } else {
       // the place has an id, put it in Aid
       Aid = ATmakeAppl0((pn2gsCheckAFun(ATmakeAFunId((char *)xmlGetProp(cur, (const xmlChar *)"id")))));
-      
-      if (strlen((const char *)xmlGetProp(cur, (const xmlChar *)"id")) > (global_MaxIDlength - global_PlaceChars)) {
-	// check if the ID is not too long
-	context.Abort = ATtrue;
-	gsErrorMsg("The id: '%t' is too long! \n", Aid);
-	return NULL;
-      }
     }
     gsDebugMsg("    id: '%t'\n", Aid); 
     
@@ -328,13 +318,6 @@ extern "C" {
     } else {
       // the transition has an id, put it in Aid
       Aid = ATmakeAppl0(pn2gsCheckAFun(ATmakeAFunId((char *)xmlGetProp(cur, (const xmlChar *)"id"))));
-      
-      if (strlen((const char *)xmlGetProp(cur, (const xmlChar *)"id")) > (global_MaxIDlength - global_TransChars)) {
-	// check if the ID is not too long
-	context.Abort = ATtrue;
-	gsErrorMsg("The id: '%t' is too long! \n", Aid);
-	return NULL;
-      }
     }
     gsDebugMsg("    id: '%t'\n", Aid); 
     
@@ -405,13 +388,6 @@ extern "C" {
     } else {
       // the arc has an id, put it in Aid
       Aid = ATmakeAppl0((pn2gsCheckAFun(ATmakeAFunId((char *)xmlGetProp(cur, (const xmlChar *)"id")))));
-      
-      if (strlen((const char *)xmlGetProp(cur, (const xmlChar *)"id")) > (global_MaxIDlength - global_ArcChars)) {
-	// check if the ID is not too long
-	context.Abort = ATtrue;
-	gsErrorMsg("The id: '%t' is too long! \n", Aid);
-	return NULL;
-      }
     }
     gsDebugMsg("    id: '%t'\n", Aid); 
     
@@ -571,7 +547,7 @@ extern "C" {
 	  // pn2gsAterm_place returns NULL, so the place will not be translated.
 	  if (context.Abort == ATtrue) {
 	    // pn2gsAterm_place has set context.Abort to ATtrue
-	    // this means the place had no ID or the ID is too long (> global_MaxIDlength - 6)
+	    // this means the place had no ID
 	    // therefor the translation will be aborted!
 	    return NULL;
 	  }
@@ -584,7 +560,7 @@ extern "C" {
 	  // pn2gsAterm_trans returns NULL, so the transition will not be translated.
 	  if (context.Abort == ATtrue) {
 	    // pn2gsAterm_trans has set context.Abort to ATtrue
-	    // this means the transition had no ID or the ID is too long (> global_MaxIDlength - 6)
+	    // this means the transition had no ID
 	    // therefor the translation will be aborted!
 	    return NULL;
 	  }
@@ -597,7 +573,7 @@ extern "C" {
 	  // pn2gsAterm_arc returns NULL, so the arc will not be translated.
 	  if (context.Abort == ATtrue) {
 	    // pn2gsAterm_arc has set context.Abort to ATtrue
-	    // this means the arc had no ID or the ID is too long (> global_MaxIDlength - 6)
+	    // this means the arc had no ID
 	    // therefor the translation will be aborted!
 	    return NULL;
 	  }
@@ -643,28 +619,6 @@ extern "C" {
     }
 
     return ATmakeAppl0(ATappendAFun(ResAFun,"_mon"));
-
-/*       char Trans[global_MaxIDlength] = "t_"; */
-/*       if (strcmp(CurrentName, "default_name")) { */
-/* 	// name of the transition is not "default_name" */
-/* 	// name of the transition may be used */
-/* 	if ((strlen(CurrentName) + strlen(CurrentId)) > (global_MaxIDlength - (global_TransChars + 1))) { */
-/* 	  // name + id are too long; only use the id */
-/* 	  // make the action: t_transid_mon */
-/* 	  CurrentId = strcat(strcat(Trans, CurrentId), "_mon"); */
-/* 	} else { */
-/* 	  // name + id are of good length; use both */
-/* 	  // make the action: t_transid_transname_mon */
-/* 	  CurrentId = strcat(strcat(strcat(strcat(Trans, CurrentId), "_"), CurrentName), "_mon"); */
-/* 	} */
-/*       } else { */
-/* 	// name of the transition is "default_name" */
-/* 	// name of the transition will not be used */
-	
-/* 	// make the action: t_transid_mon */
-/* 	CurrentId = strcat(strcat(Trans, CurrentId), "_mon"); */
-/*       } */
-/*       return ATmakeAppl0(ATmakeAFun(CurrentId, 0, ATtrue)); */
   }
   
   //==================================================
@@ -685,57 +639,25 @@ extern "C" {
     
     // variables to store the Current Action to be inserted into ActionsList
     ATermAppl CurrentAction; 
-    char * CurrentId;
     
-    // variable to go through all the arc_in-ids, the arc_out-ids and the transition-ids
+    // variable to go through all the arc-ids and next the transition-ids
     ATermList Ids;
-    
+
     //==================================================
-    // create actions from context.arc_in
+    // create actions from context.arc_in and context.arc_out
     //==================================================
-    Ids = ATtableKeys(context.arc_in);
+    Ids = ATconcat(ATtableKeys(context.arc_in), ATtableKeys(context.arc_out));
     while (ATisEmpty(Ids) == ATfalse) {
       // make the action: arcID
-      CurrentId = ATgetName(ATgetAFun(ATgetFirst(Ids)));
-      CurrentAction = ATmakeAppl0(ATmakeAFun(CurrentId, 0, ATtrue));
+      CurrentAction = ATmakeAppl0(ATgetAFun(ATgetFirst(Ids)));
       ActionsList = ATinsert(ActionsList, (ATerm)gsMakeActId(CurrentAction, ATmakeList0()));
       gsDebugMsg("Action: %t created.\n", CurrentAction);
       // make the action: _arcID
-      char Underscore0[global_MaxIDlength] = "_";     
-      CurrentId = strcat(Underscore0, CurrentId);
-      CurrentAction = ATmakeAppl0(ATmakeAFun(CurrentId, 0, ATtrue));
+      CurrentAction = ATmakeAppl0(ATprependAFun("_", ATgetAFun(ATgetFirst(Ids))));
       ActionsList = ATinsert(ActionsList, (ATerm)gsMakeActId(CurrentAction, ATmakeList0()));
       gsDebugMsg("Action: %t created.\n", CurrentAction);
       // make the action: __arcID
-      char Underscore1[global_MaxIDlength] = "_";
-      CurrentId = strcat(Underscore1, CurrentId);
-      CurrentAction = ATmakeAppl0(ATmakeAFun(CurrentId, 0, ATtrue));
-      ActionsList = ATinsert(ActionsList, (ATerm)gsMakeActId(CurrentAction, ATmakeList0()));
-      gsDebugMsg("Action: %t created.\n", CurrentAction);
-      
-      Ids = ATgetNext(Ids);
-    }
-    
-    //==================================================
-    // create actions from context.arc_out
-    //==================================================
-    Ids = ATtableKeys(context.arc_out);
-    while (ATisEmpty(Ids) == ATfalse) {
-      // make the action: arcID
-      CurrentId = ATgetName(ATgetAFun(ATgetFirst(Ids)));
-      CurrentAction = ATmakeAppl0(ATmakeAFun(CurrentId, 0, ATtrue));
-      ActionsList = ATinsert(ActionsList, (ATerm)gsMakeActId(CurrentAction, ATmakeList0()));
-      gsDebugMsg("Action: %t created.\n", CurrentAction);
-      // make the action: _arcID
-      char Underscore0[global_MaxIDlength] = "_";     
-      CurrentId = strcat(Underscore0, CurrentId);
-      CurrentAction = ATmakeAppl0(ATmakeAFun(CurrentId, 0, ATtrue));
-      ActionsList = ATinsert(ActionsList, (ATerm)gsMakeActId(CurrentAction, ATmakeList0()));
-      gsDebugMsg("Action: %t created.\n", CurrentAction);
-      // make the action: __arcID
-      char Underscore1[global_MaxIDlength] = "_";
-      CurrentId = strcat(Underscore1, CurrentId);
-      CurrentAction = ATmakeAppl0(ATmakeAFun(CurrentId, 0, ATtrue));
+      CurrentAction = ATmakeAppl0(ATprependAFun("__", ATgetAFun(ATgetFirst(Ids))));
       ActionsList = ATinsert(ActionsList, (ATerm)gsMakeActId(CurrentAction, ATmakeList0()));
       gsDebugMsg("Action: %t created.\n", CurrentAction);
       
@@ -767,12 +689,11 @@ extern "C" {
     // output: an AtermAppl that is the SYNC of all the ID's in the input-list
 
     ATermAppl sync;
-    char * CurrentElement = ATgetName(ATgetAFun(ATgetFirst(Ids)));
     if (ATgetLength(Ids) > 1) {
-      sync = gsMakeSync(pn2gsSyncIn(ATgetNext(Ids)), gsMakeActionProcess(ATmakeAppl0(ATmakeAFun(CurrentElement, 0, ATtrue)), ATmakeList0()));
+      sync = gsMakeSync(pn2gsSyncIn(ATgetNext(Ids)), gsMakeActionProcess(ATmakeAppl0(ATgetAFun(ATgetFirst(Ids))), ATmakeList0()));
     } else {
       // ATgetLength(Ids) == 1, since the input-list is not-empty!
-      sync = gsMakeActionProcess(ATmakeAppl0(ATmakeAFun(CurrentElement, 0, ATtrue)), ATmakeList0());
+      sync = gsMakeActionProcess(ATmakeAppl0(ATgetAFun(ATgetFirst(Ids))), ATmakeList0());
     }
     return sync;
   }
@@ -785,14 +706,11 @@ extern "C" {
     // output: an AtermAppl that is the SYNC of all the ID's in the input-list, each ID preceded by an underscore
 
     ATermAppl sync;
-    char Underscore[global_MaxIDlength] = "_";     
-    char * CurrentElement = ATgetName(ATgetAFun(ATgetFirst(Ids)));
-    CurrentElement = strcat(Underscore, CurrentElement);
     if (ATgetLength(Ids) > 1) {
-      sync = gsMakeSync(pn2gsSyncOut(ATgetNext(Ids)), gsMakeActionProcess(ATmakeAppl0(ATmakeAFun(CurrentElement, 0, ATtrue)), ATmakeList0()));
+      sync = gsMakeSync(pn2gsSyncOut(ATgetNext(Ids)), gsMakeActionProcess(ATmakeAppl0(ATprependAFun("_", ATgetAFun(ATgetFirst(Ids)))), ATmakeList0()));
     } else {
       // ATgetLength(Ids) == 1, since the input-list is not-empty!
-      sync = gsMakeActionProcess(ATmakeAppl0(ATmakeAFun(CurrentElement, 0, ATtrue)), ATmakeList0());
+      sync = gsMakeActionProcess(ATmakeAppl0(ATprependAFun("_", ATgetAFun(ATgetFirst(Ids)))), ATmakeList0());
     }
     return sync;
   }
@@ -807,46 +725,32 @@ extern "C" {
     ATermList EquationList=ATmakeList0();
 
     // variables to store the name and id of the transition
-    char * CurrentTransId = ATgetName(ATgetAFun(TransID)) ;
+    AFun CurrentTransId = ATgetAFun(TransID);
     char * CurrentTransName = ATgetName(ATgetAFun(ATtableGet(context.trans_name, TransID)));
 
     // variables to store the process names
     ATermAppl CurrentTrans;
     ATermAppl CurrentTransIn;
     ATermAppl CurrentTransOut;
-    char Trans0[global_MaxIDlength] = "T_";
-    char Trans1[global_MaxIDlength] = "T_";
-    char Trans2[global_MaxIDlength] = "T_";
     
     //==================================================
     // retrieve the process names
     //==================================================
     if (strcmp(CurrentTransName, "default_name")) {
       // name of the transition is not "default_name"
-      // name of the transition may be used
-      if ((strlen(CurrentTransName) + strlen(CurrentTransId)) > (global_MaxIDlength - (global_TransChars + 1))) {
-	// name + id are too long; only use the id
-	gsWarningMsg("The combination of ID: '%s' and name: '%s' is too long, so the name is left out.\n", CurrentTransId, CurrentTransName);
-	// make the processes: T_transid     >-<     T_transid_in     >-<     T_transid_out
-	CurrentTrans = ATmakeAppl0(ATmakeAFun(strcat(Trans0, CurrentTransId), 0, ATtrue));
-	CurrentTransIn = ATmakeAppl0(ATmakeAFun(strcat(strcat(Trans1, CurrentTransId), "_in"), 0, ATtrue));
-	CurrentTransOut = ATmakeAppl0(ATmakeAFun(strcat(strcat(Trans2, CurrentTransId), "_out"), 0, ATtrue));
-      } else {
-	// name + id are of good length; use both
-	// make the processes: T_transid_transname     >-<     T_transid_transname_in     >-<     T_transid_transname_out
-	CurrentTrans = ATmakeAppl0(ATmakeAFun(strcat(strcat(strcat(Trans0, CurrentTransId), "_"), CurrentTransName), 0, ATtrue));
-	CurrentTransIn = ATmakeAppl0(ATmakeAFun(strcat(strcat(strcat(strcat(Trans1, CurrentTransId), "_"), CurrentTransName), "_in"), 0, ATtrue));
-	CurrentTransOut = ATmakeAppl0(ATmakeAFun(strcat(strcat(strcat(strcat(Trans2, CurrentTransId), "_"), CurrentTransName), "_out"), 0, ATtrue));
-      }
+      // name of the transition will be used
+      // make the processes: T_transid_transname     >-<     T_transid_transname_in     >-<     T_transid_transname_out
+      CurrentTrans = ATmakeAppl0(ATprependAFun("T_", ATappendAFun(ATappendAFun(CurrentTransId, "_"), CurrentTransName)));
+      CurrentTransIn = ATmakeAppl0(ATprependAFun("T_", ATappendAFun(ATappendAFun(ATappendAFun(CurrentTransId, "_"), CurrentTransName), "_in")));
+      CurrentTransOut = ATmakeAppl0(ATprependAFun("T_", ATappendAFun(ATappendAFun(ATappendAFun(CurrentTransId, "_"), CurrentTransName), "_out")));
     } else {
       // name of the transition is "default_name"
       // name of the transition will not be used
       // make the processes: T_transid     >-<     T_transid_in     >-<     T_transid_out
-      CurrentTrans = ATmakeAppl0(ATmakeAFun(strcat(Trans0, CurrentTransId), 0, ATtrue));
-      CurrentTransIn = ATmakeAppl0(ATmakeAFun(strcat(strcat(Trans1, CurrentTransId), "_in"), 0, ATtrue));
-      CurrentTransOut = ATmakeAppl0(ATmakeAFun(strcat(strcat(Trans2, CurrentTransId), "_out"), 0, ATtrue));
+      CurrentTrans = ATmakeAppl0(ATprependAFun("T_", CurrentTransId));
+      CurrentTransIn = ATmakeAppl0(ATprependAFun("T_", ATappendAFun(CurrentTransId, "_in")));
+      CurrentTransOut = ATmakeAppl0(ATprependAFun("T_", ATappendAFun(CurrentTransId, "_out")));
     }
-
     // insert the name of the process T_ti into context.transitions
     // this is needed for the generation of the general process Trans
     context.transitions = ATinsert(context.transitions, (ATerm)CurrentTrans);
@@ -856,7 +760,7 @@ extern "C" {
     // generate the processes
     //==================================================
     ATermAppl Process;
-    ATermAppl MonitorAction = pn2gsGenerateAction_trans(ATmakeAFunId(CurrentTransId), ATmakeAFunId(CurrentTransName));
+    ATermAppl MonitorAction = pn2gsGenerateAction_trans(CurrentTransId, ATmakeAFunId(CurrentTransName));
     if (!(ATtableGet(context.trans_in, TransID)) && !(ATtableGet(context.trans_out, TransID))) {
       // Transition has no incoming arcs and no outgoing arcs
       gsDebugMsg("No in and no out for trans: %t\n", (ATerm)CurrentTrans);
@@ -916,12 +820,11 @@ extern "C" {
     // output: an AtermAppl that is the CHOICE of all the ID's in the input-list
 
     ATermAppl choice;
-    char * CurrentElement = ATgetName(ATgetAFun(ATgetFirst(Ids)));
     if (ATgetLength(Ids) > 1) {
-      choice = gsMakeChoice(pn2gsChoiceIn(ATgetNext(Ids)), gsMakeActionProcess(ATmakeAppl0(ATmakeAFun(CurrentElement, 0, ATtrue)), ATmakeList0()));
+      choice = gsMakeChoice(pn2gsChoiceIn(ATgetNext(Ids)), gsMakeActionProcess(ATmakeAppl0(ATgetAFun(ATgetFirst(Ids))), ATmakeList0()));
     } else {
       // ATgetLength(Ids) == 1, since the input-list is not-empty!
-      choice = gsMakeActionProcess(ATmakeAppl0(ATmakeAFun(CurrentElement, 0, ATtrue)), ATmakeList0());
+      choice = gsMakeActionProcess(ATmakeAppl0(ATgetAFun(ATgetFirst(Ids))), ATmakeList0());
     }
     return choice;
   }
@@ -934,14 +837,11 @@ extern "C" {
     // output: an AtermAppl that is the CHOICE of all the ID's in the input-list, each ID preceded by an underscore
 
     ATermAppl choice;
-    char Underscore[global_MaxIDlength] = "_";
-    char * CurrentElement = ATgetName(ATgetAFun(ATgetFirst(Ids)));
-    CurrentElement = strcat(Underscore, CurrentElement);
     if (ATgetLength(Ids) > 1) {
-      choice = gsMakeChoice(pn2gsChoiceOut(ATgetNext(Ids)), gsMakeActionProcess(ATmakeAppl0(ATmakeAFun(CurrentElement, 0, ATtrue)), ATmakeList0()));
+      choice = gsMakeChoice(pn2gsChoiceOut(ATgetNext(Ids)), gsMakeActionProcess(ATmakeAppl0(ATprependAFun("_", ATgetAFun(ATgetFirst(Ids)))), ATmakeList0()));
     } else {
       // ATgetLength(Ids) == 1, since the input-list is not-empty!
-      choice = gsMakeActionProcess(ATmakeAppl0(ATmakeAFun(CurrentElement, 0, ATtrue)), ATmakeList0());
+      choice = gsMakeActionProcess(ATmakeAppl0(ATprependAFun("_", ATgetAFun(ATgetFirst(Ids)))), ATmakeList0());
     }
     return choice;
   }
@@ -954,10 +854,8 @@ extern "C" {
     // output: the parameter of that place, or type Nat
     //         named: pm_PlaceName
 
-    ATermAppl CurrentParameter;
-    char Param[global_MaxIDlength] = "pm_";
-    CurrentParameter = gsMakeDataVarId(ATmakeAppl0(ATmakeAFun(strcat(Param, PlaceName), 0, ATtrue)), gsMakeSortIdNat());
-    return CurrentParameter;
+    AFun CurrentParameter = ATprependAFun("pm_", ATmakeAFun(PlaceName, 0, ATtrue));
+    return gsMakeDataVarId(ATmakeAppl0(CurrentParameter), gsMakeSortIdNat());
   }
 
   //==================================================
@@ -968,10 +866,8 @@ extern "C" {
     // output: the parameter of that place, or type Pos
     //         named: pm_PlaceName
 
-    ATermAppl CurrentParameter;
-    char Param[global_MaxIDlength] = "pm_";
-    CurrentParameter = gsMakeDataVarId(ATmakeAppl0(ATmakeAFun(strcat(Param, PlaceName), 0, ATtrue)), gsMakeSortIdPos());
-    return CurrentParameter;
+    AFun CurrentParameter = ATprependAFun("pm_", ATmakeAFun(PlaceName, 0, ATtrue));
+    return gsMakeDataVarId(ATmakeAppl0(CurrentParameter), gsMakeSortIdPos());
   }
 
   //==================================================
@@ -984,7 +880,7 @@ extern "C" {
     ATermList EquationList=ATmakeList0();
 
     // variables to store the name and id of the place
-    char * CurrentPlaceId = ATgetName(ATgetAFun(PlaceID));
+    AFun CurrentPlaceId = ATgetAFun(PlaceID);
     char * CurrentPlaceName = ATgetName(ATgetAFun(ATtableGet(context.place_name, PlaceID)));
 
     // variables to store the process names
@@ -993,11 +889,6 @@ extern "C" {
     ATermAppl CurrentPlaceIn;
     ATermAppl CurrentPlaceRem;
     ATermAppl CurrentPlaceOut;
-    char Place0[global_MaxIDlength] = "P_";
-    char Place1[global_MaxIDlength] = "P_";
-    char Place2[global_MaxIDlength] = "P_";
-    char Place3[global_MaxIDlength] = "P_";
-    char Place4[global_MaxIDlength] = "P_";
     
     //==================================================
     // retrieve the process names
@@ -1005,34 +896,22 @@ extern "C" {
     if (strcmp(CurrentPlaceName, "default_name")) {
       // name of the place is not "default_name"
       // name of the place may be used
-      if ((strlen(CurrentPlaceName) + strlen(CurrentPlaceId)) > (global_MaxIDlength - (global_PlaceChars + 1))) {
-	// name + id are too long; only use the id
-	gsWarningMsg("The combination of ID: '%s' and name: '%s' is too long, so the name is left out.\n", CurrentPlaceId, CurrentPlaceName);
-	// make the processes: P_placeid     >-<     P_placeid_add     >-<     P_placeid_in     >-<     P_placeid_rem     >-<     P_placeid_out
-	CurrentPlace = ATmakeAppl0(ATmakeAFun(strcat(Place0, CurrentPlaceId), 0, ATtrue));
-	CurrentPlaceAdd = ATmakeAppl0(ATmakeAFun(strcat(strcat(Place1, CurrentPlaceId), "_add"), 0, ATtrue));
-	CurrentPlaceIn = ATmakeAppl0(ATmakeAFun(strcat(strcat(Place2, CurrentPlaceId), "_in"), 0, ATtrue));
-	CurrentPlaceRem = ATmakeAppl0(ATmakeAFun(strcat(strcat(Place3, CurrentPlaceId), "_rem"), 0, ATtrue));
-	CurrentPlaceOut = ATmakeAppl0(ATmakeAFun(strcat(strcat(Place4, CurrentPlaceId), "_out"), 0, ATtrue));
-      } else {
-	// name + id are of good length; use both
-	// make the processes: P_placeid_placename     >-<     P_placeid_placename_add     >-<     P_placeid_placename_in     >-<
-	//                     P_placeid_placename_rem     >-<     P_placeid_placename_out
-	CurrentPlace = ATmakeAppl0(ATmakeAFun(strcat(strcat(strcat(Place0, CurrentPlaceId), "_"), CurrentPlaceName), 0, ATtrue));
-	CurrentPlaceAdd = ATmakeAppl0(ATmakeAFun(strcat(strcat(strcat(strcat(Place1, CurrentPlaceId), "_"), CurrentPlaceName), "_add"), 0, ATtrue));
-	CurrentPlaceIn = ATmakeAppl0(ATmakeAFun(strcat(strcat(strcat(strcat(Place2, CurrentPlaceId), "_"), CurrentPlaceName), "_in"), 0, ATtrue));
-	CurrentPlaceRem = ATmakeAppl0(ATmakeAFun(strcat(strcat(strcat(strcat(Place3, CurrentPlaceId), "_"), CurrentPlaceName), "_rem"), 0, ATtrue));
-	CurrentPlaceOut = ATmakeAppl0(ATmakeAFun(strcat(strcat(strcat(strcat(Place4, CurrentPlaceId), "_"), CurrentPlaceName), "_out"), 0, ATtrue));
-      }
+      // make the processes: P_placeid_placename     >-<     P_placeid_placename_add     >-<     P_placeid_placename_in     >-<
+      //                     P_placeid_placename_rem     >-<     P_placeid_placename_out
+      CurrentPlace = ATmakeAppl0(ATprependAFun("P_", ATappendAFun(ATappendAFun(CurrentPlaceId, "_"), CurrentPlaceName)));
+      CurrentPlaceAdd = ATmakeAppl0(ATprependAFun("P_", ATappendAFun(ATappendAFun(ATappendAFun(CurrentPlaceId, "_"), CurrentPlaceName), "_add")));
+      CurrentPlaceIn = ATmakeAppl0(ATprependAFun("P_", ATappendAFun(ATappendAFun(ATappendAFun(CurrentPlaceId, "_"), CurrentPlaceName), "_in")));
+      CurrentPlaceRem = ATmakeAppl0(ATprependAFun("P_", ATappendAFun(ATappendAFun(ATappendAFun(CurrentPlaceId, "_"), CurrentPlaceName), "_rem")));
+      CurrentPlaceOut = ATmakeAppl0(ATprependAFun("P_", ATappendAFun(ATappendAFun(ATappendAFun(CurrentPlaceId, "_"), CurrentPlaceName), "_out")));
     } else {
       // name of the transition is "default_name"
       // name of the transition will not be used
       // make the processes: P_placeid     >-<     P_placeid_add     >-<     P_placeid_in     >-<     P_placeid_rem     >-<     P_placeid_out
-      CurrentPlace = ATmakeAppl0(ATmakeAFun(strcat(Place0, CurrentPlaceId), 0, ATtrue));
-      CurrentPlaceAdd = ATmakeAppl0(ATmakeAFun(strcat(strcat(Place1, CurrentPlaceId), "_add"), 0, ATtrue));
-      CurrentPlaceIn = ATmakeAppl0(ATmakeAFun(strcat(strcat(Place2, CurrentPlaceId), "_in"), 0, ATtrue));
-      CurrentPlaceRem = ATmakeAppl0(ATmakeAFun(strcat(strcat(Place3, CurrentPlaceId), "_rem"), 0, ATtrue));
-      CurrentPlaceOut = ATmakeAppl0(ATmakeAFun(strcat(strcat(Place4, CurrentPlaceId), "_out"), 0, ATtrue));
+      CurrentPlace = ATmakeAppl0(ATprependAFun("P_", CurrentPlaceId));
+      CurrentPlaceAdd = ATmakeAppl0(ATprependAFun("P_", ATappendAFun(CurrentPlaceId, "_add")));
+      CurrentPlaceIn = ATmakeAppl0(ATprependAFun("P_", ATappendAFun(CurrentPlaceId, "_in")));
+      CurrentPlaceRem = ATmakeAppl0(ATprependAFun("P_", ATappendAFun(CurrentPlaceId, "_rem")));
+      CurrentPlaceOut = ATmakeAppl0(ATprependAFun("P_", ATappendAFun(CurrentPlaceId, "_out")));
     }
 
     // insert the name of the process P_pi into context.places
@@ -1195,16 +1074,14 @@ extern "C" {
   // pn2gsHideList generates a list with all the actions that should be hidden
   //==================================================
   static ATermList pn2gsHideList(ATermList List) {
-    // input: two lists, each containing different elements
-    // output: a list in which all the elements of both inputed lists are present, preceded by two underscores.
+    // input: a list
+    // output: a list in which all the elements of the inputed list are present, preceded by two underscores.
 
     ATermList ReturnList = ATmakeList0();
-    char * CurrentId;
+    AFun CurrentId;
     while (ATisEmpty(List) == ATfalse) {
-      CurrentId = ATgetName(ATgetAFun(ATgetFirst(List)));
-      char Underscores[global_MaxIDlength] = "__";
-      CurrentId = strcat(Underscores, CurrentId);
-      ReturnList = ATinsert(ReturnList, (ATerm)ATmakeAppl0(ATmakeAFun(CurrentId, 0, ATtrue)));
+      CurrentId = ATprependAFun("__", ATgetAFun(ATgetFirst(List)));
+      ReturnList = ATinsert(ReturnList, (ATerm)ATmakeAppl0(CurrentId));
       List = ATgetNext(List);
     }
     return ReturnList;
@@ -1214,17 +1091,16 @@ extern "C" {
   // pn2gsRestrictList generates a list with all the actions that should be restricted
   //==================================================
   static ATermList pn2gsRestrictList(ATermList List) {
-    // input: two lists, each containing different elements
-    // output: a list in which all the elements of both inputed lists are present twice, once preceded by an underscore.
+    // input: a list
+    // output: a list in which all the elements of the inputed list are present twice, once preceded by an underscore.
 
     ATermList ReturnList = ATmakeList0();
-    char * CurrentId;
+    AFun CurrentId;
     while (ATisEmpty(List) == ATfalse) {
-      CurrentId = ATgetName(ATgetAFun(ATgetFirst(List)));
-      ReturnList = ATinsert(ReturnList, (ATerm)ATmakeAppl0(ATmakeAFun(CurrentId, 0, ATtrue)));
-      char Underscores[global_MaxIDlength] = "_";
-      CurrentId = strcat(Underscores, CurrentId);
-      ReturnList = ATinsert(ReturnList, (ATerm)ATmakeAppl0(ATmakeAFun(CurrentId, 0, ATtrue)));
+      CurrentId = ATgetAFun(ATgetFirst(List));
+      ReturnList = ATinsert(ReturnList, (ATerm)ATmakeAppl0(CurrentId));
+      CurrentId = ATprependAFun("_", CurrentId);
+      ReturnList = ATinsert(ReturnList, (ATerm)ATmakeAppl0(CurrentId));
       List = ATgetNext(List);
     }
     return ReturnList;
@@ -1234,18 +1110,16 @@ extern "C" {
   // pn2gsCommList generates a list with all the actions that communicate
   //==================================================
   static ATermList pn2gsCommList(ATermList List) {
-    // input: two lists, each containing different elements
-    // output: a list in which all the elements of both inputed lists 
-    //         communicate with itself, once preceded by an underscore
+    // input: a list
+    // output: a list in which all the elements of the inputed list 
+    //         communicate with itself, once preceded by an underscore,
     //         to itself, preceded by two underscores.
 
     ATermList ReturnList = ATmakeList0();
-    char * CurrentId;
+    AFun CurrentId;
     while (ATisEmpty(List) == ATfalse) {
-      CurrentId = ATgetName(ATgetAFun(ATgetFirst(List)));
-      char Underscore[global_MaxIDlength] = "_";
-      char Underscores[global_MaxIDlength] = "__";
-      ATermAppl CommExpr = gsMakeCommExpr(gsMakeMultActName(ATmakeList2((ATerm)gsString2ATermAppl(CurrentId), (ATerm)gsString2ATermAppl(strcat(Underscore, CurrentId)))), gsString2ATermAppl(strcat(Underscores, CurrentId)));
+      CurrentId = ATgetAFun(ATgetFirst(List));
+      ATermAppl CommExpr = gsMakeCommExpr(gsMakeMultActName(ATmakeList2((ATerm)ATmakeAppl0(CurrentId), (ATerm)ATmakeAppl0(ATprependAFun("_", CurrentId)))), ATmakeAppl0(ATprependAFun("__", CurrentId)));
       ReturnList = ATinsert(ReturnList, (ATerm)CommExpr);
       List = ATgetNext(List);
     }
@@ -1447,7 +1321,7 @@ extern "C" {
     ProcessList = ATinsert(ProcessList, (ATerm)gsMakeProcEqn(ATmakeList0(),gsMakeProcVarId(gsString2ATermAppl("PetriNet"),pn2gsListNNats(ATgetLength(ParameterList))), ParameterList, Process));
     gsDebugMsg("Process PetriNet created.\n");
 
-    // remainder: NetID == "Net_'ID of the Petri net'"
+    // reminder: NetID == "Net_'ID of the Petri net'"
     // the Net_ is preceded to the ID of the Petri net to prevent that two processes would have the same name!
     //
     // NetID = PetriNet("...")
