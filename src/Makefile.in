@@ -137,13 +137,13 @@ ifdef USE_WX
 ifeq ($(HOST_OS),MACOSX)
 	/Developer/Tools/Rez -t APPL -o xsim sample.r
 	/Developer/Tools/SetFile -a C xsim   
-	mkdir -p $(bindir)/xsim.app/Contents
-	mkdir -p $(bindir)/xsim.app/Contents/MacOS
-	mkdir -p $(bindir)/xsim.app/Contents/Resources
-	cp xsim.plist $(bindir)xsim.app/Contents/Info.plist
-	echo -n "APPL????" > $(bindir)/xsim.app/Contents/PkgInfo
-	ln -f $(bindir)/xsim $(bindir)/xsim.app/Contents/MacOS/xsim
-	cp -f xsim.icns $(bindir)/xsim.app/Contents/Resources/xsim.icns
+	mkdir -p ../xsim.app/Contents
+	mkdir -p ../xsim.app/Contents/MacOS
+	mkdir -p ../xsim.app/Contents/Resources
+	cp xsim.plist ../xsim.app/Contents/Info.plist
+	echo -n "APPL????" > ../xsim.app/Contents/PkgInfo
+	ln -f $(bindir)/xsim ../xsim.app/Contents/MacOS/xsim
+	cp -f xsim.icns ../xsim.app/Contents/Resources/xsim.icns
 endif
 endif
 	$(INSTALL) -d $(libdir)
