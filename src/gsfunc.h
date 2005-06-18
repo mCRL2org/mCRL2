@@ -221,7 +221,7 @@ ATermAppl gsMakeOpIdNameDub();
 ATermAppl gsMakeOpIdNameAdd();
 ATermAppl gsMakeOpIdNameAddC();
 ATermAppl gsMakeOpIdNameSubt();
-ATermAppl gsMakeOpIdNameSubtB();
+ATermAppl gsMakeOpIdNameGTESubtB();
 ATermAppl gsMakeOpIdNameMult();
 ATermAppl gsMakeOpIdNameMultIR();
 ATermAppl gsMakeOpIdNameDiv();
@@ -461,9 +461,17 @@ ATermAppl gsMakeOpIdDub(ATermAppl SortExpr);
 //Ret: Operation identifier for '2*n + |b|', where n is of sort SortExpr and
 //     b is of sort Bool
 
-ATermAppl gsMakeOpIdAdd(ATermAppl SortExpr);
-//Pre: SortExpr is Pos, Nat or Int
-//Ret: Operation identifier for addition on SortExpr
+ATermAppl gsMakeOpIdAdd(ATermAppl SortExprLHS, ATermAppl SortExprRHS);
+//Pre: SortExprLHS and SortExprRHS are Pos, Nat or Int. They are denoted by
+//     S and T, respectively.
+//Ret: Operation identifier for addition on S and T, of sort S -> T -> F(S,T),
+//     where F is defined as follows:
+//       F(Pos, Pos) = Pos
+//       F(Pos, Nat) = Pos
+//       F(Nat, Pos) = Pos
+//       F(Nat, Nat) = Nat
+//       F(Int, T)   = Int
+//       F(S, Int)   = Int
 
 ATermAppl gsMakeOpIdAddC();
 //Ret: Operation identifier for the addition of two positive numbers and a
@@ -473,10 +481,10 @@ ATermAppl gsMakeOpIdSubt(ATermAppl SortExpr);
 //Pre: SortExpr is Pos, Nat or Int
 //Ret: Operation identifier for subtraction on SortExpr
 
-ATermAppl gsMakeOpIdSubtB();
-//Ret: Operation identifier for the subtraction of a positive number and a
-//     (borrow) bit from a positive number, which is of sort
-//     Bool -> Pos -> Pos -> Pos
+ATermAppl gsMakeOpIdGTESubtB();
+//Ret: Operation identifier for 'p - (q + |b|)', i.e. subtraction with borrow,
+//     where p >= q + |b|.
+//     The identifier is of sort Bool -> Pos -> Pos -> Nat
 
 ATermAppl gsMakeOpIdDouble(void);
 //Ret: Operation identifier for `double', which has sort Int -> Int
@@ -491,12 +499,14 @@ ATermAppl gsMakeOpIdMultIR();
 //     Bool -> Pos -> Pos -> Pos -> Pos
 
 ATermAppl gsMakeOpIdDiv(ATermAppl SortExpr);
-//Pre: SortExpr is Nat or Int
+//Pre: SortExpr is Pos, Nat or Int
 //Ret: Operation identifier for `quotient after division', which has sort
-//     e -> Pos -> e, where e stands for SortExpr
+//     S -> Pos -> S', where S stands for SortExpr and S' for:
+//     - Nat, if S is Pos or Nat
+//     - Int, if S is Int
 
 ATermAppl gsMakeOpIdMod(ATermAppl SortExpr);
-//Pre: SortExpr is Nat or Int
+//Pre: SortExpr is Pos, Nat or Int
 //Ret: Operation identifier for `remainder after division', which has sort
 //     S -> Pos -> Nat, where S stands for SortExpr
 
@@ -826,9 +836,10 @@ ATermAppl gsMakeDataExprDub(ATermAppl DataExprBit, ATermAppl DataExprNum);
 //     - Int, if DataExpr has sort Int
 
 ATermAppl gsMakeDataExprAdd(ATermAppl DataExprLHS, ATermAppl DataExprRHS);
-//Pre: DataExprLHS and DataExprRHS are both data expressions of sort Pos, Nat
-//     or Int
-//Ret: Data expression for the addition of DataExprLHS and DataExprRHS
+//Pre: DataExprLHS and DataExprRHS are data expressions of sort Pos, Nat or
+//     Int, denoted by t and u
+//Ret: Data expression for t + u (see gsMakeOpIdAdd for information about the
+//     result sort)
 
 ATermAppl gsMakeDataExprAddC(ATermAppl DataExprBit, ATermAppl DataExprLHS,
   ATermAppl DataExprRHS);
@@ -841,11 +852,13 @@ ATermAppl gsMakeDataExprSubt(ATermAppl DataExprLHS, ATermAppl DataExprRHS);
 //     or Int
 //Ret: Data expression for the subtraction of DataExprLHS and DataExprRHS
 
-ATermAppl gsMakeDataExprSubtB(ATermAppl DataExprBit, ATermAppl DataExprLHS,
+ATermAppl gsMakeDataExprGTESubtB(ATermAppl DataExprBit, ATermAppl DataExprLHS,
   ATermAppl DataExprRHS);
 //Pre: DataExprBit, DataExprLHS and DataExprRHS are data expressions of sort
 //     Bool, Pos and Pos, respectively, which we denote by b, p and q.
-//Ret: Data expression for 'p - (q + |b|)', i.e. subtraction with borrow.
+//     p >= q + |b|
+//Ret: Data expression for 'p - (q + |b|)', i.e. subtraction with borrow, of
+//     sort Nat
 
 ATermAppl gsMakeDataExprMult(ATermAppl DataExprLHS, ATermAppl DataExprRHS);
 //Pre: DataExprLHS and DataExprRHS are both data expressions of sort Pos, Nat
@@ -861,16 +874,18 @@ ATermAppl gsMakeDataExprMultIR(ATermAppl DataExprBit, ATermAppl DataExprIR,
 //     for the storage of intermediate results.
 
 ATermAppl gsMakeDataExprDiv(ATermAppl DataExprLHS, ATermAppl DataExprRHS);
-//Pre: DataExprLHS is a data expression of sort Nat or Int
-//     DataExprRHS is a data expression of sort Pos
-//Ret: Data expression for the quotient after division of DataExprLHS and
-//     DataExprRHS, of which the sort is equal to that of DataExprLHS
+//Pre: DataExprLHS is a data expression of sort Pos, Nat or Int, which we
+//     denote by x
+//     DataExprRHS is a data expression of sort Pos, which we denote by p
+//Ret: Data expression for x div p of sort:
+//     - Nat, if x is of sort Pos or Nat
+//     - Int, if x is of sort Int
 
 ATermAppl gsMakeDataExprMod(ATermAppl DataExprLHS, ATermAppl DataExprRHS);
-//Pre: DataExprLHS is a data expression of sort Pos, Nat or Int
-//     DataExprRHS is a data expression of sort Nat
-//Ret: Data expression for the remainder after division of DataExprLHS and
-//     DataExprRHS, which is of sort Nat
+//Pre: DataExprLHS is a data expression of sort Pos, Nat or Int, which we
+//     denote by x
+//     DataExprRHS is a data expression of sort Pos, which we denote by p
+//Ret: Data expression for x mod p of sort Nat
 
 ATermAppl gsMakeDataExprExp(ATermAppl DataExprLHS, ATermAppl DataExprRHS);
 //Pre: DataExprLHS is a data expression of sort Nat or Int
@@ -1038,16 +1053,16 @@ bool gsIsOpIdPrefix(ATermAppl Term);
 bool gsIsOpIdInfix(ATermAppl Term);
 //Ret: DataExpr is an infix operation identifier
 
-int gsPrecOpIdInfix(ATermAppl OpIdInfix);
-//Pre: OpIdInfix is an infix operation identifier
+int gsPrecOpIdInfix(ATermAppl OpIdName);
+//Pre: OpIdName is the name of an infix operation identifier
 //Ret: Precedence of the operation itself
 
-int gsPrecOpIdInfixLeft(ATermAppl OpIdInfix);
-//Pre: OpIdInfix is an infix operation identifier
+int gsPrecOpIdInfixLeft(ATermAppl OpIdName);
+//Pre: OpIdInfix is the name of an infix operation identifier
 //Ret: Precedence of the left argument of the operation
 
-int gsPrecOpIdInfixRight(ATermAppl OpIdInfix);
-//Pre: OpIdInfix is an infix operation identifier
+int gsPrecOpIdInfixRight(ATermAppl OpIdName);
+//Pre: OpIdInfix is the name of an infix operation identifier
 //Ret: Precedence of the right argument of the operation
 
 #ifdef __cplusplus

@@ -238,7 +238,7 @@ void gsPrintSpecification(FILE *OutStream, const ATermAppl Spec)
   //enable constructor functions
   gsEnableConstructorFunctions();
   //print Spec to OutStream
-  gsPrintPart(OutStream, Spec, false, 0);
+  gsPrintPart(OutStream, Spec, true, 0);
 }
 
 ATermAppl gsLinearise(ATermAppl spec)
@@ -555,15 +555,16 @@ void gsPrintPart(FILE *OutStream, const ATermAppl Part, bool ShowSorts,
     } else if (gsIsOpIdInfix(Head) && ArgsLength == 2) {
       //print infix expression
       gsDebugMsg("printing infix expression\n");
-      if (PrecLevel > gsPrecOpIdInfix(Head)) fprintf(OutStream, "(");
+      ATermAppl HeadName = ATAgetArgument(Head, 0);
+      if (PrecLevel > gsPrecOpIdInfix(HeadName)) fprintf(OutStream, "(");
       gsPrintPart(OutStream, ATAelementAt(Args, 0), ShowSorts,
-        gsPrecOpIdInfixLeft(Head));
+        gsPrecOpIdInfixLeft(HeadName));
       fprintf(OutStream, " ");
       gsPrintPart(OutStream, Head, ShowSorts, PrecLevel);
       fprintf(OutStream, " ");
       gsPrintPart(OutStream, ATAelementAt(Args, 1), ShowSorts,
-        gsPrecOpIdInfixRight(Head));
-      if (PrecLevel > gsPrecOpIdInfix(Head)) fprintf(OutStream, ")");
+        gsPrecOpIdInfixRight(HeadName));
+      if (PrecLevel > gsPrecOpIdInfix(HeadName)) fprintf(OutStream, ")");
    } else if (ATisEqual(Head, gsMakeOpId1()) ||
         (ATisEqual(Head, gsMakeOpIdCDub()) && ArgsLength == 2)) {
       //print positive number
@@ -1143,12 +1144,12 @@ void gsPrintPosMult(FILE *OutStream, const ATermAppl PosExpr, int PrecLevel,
       gsPrintPosMult(OutStream, PosArg, PrecLevel, NewMult);
     } else {
       //Mult*v(b) > 0
-      if (PrecLevel > gsPrecOpIdInfix(gsMakeOpIdAdd(gsMakeSortExprPos()))) {
+      if (PrecLevel > gsPrecOpIdInfix(gsMakeOpIdNameAdd())) {
         fprintf(OutStream, "(");
       }
       //print (Mult*2)*v(p)
       gsPrintPosMult(OutStream, PosArg, 
-        gsPrecOpIdInfixLeft(gsMakeOpIdAdd(gsMakeSortExprPos())), NewMult);
+        gsPrecOpIdInfixLeft(gsMakeOpIdNameAdd()), NewMult);
       fprintf(OutStream, " + ");
       if (ATisEqual(BoolArg, gsMakeDataExprTrue())) {
         //Mult*v(b) = Mult
@@ -1156,14 +1157,14 @@ void gsPrintPosMult(FILE *OutStream, const ATermAppl PosExpr, int PrecLevel,
       } else if (strcmp(Mult, "1") == 0) {
         //Mult*v(b) = v(b)
         gsPrintPart(OutStream, BoolArg, false,
-          gsPrecOpIdInfixRight(gsMakeOpIdAdd(gsMakeSortExprPos())));
+          gsPrecOpIdInfixRight(gsMakeOpIdNameAdd()));
       } else {
         //print Mult*v(b)
         fprintf(OutStream, "%s*", Mult);
         gsPrintPart(OutStream, BoolArg, false,
-          gsPrecOpIdInfixRight(gsMakeOpIdMult(gsMakeSortExprPos())));
+          gsPrecOpIdInfixRight(gsMakeOpIdNameMult()));
       }
-      if (PrecLevel > gsPrecOpIdInfix(gsMakeOpIdAdd(gsMakeSortExprPos()))) {
+      if (PrecLevel > gsPrecOpIdInfix(gsMakeOpIdNameAdd())) {
         fprintf(OutStream, ")");
       }
     }
@@ -1175,7 +1176,7 @@ void gsPrintPosMult(FILE *OutStream, const ATermAppl PosExpr, int PrecLevel,
     } else {
       fprintf(OutStream, "%s*", Mult);
       gsPrintPart(OutStream, PosExpr, false,
-        gsPrecOpIdInfixRight(gsMakeOpIdMult(gsMakeSortExprPos())));
+        gsPrecOpIdInfixRight(gsMakeOpIdNameMult()));
     }
   }
 }

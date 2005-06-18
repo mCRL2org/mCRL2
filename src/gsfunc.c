@@ -172,7 +172,7 @@ static ATermAppl gsOpIdNameDub;
 static ATermAppl gsOpIdNameAdd;
 static ATermAppl gsOpIdNameAddC;
 static ATermAppl gsOpIdNameSubt;
-static ATermAppl gsOpIdNameSubtB;
+static ATermAppl gsOpIdNameGTESubtB;
 static ATermAppl gsOpIdNameMult;
 static ATermAppl gsOpIdNameMultIR;
 static ATermAppl gsOpIdNameDiv;
@@ -330,7 +330,7 @@ void gsEnableConstructorFunctions(void)
     gsOpIdNameAdd          = gsString2ATermAppl("+");
     gsOpIdNameAddC         = gsString2ATermAppl("@addc");
     gsOpIdNameSubt         = gsString2ATermAppl("-");
-    gsOpIdNameSubtB        = gsString2ATermAppl("@subtb");
+    gsOpIdNameGTESubtB     = gsString2ATermAppl("@gtesubtb");
     gsOpIdNameMult         = gsString2ATermAppl("*");
     gsOpIdNameMultIR       = gsString2ATermAppl("@multir");
     gsOpIdNameDiv          = gsString2ATermAppl("div");
@@ -480,7 +480,7 @@ void gsEnableConstructorFunctions(void)
     ATprotectAppl(&gsOpIdNameAdd);
     ATprotectAppl(&gsOpIdNameAddC);
     ATprotectAppl(&gsOpIdNameSubt);
-    ATprotectAppl(&gsOpIdNameSubtB);
+    ATprotectAppl(&gsOpIdNameGTESubtB);
     ATprotectAppl(&gsOpIdNameMult);
     ATprotectAppl(&gsOpIdNameMultIR);
     ATprotectAppl(&gsOpIdNameDiv);
@@ -1494,9 +1494,9 @@ ATermAppl gsMakeOpIdNameSubt() {
   return gsOpIdNameSubt;
 }
 
-ATermAppl gsMakeOpIdNameSubtB() {
+ATermAppl gsMakeOpIdNameGTESubtB() {
   assert(gsConstructorFunctionsEnabled);
-  return gsOpIdNameSubtB;
+  return gsOpIdNameGTESubtB;
 }
 
 ATermAppl gsMakeOpIdNameMult() {
@@ -2093,11 +2093,23 @@ ATermAppl gsMakeOpIdDub(ATermAppl SortExpr)
   return gsMakeOpId(gsOpIdNameDub, gsMakeSortArrow(SortExpr, SortExpr));
 }
 
-ATermAppl gsMakeOpIdAdd(ATermAppl SortExpr)
+ATermAppl gsMakeOpIdAdd(ATermAppl SortExprLHS, ATermAppl SortExprRHS)
 {
   assert(gsConstructorFunctionsEnabled);
+  ATermAppl ResultSort;
+  if (ATisEqual(SortExprLHS, gsMakeSortExprInt()) ||
+    ATisEqual(SortExprRHS, gsMakeSortExprInt()))
+  {
+    ResultSort = gsMakeSortExprInt();
+  } else if (ATisEqual(SortExprLHS, gsMakeSortExprPos()) ||
+    ATisEqual(SortExprRHS, gsMakeSortExprPos()))
+  {
+    ResultSort = gsMakeSortExprPos();
+  } else {
+    ResultSort = gsMakeSortExprNat();
+  }
   return gsMakeOpId(gsOpIdNameAdd,
-    gsMakeSortArrow2(SortExpr, SortExpr, SortExpr));
+    gsMakeSortArrow2(SortExprLHS, SortExprRHS, ResultSort));
 }
 
 ATermAppl gsMakeOpIdAddC(void)
@@ -2115,12 +2127,12 @@ ATermAppl gsMakeOpIdSubt(ATermAppl SortExpr)
     gsMakeSortArrow2(SortExpr, SortExpr, gsMakeSortExprInt()));
 }
 
-ATermAppl gsMakeOpIdSubtB(void)
+ATermAppl gsMakeOpIdGTESubtB(void)
 {
   assert(gsConstructorFunctionsEnabled);
-  return gsMakeOpId(gsOpIdNameSubtB,
+  return gsMakeOpId(gsOpIdNameGTESubtB,
     gsMakeSortArrow3(gsMakeSortExprBool(), gsMakeSortExprPos(),
-      gsMakeSortExprPos(), gsMakeSortExprInt()));
+      gsMakeSortExprPos(), gsMakeSortExprNat()));
 }
 
 ATermAppl gsMakeOpIdMult(ATermAppl SortExpr)
@@ -2141,8 +2153,14 @@ ATermAppl gsMakeOpIdMultIR(void)
 ATermAppl gsMakeOpIdDiv(ATermAppl SortExpr)
 {
   assert(gsConstructorFunctionsEnabled);
+  ATermAppl ResultSort;
+  if ATisEqual(SortExpr, gsMakeSortExprInt()) {
+    ResultSort = gsMakeSortExprInt();
+  } else {
+    ResultSort = gsMakeSortExprNat();
+  }
   return gsMakeOpId(gsOpIdNameDiv,
-    gsMakeSortArrow2(SortExpr, gsMakeSortExprPos(), SortExpr));
+    gsMakeSortArrow2(SortExpr, gsMakeSortExprPos(), ResultSort));
 }
 
 ATermAppl gsMakeOpIdMod(ATermAppl SortExpr)
@@ -2609,10 +2627,12 @@ ATermAppl gsMakeDataExprDub(ATermAppl DataExprBit, ATermAppl DataExprNum)
 
 ATermAppl gsMakeDataExprAdd(ATermAppl DataExprLHS, ATermAppl DataExprRHS)
 {
-  ATermAppl ExprSort = gsGetSort(DataExprLHS);
-  assert(!gsIsUnknown(ExprSort));
-  assert(ATisEqual(ExprSort, gsGetSort(DataExprRHS)));
-  return gsMakeDataAppl2(gsMakeOpIdAdd(ExprSort), DataExprLHS, DataExprRHS);
+  ATermAppl SortLHS = gsGetSort(DataExprLHS);
+  ATermAppl SortRHS = gsGetSort(DataExprRHS);
+  assert(!gsIsUnknown(SortLHS));
+  assert(!gsIsUnknown(SortRHS));
+  return gsMakeDataAppl2(gsMakeOpIdAdd(SortLHS, SortRHS),
+    DataExprLHS, DataExprRHS);
 }
 
 ATermAppl gsMakeDataExprAddC(ATermAppl DataExprBit, ATermAppl DataExprLHS,
@@ -2630,10 +2650,10 @@ ATermAppl gsMakeDataExprSubt(ATermAppl DataExprLHS, ATermAppl DataExprRHS)
   return gsMakeDataAppl2(gsMakeOpIdSubt(ExprSort), DataExprLHS, DataExprRHS);
 }
 
-ATermAppl gsMakeDataExprSubtB(ATermAppl DataExprBit, ATermAppl DataExprLHS,
+ATermAppl gsMakeDataExprGTESubtB(ATermAppl DataExprBit, ATermAppl DataExprLHS,
   ATermAppl DataExprRHS)
 {
-  return gsMakeDataAppl3(gsMakeOpIdSubtB(), DataExprBit, DataExprLHS,
+  return gsMakeDataAppl3(gsMakeOpIdGTESubtB(), DataExprBit, DataExprLHS,
     DataExprRHS);
 }
 
@@ -3062,9 +3082,8 @@ bool gsIsOpIdInfix(ATermAppl Term)
   return Result;
 }
 
-int gsPrecOpIdInfix(ATermAppl OpIdInfix)
+int gsPrecOpIdInfix(ATermAppl OpIdName)
 {
-  ATermAppl OpIdName = ATAgetArgument(OpIdInfix, 0);
   if (OpIdName == gsOpIdNameImp) {
     return 2;
   } else if ((OpIdName == gsOpIdNameAnd) || (OpIdName == gsOpIdNameOr)) {
@@ -3105,9 +3124,8 @@ int gsPrecOpIdInfix(ATermAppl OpIdInfix)
   }
 }
 
-int gsPrecOpIdInfixLeft(ATermAppl OpIdInfix)
+int gsPrecOpIdInfixLeft(ATermAppl OpIdName)
 {
-  ATermAppl OpIdName = ATAgetArgument(OpIdInfix, 0);
   if (OpIdName == gsOpIdNameImp) {
     return 3;
   } else if ((OpIdName == gsOpIdNameAnd) || (OpIdName == gsOpIdNameOr)) {
@@ -3148,9 +3166,8 @@ int gsPrecOpIdInfixLeft(ATermAppl OpIdInfix)
   }
 }
 
-int gsPrecOpIdInfixRight(ATermAppl OpIdInfix)
+int gsPrecOpIdInfixRight(ATermAppl OpIdName)
 {
-  ATermAppl OpIdName = ATAgetArgument(OpIdInfix, 0);
   if (OpIdName == gsOpIdNameImp) {
     return 2;
   } else if ((OpIdName == gsOpIdNameAnd) || (OpIdName == gsOpIdNameOr)) {

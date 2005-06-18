@@ -417,15 +417,15 @@ void gstcDataInit(void){
 			    gstcMakeSortArrowProd1(gsMakeSortIdNat(),gsMakeSortIdInt()));
   gstcAddSystemFunctionProd(gsMakeOpIdPred(gsMakeSortIdInt()),
 			    gstcMakeSortArrowProd1(gsMakeSortIdInt(),gsMakeSortIdInt()));
-  gstcAddSystemFunctionProd(gsMakeOpIdAdd(gsMakeSortIdPos()),
+  gstcAddSystemFunctionProd(gsMakeOpIdAdd(gsMakeSortIdPos(), gsMakeSortIdPos()),
 			    gstcMakeSortArrowProd2(gsMakeSortIdPos(),gsMakeSortIdPos(),gsMakeSortIdPos()));
-  gstcAddSystemFunctionProd(gsMakeOpIdAdd(gsMakeSortIdPos()),
+  gstcAddSystemFunctionProd(gsMakeOpIdAdd(gsMakeSortIdPos(), gsMakeSortIdNat()),
 			    gstcMakeSortArrowProd2(gsMakeSortIdPos(),gsMakeSortIdNat(),gsMakeSortIdPos()));
-  gstcAddSystemFunctionProd(gsMakeOpIdAdd(gsMakeSortIdPos()),
+  gstcAddSystemFunctionProd(gsMakeOpIdAdd(gsMakeSortIdNat(), gsMakeSortIdPos()),
 			    gstcMakeSortArrowProd2(gsMakeSortIdNat(),gsMakeSortIdPos(),gsMakeSortIdPos()));
-  gstcAddSystemFunctionProd(gsMakeOpIdAdd(gsMakeSortIdNat()),
+  gstcAddSystemFunctionProd(gsMakeOpIdAdd(gsMakeSortIdNat(), gsMakeSortIdNat()),
 			    gstcMakeSortArrowProd2(gsMakeSortIdNat(),gsMakeSortIdNat(),gsMakeSortIdNat()));
-  gstcAddSystemFunctionProd(gsMakeOpIdAdd(gsMakeSortIdInt()),
+  gstcAddSystemFunctionProd(gsMakeOpIdAdd(gsMakeSortIdInt(), gsMakeSortIdInt()),
 			    gstcMakeSortArrowProd2(gsMakeSortIdInt(),gsMakeSortIdInt(),gsMakeSortIdInt()));
   //more
   gstcAddSystemFunctionProd(gsMakeOpIdSubt(gsMakeSortIdPos()),
