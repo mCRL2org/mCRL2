@@ -28,6 +28,11 @@ ATermAppl gsImplSortRefs(ATermAppl Spec);
 //       sort reference with e as a rhs, e is replaced by n in Spec;
 //       otherwise, n is replaced by e in Spec
 
+ATermAppl gsImplFunctionSorts(ATermAppl Spec);
+//Pre: Spec is a specification that adheres to the internal syntax after
+//     data implementation
+//Ret: Spec in which an implementation is added for each function sort
+
 typedef struct {
   ATermList Sorts;
   ATermList ConsOps;
@@ -100,6 +105,22 @@ void gsGetFreeVars_List(ATermList DataExprs, ATermList BoundVars,
 //Post:*PFreeVars is extended with the free variables in DataExprs that did not
 //     already occur in *PFreeVars or BoundVars
 
+ATermList gsGetFunctionSorts(ATermAppl Spec);
+//Pre: Spec is a specification
+//Ret: a list of all function sorts occurring in Spec, where each element is
+//     unique
+
+void gsGetFunctionSorts_Appl(ATermAppl Part, ATermList *PFuncSorts);
+//Pre: Part is a part of a specification
+//     *PFuncSorts represents the function sorts that are already found
+//Post:FuncSorts is extended with the function sorts in Part that did not
+//     already occur in *PFuncSorts
+
+void gsGetFunctionSorts_List(ATermList Parts, ATermList *PFuncSorts);
+//Pre: Parts is a list of parts of a specification
+//     *PFuncSorts represents the function sorts that are already found
+//Post:FuncSorts is extended with the function sorts in Parts that did not
+//     already occur in *PFuncSorts
 
 static ATermAppl gsApplyOpIdToVars(ATermAppl OpId, ATermList *PArgs,
                                    ATermList *PVars, ATerm Context);
@@ -159,6 +180,12 @@ void gsImplSortInt(TDataDecls *PDataDecls);
 //Pre: PDataDecls represents a pointer to new data declarations
 //Post:an implementation of sort Int is added to *PDataDecls
 
+void gsImplSortArrow(ATermAppl SortArrow, TDataDecls *PDataDecls);
+//Pre: SortArrow represents a function sort that adheres to the syntax after
+//     data implementation
+//     PDataDecls represents a pointer to new data declarations
+//Post:an implementation of SortArrow is added to *PDataDecls
+  
 void gsSplitSortDecls(ATermList SortDecls, ATermList *PSortIds,
   ATermList *PSortRefs);
 //Pre: SortDecls is a list of SortId's and SortRef's
@@ -224,7 +251,7 @@ bool gsIsLambdaOpId(ATermAppl DataExpr);
 ATermAppl gsImplExprs(ATermAppl Spec)
 {
   assert(gsIsSpecV1(Spec));
-  //implement special sort and data expressions occurring in Spec
+  //implement system sort and data expressions occurring in Spec
   ATermList Substs   = ATmakeList0();
   TDataDecls DataDecls;
   DataDecls.Sorts    = ATmakeList0();
@@ -645,7 +672,7 @@ void gsGetFreeVars_Appl(ATermAppl DataExpr, ATermList BoundVars,
 }
 
 void gsGetFreeVars_List(ATermList DataExprs, ATermList BoundVars,
-  ATermList* PFreeVars)
+  ATermList *PFreeVars)
 {
   while (!ATisEmpty(DataExprs))
   {
@@ -653,7 +680,40 @@ void gsGetFreeVars_List(ATermList DataExprs, ATermList BoundVars,
     DataExprs = ATgetNext(DataExprs);
   }
 }
+ 
+ATermList gsGetFunctionSorts(ATermAppl Spec)
+{
+  ATermList FuncSorts = ATmakeList0();
+  gsGetFunctionSorts_Appl(Spec, &FuncSorts);
+  return FuncSorts;
+}
 
+void gsGetFunctionSorts_Appl(ATermAppl Part, ATermList *PFuncSorts)
+{
+  if (gsIsSortArrow(Part) || gsIsSortArrowProd(Part)) {
+    if (ATindexOf(*PFuncSorts, (ATerm) Part, 0) == -1) {
+      *PFuncSorts = ATinsert(*PFuncSorts, (ATerm) Part);
+    }    
+  }
+  int NrArgs = ATgetArity(ATgetAFun(Part));      
+  for (int i = 0; i < NrArgs; i++) {
+    ATerm Arg = ATgetArgument(Part, i);
+    if (ATgetType(Arg) == AT_APPL)
+      gsGetFunctionSorts_Appl((ATermAppl) Arg, PFuncSorts);
+    else //ATgetType(Arg) == AT_LIST
+      gsGetFunctionSorts_List((ATermList) Arg, PFuncSorts);
+  }
+}
+ 
+void gsGetFunctionSorts_List(ATermList Parts, ATermList *PFuncSorts)
+{
+  while (!ATisEmpty(Parts))
+  {
+    gsGetFunctionSorts_Appl(ATAgetFirst(Parts), PFuncSorts);
+    Parts = ATgetNext(Parts);
+  }
+}
+ 
 static ATermAppl gsApplyOpIdToVars(ATermAppl OpId, ATermList *PArgs,
                                    ATermList *PVars, ATerm Context)
 {
@@ -822,7 +882,8 @@ ATermAppl gsImplSortStruct(ATermAppl SortStruct, ATermList *PSubsts,
     // Apply projection function to t
     t = gsMakeDataAppl(ATAgetFirst(l),t);
     // Add equation
-    OpEqns = ATinsert(OpEqns, (ATerm) gsMakeDataEqn(lhsv, nil, t, (ATermAppl) ATelementAt(lhsv,i)));
+    OpEqns = ATinsert(OpEqns,
+      (ATerm) gsMakeDataEqn(lhsv, nil, t, ATAelementAt(lhsv,i)));
   }
   //store equations for recognition in OpEqns
   for (; !ATisEmpty(Recs); Recs=ATgetNext(Recs))
@@ -984,9 +1045,15 @@ ATermAppl gsImplSortList(ATermAppl SortList, ATermList *PSubsts,
         gsMakeDataExprNeq(sSortId, tSortId), 
         gsMakeDataExprNot(gsMakeDataExprEq(sSortId, tSortId))),
       //conditional (Bool -> SortId -> SortId -> SortId)
-      (ATerm) gsMakeDataEqn(stl,nil, gsMakeDataExprIf(t, sSortId, tSortId), sSortId),
-      (ATerm) gsMakeDataEqn(stl,nil, gsMakeDataExprIf(f, sSortId, tSortId), tSortId),
-      (ATerm) gsMakeDataEqn(bsl,nil, gsMakeDataExprIf(b, sSortId, sSortId), sSortId),
+      (ATerm) gsMakeDataEqn(stl,nil,
+        gsMakeDataExprIf(t, sSortId, tSortId),
+        sSortId),
+      (ATerm) gsMakeDataEqn(stl,nil,
+        gsMakeDataExprIf(f, sSortId, tSortId),
+        tSortId),
+      (ATerm) gsMakeDataEqn(bsl,nil,
+        gsMakeDataExprIf(b, sSortId, sSortId),
+        sSortId),
       //list size (SortId -> Nat)
       (ATerm) gsMakeDataEqn(el, nil,
         gsMakeDataExprListSize(elSortId),
@@ -1020,9 +1087,13 @@ ATermAppl gsImplSortList(ATermAppl SortList, ATermList *PSubsts,
           gsMakeDataExprEltAt(sSortId,
             gsMakeDataExprInt2Nat(gsMakeDataExprPred(n)), SortElt))),
       //left head (SortId -> SortElt)
-      (ATerm) gsMakeDataEqn(dsl, nil, gsMakeDataExprLHead(ds, SortElt), dSortElt),
+      (ATerm) gsMakeDataEqn(dsl, nil,
+         gsMakeDataExprLHead(ds, SortElt),
+         dSortElt),
       //left tail (SortId -> SortId)
-      (ATerm) gsMakeDataEqn(dsl, nil, gsMakeDataExprLTail(ds), sSortId),
+      (ATerm) gsMakeDataEqn(dsl, nil,
+         gsMakeDataExprLTail(ds),
+         sSortId),
       //right head (SortId -> SortElt)
       (ATerm) gsMakeDataEqn(dl, nil,
         gsMakeDataExprRHead(gsMakeDataExprCons(dSortElt, elSortId), SortElt),
@@ -1783,6 +1854,46 @@ void gsImplSortInt(TDataDecls *PDataDecls)
     ), PDataDecls->DataEqns);
 }
 
+void gsImplFunctionSort(ATermAppl SortArrow, TDataDecls *PDataDecls)
+{
+  assert(gsIsSortArrow(SortArrow));
+  //Declare operations for sort SortArrow
+  PDataDecls->Ops = ATconcat(ATmakeList(3,
+      (ATerm) gsMakeOpIdEq(SortArrow),
+      (ATerm) gsMakeOpIdNeq(SortArrow),
+      (ATerm) gsMakeOpIdIf(SortArrow)
+    ), PDataDecls->Ops);
+  //Declare data equations for sort SortArrow
+  ATermAppl fSortArrow = gsMakeDataVarId(gsString2ATermAppl("f"), SortArrow);
+  ATermAppl gSortArrow = gsMakeDataVarId(gsString2ATermAppl("g"), SortArrow);
+  ATermAppl b = gsMakeDataVarId(gsString2ATermAppl("b"), gsMakeSortExprBool());
+  ATermAppl nil = gsMakeNil();
+  ATermAppl t = gsMakeDataExprTrue();
+  ATermAppl f = gsMakeDataExprFalse();
+  ATermList fl = ATmakeList1((ATerm) fSortArrow);
+  ATermList fgl = ATmakeList2((ATerm) fSortArrow, (ATerm) gSortArrow);
+  ATermList bfl = ATmakeList2((ATerm) b, (ATerm) fSortArrow);
+  PDataDecls->DataEqns = ATconcat(ATmakeList(5,
+      //equality (SortArrow -> SortArrow -> Bool)
+      (ATerm) gsMakeDataEqn(fl, nil,
+        gsMakeDataExprEq(fSortArrow, fSortArrow), t),
+      //inequality (SortArrow -> SortArrow -> Bool)
+      (ATerm) gsMakeDataEqn(fl,nil,
+        gsMakeDataExprNeq(fSortArrow, fSortArrow), 
+        gsMakeDataExprNot(gsMakeDataExprEq(fSortArrow, fSortArrow))),
+      //conditional (Bool -> SortArrow -> SortArrow -> SortArrow)
+      (ATerm) gsMakeDataEqn(fgl,nil,
+        gsMakeDataExprIf(t, fSortArrow, gSortArrow),
+        fSortArrow),
+      (ATerm) gsMakeDataEqn(fgl,nil,
+        gsMakeDataExprIf(f, fSortArrow, gSortArrow),
+        gSortArrow),
+      (ATerm) gsMakeDataEqn(bfl,nil,
+        gsMakeDataExprIf(b, fSortArrow, fSortArrow),
+        fSortArrow)
+    ), PDataDecls->DataEqns);
+}
+
 ATermAppl gsMakeFreshStructSortId(ATerm Term)
 {
   return gsMakeSortId(gsFreshString2ATermAppl(gsStructPrefix, Term, false));
@@ -1929,10 +2040,30 @@ void gsSplitSortDecls(ATermList SortDecls, ATermList *PSortIds,
   *PSortRefs = ATreverse(SortRefs);
 }
 
+ATermAppl gsImplFunctionSorts(ATermAppl Spec)
+{
+  assert(gsIsSpecV1(Spec));
+  //implement function sorts occurring in Spec
+  ATermList FuncSorts = gsGetFunctionSorts(Spec);
+  TDataDecls DataDecls;
+  DataDecls.Sorts = ATmakeList0();
+  DataDecls.ConsOps = ATmakeList0();
+  DataDecls.Ops = ATmakeList0();
+  DataDecls.DataEqns = ATmakeList0();
+  while (!ATisEmpty(FuncSorts))
+  {
+    gsImplFunctionSort(ATAgetFirst(FuncSorts), &DataDecls);
+    FuncSorts = ATgetNext(FuncSorts);
+  }
+  Spec = gsAddDataDecls(Spec, DataDecls);
+  return Spec;
+}
+
 ATermAppl gsImplementData(ATermAppl Spec)
 {
   Spec = gsImplExprs(Spec);
   Spec = gsImplSortRefs(Spec);
+  Spec = gsImplFunctionSorts(Spec);
   return Spec;
 }
 

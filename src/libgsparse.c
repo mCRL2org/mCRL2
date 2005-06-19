@@ -238,7 +238,7 @@ void gsPrintSpecification(FILE *OutStream, const ATermAppl Spec)
   //enable constructor functions
   gsEnableConstructorFunctions();
   //print Spec to OutStream
-  gsPrintPart(OutStream, Spec, true, 0);
+  gsPrintPart(OutStream, Spec, false, 0);
 }
 
 ATermAppl gsLinearise(ATermAppl spec)

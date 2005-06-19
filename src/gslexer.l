@@ -31,7 +31,7 @@ int gsyywrap(void);              /* action taken after an EOF (needed by yacc) *
 
 %}
 Id         [a-zA-Z\_][a-zA-Z0-9\_]*
-Number     "0"|("-"?[1-9][0-9]*) 
+Number     "0"|([1-9][0-9]*) 
 
 %%
 
