@@ -51,7 +51,7 @@ void usage(void)
 
 void version(void)
 {
-  fprintf(stderr,"version: Timed mCRL parser and LPO generator. Version %s\n", VERSION);
+  fprintf(stderr,"version: mCRL2 parser and LPE generator. Version %s\n", VERSION);
 }
 
 void help(void)
@@ -94,10 +94,10 @@ P("-help:     yields this message");
 P("-version:  get a version of the lineariser");
 P("");
 P("Except with the options help and version, a filename containing");
-P("a timed mCRL description must be given. This program checks the syntax");
-P("and the static semantics of a timed mCRL specification, and with ");
-P("proper flags can transform a subclass of untimed mCRL specifications");
-P("to linear process operators (LPOs)");
+P("a mCRL2 description must be given. This program checks the syntax");
+P("and the static semantics of a mCRL2 specification, and with ");
+P("proper flags can transform a subclass of mCRL2 specifications");
+P("to linear process equations (LPEs)");
 }
 
 static ATbool ExtensionAdded(char *filename, char *suffix) {
@@ -6880,7 +6880,8 @@ static ATermAppl split_process(ATermAppl procId, ATermTable visited)
 
   if (result!=NULL)
   { if (objectdata[n].processstatus==mCRL)
-    { ATerror("Unguarded recursion in the mCRL part of the input\n");
+    { ATerror("Unguarded recursion in the process part of the input (%t)\n",
+              objectdata[n].objectname);
     }
     assert((objectdata[n].processstatus==pCRL) ||
            (objectdata[n].processstatus==multiAction));
