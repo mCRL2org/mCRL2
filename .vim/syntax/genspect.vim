@@ -2,7 +2,7 @@
 " Language:   GenSpect
 " Extension:  gs
 " Maintainer: Aad Mathijssen <A.H.J.Mathijssen@tue.nl>
-" Date:       08-11-2004
+" Date:       20-06-2005
 
 syntax clear
 
@@ -24,7 +24,7 @@ syntax match gsOperator     /[.+|&<>:;=#@(){}\[\],!*?\\\-]/
 syntax match gsOperator     /||_/
 syntax match gsOperator     /->/
 syntax match gsNumber       /0/
-syntax match gsNumber       /\-\?[1-9][0-9]*/
+syntax match gsNumber       /[1-9][0-9]*/
 
 highlight link gsSpecKW     Special 
 highlight link gsProcCKW    Constant 
