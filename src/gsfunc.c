@@ -2090,7 +2090,8 @@ ATermAppl gsMakeOpIdPred(ATermAppl SortExpr)
 ATermAppl gsMakeOpIdDub(ATermAppl SortExpr)
 {
   assert(gsConstructorFunctionsEnabled);
-  return gsMakeOpId(gsOpIdNameDub, gsMakeSortArrow(SortExpr, SortExpr));
+  return gsMakeOpId(gsOpIdNameDub,
+    gsMakeSortArrow2(gsMakeSortExprBool(), SortExpr, SortExpr));
 }
 
 ATermAppl gsMakeOpIdAdd(ATermAppl SortExprLHS, ATermAppl SortExprRHS)
