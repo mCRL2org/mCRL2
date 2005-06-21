@@ -1520,8 +1520,8 @@ void gsImplSortNat(TDataDecls *PDataDecls)
          gsMakeDataExprDub(gsMakeDataExprNot(b),
            gsMakeDataExprGTESubtB(f, p, q))),
       //multiplication (Nat -> Nat -> Nat)
-      (ATerm) gsMakeDataEqn(nl, nil, gsMakeDataExprMult(zero, n), n),
-      (ATerm) gsMakeDataEqn(nl, nil, gsMakeDataExprMult(n, zero), n),
+      (ATerm) gsMakeDataEqn(nl, nil, gsMakeDataExprMult(zero, n), zero),
+      (ATerm) gsMakeDataEqn(nl, nil, gsMakeDataExprMult(n, zero), zero),
       (ATerm) gsMakeDataEqn(pql,nil, 
          gsMakeDataExprMult(gsMakeDataExprCNat(p), gsMakeDataExprCNat(q)),
          gsMakeDataExprCNat(gsMakeDataExprMult(p, q))),
@@ -1580,7 +1580,8 @@ void gsImplSortNat(TDataDecls *PDataDecls)
       (ATerm) gsMakeDataEqn(pl, nil,
         gsMakeDataExprEven(gsMakeDataExprCNat(one)), f),
       (ATerm) gsMakeDataEqn(bpl, nil,
-        gsMakeDataExprEven(gsMakeDataExprCNat(gsMakeDataExprCDub(b, p))), b)
+        gsMakeDataExprEven(gsMakeDataExprCNat(gsMakeDataExprCDub(b, p))),
+        gsMakeDataExprNot(b))
     ), PDataDecls->DataEqns);
 }
 
@@ -1833,7 +1834,7 @@ void gsImplSortInt(TDataDecls *PDataDecls)
          gsMakeDataExprNeg(gsMakeDataExprMult(gsMakeDataExprCNat(p), n))),
       (ATerm) gsMakeDataEqn(pql, nil,
          gsMakeDataExprMult(gsMakeDataExprCNeg(p), gsMakeDataExprCNeg(q)),
-         gsMakeDataExprCNeg(gsMakeDataExprMult(p, q))),
+        gsMakeDataExprMult(p, q)),
       //quotient after division (Int -> Pos -> Int)
       (ATerm) gsMakeDataEqn(pnl, nil,
          gsMakeDataExprDiv(gsMakeDataExprCInt(n), p),
