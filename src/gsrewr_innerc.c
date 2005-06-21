@@ -171,238 +171,186 @@ static char *whitespace(int len)
 	return whitespace_str;
 }
 
-void checkListArg(FILE *f, ATermList l, ATermList *n, int *d, int *ls)
+char checkArg_prefix[] = "a";
+void checkArg(FILE *f, ATerm t, ATermList *n, int *d, int *ls, char *pref, int k)
 {
-	int l_ls = *ls;
-
-	for (; !ATisEmpty(l); l=ATgetNext(l))
+	if ( ATisList(t) )
 	{
-		if ( ATisList(ATgetFirst(l)) )
+	fprintf(f,	"    %sif ( isAppl(%s%i) && ATisEqual(ATgetArgument(%s%i,0),int2ATerm%i) )\n"// && (ATgetArity(ATgetAFun(arg%i)) == 1 )\n"
+			"    %s{\n",
+			whitespace((*d)*2),pref,(k<0)?*ls:k,pref,(k<0)?*ls:k,ATgetInt((ATermInt) ATgetFirst((ATermList) t)),whitespace((*d)*2)//,k
+	       );
+		(*d)++;
+		ATermList l = (ATermList) t;
+		l = ATgetNext(l);
+		int i = 1;
+		for (; !ATisEmpty(l); l=ATgetNext(l))
 		{
-	fprintf(f,	"       %sif ( ATisList(ATgetFirst(l%i)) )\n"
-			"       %s{\n"
-			"       %s  ATermList l%i = (ATermList) ATgetFirst(l%i);\n"
-			"       %s  l%i = ATgetNext(l%i);\n",
-			whitespace((*d)*2),l_ls-1,whitespace((*d)*2),whitespace((*d)*2),l_ls,l_ls-1,whitespace((*d)*2),l_ls-1,l_ls-1
+	fprintf(f,	"    %s{\n"
+			"    %s  ATermAppl %s%i = (ATermAppl) ATgetArgument(%s%i,%i);\n",
+			whitespace((*d)*2),whitespace((*d)*2),checkArg_prefix,(*ls)+1,pref,(k<0)?*ls:k,i
 	       );
 			(*d)++;
 			(*ls)++;
-			checkListArg(f,ATLgetFirst(l),n,d,ls);
-		} else if ( ATisInt(ATgetFirst(l)) )
+			checkArg(f,ATgetFirst(l),n,d,ls,checkArg_prefix,-1);
+			i++;
+		}
+	} else if ( ATisInt(t) )
+	{
+//	fprintf(f,	"    %sif ( isAppl(%s%i) && ATisEqual(ATgetArgument(%s%i,0),int2ATerm%i) )\n"// && (ATgetArity(ATgetAFun(arg%i)) == 1 )\n"
+//			whitespace((*d)*2),pref,(k<0)?*ls:k,pref,(k<0)?*ls:k,ATgetInt((ATermInt) t),whitespace((*d)*2)//,k
+//	       );
+	fprintf(f,	"    %sif ( ATisEqual(%s%i,rewrAppl%i) )\n"// && (ATgetArity(ATgetAFun(arg%i)) == 1 )\n"
+			"    %s{\n",
+			whitespace((*d)*2),pref,(k<0)?*ls:k,ATgetInt((ATermInt) t),whitespace((*d)*2)//,k
+	       );
+		(*d)++;
+	} else {
+		if ( ATindexOf(*n,t,0) >= 0 )
 		{
-	fprintf(f,	"       %sif ( ATisInt(ATgetFirst(l%i)) && (ATgetInt((ATermInt) ATgetFirst(l%i)) == %i) )\n"
-			"       %s{\n"
-			"       %s  l%i = ATgetNext(l%i);\n",
-			whitespace((*d)*2),l_ls-1,l_ls-1,ATgetInt((ATermInt)ATgetFirst(l)),
-			whitespace((*d)*2),
-			whitespace((*d)*2),l_ls-1,l_ls-1
+	fprintf(f,	"    %svar_%s_%x = %s%i;\n",
+			whitespace((*d)*2),ATgetName(ATgetAFun(ATAgetArgument((ATermAppl) t,0))),ATXgetArgument((ATermAppl) t,1),pref,(k<0)?*ls:k
+	       );
+			*n = ATremoveAll(*n,t);
+		} else {
+	fprintf(f,	"    %sif ( ATisEqual(var_%s_%x,%s%i) )\n"
+			"    %s{\n",
+			whitespace((*d)*2),ATgetName(ATgetAFun(ATAgetArgument((ATermAppl) t,0))),ATXgetArgument((ATermAppl) t,1),pref,(k<0)?*ls:k,
+			whitespace((*d)*2)
 	       );
 			(*d)++;
-		} else {
-			if ( ATindexOf(*n,ATgetFirst(l),0) >= 0 )
-			{
-	fprintf(f,	"       %svar_%s_%x = ATgetFirst(l%i);\n"
-			"       %sl%i = ATgetNext(l%i);\n",
-			whitespace((*d)*2),ATgetName(ATgetAFun(ATAgetArgument(ATAgetFirst(l),0))),ATXgetArgument(ATAgetFirst(l),1),l_ls-1,
-			whitespace((*d)*2),l_ls-1,l_ls-1
-	       );
-				*n = ATremoveAll(*n,ATgetFirst(l));
-			} else {
-	fprintf(f,	"       %sif ( ATisEqual(var_%s_%x,ATgetFirst(l%i)) )\n"
-			"       %s{\n"
-			"       %s  l%i = ATgetNext(l%i);\n",
-			whitespace((*d)*2),ATgetName(ATgetAFun(ATAgetArgument(ATAgetFirst(l),0))),ATXgetArgument(ATAgetFirst(l),1),l_ls-1,
-			whitespace((*d)*2),
-			whitespace((*d)*2),l_ls-1,l_ls-1
-	       );
-				(*d)++;
-			}
 		}
 	}
 }
 
-void calcList(FILE *f, ATermList l, int d, int ls, bool incl_rest, int incl_num)
+void calcTerm(FILE *f, ATerm t)
 {
-	ATerm a;
-	int len;
-
-	a = ATgetFirst(l);
-	l = ATreverse(ATgetNext(l));
-	len = ATgetLength(l);
-
-	for (; !ATisEmpty(l); l=ATgetNext(l))
+	if ( ATisList(t) )
 	{
-		if ( ATisList(ATgetFirst(l)) )
+		int arity = ATgetLength((ATermList) t)-1;
+		ATermList l;
+		bool b = false;
+		bool v = false;
+
+		if ( !ATisInt(ATgetFirst((ATermList) t)) )
 		{
-			// XXX Perhaps easier to rewrite now
-	fprintf(f,	"       %s{\n"
-			"       %s  ATermList l%i = ATmakeList0();\n"
-			"\n",
-			whitespace(d*2),
-			whitespace(d*2),ls
-	       );
-			calcList(f,ATLgetFirst(l),d+1,ls+1,incl_rest,incl_num);
-	fprintf(f,	"\n"
-			"       %s  if ( ATisEmpty(ATgetNext(l%i)) )\n"
-			"       %s  {\n"
-			"       %s    l%i = ATinsert(l%i,ATgetFirst(l%i));\n"
-			"       %s  } else {\n",
-			whitespace(d*2),ls,
-			whitespace(d*2),
-			whitespace(d*2),ls-1,ls-1,ls,
-			whitespace(d*2)
-	       );
-			if ( 0 && ATisEmpty(ATgetNext(l)) )
+			if ( arity == 0 )
 			{
-	fprintf(f,	"       %s    l%i = ATconcat(l%i,l%i);\n",
-			whitespace(d*2),ls-1,ls,ls-1
-	       );
-			} else {
-	fprintf(f,	"       %s    l%i = ATinsert(l%i,(ATerm) l%i);\n",
-			whitespace(d*2),ls-1,ls-1,ls
-	       );
+				calcTerm(f,ATgetFirst((ATermList) t));
+				return;
 			}
-	fprintf(f,	"       %s  }\n"
-			"       %s}\n",
-			whitespace(d*2),
-			whitespace(d*2)
-	       );
-		} else if ( ATisInt(ATgetFirst(l)) )
-		{
-			// XXX Perhaps easier to rewrite now
-			// as it is a constant
-	fprintf(f,	"       %sif ( int2func[%i] != NULL )\n"
-			"       %s{\n"
-			"       %s  ATermList l%i = int2func[%i](ATmakeList0(),0);\n"
-			"       %s  if ( ATisEmpty(ATgetNext(l%i)) )\n"
-			"       %s  {\n"
-			"       %s    l%i = ATinsert(l%i,ATgetFirst(l%i));\n"
-			"       %s  } else {\n",
-			whitespace(d*2),ATgetInt((ATermInt) ATgetFirst(l)),
-			whitespace(d*2),
-			whitespace(d*2),ls,ATgetInt((ATermInt) ATgetFirst(l)),
-			whitespace(d*2),ls,
-			whitespace(d*2),
-			whitespace(d*2),ls-1,ls-1,ls,
-			whitespace(d*2)
-	       );
-			if ( 0 && ATisEmpty(ATgetNext(l)) )
+
+			v = true;
+			fprintf(f,"(isAppl(");
+			calcTerm(f,ATgetFirst((ATermList) t));
+			fprintf(f,")?varFunc%i(",arity);
+			calcTerm(f,ATgetFirst((ATermList) t));
+			l = ATgetNext((ATermList) t);
+			for (; !ATisEmpty(l); l=ATgetNext(l))
 			{
-	fprintf(f,	"       %s    l%i = ATconcat(l%i,l%i);\n",
-			whitespace(d*2),ls-1,ls,ls-1
-	       );
-			} else {
-	fprintf(f,	"       %s    l%i = ATinsert(l%i,(ATerm) l%i);\n",
-			whitespace(d*2),ls-1,ls-1,ls
-	       );
+				fprintf(f,",");
+				calcTerm(f,ATgetFirst(l));
 			}
-	fprintf(f,	"       %s  }\n"
-			"       %s} else {\n"
-			"       %s  l%i = ATinsert(l%i,int2ATerm[%i]);\n"
-			"       %s}\n",
-			whitespace(d*2),
-			whitespace(d*2),
-			whitespace(d*2),ls-1,ls-1,ATgetInt((ATermInt) ATgetFirst(l)),
-			whitespace(d*2)
-	       );
-		} else if ( !gsIsNil(ATAgetFirst(l)) )
+			fprintf(f,"):");
+		}
+
+		if ( ATisInt(ATgetFirst((ATermList) t)) && (l = innerc_eqns[ATgetInt((ATermInt) ATgetFirst((ATermList) t))]) != NULL )
 		{
-			if ( 0 && ATisEmpty(ATgetNext(l)) )
+			for (; !ATisEmpty(l); l=ATgetNext(l))
 			{
-	fprintf(f,	"       %sif ( ATisList(var_%s_%x) )\n"
-			"       %s{\n"
-			"       %s  l%i = ATconcat((ATermList) var_%s_%x,l%i);\n"
-			"       %s} else {\n"
-			"       %s  l%i = ATinsert(l%i,var_%s_%x);\n"
-			"       %s}\n",
-			whitespace(d*2),ATgetName(ATgetAFun(ATAgetArgument(ATAgetFirst(l),0))),ATXgetArgument(ATAgetFirst(l),1),
-			whitespace(d*2),
-			whitespace(d*2),ls-1,ATgetName(ATgetAFun(ATAgetArgument(ATAgetFirst(l),0))),ATXgetArgument(ATAgetFirst(l),1),ls-1,
-			whitespace(d*2),
-			whitespace(d*2),ls-1,ls-1,ATgetName(ATgetAFun(ATAgetArgument(ATAgetFirst(l),0))),ATXgetArgument(ATAgetFirst(l),1),
-			whitespace(d*2)
-	       );
-			} else {
-	fprintf(f,	"       %sl%i = ATinsert(l%i,var_%s_%x);\n",
-			whitespace(d*2),ls-1,ls-1,ATgetName(ATgetAFun(ATAgetArgument(ATAgetFirst(l),0))),ATXgetArgument(ATAgetFirst(l),1)
-	       );
+				if ( ATgetLength(ATLelementAt(ATLgetFirst(l),2)) == arity )
+				{
+					b = true;
+					break;
+				}
 			}
 		}
-	}
 
-	if ( ATisInt(a) )
+		if ( b )
+		{
+			fprintf(f,"rewr_%i_%i(",ATgetInt((ATermInt) ATgetFirst((ATermList) t)),arity);
+		} else {
+			if ( arity == 0 )
+			{
+				fprintf(f,"rewrAppl%i",ATgetInt((ATermInt) ATgetFirst((ATermList) t)));
+			} else {
+				if ( arity > 5 )
+				{
+					fprintf(f,"ATmakeAppl(appl%i,",arity);
+				} else {
+					fprintf(f,"ATmakeAppl%i(appl%i,",arity+1,arity);
+				}
+				if ( ATisInt(ATgetFirst((ATermList) t)) )
+				{
+					fprintf(f,"(ATerm) int2ATerm%i",ATgetInt((ATermInt) ATgetFirst((ATermList) t)));
+				} else {
+					fprintf(f,"(ATerm) ");
+					calcTerm(f,ATgetFirst((ATermList) t));
+				}
+			}
+		}
+		l = ATgetNext((ATermList) t);
+		bool c = !b;
+		for (; !ATisEmpty(l); l=ATgetNext(l))
+		{
+			if ( c )
+			{
+				fprintf(f,",");
+			} else {
+				c = true;
+			}
+			if ( !b )
+			{
+				fprintf(f,"(ATerm) ");
+			}
+			calcTerm(f,ATgetFirst(l));
+		}
+		fprintf(f,")");
+		
+		if ( v )
+		{
+			fprintf(f,")");
+		}
+	} else if ( ATisInt(t) )
 	{
-	fprintf(f,	"       %sif ( int2func[%i] != NULL )\n"
-			"       %s{\n"
-			"       %s  l%i = int2func[%i](l%i,%s%i+%i);\n"
-			"       %s} else {\n"
-			"       %s  l%i = ATinsert(l%i,int2ATerm[%i]);\n"
-			"       %s}\n",
-			whitespace(d*2),ATgetInt((ATermInt) a),
-			whitespace(d*2),
-			whitespace(d*2),ls-1,ATgetInt((ATermInt) a),ls-1,incl_rest?"len-":"",incl_rest?incl_num:0,len,
-			whitespace(d*2),
-			whitespace(d*2),ls-1,ls-1,ATgetInt((ATermInt) a),
-			whitespace(d*2)
-	       );
+		ATermList l;
+		bool b = false;
+		if ( (l = innerc_eqns[ATgetInt((ATermInt) t)]) != NULL )
+		{
+			for (; !ATisEmpty(l); l=ATgetNext(l))
+			{
+				if ( ATgetLength(ATLelementAt(ATLgetFirst(l),2)) == 0 )
+				{
+					b = true;
+					break;
+				}
+			}
+		}
+
+		if ( b )
+		{
+			fprintf(f,"rewr_%i_0()",ATgetInt((ATermInt) t));
+		} else {
+//			fprintf(f,"ATmakeAppl1(appl0,int2ATerm%i)",ATgetInt((ATermInt) t));
+			fprintf(f,"rewrAppl%i",ATgetInt((ATermInt) t));
+		}
 	} else {
-	fprintf(f,	"       %s{\n"
-			"       %s  ATerm a;\n"
-			"\n"
-			"       %s  if ( ATisList(var_%s_%x) )\n"
-			"       %s  {\n"
-			"       %s    a = ATgetFirst((ATermList) var_%s_%x);\n"
-			"       %s    l%i = ATconcat(ATgetNext((ATermList) var_%s_%x),l%i);\n"
-			"       %s  } else {\n"
-			"       %s    a = var_%s_%x;\n"
-			"       %s  }\n"
-
-//			"ATfprintf(stderr,\"--> %%t\\n\\n\",var_%s);\n"
-
-			"       %s  if ( ATisInt(a) && (int2func[ATgetInt((ATermInt) a)] != NULL) )\n"
-			"       %s  {\n"
-			"       %s    l%i = int2func[ATgetInt((ATermInt) a)](l%i,ATgetLength(l%i));\n"
-			"       %s  } else {\n"
-			"       %s    l%i = ATinsert(l%i,a);\n"
-			"       %s  }\n"
-			"       %s}\n",
-			whitespace(d*2),
-			whitespace(d*2),
-			whitespace(d*2),ATgetName(ATgetAFun(ATAgetArgument((ATermAppl) a,0))),ATXgetArgument((ATermAppl) a,1),
-			whitespace(d*2),
-			whitespace(d*2),ATgetName(ATgetAFun(ATAgetArgument((ATermAppl) a,0))),ATXgetArgument((ATermAppl) a,1),
-			whitespace(d*2),ls-1,ATgetName(ATgetAFun(ATAgetArgument((ATermAppl) a,0))),ATXgetArgument((ATermAppl) a,1),ls-1,
-			whitespace(d*2),
-			whitespace(d*2),ATgetName(ATgetAFun(ATAgetArgument((ATermAppl) a,0))),ATXgetArgument((ATermAppl) a,1),
-			whitespace(d*2),
-
-//			ATgetName(ATgetAFun(ATAgetArgument((ATermAppl) a,0))),
-
-			whitespace(d*2),
-			whitespace(d*2),
-			whitespace(d*2),ls-1,ls-1,ls-1,
-			whitespace(d*2),
-			whitespace(d*2),ls-1,ls-1,
-			whitespace(d*2),
-			whitespace(d*2)
-	       );
-/*	fprintf(f,	"       %sif ( ATisList(var_%s) )\n"
-			"       %s{\n"
-			"       %s  l%i = ATconcat((ATermList) var_%s,l%i);\n"
-			"       %s} else {\n"
-			"       %s  l%i = ATinsert(l%i,var_%s);\n"
-			"       %s}\n",
-			whitespace(d*2),ATgetName(ATgetAFun(ATAgetArgument((ATermAppl) a,0))),
-			whitespace(d*2),
-			whitespace(d*2),ls-1,ATgetName(ATgetAFun(ATAgetArgument((ATermAppl) a,0))),ls-1,
-			whitespace(d*2),
-			whitespace(d*2),ls-1,ls-1,ATgetName(ATgetAFun(ATAgetArgument((ATermAppl) a,0))),
-			whitespace(d*2)
-	       );*/
-/*	fprintf(f,	"       %sl%i = ATinsert(l%i,var_%s);\n",
-			whitespace(d*2),ls-1,ls-1,ATgetName(ATgetAFun(ATAgetArgument((ATermAppl) a,0)))
-	       );*/
+		fprintf(f,"var_%s_%x",ATgetName(ATgetAFun(ATAgetArgument((ATermAppl) t,0))),ATXgetArgument((ATermAppl) t,1));
 	}
+}
+
+int getArity(ATermAppl op)
+{
+	ATermAppl sort = ATAgetArgument(op,1);
+	int arity = 0;
+
+	while ( gsIsSortArrow(sort) )
+	{
+		sort = ATAgetArgument(sort,1);
+		arity++;
+	}
+
+	return arity;
 }
 
 void rewrite_init_innerc()
@@ -467,31 +415,216 @@ void rewrite_init_innerc()
 	f = fopen(t,"w");
 
 	//
-	//  Print includes and defs
+	//  Print includess
 	//
 	fprintf(f,	"#include <stdlib.h>\n"
+			"#include <string.h>\n"
 			"#include \"aterm2.h\"\n"
-			"\n"
-			"#define ATisList(x) (ATgetType(x) == AT_LIST)\n"
-			"#define ATisInt(x) (ATgetType(x) == AT_INT)\n"
-			"\n"
-			"typedef ATermList (*ftype)(ATermList, int);\n"
-			"ftype *int2func;\n"
-			"ATerm *int2ATerm;\n"
 			"\n"
 	       );
 
 	//
 	// Forward declarations of rewr_* functions
 	//
-/*	for (j=0;j<num_opids;j++)
+	int max_arity = 0;
+	for (j=0;j<num_opids;j++)
 	{
 		if ( innerc_eqns[j] != NULL )
 		{
-	fprintf(f,	"ATermList rewr_%i(ATermList args, int len);\n",j);
+			int arity = getArity(int2term[j]);
+			if ( arity > max_arity )
+			{
+				max_arity = arity;
+			}
+			for (int a=0; a<=arity; a++)
+			{
+
+				l = innerc_eqns[j];
+				bool b = false;
+				for (; !ATisEmpty(l); l=ATgetNext(l))
+				{
+					if ( a == ATgetLength(ATLelementAt(ATLgetFirst(l),2)) )
+					{
+						b = true;
+						break;
+					}
+				}
+				if ( b )
+				{
+	fprintf(f,	"static ATermAppl rewr_%i_%i(",j,a);
+					for (int i=0; i<a; i++)
+					{
+	fprintf(f,	(i==0)?"ATermAppl arg%i":", ATermAppl arg%i",i);
+					}
+	fprintf(f,	");\n");
+				}
+			}
 		}
 	}
-	fprintf(f, "\n");*/
+	fprintf(f,	"\n\n");
+
+	//
+	// Print defs
+	//
+	fprintf(f,	"#define ATisList(x) (ATgetType(x) == AT_LIST)\n"
+			"#define ATisInt(x) (ATgetType(x) == AT_INT)\n"
+//			"#define isAppl(x) (!strcmp(ATgetName(ATgetAFun(x)),\"@REWR@\"))\n"
+			"#define isAppl(x) (ATgetAFun(x) != varAFun)\n"
+	       );
+	for (int i=0; i<num_opids; i++)
+	{
+	fprintf(f,	"static ATerm int2ATerm%i;\n",i);
+	fprintf(f,	"static ATermAppl rewrAppl%i;\n",i);
+	}
+	fprintf(f,	"static AFun *apples;\n"
+			"static AFun varAFun;\n"
+	       );
+	for (int i=0; i<=max_arity; i++)
+	{
+	fprintf(f,      "static AFun appl%i;\n",i);
+	fprintf(f,	"typedef ATermAppl (*ftype%i)(",i);
+		for (int j=0; j<i; j++)
+		{
+			if ( j == 0 )
+			{
+	fprintf(f,				      "ATermAppl");
+			} else {
+	fprintf(f,				      ",ATermAppl");
+			}
+		}
+	fprintf(f,				      ");\n"
+			"ftype%i *int2func%i;\n",
+			i,i
+	       );
+	}
+	fprintf(f,	"\n"
+	       );
+
+	//
+	// Implement auxiliary functions
+	//
+	fprintf(f,	"static int num_apples = 0;\n"
+			"#define GET_APPL_INC 5\n"
+			"static AFun getAppl(int arity)\n"
+			"{\n"
+			"  int old_num = num_apples;\n"
+			"\n"
+			"  if ( apples == NULL )\n"
+			"  {\n"
+			"    apples = (AFun *) malloc(0*sizeof(AFun));\n"
+			"  }\n"
+			"\n"
+			"  while ( arity >= num_apples )\n"
+			"  {\n"
+			"    num_apples += GET_APPL_INC;\n"
+			"  }\n"
+			"  if ( old_num < num_apples )\n"
+			"  {\n"
+			"    apples = realloc(apples,num_apples*sizeof(AFun));\n"
+			"    for (int i=old_num; i<num_apples; i++)\n"
+			"    {\n"
+			"      apples[i] = ATmakeAFun(\"@REWR@\",i+1,ATfalse);\n"
+			"      ATprotectAFun(apples[i]);\n"
+			"    }\n"
+			"  }\n"
+			"\n"
+			"  return apples[arity];\n"
+			"}\n"
+			"\n"
+	       );
+				
+	for (int i=1; i<=max_arity; i++)
+	{
+	fprintf(f,	"static ATermAppl varFunc%i(ATermAppl a",i);
+		for (int j=0; j<i; j++)
+		{
+	fprintf(f,				    	       ", ATermAppl arg%i",j);
+		}
+	fprintf(f,					       ")\n"
+			"{\n"
+//			"ATprintf(\"varFunc%i(%%t)\\n\\n\",a);\n"
+			"  int arity = ATgetArity(ATgetAFun(a));\n"
+			"  if ( arity == 1 )\n"
+			"  {\n"
+			"    if ( ATisInt(ATgetArgument(a,0)) && (ATgetInt((ATermInt) ATgetArgument(a,0)) < %i) && (int2func%i[ATgetInt((ATermInt) ATgetArgument(a,0))] != NULL) )\n"
+			"    {\n"
+			"      return int2func%i[ATgetInt((ATermInt) ATgetArgument(a,0))](",
+//			i,
+			num_opids,i,i
+	       );
+		for (int j=0; j<i; j++)
+		{
+			if ( j == 0 )
+			{
+	fprintf(f,							       "(ATermAppl) arg%i",j);
+			} else {
+	fprintf(f,							       ", (ATermAppl) arg%i",j);
+			}
+		}
+	fprintf(f,									  ");\n"
+			"    } else {\n"
+			"      return ATmakeAppl(appl%i,ATgetArgument(a,0)",
+			i
+	       );
+		for (int j=0; j<i; j++)
+		{
+	fprintf(f,				",arg%i",j);
+		}
+	fprintf(f,				");\n"
+			"    }\n"
+			"  } else {\n"
+			"    ATerm args[arity+%i];\n"
+			"\n"
+			"    for (int i=0; i<arity; i++)\n"
+			"    {\n"
+			"      args[i] = ATgetArgument(a,i);\n"
+			"    }\n",
+			i
+	       );
+		for (int j=0; j<i; j++)
+		{
+	fprintf(f,	"    args[arity+%i] = (ATerm) arg%i;\n",j,j);
+		}
+	fprintf(f,	"    if ( ATisInt(args[0]) && (ATgetInt((ATermInt) args[0]) < %i) )\n"
+			"    {\n"
+//			"  ATprintf(\"switch %%i\\n\",i);\n"
+			"      switch ( arity+%i )\n"
+			"      {\n",
+			num_opids,i
+	       );
+		for (int j=i; j<=max_arity; j++)
+		{
+	fprintf(f,	"        case %i:\n"
+			"          if ( int2func%i[ATgetInt((ATermInt) args[0])] != NULL )\n"
+			"          {\n"
+			"            return int2func%i[ATgetInt((ATermInt) args[0])](",
+			j,j,j
+	       );
+			for (int k=0; k<j; k++)
+			{
+				if ( k == 0 )
+				{
+	fprintf(f,							       "(ATermAppl) args[%i]",k+1);
+				} else {
+	fprintf(f,							       ", (ATermAppl) args[%i]",k+1);
+				}
+			}
+	fprintf(f,							       ");\n"
+			"          }\n"
+			"          break;\n"
+	       );
+		}
+	fprintf(f,	"        default:\n"
+			"          break;\n"
+			"      }\n"
+			"    }\n"
+			"\n"
+			"    return ATmakeApplArray(getAppl(arity+%i),args);\n"
+			"  }\n"
+			"}\n",
+			i
+	       );
+	}
 
 	//
 	// Implement the equations of every op 
@@ -504,301 +637,137 @@ void rewrite_init_innerc()
       			//
 			// Declarations and initialisation of arrays
 			//
-	fprintf(f,	"ATermList rewr_%i(ATermList args, int len)\n"
-			"{\n"
-			"  int i;\n"
-			"  ATerm a[len];\n"
-			"  ATermList rest[len+1];\n"
-			"\n"
-
-//			"ATfprintf(stderr,\"rewr_%i(%%t,%%i)\\n\\n\",args,len);\n"
-
-/*			"  for (i=0; i<len; i++)\n"
-			"  {\n"
-			"    a[i] = ATgetFirst(args);\n"
-			"    rest[i] = args;\n"
-			"    args = ATgetNext(args);\n"
-			"  }\n"
-			"  rest[len] = args;\n"
-			"\n"
-			"  switch ( len )\n"
-			"  {\n"
-			"    default:\n",*/
-
-			"  rest[0] = args;\n"
-			"\n",
-
-//			j,
-
-			j
-	       );
-
-			//
-			// Implement every equation of the current op
-			//
-			l = innerc_eqns[j];
-			max = 0;
-			for (; !ATisEmpty(l); l=ATgetNext(l))
+			int arity = getArity(int2term[j]);
+			for (int a=0; a<=arity; a++)
 			{
-				if ( max < ATgetLength(ATLelementAt(ATLgetFirst(l),2)) )
-				{
-					max = ATgetLength(ATLelementAt(ATLgetFirst(l),2));
-				}
-			}
-//			for (; max>=0; max-- )
-			int tmpmax = max;
-			for (max = 0; max <= tmpmax; max++ )
-			{
-//	fprintf(f,	"    case %i:\n",max);
-	if ( max > 0 )
-	{
-	fprintf(f,	"    if ( %i <= len )\n"
-			"    {\n"
-			"      a[%i] = ATgetFirst(rest[%i]);\n"
-			"      rest[%i] = ATgetNext(rest[%i]);\n"
-			"\n",
-
-			max,
-			max-1,
-			max-1,
-			max,
-			max-1
-		);
-	} else {
-	fprintf(f,	"    {\n");
-	}
-//	fprintf(f,	"fprintf(stderr,\"case %i\\n\\n\");\n",max);
 
 				l = innerc_eqns[j];
+				bool b = false;
 				for (; !ATisEmpty(l); l=ATgetNext(l))
 				{
-					if ( max == ATgetLength(ATLelementAt(ATLgetFirst(l),2)) )
+					if ( a == ATgetLength(ATLelementAt(ATLgetFirst(l),2)) )
 					{
-      ATfprintf(f,	"      // %t\n",ATLgetFirst(l));
-						//
-						// Declare equation variables
-						//
-						m = ATLelementAt(ATLgetFirst(l),0);
-	fprintf(f,	"     {\n");
-						for (; !ATisEmpty(m); m=ATgetNext(m))
-						{
-							if ( ATindexOf(ATgetNext(m),ATgetFirst(m),0) < 0 ) // XXX to avoid doubles in list
-	fprintf(f,	"       ATerm var_%s_%x;\n",ATgetName(ATgetAFun(ATAgetArgument(ATAgetFirst(m),0))),ATXgetArgument(ATAgetFirst(m),1));
-						}
-	fprintf(f,	"\n");
-						//
-						// Match every parameter
-						//
-						m = ATLelementAt(ATLgetFirst(l),2);
-						n = ATLelementAt(ATLgetFirst(l),0);
-						k = 0;
-						d = 0;
-						ls = 0;
-						for (; !ATisEmpty(m); m=ATgetNext(m))
-						{
-							if ( ATisList(ATgetFirst(m)) )
-							{
-
-//	fprintf(f,	"fprintf(stderr,\"matching argument %i\\n\\n\");\n",k+1);
-
-	fprintf(f,	"       %sif ( ATisList(a[%i]) )\n"
-			"       %s{\n"
-			"       %s  ATermList l%i = (ATermList) a[%i];\n",
-			whitespace(d*2),k,whitespace(d*2),whitespace(d*2),ls,k
-	       );
-								d++;
-								ls++;
-								checkListArg(f,ATLgetFirst(m),&n,&d,&ls);
-							} else if ( ATisInt(ATgetFirst(m)) )
-							{
-	fprintf(f,	"       %sif ( ATisInt(a[%i]) && (ATgetInt((ATermInt) a[%i]) == %i) )\n"
-			"       %s{\n",
-			whitespace(d*2),k,k,ATgetInt((ATermInt)ATgetFirst(m)),whitespace(d*2)
-	       );
-								d++;
-							} else {
-								if ( ATindexOf(n,ATgetFirst(m),0) >= 0 )
-								{
-	fprintf(f,	"       %svar_%s_%x = a[%i];\n",whitespace(d*2),ATgetName(ATgetAFun(ATAgetArgument(ATAgetFirst(m),0))),ATXgetArgument(ATAgetFirst(m),1),k);
-									n = ATremoveAll(n,ATgetFirst(m));
-								} else {
-	fprintf(f,	"       %sif ( ATisEqual(var_%s_%x,a[%i]) )\n"
-			"       %s{\n",
-			whitespace(d*2),ATgetName(ATgetAFun(ATAgetArgument(ATAgetFirst(m),0))),ATXgetArgument(ATAgetFirst(m),1),k,whitespace(d*2)
-	       );
-									d++;
-								}
-							}
-							k++;
-						}
-						
-						//
-						// Test condition of equation
-						//
-						if ( ATisList(ATelementAt(ATLgetFirst(l),1)) )
-						{
-							// XXX Perhaps easier to rewrite now
-	fprintf(f,	"       %s{\n"
-			"       %s  ATermList l%i = ATmakeList0();\n"
-			"\n",
-			whitespace(d*2),
-			whitespace(d*2),ls
-	       );
-							calcList(f,ATLelementAt(ATLgetFirst(l),1),d+1,ls+1,false,0);
-	fprintf(f,	"\n"
-			"       %s  if ( ATgetInt((ATermInt) ATgetFirst(l%i)) == %i )\n"
-			"       %s  {\n",
-			whitespace(d*2),ls,true_num,
-			whitespace(d*2)
-	       );
-							d += 2;
-							ls++;
-						} else if ( ATisInt(ATelementAt(ATLgetFirst(l),1)) )
-						{
-							// XXX Perhaps easier to rewrite now
-							// as it is a constant
-	fprintf(f,	"       %s{\n"
-			"       %s  int i%i = %i;\n"
-			"\n"
-			"       %s  if ( int2func[%i] != NULL )\n"
-			"       %s  {\n"
-			"       %s    ATermList l%i = int2func[%i](ATmakeList0(),0);\n"
-			"       %s    i%i = ATgetInt((ATermInt) ATgetFirst(l%i));\n"
-			"       %s  }\n"
-			"       %s  if ( i%i == %i )\n"
-			"       %s  {\n",
-			whitespace(d*2),
-			whitespace(d*2),ls,ATgetInt((ATermInt) ATelementAt(ATLgetFirst(l),1)),
-			whitespace(d*2),ATgetInt((ATermInt) ATelementAt(ATLgetFirst(l),1)),
-			whitespace(d*2),
-			whitespace(d*2),ls,ATgetInt((ATermInt) ATelementAt(ATLgetFirst(l),1)),
-			whitespace(d*2),ls,ls,
-			whitespace(d*2),
-			whitespace(d*2),ls,true_num,
-			whitespace(d*2)
-	       );
-							d += 2;
-							ls++;
-						} else if ( !gsIsNil(ATAelementAt(ATLgetFirst(l),1)) )
-						{
-	fprintf(f,	"       %sif ( ATisInt(var_%s_%x) && (ATgetInt((ATermInt) var_%s_%x) == %i) )\n"
-			"       %s{\n",
-			whitespace(d*2),ATgetName(ATgetAFun(ATAgetArgument(ATAelementAt(ATLgetFirst(l),1),0))),ATXgetArgument(ATAelementAt(ATLgetFirst(l),1),1),ATgetName(ATgetAFun(ATAgetArgument(ATAelementAt(ATLgetFirst(l),1),0))),ATXgetArgument(ATAelementAt(ATLgetFirst(l),1),1),true_num,whitespace(d*2)
-	       );
-							d++;
-						}
-
-						//
-						// Create result
-						//
-						if ( ATisList(ATelementAt(ATLgetFirst(l),3)) )
-						{
-							// XXX Perhaps easier to rewrite now
-	fprintf(f,	"       %s{\n"
-			"       %s  ATermList l%i = rest[%i];\n"
-			"\n",
-			whitespace(d*2),
-			whitespace(d*2),ls,max
-	       );
-							calcList(f,ATLelementAt(ATLgetFirst(l),3),d+1,ls+1,true,max);
-	fprintf(f,	"\n"
-
-//			"ATfprintf(stderr,\"(%i)return %%t\\n\\n\",l%i);\n"
-
-			"       %s  return l%i;\n"
-			"       %s}\n",
-
-//			j,ls,
-
-			whitespace(d*2),ls,
-			whitespace(d*2)
-	       );
-						} else if ( ATisInt(ATelementAt(ATLgetFirst(l),3)) )
-						{
-							// XXX Perhaps easier to rewrite now
-							// as it is a constant
-	fprintf(f,	"       %sif ( int2func[%i] != NULL )\n"
-			"       %s{\n"
-
-//			"ATfprintf(stderr,\"(%i)pass\\n\\n\");\n"
-
-			"       %s  return int2func[%i](rest[%i],len-%i);\n"
-			"       %s} else {\n"
-
-//			"ATfprintf(stderr,\"(%i)return %%t\\n\\n\",ATinsert(rest[%i],int2ATerm[%i]));\n"
-
-			"       %s  return ATinsert(rest[%i],int2ATerm[%i]);\n"
-			"       %s}\n",
-			whitespace(d*2),ATgetInt((ATermInt) ATelementAt(ATLgetFirst(l),3)),
-			whitespace(d*2),
-
-//			j,
-
-			whitespace(d*2),ATgetInt((ATermInt) ATelementAt(ATLgetFirst(l),3)),max,max,
-			whitespace(d*2),
-
-//			j,max,ATgetInt((ATermInt) ATelementAt(ATLgetFirst(l),3)),
-
-			whitespace(d*2),max,ATgetInt((ATermInt) ATelementAt(ATLgetFirst(l),3)),
-			whitespace(d*2)
-	       );
-						} else if ( !gsIsNil(ATAelementAt(ATLgetFirst(l),3)) )
-						{
-	fprintf(f,	"       %sif ( ATisList(var_%s_%x) )\n"
-			"       %s{\n"
-
-//			"ATfprintf(stderr,\"(%i)return %%t\\n\\n\",ATconcat((ATermList) var_%s,rest[%i]));\n"
-
-			"       %s  return ATconcat((ATermList) var_%s_%x,rest[%i]);\n"
-			"       %s} else {\n"
-
-//			"ATfprintf(stderr,\"(%i)return %%t\\n\\n\",ATinsert(rest[%i],var_%s));\n"
-
-			"       %s  return ATinsert(rest[%i],var_%s_%x);\n"
-			"       %s}\n",
-			whitespace(d*2),ATgetName(ATgetAFun(ATAgetArgument(ATAelementAt(ATLgetFirst(l),3),0))),ATXgetArgument(ATAelementAt(ATLgetFirst(l),3),1),
-			whitespace(d*2),
-
-//			j,ATgetName(ATgetAFun(ATAgetArgument(ATAelementAt(ATLgetFirst(l),3),0))),max,
-
-			whitespace(d*2),ATgetName(ATgetAFun(ATAgetArgument(ATAelementAt(ATLgetFirst(l),3),0))),ATXgetArgument(ATAelementAt(ATLgetFirst(l),3),1),max,
-			whitespace(d*2),
-
-//			j,max,ATgetName(ATgetAFun(ATAgetArgument(ATAelementAt(ATLgetFirst(l),3),0))),
-
-			whitespace(d*2),max,ATgetName(ATgetAFun(ATAgetArgument(ATAelementAt(ATLgetFirst(l),3),0))),ATXgetArgument(ATAelementAt(ATLgetFirst(l),3),1),
-			whitespace(d*2)
-	       );
-						}
-
-						//
-						// Close all brackets
-						//
-						for (; d>0; d--)
-						{
-	fprintf(f,	"       %s}\n",whitespace((d-1)*2));
-						}
-	fprintf(f,	"     }\n");
+						b = true;
+						break;
 					}
 				}
-	fprintf(f,	"    }\n");
-			}
-			//
-			// Finish up function
-			//
-	fprintf(f,//	"      break;\n"
-//			"  }\n"
+				if ( b )
+				{
+	fprintf(f,	"static ATermAppl rewr_%i_%i(",j,a);
+					for (int i=0; i<a; i++)
+					{
+	fprintf(f,	(i==0)?"ATermAppl arg%i":", ATermAppl arg%i",i);
+					}
+	fprintf(f,	")\n"
+			"{\n"
 
-//			"ATfprintf(stderr,\"(%i)return %%t\\n\\n\",ATinsert(rest[0],int2ATerm[%i]));\n"
+//			"ATfprintf(stderr,\"rewr_%i_%i()\\n\\n\");\n"
+//			,j,a
+	       );
 
-			"  return ATinsert(rest[0],int2ATerm[%i]);\n"
-			"}\n"
-			"\n",
+					//
+					// Implement every equation of the current op
+					//
+					for (int a2 = 0; a2 <= a; a2++ )
+					{
+						l = innerc_eqns[j];
+						int z = 0;
+						for (; !ATisEmpty(l); l=ATgetNext(l))
+						{
+							z++;
+							if ( ATgetLength(ATLelementAt(ATLgetFirst(l),2)) == a2 )
+							{
+      ATfprintf(f,	"  // %t\n",ATLgetFirst(l));
+//      ATfprintf(f,	"  printf(\"rewr_%i_%i: %i\\n\");\n",j,a,z);
+								//
+								// Declare equation variables
+								//
+								m = ATLelementAt(ATLgetFirst(l),0);
+	fprintf(f,	"  {\n");
+								for (; !ATisEmpty(m); m=ATgetNext(m))
+								{
+									if ( ATindexOf(ATgetNext(m),ATgetFirst(m),0) < 0 ) // XXX to avoid doubles in list
+	fprintf(f,	"    ATermAppl var_%s_%x;\n",ATgetName(ATgetAFun(ATAgetArgument(ATAgetFirst(m),0))),ATXgetArgument(ATAgetFirst(m),1));
+								}
+	fprintf(f,	"\n");
+								//
+								// Match every parameter
+								//
+								m = ATLelementAt(ATLgetFirst(l),2);
+								n = ATLelementAt(ATLgetFirst(l),0);
+								k = 0;
+								d = 0;
+								ls = 0;
+								for (; !ATisEmpty(m); m=ATgetNext(m))
+								{
+									checkArg(f,ATgetFirst(m),&n,&d,&ls,"arg",k);
+									k++;
+								}
+						
+								//
+								// Test condition of equation
+								//
+//      ATfprintf(f,	"  printf(\"rewr_%i_%i: %i match\\n\");\n",j,a,z);
+								if ( ATisList(ATelementAt(ATLgetFirst(l),1)) || ATisInt(ATelementAt(ATLgetFirst(l),1)) || !gsIsNil(ATAelementAt(ATLgetFirst(l),1)) )
+								{
+	fprintf(f,	"    %sif ( ATisEqual(",whitespace(d*2));
+									calcTerm(f,ATelementAt(ATLgetFirst(l),1));
+	fprintf(f,			      ",rewrAppl%i) )\n"
+			"    %s{\n",
+			true_num,whitespace(d*2)
+		);
+									d++;
+								}
 
-//			j,j,
+//      ATfprintf(f,	"  printf(\"rewr_%i_%i: %i match+cond\\n\");\n",j,a,z);
+								//
+								// Create result
+								//
+	fprintf(f,	"    %sreturn ",whitespace(d*2));
+								calcTerm(f,ATelementAt(ATLgetFirst(l),3));
+	fprintf(f,		      ";\n");
 
+								//
+								// Close all brackets
+								//
+								for (; d>0; d--)
+								{
+	fprintf(f,	"    %s}\n",whitespace((d-1)*2));
+								}
+	fprintf(f,	"  }\n");
+							}
+						}
+					}
+					//
+					// Finish up function
+					//
+					if ( a == 0 )
+					{
+	fprintf(f,	"  return (rewrAppl%i",
 			j
 	       );
+					} else {
+						if ( a > 5 )
+						{
+	fprintf(f,	"  return ATmakeAppl(appl%i,(ATerm) int2ATerm%i",
+			a,j
+	       );
+						} else {
+	fprintf(f,	"  return ATmakeAppl%i(appl%i,(ATerm) int2ATerm%i",
+			a+1,a,j
+	       );
+						}
+					}
+					for (int i=0; i<a; i++)
+					{
+	fprintf(f,						     ",(ATerm) arg%i",i);
+					}
+	fprintf(f,						     ");\n"
+			"}\n"
+	       );
+				}
+			}
+	fprintf(f,	"\n");
 		}
 	}
 
@@ -806,8 +775,26 @@ void rewrite_init_innerc()
 			"{\n"
 			"  int i;\n"
 			"\n"
+			"  varAFun = ATmakeAFun(\"DataVarId\", 2, ATfalse);\n"
+			"  ATprotectAFun(varAFun);\n"
+			"\n"
+			"  apples = NULL;\n"
+			"  getAppl(%i);\n",
+			max_arity
 	       );
-	fprintf(f,	"  int2ATerm = (ATerm *) malloc(%i*sizeof(ATerm));\n"
+	for (int i=0; i<=max_arity; i++)
+	{
+	fprintf(f,	"  appl%i = apples[%i];\n",i,i);
+	}
+	fprintf(f,	"\n");
+	for (int i=0; i<num_opids; i++)
+	{
+	fprintf(f,	"  int2ATerm%i = (ATerm) ATmakeInt(%i);\n",i,i);
+	fprintf(f,	"  ATprotect(&int2ATerm%i);\n",i);
+	fprintf(f,	"  rewrAppl%i = ATmakeAppl(appl0,int2ATerm%i);\n",i,i);
+	fprintf(f,	"  ATprotectAppl(&rewrAppl%i);\n",i);
+	}
+/*			"  int2ATerm = (ATerm *) malloc(%i*sizeof(ATerm));\n"
 //			"  memset(int2ATerm,0,%i*sizeof(ATerm));\n"
 			"  ATprotectArray(int2ATerm,%i);\n"
 			"  for (i=0; i<%i; i++)\n"
@@ -816,72 +803,134 @@ void rewrite_init_innerc()
 			"  }\n"
 			"\n",
 			num_opids,num_opids,num_opids//,num_opids
-	       );
-	fprintf(f,	"  int2func = (ftype *) malloc(%i*sizeof(ftype));\n",num_opids+100);
-	for (j=0;j<num_opids;j++)
+	       );*/
+	fprintf(f,	"\n");
+	for (int a=0; a<=max_arity; a++)
 	{
-		if ( innerc_eqns[j] == NULL )
+		if ( a > 0 )
 		{
-	fprintf(f,	"  int2func[%i] = NULL;\n",j);
-		} else {
-//	fprintf(f,	"  int2func[%i] = rewr_%i;\n",j,j);
-      ATfprintf(f,	"  int2func[%i] = rewr_%i; // %t\n",j,j,int2term[j]);
+	fprintf(f,	"\n");
+		}
+	fprintf(f,	"  int2func%i = (ftype%i *) malloc(%i*sizeof(ftype%i));\n",a,a,num_opids,a);
+		for (j=0;j<num_opids;j++)
+		{
+			ATermList l;
+			bool b = false;
+			if ( (l = innerc_eqns[j]) != NULL )
+			{
+				for (; !ATisEmpty(l); l=ATgetNext(l))
+				{
+					if ( ATgetLength(ATLelementAt(ATLgetFirst(l),2)) == a )
+					{
+						b = true;
+						break;
+					}
+				}
+			}
+
+			if ( b )
+			{
+      ATfprintf(f,	"  int2func%i[%i] = rewr_%i_%i; // %t\n",a,j,j,a,int2term[j]);
+			} else {
+	fprintf(f,	"  int2func%i[%i] = NULL;\n",a,j);
+			}
 		}
 	}
-	for (j=0; j<100; j++)
-	fprintf(f,	"  int2func[%i] = NULL;\n",j+num_opids);
 	fprintf(f,	"}\n"
 			"\n"
-			"ATerm rewrite(ATerm t)\n"
+			"static ATermAppl rewr(ATerm t)\n"
 			"{\n"
-			"  ATerm a;\n"
-			"  ATermList l,n;\n"
-			"  int len;\n"
-			"\n"
-
-//			"ATfprintf(stderr,\"rewrite(%%t)\\n\\n\",t);\n"
-
+//			"  ATprintf(\"rewr(%%t)\\n\",t);\n"
 			"  if ( ATisList(t) )\n"
 			"  {\n"
-			"    a = ATgetFirst((ATermList) t);\n"
-			"    l = ATgetNext((ATermList) t);\n"
-			"  } else {\n"
-			"    a = t;\n"
-			"    l = ATmakeList0();\n"
-			"  }\n"
-			"\n"
-			"  n = ATmakeList0();\n"
-			"  len = 0;\n"
-			"  for (; !ATisEmpty(l); l=ATgetNext(l))\n"
-			"  {\n"
-
-//			"ATfprintf(stderr,\"rewrite arg %%t\\n\\n\",ATgetFirst(l));\n"
-
-			"    n = ATinsert(n, rewrite(ATgetFirst(l)));\n"
-			"    len++;\n"
-			"  }\n"
-			"  l = ATreverse(n);\n"
-			"\n"
-			"  if ( ATisInt(a) && (int2func[ATgetInt((ATermInt) a)] != NULL) )\n"
-			"  {\n"
-
-//			"ATfprintf(stderr,\"calling int2func[%%i](%%t,%%i) (%%p)\\n\\n\",ATgetInt((ATermInt) a),l,len,int2func[ATgetInt((ATermInt) a)]);\n"
-
-			"    l = int2func[ATgetInt((ATermInt) a)](l,len);\n"
-			"    if ( ATisEmpty(ATgetNext(l)) )\n"
+//			"  ATprintf(\"list\\n\");\n"
+			"    ATerm args[ATgetLength((ATermList) t)];\n"
+			"    ATerm head = ATgetFirst((ATermList) t);\n"
+			"    int i = 0;\n"
+			"    for (ATermList l=ATgetNext((ATermList) t); !ATisEmpty(l); l=ATgetNext(l))\n"
 			"    {\n"
-			"      return ATgetFirst(l);\n"
+			"      args[i+1] = (ATerm) rewr(ATgetFirst(l));\n"
+			"      i++;\n"
+			"    }\n"
+			"    if ( ATisInt(head) && (ATgetInt((ATermInt) head) < %i) )\n"
+			"    {\n"
+//			"  ATprintf(\"switch %%i\\n\",i);\n"
+			"      switch ( i )\n"
+			"      {\n",
+			num_opids
+	       );
+	for (int i=0; i<=max_arity; i++)
+	{
+	fprintf(f,	"        case %i:\n"
+			"          if ( int2func%i[ATgetInt((ATermInt) head)] != NULL )\n"
+			"          {\n"
+			"            return int2func%i[ATgetInt((ATermInt) head)](",
+			i,i,i
+	       );
+		for (int j=0; j<i; j++)
+		{
+			if ( j == 0 )
+			{
+	fprintf(f,							       "(ATermAppl) args[%i]",j+1);
+			} else {
+	fprintf(f,							       ", (ATermAppl) args[%i]",j+1);
+			}
+		}
+	fprintf(f,							       ");\n"
+			"          }\n"
+			"          break;\n"
+	       );
+	}
+	fprintf(f,	"        default:\n"
+			"          break;\n"
+			"      }\n"
+			"    }\n"
+//			"  ATprintf(\"endloop\\n\");\n"
+			"    args[0] = head;\n"
+			"    return ATmakeApplArray(getAppl(i),args);\n"
+			"  } else if ( ATisInt(t) )\n"
+			"  {\n"
+//			"  ATprintf(\"int\\n\");\n"
+			"    if ( (ATgetInt((ATermInt) t) < %i) && (int2func0[ATgetInt((ATermInt) t)] != NULL) )\n",
+			num_opids
+	       );
+	fprintf(f,	"    {\n"
+//			"  ATprintf(\"int rewr\\n\");\n"
+			"      return int2func0[ATgetInt((ATermInt) t)]();\n"
 			"    } else {\n"
+			"      return ATmakeAppl1(apples[0],t);\n"
+			"    }\n"
+			"  } else {\n"
+//			"  ATprintf(\"var\\n\");\n"
+			"    return (ATermAppl) t;\n"
+			"  }\n"
+			"}\n"
+			"\n"
+			"static ATerm remove_apples(ATermAppl t)\n"
+			"{\n"
+//			"  ATprintf(\"%%t\\n\\n\",t);\n"
+			"  if ( isAppl(t) )\n"
+			"  {\n"
+			"    if ( ATgetArity(ATgetAFun(t)) == 1 )\n"
+			"    {\n"
+			"      return ATgetArgument(t,0);\n"
+			"    } else {\n"
+			"      ATermList l = ATmakeList0();\n"
+			"      for (int i=ATgetArity(ATgetAFun(t))-1; i>0; i--)\n"
+			"      {\n"
+			"        l = ATinsert(l,remove_apples((ATermAppl) ATgetArgument(t,i)));\n"
+			"      }\n"
+			"      l = ATinsert(l,ATgetArgument(t,0));\n"
 			"      return (ATerm) l;\n"
 			"    }\n"
 			"  } else {\n"
-			"    if ( ATisEmpty(l) )\n"
-			"    {\n"
-			"      return a;\n"
-			"    } else {\n"
-			"      return (ATerm) ATinsert(l,a);\n"
-			"    }\n"
+			"    return (ATerm) t;\n"
 			"  }\n"
+			"}\n"
+			"\n"
+			"ATerm rewrite(ATerm t)\n"
+			"{\n"
+			"  return remove_apples(rewr(t));\n"
 			"}\n"
 	       );
 
@@ -1017,14 +1066,14 @@ ATerm rewrite_innerc(ATerm Term, int *b)
 				ATunprotectArray((ATerm *) int2term);
 				int2term = (ATermAppl *) realloc(int2term,num_opids*sizeof(ATermAppl));
 				ATprotectArray((ATerm *) int2term,num_opids);
-				l = ATtableKeys(term2int);
+				ATermList m = ATtableKeys(term2int);
 				c = 0;
-				for (; !ATisEmpty(l); l=ATgetNext(l))
+				for (; !ATisEmpty(m); m=ATgetNext(m))
 				{
-					i = (ATermInt) ATtableGet(term2int,ATgetFirst(l));
+					i = (ATermInt) ATtableGet(term2int,ATgetFirst(m));
 					if ( ATgetInt(i) >= old_opids )
 					{
-						int2term[ATgetInt(i)] = ATAgetFirst(l);
+						int2term[ATgetInt(i)] = ATAgetFirst(m);
 						c++;
 					}
 				}
