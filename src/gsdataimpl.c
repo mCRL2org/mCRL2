@@ -977,6 +977,10 @@ ATermAppl gsImplSortList(ATermAppl SortList, ATermList *PSubsts,
   TDataDecls *PDataDecls)
 {
   assert(gsIsSortList(SortList));
+  //add implementation of sort Nat, if necessary
+  if (ATindexOf(PDataDecls->Sorts, (ATerm) gsMakeSortIdNat(), 0) == -1) {
+    gsImplSortNat(PDataDecls);
+  }
   //declare fresh sort identifier for SortList
   ATermAppl SortId = gsMakeFreshListSortId((ATerm) PDataDecls->Sorts);
   PDataDecls->Sorts = ATinsert(PDataDecls->Sorts, (ATerm) SortId);
@@ -1010,11 +1014,12 @@ ATermAppl gsImplSortList(ATermAppl SortList, ATermList *PSubsts,
   ATermAppl tSortId = gsMakeDataVarId(gsString2ATermAppl("t"), SortId);
   ATermAppl dSortElt = gsMakeDataVarId(gsString2ATermAppl("d"), SortElt);
   ATermAppl eSortElt = gsMakeDataVarId(gsString2ATermAppl("e"), SortElt);
-  ATermAppl n = gsMakeDataVarId(gsString2ATermAppl("n"), gsMakeSortExprNat());
+  ATermAppl p = gsMakeDataVarId(gsString2ATermAppl("p"), gsMakeSortExprPos());
   ATermAppl b = gsMakeDataVarId(gsString2ATermAppl("b"), gsMakeSortExprBool());
   ATermAppl ds = gsMakeDataExprCons(dSortElt, sSortId);
   ATermAppl et = gsMakeDataExprCons(eSortElt, tSortId);
   ATermAppl nil = gsMakeNil();
+  ATermAppl zero = gsMakeDataExpr0();
   ATermAppl t = gsMakeDataExprTrue();
   ATermAppl f = gsMakeDataExprFalse();
   ATermList dl = ATmakeList1((ATerm) dSortElt);
@@ -1027,9 +1032,9 @@ ATermAppl gsImplSortList(ATermAppl SortList, ATermList *PSubsts,
     (ATerm) tSortId);
   ATermList destl = ATmakeList4((ATerm) dSortElt, (ATerm) eSortElt,
     (ATerm) sSortId, (ATerm) tSortId);
-  ATermList dsnl = ATmakeList3((ATerm) dSortElt, (ATerm) sSortId, (ATerm) n);
+  ATermList dspl = ATmakeList3((ATerm) dSortElt, (ATerm) sSortId, (ATerm) p);
   ATermList bsl = ATmakeList2((ATerm) b, (ATerm) sSortId);
-  PDataDecls->DataEqns = ATconcat(ATmakeList(23,
+  PDataDecls->DataEqns = ATconcat(ATmakeList(24,
       //equality (SortId -> SortId -> Bool)
       (ATerm) gsMakeDataEqn(el, nil, gsMakeDataExprEq(elSortId, elSortId), t),
       (ATerm) gsMakeDataEqn(dsl, nil, gsMakeDataExprEq(elSortId, ds), f),
@@ -1080,12 +1085,12 @@ ATermAppl gsImplSortList(ATermAppl SortList, ATermList *PSubsts,
         gsMakeDataExprConcat(sSortId, elSortId),
         sSortId),
       //list element at (SortId -> Nat -> SortElt)
-      (ATerm) gsMakeDataEqn(dsnl, nil,
-        gsMakeDataExprEltAt(ds, n, SortElt),
-        gsMakeDataExprIf(gsMakeDataExprEq(n, gsMakeDataExpr0()),
-          dSortElt,
-          gsMakeDataExprEltAt(sSortId,
-            gsMakeDataExprInt2Nat(gsMakeDataExprPred(n)), SortElt))),
+      (ATerm) gsMakeDataEqn(dsl, nil,
+        gsMakeDataExprEltAt(ds, zero, SortElt),
+        dSortElt),
+      (ATerm) gsMakeDataEqn(dspl, nil,
+        gsMakeDataExprEltAt(ds, gsMakeDataExprCNat(p), SortElt),
+        gsMakeDataExprEltAt(sSortId, gsMakeDataExprPred(p), SortElt)),
       //left head (SortId -> SortElt)
       (ATerm) gsMakeDataEqn(dsl, nil,
          gsMakeDataExprLHead(ds, SortElt),
