@@ -21,10 +21,19 @@ static unsigned int num_opids;
 static ATermAppl *int2term;
 static ATermList *inner3_eqns;
 static ATermInt trueint;
+static AFun nilAFun;
+static AFun opidAFun;
 static int max_vars;
-static bool isprotected = false;
+static bool is_initialised = false;
 
-static bool ATisList(ATerm a)
+#define ATAgetFirst(x) ((ATermAppl) ATgetFirst(x))
+#define ATLgetFirst(x) ((ATermList) ATgetFirst(x))
+#define gsIsOpId(x) (ATgetAFun(x) == opidAFun)
+
+#define ATisList(x) (ATgetType(x) == AT_LIST)
+#define ATisInt(x) (ATgetType(x) == AT_INT)
+
+/*static bool ATisList(ATerm a)
 {
 	return (ATgetType(a) == AT_LIST);
 }
@@ -32,9 +41,11 @@ static bool ATisList(ATerm a)
 static bool ATisInt(ATerm a)
 {
 	return (ATgetType(a) == AT_INT);
-}
+}*/
 
-static bool is_nil(ATerm t)
+#define is_nil(x) (ATisList(x)?false:(ATgetAFun((ATermAppl) x) == nilAFun))
+
+/*static bool is_nil(ATerm t)
 {
 	if ( ATisList(t) )
 	{
@@ -42,7 +53,7 @@ static bool is_nil(ATerm t)
 	} else {
 		return gsIsNil((ATermAppl) t);
 	}
-}
+}*/
 
 static ATerm OpId2Int(ATermAppl Term, bool add_opids)
 {
@@ -137,16 +148,29 @@ void rewrite_init_inner3()
 	ATermTable tmp_eqns;
 	ATermInt i;
 
+	if ( is_initialised )
+	{
+		ATtableDestroy(term2int);
+		ATunprotectInt(&trueint);
+		ATunprotectAFun(nilAFun);
+		ATunprotectAFun(opidAFun);
+		ATunprotectArray((ATerm *) int2term);
+		ATunprotectArray((ATerm *) inner3_eqns);
+	}
+	is_initialised = true;
+
 	tmp_eqns = ATtableCreate(100,100); // XXX would be nice to know the number op OpIds
 	term2int = ATtableCreate(100,100);
 
 	max_vars = 0;
 
 	trueint = (ATermInt) OpId2Int(gsMakeDataExprTrue(),true);
-	if ( !isprotected )
-	{
-		ATprotectInt(&trueint);
-	}
+	ATprotectInt(&trueint);
+
+	nilAFun = ATgetAFun(gsMakeNil());
+	ATprotectAFun(nilAFun);
+	opidAFun = ATgetAFun(gsMakeDataExprTrue());
+	ATprotectAFun(opidAFun);
 
 	l = opid_eqns;
 	for (; !ATisEmpty(l); l=ATgetNext(l))
@@ -173,29 +197,26 @@ void rewrite_init_inner3()
 
 	int2term = (ATermAppl *) malloc(num_opids*sizeof(ATermAppl));
 	inner3_eqns = (ATermList *) malloc(num_opids*sizeof(ATermList));
+	for (int i=0; i<num_opids; i++)
+	{
+		int2term[i] = NULL;
+		inner3_eqns[i] = NULL;
+	}
+	ATprotectArray((ATerm *) int2term,num_opids);
+	ATprotectArray((ATerm *) inner3_eqns,num_opids);
 
 	l = ATtableKeys(term2int);
 	for (; !ATisEmpty(l); l=ATgetNext(l))
 	{
 		i = (ATermInt) ATtableGet(term2int,ATgetFirst(l));
 		int2term[ATgetInt(i)] = ATAgetFirst(l);
-		if ( (m = (ATermList) ATtableGet(tmp_eqns,(ATerm) i)) == NULL )
+		if ( (m = (ATermList) ATtableGet(tmp_eqns,(ATerm) i)) != NULL )
 		{
-			inner3_eqns[ATgetInt(i)] = NULL;
-		} else {
 			inner3_eqns[ATgetInt(i)] = ATreverse(m);
 		}
 	}
 
-	if ( !isprotected )
-	{
-		ATprotectArray((ATerm *) int2term,num_opids);
-		ATprotectArray((ATerm *) inner3_eqns,num_opids);
-	}
-
 	ATtableDestroy(tmp_eqns);
-
-	isprotected = true;
 }
 
 void rewrite_add_inner3(ATermAppl eqn)
@@ -218,16 +239,33 @@ void rewrite_add_inner3(ATermAppl eqn)
 		m = ATmakeList4(ATgetArgument(eqn,0),toInner(ATAgetArgument(eqn,1),true),(ATerm) ATgetNext(l),toInner(ATAgetArgument(eqn,3),true));
 	}
 
-	l = ATtableKeys(term2int);
-	for (; !ATisEmpty(l); l=ATgetNext(l))
+	if ( num_opids > old_num )
 	{
-		i = (ATermInt) ATtableGet(term2int,ATgetFirst(l));
-		if ( ATgetInt(i) >= old_num )
+		ATunprotectArray((ATerm *) int2term);
+		ATunprotectArray((ATerm *) inner3_eqns);
+
+		int2term = (ATermAppl *) realloc(int2term,num_opids*sizeof(ATermAppl));
+		inner3_eqns = (ATermList *) realloc(inner3_eqns,num_opids*sizeof(ATermList));
+		for (int i=old_num; i<num_opids; i++)
 		{
-			int2term[ATgetInt(i)] = ATAgetFirst(l);
-			inner3_eqns[ATgetInt(i)] = NULL;
+			int2term[i] = NULL;
+			inner3_eqns[i] = NULL;
+		}
+		ATprotectArray((ATerm *) int2term,num_opids);
+		ATprotectArray((ATerm *) inner3_eqns,num_opids);
+
+		l = ATtableKeys(term2int);
+		for (; !ATisEmpty(l); l=ATgetNext(l))
+		{
+			i = (ATermInt) ATtableGet(term2int,ATgetFirst(l));
+			if ( ATgetInt(i) >= old_num )
+			{
+				int2term[ATgetInt(i)] = ATAgetFirst(l);
+				inner3_eqns[ATgetInt(i)] = NULL;
+			}
 		}
 	}
+
 	if ( inner3_eqns[ATgetInt(j)] == NULL )
 	{
 		inner3_eqns[ATgetInt(j)] = ATmakeList1((ATerm) m);

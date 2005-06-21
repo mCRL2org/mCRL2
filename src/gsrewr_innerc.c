@@ -358,7 +358,7 @@ void rewrite_init_innerc()
 	ATermList l,m,n;
 	ATermTable tmp_eqns;
 	ATermInt i;
-	int j,k,max,d,ls;
+	int j,k,d,ls;
 	FILE *f;
 	char *s,*t;
 	void *h;
