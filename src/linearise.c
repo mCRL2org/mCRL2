@@ -494,6 +494,7 @@ static long insertConstructorOrFunction(ATermAppl constructor,objecttype type)
 
   str=ATSgetArgument(constructor,0);
   t=ATAgetArgument(constructor,1);
+  
   assert(existsort(t));
 
   addString(str);
@@ -798,7 +799,7 @@ static specificationbasictype *read_input_file(char *filename)
 
 
 /* And very finally store the equations */
-  if (mayrewrite) gsRewriteInit(gsMakeDataEqnSpec(ATempty),GS_REWR_INNER);
+  if (mayrewrite) gsRewriteInit(gsMakeDataEqnSpec(ATempty),GS_REWR_INNER3);
   spec->eqns=ATempty;
   for(ATermList eqns=ATLgetArgument(ATAgetArgument(t,3),0) ;
       !ATisEmpty(eqns) ;
@@ -2992,6 +2993,9 @@ static void newequation(
 { 
   if (localequationvariables==NULL)
      ATerror("Variables must be declared first! %t\n",t2);
+
+  /* if ( (condition!=NULL) && (condition!=gsMakeNil()))
+            ATfprintf(stderr,"EQ: %t -> %t=%t\n",condition,t2,t3); */
   
   ATermAppl eqn=gsMakeDataEqn(
                      localequationvariables,
@@ -6875,15 +6879,17 @@ static ATermAppl split_body(
 static ATermAppl split_process(ATermAppl procId, ATermTable visited)
 { 
   long n=objectIndex(procId);
+
   ATermAppl newProcId=NULL;
   ATermAppl result=(ATermAppl)ATtableGet(visited,(ATerm)procId);
 
   if (result!=NULL)
-  { if (objectdata[n].processstatus==mCRL)
+  { /* if (objectdata[n].processstatus==mCRL)
     { ATerror("Unguarded recursion in the process part of the input (%t)\n",
               objectdata[n].objectname);
-    }
-    assert((objectdata[n].processstatus==pCRL) ||
+    } */
+    assert((objectdata[n].processstatus==mCRL) ||
+           (objectdata[n].processstatus==pCRL) ||
            (objectdata[n].processstatus==multiAction));
     return result;
   }
