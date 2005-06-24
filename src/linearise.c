@@ -249,12 +249,36 @@ static void newobject(int n)
   if (n>=maxobject)
   { int newsize=(n>=2*maxobject?
                   (n<1024?1024:(n+1)):2*maxobject);
-    objectdata=(objectdatatype *) (maxobject==0?
-                 malloc(newsize*sizeof(objectdatatype)):
+    if (maxobject==0)
+    { objectdata=(objectdatatype *)malloc(newsize*sizeof(objectdatatype));
+    }
+    else
+    { 
+      for(long i=0 ; i<maxobject ; i++)
+      { 
+        ATunprotect((ATerm *)&(objectdata[i].objectname));
+        ATunprotect(&(objectdata[i].representedprocess));
+        ATunprotect(&(objectdata[i].representedprocesses));
+        ATunprotectAppl(&(objectdata[i].targetsort));
+        ATunprotect((ATerm*)&(objectdata[i].processbody));
+        ATunprotect((ATerm*)&(objectdata[i].parameters));
+      }
+      objectdata=(objectdatatype *) (
                  realloc(objectdata,newsize*sizeof(objectdatatype)));
+    }
     if (objectdata==NULL)
     { ATerror("Fail to resize objectdata to %d\n",2*maxobject); }
     
+    for(long i=0 ; i<maxobject ; i++)
+    { 
+      ATprotect((ATerm *)&(objectdata[i].objectname));
+      ATprotect(&(objectdata[i].representedprocess));
+      ATprotect(&(objectdata[i].representedprocesses));
+      ATprotectAppl(&(objectdata[i].targetsort));
+      ATprotect((ATerm*)&(objectdata[i].processbody));
+      ATprotect((ATerm*)&(objectdata[i].parameters));
+    }
+
     for(long i=maxobject ; i<newsize ; i++)
     { objectdata[i].objectname=NULL;
       ATprotect((ATerm *)&(objectdata[i].objectname));
@@ -262,9 +286,11 @@ static void newobject(int n)
       objectdata[i].representedprocess=NULL;
       ATprotect(&(objectdata[i].representedprocess));
       objectdata[i].representedprocesses=NULL;
-      objectdata[i].targetsort=0;
+      ATprotect(&(objectdata[i].representedprocesses));
+      objectdata[i].targetsort=NULL;
+      ATprotectAppl(&(objectdata[i].targetsort));
       objectdata[i].processbody=NULL;
-      ATprotect((ATerm *)&(objectdata[i].processbody));
+      ATprotect((ATerm*)&(objectdata[i].processbody));
       objectdata[i].parameters=NULL;
       ATprotect((ATerm*)&(objectdata[i].parameters));
       objectdata[i].processstatus=unknown;
@@ -275,15 +301,12 @@ static void newobject(int n)
   }
   objectdata[n].objectname=NULL;
   objectdata[n].constructor=-1;
-/*  args;
-    representedprocesses; 
-    representedprocess; */
   objectdata[n].targetsort=0; /* for actions target sort is used to
                                     indicate the process representing 
                                     this action. */
   objectdata[n].processbody=NULL;
   objectdata[n].parameters=NULL;
-  objectdata[n].processstatus=unknown; // XXX was -1
+  objectdata[n].processstatus=unknown; 
   objectdata[n].object=none;
   objectdata[n].canterminate=0;
 
@@ -688,7 +711,11 @@ static int upperpowerof2(int i)
 }
 
 static ATermAppl RewriteTerm(ATermAppl t)
-{ if (mayrewrite) return gsRewriteTerm(t);
+{ /* ATfprintf(stderr,"REWRITE ");
+  gsPrintPart(stderr,t,0,0);
+  fflush(stderr); */
+  if (mayrewrite) t=gsRewriteTerm(t);
+  /* ATfprintf(stderr," ;;;; \n"); fflush(stderr); */
   return t;
 }
 
@@ -3163,6 +3190,7 @@ stacklisttype *new_stack(
   { stack->opns=NULL;
     stack->stackvar=gsMakeDataVarId(fresh_name(s3),
                                     gsMakeSortExprPos());
+    ATprotectAppl(&(stack->stackvar));
     insertvariable(stack->stackvar,ATtrue);
   }
   else  
@@ -3172,6 +3200,7 @@ stacklisttype *new_stack(
     if (stack->opns!=NULL)
     { stack->stackvar=gsMakeDataVarId(fresh_name(s3),
                                       stack->opns->stacksort);
+      ATprotectAppl(&(stack->stackvar));
       insertvariable(stack->stackvar,ATtrue);
     }
     else 
@@ -3180,16 +3209,27 @@ stacklisttype *new_stack(
       if (stack->opns==NULL)
           ATerror("Cannot allocate memory for stack operations\n");
 
-      stack->opns->sorts=ATempty;
-      ATprotect((ATerm *)&(stack->opns->sorts));
-      stack->opns->get=NULL;
-      ATprotect((ATerm *)&(stack->opns->get));
       stack->opns->stacksort=makenewsort(fresh_name("Stack"),spec);
+      stack->opns->sorts=ATempty;
+      ATprotectList(&(stack->opns->sorts));
+      stack->opns->get=ATempty;
+      ATprotectList(&(stack->opns->get));
+
+      stack->opns->push=NULL;
+      ATprotectAppl(&(stack->opns->push));
+      stack->opns->emptystack=NULL;
+      ATprotectAppl(&(stack->opns->emptystack));
+      stack->opns->empty=NULL;
+      ATprotectAppl(&(stack->opns->empty));
+      stack->opns->pop=NULL;
+      ATprotectAppl(&(stack->opns->pop));
+      stack->opns->getstate=NULL;
+      ATprotectAppl(&(stack->opns->getstate));
+
       stack->stackvar=gsMakeDataVarId(fresh_name(s3),
                                       stack->opns->stacksort);
+      ATprotectAppl(&(stack->stackvar));
       insertvariable(stack->stackvar,ATtrue);
-      stack->opns->sorts=ATempty;
-      stack->opns->get=ATempty;
       for( walker=parameterlist ; 
            walker!=ATempty ; 
            walker=ATgetNext(walker)) 
@@ -4227,11 +4267,11 @@ static enumeratedtype *create_enumeratedtype
   if (w==NULL)
   { w=(enumeratedtype *) malloc(sizeof(enumeratedtype));
     w->sortId=NULL;
-    ATprotect((ATerm *)&(w->sortId));
+    ATprotectAppl(&(w->sortId));
     w->elementnames=NULL;
-    ATprotect((ATerm *)&(w->elementnames));
+    ATprotectList(&(w->elementnames));
     w->functions=NULL;
-    ATprotect((ATerm *)&(w->functions));
+    ATprotectList(&(w->functions));
 
     w->size=n;
     if (n==2)
@@ -4407,7 +4447,7 @@ static enumtype *generate_enumerateddatatype(
   
   et=(enumtype *) malloc(sizeof(enumtype));
   et->var=NULL;
-  ATprotect((ATerm *)&(et->var));
+  ATprotectAppl(&(et->var));
   et->next=enumeratedtypes;
   enumeratedtypes=et;
   et->etype=create_enumeratedtype(n,spec);
@@ -6572,6 +6612,11 @@ static ATermAppl generateLPEmCRL(
 
 static void initialize_data(void)
 { 
+  ATprotectList(&seq_varnames);
+  ATprotectList(&localpcrlprocesses); 
+  ATprotectAppl(&tau_process);
+  ATprotectAppl(&delta_process);
+  ATprotectList(&LocalpCRLprocs);
   ATprotectList(&pcrlprocesses);
   pcrlprocesses=ATempty;
   gsEnableConstructorFunctions();
@@ -7159,7 +7204,6 @@ static int main2(int argc, char *argv[],ATerm *stack_bottom)
     ATerror("Option -newstate can only be used with -regular or -regular2\n");
 
   ATinit(argc,argv,stack_bottom);
-  ATprotectAppl(&result);
   if (((argc < 2)||(sname==NULL)))
       usage();
   initialize_data();
