@@ -935,11 +935,17 @@ void rewrite_init_innerc()
 	       );
 
 	fclose(f);
-
+#ifdef __WXMAC__
+	sprintf(t,"gcc -c %s %s -O3  %s.c",INNERC_CPPFLAGS,INNERC_CFLAGS,s);
+	system(t);
+	sprintf(t,"gcc %s -bundle -undefined dynamic_lookup -o %s.so %s.o",INNERC_LDFLAGS,s,s);
+	system(t);
+#else
 	sprintf(t,"gcc -c %s %s -Wno-unused -O3 -rdynamic %s.c",INNERC_CPPFLAGS,INNERC_CFLAGS,s);
 	system(t);
 	sprintf(t,"gcc %s -Wno-unused -shared -o %s.so %s.o",INNERC_LDFLAGS,s,s);
 	system(t);
+#endif
 
 	sprintf(t,"./%s.so",s);
 //fprintf(stderr,"a %s\n",t);
