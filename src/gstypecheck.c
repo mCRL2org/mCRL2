@@ -140,6 +140,7 @@ static ATermAppl gstcTypeMatchA(ATermAppl Type, ATermAppl PosType);
 static ATermList gstcTypeMatchL(ATermList TypeList, ATermList PosTypeList);
 static ATbool gstcHasUnknown(ATermAppl Type);
 static ATermAppl gstcExpandPosTypes(ATermAppl Type);
+static ATermAppl gstcExpandResTypes(ATermAppl Type);
 static ATermAppl gstcMinType(ATermList TypeList);
 static ATbool gstcMActIn(ATermList MAct, ATermList MActs);
 static ATbool gstcMActInSubEq(ATermList MAct, ATermList MActs);
@@ -1655,6 +1656,7 @@ static ATermAppl gstcTraverseVarConsTypeDN(int nFactPars, ATermTable Vars, ATerm
 	if(!(Par=gstcTypeMatchA(Par,PosType))) continue;
 	NewParList=ATinsert(NewParList,(ATerm)Par);
       }
+      NewParList=ATreverse(NewParList);
 
       if(ATisEmpty(NewParList)){
 	//Ok, this looks like a type error. We are not that strict. 
@@ -1673,10 +1675,26 @@ static ATermAppl gstcTraverseVarConsTypeDN(int nFactPars, ATermTable Vars, ATerm
 	}
 	NewParList=ATreverse(NewParList);
 	gsDebugMsg("The result of casting is %t\n",NewParList);
-	if(ATgetLength(NewParList)>1) ParList=ATmakeList1((ATerm)gstcMinType(NewParList));
-	else ParList=NewParList;
+	if(ATgetLength(NewParList)>1) NewParList=ATmakeList1((ATerm)gstcMinType(NewParList));
       }
-      else ParList=ATreverse(NewParList);
+
+      if(ATisEmpty(NewParList)){
+	//Ok, casting of the arguments did not help.
+	//Let's try to be more relaxed about the result, e.g. returning Pos or Nat is not a bad idea for int.
+	
+	ParList=BackupParList;
+	gsDebugMsg("Trying result casting for Op %t with %d arguments (ParList: %t; PosType: %t)\n",Name,nFactPars,ParList,PosType);
+	PosType=gstcExpandResTypes(gstcExpandPosTypes(PosType));
+	for(;!ATisEmpty(ParList);ParList=ATgetNext(ParList)){
+	  ATermAppl Par=ATAgetFirst(ParList);
+	  if((Par=gstcTypeMatchA(Par,PosType)))
+	    NewParList=ATinsert(NewParList,(ATerm)Par);
+	}
+	NewParList=ATreverse(NewParList);
+	gsDebugMsg("The result of casting is %t\n",NewParList);
+	if(ATgetLength(NewParList)>1) NewParList=ATmakeList1((ATerm)gstcMinType(NewParList));
+      }
+      ParList=NewParList;
     }
 	
     if(ATisEmpty(ParList)) {
@@ -2163,6 +2181,21 @@ static ATermAppl gstcExpandPosTypes(ATermAppl Type){
   } 
   
   return Type;
+}
+
+static ATermAppl gstcExpandResTypes(ATermAppl Type){
+  if(gsIsUnknown(Type)) return Type;
+  if(gsIsSortId(Type)) Type=gstcUnwindType(Type);
+  
+  if(!gsIsSortArrowProd(Type)) return Type;
+  ATermList Args=ATLgetArgument(Type,0);
+  
+  Type=ATAgetArgument(Type,1);
+  
+  if(gstcEqTypesA(gsMakeSortIdInt(),Type)) Type=gstcMakeNotInferred(ATmakeList3((ATerm)gsMakeSortIdPos(),(ATerm)gsMakeSortIdNat(),(ATerm)gsMakeSortIdInt()));
+  if(gstcEqTypesA(gsMakeSortIdNat(),Type)) Type=gstcMakeNotInferred(ATmakeList2((ATerm)gsMakeSortIdPos(),(ATerm)gsMakeSortIdNat()));
+  
+  return gsMakeSortArrowProd(Args,Type);
 }
 
 static ATermAppl gstcMinType(ATermList TypeList){
