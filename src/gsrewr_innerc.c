@@ -184,11 +184,12 @@ void checkArg(FILE *f, ATerm t, ATermList *n, int *d, int *ls, char *pref, int k
 		ATermList l = (ATermList) t;
 		l = ATgetNext(l);
 		int i = 1;
+		int oldls = *ls;
 		for (; !ATisEmpty(l); l=ATgetNext(l))
 		{
 	fprintf(f,	"    %s{\n"
 			"    %s  ATermAppl %s%i = (ATermAppl) ATgetArgument(%s%i,%i);\n",
-			whitespace((*d)*2),whitespace((*d)*2),checkArg_prefix,(*ls)+1,pref,(k<0)?*ls:k,i
+			whitespace((*d)*2),whitespace((*d)*2),checkArg_prefix,(*ls)+1,pref,(k<0)?oldls:k,i
 	       );
 			(*d)++;
 			(*ls)++;
@@ -542,14 +543,26 @@ void rewrite_init_innerc()
 		}
 	fprintf(f,					       ")\n"
 			"{\n"
-//			"ATprintf(\"varFunc%i(%%t)\\n\\n\",a);\n"
-			"  int arity = ATgetArity(ATgetAFun(a));\n"
+	       );
+/*	fprintf(f,	"ATprintf(\"varFunc%i(%%t",
+			i);
+		for (int j=0; j<i; j++)
+		{
+	fprintf(f,	",%%t");
+		}
+
+	fprintf(f,	")\\n\\n\",a");
+		for (int j=0; j<i; j++)
+		{
+	fprintf(f,	",arg%i",j);
+		}
+	fprintf(f,	");\n");*/
+	fprintf(f,	"  int arity = ATgetArity(ATgetAFun(a));\n"
 			"  if ( arity == 1 )\n"
 			"  {\n"
 			"    if ( ATisInt(ATgetArgument(a,0)) && (ATgetInt((ATermInt) ATgetArgument(a,0)) < %i) && (int2func%i[ATgetInt((ATermInt) ATgetArgument(a,0))] != NULL) )\n"
 			"    {\n"
 			"      return int2func%i[ATgetInt((ATermInt) ATgetArgument(a,0))](",
-//			i,
 			num_opids,i,i
 	       );
 		for (int j=0; j<i; j++)
@@ -588,7 +601,7 @@ void rewrite_init_innerc()
 	fprintf(f,	"    if ( ATisInt(args[0]) && (ATgetInt((ATermInt) args[0]) < %i) )\n"
 			"    {\n"
 //			"  ATprintf(\"switch %%i\\n\",i);\n"
-			"      switch ( arity+%i )\n"
+			"      switch ( arity+%i-1 )\n"
 			"      {\n",
 			num_opids,i
 	       );
@@ -619,7 +632,7 @@ void rewrite_init_innerc()
 			"      }\n"
 			"    }\n"
 			"\n"
-			"    return ATmakeApplArray(getAppl(arity+%i),args);\n"
+			"    return ATmakeApplArray(getAppl(arity+%i-1),args);\n"
 			"  }\n"
 			"}\n",
 			i
@@ -660,10 +673,22 @@ void rewrite_init_innerc()
 					}
 	fprintf(f,	")\n"
 			"{\n"
-
-//			"ATfprintf(stderr,\"rewr_%i_%i()\\n\\n\");\n"
-//			,j,a
 	       );
+
+/*	fprintf(f,	"ATfprintf(stderr,\"rewr_%i_%i("
+			,j,a
+	       );
+					for (int j=0; j<a; j++)
+					{
+	fprintf(f,	(j==0)?"%%t":",%%t");
+					}
+
+	fprintf(f,	")\\n\\n\"");
+					for (int j=0; j<a; j++)
+					{
+	fprintf(f,	",arg%i",j);
+					}
+	fprintf(f,	");\n");*/
 
 					//
 					// Implement every equation of the current op
@@ -908,6 +933,7 @@ void rewrite_init_innerc()
 			"\n"
 			"static ATerm remove_apples(ATermAppl t)\n"
 			"{\n"
+//			"  ATprintf(\"%%p \",t); fflush(stdout);\n"
 //			"  ATprintf(\"%%t\\n\\n\",t);\n"
 			"  if ( isAppl(t) )\n"
 			"  {\n"
@@ -930,6 +956,7 @@ void rewrite_init_innerc()
 			"\n"
 			"ATerm rewrite(ATerm t)\n"
 			"{\n"
+//			"  ATprintf(\"rewrite %%t\\n\\n\",t);\n"
 			"  return remove_apples(rewr(t));\n"
 			"}\n"
 	       );
