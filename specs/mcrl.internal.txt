@@ -1,6 +1,6 @@
-// Date: 08-12-2004
+// Date: 24-06-2004
 // This document describes the internal format of the MuCRL language similar
-// to GenSpect language. Here:
+// to mCRL2 language. Here:
 // - <String> represents an arbitrary string
 // - the other alphabetical strings within angular brackets are non-terminals
 //   that represent all possible branches of their productions

@@ -1,4 +1,4 @@
-//This is an EBNF description for the syntax of the GenSpect language.
+//This is an EBNF description for the syntax of the mCRL2 language.
 //In this description:
 //- the symbols <Whitespace> and <Comment> are layout symbols and may occur
 //  between every other EBNF element;
