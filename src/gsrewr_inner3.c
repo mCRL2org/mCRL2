@@ -266,6 +266,11 @@ void rewrite_add_inner3(ATermAppl eqn)
 		}
 	}
 
+	if ( ATgetLength(ATgetArgument(eqn,0)) > max_vars)
+	{
+		max_vars = ATgetLength(ATgetArgument(eqn,0));
+	}
+
 	if ( inner3_eqns[ATgetInt(j)] == NULL )
 	{
 		inner3_eqns[ATgetInt(j)] = ATmakeList1((ATerm) m);
@@ -490,7 +495,7 @@ static ATerm rewrite_func(ATermInt op, ATermList args, int *b)
 			ATermList rargs = ATLgetFirst(rule); rule=ATgetNext(rule);
 			ATerm rslt = ATgetFirst(rule);
 			ATermList l2 = args;
-	
+
 			bool match = true;
 			pos = 0;
 			while ( !ATisEmpty(rargs) )
@@ -589,7 +594,7 @@ ATerm rewrite_inner3(ATerm Term, int *b)
 {
 	ATermList l;
 	int c;
-//ATfprintf(stderr,"input: %t\n",Term);
+//ATfprintf(stderr,"input: %t\n\n",Term);
 	if ( ATisList(Term) )
 	{
 		l = ATmakeList0();
