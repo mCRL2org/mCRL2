@@ -1057,7 +1057,9 @@ static ATermAppl gstcRewrActProc(ATermTable Vars, ATermAppl ProcTerm){
   ATermList NewPosTypeList=ATmakeList0();
   for(ATermList Pars=ATLgetArgument(ProcTerm,1);!ATisEmpty(Pars);Pars=ATgetNext(Pars),PosTypeList=ATgetNext(PosTypeList)){
     ATermAppl Par=ATAgetFirst(Pars);
-    ATermAppl NewPosType=gstcTraverseVarConsTypeD(Vars,&Par,ATAgetFirst(PosTypeList));
+    ATermAppl PosType=ATAgetFirst(PosTypeList);
+    ATermAppl NewPosType=gstcTraverseVarConsTypeD(Vars,&Par,PosType);
+
     if(!NewPosType) {return NULL;}
     NewPars=ATinsert(NewPars,(ATerm)Par);
     NewPosTypeList=ATinsert(NewPosTypeList,(ATerm)NewPosType);
@@ -1066,7 +1068,40 @@ static ATermAppl gstcRewrActProc(ATermTable Vars, ATermAppl ProcTerm){
   NewPosTypeList=ATreverse(NewPosTypeList);
 
   PosTypeList=gstcAdjustNotInferredList(NewPosTypeList,ParList);
-  if(!PosTypeList) {gsErrorMsg("No %s %t with type %t is declared (while typechecking %t)",msg,Name,NewPosTypeList,ProcTerm);return NULL;}
+
+  if(!PosTypeList){
+    PosTypeList=ATLgetArgument(ATAgetArgument(Result,0),1);
+    ATermList Pars=NewPars;
+    NewPars=ATmakeList0();
+    ATermList CastedPosTypeList=ATmakeList0();
+    for(;!ATisEmpty(Pars);Pars=ATgetNext(Pars),PosTypeList=ATgetNext(PosTypeList),NewPosTypeList=ATgetNext(NewPosTypeList)){
+      ATermAppl Par=ATAgetFirst(Pars);
+      ATermAppl PosType=ATAgetFirst(PosTypeList);
+      ATermAppl NewPosType=ATAgetFirst(NewPosTypeList);
+      if(!gstcEqTypesA(PosType,NewPosType)){    
+	if(gstcTypeMatchA(PosType,gsMakeSortIdInt()) && gstcTypeMatchA(NewPosType,gsMakeSortIdNat())){
+	  NewPosType=gsMakeSortIdInt();
+	  Par=gsMakeDataApplProd(gstcMakeOpIdNat2Int(),ATmakeList1((ATerm)Par));
+	}
+	else if(gstcTypeMatchA(PosType,gsMakeSortIdInt()) && gstcTypeMatchA(NewPosType,gsMakeSortIdPos())){
+	  NewPosType=gsMakeSortIdInt();
+	  Par=gsMakeDataApplProd(gstcMakeOpIdPos2Int(),ATmakeList1((ATerm)Par));
+	}
+	else if(gstcTypeMatchA(PosType,gsMakeSortIdNat()) && gstcTypeMatchA(NewPosType,gsMakeSortIdPos())){
+	  NewPosType=gsMakeSortIdNat();
+	  Par=gsMakeDataApplProd(gstcMakeOpIdPos2Nat(),ATmakeList1((ATerm)Par));
+	}
+      }
+      NewPars=ATinsert(NewPars,(ATerm)Par);
+      CastedPosTypeList=ATinsert(CastedPosTypeList,(ATerm)NewPosType);
+    }
+    NewPars=ATreverse(NewPars);
+    NewPosTypeList=ATreverse(CastedPosTypeList);
+
+    PosTypeList=gstcAdjustNotInferredList(NewPosTypeList,ParList);
+  } 
+
+  if(!PosTypeList) {gsErrorMsg("No %s %t with type %t is declared (while typechecking %t)\n",msg,Name,NewPosTypeList,ProcTerm);return NULL;}
   
   if(gstcIsNotInferredL(PosTypeList)){
     gsWarningMsg("Ambiguous %s %t\n",msg,Name);
@@ -1546,8 +1581,8 @@ static ATermAppl gstcTraverseVarConsTypeD(ATermTable Vars, ATermAppl *DataTerm, 
       ATermList NewParList=ATmakeList0();
       for(;!ATisEmpty(ParList);ParList=ATgetNext(ParList)){
 	ATermAppl Par=ATAgetFirst(ParList);
-	if(!(Par=gstcTypeMatchA(Par,PosType))) continue;
-	NewParList=ATinsert(NewParList,(ATerm)Par);
+	if((Par=gstcTypeMatchA(Par,PosType)))
+	  NewParList=ATinsert(NewParList,(ATerm)Par);
       }
       ParList=ATreverse(NewParList);
       if(ATisEmpty(ParList)) {gsErrorMsg("No system constant %t with type %t",*DataTerm,PosType);return NULL;}
@@ -1653,8 +1688,8 @@ static ATermAppl gstcTraverseVarConsTypeDN(int nFactPars, ATermTable Vars, ATerm
       NewParList=ATmakeList0();
       for(;!ATisEmpty(ParList);ParList=ATgetNext(ParList)){
 	ATermAppl Par=ATAgetFirst(ParList);
-	if(!(Par=gstcTypeMatchA(Par,PosType))) continue;
-	NewParList=ATinsert(NewParList,(ATerm)Par);
+	if((Par=gstcTypeMatchA(Par,PosType)))
+	  NewParList=ATinsert(NewParList,(ATerm)Par);
       }
       NewParList=ATreverse(NewParList);
 
