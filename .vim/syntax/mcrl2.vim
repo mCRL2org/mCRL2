@@ -1,8 +1,8 @@
 " Vim syntax file
-" Language:   GenSpect
-" Extension:  gs
+" Language:   mCRL2
+" Extension:  mcrl2
 " Maintainer: Aad Mathijssen <A.H.J.Mathijssen@tue.nl>
-" Date:       20-06-2005
+" Date:       24-06-2005
 
 syntax clear
 
