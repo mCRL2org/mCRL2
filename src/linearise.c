@@ -7231,7 +7231,7 @@ static int main2(int argc, char *argv[],ATerm *stack_bottom)
                              Terminate */
     if ((to_toolbusfile)||(to_stdout))
     { result=transform(initial_process,spec);
-      ATwriteToTextFile(
+      ATwriteToBinaryFile(
          (ATerm)gsMakeSpecV1(
                  gsMakeSortSpec(spec->sorts),
                  gsMakeConsSpec(spec->funcs),
