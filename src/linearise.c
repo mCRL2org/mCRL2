@@ -5205,10 +5205,12 @@ static ATermAppl linMakeInitProcSpec(
                      (ATerm)sums);
 }
 
+#ifndef NDEBUG
 static int linIsInitProcSpec(ATermAppl initprocspec)
 {
   return ATgetAFun(initprocspec)==initprocspec_symbol;
 }
+#endif
 
 static ATermList linGetInit(ATermAppl initprocspec)
 { 
@@ -7193,7 +7195,7 @@ static int main2(int argc, char *argv[],ATerm *stack_bottom)
       if ((strlen(fname)>3) && (strrchr(fname,'/')!=NULL))
          oname = strrchr(oname,'/')+1;
       lastdot = strrchr(oname,'.');
-      if (lastdot && !strcmp(lastdot,".gs")) *lastdot = '\0';   
+      if (lastdot && !strcmp(lastdot,".mcrl2")) *lastdot = '\0';   
       break; 
     } 
   }
@@ -7211,7 +7213,7 @@ static int main2(int argc, char *argv[],ATerm *stack_bottom)
   strcpy(iname, sname);
   infile=fopen(iname,"r");
   if (infile==NULL) { 
-     if (ExtensionAdded(iname, ".gs")) {
+     if (ExtensionAdded(iname, ".mcrl2")) {
            infile=fopen(iname,"r");
           }
      }
