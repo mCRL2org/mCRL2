@@ -1,4 +1,4 @@
-% This is the GenSpect variant of the 'small1' mCRL example.
+% This is the MCRL2 variant of the 'small1' mCRL example.
 % The process exhibits a simple sequence of a and b actions,
 % where the parameter of 'a' is a increasing number and the parameter
 % of 'b' can be freely chosen. The state space of this example is infinite
