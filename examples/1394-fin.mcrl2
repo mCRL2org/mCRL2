@@ -119,13 +119,13 @@ act
   rPCind : Nat;
 
 proc Link0(n:Nat,id:Nat,buffer:SIG_TUPLE)=
-        sum dest:Nat,h:HEADER,d:DATA.
-           (is_void(buffer) && dest<n) ->
-              LDreq(id,dest,h,d).
-                 Link0(n,id,quadruple(dhead,
+        is_void(buffer) ->
+           ( sum dest:Nat,h:HEADER,d:DATA.
+                ( dest<n) -> LDreq(id,dest,h,d).
+                     Link0(n,id,quadruple(dhead,
                                  sig(dest),
                                  sig(h,crc(h)),
-                                 sig(d,crc(d)))),
+                                 sig(d,crc(d))))),
               sPAreq(id,fair).Link1(n,id,buffer) +
         sum p:SIGNAL.
            rPDind(id,p).
