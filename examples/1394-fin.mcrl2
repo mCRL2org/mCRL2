@@ -75,7 +75,7 @@ map  is_hda : SIGNAL -> Bool;
 var  s : SIGNAL;
 eqn  is_hda(s)=is_header(s) || is_data(s) || is_ack(s);
      valid_ack(s)=if(is_ack(s),getacrc(s)==check,false);
-     valid_hpart(s)=if(is_header(s),getdcrc(s)==check,false);
+     valid_hpart(s)=if(is_header(s),gethcrc(s)==check,false);
 
 map  corrupt : SIGNAL -> SIGNAL;
 var  h : HEADER;
