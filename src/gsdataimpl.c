@@ -749,6 +749,8 @@ static ATermAppl gsApplyOpIdToVars(ATermAppl OpId, ATermList *PArgs,
     // Next
     sort = ATAgetArgument(sort,1);
   }
+  *PArgs = ATreverse(*PArgs);
+  *PVars = ATreverse(*PVars);
   return t;
 }
 
@@ -798,13 +800,6 @@ ATermAppl gsImplSortStruct(ATermAppl SortStruct, ATermList *PSubsts,
     ATermAppl ConsName = ATAgetArgument(StructCons, 0);
     ATermList StructProjs = ATLgetArgument(StructCons, 1);
     ATermAppl RecName = ATAgetArgument(StructCons, 2);
-    //store recogniser in RecOps and Recs
-    if (!gsIsNil(RecName)) {
-      RecOps = ATinsert(RecOps, (ATerm)
-        gsMakeOpId(RecName, gsMakeSortArrow(SortId, gsMakeSortExprBool())));
-      Recs = ATinsert(Recs,
-        (ATerm) ATmakeList2(ATgetFirst(RecOps),(ATerm) ConsName));
-    }
     ATermList StructConsSorts = ATmakeList0();
     //store projection operations in ProjOps and store the implementations of
     //the sorts in StructConsSorts
@@ -820,8 +815,8 @@ ATermAppl gsImplSortStruct(ATermAppl SortStruct, ATermList *PSubsts,
       if (!gsIsNil(ProjName)) {
         ProjOps = ATinsert(ProjOps, (ATerm)
           gsMakeOpId(ProjName, gsMakeSortArrow(SortId, ProjSort)));
-        Projs = ATinsert(Projs, (ATerm) ATmakeList3(
-          ATgetFirst(ProjOps),(ATerm) ConsName,(ATerm) ATmakeInt(i)));
+        Projs = ATinsert(Projs, (ATerm) ATmakeList2(
+          ATgetFirst(ProjOps),(ATerm) ATmakeInt(i)));
       }
       StructProjs = ATgetNext(StructProjs);
       i++;
@@ -830,6 +825,20 @@ ATermAppl gsImplSortStruct(ATermAppl SortStruct, ATermList *PSubsts,
     //store constructor operation in ConsOps
     ConsOps = ATinsert(ConsOps, (ATerm)
       gsMakeOpId(ConsName, gsMakeSortArrowList(StructConsSorts, SortId)));
+    //store recogniser in RecOps and Recs
+    if (!gsIsNil(RecName)) {
+      RecOps = ATinsert(RecOps, (ATerm)
+        gsMakeOpId(RecName, gsMakeSortArrow(SortId, gsMakeSortExprBool())));
+      Recs = ATinsert(Recs,
+        (ATerm) ATmakeList2(ATgetFirst(RecOps), ATgetFirst(ConsOps)));
+    }
+    //add constructor to Projs
+    ATermList tmpl = ATmakeList0();
+    for (; !ATisEmpty(Projs); Projs=ATgetNext(Projs))
+    {
+      tmpl = ATinsert(tmpl, (ATerm) ATappend(ATLgetFirst(Projs),ATgetFirst(ConsOps)));
+    }
+    Projs = ATreverse(tmpl);
     StructConss = ATgetNext(StructConss);
   }
   //add declarations for the constructo, projection and recogniser operations
@@ -863,19 +872,11 @@ ATermAppl gsImplSortStruct(ATermAppl SortStruct, ATermList *PSubsts,
   {
     ATermList l = ATLgetFirst(Projs);
     // Name of constructor
-    ATermAppl s = ATAgetFirst(ATgetNext(l));
+    ATermAppl s = ATAgetFirst(ATgetNext(ATgetNext(l)));
     // Number of projected argument
-    int i = ATgetInt((ATermInt) ATgetFirst(ATgetNext(ATgetNext(l))));
-    // Find the constructor operation
-    ATermAppl t = NULL;
-    for (ATermList m=ConsOps; !ATisEmpty(m); m=ATgetNext(m))
-    {
-      if ( ATisEqual(ATAgetArgument(ATAgetFirst(m),0),s) )
-      {
-        t = ATAgetFirst(m);
-        break;
-      }
-    }
+    int i = ATgetInt((ATermInt) ATgetFirst(ATgetNext(l)));
+    // Start with the constructor operation
+    ATermAppl t = s;
     // Apply constructor t to (fresh) variables and store its
     // arguments in lhsv
     t = gsApplyOpIdToVars(t,&lhsv,&vars,(ATerm) IdCtx);
@@ -899,10 +900,10 @@ ATermAppl gsImplSortStruct(ATermAppl SortStruct, ATermList *PSubsts,
       // Apply constructor t to (fresh) variables and store its
       // arguments in lhsv
       t = gsApplyOpIdToVars(t,&lhsv,&vars,(ATerm) IdCtx);
-      // Apply rqcognition function to t
+      // Apply recognition function to t
       t = gsMakeDataAppl(ATAgetFirst(l),t);
       // Add right equation to OpEqns
-      if ( ATisEqual(ATAgetArgument(ATAgetFirst(m),0),s) )
+      if ( ATisEqual(ATAgetFirst(m),s) )
       {
         OpEqns = ATinsert(OpEqns, (ATerm) gsMakeDataEqn(lhsv, nil, t, gsMakeDataExprTrue()));
       } else {
