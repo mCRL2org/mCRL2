@@ -14,6 +14,8 @@ bool FindSolutionsError;
 static ATermAppl current_spec;
 static ATermAppl gsProverTrue, gsProverFalse;
 
+static ATermTable subst_table = NULL;
+
 void gsProverInit(ATermAppl Spec)
 {
 	current_spec = Spec;
@@ -88,7 +90,7 @@ static ATermList calcNext(ATermList l)
 				t = gsMakeDataAppl(t,v);
 			}
 			s = ATmakeList1((ATerm) gsMakeSubst((ATerm) var,(ATerm) t));
-			e = gsRewriteTerm((ATermAppl) gsSubstValues(s,(ATerm) a3,true));
+			e = gsRewriteTermWithSubsts((ATermAppl) gsSubstValues(s,(ATerm) a3,true),subst_table);
 			if ( !ATisEqual(e,gsProverFalse) )
 			{
 				r = ATinsert(r,(ATerm) ATmakeList3((ATerm) na1,gsSubstValues(s,(ATerm) a2,true),(ATerm) e));
@@ -190,16 +192,16 @@ static ATermList EliminateVars(ATermList l)
 	l = ATgetNext(l);
 	t = ATAgetFirst(l);
 
-	t = gsRewriteTerm(t);
+	t = gsRewriteTermWithSubsts(t,subst_table);
 	while ( !ATisEmpty(vars) && FindEquality(t,vars,&v,&e) )
 	{
 		vars = ATremoveElement(vars,(ATerm) v);
 		vals = (ATermList) gsSubstValues(ATmakeList1((ATerm) gsMakeSubst((ATerm) v,(ATerm) e)),(ATerm) vals,true);
 		t = (ATermAppl) gsSubstValues(ATmakeList1((ATerm) gsMakeSubst((ATerm) v,(ATerm) e)),(ATerm) t,true);
-		t = gsRewriteTerm(t);
+		t = gsRewriteTermWithSubsts(t,subst_table);
 	}
 
-	return ATmakeList3((ATerm) vars, (ATerm) gsRewriteTerms(vals), (ATerm) t);
+	return ATmakeList3((ATerm) vars, (ATerm) gsRewriteTermsWithSubsts(vals, subst_table), (ATerm) t);
 }
 
 static ATermList makeSubsts(ATermList vars, ATermList exprs)
@@ -224,7 +226,7 @@ ATermList FindSolutions(ATermList Vars, ATermAppl Expr)
 
 	if ( ATisEmpty(Vars) )
 	{
-		Expr = gsRewriteTerm(Expr);
+		Expr = gsRewriteTermWithSubsts(Expr,subst_table);
 		if ( ATisEqual(Expr,gsProverTrue) )
 		{
 			return ATmakeList1((ATerm) ATmakeList0());
@@ -293,6 +295,14 @@ ATermList FindSolutions(ATermList Vars, ATermAppl Expr)
 	m = ATreverse(m);
 
 	return m;
+}
+
+ATermList FindSolutionsWithSubsts(ATermList Vars, ATermAppl Expr, ATermTable Substs)
+{
+	subst_table = Substs;
+	ATermList l = FindSolutions(Vars,Expr);
+	subst_table = NULL;
+	return l;
 }
 
 #ifdef __cplusplus

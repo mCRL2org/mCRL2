@@ -44,7 +44,7 @@ static ATermList gsGetDomain(ATermAppl sort)
 
 
 static ATermAppl current_spec;
-
+static ATermTable params;
 
 ATermAppl FindDummy(ATermAppl sort)
 {
@@ -171,6 +171,8 @@ ATermList gsNextStateInit(ATermAppl Spec, bool AllowFreeVars)
 	
 	gsProverInit(Spec);
 
+	params = ATtableCreate(100,100);
+
 	l = ATLgetArgument(ATAgetArgument(Spec,5),1);
 	m = ATLgetArgument(ATAgetArgument(Spec,6),1);
 	state = ATmakeList0();
@@ -243,36 +245,46 @@ ATermAppl rewrActionArgs(ATermAppl act)
 
 ATermList gsNextState(ATermList State)
 {
-	ATermList sums,states,l,m,params;
+	ATermList sums,states,l,m;//,params;
 	ATermAppl sum;
 
 	NextStateError = false;
 
 	l = ATLgetArgument(ATAgetArgument(current_spec,5),1);
 	m = State;
-	params = ATmakeList0();
+	ATtableReset(params);
+	ATermList params_l = ATmakeList0();
 	for (; !ATisEmpty(l); l=ATgetNext(l),m=ATgetNext(m))
 	{
-		params = ATinsert(params,(ATerm) gsMakeSubst(ATgetFirst(l),ATgetFirst(m)));
+		if ( !gsIsNil(ATAgetFirst(m)) )
+		{
+			ATtablePut(params,ATgetFirst(l),ATgetFirst(m));
+			params_l = ATinsert(params_l,(ATerm) gsMakeSubst(ATgetFirst(l),ATgetFirst(m)));
+		}
 	}
-	params = ATreverse(params);
+	params_l = ATreverse(params_l);
 
 	sums = ATLgetArgument(ATAgetArgument(current_spec,5),2);
 	states = ATmakeList0();
 	ATermList pars = ATLgetArgument(ATAgetArgument(current_spec,5),1);
 	for (; !ATisEmpty(sums); sums=ATgetNext(sums))
 	{
-		sum = smd_subst_vars(ATAgetFirst(sums),params);
+//		sum = smd_subst_vars(ATAgetFirst(sums),params);
+//		ATerm act = ATgetArgument(sum,2);
+//		ATermList newstate = ATLgetArgument(sum,4);
+		sum = ATAgetFirst(sums);
+//		ATerm act = gsSubstValues(params_l,ATgetArgument(sum,2),true);
+//		ATermList newstate = (ATermList) gsSubstValues(params_l,ATgetArgument(sum,4),true);
 		ATerm act = ATgetArgument(sum,2);
 		ATermList newstate = ATLgetArgument(sum,4);
-		l = FindSolutions(ATLgetArgument(sum,0),ATAgetArgument(sum,1));
+		l = FindSolutionsWithSubsts(ATLgetArgument(sum,0),ATAgetArgument(sum,1),params);
 		NextStateError |= FindSolutionsError;
 		for (; !ATisEmpty(l); l=ATgetNext(l))
 		{
 			states = ATinsert(states, (ATerm)
 					ATmakeList2(
-						(ATerm) rewrActionArgs((ATermAppl) gsSubstValues(ATLgetFirst(l),act,true)),
-						(ATerm) makeNewState(State,pars,newstate,ATLgetFirst(l))
+						(ATerm) rewrActionArgs((ATermAppl) gsSubstValues(ATconcat(params_l,ATLgetFirst(l)),act,true)),
+						(ATerm) makeNewState(State,pars,newstate,ATconcat(params_l,ATLgetFirst(l)))
 						)
 					);
 		}

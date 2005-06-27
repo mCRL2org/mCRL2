@@ -16,6 +16,7 @@ extern "C" {
 #include "gsrewr_inner2.h"
 #include "gsrewr_inner3.h"
 #include "gsrewr_innerc.h"
+#include "gsrewr_jitty.h"
 
 static int strategy;
 
@@ -26,12 +27,11 @@ void gsRewriteInit(ATermAppl Eqns, int strat)
 {
 	ATermList eqns;
 
-	ATprotectList(&opid_eqns);
-	ATprotectList(&dataappl_eqns);
-
 	eqns = ATLgetArgument(Eqns,0);
 	opid_eqns = ATmakeList0();
+	ATprotectList(&opid_eqns);
 	dataappl_eqns = ATmakeList0();
+	ATprotectList(&dataappl_eqns);
 
 	for (; !ATisEmpty(eqns); eqns=ATgetNext(eqns))
 	{
@@ -59,6 +59,9 @@ void gsRewriteInit(ATermAppl Eqns, int strat)
 		case GS_REWR_INNERC:
 			rewrite_init_innerc();
 			break;
+		case GS_REWR_JITTY:
+			rewrite_init_jitty();
+			break;
 		case GS_REWR_INNER3:
 		default:
 			rewrite_init_inner3();
@@ -85,6 +88,9 @@ void gsRewriteAddEqn(ATermAppl Eqn)
 			break;
 		case GS_REWR_INNERC:
 			rewrite_add_innerc(Eqn);
+			break;
+		case GS_REWR_JITTY:
+			rewrite_add_jitty(Eqn);
 			break;
 		case GS_REWR_INNER3:
 		default:
@@ -131,6 +137,9 @@ void gsRewriteRemoveEqn(ATermAppl Eqn)
 		case GS_REWR_INNERC:
 			rewrite_remove_innerc(Eqn);
 			break;
+		case GS_REWR_JITTY:
+			rewrite_remove_jitty(Eqn);
+			break;
 		case GS_REWR_INNER3:
 		default:
 			rewrite_remove_inner3(Eqn);
@@ -148,9 +157,47 @@ ATerm gsRewriteTermGen(ATerm Term, int *b)
 			return rewrite_inner2(Term,b);
 		case GS_REWR_INNERC:
 			return rewrite_innerc(Term,b);
+		case GS_REWR_JITTY:
+			return rewrite_jitty(Term,b);
 		case GS_REWR_INNER3:
 		default:
 			return rewrite_inner3(Term,b);
+	}
+}
+
+static ATerm s(ATerm t, ATermTable Substs)
+{
+	ATermList ss,l;
+
+	ss = ATmakeList0();
+	l = ATtableKeys(Substs);
+	for (; !ATisEmpty(l); l=ATgetNext(l))
+	{
+		ss = ATinsert(ss,(ATerm) gsMakeSubst(ATgetFirst(l),ATtableGet(Substs,ATgetFirst(l))));
+	}
+	
+	return gsSubstValues(ss,t,true);
+}
+
+ATerm gsRewriteTermGenSubsts(ATerm Term, ATermTable Substs, int *b)
+{
+	switch ( strategy )
+	{
+		case GS_REWR_INNER:
+			Term = s(Term,Substs);
+			return rewrite_inner(Term,b);
+		case GS_REWR_INNER2:
+			Term = s(Term,Substs);
+			return rewrite_inner2(Term,b);
+		case GS_REWR_INNERC:
+			Term = s(Term,Substs);
+			return rewrite_innerc(Term,b);
+		case GS_REWR_JITTY:
+			Term = s(Term,Substs);
+			return rewrite_jitty(Term,b);
+		case GS_REWR_INNER3:
+		default:
+			return rewrite_substs_inner3(Term,Substs,b);
 	}
 }
 
@@ -161,11 +208,25 @@ ATermAppl gsRewriteTerm(ATermAppl Term)
 	return (ATermAppl) gsRewriteTermGen((ATerm) Term, &b);
 }
 
+ATermAppl gsRewriteTermWithSubsts(ATermAppl Term, ATermTable Substs)
+{
+	int b;
+
+	return (ATermAppl) gsRewriteTermGenSubsts((ATerm) Term, Substs, &b);
+}
+
 ATermList gsRewriteTerms(ATermList Terms)
 {
 	int b;
 
 	return (ATermList) gsRewriteTermGen((ATerm) Terms, &b);
+}
+
+ATermList gsRewriteTermsWithSubsts(ATermList Terms, ATermTable Substs)
+{
+	int b;
+
+	return (ATermList) gsRewriteTermGenSubsts((ATerm) Terms, Substs, &b);
 }
 
 #ifdef __cplusplus

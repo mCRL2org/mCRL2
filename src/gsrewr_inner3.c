@@ -26,6 +26,8 @@ static AFun opidAFun;
 static int max_vars;
 static bool is_initialised = false;
 
+static ATermTable subst_table = NULL;
+
 #define ATAgetFirst(x) ((ATermAppl) ATgetFirst(x))
 #define ATLgetFirst(x) ((ATermList) ATgetFirst(x))
 #define gsIsOpId(x) (ATgetAFun(x) == opidAFun)
@@ -367,8 +369,13 @@ static ATerm subst_values(ATermAppl *vars, ATerm *vals, int len, ATerm t)
 static bool match_inner(ATerm t, ATerm p, ATermAppl *vars, ATerm *vals, int *len)
 {
 	bool b;
+	ATerm a;
 
-//ATfprintf(stderr,"match_inner(  %t  ,  %t  ,  %t   )\n\n",t,p,*vars);
+	if ( (subst_table != NULL) && ((a = ATtableGet(subst_table,t)) != NULL) )
+	{
+		t = toInner(a,false);
+	}
+
 	if ( ATisList(p) )
 	{
 		if ( ATisList(t) )
@@ -586,7 +593,13 @@ static ATerm rewrite(ATerm Term, int *b)
 	{
 		return rewrite_func((ATermInt) Term, ATmakeList0(),b);
 	} else {
-		return Term;
+		ATerm a;
+		if ( (subst_table == NULL) || ((a = ATtableGet(subst_table,Term)) == NULL) )
+		{
+			return Term;
+		} else {
+			return toInner(a,false);
+		}
 	}
 }
 
@@ -594,6 +607,7 @@ ATerm rewrite_inner3(ATerm Term, int *b)
 {
 	ATermList l;
 	int c;
+
 //ATfprintf(stderr,"input: %t\n\n",Term);
 	if ( ATisList(Term) )
 	{
@@ -608,6 +622,14 @@ ATerm rewrite_inner3(ATerm Term, int *b)
 	}
 
 	return (ATerm) fromInner(rewrite(toInner((ATermAppl) Term,false),b));
+}
+
+ATerm rewrite_substs_inner3(ATerm Term, ATermTable Substs, int *b)
+{
+	subst_table = Substs;
+	ATerm a = rewrite_inner3(Term,b);
+	subst_table = NULL;
+	return a;
 }
 
 #ifdef __cplusplus

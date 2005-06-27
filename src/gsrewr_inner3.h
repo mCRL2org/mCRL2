@@ -16,6 +16,8 @@ void rewrite_remove_inner3(ATermAppl eqn);
 
 ATerm rewrite_inner3(ATerm Term, int *b);
 
+ATerm rewrite_substs_inner3(ATerm Term, ATermTable Substs, int *b);
+
 #ifdef __cplusplus
 }
 #endif

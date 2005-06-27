@@ -138,6 +138,7 @@ void print_help(FILE *f)
 	          "-2, --inner2             Use another innermost rewriter\n"
 	          "-3, --inner3             Use yet another innermost rewriter\n"
 	          "-c, --innerc             Use compiling innermost rewriter\n"
+	          "-j, --jitty              Use compiling innermost rewriter\n"
 	       );
 }
 
@@ -146,7 +147,7 @@ int main(int argc, char **argv)
 	FILE *SpecStream, *OutStream;
 	ATerm stackbot;
 	ATermAppl Spec;
-	#define sopts "hbawi23c"
+	#define sopts "hbawi23cj"
 	struct option lopts[] = {
 		{ "help",		no_argument,	NULL,	'h' },
 		{ "benchmark",		no_argument,	NULL,	'b' },
@@ -156,6 +157,7 @@ int main(int argc, char **argv)
 		{ "inner2",		no_argument,	NULL,	'2' },
 		{ "inner3",		no_argument,	NULL,	'3' },
 		{ "innerc",		no_argument,	NULL,	'c' },
+		{ "jitty",		no_argument,	NULL,	'j' },
 		{ 0, 0, 0, 0 }
 	};
 	int opt,read_aterm,write_aterm,strat,benchmark,i,bench_times;
@@ -201,6 +203,9 @@ int main(int argc, char **argv)
 				break;
 			case 'c':
 				strat = GS_REWR_INNERC;
+				break;
+			case 'j':
+				strat = GS_REWR_JITTY;
 				break;
 			default:
 				break;

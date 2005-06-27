@@ -104,17 +104,15 @@ int main(int argc, char* argv[]) {
   }
   int NoArgc; //non-option argument count
   NoArgc = argc - optind;
-  if (NoArgc <= 0) {
-    fprintf(stderr, "%s: too few arguments\n", NAME);
-   	PrintMoreInfo(stderr);
-   	return 1;
-  } else if (NoArgc > 2) {
+  if (NoArgc > 2) {
     fprintf(stderr, "%s: too many arguments\n", NAME);
    	PrintMoreInfo(stderr);
    	return 1;
   } else {
     //NoArgc > 0 && NoArgc <= 2
-    SpecFileName = strdup(argv[optind]);
+    if (NoArgc == 1)
+      if (strcmp(argv[optind],"-"))
+        SpecFileName = strdup(argv[optind]);
     if (NoArgc == 2) {
       OutputFileName = strdup(argv[optind + 1]);
     }
@@ -135,19 +133,24 @@ int main(int argc, char* argv[]) {
 
 bool PrintSpecificationFileName(char *SpecFileName, char *OutputFileName)
 {
-  assert(SpecFileName != NULL);
   bool Result           = true;
   FILE *SpecStream      = NULL;
   FILE *OutputStream    = NULL;
   //open specification file for reading
-  SpecStream = fopen(SpecFileName, "r");
+  if (SpecFileName == NULL ) {
+    SpecStream = stdin;
+    gsDebugMsg("input from stdin.\n");
+  } else {
+    SpecStream = fopen(SpecFileName, "r");
+  }
   if (SpecStream == NULL) {
     gsErrorMsg(
       "could not open specification file '%s' for reading (error %d)\n",
       SpecFileName, errno);
     Result = false;
   } else {
-    gsDebugMsg("specification file %s is opened for reading.\n", SpecFileName);
+    if ( SpecStream != stdin )
+      gsDebugMsg("specification file %s is opened for reading.\n", SpecFileName);
     //open output file for writing or set to stdout
     if (OutputFileName == NULL) {
       OutputStream = stdout;
@@ -167,10 +170,10 @@ bool PrintSpecificationFileName(char *SpecFileName, char *OutputFileName)
       Result = false;
     }
   }
-  if (SpecStream != NULL) {
+  if ((SpecStream != NULL) && (SpecStream != stdin)) {
     fclose(SpecStream);
   }
-  if (OutputStream != NULL && OutputStream != stdout) {
+  if ((OutputStream != NULL) && (OutputStream != stdout)) {
     fclose(OutputStream);
   }
   gsDebugMsg("all files are closed; return %s\n", Result?"true":"false");
@@ -200,9 +203,10 @@ bool PrintSpecificationStream(FILE *SpecStream, FILE *OutputStream)
 
 void PrintUsage(FILE *Stream) {
   fprintf(Stream, 
-    "Usage: %s OPTIONS SPECFILE [OUTFILE]\n"
+    "Usage: %s OPTIONS [SPECFILE [OUTFILE]]\n"
     "Print the internal GenSpect specification in SPECFILE to OUTFILE in a human\n"
-    "readable format. If OUTFILE is not present, stdout is used.\n"
+    "readable format. If OUTFILE is not present, stdout is used. If SPECFILE is\n"
+    "not present or -, stdin is used.\n"
     "\n"
     "The OPTIONS that can be used are:\n"
     "    --help               display this help\n"

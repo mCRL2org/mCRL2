@@ -10,6 +10,8 @@ void gsProverInit(ATermAppl Spec);
 
 ATermList FindSolutions(ATermList Vars, ATermAppl Expr);
 
+ATermList FindSolutionsWithSolutions(ATermList Vars, ATermAppl Expr, ATermTable Substs);
+
 #ifdef __cplusplus
 }
 #endif
