@@ -207,8 +207,6 @@ int main(int argc, char **argv)
 
 	ATbool new_state;
 	current_state = ATindexedSetPut(states,(ATerm) SetDCs((ATermList) state),&new_state);
-ATfprintf(aut,"%i: %t\n",num_states,SetDCs((ATermList) state));
-fflush(aut);
 	num_states++;
 
 	level = 1;
