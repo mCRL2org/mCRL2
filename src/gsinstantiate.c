@@ -60,8 +60,6 @@ void callback(ATermAppl transition, ATerm state)
 	{
 		if ( (max_states == 0) || (num_states < max_states) )
 		{
-ATfprintf(aut,"%i: %t\n",num_states,state_dc);
-fflush(aut);
 			num_states++;
 			if ( trace )
 			{
