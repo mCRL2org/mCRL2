@@ -1819,7 +1819,7 @@ static ATermAppl substitute_pCRLproc(
   if (gsIsSum(p))   
   { ATermList sumargs=ATLgetArgument(p,0);
 
-    alphaconvert(&sumargs,&terms,&vars,terms,vars);
+    alphaconvert(&sumargs,&vars,&terms,terms,vars);
     return gsMakeSum(
                sumargs,
                substitute_pCRLproc(terms,vars,ATAgetArgument(p,1))); 
@@ -2327,7 +2327,9 @@ static ATermAppl distribute_condition(
                        ATinsertA(ATempty,condition));
     return gsMakeSum(
              sumvars,
-             distribute_condition(ATAgetArgument(body1,1),condition));
+             distribute_condition(
+                 substitute_pCRLproc(terms,vars,ATAgetArgument(body1,1)),
+                 condition));
    }
   
   if (gsIsAction(body1))
@@ -2711,10 +2713,12 @@ static ATermAppl procstorealGNFbody(
   } 
   
   if (gsIsCond(body))  
-  { return distribute_condition(
+  { 
+    ATermAppl r=distribute_condition(
               procstorealGNFbody(ATAgetArgument(body,1),first,
                         todo,regular,mode,freevars),
               ATAgetArgument(body,0));
+    return r;
   }  
   
   if (gsIsSum(body))
@@ -2736,6 +2740,7 @@ static ATermAppl procstorealGNFbody(
   { ATermAppl t3;
     ATermAppl t=ATAgetArgument(body,0);
     long n;
+
     if (v==later)
     { if ((!regular)||(mode=mCRL)) 
           *todo=ATinsertA(*todo,t);
@@ -2754,12 +2759,16 @@ static ATermAppl procstorealGNFbody(
        we must now substitute */
     procstorealGNFrec(ATAgetArgument(body,0),first,todo,regular);
     long m=objectIndex(t);
+
     t3=substitute_pCRLproc(
          ATLgetArgument(body,1),
          objectdata[m].parameters,
          objectdata[m].processbody);
+    
     if (regular)
-             t3=to_regular_form(t3,todo,freevars);
+    { t3=to_regular_form(t3,todo,freevars);
+    }
+    
     return t3;
   }
   
@@ -3021,9 +3030,6 @@ static void newequation(
   if (localequationvariables==NULL)
      ATerror("Variables must be declared first! %t\n",t2);
 
-  /* if ( (condition!=NULL) && (condition!=gsMakeNil()))
-            ATfprintf(stderr,"EQ: %t -> %t=%t\n",condition,t2,t3); */
-  
   ATermAppl eqn=gsMakeDataEqn(
                      localequationvariables,
                      ((condition==NULL)?gsMakeNil():condition),
@@ -5983,7 +5989,6 @@ static ATermAppl communicationcomposition(
                      makeMultiActionConditionList(
                               ATLgetArgument(multiaction,0),
                               communications);
-    // ATfprintf(stderr,"Multiactionlist: %t\n",multiactionconditionlist);
 
     assert(multiactionconditionlist!=ATempty);
     for( ; multiactionconditionlist!=ATempty ;
