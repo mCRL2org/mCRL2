@@ -121,7 +121,7 @@ act
 proc Link0(n:Nat,id:Nat,buffer:SIG_TUPLE)=
         is_void(buffer) ->
            ( sum dest:Nat,h:HEADER,d:DATA.
-                ( dest<n) -> LDreq(id,dest,h,d).
+                ( dest<=n) -> LDreq(id,dest,h,d).
                      Link0(n,id,quadruple(dhead,
                                  sig(dest),
                                  sig(h,crc(h)),
@@ -247,7 +247,7 @@ proc Link0(n:Nat,id:Nat,buffer:SIG_TUPLE)=
 
      Link7(n,id:Nat,buffer:SIG_TUPLE)=
         rPCind(id).sPDreq(id,Prefix).Link7(n,id,buffer) +
-        sum dest:Nat,h:HEADER,d:DATA. (dest<n) ->
+        sum dest:Nat,h:HEADER,d:DATA. (dest<=n) ->
              LDreq(id,dest,h,d). Link2resp(n,id,buffer,
                       quadruple(dhead,sig(dest),sig(h,crc(h)),sig(d,crc(d))));
 
@@ -314,7 +314,7 @@ act  rPAreq: Nat#PAR;
      losesignal;
 
 proc BusIdle(n:Nat,t:BoolTABLE)=
-        sum id:Nat,astat:PAR.(id<n) ->rPAreq(id,astat).DecideIdle(n,t,id,astat) +
+        sum id:Nat,astat:PAR.(id<=n) ->rPAreq(id,astat).DecideIdle(n,t,id,astat) +
         !zero(t)->arbresgap.BusIdle(n,inita(n));
 
 
@@ -333,8 +333,8 @@ proc BusIdle(n:Nat,t:BoolTABLE)=
                 SubactionGap(n,t,0),
                   Resolve(n,t,next,0)
            ) +
-       sum j:Nat.(j<n) -> rPAreq(j,fair).sPAcon(j,lost).BusBusy(n,t,next,destfault,busy) +
-       sum j:Nat.(j<n) -> rPAreq(j,immediate).
+       sum j:Nat.(j<=n) -> rPAreq(j,fair).sPAcon(j,lost).BusBusy(n,t,next,destfault,busy) +
+       sum j:Nat.(j<=n) -> rPAreq(j,immediate).
              (!get(j,next) -> BusBusy(n,t,invert(j,next),destfault,busy));
 
      SubactionGap(n:Nat,t:BoolTABLE,i:Nat)=
@@ -352,8 +352,8 @@ proc BusIdle(n:Nat,t:BoolTABLE)=
 
      Resolve2(n:Nat,t:BoolTABLE,next:BoolTABLE)=
         more(next) ->
-           (sum j:Nat.(j<n) -> rPDreq(j,End).(get(j,next) -> Resolve2(n,t,invert(j,next)))),
-           (sum j:Nat,p:SIGNAL.(j<n) ->
+           (sum j:Nat.(j<=n) -> rPDreq(j,End).(get(j,next) -> Resolve2(n,t,invert(j,next)))),
+           (sum j:Nat,p:SIGNAL.(j<=n) ->
               rPDreq(j,p).
                  (is_end(p) ->
                      SubactionGap(n,t,0),
@@ -367,7 +367,7 @@ proc BusIdle(n:Nat,t:BoolTABLE)=
             (!is_header(p) || !get(i,destfault)) ->
                sPDind(i,p).Distribute(n,t,next,destfault,busy,p,i+1) +
             %% Destination signals may be corrupted
-            sum dest:Nat.(is_dest(p) && dest<n) ->
+            sum dest:Nat.(is_dest(p) && dest<=n) ->
                sPDind(i,sig(dest)).
                   Distribute(n,t,next,invert(i,destfault),busy,p,i+1) +
             %% Headers/Data/Acks may be corrupted
