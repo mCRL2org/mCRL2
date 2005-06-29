@@ -8,6 +8,7 @@ extern "C" {
 #include "gsfunc.h"
 #include "libgsparse.h"
 #include "libgsrewrite.h"
+#include "libgsprover.h"
 
 bool FindSolutionsError;
 
@@ -15,6 +16,11 @@ static ATermAppl current_spec;
 static ATermAppl gsProverTrue, gsProverFalse;
 
 static ATermTable subst_table = NULL;
+static int used_vars;
+
+#define MAX_VARS_INIT	1000
+#define MAX_VARS_FACTOR	5
+static int max_vars = MAX_VARS_INIT;
 
 void gsProverInit(ATermAppl Spec)
 {
@@ -86,6 +92,7 @@ static ATermList calcNext(ATermList l)
 			for (; !ATisEmpty(d); d=ATgetNext(d))
 			{
 				ATermAppl v = gsMakeDataVarId(gsFreshString2ATermAppl("s",(ATerm) na1,false),ATAgetFirst(d));
+				used_vars++;
 				na1 = ATappend(na1,(ATerm) v);
 				t = gsMakeDataAppl(t,v);
 			}
@@ -218,18 +225,26 @@ static ATermList makeSubsts(ATermList vars, ATermList exprs)
 	return l;
 }
 
-ATermList FindSolutions(ATermList Vars, ATermAppl Expr)
+ATermList FindSolutions(ATermList Vars, ATermAppl Expr, FindSolutionsCallBack f)
 {
 	ATermList l,t,m,n,o;
 
 	FindSolutionsError = false;
+
+	used_vars = 0;
 
 	if ( ATisEmpty(Vars) )
 	{
 		Expr = gsRewriteTermWithSubsts(Expr,subst_table);
 		if ( ATisEqual(Expr,gsProverTrue) )
 		{
-			return ATmakeList1((ATerm) ATmakeList0());
+			if ( f == NULL )
+			{
+				return ATmakeList1((ATerm) ATmakeList0());
+			} else {
+				f(ATmakeList0());
+				return ATmakeList0();
+			}
 		} else {
 			if ( !ATisEqual(Expr,gsProverFalse) )
 			{
@@ -243,12 +258,19 @@ ATermList FindSolutions(ATermList Vars, ATermAppl Expr)
 
 	o = ATmakeList3((ATerm) Vars,(ATerm) Vars,(ATerm) Expr);
 	o = EliminateVars(o);
+	subst_table = NULL; // XXX substitutions should already be executed by EliminateVars
 	if ( ATisEmpty(ATLgetFirst(o)) )
 	{
 		o = ATgetNext(o);
 		if ( ATisEqual(ATgetFirst(ATgetNext(o)),gsProverTrue) )
 		{
-			return ATmakeList1((ATerm) makeSubsts(Vars,ATLgetFirst(o)));
+			if ( f == NULL )
+			{
+				return ATmakeList1((ATerm) makeSubsts(Vars,ATLgetFirst(o)));
+			} else {
+				f(makeSubsts(Vars,ATLgetFirst(o)));
+				return ATmakeList0();
+			}
 		} else {
 			if ( !ATisEqual(ATgetFirst(ATgetNext(o)),gsProverFalse) )
 			{
@@ -268,6 +290,11 @@ ATermList FindSolutions(ATermList Vars, ATermAppl Expr)
 		for (; !ATisEmpty(t); t=ATgetNext(t))
 		{
 			n = calcNext(ATLgetFirst(t));
+			if ( used_vars > max_vars )
+			{
+				fprintf(stderr,"warning: Need more than %i variables to find all solutions for ",max_vars);gsPrintPart(stderr,Expr,false,0);fprintf(stderr,"\n");
+				max_vars *= MAX_VARS_FACTOR;
+			}
 			for (; !ATisEmpty(n); n=ATgetNext(n))
 			{
 				o = ATLgetFirst(n);
@@ -277,7 +304,12 @@ ATermList FindSolutions(ATermList Vars, ATermAppl Expr)
 					o = ATgetNext(o);
 					if ( ATisEqual(ATgetFirst(ATgetNext(o)),gsProverTrue) )
 					{
-						m = ATinsert(m,(ATerm) makeSubsts(Vars,ATLgetFirst(o)));
+						if ( f == NULL )
+						{
+							m = ATinsert(m,(ATerm) makeSubsts(Vars,ATLgetFirst(o)));
+						} else {
+							f(makeSubsts(Vars,ATLgetFirst(o)));
+						}
 					} else {
 						if ( !ATisEqual(ATgetFirst(ATgetNext(o)),gsProverFalse) )
 						{
@@ -297,10 +329,10 @@ ATermList FindSolutions(ATermList Vars, ATermAppl Expr)
 	return m;
 }
 
-ATermList FindSolutionsWithSubsts(ATermList Vars, ATermAppl Expr, ATermTable Substs)
+ATermList FindSolutionsWithSubsts(ATermList Vars, ATermAppl Expr, ATermTable Substs, FindSolutionsCallBack f)
 {
 	subst_table = Substs;
-	ATermList l = FindSolutions(Vars,Expr);
+	ATermList l = FindSolutions(Vars,Expr,f);
 	subst_table = NULL;
 	return l;
 }

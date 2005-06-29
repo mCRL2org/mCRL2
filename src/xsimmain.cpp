@@ -663,7 +663,7 @@ void XSimMain::UpdateTransitions()
 	wxArrayString statechanges;
 	wxArrayInt indices;
 
-	next_states = gsNextState(current_state);
+	next_states = gsNextState(current_state,NULL);
 
 	transview->DeleteAllItems();
 	int i = 0;

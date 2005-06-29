@@ -169,14 +169,19 @@ static ATerm s(ATerm t, ATermTable Substs)
 {
 	ATermList ss,l;
 
-	ss = ATmakeList0();
-	l = ATtableKeys(Substs);
-	for (; !ATisEmpty(l); l=ATgetNext(l))
+	if ( Substs != NULL )
 	{
-		ss = ATinsert(ss,(ATerm) gsMakeSubst(ATgetFirst(l),ATtableGet(Substs,ATgetFirst(l))));
-	}
+		ss = ATmakeList0();
+		l = ATtableKeys(Substs);
+		for (; !ATisEmpty(l); l=ATgetNext(l))
+		{
+			ss = ATinsert(ss,(ATerm) gsMakeSubst(ATgetFirst(l),ATtableGet(Substs,ATgetFirst(l))));
+		}
 	
-	return gsSubstValues(ss,t,true);
+		return gsSubstValues(ss,t,true);
+	} else {
+		return t;
+	}
 }
 
 ATerm gsRewriteTermGenSubsts(ATerm Term, ATermTable Substs, int *b)
@@ -190,8 +195,9 @@ ATerm gsRewriteTermGenSubsts(ATerm Term, ATermTable Substs, int *b)
 			Term = s(Term,Substs);
 			return rewrite_inner2(Term,b);
 		case GS_REWR_INNERC:
-			Term = s(Term,Substs);
-			return rewrite_innerc(Term,b);
+//			Term = s(Term,Substs);
+//			return rewrite_innerc(Term,b);
+			return rewrite_substs_innerc(Term,Substs,b);
 		case GS_REWR_JITTY:
 			Term = s(Term,Substs);
 			return rewrite_jitty(Term,b);

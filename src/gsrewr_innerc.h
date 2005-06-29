@@ -12,3 +12,5 @@ void rewrite_add_innerc(ATermAppl eqn);
 void rewrite_remove_innerc(ATermAppl eqn);
 
 ATerm rewrite_innerc(ATerm Term, int *b);
+
+ATerm rewrite_substs_innerc(ATerm Term, ATermTable Substs, int *b);

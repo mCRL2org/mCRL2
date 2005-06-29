@@ -6,11 +6,13 @@ extern "C" {
 
 extern bool FindSolutionsError;
 
+typedef void (*FindSolutionsCallBack)(ATermList);
+
 void gsProverInit(ATermAppl Spec);
 
-ATermList FindSolutions(ATermList Vars, ATermAppl Expr);
+ATermList FindSolutions(ATermList Vars, ATermAppl Expr, FindSolutionsCallBack f);
 
-ATermList FindSolutionsWithSolutions(ATermList Vars, ATermAppl Expr, ATermTable Substs);
+ATermList FindSolutionsWithSubsts(ATermList Vars, ATermAppl Expr, ATermTable Substs, FindSolutionsCallBack f);
 
 #ifdef __cplusplus
 }

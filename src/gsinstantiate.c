@@ -15,6 +15,19 @@ extern "C" {
 #include "libgsparse.h"
 #include "libgsnextstate.h"
 
+static unsigned long num_states;
+static unsigned long trans;
+static unsigned long level;
+static unsigned long max_states;
+static bool trace;
+static bool monitor;
+static FILE *aut;
+static unsigned long current_state;
+static ATermIndexedSet states;
+static ATermTable backpointers;
+static bool deadlockstate;
+static ATerm *orig_state;
+
 static ATermList SetDCs(ATermList l)
 {
 	ATermList m;
@@ -33,6 +46,40 @@ static ATermList SetDCs(ATermList l)
 
 	return m;
 }
+
+void callback(ATermAppl transition, ATerm state)
+{
+	ATerm state_dc = (ATerm) SetDCs((ATermList) state);
+	ATbool new_state;
+	unsigned long i;
+
+	deadlockstate = false;
+
+	i = ATindexedSetPut(states, state_dc, &new_state);
+	if ( new_state )
+	{
+		if ( (max_states == 0) || (num_states < max_states) )
+		{
+ATfprintf(aut,"%i: %t\n",num_states,state_dc);
+fflush(aut);
+			num_states++;
+			if ( trace )
+			{
+				ATtablePut(backpointers, state_dc, *orig_state);
+			}
+		}
+	}
+
+	if ( i < num_states )
+	{
+		fprintf(aut,"(%lu,\"",current_state);
+		gsPrintPart(aut,transition,false,0);
+		fprintf(aut,"\",%lu)\n",i);
+fflush(aut);
+		trans++;
+	}
+}
+
 
 void print_help(FILE *f)
 {
@@ -56,14 +103,9 @@ void print_help(FILE *f)
 
 int main(int argc, char **argv)
 {
-	FILE *SpecStream,*aut;
+	FILE *SpecStream;
 	ATerm stackbot;
 	ATermAppl Spec;
-	ATerm state;
-	ATermList l;
-	ATermIndexedSet states;
-	ATermTable backpointers;
-	unsigned int num_states, trans;
 	#define sopts "hyldem"
 	struct option lopts[] = {
 		{ "help", 		no_argument,		NULL,	'h' },
@@ -75,8 +117,8 @@ int main(int argc, char **argv)
 		{ "monitor", 		no_argument,		NULL,	'm' },
 		{ 0, 0, 0, 0 }
 	};
-	int opt,max_states;
-	bool usedummies,trace,trace_deadlock,monitor,explore;
+	int opt;
+	bool usedummies,trace_deadlock,explore;
 
 	ATinit(argc,argv,&stackbot);
 
@@ -163,30 +205,35 @@ int main(int argc, char **argv)
 	
 	fprintf(aut,"des (0,0,0)                   \n");
 
-	state = (ATerm) gsNextStateInit(Spec,!usedummies);
+	ATerm state = (ATerm) gsNextStateInit(Spec,!usedummies);
 
 	ATbool new_state;
-	int current_state;
 	current_state = ATindexedSetPut(states,(ATerm) SetDCs((ATermList) state),&new_state);
+ATfprintf(aut,"%i: %t\n",num_states,SetDCs((ATermList) state));
+fflush(aut);
 	num_states++;
 
-	int level = 1;
-	int nextlevelat = 1;
+	level = 1;
+	unsigned long nextlevelat = 1;
+	unsigned long prevtrans = 0;
+	unsigned long prevcurrent = 0;
 	bool err = false;
+	orig_state = &state;
 	while ( current_state < num_states )
 	{
 		state = ATindexedSetGetElem(states,current_state);
-		l = gsNextState((ATermList) state); // XXX state may contain Nils instead of free vars
+		deadlockstate = true;
+		gsNextState((ATermList) state, callback); // XXX state may contain Nils instead of free vars
 		if ( NextStateError )
 		{
 			err = true;
 			break;
 		}
-		if ( ATisEmpty(l) )
+		if ( deadlockstate )
 		{
 			if ( explore )
 			{
-				printf("explore: Deadlock found.\n");
+				printf("deadlock-detect: Deadlock found.\n");
 				fflush(stdout);
 			}
 			if ( trace_deadlock )
@@ -203,7 +250,7 @@ int main(int argc, char **argv)
 
 				for (; !ATisEmpty(tr); tr=ATgetNext(tr))
 				{
-					ATermList l = gsNextState((ATermList) s);
+					ATermList l = gsNextState((ATermList) s, NULL);
 					for (; !ATisEmpty(l); l=ATgetNext(l))
 					{
 						if ( ATisEqual(ATgetFirst(ATgetNext(ATLgetFirst(l))),ATgetFirst(tr)) )
@@ -218,56 +265,43 @@ int main(int argc, char **argv)
 				fflush(stdout);
 			}
 		}
-		for (; !ATisEmpty(l); l=ATgetNext(l))
-		{
-			ATerm e = ATgetFirst(ATgetNext(ATLgetFirst(l)));
-			ATerm edc = (ATerm) SetDCs((ATermList) e);
-			int i;
-	
-			if ( (i = ATindexedSetGetIndex(states, edc)) < 0 )
-			{
-				if ( (max_states == 0) || (num_states < max_states) )
-				{
-					i = ATindexedSetPut(states, edc,&new_state);
-					num_states++;
-					if ( trace )
-					{
-						ATtablePut(backpointers, edc, state);
-					}
-				} else {
-					i = -1;
-				}
-			}
-
-			if ( i >= 0 )
-			{
-				fprintf(aut,"(%i,\"",current_state);
-				gsPrintPart(aut,ATAgetFirst(ATLgetFirst(l)),false,0);
-				fprintf(aut,"\",%i)\n",i);
-				trans++;
-			}
-		}
 
 		current_state++;
+		if ( monitor && ( (current_state%1000) == 0 ) )
+		{
+			printf("monitor: Currently at level %lu with %lu state%s and %lu transition%s explored and %lu state%s seen.\n",level,current_state,(current_state==1)?"":"s",trans,(trans==1)?"":"s",num_states,(num_states==1)?"":"s");
+		}
 		if ( current_state == nextlevelat )
 		{
 			if ( monitor )
 			{
-				printf("monitor: Level %i done. Currently %i states visited and %i states and %i transitions explored.\n",level,num_states,current_state,trans);
+				printf("monitor: Level %lu done. (%lu state%s, %lu transition%s)\n",level,current_state-prevcurrent,((current_state-prevcurrent)==1)?"":"s",trans-prevtrans,((trans-prevtrans)==1)?"":"s");
 				fflush(stdout);
 			}
 			level++;
 			nextlevelat = num_states;
+			prevcurrent = current_state;
+			prevtrans = trans;
 		}
+/*		if ( current_state == nextlevelat )
+		{
+			if ( monitor )
+			{
+				printf("monitor: Level %lu done. Currently %lu states visited and %lu states and %lu transitions explored.\n",level,num_states,current_state,trans);
+				fflush(stdout);
+			}
+			level++;
+			nextlevelat = num_states;
+		}*/
 	}
 
 	rewind(aut);
-	fprintf(aut,"des (0,%i,%i)",trans,num_states);
+	fprintf(aut,"des (0,%lu,%lu)",trans,num_states);
 	fclose(aut);
 
 	if ( !err )
 	{
-		printf("Done with state space generation (%i levels, %i states and %i transitions).\n",level-1,num_states,trans);
+		printf("Done with state space generation (%lu level%s, %lu state%s and %lu transition%s).\n",level-1,(level==2)?"":"s",num_states,(num_states==1)?"":"s",trans,(trans==1)?"":"s");
 	}
 }
 

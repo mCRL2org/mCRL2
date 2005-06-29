@@ -87,7 +87,7 @@ int main(int argc, char **argv)
 
 	while ( 1 )
 	{
-		states = gsNextState(state);
+		states = gsNextState(state,NULL);
 		if ( ATisEmpty(states) )
 		{
 			printf("deadlock\n\n");

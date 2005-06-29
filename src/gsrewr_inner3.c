@@ -369,12 +369,6 @@ static ATerm subst_values(ATermAppl *vars, ATerm *vals, int len, ATerm t)
 static bool match_inner(ATerm t, ATerm p, ATermAppl *vars, ATerm *vals, int *len)
 {
 	bool b;
-	ATerm a;
-
-	if ( (subst_table != NULL) && ((a = ATtableGet(subst_table,t)) != NULL) )
-	{
-		t = toInner(a,false);
-	}
 
 	if ( ATisList(p) )
 	{
@@ -585,6 +579,7 @@ static ATerm rewrite(ATerm Term, int *b)
 			Term = rewrite_func((ATermInt) ATgetFirst((ATermList) Term), l, b);
 			*b |= d;
 		} else {
+			// XXX is Term in subst_table!!! XXX
 			Term = (ATerm) ATinsert(l,ATgetFirst((ATermList) Term));
 		}
 
@@ -598,8 +593,8 @@ static ATerm rewrite(ATerm Term, int *b)
 		{
 			return Term;
 		} else {
-			return toInner(a,false);
-		}
+			return toInner((ATermAppl) a,false);
+		}	
 	}
 }
 

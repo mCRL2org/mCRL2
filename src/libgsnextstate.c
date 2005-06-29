@@ -9,6 +9,7 @@ extern "C" {
 #include "gsfunc.h"
 #include "libgsprover.h"
 #include "libgsrewrite.h"
+#include "libgsnextstate.h"
 
 bool NextStateError;
 
@@ -191,7 +192,7 @@ ATermList gsNextStateInit(ATermAppl Spec, bool AllowFreeVars)
 		}
 		if ( !set )
 		{
-			state = ATinsert(state,SetVars(ATgetFirst(l)));
+			state = ATinsert(state,(ATerm) gsRewriteTerm((ATermAppl) SetVars(ATgetFirst(l))));
 		}
 	}
 
@@ -212,7 +213,7 @@ static ATermList makeNewState(ATermList old, ATermList vars, ATermList assigns, 
 		{
 			if ( ATisEqual(ATgetArgument(ATAgetFirst(l),0),ATgetFirst(vars)) )
 			{
-				nnew = ATinsert(nnew,gsSubstValues(substs,ATgetArgument(ATAgetFirst(l),1),true));
+				nnew = ATinsert(nnew,(ATerm) gsRewriteTerm((ATermAppl) SetVars(gsSubstValues(substs,ATgetArgument(ATAgetFirst(l),1),true))));
 				set = true;
 				break;
 			}
@@ -222,7 +223,8 @@ static ATermList makeNewState(ATermList old, ATermList vars, ATermList assigns, 
 			nnew = ATinsert(nnew,ATgetFirst(old));
 		}
 	}
-	nnew = gsRewriteTerms((ATermList) SetVars((ATerm) ATreverse(nnew)));
+//	nnew = gsRewriteTerms((ATermList) SetVars((ATerm) ATreverse(nnew)));
+	nnew = ATreverse(nnew);
 
 	return nnew;
 }
@@ -243,12 +245,38 @@ ATermAppl rewrActionArgs(ATermAppl act)
 	return gsMakeMultAct(m);
 }
 
-ATermList gsNextState(ATermList State)
+static ATermList *State_p;
+static ATermList *states_p;
+static ATermList *pars_p;
+static ATermList *newstate_p;
+static ATermList *params_l_p;
+static ATerm *act_p;
+static gsNextStateCallBack fscb;
+static void callback(ATermList solution)
+{
+	if ( fscb != NULL )
+	{
+		fscb(rewrActionArgs((ATermAppl) gsSubstValues(ATconcat(*params_l_p,solution),*act_p,true)),(ATerm) makeNewState(*State_p,*pars_p,*newstate_p,ATconcat(*params_l_p,solution)));
+	} else {
+		*states_p = ATinsert(*states_p, (ATerm)
+				ATmakeList2(
+					(ATerm) rewrActionArgs((ATermAppl) gsSubstValues(ATconcat(*params_l_p,solution),*act_p,true)),
+					(ATerm) makeNewState(*State_p,*pars_p,*newstate_p,ATconcat(*params_l_p,solution))
+					)
+				);
+	}
+}
+
+ATermList gsNextState(ATermList State, gsNextStateCallBack f)
 {
 	ATermList sums,states,l,m;//,params;
 	ATermAppl sum;
+	ATermList newstate;
+	ATerm act;
 
 	NextStateError = false;
+
+	fscb = f;
 
 	l = ATLgetArgument(ATAgetArgument(current_spec,5),1);
 	m = State;
@@ -267,6 +295,12 @@ ATermList gsNextState(ATermList State)
 	sums = ATLgetArgument(ATAgetArgument(current_spec,5),2);
 	states = ATmakeList0();
 	ATermList pars = ATLgetArgument(ATAgetArgument(current_spec,5),1);
+	State_p = &State;
+	states_p = &states;
+	pars_p = &pars;
+	newstate_p = &newstate;
+	params_l_p = &params_l;
+	act_p = &act;
 	for (; !ATisEmpty(sums); sums=ATgetNext(sums))
 	{
 //		sum = smd_subst_vars(ATAgetFirst(sums),params);
@@ -275,18 +309,23 @@ ATermList gsNextState(ATermList State)
 		sum = ATAgetFirst(sums);
 //		ATerm act = gsSubstValues(params_l,ATgetArgument(sum,2),true);
 //		ATermList newstate = (ATermList) gsSubstValues(params_l,ATgetArgument(sum,4),true);
-		ATerm act = ATgetArgument(sum,2);
-		ATermList newstate = ATLgetArgument(sum,4);
-		l = FindSolutionsWithSubsts(ATLgetArgument(sum,0),ATAgetArgument(sum,1),params);
+		act = ATgetArgument(sum,2);
+		newstate = ATLgetArgument(sum,4);
+		l = FindSolutionsWithSubsts(ATLgetArgument(sum,0),ATAgetArgument(sum,1),params,callback);
 		NextStateError |= FindSolutionsError;
 		for (; !ATisEmpty(l); l=ATgetNext(l))
 		{
-			states = ATinsert(states, (ATerm)
-					ATmakeList2(
-						(ATerm) rewrActionArgs((ATermAppl) gsSubstValues(ATconcat(params_l,ATLgetFirst(l)),act,true)),
-						(ATerm) makeNewState(State,pars,newstate,ATconcat(params_l,ATLgetFirst(l)))
-						)
-					);
+			if ( f != NULL )
+			{
+				f(rewrActionArgs((ATermAppl) gsSubstValues(ATconcat(params_l,ATLgetFirst(l)),act,true)),(ATerm) makeNewState(State,pars,newstate,ATconcat(params_l,ATLgetFirst(l))));
+			} else {
+				states = ATinsert(states, (ATerm)
+						ATmakeList2(
+							(ATerm) rewrActionArgs((ATermAppl) gsSubstValues(ATconcat(params_l,ATLgetFirst(l)),act,true)),
+							(ATerm) makeNewState(State,pars,newstate,ATconcat(params_l,ATLgetFirst(l)))
+							)
+						);
+			}
 		}
 	}
 	states = ATreverse(states);
