@@ -15,19 +15,21 @@ extern "C" {
 #include "libgsparse.h"
 #include "libgsnextstate.h"
 
-static void PrintState(ATermList state)
+static void gsPrintState(ATerm state)
 {
-	for (; !ATisEmpty(state); state=ATgetNext(state))
+	for (int i=0; i<gsGetStateLength(); i++)
 	{
-		if ( gsIsDataVarId(ATAgetFirst(state)) )
+		if ( i > 0 )
+		{
+			ATprintf(", ");
+		}
+
+		ATermAppl a = gsGetStateArgument(state,i);
+		if ( gsIsDataVarId(a) )
 		{
 			ATprintf("_");
 		} else {
-			gsPrintPart(stdout,ATAgetFirst(state),0,0);
-		}
-		if ( !ATisEmpty(ATgetNext(state)) )
-		{
-			ATprintf(", ");
+			gsPrintPart(stdout,a,false,0);
 		}
 	}
 }
@@ -35,9 +37,9 @@ static void PrintState(ATermList state)
 int main(int argc, char **argv)
 {
 	FILE *SpecStream;
-	ATerm stackbot;
+	ATerm stackbot, state;
 	ATermAppl Spec;
-	ATermList state, states, l;
+	ATermList states, l;
 	#define sopts "d"
 	struct option lopts[] = {
 		{ "dummy",	no_argument,	NULL,	'd' },
@@ -82,7 +84,7 @@ int main(int argc, char **argv)
 	state = gsNextStateInit(Spec,!usedummy);
 
 	ATprintf("initial state: [ ");
-	PrintState(state);
+	gsPrintState(state);
 	ATprintf(" ]\n\n");
 
 	while ( 1 )
@@ -94,10 +96,11 @@ int main(int argc, char **argv)
 		}
 		for (l=states,i=0; !ATisEmpty(l); l=ATgetNext(l), i++)
 		{
+			ATprintf("%t\n\n",ATgetFirst(ATLgetFirst(l)));
 			ATprintf("%i: ",i);
-			gsPrintPart(stdout,ATAgetFirst(ATLgetFirst(l)),0,0);
+			gsPrintPart(stdout,ATAgetFirst(ATLgetFirst(l)),false,0);
 			ATprintf("  ->  [ ");
-			PrintState(ATLgetFirst(ATgetNext(ATLgetFirst(l))));
+			gsPrintState(ATgetFirst(ATgetNext(ATLgetFirst(l))));
 			ATprintf(" ]\n\n");
 		}
 harm:
@@ -119,11 +122,11 @@ harm:
 			goto harm;
 		}
 		ATprintf("\ntransition: ");
-		gsPrintPart(stdout,ATAgetFirst(ATLelementAt(states,i)),0,0);
+		gsPrintPart(stdout,ATAgetFirst(ATLelementAt(states,i)),false,0);
 		ATprintf("\n\n");
-		state = ATLgetFirst(ATgetNext(ATLelementAt(states,i)));
+		state = ATgetFirst(ATgetNext(ATLelementAt(states,i)));
 		ATprintf("current state: [ ");
-		PrintState(state);
+		gsPrintState(state);
 		ATprintf(" ]\n\n");
 	}
 }

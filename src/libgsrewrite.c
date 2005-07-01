@@ -235,6 +235,91 @@ ATermList gsRewriteTermsWithSubsts(ATermList Terms, ATermTable Substs)
 	return (ATermList) gsRewriteTermGenSubsts((ATerm) Terms, Substs, &b);
 }
 
+ATerm gsToRewriteFormat(ATermAppl Term)
+{
+	switch ( strategy )
+	{
+		case GS_REWR_INNER:
+		case GS_REWR_INNER2:
+		case GS_REWR_INNERC:
+		case GS_REWR_JITTY:
+			return (ATerm) Term;
+		case GS_REWR_INNER3:
+		default:
+			return to_rewrite_format_inner3(Term);
+	}
+}
+
+ATermAppl gsFromRewriteFormat(ATerm Term)
+{
+	switch ( strategy )
+	{
+		case GS_REWR_INNER:
+		case GS_REWR_INNER2:
+		case GS_REWR_INNERC:
+		case GS_REWR_JITTY:
+			return (ATermAppl) Term;
+		case GS_REWR_INNER3:
+		default:
+			return from_rewrite_format_inner3(Term);
+	}
+}
+
+ATerm gsRewriteInternal(ATerm Term)
+{
+	int b;
+
+	switch ( strategy )
+	{
+		case GS_REWR_INNER:
+			return rewrite_inner(Term,&b);
+		case GS_REWR_INNER2:
+			return rewrite_inner2(Term,&b);
+		case GS_REWR_INNERC:
+			return rewrite_innerc(Term,&b);
+		case GS_REWR_JITTY:
+			return rewrite_jitty(Term,&b);
+		case GS_REWR_INNER3:
+		default:
+			return rewrite_internal_inner3(Term,&b);
+	}
+}
+
+ATermList gsRewriteInternals(ATermList Terms)
+{
+	ATermList l = ATmakeList0();
+	for (; !ATisEmpty(Terms); Terms=ATgetNext(Terms))
+	{
+		l = ATinsert(l,gsRewriteInternal(ATgetFirst(Terms)));
+	}
+	return ATreverse(l);
+}
+
+ATerm gsRewriteInternalWithSubsts(ATerm Term, ATermTable Substs)
+{
+	int b;
+
+	switch ( strategy )
+	{
+		case GS_REWR_INNER:
+			Term = s(Term,Substs);
+			return rewrite_inner(Term,&b);
+		case GS_REWR_INNER2:
+			Term = s(Term,Substs);
+			return rewrite_inner2(Term,&b);
+		case GS_REWR_INNERC:
+//			Term = s(Term,Substs);
+//			return rewrite_innerc(Term,b);
+			return rewrite_substs_innerc(Term,Substs,&b);
+		case GS_REWR_JITTY:
+			Term = s(Term,Substs);
+			return rewrite_jitty(Term,&b);
+		case GS_REWR_INNER3:
+		default:
+			return rewrite_internal_substs_inner3(Term,Substs,&b);
+	}
+}
+
 #ifdef __cplusplus
 }
 #endif

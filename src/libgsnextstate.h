@@ -8,8 +8,11 @@ extern bool NextStateError;
 
 typedef void (*gsNextStateCallBack)(ATermAppl, ATerm);
 
-ATermList gsNextStateInit(ATermAppl Spec, bool AllowFreeVars);
-ATermList gsNextState(ATermList State, gsNextStateCallBack f);
+ATerm gsNextStateInit(ATermAppl Spec, bool AllowFreeVars);
+ATermList gsNextState(ATerm State, gsNextStateCallBack f);
+
+int gsGetStateLength();
+ATermAppl gsGetStateArgument(ATerm State, int index);
 
 #ifdef __cplusplus
 }

@@ -22,6 +22,12 @@ ATermList gsRewriteTerms(ATermList Terms);
 ATermAppl gsRewriteTermWithSubsts(ATermAppl Term, ATermTable Substs);
 ATermList gsRewriteTermsWithSubsts(ATermList Terms, ATermTable Substs);
 
+ATerm gsToRewriteFormat(ATermAppl Term);
+ATermAppl gsFromRewriteFormat(ATerm Term);
+ATerm gsRewriteInternal(ATerm Term);
+ATermList gsRewriteInternals(ATermList Terms);
+ATerm gsRewriteInternalWithSubsts(ATerm Term, ATermTable Substs);
+
 #ifdef __cplusplus
 }
 #endif

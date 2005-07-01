@@ -46,21 +46,20 @@ XSimMain::XSimMain( wxWindow *parent, wxWindowID id, const wxString &title,
     CreateStatus();
     CreateContent();
 
-    ATprotectList(&state_vars);
-    ATprotectList(&state_varnames);
-    ATprotectList(&initial_state);
-    ATprotectList(&current_state);
-    ATprotectList(&next_states);
-    ATprotectList(&trace);
-    ATprotectList(&ecart);
-
     state_vars = ATmakeList0();
+    ATprotectList(&state_vars);
     state_varnames = ATmakeList0();
-    initial_state = ATmakeList0();
-    current_state = ATmakeList0();
+    ATprotectList(&state_varnames);
+    initial_state = NULL;;
+    ATprotect(&initial_state);
+    current_state = NULL;
+    ATprotect(&current_state);
     next_states = ATmakeList0();
+    ATprotectList(&next_states);
     trace = ATmakeList0();
+    ATprotectList(&trace);
     ecart = ATmakeList0();
+    ATprotectList(&ecart);
     
     tracewin = new XSimTrace(this);
     Register(tracewin);
@@ -93,8 +92,8 @@ XSimMain::~XSimMain()
 
 	ATunprotectList(&state_vars);
 	ATunprotectList(&state_varnames);
-	ATunprotectList(&initial_state);
-	ATunprotectList(&current_state);
+	ATunprotect(&initial_state);
+	ATunprotect(&current_state);
 	ATunprotectList(&next_states);
 	ATunprotectList(&trace);
 	ATunprotectList(&ecart);
@@ -300,7 +299,7 @@ void XSimMain::Reset()
 	}
 }
 
-void XSimMain::Reset(ATermList State)
+void XSimMain::Reset(ATerm State)
 {
 	initial_state = State;
 	Reset();
@@ -311,7 +310,7 @@ bool XSimMain::Undo()
 	if ( ATgetLength(trace) > 1 )
 	{
 		ATermList l = traceUndo();
-		ATermList state = ATLgetFirst(ATgetNext(l));
+		ATerm state = ATgetFirst(ATgetNext(l));
 
 		SetCurrentState(state);
 		UpdateTransitions();
@@ -339,7 +338,7 @@ bool XSimMain::Redo()
 	if ( !ATisEmpty(ecart) )
 	{
 		ATermList trans = traceRedo();
-		ATermList state = ATLgetFirst(ATgetNext(trans));
+		ATerm state = ATgetFirst(ATgetNext(trans));
 
 		SetCurrentState(state);
 		UpdateTransitions();
@@ -362,7 +361,7 @@ bool XSimMain::Redo()
 	}
 }
 
-ATermList XSimMain::GetState()
+ATerm XSimMain::GetState()
 {
 	return current_state;
 }
@@ -378,7 +377,7 @@ bool XSimMain::ChooseTransition(int index)
 	{
 		ATermList l = ATLelementAt(next_states,index);
 		ATermAppl trans = ATAgetFirst(l);
-		ATermList state = ATLgetFirst(ATgetNext(l));
+		ATerm state = ATgetFirst(ATgetNext(l));
 
 		SetCurrentState(state,true);
 		UpdateTransitions();
@@ -413,7 +412,7 @@ bool XSimMain::SetTracePos(int pos)
 {
 	int l = ATgetLength(trace)-1;
 	ATermAppl trans;
-	ATermList state;
+	ATerm state;
 
 	if ( (l >= 0) && (pos <= l+ATgetLength(ecart)) )
 	{
@@ -431,7 +430,7 @@ bool XSimMain::SetTracePos(int pos)
 		}
 
 		trans = ATAgetFirst(ATLgetFirst(trace));
-		state = ATLgetFirst(ATgetNext(ATLgetFirst(trace)));
+		state = ATgetFirst(ATgetNext(ATLgetFirst(trace)));
 
 		SetCurrentState(state);
 		UpdateTransitions();
@@ -480,7 +479,7 @@ void XSimMain::InitialiseViews()
 }
 
 
-void XSimMain::traceReset(ATermList state)
+void XSimMain::traceReset(ATerm state)
 {
 	trace = ATmakeList1((ATerm) ATmakeList2((ATerm) gsMakeNil(),(ATerm) state));
 	ecart = ATmakeList0();
@@ -584,11 +583,11 @@ void XSimMain::transOnListItemActivated( wxListEvent &event )
 	ChooseTransition(event.GetData());
 }
 
-void XSimMain::SetCurrentState(ATermList state, bool showchange)
+void XSimMain::SetCurrentState(ATerm state, bool showchange)
 {
 	char s[1000];
 	FILE *f;
-	ATermList old;
+	ATerm old;
 
 	if ( (current_state == NULL) || (ATgetLength(current_state) != ATgetLength(state)) )
 	{
@@ -598,14 +597,17 @@ void XSimMain::SetCurrentState(ATermList state, bool showchange)
 	}
 	current_state = state;
 
-	for (int i=0; !ATisEmpty(state); state=ATgetNext(state), old=ATgetNext(old), i++)
+	for (int i=0; i<ATgetLength(state_vars); i++)
 	{
+		ATermAppl oldval = gsGetStateArgument(old,i);
+		ATermAppl newval = gsGetStateArgument(state,i);
+
 		f = fopen("xsim.tmp","w+");
-		if ( gsIsDataVarId(ATAgetFirst(state)) )
+		if ( gsIsDataVarId(newval) )
 		{
 			fprintf(f,"_");
 		} else {
-			gsPrintPart(f,ATAgetFirst(state),false,0);
+			gsPrintPart(f,newval,false,0);
 		}
 		rewind(f);
 		if ( fgets(s,1000,f) == NULL )
@@ -614,7 +616,7 @@ void XSimMain::SetCurrentState(ATermList state, bool showchange)
 		}
 		fclose(f);
 		stateview->SetItem(i,1,wxT(s));
-		if ( showchange && !(ATisEqual(ATgetFirst(state),ATgetFirst(old)) || (gsIsDataVarId(ATAgetFirst(state)) && gsIsDataVarId(ATAgetFirst(old))) ) )
+		if ( showchange && !(ATisEqual(oldval,newval) || (gsIsDataVarId(oldval) && gsIsDataVarId(newval)) ) )
 		{
 		        wxColour col(255,255,210);
 		        stateview->SetItemBackgroundColour(i,col);
@@ -682,13 +684,16 @@ void XSimMain::UpdateTransitions()
 		indices.Add(i);
 //		transview->SetItemData(i,i);
 		f = fopen("xsim.tmp","w+");
-		ATermList m = current_state;
-		ATermList n = ATLgetFirst(ATgetNext(ATLgetFirst(l)));
+		ATerm m = current_state;
+		ATerm n = ATgetFirst(ATgetNext(ATLgetFirst(l)));
 		ATermList o = state_varnames;
 		bool comma = false;
-		for (; !ATisEmpty(n); n=ATgetNext(n),m=ATgetNext(m),o=ATgetNext(o))
+		for (int i=0; i<ATgetLength(state_vars); i++)
 		{
-			if ( !ATisEqual(ATgetFirst(n),ATgetFirst(m)) )
+			ATermAppl oldval = gsGetStateArgument(m,i);
+			ATermAppl newval = gsGetStateArgument(n,i);
+
+			if ( !ATisEqual(oldval,newval) )
 			{
 				if ( comma )
 				{
@@ -698,11 +703,11 @@ void XSimMain::UpdateTransitions()
 				}
 				gsPrintPart(f,ATAgetFirst(o),false,0);
 				fprintf(f," := ");
-				if ( gsIsDataVarId(ATAgetFirst(n)) )
+				if ( gsIsDataVarId(newval) )
 				{
 					fprintf(f,"_");
 				} else {
-					gsPrintPart(f,ATAgetFirst(n),false,0);
+					gsPrintPart(f,newval,false,0);
 				}
 			}
 		}

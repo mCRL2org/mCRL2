@@ -178,9 +178,17 @@ void ATunprotectInt(ATermInt *PInt)
 //Substitutions on ATerm's
 //------------------------
 
+static AFun substafun;
+static bool substafun_notset = true;
 ATermAppl gsMakeSubst(ATerm OldValue, ATerm NewValue)
 {
-  return ATmakeAppl2(ATmakeAFun("subst", 2, ATfalse), OldValue, NewValue);
+  if ( substafun_notset )
+  {
+	  substafun = ATmakeAFun("subst", 2, ATfalse);
+	  ATprotectAFun(substafun);
+	  substafun_notset = false;
+  }
+  return ATmakeAppl2(substafun, OldValue, NewValue);
 }
 
 ATermAppl gsMakeSubst_Appl(ATermAppl OldValue, ATermAppl NewValue)
@@ -235,7 +243,7 @@ ATerm gsSubstValues(ATermList Substs, ATerm Term, bool Recursive)
       }
       return (ATerm) ATreverse(Result);
     } else {
-      return NULL;
+      return Term;
     }
   }
 }

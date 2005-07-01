@@ -13,6 +13,7 @@
 #include "gslowlevel.h"
 #include "gsfunc.h"
 #include "libgsparse.h"
+#include "libgsnextstate.h"
 
 //------------------------------------------------------------------------------
 // XSimMain
@@ -25,21 +26,23 @@ BEGIN_EVENT_TABLE(XSimTrace,wxFrame)
     EVT_LIST_ITEM_ACTIVATED(ID_LISTVIEW,XSimTrace::OnListItemActivated)
 END_EVENT_TABLE()
 
-static void PrintState(FILE *f ,ATermList state)
+static void PrintState(FILE *f ,ATerm state)
 {
-	for (; !ATisEmpty(state); state=ATgetNext(state))
-	{
-		if ( gsIsDataVarId(ATAgetFirst(state)) )
-		{
-			fprintf(f,"_");
-		} else {
-			gsPrintPart(f,ATAgetFirst(state),false,0);
-		}
-		if ( !ATisEmpty(ATgetNext(state)) )
-		{
+        for (int i=0; i<gsGetStateLength(); i++)
+        {
+                if ( i > 0 )
+                {
 			fprintf(f,", ");
-		}
-	}
+                }
+
+                ATermAppl a = gsGetStateArgument(state,i);
+                if ( gsIsDataVarId(a) )
+                {
+			fprintf(f,"_");
+                } else {
+                        gsPrintPart(f,a,false,0);
+                }
+        }
 }
 
 XSimTrace::XSimTrace( wxWindow *parent ) :
@@ -80,7 +83,7 @@ void XSimTrace::Initialise(ATermList Pars)
 {
 }
 
-void XSimTrace::StateChanged(ATermAppl Transition, ATermList State, ATermList NextStates)
+void XSimTrace::StateChanged(ATermAppl Transition, ATerm State, ATermList NextStates)
 {
 	if ( Transition != NULL )
 	{
@@ -118,7 +121,7 @@ void XSimTrace::StateChanged(ATermAppl Transition, ATermList State, ATermList Ne
 	}
 }
 
-void XSimTrace::Reset(ATermList State)
+void XSimTrace::Reset(ATerm State)
 {
 	char s[1000];
 	FILE *f;
@@ -176,15 +179,15 @@ void XSimTrace::TraceChanged(ATermList Trace, int From)
 	{
 		if ( From == 0 )
 		{
-			Reset(ATLgetFirst(ATgetNext(ATLgetFirst(Trace))));
+			Reset(ATgetFirst(ATgetNext(ATLgetFirst(Trace))));
 		} else {
-			StateChanged(ATAgetFirst(ATLgetFirst(Trace)),ATLgetFirst(ATgetNext(ATLgetFirst(Trace))),NULL);
+			StateChanged(ATAgetFirst(ATLgetFirst(Trace)),ATgetFirst(ATgetNext(ATLgetFirst(Trace))),NULL);
 		}
 		From++;
 	}
 }
 
-void XSimTrace::TracePosChanged(ATermAppl Transition, ATermList State, int Index)
+void XSimTrace::TracePosChanged(ATermAppl Transition, ATerm State, int Index)
 {
 	while ( current_pos > Index )
 	{

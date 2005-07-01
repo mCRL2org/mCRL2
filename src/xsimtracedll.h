@@ -33,12 +33,12 @@ public:
     virtual void Registered(SimulatorInterface *Simulator);
     virtual void Unregistered();
     virtual void Initialise(ATermList Pars);
-    virtual void StateChanged(ATermAppl Transition, ATermList State, ATermList NextStates);
-    virtual void Reset(ATermList State);
+    virtual void StateChanged(ATermAppl Transition, ATerm State, ATermList NextStates);
+    virtual void Reset(ATerm State);
     virtual void Undo(int Count);
     virtual void Redo(int Count);
     virtual void TraceChanged(ATermList Trace, int From);
-    virtual void TracePosChanged(ATermAppl Transition, ATermList State, int Index);
+    virtual void TracePosChanged(ATermAppl Transition, ATerm State, int Index);
 
 private:
     // WDR: method declarations for XSimMain

@@ -50,10 +50,10 @@ public:
     virtual wxWindow *MainWindow();
     virtual ATermList GetParameters();
     virtual void Reset();
-    virtual void Reset(ATermList State);
+    virtual void Reset(ATerm State);
     virtual bool Undo();
     virtual bool Redo();
-    virtual ATermList GetState();
+    virtual ATerm GetState();
     virtual ATermList GetNextStates();
     virtual bool ChooseTransition(int index);
     virtual int GetTraceLength();
@@ -68,7 +68,7 @@ private:
     void CreateMenu();
     void CreateStatus();
     void CreateContent();
-    void traceReset(ATermList state);
+    void traceReset(ATerm state);
     void traceSetNext(ATermList transition);
     ATermList traceUndo();
     ATermList traceRedo();
@@ -77,8 +77,8 @@ private:
     // WDR: member variable declarations for XSimMain
     ATermList state_vars;
     ATermList state_varnames;
-    ATermList initial_state;
-    ATermList current_state;
+    ATerm initial_state;
+    ATerm current_state;
     ATermList next_states;
     ATermList trace;
     ATermList ecart;
@@ -117,7 +117,7 @@ private:
     void transOnListItemActivated( wxListEvent &event );
     
 private:
-    void SetCurrentState(ATermList state, bool showchange = false);
+    void SetCurrentState(ATerm state, bool showchange = false);
     void UpdateTransitions();
 
 private:

@@ -12,8 +12,8 @@
  *   This is an ATermList containing a sequence of DataVarIds
  *   that describe the name and sort of the process parameters.
  * - States
- *   An ATermList containing a sequence of DataExprs that are
- *   the values of the above parameters in a state.
+ *   An ATerm containing DataExprs that are the values of the
+ *   above parameters in a state.
  * - Transitions
  *   A MultiAct that describes some transitiion.
  * - NextStates
@@ -63,7 +63,7 @@ public:
 
 	virtual void Reset() = 0;
 	/* Reset trace to initial state */
-	virtual void Reset(ATermList State) = 0;
+	virtual void Reset(ATerm State) = 0;
 	/* Reset trace to new initial state State */
 	virtual bool Undo() = 0;
 	/* Go to previous state in trace, if possible.
@@ -74,7 +74,7 @@ public:
 	virtual ATermList GetParameters() = 0;
 	/* Returns the parameter names that correspond to the
 	 * elements in states. */
-	virtual ATermList GetState() = 0;
+	virtual ATerm GetState() = 0;
 	/* Returns the current state. */
 	virtual ATermList GetNextStates() = 0;
 	/* Returns the currently enabled transitions and the
@@ -113,7 +113,7 @@ public:
 	 * Pars contains the process parameters that correspond to
 	 * the elements in states. */
 
-	virtual void StateChanged(ATermAppl Transition, ATermList State, ATermList NextStates) = 0;
+	virtual void StateChanged(ATermAppl Transition, ATerm State, ATermList NextStates) = 0;
 	/* Is called whenever the current state in the simulator is
 	 * changed.
 	 * Transition is the action that was 'executed', which can
@@ -126,7 +126,7 @@ public:
 	 * changes, even when, for example, Reset() has already
 	 * been called. */
 
-	virtual void Reset(ATermList State) = 0;
+	virtual void Reset(ATerm State) = 0;
 	/* Is called whenever the current trace is reset to the
 	 * singleton trace containing State. */
 	virtual void Undo(int Count) = 0;
@@ -143,7 +143,7 @@ public:
 	 * Note that this is also called when a view is loaded
 	 * to initialise it with the current trace.
 	 */
-	virtual void TracePosChanged(ATermAppl Transition, ATermList State, int Index) = 0;
+	virtual void TracePosChanged(ATermAppl Transition, ATerm State, int Index) = 0;
 	/* Is called whenever another element of the current trace
 	 * is selected. Note that Transition might be Nil in the
 	 * case that State is the initial state (i.e. Index is 0).

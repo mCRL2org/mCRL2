@@ -10,9 +10,9 @@ typedef void (*FindSolutionsCallBack)(ATermList);
 
 void gsProverInit(ATermAppl Spec);
 
-ATermList FindSolutions(ATermList Vars, ATermAppl Expr, FindSolutionsCallBack f);
+ATermList FindSolutions(ATermList Vars, ATerm Expr, FindSolutionsCallBack f);
 
-ATermList FindSolutionsWithSubsts(ATermList Vars, ATermAppl Expr, ATermTable Substs, FindSolutionsCallBack f);
+ATermList FindSolutionsWithSubsts(ATermList Vars, ATerm Expr, ATermTable Substs, FindSolutionsCallBack f);
 
 #ifdef __cplusplus
 }

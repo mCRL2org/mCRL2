@@ -27,6 +27,7 @@ static int max_vars;
 static bool is_initialised = false;
 
 static ATermTable subst_table = NULL;
+static bool subst_is_inner = false;
 
 #define ATAgetFirst(x) ((ATermAppl) ATgetFirst(x))
 #define ATLgetFirst(x) ((ATermList) ATgetFirst(x))
@@ -580,6 +581,8 @@ static ATerm rewrite(ATerm Term, int *b)
 			*b |= d;
 		} else {
 			// XXX is Term in subst_table!!! XXX
+			if ( (ATgetType(ATgetFirst((ATermList) Term)) == AT_APPL) && gsIsDataVarId(ATAgetFirst((ATermList) Term)) ) 
+				printf("EERRRRRROORRRR!!!\n\n\n\n");
 			Term = (ATerm) ATinsert(l,ATgetFirst((ATermList) Term));
 		}
 
@@ -593,7 +596,12 @@ static ATerm rewrite(ATerm Term, int *b)
 		{
 			return Term;
 		} else {
-			return toInner((ATermAppl) a,false);
+			if ( subst_is_inner )
+			{
+				return a;
+			} else {
+				return toInner((ATermAppl) a,false);
+			}
 		}	
 	}
 }
@@ -619,12 +627,41 @@ ATerm rewrite_inner3(ATerm Term, int *b)
 	return (ATerm) fromInner(rewrite(toInner((ATermAppl) Term,false),b));
 }
 
+ATerm rewrite_internal_inner3(ATerm Term, int *b)
+{
+	return rewrite(Term,b);
+}
+
+
 ATerm rewrite_substs_inner3(ATerm Term, ATermTable Substs, int *b)
 {
 	subst_table = Substs;
 	ATerm a = rewrite_inner3(Term,b);
 	subst_table = NULL;
 	return a;
+}
+
+ATerm rewrite_internal_substs_inner3(ATerm Term, ATermTable Substs, int *b)
+{
+	subst_table = Substs;
+	subst_is_inner = true;
+//ATprintf("in: %t  (%p)\n\n",fromInner(Term),Substs);
+	ATerm a = rewrite(Term,b);
+//ATprintf("out: %t\n\n",fromInner(a));
+	subst_is_inner = false;
+	subst_table = NULL;
+	return a;
+}
+
+
+ATerm to_rewrite_format_inner3(ATermAppl Term)
+{
+	return toInner(Term,false);
+}
+
+ATermAppl from_rewrite_format_inner3(ATerm Term)
+{
+	return fromInner(Term);
 }
 
 #ifdef __cplusplus

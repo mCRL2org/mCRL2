@@ -47,7 +47,7 @@ static ATermList SetDCs(ATermList l)
 	return m;
 }
 
-void callback(ATermAppl transition, ATerm state)
+void gsinst_callback(ATermAppl transition, ATerm state)
 {
 	ATerm state_dc = (ATerm) SetDCs((ATermList) state);
 	ATbool new_state;
@@ -203,7 +203,7 @@ int main(int argc, char **argv)
 	
 	fprintf(aut,"des (0,0,0)                   \n");
 
-	ATerm state = (ATerm) gsNextStateInit(Spec,!usedummies);
+	ATerm state = gsNextStateInit(Spec,!usedummies);
 
 	ATbool new_state;
 	current_state = ATindexedSetPut(states,(ATerm) SetDCs((ATermList) state),&new_state);
@@ -219,7 +219,7 @@ int main(int argc, char **argv)
 	{
 		state = ATindexedSetGetElem(states,current_state);
 		deadlockstate = true;
-		gsNextState((ATermList) state, callback); // XXX state may contain Nils instead of free vars
+		gsNextState(state, gsinst_callback); // XXX state may contain Nils instead of free vars
 		if ( NextStateError )
 		{
 			err = true;
@@ -246,7 +246,7 @@ int main(int argc, char **argv)
 
 				for (; !ATisEmpty(tr); tr=ATgetNext(tr))
 				{
-					ATermList l = gsNextState((ATermList) s, NULL);
+					ATermList l = gsNextState(s, NULL);
 					for (; !ATisEmpty(l); l=ATgetNext(l))
 					{
 						if ( ATisEqual(ATgetFirst(ATgetNext(ATLgetFirst(l))),ATgetFirst(tr)) )
