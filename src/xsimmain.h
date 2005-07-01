@@ -29,7 +29,9 @@ const int ID_REDO = 10005;
 const int ID_RESET = 10006;
 const int ID_FITCS = 10007;
 const int ID_TRACE = 10008;
-const int ID_TRACELOAD = 10009;
+const int ID_LOADVIEW = 10009;
+const int ID_LOADTRACE = 10010;
+const int ID_SAVETRACE = 10011;
 
 class XSimMain: public wxFrame, public SimulatorInterface
 {
@@ -107,9 +109,11 @@ private:
     void OnUndo( wxCommandEvent &event );
     void OnRedo( wxCommandEvent &event );
     void OnReset( wxCommandEvent &event );
+    void OnLoadTrace( wxCommandEvent &event );
+    void OnSaveTrace( wxCommandEvent &event );
     void OnFitCurrentState( wxCommandEvent &event );
     void OnTrace( wxCommandEvent &event );
-    void OnTraceLoad( wxCommandEvent &event );
+    void OnLoadView( wxCommandEvent &event );
     void OnAbout( wxCommandEvent &event );
     void OnTraceClose( wxCloseEvent &event );
     void OnCloseWindow( wxCloseEvent &event );

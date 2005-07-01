@@ -68,7 +68,7 @@ static ATermList calcNext(ATermList l)
 	l = ATgetNext(l);
 	a2 = ATLgetFirst(l);
 	l = ATgetNext(l);
-	a3 = ATAgetFirst(l);
+	a3 = ATgetFirst(l);
 
 	var = ATAgetFirst(a1); // XXX is in internal format!
 	a1 = ATgetNext(a1);

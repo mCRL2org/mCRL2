@@ -96,7 +96,6 @@ int main(int argc, char **argv)
 		}
 		for (l=states,i=0; !ATisEmpty(l); l=ATgetNext(l), i++)
 		{
-			ATprintf("%t\n\n",ATgetFirst(ATLgetFirst(l)));
 			ATprintf("%i: ",i);
 			gsPrintPart(stdout,ATAgetFirst(ATLgetFirst(l)),false,0);
 			ATprintf("  ->  [ ");

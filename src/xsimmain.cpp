@@ -29,9 +29,11 @@ BEGIN_EVENT_TABLE(XSimMain,wxFrame)
     EVT_MENU(ID_UNDO, XSimMain::OnUndo)
     EVT_MENU(ID_REDO, XSimMain::OnRedo)
     EVT_MENU(ID_RESET, XSimMain::OnReset)
+    EVT_MENU(ID_LOADTRACE, XSimMain::OnLoadTrace)
+    EVT_MENU(ID_SAVETRACE, XSimMain::OnSaveTrace)
     EVT_MENU(ID_FITCS, XSimMain::OnFitCurrentState)
     EVT_MENU(ID_TRACE, XSimMain::OnTrace)
-    EVT_MENU(ID_TRACELOAD, XSimMain::OnTraceLoad)
+    EVT_MENU(ID_LOADVIEW, XSimMain::OnLoadView)
     EVT_MENU(wxID_ABOUT, XSimMain::OnAbout)
     EVT_CLOSE(XSimMain::OnCloseWindow)
     EVT_LIST_ITEM_SELECTED(ID_LISTCTRL1,XSimMain::stateOnListItemSelected)
@@ -116,8 +118,8 @@ void XSimMain::CreateMenu()
     redo->Enable(false);
     edit->Append( ID_RESET, wxT("&Reset	CTRL-r"), wxT("") );
     edit->AppendSeparator();
-    edit->Append( ID_MENU, wxT("&Load trace...	CTRL-l"), wxT("") )->Enable(false);
-    edit->Append( ID_MENU, wxT("&Save trace...	CTRL-s"), wxT("") )->Enable(false);
+    edit->Append( ID_LOADTRACE, wxT("&Load trace...	CTRL-l"), wxT("") );
+    edit->Append( ID_SAVETRACE, wxT("&Save trace...	CTRL-s"), wxT("") );
     edit->AppendSeparator();
 #ifdef __WINDOWS__
     edit->Append( ID_FITCS, wxT("F&it to Current State	CTRL-f"), wxT("") )->Enable(false);
@@ -129,7 +131,7 @@ void XSimMain::CreateMenu()
     wxMenu *views = new wxMenu;
     views->Append( ID_TRACE, wxT("&Trace	CTRL-t"), wxT("") );
     views->Append( ID_MENU, wxT("&Graph"), wxT("") )->Enable(false);
-    views->Append( ID_TRACELOAD, wxT("&Load Dynamic..."), wxT("") );
+    views->Append( ID_LOADVIEW, wxT("&Load Dynamic..."), wxT("") );
     menu->Append( views, wxT("&Views") );
     
     wxMenu *help = new wxMenu;
@@ -481,7 +483,7 @@ void XSimMain::InitialiseViews()
 
 void XSimMain::traceReset(ATerm state)
 {
-	trace = ATmakeList1((ATerm) ATmakeList2((ATerm) gsMakeNil(),(ATerm) state));
+	trace = ATmakeList1((ATerm) ATmakeList2((ATerm) gsMakeNil(), state));
 	ecart = ATmakeList0();
 }
 
@@ -536,6 +538,74 @@ void XSimMain::OnReset( wxCommandEvent &event )
 	Reset();
 }
 
+void XSimMain::OnLoadTrace( wxCommandEvent &event )
+{
+    wxFileDialog dialog( this, wxT("Load trace..."), wxT(""), wxT(""), wxT("Traces (*.trc)|*.trc|All Files|*.*"));
+    if ( dialog.ShowModal() == wxID_OK )
+    {
+	    wxTextFile f;
+
+	    f.Open(dialog.GetPath());
+
+	    Reset();
+
+	    if ( f.GetLineCount() > 0 )
+	    {
+		    wxString s;
+		    
+		    f.AddLine(wxT(""));
+		    for (s=f.GetFirstLine(); !f.Eof(); s=f.GetNextLine())
+		    {
+			    if ( s.Length() > 0 )
+			    {
+				    if ( s[0] == '"' )
+				    {
+					    s = s.Mid(1,s.Length()-2);
+				    }
+				    
+				    long l = transview->FindItem(-1,s);
+				    if ( l >= 0 )
+				    {
+					    ChooseTransition(transview->GetItemData(l));
+					    Update();
+				    } else {
+					    wxMessageDialog dialog(this,wxString::Format("Cannot execute transition '%s'.\n",s.c_str()),wxT("Error in trace"),wxOK|wxICON_ERROR);
+					    dialog.ShowModal();
+					    break;
+				    }
+			    }
+		    }
+	    }
+
+	    f.Close();
+    }
+}
+
+void XSimMain::OnSaveTrace( wxCommandEvent &event )
+{
+    wxFileDialog dialog( this, wxT("Save trace..."), wxT(""), wxT(""), wxT("Traces (*.trc)|*.trc|All Files|*.*"),wxSAVE);
+    if ( dialog.ShowModal() == wxID_OK )
+    {
+	    FILE *f;
+
+	    if ( (f = fopen(dialog.GetPath().c_str(),"w")) == NULL )
+	    {
+		    perror("fopen");
+		    return;
+	    }
+
+	    if ( !ATisEmpty(trace) )
+	    {
+		    for (ATermList l=ATconcat(ATgetNext(ATreverse(trace)),ecart); !ATisEmpty(l); l=ATgetNext(l))
+		    {
+			gsPrintPart(f,ATAgetFirst(ATLgetFirst(l)),false,0);
+			fprintf(f,"\n");
+		    }
+	    }
+	    fclose(f);
+    }
+}
+
 void XSimMain::OnFitCurrentState( wxCommandEvent &event )
 {
 #ifndef __WINDOWS__
@@ -552,7 +622,7 @@ void XSimMain::OnTrace( wxCommandEvent &event )
     tracewin->Show(!tracewin->IsShown());
 }
 
-void XSimMain::OnTraceLoad( wxCommandEvent &event )
+void XSimMain::OnLoadView( wxCommandEvent &event )
 {
     wxFileDialog dialog( this, wxT("Select a View DLL..."), wxT(""), wxT(""), wxT("Dynamic Libraries (*.so,*.dll)|*.so;*.dll|All Files|*.*"));
     if ( dialog.ShowModal() == wxID_OK )

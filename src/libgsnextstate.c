@@ -51,6 +51,7 @@ static AFun smndAFun;
 static ATermTable params;
 static ATermList procvars;
 static ATermList pars;
+static ATermAppl nil;
 
 static bool usedummies;
 
@@ -236,6 +237,9 @@ ATerm gsNextStateInit(ATermAppl Spec, bool AllowFreeVars)
 	current_spec = Spec;
 	ATprotectAppl(&current_spec);
 	usedummies = !AllowFreeVars;
+
+	nil = gsMakeNil();
+	ATprotectAppl(&nil);
 	
 	gsProverInit(Spec);
 
@@ -243,7 +247,7 @@ ATerm gsNextStateInit(ATermAppl Spec, bool AllowFreeVars)
 
 	l = ATLgetArgument(ATAgetArgument(current_spec,5),1);
 	pars = ATmakeList0();
-	ATprotectList(pars);
+	ATprotectList(&pars);
 	for (; !ATisEmpty(l); l=ATgetNext(l))
 	{
 		pars = ATinsert(pars,gsToRewriteFormat(ATAgetFirst(l)));
@@ -383,14 +387,13 @@ ATermList gsNextState(ATerm State, gsNextStateCallBack f)
 	ATermList params_l = ATmakeList0();
 	for (; !ATisEmpty(l); l=ATgetNext(l),m=ATgetNext(m))
 	{
-		if ( !gsIsNil(ATAgetFirst(m)) )
+		if ( !ATisEqual(ATgetFirst(m),nil) )
 		{
 			ATtablePut(params,ATgetFirst(l),ATgetFirst(m));
 			params_l = ATinsert(params_l,(ATerm) gsMakeSubst(ATgetFirst(l),ATgetFirst(m)));
 		}
 	}
 	params_l = ATreverse(params_l);
-ATprintf("params: %t  (%p)\n",params_l,params);
 
 	sum_idx = 0;
 	states = ATmakeList0();
