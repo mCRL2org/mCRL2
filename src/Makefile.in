@@ -68,7 +68,7 @@ LIN_LDFLAGS        = -lgsparse -lATerm -lm
 
 #Rewriter definitions
 LIBREWR_NAME       = libgsrewrite.a
-LIBREWR_OBJECTS    = libgsrewrite.o gsrewr_inner.o gsrewr_inner2.o gsrewr_inner3.o gsrewr_innerc.o gsrewr_jitty.o gsfunc.o gslowlevel.o
+LIBREWR_OBJECTS    = libgsrewrite.o gsrewr_inner.o gsrewr_inner2.o gsrewr_inner3.o gsrewr_innerc.o gsrewr_jitty.o gsfunc.o gslowlevel.o gssubstitute.o
 OBJECTS           += $(LIBREWR_OBJECTS)
 LIBREWR_LDFLAGS    = -lATerm -lm
 REWR_NAME          = gsrewr
