@@ -6,11 +6,15 @@
 #include "gslowlevel.h"
 #include "gsfunc.h"
 
-void rewrite_init_innerc();
+void RWrewrite_init_innerc();
 
-void rewrite_add_innerc(ATermAppl eqn);
-void rewrite_remove_innerc(ATermAppl eqn);
+void RWrewrite_add_innerc(ATermAppl eqn);
+void RWrewrite_remove_innerc(ATermAppl eqn);
 
-ATerm rewrite_innerc(ATerm Term, int *b);
+ATermAppl RWrewrite_innerc(ATermAppl);
+ATermList RWrewritelist_innerc(ATermList);
 
-ATerm rewrite_substs_innerc(ATerm Term, ATermTable Substs, int *b);
+ATerm to_rewrite_format_innerc(ATermAppl);
+
+ATermAppl from_rewrite_format_innerc(ATerm);
+

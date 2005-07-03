@@ -86,7 +86,7 @@ PNML2GS_LDFLAGS    = -lgsparse -lATerm -lxml2 -lm
 
 #Instantiator definitions
 INSTAN_NAME        = gsinstantiate
-INSTAN_OBJECTS     = gsinstantiate.o libgsnextstate.o libgsprover.o
+INSTAN_OBJECTS     = gsinstantiate.o libgsnextstate.o libgsprover.o gssubstitute.o
 OBJECTS           += $(INSTAN_OBJECTS)
 INSTAN_LDFLAGS     = -lgsrewrite -lgsparse -lATerm -lm -ldl
 
