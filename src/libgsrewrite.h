@@ -9,7 +9,8 @@ extern "C" {
 #define GS_REWR_INNER2	1
 #define GS_REWR_INNER3	2
 #define GS_REWR_INNERC	3
-#define GS_REWR_JITTY	4
+#define GS_REWR_INNERC2	4
+#define GS_REWR_JITTY	5
 
 void gsRewriteInit(ATermAppl Eqns, int strat);
 
@@ -19,14 +20,10 @@ void gsRewriteRemoveEqn(ATermAppl Eqn);
 ATermAppl gsRewriteTerm(ATermAppl Term);
 ATermList gsRewriteTerms(ATermList Terms);
 
-ATermAppl gsRewriteTermWithSubsts(ATermAppl Term, ATermTable Substs);
-ATermList gsRewriteTermsWithSubsts(ATermList Terms, ATermTable Substs);
-
 ATerm gsToRewriteFormat(ATermAppl Term);
 ATermAppl gsFromRewriteFormat(ATerm Term);
 ATerm gsRewriteInternal(ATerm Term);
 ATermList gsRewriteInternals(ATermList Terms);
-ATerm gsRewriteInternalWithSubsts(ATerm Term, ATermTable Substs);
 
 #ifdef __cplusplus
 }

@@ -7,63 +7,64 @@
 #include "gslowlevel.h"
 #include "gsfunc.h"
 #include "assert.h"
+#include "gssubstitute.h"
 
 static long maximumNumberOfVariables=0;
-static ATermAppl *Substitution=NULL;
+static ATerm *Substitution=NULL;
 
-void RWsetVariable(ATermAppl v, ATermAppl t)
+void RWsetVariable(ATerm v, ATerm t)
 {
-  assert(gsIsDataVarId(v));
+  assert(gsIsDataVarId((ATermAppl) v));
 
-  long n=ATgetAFun(ATgetArgument(v,0));
+  long n=ATgetAFun(ATgetArgument((ATermAppl) v,0));
   
   if (n>=maximumNumberOfVariables)
   { long newsize=(n>=2*maximumNumberOfVariables?
                   (n<1024?1024:(n+1)):2*maximumNumberOfVariables);
     if (maximumNumberOfVariables==0)
-    { Substitution=(ATermAppl *)malloc(newsize*sizeof(ATermAppl *));
+    { Substitution=(ATerm *)malloc(newsize*sizeof(ATerm));
     }
     else
     {
       for(long i=0 ; i<maximumNumberOfVariables ; i++)
       {
-        ATunprotectAppl((ATermAppl *)&(Substitution[i]));
+        ATunprotect(&(Substitution[i]));
       }
     }
-    { Substitution=(ATermAppl *)realloc(Substitution,newsize*sizeof(ATermAppl *));
+    { Substitution=(ATerm *)realloc(Substitution,newsize*sizeof(ATerm));
     }
     if (Substitution==NULL)
     { ATerror("Fail to increase the size of a substitution array to %d\n",newsize); }
 
     for(long i=0 ; i<maximumNumberOfVariables ; i++)
     {
-      ATprotectAppl((ATermAppl *)&(Substitution[i]));
+      ATprotectAppl(&(Substitution[i]));
     }
 
     for(long i=maximumNumberOfVariables ; i<newsize ; i++)
     { Substitution[i]=NULL;
-      ATprotect((ATerm *)&(Substitution[i]));
+      ATprotect(&(Substitution[i]));
     }
     maximumNumberOfVariables=newsize;
   }
   Substitution[n]=t;
 }
 
-void RWclearVariable(ATermAppl v)
+void RWclearVariable(ATerm v)
 { 
-  long n=ATgetAFun(ATgetArgument(v,0));
+  long n=ATgetAFun(ATgetArgument((ATermAppl) v,0));
 
   Substitution[n]=NULL;
 }
 
-ATermAppl RWapplySubstitution(ATermAppl v)
+ATerm RWapplySubstitution(ATerm v)
 {
-  long n=ATgetAFun(ATgetArgument(v,0));
+  long n=ATgetAFun(ATgetArgument((ATermAppl) v,0));
 
   if (n>=maximumNumberOfVariables)
   return v;
 
-  ATermAppl r=Substitution[n];
+  ATerm r=Substitution[n];
 
   if (r==NULL)
   return v;

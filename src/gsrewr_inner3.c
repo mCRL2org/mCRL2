@@ -12,6 +12,7 @@ extern "C" {
 #include "gsfunc.h"
 #include "gsrewr_inner3.h"
 #include "libgsparse.h"
+#include "gssubstitute.h"
 
 extern ATermList opid_eqns;
 extern ATermList dataappl_eqns;
@@ -26,8 +27,8 @@ static AFun opidAFun;
 static int max_vars;
 static bool is_initialised = false;
 
-static ATermTable subst_table = NULL;
-static bool subst_is_inner = false;
+//static ATermTable subst_table = NULL;
+//static bool subst_is_inner = false;
 
 #define ATAgetFirst(x) ((ATermAppl) ATgetFirst(x))
 #define ATLgetFirst(x) ((ATermList) ATgetFirst(x))
@@ -409,12 +410,11 @@ static bool match_inner(ATerm t, ATerm p, ATermAppl *vars, ATerm *vals, int *len
 	}
 }
 
-static ATerm rewrite_func(ATermInt op, ATermList args, int *b);
-static ATerm rewrite(ATerm Term, int *b);
+static ATerm rewrite_func(ATermInt op, ATermList args);
+static ATerm rewrite(ATerm Term);
 
 static ATerm build(ATerm Term, int buildargs, ATermAppl *vars, ATerm *vals, int len)
 {
-	int b;
 //ATfprintf(stderr,"build(%t,%i)\n\n",Term,buildargs);
 
 	if ( ATisList(Term) )
@@ -440,10 +440,9 @@ static ATerm build(ATerm Term, int buildargs, ATermAppl *vars, ATerm *vals, int 
 		}
 		args = ATreverse(l);
 
-		b = 1;
+		int b = 1;
 		while ( !ATisInt(head) && b )
 		{
-			b = 0;
 			for (int i=0; i<len; i++)
 			{
 				if ( ATisEqual(head,vars[i]) )
@@ -455,19 +454,19 @@ static ATerm build(ATerm Term, int buildargs, ATermAppl *vars, ATerm *vals, int 
 					} else {
 						head = vals[i];
 					}
-					b = 1;
 					break;
 				}
+				b = 0;
 			}
 		}
 		if ( ATisInt(head) )
 		{
-			return rewrite_func((ATermInt) head,args,&b);
+			return rewrite_func((ATermInt) head,args);
 		} else {
 			return (ATerm) ATinsert(args,head);
 		}
 	} else if ( ATisInt(Term) ) {
-		return rewrite_func((ATermInt) Term, ATmakeList0(), &b);
+		return rewrite_func((ATermInt) Term, ATmakeList0());
 	} else {
 		for (int i=0; i<len; i++)
 		{
@@ -480,7 +479,7 @@ static ATerm build(ATerm Term, int buildargs, ATermAppl *vars, ATerm *vals, int 
 	}
 }
 
-static ATerm rewrite_func(ATermInt op, ATermList args, int *b)
+static ATerm rewrite_func(ATermInt op, ATermList args)
 {
 	ATermList m;
 	DECL_A(vars,ATermAppl,max_vars);
@@ -521,7 +520,6 @@ static ATerm rewrite_func(ATermInt op, ATermList args, int *b)
 			{
 				if ( is_nil(cond) || ATisEqual(build(cond,-1,vars,vals,pos),trueint) )
 				{
-					*b = 1;
 					int rslt_len;
 					if ( ATisList(rslt) )
 					{
@@ -557,28 +555,24 @@ static ATerm rewrite_func(ATermInt op, ATermList args, int *b)
 	}
 }
 
-static ATerm rewrite(ATerm Term, int *b)
+static ATerm rewrite(ATerm Term)
 {
 ///ATfprintf(stderr,"rewrite(%t)\n\n",Term);
 	if ( ATisList(Term) )
 	{
 		ATermList l = ATgetNext((ATermList) Term);
 		ATermList m;
-		int c,d;
 
 		m = ATmakeList0();
-		d = 0;
 		for (; !ATisEmpty(l); l=ATgetNext(l))
 		{
-			m = ATinsert(m,rewrite(ATgetFirst(l),&c));
-			d|=c;
+			m = ATinsert(m,rewrite(ATgetFirst(l)));
 		}
 		l = ATreverse(m);
 
 		if ( ATisInt(ATgetFirst((ATermList) Term)) )
 		{
-			Term = rewrite_func((ATermInt) ATgetFirst((ATermList) Term), l, b);
-			*b |= d;
+			Term = rewrite_func((ATermInt) ATgetFirst((ATermList) Term), l);
 		} else {
 			// XXX is Term in subst_table!!! XXX
 			if ( (ATgetType(ATgetFirst((ATermList) Term)) == AT_APPL) && gsIsDataVarId(ATAgetFirst((ATermList) Term)) ) 
@@ -589,70 +583,16 @@ static ATerm rewrite(ATerm Term, int *b)
 		return Term;
 	} else if ( ATisInt(Term) )
 	{
-		return rewrite_func((ATermInt) Term, ATmakeList0(),b);
+		return rewrite_func((ATermInt) Term, ATmakeList0());
 	} else {
-		ATerm a;
-		if ( (subst_table == NULL) || ((a = ATtableGet(subst_table,Term)) == NULL) )
-		{
-			return Term;
-		} else {
-			if ( subst_is_inner )
-			{
-				return a;
-			} else {
-				return toInner((ATermAppl) a,false);
-			}
-		}	
+		return (ATerm) RWapplySubstitution((ATermAppl) Term);
 	}
 }
 
-ATerm rewrite_inner3(ATerm Term, int *b)
+ATerm rewrite_inner3(ATerm Term)
 {
-	ATermList l;
-	int c;
-
-//ATfprintf(stderr,"input: %t\n\n",Term);
-	if ( ATisList(Term) )
-	{
-		l = ATmakeList0();
-		*b = 0;
-		for (; !ATisEmpty((ATermList) Term); Term=(ATerm)ATgetNext((ATermList) Term))
-		{
-			l = ATinsert(l,(ATerm) fromInner(rewrite(toInner((ATermAppl) ATgetFirst((ATermList) Term),false),&c)));
-			*b |= c;
-		}
-		return (ATerm) ATreverse(l);
-	}
-
-	return (ATerm) fromInner(rewrite(toInner((ATermAppl) Term,false),b));
+	return rewrite(Term);
 }
-
-ATerm rewrite_internal_inner3(ATerm Term, int *b)
-{
-	return rewrite(Term,b);
-}
-
-
-ATerm rewrite_substs_inner3(ATerm Term, ATermTable Substs, int *b)
-{
-	subst_table = Substs;
-	ATerm a = rewrite_inner3(Term,b);
-	subst_table = NULL;
-	return a;
-}
-
-ATerm rewrite_internal_substs_inner3(ATerm Term, ATermTable Substs, int *b)
-{
-	subst_table = Substs;
-	subst_is_inner = true;
-//ATprintf("in: %t  (%p)\n\n",fromInner(Term),Substs);
-	ATerm a = rewrite(Term,b);
-//ATprintf("out: %t\n\n",fromInner(a));
-	subst_is_inner = false;
-	subst_table = NULL;
-	return a;
-}
-
 
 ATerm to_rewrite_format_inner3(ATermAppl Term)
 {

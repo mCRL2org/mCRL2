@@ -18,6 +18,7 @@
 #include "gsfunc.h"
 #include "libgsparse.h"
 #include "libgsnextstate.h"
+#include "libgsrewrite.h"
 
 //------------------------------------------------------------------------------
 // XSimMain
@@ -224,7 +225,7 @@ void XSimMain::LoadFile(const wxString &filename)
     }
     state_varnames = ATreverse(m);
     state_vars = ATreverse(n);
-    initial_state = gsNextStateInit(Spec,true);
+    initial_state = gsNextStateInit(Spec,true,GS_REWR_INNER3);
 
     InitialiseViews();
     Reset(initial_state);

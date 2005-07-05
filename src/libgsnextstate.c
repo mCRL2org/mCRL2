@@ -10,6 +10,7 @@ extern "C" {
 #include "libgsprover.h"
 #include "libgsrewrite.h"
 #include "libgsnextstate.h"
+#include "gssubstitute.h"
 
 bool NextStateError;
 
@@ -48,7 +49,6 @@ static ATermAppl current_spec;
 static int num_summands;
 static ATermAppl *summands;
 static AFun smndAFun;
-static ATermTable params;
 static ATermList procvars;
 static ATermList pars;
 static ATermAppl nil;
@@ -229,7 +229,7 @@ ATermList AssignsToRewriteFormat(ATermList assigns)
 	return ATreverse(l);
 }
 
-ATerm gsNextStateInit(ATermAppl Spec, bool AllowFreeVars)
+ATerm gsNextStateInit(ATermAppl Spec, bool AllowFreeVars, int RewriteStrategy)
 {
 	ATermList l,m,n,state;
 	bool set;
@@ -241,9 +241,7 @@ ATerm gsNextStateInit(ATermAppl Spec, bool AllowFreeVars)
 	nil = gsMakeNil();
 	ATprotectAppl(&nil);
 	
-	gsProverInit(Spec);
-
-	params = ATtableCreate(100,90);
+	gsProverInit(Spec,RewriteStrategy);
 
 	l = ATLgetArgument(ATAgetArgument(current_spec,5),1);
 	pars = ATmakeList0();
@@ -383,13 +381,14 @@ ATermList gsNextState(ATerm State, gsNextStateCallBack f)
 
 	l = procvars;
 	m = (ATermList) State;
-	ATtableReset(params);
+//	ATtableReset(params);
 	ATermList params_l = ATmakeList0();
 	for (; !ATisEmpty(l); l=ATgetNext(l),m=ATgetNext(m))
 	{
 		if ( !ATisEqual(ATgetFirst(m),nil) )
 		{
-			ATtablePut(params,ATgetFirst(l),ATgetFirst(m));
+//			ATtablePut(params,ATgetFirst(l),ATgetFirst(m));
+			RWsetVariable(ATgetFirst(l),ATgetFirst(m));
 			params_l = ATinsert(params_l,(ATerm) gsMakeSubst(ATgetFirst(l),ATgetFirst(m)));
 		}
 	}
@@ -412,7 +411,7 @@ ATermList gsNextState(ATerm State, gsNextStateCallBack f)
 //		ATermList newstate = (ATermList) gsSubstValues(params_l,ATgetArgument(sum,4),true);
 		act = ATgetArgument(sum,2);
 		newstate = ATLgetArgument(sum,3);
-		l = FindSolutionsWithSubsts(ATLgetArgument(sum,0),ATgetArgument(sum,1),params,gsns_callback);
+		l = FindSolutions(ATLgetArgument(sum,0),ATgetArgument(sum,1),gsns_callback);
 		NextStateError |= FindSolutionsError;
 		for (; !ATisEmpty(l); l=ATgetNext(l))
 		{

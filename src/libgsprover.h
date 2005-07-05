@@ -8,11 +8,9 @@ extern bool FindSolutionsError;
 
 typedef void (*FindSolutionsCallBack)(ATermList);
 
-void gsProverInit(ATermAppl Spec);
+void gsProverInit(ATermAppl Spec, int RewriteStrategy);
 
 ATermList FindSolutions(ATermList Vars, ATerm Expr, FindSolutionsCallBack f);
-
-ATermList FindSolutionsWithSubsts(ATermList Vars, ATerm Expr, ATermTable Substs, FindSolutionsCallBack f);
 
 #ifdef __cplusplus
 }

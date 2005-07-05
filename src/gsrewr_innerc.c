@@ -196,16 +196,22 @@ ATerm to_rewrite_format_innerc(ATermAppl t)
 }
 
 ATermAppl from_rewrite_format_innerc(ATerm t)
-{ 
-  int n=ATgetArity(ATgetAFun(t));
-  if (n==1)
-  { ATerm t1=ATgetArgument(t,0);
-    if (ATisInt(t1)) 
-    { return fromInner(t1);
-    }
-  }
-  
-  return fromInner((ATerm)ATgetArguments((ATermAppl)t));
+{
+	if ( ATisInt(t) )
+	{
+		return int2term[ATgetInt((ATermInt) t)];
+	} else if ( gsIsDataVarId((ATermAppl) t) )
+	{
+		return t;
+	} else {
+		ATermList l = ATgetArguments((ATermAppl) t);
+		ATermAppl a = from_rewrite_format_innerc(ATgetFirst(l));
+		for (l=ATgetNext(l); !ATisEmpty(l); l=ATgetNext(l))
+		{
+			a = gsMakeDataAppl(a,from_rewrite_format_innerc(ATgetFirst(l)));
+		}
+		return a;
+	}
 }
 
 static char *whitespace_str = NULL;
@@ -244,8 +250,8 @@ static char *whitespace(int len)
   return whitespace_str;
 }
 
-char checkArg_prefix[] = "a";
-void checkArg(FILE *f, ATerm t, ATermList *n, int *d, int *ls, char *pref, int k)
+static char checkArg_prefix[] = "a";
+static void checkArg(FILE *f, ATerm t, ATermList *n, int *d, int *ls, char *pref, int k)
 {
   if ( ATisList(t) )
   {
@@ -297,7 +303,7 @@ void checkArg(FILE *f, ATerm t, ATermList *n, int *d, int *ls, char *pref, int k
   }
 }
 
-void calcTerm(FILE *f, ATerm t, int startarg)
+static void calcTerm(FILE *f, ATerm t, int startarg)
 {
   if ( ATisList(t) )
   {
@@ -427,7 +433,7 @@ void calcTerm(FILE *f, ATerm t, int startarg)
   }
 }
 
-ATerm add_args(ATerm a, int num)
+static ATerm add_args(ATerm a, int num)
 {
   if ( num == 0 )
   {
@@ -451,17 +457,17 @@ ATerm add_args(ATerm a, int num)
   }
 }
 
-int get_startarg(ATerm a)
+static int get_startarg(ATermList a, ATerm b)
 {
-  if ( ATisList(a) )
+  if ( ATisList(b) )
   {
-    return -ATgetLength(a)+1;
+    return ATgetLength(a)-ATgetLength(b)+1;
   } else {
-    return 0;
+    return ATgetLength(a);
   }
 }
 
-int getArity(ATermAppl op)
+static int getArity(ATermAppl op)
 {
   ATermAppl sort = ATAgetArgument(op,1);
   int arity = 0;
@@ -698,6 +704,7 @@ static void CompileRewriteSystem(void)
     fprintf(f, ")\n" 
       "{\n" );
     fprintf(f,
+//      "  ATprintf(\"%%t\\n\",a);\n"
       "  int arity = ATgetArity(ATgetAFun(a));\n"
       "  if ( arity == 1 )\n"
       "  {\n"
@@ -829,8 +836,20 @@ static void CompileRewriteSystem(void)
                   "{\n"
              );
 
+/*      fprintf(f,  "  ATfprintf(stderr,\"rewr_%i_%i(",j,a);
+      for (int i=0; i<a; i++)
+      {
+        fprintf(f,  (i==0)?"%%t":", %%t");
+      }
+      fprintf(f,  ")\\n\"");
+      for (int i=0; i<a; i++)
+      {
+        fprintf(f,  ", arg%i",i);
+      }
+      fprintf(f,  ");\n");*/
+ 
 // Implement every equation of the current operation
-      ATfprintf(stderr,"LIST %t\n",innerc_eqns[j]);
+//      ATfprintf(stderr,"LIST %t\n",innerc_eqns[j]);
       int b=false;
       
       for (l=innerc_eqns[j]; (!ATisEmpty(l) && !b); l=ATgetNext(l))
@@ -902,7 +921,7 @@ static void CompileRewriteSystem(void)
                 // Create result
                 //
   fprintf(f,  "    %sreturn ",whitespace(d*2));
-                calcTerm(f,add_args(ATelementAt(ATLgetFirst(l),3),a-a2),get_startarg(ATelementAt(ATLgetFirst(l),3)));
+                calcTerm(f,add_args(ATelementAt(ATLgetFirst(l),3),a-a2),get_startarg(ATLelementAt(ATLgetFirst(l),2),ATelementAt(ATLgetFirst(l),3)));
   fprintf(f,          ";\n");
 
                 //
@@ -991,6 +1010,16 @@ static void CompileRewriteSystem(void)
   for (j=0;j<num_opids;j++)
   { ATfprintf(f,  "  int2func[%i] = rewr_%i_nnf; // %t\n",j,j,int2term[j]);
   }
+  fprintf(f,  "\n");
+  for (int i=0;i<max_arity;i++)
+  {
+  fprintf(f,  "  int2func%i = (ftype%i *) malloc(%i*sizeof(ftype%i));\n",i,i,num_opids,i);
+  for (j=0;j<num_opids;j++)
+  { if ( i <= getArity(int2term[j]) )
+  { ATfprintf(f,  "  int2func%i[%i] = rewr_%i_%i;\n",i,j,j,i);
+  }
+  }
+  }
   fprintf(f,  "}\n"
       "\n"
       "ATermAppl rewrite(ATermAppl t)\n"
@@ -998,7 +1027,7 @@ static void CompileRewriteSystem(void)
 //      "ATfprintf(stderr,\"REWRITE: %%t\\n\",t);"
       "  if ( gsIsDataVarId(t) )\n"
       "  { // the ATerm t is a variable. Substitute\n"
-      "    ATermAppl r=RWapplySubstitution(t);\n"
+      "    ATermAppl r=(ATermAppl) RWapplySubstitution(t);\n"
       "    assert(r!=NULL);\n"
       "    return r;\n"
       "  }  \n"
@@ -1137,9 +1166,9 @@ ATermList RWrewritelist_innerc(ATermList l)
 
 ATermAppl RWrewrite_innerc(ATermAppl Term)
 {
-  ATfprintf(stderr,"IN: %t\n",Term);
+//  ATfprintf(stderr,"IN: %t\n",Term);
   ATermAppl r=so_rewr(Term);
-  ATfprintf(stderr,"OUT: %t\n\n",r);
+//  ATfprintf(stderr,"OUT: %t\n\n",r);
   return r;
 }
 

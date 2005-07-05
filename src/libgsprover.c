@@ -9,24 +9,24 @@ extern "C" {
 #include "libgsparse.h"
 #include "libgsrewrite.h"
 #include "libgsprover.h"
+#include "gssubstitute.h"
 
 bool FindSolutionsError;
 
 static ATermAppl current_spec;
 static ATerm gsProverTrue, gsProverFalse;
 
-static ATermTable subst_table = NULL;
 static int used_vars;
 
 #define MAX_VARS_INIT	1000
 #define MAX_VARS_FACTOR	5
 static int max_vars = MAX_VARS_INIT;
 
-void gsProverInit(ATermAppl Spec)
+void gsProverInit(ATermAppl Spec, int RewriteStrategy)
 {
 	current_spec = Spec;
 	ATprotectAppl(&current_spec);
-	gsRewriteInit(ATAgetArgument(Spec,3),GS_REWR_INNER3);
+	gsRewriteInit(ATAgetArgument(Spec,3),RewriteStrategy);
 	gsProverTrue = gsToRewriteFormat(gsMakeDataExprTrue());
 	ATprotectAppl(&gsProverTrue);
 	gsProverFalse = gsToRewriteFormat(gsMakeDataExprFalse());
@@ -61,8 +61,8 @@ static ATermList gsGetDomain(ATermAppl sort)
 static ATermList calcNext(ATermList l)
 {
 	ATermList a1,a2,m,r,s,d,na1;
-	ATermAppl a3,var,sort,t;
-	ATerm e;
+	ATermAppl var,sort,t;
+	ATerm e,a3;
 
 	a1 = ATLgetFirst(l);
 	l = ATgetNext(l);
@@ -97,10 +97,13 @@ static ATermList calcNext(ATermList l)
 				na1 = ATappend(na1,(ATerm) v);
 				t = gsMakeDataAppl(t,v);
 			}
-			s = ATmakeList1((ATerm) gsMakeSubst((ATerm) var, gsToRewriteFormat(t)));
-			e = gsRewriteInternalWithSubsts(gsSubstValues(s,(ATerm) a3,true),subst_table);
+			ATerm t_rf = gsToRewriteFormat(t);
+			RWsetVariable((ATerm) var,t_rf);
+			e = gsRewriteInternal(a3);
+			RWclearVariable((ATerm) var);
 			if ( !ATisEqual(e,gsProverFalse) )
 			{
+				s = ATmakeList1((ATerm) gsMakeSubst((ATerm) var, t_rf));
 				r = ATinsert(r,(ATerm) ATmakeList3((ATerm) na1,gsSubstValues(s,(ATerm) a2,true),(ATerm) e));
 			}
 		}
@@ -200,16 +203,16 @@ static ATermList EliminateVars(ATermList l)
 	l = ATgetNext(l);
 	t = ATAgetFirst(l);
 
-	t = gsRewriteTermWithSubsts(t,subst_table);
+	t = gsRewriteTerm(t);
 	while ( !ATisEmpty(vars) && FindEquality(t,vars,&v,&e) )
 	{
 		vars = ATremoveElement(vars,(ATerm) v);
 		vals = (ATermList) gsSubstValues(ATmakeList1((ATerm) gsMakeSubst((ATerm) v,(ATerm) e)),(ATerm) vals,true);
 		t = (ATermAppl) gsSubstValues(ATmakeList1((ATerm) gsMakeSubst((ATerm) v,(ATerm) e)),(ATerm) t,true);
-		t = gsRewriteTermWithSubsts(t,subst_table);
+		t = gsRewriteTerm(t);
 	}
 
-	return ATmakeList3((ATerm) vars, (ATerm) gsRewriteTermsWithSubsts(vals, subst_table), (ATerm) t);
+	return ATmakeList3((ATerm) vars, (ATerm) gsRewriteTerms(vals), (ATerm) t);
 }
 
 static ATermList makeSubsts(ATermList vars, ATermList exprs)
@@ -236,7 +239,7 @@ ATermList FindSolutions(ATermList Vars, ATerm Expr, FindSolutionsCallBack f)
 
 	if ( ATisEmpty(Vars) )
 	{
-		Expr = gsRewriteInternalWithSubsts(Expr,subst_table);
+		Expr = gsRewriteInternal(Expr);
 		if ( ATisEqual(Expr,gsProverTrue) )
 		{
 			if ( f == NULL )
@@ -259,7 +262,6 @@ ATermList FindSolutions(ATermList Vars, ATerm Expr, FindSolutionsCallBack f)
 
 	o = ATmakeList3((ATerm) Vars,(ATerm) Vars,(ATerm) Expr);
 //	o = EliminateVars(o);
-//	subst_table = NULL; // XXX substitutions should already be executed by EliminateVars
 	if ( ATisEmpty(ATLgetFirst(o)) )
 	{
 		o = ATgetNext(o);
@@ -328,14 +330,6 @@ ATermList FindSolutions(ATermList Vars, ATerm Expr, FindSolutionsCallBack f)
 	m = ATreverse(m);
 
 	return m;
-}
-
-ATermList FindSolutionsWithSubsts(ATermList Vars, ATerm Expr, ATermTable Substs, FindSolutionsCallBack f)
-{
-	subst_table = Substs;
-	ATermList l = FindSolutions(Vars,Expr,f);
-	subst_table = NULL;
-	return l;
 }
 
 #ifdef __cplusplus

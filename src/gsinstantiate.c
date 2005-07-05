@@ -14,6 +14,7 @@ extern "C" {
 #include "gsfunc.h"
 #include "libgsparse.h"
 #include "libgsnextstate.h"
+#include "libgsrewrite.h"
 
 static unsigned long num_states;
 static unsigned long trans;
@@ -96,6 +97,7 @@ void print_help(FILE *f)
 	          "-e, --deadlock-trace     Write trace to each deadlock state\n"
 		  "                         to a file\n"
 	          "-m, --monitor            Print status of generation\n"
+	          "    --rewriter name      Use rewriter 'name' (default inner3)\n"
 	       );
 }
 
@@ -104,7 +106,7 @@ int main(int argc, char **argv)
 	FILE *SpecStream;
 	ATerm stackbot;
 	ATermAppl Spec;
-	#define sopts "hyldem"
+	#define sopts "hyldemR"
 	struct option lopts[] = {
 		{ "help", 		no_argument,		NULL,	'h' },
 		{ "dummy", 		no_argument,		NULL,	'y' },
@@ -113,13 +115,15 @@ int main(int argc, char **argv)
 		{ "deadlock-detect", 	no_argument,		NULL,	'd' },
 		{ "deadlock-trace", 	no_argument,		NULL,	'e' },
 		{ "monitor", 		no_argument,		NULL,	'm' },
+		{ "rewriter", 		required_argument,	NULL,	'R' },
 		{ 0, 0, 0, 0 }
 	};
-	int opt;
+	int opt, strat;
 	bool usedummies,trace_deadlock,explore;
 
 	ATinit(argc,argv,&stackbot);
 
+	strat = GS_REWR_INNER3;
 	usedummies = false;
 	max_states = 0;
 	trace = false;
@@ -163,6 +167,27 @@ int main(int argc, char **argv)
 			case 'm':
 				monitor = true;
 				break;
+			case 'R':
+				if ( !strcmp(optarg,"inner") )
+				{
+					strat = GS_REWR_INNER;
+				} else if ( !strcmp(optarg,"inner2") )
+				{
+					strat = GS_REWR_INNER2;
+				} else if ( !strcmp(optarg,"inner3") )
+				{
+					strat = GS_REWR_INNER3;
+				} else if ( !strcmp(optarg,"innerc") )
+				{
+					strat = GS_REWR_INNERC;
+				} else if ( !strcmp(optarg,"innerc2") )
+				{
+					strat = GS_REWR_INNERC2;
+				} else if ( !strcmp(optarg,"jitty") )
+				{
+					strat = GS_REWR_JITTY;
+				}
+				break;
 			default:
 				break;
 		}
@@ -203,7 +228,7 @@ int main(int argc, char **argv)
 	
 	fprintf(aut,"des (0,0,0)                   \n");
 
-	ATerm state = gsNextStateInit(Spec,!usedummies);
+	ATerm state = gsNextStateInit(Spec,!usedummies,strat);
 
 	ATbool new_state;
 	current_state = ATindexedSetPut(states,SetDCs(state),&new_state);

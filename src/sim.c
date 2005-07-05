@@ -14,6 +14,7 @@ extern "C" {
 #include "gsfunc.h"
 #include "libgsparse.h"
 #include "libgsnextstate.h"
+#include "libgsrewrite.h"
 
 static void gsPrintState(ATerm state)
 {
@@ -81,7 +82,7 @@ int main(int argc, char **argv)
 		return 1;
 	}
 
-	state = gsNextStateInit(Spec,!usedummy);
+	state = gsNextStateInit(Spec,!usedummy,GS_REWR_INNER3);
 
 	ATprintf("initial state: [ ");
 	gsPrintState(state);
