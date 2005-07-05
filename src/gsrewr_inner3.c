@@ -576,8 +576,17 @@ static ATerm rewrite(ATerm Term)
 		} else {
 			// XXX is Term in subst_table!!! XXX
 			if ( (ATgetType(ATgetFirst((ATermList) Term)) == AT_APPL) && gsIsDataVarId(ATAgetFirst((ATermList) Term)) ) 
-				printf("EERRRRRROORRRR!!!\n\n\n\n");
-			Term = (ATerm) ATinsert(l,ATgetFirst((ATermList) Term));
+			{
+				ATerm a = RWapplySubstitution(ATgetFirst((ATermList) Term));
+				if ( ATisList(a) )
+				{
+					Term = (ATerm) ATconcat((ATermList) a,l);
+				} else {
+					Term = (ATerm) ATinsert(l,ATgetFirst((ATermList) Term));
+				}
+			} else {
+				Term = (ATerm) ATinsert(l,ATgetFirst((ATermList) Term));
+			}
 		}
 
 		return Term;
