@@ -532,10 +532,10 @@ static void CompileRewriteSystem(void)
   }
 
   int2term = (ATermAppl *) malloc(num_opids*sizeof(ATermAppl));
-//  memset(int2term,0,num_opids*sizeof(ATermAppl));
+  memset(int2term,0,num_opids*sizeof(ATermAppl));
   ATprotectArray((ATerm *) int2term,num_opids);
   innerc_eqns = (ATermList *) malloc(num_opids*sizeof(ATermList));
-//  memset(innerc_eqns,0,num_opids*sizeof(ATermAppl));
+  memset(innerc_eqns,0,num_opids*sizeof(ATermAppl));
   ATprotectArray((ATerm *) innerc_eqns,num_opids);
 
   l = ATtableKeys(term2int);
@@ -562,6 +562,11 @@ static void CompileRewriteSystem(void)
   t = (char *) malloc(100+strlen(INNERC_LDFLAGS)+strlen(INNERC_CFLAGS)+strlen(INNERC_CPPFLAGS));
   sprintf(t,"%s.c",s);
   f = fopen(t,"w");
+  if ( f == NULL )
+  {
+	  perror("fopen");
+	  exit(1);
+  }
 
   //
   //  Print includes
@@ -570,9 +575,11 @@ static void CompileRewriteSystem(void)
       "#include <string.h>\n"
       "#include \"aterm2.h\"\n"
       "#include \"assert.h\"\n"
-      "#include \"gsfunc.h\"\n"
-      "#include \"gslowlevel.h\"\n"
-      "#include \"gssubstitute.h\"\n"
+//      "#include \"gsfunc.h\"\n"
+//      "#include \"gslowlevel.h\"\n"
+//      "#include \"gssubstitute.h\"\n"
+      "extern ATerm RWapplySubstitution(ATerm v);\n"
+      "extern ATerm ATprotectAppl(ATermAppl *a);\n"
       "\n"
       "ATermAppl rewrite(ATermAppl);\n"
       "\n"
@@ -1025,7 +1032,7 @@ static void CompileRewriteSystem(void)
       "ATermAppl rewrite(ATermAppl t)\n"
       "{\n"
 //      "ATfprintf(stderr,\"REWRITE: %%t\\n\",t);"
-      "  if ( gsIsDataVarId(t) )\n"
+      "  if ( !isAppl(t) )\n"
       "  { // the ATerm t is a variable. Substitute\n"
       "    ATermAppl r=(ATermAppl) RWapplySubstitution((ATerm) t);\n"
       "    assert(r!=NULL);\n"
@@ -1048,13 +1055,13 @@ static void CompileRewriteSystem(void)
   sprintf(t,"gcc -c %s %s -g %s.c",INNERC_CPPFLAGS,INNERC_CFLAGS,s);
   ATfprintf(stderr,"%s\n",t);
   system(t);
-  sprintf(t,"gcc %s -bundle -undefined dynamic_lookup -g -o %s.so %s.o",INNERC_LDFLAGS,s,s);
+  sprintf(t,"gcc -bundle -undefined dynamic_lookup -g -o %s.so %s.o",s,s);
   ATfprintf(stderr,"%s\n",t);
   system(t);
 #else
   sprintf(t,"gcc -c %s %s -Wno-unused -O3 -rdynamic %s.c",INNERC_CPPFLAGS,INNERC_CFLAGS,s);
   system(t);
-  sprintf(t,"gcc %s -Wno-unused -shared -o %s.so %s.o",INNERC_LDFLAGS,s,s);
+  sprintf(t,"gcc -shared -o %s.so %s.o",s,s);
   system(t);
 #endif
   fprintf(stderr,"done.\n");
