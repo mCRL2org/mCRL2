@@ -16,8 +16,12 @@ extern "C" {
 #include "gsrewr_inner2.h"
 #include "gsrewr_inner3.h"
 #include "gsrewr_innerc.h"
-//#include "gsrewr_innerc2.h"
 #include "gsrewr_jitty.h"
+
+//#define RWR_C2
+#ifdef RWR_C2
+#include "gsrewr_innerc2.h"
+#endif
 
 static int strategy;
 
@@ -57,11 +61,13 @@ void gsRewriteInit(ATermAppl Eqns, int strat)
 		case GS_REWR_INNER2:
 			rewrite_init_inner2();
 			break;
+		case GS_REWR_INNERC2:
+#ifdef RWR_C2
+			RWrewrite_init_innerc2();
+			break;
+#endif
 		case GS_REWR_INNERC:
 			RWrewrite_init_innerc();
-			break;
-		case GS_REWR_INNERC2:
-//			RWrewrite_init_innerc2();
 			break;
 		case GS_REWR_JITTY:
 			rewrite_init_jitty();
@@ -90,11 +96,13 @@ void gsRewriteAddEqn(ATermAppl Eqn)
 		case GS_REWR_INNER2:
 			rewrite_add_inner2(Eqn);
 			break;
+		case GS_REWR_INNERC2:
+#ifdef RWR_C2
+			RWrewrite_add_innerc2(Eqn);
+			break;
+#endif
 		case GS_REWR_INNERC:
 			RWrewrite_add_innerc(Eqn);
-			break;
-		case GS_REWR_INNERC2:
-//			RWrewrite_add_innerc2(Eqn);
 			break;
 		case GS_REWR_JITTY:
 			rewrite_add_jitty(Eqn);
@@ -141,11 +149,13 @@ void gsRewriteRemoveEqn(ATermAppl Eqn)
 		case GS_REWR_INNER2:
 			rewrite_remove_inner2(Eqn);
 			break;
+		case GS_REWR_INNERC2:
+#ifdef RWR_C2
+			RWrewrite_remove_innerc2(Eqn);
+			break;
+#endif
 		case GS_REWR_INNERC:
 			RWrewrite_remove_innerc(Eqn);
-			break;
-		case GS_REWR_INNERC2:
-//			RWrewrite_remove_innerc2(Eqn);
 			break;
 		case GS_REWR_JITTY:
 			rewrite_remove_jitty(Eqn);
@@ -167,10 +177,12 @@ ATermAppl gsRewriteTerm(ATermAppl Term)
 			return (ATermAppl) rewrite_inner((ATerm) Term,&b);
 		case GS_REWR_INNER2:
 			return (ATermAppl) rewrite_inner2((ATerm) Term,&b);
+		case GS_REWR_INNERC2:
+#ifdef RWR_C2
+			return from_rewrite_format_innerc2((ATerm) RWrewrite_innerc2((ATermAppl) to_rewrite_format_innerc2(Term)));
+#endif
 		case GS_REWR_INNERC:
 			return from_rewrite_format_innerc((ATerm) RWrewrite_innerc((ATermAppl) to_rewrite_format_innerc(Term)));
-		case GS_REWR_INNERC2:
-//			return from_rewrite_format_innerc2(RWrewrite_innerc2((ATermAppl) to_rewrite_format_innerc2(Term)));
 		case GS_REWR_JITTY:
 			return (ATermAppl) rewrite_jitty((ATerm) Term,&b);
 		case GS_REWR_INNER3:
@@ -198,10 +210,12 @@ ATerm gsToRewriteFormat(ATermAppl Term)
 		case GS_REWR_INNER2:
 		case GS_REWR_JITTY:
 			return (ATerm) Term;
+		case GS_REWR_INNERC2:
+#ifdef RWR_C2
+			return to_rewrite_format_innerc2(Term);
+#endif
 		case GS_REWR_INNERC:
 			return to_rewrite_format_innerc(Term);
-		case GS_REWR_INNERC2:
-//			return to_rewrite_format_innerc2(Term);
 		case GS_REWR_INNER3:
 		default:
 			return to_rewrite_format_inner3(Term);
@@ -216,10 +230,12 @@ ATermAppl gsFromRewriteFormat(ATerm Term)
 		case GS_REWR_INNER2:
 		case GS_REWR_JITTY:
 			return (ATermAppl) Term;
+		case GS_REWR_INNERC2:
+#ifdef RWR_C2
+			return from_rewrite_format_innerc2(Term);
+#endif
 		case GS_REWR_INNERC:
 			return from_rewrite_format_innerc(Term);
-		case GS_REWR_INNERC2:
-//			return from_rewrite_format_innerc2(Term);
 		case GS_REWR_INNER3:
 		default:
 			return from_rewrite_format_inner3(Term);
@@ -236,10 +252,12 @@ ATerm gsRewriteInternal(ATerm Term)
 			return rewrite_inner(Term,&b);
 		case GS_REWR_INNER2:
 			return rewrite_inner2(Term,&b);
+		case GS_REWR_INNERC2:
+#ifdef RWR_C2
+			return (ATerm) RWrewrite_innerc2((ATermAppl)Term);
+#endif
 		case GS_REWR_INNERC:
 			return (ATerm) RWrewrite_innerc((ATermAppl) Term);
-		case GS_REWR_INNERC2:
-//			return (ATerm)RWrewrite_innerc2((ATermAppl)Term);
 		case GS_REWR_JITTY:
 			return rewrite_jitty(Term,&b);
 		case GS_REWR_INNER3:

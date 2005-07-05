@@ -202,7 +202,7 @@ ATermAppl from_rewrite_format_innerc(ATerm t)
 		return int2term[ATgetInt((ATermInt) t)];
 	} else if ( gsIsDataVarId((ATermAppl) t) )
 	{
-		return t;
+		return (ATermAppl) t;
 	} else {
 		ATermList l = ATgetArguments((ATermAppl) t);
 		ATermAppl a = from_rewrite_format_innerc(ATgetFirst(l));
@@ -1027,7 +1027,7 @@ static void CompileRewriteSystem(void)
 //      "ATfprintf(stderr,\"REWRITE: %%t\\n\",t);"
       "  if ( gsIsDataVarId(t) )\n"
       "  { // the ATerm t is a variable. Substitute\n"
-      "    ATermAppl r=(ATermAppl) RWapplySubstitution(t);\n"
+      "    ATermAppl r=(ATermAppl) RWapplySubstitution((ATerm) t);\n"
       "    assert(r!=NULL);\n"
       "    return r;\n"
       "  }  \n"

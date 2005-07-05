@@ -594,7 +594,7 @@ static ATerm rewrite(ATerm Term)
 	{
 		return rewrite_func((ATermInt) Term, ATmakeList0());
 	} else {
-		return (ATerm) RWapplySubstitution((ATermAppl) Term);
+		return RWapplySubstitution(Term);
 	}
 }
 

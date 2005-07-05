@@ -281,7 +281,7 @@ bool gsOccurs(ATerm Elt, ATerm Term)
       for (int i = 0; i < NrArgs && !Result; i++) {
         Result = gsOccurs(Elt, ATgetArgument((ATermAppl) Term, i));
       }
-    } else { //ATgetType(Term) == AT_LIST
+    } else if (ATgetType(Term) == AT_LIST) {
       while (!ATisEmpty((ATermList) Term) && !Result)
       {
         Result = gsOccurs(Elt, ATgetFirst((ATermList) Term));

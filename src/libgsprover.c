@@ -11,6 +11,10 @@ extern "C" {
 #include "libgsprover.h"
 #include "gssubstitute.h"
 
+#define ATisList(x) (ATgetType(x) == AT_LIST)
+#define ATisAppl(x) (ATgetType(x) == AT_APPL)
+#define ATisInt(x) (ATgetType(x) == AT_INT)
+
 bool FindSolutionsError;
 
 static ATermAppl current_spec;
@@ -22,6 +26,11 @@ static int used_vars;
 #define MAX_VARS_FACTOR	5
 static int max_vars = MAX_VARS_INIT;
 
+static bool (*FindEquality)(ATerm,ATermList,ATerm*,ATerm*);
+static bool FindInner3Equality(ATerm t, ATermList vars, ATerm *v, ATerm *e);
+static bool FindInnerCEquality(ATerm t, ATermList vars, ATerm *v, ATerm *e);
+static ATerm opidAnd,eqstr;
+
 void gsProverInit(ATermAppl Spec, int RewriteStrategy)
 {
 	current_spec = Spec;
@@ -31,6 +40,21 @@ void gsProverInit(ATermAppl Spec, int RewriteStrategy)
 	ATprotectAppl(&gsProverTrue);
 	gsProverFalse = gsToRewriteFormat(gsMakeDataExprFalse());
 	ATprotectAppl(&gsProverFalse);
+
+	if ( RewriteStrategy == GS_REWR_INNER3 )
+	{
+		FindEquality = FindInner3Equality;
+		opidAnd = gsToRewriteFormat(gsMakeOpIdAnd());
+		ATprotect(&opidAnd);
+		eqstr = (ATerm) gsString2ATermAppl("==");
+		ATprotect(&eqstr);
+	} else {
+		FindEquality = FindInnerCEquality;
+		opidAnd = ATgetArgument((ATermAppl) gsToRewriteFormat(gsMakeOpIdAnd()),0);
+		ATprotect(&opidAnd);
+		eqstr = (ATerm) gsString2ATermAppl("==");
+		ATprotect(&eqstr);
+	}
 }
 
 static ATermAppl gsGetResult(ATermAppl sort)
@@ -113,73 +137,54 @@ static ATermList calcNext(ATermList l)
 	return r;
 }
 
-static bool gsIsDataExprAnd(ATermAppl a, ATermAppl *a1, ATermAppl *a2)
+static bool IsInner3Eq(ATerm a)
 {
-	if ( gsIsDataAppl(a) )
+	if ( ATisInt(a) )
 	{
-		ATermAppl h = ATAgetArgument(a,0);
-		if ( gsIsDataAppl(h) )
-		{
-			ATermAppl o = ATAgetArgument(h,0);
-			if ( gsIsOpId(o) )
-			{
-				*a1 = ATAgetArgument(h,1);
-				*a2 = ATAgetArgument(a,1);
-				return ATisEqual(o,gsMakeOpIdAnd());
-			}
-		}
+		a = (ATerm) gsFromRewriteFormat(a);
 	}
 
-	return false;
-}
-
-static bool gsIsDataExprEq(ATermAppl a, ATermAppl *a1, ATermAppl *a2)
-{
-	if ( gsIsDataAppl(a) )
+	if ( ATisEqual(ATgetArgument((ATermAppl) a,0),eqstr) )
 	{
-		ATermAppl h = ATAgetArgument(a,0);
-		if ( gsIsDataAppl(h) )
-		{
-			ATermAppl o = ATAgetArgument(h,0);
-			if ( gsIsOpId(o) )
-			{
-				*a1 = ATAgetArgument(h,1);
-				*a2 = ATAgetArgument(a,1);
-				return ATisEqual(o,gsMakeOpIdEq(gsGetSort(*a1)));
-			}
-		}
+		return true;
+	} else {
+		return false;
 	}
-
-	return false;
 }
 
-static bool FindEquality(ATermAppl t, ATermList vars, ATermAppl *v, ATermAppl *e)
+static bool FindInner3Equality(ATerm t, ATermList vars, ATerm *v, ATerm *e)
 {
 	ATermList s;
-	ATermAppl a;
+	ATerm a;
 
-	s = ATmakeList1((ATerm) t);
+	s = ATmakeList1(t);
 	while ( !ATisEmpty(s) )
 	{
-		ATermAppl a1,a2;
+		ATerm a1,a2;
 
-		a = ATAgetFirst(s);
+		a = ATgetFirst(s);
 		s = ATgetNext(s);
 
-		if ( gsIsDataExprAnd(a,&a1,&a2) )
+		if ( !ATisList(a) )
 		{
-			s = ATinsert(s,(ATerm) a2);
-			s = ATinsert(s,(ATerm) a1);
-		} else if ( gsIsDataExprEq(a,&a1,&a2) ) {
+			continue;
+		}
+
+		if ( ATisEqual(ATgetFirst((ATermList) a),opidAnd) )
+		{
+			s = ATconcat(s,ATgetNext((ATermList) a));
+		} else if ( IsInner3Eq(ATgetFirst((ATermList) a)) ) {
+			a1 = ATgetFirst(ATgetNext((ATermList) a));
+			a2 = ATgetFirst(ATgetNext(ATgetNext((ATermList) a)));
 			if ( !ATisEqual(a1,a2) )
 			{
-				if ( gsIsDataVarId(a1) && (ATindexOf(vars,(ATerm) a1,0) >= 0) && !gsOccurs((ATerm) a1,(ATerm) a2) )
+				if ( ATisAppl(a1) && gsIsDataVarId((ATermAppl) a1) && (ATindexOf(vars, a1,0) >= 0) && !gsOccurs(a1,a2) )
 				{
 					*v = a1;
 					*e = a2;
 					return true;
 				}
-				if ( gsIsDataVarId(a2) && (ATindexOf(vars,(ATerm) a2,0) >= 0) && !gsOccurs((ATerm) a2,(ATerm) a1) )
+				if ( ATisAppl(a2) && gsIsDataVarId((ATermAppl) a2) && (ATindexOf(vars, a2,0) >= 0) && !gsOccurs(a2,a1) )
 				{
 					*v = a2;
 					*e = a1;
@@ -192,27 +197,99 @@ static bool FindEquality(ATermAppl t, ATermList vars, ATermAppl *v, ATermAppl *e
 	return false;
 }
 
-static ATermList EliminateVars(ATermList l)
+static bool IsInnerCEq(ATermAppl a)
 {
-	ATermList vars,vals;
-	ATermAppl t, v, e;
+	a = gsFromRewriteFormat((ATerm) a);
+	a = (ATermAppl) ATgetArgument(a,0);
+	a = (ATermAppl) ATgetArgument(a,0);
 
-	vars = ATLgetFirst(l);
-	l = ATgetNext(l);
-	vals = ATLgetFirst(l);
-	l = ATgetNext(l);
-	t = ATAgetFirst(l);
-
-	t = gsRewriteTerm(t);
-	while ( !ATisEmpty(vars) && FindEquality(t,vars,&v,&e) )
+	if ( ATisEqual(ATgetArgument(a,0),eqstr) )
 	{
-		vars = ATremoveElement(vars,(ATerm) v);
-		vals = (ATermList) gsSubstValues(ATmakeList1((ATerm) gsMakeSubst((ATerm) v,(ATerm) e)),(ATerm) vals,true);
-		t = (ATermAppl) gsSubstValues(ATmakeList1((ATerm) gsMakeSubst((ATerm) v,(ATerm) e)),(ATerm) t,true);
-		t = gsRewriteTerm(t);
+		return true;
+	} else {
+		return false;
+	}
+}
+
+static bool FindInnerCEquality(ATerm t, ATermList vars, ATerm *v, ATerm *e)
+{
+	ATermList s;
+	ATermAppl a;
+
+	s = ATmakeList1((ATerm) t);
+	while ( !ATisEmpty(s) )
+	{
+		ATermAppl a1,a2;
+
+		a = (ATermAppl) ATgetFirst(s);
+		s = ATgetNext(s);
+
+		if ( gsIsDataVarId(a) || (ATgetArity(ATgetAFun(a)) != 3) )
+		{
+			continue;
+		}
+
+		if ( ATisEqual(ATgetArgument(a,0),opidAnd) )
+		{
+			s = ATinsert(s,ATgetArgument(a,2));
+			s = ATinsert(s,ATgetArgument(a,1));
+		} else if ( IsInnerCEq(a) ) {
+			a1 = (ATermAppl) ATgetArgument(a,1);
+			a2 = (ATermAppl) ATgetArgument(a,2);
+			if ( !ATisEqual(a1,a2) )
+			{
+				if ( gsIsDataVarId(a1) && (ATindexOf(vars,(ATerm) a1,0) >= 0) && !gsOccurs((ATerm) a1,(ATerm) a2) )
+				{
+					*v = (ATerm) a1;
+					*e = (ATerm) a2;
+					return true;
+				}
+				if ( gsIsDataVarId(a2) && (ATindexOf(vars,(ATerm) a2,0) >= 0) && !gsOccurs((ATerm) a2,(ATerm) a1) )
+				{
+					*v = (ATerm) a2;
+					*e = (ATerm) a1;
+					return true;
+				}
+			}
+		}
 	}
 
-	return ATmakeList3((ATerm) vars, (ATerm) gsRewriteTerms(vals), (ATerm) t);
+	return false;
+}
+
+static ATermList EliminateVars(ATermList l)
+{
+	ATermList vars,vals,removed_vars,m;
+	ATerm t, v, e;
+
+	vars = ATLgetFirst(l);
+	m = ATgetNext(l);
+	vals = ATLgetFirst(m);
+	m = ATgetNext(m);
+	t = ATgetFirst(m);
+
+//	t = gsRewriteInternal(t);
+	removed_vars = ATmakeList0();
+	while ( !ATisEmpty(vars) && FindEquality(t,vars,&v,&e) )
+	{
+		vars = ATremoveElement(vars, v);
+		RWsetVariable(v,e);
+		removed_vars = ATinsert(removed_vars,v);
+//		vals = (ATermList) gsSubstValues(ATmakeList1((ATerm) gsMakeSubst(v,e)),(ATerm) vals,true);
+//		t = gsSubstValues(ATmakeList1((ATerm) gsMakeSubst(v,e)),t,true);
+		t = gsRewriteInternal(t);
+	}
+
+	if ( ATisEmpty(removed_vars) )
+	{
+		return l;
+	}
+	l = ATmakeList3((ATerm) vars, (ATerm) gsRewriteInternals(vals), (ATerm) t);
+	for (; !ATisEmpty(removed_vars); removed_vars=ATgetNext(removed_vars))
+	{
+		RWclearVariable(ATgetFirst(removed_vars));
+	}
+	return l;
 }
 
 static ATermList makeSubsts(ATermList vars, ATermList exprs)
@@ -260,8 +337,9 @@ ATermList FindSolutions(ATermList Vars, ATerm Expr, FindSolutionsCallBack f)
 		}
 	}
 
-	o = ATmakeList3((ATerm) Vars,(ATerm) Vars,(ATerm) Expr);
-//	o = EliminateVars(o);
+//	o = ATmakeList3((ATerm) Vars,(ATerm) Vars,(ATerm) Expr);
+	o = ATmakeList3((ATerm) Vars,(ATerm) Vars,gsRewriteInternal((ATerm) Expr));
+	o = EliminateVars(o);
 	if ( ATisEmpty(ATLgetFirst(o)) )
 	{
 		o = ATgetNext(o);
@@ -301,7 +379,6 @@ ATermList FindSolutions(ATermList Vars, ATerm Expr, FindSolutionsCallBack f)
 			for (; !ATisEmpty(n); n=ATgetNext(n))
 			{
 				o = ATLgetFirst(n);
-//				o = EliminateVars(o);
 				if ( ATisEmpty(ATLgetFirst(o)) )
 				{
 					o = ATgetNext(o);
@@ -322,6 +399,7 @@ ATermList FindSolutions(ATermList Vars, ATerm Expr, FindSolutionsCallBack f)
 						}
 					}
 				} else {
+					o = EliminateVars(o);
 					l = ATinsert(l,(ATerm) o);
 				}
 			}
