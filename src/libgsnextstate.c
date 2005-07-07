@@ -302,6 +302,23 @@ ATerm gsNextStateInit(ATermAppl Spec, bool AllowFreeVars, int RewriteStrategy)
 
 static ATerm makeNewState(ATerm old, ATermList vars, ATermList assigns, ATermList substs)
 {
+	if ( ATisEmpty(old) )
+	{
+		return old;
+	}
+
+	for (ATermList l=assigns; !ATisEmpty(l); l=ATgetNext(l))
+	{
+		if ( ATisEqual(ATgetArgument(ATAgetFirst(l),0),ATgetFirst(vars)) )
+		{
+			return (ATerm) ATinsert(makeNewState(ATgetNext((ATermList) old),ATgetNext(vars),assigns,substs),(ATerm) gsRewriteInternal(SetVars(ATgetArgument(ATAgetFirst(l),1))));
+		}
+	}
+	return (ATerm) ATinsert(makeNewState(ATgetNext((ATermList) old),ATgetNext(vars),assigns,substs),ATgetFirst((ATermList) old));
+}
+
+/*static ATerm makeNewState(ATerm old, ATermList vars, ATermList assigns, ATermList substs)
+{
 	ATermList nnew,l;
 	bool set;
 
@@ -329,7 +346,7 @@ static ATerm makeNewState(ATerm old, ATermList vars, ATermList assigns, ATermLis
 	nnew = ATreverse(nnew);
 
 	return (ATerm) nnew;
-}
+}*/
 
 ATermAppl rewrActionArgs(ATermAppl act)
 {
