@@ -1769,7 +1769,7 @@ static ATermAppl gstcTraverseVarConsTypeDN(int nFactPars, ATermTable Vars, ATerm
       }
 
       if(ATisEqual(gsMakeOpIdNameCons(),ATAgetArgument(*DataTerm,0))){
-	gsDebugMsg("Doing List insertion matching Type %t, PosType %t\n",Type,PosType);    
+	gsDebugMsg("Doing |> matching Type %t, PosType %t\n",Type,PosType);    
 	ATermAppl NewType=gstcMatchListOpCons(Type);
 	if(!NewType){
 	  gsErrorMsg("The function |> has incompartible argument types %t (while typechecking %t)\n",Type,*DataTerm);
@@ -1779,7 +1779,7 @@ static ATermAppl gstcTraverseVarConsTypeDN(int nFactPars, ATermTable Vars, ATerm
       }
 
       if(ATisEqual(gsMakeOpIdNameSnoc(),ATAgetArgument(*DataTerm,0))){
-	gsDebugMsg("Doing List insertion matching Type %t, PosType %t\n",Type,PosType);    
+	gsDebugMsg("Doing <| matching Type %t, PosType %t\n",Type,PosType);    
 	ATermAppl NewType=gstcMatchListOpSnoc(Type);
 	if(!NewType){
 	  gsErrorMsg("The function <| has incompartible argument types %t (while typechecking %t)\n",Type,*DataTerm);
@@ -1789,20 +1789,20 @@ static ATermAppl gstcTraverseVarConsTypeDN(int nFactPars, ATermTable Vars, ATerm
       }
 
       if(ATisEqual(gsMakeOpIdNameConcat(),ATAgetArgument(*DataTerm,0))){
-	gsDebugMsg("Doing List insertion matching Type %t, PosType %t\n",Type,PosType);    
+	gsDebugMsg("Doing |> matching Type %t, PosType %t\n",Type,PosType);    
 	ATermAppl NewType=gstcMatchListOpConcat(Type);
 	if(!NewType){
-	  gsErrorMsg("The function <| has incompartible argument types %t (while typechecking %t)\n",Type,*DataTerm);
+	  gsErrorMsg("The function |> has incompartible argument types %t (while typechecking %t)\n",Type,*DataTerm);
 	  return NULL;
 	}
 	Type=NewType;
       }
 
       if(ATisEqual(gsMakeOpIdNameEltAt(),ATAgetArgument(*DataTerm,0))){
-	gsDebugMsg("Doing List insertion matching Type %t, PosType %t\n",Type,PosType);    
+	gsDebugMsg("Doing @ matching Type %t, PosType %t\n",Type,PosType);    
 	ATermAppl NewType=gstcMatchListOpEltAt(Type);
 	if(!NewType){
-	  gsErrorMsg("The function <| has incompartible argument types %t (while typechecking %t)\n",Type,*DataTerm);
+	  gsErrorMsg("The function @ has incompartible argument types %t (while typechecking %t)\n",Type,*DataTerm);
 	  return NULL;
 	}
 	Type=NewType;
@@ -1810,10 +1810,10 @@ static ATermAppl gstcTraverseVarConsTypeDN(int nFactPars, ATermTable Vars, ATerm
       
       if(ATisEqual(gsMakeOpIdNameLHead(),ATAgetArgument(*DataTerm,0))||
 	 ATisEqual(gsMakeOpIdNameRHead(),ATAgetArgument(*DataTerm,0))){
-	gsDebugMsg("Doing List insertion matching Type %t, PosType %t\n",Type,PosType);    
+	gsDebugMsg("Doing {R,L}head matching Type %t, PosType %t\n",Type,PosType);    
 	ATermAppl NewType=gstcMatchListOpHead(Type);
 	if(!NewType){
-	  gsErrorMsg("The function <| has incompartible argument types %t (while typechecking %t)\n",Type,*DataTerm);
+	  gsErrorMsg("The function {R,L}head has incompartible argument types %t (while typechecking %t)\n",Type,*DataTerm);
 	  return NULL;
 	}
 	Type=NewType;
@@ -1821,10 +1821,10 @@ static ATermAppl gstcTraverseVarConsTypeDN(int nFactPars, ATermTable Vars, ATerm
 
       if(ATisEqual(gsMakeOpIdNameLTail(),ATAgetArgument(*DataTerm,0))||
 	 ATisEqual(gsMakeOpIdNameRTail(),ATAgetArgument(*DataTerm,0))){
-	gsDebugMsg("Doing List insertion matching Type %t, PosType %t\n",Type,PosType);    
+	gsDebugMsg("Doing {R,L}tail matching Type %t, PosType %t\n",Type,PosType);    
 	ATermAppl NewType=gstcMatchListOpTail(Type);
 	if(!NewType){
-	  gsErrorMsg("The function <| has incompartible argument types %t (while typechecking %t)\n",Type,*DataTerm);
+	  gsErrorMsg("The function {R,L}tail has incompartible argument types %t (while typechecking %t)\n",Type,*DataTerm);
 	  return NULL;
 	}
 	Type=NewType;
@@ -1994,7 +1994,10 @@ static ATermAppl gstcTypeMatchA(ATermAppl Type, ATermAppl PosType){
   if(gstcIsNotInferred(PosType)){
     for(ATermList PosTypeList=ATLgetArgument(PosType,0);!ATisEmpty(PosTypeList);PosTypeList=ATgetNext(PosTypeList)){
       ATermAppl NewPosType=ATAgetFirst(PosTypeList);
-      if((NewPosType=gstcTypeMatchA(Type,NewPosType))) return NewPosType;
+      if((NewPosType=gstcTypeMatchA(Type,NewPosType))){
+	gsDebugMsg("Match gstcTypeMatchA Type: %t;    PosType: %t New Type: %t\n",Type,PosType);
+	return NewPosType;
+      }
     }
     gsDebugMsg("No match gstcTypeMatchA Type: %t;    PosType: %t \n",Type,PosType);
     return NULL;
@@ -2305,6 +2308,9 @@ static ATermAppl gstcUnifyMinType(ATermAppl Type1, ATermAppl Type2){
   //Find the minimal type that Unifies the 2. If not possible, return NULL.
   ATermAppl Res=gstcTypeMatchA(Type1,gstcExpandPosTypes(Type2));
   if(!Res) Res=gstcTypeMatchA(Type2,gstcExpandPosTypes(Type1));
+  if(!Res) return NULL;
+  if(gstcIsNotInferred(Res)) Res=ATAgetFirst(ATLgetArgument(Res,0));
+  gsDebugMsg("gstcUnifyMinType: Type1 %t; Type2 %t; Res: %t\n",Type1,Type2,Res);    
   return Res;
 }
 
@@ -2347,6 +2353,8 @@ static ATermAppl gstcMatchEqNeq(ATermAppl Type){
 static ATermAppl gstcMatchListOpCons(ATermAppl Type){
   //tries to sort out the types of Cons operations (SxList(S)->List(S))
   //If some of the parameters are Pos,Nat, or Int do upcasting.
+
+  gsDebugMsg("gstcMatchListOpCons: Type %t \n",Type);    
 
   assert(gsIsSortArrowProd(Type));
   ATermAppl Res=ATAgetArgument(Type,1);
