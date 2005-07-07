@@ -2015,13 +2015,13 @@ static ATermAppl gstcTypeMatchA(ATermAppl Type, ATermAppl PosType){
 
   if(gsIsSortSet(Type)){
     if(!gsIsSortSet(PosType)) return NULL;
-    else return gsMakeSortBag(gstcTypeMatchA(ATAgetArgument(Type,0),ATAgetArgument(PosType,0)));
+    else return gsMakeSortSet(gstcTypeMatchA(ATAgetArgument(Type,0),ATAgetArgument(PosType,0)));
   }
 
   if(gsIsSortBag(Type)){
     if(!gsIsSortBag(PosType)) return NULL;
     else return gsMakeSortBag(gstcTypeMatchA(ATAgetArgument(Type,0),ATAgetArgument(PosType,0)));
-  }
+  };
 
   if(gsIsSortArrowProd(Type)){
     if(!gsIsSortArrowProd(PosType)) return NULL;

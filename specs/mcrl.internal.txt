@@ -1,79 +1,134 @@
-// Date: 24-06-2004
-// This document describes the internal format of the MuCRL language similar
-// to mCRL2 language. Here:
-// - <String> represents an arbitrary string
+// Date: 04-07-2005
+// This document describes the internal format of the mcrl language as close as 
+// possible to the corresponding mCRL2 format. Here:
+// - three phases of implementation are distinguised, namely type checking (tc),
+//   data implementation (di) and linearisation (lin)
+// - (+p)/(-p) at the end of a branch means that this branch is added/removed at
+//   the end of phase p 
+// - <String> is an arbitrary non-empty string
+// - <NumberString> is a string of the format '"0"|("-"?[1-9][0-9]*)'
+// - <String> and <NumberString> are represented by a quoted ATermAppl constant
 // - the other alphabetical strings within angular brackets are non-terminals
 //   that represent all possible branches of their productions
 // - for non-terminal N, N*/N+ represents an ATermList with zero/one or more N's
 // - each c(a_0, ..., a_n), where c is an alphabetical string, represents an
 //   ATermAppl with c as its unquoted head and a_0, ..., a_n as its arguments
+// - a number of restrictions apply to the Assignment's, which we denote by A,
+//   of an LPESummand:
+//   + the lhs of an element of A should be declared by the LPE
+//   + A may not contain duplicate lhs's
+//   + the lhs's of A should obey the order in which they are declared 
+// - the DataVarId's of the Assignment's of an LPEInit should be identical to the
+//   DataVarId's of the corresponding LPE
+// This description uses the theory of higher-order abstract data types, i.e.
+// we have a higher-order signature Sigma = (B, O), where B is set of basic
+// sorts and O is a set of operations. From the set B, we can generate the set
+// of higher-order sorts as follows:
+// - the set of basic sorts B is in B->;
+// - for all s, s' in B->, (s -> s') is in B->.
+// The set O is a B->-sorted set of operations, where each O_s contains
+// constants of sort s, for all s in B->.
+// The higher-order signature Sigma determines a first-order signature
+// Sigma-> = (B->, O extended with Appl), where Appl is the set of operation
+// applications.  This set contains the operation apply: (s -> s') # s -> s'
+// for every s,s' in B->.
+// Because we modelled the set Appl by the data expression DataAppl, the
+// description of the data types below is essentially first-order. Also, we
+// only use finite subsets of the infinite set of sorts B-> and the infinite
+// set of operations O.
 
 //Specification
 //-------------
 
 //specification
-<Spec>        ::= SpecMuCRL(SortSpec(<SortDecl>*), FuncSpec(<OpDecl>*),
-                    MapSpec(<OpDecl>*), EqnSpec(<EqnSect>*),
-                    ActSpec(<ActDecl>*), CommSpec(<CommDecl>*), 
-                    ProcSpec(<ProcDecl>*), Init(<ProcExpr>)
-                  )
+<Spec>         ::= SpecV0(SortSpec(<SortId>*), ConsSpec(<OpId>*),
+                     MapSpec(<OpId>*), DataEqnSpec(<DataEqn>*),
+                     ActSpec(<ActId>*), CommSpec(<CommDecl>*), <ProcEqnSpec>, <Init>)
 
-//sort declaration
-<SortDecl>    ::= SortDeclStandard(SortId(<String>))
+//sort identifier
+<SortId>       ::= SortId(<String>)
 
-//operation declaration
-<OpDecl>      ::= OpDecl(<String>, <SortExpr>)
+//operation identifier
+<OpId>         ::= OpId(<String>, <SortExpr>)
 
-//equation section
-<EqnSect>     ::= EqnSect(<DataVarDecl>*, <EqnDecl>+) 
+//data equation
+<DataEqn>      ::= DataEqn(<DataVarId>*, <DataExprOrNil>,
+                     <DataExpr>, <DataExpr>)
 
-//data variable declaration
-<DataVarDecl> ::= DataVarDecl(<String>, <SortExpr>)
+//data variable identifier
+<DataVarId>    ::= DataVarId(<String>, <SortId>)
 
-//equation declaration
-<EqnDecl>     ::= EqnDecl(<DataExpr>, <DataExpr>) 
+//data expression or nil
+<DataExprOrNil>::= <DataExpr>
+                 | Nil
 
-//action declaration
-<ActDecl>     ::= ActDecl(<String>, SortId(<String>)*)
+//action identifier
+<ActId>        ::= ActId(<String>, <SortId>*)
 
-//comm declaration
-<CommDecl>    ::= CommDecl(<String>,<String>,<String>) 
+//action identifier
+<CommDecl>     ::= CommDecl(<String>, <String>, <String>)
 
-//process declaration
-<ProcDecl>    ::= ProcDecl(<String>, <DataVarDecl>*, <ProcExpr>)
+//process equations or LPE
+<ProcEqnSpec>  ::= ProcEqnSpec(<ProcEqn>*)                               (-lin)
+                 | LPE(<DataVarId>*, <DataVarId>*, <LPESummand>*)        (+lin)
+
+//process equation
+<ProcEqn>      ::= ProcEqn(<DataVarId>*, <ProcVarId>, <DataVarId>*, <ProcExpr>)
+
+//process identifier
+<ProcVarId>    ::= ProcVarId(<String>, <SortId>*)
+
+//LPE summand
+<LPESummand>   ::= LPESummand(<DataVarId>*, <DataExpr>, <ActOrDelta>,
+                    <DataExprOrNil>, <Assignment>*)
+
+//multiaction or delta
+<ActOrDelta>
+              ::= Action
+                | Delta
+
+//Action
+<Action>      ::= Action(<ActId>, <DataExpr>*)
+
+//Assignment
+<Assignment>  ::= Assignment(<DataVarId>, <DataExpr>)
+
+//process expressions or data expression
+<Init>        ::= Init(<DataVarId>*, <ProcExpr>)                         (-lin)
+                | LPEInit(<DataVarId>*, <Assignment>*)                   (+lin)
 
 //Expressions
 //-----------
 
 //sort expression
-<SortExpr>    ::= SortId(<String>)
-                | SortArrow(<SortExpr>+, <SortExpr>)
+<SortExpr>    ::= <SortId>
+                | SortArrowProd(<SortId>+, <SortId>)
 
 //string or nil
 <StringOrNil> ::= <String>
                 | Nil
 
 //data expression
-<DataExpr>    ::= DataVarOpId(<String>)                                   (- tc)
-                | DataVar(<String>, <SortExprOrUnknown>)                  (+ tc)
-                | OpId(<String>, <SortExprOrUnknown>)                     (+ tc)
-                | DataAppl(<DataExpr>, <DataExpr>+) 
+<DataExpr>    ::= DataVarIdOpId(<String>)                                (- tc)
+                | <DataVarId>                                            (+ tc)
+                | <OpId>                                                 (+ tc)
+                | DataApplProd(<OpId>, <DataExpr>+)
 
 //sort expression or unknown
 <SortExprOrUnknown>
               ::= <SortExpr> 
-                | Unknown                                                 (- tc)
+                | Unknown                                                (- tc)
 
 //process expression
-<ProcExpr>    ::= ActProcRef(<String>, <DataExpr>*)                       (- tc)
-                | Act(ActId(<String>, <SortExprOrUnknown>*, <DataExpr>*)  (+ tc)
-                | ProcRef(ProcId(<String>), <DataExpr>*)                  (+ tc)
+<ProcExpr>    ::= ActionProcess(<String>, <DataExpr>*)                   (- tc)
+                | <Action>                                               (+ tc)
+                | Process(<ProcVarId>, <DataExpr>*)                      (+ tc)
                 | Delta
                 | Tau 
-                | Sum(<DataVarDecl>+, <ProcExpr>) 
-                | Encap(<String>*, <ProcExpr>)
+                | Sum(<DataVarId>+, <ProcExpr>) 
+                | Restrict(<String>*, <ProcExpr>)
                 | Hide(<String>*, <ProcExpr>)
-                | Ren(<RenExpr>*, <ProcExpr>)
+                | Rename(<RenameExpr>*, <ProcExpr>)
                 | Sync(<ProcExpr>, <ProcExpr>)
                 | AtTime(<ProcExpr>, <DataExpr>)
                 | Seq(<ProcExpr>, <ProcExpr>)
@@ -84,5 +139,5 @@
                 | Choice(<ProcExpr>, <ProcExpr>)
 
 //renaming expression
-<RenExpr>     ::= RenExpr(<String>, <String>) 
+<RenameExpr>  ::= RenameExpr(<String>, <String>) 
 
