@@ -204,11 +204,11 @@ ATermAppl from_rewrite_format_innerc(ATerm t)
 	{
 		return (ATermAppl) t;
 	} else {
-		ATermList l = ATgetArguments((ATermAppl) t);
-		ATermAppl a = from_rewrite_format_innerc(ATgetFirst(l));
-		for (l=ATgetNext(l); !ATisEmpty(l); l=ATgetNext(l))
+		int arity = ATgetArity(ATgetAFun((ATermAppl) t));
+		ATermAppl a = from_rewrite_format_innerc(ATgetArgument((ATermAppl) t,0));
+		for (int i=1; i<arity; i++)
 		{
-			a = gsMakeDataAppl(a,from_rewrite_format_innerc(ATgetFirst(l)));
+			a = gsMakeDataAppl(a,from_rewrite_format_innerc(ATgetArgument((ATermAppl) t,i)));
 		}
 		return a;
 	}

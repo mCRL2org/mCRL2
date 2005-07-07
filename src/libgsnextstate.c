@@ -314,7 +314,8 @@ static ATerm makeNewState(ATerm old, ATermList vars, ATermList assigns, ATermLis
 		{
 			if ( ATisEqual(ATgetArgument(ATAgetFirst(l),0),ATgetFirst(vars)) )
 			{
-				nnew = ATinsert(nnew,(ATerm) gsRewriteInternal(SetVars(gsSubstValues(substs,ATgetArgument(ATAgetFirst(l),1),true))));
+				//nnew = ATinsert(nnew,(ATerm) gsRewriteInternal(SetVars(gsSubstValues(substs,ATgetArgument(ATAgetFirst(l),1),true))));
+				nnew = ATinsert(nnew,(ATerm) gsRewriteInternal(SetVars(ATgetArgument(ATAgetFirst(l),1))));
 				set = true;
 				break;
 			}
@@ -356,14 +357,33 @@ static void gsns_callback(ATermList solution)
 {
 	if ( fscb != NULL )
 	{
-		fscb(rewrActionArgs((ATermAppl) gsSubstValues(ATconcat(*params_l_p,solution),*act_p,true)),(ATerm) makeNewState(*State_p,pars,*newstate_p,ATconcat(*params_l_p,solution)));
+		for (ATermList l=solution; !ATisEmpty(l); l=ATgetNext(l))
+		{
+			RWsetVariable(ATgetArgument((ATermAppl) ATgetFirst(l),0),ATgetArgument((ATermAppl) ATgetFirst(l),1));
+		}
+//		fscb(rewrActionArgs((ATermAppl) gsSubstValues(ATconcat(*params_l_p,solution),*act_p,true)),(ATerm) makeNewState(*State_p,pars,*newstate_p,ATconcat(*params_l_p,solution)));
+		fscb(rewrActionArgs((ATermAppl) *act_p),(ATerm) makeNewState(*State_p,pars,*newstate_p,*params_l_p));
+		for (ATermList l=solution; !ATisEmpty(l); l=ATgetNext(l))
+		{
+			RWclearVariable(ATgetArgument((ATermAppl) ATgetFirst(l),0));
+		}
 	} else {
+		for (ATermList l=solution; !ATisEmpty(l); l=ATgetNext(l))
+		{
+			RWsetVariable(ATgetArgument((ATermAppl) ATgetFirst(l),0),ATgetArgument((ATermAppl) ATgetFirst(l),1));
+		}
 		*states_p = ATinsert(*states_p, (ATerm)
 				ATmakeList2(
-					(ATerm) rewrActionArgs((ATermAppl) gsSubstValues(ATconcat(*params_l_p,solution),*act_p,true)),
-					(ATerm) makeNewState(*State_p,pars,*newstate_p,ATconcat(*params_l_p,solution))
+//					(ATerm) rewrActionArgs((ATermAppl) gsSubstValues(ATconcat(*params_l_p,solution),*act_p,true)),
+//					(ATerm) makeNewState(*State_p,pars,*newstate_p,ATconcat(*params_l_p,solution))
+					(ATerm) rewrActionArgs((ATermAppl) *act_p),
+					(ATerm) makeNewState(*State_p,pars,*newstate_p,*params_l_p)
 					)
 				);
+		for (ATermList l=solution; !ATisEmpty(l); l=ATgetNext(l))
+		{
+			RWclearVariable(ATgetArgument((ATermAppl) ATgetFirst(l),0));
+		}
 	}
 }
 
