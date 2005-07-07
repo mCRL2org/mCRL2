@@ -29,34 +29,14 @@ static ATermTable backpointers;
 static bool deadlockstate;
 static ATerm *orig_state;
 
-static ATerm SetDCs(ATerm l) // XXX Should not use knowledge of state structure
-{
-	ATermList m;
-
-	m = ATmakeList0();
-	for (; !ATisEmpty((ATermList) l); l=(ATerm) ATgetNext((ATermList) l))
-	{
-		if ( (ATgetType(ATgetFirst((ATermList) l)) == AT_APPL) && gsIsDataVarId(ATAgetFirst((ATermList) l)) )
-		{
-			m = ATinsert(m,(ATerm) gsMakeNil());
-		} else {
-			m = ATinsert(m,ATgetFirst((ATermList) l));
-		}
-	}
-	m = ATreverse(m);
-
-	return (ATerm) m;
-}
-
 void gsinst_callback(ATermAppl transition, ATerm state)
 {
-	ATerm state_dc = SetDCs(state);
 	ATbool new_state;
 	unsigned long i;
 
 	deadlockstate = false;
 
-	i = ATindexedSetPut(states, state_dc, &new_state);
+	i = ATindexedSetPut(states, state, &new_state);
 	if ( new_state )
 	{
 		if ( (max_states == 0) || (num_states < max_states) )
@@ -64,7 +44,7 @@ void gsinst_callback(ATermAppl transition, ATerm state)
 			num_states++;
 			if ( trace )
 			{
-				ATtablePut(backpointers, state_dc, *orig_state);
+				ATtablePut(backpointers, state, *orig_state);
 			}
 		}
 	}
@@ -231,7 +211,7 @@ int main(int argc, char **argv)
 	ATerm state = gsNextStateInit(Spec,!usedummies,strat);
 
 	ATbool new_state;
-	current_state = ATindexedSetPut(states,SetDCs(state),&new_state);
+	current_state = ATindexedSetPut(states,state,&new_state);
 	num_states++;
 
 	level = 1;
@@ -274,7 +254,7 @@ int main(int argc, char **argv)
 					ATermList l = gsNextState(s, NULL);
 					for (; !ATisEmpty(l); l=ATgetNext(l))
 					{
-						if ( ATisEqual(SetDCs(ATgetFirst(ATgetNext(ATLgetFirst(l)))),ATgetFirst(tr)) )
+						if ( ATisEqual(ATgetFirst(ATgetNext(ATLgetFirst(l))),ATgetFirst(tr)) )
 						{
 							gsPrintPart(stdout,ATAgetFirst(ATLgetFirst(l)),false,0);
 							printf("\n");
