@@ -37,9 +37,9 @@ void gsProverInit(ATermAppl Spec, int RewriteStrategy)
 	ATprotectAppl(&current_spec);
 	gsRewriteInit(ATAgetArgument(Spec,3),RewriteStrategy);
 	gsProverTrue = gsToRewriteFormat(gsMakeDataExprTrue());
-	ATprotectAppl(&gsProverTrue);
+	ATprotect(&gsProverTrue);
 	gsProverFalse = gsToRewriteFormat(gsMakeDataExprFalse());
-	ATprotectAppl(&gsProverFalse);
+	ATprotect(&gsProverFalse);
 
 	if ( RewriteStrategy == GS_REWR_INNER3 )
 	{
@@ -61,8 +61,8 @@ void gsProverFinalise()
 {
 	ATunprotectAppl(&current_spec);
 	gsRewriteFinalise();
-	ATunprotectAppl(&gsProverTrue);
-	ATunprotectAppl(&gsProverFalse);
+	ATunprotect(&gsProverTrue);
+	ATunprotect(&gsProverFalse);
 
 	ATunprotect(&opidAnd);
 	ATunprotect(&eqstr);
