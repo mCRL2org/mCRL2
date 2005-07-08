@@ -18,7 +18,7 @@ extern "C" {
 #include "gsrewr_innerc.h"
 #include "gsrewr_jitty.h"
 
-#define RWR_C2
+//#define RWR_C2
 #ifdef RWR_C2
 #include "gsrewr_innerc2.h"
 #endif
