@@ -57,6 +57,14 @@ void RWclearVariable(ATerm v)
   Substitution[n]=NULL;
 }
 
+void RWclearAllVariables()
+{
+  for (long i=0; i<maximumNumberOfVariables; i++ )
+  {
+    Substitution[i] = NULL;
+  }
+}
+
 ATerm RWapplySubstitution(ATerm v)
 {
   long n=ATgetAFun(ATgetArgument((ATermAppl) v,0));

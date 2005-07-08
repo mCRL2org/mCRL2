@@ -10,6 +10,7 @@ extern "C" {
 #include "gsfunc.h"
 
 void rewrite_init_inner3();
+void rewrite_finalise_inner3();
 
 void rewrite_add_inner3(ATermAppl eqn);
 void rewrite_remove_inner3(ATermAppl eqn);

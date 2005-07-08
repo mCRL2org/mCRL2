@@ -10,6 +10,7 @@ typedef void (*gsNextStateCallBack)(ATermAppl, ATerm);
 
 ATerm gsNextStateInit(ATermAppl Spec, bool AllowFreeVars, int RewriteStrategy);
 ATermList gsNextState(ATerm State, gsNextStateCallBack f);
+void gsNextStateFinalise();
 
 int gsGetStateLength();
 ATermAppl gsGetStateArgument(ATerm State, int index);

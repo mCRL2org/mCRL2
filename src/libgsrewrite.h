@@ -13,6 +13,7 @@ extern "C" {
 #define GS_REWR_JITTY	5
 
 void gsRewriteInit(ATermAppl Eqns, int strat);
+void gsRewriteFinalize();
 
 void gsRewriteAddEqn(ATermAppl Eqn);
 void gsRewriteRemoveEqn(ATermAppl Eqn);

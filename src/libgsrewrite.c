@@ -18,7 +18,7 @@ extern "C" {
 #include "gsrewr_innerc.h"
 #include "gsrewr_jitty.h"
 
-//#define RWR_C2
+#define RWR_C2
 #ifdef RWR_C2
 #include "gsrewr_innerc2.h"
 #endif
@@ -75,6 +75,19 @@ void gsRewriteInit(ATermAppl Eqns, int strat)
 		case GS_REWR_INNER3:
 		default:
 			rewrite_init_inner3();
+			break;
+	}
+}
+
+void gsRewriteFinalise()
+{
+	ATunprotectList(&opid_eqns);
+	ATunprotectList(&dataappl_eqns);
+	RWclearAllVariables();
+	switch ( strategy )
+	{
+		case GS_REWR_INNER3:
+			rewrite_finalise_inner3();
 			break;
 	}
 }

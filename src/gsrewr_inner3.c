@@ -223,6 +223,17 @@ void rewrite_init_inner3()
 	ATtableDestroy(tmp_eqns);
 }
 
+void rewrite_finalise_inner3()
+{
+	ATtableDestroy(term2int);
+	ATunprotectInt(&trueint);
+	ATunprotectAFun(nilAFun);
+	ATunprotectAFun(opidAFun);
+	ATunprotectArray((ATerm *) int2term);
+	ATunprotectArray((ATerm *) inner3_eqns);
+	is_initialised = false;
+}
+
 void rewrite_add_inner3(ATermAppl eqn)
 {
 	ATermList l,m;
@@ -555,6 +566,16 @@ static ATerm rewrite_func(ATermInt op, ATermList args)
 	}
 }
 
+static ATermList rewrite_listelts(ATermList l)
+{
+	if ( ATisEmpty(l) )
+	{
+		return l;
+	} else {
+		return ATinsert(rewrite_listelts(ATgetNext(l)),rewrite(ATgetFirst(l)));
+	}
+}
+
 static ATerm rewrite(ATerm Term)
 {
 ///ATfprintf(stderr,"rewrite(%t)\n\n",Term);
@@ -563,12 +584,13 @@ static ATerm rewrite(ATerm Term)
 		ATermList l = ATgetNext((ATermList) Term);
 		ATermList m;
 
-		m = ATmakeList0();
+/*		m = ATmakeList0();
 		for (; !ATisEmpty(l); l=ATgetNext(l))
 		{
 			m = ATinsert(m,rewrite(ATgetFirst(l)));
 		}
-		l = ATreverse(m);
+		l = ATreverse(m);*/
+		l = rewrite_listelts(l);
 
 		if ( ATisInt(ATgetFirst((ATermList) Term)) )
 		{

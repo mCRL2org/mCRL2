@@ -225,6 +225,10 @@ void XSimMain::LoadFile(const wxString &filename)
     }
     state_varnames = ATreverse(m);
     state_vars = ATreverse(n);
+    if ( initial_state != NULL )
+    {
+	    gsNextStateFinalise();
+    }
     initial_state = gsNextStateInit(Spec,true,GS_REWR_INNER3);
 
     InitialiseViews();

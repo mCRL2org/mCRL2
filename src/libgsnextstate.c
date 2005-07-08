@@ -303,6 +303,7 @@ ATerm gsNextStateInit(ATermAppl Spec, bool AllowFreeVars, int RewriteStrategy)
 	procvars = ATreverse(procvars);
 	
 	smndAFun = ATmakeAFun("@SMND@",4,ATfalse);
+	ATprotectAFun(smndAFun);
 	ATermList sums = ATLgetArgument(ATAgetArgument(current_spec,5),2);
 	num_summands = ATgetLength(sums);
 	summands = (ATermAppl *) malloc(num_summands*sizeof(ATermAppl));
@@ -361,6 +362,23 @@ ATerm gsNextStateInit(ATermAppl Spec, bool AllowFreeVars, int RewriteStrategy)
 	}
 
 	return (ATerm) ATmakeApplArray(stateAFun,stateargs);
+}
+
+void gsNextStateFinalise()
+{
+	ATunprotectAppl(&current_spec);
+	ATunprotectAppl(&nil);
+	gsProverFinalise();
+
+	ATunprotectList(&pars);
+	ATunprotectAFun(stateAFun);
+	ATunprotectArray(stateargs);
+
+	ATunprotectList(&procvars);
+	
+	ATunprotectAFun(smndAFun);
+	ATunprotectArray((ATerm *) summands);
+	free(summands);
 }
 
 static ATerm makeNewState(ATerm old, ATermList vars, ATerm assigns)

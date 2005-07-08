@@ -57,6 +57,17 @@ void gsProverInit(ATermAppl Spec, int RewriteStrategy)
 	}
 }
 
+void gsProverFinalise()
+{
+	ATunprotectAppl(&current_spec);
+	gsRewriteFinalise();
+	ATunprotectAppl(&gsProverTrue);
+	ATunprotectAppl(&gsProverFalse);
+
+	ATunprotect(&opidAnd);
+	ATunprotect(&eqstr);
+}
+
 static ATermAppl gsGetResult(ATermAppl sort)
 {
 	while ( gsIsSortArrow(sort) )
@@ -197,14 +208,46 @@ static bool FindInner3Equality(ATerm t, ATermList vars, ATerm *v, ATerm *e)
 	return false;
 }
 
+//static ATerm *ceqs = NULL; // UNPROTECTED!!! (should be safe though)
+//static int num_ceqs;
+//static int ceqs_size;
+//#define CEQS_STEP 20
 static bool IsInnerCEq(ATermAppl a)
 {
+/*	if ( (ceqs == NULL) )
+	{
+		ceqs = (ATerm *) malloc(CEQS_STEP*sizeof(ATerm));
+		ceqs_size = CEQS_STEP;
+		num_ceqs = 0;
+	}
+
+	ATerm b = ATgetArgument(a,0);
+	if ( ATisAppl(b) && gsIsDataVarId((ATermAppl) b) )
+	{
+		return false;
+	}
+	for (int i=0; i<num_ceqs; i++)
+	{
+		if ( ATisEqual(b,ceqs[i]) )
+		{
+			return true;
+		}
+	}
+*/
 	a = gsFromRewriteFormat((ATerm) a);
 	a = (ATermAppl) ATgetArgument(a,0);
 	a = (ATermAppl) ATgetArgument(a,0);
 
 	if ( ATisEqual(ATgetArgument(a,0),eqstr) )
 	{
+/*		if ( num_ceqs >= ceqs_size )
+		{
+			ceqs_size += CEQS_STEP;
+			ceqs = (ATerm *) realloc(ceqs,ceqs_size*sizeof(ATerm));
+		}
+		ceqs[num_ceqs] = (ATerm) a;
+		num_ceqs++;
+*/
 		return true;
 	} else {
 		return false;
