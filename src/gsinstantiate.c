@@ -170,6 +170,9 @@ int main(int argc, char **argv)
 				} else if ( !strcmp(optarg,"jitty") )
 				{
 					strat = GS_REWR_JITTY;
+				} else {
+					fprintf(stderr,"warning: unknown rewriter '%s', using default\n",optarg);
+					strat = GS_REWR_INNER3;
 				}
 				break;
 			default:
