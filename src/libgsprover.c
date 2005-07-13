@@ -127,25 +127,30 @@ static ATermList calcNext(ATermList l)
 	{
 		if ( ATisEqual(gsGetResult(ATAgetArgument(ATAgetFirst(m),1)),sort) )
 		{
+//ATfprintf(stderr,"cons: %t\n\n",ATgetFirst(m));
 			na1 = a1;
 			d = gsGetDomain(ATAgetArgument(ATAgetFirst(m),1));
 			t = ATAgetFirst(m);
 			for (; !ATisEmpty(d); d=ATgetNext(d))
 			{
-				ATermAppl v = gsMakeDataVarId(gsFreshString2ATermAppl("s",(ATerm) na1,false),ATAgetFirst(d));
+				ATermAppl v = gsMakeDataVarId(gsFreshString2ATermAppl("@enum@",(ATerm) na1,false),ATAgetFirst(d));
 				used_vars++;
 				na1 = ATappend(na1,(ATerm) v);
 				t = gsMakeDataAppl(t,v);
 			}
+//ATfprintf(stderr,"%t\n\n",t);
 			ATerm t_rf = gsToRewriteFormat(t);
 			RWsetVariable((ATerm) var,t_rf);
+//gsPrintPart(stderr,gsFromRewriteFormat(a3),false,0); fprintf(stderr,"\n");
 			e = gsRewriteInternal(a3);
-			RWclearVariable((ATerm) var);
+//gsPrintPart(stderr,gsFromRewriteFormat(e),false,0); fprintf(stderr,"\n\n");
 			if ( !ATisEqual(e,gsProverFalse) )
 			{
 				s = ATmakeList1((ATerm) gsMakeSubst((ATerm) var, t_rf));
-				r = ATinsert(r,(ATerm) ATmakeList3((ATerm) na1,gsRewriteInternals(gsSubstValues(s,(ATerm) a2,true)),(ATerm) e));
+//				r = ATinsert(r,(ATerm) ATmakeList3((ATerm) na1,gsRewriteInternals(gsSubstValues(s,(ATerm) a2,true)),(ATerm) e));
+				r = ATinsert(r,(ATerm) ATmakeList3((ATerm) na1,(ATerm) gsRewriteInternals(a2),(ATerm) e));
 			}
+			RWclearVariable((ATerm) var);
 		}
 	}
 	r = ATreverse(r);
@@ -307,7 +312,7 @@ static bool FindInnerCEquality(ATerm t, ATermList vars, ATerm *v, ATerm *e)
 
 static ATermList EliminateVars(ATermList l)
 {
-	ATermList vars,vals,removed_vars,m;
+	ATermList vars,vals,m;//,removed_vars;
 	ATerm t, v, e;
 
 	vars = ATLgetFirst(l);

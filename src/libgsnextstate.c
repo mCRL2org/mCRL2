@@ -103,7 +103,7 @@ ATermAppl FindDummy(ATermAppl sort)
 			ATermList domain = gsGetDomain(conssort);
 			ATermAppl t = ATAgetFirst(l);
 
-			if ( ATindexOf(domain,sort,0) == -1)
+			if ( ATindexOf(domain,(ATerm) sort,0) == -1)
 			{
 				for (; !ATisEmpty(domain); domain=ATgetNext(domain))
 				{
@@ -209,7 +209,7 @@ ATermList ListToFormat(ATermList l,ATermList free_vars)
 	ATermList m = ATmakeList0();
 	for (; !ATisEmpty(l); l=ATgetNext(l))
 	{
-		m = ATinsert(m,gsToRewriteFormat(SetVars(ATAgetFirst(l),free_vars)));
+		m = ATinsert(m,gsToRewriteFormat((ATermAppl) SetVars(ATgetFirst(l),free_vars)));
 	}
 	return ATreverse(m);
 }
@@ -259,7 +259,7 @@ ATerm AssignsToRewriteFormat(ATermList assigns, ATermList free_vars)
 		{
 			if ( ATisEqual(ATAgetArgument(ATAgetFirst(m),0),ATAgetFirst(l)) )
 			{
-				stateargs[i] = gsToRewriteFormat(SetVars(ATAgetArgument(ATAgetFirst(m),1),free_vars));
+				stateargs[i] = gsToRewriteFormat((ATermAppl) SetVars(ATgetArgument(ATAgetFirst(m),1),free_vars));
 				set = true;
 				break;
 			}
@@ -275,7 +275,7 @@ ATerm AssignsToRewriteFormat(ATermList assigns, ATermList free_vars)
 
 ATerm gsNextStateInit(ATermAppl Spec, bool AllowFreeVars, int RewriteStrategy)
 {
-	ATermList l,m,n,state,free_vars;
+	ATermList l,m,n,free_vars;
 	bool set;
 
 	current_spec = Spec;
@@ -329,7 +329,7 @@ ATerm gsNextStateInit(ATermAppl Spec, bool AllowFreeVars, int RewriteStrategy)
 	ATprotectArray((ATerm *) summands,num_summands);
 	for (int i=0; !ATisEmpty(sums); sums=ATgetNext(sums),i++)
 	{
-		summands[i] = ATmakeAppl4(smndAFun,ATgetArgument(ATAgetFirst(sums),0),gsToRewriteFormat(SetVars(ATAgetArgument(ATAgetFirst(sums),1),free_vars)),(ATerm) ActionToRewriteFormat(ATAgetArgument(ATAgetFirst(sums),2),free_vars),(ATerm) AssignsToRewriteFormat(ATLgetArgument(ATAgetFirst(sums),4),free_vars));
+		summands[i] = ATmakeAppl4(smndAFun,ATgetArgument(ATAgetFirst(sums),0),gsToRewriteFormat((ATermAppl) SetVars(ATgetArgument(ATAgetFirst(sums),1),free_vars)),(ATerm) ActionToRewriteFormat(ATAgetArgument(ATAgetFirst(sums),2),free_vars),(ATerm) AssignsToRewriteFormat(ATLgetArgument(ATAgetFirst(sums),4),free_vars));
 	}
 
 	l = pars;
@@ -364,7 +364,7 @@ ATerm gsNextStateInit(ATermAppl Spec, bool AllowFreeVars, int RewriteStrategy)
 		{
 			if ( ATisEqual(ATAgetArgument(ATAgetFirst(n),0),ATAgetFirst(l)) )
 			{
-				stateargs[i] = gsRewriteInternal(gsToRewriteFormat(SetVars(ATAgetArgument(ATAgetFirst(n),1),free_vars)));
+				stateargs[i] = gsRewriteInternal(gsToRewriteFormat((ATermAppl) SetVars(ATgetArgument(ATAgetFirst(n),1),free_vars)));
 				set = true;
 				break;
 			}
@@ -485,6 +485,15 @@ static ATerm *act_p;
 static gsNextStateCallBack fscb;
 static void gsns_callback(ATermList solution)
 {
+//ATprintf("%t\n",ListFromFormat(solution));
+/*for (ATermList l=solution; !ATisEmpty(l); l=ATgetNext(l))
+{
+	ATfprintf(stderr,"%t := ",ATgetArgument(ATAgetFirst(l),0)); 
+	gsPrintPart(stderr,gsFromRewriteFormat(ATgetArgument(ATgetFirst(l),1)),false,0);
+	if ( !ATisEmpty(ATgetNext(l)) )
+		fprintf(stderr,", "); 
+}
+fprintf(stderr,"\n");*/
 	if ( fscb != NULL )
 	{
 		for (ATermList l=solution; !ATisEmpty(l); l=ATgetNext(l))
@@ -519,11 +528,13 @@ static void gsns_callback(ATermList solution)
 
 ATermList gsNextState(ATerm State, gsNextStateCallBack f)
 {
-	ATermList states,l,m;//,params;
+	ATermList states,l;//,m,params;
 	ATermAppl sum;
 	ATerm newstate;
 	ATerm act;
 	int sum_idx;
+
+//fprintf(stderr,"\nState: "); gsPrintParts(stderr,ListFromFormat(ATgetArguments(State)),false,0,"",", "); fprintf(stderr,"\n\n");
 
 	NextStateError = false;
 
@@ -561,6 +572,7 @@ ATermList gsNextState(ATerm State, gsNextStateCallBack f)
 //		ATermList newstate = (ATermList) gsSubstValues(params_l,ATgetArgument(sum,4),true);
 		act = ATgetArgument(sum,2);
 		newstate = ATgetArgument(sum,3);
+//ATfprintf(stderr,"\n%t  ",ATLgetArgument(sum,0)); gsPrintPart(stderr,gsFromRewriteFormat(ATgetArgument(sum,1)),false,0); fprintf(stderr,"\n\n");
 		l = FindSolutions(ATLgetArgument(sum,0),ATgetArgument(sum,1),gsns_callback);
 		NextStateError |= FindSolutionsError;
 		for (; !ATisEmpty(l); l=ATgetNext(l))
