@@ -785,6 +785,8 @@ void XSimMain::UpdateTransitions()
 					gsPrintPart(f,newval,false,0);
 				}
 			}
+
+			o = ATgetNext(o);
 		}
 		rewind(f);
 		if ( fgets(s,1000,f) == NULL )
