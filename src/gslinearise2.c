@@ -11,13 +11,16 @@ extern "C" {
 #include "gsfunc.h"
 #include "gslowlevel.h"
 #include "libgsparse.h"
+#include "libgsrewrite.h"
 
 /* Global variables */
 
 static ATermList processes;
 static ATermList todo_stack;
 static ATerm debruijn;
-
+static bool generalise;
+static ATermAppl linTrue;
+static ATermAppl linFalse;
 
 /* Needed forward declarations */
 
@@ -52,10 +55,10 @@ ATbool ATisAnnotated(ATerm a)
 
 ATermAppl gsMakeDataExprAndWithTrueCheck(ATermAppl b, ATermAppl c)
 {
-	if ( ATisEqual(b,gsMakeDataExprTrue()) )
+	if ( ATisEqual(b,linTrue) )
 	{
 		return c;
-	} else if ( ATisEqual(c,gsMakeDataExprTrue()) )
+	} else if ( ATisEqual(c,linTrue) )
 	{
 		return b;
 	} else {
@@ -65,15 +68,15 @@ ATermAppl gsMakeDataExprAndWithTrueCheck(ATermAppl b, ATermAppl c)
 
 ATermAppl gsMakeDataExprAndWithCheck(ATermAppl b, ATermAppl c)
 {
-	if ( ATisEqual(b,gsMakeDataExprTrue()) )
+	if ( ATisEqual(b,linTrue) )
 	{
 		return c;
-	} else if ( ATisEqual(c,gsMakeDataExprTrue()) )
+	} else if ( ATisEqual(c,linTrue) )
 	{
 		return b;
-	} else if ( ATisEqual(b,gsMakeDataExprFalse()) || ATisEqual(c,gsMakeDataExprFalse()) )
+	} else if ( ATisEqual(b,linFalse) || ATisEqual(c,linFalse) )
 	{
-		return gsMakeDataExprFalse();
+		return linFalse;
 	} else {
 		return gsMakeDataExprAnd(b,c);
 	}
@@ -81,12 +84,12 @@ ATermAppl gsMakeDataExprAndWithCheck(ATermAppl b, ATermAppl c)
 
 ATermAppl gsMakeDataExprNotWithCheck(ATermAppl b)
 {
-	if ( ATisEqual(b,gsMakeDataExprTrue()) )
+	if ( ATisEqual(b,linTrue) )
 	{
-		return gsMakeDataExprFalse();
-	} else if ( ATisEqual(b,gsMakeDataExprFalse()) )
+		return linFalse;
+	} else if ( ATisEqual(b,linFalse) )
 	{
-		return gsMakeDataExprTrue();
+		return linTrue;
 	} else {
 		return gsMakeDataExprNot(b);
 	}
@@ -264,14 +267,24 @@ ATerm increase_index_bnd(ATerm a, int n, int b)
 		{
 			return (ATerm) gsMakeSum(ATLgetArgument((ATermAppl) a,0),(ATermAppl) increase_index_bnd(ATgetArgument((ATermAppl) a,1),n,b+ATgetLength(ATLgetArgument((ATermAppl) a,0))));
 		} else {
-			l = ATgetArguments((ATermAppl) a);
+			int ar = ATgetArity(ATgetAFun((ATermAppl) a));
+			DECL_A(args,ATerm,ar);
+			for (int i=0; i<ar; i++)
+			{
+				args[i] = increase_index_bnd(ATgetArgument((ATermAppl) a,i),n,b);
+			}
+			a = ATmakeApplArray(ATgetAFun((ATermAppl) a),args);
+			FREE_A(args);
+			return a;
+			
+/*			l = ATgetArguments((ATermAppl) a);
 			m = ATmakeList0();
 			for (; !ATisEmpty(l); l=ATgetNext(l))
 			{
 				m = ATinsert(m,increase_index_bnd(ATgetFirst(l),n,b));
 			}
 			m = ATreverse(m);
-			return (ATerm) ATmakeApplList(ATgetAFun((ATermAppl) a),m);
+			return (ATerm) ATmakeApplList(ATgetAFun((ATermAppl) a),m);*/
 		}
 	} else if ( ATisList((ATerm) a) )
 	{
@@ -607,19 +620,24 @@ int add_process_eqn(ATermAppl e)
 	ATermAppl name = fresh_var_name();
 	ATermList vars = ATLgetArgument(e,2);
 	ATermList data = ATLgetArgument(e,2);
-	ATermAppl ni = replace_data_with_vars((ATermAppl) annotate(ATgetArgument(e,3)),&vars,&data);
+	ATermAppl ni = generalise?replace_data_with_vars((ATermAppl) annotate(ATgetArgument(e,3)),&vars,&data):NULL;
 
-	processes = ATappend(processes,(ATerm) ATmakeList4(ATgetArgument(ATAgetArgument(e,1),0),ATgetArgument(e,2),annotate(ATgetArgument(e,3)),(ATerm) gsMakeNil()));
-//ATfprintf(stderr,"\n\nprocess %i: %t\n\n",ATgetLength(processes)-1,ATgetLast(processes));
-//gsPrintPart(stderr,ATelementAt((ATermList) ATgetLast(processes),2),0,0);
-	if ( ATgetLength(vars) > ATgetLength(ATLgetArgument(e,2)) )
+//	if ( !generalise )
 	{
+		processes = ATappend(processes,(ATerm) ATmakeList4(ATgetArgument(ATAgetArgument(e,1),0),ATgetArgument(e,2),annotate(ATgetArgument(e,3)),(ATerm) gsMakeNil()));
+ATfprintf(stderr,"\n\nprocess %i: %t\n\n",ATgetLength(processes)-1,ATgetLast(processes));
+gsPrintPart(stderr,ATAelementAt((ATermList) ATgetLast(processes),2),0,0);
+	}
+	if ( generalise && (ATgetLength(vars) > ATgetLength(ATLgetArgument(e,2))) )
+	{
+//		processes = ATappend(processes,(ATerm) ATmakeList4(ATgetArgument(ATAgetArgument(e,1),0),(ATerm) vars,annotate((ATerm) ni),(ATerm) gsMakeNil()));
 		processes = ATappend(processes,(ATerm) ATmakeList4((ATerm) name,(ATerm) vars,annotate((ATerm) ni),(ATerm) gsMakeNil()));
-//ATfprintf(stderr,"\n\nprocess %i: %t\n\n",ATgetLength(processes)-1,ATgetLast(processes));
-//gsPrintPart(stderr,ATelementAt((ATermList) ATgetLast(processes),2),0,0);
+ATfprintf(stderr,"\n\nprocess %i: %t\n\n",ATgetLength(processes)-1,ATgetLast(processes));
+gsPrintPart(stderr,ATAelementAt((ATermList) ATgetLast(processes),2),0,0);
+		return ATgetLength(processes)-2;
 	}
 
-	return ATgetLength(processes)-2;
+	return ATgetLength(processes)-1;
 }
 
 ATbool has_bounded_var(ATermAppl a) //XXX
@@ -645,14 +663,14 @@ ATerm replace_data_with_vars_gen(ATerm a, ATermList *v, ATermList *d, ATermAppl 
 
 	if ( ATisAppl(a) )
 	{
-		if ( gsIsDataAppl((ATermAppl) a) || gsIsOpId((ATermAppl) a) )
+		if ( gsIsDataAppl((ATermAppl) a) || gsIsOpId((ATermAppl) a) || gsIsDataVarId((ATermAppl) a) )
 		{
 /*			if ( ATindexOf(*d,a,0) >= 0 )
 			{
 				return ATelementAt(*v,ATindexOf(*d,a,0));
 			} else {*/
 //ATfprintf(stderr,"\nhas_bounded_var(%t) = %i\n",a,has_bounded_var((ATermAppl) a));
-				if ( gsIsDataAppl((ATermAppl) a) && has_bounded_var((ATermAppl) a) )
+				if ( /*gsIsDataAppl((ATermAppl) a) &&*/ has_bounded_var((ATermAppl) a) )
 				{
 /*					if ( gsIsOpId(ATAgetArgument((ATermAppl) a,0)) )
 					{
@@ -672,6 +690,9 @@ ATerm replace_data_with_vars_gen(ATerm a, ATermList *v, ATermList *d, ATermAppl 
 					return (ATerm) var;
 				}
 /*			}*/
+/*		} else if ( gsIsDataVarId((ATermAppl) a) && has_bounded_var(a) )
+		{
+			return a;*/
 		} else {
 			if ( gsIsProcess((ATermAppl) a) && (proc_id((ATermAppl) a) >= 0) )
 			{
@@ -685,6 +706,9 @@ ATerm replace_data_with_vars_gen(ATerm a, ATermList *v, ATermList *d, ATermAppl 
 				}
 				m = ATreverse(m);
 				return (ATerm) ATsetArgument((ATermAppl) a,(ATerm) m,1);
+			} else if ( gsIsSum((ATermAppl) a) )
+			{
+				return gsMakeSum(ATLgetArgument((ATermAppl) a,0),(ATermAppl) replace_data_with_vars_gen(ATgetArgument((ATermAppl) a,1),v,d,namebase));
 			} else {
 				l = ATgetArguments((ATermAppl) a);
 				m = ATmakeList0();
@@ -729,11 +753,11 @@ if ( gsIsProcess(i) )
 	name = fresh_var_name();
 	vars = ATmakeList0();
 	data = ATmakeList0();
-	ni = replace_data_with_vars((ATermAppl) annotate((ATerm) i),&vars,&data);
+	ni = generalise?replace_data_with_vars((ATermAppl) annotate((ATerm) i),&vars,&data):i;
 
 	processes = ATappend(processes,(ATerm) ATmakeList4((ATerm) name,(ATerm) vars,annotate((ATerm) ni),(ATerm) gsMakeNil()));
-//ATfprintf(stderr,"\n\nprocess %i: %t\n\n",ATgetLength(processes)-1,ATgetLast(processes));
-//gsPrintPart(stderr,ATelementAt((ATermList) ATgetLast(processes),2),0,0);
+ATfprintf(stderr,"\n\nprocess %i: %t\n\n",ATgetLength(processes)-1,ATgetLast(processes));
+gsPrintPart(stderr,ATAelementAt((ATermList) ATgetLast(processes),2),0,0);
 
 	initial_process = gsMakeProcess(gsMakeProcVarId(name,vars),data);
 
@@ -788,6 +812,7 @@ ATermList get_proc(int i, ATermList l)
 int proc_id(ATermAppl a)
 {
 	ATermList l = processes;
+//ATfprintf(stderr,"\n\nprocid(%t)\n",a);
 
 	for (; !ATisEmpty(l); l=ATgetNext(l))
 	{
@@ -1023,17 +1048,17 @@ ATermAppl make_xi(ATermList l)
 	if ( ATisEmpty(l) )
 	{
 		gsWarningMsg("multiaction supplied to make_xi should not be empty\n");
-		return gsMakeDataExprTrue();
+		return linTrue;
 	} else {
 		a = ATLgetArgument(ATAgetFirst(l),1);
 		l = ATgetNext(l);
-		c = gsMakeDataExprTrue();
+		c = linTrue;
 		for (; !ATisEmpty(l); l=ATgetNext(l))
 		{
 			t = a;
 			u = ATLgetArgument(ATAgetFirst(l),1);
 			b = 1;
-			d = gsMakeDataExprTrue();
+			d = linTrue;
 			for (; !ATisEmpty(t); t=ATgetNext(t), u=ATgetNext(u))
 			{
 				if ( b )
@@ -1044,7 +1069,7 @@ ATermAppl make_xi(ATermList l)
 					d = gsMakeDataExprAnd(d,gsMakeDataExprEq(ATAgetFirst(t),ATAgetFirst(u)));
 				}
 			}
-			c = gsMakeDataExprAndWithTrueCheck(c,d);
+			c = gsRewriteTerm(gsMakeDataExprAndWithTrueCheck(c,d));
 		}
 		return c;
 	}
@@ -1085,16 +1110,16 @@ ATermAppl param_eq(ATermList m, ATermList n)
 
 	if ( ATgetLength(m) != ATgetLength(n) )
 	{
-		return gsMakeDataExprFalse();
+		return linFalse;
 	}
 
-	c = gsMakeDataExprTrue();
+	c = linTrue;
 	b = 1;
 	for (; !ATisEmpty(m); m=ATgetNext(m), n=ATgetNext(n))
 	{
 		if ( !ATisEqual(gsGetSort(ATAgetFirst(m)),gsGetSort(ATAgetFirst(n))) )
 		{
-			return gsMakeDataExprFalse();
+			return linFalse;
 		}
 		if ( b )
 		{
@@ -1105,7 +1130,7 @@ ATermAppl param_eq(ATermList m, ATermList n)
 		}
 	}
 
-	return c;
+	return gsRewriteTerm(c);
 }
 
 ATermList calc_comm(ATermList m, ATermList d, ATermList w, ATermList n, ATermList C)
@@ -1139,12 +1164,17 @@ ATermList calc_comm(ATermList m, ATermList d, ATermList w, ATermList n, ATermLis
 		for (; !ATisEmpty(s); s=ATgetNext(s))
 		{
 			c = param_eq(ATLgetArgument(ATAgetFirst(n),1),d);
-			if ( !ATisEqual(c,gsMakeDataExprFalse()) )
+			if ( !ATisEqual(c,linFalse) )
 			{
-				l = ATinsert(l,(ATerm) ATmakeList2(ATelementAt(ATLgetFirst(s),0),(ATerm) gsMakeDataExprAndWithTrueCheck(c,ATAelementAt(ATLgetFirst(s),1))));
+				ATermAppl a = gsRewriteTerm(gsMakeDataExprAndWithTrueCheck(c,ATAelementAt(ATLgetFirst(s),1)));
+				if ( !ATisEqual(a,linFalse) )
+				{
+					l = ATinsert(l,(ATerm) ATmakeList2(ATelementAt(ATLgetFirst(s),0),(ATerm) a));
+				}
 			}
 		}
-		s = ATconcat(ATreverse(l),calc_comm(m,d,ATinsert(w,ATgetFirst(n)),ATgetNext(n),C));
+		s = ATconcat(l,calc_comm(m,d,ATinsert(w,ATgetFirst(n)),ATgetNext(n),C));
+//XXX		s = ATconcat(ATreverse(l),calc_comm(m,d,ATinsert(w,ATgetFirst(n)),ATgetNext(n),C));
 		return s;
 	}
 }
@@ -1235,26 +1265,31 @@ ATermList mactl_comm(ATermList mal, ATermList C)
 //ATfprintf(stderr,"mal=%t\n\n",mal);
 	if ( ATisEmpty(mal) )
 	{
-		return ATmakeList1((ATerm) ATmakeList2((ATerm) mal,(ATerm) gsMakeDataExprTrue()));
+		return ATmakeList1((ATerm) ATmakeList2((ATerm) mal,(ATerm) linTrue));
 	} else {
 		s = calc_comm(ATmakeList1(ATgetFirst(mal)),ATLgetArgument(ATAgetFirst(mal),1),ATmakeList0(),ATgetNext(mal),C);
-		b = gsMakeDataExprTrue();
+		b = linTrue;
 		l = s;
 		for (; !ATisEmpty(l); l=ATgetNext(l))
 		{
 			b = gsMakeDataExprAndWithCheck(b,gsMakeDataExprNotWithCheck(ATAelementAt(ATLgetFirst(l),1)));
 		}
-		if ( !ATisEqual(b,gsMakeDataExprFalse()) )
+		b = gsRewriteTerm(b);
+		if ( !ATisEqual(b,linFalse) )
 		{
 			t = mactl_comm(ATgetNext(mal),C);
 //ATfprintf(stderr,"g( %t  ,  %t ) =   %t\n\n",ATgetNext(mal),C,t);
 			l = t;
-			s = ATreverse(s);
+//XXX			s = ATreverse(s);
 			for (; !ATisEmpty(l); l=ATgetNext(l))
 			{
-				s = ATinsert(s,(ATerm) ATmakeList2((ATerm) ATinsert(ATLelementAt(ATLgetFirst(l),0),ATgetFirst(mal)),(ATerm) gsMakeDataExprAndWithCheck(b,ATAelementAt(ATLgetFirst(l),1))));
+				ATermAppl a = gsRewriteTerm(gsMakeDataExprAndWithCheck(b,ATAelementAt(ATLgetFirst(l),1)));
+				if ( !ATisEqual(a,linFalse) )
+				{
+					s = ATinsert(s,(ATerm) ATmakeList2((ATerm) ATinsert(ATLelementAt(ATLgetFirst(l),0),ATgetFirst(mal)),(ATerm) a));
+				}
 			}
-			s = ATreverse(s);
+//XXX			s = ATreverse(s);
 		}
 		return s;
 	}
@@ -1269,10 +1304,10 @@ ATermList mactl_comm(ATermList mal, ATermList C)
 
 	if ( ATisEmpty(r) )
 	{
-		return ATmakeList1((ATerm) ATmakeList2((ATerm) list2synch(mal),(ATerm) gsMakeDataExprTrue()));
+		return ATmakeList1((ATerm) ATmakeList2((ATerm) list2synch(mal),(ATerm) linTrue));
 	} else {
 		b = 1;
-		d = gsMakeDataExprFalse();
+		d = linFalse;
 		for (l=r; !ATisEmpty(l); l=ATgetNext(l))
 		{
 			if ( b )
@@ -1454,6 +1489,7 @@ ATbool match_proc(ATermAppl a, ATermAppl m, ATermList l, ATermTable r)
 
 	if ( !ATisEqualAFun(ATgetAFun(a),ATgetAFun(m)) )
 	{
+//fprintf(stderr,"i!\n");
 		return ATfalse;
 	}
 
@@ -1461,6 +1497,7 @@ ATbool match_proc(ATermAppl a, ATermAppl m, ATermList l, ATermTable r)
 	{
 		if ( !ATisEqual(ATgetArgument(a,0),ATgetArgument(m,0)) )
 		{
+//fprintf(stderr,"h!\n");
 			return ATfalse;
 		}
 
@@ -1468,12 +1505,14 @@ ATbool match_proc(ATermAppl a, ATermAppl m, ATermList l, ATermTable r)
 		l2 = ATLgetArgument(m,1);
 		if ( ATgetLength(l1) != ATgetLength(l2) )
 		{
+//fprintf(stderr,"g!\n");
 			return ATfalse;
 		}
 		for (;!ATisEmpty(l1); l1=ATgetNext(l1), l2=ATgetNext(l2))
 		{
 			if ( !match_data(ATAgetFirst(l1),ATAgetFirst(l2),l,r) )
 			{
+//ATfprintf(stderr,"f! %t    %t\n",ATAgetFirst(l1),ATAgetFirst(l2));
 				return ATfalse;
 			}
 		}
@@ -1489,6 +1528,7 @@ ATbool match_proc(ATermAppl a, ATermAppl m, ATermList l, ATermTable r)
 	{
 		if ( !list_eq(ATLgetArgument(a,0),ATLgetArgument(m,0)) )
 		{
+//fprintf(stderr,"e!\n");
 			return ATfalse;
 		}
 
@@ -1506,6 +1546,7 @@ ATbool match_proc(ATermAppl a, ATermAppl m, ATermList l, ATermTable r)
 		{
 			return match_proc(ATAgetArgument(a,1),ATAgetArgument(m,1),l,r);
 		} else {
+//fprintf(stderr,"d!\n");
 			return ATfalse;
 		}
 	}
@@ -1514,8 +1555,9 @@ ATbool match_proc(ATermAppl a, ATermAppl m, ATermList l, ATermTable r)
 	{
 		if ( match_data(ATAgetArgument(a,0),ATAgetArgument(m,0),l,r) )
 		{
-			return match_proc(ATAgetArgument(a,1),ATAgetArgument(m,1),l,r);
+			return match_proc(ATAgetArgument(a,1),ATAgetArgument(m,1),l,r) && match_proc(ATAgetArgument(a,2),ATAgetArgument(m,2),l,r);
 		} else {
+//fprintf(stderr,"c!\n");
 			return ATfalse;
 		}
 	}
@@ -1538,6 +1580,7 @@ ATbool match(ATermAppl a, ATermList l, ATermList *r)
 			v = ATtableGet(t,ATgetFirst(m));
 			if ( v == NULL )
 			{
+//fprintf(stderr,"a!\n");
 				ATtableDestroy(t);
 				return ATfalse;
 			}
@@ -1554,6 +1597,7 @@ ATbool match(ATermAppl a, ATermList l, ATermList *r)
 			v = ATtableGet(t,ATgetFirst(m));
 			if ( v == NULL )
 			{
+//ATfprintf(stderr,"b! %t %t\n",ATelementAt(l,1),ATtableKeys(t));
 				ATtableDestroy(t);
 				return ATfalse;
 			}
@@ -1618,13 +1662,22 @@ ATermAppl get_proc_call(ATermAppl a, ATermList c)
 	l = (ATermList) remove_indices_context((ATerm) m,&a2,&c); // XXX check
 	s = makeSubsts(l,m);
 	a = (ATermAppl) a2;
-	arg_list = (ATermList) remove_indices_context((ATerm) l,&a2,&c);
+	arg_list = (ATermList) remove_indices_context((ATerm) l,&a2,&c); // XXX double??
+	
+	if ( generalise )
+	{
+		ATermList data = ATmakeList0();
+		arg_list = ATmakeList0();
+		a2 = generalise?replace_data_with_vars(a2,&arg_list,&data):a2;
+		//arg_list = get_vars(a2);
+	}
+
 	t = ATmakeList4((ATerm) var_name,(ATerm) arg_list,a2,(ATerm) gsMakeNil());
 	//arg_list = get_vars(a);
 	//t = ATmakeList4((ATerm) var_name,(ATerm) arg_list,(ATerm) a,(ATerm) gsMakeNil());
 	processes = ATappend(processes,(ATerm) t);
-//ATfprintf(stderr,"\n\nprocess %i: %t\n\n",ATgetLength(processes)-1,ATgetLast(processes));
-//gsPrintPart(stderr,ATelementAt((ATermList) ATgetLast(processes),2),0,0);
+ATfprintf(stderr,"\n\nprocess %i: %t\n\n",ATgetLength(processes)-1,ATgetLast(processes));
+gsPrintPart(stderr,ATelementAt((ATermList) ATgetLast(processes),2),0,0);
 	add_to_stack(ATgetLength(processes)-1);
 	if ( !match(a,t,&m) )
 	{
@@ -1646,17 +1699,22 @@ ATermList get_firsts(ATermAppl t)
 
 	if ( gsIsAction(t) )
 	{
-		return ATmakeList1((ATerm) ATmakeList4((ATerm) ATmakeList0(),(ATerm) t,(ATerm) gsMakeNil(),(ATerm) gsMakeDataExprTrue()));
+		return ATmakeList1((ATerm) ATmakeList4((ATerm) ATmakeList0(),(ATerm) t,(ATerm) gsMakeNil(),(ATerm) linTrue));
 	}
 	if ( gsIsProcess(t) )
 	{
 		j = proc_id(t);
-		if ( !is_done(j) )
+		if ( generalise || ATisEmpty(ATLgetArgument(t,1)) )
 		{
-			linearise(j);
-			remove_from_stack(j);
+			if ( !is_done(j) )
+			{
+				linearise(j);
+				remove_from_stack(j);
+			}
+			return get_proc(j,ATLgetArgument(t,1));
+		} else {
+			return get_firsts((ATermAppl) substitute_vars(ATelementAt(ATLelementAt(processes,j),2),ATLelementAt(ATLelementAt(processes,j),1),ATLgetArgument(t,1)));
 		}
-		return get_proc(j,ATLgetArgument(t,1));
 	}
 	if ( gsIsDelta(t) )
 	{
@@ -1664,7 +1722,7 @@ ATermList get_firsts(ATermAppl t)
 	}
 	if ( gsIsTau(t) )
 	{
-		return ATmakeList1((ATerm) ATmakeList4((ATerm) ATmakeList0(),(ATerm) t,(ATerm) gsMakeNil(),(ATerm) gsMakeDataExprTrue()));
+		return ATmakeList1((ATerm) ATmakeList4((ATerm) ATmakeList0(),(ATerm) t,(ATerm) gsMakeNil(),(ATerm) linTrue));
 	}
 	if ( gsIsSum(t) )
 	{
@@ -1741,21 +1799,25 @@ ATermList get_firsts(ATermAppl t)
 			n = synch_comm(ATAelementAt(ATLgetFirst(l),1),ATLgetArgument(t,0));
 			for (; !ATisEmpty(n); n=ATgetNext(n))
 			{
-				if ( gsIsNil(ATAelementAt(ATLgetFirst(l),2)) )
+				ATermAppl a = gsRewriteTerm(gsMakeDataExprAndWithTrueCheck(ATAelementAt(ATLgetFirst(n),1),ATAelementAt(ATLgetFirst(l),3)));
+				if ( !ATisEqual(a,linFalse) )
 				{
-					m = ATinsert(m,(ATerm) ATmakeList4(
-								ATelementAt(ATLgetFirst(l),0),
-								ATelementAt(ATLgetFirst(n),0),
-								(ATerm) gsMakeNil(),
-								(ATerm) gsMakeDataExprAndWithTrueCheck(ATAelementAt(ATLgetFirst(n),1),ATAelementAt(ATLgetFirst(l),3))
-								));
-				} else {
-					m = ATinsert(m,(ATerm) ATmakeList4(
-								ATelementAt(ATLgetFirst(l),0),
-								ATelementAt(ATLgetFirst(n),0),
-								(ATerm) gsMakeComm(ATLgetArgument(t,0),ATAelementAt(ATLgetFirst(l),2)),
-								(ATerm) gsMakeDataExprAndWithTrueCheck(ATAelementAt(ATLgetFirst(n),1),ATAelementAt(ATLgetFirst(l),3))
-								));
+					if ( gsIsNil(ATAelementAt(ATLgetFirst(l),2)) )
+					{
+						m = ATinsert(m,(ATerm) ATmakeList4(
+									ATelementAt(ATLgetFirst(l),0),
+									ATelementAt(ATLgetFirst(n),0),
+									(ATerm) gsMakeNil(),
+									(ATerm) a
+									));
+					} else {
+						m = ATinsert(m,(ATerm) ATmakeList4(
+									ATelementAt(ATLgetFirst(l),0),
+									ATelementAt(ATLgetFirst(n),0),
+									(ATerm) gsMakeComm(ATLgetArgument(t,0),ATAelementAt(ATLgetFirst(l),2)),
+									(ATerm) a
+									));
+					}
 				}
 			}
 		}
@@ -1798,24 +1860,28 @@ ATermList get_firsts(ATermAppl t)
 					u = gsMakeMerge((ATermAppl) increase_index(ATelementAt(ATLgetFirst(l),2),ATgetLength(ATelementAt(ATLgetFirst(n),0))),ATAelementAt(ATLgetFirst(n),2));
 				}
 
-				o = ATinsert(o,(ATerm) ATmakeList4(
-							(ATerm) ATconcat((ATermList) increase_index((ATerm) make_indices(ATLelementAt(ATLgetFirst(l),0)),ATgetLength(ATelementAt(ATLgetFirst(n),0))),ATLelementAt(ATLgetFirst(n),0)),
-							(ATerm) gsMakeSync((ATermAppl) increase_index(ATelementAt(ATLgetFirst(l),1),ATgetLength(ATelementAt(ATLgetFirst(n),0))),ATAelementAt(ATLgetFirst(n),1)),
-							(ATerm) u,
-							(ATerm) gsMakeDataExprAndWithTrueCheck((ATermAppl) increase_index(ATelementAt(ATLgetFirst(l),3),ATgetLength(ATelementAt(ATLgetFirst(n),0))),ATAelementAt(ATLgetFirst(n),3))
+				ATermAppl a = gsRewriteTerm(gsMakeDataExprAndWithTrueCheck((ATermAppl) increase_index(ATelementAt(ATLgetFirst(l),3),ATgetLength(ATelementAt(ATLgetFirst(n),0))),ATAelementAt(ATLgetFirst(n),3)));
+				if ( !ATisEqual(a,linFalse) )
+				{
+					o = ATinsert(o,(ATerm) ATmakeList4(
+								(ATerm) ATconcat((ATermList) increase_index((ATerm) make_indices(ATLelementAt(ATLgetFirst(l),0)),ATgetLength(ATelementAt(ATLgetFirst(n),0))),ATLelementAt(ATLgetFirst(n),0)),
+								(ATerm) gsMakeSync((ATermAppl) increase_index(ATelementAt(ATLgetFirst(l),1),ATgetLength(ATelementAt(ATLgetFirst(n),0))),ATAelementAt(ATLgetFirst(n),1)),
+								(ATerm) u,
+								(ATerm) a
 //							(ATerm) ATconcat((ATermList) make_indices(ATLelementAt(ATLgetFirst(l),0)),(ATermList) increase_index(ATelementAt(ATLgetFirst(n),0),ATgetLength(ATLelementAt(ATLgetFirst(l),0)))),
 		//					(ATerm) ATconcat(ATLelementAt(ATLgetFirst(l),0),ATLelementAt(ATLgetFirst(n),0)),
 //							(ATerm) gsMakeSync(ATAelementAt(ATLgetFirst(l),1),(ATermAppl) increase_index(ATelementAt(ATLgetFirst(n),1),ATgetLength(ATLelementAt(ATLgetFirst(l),0)))),
 //							(ATerm) gsMakeMerge(ATAelementAt(ATLgetFirst(l),2),(ATermAppl) increase_index(ATelementAt(ATLgetFirst(n),2),ATgetLength(ATLelementAt(ATLgetFirst(l),0)))),
 //							(ATerm) gsMakeDataExprAndWithTrueCheck(ATAelementAt(ATLgetFirst(l),3),(ATermAppl) increase_index(ATelementAt(ATLgetFirst(n),3),ATgetLength(ATLelementAt(ATLgetFirst(l),0))))
-							));
+								));
+				}
 			}
 		}
 		return ATreverse(o);
 /*		l = split_sync(t);
 		if ( ATisEmpty(ATLelementAt(l,1)) )
 		{
-			return ATmakeList1((ATerm) ATmakeList4((ATerm) ATmakeList0(),(ATerm) t,(ATerm) gsMakeNil(),(ATerm) gsMakeDataExprTrue()));
+			return ATmakeList1((ATerm) ATmakeList4((ATerm) ATmakeList0(),(ATerm) t,(ATerm) gsMakeNil(),(ATerm) linTrue));
 		} else {
 			m = get_firsts(ATAgetArgument(t,1));
 			//XXX
@@ -1841,20 +1907,30 @@ ATermList get_firsts(ATermAppl t)
 		m = ATmakeList0();
 		for (; !ATisEmpty(l); l=ATgetNext(l))
 		{
-			m = ATinsert(m,(ATerm) ATreplace(ATLgetFirst(l),(ATerm) gsMakeDataExprAnd(ATAgetArgument(t,0),ATAelementAt(ATLgetFirst(l),3)),3));
+			ATermAppl a = gsRewriteTerm(gsMakeDataExprAnd(ATAgetArgument(t,0),ATAelementAt(ATLgetFirst(l),3)));
+			if ( !ATisEqual(a,linFalse) )
+			{
+				m = ATinsert(m,(ATerm) ATreplace(ATLgetFirst(l),(ATerm) a,3));
+			}
 		}
 		l = get_firsts(ATAgetArgument(t,2));
 		for (; !ATisEmpty(l); l=ATgetNext(l))
 		{
-			m = ATinsert(m,(ATerm) ATreplace(ATLgetFirst(l),(ATerm) gsMakeDataExprAnd(gsMakeDataExprNot(ATAgetArgument(t,0)),ATAelementAt(ATLgetFirst(l),3)),3));
+			ATermAppl a = gsRewriteTerm(gsMakeDataExprAnd(gsMakeDataExprNot(ATAgetArgument(t,0)),ATAelementAt(ATLgetFirst(l),3)));
+			if ( !ATisEqual(a,linFalse) )
+			{
+				m = ATinsert(m,(ATerm) ATreplace(ATLgetFirst(l),(ATerm) a,3));
+			}
 		}
 		return ATreverse(m);
 	}
 	if ( gsIsMerge(t) )
 	{
+//gsPrintPart(stderr,t,false,0);fprintf(stderr,"\n\n");
 		l = get_firsts(gsMakeLMerge(ATAgetArgument(t,0),ATAgetArgument(t,1)));
 		m = get_firsts(gsMakeLMerge(ATAgetArgument(t,1),ATAgetArgument(t,0)));
 		n = ATmakeList0();
+//fprintf(stderr,"merge\n\n");
 		for (;!ATisEmpty(m);m=ATgetNext(m))
 		{
 			if ( gsIsMerge(ATAelementAt(ATLgetFirst(m),2)) )
@@ -1873,7 +1949,9 @@ ATermList get_firsts(ATermAppl t)
 		n = ATreverse(n);
 		l = ATconcat(l,n);
 //		l = ATconcat(l,get_firsts(gsMakeLMerge(ATAgetArgument(t,1),ATAgetArgument(t,0))));
+//fprintf(stderr,"add sync\n\n");
 		l = ATconcat(l,get_firsts(gsMakeSync(ATAgetArgument(t,0),ATAgetArgument(t,1))));
+//fprintf(stderr,"done merge\n\n");
 		return l;
 	}
 	if ( gsIsLMerge(t) )
@@ -1926,6 +2004,16 @@ void linearise(int i)
 	m = ATreverse(m);
 	set_proc(i,m);
 //ATfprintf(stderr,"\n\nset_proc(%i): %t\n\n",i,m);
+/*fprintf(stderr,"\n\nset_proc(%i)\n",i);
+for (; !ATisEmpty(m); m=ATgetNext(m))
+{
+gsPrintPart(stderr,ATelementAt(ATLgetFirst(m),3),false,0);
+fprintf(stderr," -> ");
+gsPrintPart(stderr,ATelementAt(ATLgetFirst(m),1),false,0);
+fprintf(stderr," . ");
+gsPrintPart(stderr,ATelementAt(ATLgetFirst(m),2),false,0);
+fprintf(stderr,"\n\n");
+}*/
 }
 
 
@@ -1947,7 +2035,7 @@ ATermAppl gen_linproc(ATermList sums, ATermList c)
 		} else {
 			t = gsMakeSeq(ATAelementAt(ATLgetFirst(sums),1),ATAelementAt(ATLgetFirst(sums),2));
 		}
-		if ( !ATisEqual(ATAelementAt(ATLgetFirst(sums),3),gsMakeDataExprTrue()) )
+		if ( !ATisEqual(ATAelementAt(ATLgetFirst(sums),3),linTrue) )
 		{
 			t = gsMakeCond(ATAelementAt(ATLgetFirst(sums),3),t,gsMakeDelta());
 		}
@@ -2377,6 +2465,13 @@ int main_linearisation(ATermAppl Spec)
 	ATbool init_used;
 	int i, init_id;
 
+	gsRewriteInit(ATAgetArgument(Spec,3),GS_REWR_INNER3);
+
+	linTrue = gsMakeDataExprTrue();
+	ATprotectAppl(&linTrue);
+	linFalse = gsMakeDataExprFalse();
+	ATprotectAppl(&linFalse);
+
 	ATprotectList(&processes);
 	ATprotectAppl(&initial_process);
 	ATprotectList(&todo_stack);
@@ -2430,6 +2525,7 @@ ATermAppl gsLinearise2_nolpe(ATermAppl Spec)
 //	ATermList lin;
 	int init_id;
 
+	generalise = true;
 	init_id = main_linearisation(Spec);
 //	Spec = ATAelementAt(lin,0);
 //	init_id = ATgetInt((ATermInt) ATelementAt(lin,1));
@@ -2441,9 +2537,27 @@ ATermAppl gsLinearise2_nolpe_subst(ATermAppl Spec, int reuse_cycles)
 {
 	int init_id;
 
+	generalise = true;
 	init_id = main_linearisation(Spec);
 
 	return update_spec_subst(Spec,init_id,reuse_cycles);
+}
+
+ATermAppl gsLinearise2_statespace(ATermAppl Spec, bool lpe)
+{
+	int init_id;
+
+	generalise = false;
+	init_id = main_linearisation(Spec);
+
+	if ( lpe )
+	{
+		Spec = make_lpe(Spec,init_id);
+	} else {
+		Spec = update_spec(Spec,init_id);
+	}
+
+	return Spec;
 }
 
 ATermAppl gsLinearise2(ATermAppl Spec, int cluster)
@@ -2452,6 +2566,7 @@ ATermAppl gsLinearise2(ATermAppl Spec, int cluster)
 //	ATermList l;	
 	int init_id;
 
+	generalise = true;
 	init_id = main_linearisation(Spec);
 
 //	Spec = ATAelementAt(lin,0);

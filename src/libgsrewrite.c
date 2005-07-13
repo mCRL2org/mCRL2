@@ -11,6 +11,7 @@ extern "C" {
 #include "gslowlevel.h"
 #include "gsfunc.h"
 #include "libgsrewrite.h"
+#include "gssubstitute.h"
 
 #include "gsrewr_inner.h"
 #include "gsrewr_inner2.h"

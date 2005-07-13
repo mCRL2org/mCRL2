@@ -7,6 +7,7 @@ extern "C" {
 
 ATermAppl gsLinearise2_nolpe(ATermAppl Spec);
 ATermAppl gsLinearise2_nolpe_subst(ATermAppl Spec, int reuse_cycles);
+ATermAppl gsLinearise2_statespace(ATermAppl Spec, bool lpe);
 ATermAppl gsLinearise2(ATermAppl Spec, int cluster);
 
 #ifdef __cplusplus

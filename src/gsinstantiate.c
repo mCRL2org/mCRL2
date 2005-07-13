@@ -51,10 +51,13 @@ void gsinst_callback(ATermAppl transition, ATerm state)
 
 	if ( i < num_states )
 	{
-		fprintf(aut,"(%lu,\"",current_state);
-		gsPrintPart(aut,transition,false,0);
-		fprintf(aut,"\",%lu)\n",i);
+		if ( aut != NULL )
+		{
+			fprintf(aut,"(%lu,\"",current_state);
+			gsPrintPart(aut,transition,false,0);
+			fprintf(aut,"\",%lu)\n",i);
 fflush(aut);
+		}
 		trans++;
 	}
 }
@@ -62,9 +65,10 @@ fflush(aut);
 
 void print_help(FILE *f)
 {
-	fprintf(f,"Usage: %s OPTIONS LPEFILE OUTFILE\n",NAME);
+	fprintf(f,"Usage: %s OPTIONS LPEFILE [OUTFILE]\n",NAME);
 	fprintf(f,"Generate state space of LPEFILE and save the result to\n"
-	          "OUTFILE (in the aut format).\n"
+	          "OUTFILE (in the aut format). If OUTFILE is not supplied, the\n"
+		  "state space is not stored.\n"
 	          "\n"
 	          "The OPTIONS that can be used are:\n"
 	          "-h, --help               Display this help message\n"
@@ -173,9 +177,9 @@ int main(int argc, char **argv)
 		}
 	}
 
-	if ( argc-optind < 2 )
+	if ( argc-optind < 1 )
 	{
-		fprintf(stderr,"Usage: %s <lpe file> <output aut file>\n",NAME);
+		print_help(stderr);
 		return 1;
 	}
 
@@ -184,11 +188,17 @@ int main(int argc, char **argv)
 		perror(NAME);
 		return 1;
 	}
-	if ( (aut = fopen(argv[optind+1],"w")) == NULL )
+	if ( argc-optind > 1 )
 	{
-		perror(NAME);
-		return 1;
+		if ( (aut = fopen(argv[optind+1],"w")) == NULL )
+		{
+			perror(NAME);
+			return 1;
+		}
+	} else {
+		aut = NULL;
 	}
+
 	gsEnableConstructorFunctions();
 	Spec = (ATermAppl) ATreadFromFile(SpecStream);
 	if ( Spec == NULL )
@@ -206,7 +216,10 @@ int main(int argc, char **argv)
 		backpointers = NULL;
 	}
 	
-	fprintf(aut,"des (0,0,0)                   \n");
+	if ( aut != NULL )
+	{
+		fprintf(aut,"des (0,0,0)                   \n");
+	}
 
 	ATerm state = gsNextStateInit(Spec,!usedummies,strat);
 
@@ -296,9 +309,12 @@ int main(int argc, char **argv)
 		}*/
 	}
 
-	rewind(aut);
-	fprintf(aut,"des (0,%lu,%lu)",trans,num_states);
-	fclose(aut);
+	if ( aut != NULL )
+	{
+		rewind(aut);
+		fprintf(aut,"des (0,%lu,%lu)",trans,num_states);
+		fclose(aut);
+	}
 
 	if ( !err )
 	{

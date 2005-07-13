@@ -32,6 +32,10 @@ void print_help(FILE *f)
 		  "                         processes if possible\n"
 	          "-r, --reuse-cycles       Improves result of -2 but can take\n"
 		  "                         longer to calculate\n"
+	          "-s, --state-space        Generate state-space. Useful if the\n"
+		  "                         system is very complex in general,\n"
+		  "                         but because of the initial state has\n"
+		  "                         a small state-space.\n"
 	          "-a, --read-aterm         SPECFILE is an ATerm\n"
 	          "-h, --human              Write the result in human readable\n"
 		  "                         format\n"
@@ -43,7 +47,7 @@ int main(int argc, char **argv)
 	FILE *SpecStream,*OutFile;
 	ATerm stackbot;
 	ATermAppl Spec;
-	#define sopts "cl2rah"
+	#define sopts "cl2rsah"
 	#define HelpOption 1
 	struct option lopts[] = {
 		{ "help",		no_argument,	NULL,	HelpOption },
@@ -51,12 +55,13 @@ int main(int argc, char **argv)
 		{ "linear",		no_argument,	NULL,	'l' },
 		{ "linear2",		no_argument,	NULL,	'2' },
 		{ "reuse-cycles",	no_argument,	NULL,	'r' },
+		{ "state-space",	no_argument,	NULL,	's' },
 		{ "read-aterm",		no_argument,	NULL,	'a' },
 		{ "human",		no_argument,	NULL,	'h' },
 		{ 0, 0, 0, 0 }
 	};
 	int opt;
-	bool cluster,linear,linear2,reuse,read_aterm,human;
+	bool cluster,linear,linear2,reuse,sspace,read_aterm,human;
 
 	ATinit(argc,argv,&stackbot);
 
@@ -64,6 +69,7 @@ int main(int argc, char **argv)
 	linear = false;
 	linear2 = false;
 	reuse = false;
+	sspace = false;
 	read_aterm = false;
 	human = false;
 	while ( (opt = getopt_long(argc,argv,sopts,lopts,NULL)) != -1 )
@@ -84,6 +90,9 @@ int main(int argc, char **argv)
 				break;
 			case 'r':
 				reuse = true;
+				break;
+			case 's':
+				sspace = true;
 				break;
 			case 'a':
 				read_aterm = true;
@@ -168,14 +177,19 @@ int main(int argc, char **argv)
 		}
 	}
 
-	if ( linear )
+	if ( sspace )
 	{
-		Spec = gsLinearise2_nolpe(Spec);
-	} else if ( linear2 )
-	{
-		Spec = gsLinearise2_nolpe_subst(Spec,reuse);
+		Spec = gsLinearise2_statespace(Spec,!(linear||linear2));
 	} else {
-		Spec = gsLinearise2(Spec,cluster);
+		if ( linear )
+		{
+			Spec = gsLinearise2_nolpe(Spec);
+		} else if ( linear2 )
+		{
+			Spec = gsLinearise2_nolpe_subst(Spec,reuse);
+		} else {
+			Spec = gsLinearise2(Spec,cluster);
+		}
 	}
 
 	if ( human )

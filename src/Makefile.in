@@ -64,7 +64,7 @@ LINEARISER_LDFLAGS = -lgsparse -lgsrewrite -lATerm -lm -ldl
 LIN_NAME           = lin
 LIN_OBJECTS        = lin.o gslinearise2.o
 OBJECTS           += $(LIN_OBJECTS)
-LIN_LDFLAGS        = -lgsparse -lATerm -lm
+LIN_LDFLAGS        = -lgsparse -lgsrewrite -lATerm -lm -ldl
 
 #Rewriter definitions
 LIBREWR_NAME       = libgsrewrite.a

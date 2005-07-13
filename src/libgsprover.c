@@ -312,26 +312,29 @@ static ATermList EliminateVars(ATermList l)
 	t = ATgetFirst(m);
 
 //	t = gsRewriteInternal(t);
-	removed_vars = ATmakeList0();
+//	removed_vars = ATmakeList0();
 	while ( !ATisEmpty(vars) && FindEquality(t,vars,&v,&e) )
 	{
 		vars = ATremoveElement(vars, v);
 		RWsetVariable(v,e);
-		removed_vars = ATinsert(removed_vars,v);
+//		removed_vars = ATinsert(removed_vars,v);
 //		vals = (ATermList) gsSubstValues(ATmakeList1((ATerm) gsMakeSubst(v,e)),(ATerm) vals,true);
+		vals = gsRewriteInternals(vals);		
 //		t = gsSubstValues(ATmakeList1((ATerm) gsMakeSubst(v,e)),t,true);
 		t = gsRewriteInternal(t);
+		RWclearVariable(v);
 	}
 
-	if ( ATisEmpty(removed_vars) )
+/*	if ( ATisEmpty(removed_vars) )
 	{
 		return l;
-	}
-	l = ATmakeList3((ATerm) vars, (ATerm) gsRewriteInternals(vals), (ATerm) t);
-	for (; !ATisEmpty(removed_vars); removed_vars=ATgetNext(removed_vars))
+	}*/
+//	l = ATmakeList3((ATerm) vars, (ATerm) gsRewriteInternals(vals), (ATerm) t);
+	l = ATmakeList3((ATerm) vars, (ATerm) vals, (ATerm) t);
+/*	for (; !ATisEmpty(removed_vars); removed_vars=ATgetNext(removed_vars))
 	{
 		RWclearVariable(ATgetFirst(removed_vars));
-	}
+	}*/
 	return l;
 }
 
