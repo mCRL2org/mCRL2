@@ -273,7 +273,7 @@ ATerm increase_index_bnd(ATerm a, int n, int b)
 			{
 				args[i] = increase_index_bnd(ATgetArgument((ATermAppl) a,i),n,b);
 			}
-			a = ATmakeApplArray(ATgetAFun((ATermAppl) a),args);
+			a = (ATerm) ATmakeApplArray(ATgetAFun((ATermAppl) a),args);
 			FREE_A(args);
 			return a;
 			
@@ -625,15 +625,15 @@ int add_process_eqn(ATermAppl e)
 //	if ( !generalise )
 	{
 		processes = ATappend(processes,(ATerm) ATmakeList4(ATgetArgument(ATAgetArgument(e,1),0),ATgetArgument(e,2),annotate(ATgetArgument(e,3)),(ATerm) gsMakeNil()));
-ATfprintf(stderr,"\n\nprocess %i: %t\n\n",ATgetLength(processes)-1,ATgetLast(processes));
-gsPrintPart(stderr,ATAelementAt((ATermList) ATgetLast(processes),2),0,0);
+//ATfprintf(stderr,"\n\nprocess %i: %t\n\n",ATgetLength(processes)-1,ATgetLast(processes));
+//gsPrintPart(stderr,ATAelementAt((ATermList) ATgetLast(processes),2),0,0);
 	}
 	if ( generalise && (ATgetLength(vars) > ATgetLength(ATLgetArgument(e,2))) )
 	{
 //		processes = ATappend(processes,(ATerm) ATmakeList4(ATgetArgument(ATAgetArgument(e,1),0),(ATerm) vars,annotate((ATerm) ni),(ATerm) gsMakeNil()));
 		processes = ATappend(processes,(ATerm) ATmakeList4((ATerm) name,(ATerm) vars,annotate((ATerm) ni),(ATerm) gsMakeNil()));
-ATfprintf(stderr,"\n\nprocess %i: %t\n\n",ATgetLength(processes)-1,ATgetLast(processes));
-gsPrintPart(stderr,ATAelementAt((ATermList) ATgetLast(processes),2),0,0);
+//ATfprintf(stderr,"\n\nprocess %i: %t\n\n",ATgetLength(processes)-1,ATgetLast(processes));
+//gsPrintPart(stderr,ATAelementAt((ATermList) ATgetLast(processes),2),0,0);
 		return ATgetLength(processes)-2;
 	}
 
@@ -708,7 +708,7 @@ ATerm replace_data_with_vars_gen(ATerm a, ATermList *v, ATermList *d, ATermAppl 
 				return (ATerm) ATsetArgument((ATermAppl) a,(ATerm) m,1);
 			} else if ( gsIsSum((ATermAppl) a) )
 			{
-				return gsMakeSum(ATLgetArgument((ATermAppl) a,0),(ATermAppl) replace_data_with_vars_gen(ATgetArgument((ATermAppl) a,1),v,d,namebase));
+				return (ATerm) gsMakeSum(ATLgetArgument((ATermAppl) a,0),(ATermAppl) replace_data_with_vars_gen(ATgetArgument((ATermAppl) a,1),v,d,namebase));
 			} else {
 				l = ATgetArguments((ATermAppl) a);
 				m = ATmakeList0();
@@ -756,8 +756,8 @@ if ( gsIsProcess(i) )
 	ni = generalise?replace_data_with_vars((ATermAppl) annotate((ATerm) i),&vars,&data):i;
 
 	processes = ATappend(processes,(ATerm) ATmakeList4((ATerm) name,(ATerm) vars,annotate((ATerm) ni),(ATerm) gsMakeNil()));
-ATfprintf(stderr,"\n\nprocess %i: %t\n\n",ATgetLength(processes)-1,ATgetLast(processes));
-gsPrintPart(stderr,ATAelementAt((ATermList) ATgetLast(processes),2),0,0);
+//ATfprintf(stderr,"\n\nprocess %i: %t\n\n",ATgetLength(processes)-1,ATgetLast(processes));
+//gsPrintPart(stderr,ATAelementAt((ATermList) ATgetLast(processes),2),0,0);
 
 	initial_process = gsMakeProcess(gsMakeProcVarId(name,vars),data);
 
@@ -1668,7 +1668,7 @@ ATermAppl get_proc_call(ATermAppl a, ATermList c)
 	{
 		ATermList data = ATmakeList0();
 		arg_list = ATmakeList0();
-		a2 = generalise?replace_data_with_vars(a2,&arg_list,&data):a2;
+		a2 = generalise?((ATerm) replace_data_with_vars((ATermAppl) a2,&arg_list,&data)):a2;
 		//arg_list = get_vars(a2);
 	}
 
@@ -1676,8 +1676,8 @@ ATermAppl get_proc_call(ATermAppl a, ATermList c)
 	//arg_list = get_vars(a);
 	//t = ATmakeList4((ATerm) var_name,(ATerm) arg_list,(ATerm) a,(ATerm) gsMakeNil());
 	processes = ATappend(processes,(ATerm) t);
-ATfprintf(stderr,"\n\nprocess %i: %t\n\n",ATgetLength(processes)-1,ATgetLast(processes));
-gsPrintPart(stderr,ATelementAt((ATermList) ATgetLast(processes),2),0,0);
+//ATfprintf(stderr,"\n\nprocess %i: %t\n\n",ATgetLength(processes)-1,ATgetLast(processes));
+//gsPrintPart(stderr,ATelementAt((ATermList) ATgetLast(processes),2),0,0);
 	add_to_stack(ATgetLength(processes)-1);
 	if ( !match(a,t,&m) )
 	{
