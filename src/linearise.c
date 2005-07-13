@@ -1411,8 +1411,15 @@ static ATermAppl fresh_name(char *name)
 
 static int occursinterm(ATermAppl var, ATermAppl t)
 { 
+  assert(gsIsDataVarId(var));
   if (gsIsDataVarId(t))
-  { return var==t; }
+  { 
+    /* we check whether the name of the variable and the
+       constant match; they may have different types, and
+       not be exactly the same */
+    return ATgetAFun(ATgetArgument(var,0))==
+           ATgetAFun(ATgetArgument(t,0)); 
+  }
 
   if (gsIsOpId(t))
   { return 0; }
@@ -2935,29 +2942,57 @@ static ATermList makepCRLprocs(ATermAppl t, ATermList pCRLprocs)
 }
 /**************** Collectparameterlist ******************************/
 
-static int alreadypresent(ATermAppl *var,ATermList vl,int n)
+static int alreadypresent(ATermAppl *var,ATermList vl, long n)
 { /* Note: variables can be different, although they have the
-     same string, due to different types. */
+     same string, due to different types. If they have the
+     same string, but different types, the conflict must
+     be resolved by renaming the name of the variable */
 
-  ATermAppl var1=NULL;
+  // ATfprintf(stderr,"Alreadypresent: %t in %t\n",*var,vl);
 
   if (vl==ATempty) return 0;
-  var1=ATAgetFirst(vl);
+  ATermAppl var1=ATAgetFirst(vl);
 
   if (!gsIsDataVarId(var1))
   { ATerror("Expect variablelist %t\n",vl);
   }
 
+  /* The variable with correct type is present: */
   if (*var==var1)
   { return 1;
   }
 
+  /* Compare whether the string indicating the variable
+     name is equal, but the types are different. In that
+     case the variable needs to be renamed to a fresh one,
+     and is not present in vl. */
+  if (ATgetAFun(ATAgetArgument(*var,0))==
+      ATgetAFun(ATAgetArgument(var1,0)))
+  { 
+    ATermAppl var2=getfreshvariable(
+                      ATgetName(ATgetAFun(ATAgetArgument(*var,0))),
+                      ATAgetArgument(*var,1));
+    // ATfprintf(stderr,"HIER: %t   %t    %t\n",*var,var1,var2);
+    objectdata[n].parameters=
+               substitute_datalist(ATinsertA(ATempty,var2),
+                                   ATinsertA(ATempty,*var),
+                                   objectdata[n].parameters);
+    objectdata[n].processbody=
+               substitute_pCRLproc(ATinsertA(ATempty,var2),  
+                                   ATinsertA(ATempty,*var),
+                                   objectdata[n].processbody);
+    *var=var2;
+    return 0;
+  }
+
+  /* otherwise it can be present in vl */
   vl=ATgetNext(vl);
   return alreadypresent(var,vl,n);
 }
 
-static ATermList joinparameters(ATermList par1,ATermList par2,int n)
+static ATermList joinparameters(ATermList par1,ATermList par2,long n)
 { ATermAppl var2=NULL;
+  
 
   if (par2==ATempty) 
      return par1;
@@ -2977,6 +3012,7 @@ static ATermList collectparameterlist(ATermList pCRLprocs)
   ATermList parameters=ATempty;
   for (walker=pCRLprocs ; walker!=ATempty ; walker=ATgetNext(walker))
     { long n=objectIndex(ATAgetFirst(walker));
+//  ATfprintf(stderr,"Join Parameters:\npar1 %t\npar2: %t\n\n",parameters,objectdata[n].parameters);
       parameters=joinparameters(parameters,objectdata[n].parameters,n);
     }
   return parameters;
@@ -3777,7 +3813,15 @@ static ATermList make_procargs(
 }
 
 static int occursin(ATermAppl name,ATermList pars)
-{ return (ATindexOf(pars,(ATerm)name,0)>=0);
+{ 
+  assert(gsIsDataVarId(name));
+  for(ATermList l=pars ; l!=ATempty ; l=ATgetNext(l))
+  { if (ATgetAFun(ATgetArgument(name,0))==
+        ATgetAFun(ATgetArgument(ATgetFirst(l),0)))
+    { return 1;
+    }
+  }
+  return 0;
 }
 
 static ATermAppl dummyterm(
@@ -4293,7 +4337,7 @@ static enumeratedtype *create_enumeratedtype
       for(j=0 ; (j<n) ; j++)
       { /* Maak hier een naamlijst van sort elementen. */
         ATermAppl constructor=NULL;
-        snprintf(scratch1,STRINGLENGTH,"e%d-%d",j,n);
+        snprintf(scratch1,STRINGLENGTH,"e%d_%d",j,n);
         constructor=gsMakeOpId(fresh_name(scratch1),w->sortId);
         insertconstructor(constructor,spec);
         w->elementnames=ATinsertA(w->elementnames,constructor);
@@ -4421,7 +4465,7 @@ static void create_case_function_on_enumeratedtype(
     }
 
     newsort=gsMakeSortArrow(e->sortId,newsort);
-    snprintf(scratch1,STRINGLENGTH,"C%d-%s",e->size,
+    snprintf(scratch1,STRINGLENGTH,"C%d_%s",e->size,
          ((gsIsSortArrow(newsort))?"fun":ATSgetArgument(sort,0)));
     casefunction=gsMakeOpId(
                       fresh_name(scratch1),
@@ -4491,7 +4535,7 @@ static int count_summands(ATermList t)
 { return ATgetLength(t);
 }
 
-static int mergeoccursin(
+static int mergeoccursin( 
                ATermAppl *var, 
                ATermList v,
                ATermList *matchinglist,
@@ -4915,7 +4959,6 @@ static ATermAppl collect_sum_arg_arg_cond(
   }
   else
   { resultmultiactionlist=ATempty;
-    ATermList resultf=ATempty;
     /* ATermList nextmultiActions=ATempty; */
     long multiactioncount=ATgetLength(
                             ATLgetArgument(
@@ -4923,6 +4966,7 @@ static ATermAppl collect_sum_arg_arg_cond(
                               0));
     for( ; multiactioncount>0 ; multiactioncount-- )
     { 
+      ATermList resultf=ATempty;
       long fcnt=ATgetLength(
                      ATgetArgument(
                        ATelementAt(
@@ -5638,6 +5682,13 @@ static int occursinvarandremove(ATermAppl var, ATermList *vl)
   if (var==var1)
     return 1; 
 
+#ifdef NDEBUG
+   if (ATgetAFun(ATgetArgument(var,0))==
+       ATgetAFun(ATgetArgument(var1,0)))
+   { ATerror("Variable conflict %t  %t\n",var,var1);
+   }
+#endif
+
   result=occursinvarandremove(var,vl);
   *vl=ATinsertA(*vl,var1); 
   return result;
@@ -5694,11 +5745,10 @@ static ATermList construct_renaming(
     pars2=ATgetNext(pars2);
 
     if (occursin(var2,pars1))
-    { ATermAppl var3=gsMakeDataVarId(
-                        fresh_name(ATSgetArgument(var2,0)),
+    { ATermAppl var3=getfreshvariable(
+                        ATSgetArgument(var2,0), 
                         ATAgetArgument(var2,1)); 
 
-      insertvariable(var3,ATtrue);
       t1=ATinsertA(construct_renaming(pars1,pars2,&t,&t2),var3);
           
       *pars4=ATinsertA(t2,var2);
@@ -6385,7 +6435,7 @@ static ATermAppl parallelcomposition(
   pars2=linGetParameters(t2);
 
   renaming=construct_renaming(pars1,pars2,&pars3,&pars2renaming); 
-
+//  ATfprintf(stderr,"pars1: %t\npars2: %t\npars3: %t\n\n",pars1,pars2,pars3);
 
   ATfprintf(stderr,"Parallel composition is being translated... ");
 
