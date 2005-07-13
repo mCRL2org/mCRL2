@@ -24,6 +24,7 @@ static ATermList *inner3_eqns;
 static ATermInt trueint;
 static AFun nilAFun;
 static AFun opidAFun;
+static AFun ruleAFun;
 static int max_vars;
 static bool is_initialised = false;
 
@@ -158,6 +159,7 @@ void rewrite_init_inner3()
 		ATunprotectInt(&trueint);
 		ATunprotectAFun(nilAFun);
 		ATunprotectAFun(opidAFun);
+		ATunprotectAFun(ruleAFun);
 		ATunprotectArray((ATerm *) int2term);
 		ATunprotectArray((ATerm *) inner3_eqns);
 	}
@@ -175,12 +177,15 @@ void rewrite_init_inner3()
 	ATprotectAFun(nilAFun);
 	opidAFun = ATgetAFun(gsMakeDataExprTrue());
 	ATprotectAFun(opidAFun);
+	ruleAFun = ATmakeAFun("@RULE@",4,false);
+	ATprotectAFun(opidAFun);
 
 	l = opid_eqns;
 	for (; !ATisEmpty(l); l=ATgetNext(l))
 	{
 		// XXX only adds the last rule where lhs is an opid; this might go "wrong" if this rule is removed later
-		ATtablePut(tmp_eqns,OpId2Int(ATAgetArgument(ATAgetFirst(l),2),true),(ATerm) ATmakeList1((ATerm) ATmakeList4((ATerm) ATmakeList0(),toInner(ATAgetArgument(ATAgetFirst(l),1),true),(ATerm) ATmakeList0(),toInner(ATAgetArgument(ATAgetFirst(l),3),true))));
+//		ATtablePut(tmp_eqns,OpId2Int(ATAgetArgument(ATAgetFirst(l),2),true),(ATerm) ATmakeList1((ATerm) ATmakeList4((ATerm) ATmakeList0(),toInner(ATAgetArgument(ATAgetFirst(l),1),true),(ATerm) ATmakeList0(),toInner(ATAgetArgument(ATAgetFirst(l),3),true))));
+		ATtablePut(tmp_eqns,OpId2Int(ATAgetArgument(ATAgetFirst(l),2),true),(ATerm) ATmakeList1((ATerm) ATmakeAppl4(ruleAFun,(ATerm) ATmakeList0(),toInner(ATAgetArgument(ATAgetFirst(l),1),true),(ATerm) ATmakeList0(),toInner(ATAgetArgument(ATAgetFirst(l),3),true))));
 	}
 
 	l = dataappl_eqns;
@@ -195,7 +200,8 @@ void rewrite_init_inner3()
 		{
 			max_vars = ATgetLength(ATgetArgument(ATAgetFirst(l),0));
 		}
-		n = ATinsert(n,(ATerm) ATmakeList4(ATgetArgument(ATAgetFirst(l),0),toInner(ATAgetArgument(ATAgetFirst(l),1),true),(ATerm) ATgetNext(m),toInner(ATAgetArgument(ATAgetFirst(l),3),true)));
+//		n = ATinsert(n,(ATerm) ATmakeList4(ATgetArgument(ATAgetFirst(l),0),toInner(ATAgetArgument(ATAgetFirst(l),1),true),(ATerm) ATgetNext(m),toInner(ATAgetArgument(ATAgetFirst(l),3),true)));
+		n = ATinsert(n,(ATerm) ATmakeAppl4(ruleAFun,ATgetArgument(ATAgetFirst(l),0),toInner(ATAgetArgument(ATAgetFirst(l),1),true),(ATerm) ATgetNext(m),toInner(ATAgetArgument(ATAgetFirst(l),3),true)));
 		ATtablePut(tmp_eqns,ATgetFirst(m),(ATerm) n);
 	}
 
@@ -229,6 +235,7 @@ void rewrite_finalise_inner3()
 	ATunprotectInt(&trueint);
 	ATunprotectAFun(nilAFun);
 	ATunprotectAFun(opidAFun);
+	ATunprotectAFun(ruleAFun);
 	ATunprotectArray((ATerm *) int2term);
 	ATunprotectArray((ATerm *) inner3_eqns);
 	is_initialised = false;
@@ -236,8 +243,8 @@ void rewrite_finalise_inner3()
 
 void rewrite_add_inner3(ATermAppl eqn)
 {
-	ATermList l,m;
-	ATermAppl a;
+	ATermList l;
+	ATermAppl a,m;
 	ATermInt i,j;
 	unsigned int old_num;
 
@@ -247,11 +254,13 @@ void rewrite_add_inner3(ATermAppl eqn)
 	if ( gsIsOpId(a) )
 	{
 		j = (ATermInt) OpId2Int(a,true);
-		m = ATmakeList4((ATerm) ATmakeList0(),toInner(ATAgetArgument(eqn,1),true),(ATerm) ATmakeList0(),toInner(ATAgetArgument(eqn,3),true));
+//		m = ATmakeList4((ATerm) ATmakeList0(),toInner(ATAgetArgument(eqn,1),true),(ATerm) ATmakeList0(),toInner(ATAgetArgument(eqn,3),true));
+		m = ATmakeAppl4(ruleAFun,(ATerm) ATmakeList0(),toInner(ATAgetArgument(eqn,1),true),(ATerm) ATmakeList0(),toInner(ATAgetArgument(eqn,3),true));
 	} else {
 		l = (ATermList) toInner(a,true);
 		j = (ATermInt) ATgetFirst(l);
-		m = ATmakeList4(ATgetArgument(eqn,0),toInner(ATAgetArgument(eqn,1),true),(ATerm) ATgetNext(l),toInner(ATAgetArgument(eqn,3),true));
+//		m = ATmakeList4(ATgetArgument(eqn,0),toInner(ATAgetArgument(eqn,1),true),(ATerm) ATgetNext(l),toInner(ATAgetArgument(eqn,3),true));
+		m = ATmakeAppl4(ruleAFun,ATgetArgument(eqn,0),toInner(ATAgetArgument(eqn,1),true),(ATerm) ATgetNext(l),toInner(ATAgetArgument(eqn,3),true));
 	}
 
 	if ( num_opids > old_num )
@@ -296,19 +305,21 @@ void rewrite_add_inner3(ATermAppl eqn)
 
 void rewrite_remove_inner3(ATermAppl eqn)
 {
-	ATermList l,m;
-	ATermAppl a;
+	ATermList l;
+	ATermAppl a,m;
 	ATerm t;
 
 	a = ATAgetArgument(eqn,2);
 	if ( gsIsOpId(a) )
 	{
 		t = OpId2Int(a,false);
-		m = ATmakeList4((ATerm) ATmakeList0(),toInner(ATAgetArgument(eqn,1),true),(ATerm) ATmakeList0(),toInner(ATAgetArgument(eqn,3),true));
+//		m = ATmakeList4((ATerm) ATmakeList0(),toInner(ATAgetArgument(eqn,1),true),(ATerm) ATmakeList0(),toInner(ATAgetArgument(eqn,3),true));
+		m = ATmakeAppl4(ruleAFun,(ATerm) ATmakeList0(),toInner(ATAgetArgument(eqn,1),true),(ATerm) ATmakeList0(),toInner(ATAgetArgument(eqn,3),true));
 	} else {
 		l = (ATermList) toInner(a,false);
 		t = ATgetFirst(l);
-		m = ATmakeList4(ATgetArgument(eqn,0),toInner(ATAgetArgument(eqn,1),true),(ATerm) ATgetNext(l),toInner(ATAgetArgument(eqn,3),true));
+//		m = ATmakeList4(ATgetArgument(eqn,0),toInner(ATAgetArgument(eqn,1),true),(ATerm) ATgetNext(l),toInner(ATAgetArgument(eqn,3),true));
+		m = ATmakeAppl4(ruleAFun,ATgetArgument(eqn,0),toInner(ATAgetArgument(eqn,1),true),(ATerm) ATgetNext(l),toInner(ATAgetArgument(eqn,3),true));
 	}
 
 	if ( ATisInt(t) )
@@ -421,8 +432,19 @@ static bool match_inner(ATerm t, ATerm p, ATermAppl *vars, ATerm *vals, int *len
 	}
 }
 
+static ATerm build(ATerm Term, int buildargs, ATermAppl *vars, ATerm *vals, int len);
 static ATerm rewrite_func(ATermInt op, ATermList args);
 static ATerm rewrite(ATerm Term);
+
+static ATermList build_args(ATermList args, int buildargs, ATermAppl *vars, ATerm *vals, int len)
+{
+	if ( (buildargs == 0) || ATisEmpty(args) )
+	{
+		return args;
+	} else {
+		return ATinsert(build_args(ATgetNext(args),buildargs-1,vars,vals,len),build(ATgetFirst(args),-1,vars,vals,len));
+	}
+}
 
 static ATerm build(ATerm Term, int buildargs, ATermAppl *vars, ATerm *vals, int len)
 {
@@ -439,7 +461,7 @@ static ATerm build(ATerm Term, int buildargs, ATermAppl *vars, ATerm *vals, int 
 			buildargs = ATgetLength(args);
 		}
 
-		l = ATmakeList0();
+/*		l = ATmakeList0();
 		for (int i=0; i<buildargs; i++)
 		{
 			l = ATinsert(l,build(ATgetFirst(args),-1,vars,vals,len));
@@ -449,7 +471,8 @@ static ATerm build(ATerm Term, int buildargs, ATermAppl *vars, ATerm *vals, int 
 		{
 			l = ATinsert(l,ATgetFirst(args));
 		}
-		args = ATreverse(l);
+		args = ATreverse(l);*/
+		args = build_args(args,buildargs,vars,vals,len);
 
 		int b = 1;
 		while ( !ATisInt(head) && b )
@@ -502,10 +525,12 @@ static ATerm rewrite_func(ATermInt op, ATermList args)
 	{
 		for (; !ATisEmpty(m); m=ATgetNext(m))
 		{
-			ATermList rule = ATgetNext(ATLgetFirst(m));
-			ATerm cond = ATgetFirst(rule); rule=ATgetNext(rule);
-			ATermList rargs = ATLgetFirst(rule); rule=ATgetNext(rule);
-			ATerm rslt = ATgetFirst(rule);
+//			ATermList rule = ATgetNext(ATLgetFirst(m));
+//			ATerm cond = ATgetFirst(rule); rule=ATgetNext(rule);
+//			ATermList rargs = ATLgetFirst(rule); rule=ATgetNext(rule);
+//			ATerm rslt = ATgetFirst(rule);
+			ATermAppl rule = (ATermAppl) ATgetFirst(m);
+			ATermList rargs = (ATermList) ATgetArgument(rule,2);
 			ATermList l2 = args;
 
 			bool match = true;
@@ -529,8 +554,10 @@ static ATerm rewrite_func(ATermInt op, ATermList args)
 			}
 			if ( match )
 			{
+				ATerm cond = ATgetArgument(rule,1);
 				if ( is_nil(cond) || ATisEqual(build(cond,-1,vars,vals,pos),trueint) )
 				{
+					ATerm rslt = ATgetArgument(rule,3);
 					int rslt_len;
 					if ( ATisList(rslt) )
 					{

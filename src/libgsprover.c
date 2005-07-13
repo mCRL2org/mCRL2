@@ -15,6 +15,11 @@ extern "C" {
 #define ATisAppl(x) (ATgetType(x) == AT_APPL)
 #define ATisInt(x) (ATgetType(x) == AT_INT)
 
+#define ATAgetFirst(x) ((ATermAppl) ATgetFirst(x))
+#define ATLgetFirst(x) ((ATermList) ATgetFirst(x))
+#define ATAgetArgument(x,y) ((ATermAppl) ATgetArgument(x,y))
+#define ATLgetArgument(x,y) ((ATermList) ATgetArgument(x,y))
+
 bool FindSolutionsError;
 
 static ATermAppl current_spec;
@@ -139,7 +144,7 @@ static ATermList calcNext(ATermList l)
 			if ( !ATisEqual(e,gsProverFalse) )
 			{
 				s = ATmakeList1((ATerm) gsMakeSubst((ATerm) var, t_rf));
-				r = ATinsert(r,(ATerm) ATmakeList3((ATerm) na1,gsSubstValues(s,(ATerm) a2,true),(ATerm) e));
+				r = ATinsert(r,(ATerm) ATmakeList3((ATerm) na1,gsRewriteInternals(gsSubstValues(s,(ATerm) a2,true)),(ATerm) e));
 			}
 		}
 	}

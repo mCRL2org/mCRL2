@@ -12,6 +12,11 @@ extern "C" {
 #include "libgsnextstate.h"
 #include "gssubstitute.h"
 
+#define ATAgetFirst(x) ((ATermAppl) ATgetFirst(x))
+#define ATLgetFirst(x) ((ATermList) ATgetFirst(x))
+#define ATAgetArgument(x,y) ((ATermAppl) ATgetArgument(x,y))
+#define ATLgetArgument(x,y) ((ATermList) ATgetArgument(x,y))
+
 bool NextStateError;
 
 bool ATisList(ATerm a)
