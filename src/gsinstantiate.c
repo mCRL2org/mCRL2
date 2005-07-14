@@ -72,8 +72,10 @@ void print_help(FILE *f)
 	          "\n"
 	          "The OPTIONS that can be used are:\n"
 	          "-h, --help               Display this help message\n"
-		  "-y, --dummy              Replace free variables in states\n"
-		  "                         with dummy values.\n"
+		  "-f, --freevar            Do not replace free variables in\n"
+		  "                         the LPE with dummy values.\n"
+		  "-y, --dummy              Replace free variables in the LPE\n"
+		  "                         with dummy values. (default)\n"
 	          "-l, --max num            Explore at most num states\n"
 	          "    --deadlock           Synonym for --deadlock-detect\n"
 	          "-d, --deadlock-detect    Detect deadlocks (i.e. for every\n"
@@ -90,9 +92,10 @@ int main(int argc, char **argv)
 	FILE *SpecStream;
 	ATerm stackbot;
 	ATermAppl Spec;
-	#define sopts "hyldemR"
+	#define sopts "hfyldemR"
 	struct option lopts[] = {
 		{ "help", 		no_argument,		NULL,	'h' },
+		{ "freevar", 		no_argument,		NULL,	'f' },
 		{ "dummy", 		no_argument,		NULL,	'y' },
 		{ "max", 		required_argument,	NULL,	'l' },
 		{ "deadlock", 		no_argument,		NULL,	'd' },
@@ -108,7 +111,7 @@ int main(int argc, char **argv)
 	ATinit(argc,argv,&stackbot);
 
 	strat = GS_REWR_INNER3;
-	usedummies = false;
+	usedummies = true;
 	max_states = 0;
 	trace = false;
 	trace_deadlock = false;
@@ -121,6 +124,9 @@ int main(int argc, char **argv)
 			case 'h':
 				print_help(stderr);
 				return 0;
+			case 'f':
+				usedummies = false;
+				break;
 			case 'y':
 				usedummies = true;
 				break;

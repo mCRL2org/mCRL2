@@ -2455,6 +2455,170 @@ ATermAppl cluster_lpe(ATermAppl spec)
 	return ATsetArgument(spec,(ATerm) gsMakeLPE(ATLgetArgument(ATAgetArgument(spec,4),0),newsums),4); */
 }
 
+ATermAppl get_unique_var(ATermAppl var, ATermTable names, ATermList *substs, ATermList *new)
+{
+	char name[100];
+	char namebase[100];
+	ATermAppl n;
+	int i;
+
+	strncpy(namebase,gsATermAppl2String(ATAgetArgument(var,0)),99);
+	namebase[99] = 0;
+	strcpy(name,namebase);
+	n =gsString2ATermAppl(name);
+	i = 0;
+	while ( (ATtableGet(names,(ATerm) n) != NULL) || ((new != NULL) && (ATindexOf(*new,(ATerm) n,0) >= 0)) )
+	{
+		if ( i == INT_MAX )
+		{
+			gsErrorMsg("cannot create a fresh data variable\n");
+			exit(1);
+		}
+		snprintf(name,99,"%s%i",namebase,i);
+		name[99] = 0;
+		n = gsString2ATermAppl(name);
+		i++;
+	}
+
+	if ( new == NULL )
+		ATtablePut(names,(ATerm) n,(ATerm) n);
+	else
+		*new = ATinsert(*new,(ATerm) n);
+	n = gsMakeDataVarId(n,ATAgetArgument(var,1));
+	*substs = ATinsert(*substs,(ATerm) gsMakeSubst((ATerm) var,(ATerm) n));
+
+	return n;
+}
+
+ATermList make_unique(ATermList l, ATermTable names, ATermList *substs)
+{
+	ATermList r = ATmakeList0();
+
+	for (; !ATisEmpty(l); l=ATgetNext(l))
+	{
+		r = ATinsert(r,(ATerm) get_unique_var((ATermAppl) ATgetFirst(l),names,substs,NULL));
+	}
+
+	return ATreverse(r);
+}
+
+ATermList make_unique_sum(ATermList l, ATermTable names, ATermList *substs)
+{
+	ATermList r = ATmakeList0();
+	ATermList n = ATmakeList0();
+
+	for (; !ATisEmpty(l); l=ATgetNext(l))
+	{
+		r = ATinsert(r,(ATerm) get_unique_var((ATermAppl) ATgetFirst(l),names,substs,&n));
+	}
+
+	return ATreverse(r);
+}
+
+void add_names(ATermTable names, ATermList l)
+{
+	for (; !ATisEmpty(l); l=ATgetNext(l))
+	{
+		ATerm a = ATgetArgument((ATermAppl) ATgetFirst(l),0);
+		ATtablePut(names,a,a);
+	}
+}
+
+ATerm uvSubstValues(ATermList substs, ATerm a)
+{
+	for (ATermList l=substs; !ATisEmpty(l); l=ATgetNext(l))
+	{
+		if ( ATisEqual(ATgetArgument((ATermAppl) ATgetFirst(l),0),a) )
+		{
+			return ATgetArgument((ATermAppl) ATgetFirst(l),1);
+		}
+	}
+	if ( ATgetType(a) == AT_LIST)
+	{
+		ATermList l = ATmakeList0();
+		for (; !ATisEmpty((ATermList) a); a=(ATerm)ATgetNext((ATermList) a))
+		{
+			l = ATinsert(l, uvSubstValues(substs,ATgetFirst((ATermList) a)));
+		}
+		return (ATerm) ATreverse(l);
+	} else if ( ATgetType(a) == AT_APPL )
+	{
+		ATermList l = ATmakeList0();
+		ATermList m = ATgetArguments((ATermAppl) a);
+		for (; !ATisEmpty(m); m=ATgetNext(m))
+		{
+			l = ATinsert(l, uvSubstValues(substs,ATgetFirst(m)));
+		}
+		return (ATerm) ATmakeApplList(ATgetAFun((ATermAppl) a),ATreverse(l));
+	} else {
+		return a;
+	}
+}
+
+ATermAppl unique_vars(ATermAppl spec)
+{
+	ATermAppl lpe = (ATermAppl) ATgetArgument(spec,5);
+	ATermAppl init = (ATermAppl) ATgetArgument(spec,6);
+
+	ATermList lpe_vars = (ATermList) ATgetArgument(lpe,0);
+	ATermList lpe_pars = (ATermList) ATgetArgument(lpe,1);
+	ATermList init_vars = (ATermList) ATgetArgument(init,0);
+
+	ATermTable used_names = ATtableCreate(1000,75);
+	ATermList lpe_pars_substs = ATmakeList0();
+	ATermList lpe_vars_substs = ATmakeList0();
+	ATermList init_vars_substs = ATmakeList0();
+
+	ATermList l,m,n;
+
+	add_names(used_names, (ATermList) ATgetArgument((ATermAppl) ATgetArgument(spec,0),0));
+	add_names(used_names, (ATermList) ATgetArgument((ATermAppl) ATgetArgument(spec,1),0));
+	add_names(used_names, (ATermList) ATgetArgument((ATermAppl) ATgetArgument(spec,2),0));
+
+	lpe_pars = make_unique(lpe_pars,used_names,&lpe_pars_substs);
+	lpe_vars = make_unique(lpe_vars,used_names,&lpe_vars_substs);
+	init_vars = make_unique(init_vars,used_names,&init_vars_substs);
+
+//ATprintf("lpe_pars_substs: %t\n\n",lpe_pars_substs);
+//ATprintf("lpe_vars_substs: %t\n\n",lpe_vars_substs);
+//ATprintf("init_vars_substs: %t\n\n",init_vars_substs);
+	l = ATmakeList0();
+	m = (ATermList) ATgetArgument(lpe,2);
+	n = ATconcat(lpe_pars_substs,lpe_vars_substs);
+	for (; !ATisEmpty(m); m=ATgetNext(m))
+	{
+		ATermAppl sum = (ATermAppl) ATgetFirst(m);
+		ATermList substs = n;
+
+//ATprintf("sum: %t\n\n",sum);
+//ATprintf("sum_substs: %t\n\n",substs);
+		make_unique_sum((ATermList) ATgetArgument(sum,0),used_names,&substs);
+		
+		l = ATinsert(l,uvSubstValues(substs,(ATerm) sum));
+//ATprintf("new sum: %t\n\n",ATgetFirst(l));
+	}
+	l = ATreverse(l);
+	lpe = gsMakeLPE(lpe_vars,lpe_pars,l);
+
+	l = ATmakeList0();
+	m = (ATermList) ATgetArgument(init,1);
+	for (; !ATisEmpty(m); m=ATgetNext(m))
+	{
+		ATermAppl a = (ATermAppl) ATgetFirst(m);
+
+		l = ATinsert(l,(ATerm) gsMakeAssignment((ATermAppl) uvSubstValues(lpe_pars_substs,ATgetArgument(a,0)),(ATermAppl) uvSubstValues(init_vars_substs,ATgetArgument(a,1))));
+	}
+	l = ATreverse(l);
+	init = gsMakeLPEInit(init_vars,l);
+
+	spec = ATsetArgument(spec,(ATerm) lpe,5);
+	spec = ATsetArgument(spec,(ATerm) init,6);
+
+	ATtableDestroy(used_names);
+
+	return spec;
+}
+
 
 /* Interface */
 
@@ -2581,6 +2745,7 @@ ATermAppl gsLinearise2(ATermAppl Spec, int cluster)
 	{
 		Spec = cluster_lpe(Spec);
 	}
+	Spec = unique_vars(Spec);
 
 	return Spec;
 }
