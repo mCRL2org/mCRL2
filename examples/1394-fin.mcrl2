@@ -312,6 +312,7 @@ act  rPAreq: Nat#PAR;
      sPCind: Nat;
      arbresgap;
      losesignal;
+     internal;
 
 proc BusIdle(n:Nat,t:BoolTABLE)=
         sum id:Nat,astat:PAR.(id<=n) ->rPAreq(id,astat).DecideIdle(n,t,id,astat) +
@@ -346,7 +347,7 @@ proc BusIdle(n:Nat,t:BoolTABLE)=
         (i<n) ->
         (get(i,next) ->
             sPAcon(i,won).sPCind(i).Resolve(n,t,next,i+1),
-            tau.Resolve(n,t,next,i+1) 
+            internal.Resolve(n,t,next,i+1) 
         ),
         Resolve2(n,t,next);
 
@@ -386,7 +387,7 @@ proc BusIdle(n:Nat,t:BoolTABLE)=
                   Distribute(n,t,invert(i,next),destfault,busy,p,i)
          ),
          %% i==busy
-         tau.Distribute(n,t,next,destfault,busy,p,i+1)
+         internal.Distribute(n,t,next,destfault,busy,p,i+1)
        ),
        %% i>=n
        ( is_end(p) ->
@@ -405,10 +406,11 @@ proc LINK(n:Nat,i:Nat)=Link0(n,i,void);
 
      P1394(n:Nat)=
         allow({LDreq,LDcon,LDind,LDres},
-           hide({arbresgap,losesignal},
+           hide({arbresgap,losesignal,internal},
               comm({rPDind|sPDind,rPDreq|sPDreq,rPAcon|sPAcon,
                     rPAreq|sPAreq,rPCind|sPCind},
-                  allow({LDreq,LDcon,LDind,LDres,arbresgap,losesignal,rPDind|sPDind,rPDreq|sPDreq,rPAcon|sPAcon,
+                  allow({LDreq,LDcon,LDind,LDres,arbresgap,losesignal,internal,
+                              rPDind|sPDind,rPDreq|sPDreq,rPAcon|sPAcon,
                     rPAreq|sPAreq,rPCind|sPCind},
                           BUS(2) || LINK(2,0) || LINK(2,1)))));
 
