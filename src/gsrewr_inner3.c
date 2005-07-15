@@ -305,7 +305,7 @@ void rewrite_add_inner3(ATermAppl eqn)
 
 void rewrite_remove_inner3(ATermAppl eqn)
 {
-	ATermList l;
+	ATermList l,n;
 	ATermAppl a,m;
 	ATerm t;
 
@@ -325,19 +325,19 @@ void rewrite_remove_inner3(ATermAppl eqn)
 	if ( ATisInt(t) )
 	{
 		l = inner3_eqns[ATgetInt((ATermInt) t)];
-		m = ATmakeList0();
+		n = ATmakeList0();
 		for (; !ATisEmpty(l); l=ATgetNext(l))
 		{
 			if ( !ATisEqual(m,ATgetFirst(l)) )
 			{
-				ATinsert(m,ATgetFirst(l));
+				ATinsert(n,ATgetFirst(l));
 			}
 		}
-		if ( ATisEmpty(m) )
+		if ( ATisEmpty(n) )
 		{
 			inner3_eqns[ATgetInt((ATermInt) t)] = NULL;
 		} else {
-			inner3_eqns[ATgetInt((ATermInt) t)] = ATreverse(m);
+			inner3_eqns[ATgetInt((ATermInt) t)] = ATreverse(n);
 		}
 	}
 }
@@ -454,7 +454,6 @@ static ATerm build(ATerm Term, int buildargs, ATermAppl *vars, ATerm *vals, int 
 	{
 		ATerm head = ATgetFirst((ATermList) Term);
 		ATermList args = ATgetNext((ATermList) Term);
-		ATermList l;
 
 		if ( buildargs == -1 )
 		{
@@ -609,7 +608,6 @@ static ATerm rewrite(ATerm Term)
 	if ( ATisList(Term) )
 	{
 		ATermList l = ATgetNext((ATermList) Term);
-		ATermList m;
 
 /*		m = ATmakeList0();
 		for (; !ATisEmpty(l); l=ATgetNext(l))

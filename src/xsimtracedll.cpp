@@ -8,12 +8,15 @@
     #pragma hdrstop
 #endif
 
+#include <sstream>
 #include <aterm2.h>
 #include "xsimtracedll.h"
 #include "gslowlevel.h"
 #include "gsfunc.h"
-#include "libgsparse.h"
+#include "libprint.h"
 #include "libgsnextstate.h"
+
+using namespace std;
 
 //------------------------------------------------------------------------------
 // XSimMain
@@ -26,21 +29,21 @@ BEGIN_EVENT_TABLE(XSimTraceDLL,wxFrame)
     EVT_LIST_ITEM_ACTIVATED(ID_LISTVIEW,XSimTraceDLL::OnListItemActivated)
 END_EVENT_TABLE()
 
-static void PrintState(FILE *f ,ATerm state)
+static void PrintState(stringstream &ss ,ATerm state)
 {
         for (int i=0; i<gsGetStateLength(); i++)
         {
                 if ( i > 0 )
                 {
-			fprintf(f,", ");
-                }
+			ss << ", ";
+		}
 
                 ATermAppl a = gsGetStateArgument(state,i);
                 if ( gsIsDataVarId(a) )
                 {
-			fprintf(f,"_");
+			ss << "_";
                 } else {
-                        gsPrintPart(f,a,false,0);
+                        DataExpressionToStream(ss,a);
                 }
         }
 }
@@ -95,8 +98,7 @@ void XSimTraceDLL::StateChanged(ATermAppl Transition, ATerm State, ATermList Nex
 {
 	if ( Transition != NULL )
 	{
-		char s[1000];
-		FILE *f;
+		stringstream ss;
 		int l = traceview->GetItemCount()-1;
 
 		while ( l > current_pos )
@@ -106,47 +108,22 @@ void XSimTraceDLL::StateChanged(ATermAppl Transition, ATerm State, ATermList Nex
 		}
 		current_pos++;
 		traceview->InsertItem(current_pos,wxString::Format("%i",current_pos));
-		f = fopen("xsim.tmp","w+");
-		gsPrintPart(f,Transition,false,0);
-		rewind(f);
-		if ( fgets(s,1000,f) == NULL )
-		{
-			s[0] = 0;
-		}
-		fclose(f);
-		traceview->SetItem(current_pos,1,wxT(s));
-		f = fopen("xsim.tmp","w+");
-		PrintState(f,State);
-//		gsPrintParts(f,(ATerm) State,false,0,NULL,",");
-		rewind(f);
-		if ( fgets(s,1000,f) == NULL )
-		{
-			s[0] = 0;
-		}
-		fclose(f);
-		traceview->SetItem(current_pos,2,wxT(s));
+		traceview->SetItem(current_pos,1,wxT(DataExpressionToString(Transition)));
+		PrintState(ss,State);
+		traceview->SetItem(current_pos,2,wxT(ss.str()));
 		traceview->SetColumnWidth(2,wxLIST_AUTOSIZE);
 	}
 }
 
 void XSimTraceDLL::Reset(ATerm State)
 {
-	char s[1000];
-	FILE *f;
+	stringstream ss;
 
 	traceview->DeleteAllItems();
 	traceview->InsertItem(0,wxT("0"));
 	traceview->SetItem(0,1,wxT(""));
-	f = fopen("xsim.tmp","w+");
-	PrintState(f,State);
-//	gsPrintParts(f,(ATerm) State,false,0,NULL,",");
-	rewind(f);
-	if ( fgets(s,1000,f) == NULL )
-	{
-		s[0] = 0;
-	}
-	fclose(f);
-	traceview->SetItem(0,2,wxT(s));
+	PrintState(ss,State);
+	traceview->SetItem(0,2,wxT(ss.str()));
 	traceview->SetColumnWidth(2,wxLIST_AUTOSIZE);
 	current_pos = 0;
 }

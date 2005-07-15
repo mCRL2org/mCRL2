@@ -17,6 +17,7 @@ LEX                = @LEX@
 LFLAGS             = -I -Pgsyy
 BISON              = @BISON@
 BFLAGS             = -d -pgsyy
+ATERM              = ATerm 
 USE_XML2           = @USE_XML2@
 USE_WX             = @USE_WX@
 WX_LIBS            = @WX_LIBS@
@@ -44,37 +45,37 @@ OBJECTS            =
 LIBPARSER_NAME     = libgsparse.a
 LIBPARSER_OBJECTS  = libgsparse.o gsparser.o gslexer.o gstypecheck.o gsdataimpl.o gsfunc.o gslowlevel.o
 OBJECTS           += $(LIBPARSER_OBJECTS)
-LIBPARSER_LDFLAGS  = -lATerm -lm
+LIBPARSER_LDFLAGS  = -l$(ATERM) -lm
 PARSER_NAME        = gsparse
 PARSER_OBJECTS     = gsparse.o
 OBJECTS           += $(PARSER_OBJECTS)
-PARSER_LDFLAGS     = -lgsparse -lATerm -lm
+PARSER_LDFLAGS     = -lgsparse -l$(ATERM) -lm
 
 #Printer definitions
 PRINTER_NAME       = gsprint
 PRINTER_OBJECTS    = gsprint.o
 OBJECTS           += $(PRINTER_OBJECTS)
-PRINTER_LDFLAGS    = -lgsparse -lATerm -lm
+PRINTER_LDFLAGS    = -lgsparse -l$(ATERM) -lm
 
 #Lineariser definitions
 LINEARISER_NAME    = linearise
 LINEARISER_OBJECTS = linearise.o
 OBJECTS           += $(LINEARISER_OBJECTS)
-LINEARISER_LDFLAGS = -lgsparse -lgsrewrite -lATerm -lm -ldl
+LINEARISER_LDFLAGS = -lgsparse -lgsrewrite -l$(ATERM) -lm -ldl
 LIN_NAME           = lin
 LIN_OBJECTS        = lin.o gslinearise2.o
 OBJECTS           += $(LIN_OBJECTS)
-LIN_LDFLAGS        = -lgsparse -lgsrewrite -lATerm -lm -ldl
+LIN_LDFLAGS        = -lgsparse -lgsrewrite -l$(ATERM) -lm -ldl
 
 #Rewriter definitions
 LIBREWR_NAME       = libgsrewrite.a
 LIBREWR_OBJECTS    = libgsrewrite.o gsrewr_inner.o gsrewr_inner2.o gsrewr_inner3.o gsrewr_innerc.o gsrewr_jitty.o gsfunc.o gslowlevel.o gssubstitute.o
 OBJECTS           += $(LIBREWR_OBJECTS)
-LIBREWR_LDFLAGS    = -lATerm -lm
+LIBREWR_LDFLAGS    = -l$(ATERM) -lm
 REWR_NAME          = gsrewr
 REWR_OBJECTS       = gsrewr.o
 OBJECTS           += $(REWR_OBJECTS)
-REWR_LDFLAGS       = -lgsrewrite -lgsparse -lATerm -lm -ldl
+REWR_LDFLAGS       = -lgsrewrite -lgsparse -l$(ATERM) -lm -ldl
 
 #pnml2gs definitions
 PNML2GS_NAME       = pnml2gs
@@ -82,25 +83,31 @@ PNML2GS_OBJECTS    = pnml2gs.o
 ifdef USE_XML2
 OBJECTS           += $(PNML2GS_OBJECTS)
 endif
-PNML2GS_LDFLAGS    = -lgsparse -lATerm -lxml2 -lm
+PNML2GS_LDFLAGS    = -lgsparse -l$(ATERM) -lxml2 -lm
+
+#Alphabet axiom applicator definitions
+ALPHA_NAME         = gsalpha
+ALPHA_OBJECTS      = gsalpha.o libgsalpha.o
+OBJECTS           += $(ALPHA_OBJECTS)
+ALPHA_LDFLAGS      = -lgsparse -l$(ATERM) -lm
 
 #Instantiator definitions
 INSTAN_NAME        = gsinstantiate
 INSTAN_OBJECTS     = gsinstantiate.o libgsnextstate.o libgsprover.o gssubstitute.o
 OBJECTS           += $(INSTAN_OBJECTS)
-INSTAN_LDFLAGS     = -lgsrewrite -lgsparse -lATerm -lm -ldl
+INSTAN_LDFLAGS     = -lgsrewrite -lgsparse -l$(ATERM) -lm -ldl
 
 #Simulator definitions
 SIM_NAME           = sim
 SIM_OBJECTS        = sim.o libgsnextstate.o libgsprover.o
 OBJECTS           += $(SIM_OBJECTS)
-SIM_LDFLAGS        = -lgsrewrite -lgsparse -lATerm -lm -ldl
+SIM_LDFLAGS        = -lgsrewrite -lgsparse -l$(ATERM) -lm -ldl
 XSIM_NAME          = xsim
-XSIM_OBJECTS       = xsim.o xsimbase.o xsimmain.o xsimtrace.o libgsnextstate.o libgsprover.o
+XSIM_OBJECTS       = xsim.o xsimbase.o xsimmain.o xsimtrace.o libgsnextstate.o libgsprover.o libprint.o
 ifdef USE_WX
 OBJECTS           += $(XSIM_OBJECTS)
 endif
-XSIM_LDFLAGS       = -lgsrewrite -lgsparse -lATerm -lm -ldl $(WX_LIBS)
+XSIM_LDFLAGS       = -lgsrewrite -lgsparse -l$(ATERM) -lm -ldl $(WX_LIBS)
 XSIMTRACE_NAME     = xsimtrace.so
 XSIMTRACE_OBJECTS  = xsimtracedll.o
 ifdef USE_WX
@@ -114,7 +121,7 @@ else
 endif
 
 #Group definitions
-EXE_NAMES          =  $(PARSER_NAME) $(PRINTER_NAME) $(LINEARISER_NAME) $(LIN_NAME) $(REWR_NAME) $(PNML2GS_NAME) $(INSTAN_NAME) $(SIM_NAME) $(XSIM_NAME)
+EXE_NAMES          =  $(PARSER_NAME) $(PRINTER_NAME) $(LINEARISER_NAME) $(LIN_NAME) $(REWR_NAME) $(ALPHA_NAME) $(PNML2GS_NAME) $(INSTAN_NAME) $(SIM_NAME) $(XSIM_NAME)
 LIB_NAMES          =  $(XSIMTRACE_NAME)
 OBJECTS            := $(sort $(OBJECTS))
 
@@ -181,6 +188,9 @@ $(LIBREWR_NAME) : $(LIBREWR_OBJECTS)
 
 $(REWR_NAME) : $(REWR_OBJECTS) $(LIBPARSER_NAME) $(LIBREWR_NAME)
 	$(CC) -o $@ $(REWR_OBJECTS) $(LDFLAGS) $(REWR_LDFLAGS)
+
+$(ALPHA_NAME) : $(ALPHA_OBJECTS) $(LIBPARSER_NAME)
+	$(CC) -o $@ $(ALPHA_OBJECTS) $(LDFLAGS) $(ALPHA_LDFLAGS)
 
 ifdef USE_XML2
 $(PNML2GS_NAME) : $(PNML2GS_OBJECTS) $(LIBPARSER_NAME)

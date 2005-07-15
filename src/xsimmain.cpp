@@ -11,6 +11,7 @@
 #include <wx/dynlib.h>
 #include <wx/config.h>
 #include <wx/dynarray.h>
+#include <sstream>
 #include <aterm2.h>
 #include "xsimbase.h"
 #include "xsimmain.h"
@@ -19,6 +20,9 @@
 #include "libgsparse.h"
 #include "libgsnextstate.h"
 #include "libgsrewrite.h"
+#include "libprint.h"
+
+using namespace std;
 
 //------------------------------------------------------------------------------
 // XSimMain
@@ -660,8 +664,6 @@ void XSimMain::transOnListItemActivated( wxListEvent &event )
 
 void XSimMain::SetCurrentState(ATerm state, bool showchange)
 {
-	char s[1000];
-	FILE *f;
 	ATerm old;
 
 	if ( (current_state == NULL) || (ATgetLength(current_state) != ATgetLength(state)) )
@@ -677,20 +679,12 @@ void XSimMain::SetCurrentState(ATerm state, bool showchange)
 		ATermAppl oldval = gsGetStateArgument(old,i);
 		ATermAppl newval = gsGetStateArgument(state,i);
 
-		f = fopen("xsim.tmp","w+");
 		if ( gsIsDataVarId(newval) )
 		{
-			fprintf(f,"_");
+			stateview->SetItem(i,1,wxT("_"));
 		} else {
-			gsPrintPart(f,newval,false,0);
+			stateview->SetItem(i,1,wxT(DataExpressionToString(newval)));
 		}
-		rewind(f);
-		if ( fgets(s,1000,f) == NULL )
-		{
-			s[0] = 0;
-		}
-		fclose(f);
-		stateview->SetItem(i,1,wxT(s));
 		if ( showchange && !(ATisEqual(oldval,newval) || (gsIsDataVarId(oldval) && gsIsDataVarId(newval)) ) )
 		{
 		        wxColour col(255,255,210);
@@ -734,8 +728,6 @@ static void sort_transitions(wxArrayString &actions, wxArrayString &statechanges
 
 void XSimMain::UpdateTransitions()
 {
-	char s[1000];
-	FILE *f;
 	wxArrayString actions;
 	wxArrayString statechanges;
 	wxArrayInt indices;
@@ -746,19 +738,10 @@ void XSimMain::UpdateTransitions()
 	int i = 0;
 	for (ATermList l=next_states; !ATisEmpty(l); l=ATgetNext(l), i++)
 	{
-		f = fopen("xsim.tmp","w+");
-		gsPrintPart(f,ATAgetFirst(ATLgetFirst(l)),false,0);
-		rewind(f);
-		if ( fgets(s,1000,f) == NULL )
-		{
-			s[0] = 0;
-		}
-		fclose(f);
-//		transview->InsertItem(i,wxT(s));
-		actions.Add(wxT(s));
+		actions.Add(wxT(DataExpressionToString(ATAgetFirst(ATLgetFirst(l)))));
 		indices.Add(i);
 //		transview->SetItemData(i,i);
-		f = fopen("xsim.tmp","w+");
+		stringstream ss;
 		ATerm m = current_state;
 		ATerm n = ATgetFirst(ATgetNext(ATLgetFirst(l)));
 		ATermList o = state_varnames;
@@ -772,30 +755,24 @@ void XSimMain::UpdateTransitions()
 			{
 				if ( comma )
 				{
-					fprintf(f,", ");
+					ss << ", ";
 				} else {
 					comma = true;
 				}
-				gsPrintPart(f,ATAgetFirst(o),false,0);
-				fprintf(f," := ");
+				DataExpressionToStream(ss,ATAgetFirst(o));
+				ss << " := ";
 				if ( gsIsDataVarId(newval) )
 				{
-					fprintf(f,"_");
+					ss << "_";
 				} else {
-					gsPrintPart(f,newval,false,0);
+					DataExpressionToStream(ss,newval);
 				}
 			}
 
 			o = ATgetNext(o);
 		}
-		rewind(f);
-		if ( fgets(s,1000,f) == NULL )
-		{
-			s[0] = 0;
-		}
-		fclose(f);
 //		transview->SetItem(i,1,wxT(s));
-		statechanges.Add(wxT(s));
+		statechanges.Add(wxT(ss.str()));
 	}
 
 	sort_transitions(actions,statechanges,indices);
