@@ -100,7 +100,7 @@ void XSimTrace::StateChanged(ATermAppl Transition, ATerm State, ATermList NextSt
 		}
 		current_pos++;
 		traceview->InsertItem(current_pos,wxString::Format("%i",current_pos));
-		traceview->SetItem(current_pos,1,wxT(DataExpressionToString(Transition)));
+		traceview->SetItem(current_pos,1,wxT(DataExpressionToString(Transition).c_str()));
 		PrintState(ss,State);
 		traceview->SetItem(current_pos,2,wxT(ss.str()));
 		traceview->SetColumnWidth(2,wxLIST_AUTOSIZE);

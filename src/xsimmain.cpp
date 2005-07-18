@@ -683,7 +683,7 @@ void XSimMain::SetCurrentState(ATerm state, bool showchange)
 		{
 			stateview->SetItem(i,1,wxT("_"));
 		} else {
-			stateview->SetItem(i,1,wxT(DataExpressionToString(newval)));
+			stateview->SetItem(i,1,wxT(DataExpressionToString(newval).c_str()));
 		}
 		if ( showchange && !(ATisEqual(oldval,newval) || (gsIsDataVarId(oldval) && gsIsDataVarId(newval)) ) )
 		{
@@ -738,7 +738,7 @@ void XSimMain::UpdateTransitions()
 	int i = 0;
 	for (ATermList l=next_states; !ATisEmpty(l); l=ATgetNext(l), i++)
 	{
-		actions.Add(wxT(DataExpressionToString(ATAgetFirst(ATLgetFirst(l)))));
+		actions.Add(wxT(DataExpressionToString(ATAgetFirst(ATLgetFirst(l))).c_str()));
 		indices.Add(i);
 //		transview->SetItemData(i,i);
 		stringstream ss;
