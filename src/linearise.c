@@ -23,6 +23,7 @@ extern "C" {
 #include "gstypecheck.h"
 #include "gsdataimpl.h"
 #include "libgsrewrite.h"
+#include "libgsalpha.h"
 
 #define STRINGLENGTH 256
 
@@ -191,6 +192,7 @@ char scratch1[STRINGLENGTH];
 
 ATermIndexedSet objectIndexTable=NULL;
 ATermIndexedSet stringTable=NULL;
+ATermTable freshstringIndices=NULL;
 
 typedef struct enumeratedtype {
   int size;
@@ -349,13 +351,13 @@ static int variablesequal(ATermList t1, ATermList t2, /* XXXXXXXXXXXXXXX */
 
 static string *emptystringlist =NULL;
 
-/* static void release_string(string *c)
+static void release_string(string *c)
 {
   
   c->next = emptystringlist;
   emptystringlist = c;
   strncpy(&c->s[0],"",STRINGLENGTH);
-} */
+} 
 
 static string *new_string(char *s)
 {
@@ -456,7 +458,7 @@ static int existsort(ATermAppl sortterm)
     if (objectdata[n].object==sort) return 1;
     return 0;
   }
-  assert(0);
+
   ATerror("Internal: Expected a sortterm (1) %t\n",sortterm);
   return 0;
 }
@@ -719,6 +721,94 @@ static ATermAppl RewriteTerm(ATermAppl t)
   return t;
 }
 
+static ATermList RewriteTermList(ATermList t)
+{ 
+  if (t==ATempty) return t;
+
+  return ATinsertA(RewriteTermList(ATgetNext(t)),
+                  RewriteTerm(ATAgetFirst(t)));
+}
+
+static ATermAppl RewriteAction(ATermAppl t)
+{
+  ATfprintf(stderr,"REWR %t\n",t);
+  return t;
+}
+
+static ATermAppl RewriteProcess(ATermAppl t)
+{
+  assert(gsIsProcess(t));
+
+  return gsMakeProcess(
+           ATAgetArgument(t,0),
+           RewriteTermList(ATLgetArgument(t,1)));
+}
+
+static ATermAppl RewriteMultAct(ATermAppl t)
+{
+  ATfprintf(stderr,"REWR %t\n",t);
+  return t;
+}
+
+static ATermAppl pCRLrewrite(ATermAppl t)
+{ 
+  /* ATfprintf(stderr,"%d %t\n",mayrewrite,t); */
+
+  if (!mayrewrite) return t;
+
+  if (gsIsCond(t))
+  { ATermAppl newcond=RewriteTerm(ATAgetArgument(t,0));
+    if (newcond==gsMakeDataExprTrue())
+    { return pCRLrewrite(ATAgetArgument(t,1));
+    }
+    if (newcond==gsMakeDataExprFalse())
+    { return pCRLrewrite(ATAgetArgument(t,2));
+    }
+    return gsMakeCond(
+             newcond,
+             pCRLrewrite(ATAgetArgument(t,1)),
+             pCRLrewrite(ATAgetArgument(t,2)));
+  }
+
+  if (gsIsSeq(t)) 
+  { /* only one summand is needed */
+    return gsMakeSeq(
+             pCRLrewrite(ATAgetArgument(t,0)),
+             pCRLrewrite(ATAgetArgument(t,1)));
+
+  }
+
+  if (gsIsAtTime(t))
+  { ATermAppl atTime=RewriteTerm(ATAgetArgument(t,1));
+    t=pCRLrewrite(ATAgetArgument(t,0));
+    return gsMakeAtTime(t,atTime);
+  } 
+    
+  if (gsIsDelta(t))
+  { return t;
+  } 
+
+  if (gsIsTau(t))
+  { return t;
+  } 
+
+  if (gsIsAction(t))
+  { return RewriteAction(t);
+  } 
+
+  if (gsIsProcess(t))
+  { return RewriteProcess(t);
+  }
+
+  if (gsIsMultAct(t))
+  { return RewriteMultAct(t);
+  } 
+
+  ATerror("InternalXX: Expect pCRLterm %t\n",t);
+  return NULL;
+  
+}
+
 /************ storeact ****************************************************/
 
 static long insertAction(ATermAppl actionId)
@@ -797,6 +887,8 @@ static specificationbasictype *read_input_file(char *filename)
   
 
   assert(gsIsSpecV1(t));
+  /* t=Alpha(t); / * Apply alpha-beta axioms */
+
 
 /* First store the sorts */
   
@@ -1400,11 +1492,23 @@ static ATermAppl fresh_name(char *name)
   string *str;
   int i;
   str=new_string(name);
-  for( i=0 ; (existsString(str->s)) ; i++)
+  ATerm stringterm=(ATerm)gsString2ATermAppl(str->s);
+  ATerm index=ATtableGet(freshstringIndices,stringterm);
+  if (index==NULL)
+  { i=0;
+  }
+  else 
+  { i=ATgetInt((ATermInt)index);
+  }
+
+  for( ; (existsString(str->s)) ; i++)
     { snprintf(str->s,STRINGLENGTH,"%s%d",name,i); }
   /* check that name does not already exist, otherwise,
      add some suffix and check again */
-  return gsString2ATermAppl(str->s);
+  ATtablePut(freshstringIndices,stringterm,(ATerm)ATmakeInt(i));
+  stringterm=(ATerm)gsString2ATermAppl(str->s);
+  release_string(str);
+  return (ATermAppl)stringterm;
 }
 
 /****************  occursinterm *** occursintermlist ***********/
@@ -1903,6 +2007,9 @@ static ATermAppl newprocess(ATermList parameters, ATermAppl body,
 { 
   parameters=parameters_that_occur_in_body(parameters, body);
   ATermAppl p=gsMakeProcVarId(fresh_name("P"),linGetSorts(parameters));
+//  ATfprintf(stderr,"NEWPROC %t %t\n",p,parameters);
+//  gsPrintPart(stderr,body,0,0);
+//  ATfprintf(stderr,"\n");
   insertProcDeclaration(
              p,
              parameters,
@@ -2393,28 +2500,65 @@ static ATermAppl distribute_sum(ATermList sumvars,ATermAppl body1)
   return NULL;
 }
 
+static int match_sequence(ATermList s1, ATermList s2)
+{ /* s1 and s2 are sequences of typed variables of
+     the form Process(ProcVarId("P2",[SortId("Bit"),
+     SortId("Bit")]),[OpId("b1",SortId("Bit")),OpId("b1",SortId("Bit"))]).
+     This function yields true if the names and types of
+     the processes in s1 and s2 match. */
+
+  if (s1==ATempty)
+  { if (s2==ATempty)
+    { return true;
+    }
+    return false;
+  }
+
+  if (s2==ATempty)
+  { return false;
+  }
+
+  ATermAppl proc1=ATAgetFirst(s1);
+  ATermAppl proc2=ATAgetFirst(s2);
+
+  assert(gsIsProcess(proc1));
+  assert(gsIsProcess(proc2));
+
+  if (ATAgetArgument(proc1,0)!=
+      ATAgetArgument(proc2,0))
+  { return false;
+  }
+
+  return match_sequence(ATgetNext(s1),ATgetNext(s2));
+}
+
 static ATermAppl exists_variable_for_sequence(
                      ATermList process_names,
                      ATermAppl process_body)
-{ ATermList walker=NULL;
-
+{ 
   if (regular2)
-  { for(walker=seq_varnames; (walker!=ATempty);
+  { for(ATermList walker=seq_varnames; (walker!=ATempty);
                     walker=ATgetNext(walker))
     { ATermAppl process=ATAgetFirst(walker);
-      if (process_names==
-            (ATermList)objectdata[objectIndex(process)].representedprocesses)
-      return process;
+      if (match_sequence(
+            process_names,
+            (ATermList)objectdata[objectIndex(process)].representedprocesses))
+      { 
+        return process;
+      }
     }
     return NULL;  
   }
   
-  for(walker=seq_varnames; (walker!=ATempty);
+  /* here an ordinary regular sequence is checked */
+  for(ATermList walker=seq_varnames; (walker!=ATempty);
          walker=ATgetNext(walker))
   { ATermAppl process=ATAgetFirst(walker);
     if (process_body==
              (ATermAppl)objectdata[objectIndex(process)].representedprocess)
-     return process;
+    {  
+       return process;
+    }
   }
   return NULL;  
 }
@@ -2500,8 +2644,13 @@ static ATermAppl create_regular_invocation(
 
   /* Sequence consists of a sequence of process references, 
      concatenated with the sequential composition operator */
+  sequence=pCRLrewrite(sequence);
   process_names=extract_names(sequence);
   assert(process_names!=ATempty);
+
+  /* ATfprintf(stderr,"Names: ");
+  gsPrintParts(stderr,process_names,0,0,NULL,",");
+  ATfprintf(stderr,"\n");  */
 
   if (ATgetLength(process_names)==1)
   { /* length of list equals 1 */
@@ -2518,6 +2667,8 @@ static ATermAppl create_regular_invocation(
      there is already a variable with a matching sequence
      of variables */
   new_process=exists_variable_for_sequence(process_names,sequence);
+  /* if (new_process==NULL)
+    ATfprintf(stderr,"NEWWEWERE\n"); */
 
   if (new_process==NULL)
   { /* There does not exist an appropriate variable,
@@ -4387,7 +4538,8 @@ static ATermAppl find_case_function(enumeratedtype *e, ATermAppl sort)
     { return w1;
     }
   };
-assert(0);
+
+  
   ATerror("Internal: Searching for nonexisting case function on sort %t\n",sort);
   return NULL;
 }
@@ -4732,11 +4884,17 @@ static ATermAppl construct_binary_case_tree_rec(
 { ATermAppl t=NULL,t1=NULL;
   ATermAppl casevar;
 
+  // ATfprintf(stderr,"CASETREE %d ",n);
+  // gsPrintParts(stderr,*terms,0,0,NULL,";");
+  // ATfprintf(stderr,"\n",n);
+
   assert(*terms!=ATempty);
 
   if (n<=0)
   { assert(*terms!=ATempty);
-    return ATAgetFirst(*terms);
+    ATermAppl t=ATAgetFirst(*terms);
+    *terms=ATgetNext(*terms);
+    return t;
   }
 
   assert(sums!=ATempty);
@@ -5141,10 +5299,13 @@ static ATermAppl collect_sum_arg_arg_cond(
                        ATinsertA(auxresult,e->var)));
       }
       else 
-      { ATermAppl temp=construct_binary_case_tree(
+      { // ATfprintf(stderr,"FFFF %t\n",ffunct);
+        ATermAppl temp=construct_binary_case_tree(
                            n,
                            resultsum,
-                           auxresult,ATAgetFirst(ffunct),e);
+                           auxresult,
+                           ATAgetArgument(ATAgetFirst(ffunct),1),
+                           e);
         resultnextstate=ATinsertA(resultnextstate,temp);
       }
     }
@@ -6679,6 +6840,7 @@ static void initialize_data(void)
   gsEnableConstructorFunctions();
   objectIndexTable=ATindexedSetCreate(1024,75);
   stringTable=ATindexedSetCreate(1024,75);
+  freshstringIndices=ATtableCreate(64,75);
   objectdata=NULL;
   time_operators_used=0;
   seq_varnames=ATempty;
