@@ -316,7 +316,7 @@ ATermAppl gsImplExprsPart(ATermAppl Part, ATermList *PSubsts,
 {
   bool Recursive = true;
   //perform substitutions from *PSubsts on Part
-  Part = gsSubstValues_Appl(*PSubsts, Part, false);
+  Part = gsSubstValues_Appl(*PSubsts, Part, true);
   //replace Part by an implementation if the head of Part is a special
   //expression
   if (gsIsSortArrowProd(Part)) {
