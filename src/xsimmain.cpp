@@ -772,7 +772,7 @@ void XSimMain::UpdateTransitions()
 			o = ATgetNext(o);
 		}
 //		transview->SetItem(i,1,wxT(s));
-		statechanges.Add(wxT(ss.str()));
+		statechanges.Add(wxT(ss.str().c_str()));
 	}
 
 	sort_transitions(actions,statechanges,indices);
