@@ -7,9 +7,9 @@ CPPFLAGS           = @CPPFLAGS@
 CXX                = @CXX@
 CXXFLAGS           = @CXXFLAGS@
 ifeq ($(HOST_OS),MACOSX)
-LDFLAGS            = -L./aterm -L./svc @LDFLAGS@
+LDFLAGS            = @LDFLAGS@
 else
-LDFLAGS            = -Wl,-rpath,$(libdir) -rdynamic -L./aterm -L./svc @LDFLAGS@
+LDFLAGS            = -Wl,-rpath,$(libdir) -rdynamic @LDFLAGS@
 endif
 ARFLAGS            = crs
 INSTALL            = install
@@ -246,7 +246,7 @@ endif
 %.c : %.l
 	$(LEX) $(LFLAGS) -o$@ $<
 
-* aterm/* svc/* : Makefile
+*.* aterm/*.* svc/*.* : Makefile
 
 %.d : %.c
 	@echo generating dependencies for $<

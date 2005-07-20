@@ -1054,16 +1054,16 @@ static void CompileRewriteSystem(void)
   fclose(f);
   fprintf(stderr,"Compiling rewriter...");fflush(stderr);
 #ifdef __WXMAC__
-  sprintf(t,"gcc -c %s %s -g %s.c",INNERC_CPPFLAGS,INNERC_CFLAGS,s);
+  sprintf(t,"gcc -c %s %s %s.c",INNERC_CPPFLAGS,INNERC_CFLAGS,s);
   ATfprintf(stderr,"%s\n",t);
   system(t);
-  sprintf(t,"gcc -bundle -undefined dynamic_lookup -g -o %s.so %s.o",s,s);
+  sprintf(t,"gcc %s -bundle -undefined dynamic_lookup -o %s.so %s.o",INNERC_LDFLAGS,s,s);
   ATfprintf(stderr,"%s\n",t);
   system(t);
 #else
   sprintf(t,"gcc -c %s %s -Wno-unused -O3 -rdynamic %s.c",INNERC_CPPFLAGS,INNERC_CFLAGS,s);
   system(t);
-  sprintf(t,"gcc -shared -o %s.so %s.o",s,s);
+  sprintf(t,"gcc %s -shared -o %s.so %s.o",INNERC_LDFLAGS,s,s);
   system(t);
 #endif
   fprintf(stderr,"done.\n");

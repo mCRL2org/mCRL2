@@ -45,7 +45,7 @@ fi
 CPPFLAGS=""
 CFLAGS="-std=gnu99"
 CXXFLAGS=""
-LDFLAGS="-L."
+LDFLAGS="-L. -Lsvc"
 
 # Check for C99 standard
 AC_MSG_CHECKING([for C99 standard])

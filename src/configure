@@ -3999,7 +3999,7 @@ fi
 CPPFLAGS=""
 CFLAGS="-std=gnu99"
 CXXFLAGS=""
-LDFLAGS="-L."
+LDFLAGS="-L. -Lsvc"
 
 # Check for C99 standard
 echo "$as_me:$LINENO: checking for C99 standard" >&5
