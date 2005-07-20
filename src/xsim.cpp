@@ -31,7 +31,7 @@ bool XSim::OnInit()
 
     if ( argc > 1 )
     {
-	frame->LoadFile(wxT(argv[1]));
+	frame->LoadFile(argv[1]);
     }
 
     return TRUE;
