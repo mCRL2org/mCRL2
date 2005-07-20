@@ -7,9 +7,9 @@ CPPFLAGS           = @CPPFLAGS@
 CXX                = @CXX@
 CXXFLAGS           = @CXXFLAGS@
 ifeq ($(HOST_OS),MACOSX)
-LDFLAGS            = @LDFLAGS@
+LDFLAGS            = -L./aterm -L./svc @LDFLAGS@
 else
-LDFLAGS            = -Wl,-rpath,$(libdir) -rdynamic @LDFLAGS@
+LDFLAGS            = -Wl,-rpath,$(libdir) -rdynamic -L./aterm -L./svc @LDFLAGS@
 endif
 ARFLAGS            = crs
 INSTALL            = install
@@ -17,7 +17,8 @@ LEX                = @LEX@
 LFLAGS             = -I -Pgsyy
 BISON              = @BISON@
 BFLAGS             = -d -pgsyy
-ATERM              = ATerm 
+ATERM              = @ATERM_NAME@ 
+BUILD_ATERM        = @BUILD_ATERM@
 USE_XML2           = @USE_XML2@
 USE_WX             = @USE_WX@
 WX_LIBS            = @WX_LIBS@
@@ -40,6 +41,19 @@ endif
 
 #All objects that are used
 OBJECTS            =
+
+#ATerm definitions
+ATERM_NAME         = aterm/libATerm.a
+ATERM_OBJECTS      = aterm/afun.o aterm/aterm.o aterm/bafio.o aterm/byteio.o aterm/gc.o aterm/hash.o aterm/list.o aterm/make.o aterm/md5c.o aterm/memory.o aterm/tafio.o aterm/version.o
+ifdef BUILD_ATERM
+OBJECTS           += $(ATERM_OBJECTS)
+ATERM_DEP          = $(ATERM_NAME)
+endif
+
+#SVC definitions
+LIBSVC_NAME        = svc/libsvc.a
+LIBSVC_OBJECTS     = svc/blocklist.o svc/code.o svc/compress.o svc/hashtable.o svc/huffman.o svc/lz.o svc/ptable.o svc/svc1.o svc/svc2.o 
+OBJECTS           += $(LIBSVC_OBJECTS)
 
 #Parser definitions
 LIBPARSER_NAME     = libgsparse.a
@@ -95,7 +109,7 @@ ALPHA_LDFLAGS      = -lgsparse -l$(ATERM) -lm
 INSTAN_NAME        = gsinstantiate
 INSTAN_OBJECTS     = gsinstantiate.o libgsnextstate.o libgsprover.o gssubstitute.o
 OBJECTS           += $(INSTAN_OBJECTS)
-INSTAN_LDFLAGS     = -lgsrewrite -lgsparse -l$(ATERM) -lm -ldl
+INSTAN_LDFLAGS     = -lgsrewrite -lgsparse -lsvc -l$(ATERM) -lm -ldl
 
 #Simulator definitions
 SIM_NAME           = sim
@@ -163,54 +177,60 @@ endif
 	done
 
 clean :
-	$(RM) $(EXE_NAMES) $(LIB_NAMES) *.o *.a *.d *.dpp\
+	$(RM) $(EXE_NAMES) $(LIB_NAMES) *.o *.a *.d *.dpp aterm/*.o aterm/*.a aterm/*.d svc/*.o svc/*.a svc/*.d\
         gslexer.c gsparser.c gsparser.h gsparser.output config.status config.log *~ core core.*
 
-$(LIBPARSER_NAME) : $(LIBPARSER_OBJECTS)
+$(ATERM_NAME): $(ATERM_OBJECTS)
+	$(AR) $(ARFLAGS) $@ $(ATERM_OBJECTS)
+
+$(LIBSVC_NAME): $(LIBSVC_OBJECTS)
+	$(AR) $(ARFLAGS) $@ $(LIBSVC_OBJECTS)
+
+$(LIBPARSER_NAME) : $(LIBPARSER_OBJECTS) $(ATERM_DEP)
 	$(AR) $(ARFLAGS) $@ $(LIBPARSER_OBJECTS)
 #	$(CC) -shared -o $@ $(LIBPARSER_OBJECTS)
 
-$(PARSER_NAME) : $(PARSER_OBJECTS) $(LIBPARSER_NAME)
+$(PARSER_NAME) : $(PARSER_OBJECTS) $(ATERM_DEP) $(LIBPARSER_NAME)
 	$(CC) -o $@ $(PARSER_OBJECTS) $(LDFLAGS) $(PARSER_LDFLAGS)
 
-$(PRINTER_NAME) : $(PRINTER_OBJECTS) $(LIBPARSER_NAME)
+$(PRINTER_NAME) : $(PRINTER_OBJECTS) $(ATERM_DEP) $(LIBPARSER_NAME)
 	$(CC) -o $@ $(PRINTER_OBJECTS) $(LDFLAGS) $(PRINTER_LDFLAGS)
 
-$(LINEARISER_NAME) : $(LINEARISER_OBJECTS) $(LIBPARSER_NAME) $(LIBREWR_NAME)
+$(LINEARISER_NAME) : $(LINEARISER_OBJECTS) $(ATERM_DEP) $(LIBPARSER_NAME) $(LIBREWR_NAME)
 	$(CC) -o $@ $(LINEARISER_OBJECTS) $(LDFLAGS) $(LINEARISER_LDFLAGS)
 
-$(LIN_NAME) : $(LIN_OBJECTS) $(LIBPARSER_NAME)
+$(LIN_NAME) : $(LIN_OBJECTS) $(ATERM_DEP) $(LIBPARSER_NAME)
 	$(CC) -o $@ $(LIN_OBJECTS) $(LDFLAGS) $(LIN_LDFLAGS)
 
-$(LIBREWR_NAME) : $(LIBREWR_OBJECTS)
+$(LIBREWR_NAME) : $(LIBREWR_OBJECTS) $(ATERM_DEP)
 	$(AR) $(ARFLAGS) $@ $(LIBREWR_OBJECTS)
 #	$(CC) -shared -o $@ $(LIBREWR_OBJECTS)
 
-$(REWR_NAME) : $(REWR_OBJECTS) $(LIBPARSER_NAME) $(LIBREWR_NAME)
+$(REWR_NAME) : $(REWR_OBJECTS) $(ATERM_DEP) $(LIBPARSER_NAME) $(LIBREWR_NAME)
 	$(CC) -o $@ $(REWR_OBJECTS) $(LDFLAGS) $(REWR_LDFLAGS)
 
-$(ALPHA_NAME) : $(ALPHA_OBJECTS) $(LIBPARSER_NAME)
+$(ALPHA_NAME) : $(ALPHA_OBJECTS) $(ATERM_DEP) $(LIBPARSER_NAME)
 	$(CC) -o $@ $(ALPHA_OBJECTS) $(LDFLAGS) $(ALPHA_LDFLAGS)
 
 ifdef USE_XML2
-$(PNML2GS_NAME) : $(PNML2GS_OBJECTS) $(LIBPARSER_NAME)
+$(PNML2GS_NAME) : $(PNML2GS_OBJECTS) $(ATERM_DEP) $(LIBPARSER_NAME)
 	$(CC) -o $@ $(PNML2GS_OBJECTS) $(LDFLAGS) $(PNML2GS_LDFLAGS)
 else
 $(PNML2GS_NAME) :
 	@echo cannot make target $@ because the xml2 library cannot be used
 endif
 
-$(INSTAN_NAME) : $(INSTAN_OBJECTS) $(LIBPARSER_NAME) $(LIBREWR_NAME)
+$(INSTAN_NAME) : $(INSTAN_OBJECTS) $(ATERM_DEP) $(LIBSVC_NAME) $(LIBPARSER_NAME) $(LIBREWR_NAME)
 	$(CC) -o $@ $(INSTAN_OBJECTS) $(LDFLAGS) $(INSTAN_LDFLAGS)
 
-$(SIM_NAME) : $(SIM_OBJECTS) $(LIBPARSER_NAME) $(LIBREWR_NAME)
+$(SIM_NAME) : $(SIM_OBJECTS) $(ATERM_DEP) $(LIBPARSER_NAME) $(LIBREWR_NAME)
 	$(CC) -o $@ $(SIM_OBJECTS) $(LDFLAGS) $(SIM_LDFLAGS)
 
 ifdef USE_WX
-$(XSIM_NAME): $(XSIM_OBJECTS) $(LIBPARSER_NAME) $(LIBREWR_NAME)
+$(XSIM_NAME): $(XSIM_OBJECTS) $(ATERM_DEP) $(LIBPARSER_NAME) $(LIBREWR_NAME)
 	$(CXX) -o $@ $(XSIM_OBJECTS) $(LDFLAGS) $(XSIM_LDFLAGS)
 
-$(XSIMTRACE_NAME): $(XSIMTRACE_OBJECTS) $(LIBPARSER_NAME) $(LIBREWR_NAME)
+$(XSIMTRACE_NAME): $(XSIMTRACE_OBJECTS) $(ATERM_DEP) $(LIBPARSER_NAME) $(LIBREWR_NAME)
 	$(CXX) -o $@ $(XSIMTRACE_OBJECTS) $(LDFLAGS) $(XSIMTRACE_LDFLAGS)
 else
 $(XSIM_NAME):
@@ -226,7 +246,7 @@ endif
 %.c : %.l
 	$(LEX) $(LFLAGS) -o$@ $<
 
-*.* : Makefile
+* aterm/* svc/* : Makefile
 
 %.d : %.c
 	@echo generating dependencies for $<

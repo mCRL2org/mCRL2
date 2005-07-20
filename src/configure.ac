@@ -24,6 +24,7 @@ esac
 AC_SUBST([HOST_OS])
 
 # Checks for programs.
+AC_PROG_CPP
 AC_PROG_CC
 AC_PROG_CXX
 AC_PROG_LEX
@@ -41,9 +42,10 @@ else
 fi
 
 # Set flags
-CFLAGS="$CFLAGS -std=c99 -Wall -pedantic"
-CXXFLAGS="$CXXFLAGS -Wall"
-LDFLAGS="-L. $LDFLAGS"
+CPPFLAGS=""
+CFLAGS="-std=gnu99"
+CXXFLAGS=""
+LDFLAGS="-L."
 
 # Check for C99 standard
 AC_MSG_CHECKING([for C99 standard])
@@ -59,6 +61,37 @@ AC_RUN_IFELSE(
   AC_MSG_RESULT([yes]),
   AC_MSG_ERROR([C99 standard not supported])
 )
+
+# Check for debug/profiling options
+AC_ARG_ENABLE(
+  [debug],
+  AC_HELP_STRING(
+    [[[[--enable-debug]]]],
+    [compile with debugging information]
+  )
+)
+if test $enable_debug; then
+  AC_MSG_NOTICE([compiling with debugging information])
+  CFLAGS="-g -Wall -pedantic $CFLAGS"
+  CXXFLAGS="-g -Wall $CXXFLAGS"
+else
+  CPPFLAGS="-DNDEBUG $CPPFLAGS"
+  CFLAGS="-w $CFLAGS"
+  CXXFLAGS="-w $CXXFLAGS"
+fi
+
+AC_ARG_ENABLE(
+  [profiling],
+  AC_HELP_STRING(
+    [[[[--enable-profiling]]]],
+    [compile with profiling support]
+  )
+)
+if test $enable_profiling; then
+  AC_MSG_NOTICE([compiling with profiling support])
+  CPPFLAGS="-pg $CPPFLAGS"
+  LDFLAGS="-pg $LDFLAGS"
+fi
 
 # Check for ATerm library and header files
 AC_ARG_WITH(
@@ -84,11 +117,30 @@ if test $with_aterm; then
     CPPFLAGS="-I$ATERM_INCLUDE $CPPFLAGS"
     LDFLAGS="-L$ATERM_LIB $LDFLAGS"
   fi
+  if test $enable_profiling; then
+    AC_CHECK_LIB([ATerm-prof], [ATinit], , [AC_MSG_ERROR([cannot find ATerm-prof library])])
+    ATERM_NAME="ATerm-prof"
+  else
+    if test $enable_debug; then
+      AC_CHECK_LIB([ATerm-dbg], [ATinit], , [AC_MSG_ERROR([cannot find ATerm-dbg library])])
+      ATERM_NAME="ATerm-debug"
+    else
+      AC_CHECK_LIB([ATerm], [ATinit], , [AC_MSG_ERROR([cannot find ATerm library])])
+      ATERM_NAME="ATerm"
+    fi
+  fi;
+  AC_CHECK_HEADERS([aterm2.h], , [AC_MSG_ERROR([cannot find ATerm headers])])
+else
+  AC_MSG_NOTICE([using local ATerm library])
+  CPPFLAGS="-I$PWD/aterm $CPPFLAGS"
+  LDFLAGS="-L$PWD/aterm $LDFLAGS"
+  ATERM_NAME="ATerm"
+  BUILD_ATERM=1
 fi
+AC_SUBST([ATERM_NAME],[])
+AC_SUBST([BUILD_ATERM],[])
 # debug: AC_MSG_RESULT([CPPFLAGS=$CPPFLAGS])
 # debug: AC_MSG_RESULT([LDFLAGS=$LDFLAGS])
-AC_CHECK_LIB([ATerm], [ATinit], , [AC_MSG_ERROR([cannot find ATerm library])])
-AC_CHECK_HEADERS([aterm2.h], , [AC_MSG_ERROR([cannot find ATerm headers])])
 
 # Check for xml2 library and header files
 AC_ARG_WITH(

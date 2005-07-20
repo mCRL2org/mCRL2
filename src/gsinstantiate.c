@@ -83,7 +83,7 @@ void print_help(FILE *f)
 	          "-e, --deadlock-trace     Write trace to each deadlock state\n"
 		  "                         to a file\n"
 	          "-m, --monitor            Print status of generation\n"
-	          "    --rewriter name      Use rewriter 'name' (default inner3)\n"
+	          "-R, --rewriter name      Use rewriter 'name' (default inner3)\n"
 	       );
 }
 
@@ -107,6 +107,7 @@ int main(int argc, char **argv)
 	};
 	int opt, strat;
 	bool usedummies,trace_deadlock,explore;
+	char *rw_arg;
 
 	ATinit(argc,argv,&stackbot);
 
@@ -158,26 +159,32 @@ int main(int argc, char **argv)
 				monitor = true;
 				break;
 			case 'R':
-				if ( !strcmp(optarg,"inner") )
+				if ( optarg == NULL )
+				{
+					rw_arg = argv[optind++];
+				} else {
+					rw_arg = optarg;
+				}
+				if ( !strcmp(rw_arg,"inner") )
 				{
 					strat = GS_REWR_INNER;
-				} else if ( !strcmp(optarg,"inner2") )
+				} else if ( !strcmp(rw_arg,"inner2") )
 				{
 					strat = GS_REWR_INNER2;
-				} else if ( !strcmp(optarg,"inner3") )
+				} else if ( !strcmp(rw_arg,"inner3") )
 				{
 					strat = GS_REWR_INNER3;
-				} else if ( !strcmp(optarg,"innerc") )
+				} else if ( !strcmp(rw_arg,"innerc") )
 				{
 					strat = GS_REWR_INNERC;
-				} else if ( !strcmp(optarg,"innerc2") )
+				} else if ( !strcmp(rw_arg,"innerc2") )
 				{
 					strat = GS_REWR_INNERC2;
-				} else if ( !strcmp(optarg,"jitty") )
+				} else if ( !strcmp(rw_arg,"jitty") )
 				{
 					strat = GS_REWR_JITTY;
 				} else {
-					fprintf(stderr,"warning: unknown rewriter '%s', using default\n",optarg);
+					fprintf(stderr,"warning: unknown rewriter '%s', using default\n",rw_arg);
 					strat = GS_REWR_INNER3;
 				}
 				break;
