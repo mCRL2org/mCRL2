@@ -223,7 +223,7 @@ void XSimMain::LoadFile(const wxString &filename)
     stateview->DeleteAllItems();
     for (int i=0; !ATisEmpty(l); l=ATgetNext(l), i++)
     {
-	    stateview->InsertItem(i,wxT(ATgetName(ATgetAFun(ATAgetArgument(ATAgetFirst(l),0)))));
+	    stateview->InsertItem(i,ATgetName(ATgetAFun(ATAgetArgument(ATAgetFirst(l),0))));
 	    m = ATinsert(m,ATgetArgument(ATAgetFirst(l),0));
 	    n = ATinsert(n,ATgetFirst(l));
     }
@@ -683,7 +683,7 @@ void XSimMain::SetCurrentState(ATerm state, bool showchange)
 		{
 			stateview->SetItem(i,1,wxT("_"));
 		} else {
-			stateview->SetItem(i,1,wxT(DataExpressionToString(newval).c_str()));
+			stateview->SetItem(i,1,DataExpressionToString(newval).c_str());
 		}
 		if ( showchange && !(ATisEqual(oldval,newval) || (gsIsDataVarId(oldval) && gsIsDataVarId(newval)) ) )
 		{
@@ -738,7 +738,7 @@ void XSimMain::UpdateTransitions()
 	int i = 0;
 	for (ATermList l=next_states; !ATisEmpty(l); l=ATgetNext(l), i++)
 	{
-		actions.Add(wxT(DataExpressionToString(ATAgetFirst(ATLgetFirst(l))).c_str()));
+		actions.Add(DataExpressionToString(ATAgetFirst(ATLgetFirst(l))).c_str());
 		indices.Add(i);
 //		transview->SetItemData(i,i);
 		stringstream ss;
@@ -771,8 +771,8 @@ void XSimMain::UpdateTransitions()
 
 			o = ATgetNext(o);
 		}
-//		transview->SetItem(i,1,wxT(s));
-		statechanges.Add(wxT(ss.str().c_str()));
+//		transview->SetItem(i,1,s);
+		statechanges.Add(ss.str().c_str());
 	}
 
 	sort_transitions(actions,statechanges,indices);
