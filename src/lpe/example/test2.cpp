@@ -170,6 +170,22 @@ class simple_visitor: public mcrl2_visitor
    void leave_Choice(aterm_appl t)                       { cout << "leaving  Choice          " << endl; }
 };
 
+// function object that returns true if the function symbol f matches with
+// the given aterm_appl t
+struct StopAtMatch
+{
+  const function_symbol& f;
+
+  StopAtMatch(const function_symbol& f_)
+    : f(f_)
+  {}
+
+  bool operator()(aterm_appl t) const
+  {
+    return t.function() == f;
+  }
+};
+
 int main()
 {
   string filename("data/abp_b.lpe");
@@ -179,8 +195,11 @@ int main()
   
   simple_visitor v;
   v.walk_SpecV1(t);
-  
-  cin.get();
+
+  cout << "-------------------------------------------" << endl;
+
+  function_symbol f("SortId", 2);
+  v.walk_SpecV1(t, StopAtMatch(f)); // don't search any deeper when a "SortId" term is encountered 
 
   return 0;
 }

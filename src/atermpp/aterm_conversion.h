@@ -22,10 +22,24 @@
 
 namespace { // unnamed namespace
 
+  // --- term ---
+  inline
+  ATerm void2term(void* t)
+  { return reinterpret_cast<ATerm>(t); }
+
+  inline
+  const ATerm void2term(const void* t)
+  { return reinterpret_cast<ATerm>(const_cast<void*>(t)); }
+  
+  inline
+  void* term2void(ATerm t)
+  { return reinterpret_cast<void*>(t); }
+  
+  // --- list ---
   inline
   ATermList void2list(void* t)
   { return reinterpret_cast<ATermList>(t); }
-  
+
   inline
   const ATermList void2list(const void* t)
   { return reinterpret_cast<ATermList>(const_cast<void*>(t)); }

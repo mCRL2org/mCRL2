@@ -1,6 +1,5 @@
 #include <string>
 #include "atermpp/aterm.h"
-#include "mcrl2/sort.h"
 
 using namespace std;
 using namespace atermpp;
@@ -16,9 +15,7 @@ int main()
 
   assert(t.type() == AT_APPL);
   cout << "name = " << t.function().name() << endl;
-  cin.get();
   cout << t.to_string() << endl;
-  cin.get();
 
   return 0;
 }

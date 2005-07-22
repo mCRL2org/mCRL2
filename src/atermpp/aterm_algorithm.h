@@ -45,7 +45,6 @@ bool is_subterm(aterm_appl s, aterm_appl t)
   return false;
 }
 
-
 // recursively replaces src by dest in term t
 inline
 aterm_appl replace(aterm_appl t, aterm_appl src, aterm_appl dest)
@@ -68,6 +67,27 @@ aterm_appl replace(aterm_appl t, aterm_appl src, aterm_appl dest)
     return dest;
   else
     return result;
+}
+
+// non-recursively replaces src by dest in term t
+inline
+aterm_appl replace_non_recursive(aterm_appl t, aterm_appl src, aterm_appl dest)
+{
+  if (t == src)
+    return dest;
+
+  if (t.function().arity() == 0)
+    return t;
+
+  aterm_list args = t.argument_list();
+  std::vector<aterm> v;
+  for (aterm_list::iterator i = args.begin(); i != args.end(); ++i)
+  {
+    v.push_back(replace(i->to_appl(), src, dest));
+  }
+
+  aterm_appl result(t.function(), aterm_list(v.begin(), v.end()));
+  return result;
 }
 
 // non-recursive multiple replace
