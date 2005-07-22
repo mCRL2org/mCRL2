@@ -233,7 +233,7 @@ void XSimMain::LoadFile(const wxString &filename)
     {
 	    gsNextStateFinalise();
     }
-    initial_state = gsNextStateInit(Spec,true,GS_REWR_INNER3);
+    initial_state = gsNextStateInit(Spec,true,GS_STATE_VECTOR,GS_REWR_INNER3);
 
     InitialiseViews();
     Reset(initial_state);

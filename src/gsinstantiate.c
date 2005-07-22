@@ -76,6 +76,10 @@ void print_help(FILE *f)
 		  "                         the LPE with dummy values.\n"
 		  "-y, --dummy              Replace free variables in the LPE\n"
 		  "                         with dummy values. (default)\n"
+		  "-c, --vector             Store state in a vector (fastest,\n"
+		  "                         default)\n"
+		  "-r, --tree               Store state in a tree (for memory\n"
+		  "                         efficiency)\n"
 	          "-l, --max num            Explore at most num states\n"
 	          "    --deadlock           Synonym for --deadlock-detect\n"
 	          "-d, --deadlock-detect    Detect deadlocks (i.e. for every\n"
@@ -92,11 +96,13 @@ int main(int argc, char **argv)
 	FILE *SpecStream;
 	ATerm stackbot;
 	ATermAppl Spec;
-	#define sopts "hfyldemR"
+	#define sopts "hfycrldemR"
 	struct option lopts[] = {
 		{ "help", 		no_argument,		NULL,	'h' },
 		{ "freevar", 		no_argument,		NULL,	'f' },
 		{ "dummy", 		no_argument,		NULL,	'y' },
+		{ "vector", 		no_argument,		NULL,	'c' },
+		{ "tree", 		no_argument,		NULL,	'r' },
 		{ "max", 		required_argument,	NULL,	'l' },
 		{ "deadlock", 		no_argument,		NULL,	'd' },
 		{ "deadlock-detect", 	no_argument,		NULL,	'd' },
@@ -105,7 +111,7 @@ int main(int argc, char **argv)
 		{ "rewriter", 		required_argument,	NULL,	'R' },
 		{ 0, 0, 0, 0 }
 	};
-	int opt, strat;
+	int opt, strat, stateformat;
 	bool usedummies,trace_deadlock,explore;
 	char *rw_arg;
 
@@ -113,6 +119,7 @@ int main(int argc, char **argv)
 
 	strat = GS_REWR_INNER3;
 	usedummies = true;
+	stateformat = GS_STATE_VECTOR;
 	max_states = 0;
 	trace = false;
 	trace_deadlock = false;
@@ -130,6 +137,12 @@ int main(int argc, char **argv)
 				break;
 			case 'y':
 				usedummies = true;
+				break;
+			case 'v':
+				stateformat = GS_STATE_VECTOR;
+				break;
+			case 'r':
+				stateformat = GS_STATE_TREE;
 				break;
 			case 'l':
 				if ( optarg == NULL )
@@ -237,7 +250,7 @@ int main(int argc, char **argv)
 		fprintf(aut,"des (0,0,0)                   \n");
 	}
 
-	ATerm state = gsNextStateInit(Spec,!usedummies,strat);
+	ATerm state = gsNextStateInit(Spec,!usedummies,stateformat,strat);
 
 	ATbool new_state;
 	current_state = ATindexedSetPut(states,state,&new_state);

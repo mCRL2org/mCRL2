@@ -51,8 +51,10 @@ static ATermList gsGetDomain(ATermAppl sort)
 
 
 static ATermAppl current_spec;
+static int stateformat;
 static int statelen;
 static AFun stateAFun;
+static AFun pairAFun;
 static ATerm *stateargs;
 static int num_summands;
 static ATermAppl *summands;
@@ -63,6 +65,98 @@ static ATermAppl nil;
 
 static bool usedummies;
 
+static bool *tree_init = NULL;
+static void fill_tree_init(bool *init, int n, int l)
+{
+	if ( l == 0 )
+		return;
+
+	if ( n > 2 )
+	{
+		fill_tree_init(init,n-n/2,l-l/2);
+		fill_tree_init(init+(n-n/2),n/2,l/2);
+	} else /* n == 2 */ {
+		init[1] = true;
+	}
+}
+static ATerm buildTree(ATerm *args)
+{
+	int n,m;
+
+	if ( statelen == 0 )
+		return (ATerm) nil;
+
+	if ( tree_init == NULL )
+	{
+		tree_init = (bool *) malloc(statelen*sizeof(bool));
+		for (int i=0; i<statelen; i++)
+			tree_init[i] = false;
+		n = 1;
+		while ( n < statelen )
+		{
+			n *= 2;
+		}
+		n /= 2;
+		fill_tree_init(tree_init,statelen,statelen-n);
+	}
+
+	n = 0;
+	m = 0;
+	while ( n < statelen )
+	{
+		if ( tree_init[n] )
+		{
+			args[m-1] = (ATerm) ATmakeAppl2(pairAFun,args[m-1],args[n]);
+		} else {
+			args[m] = args[n];
+			m++;
+		}
+		n++;
+	}
+
+	n = m;
+	while ( n > 1 )
+	{
+		for (int i=0; i<n; i+=2)
+		{
+			args[i/2] = (ATerm) ATmakeAppl2(pairAFun,args[i],args[i+1]);
+		}
+		
+		n /= 2;
+	}
+	
+	return args[0];
+}
+
+static ATerm getTreeElement(ATerm tree, int index)
+{
+	int n = statelen;
+	int m = 0;
+	int t = (n+m+1)/2;
+
+	while ( 1 )
+	{
+		if ( index < t )
+		{
+			tree = ATgetArgument((ATermAppl) tree,0);
+			n = t;
+		} else {
+			tree = ATgetArgument((ATermAppl) tree,1);
+			m = t;
+		}
+
+		if ( (t == 1) || (t == index) )
+			break;
+
+		t = (n+m+1)/2;
+	}
+	while ( (ATgetType(tree) == AT_APPL) && ATisEqualAFun(ATgetAFun((ATermAppl) tree),pairAFun) )
+	{
+		tree = ATgetArgument((ATermAppl) tree,0);
+	}
+	return tree;
+}
+
 int gsGetStateLength()
 {
 //	return ATgetLength(procvars);
@@ -71,7 +165,15 @@ int gsGetStateLength()
 
 ATermAppl gsGetStateArgument(ATerm state, int index)
 {
-	return gsFromRewriteFormat(ATgetArgument((ATermAppl) state,index));
+	switch ( stateformat )
+	{
+		case GS_STATE_VECTOR:
+			return gsFromRewriteFormat(ATgetArgument((ATermAppl) state,index));
+		case GS_STATE_TREE:
+			return gsFromRewriteFormat(getTreeElement(state,index));
+		default:
+			return NULL;
+	}
 }
 
 /*ATermAppl gsGetStateArgument(ATerm state, int index)
@@ -273,7 +375,7 @@ ATerm AssignsToRewriteFormat(ATermList assigns, ATermList free_vars)
 	return (ATerm) ATmakeApplArray(stateAFun,stateargs);
 }
 
-ATerm gsNextStateInit(ATermAppl Spec, bool AllowFreeVars, int RewriteStrategy)
+ATerm gsNextStateInit(ATermAppl Spec, bool AllowFreeVars, int StateFormat, int RewriteStrategy)
 {
 	ATermList l,m,n,free_vars;
 	bool set;
@@ -281,6 +383,10 @@ ATerm gsNextStateInit(ATermAppl Spec, bool AllowFreeVars, int RewriteStrategy)
 	current_spec = Spec;
 	ATprotectAppl(&current_spec);
 	usedummies = !AllowFreeVars;
+
+	stateformat = StateFormat;
+	pairAFun = ATmakeAFun("@STATE_PAIR@",2,ATfalse);
+	ATprotectAFun(pairAFun);
 
 	nil = gsMakeNil();
 	ATprotectAppl(&nil);
@@ -376,7 +482,15 @@ ATerm gsNextStateInit(ATermAppl Spec, bool AllowFreeVars, int RewriteStrategy)
 		}
 	}
 
-	return (ATerm) ATmakeApplArray(stateAFun,stateargs);
+	switch ( stateformat )
+	{
+		case GS_STATE_VECTOR:
+			return (ATerm) ATmakeApplArray(stateAFun,stateargs);
+		case GS_STATE_TREE:
+			return (ATerm) buildTree(stateargs);
+		default:
+			return NULL;
+	}
 }
 
 void gsNextStateFinalise()
@@ -384,6 +498,8 @@ void gsNextStateFinalise()
 	ATunprotectAppl(&current_spec);
 	ATunprotectAppl(&nil);
 	gsProverFinalise();
+	
+	ATunprotectAFun(pairAFun);
 
 	ATunprotectList(&pars);
 	ATunprotectAFun(stateAFun);
@@ -394,6 +510,12 @@ void gsNextStateFinalise()
 	ATunprotectAFun(smndAFun);
 	ATunprotectArray((ATerm *) summands);
 	free(summands);
+
+	if ( tree_init != NULL )
+	{
+		free(tree_init);
+		tree_init = NULL;
+	}
 }
 
 static ATerm makeNewState(ATerm old, ATermList vars, ATerm assigns)
@@ -403,14 +525,29 @@ static ATerm makeNewState(ATerm old, ATermList vars, ATerm assigns)
 		ATerm a = ATgetArgument((ATermAppl) assigns,i);
 		if ( ATisEqual(a,nil) )
 		{
-			stateargs[i] = ATgetArgument((ATermAppl) old,i);
+			switch ( stateformat )
+			{
+				case GS_STATE_VECTOR:
+					stateargs[i] = ATgetArgument((ATermAppl) old,i);
+					break;
+				case GS_STATE_TREE:
+					stateargs[i] = getTreeElement(old,i);
+					break;
+			}
 		} else {
 			stateargs[i] = gsRewriteInternal(a);
 //			stateargs[i] = gsRewriteInternal(SetVars(a));
 		}
 	}
-
-	return (ATerm) ATmakeApplArray(stateAFun,stateargs);
+	switch ( stateformat )
+	{
+		case GS_STATE_VECTOR:
+			return (ATerm) ATmakeApplArray(stateAFun,stateargs);
+		case GS_STATE_TREE:
+			return buildTree(stateargs);
+		default:
+			return NULL;
+	}
 }
 
 /*static ATerm makeNewState(ATerm old, ATermList vars, ATermList assigns, ATermList substs)
@@ -546,10 +683,22 @@ ATermList gsNextState(ATerm State, gsNextStateCallBack f)
 //	ATermList params_l = ATmakeList0();
 	for (int i=0; !ATisEmpty(l); l=ATgetNext(l),i++)
 	{
-		if ( !ATisEqual(ATgetArgument((ATermAppl) State,i),nil) )
+		ATerm a;
+
+		switch ( stateformat )
+		{
+			case GS_STATE_VECTOR:
+				a = ATgetArgument((ATermAppl) State,i);
+				break;
+			case GS_STATE_TREE:
+				a = getTreeElement(State,i);
+				break;
+		}
+
+		if ( !ATisEqual(a,nil) )
 		{
 //			ATtablePut(params,ATgetFirst(l),ATgetFirst(m));
-			RWsetVariable(ATgetFirst(l),ATgetArgument((ATermAppl) State,i));
+			RWsetVariable(ATgetFirst(l),a);
 //			params_l = ATinsert(params_l,(ATerm) gsMakeSubst(ATgetFirst(l),ATgetFirst(m)));
 		}
 	}

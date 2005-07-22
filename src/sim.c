@@ -82,7 +82,7 @@ int main(int argc, char **argv)
 		return 1;
 	}
 
-	state = gsNextStateInit(Spec,!usedummy,GS_REWR_INNER3);
+	state = gsNextStateInit(Spec,!usedummy,GS_STATE_VECTOR,GS_REWR_INNER3);
 
 	ATprintf("initial state: [ ");
 	gsPrintState(state);
