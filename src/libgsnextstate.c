@@ -73,8 +73,8 @@ static void fill_tree_init(bool *init, int n, int l)
 
 	if ( n > 2 )
 	{
-		fill_tree_init(init,n-n/2,l-l/2);
-		fill_tree_init(init+(n-n/2),n/2,l/2);
+		fill_tree_init(init,n/2,l/2);
+		fill_tree_init(init+n/2,n-n/2,l-l/2);
 	} else /* n == 2 */ {
 		init[1] = true;
 	}
@@ -132,7 +132,7 @@ static ATerm getTreeElement(ATerm tree, int index)
 {
 	int n = statelen;
 	int m = 0;
-	int t = (n+m+1)/2;
+	int t = n/2;
 
 	while ( 1 )
 	{
@@ -148,7 +148,7 @@ static ATerm getTreeElement(ATerm tree, int index)
 		if ( (t == 1) || (t == index) )
 			break;
 
-		t = (n+m+1)/2;
+		t = (n+m)/2;
 	}
 	while ( (ATgetType(tree) == AT_APPL) && ATisEqualAFun(ATgetAFun((ATermAppl) tree),pairAFun) )
 	{
@@ -520,6 +520,9 @@ void gsNextStateFinalise()
 
 static ATerm makeNewState(ATerm old, ATermList vars, ATerm assigns)
 {
+	ATermList l;
+
+	l = procvars;
 	for (int i=0; i<statelen; i++)
 	{
 		ATerm a = ATgetArgument((ATermAppl) assigns,i);
@@ -531,13 +534,15 @@ static ATerm makeNewState(ATerm old, ATermList vars, ATerm assigns)
 					stateargs[i] = ATgetArgument((ATermAppl) old,i);
 					break;
 				case GS_STATE_TREE:
-					stateargs[i] = getTreeElement(old,i);
+//					stateargs[i] = getTreeElement(old,i);
+					stateargs[i] = RWapplySubstitution(ATgetFirst(l));
 					break;
 			}
 		} else {
 			stateargs[i] = gsRewriteInternal(a);
 //			stateargs[i] = gsRewriteInternal(SetVars(a));
 		}
+		l = ATgetNext(l);
 	}
 	switch ( stateformat )
 	{
@@ -663,6 +668,18 @@ fprintf(stderr,"\n");*/
 	}
 }
 
+static void SetTreeStateVars(ATerm tree, ATermList *vars)
+{
+	if ( (ATgetType(tree) == AT_APPL) && ATisEqualAFun(ATgetAFun((ATermAppl) tree),pairAFun) )
+	{
+		SetTreeStateVars(ATgetArgument((ATermAppl) tree,0),vars);
+		SetTreeStateVars(ATgetArgument((ATermAppl) tree,1),vars);
+	} else {
+		RWsetVariable(ATgetFirst(*vars),tree);
+		*vars = ATgetNext(*vars);
+	}
+}
+
 ATermList gsNextState(ATerm State, gsNextStateCallBack f)
 {
 	ATermList states,l;//,m,params;
@@ -681,26 +698,24 @@ ATermList gsNextState(ATerm State, gsNextStateCallBack f)
 //	m = (ATermList) State;
 //	ATtableReset(params);
 //	ATermList params_l = ATmakeList0();
-	for (int i=0; !ATisEmpty(l); l=ATgetNext(l),i++)
+	switch ( stateformat )
 	{
-		ATerm a;
+		case GS_STATE_VECTOR:
+			for (int i=0; !ATisEmpty(l); l=ATgetNext(l),i++)
+			{
+				ATerm a = ATgetArgument((ATermAppl) State,i);
 
-		switch ( stateformat )
-		{
-			case GS_STATE_VECTOR:
-				a = ATgetArgument((ATermAppl) State,i);
-				break;
-			case GS_STATE_TREE:
-				a = getTreeElement(State,i);
-				break;
-		}
-
-		if ( !ATisEqual(a,nil) )
-		{
+				if ( !ATisEqual(a,nil) )
+				{
 //			ATtablePut(params,ATgetFirst(l),ATgetFirst(m));
-			RWsetVariable(ATgetFirst(l),a);
+					RWsetVariable(ATgetFirst(l),a);
 //			params_l = ATinsert(params_l,(ATerm) gsMakeSubst(ATgetFirst(l),ATgetFirst(m)));
-		}
+				}
+			}
+			break;
+		case GS_STATE_TREE:
+			SetTreeStateVars(State,&l);
+			break;
 	}
 //	params_l = ATreverse(params_l);
 
