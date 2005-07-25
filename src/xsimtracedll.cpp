@@ -107,10 +107,10 @@ void XSimTraceDLL::StateChanged(ATermAppl Transition, ATerm State, ATermList Nex
 			l--;
 		}
 		current_pos++;
-		traceview->InsertItem(current_pos,wxString::Format("%i",current_pos));
-		traceview->SetItem(current_pos,1,DataExpressionToString(Transition).c_str());
+		traceview->InsertItem(current_pos,wxString::Format(wxT("%i"),current_pos));
+		traceview->SetItem(current_pos,1,wxConvLocal.cMB2WX(DataExpressionToString(Transition).c_str()));
 		PrintState(ss,State);
-		traceview->SetItem(current_pos,2,ss.str().c_str());
+		traceview->SetItem(current_pos,2,wxConvLocal.cMB2WX(ss.str().c_str()));
 		traceview->SetColumnWidth(2,wxLIST_AUTOSIZE);
 	}
 }
@@ -123,7 +123,7 @@ void XSimTraceDLL::Reset(ATerm State)
 	traceview->InsertItem(0,wxT("0"));
 	traceview->SetItem(0,1,wxT(""));
 	PrintState(ss,State);
-	traceview->SetItem(0,2,ss.str().c_str());
+	traceview->SetItem(0,2,wxConvLocal.cMB2WX(ss.str().c_str()));
 	traceview->SetColumnWidth(2,wxLIST_AUTOSIZE);
 	current_pos = 0;
 }

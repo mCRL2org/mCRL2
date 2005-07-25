@@ -198,7 +198,7 @@ void XSimMain::LoadFile(const wxString &filename)
 {
     FILE *f;
     
-    if ( (f = fopen(filename.c_str(),"r")) == NULL )
+    if ( (f = fopen(filename.fn_str(),"r")) == NULL )
     {
 	    wxMessageDialog msg(this, wxT("Failed to open file."),
 		wxT("Error"), wxOK|wxICON_ERROR);
@@ -223,7 +223,12 @@ void XSimMain::LoadFile(const wxString &filename)
     stateview->DeleteAllItems();
     for (int i=0; !ATisEmpty(l); l=ATgetNext(l), i++)
     {
-	    stateview->InsertItem(i,ATgetName(ATgetAFun(ATAgetArgument(ATAgetFirst(l),0))));
+	    wxString s(ATgetName(ATgetAFun(ATAgetArgument(ATAgetFirst(l),0)))
+#ifdef USE_UNICODE
+			    ,wxConvLocal
+#endif
+			    );
+	    stateview->InsertItem(i,s);
 	    m = ATinsert(m,ATgetArgument(ATAgetFirst(l),0));
 	    n = ATinsert(n,ATgetFirst(l));
     }
@@ -567,7 +572,7 @@ void XSimMain::OnLoadTrace( wxCommandEvent &event )
 		    {
 			    if ( s.Length() > 0 )
 			    {
-				    if ( s[0] == '"' )
+				    if ( s[0] == wxT('"') )
 				    {
 					    s = s.Mid(1,s.Length()-2);
 				    }
@@ -578,7 +583,7 @@ void XSimMain::OnLoadTrace( wxCommandEvent &event )
 					    ChooseTransition(transview->GetItemData(l));
 					    Update();
 				    } else {
-					    wxMessageDialog dialog(this,wxString::Format("Cannot execute transition '%s'.\n",s.c_str()),wxT("Error in trace"),wxOK|wxICON_ERROR);
+					    wxMessageDialog dialog(this,wxString::Format(wxT("Cannot execute transition '%s'.\n"),s.c_str()),wxT("Error in trace"),wxOK|wxICON_ERROR);
 					    dialog.ShowModal();
 					    break;
 				    }
@@ -597,7 +602,7 @@ void XSimMain::OnSaveTrace( wxCommandEvent &event )
     {
 	    FILE *f;
 
-	    if ( (f = fopen(dialog.GetPath().c_str(),"w")) == NULL )
+	    if ( (f = fopen(dialog.GetPath().fn_str(),"w")) == NULL )
 	    {
 		    perror("fopen");
 		    return;
@@ -683,7 +688,7 @@ void XSimMain::SetCurrentState(ATerm state, bool showchange)
 		{
 			stateview->SetItem(i,1,wxT("_"));
 		} else {
-			stateview->SetItem(i,1,DataExpressionToString(newval).c_str());
+			stateview->SetItem(i,1,wxConvLocal.cMB2WX(DataExpressionToString(newval).c_str()));
 		}
 		if ( showchange && !(ATisEqual(oldval,newval) || (gsIsDataVarId(oldval) && gsIsDataVarId(newval)) ) )
 		{
@@ -738,7 +743,7 @@ void XSimMain::UpdateTransitions()
 	int i = 0;
 	for (ATermList l=next_states; !ATisEmpty(l); l=ATgetNext(l), i++)
 	{
-		actions.Add(DataExpressionToString(ATAgetFirst(ATLgetFirst(l))).c_str());
+		actions.Add(wxConvLocal.cMB2WX(DataExpressionToString(ATAgetFirst(ATLgetFirst(l))).c_str()));
 		indices.Add(i);
 //		transview->SetItemData(i,i);
 		stringstream ss;
@@ -772,7 +777,7 @@ void XSimMain::UpdateTransitions()
 			o = ATgetNext(o);
 		}
 //		transview->SetItem(i,1,s);
-		statechanges.Add(ss.str().c_str());
+		statechanges.Add(wxConvLocal.cMB2WX(ss.str().c_str()));
 	}
 
 	sort_transitions(actions,statechanges,indices);
