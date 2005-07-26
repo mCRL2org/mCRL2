@@ -224,7 +224,7 @@ void XSimMain::LoadFile(const wxString &filename)
     for (int i=0; !ATisEmpty(l); l=ATgetNext(l), i++)
     {
 	    wxString s(ATgetName(ATgetAFun(ATAgetArgument(ATAgetFirst(l),0)))
-#ifdef USE_UNICODE
+#ifdef wxUSE_UNICODE
 			    ,wxConvLocal
 #endif
 			    );
@@ -572,7 +572,7 @@ void XSimMain::OnLoadTrace( wxCommandEvent &event )
 		    {
 			    if ( s.Length() > 0 )
 			    {
-				    if ( s[0] == wxT('"') )
+				    if ( s[0u] == wxT('"') )
 				    {
 					    s = s.Mid(1,s.Length()-2);
 				    }
