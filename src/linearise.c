@@ -1506,6 +1506,7 @@ static ATermAppl fresh_name(char *name)
   /* check that name does not already exist, otherwise,
      add some suffix and check again */
   ATtablePut(freshstringIndices,stringterm,(ATerm)ATmakeInt(i));
+  addString(str->s);
   stringterm=(ATerm)gsString2ATermAppl(str->s);
   release_string(str);
   return (ATermAppl)stringterm;
@@ -6249,7 +6250,7 @@ static ATermAppl makesingleultimatedelaycondition(
     { /* make a new process equation */
       ATermList extendedvariables=ATappend(variables,(ATerm)sumvar);
       ATermAppl newfunction=gsMakeOpId(fresh_name("ExistsFun"),
-                                       gsMakeSortArrowList(getsorts(extendedvariables),gsMakeSortExprBool()));
+              gsMakeSortArrowList(getsorts(extendedvariables),gsMakeSortExprBool()));
       
       newequation(NULL,gsMakeDataApplList(newfunction,extendedvariables),result,spec);
       result=gsMakeDataExprExists(gsMakeDataApplList(newfunction,variables));
@@ -6320,6 +6321,9 @@ static ATermList combinesumlist(
   ATermAppl ultimatedelaycondition=
                substitute_data(rename_list,par2,
                    getUltimateDelayCondition(sumlist2,parametersOfsumlist2,timevar,spec));
+  // ATfprintf(stderr,"ultimatedelaycond1");
+  // gsPrintPart(stderr,ultimatedelaycondition,0,0);
+  // ATfprintf(stderr,"\n");
 
   for (ATermList walker1=sumlist1; (walker1!=ATempty); 
                         walker1=ATgetNext(walker1)) 
@@ -6383,6 +6387,10 @@ static ATermList combinesumlist(
 
   ultimatedelaycondition=
                    getUltimateDelayCondition(sumlist1,par1,timevar,spec);
+
+  // ATfprintf(stderr,"ultimatedelaycond2\n");
+  // gsPrintPart(stderr,ultimatedelaycondition,0,0);
+  // ATfprintf(stderr,"\n");
 
   for (ATermList walker2=sumlist2; walker2!=ATempty;
          walker2=ATgetNext(walker2) )
