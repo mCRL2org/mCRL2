@@ -6321,7 +6321,7 @@ static ATermList combinesumlist(
   ATermAppl ultimatedelaycondition=
                substitute_data(rename_list,par2,
                    getUltimateDelayCondition(sumlist2,parametersOfsumlist2,timevar,spec));
-  // ATfprintf(stderr,"ultimatedelaycond1");
+  // ATfprintf(stderr,"ultimatedelaycond1i %t\n",timevar);
   // gsPrintPart(stderr,ultimatedelaycondition,0,0);
   // ATfprintf(stderr,"\n");
 
@@ -6346,10 +6346,11 @@ static ATermList combinesumlist(
     actiontime1=substitute_time(rename1_list,sums1renaming,actiontime1);
 
     if (multiaction1!=terminationAction)
-    { if (actiontime1==gsMakeNil())
+    { 
+      if (actiontime1==gsMakeNil())
       { if (ultimatedelaycondition!=gsMakeDataExprTrue())
         { actiontime1=timevar;
-          sumvars1=ATinsertA(sumvars1,timevar);
+          sumvars1new=ATinsertA(sumvars1new,timevar);
           condition1=gsMakeDataExprAnd(ultimatedelaycondition,condition1);
         }
       }
@@ -6388,9 +6389,9 @@ static ATermList combinesumlist(
   ultimatedelaycondition=
                    getUltimateDelayCondition(sumlist1,par1,timevar,spec);
 
-  // ATfprintf(stderr,"ultimatedelaycond2\n");
-  // gsPrintPart(stderr,ultimatedelaycondition,0,0);
-  // ATfprintf(stderr,"\n");
+//  ATfprintf(stderr,"ultimatedelaycond2\n");
+//  gsPrintPart(stderr,ultimatedelaycondition,0,0);
+//  ATfprintf(stderr,"\n");
 
   for (ATermList walker2=sumlist2; walker2!=ATempty;
          walker2=ATgetNext(walker2) )
@@ -6419,7 +6420,7 @@ static ATermList combinesumlist(
       if (actiontime2==gsMakeNil())
       { if (ultimatedelaycondition!=gsMakeDataExprTrue())
         { actiontime2=timevar;
-          sumvars2=ATinsertA(sumvars2,timevar);
+          sumvars2new=ATinsertA(sumvars2new,timevar);
           condition2=gsMakeDataExprAnd(ultimatedelaycondition,condition2);
         }
       }
