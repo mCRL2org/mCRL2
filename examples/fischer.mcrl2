@@ -1,0 +1,39 @@
+% This is an MCRL2 description of Fischer's mutual exclusion protocol
+% for two processes. The idea is that two processes communicate within
+% certain time bounds to obtain exclusive access to a mututal resource.
+% This protocol is particularly interesting, because it crucially 
+% relies on time, and is quite simple. This version has been made by
+% Yaroslav Usenko.
+
+% Temporary hack, as long as mCRL2 does not include reals.
+
+sort Real=Nat;
+
+map  k:Real; 
+eqn  k=2;
+
+act  get,_get,__get:Nat;
+     set,_set,__set:Nat;
+
+proc P(pid:Nat)=P_init(pid,0,0);
+
+     P_init(pid:Nat,t:Real,x:Real)=
+       sum u:Real._get(0)@(t+u).P_req(pid,t+u,0);
+ 
+     P_req(pid:Nat,t:Real,x:Real)=
+       sum u:Real.(u<k)->_set(pid)@(t+u).P_wait(pid,t+u,0);
+
+     P_wait(pid:Nat,t:Real,x:Real)=
+       sum u:Real.(x+u>=k)->_get(pid)@(t+u).P_cs(pid,t+u,x)+
+       sum u:Real._get(0)@(t+u).P_req(pid,t+u,0);
+
+     P_cs(pid:Nat,t:Real,x:Real)=
+       sum u:Real._set(0)@(t+u).P_init(pid,t+u,x);
+
+
+     ID(id:Nat) = sum n:Nat.set(n).ID(n) + get(id).ID(id);
+
+init restrict({get,_get,set,_set},
+       comm({get|_get->__get,set|_set->__set},
+         ID(0)||P(1)||P(2)));
+
