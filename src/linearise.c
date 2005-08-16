@@ -6229,11 +6229,15 @@ static ATermAppl communicationcomposition(
 static ATermAppl makesingleultimatedelaycondition(
                      ATermList sumvars,
                      ATermList freevars,
+                     ATermAppl condition,
                      ATermAppl timevariable,
                      ATermAppl actiontime,
                      specificationbasictype *spec)
 { 
-  ATermAppl result=gsMakeDataExprLT(timevariable,actiontime);
+  ATermAppl result=RewriteTerm(
+                     gsMakeDataExprAnd(
+                       condition,
+                       gsMakeDataExprLTE(timevariable,actiontime)));
   ATermList variables=ATinsertA(ATempty,timevariable);
 
   for ( ; freevars!=ATempty ; freevars=ATgetNext(freevars) )
@@ -6243,20 +6247,25 @@ static ATermAppl makesingleultimatedelaycondition(
     }
   } 
 
-  declare_equation_variables(variables); 
   for ( ; sumvars!=ATempty ; sumvars=ATgetNext(sumvars) )
   { ATermAppl sumvar=ATAgetFirst(sumvars);
     if (occursinterm(sumvar,result))
     { /* make a new process equation */
-      ATermList extendedvariables=ATappend(variables,(ATerm)sumvar);
+      ATermList extendedvariables=ATappend(
+                                    ATconcat(variables,ATgetNext(sumvars)),
+                                    (ATerm)sumvar);
+      declare_equation_variables(extendedvariables); 
       ATermAppl newfunction=gsMakeOpId(fresh_name("ExistsFun"),
               gsMakeSortArrowList(getsorts(extendedvariables),gsMakeSortExprBool()));
       
       newequation(NULL,gsMakeDataApplList(newfunction,extendedvariables),result,spec);
-      result=gsMakeDataExprExists(gsMakeDataApplList(newfunction,variables));
+      end_equation_section();
+      result=gsMakeDataExprExists(
+               gsMakeDataApplList(
+                 newfunction,
+                 ATconcat(variables,ATgetNext(sumvars))));
     }
   } 
-  end_equation_section();
  
   return result;
 }
@@ -6267,21 +6276,23 @@ static ATermAppl getUltimateDelayCondition(
                  ATermAppl timevariable,
                  specificationbasictype *spec)
 {  
-   ATermAppl result=gsMakeDataExprTrue();
+   ATermAppl result=gsMakeDataExprFalse();
    for (ATermList walker=sumlist; (walker!=ATempty);
                                walker=ATgetNext(walker))
    { ATermAppl summand=ATAgetFirst(walker);
      ATermList sumvars=linGetSumVars(summand);
      ATermAppl actiontime=linGetActionTime(summand);
+     ATermAppl condition=linGetCondition(summand);
 
      if (actiontime==gsMakeNil())
      { return gsMakeDataExprTrue();
      }
 
-     result=gsMakeDataExprAnd(result,
+     result=gsMakeDataExprOr(result,
               makesingleultimatedelaycondition(
                      sumvars,
                      freevars,
+                     condition,
                      timevariable,
                      actiontime,
                      spec));
