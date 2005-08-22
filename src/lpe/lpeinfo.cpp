@@ -5,9 +5,10 @@ namespace po = boost::program_options;
 #include <iterator>
 using namespace std;
 
-#include "../mcrl2/lpe.h"
+#include "mcrl2/lpe.h"
 
 using namespace mcrl2;
+using namespace atermpp;
 
 po::variables_map vm;
 
