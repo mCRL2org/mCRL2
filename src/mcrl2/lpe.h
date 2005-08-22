@@ -17,11 +17,13 @@ namespace mcrl2 {
 
 using atermpp::aterm_appl;
 using atermpp::aterm_list_iterator;
+using atermpp::read_from_named_file;
 
 ///////////////////////////////////////////////////////////////////////////////
 // LPEAssignment
-/// \brief LPEAssignment to a data variable.
+/// \brief LPEAssignment is an assignment to a data variable.
 ///
+// syntax: LPEAssignment(DataVariable lhs, DataExpression rhs)
 class LPEAssignment
 {
   protected:
@@ -65,6 +67,7 @@ class LPEAssignment
 // LPEInit
 /// \brief initialization fo an LPE.
 ///
+// syntax: LPEInit(list<DataVariable> free_variables, list<LPEAssignment> assignments)
 class LPEInit
 {
   protected:
@@ -124,26 +127,12 @@ class LPEInit
 // LPEState
 /// \brief state of an LPE.
 //
-// LPEState
-// 
 // P(true,0)
 // 
 // free_variables -\> \<empty\>
 // expressions -\> true, 0
 // 
-// 
-// LPESummand
-// 
-// sum c: Bool. b -\> e@1.P(b := c)
-// 
-// sum_variables -\> c
-// condition -\> b
-// action -\> e		(kan delta zijn)
-// time -\> 1		(kan nil zijn)
-// state_change -\> b := c
-// 
-// next_states([true,0]) -\> (e,[true,0]), (e,[false,0])	(hier mist tijd nog)
-//
+// syntax: LPEState(list<DataExpression> expressions, list<DataVariable> free_variables)
 class LPEState
 {
   protected:
@@ -206,6 +195,23 @@ class LPEState
 // LPESummand
 /// \brief LPE summand.
 ///
+// 
+// sum c: Bool. b -\> e@1.P(b := c)
+// 
+// sum_variables -\> c
+// condition -\> b
+// action -\> e		(kan delta zijn)
+// time -\> 1		(kan nil zijn)
+// state_change -\> b := c
+// 
+// next_states([true,0]) -\> (e,[true,0]), (e,[false,0])	(hier mist tijd nog)
+//
+// syntax: LPESummand(list<DataVariable> summation_variables,
+//                    DataExpression condition,
+//                    list<Action> actions | Delta,
+//                    DataExpression time,
+//                    list<LPEAssignment> assignments
+//         )
 class LPESummand
 {
   protected:
@@ -220,6 +226,9 @@ class LPESummand
     typedef list_iterator<DataVariable>   variable_iterator;
     typedef list_iterator<Action>         action_iterator;
     typedef list_iterator<LPEAssignment>  assignment_iterator;
+
+    LPESummand()
+    {}
 
     LPESummand(aterm_appl t)
      : m_term(t)
@@ -341,6 +350,14 @@ class LPESummand
 // initial_state -\> true, 0
 // data -\> ...
 // summands -\> [[],true,a(b),nil,[]], [[c],b,e,1,[b := c]]
+//
+// syntax: SpecV1(SortSpec(list<Sort> sorts),
+//                ConsSpec(list<Operation> constructors),
+//                MapSpec(list<Operation> mappings),
+//                DataEqnSpec(list<DataEquation> equations),
+//                ActSpec(list<Action> actions),
+//                LPE(list<DataVariable> free_variables, list<DataVariable> process_parameters, list<LPESummand> lpe_summands),
+//         )
 class LPE
 {
   protected:
@@ -353,17 +370,11 @@ class LPE
     LPEState   m_initial_state;
     aterm_appl m_lpe_init;
 
-  public:
-    typedef list_iterator<LPESummand>     summand_iterator;
-    typedef list_iterator<DataVariable>   variable_iterator;
-    typedef list_iterator<Action>         action_iterator;
-
-    LPE()
-    {}
-
-    LPE(aterm_appl t)
-     : m_term(t)
+    /// Initialize the LPE with an aterm_appl.
+    ///
+    void init_term(aterm_appl t)
     {
+      m_term = t;
       aterm_list_iterator i = m_term.argument_list().begin();
       aterm_list sorts        = aterm_appl(*i++).argument(0);
       aterm_list constructors = aterm_appl(*i++).argument(0);
@@ -383,6 +394,44 @@ class LPE
       
       // initial state
       // TODO: compute m_initial_state from lpe_init
+    }
+
+  public:
+    typedef list_iterator<LPESummand>     summand_iterator;
+    typedef list_iterator<DataVariable>   variable_iterator;
+    typedef list_iterator<Action>         action_iterator;
+
+    LPE()
+    {}
+
+    LPE(aterm_appl t)
+    {
+      init_term(t);
+    }
+
+    /// Reads the LPE from file. Returns true if the operation succeeded.
+    ///
+    bool load(const std::string& filename)
+    {
+      aterm_appl t = atermpp::read_from_named_file(filename);
+      if (!t)
+        return false;
+      init_term(t);
+      return true;
+    }
+
+    /// Writes the LPE to file. Returns true if the operation succeeded.
+    ///
+    bool save(const std::string& filename, bool binary = true)
+    {
+      if (binary)
+      {
+        return atermpp::write_to_named_binary_file(m_term, filename);
+      }
+      else
+      {
+        return atermpp::write_to_named_text_file(m_term, filename);
+      }
     }
 
     /// Returns the data declaration part of the LPE.
@@ -471,7 +520,7 @@ class LPE
     /// NOT YET IMPLEMENTED!
     /// Returns a sequence of all possible transitions.
     ///
-    std::vector<std::pair<Action, LPEState> > next_state(LPEState s)
+    std::vector<std::pair<Action, LPEState> > transitions(LPEState s)
     {
     }
 
