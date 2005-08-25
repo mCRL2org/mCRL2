@@ -1619,10 +1619,11 @@ extern "C" {
     ATerm stackbot;
     ATinit(0,NULL,&stackbot);
     
-#define sopts "adp"
+#define sopts "adqp"
     struct option lopts[] = {
       {"read-aterm"  , no_argument,      NULL, 'a'},
       {"debug"       , no_argument,      NULL, 'd'},
+      {"quiet"       , no_argument,      NULL, 'q'},
       {"no_rec_par"  , no_argument,      NULL, 'p'},
       {0, 0, 0, 0}
     };
@@ -1637,6 +1638,9 @@ extern "C" {
       case 'd': 
 	gsSetDebugMsg();
 	break;
+      case 'q':
+        gsSetQuietMsg();
+        break;
       case 'p': 
 	rec_par=ATfalse;
 	break;
