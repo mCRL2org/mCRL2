@@ -1,0 +1,1 @@
+ATermAppl translate(ATermAppl spec);

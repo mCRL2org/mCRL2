@@ -105,6 +105,12 @@ ALPHA_OBJECTS      = gsalpha.o libgsalpha.o
 OBJECTS           += $(ALPHA_OBJECTS)
 ALPHA_LDFLAGS      = -lgsparse -l$(ATERM) -lm
 
+#Alphabet axiom applicator definitions
+M2M2_NAME          = mcrl2mcrl2
+M2M2_OBJECTS       = mcrl2mcrl2.o lpetrans.o
+OBJECTS           += $(M2M2_OBJECTS)
+M2M2_LDFLAGS       = -lgsparse -l$(ATERM) -lm
+
 #Instantiator definitions
 INSTAN_NAME        = gsinstantiate
 INSTAN_OBJECTS     = gsinstantiate.o libgsnextstate.o libgsprover.o gssubstitute.o
@@ -135,7 +141,7 @@ else
 endif
 
 #Group definitions
-EXE_NAMES          =  $(PARSER_NAME) $(PRINTER_NAME) $(LINEARISER_NAME) $(LIN_NAME) $(REWR_NAME) $(ALPHA_NAME) $(PNML2GS_NAME) $(INSTAN_NAME) $(SIM_NAME) $(XSIM_NAME)
+EXE_NAMES          =  $(PARSER_NAME) $(PRINTER_NAME) $(LINEARISER_NAME) $(LIN_NAME) $(REWR_NAME) $(ALPHA_NAME) $(M2M2_NAME) $(PNML2GS_NAME) $(INSTAN_NAME) $(SIM_NAME) $(XSIM_NAME)
 LIB_NAMES          =  $(XSIMTRACE_NAME)
 OBJECTS            := $(sort $(OBJECTS))
 
@@ -211,6 +217,9 @@ $(REWR_NAME) : $(REWR_OBJECTS) $(ATERM_DEP) $(LIBPARSER_NAME) $(LIBREWR_NAME)
 
 $(ALPHA_NAME) : $(ALPHA_OBJECTS) $(ATERM_DEP) $(LIBPARSER_NAME)
 	$(CC) -o $@ $(ALPHA_OBJECTS) $(LDFLAGS) $(ALPHA_LDFLAGS)
+
+$(M2M2_NAME) : $(M2M2_OBJECTS) $(ATERM_DEP) $(LIBPARSER_NAME)
+	$(CC) -o $@ $(M2M2_OBJECTS) $(LDFLAGS) $(M2M2_LDFLAGS)
 
 ifdef USE_XML2
 $(PNML2GS_NAME) : $(PNML2GS_OBJECTS) $(ATERM_DEP) $(LIBPARSER_NAME)
