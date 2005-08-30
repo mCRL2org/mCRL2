@@ -10,11 +10,16 @@ extern "C" {
 #include <string.h>
 #include <getopt.h>
 #include <aterm2.h>
+#include "svc/svc.h" //XXX
 #include "gslowlevel.h"
 #include "gsfunc.h"
 #include "libgsparse.h"
 #include "libgsnextstate.h"
 #include "libgsrewrite.h"
+
+#define OF_UNKNOWN	0
+#define OF_AUT		1
+#define OF_SVC		2
 
 static unsigned long num_states;
 static unsigned long trans;
@@ -22,12 +27,16 @@ static unsigned long level;
 static unsigned long max_states;
 static bool trace;
 static bool monitor;
-static FILE *aut;
 static unsigned long current_state;
 static ATermIndexedSet states;
 static ATermTable backpointers;
 static bool deadlockstate;
 static ATerm *orig_state;
+static int outformat;
+static bool outinfo;
+static FILE *aut;
+static SVCfile svcf, *svc;
+static SVCparameterIndex svcparam;
 
 void gsinst_callback(ATermAppl transition, ATerm state)
 {
@@ -51,12 +60,33 @@ void gsinst_callback(ATermAppl transition, ATerm state)
 
 	if ( i < num_states )
 	{
-		if ( aut != NULL )
+		switch ( outformat )
 		{
-			fprintf(aut,"(%lu,\"",current_state);
-			gsPrintPart(aut,transition,false,0);
-			fprintf(aut,"\",%lu)\n",i);
+			case OF_AUT:
+				fprintf(aut,"(%lu,\"",current_state);
+				gsPrintPart(aut,transition,false,0);
+				fprintf(aut,"\",%lu)\n",i);
 fflush(aut);
+			case OF_SVC:
+				if ( outinfo )
+				{
+					SVCbool b;
+					SVCputTransition(svc,
+						SVCnewState(svc,(ATerm) gsMakeStateVector(ATindexedSetGetElem(states,current_state)),&b),
+						SVCnewLabel(svc,(ATerm) transition,&b),
+						SVCnewState(svc,(ATerm) gsMakeStateVector(ATindexedSetGetElem(states,i)),&b),
+						svcparam);
+				} else {
+					SVCbool b;
+					SVCputTransition(svc,
+						SVCnewState(svc,(ATerm) ATmakeInt(current_state),&b),
+						SVCnewLabel(svc,(ATerm) transition,&b),
+						SVCnewState(svc,(ATerm) ATmakeInt(i),&b),
+						svcparam);
+				}
+				break;
+			default:
+				break;
 		}
 		trans++;
 	}
@@ -69,6 +99,10 @@ void print_help(FILE *f)
 	fprintf(f,"Generate state space of LPEFILE and save the result to\n"
 	          "OUTFILE (in the aut format). If OUTFILE is not supplied, the\n"
 		  "state space is not stored.\n"
+		  "\n"
+		  "The format of OUTFILE is determined by its extension (unless\n"
+		  "the format is explicitly specified with an option). If no\n"
+		  "known extension is used, the aut format will be used.\n"
 	          "\n"
 	          "The OPTIONS that can be used are:\n"
 	          "-h, --help               Display this help message\n"
@@ -88,6 +122,11 @@ void print_help(FILE *f)
 		  "                         to a file\n"
 	          "-m, --monitor            Print status of generation\n"
 	          "-R, --rewriter name      Use rewriter 'name' (default inner3)\n"
+		  "    --aut                Force OUTFILE to be in the aut format\n"
+		  "                         (No state information)\n"
+		  "    --svc                Force OUTFILE to be in the svc format\n"
+		  "    --no-info            Do not add state information to\n"
+		  "                         OUTFILE\n"
 	       );
 }
 
@@ -109,6 +148,9 @@ int main(int argc, char **argv)
 		{ "deadlock-trace", 	no_argument,		NULL,	'e' },
 		{ "monitor", 		no_argument,		NULL,	'm' },
 		{ "rewriter", 		required_argument,	NULL,	'R' },
+		{ "aut", 		no_argument,		NULL,	0 },
+		{ "svc", 		no_argument,		NULL,	1 },
+		{ "no-info", 		no_argument,		NULL,	2 },
 		{ 0, 0, 0, 0 }
 	};
 	int opt, strat, stateformat;
@@ -120,6 +162,8 @@ int main(int argc, char **argv)
 	strat = GS_REWR_INNER3;
 	usedummies = true;
 	stateformat = GS_STATE_VECTOR;
+	outformat = OF_UNKNOWN;
+	outinfo = true;
 	max_states = 0;
 	trace = false;
 	trace_deadlock = false;
@@ -201,6 +245,15 @@ int main(int argc, char **argv)
 					strat = GS_REWR_INNER3;
 				}
 				break;
+			case 0:
+				outformat = OF_AUT;
+				break;
+			case 1:
+				outformat = OF_SVC;
+				break;
+			case 2:
+				outinfo = false;
+				break;
 			default:
 				break;
 		}
@@ -219,13 +272,51 @@ int main(int argc, char **argv)
 	}
 	if ( argc-optind > 1 )
 	{
-		if ( (aut = fopen(argv[optind+1],"w")) == NULL )
+		if ( outformat == OF_UNKNOWN )
 		{
-			perror(NAME);
-			return 1;
+			char *s;
+
+			s = strrchr(argv[optind+1],'.');
+			if ( s == NULL )
+			{
+				outformat = OF_AUT;
+			} else {
+				s++;
+				if ( !strcmp(s,"svc") )
+				{
+					outformat = OF_SVC;
+				} else {
+					outformat = OF_AUT;
+				}
+			}
+		}
+
+		switch ( outformat )
+		{
+			case OF_AUT:
+				outinfo = false;
+				if ( (aut = fopen(argv[optind+1],"w")) == NULL )
+				{
+					perror(NAME);
+					return 1;
+				}
+				break;
+			case OF_SVC:
+				{
+					SVCbool b;
+
+					svc = &svcf;
+					b = outinfo?SVCfalse:SVCtrue;
+					SVCopen(svc,argv[optind+1],SVCwrite,&b);
+					SVCsetCreator(svc,NAME);
+					SVCsetType(svc,outinfo?"mCRL2+info":"mCRL2");
+					svcparam = SVCnewParameter(svc,(ATerm) ATmakeList0(),&b);
+				}
+			default:
+				break;
 		}
 	} else {
-		aut = NULL;
+		outformat = OF_UNKNOWN;
 	}
 
 	gsEnableConstructorFunctions();
@@ -244,13 +335,28 @@ int main(int argc, char **argv)
 	} else {
 		backpointers = NULL;
 	}
-	
-	if ( aut != NULL )
-	{
-		fprintf(aut,"des (0,0,0)                   \n");
-	}
 
 	ATerm state = gsNextStateInit(Spec,!usedummies,stateformat,strat);
+	switch ( outformat )
+	{
+		case OF_AUT:
+			fprintf(aut,"des (0,0,0)                   \n");
+			break;
+		case OF_SVC:
+			{
+				SVCbool b;
+				if ( outinfo )
+				{
+					SVCsetInitialState(svc,SVCnewState(svc,(ATerm) gsMakeStateVector(state),&b));
+				} else {
+					ATprintf("a\n");
+					SVCsetInitialState(svc,SVCnewState(svc,(ATerm) ATmakeInt(0),&b));
+				}
+			}
+			break;
+		default:
+			break;
+	}
 
 	ATbool new_state;
 	current_state = ATindexedSetPut(states,state,&new_state);
@@ -338,11 +444,18 @@ int main(int argc, char **argv)
 		}*/
 	}
 
-	if ( aut != NULL )
+	switch ( outformat )
 	{
-		rewind(aut);
-		fprintf(aut,"des (0,%lu,%lu)",trans,num_states);
-		fclose(aut);
+		case OF_AUT:
+			rewind(aut);
+			fprintf(aut,"des (0,%lu,%lu)",trans,num_states);
+			fclose(aut);
+			break;
+		case OF_SVC:
+			SVCclose(svc);
+			break;
+		default:
+			break;
 	}
 
 	if ( !err )

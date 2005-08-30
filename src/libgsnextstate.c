@@ -186,6 +186,16 @@ ATermAppl gsGetStateArgument(ATerm state, int index)
 	}
 }*/
 
+ATermAppl gsMakeStateVector(ATerm state)
+{
+	// XXX can be done more efficiently in some cases
+	for (int i=0; i<statelen; i++)
+	{
+		stateargs[i] = (ATerm) gsGetStateArgument(state,i);
+	}
+	return ATmakeApplArray(stateAFun,stateargs);
+}
+
 ATermAppl FindDummy(ATermAppl sort)
 {
 	ATermList l;
@@ -405,7 +415,7 @@ ATerm gsNextStateInit(ATermAppl Spec, bool AllowFreeVars, int StateFormat, int R
 	pars = ATreverse(pars);
 
 	statelen = ATgetLength(pars);
-	stateAFun = ATmakeAFun("@STATE@",statelen,ATfalse);
+	stateAFun = ATmakeAFun("STATE",statelen,ATfalse);
 	ATprotectAFun(stateAFun);
 	stateargs = (ATerm *) malloc(statelen*sizeof(ATerm));
 	for (int i=0; i<statelen; i++)

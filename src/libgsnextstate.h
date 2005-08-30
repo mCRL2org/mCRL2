@@ -17,6 +17,7 @@ void gsNextStateFinalise();
 
 int gsGetStateLength();
 ATermAppl gsGetStateArgument(ATerm State, int index);
+ATermAppl gsMakeStateVector(ATerm State);
 
 #ifdef __cplusplus
 }
