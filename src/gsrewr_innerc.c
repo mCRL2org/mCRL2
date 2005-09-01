@@ -1045,8 +1045,21 @@ static void CompileRewriteSystem(void)
       "  assert(ATisInt(ATgetArgument(t,0)));\n"
       "  long function_index = ATgetInt((ATermInt)ATgetArgument(t,0));\n"
 //      "  ATfprintf(stderr,\"FUNCTION %%i %%t\\n\",function_index,t); \n"
-      "  assert( function_index < %i);\n"
-      "  return int2func[function_index](t);\n"
+      "  if ( function_index < %i )\n"
+      "  {\n"
+      "    return int2func[function_index](t);\n"
+      "  } else {\n"
+      "    int arity = ATgetArity(ATgetAFun(t));\n"
+      "    ATerm args[arity];\n"
+      "\n"
+      "    args[0] = ATgetArgument(t,0);\n"
+      "    for (int i=1; i<arity; i++)\n"
+      "    {\n"
+      "      args[i] = rewrite(ATgetArgument(t,i));\n"
+      "    }\n"
+      "\n"
+      "    return ATmakeApplArray(ATgetAFun(t),args);\n"
+      "  }\n"
       "}\n",
       num_opids
          );
