@@ -1055,7 +1055,7 @@ static void CompileRewriteSystem(void)
       "    args[0] = ATgetArgument(t,0);\n"
       "    for (int i=1; i<arity; i++)\n"
       "    {\n"
-      "      args[i] = rewrite(ATgetArgument(t,i));\n"
+      "      args[i] = (ATerm) rewrite((ATermAppl) ATgetArgument(t,i));\n"
       "    }\n"
       "\n"
       "    return ATmakeApplArray(ATgetAFun(t),args);\n"
