@@ -14,7 +14,10 @@ void rewrite_init_jitty();
 void rewrite_add_jitty(ATermAppl eqn);
 void rewrite_remove_jitty(ATermAppl eqn);
 
-ATerm rewrite_jitty(ATerm Term, int *b);
+ATerm to_rewrite_format_jitty(ATermAppl Term);
+ATermAppl from_rewrite_format_jitty(ATerm Term);
+
+ATerm rewrite_jitty(ATerm Term);
 
 #ifdef __cplusplus
 }

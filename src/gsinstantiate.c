@@ -67,6 +67,7 @@ void gsinst_callback(ATermAppl transition, ATerm state)
 				gsPrintPart(aut,transition,false,0);
 				fprintf(aut,"\",%lu)\n",i);
 fflush(aut);
+				break;
 			case OF_SVC:
 				if ( outinfo )
 				{

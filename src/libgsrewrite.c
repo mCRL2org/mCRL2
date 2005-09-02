@@ -49,8 +49,9 @@ void gsRewriteInit(ATermAppl Eqns, int strat)
 		}
 	}
 
-	opid_eqns = ATreverse(opid_eqns);
-	dataappl_eqns = ATreverse(dataappl_eqns);
+// order should not matter
+//	opid_eqns = ATreverse(opid_eqns);
+//	dataappl_eqns = ATreverse(dataappl_eqns);
 
 	strategy = strat;
 
@@ -97,9 +98,13 @@ void gsRewriteAddEqn(ATermAppl Eqn)
 {
 	if ( gsIsOpId(ATAgetArgument(Eqn,2)) )
 	{
-		opid_eqns = ATappend(opid_eqns, (ATerm) Eqn);
+// order should not matter
+//		opid_eqns = ATappend(opid_eqns, (ATerm) Eqn);
+		opid_eqns = ATinsert(opid_eqns, (ATerm) Eqn);
 	} else {
-		dataappl_eqns = ATappend(dataappl_eqns, (ATerm) Eqn);
+// order should not matter
+//		dataappl_eqns = ATappend(dataappl_eqns, (ATerm) Eqn);
+		dataappl_eqns = ATinsert(dataappl_eqns, (ATerm) Eqn);
 	}
 
 	switch ( strategy )
@@ -142,7 +147,8 @@ void gsRewriteRemoveEqn(ATermAppl Eqn)
 				l = ATinsert(l, ATgetFirst(opid_eqns));
 			}
 		}
-		opid_eqns = ATreverse(l);
+// order should not matter
+//		opid_eqns = ATreverse(l);
 	} else {
 		l = ATmakeList0();
 		for (; !ATisEmpty(dataappl_eqns); dataappl_eqns=ATgetNext(dataappl_eqns));
@@ -152,7 +158,8 @@ void gsRewriteRemoveEqn(ATermAppl Eqn)
 				l = ATinsert(l, ATgetFirst(dataappl_eqns));
 			}
 		}
-		dataappl_eqns = ATreverse(l);
+// order should not matter
+//		dataappl_eqns = ATreverse(l);
 	}
 
 	switch ( strategy )
@@ -198,7 +205,7 @@ ATermAppl gsRewriteTerm(ATermAppl Term)
 		case GS_REWR_INNERC:
 			return from_rewrite_format_innerc((ATerm) RWrewrite_innerc((ATermAppl) to_rewrite_format_innerc(Term)));
 		case GS_REWR_JITTY:
-			return (ATermAppl) rewrite_jitty((ATerm) Term,&b);
+			return from_rewrite_format_jitty(rewrite_jitty(to_rewrite_format_jitty(Term)));
 		case GS_REWR_INNER3:
 		default:
 			return from_rewrite_format_inner3(rewrite_inner3(to_rewrite_format_inner3(Term)));
@@ -222,8 +229,9 @@ ATerm gsToRewriteFormat(ATermAppl Term)
 	{
 		case GS_REWR_INNER:
 		case GS_REWR_INNER2:
-		case GS_REWR_JITTY:
 			return (ATerm) Term;
+		case GS_REWR_JITTY:
+			return to_rewrite_format_jitty(Term);
 		case GS_REWR_INNERC2:
 #ifdef RWR_C2
 			return to_rewrite_format_innerc2(Term);
@@ -242,8 +250,9 @@ ATermAppl gsFromRewriteFormat(ATerm Term)
 	{
 		case GS_REWR_INNER:
 		case GS_REWR_INNER2:
-		case GS_REWR_JITTY:
 			return (ATermAppl) Term;
+		case GS_REWR_JITTY:
+			return from_rewrite_format_jitty(Term);
 		case GS_REWR_INNERC2:
 #ifdef RWR_C2
 			return from_rewrite_format_innerc2(Term);
@@ -273,7 +282,7 @@ ATerm gsRewriteInternal(ATerm Term)
 		case GS_REWR_INNERC:
 			return (ATerm) RWrewrite_innerc((ATermAppl) Term);
 		case GS_REWR_JITTY:
-			return rewrite_jitty(Term,&b);
+			return rewrite_jitty(Term);
 		case GS_REWR_INNER3:
 		default:
 			return rewrite_inner3(Term);

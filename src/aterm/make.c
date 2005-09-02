@@ -46,7 +46,9 @@ static va_list *args = (va_list *) &theargs;
 /*}}}  */
 /*{{{  function declarations */
 
-/* extern char *strdup(const char *s); */
+#if !(defined __USE_SVID || defined __USE_BSD || defined __USE_XOPEN_EXTENDED || defined __APPLE__ || defined _MSC_VER)
+extern char *strdup(const char *s);
+#endif
 static ATerm makePlaceholder(ATermPlaceholder pat);
 static ATermAppl makeArguments(ATermAppl appl, Symbol name);
 static ATerm AT_vmakeTerm(ATerm pat);

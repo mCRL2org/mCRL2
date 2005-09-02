@@ -43,7 +43,7 @@ fi
 
 # Set flags
 CPPFLAGS=""
-CFLAGS="-std=gnu99"
+CFLAGS="-std=c99"
 CXXFLAGS=""
 LDFLAGS="-L. -Lsvc"
 

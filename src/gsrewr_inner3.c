@@ -165,8 +165,8 @@ void rewrite_init_inner3()
 	}
 	is_initialised = true;
 
-	tmp_eqns = ATtableCreate(100,100); // XXX would be nice to know the number op OpIds
-	term2int = ATtableCreate(100,100);
+	tmp_eqns = ATtableCreate(100,50); // XXX would be nice to know the number op OpIds
+	term2int = ATtableCreate(100,50);
 
 	max_vars = 0;
 
@@ -222,7 +222,9 @@ void rewrite_init_inner3()
 		int2term[ATgetInt(i)] = ATAgetFirst(l);
 		if ( (m = (ATermList) ATtableGet(tmp_eqns,(ATerm) i)) != NULL )
 		{
-			inner3_eqns[ATgetInt(i)] = ATreverse(m);
+// order should not matter
+//			inner3_eqns[ATgetInt(i)] = ATreverse(m);
+			inner3_eqns[ATgetInt(i)] = m;
 		}
 	}
 
@@ -299,7 +301,9 @@ void rewrite_add_inner3(ATermAppl eqn)
 	{
 		inner3_eqns[ATgetInt(j)] = ATmakeList1((ATerm) m);
 	} else {
-		inner3_eqns[ATgetInt(j)] = ATappend(inner3_eqns[ATgetInt(j)],(ATerm) m);
+// order should not matter
+//		inner3_eqns[ATgetInt(j)] = ATappend(inner3_eqns[ATgetInt(j)],(ATerm) m);
+		inner3_eqns[ATgetInt(j)] = ATinsert(inner3_eqns[ATgetInt(j)],(ATerm) m);
 	}
 }
 
@@ -337,7 +341,9 @@ void rewrite_remove_inner3(ATermAppl eqn)
 		{
 			inner3_eqns[ATgetInt((ATermInt) t)] = NULL;
 		} else {
-			inner3_eqns[ATgetInt((ATermInt) t)] = ATreverse(n);
+// order should not matter
+//			inner3_eqns[ATgetInt((ATermInt) t)] = ATreverse(n);
+			inner3_eqns[ATgetInt((ATermInt) t)] = n;
 		}
 	}
 }

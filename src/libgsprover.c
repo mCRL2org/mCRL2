@@ -35,6 +35,7 @@ static bool (*FindEquality)(ATerm,ATermList,ATerm*,ATerm*);
 static bool FindInner3Equality(ATerm t, ATermList vars, ATerm *v, ATerm *e);
 static bool FindInnerCEquality(ATerm t, ATermList vars, ATerm *v, ATerm *e);
 static ATerm opidAnd,eqstr;
+static AFun tupAFun;
 
 void gsProverInit(ATermAppl Spec, int RewriteStrategy)
 {
@@ -60,6 +61,9 @@ void gsProverInit(ATermAppl Spec, int RewriteStrategy)
 		eqstr = (ATerm) gsString2ATermAppl("==");
 		ATprotect(&eqstr);
 	}
+
+	tupAFun = ATmakeAFun("@tup@",2,ATfalse);
+	ATprotectAFun(tupAFun);
 }
 
 void gsProverFinalise()
@@ -71,6 +75,8 @@ void gsProverFinalise()
 
 	ATunprotect(&opidAnd);
 	ATunprotect(&eqstr);
+	
+	ATunprotectAFun(tupAFun);
 }
 
 static ATermAppl gsGetResult(ATermAppl sort)
@@ -133,7 +139,7 @@ static ATermList calcNext(ATermList l)
 			t = ATAgetFirst(m);
 			for (; !ATisEmpty(d); d=ATgetNext(d))
 			{
-				ATermAppl v = gsMakeDataVarId(gsFreshString2ATermAppl("@enum@",(ATerm) na1,false),ATAgetFirst(d));
+				ATermAppl v = gsMakeDataVarId(gsFreshString2ATermAppl("@enum@",(ATerm) ATmakeAppl2(tupAFun,(ATerm) na1,(ATerm) var),false),ATAgetFirst(d));
 				used_vars++;
 				na1 = ATappend(na1,(ATerm) v);
 				t = gsMakeDataAppl(t,v);
