@@ -37,7 +37,7 @@ ATermAppl gsLinearise(ATermAppl Spec);
 void gsPrintPart(FILE *OutStream, const ATermAppl Part, bool ShowSorts,
   int PrecLevel);
 /*Pre: OutStream points to a stream to which can be written
-       Part is an ATermAppl containing a part of a GenSpect specification
+       Part is an ATermAppl containing a part of a mCRL2 specification
        ShowSorts indicates if sorts should be shown for the part
        PrecLevel indicates the precedence level of the context of the part
        0 <= PrecLevel
@@ -52,7 +52,7 @@ void gsPrintPart(FILE *OutStream, const ATermAppl Part, bool ShowSorts,
 void gsPrintParts(FILE *OutStream, const ATermList Parts, bool ShowSorts,
   int PrecLevel, const char *Terminator, const char *Separator);
 /*Pre: OutStream points to a stream to which can be written
-       Parts is an ATermList containing parts of a GenSpect specification
+       Parts is an ATermList containing parts of a mCRL2 specification
        ShowSorts indicates if sorts should be shown for the part
        PrecLevel indicates the precedence level of the context of the parts
        0 <= PrecLevel
@@ -65,7 +65,7 @@ void gsPrintParts(FILE *OutStream, const ATermList Parts, bool ShowSorts,
 void gsPrintEqns(FILE *OutStream, const ATermList DataEqns, bool ShowSorts,
   int PrecLevel);
 /*Pre: OutStream points to a stream to which can be written
-       Eqns is an ATermList containing equations from a GenSpect specification
+       Eqns is an ATermList containing equations from a mCRL2 specification
        ShowSorts indicates if sorts should be shown for each equation
        PrecLevel indicates the precedence level of the context of the equations
        0 <= PrecLevel
@@ -79,7 +79,7 @@ void gsPrintEqns(FILE *OutStream, const ATermList DataEqns, bool ShowSorts,
 void gsPrintProcEqns(FILE *OutStream, const ATermList ProcEqns, bool ShowSorts,
   int PrecLevel);
 /*Pre: OutStream points to a stream to which can be written
-       ProcEqns is an ATermList containing process equations from a GenSpect
+       ProcEqns is an ATermList containing process equations from a mCRL2
        specification
        ShowSorts indicates if sorts should be shown for each equation
        PrecLevel indicates the precedence level of the context of the equations
@@ -93,7 +93,7 @@ void gsPrintProcEqns(FILE *OutStream, const ATermList ProcEqns, bool ShowSorts,
 
 ATermList gsGroupDeclsBySort(const ATermList Decls);
 /*Pre: Decls is an ATermList containing declarations of the form
-       Decl(Name, Sort) from a GenSpect specification
+       Decl(Name, Sort) from a mCRL2 specification
   Ret: a list containing the declarations from Decls, where declarations of the
        same sort are placed in sequence
 */
@@ -101,7 +101,7 @@ ATermList gsGroupDeclsBySort(const ATermList Decls);
 void gsPrintDecls(FILE *OutStream, const ATermList Decls,
   const char *Terminator, const char *Separator);
 /*Pre: Decls is an ATermList containing action, operation, or variable
-       declarations from a GenSpect specification
+       declarations from a mCRL2 specification
   Ret: A textual representation of the declarations is written to OutStream,
        in which:
        - of two consecutive declarations Decl(x, S) and Decl(y, T), the first
@@ -114,7 +114,7 @@ void gsPrintDecls(FILE *OutStream, const ATermList Decls,
 
 void gsPrintDecl(FILE *OutStream, const ATermAppl Decl, const bool ShowSorts);
 /*Pre: Decl is an ATermAppl that represents an action, operation, or variable
-       declaration from a GenSpect specification
+       declaration from a mCRL2 specification
        ShowSorts indicates if the sort of the declaration should be shown
   Ret: A textual representation of the declaration, say Decl(x, S), is written
        to OutStream, i.e.:
@@ -127,7 +127,7 @@ bool gsHasConsistentContext(const ATermTable DataVarDecls,
 /*Pre: DataVarDecls represents the variables from an equation section, where
  *     the keys are the variable names and the values are the corresponding
  *     variables
- *     Part is an ATermAppl containing an equation of a GenSpect specification,
+ *     Part is an ATermAppl containing an equation of a mCRL2 specification,
  *     or the elements it consists of
  *Ret: all operations occurring in Part are consistent with the variables from
  *     the context
@@ -138,7 +138,7 @@ bool gsHasConsistentContextList(const ATermTable DataVarDecls,
 /*Pre: DataVarDecls represents the variables from an equation section, where
  *     the keys are the variable names and the values are the
  *     corresponding variables
- *     Parts is an ATermList containing elements of an equation of a GenSpect
+ *     Parts is an ATermList containing elements of an equation of a mCRL2
  *     specification
  *Ret: all operations occurring in Parts are consistent with the variables from
  *     the context

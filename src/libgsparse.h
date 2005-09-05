@@ -11,7 +11,7 @@ extern "C" {
 
 ATermAppl gsParseSpecification(FILE *SpecStream);
 /*Pre: SpecStream points to a stream from which can be read
-  Post:if SpecStream contains GenSpect specification, this specification is
+  Post:if SpecStream contains mCRL2 specification, this specification is
        parsed and returned in the ATerm format; otherwise NULL is returned and
        an appropriate error message is printed to stderr.
 */ 
@@ -20,7 +20,7 @@ void gsPrintSpecification(FILE *OutStream, const ATermAppl Spec);
 /*Pre: OutStream points to a stream to which can be written
        Spec is a specification or a part of it, that adheres to the internal
        format
-  Post:A textual representation of the GenSpect specification is written to
+  Post:A textual representation of the mCRL2 specification is written to
        OutStream.
 */
 

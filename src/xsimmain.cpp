@@ -647,7 +647,7 @@ void XSimMain::OnLoadView( wxCommandEvent &event )
 
 void XSimMain::OnAbout( wxCommandEvent &event )
 {
-    wxMessageDialog dialog( this, wxT("GenSpect Simulator GUI"),
+    wxMessageDialog dialog( this, wxT("mCRL2 Simulator GUI"),
         wxT("About XSim"), wxOK|wxICON_INFORMATION );
     dialog.ShowModal();
 }

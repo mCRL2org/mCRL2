@@ -204,7 +204,7 @@ bool PrintSpecificationStream(FILE *SpecStream, FILE *OutputStream)
 void PrintUsage(FILE *Stream) {
   fprintf(Stream, 
     "Usage: %s OPTIONS [SPECFILE [OUTFILE]]\n"
-    "Print the internal GenSpect specification in SPECFILE to OUTFILE in a human\n"
+    "Print the internal mCRL2 specification in SPECFILE to OUTFILE in a human\n"
     "readable format. If OUTFILE is not present, stdout is used. If SPECFILE is\n"
     "not present or -, stdin is used.\n"
     "\n"

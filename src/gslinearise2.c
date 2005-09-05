@@ -51,7 +51,7 @@ ATbool ATisAnnotated(ATerm a)
 }
 
 
-/* Auxiliary GenSpect functions */
+/* Auxiliary mCRL2 functions */
 
 ATermAppl gsMakeDataExprAndWithTrueCheck(ATermAppl b, ATermAppl c)
 {

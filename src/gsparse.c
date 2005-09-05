@@ -42,7 +42,7 @@ bool ParseSpecificationFileName(
   char *OutFileName,
   bool Human,
   bool NoSave);
-/*Pre: SpecFileName is the name of a valid GenSpect specification file from
+/*Pre: SpecFileName is the name of a valid mCRL2 specification file from
        which can be read
        OutFileName is the name of a valid file to which can be written, or NULL
   Post:the specification in SpecFileName is parsed and saved to OutFileName
@@ -58,7 +58,7 @@ bool ParseSpecificationStream(
   FILE *OutStream,
   bool Human,
   bool NoSave);
-/*Pre: SpecStream is a valid GenSpect specification stream from which can be
+/*Pre: SpecStream is a valid mCRL2 specification stream from which can be
        read
        OutStream is the name of a valid stream to which can be written
   Post:the specification in SpecStream is parsed and saved to OutStream
@@ -239,7 +239,7 @@ bool ParseSpecificationStream(FILE *SpecStream, FILE *OutputStream,
 void PrintUsage(FILE *Stream) {
   fprintf(Stream, 
     "Usage: %s OPTIONS SPECFILE [OUTFILE]\n"
-    "Translate the GenSpect specification in SPECFILE to the ATerm format and\n"
+    "Translate the mCRL2 specification in SPECFILE to the ATerm format and\n"
     "save it to OUTFILE. If OUTFILE is not present, stdout is used.\n"
     "\n"
     "The OPTIONS that can be used are:\n"

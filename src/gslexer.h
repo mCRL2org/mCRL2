@@ -9,7 +9,7 @@ extern "C" {
 
 ATermAppl gsParse(FILE *FormStream);
 /*Pre: FormStream is a valid formula stream from which can be read       
-  Post:the GenSpect specification in formStream is parsed
+  Post:the mCRL2 specification in formStream is parsed
   Ret: the parsed formula, if everything went ok
        NULL, otherwise
 */ 
