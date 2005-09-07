@@ -1336,7 +1336,7 @@ static ATermAppl gstcTraverseVarConsTypeD(ATermTable Vars, ATermAppl *DataTerm, 
     gstcATermTableCopy(Vars,CopyVars);
 
     ATermAppl VarDecl=ATAgetArgument(*DataTerm,0);
-    ATermAppl NewType=gstcMakeNotInferredSetBag(ATAgetArgument(VarDecl,1));
+    ATermAppl NewType=/*gstcMakeNotInferredSetBag*/gsMakeSortBag(ATAgetArgument(VarDecl,1));
     if(!(NewType=gstcAdjustPosTypesA(NewType,PosType))){
       gsErrorMsg("A set or bag comprehansion of type %t does not match possible type %t (while typechecking %t)",ATAgetArgument(VarDecl,1),PosType,*DataTerm);  
       return NULL;
