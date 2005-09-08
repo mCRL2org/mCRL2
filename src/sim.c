@@ -35,29 +35,80 @@ static void gsPrintState(ATerm state)
 	}
 }
 
+void print_help(FILE *f)
+{
+	fprintf(f,"Usage: %s OPTIONS LPEFILE\n",NAME);
+	fprintf(f,"Simulates the LPE in LPEFILE.\n"
+		  "(Enter '-1' or use CTRL-d to end simulation.)\n"
+		  "\n"
+	          "The OPTIONS that can be used are:\n"
+	          "-h, --help               Display this help message\n"
+	          "-y, --dummy              Replace free variables in the LPE\n"
+		  "                         with dummy values\n"
+	          "-R, --rewriter name      Use rewriter 'name' (default inner3)\n"
+      );
+}
+
 int main(int argc, char **argv)
 {
 	FILE *SpecStream;
 	ATerm stackbot, state;
 	ATermAppl Spec;
 	ATermList states, l;
-	#define sopts "d"
+	#define sopts "hycrR"
 	struct option lopts[] = {
-		{ "dummy",	no_argument,	NULL,	'd' },
+		{ "help",	no_argument,	NULL,	'h' },
+		{ "dummy",	no_argument,	NULL,	'y' },
+		{ "rewriter",	no_argument,	NULL,	'R' },
 		{ 0, 0, 0, 0 }
 	};
-	int opt, i, r;
+	int opt, i, r, strat;
 	bool usedummy;
+	char *rw_arg;
 
 	ATinit(argc,argv,&stackbot);
 
 	usedummy = false;
+	strat = GS_REWR_INNER3;
 	while ( (opt = getopt_long(argc,argv,sopts,lopts,NULL)) != -1 )
 	{
 		switch ( opt )
 		{
-			case 'd':
+			case 'h':
+				print_help(stderr);
+				return 0;
+			case 'y':
 				usedummy = true;
+				break;
+			case 'R':
+				if ( optarg == NULL )
+				{
+					rw_arg = argv[optind++];
+				} else {
+					rw_arg = optarg;
+				}
+				if ( !strcmp(rw_arg,"inner") )
+				{
+					strat = GS_REWR_INNER;
+				} else if ( !strcmp(rw_arg,"inner2") )
+				{
+					strat = GS_REWR_INNER2;
+				} else if ( !strcmp(rw_arg,"inner3") )
+				{
+					strat = GS_REWR_INNER3;
+				} else if ( !strcmp(rw_arg,"innerc") )
+				{
+					strat = GS_REWR_INNERC;
+				} else if ( !strcmp(rw_arg,"innerc2") )
+				{
+					strat = GS_REWR_INNERC2;
+				} else if ( !strcmp(rw_arg,"jitty") )
+				{
+					strat = GS_REWR_JITTY;
+				} else {
+					fprintf(stderr,"warning: unknown rewriter '%s', using default\n",rw_arg);
+					strat = GS_REWR_INNER3;
+				}
 				break;
 			default:
 				break;
@@ -66,7 +117,7 @@ int main(int argc, char **argv)
 
 	if ( argc-optind < 1 )
 	{
-		fprintf(stderr,"Usage: %s <lpe file>\n",NAME);
+		print_help(stderr);
 		return 1;
 	}
 
@@ -82,7 +133,7 @@ int main(int argc, char **argv)
 		return 1;
 	}
 
-	state = gsNextStateInit(Spec,!usedummy,GS_STATE_VECTOR,GS_REWR_INNER3);
+	state = gsNextStateInit(Spec,!usedummy,GS_STATE_VECTOR,strat);
 
 	ATprintf("initial state: [ ");
 	gsPrintState(state);

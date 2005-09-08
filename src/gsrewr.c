@@ -130,6 +130,8 @@ void print_help(FILE *f)
 	          "\n"
 	          "The OPTIONS that can be used are:\n"
 	          "-h, --help               display this help message\n"
+	          "-q, --quiet              do not print any unrequested\n"
+		  "                         information\n"
 	          "-b, --benchmark [num]    rewrites specification num times\n"
 	          "                         (default is 1000 times)\n"
 	          "-a, --read-aterm         SPECFILE is an ATerm\n"
@@ -147,9 +149,10 @@ int main(int argc, char **argv)
 	FILE *SpecStream, *OutStream;
 	ATerm stackbot;
 	ATermAppl Spec;
-	#define sopts "hbawi23cj"
+	#define sopts "hqbawi23cj"
 	struct option lopts[] = {
 		{ "help",		no_argument,	NULL,	'h' },
+		{ "quiet",		no_argument,	NULL,	'q' },
 		{ "benchmark",		no_argument,	NULL,	'b' },
 		{ "read-aterm",		no_argument,	NULL,	'a' },
 		{ "write-aterm",	no_argument,	NULL,	'w' },
@@ -161,9 +164,11 @@ int main(int argc, char **argv)
 		{ 0, 0, 0, 0 }
 	};
 	int opt,read_aterm,write_aterm,strat,benchmark,i,bench_times;
+	bool quiet;
 
 	ATinit(argc,argv,&stackbot);
 
+	quiet = false;
 	benchmark = 0;
 	bench_times = 1000;
 	read_aterm = 0;
@@ -176,6 +181,9 @@ int main(int argc, char **argv)
 			case 'h':
 				print_help(stderr);
 				return 0;
+			case 'q':
+				quiet = true;
+				break;
 			case 'b':
 				benchmark = 1;
 				// XXX optional argument hack
@@ -217,7 +225,10 @@ int main(int argc, char **argv)
 	{
 		if ( (SpecStream = fopen(argv[optind],"r")) == NULL )
 		{
-			perror(NAME);
+			if ( !quiet )
+			{
+				perror(NAME);
+			}
 			return 1;
 		}
 	}
@@ -229,7 +240,10 @@ int main(int argc, char **argv)
 		{
 			if ( (OutStream = fopen(argv[optind+1],"w")) == NULL )
 			{
-				perror(NAME);
+				if ( !quiet )
+				{
+					perror(NAME);
+				}
 				return 1;
 			}
 		}

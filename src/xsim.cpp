@@ -8,10 +8,12 @@
     #pragma hdrstop
 #endif
 
+#include <wx/cmdline.h>
 #include <aterm2.h>
 #include "xsim.h"
 #include "xsimmain.h"
 #include "gsfunc.h"
+#include "libgsrewrite.h"
 
 //------------------------------------------------------------------------------
 // XSim
@@ -24,14 +26,64 @@ XSim::XSim()
 
 bool XSim::OnInit()
 {
-    XSimMain *frame = new XSimMain( NULL, -1, wxT("XSim"), wxPoint(-1,-1), wxSize(500,400) );
-    frame->Show( TRUE );
-    
     gsEnableConstructorFunctions();
 
-    if ( argc > 1 )
+    wxCmdLineParser cmdln(argc,argv);
+    cmdln.AddSwitch("h","help","Displays this message");
+    cmdln.AddSwitch("y","dummy","Replace free variables in the LPE with dummy values");
+    cmdln.AddOption("R","rewriter","Use specified rewriter (default inner3)");
+    cmdln.AddParam("LPE to simulate",wxCMD_LINE_VAL_STRING,wxCMD_LINE_PARAM_OPTIONAL);
+    if ( cmdln.Parse() )
     {
-	frame->LoadFile(argv[1]);
+	    return FALSE;
+    }
+
+    if ( cmdln.Found("h") )
+    {
+	    cmdln.Usage();
+	    return FALSE;
+    }
+    bool dummies = false;
+    int strat = GS_REWR_INNER3;
+    if ( cmdln.Found("y") )
+    {
+	    dummies = true;
+    }
+    wxString s;
+    if ( cmdln.Found("R",&s) )
+    {
+	    if ( s == "inner" )
+	    {
+		    strat = GS_REWR_INNER;
+	    } else if ( s == "inner2" )
+	    {
+		    strat = GS_REWR_INNER2;
+	    } else if ( s == "inner3" )
+	    {
+		    strat = GS_REWR_INNER3;
+	    } else if ( s == "innerc" )
+	    {
+		    strat = GS_REWR_INNERC;
+	    } else if ( s == "innerc2" )
+	    {
+		    strat = GS_REWR_INNERC2;
+	    } else if ( s == "jitty" )
+	    {
+		    strat = GS_REWR_JITTY;
+	    } else {
+		    fprintf(stderr,"warning: unknown rewriter '%s', using default\n",s.c_str());
+		    strat = GS_REWR_INNER3;
+	    }
+    }
+
+    XSimMain *frame = new XSimMain( NULL, -1, wxT("XSim"), wxPoint(-1,-1), wxSize(500,400) );
+    frame->use_dummies = dummies;
+    frame->rewr_strat = strat;
+    frame->Show( TRUE );
+   
+    if ( cmdln.GetParamCount() > 0 )
+    {
+	frame->LoadFile(cmdln.GetParam(0));
     }
 
     return TRUE;

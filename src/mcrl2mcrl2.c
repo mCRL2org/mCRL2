@@ -22,6 +22,8 @@ void print_help(FILE *f)
 		  "\n"
 	          "The OPTIONS that can be used are:\n"
 	          "-h, --help               display this help message\n"
+	          "-q, --quiet              do not print any unrequested\n"
+		  "                         information\n"
       );
 }
 
@@ -29,17 +31,20 @@ int main(int argc, char **argv)
 {
 	FILE *SpecStream, *OutStream;
 	ATerm bot;
-	#define sopts "h"
+	#define sopts "hq"
 	struct option lopts[] = {
 		{ "help",		no_argument,	NULL,	'h' },
+		{ "quiet",		no_argument,	NULL,	'q' },
  		{ 0, 0, 0, 0 }
 	};
 	int opt;
+	bool quiet;
 	ATerm mu_spec,spec;
 
 	ATinit(argc,argv,&bot);
 	gsEnableConstructorFunctions();
 
+	quiet = false;
 	while ( (opt = getopt_long(argc,argv,sopts,lopts,NULL)) != -1 )
 	{
 		switch ( opt )
@@ -47,6 +52,9 @@ int main(int argc, char **argv)
 			case 'h':
 				print_help(stderr);
 				return 0;
+			case 'q':
+				quiet = true;
+				break;
 			default:
 				break;
 		}
@@ -57,7 +65,10 @@ int main(int argc, char **argv)
 	{
 		if ( (SpecStream = fopen(argv[optind],"r")) == NULL )
 		{
-			perror(NAME);
+			if ( !quiet )
+			{
+				perror(NAME);
+			}
 			return 1;
 		}
 	}
@@ -67,7 +78,10 @@ int main(int argc, char **argv)
 	{
 		if ( (OutStream = fopen(argv[optind+1],"w")) == NULL )
 		{
-			perror(NAME);
+			if ( !quiet )
+			{
+				perror(NAME);
+			}
 			return 1;
 		}
 	}

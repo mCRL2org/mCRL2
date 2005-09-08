@@ -46,6 +46,10 @@ public:
     void LoadFile(const wxString &filename);
     void LoadDLL(const wxString &filename);
 
+    // XXX make private and use functions?
+    bool use_dummies;
+    int rewr_strat;
+
     // SimulatorInterface methods
     virtual void Register(SimulatorViewInterface *View);
     virtual void Unregister(SimulatorViewInterface *View);

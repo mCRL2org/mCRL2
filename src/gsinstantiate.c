@@ -107,10 +107,12 @@ void print_help(FILE *f)
 	          "\n"
 	          "The OPTIONS that can be used are:\n"
 	          "-h, --help               Display this help message\n"
+	          "-q, --quiet              Do not print any unrequested\n"
+		  "                         information\n"
 		  "-f, --freevar            Do not replace free variables in\n"
-		  "                         the LPE with dummy values.\n"
+		  "                         the LPE with dummy values\n"
 		  "-y, --dummy              Replace free variables in the LPE\n"
-		  "                         with dummy values. (default)\n"
+		  "                         with dummy values (default)\n"
 		  "-c, --vector             Store state in a vector (fastest,\n"
 		  "                         default)\n"
 		  "-r, --tree               Store state in a tree (for memory\n"
@@ -136,9 +138,10 @@ int main(int argc, char **argv)
 	FILE *SpecStream;
 	ATerm stackbot;
 	ATermAppl Spec;
-	#define sopts "hfycrldemR"
+	#define sopts "hqfycrldemR"
 	struct option lopts[] = {
 		{ "help", 		no_argument,		NULL,	'h' },
+		{ "quiet", 		no_argument,		NULL,	'q' },
 		{ "freevar", 		no_argument,		NULL,	'f' },
 		{ "dummy", 		no_argument,		NULL,	'y' },
 		{ "vector", 		no_argument,		NULL,	'c' },
@@ -155,11 +158,12 @@ int main(int argc, char **argv)
 		{ 0, 0, 0, 0 }
 	};
 	int opt, strat, stateformat;
-	bool usedummies,trace_deadlock,explore;
+	bool usedummies,trace_deadlock,explore,quiet;
 	char *rw_arg;
 
 	ATinit(argc,argv,&stackbot);
 
+	quiet = false;
 	strat = GS_REWR_INNER3;
 	usedummies = true;
 	stateformat = GS_STATE_VECTOR;
@@ -177,6 +181,9 @@ int main(int argc, char **argv)
 			case 'h':
 				print_help(stderr);
 				return 0;
+			case 'q':
+				quiet = true;
+				break;
 			case 'f':
 				usedummies = false;
 				break;
@@ -262,13 +269,19 @@ int main(int argc, char **argv)
 
 	if ( argc-optind < 1 )
 	{
-		print_help(stderr);
+		if ( !quiet )
+		{
+			print_help(stderr);
+		}
 		return 1;
 	}
 
 	if ( (SpecStream = fopen(argv[optind],"r")) == NULL )
 	{
-		perror(NAME);
+		if ( !quiet )
+		{
+			perror(NAME);
+		}
 		return 1;
 	}
 	if ( argc-optind > 1 )
@@ -298,7 +311,10 @@ int main(int argc, char **argv)
 				outinfo = false;
 				if ( (aut = fopen(argv[optind+1],"w")) == NULL )
 				{
-					perror(NAME);
+					if ( !quiet )
+					{
+						perror(NAME);
+					}
 					return 1;
 				}
 				break;
@@ -459,7 +475,7 @@ int main(int argc, char **argv)
 			break;
 	}
 
-	if ( !err )
+	if ( !err && !quiet )
 	{
 		printf("Done with state space generation (%lu level%s, %lu state%s and %lu transition%s).\n",level-1,(level==2)?"":"s",num_states,(num_states==1)?"":"s",trans,(trans==1)?"":"s");
 	}

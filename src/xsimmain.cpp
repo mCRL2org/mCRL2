@@ -49,6 +49,9 @@ XSimMain::XSimMain( wxWindow *parent, wxWindowID id, const wxString &title,
     const wxPoint &position, const wxSize& size, long style ) :
     wxFrame( parent, id, title, position, size, style )
 {
+    use_dummies = false;
+    rewr_strat = GS_REWR_INNER3; // XXX add to constructor?
+
     CreateMenu();
     CreateStatus();
     CreateContent();
@@ -238,7 +241,7 @@ void XSimMain::LoadFile(const wxString &filename)
     {
 	    gsNextStateFinalise();
     }
-    initial_state = gsNextStateInit(Spec,true,GS_STATE_VECTOR,GS_REWR_INNER3);
+    initial_state = gsNextStateInit(Spec,!use_dummies,GS_STATE_VECTOR,rewr_strat);
 
     InitialiseViews();
     Reset(initial_state);
