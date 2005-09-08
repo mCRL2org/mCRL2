@@ -1336,19 +1336,25 @@ static ATermAppl gstcTraverseVarConsTypeD(ATermTable Vars, ATermAppl *DataTerm, 
     gstcATermTableCopy(Vars,CopyVars);
 
     ATermAppl VarDecl=ATAgetArgument(*DataTerm,0);
-    ATermAppl NewType=/*gstcMakeNotInferredSetBag*/gsMakeSortBag(ATAgetArgument(VarDecl,1));
-    if(!(NewType=gstcAdjustPosTypesA(NewType,PosType))){
-      gsErrorMsg("A set or bag comprehansion of type %t does not match possible type %t (while typechecking %t)",ATAgetArgument(VarDecl,1),PosType,*DataTerm);  
-      return NULL;
-    }
+    ATermAppl NewType=ATAgetArgument(VarDecl,1);
     ATermTable NewVars=gstcAddVars2Table(CopyVars,ATmakeList1((ATerm)VarDecl));
     if(!NewVars) {ATtableDestroy(CopyVars); return NULL;}
     ATermAppl Data=ATAgetArgument(*DataTerm,1);
     
-    ATermAppl ResType=gstcTraverseVarConsTypeD(NewVars,&Data,gsMakeSortIdBool()); // should be bool
+    ATermAppl ResType=gstcTraverseVarConsTypeD(NewVars,&Data,gsMakeUnknown());
     ATtableDestroy(CopyVars); 
-    if(!ResType) {return NULL;}
-    if(!gstcAdjustPosTypesA(gsMakeSortIdBool(),ResType)) {return NULL;}
+    if(!ResType) return NULL;
+    if(gstcAdjustPosTypesA(gsMakeSortIdBool(),ResType)) {
+      NewType=gsMakeSortSet(NewType);
+    } else if(gstcAdjustPosTypesA(gsMakeSortIdNat(),ResType)) {
+             NewType=gsMakeSortBag(NewType);
+           } else return NULL;
+
+    if(!(NewType=gstcAdjustPosTypesA(NewType,PosType))){
+      gsErrorMsg("A set or bag comprehansion of type %t does not match possible type %t (while typechecking %t)",ATAgetArgument(VarDecl,1),PosType,*DataTerm);
+      return NULL;
+    }
+
     *DataTerm=ATsetArgument(*DataTerm,(ATerm)Data,1);
     return NewType;
   }
