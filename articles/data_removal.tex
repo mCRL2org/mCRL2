@@ -1,7 +1,7 @@
 \documentclass[a4paper,fleqn]{article}
 
 % title and author
-\title{The Data Removal Phase of the GenSpect Parser}
+\title{The Data Removal Phase of the mCRL2 Parser}
 \author{Aad Mathijssen} 
 
 % packages
@@ -489,7 +489,7 @@
 % temporary lengths
 \newlength{\tlength}
 
-% GenSpect keywords
+% mCRL2 keywords
 \newcommand{\kwsort}{{\bf sort}}
 \newcommand{\kwcons}{{\bf cons}}
 \newcommand{\kwmap}{{\bf map}}
@@ -557,7 +557,7 @@
 \newcommand{\qed}{\hfill\ensuremath{\quad\Box}}
 \newcommand{\leftmerge}{\underline {\parallel}}
 
-\newenvironment{genspect}%
+\newenvironment{mCRL2}%
 {\par\bigskip\noindent%
  \begin{tabular}{@{}>{\bf}p{2.3em}L@{\ }L@{\ }L@{\ }L@{\ }L@{\ }L@{\ }L@{\ }L}%
 }%
@@ -579,7 +579,7 @@ only show expressions in the external format instead of the internal format.
 \subsection{Structured sorts}
 
 A structured sorts is of the form
-\begin{genspect}
+\begin{mCRL2}
 & \kwstruct
     &c_{1}(\f{pr}_{1,1}: A_{1,1}, & \ldots & , \f{pr}_{1,k_{1}}: A_{1,k_{1}})
       ?\f{is\_c_{1}}\\
@@ -590,7 +590,7 @@ A structured sorts is of the form
 &\hfill |
     &c_{n}(\f{pr}_{n,1}: A_{n,1}, & \ldots & , \f{pr}_{n,k_{n}}: A_{n,k_{n}})
       ?\f{is\_c_{n}},
-\end{genspect}
+\end{mCRL2}
 \noindent
 where \frm{n \in \pos} and \frm{k_{i} \in \nat} with \frm{1 \leq i \leq n}.
 All projections \frm{\f{pr}_{i,j}} and recognisers \frm{\f{is\_c_{i}}} are
@@ -611,7 +611,7 @@ generated:
 For the types \frm{\srtpos}, \frm{\srtnat} and \frm{\srtint}, the following
 constructors are provided:
 
-\begin{genspect}
+\begin{mCRL2}
 &@1:       & \srtpos             & \text{one}\\
 &@0.:      & \srtpos \To \srtpos & \text{double the argument}\\
 &@1.:      & \srtpos \To \srtpos & \text{double the argument and add one}\\
@@ -621,7 +621,7 @@ constructors are provided:
 \\
 &@-:       & \srtpos \To \srtint & \text{negation of a positive number}\\
 &@cNatInt  & \srtnat \To \srtint & \text{natural number}\\
-\end{genspect}
+\end{mCRL2}
 
 \noindent
 Each numerical constant \frm{p} of type \frm{\srtpos} is implemented as a term

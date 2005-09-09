@@ -1,7 +1,7 @@
 \documentclass[a4paper,fleqn]{article}
 
 % title and author
-\title{Data types for GenSpect}
+\title{Data types for mCRL2}
 \author{Aad Mathijssen} 
 
 % packages
@@ -490,7 +490,7 @@
 % temporary lengths
 \newlength{\tlength}
 
-% GenSpect keywords
+% mCRL2 keywords
 \newcommand{\kwsort}{{\bf sort}}
 \newcommand{\kwcons}{{\bf cons}}
 \newcommand{\kwmap}{{\bf map}}
@@ -558,7 +558,7 @@
 \newcommand{\qed}{\hfill\ensuremath{\quad\Box}}
 \newcommand{\leftmerge}{\underline {\parallel}}
 
-\newenvironment{genspect}%
+\newenvironment{mCRL2}%
 {\par\bigskip\noindent%
  \begin{tabular}{@{}>{\bf}p{2.3em}L@{\ }L@{\ }L@{\ }L@{\ }L@{\ }L@{\ }L@{\ }L}%
 }%
@@ -570,13 +570,13 @@
 \maketitle
 
 \noindent
-We provide a syntax for the standard data types of the GenSpect language. This
-syntax is intended to be a fruitful mix between standard mathematical notation
-and the syntax of specification languages and programming languages.
+We provide a syntax for the standard data types of the mCRL2 language. This
+syntax is intended to be a practical mix between standard mathematical notation
+and the syntax of specification languages and programming languages in general.
 
 \section{Basic formalism}
 
-The underlying theory of the GenSpect data types is abstract data types.
+The underlying theory of the mCRL2 data types is abstract data types.
 Abstract data types consist of:
 \begin{tdefinitions}{-}
 \item sorts and operations on these sorts;
@@ -596,7 +596,7 @@ also abbreviations for sort expressions may be introduced.
 
 \subsection{Expressions}
 
-There are three kind of expressions in GenSpect, namely expressions over sorts,
+There are three kind of expressions in mCRL2, namely expressions over sorts,
 over data and over processes. Sort expressions are made up from existing sort
 names and from representations of predefined data types and type constructors.
 Data expressions are terms constructed from operations and variables. These
@@ -620,7 +620,7 @@ is irrelevant.
 \section{Predefined data types}
 \label{sec:StandardTypes}
 
-A number of predefined data types are provided. For each data types a sort is
+A number of predefined data types are provided. For each data type a sort is
 provided together with a number of predefined operations.
 
 \subsection{Booleans}
@@ -643,8 +643,12 @@ existential quantification & \exists \_ {:} \_ . \_ & \verb+exists _:_._+\\
 \hline
 \end{tabular}\bigskip
 
-We have operations that express the equality and inequality of two terms of the
-same sort. Also we have an operation that expresses the conditional. These
+\noindent
+In the quantifiers the first two parameters form a variable declaration,
+consisting of a name and a sort; the third parameter is the body.
+
+We also have operations that express the equality and inequality of two terms
+of the same sort, and an operation that expresses the conditional. These
 operations are available for any predefined sort, and are automatically
 generated for user defined sorts.
 
@@ -657,10 +661,6 @@ inequality                 & \_ \not = \_           & \verb+_ != _+\\
 conditional                & \faaa{if}{\_}{\_}{\_}  & \verb+if(_,_,_)+\\
 \hline
 \end{tabular}\bigskip
-
-\noindent
-For sort \frm{\srtbool}, we have that equality is bi-implication, and that
-inequality is exclusive-or.
 
 \subsection{Numbers}
 
@@ -700,20 +700,6 @@ exponentiation             & \faa{exp}{\_\,}{\_}        & \verb+exp(_,_)+\\
 Explicit type conversions can be done using the conversion operation
 \frm{\f{A2B}}. The other operations perform implicit type conversions, when
 needed.
-
-\subsection{Extensions}
-
-Other desirable predefined data types could be the following:
-\begin{tdefinitions}{-}
-\item rational numbers (\frm{\mathbb{Q}})
-\item real numbers (\frm{\mathbb{R}})
-\item characters
-\item strings
-\end{tdefinitions}
-
-\noindent
-These data types will be provided when the need arises. However, for the
-rational and real numbers, a suitable representation has not yet been found.
 
 \section{Type constructors}
 \label{sec:TypeConstructors}
@@ -822,7 +808,7 @@ be used.
 Structured types consist of \emph{sum} types and \emph{product} types. A
 structured type is declared by the following sort expression, where \frm{n \in
 \pos} and \frm{k_{i} \in \nat} with \frm{1 \leq i \leq n}:
-\begin{genspect}
+\begin{mCRL2}
 & \kwstruct
     &c_{1}(\f{pr}_{1,1}: A_{1,1}, & \ldots & , \f{pr}_{1,k_{1}}: A_{1,k_{1}}) 
       ?\f{is\_c_{1}}\\
@@ -833,11 +819,11 @@ structured type is declared by the following sort expression, where \frm{n \in
 &\hfill |
     &c_{n}(\f{pr}_{n,1}: A_{n,1}, & \ldots & , \f{pr}_{n,k_{n}}: A_{n,k_{n}})
       ?\f{is\_c_{n}}
-\end{genspect}
+\end{mCRL2}
 
 \noindent
 From this declaration it can be seen that at least \frm{1} summation has to be
-specified and a summation may consists of \frm{0} products. Each summation
+specified and a summation may consist of \frm{0} products. Each summation
 \frm{i} is labelled by a \emph{constructor} \frm{c_{i}} and optionally by a
 \emph{recogniser} \frm{\f{is\_c_{i}}}. Recogniser \frm{\f{is\_c_{i}}} is used
 to determine if a term of the above sort is constructed with \frm{c_{i}}. If a
@@ -867,12 +853,12 @@ projection \frm{(i,j)}, if declared & \fa{\f{pr}_{i,j}}{\_}  & \verb+prij(_)+\\
 \hline
 \end{tabular}\bigskip
 
-We give a few examples. For finite \frm{n \in \nat}, an enumerated type can be
-declared by
-\begin{genspect}
+We give a few examples of sort declarations involving structured sorts. For
+finite \frm{n \in \nat}, an enumerated type can be declared by
+\begin{mCRL2}
 sort & Enum & = & \kwstruct\ \f{enum}_{0}?\f{is\_enum}_{0}\ |\ \ldots\ |\
 \f{enum}_{n}?\f{is\_enum}_{n}
-\end{genspect}
+\end{mCRL2}
 
 \noindent
 This generates constructor operations \frm{\f{enum}_{i} : \f{Enum}}, together
@@ -880,9 +866,9 @@ with recogniser operations \frm{\f{is\_enum}_{i}: \f{Enum} \To \srtbool}, with
 \frm{0 \leq i \leq n}.
 
 Pairs of elements of sort \frm{A} and \frm{B} can be declared as follows:
-\begin{genspect}
+\begin{mCRL2}
 sort & \f{ABPair} & = & \kwstruct\ \faa{pair}{\f{fst}: A}{\f{snd}: B}
-\end{genspect}
+\end{mCRL2}
 
 \noindent
 For this declaration, constructor operation \frm{\f{pair}: A \times B \To
@@ -892,39 +878,39 @@ For this declaration, constructor operation \frm{\f{pair}: A \times B \To
 Binary trees where all leaves and nodes are labelled with elements of sort
 \frm{A} can be declared as follows:
 Example:
-\begin{genspect}
+\begin{mCRL2}
 sort & \f{BATree} & = 
   & \kwstruct\ \fa{leaf}{A} \  | \  \faaa{node}{BATree}{A}{BATree}
-\end{genspect}
+\end{mCRL2}
 \noindent
 Or, with projection and recogniser labels:
-\begin{genspect}
+\begin{mCRL2}
 sort & \f{BATree} & = 
   & \kwstruct & \fa{leaf}{\f{lval}: A}?\f{is\_leaf}\\
 &&& \hfill |  & \faaa{node}{
     \f{left}: \f{BATree}}{\f{nval}: A}{\f{right}:\f{BATree}}?\f{is\_node}
-\end{genspect}
+\end{mCRL2}
 \noindent
 The quantification of an associative operation \frm{f: A \times A \To A} over
 all labels in a \frm{\f{BATree}}, can be defined in the same way for both
 declarations of the tree:
-\begin{genspect}
+\begin{mCRL2}
 map  & \f{qf}: \f{BATree} \To A\\
 var  & t,u: \f{BATree}\\
      & a: A\\
 eqn  & \fa{qf}{\fa{leaf}{a}}         & = & a\\
      & \fa{qf}{\faaa{node}{t}{a}{u}} & =
        & \faa{f}{\fa{qf}{t}}{\faa{f}{a}{\fa{qf}{u}}}\\
-\end{genspect}
+\end{mCRL2}
 \noindent
 The last definition of sort \frm{\f{BATree}} also allows the definition of
 operation \frm{\f{qf}} without pattern matching:
-\begin{genspect}
+\begin{mCRL2}
 var  & \multicolumn{3}{L}{t: \f{BATree}}\\
 eqn  & \fa{qf}{t} & = & \faaa{if}{\fa{is\_leaf}{t}}{\fa{lval}{t}}{
          \faa{f}{\fa{qf}{\fa{left}{t}}}{
            \faa{f}{\fa{nval}{t}}{\fa{qf}{\fa{right}{t}}}}}\\
-\end{genspect}
+\end{mCRL2}
 
 \subsubsection{Pattern matching versus projections and recognisers}
 
@@ -937,46 +923,33 @@ directly on the left hand side of the equation. However, we can apply it
 indirectly through the use of the summation and conditional operators in the
 right hand side. As an example, take the following process declaration without
 pattern matching:
-\begin{genspect}
+\begin{mCRL2}
 proc & \fa{P}{t: \f{BATree}} & = &
     \fa{is\_leaf}{t} & \To
     & \multicolumn{3}{@{}L}{\fa{get}{\fa{lval}{t}}.\delta\ +}\\
 &&& \fa{is\_node}{t} & \To
     & \fa{get}{\fa{nval}{t}}.(\fa{P}{\fa{left}{t}} + \fa{P}{\fa{right}{t}})\\
-\end{genspect}
+\end{mCRL2}
 
 \noindent
 This declaration is equivalent to the following declaration, which uses pattern
 matching:
-\begin{genspect}
+\begin{mCRL2}
 proc & \fa{P}{t: \f{BATree}} & = &
     \sum_{a:A}         
     & (t & == & \fa{leaf}{a}) \To \fa{get}{a}.\delta\ +\\
 &&& \sum_{a:A, u,v: \f{BATree}}
     & (t & == & \faaa{node}{u}{a}{v}) \To \fa{get}{a}.(\fa{P}{u} + \fa{P}{v})\\
-\end{genspect}
+\end{mCRL2}
 
 \noindent
-As can be seen from the above example, it is arguable what is the most elegant
-way to specify process equations.
-
-\subsection{Extensions}
-
-Other desirable type constructors could be the following:
-\begin{tdefinitions}{-}
-\item natural numbers modulo \frm{n}, for finite \frm{n \in \nat}
-\item (infinite) tables, arrays
-\item stacks, queues
-\item \ldots
-\end{tdefinitions}
-
-\noindent
-These type constructors will be provided when the need arises. Note that most
-of these type constructors can be easily constructed using function types and
-structured types. However, for reasons of standardisation and better syntax, it
-might be important to add these to the language.
+As can be seen from the above example, it is arguable which way is the most
+elegant to specify process equations.
 
 \section{Parsing issues}
+
+The following issues are important not only for parsing by computer, but also
+for parsing by humans.
 
 \subsection{Relation with processes}
 
@@ -999,8 +972,11 @@ parenthesized.
 Data expressions involving numbers, sets, bags or lists may be ambiguous. E.g.\
 namely \frm{1} can be parsed as a term of sort \frm{\srtpos}, \frm{\srtnat} or
 \frm{\srtint}, and \frm{\set{}} can be parsed as a term of an arbitrary set or
-bag sort. For overloaded operations, we have similar problems. This requires
-the implementation of a type inference system.
+bag sort. For overloaded operations, we have similar problems.
+
+These problems are solved by a type inference system: if the type of an
+expression can be determined unambiguously, the system is able to infer the
+type of this expression.
 
 \subsection{Priorities and associativity}
 
@@ -1048,17 +1024,83 @@ The most important ones are listed here:
 \item Declarations have to be terminated by a semicolon. If this was not
 required the language would be ambiguous. E.g.\ consider the following
 operation declarations:
-\begin{genspect}
+\begin{mCRL2}
 & X   & = & \fa{f}{g}\\
 & (k) & = & Y\\
-\end{genspect}
+\end{mCRL2}
 From the layout it is clear that \frm{X} is equal to \frm{\fa{f}{g}} and
 \frm{Y} to \frm{(k)}. However, since layout may not have any effect on the
 semantics of the language, it is also possible that \frm{X} is equal to
-\frm{f} and \frm{Y} to \frm{fa{(g)}{k}}.
+\frm{f} and \frm{Y} to \frm{\fa{(g)}{k}}.
 \end{tdefinitions}
 
-\section{Remarks}
+\section {Comparison of data languages}
+
+The data part of both the \mCRL and the mCRL2 languages have a lot in common
+with functional programming languages. For the features that involve functional
+programming languages the following comparison is made.
+
+\begin{table}[h!bt]
+\centering
+\begin{tabular}{|l|llll|}
+\hline
+Aspect \verb+\+ Language&\mCRL        &mCRL2       &Haskell/Clean&MetaOCaml\\
+\hline
+Purely functional       &yes          &yes         &yes          &no\\
+Expressiveness          &first-order  &higher-order&higher-order &higher-order\\
+Strict                  &no           &no          &no           &yes\\
+Evaluation              &somewhat lazy&somewhat lazy&lazy        &eager\\
+Control of eval.\ order & no       &yes         &yes          &yes\\
+Partial evaluation      &yes          &yes         &no           &yes\\
+Polymorphism            &no           &no          &yes          &yes\\
+Modules                 &no           &no          &yes          &yes\\
+Object orientation      &no           &no          &no           &yes\\
+Concrete data types     &no           &yes         &yes          &yes\\
+\hline
+\end{tabular}
+\caption{Comparison of data languages}
+\label{tab:comparison}
+\end{table}
+
+\noindent
+Note that originally the evaluation in \mCRL and mCRL2 was eager, but the
+addition of just-in-time strategies has moved towards laziness. Since both
+languages have a non-strict semantics and evaluation is not fully lazy, the
+evaluation only \emph{approximates} the semantics. However, this problem rarely
+pops up in practise and if it pops up, it can usually be circumvented by
+controlling the evaluation order. This can be achieved by the use of
+\emph{conditional rewrite rules}.
+
+\section{Future work}
+
+\subsection{Extensions of data types}
+
+\emph{Predefined data types} that could be desirable include the following:
+\begin{tdefinitions}{-}
+\item rational numbers (\frm{\mathbb{Q}})
+\item real numbers (\frm{\mathbb{R}})
+\item characters
+\item strings
+\end{tdefinitions}
+
+\noindent
+These data types will be provided when the need arises. However, for the
+rational and real numbers, a suitable representation has not yet been found.
+
+Desirable \emph{type constructors} include the following:
+\begin{tdefinitions}{-}
+\item natural numbers modulo \frm{n}, for finite \frm{n \in \nat}
+\item (infinite) tables, arrays
+\item stacks, queues
+\end{tdefinitions}
+
+\noindent
+These type constructors will be provided when the need arises. Note that most
+of these type constructors can be easily constructed using function types and
+structured types. However, for reasons of standardisation and better syntax, it
+might be important to add these to the language.
+
+\subsection{Miscellaneous}
 
 Based on the remarks by Jan Friso Groote and Jaco van de Pol, these issues are
 still open:
@@ -1070,23 +1112,5 @@ explicitly state the sort of a data expression, e.g.\ \frm{1: \f{Nat}}
 \item The \emph{if-then-else} construct should be in mixfix notation instead of
 function notation.
 \end{tdefinitions}
-
-\section{Relation with \mCRL}
-
-In order to place the introduced data types in the context of \mCRL, the
-introduced concepts can be depicted hierarchically as follows:
-
-\begin{center}
-\renewcommand{\arraystretch}{2.5}
-\begin{tabular}{|p{2em}|c|c|c|c|c|c|p{2em}|}
-\hline
-\multicolumn{8}{|c|}{User defined data types}\\\cline{2-7}
-& Numbers & Lists & \multicolumn{2}{c|}{Booleans} & Sets & Bags &\\\hline
-\multicolumn{4}{|p{13em}|}{\centering Structured types}
-  & \multicolumn{4}{c|}{Function types}\\\hline
-\multicolumn{8}{|c|}{\mCRL data types}\\
-\hline
-\end{tabular}
-\end{center}
 
 \end{document}

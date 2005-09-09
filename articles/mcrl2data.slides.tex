@@ -6,8 +6,8 @@
 
 \hypersetup{
   pdfauthor={Aad Mathijssen},
-  pdftitle={Data Types for GenSpect},
-  pdfsubject={Data Types for GenSpect},
+  pdftitle={Data Types for mCRL2},
+  pdfsubject={Data Types for mCRL2},
   pdfkeywords={algebraic specification, abstract data types, implementation},
   pdfpagemode={FullScreen}
 }
@@ -25,7 +25,7 @@
 %%
 \overlay{tuebgkuk}
 
-\title{\Huge Data Types for GenSpect}
+\title{\Huge Data Types for mCRL2}
 \author{\Large Aad Mathijssen}
 \date{\large 23th September 2004}
 
@@ -511,7 +511,7 @@
 % temporary lengths
 \newlength{\tlength}
 
-% GenSpect keywords
+% mCRL2 keywords
 \newcommand{\kwsort}{{\bf sort}}
 \newcommand{\kwop}{{\bf op}}
 \newcommand{\kwvar}{{\bf var}}
@@ -573,7 +573,7 @@
 \newcommand{\qed}{\hfill\ensuremath{\quad\Box}}
 \newcommand{\leftmerge}{\underline {\parallel}}
 
-\newenvironment{genspect}%
+\newenvironment{mCRL2}%
 {\par\bigskip\noindent%
  \begin{tabular}{@{}>{\bf}p{2.3em}L@{\ }L@{\ }L@{\ }L@{\ }L@{\ }L@{\ }L@{\ }L}%
 }%
@@ -589,7 +589,7 @@
 \begin{slidetop}
 \section*{Basic formalism}
 
-Data types in GenSpect are abstract data types.
+Data types in mCRL2 are abstract data types.
 
 \bigskip
 Abstract data types consist of:
@@ -599,7 +599,7 @@ Abstract data types consist of:
 \end{itemize}
 
 \bigskip
-Declaration in GenSpect:
+Declaration in mCRL2:
 \begin{center}
 \begin{tabular}{|l|l|}
 \hline
@@ -713,9 +713,9 @@ conversions                & \fa{A2B}{\_}               & \verb+A2B(_)+\\
 \section*{Type constructors: lists}
 
 Singly linked lists consisting of elements of sort \frm{A} only:
-\begin{genspect}
+\begin{mCRL2}
 sort & L & = & \fa{List}{A}
-\end{genspect}
+\end{mCRL2}
 
 \bigskip
 The following operations are provided for this sort:
@@ -769,10 +769,10 @@ Should we leave the choice to the user?
 \section*{Type constructors: sets and bags}
 
 Sets and bags consisting of elements of sort \frm{A} only:
-\begin{genspect}
+\begin{mCRL2}
 sort & S & = & \fa{Set}{A}\\
      & B & = & \fa{Bag}{A}
-\end{genspect}
+\end{mCRL2}
 
 The following operations are provided:
 \begin{center}
@@ -824,9 +824,9 @@ Note that the empty set or bag is written as an empty enumeration: \frm{\set{}}.
 \section*{Type constructors: function types}
 
 A function type of total functions from \frm{X} to \frm{Y}:
-\begin{genspect}
+\begin{mCRL2}
 sort & F = X \To Y
-\end{genspect}
+\end{mCRL2}
 
 The following operations are provided for this sort:
 \begin{center}
@@ -844,13 +844,13 @@ lambda abstraction         & \lambda {\_ {:} \_}.\_ & \verb+lambda _:_._+\\
 \section*{Type constructors: structured types}
 
 General form of structured types, where \frm{n \in \pos} and \frm{k_{i} \in \nat}, \frm{1 \leq i \leq n}:
-\begin{genspect}
+\begin{mCRL2}
 sort & \f{A} & = & 
     &c_{1}: (\f{pr}_{1,1}: A_{1,1}) & \times & \ldots & \times & (\f{pr}_{1,k_{1}}: A_{1,k_{1}})\\
 &&&|&c_{2}: (\f{pr}_{2,1}: A_{2,1}) & \times & \ldots & \times & (\f{pr}_{2,k_{2}}: A_{2,k_{2}})\\
 &&& &                               &        & \multicolumn{1}{c}{\vdots}\\
 &&&|&c_{n}: (\f{pr}_{n,1}: A_{n,1}) & \times & \ldots & \times & (\f{pr}_{n,k_{n}}: A_{n,k_{n}})
-\end{genspect}
+\end{mCRL2}
 
 Remarks:
 \begin{itemize}
@@ -886,9 +886,9 @@ A projection operation is only provided when its projection label is declared.
 \section*{Type constructors: structured type examples}
 
 For finite \frm{n \in \nat}, an enumerated type can be declared as follows:
-\begin{genspect}
+\begin{mCRL2}
 sort & Enum & = & \f{enum}_{0} \ |\ \ldots\ |\ \f{enum}_{n}
-\end{genspect}
+\end{mCRL2}
 
 Provided operations, for all \frm{i}, \frm{0 \leq i \leq n}:
 \begin{itemize}
@@ -898,9 +898,9 @@ Provided operations, for all \frm{i}, \frm{0 \leq i \leq n}:
 
 \bigskip
 Pairs of elements of sort \frm{A} and \frm{B} can be declared as follows:
-\begin{genspect}
+\begin{mCRL2}
 sort & \f{ABPair} & = & \f{pair}: (\f{fst}: A) \times (\f{snd}: B)
-\end{genspect}
+\end{mCRL2}
 
 Provided operations:
 \begin{itemize}
@@ -913,23 +913,23 @@ Provided operations:
 \section*{Type constructors: structured type examples (2)}
 
 Binary trees where all leaves and nodes are labelled with elements of sort \frm{A}:
-\begin{genspect}
+\begin{mCRL2}
 sort & \f{T} & = & \f{leaf}: (\f{lval}: A) \  | \  \f{node}: (\f{left}: \f{T}) \times (\f{nval}: A) \times (\f{right}: \f{T})
-\end{genspect}
+\end{mCRL2}
 Quantification of an associative operation \frm{f: A \times A \To A} over all labels in a \frm{T} tree:
-\begin{genspect}
+\begin{mCRL2}
 op   & \f{quantf}: T \To A\\
 var  & t,u: T\\
      & a: A\\
 eqn  & \fa{quantf}{\fa{leaf}{a}}         & = & a\\
      & \fa{quantf}{\faaa{node}{t}{a}{u}} & = & \faa{f}{\fa{quantf}{t}}{\faa{f}{a}{\fa{quantf}{u}}}\\
-\end{genspect}
+\end{mCRL2}
 Without pattern matching:
-\begin{genspect}
+\begin{mCRL2}
 var  & t: T\\
 eqn  & \fa{quantf}{t} & = & \f{ite}(\fa{isleaf}{t},\fa{lval}{t},\\
 &&&    \quad\faa{f}{\fa{quantf}{\fa{left}{t}}}{\faa{f}{\fa{nval}{t}}{\fa{quantf}{\fa{right}{t}}}})\\
-\end{genspect}
+\end{mCRL2}
 \end{slidetop}
 
 \begin{slidetop}
@@ -952,7 +952,7 @@ Hierarchy in the context of \mCRL:
 \begin{slidetop}
 \section*{Extensions}
 
-GenSpect representations were provided for the most important data types.
+mCRL2 representations were provided for the most important data types.
 
 \bigskip
 When needed, the following predefined data types can be added:
@@ -980,34 +980,34 @@ There are three candidate representations.
 
 \bigskip
 1) Current \mCRL representation:
-\begin{genspect}
+\begin{mCRL2}
 proc & \fa{P}{t: T} & = &
     \fa{isleaf}{t} &\To& \multicolumn{3}{@{}L}{\fa{get}{\fa{lval}{t}}.\delta\ +}\\
 &&& \fa{isnode}{t} &\To& \fa{get}{\fa{nval}{t}}.(\fa{P}{\fa{left}{t}} + \fa{P}{\fa{right}{t}})\\
-\end{genspect}
+\end{mCRL2}
 
 \bigskip
 2) Current \mCRL representation extended with pattern matching:
-\begin{genspect}
+\begin{mCRL2}
 proc & \fa{P}{\fa{leaf}{a: A}}               & = & \fa{get}{a}.\delta\\
      & \fa{P}{\faaa{node}{t: T}{a: A}{u: T}} & = & 
        \fa{get}{a}.(\fa{snd}{d}.\faaa{P}{t}{d}{e}\ +\\
 &&&    \fa{snd}{e}.\faaa{P}{u}{d}{e})
-\end{genspect}
+\end{mCRL2}
 \end{slidetop}
 
 \begin{slidetop}
 \section*{Process declarations (2)}
 
 3) Representation 2) where variable declarations are separated from the process declarations and a type declaration for the process is added:
-\begin{genspect}
+\begin{mCRL2}
 proc & P: T\\
 var  & a: A\\
      & t,u: T\\
 pdef & \fa{P}{\fa{leaf}{a}}         & = & \fa{get}{a}.\delta\\
      & \fa{P}{\faaa{node}{t}{a}{u}} & = & 
        \fa{get}{a}.(\fa{snd}{d}.\faaa{P}{t}{d}{e} + \fa{snd}{e}.\faaa{P}{u}{d}{e})    
-\end{genspect}
+\end{mCRL2}
 
 \bigskip
 Advantages 2) and 3) over 1): avoid membership and projection operations.\\
