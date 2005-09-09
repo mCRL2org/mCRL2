@@ -140,11 +140,6 @@ void gsPrintParts(FILE *OutStream, const ATermList Parts, bool ShowSorts,
 	PrintPartsFile(OutStream,Parts,ShowSorts,PrecLevel,Terminator,Separator);
 }
 
-void f(ATermList *pl)
-{
-  *pl = ATconcat(*pl, *pl);
-}
-
 void gsTest(void)
 {
   //initialise ATerm library
