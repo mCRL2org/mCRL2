@@ -426,22 +426,26 @@ void gsPrintPart(FILE *OutStream, const ATermAppl Part, bool ShowSorts,
       fprintf(OutStream, " -> ");
     }
     //print multiaction
-    bool IsTimed = !gsIsNil(ATAgetArgument(Part, 3));
-    gsPrintPart(OutStream, ATAgetArgument(Part, 2), ShowSorts, (IsTimed)?6:5);
+    ATermAppl MultAct = ATAgetArgument(Part, 2);
+    ATermAppl Time = ATAgetArgument(Part, 3);
+    bool IsTimed = !gsIsNil(Time);
+    gsPrintPart(OutStream, MultAct, ShowSorts, (IsTimed)?6:5);
     //print time
     if (IsTimed) {
       fprintf(OutStream, " @ ");
-      gsPrintPart(OutStream, ATAgetArgument(Part, 3), ShowSorts, 12);
+      gsPrintPart(OutStream, Time, ShowSorts, 12);
     }
-    fprintf(OutStream, " . ");
     //print process reference
-    ATermList Assignments = ATLgetArgument(Part, 4);
-    int AssignmentsLength = ATgetLength(Assignments);
-    fprintf(OutStream, "P");
-    if (AssignmentsLength > 0) {
-      fprintf(OutStream, "(");
-      gsPrintParts(OutStream, Assignments, ShowSorts, PrecLevel, NULL, ", ");
-      fprintf(OutStream, ")");
+    if (!gsIsDelta(MultAct)) {
+      fprintf(OutStream, " . ");
+      ATermList Assignments = ATLgetArgument(Part, 4);
+      int AssignmentsLength = ATgetLength(Assignments);
+      fprintf(OutStream, "P");
+      if (AssignmentsLength > 0) {
+        fprintf(OutStream, "(");
+        gsPrintParts(OutStream, Assignments, ShowSorts, PrecLevel, NULL, ", ");
+        fprintf(OutStream, ")");
+      }
     }
   } else if (gsIsMultAct(Part)) {
     //print multiaction

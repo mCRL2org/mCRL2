@@ -1,5 +1,5 @@
-#define  NAME      "gsparse"
-#define  LVERSION  "0.1.1"
+#define  NAME      "gsprint"
+#define  LVERSION  "0.2"
 #define  AUTHOR    "Aad Mathijssen"
 
 #ifdef __cplusplus
@@ -109,10 +109,11 @@ int main(int argc, char* argv[]) {
    	PrintMoreInfo(stderr);
    	return 1;
   } else {
-    //NoArgc > 0 && NoArgc <= 2
-    if (NoArgc == 1)
-      if (strcmp(argv[optind],"-"))
+    //NoArgc >= 0 && NoArgc <= 2
+    if (NoArgc > 0) {
+      if (strcmp(argv[optind],"-") != 0)
         SpecFileName = strdup(argv[optind]);
+    }
     if (NoArgc == 2) {
       OutputFileName = strdup(argv[optind + 1]);
     }

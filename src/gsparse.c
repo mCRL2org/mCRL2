@@ -1,5 +1,5 @@
 #define  NAME      "gsparse"
-#define  LVERSION  "0.1.37"
+#define  LVERSION  "0.2"
 #define  AUTHOR    "Aad Mathijssen"
 
 #ifdef __cplusplus
@@ -130,17 +130,16 @@ int main(int argc, char* argv[]) {
   }
   int NoArgc; //non-option argument count
   NoArgc = argc - optind;
-  if (NoArgc <= 0) {
-    fprintf(stderr, "%s: too few arguments\n", NAME);
-   	PrintMoreInfo(stderr);
-   	return 1;
-  } else if (NoArgc > 2) {
+  if (NoArgc > 2) {
     fprintf(stderr, "%s: too many arguments\n", NAME);
    	PrintMoreInfo(stderr);
    	return 1;
   } else {
-    //NoArgc > 0 && NoArgc <= 2
-    SpecFileName = strdup(argv[optind]);
+    //NoArgc >= 0 && NoArgc <= 2
+    if (NoArgc > 0) {
+      if (strcmp(argv[optind],"-") != 0)
+        SpecFileName = strdup(argv[optind]);
+    }
     if (NoArgc == 2) {
       OutputFileName = strdup(argv[optind + 1]);
     }
@@ -167,13 +166,19 @@ bool ParseSpecificationFileName(char *SpecFileName, char *OutputFileName,
   FILE *SpecStream      = NULL;
   FILE *OutputStream    = NULL;
   //open specification file for reading
-  SpecStream = fopen(SpecFileName, "r");
+  if (SpecFileName == NULL ) {
+    SpecStream = stdin;
+    gsDebugMsg("input from stdin.\n");
+  } else {
+    SpecStream = fopen(SpecFileName, "r");
+  }
   if (SpecStream == NULL) {
     gsErrorMsg("could not open specification file '%s' for reading (error %d)\n",
       SpecFileName, errno);
     Result = false;
   } else {
-    gsDebugMsg("formula file %s is opened for reading.\n", SpecFileName);
+    if ( SpecStream != stdin )
+      gsDebugMsg("formula file %s is opened for reading.\n", SpecFileName);
     //open output file for writing or set to stdout
     if (OutputFileName == NULL) {
       OutputStream = stdout;
@@ -193,7 +198,7 @@ bool ParseSpecificationFileName(char *SpecFileName, char *OutputFileName,
       Result = false;
     }
   }
-  if (SpecStream != NULL) {
+  if (SpecStream != NULL && SpecStream != stdin) {
     fclose(SpecStream);
   }
   if (OutputStream != NULL && OutputStream != stdout) {
@@ -238,9 +243,10 @@ bool ParseSpecificationStream(FILE *SpecStream, FILE *OutputStream,
 
 void PrintUsage(FILE *Stream) {
   fprintf(Stream, 
-    "Usage: %s OPTIONS SPECFILE [OUTFILE]\n"
+    "Usage: %s OPTIONS [SPECFILE [OUTFILE]]\n"
     "Translate the mCRL2 specification in SPECFILE to the ATerm format and\n"
-    "save it to OUTFILE. If OUTFILE is not present, stdout is used.\n"
+    "save it to OUTFILE. If OUTFILE is not present, stdout is used. If SPECFILE is\n"
+    "not present or -, stdin is used.\n"
     "\n"
     "The OPTIONS that can be used are:\n"
     "    --help               display this help\n"
