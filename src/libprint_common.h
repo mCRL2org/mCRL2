@@ -990,7 +990,7 @@ static void GS_PRINT_FUNC(PrintPart)(GS_PRINT_OUTTYPE OutStream, const ATermAppl
     fprintf(OutStream, (gsIsForall(Part))?"forall ":"exists ");
 #endif
 #ifdef GS_PRINT_STREAM
-    OutStream << (gsIsForall(Part))?"forall ":"exists ";
+    OutStream << ((gsIsForall(Part))?"forall ":"exists ");
 #endif
     GS_PRINT_FUNC(PrintDecls)(OutStream, ATLgetArgument(Part, 0), NULL, ", ");
 #ifdef GS_PRINT_FILE
@@ -1913,7 +1913,7 @@ static void GS_PRINT_FUNC(PrintPosMult)(GS_PRINT_OUTTYPE OutStream, const ATermA
         fprintf(OutStream, "%s*", Mult);
 #endif
 #ifdef GS_PRINT_STREAM
-        OutStream << "%s*", Mult;
+        OutStream << Mult << "*";
 #endif
         GS_PRINT_FUNC(PrintPart)(OutStream, BoolArg, false,
           gsPrecOpIdInfixRight(gsMakeOpIdNameMult()));
@@ -1937,7 +1937,7 @@ static void GS_PRINT_FUNC(PrintPosMult)(GS_PRINT_OUTTYPE OutStream, const ATermA
       fprintf(OutStream, "%s*", Mult);
 #endif
 #ifdef GS_PRINT_STREAM
-      OutStream << "%s*", Mult;
+      OutStream << Mult << "*";
 #endif
       GS_PRINT_FUNC(PrintPart)(OutStream, PosExpr, false,
         gsPrecOpIdInfixRight(gsMakeOpIdNameMult()));
