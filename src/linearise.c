@@ -24,6 +24,7 @@ extern "C" {
 #include "gsdataimpl.h"
 #include "libgsrewrite.h"
 #include "libgsalpha.h"
+#include <getopt.h>
 
 #define STRINGLENGTH 256
 
@@ -38,6 +39,7 @@ static int oldstate=1;
 static int statenames=0;
 static int mayrewrite=1;
 static int allowFreeDataVariablesInProcesses=1;
+static int informative_output=1;
 
 FILE *outfile;
 FILE *toolbusfile;
@@ -63,36 +65,38 @@ P("====================================");
 P("");
 P("Usage: linearise [options] [file]");
 P("");
-P("The following options can be used:");
-P("-stack:    an LPO of the input file in toolbus term format file is ");
-P("           translated using stack datatypes. Result in written to file.lpe.");
-P("-stdout:   an LPO in toolbus term format is generated, and written");
-P("           to stdout");
-P("-regular:  it is assumed that the input file is regular, and the");
-P("           output LPO will be generated in regular form");
-P("-regular2: a variant of regular where much more datavariables are");
-P("           being used. Regular2 is sometimes successful where");
-P("           the use of -regular leads to non termination of this tool");
-P("-cluster:  all actions in the output are clustered ");
-P("-nocluster:no actions are clustered, not even in intermediate LPOs");
-P("-binary:   use binary, instead of n-ary, case functions when clustering.");
-P("           In the presence of -newstate, state variables use binary encoding.");
-P("-multi     Write the term before the final composition of LPOs");
-P("-newstate: linearise will encode state variables using enumerated types.");
-P("           -newstate is only allowed in the presence of -regular or -regular2.");
-P("           Using the flag -binary in addition will lead linearise to encode");
-P("           the state by a vector of boolean variables.");
-P("           By default (i.e. without -newstate), the functions");
-P("           one, x2p1 and x2p0 will be used.");
-P("-statenames: linearise will use meaningful names for the state variables,");
-P("           derived from the specification.");
-P("-no-rewrite: do not use a rewriter while linearising. If the rewrite system");
-P("           does not terminate, the lineariser will only terminate, if the");
-P("           rewrite system is not used");
-P("-nofreevars: the lineariser will not introduce free data variables in");
-P("           processes, but instead use arbitrary constants.");
-P("-help:     yields this message");
-P("-version:  get a version of the lineariser");
+P("The following options can be used (within brackets the single letter form");
+P("of the options is given. E.g. linearise -1a stands for linearise --regular");
+P(" --statenames):");
+P("--stack (0):    an LPO of the input file in toolbus term format file is ");
+P("                translated using stack datatypes. Result in written to file.lpe.");
+P("--stdout:       an LPO in toolbus term format is generated, and written");
+P("                to stdout.");
+P("--regular (1):  it is assumed that the input file is regular, and the");
+P("                output LPO will be generated in regular form.");
+P("--regular2 (2): a variant of regular where much more datavariables are");
+P("                being used. Regular2 is sometimes successful where.");
+P("                the use of --regular leads to non termination of this tool");
+P("--cluster (c):  all actions in the output are clustered.");
+P("--nocluster (n):no actions are clustered, not even in intermediate LPOs.");
+P("--binary (b):   use binary, instead of n-ary, case functions when clustering.");
+P("                In the presence of --newstate, state variables use binary ");
+P("                encoding.");
+P("--newstate (w): linearise will encode state variables using enumerated types.");
+P("                --newstate is only allowed in the presence of --regular or ");
+P("                --regular2. Using the flag --binary in addition will lead ");
+P("                linearise to encode the state by a vector of boolean variables.");
+P("                By default (i.e. without --newstate), natural numbers are used.");
+P("--statenames (a): linearise will use meaningful names for the state variables,");
+P("                derived from the specification.");
+P("--no-rewrite (o): do not use a rewriter while linearising. If the rewrite system");
+P("                does not terminate, the lineariser will not terminate, unless");
+P("                rewrite system is not used.");
+P("--nofreevars (f): the lineariser will not introduce free data variables in");
+P("                processes, but instead use arbitrary constants.");
+P("--help (h):     yields this message");
+P("--version (v):  get a version of the lineariser");
+P("--quiet (q):    get a version of the lineariser");
 P("");
 P("Except with the options help and version, a filename containing");
 P("a mCRL2 description must be given. This program checks the syntax");
@@ -752,8 +756,6 @@ static ATermAppl RewriteMultAct(ATermAppl t)
 
 static ATermAppl pCRLrewrite(ATermAppl t)
 { 
-  /* ATfprintf(stderr,"%d %t\n",mayrewrite,t); */
-
   if (!mayrewrite) return t;
 
   if (gsIsCond(t))
@@ -6618,9 +6620,11 @@ static ATermAppl parallelcomposition(
   renaming=construct_renaming(pars1,pars2,&pars3,&pars2renaming); 
 //  ATfprintf(stderr,"pars1: %t\npars2: %t\npars3: %t\n\n",pars1,pars2,pars3);
 
-  ATfprintf(stderr,"Parallel composition is being translated... ");
+  if (informative_output)
+       ATfprintf(stderr,"Parallel composition is being translated... ");
 
-  ATfprintf(stderr,"%d   %d   ",
+  if (informative_output)
+       ATfprintf(stderr,"%d   %d   ",
               ATgetLength(linGetSums(t1)),
               ATgetLength(linGetSums(t2)));
 
@@ -6629,7 +6633,8 @@ static ATermAppl parallelcomposition(
                linGetSums(t2),
                pars1,pars2renaming,pars3,renaming,spec,pars2);
   
-  fprintf(stderr,"%d   done.\n",ATgetLength(result)); 
+  if (informative_output)
+       fprintf(stderr,"%d   done.\n",ATgetLength(result)); 
   return linMakeInitProcSpec(
                ATconcat(init1,
                         substitute_assignmentlist(
@@ -7383,64 +7388,96 @@ static int main2(int argc, char *argv[],ATerm *stack_bottom)
   fname[0]='\0';
   to_toolbusfile=0;
   to_stdout=0;
-  for(i = 1; i < argc; i++){
-    if(strequal(argv[i], "-version")){
-      version(); exit(0);
-    } else if(strequal(argv[i], "-help")){
-      help(); exit(0);
-    } else if (strequal(argv[i], "-stack")){
-      if (to_stdout==1)
-         ATerror("Options -stack and -stdout cannot be used together\n");
-      to_toolbusfile=1;
-    } else if(strequal(argv[i], "-stdout")){
-      to_toolbusfile=0;
-      to_stdout=1;
-    } else if(strequal(argv[i], "-regular")){
-      regular=1;
-    } else if(strequal(argv[i], "-regular2")){
-      regular2=1;
-      regular=1;
-    } else if(strequal(argv[i], "-cluster")){
-      cluster=1;
-      binary=1;
-      fprintf(stderr,"lineariser: -cluster also sets -binary\n");
-    } else if(strequal(argv[i], "-nocluster")){
-      nocluster=1;
-    } else if(strequal(argv[i], "-binary")){
-      binary=1;
-    } else if(strequal(argv[i], "-newstate")){
-      oldstate=0;
-    } else if(strequal(argv[i], "-nofreevars")){
-      allowFreeDataVariablesInProcesses=0;
-    } else if(strequal(argv[i], "-statenames")){
-      statenames=1;
-    } else if(strequal(argv[i], "-no-rewrite")){
-      mayrewrite=0;
-    } else if(strequal(argv[i], "-at-termtable")){
-      i++;
-    } else if(strequal(argv[i], "-at-symboltable")){
-      i++;
-    } else if((argv[i][0]=='-') && (argv[i][1]=='a') && (argv[i][2]=='t')){ 
 
-    } else if(argv[i][0]=='-'){
-      fprintf(stderr,"Unknown option %s ignored\n",argv[i]);
-    } else {
-      char *lastdot = NULL;
-      sname = argv[i];
-      strcpy(fname, sname);
-      oname = fname;
-      if ((strlen(fname)>3) && (strrchr(fname,'/')!=NULL))
-         oname = strrchr(oname,'/')+1;
-      lastdot = strrchr(oname,'.');
-      if (lastdot && !strcmp(lastdot,".mcrl2")) *lastdot = '\0';   
-      break; 
+  struct option lopts[] = {
+                { "stack",        no_argument,    NULL,   '0' },
+                { "stdout",       no_argument,    NULL,   -1 },
+                { "regular",      no_argument,    NULL,   '1' },
+                { "regular2",     no_argument,    NULL,   '2' },
+                { "cluster",      no_argument,    NULL,   'c' },
+                { "nocluster",    no_argument,    NULL,   'n' },
+                { "binary",       no_argument,    NULL,   'b' },
+                { "newstate",     no_argument,    NULL,   'w' },
+                { "statenames",   no_argument,    NULL,   'a' },
+                { "no-rewrite",   no_argument,    NULL,   'o' },
+                { "nofreevars",   no_argument,    NULL,   'f' },
+                { "help",         no_argument,    NULL,   'h' },
+                { "version",      no_argument,    NULL,   'v' },
+                { "quiet",        no_argument,    NULL,   'q' },
+                { 0, 0, 0, 0 }
+        };
+
+  int opt=0;
+  while ( (opt = getopt_long(argc,argv,"012vnb2aofhvq",lopts,NULL)) != -1 )
+  { switch (opt)
+    { case '0': /* stack */
+        if (to_stdout==1)
+        { ATerror("Options --stack and --stdout cannot be used together\n");
+        }
+        to_toolbusfile=1;
+        break;
+      case -1:  /* stdout */
+        to_toolbusfile=0; to_stdout=1; break;
+      case '1': /* regular */
+        regular=1; break;
+      case '2': /* regular2 */
+        regular2=1; regular=1; break;
+      case 'c': /* cluster */ 
+        cluster=1;
+        binary=1;
+        fprintf(stderr,"lineariser: --cluster also sets --binary\n");
+        break;
+      case 'n': /* nocluster */
+        nocluster=1; break;
+      case 'b': /* binary */ 
+        binary=1; break;
+      case 'w': /* newstate */ 
+        oldstate=0; break;
+      case 'a': /* --statenames */ 
+        statenames=1; break;
+      case 'o': /* --no-rewrite */ 
+        mayrewrite=0; break;
+      case 'f': /* --nofreevars */
+        allowFreeDataVariablesInProcesses=0; break;
+      case 'h': /* help */
+        help(); exit(0);
+      case 'v': /* version */
+        version(); exit(0);
+      case 'q': /* --quiet */
+        informative_output=0; break;
+      case '?':
+      default:
+        ATerror("Unknown commandline option\n"); 
+    
     } 
   }
+  /* Now the name of the inputfile must be read from the commandline */
+
+  if ((optind < argc) && (argv[optind][0]!="-"))
+  { char *lastdot = NULL;
+    sname = argv[optind];
+    strcpy(fname, sname);
+    oname = fname;
+    if ((strlen(fname)>3) && (strrchr(fname,'/')!=NULL))
+         oname = strrchr(oname,'/')+1;
+    lastdot = strrchr(oname,'.');
+      if (lastdot && !strcmp(lastdot,".mcrl2")) 
+      { *lastdot = '\0';   
+      }
+  } 
+  else 
+  { ATerror("No name of input file provided"); 
+  }
+
+  if (optind+1<argc)
+  { ATerror("Too many input files on command line");
+  }
+
   if (to_stdout==0 && 
      (regular || nocluster || cluster || binary || !oldstate)) 
       to_toolbusfile=1; 
   if (!oldstate && !regular && !regular2)
-    ATerror("Option -newstate can only be used with -regular or -regular2\n");
+    ATerror("Option --newstate can only be used with --regular or --regular2\n");
 
   ATinit(argc,argv,stack_bottom);
   if (((argc < 2)||(sname==NULL)))
@@ -7481,8 +7518,11 @@ static int main2(int argc, char *argv[],ATerm *stack_bottom)
                  gsMakeLPEInit(spec->procdatavars, ATLgetArgument(result,0))),
                  to_stdout?stdout:toolbusfile);
     }
-  else ATfprintf(stderr,"The file %s contains a correctly typed mCRL2 specification\n",
+  else 
+  { if (informative_output)
+    { ATfprintf(stderr,"The file %s contains a correctly typed mCRL2 specification\n",
                           iname);  
+  } }
   return 0;
 }
 
