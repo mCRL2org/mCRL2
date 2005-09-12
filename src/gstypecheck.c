@@ -74,6 +74,7 @@ static void gstcAddSystemFunctionProd(ATermAppl, ATermAppl);
 static void gstcATermTableCopy(ATermTable Vars, ATermTable CopyVars);
 
 static ATermTable gstcAddVars2Table(ATermTable,ATermList);
+static ATbool gstcVarsUnique(ATermList VarDecls);
 static ATermAppl gstcRewrActProc(ATermTable, ATermAppl);
 static inline ATermAppl gstcMakeActionOrProc(ATbool, ATermAppl, ATermList, ATermList);
 static ATermAppl gstcTraverseActProcVarConstP(ATermTable, ATermAppl);
@@ -673,6 +674,11 @@ static ATbool gstcReadInProcsAndInit (ATermList Procs, ATermAppl Init){
       }
     }
     ATtablePut(context.processes,(ATerm)ProcName,(ATerm)Types);
+
+    //check that all formal parameters of the process are unique.
+    ATermList ProcVars=ATLgetArgument(Proc,2);
+    if(!gstcVarsUnique(ProcVars)){ gstcE("The formal variables in process %T are not unique\n",Proc); return ATfalse;}
+
     ATtablePut(body.proc_pars,(ATerm)ATAgetArgument(Proc,1),(ATerm)ATLgetArgument(Proc,2));
     ATtablePut(body.proc_bodies,(ATerm)ATAgetArgument(Proc,1),(ATerm)ATAgetArgument(Proc,3));
     gsDebugMsg("Read-in Proc Name %t, Types %t\n",ProcName,Types);    
@@ -708,6 +714,9 @@ static ATbool gstcTransformVarConsTypeData(void){
   for(ATermList Eqns=body.equations;!ATisEmpty(Eqns);Eqns=ATgetNext(Eqns)){
     ATermAppl Eqn=ATAgetFirst(Eqns);
     ATermList VarList=ATLgetArgument(Eqn,0);
+
+    if(!gstcVarsUnique(VarList)){ b = false; gstcE("The variables in equation declaration %T are not unique\n",VarList,Eqn); break;}
+
     Vars=gstcAddVars2Table(Vars,VarList);
     if(!Vars){ b = false; break; }
     ATermAppl Cond=ATAgetArgument(Eqn,1);
@@ -983,6 +992,26 @@ static void gstcATermTableCopy(ATermTable Orig, ATermTable Copy){
     ATerm Key=ATgetFirst(Keys);
     ATtablePut(Copy,Key,ATtableGet(Orig,Key));
   }
+}
+
+
+static ATbool gstcVarsUnique(ATermList VarDecls){
+  ATbool Result=ATtrue;
+  ATermIndexedSet Temp=ATindexedSetCreate(63,50);
+
+  for(;!ATisEmpty(VarDecls);VarDecls=ATgetNext(VarDecls)){
+    ATermAppl VarDecl=ATAgetFirst(VarDecls);
+    ATermAppl VarName=ATAgetArgument(VarDecl,0);
+    // if already defined -- replace (other option -- warning)
+    // if variable name is a constant name -- it has more priority (other options -- warning, error)
+    ATbool nnew;
+    ATindexedSetPut(Temp, (ATerm)VarName, &nnew);
+    if(!nnew) {Result=ATfalse; goto final;}
+  } 
+
+ final:
+  ATindexedSetDestroy(Temp);
+  return Result;
 }
 
 static ATermTable gstcAddVars2Table(ATermTable Vars, ATermList VarDecls){
