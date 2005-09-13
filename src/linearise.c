@@ -66,8 +66,8 @@ P("");
 P("Usage: linearise [options] [file]");
 P("");
 P("The following options can be used (within brackets the single letter form");
-P("of the options is given. E.g. linearise -1a stands for linearise --regular");
-P(" --statenames):");
+P("of the options is given. E.g. linearise -1a file.mcrl2 stands for ");
+P("linearise --regular --statenames file.mcrl2):");
 P("--stack (0):    an LPO of the input file in toolbus term format file is ");
 P("                translated using stack datatypes. Result in written to file.lpe.");
 P("--stdout:       an LPO in toolbus term format is generated, and written");
@@ -96,7 +96,7 @@ P("--nofreevars (f): the lineariser will not introduce free data variables in");
 P("                processes, but instead use arbitrary constants.");
 P("--help (h):     yields this message");
 P("--version (v):  get a version of the lineariser");
-P("--quiet (q):    get a version of the lineariser");
+P("--quiet (q):    avoid printing informative output to stderr");
 P("");
 P("Except with the options help and version, a filename containing");
 P("a mCRL2 description must be given. This program checks the syntax");
@@ -5623,6 +5623,89 @@ static ATermAppl hidecomposition(ATermList hidelist, ATermAppl ips)
 
 /**************** allow  *************************************/
 
+static int gsIsDataExprAnd(ATermAppl t)
+{ 
+  if (gsIsDataAppl(t))
+  { ATermAppl t1=ATgetArgument(t,0);
+    if (gsIsDataAppl(t1))
+    { if (ATgetArgument(t1,0)==gsMakeOpIdAnd())
+      { 
+       return 1;
+      };
+    }
+  } 
+  return 0;
+}
+
+static int gsIsDataExprOr(ATermAppl t)
+{ 
+  if (gsIsDataAppl(t))
+  { ATermAppl t1=ATgetArgument(t,0);
+    if (gsIsDataAppl(t1))
+    { return ATgetArgument(t1,0)==gsMakeOpIdOr();
+    }
+  } 
+  return 0;
+}
+
+static int implies_condition(ATermAppl c1, ATermAppl c2)
+{
+  if (c1==c2)
+  { return 1;
+  }
+  
+  if (gsIsDataExprAnd(c1))
+  { return implies_condition(ATAgetArgument(ATAgetArgument(c1,0),1),c2) || 
+           implies_condition(ATAgetArgument(c1,1),c2);
+  }
+
+  if (gsIsDataExprOr(c1))
+  { return implies_condition(ATAgetArgument(ATAgetArgument(c1,0),1),c2) &&
+           implies_condition(ATAgetArgument(c1,1),c2);
+  }
+
+  if (gsIsDataExprOr(c2))
+  { return implies_condition(c1,ATAgetArgument(ATAgetArgument(c2,0),1)) ||
+           implies_condition(c1,ATAgetArgument(c2,1));
+  }
+
+  if (gsIsDataExprAnd(c2))
+  { return implies_condition(c1,ATAgetArgument(ATAgetArgument(c2,0),1)) &&
+           implies_condition(c1,ATAgetArgument(c2,1));
+  }
+  
+  return 0;
+
+}
+
+static ATermList insert_timed_delta_summand(ATermList l, ATermAppl s)
+{ 
+  assert(linGetMultiAction(s)==gsMakeDelta());
+  ATermList result=ATempty;
+  
+  ATermAppl cond=linGetCondition(s);
+
+  for( ; l!=ATempty ; l=ATgetNext(l) )
+  { ATermAppl summand=ATAgetFirst(l);
+    ATermAppl cond1=linGetCondition(summand);
+    if ((implies_condition(cond,cond1)) &&
+        (linGetActionTime(s)==linGetActionTime(summand)))
+    { 
+      return ATconcat(l,result);
+    }
+    if ((linGetMultiAction(summand)==gsMakeDelta()) &&
+                implies_condition(cond1,cond) &&
+                (linGetActionTime(s)==linGetActionTime(summand)))
+    { /* do not add summand to result, as it is superseded by s */
+    }
+    else 
+    { result=ATinsertA(result,summand);
+    }
+  }
+  result=ATinsertA(result,s);
+  return result;
+}
+
 static ATermList sortMultiActionLabels(ATermList l)
 {
   ATermList result=ATempty;
@@ -5699,7 +5782,7 @@ static ATermAppl allowcomposition(ATermList allowlist, ATermAppl ips)
     else
     { 
       if (!gsIsNil(actiontime))
-      { resultsumlist=ATinsertA(
+      { resultsumlist=insert_timed_delta_summand(
                       resultsumlist,
                       gsMakeLPESummand(
                              sumvars,
@@ -5754,10 +5837,20 @@ static ATermAppl encapcomposition(ATermList encaplist , ATermAppl ips)
  
     ATermAppl resultmultiaction=encap(encaplist,multiaction);
 
-    if ((!gsIsDelta(resultmultiaction)) ||
-        (actiontime!=gsMakeNil()))
+    if (!gsIsDelta(resultmultiaction)) 
     { 
       resultsumlist=ATinsertA(
+                    resultsumlist,
+                    gsMakeLPESummand(
+                           sumvars,
+                           condition,
+                           resultmultiaction,
+                           actiontime,
+                           nextstate));
+    }
+    else if (actiontime!=gsMakeNil())
+    { 
+      resultsumlist=insert_timed_delta_summand(
                     resultsumlist,
                     gsMakeLPESummand(
                            sumvars,
@@ -7377,7 +7470,6 @@ static ATermAppl transform(
 
 static int main2(int argc, char *argv[],ATerm *stack_bottom)
 { 
-  int i = 1;
   char *sname = NULL, *oname = NULL;
   specificationbasictype *spec;
   char messagebuffer[STRINGLENGTH]="Unitialized messagebuffer";
