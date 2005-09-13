@@ -65,11 +65,10 @@ int main(int argc, char* argv[]) {
   char *SpecFileName   = NULL;
   char *OutputFileName = NULL;
   //declarations for getopt  
-  #define ShortOptions      "qvd"
-  #define HelpOption        CHAR_MAX + 1
-  #define VersionOption     HelpOption + 1
+  #define ShortOptions      "hqvd"
+  #define VersionOption     CHAR_MAX + 1
   struct option LongOptions[] = { 
-    {"help"      , no_argument,       NULL, HelpOption},
+    {"help"      , no_argument,       NULL, 'h'},
     {"version"   , no_argument,       NULL, VersionOption},
     {"quiet"     , no_argument,       NULL, 'q'},
     {"verbose"   , no_argument,       NULL, 'v'},
@@ -81,7 +80,7 @@ int main(int argc, char* argv[]) {
   Option = getopt_long(argc, argv, ShortOptions, LongOptions, NULL);
   while (Option != -1) {
     switch (Option) {
-      case HelpOption: 
+      case 'h':
         PrintUsage(stdout);
         return 0; 
       case VersionOption: 
@@ -210,11 +209,11 @@ void PrintUsage(FILE *Stream) {
     "not present or -, stdin is used.\n"
     "\n"
     "The OPTIONS that can be used are:\n"
-    "    --help               display this help\n"
-    "    --version            display version information\n"
-    "-q, --quiet              do not display warning messages\n"
-    "-v, --verbose            turn on the display of short intermediate messages\n"
-    "-d, --debug              turn on the display of detailed intermediate messages\n",
+    "  -h, --help             display this help\n"
+    "      --version          display version information\n"
+    "  -q, --quiet            do not display warning messages\n"
+    "  -v, --verbose          turn on the display of short intermediate messages\n"
+    "  -d, --debug            turn on the display of detailed intermediate messages\n",
     NAME
   );
 }

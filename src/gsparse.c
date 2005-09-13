@@ -43,11 +43,12 @@ bool ParseSpecificationFileName(
   bool Human,
   bool NoSave);
 /*Pre: SpecFileName is the name of a valid mCRL2 specification file from
-       which can be read
+       which can be read, or NULL
        OutFileName is the name of a valid file to which can be written, or NULL
   Post:the specification in SpecFileName is parsed and saved to OutFileName
+       If SpecFileName is NULL, stdin is used.
        If OutFileName is NULL, stdout is used.
-       If Human, the parsed formula is saved in a human readable format
+       If Human, the parsed formula is saved in a human readable format.
        If NoSave, the parsed formula is not saved.
   Ret: true, if everything went ok.
        false, otherwise; appropriate error messages have been shown.
@@ -78,18 +79,17 @@ int main(int argc, char* argv[]) {
   bool Human           = false;
   bool NoSave          = false;
   //declarations for getopt  
-  #define ShortOptions      "hqvdn"
-  #define HelpOption        CHAR_MAX + 1
-  #define VersionOption     HelpOption + 1
+  #define ShortOptions      "hqvdun"
+  #define VersionOption     CHAR_MAX + 1
   #define TestOption        VersionOption + 1
   struct option LongOptions[] = { 
-    {"help"      , no_argument,       NULL, HelpOption},
+    {"help"      , no_argument,       NULL, 'h'},
     {"version"   , no_argument,       NULL, VersionOption},
     {"test"      , no_argument,       NULL, TestOption},
     {"quiet"     , no_argument,       NULL, 'q'},
     {"verbose"   , no_argument,       NULL, 'v'},
     {"debug"     , no_argument,       NULL, 'd'},
-    {"human"     , no_argument,       NULL, 'h'},
+    {"human"     , no_argument,       NULL, 'u'},
     {"no-save"   , no_argument,       NULL, 'n'},
     {0, 0, 0, 0}
   };
@@ -98,7 +98,7 @@ int main(int argc, char* argv[]) {
   Option = getopt_long(argc, argv, ShortOptions, LongOptions, NULL);
   while (Option != -1) {
     switch (Option) {
-      case HelpOption: 
+      case 'h': 
         PrintUsage(stdout);
         return 0; 
       case VersionOption: 
@@ -116,7 +116,7 @@ int main(int argc, char* argv[]) {
       case 'd': 
         gsSetDebugMsg();
         break;
-      case 'h':
+      case 'u':
         Human = true;
         break;
       case 'n': 
@@ -161,7 +161,6 @@ int main(int argc, char* argv[]) {
 bool ParseSpecificationFileName(char *SpecFileName, char *OutputFileName,
   bool Human, bool NoSave)
 {
-  assert(SpecFileName != NULL);
   bool Result           = true;
   FILE *SpecStream      = NULL;
   FILE *OutputStream    = NULL;
@@ -249,14 +248,14 @@ void PrintUsage(FILE *Stream) {
     "not present or -, stdin is used.\n"
     "\n"
     "The OPTIONS that can be used are:\n"
-    "    --help               display this help\n"
-    "    --version            display version information\n"
-    "    --test               execute test function (will be removed)\n"
-    "-q, --quiet              do not display warning messages\n"
-    "-v, --verbose            turn on the display of short intermediate messages\n"
-    "-d, --debug              turn on the display of detailed intermediate messages\n"
-    "-h, --human              save the parsed formula in a human readable format\n"
-    "-n, --no-save            do not save the parsed formula\n",
+    "  -h, --help             display this help\n"
+    "      --version          display version information\n"
+    "      --test             execute test function (will be removed)\n"
+    "  -q, --quiet            do not display warning messages\n"
+    "  -v, --verbose          turn on the display of short intermediate messages\n"
+    "  -d, --debug            turn on the display of detailed intermediate messages\n"
+    "  -u, --human            save the parsed formula in a human readable format\n"
+    "  -n, --no-save          do not save the parsed formula\n",
     NAME
   );
 }
