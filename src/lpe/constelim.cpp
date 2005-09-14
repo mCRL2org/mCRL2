@@ -3,6 +3,7 @@
 #include "mcrl2/mcrl2_visitor.h"
 #include "mcrl2/lpe.h"
 #include <boost/program_options.hpp>
+#include <vector>
 
 using namespace std;
 using namespace mcrl2;
@@ -15,12 +16,88 @@ po::variables_map vm;
 //Constanten
 string version = "Version 0.1";
 
-
 int const_main(string filename, int opt)
 {
+  vector<DataExpression>            iv;		//init vector
+  vector<bool> 		                  fv;		//flag vector (C= True, V= False)
+  vector< vector<DataExpression> >  sv; 	//(new) state vector
+  vector< vector<bool> >            cv;		//change vector	
+  vector<bool>                      pcv;  //partial change vector
+
+  int                               nopp; //number of process parameters
+  int                               nos;  //number of summands
+  int                               noa;  //number of assignments in the init
+
+  //Debug test vars
+  int outputvar =  0;
+  outputvar++;
+
   aterm_appl t = read_from_named_file(filename).to_appl();
   if (!t)
     cerr << "could not read file!" << endl;
+  if (opt == 0)
+  {
+    //Get number of process parameters
+    LPE::variable_iterator var_itpb = LPE(t).process_parameters_begin();
+    LPE::variable_iterator var_itpe = LPE(t).process_parameters_end();
+    nopp = distance(var_itpb, var_itpe);
+    
+    //Build "init vector" Step 1
+
+    //#assignments == #process parameters 
+    LPEInit::assignment_iterator var_isb = LPE::LPE(t).lpe_init().assignments_begin();
+    LPEInit::assignment_iterator var_ise = LPE::LPE(t).lpe_init().assignments_end();
+    noa = distance(var_isb, var_ise);
+    //Vragen of onderstaande regel klopt
+    if(nopp!=noa){cout << "Error: #assignments != #process parameters"<< endl; return 1;}; 
+    
+    //Get all right hand expressions from the init 
+    for(LPEInit::assignment_iterator s_current =  var_isb; s_current != var_ise; s_current++){
+      iv.push_back(LPEAssignment(*s_current).rhs());
+    };	
+
+    //Build "flag vector" Step 2
+    for (int i=0; i < nopp; i++){
+      fv.push_back(true);
+    }
+
+    //Begin Iteration
+      //Build new state vector
+      
+      //Get number of summands
+      LPE::summand_iterator sum_itb = LPE(t).summands_begin();
+      LPE::summand_iterator sum_ite = LPE(t).summands_end(); 
+      nos = distance(sum_itb, sum_ite);
+
+      for(LPE::summand_iterator s_current =  sum_itb; s_current != sum_ite; ++s_current){
+        //Summand Loop
+        //Each pcv should be empty
+        pcv.clear();
+        //Fill the pcv
+        //Number of partial pcv elements
+        LPESummand::assignment_iterator var_ppcvb = LPESummand(*s_current).assignments_begin();
+        LPESummand::assignment_iterator var_ppcve = LPESummand(*s_current).assignments_end();
+        
+        //Begin Debug
+        outputvar = distance(var_ppcvb, var_ppcve);
+        
+        cout << outputvar << endl;
+        
+        DataExpression c_obj = LPESummand(*s_current).assignments_begin(); 
+        cout << c_obj.to_string() << endl;
+        //End Debug
+        
+        //Add pcv
+      };	
+      
+      //Build change vector
+      //Compare change vector with flag vector
+    //End Iteration  
+    //Subtitute all constant values
+
+ 
+ }
+  
   return 0;
 }
 

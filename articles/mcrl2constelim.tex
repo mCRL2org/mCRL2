@@ -69,8 +69,12 @@ Shorthand we denote \textit{constant} as "C" and \textit{variable} as "V". When 
 \subsection{Example 1}
 To illustrate how constelim behaves we will take the example stated below:
 \begin{verbatim}
-    Init P(i:=0, j:=0);
-    P(i,j) = action(i).P(i := i+1, j := j); 
+act  action: Nat;
+
+proc P(i,j: Nat) =
+       true -> action(i) . P(i := i + Pos2Nat(1));
+
+init P(i := 0, j := 0);
 \end{verbatim}
 
 First we write the initial state vector: $\langle$0,0$\rangle$. For calculation we will also store the variables i=0 and j=0.
