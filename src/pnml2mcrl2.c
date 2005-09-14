@@ -3,7 +3,7 @@
 extern "C" {
 #endif
 
-#define NAME "pnml2gs"
+#define NAME "pnml2mcrl2"
 
 #include <ctype.h>
 #include <stdio.h>
@@ -33,9 +33,9 @@ extern "C" {
     ATermTable trans_in;	        // trans_id -> List(arc_id) (arc_out)
     ATermTable place_out;	        // place_id -> List(arc_id) (arc_out)
     ATermTable trans_out;	        // trans_id -> List(arc_id) (arc_in)
-    // needed for the creation of general GenSpect processes
-    ATermList transitions;      // store all the GenSpect processes (involving transitions) needed for the Trans-process
-    ATermList places;           // store all the GenSpect processes (involving places) needed for the PetriNet-process
+    // needed for the creation of general mCRL2 processes
+    ATermList transitions;      // store all the mCRL2 processes (involving transitions) needed for the Trans-process
+    ATermList places;           // store all the mCRL2 processes (involving places) needed for the PetriNet-process
     ATermTable place_process_name; // place_id -> name of the corresponding process
   } Context;
   static Context context;
@@ -622,7 +622,7 @@ extern "C" {
   }
   
   //==================================================
-  // pn2gsGenerateActions generates all the GenSpect actions
+  // pn2gsGenerateActions generates all the mCRL2 actions
   //==================================================
   static ATermList pn2gsGenerateActions(void){
     // input: access to the context
@@ -682,7 +682,7 @@ extern "C" {
   }
 
   //==================================================
-  // pn2gsSyncIn creates the GenSpect syncronistation of all elements of the list
+  // pn2gsSyncIn creates the mCRL2 syncronistation of all elements of the list
   //==================================================
   static ATermAppl pn2gsSyncIn(ATermList Ids){
     // input: a not-empty list with the ID's
@@ -699,7 +699,7 @@ extern "C" {
   }
 
   //==================================================
-  // pn2gsSyncOut creates the GenSpect syncronistation of all elements of the list, preceded by an underscore
+  // pn2gsSyncOut creates the mCRL2 syncronistation of all elements of the list, preceded by an underscore
   //==================================================
   static ATermAppl pn2gsSyncOut(ATermList Ids){
     // input: a not-empty list with the ID's
@@ -716,7 +716,7 @@ extern "C" {
   }
 
   //==================================================
-  // pn2gsGenerateTransition generates the GenSpect Process Equations belonging to one transition
+  // pn2gsGenerateTransition generates the mCRL2 Process Equations belonging to one transition
   //==================================================
   static ATermList pn2gsGenerateTransition(ATerm TransID){
     // input: access to the context; ID of the transtion
@@ -813,7 +813,7 @@ extern "C" {
   }
 
   //==================================================
-  // pn2gsChoiceIn creates the GenSpect choice of all elements of the list
+  // pn2gsChoiceIn creates the mCRL2 choice of all elements of the list
   //==================================================
   static ATermAppl pn2gsChoiceIn(ATermList Ids){
     // input: a not-empty list with the ID's
@@ -830,7 +830,7 @@ extern "C" {
   }
 
   //==================================================
-  // pn2gsChoiceOut creates the GenSpect choice of all elements of the list, preceded by an underscore
+  // pn2gsChoiceOut creates the mCRL2 choice of all elements of the list, preceded by an underscore
   //==================================================
   static ATermAppl pn2gsChoiceOut(ATermList Ids){
     // input: a not-empty list with the ID's
@@ -871,7 +871,7 @@ extern "C" {
   }
 
   //==================================================
-  // pn2gsGeneratePlace generates the GenSpect Process Equations belonging to one place
+  // pn2gsGeneratePlace generates the mCRL2 Process Equations belonging to one place
   //==================================================
   static ATermList pn2gsGeneratePlace(ATerm PlaceID){
     // input: access to the context; ID of the place
@@ -1143,7 +1143,7 @@ extern "C" {
   }
 
   //==================================================
-  // pn2gsMerge creates the GenSpect merge of all elements of the list, with a parameter!
+  // pn2gsMerge creates the mCRL2 merge of all elements of the list, with a parameter!
   //==================================================
   static ATermAppl pn2gsMerge(ATermList Ids) {
     // input: a not-empty list with the ID's
@@ -1180,7 +1180,7 @@ extern "C" {
   }
 
   //==================================================
-  // pn2gsGenerateProcEqns generates all the GenSpect Process Equations
+  // pn2gsGenerateProcEqns generates all the mCRL2 Process Equations
   //==================================================
   static ATermList pn2gsGenerateProcEqns(ATermAppl NetID){
     // input: access to the context and the ID of the Petri net
@@ -1344,11 +1344,11 @@ extern "C" {
   /*                           */
 
   //==================================================
-  // pn2gsTranslate converts the ATerm delivered by pn2gsAterm to a GenSpect ATerm.
+  // pn2gsTranslate converts the ATerm delivered by pn2gsAterm to a mCRL2 ATerm.
   //==================================================
   static ATermAppl pn2gsTranslate(ATermAppl Spec){
     // input: an ATermAppl that contains the translated PNML-file
-    // output: another ATermAppl, which is the GenSpect translation
+    // output: another ATermAppl, which is the mCRL2 translation
     //         of the PNML-ATerm.
     
     //==================================================
@@ -1590,11 +1590,11 @@ extern "C" {
     gsDebugMsg("\n====================\n\n");
     
     //==================================================
-    // creation of GenSpect ATerms
+    // creation of mCRL2 ATerms
     //==================================================
 
-    ATermList Actions=pn2gsGenerateActions();       // store all the GenSpect Actions
-    ATermList ProcEqns=pn2gsGenerateProcEqns(ATAgetArgument(Spec, 3));      // store all the GenSpect Process Equations
+    ATermList Actions=pn2gsGenerateActions();       // store all the mCRL2 Actions
+    ATermList ProcEqns=pn2gsGenerateProcEqns(ATAgetArgument(Spec, 3));      // store all the mCRL2 Process Equations
     
     gsDebugMsg("\n\n====================\n\n");
     gsDebugMsg("Conversion Succesful!");
@@ -1705,7 +1705,7 @@ extern "C" {
     ATtableDestroy(context.place_process_name);
     
     if(!Spec) {
-      gsErrorMsg("Error while converting PNML ATerm to GenSpect ATerm, conversion stopped!  \n");
+      gsErrorMsg("Error while converting PNML ATerm to mCRL2 ATerm, conversion stopped!  \n");
       return 1;
     }
     
@@ -1725,7 +1725,7 @@ extern "C" {
   static ATermList pn2gsMakeSendActions(ATermList ReadActions);
 
   //==================================================
-  // pn2gsGeneratePlaceAlternative generates the GenSpect Process Equations belonging to one place
+  // pn2gsGeneratePlaceAlternative generates the mCRL2 Process Equations belonging to one place
   // without recursive parallelism
   //==================================================
   static ATermList pn2gsGeneratePlaceAlternative(ATerm PlaceID){
@@ -1976,7 +1976,7 @@ extern "C" {
   }
 
   //==================================================
-  // pn2gsGenerateTransitionAlternative generates the GenSpect Process Equations belonging to one transition
+  // pn2gsGenerateTransitionAlternative generates the mCRL2 Process Equations belonging to one transition
   //==================================================
   static ATermList pn2gsGenerateTransitionAlternative(ATerm TransID){
     // input: access to the context; ID of the transtion

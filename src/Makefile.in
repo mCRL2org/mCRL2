@@ -91,13 +91,13 @@ REWR_OBJECTS       = gsrewr.o
 OBJECTS           += $(REWR_OBJECTS)
 REWR_LDFLAGS       = -lgsrewrite -lgsparse -l$(ATERM) -lm -ldl
 
-#pnml2gs definitions
-PNML2GS_NAME       = pnml2gs
-PNML2GS_OBJECTS    = pnml2gs.o
+#pnml2mcrl2 definitions
+PNML2MCRL2_NAME    = pnml2mcrl2
+PNML2MCRL2_OBJECTS = pnml2mcrl2.o
 ifdef USE_XML2
-OBJECTS           += $(PNML2GS_OBJECTS)
+OBJECTS           += $(PNML2MCRL2_OBJECTS)
 endif
-PNML2GS_LDFLAGS    = -lgsparse -l$(ATERM) -lxml2 -lm
+PNML2MCRL2_LDFLAGS = -lgsparse -l$(ATERM) -lxml2 -lm
 
 #Alphabet axiom applicator definitions
 ALPHA_NAME         = gsalpha
@@ -141,7 +141,7 @@ else
 endif
 
 #Group definitions
-EXE_NAMES          =  $(PARSER_NAME) $(PRINTER_NAME) $(LINEARISER_NAME) $(LIN_NAME) $(REWR_NAME) $(ALPHA_NAME) $(M2M2_NAME) $(PNML2GS_NAME) $(INSTAN_NAME) $(SIM_NAME) $(XSIM_NAME)
+EXE_NAMES          =  $(PARSER_NAME) $(PRINTER_NAME) $(LINEARISER_NAME) $(LIN_NAME) $(REWR_NAME) $(ALPHA_NAME) $(M2M2_NAME) $(PNML2MCRL2_NAME) $(INSTAN_NAME) $(SIM_NAME) $(XSIM_NAME)
 LIB_NAMES          =  $(XSIMTRACE_NAME)
 OBJECTS            := $(sort $(OBJECTS))
 
@@ -222,10 +222,10 @@ $(M2M2_NAME) : $(M2M2_OBJECTS) $(ATERM_DEP) $(LIBPARSER_NAME)
 	$(CC) -o $@ $(M2M2_OBJECTS) $(LDFLAGS) $(M2M2_LDFLAGS)
 
 ifdef USE_XML2
-$(PNML2GS_NAME) : $(PNML2GS_OBJECTS) $(ATERM_DEP) $(LIBPARSER_NAME)
-	$(CC) -o $@ $(PNML2GS_OBJECTS) $(LDFLAGS) $(PNML2GS_LDFLAGS)
+$(PNML2MCRL2_NAME) : $(PNML2MCRL2_OBJECTS) $(ATERM_DEP) $(LIBPARSER_NAME)
+	$(CC) -o $@ $(PNML2MCRL2_OBJECTS) $(LDFLAGS) $(PNML2MCRL2_LDFLAGS)
 else
-$(PNML2GS_NAME) :
+$(PNML2MCRL2_NAME) :
 	@echo cannot make target $@ because the xml2 library cannot be used
 endif
 
