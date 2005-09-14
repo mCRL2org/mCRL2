@@ -260,9 +260,16 @@ ATermList gsSubstValues_List(ATermList Substs, ATermList List, bool Recursive)
 
 ATermList gsAddSubstToSubsts(ATermAppl Subst, ATermList Substs)
 {
-  return ATinsert(
-    gsSubstValues_List(ATmakeList1((ATerm) Subst), Substs, true),
-    (ATerm) Subst);
+  //add Subst to Substs in which Subst is performed on the RHS's
+  ATermList Result = ATmakeList0();
+  while (!ATisEmpty(Substs)) {
+    ATermAppl SubstsElt = ATAgetFirst(Substs);
+    Result = ATinsert(Result, (ATerm) ATsetArgument(SubstsElt,
+      (ATerm) gsSubstValues(ATmakeList1((ATerm) Subst),
+        ATgetArgument(SubstsElt, 1) , true), 1));
+    Substs = ATgetNext(Substs);
+  }
+  return ATinsert(ATreverse(Result), (ATerm) Subst);
 }
 
 //Occurrences of ATerm's

@@ -18,13 +18,13 @@ ATermAppl gsImplExprs(ATermAppl Spec);
 //     type checking
 //Ret: Spec in which all expressions are implemented
 
-ATermAppl gsImplSortRefs(ATermAppl Spec, bool first_run);
+ATermAppl gsImplSortRefs(ATermAppl Spec);
 //Pre: Spec is a specification that adheres to the internal syntax after
 //     data implementation, with the exception that sort references may occur
 //Ret: Spec in which all sort references are implemented, i.e.:
 //     - all sort references are removed from Spec
 //     - if a sort reference is of the form SortRef(n, e), where e is the
-//       implementation of a structured sort and SortRef(n, e) is the first
+//       implementation of a type constructor and SortRef(n, e) is the first
 //       sort reference with e as a rhs, e is replaced by n in Spec;
 //       otherwise, n is replaced by e in Spec
 
@@ -316,7 +316,7 @@ ATermAppl gsImplExprsPart(ATermAppl Part, ATermList *PSubsts,
 {
   bool Recursive = true;
   //perform substitutions from *PSubsts on Part
-  Part = gsSubstValues_Appl(*PSubsts, Part, true);
+  Part = gsSubstValues_Appl(*PSubsts, Part, false);
   //replace Part by an implementation if the head of Part is a special
   //expression
   if (gsIsSortArrowProd(Part)) {
@@ -1998,7 +1998,7 @@ bool gsIsLambdaOpId(ATermAppl DataExpr)
   }
 }
 
-ATermAppl gsImplSortRefs(ATermAppl Spec, bool first_run)
+ATermAppl gsImplSortRefs(ATermAppl Spec)
 {
   assert(gsIsSpecV1(Spec));
   //get sort declarations
@@ -2010,11 +2010,8 @@ ATermAppl gsImplSortRefs(ATermAppl Spec, bool first_run)
   gsSplitSortDecls(SortDecls, &SortIds, &SortRefs);
   //replace the sort declarations in Spec by the SortIds, the list of
   //identifiers
-  if ( !first_run )
-  {
-	  SortSpec = ATsetArgument(SortSpec, (ATerm) SortIds, 0);  
-	  Spec = ATsetArgument(Spec, (ATerm) SortSpec, 0);
-  }
+  SortSpec = ATsetArgument(SortSpec, (ATerm) SortIds, 0);  
+  Spec = ATsetArgument(Spec, (ATerm) SortSpec, 0);
   //make list of substitutions from SortRefs, the list of sort references
   ATermList Substs = ATmakeList0();
   while (!ATisEmpty(SortRefs))
@@ -2082,9 +2079,8 @@ ATermAppl gsImplFunctionSorts(ATermAppl Spec)
 
 ATermAppl gsImplementData(ATermAppl Spec)
 {
-  Spec = gsImplSortRefs(Spec,true);
   Spec = gsImplExprs(Spec);
-  Spec = gsImplSortRefs(Spec,false);
+  Spec = gsImplSortRefs(Spec);
   Spec = gsImplFunctionSorts(Spec);
   return Spec;
 }
