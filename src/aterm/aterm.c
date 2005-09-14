@@ -90,6 +90,10 @@ int             nr_marks = 0;
 /*}}}  */
 /*{{{  function declarations */
 
+#if !(defined __USE_SVID || defined __USE_BSD || defined __USE_XOPEN_EXTENDED || defined __APPLE__ || defined _MSC_VER)
+extern char *strdup(const char *s);
+#endif
+
 static ATerm    fparse_term(int *c, FILE * f);
 static ATerm    sparse_term(int *c, char **s);
 static ATerm AT_diff(ATerm t1, ATerm t2, ATermList *diffs);

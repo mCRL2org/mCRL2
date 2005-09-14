@@ -7,11 +7,13 @@ extern "C" {
 
 #include <stdio.h>
 #include <stdlib.h>
+#include <string.h>
 #include <aterm2.h>
 #include "gslowlevel.h"
 #include "gsfunc.h"
 #include "gsrewr_jitty.h"
 #include "libgsparse.h"
+#include "gssubstitute.h"
 
 extern ATermList opid_eqns;
 extern ATermList dataappl_eqns;

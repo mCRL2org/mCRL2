@@ -362,11 +362,11 @@ static ATermAppl PushRestrict(ATermList H, ATermAppl a)
 		if ( !ATisEmpty(Hc) )
 		{
 			a = PushRestrict(Hc,ATAgetArgument(a,1));
-			l = ATtableGet(alphas,(ATerm) a);
+			l = (ATermList) ATtableGet(alphas,(ATerm) a);
 			a = gsMakeComm(C,a);
 			ATtablePut(alphas,(ATerm) a,(ATerm) apply_comm_list(l,C));
 		} else {
-			l = ATtableGet(alphas,(ATerm) a);
+			l = (ATermList) ATtableGet(alphas,(ATerm) a);
 		}
 
 		if ( !ATisEmpty(Ha) )

@@ -15,6 +15,9 @@ extern "C" {
 #include "libgsparse.h"
 #include "libgsalpha.h"
 
+extern ATermAppl gsParse(FILE *);
+extern ATermAppl gsTypeCheck(ATermAppl);
+
 void print_help(FILE *f)
 {
 	fprintf(f,"Usage: %s OPTIONS [SPECFILE [OUTFILE]]\n",NAME);

@@ -55,7 +55,9 @@ ATerm    *at_lookup_table_alias = NULL;
 /*}}}  */
 /*{{{  function declarations */
 
-/* extern char *strdup(const char *s); */
+#if !(defined __USE_SVID || defined __USE_BSD || defined __USE_XOPEN_EXTENDED || defined __APPLE__ || defined _MSC_VER)
+extern char *strdup(const char *s);
+#endif
 
 /*}}}  */
 

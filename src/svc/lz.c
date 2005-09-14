@@ -20,9 +20,13 @@
 
    $Id: lz.c,v 1.1.1.1 2004/09/07 15:06:33 uid523 Exp $ */
 
+#include <stdlib.h>
 #include <string.h>
 #include "lz.h"
 
+#if !(defined __USE_SVID || defined __USE_BSD || defined __USE_XOPEN_EXTENDED || defined __APPLE__ || defined _MSC_VER)
+extern char *strdup(const char *s);
+#endif
 
 static int compress(BitStream *bs, LZbuffer *buffer, char *string);
 static int decompress(BitStream *bs, LZbuffer *buffer, char **str);
