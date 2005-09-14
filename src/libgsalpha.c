@@ -641,10 +641,10 @@ static ATermAppl PushComm(ATermList C, ATermAppl a)
 				if ( gsIsSync(a) )
 				{
 					a = gsMakeSync(p,q);
-				} else if ( gsIsMerge )
+				} else if ( gsIsMerge(a) )
 				{
 					a = gsMakeMerge(p,q);
-				} else if ( gsIsLMerge )
+				} else if ( gsIsLMerge(a) )
 				{
 					a = gsMakeLMerge(p,q);
 				}
