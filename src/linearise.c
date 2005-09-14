@@ -5691,13 +5691,15 @@ static ATermList insert_timed_delta_summand(ATermList l, ATermAppl s)
   { ATermAppl summand=ATAgetFirst(l);
     ATermAppl cond1=linGetCondition(summand);
     if ((implies_condition(cond,cond1)) &&
-        (linGetActionTime(s)==linGetActionTime(summand)))
+        ((linGetActionTime(s)==linGetActionTime(summand))||
+         (linGetActionTime(summand)==gsMakeNil())))
     { 
       return ATconcat(l,result);
     }
     if ((linGetMultiAction(summand)==gsMakeDelta()) &&
                 implies_condition(cond1,cond) &&
-                (linGetActionTime(s)==linGetActionTime(summand)))
+                ((linGetActionTime(s)==linGetActionTime(summand))||
+                 (linGetActionTime(s)==gsMakeNil())))
     { /* do not add summand to result, as it is superseded by s */
     }
     else 
@@ -5826,7 +5828,8 @@ static ATermAppl encap(ATermList encaplist, ATermAppl multiaction)
 
 static ATermAppl encapcomposition(ATermList encaplist , ATermAppl ips)
 {  
-  ATermList resultsumlist=ATempty;
+  ATermList resultactionsumlist=ATempty;
+  ATermList resultdeltasumlist=ATempty;
   ATermList sourcesumlist=linGetSums(ips);
 
   for( ; sourcesumlist!=ATempty ; sourcesumlist=ATgetNext(sourcesumlist))
@@ -5839,10 +5842,15 @@ static ATermAppl encapcomposition(ATermList encaplist , ATermAppl ips)
  
     ATermAppl resultmultiaction=encap(encaplist,multiaction);
 
-    if (!gsIsDelta(resultmultiaction)) 
+    /* The action and delta summands are first put into
+       different lists. Below the delta's are added to
+       the actions, and while doing so, it is checked whether
+       adding them is necessary, or whether they are already
+       implied by other actions, or delta's */
+    if (gsIsDelta(resultmultiaction)) 
     { 
-      resultsumlist=ATinsertA(
-                    resultsumlist,
+      resultdeltasumlist=ATinsertA(
+                    resultdeltasumlist,
                     gsMakeLPESummand(
                            sumvars,
                            condition,
@@ -5850,17 +5858,26 @@ static ATermAppl encapcomposition(ATermList encaplist , ATermAppl ips)
                            actiontime,
                            nextstate));
     }
-    else if (actiontime!=gsMakeNil())
+    else 
     { 
+      resultactionsumlist=ATinsertA(
+                    resultactionsumlist,
+                    gsMakeLPESummand(
+                           sumvars,
+                           condition,
+                           resultmultiaction,
+                           actiontime,
+                           nextstate));
+    }
+  }
+
+  ATermList resultsumlist=resultactionsumlist;
+  for( ; resultdeltasumlist!=ATempty ; 
+         resultdeltasumlist=ATgetNext(resultdeltasumlist))
+  { 
       resultsumlist=insert_timed_delta_summand(
                     resultsumlist,
-                    gsMakeLPESummand(
-                           sumvars,
-                           condition,
-                           resultmultiaction,
-                           actiontime,
-                           nextstate));
-    }
+                    ATAgetFirst(resultdeltasumlist));
   }
   return linMakeInitProcSpec(
              linGetInit(ips),linGetParameters(ips),resultsumlist);
