@@ -1802,9 +1802,11 @@ ATermAppl gsGetSort(ATermAppl DataExpr)
       Result = ATAgetArgument(HeadSort, 1);
     else
       Result = gsMakeUnknown();
+  } else if (gsIsForall(DataExpr) || gsIsExists(DataExpr)) {
+      Result = gsMakeSortExprBool();
   } else if (gsIsSetBagComp(DataExpr)) {
     //DataExpr is a set of bag comprehension; depending on the sort of the
-    //body, return List(S) or Bag(S), where S is the sort of the variable
+    //body, return Set(S) or Bag(S), where S is the sort of the variable
     //declaration
     ATermAppl Var = ATAgetArgument(DataExpr, 0);
     ATermAppl SortBody = gsGetSort(ATAgetArgument(DataExpr, 1));
@@ -1814,11 +1816,10 @@ ATermAppl gsGetSort(ATermAppl DataExpr)
       Result = gsMakeSortBag(gsGetSort(Var));
     else
       Result = gsMakeUnknown();
-  } else if (gsIsForall(DataExpr) || gsIsExists(DataExpr) ||
-      gsIsLambda(DataExpr)) {
-    //DataExpr is a quantification or a lambda abstraction of the form
-    //  Q x0: S0, ..., xn: Sn. e
-    //return S0 -> ... -> Sn -> e
+  } else if (gsIsLambda(DataExpr)) {
+    //DataExpr is a lambda abstraction of the form
+    //  lambda x0: S0, ..., xn: Sn. e
+    //return S0 -> ... -> Sn -> gsGetSort(e)
     Result = gsGetSort(ATAgetArgument(DataExpr, 1));
     ATermList Vars = ATreverse(ATLgetArgument(DataExpr, 0));
     while (!ATisEmpty(Vars))
