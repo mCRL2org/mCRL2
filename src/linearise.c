@@ -467,15 +467,18 @@ static int existsort(ATermAppl sortterm)
   return 0;
 }
 
-static void insertsort(ATermAppl sortterm)
+static void insertsort(ATermAppl sortterm, specificationbasictype *spec)
 { 
+
+  spec->sorts=ATinsertA(spec->sorts,sortterm); 
+  
   /* if (sortterm==gsMakeSortExprBool()) return;
      if (sortterm==gsMakeSortExprInt()) return;
      if (sortterm==gsMakeSortExprNat()) return;
      if (sortterm==gsMakeSortExprPos()) return; */
   if (gsIsSortArrow(sortterm))
-  { insertsort(ATAgetArgument(sortterm,0));
-    insertsort(ATAgetArgument(sortterm,1));
+  { insertsort(ATAgetArgument(sortterm,0),spec);
+    insertsort(ATAgetArgument(sortterm,1),spec);
     return;
   }
   /* if (gsIsSortList(sortterm))
@@ -898,7 +901,7 @@ static specificationbasictype *read_input_file(char *filename)
   for(ATermList sorts=ATLgetArgument(ATAgetArgument(t,0),0) ; 
       sorts!=ATempty ; 
       sorts=ATgetNext(sorts) )
-  { insertsort(ATAgetFirst(sorts)); 
+  { insertsort(ATAgetFirst(sorts),spec); 
   }
           
   spec->funcs=ATempty;
@@ -3179,8 +3182,7 @@ static ATermAppl makenewsort(
                     specificationbasictype *spec)
 { ATermAppl newSort=NULL;
   newSort=gsMakeSortId(sortname);
-  insertsort(newSort);
-  spec->sorts=ATinsertA(spec->sorts,newSort); 
+  insertsort(newSort,spec);
   return newSort;
 }
 
@@ -5626,9 +5628,9 @@ static ATermAppl hidecomposition(ATermList hidelist, ATermAppl ips)
 static int gsIsDataExprAnd(ATermAppl t)
 { 
   if (gsIsDataAppl(t))
-  { ATermAppl t1=ATgetArgument(t,0);
+  { ATermAppl t1=ATAgetArgument(t,0);
     if (gsIsDataAppl(t1))
-    { if (ATgetArgument(t1,0)==gsMakeOpIdAnd())
+    { if (ATAgetArgument(t1,0)==gsMakeOpIdAnd())
       { 
        return 1;
       };
@@ -5640,9 +5642,9 @@ static int gsIsDataExprAnd(ATermAppl t)
 static int gsIsDataExprOr(ATermAppl t)
 { 
   if (gsIsDataAppl(t))
-  { ATermAppl t1=ATgetArgument(t,0);
+  { ATermAppl t1=ATAgetArgument(t,0);
     if (gsIsDataAppl(t1))
-    { return ATgetArgument(t1,0)==gsMakeOpIdOr();
+    { return ATAgetArgument(t1,0)==gsMakeOpIdOr();
     }
   } 
   return 0;
@@ -7545,7 +7547,7 @@ static int main2(int argc, char *argv[],ATerm *stack_bottom)
   }
   /* Now the name of the inputfile must be read from the commandline */
 
-  if ((optind < argc) && (argv[optind][0]!="-"))
+  if ((optind < argc) && (argv[optind][0]!='-'))
   { char *lastdot = NULL;
     sname = argv[optind];
     strcpy(fname, sname);
