@@ -940,10 +940,15 @@ ATermAppl gsMakeDataExprRTail(ATermAppl DataExpr);
 //Pre: DataExpr is a data expression
 //Ret: Data expression for the right tail of DataExpr
 
-ATermAppl gsMakeDataExprSetComp(ATermAppl DataExpr, ATermAppl SortExprResult);
+ATermAppl gsMakeDataExprSetComp(ATermAppl DataExpr, ATermAppl SortExpr);
 //Pre: DataExpr is a data expression of sort S -> Bool
 //     SortExprResult is a sort expression
 //Ret: Set comprehension for sort S with result sort SortExprResult
+
+ATermAppl gsMakeDataExprSetIn(ATermAppl DataExprLHS, ATermAppl DataExprRHS);
+//Pre: DataExprLHS and DataExprRHS are data expressions
+//Ret: Data expression for "e in e'", where e = DataExprLHS and
+//     e' = DataExprRHS
 
 ATermAppl gsMakeDataExprBagComp(ATermAppl DataExpr, ATermAppl SortExprResult);
 //Pre: DataExpr is a data expression of sort S -> Nat
