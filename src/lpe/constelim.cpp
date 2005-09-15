@@ -16,9 +16,14 @@ po::variables_map vm;
 //Constanten
 string version = "Version 0.1";
 
+bool cex()
+{
+  return true;
+}
+
 int const_main(string filename, int opt)
 {
-  vector<DataExpression>            iv;		//init vector
+  vector<LPEAssignment>            iv;		//init vector
   vector<bool> 		                  fv;		//flag vector (C= True, V= False)
   vector< vector<DataExpression> >  sv; 	//(new) state vector
   vector< vector<bool> >            cv;		//change vector	
@@ -51,18 +56,20 @@ int const_main(string filename, int opt)
     //Vragen of onderstaande regel klopt
     if(nopp!=noa){cout << "Error: #assignments != #process parameters"<< endl; return 1;}; 
     
-    //Get all right hand expressions from the init 
+    //Get all assingments from the init 
     for(LPEInit::assignment_iterator s_current =  var_isb; s_current != var_ise; s_current++){
-      iv.push_back(LPEAssignment(*s_current).rhs());
+      iv.push_back(*s_current);
     };	
 
     //Build "flag vector" Step 2
     for (int i=0; i < nopp; i++){
       fv.push_back(true);
     }
-
+    
+    bool iteration = true;
     //Begin Iteration
-      //Build new state vector
+    while(iteration){
+      //Build new state vector and change vector
       
       //Get number of summands
       LPE::summand_iterator sum_itb = LPE(t).summands_begin();
@@ -73,30 +80,77 @@ int const_main(string filename, int opt)
         //Summand Loop
         //Each pcv should be empty
         pcv.clear();
-        //Fill the pcv
+
+        //Fill the pcv with all true
+        for (int i=0; i < nopp; i++){
+          pcv.push_back(true);
+        } 
+
         //Number of partial pcv elements
         LPESummand::assignment_iterator var_ppcvb = LPESummand(*s_current).assignments_begin();
         LPESummand::assignment_iterator var_ppcve = LPESummand(*s_current).assignments_end();
+        
+        cout << LPESummand(*s_current).to_string() << endl;
+        //Only check when OpID evaluates to true
         
         //Begin Debug
         outputvar = distance(var_ppcvb, var_ppcve);
         
         cout << outputvar << endl;
         
-        DataExpression c_obj = LPESummand(*s_current).assignments_begin(); 
-        cout << c_obj.to_string() << endl;
-        //End Debug
+        for (LPESummand::assignment_iterator c_obj = LPESummand(*s_current).assignments_begin(); c_obj != var_ppcve; ++c_obj){
         
-        //Add pcv
+        //Get LHS from State Vector element
+        //cout <<(LPEAssignment(*c_obj).lhs()).name() << endl;
+        
+          //Get match LHS from State Vector element to LHS init vector
+          unsigned int indx;
+          for (indx = 0; indx < iv.size(); indx++){
+            if (iv[indx].lhs().name() == (LPEAssignment(*c_obj).lhs()).name()) {
+              //Compare expression
+              if (!cex()) 
+              { //Vector elements are not equal
+                pcv[indx] = false;
+              };
+            }   
+          }; 
+          //Add pcv
+          cv.push_back(pcv);
+        }
       };	
-      
-      //Build change vector
       //Compare change vector with flag vector
-    //End Iteration  
+      
+      vector<bool> fch; //flattened change vector
+      for (unsigned int i=0; i < cv[0].size(); i++)
+      { bool b = true;
+        for(unsigned int j=0; j < cv.size(); j++)
+        {
+          b = b && cv[j][i];
+        }
+        //flatten change vector
+        fch.push_back(b);
+      }
+      
+      //Actual compare flattened change vector with flag vector
+      if (fch.size()!= fv.size()) 
+        {cout << "fch != fv" << endl; return 1;}
+      
+      //While condition :)
+      bool b = true;
+      for (unsigned int i=0; i < fch.size(); i++){
+        b = b && (fch[i]==fv[i]);  
+      }
+      //If all elements equal -> No more iteration, set iteration false
+      //If a element differs -> Iteration needed, set iteration true
+      iteration = !b ;
+      cout << "iterate " << b << endl;
+      }
+    //End Iteration 
+    } 
     //Subtitute all constant values
 
  
- }
+    
   
   return 0;
 }
@@ -117,7 +171,7 @@ int main(int ac, char* av[])
         po::options_description desc("Allowed options");
         desc.add_options()
             ("help,h", "produce help message")
-            ("version,v", "get the version number of the current release of the mCRL2 tools")
+            ("version,v", "gets the version number of the current release of this mCRL2 tool")
         ;
 	
 	po::options_description hidden("Hidden options");
@@ -141,7 +195,7 @@ int main(int ac, char* av[])
         
 	// If no arguments are ac==1, so print help
         if (vm.count("help") || ac == 1) {
-            cout << "Usage: constelim [options] input-file\n";
+            cout << "Usage: "<< av[0] << " [options] input-file\n";
             cout << desc;
             return 0;
         }

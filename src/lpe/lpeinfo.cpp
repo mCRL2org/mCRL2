@@ -130,7 +130,7 @@ int main(int ac, char* av[])
         
 	// If no arguments are ac==1, so print help
         if (vm.count("help") || ac == 1) {
-            cout << "Usage: lpeinfo [options] input-file\n";
+            cout << "Usage: "<< av[0] << " [options] input-file\n";
             cout << desc;
             return 0;
         }
