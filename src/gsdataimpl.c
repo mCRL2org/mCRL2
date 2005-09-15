@@ -563,20 +563,22 @@ ATermAppl gsImplSetBagEnum(ATermList Elts, ATermAppl SortExpr)
       ATAgetArgument(SortExpr, 0));
   //make body for the lambda abstraction
   Elts = ATreverse(Elts);
-  if (gsIsSortSet(SortExpr)) {
-    Result = gsMakeDataExprEq(Var, ATAgetFirst(Elts));
-    Elts = ATgetNext(Elts);
-  } else { //gsIsSortBag(SortExpr)
-    Result = gsMakeDataExpr0();
-  }
+  ATermAppl Elt = ATAgetFirst(Elts);
+  if (gsIsSortSet(SortExpr))
+    Result = gsMakeDataExprEq(Var, Elt);
+  else //gsIsSortBag(SortExpr)
+    Result = gsMakeDataExprIf(gsMakeDataExprEq(Var, ATAgetArgument(Elt, 0)),
+      ATAgetArgument(Elt, 1), gsMakeDataExpr0());
+  Elts = ATgetNext(Elts);
   while (!ATisEmpty(Elts))
   {
-    ATermAppl Elt = ATAgetFirst(Elts);
+    Elt = ATAgetFirst(Elts);
     if (gsIsSortSet(SortExpr))
       Result = gsMakeDataExprOr(gsMakeDataExprEq(Var, Elt), Result);
     else //gsIsSortBag(SortExpr)
-      Result = gsMakeDataExprIf(gsMakeDataExprEq(Var, ATAgetArgument(Elt, 0)),
-        ATAgetArgument(Elt, 1), Result);
+      Result = gsMakeDataExprAdd(
+        gsMakeDataExprIf(gsMakeDataExprEq(Var, ATAgetArgument(Elt, 0)),
+        ATAgetArgument(Elt, 1), gsMakeDataExpr0()), Result);
     Elts = ATgetNext(Elts);
   }
   //make lambda abstraction
