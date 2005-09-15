@@ -1,4 +1,4 @@
-#define  NAME      "gsprint"
+#define  NAME      "mcrl2parse"
 #define  LVERSION  "0.2"
 #define  AUTHOR    "Aad Mathijssen"
 
@@ -16,7 +16,7 @@ extern "C" {
 #include <assert.h>
 
 #include <aterm2.h>
-#include "gsprint.h"
+#include "mcrl2parse.h"
 #include "gsfunc.h"
 #include "gslowlevel.h"
 #include "libgsparse.h"
@@ -37,22 +37,34 @@ void PrintVersion(FILE* Stream);
 void PrintMoreInfo(FILE* Stream);
 //print --help suggestion to stream
 
-bool PrintSpecificationFileName(char *SpecFileName, char *OutFileName);
-/*Pre: SpecFileName is the name of a file from which can be read, and which
-       contains a specification that adheres to the internal format
-       which can be read
+bool ParseSpecificationFileName(
+  char *SpecFileName,
+  char *OutFileName,
+  bool Human,
+  bool NoSave);
+/*Pre: SpecFileName is the name of a valid mCRL2 specification file from
+       which can be read, or NULL
        OutFileName is the name of a valid file to which can be written, or NULL
-  Post:the specification in SpecFileName is printed and saved to OutFileName
+  Post:the specification in SpecFileName is parsed and saved to OutFileName
+       If SpecFileName is NULL, stdin is used.
        If OutFileName is NULL, stdout is used.
+       If Human, the parsed formula is saved in a human readable format.
+       If NoSave, the parsed formula is not saved.
   Ret: true, if everything went ok.
        false, otherwise; appropriate error messages have been shown.
 */ 
 
-bool PrintSpecificationStream(FILE *SpecStream, FILE *OutStream);
-/*Pre: SpecStream is a stream from which can be read, and which contains a
-       specification that adheres to the internal format
+bool ParseSpecificationStream(
+  FILE *SpecStream,
+  FILE *OutStream,
+  bool Human,
+  bool NoSave);
+/*Pre: SpecStream is a valid mCRL2 specification stream from which can be
+       read
        OutStream is the name of a valid stream to which can be written
-  Post:the specification in SpecStream is printed and saved to OutStream
+  Post:the specification in SpecStream is parsed and saved to OutStream
+       If Human, the parsed formula is saved in a human readable format
+       If NoSave, the parsed formula is not saved.
   Ret: true, if everything went ok.
        false, otherwise; appropriate error messages have been shown.
 */ 
@@ -64,15 +76,21 @@ int main(int argc, char* argv[]) {
   //declarations for parsing the specification
   char *SpecFileName   = NULL;
   char *OutputFileName = NULL;
+  bool Human           = false;
+  bool NoSave          = false;
   //declarations for getopt  
-  #define ShortOptions      "hqvd"
+  #define ShortOptions      "hqvdun"
   #define VersionOption     CHAR_MAX + 1
+  #define TestOption        VersionOption + 1
   struct option LongOptions[] = { 
     {"help"      , no_argument,       NULL, 'h'},
     {"version"   , no_argument,       NULL, VersionOption},
+    {"test"      , no_argument,       NULL, TestOption},
     {"quiet"     , no_argument,       NULL, 'q'},
     {"verbose"   , no_argument,       NULL, 'v'},
     {"debug"     , no_argument,       NULL, 'd'},
+    {"human"     , no_argument,       NULL, 'u'},
+    {"no-save"   , no_argument,       NULL, 'n'},
     {0, 0, 0, 0}
   };
   int Option;
@@ -80,11 +98,14 @@ int main(int argc, char* argv[]) {
   Option = getopt_long(argc, argv, ShortOptions, LongOptions, NULL);
   while (Option != -1) {
     switch (Option) {
-      case 'h':
+      case 'h': 
         PrintUsage(stdout);
         return 0; 
       case VersionOption: 
         PrintVersion(stdout); 
+        return 0;
+      case TestOption: 
+        gsTest();
         return 0;
       case 'q':
         gsSetQuietMsg();
@@ -94,6 +115,12 @@ int main(int argc, char* argv[]) {
         break;
       case 'd': 
         gsSetDebugMsg();
+        break;
+      case 'u':
+        Human = true;
+        break;
+      case 'n': 
+        NoSave = true;
         break;
       default:
       	PrintMoreInfo(stderr);
@@ -120,8 +147,8 @@ int main(int argc, char* argv[]) {
   //initialise ATerm library
   ATerm StackBottom;
   ATinit(0, NULL, &StackBottom);
-  //print specification  
-  if (!PrintSpecificationFileName(SpecFileName, OutputFileName))
+  //parse specification  
+  if (!ParseSpecificationFileName(SpecFileName, OutputFileName, Human, NoSave))
   {
     Result = 1;  
   }       
@@ -131,7 +158,8 @@ int main(int argc, char* argv[]) {
   return Result;
 }
 
-bool PrintSpecificationFileName(char *SpecFileName, char *OutputFileName)
+bool ParseSpecificationFileName(char *SpecFileName, char *OutputFileName,
+  bool Human, bool NoSave)
 {
   bool Result           = true;
   FILE *SpecStream      = NULL;
@@ -144,13 +172,12 @@ bool PrintSpecificationFileName(char *SpecFileName, char *OutputFileName)
     SpecStream = fopen(SpecFileName, "r");
   }
   if (SpecStream == NULL) {
-    gsErrorMsg(
-      "could not open specification file '%s' for reading (error %d)\n",
+    gsErrorMsg("could not open specification file '%s' for reading (error %d)\n",
       SpecFileName, errno);
     Result = false;
   } else {
     if ( SpecStream != stdin )
-      gsDebugMsg("specification file %s is opened for reading.\n", SpecFileName);
+      gsDebugMsg("formula file %s is opened for reading.\n", SpecFileName);
     //open output file for writing or set to stdout
     if (OutputFileName == NULL) {
       OutputStream = stdout;
@@ -165,37 +192,49 @@ bool PrintSpecificationFileName(char *SpecFileName, char *OutputFileName)
         gsDebugMsg("output file %s is opened for writing.\n", OutputFileName);
       }
     }
-    if (Result && !PrintSpecificationStream(SpecStream, OutputStream))
+    if ( Result && !ParseSpecificationStream(SpecStream, OutputStream, Human, NoSave))
     {
       Result = false;
     }
   }
-  if ((SpecStream != NULL) && (SpecStream != stdin)) {
+  if (SpecStream != NULL && SpecStream != stdin) {
     fclose(SpecStream);
   }
-  if ((OutputStream != NULL) && (OutputStream != stdout)) {
+  if (OutputStream != NULL && OutputStream != stdout) {
     fclose(OutputStream);
   }
   gsDebugMsg("all files are closed; return %s\n", Result?"true":"false");
   return Result;
 }
 
-bool PrintSpecificationStream(FILE *SpecStream, FILE *OutputStream)
+bool ParseSpecificationStream(FILE *SpecStream, FILE *OutputStream,
+  bool Human, bool NoSave)
 {
   assert(SpecStream != NULL);
   assert(OutputStream != NULL);
   bool Result;
-  //read specification from SpecStream
-  ATermAppl Spec = (ATermAppl) ATreadFromFile(SpecStream);
-  if (Spec == NULL) {
-    gsErrorMsg("error: could not read specification from stream\n");
-    Result = false;
-  } else {
-    //print specification to OutputStream
-    if (OutputStream != stdout) gsVerboseMsg(
-      "printing specification to file in a human readable format\n");
-    gsPrintSpecification(OutputStream, Spec);
+  //parse specification save it to Spec
+  ATermAppl Spec = gsParseSpecification(SpecStream);
+  if (Spec != NULL) {
+    if (NoSave) {
+      gsVerboseMsg("do not save specification\n");
+    } else {
+      if (Human) {
+        //save specification in a human readable format
+        if (OutputStream != stdout) gsVerboseMsg(
+          "saving specification to file in a human readable format\n");
+        gsPrintSpecification(OutputStream, Spec);
+      } else {
+        //save specification as an ATerm
+        if (OutputStream != stdout) gsVerboseMsg(
+          "saving specification to file\n");
+        ATwriteToTextFile((ATerm) Spec, OutputStream);
+        fprintf(OutputStream, "\n");
+      }
+    }
     Result = true;
+  } else {
+    Result = false;
   }
   gsDebugMsg("all files are closed; return %s\n", Result?"true":"false");
   return Result;
@@ -204,16 +243,19 @@ bool PrintSpecificationStream(FILE *SpecStream, FILE *OutputStream)
 void PrintUsage(FILE *Stream) {
   fprintf(Stream, 
     "Usage: %s OPTIONS [SPECFILE [OUTFILE]]\n"
-    "Print the internal mCRL2 specification in SPECFILE to OUTFILE in a human\n"
-    "readable format. If OUTFILE is not present, stdout is used. If SPECFILE is\n"
-    "not present or -, stdin is used.\n"
+    "Translate the mCRL2 specification in SPECFILE to the internal format and save it\n"
+    "to OUTFILE. If OUTFILE is not present, stdout is used. If SPECFILE is not\n"
+    "present or -, stdin is used.\n"
     "\n"
     "The OPTIONS that can be used are:\n"
     "  -h, --help             display this help\n"
     "      --version          display version information\n"
+    "      --test             execute test function (will be removed)\n"
     "  -q, --quiet            do not display warning messages\n"
     "  -v, --verbose          turn on the display of short intermediate messages\n"
-    "  -d, --debug            turn on the display of detailed intermediate messages\n",
+    "  -d, --debug            turn on the display of detailed intermediate messages\n"
+    "  -u, --human            save the parsed formula in a human readable format\n"
+    "  -n, --no-save          do not save the parsed formula\n",
     NAME
   );
 }

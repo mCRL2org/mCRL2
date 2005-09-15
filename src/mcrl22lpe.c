@@ -1,4 +1,5 @@
-/*Id: main.c,v 1.2 2004/11/23 12:36:17 uid523 Exp $ */
+#define NAME "mcrl22lpe"
+
 #ifdef __cplusplus
 extern "C" {
 #endif
@@ -17,7 +18,7 @@ extern "C" {
 #include "config.h"
 #endif
 #define MAIN
-#include "linearise.h"
+#include "mcrl22lpe.h"
 #include "libgsparse.h"
 #include "gslowlevel.h"
 #include "gstypecheck.h"
@@ -49,7 +50,7 @@ FILE *infile;
 
 void usage(void)
 {
-  ATerror("Use linearise -help for options\n");
+  fprintf(stderr, "Use %s --help for options\n", NAME);
 }
 
 void version(void)
@@ -63,7 +64,7 @@ P("");
 P("Timed mCRL2 parser and LPE generator");
 P("====================================");
 P("");
-P("Usage: linearise [options] [file]");
+fprintf(stderr, "Usage: %s OPTIONS SPECFILE", NAME);
 P("");
 P("The following options can be used (within brackets the single letter form");
 P("of the options is given. E.g. linearise -1a file.mcrl2 stands for ");
@@ -7577,11 +7578,11 @@ static int main2(int argc, char *argv[],ATerm *stack_bottom)
       }
   } 
   else 
-  { ATerror("No name of input file provided"); 
+  { ATerror("No name of input file provided\n"); 
   }
 
   if (optind+1<argc)
-  { ATerror("Too many input files on command line");
+  { ATerror("Too many input files on command line\n");
   }
 
   if (to_stdout==0 && 

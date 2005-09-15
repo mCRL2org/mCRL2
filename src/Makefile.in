@@ -60,22 +60,24 @@ LIBPARSER_NAME     = libgsparse.a
 LIBPARSER_OBJECTS  = libgsparse.o gsparser.o gslexer.o gstypecheck.o gsdataimpl.o gsfunc.o gslowlevel.o
 OBJECTS           += $(LIBPARSER_OBJECTS)
 LIBPARSER_LDFLAGS  = -l$(ATERM) -lm
-PARSER_NAME        = gsparse
-PARSER_OBJECTS     = gsparse.o
+PARSER_NAME        = mcrl2parse
+PARSER_OBJECTS     = mcrl2parse.o
 OBJECTS           += $(PARSER_OBJECTS)
 PARSER_LDFLAGS     = -lgsparse -l$(ATERM) -lm
 
 #Printer definitions
-PRINTER_NAME       = gsprint
-PRINTER_OBJECTS    = gsprint.o
+PRINTER_NAME       = lpepp
+PRINTER_OBJECTS    = lpepp.o
 OBJECTS           += $(PRINTER_OBJECTS)
 PRINTER_LDFLAGS    = -lgsparse -l$(ATERM) -lm
 
-#Lineariser definitions
-LINEARISER_NAME    = linearise
-LINEARISER_OBJECTS = linearise.o
-OBJECTS           += $(LINEARISER_OBJECTS)
-LINEARISER_LDFLAGS = -lgsparse -lgsrewrite -l$(ATERM) -lm -ldl
+#Lineariser definitions (mcrl22lpe)
+MCRL22LPE_NAME     = mcrl22lpe
+MCRL22LPE_OBJECTS  = mcrl22lpe.o
+OBJECTS           += $(MCRL22LPE_OBJECTS)
+MCRL22LPE_LDFLAGS  = -lgsparse -lgsrewrite -l$(ATERM) -lm -ldl
+
+#Lineariser definitions (lin)
 LIN_NAME           = lin
 LIN_OBJECTS        = lin.o gslinearise2.o
 OBJECTS           += $(LIN_OBJECTS)
@@ -86,8 +88,8 @@ LIBREWR_NAME       = libgsrewrite.a
 LIBREWR_OBJECTS    = libgsrewrite.o gsrewr_inner.o gsrewr_inner2.o gsrewr_inner3.o gsrewr_innerc.o gsrewr_jitty.o gsfunc.o gslowlevel.o gssubstitute.o
 OBJECTS           += $(LIBREWR_OBJECTS)
 LIBREWR_LDFLAGS    = -l$(ATERM) -lm
-REWR_NAME          = gsrewr
-REWR_OBJECTS       = gsrewr.o
+REWR_NAME          = lperewr
+REWR_OBJECTS       = lperewr.o
 OBJECTS           += $(REWR_OBJECTS)
 REWR_LDFLAGS       = -lgsrewrite -lgsparse -l$(ATERM) -lm -ldl
 
@@ -100,20 +102,20 @@ endif
 PNML2MCRL2_LDFLAGS = -lgsparse -l$(ATERM) -lxml2 -lm
 
 #Alphabet axiom applicator definitions
-ALPHA_NAME         = gsalpha
-ALPHA_OBJECTS      = gsalpha.o libgsalpha.o
+ALPHA_NAME         = alpha
+ALPHA_OBJECTS      = alpha.o libgsalpha.o
 OBJECTS           += $(ALPHA_OBJECTS)
 ALPHA_LDFLAGS      = -lgsparse -l$(ATERM) -lm
 
 #Alphabet axiom applicator definitions
-M2M2_NAME          = mcrl2mcrl2
-M2M2_OBJECTS       = mcrl2mcrl2.o lpetrans.o
+M2M2_NAME          = tbf2lpe
+M2M2_OBJECTS       = tbf2lpe.o lpetrans.o
 OBJECTS           += $(M2M2_OBJECTS)
 M2M2_LDFLAGS       = -lgsparse -l$(ATERM) -lm
 
 #Instantiator definitions
-INSTAN_NAME        = gsinstantiate
-INSTAN_OBJECTS     = gsinstantiate.o libgsnextstate.o libgsprover.o gssubstitute.o
+INSTAN_NAME        = lpe2lts
+INSTAN_OBJECTS     = lpe2lts.o libgsnextstate.o libgsprover.o gssubstitute.o
 OBJECTS           += $(INSTAN_OBJECTS)
 INSTAN_LDFLAGS     = -lgsrewrite -lgsparse -lsvc -l$(ATERM) -lm -ldl
 
@@ -141,7 +143,7 @@ else
 endif
 
 #Group definitions
-EXE_NAMES          =  $(PARSER_NAME) $(PRINTER_NAME) $(LINEARISER_NAME) $(LIN_NAME) $(REWR_NAME) $(ALPHA_NAME) $(M2M2_NAME) $(PNML2MCRL2_NAME) $(INSTAN_NAME) $(SIM_NAME) $(XSIM_NAME)
+EXE_NAMES          =  $(PARSER_NAME) $(PRINTER_NAME) $(MCRL22LPE_NAME) $(LIN_NAME) $(REWR_NAME) $(ALPHA_NAME) $(M2M2_NAME) $(PNML2MCRL2_NAME) $(INSTAN_NAME) $(SIM_NAME) $(XSIM_NAME)
 LIB_NAMES          =  $(XSIMTRACE_NAME)
 OBJECTS            := $(sort $(OBJECTS))
 
@@ -202,8 +204,8 @@ $(PARSER_NAME) : $(PARSER_OBJECTS) $(ATERM_DEP) $(LIBPARSER_NAME)
 $(PRINTER_NAME) : $(PRINTER_OBJECTS) $(ATERM_DEP) $(LIBPARSER_NAME)
 	$(CC) -o $@ $(PRINTER_OBJECTS) $(LDFLAGS) $(PRINTER_LDFLAGS)
 
-$(LINEARISER_NAME) : $(LINEARISER_OBJECTS) $(ATERM_DEP) $(LIBPARSER_NAME) $(LIBREWR_NAME)
-	$(CC) -o $@ $(LINEARISER_OBJECTS) $(LDFLAGS) $(LINEARISER_LDFLAGS)
+$(MCRL22LPE_NAME) : $(MCRL22LPE_OBJECTS) $(ATERM_DEP) $(LIBPARSER_NAME) $(LIBREWR_NAME)
+	$(CC) -o $@ $(MCRL22LPE_OBJECTS) $(LDFLAGS) $(MCRL22LPE_LDFLAGS)
 
 $(LIN_NAME) : $(LIN_OBJECTS) $(ATERM_DEP) $(LIBPARSER_NAME)
 	$(CC) -o $@ $(LIN_OBJECTS) $(LDFLAGS) $(LIN_LDFLAGS)

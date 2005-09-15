@@ -1,7 +1,7 @@
-all: constelim
+all: lpeconstelm
 
-constelim.o: constelim.cpp Makefile
-	g++ -c -ftemplate-depth-256 -g -O0 -Wall -I/home/fstapper/mcrl/trunk/src -I/home/fstapper/mcrl/trunk/src/aterm -o constelim.o  constelim.cpp
+lpeconstelm.o: lpeconstelm.cpp Makefile
+	g++ -c -ftemplate-depth-256 -g -O0 -Wall -I/home/fstapper/mcrl/trunk/src -I/home/fstapper/mcrl/trunk/src/aterm -o lpeconstelm.o  lpeconstelm.cpp
 
-constelim: constelim.o
-	g++ -o constelim constelim.o -L/home/fstapper/mcrl/trunk/src/aterm/ -lboost_program_options -lATerm
+lpeconstelm: lpeconstelm.o
+	g++ -o lpeconstelm lpeconstelm.o -L/home/fstapper/mcrl/trunk/src/aterm/ -lboost_program_options -lATerm

@@ -1,9 +1,8 @@
-/* $Id: gsinstantiate.c,v 1.1 2005/05/03 15:44:47 muck Exp $ */
 #ifdef __cplusplus
 extern "C" {
 #endif
 
-#define NAME "gsinstantiate"
+#define NAME "lpe2lts"
 
 #include <stdio.h>
 #include <stdlib.h>

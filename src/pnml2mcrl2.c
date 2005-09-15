@@ -1,4 +1,3 @@
-/* $Id: pnml2gs.c,v 1.0 2005/03/09 15:46:00 ysu Exp $ */
 #ifdef __cplusplus
 extern "C" {
 #endif

@@ -1,9 +1,8 @@
-/* $Id: gsrewr.c,v 1.2 2005/04/08 12:33:51 muck Exp $ */
 #ifdef __cplusplus
 extern "C" {
 #endif
 
-#define NAME "gsalpha"
+#define NAME "alpha"
 
 #include <stdio.h>
 #include <stdlib.h>

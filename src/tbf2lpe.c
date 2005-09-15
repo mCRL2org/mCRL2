@@ -1,4 +1,4 @@
-#define NAME "mcrl2mcrl2"
+#define NAME "tbf2lpe"
 
 #include <stdio.h>
 #include <stdlib.h>
@@ -11,19 +11,17 @@
 
 void print_help(FILE *f)
 {
-	fprintf(f,"Usage: %s OPTIONS [SPECFILE [OUTFILE]]\n",NAME);
-	fprintf(f,"Read muCRL specification or LPE from SPECFILE, convert it\n"
-		  "to mCRL2 and save the result to OUTFILE. If OUTFILE is not\n"
-		  "present, stdout is used. If SPECFILE is not present, stdin\n"
-		  "is used. To use stdin and save the output into a file, use\n"
-		  "'-' for SPECFILE.\n"
-	          "\n"
-		  "Currently, only LPE can be transformed.\n"
-		  "\n"
-	          "The OPTIONS that can be used are:\n"
-	          "-h, --help               display this help message\n"
-	          "-q, --quiet              do not print any unrequested\n"
-		  "                         information\n"
+  fprintf(f,
+    "Usage: %s OPTIONS [SPECFILE [OUTFILE]]\n", NAME);
+  fprintf(f,
+    "Read mCRL LPE from SPECFILE, convert it to a mCRL2 LPE and save the result to\n"
+    "OUTFILE. If OUTFILE is not present, stdout is used. If SPECFILE is not present,\n"
+    "stdin is used. To use stdin and save the output to a file, use '-' for SPECFILE.\n"
+  "\n"
+  "The OPTIONS that can be used are:\n"
+  "-h, --help               display this help message\n"
+  "-q, --quiet              do not print any unrequested\n"
+  "                         information\n"
       );
 }
 

@@ -64,19 +64,19 @@
     <sources>libgsrewrite.c gsrewr_inner.c gsrewr_inner2.c gsrewr_inner3.c gsfunc.c gslowlevel.c</sources>
   </lib>
 
-  <exe id="parser" template="cexe">
-    <exename>gsparse</exename>
-    <sources>gsparse.c</sources>
+  <exe id="mcrl2parse" template="cexe">
+    <exename>mcrl2parse</exename>
+    <sources>mcrl2parse.c</sources>
     <library>gsparse</library>
   </exe>
 
-  <exe id="gsprint" template="cexe">
-    <sources>gsprint.c</sources>
+  <exe id="lpepp" template="cexe">
+    <sources>lpepp.c</sources>
     <library>gsparse</library>
   </exe>
 
-  <exe id="linearise" template="cexe">
-    <sources>linearise.c</sources>
+  <exe id="mcrl22lpe" template="cexe">
+    <sources>mcrl22lpe.c</sources>
     <library>gsparse</library>
     <library>gsrewrite</library>
   </exe>
@@ -87,14 +87,14 @@
     <library>gsparse</library>
   </exe>
 
-  <exe id="gsrewr" template="cexe">
-    <sources>gsrewr.c</sources>
+  <exe id="lperewr" template="cexe">
+    <sources>lperewr.c</sources>
     <library>gsparse</library>
     <library>gsrewrite</library>
   </exe>
 
-  <exe id="gsinstantiate" template="cexe">
-    <sources>gsinstantiate.c</sources>
+  <exe id="lpe2lts" template="cexe">
+    <sources>lpe2lts.c</sources>
     <sources>libgsnextstate.c libgsprover.c</sources>
     <library>gsparse</library>
     <library>gsrewrite</library>
