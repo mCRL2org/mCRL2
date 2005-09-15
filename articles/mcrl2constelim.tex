@@ -4,7 +4,7 @@
 \setmarginsrb{1.5cm}{2cm}{1.5cm}{2cm}{0cm}{0cm}{0cm}{1cm}
 
 %opening
-\title{DRAFT: mCRL2-constelim}
+\title{mCRL2-constelim \\ DRAFT}
 \author{Frank Stappers}
 
 \begin{document}
@@ -12,62 +12,92 @@
 \maketitle
 
 \begin{abstract}
-This documentation describes the usage from the tool \verb"constelim" within mCRL2. Basically \verb"constelim" is a tool which eliminates constant parameters in a linear process equation (LPE).
+This documentation describes the usage and implementation of  the tool \verb"constelim" within the mCRL2 toolset. 
+Basically, \verb"constelim" is a tool which eliminates constant parameters in a linear process equation (LPE).
 \end{abstract}
 
 \section{Description} \label{sec:dec}
-Variables which act as a \textit{don't care} are denoted "\_". Because the rules of changed variables differ from \textit{don't care} variable we introduce 
-A special variable $x_{nc}$. This is a special value which indicates a that variable $x$ is changed. When the algorithm detects a changed variable $x$, it indicates the variable with the special value $x_{nc}$. $x_{nc}$ acts like a sort of flag. $x_{nc}$ differs from a \textit{don't care} value. 
 
 \subsection{Algorithm}
 Before the algorithm is given we declare some of the used keywords.
 \begin{itemize}
-\item[\textit{init vector}] This vector is constructed to detect changes during during each iteration. This vector is constructed each time at the beginning of the iteration. The values are within the vector represent the values of the process parameter.
-\item[\textit{flag vector}] This vector is a representation of the process parameters type. They can either be constant or variable. 
-\item[\textit{state vector}] This vector is calculated from the \textit{init vector}. Each summand of the LPE has is own state vector.
-\item[\textit{change vector}] This vector is constructed from the \textit{init vector}, \textit{flag vector} and the \textit{(state vector)}. The output is a vector which is a representation of the type of process parameters. They can either be constant or variable.
+\item \textit{init vector} \\ A vector which is constructed to detect changes during during each iteration. 
+ The elements in the vector represent the values of the process parameter.
+\item \textit{flag vector} \\ This vector is a representation for indicating which elements of the \textit{init vector} 
+are constant and variable. 
+\item \textit{state vector} \\ This vector is calculated from the \textit{init vector}. 
+Each summand of the LPE has is own state vector.
+\item \textit{change vector} \\ This vector is constructed from the \textit{init vector}, \textit{flag vector} 
+and the \textit{state vector}. This vector is a representation for indicating which element of the \textit{state vector}
+are constant and variable. 
 \end{itemize}
 
-The Algorithm
+\textbf{The Algorithm}
 \begin{enumerate}
-\item[\textbf{1}] Construct the initial state vector \textit{(init vector)}and define all free variables from the initialization
-\item[\textbf{2}] Mark all process parameters \textit{constant} and construct the \textit{flag vector}.
+\item[\textbf{1}] Construct the \textit{init vector} out of the \verb"init" process.
+All variables which are not included in the \textit{init vector} are free variables and marked as don't care.
+\item[\textbf{2}] Mark the process parameters form the \textit{init vector} \textit{constant} and 
+store the result in \textit{flag vector}.
 \item[\textbf{3}] Rewrite all data arguments of \textit{constant} marked process parameters.
-\item[\textbf{4}] Calculate the all possible state vectors \textit{(state vector)} with respect to their guards and calculate the \textit{change vector}
-\item[\textbf{5}] Construct the new \textit{init} and \textit{change vector}. If the newly constructed \textit{change vector} differs from the \textit{flag vector} substitute the \textit{flag vector} with the \textit{change vector} and substitute the \textit{init vector} with the \textit{state vector}. Afterwards continue with steps 3, 4 and 5. If the \textit{change vector} does not change from the \textit{flag vector} continue to the next step.
-\item[\textbf{6}] Substitute all variables which are marked \textit{constant} with the given constant values.
+\item[\textbf{4}] Calculate the for each summand, which the guard evalutes true, its \textit{state vector} and 
+for each \textit{state vector} its \textit{change vector}.
+\item[\textbf{5}] Construct out of all calculted \textit{state vectors} the new \textit{init vector}.
+Construct out of all the corresponding \textit{change vectors} the new \textit{flag vector}. 
+If the newly constructed \textit{flag vector} 
+differs from the old \textit{flag vector} substitute the old \textit{flag vector} with new \textit{flag vector} and
+ substitute the old \textit{init vector} with the new  \textit{init vector}. 
+ If the old and the \textit{flag vector} differs continu with steps 3, 4 and 5.
+ If the \textit{change vector} does not change from the \textit{flag vector} continue to the next step.
+\item[\textbf{6}] Substitute all parameters which are marked \textit{constant} with the given constant values and remove
+the parameters from the LPE.
 \end{enumerate}
 
 \subsection{Decisions}
-%Subtitution rules:\\
-If a process parameter becomes flagged variable and there are multiple summand an arbitrary value can be chosen. For sake of calculation we set the value of the variable $x$ to $x_{nc}$. This means an value is already assigned and cannot act as a don't care value. If a $x_{nc}$ is substituted this will always change that process parameter flag to \textit{variable}. If a \_ is substituted the process parameter flag stays unchanged. \\ 
-If a process parameter is flagged \textit{constant} and there are multiple assignments (e.g. i:=j $\wedge$ i:=\_) the assignment with the most specific value will be used. Of course the guard is evaluated to define the value. If no guard of specific value is given the smallest element in the domain is used. \\
-Let v1 be the values of the process parameter of the init vector and let v2 be the values of the new state vector. The rules for mapping comparing process parameters to elements of the "change vector" are:
+
+If a process parameter becomes flagged \textit{variable} the value of this parameter is set to an arbitray value.
+To indicate that for process $x$ a arbitrary value can be chosen we introduce the notation $x_{nc}$.
+    
+%of the variable $x$ to $x_{nc}$. This means an value is already assigned and cannot act as a don't care value.
+% If a $x_{nc}$ is substituted this will always change that process parameter flag to \textit{variable}. 
+%If a \_ is substituted the process parameter flag stays unchanged. \\ 
+If a process parameter is flagged \textit{constant} and there are multiple assignments (e.g. i:=j $\wedge$ i:=\_) 
+the assignment with the most specific value will be used. \\
+Let $v_{1}$ be a value of the process parameter of a \textit{init vector} and let $v_{2}$ be a value of a 
+\textit{state vector} of a summand. 
+Shorthand we denote \textit{constant} as $C$ and \textit{variable} as $V$.
+The rules for constructing the \textit{change vector} on the values upon $v_{1}$ and $v_{2}$ are:
 
 \begin{enumerate}
-\item  v1 = v2 $\rightarrow$ C 
-\item v1 $\neq$ v2 $\rightarrow$ V 
-\item v1 == $nc$ $\vee$ v2 == $nc$ $\rightarrow$ V
-\item v1 == \_ $\vee$ v2 == \_ $\rightarrow$ C 
+\item $ v_{1} = v_{2} \rightarrow C $
+\item $ v_{1} \neq v_{2} \rightarrow V $
+\item $ v_{1} = v_{2_{nc}} \vee v_{2} == v_{2_{nc}} \rightarrow V$
+\item $ v_{1} = \_  \vee v_{2} = \_ \rightarrow C $
 \end{enumerate}
-Note: The rule rule the lowerst number has the highest priority.
+Note: The rule with the lowerst number has the highest priority.
 
 \subsubsection*{Flag Rules} 
-Initial all process parameters are flagged \textit{constant}.
-If a process parameter is a \textit{don't care} the corresponding flag stays unchanged.
-If a process parameter is a $nc$ the corresponding flag is \textit{variable}.
-If a process parameter after a rewriting in not equal to its initial value the corresponding flag is \textit{variable}.
+Initially all process parameters are flagged \textit{constant}.
+If the value of process parameter is equal to a \textit{don't care} the corresponding flag stays unchanged.
+If process parameter $x$ has a value equal to $x_{nc}$ the corresponding flag is set \textit{variable}.
+If a process parameter after a rewriting in not equal to its initial value the corresponding flag is set \textit{variable}.
 In case the value of the process parameter is not changed during rewriting the corresponding flag stays unchanged.
-Shorthand we denote \textit{constant} as "C" and \textit{variable} as "V". When comparing flags we use these rules: 
+When comparing flags we use these rules: 
 \begin{tabbing}
 \verb"    " \= C $\wedge$ C $\rightarrow$ C \\
 \> C $\wedge$ V $\rightarrow$ V \\
 \> V $\wedge$ C $\rightarrow$ V \\
 \> V $\wedge$ V $\rightarrow$ V \\
 \end{tabbing}
+
+Variables which act as a \textit{don't care} are denoted with a "\_". 
+Because the rules of changed process parameters differ from \textit{don't care} variables we introduce 
+a special variable $x_{nc}$. This is a special value which indicates a that variable $x$ is changed. 
+When the algorithm detects a changed variable $x$, it indicates the variable with the special 
+value $x_{nc}$. $x_{nc}$ acts like a sort of flag. $x_{nc}$ differs from a \textit{don't care} value. 
+
 \section{Examples}
 \subsection{Example 1}
-To illustrate how constelim behaves we will take the example stated below:
+To illustrate how constelim behaves we look at the example below:
 \begin{verbatim}
 act  action: Nat;
 
@@ -77,11 +107,11 @@ proc P(i,j: Nat) =
 init P(i := 0, j := 0);
 \end{verbatim}
 
-First we write the initial state vector: $\langle$0,0$\rangle$. For calculation we will also store the variables i=0 and j=0.
-Next we mark all to process parameters to be \textit{constant}. In the vector we will abbreviate \textit{constant} as  C and \textit{variable} to V. So this will result in the change vector: $\langle$C,C$\rangle$.
-We now process all data arguments of marked process parameters. The change vector is the result between the \textit{init}, \textit{state} and \textit{flag vector} of each summand. We have only one summand so therefore the \textit{change vector} will be
-$\langle$1,0$\rangle$. 
-Next we compute the new \textit{state} and \textit{change vector}. We can see that the \textit{change vector} differst from the \textit{flag vector}, so we substitute both the \textit{init} and \textit{flag vector} with the \textit{state} and \textit{change vector} respectively. We continue with steps 3, 4, and 5 in \ref{sec:dec}. In the following iteration the init vector will be: $\langle$ $i_nc$,0$\rangle$ and the flag vector will be: $\langle$V,C$\rangle$. After repeating steps 3, 4 and 5 we see that the \textit{change vector} does not differ from the \textit{init vector}. The iteration terminates. Now we have to substitute \verb"j" by \verb"0".\\
+First we write the construct the  \textit{init vector} form \verb"init": $\langle 0 ,0 rangle$. 
+Next we mark all  process parameters to be \textit{constant}. This gives us the following \textit{flag vector}: $\langle$C,C$\rangle$.
+We now process all data arguments of marked process parameters. 
+We construct \textit{state vectors} for each summand which yields $true$. In this example we have only one summand which always yield $true$, so we get the following \textit{state vector}: $\langle 1, 0 \rangle$. Next we compute the \textit{state vector}. The state vector will result in: $\langle V, C \rangle$
+If the the \ldots over all \textit{change vectors} differs from the \textit{flag vector}, we compute the new \textit{init} and \textit{flag vector} and continue with steps 3, 4, and 5 in the algorithm. We keep on doing until the \textit{change vector} does not differ from the \textit{flag vector}. The iteration terminates. In our case we then have to substitute \verb"j" by \verb"0".\\
 
 The tabular below will show the taken computable steps: \\
 \begin{tabular}{|l|l|l|l|l|l|}
@@ -97,15 +127,15 @@ step 	&  init vector 			& flag vector			& state vector 			& change vector 		& va
 \hline
 4	&  $\langle 0,0 \rangle$ 	&  $\langle C,C \rangle$ 	&  $\langle 1,0 \rangle$ 	&  $\langle V,C \rangle$ 	& $i=1, j=0 $\\
 \hline
-5	&  $\langle i_{nc},0 \rangle$ 	&  $\langle V,C \rangle$ 	&  $\langle 1,0 \rangle$ 	&  $\langle V,C \rangle$ 	& $i= i_{nc} , j=0$ \\
+5	&  $\langle i_{nc},0 \rangle$ 	&  $\langle V,C \rangle$ 	&  \_				& \_ 				&  $i= i_{nc} , j=0$\\
 \hline
-3	&  $\langle   i_{nc} ,0 \rangle$ 	&  $\langle V,C \rangle$ 	&  $\langle   i_{nc} ,j \rangle$ 	&  \_			 	& $i= i_{nc} , j=0$ \\
+3	&  $\langle   i_{nc} ,0 \rangle$ 	&  $\langle V,C \rangle$ 	&  $\langle   i_{nc}+1 ,0 \rangle$  			&  \_			 	& $i= i_{nc} , j=0$ \\
 \hline
-4	&  $\langle   i_{nc} ,0 \rangle$ 	&  $\langle V,C \rangle$ 	&  $\langle   i_{nc} ,0 \rangle$ 	&  $\langle V,C \rangle$ 	& $i= i_{nc} , j=0 $\\
+4	&  $\langle   i_{nc} ,0 \rangle$ 	&  $\langle V,C \rangle$ 	&  $\langle   i_{nc} ,0 \rangle$	&  $\langle V,C \rangle$  		& $i= i_{nc} , j=0 $\\
 \hline
-5	&  $\langle   i_{nc} ,0 \rangle$ 	&  $\langle V,C \rangle$ 	&  $\langle   i_{nc} ,0 \rangle$ 	&  $\langle V,C \rangle$ 	& $i= i_{nc} , j=0 $\\
+5	&  $\langle   i_{nc} ,0 \rangle$ 	&  $\langle V,C \rangle$ 	&  \_ 					& \_  					& $i= i_{nc} , j=0 $\\
 \hline
-6	& 				&				&				&				& \verb"j" is substituted by \verb"0"\\	
+6	& 					&				&					&					& \verb"j" is substituted by \verb"0" and remove all \verb"j"\\	
 \hline
 \end{tabular}\\
 
@@ -116,7 +146,7 @@ We get the following LPE:
 \end{verbatim}
 
 \subsection{Example 2}
-This example show why we need have to iteration over steps 3, 4 and 5 in \ref{sec:dec}. We take the following linear process equation:
+This example show why we need have to iteration over steps 3, 4 and 5 in the algorithm. We take the following linear process equation:
 \begin{verbatim}
     Init P(i:=0, j:=0);
     P(i,j) = action(i).P(i := i+1, j := i); 
@@ -135,25 +165,25 @@ step 	&  init vector & flag vector& state vector & change vector & variables \\
 \hline
 4	&  $\langle 0,0 \rangle$ 		&  $\langle C,C \rangle$ 	&  $\langle 1,0 \rangle$  		&  $\langle V,C \rangle$ 	& $i=1, j=0 $\\
 \hline
-5	&  $\langle i_{nc},0 \rangle$ 		&  $\langle V,C \rangle$ 	&  $\langle 1,0 \rangle$  		&  $\langle V,C \rangle$ 	& $i= i_{nc} , j=0$ \\
+5	&  $\langle i_{nc},0 \rangle$ 		&  $\langle V,C \rangle$ 	&  \_			  		&  \_			 	& $i= i_{nc} , j=0$ \\
 \hline
-3	&  $\langle   i_{nc} ,0 \rangle$  		&  $\langle V,C \rangle$ 	&  $\langle   i_{nc} ,i  \rangle$  		&  \_			  	& $i= i_{nc} , j=0$ \\
+3	&  $\langle   i_{nc} ,0 \rangle$  		&  $\langle V,C \rangle$ 	&  $\langle   i_{nc}+1 , i_{nc}$		&  \_			  	& $i= i_{nc} , j=0$ \\
 \hline
 4	&  $\langle   i_{nc} ,0 \rangle$  		&  $\langle V,C \rangle$  	&  $\langle   i_{nc} , i_{nc}   \rangle$  	&  $\langle V,V \rangle$  	& $i= i_{nc} , j= i_{nc}  $\\
 \hline
-5	&  $\langle   i_{nc} ,j_{nc} \rangle$  		&  $\langle V,V \rangle$  	&  $\langle   i_{nc} , j_{nc}   \rangle$  	&  $\langle V,V \rangle$  	& $i= i_{nc} , j= j_{nc}  $\\
+5	&  $\langle   i_{nc} ,j_{nc} \rangle$  		&  $\langle V,V \rangle$  	&  \_  						&  \_  				& $i= i_{nc} , j= j_{nc}  $\\
 \hline
-3 	&  $\langle   i_{nc} , j_{nc}   \rangle$  	&  $\langle V,V \rangle$ 	&  $\langle   i_{nc} , j_{nc}   \rangle$  	&  \_			  	& $i= i_{nc} , j= j_{nc}  $\\
+3 	&  $\langle   i_{nc} , j_{nc}   \rangle$  	&  $\langle V,V \rangle$ 	&  $\langle   i_{nc}+1 , j_{nc}   \rangle$  	&  \_			  	& $i= i_{nc} , j= j_{nc}  $\\
 \hline
 4	&  $\langle   i_{nc} , j_{nc}   \rangle$  	&  $\langle V,V \rangle$  	&  $\langle   i_{nc} , j_{nc}   \rangle$  	&  $\langle V,V \rangle$  	& $i= i_{nc} , j= j_{nc} $ \\
 \hline
-5	&  $\langle   i_{nc} , j_{nc}   \rangle$  	&  $\langle V,V \rangle$  	&  $\langle   i_{nc} , j_{nc}   \rangle$  	&  $\langle V,V \rangle$  	& $i= i_{nc} , j= j_{nc} $ \\
+5	&  $\langle   i_{nc} , j_{nc}   \rangle$  	&  $\langle V,V \rangle$  	&  \_					  	&  \_			 	& $i= i_{nc} , j= j_{nc} $ \\
 \hline
-6 	& 			 		& 				& 					&				& No substitution\\
+6 	& 			 			& 				& 						&				& No substitution\\
 \hline
 \end{tabular} \\
 
-Now we can see why the iteration of steps 3, 4 and 5 of \ref{sec:def} are needed. The linear process equation cannot be improved by \verb"constelim".
+Now we can see why the iteration of steps 3, 4 and 5 of the algorithm are needed. The linear process equation cannot be improved by \verb"constelim".
 
 \subsection{Example 3} 
 Next we will study a case with free variables. We take the following linear process equation:
@@ -174,36 +204,41 @@ This will lead to the following sequence of steps:\\
 \begin{tabular}{|l|l|l|l|l|l|}
 \hline
 step & init vector & flag vector & state vectors & change vector & variables \\
-1	& $\langle2,\_,0\rangle$ 		& $\langle C,C,C\rangle$	& \_ 										& -				& $state=2, i=0, j=\_, k=\_, l=\_, m=\_, n=\_$ \\
+1	& $\langle 2,\_,0\rangle$ 		& \_				& \_ 										& \_				& $state=2, i=0, j=\_, k=\_, l=\_, m=\_, n=\_$ \\
 \hline
-2	& $\langle2,\_,0\rangle$ 		& $\langle C,C,C\rangle$	& \_ 										& \_ 				& $state=2, i=0, j=\_, k=\_, l=\_, m=\_, n=\_$ \\
+2	& $\langle 2,\_,0\rangle$ 		& $\langle C,C,C\rangle$	& \_ 										& \_ 				& $state=2, i=0, j=\_, k=\_, l=\_, m=\_, n=\_$ \\
 \hline
-3	& $\langle2,\_,0\rangle$ 		& $\langle C,C,C\rangle$	& $\{state=1\}\rightarrow \langle 1, j, k \rangle$				& \_				& $state=2, i=0, j=\_, k=\_, l=\_, m=\_, n=\_$ \\
+3	& $\langle 2,\_,0\rangle$ 		& $\langle C,C,C\rangle$	& $\{state=1\}\rightarrow \langle 1, j, k \rangle$				& \_				& $state=2, i=0, j=\_, k=\_, l=\_, m=\_, n=\_$ \\
 	&					&				& $\{state=2 \wedge i < 5 \} \rightarrow \langle 2, l , i+1 \rangle$		& 				& \\
 	&					&				& $\{state=2 \wedge i =5 \} \rightarrow \langle 1, i, m \rangle$		& 				& \\
 \hline
-4	& $\langle2,\_,0\rangle$ 		& $\langle C,C,C\rangle$	& $\langle 1,\_,\_\rangle$							& $\langle V,C,C\rangle$	& $ \bullet state=1, i=0, j=\_, k=\_, l=\_, m=\_, n=\_$ \\
+4	& $\langle 2,\_,0\rangle$ 		& $\langle C,C,C\rangle$	& $false \rightarrow \delta$							& \_				& \_ \\
 	&					&				& $\langle 2,\_,1\rangle$							& $\langle C,C,V\rangle$	& $ \bullet state=2, i=1, j=\_, k=\_, l=\_, m=\_, n=\_$ \\
-	&					&				& $\langle 1,5,\_\rangle$							& $\langle C,C,V\rangle$	& $ \bullet state=1, i=5, j=5, k=\_, l=\_, m=\_, n=\_ $\\
+	&					&				& $false \rightarrow \delta$							& \_				& \_ \\
 \hline
-5	&$\langle state_{nc},5,i=i_{nc}\rangle$	& $\langle V,C,V\rangle$	& $\langle 1,\_,\_\rangle$							& $\langle V,C,C\rangle$	& $ state_{nc}, i=i_{nc}, j=5, k=\_, l=\_, m=\_, n=\_$ \\
-	&					&				& $\langle 2,\_,1\rangle$							& $\langle C,C,V\rangle$	& \\
-	&					&				& $\langle 1,5,\_\rangle$							& $\langle C,C,V\rangle$	& \\
+5	&$\langle 2,\_,i=i_{nc}\rangle$		& $\langle C,C,V\rangle$	& \_										& \_				& $ state =2, i=i_{nc}, j=5, k=\_, l=\_, m=\_, n=\_$ \\
 \hline
-3	&$\langle state_{nc},5,i=i_{nc}\rangle$	& $\langle V,C,V\rangle$	& $\{state=1\}\rightarrow \langle 1, j, k \rangle$				& \_				& $ state_{nc}, i=i_{nc}, j=5, k=\_, l=\_, m=\_, n=\_$\\
+3	&$\langle 2,\_,i=i_{nc}\rangle$		& $\langle C,C,V\rangle$	& $\{state=1\}\rightarrow \langle 1, j, k \rangle$				& \_				& $ state =2, i=i_{nc}, j=5, k=\_, l=\_, m=\_, n=\_$ \\
 	&					&				& $\{state=2 \wedge i < 5 \} \rightarrow \langle 2, l , i+1 \rangle$		& 				& \\
 	&					&				& $\{state=2 \wedge i =5 \} \rightarrow \langle 1, i, m \rangle$		& 				& \\
 \hline
-4	&$\langle state_{nc},5,i=i_{nc}\rangle$	& $\langle V,C,V\rangle$	& $\langle 1, 5, \_ \rangle$							& $\langle V,C,V\rangle$	& $\bullet state_{nc}, i=i_{nc}, j=5, k=\_, l=\_, m=\_, n=\_$ \\
-	&					&				& $\langle 2, \_, i_{nc} \rangle$						& $\langle V,C,V\rangle$	& $\bullet state_{nc}, i=i_{nc}, j=5, k=\_, l=\_, m=\_, n=\_$ \\
-	&					&				& $\langle 2, 5, \_ \rangle$							& $\langle V,C,V\rangle$	& $\bullet state_{nc}, i=i_{nc}, j=5, k=\_, l=\_, m=\_, n=\_$ \\
+4	& $\langle 2,\_,i=_{nc}\rangle$ 	& $\langle C,C,V\rangle$	& $false \rightarrow \delta$							& \_				& \_ \\
+	&					&				& $\langle 2,\_,i_{nc}\rangle$							& $\langle C,C,V\rangle$	& $ \bullet state=2, i=i_{nc}, j=\_, k=\_, l=\_, m=\_, n=\_$ \\
+	&					&				& $\langle 1,5,\_ \rangle$							& $\langle V,C,C\rangle$	& $ \bullet state=1, i=i_{nc}, j=5, k=\_, l=\_, m=\_, n=\_$ \\
 \hline
-5	&$\langle state_{nc},5,i=i_{nc}\rangle$	& $\langle V,C,V\rangle$	& $\langle 1, 5, \_ \rangle$							& $\langle V,C,V\rangle$	& $state_{nc}, i=i_{nc}, j=5, k=\_, l=\_, m=\_, n=\_$ \\
-	&					&				& $\langle 2, \_, i_{nc} \rangle$						& $\langle V,C,V\rangle$	& \\
-	&					&				& $\langle 2, 5, \_ \rangle$							& $\langle V,C,V\rangle$	& \\
+5	&$\langle state_{nc},5,i=i_{nc}\rangle$	& $\langle V,C,V\rangle$	& \_										& \_				& $ state = state_{nc}, i=i_{nc}, j=5, k=\_, l=\_, m=\_, n=\_$ \\
 \hline
-6	&					& 				& 										& 				& Substitute \verb"j := 5" \\
-
+3	&$\langle state_{nc},5,i=i_{nc}\rangle$	& $\langle V,C,V\rangle$	& $\{state=1\}\rightarrow \langle 1, j, k \rangle$				& \_				& $ state = state_{nc}, i=i_{nc}, j=5, k=\_, l=\_, m=\_, n=\_$ \\
+	&					&				& $\{state=2 \wedge i < 5 \} \rightarrow \langle 2, l , i+1 \rangle$		& 				& \\
+	&					&				& $\{state=2 \wedge i =5 \} \rightarrow \langle 1, i, m \rangle$		& 				& \\
+\hline
+4	&$\langle state_{nc},5,i=i_{nc}\rangle$	& $\langle V,C,V\rangle$	& $\langle 1,\_,\_ \rangle $							& $\langle V,C,V\rangle$	& $ \bullet state=state_{nc}, i=i_{nc}, j=\_, k=\_, l=\_, m=\_, n=\_$ \\ 
+	&					&				& $\langle 2,\_,i_{nc}\rangle$							& $\langle C,C,V\rangle$	& $ \bullet state=state_{nc}, i=i_{nc}, j=\_, k=\_, l=\_, m=\_, n=\_$ \\
+	&					&				& $\langle 1,5,\_\rangle$							& $\langle V,C,C\rangle$	& $ \bullet state=state_{nc}, i=i_{nc}, j=5, k=\_, l=\_, m=\_, n=\_$ \\
+\hline
+5	&$\langle state_{nc},5,i=i_{nc}\rangle$	& $\langle V,C,V\rangle$	& \_										& \_				& $ state = state_{n}, i=i_{nc}, j=5, k=\_, l=\_, m=\_, n=\_$ \\
+\hline
+6	&					&				&										&				&  subtitute \verb"j:=5" and remove \verb"j" \\
 \hline	
 \end{tabular}
 The resulting algorithm:
@@ -211,13 +246,13 @@ The resulting algorithm:
     act  action: Nat;
 
     var  k,l,m: Nat;
-    proc P(state: Pos, j,i: Nat) =
-           state == 1           -> action(5) . P(state := 1, 5, i := k)
-         + state == 2 && i <  5 -> action(i) . P(state := 2, 5, i := i + Pos2Nat(1))
-         + state == 2 && i == 5 -> action(i) . P(state := 1, 5, i := m);
+    proc P(state: Pos, i: Nat) =
+           state == 1           -> action(5) . P(state := 1, i := k)
+         + state == 2 && i <  5 -> action(i) . P(state := 2, i := i + Pos2Nat(1))
+         + state == 2 && i == 5 -> action(i) . P(state := 1, i := m);
 
     var  n: Nat;
-    init P(state := 2, 5, i := 0);
+    init P(state := 2, i := 0);
 \end{verbatim}
 
 \end{document}
