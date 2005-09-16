@@ -93,9 +93,9 @@ fflush(aut);
 }
 
 
-void print_help(FILE *f)
+void print_help(FILE *f, char *Name)
 {
-	fprintf(f,"Usage: %s OPTIONS LPEFILE [OUTFILE]\n",NAME);
+	fprintf(f,"Usage: %s OPTIONS LPEFILE [OUTFILE]\n",Name);
 	fprintf(f,"Generate state space of LPEFILE and save the result to\n"
 	          "OUTFILE (in the aut format). If OUTFILE is not supplied, the\n"
 		  "state space is not stored.\n"
@@ -178,7 +178,7 @@ int main(int argc, char **argv)
 		switch ( opt )
 		{
 			case 'h':
-				print_help(stderr);
+				print_help(stderr, argv[0]);
 				return 0;
 			case 'q':
 				quiet = true;
@@ -270,7 +270,7 @@ int main(int argc, char **argv)
 	{
 		if ( !quiet )
 		{
-			print_help(stderr);
+			print_help(stderr, argv[0]);
 		}
 		return 1;
 	}

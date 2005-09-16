@@ -119,9 +119,9 @@ static ATermAppl rewrite_lpe(ATermAppl Spec)
 	return Spec;
 }
 
-void print_help(FILE *f)
+void print_help(FILE *f, char *Name)
 {
-	fprintf(f,"Usage: %s OPTIONS [SPECFILE [OUTFILE]]\n",NAME);
+	fprintf(f,"Usage: %s OPTIONS [SPECFILE [OUTFILE]]\n",Name);
 	fprintf(f,"Rewrite data expressions in SPECFILE and save the result to\n"
 	          "OUTFILE. If OUTFILE is not present, stdout is used. If\n"
 	          "SPECFILE is not present, stdin is used. To use stdin and\n"
@@ -178,7 +178,7 @@ int main(int argc, char **argv)
 		switch ( opt )
 		{
 			case 'h':
-				print_help(stderr);
+				print_help(stderr, argv[0]);
 				return 0;
 			case 'q':
 				quiet = true;

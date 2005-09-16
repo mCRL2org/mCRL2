@@ -14,9 +14,9 @@ extern "C" {
 #include "libgsparse.h"
 #include "gslinearise2.h"
 
-void print_help(FILE *f)
+void print_help(FILE *f, char *Name)
 {
-	fprintf(f,"Usage: %s OPTIONS SPECFILE [OUTFILE]\n",NAME);
+	fprintf(f,"Usage: %s OPTIONS SPECFILE [OUTFILE]\n",Name);
 	fprintf(f,"Linearises SPECFILE and writes the result to OUTFILE. If\n"
 		  "OUTFILE is not specified, SPECFILE with its extension\n"
 		  "replaced by 'lpe' is assumed. If OUTFILE is -, stdout is\n"
@@ -77,7 +77,7 @@ int main(int argc, char **argv)
 		switch ( opt )
 		{
 			case HelpOption:
-				print_help(stderr);
+				print_help(stderr, argv[0]);
 				return 0;
 			case 'c':
 				cluster = false;
@@ -107,7 +107,7 @@ int main(int argc, char **argv)
 
 	if ( argc-optind < 1 )
 	{
-		print_help(stderr);
+		print_help(stderr, argv[0]);
 		return 0;
 	}
 

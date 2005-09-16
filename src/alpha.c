@@ -17,9 +17,9 @@ extern "C" {
 extern ATermAppl gsParse(FILE *);
 extern ATermAppl gsTypeCheck(ATermAppl);
 
-void print_help(FILE *f)
+void print_help(FILE *f, char *Name)
 {
-	fprintf(f,"Usage: %s OPTIONS [SPECFILE [OUTFILE]]\n",NAME);
+	fprintf(f,"Usage: %s OPTIONS [SPECFILE [OUTFILE]]\n",Name);
 	fprintf(f,"Apply alphabet axioms to processes in SPECFILE and save\n"
 		  "the result to OUTFILE. If OUTFILE is not present, stdout\n"
 		  "is used. If SPECFILE is not present, stdin is used. To\n"
@@ -56,7 +56,7 @@ int main(int argc, char **argv)
 		switch ( opt )
 		{
 			case 'h':
-				print_help(stderr);
+				print_help(stderr, argv[0]);
 				return 0;
 			case 'a':
 				read_aterm = 1;

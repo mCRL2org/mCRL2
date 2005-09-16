@@ -1,5 +1,5 @@
 #define  NAME      "mcrl2parse"
-#define  LVERSION  "0.2"
+#define  LVERSION  "0.3"
 #define  AUTHOR    "Aad Mathijssen"
 
 #ifdef __cplusplus
@@ -28,14 +28,14 @@ int main(int argc, char *argv[]);
 //  argc represents the number of arguments
 //  argv represents the arguments
 
-void PrintUsage(FILE* Stream);
+void PrintUsage(FILE* Stream, char *Name);
 //print usage information to stream
+
+void PrintMoreInfo(FILE* Stream, char *Name);
+//print --help suggestion to stream
 
 void PrintVersion(FILE* Stream);
 //print version information to stream
-
-void PrintMoreInfo(FILE* Stream);
-//print --help suggestion to stream
 
 bool ParseSpecificationFileName(
   char *SpecFileName,
@@ -99,7 +99,7 @@ int main(int argc, char* argv[]) {
   while (Option != -1) {
     switch (Option) {
       case 'h': 
-        PrintUsage(stdout);
+        PrintUsage(stdout, argv[0]);
         return 0; 
       case VersionOption: 
         PrintVersion(stdout); 
@@ -123,7 +123,7 @@ int main(int argc, char* argv[]) {
         NoSave = true;
         break;
       default:
-      	PrintMoreInfo(stderr);
+      	PrintMoreInfo(stderr, argv[0]);
       	return 1;
     }
     Option = getopt_long(argc, argv, ShortOptions, LongOptions, NULL);
@@ -132,7 +132,7 @@ int main(int argc, char* argv[]) {
   NoArgc = argc - optind;
   if (NoArgc > 2) {
     fprintf(stderr, "%s: too many arguments\n", NAME);
-   	PrintMoreInfo(stderr);
+   	PrintMoreInfo(stderr, argv[0]);
    	return 1;
   } else {
     //NoArgc >= 0 && NoArgc <= 2
@@ -240,7 +240,7 @@ bool ParseSpecificationStream(FILE *SpecStream, FILE *OutputStream,
   return Result;
 }
 
-void PrintUsage(FILE *Stream) {
+void PrintUsage(FILE *Stream, char *Name) {
   fprintf(Stream, 
     "Usage: %s OPTIONS [SPECFILE [OUTFILE]]\n"
     "Translate the mCRL2 specification in SPECFILE to the internal format and save it\n"
@@ -256,17 +256,17 @@ void PrintUsage(FILE *Stream) {
     "  -d, --debug            turn on the display of detailed intermediate messages\n"
     "  -u, --human            save the parsed formula in a human readable format\n"
     "  -n, --no-save          do not save the parsed formula\n",
-    NAME
+    Name
   );
+}
+
+void PrintMoreInfo(FILE *Stream, char *Name) {
+  fprintf(Stream, "Try \'%s --help\' for more information.\n", Name);
 }
 
 void PrintVersion(FILE *Stream) {
   fprintf(Stream, "%s %s\nWritten by %s.\n", 
-    NAME, LVERSION, AUTHOR);  
-}
-
-void PrintMoreInfo(FILE *Stream) {
-  fprintf(Stream, "Try \'%s --help\' for more information.\n", NAME);
+    NAME, LVERSION, AUTHOR); 
 }
 
 #ifdef __cplusplus

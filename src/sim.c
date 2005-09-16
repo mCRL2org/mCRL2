@@ -35,9 +35,9 @@ static void gsPrintState(ATerm state)
 	}
 }
 
-void print_help(FILE *f)
+void print_help(FILE *f, char *Name)
 {
-	fprintf(f,"Usage: %s OPTIONS LPEFILE\n",NAME);
+	fprintf(f,"Usage: %s OPTIONS LPEFILE\n",Name);
 	fprintf(f,"Simulates the LPE in LPEFILE.\n"
 		  "(Enter '-1' or use CTRL-d to end simulation.)\n"
 		  "\n"
@@ -75,7 +75,7 @@ int main(int argc, char **argv)
 		switch ( opt )
 		{
 			case 'h':
-				print_help(stderr);
+				print_help(stderr, argv[0]);
 				return 0;
 			case 'y':
 				usedummy = true;
@@ -117,7 +117,7 @@ int main(int argc, char **argv)
 
 	if ( argc-optind < 1 )
 	{
-		print_help(stderr);
+		print_help(stderr, argv[0]);
 		return 1;
 	}
 
