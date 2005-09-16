@@ -1,14 +1,19 @@
 #include <iostream>
+#include <vector>
+#include <boost/program_options.hpp>
+#include <stdbool.h>
+#include <aterm2.h>
+
 #include "atermpp/aterm.h"
 #include "mcrl2/mcrl2_visitor.h"
 #include "mcrl2/lpe.h"
-#include <boost/program_options.hpp>
-#include <vector>
+#include "libgsrewrite.h"
+#include "gsfunc.h"
+#include "gslowlevel.h"
 
 using namespace std;
 using namespace mcrl2;
 using namespace atermpp;
-
 
 namespace po = boost::program_options;
 po::variables_map vm;
@@ -21,17 +26,28 @@ bool cex()
   return true;
 }
 
+bool eval_datexp(DataExpression datexpr){
+  //x for debug
+  //gsRewriteInit(ATgetArgument(Spec, 3),GS_REWR_INNER3);
+  //cout << datexpr.to_string() << endl;
+  if (DataExpression(*gsMakeOpIdNameTrue()) == datexpr){cout <<"w"<<endl;}
+
+  //gsRewriteInit();
+  return true;
+}
+
 int const_main(string filename, int opt)
 {
-  vector<LPEAssignment>            iv;		//init vector
+  vector<LPEAssignment>             iv;		//init vector
   vector<bool> 		                  fv;		//flag vector (C= True, V= False)
   vector< vector<DataExpression> >  sv; 	//(new) state vector
   vector< vector<bool> >            cv;		//change vector	
   vector<bool>                      pcv;  //partial change vector
-
+  vector<string>                    sovp; //set of variable process parameters
   int                               nopp; //number of process parameters
   int                               nos;  //number of summands
   int                               noa;  //number of assignments in the init
+
 
   //Debug test vars
   int outputvar =  0;
@@ -53,7 +69,7 @@ int const_main(string filename, int opt)
     LPEInit::assignment_iterator var_isb = LPE::LPE(t).lpe_init().assignments_begin();
     LPEInit::assignment_iterator var_ise = LPE::LPE(t).lpe_init().assignments_end();
     noa = distance(var_isb, var_ise);
-    //Vragen of onderstaande regel klopt
+    
     if(nopp!=noa){cout << "Error: #assignments != #process parameters"<< endl; return 1;}; 
     
     //Get all assingments from the init 
@@ -90,36 +106,40 @@ int const_main(string filename, int opt)
         LPESummand::assignment_iterator var_ppcvb = LPESummand(*s_current).assignments_begin();
         LPESummand::assignment_iterator var_ppcve = LPESummand(*s_current).assignments_end();
         
-        cout << LPESummand(*s_current).to_string() << endl;
-        //Only check when OpID evaluates to true
+        //debug cout << LPESummand(*s_current).to_string() << endl;
+
+        //Only check when Guard evaluates to true
+        //cout << LPESummand(*s_current).condition().to_string() << endl;
+        cout << LPESummand(*s_current).condition().is_operation() << endl;
         
-        //Begin Debug
-        outputvar = distance(var_ppcvb, var_ppcve);
         
-        cout << outputvar << endl;
+        // If Guard of summand is true -> 
+        if (eval_datexp(LPESummand(*s_current).condition())){
+          for (LPESummand::assignment_iterator c_obj = LPESummand(*s_current).assignments_begin(); c_obj != var_ppcve; ++c_obj){
         
-        for (LPESummand::assignment_iterator c_obj = LPESummand(*s_current).assignments_begin(); c_obj != var_ppcve; ++c_obj){
-        
-        //Get LHS from State Vector element
-        //cout <<(LPEAssignment(*c_obj).lhs()).name() << endl;
-        
-          //Get match LHS from State Vector element to LHS init vector
-          unsigned int indx;
-          for (indx = 0; indx < iv.size(); indx++){
-            if (iv[indx].lhs().name() == (LPEAssignment(*c_obj).lhs()).name()) {
-              //Compare expression
-              if (!cex()) 
-              { //Vector elements are not equal
-                pcv[indx] = false;
-              };
-            }   
-          }; 
-          //Add pcv
-          cv.push_back(pcv);
+          //Get LHS from State Vector element
+          //cout <<(LPEAssignment(*c_obj).lhs()).name() << endl;
+          
+            //Get match LHS from State Vector element to LHS init vector
+            unsigned int indx;
+            for (indx = 0; indx < iv.size(); indx++){
+              if (iv[indx].lhs().name() == (LPEAssignment(*c_obj).lhs()).name()) {
+                //Compare expression
+                if (!cex()) 
+                  { //Vector elements are not equal
+                  pcv[indx] = false;
+                  //Add process to list of variable processes
+                  sovp.push_back(LPEAssignment(*c_obj).lhs().name());
+                };
+              }   
+            }; 
+            //Add pcv
+            cv.push_back(pcv);
+          }
         }
       };	
+
       //Compare change vector with flag vector
-      
       vector<bool> fch; //flattened change vector
       for (unsigned int i=0; i < cv[0].size(); i++)
       { bool b = true;
@@ -144,6 +164,7 @@ int const_main(string filename, int opt)
       //If a element differs -> Iteration needed, set iteration true
       iteration = !b ;
       cout << "iterate " << b << endl;
+      //Debug "list of variable processes" cout << sovp[0] << endl;
       }
     //End Iteration 
     } 
