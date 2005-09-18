@@ -26,94 +26,75 @@ extern "C" {
 #include "libgsrewrite.h"
 #include "libgsalpha.h"
 #include <getopt.h>
+#include <limits.h>
+#include <stdbool.h>
+#include <tgmath.h>
 
 #define STRINGLENGTH 256
+#define INFILEEXT ".mcrl2"
+#define OUTFILEEXT ".lpe"
 
-static int to_toolbusfile=0;
-static int to_stdout=0;
-static int regular=0;
-static int regular2=0;
-static int cluster=0;
-static int nocluster=0;
-static int binary=0;
-static int oldstate=1;
-static int statenames=0;
-static int mayrewrite=1;
-static int allowFreeDataVariablesInProcesses=1;
-static int informative_output=1;
-
-FILE *outfile;
-FILE *toolbusfile;
-FILE *infile;
+static bool regular = false;
+static bool regular2 = false;
+static bool cluster = false;
+static bool nocluster = false;
+static bool binary = false;
+static bool oldstate = true;
+static bool statenames = false;
+static bool mayrewrite = true;
+static bool allowFreeDataVariablesInProcesses = true;
 
 #define P(msg)  fprintf(stderr,"%s\n",msg)
 
-void usage(void)
+void PrintMoreInfo(char *Name)
 {
-  fprintf(stderr, "Use %s --help for options\n", NAME);
+  fprintf(stderr, "Use %s --help for options\n", Name);
 }
 
-void version(void)
+void PrintVersion(void)
 {
-  fprintf(stderr,"version: mCRL2 parser and LPE generator. Version %s\n", VERSION);
+  fprintf(stderr,"mCRL2 parser and LPE generator, version %s\n", VERSION);
 }
 
-void help(void)
+void PrintHelp(char *Name)
 {
-P("");
-P("Timed mCRL2 parser and LPE generator");
-P("====================================");
-P("");
-fprintf(stderr, "Usage: %s OPTIONS SPECFILE", NAME);
-P("");
-P("The following options can be used (within brackets the single letter form");
-P("of the options is given. E.g. linearise -1a file.mcrl2 stands for ");
-P("linearise --regular --statenames file.mcrl2):");
-P("--stack (0):    an LPO of the input file in toolbus term format file is ");
-P("                translated using stack datatypes. Result in written to file.lpe.");
-P("--stdout:       an LPO in toolbus term format is generated, and written");
-P("                to stdout.");
-P("--regular (1):  it is assumed that the input file is regular, and the");
-P("                output LPO will be generated in regular form.");
-P("--regular2 (2): a variant of regular where much more datavariables are");
-P("                being used. Regular2 is sometimes successful where.");
-P("                the use of --regular leads to non termination of this tool");
-P("--cluster (c):  all actions in the output are clustered.");
-P("--nocluster (n):no actions are clustered, not even in intermediate LPOs.");
-P("--binary (b):   use binary, instead of n-ary, case functions when clustering.");
-P("                In the presence of --newstate, state variables use binary ");
-P("                encoding.");
-P("--newstate (w): linearise will encode state variables using enumerated types.");
-P("                --newstate is only allowed in the presence of --regular or ");
-P("                --regular2. Using the flag --binary in addition will lead ");
-P("                linearise to encode the state by a vector of boolean variables.");
-P("                By default (i.e. without --newstate), natural numbers are used.");
-P("--statenames (a): linearise will use meaningful names for the state variables,");
-P("                derived from the specification.");
-P("--no-rewrite (o): do not use a rewriter while linearising. If the rewrite system");
-P("                does not terminate, the lineariser will not terminate, unless");
-P("                rewrite system is not used.");
-P("--nofreevars (f): the lineariser will not introduce free data variables in");
-P("                processes, but instead use arbitrary constants.");
-P("--help (h):     yields this message");
-P("--version (v):  get a version of the lineariser");
-P("--quiet (q):    avoid printing informative output to stderr");
-P("");
-P("Except with the options help and version, a filename containing");
-P("a mCRL2 description must be given. This program checks the syntax");
-P("and the static semantics of a mCRL2 specification, and with ");
-P("proper flags can transform a subclass of mCRL2 specifications");
-P("to linear process equations (LPEs)");
+  fprintf(stderr,
+    "Usage: %s OPTIONS SPECFILE\n"
+    "Linearises the mCRL2 specification in SPECFILE and writes the resulting LPE to\n"
+    "a file. If SPECFILE does not have the extension 'mcrl2', SPECFILE.mcrl2 is used.\n"
+    "In the name of the output file, the extension 'mcrl2' is replaced by 'lpe'.\n"
+    "\n"
+    "The OPTIONS that can be used are:\n"
+    "  -0, --stack       the LPE is generated using stack datatypes (useful when\n"
+    "                    --regular and --regular2 do not work)\n"
+    "  -1, --regular     if the specification is regular, the LPE is generated in\n"
+    "                    regular form (default)\n"
+    "  -2, --regular2    a variant of regular where much more data variables are\n"
+    "                    being used; (sometimes successful when --regular leads to\n"
+    "                    non-termination)\n"
+    "  -c, --cluster     all actions in the LPE are clustered (requires --binary)\n"
+    "  -n, --no-cluster  no actions are clustered (default)\n"
+    "  -w, --newstate    state variables are encoded using enumerated types\n"
+    "                    (requires --regular or --regular2);\n"
+    "                    without --newstate positive numbers are used\n"
+    "  -b, --binary      use binary case functions when clustering, instead of n-ary;\n"
+    "                    in the presence of --newstate, state variables are encoded\n"
+    "                    by a vector of boolean variables\n"
+    "  -a, --statenames  the names of state variables are derived from the\n"
+    "                    specification\n"
+    "  -o, --no-rewrite  do not rewrite data terms while linearising; this option is\n"
+    "                    useful when the rewrite system does not terminate\n"
+    "  -f, --no-freevars instantiate don't care values with arbitrary constants,\n"
+    "                    instead of using free variables to model these values\n"
+    "  -e  --check-only  check syntax and static semantics only; do not linearise\n"
+    "      --stdout      the generated LPE is written to stdout in textual format\n"
+    "  -h, --help        display this help\n"    
+    "  -v, --version     display version information\n"
+    "  -q, --quiet       do not display warning messages\n"
+    "  -v, --verbose     turn on the display of short intermediate messages\n"
+    "  -d, --debug       turn on the display of detailed intermediate messages\n",
+    Name);
 }
-
-static ATbool ExtensionAdded(char *filename, char *suffix) {
-     char *lastdot = strrchr(filename,'.');
-     if (!lastdot || strcmp(lastdot, suffix)) {
-          strcat(filename, suffix);
-          return ATtrue;
-          }
-     return ATfalse;
-     }
 
 
 /* This file describes a C implementation of the abstract datatype
@@ -186,7 +167,6 @@ static char *ATSgetArgument(ATermAppl appl, int nr)
 { return gsATermAppl2String(ATAgetArgument(appl, nr));
 }
 
-extern FILE *outfile;
 int time_operators_used=0;
 static ATermList seq_varnames=NULL;
 
@@ -854,12 +834,14 @@ static void storeact(ATermList acts)
   { insertAction(ATAgetFirst(acts)); }
 } 
 
-/************ read_input_file  **********************************/
+/************ create_spec  **********************************/
 
-static specificationbasictype *read_input_file(char *filename) 
-{ FILE *inputfile;
-  ATermAppl t=NULL;
-  specificationbasictype *spec=(specificationbasictype *) malloc(sizeof(specificationbasictype));
+static specificationbasictype *create_spec(ATermAppl t) 
+{ 
+  assert(gsIsSpecV1(t));
+  
+  specificationbasictype *spec =
+    (specificationbasictype *) malloc(sizeof(specificationbasictype));
   spec->sorts=NULL;
   ATprotect((ATerm *)&(spec->sorts));
   spec->funcs=NULL;
@@ -879,74 +861,57 @@ static specificationbasictype *read_input_file(char *filename)
   spec->init=NULL;
   ATprotect((ATerm *)&(spec->init));
   
-  if (spec==NULL)
-  { ATerror("Cannot allocate memory for elementary operations\n"); }
-
-  inputfile=fopen(filename,"r");
-  if (inputfile==NULL)
-     ATerror("Fail to open inputfile %s\n",filename);
-
-  t=gsParseSpecification(inputfile);
-  if (t==NULL)
-  { ATerror("Parse error\n");
-  }
-  
-
-  assert(gsIsSpecV1(t));
   /* t=Alpha(t); / * Apply alpha-beta axioms */
 
-
-/* First store the sorts */
-  
-  spec->sorts=ATempty;
-  for(ATermList sorts=ATLgetArgument(ATAgetArgument(t,0),0) ; 
-      sorts!=ATempty ; 
-      sorts=ATgetNext(sorts) )
-  { insertsort(ATAgetFirst(sorts),spec); 
+  /* Store the sorts */
+  spec->sorts = ATempty;
+  for(ATermList sorts = ATLgetArgument(ATAgetArgument(t,0),0); 
+    !ATisEmpty(sorts); sorts = ATgetNext(sorts) )
+  {
+    insertsort(ATAgetFirst(sorts),spec); 
   }
-          
-  spec->funcs=ATempty;
-/* Now store the constructors */
-  for(ATermList constr=ATLgetArgument(ATAgetArgument(t,1),0) ; 
-      !ATisEmpty(constr) ; 
-      constr=ATgetNext(constr) )
-  { 
+  /* Store the constructors */
+  spec->funcs = ATempty;
+  for(ATermList constr = ATLgetArgument(ATAgetArgument(t,1),0);
+    !ATisEmpty(constr); constr = ATgetNext(constr) )
+  {
     insertconstructor(ATAgetFirst(constr),spec); 
   }
-
-  spec->maps=ATempty;
-/* Finally store the functions */
-  for(ATermList maps=ATLgetArgument(ATAgetArgument(t,2),0) ; 
-      !ATisEmpty(maps) ; 
-      maps=ATgetNext(maps) )
-  { insertmapping(ATAgetFirst(maps),spec); 
+  /* Store the functions */
+  spec->maps = ATempty;
+  for(ATermList maps = ATLgetArgument(ATAgetArgument(t,2),0);
+    !ATisEmpty(maps); maps=ATgetNext(maps) )
+  {
+    insertmapping(ATAgetFirst(maps),spec); 
   }
-
-
-/* And very finally store the equations */
-  if (mayrewrite) gsRewriteInit(gsMakeDataEqnSpec(ATempty),GS_REWR_INNER3);
-  spec->eqns=ATempty;
-  for(ATermList eqns=ATLgetArgument(ATAgetArgument(t,3),0) ;
-      !ATisEmpty(eqns) ;
-      eqns=ATgetNext(eqns) )
-  { ATermAppl eqn=ATAgetFirst(eqns);
+  /* Store the equations */
+  if (mayrewrite) {
+    gsRewriteInit(gsMakeDataEqnSpec(ATempty),GS_REWR_INNER3);
+  }
+  spec->eqns = ATempty;
+  for(ATermList eqns = ATLgetArgument(ATAgetArgument(t,3),0);
+    !ATisEmpty(eqns); eqns = ATgetNext(eqns) )
+  {
+    ATermAppl eqn=ATAgetFirst(eqns);
     declare_equation_variables(ATLgetArgument(eqn,0));
-    newequation(ATAgetArgument(eqn,1),ATAgetArgument(eqn,2),ATAgetArgument(eqn,3),spec);
+    newequation(
+      ATAgetArgument(eqn,1),
+      ATAgetArgument(eqn,2),
+      ATAgetArgument(eqn,3),
+      spec
+    );
     end_equation_section();
   }
 
-  spec->eqns=ATLgetArgument(ATAgetArgument(t,3),0);
-
-  spec->acts=ATLgetArgument(ATAgetArgument(t,4),0);
+  spec->eqns = ATLgetArgument(ATAgetArgument(t,3),0);
+  spec->acts = ATLgetArgument(ATAgetArgument(t,4),0);
   storeact(spec->acts);
-  spec->procdatavars=ATempty;
-  spec->procs=ATLgetArgument(ATAgetArgument(t,5),0);
+  spec->procdatavars = ATempty;
+  spec->procs = ATLgetArgument(ATAgetArgument(t,5),0);
   storeprocs(spec->procs);
-  spec->initdatavars=ATLgetArgument(ATAgetArgument(t,6),0);
-  spec->init=storeinit(ATAgetArgument(ATAgetArgument(t,6),1));
-
+  spec->initdatavars = ATLgetArgument(ATAgetArgument(t,6),0);
+  spec->init = storeinit(ATAgetArgument(ATAgetArgument(t,6),1));
   return spec;
-
 }
 
 /************ storeprocs *************************************************/
@@ -6733,21 +6698,15 @@ static ATermAppl parallelcomposition(
   renaming=construct_renaming(pars1,pars2,&pars3,&pars2renaming); 
 //  ATfprintf(stderr,"pars1: %t\npars2: %t\npars3: %t\n\n",pars1,pars2,pars3);
 
-  if (informative_output)
-       ATfprintf(stderr,"Parallel composition is being translated... ");
-
-  if (informative_output)
-       ATfprintf(stderr,"%d   %d   ",
-              ATgetLength(linGetSums(t1)),
-              ATgetLength(linGetSums(t2)));
-
+  gsVerboseMsg(
+    "- parallel composition is being translated: %d   %d",
+    ATgetLength(linGetSums(t1)),
+    ATgetLength(linGetSums(t2)));
   result=combinesumlist(
-               linGetSums(t1),
-               linGetSums(t2),
-               pars1,pars2renaming,pars3,renaming,spec,pars2);
-  
-  if (informative_output)
-       fprintf(stderr,"%d   done.\n",ATgetLength(result)); 
+    linGetSums(t1),
+    linGetSums(t2),
+    pars1,pars2renaming,pars3,renaming,spec,pars2);
+  gsVerboseMsg("   %d   done\n", ATgetLength(result)); 
   return linMakeInitProcSpec(
                ATconcat(init1,
                         substitute_assignmentlist(
@@ -6975,7 +6934,6 @@ static void initialize_data(void)
   ATprotectList(&LocalpCRLprocs);
   ATprotectList(&pcrlprocesses);
   pcrlprocesses=ATempty;
-  gsEnableConstructorFunctions();
   objectIndexTable=ATindexedSetCreate(1024,75);
   stringTable=ATindexedSetCreate(1024,75);
   freshstringIndices=ATtableCreate(64,75);
@@ -7488,160 +7446,245 @@ static ATermAppl transform(
 
 /*--- main program -----------------------------*/
 
-static int main2(int argc, char *argv[],ATerm *stack_bottom)
+int main(int argc, char *argv[])
 { 
-  char *sname = NULL, *oname = NULL;
-  specificationbasictype *spec;
-  char messagebuffer[STRINGLENGTH]="Unitialized messagebuffer";
-  ATermAppl initial_process=NULL;
-  ATermAppl result=NULL;
-  char fname[STRINGLENGTH], iname[STRINGLENGTH];
-  
-  fname[0]='\0';
-  to_toolbusfile=0;
-  to_stdout=0;
-
-  struct option lopts[] = {
-                { "stack",        no_argument,    NULL,   '0' },
-                { "stdout",       no_argument,    NULL,   -1 },
-                { "regular",      no_argument,    NULL,   '1' },
-                { "regular2",     no_argument,    NULL,   '2' },
-                { "cluster",      no_argument,    NULL,   'c' },
-                { "nocluster",    no_argument,    NULL,   'n' },
-                { "binary",       no_argument,    NULL,   'b' },
-                { "newstate",     no_argument,    NULL,   'w' },
-                { "statenames",   no_argument,    NULL,   'a' },
-                { "no-rewrite",   no_argument,    NULL,   'o' },
-                { "nofreevars",   no_argument,    NULL,   'f' },
-                { "help",         no_argument,    NULL,   'h' },
-                { "version",      no_argument,    NULL,   'v' },
-                { "quiet",        no_argument,    NULL,   'q' },
-                { 0, 0, 0, 0 }
-        };
-
-  int opt=0;
-  while ( (opt = getopt_long(argc,argv,"012vnb2aofhvq",lopts,NULL)) != -1 )
-  { switch (opt)
-    { case '0': /* stack */
-        if (to_stdout==1)
-        { ATerror("Options --stack and --stdout cannot be used together\n");
-        }
-        to_toolbusfile=1;
+  //declarations for getopt
+  bool to_stdout = false;
+  bool check_only = false;
+  bool opt_stack = false;
+  bool opt_regular = false;
+  bool opt_regular2 = false;
+  #define ShortOptions   "012cnwbaofehqvd"
+  #define StdOutOption   CHAR_MAX + 1
+  #define VersionOption  StdOutOption + 1
+  struct option LongOptions[] = {
+    { "stack",        no_argument,    NULL,   '0' },
+    { "regular",      no_argument,    NULL,   '1' },
+    { "regular2",     no_argument,    NULL,   '2' },
+    { "cluster",      no_argument,    NULL,   'c' },
+    { "no-cluster",   no_argument,    NULL,   'n' },
+    { "newstate",     no_argument,    NULL,   'w' },
+    { "binary",       no_argument,    NULL,   'b' },
+    { "statenames",   no_argument,    NULL,   'a' },
+    { "no-rewrite",   no_argument,    NULL,   'o' },
+    { "no-freevars",  no_argument,    NULL,   'f' },
+    { "check-only",   no_argument,    NULL,   'e' },
+    { "stdout",       no_argument,    NULL,   StdOutOption },
+    { "help",         no_argument,    NULL,   'h' },
+    { "version",      no_argument,    NULL,   VersionOption },
+    { "quiet",        no_argument,    NULL,   'q' },
+    { "verbose",      no_argument,    NULL,   'v' },
+    { "debug",        no_argument,    NULL,   'd' },
+    { 0, 0, 0, 0 }
+  };
+  int Option;
+  //parse options
+  Option = getopt_long(argc, argv, ShortOptions, LongOptions, NULL);
+  while (Option != -1) {
+    switch (Option){
+      case '0': /* stack */
+        opt_stack = true;
+        regular = false;
         break;
-      case -1:  /* stdout */
-        to_toolbusfile=0; to_stdout=1; break;
       case '1': /* regular */
-        regular=1; break;
+        opt_regular = true;
+        //regular = true;
+        break;
       case '2': /* regular2 */
-        regular2=1; regular=1; break;
+        opt_regular2 = true;
+        //regular2 = true;
+        //regular = true;
+        break;
       case 'c': /* cluster */ 
-        cluster=1;
-        binary=1;
-        fprintf(stderr,"lineariser: --cluster also sets --binary\n");
+        cluster = true;
         break;
       case 'n': /* nocluster */
-        nocluster=1; break;
-      case 'b': /* binary */ 
-        binary=1; break;
+        nocluster = true;
+        break;
       case 'w': /* newstate */ 
-        oldstate=0; break;
-      case 'a': /* --statenames */ 
-        statenames=1; break;
-      case 'o': /* --no-rewrite */ 
-        mayrewrite=0; break;
-      case 'f': /* --nofreevars */
-        allowFreeDataVariablesInProcesses=0; break;
+        oldstate = false;
+        break;
+      case 'b': /* binary */ 
+        binary = true;
+        break;
+      case 'a': /* statenames */ 
+        statenames = true;
+        break;
+      case 'o': /* no-rewrite */ 
+        mayrewrite = false;
+        break;
+      case 'f': /* nofreevars */
+        allowFreeDataVariablesInProcesses = false;
+        break;
+      case 'e': /* check-only */
+        check_only = true;
+        break;
+      case StdOutOption:  /* stdout */
+        to_stdout = true;
+        break;
       case 'h': /* help */
-        help(); exit(0);
-      case 'v': /* version */
-        version(); exit(0);
-      case 'q': /* --quiet */
-        informative_output=0; break;
+        PrintHelp(argv[0]);
+        return 0;
+      case VersionOption: /* version */
+        PrintVersion();
+        return 0;
+      case 'q': /* quiet */
+        gsSetQuietMsg();
+        break;
+      case 'v': /* verbose */
+        gsSetVerboseMsg();
+        break;
+      case 'd': /* debug */
+        gsSetDebugMsg();
+        break;
       case '?':
       default:
-        ATerror("Unknown commandline option\n"); 
-    
+        PrintMoreInfo(argv[0]); 
+        return 1;
     } 
+    Option = getopt_long(argc, argv, ShortOptions, LongOptions, NULL);
   }
-  /* Now the name of the inputfile must be read from the commandline */
-
-  if ((optind < argc) && (argv[optind][0]!='-'))
-  { char *lastdot = NULL;
-    sname = argv[optind];
-    strcpy(fname, sname);
-    oname = fname;
-    if ((strlen(fname)>3) && (strrchr(fname,'/')!=NULL))
-         oname = strrchr(oname,'/')+1;
-    lastdot = strrchr(oname,'.');
-      if (lastdot && !strcmp(lastdot,".mcrl2")) 
-      { *lastdot = '\0';   
-      }
-  } 
-  else 
-  { ATerror("No name of input file provided\n"); 
+  //check for dangerous and illegal option combinations
+  if ((opt_stack && opt_regular) || (opt_stack && opt_regular2) ||
+    (opt_regular && opt_regular2))
+  {
+    gsErrorMsg("only one method of linearisation is allowed\n");
   }
-
-  if (optind+1<argc)
-  { ATerror("Too many input files on command line\n");
-  }
-
-  if (to_stdout==0 && 
-     (regular || nocluster || cluster || binary || !oldstate)) 
-      to_toolbusfile=1; 
-  if (!oldstate && !regular && !regular2)
-    ATerror("Option --newstate can only be used with --regular or --regular2\n");
-
-  ATinit(argc,argv,stack_bottom);
-  if (((argc < 2)||(sname==NULL)))
-      usage();
-  initialize_data();
-
-  strcpy(iname, sname);
-  infile=fopen(iname,"r");
-  if (infile==NULL) { 
-     if (ExtensionAdded(iname, ".mcrl2")) {
-           infile=fopen(iname,"r");
-          }
-     }
-  if (infile==NULL)
-        ATerror ("Cannot open input file `%s'\n", iname);
-  fclose(infile);
-  if (to_toolbusfile)
-   { snprintf(messagebuffer,STRINGLENGTH,"%s.lpe",oname);
-     toolbusfile=fopen(messagebuffer,"w");
-     if (toolbusfile==NULL)
-        ATerror("Cannot open file for output\n"); }
-    spec=read_input_file(iname); 
-
-    initial_process=spec->init;
-    initialize_symbols(); /* This must be done after storing the data,
-                             to avoid a possible name conflict with action
-                             Terminate */
-    if ((to_toolbusfile)||(to_stdout))
-    { result=transform(initial_process,spec);
-      ATwriteToBinaryFile(
-         (ATerm)gsMakeSpecV1(
-                 gsMakeSortSpec(spec->sorts),
-                 gsMakeConsSpec(spec->funcs),
-                 gsMakeMapSpec(spec->maps),
-                 gsMakeDataEqnSpec(spec->eqns),
-                 gsMakeActSpec(spec->acts),
-                 gsMakeLPE(spec->procdatavars, ATLgetArgument(result,1),ATLgetArgument(result,2)),
-                 gsMakeLPEInit(spec->procdatavars, ATLgetArgument(result,0))),
-                 to_stdout?stdout:toolbusfile);
+  if (!opt_stack) {
+    regular = true;
+    if (opt_regular2) {
+      regular2 = true;
     }
-  else 
-  { if (informative_output)
-    { ATfprintf(stderr,"The file %s contains a correctly typed mCRL2 specification\n",
-                          iname);  
-  } }
-  return 0;
-}
-
-int main(int argc, char *argv[])
-{
+  }
+  if (!oldstate && !regular && !regular2) {
+    gsErrorMsg(
+      "option --newstate can only be used with --regular or --regular2\n");
+    return 1;
+  }
+  if (cluster && !binary) {
+    gsWarningMsg("option --cluster also sets option --binary\n");
+    binary = true;
+  }
+  //check for too many arguments
+  int NoArgc; //non-option argument count
+  NoArgc = argc - optind;
+  assert(NoArgc >= 0);
+  if (NoArgc > 1) {
+    fprintf(stderr, "%s: too many arguments\n", NAME);
+    PrintMoreInfo(argv[0]);
+    return 1;
+  }
+  assert(NoArgc == 1);
+  //determine and open input filename
+  int MaxLen =
+    strlen(argv[optind]) + fmax(strlen(INFILEEXT), strlen(OUTFILEEXT)) + 1;
+  char SpecFileName[MaxLen];
+  //SpecFileName and OutFileName can hold the supplied file name, possibly
+  //suffixed with INFILEEXT and OUTFILEEXT, respectively
+  //determine specification filename
+  strcpy(SpecFileName, argv[optind]);
+  char *FileExt = strrchr(SpecFileName, '.');
+  if (FileExt == NULL) {
+    //'.' does not occur in SpecFileName, append INFILEEXT 
+    strcat(SpecFileName, INFILEEXT);
+  } else { //FileExt != NULL
+    if (strcmp(FileExt, INFILEEXT) != 0) {
+      //FileExt is not equal to INFILEEXT, append INFILEEXT
+      strcat(SpecFileName, INFILEEXT);
+    }
+  }
+  //SpecFileName ends with INFILEEXT
+  gsDebugMsg("input filename: %s\n", SpecFileName);
+  //open input filename
+  FILE *instream = fopen(SpecFileName,"r");
+  if (instream==NULL) {
+    gsErrorMsg("Cannot open input file `%s'\n", SpecFileName);
+    return 1;
+  }
+  //determine and open output filename
+  char OutFileName[MaxLen];
+  FILE *outstream = NULL;
+  if (!check_only) {
+    //determine output filename
+    strcpy(OutFileName, SpecFileName);
+    //remove explicit path specifiers
+    char *NoPath = strrchr(OutFileName, '/');
+    if (NoPath != NULL) {
+      strcpy(OutFileName, NoPath + 1);
+    }
+    //replace INFILEEXT suffix by OUTFILEEXT
+    OutFileName[strlen(OutFileName) - strlen(INFILEEXT)] = '\0';
+    strcat(OutFileName, OUTFILEEXT);
+    gsDebugMsg("output filename: %s\n", OutFileName);
+    //open output filename
+    if (to_stdout) {
+      outstream = stdout;
+    } else { // !to_stdout
+      outstream = fopen(OutFileName,"w");
+      if (outstream == NULL) {
+        gsErrorMsg("Cannot open output file `%s'\n", OutFileName);
+        fclose(instream);
+        return 1;
+      }
+    }
+  }
+  
+  //initialise ATerm library
   ATerm stack_bottom;
-  return main2(argc,argv,&stack_bottom);
+  ATinit(argc,argv,&stack_bottom);
+
+  //parse, type check and implement data types on the input specificaton
+  ATermAppl SpecTerm = gsParseSpecification(instream, !check_only);
+  fclose(instream);
+  if (SpecTerm == NULL) {
+    if (outstream != NULL) {
+      fclose(outstream);
+    }
+    return 1;
+  }
+  if (check_only) {
+    fprintf(stdout,
+      "The file %s contains a correctly typed mCRL2 specification\n",
+      SpecFileName);
+    return 0;
+  }
+  assert(gsIsSpecV1(SpecTerm));
+  assert(outstream != NULL);
+  
+  //initialise local data structures for linearisation
+  gsVerboseMsg("linearising processes...\n");
+  initialize_data();
+  specificationbasictype *spec = create_spec(SpecTerm);
+  if (spec == NULL) {
+    fclose(outstream);
+    return 1;    
+  }
+  initialize_symbols(); /* This must be done after storing the data,
+                           to avoid a possible name conflict with action
+                           Terminate */
+  //linearise spec
+  ATermAppl result = transform(spec->init, spec);
+  result = gsMakeSpecV1(
+    gsMakeSortSpec(spec->sorts),
+    gsMakeConsSpec(spec->funcs),
+    gsMakeMapSpec(spec->maps),
+    gsMakeDataEqnSpec(spec->eqns),
+    gsMakeActSpec(spec->acts),
+    gsMakeLPE(spec->procdatavars,
+      ATLgetArgument(result,1),
+      ATLgetArgument(result,2)),
+    gsMakeLPEInit(spec->procdatavars,
+      ATLgetArgument(result,0))
+  );
+  //store the LPE
+  if (outstream == stdout) {
+    ATwriteToTextFile((ATerm) result, outstream);
+    fprintf(outstream, "\n");
+  } else { //outstream != stdout
+    ATwriteToBinaryFile((ATerm) result, outstream);
+    fclose(outstream);
+  }
+  return 0;
 }
 
 #ifdef __cplusplus

@@ -1,5 +1,5 @@
 #define  NAME      "libgsparse"
-#define  LVERSION  "0.1.37"
+#define  LVERSION  "0.2.0"
 #define  AUTHOR    "Aad Mathijssen"
 
 #ifdef __cplusplus
@@ -64,49 +64,39 @@ void gsPrintParts(FILE *OutStream, const ATermList Parts, bool ShowSorts,
 
 //implementation
 
-ATermAppl gsParseSpecification (FILE *SpecStream)
+ATermAppl gsParseSpecification (FILE *SpecStream, bool ImplementData)
 {
-  ATermAppl Result = NULL;
   //check preconditions
   if (SpecStream == NULL) {
     gsErrorMsg("formula stream may not be empty\n");
-  } else {
-    //enable constructor functions
-    gsEnableConstructorFunctions();
-    //parse specification using bison
-    gsVerboseMsg("parsing specification from stream\n");
-    Result = gsParse(SpecStream);
-    //Result = (ATermAppl) ATreadFromFile(SpecStream);
+    return NULL;
+  }
+  //enable constructor functions
+  gsEnableConstructorFunctions();
+  //parse specification using bison
+  gsVerboseMsg("parsing...\n");
+  ATermAppl Result = gsParse(SpecStream);
+  if (Result == NULL) {
+    gsErrorMsg("parsing failed\n");
+    return NULL;
+  }
+  //type check specification
+  gsVerboseMsg("type checking...\n");
+  Result = gsTypeCheck(Result);
+  if (Result == NULL) {
+    gsErrorMsg("type checking failed\n");
+    return NULL;
+  }
+  //implement standard data types and type constructors
+  if (ImplementData) {
+    gsVerboseMsg("implementing standard data types and type constructors...\n");
+    Result = gsImplementData(Result);
     if (Result == NULL) {
-      gsErrorMsg("parsing failed\n");
-    } else {
-      //type check specification
-      gsVerboseMsg("type checking specification\n");
-      Result = gsTypeCheck(Result);
-      if (Result == NULL) {
-        gsErrorMsg("type checking failed\n");
-      } else {
-        //implement standard data types and type constructors
-        gsVerboseMsg("implementing standard data types and type constructors\n");
-        Result = gsImplementData(Result);
-        if (Result == NULL) {
-          gsErrorMsg("data implementation failed\n");
-        } else {
-          //linearise processes
-          gsVerboseMsg("linearising processes\n");
-          Result = gsLinearise(Result);
-          if (Result == NULL) {
-            gsErrorMsg("linearisation failed\n");
-          }
-        }
-      }
+      gsErrorMsg("data implementation failed\n");
+      return NULL;
     }
   }
-  if (Result != NULL) {
-    gsDebugMsg("return %t\n", Result);
-  } else {
-    gsDebugMsg("return NULL\n");
-  }
+  gsDebugMsg("return %t\n", Result);
   return Result;
 }
 

@@ -214,7 +214,7 @@ bool ParseSpecificationStream(FILE *SpecStream, FILE *OutputStream,
   assert(OutputStream != NULL);
   bool Result;
   //parse specification save it to Spec
-  ATermAppl Spec = gsParseSpecification(SpecStream);
+  ATermAppl Spec = gsParseSpecification(SpecStream, true);
   if (Spec != NULL) {
     if (NoSave) {
       gsVerboseMsg("do not save specification\n");

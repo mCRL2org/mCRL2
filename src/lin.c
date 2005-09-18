@@ -121,7 +121,7 @@ int main(int argc, char **argv)
 		gsEnableConstructorFunctions();
 		Spec = (ATermAppl) ATreadFromFile(SpecStream);
 	} else {
-		Spec = gsParseSpecification(SpecStream);
+		Spec = gsParseSpecification(SpecStream, true);
 		fclose(SpecStream);
 	}
 	if ( Spec == NULL )

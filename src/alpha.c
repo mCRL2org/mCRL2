@@ -97,7 +97,7 @@ int main(int argc, char **argv)
 		gsEnableConstructorFunctions();
 		Spec = gsParse(SpecStream);
 		Spec = gsTypeCheck(Spec);
-		//Spec = gsParseSpecification(SpecStream);
+		//Spec = gsParseSpecification(SpecStream, false);
 		fclose(SpecStream);
 	}
 	if ( Spec == NULL )

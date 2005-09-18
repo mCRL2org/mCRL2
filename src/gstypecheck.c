@@ -260,7 +260,7 @@ ATermAppl gstcFoldSpec(ATermAppl s)
 // Main function
 ATermAppl gsTypeCheck (ATermAppl input){	
   ATermAppl Result=NULL;
-  gsVerboseMsg ("type checking phase started\n");
+  gsDebugMsg ("type checking phase started\n");
   gstcDataInit();
 
   gsDebugMsg ("type checking read-in phase started\n");
@@ -292,7 +292,7 @@ ATermAppl gsTypeCheck (ATermAppl input){
 
   Result=gstcFoldSpec(Result);
 
-  gsVerboseMsg ("type checking phase finished\n");
+  gsDebugMsg ("type checking phase finished\n");
   }}}}}}}
 
   if (Result != NULL) {

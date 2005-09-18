@@ -9,11 +9,16 @@ extern "C" {
 //Global preconditions:
 //- the ATerm library has been initialised
 
-ATermAppl gsParseSpecification(FILE *SpecStream);
+ATermAppl gsParseSpecification(FILE *SpecStream, bool ImplementData);
 /*Pre: SpecStream points to a stream from which can be read
-  Post:if SpecStream contains mCRL2 specification, this specification is
-       parsed and returned in the ATerm format; otherwise NULL is returned and
-       an appropriate error message is printed to stderr.
+  Ret: if SpecStream contains a valid mCRL2 specification, this specification
+       is:
+       - parsed,
+       - type checked
+       - the part is implemented, if ImplementData
+       The resulting ATerm is returned;
+       If something went wrong, NULL is returned and an appropriate error
+       the message is printed to stderr.
 */ 
 
 void gsPrintSpecification(FILE *OutStream, const ATermAppl Spec);
