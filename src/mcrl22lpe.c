@@ -5,9 +5,8 @@ extern "C" {
 #endif
 
 /* TODO:
- * Verwerk vrije procesvariabelen op correcte wijze.
- * Apply sum elimination.
- * Apply rewriting.
+ * Remove free variables that are declared, but not used
+ * inside processes, or the initial process.
  * Put renaming, hiding, encapsulation, and visibility
  * operators as far inside the parallel operators as
  * is possible.
@@ -1562,6 +1561,10 @@ static int occursinpCRLterm(ATermAppl var, ATermAppl p, int strict)
   if (gsIsMultAct(p)) 
   { return occursinmultiaction(var,ATLgetArgument(p,0));
   }
+  if (gsIsAtTime(p))
+  { return occursinterm(var,ATAgetArgument(p,1)) ||
+           occursinpCRLterm(var,ATAgetArgument(p,0),strict);
+  }
   if (gsIsDelta(p))
    { return 0; }
   if (gsIsTau(p))
@@ -2799,7 +2802,7 @@ static ATermAppl procstorealGNFbody(
 { 
   if (verbose>=1)
   { ATfprintf(stderr,"procstorealGNFbody: ");
-    gsPrintPart(body,0,0,0);
+    gsPrintPart(stderr,body,0,0);
     ATfprintf(stderr,"\n");
   }
 
@@ -5612,7 +5615,7 @@ static int gsIsDataExprEquality(ATermAppl t)
       { return 0;
       }
       if (ATAgetArgument(t1,0)==gsMakeOpIdEq(sort))
-      { ATfprintf(stderr,"IS an equality !!!\n");
+      { 
         return 1;
       };
     }
@@ -5762,10 +5765,17 @@ static int allow(ATermList allowlist, ATermAppl multiaction)
 
 static ATermAppl allowcomposition(ATermList allowlist, ATermAppl ips)
 {
-  ATermList resultsumlist=ATempty;
+  ATermList resultdeltasumlist=ATempty;
+  ATermList resultactionsumlist=ATempty;
   ATermList sourcesumlist=linGetSums(ips);
   allowlist=sortMultiActionLabels(allowlist);
 
+  /* First add the resulting sums in two separate lists
+     one for actions, and one for delta's. The delta's 
+     are added at the end to the actions, where for
+     each delta summand it is determined whether it ought
+     to be added, or is superseded by an action or another
+     delta summand */
   for( ; sourcesumlist!=ATempty ; sourcesumlist=ATgetNext(sourcesumlist))
   { ATermAppl summand=ATAgetFirst(sourcesumlist);
     ATermList sumvars=linGetSumVars(summand);
@@ -5776,22 +5786,29 @@ static ATermAppl allowcomposition(ATermList allowlist, ATermAppl ips)
 
     if (allow(allowlist,multiaction))
     { 
-      resultsumlist=ATinsertA(
-                    resultsumlist,
+      resultactionsumlist=ATinsertA(
+                    resultactionsumlist,
                     summand); }
     else
     { 
-      if (!gsIsNil(actiontime))
-      { resultsumlist=insert_timed_delta_summand(
-                      resultsumlist,
+      resultdeltasumlist=ATinsertA(
+                    resultdeltasumlist,
                       gsMakeLPESummand(
                              sumvars,
                              condition,
                              gsMakeDelta(),
                              actiontime,
                              nextstate));
-      }
     }
+  }
+
+  ATermList resultsumlist=resultactionsumlist;
+
+  for ( ; resultdeltasumlist!=ATempty ; 
+             resultdeltasumlist=ATgetNext(resultdeltasumlist))    
+  { resultsumlist=insert_timed_delta_summand(
+                      resultsumlist,
+                      ATAgetFirst(resultdeltasumlist));
   }
   return linMakeInitProcSpec(
              linGetInit(ips),linGetParameters(ips),resultsumlist);
@@ -5966,7 +5983,7 @@ static int occursinvarandremove(ATermAppl var, ATermList *vl)
   return result;
 }
 
-static int sumelimination(
+/* static int sumelimination(
                    ATermAppl u1, 
                    ATermAppl u2,
                    ATermList *sumlist, 
@@ -5985,7 +6002,7 @@ static int sumelimination(
     *subpars=ATinsertA(*subpars,u2);
   }
   return result;
-}
+} */
 
 /********************** construct renaming **************************/
 
@@ -6268,6 +6285,98 @@ static ATermList makeMultiActionConditionList(
 
 }
 
+static void ApplySumElimination(ATermList *sumvars,
+                                ATermAppl *condition,
+                                ATermAppl *multiaction,
+                                ATermAppl *actiontime,
+                                ATermList *nextstate,
+                                ATermAppl communicationcondition,
+                                ATermList parameters)
+{ /* Apply sumelimination on the summand consisting of 
+     sumvars, condition, multiaction, actiontime and nextstate,
+     using the condition in communicationcondition. It is
+     assumed that the communicationcondition is a conjunction of
+     conditions. If these conditions are equalities, it is checked
+     whether they are of the form x==t, or t==x, where x is a variable
+     occuring in sumvars. If so, x is removed from sumvars and
+     t is substituted for x in the summand */
+   
+  if (gsIsDataExprAnd(communicationcondition))
+  { ApplySumElimination(sumvars,
+                        condition,
+                        multiaction,
+                        actiontime,
+                        nextstate,
+                        ATAgetArgument(ATAgetArgument(communicationcondition,0),1),
+                        parameters);
+    ApplySumElimination(sumvars,
+                        condition,
+                        multiaction,
+                        actiontime,
+                        nextstate,
+                        ATAgetArgument(communicationcondition,1),
+                        parameters);
+    return;
+  }
+                          
+  if (gsIsDataExprEquality(communicationcondition))
+  { /* Try to see whether left or right hand side of the 
+       equality is a data variable that occurs in sumvars and
+       apply sum elimination */
+    ATermAppl lefthandside=ATAgetArgument(
+                              ATAgetArgument(communicationcondition,0),1);
+    ATermAppl righthandside=ATAgetArgument(communicationcondition,1);
+
+    if (gsIsDataVarId(righthandside) &&
+           occursin(righthandside,*sumvars))
+    { /* Turn lefthandside and righthandside around, such
+             that this case is handled by the next piece of code also */
+      ATermAppl temp=lefthandside;
+      lefthandside=righthandside;
+      righthandside=temp;
+    }
+
+    if (gsIsDataVarId(lefthandside) &&
+            occursin(lefthandside,*sumvars))
+    { /* replace the lefthandside by the righthandside in this
+             summand and remove the lefthandside from the sumvars. */
+      *sumvars=ATremoveElement(*sumvars,(ATerm)lefthandside);
+      *condition=substitute_data(
+                        ATinsertA(ATempty,righthandside),
+                        ATinsertA(ATempty,lefthandside),
+                        *condition);
+      *multiaction=substitute_multiaction(
+                        ATinsertA(ATempty,righthandside),
+                        ATinsertA(ATempty,lefthandside),
+                        *multiaction);
+      if (*actiontime!=gsMakeNil())
+      { *actiontime=substitute_data(
+                        ATinsertA(ATempty,righthandside),
+                        ATinsertA(ATempty,lefthandside),
+                        *actiontime);
+      }
+      *nextstate=substitute_assignmentlist(
+                        ATinsertA(ATempty,righthandside),
+                        ATinsertA(ATempty,lefthandside),
+                        *nextstate,
+                        parameters,
+                        0);
+      return;
+    }
+  }
+
+  /* Either the communicationcondition is not an equality
+     or a conjunction, or if it is an equality, it is not
+     of the form x==t, or t==x with x a variable in sumvars.
+     In this case no sum elimination is applied */
+
+  *condition=gsMakeDataExprAnd(
+                       *condition,
+                       communicationcondition);
+  return; 
+}
+
+
 static ATermAppl communicationcomposition(
                       ATermList communications,
                       ATermAppl ips)
@@ -6312,75 +6421,41 @@ static ATermAppl communicationcomposition(
                               ATLgetArgument(multiaction,0),
                               communications);
 
+
     assert(multiactionconditionlist!=ATempty);
     for( ; multiactionconditionlist!=ATempty ;
                multiactionconditionlist=ATgetNext(multiactionconditionlist) )
     { ATermAppl multiactioncondition=ATAgetFirst(multiactionconditionlist);
       ATermAppl communicationcondition=
                   RewriteTerm(ATAgetArgument(multiactioncondition,1));
-      ATfprintf(stderr,"MMMM %t\n\n",communicationcondition);
-      if (gsIsDataExprEquality(communicationcondition))
-      { /* Try to see whether left or right hand side of the 
-           equality is a data variable that occurs in sumvars and
-           apply sum elimination */
-        ATermAppl lefthandside=ATAgetArgument(
-                                 ATAgetArgument(communicationcondition,0),1);
-        ATermAppl righthandside=ATAgetArgument(communicationcondition,1);
 
-        if (gsIsDataVarId(righthandside) &&
-            occursin(righthandside,sumvars))
-        { /* Turn lefthandside and righthandside around, such
-             that this case is handled by the next piece of code also */
-          ATermAppl temp=lefthandside;
-          lefthandside=righthandside;
-          righthandside=temp;
-        }
+      multiaction=gsMakeMultAct(ATLgetArgument(multiactioncondition,0));
+      
+      ATermList newsumvars=sumvars;
+      ATermAppl newcondition=condition;
+      ATermAppl newmultiaction=multiaction;
+      ATermAppl newactiontime=actiontime;
+      ATermList newnextstate=nextstate;
 
-        if (gsIsDataVarId(lefthandside) &&
-            occursin(lefthandside,sumvars))
-        { /* replace the lefthandside by the righthandside in this
-             summand and remove the lefthandside from the sumvars. */
-          sumvars=ATremoveElement(sumvars,lefthandside);
-          condition=substitute_data(
-                            ATinsertA(ATempty,righthandside),
-                            ATinsertA(ATempty,lefthandside),
-                            condition);
-          multiaction=substitute_multiaction(
-                            ATinsertA(ATempty,righthandside),
-                            ATinsertA(ATempty,lefthandside),
-                            gsMakeMultAct(ATLgetArgument(multiactioncondition,0)));
-          if (actiontime!=gsMakeNil())
-          { actiontime=substitute_data(
-                            ATinsertA(ATempty,righthandside),
-                            ATinsertA(ATempty,lefthandside),
-                            actiontime);
-          }
-          nextstate=substitute_datalist(
-                            ATinsertA(ATempty,righthandside),
-                            ATinsertA(ATempty,lefthandside),
-                            nextstate);
-        }
-        else 
-        { condition=RewriteTerm(
-                       gsMakeDataExprAnd(
-                       condition,
-                       communicationcondition));
-          multiaction=gsMakeMultAct(ATLgetArgument(multiactioncondition,0));
+      ApplySumElimination(&newsumvars,
+                          &newcondition,
+                          &newmultiaction,
+                          &newactiontime,
+                          &newnextstate,
+                          communicationcondition,
+                          linGetParameters(ips));
 
-        }
-
-
-
-      }
-      if (condition!=gsMakeDataExprFalse())
-      { resultsumlist=ATinsertA(
+      newcondition=RewriteTerm(newcondition);
+      if (newcondition!=gsMakeDataExprFalse())
+      { 
+        resultsumlist=ATinsertA(
                     resultsumlist,
                     gsMakeLPESummand(
-                           sumvars,
-                           condition,
-                           multiaction,
-                           actiontime,
-                           nextstate));
+                           newsumvars,
+                           newcondition,
+                           newmultiaction,
+                           newactiontime,
+                           newnextstate));
       }
     }
   }
