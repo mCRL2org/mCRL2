@@ -34,6 +34,7 @@ extern "C" {
 #define INFILEEXT ".mcrl2"
 #define OUTFILEEXT ".lpe"
 
+static int verbose=0;
 static bool regular = false;
 static bool regular2 = false;
 static bool cluster = false;
@@ -1979,9 +1980,11 @@ static ATermAppl newprocess(ATermList parameters, ATermAppl body,
 { 
   parameters=parameters_that_occur_in_body(parameters, body);
   ATermAppl p=gsMakeProcVarId(fresh_name("P"),linGetSorts(parameters));
-//  ATfprintf(stderr,"NEWPROC %t %t\n",p,parameters);
-//  gsPrintPart(stderr,body,0,0);
-//  ATfprintf(stderr,"\n");
+  if (verbose>=1)
+  { ATfprintf(stderr,"NEWPROC %t %t\n",p,parameters);
+    gsPrintPart(stderr,body,0,0);
+    ATfprintf(stderr,"\n");
+  }
   insertProcDeclaration(
              p,
              parameters,
@@ -2255,12 +2258,12 @@ static ATermAppl bodytovarheadGNF(
                          s,
                          freevars,
                          first);
+    ATermAppl time=ATAgetArgument(body,1);
+    /* put the time operator around the first action or process */
+    body1=wraptime(body1,time,freevars);
     if (v==first)
-    { /* put the time operator around the first action 
-         or process */
-      
-      ATermAppl time=ATAgetArgument(body,1);
-      return wraptime(body1,time,freevars);
+    { 
+      return body1;
     }
 
     /* make a new process, containing this process */
@@ -2620,10 +2623,6 @@ static ATermAppl create_regular_invocation(
   process_names=extract_names(sequence);
   assert(process_names!=ATempty);
 
-  /* ATfprintf(stderr,"Names: ");
-  gsPrintParts(stderr,process_names,0,0,NULL,",");
-  ATfprintf(stderr,"\n");  */
-
   if (ATgetLength(process_names)==1)
   { /* length of list equals 1 */
     if (gsIsProcess(sequence)) 
@@ -2639,8 +2638,6 @@ static ATermAppl create_regular_invocation(
      there is already a variable with a matching sequence
      of variables */
   new_process=exists_variable_for_sequence(process_names,sequence);
-  /* if (new_process==NULL)
-    ATfprintf(stderr,"NEWWEWERE\n"); */
 
   if (new_process==NULL)
   { /* There does not exist an appropriate variable,
@@ -2715,7 +2712,7 @@ static ATermAppl to_regular_form(
                     ATconcat(sumvars,freevars)));
   }
   
-  if (gsIsMultAct(t)||gsIsDelta(t)||gsIsTau(t)) 
+  if (gsIsMultAct(t)||gsIsDelta(t)||gsIsTau(t)||gsIsAtTime(t)) 
   { return t;    
   }
   
@@ -2800,6 +2797,11 @@ static ATermAppl procstorealGNFbody(
    GNF where one action is always followed by a
    variable. */
 { 
+  if (verbose>=1)
+  { ATfprintf(stderr,"procstorealGNFbody: ");
+    gsPrintPart(body,0,0,0);
+    ATfprintf(stderr,"\n");
+  }
 
   if (gsIsAtTime(body))
   { ATermAppl timecondition=NULL;
@@ -5591,6 +5593,34 @@ static ATermAppl hidecomposition(ATermList hidelist, ATermAppl ips)
 
 /**************** allow  *************************************/
 
+static int gsIsDataExprEquality(ATermAppl t)
+{
+  if (gsIsDataAppl(t))
+  { ATermAppl t1=ATAgetArgument(t,0);
+    if (gsIsDataAppl(t1))
+    { ATermAppl f=ATAgetArgument(t1,0);
+      if (!gsIsOpId(f))
+      { /* This is not a functionsymbol */
+        return 0;
+      }
+      ATermAppl functionsort=ATAgetArgument(f,1);
+      if (!gsIsSortArrow(functionsort))
+      { return 0;
+      }
+      ATermAppl sort=ATAgetArgument(functionsort,0);
+      if (!existsort(sort))
+      { return 0;
+      }
+      if (ATAgetArgument(t1,0)==gsMakeOpIdEq(sort))
+      { ATfprintf(stderr,"IS an equality !!!\n");
+        return 1;
+      };
+    }
+  }
+  return 0;
+}
+
+
 static int gsIsDataExprAnd(ATermAppl t)
 { 
   if (gsIsDataAppl(t))
@@ -6286,17 +6316,69 @@ static ATermAppl communicationcomposition(
     for( ; multiactionconditionlist!=ATempty ;
                multiactionconditionlist=ATgetNext(multiactionconditionlist) )
     { ATermAppl multiactioncondition=ATAgetFirst(multiactionconditionlist);
-      ATermAppl freshcondition=RewriteTerm(
-                    gsMakeDataExprAnd(
-                    condition,
-                    ATAgetArgument(multiactioncondition,1)));
-      if (freshcondition!=gsMakeDataExprFalse())
+      ATermAppl communicationcondition=
+                  RewriteTerm(ATAgetArgument(multiactioncondition,1));
+      ATfprintf(stderr,"MMMM %t\n\n",communicationcondition);
+      if (gsIsDataExprEquality(communicationcondition))
+      { /* Try to see whether left or right hand side of the 
+           equality is a data variable that occurs in sumvars and
+           apply sum elimination */
+        ATermAppl lefthandside=ATAgetArgument(
+                                 ATAgetArgument(communicationcondition,0),1);
+        ATermAppl righthandside=ATAgetArgument(communicationcondition,1);
+
+        if (gsIsDataVarId(righthandside) &&
+            occursin(righthandside,sumvars))
+        { /* Turn lefthandside and righthandside around, such
+             that this case is handled by the next piece of code also */
+          ATermAppl temp=lefthandside;
+          lefthandside=righthandside;
+          righthandside=temp;
+        }
+
+        if (gsIsDataVarId(lefthandside) &&
+            occursin(lefthandside,sumvars))
+        { /* replace the lefthandside by the righthandside in this
+             summand and remove the lefthandside from the sumvars. */
+          sumvars=ATremoveElement(sumvars,lefthandside);
+          condition=substitute_data(
+                            ATinsertA(ATempty,righthandside),
+                            ATinsertA(ATempty,lefthandside),
+                            condition);
+          multiaction=substitute_multiaction(
+                            ATinsertA(ATempty,righthandside),
+                            ATinsertA(ATempty,lefthandside),
+                            gsMakeMultAct(ATLgetArgument(multiactioncondition,0)));
+          if (actiontime!=gsMakeNil())
+          { actiontime=substitute_data(
+                            ATinsertA(ATempty,righthandside),
+                            ATinsertA(ATempty,lefthandside),
+                            actiontime);
+          }
+          nextstate=substitute_datalist(
+                            ATinsertA(ATempty,righthandside),
+                            ATinsertA(ATempty,lefthandside),
+                            nextstate);
+        }
+        else 
+        { condition=RewriteTerm(
+                       gsMakeDataExprAnd(
+                       condition,
+                       communicationcondition));
+          multiaction=gsMakeMultAct(ATLgetArgument(multiactioncondition,0));
+
+        }
+
+
+
+      }
+      if (condition!=gsMakeDataExprFalse())
       { resultsumlist=ATinsertA(
                     resultsumlist,
                     gsMakeLPESummand(
                            sumvars,
-                           freshcondition,
-                           gsMakeMultAct(ATLgetArgument(multiactioncondition,0)),
+                           condition,
+                           multiaction,
                            actiontime,
                            nextstate));
       }
