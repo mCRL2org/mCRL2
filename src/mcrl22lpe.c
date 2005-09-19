@@ -158,7 +158,7 @@ static void newequation(
                 ATermAppl t2, 
                 ATermAppl t3, 
                 specificationbasictype *spec);
-
+static ATermList replaceArgumentsByAssignments(ATermList args,ATermList pars);
 
 static ATermList ATinsertA(ATermList l, ATermAppl a)
 { return ATinsert(l,(ATerm)a);
@@ -4977,6 +4977,18 @@ static int summandsCanBeClustered(
   return 1;
 }
 
+static ATermAppl getRHSassignment(ATermAppl var, ATermList as)
+{
+  for( ; as!=ATempty ; as=ATgetNext(as))
+  { 
+    ATermAppl a=ATAgetFirst(as);
+    if (ATAgetArgument(a,0)==var)
+    { return ATAgetArgument(a,1);
+    }
+  }
+  return var;
+}
+
 static ATermAppl collect_sum_arg_arg_cond(
                    enumtype *e,
                    int n,
@@ -5268,8 +5280,9 @@ static ATermAppl collect_sum_arg_arg_cond(
 
       ATermAppl nextstateparameter=NULL;
       if (withAssignmentsInNextState)
-      { /* XXXXXX */
-        assert(0);
+      { 
+        ATermAppl var=(ATermAppl)ATelementAt(gsorts,fcnt);
+        nextstateparameter=getRHSassignment(var,nextstate);
       }
       else 
       { nextstateparameter=(ATermAppl)ATelementAt(nextstate,fcnt);
@@ -5301,7 +5314,7 @@ static ATermAppl collect_sum_arg_arg_cond(
                        ATinsertA(auxresult,e->var)));
       }
       else 
-      { // ATfprintf(stderr,"FFFF %t\n",ffunct);
+      { 
         ATermAppl temp=construct_binary_case_tree(
                            n,
                            resultsum,
@@ -5315,6 +5328,11 @@ static ATermAppl collect_sum_arg_arg_cond(
   }
   /* Now turn *resultg around */
   resultnextstate=ATreverse(resultnextstate);
+  if (withAssignmentsInNextState)
+  { /* The list of arguments in nextstate are now in a sequential form, and
+       must be transformed back to a list of assignments */
+    resultnextstate=replaceArgumentsByAssignments(resultnextstate,gsorts);
+  }
   
   return gsMakeLPESummand(resultsum,
                         resultcondition,
@@ -5339,7 +5357,7 @@ static ATermList getActionSorts(ATermList actionlist)
   return resultsorts;
 }
 
-static ATermList  cluster_actions(
+static ATermList cluster_actions(
                        ATermList sums,
                        ATermList pars,
                        specificationbasictype *spec,
