@@ -5,11 +5,12 @@ extern "C" {
 #endif
 
 /* TODO:
- * Remove free variables that are declared, but not used
- * inside processes, or the initial process.
  * Put renaming, hiding, encapsulation, and visibility
  * operators as far inside the parallel operators as
  * is possible.
+ *
+ * Take care that the flag --cluster works properly again
+ * now that there are assignments in the nextstate.
  *
  * The program should be extensively tested */
 
@@ -1521,6 +1522,23 @@ static int occursinmultiaction(ATermAppl var, ATermList ma)
   for( ; ma!=ATempty ; ma=ATgetNext(ma) )
   { if (occursintermlist(var,ATLgetArgument(ATAgetFirst(ma),1)))
     { return 1; 
+    }
+  }
+  return 0;
+}
+
+static int occursinassignmentlist(
+                ATermAppl var, 
+                ATermList as, 
+                ATermList parameters)
+{
+  if (occursintermlist(var,parameters))
+  return 1;
+
+  for( ; as!=ATempty ; as=ATgetNext(as))
+  { ATermAppl rhs=ATAgetArgument(ATAgetFirst(as),1);
+    if (occursinterm(var,rhs))
+    { return 1;
     }
   }
   return 0;
@@ -7573,6 +7591,58 @@ static void AddTerminationActionIfNecessary(
   }
 }
 
+/********************** SieveProcDataVars ***********************/
+
+static ATermList SieveProcDataVarsSummands(
+                        ATermList vars,
+                        ATermList summands,
+                        ATermList parameters)
+{
+  ATermList result=ATempty;
+
+  for( ; vars!=ATempty ; vars=ATgetNext(vars))
+  { ATermAppl var=ATAgetFirst(vars);
+    for(ATermList smds=summands ;
+        smds!=ATempty ;
+        smds=ATgetNext(smds))
+    { ATermAppl smd=ATAgetFirst(smds);
+      ATermAppl multiaction=linGetMultiAction(smd);
+      ATermAppl actiontime=linGetActionTime(smd);
+      ATermAppl condition=linGetCondition(smd);
+      ATermList nextstate=linGetNextState(smd);
+
+      if (((multiaction!=gsMakeDelta()) &&
+              (occursinmultiaction(var,ATLgetArgument(multiaction,0))))||
+          (((actiontime!=gsMakeNil()) && (occursinterm(var,actiontime))))||
+          (occursinterm(var,condition))||
+          (occursinassignmentlist(var,nextstate,parameters)))
+      { result=ATinsertA(result,var);
+        break;
+      }
+    }
+  }
+  
+  return result;
+}
+
+static ATermList SieveProcDataVarsAssignments(
+                        ATermList vars,
+                        ATermList assignments,
+                        ATermList parameters)
+{
+  ATermList result=ATempty;
+
+  for( ; vars!=ATempty ; vars=ATgetNext(vars))
+  { ATermAppl var=ATAgetFirst(vars);
+    if (occursinassignmentlist(var,assignments,parameters))
+    { result=ATinsertA(result,var);
+    }
+  }
+  
+  return result;
+
+}
+
 /**************** transform **************************************/
 
 static ATermAppl transform(
@@ -7839,10 +7909,16 @@ int main(int argc, char *argv[])
     gsMakeMapSpec(spec->maps),
     gsMakeDataEqnSpec(spec->eqns),
     gsMakeActSpec(spec->acts),
-    gsMakeLPE(spec->procdatavars,
+    gsMakeLPE(SieveProcDataVarsSummands(
+                   spec->procdatavars,
+                   ATLgetArgument(result,2),
+                   ATLgetArgument(result,1)),
       ATLgetArgument(result,1),
       ATLgetArgument(result,2)),
-    gsMakeLPEInit(spec->procdatavars,
+    gsMakeLPEInit(SieveProcDataVarsAssignments(
+                   spec->procdatavars,
+                   ATLgetArgument(result,0),
+                   ATLgetArgument(result,1)),
       ATLgetArgument(result,0))
   );
   //store the LPE
