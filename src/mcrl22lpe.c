@@ -72,7 +72,7 @@ void PrintHelp(char *Name)
     "  -2, --regular2    a variant of regular where much more data variables are\n"
     "                    being used (sometimes successful when --regular leads to\n"
     "                    non-termination)\n"
-    "  -c, --cluster     all actions in the LPE are clustered (requires --binary)\n"
+    "  -c, --cluster     all actions in the LPE are clustered\n"
     "  -n, --no-cluster  no actions are clustered, not even in intermediate LPEs\n"
     "  -w, --newstate    state variables are encoded using enumerated types\n"
     "                    (requires --regular or --regular2);\n"
