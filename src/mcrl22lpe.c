@@ -7837,35 +7837,8 @@ int main(int argc, char *argv[])
   //open input filename
   FILE *instream = fopen(SpecFileName,"r");
   if (instream==NULL) {
-    gsErrorMsg("Cannot open input file `%s'\n", SpecFileName);
+    gsErrorMsg("cannot open input file `%s'\n", SpecFileName);
     return 1;
-  }
-  //determine and open output filename
-  char OutFileName[MaxLen];
-  FILE *outstream = NULL;
-  if (!check_only) {
-    //determine output filename
-    strcpy(OutFileName, SpecFileName);
-    //remove explicit path specifiers
-    char *NoPath = strrchr(OutFileName, '/');
-    if (NoPath != NULL) {
-      strcpy(OutFileName, NoPath + 1);
-    }
-    //replace INFILEEXT suffix by OUTFILEEXT
-    OutFileName[strlen(OutFileName) - strlen(INFILEEXT)] = '\0';
-    strcat(OutFileName, OUTFILEEXT);
-    gsDebugMsg("output filename: %s\n", OutFileName);
-    //open output filename
-    if (to_stdout) {
-      outstream = stdout;
-    } else { // !to_stdout
-      outstream = fopen(OutFileName,"w");
-      if (outstream == NULL) {
-        gsErrorMsg("Cannot open output file `%s'\n", OutFileName);
-        fclose(instream);
-        return 1;
-      }
-    }
   }
   
   //initialise ATerm library
@@ -7876,9 +7849,6 @@ int main(int argc, char *argv[])
   ATermAppl SpecTerm = gsParseSpecification(instream, !check_only);
   fclose(instream);
   if (SpecTerm == NULL) {
-    if (outstream != NULL) {
-      fclose(outstream);
-    }
     return 1;
   }
   if (check_only) {
@@ -7888,14 +7858,12 @@ int main(int argc, char *argv[])
     return 0;
   }
   assert(gsIsSpecV1(SpecTerm));
-  assert(outstream != NULL);
   
   //initialise local data structures for linearisation
   gsVerboseMsg("linearising processes...\n");
   initialize_data();
   specificationbasictype *spec = create_spec(SpecTerm);
   if (spec == NULL) {
-    fclose(outstream);
     return 1;    
   }
   initialize_symbols(); /* This must be done after storing the data,
@@ -7921,7 +7889,34 @@ int main(int argc, char *argv[])
                    ATLgetArgument(result,1)),
       ATLgetArgument(result,0))
   );
-  //store the LPE
+  //determine output stream to store the LPE
+  FILE *outstream = NULL;
+  if (to_stdout) {
+    outstream = stdout;
+  } else { //!to_stdout
+    //determine and open output filename
+    char OutFileName[MaxLen];
+    //determine output filename
+    strcpy(OutFileName, SpecFileName);
+    //remove explicit path specifiers
+    char *NoPath = strrchr(OutFileName, '/');
+    if (NoPath != NULL) {
+      strcpy(OutFileName, NoPath + 1);
+    }
+    //replace INFILEEXT suffix by OUTFILEEXT
+    OutFileName[strlen(OutFileName) - strlen(INFILEEXT)] = '\0';
+    strcat(OutFileName, OUTFILEEXT);
+    gsDebugMsg("output filename: %s\n", OutFileName);
+    //open output filename
+    outstream = fopen(OutFileName,"w");
+    if (outstream == NULL) {
+      gsErrorMsg("cannot open output file `%s'\n", OutFileName);
+      fclose(instream);
+      return 1;
+    }
+  }
+  assert(outstream != NULL);
+  //save the LPE to outstream
   if (outstream == stdout) {
     ATwriteToTextFile((ATerm) result, outstream);
     fprintf(outstream, "\n");
