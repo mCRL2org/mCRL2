@@ -19,16 +19,16 @@ extern "C" {
 #endif
 #define MAIN
 #include "mcrl22lpe.h"
-#include "libgsparse.h"
 #include "gslowlevel.h"
+#include "gslexer.h"
 #include "gstypecheck.h"
 #include "gsdataimpl.h"
+#include "libgsparse.h"
 #include "libgsrewrite.h"
 #include "libgsalpha.h"
 #include <getopt.h>
 #include <limits.h>
 #include <stdbool.h>
-#include <tgmath.h>
 
 #define STRINGLENGTH 256
 #define INFILEEXT ".mcrl2"
@@ -6902,14 +6902,14 @@ static ATermAppl parallelcomposition(
 //  ATfprintf(stderr,"pars1: %t\npars2: %t\npars3: %t\n\n",pars1,pars2,pars3);
 
   gsVerboseMsg(
-    "- parallel composition is being translated: %d   %d",
+    "- parallel composition is being translated: %d || %d",
     ATgetLength(linGetSums(t1)),
     ATgetLength(linGetSums(t2)));
   result=combinesumlist(
     linGetSums(t1),
     linGetSums(t2),
     pars1,pars2renaming,pars3,renaming,spec,pars2);
-  gsVerboseMsg("   %d   done\n", ATgetLength(result)); 
+  gsVerboseMsg(" = %d\n", ATgetLength(result)); 
   return linMakeInitProcSpec(
                ATconcat(init1,
                         substitute_assignmentlist(
@@ -7699,6 +7699,83 @@ static ATermAppl transform(
   return t3;
 }
 
+
+/**************** calc_infilename ****************************/
+
+static void calc_infilename(char *infilename, char *specname)
+{
+  //Pre : infilename is able to store specname appended with INFILEEXT
+  //Post: infilename represents specname, in which INFILEEXT is appended
+  //      if it didn't already end with it
+  strcpy(infilename, specname);
+  char *file_ext = strrchr(infilename, '.');
+  if (file_ext == NULL) {
+    //'.' does not occur in infilename, append INFILEEXT 
+    strcat(infilename, INFILEEXT);
+  } else { //file_ext != NULL
+    if (strcmp(file_ext, INFILEEXT) != 0) {
+      //file_ext is not equal to INFILEEXT, append INFILEEXT
+      strcat(infilename, INFILEEXT);
+    }
+  }
+}
+
+/**************** calc_outfilename ****************************/
+
+static void calc_outfilename(char *outfilename, char *infilename)
+{
+  //Pre: infilename ends with INFILEEXT
+  strcpy(outfilename, infilename);
+  //replace suffix INFILEEXT by OUTFILEEXT
+  outfilename[strlen(outfilename) - strlen(INFILEEXT)] = '\0';
+  strcat(outfilename, OUTFILEEXT);
+  //strip path
+  char *no_path = strrchr(outfilename, '/');
+  if (no_path != NULL) {
+    strcpy(outfilename, no_path + 1);
+  }
+}
+
+
+/**************** linearise **************************************/
+
+static ATermAppl linearise(ATermAppl spec_term)
+{
+  //initialise local data structures
+  initialize_data();
+  specificationbasictype *spec = create_spec(spec_term);
+  if (spec == NULL) {
+    return NULL;
+  }
+  initialize_symbols(); /* This must be done after storing the data,
+                           to avoid a possible name conflict with action
+                           Terminate */
+  //linearise spec
+  ATermAppl result = transform(spec->init, spec);
+  if (result == NULL) {
+    return NULL;
+  }
+  result = gsMakeSpecV1(
+    gsMakeSortSpec(spec->sorts),
+    gsMakeConsSpec(spec->funcs),
+    gsMakeMapSpec(spec->maps),
+    gsMakeDataEqnSpec(spec->eqns),
+    gsMakeActSpec(spec->acts),
+    gsMakeLPE(SieveProcDataVarsSummands(
+                   spec->procdatavars,
+                   ATLgetArgument(result,2),
+                   ATLgetArgument(result,1)),
+      ATLgetArgument(result,1),
+      ATLgetArgument(result,2)),
+    gsMakeLPEInit(SieveProcDataVarsAssignments(
+                   spec->procdatavars,
+                   ATLgetArgument(result,0),
+                   ATLgetArgument(result,1)),
+      ATLgetArgument(result,0))
+  );
+  return result;
+}
+
 /*--- main program -----------------------------*/
 
 int main(int argc, char *argv[])
@@ -7823,122 +7900,83 @@ int main(int argc, char *argv[])
         binary = true;
      }  */
   //check for too many arguments
-  int NoArgc; //non-option argument count
-  NoArgc = argc - optind;
-  assert(NoArgc >= 0);
-  if (NoArgc > 1) {
+  int noargc; //non-option argument count
+  noargc = argc - optind;
+  assert(noargc >= 0);
+  if (noargc > 1) {
     fprintf(stderr, "%s: too many arguments\n", NAME);
     PrintMoreInfo(argv[0]);
     return 1;
   }
-  assert(NoArgc == 1);
-  //determine and open input filename
-  int MaxLen =
-    strlen(argv[optind]) + fmax(strlen(INFILEEXT), strlen(OUTFILEEXT)) + 1;
-  char SpecFileName[MaxLen];
-  //SpecFileName and OutFileName can hold the supplied file name, possibly
-  //suffixed with INFILEEXT and OUTFILEEXT, respectively
-  //determine specification filename
-  strcpy(SpecFileName, argv[optind]);
-  char *FileExt = strrchr(SpecFileName, '.');
-  if (FileExt == NULL) {
-    //'.' does not occur in SpecFileName, append INFILEEXT 
-    strcat(SpecFileName, INFILEEXT);
-  } else { //FileExt != NULL
-    if (strcmp(FileExt, INFILEEXT) != 0) {
-      //FileExt is not equal to INFILEEXT, append INFILEEXT
-      strcat(SpecFileName, INFILEEXT);
-    }
-  }
-  //SpecFileName ends with INFILEEXT
-  gsDebugMsg("input filename: %s\n", SpecFileName);
+  assert(noargc == 1);
+  //determine input filename
+  char infilename[strlen(argv[optind]) + strlen(INFILEEXT) + 1];
+  calc_infilename(infilename, argv[optind]);
   //open input filename
-  FILE *instream = fopen(SpecFileName,"r");
-  if (instream==NULL) {
-    gsErrorMsg("cannot open input file `%s'\n", SpecFileName);
+  FILE *instream = fopen(infilename, "r");
+  if (instream == NULL) {
+    gsErrorMsg("cannot open input file %s\n", infilename);
     return 1;
   }
-  
+
   //initialise ATerm library
   ATerm stack_bottom;
   ATinit(argc,argv,&stack_bottom);
+  //enable constructor functions
+  gsEnableConstructorFunctions();
 
-  //parse, type check and implement data types on the input specificaton
-  ATermAppl SpecTerm = gsParseSpecification(instream, !check_only);
+  //parse specification from instream
+  gsVerboseMsg("parsing input file '%s'...\n", infilename);
+  ATermAppl result = gsParse(instream);
   fclose(instream);
-  if (SpecTerm == NULL) {
+  if (result == NULL) {
+    gsErrorMsg("parsing failed\n");
+    return 1;
+  }
+  //type check the result
+  gsVerboseMsg("type checking...\n");
+  result = gsTypeCheck(result);
+  if (result == NULL) {
+    gsErrorMsg("type checking failed\n");
     return 1;
   }
   if (check_only) {
     fprintf(stdout,
-      "The file %s contains a correctly typed mCRL2 specification\n",
-      SpecFileName);
+      "The file %s contains a well-formed mCRL2 specification.\n",
+      infilename);
     return 0;
   }
-  assert(gsIsSpecV1(SpecTerm));
-  
-  //initialise local data structures for linearisation
-  gsVerboseMsg("linearising processes...\n");
-  initialize_data();
-  specificationbasictype *spec = create_spec(SpecTerm);
-  if (spec == NULL) {
-    return 1;    
+  //implement standard data types and type constructors on the result
+  gsVerboseMsg("implementing standard data types and type constructors...\n");
+  result = gsImplementData(result);
+  if (result == NULL) {
+    gsErrorMsg("data implementation failed\n");
+    return 1;
   }
-  initialize_symbols(); /* This must be done after storing the data,
-                           to avoid a possible name conflict with action
-                           Terminate */
-  //linearise spec
-  ATermAppl result = transform(spec->init, spec);
-  result = gsMakeSpecV1(
-    gsMakeSortSpec(spec->sorts),
-    gsMakeConsSpec(spec->funcs),
-    gsMakeMapSpec(spec->maps),
-    gsMakeDataEqnSpec(spec->eqns),
-    gsMakeActSpec(spec->acts),
-    gsMakeLPE(SieveProcDataVarsSummands(
-                   spec->procdatavars,
-                   ATLgetArgument(result,2),
-                   ATLgetArgument(result,1)),
-      ATLgetArgument(result,1),
-      ATLgetArgument(result,2)),
-    gsMakeLPEInit(SieveProcDataVarsAssignments(
-                   spec->procdatavars,
-                   ATLgetArgument(result,0),
-                   ATLgetArgument(result,1)),
-      ATLgetArgument(result,0))
-  );
-  //determine output stream to store the LPE
-  FILE *outstream = NULL;
+  //linearise the result
+  gsVerboseMsg("linearising processes...\n");
+  result = linearise(result);
+  if (result == NULL) {
+    gsErrorMsg("linearisation failed\n");
+    return 1;
+  }
+ 
+  //store the result
   if (to_stdout) {
-    outstream = stdout;
+    gsVerboseMsg("saving result to stdout...\n");
+    ATwriteToTextFile((ATerm) result, stdout);
+    fprintf(stdout, "\n");
   } else { //!to_stdout
-    //determine and open output filename
-    char OutFileName[MaxLen];
     //determine output filename
-    strcpy(OutFileName, SpecFileName);
-    //remove explicit path specifiers
-    char *NoPath = strrchr(OutFileName, '/');
-    if (NoPath != NULL) {
-      strcpy(OutFileName, NoPath + 1);
-    }
-    //replace INFILEEXT suffix by OUTFILEEXT
-    OutFileName[strlen(OutFileName) - strlen(INFILEEXT)] = '\0';
-    strcat(OutFileName, OUTFILEEXT);
-    gsDebugMsg("output filename: %s\n", OutFileName);
+    char outfilename[strlen(infilename) + strlen(OUTFILEEXT) + 1];
+    calc_outfilename(outfilename, infilename);
     //open output filename
-    outstream = fopen(OutFileName,"w");
+    FILE *outstream = fopen(outfilename, "w");
     if (outstream == NULL) {
-      gsErrorMsg("cannot open output file `%s'\n", OutFileName);
-      fclose(instream);
+      gsErrorMsg("cannot open output file '%s'\n", outfilename);
       return 1;
     }
-  }
-  assert(outstream != NULL);
-  //save the LPE to outstream
-  if (outstream == stdout) {
-    ATwriteToTextFile((ATerm) result, outstream);
-    fprintf(outstream, "\n");
-  } else { //outstream != stdout
+    gsVerboseMsg("saving result to '%s'...\n", outfilename);
     ATwriteToBinaryFile((ATerm) result, outstream);
     fclose(outstream);
   }
