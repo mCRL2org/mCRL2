@@ -4964,7 +4964,8 @@ static ATermAppl collect_sum_arg_arg_cond(
                    int n,
                    ATermList sumlist,
                    ATermList gsorts,
-                   specificationbasictype *spec)
+                   specificationbasictype *spec,
+                   int withAssignmentsInNextState)
 { /* This function gets a list of summands, with
      the same multiaction and time 
      status. It yields a single clustered summand
@@ -5247,7 +5248,14 @@ static ATermAppl collect_sum_arg_arg_cond(
       ATermList auxargs=(ATermList)ATgetFirst(auxrename_list);
       auxrename_list=(ATermList)ATgetNext(auxrename_list);
 
-      ATermAppl nextstateparameter=(ATermAppl)ATelementAt(nextstate,fcnt);
+      ATermAppl nextstateparameter=NULL;
+      if (withAssignmentsInNextState)
+      { /* XXXXXX */
+        assert(0);
+      }
+      else 
+      { nextstateparameter=(ATermAppl)ATelementAt(nextstate,fcnt);
+      }
       
       auxresult1=substitute_data(auxargs,auxpars,nextstateparameter); 
       if (equalterm==NULL)
@@ -5316,7 +5324,8 @@ static ATermList getActionSorts(ATermList actionlist)
 static ATermList  cluster_actions(
                        ATermList sums,
                        ATermList pars,
-                       specificationbasictype *spec)
+                       specificationbasictype *spec,
+                       int withAssignmentsInNextState)
 { enumtype *enumeratedtype=NULL; 
   int n=0;
    /* We cluster first the summands with the action
@@ -5370,7 +5379,8 @@ static ATermList  cluster_actions(
       }
 
       result=ATinsertA(result,
-             collect_sum_arg_arg_cond(enumeratedtype,n,w1,pars,spec));
+             collect_sum_arg_arg_cond(enumeratedtype,n,w1,pars,spec,
+                 withAssignmentsInNextState));
 
     }
     else 
@@ -5423,7 +5433,7 @@ static ATermAppl clusterfinalresult(ATermAppl t,specificationbasictype *spec)
   return linMakeInitProcSpec(
                  linGetInit(t),
                  linGetParameters(t),
-                 cluster_actions(linGetSums(t),linGetParameters(t),spec));
+                 cluster_actions(linGetSums(t),linGetParameters(t),spec,1));
 }
 
 /**************** GENERATE LPEpCRL **********************************/
@@ -5474,7 +5484,7 @@ static ATermAppl generateLPEpCRL(ATermAppl procId, int canterminate,
               ((!singlecontrolstate)?
                     ATinsertA(stack->parameterlist,stack->stackvar):
                     stack->parameterlist),
-               spec); 
+               spec,0); 
       }
       else if (binary)
       { ATermList l=NULL;
@@ -5482,19 +5492,19 @@ static ATermAppl generateLPEpCRL(ATermAppl procId, int canterminate,
         for(l=stack->booleanStateVariables; !ATisEmpty(l) ; l=ATgetNext(l))
         { vars=ATinsertA(vars,ATAgetFirst(l));
         }
-        sums=cluster_actions(sums,vars,spec);
+        sums=cluster_actions(sums,vars,spec,0);
         create_enumeratedtype(stack->no_of_states,spec);
         sums=cluster_actions(sums,
                  ((!singlecontrolstate)?
                     ATinsertA(stack->parameterlist,stack->stackvar):
                     stack->parameterlist),
-                 spec);
+                 spec,0);
       }
     }
   }
   else /* not regular, use a stack */
   { if (!nocluster)
-    { sums=cluster_actions(sums,ATinsertA(ATempty,stack->stackvar),spec); 
+    { sums=cluster_actions(sums,ATinsertA(ATempty,stack->stackvar),spec,0); 
     }
   }
 
@@ -7718,10 +7728,12 @@ int main(int argc, char *argv[])
       "option --newstate can only be used with --regular or --regular2\n");
     return 1;
   }
-  if (cluster && !binary) {
-    gsWarningMsg("option --cluster also sets option --binary\n");
-    binary = true;
-  }
+  /* Outcommentented by jfg, because there does not seem to be a 
+     necessary link between cluster and binary. 19/9/2005.
+     if (cluster && !binary) {
+        gsWarningMsg("option --cluster also sets option --binary\n");
+        binary = true;
+     }  */
   //check for too many arguments
   int NoArgc; //non-option argument count
   NoArgc = argc - optind;
