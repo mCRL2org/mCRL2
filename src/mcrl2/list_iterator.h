@@ -12,6 +12,7 @@
 namespace mcrl2 {
 
 using atermpp::aterm_list;
+using atermpp::aterm_appl;
 
 //---------------------------------------------------------//
 //                     list_iterator

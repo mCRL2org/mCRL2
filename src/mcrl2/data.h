@@ -146,7 +146,14 @@ class DataExpression
     /// b(x) -\> q(s)
     ///
     //template <typename FwdIt>
-    //replace(FwdIt first, FwdIt last);
+    //replace(FwdIt first, FwdIt last); 
+    
+    /// Returns the internal aterm representation (DEPRECATED).
+    ///
+    aterm_appl term() const
+    {
+      return m_term;
+    }
 };
 
 

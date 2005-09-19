@@ -397,9 +397,9 @@ class LPE
     }
 
   public:
-    typedef list_iterator<LPESummand>     summand_iterator;
-    typedef list_iterator<DataVariable>   variable_iterator;
-    typedef list_iterator<Action>         action_iterator;
+    typedef list_iterator<LPESummand>       summand_iterator;
+    typedef list_iterator<DataVariable>     variable_iterator;
+    typedef list_iterator<ActionExpression> action_iterator;
 
     LPE()
     {}
