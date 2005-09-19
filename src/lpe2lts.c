@@ -93,6 +93,11 @@ fflush(aut);
 }
 
 
+void print_help_suggestion(FILE *f, char *Name)
+{
+	fprintf(f,"Try '%s --help' for more information.\n",Name);
+}
+
 void print_help(FILE *f, char *Name)
 {
 	fprintf(f,"Usage: %s OPTIONS LPEFILE [OUTFILE]\n",Name);
@@ -200,6 +205,16 @@ int main(int argc, char **argv)
 				{
 					// XXX argument hack
 					// argument doesn't seem to work for short options
+					if ( optind >= argc )
+					{
+						if ( !quiet )
+						{
+							fprintf(stderr,"Option -l/--max needs an argument.\n");
+							print_help_suggestion(stderr,argv[0]);
+						}
+						return 1;
+					}
+
 					if ( (argv[optind][0] >= '0') && (argv[optind][0] <= '9') )
 					{
 						max_states = strtoul(argv[optind],NULL,0);
@@ -225,6 +240,16 @@ int main(int argc, char **argv)
 			case 'R':
 				if ( optarg == NULL )
 				{
+					if ( optind >= argc )
+					{
+						if ( !quiet )
+						{
+							fprintf(stderr,"Option -R/--rewriter needs an argument.\n");
+							print_help_suggestion(stderr,argv[0]);
+						}
+						return 1;
+					}
+
 					rw_arg = argv[optind++];
 				} else {
 					rw_arg = optarg;
@@ -270,7 +295,7 @@ int main(int argc, char **argv)
 	{
 		if ( !quiet )
 		{
-			print_help(stderr, argv[0]);
+			print_help_suggestion(stderr,argv[0]);
 		}
 		return 1;
 	}

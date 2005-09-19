@@ -24,28 +24,28 @@ static ATermAppl linFalse;
 
 /* Needed forward declarations */
 
-ATermList get_sorts(ATermList l);
-void linearise(int i);
-ATermList list_minus(ATermList l1, ATermList l2);
-ATermList merge_list(ATermList l1, ATermList l2);
-ATermList mactl_comm(ATermList mal, ATermList C);
-ATermAppl synch_reduce(ATermAppl ma);
-int proc_id(ATermAppl a);
+static ATermList get_sorts(ATermList l);
+static void linearise(int i);
+static ATermList list_minus(ATermList l1, ATermList l2);
+static ATermList merge_list(ATermList l1, ATermList l2);
+static ATermList mactl_comm(ATermList mal, ATermList C);
+static ATermAppl synch_reduce(ATermAppl ma);
+static int proc_id(ATermAppl a);
 
 
 /* Auxiliary ATerm functions */
 
-ATbool ATisList(ATerm a)
+static ATbool ATisList(ATerm a)
 {
 	return (ATbool) (ATgetType(a) == AT_LIST);
 }
 
-ATbool ATisAppl(ATerm a)
+static ATbool ATisAppl(ATerm a)
 {
 	return (ATbool) (ATgetType(a) == AT_APPL);
 }
 
-ATbool ATisAnnotated(ATerm a)
+static ATbool ATisAnnotated(ATerm a)
 {
 	return (ATbool) (ATgetAnnotation(a,debruijn) != NULL);
 }
@@ -53,7 +53,7 @@ ATbool ATisAnnotated(ATerm a)
 
 /* Auxiliary mCRL2 functions */
 
-ATermAppl gsMakeDataExprAndWithTrueCheck(ATermAppl b, ATermAppl c)
+static ATermAppl gsMakeDataExprAndWithTrueCheck(ATermAppl b, ATermAppl c)
 {
 	if ( ATisEqual(b,linTrue) )
 	{
@@ -66,7 +66,7 @@ ATermAppl gsMakeDataExprAndWithTrueCheck(ATermAppl b, ATermAppl c)
 	}
 }
 
-ATermAppl gsMakeDataExprAndWithCheck(ATermAppl b, ATermAppl c)
+static ATermAppl gsMakeDataExprAndWithCheck(ATermAppl b, ATermAppl c)
 {
 	if ( ATisEqual(b,linTrue) )
 	{
@@ -82,7 +82,7 @@ ATermAppl gsMakeDataExprAndWithCheck(ATermAppl b, ATermAppl c)
 	}
 }
 
-ATermAppl gsMakeDataExprNotWithCheck(ATermAppl b)
+static ATermAppl gsMakeDataExprNotWithCheck(ATermAppl b)
 {
 	if ( ATisEqual(b,linTrue) )
 	{
@@ -95,7 +95,7 @@ ATermAppl gsMakeDataExprNotWithCheck(ATermAppl b)
 	}
 }
 
-/*ATermAppl gsMakeDataExprPosFromInt(int i)
+/*static ATermAppl gsMakeDataExprPosFromInt(int i)
 {
 	char s[10];
 	if ( i <= 0 )
@@ -104,7 +104,7 @@ ATermAppl gsMakeDataExprNotWithCheck(ATermAppl b)
 	return gsMakeDataExprPos(s);
 }*/
 
-ATermAppl get_new_sort_name(ATermAppl s, ATermList o)
+/*static ATermAppl get_new_sort_name(ATermAppl s, ATermList o)
 {
 	char name[40];
 	ATermAppl v;
@@ -126,9 +126,9 @@ ATermAppl get_new_sort_name(ATermAppl s, ATermList o)
 	}
 
 	return v;
-}
+}*/
 
-/*ATermAppl gsMakeDataExprOfSort(ATermAppl s, ATermList cons, ATermList *maps)
+/*static ATermAppl gsMakeDataExprOfSort(ATermAppl s, ATermList cons, ATermList *maps)
 {
 	ATermList l;
 
@@ -156,7 +156,7 @@ ATermAppl get_new_sort_name(ATermAppl s, ATermList o)
 
 /* Variable manipulation functions */
 
-ATermAppl fresh_var_name()
+static ATermAppl fresh_var_name()
 {
 	char s[16];
 	int b,i,j;
@@ -197,7 +197,7 @@ ATermAppl fresh_var_name()
 	exit(1);
 }
 
-ATerm annotate_context(ATerm a, ATermList c)
+static ATerm annotate_context(ATerm a, ATermList c)
 {
 	ATermList l,m;
 
@@ -244,12 +244,12 @@ ATerm annotate_context(ATerm a, ATermList c)
 	}
 }
 
-ATerm annotate(ATerm a)
+static ATerm annotate(ATerm a)
 {
 	return annotate_context(a,ATmakeList0());
 }
 
-ATerm increase_index_bnd(ATerm a, int n, int b)
+static ATerm increase_index_bnd(ATerm a, int n, int b)
 {
 	ATermList l,m;
 
@@ -301,12 +301,12 @@ ATerm increase_index_bnd(ATerm a, int n, int b)
 	}
 }
 
-ATerm increase_index(ATerm a, int n)
+static ATerm increase_index(ATerm a, int n)
 {
 	return increase_index_bnd(a, n, 0);
 }
 
-ATermAppl get_new_var(ATermAppl a, ATermList *t)
+static ATermAppl get_new_var(ATermAppl a, ATermList *t)
 {
 	char name[100];
 	ATermAppl v;
@@ -333,7 +333,7 @@ ATermAppl get_new_var(ATermAppl a, ATermList *t)
 	return v;
 }
 
-ATerm subst_new_var(ATerm a, int n, ATermAppl v)
+static ATerm subst_new_var(ATerm a, int n, ATermAppl v)
 {
 	ATermList l,m;
 
@@ -376,7 +376,7 @@ ATerm subst_new_var(ATerm a, int n, ATermAppl v)
 	}
 }
 
-ATerm remove_indices_context(ATerm a, ATerm *b, ATermList *t)
+static ATerm remove_indices_context(ATerm a, ATerm *b, ATermList *t)
 {
 	ATermList l,m;
 	ATermAppl u,p;
@@ -439,17 +439,17 @@ ATerm remove_indices_context(ATerm a, ATerm *b, ATermList *t)
 	}
 }
 
-ATerm remove_indices_contextA(ATerm a, ATermAppl *b, ATermList *t)
+static ATerm remove_indices_contextA(ATerm a, ATermAppl *b, ATermList *t)
 {
 	return remove_indices_context(a,(ATerm *) b, t);
 }
 
-ATerm remove_indices_contextL(ATerm a, ATermList *b, ATermList *t)
+static ATerm remove_indices_contextL(ATerm a, ATermList *b, ATermList *t)
 {
 	return remove_indices_context(a,(ATerm *) b, t);
 }
 
-ATerm remove_indices_sep(ATerm a, ATerm *b)
+/*static ATerm remove_indices_sep(ATerm a, ATerm *b)
 {
 	ATermList t;
 	ATerm r;
@@ -460,12 +460,12 @@ ATerm remove_indices_sep(ATerm a, ATerm *b)
 	return r;
 }
 
-ATerm remove_indices(ATerm a)
+static ATerm remove_indices(ATerm a)
 {
 	return remove_indices_sep(a,NULL);
-}
+}*/
 
-ATermList make_indices(ATermList l)
+static ATermList make_indices(ATermList l)
 {
 	ATermList m;
 	int i;
@@ -481,7 +481,7 @@ ATermList make_indices(ATermList l)
 	return ATreverse(m);
 }
 
-ATerm substitute_vars(ATerm a, ATermList v, ATermList s)
+static ATerm substitute_vars(ATerm a, ATermList v, ATermList s)
 {
 	ATermList l,m;
 
@@ -523,7 +523,7 @@ ATerm substitute_vars(ATerm a, ATermList v, ATermList s)
 	}
 }
 
-ATermList decrease_indices(ATermList l)
+static ATermList decrease_indices(ATermList l)
 {
 	ATermList m;
 	ATerm a;
@@ -545,7 +545,7 @@ ATermList decrease_indices(ATermList l)
 
 //XXX
 #define ATAgetFirst (ATermAppl) ATgetFirst
-ATermList get_vars(ATermAppl a)
+static ATermList get_vars(ATermAppl a)
 {
 	ATermList l,m;
 
@@ -613,9 +613,9 @@ ATermList get_vars(ATermAppl a)
 
 /* Global variables manipulation functions */
 
-ATermAppl replace_data_with_vars(ATermAppl a, ATermList *v, ATermList *d);
+static ATermAppl replace_data_with_vars(ATermAppl a, ATermList *v, ATermList *d);
 
-int add_process_eqn(ATermAppl e)
+static int add_process_eqn(ATermAppl e)
 {
 	ATermAppl name = fresh_var_name();
 	ATermList vars = ATLgetArgument(e,2);
@@ -640,7 +640,7 @@ int add_process_eqn(ATermAppl e)
 	return ATgetLength(processes)-1;
 }
 
-ATbool has_bounded_var(ATermAppl a) //XXX
+static ATbool has_bounded_var(ATermAppl a) //XXX
 {
 	if ( gsIsDataVarId(a) )
 	{
@@ -733,12 +733,12 @@ ATerm replace_data_with_vars_gen(ATerm a, ATermList *v, ATermList *d, ATermAppl 
 	gsWarningMsg("unknown data expression to generalise (%t)\n",a);
 	return a;
 }
-ATermAppl replace_data_with_vars(ATermAppl a, ATermList *v, ATermList *d)
+static ATermAppl replace_data_with_vars(ATermAppl a, ATermList *v, ATermList *d)
 {
 	return (ATermAppl) replace_data_with_vars_gen((ATerm) a,v,d,NULL);
 }
 static ATermAppl initial_process;
-int add_init(ATermAppl i)
+static int add_init(ATermAppl i)
 {
 	ATermAppl name;
 	ATermList vars;
@@ -765,12 +765,12 @@ if ( gsIsProcess(i) )
 }
 }
 
-ATbool is_done(int i)
+static ATbool is_done(int i)
 {
 	return ATisList(ATelementAt(ATLelementAt(processes,i),3));
 }
 
-void add_to_stack(int i)
+static void add_to_stack(int i)
 {
 	if ( !is_done(i) && (ATindexOf(todo_stack,(ATerm) ATmakeInt(i),0) == -1) )
 	{
@@ -779,7 +779,7 @@ void add_to_stack(int i)
 	}
 }
 
-int pop_stack()
+static int pop_stack()
 {
 	int i;
 
@@ -789,27 +789,27 @@ int pop_stack()
 	return i;
 }
 
-void remove_from_stack(int i)
+static void remove_from_stack(int i)
 {
 	todo_stack = ATremoveElement(todo_stack,(ATerm) ATmakeInt(i));
 }
 
-ATbool empty_stack()
+static ATbool empty_stack()
 {
 	return ATisEmpty(todo_stack);
 }
 
-void set_proc(int i, ATermList l)
+static void set_proc(int i, ATermList l)
 {
 	processes = ATreplace(processes,(ATerm) ATreplace(ATLelementAt(processes,i),(ATerm) l,3),i);
 }
 
-ATermList get_proc(int i, ATermList l)
+static ATermList get_proc(int i, ATermList l)
 {
 	return (ATermList) substitute_vars(ATelementAt(ATLelementAt(processes,i),3),ATLelementAt(ATLelementAt(processes,i),1),l);
 }
 
-int proc_id(ATermAppl a)
+static int proc_id(ATermAppl a)
 {
 	ATermList l = processes;
 //ATfprintf(stderr,"\n\nprocid(%t)\n",a);
@@ -828,7 +828,7 @@ int proc_id(ATermAppl a)
 
 /* Multiaction manipulation functions */
 
-//ATermList split_sync(ATermAppl ma)
+//static ATermList split_sync(ATermAppl ma)
 //{
 //	ATermList l,m;
 //	if ( gsIsAction(ma) || gsIsTau(ma) )
@@ -852,7 +852,7 @@ int proc_id(ATermAppl a)
 //	}
 //}
 
-/*ATbool is_maction(ATermAppl ma)
+/*static ATbool is_maction(ATermAppl ma)
 {
 	if ( gsIsAction(ma) || gsIsTau(ma) )
 	{
@@ -865,7 +865,7 @@ int proc_id(ATermAppl a)
 	}
 }*/
 
-ATermList synch2actl(ATermAppl ma)
+static ATermList synch2actl(ATermAppl ma)
 {
 	if ( gsIsTau(ma) )
 	{
@@ -882,12 +882,12 @@ ATermList synch2actl(ATermAppl ma)
 	}
 }
 
-ATermAppl synch2mact(ATermAppl ma)
+static ATermAppl synch2mact(ATermAppl ma)
 {
 	return gsMakeMultActName(synch2actl(ma));
 }
 
-ATbool actl_eq(ATermList ma1, ATermList ma2)
+static ATbool actl_eq(ATermList ma1, ATermList ma2)
 {
 	if ( ATisEmpty(ma1) )
 	{
@@ -902,12 +902,12 @@ ATbool actl_eq(ATermList ma1, ATermList ma2)
 	}
 }
 
-ATbool mact_eq(ATermAppl ma1, ATermAppl ma2)
+static ATbool mact_eq(ATermAppl ma1, ATermAppl ma2)
 {
 	return actl_eq(ATLgetArgument(ma1,0),ATLgetArgument(ma2,0));
 }
 
-ATbool synch_in(ATermAppl ma, ATermList V)
+static ATbool synch_in(ATermAppl ma, ATermList V)
 {
 	if ( gsIsTau(synch_reduce(ma)) )
 	{
@@ -927,7 +927,7 @@ ATbool synch_in(ATermAppl ma, ATermList V)
 }
 
 // mact_cap(ma,H) == (ma \cap H)\not=\emptyset
-ATbool synch_cap(ATermAppl ma, ATermList H)
+static ATbool synch_cap(ATermAppl ma, ATermList H)
 {
 	if ( gsIsTau(ma) )
 	{
@@ -949,7 +949,7 @@ ATbool synch_cap(ATermAppl ma, ATermList H)
 	}
 }
 
-ATermAppl synch_hide(ATermAppl ma, ATermList I)
+static ATermAppl synch_hide(ATermAppl ma, ATermList I)
 {
 	ATermAppl a,b;
 
@@ -983,7 +983,7 @@ ATermAppl synch_hide(ATermAppl ma, ATermList I)
 	}
 }
 
-ATermAppl synch_rename(ATermAppl ma, ATermList R)
+static ATermAppl synch_rename(ATermAppl ma, ATermList R)
 {
 	if ( gsIsTau(ma) )
 	{
@@ -1009,7 +1009,7 @@ ATermAppl synch_rename(ATermAppl ma, ATermList R)
 	}
 }
 
-ATermList synch2list(ATermAppl ma)
+static ATermList synch2list(ATermAppl ma)
 {
 	if ( gsIsAction(ma) )
 	{
@@ -1026,7 +1026,7 @@ ATermList synch2list(ATermAppl ma)
 	}
 }
 
-ATermAppl list2synch(ATermList mal)
+static ATermAppl list2synch(ATermList mal)
 {
 	if ( ATisEmpty(mal) )
 	{
@@ -1039,7 +1039,7 @@ ATermAppl list2synch(ATermList mal)
 	}
 }
 
-ATermAppl make_xi(ATermList l)
+/*static ATermAppl make_xi(ATermList l)
 {
 	ATermAppl c, d;
 	int b;
@@ -1073,9 +1073,9 @@ ATermAppl make_xi(ATermList l)
 		}
 		return c;
 	}
-}
+}*/
 
-ATermList mu(ATermList m)
+static ATermList mu(ATermList m)
 {
 	ATermList r;
 
@@ -1088,7 +1088,7 @@ ATermList mu(ATermList m)
 	return ATreverse(r);
 }
 
-ATbool find_comm(ATermList m, ATermList C, ATermAppl *c)
+static ATbool find_comm(ATermList m, ATermList C, ATermAppl *c)
 {
 	for (; !ATisEmpty(C); C=ATgetNext(C))
 	{
@@ -1103,7 +1103,7 @@ ATbool find_comm(ATermList m, ATermList C, ATermAppl *c)
 	return ATfalse;
 }
 
-ATermAppl param_eq(ATermList m, ATermList n)
+static ATermAppl param_eq(ATermList m, ATermList n)
 {
 	ATermAppl c;
 	int b;
@@ -1133,7 +1133,7 @@ ATermAppl param_eq(ATermList m, ATermList n)
 	return gsRewriteTerm(c);
 }
 
-ATermList calc_comm(ATermList m, ATermList d, ATermList w, ATermList n, ATermList C)
+static ATermList calc_comm(ATermList m, ATermList d, ATermList w, ATermList n, ATermList C)
 {
 	ATermList s,l;
 	ATermAppl c;
@@ -1179,7 +1179,7 @@ ATermList calc_comm(ATermList m, ATermList d, ATermList w, ATermList n, ATermLis
 	}
 }
 
-/*ATermList calc_comm_aux(ATermAppl a, ATermList C, ATermList mal, ATermList c, ATermAppl ca, ATermList b, ATermList r)
+/*static ATermList calc_comm_aux(ATermAppl a, ATermList C, ATermList mal, ATermList c, ATermAppl ca, ATermList b, ATermList r)
 {
 	ATermList m,o,p;
 
@@ -1217,7 +1217,7 @@ ATermList calc_comm(ATermList m, ATermList d, ATermList w, ATermList n, ATermLis
 	}
 }
 
-ATermList calc_comm(ATermAppl a, ATermList mal, ATermList C)
+static ATermList calc_comm(ATermAppl a, ATermList mal, ATermList C)
 {
 	ATermList l,n,o,r;
 
@@ -1236,7 +1236,7 @@ ATermList calc_comm(ATermAppl a, ATermList mal, ATermList C)
 	return r;
 }*/
 
-ATermList map_concat(ATermAppl a, ATermList m) //XXX
+/*static ATermList map_concat(ATermAppl a, ATermList m) //XXX
 {
 	ATermList r;
 
@@ -1257,8 +1257,8 @@ ATermList map_concat(ATermAppl a, ATermList m) //XXX
 	}
 
 	return ATreverse(r);
-}
-ATermList mactl_comm(ATermList mal, ATermList C)
+}*/
+static ATermList mactl_comm(ATermList mal, ATermList C)
 {
 	ATermList s,t,l;
 	ATermAppl b;
@@ -1324,7 +1324,7 @@ ATermList mactl_comm(ATermList mal, ATermList C)
 	}*/
 }
 
-ATermList synch_comm(ATermAppl ma, ATermList C)
+static ATermList synch_comm(ATermAppl ma, ATermList C)
 {
 	ATermList s,l;
 
@@ -1340,7 +1340,7 @@ ATermList synch_comm(ATermAppl ma, ATermList C)
 	return ATreverse(l);
 }
 
-ATermAppl synch_reduce(ATermAppl ma)
+static ATermAppl synch_reduce(ATermAppl ma)
 {
 	ATermAppl ma1,ma2;
 
@@ -1369,7 +1369,7 @@ ATermAppl synch_reduce(ATermAppl ma)
 
 /* List manipulation functions */
 
-ATbool list_eq(ATermList l1, ATermList l2)
+static ATbool list_eq(ATermList l1, ATermList l2)
 {
 	if ( ATisEmpty(l1) )
 	{
@@ -1384,7 +1384,7 @@ ATbool list_eq(ATermList l1, ATermList l2)
 	}
 }
 
-ATermList merge_list(ATermList l1, ATermList l2)
+static ATermList merge_list(ATermList l1, ATermList l2)
 {
 	l1 = ATreverse(l1);
 	for (;!ATisEmpty(l2); l2=ATgetNext(l2))
@@ -1399,7 +1399,7 @@ ATermList merge_list(ATermList l1, ATermList l2)
 	return l1;
 }
 
-ATermList list_minus(ATermList l1, ATermList l2)
+static ATermList list_minus(ATermList l1, ATermList l2)
 {
 	for (;!ATisEmpty(l2); l2=ATgetNext(l2))
 	{
@@ -1412,7 +1412,7 @@ ATermList list_minus(ATermList l1, ATermList l2)
 
 /* Matching functions */
 
-ATbool match_data(ATermAppl a, ATermAppl m, ATermList l, ATermTable r)
+static ATbool match_data(ATermAppl a, ATermAppl m, ATermList l, ATermTable r)
 {
 	if ( gsIsDataVarId(a) )
 	{
@@ -1483,7 +1483,7 @@ ATbool match_data(ATermAppl a, ATermAppl m, ATermList l, ATermTable r)
 	return ATfalse;
 }
 
-ATbool match_proc(ATermAppl a, ATermAppl m, ATermList l, ATermTable r)
+static ATbool match_proc(ATermAppl a, ATermAppl m, ATermList l, ATermTable r)
 {
 	ATermList l1,l2;
 
@@ -1566,7 +1566,7 @@ ATbool match_proc(ATermAppl a, ATermAppl m, ATermList l, ATermTable r)
 	return ATfalse;
 }
 
-ATbool match(ATermAppl a, ATermList l, ATermList *r)
+static ATbool match(ATermAppl a, ATermList l, ATermList *r)
 {
 	ATermList m = ATLelementAt(l,1);
 	ATermTable t = ATtableCreate(ATgetLength(m),100);
@@ -1615,7 +1615,7 @@ ATbool match(ATermAppl a, ATermList l, ATermList *r)
 
 /* Misc. functions */
 
-ATermList get_sorts(ATermList l)
+static ATermList get_sorts(ATermList l)
 {
 	ATermList m = ATmakeList0();
 
@@ -1627,7 +1627,7 @@ ATermList get_sorts(ATermList l)
 	return ATreverse(m);
 }
 
-ATermList makeSubsts(ATermList l, ATermList m)
+static ATermList makeSubsts(ATermList l, ATermList m)
 {
 	ATermList r;
 
@@ -1641,7 +1641,7 @@ ATermList makeSubsts(ATermList l, ATermList m)
 	return r;
 }
 
-ATermAppl get_proc_call(ATermAppl a, ATermList c)
+static ATermAppl get_proc_call(ATermAppl a, ATermList c)
 {
 	ATermList l,m,t,arg_list,s;
 	ATermAppl var_name;
@@ -1691,7 +1691,7 @@ ATermAppl get_proc_call(ATermAppl a, ATermList c)
 
 /* Main linearisation functions */
 
-ATermList get_firsts(ATermAppl t)
+static ATermList get_firsts(ATermAppl t)
 {
 	ATermList l,m,n,o;
 	ATermAppl u;
@@ -1978,7 +1978,7 @@ ATermList get_firsts(ATermAppl t)
 	return ATmakeList0();
 }
 
-void linearise(int i)
+static void linearise(int i)
 {
 //ATfprintf(stderr,"\n\nlinearise(%i)\n\n",i);
 	ATermAppl t = ATAelementAt(ATLelementAt(processes,i),2);
@@ -2019,7 +2019,7 @@ fprintf(stderr,"\n\n");
 
 /* Functions for converting result back to internal format */
 
-ATermAppl gen_linproc(ATermList sums, ATermList c)
+static ATermAppl gen_linproc(ATermList sums, ATermList c)
 {
 	ATermList l,m;
 	ATermAppl r,t;
@@ -2058,7 +2058,7 @@ ATermAppl gen_linproc(ATermList sums, ATermList c)
 	return r;
 }
 
-ATermAppl update_spec(ATermAppl spec, int init)
+static ATermAppl update_spec(ATermAppl spec, int init)
 {
 	ATermList l,m,n;
 /*	ATermList o;
@@ -2095,7 +2095,7 @@ ATermAppl update_spec(ATermAppl spec, int init)
 }
 
 
-ATermAppl subst_procs(ATermAppl a, ATermList nosubst)
+static ATermAppl subst_procs(ATermAppl a, ATermList nosubst)
 {
 	int i;
 
@@ -2139,7 +2139,7 @@ ATermAppl subst_procs(ATermAppl a, ATermList nosubst)
 	exit(1);
 }
 
-void update_spec_subst_trace(ATermInt next, ATermList trace, ATermList *nosubst, int reuse)
+static void update_spec_subst_trace(ATermInt next, ATermList trace, ATermList *nosubst, int reuse)
 {
 	ATermList l,m;
 	ATermInt i;
@@ -2176,7 +2176,7 @@ void update_spec_subst_trace(ATermInt next, ATermList trace, ATermList *nosubst,
 		}
 	}
 }
-ATermAppl update_spec_subst(ATermAppl spec, int init, int reuse)
+static ATermAppl update_spec_subst(ATermAppl spec, int init, int reuse)
 {
 	ATermList nosubst;
 	ATermList l,m,n;
@@ -2213,7 +2213,7 @@ ATermAppl update_spec_subst(ATermAppl spec, int init, int reuse)
 
 /* Result manipulation functions */
 
-int remove_unused(int init, ATbool *init_used)
+static int remove_unused(int init, ATbool *init_used)
 {
 	ATermList used = ATmakeList1((ATerm) ATmakeInt(init));
 	ATermList sums;
@@ -2313,7 +2313,7 @@ int remove_unused(int init, ATbool *init_used)
 	return init;
 }*/
 
-ATermAppl make_lpe(ATermAppl Spec, int init_id)
+static ATermAppl make_lpe(ATermAppl Spec, int init_id)
 {
 //	ATermList cons = ATLgetArgument(ATAgetArgument(Spec,1),0);
 //	ATermList maps = ATLgetArgument(ATAgetArgument(Spec,2),0);
@@ -2436,7 +2436,7 @@ ATermAppl make_lpe(ATermAppl Spec, int init_id)
 	return Spec;
 }
 
-ATermAppl cluster_lpe(ATermAppl spec)
+static ATermAppl cluster_lpe(ATermAppl spec)
 {
 	gsWarningMsg("clustering not yet implemented\n");
 	return spec;
@@ -2455,7 +2455,7 @@ ATermAppl cluster_lpe(ATermAppl spec)
 	return ATsetArgument(spec,(ATerm) gsMakeLPE(ATLgetArgument(ATAgetArgument(spec,4),0),newsums),4); */
 }
 
-ATermAppl get_unique_var(ATermAppl var, ATermTable names, ATermList *substs, ATermList *new)
+static ATermAppl get_unique_var(ATermAppl var, ATermTable names, ATermList *substs, ATermList *new)
 {
 	char name[100];
 	char namebase[100];
@@ -2490,7 +2490,7 @@ ATermAppl get_unique_var(ATermAppl var, ATermTable names, ATermList *substs, ATe
 	return n;
 }
 
-ATermList make_unique(ATermList l, ATermTable names, ATermList *substs)
+static ATermList make_unique(ATermList l, ATermTable names, ATermList *substs)
 {
 	ATermList r = ATmakeList0();
 
@@ -2502,7 +2502,7 @@ ATermList make_unique(ATermList l, ATermTable names, ATermList *substs)
 	return ATreverse(r);
 }
 
-ATermList make_unique_sum(ATermList l, ATermTable names, ATermList *substs)
+static ATermList make_unique_sum(ATermList l, ATermTable names, ATermList *substs)
 {
 	ATermList r = ATmakeList0();
 	ATermList n = ATmakeList0();
@@ -2515,7 +2515,7 @@ ATermList make_unique_sum(ATermList l, ATermTable names, ATermList *substs)
 	return ATreverse(r);
 }
 
-void add_names(ATermTable names, ATermList l)
+static void add_names(ATermTable names, ATermList l)
 {
 	for (; !ATisEmpty(l); l=ATgetNext(l))
 	{
@@ -2524,7 +2524,7 @@ void add_names(ATermTable names, ATermList l)
 	}
 }
 
-ATerm uvSubstValues(ATermList substs, ATerm a)
+static ATerm uvSubstValues(ATermList substs, ATerm a)
 {
 	for (ATermList l=substs; !ATisEmpty(l); l=ATgetNext(l))
 	{
@@ -2555,7 +2555,7 @@ ATerm uvSubstValues(ATermList substs, ATerm a)
 	}
 }
 
-ATermAppl unique_vars(ATermAppl spec)
+static ATermAppl unique_vars(ATermAppl spec)
 {
 	ATermAppl lpe = (ATermAppl) ATgetArgument(spec,5);
 	ATermAppl init = (ATermAppl) ATgetArgument(spec,6);
@@ -2622,7 +2622,7 @@ ATermAppl unique_vars(ATermAppl spec)
 
 /* Interface */
 
-int main_linearisation(ATermAppl Spec)
+static int main_linearisation(ATermAppl Spec)
 {
 	ATermAppl init;
 	ATermList l,m;

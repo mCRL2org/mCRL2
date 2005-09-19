@@ -19,7 +19,7 @@ extern "C" {
 
 bool NextStateError;
 
-bool ATisList(ATerm a)
+static bool ATisList(ATerm a)
 {
 	return (ATgetType(a) == AT_LIST);
 }
@@ -436,6 +436,20 @@ ATerm gsNextStateInit(ATermAppl Spec, bool AllowFreeVars, int StateFormat, int R
 	smndAFun = ATmakeAFun("@SMND@",4,ATfalse);
 	ATprotectAFun(smndAFun);
 	ATermList sums = ATLgetArgument(ATAgetArgument(current_spec,5),2);
+	l = ATmakeList0();
+	for (bool b=true; !ATisEmpty(sums); sums=ATgetNext(sums))
+	{
+		if ( b && !gsIsNil(ATAgetArgument(ATAgetFirst(sums),3)) )
+		{
+			fprintf(stderr,"warning: specification uses time, which is (currently) not supported; ignoring timing\n");
+			b = false;
+		}
+		if ( !gsIsDelta(ATAgetArgument(ATAgetFirst(sums),2)) )
+		{
+			l = ATinsert(l,ATgetFirst(sums));
+		}
+	}
+	sums = ATreverse(l);
 	num_summands = ATgetLength(sums);
 	summands = (ATermAppl *) malloc(num_summands*sizeof(ATermAppl));
 	for (int i=0; i<num_summands; i++)
