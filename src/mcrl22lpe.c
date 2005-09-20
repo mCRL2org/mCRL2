@@ -31,16 +31,17 @@ extern "C" {
 #define INFILEEXT ".mcrl2"
 #define OUTFILEEXT ".lpe"
 
-static bool regular = false;
-static bool regular2 = false;
-static bool cluster = false;
-static bool nocluster = false;
-static bool binary = false;
-static bool oldstate = true;
-static bool statenames = false;
-static bool mayrewrite = true;
-static bool allowFreeDataVariablesInProcesses = true;
 static bool timeIsBeingUsed = false;
+
+static bool regular;
+static bool regular2;
+static bool cluster;
+static bool nocluster;
+static bool oldstate;
+static bool binary;
+static bool statenames;
+static bool mayrewrite;
+static bool allowFreeDataVariablesInProcesses;
 
 #define P(msg)  fprintf(stderr,"%s\n",msg)
 
@@ -63,34 +64,35 @@ void PrintHelp(char *Name)
     "In the name of the output file, the extension 'mcrl2' is replaced by 'lpe'.\n"
     "\n"
     "The OPTIONS that can be used are:\n"
-    "  -0, --stack       the LPE is generated using stack datatypes (useful when\n"
-    "                    --regular and --regular2 do not work)\n"
-    "  -1, --regular     if the specification is regular, the LPE is generated in\n"
-    "                    regular form (default)\n"
-    "  -2, --regular2    a variant of regular where much more data variables are\n"
-    "                    being used (sometimes successful when --regular leads to\n"
-    "                    non-termination)\n"
-    "  -c, --cluster     all actions in the LPE are clustered\n"
-    "  -n, --no-cluster  no actions are clustered, not even in intermediate LPEs\n"
-    "  -w, --newstate    state variables are encoded using enumerated types\n"
-    "                    (requires --regular or --regular2);\n"
-    "                    without --newstate positive numbers are used\n"
-    "  -b, --binary      use binary case functions when clustering, instead of n-ary;\n"
-    "                    in the presence of --newstate, state variables are encoded\n"
-    "                    by a vector of boolean variables\n"
-    "  -a, --statenames  the names of state variables are derived from the\n"
-    "                    specification\n"
-    "  -o, --no-rewrite  do not rewrite data terms while linearising; this option is\n"
-    "                    useful when the rewrite system does not terminate\n"
-    "  -f, --no-freevars instantiate don't care values with arbitrary constants,\n"
-    "                    instead of using free variables to model these values\n"
-    "  -e  --check-only  check syntax and static semantics only; do not linearise\n"
-    "      --stdout      the generated LPE is written to stdout in textual format\n"
-    "  -h, --help        display this help\n"    
-    "  -v, --version     display version information\n"
-    "  -q, --quiet       do not display warning messages\n"
-    "  -v, --verbose     turn on the display of short intermediate messages\n"
-    "  -d, --debug       turn on the display of detailed intermediate messages\n",
+    "  -0, --stack            the LPE is generated using stack datatypes;\n"
+    "                         useful when -1 and -2 do not work\n"
+    "  -1, --regular          if the specification is regular, the LPE is generated\n"
+    "                         in regular form (default)\n"
+    "  -2, --regular2         a variant of regular that uses more data variables;\n"
+    "                         sometimes successful when -1 leads to non-termination\n"
+    "  -c, --cluster          all actions in the LPE are clustered\n"
+    "  -n, --no-cluster       no actions are clustered, not even in intermediate LPEs\n"
+    "  -w, --newstate         state variables are encoded using enumerated types\n"
+    "                         (requires -1 or -2); without -w numbers are used\n"
+    "  -b, --binary           when clustering use binary case functions instead of\n"
+    "                         n-ary; in the presence of -w, state variables are\n"
+    "                         encoded by a vector of boolean variables\n"
+    "  -a, --statenames       the names of state variables are derived from the\n"
+    "                         specification\n"
+    "  -o, --no-rewrite       do not rewrite data terms while linearising;\n"
+    "                         useful when the rewrite system does not terminate\n"
+    "  -f, --no-freevars      instantiate don't care values with arbitrary constants,\n"
+    "                         instead of modelling them by free variables\n"
+    "  -e  --check-only       check syntax and static semantics; do not linearise\n"
+    "  -p  --end-phase=PHASE  stop linearisation after phase PHASE and output the\n"
+    "                         result; PHASE can be 'pa' (parse), 'tc' (type check)\n"
+    "                         or 'di' (data implementation)\n"
+    "      --stdout           the generated LPE is written to stdout\n"
+    "  -h, --help             display this help\n"    
+    "  -v, --version          display version information\n"
+    "  -q, --quiet            do not display warning messages\n"
+    "  -v, --verbose          turn on the display of short intermediate messages\n"
+    "  -d, --debug            turn on the display of detailed intermediate messages\n",
     Name);
 }
 
@@ -108,6 +110,10 @@ void PrintHelp(char *Name)
  */
    
 /* PREAMBLE */
+
+typedef enum { phNone, phParse, phTypeCheck, phDataImpl } t_phase;
+//enumerated type to represent a pre-linearisation phase; used in the
+//--end-phase option
 
 typedef struct specificationbasictype {
             ATermList sorts;     /* storage place for sorts */
@@ -6880,7 +6886,7 @@ static ATermAppl parallelcomposition(
   renaming=construct_renaming(pars1,pars2,&pars3,&pars2renaming); 
 
   gsVerboseMsg(
-    "- parallel composition is being translated: %d || %d",
+    "- calculating parallel composition: %d || %d",
     ATgetLength(linGetSums(t1)),
     ATgetLength(linGetSums(t2)));
   result=combinesumlist(
@@ -7719,9 +7725,9 @@ static void calc_outfilename(char *outfilename, char *infilename)
 }
 
 
-/**************** linearise **************************************/
+/**************** linearise_term **************************************/
 
-static ATermAppl linearise(ATermAppl spec_term)
+static ATermAppl linearise_term(ATermAppl spec_term)
 {
   //initialise local data structures
   initialize_data();
@@ -7758,37 +7764,99 @@ static ATermAppl linearise(ATermAppl spec_term)
   return result;
 }
 
+
+/*--- linearise_file -----------------------------*/
+
+ATermAppl linearise_file(char *infilename, t_phase end_phase)
+{
+  assert(infilename != NULL);
+  //open input filename
+  FILE *instream = fopen(infilename, "r");
+  if (instream == NULL) {
+    gsErrorMsg("cannot open input file '%s'\n", infilename);
+    return NULL;
+  }
+  //parse specification from instream
+  gsVerboseMsg("parsing input file '%s'...\n", infilename);
+  ATermAppl result = gsParse(instream);
+  fclose(instream);
+  if (result == NULL) {
+    gsErrorMsg("parsing failed\n");
+    return NULL;
+  }
+  if (end_phase == phParse) {
+    return result;
+  }
+  //type check the result
+  gsVerboseMsg("type checking...\n");
+  result = gsTypeCheck(result);
+  if (result == NULL) {
+    gsErrorMsg("type checking failed\n");
+    return NULL;
+  }
+  if (end_phase == phTypeCheck) {
+    return result;
+  }
+  //implement standard data types and type constructors on the result
+  gsVerboseMsg("implementing standard data types and type constructors...\n");
+  result = gsImplementData(result);
+  if (result == NULL) {
+    gsErrorMsg("data implementation failed\n");
+    return NULL;
+  }
+  if (end_phase == phDataImpl) {
+    return result;
+  }
+  //linearise the result
+  gsVerboseMsg("linearising processes...\n");
+  result = linearise_term(result);
+  if (result == NULL) {
+    gsErrorMsg("linearisation failed\n");
+    return NULL;
+  }
+  return result; 
+}
+
 /*--- main program -----------------------------*/
 
 int main(int argc, char *argv[])
 { 
   //declarations for getopt
-  bool to_stdout = false;
-  bool check_only = false;
   bool opt_stack = false;
   bool opt_regular = false;
   bool opt_regular2 = false;
-  #define ShortOptions   "012cnwbaofehqvd"
+  bool opt_cluster = false;
+  bool opt_nocluster = false;
+  bool opt_newstate = false;
+  bool opt_binary = false;
+  bool opt_statenames = false;
+  bool opt_norewrite = false;
+  bool opt_nofreevars = false;
+  bool opt_check_only = false;
+  t_phase opt_end_phase = phNone;
+  bool opt_stdout = false;
+  #define ShortOptions   "012cnwbaofep:hqvd"
   #define StdOutOption   CHAR_MAX + 1
   #define VersionOption  StdOutOption + 1
   struct option LongOptions[] = {
-    { "stack",        no_argument,    NULL,   '0' },
-    { "regular",      no_argument,    NULL,   '1' },
-    { "regular2",     no_argument,    NULL,   '2' },
-    { "cluster",      no_argument,    NULL,   'c' },
-    { "no-cluster",   no_argument,    NULL,   'n' },
-    { "newstate",     no_argument,    NULL,   'w' },
-    { "binary",       no_argument,    NULL,   'b' },
-    { "statenames",   no_argument,    NULL,   'a' },
-    { "no-rewrite",   no_argument,    NULL,   'o' },
-    { "no-freevars",  no_argument,    NULL,   'f' },
-    { "check-only",   no_argument,    NULL,   'e' },
-    { "stdout",       no_argument,    NULL,   StdOutOption },
-    { "help",         no_argument,    NULL,   'h' },
-    { "version",      no_argument,    NULL,   VersionOption },
-    { "quiet",        no_argument,    NULL,   'q' },
-    { "verbose",      no_argument,    NULL,   'v' },
-    { "debug",        no_argument,    NULL,   'd' },
+    { "stack",       no_argument,       NULL, '0' },
+    { "regular",     no_argument,       NULL, '1' },
+    { "regular2",    no_argument,       NULL, '2' },
+    { "cluster",     no_argument,       NULL, 'c' },
+    { "no-cluster",  no_argument,       NULL, 'n' },
+    { "newstate",    no_argument,       NULL, 'w' },
+    { "binary",      no_argument,       NULL, 'b' },
+    { "statenames",  no_argument,       NULL, 'a' },
+    { "no-rewrite",  no_argument,       NULL, 'o' },
+    { "no-freevars", no_argument,       NULL, 'f' },
+    { "check-only",  no_argument,       NULL, 'e' },
+    { "end-phase",   required_argument, NULL, 'p' },
+    { "stdout",      no_argument,       NULL, StdOutOption },
+    { "help",        no_argument,       NULL, 'h' },
+    { "version",     no_argument,       NULL, VersionOption },
+    { "quiet",       no_argument,       NULL, 'q' },
+    { "verbose",     no_argument,       NULL, 'v' },
+    { "debug",       no_argument,       NULL, 'd' },
     { 0, 0, 0, 0 }
   };
   int Option;
@@ -7798,43 +7866,51 @@ int main(int argc, char *argv[])
     switch (Option){
       case '0': /* stack */
         opt_stack = true;
-        regular = false;
         break;
       case '1': /* regular */
         opt_regular = true;
-        //regular = true;
         break;
       case '2': /* regular2 */
         opt_regular2 = true;
-        //regular2 = true;
-        //regular = true;
         break;
       case 'c': /* cluster */ 
-        cluster = true;
+        opt_cluster = true;
         break;
       case 'n': /* nocluster */
-        nocluster = true;
+        opt_nocluster = true;
         break;
       case 'w': /* newstate */ 
-        oldstate = false;
+        opt_newstate = true;
         break;
       case 'b': /* binary */ 
-        binary = true;
+        opt_binary = true;
         break;
       case 'a': /* statenames */ 
-        statenames = true;
+        opt_statenames = true;
         break;
       case 'o': /* no-rewrite */ 
-        mayrewrite = false;
+        opt_norewrite = true;
         break;
       case 'f': /* nofreevars */
-        allowFreeDataVariablesInProcesses = false;
+        opt_nofreevars = true;
         break;
       case 'e': /* check-only */
-        check_only = true;
+        opt_check_only = true;
+        break;
+      case 'p': /* end-phase */
+        if (strcmp(optarg, "pa") == 0) {
+          opt_end_phase = phParse;
+        } else if (strcmp(optarg, "tc") == 0) {
+          opt_end_phase = phTypeCheck;
+        } else if (strcmp(optarg, "di") == 0) {
+          opt_end_phase = phDataImpl;
+        } else {
+          gsErrorMsg("option -p has illegal argument '%s'\n", optarg);
+          return 1;
+        }
         break;
       case StdOutOption:  /* stdout */
-        to_stdout = true;
+        opt_stdout = true;
         break;
       case 'h': /* help */
         PrintHelp(argv[0]);
@@ -7863,43 +7939,39 @@ int main(int argc, char *argv[])
     (opt_regular && opt_regular2))
   {
     gsErrorMsg("only one method of linearisation is allowed\n");
-  }
-  if (!opt_stack) {
-    regular = true;
-    if (opt_regular2) {
-      regular2 = true;
-    }
-  }
-  if (!oldstate && !regular && !regular2) {
-    gsErrorMsg(
-      "option --newstate can only be used with --regular or --regular2\n");
     return 1;
   }
-  /* Outcommentented by jfg, because there does not seem to be a 
-     necessary link between cluster and binary. 19/9/2005.
-     if (cluster && !binary) {
-        gsWarningMsg("option --cluster also sets option --binary\n");
-        binary = true;
-     }  */
-  //check for too many arguments
+  if (opt_newstate && opt_stack) {
+    gsErrorMsg("option -w can only be used with -1 or -2\n");
+    return 1;
+  }
+  if (opt_check_only && (opt_end_phase != phNone)) {
+    gsErrorMsg("options -e and -p may not be used in conjunction\n");
+    return 1;
+  }
+  //set global parameters
+  regular = !opt_stack;
+  regular2 = opt_regular2;
+  cluster = opt_cluster;
+  nocluster = opt_nocluster;
+  oldstate = !opt_newstate;
+  binary = opt_binary;
+  statenames = opt_statenames;
+  mayrewrite = !opt_norewrite;
+  allowFreeDataVariablesInProcesses = !opt_nofreevars;
+  //check for wrong number of arguments
   int noargc; //non-option argument count
   noargc = argc - optind;
-  assert(noargc >= 0);
-  if (noargc > 1) {
+  if (noargc <= 0) {
+    fprintf(stderr, "%s: too few arguments\n", NAME);
+    PrintMoreInfo(argv[0]);
+    return 1;
+  } else if (noargc > 1) {
     fprintf(stderr, "%s: too many arguments\n", NAME);
     PrintMoreInfo(argv[0]);
     return 1;
   }
   assert(noargc == 1);
-  //determine input filename
-  char infilename[strlen(argv[optind]) + strlen(INFILEEXT) + 1];
-  calc_infilename(infilename, argv[optind]);
-  //open input filename
-  FILE *instream = fopen(infilename, "r");
-  if (instream == NULL) {
-    gsErrorMsg("cannot open input file %s\n", infilename);
-    return 1;
-  }
 
   //initialise ATerm library
   ATerm stack_bottom;
@@ -7907,60 +7979,40 @@ int main(int argc, char *argv[])
   //enable constructor functions
   gsEnableConstructorFunctions();
 
-  //parse specification from instream
-  gsVerboseMsg("parsing input file '%s'...\n", infilename);
-  ATermAppl result = gsParse(instream);
-  fclose(instream);
+  //determine input filename
+  char infilename[strlen(argv[optind]) + strlen(INFILEEXT) + 1];
+  calc_infilename(infilename, argv[optind]);
+
+  ATermAppl result =
+    linearise_file(infilename, opt_check_only?phTypeCheck:opt_end_phase);
   if (result == NULL) {
-    gsErrorMsg("parsing failed\n");
     return 1;
   }
-  //type check the result
-  gsVerboseMsg("type checking...\n");
-  result = gsTypeCheck(result);
-  if (result == NULL) {
-    gsErrorMsg("type checking failed\n");
-    return 1;
-  }
-  if (check_only) {
+  if (opt_check_only) {
     fprintf(stdout,
       "The file %s contains a well-formed mCRL2 specification.\n",
       infilename);
     return 0;
-  }
-  //implement standard data types and type constructors on the result
-  gsVerboseMsg("implementing standard data types and type constructors...\n");
-  result = gsImplementData(result);
-  if (result == NULL) {
-    gsErrorMsg("data implementation failed\n");
-    return 1;
-  }
-  //linearise the result
-  gsVerboseMsg("linearising processes...\n");
-  result = linearise(result);
-  if (result == NULL) {
-    gsErrorMsg("linearisation failed\n");
-    return 1;
-  }
- 
-  //store the result
-  if (to_stdout) {
-    gsVerboseMsg("saving result to stdout...\n");
-    ATwriteToTextFile((ATerm) result, stdout);
-    fprintf(stdout, "\n");
-  } else { //!to_stdout
-    //determine output filename
-    char outfilename[strlen(infilename) + strlen(OUTFILEEXT) + 1];
-    calc_outfilename(outfilename, infilename);
-    //open output filename
-    FILE *outstream = fopen(outfilename, "w");
-    if (outstream == NULL) {
-      gsErrorMsg("cannot open output file '%s'\n", outfilename);
-      return 1;
+  } else {
+    //store the result
+    if (opt_stdout) {
+      gsVerboseMsg("saving result to stdout...\n");
+      ATwriteToTextFile((ATerm) result, stdout);
+      fprintf(stdout, "\n");
+    } else { //!opt_stdout
+      //determine output filename
+      char outfilename[strlen(infilename) + strlen(OUTFILEEXT) + 1];
+      calc_outfilename(outfilename, infilename);
+      //open output filename
+      FILE *outstream = fopen(outfilename, "w");
+      if (outstream == NULL) {
+        gsErrorMsg("cannot open output file '%s'\n", outfilename);
+        return 1;
+      }
+      gsVerboseMsg("saving result to '%s'...\n", outfilename);
+      ATwriteToTextFile((ATerm) result, outstream);
+      fclose(outstream);
     }
-    gsVerboseMsg("saving result to '%s'...\n", outfilename);
-    ATwriteToBinaryFile((ATerm) result, outstream);
-    fclose(outstream);
   }
   return 0;
 }
