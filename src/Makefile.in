@@ -60,10 +60,6 @@ LIBPARSER_NAME     = libgsparse.a
 LIBPARSER_OBJECTS  = libgsparse.o gsparser.o gslexer.o gstypecheck.o gsdataimpl.o gsfunc.o gslowlevel.o
 OBJECTS           += $(LIBPARSER_OBJECTS)
 LIBPARSER_LDFLAGS  = -l$(ATERM) -lm
-PARSER_NAME        = mcrl2parse
-PARSER_OBJECTS     = mcrl2parse.o
-OBJECTS           += $(PARSER_OBJECTS)
-PARSER_LDFLAGS     = -lgsparse -l$(ATERM) -lm
 
 #Printer definitions
 PRINTER_NAME       = lpepp
@@ -143,12 +139,12 @@ else
 endif
 
 #Group definitions
-EXE_NAMES          =  $(PARSER_NAME) $(PRINTER_NAME) $(MCRL22LPE_NAME) $(LIN_NAME) $(REWR_NAME) $(ALPHA_NAME) $(M2M2_NAME) $(PNML2MCRL2_NAME) $(INSTAN_NAME) $(SIM_NAME) $(XSIM_NAME)
+EXE_NAMES          =  $(MCRL22LPE_NAME) $(PRINTER_NAME) $(INSTAN_NAME) $(SIM_NAME) $(XSIM_NAME) $(M2M2_NAME) $(PNML2MCRL2_NAME) $(REWR_NAME) $(ALPHA_NAME) $(LIN_NAME) 
 LIB_NAMES          =  $(XSIMTRACE_NAME)
 OBJECTS            := $(sort $(OBJECTS))
 
 #Make rules
-.PHONY: all install clean
+.PHONY: all install clean distclean
 .PRECIOUS: gsparser.c gslexer.c
 
 all : $(EXE_NAMES) $(LIB_NAMES)
@@ -188,6 +184,9 @@ clean :
 	$(RM) $(EXE_NAMES) $(LIB_NAMES) *.o *.a *.d *.dpp aterm/*.o aterm/*.a aterm/*.d svc/*.o svc/*.a svc/*.d\
         gslexer.c gsparser.c gsparser.h gsparser.output config.status config.log *~ core core.*
 
+distclean : clean
+	$(RM) -r autom4te.cache Makefile gsrewr_innerc_aux.h
+
 $(ATERM_NAME): $(ATERM_OBJECTS)
 	$(AR) $(ARFLAGS) $@ $(ATERM_OBJECTS)
 
@@ -197,9 +196,6 @@ $(LIBSVC_NAME): $(LIBSVC_OBJECTS)
 $(LIBPARSER_NAME) : $(LIBPARSER_OBJECTS) $(ATERM_DEP)
 	$(AR) $(ARFLAGS) $@ $(LIBPARSER_OBJECTS)
 #	$(CC) -shared -o $@ $(LIBPARSER_OBJECTS)
-
-$(PARSER_NAME) : $(PARSER_OBJECTS) $(ATERM_DEP) $(LIBPARSER_NAME)
-	$(CC) -o $@ $(PARSER_OBJECTS) $(LDFLAGS) $(PARSER_LDFLAGS)
 
 $(PRINTER_NAME) : $(PRINTER_OBJECTS) $(ATERM_DEP) $(LIBPARSER_NAME)
 	$(CC) -o $@ $(PRINTER_OBJECTS) $(LDFLAGS) $(PRINTER_LDFLAGS)
@@ -271,7 +267,7 @@ endif
 	sed 's,\($*\)\.o[ :]*,\1.o $@ : ,g' < $@.$$$$ > $@; \
 	$(RM) $@.$$$$
 
-ifneq ($(MAKECMDGOALS),clean)
+ifeq (,$(findstring $(MAKECMDGOALS),clean distclean))
 -include $(foreach s,$(OBJECTS),$(shell if test -f $(basename $s).c; then echo -n $(basename $s).d; fi))
 -include $(foreach s,$(OBJECTS),$(shell if test -f $(basename $s).cpp; then echo -n $(basename $s).dpp; fi))
 endif
