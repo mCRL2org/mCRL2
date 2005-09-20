@@ -5701,9 +5701,14 @@ static int implies_condition(ATermAppl c1, ATermAppl c2)
   { return 1;
   }
   
-  if (gsIsDataExprAnd(c1))
-  { return implies_condition(ATAgetArgument(ATAgetArgument(c1,0),1),c2) || 
-           implies_condition(ATAgetArgument(c1,1),c2);
+  /* Dealing with the conjunctions (&&) first and then the disjunctions (||)
+     yields a 10-fold speed increase compared to the case where first the
+     || occur, and then the &&. This result was measured on the alternating
+     bit protocol, with --regular. */
+
+  if (gsIsDataExprAnd(c2))
+  { return implies_condition(c1,ATAgetArgument(ATAgetArgument(c2,0),1)) &&
+           implies_condition(c1,ATAgetArgument(c2,1));
   }
 
   if (gsIsDataExprOr(c1))
@@ -5711,13 +5716,13 @@ static int implies_condition(ATermAppl c1, ATermAppl c2)
            implies_condition(ATAgetArgument(c1,1),c2);
   }
 
-  if (gsIsDataExprOr(c2))
-  { return implies_condition(c1,ATAgetArgument(ATAgetArgument(c2,0),1)) ||
-           implies_condition(c1,ATAgetArgument(c2,1));
+  if (gsIsDataExprAnd(c1))
+  { return implies_condition(ATAgetArgument(ATAgetArgument(c1,0),1),c2) || 
+           implies_condition(ATAgetArgument(c1,1),c2);
   }
 
-  if (gsIsDataExprAnd(c2))
-  { return implies_condition(c1,ATAgetArgument(ATAgetArgument(c2,0),1)) &&
+  if (gsIsDataExprOr(c2))
+  { return implies_condition(c1,ATAgetArgument(ATAgetArgument(c2,0),1)) ||
            implies_condition(c1,ATAgetArgument(c2,1));
   }
   
