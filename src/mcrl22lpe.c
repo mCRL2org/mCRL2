@@ -9,9 +9,6 @@ extern "C" {
  * operators as far inside the parallel operators as
  * is possible.
  *
- * Take care that the flag --cluster works properly again
- * now that there are assignments in the nextstate.
- *
  * The program should be extensively tested */
 
 #ifdef HAVE_CONFIG_H
@@ -34,7 +31,6 @@ extern "C" {
 #define INFILEEXT ".mcrl2"
 #define OUTFILEEXT ".lpe"
 
-static int verbose=0;
 static bool regular = false;
 static bool regular2 = false;
 static bool cluster = false;
@@ -179,6 +175,7 @@ char scratch1[STRINGLENGTH];
 ATermIndexedSet objectIndexTable=NULL;
 ATermIndexedSet stringTable=NULL;
 ATermTable freshstringIndices=NULL;
+ATermAppl realsort=NULL;
 
 typedef struct enumeratedtype {
   int size;
@@ -516,7 +513,7 @@ static long insertConstructorOrFunction(ATermAppl constructor,objecttype type)
   n=addObject(constructor,&isnew);
 
   if (isnew==0)
-  { ATerror("Function %t is added twice\n",constructor); }
+  { ATerror("Internal: Function %t is added twice\n",constructor); }
 
   newobject(n);
 
@@ -649,7 +646,8 @@ static void insertvariable(ATermAppl var, ATbool mustbenew)
   n=addObject(var,&isnew);
 
   if ((isnew==0)&&(mustbenew))
-  { ATerror("Variable %t already exists\n",var); }
+  { ATerror("Variable %t already exists\n",var); 
+  }
 
   newobject(n);
 
@@ -2001,11 +1999,6 @@ static ATermAppl newprocess(ATermList parameters, ATermAppl body,
 { 
   parameters=parameters_that_occur_in_body(parameters, body);
   ATermAppl p=gsMakeProcVarId(fresh_name("P"),linGetSorts(parameters));
-  if (verbose>=1)
-  { ATfprintf(stderr,"NEWPROC %t %t\n",p,parameters);
-    gsPrintPart(stderr,body,0,0);
-    ATfprintf(stderr,"\n");
-  }
   insertProcDeclaration(
              p,
              parameters,
@@ -2818,11 +2811,6 @@ static ATermAppl procstorealGNFbody(
    GNF where one action is always followed by a
    variable. */
 { 
-  if (verbose>=1)
-  { ATfprintf(stderr,"procstorealGNFbody: ");
-    gsPrintPart(stderr,body,0,0);
-    ATfprintf(stderr,"\n");
-  }
 
   if (gsIsAtTime(body))
   { ATermAppl timecondition=NULL;
@@ -3118,7 +3106,6 @@ static int alreadypresent(ATermAppl *var,ATermList vl, long n)
     ATermAppl var2=getfreshvariable(
                       ATgetName(ATgetAFun(ATAgetArgument(*var,0))),
                       ATAgetArgument(*var,1));
-    // ATfprintf(stderr,"HIER: %t   %t    %t\n",*var,var1,var2);
     objectdata[n].parameters=
                substitute_datalist(ATinsertA(ATempty,var2),
                                    ATinsertA(ATempty,*var),
@@ -3158,7 +3145,6 @@ static ATermList collectparameterlist(ATermList pCRLprocs)
   ATermList parameters=ATempty;
   for (walker=pCRLprocs ; walker!=ATempty ; walker=ATgetNext(walker))
     { long n=objectIndex(ATAgetFirst(walker));
-//  ATfprintf(stderr,"Join Parameters:\npar1 %t\npar2: %t\n\n",parameters,objectdata[n].parameters);
       parameters=joinparameters(parameters,objectdata[n].parameters,n);
     }
   return parameters;
@@ -4670,6 +4656,11 @@ static enumtype *generate_enumerateddatatype(
                   et->etype,
                   spec);
 
+  create_case_function_on_enumeratedtype(
+                  realsort,
+                  et->etype,
+                  spec);
+
   
   return et;
 }
@@ -4877,10 +4868,6 @@ static ATermAppl construct_binary_case_tree_rec(
                        enumtype *e)
 { ATermAppl t=NULL,t1=NULL;
   ATermAppl casevar;
-
-  // ATfprintf(stderr,"CASETREE %d ",n);
-  // gsPrintParts(stderr,*terms,0,0,NULL,";");
-  // ATfprintf(stderr,"\n",n);
 
   assert(*terms!=ATempty);
 
@@ -5243,7 +5230,7 @@ static ATermAppl collect_sum_arg_arg_cond(
   }   
   if (binary==1)
   { resulttime=construct_binary_case_tree(n,
-                resultsum,auxresult,gsMakeSortExprBool(),e);
+                resultsum,auxresult,realsort,e);
   }
   else
   {
@@ -5252,7 +5239,7 @@ static ATermAppl collect_sum_arg_arg_cond(
     }
     else
     { resulttime=gsMakeDataApplList(
-                     find_case_function(e->etype,gsMakeSortExprBool()),
+                     find_case_function(e->etype,realsort),
                      ATinsertA(auxresult,e->var));
     }
   }
@@ -6611,18 +6598,11 @@ static ATermList combinesumlist(
 
   /* first we enumerate the summands of t1 */
 
-  ATermAppl realsort=gsMakeSortId(gsString2ATermAppl("Real"));
-  if (!existsort(gsMakeSortId(gsString2ATermAppl("Real"))))
-  { realsort=gsMakeSortId(gsString2ATermAppl("Nat"));
-  }
   ATermAppl timevar=getfreshvariable(
                        "timevar",realsort);
   ATermAppl ultimatedelaycondition=
                substitute_data(rename_list,par2,
                    getUltimateDelayCondition(sumlist2,parametersOfsumlist2,timevar,spec));
-  // ATfprintf(stderr,"ultimatedelaycond1i %t\n",timevar);
-  // gsPrintPart(stderr,ultimatedelaycondition,0,0);
-  // ATfprintf(stderr,"\n");
 
   for (ATermList walker1=sumlist1; (walker1!=ATempty); 
                         walker1=ATgetNext(walker1)) 
@@ -6687,10 +6667,6 @@ static ATermList combinesumlist(
 
   ultimatedelaycondition=
                    getUltimateDelayCondition(sumlist1,par1,timevar,spec);
-
-//  ATfprintf(stderr,"ultimatedelaycond2\n");
-//  gsPrintPart(stderr,ultimatedelaycondition,0,0);
-//  ATfprintf(stderr,"\n");
 
   for (ATermList walker2=sumlist2; walker2!=ATempty;
          walker2=ATgetNext(walker2) )
@@ -6904,7 +6880,6 @@ static ATermAppl parallelcomposition(
   pars2=linGetParameters(t2);
 
   renaming=construct_renaming(pars1,pars2,&pars3,&pars2renaming); 
-//  ATfprintf(stderr,"pars1: %t\npars2: %t\npars3: %t\n\n",pars1,pars2,pars3);
 
   gsVerboseMsg(
     "- parallel composition is being translated: %d || %d",
@@ -7153,7 +7128,11 @@ static void initialize_data(void)
   stacklist=NULL;
   ATprotectList(&sumlist);
   ATprotectList(&localequationvariables);
-  
+  ATprotectAppl(&realsort);
+  realsort=gsMakeSortId(gsString2ATermAppl("Real"));
+  if (!existsort(gsMakeSortId(gsString2ATermAppl("Real"))))
+  { realsort=gsMakeSortId(gsString2ATermAppl("Nat"));
+  }
 }
 
 /**************** alphaconversion ********************************/
