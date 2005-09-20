@@ -118,6 +118,19 @@ ATermAppl gsLinearise(ATermAppl spec)
 #define GS_PRINT_FILE
 #include "libprint_common.h"
 
+void PrettyPrint(FILE *OutStream, const ATerm Part)
+{
+  if (ATgetType(Part) == AT_APPL) {
+    PrintPartFile(OutStream, (ATermAppl) Part, false, 0);
+  } else if (ATgetType(Part) == AT_LIST) {
+    fprintf(OutStream, "[");
+    PrintPartsFile(OutStream, (ATermList) Part, false, 0, "", ", ");
+    fprintf(OutStream, "]");
+  } else {
+    gsErrorMsg("ATerm Part is not an ATermAppl or an ATermList\n");
+  }
+}
+
 void gsPrintPart(FILE *OutStream, const ATermAppl Part, bool ShowSorts,
   int PrecLevel)
 {

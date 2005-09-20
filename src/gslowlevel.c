@@ -6,8 +6,10 @@ extern "C" {
 #include <stdlib.h>
 #include <assert.h>
 #include <math.h>
+#include <ctype.h>
 
 #include "gslowlevel.h"
+#include "libgsparse.h"
 
 //String manipulation
 //-------------------
@@ -27,6 +29,176 @@ char *strdup(const char *s)
 
 //Message printing
 //----------------
+
+int ATppprintf(const char *format, ...)
+{
+  int             result = 0;
+  va_list         args;
+
+  va_start(args, format);
+  result = ATppvfprintf(stdout, format, args);
+  va_end(args);
+
+  return result;
+}
+
+int ATppfprintf(FILE *stream, const char *format, ...)
+{
+  int             result = 0;
+  va_list         args;
+
+  va_start(args, format);
+  result = ATppvfprintf(stream, format, args);
+  va_end(args);
+
+  return result;
+}
+
+int ATppvfprintf(FILE *stream, const char *format, va_list args)
+{
+  //code copied from the ATerm library in which '%T' is added to the format to
+  //enable pretty printing of ATerm's
+
+  const char     *p;
+  char           *s;
+  char            fmt[16];
+  int             result = 0;
+  ATerm           t;
+  ATermList       l;
+
+  for (p = format; *p; p++)
+  {
+    if (*p != '%')
+    {
+      fputc(*p, stream);
+      continue;
+    }
+
+    s = fmt;
+    while (!isalpha((int) *p))	/* parse formats %-20s, etc. */
+      *s++ = *p++;
+    *s++ = *p;
+    *s = '\0';
+
+    switch (*p)
+    {
+      case 'c':
+      case 'd':
+      case 'i':
+      case 'o':
+      case 'u':
+      case 'x':
+      case 'X':
+	fprintf(stream, fmt, va_arg(args, int));
+	break;
+
+      case 'e':
+      case 'E':
+      case 'f':
+      case 'g':
+      case 'G':
+	fprintf(stream, fmt, va_arg(args, double));
+	break;
+
+      case 'p':
+	fprintf(stream, fmt, va_arg(args, void *));
+	break;
+
+      case 's':
+	fprintf(stream, fmt, va_arg(args, char *));
+	break;
+
+	/*
+	 * MCRL2 specifics start here: "%T" to prettiprint an ATerm
+	 */
+      case 'T':
+	PrettyPrint(stream, va_arg(args, ATerm));
+	break;
+	/*
+	 * ATerm specifics start here: "%t" to print an ATerm; "%l" to
+	 * print a list; "%y" to print a Symbol; "%n" to print a single
+	 * ATerm node
+	 */
+      case 't':
+	ATwriteToTextFile(va_arg(args, ATerm), stream);
+	break;
+      case 'l':
+	l = va_arg(args, ATermList);
+	fmt[strlen(fmt) - 1] = '\0';	/* Remove 'l' */
+	while (!ATisEmpty(l))
+	{
+	  ATwriteToTextFile(ATgetFirst(l), stream);
+	  /*
+	   * ATfprintf(stream, "\nlist node: %n\n", l);
+	   * ATfprintf(stream, "\nlist element: %n\n", ATgetFirst(l));
+	   */
+	  l = ATgetNext(l);
+	  if (!ATisEmpty(l))
+	    fputs(fmt + 1, stream);
+	}
+	break;
+      case 'a':
+      case 'y':
+	AT_printSymbol(va_arg(args, Symbol), stream);
+	break;
+      case 'n':
+	t = va_arg(args, ATerm);
+	switch (ATgetType(t))
+	{
+	  case AT_INT:
+	  case AT_REAL:
+	  case AT_BLOB:
+	    ATwriteToTextFile(t, stream);
+	    break;
+
+	  case AT_PLACEHOLDER:
+	    fprintf(stream, "<...>");
+	    break;
+
+	  case AT_LIST:
+	    fprintf(stream, "[...(%d)]", ATgetLength((ATermList) t));
+	    break;
+
+	  case AT_APPL:
+	    if (AT_isValidSymbol(ATgetAFun(t))) {
+	      AT_printSymbol(ATgetAFun(t), stream);
+	      fprintf(stream, "(...(%d))",
+		      GET_ARITY(t->header));
+	    } else {
+	      fprintf(stream, "<sym>(...(%d))",
+		      GET_ARITY(t->header));
+	    }
+	    if (HAS_ANNO(t->header)) {
+	      fprintf(stream, "{}");
+	    }
+	    break;
+	  case AT_FREE:
+	    fprintf(stream, "@");
+	    break;
+	  default:
+	    fprintf(stream, "#");
+	    break;
+	}
+	break;
+
+      case 'h':
+	{
+	  unsigned char *digest = ATchecksum(va_arg(args, ATerm));
+	  int i;
+	  for (i=0; i<16; i++) {
+	    fprintf(stream, "%02x", digest[i]);
+	  }
+	}
+	break;
+
+
+      default:
+	fputc(*p, stream);
+	break;
+    }
+  }
+  return result;
+}
 
 bool gsWarning = true; //indicates if warning should be printed
 bool gsVerbose = false;//indicates if verbose messages should be printed

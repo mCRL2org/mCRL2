@@ -49,6 +49,13 @@ extern char *strdup(const char *s);
 //Message printing
 //----------------
 
+int ATppprintf(const char *format, ...);
+int ATppfprintf(FILE *stream, const char *format, ...);
+int ATppvfprintf(FILE *stream, const char *format, va_list args);
+//Pretty print versions of the ATprintf functions
+//If '%T' is used in the format, the corresponding ATerm argument is pretty
+//printed 
+
 void gsSetQuietMsg(void);
 //Post: Printing of warnings, verbose information and extended debugging
 //      information during program execution is disabled.
@@ -71,38 +78,38 @@ extern bool gsDebug;
 
 inline static void gsErrorMsg(char *Format, ...)
 //Post: "error: " is printed to stderr followed by Format, where the remaining
-//      parameters are used as ATprintf arguments to Format.
+//      parameters are used as ATppprintf arguments to Format.
 {
   fprintf(stderr, "error: ");
   va_list Args;
   va_start(Args, Format);
-  ATvfprintf(stderr, Format, Args);
+  ATppvfprintf(stderr, Format, Args);
   va_end(Args);
 }
 
 inline static void gsWarningMsg(char *Format, ...)
 //Post: If the printing of warning messages is enabled, "warning: " is printed
 //      to stderr followed by Format, where the remaining parameters are used
-//      as ATprintf arguments to Format.
+//      as ATppprintf arguments to Format.
 {
   if (gsWarning) {
     fprintf(stderr, "warning: ");
     va_list Args;
     va_start(Args, Format);
-    ATvfprintf(stderr, Format, Args);
+    ATppvfprintf(stderr, Format, Args);
     va_end(Args);
   }
 }
 
 inline static void gsVerboseMsg(char *Format, ...)
 //Post: If the printing of verbose information is enabled, Format is printed to
-//      stderr, where the remaining parameters are used as ATprintf arguments
+//      stderr, where the remaining parameters are used as ATppprintf arguments
 //      to Format.
 {
   if (gsVerbose) {
     va_list Args;
     va_start(Args, Format);
-    ATvfprintf(stderr, Format, Args);
+    ATppvfprintf(stderr, Format, Args);
     va_end(Args);
   }
 }
@@ -112,7 +119,7 @@ inline static void gsVerboseMsg(char *Format, ...)
     fprintf(stderr, "(%s): ", FuncName); \
     va_list Args; \
     va_start(Args, Format); \
-    ATvfprintf(stderr, Format, Args); \
+    ATppvfprintf(stderr, Format, Args); \
     va_end(Args); \
   }
 
