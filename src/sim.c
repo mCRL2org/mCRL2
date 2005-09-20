@@ -30,7 +30,7 @@ static void gsPrintState(ATerm state)
 		{
 			ATprintf("_");
 		} else {
-			gsPrintPart(stdout,a,false,0);
+			ATppprintf("%T",a);
 		}
 	}
 }
@@ -62,7 +62,8 @@ int main(int argc, char **argv)
 		{ "rewriter",	no_argument,	NULL,	'R' },
 		{ 0, 0, 0, 0 }
 	};
-	int opt, i, r, strat;
+	int opt, i, r;
+	RewriteStrategy strat;
 	bool usedummy;
 	char *rw_arg;
 
@@ -148,9 +149,7 @@ int main(int argc, char **argv)
 		}
 		for (l=states,i=0; !ATisEmpty(l); l=ATgetNext(l), i++)
 		{
-			ATprintf("%i: ",i);
-			gsPrintPart(stdout,ATAgetFirst(ATLgetFirst(l)),false,0);
-			ATprintf("  ->  [ ");
+			ATppprintf("%i: %T  ->  [ ",i,ATAgetFirst(ATLgetFirst(l)));
 			gsPrintState(ATgetFirst(ATgetNext(ATLgetFirst(l))));
 			ATprintf(" ]\n\n");
 		}
@@ -172,9 +171,7 @@ harm:
 		{
 			goto harm;
 		}
-		ATprintf("\ntransition: ");
-		gsPrintPart(stdout,ATAgetFirst(ATLelementAt(states,i)),false,0);
-		ATprintf("\n\n");
+		ATppprintf("\ntransition: %T\n\n",ATAgetFirst(ATLelementAt(states,i)));
 		state = ATgetFirst(ATgetNext(ATLelementAt(states,i)));
 		ATprintf("current state: [ ");
 		gsPrintState(state);

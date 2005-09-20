@@ -392,7 +392,7 @@ ATermList FindSolutions(ATermList Vars, ATerm Expr, FindSolutionsCallBack f)
 			if ( !ATisEqual(Expr,gsProverFalse) )
 			{
 //				gsWarningMsg("term does not evaluate to true or false (%t)\n",ATgetFirst(ATgetNext(o)));
-				ATfprintf(stderr,"Term does not evaluate to true or false: ");gsPrintPart(stderr,gsFromRewriteFormat(Expr),false,0);ATfprintf(stderr,"\n");
+				ATppfprintf(stderr,"Term does not evaluate to true or false: %T\n",gsFromRewriteFormat(Expr));
 				FindSolutionsError = true;
 			}
 			return ATmakeList0();
@@ -418,7 +418,7 @@ ATermList FindSolutions(ATermList Vars, ATerm Expr, FindSolutionsCallBack f)
 			if ( !ATisEqual(ATgetFirst(ATgetNext(o)),gsProverFalse) )
 			{
 //				gsWarningMsg("term does not evaluate to true or false (%t)\n",ATgetFirst(ATgetNext(o)));
-				ATfprintf(stderr,"Term does not evaluate to true or false: ");gsPrintPart(stderr,gsFromRewriteFormat(ATgetFirst(ATgetNext(o))),false,0);ATfprintf(stderr,"\n");
+				ATppfprintf(stderr,"Term does not evaluate to true or false: %T\n",gsFromRewriteFormat(ATgetFirst(ATgetNext(o))));
 				FindSolutionsError = true;
 			}
 			return ATmakeList0();
@@ -435,7 +435,7 @@ ATermList FindSolutions(ATermList Vars, ATerm Expr, FindSolutionsCallBack f)
 			n = calcNext(ATLgetFirst(t));
 			if ( used_vars > max_vars )
 			{
-				fprintf(stderr,"warning: Need more than %i variables to find all solutions for ",max_vars);gsPrintPart(stderr,gsFromRewriteFormat(Expr),false,0);fprintf(stderr,"\n");
+				ATppfprintf(stderr,"warning: Need more than %i variables to find all solutions for %T\n",max_vars,gsFromRewriteFormat(Expr));
 				max_vars *= MAX_VARS_FACTOR;
 			}
 			for (; !ATisEmpty(n); n=ATgetNext(n))
@@ -456,7 +456,7 @@ ATermList FindSolutions(ATermList Vars, ATerm Expr, FindSolutionsCallBack f)
 						if ( !ATisEqual(ATgetFirst(ATgetNext(o)),gsProverFalse) )
 						{
 //							ATfprintf(stderr,"Term does not evaluate to true or false (%t)\n",ATgetFirst(ATgetNext(o)));
-							ATfprintf(stderr,"Term does not evaluate to true or false: ");gsPrintPart(stderr,gsFromRewriteFormat(ATgetFirst(ATgetNext(o))),false,0);ATfprintf(stderr,"\n");
+							ATppfprintf(stderr,"Term does not evaluate to true or false: %T\n",gsFromRewriteFormat(ATgetFirst(ATgetNext(o))));
 							FindSolutionsError = true;
 						}
 					}

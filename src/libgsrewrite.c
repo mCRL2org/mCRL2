@@ -24,12 +24,12 @@ extern "C" {
 #include "gsrewr_innerc2.h"
 #endif
 
-static int strategy;
+static RewriteStrategy strategy;
 
 ATermList opid_eqns;
 ATermList dataappl_eqns;
 
-void gsRewriteInit(ATermAppl Eqns, int strat)
+void gsRewriteInit(ATermAppl Eqns, RewriteStrategy strat)
 {
 	ATermList eqns;
 
@@ -90,6 +90,8 @@ void gsRewriteFinalise()
 	{
 		case GS_REWR_INNER3:
 			rewrite_finalise_inner3();
+			break;
+		default:
 			break;
 	}
 }

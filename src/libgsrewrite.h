@@ -1,18 +1,21 @@
 /* $Id: libgsrewrite.h,v 1.3 2005/04/08 09:49:58 muck Exp $ */
+#ifndef __LIBGSREWRITE_H
+#define __LIBGSREWRITE_H
 #ifdef __cplusplus
 extern "C" {
 #endif
 
 #include <aterm2.h>
 
-#define GS_REWR_INNER	0
-#define GS_REWR_INNER2	1
-#define GS_REWR_INNER3	2
-#define GS_REWR_INNERC	3
-#define GS_REWR_INNERC2	4
-#define GS_REWR_JITTY	5
+typedef enum { GS_REWR_INNER
+	     , GS_REWR_INNER2
+	     , GS_REWR_INNER3
+	     , GS_REWR_INNERC
+	     , GS_REWR_INNERC2
+	     , GS_REWR_JITTY
+	     } RewriteStrategy;
 
-void gsRewriteInit(ATermAppl Eqns, int strat);
+void gsRewriteInit(ATermAppl DataEqnSpec, RewriteStrategy Strategy);
 void gsRewriteFinalise();
 
 void gsRewriteAddEqn(ATermAppl Eqn);
@@ -28,4 +31,5 @@ ATermList gsRewriteInternals(ATermList Terms);
 
 #ifdef __cplusplus
 }
+#endif
 #endif

@@ -1,0 +1,211 @@
+<?xml version="1.0"?>
+
+<!DOCTYPE refentry PUBLIC "-//OASIS//DTD DocBook XML V4.2//EN" "http://www.oasis-open.org/docbook/xml/4.2/docbookx.dtd"[
+<!ENTITY % param SYSTEM "param.xml">
+%param;
+<!ENTITY tvoid "<type>void</type>">
+<!ENTITY taterm "<type>ATerm</type>">
+<!ENTITY trewrstrat "<type>RewriteStrategy</type>">
+<!ENTITY gsRewriteInit "<function>gsRewriteInit</function>">
+<!ENTITY gsRewriteFinalise "<function>gsRewriteFinalise</function>">
+<!ENTITY gsRewriteAddEqn "<function>gsRewriteAddEqn</function>">
+<!ENTITY gsRewriteRemoveEqn "<function>gsRewriteRemoveEqn</function>">
+<!ENTITY gsRewriteTerm "<function>gsRewriteTerm</function>">
+<!ENTITY gsRewriteTerms "<function>gsRewriteTerms</function>">
+<!ENTITY gsToRewriteFormat "<function>gsToRewriteFormat</function>">
+<!ENTITY gsFromRewriteFormat "<function>gsFromRewriteFormat</function>">
+<!ENTITY gsRewriteInternal "<function>gsRewriteInternal</function>">
+<!ENTITY gsRewriteInternals "<function>gsRewriteInternals</function>">
+<!ENTITY parDataEqnSpec "<parameter>DataEqnSpec</parameter>">
+<!ENTITY parStrategy "<parameter>Strategy</parameter>">
+<!ENTITY parEqn "<parameter>Eqn</parameter>">
+<!ENTITY parTerm "<parameter>Term</parameter>">
+<!ENTITY parTerms "<parameter>Terms</parameter>">
+<!ENTITY stratINNER3 "<literal>GS_REWR_INNER3</literal>">
+<!ENTITY stratINNERC "<literal>GS_REWR_INNERC</literal>">
+<!ENTITY stratJITTY "<literal>GS_REWR_JITTY</literal>">
+<!ENTITY gsEnableConstructorFunctions "<function>gsEnableConstructorFunctions</function>">
+<!ENTITY RWapplySubstitution "<function>RWapplySubstitution</function>">
+]>
+
+<refentry id="libgsrewrite">
+
+<refmeta>
+<refentrytitle>libgsrewrite</refentrytitle>
+<manvolnum>7</manvolnum>
+</refmeta>
+
+<refnamediv>
+<refname>libgsrewrite</refname>
+<refpurpose>a mCRL2 library for rewriting data expressions.</refpurpose>
+</refnamediv>
+
+<refsynopsisdiv>
+<funcsynopsis>
+<funcsynopsisinfo>
+#include "libgsrewrite.h"
+</funcsynopsisinfo>
+<funcprototype>
+  <funcdef>&tvoid; &gsRewriteInit;</funcdef>
+  <paramdef>&tatermappl; &parDataEqnSpec;</paramdef>
+  <paramdef>&trewrstrat; &parStrategy;</paramdef>
+</funcprototype>
+<funcprototype>
+  <funcdef>&tvoid; &gsRewriteFinalise;</funcdef>
+  <paramdef>&tvoid;</paramdef>
+</funcprototype>
+<funcprototype>
+  <funcdef>&tvoid; &gsRewriteAddEqn;</funcdef>
+  <paramdef>&tatermappl; &parEqn;</paramdef>
+</funcprototype>
+<funcprototype>
+  <funcdef>&tvoid; &gsRewriteRemoveEqn;</funcdef>
+  <paramdef>&tatermappl; &parEqn;</paramdef>
+</funcprototype>
+<funcprototype>
+  <funcdef>&tatermappl; &gsRewriteTerm;</funcdef>
+  <paramdef>&tatermappl; &parTerm;</paramdef>
+</funcprototype>
+<funcprototype>
+  <funcdef>&tatermlist; &gsRewriteTerms;</funcdef>
+  <paramdef>&tatermlist; &parTerms;</paramdef>
+</funcprototype>
+<funcprototype>
+  <funcdef>&taterm; &gsToRewriteFormat;</funcdef>
+  <paramdef>&tatermappl; &parTerm;</paramdef>
+</funcprototype>
+<funcprototype>
+  <funcdef>&tatermappl; &gsFromRewriteFormat;</funcdef>
+  <paramdef>&taterm; &parTerm;</paramdef>
+</funcprototype>
+<funcprototype>
+  <funcdef>&taterm; &gsRewriteInternal;</funcdef>
+  <paramdef>&taterm; &parTerm;</paramdef>
+</funcprototype>
+<funcprototype>
+  <funcdef>&tatermlist; &gsRewriteInternals;</funcdef>
+  <paramdef>&tatermlist; &parTerms;</paramdef>
+</funcprototype>
+</funcsynopsis>
+</refsynopsisdiv>
+
+<refsect1>
+<title>Preconditions</title>
+<para>
+The following preconditions have to be satisfied for all functions:
+<itemizedlist>
+  <listitem>
+    <para>the &aterm; library is initialised</para>
+  </listitem>
+  <listitem>
+    <para>&gsEnableConstructorFunctions; has been called</para>  
+  </listitem>
+</itemizedlist>
+</para>
+<para>
+The following preconditions have to be satisfied for &gsRewriteInit;:
+<itemizedlist>
+  <listitem>
+    <para>the last call to &gsRewriteInit; has been followed by a call to &gsRewriteFinalise;</para>
+  </listitem>
+  <listitem>
+    <para>&parDataEqnSpec; is a DataEqnSpec from a mCRL2 specification (after data implementation)</para>
+  </listitem>
+</itemizedlist>
+</para>
+<para>
+The following precondition has to be satisfied for &gsRewriteFinalise;, &gsRewriteAddEqn;, &gsRewriteRemoveEqn;, &gsRewriteTerm;, &gsRewriteTerms;, &gsToRewriteFormat;, &gsFromRewriteFormat;, &gsRewriteInternal; and &gsRewriteInternals;:
+<itemizedlist>
+  <listitem>
+    <para>a call to &gsRewriteInit; has been made without a following call to &gsRewriteFinalise;</para>
+  </listitem>
+</itemizedlist>
+</para>
+<para>
+The following precondition has to be satisfied for &gsRewriteAddEqn; and &gsRewriteRemoveEqn;:
+<itemizedlist>
+  <listitem>
+    <para>&parEqn; is a DataEqn (after data implementation)</para>
+  </listitem>
+</itemizedlist>
+</para>
+<para>
+The following precondition has to be satisfied for &gsRewriteTerm; and &gsToRewriteFormat;:
+<itemizedlist>
+  <listitem>
+    <para>&parTerm; is a DataExpr (after data implementation)</para>
+  </listitem>
+</itemizedlist>
+</para>
+<para>
+The following precondition has to be satisfied for &gsRewriteInternal; and &gsFromRewriteFormat;:
+<itemizedlist>
+  <listitem>
+    <para>&parTerm; is a data expression in the internal rewriter format</para>
+  </listitem>
+</itemizedlist>
+</para>
+<para>
+The following precondition has to be satisfied for &gsRewriteTerms;:
+<itemizedlist>
+  <listitem>
+    <para>&parTerms; is a ATermList of DataExprs (after data implementation)</para>
+  </listitem>
+</itemizedlist>
+</para>
+<para>
+The following precondition has to be satisfied for &gsRewriteInternals;:
+<itemizedlist>
+  <listitem>
+    <para>&parTerm; is a ATermList of data expressions in the internal rewriter format</para>
+  </listitem>
+</itemizedlist>
+</para>
+</refsect1>
+
+<refsect1>
+<title>Description</title>
+<para>
+The libgsrewrite library provides a rewrite system for mCRL2 data expressions (only after data implementation). To use it, one first needs to call &gsRewriteInit; to initialise the system with the equations from &parDataEqnSpec; and a rewriter strategy &parStrategy; (see below). To reinitialise the system or before closing the application, a call to &gsRewriteFinalise; has to be made to clean up the current rewrite system. After initialisation, one can still add or remove an equation &parEqn; with the functions &gsRewriteAddEqn; and &gsRewriteRemoveEqn;. The latter removes all occurrences of &parEqn; from the set of equations used by the rewrite system.
+</para>
+<para>
+To actually rewrite a data expression, the functions &gsRewriteTerm; and &gsRewriteTerms; can be used. The function &gsRewriteTerm; rewrites a single mCRL2 data expression &parTerm;, while &gsRewriteTerms; rewrites every expression in the list &parTerms;. Because the rewriters use their own internal format for data expressions (for more efficient rewriting), every call to &gsRewriteTerm; or &gsRewriteTerms; results in a implicit conversion to and from the internal format before, respectively after the actual rewriting. When rewriting is a critical part of an application, it is wise to explicitly convert the data expressions before repeated calls on such an expression. This is done with the functions &gsToRewriteFormat; and &gsFromRewriteFormat;. (Note that the expression in the internal format is a &taterm; instead of an &tatermappl;.) Terms in the internal format can be rewritten with the function &gsRewriteInternal; and &gsRewriteInternals; (analogous to &gsRewriteTerm; and &gsRewriteTerms;).
+</para>
+
+<refsect2>
+<title>Strategies</title>
+<para>
+Currently, their are three different rewriting strategies available in libgsrewrite. A standard innermost rewriting strategy is available under the name &stratINNER3;. This strategy will fit most non critical rewriting uses, such as simulation, (simple) LPE manipulation and generation of (very) small state spaces. For time critical uses, there is a compiling innermost rewriting strategy &stratINNERC;. With this strategy, a call to &gsRewriteInit; will result in the compilation of a optimalised rewriter. This does mean that gcc and the appropriate headers and libraries must be available.
+</para>
+<para>
+An alternative to &stratINNER3; is the JITty rewriter &stratJITTY;. This strategy can avoid a lot of unnecessary rewriting in certain cases and can handle some rewrite rules that cause the innermost rewriters to rewrite infinitely.
+</para>
+</refsect2>
+
+<refsect2>
+<title>Variable substitutions</title>
+<para>
+For efficient variable substitutions, the gssubstitute functions are uses. This means that if the rewriter encounters a variable in a data expression, it will apply &RWapplySubstitution; to it.
+</para>
+</refsect2>
+
+</refsect1>
+
+<refsect1>
+<title>Known issues</title>
+<para>
+Functions &gsRewriteAddEqn; and &gsRewriteRemoveEqn; have no effect when the compiling rewriter (&stratINNERC;) is chosen.
+</para>
+<para>
+Files generated by the compiling rewriter (&stratINNERC;) are not removed after usage.
+</para>
+</refsect1>
+
+<refsect1>
+<title>Author</title>
+<para>
+Written by Muck van Weerdenburg. Please send all complaints, comments and bug fixes to me.
+</para>
+</refsect1>
+
+</refentry>

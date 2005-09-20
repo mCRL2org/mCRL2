@@ -162,7 +162,8 @@ int main(int argc, char **argv)
 		{ "jitty",		no_argument,	NULL,	'j' },
 		{ 0, 0, 0, 0 }
 	};
-	int opt,read_aterm,write_aterm,strat,benchmark,i,bench_times;
+	int opt,read_aterm,write_aterm,benchmark,i,bench_times;
+	RewriteStrategy strat;
 	bool quiet;
 
 	ATinit(argc,argv,&stackbot);

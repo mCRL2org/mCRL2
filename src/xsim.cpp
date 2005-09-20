@@ -44,7 +44,7 @@ bool XSim::OnInit()
 	    return FALSE;
     }
     bool dummies = false;
-    int strat = GS_REWR_INNER3;
+    RewriteStrategy strat = GS_REWR_INNER3;
     if ( cmdln.Found("y") )
     {
 	    dummies = true;

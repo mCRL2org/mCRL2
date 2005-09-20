@@ -62,9 +62,7 @@ void gsinst_callback(ATermAppl transition, ATerm state)
 		switch ( outformat )
 		{
 			case OF_AUT:
-				fprintf(aut,"(%lu,\"",current_state);
-				gsPrintPart(aut,transition,false,0);
-				fprintf(aut,"\",%lu)\n",i);
+				ATppfprintf(aut,"(%lu,\"%T\",%lu)\n",current_state,transition,i);
 fflush(aut);
 				break;
 			case OF_SVC:
@@ -161,7 +159,8 @@ int main(int argc, char **argv)
 		{ "no-info", 		no_argument,		NULL,	2 },
 		{ 0, 0, 0, 0 }
 	};
-	int opt, strat, stateformat;
+	int opt, stateformat;
+	RewriteStrategy strat;
 	bool usedummies,trace_deadlock,explore,quiet;
 	char *rw_arg;
 
@@ -445,8 +444,7 @@ int main(int argc, char **argv)
 					{
 						if ( ATisEqual(ATgetFirst(ATgetNext(ATLgetFirst(l))),ATgetFirst(tr)) )
 						{
-							gsPrintPart(stdout,ATAgetFirst(ATLgetFirst(l)),false,0);
-							printf("\n");
+							ATppprintf("%T\n",ATAgetFirst(ATLgetFirst(l)));
 							break;
 						}
 					}

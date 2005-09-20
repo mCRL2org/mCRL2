@@ -13,6 +13,7 @@
 #include <wx/listctrl.h>
 #include <aterm2.h>
 
+#include "libgsrewrite.h"
 #include "xsimbase.h"
 #include "xsimtrace.h"
 
@@ -48,7 +49,7 @@ public:
 
     // XXX make private and use functions?
     bool use_dummies;
-    int rewr_strat;
+    RewriteStrategy rewr_strat;
 
     // SimulatorInterface methods
     virtual void Register(SimulatorViewInterface *View);
