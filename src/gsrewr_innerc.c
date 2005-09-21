@@ -1086,6 +1086,7 @@ static void CompileRewriteSystem(void)
       "    }\n"
       "  }\n"
       "}\n",
+      num_opids,
       num_opids
          );
 
