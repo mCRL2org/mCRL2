@@ -12,7 +12,7 @@ extern "C" {
 #include <aterm2.h>
 #include "gsfunc.h"
 #include "libgsparse.h"
-#include "gslinearise2.h"
+#include "lin_alt.h"
 
 void print_help(FILE *f, char *Name)
 {
@@ -179,16 +179,17 @@ int main(int argc, char **argv)
 
 	if ( sspace )
 	{
-		Spec = gsLinearise2_statespace(Spec,!(linear||linear2));
+		Spec = linearise_alt_statespace(Spec,!(linear||linear2));
 	} else {
 		if ( linear )
 		{
-			Spec = gsLinearise2_nolpe(Spec);
+			Spec = linearise_alt_nolpe(Spec);
 		} else if ( linear2 )
 		{
-			Spec = gsLinearise2_nolpe_subst(Spec,reuse);
+			Spec = linearise_alt_nolpe_subst(Spec,reuse);
 		} else {
-			Spec = gsLinearise2(Spec,cluster);
+                        t_lin_options lin_options;
+			Spec = linearise_alt(Spec,lin_options);
 		}
 	}
 

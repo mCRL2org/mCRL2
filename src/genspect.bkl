@@ -83,7 +83,7 @@
 
   <exe id="lin" template="cexe">
     <sources>lin.c</sources>
-    <sources>gslinearise2.c</sources>
+    <sources>lin_alt.c</sources>
     <library>gsparse</library>
   </exe>
 

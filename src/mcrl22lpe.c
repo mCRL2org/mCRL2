@@ -16,20 +16,28 @@ extern "C" {
 #include <string.h>
 #include "lin_types.h"
 #include "lin_std.h"
+#include "lin_alt.h"
 #include "gslowlevel.h"
 #include "gsfunc.h"
 #include "gslexer.h"
 #include "gstypecheck.h"
 #include "gsdataimpl.h"
 
+//Type definitions
+
+typedef enum { phNone, phParse, phTypeCheck, phDataImpl } t_phase;
+//t_phase represents the phases at which the program should be able to stop
+
 //Functions used by the main program
 ATermAppl linearise_file(char *infilename, t_lin_options lin_options,
   t_phase end_phase);
 static void calc_infilename(char *infilename, char *specname);
 static void calc_outfilename(char *outfilename, char *infilename);
+void AltIllegalOptWarning(char opt);
 void PrintMoreInfo(char *Name);
 void PrintVersion(void);
 void PrintHelp(char *Name);
+void PrintLinMethod(FILE *stream, t_lin_method lin_method);
 
 //Main program
 
@@ -47,13 +55,14 @@ int main(int argc, char *argv[])
   bool opt_check_only = false;
   t_phase opt_end_phase = phNone;
   bool opt_stdout = false;
-  #define ShortOptions   "012cnwbaofep:hqvd"
+  #define ShortOptions   "0123cnwbaofep:hqvd"
   #define StdOutOption   CHAR_MAX + 1
   #define VersionOption  StdOutOption + 1
   struct option LongOptions[] = {
     { "stack",       no_argument,       NULL, '0' },
     { "regular",     no_argument,       NULL, '1' },
     { "regular2",    no_argument,       NULL, '2' },
+    { "alternative", no_argument,       NULL, '3' },
     { "cluster",     no_argument,       NULL, 'c' },
     { "no-cluster",  no_argument,       NULL, 'n' },
     { "newstate",    no_argument,       NULL, 'w' },
@@ -99,6 +108,14 @@ int main(int argc, char *argv[])
         }
         lm_chosen = true;
         opt_lin_method = lmRegular2;
+        break;
+      case '3': /* alternative */
+        if (lm_chosen && opt_lin_method != lmAlternative) {
+          gsErrorMsg("only one method of linearisation is allowed\n");
+          return 1;
+        }
+        lm_chosen = true;
+        opt_lin_method = lmAlternative;
         break;
       case 'c': /* cluster */ 
         if (opt_cluster_method == cmNone) {
@@ -177,6 +194,15 @@ int main(int argc, char *argv[])
   if (opt_check_only && (opt_end_phase != phNone)) {
     gsErrorMsg("options -e and -p may not be used in conjunction\n");
     return 1;
+  }
+  if (opt_lin_method == lmAlternative) {
+    if (opt_cluster_method == cmFull) AltIllegalOptWarning('c');
+    if (opt_cluster_method == cmNone) AltIllegalOptWarning('n');
+    if (opt_newstate)                 AltIllegalOptWarning('w');
+    if (opt_binary)                   AltIllegalOptWarning('b');
+    if (opt_statenames)               AltIllegalOptWarning('a');
+    if (opt_norewrite)                AltIllegalOptWarning('n');
+    if (opt_nofreevars)               AltIllegalOptWarning('f');
   }
   //check for wrong number of arguments
   int noargc; //non-option argument count
@@ -293,8 +319,16 @@ ATermAppl linearise_file(char *infilename, t_lin_options lin_options,
     return result;
   }
   //linearise the result
-  gsVerboseMsg("linearising processes...\n");
-  result = linearise_std(result, lin_options);
+  if (gsVerbose) {
+    fprintf(stderr, "linearising processes using the ");
+    PrintLinMethod(stderr, lin_options.lin_method);
+    fprintf(stderr, " method...\n");
+  }
+  if (lin_options.lin_method != lmAlternative) {
+    result = linearise_std(result, lin_options);
+  } else { //lin_options.lin_method == lmAlternative
+    result = linearise_alt(result, lin_options);
+  }
   if (result == NULL) 
   {
     gsErrorMsg("linearisation failed\n");
@@ -335,6 +369,25 @@ static void calc_outfilename(char *outfilename, char *infilename)
   }
 }
 
+void AltIllegalOptWarning(char opt)
+{
+  gsWarningMsg(
+    "option -%c is not supported by linearisation method -3, ignored\n", opt);
+}
+
+void PrintLinMethod(FILE *stream, t_lin_method lin_method)
+{
+  if (lin_method == lmStack) {
+    fprintf(stream, "stack");
+  } else if (lin_method == lmRegular) {
+    fprintf(stream, "regular");
+  } else if (lin_method == lmRegular2) {
+    fprintf(stream, "regular2");
+  } else if (lin_method == lmAlternative) {
+    fprintf(stream, "alternative");
+  }
+}
+
 void PrintMoreInfo(char *Name)
 {
   fprintf(stderr, "Use %s --help for options\n", Name);
@@ -360,6 +413,9 @@ void PrintHelp(char *Name)
     "                         in regular form (default)\n"
     "  -2, --regular2         a variant of regular that uses more data variables;\n"
     "                         sometimes successful when -1 leads to non-termination\n"
+    "  -3, --alternative      more general method of linearisation that can handle\n"
+    "                         a wider range of specifications; currently it is unable\n"
+    "                         to handle time and does not accept the -c to -f options\n"
     "  -c, --cluster          all actions in the LPE are clustered\n"
     "  -n, --no-cluster       no actions are clustered, not even in intermediate LPEs\n"
     "  -w, --newstate         state variables are encoded using enumerated types\n"

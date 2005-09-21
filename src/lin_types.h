@@ -9,10 +9,7 @@ extern "C" {
 
 //Type definitions for all linearisers
 
-typedef enum { phNone, phParse, phTypeCheck, phDataImpl } t_phase;
-//t_phase represents the phases at which the program should be able to stop
-
-typedef enum { lmStack, lmRegular, lmRegular2 } t_lin_method;
+typedef enum { lmStack, lmRegular, lmRegular2, lmAlternative } t_lin_method;
 //t_lin_method represents the available linearisation methods
 
 typedef enum { cmDefault, cmFull, cmNone } t_cluster_method;

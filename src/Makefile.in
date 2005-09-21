@@ -69,15 +69,16 @@ PRINTER_LDFLAGS    = -lgsparse -l$(ATERM) -lm
 
 #Lineariser definitions (mcrl22lpe)
 MCRL22LPE_NAME     = mcrl22lpe
-MCRL22LPE_OBJECTS  = mcrl22lpe.o lin_std.o
+MCRL22LPE_OBJECTS  = mcrl22lpe.o lin_std.o lin_alt.o
 OBJECTS           += $(MCRL22LPE_OBJECTS)
 MCRL22LPE_LDFLAGS  = -lgsparse -lgsrewrite -l$(ATERM) -lm -ldl
 
 #Lineariser definitions (lin)
 LIN_NAME           = lin
-LIN_OBJECTS        = lin.o gslinearise2.o
+LIN_OBJECTS        = lin.o lin_alt.o
 OBJECTS           += $(LIN_OBJECTS)
 LIN_LDFLAGS        = -lgsparse -lgsrewrite -l$(ATERM) -lm -ldl
+
 #Rewriter definitions
 LIBREWR_NAME       = libgsrewrite.a
 LIBREWR_OBJECTS    = libgsrewrite.o gsrewr_inner.o gsrewr_inner2.o gsrewr_inner3.o gsrewr_innerc.o gsrewr_jitty.o gsfunc.o gslowlevel.o gssubstitute.o

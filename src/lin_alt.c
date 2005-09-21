@@ -1,4 +1,3 @@
-/* $Id: gslinearise2.c,v 1.21 2005/05/12 09:34:11 muck Exp $ */
 #ifdef __cplusplus
 extern "C" {
 #endif
@@ -7,7 +6,7 @@ extern "C" {
 #include <stdlib.h>
 #include <string.h>
 #include <limits.h>
-#include <aterm2.h>
+#include "lin_alt.h"
 #include "gsfunc.h"
 #include "gslowlevel.h"
 #include "libgsparse.h"
@@ -2684,7 +2683,7 @@ static int main_linearisation(ATermAppl Spec)
 	return init_id;
 }
 
-ATermAppl gsLinearise2_nolpe(ATermAppl Spec)
+ATermAppl linearise_alt_nolpe(ATermAppl Spec)
 {
 //	ATermList lin;
 	int init_id;
@@ -2697,7 +2696,7 @@ ATermAppl gsLinearise2_nolpe(ATermAppl Spec)
 	return update_spec(Spec,init_id);
 }
 
-ATermAppl gsLinearise2_nolpe_subst(ATermAppl Spec, int reuse_cycles)
+ATermAppl linearise_alt_nolpe_subst(ATermAppl Spec, int reuse_cycles)
 {
 	int init_id;
 
@@ -2707,7 +2706,7 @@ ATermAppl gsLinearise2_nolpe_subst(ATermAppl Spec, int reuse_cycles)
 	return update_spec_subst(Spec,init_id,reuse_cycles);
 }
 
-ATermAppl gsLinearise2_statespace(ATermAppl Spec, bool lpe)
+ATermAppl linearise_alt_statespace(ATermAppl Spec, bool lpe)
 {
 	int init_id;
 
@@ -2724,10 +2723,10 @@ ATermAppl gsLinearise2_statespace(ATermAppl Spec, bool lpe)
 	return Spec;
 }
 
-ATermAppl gsLinearise2(ATermAppl Spec, int cluster)
+ATermAppl linearise_alt(ATermAppl Spec, t_lin_options lin_options)
 {
 //	ATermList lin;
-//	ATermList l;	
+//	ATermList l;
 	int init_id;
 
 	generalise = true;
@@ -2741,10 +2740,10 @@ ATermAppl gsLinearise2(ATermAppl Spec, int cluster)
 	Spec = ATsetArgument(Spec,(ATerm) gsMakeMapSpec(l),2);*/
 
 	Spec = make_lpe(Spec,init_id);
-	if ( cluster )
-	{
-		Spec = cluster_lpe(Spec);
-	}
+	//if ( cluster )
+	//{
+	//	Spec = cluster_lpe(Spec);
+	//}
 	Spec = unique_vars(Spec);
 
 	return Spec;

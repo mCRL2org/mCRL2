@@ -23,17 +23,6 @@ extern "C" {
 extern ATermAppl gsParse(FILE *SpecFile);/* declared in lexer.l */
 
 //local declarations
-ATermAppl gsLinearise(ATermAppl Spec);
-/*Pre:Spec represents a specification that adheres to the internal ATerm
-      structure after the data implementation phase.
- Post:The processes of spec are linearised.
- Ret: if the linearisation went ok, an equivalent version spec is
-      returned that adheres to the internal ATerm structure after
-      linearisation.
-      if something went wrong, an appropriate error message is printed and
-      NULL is returned.
- */
-
 void gsPrintPart(FILE *OutStream, const ATermAppl Part, bool ShowSorts,
   int PrecLevel);
 /*Pre: OutStream points to a stream to which can be written
@@ -107,12 +96,6 @@ void gsPrintSpecification(FILE *OutStream, const ATermAppl Spec)
   gsEnableConstructorFunctions();
   //print Spec to OutStream
   gsPrintPart(OutStream, Spec, false, 0);
-}
-
-ATermAppl gsLinearise(ATermAppl spec)
-{
-  gsVerboseMsg("linearisation is not yet implemented\n");
-  return spec;
 }
 
 #define GS_PRINT_FILE
