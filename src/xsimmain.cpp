@@ -615,8 +615,7 @@ void XSimMain::OnSaveTrace( wxCommandEvent &event )
 	    {
 		    for (ATermList l=ATconcat(ATgetNext(ATreverse(trace)),ecart); !ATisEmpty(l); l=ATgetNext(l))
 		    {
-			gsPrintPart(f,ATAgetFirst(ATLgetFirst(l)),false,0);
-			fprintf(f,"\n");
+			gsfprintf(f, "%T\n", ATgetFirst(ATLgetFirst(l)));
 		    }
 	    }
 	    fclose(f);

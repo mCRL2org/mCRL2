@@ -62,7 +62,7 @@ void gsinst_callback(ATermAppl transition, ATerm state)
 		switch ( outformat )
 		{
 			case OF_AUT:
-				ATppfprintf(aut,"(%lu,\"%T\",%lu)\n",current_state,transition,i);
+				gsfprintf(aut,"(%lu,\"%T\",%lu)\n",current_state,transition,i);
 fflush(aut);
 				break;
 			case OF_SVC:
@@ -444,7 +444,7 @@ int main(int argc, char **argv)
 					{
 						if ( ATisEqual(ATgetFirst(ATgetNext(ATLgetFirst(l))),ATgetFirst(tr)) )
 						{
-							ATppprintf("%T\n",ATAgetFirst(ATLgetFirst(l)));
+							gsprintf("%T\n",ATAgetFirst(ATLgetFirst(l)));
 							break;
 						}
 					}

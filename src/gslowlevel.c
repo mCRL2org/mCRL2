@@ -30,31 +30,31 @@ char *strdup(const char *s)
 //Message printing
 //----------------
 
-int ATppprintf(const char *format, ...)
+int gsprintf(const char *format, ...)
 {
   int             result = 0;
   va_list         args;
 
   va_start(args, format);
-  result = ATppvfprintf(stdout, format, args);
+  result = gsvfprintf(stdout, format, args);
   va_end(args);
 
   return result;
 }
 
-int ATppfprintf(FILE *stream, const char *format, ...)
+int gsfprintf(FILE *stream, const char *format, ...)
 {
   int             result = 0;
   va_list         args;
 
   va_start(args, format);
-  result = ATppvfprintf(stream, format, args);
+  result = gsvfprintf(stream, format, args);
   va_end(args);
 
   return result;
 }
 
-int ATppvfprintf(FILE *stream, const char *format, va_list args)
+int gsvfprintf(FILE *stream, const char *format, va_list args)
 {
   //code copied from the ATerm library in which '%T' is added to the format to
   //enable pretty printing of ATerm's

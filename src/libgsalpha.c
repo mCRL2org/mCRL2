@@ -272,7 +272,7 @@ static ATermList apply_comm_list(ATermList l, ATermList C)
 
 static ATermAppl PushRestrict(ATermList H, ATermAppl a)
 {
-//ATprintf("%t ",H);gsPrintPart(stdout,a,false,0);printf("\n\n");
+//ATprintf("%t ",H);PrettyPrint(stdout,a);printf("\n\n");
 	if ( gsIsAction(a) )
 	{
 		if ( ATindexOf(H,ATgetArgument(ATAgetArgument(a,0),0),0) >= 0 )
@@ -524,7 +524,7 @@ static ATermAppl PushHide(ATermList I, ATermAppl a)
 
 static ATermAppl PushComm(ATermList C, ATermAppl a)
 {
-//ATprintf("%t ",C);gsPrintPart(stdout,a,false,0);printf("\n\n");
+//ATprintf("%t ",C);PrettyPrint(stdout,a);printf("\n\n");
 	if ( gsIsAction(a) )
 	{
 		return a;
@@ -762,7 +762,7 @@ ATermAppl ApplyAlpha(ATermAppl a)
 {
 	ATermList l = NULL;
 
-//gsPrintPart(stdout,a,false,0);printf("\n\n");
+//PrettyPrint(stdout,a);printf("\n\n");
 	if ( gsIsProcEqn(a) )
 	{
 		if ( ATtableGet(alphas,ATgetArgument(a,1)) == NULL )
@@ -959,7 +959,7 @@ ATermAppl ApplyAlpha(ATermAppl a)
 	}
 
 //if ( l != NULL ) ATprintf("%t\n",ATtableGet(alphas,a));
-//gsPrintPart(stdout,a,false,0);printf(".\n\n");
+//PrettyPrint(stdout,a);printf(".\n\n");
 	return a;
 }
 

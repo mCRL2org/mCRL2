@@ -147,9 +147,9 @@ static ATermList calcNext(ATermList l)
 //ATfprintf(stderr,"%t\n\n",t);
 			ATerm t_rf = gsToRewriteFormat(t);
 			RWsetVariable((ATerm) var,t_rf);
-//gsPrintPart(stderr,gsFromRewriteFormat(a3),false,0); fprintf(stderr,"\n");
+//PrettyPrint(stderr,gsFromRewriteFormat(a3)); fprintf(stderr,"\n");
 			e = gsRewriteInternal(a3);
-//gsPrintPart(stderr,gsFromRewriteFormat(e),false,0); fprintf(stderr,"\n\n");
+//PrettyPrint(stderr,gsFromRewriteFormat(e)); fprintf(stderr,"\n\n");
 			if ( !ATisEqual(e,gsProverFalse) )
 			{
 				s = ATmakeList1((ATerm) gsMakeSubst((ATerm) var, t_rf));
@@ -392,7 +392,7 @@ ATermList FindSolutions(ATermList Vars, ATerm Expr, FindSolutionsCallBack f)
 			if ( !ATisEqual(Expr,gsProverFalse) )
 			{
 //				gsWarningMsg("term does not evaluate to true or false (%t)\n",ATgetFirst(ATgetNext(o)));
-				ATppfprintf(stderr,"Term does not evaluate to true or false: %T\n",gsFromRewriteFormat(Expr));
+				gsfprintf(stderr,"Term does not evaluate to true or false: %T\n",gsFromRewriteFormat(Expr));
 				FindSolutionsError = true;
 			}
 			return ATmakeList0();
@@ -418,7 +418,7 @@ ATermList FindSolutions(ATermList Vars, ATerm Expr, FindSolutionsCallBack f)
 			if ( !ATisEqual(ATgetFirst(ATgetNext(o)),gsProverFalse) )
 			{
 //				gsWarningMsg("term does not evaluate to true or false (%t)\n",ATgetFirst(ATgetNext(o)));
-				ATppfprintf(stderr,"Term does not evaluate to true or false: %T\n",gsFromRewriteFormat(ATgetFirst(ATgetNext(o))));
+				gsfprintf(stderr,"Term does not evaluate to true or false: %T\n",gsFromRewriteFormat(ATgetFirst(ATgetNext(o))));
 				FindSolutionsError = true;
 			}
 			return ATmakeList0();
@@ -435,7 +435,7 @@ ATermList FindSolutions(ATermList Vars, ATerm Expr, FindSolutionsCallBack f)
 			n = calcNext(ATLgetFirst(t));
 			if ( used_vars > max_vars )
 			{
-				ATppfprintf(stderr,"warning: Need more than %i variables to find all solutions for %T\n",max_vars,gsFromRewriteFormat(Expr));
+				gsfprintf(stderr,"warning: Need more than %i variables to find all solutions for %T\n",max_vars,gsFromRewriteFormat(Expr));
 				max_vars *= MAX_VARS_FACTOR;
 			}
 			for (; !ATisEmpty(n); n=ATgetNext(n))
@@ -456,7 +456,7 @@ ATermList FindSolutions(ATermList Vars, ATerm Expr, FindSolutionsCallBack f)
 						if ( !ATisEqual(ATgetFirst(ATgetNext(o)),gsProverFalse) )
 						{
 //							ATfprintf(stderr,"Term does not evaluate to true or false (%t)\n",ATgetFirst(ATgetNext(o)));
-							ATppfprintf(stderr,"Term does not evaluate to true or false: %T\n",gsFromRewriteFormat(ATgetFirst(ATgetNext(o))));
+							gsfprintf(stderr,"Term does not evaluate to true or false: %T\n",gsFromRewriteFormat(ATgetFirst(ATgetNext(o))));
 							FindSolutionsError = true;
 						}
 					}

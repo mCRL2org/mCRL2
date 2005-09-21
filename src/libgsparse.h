@@ -35,13 +35,6 @@ void PrettyPrint(FILE *OutStream, const ATerm Part);
   Post:A textual representation of Part is written to OutStream.
 */
 
-void gsPrintPart(FILE *OutStream, const ATermAppl Part, bool ShowSorts,
-  int PrecLevel);
-//deprecated
-void gsPrintParts(FILE *OutStream, const ATermList Parts, bool ShowSorts,
-  int PrecLevel, const char *Terminator, const char *Separator);
-//deprecated
-  
 void gsTest(void);
 //will be removed in the final version
 

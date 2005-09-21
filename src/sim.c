@@ -30,7 +30,7 @@ static void gsPrintState(ATerm state)
 		{
 			ATprintf("_");
 		} else {
-			ATppprintf("%T",a);
+			gsprintf("%T",a);
 		}
 	}
 }
@@ -149,7 +149,7 @@ int main(int argc, char **argv)
 		}
 		for (l=states,i=0; !ATisEmpty(l); l=ATgetNext(l), i++)
 		{
-			ATppprintf("%i: %T  ->  [ ",i,ATAgetFirst(ATLgetFirst(l)));
+			gsprintf("%i: %T  ->  [ ",i,ATAgetFirst(ATLgetFirst(l)));
 			gsPrintState(ATgetFirst(ATgetNext(ATLgetFirst(l))));
 			ATprintf(" ]\n\n");
 		}
@@ -171,7 +171,7 @@ harm:
 		{
 			goto harm;
 		}
-		ATppprintf("\ntransition: %T\n\n",ATAgetFirst(ATLelementAt(states,i)));
+		gsprintf("\ntransition: %T\n\n",ATAgetFirst(ATLelementAt(states,i)));
 		state = ATgetFirst(ATgetNext(ATLelementAt(states,i)));
 		ATprintf("current state: [ ");
 		gsPrintState(state);

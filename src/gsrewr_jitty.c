@@ -224,7 +224,7 @@ ATermList create_strategy(ATermList rules)
 
 //ATfprintf(stderr,"rule: %t\n",ATgetFirst(rules));
 //ATfprintf(stderr,"rule: %t\n",ATAelementAt(ATgetFirst(rules),2));
-//ATfprintf(stderr,"rule: "); gsPrintPart(stderr,fromInner(ATAelementAt(ATgetFirst(rules),2)),0,0); ATfprintf(stderr,"\n");
+//ATfprintf(stderr,"rule: "); PrettyPrint(stderr,fromInner(ATAelementAt(ATgetFirst(rules),2))); ATfprintf(stderr,"\n");
 //ATprintf("pars: %t\n",pars);
 
 				for (int i=0; i<arity; i++)
@@ -598,11 +598,11 @@ static bool match_jitty(ATerm t, ATerm p, ATermAppl *vars, ATerm *vals, int *len
 static ATermAppl rewrite(ATermAppl Term)
 {
 //ATfprintf(stderr,"rewrite(%t)\n\n",Term);
-//fprintf(stderr,"rewrite(  ");gsPrintPart(stderr,fromInner(Term),false,0);fprintf(stderr,"  )\n\n");
+//fprintf(stderr,"rewrite(  ");PrettyPrint(stderr,fromInner(Term));fprintf(stderr,"  )\n\n");
 	if ( gsIsDataVarId(Term) )
 	{
 //ATfprintf(stderr,"return %t\n\n",Term);
-//fprintf(stderr,"return  ");gsPrintPart(stderr,fromInner((ATermAppl) RWapplySubstitution((ATerm) Term)),false,0);fprintf(stderr,"\n\n");
+//fprintf(stderr,"return  ");PrettyPrint(stderr,fromInner((ATermAppl) RWapplySubstitution((ATerm) Term)));fprintf(stderr,"\n\n");
 		return (ATermAppl) RWapplySubstitution((ATerm) Term);
 	} else {
 		ATerm op = ATgetArgument(Term,0);
@@ -712,7 +712,7 @@ static ATermAppl rewrite(ATermAppl Term)
 
 						ATermAppl aa = rewrite(a);
 //ATfprintf(stderr,"return %t\n\n",aa);
-//fprintf(stderr,"return  ");gsPrintPart(stderr,fromInner(aa),false,0);fprintf(stderr,"\n\n");
+//fprintf(stderr,"return  ");PrettyPrint(stderr,fromInner(aa));fprintf(stderr,"\n\n");
 						return aa;
 					}
 
@@ -736,7 +736,7 @@ static ATermAppl rewrite(ATermAppl Term)
 
 		FREE_A(rewritten);
 //ATfprintf(stderr,"return %t\n\n",a);
-//fprintf(stderr,"return  ");gsPrintPart(stderr,fromInner(a),false,0);fprintf(stderr,"\n\n");
+//fprintf(stderr,"return  ");PrettyPrint(stderr,fromInner(a));fprintf(stderr,"\n\n");
 		return a;
 	}
 }
@@ -805,9 +805,9 @@ ATermAppl from_rewrite_format_jitty(ATerm Term)
 
 ATerm rewrite_jitty(ATerm Term)
 {
-/*fprintf(stderr,"rewrite(  ");gsPrintPart(stderr,fromInner(Term),false,0);fprintf(stderr,"  )\n\n");
+/*fprintf(stderr,"rewrite(  ");PrettyPrint(stderr,fromInner(Term));fprintf(stderr,"  )\n\n");
 ATermAppl a = rewrite((ATermAppl) Term);
-fprintf(stderr,"return  ");gsPrintPart(stderr,fromInner(a),false,0);fprintf(stderr,"  )\n\n");
+fprintf(stderr,"return  ");PrettyPrint(stderr,fromInner(a));fprintf(stderr,"  )\n\n");
 return (ATerm) a;*/
 	return (ATerm) rewrite((ATermAppl) Term);
 }

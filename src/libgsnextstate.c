@@ -655,7 +655,7 @@ static void gsns_callback(ATermList solution)
 /*for (ATermList l=solution; !ATisEmpty(l); l=ATgetNext(l))
 {
 	ATfprintf(stderr,"%t := ",ATgetArgument(ATAgetFirst(l),0)); 
-	gsPrintPart(stderr,gsFromRewriteFormat(ATgetArgument(ATgetFirst(l),1)),false,0);
+	PrettyPrint(stderr,gsFromRewriteFormat(ATgetArgument(ATgetFirst(l),1)));
 	if ( !ATisEmpty(ATgetNext(l)) )
 		fprintf(stderr,", "); 
 }
@@ -712,7 +712,7 @@ ATermList gsNextState(ATerm State, gsNextStateCallBack f)
 	ATerm act;
 	int sum_idx;
 
-//fprintf(stderr,"\nState: "); gsPrintParts(stderr,ListFromFormat(ATgetArguments(State)),false,0,"",", "); fprintf(stderr,"\n\n");
+//fprintf(stderr,"\nState: "); PrettyPrint(stderr,ListFromFormat(ATgetArguments(State))); fprintf(stderr,"\n\n");
 
 	NextStateError = false;
 
@@ -760,7 +760,7 @@ ATermList gsNextState(ATerm State, gsNextStateCallBack f)
 //		ATermList newstate = (ATermList) gsSubstValues(params_l,ATgetArgument(sum,4),true);
 		act = ATgetArgument(sum,2);
 		newstate = ATgetArgument(sum,3);
-//ATfprintf(stderr,"\n%t  ",ATLgetArgument(sum,0)); gsPrintPart(stderr,gsFromRewriteFormat(ATgetArgument(sum,1)),false,0); fprintf(stderr,"\n\n");
+//ATfprintf(stderr,"\n%t  ",ATLgetArgument(sum,0)); PrettyPrint(stderr,gsFromRewriteFormat(ATgetArgument(sum,1))); fprintf(stderr,"\n\n");
 		l = FindSolutions(ATLgetArgument(sum,0),ATgetArgument(sum,1),gsns_callback);
 		NextStateError |= FindSolutionsError;
 		for (; !ATisEmpty(l); l=ATgetNext(l))
