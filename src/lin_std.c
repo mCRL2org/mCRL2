@@ -5580,14 +5580,8 @@ static ATermAppl generateLPEpCRL(ATermAppl procId, int canterminate,
 
   if (regular)
   { if (!nocluster) 
-    { if (oldstate)
-      { sums=cluster_actions(sums,
-              ((!singlecontrolstate)?
-                    ATinsertA(stack->parameterlist,stack->stackvar):
-                    stack->parameterlist),
-               spec,0); 
-      }
-      else if (binary)
+    { 
+      if (binary)
       { ATermList l=NULL;
         ATermList vars=stack->parameterlist;
         for(l=stack->booleanStateVariables; !ATisEmpty(l) ; l=ATgetNext(l))
@@ -5600,6 +5594,13 @@ static ATermAppl generateLPEpCRL(ATermAppl procId, int canterminate,
                     ATinsertA(stack->parameterlist,stack->stackvar):
                     stack->parameterlist),
                  spec,0);
+      }
+      else /* if (oldstate)  and newstate ????? XXXXXXXXX */
+      { sums=cluster_actions(sums,
+              ((!singlecontrolstate)?
+                    ATinsertA(stack->parameterlist,stack->stackvar):
+                    stack->parameterlist),
+               spec,0); 
       }
     }
   }
