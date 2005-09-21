@@ -349,6 +349,12 @@ void rewrite_init_jitty()
 
 	tmp_eqns = ATtableCreate(100,50); // XXX would be nice to know the number op OpIds
 	term2int = ATtableCreate(100,50);
+	num_opids = 0;
+
+	nilAFun = ATgetAFun(gsMakeNil());
+	ATprotectAFun(nilAFun);
+	opidAFun = ATgetAFun(gsMakeDataExprTrue());
+	ATprotectAFun(opidAFun);
 
 	max_vars = 0;
 
@@ -357,11 +363,6 @@ void rewrite_init_jitty()
 	{
 		ATprotectAppl(&jitty_true);
 	}
-
-	nilAFun = ATgetAFun(gsMakeNil());
-	ATprotectAFun(nilAFun);
-	opidAFun = ATgetAFun(gsMakeDataExprTrue());
-	ATprotectAFun(opidAFun);
 
 	l = opid_eqns;
 	for (; !ATisEmpty(l); l=ATgetNext(l))
@@ -551,7 +552,7 @@ static ATerm subst_values(ATermAppl *vars, ATerm *vals, int len, ATerm t)
 
 static bool match_jitty(ATerm t, ATerm p, ATermAppl *vars, ATerm *vals, int *len)
 {
-//ATfprintf(stderr,"match_inner(  %t  ,  %t  ,  %t   )\n\n",t,p,*vars);
+//ATfprintf(stderr,"match_jitty(  %t  ,  %t  ,  %t   )\n\n",t,p,*vars);
         if ( ATisInt(p) )
 	{
 		return ATisEqual(p,t);
@@ -576,9 +577,47 @@ static bool match_jitty(ATerm t, ATerm p, ATermAppl *vars, ATerm *vals, int *len
 		return true;
 	} else {
 		t = RWapplySubstitution(t); //XXX dirty (t is not a variable)
-		if ( ATisInt(t) || gsIsDataVarId((ATermAppl) t) || !ATisEqualAFun(ATgetAFun((ATermAppl) p),ATgetAFun((ATermAppl) t)) )
+		if ( ATisInt(t) || gsIsDataVarId((ATermAppl) t) )
 		{
 			return false; 
+		}
+		ATerm head = ATgetArgument((ATermAppl) t, 0);
+		if ( !ATisInt(head) )
+		{
+			head = RWapplySubstitution(head);
+			if ( ATisInt(head) )
+			{
+				t = (ATerm) ATsetArgument((ATermAppl) t,head,0);
+			} else if ( !gsIsDataVarId((ATermAppl) head) )
+			{
+				int ar1 = ATgetArity(ATgetAFun((ATermAppl) head));
+				int ar2 = ATgetArity(ATgetAFun((ATermAppl) t));
+
+				if ( ar1+ar2-1 != ATgetArity(ATgetAFun(p)) )
+				{
+					return false;
+				}
+
+				for (int i=0; i<ar1; i++)
+				{
+					if ( !match_jitty(ATgetArgument((ATermAppl) head,i),ATgetArgument((ATermAppl) p,i),vars,vals,len) )
+					{
+						return false;
+					}
+				}
+				for (int i=1; i<ar2; i++)
+				{
+					if ( !match_jitty(ATgetArgument((ATermAppl) t,i),ATgetArgument((ATermAppl) p,ar1+i-1),vars,vals,len) )
+					{
+						return false;
+					}
+				}
+				return true;
+			}
+		}
+		if ( !ATisEqualAFun(ATgetAFun((ATermAppl) p),ATgetAFun((ATermAppl) t)) )
+		{
+			return false;
 		}
 
 		int arity = ATgetArity(ATgetAFun((ATermAppl) p));
@@ -598,21 +637,49 @@ static bool match_jitty(ATerm t, ATerm p, ATermAppl *vars, ATerm *vals, int *len
 static ATermAppl rewrite(ATermAppl Term)
 {
 //ATfprintf(stderr,"rewrite(%t)\n\n",Term);
-//fprintf(stderr,"rewrite(  ");PrettyPrint(stderr,fromInner(Term));fprintf(stderr,"  )\n\n");
+//gsfprintf(stderr,"rewrite(  %T  )\n\n",fromInner(Term));
 	if ( gsIsDataVarId(Term) )
 	{
 //ATfprintf(stderr,"return %t\n\n",Term);
-//fprintf(stderr,"return  ");PrettyPrint(stderr,fromInner((ATermAppl) RWapplySubstitution((ATerm) Term)));fprintf(stderr,"\n\n");
+//gsfprintf(stderr,"return1  %T\n\n",fromInner((ATermAppl) RWapplySubstitution((ATerm) Term)));
 		return (ATermAppl) RWapplySubstitution((ATerm) Term);
 	} else {
 		ATerm op = ATgetArgument(Term,0);
+		ATerm head;
 		ATermList strat;
+		int head_arity = 0;
 		int arity = ATgetArity(ATgetAFun(Term));
-		DECL_A(rewritten,ATerm,arity);
 
+		if ( !ATisInt(op) )
+		{
+			head = RWapplySubstitution(op);
+			if ( ATisInt(head) )
+			{
+				op = head;
+			} else if ( !gsIsDataVarId((ATermAppl) head) )
+			{
+				op = ATgetArgument((ATermAppl) head,0);
+				head_arity = ATgetArity(ATgetAFun(head));
+				arity = arity-1 + head_arity;
+			}
+		}
+
+		DECL_A(rewritten,ATerm,arity);
+		DECL_A(args,ATermAppl,arity);
+
+		if ( head_arity > 0 )
+		{
+			head_arity--;
+		}
 		for (int i=1; i<arity; i++)
 		{
 			rewritten[i] = NULL;
+			if ( i < head_arity+1 )
+			{
+				args[i] = ATAgetArgument((ATermAppl) head,i);
+			} else {
+				args[i] = ATAgetArgument(Term,i-head_arity);
+			}
 		}
 		
 		if ( ATisInt(op) && ((strat = jitty_eqns[ATgetInt((ATermInt) op)]) != NULL) )
@@ -626,7 +693,7 @@ static ATermAppl rewrite(ATermAppl Term)
 					int i = ATgetInt((ATermInt) ATgetFirst(strat))+1;
 					if ( i < arity )
 					{
-						rewritten[i] = (ATerm) rewrite(ATAgetArgument(Term,i));
+						rewritten[i] = (ATerm) rewrite(args[i]);
 					} else {
 						break;
 					}
@@ -648,7 +715,7 @@ static ATermAppl rewrite(ATermAppl Term)
 
 					for (int i=1; i<rule_arity; i++)
 					{
-						if ( !match_jitty((rewritten[i]==NULL)?ATgetArgument(Term,i):rewritten[i],ATgetArgument(lhs,i),vars,vals,&len) )
+						if ( !match_jitty((rewritten[i]==NULL)?((ATerm) args[i]):rewritten[i],ATgetArgument(lhs,i),vars,vals,&len) )
 						{
 							matches = false;
 							break;
@@ -657,7 +724,7 @@ static ATermAppl rewrite(ATermAppl Term)
 
 //if ( matches && !gsIsNil(ATAelementAt(rule,1)) )
 //{
-//ATprintf("%t --> %t\n\n",ATelementAt(rule,1),rewrite((ATermAppl) subst_values(vars,vals,len,ATelementAt(rule,1)),&e));
+//ATfprintf(stderr,"%t --> %t (%t)\n\n",ATelementAt(rule,1),rewrite((ATermAppl) subst_values(vars,vals,len,ATelementAt(rule,1))),jitty_true);
 //}
 					if ( matches && (gsIsNil(ATAelementAt(rule,1)) || ATisEqual(rewrite((ATermAppl) subst_values(vars,vals,len,ATelementAt(rule,1))),jitty_true)) )
 					{
@@ -675,18 +742,18 @@ static ATermAppl rewrite(ATermAppl Term)
 						{
 							new_arity += ATgetArity(ATgetAFun((ATermAppl) arg0))-1;
 						}
-						DECL_A(args,ATerm,rhs_arity+arity-rule_arity);
+						DECL_A(newargs,ATerm,rhs_arity+arity-rule_arity);
 						int i;
 						if ( ATisInt(arg0) || gsIsDataVarId((ATermAppl) arg0))
 						{
-							args[0] = arg0;
+							newargs[0] = arg0;
 							i = 1;
 						} else {
 							i = 0;
 							int arg0_arity = ATgetArity(ATgetAFun((ATermAppl) arg0));
 							while ( i < arg0_arity ) 
 							{
-								args[0] = ATgetArgument((ATermAppl) arg0,i);
+								newargs[0] = ATgetArgument((ATermAppl) arg0,i);
 								i++;
 							}
 						}
@@ -694,25 +761,25 @@ static ATermAppl rewrite(ATermAppl Term)
 						for (int j=1; j<rhs_arity; j++)
 						{
 //ATfprintf(stderr,"pre %t\n\n",ATgetArgument(rhs,i));
-							args[i] = subst_values(vars,vals,len,ATgetArgument(rhs,j));
+							newargs[i] = subst_values(vars,vals,len,ATgetArgument(rhs,j));
 							i++;
 //ATfprintf(stderr,"post %t\n\n",args[i]);
 						}
 						for (int j=0; j<arity-rule_arity; j++)
 						{
-							args[i] = ATgetArgument(Term,rule_arity+j);
+							newargs[i] = (ATerm) args[rule_arity+j];
 							i++;
 						}
 
-						ATermAppl a = ATmakeApplArray(getAppl(new_arity),args);
+						ATermAppl a = ATmakeApplArray(getAppl(new_arity),newargs);
 
-						FREE_A(args);
+						FREE_A(newargs);
 						FREE_A(vals);
 						FREE_A(vars);
 
 						ATermAppl aa = rewrite(a);
 //ATfprintf(stderr,"return %t\n\n",aa);
-//fprintf(stderr,"return  ");PrettyPrint(stderr,fromInner(aa));fprintf(stderr,"\n\n");
+//gsfprintf(stderr,"return2  %T\n\n",fromInner(aa));
 						return aa;
 					}
 
@@ -728,15 +795,16 @@ static ATermAppl rewrite(ATermAppl Term)
 		{
 			if ( rewritten[i] == NULL )
 			{
-				rewritten[i] = (ATerm) rewrite(ATAgetArgument(Term,i));
+				rewritten[i] = (ATerm) rewrite(args[i]);
 			}
 		}
 
 		ATermAppl a = ATmakeApplArray(ATgetAFun(Term),rewritten);
 
+		FREE_A(args);
 		FREE_A(rewritten);
 //ATfprintf(stderr,"return %t\n\n",a);
-//fprintf(stderr,"return  ");PrettyPrint(stderr,fromInner(a));fprintf(stderr,"\n\n");
+//gsfprintf(stderr,"return3  %T\n\n",fromInner(a));
 		return a;
 	}
 }

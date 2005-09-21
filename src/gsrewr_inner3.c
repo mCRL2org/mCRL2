@@ -36,6 +36,7 @@ static bool is_initialised = false;
 #define gsIsOpId(x) (ATgetAFun(x) == opidAFun)
 
 #define ATisList(x) (ATgetType(x) == AT_LIST)
+#define ATisAppl(x) (ATgetType(x) == AT_APPL)
 #define ATisInt(x) (ATgetType(x) == AT_INT)
 
 /*static bool ATisList(ATerm a)
@@ -610,7 +611,7 @@ static ATermList rewrite_listelts(ATermList l)
 
 static ATerm rewrite(ATerm Term)
 {
-///ATfprintf(stderr,"rewrite(%t)\n\n",Term);
+//ATfprintf(stderr,"rewrite(%t)\n\n",Term);
 	if ( ATisList(Term) )
 	{
 		ATermList l = ATgetNext((ATermList) Term);
@@ -623,23 +624,25 @@ static ATerm rewrite(ATerm Term)
 		l = ATreverse(m);*/
 		l = rewrite_listelts(l);
 
-		if ( ATisInt(ATgetFirst((ATermList) Term)) )
+		if ( !ATisInt(ATgetFirst((ATermList) Term)) )
 		{
-			Term = rewrite_func((ATermInt) ATgetFirst((ATermList) Term), l);
-		} else {
-			// XXX is Term in subst_table!!! XXX
-			if ( (ATgetType(ATgetFirst((ATermList) Term)) == AT_APPL) && gsIsDataVarId(ATAgetFirst((ATermList) Term)) ) 
+			if ( (ATisAppl(ATgetFirst((ATermList) Term))) && gsIsDataVarId(ATAgetFirst((ATermList) Term)) ) 
 			{
 				ATerm a = RWapplySubstitution(ATgetFirst((ATermList) Term));
 				if ( ATisList(a) )
 				{
+					a = (ATerm) ATinsert(rewrite_listelts(ATgetNext((ATermList) a)),ATgetFirst((ATermList) a));
 					Term = (ATerm) ATconcat((ATermList) a,l);
 				} else {
-					Term = (ATerm) ATinsert(l,ATgetFirst((ATermList) Term));
+					Term = (ATerm) ATinsert(l,a);
 				}
 			} else {
 				Term = (ATerm) ATinsert(l,ATgetFirst((ATermList) Term));
 			}
+		}
+		if ( ATisInt(ATgetFirst((ATermList) Term)) )
+		{
+			Term = rewrite_func((ATermInt) ATgetFirst((ATermList) Term), l);
 		}
 
 		return Term;
