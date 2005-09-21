@@ -1,8 +1,10 @@
-#define NAME "mcrl22lpe"
-
 #ifdef __cplusplus
 extern "C" {
 #endif
+
+/*********************************************************************/
+/*                            implementation                         */
+/*********************************************************************/
 
 /* TODO:
  * Put renaming, hiding, encapsulation, and visibility
@@ -17,19 +19,11 @@ extern "C" {
 #define MAIN
 #include "mcrl22lpe.h"
 #include "gslowlevel.h"
-#include "gslexer.h"
-#include "gstypecheck.h"
-#include "gsdataimpl.h"
-#include "libgsparse.h"
 #include "libgsrewrite.h"
 #include "libgsalpha.h"
-#include <getopt.h>
-#include <limits.h>
 #include <stdbool.h>
 
 #define STRINGLENGTH 256
-#define INFILEEXT ".mcrl2"
-#define OUTFILEEXT ".lpe"
 
 static bool timeIsBeingUsed = false;
 
@@ -43,64 +37,11 @@ static bool statenames;
 static bool mayrewrite;
 static bool allowFreeDataVariablesInProcesses;
 
-#define P(msg)  fprintf(stderr,"%s\n",msg)
-
 static void stop(void)
 { /* in debug mode allow a debugger to trace the problem,
      and in any case, stop the program */
   assert(0);
   exit(-1);
-}
-
-void PrintMoreInfo(char *Name)
-{
-  fprintf(stderr, "Use %s --help for options\n", Name);
-}
-
-void PrintVersion(void)
-{
-  fprintf(stderr,"mCRL2 parser and LPE generator, version %s\n", VERSION);
-}
-
-void PrintHelp(char *Name)
-{
-  fprintf(stderr,
-    "Usage: %s OPTIONS SPECFILE\n"
-    "Linearises the mCRL2 specification in SPECFILE and writes the resulting LPE to\n"
-    "a file. If SPECFILE does not have the extension 'mcrl2', SPECFILE.mcrl2 is used.\n"
-    "In the name of the output file, the extension 'mcrl2' is replaced by 'lpe'.\n"
-    "\n"
-    "The OPTIONS that can be used are:\n"
-    "  -0, --stack            the LPE is generated using stack datatypes;\n"
-    "                         useful when -1 and -2 do not work\n"
-    "  -1, --regular          if the specification is regular, the LPE is generated\n"
-    "                         in regular form (default)\n"
-    "  -2, --regular2         a variant of regular that uses more data variables;\n"
-    "                         sometimes successful when -1 leads to non-termination\n"
-    "  -c, --cluster          all actions in the LPE are clustered\n"
-    "  -n, --no-cluster       no actions are clustered, not even in intermediate LPEs\n"
-    "  -w, --newstate         state variables are encoded using enumerated types\n"
-    "                         (requires -1 or -2); without -w numbers are used\n"
-    "  -b, --binary           when clustering use binary case functions instead of\n"
-    "                         n-ary; in the presence of -w, state variables are\n"
-    "                         encoded by a vector of boolean variables\n"
-    "  -a, --statenames       the names of state variables are derived from the\n"
-    "                         specification\n"
-    "  -o, --no-rewrite       do not rewrite data terms while linearising;\n"
-    "                         useful when the rewrite system does not terminate\n"
-    "  -f, --no-freevars      instantiate don't care values with arbitrary constants,\n"
-    "                         instead of modelling them by free variables\n"
-    "  -e  --check-only       check syntax and static semantics; do not linearise\n"
-    "  -p  --end-phase=PHASE  stop linearisation after phase PHASE and output the\n"
-    "                         result; PHASE can be 'pa' (parse), 'tc' (type check)\n"
-    "                         or 'di' (data implementation)\n"
-    "      --stdout           the generated LPE is written to stdout\n"
-    "  -h, --help             display this help\n"    
-    "      --version          display version information\n"
-    "  -q, --quiet            do not display warning messages\n"
-    "  -v, --verbose          turn on the display of short intermediate messages\n"
-    "  -d, --debug            turn on the display of detailed intermediate messages\n",
-    Name);
 }
 
 
@@ -117,10 +58,6 @@ void PrintHelp(char *Name)
  */
    
 /* PREAMBLE */
-
-typedef enum { phNone, phParse, phTypeCheck, phDataImpl } t_phase;
-//enumerated type to represent a pre-linearisation phase; used in the
-//--end-phase option
 
 typedef struct specificationbasictype {
             ATermList sorts;     /* storage place for sorts */
@@ -7838,44 +7775,6 @@ static ATermAppl transform(
   return t3;
 }
 
-
-/**************** calc_infilename ****************************/
-
-static void calc_infilename(char *infilename, char *specname)
-{
-  //Pre : infilename is able to store specname appended with INFILEEXT
-  //Post: infilename represents specname, in which INFILEEXT is appended
-  //      if it didn't already end with it
-  strcpy(infilename, specname);
-  char *file_ext = strrchr(infilename, '.');
-  if (file_ext == NULL) {
-    //'.' does not occur in infilename, append INFILEEXT 
-    strcat(infilename, INFILEEXT);
-  } else { //file_ext != NULL
-    if (strcmp(file_ext, INFILEEXT) != 0) {
-      //file_ext is not equal to INFILEEXT, append INFILEEXT
-      strcat(infilename, INFILEEXT);
-    }
-  }
-}
-
-/**************** calc_outfilename ****************************/
-
-static void calc_outfilename(char *outfilename, char *infilename)
-{
-  //Pre: infilename ends with INFILEEXT
-  strcpy(outfilename, infilename);
-  //replace suffix INFILEEXT by OUTFILEEXT
-  outfilename[strlen(outfilename) - strlen(INFILEEXT)] = '\0';
-  strcat(outfilename, OUTFILEEXT);
-  //strip path
-  char *no_path = strrchr(outfilename, '/');
-  if (no_path != NULL) {
-    strcpy(outfilename, no_path + 1);
-  }
-}
-
-
 /**************** linearise_term **************************************/
 
 static ATermAppl linearise_term(ATermAppl spec_term)
@@ -7915,73 +7814,56 @@ static ATermAppl linearise_term(ATermAppl spec_term)
   return result;
 }
 
-
-/*--- linearise_file -----------------------------*/
-
-ATermAppl linearise_file(char *infilename, t_phase end_phase)
-{
-  assert(infilename != NULL);
-  //open input filename
-  FILE *instream = fopen(infilename, "r");
-  if (instream == NULL) {
-    gsErrorMsg("cannot open input file '%s'\n", infilename);
-    return NULL;
-  }
-  //parse specification from instream
-  gsVerboseMsg("parsing input file '%s'...\n", infilename);
-  ATermAppl result = gsParse(instream);
-  fclose(instream);
-  if (result == NULL) 
-  {
-    gsErrorMsg("parsing failed\n");
-    return NULL;
-  }
-  if (end_phase == phParse) {
-    return result;
-  }
-  //type check the result
-  gsVerboseMsg("type checking...\n");
-  result = gsTypeCheck(result);
-  if (result == NULL) 
-  {
-    gsErrorMsg("type checking failed\n");
-    return NULL;
-  }
-  if (end_phase == phTypeCheck) {
-    return result;
-  }
-  //implement standard data types and type constructors on the result
-  gsVerboseMsg("implementing standard data types and type constructors...\n");
-  result = gsImplementData(result);
-  if (result == NULL) 
-  {
-    gsErrorMsg("data implementation failed\n");
-    return NULL;
-  }
-  if (end_phase == phDataImpl) {
-    return result;
-  }
-  //linearise the result
-  gsVerboseMsg("linearising processes...\n");
-  result = linearise_term(result);
-  if (result == NULL) 
-  {
-    gsErrorMsg("linearisation failed\n");
-    return NULL;
-  }
-  return result; 
+#ifdef __cplusplus
 }
+#endif
 
-/*--- main program -----------------------------*/
+/*********************************************************************/
+/*                            interface                              */
+/*********************************************************************/
+
+#define NAME "mcrl22lpe"
+
+#ifdef __cplusplus
+extern "C" {
+#endif
+
+#include "gslexer.h"
+#include "gstypecheck.h"
+#include "gsdataimpl.h"
+#include <getopt.h>
+#include <limits.h>
+
+#define INFILEEXT ".mcrl2"
+#define OUTFILEEXT ".lpe"
+
+//Type definitions
+typedef enum { phNone, phParse, phTypeCheck, phDataImpl } t_phase;
+//t_phase represents the phases at which the program should be able to stop
+
+typedef enum { lmStack, lmRegular, lmRegular2 } t_lin_method;
+//t_lin_method represents the available linearisation methods
+
+typedef enum { cmDefault, cmFull, cmNone } t_cluster_method;
+//t_cluster_method represents the available clustering methods
+
+
+//Functions used by the main program
+ATermAppl linearise_file(char *infilename, t_phase end_phase);
+static void calc_infilename(char *infilename, char *specname);
+static void calc_outfilename(char *outfilename, char *infilename);
+void PrintMoreInfo(char *Name);
+void PrintVersion(void);
+void PrintHelp(char *Name);
+
+//Main program
 
 int main(int argc, char *argv[])
 { 
   //declarations for getopt
-  bool opt_stack = false;
-  bool opt_regular = false;
-  bool opt_regular2 = false;
-  bool opt_cluster = false;
-  bool opt_nocluster = false;
+  bool lm_chosen = false;
+  t_lin_method opt_lin_method = lmRegular;
+  t_cluster_method opt_cluster_method = cmDefault;
   bool opt_newstate = false;
   bool opt_binary = false;
   bool opt_statenames = false;
@@ -8020,19 +7902,42 @@ int main(int argc, char *argv[])
   while (Option != -1) {
     switch (Option){
       case '0': /* stack */
-        opt_stack = true;
+        if (lm_chosen && opt_lin_method != lmStack) {
+          gsErrorMsg("only one method of linearisation is allowed\n");
+          return 1;
+        }
+        lm_chosen = true;
+        opt_lin_method = lmStack;
         break;
       case '1': /* regular */
-        opt_regular = true;
+        if (lm_chosen && opt_lin_method != lmRegular) {
+          gsErrorMsg("only one method of linearisation is allowed\n");
+          return 1;
+        }
+        lm_chosen = true;
+        opt_lin_method = lmRegular;
         break;
       case '2': /* regular2 */
-        opt_regular2 = true;
+        if (lm_chosen && opt_lin_method != lmRegular2) {
+          gsErrorMsg("only one method of linearisation is allowed\n");
+          return 1;
+        }
+        lm_chosen = true;
+        opt_lin_method = lmRegular2;
         break;
       case 'c': /* cluster */ 
-        opt_cluster = true;
+        if (opt_cluster_method == cmNone) {
+          gsErrorMsg("only one clustering method is allowed\n");
+          return 1;
+        }
+        opt_cluster_method = cmFull;
         break;
       case 'n': /* nocluster */
-        opt_nocluster = true;
+        if (opt_cluster_method == cmFull) {
+          gsErrorMsg("only one clustering method is allowed\n");
+          return 1;
+        }
+        opt_cluster_method = cmNone;
         break;
       case 'w': /* newstate */ 
         opt_newstate = true;
@@ -8091,13 +7996,7 @@ int main(int argc, char *argv[])
     Option = getopt_long(argc, argv, ShortOptions, LongOptions, NULL);
   }
   //check for dangerous and illegal option combinations
-  if ((opt_stack && opt_regular) || (opt_stack && opt_regular2) ||
-    (opt_regular && opt_regular2))
-  {
-    gsErrorMsg("only one method of linearisation is allowed\n");
-    return 1;
-  }
-  if (opt_newstate && opt_stack) {
+  if (opt_newstate && opt_lin_method == lmStack) {
     gsErrorMsg("option -w can only be used with -1 or -2\n");
     return 1;
   }
@@ -8106,12 +8005,12 @@ int main(int argc, char *argv[])
     return 1;
   }
   //set global parameters
-  regular = !opt_stack;
-  regular2 = opt_regular2;
-  cluster = opt_cluster;
-  nocluster = opt_nocluster;
-  oldstate = !opt_newstate;
-  binary = opt_binary;
+  regular    = (opt_lin_method != lmStack);
+  regular2   = (opt_lin_method == lmRegular2);
+  cluster    = (opt_cluster_method == cmFull);
+  nocluster  = (opt_cluster_method == cmNone);
+  oldstate   = !opt_newstate;
+  binary     = opt_binary;
   statenames = opt_statenames;
   mayrewrite = !opt_norewrite;
   allowFreeDataVariablesInProcesses = !opt_nofreevars;
@@ -8171,6 +8070,143 @@ int main(int argc, char *argv[])
     }
   }
   return 0;
+}
+
+ATermAppl linearise_file(char *infilename, t_phase end_phase)
+{
+  assert(infilename != NULL);
+  //open input filename
+  FILE *instream = fopen(infilename, "r");
+  if (instream == NULL) {
+    gsErrorMsg("cannot open input file '%s'\n", infilename);
+    return NULL;
+  }
+  //parse specification from instream
+  gsVerboseMsg("parsing input file '%s'...\n", infilename);
+  ATermAppl result = gsParse(instream);
+  fclose(instream);
+  if (result == NULL) 
+  {
+    gsErrorMsg("parsing failed\n");
+    return NULL;
+  }
+  if (end_phase == phParse) {
+    return result;
+  }
+  //type check the result
+  gsVerboseMsg("type checking...\n");
+  result = gsTypeCheck(result);
+  if (result == NULL) 
+  {
+    gsErrorMsg("type checking failed\n");
+    return NULL;
+  }
+  if (end_phase == phTypeCheck) {
+    return result;
+  }
+  //implement standard data types and type constructors on the result
+  gsVerboseMsg("implementing standard data types and type constructors...\n");
+  result = gsImplementData(result);
+  if (result == NULL) 
+  {
+    gsErrorMsg("data implementation failed\n");
+    return NULL;
+  }
+  if (end_phase == phDataImpl) {
+    return result;
+  }
+  //linearise the result
+  gsVerboseMsg("linearising processes...\n");
+  result = linearise_term(result);
+  if (result == NULL) 
+  {
+    gsErrorMsg("linearisation failed\n");
+    return NULL;
+  }
+  return result; 
+}
+
+static void calc_infilename(char *infilename, char *specname)
+{
+  //Pre : infilename is able to store specname appended with INFILEEXT
+  //Post: infilename represents specname, in which INFILEEXT is appended
+  //      if it didn't already end with it
+  strcpy(infilename, specname);
+  char *file_ext = strrchr(infilename, '.');
+  if (file_ext == NULL) {
+    //'.' does not occur in infilename, append INFILEEXT 
+    strcat(infilename, INFILEEXT);
+  } else { //file_ext != NULL
+    if (strcmp(file_ext, INFILEEXT) != 0) {
+      //file_ext is not equal to INFILEEXT, append INFILEEXT
+      strcat(infilename, INFILEEXT);
+    }
+  }
+}
+
+static void calc_outfilename(char *outfilename, char *infilename)
+{
+  //Pre: infilename ends with INFILEEXT
+  strcpy(outfilename, infilename);
+  //replace suffix INFILEEXT by OUTFILEEXT
+  outfilename[strlen(outfilename) - strlen(INFILEEXT)] = '\0';
+  strcat(outfilename, OUTFILEEXT);
+  //strip path
+  char *no_path = strrchr(outfilename, '/');
+  if (no_path != NULL) {
+    strcpy(outfilename, no_path + 1);
+  }
+}
+
+void PrintMoreInfo(char *Name)
+{
+  fprintf(stderr, "Use %s --help for options\n", Name);
+}
+
+void PrintVersion(void)
+{
+  fprintf(stderr,"mCRL2 parser and LPE generator, version %s\n", VERSION);
+}
+
+void PrintHelp(char *Name)
+{
+  fprintf(stderr,
+    "Usage: %s OPTIONS SPECFILE\n"
+    "Linearises the mCRL2 specification in SPECFILE and writes the resulting LPE to\n"
+    "a file. If SPECFILE does not have the extension 'mcrl2', SPECFILE.mcrl2 is used.\n"
+    "In the name of the output file, the extension 'mcrl2' is replaced by 'lpe'.\n"
+    "\n"
+    "The OPTIONS that can be used are:\n"
+    "  -0, --stack            the LPE is generated using stack datatypes;\n"
+    "                         useful when -1 and -2 do not work\n"
+    "  -1, --regular          if the specification is regular, the LPE is generated\n"
+    "                         in regular form (default)\n"
+    "  -2, --regular2         a variant of regular that uses more data variables;\n"
+    "                         sometimes successful when -1 leads to non-termination\n"
+    "  -c, --cluster          all actions in the LPE are clustered\n"
+    "  -n, --no-cluster       no actions are clustered, not even in intermediate LPEs\n"
+    "  -w, --newstate         state variables are encoded using enumerated types\n"
+    "                         (requires -1 or -2); without -w numbers are used\n"
+    "  -b, --binary           when clustering use binary case functions instead of\n"
+    "                         n-ary; in the presence of -w, state variables are\n"
+    "                         encoded by a vector of boolean variables\n"
+    "  -a, --statenames       the names of state variables are derived from the\n"
+    "                         specification\n"
+    "  -o, --no-rewrite       do not rewrite data terms while linearising;\n"
+    "                         useful when the rewrite system does not terminate\n"
+    "  -f, --no-freevars      instantiate don't care values with arbitrary constants,\n"
+    "                         instead of modelling them by free variables\n"
+    "  -e  --check-only       check syntax and static semantics; do not linearise\n"
+    "  -p  --end-phase=PHASE  stop linearisation after phase PHASE and output the\n"
+    "                         result; PHASE can be 'pa' (parse), 'tc' (type check)\n"
+    "                         or 'di' (data implementation)\n"
+    "      --stdout           the generated LPE is written to stdout\n"
+    "  -h, --help             display this help\n"    
+    "      --version          display version information\n"
+    "  -q, --quiet            do not display warning messages\n"
+    "  -v, --verbose          turn on the display of short intermediate messages\n"
+    "  -d, --debug            turn on the display of detailed intermediate messages\n",
+    Name);
 }
 
 #ifdef __cplusplus
