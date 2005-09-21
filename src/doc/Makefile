@@ -1,7 +1,12 @@
 XMLTO      = xmlto
-OBJECTS    = libgsrewrite.7
+OBJECTS    = libgsrewrite.7 libgsrewrite.txt libgsrewrite.html
+
+.PHONY: clean, all
 
 all: $(OBJECTS)
+
+clean:
+	$(RM) $(OBJECTS)
 
 %.1: %.xml
 	xmlto man $<
@@ -29,3 +34,9 @@ all: $(OBJECTS)
 
 %.9: %.xml
 	xmlto man $<
+
+%.html: %.xml
+	xmlto xhtml-nochunks $<
+
+%.txt: %.xml
+	xmlto txt $<
