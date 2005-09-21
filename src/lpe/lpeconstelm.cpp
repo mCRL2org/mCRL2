@@ -21,27 +21,72 @@ po::variables_map vm;
 //Constanten
 string version = "Version 0.1";
 
-bool cex()
-{
+//Global Vars
+vector<LPEAssignment>             iv;		//init vector
+vector<bool> 		                  fv;		//flag vector (C= True, V= False)
+vector< vector<DataExpression> >  sv; 	//(new) state vector
+vector< vector<bool> >            cv;		//change vector	
+
+//debug vars
+int                               noi = 0 ;  //number of iterations                               
+
+bool substitute(LPEAssignment x){
+  cout << x.lhs().name() << " by value " << x.rhs().to_string()<< endl;
   return true;
 }
 
-bool eval_datexp(DataExpression datexpr){
-  //x for debug
-  //gsRewriteInit(ATgetArgument(Spec, 3),GS_REWR_INNER3);
-  //cout << datexpr.to_string() << endl;
-  if (DataExpression(*gsMakeOpIdNameTrue()) == datexpr){cout <<"w"<<endl;}
 
-  //gsRewriteInit();
-  return true;
+bool cex(LPEAssignment x, LPEAssignment y)
+{
+  if ATisEqual(x.rhs().term(), y.rhs().term()) { 
+    return true;
+  } 
+  else {
+    x.rhs().replace(x.rhs(),y.rhs());
+    return false;
+  } 
+}
+
+bool eval_datexp(DataExpression datexpr){
+  //Vul replace vector in de condititie in
+  for (unsigned int i=0; i < iv.size(); i++){
+    datexpr.replace(iv[i].lhs().head(), iv[i].rhs());
+  }
+
+  //if configure is not done with "enable-debug" then uncommont following line 
+  //gsEnableConstructorFunctions();
+
+
+  /**
+    *   Rewrite dataxpr.term to eval
+    **/
+
+  ATerm x = (ATerm) gsRewriteTerm(datexpr.term().appl());
+
+
+  ATerm t = (ATerm) gsMakeDataExprTrue();
+  ATerm f = (ATerm) gsMakeDataExprFalse();
+
+  //debug
+  return(true);  
+
+  
+  if (ATisEqual(x,t)) 
+    { 
+      return true;
+    } else { 
+      if (ATisEqual(x,f))
+        {  
+          return false;
+        } else {
+          return false ;  
+        } ;
+    }
 }
 
 int const_main(string filename, int opt)
 {
-  vector<LPEAssignment>             iv;		//init vector
-  vector<bool> 		                  fv;		//flag vector (C= True, V= False)
-  vector< vector<DataExpression> >  sv; 	//(new) state vector
-  vector< vector<bool> >            cv;		//change vector	
+
   vector<bool>                      pcv;  //partial change vector
   vector<string>                    sovp; //set of variable process parameters
   int                               nopp; //number of process parameters
@@ -52,12 +97,17 @@ int const_main(string filename, int opt)
   //Debug test vars
   int outputvar =  0;
   outputvar++;
+  gsEnableConstructorFunctions();
 
   aterm_appl t = read_from_named_file(filename).to_appl();
   if (!t)
     cerr << "could not read file!" << endl;
   if (opt == 0)
   {
+
+    //Define rewrite rules on conditons
+    gsRewriteInit(ATAgetArgument(t.appl(),3),GS_REWR_INNER3);    
+
     //Get number of process parameters
     LPE::variable_iterator var_itpb = LPE(t).process_parameters_begin();
     LPE::variable_iterator var_itpe = LPE(t).process_parameters_end();
@@ -84,7 +134,7 @@ int const_main(string filename, int opt)
     
     bool iteration = true;
     //Begin Iteration
-    while(iteration){
+    while(iteration==true){
       //Build new state vector and change vector
       
       //Get number of summands
@@ -106,26 +156,20 @@ int const_main(string filename, int opt)
         LPESummand::assignment_iterator var_ppcvb = LPESummand(*s_current).assignments_begin();
         LPESummand::assignment_iterator var_ppcve = LPESummand(*s_current).assignments_end();
         
-        //debug cout << LPESummand(*s_current).to_string() << endl;
-
         //Only check when Guard evaluates to true
-        //cout << LPESummand(*s_current).condition().to_string() << endl;
-        cout << LPESummand(*s_current).condition().is_operation() << endl;
-        
+        //DataExpression cond
         
         // If Guard of summand is true -> 
         if (eval_datexp(LPESummand(*s_current).condition())){
           for (LPESummand::assignment_iterator c_obj = LPESummand(*s_current).assignments_begin(); c_obj != var_ppcve; ++c_obj){
         
           //Get LHS from State Vector element
-          //cout <<(LPEAssignment(*c_obj).lhs()).name() << endl;
-          
             //Get match LHS from State Vector element to LHS init vector
             unsigned int indx;
             for (indx = 0; indx < iv.size(); indx++){
               if (iv[indx].lhs().name() == (LPEAssignment(*c_obj).lhs()).name()) {
-                //Compare expression
-                if (!cex()) 
+                //Compare process with init vector
+                if (!cex(iv[indx], LPEAssignment(*c_obj))) 
                   { //Vector elements are not equal
                   pcv[indx] = false;
                   //Add process to list of variable processes
@@ -140,7 +184,7 @@ int const_main(string filename, int opt)
       };	
 
       //Compare change vector with flag vector
-      vector<bool> fch; //flattened change vector
+      vector<bool> fcv; //flattened change vector
       for (unsigned int i=0; i < cv[0].size(); i++)
       { bool b = true;
         for(unsigned int j=0; j < cv.size(); j++)
@@ -148,30 +192,37 @@ int const_main(string filename, int opt)
           b = b && cv[j][i];
         }
         //flatten change vector
-        fch.push_back(b);
+        fcv.push_back(b);
       }
       
       //Actual compare flattened change vector with flag vector
-      if (fch.size()!= fv.size()) 
+      if (fcv.size()!= fv.size()) 
         {cout << "fch != fv" << endl; return 1;}
       
       //While condition :)
       bool b = true;
-      for (unsigned int i=0; i < fch.size(); i++){
-        b = b && (fch[i]==fv[i]);  
+      for (unsigned int i=0; i < fcv.size(); i++){
+        b = b && (fcv[i]==fv[i]);  
       }
       //If all elements equal -> No more iteration, set iteration false
       //If a element differs -> Iteration needed, set iteration true
       iteration = !b ;
-      cout << "iterate " << b << endl;
-      //Debug "list of variable processes" cout << sovp[0] << endl;
+      if (iteration){
+        fv = fcv;
       }
-    //End Iteration 
-    } 
-    //Subtitute all constant values
-
- 
-    
+    noi++;
+    }
+  //End Iteration 
+  } 
+  //Subtitute all constant values
+  for (unsigned int i  = 0; i != fv.size(); i++){
+    if (fv[i]){ 
+      substitute(iv[i]);
+    };
+  };
+   
+  cout << "noi " << noi <<endl;
+  cerr << "einde" << endl;
   
   return 0;
 }
