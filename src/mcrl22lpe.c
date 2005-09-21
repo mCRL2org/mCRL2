@@ -3,8 +3,59 @@ extern "C" {
 #endif
 
 /*********************************************************************/
+/*                            general                                */
+/*********************************************************************/
+
+#include <stdbool.h>
+
+//Type definitions
+typedef enum { phNone, phParse, phTypeCheck, phDataImpl } t_phase;
+//t_phase represents the phases at which the program should be able to stop
+
+typedef enum { lmStack, lmRegular, lmRegular2 } t_lin_method;
+//t_lin_method represents the available linearisation methods
+
+typedef enum { cmDefault, cmFull, cmNone } t_cluster_method;
+//t_cluster_method represents the available clustering methods
+
+typedef struct {
+  t_lin_method lin_method;
+  t_cluster_method cluster_method;
+  bool newstate;
+  bool binary;
+  bool statenames;
+  bool norewrite;
+  bool nofreevars;
+} t_lin_options;
+//t_lin_options represents the options of the lineariser
+
+#ifdef __cplusplus
+}
+#endif
+
+/*********************************************************************/
 /*                            implementation                         */
 /*********************************************************************/
+
+/* This file contains the implementation of an mCRL2 lineariser.
+
+   It is based on the implementation of the mCRL lineariser, on which work
+   started on 12 juli 1997.  This lineariser was based on the CWI technical
+   report "The Syntax and Semantics of Timed mCRL", by J.F. Groote.
+
+   Everybody is free to use this software, provided it is not changed.
+
+   In case problems are encountered when using this software, please report
+   them to J.F. Groote, TU/e, Eindhoven, jfg@win.tue.nl
+
+   This software comes as it is. I.e. the author assumes no responsibility for
+   the use of this software. 
+
+*/
+
+#ifdef __cplusplus
+extern "C" {
+#endif
 
 /* TODO:
  * Put renaming, hiding, encapsulation, and visibility
@@ -17,11 +68,16 @@ extern "C" {
 #include "config.h"
 #endif
 #define MAIN
+#include <stdlib.h>
+#include <stdbool.h>
+#include <assert.h>
+#include <string.h>
+#include <aterm2.h>
 #include "mcrl22lpe.h"
+#include "gsfunc.h"
 #include "gslowlevel.h"
 #include "libgsrewrite.h"
 #include "libgsalpha.h"
-#include <stdbool.h>
 
 #define STRINGLENGTH 256
 
@@ -7777,8 +7833,18 @@ static ATermAppl transform(
 
 /**************** linearise_term **************************************/
 
-static ATermAppl linearise_term(ATermAppl spec_term)
+static ATermAppl linearise_term(ATermAppl spec_term, t_lin_options lin_options)
 {
+  //set global parameters
+  regular    = (lin_options.lin_method != lmStack);
+  regular2   = (lin_options.lin_method == lmRegular2);
+  cluster    = (lin_options.cluster_method == cmFull);
+  nocluster  = (lin_options.cluster_method == cmNone);
+  oldstate   = !lin_options.newstate;
+  binary     = lin_options.binary;
+  statenames = lin_options.statenames;
+  mayrewrite = !lin_options.norewrite;
+  allowFreeDataVariablesInProcesses = !lin_options.nofreevars;
   //initialise local data structures
   initialize_data();
   specificationbasictype *spec = create_spec(spec_term);
@@ -7823,6 +7889,7 @@ static ATermAppl linearise_term(ATermAppl spec_term)
 /*********************************************************************/
 
 #define NAME "mcrl22lpe"
+#define VERSION "0.1.0"
 
 #ifdef __cplusplus
 extern "C" {
@@ -7831,25 +7898,20 @@ extern "C" {
 #include "gslexer.h"
 #include "gstypecheck.h"
 #include "gsdataimpl.h"
+#include <assert.h>
+#include <stdbool.h>
 #include <getopt.h>
 #include <limits.h>
+#include <stdio.h>
+#include <aterm2.h>
 
 #define INFILEEXT ".mcrl2"
 #define OUTFILEEXT ".lpe"
 
-//Type definitions
-typedef enum { phNone, phParse, phTypeCheck, phDataImpl } t_phase;
-//t_phase represents the phases at which the program should be able to stop
-
-typedef enum { lmStack, lmRegular, lmRegular2 } t_lin_method;
-//t_lin_method represents the available linearisation methods
-
-typedef enum { cmDefault, cmFull, cmNone } t_cluster_method;
-//t_cluster_method represents the available clustering methods
-
 
 //Functions used by the main program
-ATermAppl linearise_file(char *infilename, t_phase end_phase);
+ATermAppl linearise_file(char *infilename, t_lin_options lin_options,
+  t_phase end_phase);
 static void calc_infilename(char *infilename, char *specname);
 static void calc_outfilename(char *outfilename, char *infilename);
 void PrintMoreInfo(char *Name);
@@ -8004,16 +8066,6 @@ int main(int argc, char *argv[])
     gsErrorMsg("options -e and -p may not be used in conjunction\n");
     return 1;
   }
-  //set global parameters
-  regular    = (opt_lin_method != lmStack);
-  regular2   = (opt_lin_method == lmRegular2);
-  cluster    = (opt_cluster_method == cmFull);
-  nocluster  = (opt_cluster_method == cmNone);
-  oldstate   = !opt_newstate;
-  binary     = opt_binary;
-  statenames = opt_statenames;
-  mayrewrite = !opt_norewrite;
-  allowFreeDataVariablesInProcesses = !opt_nofreevars;
   //check for wrong number of arguments
   int noargc; //non-option argument count
   noargc = argc - optind;
@@ -8038,8 +8090,20 @@ int main(int argc, char *argv[])
   char infilename[strlen(argv[optind]) + strlen(INFILEEXT) + 1];
   calc_infilename(infilename, argv[optind]);
 
+  //set linearisation parameters
+  t_lin_options lin_options;
+  lin_options.lin_method = opt_lin_method;
+  lin_options.cluster_method = opt_cluster_method;
+  lin_options.newstate = opt_newstate;
+  lin_options.binary = opt_binary;
+  lin_options.statenames = opt_statenames;
+  lin_options.norewrite = opt_norewrite;
+  lin_options.nofreevars = opt_nofreevars;
+
+  //linearise infilename with options lin_options
   ATermAppl result =
-    linearise_file(infilename, opt_check_only?phTypeCheck:opt_end_phase);
+    linearise_file(infilename, lin_options,
+      opt_check_only?phTypeCheck:opt_end_phase);
   if (result == NULL) {
     return 1;
   }
@@ -8072,7 +8136,8 @@ int main(int argc, char *argv[])
   return 0;
 }
 
-ATermAppl linearise_file(char *infilename, t_phase end_phase)
+ATermAppl linearise_file(char *infilename, t_lin_options lin_options,
+  t_phase end_phase)
 {
   assert(infilename != NULL);
   //open input filename
@@ -8117,7 +8182,7 @@ ATermAppl linearise_file(char *infilename, t_phase end_phase)
   }
   //linearise the result
   gsVerboseMsg("linearising processes...\n");
-  result = linearise_term(result);
+  result = linearise_term(result, lin_options);
   if (result == NULL) 
   {
     gsErrorMsg("linearisation failed\n");
@@ -8165,7 +8230,7 @@ void PrintMoreInfo(char *Name)
 
 void PrintVersion(void)
 {
-  fprintf(stderr,"mCRL2 parser and LPE generator, version %s\n", VERSION);
+  fprintf(stderr,"%s version %s\n", NAME, VERSION);
 }
 
 void PrintHelp(char *Name)
