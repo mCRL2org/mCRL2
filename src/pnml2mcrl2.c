@@ -1712,7 +1712,7 @@ extern "C" {
 
     Spec=gsTypeCheck(Spec);
 
-    if(Spec) PrettyPrint(stdout, (ATerm) Spec);
+    if(Spec) PrintPart_C(stdout, (ATerm) Spec);
     return 0;
   }
 

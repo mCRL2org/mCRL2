@@ -110,7 +110,7 @@ int main(int argc, char **argv)
 	{
 		ATwriteToTextFile((ATerm) Spec,OutStream);
 	} else {
-		PrettyPrint(OutStream, (ATerm) Spec);
+		PrintPart_C(OutStream, (ATerm) Spec);
 	}
 	if ( OutStream != stdout )
 	{

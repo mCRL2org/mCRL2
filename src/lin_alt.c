@@ -625,14 +625,14 @@ static int add_process_eqn(ATermAppl e)
 	{
 		processes = ATappend(processes,(ATerm) ATmakeList4(ATgetArgument(ATAgetArgument(e,1),0),ATgetArgument(e,2),annotate(ATgetArgument(e,3)),(ATerm) gsMakeNil()));
 //ATfprintf(stderr,"\n\nprocess %i: %t\n\n",ATgetLength(processes)-1,ATgetLast(processes));
-//PrettyPrint(stderr,ATelementAt((ATermList) ATgetLast(processes),2));
+//PrintPart_C(stderr,ATelementAt((ATermList) ATgetLast(processes),2));
 	}
 	if ( generalise && (ATgetLength(vars) > ATgetLength(ATLgetArgument(e,2))) )
 	{
 //		processes = ATappend(processes,(ATerm) ATmakeList4(ATgetArgument(ATAgetArgument(e,1),0),(ATerm) vars,annotate((ATerm) ni),(ATerm) gsMakeNil()));
 		processes = ATappend(processes,(ATerm) ATmakeList4((ATerm) name,(ATerm) vars,annotate((ATerm) ni),(ATerm) gsMakeNil()));
 //ATfprintf(stderr,"\n\nprocess %i: %t\n\n",ATgetLength(processes)-1,ATgetLast(processes));
-//PrettyPrint(stderr,ATAelementAt((ATermList) ATgetLast(processes),2));
+//PrintPart_C(stderr,ATAelementAt((ATermList) ATgetLast(processes),2));
 		return ATgetLength(processes)-2;
 	}
 
@@ -756,7 +756,7 @@ if ( gsIsProcess(i) )
 
 	processes = ATappend(processes,(ATerm) ATmakeList4((ATerm) name,(ATerm) vars,annotate((ATerm) ni),(ATerm) gsMakeNil()));
 //ATfprintf(stderr,"\n\nprocess %i: %t\n\n",ATgetLength(processes)-1,ATgetLast(processes));
-//PrettyPrint(stderr,ATAelementAt((ATermList) ATgetLast(processes),2));
+//PrintPart_C(stderr,ATAelementAt((ATermList) ATgetLast(processes),2));
 
 	initial_process = gsMakeProcess(gsMakeProcVarId(name,vars),data);
 
@@ -1676,7 +1676,7 @@ static ATermAppl get_proc_call(ATermAppl a, ATermList c)
 	//t = ATmakeList4((ATerm) var_name,(ATerm) arg_list,(ATerm) a,(ATerm) gsMakeNil());
 	processes = ATappend(processes,(ATerm) t);
 //ATfprintf(stderr,"\n\nprocess %i: %t\n\n",ATgetLength(processes)-1,ATgetLast(processes));
-//PrettyPrint(stderr,ATelementAt((ATermList) ATgetLast(processes),2));
+//PrintPart_C(stderr,ATelementAt((ATermList) ATgetLast(processes),2));
 	add_to_stack(ATgetLength(processes)-1);
 	if ( !match(a,t,&m) )
 	{
@@ -1925,7 +1925,7 @@ static ATermList get_firsts(ATermAppl t)
 	}
 	if ( gsIsMerge(t) )
 	{
-//PrettyPrint(stderr,t);fprintf(stderr,"\n\n");
+//PrintPart_C(stderr,t);fprintf(stderr,"\n\n");
 		l = get_firsts(gsMakeLMerge(ATAgetArgument(t,0),ATAgetArgument(t,1)));
 		m = get_firsts(gsMakeLMerge(ATAgetArgument(t,1),ATAgetArgument(t,0)));
 		n = ATmakeList0();
@@ -2006,11 +2006,11 @@ static void linearise(int i)
 /*fprintf(stderr,"\n\nset_proc(%i)\n",i);
 for (; !ATisEmpty(m); m=ATgetNext(m))
 {
-PrettyPrint(stderr,ATelementAt(ATLgetFirst(m),3));
+PrintPart_C(stderr,ATelementAt(ATLgetFirst(m),3));
 fprintf(stderr," -> ");
-PrettyPrint(stderr,ATelementAt(ATLgetFirst(m),1));
+PrintPart_C(stderr,ATelementAt(ATLgetFirst(m),1));
 fprintf(stderr," . ");
-PrettyPrint(stderr,ATelementAt(ATLgetFirst(m),2));
+PrintPart_C(stderr,ATelementAt(ATLgetFirst(m),2));
 fprintf(stderr,"\n\n");
 }*/
 }

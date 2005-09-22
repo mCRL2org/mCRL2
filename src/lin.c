@@ -214,7 +214,7 @@ int main(int argc, char **argv)
 
 	if ( human )
 	{
-		PrettyPrint(OutFile, (ATerm) Spec);
+		PrintPart_C(OutFile, (ATerm) Spec);
 	} else {
 		ATwriteToTextFile((ATerm) Spec,OutFile);
 	}

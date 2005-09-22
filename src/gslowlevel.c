@@ -112,7 +112,7 @@ int gsvfprintf(FILE *stream, const char *format, va_list args)
 	 * MCRL2 specifics start here: "%T" to prettiprint an ATerm
 	 */
       case 'T':
-	PrettyPrint(stream, va_arg(args, ATerm));
+	PrintPart_C(stream, va_arg(args, ATerm));
 	break;
 	/*
 	 * ATerm specifics start here: "%t" to print an ATerm; "%l" to

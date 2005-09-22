@@ -195,7 +195,7 @@ bool PrintSpecificationStream(FILE *SpecStream, FILE *OutputStream)
     if (OutputStream != stdout) gsVerboseMsg(
       "printing specification to file in a human readable format\n");
     gsEnableConstructorFunctions();
-    PrettyPrint(OutputStream, (ATerm) Spec);
+    PrintPart_C(OutputStream, (ATerm) Spec);
     Result = true;
   }
   gsDebugMsg("all files are closed; return %s\n", Result?"true":"false");

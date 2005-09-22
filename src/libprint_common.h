@@ -1,4 +1,4 @@
-#ifdef GS_PRINT_FILE
+#ifdef GS_PRINT_C
 #include <stdio.h>
 #include <stdlib.h>
 #include <aterm2.h>
@@ -7,16 +7,25 @@
 #include "gsfunc.h"
 #include "gslowlevel.h"
 #define GS_PRINT_OUTTYPE FILE*
-#define GS_PRINT_FUNC(x) x ## File
+#define GS_PRINT_FUNC(x) x ## _C
 #endif
 
-#ifdef GS_PRINT_STREAM
+#ifdef GS_PRINT_CXX
 #include <ostream>
+#include <aterm2.h>
+#include "gsfunc.h"
+#include "gslowlevel.h"
 #define GS_PRINT_OUTTYPE std::ostream&
-#define GS_PRINT_FUNC(x) x ## Stream
+#define GS_PRINT_FUNC(x) x ## _CXX
 #endif
 
-static void GS_PRINT_FUNC(PrintPart)(GS_PRINT_OUTTYPE OutStream, const ATermAppl Part, bool ShowSorts,
+static void GS_PRINT_FUNC(PrintPart_)(GS_PRINT_OUTTYPE OutStream, const ATerm Part);
+/*Pre: OutStream points to a stream to which can be written
+       Part is an ATerm containing a part of a mCRL2 specification
+  Post:A textual representation of Part is written to OutStream
+*/
+
+static void GS_PRINT_FUNC(PrintPart_Appl)(GS_PRINT_OUTTYPE OutStream, const ATermAppl Part, bool ShowSorts,
   int PrecLevel);
 /*Pre: OutStream points to a stream to which can be written
        Part is an ATermAppl containing a part of a mCRL2 specification
@@ -31,7 +40,7 @@ static void GS_PRINT_FUNC(PrintPart)(GS_PRINT_OUTTYPE OutStream, const ATermAppl
          otherwise, sorts are only shown when necessary
 */
 
-static void GS_PRINT_FUNC(PrintParts)(GS_PRINT_OUTTYPE OutStream, const ATermList Parts, bool ShowSorts,
+static void GS_PRINT_FUNC(PrintPart_List)(GS_PRINT_OUTTYPE OutStream, const ATermList Parts, bool ShowSorts,
   int PrecLevel, const char *Terminator, const char *Separator);
 /*Pre: OutStream points to a stream to which can be written
        Parts is an ATermList containing parts of a mCRL2 specification
@@ -168,39 +177,62 @@ static void GS_PRINT_FUNC(PrintPosMult)(GS_PRINT_OUTTYPE OutStream, const ATermA
 
 //implementation
 
-static void GS_PRINT_FUNC(PrintPart)(GS_PRINT_OUTTYPE OutStream, const ATermAppl Part, bool ShowSorts,
+static void GS_PRINT_FUNC(PrintPart_)(GS_PRINT_OUTTYPE OutStream, const ATerm Part)
+{
+  if (ATgetType(Part) == AT_APPL) {
+    GS_PRINT_FUNC(PrintPart_Appl)(OutStream, (ATermAppl) Part, false, 0);
+  } else if (ATgetType(Part) == AT_LIST) {
+#ifdef GS_PRINT_C
+    fprintf(OutStream, "[");
+#endif
+#ifdef GS_PRINT_CXX
+    OutStream << "[";
+#endif
+    GS_PRINT_FUNC(PrintPart_List)(OutStream, (ATermList) Part, false, 0, "", ", ");
+#ifdef GS_PRINT_C
+    fprintf(OutStream, "]");
+#endif
+#ifdef GS_PRINT_CXX
+    OutStream << "]";
+#endif
+  } else {
+    gsErrorMsg("ATerm Part is not an ATermAppl or an ATermList\n");
+  }
+}
+
+static void GS_PRINT_FUNC(PrintPart_Appl)(GS_PRINT_OUTTYPE OutStream, const ATermAppl Part, bool ShowSorts,
   int PrecLevel)
 {
   if (ATisQuoted(ATgetAFun(Part)) == ATtrue) {
     //print string
-#ifdef GS_PRINT_FILE
+#ifdef GS_PRINT_C
     fprintf(OutStream, ATgetName(ATgetAFun(Part)));
 #endif
-#ifdef GS_PRINT_STREAM
+#ifdef GS_PRINT_CXX
     OutStream << ATgetName(ATgetAFun(Part));
 #endif
   } else if (gsIsSpecV1(Part)) {
     //print specification
     gsDebugMsg("printing specification\n");
     for (int i = 0; i < 7; i++) {
-      GS_PRINT_FUNC(PrintPart)(OutStream, ATAgetArgument(Part, i), ShowSorts, PrecLevel);
+      GS_PRINT_FUNC(PrintPart_Appl)(OutStream, ATAgetArgument(Part, i), ShowSorts, PrecLevel);
     }
   } else if (gsIsSortSpec(Part)) {
     //print sort specification
     gsDebugMsg("printing sort specification\n");
     ATermList SortDecls = ATLgetArgument(Part, 0);
     if (ATgetLength(SortDecls) > 0) {
-#ifdef GS_PRINT_FILE
+#ifdef GS_PRINT_C
       fprintf(OutStream, "sort ");
 #endif
-#ifdef GS_PRINT_STREAM
+#ifdef GS_PRINT_CXX
       OutStream << "sort ";
 #endif
-      GS_PRINT_FUNC(PrintParts)(OutStream, SortDecls, ShowSorts, PrecLevel, ";\n", "     ");
-#ifdef GS_PRINT_FILE
+      GS_PRINT_FUNC(PrintPart_List)(OutStream, SortDecls, ShowSorts, PrecLevel, ";\n", "     ");
+#ifdef GS_PRINT_C
       fprintf(OutStream, "\n");
 #endif
-#ifdef GS_PRINT_STREAM
+#ifdef GS_PRINT_CXX
       OutStream << std::endl;
 #endif
     }
@@ -209,17 +241,17 @@ static void GS_PRINT_FUNC(PrintPart)(GS_PRINT_OUTTYPE OutStream, const ATermAppl
     gsDebugMsg("printing operation specification\n");
     ATermList OpIds = ATLgetArgument(Part, 0);
     if (ATgetLength(OpIds) > 0) {
-#ifdef GS_PRINT_FILE
+#ifdef GS_PRINT_C
       fprintf(OutStream, gsIsConsSpec(Part)?"cons ":"map  ");
 #endif
-#ifdef GS_PRINT_STREAM
+#ifdef GS_PRINT_CXX
       OutStream << (gsIsConsSpec(Part)?"cons ":"map  ");
 #endif
       GS_PRINT_FUNC(PrintDecls)(OutStream, OpIds, ";\n", "     ");
-#ifdef GS_PRINT_FILE
+#ifdef GS_PRINT_C
       fprintf(OutStream, "\n");
 #endif
-#ifdef GS_PRINT_STREAM
+#ifdef GS_PRINT_CXX
       OutStream << std::endl;
 #endif
     }
@@ -232,17 +264,17 @@ static void GS_PRINT_FUNC(PrintPart)(GS_PRINT_OUTTYPE OutStream, const ATermAppl
     gsDebugMsg("printing action specification\n");
     ATermList ActIds = ATLgetArgument(Part, 0);
     if (ATgetLength(ActIds) > 0) {
-#ifdef GS_PRINT_FILE
+#ifdef GS_PRINT_C
       fprintf(OutStream, "act  ");
 #endif
-#ifdef GS_PRINT_STREAM
+#ifdef GS_PRINT_CXX
       OutStream << "act  ";
 #endif
       GS_PRINT_FUNC(PrintDecls)(OutStream, ActIds, ";\n", "     ");
-#ifdef GS_PRINT_FILE
+#ifdef GS_PRINT_C
       fprintf(OutStream, "\n");
 #endif
-#ifdef GS_PRINT_STREAM
+#ifdef GS_PRINT_CXX
       OutStream << std::endl;
 #endif
     }
@@ -256,10 +288,10 @@ static void GS_PRINT_FUNC(PrintPart)(GS_PRINT_OUTTYPE OutStream, const ATermAppl
     //print global variables
     ATermList Vars = ATLgetArgument(Part, 0);
     if (ATgetLength(Vars) > 0) {
-#ifdef GS_PRINT_FILE
+#ifdef GS_PRINT_C
       fprintf(OutStream, "var  ");
 #endif
-#ifdef GS_PRINT_STREAM
+#ifdef GS_PRINT_CXX
       OutStream << "var  ";
 #endif
       GS_PRINT_FUNC(PrintDecls)(OutStream, Vars, ";\n", "     ");
@@ -267,64 +299,64 @@ static void GS_PRINT_FUNC(PrintPart)(GS_PRINT_OUTTYPE OutStream, const ATermAppl
     //print process name and variable declarations
     ATermList VarDecls = ATLgetArgument(Part, 1);
     int VarDeclsLength = ATgetLength(VarDecls);
-#ifdef GS_PRINT_FILE
+#ifdef GS_PRINT_C
     fprintf(OutStream, "proc P");
 #endif
-#ifdef GS_PRINT_STREAM
+#ifdef GS_PRINT_CXX
     OutStream << "proc P";
 #endif
     if (VarDeclsLength > 0) {
-#ifdef GS_PRINT_FILE
+#ifdef GS_PRINT_C
       fprintf(OutStream, "(");
 #endif
-#ifdef GS_PRINT_STREAM
+#ifdef GS_PRINT_CXX
       OutStream << "(";
 #endif
       GS_PRINT_FUNC(PrintDecls)(OutStream, VarDecls, NULL, ", ");
-#ifdef GS_PRINT_FILE
+#ifdef GS_PRINT_C
       fprintf(OutStream, ")");
 #endif
-#ifdef GS_PRINT_STREAM
+#ifdef GS_PRINT_CXX
       OutStream << ")";
 #endif
     }
-#ifdef GS_PRINT_FILE
+#ifdef GS_PRINT_C
     fprintf(OutStream, " =");
 #endif
-#ifdef GS_PRINT_STREAM
+#ifdef GS_PRINT_CXX
     OutStream << " =";
 #endif
     //print summations
     ATermList Summands = ATLgetArgument(Part, 2);
     int SummandsLength = ATgetLength(Summands);
     if (SummandsLength == 0) {
-#ifdef GS_PRINT_FILE
+#ifdef GS_PRINT_C
       fprintf(OutStream, " delta\n");
 #endif
-#ifdef GS_PRINT_STREAM
+#ifdef GS_PRINT_CXX
       OutStream << " delta" << std::endl;
 #endif
     } else {
       //SummandsLength > 0
-#ifdef GS_PRINT_FILE
+#ifdef GS_PRINT_C
       fprintf(OutStream, "\n       ");
 #endif
-#ifdef GS_PRINT_STREAM
+#ifdef GS_PRINT_CXX
       OutStream << std::endl << "       ";
 #endif
-      GS_PRINT_FUNC(PrintParts)(OutStream, Summands, ShowSorts, PrecLevel,
+      GS_PRINT_FUNC(PrintPart_List)(OutStream, Summands, ShowSorts, PrecLevel,
         NULL, "\n     + ");
-#ifdef GS_PRINT_FILE
+#ifdef GS_PRINT_C
       fprintf(OutStream, ";\n");
 #endif
-#ifdef GS_PRINT_STREAM
+#ifdef GS_PRINT_CXX
       OutStream << ";" << std::endl;
 #endif
     }
-#ifdef GS_PRINT_FILE
+#ifdef GS_PRINT_C
     fprintf(OutStream, "\n");
 #endif
-#ifdef GS_PRINT_STREAM
+#ifdef GS_PRINT_CXX
     OutStream << std::endl;
 #endif
   } else if (gsIsInit(Part)) {
@@ -332,31 +364,31 @@ static void GS_PRINT_FUNC(PrintPart)(GS_PRINT_OUTTYPE OutStream, const ATermAppl
     gsDebugMsg("printing initialisation\n");
     ATermList Vars = ATLgetArgument(Part, 0);
     if (ATgetLength(Vars) > 0) {
-#ifdef GS_PRINT_FILE
+#ifdef GS_PRINT_C
       fprintf(OutStream, "var  ");
 #endif
-#ifdef GS_PRINT_STREAM
+#ifdef GS_PRINT_CXX
       OutStream << "var  ";
 #endif
       GS_PRINT_FUNC(PrintDecls)(OutStream, Vars, ";\n", "     ");
-#ifdef GS_PRINT_FILE
+#ifdef GS_PRINT_C
       fprintf(OutStream, "\n");
 #endif
-#ifdef GS_PRINT_STREAM
+#ifdef GS_PRINT_CXX
       OutStream << std::endl;
 #endif
     }
-#ifdef GS_PRINT_FILE
+#ifdef GS_PRINT_C
     fprintf(OutStream, "init "); 
 #endif
-#ifdef GS_PRINT_STREAM
+#ifdef GS_PRINT_CXX
     OutStream << "init "; 
 #endif
-    GS_PRINT_FUNC(PrintPart)(OutStream, ATAgetArgument(Part, 1), ShowSorts, PrecLevel);
-#ifdef GS_PRINT_FILE
+    GS_PRINT_FUNC(PrintPart_Appl)(OutStream, ATAgetArgument(Part, 1), ShowSorts, PrecLevel);
+#ifdef GS_PRINT_C
     fprintf(OutStream, ";\n");
 #endif
-#ifdef GS_PRINT_STREAM
+#ifdef GS_PRINT_CXX
     OutStream << ";" << std::endl;
 #endif
   } else if (gsIsLPEInit(Part)) {
@@ -364,135 +396,135 @@ static void GS_PRINT_FUNC(PrintPart)(GS_PRINT_OUTTYPE OutStream, const ATermAppl
     gsDebugMsg("printing LPE initialisation\n");
     ATermList Vars = ATLgetArgument(Part, 0);
     if (ATgetLength(Vars) > 0) {
-#ifdef GS_PRINT_FILE
+#ifdef GS_PRINT_C
       fprintf(OutStream, "var  ");
 #endif
-#ifdef GS_PRINT_STREAM
+#ifdef GS_PRINT_CXX
       OutStream << "var  ";
 #endif
       GS_PRINT_FUNC(PrintDecls)(OutStream, Vars, ";\n", "     ");
     }
-#ifdef GS_PRINT_FILE
+#ifdef GS_PRINT_C
     fprintf(OutStream, "init P"); 
 #endif
-#ifdef GS_PRINT_STREAM
+#ifdef GS_PRINT_CXX
     OutStream << "init P"; 
 #endif
     ATermList Args = ATLgetArgument(Part, 1);
     if (ATgetLength(Args) > 0) {
-#ifdef GS_PRINT_FILE
+#ifdef GS_PRINT_C
       fprintf(OutStream, "(");
 #endif
-#ifdef GS_PRINT_STREAM
+#ifdef GS_PRINT_CXX
       OutStream << "(";
 #endif
-      GS_PRINT_FUNC(PrintParts)(OutStream, Args, ShowSorts, 0, NULL, ", ");
-#ifdef GS_PRINT_FILE
+      GS_PRINT_FUNC(PrintPart_List)(OutStream, Args, ShowSorts, 0, NULL, ", ");
+#ifdef GS_PRINT_C
       fprintf(OutStream, ")");
 #endif
-#ifdef GS_PRINT_STREAM
+#ifdef GS_PRINT_CXX
       OutStream << ")";
 #endif
     }
-#ifdef GS_PRINT_FILE
+#ifdef GS_PRINT_C
     fprintf(OutStream, ";\n");
 #endif
-#ifdef GS_PRINT_STREAM
+#ifdef GS_PRINT_CXX
     OutStream << ";" << std::endl;
 #endif
   } else if (gsIsSortId(Part)) {
     //print sort identifier
     gsDebugMsg("printing standard sort identifier\n");
-    GS_PRINT_FUNC(PrintPart)(OutStream, ATAgetArgument(Part, 0), ShowSorts, PrecLevel);
+    GS_PRINT_FUNC(PrintPart_Appl)(OutStream, ATAgetArgument(Part, 0), ShowSorts, PrecLevel);
   } else if (gsIsSortRef(Part)) {
     //print sort reference
     gsDebugMsg("printing sort reference declaration\n");
-    GS_PRINT_FUNC(PrintPart)(OutStream, ATAgetArgument(Part, 0), ShowSorts, PrecLevel);
-#ifdef GS_PRINT_FILE
+    GS_PRINT_FUNC(PrintPart_Appl)(OutStream, ATAgetArgument(Part, 0), ShowSorts, PrecLevel);
+#ifdef GS_PRINT_C
     fprintf(OutStream, " = ");
 #endif
-#ifdef GS_PRINT_STREAM
+#ifdef GS_PRINT_CXX
     OutStream << " = ";
 #endif
-    GS_PRINT_FUNC(PrintPart)(OutStream, ATAgetArgument(Part, 1), ShowSorts, PrecLevel);
+    GS_PRINT_FUNC(PrintPart_Appl)(OutStream, ATAgetArgument(Part, 1), ShowSorts, PrecLevel);
   } else if (gsIsDataEqn(Part)) {
     //print data equation (without variables)
     gsDebugMsg("printing data equation\n");
     ATermAppl Condition = ATAgetArgument(Part, 1);
     if (!gsIsNil(Condition)) {
-      GS_PRINT_FUNC(PrintPart)(OutStream, Condition, ShowSorts, 0);
-#ifdef GS_PRINT_FILE
+      GS_PRINT_FUNC(PrintPart_Appl)(OutStream, Condition, ShowSorts, 0);
+#ifdef GS_PRINT_C
       fprintf(OutStream, "  ->  ");
 #endif
-#ifdef GS_PRINT_STREAM
+#ifdef GS_PRINT_CXX
       OutStream << "  ->  ";
 #endif
     }
-    GS_PRINT_FUNC(PrintPart)(OutStream, ATAgetArgument(Part, 2), ShowSorts, 0);
-#ifdef GS_PRINT_FILE
+    GS_PRINT_FUNC(PrintPart_Appl)(OutStream, ATAgetArgument(Part, 2), ShowSorts, 0);
+#ifdef GS_PRINT_C
     fprintf(OutStream, "  =  ");
 #endif
-#ifdef GS_PRINT_STREAM
+#ifdef GS_PRINT_CXX
     OutStream << "  =  ";
 #endif
-    GS_PRINT_FUNC(PrintPart)(OutStream, ATAgetArgument(Part, 3), ShowSorts, 0);
+    GS_PRINT_FUNC(PrintPart_Appl)(OutStream, ATAgetArgument(Part, 3), ShowSorts, 0);
   } else if (gsIsActId(Part)) {
     //print action identifier
     gsDebugMsg("printing action identifier\n");
-    GS_PRINT_FUNC(PrintPart)(OutStream, ATAgetArgument(Part, 0), ShowSorts, PrecLevel);
+    GS_PRINT_FUNC(PrintPart_Appl)(OutStream, ATAgetArgument(Part, 0), ShowSorts, PrecLevel);
     if (ShowSorts) {
       ATermList SortExprs = ATLgetArgument(Part, 1);
       if (ATgetLength(SortExprs) > 0) {
-#ifdef GS_PRINT_FILE
+#ifdef GS_PRINT_C
         fprintf(OutStream, ": ");
 #endif
-#ifdef GS_PRINT_STREAM
+#ifdef GS_PRINT_CXX
         OutStream << ": ";
 #endif
-        GS_PRINT_FUNC(PrintParts)(OutStream, SortExprs, ShowSorts, 2, NULL, " # ");
+        GS_PRINT_FUNC(PrintPart_List)(OutStream, SortExprs, ShowSorts, 2, NULL, " # ");
       }
     }
   } else if (gsIsProcEqn(Part)) {
     //print process equation (without free variables)
     gsDebugMsg("printing process equation\n");
-    GS_PRINT_FUNC(PrintPart)(OutStream, ATAgetArgument(Part, 1), ShowSorts, PrecLevel);
+    GS_PRINT_FUNC(PrintPart_Appl)(OutStream, ATAgetArgument(Part, 1), ShowSorts, PrecLevel);
     ATermList DataVarIds = ATLgetArgument(Part, 2);
     if (ATgetLength(DataVarIds) > 0) {
-#ifdef GS_PRINT_FILE
+#ifdef GS_PRINT_C
       fprintf(OutStream, "(");
 #endif
-#ifdef GS_PRINT_STREAM
+#ifdef GS_PRINT_CXX
       OutStream << "(";
 #endif
       GS_PRINT_FUNC(PrintDecls)(OutStream, DataVarIds, NULL, ", ");
-#ifdef GS_PRINT_FILE
+#ifdef GS_PRINT_C
       fprintf(OutStream, ")");
 #endif
-#ifdef GS_PRINT_STREAM
+#ifdef GS_PRINT_CXX
       OutStream << ")";
 #endif
     }
-#ifdef GS_PRINT_FILE
+#ifdef GS_PRINT_C
     fprintf(OutStream, " = ");
 #endif
-#ifdef GS_PRINT_STREAM
+#ifdef GS_PRINT_CXX
     OutStream << " = ";
 #endif
-    GS_PRINT_FUNC(PrintPart)(OutStream, ATAgetArgument(Part, 3), ShowSorts, 0);
+    GS_PRINT_FUNC(PrintPart_Appl)(OutStream, ATAgetArgument(Part, 3), ShowSorts, 0);
   } else if (gsIsProcVarId(Part)) {
     //print process variable
     gsDebugMsg("printing process variable\n");
-    GS_PRINT_FUNC(PrintPart)(OutStream, ATAgetArgument(Part, 0), ShowSorts, PrecLevel);
+    GS_PRINT_FUNC(PrintPart_Appl)(OutStream, ATAgetArgument(Part, 0), ShowSorts, PrecLevel);
     if (ShowSorts) {
       ATermList SortExprs = ATLgetArgument(Part, 1);
       if (ATgetLength(SortExprs) > 0) {
-#ifdef GS_PRINT_FILE
+#ifdef GS_PRINT_C
         fprintf(OutStream, ": ");
 #endif
-#ifdef GS_PRINT_STREAM
+#ifdef GS_PRINT_CXX
         OutStream << ": ";
 #endif
-        GS_PRINT_FUNC(PrintParts)(OutStream, SortExprs, ShowSorts, 2, NULL, " # ");
+        GS_PRINT_FUNC(PrintPart_List)(OutStream, SortExprs, ShowSorts, 2, NULL, " # ");
       }
     }
   } else if (gsIsLPESummand(Part)) {
@@ -501,28 +533,28 @@ static void GS_PRINT_FUNC(PrintPart)(GS_PRINT_OUTTYPE OutStream, const ATermAppl
     //print data summations
     ATermList SumVarDecls = ATLgetArgument(Part, 0);
     if (ATgetLength(SumVarDecls) > 0) {
-#ifdef GS_PRINT_FILE
+#ifdef GS_PRINT_C
       fprintf(OutStream, "sum ");
 #endif
-#ifdef GS_PRINT_STREAM
+#ifdef GS_PRINT_CXX
       OutStream << "sum ";
 #endif
       GS_PRINT_FUNC(PrintDecls)(OutStream, SumVarDecls, NULL, ",");
-#ifdef GS_PRINT_FILE
+#ifdef GS_PRINT_C
       fprintf(OutStream, ". ");
 #endif
-#ifdef GS_PRINT_STREAM
+#ifdef GS_PRINT_CXX
       OutStream << ". ";
 #endif
     }
     //print condition
     ATermAppl Cond = ATAgetArgument(Part, 1);
     if (!gsIsNil(Cond)) {
-      GS_PRINT_FUNC(PrintPart)(OutStream, Cond, ShowSorts, 0);
-#ifdef GS_PRINT_FILE
+      GS_PRINT_FUNC(PrintPart_Appl)(OutStream, Cond, ShowSorts, 0);
+#ifdef GS_PRINT_C
       fprintf(OutStream, " -> ");
 #endif
-#ifdef GS_PRINT_STREAM
+#ifdef GS_PRINT_CXX
       OutStream << " -> ";
 #endif
     }
@@ -530,45 +562,45 @@ static void GS_PRINT_FUNC(PrintPart)(GS_PRINT_OUTTYPE OutStream, const ATermAppl
     ATermAppl MultAct = ATAgetArgument(Part, 2);
     ATermAppl Time = ATAgetArgument(Part, 3);
     bool IsTimed = !gsIsNil(Time);
-    GS_PRINT_FUNC(PrintPart)(OutStream, MultAct, ShowSorts, (IsTimed)?6:5);
+    GS_PRINT_FUNC(PrintPart_Appl)(OutStream, MultAct, ShowSorts, (IsTimed)?6:5);
     //print time
     if (IsTimed) {
-#ifdef GS_PRINT_FILE
+#ifdef GS_PRINT_C
       fprintf(OutStream, " @ ");
 #endif
-#ifdef GS_PRINT_STREAM
+#ifdef GS_PRINT_CXX
       OutStream << " @ ";
 #endif
-      GS_PRINT_FUNC(PrintPart)(OutStream, Time, ShowSorts, 12);
+      GS_PRINT_FUNC(PrintPart_Appl)(OutStream, Time, ShowSorts, 12);
     }
     //print process reference
     if (!gsIsDelta(MultAct)) {
-#ifdef GS_PRINT_FILE
+#ifdef GS_PRINT_C
       fprintf(OutStream, " . ");
 #endif
-#ifdef GS_PRINT_STREAM
+#ifdef GS_PRINT_CXX
       OutStream << " . ";
 #endif
       ATermList Assignments = ATLgetArgument(Part, 4);
       int AssignmentsLength = ATgetLength(Assignments);
-#ifdef GS_PRINT_FILE
+#ifdef GS_PRINT_C
       fprintf(OutStream, "P");
 #endif
-#ifdef GS_PRINT_STREAM
+#ifdef GS_PRINT_CXX
       OutStream << "P";
 #endif
       if (AssignmentsLength > 0) {
-#ifdef GS_PRINT_FILE
+#ifdef GS_PRINT_C
         fprintf(OutStream, "(");
 #endif
-#ifdef GS_PRINT_STREAM
+#ifdef GS_PRINT_CXX
         OutStream << "(";
 #endif
-        GS_PRINT_FUNC(PrintParts)(OutStream, Assignments, ShowSorts, PrecLevel, NULL, ", ");
-#ifdef GS_PRINT_FILE
+        GS_PRINT_FUNC(PrintPart_List)(OutStream, Assignments, ShowSorts, PrecLevel, NULL, ", ");
+#ifdef GS_PRINT_C
         fprintf(OutStream, ")");
 #endif
-#ifdef GS_PRINT_STREAM
+#ifdef GS_PRINT_CXX
         OutStream << ")";
 #endif
       }
@@ -579,200 +611,200 @@ static void GS_PRINT_FUNC(PrintPart)(GS_PRINT_OUTTYPE OutStream, const ATermAppl
     ATermList Actions = ATLgetArgument(Part, 0);
     int ActionsLength = ATgetLength(Actions);
     if (ActionsLength == 0) {
-#ifdef GS_PRINT_FILE
+#ifdef GS_PRINT_C
       fprintf(OutStream, "tau");
 #endif
-#ifdef GS_PRINT_STREAM
+#ifdef GS_PRINT_CXX
       OutStream << "tau";
 #endif
     } else {
       //ActionsLength > 0
-#ifdef GS_PRINT_FILE
+#ifdef GS_PRINT_C
       if (PrecLevel > 7) fprintf(OutStream, "(");
 #endif
-#ifdef GS_PRINT_STREAM
+#ifdef GS_PRINT_CXX
       if (PrecLevel > 7) OutStream << "(";
 #endif
-      GS_PRINT_FUNC(PrintParts)(OutStream, Actions, ShowSorts, PrecLevel, NULL, "|");
-#ifdef GS_PRINT_FILE
+      GS_PRINT_FUNC(PrintPart_List)(OutStream, Actions, ShowSorts, PrecLevel, NULL, "|");
+#ifdef GS_PRINT_C
       if (PrecLevel > 7) fprintf(OutStream, ")");
 #endif
-#ifdef GS_PRINT_STREAM
+#ifdef GS_PRINT_CXX
       if (PrecLevel > 7) OutStream << ")";
 #endif
     }
   } else if (gsIsAssignment(Part)) {
     //print assignment
     gsDebugMsg("printing assignment\n");
-    GS_PRINT_FUNC(PrintPart)(OutStream, ATAgetArgument(Part, 0), ShowSorts, PrecLevel);
-#ifdef GS_PRINT_FILE
+    GS_PRINT_FUNC(PrintPart_Appl)(OutStream, ATAgetArgument(Part, 0), ShowSorts, PrecLevel);
+#ifdef GS_PRINT_C
     fprintf(OutStream, " := ");
 #endif
-#ifdef GS_PRINT_STREAM
+#ifdef GS_PRINT_CXX
     OutStream << " := ";
 #endif
-    GS_PRINT_FUNC(PrintPart)(OutStream, ATAgetArgument(Part, 1), ShowSorts, 0);
+    GS_PRINT_FUNC(PrintPart_Appl)(OutStream, ATAgetArgument(Part, 1), ShowSorts, 0);
   } else if (gsIsSortList(Part)) {
     //print list sort
     gsDebugMsg("printing list sort\n");
-#ifdef GS_PRINT_FILE
+#ifdef GS_PRINT_C
     fprintf(OutStream, "List(");
 #endif
-#ifdef GS_PRINT_STREAM
+#ifdef GS_PRINT_CXX
     OutStream << "List(";
 #endif
-    GS_PRINT_FUNC(PrintPart)(OutStream, ATAgetArgument(Part, 0), ShowSorts, 0);
-#ifdef GS_PRINT_FILE
+    GS_PRINT_FUNC(PrintPart_Appl)(OutStream, ATAgetArgument(Part, 0), ShowSorts, 0);
+#ifdef GS_PRINT_C
     fprintf(OutStream, ")");
 #endif
-#ifdef GS_PRINT_STREAM
+#ifdef GS_PRINT_CXX
     OutStream << ")";
 #endif
   } else if (gsIsSortSet(Part)) {
     //print set sort
     gsDebugMsg("printing set sort\n");
-#ifdef GS_PRINT_FILE
+#ifdef GS_PRINT_C
     fprintf(OutStream, "Set(");
 #endif
-#ifdef GS_PRINT_STREAM
+#ifdef GS_PRINT_CXX
     OutStream << "Set(";
 #endif
-    GS_PRINT_FUNC(PrintPart)(OutStream, ATAgetArgument(Part, 0), ShowSorts, 0);
-#ifdef GS_PRINT_FILE
+    GS_PRINT_FUNC(PrintPart_Appl)(OutStream, ATAgetArgument(Part, 0), ShowSorts, 0);
+#ifdef GS_PRINT_C
     fprintf(OutStream, ")");
 #endif
-#ifdef GS_PRINT_STREAM
+#ifdef GS_PRINT_CXX
     OutStream << ")";
 #endif
   } else if (gsIsSortBag(Part)) {
     //print bag sort
     gsDebugMsg("printing bag sort\n");
-#ifdef GS_PRINT_FILE
+#ifdef GS_PRINT_C
     fprintf(OutStream, "Bag(");
 #endif
-#ifdef GS_PRINT_STREAM
+#ifdef GS_PRINT_CXX
     OutStream << "Bag(";
 #endif
-    GS_PRINT_FUNC(PrintPart)(OutStream, ATAgetArgument(Part, 0), ShowSorts, 0);
-#ifdef GS_PRINT_FILE
+    GS_PRINT_FUNC(PrintPart_Appl)(OutStream, ATAgetArgument(Part, 0), ShowSorts, 0);
+#ifdef GS_PRINT_C
     fprintf(OutStream, ")");
 #endif
-#ifdef GS_PRINT_STREAM
+#ifdef GS_PRINT_CXX
     OutStream << ")";
 #endif
   } else if (gsIsSortStruct(Part)) {
     //print structured sort
     gsDebugMsg("printing structured sort\n");
-#ifdef GS_PRINT_FILE
+#ifdef GS_PRINT_C
     if (PrecLevel > 1) fprintf(OutStream, "(");
 #endif
-#ifdef GS_PRINT_STREAM
+#ifdef GS_PRINT_CXX
     if (PrecLevel > 1) OutStream << "(";
 #endif
-#ifdef GS_PRINT_FILE
+#ifdef GS_PRINT_C
     fprintf(OutStream, "struct ");
 #endif
-#ifdef GS_PRINT_STREAM
+#ifdef GS_PRINT_CXX
     OutStream << "struct ";
 #endif
-    GS_PRINT_FUNC(PrintParts)(OutStream, ATLgetArgument(Part, 0), ShowSorts, PrecLevel,
+    GS_PRINT_FUNC(PrintPart_List)(OutStream, ATLgetArgument(Part, 0), ShowSorts, PrecLevel,
       NULL, " | ");
-#ifdef GS_PRINT_FILE
+#ifdef GS_PRINT_C
     if (PrecLevel > 1) fprintf(OutStream, ")");
 #endif
-#ifdef GS_PRINT_STREAM
+#ifdef GS_PRINT_CXX
     if (PrecLevel > 1) OutStream << ")";
 #endif
   } else if (gsIsSortArrowProd(Part)) {
     //print product arrow sort
     gsDebugMsg("printing product arrow sort\n");
-#ifdef GS_PRINT_FILE
+#ifdef GS_PRINT_C
     if (PrecLevel > 0) fprintf(OutStream, "(");
 #endif
-#ifdef GS_PRINT_STREAM
+#ifdef GS_PRINT_CXX
     if (PrecLevel > 0) OutStream << "(";
 #endif
-    GS_PRINT_FUNC(PrintParts)(OutStream, ATLgetArgument(Part, 0), ShowSorts, 1, NULL, " # ");
-#ifdef GS_PRINT_FILE
+    GS_PRINT_FUNC(PrintPart_List)(OutStream, ATLgetArgument(Part, 0), ShowSorts, 1, NULL, " # ");
+#ifdef GS_PRINT_C
     fprintf(OutStream, " -> ");
 #endif
-#ifdef GS_PRINT_STREAM
+#ifdef GS_PRINT_CXX
     OutStream << " -> ";
 #endif
-    GS_PRINT_FUNC(PrintPart)(OutStream, ATAgetArgument(Part, 1), ShowSorts, 0);
-#ifdef GS_PRINT_FILE
+    GS_PRINT_FUNC(PrintPart_Appl)(OutStream, ATAgetArgument(Part, 1), ShowSorts, 0);
+#ifdef GS_PRINT_C
     if (PrecLevel > 0) fprintf(OutStream, ")");
 #endif
-#ifdef GS_PRINT_STREAM
+#ifdef GS_PRINT_CXX
     if (PrecLevel > 0) OutStream << ")";
 #endif
   } else if (gsIsSortArrow(Part)) {
     //print arrow sort
     gsDebugMsg("printing arrow sort\n");
-#ifdef GS_PRINT_FILE
+#ifdef GS_PRINT_C
     if (PrecLevel > 0) fprintf(OutStream, "(");
 #endif
-#ifdef GS_PRINT_STREAM
+#ifdef GS_PRINT_CXX
     if (PrecLevel > 0) OutStream << "(";
 #endif
-    GS_PRINT_FUNC(PrintPart)(OutStream, ATAgetArgument(Part, 0), ShowSorts, 1);
-#ifdef GS_PRINT_FILE
+    GS_PRINT_FUNC(PrintPart_Appl)(OutStream, ATAgetArgument(Part, 0), ShowSorts, 1);
+#ifdef GS_PRINT_C
     fprintf(OutStream, " -> ");
 #endif
-#ifdef GS_PRINT_STREAM
+#ifdef GS_PRINT_CXX
     OutStream << " -> ";
 #endif
-    GS_PRINT_FUNC(PrintPart)(OutStream, ATAgetArgument(Part, 1), ShowSorts, 0);
-#ifdef GS_PRINT_FILE
+    GS_PRINT_FUNC(PrintPart_Appl)(OutStream, ATAgetArgument(Part, 1), ShowSorts, 0);
+#ifdef GS_PRINT_C
     if (PrecLevel > 0) fprintf(OutStream, ")");
 #endif
-#ifdef GS_PRINT_STREAM
+#ifdef GS_PRINT_CXX
     if (PrecLevel > 0) OutStream << ")";
 #endif
   } else if (gsIsStructCons(Part)) {
     //print structured sort constructor
     gsDebugMsg("printing structured sort constructor\n");
-    GS_PRINT_FUNC(PrintPart)(OutStream, ATAgetArgument(Part, 0), ShowSorts, PrecLevel);
+    GS_PRINT_FUNC(PrintPart_Appl)(OutStream, ATAgetArgument(Part, 0), ShowSorts, PrecLevel);
     ATermList StructProjs = ATLgetArgument(Part, 1);
     if (ATgetLength(StructProjs) > 0) {
-#ifdef GS_PRINT_FILE
+#ifdef GS_PRINT_C
       fprintf(OutStream, "(");
 #endif
-#ifdef GS_PRINT_STREAM
+#ifdef GS_PRINT_CXX
       OutStream << "(";
 #endif
-      GS_PRINT_FUNC(PrintParts)(OutStream, StructProjs, ShowSorts, PrecLevel, NULL, ", ");
-#ifdef GS_PRINT_FILE
+      GS_PRINT_FUNC(PrintPart_List)(OutStream, StructProjs, ShowSorts, PrecLevel, NULL, ", ");
+#ifdef GS_PRINT_C
       fprintf(OutStream, ")");
 #endif
-#ifdef GS_PRINT_STREAM
+#ifdef GS_PRINT_CXX
       OutStream << ")";
 #endif
     }
     ATermAppl Recogniser = ATAgetArgument(Part, 2);
     if (!gsIsNil(Recogniser)) {
-#ifdef GS_PRINT_FILE
+#ifdef GS_PRINT_C
       fprintf(OutStream, "?");
 #endif
-#ifdef GS_PRINT_STREAM
+#ifdef GS_PRINT_CXX
       OutStream << "?";
 #endif
-      GS_PRINT_FUNC(PrintPart)(OutStream, Recogniser, ShowSorts, PrecLevel);
+      GS_PRINT_FUNC(PrintPart_Appl)(OutStream, Recogniser, ShowSorts, PrecLevel);
     }
   } else if (gsIsStructProj(Part)) {
     //print structured sort projection
     gsDebugMsg("printing structured sort projection\n");
     ATermAppl Projection = ATAgetArgument(Part, 0);
     if (!gsIsNil(Projection)) {
-      GS_PRINT_FUNC(PrintPart)(OutStream, Projection, ShowSorts, PrecLevel);
-#ifdef GS_PRINT_FILE
+      GS_PRINT_FUNC(PrintPart_Appl)(OutStream, Projection, ShowSorts, PrecLevel);
+#ifdef GS_PRINT_C
       fprintf(OutStream, ": ");
 #endif
-#ifdef GS_PRINT_STREAM
+#ifdef GS_PRINT_CXX
       OutStream << ": ";
 #endif
     }
-    GS_PRINT_FUNC(PrintPart)(OutStream, ATAgetArgument(Part, 1), ShowSorts, 0);
+    GS_PRINT_FUNC(PrintPart_Appl)(OutStream, ATAgetArgument(Part, 1), ShowSorts, 0);
   } else if (gsIsDataVarIdOpId(Part) || gsIsOpId(Part) || gsIsDataVarId(Part) ||
       gsIsDataAppl(Part) || gsIsDataApplProd(Part)) {
     //print data expression, if possible in the external format
@@ -787,67 +819,67 @@ static void GS_PRINT_FUNC(PrintPart)(GS_PRINT_OUTTYPE OutStream, const ATermAppl
     }
     int ArgsLength = ATgetLength(Args);
     if (gsIsListEnumImpl(Part)) {
-#ifdef GS_PRINT_FILE
+#ifdef GS_PRINT_C
       fprintf(OutStream, "[");
 #endif
-#ifdef GS_PRINT_STREAM
+#ifdef GS_PRINT_CXX
       OutStream << "[";
 #endif
       GS_PRINT_FUNC(PrintListEnumElts)(OutStream, Part, ShowSorts);
-#ifdef GS_PRINT_FILE
+#ifdef GS_PRINT_C
       fprintf(OutStream, "]");
 #endif
-#ifdef GS_PRINT_STREAM
+#ifdef GS_PRINT_CXX
       OutStream << "]";
 #endif
     } else if (gsIsOpIdPrefix(Head) && ArgsLength == 1) {
       //print prefix expression
       gsDebugMsg("printing prefix expression\n");
-#ifdef GS_PRINT_FILE
+#ifdef GS_PRINT_C
       if (PrecLevel > 12) fprintf(OutStream, "(");
 #endif
-#ifdef GS_PRINT_STREAM
+#ifdef GS_PRINT_CXX
       if (PrecLevel > 12) OutStream << "(";
 #endif
-      GS_PRINT_FUNC(PrintPart)(OutStream, Head, ShowSorts, PrecLevel);
-      GS_PRINT_FUNC(PrintPart)(OutStream, ATAelementAt(Args, 0), ShowSorts, 12);
-#ifdef GS_PRINT_FILE
+      GS_PRINT_FUNC(PrintPart_Appl)(OutStream, Head, ShowSorts, PrecLevel);
+      GS_PRINT_FUNC(PrintPart_Appl)(OutStream, ATAelementAt(Args, 0), ShowSorts, 12);
+#ifdef GS_PRINT_C
       if (PrecLevel > 12) fprintf(OutStream, ")");
 #endif
-#ifdef GS_PRINT_STREAM
+#ifdef GS_PRINT_CXX
       if (PrecLevel > 12) OutStream << ")";
 #endif
     } else if (gsIsOpIdInfix(Head) && ArgsLength == 2) {
       //print infix expression
       gsDebugMsg("printing infix expression\n");
       ATermAppl HeadName = ATAgetArgument(Head, 0);
-#ifdef GS_PRINT_FILE
+#ifdef GS_PRINT_C
       if (PrecLevel > gsPrecOpIdInfix(HeadName)) fprintf(OutStream, "(");
 #endif
-#ifdef GS_PRINT_STREAM
+#ifdef GS_PRINT_CXX
       if (PrecLevel > gsPrecOpIdInfix(HeadName)) OutStream << "(";
 #endif
-      GS_PRINT_FUNC(PrintPart)(OutStream, ATAelementAt(Args, 0), ShowSorts,
+      GS_PRINT_FUNC(PrintPart_Appl)(OutStream, ATAelementAt(Args, 0), ShowSorts,
         gsPrecOpIdInfixLeft(HeadName));
-#ifdef GS_PRINT_FILE
+#ifdef GS_PRINT_C
       fprintf(OutStream, " ");
 #endif
-#ifdef GS_PRINT_STREAM
+#ifdef GS_PRINT_CXX
       OutStream << " ";
 #endif
-      GS_PRINT_FUNC(PrintPart)(OutStream, Head, ShowSorts, PrecLevel);
-#ifdef GS_PRINT_FILE
+      GS_PRINT_FUNC(PrintPart_Appl)(OutStream, Head, ShowSorts, PrecLevel);
+#ifdef GS_PRINT_C
       fprintf(OutStream, " ");
 #endif
-#ifdef GS_PRINT_STREAM
+#ifdef GS_PRINT_CXX
       OutStream << " ";
 #endif
-      GS_PRINT_FUNC(PrintPart)(OutStream, ATAelementAt(Args, 1), ShowSorts,
+      GS_PRINT_FUNC(PrintPart_Appl)(OutStream, ATAelementAt(Args, 1), ShowSorts,
         gsPrecOpIdInfixRight(HeadName));
-#ifdef GS_PRINT_FILE
+#ifdef GS_PRINT_C
       if (PrecLevel > gsPrecOpIdInfix(HeadName)) fprintf(OutStream, ")");
 #endif
-#ifdef GS_PRINT_STREAM
+#ifdef GS_PRINT_CXX
       if (PrecLevel > gsPrecOpIdInfix(HeadName)) OutStream << ")";
 #endif
    } else if (ATisEqual(Head, gsMakeOpId1()) ||
@@ -857,487 +889,487 @@ static void GS_PRINT_FUNC(PrintPart)(GS_PRINT_OUTTYPE OutStream, const ATermAppl
       GS_PRINT_FUNC(PrintPos)(OutStream, Part, PrecLevel);
     } else if (ATisEqual(Head, gsMakeOpId0())) {
       //print 0
-#ifdef GS_PRINT_FILE
+#ifdef GS_PRINT_C
       fprintf(OutStream, "0");
 #endif
-#ifdef GS_PRINT_STREAM
+#ifdef GS_PRINT_CXX
       OutStream << "0";
 #endif
     } else if ((ATisEqual(Head, gsMakeOpIdCNat()) ||
         ATisEqual(Head, gsMakeOpIdCInt())) && ArgsLength == 1) {
       //print argument (ArgsLength == 1)
-      GS_PRINT_FUNC(PrintPart)(OutStream, ATAelementAt(Args, 0), ShowSorts, PrecLevel);
+      GS_PRINT_FUNC(PrintPart_Appl)(OutStream, ATAelementAt(Args, 0), ShowSorts, PrecLevel);
     } else if (ATisEqual(Head, gsMakeOpIdCNeg()) && ArgsLength == 1) {
       //print negation (ArgsLength == 1)
       gsDebugMsg("printing negation\n");
-#ifdef GS_PRINT_FILE
+#ifdef GS_PRINT_C
       fprintf(OutStream, "-");
 #endif
-#ifdef GS_PRINT_STREAM
+#ifdef GS_PRINT_CXX
       OutStream << "-";
 #endif
-      GS_PRINT_FUNC(PrintPart)(OutStream, ATAelementAt(Args, 0), ShowSorts, 12);
+      GS_PRINT_FUNC(PrintPart_Appl)(OutStream, ATAelementAt(Args, 0), ShowSorts, 12);
     } else if (gsIsDataVarIdOpId(Part)) {
       //print untyped data variable or operation identifier
       gsDebugMsg("printing untyped data variable or operation identifier\n");
-      GS_PRINT_FUNC(PrintPart)(OutStream, ATAgetArgument(Part, 0), ShowSorts, PrecLevel);
+      GS_PRINT_FUNC(PrintPart_Appl)(OutStream, ATAgetArgument(Part, 0), ShowSorts, PrecLevel);
     } else if (gsIsOpId(Part) || gsIsDataVarId(Part)) {
       //print data variable or operation identifier
       gsDebugMsg("printing data variable or operation identifier\n");
-      GS_PRINT_FUNC(PrintPart)(OutStream, ATAgetArgument(Part, 0), ShowSorts, PrecLevel);
+      GS_PRINT_FUNC(PrintPart_Appl)(OutStream, ATAgetArgument(Part, 0), ShowSorts, PrecLevel);
       if (ShowSorts) {
-#ifdef GS_PRINT_FILE
+#ifdef GS_PRINT_C
         fprintf(OutStream, ": ");
 #endif
-#ifdef GS_PRINT_STREAM
+#ifdef GS_PRINT_CXX
         OutStream << ": ";
 #endif
-        GS_PRINT_FUNC(PrintPart)(OutStream, ATAgetArgument(Part, 1), ShowSorts, 0);
+        GS_PRINT_FUNC(PrintPart_Appl)(OutStream, ATAgetArgument(Part, 1), ShowSorts, 0);
       }
     } else {
       //print data application
       gsDebugMsg("printing data application\n");
-#ifdef GS_PRINT_FILE
+#ifdef GS_PRINT_C
       if (PrecLevel > 13) fprintf(OutStream, "(");
 #endif
-#ifdef GS_PRINT_STREAM
+#ifdef GS_PRINT_CXX
       if (PrecLevel > 13) OutStream << "(";
 #endif
-      GS_PRINT_FUNC(PrintPart)(OutStream, Head, ShowSorts, 13);
-#ifdef GS_PRINT_FILE
+      GS_PRINT_FUNC(PrintPart_Appl)(OutStream, Head, ShowSorts, 13);
+#ifdef GS_PRINT_C
       fprintf(OutStream, "(");
 #endif
-#ifdef GS_PRINT_STREAM
+#ifdef GS_PRINT_CXX
       OutStream << "(";
 #endif
-      GS_PRINT_FUNC(PrintParts)(OutStream, Args, ShowSorts, 0, NULL, ", ");
-#ifdef GS_PRINT_FILE
+      GS_PRINT_FUNC(PrintPart_List)(OutStream, Args, ShowSorts, 0, NULL, ", ");
+#ifdef GS_PRINT_C
       fprintf(OutStream, ")");
 #endif
-#ifdef GS_PRINT_STREAM
+#ifdef GS_PRINT_CXX
       OutStream << ")";
 #endif
-#ifdef GS_PRINT_FILE
+#ifdef GS_PRINT_C
       if (PrecLevel > 13) fprintf(OutStream, ")");
 #endif
-#ifdef GS_PRINT_STREAM
+#ifdef GS_PRINT_CXX
       if (PrecLevel > 13) OutStream << ")";
 #endif
     }
   } else if (gsIsNumber(Part)) {
     //print number
     gsDebugMsg("printing number\n");
-    GS_PRINT_FUNC(PrintPart)(OutStream, ATAgetArgument(Part, 0), ShowSorts, PrecLevel);
+    GS_PRINT_FUNC(PrintPart_Appl)(OutStream, ATAgetArgument(Part, 0), ShowSorts, PrecLevel);
   } else if (gsIsListEnum(Part)) {
     //print list enumeration
     gsDebugMsg("printing list enumeration\n");
-#ifdef GS_PRINT_FILE
+#ifdef GS_PRINT_C
     fprintf(OutStream, "[");
 #endif
-#ifdef GS_PRINT_STREAM
+#ifdef GS_PRINT_CXX
     OutStream << "[";
 #endif
-    GS_PRINT_FUNC(PrintParts)(OutStream, ATLgetArgument(Part, 0), ShowSorts, 0, NULL, ", ");
-#ifdef GS_PRINT_FILE
+    GS_PRINT_FUNC(PrintPart_List)(OutStream, ATLgetArgument(Part, 0), ShowSorts, 0, NULL, ", ");
+#ifdef GS_PRINT_C
     fprintf(OutStream, "]");
 #endif
-#ifdef GS_PRINT_STREAM
+#ifdef GS_PRINT_CXX
     OutStream << "]";
 #endif
   } else if (gsIsSetEnum(Part) || gsIsBagEnum(Part)) {
     //print set/bag enumeration
     gsDebugMsg("printing set/bag enumeration\n");
-#ifdef GS_PRINT_FILE
+#ifdef GS_PRINT_C
     fprintf(OutStream, "{");
 #endif
-#ifdef GS_PRINT_STREAM
+#ifdef GS_PRINT_CXX
     OutStream << "{";
 #endif
-    GS_PRINT_FUNC(PrintParts)(OutStream, ATLgetArgument(Part, 0), ShowSorts, 0, NULL, ", ");
-#ifdef GS_PRINT_FILE
+    GS_PRINT_FUNC(PrintPart_List)(OutStream, ATLgetArgument(Part, 0), ShowSorts, 0, NULL, ", ");
+#ifdef GS_PRINT_C
     fprintf(OutStream, "}");
 #endif
-#ifdef GS_PRINT_STREAM
+#ifdef GS_PRINT_CXX
     OutStream << "}";
 #endif
   } else if (gsIsSetBagComp(Part)) {
     //print set/bag comprehension
     gsDebugMsg("printing set/bag comprehension\n");
-#ifdef GS_PRINT_FILE
+#ifdef GS_PRINT_C
     fprintf(OutStream, "{ ");
 #endif
-#ifdef GS_PRINT_STREAM
+#ifdef GS_PRINT_CXX
     OutStream << "{ ";
 #endif
     GS_PRINT_FUNC(PrintDecl)(OutStream, ATAgetArgument(Part, 0), true);
-#ifdef GS_PRINT_FILE
+#ifdef GS_PRINT_C
     fprintf(OutStream, " | ");
 #endif
-#ifdef GS_PRINT_STREAM
+#ifdef GS_PRINT_CXX
     OutStream << " | ";
 #endif
-    GS_PRINT_FUNC(PrintPart)(OutStream, ATAgetArgument(Part, 1), ShowSorts, 0);
-#ifdef GS_PRINT_FILE
+    GS_PRINT_FUNC(PrintPart_Appl)(OutStream, ATAgetArgument(Part, 1), ShowSorts, 0);
+#ifdef GS_PRINT_C
     fprintf(OutStream, " }");
 #endif
-#ifdef GS_PRINT_STREAM
+#ifdef GS_PRINT_CXX
     OutStream << " }";
 #endif
   } else if (gsIsForall(Part) || gsIsExists(Part)) {
     //print universal/existential quantification
     gsDebugMsg("printing universal/existential quantification\n");
-#ifdef GS_PRINT_FILE
+#ifdef GS_PRINT_C
     if (PrecLevel > 12) fprintf(OutStream, "(");
 #endif
-#ifdef GS_PRINT_STREAM
+#ifdef GS_PRINT_CXX
     if (PrecLevel > 12) OutStream << "(";
 #endif
-#ifdef GS_PRINT_FILE
+#ifdef GS_PRINT_C
     fprintf(OutStream, (gsIsForall(Part))?"forall ":"exists ");
 #endif
-#ifdef GS_PRINT_STREAM
+#ifdef GS_PRINT_CXX
     OutStream << ((gsIsForall(Part))?"forall ":"exists ");
 #endif
     GS_PRINT_FUNC(PrintDecls)(OutStream, ATLgetArgument(Part, 0), NULL, ", ");
-#ifdef GS_PRINT_FILE
+#ifdef GS_PRINT_C
     fprintf(OutStream, ". ");
 #endif
-#ifdef GS_PRINT_STREAM
+#ifdef GS_PRINT_CXX
     OutStream << ". ";
 #endif
-    GS_PRINT_FUNC(PrintPart)(OutStream, ATAgetArgument(Part, 1), ShowSorts, 12);
-#ifdef GS_PRINT_FILE
+    GS_PRINT_FUNC(PrintPart_Appl)(OutStream, ATAgetArgument(Part, 1), ShowSorts, 12);
+#ifdef GS_PRINT_C
     if (PrecLevel > 12) fprintf(OutStream, ")");
 #endif
-#ifdef GS_PRINT_STREAM
+#ifdef GS_PRINT_CXX
     if (PrecLevel > 12) OutStream << ")";
 #endif
   } else if (gsIsLambda(Part)) {
     //print lambda abstraction
     gsDebugMsg("printing lambda abstraction\n");
-#ifdef GS_PRINT_FILE
+#ifdef GS_PRINT_C
     if (PrecLevel > 1) fprintf(OutStream, "(");
 #endif
-#ifdef GS_PRINT_STREAM
+#ifdef GS_PRINT_CXX
     if (PrecLevel > 1) OutStream << "(";
 #endif
-#ifdef GS_PRINT_FILE
+#ifdef GS_PRINT_C
     fprintf(OutStream, "lambda ");
 #endif
-#ifdef GS_PRINT_STREAM
+#ifdef GS_PRINT_CXX
     OutStream << "lambda ";
 #endif
     GS_PRINT_FUNC(PrintDecls)(OutStream, ATLgetArgument(Part, 0), NULL, ", ");
-#ifdef GS_PRINT_FILE
+#ifdef GS_PRINT_C
     fprintf(OutStream, ". ");
 #endif
-#ifdef GS_PRINT_STREAM
+#ifdef GS_PRINT_CXX
     OutStream << ". ";
 #endif
-    GS_PRINT_FUNC(PrintPart)(OutStream, ATAgetArgument(Part, 1), ShowSorts, 1);
-#ifdef GS_PRINT_FILE
+    GS_PRINT_FUNC(PrintPart_Appl)(OutStream, ATAgetArgument(Part, 1), ShowSorts, 1);
+#ifdef GS_PRINT_C
     if (PrecLevel > 1) fprintf(OutStream, ")");
 #endif
-#ifdef GS_PRINT_STREAM
+#ifdef GS_PRINT_CXX
     if (PrecLevel > 1) OutStream << ")";
 #endif
   } else if (gsIsWhr(Part)) {
     //print where clause
     gsDebugMsg("printing where clause\n");
-#ifdef GS_PRINT_FILE
+#ifdef GS_PRINT_C
     if (PrecLevel > 0) fprintf(OutStream, "(");
 #endif
-#ifdef GS_PRINT_STREAM
+#ifdef GS_PRINT_CXX
     if (PrecLevel > 0) OutStream << "(";
 #endif
-    GS_PRINT_FUNC(PrintPart)(OutStream, ATAgetArgument(Part, 0), ShowSorts, 0);
-#ifdef GS_PRINT_FILE
+    GS_PRINT_FUNC(PrintPart_Appl)(OutStream, ATAgetArgument(Part, 0), ShowSorts, 0);
+#ifdef GS_PRINT_C
     fprintf(OutStream, " whr ");
 #endif
-#ifdef GS_PRINT_STREAM
+#ifdef GS_PRINT_CXX
     OutStream << " whr ";
 #endif
-    GS_PRINT_FUNC(PrintParts)(OutStream, ATLgetArgument(Part, 1), ShowSorts, PrecLevel,
+    GS_PRINT_FUNC(PrintPart_List)(OutStream, ATLgetArgument(Part, 1), ShowSorts, PrecLevel,
       NULL, ", ");
-#ifdef GS_PRINT_FILE
+#ifdef GS_PRINT_C
     fprintf(OutStream, " end");
 #endif
-#ifdef GS_PRINT_STREAM
+#ifdef GS_PRINT_CXX
     OutStream << " end";
 #endif
-#ifdef GS_PRINT_FILE
+#ifdef GS_PRINT_C
     if (PrecLevel > 0) fprintf(OutStream, ")");
 #endif
-#ifdef GS_PRINT_STREAM
+#ifdef GS_PRINT_CXX
     if (PrecLevel > 0) OutStream << ")";
 #endif
   } else if (gsIsBagEnumElt(Part)) {
     //print bag enumeration element
     gsDebugMsg("printing bag enumeration element\n");
-    GS_PRINT_FUNC(PrintPart)(OutStream, ATAgetArgument(Part, 0), ShowSorts, 0);
-#ifdef GS_PRINT_FILE
+    GS_PRINT_FUNC(PrintPart_Appl)(OutStream, ATAgetArgument(Part, 0), ShowSorts, 0);
+#ifdef GS_PRINT_C
     fprintf(OutStream, ": ");
 #endif
-#ifdef GS_PRINT_STREAM
+#ifdef GS_PRINT_CXX
     OutStream << ": ";
 #endif
-    GS_PRINT_FUNC(PrintPart)(OutStream, ATAgetArgument(Part, 1), ShowSorts, 0);
+    GS_PRINT_FUNC(PrintPart_Appl)(OutStream, ATAgetArgument(Part, 1), ShowSorts, 0);
   } else if (gsIsWhrDecl(Part)) {
     //print where declaration element
     gsDebugMsg("printing where declaration\n");
-    GS_PRINT_FUNC(PrintPart)(OutStream, ATAgetArgument(Part, 0), ShowSorts, PrecLevel);
-#ifdef GS_PRINT_FILE
+    GS_PRINT_FUNC(PrintPart_Appl)(OutStream, ATAgetArgument(Part, 0), ShowSorts, PrecLevel);
+#ifdef GS_PRINT_C
     fprintf(OutStream, " = ");
 #endif
-#ifdef GS_PRINT_STREAM
+#ifdef GS_PRINT_CXX
     OutStream << " = ";
 #endif
-    GS_PRINT_FUNC(PrintPart)(OutStream, ATAgetArgument(Part, 1), ShowSorts, 0);
+    GS_PRINT_FUNC(PrintPart_Appl)(OutStream, ATAgetArgument(Part, 1), ShowSorts, 0);
   } else if (gsIsActionProcess(Part) || gsIsAction(Part) || gsIsProcess(Part)) {
     //print action or process reference
     gsDebugMsg("printing action or process reference\n");
-    GS_PRINT_FUNC(PrintPart)(OutStream, ATAgetArgument(Part, 0), ShowSorts, PrecLevel);
+    GS_PRINT_FUNC(PrintPart_Appl)(OutStream, ATAgetArgument(Part, 0), ShowSorts, PrecLevel);
     ATermList Args = ATLgetArgument(Part, 1);
     if (ATgetLength(Args) > 0) {
-#ifdef GS_PRINT_FILE
+#ifdef GS_PRINT_C
       fprintf(OutStream, "(");
 #endif
-#ifdef GS_PRINT_STREAM
+#ifdef GS_PRINT_CXX
       OutStream << "(";
 #endif
-      GS_PRINT_FUNC(PrintParts)(OutStream, Args, ShowSorts, 0, NULL, ", ");
-#ifdef GS_PRINT_FILE
+      GS_PRINT_FUNC(PrintPart_List)(OutStream, Args, ShowSorts, 0, NULL, ", ");
+#ifdef GS_PRINT_C
       fprintf(OutStream, ")");
 #endif
-#ifdef GS_PRINT_STREAM
+#ifdef GS_PRINT_CXX
       OutStream << ")";
 #endif
     }
   } else if (gsIsDelta(Part)) {
     //print delta
     gsDebugMsg("printing delta\n");
-#ifdef GS_PRINT_FILE
+#ifdef GS_PRINT_C
     fprintf(OutStream, "delta");
 #endif
-#ifdef GS_PRINT_STREAM
+#ifdef GS_PRINT_CXX
     OutStream << "delta";
 #endif
   } else if (gsIsTau(Part)) {
     //print tau
     gsDebugMsg("printing tau\n");
-#ifdef GS_PRINT_FILE
+#ifdef GS_PRINT_C
     fprintf(OutStream, "tau");
 #endif
-#ifdef GS_PRINT_STREAM
+#ifdef GS_PRINT_CXX
     OutStream << "tau";
 #endif
   } else if (gsIsChoice(Part)) {
     //print choice
     gsDebugMsg("printing choice\n");
-#ifdef GS_PRINT_FILE
+#ifdef GS_PRINT_C
     if (PrecLevel > 0) fprintf(OutStream, "(");
 #endif
-#ifdef GS_PRINT_STREAM
+#ifdef GS_PRINT_CXX
     if (PrecLevel > 0) OutStream << "(";
 #endif
-    GS_PRINT_FUNC(PrintPart)(OutStream, ATAgetArgument(Part, 0), ShowSorts, 1);
-#ifdef GS_PRINT_FILE
+    GS_PRINT_FUNC(PrintPart_Appl)(OutStream, ATAgetArgument(Part, 0), ShowSorts, 1);
+#ifdef GS_PRINT_C
     fprintf(OutStream, " + ");
 #endif
-#ifdef GS_PRINT_STREAM
+#ifdef GS_PRINT_CXX
     OutStream << " + ";
 #endif
-    GS_PRINT_FUNC(PrintPart)(OutStream, ATAgetArgument(Part, 1), ShowSorts, 0);
-#ifdef GS_PRINT_FILE
+    GS_PRINT_FUNC(PrintPart_Appl)(OutStream, ATAgetArgument(Part, 1), ShowSorts, 0);
+#ifdef GS_PRINT_C
     if (PrecLevel > 0) fprintf(OutStream, ")");
 #endif
-#ifdef GS_PRINT_STREAM
+#ifdef GS_PRINT_CXX
     if (PrecLevel > 0) OutStream << ")";
 #endif
   } else if (gsIsSum(Part)) {
     //print summation
     gsDebugMsg("printing summation\n");
-#ifdef GS_PRINT_FILE
+#ifdef GS_PRINT_C
     if (PrecLevel > 1) fprintf(OutStream, "(");
 #endif
-#ifdef GS_PRINT_STREAM
+#ifdef GS_PRINT_CXX
     if (PrecLevel > 1) OutStream << "(";
 #endif
-#ifdef GS_PRINT_FILE
+#ifdef GS_PRINT_C
     fprintf(OutStream, "sum ");
 #endif
-#ifdef GS_PRINT_STREAM
+#ifdef GS_PRINT_CXX
     OutStream << "sum ";
 #endif
     GS_PRINT_FUNC(PrintDecls)(OutStream, ATLgetArgument(Part, 0), NULL, ", ");
-#ifdef GS_PRINT_FILE
+#ifdef GS_PRINT_C
     fprintf(OutStream, ". ");
 #endif
-#ifdef GS_PRINT_STREAM
+#ifdef GS_PRINT_CXX
     OutStream << ". ";
 #endif
-    GS_PRINT_FUNC(PrintPart)(OutStream, ATAgetArgument(Part, 1), ShowSorts, 1);
-#ifdef GS_PRINT_FILE
+    GS_PRINT_FUNC(PrintPart_Appl)(OutStream, ATAgetArgument(Part, 1), ShowSorts, 1);
+#ifdef GS_PRINT_C
     if (PrecLevel > 1) fprintf(OutStream, ")");
 #endif
-#ifdef GS_PRINT_STREAM
+#ifdef GS_PRINT_CXX
     if (PrecLevel > 1) OutStream << ")";
 #endif
   } else if (gsIsMerge(Part) || gsIsLMerge(Part)) {
     //print merge of left merge
     gsDebugMsg("printing merge or left merge\n");
-#ifdef GS_PRINT_FILE
+#ifdef GS_PRINT_C
     if (PrecLevel > 2) fprintf(OutStream, "(");
 #endif
-#ifdef GS_PRINT_STREAM
+#ifdef GS_PRINT_CXX
     if (PrecLevel > 2) OutStream << "(";
 #endif
-    GS_PRINT_FUNC(PrintPart)(OutStream, ATAgetArgument(Part, 0), ShowSorts, 3);
+    GS_PRINT_FUNC(PrintPart_Appl)(OutStream, ATAgetArgument(Part, 0), ShowSorts, 3);
     if (gsIsMerge(Part)) {
-#ifdef GS_PRINT_FILE
+#ifdef GS_PRINT_C
       fprintf(OutStream, " || ");
 #endif
-#ifdef GS_PRINT_STREAM
+#ifdef GS_PRINT_CXX
       OutStream << " || ";
 #endif
     } else {
-#ifdef GS_PRINT_FILE
+#ifdef GS_PRINT_C
       fprintf(OutStream, " ||_ ");
 #endif
-#ifdef GS_PRINT_STREAM
+#ifdef GS_PRINT_CXX
       OutStream << " ||_ ";
 #endif
     }
-    GS_PRINT_FUNC(PrintPart)(OutStream, ATAgetArgument(Part, 1), ShowSorts, 2);
-#ifdef GS_PRINT_FILE
+    GS_PRINT_FUNC(PrintPart_Appl)(OutStream, ATAgetArgument(Part, 1), ShowSorts, 2);
+#ifdef GS_PRINT_C
     if (PrecLevel > 2) fprintf(OutStream, ")");
 #endif
-#ifdef GS_PRINT_STREAM
+#ifdef GS_PRINT_CXX
     if (PrecLevel > 2) OutStream << ")";
 #endif
   } else if (gsIsBInit(Part)) {
     //print bounded initialisation
     gsDebugMsg("printing bounded initialisation\n");
-#ifdef GS_PRINT_FILE
+#ifdef GS_PRINT_C
     if (PrecLevel > 3) fprintf(OutStream, "(");
 #endif
-#ifdef GS_PRINT_STREAM
+#ifdef GS_PRINT_CXX
     if (PrecLevel > 3) OutStream << "(";
 #endif
-    GS_PRINT_FUNC(PrintPart)(OutStream, ATAgetArgument(Part, 0), ShowSorts, 4);
-#ifdef GS_PRINT_FILE
+    GS_PRINT_FUNC(PrintPart_Appl)(OutStream, ATAgetArgument(Part, 0), ShowSorts, 4);
+#ifdef GS_PRINT_C
     fprintf(OutStream, " << ");
 #endif
-#ifdef GS_PRINT_STREAM
+#ifdef GS_PRINT_CXX
     OutStream << " << ";
 #endif
-    GS_PRINT_FUNC(PrintPart)(OutStream, ATAgetArgument(Part, 1), ShowSorts, 3);
-#ifdef GS_PRINT_FILE
+    GS_PRINT_FUNC(PrintPart_Appl)(OutStream, ATAgetArgument(Part, 1), ShowSorts, 3);
+#ifdef GS_PRINT_C
     if (PrecLevel > 3) fprintf(OutStream, ")");
 #endif
-#ifdef GS_PRINT_STREAM
+#ifdef GS_PRINT_CXX
     if (PrecLevel > 3) OutStream << ")";
 #endif
   } else if (gsIsCond(Part)) {
     //print conditional
     gsDebugMsg("printing conditional\n");
-#ifdef GS_PRINT_FILE
+#ifdef GS_PRINT_C
     if (PrecLevel > 4) fprintf(OutStream, "(");
 #endif
-#ifdef GS_PRINT_STREAM
+#ifdef GS_PRINT_CXX
     if (PrecLevel > 4) OutStream << "(";
 #endif
-    GS_PRINT_FUNC(PrintPart)(OutStream, ATAgetArgument(Part, 0), ShowSorts, 12);
-#ifdef GS_PRINT_FILE
+    GS_PRINT_FUNC(PrintPart_Appl)(OutStream, ATAgetArgument(Part, 0), ShowSorts, 12);
+#ifdef GS_PRINT_C
     fprintf(OutStream, " -> ");
 #endif
-#ifdef GS_PRINT_STREAM
+#ifdef GS_PRINT_CXX
     OutStream << " -> ";
 #endif
-    GS_PRINT_FUNC(PrintPart)(OutStream, ATAgetArgument(Part, 1), ShowSorts, 5);
+    GS_PRINT_FUNC(PrintPart_Appl)(OutStream, ATAgetArgument(Part, 1), ShowSorts, 5);
     ATermAppl PartElse = ATAgetArgument(Part, 2);
     if (!gsIsDelta(PartElse)) {
-#ifdef GS_PRINT_FILE
+#ifdef GS_PRINT_C
       fprintf(OutStream, ", ");
 #endif
-#ifdef GS_PRINT_STREAM
+#ifdef GS_PRINT_CXX
       OutStream << ", ";
 #endif
-      GS_PRINT_FUNC(PrintPart)(OutStream, PartElse, ShowSorts, 5);
+      GS_PRINT_FUNC(PrintPart_Appl)(OutStream, PartElse, ShowSorts, 5);
     }
-#ifdef GS_PRINT_FILE
+#ifdef GS_PRINT_C
     if (PrecLevel > 4) fprintf(OutStream, ")");
 #endif
-#ifdef GS_PRINT_STREAM
+#ifdef GS_PRINT_CXX
     if (PrecLevel > 4) OutStream << ")";
 #endif
   } else if (gsIsSeq(Part)) {
     //print sequential composition
     gsDebugMsg("printing sequential composition\n");
-#ifdef GS_PRINT_FILE
+#ifdef GS_PRINT_C
     if (PrecLevel > 5) fprintf(OutStream, "(");
 #endif
-#ifdef GS_PRINT_STREAM
+#ifdef GS_PRINT_CXX
     if (PrecLevel > 5) OutStream << "(";
 #endif
-    GS_PRINT_FUNC(PrintPart)(OutStream, ATAgetArgument(Part, 0), ShowSorts, 6);
-#ifdef GS_PRINT_FILE
+    GS_PRINT_FUNC(PrintPart_Appl)(OutStream, ATAgetArgument(Part, 0), ShowSorts, 6);
+#ifdef GS_PRINT_C
     fprintf(OutStream, " . ");
 #endif
-#ifdef GS_PRINT_STREAM
+#ifdef GS_PRINT_CXX
     OutStream << " . ";
 #endif
-    GS_PRINT_FUNC(PrintPart)(OutStream, ATAgetArgument(Part, 1), ShowSorts, 5);
-#ifdef GS_PRINT_FILE
+    GS_PRINT_FUNC(PrintPart_Appl)(OutStream, ATAgetArgument(Part, 1), ShowSorts, 5);
+#ifdef GS_PRINT_C
     if (PrecLevel > 5) fprintf(OutStream, ")");
 #endif
-#ifdef GS_PRINT_STREAM
+#ifdef GS_PRINT_CXX
     if (PrecLevel > 5) OutStream << ")";
 #endif
   } else if (gsIsAtTime(Part)) {
     //print at expression
     gsDebugMsg("printing at expression\n");
-#ifdef GS_PRINT_FILE
+#ifdef GS_PRINT_C
     if (PrecLevel > 6) fprintf(OutStream, "(");
 #endif
-#ifdef GS_PRINT_STREAM
+#ifdef GS_PRINT_CXX
     if (PrecLevel > 6) OutStream << "(";
 #endif
-    GS_PRINT_FUNC(PrintPart)(OutStream, ATAgetArgument(Part, 0), ShowSorts, 6);
-#ifdef GS_PRINT_FILE
+    GS_PRINT_FUNC(PrintPart_Appl)(OutStream, ATAgetArgument(Part, 0), ShowSorts, 6);
+#ifdef GS_PRINT_C
     fprintf(OutStream, " @ ");
 #endif
-#ifdef GS_PRINT_STREAM
+#ifdef GS_PRINT_CXX
     OutStream << " @ ";
 #endif
-    GS_PRINT_FUNC(PrintPart)(OutStream, ATAgetArgument(Part, 1), ShowSorts, 12);
-#ifdef GS_PRINT_FILE
+    GS_PRINT_FUNC(PrintPart_Appl)(OutStream, ATAgetArgument(Part, 1), ShowSorts, 12);
+#ifdef GS_PRINT_C
     if (PrecLevel > 6) fprintf(OutStream, ")");
 #endif
-#ifdef GS_PRINT_STREAM
+#ifdef GS_PRINT_CXX
     if (PrecLevel > 6) OutStream << ")";
 #endif
   } else if (gsIsSync(Part)) {
     //print sync
     gsDebugMsg("printing sync\n");
-#ifdef GS_PRINT_FILE
+#ifdef GS_PRINT_C
     if (PrecLevel > 7) fprintf(OutStream, "(");
 #endif
-#ifdef GS_PRINT_STREAM
+#ifdef GS_PRINT_CXX
     if (PrecLevel > 7) OutStream << "(";
 #endif
-    GS_PRINT_FUNC(PrintPart)(OutStream, ATAgetArgument(Part, 0), ShowSorts, 8);
-#ifdef GS_PRINT_FILE
+    GS_PRINT_FUNC(PrintPart_Appl)(OutStream, ATAgetArgument(Part, 0), ShowSorts, 8);
+#ifdef GS_PRINT_C
     fprintf(OutStream, " | ");
 #endif
-#ifdef GS_PRINT_STREAM
+#ifdef GS_PRINT_CXX
     OutStream << " | ";
 #endif
-    GS_PRINT_FUNC(PrintPart)(OutStream, ATAgetArgument(Part, 1), ShowSorts, 7);
-#ifdef GS_PRINT_FILE
+    GS_PRINT_FUNC(PrintPart_Appl)(OutStream, ATAgetArgument(Part, 1), ShowSorts, 7);
+#ifdef GS_PRINT_C
     if (PrecLevel > 7) fprintf(OutStream, ")");
 #endif
-#ifdef GS_PRINT_STREAM
+#ifdef GS_PRINT_CXX
     if (PrecLevel > 7) OutStream << ")";
 #endif
   } else if (gsIsRestrict(Part) || gsIsHide(Part) || gsIsRename(Part) ||
@@ -1345,106 +1377,106 @@ static void GS_PRINT_FUNC(PrintPart)(GS_PRINT_OUTTYPE OutStream, const ATermAppl
     //print process quantification
     gsDebugMsg("printing process quantification\n");
     if (gsIsRestrict(Part)) {
-#ifdef GS_PRINT_FILE
+#ifdef GS_PRINT_C
       fprintf(OutStream, "restrict");
 #endif
-#ifdef GS_PRINT_STREAM
+#ifdef GS_PRINT_CXX
       OutStream << "restrict";
 #endif
     } else if (gsIsHide(Part)) {
-#ifdef GS_PRINT_FILE
+#ifdef GS_PRINT_C
       fprintf(OutStream, "hide");
 #endif
-#ifdef GS_PRINT_STREAM
+#ifdef GS_PRINT_CXX
       OutStream << "hide";
 #endif
     } else if (gsIsRename(Part)) {
-#ifdef GS_PRINT_FILE
+#ifdef GS_PRINT_C
       fprintf(OutStream, "rename");
 #endif
-#ifdef GS_PRINT_STREAM
+#ifdef GS_PRINT_CXX
       OutStream << "rename";
 #endif
     } else if (gsIsComm(Part)) {
-#ifdef GS_PRINT_FILE
+#ifdef GS_PRINT_C
       fprintf(OutStream, "comm");
 #endif
-#ifdef GS_PRINT_STREAM
+#ifdef GS_PRINT_CXX
       OutStream << "comm";
 #endif
     } else {
-#ifdef GS_PRINT_FILE
+#ifdef GS_PRINT_C
       fprintf(OutStream, "allow");
 #endif
-#ifdef GS_PRINT_STREAM
+#ifdef GS_PRINT_CXX
       OutStream << "allow";
 #endif
     }
-#ifdef GS_PRINT_FILE
+#ifdef GS_PRINT_C
     fprintf(OutStream, "({");
 #endif
-#ifdef GS_PRINT_STREAM
+#ifdef GS_PRINT_CXX
     OutStream << "({";
 #endif
-    GS_PRINT_FUNC(PrintParts)(OutStream, ATLgetArgument(Part, 0), ShowSorts, 0, NULL, ", ");
-#ifdef GS_PRINT_FILE
+    GS_PRINT_FUNC(PrintPart_List)(OutStream, ATLgetArgument(Part, 0), ShowSorts, 0, NULL, ", ");
+#ifdef GS_PRINT_C
     fprintf(OutStream, "}, ");
 #endif
-#ifdef GS_PRINT_STREAM
+#ifdef GS_PRINT_CXX
     OutStream << "}, ";
 #endif
-    GS_PRINT_FUNC(PrintPart)(OutStream, ATAgetArgument(Part, 1), ShowSorts, 0);
-#ifdef GS_PRINT_FILE
+    GS_PRINT_FUNC(PrintPart_Appl)(OutStream, ATAgetArgument(Part, 1), ShowSorts, 0);
+#ifdef GS_PRINT_C
     fprintf(OutStream, ")");
 #endif
-#ifdef GS_PRINT_STREAM
+#ifdef GS_PRINT_CXX
     OutStream << ")";
 #endif
   } else if (gsIsMultActName(Part)) {
     //print multi action name
     gsDebugMsg("printing multi action name\n");
-    GS_PRINT_FUNC(PrintParts)(OutStream, ATLgetArgument(Part, 0), ShowSorts, 0, NULL, " | ");
+    GS_PRINT_FUNC(PrintPart_List)(OutStream, ATLgetArgument(Part, 0), ShowSorts, 0, NULL, " | ");
   } else if (gsIsRenameExpr(Part)) {
     //print renaming expression
     gsDebugMsg("printing renaming expression\n");
-    GS_PRINT_FUNC(PrintPart)(OutStream, ATAgetArgument(Part, 0), ShowSorts, PrecLevel);
-#ifdef GS_PRINT_FILE
+    GS_PRINT_FUNC(PrintPart_Appl)(OutStream, ATAgetArgument(Part, 0), ShowSorts, PrecLevel);
+#ifdef GS_PRINT_C
     fprintf(OutStream, " -> ");
 #endif
-#ifdef GS_PRINT_STREAM
+#ifdef GS_PRINT_CXX
     OutStream << " -> ";
 #endif
-    GS_PRINT_FUNC(PrintPart)(OutStream, ATAgetArgument(Part, 1), ShowSorts, PrecLevel);
+    GS_PRINT_FUNC(PrintPart_Appl)(OutStream, ATAgetArgument(Part, 1), ShowSorts, PrecLevel);
   } else if (gsIsCommExpr(Part)) {
     //print communication expression
     gsDebugMsg("printing communication expression\n");
-    GS_PRINT_FUNC(PrintPart)(OutStream, ATAgetArgument(Part, 0), ShowSorts, PrecLevel);
+    GS_PRINT_FUNC(PrintPart_Appl)(OutStream, ATAgetArgument(Part, 0), ShowSorts, PrecLevel);
     ATermAppl CommResult = ATAgetArgument(Part, 1);
     if (!gsIsNil(CommResult)) {
-#ifdef GS_PRINT_FILE
+#ifdef GS_PRINT_C
       fprintf(OutStream, " -> ");
 #endif
-#ifdef GS_PRINT_STREAM
+#ifdef GS_PRINT_CXX
       OutStream << " -> ";
 #endif
-      GS_PRINT_FUNC(PrintPart)(OutStream, CommResult, ShowSorts, PrecLevel);
+      GS_PRINT_FUNC(PrintPart_Appl)(OutStream, CommResult, ShowSorts, PrecLevel);
     }
   } else if (gsIsNil(Part)) {
     //print nil
     gsDebugMsg("printing nil\n");
-#ifdef GS_PRINT_FILE
+#ifdef GS_PRINT_C
     fprintf(OutStream, "nil");
 #endif
-#ifdef GS_PRINT_STREAM
+#ifdef GS_PRINT_CXX
     OutStream << "nil";
 #endif
   } else if (gsIsUnknown(Part)) {
     //print unknown
     gsDebugMsg("printing unknown\n");
-#ifdef GS_PRINT_FILE
+#ifdef GS_PRINT_C
     fprintf(OutStream, "unknown");
 #endif
-#ifdef GS_PRINT_STREAM
+#ifdef GS_PRINT_CXX
     OutStream << "unknown";
 #endif
   } else {
@@ -1452,25 +1484,25 @@ static void GS_PRINT_FUNC(PrintPart)(GS_PRINT_OUTTYPE OutStream, const ATermAppl
   }
 }
 
-static void GS_PRINT_FUNC(PrintParts)(GS_PRINT_OUTTYPE OutStream, const ATermList Parts, bool ShowSorts,
+static void GS_PRINT_FUNC(PrintPart_List)(GS_PRINT_OUTTYPE OutStream, const ATermList Parts, bool ShowSorts,
   int PrecLevel, const char *Terminator, const char *Separator)
 {
   ATermList l = Parts;
   while (!ATisEmpty(l)) {
     if (!ATisEqual(l, Parts) && Separator != NULL) {
-#ifdef GS_PRINT_FILE
+#ifdef GS_PRINT_C
       fprintf(OutStream, Separator);
 #endif
-#ifdef GS_PRINT_STREAM
+#ifdef GS_PRINT_CXX
       OutStream << Separator;
 #endif
     }
-    GS_PRINT_FUNC(PrintPart)(OutStream, ATAgetFirst(l), ShowSorts, PrecLevel);
+    GS_PRINT_FUNC(PrintPart_Appl)(OutStream, ATAgetFirst(l), ShowSorts, PrecLevel);
     if (Terminator != NULL) {
-#ifdef GS_PRINT_FILE
+#ifdef GS_PRINT_C
       fprintf(OutStream, Terminator);
 #endif
-#ifdef GS_PRINT_STREAM
+#ifdef GS_PRINT_CXX
       OutStream << Terminator;
 #endif
     }
@@ -1519,38 +1551,38 @@ static void GS_PRINT_FUNC(PrintEqns)(GS_PRINT_OUTTYPE OutStream, const ATermList
         //reset VarDeclTable.
         ATermList VarDecls = ATtableValues(VarDeclTable);
         if (ATgetLength(VarDecls) > 0) {
-#ifdef GS_PRINT_FILE
+#ifdef GS_PRINT_C
           fprintf(OutStream, "var  ");
 #endif
-#ifdef GS_PRINT_STREAM
+#ifdef GS_PRINT_CXX
           OutStream << "var  ";
 #endif
           GS_PRINT_FUNC(PrintDecls)(OutStream, gsGroupDeclsBySort(ATreverse(VarDecls)),
             ";\n", "     ");
         }
         if (gsIsDataEqn(Eqn)) {
-#ifdef GS_PRINT_FILE
+#ifdef GS_PRINT_C
           fprintf(OutStream, "eqn  ");
 #endif
-#ifdef GS_PRINT_STREAM
+#ifdef GS_PRINT_CXX
           OutStream << "eqn  ";
 #endif
         } else { //gsIsProcEqn(Eqn)
-#ifdef GS_PRINT_FILE
+#ifdef GS_PRINT_C
           fprintf(OutStream, "proc ");
 #endif
-#ifdef GS_PRINT_STREAM
+#ifdef GS_PRINT_CXX
           OutStream << "proc ";
 #endif
         }
-        GS_PRINT_FUNC(PrintParts)(OutStream,
+        GS_PRINT_FUNC(PrintPart_List)(OutStream,
           ATgetSlice(Eqns, StartPrefix, i), ShowSorts, PrecLevel,
             ";\n", "     ");
         if (i < EqnsLength) {
-#ifdef GS_PRINT_FILE
+#ifdef GS_PRINT_C
           fprintf(OutStream, "\n");
 #endif
-#ifdef GS_PRINT_STREAM
+#ifdef GS_PRINT_CXX
           OutStream << std::endl;
 #endif
           StartPrefix = i;
@@ -1559,10 +1591,10 @@ static void GS_PRINT_FUNC(PrintEqns)(GS_PRINT_OUTTYPE OutStream, const ATermList
       }
     }
     //finalisation after printing all (>0) equations
-#ifdef GS_PRINT_FILE
+#ifdef GS_PRINT_C
     fprintf(OutStream, "\n");
 #endif
-#ifdef GS_PRINT_STREAM
+#ifdef GS_PRINT_CXX
     OutStream << std::endl;
 #endif
     ATtableDestroy(VarDeclTable);
@@ -1610,29 +1642,29 @@ static void GS_PRINT_FUNC(PrintEqns)(GS_PRINT_OUTTYPE OutStream, const ATermList
         //and reset VarDeclTable.
         ATermList VarDecls = ATtableValues(VarDeclTable);
         if (ATgetLength(VarDecls) > 0) {
-#ifdef GS_PRINT_FILE
+#ifdef GS_PRINT_C
           fprintf(OutStream, "var  ");
 #endif
-#ifdef GS_PRINT_STREAM
+#ifdef GS_PRINT_CXX
           OutStream << "var  ";
 #endif
           GS_PRINT_FUNC(PrintDecls)(OutStream, gsGroupDeclsBySort(ATreverse(VarDecls)),
             ";\n", "     ");
         }
-#ifdef GS_PRINT_FILE
+#ifdef GS_PRINT_C
         fprintf(OutStream, "eqn  ");
 #endif
-#ifdef GS_PRINT_STREAM
+#ifdef GS_PRINT_CXX
         OutStream << "eqn  ";
 #endif
-        GS_PRINT_FUNC(PrintParts)(OutStream,
+        GS_PRINT_FUNC(PrintPart_List)(OutStream,
           ATgetSlice(ProcEqns, StartPrefix, i), ShowSorts, PrecLevel,
           ";\n", "     ");
         if (i < ProcEqnsLength) {
-#ifdef GS_PRINT_FILE
+#ifdef GS_PRINT_C
           fprintf(OutStream, "\n");
 #endif
-#ifdef GS_PRINT_STREAM
+#ifdef GS_PRINT_CXX
           OutStream << std::endl;
 #endif
           StartPrefix = i;
@@ -1641,10 +1673,10 @@ static void GS_PRINT_FUNC(PrintEqns)(GS_PRINT_OUTTYPE OutStream, const ATermList
       }
     }
     //finalisation after printing all (>0) process equations
-#ifdef GS_PRINT_FILE
+#ifdef GS_PRINT_C
     fprintf(OutStream, "\n");
 #endif
-#ifdef GS_PRINT_STREAM
+#ifdef GS_PRINT_CXX
     OutStream << std::endl;
 #endif
     ATtableDestroy(VarDeclTable);
@@ -1749,33 +1781,33 @@ static void GS_PRINT_FUNC(PrintDecls)(GS_PRINT_OUTTYPE OutStream, const ATermLis
       if (ATisEqual(ATgetArgument(Decl, 1),
           ATgetArgument(ATelementAt(Decls, i+1), 1))) {
         GS_PRINT_FUNC(PrintDecl)(OutStream, Decl, false);
-#ifdef GS_PRINT_FILE
+#ifdef GS_PRINT_C
         fprintf(OutStream, ",");
 #endif
-#ifdef GS_PRINT_STREAM
+#ifdef GS_PRINT_CXX
         OutStream << ",";
 #endif
       } else {
         GS_PRINT_FUNC(PrintDecl)(OutStream, Decl, true);
-#ifdef GS_PRINT_FILE
+#ifdef GS_PRINT_C
         if (Terminator  != NULL) fprintf(OutStream, Terminator);
 #endif
-#ifdef GS_PRINT_STREAM
+#ifdef GS_PRINT_CXX
         if (Terminator  != NULL) OutStream << Terminator;
 #endif
-#ifdef GS_PRINT_FILE
+#ifdef GS_PRINT_C
         if (Separator  != NULL) fprintf(OutStream, Separator);
 #endif
-#ifdef GS_PRINT_STREAM
+#ifdef GS_PRINT_CXX
         if (Separator  != NULL) OutStream << Separator;
 #endif
       }
     }
     GS_PRINT_FUNC(PrintDecl)(OutStream, ATAelementAt(Decls, n-1), true);
-#ifdef GS_PRINT_FILE
+#ifdef GS_PRINT_C
     if (Terminator  != NULL) fprintf(OutStream, Terminator);
 #endif
-#ifdef GS_PRINT_STREAM
+#ifdef GS_PRINT_CXX
     if (Terminator  != NULL) OutStream << Terminator;
 #endif
   }
@@ -1783,27 +1815,27 @@ static void GS_PRINT_FUNC(PrintDecls)(GS_PRINT_OUTTYPE OutStream, const ATermLis
 
 static void GS_PRINT_FUNC(PrintDecl)(GS_PRINT_OUTTYPE OutStream, const ATermAppl Decl, const bool ShowSorts)
 {
-  GS_PRINT_FUNC(PrintPart)(OutStream, ATAgetArgument(Decl, 0), ShowSorts, 0);
+  GS_PRINT_FUNC(PrintPart_Appl)(OutStream, ATAgetArgument(Decl, 0), ShowSorts, 0);
   if (ShowSorts) {
     if (gsIsActId(Decl)) {
       ATermList SortExprs = ATLgetArgument(Decl, 1);
       if (ATgetLength(SortExprs) > 0) {
-#ifdef GS_PRINT_FILE
+#ifdef GS_PRINT_C
         fprintf(OutStream, ": ");
 #endif
-#ifdef GS_PRINT_STREAM
+#ifdef GS_PRINT_CXX
         OutStream << ": ";
 #endif
-        GS_PRINT_FUNC(PrintParts)(OutStream, SortExprs, ShowSorts, 2, NULL, " # ");
+        GS_PRINT_FUNC(PrintPart_List)(OutStream, SortExprs, ShowSorts, 2, NULL, " # ");
       }
     } else {
-#ifdef GS_PRINT_FILE
+#ifdef GS_PRINT_C
       fprintf(OutStream, ": ");
 #endif
-#ifdef GS_PRINT_STREAM
+#ifdef GS_PRINT_CXX
       OutStream << ": ";
 #endif
-      GS_PRINT_FUNC(PrintPart)(OutStream, ATAgetArgument(Decl, 1), ShowSorts, 0);
+      GS_PRINT_FUNC(PrintPart_Appl)(OutStream, ATAgetArgument(Decl, 1), ShowSorts, 0);
     }
   }
 }
@@ -1829,15 +1861,15 @@ static void GS_PRINT_FUNC(PrintListEnumElts)(GS_PRINT_OUTTYPE OutStream, const A
   ATermAppl HeadName = ATAgetArgument(gsGetDataExprHead(DataExpr), 0);
   if (ATisEqual(HeadName, gsMakeOpIdNameCons())) {
     ATermList Args = gsGetDataExprArgs(DataExpr);
-    GS_PRINT_FUNC(PrintPart)(OutStream, ATAelementAt(Args, 0), ShowSorts, 0);
+    GS_PRINT_FUNC(PrintPart_Appl)(OutStream, ATAelementAt(Args, 0), ShowSorts, 0);
     ATermAppl Arg1 = ATAelementAt(Args, 1);
     if (ATisEqual(ATAgetArgument(gsGetDataExprHead(Arg1), 0),
       gsMakeOpIdNameCons()))
     {
-#ifdef GS_PRINT_FILE
+#ifdef GS_PRINT_C
       fprintf(OutStream, ", ");
 #endif
-#ifdef GS_PRINT_STREAM
+#ifdef GS_PRINT_CXX
       OutStream << ", ";
 #endif
       GS_PRINT_FUNC(PrintListEnumElts)(OutStream, Arg1, ShowSorts);
@@ -1849,10 +1881,10 @@ static void GS_PRINT_FUNC(PrintPos)(GS_PRINT_OUTTYPE OutStream, const ATermAppl 
 {
   if (gsIsPosConstant(PosExpr)) {
     char *PosValue = gsPosValue(PosExpr);
-#ifdef GS_PRINT_FILE
+#ifdef GS_PRINT_C
     fprintf(OutStream, PosValue);
 #endif
-#ifdef GS_PRINT_STREAM
+#ifdef GS_PRINT_CXX
     OutStream << PosValue;
 #endif
     free(PosValue);
@@ -1868,10 +1900,10 @@ static void GS_PRINT_FUNC(PrintPosMult)(GS_PRINT_OUTTYPE OutStream, const ATermA
   ATermList Args = gsGetDataExprArgs(PosExpr);
   if (ATisEqual(PosExpr, gsMakeOpId1())) {
     //PosExpr is 1; print Mult
-#ifdef GS_PRINT_FILE
+#ifdef GS_PRINT_C
     fprintf(OutStream, Mult);
 #endif
-#ifdef GS_PRINT_STREAM
+#ifdef GS_PRINT_CXX
     OutStream << Mult;
 #endif
   } else if (ATisEqual(Head, gsMakeOpIdCDub())) {
@@ -1885,50 +1917,50 @@ static void GS_PRINT_FUNC(PrintPosMult)(GS_PRINT_OUTTYPE OutStream, const ATermA
     } else {
       //Mult*v(b) > 0
       if (PrecLevel > gsPrecOpIdInfix(gsMakeOpIdNameAdd())) {
-#ifdef GS_PRINT_FILE
+#ifdef GS_PRINT_C
         fprintf(OutStream, "(");
 #endif
-#ifdef GS_PRINT_STREAM
+#ifdef GS_PRINT_CXX
         OutStream << "(";
 #endif
       }
       //print (Mult*2)*v(p)
       GS_PRINT_FUNC(PrintPosMult)(OutStream, PosArg, 
         gsPrecOpIdInfixLeft(gsMakeOpIdNameAdd()), NewMult);
-#ifdef GS_PRINT_FILE
+#ifdef GS_PRINT_C
       fprintf(OutStream, " + ");
 #endif
-#ifdef GS_PRINT_STREAM
+#ifdef GS_PRINT_CXX
       OutStream << " + ";
 #endif
       if (ATisEqual(BoolArg, gsMakeDataExprTrue())) {
         //Mult*v(b) = Mult
-#ifdef GS_PRINT_FILE
+#ifdef GS_PRINT_C
         fprintf(OutStream, Mult);
 #endif
-#ifdef GS_PRINT_STREAM
+#ifdef GS_PRINT_CXX
         OutStream << Mult;
 #endif
       } else if (strcmp(Mult, "1") == 0) {
         //Mult*v(b) = v(b)
-        GS_PRINT_FUNC(PrintPart)(OutStream, BoolArg, false,
+        GS_PRINT_FUNC(PrintPart_Appl)(OutStream, BoolArg, false,
           gsPrecOpIdInfixRight(gsMakeOpIdNameAdd()));
       } else {
         //print Mult*v(b)
-#ifdef GS_PRINT_FILE
+#ifdef GS_PRINT_C
         fprintf(OutStream, "%s*", Mult);
 #endif
-#ifdef GS_PRINT_STREAM
+#ifdef GS_PRINT_CXX
         OutStream << Mult << "*";
 #endif
-        GS_PRINT_FUNC(PrintPart)(OutStream, BoolArg, false,
+        GS_PRINT_FUNC(PrintPart_Appl)(OutStream, BoolArg, false,
           gsPrecOpIdInfixRight(gsMakeOpIdNameMult()));
       }
       if (PrecLevel > gsPrecOpIdInfix(gsMakeOpIdNameAdd())) {
-#ifdef GS_PRINT_FILE
+#ifdef GS_PRINT_C
         fprintf(OutStream, ")");
 #endif
-#ifdef GS_PRINT_STREAM
+#ifdef GS_PRINT_CXX
         OutStream << ")";
 #endif
       }
@@ -1937,15 +1969,15 @@ static void GS_PRINT_FUNC(PrintPosMult)(GS_PRINT_OUTTYPE OutStream, const ATermA
   } else {
     //PosExpr is not a Pos constructor
     if (strcmp(Mult, "1") == 0) {
-      GS_PRINT_FUNC(PrintPart)(OutStream, PosExpr, false, PrecLevel);
+      GS_PRINT_FUNC(PrintPart_Appl)(OutStream, PosExpr, false, PrecLevel);
     } else {
-#ifdef GS_PRINT_FILE
+#ifdef GS_PRINT_C
       fprintf(OutStream, "%s*", Mult);
 #endif
-#ifdef GS_PRINT_STREAM
+#ifdef GS_PRINT_CXX
       OutStream << Mult << "*";
 #endif
-      GS_PRINT_FUNC(PrintPart)(OutStream, PosExpr, false,
+      GS_PRINT_FUNC(PrintPart_Appl)(OutStream, PosExpr, false,
         gsPrecOpIdInfixRight(gsMakeOpIdNameMult()));
     }
   }

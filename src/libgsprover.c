@@ -147,9 +147,9 @@ static ATermList calcNext(ATermList l)
 //ATfprintf(stderr,"%t\n\n",t);
 			ATerm t_rf = gsToRewriteFormat(t);
 			RWsetVariable((ATerm) var,t_rf);
-//PrettyPrint(stderr,gsFromRewriteFormat(a3)); fprintf(stderr,"\n");
+//PrintPart_C(stderr,gsFromRewriteFormat(a3)); fprintf(stderr,"\n");
 			e = gsRewriteInternal(a3);
-//PrettyPrint(stderr,gsFromRewriteFormat(e)); fprintf(stderr,"\n\n");
+//PrintPart_C(stderr,gsFromRewriteFormat(e)); fprintf(stderr,"\n\n");
 			if ( !ATisEqual(e,gsProverFalse) )
 			{
 				s = ATmakeList1((ATerm) gsMakeSubst((ATerm) var, t_rf));

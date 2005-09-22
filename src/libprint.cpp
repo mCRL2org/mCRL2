@@ -1,24 +1,19 @@
-#include <string>
-#include <ostream>
+#include "libprint.h"
 #include <sstream>
-#include "gsfunc.h"
-#include "gslowlevel.h"
 
-#define GS_PRINT_STREAM 1
+#define GS_PRINT_CXX 1
 #include "libprint_common.h"
 
 using namespace std;
 
-void DataExpressionToStream(ostream &Stream, ATermAppl Expr)
+void PrintPart_CXX(std::ostream &OutStream, const ATerm Part)
 {
-	PrintPartStream(Stream,Expr,false,0);
+  PrintPart__CXX(OutStream, (ATerm) Part);
 }
 
-string DataExpressionToString(ATermAppl Expr)
+string PrintPart_CXX(const ATerm Part)
 {
-	stringstream ss;
-
-	DataExpressionToStream(ss,Expr);
-
-	return ss.str();
+  stringstream ss;
+  PrintPart_CXX(ss, Part);
+  return ss.str();
 }

@@ -690,7 +690,7 @@ void XSimMain::SetCurrentState(ATerm state, bool showchange)
 		{
 			stateview->SetItem(i,1,wxT("_"));
 		} else {
-			stateview->SetItem(i,1,wxConvLocal.cMB2WX(DataExpressionToString(newval).c_str()));
+			stateview->SetItem(i,1,wxConvLocal.cMB2WX(PrintPart_CXX((ATerm) newval).c_str()));
 		}
 		if ( showchange && !(ATisEqual(oldval,newval) || (gsIsDataVarId(oldval) && gsIsDataVarId(newval)) ) )
 		{
@@ -745,7 +745,7 @@ void XSimMain::UpdateTransitions()
 	int i = 0;
 	for (ATermList l=next_states; !ATisEmpty(l); l=ATgetNext(l), i++)
 	{
-		actions.Add(wxConvLocal.cMB2WX(DataExpressionToString(ATAgetFirst(ATLgetFirst(l))).c_str()));
+		actions.Add(wxConvLocal.cMB2WX(PrintPart_CXX(ATgetFirst(ATLgetFirst(l))).c_str()));
 		indices.Add(i);
 //		transview->SetItemData(i,i);
 		stringstream ss;
@@ -766,13 +766,13 @@ void XSimMain::UpdateTransitions()
 				} else {
 					comma = true;
 				}
-				DataExpressionToStream(ss,ATAgetFirst(o));
+				PrintPart_CXX(ss, ATgetFirst(o));
 				ss << " := ";
 				if ( gsIsDataVarId(newval) )
 				{
 					ss << "_";
 				} else {
-					DataExpressionToStream(ss,newval);
+					PrintPart_CXX(ss, (ATerm) newval);
 				}
 			}
 

@@ -273,7 +273,7 @@ static ATerm rewrite(ATerm Term, int *b, ATermList vars)
 	bool x;
 
 //ATfprintf(stderr,"rewrite(%t)\n\n",Term);
-//ATfprintf(stderr,"rewrite(");PrettyPrint(stderr,fromInner(Term));ATfprintf(stderr,")\n\n");
+//ATfprintf(stderr,"rewrite(");PrintPart_C(stderr,fromInner(Term));ATfprintf(stderr,")\n\n");
 
 	l2 = NULL;
 
@@ -283,7 +283,7 @@ static ATerm rewrite(ATerm Term, int *b, ATermList vars)
 		while ( x )
 		{
 //ATfprintf(stderr,"loop: %t\n\n",Term);
-//ATfprintf(stderr,"loop: ");PrettyPrint(stderr,fromInner(Term));ATfprintf(stderr,"\n\n");
+//ATfprintf(stderr,"loop: ");PrintPart_C(stderr,fromInner(Term));ATfprintf(stderr,"\n\n");
 			x = false;
 			d = 0;
 			t = rewrite(ATgetFirst((ATermList) Term),&d,vars);
@@ -373,7 +373,7 @@ static ATerm rewrite(ATerm Term, int *b, ATermList vars)
 			}
 		}
 //ATfprintf(stderr,"return: %t\n\n",Term);
-//ATfprintf(stderr,"return: ");PrettyPrint(stderr,fromInner(Term));ATfprintf(stderr,"\n\n");
+//ATfprintf(stderr,"return: ");PrintPart_C(stderr,fromInner(Term));ATfprintf(stderr,"\n\n");
 		return Term;
 	} else if ( gsIsOpId((ATermAppl) Term) )
 	{
@@ -387,7 +387,7 @@ static ATerm rewrite(ATerm Term, int *b, ATermList vars)
 					{
 						*b = 1;
 //ATfprintf(stderr,"return: %t\n\n",ATelementAt(ATLgetFirst(m),3));
-//ATfprintf(stderr,"return: ");PrettyPrint(stderr,fromInner(ATelementAt(ATLgetFirst(m),3)));ATfprintf(stderr,"\n\n");
+//ATfprintf(stderr,"return: ");PrintPart_C(stderr,fromInner(ATelementAt(ATLgetFirst(m),3)));ATfprintf(stderr,"\n\n");
 						return ATelementAt(ATLgetFirst(m),3);
 					}		
 					
@@ -395,11 +395,11 @@ static ATerm rewrite(ATerm Term, int *b, ATermList vars)
 			}
 		}
 //ATfprintf(stderr,"return: %t\n\n",Term);
-//ATfprintf(stderr,"return: ");PrettyPrint(stderr,fromInner(Term));ATfprintf(stderr,"\n\n");
+//ATfprintf(stderr,"return: ");PrintPart_C(stderr,fromInner(Term));ATfprintf(stderr,"\n\n");
 		return Term;
 	} else {
 //ATfprintf(stderr,"return: %t\n\n",Term);
-//ATfprintf(stderr,"return: ");PrettyPrint(stderr,fromInner(Term));ATfprintf(stderr,"\n\n");
+//ATfprintf(stderr,"return: ");PrintPart_C(stderr,fromInner(Term));ATfprintf(stderr,"\n\n");
 		return Term;
 	}
 }

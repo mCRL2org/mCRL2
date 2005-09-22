@@ -224,7 +224,7 @@ ATermList create_strategy(ATermList rules)
 
 //ATfprintf(stderr,"rule: %t\n",ATgetFirst(rules));
 //ATfprintf(stderr,"rule: %t\n",ATAelementAt(ATgetFirst(rules),2));
-//ATfprintf(stderr,"rule: "); PrettyPrint(stderr,fromInner(ATAelementAt(ATgetFirst(rules),2))); ATfprintf(stderr,"\n");
+//ATfprintf(stderr,"rule: "); PrintPart_C(stderr,fromInner(ATAelementAt(ATgetFirst(rules),2))); ATfprintf(stderr,"\n");
 //ATprintf("pars: %t\n",pars);
 
 				for (int i=0; i<arity; i++)
@@ -873,9 +873,9 @@ ATermAppl from_rewrite_format_jitty(ATerm Term)
 
 ATerm rewrite_jitty(ATerm Term)
 {
-/*fprintf(stderr,"rewrite(  ");PrettyPrint(stderr,fromInner(Term));fprintf(stderr,"  )\n\n");
+/*fprintf(stderr,"rewrite(  ");PrintPart_C(stderr,fromInner(Term));fprintf(stderr,"  )\n\n");
 ATermAppl a = rewrite((ATermAppl) Term);
-fprintf(stderr,"return  ");PrettyPrint(stderr,fromInner(a));fprintf(stderr,"  )\n\n");
+fprintf(stderr,"return  ");PrintPart_C(stderr,fromInner(a));fprintf(stderr,"  )\n\n");
 return (ATerm) a;*/
 	return (ATerm) rewrite((ATermAppl) Term);
 }
