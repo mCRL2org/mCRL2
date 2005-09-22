@@ -47,15 +47,13 @@ bool cex(LPEAssignment x, LPEAssignment y)
   } 
 }
 
-bool eval_datexp(DataExpression datexpr){
-  //Vul replace vector in de condititie in
+bool eval_datexp(DataExpression datexpr, int opt)
+{
+  if (opt==3) {return(true);};
+
   for (unsigned int i=0; i < iv.size(); i++){
-    datexpr.replace(iv[i].lhs().head(), iv[i].rhs());
+    datexpr = datexpr.replace(iv[i].lhs(), iv[i].rhs());
   }
-
-  //if configure is not done with "enable-debug" then uncommont following line 
-  //gsEnableConstructorFunctions();
-
 
   /**
     *   Rewrite dataxpr.term to eval
@@ -67,21 +65,14 @@ bool eval_datexp(DataExpression datexpr){
   ATerm t = (ATerm) gsMakeDataExprTrue();
   ATerm f = (ATerm) gsMakeDataExprFalse();
 
-  //debug
-  return(true);  
 
-  
-  if (ATisEqual(x,t)) 
+ 
+  if (ATisEqual(x,t) || (!ATisEqual(x,f))) 
     { 
       return true;
     } else { 
-      if (ATisEqual(x,f))
-        {  
-          return false;
-        } else {
-          return false ;  
-        } ;
-    }
+      return false;
+    };
 }
 
 int const_main(string filename, int opt)
@@ -92,17 +83,23 @@ int const_main(string filename, int opt)
   int                               nopp; //number of process parameters
   int                               nos;  //number of summands
   int                               noa;  //number of assignments in the init
+  
 
-
-  //Debug test vars
+  // Init vars
+/** 
+  **/ 
+ 
   int outputvar =  0;
   outputvar++;
   gsEnableConstructorFunctions();
-
-  aterm_appl t = read_from_named_file(filename).to_appl();
+  
+/**
+  **/
+  
+aterm_appl t = read_from_named_file(filename).to_appl();
   if (!t)
     cerr << "could not read file!" << endl;
-  if (opt == 0)
+  if ((opt == 0) || (opt == 1) || (opt == 2) || (opt == 3))
   {
 
     //Define rewrite rules on conditons
@@ -160,7 +157,7 @@ int const_main(string filename, int opt)
         //DataExpression cond
         
         // If Guard of summand is true -> 
-        if (eval_datexp(LPESummand(*s_current).condition())){
+        if (eval_datexp(LPESummand(*s_current).condition() , opt)){
           for (LPESummand::assignment_iterator c_obj = LPESummand(*s_current).assignments_begin(); c_obj != var_ppcve; ++c_obj){
         
           //Get LHS from State Vector element
@@ -221,7 +218,7 @@ int const_main(string filename, int opt)
     };
   };
    
-  cout << "noi " << noi <<endl;
+  //cout << "noi " << noi <<endl;
   cerr << "einde" << endl;
   
   return 0;
@@ -244,6 +241,9 @@ int main(int ac, char* av[])
         desc.add_options()
             ("help,h", "produce help message")
             ("version,v", "gets the version number of the current release of this mCRL2 tool")
+            ("monitor,m", "displays progressing information")
+            ("nosingleton", "displays progressing information")
+            ("nocondition", "Saves computing time. No check if conditions are rewritten to false")
         ;
 	
 	po::options_description hidden("Hidden options");
@@ -273,15 +273,29 @@ int main(int ac, char* av[])
         }
         
         if (vm.count("version")) {
-	    cout << version << endl;
-	    return 0;
-	}
+	        cout << version << endl;
+	        return 0;
+	      }
+
+        if (vm.count("monitor")) {
+          cout << "Displaying progress" << endl;
+          opt = 1;
+	      }
+
+        if (vm.count("nosingleton")) {
+          cout << "Active: no removal of process parameters which have sorts of cardinatilty one" << endl;
+          opt = 2;
+	      }
+
+        if (vm.count("nocondition")) {
+          cout << "Active: All conditions are true" << endl;
+          opt = 3;
+	      }
 
         if (vm.count("input-file"))
         {
           filename = vm["input-file"].as<string>();
-	  cout << filename << endl;
-	}
+	      }
 
         const_main(filename, opt);       
 	
