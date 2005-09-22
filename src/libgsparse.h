@@ -3,11 +3,11 @@ extern "C" {
 #endif
 
 #include <stdio.h>
-#include <stdbool.h>
 #include <aterm2.h>
 
 //Global preconditions:
 //- the ATerm library has been initialised
+//- gsEnableConstructorFunctions() has been called
 
 void PrettyPrint(FILE *OutStream, const ATerm Part);
 /*Pre: OutStream points to a stream to which can be written

@@ -1,5 +1,11 @@
 #ifdef GS_PRINT_FILE
 #include <stdio.h>
+#include <stdlib.h>
+#include <aterm2.h>
+#include <stdbool.h>
+#include <string.h>
+#include "gsfunc.h"
+#include "gslowlevel.h"
 #define GS_PRINT_OUTTYPE FILE*
 #define GS_PRINT_FUNC(x) x ## File
 #endif
