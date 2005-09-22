@@ -11,7 +11,7 @@
 #include "gslowlevel.h"
 #include "gsfunc.h"
 #include "gsrewr_innerc.h"
-#include "libgsparse.h"
+#include "libprint_c.h"
 #include "gsrewr_innerc_aux.h"
 #include "gssubstitute.h"
 #include "assert.h"

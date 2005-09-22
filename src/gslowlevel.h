@@ -54,7 +54,16 @@ int gsfprintf(FILE *stream, const char *format, ...);
 int gsvfprintf(FILE *stream, const char *format, va_list args);
 //Pretty print versions of the ATprintf functions
 //If '%T' is used in the format, the corresponding ATerm argument is pretty
-//printed 
+//printed
+//
+//Note that the original ATerm code has the following bugs in it, that are
+//also present in this implementation:
+//- '%a' disables conversion 'a' of signed hexadecimal floating point
+//  conversions
+//  '%h' disables size specification 'h' to indicate short
+//- '%l' disables size specification 'l' to indicate long
+//- '%n' disables conversion 'n' of integer pointers
+//- '%t' disables size specification 't' to indicate ptrdiff_t
 
 void gsSetQuietMsg(void);
 //Post: Printing of warnings, verbose information and extended debugging

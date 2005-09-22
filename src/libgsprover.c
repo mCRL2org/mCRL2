@@ -6,7 +6,7 @@ extern "C" {
 #include <aterm2.h>
 #include "gslowlevel.h"
 #include "gsfunc.h"
-#include "libgsparse.h"
+#include "libprint_c.h"
 #include "libgsrewrite.h"
 #include "libgsprover.h"
 #include "gssubstitute.h"

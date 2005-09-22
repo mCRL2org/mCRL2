@@ -24,7 +24,7 @@ Studio::Studio()
 
 bool Studio::OnInit()
 {
-    StudioProj *frame = new StudioProj( NULL, -1, wxT("Genspect Project"), wxPoint(-1,-1), wxSize(500,400) );
+    StudioProj *frame = new StudioProj( NULL, -1, wxT("mCRL2 Project"), wxPoint(-1,-1), wxSize(500,400) );
 
     frame->Show( TRUE );
     

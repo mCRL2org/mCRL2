@@ -55,93 +55,92 @@ LIBSVC_NAME        = svc/libsvc.a
 LIBSVC_OBJECTS     = svc/blocklist.o svc/code.o svc/compress.o svc/hashtable.o svc/huffman.o svc/lz.o svc/ptable.o svc/svc1.o svc/svc2.o 
 OBJECTS           += $(LIBSVC_OBJECTS)
 
-#Parser definitions
-LIBPARSER_NAME     = libgsparse.a
-LIBPARSER_OBJECTS  = libgsparse.o gsparser.o gslexer.o gstypecheck.o gsdataimpl.o gsfunc.o gslowlevel.o
-OBJECTS           += $(LIBPARSER_OBJECTS)
-LIBPARSER_LDFLAGS  = -l$(ATERM) -lm
-
-#Printer definitions
-PRINTER_NAME       = lpepp
-PRINTER_OBJECTS    = lpepp.o
-OBJECTS           += $(PRINTER_OBJECTS)
-PRINTER_LDFLAGS    = -lgsparse -l$(ATERM) -lm
-
-#Lineariser definitions (mcrl22lpe)
-MCRL22LPE_NAME     = mcrl22lpe
-MCRL22LPE_OBJECTS  = mcrl22lpe.o lin_std.o lin_alt.o
-OBJECTS           += $(MCRL22LPE_OBJECTS)
-MCRL22LPE_LDFLAGS  = -lgsparse -lgsrewrite -l$(ATERM) -lm -ldl
-
-#Lineariser definitions (lin)
-LIN_NAME           = lin
-LIN_OBJECTS        = lin.o lin_alt.o
-OBJECTS           += $(LIN_OBJECTS)
-LIN_LDFLAGS        = -lgsparse -lgsrewrite -l$(ATERM) -lm -ldl
-
-#Rewriter definitions
+#rewrite library definitions
 LIBREWR_NAME       = libgsrewrite.a
-LIBREWR_OBJECTS    = libgsrewrite.o gsrewr_inner.o gsrewr_inner2.o gsrewr_inner3.o gsrewr_innerc.o gsrewr_jitty.o gsfunc.o gslowlevel.o gssubstitute.o
+LIBREWR_OBJECTS    = libgsrewrite.o gsrewr_inner.o gsrewr_inner2.o gsrewr_inner3.o gsrewr_innerc.o gsrewr_jitty.o gssubstitute.o
 OBJECTS           += $(LIBREWR_OBJECTS)
 LIBREWR_LDFLAGS    = -l$(ATERM) -lm
-REWR_NAME          = lperewr
-REWR_OBJECTS       = lperewr.o
-OBJECTS           += $(REWR_OBJECTS)
-REWR_LDFLAGS       = -lgsrewrite -lgsparse -l$(ATERM) -lm -ldl
 
-#pnml2mcrl2 definitions
-PNML2MCRL2_NAME    = pnml2mcrl2
-PNML2MCRL2_OBJECTS = pnml2mcrl2.o
-ifdef USE_XML2
-OBJECTS           += $(PNML2MCRL2_OBJECTS)
-endif
-PNML2MCRL2_LDFLAGS = -lgsparse -l$(ATERM) -lxml2 -lm
+#mcrl22lpe definitions
+MCRL22LPE_NAME     = mcrl22lpe
+MCRL22LPE_OBJECTS  = mcrl22lpe.o lin_std.o lin_alt.o gsparser.o gslexer.o gstypecheck.o gsdataimpl.o libprint_c.o gsfunc.o gslowlevel.o
+OBJECTS           += $(MCRL22LPE_OBJECTS)
+MCRL22LPE_LDFLAGS  = -lgsrewrite -l$(ATERM) -lm -ldl
 
-#Alphabet axiom applicator definitions
-ALPHA_NAME         = alpha
-ALPHA_OBJECTS      = alpha.o libgsalpha.o
-OBJECTS           += $(ALPHA_OBJECTS)
-ALPHA_LDFLAGS      = -lgsparse -l$(ATERM) -lm
+#lpepp definitions
+LPEPP_NAME         = lpepp
+LPEPP_OBJECTS      = lpepp.o libprint_c.o gsfunc.o gslowlevel.o
+OBJECTS           += $(LPEPP_OBJECTS)
+LPEPP_LDFLAGS      = -l$(ATERM) -lm
 
-#Alphabet axiom applicator definitions
-M2M2_NAME          = tbf2lpe
-M2M2_OBJECTS       = tbf2lpe.o lpetrans.o
-OBJECTS           += $(M2M2_OBJECTS)
-M2M2_LDFLAGS       = -lgsparse -l$(ATERM) -lm
-
-#Instantiator definitions
-INSTAN_NAME        = lpe2lts
-INSTAN_OBJECTS     = lpe2lts.o libgsnextstate.o libgsprover.o gssubstitute.o
-OBJECTS           += $(INSTAN_OBJECTS)
-INSTAN_LDFLAGS     = -lgsrewrite -lgsparse -lsvc -l$(ATERM) -lm -ldl
-
-#Simulator definitions
+#sim definitions
 SIM_NAME           = sim
-SIM_OBJECTS        = sim.o libgsnextstate.o libgsprover.o
+SIM_OBJECTS        = sim.o libgsnextstate.o libgsprover.o libprint_c.o gsfunc.o gslowlevel.o
 OBJECTS           += $(SIM_OBJECTS)
-SIM_LDFLAGS        = -lgsrewrite -lgsparse -l$(ATERM) -lm -ldl
+SIM_LDFLAGS        = -lgsrewrite -l$(ATERM) -lm -ldl
+
+#xsim definitions
 XSIM_NAME          = xsim
-XSIM_OBJECTS       = xsim.o xsimbase.o xsimmain.o xsimtrace.o libgsnextstate.o libgsprover.o libprint.o
+XSIM_OBJECTS       = xsim.o xsimbase.o xsimmain.o xsimtrace.o libgsnextstate.o libgsprover.o libprint_cxx.o gsfunc.o gslowlevel.o libprint_c.o
 ifdef USE_WX
 OBJECTS           += $(XSIM_OBJECTS)
 endif
-XSIM_LDFLAGS       = -lgsrewrite -lgsparse -l$(ATERM) -lm -ldl $(WX_LIBS)
+XSIM_LDFLAGS       = -lgsrewrite -l$(ATERM) -lm -ldl $(WX_LIBS)
+
+#xsimtrace library definitions
 XSIMTRACE_NAME     = xsimtrace.so
 XSIMTRACE_OBJECTS  = xsimtracedll.o
 ifdef USE_WX
 OBJECTS           += $(XSIMTRACE_OBJECTS)
 endif
-
 ifeq ($(HOST_OS),MACOSX)
-  XSIMTRACE_LDFLAGS  = -bundle -undefined dynamic_lookup
+  XSIMTRACE_LDFLAGS = -bundle -undefined dynamic_lookup
 else
-  XSIMTRACE_LDFLAGS  = -shared
+  XSIMTRACE_LDFLAGS = -shared
 endif
 
+#lperewr definitions
+LPEREWR_NAME       = lperewr
+LPEREWR_OBJECTS    = lperewr.o gsparser.o gslexer.o gstypecheck.o gsdataimpl.o libprint_c.o gsfunc.o gslowlevel.o
+OBJECTS           += $(LPEREWR_OBJECTS)
+LPEREWR_LDFLAGS    = -lgsrewrite -l$(ATERM) -lm -ldl
+
+#lpe2lts definitions
+LPE2LTS_NAME       = lpe2lts
+LPE2LTS_OBJECTS    = lpe2lts.o libgsnextstate.o libgsprover.o gssubstitute.o libprint_c.o gsfunc.o gslowlevel.o
+OBJECTS           += $(LPE2LTS_OBJECTS)
+LPE2LTS_LDFLAGS    = -lgsrewrite -lsvc -l$(ATERM) -lm -ldl
+
+#tbf2lpe definitions
+TBF2LPE_NAME       = tbf2lpe
+TBF2LPE_OBJECTS    = tbf2lpe.o lpetrans.o libprint_c.o gsfunc.o gslowlevel.o
+OBJECTS           += $(TBF2LPE_OBJECTS)
+TBF2LPE_LDFLAGS    = -l$(ATERM) -lm
+
+#pnml2mcrl2 definitions
+PNML2MCRL2_NAME    = pnml2mcrl2
+PNML2MCRL2_OBJECTS = pnml2mcrl2.o gstypecheck.o libprint_c.o gsfunc.o gslowlevel.o
+ifdef USE_XML2
+OBJECTS           += $(PNML2MCRL2_OBJECTS)
+endif
+PNML2MCRL2_LDFLAGS = -l$(ATERM) -lxml2 -lm
+
+#alpha definitions
+ALPHA_NAME         = alpha
+ALPHA_OBJECTS      = alpha.o libgsalpha.o gsparser.o gslexer.o gstypecheck.o libprint_c.o gsfunc.o gslowlevel.o
+OBJECTS           += $(ALPHA_OBJECTS)
+ALPHA_LDFLAGS      = -l$(ATERM) -lm
+
+#lin definitions
+LIN_NAME           = lin
+LIN_OBJECTS        = lin.o lin_alt.o gsparser.o gslexer.o gstypecheck.o gsdataimpl.o libprint_c.o gsfunc.o gslowlevel.o
+OBJECTS           += $(LIN_OBJECTS)
+LIN_LDFLAGS        = -lgsrewrite -l$(ATERM) -lm -ldl
+
 #Group definitions
-EXE_NAMES          =  $(MCRL22LPE_NAME) $(PRINTER_NAME) $(INSTAN_NAME) $(SIM_NAME) $(XSIM_NAME) $(M2M2_NAME) $(PNML2MCRL2_NAME) $(REWR_NAME) $(ALPHA_NAME) $(LIN_NAME) 
+EXE_NAMES          =  $(MCRL22LPE_NAME) $(LPEPP_NAME) $(LPE2LTS_NAME) $(SIM_NAME) $(XSIM_NAME) $(TBF2LPE_NAME) $(PNML2MCRL2_NAME) $(LPEREWR_NAME) $(ALPHA_NAME) $(LIN_NAME) 
 LIB_NAMES          =  $(XSIMTRACE_NAME)
-OBJECTS            := $(sort $(OBJECTS))
+OBJECTS           := $(sort $(OBJECTS))
 
 #Make rules
 .PHONY: all install clean distclean
@@ -193,51 +192,24 @@ $(ATERM_NAME): $(ATERM_OBJECTS)
 $(LIBSVC_NAME): $(LIBSVC_OBJECTS)
 	$(AR) $(ARFLAGS) $@ $(LIBSVC_OBJECTS)
 
-$(LIBPARSER_NAME) : $(LIBPARSER_OBJECTS) $(ATERM_DEP)
-	$(AR) $(ARFLAGS) $@ $(LIBPARSER_OBJECTS)
-#	$(CC) -shared -o $@ $(LIBPARSER_OBJECTS)
-
-$(PRINTER_NAME) : $(PRINTER_OBJECTS) $(ATERM_DEP) $(LIBPARSER_NAME)
-	$(CC) -o $@ $(PRINTER_OBJECTS) $(LDFLAGS) $(PRINTER_LDFLAGS)
-
-$(MCRL22LPE_NAME) : $(MCRL22LPE_OBJECTS) $(ATERM_DEP) $(LIBPARSER_NAME) $(LIBREWR_NAME)
-	$(CC) -o $@ $(MCRL22LPE_OBJECTS) $(LDFLAGS) $(MCRL22LPE_LDFLAGS)
-
-$(LIN_NAME) : $(LIN_OBJECTS) $(ATERM_DEP) $(LIBPARSER_NAME)
-	$(CC) -o $@ $(LIN_OBJECTS) $(LDFLAGS) $(LIN_LDFLAGS)
-
 $(LIBREWR_NAME) : $(LIBREWR_OBJECTS) $(ATERM_DEP)
 	$(AR) $(ARFLAGS) $@ $(LIBREWR_OBJECTS)
 #	$(CC) -shared -o $@ $(LIBREWR_OBJECTS)
 
-$(REWR_NAME) : $(REWR_OBJECTS) $(ATERM_DEP) $(LIBPARSER_NAME) $(LIBREWR_NAME)
-	$(CC) -o $@ $(REWR_OBJECTS) $(LDFLAGS) $(REWR_LDFLAGS)
+$(MCRL22LPE_NAME) : $(MCRL22LPE_OBJECTS) $(ATERM_DEP) $(LIBREWR_NAME)
+	$(CC) -o $@ $(MCRL22LPE_OBJECTS) $(LDFLAGS) $(MCRL22LPE_LDFLAGS)
 
-$(ALPHA_NAME) : $(ALPHA_OBJECTS) $(ATERM_DEP) $(LIBPARSER_NAME)
-	$(CC) -o $@ $(ALPHA_OBJECTS) $(LDFLAGS) $(ALPHA_LDFLAGS)
+$(LPEPP_NAME) : $(LPEPP_OBJECTS) $(ATERM_DEP)
+	$(CC) -o $@ $(LPEPP_OBJECTS) $(LDFLAGS) $(LPEPP_LDFLAGS)
 
-$(M2M2_NAME) : $(M2M2_OBJECTS) $(ATERM_DEP) $(LIBPARSER_NAME)
-	$(CC) -o $@ $(M2M2_OBJECTS) $(LDFLAGS) $(M2M2_LDFLAGS)
-
-ifdef USE_XML2
-$(PNML2MCRL2_NAME) : $(PNML2MCRL2_OBJECTS) $(ATERM_DEP) $(LIBPARSER_NAME)
-	$(CC) -o $@ $(PNML2MCRL2_OBJECTS) $(LDFLAGS) $(PNML2MCRL2_LDFLAGS)
-else
-$(PNML2MCRL2_NAME) :
-	@echo cannot make target $@ because the xml2 library cannot be used
-endif
-
-$(INSTAN_NAME) : $(INSTAN_OBJECTS) $(ATERM_DEP) $(LIBSVC_NAME) $(LIBPARSER_NAME) $(LIBREWR_NAME)
-	$(CC) -o $@ $(INSTAN_OBJECTS) $(LDFLAGS) $(INSTAN_LDFLAGS)
-
-$(SIM_NAME) : $(SIM_OBJECTS) $(ATERM_DEP) $(LIBPARSER_NAME) $(LIBREWR_NAME)
+$(SIM_NAME) : $(SIM_OBJECTS) $(ATERM_DEP) $(LIBREWR_NAME)
 	$(CC) -o $@ $(SIM_OBJECTS) $(LDFLAGS) $(SIM_LDFLAGS)
 
 ifdef USE_WX
-$(XSIM_NAME): $(XSIM_OBJECTS) $(ATERM_DEP) $(LIBPARSER_NAME) $(LIBREWR_NAME)
+$(XSIM_NAME): $(XSIM_OBJECTS) $(ATERM_DEP) $(LIBREWR_NAME)
 	$(CXX) -o $@ $(XSIM_OBJECTS) $(LDFLAGS) $(XSIM_LDFLAGS)
 
-$(XSIMTRACE_NAME): $(XSIMTRACE_OBJECTS) $(ATERM_DEP) $(LIBPARSER_NAME) $(LIBREWR_NAME)
+$(XSIMTRACE_NAME): $(XSIMTRACE_OBJECTS) $(ATERM_DEP) $(LIBREWR_NAME)
 	$(CXX) -o $@ $(XSIMTRACE_OBJECTS) $(LDFLAGS) $(XSIMTRACE_LDFLAGS)
 else
 $(XSIM_NAME):
@@ -246,6 +218,33 @@ $(XSIM_NAME):
 $(XSIMTRACE_NAME):
 	@echo cannot make target $@ because the wxWidgets library cannot be used
 endif
+
+$(LPEREWR_NAME) : $(LPEREWR_OBJECTS) $(ATERM_DEP) $(LIBREWR_NAME)
+	$(CC) -o $@ $(LPEREWR_OBJECTS) $(LDFLAGS) $(LPEREWR_LDFLAGS)
+
+$(LPE2LTS_NAME) : $(LPE2LTS_OBJECTS) $(ATERM_DEP) $(LIBSVC_NAME) $(LIBREWR_NAME)
+	$(CC) -o $@ $(LPE2LTS_OBJECTS) $(LDFLAGS) $(LPE2LTS_LDFLAGS)
+
+$(TBF2LPE_NAME) : $(TBF2LPE_OBJECTS) $(ATERM_DEP)
+	$(CC) -o $@ $(TBF2LPE_OBJECTS) $(LDFLAGS) $(TBF2LPE_LDFLAGS)
+
+ifdef USE_XML2
+$(PNML2MCRL2_NAME) : $(PNML2MCRL2_OBJECTS) $(ATERM_DEP)
+	$(CC) -o $@ $(PNML2MCRL2_OBJECTS) $(LDFLAGS) $(PNML2MCRL2_LDFLAGS)
+else
+$(PNML2MCRL2_NAME) :
+	@echo cannot make target $@ because the xml2 library cannot be used
+endif
+
+$(ALPHA_NAME) : $(ALPHA_OBJECTS) $(ATERM_DEP)
+	$(CC) -o $@ $(ALPHA_OBJECTS) $(LDFLAGS) $(ALPHA_LDFLAGS)
+
+$(LIN_NAME) : $(LIN_OBJECTS) $(ATERM_DEP) $(LIBREWR_NAME)
+	$(CC) -o $@ $(LIN_OBJECTS) $(LDFLAGS) $(LIN_LDFLAGS)
+
+$(LIBPARSER_NAME) : $(LIBPARSER_OBJECTS) $(ATERM_DEP)
+	$(AR) $(ARFLAGS) $@ $(LIBPARSER_OBJECTS)
+#	$(CC) -shared -o $@ $(LIBPARSER_OBJECTS)
 
 %.c : %.y
 	$(BISON) $(BFLAGS) -o $@ $<
@@ -272,10 +271,10 @@ ifeq (,$(findstring $(MAKECMDGOALS),clean distclean))
 -include $(foreach s,$(OBJECTS),$(shell if test -f $(basename $s).cpp; then echo -n $(basename $s).dpp; fi))
 endif
 
-#Note: to make a shared version of the gsparse library instead of a static one, do the following:
+#Note: to make a shared version of the gsrewr library instead of a static one, do the following:
 #- add the option `-fpic' to CFLAGS
-#- change the `a' suffix to `so' in LIBPARSER_NAME
-#- in the rule with target $(LIBPARSER_NAME), replace the command by
-#    $(CC) -shared -o $@ $(LIBPARSER_OBJECTS) $(LIBPARSER_LDFLAGS)
+#- change the `a' suffix to `so' in LIBREWR_NAME
+#- in the rule with target $(LIBREWR_NAME), replace the command by
+#    $(CC) -shared -o $@ $(LIBREWR_OBJECTS) $(LIBREWR_LDFLAGS)
 #- extend the environment variable LD_LIBRARY_PATH with `.'
 

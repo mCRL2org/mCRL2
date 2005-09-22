@@ -259,7 +259,7 @@ void StudioProj::OnAddAnal( wxCommandEvent &event )
 
 void StudioProj::OnAbout( wxCommandEvent &event )
 {
-    wxMessageDialog dialog( this, wxT("GenSpect GUI"),
+    wxMessageDialog dialog( this, wxT("mCRL2 Studio"),
         wxT("About XSim"), wxOK|wxICON_INFORMATION );
     dialog.ShowModal();
 }

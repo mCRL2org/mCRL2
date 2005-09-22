@@ -9,7 +9,7 @@ extern "C" {
 #include "lin_alt.h"
 #include "gsfunc.h"
 #include "gslowlevel.h"
-#include "libgsparse.h"
+#include "libprint_c.h"
 #include "libgsrewrite.h"
 
 /* Global variables */

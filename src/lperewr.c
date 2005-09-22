@@ -14,7 +14,7 @@ extern "C" {
 #include "gslexer.h"
 #include "gstypecheck.h"
 #include "gsdataimpl.h"
-#include "libgsparse.h"
+#include "libprint_c.h"
 #include "libgsrewrite.h"
 
 static bool gsIsLPESpec(ATermAppl Spec)

@@ -2,8 +2,7 @@
 extern "C" {
 #endif
 
-#include <stdio.h>
-#include <aterm2.h>
+#include "libprint_c.h"
 
 #define GS_PRINT_C
 #include "libprint_common.h"

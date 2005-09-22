@@ -18,7 +18,7 @@
 #include <aterm2.h>
 #include "gsfunc.h"
 #include "gslowlevel.h"
-#include "libgsparse.h"
+#include "libprint_c.h"
 
 void add_id(ATermList *ids, ATermAppl id)
 {

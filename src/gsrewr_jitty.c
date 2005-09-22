@@ -12,7 +12,7 @@ extern "C" {
 #include "gslowlevel.h"
 #include "gsfunc.h"
 #include "gsrewr_jitty.h"
-#include "libgsparse.h"
+#include "libprint_c.h"
 #include "gssubstitute.h"
 
 extern ATermList opid_eqns;

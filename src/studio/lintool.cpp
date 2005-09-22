@@ -9,8 +9,13 @@
 #endif
 
 #include "lintool.h"
-#include "gslinearise2.h"
-#include "libgsparse.h"
+#include "gslowlevel.h"
+#include "gsfunc.h"
+#include "libprint_cxx.h"
+#include "gslexer.h"
+#include "gstypecheck.h"
+#include "gsdataimpl.h"
+#include "lin_alt.h"
 
 void LineariseTool::GetOption(gsToolOption &opt)
 {
@@ -81,8 +86,31 @@ void* LineariseTool::Entry()
 		return 0;
 	}
 
-	ATermAppl Spec = gsParseSpecification(SpecStream,true);
-	Spec = gsLinearise2(Spec,true);
+	gsEnableConstructorFunctions();
+        //parse specification
+        gsVerboseMsg("parsing...\n");
+        ATermAppl Spec = gsParse(SpecStream);
+	fclose(SpecStream);
+        if (Spec == NULL) {
+          gsErrorMsg("parsing failed\n");
+          return 0;
+        }
+        //type check specification
+        gsVerboseMsg("type checking...\n");
+        Spec = gsTypeCheck(Spec);
+        if (Spec == NULL) {
+          gsErrorMsg("type checking failed\n");
+          return 0;
+        }
+        //implement standard data types and type constructors
+        gsVerboseMsg("implementing standard data types and type constructors...\n");
+        Spec = gsImplementData(Spec);
+        if (Spec == NULL) {
+          gsErrorMsg("data implementation failed\n");
+          return 0;
+        }
+        t_lin_options lin_options;
+	Spec = linearise_alt(Spec, lin_options);
 	ATwriteToTextFile((ATerm) Spec,OutFile);
 
 	fclose(OutFile);

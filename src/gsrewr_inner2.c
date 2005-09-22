@@ -11,7 +11,7 @@ extern "C" {
 #include "gslowlevel.h"
 #include "gsfunc.h"
 #include "gsrewr_inner2.h"
-#include "libgsparse.h"
+#include "libprint_c.h"
 
 extern ATermList opid_eqns;
 extern ATermList dataappl_eqns;

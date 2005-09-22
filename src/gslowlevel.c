@@ -9,7 +9,7 @@ extern "C" {
 #include <ctype.h>
 
 #include "gslowlevel.h"
-#include "libgsparse.h"
+#include "libprint_c.h"
 
 //String manipulation
 //-------------------

@@ -13,10 +13,9 @@ extern "C" {
 #include <libxml/xmlmemory.h>
 #include <libxml/parser.h>
 #include <aterm2.h>
-#include "libgsparse.h"
 #include "gslowlevel.h"
 #include "gsfunc.h"
-#include "libgsparse.h"
+#include "libprint_c.h"
 #include "gstypecheck.h"
   
   typedef struct {

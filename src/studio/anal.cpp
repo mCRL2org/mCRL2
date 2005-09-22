@@ -38,7 +38,7 @@ BEGIN_EVENT_TABLE(StudioAnal,wxFrame)
 END_EVENT_TABLE()
 
 StudioAnal::StudioAnal( wxWindow *parent, gsAnalysis *analysis, gsObjectCollection *oc ) :
-    wxFrame( parent, -1,wxT("GenSpect Analysis"), wxDefaultPosition, wxDefaultSize,
+    wxFrame( parent, -1,wxT("mCRL2 Analysis"), wxDefaultPosition, wxDefaultSize,
 	     wxDEFAULT_FRAME_STYLE )
 {
     CreateMenu();
@@ -205,7 +205,7 @@ void StudioAnal::OnTmpExec( wxCommandEvent &event )
 
 void StudioAnal::OnAbout( wxCommandEvent &event )
 {
-    wxMessageDialog dialog( this, wxT("GenSpect GUI"),
+    wxMessageDialog dialog( this, wxT("mCRL2 Studio"),
         wxT("About XSim"), wxOK|wxICON_INFORMATION );
     dialog.ShowModal();
 }

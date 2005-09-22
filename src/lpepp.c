@@ -19,7 +19,7 @@ extern "C" {
 #include "lpepp.h"
 #include "gsfunc.h"
 #include "gslowlevel.h"
-#include "libgsparse.h"
+#include "libprint_c.h"
 
 //local declarations
 

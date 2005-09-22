@@ -6,7 +6,6 @@
 #include <getopt.h>
 #include <aterm2.h>
 #include "gsfunc.h"
-#include "libgsparse.h"
 #include "lpetrans.h"
 
 void print_help(FILE *f)

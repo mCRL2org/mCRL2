@@ -1,4 +1,4 @@
-#include "libprint.h"
+#include "libprint_cxx.h"
 #include <sstream>
 
 #define GS_PRINT_CXX 1

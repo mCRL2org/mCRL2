@@ -17,10 +17,9 @@
 #include "xsimmain.h"
 #include "gslowlevel.h"
 #include "gsfunc.h"
-#include "libgsparse.h"
 #include "libgsnextstate.h"
 #include "libgsrewrite.h"
-#include "libprint.h"
+#include "libprint_cxx.h"
 
 using namespace std;
 

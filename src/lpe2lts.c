@@ -12,7 +12,7 @@ extern "C" {
 #include "svc/svc.h" //XXX
 #include "gslowlevel.h"
 #include "gsfunc.h"
-#include "libgsparse.h"
+#include "libprint_c.h"
 #include "libgsnextstate.h"
 #include "libgsrewrite.h"
 

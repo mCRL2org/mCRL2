@@ -23,7 +23,7 @@ void SimulatorTool::SetOption(gsToolOption &opt)
 
 void SimulatorTool::Execute(gsObject *in, gsObject *out, wxWindow *parent)
 {
-	win = new XSimMain(parent,-1,wxT("GenSpect GUI Simulator"));
+	win = new XSimMain(parent,-1,wxT("mCRL2 Simulator"));
 	win->LoadFile(in->GetFilename());
 	if ( win->GetState() )
 	{

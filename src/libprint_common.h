@@ -1,3 +1,7 @@
+//This file contains a generic implementation of the PrintPart functions for
+//both C and C++. It should NEVER be included directly. Use libprint_c.h and
+//libprint_cxx.h instead.
+
 #ifdef GS_PRINT_C
 #include <stdio.h>
 #include <stdlib.h>

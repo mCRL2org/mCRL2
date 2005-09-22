@@ -11,7 +11,7 @@ extern "C" {
 #include <aterm2.h>
 #include "gslowlevel.h"
 #include "gsfunc.h"
-#include "libgsparse.h"
+#include "libprint_c.h"
 #include "libgsalpha.h"
 
 extern ATermAppl gsParse(FILE *);

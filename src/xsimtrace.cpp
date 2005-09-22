@@ -13,7 +13,7 @@
 #include "xsimtrace.h"
 #include "gslowlevel.h"
 #include "gsfunc.h"
-#include "libprint.h"
+#include "libprint_cxx.h"
 #include "libgsnextstate.h"
 
 using namespace std;
