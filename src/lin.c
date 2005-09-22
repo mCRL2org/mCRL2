@@ -1,4 +1,3 @@
-/* $Id: lin.c,v 1.8 2005/05/05 16:59:02 muck Exp $ */
 #ifdef __cplusplus
 extern "C" {
 #endif
@@ -11,7 +10,11 @@ extern "C" {
 #include <getopt.h>
 #include <aterm2.h>
 #include "gsfunc.h"
+#include "gslowlevel.h"
 #include "libgsparse.h"
+#include "gslexer.h"
+#include "gstypecheck.h"
+#include "gsdataimpl.h"
 #include "lin_alt.h"
 
 void print_help(FILE *f, char *Name)
@@ -116,17 +119,33 @@ int main(int argc, char **argv)
 		perror(NAME);
 		return 1;
 	}
+	gsEnableConstructorFunctions();
 	if ( read_aterm )
 	{
-		gsEnableConstructorFunctions();
 		Spec = (ATermAppl) ATreadFromFile(SpecStream);
 	} else {
-		Spec = gsParseSpecification(SpecStream, true);
+                //parse specification
+                gsVerboseMsg("parsing...\n");
+                Spec = gsParse(SpecStream);
 		fclose(SpecStream);
-	}
-	if ( Spec == NULL )
-	{
-		return 1;
+                if (Spec == NULL) {
+                  gsErrorMsg("parsing failed\n");
+                  return 1;
+                }
+                //type check specification
+                gsVerboseMsg("type checking...\n");
+                Spec = gsTypeCheck(Spec);
+                if (Spec == NULL) {
+                  gsErrorMsg("type checking failed\n");
+                  return 1;
+                }
+                //implement standard data types and type constructors
+                gsVerboseMsg("implementing standard data types and type constructors...\n");
+                Spec = gsImplementData(Spec);
+                if (Spec == NULL) {
+                  gsErrorMsg("data implementation failed\n");
+                  return 1;
+                }
 	}
 
 	if ( argc-optind > 1 )
@@ -195,7 +214,7 @@ int main(int argc, char **argv)
 
 	if ( human )
 	{
-		gsPrintSpecification(OutFile,Spec);
+		PrettyPrint(OutFile, (ATerm) Spec);
 	} else {
 		ATwriteToTextFile((ATerm) Spec,OutFile);
 	}

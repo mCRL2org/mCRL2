@@ -11,6 +11,9 @@ extern "C" {
 #include <aterm2.h>
 #include "gslowlevel.h"
 #include "gsfunc.h"
+#include "gslexer.h"
+#include "gstypecheck.h"
+#include "gsdataimpl.h"
 #include "libgsparse.h"
 #include "libgsrewrite.h"
 
@@ -249,17 +252,33 @@ int main(int argc, char **argv)
 		}
 	}
 
+	gsEnableConstructorFunctions();
 	if ( read_aterm )
 	{
-		gsEnableConstructorFunctions();
 		Spec = (ATermAppl) ATreadFromFile(SpecStream);
 	} else {
-		Spec = gsParseSpecification(SpecStream, true);
+                //parse specification
+                gsVerboseMsg("parsing...\n");
+                Spec = gsParse(SpecStream);
 		fclose(SpecStream);
-	}
-	if ( Spec == NULL )
-	{
-		return 1;
+                if (Spec == NULL) {
+                  gsErrorMsg("parsing failed\n");
+                  return 1;
+                }
+                //type check specification
+                gsVerboseMsg("type checking...\n");
+                Spec = gsTypeCheck(Spec);
+                if (Spec == NULL) {
+                  gsErrorMsg("type checking failed\n");
+                  return 1;
+                }
+                //implement standard data types and type constructors
+                gsVerboseMsg("implementing standard data types and type constructors...\n");
+                Spec = gsImplementData(Spec);
+                if (Spec == NULL) {
+                  gsErrorMsg("data implementation failed\n");
+                  return 1;
+                }
 	}
 
 	gsRewriteInit(ATAgetArgument(Spec,3),strat);
@@ -291,7 +310,7 @@ int main(int argc, char **argv)
 		{
 			ATwriteToTextFile((ATerm) Spec,OutStream);
 		} else {
-			gsPrintSpecification(OutStream,Spec);
+			PrettyPrint(OutStream, (ATerm) Spec);
 		}
 		if ( OutStream != stdout )
 		{

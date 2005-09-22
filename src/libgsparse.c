@@ -53,51 +53,6 @@ void gsPrintParts(FILE *OutStream, const ATermList Parts, bool ShowSorts,
 
 //implementation
 
-ATermAppl gsParseSpecification (FILE *SpecStream, bool ImplementData)
-{
-  //check preconditions
-  if (SpecStream == NULL) {
-    gsErrorMsg("formula stream may not be empty\n");
-    return NULL;
-  }
-  //enable constructor functions
-  gsEnableConstructorFunctions();
-  //parse specification using bison
-  gsVerboseMsg("parsing...\n");
-  ATermAppl Result = gsParse(SpecStream);
-  if (Result == NULL) {
-    gsErrorMsg("parsing failed\n");
-    return NULL;
-  }
-  //type check specification
-  gsVerboseMsg("type checking...\n");
-  Result = gsTypeCheck(Result);
-  if (Result == NULL) {
-    gsErrorMsg("type checking failed\n");
-    return NULL;
-  }
-  //implement standard data types and type constructors
-  if (ImplementData) {
-    gsVerboseMsg("implementing standard data types and type constructors...\n");
-    Result = gsImplementData(Result);
-    if (Result == NULL) {
-      gsErrorMsg("data implementation failed\n");
-      return NULL;
-    }
-  }
-  gsDebugMsg("return %t\n", Result);
-  return Result;
-}
-
-void gsPrintSpecification(FILE *OutStream, const ATermAppl Spec)
-{
-  assert(Spec != NULL);
-  //enable constructor functions
-  gsEnableConstructorFunctions();
-  //print Spec to OutStream
-  gsPrintPart(OutStream, Spec, false, 0);
-}
-
 #define GS_PRINT_FILE
 #include "libprint_common.h"
 

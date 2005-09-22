@@ -97,7 +97,6 @@ int main(int argc, char **argv)
 		gsEnableConstructorFunctions();
 		Spec = gsParse(SpecStream);
 		Spec = gsTypeCheck(Spec);
-		//Spec = gsParseSpecification(SpecStream, false);
 		fclose(SpecStream);
 	}
 	if ( Spec == NULL )
@@ -111,7 +110,7 @@ int main(int argc, char **argv)
 	{
 		ATwriteToTextFile((ATerm) Spec,OutStream);
 	} else {
-		gsPrintSpecification(OutStream,Spec);
+		PrettyPrint(OutStream, (ATerm) Spec);
 	}
 	if ( OutStream != stdout )
 	{
