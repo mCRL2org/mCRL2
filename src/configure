@@ -312,7 +312,7 @@ ac_includes_default="\
 # include <unistd.h>
 #endif"
 
-ac_subst_vars='SHELL PATH_SEPARATOR PACKAGE_NAME PACKAGE_TARNAME PACKAGE_VERSION PACKAGE_STRING PACKAGE_BUGREPORT exec_prefix prefix program_transform_name bindir sbindir libexecdir datadir sysconfdir sharedstatedir localstatedir libdir includedir oldincludedir infodir mandir build_alias host_alias target_alias DEFS ECHO_C ECHO_N ECHO_T LIBS build build_cpu build_vendor build_os host host_cpu host_vendor host_os HOST_OS CC CFLAGS LDFLAGS CPPFLAGS ac_ct_CC EXEEXT OBJEXT CPP CXX CXXFLAGS ac_ct_CXX LEX LEXLIB LEX_OUTPUT_ROOT BISON EGREP ATERM_NAME BUILD_ATERM USE_XML2 WX_CONFIG USE_WX WX_LIBS LIBOBJS LTLIBOBJS'
+ac_subst_vars='SHELL PATH_SEPARATOR PACKAGE_NAME PACKAGE_TARNAME PACKAGE_VERSION PACKAGE_STRING PACKAGE_BUGREPORT exec_prefix prefix program_transform_name bindir sbindir libexecdir datadir sysconfdir sharedstatedir localstatedir libdir includedir oldincludedir infodir mandir build_alias host_alias target_alias DEFS ECHO_C ECHO_N ECHO_T LIBS build build_cpu build_vendor build_os host host_cpu host_vendor host_os HOST_OS CC CFLAGS LDFLAGS CPPFLAGS ac_ct_CC EXEEXT OBJEXT CPP CXX CXXFLAGS ac_ct_CXX LEX LEXLIB LEX_OUTPUT_ROOT BISON EGREP ATERM_NAME BUILD_ATERM USE_XML2 BOOST_PREFIX USE_BOOST WX_CONFIG USE_WX WX_LIBS LIBOBJS LTLIBOBJS'
 ac_subst_files=''
 
 # Initialize some variables set by options.
@@ -871,6 +871,8 @@ Optional Packages:
 
   --with-xml2-header=dir  use xml2 headers from dir/libxml; defaults to
                           /usr/include/libxml2
+
+  --with-boost=prefix     try this for the boost prefix install directory
 
   --with-wx=dir           use wxWidgets configuration program wx-config in dir
 
@@ -4016,7 +4018,7 @@ fi
 
 # Set flags
 CPPFLAGS=""
-CFLAGS="-std=c99"
+CFLAGS="-std=c99 -O2"
 CXXFLAGS=""
 LDFLAGS="-L. -Lsvc"
 
@@ -5029,6 +5031,136 @@ if test $have_libxml2; then
   fi
 fi
 
+
+# Check for Boost C++ library
+
+# Check whether --with-boost or --without-boost was given.
+if test "${with_boost+set}" = set; then
+  withval="$with_boost"
+
+fi;
+echo "$as_me:$LINENO: checking for the Boost C++ libraries" >&5
+echo $ECHO_N "checking for the Boost C++ libraries... $ECHO_C" >&6
+if test $with_boost; then
+  cat >conftest.$ac_ext <<_ACEOF
+/* confdefs.h.  */
+_ACEOF
+cat confdefs.h >>conftest.$ac_ext
+cat >>conftest.$ac_ext <<_ACEOF
+/* end confdefs.h.  */
+
+      #include "$with_boost/include/boost/version.hpp"
+
+int
+main ()
+{
+
+  ;
+  return 0;
+}
+_ACEOF
+rm -f conftest.$ac_objext
+if { (eval echo "$as_me:$LINENO: \"$ac_compile\"") >&5
+  (eval $ac_compile) 2>conftest.er1
+  ac_status=$?
+  grep -v '^ *+' conftest.er1 >conftest.err
+  rm -f conftest.er1
+  cat conftest.err >&5
+  echo "$as_me:$LINENO: \$? = $ac_status" >&5
+  (exit $ac_status); } &&
+	 { ac_try='test -z "$ac_c_werror_flag"
+			 || test ! -s conftest.err'
+  { (eval echo "$as_me:$LINENO: \"$ac_try\"") >&5
+  (eval $ac_try) 2>&5
+  ac_status=$?
+  echo "$as_me:$LINENO: \$? = $ac_status" >&5
+  (exit $ac_status); }; } &&
+	 { ac_try='test -s conftest.$ac_objext'
+  { (eval echo "$as_me:$LINENO: \"$ac_try\"") >&5
+  (eval $ac_try) 2>&5
+  ac_status=$?
+  echo "$as_me:$LINENO: \$? = $ac_status" >&5
+  (exit $ac_status); }; }; then
+
+       BOOST_PREFIX=$with_boost
+
+       USE_BOOST=1
+
+else
+  echo "$as_me: failed program was:" >&5
+sed 's/^/| /' conftest.$ac_ext >&5
+
+
+
+fi
+rm -f conftest.err conftest.$ac_objext conftest.$ac_ext
+else
+  cat >conftest.$ac_ext <<_ACEOF
+/* confdefs.h.  */
+_ACEOF
+cat confdefs.h >>conftest.$ac_ext
+cat >>conftest.$ac_ext <<_ACEOF
+/* end confdefs.h.  */
+
+      #include <boost/version.hpp>
+
+int
+main ()
+{
+
+  ;
+  return 0;
+}
+_ACEOF
+rm -f conftest.$ac_objext
+if { (eval echo "$as_me:$LINENO: \"$ac_compile\"") >&5
+  (eval $ac_compile) 2>conftest.er1
+  ac_status=$?
+  grep -v '^ *+' conftest.er1 >conftest.err
+  rm -f conftest.er1
+  cat conftest.err >&5
+  echo "$as_me:$LINENO: \$? = $ac_status" >&5
+  (exit $ac_status); } &&
+	 { ac_try='test -z "$ac_c_werror_flag"
+			 || test ! -s conftest.err'
+  { (eval echo "$as_me:$LINENO: \"$ac_try\"") >&5
+  (eval $ac_try) 2>&5
+  ac_status=$?
+  echo "$as_me:$LINENO: \$? = $ac_status" >&5
+  (exit $ac_status); }; } &&
+	 { ac_try='test -s conftest.$ac_objext'
+  { (eval echo "$as_me:$LINENO: \"$ac_try\"") >&5
+  (eval $ac_try) 2>&5
+  ac_status=$?
+  echo "$as_me:$LINENO: \$? = $ac_status" >&5
+  (exit $ac_status); }; }; then
+
+
+       USE_BOOST=1
+
+else
+  echo "$as_me: failed program was:" >&5
+sed 's/^/| /' conftest.$ac_ext >&5
+
+
+
+fi
+rm -f conftest.err conftest.$ac_objext conftest.$ac_ext
+#  AC_CHECK_PROG([BOOST_CONFIG],[boost-config],[wx-config])
+fi
+
+if test $USE_BOOST; then
+  echo "$as_me:$LINENO: result: yes" >&5
+echo "${ECHO_T}yes" >&6
+else
+  echo "$as_me:$LINENO: result: no" >&5
+echo "${ECHO_T}no" >&6
+
+  { echo "$as_me:$LINENO: The Boost C++ libraries are required for certain tools in the toolset." >&5
+echo "$as_me: The Boost C++ libraries are required for certain tools in the toolset." >&6;}
+  { echo "$as_me:$LINENO: They can be obtained from http://www.boost.org." >&5
+echo "$as_me: They can be obtained from http://www.boost.org." >&6;}
+fi
 
 # Check for wxWidgets
 
@@ -6106,7 +6238,40 @@ fi
 done
 
 
-                    ac_config_files="$ac_config_files Makefile gsrewr_innerc_aux.h"
+{ echo "$as_me:$LINENO: " >&5
+echo "$as_me: " >&6;}
+{ echo "$as_me:$LINENO: " >&5
+echo "$as_me: " >&6;}
+if test $USE_WX; then
+  { echo "$as_me:$LINENO: wxWidgets     :  FOUND" >&5
+echo "$as_me: wxWidgets     :  FOUND" >&6;}
+else
+  { echo "$as_me:$LINENO: wxWidgets     :  MISSING" >&5
+echo "$as_me: wxWidgets     :  MISSING" >&6;}
+fi
+if test $USE_XML2; then
+  { echo "$as_me:$LINENO: libXML2       :  FOUND" >&5
+echo "$as_me: libXML2       :  FOUND" >&6;}
+else
+  { echo "$as_me:$LINENO: libXML2       :  MISSING" >&5
+echo "$as_me: libXML2       :  MISSING" >&6;}
+fi
+if test $USE_BOOST; then
+  { echo "$as_me:$LINENO: Boost         :  FOUND" >&5
+echo "$as_me: Boost         :  FOUND" >&6;}
+else
+  { echo "$as_me:$LINENO: Boost         :  MISSING" >&5
+echo "$as_me: Boost         :  MISSING" >&6;}
+fi
+
+{ echo "$as_me:$LINENO: " >&5
+echo "$as_me: " >&6;}
+{ echo "$as_me:$LINENO: Some tools will not be build if any of these libraries are missing." >&5
+echo "$as_me: Some tools will not be build if any of these libraries are missing." >&6;}
+{ echo "$as_me:$LINENO: " >&5
+echo "$as_me: " >&6;}
+
+                              ac_config_files="$ac_config_files Makefile gsrewr_innerc_aux.h config"
 
 cat >confcache <<\_ACEOF
 # This file is a shell script that caches the results of configure
@@ -6660,6 +6825,7 @@ do
   # Handling of arguments.
   "Makefile" ) CONFIG_FILES="$CONFIG_FILES Makefile" ;;
   "gsrewr_innerc_aux.h" ) CONFIG_FILES="$CONFIG_FILES gsrewr_innerc_aux.h" ;;
+  "config" ) CONFIG_FILES="$CONFIG_FILES config" ;;
   *) { { echo "$as_me:$LINENO: error: invalid argument: $ac_config_target" >&5
 echo "$as_me: error: invalid argument: $ac_config_target" >&2;}
    { (exit 1); exit 1; }; };;
@@ -6771,6 +6937,8 @@ s,@EGREP@,$EGREP,;t t
 s,@ATERM_NAME@,$ATERM_NAME,;t t
 s,@BUILD_ATERM@,$BUILD_ATERM,;t t
 s,@USE_XML2@,$USE_XML2,;t t
+s,@BOOST_PREFIX@,$BOOST_PREFIX,;t t
+s,@USE_BOOST@,$USE_BOOST,;t t
 s,@WX_CONFIG@,$WX_CONFIG,;t t
 s,@USE_WX@,$USE_WX,;t t
 s,@WX_LIBS@,$WX_LIBS,;t t
@@ -7038,4 +7206,5 @@ if test "$no_create" != yes; then
   # would make configure fail if this is the last instruction.
   $ac_cs_success || { (exit 1); exit 1; }
 fi
+
 

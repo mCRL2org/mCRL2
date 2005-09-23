@@ -22,6 +22,8 @@ BUILD_ATERM        = @BUILD_ATERM@
 USE_XML2           = @USE_XML2@
 USE_WX             = @USE_WX@
 WX_LIBS            = @WX_LIBS@
+USE_BOOST          = @USE_BOOST@
+BOOST_PREFIX       = @BOOST_PREFIX@
 
 #installation directories
 prefix             = @prefix@
@@ -147,6 +149,11 @@ OBJECTS           := $(sort $(OBJECTS))
 .PRECIOUS: gsparser.c gslexer.c
 
 all : $(EXE_NAMES) $(LIB_NAMES)
+ifdef USE_BOOST
+	$(MAKE) -C lpe
+else
+	@echo "Missing Boost libraries so skipping build of lpeinfo and lpeconstelm."
+endif
 
 install: all
 	$(INSTALL) -d $(bindir)
@@ -181,7 +188,7 @@ endif
 
 clean :
 	$(RM) $(EXE_NAMES) $(LIB_NAMES) *.o *.a *.d *.dpp aterm/*.o aterm/*.a aterm/*.d svc/*.o svc/*.a svc/*.d\
-        gslexer.c gsparser.c gsparser.h gsparser.output config.status config.log *~ core core.*
+        gslexer.c gsparser.c gsparser.h gsparser.output lpeinfo lpeconstelm config.status config.log *~ core core.*
 
 distclean : clean
 	$(RM) -r autom4te.cache Makefile gsrewr_innerc_aux.h

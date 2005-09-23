@@ -43,7 +43,7 @@ fi
 
 # Set flags
 CPPFLAGS=""
-CFLAGS="-std=c99"
+CFLAGS="-std=c99 -O2"
 CXXFLAGS=""
 LDFLAGS="-L. -Lsvc"
 
@@ -165,6 +165,51 @@ if test $have_libxml2; then
 fi
 AC_SUBST([USE_XML2],[])
 
+# Check for Boost C++ library
+AC_ARG_WITH(
+  [boost],
+  AC_HELP_STRING(
+    [--with-boost=prefix],
+    [try this for the boost prefix install directory]
+  )
+)
+AC_MSG_CHECKING([for the Boost C++ libraries])
+if test $with_boost; then
+  AC_TRY_COMPILE(
+     [
+      #include "$with_boost/include/boost/version.hpp"
+     ],
+     [],
+     [
+       AC_SUBST([BOOST_PREFIX],[$with_boost])
+       USE_BOOST=1
+     ],
+     [
+     ])
+else 
+  AC_TRY_COMPILE(
+     [
+      #include <boost/version.hpp>
+     ],
+     [],
+     [
+       AC_SUBST([BOOST_PREFIX],[])
+       USE_BOOST=1
+     ],
+     [
+     ])
+#  AC_CHECK_PROG([BOOST_CONFIG],[boost-config],[wx-config])
+fi
+
+if test $USE_BOOST; then
+  AC_MSG_RESULT(yes)
+else
+  AC_MSG_RESULT(no)
+  AC_SUBST([USE_BOOST],[])
+  AC_MSG_NOTICE(The Boost C++ libraries are required for certain tools in the toolset.)
+  AC_MSG_NOTICE(They can be obtained from http://www.boost.org.)
+fi
+
 # Check for wxWidgets
 AC_ARG_WITH(
   [wx],
@@ -199,5 +244,28 @@ AC_TYPE_SIZE_T
 AC_FUNC_MALLOC
 AC_CHECK_FUNCS([strdup])
 
-AC_CONFIG_FILES([Makefile gsrewr_innerc_aux.h])
+AC_MSG_NOTICE()
+AC_MSG_NOTICE()
+if test $USE_WX; then
+  AC_MSG_NOTICE(wxWidgets     :  FOUND)
+else
+  AC_MSG_NOTICE(wxWidgets     :  MISSING)
+fi
+if test $USE_XML2; then
+  AC_MSG_NOTICE(libXML2       :  FOUND)
+else
+  AC_MSG_NOTICE(libXML2       :  MISSING)
+fi
+if test $USE_BOOST; then
+  AC_MSG_NOTICE(Boost         :  FOUND)
+else
+  AC_MSG_NOTICE(Boost         :  MISSING)
+fi
+
+AC_MSG_NOTICE()
+AC_MSG_NOTICE(Some tools will not be build if any of these libraries are missing.)
+AC_MSG_NOTICE()
+
+AC_CONFIG_FILES([Makefile gsrewr_innerc_aux.h config])
 AC_OUTPUT
+

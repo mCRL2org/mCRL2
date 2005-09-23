@@ -1,0 +1,43 @@
+#Redefine default definitions using autoconf
+HOST_OS            = @HOST_OS@
+CC                 = @CC@
+CFLAGS             = @CFLAGS@
+CPP                = @CPP@
+CPPFLAGS           = @CPPFLAGS@
+CXX                = @CXX@
+CXXFLAGS           = @CXXFLAGS@
+ifeq ($(HOST_OS),MACOSX)
+LDFLAGS            = @LDFLAGS@
+else
+LDFLAGS            = -Wl,-rpath,$(libdir) -rdynamic @LDFLAGS@
+endif
+ARFLAGS            = crs
+INSTALL            = install
+LEX                = @LEX@
+LFLAGS             = -I -Pgsyy
+BISON              = @BISON@
+BFLAGS             = -d -pgsyy
+ATERM              = @ATERM_NAME@ 
+BUILD_ATERM        = @BUILD_ATERM@
+USE_XML2           = @USE_XML2@
+USE_WX             = @USE_WX@
+WX_LIBS            = @WX_LIBS@
+USE_BOOST          = @USE_BOOST@
+BOOST_PREFIX       = @BOOST_PREFIX@
+
+#installation directories
+prefix             = @prefix@
+exec_prefix        = @exec_prefix@
+bindir             = @bindir@
+libdir             = @libdir@
+datadir            = @datadir@
+includedir         = @includedir@
+infodir            = @infodir@
+mandir             = @mandir@
+
+#Environment variable for Mac
+ifeq ($(HOST_OS),MACOSX)
+MACOSX_DEPLOYMENT_TARGET = 10.3
+export MACOSX_DEPLOYMENT_TARGET
+endif
+
