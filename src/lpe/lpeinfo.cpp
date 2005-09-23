@@ -18,40 +18,45 @@ int display(string filename, int opt)
 {
   
   int outputvar;
-  aterm_appl t = read_from_named_file(filename).to_appl();
+  LPE lpe = read_from_named_file(filename).to_appl();
   if (!t)
-    cerr << "could not read file!" << endl;
+    cerr << "could not read " << vm["input-file"].as<string>() << endl;
   
   if (opt==0){
   //
   // #Summands
   //
-  LPE::summand_iterator sum_itb = LPE(t).summands_begin();
-  LPE::summand_iterator sum_ite = LPE(t).summands_end(); 
+  LPE::summand_iterator sum_itb = lpe.summands_begin();
+  LPE::summand_iterator sum_ite = lpe.summands_end(); 
   outputvar = distance(sum_itb, sum_ite);
   cout << "Number of summands :" << outputvar <<endl;
   
   //
   // #free variables
   //
-  LPE::variable_iterator var_itfb = LPE(t).free_variables_begin();
-  LPE::variable_iterator var_itfe = LPE(t).free_variables_end();
+  // #free variables of processes
+  LPE::variable_iterator var_itfb = lpe.free_variables_begin();
+  LPE::variable_iterator var_itfe = lpe.free_variables_end();
   outputvar = distance(var_itfb, var_itfe);
+  // #free variable of the init process
+  LPEInit::variable_iterator var_fvb = LPE::lpe.lpe_init().free_variables_begin();
+  LPEInit::variable_iterator var_fve = LPE::lpe.lpe_init().free_variables_end();
+  outputvar += distance(var_fvb, var_fve);  
   cout << "Number of free variables :" << outputvar <<endl;
   
   //
   // #process parameters
   //
-  LPE::variable_iterator var_itpb = LPE(t).process_parameters_begin();
-  LPE::variable_iterator var_itpe = LPE(t).process_parameters_end();
+  LPE::variable_iterator var_itpb = lpe.process_parameters_begin();
+  LPE::variable_iterator var_itpe = lpe.process_parameters_end();
   outputvar = distance(var_itpb, var_itpe);
   cout << "Number of process variables :" << outputvar <<endl; 
 
   //
   // #actions
   //
-  LPE::action_iterator act_itb = LPE(t).actions_begin();
-  LPE::action_iterator act_ite = LPE(t).actions_end();
+  LPE::action_iterator act_itb = lpe.actions_begin();
+  LPE::action_iterator act_ite = lpe.actions_end();
   
   //SEGMENTATION FAULT outputvar = distance(act_itb, act_ite);
  
@@ -60,8 +65,8 @@ int display(string filename, int opt)
   }
   
   if (opt==1){
-  LPE::variable_iterator var_itpb = LPE(t).process_parameters_begin();
-  LPE::variable_iterator var_itpe = LPE(t).process_parameters_end();
+  LPE::variable_iterator var_itpb = lpe.process_parameters_begin();
+  LPE::variable_iterator var_itpe = lpe.process_parameters_end();
 
   //Inspecteren van de iteratorlist
   string stringout_1;
@@ -79,8 +84,8 @@ int display(string filename, int opt)
   return 0; 
   }
   if (opt==2){
-    	LPE::variable_iterator var_itpb = LPE(t).process_parameters_begin();
-  	LPE::variable_iterator var_itpe = LPE(t).process_parameters_end();
+    	LPE::variable_iterator var_itpb = lpe.process_parameters_begin();
+  	LPE::variable_iterator var_itpe = lpe.process_parameters_end();
   	outputvar = distance(var_itpb, var_itpe);
   	cout << outputvar;
 	}

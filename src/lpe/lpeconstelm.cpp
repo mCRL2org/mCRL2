@@ -24,8 +24,11 @@ string version = "Version 0.1";
 //Global Vars
 vector<LPEAssignment>             iv;		//init vector
 vector<bool> 		                  fv;		//flag vector (C= True, V= False)
-vector< vector<DataExpression> >  sv; 	//(new) state vector
+vector< vector<LPEAssignment> >   sv; 	//(new) state vector
 vector< vector<bool> >            cv;		//change vector	
+
+vector< DataVariable >            lofv; //list of free variables
+//ATermAppl                         rwcon; //rewritten condition 
 
 //debug vars
 int                               noi = 0 ;  //number of iterations                               
@@ -36,49 +39,62 @@ bool substitute(LPEAssignment x){
 }
 
 
-bool cex(LPEAssignment x, LPEAssignment y)
-{
-  if ATisEqual(x.rhs().term(), y.rhs().term()) { 
+bool cex(LPEAssignment init, LPEAssignment state){
+//
+// Compares if two given assignments are equal
+// if the right hand side of "state" is a don't care 
+// they the given assignments are equal 
+//
+  if (ATisEqual(init.rhs().term(), state.rhs().term())){
     return true;
-  } 
-  else {
-    x.rhs().replace(x.rhs(),y.rhs());
-    return false;
-  } 
+  }; 
+  
+  for (unsigned int i=0; i < lofv.size() ;i++){
+    if (ATisEqual(state.rhs().term(),lofv[i].term())) {
+      return true;
+    };
+  };
+
+  return false;  
 }
 
-bool eval_datexp(DataExpression datexpr, int opt)
+int eval_datexp(DataExpression datexpr, int opt)
 {
   if (opt==3) {return(true);};
 
   for (unsigned int i=0; i < iv.size(); i++){
-    datexpr = datexpr.replace(iv[i].lhs(), iv[i].rhs());
+    if (fv[i]) {
+      datexpr = datexpr.replace(iv[i].lhs(), iv[i].rhs());
+    }
   }
 
   /**
     *   Rewrite dataxpr.term to eval
     **/
-
-  ATerm x = (ATerm) gsRewriteTerm(datexpr.term().appl());
-
-
+  
+  ATerm rwcon = (ATerm) gsRewriteTerm(datexpr.term().appl());
+  
   ATerm t = (ATerm) gsMakeDataExprTrue();
   ATerm f = (ATerm) gsMakeDataExprFalse();
 
 
  
-  if (ATisEqual(x,t) || (!ATisEqual(x,f))) 
-    { 
-      return true;
-    } else { 
-      return false;
-    };
+  if (ATisEqual(rwcon,t)){ 
+    return 0;
+  } else {
+    if (ATisEqual(rwcon,f)){ 
+      return 1;
+    } else {
+      return 2;
+    }; 
+  } 
+  
 }
 
 int const_main(string filename, int opt)
 {
 
-  vector<bool>                      pcv;  //partial change vector
+  //vector<bool>                      pcv;  //partial change vector
   vector<string>                    sovp; //set of variable process parameters
   int                               nopp; //number of process parameters
   int                               nos;  //number of summands
@@ -96,12 +112,30 @@ int const_main(string filename, int opt)
 /**
   **/
   
-aterm_appl t = read_from_named_file(filename).to_appl();
+  aterm_appl t = read_from_named_file(filename).to_appl();
   if (!t)
-    cerr << "could not read file!" << endl;
+    cerr << "could not read "<< vm["input-file"].as<string>() << endl;
   if ((opt == 0) || (opt == 1) || (opt == 2) || (opt == 3))
   {
+    //make list of free variables
+    LPEInit::variable_iterator fv_1b = LPE::LPE(t).lpe_init().free_variables_begin();
+    LPEInit::variable_iterator fv_1e = LPE::LPE(t).lpe_init().free_variables_end();
+    for(LPEInit::variable_iterator s_current =  fv_1b; s_current != fv_1e; s_current++){
+      lofv.push_back(*s_current);
+    };  
+    //concat list of free variables
+    LPE::variable_iterator fv_2b = LPE::LPE(t).free_variables_begin();
+    LPE::variable_iterator fv_2e = LPE::LPE(t).free_variables_end();
+    for(LPEInit::variable_iterator s_current =  fv_2b; s_current != fv_2e; s_current++){
+      lofv.push_back(*s_current);
+    };  
 
+    //print list of free vars
+    for (unsigned int i=0; i < lofv.size(); i++){
+      cout << DataVariable(lofv[i]).name() << " ";
+    }
+    cout << endl;
+    
     //Define rewrite rules on conditons
     gsRewriteInit(ATAgetArgument(t.appl(),3),GS_REWR_INNER3);    
 
@@ -142,59 +176,106 @@ aterm_appl t = read_from_named_file(filename).to_appl();
       for(LPE::summand_iterator s_current =  sum_itb; s_current != sum_ite; ++s_current){
         //Summand Loop
         //Each pcv should be empty
-        pcv.clear();
-
-        //Fill the pcv with all true
-        for (int i=0; i < nopp; i++){
-          pcv.push_back(true);
-        } 
-
+        //pcv.clear();
+        
         //Number of partial pcv elements
         LPESummand::assignment_iterator var_ppcvb = LPESummand(*s_current).assignments_begin();
         LPESummand::assignment_iterator var_ppcve = LPESummand(*s_current).assignments_end();
         
-        //Only check when Guard evaluates to true
-        //DataExpression cond
-        
-        // If Guard of summand is true -> 
-        if (eval_datexp(LPESummand(*s_current).condition() , opt)){
-          for (LPESummand::assignment_iterator c_obj = LPESummand(*s_current).assignments_begin(); c_obj != var_ppcve; ++c_obj){
-        
-          //Get LHS from State Vector element
-            //Get match LHS from State Vector element to LHS init vector
-            unsigned int indx;
-            for (indx = 0; indx < iv.size(); indx++){
-              if (iv[indx].lhs().name() == (LPEAssignment(*c_obj).lhs()).name()) {
-                //Compare process with init vector
-                if (!cex(iv[indx], LPEAssignment(*c_obj))) 
-                  { //Vector elements are not equal
-                  pcv[indx] = false;
-                  //Add process to list of variable processes
-                  sovp.push_back(LPEAssignment(*c_obj).lhs().name());
-                };
-              }   
-            }; 
-            //Add pcv
-            cv.push_back(pcv);
-          }
-        }
-      };	
+        int c = eval_datexp(LPESummand(*s_current).condition() , opt);
 
-      //Compare change vector with flag vector
-      vector<bool> fcv; //flattened change vector
-      for (unsigned int i=0; i < cv[0].size(); i++)
-      { bool b = true;
-        for(unsigned int j=0; j < cv.size(); j++)
-        {
-          b = b && cv[j][i];
-        }
-        //flatten change vector
-        fcv.push_back(b);
+        if ((c == 0) or (c== 2)){
+          //Summand is rewritten
+          //Create a new state vector
+          sv.push_back(iv);          
+          for (LPESummand::assignment_iterator c_obj = LPESummand(*s_current).assignments_begin(); c_obj != var_ppcve; ++c_obj){
+            for (unsigned int i=0; i < sv[sv.size()-1].size(); i++){
+              if (ATisEqual(sv[sv.size()-1][i].lhs().term(), LPEAssignment(*c_obj).lhs().term())){
+                
+                // Copy rhs of c_obj to sv
+                // sv[sv.end()][i].rhs() = LPEAssignment(*c_obj).rhs();
+                // Fill in the values
+                //
+                // No Code
+                //
+                // Rewrite the rhs of the current sv element
+                
+                // Due missing above implementation the algorithm is not working proberly
+                cout << cex(sv[sv.size()-1][i],LPEAssignment(*c_obj)) << endl; 
+                // Algorithm however detect possible changes between init vector and statevector 
+                // Only new assignments connot be made 
+                //
+              }
+              ;
+            };
+          };
+          //New state vector is computed
+           
+          //Create a new change vector from the flag vector
+          cv.push_back(fv);
+          for (unsigned int i=0; i < cv[cv.size()-1].size(); i++) {
+            if (cv[cv.size()-1][i]){
+              //compare if state vector elements are equal to init vector elements
+              cv[cv.size()-1][i] = cv[cv.size()-1][i] && cex(iv[i], sv[sv.size()-1][i]); 
+            };
+          }
+          //change vector is created
+        };
+        if (c == 1) {
+            //skip;          
+        };
+        
+      }; //end summand loop	
+  
+      //
+      //flattened the change vector and flag vector
+      //
+      vector<bool>          fcv = fv;      //create flattened change vector 
+      vector<LPEAssignment> fsv = iv; //create flattened init vector
+ 
+      for (unsigned int i=0; i < cv[0].size(); i++){ 
+        //Check only those vectors of which the flagvector elements are true/Constant
+        if (fv[i]) {
+          for(unsigned int j=0; j < cv.size(); j++){ 
+            if (!cv[j][i]) { 
+              fcv[i] = false;
+              fsv[i] = sv[j][i];
+            }
+          }
+        };
       }
-      
+
+      if (opt==2)
+      {
+        for (unsigned int i=0; i < cv.size(); i++) {
+          for (unsigned int j=0; j < cv[i].size(); j++) {
+            cout << cv[i][j]; 
+          }
+          cout << endl;
+        }
+        cout << endl;
+      }
+     
+
+      // change vector and state vector are flattened
+     
+
       //Actual compare flattened change vector with flag vector
       if (fcv.size()!= fv.size()) 
         {cout << "fch != fv" << endl; return 1;}
+
+      //Display change vector
+      if (opt==2)
+      {
+        for (unsigned int i=0; i < fv.size(); i++){
+          cout << fv[i];
+        };
+        cout << " -- ";
+        for (unsigned int i=0; i < fcv.size(); i++){
+          cout << fcv[i];
+        };
+      cout << endl;
+      }       
       
       //While condition :)
       bool b = true;
@@ -205,7 +286,8 @@ aterm_appl t = read_from_named_file(filename).to_appl();
       //If a element differs -> Iteration needed, set iteration true
       iteration = !b ;
       if (iteration){
-        fv = fcv;
+        fv = fcv; //flag vector is replaced by the flattend change vector
+        iv = fsv; //init vector is replaced by the flattend state vector
       }
     noi++;
     }
