@@ -43,7 +43,7 @@ fi
 
 # Set flags
 CPPFLAGS=""
-CFLAGS="-std=c99 -O2"
+CFLAGS="-std=c99"
 CXXFLAGS=""
 LDFLAGS="-L. -Lsvc"
 
@@ -76,8 +76,8 @@ if test $enable_debug; then
   CXXFLAGS="-g -Wall $CXXFLAGS"
 else
   CPPFLAGS="-DNDEBUG $CPPFLAGS"
-  CFLAGS="-w $CFLAGS"
-  CXXFLAGS="-w $CXXFLAGS"
+  CFLAGS="-O2 -w $CFLAGS"
+  CXXFLAGS="-O2 -w $CXXFLAGS"
 fi
 
 AC_ARG_ENABLE(
@@ -263,7 +263,7 @@ else
 fi
 
 AC_MSG_NOTICE()
-AC_MSG_NOTICE(Some tools will not be build if any of these libraries are missing.)
+AC_MSG_NOTICE(Some tools will not be built if any of these libraries are missing.)
 AC_MSG_NOTICE()
 
 AC_CONFIG_FILES([Makefile gsrewr_innerc_aux.h config])

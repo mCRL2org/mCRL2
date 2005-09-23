@@ -4018,7 +4018,7 @@ fi
 
 # Set flags
 CPPFLAGS=""
-CFLAGS="-std=c99 -O2"
+CFLAGS="-std=c99"
 CXXFLAGS=""
 LDFLAGS="-L. -Lsvc"
 
@@ -4093,8 +4093,8 @@ echo "$as_me: compiling with debugging information" >&6;}
   CXXFLAGS="-g -Wall $CXXFLAGS"
 else
   CPPFLAGS="-DNDEBUG $CPPFLAGS"
-  CFLAGS="-w $CFLAGS"
-  CXXFLAGS="-w $CXXFLAGS"
+  CFLAGS="-O2 -w $CFLAGS"
+  CXXFLAGS="-O2 -w $CXXFLAGS"
 fi
 
 # Check whether --enable-profiling or --disable-profiling was given.
@@ -6266,8 +6266,8 @@ fi
 
 { echo "$as_me:$LINENO: " >&5
 echo "$as_me: " >&6;}
-{ echo "$as_me:$LINENO: Some tools will not be build if any of these libraries are missing." >&5
-echo "$as_me: Some tools will not be build if any of these libraries are missing." >&6;}
+{ echo "$as_me:$LINENO: Some tools will not be built if any of these libraries are missing." >&5
+echo "$as_me: Some tools will not be built if any of these libraries are missing." >&6;}
 { echo "$as_me:$LINENO: " >&5
 echo "$as_me: " >&6;}
 
