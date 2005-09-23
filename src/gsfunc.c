@@ -133,6 +133,7 @@ static ATermAppl gsSortIdNameBool;
 static ATermAppl gsSortIdNamePos;
 static ATermAppl gsSortIdNameNat;
 static ATermAppl gsSortIdNameInt;
+static ATermAppl gsSortIdNameReal;
 
 //Constant ATermAppl's for each operation system identifier name
 static ATermAppl gsOpIdNameTrue;
@@ -158,6 +159,8 @@ static ATermAppl gsOpIdNameNat2Pos;
 static ATermAppl gsOpIdNameNat2Int;
 static ATermAppl gsOpIdNameInt2Pos;
 static ATermAppl gsOpIdNameInt2Nat;
+static ATermAppl gsOpIdNameInt2Real;
+static ATermAppl gsOpIdNameReal2Int;
 static ATermAppl gsOpIdNameLTE;
 static ATermAppl gsOpIdNameLT;
 static ATermAppl gsOpIdNameGTE;
@@ -292,6 +295,8 @@ void gsEnableConstructorFunctions(void)
     gsSortIdNamePos        = gsString2ATermAppl("Pos");
     gsSortIdNameNat        = gsString2ATermAppl("Nat");
     gsSortIdNameInt        = gsString2ATermAppl("Int");
+    gsSortIdNameReal       = gsString2ATermAppl("Real");
+
     //create operation system identifier names
     gsOpIdNameTrue         = gsString2ATermAppl("true");
     gsOpIdNameFalse        = gsString2ATermAppl("false");
@@ -316,6 +321,8 @@ void gsEnableConstructorFunctions(void)
     gsOpIdNameNat2Int      = gsString2ATermAppl("Nat2Int");
     gsOpIdNameInt2Pos      = gsString2ATermAppl("Int2Pos");
     gsOpIdNameInt2Nat      = gsString2ATermAppl("Int2Nat");
+    gsOpIdNameInt2Real     = gsString2ATermAppl("Int2Real");
+    gsOpIdNameReal2Int     = gsString2ATermAppl("Real2Int");
     gsOpIdNameLTE          = gsString2ATermAppl("<=");
     gsOpIdNameLT           = gsString2ATermAppl("<");
     gsOpIdNameGTE          = gsString2ATermAppl(">=");
@@ -442,6 +449,7 @@ void gsEnableConstructorFunctions(void)
     ATprotectAppl(&gsSortIdNamePos);
     ATprotectAppl(&gsSortIdNameNat);
     ATprotectAppl(&gsSortIdNameInt);
+    ATprotectAppl(&gsSortIdNameReal);
     //protect operation system identifier names
     ATprotectAppl(&gsOpIdNameTrue);
     ATprotectAppl(&gsOpIdNameFalse);
@@ -466,6 +474,8 @@ void gsEnableConstructorFunctions(void)
     ATprotectAppl(&gsOpIdNameNat2Int);
     ATprotectAppl(&gsOpIdNameInt2Pos);
     ATprotectAppl(&gsOpIdNameInt2Nat);
+    ATprotectAppl(&gsOpIdNameInt2Real);
+    ATprotectAppl(&gsOpIdNameReal2Int);
     ATprotectAppl(&gsOpIdNameLTE);
     ATprotectAppl(&gsOpIdNameLT);
     ATprotectAppl(&gsOpIdNameGTE);
@@ -1307,6 +1317,10 @@ ATermAppl gsMakeSortIdNameInt() {
   return gsSortIdNameInt;
 }
 
+ATermAppl gsMakeSortIdNameReal() {
+  assert(gsConstructorFunctionsEnabled);
+  return gsSortIdNameReal;
+}
 
 //Creation of names for system operation identifiers
 ATermAppl gsMakeOpIdNameTrue() {
@@ -1422,6 +1436,16 @@ ATermAppl gsMakeOpIdNameInt2Pos() {
 ATermAppl gsMakeOpIdNameInt2Nat() {
   assert(gsConstructorFunctionsEnabled);
   return gsOpIdNameInt2Nat;
+}
+
+ATermAppl gsMakeOpIdNameInt2Real() {
+  assert(gsConstructorFunctionsEnabled);
+  return gsOpIdNameInt2Real;
+}
+
+ATermAppl gsMakeOpIdNameReal2Int() {
+  assert(gsConstructorFunctionsEnabled);
+  return gsOpIdNameReal2Int;
 }
 
 ATermAppl gsMakeOpIdNameLTE() {
@@ -1713,6 +1737,12 @@ ATermAppl gsMakeSortIdInt()
 {
   assert(gsConstructorFunctionsEnabled);
   return gsMakeSortId(gsSortIdNameInt);
+}
+
+ATermAppl gsMakeSortIdReal()
+{
+  assert(gsConstructorFunctionsEnabled);
+  return gsMakeSortId(gsSortIdNameReal);
 }
 
 //Creation of sort expressions for system defined sorts.

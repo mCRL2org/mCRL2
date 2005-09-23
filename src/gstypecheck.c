@@ -111,6 +111,10 @@ static inline ATermAppl gstcMakeOpIdNat2Int(void){
   return gsMakeOpId(gsMakeOpIdNameNat2Int(),gstcMakeSortArrowProd1(gsMakeSortIdNat(),gsMakeSortIdInt()));
 }
 
+static inline ATermAppl gstcMakeOpIdInt2Real(void){
+  return gsMakeOpId(gsMakeOpIdNameInt2Real(),gstcMakeSortArrowProd1(gsMakeSortIdInt(),gsMakeSortIdReal()));
+}
+
 static inline ATermAppl gstcMakeOpIdSet2Bag(ATermAppl Type){
     return gsMakeOpId(gsMakeOpIdNameSet2Bag(),gstcMakeSortArrowProd1(gsMakeSortSet(Type),gsMakeSortBag(Type)));
 }
@@ -345,12 +349,18 @@ void gstcDataInit(void){
 			gstcMakeSortArrowProd1(gsMakeSortIdInt(),gsMakeSortIdPos()));
   gstcAddSystemFunctionProd(gsMakeOpIdNameInt2Nat(),
 			gstcMakeSortArrowProd1(gsMakeSortIdInt(),gsMakeSortIdNat()));
+  gstcAddSystemFunctionProd(gsMakeOpIdNameInt2Real(),
+			gstcMakeSortArrowProd1(gsMakeSortIdInt(),gsMakeSortIdReal()));
+  gstcAddSystemFunctionProd(gsMakeOpIdNameReal2Int(),
+			gstcMakeSortArrowProd1(gsMakeSortIdReal(),gsMakeSortIdInt()));
   gstcAddSystemFunctionProd(gsMakeOpIdNameLTE(),
 			    gstcMakeSortArrowProd2(gsMakeSortIdPos(),gsMakeSortIdPos(),gsMakeSortIdBool()));
   gstcAddSystemFunctionProd(gsMakeOpIdNameLTE(),
 			    gstcMakeSortArrowProd2(gsMakeSortIdNat(),gsMakeSortIdNat(),gsMakeSortIdBool()));
   gstcAddSystemFunctionProd(gsMakeOpIdNameLTE(),
 			    gstcMakeSortArrowProd2(gsMakeSortIdInt(),gsMakeSortIdInt(),gsMakeSortIdBool()));
+  gstcAddSystemFunctionProd(gsMakeOpIdNameLTE(),
+			    gstcMakeSortArrowProd2(gsMakeSortIdReal(),gsMakeSortIdReal(),gsMakeSortIdBool()));
   //more
   gstcAddSystemFunctionProd(gsMakeOpIdNameLT(),
 			    gstcMakeSortArrowProd2(gsMakeSortIdPos(),gsMakeSortIdPos(),gsMakeSortIdBool()));
@@ -358,6 +368,8 @@ void gstcDataInit(void){
 			    gstcMakeSortArrowProd2(gsMakeSortIdNat(),gsMakeSortIdNat(),gsMakeSortIdBool()));
   gstcAddSystemFunctionProd(gsMakeOpIdNameLT(),
 			    gstcMakeSortArrowProd2(gsMakeSortIdInt(),gsMakeSortIdInt(),gsMakeSortIdBool()));
+  gstcAddSystemFunctionProd(gsMakeOpIdNameLT(),
+			    gstcMakeSortArrowProd2(gsMakeSortIdReal(),gsMakeSortIdReal(),gsMakeSortIdBool()));
   //more
   gstcAddSystemFunctionProd(gsMakeOpIdNameGTE(),
 			    gstcMakeSortArrowProd2(gsMakeSortIdPos(),gsMakeSortIdPos(),gsMakeSortIdBool()));
@@ -365,6 +377,8 @@ void gstcDataInit(void){
 			    gstcMakeSortArrowProd2(gsMakeSortIdNat(),gsMakeSortIdNat(),gsMakeSortIdBool()));
   gstcAddSystemFunctionProd(gsMakeOpIdNameGTE(),
 			    gstcMakeSortArrowProd2(gsMakeSortIdInt(),gsMakeSortIdInt(),gsMakeSortIdBool()));
+  gstcAddSystemFunctionProd(gsMakeOpIdNameGTE(),
+			    gstcMakeSortArrowProd2(gsMakeSortIdReal(),gsMakeSortIdReal(),gsMakeSortIdBool()));
   //more
   gstcAddSystemFunctionProd(gsMakeOpIdNameGT(),
 			    gstcMakeSortArrowProd2(gsMakeSortIdPos(),gsMakeSortIdPos(),gsMakeSortIdBool()));
@@ -372,6 +386,8 @@ void gstcDataInit(void){
 			    gstcMakeSortArrowProd2(gsMakeSortIdNat(),gsMakeSortIdNat(),gsMakeSortIdBool()));
   gstcAddSystemFunctionProd(gsMakeOpIdNameGT(),
 			    gstcMakeSortArrowProd2(gsMakeSortIdInt(),gsMakeSortIdInt(),gsMakeSortIdBool()));
+  gstcAddSystemFunctionProd(gsMakeOpIdNameGT(),
+			    gstcMakeSortArrowProd2(gsMakeSortIdReal(),gsMakeSortIdReal(),gsMakeSortIdBool()));
   //more
   gstcAddSystemFunctionProd(gsMakeOpIdNameMax(),
 			    gstcMakeSortArrowProd2(gsMakeSortIdPos(),gsMakeSortIdInt(),gsMakeSortIdPos()));
@@ -383,6 +399,8 @@ void gstcDataInit(void){
 			    gstcMakeSortArrowProd2(gsMakeSortIdInt(),gsMakeSortIdNat(),gsMakeSortIdNat()));
   gstcAddSystemFunctionProd(gsMakeOpIdNameMax(),
 			    gstcMakeSortArrowProd2(gsMakeSortIdInt(),gsMakeSortIdInt(),gsMakeSortIdInt()));
+  gstcAddSystemFunctionProd(gsMakeOpIdNameMax(),
+			    gstcMakeSortArrowProd2(gsMakeSortIdReal(),gsMakeSortIdReal(),gsMakeSortIdReal()));
   //more
   gstcAddSystemFunctionProd(gsMakeOpIdNameMin(),
 			    gstcMakeSortArrowProd2(gsMakeSortIdPos(),gsMakeSortIdPos(),gsMakeSortIdPos()));
@@ -390,9 +408,13 @@ void gstcDataInit(void){
 			    gstcMakeSortArrowProd2(gsMakeSortIdNat(),gsMakeSortIdNat(),gsMakeSortIdNat()));
   gstcAddSystemFunctionProd(gsMakeOpIdNameMin(),
 			    gstcMakeSortArrowProd2(gsMakeSortIdInt(),gsMakeSortIdInt(),gsMakeSortIdInt()));
+  gstcAddSystemFunctionProd(gsMakeOpIdNameMin(),
+			    gstcMakeSortArrowProd2(gsMakeSortIdReal(),gsMakeSortIdReal(),gsMakeSortIdReal()));
   //more
   gstcAddSystemFunctionProd(gsMakeOpIdNameAbs(),
 			    gstcMakeSortArrowProd1(gsMakeSortIdInt(),gsMakeSortIdNat()));
+  gstcAddSystemFunctionProd(gsMakeOpIdNameAbs(),
+			    gstcMakeSortArrowProd1(gsMakeSortIdReal(),gsMakeSortIdReal()));
   //more
   gstcAddSystemFunctionProd(gsMakeOpIdNameNeg(),
 			    gstcMakeSortArrowProd1(gsMakeSortIdPos(),gsMakeSortIdInt()));
@@ -400,18 +422,24 @@ void gstcDataInit(void){
 			    gstcMakeSortArrowProd1(gsMakeSortIdNat(),gsMakeSortIdInt()));
   gstcAddSystemFunctionProd(gsMakeOpIdNameNeg(),
 			    gstcMakeSortArrowProd1(gsMakeSortIdInt(),gsMakeSortIdInt()));
+  gstcAddSystemFunctionProd(gsMakeOpIdNameNeg(),
+			    gstcMakeSortArrowProd1(gsMakeSortIdReal(),gsMakeSortIdReal()));
   gstcAddSystemFunctionProd(gsMakeOpIdNameSucc(),
 			    gstcMakeSortArrowProd1(gsMakeSortIdPos(),gsMakeSortIdPos()));
   gstcAddSystemFunctionProd(gsMakeOpIdNameSucc(),
 			    gstcMakeSortArrowProd1(gsMakeSortIdNat(),gsMakeSortIdPos()));
   gstcAddSystemFunctionProd(gsMakeOpIdNameSucc(),
 			    gstcMakeSortArrowProd1(gsMakeSortIdInt(),gsMakeSortIdInt()));
+  gstcAddSystemFunctionProd(gsMakeOpIdNameSucc(),
+			    gstcMakeSortArrowProd1(gsMakeSortIdReal(),gsMakeSortIdReal()));
   gstcAddSystemFunctionProd(gsMakeOpIdNamePred(),
 			    gstcMakeSortArrowProd1(gsMakeSortIdPos(),gsMakeSortIdNat()));
   gstcAddSystemFunctionProd(gsMakeOpIdNamePred(),
 			    gstcMakeSortArrowProd1(gsMakeSortIdNat(),gsMakeSortIdInt()));
   gstcAddSystemFunctionProd(gsMakeOpIdNamePred(),
 			    gstcMakeSortArrowProd1(gsMakeSortIdInt(),gsMakeSortIdInt()));
+  gstcAddSystemFunctionProd(gsMakeOpIdNamePred(),
+			    gstcMakeSortArrowProd1(gsMakeSortIdReal(),gsMakeSortIdReal()));
   gstcAddSystemFunctionProd(gsMakeOpIdNameAdd(),
 			    gstcMakeSortArrowProd2(gsMakeSortIdPos(),gsMakeSortIdPos(),gsMakeSortIdPos()));
   gstcAddSystemFunctionProd(gsMakeOpIdNameAdd(),
@@ -422,6 +450,8 @@ void gstcDataInit(void){
 			    gstcMakeSortArrowProd2(gsMakeSortIdNat(),gsMakeSortIdNat(),gsMakeSortIdNat()));
   gstcAddSystemFunctionProd(gsMakeOpIdNameAdd(),
 			    gstcMakeSortArrowProd2(gsMakeSortIdInt(),gsMakeSortIdInt(),gsMakeSortIdInt()));
+  gstcAddSystemFunctionProd(gsMakeOpIdNameAdd(),
+			    gstcMakeSortArrowProd2(gsMakeSortIdReal(),gsMakeSortIdReal(),gsMakeSortIdReal()));
   //more
   gstcAddSystemFunctionProd(gsMakeOpIdNameSubt(),
 			    gstcMakeSortArrowProd2(gsMakeSortIdPos(),gsMakeSortIdPos(),gsMakeSortIdInt()));
@@ -429,12 +459,16 @@ void gstcDataInit(void){
 			    gstcMakeSortArrowProd2(gsMakeSortIdNat(),gsMakeSortIdNat(),gsMakeSortIdInt()));
   gstcAddSystemFunctionProd(gsMakeOpIdNameSubt(),
 			    gstcMakeSortArrowProd2(gsMakeSortIdInt(),gsMakeSortIdInt(),gsMakeSortIdInt()));
+  gstcAddSystemFunctionProd(gsMakeOpIdNameSubt(),
+			    gstcMakeSortArrowProd2(gsMakeSortIdReal(),gsMakeSortIdReal(),gsMakeSortIdReal()));
   gstcAddSystemFunctionProd(gsMakeOpIdNameMult(),
 			    gstcMakeSortArrowProd2(gsMakeSortIdPos(),gsMakeSortIdPos(),gsMakeSortIdPos()));
   gstcAddSystemFunctionProd(gsMakeOpIdNameMult(),
 			    gstcMakeSortArrowProd2(gsMakeSortIdNat(),gsMakeSortIdNat(),gsMakeSortIdNat()));
   gstcAddSystemFunctionProd(gsMakeOpIdNameMult(),
 			    gstcMakeSortArrowProd2(gsMakeSortIdInt(),gsMakeSortIdInt(),gsMakeSortIdInt()));
+  gstcAddSystemFunctionProd(gsMakeOpIdNameMult(),
+			    gstcMakeSortArrowProd2(gsMakeSortIdReal(),gsMakeSortIdReal(),gsMakeSortIdReal()));
   //more
   gstcAddSystemFunctionProd(gsMakeOpIdNameDiv(),
 			    gstcMakeSortArrowProd2(gsMakeSortIdNat(),gsMakeSortIdPos(),gsMakeSortIdNat()));
@@ -450,6 +484,8 @@ void gstcDataInit(void){
 			    gstcMakeSortArrowProd2(gsMakeSortIdNat(),gsMakeSortIdNat(),gsMakeSortIdNat()));
   gstcAddSystemFunctionProd(gsMakeOpIdNameExp(),
 			    gstcMakeSortArrowProd2(gsMakeSortIdInt(),gsMakeSortIdNat(),gsMakeSortIdInt()));
+  gstcAddSystemFunctionProd(gsMakeOpIdNameExp(),
+			    gstcMakeSortArrowProd2(gsMakeSortIdReal(),gsMakeSortIdNat(),gsMakeSortIdReal()));
 //Lists
   gstcAddSystemConstant(gsMakeOpIdNameEmptyList(),gsMakeSortList(gsMakeUnknown()));
   gstcAddSystemFunctionProd(gsMakeOpIdNameListSize(),
@@ -548,6 +584,10 @@ static ATbool gstcReadInSorts (ATermList Sorts){
     }				
     if(ATisEqual(gsMakeSortIdInt(),gsMakeSortId(SortName))){
       gsErrorMsg("attempt to redeclare sort Int\n");
+      return ATfalse;
+    }				
+    if(ATisEqual(gsMakeSortIdReal(),gsMakeSortId(SortName))){
+      gsErrorMsg("attempt to redeclare sort Real\n");
       return ATfalse;
     }				
     if(ATindexedSetGetIndex(context.basic_sorts, (ATerm)SortName)>=0 
@@ -807,6 +847,7 @@ static ATbool gstcIsSortDeclared(ATermAppl SortName){
   if(ATisEqual(gsMakeSortIdPos(),gsMakeSortId(SortName))) return ATtrue;
   if(ATisEqual(gsMakeSortIdNat(),gsMakeSortId(SortName))) return ATtrue;
   if(ATisEqual(gsMakeSortIdInt(),gsMakeSortId(SortName))) return ATtrue;
+  if(ATisEqual(gsMakeSortIdReal(),gsMakeSortId(SortName))) return ATtrue;
   if(ATindexedSetGetIndex(context.basic_sorts, (ATerm)SortName)>=0) return ATtrue;
   if(ATAtableGet(context.defined_sorts,(ATerm)SortName)) return ATtrue;
   return ATfalse;
@@ -1298,7 +1339,7 @@ static ATermAppl gstcTraverseActProcVarConstP(ATermTable Vars, ATermAppl ProcTer
     ATermAppl NewProc=gstcTraverseActProcVarConstP(Vars,ATAgetArgument(ProcTerm,0));
     if(!NewProc) {return NULL;}
     ATermAppl Time=ATAgetArgument(ProcTerm,1);
-    ATermAppl NewType=gstcTraverseVarConsTypeD(Vars,&Time,gsMakeSortIdNat());
+    ATermAppl NewType=gstcTraverseVarConsTypeD(Vars,&Time,gsMakeSortIdReal());
     if(!NewType) {return NULL;}
     return gsMakeAtTime(NewProc,Time);
   }
@@ -1355,6 +1396,11 @@ static ATermAppl gstcTraverseVarConsTypeD(ATermTable Vars, ATermAppl *DataTerm, 
     }
     
     if(!gstcAdjustPosTypesA(Sort,PosType) && ATisEqual(Sort,gsMakeSortIdInt())){
+      Sort=gsMakeSortIdReal();
+      *DataTerm=gsMakeDataApplProd(gstcMakeOpIdInt2Real(),ATmakeList1((ATerm)*DataTerm));
+    }
+
+    if(!gstcAdjustPosTypesA(Sort,PosType) && ATisEqual(Sort,gsMakeSortIdReal())){
       gsErrorMsg("a number type is not in this list of allowed types: %T (while typechecking %T)\n",PosType,*DataTerm);
       return NULL;
     }

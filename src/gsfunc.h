@@ -182,6 +182,7 @@ ATermAppl gsMakeSortIdNameBool();
 ATermAppl gsMakeSortIdNamePos();
 ATermAppl gsMakeSortIdNameNat();
 ATermAppl gsMakeSortIdNameInt();
+ATermAppl gsMakeSortIdNameReal();
 
 //Creation of names for system operation identifiers
 ATermAppl gsMakeOpIdNameTrue();
@@ -207,6 +208,8 @@ ATermAppl gsMakeOpIdNameNat2Pos();
 ATermAppl gsMakeOpIdNameNat2Int();
 ATermAppl gsMakeOpIdNameInt2Pos();
 ATermAppl gsMakeOpIdNameInt2Nat();
+ATermAppl gsMakeOpIdNameInt2Real();
+ATermAppl gsMakeOpIdNameReal2Int();
 ATermAppl gsMakeOpIdNameLTE();
 ATermAppl gsMakeOpIdNameLT();
 ATermAppl gsMakeOpIdNameGTE();
@@ -273,6 +276,9 @@ ATermAppl gsMakeSortIdNat(void);
 
 ATermAppl gsMakeSortIdInt(void);
 //Ret: Sort identifier for `Int'
+
+ATermAppl gsMakeSortIdReal(void);
+//Ret: Sort identifier for `Real'
 
 
 //Creation of sort expressions for system defined sorts.
