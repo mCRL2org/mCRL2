@@ -47,7 +47,7 @@ static ATermList synch_mact(ATermList a, ATermList b)
 
 static ATermList merge_list(ATermList l, ATermList m)
 {
-//	ATprintf("merge_list(%p,%p)\n\n",l,m);
+//	gsprintf("merge_list(%p,%p)\n\n",l,m);
 	for (; !ATisEmpty(l); l=ATgetNext(l))
 	{
 		if ( ATindexOf(m,ATgetFirst(l),0) < 0 )
@@ -109,8 +109,8 @@ static ATermList sync_list(ATermList l, ATermList m)
 {
 	ATermList n;
 
-//ATprintf("sync_list(%p,%p)\n",l,m);
-//ATprintf("sync_list(%t,%t)\n",l,m);
+//gsprintf("sync_list(%p,%p)\n",l,m);
+//gsprintf("sync_list(%T,%T)\n",l,m);
 
 	n = ATmakeList0();
 	for (; !ATisEmpty(l); l=ATgetNext(l))
@@ -121,7 +121,7 @@ static ATermList sync_list(ATermList l, ATermList m)
 		}
 	}
 
-//ATprintf("%t\n\n",n);
+//gsprintf("%T\n\n",n);
 	return n;
 }
 
@@ -272,7 +272,7 @@ static ATermList apply_comm_list(ATermList l, ATermList C)
 
 static ATermAppl PushRestrict(ATermList H, ATermAppl a)
 {
-//ATprintf("%t ",H);PrintPart_C(stdout,a);printf("\n\n");
+//gsprintf("%T ",H);PrintPart_C(stdout,a);printf("\n\n");
 	if ( gsIsAction(a) )
 	{
 		if ( ATindexOf(H,ATgetArgument(ATAgetArgument(a,0),0),0) >= 0 )
@@ -524,7 +524,7 @@ static ATermAppl PushHide(ATermList I, ATermAppl a)
 
 static ATermAppl PushComm(ATermList C, ATermAppl a)
 {
-//ATprintf("%t ",C);PrintPart_C(stdout,a);printf("\n\n");
+//gsprintf("%T ",C);PrintPart_C(stdout,a);printf("\n\n");
 	if ( gsIsAction(a) )
 	{
 		return a;
@@ -605,7 +605,7 @@ static ATermAppl PushComm(ATermList C, ATermAppl a)
 			ATermList Ca = ATmakeList0();
 			ATermList l;
 
-//ATprintf("split: %t   %t\n\n",lp,lq);
+//gsprintf("split: %T   %T\n\n",lp,lq);
 
 			for (; !ATisEmpty(C); C=ATgetNext(C))
 			{
@@ -626,7 +626,7 @@ static ATermAppl PushComm(ATermList C, ATermAppl a)
 				}
 			}
 
-//ATprintf("split: %t   %t   %t\n\n",Cp,Cq,Ca);
+//gsprintf("split: %T   %T   %T\n\n",Cp,Cq,Ca);
 			if ( !(ATisEmpty(Cp) && ATisEmpty(Cq)) )
 			{
 				if ( !ATisEmpty(Cp) )
@@ -661,7 +661,7 @@ static ATermAppl PushComm(ATermList C, ATermAppl a)
 
 			return a;
 		} else {
-//ATprintf("nosplit\n\n");			
+//gsprintf("nosplit\n\n");			
 			ATermList l = (ATermList) ATtableGet(alphas,(ATerm) a);
 			a = gsMakeComm(C,a);
 			ATtablePut(alphas,(ATerm) a,(ATerm) apply_comm_list(l,C));
@@ -775,7 +775,7 @@ ATermAppl ApplyAlpha(ATermAppl a)
 
 			l = (ATermList) ATtableGet(alphas,(ATerm) p);
 
-//ATprintf("%t: %t\n",ATgetArgument(a,1),l);
+//gsprintf("%T: %T\n",ATgetArgument(a,1),l);
 			ATtablePut(alphas,ATgetArgument(a,1),(ATerm) l);
 
 			a = ATsetArgument(a,(ATerm) p,3);
@@ -784,12 +784,12 @@ ATermAppl ApplyAlpha(ATermAppl a)
 	} else if ( gsIsAction(a) )
 	{
 		l = ATmakeList1((ATerm) ATmakeList1(ATgetArgument(a,0)));
-//ATprintf("%t\n\n",l);
+//gsprintf("%T\n\n",l);
 	} else if ( gsIsProcess(a) )
 	{
-//ATprintf("%t\n",a);
+//gsprintf("%T\n",a);
 		l = (ATermList) ATtableGet(alphas,ATgetArgument(a,0));
-//if (l == NULL ) ATprintf("(null)\n\n"); else ATprintf("%t\n\n",l);
+//if (l == NULL ) gsprintf("(null)\n\n"); else gsprintf("%T\n\n",l);
 		if ( l == NULL )
 		{
 			l = procs;
@@ -958,7 +958,7 @@ ATermAppl ApplyAlpha(ATermAppl a)
 		ATtablePut(alphas,(ATerm) a,(ATerm) l);
 	}
 
-//if ( l != NULL ) ATprintf("%t\n",ATtableGet(alphas,a));
+//if ( l != NULL ) gsprintf("%T\n",ATtableGet(alphas,a));
 //PrintPart_C(stdout,a);printf(".\n\n");
 	return a;
 }

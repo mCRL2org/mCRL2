@@ -52,18 +52,13 @@ extern char *strdup(const char *s);
 int gsprintf(const char *format, ...);
 int gsfprintf(FILE *stream, const char *format, ...);
 int gsvfprintf(FILE *stream, const char *format, va_list args);
-//Pretty print versions of the ATprintf functions
-//If '%T' is used in the format, the corresponding ATerm argument is pretty
+//Pretty print versions of the printf functions
+//If '%P' is used in the format, the corresponding ATerm argument is pretty
 //printed
-//
-//Note that the original ATerm code has the following bugs in it, that are
-//also present in this implementation:
-//- '%a' disables conversion 'a' of signed hexadecimal floating point
-//  conversions
-//  '%h' disables size specification 'h' to indicate short
-//- '%l' disables size specification 'l' to indicate long
-//- '%n' disables conversion 'n' of integer pointers
-//- '%t' disables size specification 't' to indicate ptrdiff_t
+//If '%T' is used in the format, the corresponding ATerm argument is printed
+//in the ATerm text format 
+//If '%F' is used in the format, the name of the corresponding AFun argument
+//is printed
 
 void gsSetQuietMsg(void);
 //Post: Printing of warnings, verbose information and extended debugging
@@ -142,12 +137,12 @@ inline static void gsDebugMsg(char *Format,...)
 #endif
 //Post: If the printing of debug messages is enabled, the name of the current
 //      function is printed to stderr, followed by the first parameter with the
-//      remaining parameters as ATprintf arguments.
+//      remaining parameters as gsprintf arguments.
 
 inline static void gsDebugMsgFunc(const char *FuncName, char *Format, ...)
 //Post: If the printing of debug messages is enabled, the name of FuncName is
 //      printed to stderr, followed by Format where  the remaining parameters
-//      are used as ATprintf arguments to Format.
+//      are used as gsprintf arguments to Format.
 {
   GS_DEBUG_MSG_FUNC(FuncName,Format)
 }

@@ -122,60 +122,50 @@ static ATermAppl rewrite_lpe(ATermAppl Spec)
 	return Spec;
 }
 
-void print_help(FILE *f, char *Name)
+static void print_help(FILE *f, char *Name)
 {
-	fprintf(f,"Usage: %s OPTIONS [SPECFILE [OUTFILE]]\n",Name);
-	fprintf(f,"Rewrite data expressions in SPECFILE and save the result to\n"
+	fprintf(f,"Usage: %s OPTIONS [INFILE [OUTFILE]]\n",Name);
+	fprintf(f,"Rewrite data expressions in INFILE and save the result to\n"
 	          "OUTFILE. If OUTFILE is not present, stdout is used. If\n"
-	          "SPECFILE is not present, stdin is used. To use stdin and\n"
-	          "save the output into a file, use '-' for SPECFILE.\n"
+	          "INFILE is not present, stdin is used. To use stdin and\n"
+	          "save the output into a file, use '-' for INFILE.\n"
 	          "\n"
 	          "The OPTIONS that can be used are:\n"
 	          "-h, --help               display this help message\n"
 	          "-q, --quiet              do not print any unrequested\n"
 		  "                         information\n"
+	          "-v, --verbose            do not print any unrequested\n"
+		  "                         information\n"
 	          "-b, --benchmark [num]    rewrites specification num times\n"
 	          "                         (default is 1000 times)\n"
-	          "-a, --read-aterm         SPECFILE is an ATerm\n"
-	          "-w, --write-aterm        OUTFILE should be an ATerm\n"
-	          "-i, --inner              Use innermost rewriter (default)\n"
-	          "-2, --inner2             Use another innermost rewriter\n"
-	          "-3, --inner3             Use yet another innermost rewriter\n"
-	          "-c, --innerc             Use compiling innermost rewriter\n"
-	          "-j, --jitty              Use compiling innermost rewriter\n"
+	          "-R, --rewriter name      use rewriter 'name' (default inner3)\n"
 	       );
 }
 
 int main(int argc, char **argv)
 {
-	FILE *SpecStream, *OutStream;
+	FILE *InStream, *OutStream;
 	ATerm stackbot;
 	ATermAppl Spec;
-	#define sopts "hqbawi23cj"
+	#define sopts "hqvb::R:"
 	struct option lopts[] = {
-		{ "help",		no_argument,	NULL,	'h' },
-		{ "quiet",		no_argument,	NULL,	'q' },
-		{ "benchmark",		no_argument,	NULL,	'b' },
-		{ "read-aterm",		no_argument,	NULL,	'a' },
-		{ "write-aterm",	no_argument,	NULL,	'w' },
-		{ "inner",		no_argument,	NULL,	'i' },
-		{ "inner2",		no_argument,	NULL,	'2' },
-		{ "inner3",		no_argument,	NULL,	'3' },
-		{ "innerc",		no_argument,	NULL,	'c' },
-		{ "jitty",		no_argument,	NULL,	'j' },
+		{ "help",		no_argument,		NULL,	'h' },
+		{ "quiet",		no_argument,		NULL,	'q' },
+		{ "verbose",		no_argument,		NULL,	'b' },
+		{ "benchmark",		optional_argument,	NULL,	'b' },
+		{ "rewriter",		required_argument,	NULL,	'R' },
 		{ 0, 0, 0, 0 }
 	};
-	int opt,read_aterm,write_aterm,benchmark,i,bench_times;
+	int opt,i,bench_times;
 	RewriteStrategy strat;
-	bool quiet;
+	bool quiet,verbose,benchmark;
 
 	ATinit(argc,argv,&stackbot);
 
 	quiet = false;
-	benchmark = 0;
+	verbose = false;
+	benchmark = false;
 	bench_times = 1000;
-	read_aterm = 0;
-	write_aterm = 0;
 	strat = GS_REWR_INNER3;
 	while ( (opt = getopt_long(argc,argv,sopts,lopts,NULL)) != -1 )
 	{
@@ -187,51 +177,44 @@ int main(int argc, char **argv)
 			case 'q':
 				quiet = true;
 				break;
+			case 'v':
+				verbose = true;
+				break;
 			case 'b':
-				benchmark = 1;
-				// XXX optional argument hack
-				// optional_argument doesn't seem to work
-				if ( argv[optind] != NULL && (argv[optind][0] >= '0') && (argv[optind][0] <= '9') )
+				benchmark = true;
+				if ( optarg != NULL && (optarg[0] >= '0') && (optarg[0] <= '9') )
 				{
-					bench_times = strtoul(argv[optind],NULL,0);
-					optind++;
+					bench_times = strtoul(optarg,NULL,0);
 				}
 				break;
-			case 'a':
-				read_aterm = 1;
-				break;
-			case 'w':
-				write_aterm = 1;
-				break;
-			case 'i':
-				strat = GS_REWR_INNER;
-				break;
-			case '2':
-				strat = GS_REWR_INNER2;
-				break;
-			case '3':
-				strat = GS_REWR_INNER3;
-				break;
-			case 'c':
-				strat = GS_REWR_INNERC;
-				break;
-			case 'j':
-				strat = GS_REWR_JITTY;
+			case 'R':
+				strat = RewriteStrategyFromString(optarg);
+				if ( strat == GS_REWR_INVALID )
+				{
+					gsErrorMsg("invalid rewrite strategy '%s'\n",optarg);
+					return 1;
+				}
 				break;
 			default:
 				break;
 		}
 	}
+	if ( quiet && verbose )
+	{
+		gsErrorMsg("options -q/--quiet and -v/--verbose cannot be used together\n");
+		return 1;
+	}
+	if ( quiet )
+		gsSetQuietMsg();
+	if ( verbose )
+		gsSetVerboseMsg();
 
-	SpecStream = stdin;
+	InStream = stdin;
 	if ( optind < argc && strcmp(argv[optind],"-") )
 	{
-		if ( (SpecStream = fopen(argv[optind],"r")) == NULL )
+		if ( (InStream = fopen(argv[optind],"r")) == NULL )
 		{
-			if ( !quiet )
-			{
-				perror(NAME);
-			}
+			gsErrorMsg("cannot open '%s' for reading\n",argv[optind]);
 			return 1;
 		}
 	}
@@ -243,49 +226,31 @@ int main(int argc, char **argv)
 		{
 			if ( (OutStream = fopen(argv[optind+1],"w")) == NULL )
 			{
-				if ( !quiet )
-				{
-					perror(NAME);
-				}
+				gsErrorMsg("cannot open '%s' for writing\n",argv[optind+1]);
 				return 1;
 			}
 		}
 	}
 
 	gsEnableConstructorFunctions();
-	if ( read_aterm )
+
+	if ( InStream == stdin )
+		gsVerboseMsg("reading input from stdin...\n");
+	else
+		gsVerboseMsg("reading input from '%s'...\n",argv[optind]);
+	Spec = (ATermAppl) ATreadFromFile(InStream);
+	if ( Spec == NULL )
 	{
-		Spec = (ATermAppl) ATreadFromFile(SpecStream);
-	} else {
-                //parse specification
-                gsVerboseMsg("parsing...\n");
-                Spec = gsParse(SpecStream);
-		fclose(SpecStream);
-                if (Spec == NULL) {
-                  gsErrorMsg("parsing failed\n");
-                  return 1;
-                }
-                //type check specification
-                gsVerboseMsg("type checking...\n");
-                Spec = gsTypeCheck(Spec);
-                if (Spec == NULL) {
-                  gsErrorMsg("type checking failed\n");
-                  return 1;
-                }
-                //implement standard data types and type constructors
-                gsVerboseMsg("implementing standard data types and type constructors...\n");
-                Spec = gsImplementData(Spec);
-                if (Spec == NULL) {
-                  gsErrorMsg("data implementation failed\n");
-                  return 1;
-                }
+		gsErrorMsg("input is not valid\n");
+		return 1;
 	}
 
+	gsVerboseMsg("initialising rewriter...\n");
 	gsRewriteInit(ATAgetArgument(Spec,3),strat);
-
 
 	if ( benchmark )
 	{
+		gsVerboseMsg("benchmarking %i times...\n",bench_times);
 		if ( gsIsLPESpec(Spec) )
 		{
 			for(i=0; i<bench_times; i++)
@@ -299,6 +264,7 @@ int main(int argc, char **argv)
 			}
 		}
 	} else {
+		gsVerboseMsg("rewriting input...\n",bench_times);
 		if ( gsIsLPESpec(Spec) )
 		{
 			Spec = rewrite_lpe(Spec);
@@ -306,12 +272,11 @@ int main(int argc, char **argv)
 			Spec = rewrite_nolpe(Spec);
 		}
 
-		if ( write_aterm )
-		{
-			ATwriteToTextFile((ATerm) Spec,OutStream);
-		} else {
-			PrintPart_C(OutStream, (ATerm) Spec);
-		}
+		if ( OutStream == stdout )
+			gsVerboseMsg("writing result to stdout...\n");
+		else
+			gsVerboseMsg("writing result to '%s'...\n",argv[optind+1]);
+		ATwriteToBinaryFile((ATerm) Spec,OutStream);
 		if ( OutStream != stdout )
 		{
 			fclose(OutStream);

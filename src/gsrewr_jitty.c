@@ -142,10 +142,10 @@ static ATermAppl fromInner(ATermAppl Term)
 	ATermAppl a;
 	ATerm t;
 
-//ATprintf("in: %t\n\n",Term);
+//gsprintf("in: %T\n\n",Term);
 	if ( gsIsDataVarId(Term) )
 	{
-//ATprintf("out: %t\n\n",Term);
+//gsprintf("out: %T\n\n",Term);
 		return Term;
 	}
 
@@ -161,7 +161,7 @@ static ATermAppl fromInner(ATermAppl Term)
 		a = gsMakeDataAppl(a,fromInner(ATAgetArgument(Term,i)));
 	}
 
-//ATprintf("out: %t\n\n",a);
+//gsprintf("out: %T\n\n",a);
 	return a;
 }
 
@@ -186,7 +186,7 @@ ATermList create_strategy(ATermList rules)
 	ATermList strat = ATmakeList0();
 	int arity;
 
-//ATfprintf(stderr,"rules: %t\n\n",rules);
+//gsfprintf(stderr,"rules: %T\n\n",rules);
 	int max_arity = 0;
 	for (ATermList l=rules; !ATisEmpty(l); l=ATgetNext(l))
 	{
@@ -222,10 +222,10 @@ ATermList create_strategy(ATermList rules)
 				ATermList vars = ATmakeList0();
 				ATermAppl pars = ATAelementAt(ATLgetFirst(rules),2);
 
-//ATfprintf(stderr,"rule: %t\n",ATgetFirst(rules));
-//ATfprintf(stderr,"rule: %t\n",ATAelementAt(ATgetFirst(rules),2));
-//ATfprintf(stderr,"rule: "); PrintPart_C(stderr,fromInner(ATAelementAt(ATgetFirst(rules),2))); ATfprintf(stderr,"\n");
-//ATprintf("pars: %t\n",pars);
+//gsfprintf(stderr,"rule: %T\n",ATgetFirst(rules));
+//gsfprintf(stderr,"rule: %T\n",ATAelementAt(ATgetFirst(rules),2));
+//gsfprintf(stderr,"rule: "); PrintPart_C(stderr,fromInner(ATAelementAt(ATgetFirst(rules),2))); gsfprintf(stderr,"\n");
+//gsprintf("pars: %T\n",pars);
 
 				for (int i=0; i<arity; i++)
 				{
@@ -271,7 +271,7 @@ ATermList create_strategy(ATermList rules)
 				deps = ATreverse(deps);
 
 				m = ATinsert(m,(ATerm) ATmakeList2((ATerm) deps,ATgetFirst(rules)));
-//ATfprintf(stderr,"\n");
+//gsfprintf(stderr,"\n");
 			} else {
 				l = ATinsert(l,ATgetFirst(rules));
 			}
@@ -284,7 +284,7 @@ ATermList create_strategy(ATermList rules)
 			{
 				if ( ATisEmpty(ATLgetFirst(ATLgetFirst(m))) )
 				{
-//ATprintf("add: %t\n",ATgetFirst(ATgetNext(ATLgetFirst(m))));
+//gsprintf("add: %T\n",ATgetFirst(ATgetNext(ATLgetFirst(m))));
 					strat = ATinsert(strat, ATgetFirst(ATgetNext(ATLgetFirst(m))));
 				} else {
 					m2 = ATinsert(m2,ATgetFirst(m));
@@ -315,7 +315,7 @@ ATermList create_strategy(ATermList rules)
 				used[maxidx] = true;
 
 				ATermInt k = ATmakeInt(maxidx);
-//ATprintf("add: %t\n",k);
+//gsprintf("add: %T\n",k);
 				strat = ATinsert(strat,(ATerm) k);
 				m2 = ATmakeList0();
 				for (; !ATisEmpty(m); m=ATgetNext(m))
@@ -334,7 +334,7 @@ ATermList create_strategy(ATermList rules)
 
 	//XXX Add unused, so we don't need to check all args during rewriting
 
-//ATfprintf(stderr,"strat: %t\n\n",ATreverse(strat));
+//gsfprintf(stderr,"strat: %T\n\n",ATreverse(strat));
 
 	FREE_A(used);
 	return ATreverse(strat);
@@ -409,7 +409,7 @@ void rewrite_init_jitty()
 		{
 			jitty_eqns[ATgetInt(i)] = NULL;
 		} else {
-//ATfprintf(stderr,"%t\n",ATAgetFirst(l));
+//gsfprintf(stderr,"%T\n",ATAgetFirst(l));
 			jitty_eqns[ATgetInt(i)] = create_strategy(ATreverse(n));
 		}
 	}
@@ -509,7 +509,7 @@ static ATerm subst_values(ATermAppl *vars, ATerm *vals, int len, ATerm t)
 				return vals[i];
 			}
 		}
-		ATfprintf(stderr,"%s: variable %t not assigned\n",NAME,t);
+		gsfprintf(stderr,"%s: variable %T not assigned\n",NAME,t);
 		exit(1);
 	} else {
 		int arity = ATgetArity(ATgetAFun((ATermAppl) t));
@@ -552,7 +552,7 @@ static ATerm subst_values(ATermAppl *vars, ATerm *vals, int len, ATerm t)
 
 static bool match_jitty(ATerm t, ATerm p, ATermAppl *vars, ATerm *vals, int *len)
 {
-//ATfprintf(stderr,"match_jitty(  %t  ,  %t  ,  %t   )\n\n",t,p,*vars);
+//gsfprintf(stderr,"match_jitty(  %T  ,  %T  ,  %T   )\n\n",t,p,*vars);
         if ( ATisInt(p) )
 	{
 		return ATisEqual(p,t);
@@ -636,12 +636,12 @@ static bool match_jitty(ATerm t, ATerm p, ATermAppl *vars, ATerm *vals, int *len
 
 static ATermAppl rewrite(ATermAppl Term)
 {
-//ATfprintf(stderr,"rewrite(%t)\n\n",Term);
-//gsfprintf(stderr,"rewrite(  %T  )\n\n",fromInner(Term));
+//gsfprintf(stderr,"rewrite(%T)\n\n",Term);
+//gsfprintf(stderr,"rewrite(  %P  )\n\n",fromInner(Term));
 	if ( gsIsDataVarId(Term) )
 	{
-//ATfprintf(stderr,"return %t\n\n",Term);
-//gsfprintf(stderr,"return1  %T\n\n",fromInner((ATermAppl) RWapplySubstitution((ATerm) Term)));
+//gsfprintf(stderr,"return %T\n\n",Term);
+//gsfprintf(stderr,"return1  %P\n\n",fromInner((ATermAppl) RWapplySubstitution((ATerm) Term)));
 		return (ATermAppl) RWapplySubstitution((ATerm) Term);
 	} else {
 		ATerm op = ATgetArgument(Term,0);
@@ -684,10 +684,10 @@ static ATermAppl rewrite(ATermAppl Term)
 		
 		if ( ATisInt(op) && ((strat = jitty_eqns[ATgetInt((ATermInt) op)]) != NULL) )
 		{
-//ATfprintf(stderr,"strat: %t\n\n",strat);
+//gsfprintf(stderr,"strat: %T\n\n",strat);
 			for (; !ATisEmpty(strat); strat=ATgetNext(strat))
 			{
-//ATfprintf(stderr,"strat action: %t\n\n",ATgetFirst(strat));
+//gsfprintf(stderr,"strat action: %T\n\n",ATgetFirst(strat));
 				if ( ATisInt(ATgetFirst(strat)) )
 				{
 					int i = ATgetInt((ATermInt) ATgetFirst(strat))+1;
@@ -724,7 +724,7 @@ static ATermAppl rewrite(ATermAppl Term)
 
 //if ( matches && !gsIsNil(ATAelementAt(rule,1)) )
 //{
-//ATfprintf(stderr,"%t --> %t (%t)\n\n",ATelementAt(rule,1),rewrite((ATermAppl) subst_values(vars,vals,len,ATelementAt(rule,1))),jitty_true);
+//gsfprintf(stderr,"%T --> %T (%T)\n\n",ATelementAt(rule,1),rewrite((ATermAppl) subst_values(vars,vals,len,ATelementAt(rule,1))),jitty_true);
 //}
 					if ( matches && (gsIsNil(ATAelementAt(rule,1)) || ATisEqual(rewrite((ATermAppl) subst_values(vars,vals,len,ATelementAt(rule,1))),jitty_true)) )
 					{
@@ -760,10 +760,10 @@ static ATermAppl rewrite(ATermAppl Term)
 
 						for (int j=1; j<rhs_arity; j++)
 						{
-//ATfprintf(stderr,"pre %t\n\n",ATgetArgument(rhs,i));
+//gsfprintf(stderr,"pre %T\n\n",ATgetArgument(rhs,i));
 							newargs[i] = subst_values(vars,vals,len,ATgetArgument(rhs,j));
 							i++;
-//ATfprintf(stderr,"post %t\n\n",args[i]);
+//gsfprintf(stderr,"post %T\n\n",args[i]);
 						}
 						for (int j=0; j<arity-rule_arity; j++)
 						{
@@ -778,8 +778,8 @@ static ATermAppl rewrite(ATermAppl Term)
 						FREE_A(vars);
 
 						ATermAppl aa = rewrite(a);
-//ATfprintf(stderr,"return %t\n\n",aa);
-//gsfprintf(stderr,"return2  %T\n\n",fromInner(aa));
+//gsfprintf(stderr,"return %T\n\n",aa);
+//gsfprintf(stderr,"return2  %P\n\n",fromInner(aa));
 						return aa;
 					}
 
@@ -788,7 +788,7 @@ static ATermAppl rewrite(ATermAppl Term)
 				}
 			}
 		}
-//ATfprintf(stderr,"done with strat\n\n");
+//gsfprintf(stderr,"done with strat\n\n");
 
 		rewritten[0] = op;
 		for (int i=1; i<arity; i++)
@@ -803,8 +803,8 @@ static ATermAppl rewrite(ATermAppl Term)
 
 		FREE_A(args);
 		FREE_A(rewritten);
-//ATfprintf(stderr,"return %t\n\n",a);
-//gsfprintf(stderr,"return3  %T\n\n",fromInner(a));
+//gsfprintf(stderr,"return %T\n\n",a);
+//gsfprintf(stderr,"return3  %P\n\n",fromInner(a));
 		return a;
 	}
 }
@@ -813,7 +813,7 @@ static ATermAppl rewrite(ATermAppl Term)
 {
 	ATermList l;
 	int c;
-//ATfprintf(stderr,"input: %t\n",Term);
+//gsfprintf(stderr,"input: %T\n",Term);
 	if ( ATisList(Term) )
 	{
 		l = ATmakeList0();

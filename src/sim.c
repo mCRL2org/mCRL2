@@ -22,15 +22,15 @@ static void gsPrintState(ATerm state)
 	{
 		if ( i > 0 )
 		{
-			ATprintf(", ");
+			gsprintf(", ");
 		}
 
 		ATermAppl a = gsGetStateArgument(state,i);
 		if ( gsIsDataVarId(a) )
 		{
-			ATprintf("_");
+			gsprintf("_");
 		} else {
-			gsprintf("%T",a);
+			gsprintf("%P",a);
 		}
 	}
 }
@@ -55,7 +55,7 @@ int main(int argc, char **argv)
 	ATerm stackbot, state;
 	ATermAppl Spec;
 	ATermList states, l;
-	#define sopts "hycrR"
+	#define sopts "hyR:"
 	struct option lopts[] = {
 		{ "help",	no_argument,	NULL,	'h' },
 		{ "dummy",	no_argument,	NULL,	'y' },
@@ -65,7 +65,6 @@ int main(int argc, char **argv)
 	int opt, i, r;
 	RewriteStrategy strat;
 	bool usedummy;
-	char *rw_arg;
 
 	ATinit(argc,argv,&stackbot);
 
@@ -82,33 +81,11 @@ int main(int argc, char **argv)
 				usedummy = true;
 				break;
 			case 'R':
-				if ( optarg == NULL )
+				strat = RewriteStrategyFromString(optarg);
+				if ( strat == GS_REWR_INVALID )
 				{
-					rw_arg = argv[optind++];
-				} else {
-					rw_arg = optarg;
-				}
-				if ( !strcmp(rw_arg,"inner") )
-				{
-					strat = GS_REWR_INNER;
-				} else if ( !strcmp(rw_arg,"inner2") )
-				{
-					strat = GS_REWR_INNER2;
-				} else if ( !strcmp(rw_arg,"inner3") )
-				{
-					strat = GS_REWR_INNER3;
-				} else if ( !strcmp(rw_arg,"innerc") )
-				{
-					strat = GS_REWR_INNERC;
-				} else if ( !strcmp(rw_arg,"innerc2") )
-				{
-					strat = GS_REWR_INNERC2;
-				} else if ( !strcmp(rw_arg,"jitty") )
-				{
-					strat = GS_REWR_JITTY;
-				} else {
-					fprintf(stderr,"warning: unknown rewriter '%s', using default\n",rw_arg);
-					strat = GS_REWR_INNER3;
+					gsErrorMsg("invalid rewrite strategy '%s'\n",optarg);
+					return 1;
 				}
 				break;
 			default:
@@ -136,9 +113,9 @@ int main(int argc, char **argv)
 
 	state = gsNextStateInit(Spec,!usedummy,GS_STATE_VECTOR,strat);
 
-	ATprintf("initial state: [ ");
+	gsprintf("initial state: [ ");
 	gsPrintState(state);
-	ATprintf(" ]\n\n");
+	gsprintf(" ]\n\n");
 
 	while ( 1 )
 	{
@@ -149,9 +126,9 @@ int main(int argc, char **argv)
 		}
 		for (l=states,i=0; !ATisEmpty(l); l=ATgetNext(l), i++)
 		{
-			gsprintf("%i: %T  ->  [ ",i,ATAgetFirst(ATLgetFirst(l)));
+			gsprintf("%i: %P  ->  [ ",i,ATAgetFirst(ATLgetFirst(l)));
 			gsPrintState(ATgetFirst(ATgetNext(ATLgetFirst(l))));
-			ATprintf(" ]\n\n");
+			gsprintf(" ]\n\n");
 		}
 harm:
 		printf("? "); fflush(stdout);
@@ -171,11 +148,11 @@ harm:
 		{
 			goto harm;
 		}
-		gsprintf("\ntransition: %T\n\n",ATAgetFirst(ATLelementAt(states,i)));
+		gsprintf("\ntransition: %P\n\n",ATAgetFirst(ATLelementAt(states,i)));
 		state = ATgetFirst(ATgetNext(ATLelementAt(states,i)));
-		ATprintf("current state: [ ");
+		gsprintf("current state: [ ");
 		gsPrintState(state);
-		ATprintf(" ]\n\n");
+		gsprintf(" ]\n\n");
 	}
 }
 

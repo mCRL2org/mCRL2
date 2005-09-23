@@ -412,7 +412,7 @@ static ATerm remove_indices_context(ATerm a, ATerm *b, ATermList *t)
 			*t = list_minus(*t,m);
 			return (ATerm) gsMakeSum(m, u);
 		} else {
-			ATfprintf(stderr,"else %t\n",a);
+			gsfprintf(stderr,"else %T\n",a);
 			l = ATgetArguments((ATermAppl) a);
 			m = ATmakeList0();
 			for (; !ATisEmpty(l); l=ATgetNext(l))
@@ -588,7 +588,7 @@ static ATermList get_vars(ATermAppl a)
 	// XXX Special case to compensate for unfinished data implementation
 	else
 	{
-		gsWarningMsg("unknown process or data expression (%t); trying to compensate\n",a);
+		gsWarningMsg("unknown process or data expression (%T); trying to compensate\n",a);
 		if ( ATisList((ATerm) a) )
 		{
 			m = (ATermList) a;
@@ -603,7 +603,7 @@ static ATermList get_vars(ATermAppl a)
 		return l;
 	}
 	
-	gsWarningMsg("unknown process or data expression (%t)\n",a);
+	gsWarningMsg("unknown process or data expression (%T)\n",a);
 	return ATmakeList0();
 }
 //XXX
@@ -624,14 +624,14 @@ static int add_process_eqn(ATermAppl e)
 //	if ( !generalise )
 	{
 		processes = ATappend(processes,(ATerm) ATmakeList4(ATgetArgument(ATAgetArgument(e,1),0),ATgetArgument(e,2),annotate(ATgetArgument(e,3)),(ATerm) gsMakeNil()));
-//ATfprintf(stderr,"\n\nprocess %i: %t\n\n",ATgetLength(processes)-1,ATgetLast(processes));
+//gsfprintf(stderr,"\n\nprocess %i: %T\n\n",ATgetLength(processes)-1,ATgetLast(processes));
 //PrintPart_C(stderr,ATelementAt((ATermList) ATgetLast(processes),2));
 	}
 	if ( generalise && (ATgetLength(vars) > ATgetLength(ATLgetArgument(e,2))) )
 	{
 //		processes = ATappend(processes,(ATerm) ATmakeList4(ATgetArgument(ATAgetArgument(e,1),0),(ATerm) vars,annotate((ATerm) ni),(ATerm) gsMakeNil()));
 		processes = ATappend(processes,(ATerm) ATmakeList4((ATerm) name,(ATerm) vars,annotate((ATerm) ni),(ATerm) gsMakeNil()));
-//ATfprintf(stderr,"\n\nprocess %i: %t\n\n",ATgetLength(processes)-1,ATgetLast(processes));
+//gsfprintf(stderr,"\n\nprocess %i: %T\n\n",ATgetLength(processes)-1,ATgetLast(processes));
 //PrintPart_C(stderr,ATAelementAt((ATermList) ATgetLast(processes),2));
 		return ATgetLength(processes)-2;
 	}
@@ -652,7 +652,7 @@ static ATbool has_bounded_var(ATermAppl a) //XXX
 		return ATfalse;
 	}
 
-	gsErrorMsg("invalid data expr (%t)\n",a);
+	gsErrorMsg("invalid data expr (%T)\n",a);
 	exit(1);
 }
 ATerm replace_data_with_vars_gen(ATerm a, ATermList *v, ATermList *d, ATermAppl namebase)
@@ -668,7 +668,7 @@ ATerm replace_data_with_vars_gen(ATerm a, ATermList *v, ATermList *d, ATermAppl 
 			{
 				return ATelementAt(*v,ATindexOf(*d,a,0));
 			} else {*/
-//ATfprintf(stderr,"\nhas_bounded_var(%t) = %i\n",a,has_bounded_var((ATermAppl) a));
+//gsfprintf(stderr,"\nhas_bounded_var(%T) = %i\n",a,has_bounded_var((ATermAppl) a));
 				if ( /*gsIsDataAppl((ATermAppl) a) &&*/ has_bounded_var((ATermAppl) a) )
 				{
 /*					if ( gsIsOpId(ATAgetArgument((ATermAppl) a,0)) )
@@ -729,7 +729,7 @@ ATerm replace_data_with_vars_gen(ATerm a, ATermList *v, ATermList *d, ATermAppl 
 			return (ATerm) ATreverse(m);
 	}
 
-	gsWarningMsg("unknown data expression to generalise (%t)\n",a);
+	gsWarningMsg("unknown data expression to generalise (%T)\n",a);
 	return a;
 }
 static ATermAppl replace_data_with_vars(ATermAppl a, ATermList *v, ATermList *d)
@@ -755,7 +755,7 @@ if ( gsIsProcess(i) )
 	ni = generalise?replace_data_with_vars((ATermAppl) annotate((ATerm) i),&vars,&data):i;
 
 	processes = ATappend(processes,(ATerm) ATmakeList4((ATerm) name,(ATerm) vars,annotate((ATerm) ni),(ATerm) gsMakeNil()));
-//ATfprintf(stderr,"\n\nprocess %i: %t\n\n",ATgetLength(processes)-1,ATgetLast(processes));
+//gsfprintf(stderr,"\n\nprocess %i: %T\n\n",ATgetLength(processes)-1,ATgetLast(processes));
 //PrintPart_C(stderr,ATAelementAt((ATermList) ATgetLast(processes),2));
 
 	initial_process = gsMakeProcess(gsMakeProcVarId(name,vars),data);
@@ -773,7 +773,7 @@ static void add_to_stack(int i)
 {
 	if ( !is_done(i) && (ATindexOf(todo_stack,(ATerm) ATmakeInt(i),0) == -1) )
 	{
-//ATfprintf(stderr,"\n\nadd_to_stack(%i)\n\n",i);
+//gsfprintf(stderr,"\n\nadd_to_stack(%i)\n\n",i);
 		todo_stack = ATappend(todo_stack,(ATerm) ATmakeInt(i));
 	}
 }
@@ -811,7 +811,7 @@ static ATermList get_proc(int i, ATermList l)
 static int proc_id(ATermAppl a)
 {
 	ATermList l = processes;
-//ATfprintf(stderr,"\n\nprocid(%t)\n",a);
+//gsfprintf(stderr,"\n\nprocid(%T)\n",a);
 
 	for (; !ATisEmpty(l); l=ATgetNext(l))
 	{
@@ -876,7 +876,7 @@ static ATermList synch2actl(ATermAppl ma)
 	{
 		return ATconcat(synch2actl(ATAgetArgument(ma,0)),synch2actl(ATAgetArgument(ma,1)));
 	} else {
-		gsErrorMsg("invalid multiaction supplied to synch2actl (%t)\n",ma);
+		gsErrorMsg("invalid multiaction supplied to synch2actl (%T)\n",ma);
 		exit(1);
 	}
 }
@@ -943,7 +943,7 @@ static ATbool synch_cap(ATermAppl ma, ATermList H)
 	{
 		return (ATbool) (synch_cap(ATAgetArgument(ma,0),H) || synch_cap(ATAgetArgument(ma,1),H));
 	} else {
-		gsErrorMsg("invalid multiaction supplied to synch_cap (%t)\n",ma);
+		gsErrorMsg("invalid multiaction supplied to synch_cap (%T)\n",ma);
 		exit(1);
 	}
 }
@@ -977,7 +977,7 @@ static ATermAppl synch_hide(ATermAppl ma, ATermList I)
 			return gsMakeSync(a,b);
 		}
 	} else {
-		gsErrorMsg("invalid multiaction supplied to synch_hide (%t)\n",ma);
+		gsErrorMsg("invalid multiaction supplied to synch_hide (%T)\n",ma);
 		exit(1);
 	}
 }
@@ -1003,7 +1003,7 @@ static ATermAppl synch_rename(ATermAppl ma, ATermList R)
 	{
 		return gsMakeSync(synch_rename(ATAgetArgument(ma,0),R),synch_rename(ATAgetArgument(ma,1),R));
 	} else {
-		gsErrorMsg("invalid multiaction supplied to synch_rename (%t)\n",ma);
+		gsErrorMsg("invalid multiaction supplied to synch_rename (%T)\n",ma);
 		exit(1);
 	}
 }
@@ -1020,7 +1020,7 @@ static ATermList synch2list(ATermAppl ma)
 	{
 		return ATconcat(synch2list(ATAgetArgument(ma,0)),synch2list(ATAgetArgument(ma,1)));
 	} else {
-		gsErrorMsg("invalid multiaction supplied to synch2list (%t)\n",ma);
+		gsErrorMsg("invalid multiaction supplied to synch2list (%T)\n",ma);
 		exit(1);
 	}
 }
@@ -1091,7 +1091,7 @@ static ATbool find_comm(ATermList m, ATermList C, ATermAppl *c)
 {
 	for (; !ATisEmpty(C); C=ATgetNext(C))
 	{
-//ATfprintf(stderr,"cmp  %t  %t\n\n",m,ATLgetArgument(ATAgetArgument(ATAgetFirst(C),0),0));
+//gsfprintf(stderr,"cmp  %T  %T\n\n",m,ATLgetArgument(ATAgetArgument(ATAgetFirst(C),0),0));
 		if ( actl_eq(m,ATLgetArgument(ATAgetArgument(ATAgetFirst(C),0),0)) )
 		{
 			*c = ATAgetArgument(ATAgetFirst(C),1);
@@ -1139,7 +1139,7 @@ static ATermList calc_comm(ATermList m, ATermList d, ATermList w, ATermList n, A
 
 	if ( ATisEmpty(n) )
 	{
-//ATfprintf(stderr,"mu(%t) = %t\n\n",m,mu(m));
+//gsfprintf(stderr,"mu(%T) = %T\n\n",m,mu(m));
 		if ( find_comm(mu(m),C,&c) )
 		{
 			s = mactl_comm(w,C);
@@ -1261,7 +1261,7 @@ static ATermList mactl_comm(ATermList mal, ATermList C)
 {
 	ATermList s,t,l;
 	ATermAppl b;
-//ATfprintf(stderr,"mal=%t\n\n",mal);
+//gsfprintf(stderr,"mal=%T\n\n",mal);
 	if ( ATisEmpty(mal) )
 	{
 		return ATmakeList1((ATerm) ATmakeList2((ATerm) mal,(ATerm) linTrue));
@@ -1277,7 +1277,7 @@ static ATermList mactl_comm(ATermList mal, ATermList C)
 		if ( !ATisEqual(b,linFalse) )
 		{
 			t = mactl_comm(ATgetNext(mal),C);
-//ATfprintf(stderr,"g( %t  ,  %t ) =   %t\n\n",ATgetNext(mal),C,t);
+//gsfprintf(stderr,"g( %T  ,  %T ) =   %T\n\n",ATgetNext(mal),C,t);
 			l = t;
 //XXX			s = ATreverse(s);
 			for (; !ATisEmpty(l); l=ATgetNext(l))
@@ -1327,10 +1327,10 @@ static ATermList synch_comm(ATermAppl ma, ATermList C)
 {
 	ATermList s,l;
 
-//ATfprintf(stderr,"\n\nsynch_comm( %t ,  %t ) =  %t\n\n",ma,C,mactl_comm(synch2list(ma),C));
-//ATfprintf(stderr,"synch_comm(%t  ,  %t)\n\n",ma,C);
+//gsfprintf(stderr,"\n\nsynch_comm( %T ,  %T ) =  %T\n\n",ma,C,mactl_comm(synch2list(ma),C));
+//gsfprintf(stderr,"synch_comm(%T  ,  %T)\n\n",ma,C);
 	s = mactl_comm(synch2list(ma),C);
-//ATfprintf(stderr,"result = %t\n\n",s);
+//gsfprintf(stderr,"result = %T\n\n",s);
 	l = ATmakeList0();
 	for (; !ATisEmpty(s); s=ATgetNext(s))
 	{
@@ -1360,7 +1360,7 @@ static ATermAppl synch_reduce(ATermAppl ma)
 			return gsMakeSync(ma1,ma2);
 		}
 	} else {
-		gsErrorMsg("invalid multiaction supplied to synch_reduce (%t)\n",ma);
+		gsErrorMsg("invalid multiaction supplied to synch_reduce (%T)\n",ma);
 		exit(1);
 	}
 }
@@ -1478,7 +1478,7 @@ static ATbool match_data(ATermAppl a, ATermAppl m, ATermList l, ATermTable r)
 		return ATtrue;
 	}
 	
-	gsWarningMsg("unknown data expression (%t)\n",a);
+	gsWarningMsg("unknown data expression (%T)\n",a);
 	return ATfalse;
 }
 
@@ -1511,7 +1511,7 @@ static ATbool match_proc(ATermAppl a, ATermAppl m, ATermList l, ATermTable r)
 		{
 			if ( !match_data(ATAgetFirst(l1),ATAgetFirst(l2),l,r) )
 			{
-//ATfprintf(stderr,"f! %t    %t\n",ATAgetFirst(l1),ATAgetFirst(l2));
+//gsfprintf(stderr,"f! %T    %T\n",ATAgetFirst(l1),ATAgetFirst(l2));
 				return ATfalse;
 			}
 		}
@@ -1561,7 +1561,7 @@ static ATbool match_proc(ATermAppl a, ATermAppl m, ATermList l, ATermTable r)
 		}
 	}
 	
-	gsWarningMsg("unknown process (%t)\n",a);
+	gsWarningMsg("unknown process (%T)\n",a);
 	return ATfalse;
 }
 
@@ -1596,7 +1596,7 @@ static ATbool match(ATermAppl a, ATermList l, ATermList *r)
 			v = ATtableGet(t,ATgetFirst(m));
 			if ( v == NULL )
 			{
-//ATfprintf(stderr,"b! %t %t\n",ATelementAt(l,1),ATtableKeys(t));
+//gsfprintf(stderr,"b! %T %T\n",ATelementAt(l,1),ATtableKeys(t));
 				ATtableDestroy(t);
 				return ATfalse;
 			}
@@ -1675,12 +1675,12 @@ static ATermAppl get_proc_call(ATermAppl a, ATermList c)
 	//arg_list = get_vars(a);
 	//t = ATmakeList4((ATerm) var_name,(ATerm) arg_list,(ATerm) a,(ATerm) gsMakeNil());
 	processes = ATappend(processes,(ATerm) t);
-//ATfprintf(stderr,"\n\nprocess %i: %t\n\n",ATgetLength(processes)-1,ATgetLast(processes));
+//gsfprintf(stderr,"\n\nprocess %i: %T\n\n",ATgetLength(processes)-1,ATgetLast(processes));
 //PrintPart_C(stderr,ATelementAt((ATermList) ATgetLast(processes),2));
 	add_to_stack(ATgetLength(processes)-1);
 	if ( !match(a,t,&m) )
 	{
-		gsErrorMsg("introduced process does not match with original (%t , %t)\n",t,a);
+		gsErrorMsg("introduced process does not match with original (%T , %T)\n",t,a);
 		exit(1);
 	}
 	m = (ATermList) gsSubstValues(s,(ATerm) m,true);
@@ -1973,13 +1973,13 @@ static ATermList get_firsts(ATermAppl t)
 		return ATconcat(l,m);
 	}
 
-	gsWarningMsg("unknown process (%t)\n",t);
+	gsWarningMsg("unknown process (%T)\n",t);
 	return ATmakeList0();
 }
 
 static void linearise(int i)
 {
-//ATfprintf(stderr,"\n\nlinearise(%i)\n\n",i);
+//gsfprintf(stderr,"\n\nlinearise(%i)\n\n",i);
 	ATermAppl t = ATAelementAt(ATLelementAt(processes,i),2);
 	ATermList l = get_firsts(t);
 	ATermList m;
@@ -2002,7 +2002,7 @@ static void linearise(int i)
 	}
 	m = ATreverse(m);
 	set_proc(i,m);
-//ATfprintf(stderr,"\n\nset_proc(%i): %t\n\n",i,m);
+//gsfprintf(stderr,"\n\nset_proc(%i): %T\n\n",i,m);
 /*fprintf(stderr,"\n\nset_proc(%i)\n",i);
 for (; !ATisEmpty(m); m=ATgetNext(m))
 {
@@ -2134,7 +2134,7 @@ static ATermAppl subst_procs(ATermAppl a, ATermList nosubst)
 		return ATmakeAppl2(ATgetAFun(a),ATgetArgument(a,0),(ATerm) subst_procs(ATAgetArgument(a,1),nosubst));
 	}
 
-	gsErrorMsg("invalid process parameter (%t)\n",a);
+	gsErrorMsg("invalid process parameter (%T)\n",a);
 	exit(1);
 }
 
@@ -2578,9 +2578,9 @@ static ATermAppl unique_vars(ATermAppl spec)
 	lpe_vars = make_unique(lpe_vars,used_names,&lpe_vars_substs);
 	init_vars = make_unique(init_vars,used_names,&init_vars_substs);
 
-//ATprintf("lpe_pars_substs: %t\n\n",lpe_pars_substs);
-//ATprintf("lpe_vars_substs: %t\n\n",lpe_vars_substs);
-//ATprintf("init_vars_substs: %t\n\n",init_vars_substs);
+//gsprintf("lpe_pars_substs: %T\n\n",lpe_pars_substs);
+//gsprintf("lpe_vars_substs: %T\n\n",lpe_vars_substs);
+//gsprintf("init_vars_substs: %T\n\n",init_vars_substs);
 	l = ATmakeList0();
 	m = (ATermList) ATgetArgument(lpe,2);
 	n = ATconcat(lpe_pars_substs,lpe_vars_substs);
@@ -2589,12 +2589,12 @@ static ATermAppl unique_vars(ATermAppl spec)
 		ATermAppl sum = (ATermAppl) ATgetFirst(m);
 		ATermList substs = n;
 
-//ATprintf("sum: %t\n\n",sum);
-//ATprintf("sum_substs: %t\n\n",substs);
+//gsprintf("sum: %T\n\n",sum);
+//gsprintf("sum_substs: %T\n\n",substs);
 		make_unique_sum((ATermList) ATgetArgument(sum,0),used_names,&substs);
 		
 		l = ATinsert(l,uvSubstValues(substs,(ATerm) sum));
-//ATprintf("new sum: %t\n\n",ATgetFirst(l));
+//gsprintf("new sum: %T\n\n",ATgetFirst(l));
 	}
 	l = ATreverse(l);
 	lpe = gsMakeLPE(lpe_vars,lpe_pars,l);

@@ -65,7 +65,7 @@ static ATermAppl fromInner(ATerm Term)
 
 	if ( ATisEmpty((ATermList) Term) )
 	{
-		ATfprintf(stderr,"%s: invalid inner format term (%t)\n",NAME,Term);
+		gsfprintf(stderr,"%s: invalid inner format term (%T)\n",NAME,Term);
 		exit(1);
 	}
 	
@@ -213,7 +213,7 @@ static ATerm subst_values(ATermList s, ATerm t)
 				return ATgetArgument(ATAgetFirst(s),1);
 			}
 		}
-		ATfprintf(stderr,"%s: variable %t not assigned\n",NAME,t);
+		gsfprintf(stderr,"%s: variable %T not assigned\n",NAME,t);
 		exit(1);
 	} else {
 		return t;
@@ -225,7 +225,7 @@ static bool match_inner(ATerm t, ATerm p, ATermList *vars)
 	bool b;
 	ATermList l;
 
-//ATfprintf(stderr,"match_inner(  %t  ,  %t  ,  %t   )\n\n",t,p,*vars);
+//gsfprintf(stderr,"match_inner(  %T  ,  %T  ,  %T   )\n\n",t,p,*vars);
 	if ( ATisList(p) )
 	{
 		if ( ATisList(t) )
@@ -272,8 +272,8 @@ static ATerm rewrite(ATerm Term, int *b, ATermList vars)
 	int i,len,c,d,e;
 	bool x;
 
-//ATfprintf(stderr,"rewrite(%t)\n\n",Term);
-//ATfprintf(stderr,"rewrite(");PrintPart_C(stderr,fromInner(Term));ATfprintf(stderr,")\n\n");
+//gsfprintf(stderr,"rewrite(%T)\n\n",Term);
+//gsfprintf(stderr,"rewrite(");PrintPart_C(stderr,fromInner(Term));gsfprintf(stderr,")\n\n");
 
 	l2 = NULL;
 
@@ -282,8 +282,8 @@ static ATerm rewrite(ATerm Term, int *b, ATermList vars)
 		x = true;
 		while ( x )
 		{
-//ATfprintf(stderr,"loop: %t\n\n",Term);
-//ATfprintf(stderr,"loop: ");PrintPart_C(stderr,fromInner(Term));ATfprintf(stderr,"\n\n");
+//gsfprintf(stderr,"loop: %T\n\n",Term);
+//gsfprintf(stderr,"loop: ");PrintPart_C(stderr,fromInner(Term));gsfprintf(stderr,"\n\n");
 			x = false;
 			d = 0;
 			t = rewrite(ATgetFirst((ATermList) Term),&d,vars);
@@ -315,10 +315,10 @@ static ATerm rewrite(ATerm Term, int *b, ATermList vars)
 			{
 				o = ATinsert(o,(ATerm) ATmakeList0());
 			}
-//ATfprintf(stderr,"Trying %t...\n\n",Term);
+//gsfprintf(stderr,"Trying %T...\n\n",Term);
 			while ( !ATisEmpty(m) )
 			{
-//ATfprintf(stderr,"%t matches? %t\n\n",l,m);
+//gsfprintf(stderr,"%T matches? %T\n\n",l,m);
 				if ( !ATisEmpty(l) )
 				{
 					t = ATgetFirst(l);
@@ -334,7 +334,7 @@ static ATerm rewrite(ATerm Term, int *b, ATermList vars)
 						// XXX check ATisEmpty(l)
 						if ( is_nil(ATelementAt(ATLgetFirst(m),1)) || ATisEqual(rewrite(subst_values(p,ATelementAt(ATLgetFirst(m),1)),&e,ATmakeList0()),gsMakeDataExprTrue()) )
 						{
-//ATfprintf(stderr,"apply %t\n\n",ATgetFirst(m));
+//gsfprintf(stderr,"apply %T\n\n",ATgetFirst(m));
 							*b = 1;
 							Term = subst_values(p,ATelementAt(ATLgetFirst(m),3));
 							if ( !ATisEmpty(l) )
@@ -372,8 +372,8 @@ static ATerm rewrite(ATerm Term, int *b, ATermList vars)
 				}
 			}
 		}
-//ATfprintf(stderr,"return: %t\n\n",Term);
-//ATfprintf(stderr,"return: ");PrintPart_C(stderr,fromInner(Term));ATfprintf(stderr,"\n\n");
+//gsfprintf(stderr,"return: %T\n\n",Term);
+//gsfprintf(stderr,"return: ");PrintPart_C(stderr,fromInner(Term));gsfprintf(stderr,"\n\n");
 		return Term;
 	} else if ( gsIsOpId((ATermAppl) Term) )
 	{
@@ -386,20 +386,20 @@ static ATerm rewrite(ATerm Term, int *b, ATermList vars)
 					if ( is_nil(ATelementAt(ATLgetFirst(m),1)) || ATisEqual(rewrite(ATelementAt(ATLgetFirst(m),1),&e,ATmakeList0()),gsMakeDataExprTrue()) )
 					{
 						*b = 1;
-//ATfprintf(stderr,"return: %t\n\n",ATelementAt(ATLgetFirst(m),3));
-//ATfprintf(stderr,"return: ");PrintPart_C(stderr,fromInner(ATelementAt(ATLgetFirst(m),3)));ATfprintf(stderr,"\n\n");
+//gsfprintf(stderr,"return: %T\n\n",ATelementAt(ATLgetFirst(m),3));
+//gsfprintf(stderr,"return: ");PrintPart_C(stderr,fromInner(ATelementAt(ATLgetFirst(m),3)));gsfprintf(stderr,"\n\n");
 						return ATelementAt(ATLgetFirst(m),3);
 					}		
 					
 				}
 			}
 		}
-//ATfprintf(stderr,"return: %t\n\n",Term);
-//ATfprintf(stderr,"return: ");PrintPart_C(stderr,fromInner(Term));ATfprintf(stderr,"\n\n");
+//gsfprintf(stderr,"return: %T\n\n",Term);
+//gsfprintf(stderr,"return: ");PrintPart_C(stderr,fromInner(Term));gsfprintf(stderr,"\n\n");
 		return Term;
 	} else {
-//ATfprintf(stderr,"return: %t\n\n",Term);
-//ATfprintf(stderr,"return: ");PrintPart_C(stderr,fromInner(Term));ATfprintf(stderr,"\n\n");
+//gsfprintf(stderr,"return: %T\n\n",Term);
+//gsfprintf(stderr,"return: ");PrintPart_C(stderr,fromInner(Term));gsfprintf(stderr,"\n\n");
 		return Term;
 	}
 }

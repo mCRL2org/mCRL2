@@ -230,7 +230,7 @@ extern "C" {
       // the place has an id, put it in Aid
       Aid = ATmakeAppl0((pn2gsCheckAFun(ATmakeAFunId((char *)xmlGetProp(cur, (const xmlChar *)"id")))));
     }
-    gsDebugMsg("    id: '%t'\n", Aid); 
+    gsDebugMsg("    id: '%T'\n", Aid); 
     
     // second, we want to retrieve the necessary attributes of the place
     cur = cur->xmlChildrenNode;
@@ -256,7 +256,7 @@ extern "C" {
 	if (!(Aname=(ATerm)pn2gsRetrieveTextWithCheck(cur))) {
 	  Aname = ATparse("default_name");
 	}
-	gsDebugMsg("    name: '%t'\n", Aname);
+	gsDebugMsg("    name: '%T'\n", Aname);
       } else if (!xmlStrcmp(cur->name, (const xmlChar *)"initialMarking")) {
 	// the place contains an <initialMarking> element
 	// this element contains a childelement <text> which contains the initial marking of the place
@@ -269,9 +269,9 @@ extern "C" {
 	  // if the initial marking is less than zero, it is resetted to zero
 	  AinitialMarking = ATparse("0");
 	  
-	  gsWarningMsg("Place with id '%t' has initial marking is less than 0, resetting initial marking to 0! \n", Aid);
+	  gsWarningMsg("Place with id '%T' has initial marking is less than 0, resetting initial marking to 0! \n", Aid);
 	}
-	gsDebugMsg("    initialMarking: '%t'\n", AinitialMarking);
+	gsDebugMsg("    initialMarking: '%T'\n", AinitialMarking);
       } else if (!xmlStrcmp(cur->name, (const xmlChar *)"type")) {
 	// the place contains an <type> element
 	// this element contains a childelement <text> which contains the type of the place
@@ -282,10 +282,10 @@ extern "C" {
 	if (!ATisEqual(Atype, ATparse("channel"))) {
 	  // the type should either be omitted or have the value "channel"
 	  // otherwise the place does not need to be translated!
-	  gsWarningMsg("Place with id '%t' has type '%t' and will not be translated.\n", Aid, Atype);
+	  gsWarningMsg("Place with id '%T' has type '%T' and will not be translated.\n", Aid, Atype);
 	  return NULL;
 	}
-	gsDebugMsg("    type: '%t'\n", Atype);
+	gsDebugMsg("    type: '%T'\n", Atype);
       } else if (xmlNodeIsText(cur)) {
       } else {
 	gsWarningMsg("Ignore an element named '%s'.\n", (const char *)cur->name);
@@ -317,7 +317,7 @@ extern "C" {
       // the transition has an id, put it in Aid
       Aid = ATmakeAppl0(pn2gsCheckAFun(ATmakeAFunId((char *)xmlGetProp(cur, (const xmlChar *)"id"))));
     }
-    gsDebugMsg("    id: '%t'\n", Aid); 
+    gsDebugMsg("    id: '%T'\n", Aid); 
     
     // second, we want to retrieve the necessary attributes of the transition
     cur = cur->xmlChildrenNode;
@@ -342,7 +342,7 @@ extern "C" {
 	if (!(Aname=(ATerm)pn2gsRetrieveTextWithCheck(cur))) {
 	  Aname = ATparse("default_name");
 	}
-	gsDebugMsg("    name: '%t'\n", Aname);
+	gsDebugMsg("    name: '%T'\n", Aname);
       } else if (!xmlStrcmp(cur->name, (const xmlChar *)"type")) {
 	// the transition contains an <type> element
 	// this element contains a childelement <text> which contains the type of the transition
@@ -352,10 +352,10 @@ extern "C" {
 	if (!ATisEqual(Atype, ATparse("AND"))) {
 	  // the type should either be omitted or have the value "AND"
 	  // otherwise the place does not need to be translated!
-	  gsWarningMsg("Transition with id '%t' has type '%t' and will not be translated.\n", Aid, Atype);
+	  gsWarningMsg("Transition with id '%T' has type '%T' and will not be translated.\n", Aid, Atype);
 	  return NULL;
 	}
-	gsDebugMsg("    type: '%t'\n", Atype);
+	gsDebugMsg("    type: '%T'\n", Atype);
       } else if (xmlNodeIsText(cur)) {
       } else {
 	gsWarningMsg("Ignore an element named '%s'.\n", (const char *)cur->name);
@@ -387,28 +387,28 @@ extern "C" {
       // the arc has an id, put it in Aid
       Aid = ATmakeAppl0((pn2gsCheckAFun(ATmakeAFunId((char *)xmlGetProp(cur, (const xmlChar *)"id")))));
     }
-    gsDebugMsg("    id: '%t'\n", Aid); 
+    gsDebugMsg("    id: '%T'\n", Aid); 
     
     // second, we want to retrieve the source and the target of the arc
     ATermAppl Asource;
     if (!xmlGetProp(cur, (const xmlChar *)"source")) {
       // the arc has NO source, so the arc will not be translated!
-      gsWarningMsg("Arc with id '%t' has no source and will not be translated.\n", Aid);
+      gsWarningMsg("Arc with id '%T' has no source and will not be translated.\n", Aid);
       return NULL;
     } else {
       Asource = ATmakeAppl0((pn2gsCheckAFun(ATmakeAFunId((char *)xmlGetProp(cur, (const xmlChar *)"source")))));
     }
-    gsDebugMsg("    source: '%t'\n", Asource);
+    gsDebugMsg("    source: '%T'\n", Asource);
     
     ATermAppl Atarget;
     if (!xmlGetProp(cur, (const xmlChar *)"target")) {
       // the arc has NO target, so the arc will not be translated!
-      gsWarningMsg("Arc with id '%t' has no target and will not be translated.\n", Aid);
+      gsWarningMsg("Arc with id '%T' has no target and will not be translated.\n", Aid);
       return NULL;
     } else {
       Atarget = ATmakeAppl0(pn2gsCheckAFun(ATmakeAFunId((char *)xmlGetProp(cur, (const xmlChar *)"target"))));
     }
-    gsDebugMsg("    target: '%t'\n", Atarget);
+    gsDebugMsg("    target: '%T'\n", Atarget);
     
     // third, we want to verify the arc needs translation (thus is of the correct type)
     cur = cur->xmlChildrenNode;
@@ -434,10 +434,10 @@ extern "C" {
 	if (!ATisEqual(Atype, ATparse("some_strange`type=that n0b0dy u5e5..."))) {
 	  // the type should be omitted
 	  // otherwise the arc does not need to be translated!
-	  gsWarningMsg("Arc with id '%t' has type '%t' and will not be translated.\n", Aid, Atype);
+	  gsWarningMsg("Arc with id '%T' has type '%T' and will not be translated.\n", Aid, Atype);
 	  return NULL;
 	}
-	gsDebugMsg("    type: '%t'\n", Atype);
+	gsDebugMsg("    type: '%T'\n", Atype);
       } else if (xmlNodeIsText(cur)) {
       } else {
 	gsWarningMsg("Ignore an element named '%s'.\n", (const char *)cur->name);
@@ -509,7 +509,7 @@ extern "C" {
       NetID = ATprependAFun("Net_",NetID);
       ANetID = ATmakeAppl0(NetID);
     }
-    gsDebugMsg("NetID = '%t'\n",ANetID);
+    gsDebugMsg("NetID = '%T'\n",ANetID);
     
     cur = cur->xmlChildrenNode;
     // cur now points to the first element in the Petri net
@@ -551,7 +551,7 @@ extern "C" {
 	  }
 	} else {
 	  APlaces = ATinsert(APlaces, (ATerm)ACurrentPlace);
-	  gsDebugMsg("  Translate this place: %t\n", (ATerm)ACurrentPlace);
+	  gsDebugMsg("  Translate this place: %T\n", (ATerm)ACurrentPlace);
 	}
       } else if (!xmlStrcmp(cur->name, (const xmlChar *)"transition")) {
 	if(!(ACurrentTransition=pn2gsAterm_trans(cur))) {
@@ -564,7 +564,7 @@ extern "C" {
 	  }
 	} else {
 	  ATransitions = ATinsert(ATransitions, (ATerm)ACurrentTransition);
-	  gsDebugMsg("  Translate this transition: %t\n", (ATerm)ACurrentTransition);
+	  gsDebugMsg("  Translate this transition: %T\n", (ATerm)ACurrentTransition);
 	}
       } else if (!xmlStrcmp(cur->name, (const xmlChar *)"arc")) {
 	if(!(ACurrentArc=pn2gsAterm_arc(cur))) {
@@ -577,7 +577,7 @@ extern "C" {
 	  }
 	} else {
 	  AArcs = ATinsert(AArcs, (ATerm)ACurrentArc);
-	  gsDebugMsg("  Translate this arc: %t\n", (ATerm)ACurrentArc);
+	  gsDebugMsg("  Translate this arc: %T\n", (ATerm)ACurrentArc);
 	}
       } else if (xmlNodeIsText(cur)) {
       } else {
@@ -649,15 +649,15 @@ extern "C" {
       // make the action: arcID
       CurrentAction = ATmakeAppl0(ATgetAFun(ATgetFirst(Ids)));
       ActionsList = ATinsert(ActionsList, (ATerm)gsMakeActId(CurrentAction, ATmakeList0()));
-      gsDebugMsg("Action: %t created.\n", CurrentAction);
+      gsDebugMsg("Action: %T created.\n", CurrentAction);
       // make the action: _arcID
       CurrentAction = ATmakeAppl0(ATprependAFun("_", ATgetAFun(ATgetFirst(Ids))));
       ActionsList = ATinsert(ActionsList, (ATerm)gsMakeActId(CurrentAction, ATmakeList0()));
-      gsDebugMsg("Action: %t created.\n", CurrentAction);
+      gsDebugMsg("Action: %T created.\n", CurrentAction);
       // make the action: __arcID
       CurrentAction = ATmakeAppl0(ATprependAFun("__", ATgetAFun(ATgetFirst(Ids))));
       ActionsList = ATinsert(ActionsList, (ATerm)gsMakeActId(CurrentAction, ATmakeList0()));
-      gsDebugMsg("Action: %t created.\n", CurrentAction);
+      gsDebugMsg("Action: %T created.\n", CurrentAction);
       
       Ids = ATgetNext(Ids);
     }
@@ -671,7 +671,7 @@ extern "C" {
       
       CurrentAction = pn2gsGenerateAction_trans(ATgetAFun(ATgetFirst(Ids)), ATgetAFun(ATtableGet(context.trans_name, ATgetFirst(Ids))));
       ActionsList = ATinsert(ActionsList, (ATerm)gsMakeActId(CurrentAction, ATmakeList0()));
-      gsDebugMsg("Action: %t created.\n", CurrentAction);
+      gsDebugMsg("Action: %T created.\n", CurrentAction);
       Ids = ATgetNext(Ids);
     }
 
@@ -752,7 +752,7 @@ extern "C" {
     // insert the name of the process T_ti into context.transitions
     // this is needed for the generation of the general process Trans
     context.transitions = ATinsert(context.transitions, (ATerm)CurrentTrans);
-    gsDebugMsg("context.transitions now contains the following transitions: %t\n", context.transitions);
+    gsDebugMsg("context.transitions now contains the following transitions: %T\n", context.transitions);
 
     //==================================================
     // generate the processes
@@ -761,51 +761,51 @@ extern "C" {
     ATermAppl MonitorAction = pn2gsGenerateAction_trans(CurrentTransId, ATmakeAFunId(CurrentTransName));
     if (!(ATtableGet(context.trans_in, TransID)) && !(ATtableGet(context.trans_out, TransID))) {
       // Transition has no incoming arcs and no outgoing arcs
-      gsDebugMsg("No in and no out for trans: %t\n", (ATerm)CurrentTrans);
+      gsDebugMsg("No in and no out for trans: %T\n", (ATerm)CurrentTrans);
       // create T_ti
       Process = gsMakeActionProcess(MonitorAction, ATmakeList0());
       EquationList = ATinsert(EquationList, (ATerm)gsMakeProcEqn(ATmakeList0(), gsMakeProcVarId(CurrentTrans, ATmakeList0()), ATmakeList0(), Process));
-      gsDebugMsg("Process: %t created.\n", CurrentTrans);
+      gsDebugMsg("Process: %T created.\n", CurrentTrans);
       
     } else if (ATtableGet(context.trans_in, TransID) && !(ATtableGet(context.trans_out, TransID))) {
       // Transition has incoming arcs but no outgoing arcs
-      gsDebugMsg("In and no out for trans: %t\n", (ATerm)CurrentTrans);
+      gsDebugMsg("In and no out for trans: %T\n", (ATerm)CurrentTrans);
       // create T_ti
       Process = gsMakeSync(gsMakeActionProcess(CurrentTransIn, ATmakeList0()), gsMakeActionProcess(MonitorAction, ATmakeList0()));
       EquationList = ATinsert(EquationList, (ATerm)gsMakeProcEqn(ATmakeList0(), gsMakeProcVarId(CurrentTrans, ATmakeList0()), ATmakeList0(), Process));
-      gsDebugMsg("Process: %t created.\n", CurrentTrans);
+      gsDebugMsg("Process: %T created.\n", CurrentTrans);
       // create T_ti_in
       Process = pn2gsSyncIn((ATermList)ATtableGet(context.trans_in, TransID));
       EquationList = ATinsert(EquationList, (ATerm)gsMakeProcEqn(ATmakeList0(), gsMakeProcVarId(CurrentTransIn, ATmakeList0()), ATmakeList0(), Process));
-      gsDebugMsg("Process: %t created.\n", CurrentTransIn);
+      gsDebugMsg("Process: %T created.\n", CurrentTransIn);
       
     } else if (!(ATtableGet(context.trans_in, TransID)) && ATtableGet(context.trans_out, TransID)) {
       // Transition has outgoing arcs but no incoming arcs
-      gsDebugMsg("Out and no in for trans: %t\n", (ATerm)CurrentTrans);
+      gsDebugMsg("Out and no in for trans: %T\n", (ATerm)CurrentTrans);
       // create T_ti
       Process = gsMakeSync(gsMakeActionProcess(CurrentTransOut, ATmakeList0()), gsMakeActionProcess(MonitorAction, ATmakeList0()));
       EquationList = ATinsert(EquationList, (ATerm)gsMakeProcEqn(ATmakeList0(), gsMakeProcVarId(CurrentTrans, ATmakeList0()), ATmakeList0(), Process));
-      gsDebugMsg("Process: %t created.\n", CurrentTrans);
+      gsDebugMsg("Process: %T created.\n", CurrentTrans);
       // create T_ti_out
       Process = pn2gsSyncOut((ATermList)ATtableGet(context.trans_out, TransID));
       EquationList = ATinsert(EquationList, (ATerm)gsMakeProcEqn(ATmakeList0(), gsMakeProcVarId(CurrentTransOut, ATmakeList0()), ATmakeList0(), Process));
-      gsDebugMsg("Process: %t created.\n", CurrentTransOut);
+      gsDebugMsg("Process: %T created.\n", CurrentTransOut);
       
     } else if (ATtableGet(context.trans_in, TransID) && ATtableGet(context.trans_out, TransID)) {
       // Transition has incoming arcs and outgoing arcs
-      gsDebugMsg("In and out for trans: %t\n", (ATerm)CurrentTrans);
+      gsDebugMsg("In and out for trans: %T\n", (ATerm)CurrentTrans);
       // create T_ti
       Process = gsMakeSync(gsMakeSync(gsMakeActionProcess(CurrentTransIn, ATmakeList0()), gsMakeActionProcess(CurrentTransOut, ATmakeList0())), gsMakeActionProcess(MonitorAction, ATmakeList0()));
       EquationList = ATinsert(EquationList, (ATerm)gsMakeProcEqn(ATmakeList0(), gsMakeProcVarId(CurrentTrans, ATmakeList0()), ATmakeList0(), Process));
-      gsDebugMsg("Process: %t created.\n", CurrentTrans);
+      gsDebugMsg("Process: %T created.\n", CurrentTrans);
       // create T_ti_in
       Process = pn2gsSyncIn((ATermList)ATtableGet(context.trans_in, TransID));
       EquationList = ATinsert(EquationList, (ATerm)gsMakeProcEqn(ATmakeList0(), gsMakeProcVarId(CurrentTransIn, ATmakeList0()), ATmakeList0(), Process));
-      gsDebugMsg("Process: %t created.\n", CurrentTransIn);
+      gsDebugMsg("Process: %T created.\n", CurrentTransIn);
       // create T_ti_out
       Process = pn2gsSyncOut((ATermList)ATtableGet(context.trans_out, TransID));
       EquationList = ATinsert(EquationList, (ATerm)gsMakeProcEqn(ATmakeList0(), gsMakeProcVarId(CurrentTransOut, ATmakeList0()), ATmakeList0(), Process));
-      gsDebugMsg("Process: %t created.\n", CurrentTransOut);
+      gsDebugMsg("Process: %T created.\n", CurrentTransOut);
     }
     return EquationList;
   }
@@ -919,7 +919,7 @@ extern "C" {
     //added by Yarick: we need a table to relate PlaceId and CurrentPlace.
     ATtablePut(context.place_process_name,PlaceID,(ATerm)CurrentPlace);
 
-    gsDebugMsg("context.places now contains the following places: %t\n", context.places);
+    gsDebugMsg("context.places now contains the following places: %T\n", context.places);
 
     //==================================================
     // retrieve the maximum concurrency
@@ -933,9 +933,9 @@ extern "C" {
     ATermAppl MaxConcIn;
     MaxConcIn = gsMakeNumber(ATmakeAppl0(ATmakeAFunInt0(MaxConcIn_int)), gsMakeUnknown());
     if (gsIsNumber(MaxConcIn)) {
-     gsDebugMsg("Parameter %t is a Number\n", MaxConcIn);
+     gsDebugMsg("Parameter %T is a Number\n", MaxConcIn);
     } else {
-      gsDebugMsg("Parameter %t is not a Number\n", MaxConcIn);
+      gsDebugMsg("Parameter %T is not a Number\n", MaxConcIn);
     }
 
     int MaxConcOut_int;
@@ -947,12 +947,12 @@ extern "C" {
     ATermAppl MaxConcOut;
     MaxConcOut = gsMakeNumber(ATmakeAppl0(ATmakeAFunInt0(MaxConcOut_int)), gsMakeUnknown());
     if (gsIsNumber(MaxConcIn)) {
-      gsDebugMsg("Parameter %t is a Number\n", MaxConcOut);
+      gsDebugMsg("Parameter %T is a Number\n", MaxConcOut);
     } else {
-      gsDebugMsg("Parameter %t is not a Number\n", MaxConcOut);
+      gsDebugMsg("Parameter %T is not a Number\n", MaxConcOut);
     }
-    gsDebugMsg("Place %t has maximum concurrency in: '%d' and out: '%d'\n", PlaceID, MaxConcIn_int, MaxConcOut_int);
-    gsDebugMsg("Place %t has maximum concurrency in: '%t' and out: '%t'\n", PlaceID, MaxConcIn, MaxConcOut);
+    gsDebugMsg("Place %T has maximum concurrency in: '%d' and out: '%d'\n", PlaceID, MaxConcIn_int, MaxConcOut_int);
+    gsDebugMsg("Place %T has maximum concurrency in: '%T' and out: '%T'\n", PlaceID, MaxConcIn, MaxConcOut);
 
     //==================================================
     // generate the processes
@@ -984,38 +984,38 @@ extern "C" {
       ATermAppl SumVar0 = gsMakeDataVarId(ATmakeAppl0(ATmakeAFun("y", 0, ATtrue)), gsMakeSortIdPos());
       ATermAppl SumVar1 = gsMakeDataVarId(ATmakeAppl0(ATmakeAFun("z", 0, ATtrue)), gsMakeSortIdPos());
       ATermList SumVars;
-      gsDebugMsg("Parameter %t is %d a DataVarId\n", SumVar0, gsIsDataVarId(SumVar0));
-      gsDebugMsg("Parameter %t is %d a DataVarId\n", SumVar1, gsIsDataVarId(SumVar1));
+      gsDebugMsg("Parameter %T is %d a DataVarId\n", SumVar0, gsIsDataVarId(SumVar0));
+      gsDebugMsg("Parameter %T is %d a DataVarId\n", SumVar1, gsIsDataVarId(SumVar1));
 
       // create P_pi parameter
       ProcVar = pn2gsPlaceParameterNat(gsATermAppl2String(CurrentPlace));
-      gsDebugMsg("Parameter %t is %d a DataVarId\n", ProcVar, gsIsDataVarId(ProcVar));
+      gsDebugMsg("Parameter %T is %d a DataVarId\n", ProcVar, gsIsDataVarId(ProcVar));
 
       // create first sum-sub-process
       SumVars = ATmakeList1((ATerm)SumVar0);
       CondIf0 = pn2gsMakeDataApplProd2(OpLTE,SumVar0,MaxConcIn);
       CondThan0 = gsMakeSeq(gsMakeActionProcess(CurrentPlaceAdd, ATmakeList1((ATerm)SumVar0)), gsMakeActionProcess(CurrentPlace, ATmakeList1((ATerm)pn2gsMakeDataApplProd2(OpAdd,SumVar0,ProcVar))));
       SubProcess0 = gsMakeSum(SumVars, gsMakeCond(CondIf0, CondThan0, gsMakeDelta()));
-      gsDebugMsg("Parameter %t is %d a Sum\n", SubProcess0, gsIsSum(SubProcess0));
+      gsDebugMsg("Parameter %T is %d a Sum\n", SubProcess0, gsIsSum(SubProcess0));
 
       // create second sum-sub-process
       SumVars = ATmakeList1((ATerm)SumVar1);
       CondIf1 = pn2gsMakeDataApplProd2(OpLTE,SumVar1, pn2gsMakeDataApplProd2(OpMin, MaxConcOut, ProcVar));
       CondThan1 = gsMakeSeq(gsMakeActionProcess(CurrentPlaceRem, ATmakeList1((ATerm)SumVar1)), gsMakeActionProcess(CurrentPlace, ATmakeList1((ATerm)pn2gsMakeDataApplProd2(OpMax,Number0, pn2gsMakeDataApplProd2(OpSubt,ProcVar,SumVar1)))));
       SubProcess1 = gsMakeSum(SumVars, gsMakeCond(CondIf1, CondThan1, gsMakeDelta()));
-      gsDebugMsg("Parameter %t is %d a Sum\n", SubProcess1, gsIsSum(SubProcess1));
+      gsDebugMsg("Parameter %T is %d a Sum\n", SubProcess1, gsIsSum(SubProcess1));
 
       // create third sum-sub-process
       SumVars = ATmakeList2((ATerm)SumVar0, (ATerm)SumVar1);
       CondIf2 = pn2gsMakeDataApplProd2(OpAnd, CondIf0, CondIf1);
       CondThan2 = gsMakeSeq(gsMakeSync(gsMakeActionProcess(CurrentPlaceAdd, ATmakeList1((ATerm)SumVar0)), gsMakeActionProcess(CurrentPlaceRem, ATmakeList1((ATerm)SumVar1))), gsMakeActionProcess(CurrentPlace, ATmakeList1((ATerm)pn2gsMakeDataApplProd2(OpMax,Number0,pn2gsMakeDataApplProd2(OpSubt,pn2gsMakeDataApplProd2(OpAdd,SumVar0,ProcVar), SumVar1)))));
       SubProcess2 = gsMakeSum(SumVars, gsMakeCond(CondIf2, CondThan2, gsMakeDelta()));
-      gsDebugMsg("Parameter %t is %d a Sum\n", SubProcess2, gsIsSum(SubProcess2));
+      gsDebugMsg("Parameter %T is %d a Sum\n", SubProcess2, gsIsSum(SubProcess2));
 
       // create P_pi
       Process = gsMakeChoice(gsMakeChoice(SubProcess0, SubProcess1), SubProcess2);
       EquationList = ATinsert(EquationList, (ATerm)gsMakeProcEqn(ATmakeList0(), gsMakeProcVarId(CurrentPlace, ATmakeList1((ATerm)gsMakeSortIdNat())), ATmakeList1((ATerm)ProcVar), Process));
-      gsDebugMsg("Process: %t created.\n", CurrentPlace);
+      gsDebugMsg("Process: %T created.\n", CurrentPlace);
     }
 
     {
@@ -1026,7 +1026,7 @@ extern "C" {
       ATermAppl CondElse = gsMakeActionProcess(CurrentPlaceIn, ATmakeList0());
       ATermAppl Process = gsMakeCond(CondIf, CondThan, CondElse);
       EquationList = ATinsert(EquationList, (ATerm)gsMakeProcEqn(ATmakeList0(), gsMakeProcVarId(CurrentPlaceAdd, ATmakeList1((ATerm)gsMakeSortIdPos())), ATmakeList1((ATerm)ProcVar), Process));
-      gsDebugMsg("Process: %t created.\n", CurrentPlaceAdd);
+      gsDebugMsg("Process: %T created.\n", CurrentPlaceAdd);
     }
 
     {
@@ -1038,7 +1038,7 @@ extern "C" {
 	Process = pn2gsChoiceIn((ATermList)ATtableGet(context.place_in, PlaceID));
       }
       EquationList = ATinsert(EquationList, (ATerm)gsMakeProcEqn(ATmakeList0(), gsMakeProcVarId(CurrentPlaceIn, ATmakeList0()), ATmakeList0(), Process));
-      gsDebugMsg("Process: %t created.\n", CurrentPlaceIn);
+      gsDebugMsg("Process: %T created.\n", CurrentPlaceIn);
     }
 
     {
@@ -1049,7 +1049,7 @@ extern "C" {
       ATermAppl CondElse = gsMakeActionProcess(CurrentPlaceOut, ATmakeList0());
       ATermAppl Process = gsMakeCond(CondIf, CondThan, CondElse);
       EquationList = ATinsert(EquationList, (ATerm)gsMakeProcEqn(ATmakeList0(), gsMakeProcVarId(CurrentPlaceRem, ATmakeList1((ATerm)gsMakeSortIdPos())), ATmakeList1((ATerm)ProcVar), Process));
-      gsDebugMsg("Process: %t created.\n", CurrentPlaceRem);
+      gsDebugMsg("Process: %T created.\n", CurrentPlaceRem);
     }
 
     {
@@ -1061,7 +1061,7 @@ extern "C" {
 	Process = pn2gsChoiceOut((ATermList)ATtableGet(context.place_out, PlaceID));
       }
       EquationList = ATinsert(EquationList, (ATerm)gsMakeProcEqn(ATmakeList0(), gsMakeProcVarId(CurrentPlaceOut, ATmakeList0()), ATmakeList0(), Process));
-      gsDebugMsg("Process: %t created.\n", CurrentPlaceOut);
+      gsDebugMsg("Process: %T created.\n", CurrentPlaceOut);
     }
 
     // return the updated list of the processes: the processes belonging to the place added to the input-list
@@ -1168,9 +1168,9 @@ extern "C" {
     ATermList ReturnList = ATmakeList0();
     while (ATisEmpty(Places) == ATfalse) {
       ATerm MarkingUnQuoted = ATtableGet(Markings, ATgetFirst(Places));
-      gsDebugMsg("Initial Marking unquoted = %t\n", MarkingUnQuoted);
+      gsDebugMsg("Initial Marking unquoted = %T\n", MarkingUnQuoted);
       ATermAppl MarkingQuoted = ATmakeAppl0(ATmakeAFun(ATwriteToString(MarkingUnQuoted), 0, ATtrue));
-      gsDebugMsg("Initial Marking quoted= %t\n", MarkingQuoted);
+      gsDebugMsg("Initial Marking quoted= %T\n", MarkingQuoted);
       ReturnList = ATinsert(ReturnList, (ATerm)gsMakeNumber(MarkingQuoted, gsMakeUnknown()));
       Places = ATgetNext(Places);
     }
@@ -1327,7 +1327,7 @@ extern "C" {
 
     Process = gsMakeActionProcess(gsString2ATermAppl("PetriNet"), pn2gsInitialMarkings(ATtableKeys(context.place_mark), context.place_mark));
     ProcessList = ATinsert(ProcessList, (ATerm)gsMakeProcEqn(ATmakeList0(), gsMakeProcVarId(NetID, ATmakeList0()), ATmakeList0(), Process));
-    gsDebugMsg("Process %t created.\n", NetID);
+    gsDebugMsg("Process %T created.\n", NetID);
 
     //Now reverse the whole thing
     return ATreverse(ProcessList);
@@ -1367,14 +1367,14 @@ extern "C" {
     gsDebugMsg("> Insert the data of places that will be translated into tables...  \n");
     while (ATisEmpty(APlaces) == ATfalse) {
       // this loop itterates all places that will be translated
-      gsDebugMsg("    examining %t\n", ATgetFirst(APlaces));
+      gsDebugMsg("    examining %T\n", ATgetFirst(APlaces));
       CurrentKey = ATgetArgument(ATgetFirst(APlaces), 0);
       // it is sufficient to check whether a key appears in place_name OR place_mark
       // since a value is inserted in both tables at the same time!
       if (ATtableGet(context.place_name, CurrentKey)) {
 	// the ID of the current places appears more than once in the places.
 	// this is an error in the input, and thus termination takes place!
-	gsErrorMsg("The id: '%t' appears more than once!\n", CurrentKey);
+	gsErrorMsg("The id: '%T' appears more than once!\n", CurrentKey);
 	return NULL;
       } else {
 	// insert the data into context.place_name
@@ -1391,24 +1391,24 @@ extern "C" {
       // remove the entry from the list
       APlaces = ATgetNext(APlaces);
     }
-    gsDebugMsg("\n  Places that are not inserted into the tables: %t\n", (ATerm)APlaces);
+    gsDebugMsg("\n  Places that are not inserted into the tables: %T\n", (ATerm)APlaces);
     gsDebugMsg("  ID's of the two read-in place tables.\n  THESE TWO LISTS SHOULD BE EXACTLY THE SAME!\n  ");
-    gsDebugMsg("%t \n  %t \n", (ATerm)ATtableKeys(context.place_name), (ATerm)ATtableKeys(context.place_mark));
+    gsDebugMsg("%T \n  %T \n", (ATerm)ATtableKeys(context.place_name), (ATerm)ATtableKeys(context.place_mark));
     
     gsDebugMsg("> Insert the the data of transitions that will be translated into tables...  \n");
     while (ATisEmpty(ATransitions) == ATfalse) {
       // this loop itterates all transitions that will be translated
-      gsDebugMsg("    examining %t\n", ATgetFirst(ATransitions));
+      gsDebugMsg("    examining %T\n", ATgetFirst(ATransitions));
       CurrentKey = ATgetArgument(ATgetFirst(ATransitions), 0);
       if (ATtableGet(context.place_name, CurrentKey)) {
 	// the ID of the current transition appeared already in the places.
 	// this is an error in the input, and thus termination takes place!
-	gsErrorMsg("The id: '%t' appears more than once!\n", CurrentKey);
+	gsErrorMsg("The id: '%T' appears more than once!\n", CurrentKey);
 	return NULL;
       } else if (ATtableGet(context.trans_name, CurrentKey)) {
 	// the ID of the current transition appears more than once in the transitions.
 	// this is an error in the input, and thus termination takes place!
-	gsErrorMsg("The id: '%t' appears more than once!\n", CurrentKey);
+	gsErrorMsg("The id: '%T' appears more than once!\n", CurrentKey);
 	return NULL;
       } else {
 	// insert the data into context.trans_name
@@ -1419,8 +1419,8 @@ extern "C" {
       // remove the entry from the list ATransitions
       ATransitions = ATgetNext(ATransitions);
     }
-    gsDebugMsg("\n  Transitions that are not inserted into the tables: %t\n", (ATerm)ATransitions);
-    gsDebugMsg("  ID's of the read-in transition table.\n  %t\n", (ATerm)ATtableKeys(context.trans_name));
+    gsDebugMsg("\n  Transitions that are not inserted into the tables: %T\n", (ATerm)ATransitions);
+    gsDebugMsg("  ID's of the read-in transition table.\n  %T\n", (ATerm)ATtableKeys(context.trans_name));
     
     // temporary variables to store the current source and target
     ATerm CurrentSource;
@@ -1428,27 +1428,27 @@ extern "C" {
     gsDebugMsg("> Insert the data of the arcs that will be translated into tables...  \n");
     while (ATisEmpty(AArcs) == ATfalse) {
       // this loop itterates all arcs that will be translated
-      gsDebugMsg("    examining %t\n", ATgetFirst(AArcs));
+      gsDebugMsg("    examining %T\n", ATgetFirst(AArcs));
       CurrentKey = ATgetArgument(ATgetFirst(AArcs), 0);
       if (ATtableGet(context.place_name, CurrentKey)) {
 	// the ID of the current arc appeared already in the places.
 	// this is an error in the input, and thus termination takes place!
-	gsErrorMsg("The id: '%t' appears more than once!\n", CurrentKey);
+	gsErrorMsg("The id: '%T' appears more than once!\n", CurrentKey);
 	return NULL;
       } else if (ATtableGet(context.trans_name, CurrentKey)) {
 	// the ID of the current arc appeared already in the transitions.
 	// this is an error in the input, and thus termination takes place!
-	gsErrorMsg("The id: '%t' appears more than once!\n", CurrentKey);
+	gsErrorMsg("The id: '%T' appears more than once!\n", CurrentKey);
 	return NULL;
       } else if (ATtableGet(context.arc_in, CurrentKey)) {
 	// the ID of the current arc appeared already in the in_arcs.
 	// this is an error in the input, and thus termination takes place!
-	gsErrorMsg("The id: '%t' appears more than once!\n", CurrentKey);
+	gsErrorMsg("The id: '%T' appears more than once!\n", CurrentKey);
 	return NULL;
       } else if (ATtableGet(context.arc_out, CurrentKey)) {
 	// the ID of the current arc appeared already in the out_arcs.
 	// this is an error in the input, and thus termination takes place!
-	gsErrorMsg("The id: '%t' appears more than once!\n", CurrentKey);
+	gsErrorMsg("The id: '%T' appears more than once!\n", CurrentKey);
 	return NULL;
       } else {
 	// the arc's ID did not appear in the transitions, places or arcs that will be translated
@@ -1470,17 +1470,17 @@ extern "C" {
 	} else {
 	  // either the source or the target (or both) of the arc will not be translated
 	  // therefore the arc will not be translated either!
-	  gsWarningMsg("The source or target of arc with id '%t' will not be translated, and thus this arc will not be translated either.\n", CurrentKey);
+	  gsWarningMsg("The source or target of arc with id '%T' will not be translated, and thus this arc will not be translated either.\n", CurrentKey);
 	}
       }
       // remove the entry from the list ATransitions
       AArcs = ATgetNext(AArcs);
     }
-    gsDebugMsg("\n  Arcs that are not inserted into the tables: %t\n", (ATerm)AArcs);
+    gsDebugMsg("\n  Arcs that are not inserted into the tables: %T\n", (ATerm)AArcs);
     
     gsDebugMsg("  ID's of the two read-in arc tables. The first list contains the in-arcs, the second one the out-arcs. \n");
     gsDebugMsg("  NO TWO ID'S SHOULD BE IN BOTH TABLES!\n");
-    gsDebugMsg("%t\n  %t\n\n", (ATerm)ATtableKeys(context.arc_in), (ATerm)ATtableKeys(context.arc_out));
+    gsDebugMsg("%T\n  %T\n\n", (ATerm)ATtableKeys(context.arc_in), (ATerm)ATtableKeys(context.arc_out));
     
     //==================================================
     // generation of some necessary data
@@ -1527,15 +1527,15 @@ extern "C" {
       Arcs = ATgetNext(Arcs);
     }
     Arcs = ATtableKeys(context.place_in);
-    gsDebugMsg("context.place_in contains the following keys: %t\n", Arcs);
+    gsDebugMsg("context.place_in contains the following keys: %T\n", Arcs);
     while (ATisEmpty(Arcs) == ATfalse) {
-      gsDebugMsg("Place '%t' has the following incoming arcs: %t\n", ATgetFirst(Arcs), ATtableGet(context.place_in, ATgetFirst(Arcs)));
+      gsDebugMsg("Place '%T' has the following incoming arcs: %T\n", ATgetFirst(Arcs), ATtableGet(context.place_in, ATgetFirst(Arcs)));
       Arcs = ATgetNext(Arcs);
     }
     Arcs = ATtableKeys(context.trans_out);
-    gsDebugMsg("context.trans_out contains the following keys: %t\n", Arcs);
+    gsDebugMsg("context.trans_out contains the following keys: %T\n", Arcs);
     while (ATisEmpty(Arcs) == ATfalse) {
-      gsDebugMsg("Transition '%t' has the following outgoing arcs: %t\n", ATgetFirst(Arcs), ATtableGet(context.trans_out, ATgetFirst(Arcs)));
+      gsDebugMsg("Transition '%T' has the following outgoing arcs: %T\n", ATgetFirst(Arcs), ATtableGet(context.trans_out, ATgetFirst(Arcs)));
       Arcs = ATgetNext(Arcs);
     }
     
@@ -1573,15 +1573,15 @@ extern "C" {
       Arcs = ATgetNext(Arcs);
     }
     Arcs = ATtableKeys(context.place_out);
-    gsDebugMsg("context.place_out contains the following keys: %t\n", Arcs);
+    gsDebugMsg("context.place_out contains the following keys: %T\n", Arcs);
     while (ATisEmpty(Arcs) == ATfalse) {
-      gsDebugMsg("Place '%t' has the following outgoing arcs: %t\n", ATgetFirst(Arcs), ATtableGet(context.place_out, ATgetFirst(Arcs)));
+      gsDebugMsg("Place '%T' has the following outgoing arcs: %T\n", ATgetFirst(Arcs), ATtableGet(context.place_out, ATgetFirst(Arcs)));
       Arcs = ATgetNext(Arcs);
     }
     Arcs = ATtableKeys(context.trans_in);
-    gsDebugMsg("context.trans_in contains the following keys: %t\n", Arcs);
+    gsDebugMsg("context.trans_in contains the following keys: %T\n", Arcs);
     while (ATisEmpty(Arcs) == ATfalse) {
-      gsDebugMsg("Transition '%t' has the following incoming arcs: %t\n", ATgetFirst(Arcs), ATtableGet(context.trans_in, ATgetFirst(Arcs)));
+      gsDebugMsg("Transition '%T' has the following incoming arcs: %T\n", ATgetFirst(Arcs), ATtableGet(context.trans_in, ATgetFirst(Arcs)));
       Arcs = ATgetNext(Arcs);
     }
     
@@ -1707,7 +1707,7 @@ extern "C" {
       return 1;
     }
     
-    gsDebugMsg("The result of conversion is: %t\n",Spec);
+    gsDebugMsg("The result of conversion is: %T\n",Spec);
 
     Spec=gsTypeCheck(Spec);
 
@@ -1744,7 +1744,7 @@ extern "C" {
     else ActsOut=pn2gsMakeSendActions(ActsOut);
     if (ActsOut) m=ATgetLength(ActsOut);
 
-    gsDebugMsg("Place %t has maximum concurrency in: '%d' and out: '%d'\n", PlaceID, n,m);
+    gsDebugMsg("Place %T has maximum concurrency in: '%d' and out: '%d'\n", PlaceID, n,m);
 
     //==================================================
     // generate the processes
@@ -1813,7 +1813,7 @@ extern "C" {
     // insert the name of the process P_pi into context.places
     // this is needed for the generation of the general process PetriNet
     context.places = ATinsert(context.places, (ATerm)CurrentPlace);
-    gsDebugMsg("context.places now contains the following places: %t\n", context.places);
+    gsDebugMsg("context.places now contains the following places: %T\n", context.places);
 
     //added by Yarick: we need a table to relate PlaceId and CurrentPlace.
     ATtablePut(context.place_process_name,PlaceID,(ATerm)CurrentPlace);
@@ -1899,7 +1899,7 @@ extern "C" {
     ATermList InActionLists=pn2gsGetActionLists(in,In);
     ATermList OutActionLists=pn2gsGetActionLists(out,Out);
 
-    //gsWarningMsg("pn2gsGenerateP_pi_ar: in %d; out %d; In %t; Out %t;\n InActionLists %t; OutActionLists %t\n",in,out,In,Out,InActionLists,OutActionLists);
+    //gsWarningMsg("pn2gsGenerateP_pi_ar: in %d; out %d; In %T; Out %T;\n InActionLists %T; OutActionLists %T\n",in,out,In,Out,InActionLists,OutActionLists);
 
     //pairwise merge the elements of the 2 lists into 1 big list. 
     ATermList TmpOutActionLists=OutActionLists;
@@ -1998,7 +1998,7 @@ extern "C" {
     // insert the name of the process T_ti into context.transs
     // this is needed for the generation of the general process PetriNet
     context.transitions = ATinsert(context.transitions, (ATerm)CurrentTrans);
-    gsDebugMsg("context.trans now contains the following trans: %t\n", context.transitions);
+    gsDebugMsg("context.trans now contains the following trans: %T\n", context.transitions);
     
     //==================================================
     // generate the processes

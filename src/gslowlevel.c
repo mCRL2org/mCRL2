@@ -56,15 +56,10 @@ int gsfprintf(FILE *stream, const char *format, ...)
 
 int gsvfprintf(FILE *stream, const char *format, va_list args)
 {
-  //code copied from the ATerm library in which '%T' is added to the format to
-  //enable pretty printing of ATerm's
-
   const char     *p;
   char           *s;
-  char            fmt[16];
+  char            fmt[32];
   int             result = 0;
-  ATerm           t;
-  ATermList       l;
 
   for (p = format; *p; p++)
   {
@@ -76,6 +71,8 @@ int gsvfprintf(FILE *stream, const char *format, va_list args)
 
     s = fmt;
     while (!isalpha((int) *p))	/* parse formats %-20s, etc. */
+      *s++ = *p++;
+    while ( (*p) == 'l' || (*p) == 'h' || (*p) == 'j' || (*p) == 'L' || (*p) == 'j' || (*p) == 'z' || (*p) == 't' )
       *s++ = *p++;
     *s++ = *p;
     *s = '\0';
@@ -100,97 +97,52 @@ int gsvfprintf(FILE *stream, const char *format, va_list args)
 	fprintf(stream, fmt, va_arg(args, double));
 	break;
 
+      case 'n':
       case 'p':
 	fprintf(stream, fmt, va_arg(args, void *));
 	break;
 
+      case 'a':
+      case 'A':
       case 's':
 	fprintf(stream, fmt, va_arg(args, char *));
 	break;
 
 	/*
-	 * MCRL2 specifics start here: "%T" to prettiprint an ATerm
+	 * MCRL2 specifics start here: "%P" to pretty print an ATerm
 	 */
-      case 'T':
+      case 'P':
 	PrintPart_C(stream, va_arg(args, ATerm));
 	break;
+
 	/*
-	 * ATerm specifics start here: "%t" to print an ATerm; "%l" to
-	 * print a list; "%y" to print a Symbol; "%n" to print a single
-	 * ATerm node
+	 * ATerm specifics start here: "%T" to print an ATerm; "%F" to
+	 * print an AFun
+	 *
+	 * Commented out are:
+	 * "%I" to print a list; "%N" to print a single ATerm node;
+	 * "%H" to print the MD5 sum of a ATerm
 	 */
-      case 't':
-	ATwriteToTextFile(va_arg(args, ATerm), stream);
+      case 'T':
+	fmt[strlen(fmt)-1] = 't';
+	ATfprintf(stream, fmt, va_arg(args, ATerm));
 	break;
-      case 'l':
-	l = va_arg(args, ATermList);
-	fmt[strlen(fmt) - 1] = '\0';	/* Remove 'l' */
-	while (!ATisEmpty(l))
-	{
-	  ATwriteToTextFile(ATgetFirst(l), stream);
-	  /*
-	   * ATfprintf(stream, "\nlist node: %n\n", l);
-	   * ATfprintf(stream, "\nlist element: %n\n", ATgetFirst(l));
-	   */
-	  l = ATgetNext(l);
-	  if (!ATisEmpty(l))
-	    fputs(fmt + 1, stream);
-	}
+/*      case 'I':
+	fmt[strlen(fmt)-1] = 'l';
+	ATfprintf(stream, fmt, va_arg(args, ATermList));
+	break;*/
+      case 'F':
+	fmt[strlen(fmt)-1] = 'y';
+	ATfprintf(stream, fmt, va_arg(args, AFun));
 	break;
-      case 'a':
-      case 'y':
-	AT_printSymbol(va_arg(args, Symbol), stream);
+/*      case 'N':
+	fmt[strlen(fmt)-1] = 'n';
+	ATfprintf(stream, fmt, va_arg(args, ATerm));
 	break;
-      case 'n':
-	t = va_arg(args, ATerm);
-	switch (ATgetType(t))
-	{
-	  case AT_INT:
-	  case AT_REAL:
-	  case AT_BLOB:
-	    ATwriteToTextFile(t, stream);
-	    break;
-
-	  case AT_PLACEHOLDER:
-	    fprintf(stream, "<...>");
-	    break;
-
-	  case AT_LIST:
-	    fprintf(stream, "[...(%d)]", ATgetLength((ATermList) t));
-	    break;
-
-	  case AT_APPL:
-	    if (AT_isValidSymbol(ATgetAFun(t))) {
-	      AT_printSymbol(ATgetAFun(t), stream);
-	      fprintf(stream, "(...(%d))",
-		      GET_ARITY(t->header));
-	    } else {
-	      fprintf(stream, "<sym>(...(%d))",
-		      GET_ARITY(t->header));
-	    }
-	    if (HAS_ANNO(t->header)) {
-	      fprintf(stream, "{}");
-	    }
-	    break;
-	  case AT_FREE:
-	    fprintf(stream, "@");
-	    break;
-	  default:
-	    fprintf(stream, "#");
-	    break;
-	}
-	break;
-
-      case 'h':
-	{
-	  unsigned char *digest = ATchecksum(va_arg(args, ATerm));
-	  int i;
-	  for (i=0; i<16; i++) {
-	    fprintf(stream, "%02x", digest[i]);
-	  }
-	}
-	break;
-
+      case 'H':
+	fmt[strlen(fmt)-1] = 'h';
+	ATfprintf(stream, fmt, va_arg(args, ATerm));
+	break;*/
 
       default:
 	fputc(*p, stream);

@@ -396,7 +396,7 @@ ATermAppl gsImplExprsPart(ATermAppl Part, ATermList *PSubsts,
     else if (ATisEqual(Sort, gsMakeSortExprInt()))
       Part = gsMakeDataExprInt(gsATermAppl2String(Number));
     else //sort of Part is wrong
-      gsWarningMsg("%T can not be implemented because its sort differs from "
+      gsWarningMsg("%P can not be implemented because its sort differs from "
         "Pos, Nat or Int\n", Part);
   } else if (gsIsListEnum(Part)) {
     //Part is a list enumeration; replace by its internal representation
@@ -405,7 +405,7 @@ ATermAppl gsImplExprsPart(ATermAppl Part, ATermList *PSubsts,
     if (ATgetLength(Elts) == 0) {
       //enumeration consists of 0 elements
       gsWarningMsg(
-        "%T can not be implemented because it has 0 elements\n", Part);
+        "%P can not be implemented because it has 0 elements\n", Part);
     } else {
       //make cons list
       Elts = ATreverse(Elts);
@@ -423,7 +423,7 @@ ATermAppl gsImplExprsPart(ATermAppl Part, ATermList *PSubsts,
     if (ATgetLength(Elts) == 0) {
       //enumeration consists of 0 elements
       gsWarningMsg(
-        "%T can not be implemented because it has 0 elements\n", Part);
+        "%P can not be implemented because it has 0 elements\n", Part);
     } else {
       Part = gsImplSetBagEnum(Elts, Sort);
     }
@@ -436,7 +436,7 @@ ATermAppl gsImplExprsPart(ATermAppl Part, ATermList *PSubsts,
     if (!(ATisEqual(BodySort, gsMakeSortIdBool()) ||
         ATisEqual(BodySort, gsMakeSortIdNat()))) {
       //sort of the comprehension is wrong
-      gsWarningMsg("%T can not be implemented because the body is of sort %T "
+      gsWarningMsg("%P can not be implemented because the body is of sort %P "
         "instead of Bool or Nat\n", Part, BodySort);
     } else {
       if (ATisEqual(BodySort, gsMakeSortIdBool())) {
@@ -498,7 +498,7 @@ ATermAppl gsImplExprsPart(ATermAppl Part, ATermList *PSubsts,
     ATermList WhrDecls = ATLgetArgument(Part, 1);
     if (ATgetLength(WhrDecls) == 0) {
       //where clause consists of 0 where clause declarations
-      gsWarningMsg("%T can not be implemented because it has 0 where clause "
+      gsWarningMsg("%P can not be implemented because it has 0 where clause "
          "declarations\n", Part);
     } else {
       //make list of variables and where expressions
@@ -672,7 +672,7 @@ void gsGetFreeVars_Appl(ATermAppl DataExpr, ATermList BoundVars,
     }
     gsGetFreeVars_Appl(ATAgetArgument(DataExpr, 0), BoundVars, PFreeVars);
   } else {
-    gsErrorMsg("%T is not a data expression or a bag enumeration element\n",\
+    gsErrorMsg("%P is not a data expression or a bag enumeration element\n",\
       DataExpr);
   }
 }

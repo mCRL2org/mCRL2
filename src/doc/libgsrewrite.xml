@@ -3,7 +3,9 @@
 <!DOCTYPE refentry PUBLIC "-//OASIS//DTD DocBook XML V4.2//EN" "http://www.oasis-open.org/docbook/xml/4.2/docbookx.dtd"[
 <!ENTITY % param SYSTEM "param.xml">
 %param;
+<!ENTITY tconst "<type>const</type>">
 <!ENTITY tvoid "<type>void</type>">
+<!ENTITY tpchar "<type>char*</type>">
 <!ENTITY taterm "<type>ATerm</type>">
 <!ENTITY trewrstrat "<type>RewriteStrategy</type>">
 <!ENTITY gsRewriteInit "<function>gsRewriteInit</function>">
@@ -16,14 +18,18 @@
 <!ENTITY gsFromRewriteFormat "<function>gsFromRewriteFormat</function>">
 <!ENTITY gsRewriteInternal "<function>gsRewriteInternal</function>">
 <!ENTITY gsRewriteInternals "<function>gsRewriteInternals</function>">
+<!ENTITY RewriteStrategyFromString "<function>RewriteStrategyFromString</function>">
 <!ENTITY parDataEqnSpec "<parameter>DataEqnSpec</parameter>">
 <!ENTITY parStrategy "<parameter>Strategy</parameter>">
 <!ENTITY parEqn "<parameter>Eqn</parameter>">
 <!ENTITY parTerm "<parameter>Term</parameter>">
 <!ENTITY parTerms "<parameter>Terms</parameter>">
+<!ENTITY parS "<parameter>s</parameter>">
 <!ENTITY stratINNER3 "<literal>GS_REWR_INNER3</literal>">
+<!ENTITY stratINNER3string "<literal>inner3</literal>">
 <!ENTITY stratINNERC "<literal>GS_REWR_INNERC</literal>">
 <!ENTITY stratJITTY "<literal>GS_REWR_JITTY</literal>">
+<!ENTITY stratINVALID "<literal>GS_REWR_INVALID</literal>">
 <!ENTITY gsEnableConstructorFunctions "<function>gsEnableConstructorFunctions</function>">
 <!ENTITY RWapplySubstitution "<function>RWapplySubstitution</function>">
 ]>
@@ -86,13 +92,17 @@
   <funcdef>&tatermlist; &gsRewriteInternals;</funcdef>
   <paramdef>&tatermlist; &parTerms;</paramdef>
 </funcprototype>
+<funcprototype>
+  <funcdef>&trewrstrat; &RewriteStrategyFromString;</funcdef>
+  <paramdef>&tconst; &tpchar; &parS;</paramdef>
+</funcprototype>
 </funcsynopsis>
 </refsynopsisdiv>
 
 <refsect1>
 <title>Preconditions</title>
 <para>
-The following preconditions have to be satisfied for all functions:
+The following preconditions have to be satisfied for all functions, except &RewriteStrategyFromString;:
 <itemizedlist>
   <listitem>
     <para>the &aterm; library is initialised</para>
@@ -110,6 +120,9 @@ The following preconditions have to be satisfied for &gsRewriteInit;:
   </listitem>
   <listitem>
     <para>&parDataEqnSpec; is a DataEqnSpec from a mCRL2 specification (after data implementation)</para>
+  </listitem>
+  <listitem>
+    <para>&parStrategy; is not &stratINVALID;</para>
   </listitem>
 </itemizedlist>
 </para>
@@ -179,6 +192,9 @@ Currently, their are three different rewriting strategies available in libgsrewr
 </para>
 <para>
 An alternative to &stratINNER3; is the JITty rewriter &stratJITTY;. This strategy can avoid a lot of unnecessary rewriting in certain cases and can handle some rewrite rules that cause the innermost rewriters to rewrite infinitely.
+</para>
+<para>
+To convert a string representation of a strategy to a &trewrstrat;, one can use &RewriteStrategyFromString;. This is useful for converting command line arguments, specifying a rewrite strategy. The string representations are derived from there &trewrstrat; name by taking the last part and writing it in lower case (e.g. &stratINNER3string; for &stratINNER3;). If the supplied string does not match any of the available strategies, &stratINVALID; is returned. Note that it is not allowed to supply &stratINVALID; to &gsRewriteInit;.
 </para>
 </refsect2>
 

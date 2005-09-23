@@ -101,7 +101,7 @@ static ATbool match(ATerm a, ATerm m, ATermList *l)
 		return ATtrue;
 	}
 	
-	ATfprintf(stderr,"%s: unknown expression (%t)\n",NAME,m);
+	gsfprintf(stderr,"%s: unknown expression (%T)\n",NAME,m);
 	return ATfalse;
 }
 
@@ -208,7 +208,7 @@ ATerm rewrite_inner(ATerm Term, int *b)
 		return (ATerm) ATreverse(l);
 	}
 
-	ATfprintf(stderr,"%s: term is not a ATermAppl or ATermList (%t)\n",NAME,Term);
+	gsfprintf(stderr,"%s: term is not a ATermAppl or ATermList (%T)\n",NAME,Term);
 	exit(1);
 }
 

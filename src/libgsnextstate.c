@@ -202,7 +202,7 @@ ATermAppl FindDummy(ATermAppl sort)
 
 	if ( gsIsSortArrow(sort) )
 	{
-		gsErrorMsg("cannot generate dummies for function sorts (%t)\n",sort);
+		gsErrorMsg("cannot generate dummies for function sorts (%T)\n",sort);
 		exit(1);
 	}
 
@@ -245,7 +245,7 @@ ATermAppl FindDummy(ATermAppl sort)
 		}
 	}
 
-	ATfprintf(stderr,"Could not find dummy of type %t\n",sort);
+	gsfprintf(stderr,"Could not find dummy of type %T\n",sort);
 	exit(1);
 }
 
@@ -501,7 +501,7 @@ ATerm gsNextStateInit(ATermAppl Spec, bool AllowFreeVars, int StateFormat, int R
 		}
 		if ( !set )
 		{
-			gsErrorMsg("Parameter '%t' does not have an initial value.",ATgetArgument(ATAgetFirst(l),0));
+			gsErrorMsg("Parameter '%T' does not have an initial value.",ATgetArgument(ATAgetFirst(l),0));
 			return NULL;
 		}
 	}
@@ -651,10 +651,10 @@ static ATerm *act_p;
 static gsNextStateCallBack fscb;
 static void gsns_callback(ATermList solution)
 {
-//ATprintf("%t\n",ListFromFormat(solution));
+//gsprintf("%T\n",ListFromFormat(solution));
 /*for (ATermList l=solution; !ATisEmpty(l); l=ATgetNext(l))
 {
-	ATfprintf(stderr,"%t := ",ATgetArgument(ATAgetFirst(l),0)); 
+	gsfprintf(stderr,"%T := ",ATgetArgument(ATAgetFirst(l),0)); 
 	PrintPart_C(stderr,gsFromRewriteFormat(ATgetArgument(ATgetFirst(l),1)));
 	if ( !ATisEmpty(ATgetNext(l)) )
 		fprintf(stderr,", "); 
@@ -760,7 +760,7 @@ ATermList gsNextState(ATerm State, gsNextStateCallBack f)
 //		ATermList newstate = (ATermList) gsSubstValues(params_l,ATgetArgument(sum,4),true);
 		act = ATgetArgument(sum,2);
 		newstate = ATgetArgument(sum,3);
-//ATfprintf(stderr,"\n%t  ",ATLgetArgument(sum,0)); PrintPart_C(stderr,gsFromRewriteFormat(ATgetArgument(sum,1))); fprintf(stderr,"\n\n");
+//gsfprintf(stderr,"\n%T  ",ATLgetArgument(sum,0)); PrintPart_C(stderr,gsFromRewriteFormat(ATgetArgument(sum,1))); fprintf(stderr,"\n\n");
 		l = FindSolutions(ATLgetArgument(sum,0),ATgetArgument(sum,1),gsns_callback);
 		NextStateError |= FindSolutionsError;
 		for (; !ATisEmpty(l); l=ATgetNext(l))

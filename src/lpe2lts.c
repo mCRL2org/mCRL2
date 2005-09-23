@@ -37,7 +37,7 @@ static FILE *aut;
 static SVCfile svcf, *svc;
 static SVCparameterIndex svcparam;
 
-void gsinst_callback(ATermAppl transition, ATerm state)
+static void gsinst_callback(ATermAppl transition, ATerm state)
 {
 	ATbool new_state;
 	unsigned long i;
@@ -62,7 +62,7 @@ void gsinst_callback(ATermAppl transition, ATerm state)
 		switch ( outformat )
 		{
 			case OF_AUT:
-				gsfprintf(aut,"(%lu,\"%T\",%lu)\n",current_state,transition,i);
+				gsfprintf(aut,"(%lu,\"%P\",%lu)\n",current_state,transition,i);
 fflush(aut);
 				break;
 			case OF_SVC:
@@ -91,12 +91,12 @@ fflush(aut);
 }
 
 
-void print_help_suggestion(FILE *f, char *Name)
+static void print_help_suggestion(FILE *f, char *Name)
 {
 	fprintf(f,"Try '%s --help' for more information.\n",Name);
 }
 
-void print_help(FILE *f, char *Name)
+static void print_help(FILE *f, char *Name)
 {
 	fprintf(f,"Usage: %s OPTIONS LPEFILE [OUTFILE]\n",Name);
 	fprintf(f,"Generate state space of LPEFILE and save the result to\n"
@@ -111,6 +111,8 @@ void print_help(FILE *f, char *Name)
 	          "-h, --help               Display this help message\n"
 	          "-q, --quiet              Do not print any unrequested\n"
 		  "                         information\n"
+	          "-v, --verbose            Display extra information about the\n"
+		  "                         state space generation\n"
 		  "-f, --freevar            Do not replace free variables in\n"
 		  "                         the LPE with dummy values\n"
 		  "-y, --dummy              Replace free variables in the LPE\n"
@@ -125,7 +127,7 @@ void print_help(FILE *f, char *Name)
 		  "                         deadlock a message is printed)\n"
 	          "-e, --deadlock-trace     Write trace to each deadlock state\n"
 		  "                         to a file\n"
-	          "-m, --monitor            Print status of generation\n"
+	          "-m, --monitor            Print detailed status of generation\n"
 	          "-R, --rewriter name      Use rewriter 'name' (default inner3)\n"
 		  "    --aut                Force OUTFILE to be in the aut format\n"
 		  "                         (No state information)\n"
@@ -140,10 +142,11 @@ int main(int argc, char **argv)
 	FILE *SpecStream;
 	ATerm stackbot;
 	ATermAppl Spec;
-	#define sopts "hqfycrldemR"
+	#define sopts "hqvfycrl:demR:"
 	struct option lopts[] = {
 		{ "help", 		no_argument,		NULL,	'h' },
 		{ "quiet", 		no_argument,		NULL,	'q' },
+		{ "verbose", 		no_argument,		NULL,	'v' },
 		{ "freevar", 		no_argument,		NULL,	'f' },
 		{ "dummy", 		no_argument,		NULL,	'y' },
 		{ "vector", 		no_argument,		NULL,	'c' },
@@ -161,12 +164,12 @@ int main(int argc, char **argv)
 	};
 	int opt, stateformat;
 	RewriteStrategy strat;
-	bool usedummies,trace_deadlock,explore,quiet;
-	char *rw_arg;
+	bool usedummies,trace_deadlock,explore,quiet,verbose;
 
 	ATinit(argc,argv,&stackbot);
 
 	quiet = false;
+	verbose = false;
 	strat = GS_REWR_INNER3;
 	usedummies = true;
 	stateformat = GS_STATE_VECTOR;
@@ -187,43 +190,25 @@ int main(int argc, char **argv)
 			case 'q':
 				quiet = true;
 				break;
+			case 'v':
+				verbose = true;
+				break;
 			case 'f':
 				usedummies = false;
 				break;
 			case 'y':
 				usedummies = true;
 				break;
-			case 'v':
+			case 'c':
 				stateformat = GS_STATE_VECTOR;
 				break;
 			case 'r':
 				stateformat = GS_STATE_TREE;
 				break;
 			case 'l':
-				if ( optarg == NULL )
+				if ( (optarg[0] >= '0') && (optarg[0] <= '9') )
 				{
-					// XXX argument hack
-					// argument doesn't seem to work for short options
-					if ( optind >= argc )
-					{
-						if ( !quiet )
-						{
-							fprintf(stderr,"Option -l/--max needs an argument.\n");
-							print_help_suggestion(stderr,argv[0]);
-						}
-						return 1;
-					}
-
-					if ( (argv[optind][0] >= '0') && (argv[optind][0] <= '9') )
-					{
-						max_states = strtoul(argv[optind],NULL,0);
-						optind++;
-					}
-				} else {
-					if ( (optarg[0] >= '0') && (optarg[0] <= '9') )
-					{
-						max_states = strtoul(optarg,NULL,0);
-					}
+					max_states = strtoul(optarg,NULL,0);
 				}
 				break;
 			case 'd':
@@ -237,43 +222,11 @@ int main(int argc, char **argv)
 				monitor = true;
 				break;
 			case 'R':
-				if ( optarg == NULL )
+				strat = RewriteStrategyFromString(optarg);
+				if ( strat == GS_REWR_INVALID )
 				{
-					if ( optind >= argc )
-					{
-						if ( !quiet )
-						{
-							fprintf(stderr,"Option -R/--rewriter needs an argument.\n");
-							print_help_suggestion(stderr,argv[0]);
-						}
-						return 1;
-					}
-
-					rw_arg = argv[optind++];
-				} else {
-					rw_arg = optarg;
-				}
-				if ( !strcmp(rw_arg,"inner") )
-				{
-					strat = GS_REWR_INNER;
-				} else if ( !strcmp(rw_arg,"inner2") )
-				{
-					strat = GS_REWR_INNER2;
-				} else if ( !strcmp(rw_arg,"inner3") )
-				{
-					strat = GS_REWR_INNER3;
-				} else if ( !strcmp(rw_arg,"innerc") )
-				{
-					strat = GS_REWR_INNERC;
-				} else if ( !strcmp(rw_arg,"innerc2") )
-				{
-					strat = GS_REWR_INNERC2;
-				} else if ( !strcmp(rw_arg,"jitty") )
-				{
-					strat = GS_REWR_JITTY;
-				} else {
-					fprintf(stderr,"warning: unknown rewriter '%s', using default\n",rw_arg);
-					strat = GS_REWR_INNER3;
+					gsErrorMsg("invalid rewrite strategy '%s'\n",optarg);
+					return 1;
 				}
 				break;
 			case 0:
@@ -289,24 +242,36 @@ int main(int argc, char **argv)
 				break;
 		}
 	}
+	if ( quiet && verbose )
+	{
+		gsErrorMsg("options -q/--quiet and -v/--verbose cannot be used together\n");
+		return 1;
+	}
+	if ( quiet )
+		gsSetQuietMsg();
+	if ( verbose )
+		gsSetVerboseMsg();
 
 	if ( argc-optind < 1 )
 	{
-		if ( !quiet )
-		{
-			print_help_suggestion(stderr,argv[0]);
-		}
+		print_help_suggestion(stderr,argv[0]);
 		return 1;
 	}
 
 	if ( (SpecStream = fopen(argv[optind],"r")) == NULL )
 	{
-		if ( !quiet )
-		{
-			perror(NAME);
-		}
+		gsErrorMsg("cannot open '%s' for reading\n",argv[optind]);
 		return 1;
 	}
+	gsEnableConstructorFunctions();
+	Spec = (ATermAppl) ATreadFromFile(SpecStream);
+	if ( Spec == NULL )
+	{
+		gsErrorMsg("input is not a valid LPE\n");
+		return 1;
+	}
+	gsVerboseMsg("reading LPE from '%s'.\n",argv[optind]);
+
 	if ( argc-optind > 1 )
 	{
 		if ( outformat == OF_UNKNOWN )
@@ -331,41 +296,36 @@ int main(int argc, char **argv)
 		switch ( outformat )
 		{
 			case OF_AUT:
+				gsVerboseMsg("writing state space in AUT format to '%s'.\n",argv[optind+1]);
 				outinfo = false;
 				if ( (aut = fopen(argv[optind+1],"w")) == NULL )
 				{
-					if ( !quiet )
-					{
-						perror(NAME);
-					}
+					gsErrorMsg("cannot open '%s' for writing\n",argv[optind+1]);
 					return 1;
 				}
 				break;
 			case OF_SVC:
+				gsVerboseMsg("writing state space in SVC format to '%s'.\n",argv[optind+1]);
 				{
 					SVCbool b;
 
 					svc = &svcf;
 					b = outinfo?SVCfalse:SVCtrue;
-					SVCopen(svc,argv[optind+1],SVCwrite,&b);
+					SVCopen(svc,argv[optind+1],SVCwrite,&b); // XXX check result
 					SVCsetCreator(svc,NAME);
 					SVCsetType(svc,outinfo?"mCRL2+info":"mCRL2");
 					svcparam = SVCnewParameter(svc,(ATerm) ATmakeList0(),&b);
 				}
 			default:
+				gsVerboseMsg("not saving state space.\n");
 				break;
 		}
 	} else {
 		outformat = OF_UNKNOWN;
+		gsVerboseMsg("not saving state space.\n");
 	}
 
-	gsEnableConstructorFunctions();
-	Spec = (ATermAppl) ATreadFromFile(SpecStream);
-	if ( Spec == NULL )
-	{
-		return 1;
-	}
-
+	gsVerboseMsg("initialising...\n");
 	states = ATindexedSetCreate(10000,50);
 	num_states = 0;
 	trans = 0;
@@ -389,7 +349,6 @@ int main(int argc, char **argv)
 				{
 					SVCsetInitialState(svc,SVCnewState(svc,(ATerm) gsMakeStateVector(state),&b));
 				} else {
-					ATprintf("a\n");
 					SVCsetInitialState(svc,SVCnewState(svc,(ATerm) ATmakeInt(0),&b));
 				}
 			}
@@ -408,6 +367,7 @@ int main(int argc, char **argv)
 	unsigned long prevcurrent = 0;
 	bool err = false;
 	orig_state = &state;
+	gsVerboseMsg("generating state space...\n");
 	while ( current_state < num_states )
 	{
 		state = ATindexedSetGetElem(states,current_state);
@@ -422,7 +382,7 @@ int main(int argc, char **argv)
 		{
 			if ( explore )
 			{
-				printf("deadlock-detect: Deadlock found.\n");
+				printf("deadlock-detect: deadlock found.\n");
 				fflush(stdout);
 			}
 			if ( trace_deadlock )
@@ -444,7 +404,7 @@ int main(int argc, char **argv)
 					{
 						if ( ATisEqual(ATgetFirst(ATgetNext(ATLgetFirst(l))),ATgetFirst(tr)) )
 						{
-							gsprintf("%T\n",ATAgetFirst(ATLgetFirst(l)));
+							gsprintf("%P\n",ATAgetFirst(ATLgetFirst(l)));
 							break;
 						}
 					}
@@ -455,15 +415,15 @@ int main(int argc, char **argv)
 		}
 
 		current_state++;
-		if ( monitor && ( (current_state%1000) == 0 ) )
+		if ( (monitor || gsVerbose) && ((current_state%1000) == 0) )
 		{
-			printf("monitor: Currently at level %lu with %lu state%s and %lu transition%s explored and %lu state%s seen.\n",level,current_state,(current_state==1)?"":"s",trans,(trans==1)?"":"s",num_states,(num_states==1)?"":"s");
+			printf("monitor: currently at level %lu with %lu state%s and %lu transition%s explored and %lu state%s seen.\n",level,current_state,(current_state==1)?"":"s",trans,(trans==1)?"":"s",num_states,(num_states==1)?"":"s");
 		}
 		if ( current_state == nextlevelat )
 		{
 			if ( monitor )
 			{
-				printf("monitor: Level %lu done. (%lu state%s, %lu transition%s)\n",level,current_state-prevcurrent,((current_state-prevcurrent)==1)?"":"s",trans-prevtrans,((trans-prevtrans)==1)?"":"s");
+				printf("monitor: level %lu done. (%lu state%s, %lu transition%s)\n",level,current_state-prevcurrent,((current_state-prevcurrent)==1)?"":"s",trans-prevtrans,((trans-prevtrans)==1)?"":"s");
 				fflush(stdout);
 			}
 			level++;
@@ -497,9 +457,9 @@ int main(int argc, char **argv)
 			break;
 	}
 
-	if ( !err && !quiet )
+	if ( !err && (monitor || gsVerbose))
 	{
-		printf("Done with state space generation (%lu level%s, %lu state%s and %lu transition%s).\n",level-1,(level==2)?"":"s",num_states,(num_states==1)?"":"s",trans,(trans==1)?"":"s");
+		printf("done with state space generation (%lu level%s, %lu state%s and %lu transition%s).\n",level-1,(level==2)?"":"s",num_states,(num_states==1)?"":"s",trans,(trans==1)?"":"s");
 	}
 }
 

@@ -7,6 +7,7 @@ extern "C" {
 
 #include <stdio.h>
 #include <stdlib.h>
+#include <string.h>
 #include <aterm2.h>
 #include "gslowlevel.h"
 #include "gsfunc.h"
@@ -226,7 +227,7 @@ ATermList gsRewriteTerms(ATermList Terms)
 
 ATerm gsToRewriteFormat(ATermAppl Term)
 {
-//   ATfprintf(stderr,"gsToRewriteFormat: %d\n",strategy);
+//   gsfprintf(stderr,"gsToRewriteFormat: %d\n",strategy);
 	switch ( strategy )
 	{
 		case GS_REWR_INNER:
@@ -270,7 +271,7 @@ ATermAppl gsFromRewriteFormat(ATerm Term)
 ATerm gsRewriteInternal(ATerm Term)
 {
 	int b;
-//        ATfprintf(stderr,"REWRITE %t\n",Term);
+//        gsfprintf(stderr,"REWRITE %T\n",Term);
 	switch ( strategy )
 	{
 		case GS_REWR_INNER:
@@ -299,6 +300,31 @@ ATermList gsRewriteInternals(ATermList Terms)
 		l = ATinsert(l,gsRewriteInternal(ATgetFirst(Terms)));
 	}
 	return ATreverse(l);
+}
+
+RewriteStrategy RewriteStrategyFromString(const char *s)
+{
+	if ( !strcmp(s,"inner") )
+	{
+		return GS_REWR_INNER;
+	} else if ( !strcmp(s,"inner2") )
+	{
+		return GS_REWR_INNER2;
+	} else if ( !strcmp(s,"inner3") )
+	{
+		return GS_REWR_INNER3;
+	} else if ( !strcmp(s,"innerc") )
+	{
+		return GS_REWR_INNERC;
+	} else if ( !strcmp(s,"innerc2") )
+	{
+		return GS_REWR_INNERC2;
+	} else if ( !strcmp(s,"jitty") )
+	{
+		return GS_REWR_JITTY;
+	} else {
+		return GS_REWR_INVALID;
+	}
 }
 
 #ifdef __cplusplus

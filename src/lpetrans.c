@@ -20,7 +20,7 @@
 #include "gslowlevel.h"
 #include "libprint_c.h"
 
-void add_id(ATermList *ids, ATermAppl id)
+static void add_id(ATermList *ids, ATermAppl id)
 {
 	if ( ATindexOf(*ids,(ATerm) id,0) == -1 )
 	{
@@ -28,7 +28,7 @@ void add_id(ATermList *ids, ATermAppl id)
 	}
 }
 
-ATbool is_domain(ATermList args, ATermAppl sort)
+static ATbool is_domain(ATermList args, ATermAppl sort)
 {
 	while ( !gsIsSortId(sort) )
 	{
@@ -52,7 +52,7 @@ ATbool is_domain(ATermList args, ATermAppl sort)
 	}
 }
 
-ATermAppl find_type(ATermAppl a, ATermList args, ATermList typelist)
+static ATermAppl find_type(ATermAppl a, ATermList args, ATermList typelist)
 {
 	for (; !ATisEmpty(typelist); typelist=ATgetNext(typelist))
 	{
@@ -68,7 +68,7 @@ ATermAppl find_type(ATermAppl a, ATermList args, ATermList typelist)
 	return NULL;
 }
 
-ATermAppl dataterm2ATermAppl(ATermAppl t, ATermList args, ATermList typelist)
+static ATermAppl dataterm2ATermAppl(ATermAppl t, ATermList args, ATermList typelist)
 {
 	ATermList l = ATgetArguments(t);
 	ATermList m;
@@ -101,7 +101,7 @@ ATermAppl dataterm2ATermAppl(ATermAppl t, ATermList args, ATermList typelist)
 	return r;
 }
 
-ATermList get_lpe_acts(ATermAppl lpe, ATermList *ids)
+static ATermList get_lpe_acts(ATermAppl lpe, ATermList *ids)
 {
 	ATermList acts = ATmakeList0();
 	ATermList sums = ATLgetArgument(lpe,2);
@@ -119,7 +119,7 @@ ATermList get_lpe_acts(ATermAppl lpe, ATermList *ids)
 	return ATreverse(acts);
 }
 
-ATermList get_substs(ATermList ids)
+static ATermList get_substs(ATermList ids)
 {
 	// XXX check identifier syntax!
 
@@ -147,7 +147,7 @@ ATermList get_substs(ATermList ids)
  ************* Main conversion functions *************
  *****************************************************/
 
-ATermList convert_sorts(ATermAppl spec, ATermList *ids)
+static ATermList convert_sorts(ATermAppl spec, ATermList *ids)
 {
 	ATermList sorts = ATLgetArgument(ATAgetArgument(ATAgetArgument(spec,0),0),0);
 	ATermList r;
@@ -162,7 +162,7 @@ ATermList convert_sorts(ATermAppl spec, ATermList *ids)
 	return r;
 }
 
-ATermList convert_funcs(ATermList funcs, ATermList *ids)
+static ATermList convert_funcs(ATermList funcs, ATermList *ids)
 {
 	ATermList r,l,m;
 	ATermAppl sort;
@@ -186,17 +186,17 @@ ATermList convert_funcs(ATermList funcs, ATermList *ids)
 	return r;
 }
 
-ATermList convert_cons(ATermAppl spec, ATermList *ids)
+static ATermList convert_cons(ATermAppl spec, ATermList *ids)
 {
 	return convert_funcs(ATLgetArgument(ATAgetArgument(ATAgetArgument(spec,0),0),1),ids);
 }
 
-ATermList convert_maps(ATermAppl spec, ATermList *ids)
+static ATermList convert_maps(ATermAppl spec, ATermList *ids)
 {
 	return convert_funcs(ATLgetArgument(ATAgetArgument(ATAgetArgument(spec,0),0),2),ids);
 }
 
-ATermList convert_datas(ATermAppl spec, ATermList typelist, ATermList *ids)
+static ATermList convert_datas(ATermAppl spec, ATermList typelist, ATermList *ids)
 {
 	ATermList eqns = ATLgetArgument(ATAgetArgument(spec,0),1);
 	ATermList l,args,r;
@@ -220,7 +220,7 @@ ATermList convert_datas(ATermAppl spec, ATermList typelist, ATermList *ids)
 	return r;
 }
 
-ATermAppl convert_lpe(ATermAppl spec, ATermList typelist, ATermList *ids)
+static ATermAppl convert_lpe(ATermAppl spec, ATermList typelist, ATermList *ids)
 {
 	ATermList vars = ATLgetArgument(ATAgetArgument(spec,1),1);
 	ATermList sums = ATLgetArgument(ATAgetArgument(spec,1),2);
@@ -301,7 +301,7 @@ ATermAppl convert_lpe(ATermAppl spec, ATermList typelist, ATermList *ids)
 	return gsMakeLPE(ATmakeList0(),pars,ATreverse(smds));
 }
 
-ATermList convert_init(ATermAppl spec, ATermList typelist, ATermList *ids)
+static ATermList convert_init(ATermAppl spec, ATermList typelist, ATermList *ids)
 {
 	ATermList vars = ATLgetArgument(ATAgetArgument(spec,1),1);
 	ATermList vals = ATLgetArgument(ATAgetArgument(spec,1),0);
@@ -334,13 +334,27 @@ ATermAppl translate(ATermAppl spec)
 
 	ids = ATmakeList0();
 
+	gsVerboseMsg("converting sort declarations...\n");
 	sorts = gsMakeSortSpec(convert_sorts(spec,&ids));
+
+	gsVerboseMsg("converting constructor function declarations...\n");
 	cons = gsMakeConsSpec(convert_cons(spec,&ids));
+
+	gsVerboseMsg("converting mapping declarations...\n");
 	maps = gsMakeMapSpec(convert_maps(spec,&ids));
+
 	typelist = ATconcat(ATLgetArgument(cons,0),ATLgetArgument(maps,0));
+
+	gsVerboseMsg("converting data equations...\n");
 	datas = gsMakeDataEqnSpec(convert_datas(spec,typelist,&ids));
+
+	gsVerboseMsg("converting initial LPE state...\n");
 	init = gsMakeLPEInit(ATmakeList0(),convert_init(spec,typelist,&ids));
+	
+	gsVerboseMsg("converting LPE...\n");
 	lpe = convert_lpe(spec,typelist,&ids);
+	
+	gsVerboseMsg("constructing action declarations...\n");
 	acts = gsMakeActSpec(get_lpe_acts(lpe,&ids));
 
 	ATermAppl r = gsMakeSpecV1(sorts,cons,maps,datas,acts,lpe,init);

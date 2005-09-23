@@ -13,6 +13,7 @@ typedef enum { GS_REWR_INNER
 	     , GS_REWR_INNERC
 	     , GS_REWR_INNERC2
 	     , GS_REWR_JITTY
+	     , GS_REWR_INVALID
 	     } RewriteStrategy;
 
 void gsRewriteInit(ATermAppl DataEqnSpec, RewriteStrategy Strategy);
@@ -28,6 +29,8 @@ ATerm gsToRewriteFormat(ATermAppl Term);
 ATermAppl gsFromRewriteFormat(ATerm Term);
 ATerm gsRewriteInternal(ATerm Term);
 ATermList gsRewriteInternals(ATermList Terms);
+
+RewriteStrategy RewriteStrategyFromString(const char *s);
 
 #ifdef __cplusplus
 }

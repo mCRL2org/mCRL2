@@ -69,7 +69,7 @@ static ATerm OpId2Int(ATermAppl Term, bool add_opids)
       return (ATerm) Term;
     }
     i = ATmakeInt(num_opids);
-//ATfprintf(stderr,"%i := %p (%t)\n\n",num_opids,Term,Term);
+//gsfprintf(stderr,"%i := %p (%T)\n\n",num_opids,Term,Term);
     ATtablePut(term2int,(ATerm) Term,(ATerm) i);
     num_opids++;
   }
@@ -117,7 +117,7 @@ static ATermAppl fromInner(ATerm Term)
         {
                 if ( ATisInt(Term) )
                 {
-//ATfprintf(stderr,"%i -> %p (%t)\n\n",ATgetInt((ATermInt) Term),int2term[ATgetInt((ATermInt) Term)],int2term[ATgetInt((ATermInt) Term)]);
+//gsfprintf(stderr,"%i -> %p (%T)\n\n",ATgetInt((ATermInt) Term),int2term[ATgetInt((ATermInt) Term)],int2term[ATgetInt((ATermInt) Term)]);
                         return int2term[ATgetInt((ATermInt) Term)];
                 } else {
                         return (ATermAppl) Term;
@@ -126,7 +126,7 @@ static ATermAppl fromInner(ATerm Term)
 
         if ( ATisEmpty((ATermList) Term) )
         {
-                ATfprintf(stderr,"%s: invalid inner format term (%t)\n",NAME,Term);
+                gsfprintf(stderr,"%s: invalid inner format term (%T)\n",NAME,Term);
                 exit(1);
         }
 
@@ -169,13 +169,13 @@ static ATerm toInnerc(ATerm Term)
     }
     else
     {
-      ATerror("%s: Do not deal with application terms correctly\n%t\n\n",NAME,Term);
+      ATerror("%s: Do not deal with application terms correctly\n%T\n\n",NAME,Term);
     }
   }
 
   if ( ATisEmpty((ATermList) Term) )
   {
-    ATerror("%s: invalid inner format term (%t)\n",NAME,Term);
+    ATerror("%s: invalid inner format term (%T)\n",NAME,Term);
   }
 
   ATermList l=ATinsert(ATempty,ATgetFirst((ATermList)Term));
@@ -186,7 +186,7 @@ static ATerm toInnerc(ATerm Term)
   }
   l=ATreverse(l);
   ATerm r=Apply((ATermList) l);
-  // ATfprintf(stderr,"RESULT: %t\n%t\n%t\n\n",Term,r,l);
+  // gsfprintf(stderr,"RESULT: %T\n%T\n%T\n\n",Term,r,l);
   return r;
 }
 
@@ -497,7 +497,7 @@ static void CompileRewriteSystem(void)
   true_num = ATgetInt((ATermInt) OpId2Int(gsMakeDataExprTrue(),true));
 
   l = opid_eqns;
-//  ATfprintf(stderr,"OPIDEQNS %t\n\n",l);
+//  gsfprintf(stderr,"OPIDEQNS %T\n\n",l);
   for (; !ATisEmpty(l); l=ATgetNext(l))
   {
     // XXX only adds the last rule where lhs is an opid; this might go "wrong" if 
@@ -514,7 +514,7 @@ static void CompileRewriteSystem(void)
   }
 
   l = dataappl_eqns;
-//  ATfprintf(stderr,"DATAAPPL_EQNS %t\n\n",l);
+//  gsfprintf(stderr,"DATAAPPL_EQNS %T\n\n",l);
   for (; !ATisEmpty(l); l=ATgetNext(l))
   {
     m = (ATermList) toInner(ATAgetArgument(ATAgetFirst(l),2),true);
@@ -539,7 +539,7 @@ static void CompileRewriteSystem(void)
   ATprotectArray((ATerm *) innerc_eqns,num_opids);
 
   l = ATtableKeys(term2int);
-//  ATfprintf(stderr,"TERM2INT %t\n",l);
+//  gsfprintf(stderr,"TERM2INT %T\n",l);
   for (; !ATisEmpty(l); l=ATgetNext(l))
   {
     i = (ATermInt) ATtableGet(term2int,ATgetFirst(l));
@@ -547,10 +547,10 @@ static void CompileRewriteSystem(void)
     m = (ATermList) ATtableGet(tmp_eqns,(ATerm) i);
     if ( m==NULL )
     {
-    // ATfprintf(stderr,"TERMS %t %t NULL\n",ATgetFirst(l),i);
+    // gsfprintf(stderr,"TERMS %T %T NULL\n",ATgetFirst(l),i);
       innerc_eqns[ATgetInt(i)] = ATempty;
     } else {
-    // ATfprintf(stderr,"TERMS %t %t %t\n",ATgetFirst(l),i,m);
+    // gsfprintf(stderr,"TERMS %T %T %T\n",ATgetFirst(l),i,m);
       innerc_eqns[ATgetInt(i)] = ATreverse(m);
     }
   }
@@ -759,7 +759,7 @@ static void CompileRewriteSystem(void)
     fprintf(f,
       "    if ( ATisInt(args[0]) && (ATgetInt((ATermInt) args[0]) < %i) )\n"
       "    {\n"
-//                      "  ATprintf(\"switch %%i\\n\",i);\n"
+//                      "  gsprintf(\"switch %%i\\n\",i);\n"
       "      switch ( arity+%i-1 )\n"
       "      {\n",num_opids,i);
     for (int j=i; j<=max_arity; j++)
@@ -804,7 +804,7 @@ static void CompileRewriteSystem(void)
 
     int arity = getArity(int2term[j]);
 
-    ATfprintf(f,  "// %t\n",int2term[j]);
+    gsfprintf(f,  "// %T\n",int2term[j]);
     fprintf(f,  "static ATermAppl rewr_%i_nnf(ATermAppl t)\n"
                 "{\n",j);
     if (arity>0)
@@ -858,7 +858,7 @@ static void CompileRewriteSystem(void)
       fprintf(f,  ");\n");*/
  
 // Implement every equation of the current operation
-//      ATfprintf(stderr,"LIST %t\n",innerc_eqns[j]);
+//      gsfprintf(stderr,"LIST %T\n",innerc_eqns[j]);
       int b=false;
       
       for (l=innerc_eqns[j]; (!ATisEmpty(l) && !b); l=ATgetNext(l))
@@ -883,8 +883,8 @@ static void CompileRewriteSystem(void)
             z++;
               if ( ATgetLength(ATLelementAt(ATLgetFirst(l),2)) == a2 )
               {
-      ATfprintf(f,  "  // %t\n",ATLgetFirst(l));
-//      ATfprintf(f,  "  printf(\"rewr_%i_%i: %i\\n\");\n",j,a,z);
+      gsfprintf(f,  "  // %T\n",ATLgetFirst(l));
+//      gsfprintf(f,  "  printf(\"rewr_%i_%i: %i\\n\");\n",j,a,z);
                 //
                 // Declare equation variables
                 //
@@ -913,7 +913,7 @@ static void CompileRewriteSystem(void)
                 //
                 // Test condition of equation
                 //
-//      ATfprintf(f,  "  printf(\"rewr_%i_%i: %i match\\n\");\n",j,a,z);
+//      gsfprintf(f,  "  printf(\"rewr_%i_%i: %i match\\n\");\n",j,a,z);
                 if ( ATisList(ATelementAt(ATLgetFirst(l),1)) || ATisInt(ATelementAt(ATLgetFirst(l),1)) || !gsIsNil(ATAelementAt(ATLgetFirst(l),1)) )
                 {
   fprintf(f,  "    %sif ( ATisEqual(",whitespace(d*2));
@@ -925,7 +925,7 @@ static void CompileRewriteSystem(void)
                   d++;
                 }
 
-//      ATfprintf(f,  "  printf(\"rewr_%i_%i: %i match+cond\\n\");\n",j,a,z);
+//      gsfprintf(f,  "  printf(\"rewr_%i_%i: %i match+cond\\n\");\n",j,a,z);
                 //
                 // Create result
                 //
@@ -1017,7 +1017,7 @@ static void CompileRewriteSystem(void)
   fprintf(f,  "\n");
   fprintf(f,  "  int2func = (ftype1 *) malloc(%i*sizeof(ftype1));\n",num_opids);
   for (j=0;j<num_opids;j++)
-  { ATfprintf(f,  "  int2func[%i] = rewr_%i_nnf; // %t\n",j,j,int2term[j]);
+  { gsfprintf(f,  "  int2func[%i] = rewr_%i_nnf; // %T\n",j,j,int2term[j]);
   }
   fprintf(f,  "\n");
   for (int i=0;i<max_arity;i++)
@@ -1025,7 +1025,7 @@ static void CompileRewriteSystem(void)
   fprintf(f,  "  int2func%i = (ftype%i *) malloc(%i*sizeof(ftype%i));\n",i,i,num_opids,i);
   for (j=0;j<num_opids;j++)
   { if ( i <= getArity(int2term[j]) )
-  { ATfprintf(f,  "  int2func%i[%i] = rewr_%i_%i;\n",i,j,j,i);
+  { gsfprintf(f,  "  int2func%i[%i] = rewr_%i_%i;\n",i,j,j,i);
   }
   }
   }
@@ -1094,10 +1094,10 @@ static void CompileRewriteSystem(void)
   fprintf(stderr,"Compiling rewriter...");fflush(stderr);
 #ifdef __WXMAC__
   sprintf(t,"gcc -c %s %s %s.c",INNERC_CPPFLAGS,INNERC_CFLAGS,s);
-  ATfprintf(stderr,"%s\n",t);
+  gsfprintf(stderr,"%s\n",t);
   system(t);
   sprintf(t,"gcc %s -bundle -undefined dynamic_lookup -o %s.so %s.o",INNERC_LDFLAGS,s,s);
-  ATfprintf(stderr,"%s\n",t);
+  gsfprintf(stderr,"%s\n",t);
   system(t);
 #else
   sprintf(t,"gcc -c %s %s -Wno-unused -O3 -rdynamic %s.c",INNERC_CPPFLAGS,INNERC_CFLAGS,s);
@@ -1214,9 +1214,9 @@ ATermList RWrewritelist_innerc(ATermList l)
 
 ATermAppl RWrewrite_innerc(ATermAppl Term)
 {
-//  ATfprintf(stderr,"IN: %t\n",Term);
+//  gsfprintf(stderr,"IN: %T\n",Term);
   ATermAppl r=so_rewr(Term);
-//  ATfprintf(stderr,"OUT: %t\n\n",r);
+//  gsfprintf(stderr,"OUT: %T\n\n",r);
   return r;
 }
 

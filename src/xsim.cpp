@@ -52,27 +52,11 @@ bool XSim::OnInit()
     wxString s;
     if ( cmdln.Found("R",&s) )
     {
-	    if ( s == "inner" )
+	    strat = RewriteStrategyFromString(s);
+	    if ( strat == GS_REWR_INVALID )
 	    {
-		    strat = GS_REWR_INNER;
-	    } else if ( s == "inner2" )
-	    {
-		    strat = GS_REWR_INNER2;
-	    } else if ( s == "inner3" )
-	    {
-		    strat = GS_REWR_INNER3;
-	    } else if ( s == "innerc" )
-	    {
-		    strat = GS_REWR_INNERC;
-	    } else if ( s == "innerc2" )
-	    {
-		    strat = GS_REWR_INNERC2;
-	    } else if ( s == "jitty" )
-	    {
-		    strat = GS_REWR_JITTY;
-	    } else {
-		    fprintf(stderr,"warning: unknown rewriter '%s', using default\n",s.c_str());
-		    strat = GS_REWR_INNER3;
+		    cerr << "error: invalid rewrite strategy '" << s << "'" << endl;;
+		    return FALSE;
 	    }
     }
 

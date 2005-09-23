@@ -127,7 +127,7 @@ static ATermAppl fromInner(ATerm Term)
 
 	if ( ATisEmpty((ATermList) Term) )
 	{
-		ATfprintf(stderr,"%s: invalid inner format term (%t)\n",NAME,Term);
+		gsfprintf(stderr,"%s: invalid inner format term (%T)\n",NAME,Term);
 		exit(1);
 	}
 	
@@ -390,7 +390,7 @@ static ATerm subst_values(ATermAppl *vars, ATerm *vals, int len, ATerm t)
 				return vals[i];
 			}
 		}
-		ATfprintf(stderr,"%s: variable %t not assigned\n",NAME,t);
+		gsfprintf(stderr,"%s: variable %T not assigned\n",NAME,t);
 		exit(1);
 	} else {
 		return t;
@@ -455,7 +455,7 @@ static ATermList build_args(ATermList args, int buildargs, ATermAppl *vars, ATer
 
 static ATerm build(ATerm Term, int buildargs, ATermAppl *vars, ATerm *vals, int len)
 {
-//ATfprintf(stderr,"build(%t,%i)\n\n",Term,buildargs);
+//gsfprintf(stderr,"build(%T,%i)\n\n",Term,buildargs);
 
 	if ( ATisList(Term) )
 	{
@@ -525,7 +525,7 @@ static ATerm rewrite_func(ATermInt op, ATermList args)
 	DECL_A(vars,ATermAppl,max_vars);
 	DECL_A(vals,ATerm,max_vars);
 	int pos;
-//ATfprintf(stderr,"rewrite_func(%t,%t)\n\n",op,args);
+//gsfprintf(stderr,"rewrite_func(%T,%T)\n\n",op,args);
 
 	if ( (m = inner3_eqns[ATgetInt(op)]) != NULL )
 	{
@@ -611,7 +611,7 @@ static ATermList rewrite_listelts(ATermList l)
 
 static ATerm rewrite(ATerm Term)
 {
-//ATfprintf(stderr,"rewrite(%t)\n\n",Term);
+//gsfprintf(stderr,"rewrite(%T)\n\n",Term);
 	if ( ATisList(Term) )
 	{
 		ATermList l = ATgetNext((ATermList) Term);

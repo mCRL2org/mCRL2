@@ -889,7 +889,7 @@ void GS_PRINT_FUNC(PrintPart_Appl)(GS_PRINT_OUTTYPE OutStream, const ATermAppl P
    } else if (ATisEqual(Head, gsMakeOpId1()) ||
         (ATisEqual(Head, gsMakeOpIdCDub()) && ArgsLength == 2)) {
       //print positive number
-      gsDebugMsg("printing positive number %t\n", Part);
+      gsDebugMsg("printing positive number %T\n", Part);
       GS_PRINT_FUNC(PrintPos)(OutStream, Part, PrecLevel);
     } else if (ATisEqual(Head, gsMakeOpId0())) {
       //print 0
@@ -1484,7 +1484,7 @@ void GS_PRINT_FUNC(PrintPart_Appl)(GS_PRINT_OUTTYPE OutStream, const ATermAppl P
     OutStream << "unknown";
 #endif
   } else {
-    gsErrorMsg("the term %t is not part of the internal format\n", Part);
+    gsErrorMsg("the term %T is not part of the internal format\n", Part);
   }
 }
 
