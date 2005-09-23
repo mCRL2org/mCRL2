@@ -29,15 +29,15 @@ typedef enum { phNone, phParse, phTypeCheck, phDataImpl } t_phase;
 //t_phase represents the phases at which the program should be able to stop
 
 //Functions used by the main program
-ATermAppl linearise_file(char *infilename, t_lin_options lin_options,
+static ATermAppl linearise_file(char *infilename, t_lin_options lin_options,
   t_phase end_phase);
 static void calc_infilename(char *infilename, char *specname);
 static void calc_outfilename(char *outfilename, char *infilename);
-void AltIllegalOptWarning(char opt);
-void PrintMoreInfo(char *Name);
-void PrintVersion(void);
-void PrintHelp(char *Name);
-void PrintLinMethod(FILE *stream, t_lin_method lin_method);
+static void AltIllegalOptWarning(char opt);
+static void PrintMoreInfo(char *Name);
+static void PrintVersion(void);
+static void PrintHelp(char *Name);
+static void PrintLinMethod(FILE *stream, t_lin_method lin_method);
 
 //Main program
 
@@ -337,7 +337,7 @@ ATermAppl linearise_file(char *infilename, t_lin_options lin_options,
   return result; 
 }
 
-static void calc_infilename(char *infilename, char *specname)
+void calc_infilename(char *infilename, char *specname)
 {
   //Pre : infilename is able to store specname appended with INFILEEXT
   //Post: infilename represents specname, in which INFILEEXT is appended
@@ -355,7 +355,7 @@ static void calc_infilename(char *infilename, char *specname)
   }
 }
 
-static void calc_outfilename(char *outfilename, char *infilename)
+void calc_outfilename(char *outfilename, char *infilename)
 {
   //Pre: infilename ends with INFILEEXT
   strcpy(outfilename, infilename);

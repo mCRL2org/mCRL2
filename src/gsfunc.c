@@ -2793,6 +2793,11 @@ ATermAppl gsMakeDataExprRTail(ATermAppl DataExpr)
     gsMakeOpIdRTail(gsGetSort(DataExpr)), DataExpr);
 }
 
+ATermAppl gsMakeDataExprEmptySet(ATermAppl SortExpr)
+{
+  return gsMakeOpIdEmptySet(SortExpr);
+}
+
 ATermAppl gsMakeDataExprSetComp(ATermAppl DataExpr, ATermAppl SortExprResult)
 {
   ATermAppl ExprSort = gsGetSort(DataExpr);

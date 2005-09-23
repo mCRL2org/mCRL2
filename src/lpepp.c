@@ -28,16 +28,16 @@ int main(int argc, char *argv[]);
 //  argc represents the number of arguments
 //  argv represents the arguments
 
-void PrintUsage(FILE* Stream, char *Name);
+static void PrintUsage(FILE* Stream, char *Name);
 //print usage information to stream
 
-void PrintMoreInfo(FILE* Stream, char *Name);
+static void PrintMoreInfo(FILE* Stream, char *Name);
 //print --help suggestion to stream
 
-void PrintVersion(FILE* Stream);
+static void PrintVersion(FILE* Stream);
 //print version information to stream
 
-bool PrintSpecificationFileName(char *SpecFileName, char *OutFileName);
+static bool PrintSpecificationFileName(char *SpecFileName, char *OutFileName);
 /*Pre: SpecFileName is the name of a file from which can be read, and which
        contains a specification that adheres to the internal format
        which can be read
@@ -48,7 +48,7 @@ bool PrintSpecificationFileName(char *SpecFileName, char *OutFileName);
        false, otherwise; appropriate error messages have been shown.
 */ 
 
-bool PrintSpecificationStream(FILE *SpecStream, FILE *OutStream);
+static bool PrintSpecificationStream(FILE *SpecStream, FILE *OutStream);
 /*Pre: SpecStream is a stream from which can be read, and which contains a
        specification that adheres to the internal format
        OutStream is the name of a valid stream to which can be written

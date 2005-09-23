@@ -946,6 +946,10 @@ ATermAppl gsMakeDataExprRTail(ATermAppl DataExpr);
 //Pre: DataExpr is a data expression
 //Ret: Data expression for the right tail of DataExpr
 
+ATermAppl gsMakeDataExprEmptySet(ATermAppl SortExpr);
+//Pre: SortExpr is a sort expression
+//Ret: Data expression for the empty set of sort SortExpr
+
 ATermAppl gsMakeDataExprSetComp(ATermAppl DataExpr, ATermAppl SortExpr);
 //Pre: DataExpr is a data expression of sort S -> Bool
 //     SortExprResult is a sort expression

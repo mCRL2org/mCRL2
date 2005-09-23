@@ -86,7 +86,7 @@ static void GS_PRINT_FUNC(PrintEqns)(GS_PRINT_OUTTYPE OutStream, const ATermList
        - PrecLevel and ShowSort are distributed over the equations
 */
 
-ATermList gsGroupDeclsBySort(const ATermList Decls);
+static ATermList gsGroupDeclsBySort(const ATermList Decls);
 /*Pre: Decls is an ATermList containing declarations of the form
        Decl(Name, Sort) from a mCRL2 specification
   Ret: a list containing the declarations from Decls, where declarations of the
@@ -117,7 +117,7 @@ static void GS_PRINT_FUNC(PrintDecl)(GS_PRINT_OUTTYPE OutStream, const ATermAppl
        - "x", otherwise
 */
 
-bool gsHasConsistentContext(const ATermTable DataVarDecls,
+static bool gsHasConsistentContext(const ATermTable DataVarDecls,
   const ATermAppl Part);
 /*Pre: DataVarDecls represents the variables from an equation section, where
  *     the keys are the variable names and the values are the corresponding
@@ -128,7 +128,7 @@ bool gsHasConsistentContext(const ATermTable DataVarDecls,
  *     the context
  */
 
-bool gsHasConsistentContextList(const ATermTable DataVarDecls,
+static bool gsHasConsistentContextList(const ATermTable DataVarDecls,
   const ATermList Parts);
 /*Pre: DataVarDecls represents the variables from an equation section, where
  *     the keys are the variable names and the values are the
@@ -139,7 +139,7 @@ bool gsHasConsistentContextList(const ATermTable DataVarDecls,
  *     the context
  */
 
-bool gsIsListEnumImpl(ATermAppl DataExpr);
+static bool gsIsListEnumImpl(ATermAppl DataExpr);
 //Ret: DataExpr is the implementation of a list enumeration
 
 static void GS_PRINT_FUNC(PrintListEnumElts)(GS_PRINT_OUTTYPE OutStream, const ATermAppl DataExpr,
@@ -181,7 +181,7 @@ static void GS_PRINT_FUNC(PrintPosMult)(GS_PRINT_OUTTYPE OutStream, const ATermA
 
 //implementation
 
-static void GS_PRINT_FUNC(PrintPart_)(GS_PRINT_OUTTYPE OutStream, const ATerm Part)
+void GS_PRINT_FUNC(PrintPart_)(GS_PRINT_OUTTYPE OutStream, const ATerm Part)
 {
   if (ATgetType(Part) == AT_APPL) {
     GS_PRINT_FUNC(PrintPart_Appl)(OutStream, (ATermAppl) Part, false, 0);
@@ -204,7 +204,7 @@ static void GS_PRINT_FUNC(PrintPart_)(GS_PRINT_OUTTYPE OutStream, const ATerm Pa
   }
 }
 
-static void GS_PRINT_FUNC(PrintPart_Appl)(GS_PRINT_OUTTYPE OutStream, const ATermAppl Part, bool ShowSorts,
+void GS_PRINT_FUNC(PrintPart_Appl)(GS_PRINT_OUTTYPE OutStream, const ATermAppl Part, bool ShowSorts,
   int PrecLevel)
 {
   if (ATisQuoted(ATgetAFun(Part)) == ATtrue) {
@@ -1488,7 +1488,7 @@ static void GS_PRINT_FUNC(PrintPart_Appl)(GS_PRINT_OUTTYPE OutStream, const ATer
   }
 }
 
-static void GS_PRINT_FUNC(PrintPart_List)(GS_PRINT_OUTTYPE OutStream, const ATermList Parts, bool ShowSorts,
+void GS_PRINT_FUNC(PrintPart_List)(GS_PRINT_OUTTYPE OutStream, const ATermList Parts, bool ShowSorts,
   int PrecLevel, const char *Terminator, const char *Separator)
 {
   ATermList l = Parts;
@@ -1514,7 +1514,7 @@ static void GS_PRINT_FUNC(PrintPart_List)(GS_PRINT_OUTTYPE OutStream, const ATer
   }
 }
 
-static void GS_PRINT_FUNC(PrintEqns)(GS_PRINT_OUTTYPE OutStream, const ATermList Eqns, bool ShowSorts,
+void GS_PRINT_FUNC(PrintEqns)(GS_PRINT_OUTTYPE OutStream, const ATermList Eqns, bool ShowSorts,
   int PrecLevel)
 {
   int EqnsLength = ATgetLength(Eqns);
@@ -1605,7 +1605,7 @@ static void GS_PRINT_FUNC(PrintEqns)(GS_PRINT_OUTTYPE OutStream, const ATermList
   }
 }
 
-/*static void GS_PRINT_FUNC(PrintProcEqns)(GS_PRINT_OUTTYPE OutStream, const ATermList ProcEqns, bool ShowSorts,
+/*void GS_PRINT_FUNC(PrintProcEqns)(GS_PRINT_OUTTYPE OutStream, const ATermList ProcEqns, bool ShowSorts,
   int PrecLevel)
 {
   int ProcEqnsLength = ATgetLength(ProcEqns);
@@ -1774,7 +1774,7 @@ ATermList gsGroupDeclsBySort(const ATermList Decls)
   }
 }
 
-static void GS_PRINT_FUNC(PrintDecls)(GS_PRINT_OUTTYPE OutStream, const ATermList Decls,
+void GS_PRINT_FUNC(PrintDecls)(GS_PRINT_OUTTYPE OutStream, const ATermList Decls,
   const char *Terminator, const char *Separator)
 {
   int n = ATgetLength(Decls);
@@ -1817,7 +1817,7 @@ static void GS_PRINT_FUNC(PrintDecls)(GS_PRINT_OUTTYPE OutStream, const ATermLis
   }
 }
 
-static void GS_PRINT_FUNC(PrintDecl)(GS_PRINT_OUTTYPE OutStream, const ATermAppl Decl, const bool ShowSorts)
+void GS_PRINT_FUNC(PrintDecl)(GS_PRINT_OUTTYPE OutStream, const ATermAppl Decl, const bool ShowSorts)
 {
   GS_PRINT_FUNC(PrintPart_Appl)(OutStream, ATAgetArgument(Decl, 0), ShowSorts, 0);
   if (ShowSorts) {
@@ -1859,7 +1859,7 @@ bool gsIsListEnumImpl(ATermAppl DataExpr) {
   }
 }
 
-static void GS_PRINT_FUNC(PrintListEnumElts)(GS_PRINT_OUTTYPE OutStream, const ATermAppl DataExpr,
+void GS_PRINT_FUNC(PrintListEnumElts)(GS_PRINT_OUTTYPE OutStream, const ATermAppl DataExpr,
   bool ShowSorts)
 {
   ATermAppl HeadName = ATAgetArgument(gsGetDataExprHead(DataExpr), 0);
@@ -1881,7 +1881,7 @@ static void GS_PRINT_FUNC(PrintListEnumElts)(GS_PRINT_OUTTYPE OutStream, const A
   }
 }
 
-static void GS_PRINT_FUNC(PrintPos)(GS_PRINT_OUTTYPE OutStream, const ATermAppl PosExpr, int PrecLevel)
+void GS_PRINT_FUNC(PrintPos)(GS_PRINT_OUTTYPE OutStream, const ATermAppl PosExpr, int PrecLevel)
 {
   if (gsIsPosConstant(PosExpr)) {
     char *PosValue = gsPosValue(PosExpr);
@@ -1897,7 +1897,7 @@ static void GS_PRINT_FUNC(PrintPos)(GS_PRINT_OUTTYPE OutStream, const ATermAppl 
   }
 }
 
-static void GS_PRINT_FUNC(PrintPosMult)(GS_PRINT_OUTTYPE OutStream, const ATermAppl PosExpr, int PrecLevel,
+void GS_PRINT_FUNC(PrintPosMult)(GS_PRINT_OUTTYPE OutStream, const ATermAppl PosExpr, int PrecLevel,
   char *Mult)
 {
   ATermAppl Head = gsGetDataExprHead(PosExpr);
