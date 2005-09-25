@@ -1804,48 +1804,59 @@ static ATermList substitute_assignmentlist(
                  ATermList vars,
                  ATermList assignments,
                  ATermList parameters,
-                 int replacelhs)
+                 int replacelhs,
+                 int replacerhs)
 { /* precondition: the variables in the assignment occur in
      the same sequence as in the parameters, which stands for the
      total list of parameters.
 
      This function replaces the variables in vars by the terms in terms
-     in the right hand side of the assignments. If for some variable
+     in the right hand side of the assignments if replacerhs holds, and
+     in the lefthandside of an assignment if replacelhs holds. If for some variable
      occuring in the parameterlist no assignment is present, whereas
      this variable occurs in vars, an assignment for it is added.
 
-     If replacelhs is true, it is assumed that the parameters contains
-     the variables after replacing the vars by terms. In this case
-     the terms must be variables themselves. The result is that in the
-     lhs and the rhs the variables are renamed. */
+  */
 
+  /* gsfprintf(stderr,"terms %P\nvars%P\nassignments%P\nparameters%P\n\n",
+                      terms,vars,assignments,parameters); */
+
+  assert(replacelhs==0 || replacelhs==1);
+  assert(replacerhs==0 || replacerhs==1);
 
   if (parameters==ATempty)
   { assert(assignments==ATempty);
     return ATempty; 
   }
+
   ATermAppl parameter=ATAgetFirst(parameters);
 
-  if (assignments!=ATempty)
+  if (assignments!=ATempty) 
   { ATermAppl assignment=ATAgetFirst(assignments);
     ATermAppl lhs=ATAgetArgument(assignment,0);
-    if (replacelhs) 
-    { lhs=substitute_data(terms,vars,lhs);
-      assert(gsIsDataVarId(lhs));
-    }
     if (parameter==lhs)
     { /* The assignment refers to parameter par. Substitute its
-         righthandside and check whether the left and right
+         left and righthandside and check whether the left and right
          handside have become equal, in which case no assignment
          is necessary anymore */
-      ATermAppl rhs=substitute_data(terms,vars,ATAgetArgument(assignment,1));
+      ATermAppl rhs=ATAgetArgument(assignment,1);
+
+      if (replacelhs) 
+      { lhs=substitute_data(terms,vars,lhs);
+        assert(gsIsDataVarId(lhs));
+      }
+      if (replacerhs)
+      { rhs=substitute_data(terms,vars,rhs);
+      }
+
       if (lhs==rhs)
       { return substitute_assignmentlist(
                     terms,
                     vars,
                     ATgetNext(assignments),
                     ATgetNext(parameters),
-                    replacelhs);
+                    replacelhs,
+                    replacerhs);
       }
       return ATinsertA(
                 substitute_assignmentlist(
@@ -1853,7 +1864,8 @@ static ATermList substitute_assignmentlist(
                     vars,
                     ATgetNext(assignments),
                     ATgetNext(parameters),
-                    replacelhs),
+                    replacelhs,
+                    replacerhs),
                 gsMakeAssignment(lhs,rhs));
     }
   }
@@ -1864,35 +1876,35 @@ static ATermList substitute_assignmentlist(
      from the variable, in which case an assignment must 
      be added. */
 
-  if (!replacelhs)
-  { /* if replacelhs holds the left and right side of
-       all new assignments will be the same */
-    ATermAppl rhs=substitute_data(terms,vars,parameter);
-    if (parameter==rhs)
-    { /* no assignment needs to be added */
-      return substitute_assignmentlist(
-                      terms,
-                      vars,
-                      assignments,
-                      ATgetNext(parameters),
-                      replacelhs);
-    }
-    /* an assignment is necessary */
-    return ATinsertA(
-              substitute_assignmentlist(
-                  terms,
-                  vars,
-                  assignments,
-                  ATgetNext(parameters),
-                  replacelhs),
-              gsMakeAssignment(parameter,rhs));
+  ATermAppl lhs=parameter;
+  ATermAppl rhs=parameter;
+
+  if (replacelhs)
+  { lhs=substitute_data(terms,vars,lhs);
+    assert(gsIsDataVarId(lhs));
   }
-  return substitute_assignmentlist(
-                      terms,
-                      vars,
-                      assignments,
-                      ATgetNext(parameters),
-                      replacelhs);
+  if (replacerhs)
+  { rhs=substitute_data(terms,vars,rhs);
+  }
+
+  if (lhs==rhs)
+  { return substitute_assignmentlist(
+                    terms,
+                    vars,
+                    assignments,
+                    ATgetNext(parameters),
+                    replacelhs,
+                    replacerhs);
+  }
+  return ATinsertA(
+                substitute_assignmentlist(
+                    terms,
+                    vars,
+                    assignments,
+                    ATgetNext(parameters),
+                    replacelhs,
+                    replacerhs),
+                gsMakeAssignment(lhs,rhs));
 }
 
 static ATermAppl substitute_time(
@@ -6487,7 +6499,7 @@ static void ApplySumElimination(ATermList *sumvars,
                         ATinsertA(ATempty,lefthandside),
                         *nextstate,
                         parameters,
-                        0);
+                        0,1);
       return;
     }
   }
@@ -6758,7 +6770,7 @@ static ATermList combinesumlist(
                                sums1renaming,
                                nextstate1,
                                par1,
-                               0)));
+                               0,1)));
       }
     }
   }
@@ -6811,7 +6823,8 @@ static ATermList combinesumlist(
   
       condition2=RewriteTerm(condition2);
       if (condition2!=gsMakeDataExprFalse())
-      { resultsumlist=
+      { 
+        resultsumlist=
           ATinsertA(
             resultsumlist,
             gsMakeLPESummand(
@@ -6827,10 +6840,10 @@ static ATermList combinesumlist(
                                rename_list,
                                par2,
                                nextstate2,
-                               par3,
-                               1),
+                               parametersOfsumlist2,
+                               1,1),
                          par3,
-                         0)));
+                         0,1)));
       }
     }
   }
@@ -6860,7 +6873,7 @@ static ATermList combinesumlist(
                      sums1renaming,
                      nextstate1,
                      par1,
-                     0);
+                     0,1);
     actiontime1= substitute_time(rename1_list,sums1renaming,actiontime1);
     condition1= substitute_data(rename1_list,sums1renaming,condition1);
 
@@ -6933,10 +6946,10 @@ static ATermList combinesumlist(
                           rename_list,
                           par2,
                           nextstate2,
-                          par3,
-                          1),
+                          parametersOfsumlist2,
+                          1,1),
                      par3,
-                     0);
+                     0,1);
   
         ATermList nextstate3=ATconcat(nextstate1,nextstate2);
         
@@ -6995,8 +7008,8 @@ static ATermAppl parallelcomposition(
                                   renaming,
                                   pars2renaming,
                                   init2,
-                                  pars3,
-                                  1)),
+                                  pars2,
+                                  1,0)),  
                ATconcat(pars1,pars3),
                result);
 }
@@ -7013,8 +7026,8 @@ static ATermAppl namecomposition(
   ATermList pars=linGetParameters(t);
   ATermList sums=linGetSums(t); 
   return linMakeInitProcSpec(
-                substitute_assignmentlist(args,objectdata[n].parameters,init,pars,0),
-                pars,
+                substitute_assignmentlist(args,objectdata[n].parameters,init,pars,0,1),
+                pars, 
                 sums);
 }
 
