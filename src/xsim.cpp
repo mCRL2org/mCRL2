@@ -8,6 +8,7 @@
     #pragma hdrstop
 #endif
 
+#include <iostream>
 #include <wx/cmdline.h>
 #include <aterm2.h>
 #include "xsim.h"
