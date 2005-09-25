@@ -4655,32 +4655,40 @@ static void create_case_function_on_enumeratedtype(
   
   /* first find out whether the function exists already, in which
        case nothing need to be done */
-  for(w=e->functions; (w!=ATempty) &&
-          (objectdata[objectIndex(ATAgetFirst(w))].targetsort!=sort);
-           w=ATgetNext(w)) {};
-  if (w==ATempty)
-  { /* The function does not exist;
-       Create a new function of enumeratedtype e, on sort */
-       
-    ATermAppl newsort=sort;
-    ATermAppl casefunction=NULL;
-    w=ATempty;
-    for(j=0; (j<e->size) ; j++)
-    {
-      newsort=gsMakeSortArrow(sort,newsort);
-    }
 
-    newsort=gsMakeSortArrow(e->sortId,newsort);
-    snprintf(scratch1,STRINGLENGTH,"C%d_%s",e->size,
+  for(ATermList w=e->functions; w!=ATempty; w=ATgetNext(w))
+  {
+    ATermAppl w1=ATAgetFirst(w);
+    ATermAppl wsort=
+               ATAgetArgument(
+                 ATAgetArgument(ATAgetArgument(w1,1),1),0);
+    if (wsort==sort)
+    { return; /* the case function does already exist !!! */
+    }
+  };
+
+  /* The function does not exist;
+     Create a new function of enumeratedtype e, on sort */
+       
+  ATermAppl newsort=sort;
+  ATermAppl casefunction=NULL;
+  w=ATempty;
+  for(j=0; (j<e->size) ; j++)
+  {
+    newsort=gsMakeSortArrow(sort,newsort);
+  }
+
+  newsort=gsMakeSortArrow(e->sortId,newsort);
+  snprintf(scratch1,STRINGLENGTH,"C%d_%s",e->size,
          ((gsIsSortArrow(newsort))?"fun":ATSgetArgument(sort,0)));
-    casefunction=gsMakeOpId(
+  casefunction=gsMakeOpId(
                       fresh_name(scratch1),
                       newsort);
-    insertmapping(casefunction,spec); 
-    e->functions=ATinsertA(e->functions,casefunction);
+  insertmapping(casefunction,spec); 
+  e->functions=ATinsertA(e->functions,casefunction);
 
-    define_equations_for_case_function(e,casefunction,sort,spec);
-  }
+  define_equations_for_case_function(e,casefunction,sort,spec);
+  return;
 }
 
 typedef struct enumtype {
@@ -5470,6 +5478,7 @@ static ATermList cluster_actions(
       else
       { actionsorts=getActionSorts(ATLgetArgument(multiaction,0));
       }
+
       if (binary==0)
       { enumeratedtype=generate_enumerateddatatype(
                       n,actionsorts,getsorts(pars),spec); 
