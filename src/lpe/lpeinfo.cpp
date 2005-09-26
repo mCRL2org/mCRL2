@@ -16,11 +16,16 @@ string version = "Version 0.2";
 
 int display(string filename, int opt)
 {
+
   
   int outputvar;
-  LPE lpe = read_from_named_file(filename).to_appl();
-  if (!t)
-    cerr << "could not read " << vm["input-file"].as<string>() << endl;
+  try { 
+    read_from_named_file(filename);
+  } catch (string i) {
+    cerr << "could not read " << i << endl;
+  };
+
+  LPE lpe = read_from_named_file(filename).to_appl();  
   
   if (opt==0){
   //
@@ -39,8 +44,8 @@ int display(string filename, int opt)
   LPE::variable_iterator var_itfe = lpe.free_variables_end();
   outputvar = distance(var_itfb, var_itfe);
   // #free variable of the init process
-  LPEInit::variable_iterator var_fvb = LPE::lpe.lpe_init().free_variables_begin();
-  LPEInit::variable_iterator var_fve = LPE::lpe.lpe_init().free_variables_end();
+  LPEInit::variable_iterator var_fvb = lpe.lpe_init().free_variables_begin();
+  LPEInit::variable_iterator var_fve = lpe.lpe_init().free_variables_end();
   outputvar += distance(var_fvb, var_fve);  
   cout << "Number of free variables :" << outputvar <<endl;
   
