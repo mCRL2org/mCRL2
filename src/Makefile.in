@@ -210,11 +210,10 @@ endif
 	done
 
 clean :
-	$(RM) $(EXE_NAMES) $(LIB_NAMES) *.o *.a *.d *.dpp aterm/*.o aterm/*.a aterm/*.d svc/*.o svc/*.a svc/*.d\
-        gslexer.c gsparser.c gsparser.h gsparser.output lpeinfo lpeconstelm config.status config.log *~ core core.*
+	$(RM) $(EXE_NAMES) $(LIB_NAMES) *.o *.a *.d *.dpp aterm/*.o aterm/*.a aterm/*.d svc/*.o svc/*.a svc/*.d gslexer.c gsparser.c gsparser.h gsparser.output lpeinfo lpeconstelm config.status config.log *~ core core.*
 
 distclean : clean
-	$(RM) -r autom4te.cache Makefile gsrewr_innerc_aux.h
+	$(RM) -r autom4te.cache Makefile config gsrewr_innerc_aux.h
 
 $(ATERM_NAME): $(ATERM_OBJECTS)
 	$(AR) $(ARFLAGS) $@ $(ATERM_OBJECTS)
