@@ -83,7 +83,7 @@ SIM_LDFLAGS        = -lgsrewrite -l$(ATERM) -lm -ldl
 
 #xsim definitions
 XSIM_NAME          = xsim
-XSIM_OBJECTS       = xsim.o xsimbase.o xsimmain.o xsimtrace.o libgsnextstate.o libgsprover.o libprint_cxx.o gsfunc.o gslowlevel.o libprint_c.o
+XSIM_OBJECTS       = xsim.o xsimbase.o xsimmain.o xsimtrace.o libgsnextstate.o libgsprover.o libprint_cxx.o libprint_c.o gsfunc.o gslowlevel.o
 ifdef USE_WX
 OBJECTS           += $(XSIM_OBJECTS)
 endif

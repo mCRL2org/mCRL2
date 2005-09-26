@@ -5,8 +5,9 @@
 #include <string.h>
 #include <getopt.h>
 #include <aterm2.h>
-#include "gslowlevel.h"
 #include "gsfunc.h"
+#include "gslowlevel.h"
+#include "libprint_c.h"
 #include "lpetrans.h"
 
 static void print_help(FILE *f)

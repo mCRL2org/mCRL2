@@ -31,6 +31,7 @@ extern "C" {
 #include "lin_std.h"
 #include "gsfunc.h"
 #include "gslowlevel.h"
+#include "libprint_c.h"
 #include "libgsrewrite.h"
 #include "libgsalpha.h"
 

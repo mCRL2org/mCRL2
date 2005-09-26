@@ -54,7 +54,7 @@ ATermAppl gsFreshString2ATermAppl(const char *s, ATerm Term, bool TryNoSuffix)
     return NewTerm;
   } else {
     //there is no fresh ATermAppl "si", with 0 <= i < INT_MAX
-    gsErrorMsg("cannot generate fresh ATermAppl with prefix %s", s);
+    fprintf(stderr, "error: cannot generate fresh ATermAppl with prefix %s\n", s);
     return NULL;
   }
 }

@@ -10,6 +10,7 @@ extern "C" {
 #include "gsdataimpl.h"
 #include "gsfunc.h"
 #include "gslowlevel.h"
+#include "libprint_c.h"
 
 //local declarations
 

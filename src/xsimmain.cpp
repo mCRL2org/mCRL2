@@ -11,6 +11,7 @@
 #include <wx/dynlib.h>
 #include <wx/config.h>
 #include <wx/dynarray.h>
+#include <fstream>
 #include <sstream>
 #include <aterm2.h>
 #include "xsimbase.h"
@@ -602,22 +603,25 @@ void XSimMain::OnSaveTrace( wxCommandEvent &event )
     wxFileDialog dialog( this, wxT("Save trace..."), wxT(""), wxT(""), wxT("Traces (*.trc)|*.trc|All Files|*.*"),wxSAVE);
     if ( dialog.ShowModal() == wxID_OK )
     {
-	    FILE *f;
+	    ofstream f(dialog.GetPath().c_str());
 
-	    if ( (f = fopen(dialog.GetPath().fn_str(),"w")) == NULL )
-	    {
-		    perror("fopen");
-		    return;
-	    }
+	    if ( !f.is_open() )
+            {
+              wxMessageDialog dialog(this,wxT("Cannot open file for writing"),wxT("File error"),wxOK|wxICON_ERROR);
+              dialog.ShowModal();
+              return;
+            }
 
 	    if ( !ATisEmpty(trace) )
 	    {
 		    for (ATermList l=ATconcat(ATgetNext(ATreverse(trace)),ecart); !ATisEmpty(l); l=ATgetNext(l))
 		    {
-			gsfprintf(f, "%P\n", ATgetFirst(ATLgetFirst(l)));
+			PrintPart_CXX(f, ATgetFirst(ATLgetFirst(l)));
+                        f << endl;
 		    }
 	    }
-	    fclose(f);
+	    
+            f.close();
     }
 }
 

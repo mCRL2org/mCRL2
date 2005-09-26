@@ -16,6 +16,7 @@
 
 #ifdef GS_PRINT_CXX
 #include <ostream>
+#include <iostream>
 #include <aterm2.h>
 #include "gsfunc.h"
 #include "gslowlevel.h"
@@ -200,7 +201,12 @@ void GS_PRINT_FUNC(PrintPart_)(GS_PRINT_OUTTYPE OutStream, const ATerm Part)
     OutStream << "]";
 #endif
   } else {
+#ifdef GS_PRINT_C
     gsErrorMsg("ATerm Part is not an ATermAppl or an ATermList\n");
+#endif
+#ifdef GS_PRINT_CXX
+    std::cerr << "error: ATerm Part is not an ATermAppl or an ATermList\n";
+#endif
   }
 }
 
@@ -217,13 +223,23 @@ void GS_PRINT_FUNC(PrintPart_Appl)(GS_PRINT_OUTTYPE OutStream, const ATermAppl P
 #endif
   } else if (gsIsSpecV1(Part)) {
     //print specification
+#ifdef GS_PRINT_C
     gsDebugMsg("printing specification\n");
+#endif
+#ifdef GS_PRINT_CXX
+    if (gsDebug) std::cerr << "printing specification\n";
+#endif
     for (int i = 0; i < 7; i++) {
       GS_PRINT_FUNC(PrintPart_Appl)(OutStream, ATAgetArgument(Part, i), ShowSorts, PrecLevel);
     }
   } else if (gsIsSortSpec(Part)) {
     //print sort specification
+#ifdef GS_PRINT_C
     gsDebugMsg("printing sort specification\n");
+#endif
+#ifdef GS_PRINT_CXX
+    if (gsDebug) std::cerr << "printing sort specification\n";
+#endif
     ATermList SortDecls = ATLgetArgument(Part, 0);
     if (ATgetLength(SortDecls) > 0) {
 #ifdef GS_PRINT_C
@@ -242,7 +258,12 @@ void GS_PRINT_FUNC(PrintPart_Appl)(GS_PRINT_OUTTYPE OutStream, const ATermAppl P
     }
   } else if (gsIsConsSpec(Part) || gsIsMapSpec(Part)) {
     //print operation specification
+#ifdef GS_PRINT_C
     gsDebugMsg("printing operation specification\n");
+#endif
+#ifdef GS_PRINT_CXX
+    if (gsDebug) std::cerr << "printing operation specification\n";
+#endif
     ATermList OpIds = ATLgetArgument(Part, 0);
     if (ATgetLength(OpIds) > 0) {
 #ifdef GS_PRINT_C
@@ -261,11 +282,21 @@ void GS_PRINT_FUNC(PrintPart_Appl)(GS_PRINT_OUTTYPE OutStream, const ATermAppl P
     }
   } else if (gsIsDataEqnSpec(Part)) {
     //print equation specification
+#ifdef GS_PRINT_C
     gsDebugMsg("printing equation specification\n");
+#endif
+#ifdef GS_PRINT_CXX
+    if (gsDebug) std::cerr << "printing equation specification\n";
+#endif
     GS_PRINT_FUNC(PrintEqns)(OutStream, ATLgetArgument(Part, 0), ShowSorts, PrecLevel);
   } else if (gsIsActSpec(Part)) {
     //print action specification
+#ifdef GS_PRINT_C
     gsDebugMsg("printing action specification\n");
+#endif
+#ifdef GS_PRINT_CXX
+    if (gsDebug) std::cerr << "printing action specification\n";
+#endif
     ATermList ActIds = ATLgetArgument(Part, 0);
     if (ATgetLength(ActIds) > 0) {
 #ifdef GS_PRINT_C
@@ -284,11 +315,21 @@ void GS_PRINT_FUNC(PrintPart_Appl)(GS_PRINT_OUTTYPE OutStream, const ATermAppl P
     }
   } else if (gsIsProcEqnSpec(Part)) {
     //print process specification
+#ifdef GS_PRINT_C
     gsDebugMsg("printing process specification\n");
+#endif
+#ifdef GS_PRINT_CXX
+    if (gsDebug) std::cerr << "printing process specification\n";
+#endif
     GS_PRINT_FUNC(PrintEqns)(OutStream, ATLgetArgument(Part, 0), ShowSorts, PrecLevel);
   } else if (gsIsLPE(Part)) {
     //print LPE
+#ifdef GS_PRINT_C
     gsDebugMsg("printing LPE\n");
+#endif
+#ifdef GS_PRINT_CXX
+    if (gsDebug) std::cerr << "printing LPE\n";
+#endif
     //print global variables
     ATermList Vars = ATLgetArgument(Part, 0);
     if (ATgetLength(Vars) > 0) {
@@ -365,7 +406,12 @@ void GS_PRINT_FUNC(PrintPart_Appl)(GS_PRINT_OUTTYPE OutStream, const ATermAppl P
 #endif
   } else if (gsIsInit(Part)) {
     //print initialisation
+#ifdef GS_PRINT_C
     gsDebugMsg("printing initialisation\n");
+#endif
+#ifdef GS_PRINT_CXX
+    if (gsDebug) std::cerr << "printing initialisation\n";
+#endif
     ATermList Vars = ATLgetArgument(Part, 0);
     if (ATgetLength(Vars) > 0) {
 #ifdef GS_PRINT_C
@@ -397,7 +443,12 @@ void GS_PRINT_FUNC(PrintPart_Appl)(GS_PRINT_OUTTYPE OutStream, const ATermAppl P
 #endif
   } else if (gsIsLPEInit(Part)) {
     //print LPE initialisation
+#ifdef GS_PRINT_C
     gsDebugMsg("printing LPE initialisation\n");
+#endif
+#ifdef GS_PRINT_CXX
+    if (gsDebug) std::cerr << "printing LPE initialisation\n";
+#endif
     ATermList Vars = ATLgetArgument(Part, 0);
     if (ATgetLength(Vars) > 0) {
 #ifdef GS_PRINT_C
@@ -438,11 +489,21 @@ void GS_PRINT_FUNC(PrintPart_Appl)(GS_PRINT_OUTTYPE OutStream, const ATermAppl P
 #endif
   } else if (gsIsSortId(Part)) {
     //print sort identifier
+#ifdef GS_PRINT_C
     gsDebugMsg("printing standard sort identifier\n");
+#endif
+#ifdef GS_PRINT_CXX
+    if (gsDebug) std::cerr << "printing standard sort identifier\n";
+#endif
     GS_PRINT_FUNC(PrintPart_Appl)(OutStream, ATAgetArgument(Part, 0), ShowSorts, PrecLevel);
   } else if (gsIsSortRef(Part)) {
     //print sort reference
+#ifdef GS_PRINT_C
     gsDebugMsg("printing sort reference declaration\n");
+#endif
+#ifdef GS_PRINT_CXX
+    if (gsDebug) std::cerr << "printing sort reference declaration\n";
+#endif
     GS_PRINT_FUNC(PrintPart_Appl)(OutStream, ATAgetArgument(Part, 0), ShowSorts, PrecLevel);
 #ifdef GS_PRINT_C
     fprintf(OutStream, " = ");
@@ -453,7 +514,12 @@ void GS_PRINT_FUNC(PrintPart_Appl)(GS_PRINT_OUTTYPE OutStream, const ATermAppl P
     GS_PRINT_FUNC(PrintPart_Appl)(OutStream, ATAgetArgument(Part, 1), ShowSorts, PrecLevel);
   } else if (gsIsDataEqn(Part)) {
     //print data equation (without variables)
+#ifdef GS_PRINT_C
     gsDebugMsg("printing data equation\n");
+#endif
+#ifdef GS_PRINT_CXX
+    if (gsDebug) std::cerr << "printing data equation\n";
+#endif
     ATermAppl Condition = ATAgetArgument(Part, 1);
     if (!gsIsNil(Condition)) {
       GS_PRINT_FUNC(PrintPart_Appl)(OutStream, Condition, ShowSorts, 0);
@@ -474,7 +540,12 @@ void GS_PRINT_FUNC(PrintPart_Appl)(GS_PRINT_OUTTYPE OutStream, const ATermAppl P
     GS_PRINT_FUNC(PrintPart_Appl)(OutStream, ATAgetArgument(Part, 3), ShowSorts, 0);
   } else if (gsIsActId(Part)) {
     //print action identifier
+#ifdef GS_PRINT_C
     gsDebugMsg("printing action identifier\n");
+#endif
+#ifdef GS_PRINT_CXX
+    if (gsDebug) std::cerr << "printing action identifier\n";
+#endif
     GS_PRINT_FUNC(PrintPart_Appl)(OutStream, ATAgetArgument(Part, 0), ShowSorts, PrecLevel);
     if (ShowSorts) {
       ATermList SortExprs = ATLgetArgument(Part, 1);
@@ -490,7 +561,12 @@ void GS_PRINT_FUNC(PrintPart_Appl)(GS_PRINT_OUTTYPE OutStream, const ATermAppl P
     }
   } else if (gsIsProcEqn(Part)) {
     //print process equation (without free variables)
+#ifdef GS_PRINT_C
     gsDebugMsg("printing process equation\n");
+#endif
+#ifdef GS_PRINT_CXX
+    if (gsDebug) std::cerr << "printing process equation\n";
+#endif
     GS_PRINT_FUNC(PrintPart_Appl)(OutStream, ATAgetArgument(Part, 1), ShowSorts, PrecLevel);
     ATermList DataVarIds = ATLgetArgument(Part, 2);
     if (ATgetLength(DataVarIds) > 0) {
@@ -517,7 +593,12 @@ void GS_PRINT_FUNC(PrintPart_Appl)(GS_PRINT_OUTTYPE OutStream, const ATermAppl P
     GS_PRINT_FUNC(PrintPart_Appl)(OutStream, ATAgetArgument(Part, 3), ShowSorts, 0);
   } else if (gsIsProcVarId(Part)) {
     //print process variable
+#ifdef GS_PRINT_C
     gsDebugMsg("printing process variable\n");
+#endif
+#ifdef GS_PRINT_CXX
+    if (gsDebug) std::cerr << "printing process variable\n";
+#endif
     GS_PRINT_FUNC(PrintPart_Appl)(OutStream, ATAgetArgument(Part, 0), ShowSorts, PrecLevel);
     if (ShowSorts) {
       ATermList SortExprs = ATLgetArgument(Part, 1);
@@ -533,7 +614,12 @@ void GS_PRINT_FUNC(PrintPart_Appl)(GS_PRINT_OUTTYPE OutStream, const ATermAppl P
     }
   } else if (gsIsLPESummand(Part)) {
     //print LPE summand
+#ifdef GS_PRINT_C
     gsDebugMsg("printing LPE summand\n");
+#endif
+#ifdef GS_PRINT_CXX
+    if (gsDebug) std::cerr << "printing LPE summand\n";
+#endif
     //print data summations
     ATermList SumVarDecls = ATLgetArgument(Part, 0);
     if (ATgetLength(SumVarDecls) > 0) {
@@ -611,7 +697,12 @@ void GS_PRINT_FUNC(PrintPart_Appl)(GS_PRINT_OUTTYPE OutStream, const ATermAppl P
     }
   } else if (gsIsMultAct(Part)) {
     //print multiaction
+#ifdef GS_PRINT_C
     gsDebugMsg("printing multiaction\n");
+#endif
+#ifdef GS_PRINT_CXX
+    if (gsDebug) std::cerr << "printing multiaction\n";
+#endif
     ATermList Actions = ATLgetArgument(Part, 0);
     int ActionsLength = ATgetLength(Actions);
     if (ActionsLength == 0) {
@@ -639,7 +730,12 @@ void GS_PRINT_FUNC(PrintPart_Appl)(GS_PRINT_OUTTYPE OutStream, const ATermAppl P
     }
   } else if (gsIsAssignment(Part)) {
     //print assignment
+#ifdef GS_PRINT_C
     gsDebugMsg("printing assignment\n");
+#endif
+#ifdef GS_PRINT_CXX
+    if (gsDebug) std::cerr << "printing assignment\n";
+#endif
     GS_PRINT_FUNC(PrintPart_Appl)(OutStream, ATAgetArgument(Part, 0), ShowSorts, PrecLevel);
 #ifdef GS_PRINT_C
     fprintf(OutStream, " := ");
@@ -650,7 +746,12 @@ void GS_PRINT_FUNC(PrintPart_Appl)(GS_PRINT_OUTTYPE OutStream, const ATermAppl P
     GS_PRINT_FUNC(PrintPart_Appl)(OutStream, ATAgetArgument(Part, 1), ShowSorts, 0);
   } else if (gsIsSortList(Part)) {
     //print list sort
+#ifdef GS_PRINT_C
     gsDebugMsg("printing list sort\n");
+#endif
+#ifdef GS_PRINT_CXX
+    if (gsDebug) std::cerr << "printing list sort\n";
+#endif
 #ifdef GS_PRINT_C
     fprintf(OutStream, "List(");
 #endif
@@ -666,7 +767,12 @@ void GS_PRINT_FUNC(PrintPart_Appl)(GS_PRINT_OUTTYPE OutStream, const ATermAppl P
 #endif
   } else if (gsIsSortSet(Part)) {
     //print set sort
+#ifdef GS_PRINT_C
     gsDebugMsg("printing set sort\n");
+#endif
+#ifdef GS_PRINT_CXX
+    if (gsDebug) std::cerr << "printing set sort\n";
+#endif
 #ifdef GS_PRINT_C
     fprintf(OutStream, "Set(");
 #endif
@@ -682,7 +788,12 @@ void GS_PRINT_FUNC(PrintPart_Appl)(GS_PRINT_OUTTYPE OutStream, const ATermAppl P
 #endif
   } else if (gsIsSortBag(Part)) {
     //print bag sort
+#ifdef GS_PRINT_C
     gsDebugMsg("printing bag sort\n");
+#endif
+#ifdef GS_PRINT_CXX
+    if (gsDebug) std::cerr << "printing bag sort\n";
+#endif
 #ifdef GS_PRINT_C
     fprintf(OutStream, "Bag(");
 #endif
@@ -698,7 +809,12 @@ void GS_PRINT_FUNC(PrintPart_Appl)(GS_PRINT_OUTTYPE OutStream, const ATermAppl P
 #endif
   } else if (gsIsSortStruct(Part)) {
     //print structured sort
+#ifdef GS_PRINT_C
     gsDebugMsg("printing structured sort\n");
+#endif
+#ifdef GS_PRINT_CXX
+    if (gsDebug) std::cerr << "printing structured sort\n";
+#endif
 #ifdef GS_PRINT_C
     if (PrecLevel > 1) fprintf(OutStream, "(");
 #endif
@@ -721,7 +837,12 @@ void GS_PRINT_FUNC(PrintPart_Appl)(GS_PRINT_OUTTYPE OutStream, const ATermAppl P
 #endif
   } else if (gsIsSortArrowProd(Part)) {
     //print product arrow sort
+#ifdef GS_PRINT_C
     gsDebugMsg("printing product arrow sort\n");
+#endif
+#ifdef GS_PRINT_CXX
+    if (gsDebug) std::cerr << "printing product arrow sort\n";
+#endif
 #ifdef GS_PRINT_C
     if (PrecLevel > 0) fprintf(OutStream, "(");
 #endif
@@ -744,7 +865,12 @@ void GS_PRINT_FUNC(PrintPart_Appl)(GS_PRINT_OUTTYPE OutStream, const ATermAppl P
 #endif
   } else if (gsIsSortArrow(Part)) {
     //print arrow sort
+#ifdef GS_PRINT_C
     gsDebugMsg("printing arrow sort\n");
+#endif
+#ifdef GS_PRINT_CXX
+    if (gsDebug) std::cerr << "printing arrow sort\n";
+#endif
 #ifdef GS_PRINT_C
     if (PrecLevel > 0) fprintf(OutStream, "(");
 #endif
@@ -767,7 +893,12 @@ void GS_PRINT_FUNC(PrintPart_Appl)(GS_PRINT_OUTTYPE OutStream, const ATermAppl P
 #endif
   } else if (gsIsStructCons(Part)) {
     //print structured sort constructor
+#ifdef GS_PRINT_C
     gsDebugMsg("printing structured sort constructor\n");
+#endif
+#ifdef GS_PRINT_CXX
+    if (gsDebug) std::cerr << "printing structured sort constructor\n";
+#endif
     GS_PRINT_FUNC(PrintPart_Appl)(OutStream, ATAgetArgument(Part, 0), ShowSorts, PrecLevel);
     ATermList StructProjs = ATLgetArgument(Part, 1);
     if (ATgetLength(StructProjs) > 0) {
@@ -797,7 +928,12 @@ void GS_PRINT_FUNC(PrintPart_Appl)(GS_PRINT_OUTTYPE OutStream, const ATermAppl P
     }
   } else if (gsIsStructProj(Part)) {
     //print structured sort projection
+#ifdef GS_PRINT_C
     gsDebugMsg("printing structured sort projection\n");
+#endif
+#ifdef GS_PRINT_CXX
+    if (gsDebug) std::cerr << "printing structured sort projection\n";
+#endif
     ATermAppl Projection = ATAgetArgument(Part, 0);
     if (!gsIsNil(Projection)) {
       GS_PRINT_FUNC(PrintPart_Appl)(OutStream, Projection, ShowSorts, PrecLevel);
@@ -838,7 +974,12 @@ void GS_PRINT_FUNC(PrintPart_Appl)(GS_PRINT_OUTTYPE OutStream, const ATermAppl P
 #endif
     } else if (gsIsOpIdPrefix(Head) && ArgsLength == 1) {
       //print prefix expression
+#ifdef GS_PRINT_C
       gsDebugMsg("printing prefix expression\n");
+#endif
+#ifdef GS_PRINT_CXX
+      if (gsDebug) std::cerr << "printing prefix expression\n";
+#endif
 #ifdef GS_PRINT_C
       if (PrecLevel > 12) fprintf(OutStream, "(");
 #endif
@@ -855,7 +996,12 @@ void GS_PRINT_FUNC(PrintPart_Appl)(GS_PRINT_OUTTYPE OutStream, const ATermAppl P
 #endif
     } else if (gsIsOpIdInfix(Head) && ArgsLength == 2) {
       //print infix expression
+#ifdef GS_PRINT_C
       gsDebugMsg("printing infix expression\n");
+#endif
+#ifdef GS_PRINT_CXX
+      if (gsDebug) std::cerr << "printing infix expression\n";
+#endif
       ATermAppl HeadName = ATAgetArgument(Head, 0);
 #ifdef GS_PRINT_C
       if (PrecLevel > gsPrecOpIdInfix(HeadName)) fprintf(OutStream, "(");
@@ -889,7 +1035,12 @@ void GS_PRINT_FUNC(PrintPart_Appl)(GS_PRINT_OUTTYPE OutStream, const ATermAppl P
    } else if (ATisEqual(Head, gsMakeOpId1()) ||
         (ATisEqual(Head, gsMakeOpIdCDub()) && ArgsLength == 2)) {
       //print positive number
-      gsDebugMsg("printing positive number %T\n", Part);
+#ifdef GS_PRINT_C
+      gsDebugMsg("printing positive number\n");
+#endif
+#ifdef GS_PRINT_CXX
+      if (gsDebug) std::cerr << "printing positive number\n";
+#endif
       GS_PRINT_FUNC(PrintPos)(OutStream, Part, PrecLevel);
     } else if (ATisEqual(Head, gsMakeOpId0())) {
       //print 0
@@ -905,7 +1056,12 @@ void GS_PRINT_FUNC(PrintPart_Appl)(GS_PRINT_OUTTYPE OutStream, const ATermAppl P
       GS_PRINT_FUNC(PrintPart_Appl)(OutStream, ATAelementAt(Args, 0), ShowSorts, PrecLevel);
     } else if (ATisEqual(Head, gsMakeOpIdCNeg()) && ArgsLength == 1) {
       //print negation (ArgsLength == 1)
+#ifdef GS_PRINT_C
       gsDebugMsg("printing negation\n");
+#endif
+#ifdef GS_PRINT_CXX
+      if (gsDebug) std::cerr << "printing negation\n";
+#endif
 #ifdef GS_PRINT_C
       fprintf(OutStream, "-");
 #endif
@@ -915,11 +1071,21 @@ void GS_PRINT_FUNC(PrintPart_Appl)(GS_PRINT_OUTTYPE OutStream, const ATermAppl P
       GS_PRINT_FUNC(PrintPart_Appl)(OutStream, ATAelementAt(Args, 0), ShowSorts, 12);
     } else if (gsIsDataVarIdOpId(Part)) {
       //print untyped data variable or operation identifier
+#ifdef GS_PRINT_C
       gsDebugMsg("printing untyped data variable or operation identifier\n");
+#endif
+#ifdef GS_PRINT_CXX
+      if (gsDebug) std::cerr << "printing untyped data variable or operation identifier\n";
+#endif
       GS_PRINT_FUNC(PrintPart_Appl)(OutStream, ATAgetArgument(Part, 0), ShowSorts, PrecLevel);
     } else if (gsIsOpId(Part) || gsIsDataVarId(Part)) {
       //print data variable or operation identifier
+#ifdef GS_PRINT_C
       gsDebugMsg("printing data variable or operation identifier\n");
+#endif
+#ifdef GS_PRINT_CXX
+      if (gsDebug) std::cerr << "printing data variable or operation identifier\n";
+#endif
       GS_PRINT_FUNC(PrintPart_Appl)(OutStream, ATAgetArgument(Part, 0), ShowSorts, PrecLevel);
       if (ShowSorts) {
 #ifdef GS_PRINT_C
@@ -932,7 +1098,12 @@ void GS_PRINT_FUNC(PrintPart_Appl)(GS_PRINT_OUTTYPE OutStream, const ATermAppl P
       }
     } else {
       //print data application
+#ifdef GS_PRINT_C
       gsDebugMsg("printing data application\n");
+#endif
+#ifdef GS_PRINT_CXX
+      if (gsDebug) std::cerr << "printing data application\n";
+#endif
 #ifdef GS_PRINT_C
       if (PrecLevel > 13) fprintf(OutStream, "(");
 #endif
@@ -962,11 +1133,21 @@ void GS_PRINT_FUNC(PrintPart_Appl)(GS_PRINT_OUTTYPE OutStream, const ATermAppl P
     }
   } else if (gsIsNumber(Part)) {
     //print number
+#ifdef GS_PRINT_C
     gsDebugMsg("printing number\n");
+#endif
+#ifdef GS_PRINT_CXX
+    if (gsDebug) std::cerr << "printing number\n";
+#endif
     GS_PRINT_FUNC(PrintPart_Appl)(OutStream, ATAgetArgument(Part, 0), ShowSorts, PrecLevel);
   } else if (gsIsListEnum(Part)) {
     //print list enumeration
+#ifdef GS_PRINT_C
     gsDebugMsg("printing list enumeration\n");
+#endif
+#ifdef GS_PRINT_CXX
+    if (gsDebug) std::cerr << "printing list enumeration\n";
+#endif
 #ifdef GS_PRINT_C
     fprintf(OutStream, "[");
 #endif
@@ -982,7 +1163,12 @@ void GS_PRINT_FUNC(PrintPart_Appl)(GS_PRINT_OUTTYPE OutStream, const ATermAppl P
 #endif
   } else if (gsIsSetEnum(Part) || gsIsBagEnum(Part)) {
     //print set/bag enumeration
+#ifdef GS_PRINT_C
     gsDebugMsg("printing set/bag enumeration\n");
+#endif
+#ifdef GS_PRINT_CXX
+    if (gsDebug) std::cerr << "printing set/bag enumeration\n";
+#endif
 #ifdef GS_PRINT_C
     fprintf(OutStream, "{");
 #endif
@@ -998,7 +1184,12 @@ void GS_PRINT_FUNC(PrintPart_Appl)(GS_PRINT_OUTTYPE OutStream, const ATermAppl P
 #endif
   } else if (gsIsSetBagComp(Part)) {
     //print set/bag comprehension
+#ifdef GS_PRINT_C
     gsDebugMsg("printing set/bag comprehension\n");
+#endif
+#ifdef GS_PRINT_CXX
+    if (gsDebug) std::cerr << "printing set/bag comprehension\n";
+#endif
 #ifdef GS_PRINT_C
     fprintf(OutStream, "{ ");
 #endif
@@ -1021,7 +1212,12 @@ void GS_PRINT_FUNC(PrintPart_Appl)(GS_PRINT_OUTTYPE OutStream, const ATermAppl P
 #endif
   } else if (gsIsForall(Part) || gsIsExists(Part)) {
     //print universal/existential quantification
+#ifdef GS_PRINT_C
     gsDebugMsg("printing universal/existential quantification\n");
+#endif
+#ifdef GS_PRINT_CXX
+    if (gsDebug) std::cerr << "printing universal/existential quantification\n";
+#endif
 #ifdef GS_PRINT_C
     if (PrecLevel > 12) fprintf(OutStream, "(");
 #endif
@@ -1050,7 +1246,12 @@ void GS_PRINT_FUNC(PrintPart_Appl)(GS_PRINT_OUTTYPE OutStream, const ATermAppl P
 #endif
   } else if (gsIsLambda(Part)) {
     //print lambda abstraction
+#ifdef GS_PRINT_C
     gsDebugMsg("printing lambda abstraction\n");
+#endif
+#ifdef GS_PRINT_CXX
+    if (gsDebug) std::cerr << "printing lambda abstraction\n";
+#endif
 #ifdef GS_PRINT_C
     if (PrecLevel > 1) fprintf(OutStream, "(");
 #endif
@@ -1079,7 +1280,12 @@ void GS_PRINT_FUNC(PrintPart_Appl)(GS_PRINT_OUTTYPE OutStream, const ATermAppl P
 #endif
   } else if (gsIsWhr(Part)) {
     //print where clause
+#ifdef GS_PRINT_C
     gsDebugMsg("printing where clause\n");
+#endif
+#ifdef GS_PRINT_CXX
+    if (gsDebug) std::cerr << "printing where clause\n";
+#endif
 #ifdef GS_PRINT_C
     if (PrecLevel > 0) fprintf(OutStream, "(");
 #endif
@@ -1109,7 +1315,12 @@ void GS_PRINT_FUNC(PrintPart_Appl)(GS_PRINT_OUTTYPE OutStream, const ATermAppl P
 #endif
   } else if (gsIsBagEnumElt(Part)) {
     //print bag enumeration element
+#ifdef GS_PRINT_C
     gsDebugMsg("printing bag enumeration element\n");
+#endif
+#ifdef GS_PRINT_CXX
+    if (gsDebug) std::cerr << "printing bag enumeration element\n";
+#endif
     GS_PRINT_FUNC(PrintPart_Appl)(OutStream, ATAgetArgument(Part, 0), ShowSorts, 0);
 #ifdef GS_PRINT_C
     fprintf(OutStream, ": ");
@@ -1120,7 +1331,12 @@ void GS_PRINT_FUNC(PrintPart_Appl)(GS_PRINT_OUTTYPE OutStream, const ATermAppl P
     GS_PRINT_FUNC(PrintPart_Appl)(OutStream, ATAgetArgument(Part, 1), ShowSorts, 0);
   } else if (gsIsWhrDecl(Part)) {
     //print where declaration element
+#ifdef GS_PRINT_C
     gsDebugMsg("printing where declaration\n");
+#endif
+#ifdef GS_PRINT_CXX
+    if (gsDebug) std::cerr << "printing where declaration\n";
+#endif
     GS_PRINT_FUNC(PrintPart_Appl)(OutStream, ATAgetArgument(Part, 0), ShowSorts, PrecLevel);
 #ifdef GS_PRINT_C
     fprintf(OutStream, " = ");
@@ -1131,7 +1347,12 @@ void GS_PRINT_FUNC(PrintPart_Appl)(GS_PRINT_OUTTYPE OutStream, const ATermAppl P
     GS_PRINT_FUNC(PrintPart_Appl)(OutStream, ATAgetArgument(Part, 1), ShowSorts, 0);
   } else if (gsIsActionProcess(Part) || gsIsAction(Part) || gsIsProcess(Part)) {
     //print action or process reference
+#ifdef GS_PRINT_C
     gsDebugMsg("printing action or process reference\n");
+#endif
+#ifdef GS_PRINT_CXX
+    if (gsDebug) std::cerr << "printing action or process reference\n";
+#endif
     GS_PRINT_FUNC(PrintPart_Appl)(OutStream, ATAgetArgument(Part, 0), ShowSorts, PrecLevel);
     ATermList Args = ATLgetArgument(Part, 1);
     if (ATgetLength(Args) > 0) {
@@ -1151,7 +1372,12 @@ void GS_PRINT_FUNC(PrintPart_Appl)(GS_PRINT_OUTTYPE OutStream, const ATermAppl P
     }
   } else if (gsIsDelta(Part)) {
     //print delta
+#ifdef GS_PRINT_C
     gsDebugMsg("printing delta\n");
+#endif
+#ifdef GS_PRINT_CXX
+    if (gsDebug) std::cerr << "printing delta\n";
+#endif
 #ifdef GS_PRINT_C
     fprintf(OutStream, "delta");
 #endif
@@ -1160,7 +1386,12 @@ void GS_PRINT_FUNC(PrintPart_Appl)(GS_PRINT_OUTTYPE OutStream, const ATermAppl P
 #endif
   } else if (gsIsTau(Part)) {
     //print tau
+#ifdef GS_PRINT_C
     gsDebugMsg("printing tau\n");
+#endif
+#ifdef GS_PRINT_CXX
+    if (gsDebug) std::cerr << "printing tau\n";
+#endif
 #ifdef GS_PRINT_C
     fprintf(OutStream, "tau");
 #endif
@@ -1169,7 +1400,12 @@ void GS_PRINT_FUNC(PrintPart_Appl)(GS_PRINT_OUTTYPE OutStream, const ATermAppl P
 #endif
   } else if (gsIsChoice(Part)) {
     //print choice
+#ifdef GS_PRINT_C
     gsDebugMsg("printing choice\n");
+#endif
+#ifdef GS_PRINT_CXX
+    if (gsDebug) std::cerr << "printing choice\n";
+#endif
 #ifdef GS_PRINT_C
     if (PrecLevel > 0) fprintf(OutStream, "(");
 #endif
@@ -1192,7 +1428,12 @@ void GS_PRINT_FUNC(PrintPart_Appl)(GS_PRINT_OUTTYPE OutStream, const ATermAppl P
 #endif
   } else if (gsIsSum(Part)) {
     //print summation
+#ifdef GS_PRINT_C
     gsDebugMsg("printing summation\n");
+#endif
+#ifdef GS_PRINT_CXX
+    if (gsDebug) std::cerr << "printing summation\n";
+#endif
 #ifdef GS_PRINT_C
     if (PrecLevel > 1) fprintf(OutStream, "(");
 #endif
@@ -1221,7 +1462,12 @@ void GS_PRINT_FUNC(PrintPart_Appl)(GS_PRINT_OUTTYPE OutStream, const ATermAppl P
 #endif
   } else if (gsIsMerge(Part) || gsIsLMerge(Part)) {
     //print merge of left merge
+#ifdef GS_PRINT_C
     gsDebugMsg("printing merge or left merge\n");
+#endif
+#ifdef GS_PRINT_CXX
+    if (gsDebug) std::cerr << "printing merge or left merge\n";
+#endif
 #ifdef GS_PRINT_C
     if (PrecLevel > 2) fprintf(OutStream, "(");
 #endif
@@ -1253,7 +1499,12 @@ void GS_PRINT_FUNC(PrintPart_Appl)(GS_PRINT_OUTTYPE OutStream, const ATermAppl P
 #endif
   } else if (gsIsBInit(Part)) {
     //print bounded initialisation
+#ifdef GS_PRINT_C
     gsDebugMsg("printing bounded initialisation\n");
+#endif
+#ifdef GS_PRINT_CXX
+    if (gsDebug) std::cerr << "printing bounded initialisation\n";
+#endif
 #ifdef GS_PRINT_C
     if (PrecLevel > 3) fprintf(OutStream, "(");
 #endif
@@ -1276,7 +1527,12 @@ void GS_PRINT_FUNC(PrintPart_Appl)(GS_PRINT_OUTTYPE OutStream, const ATermAppl P
 #endif
   } else if (gsIsCond(Part)) {
     //print conditional
+#ifdef GS_PRINT_C
     gsDebugMsg("printing conditional\n");
+#endif
+#ifdef GS_PRINT_CXX
+    if (gsDebug) std::cerr << "printing conditional\n";
+#endif
 #ifdef GS_PRINT_C
     if (PrecLevel > 4) fprintf(OutStream, "(");
 #endif
@@ -1309,7 +1565,12 @@ void GS_PRINT_FUNC(PrintPart_Appl)(GS_PRINT_OUTTYPE OutStream, const ATermAppl P
 #endif
   } else if (gsIsSeq(Part)) {
     //print sequential composition
+#ifdef GS_PRINT_C
     gsDebugMsg("printing sequential composition\n");
+#endif
+#ifdef GS_PRINT_CXX
+    if (gsDebug) std::cerr << "printing sequential composition\n";
+#endif
 #ifdef GS_PRINT_C
     if (PrecLevel > 5) fprintf(OutStream, "(");
 #endif
@@ -1332,7 +1593,12 @@ void GS_PRINT_FUNC(PrintPart_Appl)(GS_PRINT_OUTTYPE OutStream, const ATermAppl P
 #endif
   } else if (gsIsAtTime(Part)) {
     //print at expression
+#ifdef GS_PRINT_C
     gsDebugMsg("printing at expression\n");
+#endif
+#ifdef GS_PRINT_CXX
+    if (gsDebug) std::cerr << "printing at expression\n";
+#endif
 #ifdef GS_PRINT_C
     if (PrecLevel > 6) fprintf(OutStream, "(");
 #endif
@@ -1355,7 +1621,12 @@ void GS_PRINT_FUNC(PrintPart_Appl)(GS_PRINT_OUTTYPE OutStream, const ATermAppl P
 #endif
   } else if (gsIsSync(Part)) {
     //print sync
+#ifdef GS_PRINT_C
     gsDebugMsg("printing sync\n");
+#endif
+#ifdef GS_PRINT_CXX
+    if (gsDebug) std::cerr << "printing sync\n";
+#endif
 #ifdef GS_PRINT_C
     if (PrecLevel > 7) fprintf(OutStream, "(");
 #endif
@@ -1379,7 +1650,12 @@ void GS_PRINT_FUNC(PrintPart_Appl)(GS_PRINT_OUTTYPE OutStream, const ATermAppl P
   } else if (gsIsRestrict(Part) || gsIsHide(Part) || gsIsRename(Part) ||
       gsIsComm(Part) || gsIsAllow(Part)) {
     //print process quantification
+#ifdef GS_PRINT_C
     gsDebugMsg("printing process quantification\n");
+#endif
+#ifdef GS_PRINT_CXX
+    if (gsDebug) std::cerr << "printing process quantification\n";
+#endif
     if (gsIsRestrict(Part)) {
 #ifdef GS_PRINT_C
       fprintf(OutStream, "restrict");
@@ -1438,11 +1714,21 @@ void GS_PRINT_FUNC(PrintPart_Appl)(GS_PRINT_OUTTYPE OutStream, const ATermAppl P
 #endif
   } else if (gsIsMultActName(Part)) {
     //print multi action name
+#ifdef GS_PRINT_C
     gsDebugMsg("printing multi action name\n");
+#endif
+#ifdef GS_PRINT_CXX
+    if (gsDebug) std::cerr << "printing multi action name\n";
+#endif
     GS_PRINT_FUNC(PrintPart_List)(OutStream, ATLgetArgument(Part, 0), ShowSorts, 0, NULL, " | ");
   } else if (gsIsRenameExpr(Part)) {
     //print renaming expression
+#ifdef GS_PRINT_C
     gsDebugMsg("printing renaming expression\n");
+#endif
+#ifdef GS_PRINT_CXX
+    if (gsDebug) std::cerr << "printing renaming expression\n";
+#endif
     GS_PRINT_FUNC(PrintPart_Appl)(OutStream, ATAgetArgument(Part, 0), ShowSorts, PrecLevel);
 #ifdef GS_PRINT_C
     fprintf(OutStream, " -> ");
@@ -1453,7 +1739,12 @@ void GS_PRINT_FUNC(PrintPart_Appl)(GS_PRINT_OUTTYPE OutStream, const ATermAppl P
     GS_PRINT_FUNC(PrintPart_Appl)(OutStream, ATAgetArgument(Part, 1), ShowSorts, PrecLevel);
   } else if (gsIsCommExpr(Part)) {
     //print communication expression
+#ifdef GS_PRINT_C
     gsDebugMsg("printing communication expression\n");
+#endif
+#ifdef GS_PRINT_CXX
+    if (gsDebug) std::cerr << "printing communication expression\n";
+#endif
     GS_PRINT_FUNC(PrintPart_Appl)(OutStream, ATAgetArgument(Part, 0), ShowSorts, PrecLevel);
     ATermAppl CommResult = ATAgetArgument(Part, 1);
     if (!gsIsNil(CommResult)) {
@@ -1467,7 +1758,12 @@ void GS_PRINT_FUNC(PrintPart_Appl)(GS_PRINT_OUTTYPE OutStream, const ATermAppl P
     }
   } else if (gsIsNil(Part)) {
     //print nil
+#ifdef GS_PRINT_C
     gsDebugMsg("printing nil\n");
+#endif
+#ifdef GS_PRINT_CXX
+    if (gsDebug) std::cerr << "printing nil\n";
+#endif
 #ifdef GS_PRINT_C
     fprintf(OutStream, "nil");
 #endif
@@ -1476,7 +1772,12 @@ void GS_PRINT_FUNC(PrintPart_Appl)(GS_PRINT_OUTTYPE OutStream, const ATermAppl P
 #endif
   } else if (gsIsUnknown(Part)) {
     //print unknown
+#ifdef GS_PRINT_C
     gsDebugMsg("printing unknown\n");
+#endif
+#ifdef GS_PRINT_CXX
+    if (gsDebug) std::cerr << "printing unknown\n";
+#endif
 #ifdef GS_PRINT_C
     fprintf(OutStream, "unknown");
 #endif
@@ -1484,7 +1785,12 @@ void GS_PRINT_FUNC(PrintPart_Appl)(GS_PRINT_OUTTYPE OutStream, const ATermAppl P
     OutStream << "unknown";
 #endif
   } else {
+#ifdef GS_PRINT_C
     gsErrorMsg("the term %T is not part of the internal format\n", Part);
+#endif
+#ifdef GS_PRINT_CXX
+    std::cerr << "error: the term " << ATwriteToString((ATerm) Part) << " is not part of the internal format\n";
+#endif
   }
 }
 

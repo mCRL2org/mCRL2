@@ -11,6 +11,7 @@ extern "C"
 #include "gstypecheck.h"
 #include "gsfunc.h"
 #include "gslowlevel.h"
+#include "libprint_c.h"
 
 
 // Static data 

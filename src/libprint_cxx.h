@@ -1,3 +1,6 @@
+#ifndef __LIBPRINT_CXX_H
+#define __LIBPRINT_CXX_H
+
 #include <ostream>
 #include <string>
 #include <aterm2.h>
@@ -16,3 +19,5 @@ std::string PrintPart_CXX(const ATerm Part);
 /*Pre: Part is an ATerm containing a part of a mCRL2 specification
   Ret: A textual representation of Part
 */
+
+#endif //__LIBPRINT_CXX_H

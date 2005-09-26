@@ -46,19 +46,8 @@ extern char *strdup(const char *s);
 #endif
 #endif
 
-//Message printing
-//----------------
-
-int gsprintf(const char *format, ...);
-int gsfprintf(FILE *stream, const char *format, ...);
-int gsvfprintf(FILE *stream, const char *format, va_list args);
-//Pretty print versions of the printf functions
-//If '%P' is used in the format, the corresponding ATerm argument is pretty
-//printed
-//If '%T' is used in the format, the corresponding ATerm argument is printed
-//in the ATerm text format 
-//If '%F' is used in the format, the name of the corresponding AFun argument
-//is printed
+//Message printing options
+//------------------------
 
 void gsSetQuietMsg(void);
 //Post: Printing of warnings, verbose information and extended debugging
@@ -79,73 +68,6 @@ void gsSetDebugMsg(void);
 extern bool gsWarning;
 extern bool gsVerbose;
 extern bool gsDebug;
-
-inline static void gsErrorMsg(char *Format, ...)
-//Post: "error: " is printed to stderr followed by Format, where the remaining
-//      parameters are used as gsprintf arguments to Format.
-{
-  fprintf(stderr, "error: ");
-  va_list Args;
-  va_start(Args, Format);
-  gsvfprintf(stderr, Format, Args);
-  va_end(Args);
-}
-
-inline static void gsWarningMsg(char *Format, ...)
-//Post: If the printing of warning messages is enabled, "warning: " is printed
-//      to stderr followed by Format, where the remaining parameters are used
-//      as gsprintf arguments to Format.
-{
-  if (gsWarning) {
-    fprintf(stderr, "warning: ");
-    va_list Args;
-    va_start(Args, Format);
-    gsvfprintf(stderr, Format, Args);
-    va_end(Args);
-  }
-}
-
-inline static void gsVerboseMsg(char *Format, ...)
-//Post: If the printing of verbose information is enabled, Format is printed to
-//      stderr, where the remaining parameters are used as gsprintf arguments
-//      to Format.
-{
-  if (gsVerbose) {
-    va_list Args;
-    va_start(Args, Format);
-    gsvfprintf(stderr, Format, Args);
-    va_end(Args);
-  }
-}
-
-#define GS_DEBUG_MSG_FUNC(FuncName,Format) \
-  if (gsDebug) { \
-    fprintf(stderr, "(%s): ", FuncName); \
-    va_list Args; \
-    va_start(Args, Format); \
-    gsvfprintf(stderr, Format, Args); \
-    va_end(Args); \
-  }
-
-#ifdef _MSC_VER
-inline static void gsDebugMsg(char *Format,...)
-{
-	GS_DEBUG_MSG_FUNC("unknown",Format)
-}
-#else
-#define gsDebugMsg(...)        gsDebugMsgFunc(__func__, __VA_ARGS__)
-#endif
-//Post: If the printing of debug messages is enabled, the name of the current
-//      function is printed to stderr, followed by the first parameter with the
-//      remaining parameters as gsprintf arguments.
-
-inline static void gsDebugMsgFunc(const char *FuncName, char *Format, ...)
-//Post: If the printing of debug messages is enabled, the name of FuncName is
-//      printed to stderr, followed by Format where  the remaining parameters
-//      are used as gsprintf arguments to Format.
-{
-  GS_DEBUG_MSG_FUNC(FuncName,Format)
-}
 
 //ATerm library work arounds
 //--------------------------

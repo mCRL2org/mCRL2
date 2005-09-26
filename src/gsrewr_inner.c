@@ -1,4 +1,3 @@
-/* $Id: gsrewr_inner.c,v 1.2 2005/04/08 12:33:51 muck Exp $ */
 #ifdef __cplusplus
 extern "C" {
 #endif
@@ -10,6 +9,7 @@ extern "C" {
 #include <aterm2.h>
 #include "gslowlevel.h"
 #include "gsfunc.h"
+#include "libprint_c.h"
 #include "gsrewr_inner.h"
 
 extern ATermList opid_eqns;

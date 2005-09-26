@@ -19,6 +19,7 @@ extern "C" {
 #include "lin_alt.h"
 #include "gslowlevel.h"
 #include "gsfunc.h"
+#include "libprint_c.h"
 #include "gslexer.h"
 #include "gstypecheck.h"
 #include "gsdataimpl.h"
