@@ -1,0 +1,222 @@
+\documentclass[a4paper,10pt]{article}
+\usepackage{textcomp,amsmath,amssymb,amsthm}%,stmaryrd}
+%\usepackage{geometry}
+%\usepackage[ps2pdf]{hyperref} % remove for printing
+%\usepackage[active]{srcltx}
+\usepackage{mymath,mythm}
+
+\newcommand{\lpe}{linear process equation}
+\newcommand{\tool}{\textit{lpeconstelm}}
+\newcommand{\ovr}{\overrightarrow}
+\newcommand{\mcrl}{$\mu$CRL2}
+\newcommand{\framework}{\textit{LPE framework} \cite{LPEframework}}
+\newcommand{\pp}{process parameter}
+\newcommand{\pps}{process parameters}
+\newcommand{\ti}{\textit}
+\newcommand{\sv}{\textit{state vector}}
+\newcommand{\fv}{\textit{flag vector}}
+\newcommand{\svs}{\textit{new state vector set}}
+\newcommand{\fvs}{\textit{new flag vector set}}
+
+%opening
+\title{lpeconstelm \\ DRAFT \\ work in progress}
+\author{F.P.M. Stappers}
+
+\begin{document}
+
+\maketitle
+
+\begin{abstract}
+This documentation describes the usage and implementation of  the tool \tool\ within the \mcrl\ toolset.
+Basically,\tool\ is a tool which eliminates constant parameters in a \lpe\ (LPE).
+\end{abstract}
+
+\tableofcontents
+
+\section{Intoduction}
+This \tool\ tool is a tool for the \mcrl\ studio. The tool is a
+filter which reads form a \ti{input.lpe}. The file \ti{input.lpe} is
+a file in \ti{.lpe} format \cite{LPEformat}. We make use of the
+\framework\ to read the \ti{input.lpe}. The filter substitutes for
+each constant \pp\ its constant value and removes the \pp\ from the
+\lpe . After the algorithm (section \ref{sec:alg}) ends, the \tool\
+will write the output to an output file \ti{output.lpe}. This file is
+a file in the \ti{.lpe} format \cite{LPEformat}.
+
+\section{Algorithm} \label{sec:alg}
+
+\subsection{LPE definition}\label{sdef}
+The equation below is a simplified representation of a \lpe\ in \mcrl\ for \tool . 
+\begin{defn}\label{def:LPE}
+\begin{displaymath}
+%X (d:D) = \sum_{i \in I} \sum_{\ovr{e_i:E_i}} c_i ( \ovr{d, e_i} ) \rightarrow a_i (\ovr{f_i} (\ovr{d, e_i)}) \cdot X_i(\ovr{g_i}(\ovr{d,e_i}))
+X (d:D) = \sum_{i \in I} \sum_{\ovr{e_i:E_i}} c_i ( \ovr{d, e_i} ) \rightarrow X(\ovr{g_i}(\ovr{d,e_i}))
+\end{displaymath}
+\end{defn}
+For explanation of the notion we refer to \cite{LPE_info}.
+
+\subsection{Definition}
+For the description of the algorithm we use definition \ref{def:LPE}
+from section \ref{sdef}. The set of $n$ \pps\ is denoted with the
+elements $d_0 \ldots d_n$. In search of a constant \pp\ we need to
+find all \pps\ $d$ which are constant. The set of summands is
+indicated with $I$. Also sum variables $(e_i \in E_i)$
+are inspected. %If all $e_i$ are equal, these $e_i$ are substituted by their constant values.
+$(\ovr{d},e)$ are a Cartesian product. A new $d$ can be constructed by $f_A: D \times E \rightarrow D_A$.
+$c$ holds a boolean: $c: d \times e \rightarrow \mathbb{B}$ and $g$ a function $g: d \times e \rightarrow d_g$
+
+ To indicate a if a $\ovr{d}$ is constant we use function $C$ of definition \ref{defn:const}.
+\begin{defn}
+\label{defn:const}$C =$
+\begin{displaymath}
+ \langle \cup_{j \in 0 \ldots n}: \langle \forall_{i \in I}:
+c_i(\ovr{d},e_i) : (\ovr{d_j},e_i) = \ovr{g_i} (\ovr{d},e_i)_j \rangle :
+j \rangle 
+\end{displaymath}
+
+\end{defn}
+
+\subsection{Algorithm}
+To calculate the set of constant \pps\ we use the algorithm
+\ref{sss:alg} Before we describe the algorithm we need to introduce
+some definitions. These definitions are defined in \ref{sss:algdef}.
+A more general explanation is given in \ref{sss:algdesc}
+
+\subsubsection{Algorithm definitions} \label{sss:algdef}
+\begin{itemize}
+\item \begin{defn} \textbf{- state vector}\\
+This vector represents the \pps\ of the input of a \lpe . This
+vector is constructed out of $\ovr{(d:D)}$ 
+ and  $\sum_{\ovr{(e_i):E_i}}$. $D$ is the set of $d_0 \ldots d_n$ where $n$ is the number
+of \pp .
+
+\begin{displaymath}
+(\ovr{d})
+\end{displaymath}
+\end{defn}
+
+\item \begin{defn} \textbf{- flag vector}\\
+This vector is a vector of boolean values which represents if \pps\
+are constant or variable. If an element of this vector is \ti{true}
+this implies that the corresponding \pp\ is possible constant. If an element
+of this vector is \ti{false} this implies that the corresponding
+\pp\ is variable.
+\begin{displaymath}
+%\langle \cup_{d \in d_0 \ldots d_n} :: \langle \forall_{i \in I} :: Constant(d, e_i) \rangle \rangle
+(\ovr{\Bbb{B}})
+\end{displaymath}
+\end{defn}
+
+\item \begin{defn} \textbf{- new state set}\\
+ This vector represents the outcome of the
+\pps\ for which the normal form of the condition is not \ti{false}. So
+the set is defined by:
+
+\begin{displaymath}\langle \cup_{i \in I}: c_i(\ovr{d},
+e_i) :\ovr{g_i}(\ovr{d},e_i) \rangle
+\end{displaymath}
+\end{defn}
+
+\item \begin{defn}
+\textbf{- new flag set} \\
+This set represents the boolean values indicating if the
+corresponding \pps\ are \ti{constant} or \ti{variable}. Only the summands for
+which the normal form of conditions are not \ti{false} are in this set. The set is
+defined by:
+\begin{displaymath}
+\langle \cup_{i \in I}: c_i(\ovr{d, e_i}) : (\ovr{\Bbb{B}}) ) \rangle
+\end{displaymath}
+\end{defn}
+\end{itemize}
+
+\subsubsection{Description}\label{sss:desc}
+In this subsection the idea behind the algorithm is explained. First we take the \sv . The \sv\ is constructed out of the \verb"init" from the \lpe (see \cite{LPE_info}). Next the \fv\ is constructed. The number of vector elements is equal to the number of \pps . Each \pp\ corresponds with an element in the \fv .  All elements in this vector are set \ti{true}.
+
+ We start the iteration. In the next step we evaluate for each summand its condition. We evaluate the condition by substituting the \pp\ from the \sv\ in the condition. Only those \pp\ from the \sv\ are substituted for which the corresponding \pp\ in the \fv is true. 
+
+After substitution the condition is rewritten. If the rewritten condition is in a normal form other then \ti{false} the condition implies that it might be true the summand will evaluated. 
+
+In a next step the \svs\ is constructed. This set of new state vectors only contains the set of next state vectors which can be reached out of the \sv\ and for which the condition might be "true". 
+
+After the \svs\ is constructed, we construct the \fvs . Initally we set the the size of the set to the number of non false conditions. Each element within  these vectors is set true. Each vector of the \fvs\ corresponds with a vector of \svs and each element of a vector of \fvs\ is a mapping to an element of a vector of the \fvs\. If a element from the vector out of the \svs\ is not equal to an element out of the \sv\ the corresponding \fvs\ element is set to false. 
+
+Next we construct a \ti{new} \fv . For each element in this vector we take the conjunction of all the values of the same element in the vectors of the \fvs . Also each element in a vector of the \svs\ is checked if they differ from the same element in another vector in the \fvs . The boolean outcome of both results is the \ti{new} \fv . The reason for this second check is needed because free variables might occur.
+of free variables. %to be implemented CHECK LPECONSTELM
+ 
+If the \ti{new} \fv\ differs from the \fv , a \ti{new} \sv has to be created as well. The construction of the \ti{new} \sv\ contains all elements from the \sv\ with substition with the elements that differ from the \fvs . 
+%These can be found in the \svs . 
+A next iteration is started in whcih the old \sv\ is substituted by the \ti{new} \sv and the old \fv\ is substituted by the \ti{new} \fv .
+  
+If the \ti{new} \fv\ does not differ from the \fv\ the algorithm ends and all \pps\ which have a corresponding value true in the \fv are removed from the \pp list and all occurrences of \pp\ are substituted by their constant values.
+
+\subsubsection{Free variables}
+In \mcrl\ it is possible to use free variables. Free variables are values which have no particual value and can therefore be theated as don't care values. If a \pp\ is subtituted by a free variable and it already has a value, the value remains the same. If a \pp\ is subtituted by a varable with a specific value, the value is changed to that specific value. If a \pp\ is subtituted by another free variable, the \pp\ remains a free variable. 
+
+If we compare a free variable with another value, either another free variable or a specific value this always yields to true. However by adding a constant check on the \svs\ solves the possiblity of fake constants. At first this seems strange, but is does not violate the outcome of the alorithm. Let us concider example \ref{exmpl:freevar}:
+\begin{example}\label{exmpl:freevar} The LPE: 
+\begin{tabbing}
+$P(y = \_,x = 0) =$ \= $(c_1 = true) \rightarrow  P(y := x+1, x := x) + $ \\
+	    \> $(c_2 = true)
+ \rightarrow P(y := x+2, x := x)$
+\end{tabbing}
+
+A free variable is denoted with $\_$. If we take a look at the LPE and build the \fvs\ we get something like:
+\begin{center}
+\begin{tabular}{cc} 
+ $\langle True $ & $ True \rangle$\\
+ $\langle True $ & $ True \rangle$\\
+\end{tabular} 
+\end{center}
+
+However the when we build the \svs , we get:
+\begin{center}
+\begin{tabular}{cc} 
+ $\langle$ 1 & 0 $\rangle$\\
+ $\langle$ 2 & 0 $\rangle$\\
+\end{tabular}  
+\end{center}
+
+If we take the conjunction of the elements of each vector within the \fvs\ the \ti{new} \fv\ will be:
+\begin{center}
+\begin{tabular}{cc} 
+ $\langle True $ & $ True \rangle$\\
+\end{tabular}
+\end{center}
+
+However by examining the \svs\ this should be: 
+\begin{center}
+\begin{tabular}{cc} 
+ $\langle False $ & $ True \rangle$\\
+\end{tabular}
+\end{center}
+
+This why have an additional check on the \svs\ to overcome such a problem.
+\end{example}
+
+For further reading please refer to \cite{LPEfreevar} 
+
+\subsubsection{Algorithm} \label{sss:alg}
+\begin{enumerate}
+\item step
+\end{enumerate}
+
+\section{Examples}
+
+\newpage
+\begin{thebibliography}{99}  \bibitem{LPE_info} auteur\\
+   \textit{article},
+   Extra info.
+  \bibitem{LPEframework} J.W. Wesselink,
+   \textit{http://www.win.tue.nl/~wieger/mcrl2/html/index.html}\\
+   A C++ wrapper for the ATerm library.
+  \bibitem{LPEformat} auteur,
+   \textit{article}
+   Extra info.
+  \bibitem{LPEfreevar} auteur,
+   \textit{article}
+   Extra info.
+
+\end{thebibliography}
+
+
+\end{document}
