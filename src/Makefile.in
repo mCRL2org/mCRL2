@@ -196,6 +196,7 @@ ifeq ($(HOST_OS),MACOSX)
 	mkdir -p ../xsim.app/Contents/Resources
 	cp xsim.plist ../xsim.app/Contents/Info.plist
 	echo -n "APPL????" > ../xsim.app/Contents/PkgInfo
+	cp xsim $(bindir)/xsim
 	ln -f $(bindir)/xsim ../xsim.app/Contents/MacOS/xsim
 	cp -f xsim.icns ../xsim.app/Contents/Resources/xsim.icns
 endif
