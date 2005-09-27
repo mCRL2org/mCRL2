@@ -1195,15 +1195,37 @@ ATermAppl gsImplSortSet(ATermAppl SortSet, ATermList *PSubsts,
   //  (ATerm) sSortId, (ATerm) tSortId);
   //ATermList dspl = ATmakeList3((ATerm) dSortElt, (ATerm) sSortId, (ATerm) p);
   ATermList bsl = ATmakeList2((ATerm) b, (ATerm) sSortId);
-  //ATermList fl = ATmakeList1((ATerm) fSortFunc);
+  ATermList fl = ATmakeList1((ATerm) fSortFunc);
   ATermList dfl = ATmakeList2((ATerm) dSortElt, (ATerm) fSortFunc);
   ATermList fgl = ATmakeList2((ATerm) fSortFunc, (ATerm) gSortFunc);
-  ATermAppl LambdaFalse = gsImplExprsPart(
-    gsMakeLambda(ATmakeList1((ATerm) xSortElt), f),
-    PSubsts, 
-    PDataDecls
-  );
-  PDataDecls->DataEqns = ATconcat(ATmakeList(7,
+  ATermAppl FalseFunc = gsImplExprsPart(
+    gsMakeLambda(ATmakeList1((ATerm) xSortElt), f), PSubsts, PDataDecls);
+  ATermAppl ImpFunc = gsImplExprsPart(
+    gsMakeLambda(ATmakeList1((ATerm) xSortElt),
+      gsMakeDataExprImp(
+        gsMakeDataAppl(fSortFunc, xSortElt),
+        gsMakeDataAppl(gSortFunc, xSortElt)
+      )
+    ), PSubsts, PDataDecls);
+  ATermAppl OrFunc = gsImplExprsPart(
+    gsMakeLambda(ATmakeList1((ATerm) xSortElt),
+      gsMakeDataExprOr(
+        gsMakeDataAppl(fSortFunc, xSortElt),
+        gsMakeDataAppl(gSortFunc, xSortElt)
+      )
+    ), PSubsts, PDataDecls);
+  ATermAppl AndFunc = gsImplExprsPart(
+    gsMakeLambda(ATmakeList1((ATerm) xSortElt),
+      gsMakeDataExprAnd(
+        gsMakeDataAppl(fSortFunc, xSortElt),
+        gsMakeDataAppl(gSortFunc, xSortElt)
+      )
+    ), PSubsts, PDataDecls);
+  ATermAppl NotFunc = gsImplExprsPart(
+    gsMakeLambda(ATmakeList1((ATerm) xSortElt),
+      gsMakeDataExprNot(gsMakeDataAppl(fSortFunc, xSortElt))
+    ), PSubsts, PDataDecls);
+  PDataDecls->DataEqns = ATconcat(ATmakeList(13,
       //equality (SortId -> SortId -> Bool)
       (ATerm) gsMakeDataEqn(fgl, nil,
         gsMakeDataExprEq(
@@ -1227,11 +1249,53 @@ ATermAppl gsImplSortSet(ATermAppl SortSet, ATermList *PSubsts,
       //empty set (SortId)
       (ATerm) gsMakeDataEqn(el, nil,
         gsMakeDataExprEmptySet(SortId),
-        gsMakeDataExprSetComp(LambdaFalse, SortId)),
-      //set element test (SortElt -> SortId -> Bool)
+        gsMakeDataExprSetComp(FalseFunc, SortId)),
+      //element test (SortElt -> SortId -> Bool)
       (ATerm) gsMakeDataEqn(dfl, nil,
         gsMakeDataExprSetIn(dSortElt, gsMakeDataExprSetComp(fSortFunc, SortId)),
-        gsMakeDataAppl(fSortFunc, dSortElt))
+        gsMakeDataAppl(fSortFunc, dSortElt)),
+      //subset (SortId -> SortId -> Bool)
+      (ATerm) gsMakeDataEqn(fgl, nil,
+        gsMakeDataExprSubSetEq(
+          gsMakeDataExprSetComp(fSortFunc, SortId),
+          gsMakeDataExprSetComp(gSortFunc, SortId)), 
+        gsMakeDataExprForall(ImpFunc)),
+      //proper subset (SortId -> SortId -> Bool)
+      (ATerm) gsMakeDataEqn(stl, nil,
+        gsMakeDataExprSubSet(sSortId, tSortId),
+        gsMakeDataExprAnd(
+          gsMakeDataExprSubSetEq(sSortId, tSortId), 
+          gsMakeDataExprNeq(sSortId, tSortId)
+        )),
+      //union (SortId -> SortId -> SortId)
+      (ATerm) gsMakeDataEqn(fgl, nil,
+        gsMakeDataExprSetUnion(
+          gsMakeDataExprSetComp(fSortFunc, SortId),
+          gsMakeDataExprSetComp(gSortFunc, SortId)), 
+        gsMakeDataExprSetComp(OrFunc, SortId)),
+      //difference (SortId -> SortId -> SortId)
+      (ATerm) gsMakeDataEqn(stl, nil,
+        gsMakeDataExprSetDiff(sSortId, tSortId),
+        gsMakeDataExprSetInterSect(sSortId, gsMakeDataExprSetCompl(tSortId))),
+      //intersection (SortId -> SortId -> SortId)
+      (ATerm) gsMakeDataEqn(stl, nil,
+        gsMakeDataExprSetInterSect(
+          gsMakeDataExprSetComp(fSortFunc, SortId),
+          gsMakeDataExprSetComp(gSortFunc, SortId)), 
+        gsMakeDataExprSetComp(AndFunc, SortId)),
+      //complement (SortId -> SortId)
+      (ATerm) gsMakeDataEqn(fl, nil,
+        gsMakeDataExprSetCompl(gsMakeDataExprSetComp(fSortFunc, SortId)),
+        gsMakeDataExprSetComp(NotFunc, SortId))
+      //simplification of combinations of functions false, not, imp, and, or
+      ////left unit of the or function
+      //(ATerm) gsMakeDataEqn(fl, nil,
+      //  gsMakeDataAppl2(gsGetDataExprHead(OrFunc), FalseFunc, fSortFunc),
+      //  fSortFunc),
+      ////right unit of the or function
+      //(ATerm) gsMakeDataEqn(fl, nil,
+      //  gsMakeDataAppl2(gsGetDataExprHead(OrFunc), fSortFunc, FalseFunc),
+      //  fSortFunc)
     ), PDataDecls->DataEqns);
   return SortId;
 }

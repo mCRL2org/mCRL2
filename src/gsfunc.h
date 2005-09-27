@@ -960,6 +960,32 @@ ATermAppl gsMakeDataExprSetIn(ATermAppl DataExprLHS, ATermAppl DataExprRHS);
 //Ret: Data expression for "e in e'", where e = DataExprLHS and
 //     e' = DataExprRHS
 
+ATermAppl gsMakeDataExprSubSetEq(ATermAppl DataExprLHS, ATermAppl DataExprRHS);
+//Pre: DataExprLHS and DataExprRHS are data expressions of the same sort
+//Ret: Data expression for the subset or equality relation "e <= e'", where
+//     e = DataExprLHS and e' = DataExprRHS
+
+ATermAppl gsMakeDataExprSubSet(ATermAppl DataExprLHS, ATermAppl DataExprRHS);
+//Pre: DataExprLHS and DataExprRHS are data expressions of the same sort
+//Ret: Data expression for the proper subset relation "e < e'", where
+//     e = DataExprLHS and e' = DataExprRHS
+
+ATermAppl gsMakeDataExprSetUnion(ATermAppl DataExprLHS, ATermAppl DataExprRHS);
+//Pre: DataExprLHS and DataExprRHS are data expressions of the same sort
+//Ret: Data expression for the set union of DataExprLHS and DataExprRHS
+
+ATermAppl gsMakeDataExprSetDiff(ATermAppl DataExprLHS, ATermAppl DataExprRHS);
+//Pre: DataExprLHS and DataExprRHS are data expressions of the same sort
+//Ret: Data expression for the set difference of DataExprLHS and DataExprRHS
+
+ATermAppl gsMakeDataExprSetInterSect(ATermAppl DataExprLHS, ATermAppl DataExprRHS);
+//Pre: DataExprLHS and DataExprRHS are data expressions of the same sort
+//Ret: Data expression for the set intersection of DataExprLHS and DataExprRHS
+
+ATermAppl gsMakeDataExprSetCompl(ATermAppl DataExpr);
+//Pre: DataExpr is a data expression
+//Ret: Data expression for the set complement of DataExpr
+
 ATermAppl gsMakeDataExprBagComp(ATermAppl DataExpr, ATermAppl SortExprResult);
 //Pre: DataExpr is a data expression of sort S -> Nat
 //     SortExprResult is a sort expression

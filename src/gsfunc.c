@@ -2816,6 +2816,46 @@ ATermAppl gsMakeDataExprSetIn(ATermAppl DataExprLHS, ATermAppl DataExprRHS)
     DataExprLHS, DataExprRHS);
 }
 
+ATermAppl gsMakeDataExprSubSetEq(ATermAppl DataExprLHS, ATermAppl DataExprRHS)
+{
+  assert(ATisEqual(gsGetSort(DataExprLHS), gsGetSort(DataExprRHS)));
+  return gsMakeDataAppl2(
+    gsMakeOpIdSubSetEq(gsGetSort(DataExprLHS)), DataExprLHS, DataExprRHS);
+}
+
+ATermAppl gsMakeDataExprSubSet(ATermAppl DataExprLHS, ATermAppl DataExprRHS)
+{
+  assert(ATisEqual(gsGetSort(DataExprLHS), gsGetSort(DataExprRHS)));
+  return gsMakeDataAppl2(
+    gsMakeOpIdSubSet(gsGetSort(DataExprLHS)), DataExprLHS, DataExprRHS);
+}
+
+ATermAppl gsMakeDataExprSetUnion(ATermAppl DataExprLHS, ATermAppl DataExprRHS)
+{
+  assert(ATisEqual(gsGetSort(DataExprLHS), gsGetSort(DataExprRHS)));
+  return gsMakeDataAppl2(
+    gsMakeOpIdSetUnion(gsGetSort(DataExprLHS)), DataExprLHS, DataExprRHS);
+}
+
+ATermAppl gsMakeDataExprSetDiff(ATermAppl DataExprLHS, ATermAppl DataExprRHS)
+{
+  assert(ATisEqual(gsGetSort(DataExprLHS), gsGetSort(DataExprRHS)));
+  return gsMakeDataAppl2(
+    gsMakeOpIdSetDiff(gsGetSort(DataExprLHS)), DataExprLHS, DataExprRHS);
+}
+
+ATermAppl gsMakeDataExprSetInterSect(ATermAppl DataExprLHS, ATermAppl DataExprRHS)
+{
+  assert(ATisEqual(gsGetSort(DataExprLHS), gsGetSort(DataExprRHS)));
+  return gsMakeDataAppl2(
+    gsMakeOpIdSetIntersect(gsGetSort(DataExprLHS)), DataExprLHS, DataExprRHS);
+}
+
+ATermAppl gsMakeDataExprSetCompl(ATermAppl DataExpr)
+{
+  return gsMakeDataAppl(gsMakeOpIdSetCompl(gsGetSort(DataExpr)), DataExpr);
+}
+
 ATermAppl gsMakeDataExprBagComp(ATermAppl DataExpr, ATermAppl SortExprResult)
 {
   ATermAppl ExprSort = gsGetSort(DataExpr);
