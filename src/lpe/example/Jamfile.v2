@@ -1,21 +1,37 @@
-project atermpp/test
+project lpe/example
    : requirements
-       <include>../../../../boost
        <include>../../../..
+       <include>../../../../boost
+       <include>../../../src
+       <include>../../../src/nt
        <source>/aterm//libaterm
+       <source>/boost/program_options//boost_program_options
+       <define>BOOST_ALL_NO_LIB    # do not use automatic library selection
    ;
 
-exe test1    : test1.cpp : ;
-exe test2    : test2.cpp : ;
-exe test3    : test3.cpp : ;
-exe test4    : test4.cpp : ;
+SOURCES = gsfunc libgsrewrite gsrewr_inner gsrewr_inner2 gsrewr_inner3 gsrewr_innerc
+		  gsrewr_jitty gssubstitute libprint_c gslowlevel
+   ;
+
+lib mcrl-gs
+    : ../../../src/$(SOURCES).c
+    : <cflags>-std=c99
+    ;
+
+exe test1        : test1.cpp : ;
+exe test2        : test2.cpp : ;
+exe test3        : test3.cpp : ;
+exe spec         : spec.cpp mcrl-gs : ;
+exe lpeinfo      : lpeinfo.cpp mcrl-gs : ;
+exe lpeconstelm  : lpeconstelm.cpp mcrl-gs : ;
 
 install dist
    :
      test1
      test2
      test3
-     test4
+     spec
+     lpeinfo
+     lpeconstelm
    : 
-     <location>.
    ;

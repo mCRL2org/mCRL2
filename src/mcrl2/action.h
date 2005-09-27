@@ -6,6 +6,8 @@
 #define MCRL2_ACTION_H
 
 #include "atermpp/aterm.h"
+#include "mcrl2/substitute.h"
+#include "mcrl2/term_list.h"
 #include "mcrl2/data.h"
 #include "mcrl2/list_iterator.h"
 
@@ -16,42 +18,25 @@ using atermpp::aterm_list;
 using atermpp::aterm_list_iterator;
 
 ///////////////////////////////////////////////////////////////////////////////
-// Action
-/// \brief action id.
-//
-// An action id can not be modified.
-//
-// Example:
-//
-// Action
-// 
-// a(n,m)
-// 
-// Action(ActId("a",[Nat,Nat]),
-//  	[DataVarId("n",SortId("Nat")),DataVarId("n",SortId("Nat"))])
-// 
-// identifier -\> ActId("a",[Nat,Nat])
-// arguments -\> DataVarId("n",SortId("Nat")), DataVarId("n",SortId("Nat"))
-
-class Action
+// action
+/// \brief Represents an action.
+///
+class action: public aterm_wrapper
 {
   protected:
-    aterm_appl m_term;         // keep the original aterm for reference
     aterm_appl m_name;
-    aterm_list m_arguments;    // elements are of type DataExpression
+    data_expression_list m_arguments;    // elements are of type data_expression
 
   public:
-    typedef list_iterator<DataExpression> expression_iterator;
-
-    Action()
+    action()
     {}
 
-    Action(aterm_appl t)
-     : m_term(t)
+    action(aterm_appl t)
+     : aterm_wrapper(t)
     {
-      aterm_list_iterator i = m_term.argument_list().begin();
+      aterm_list_iterator i = term().argument_list().begin();
       m_name      = *i++;
-      m_arguments = *i;
+      m_arguments = data_expression_list(*i);
     }
 
     /// Returns the name of the action.
@@ -61,149 +46,32 @@ class Action
       return m_name.to_string();
     }
 
-    /// Returns a begin iterator to the sequence of arguments.
+    /// Returns the sequence of arguments.
     ///
-    expression_iterator arguments_begin() const
+    data_expression_list arguments() const
     {
-      return expression_iterator(m_arguments);
+      return m_arguments;
     }
 
-    /// Returns an end iterator to the sequence of arguments.
+    /// Applies a substitution to this action and returns the result.
+    /// The Substitution object must supply the method aterm_appl operator()(aterm_appl).
     ///
-    expression_iterator arguments_end() const
+    template <typename Substitution>
+    action substitute(Substitution f)
     {
-      return expression_iterator();
-    }
+      return data_expression(f(term()));
+    }     
 
-    /// Returns the internal representation of the Action.
+    /// Applies a sequence of substitutions to this action and returns the result.
     ///
-    std::string to_string() const
+    template <typename SubstIter>
+    action substitute(SubstIter first, SubstIter last) const
     {
-      return m_term.to_string();
+      return action(aterm_appl_substitute(term(), first, last));
     }
 };
 
-
-///////////////////////////////////////////////////////////////////////////////
-// ActionExpression
-/// \brief action expression.
-//
-// An action expression is a sequence of actions.
-//
-// a
-// 
-// ActId("a",[Nat,Nat])
-// 
-// name -\> "a"
-// type -\> Nat, Nat
-// 
-class ActionExpression
-{
-  protected:
-    aterm_appl m_term;         // keep the original aterm for reference
-    aterm_appl m_name;
-    aterm_list m_sorts;        // elements are of type Sort
-
-  public:
-    typedef list_iterator<Sort>   sort_iterator;
-
-    ActionExpression()
-    {}
-
-    ActionExpression(aterm_appl t)
-     : m_term(t)
-    {
-      aterm_list_iterator i = m_term.argument_list().begin();
-      m_name  = *i++;
-      m_sorts = *i;
-    }
-
-    /// Returns the name of the action.
-    ///
-    std::string name() const
-    {
-      return m_name.to_string();
-    }
-
-    /// Returns a begin iterator to the sequence of arguments.
-    ///
-    sort_iterator sorts_begin() const
-    {
-      return sort_iterator(m_sorts);
-    }
-
-    /// Returns an end iterator to the sequence of arguments.
-    ///
-    sort_iterator sorts_end() const
-    {
-      return sort_iterator();
-    }
-
-    /// Returns the internal representation of the ActionExpression.
-    ///
-    std::string to_string() const
-    {
-      return m_term.to_string();
-    }
-};
-
-
-///////////////////////////////////////////////////////////////////////////////
-// ActionDeclaration
-/// \brief action declaration.
-//
-// An action declaration is a sequence of action identifiers.
-//
-// Example:
-//
-// ActionDeclaration
-// 
-// act a: Nat#Nat;
-//      b;
-// 
-// ActSpec([ActId("a",[Nat,Nat]),ActId("b",[])])
-// 
-// identifiers -\> ActId("a",[Nat,Nat]), ActId("b",[])
-class ActionDeclaration
-{
-  protected:
-    aterm_appl m_term;         // keep the original aterm for reference
-    aterm_list m_identifiers;  // elements are of type ActionExpression
-
-  public:
-    typedef list_iterator<ActionExpression> action_expression_iterator;
-
-    ActionDeclaration()
-    {}
-
-    ActionDeclaration(aterm_appl t)
-     : m_term(t)
-    {
-      m_identifiers = m_term.argument(0).to_list();
-    }
-
-    /// Returns a begin iterator to the sequence of identifiers.
-    ///
-    action_expression_iterator identifiers_begin() const
-    {
-      return action_expression_iterator(m_identifiers);
-    }
-
-    /// Returns an end iterator to the sequence of identifiers.
-    ///
-    action_expression_iterator identifiers_end() const
-    {
-      return action_expression_iterator();
-    }
-
-    /// Returns the internal representation of the ActionExpression.
-    ///
-    std::string to_string() const
-    {
-      return m_term.to_string();
-    }
-};
-
+typedef term_list<action> action_list;
 
 } // namespace mcrl
 

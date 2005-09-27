@@ -8,6 +8,7 @@
 #include <list>
 #include "atermpp/aterm.h"
 #include "mcrl2/list_iterator.h"
+#include "mcrl2/term_list.h"
 
 namespace mcrl2 {
 
@@ -16,101 +17,86 @@ using atermpp::aterm_list;
 using atermpp::make_term;
 
 ///////////////////////////////////////////////////////////////////////////////
-// Sort
+// sort
 /// \brief sort expression.
 ///
 /// Models sorts of shape <tt>A -\> B</tt>, where A is the domain and B the range. A constant sort
 /// has an empty domain, for example <tt>-\> S</tt>, or simply <tt>S</tt>.
 /// 
-class Sort
+class sort: public aterm_wrapper
 {
   public:
+    sort()
+    {}
+
     /// Constructs a sort with internal representation t.
     ///
-    Sort(aterm_appl t)
-      : m_term(t)
+    sort(aterm_appl t)
+      : aterm_wrapper(t)
     {}
 
     /// Constructs a sort with the given domain and range.
     ///
-    Sort(aterm_appl domain, aterm_appl range)
+    sort(aterm_appl domain, aterm_appl range)
     {}
 
     /// Constructs a sort from a string. Currently the aterm string representation is
-    /// used, but probably something like Sort s("A-\>(B-\>C)"); should be supported.
+    /// used, but probably something like sort s("A-\>(B-\>C)"); should be supported.
     ///
-    Sort(std::string s)
-      : m_term(make_term(s).to_appl())
+    sort(std::string s)
+      : aterm_wrapper(make_term(s).to_appl())
     {}
 
     /// Returns the domain of the sort expression. Note that the domain is a list.
     /// For example the domain of the expression A -\> B -\> C is equal to [A,B].
     ///
     /// The domain of sort expression (A-\>B)-\>C-\>D is [A-\>B, C].
-    std::list<Sort> domain() const
+    std::list<sort> domain() const
     {
-      return std::list<Sort>();
+      return std::list<sort>();
     }
     
     /// Returns the range of the sort expression.
     /// For example the range of the expression <tt>A -\> B -\> C</tt> is equal to C.
     /// The range of sort expression (A-\>B)-\>C-\>D is D.
     ///
-    Sort range() const
+    sort range() const
     {
-      return Sort("empty");
+      return sort("empty");
     }
 
     /// Returns the left hand side of the sort expression.
     ///
     /// The left hand side of sort expression (A-\>B)-\>C-\>D is A-\>B.
-    Sort lhs() const
+    sort lhs() const
     {
-      return Sort("lhs");
+      return sort("lhs");
     }   
 
     /// Returns the right hand side of the sort expression.
     ///
     /// The right hand side of sort expression (A-\>B)-\>C-\>D is C-\>D.
-    Sort rhs() const
+    sort rhs() const
     {
-      return Sort("rhs");
+      return sort("rhs");
     }   
 
     /// Returns true if the sort is constant, i.e. has an empty domain.
     ///
     bool is_constant() const
     {
-      return m_term.function().name() == "SortID";
+      return term().function().name() == "SortID";
     }
-
-    /// Returns a string representation of the sort.
-    ///
-    std::string to_string() const
-    {
-      return m_term.to_string();
-    }
-
-    /// Under what conditions are two sorts considered equal? How about
-    /// <tt>(A-\>B)-\>C</tt> and <tt>A-\>(B-\>C)</tt>?
-    ///
-    bool operator==(Sort t) const
-    {
-      return m_term == t.m_term;
-    }
-
-    friend Sort make_sort(Sort domain, Sort range);
-
-  protected:
-    aterm_appl m_term;
 };
+
+typedef term_list<sort> sort_list;
 
 /// Creates a sort with the given domain and range.
 ///
 inline
-Sort make_sort(Sort domain, Sort range)
+sort make_sort(sort domain, sort range)
 {
-  return Sort(domain.m_term, range.m_term);
+  return sort(domain.term(), range.term());
 }
 
 } // namespace mcrl

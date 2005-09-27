@@ -1,9 +1,9 @@
 ///////////////////////////////////////////////////////////////////////////////
-/// \file mcrl2/list_iterator.h
+/// \file mcrl2/term_list_iterator.h
 /// Contains a general aterm_list iterator.
 
-#ifndef MCRL2_LIST_ITERATOR_H
-#define MCRL2_LIST_ITERATOR_H
+#ifndef MCRL2_TERM_LIST_ITERATOR_H
+#define MCRL2_TERM_LIST_ITERATOR_H
 
 #include <list>
 #include <boost/iterator/iterator_facade.hpp>
@@ -15,22 +15,22 @@ using atermpp::aterm_list;
 using atermpp::aterm_appl;
 
 //---------------------------------------------------------//
-//                     list_iterator
+//                     term_list_iterator
 //---------------------------------------------------------//
 template <typename Value>
-class list_iterator: public boost::iterator_facade<
-        list_iterator<Value>,              // Derived
+class term_list_iterator: public boost::iterator_facade<
+        term_list_iterator<Value>,         // Derived
         const Value,                       // Value
         boost::forward_traversal_tag,      // CategoryOrTraversal
         const Value                        // Reference
     >
 {
  public:
-    list_iterator()
+    term_list_iterator()
       : m_list(ATempty)
     {}
 
-    list_iterator(aterm_list l)
+    term_list_iterator(aterm_list l)
       : m_list(l.list())
     {}
 
@@ -38,7 +38,7 @@ class list_iterator: public boost::iterator_facade<
     friend class boost::iterator_core_access;
 
     /// INTERNAL ONLY
-    bool equal(list_iterator const& other) const
+    bool equal(term_list_iterator const& other) const
     { return this->m_list == other.m_list; }
 
     /// INTERNAL ONLY
@@ -54,4 +54,4 @@ class list_iterator: public boost::iterator_facade<
 
 } // namespace mcrl
 
-#endif // MCRL2_LIST_ITERATOR_H
+#endif // MCRL2_TERM_LIST_ITERATOR_H
