@@ -479,7 +479,7 @@ static long insertConstructorOrFunction(ATermAppl constructor,objecttype type)
 
   str=ATSgetArgument(constructor,0);
   t=ATAgetArgument(constructor,1);
-  
+ 
   assert(existsort(t));
 
   addString(str);
@@ -5563,7 +5563,7 @@ static ATermAppl clusterfinalresult(ATermAppl t,specificationbasictype *spec)
 
 
 /* The variable regular indicates that we are interested in generating 
-   a LPO assuming the pCRL term under consideration is regular */
+   a LPE assuming the pCRL term under consideration is regular */
 
 static ATermAppl generateLPEpCRL(ATermAppl procId, int canterminate,
                        specificationbasictype *spec,int regular)
