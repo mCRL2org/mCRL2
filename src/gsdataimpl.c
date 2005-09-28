@@ -185,6 +185,17 @@ static ATermAppl gsImplSortSet(ATermAppl SortSet, ATermList *PSubsts,
 //     substitutions are added *PSubsts
 //Ret: a sort identifier which is the implementation of SortSet
 
+static ATermAppl gsImplSortBag(ATermAppl SortBag, ATermList *PSubsts,
+  TDataDecls *PDataDecls);
+//Pre: SortBag is a bag sort
+//     PSubsts is a pointer to a list of substitutions induced by the context
+//     of SortBag
+//     PDataDecls represents a pointer to new data declarations, induced by
+//     the context of SortBag
+//Post:an implementation of SortBag is added to *PDataDecls and new induced
+//     substitutions are added *PSubsts
+//Ret: a sort identifier which is the implementation of SortBag
+
 static ATermAppl gsImplSortArrowProd(ATermAppl SortArrowProd);
 //Pre: SortArrowProd represents a function sort that adheres to the syntax
 //     after data implementation
@@ -357,11 +368,7 @@ ATermAppl gsImplExprsPart(ATermAppl Part, ATermList *PSubsts,
   } else if (gsIsSortBag(Part)) {
     //Part is a bag sort; replace by a new sort and add data declarations for
     //this sort
-    ATermAppl SortId = gsMakeFreshBagSortId((ATerm) PDataDecls->Sorts);
-    PDataDecls->Sorts = ATinsert(PDataDecls->Sorts, (ATerm) SortId);
-    ATermAppl Subst = gsMakeSubst_Appl(Part, SortId);
-    *PSubsts = gsAddSubstToSubsts(Subst, *PSubsts);
-    Part = SortId;
+    Part = gsImplSortBag(Part, PSubsts, PDataDecls);
   } else if (gsIsSortId(Part)) {
     //Part is a sort identifier; add data declarations for this sort, if needed
     if (ATisEqual(Part, gsMakeSortIdInt())) {
@@ -1014,7 +1021,10 @@ ATermAppl gsImplSortList(ATermAppl SortList, ATermList *PSubsts,
       (ATerm) gsMakeOpIdCons(SortElt, SortId)
     ), PDataDecls->ConsOps);
   //Declare operations for sort SortId
-  PDataDecls->Ops = ATconcat(ATmakeList(11,
+  PDataDecls->Ops = ATconcat(ATmakeList(14,
+      (ATerm) gsMakeOpIdEq(SortId),
+      (ATerm) gsMakeOpIdNeq(SortId),
+      (ATerm) gsMakeOpIdIf(SortId),
       (ATerm) gsMakeOpIdListSize(SortId),
       (ATerm) gsMakeOpIdSnoc(SortId, SortElt),
       (ATerm) gsMakeOpIdConcat(SortId),
@@ -1144,19 +1154,18 @@ ATermAppl gsImplSortSet(ATermAppl SortSet, ATermList *PSubsts,
   TDataDecls *PDataDecls)
 {
   assert(gsIsSortSet(SortSet));
-  //add implementation of sort Nat, if necessary
-  if (ATindexOf(PDataDecls->Sorts, (ATerm) gsMakeSortIdNat(), 0) == -1) {
-    gsImplSortNat(PDataDecls);
-  }
   //declare fresh sort identifier for SortSet
   ATermAppl SortId = gsMakeFreshSetSortId((ATerm) PDataDecls->Sorts);
   PDataDecls->Sorts = ATinsert(PDataDecls->Sorts, (ATerm) SortId);
   //add substitution for this identifier
   ATermAppl Subst = gsMakeSubst_Appl(SortSet, SortId);
   *PSubsts = gsAddSubstToSubsts(Subst, *PSubsts);
-  //Declare operations for sort SortId
+  //declare operations for sort SortId
   ATermAppl SortElt = ATAgetArgument(SortSet, 0);
-  PDataDecls->Ops = ATconcat(ATmakeList(9,
+  PDataDecls->Ops = ATconcat(ATmakeList(12,
+      (ATerm) gsMakeOpIdEq(SortId),
+      (ATerm) gsMakeOpIdNeq(SortId),
+      (ATerm) gsMakeOpIdIf(SortId),
       (ATerm) gsMakeOpIdSetComp(SortElt, SortId),
       (ATerm) gsMakeOpIdEmptySet(SortId),
       (ATerm) gsMakeOpIdSetIn(SortElt, SortId),
@@ -1167,7 +1176,7 @@ ATermAppl gsImplSortSet(ATermAppl SortSet, ATermList *PSubsts,
       (ATerm) gsMakeOpIdSetIntersect(SortId),
       (ATerm) gsMakeOpIdSetCompl(SortId)
     ), PDataDecls->Ops);
-  //Declare data equations for sort SortId
+  //declare data equations for sort SortId
   ATermAppl SortFunc = gsMakeSortArrow(SortElt, gsMakeSortExprBool());
   ATermList el = ATmakeList0();
   ATermAppl sSortId = gsMakeDataVarId(gsString2ATermAppl("s"), SortId);
@@ -1175,12 +1184,10 @@ ATermAppl gsImplSortSet(ATermAppl SortSet, ATermList *PSubsts,
   ATermAppl fSortFunc = gsMakeDataVarId(gsString2ATermAppl("f"), SortFunc);
   ATermAppl gSortFunc = gsMakeDataVarId(gsString2ATermAppl("g"), SortFunc);
   ATermAppl dSortElt = gsMakeDataVarId(gsString2ATermAppl("d"), SortElt);
-  ATermAppl xSortElt = gsMakeDataVarId(gsString2ATermAppl("x"), SortElt);
   //ATermAppl eSortElt = gsMakeDataVarId(gsString2ATermAppl("e"), SortElt);
-  //ATermAppl p = gsMakeDataVarId(gsString2ATermAppl("p"), gsMakeSortExprPos());
+  ATermAppl xSortElt = gsMakeDataVarId(gsString2ATermAppl("x"), SortElt);
   ATermAppl b = gsMakeDataVarId(gsString2ATermAppl("b"), gsMakeSortExprBool());
   ATermAppl nil = gsMakeNil();
-  //ATermAppl zero = gsMakeDataExpr0();
   ATermAppl t = gsMakeDataExprTrue();
   ATermAppl f = gsMakeDataExprFalse();
   //ATermList dl = ATmakeList1((ATerm) dSortElt);
@@ -1193,7 +1200,6 @@ ATermAppl gsImplSortSet(ATermAppl SortSet, ATermList *PSubsts,
   //  (ATerm) tSortId);
   //ATermList destl = ATmakeList4((ATerm) dSortElt, (ATerm) eSortElt,
   //  (ATerm) sSortId, (ATerm) tSortId);
-  //ATermList dspl = ATmakeList3((ATerm) dSortElt, (ATerm) sSortId, (ATerm) p);
   ATermList bsl = ATmakeList2((ATerm) b, (ATerm) sSortId);
   ATermList fl = ATmakeList1((ATerm) fSortFunc);
   ATermList dfl = ATmakeList2((ATerm) dSortElt, (ATerm) fSortFunc);
@@ -1254,7 +1260,7 @@ ATermAppl gsImplSortSet(ATermAppl SortSet, ATermList *PSubsts,
       (ATerm) gsMakeDataEqn(dfl, nil,
         gsMakeDataExprSetIn(dSortElt, gsMakeDataExprSetComp(fSortFunc, SortId)),
         gsMakeDataAppl(fSortFunc, dSortElt)),
-      //subset (SortId -> SortId -> Bool)
+      //subset or equal (SortId -> SortId -> Bool)
       (ATerm) gsMakeDataEqn(fgl, nil,
         gsMakeDataExprSubSetEq(
           gsMakeDataExprSetComp(fSortFunc, SortId),
@@ -1278,7 +1284,7 @@ ATermAppl gsImplSortSet(ATermAppl SortSet, ATermList *PSubsts,
         gsMakeDataExprSetDiff(sSortId, tSortId),
         gsMakeDataExprSetInterSect(sSortId, gsMakeDataExprSetCompl(tSortId))),
       //intersection (SortId -> SortId -> SortId)
-      (ATerm) gsMakeDataEqn(stl, nil,
+      (ATerm) gsMakeDataEqn(fgl, nil,
         gsMakeDataExprSetInterSect(
           gsMakeDataExprSetComp(fSortFunc, SortId),
           gsMakeDataExprSetComp(gSortFunc, SortId)), 
@@ -1296,6 +1302,172 @@ ATermAppl gsImplSortSet(ATermAppl SortSet, ATermList *PSubsts,
       //(ATerm) gsMakeDataEqn(fl, nil,
       //  gsMakeDataAppl2(gsGetDataExprHead(OrFunc), fSortFunc, FalseFunc),
       //  fSortFunc)
+    ), PDataDecls->DataEqns);
+  return SortId;
+}
+
+ATermAppl gsImplSortBag(ATermAppl SortBag, ATermList *PSubsts,
+  TDataDecls *PDataDecls)
+{
+  assert(gsIsSortBag(SortBag));
+  //add implementation of sort Nat, if necessary
+  if (ATindexOf(PDataDecls->Sorts, (ATerm) gsMakeSortIdNat(), 0) == -1) {
+    gsImplSortNat(PDataDecls);
+  }
+  //declare fresh sort identifier for SortBag
+  ATermAppl SortId = gsMakeFreshBagSortId((ATerm) PDataDecls->Sorts);
+  PDataDecls->Sorts = ATinsert(PDataDecls->Sorts, (ATerm) SortId);
+  //add substitution for this identifier
+  ATermAppl Subst = gsMakeSubst_Appl(SortBag, SortId);
+  *PSubsts = gsAddSubstToSubsts(Subst, *PSubsts);
+  //declare operations for sort SortId
+  ATermAppl SortElt = ATAgetArgument(SortBag, 0);
+  PDataDecls->Ops = ATconcat(ATmakeList(12,
+      (ATerm) gsMakeOpIdEq(SortId),
+      (ATerm) gsMakeOpIdNeq(SortId),
+      (ATerm) gsMakeOpIdIf(SortId),
+      (ATerm) gsMakeOpIdBagComp(SortElt, SortId),
+      (ATerm) gsMakeOpIdEmptyBag(SortId),
+      (ATerm) gsMakeOpIdCount(SortElt, SortId),
+      (ATerm) gsMakeOpIdBagIn(SortElt, SortId),
+      (ATerm) gsMakeOpIdSubBagEq(SortId),
+      (ATerm) gsMakeOpIdSubBag(SortId),
+      (ATerm) gsMakeOpIdBagUnion(SortId),
+      (ATerm) gsMakeOpIdBagDiff(SortId),
+      (ATerm) gsMakeOpIdBagIntersect(SortId)
+    ), PDataDecls->Ops);
+  //declare data equations for sort SortId
+  ATermAppl SortFunc = gsMakeSortArrow(SortElt, gsMakeSortExprNat());
+  ATermList el = ATmakeList0();
+  ATermAppl sSortId = gsMakeDataVarId(gsString2ATermAppl("s"), SortId);
+  ATermAppl tSortId = gsMakeDataVarId(gsString2ATermAppl("t"), SortId);
+  ATermAppl fSortFunc = gsMakeDataVarId(gsString2ATermAppl("f"), SortFunc);
+  ATermAppl gSortFunc = gsMakeDataVarId(gsString2ATermAppl("g"), SortFunc);
+  ATermAppl dSortElt = gsMakeDataVarId(gsString2ATermAppl("d"), SortElt);
+  ATermAppl xSortElt = gsMakeDataVarId(gsString2ATermAppl("x"), SortElt);
+  //ATermAppl eSortElt = gsMakeDataVarId(gsString2ATermAppl("e"), SortElt);
+  //ATermAppl p = gsMakeDataVarId(gsString2ATermAppl("p"), gsMakeSortExprPos());
+  ATermAppl b = gsMakeDataVarId(gsString2ATermAppl("b"), gsMakeSortExprBool());
+  ATermAppl mName = gsString2ATermAppl("m");
+  ATermAppl nName = gsString2ATermAppl("n");
+  ATermAppl m = gsMakeDataVarId(mName, gsMakeSortExprNat());
+  ATermAppl n = gsMakeDataVarId(nName, gsMakeSortExprNat());
+  ATermAppl nil = gsMakeNil();
+  ATermAppl zero = gsMakeDataExpr0();
+  ATermAppl t = gsMakeDataExprTrue();
+  ATermAppl f = gsMakeDataExprFalse();
+  //ATermList dl = ATmakeList1((ATerm) dSortElt);
+  //ATermList sl = ATmakeList1((ATerm) sSortId);
+  ATermList stl = ATmakeList2((ATerm) sSortId, (ATerm) tSortId);
+  ATermList dsl = ATmakeList2((ATerm) dSortElt, (ATerm) sSortId);
+  //ATermList desl = ATmakeList3((ATerm) dSortElt, (ATerm) eSortElt,
+  //  (ATerm) sSortId);
+  //ATermList dstl = ATmakeList3((ATerm) dSortElt, (ATerm) sSortId,
+  //  (ATerm) tSortId);
+  //ATermList destl = ATmakeList4((ATerm) dSortElt, (ATerm) eSortElt,
+  //  (ATerm) sSortId, (ATerm) tSortId);
+  //ATermList dspl = ATmakeList3((ATerm) dSortElt, (ATerm) sSortId, (ATerm) p);
+  ATermList bsl = ATmakeList2((ATerm) b, (ATerm) sSortId);
+  ATermList dfl = ATmakeList2((ATerm) dSortElt, (ATerm) fSortFunc);
+  ATermList fgl = ATmakeList2((ATerm) fSortFunc, (ATerm) gSortFunc);
+  ATermAppl ZeroFunc = gsImplExprsPart(
+    gsMakeLambda(ATmakeList1((ATerm) xSortElt), zero), PSubsts, PDataDecls);
+  ATermAppl LTEFunc = gsImplExprsPart(
+    gsMakeLambda(ATmakeList1((ATerm) xSortElt),
+      gsMakeDataExprLTE(
+        gsMakeDataAppl(fSortFunc, xSortElt),
+        gsMakeDataAppl(gSortFunc, xSortElt)
+      )
+    ), PSubsts, PDataDecls);
+  ATermAppl AddFunc = gsImplExprsPart(
+    gsMakeLambda(ATmakeList1((ATerm) xSortElt),
+      gsMakeDataExprAdd(
+        gsMakeDataAppl(fSortFunc, xSortElt),
+        gsMakeDataAppl(gSortFunc, xSortElt)
+      )
+    ), PSubsts, PDataDecls);
+  ATermAppl SubtMax0Func = gsImplExprsPart(
+    gsMakeLambda(ATmakeList1((ATerm) xSortElt),
+      gsMakeWhr(
+        gsMakeDataExprIf(
+          gsMakeDataExprGT(m, n), gsMakeDataExprGTESubt(m, n), zero
+        ), ATmakeList2(
+          (ATerm) gsMakeWhrDecl(mName, gsMakeDataAppl(fSortFunc, xSortElt)),
+          (ATerm) gsMakeWhrDecl(nName, gsMakeDataAppl(gSortFunc, xSortElt))
+        )
+      )
+    ), PSubsts, PDataDecls);
+  ATermAppl MinFunc = gsImplExprsPart(
+    gsMakeLambda(ATmakeList1((ATerm) xSortElt),
+      gsMakeDataExprMin(
+        gsMakeDataAppl(fSortFunc, xSortElt),
+        gsMakeDataAppl(gSortFunc, xSortElt)
+      )
+    ), PSubsts, PDataDecls);
+  PDataDecls->DataEqns = ATconcat(ATmakeList(13,
+      //equality (SortId -> SortId -> Bool)
+      (ATerm) gsMakeDataEqn(fgl, nil,
+        gsMakeDataExprEq(
+          gsMakeDataExprBagComp(fSortFunc, SortId),
+          gsMakeDataExprBagComp(gSortFunc, SortId)), 
+        gsMakeDataExprEq(fSortFunc, gSortFunc)),
+      //inequality (SortId -> SortId -> Bool)
+      (ATerm) gsMakeDataEqn(stl,nil,
+        gsMakeDataExprNeq(sSortId, tSortId), 
+        gsMakeDataExprNot(gsMakeDataExprEq(sSortId, tSortId))),
+      //conditional (Bool -> SortId -> SortId -> SortId)
+      (ATerm) gsMakeDataEqn(stl,nil,
+        gsMakeDataExprIf(t, sSortId, tSortId),
+        sSortId),
+      (ATerm) gsMakeDataEqn(stl,nil,
+        gsMakeDataExprIf(f, sSortId, tSortId),
+        tSortId),
+      (ATerm) gsMakeDataEqn(bsl,nil,
+        gsMakeDataExprIf(b, sSortId, sSortId),
+        sSortId),
+      //empty bag (SortId)
+      (ATerm) gsMakeDataEqn(el, nil,
+        gsMakeDataExprEmptyBag(SortId),
+        gsMakeDataExprBagComp(ZeroFunc, SortId)),
+      //count (SortElt -> SortId -> Bool)
+      (ATerm) gsMakeDataEqn(dfl, nil,
+        gsMakeDataExprCount(dSortElt, gsMakeDataExprBagComp(fSortFunc, SortId)),
+        gsMakeDataAppl(fSortFunc, dSortElt)),
+      //element test (SortElt -> SortId -> Bool)
+      (ATerm) gsMakeDataEqn(dsl, nil,
+        gsMakeDataExprBagIn(dSortElt, sSortId),
+        gsMakeDataExprGT(gsMakeDataExprCount(dSortElt, sSortId), zero)),
+      //subbag or equal (SortId -> SortId -> Bool)
+      (ATerm) gsMakeDataEqn(fgl, nil,
+        gsMakeDataExprSubBagEq(
+          gsMakeDataExprBagComp(fSortFunc, SortId),
+          gsMakeDataExprBagComp(gSortFunc, SortId)), 
+        gsMakeDataExprForall(LTEFunc)),
+      //proper subbag (SortId -> SortId -> Bool)
+      (ATerm) gsMakeDataEqn(stl, nil,
+        gsMakeDataExprSubBag(sSortId, tSortId),
+        gsMakeDataExprAnd(
+          gsMakeDataExprSubBagEq(sSortId, tSortId), 
+          gsMakeDataExprNeq(sSortId, tSortId)
+        )),
+      //union (SortId -> SortId -> SortId)
+      (ATerm) gsMakeDataEqn(fgl, nil,
+        gsMakeDataExprBagUnion(
+          gsMakeDataExprBagComp(fSortFunc, SortId),
+          gsMakeDataExprBagComp(gSortFunc, SortId)), 
+        gsMakeDataExprBagComp(AddFunc, SortId)),
+      //difference (SortId -> SortId -> SortId)
+      (ATerm) gsMakeDataEqn(fgl, nil,
+        gsMakeDataExprBagDiff(
+          gsMakeDataExprBagComp(fSortFunc, SortId),
+          gsMakeDataExprBagComp(gSortFunc, SortId)), 
+        gsMakeDataExprBagComp(SubtMax0Func, SortId)),
+      //intersection (SortId -> SortId -> SortId)
+      (ATerm) gsMakeDataEqn(fgl, nil,
+        gsMakeDataExprBagInterSect(
+          gsMakeDataExprBagComp(fSortFunc, SortId),
+          gsMakeDataExprBagComp(gSortFunc, SortId)), 
+        gsMakeDataExprBagComp(MinFunc, SortId))
     ), PDataDecls->DataEqns);
   return SortId;
 }
@@ -1549,7 +1721,7 @@ void gsImplSortNat(TDataDecls *PDataDecls)
   //Declare operations for sort Nat
   ATermAppl seNat = gsMakeSortExprNat();
   ATermAppl sePos = gsMakeSortExprPos();
-  PDataDecls->Ops = ATconcat(ATmakeList(26,
+  PDataDecls->Ops = ATconcat(ATmakeList(28,
       (ATerm) gsMakeOpIdEq(seNat),
       (ATerm) gsMakeOpIdNeq(seNat),
       (ATerm) gsMakeOpIdIf(seNat),
@@ -1567,6 +1739,8 @@ void gsImplSortNat(TDataDecls *PDataDecls)
       (ATerm) gsMakeOpIdAdd(sePos, seNat),
       (ATerm) gsMakeOpIdAdd(seNat, sePos),
       (ATerm) gsMakeOpIdAdd(seNat, seNat),
+      (ATerm) gsMakeOpIdGTESubt(sePos),
+      (ATerm) gsMakeOpIdGTESubt(seNat),
       (ATerm) gsMakeOpIdGTESubtB(),
       (ATerm) gsMakeOpIdMult(seNat),
       (ATerm) gsMakeOpIdDiv(sePos),
@@ -1599,7 +1773,7 @@ void gsImplSortNat(TDataDecls *PDataDecls)
   ATermList nl = ATmakeList1((ATerm) n);
   ATermList mnl = ATmakeList2((ATerm) m, (ATerm) n);
   ATermList bnl = ATmakeList2((ATerm) b, (ATerm) n);
-  PDataDecls->DataEqns = ATconcat(ATmakeList(62,
+  PDataDecls->DataEqns = ATconcat(ATmakeList(65,
       //equality (Nat -> Nat -> Bool)
       (ATerm) gsMakeDataEqn(el, nil, gsMakeDataExprEq(zero, zero), t),
       (ATerm) gsMakeDataEqn(pl, nil,
@@ -1683,6 +1857,15 @@ void gsImplSortNat(TDataDecls *PDataDecls)
       (ATerm) gsMakeDataEqn(pql,nil, 
          gsMakeDataExprAdd(gsMakeDataExprCNat(p), gsMakeDataExprCNat(q)),
          gsMakeDataExprCNat(gsMakeDataExprAddC(f, p, q))),
+      //GTE subtraction (Pos -> Pos -> Nat)
+      (ATerm) gsMakeDataEqn(pql, nil,
+         gsMakeDataExprGTESubt(p, q),
+         gsMakeDataExprGTESubtB(f, p, q)),
+      //GTE subtraction (Nat -> Nat -> Nat)
+      (ATerm) gsMakeDataEqn(nl, nil, gsMakeDataExprGTESubt(n, zero), n),
+      (ATerm) gsMakeDataEqn(pql, nil,
+         gsMakeDataExprGTESubt(gsMakeDataExprCNat(p), gsMakeDataExprCNat(q)),
+         gsMakeDataExprGTESubt(p, q)),
       //GTE subtraction with borrow (Bool -> Pos -> Pos -> Nat)
       (ATerm) gsMakeDataEqn(pl, nil,
          gsMakeDataExprGTESubtB(f, p, one),
@@ -1715,7 +1898,7 @@ void gsImplSortNat(TDataDecls *PDataDecls)
          gsMakeDataExprGTE(p, q),
          gsMakeDataExprDiv(p, q),
          gsMakeDataExprCNat(gsMakeDataExprSucc(
-           gsMakeDataExprDiv(gsMakeDataExprGTESubtB(f, p, q), q)))),
+           gsMakeDataExprDiv(gsMakeDataExprGTESubt(p, q), q)))),
       (ATerm) gsMakeDataEqn(pql,
          gsMakeDataExprLT(p, q),
          gsMakeDataExprDiv(p, q),
@@ -1729,7 +1912,7 @@ void gsImplSortNat(TDataDecls *PDataDecls)
       (ATerm) gsMakeDataEqn(pql,
          gsMakeDataExprGTE(p, q),
          gsMakeDataExprMod(p, q),
-         gsMakeDataExprMod(gsMakeDataExprGTESubtB(f, p, q), q)),
+         gsMakeDataExprMod(gsMakeDataExprGTESubt(p, q), q)),
       (ATerm) gsMakeDataEqn(pql,
          gsMakeDataExprLT(p, q),
          gsMakeDataExprMod(p, q),
@@ -1843,7 +2026,7 @@ void gsImplSortInt(TDataDecls *PDataDecls)
   ATermList nxl = ATmakeList2((ATerm) n, (ATerm) x);
   ATermList xl  = ATmakeList1((ATerm) x);
   ATermList xyl = ATmakeList2((ATerm) x, (ATerm) y);
-  PDataDecls->DataEqns = ATconcat(ATmakeList(66,
+  PDataDecls->DataEqns = ATconcat(ATmakeList(65,
       //equality (Int -> Int -> Bool)
       (ATerm) gsMakeDataEqn(mnl,nil, 
          gsMakeDataExprEq(gsMakeDataExprCInt(m), gsMakeDataExprCInt(n)),
@@ -1991,19 +2174,20 @@ void gsImplSortInt(TDataDecls *PDataDecls)
       (ATerm) gsMakeDataEqn(pql,
          gsMakeDataExprGTE(p, q),
          gsMakeDataExprSubt(p, q),
-         gsMakeDataExprCInt(gsMakeDataExprGTESubtB(f, p, q))),
+         gsMakeDataExprCInt(gsMakeDataExprGTESubt(p, q))),
       (ATerm) gsMakeDataEqn(pql,
          gsMakeDataExprLT(p, q),
          gsMakeDataExprSubt(p, q),
-         gsMakeDataExprNeg(gsMakeDataExprGTESubtB(f, q, p))),      
+         gsMakeDataExprNeg(gsMakeDataExprGTESubt(q, p))),      
       //subtraction (Nat -> Nat -> Int)
-      (ATerm) gsMakeDataEqn(nl, nil,
-         gsMakeDataExprSubt(zero, n), gsMakeDataExprNeg(n)),
-      (ATerm) gsMakeDataEqn(nl, nil,
-         gsMakeDataExprSubt(n, zero), gsMakeDataExprCInt(n)),
-      (ATerm) gsMakeDataEqn(pql, nil,
-         gsMakeDataExprSubt(gsMakeDataExprCNat(p), gsMakeDataExprCNat(q)),
-         gsMakeDataExprSubt(p, q)),
+      (ATerm) gsMakeDataEqn(mnl,
+         gsMakeDataExprGTE(m, n),
+         gsMakeDataExprSubt(m, n),
+         gsMakeDataExprCInt(gsMakeDataExprGTESubt(m, n))),
+      (ATerm) gsMakeDataEqn(mnl,
+         gsMakeDataExprLT(m, n),
+         gsMakeDataExprSubt(m, n),
+         gsMakeDataExprNeg(gsMakeDataExprGTESubt(n, m))),      
       //subtraction (Int -> Int -> Int)
       (ATerm) gsMakeDataEqn(xyl, nil,
          gsMakeDataExprSubt(x, y), gsMakeDataExprAdd(x, gsMakeDataExprNeg(y))),

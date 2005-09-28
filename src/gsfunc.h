@@ -224,6 +224,7 @@ ATermAppl gsMakeOpIdNameDub();
 ATermAppl gsMakeOpIdNameAdd();
 ATermAppl gsMakeOpIdNameAddC();
 ATermAppl gsMakeOpIdNameSubt();
+ATermAppl gsMakeOpIdNameGTESubt();
 ATermAppl gsMakeOpIdNameGTESubtB();
 ATermAppl gsMakeOpIdNameMult();
 ATermAppl gsMakeOpIdNameMultIR();
@@ -487,6 +488,12 @@ ATermAppl gsMakeOpIdSubt(ATermAppl SortExpr);
 //Pre: SortExpr is Pos, Nat or Int
 //Ret: Operation identifier for subtraction on SortExpr
 
+ATermAppl gsMakeOpIdGTESubt(ATermAppl SortExpr);
+//Pre: SortExpr is Pos or Nat
+//Ret: Operation identifier for subtraction 'x - y', where x >= y and x,y are
+//     both of sort Pos or Nat
+//     The identifier is of sort -> SortExpr -> SortExpr -> Nat
+
 ATermAppl gsMakeOpIdGTESubtB();
 //Ret: Operation identifier for 'p - (q + |b|)', i.e. subtraction with borrow,
 //     where p >= q + |b|.
@@ -577,12 +584,6 @@ ATermAppl gsMakeOpIdSetComp(ATermAppl SortExprDom, ATermAppl SortExprResult);
 //Ret: Operation identifier for set comprehension of sort (S -> Bool) -> T,
 //     where S and T stand for SortExprDom and SortExprResult
      
-ATermAppl gsMakeOpIdSet2Bag(ATermAppl SortExprDom,
-  ATermAppl SortExprResult);
-//Pre: SortExprDom and SortExprResult are sort expressions
-//Ret: Operation identifier for set to bag conversion of sort S -> T,
-//     where S and T stand for SortExprDom and SortExprResult
-     
 ATermAppl gsMakeOpIdEmptySet(ATermAppl SortExpr);
 //Pre: SortExpr is a sort expression
 //Ret: Operation identifier for the empty set of sort SortExpr
@@ -631,12 +632,6 @@ ATermAppl gsMakeOpIdBagComp(ATermAppl SortExprDom, ATermAppl SortExprResult);
 //Ret: Operation identifier for bag comprehension of sort (S -> Nat) -> T,
 //     where S and T stand for SortExprDom and SortExprResult
 
-ATermAppl gsMakeOpIdBag2Set(ATermAppl SortExprDom,
-  ATermAppl SortExprResult);
-//Pre: SortExprDom and SortExprResult are sort expressions
-//Ret: Operation identifier for bag to set conversion of sort S -> T,
-//     where S and T stand for SortExprDom and SortExprResult
-     
 ATermAppl gsMakeOpIdEmptyBag(ATermAppl SortExpr);
 //Pre: SortExpr is a sort expression
 //Ret: Operation identifier for the empty bag of sort SortExpr
@@ -680,6 +675,18 @@ ATermAppl gsMakeOpIdBagIntersect(ATermAppl SortExpr);
 //Ret: Operation identifier for 'bag intersection', which has sort S -> S -> S,
 //     where S stands for SortExpr
 
+ATermAppl gsMakeOpIdSet2Bag(ATermAppl SortExprDom,
+  ATermAppl SortExprResult);
+//Pre: SortExprDom and SortExprResult are sort expressions
+//Ret: Operation identifier for set to bag conversion of sort S -> T,
+//     where S and T stand for SortExprDom and SortExprResult
+     
+ATermAppl gsMakeOpIdBag2Set(ATermAppl SortExprDom,
+  ATermAppl SortExprResult);
+//Pre: SortExprDom and SortExprResult are sort expressions
+//Ret: Operation identifier for bag to set conversion of sort S -> T,
+//     where S and T stand for SortExprDom and SortExprResult
+     
 //Creation of data expressions for system defined operations.
 ATermAppl gsMakeDataExprTrue(void);
 //Ret: Data expression for `true'
@@ -858,6 +865,12 @@ ATermAppl gsMakeDataExprSubt(ATermAppl DataExprLHS, ATermAppl DataExprRHS);
 //     or Int
 //Ret: Data expression for the subtraction of DataExprLHS and DataExprRHS
 
+ATermAppl gsMakeDataExprGTESubt(ATermAppl DataExprLHS, ATermAppl DataExprRHS);
+//Pre: DataExprLHS and DataExprRHS are both data expressions of sort Pos or
+//     Nat, which we denote by x and y.
+//     x >= y
+//Ret: Data expression for subtraction 'x - y', of sort Nat
+
 ATermAppl gsMakeDataExprGTESubtB(ATermAppl DataExprBit, ATermAppl DataExprLHS,
   ATermAppl DataExprRHS);
 //Pre: DataExprBit, DataExprLHS and DataExprRHS are data expressions of sort
@@ -946,18 +959,18 @@ ATermAppl gsMakeDataExprRTail(ATermAppl DataExpr);
 //Pre: DataExpr is a data expression
 //Ret: Data expression for the right tail of DataExpr
 
-ATermAppl gsMakeDataExprEmptySet(ATermAppl SortExpr);
-//Pre: SortExpr is a sort expression
-//Ret: Data expression for the empty set of sort SortExpr
-
 ATermAppl gsMakeDataExprSetComp(ATermAppl DataExpr, ATermAppl SortExpr);
 //Pre: DataExpr is a data expression of sort S -> Bool
 //     SortExprResult is a sort expression
 //Ret: Set comprehension for sort S with result sort SortExprResult
 
+ATermAppl gsMakeDataExprEmptySet(ATermAppl SortExpr);
+//Pre: SortExpr is a sort expression
+//Ret: Data expression for the empty set of sort SortExpr
+
 ATermAppl gsMakeDataExprSetIn(ATermAppl DataExprLHS, ATermAppl DataExprRHS);
 //Pre: DataExprLHS and DataExprRHS are data expressions
-//Ret: Data expression for "e in e'", where e = DataExprLHS and
+//Ret: Data expression for set element test "e in e'", where e = DataExprLHS and
 //     e' = DataExprRHS
 
 ATermAppl gsMakeDataExprSubSetEq(ATermAppl DataExprLHS, ATermAppl DataExprRHS);
@@ -990,6 +1003,49 @@ ATermAppl gsMakeDataExprBagComp(ATermAppl DataExpr, ATermAppl SortExprResult);
 //Pre: DataExpr is a data expression of sort S -> Nat
 //     SortExprResult is a sort expression
 //Ret: Bag comprehension for sort S with result sort SortExprResult
+
+ATermAppl gsMakeDataExprEmptyBag(ATermAppl SortExpr);
+//Pre: SortExpr is a sort expression
+//Ret: Data expression for the empty set of sort SortExpr
+
+ATermAppl gsMakeDataExprCount(ATermAppl DataExprLHS, ATermAppl DataExprRHS);
+//Pre: DataExprLHS and DataExprRHS are data expressions
+//Ret: Data expression for the count of element DataExprLHS in bag DataExprRHS
+
+ATermAppl gsMakeDataExprBagIn(ATermAppl DataExprLHS, ATermAppl DataExprRHS);
+//Pre: DataExprLHS and DataExprRHS are data expressions
+//Ret: Data expression for bag element test "e in e'", where e = DataExprLHS
+//     and e' = DataExprRHS
+
+ATermAppl gsMakeDataExprSubBagEq(ATermAppl DataExprLHS, ATermAppl DataExprRHS);
+//Pre: DataExprLHS and DataExprRHS are data expressions of the same sort
+//Ret: Data expression for the subbag or equality relation "e <= e'", where
+//     e = DataExprLHS and e' = DataExprRHS
+
+ATermAppl gsMakeDataExprSubBag(ATermAppl DataExprLHS, ATermAppl DataExprRHS);
+//Pre: DataExprLHS and DataExprRHS are data expressions of the same sort
+//Ret: Data expression for the proper subbag relation "e < e'", where
+//     e = DataExprLHS and e' = DataExprRHS
+
+ATermAppl gsMakeDataExprBagUnion(ATermAppl DataExprLHS, ATermAppl DataExprRHS);
+//Pre: DataExprLHS and DataExprRHS are data expressions of the same sort
+//Ret: Data expression for the bag union of DataExprLHS and DataExprRHS
+
+ATermAppl gsMakeDataExprBagDiff(ATermAppl DataExprLHS, ATermAppl DataExprRHS);
+//Pre: DataExprLHS and DataExprRHS are data expressions of the same sort
+//Ret: Data expression for the bag difference of DataExprLHS and DataExprRHS
+
+ATermAppl gsMakeDataExprBagInterSect(ATermAppl DataExprLHS, ATermAppl DataExprRHS);
+//Pre: DataExprLHS and DataExprRHS are data expressions of the same sort
+//Ret: Data expression for the bag intersection of DataExprLHS and DataExprRHS
+
+ATermAppl gsMakeDataExprSet2Bag(ATermAppl DataExpr, ATermAppl SortExpr);
+//Pre: DataExpr is a data expression
+//Ret: Data expression for Set2Bag(DataExpr) of sort SortExpr
+
+ATermAppl gsMakeDataExprBag2Set(ATermAppl DataExpr, ATermAppl SortExpr);
+//Pre: DataExpr is a data expression
+//Ret: Data expression for Bag2Set(DataExpr) of sort SortExpr
 
 //Auxiliary functions concerning data expressions 
 ATermAppl gsMakeDataAppl2(ATermAppl DataExpr, ATermAppl DataExprArg1,
