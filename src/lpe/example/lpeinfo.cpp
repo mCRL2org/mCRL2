@@ -11,7 +11,7 @@ namespace po = boost::program_options;
 po::variables_map vm;
 
 //Constanten
-string version = "Version 0.2";
+string version = "Version 0.3";
 
 int display(string filename, int opt)
 {
@@ -24,10 +24,10 @@ int display(string filename, int opt)
     
   if (opt==0)
   {
-    cout << "Number of summands :" << lpe.summands().size() <<endl;
-    cout << "Number of free variables :" << spec.initial_free_variables().size() + lpe.free_variables().size() <<endl;
+    cout << "Number of summands          :" << lpe.summands().size() <<endl;
+    cout << "Number of free variables    :" << spec.initial_free_variables().size() + lpe.free_variables().size() <<endl;
     cout << "Number of process variables :" << lpe.process_parameters().size() <<endl; 
-    cout << "Number of actions " << lpe.actions().size() << endl;
+    cout << "Number of actions           :" << lpe.actions().size() << endl;
   }
 
   if (opt==1)
@@ -36,6 +36,10 @@ int display(string filename, int opt)
     {
       cout << i->name() << " " << i->type().to_string() << endl;
     }
+
+  if (opt==2)
+  {
+    cout << lpe.process_parameters().size(); 
   }
 
   return 0;
@@ -96,16 +100,13 @@ int main(int ac, char* av[])
         if (vm.count("input-file"))
         {
           filename = vm["input-file"].as<string>();
-	  cout << filename << endl;
 	}
 
 	if (vm.count("pars"))
 		{opt = 1;}
 	if (vm.count("npars"))
 		{opt = 2;}
-
-        display(filename, opt);       
-	
+  display(filename, opt);       
     }
     catch(exception& e)
     {
