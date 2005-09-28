@@ -1,3 +1,5 @@
+// 1) Een type cast van iterators is overbodig/foutief! (zoals in data_expression_list(*i))
+
 #include <iostream>
 #include <vector>
 #include <boost/program_options.hpp>
@@ -6,7 +8,7 @@
 
 #include "atermpp/aterm.h"
 #include "mcrl2/mcrl2_visitor.h"
-#include "mcrl2/lpe.h"
+#include "mcrl2/specification.h"
 #include "libgsrewrite.h"
 #include "gsfunc.h"
 #include "gslowlevel.h"
@@ -22,24 +24,24 @@ po::variables_map vm;
 string version = "Version 0.1";
 
 //Global Vars
-vector<LPEAssignment>             iv;		//init vector
+vector<data_assignment>           iv;		//init vector
 vector<bool> 		                  fv;		//flag vector (C= True, V= False)
-vector< vector<LPEAssignment> >   sv; 	//(new) state vector
+vector< vector<data_assignment> > sv; 	//(new) state vector
 vector< vector<bool> >            cv;		//change vector	
 
-vector< DataVariable >            lofv; //list of free variables
+vector< data_variable >            lofv; //list of free variables
 //ATermAppl                         rwcon; //rewritten condition 
 
 //debug vars
 int                               noi = 0 ;  //number of iterations                               
 
-bool substitute(LPEAssignment x){
+bool substitute(data_assignment x){
   cout << x.lhs().name() << " by value " << x.rhs().to_string()<< endl;
   return true;
 }
 
 
-bool cex(LPEAssignment init, LPEAssignment state){
+bool cex(data_assignment init, data_assignment state){
 //
 // Compares if two given assignments are equal
 // if the right hand side of "state" is a don't care 
@@ -58,13 +60,13 @@ bool cex(LPEAssignment init, LPEAssignment state){
   return false;  
 }
 
-int eval_datexp(DataExpression datexpr, int opt)
+int eval_datexp(const specification& spec, data_expression datexpr, int opt)
 {
   if (opt==3) {return(true);};
 
   for (unsigned int i=0; i < iv.size(); i++){
     if (fv[i]) {
-      datexpr = datexpr.replace(iv[i].lhs(), iv[i].rhs());
+//      datexpr.substitute(iv[i]);  // NOT YET IMPLEMENTED
     }
   }
 
@@ -111,53 +113,38 @@ int const_main(string filename, int opt)
   
 /**
   **/
-  
-  aterm_appl t = read_from_named_file(filename).to_appl();
-  if (!t)
-    cerr << "could not read "<< vm["input-file"].as<string>() << endl;
+
+  specification spec;
+  if (!spec.load(filename))
+  {
+    cerr << "could not read " << filename << endl;
+  }
+  LPE lpe = spec.lpe();
+
   if ((opt == 0) || (opt == 1) || (opt == 2) || (opt == 3))
   {
-    //make list of free variables
-    LPEInit::variable_iterator fv_1b = LPE::LPE(t).lpe_init().free_variables_begin();
-    LPEInit::variable_iterator fv_1e = LPE::LPE(t).lpe_init().free_variables_end();
-    for(LPEInit::variable_iterator s_current =  fv_1b; s_current != fv_1e; s_current++){
-      lofv.push_back(*s_current);
-    };  
-    //concat list of free variables
-    LPE::variable_iterator fv_2b = LPE::LPE(t).free_variables_begin();
-    LPE::variable_iterator fv_2e = LPE::LPE(t).free_variables_end();
-    for(LPEInit::variable_iterator s_current =  fv_2b; s_current != fv_2e; s_current++){
-      lofv.push_back(*s_current);
-    };  
-
+    lofv.insert(lofv.end(), lpe.free_variables().begin(), lpe.free_variables().end());
+    lofv.insert(lofv.end(), spec.initial_free_variables().begin(), spec.initial_free_variables().end());
+    
     //print list of free vars
     for (unsigned int i=0; i < lofv.size(); i++){
-      cout << DataVariable(lofv[i]).name() << " ";
+      cout << lofv[i].name() << " ";
     }
     cout << endl;
     
     //Define rewrite rules on conditons
-    gsRewriteInit(ATAgetArgument(t.appl(),3),GS_REWR_INNER3);    
+//    gsRewriteInit(spec.equations().term(), GS_REWR_INNER3);
 
     //Get number of process parameters
-    LPE::variable_iterator var_itpb = LPE(t).process_parameters_begin();
-    LPE::variable_iterator var_itpe = LPE(t).process_parameters_end();
-    nopp = distance(var_itpb, var_itpe);
+    nopp = lpe.process_parameters().size();
     
     //Build "init vector" Step 1
 
     //#assignments == #process parameters 
-    LPEInit::assignment_iterator var_isb = LPE::LPE(t).lpe_init().assignments_begin();
-    LPEInit::assignment_iterator var_ise = LPE::LPE(t).lpe_init().assignments_end();
-    noa = distance(var_isb, var_ise);
+//   N.B. The initial assignments are not available through the interface!
+//    noa = spec.initial_assignments().size();   
+//    if(nopp!=noa){cout << "Error: #assignments != #process parameters"<< endl; return 1;}; 
     
-    if(nopp!=noa){cout << "Error: #assignments != #process parameters"<< endl; return 1;}; 
-    
-    //Get all assingments from the init 
-    for(LPEInit::assignment_iterator s_current =  var_isb; s_current != var_ise; s_current++){
-      iv.push_back(*s_current);
-    };	
-
     //Build "flag vector" Step 2
     for (int i=0; i < nopp; i++){
       fv.push_back(true);
@@ -169,31 +156,25 @@ int const_main(string filename, int opt)
       //Build new state vector and change vector
       
       //Get number of summands
-      LPE::summand_iterator sum_itb = LPE(t).summands_begin();
-      LPE::summand_iterator sum_ite = LPE(t).summands_end(); 
-      nos = distance(sum_itb, sum_ite);
+      nos = lpe.summands().size();
 
-      for(LPE::summand_iterator s_current =  sum_itb; s_current != sum_ite; ++s_current){
+      for(summand_list::iterator s_current = lpe.summands().begin(); s_current != lpe.summands().end(); ++s_current){
         //Summand Loop
         //Each pcv should be empty
         //pcv.clear();
         
-        //Number of partial pcv elements
-        LPESummand::assignment_iterator var_ppcvb = LPESummand(*s_current).assignments_begin();
-        LPESummand::assignment_iterator var_ppcve = LPESummand(*s_current).assignments_end();
-        
-        int c = eval_datexp(LPESummand(*s_current).condition() , opt);
+        int c = eval_datexp(spec, s_current->condition() , opt);
 
-        if ((c == 0) or (c== 2)){
+        if ((c == 0) || (c== 2)){
           //Summand is rewritten
           //Create a new state vector
           sv.push_back(iv);          
-          for (LPESummand::assignment_iterator c_obj = LPESummand(*s_current).assignments_begin(); c_obj != var_ppcve; ++c_obj){
+          for (data_assignment_list::iterator c_obj = s_current->assignments().begin(); c_obj != s_current->assignments().end(); ++c_obj){
             for (unsigned int i=0; i < sv[sv.size()-1].size(); i++){
-              if (ATisEqual(sv[sv.size()-1][i].lhs().term(), LPEAssignment(*c_obj).lhs().term())){
+              if (ATisEqual(sv[sv.size()-1][i].lhs().term(), data_assignment(*c_obj).lhs().term())){
                 
                 // Copy rhs of c_obj to sv
-                // sv[sv.end()][i].rhs() = LPEAssignment(*c_obj).rhs();
+                // sv[sv.end()][i].rhs() = data_assignment(*c_obj).rhs();
                 // Fill in the values
                 //
                 // No Code
@@ -201,7 +182,7 @@ int const_main(string filename, int opt)
                 // Rewrite the rhs of the current sv element
                 
                 // Due missing above implementation the algorithm is not working proberly
-                cout << cex(sv[sv.size()-1][i],LPEAssignment(*c_obj)) << endl; 
+                cout << cex(sv[sv.size()-1][i],data_assignment(*c_obj)) << endl; 
                 // Algorithm however detect possible changes between init vector and statevector 
                 // Only new assignments connot be made 
                 //
@@ -231,7 +212,7 @@ int const_main(string filename, int opt)
       //flattened the change vector and flag vector
       //
       vector<bool>          fcv = fv;      //create flattened change vector 
-      vector<LPEAssignment> fsv = iv; //create flattened init vector
+      vector<data_assignment> fsv = iv; //create flattened init vector
  
       for (unsigned int i=0; i < cv[0].size(); i++){ 
         //Check only those vectors of which the flagvector elements are true/Constant

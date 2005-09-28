@@ -1,7 +1,6 @@
 #include <iostream>
 #include "atermpp/aterm.h"
-#include "mcrl2/mcrl2_visitor.h"
-#include "mcrl2/lpe.h"
+#include "mcrl2/specification.h"
 #include <boost/program_options.hpp>
 
 using namespace std;
@@ -12,89 +11,38 @@ namespace po = boost::program_options;
 po::variables_map vm;
 
 //Constanten
-string version = "Version 0.2";
+string version = "Version 0.3";
 
 int display(string filename, int opt)
 {
-
-  
-  int outputvar;
-  try { 
-    read_from_named_file(filename);
-  } catch (string i) {
-    cerr << "could not read " << i << endl;
-  };
-
-  LPE lpe = read_from_named_file(filename).to_appl();  
-  
-  if (opt==0){
-  //
-  // #Summands
-  //
-  LPE::summand_iterator sum_itb = lpe.summands_begin();
-  LPE::summand_iterator sum_ite = lpe.summands_end(); 
-  outputvar = distance(sum_itb, sum_ite);
-  cout << "Number of summands :" << outputvar <<endl;
-  
-  //
-  // #free variables
-  //
-  // #free variables of processes
-  LPE::variable_iterator var_itfb = lpe.free_variables_begin();
-  LPE::variable_iterator var_itfe = lpe.free_variables_end();
-  outputvar = distance(var_itfb, var_itfe);
-  // #free variable of the init process
-  LPEInit::variable_iterator var_fvb = lpe.lpe_init().free_variables_begin();
-  LPEInit::variable_iterator var_fve = lpe.lpe_init().free_variables_end();
-  outputvar += distance(var_fvb, var_fve);  
-  cout << "Number of free variables :" << outputvar <<endl;
-  
-  //
-  // #process parameters
-  //
-  LPE::variable_iterator var_itpb = lpe.process_parameters_begin();
-  LPE::variable_iterator var_itpe = lpe.process_parameters_end();
-  outputvar = distance(var_itpb, var_itpe);
-  cout << "Number of process variables :" << outputvar <<endl; 
-
-  //
-  // #actions
-  //
-  LPE::action_iterator act_itb = lpe.actions_begin();
-  LPE::action_iterator act_ite = lpe.actions_end();
-  
-  //SEGMENTATION FAULT outputvar = distance(act_itb, act_ite);
- 
-  //cout << "Number of actions " << outputvar << endl;
-  return 0;  
+  specification spec;
+  if (!spec.load(filename))
+  {
+    cerr << "could not read " << filename << endl;
   }
-  
-  if (opt==1){
-  LPE::variable_iterator var_itpb = lpe.process_parameters_begin();
-  LPE::variable_iterator var_itpe = lpe.process_parameters_end();
+  LPE lpe = spec.lpe();
+    
+  if (opt==0)
+  {
+    cout << "Number of summands          :" << lpe.summands().size() <<endl;
+    cout << "Number of free variables    :" << spec.initial_free_variables().size() + lpe.free_variables().size() <<endl;
+    cout << "Number of process variables :" << lpe.process_parameters().size() <<endl; 
+    cout << "Number of actions           :" << lpe.actions().size() << endl;
+  }
 
-  //Inspecteren van de iteratorlist
-  string stringout_1;
-  string stringout_2;
-  LPE::variable_iterator s_current = var_itpb;
-  while (s_current != var_itpe)
+  if (opt==1)
+  {
+    for (data_variable_list::iterator i = lpe.process_parameters().begin(); i != lpe.process_parameters().end(); ++i)
     {
-     stringout_1 = DataVariable(*s_current).name();
-     stringout_2 = DataVariable(*s_current).sort().to_string();
-     
-     //Has to be in pritty print format
-     cout << stringout_1 << " " << stringout_2 << endl;;
-     ++s_current;
-    };	
-  return 0; 
+      cout << i->name() << " " << i->type().to_string() << endl;
+    }
   }
-  if (opt==2){
-    	LPE::variable_iterator var_itpb = lpe.process_parameters_begin();
-  	LPE::variable_iterator var_itpe = lpe.process_parameters_end();
-  	outputvar = distance(var_itpb, var_itpe);
-  	cout << outputvar;
-	}
-  
+
+  if (opt==2)
+  {
+    cout << lpe.process_parameters().size(); 
+  }
+
   return 0;
 }
 
@@ -153,16 +101,13 @@ int main(int ac, char* av[])
         if (vm.count("input-file"))
         {
           filename = vm["input-file"].as<string>();
-	  cout << filename << endl;
 	}
 
 	if (vm.count("pars"))
 		{opt = 1;}
 	if (vm.count("npars"))
 		{opt = 2;}
-
-        display(filename, opt);       
-	
+  display(filename, opt);       
     }
     catch(exception& e)
     {
