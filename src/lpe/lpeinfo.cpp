@@ -1,3 +1,11 @@
+/* 
+
+Version 0.3.1
+*) Program exits after illigal input file
+*) Added enumerated types for options
+
+*/
+
 #include <iostream>
 #include "atermpp/aterm.h"
 #include "mcrl2/specification.h"
@@ -11,18 +19,25 @@ namespace po = boost::program_options;
 po::variables_map vm;
 
 //Constanten
-string version = "Version 0.3";
+string version = "Version 0.3.1";
+enum {
+  NO_OPTION = 0,
+  PARS = 1,
+  NPARS = 2
+};
+
 
 int display(string filename, int opt)
 {
   specification spec;
   if (!spec.load(filename))
   {
-    cerr << "could not read " << filename << endl;
+    cerr << "Could not read given inputfile: " << filename << endl;
+    return 1;
   }
   LPE lpe = spec.lpe();
     
-  if (opt==0)
+  if (opt == NO_OPTION)
   {
     cout << "Number of summands          :" << lpe.summands().size() <<endl;
     cout << "Number of free variables    :" << spec.initial_free_variables().size() + lpe.free_variables().size() <<endl;
@@ -30,7 +45,7 @@ int display(string filename, int opt)
     cout << "Number of actions           :" << lpe.actions().size() << endl;
   }
 
-  if (opt==1)
+  if (opt== PARS)
   {
     for (data_variable_list::iterator i = lpe.process_parameters().begin(); i != lpe.process_parameters().end(); ++i)
     {
@@ -38,7 +53,7 @@ int display(string filename, int opt)
     }
   }
 
-  if (opt==2)
+  if (opt== NPARS )
   {
     cout << lpe.process_parameters().size(); 
   }
@@ -56,7 +71,7 @@ ostream& operator<<(ostream& os, const vector<T>& v)
 int main(int ac, char* av[])
 {
       string filename;
-      int opt = 0;
+      int opt = NO_OPTION;
 
       try {
         po::options_description desc("Allowed options");
@@ -104,9 +119,9 @@ int main(int ac, char* av[])
 	}
 
 	if (vm.count("pars"))
-		{opt = 1;}
+		{opt = PARS;}
 	if (vm.count("npars"))
-		{opt = 2;}
+		{opt = NPARS;}
   display(filename, opt);       
     }
     catch(exception& e)

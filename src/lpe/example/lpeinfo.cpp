@@ -19,6 +19,7 @@ int display(string filename, int opt)
   if (!spec.load(filename))
   {
     cerr << "could not read " << filename << endl;
+    return 1;
   }
   LPE lpe = spec.lpe();
     

@@ -8,7 +8,7 @@ ifeq ($(USE_BOOST),1)
  endif
 
  ifeq ($(CC),gcc)
-  BOOST_LIBRARIES = -lboost_program_options-gcc
+  BOOST_LIBRARIES = -lboost_program_options
  else
   BOOST_LIBRARIES = -lboost_program_options
  endif
