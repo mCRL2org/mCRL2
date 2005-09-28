@@ -1,0 +1,25 @@
+% This is the dining philosophers problem with two philosophers
+
+act
+    get_f1;  get_f2;
+    put_f1;  put_f2;
+    down_f1; up_f1;
+    down_f2; up_f2;
+    lock_f1; lock_f2;
+    free_f1; free_f2;
+
+
+proc P1	= get_f1 . get_f2 . put_f1 . put_f2 . P1;
+
+proc P2 = get_f2 .  get_f1 .  put_f2 .  put_f1 . P2;
+
+proc F1 =  up_f1 . down_f1 . F1;
+
+proc F2 = up_f2 . down_f2 . F2;
+
+init
+    allow( { lock_f1, lock_f2, free_f1, free_f2},
+    comm( { get_f1|up_f1->lock_f1, get_f2|up_f2->lock_f2, put_f1|down_f1->free_f1,
+	    put_f2|down_f2->free_f2 },
+      P1 || P2 || F1 ||  F2
+    ));
