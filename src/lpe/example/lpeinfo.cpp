@@ -36,6 +36,7 @@ int display(string filename, int opt)
     {
       cout << i->name() << " " << i->type().to_string() << endl;
     }
+  }
 
   if (opt==2)
   {
