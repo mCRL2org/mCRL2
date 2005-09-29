@@ -1,4 +1,9 @@
-// 1) Een type cast van iterators is overbodig/foutief! (zoals in data_expression_list(*i))
+/* 
+
+Version 0.1.1
+*) Added "new state vector set"-change check 
+
+*/
 
 #include <iostream>
 #include <vector>
@@ -209,11 +214,12 @@ int const_main(string filename, int opt)
       }; //end summand loop	
   
       //
-      //flattened the change vector and flag vector
+      //flatten the set of new flag vectors and set of new state vector
       //
       vector<bool>          fcv = fv;      //create flattened change vector 
       vector<data_assignment> fsv = iv; //create flattened init vector
- 
+      
+      //flatten the set of new flag vectors
       for (unsigned int i=0; i < cv[0].size(); i++){ 
         //Check only those vectors of which the flagvector elements are true/Constant
         if (fv[i]) {
@@ -225,6 +231,29 @@ int const_main(string filename, int opt)
           }
         };
       }
+      
+      //Additional check on new state vectors set
+      for (unsigned int i=0; i < sv[0].size(); i++){ 
+        if (fcv[i]) {
+          //2B coded
+          //data_assignment value = "don't care";
+          for (unsigned int j=0; j < sv.size(); j++)
+            //2B coded
+            //if (!Compare(sv[j][i], "don't care") 
+            {
+              //2B coded
+              //bool b = compare(sv[j][i], value);
+              //if (b) {
+              //  value = sv[j][i];
+              //} else {
+              //  fcv[i] := false
+              //  fsv[i] := sv[j][i]
+              //}
+            }
+   
+        };
+      };
+
 
       if (opt==2)
       {
