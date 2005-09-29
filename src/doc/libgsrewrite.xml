@@ -100,6 +100,37 @@
 </refsynopsisdiv>
 
 <refsect1>
+<title>Description</title>
+<para>
+The libgsrewrite library provides a rewrite system for mCRL2 data expressions (only after data implementation). To use it, one first needs to call &gsRewriteInit; to initialise the system with the equations from &parDataEqnSpec; and a rewriter strategy &parStrategy; (see below). To reinitialise the system or before closing the application, a call to &gsRewriteFinalise; has to be made to clean up the current rewrite system. After initialisation, one can still add or remove an equation &parEqn; with the functions &gsRewriteAddEqn; and &gsRewriteRemoveEqn;. The latter removes (all occurrences of) &parEqn; from the equations used by the rewrite system.
+</para>
+<para>
+To actually rewrite a data expression, the functions &gsRewriteTerm; and &gsRewriteTerms; can be used. The function &gsRewriteTerm; rewrites a single mCRL2 data expression &parTerm;, while &gsRewriteTerms; rewrites every expression in the list &parTerms;. Because the rewriters use their own internal format for data expressions (for more efficient rewriting), every call to &gsRewriteTerm; or &gsRewriteTerms; results in an implicit conversion to and from the internal format before, respectively after the actual rewriting. When rewriting is a critical part of an application, it is wise to explicitly convert the data expressions before repeated calls on such an expression. This is done with the functions &gsToRewriteFormat; and &gsFromRewriteFormat;. (Note that the expression in the internal format is a &taterm; instead of an &tatermappl;.) Terms in the internal format can be rewritten with the function &gsRewriteInternal; and &gsRewriteInternals; (analogous to &gsRewriteTerm; and &gsRewriteTerms;).
+</para>
+
+<refsect2>
+<title>Strategies</title>
+<para>
+Currently, there are three different rewriting strategies available in libgsrewrite. A standard innermost rewriting strategy is available under the name &stratINNER3;. This strategy will fit most non critical rewriting uses, such as simulation, (simple) LPE manipulation and generation of (very) small state spaces. For time critical uses, there is a compiling innermost rewriting strategy &stratINNERC;. With this strategy, a call to &gsRewriteInit; will result in the compilation of an optimised rewriter. This does mean that gcc and the appropriate headers and libraries must be available.
+</para>
+<para>
+An alternative to &stratINNER3; is the JITty rewriter &stratJITTY;. This strategy can avoid a lot of unnecessary rewriting in certain cases and can handle some rewrite rules that cause the innermost rewriters to rewrite infinitely.
+</para>
+<para>
+To convert a string representation of a strategy to a &trewrstrat;, one can use &RewriteStrategyFromString;. This is useful for converting command line arguments, specifying a rewrite strategy. The string representations are derived from there &trewrstrat; name by taking the last part and writing it in lower case (e.g. &stratINNER3string; for &stratINNER3;). If the supplied string does not match any of the available strategies, &stratINVALID; is returned. Note that it is not allowed to supply &stratINVALID; to &gsRewriteInit;.
+</para>
+</refsect2>
+
+<refsect2>
+<title>Variable substitutions</title>
+<para>
+For efficient variable substitutions, the gssubstitute functions are used. This means that if the rewriter encounters a variable in a data expression, it will apply &RWapplySubstitution; to it.
+</para>
+</refsect2>
+
+</refsect1>
+
+<refsect1>
 <title>Preconditions</title>
 <para>
 The following preconditions have to be satisfied for all functions, except &RewriteStrategyFromString;:
@@ -174,37 +205,6 @@ The following precondition has to be satisfied for &gsRewriteInternals;:
   </listitem>
 </itemizedlist>
 </para>
-</refsect1>
-
-<refsect1>
-<title>Description</title>
-<para>
-The libgsrewrite library provides a rewrite system for mCRL2 data expressions (only after data implementation). To use it, one first needs to call &gsRewriteInit; to initialise the system with the equations from &parDataEqnSpec; and a rewriter strategy &parStrategy; (see below). To reinitialise the system or before closing the application, a call to &gsRewriteFinalise; has to be made to clean up the current rewrite system. After initialisation, one can still add or remove an equation &parEqn; with the functions &gsRewriteAddEqn; and &gsRewriteRemoveEqn;. The latter removes all occurrences of &parEqn; from the set of equations used by the rewrite system.
-</para>
-<para>
-To actually rewrite a data expression, the functions &gsRewriteTerm; and &gsRewriteTerms; can be used. The function &gsRewriteTerm; rewrites a single mCRL2 data expression &parTerm;, while &gsRewriteTerms; rewrites every expression in the list &parTerms;. Because the rewriters use their own internal format for data expressions (for more efficient rewriting), every call to &gsRewriteTerm; or &gsRewriteTerms; results in a implicit conversion to and from the internal format before, respectively after the actual rewriting. When rewriting is a critical part of an application, it is wise to explicitly convert the data expressions before repeated calls on such an expression. This is done with the functions &gsToRewriteFormat; and &gsFromRewriteFormat;. (Note that the expression in the internal format is a &taterm; instead of an &tatermappl;.) Terms in the internal format can be rewritten with the function &gsRewriteInternal; and &gsRewriteInternals; (analogous to &gsRewriteTerm; and &gsRewriteTerms;).
-</para>
-
-<refsect2>
-<title>Strategies</title>
-<para>
-Currently, their are three different rewriting strategies available in libgsrewrite. A standard innermost rewriting strategy is available under the name &stratINNER3;. This strategy will fit most non critical rewriting uses, such as simulation, (simple) LPE manipulation and generation of (very) small state spaces. For time critical uses, there is a compiling innermost rewriting strategy &stratINNERC;. With this strategy, a call to &gsRewriteInit; will result in the compilation of a optimalised rewriter. This does mean that gcc and the appropriate headers and libraries must be available.
-</para>
-<para>
-An alternative to &stratINNER3; is the JITty rewriter &stratJITTY;. This strategy can avoid a lot of unnecessary rewriting in certain cases and can handle some rewrite rules that cause the innermost rewriters to rewrite infinitely.
-</para>
-<para>
-To convert a string representation of a strategy to a &trewrstrat;, one can use &RewriteStrategyFromString;. This is useful for converting command line arguments, specifying a rewrite strategy. The string representations are derived from there &trewrstrat; name by taking the last part and writing it in lower case (e.g. &stratINNER3string; for &stratINNER3;). If the supplied string does not match any of the available strategies, &stratINVALID; is returned. Note that it is not allowed to supply &stratINVALID; to &gsRewriteInit;.
-</para>
-</refsect2>
-
-<refsect2>
-<title>Variable substitutions</title>
-<para>
-For efficient variable substitutions, the gssubstitute functions are uses. This means that if the rewriter encounters a variable in a data expression, it will apply &RWapplySubstitution; to it.
-</para>
-</refsect2>
-
 </refsect1>
 
 <refsect1>
