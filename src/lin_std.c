@@ -3377,7 +3377,7 @@ static stackoperations *find_suitable_stack_operations(
   return find_suitable_stack_operations(parameters,stacklist->next);
 }
 
-stacklisttype *new_stack(
+static stacklisttype *new_stack(
                  ATermList parameterlist,
                  specificationbasictype *spec, 
                  int regular,
@@ -5589,8 +5589,13 @@ static ATermAppl generateLPEpCRL(ATermAppl procId, int canterminate,
   }
   parameters=collectparameterlist(pCRLprocs);
   alphaconversion(procId,parameters);
+  /* We reverse the pCRLprocslist to give the processes that occur first the 
+     lowest index. In particular initial states get value 1, instead of the
+     highest conceivable value, as happened hitherto (29/905) */
+  pCRLprocs=ATreverse(pCRLprocs);
   if ((!singlecontrolstate)||(!regular)) 
-         declare_control_state(spec,pCRLprocs);
+  { declare_control_state(spec,pCRLprocs);
+  }
   stack=new_stack(parameters,spec,regular,pCRLprocs);
   initial=make_initialstate(procId,stack,pCRLprocs,
                               regular,singlecontrolstate,spec);
