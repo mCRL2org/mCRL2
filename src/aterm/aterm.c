@@ -83,9 +83,6 @@ ProtEntry      *at_prot_memory = NULL;
 static ATerm   *mark_stack = NULL;
 static int      mark_stack_size = 0;
 int             mark_stats[3] = {0, MYMAXINT, 0};
-#ifdef WITH_STATS
-int             nr_marks = 0;
-#endif
 
 /*}}}  */
 /*{{{  function declarations */
@@ -2219,9 +2216,6 @@ void AT_markTerm(ATerm t)
   Symbol          sym;
   ATerm          *current = mark_stack + 1;
   ATerm          *limit = mark_stack + mark_stack_size - MARK_STACK_MARGE;
-#ifdef WITH_STATS
-  ATerm          *depth = mark_stack;
-#endif
   
   mark_stack[0] = NULL;
   *current++ = t;
@@ -2229,9 +2223,6 @@ void AT_markTerm(ATerm t)
   while (ATtrue) {
     if (current >= limit) {
       int current_index;
-#ifdef WITH_STATS
-      int depth_index = depth - mark_stack;
-#endif
       current_index = current - mark_stack;
 
       /* We need to resize the mark stack */
@@ -2246,16 +2237,8 @@ void AT_markTerm(ATerm t)
       fflush(stderr);
 
       current = mark_stack + current_index;
-#ifdef WITH_STATS
-      depth   = mark_stack + depth_index;
-#endif
     }
 
-#ifdef WITH_STATS
-    if (current > depth)
-      depth = current;
-#endif
-    
     t = *--current;
 
     if (!t) {
@@ -2322,10 +2305,6 @@ void AT_markTerm(ATerm t)
 	break;
     }
   }
-#ifdef WITH_STATS
-  STATS(mark_stats, depth - mark_stack);
-  nr_marks++;
-#endif
 }
 
 /* Jurgen asks: why is this function not in gc.c ? */
@@ -2335,9 +2314,6 @@ void AT_markTerm_young(ATerm t)
   Symbol          sym;
   ATerm          *current = mark_stack + 1;
   ATerm          *limit = mark_stack + mark_stack_size - MARK_STACK_MARGE;
-#ifdef WITH_STATS
-  ATerm          *depth = mark_stack;
-#endif
 
   if(IS_MARKED(t->header) || IS_OLD(t->header)) {
       /*fprintf(stderr,"AT_markTerm_young (%p) STOP MARK: age = %d\n",t,GET_AGE(t->header));*/
@@ -2350,9 +2326,6 @@ void AT_markTerm_young(ATerm t)
   while (ATtrue) {
     if (current >= limit) {
       int current_index;
-#ifdef WITH_STATS
-      int depth_index   = depth - mark_stack;
-#endif
 
       current_index = current - mark_stack;
       /* We need to resize the mark stack */
@@ -2367,16 +2340,8 @@ void AT_markTerm_young(ATerm t)
       fflush(stderr);
 
       current = mark_stack + current_index;
-#ifdef WITH_STATS
-      depth   = mark_stack + depth_index;
-#endif
     }
 
-#ifdef WITH_STATS
-    if (current > depth)
-      depth = current;
-#endif
-    
     t = *--current;
 
     if (!t) {
@@ -2437,10 +2402,6 @@ void AT_markTerm_young(ATerm t)
 	break;
     }
   }
-#ifdef WITH_STATS
-  STATS(mark_stats, depth - mark_stack);
-  nr_marks++;
-#endif
 }
 
 /*}}}  */

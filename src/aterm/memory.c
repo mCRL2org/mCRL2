@@ -379,11 +379,6 @@ static void hash_info(int stats[MAX_INFO_SIZES][3])
       len = MAX_INFO_SIZES-1;
     count[len]++;
   }
-
-  /* Update global statistic information */
-  for(i=0; i<MAX_INFO_SIZES; i++) {
-    STATS(stats[i], count[i]);
-  }
 }
 
 /*}}}  */

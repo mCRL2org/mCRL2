@@ -11,6 +11,7 @@ extern "C" {
 #include <aterm2.h>
 #include "gslowlevel.h"
 #include "gsfunc.h"
+#include "libprint_c.h"
 #include "libgsrewrite.h"
 #include "gssubstitute.h"
 
@@ -70,7 +71,12 @@ void gsRewriteInit(ATermAppl Eqns, RewriteStrategy strat)
 			break;
 #endif
 		case GS_REWR_INNERC:
+#ifdef USING_INNERC
 			RWrewrite_init_innerc();
+#else
+			gsErrorMsg("rewriter 'innerc' is not available\n");
+			exit(1);
+#endif
 			break;
 		case GS_REWR_JITTY:
 			rewrite_init_jitty();
@@ -124,7 +130,12 @@ void gsRewriteAddEqn(ATermAppl Eqn)
 			break;
 #endif
 		case GS_REWR_INNERC:
+#ifdef USING_INNERC
 			RWrewrite_add_innerc(Eqn);
+#else
+			gsErrorMsg("rewriter 'innerc' is not available\n");
+			exit(1);
+#endif
 			break;
 		case GS_REWR_JITTY:
 			rewrite_add_jitty(Eqn);
@@ -179,7 +190,12 @@ void gsRewriteRemoveEqn(ATermAppl Eqn)
 			break;
 #endif
 		case GS_REWR_INNERC:
+#ifdef USING_INNERC
 			RWrewrite_remove_innerc(Eqn);
+#else
+			gsErrorMsg("rewriter 'innerc' is not available\n");
+			exit(1);
+#endif
 			break;
 		case GS_REWR_JITTY:
 			rewrite_remove_jitty(Eqn);
@@ -206,7 +222,12 @@ ATermAppl gsRewriteTerm(ATermAppl Term)
 			return from_rewrite_format_innerc2((ATerm) RWrewrite_innerc2((ATermAppl) to_rewrite_format_innerc2(Term)));
 #endif
 		case GS_REWR_INNERC:
+#ifdef USING_INNERC
 			return from_rewrite_format_innerc((ATerm) RWrewrite_innerc((ATermAppl) to_rewrite_format_innerc(Term)));
+#else
+			gsErrorMsg("rewriter 'innerc' is not available\n");
+			exit(1);
+#endif
 		case GS_REWR_JITTY:
 			return from_rewrite_format_jitty(rewrite_jitty(to_rewrite_format_jitty(Term)));
 		case GS_REWR_INNER3:
@@ -240,7 +261,12 @@ ATerm gsToRewriteFormat(ATermAppl Term)
 			return to_rewrite_format_innerc2(Term);
 #endif
 		case GS_REWR_INNERC:
+#ifdef USING_INNERC
 			return to_rewrite_format_innerc(Term);
+#else
+			gsErrorMsg("rewriter 'innerc' is not available\n");
+			exit(1);
+#endif
 		case GS_REWR_INNER3:
 		default:
 			return to_rewrite_format_inner3(Term);
@@ -261,7 +287,12 @@ ATermAppl gsFromRewriteFormat(ATerm Term)
 			return from_rewrite_format_innerc2(Term);
 #endif
 		case GS_REWR_INNERC:
+#ifdef USING_INNERC
 			return from_rewrite_format_innerc(Term);
+#else
+			gsErrorMsg("rewriter 'innerc' is not available\n");
+			exit(1);
+#endif
 		case GS_REWR_INNER3:
 		default:
 			return from_rewrite_format_inner3(Term);
@@ -283,7 +314,12 @@ ATerm gsRewriteInternal(ATerm Term)
 			return (ATerm) RWrewrite_innerc2((ATermAppl)Term);
 #endif
 		case GS_REWR_INNERC:
+#ifdef USING_INNERC
 			return (ATerm) RWrewrite_innerc((ATermAppl) Term);
+#else
+			gsErrorMsg("rewriter 'innerc' is not available\n");
+			exit(1);
+#endif
 		case GS_REWR_JITTY:
 			return rewrite_jitty(Term);
 		case GS_REWR_INNER3:

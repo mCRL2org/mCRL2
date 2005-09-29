@@ -382,7 +382,7 @@ int main(int argc, char **argv)
 		{
 			if ( explore )
 			{
-				printf("deadlock-detect: deadlock found.\n");
+				fprintf(stderr,"deadlock-detect: deadlock found.\n");
 				fflush(stdout);
 			}
 			if ( trace_deadlock )
@@ -417,13 +417,13 @@ int main(int argc, char **argv)
 		current_state++;
 		if ( (monitor || gsVerbose) && ((current_state%1000) == 0) )
 		{
-			printf("monitor: currently at level %lu with %lu state%s and %lu transition%s explored and %lu state%s seen.\n",level,current_state,(current_state==1)?"":"s",trans,(trans==1)?"":"s",num_states,(num_states==1)?"":"s");
+			fprintf(stderr,"monitor: currently at level %lu with %lu state%s and %lu transition%s explored and %lu state%s seen.\n",level,current_state,(current_state==1)?"":"s",trans,(trans==1)?"":"s",num_states,(num_states==1)?"":"s");
 		}
 		if ( current_state == nextlevelat )
 		{
 			if ( monitor )
 			{
-				printf("monitor: level %lu done. (%lu state%s, %lu transition%s)\n",level,current_state-prevcurrent,((current_state-prevcurrent)==1)?"":"s",trans-prevtrans,((trans-prevtrans)==1)?"":"s");
+				fprintf(stderr,"monitor: level %lu done. (%lu state%s, %lu transition%s)\n",level,current_state-prevcurrent,((current_state-prevcurrent)==1)?"":"s",trans-prevtrans,((trans-prevtrans)==1)?"":"s");
 				fflush(stdout);
 			}
 			level++;
@@ -459,7 +459,7 @@ int main(int argc, char **argv)
 
 	if ( !err && (monitor || gsVerbose))
 	{
-		printf("done with state space generation (%lu level%s, %lu state%s and %lu transition%s).\n",level-1,(level==2)?"":"s",num_states,(num_states==1)?"":"s",trans,(trans==1)?"":"s");
+		fprintf(stderr,"done with state space generation (%lu level%s, %lu state%s and %lu transition%s).\n",level-1,(level==2)?"":"s",num_states,(num_states==1)?"":"s",trans,(trans==1)?"":"s");
 	}
 }
 

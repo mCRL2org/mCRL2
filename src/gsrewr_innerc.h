@@ -1,10 +1,15 @@
-/* $Id: gsrewr_innerc.h,v 1.2 2005/04/08 12:33:51 muck Exp $ */
+#ifndef NO_DYNLOAD
+#ifdef __cplusplus
+extern "C" {
+#endif
 
 #include <stdio.h>
 #include <stdlib.h>
 #include "aterm2.h"
 #include "gslowlevel.h"
 #include "gsfunc.h"
+
+#define USING_INNERC
 
 void RWrewrite_init_innerc();
 
@@ -18,3 +23,7 @@ ATerm to_rewrite_format_innerc(ATermAppl);
 
 ATermAppl from_rewrite_format_innerc(ATerm);
 
+#ifdef __cplusplus
+}
+#endif
+#endif

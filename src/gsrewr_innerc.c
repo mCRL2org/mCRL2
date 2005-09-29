@@ -1,4 +1,7 @@
-/* $Id: gsmewr_innerc.c,v 1.3 2005/04/14 11:57:17 muck Exp $ */
+#ifndef NO_DYNLOAD
+#ifdef __cplusplus
+extern "C" {
+#endif
 
 #define NAME "rewr_innerc"
 
@@ -1220,3 +1223,7 @@ ATermAppl RWrewrite_innerc(ATermAppl Term)
   return r;
 }
 
+#ifdef __cplusplus
+}
+#endif
+#endif

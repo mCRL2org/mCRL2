@@ -2,7 +2,6 @@
 #include <stdlib.h>
 #include <unistd.h>
 #include <string.h>
-#include <dlfcn.h>
 #include "aterm2.h"
 #include "gslowlevel.h"
 #include "gsfunc.h"

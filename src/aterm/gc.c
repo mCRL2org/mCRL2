@@ -2,14 +2,12 @@
 
 
 #include <stdlib.h>
-#include <time.h>
 #include <limits.h>
 #include <assert.h>
 #include <setjmp.h>
 
 #ifndef WIN32
 #include <unistd.h>
-#include <sys/times.h>
 #endif
 
 #include "_aterm.h"
@@ -39,11 +37,7 @@ int at_gc_count			   = 0;
 static int     stack_depth[3]      = { 0, MYMAXINT, 0 };
 static int     reclaim_perc[3]     = { 0, MYMAXINT, 0 };
 extern int     mark_stats[3];
-#ifdef WITH_STATS
-static clock_t sweep_time[3]       = { 0, MYMAXINT, 0 };
-static clock_t mark_time[3]        = { 0, MYMAXINT, 0 };
-extern int     nr_marks;
-#endif
+
 static FILE *gc_f = NULL;
 
 AFun at_parked_symbol = -1;
@@ -299,7 +293,6 @@ VOIDCDECL mark_phase()
   stop  = MAX(stackTop, stackBot);
 
   stack_size = stop-start;
-  STATS(stack_depth, stack_size);
 
   mark_memory(start, stop);
 
@@ -410,7 +403,6 @@ VOIDCDECL mark_phase_young()
   stop  = MAX(stackTop, stackBot);
 
   stack_size = stop-start;
-  STATS(stack_depth, stack_size);
 
   mark_memory_young(start, stop);
 
@@ -680,7 +672,7 @@ void check_unmarked_block(Block **blocks)
 
 void major_sweep_phase_old() 
 {
-  int size, perc;
+  int size;
   int reclaiming = 0;
   int alive = 0;
 
@@ -773,10 +765,6 @@ void major_sweep_phase_old()
       reclaiming += dead_in_block;
     }
   }
-  if(alive) {
-    perc = (100*reclaiming)/alive;
-    STATS(reclaim_perc, perc);
-  }
 }
 
 /*}}}  */
@@ -784,7 +772,6 @@ void major_sweep_phase_old()
 
 void major_sweep_phase_young() 
 {
-  int perc;
   int reclaiming = 0;
   int alive = 0;
   int size;
@@ -919,10 +906,6 @@ void major_sweep_phase_young()
 #endif
     
   }
-  if(alive) {
-    perc = (100*reclaiming)/alive;
-    STATS(reclaim_perc, perc);
-  }
 }
 
 /*}}}  */
@@ -930,7 +913,7 @@ void major_sweep_phase_young()
 
 void minor_sweep_phase_young() 
 {
-  int size, perc;
+  int size;
   int reclaiming = 0;
   int alive = 0;
 
@@ -1056,10 +1039,6 @@ void minor_sweep_phase_young()
 #endif
     
   }
-  if(alive) {
-    perc = (100*reclaiming)/alive;
-    STATS(reclaim_perc, perc);
-  }
 }
 
 /*}}}  */
@@ -1072,8 +1051,6 @@ void minor_sweep_phase_young()
 
 void AT_collect()
 {
-  clock_t start, mark, sweep;
-  clock_t user;
   FILE *file = gc_f;
   int size;
 
@@ -1090,16 +1067,9 @@ void AT_collect()
     fprintf(file, "collecting garbage..(%d)",at_gc_count);
     fflush(file);
   }
-  start = clock();
   mark_phase();
-  mark = clock();
-  user = mark - start;
-  STATS(mark_time, user);
 
   sweep_phase();
-  sweep = clock();
-  user = sweep - mark;
-  STATS(sweep_time, user);
 
   if (!silent)
     fprintf(file, "..\n");
@@ -1110,8 +1080,6 @@ void AT_collect()
 
 void AT_collect_minor()
 {
-  clock_t start, mark, sweep;
-  clock_t user;
   FILE *file = gc_f;
   int size;
 
@@ -1128,18 +1096,11 @@ void AT_collect_minor()
     fprintf(file, "young collecting garbage..(%d)",at_gc_count);
     fflush(file);
   }
-  start = clock();
 
   /* was minor_mark_phase_young(); this should be verified! */
   mark_phase_young();
-  mark = clock();
-  user = mark - start;
-  STATS(mark_time, user);
 
   minor_sweep_phase_young();
-  sweep = clock();
-  user = sweep - mark;
-  STATS(sweep_time, user);
 
   if (!silent)
     fprintf(file, "..\n");
@@ -1151,8 +1112,6 @@ void AT_collect_minor()
 
 void AT_collect()
 {
-  struct tms start, mark, sweep;
-  clock_t user;
   FILE *file = gc_f;
   int size;
 
@@ -1169,20 +1128,12 @@ void AT_collect()
     fprintf(file, "collecting garbage..(%d)",at_gc_count);
     fflush(file);
   }
-  times(&start);
   CHECK_UNMARKED_BLOCK(at_blocks);
   CHECK_UNMARKED_BLOCK(at_old_blocks);
   mark_phase();
-  times(&mark);
-  user = mark.tms_utime - start.tms_utime;
-  STATS(mark_time, user);
 
   sweep_phase();
   
-  times(&sweep);
-  user = sweep.tms_utime - mark.tms_utime;
-  STATS(sweep_time, user);
-
   if (!silent) {
     fprintf(file, "..\n");
   }
@@ -1193,8 +1144,6 @@ void AT_collect()
 
 void AT_collect_minor()
 {
-  struct tms start, mark, sweep;
-  clock_t user;
   FILE *file = gc_f;
   int size;
   
@@ -1211,23 +1160,15 @@ void AT_collect_minor()
     fprintf(file, "young collecting garbage..(%d)",at_gc_count);
     fflush(file);
   }
-  times(&start);
   CHECK_UNMARKED_BLOCK(at_blocks);
   CHECK_UNMARKED_BLOCK(at_old_blocks);
     /*nb_cell_in_stack=0;*/
   mark_phase_young();
     /*fprintf(stderr,"AT_collect_young: nb_cell_in_stack = %d\n",nb_cell_in_stack++);*/
-  times(&mark);
-  user = mark.tms_utime - start.tms_utime;
-  STATS(mark_time, user);
 
   minor_sweep_phase_young();
   CHECK_UNMARKED_BLOCK(at_blocks);
   CHECK_UNMARKED_BLOCK(at_old_blocks);
-
-  times(&sweep);
-  user = sweep.tms_utime - mark.tms_utime;
-  STATS(sweep_time, user);
 
   if (!silent)
     fprintf(file, "..\n");
@@ -1249,30 +1190,6 @@ void AT_cleanupGC()
   FILE *file = gc_f;
   if(flags & PRINT_GC_TIME) {
     fprintf(file, "%d garbage collects,\n", at_gc_count);
-#ifdef WITH_STATS
-    fprintf(file, "(all statistics are printed min/avg/max)\n");
-    if(at_gc_count > 0) {
-      if(nr_marks > 0) {
-	fprintf(file, "  mark stack needed: %d/%d/%d (%d marks)\n", 
-		mark_stats[IDX_MIN],
-                mark_stats[IDX_TOTAL]/nr_marks, 
-		mark_stats[IDX_MAX], nr_marks);
-      }
-      fprintf(file, "  marking  took %.2f/%.2f/%.2f seconds, total: %.2f\n", 
-	      ((double)mark_time[IDX_MIN])/(double)CLOCK_DIVISOR,
-	      (((double)mark_time[IDX_TOTAL])/(double)at_gc_count)/(double)CLOCK_DIVISOR,
-	      ((double)mark_time[IDX_MAX])/(double)CLOCK_DIVISOR,
-	      ((double)mark_time[IDX_TOTAL])/(double)CLOCK_DIVISOR);
-      fprintf(file, "  sweeping took %.2f/%.2f/%.2f seconds, total: %.2f\n", 
-	      ((double)sweep_time[IDX_MIN])/(double)CLOCK_DIVISOR,
-	      (((double)sweep_time[IDX_TOTAL])/(double)at_gc_count)/(double)CLOCK_DIVISOR,
-	      ((double)sweep_time[IDX_MAX])/(double)CLOCK_DIVISOR,
-	      ((double)sweep_time[IDX_TOTAL])/(double)CLOCK_DIVISOR);
-    }
-#ifdef WIN32
-    fprintf(file, "Note: WinNT times are absolute, and might be influenced by other processes.\n");
-#endif
-#endif
   }
   
   if(flags & PRINT_GC_STATS) {
