@@ -35,7 +35,7 @@
 \maketitle
 
 \begin{abstract}
-This documentation describes the usage and implementation of  the tool \tool\ within the \mcrl\ toolset.
+This documentation describes the usage and implementation of the tool \tool\ within the \mcrl\ toolset.
 Basically, \tool\ is a tool which eliminates constant parameters in a \lpe\ (LPE).
 \end{abstract}
 
@@ -51,47 +51,67 @@ each constant \pp\ its constant value and removes the \pp\ from the
 will write the output to an output file \ti{output.lpe}. This file is
 a file in the \ti{.lpe} format \cite{LPEformat}.
 
-\section{Algorithm} \label{sec:alg}
+\section{definitions} \label{sec:def}
 
-\subsection{LPE definition}\label{sdef}
-The equation below is a simplified representation of a \lpe\ in \mcrl\ . This definition simplified to fit 
-the filter \tool\ . 
-\begin{defn}\label{def:LPE}
+The equation below is a representation of a \lpe\ in \mcrl\ . This definition simplified to describe the \tool\ tool.
+\begin{defn}[\lpe]\label{def:LPE}
 \begin{displaymath}
-%X (d:D) = \sum_{i \in I} \sum_{\ovr{e_i:E_i}} c_i ( \ovr{d, e_i} ) \rightarrow a_i (\ovr{f_i} (\ovr{d, e_i)}) \cdot X_i(\ovr{g_i}(\ovr{d,e_i}))
-X (d:D) = \sum_{i \in I} \sum_{\ovr{e_i:E_i}} c_i ( \ovr{d, e_i} ) \rightarrow X(\ovr{g_i}(\ovr{d,e_i}))
+X (\ovr{d}:\ovr{D}) = \sum_{i \in I} \sum_{e_i:E_i} c_i ( \ovr{d}, \ovr{e_i} ) \rightarrow a(\ovr{f_i}(\ovr{d},e_i)) \cdot X(\ovr{g_i}(\ovr{d},\ovr{e_i})) $$
+$$ X(\ovr{init})
 \end{displaymath}
-\end{defn}
-For explanation of the notion on \lpe s  we refer to \cite{LPE_info}.
 
-\subsection{Definition}
-For the description of the algorithm we use definition \ref{def:LPE}
-from section \ref{sdef}. The set of $n$ \pps\ is denoted with the
-elements $d_0 \ldots d_n$. In search of a constant \pp\ we need to
-find all \pps\ $d$ which are constant. The set of summands is
-indicated with $I$. Also sum variables $(e_i \in E_i)$
-are taken into account. %If all $e_i$ are equal, these $e_i$ are substituted by their constant values.
-$(\ovr{d},e)$ are a Cartesian product. A new $d$ can be constructed by $f_A: D \times E \rightarrow D_A$.
-$c$ holds a boolean: $c: d \times e \rightarrow \mathbb{B}$ and $g$ holds a next state function $g: d \times e \rightarrow d_g$
+A \lpe\ is written as in Definition \ref{def:LPE}, the different states of the process are represented by the data vector parameter $\ovr{d:D}$. $D$ may be a Cartesian product of $n$ data types, meaning that $d$ may consist of a tuple $(d_1, \ldots, d_n)$. The \lpe expresses that in state $\ovr{d}$ it preforms action $a$, carrying data parameter $f_i(\ovr{d},e)$ and it can reach the new state $g_i(\ovr{d,e})$ under the conditions that $c_i(\ovr{d,e})$ is true. So for each summand $i:I$ we have a function $g_i: D \times E \rightarrow D$ and a function $c_i: D \times E $, which reduces to a normal form \ti{true}, \ti{false} or something else. 
 
- To indicate a if a $\ovr{d}$ is constant we use function $C$ of definition \ref{defn:const}.
-\begin{defn}
-\label{defn:const}$C =$
-\begin{displaymath}
- \langle \cup_{j \in 0 \ldots n}: \langle \forall_{i \in I}:
-c_i(\ovr{d},e_i) : (\ovr{d_j},e_i) = \ovr{g_i} (\ovr{d},e_i)_j \rangle :
-j \rangle 
-\end{displaymath}
-$j$ is the position of a constant \pp .
+The data type $E$ helps to give the \lpe s a more general form. Not only the data parameter $\ovr{d:D}$, but also the data parameters $\ovr{e_i: E_i}$ can influence the condition $c_i$ and the and the resulting state $g_i$. Such a $e$ is often used in a \lpe to do a read or send action range over a domain. 
+
+For an more detailed explanation of \lpe s  we refer to \cite{LPE_info}.
 \end{defn}
 
-\subsection{Algorithm}
+\subsection{lpeconstelm definition}\label{subsec:lpedef}
+
+A parameter of a \lpe\ can be replaced by its intial value if it can be determined that this parameter remains constant throughout any run of the process. Thi elimination of constant parameters does not reduce the resulting state space, however it may shorten the time needed tot generate a state space from a \lpe. \\
+If we live in an ideal world and have all the time of the world we can inspected each state space and check if a \pp\ changes throughout the the run of the process. We can determine the reachability $R_{\psi}$ for each state given a certain input value ($\ovr{v_0}$). 
+
+We proceed to give a definition based upon a minimal fixed point $v_0$ with induction. 
+\begin{defn}\label{def:lpe}
+$R_\psi$ is the smallest set which complies to:
+\begin{itemize}
+\item $\ovr{v_0} \in R_\psi(\ovr{v_0})$
+\item For all $i \in I$ and $w_i \in E_i$ if $v \in R_\psi(\ovr{v_0})$ and $c_i(v, w_i$ holds, \\ then $g_i(v, w_i) \in R_\psi(\ovr{v_0})$ \\
+
+$S_\psi(\ovr{v_0}) = \lbrace j \in  \lbrace 1, \ldots, n \rbrace \vert \exists_u : D_j . \forall \ovr{v} \in R_\psi(\ovr{v_0}) . v_j = u \rbrace $
+\end{itemize}
+
+$S_\psi(\ovr{v_0})$ will give the set of indeces in for which the \pp\ is constant.
+\end{defn}
+
+Note that definition \ref{def:lpe} has to generate the entire statespace. Generating an entire statespace can take a lot of time. In some cases generating the entire statespace and checking for constants can take forever. This is why we have to come up with a "faster" solution. However to create such a solution we have to make descisions which will influence the outcome of the filter. The outcome can contain a smaller set of constant \pps; will not detect all constant \pps .
+
+\subsection{Suggestions 1}
+We don't want to inspect all state spaces as mentioned in section \ref{subsec:lpedef}. This is why we have to aproximate the solution to definiton \ref{def:lpe}. Our first approximation we suggest will be:
+\begin{defn} \label{def:sug1}
+\label{defn:const}$S=$
+\begin{displaymath}
+\lbrace   
+j \in \lbrace 1, \ldots , n \rbrace \vert \forall_{i\in I}, \ovr{d}: \ovr{D} , e_i: E_i, ((c_i(\ovr{d},e_i) = true)  \rightarrow d_j = g_i^j(\ovr{d},e_i)))\rbrace
+\end{displaymath}
+This approximation is very basic and does not cover all possiple solutions. Let us take a look at example \ref{example:sug1}:
+\begin{example} \label{example:sug1}
+proc P($x$: Nat) = P($2 \times x$);
+init P(0);
+\end{example}
+By filling in example \ref{example:sug1} into definition \ref{def:sug1} this will result into $S = \oslash$. For all $x / 0 $ the outcome of the \pp\ is not constant. However for $x=0$ the \pp\ is constant in this \lpe . We have create an other sollution which is not as relax as definition \ref{def:sug1}.
+% { j | forall d : d=2*d }
+
+\end{defn}
+
+\subsection{Algorithm definitions}
 To calculate the set of constant \pps\ we use the algorithm
 \ref{sss:alg} Before we describe the algorithm we need to introduce
-some definitions. These definitions are defined in \ref{sss:algdef}.
-A more general explanation is given in \ref{sss:algdesc}
+some definitions. 
+%These definitions are defined in \ref{sss:algdef}.
+%A more general explanation is given in \ref{sss:algdesc}
 
-\subsubsection{Algorithm definitions} \label{sss:algdef}
 \begin{itemize}
 \item \begin{defn} \textbf{- state vector}\\
 This vector represents the \pps\ of the input of a \lpe . The vector is 
@@ -202,7 +222,7 @@ This why have an additional check on the \svs\ to overcome this problem.
 
 For further reading about \lpe\ and free variables please refer to \cite{LPEfreevar} 
 
-\subsubsection{Algorithm} \label{sss:alg}
+\section{Algorithm} \label{sec:alg}
 \begin{tabbing} 
 statevector \la create\_statevector(\verb"P(init)"); \\
 flagvector \la create\_flagvector(statevector.size()); \\
@@ -360,6 +380,9 @@ Non of the elements in the \fv\ are \ti{true}, so there are no constants. The \l
    Extra info.
 
 \end{thebibliography}
+
+\newpage
+
 
 
 \end{document}
