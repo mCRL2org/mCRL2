@@ -1,29 +1,30 @@
 #Redefine default definitions using autoconf
-HOST_OS            = @HOST_OS@
-CC                 = @CC@
-CFLAGS             = @CFLAGS@
-CPP                = @CPP@
-CPPFLAGS           = @CPPFLAGS@
-CXX                = @CXX@
-CXXFLAGS           = @CXXFLAGS@
+HOST_OS              = @HOST_OS@
+CC                   = @CC@
+CFLAGS               = @CFLAGS@
+CPP                  = @CPP@
+CPPFLAGS             = @CPPFLAGS@
+CXX                  = @CXX@
+CXXFLAGS             = @CXXFLAGS@
 ifeq ($(HOST_OS),MACOSX)
-LDFLAGS            = @LDFLAGS@
+LDFLAGS              = @LDFLAGS@
 else
-LDFLAGS            = -Wl,-rpath,$(libdir) -rdynamic @LDFLAGS@
+LDFLAGS              = -Wl,-rpath,$(libdir) -rdynamic @LDFLAGS@
 endif
-ARFLAGS            = crs
-INSTALL            = install
-LEX                = @LEX@
-LFLAGS             = -I -Pgsyy
-BISON              = @BISON@
-BFLAGS             = -d -pgsyy
-ATERM              = @ATERM_NAME@ 
-BUILD_ATERM        = @BUILD_ATERM@
-USE_XML2           = @USE_XML2@
-USE_WX             = @USE_WX@
-WX_LIBS            = @WX_LIBS@
-USE_BOOST          = @USE_BOOST@
-BOOST_PREFIX       = @BOOST_PREFIX@
+ARFLAGS              = crs
+INSTALL              = install
+LEX                  = @LEX@
+LFLAGS               = -I -Pgsyy
+BISON                = @BISON@
+BFLAGS               = -d -pgsyy
+ATERM                = @ATERM_NAME@ 
+BUILD_ATERM          = @BUILD_ATERM@
+USE_XML2             = @USE_XML2@
+USE_WX               = @USE_WX@
+WX_LIBS              = @WX_LIBS@
+USE_BOOST            = @USE_BOOST@
+BOOST_PREFIX         = @BOOST_PREFIX@
+BOOST_LIBRARY_SUFFIX = @BOOST_LIBRARY_SUFFIX@
 
 #installation directories
 prefix             = @prefix@
@@ -106,13 +107,17 @@ ifdef USE_BOOST
  ifneq ($(BOOST_PREFIX),)
   BOOST_HEADERS   = -I$(BOOST_PREFIX)/include
   BOOST_LIBRARIES = -L$(BOOST_PREFIX)/lib
-  ifeq ($(CC),gcc)
-   # This appears to be necessary for boost 1.33 on Linux
-   BOOST_LIBRARIES += -lboost_program_options-gcc
-  else
-   BOOST_LIBRARIES += -lboost_program_options
-  endif
  endif
+
+ BOOST_LIBRARIES += -lboost_program_options
+
+#######################################################
+# Will be fixed when configure script works properly
+#######################################################
+# ifneq ($(BOOST_LIBRARY_SUFFIX),none)
+#  # This appears to be necessary for boost 1.33 on Linux
+#  BOOST_LIBRARIES += -lboost_program_options$(BOOST_LIBRARY_SUFFIX)
+# endif
 
  #lpeinfo definitions
  LPEINFO_NAME        = lpeinfo
@@ -251,22 +256,7 @@ endif
 
 # Targets that depend on any of the boost libraries
 ifdef USE_BOOST
- ifneq ($(BOOST_PREFIX),)
-  BOOST_HEADERS   = -I$(BOOST_PREFIX)/include
-  BOOST_LIBRARIES = -L$(BOOST_PREFIX)/lib
- else
-  BOOST_HEADERS   =
-  BOOST_LIBRARIES =
- endif
-
- ifeq ($(CXX),g++)
-  BOOST_LIBRARIES += -lboost_program_options-gcc
- else
-  BOOST_LIBRARIES += -lboost_program_options
- endif
-
 $(LPEINFO_NAME) : $(LPEINFO_OBJECTS) $(ATERM_DEP)
-	echo $(BOOST_LIBRARIES)
 	$(CXX) $(CXXFLAGS) -ftemplate-depth-256 -o $@ lpe/lpeinfo.cpp $(BOOST_HEADERS) -I./ -Iaterm $(BOOST_LIBRARIES) $(LPEINFO_OBJECTS) $(LDFLAGS) $(LPEINFO_LDFLAGS)
 
 $(LPECONSTELM_NAME) : $(LPECONSTELM_OBJECTS) $(ATERM_DEP)
