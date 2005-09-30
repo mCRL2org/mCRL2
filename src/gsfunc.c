@@ -194,9 +194,7 @@ static ATermAppl gsOpIdNameLTail;
 static ATermAppl gsOpIdNameRHead;
 static ATermAppl gsOpIdNameRTail;
 static ATermAppl gsOpIdNameSetComp;
-static ATermAppl gsOpIdNameSet2Bag;
 static ATermAppl gsOpIdNameEmptySet;
-static ATermAppl gsOpIdNameSetSize;
 static ATermAppl gsOpIdNameSetIn;
 static ATermAppl gsOpIdNameSubSetEq;
 static ATermAppl gsOpIdNameSubSet;
@@ -206,8 +204,8 @@ static ATermAppl gsOpIdNameSetIntersect;
 static ATermAppl gsOpIdNameSetCompl;
 static ATermAppl gsOpIdNameBagComp;
 static ATermAppl gsOpIdNameBag2Set;
+static ATermAppl gsOpIdNameSet2Bag;
 static ATermAppl gsOpIdNameEmptyBag;
-static ATermAppl gsOpIdNameBagSize;
 static ATermAppl gsOpIdNameBagIn;
 static ATermAppl gsOpIdNameCount;
 static ATermAppl gsOpIdNameSubBagEq;
@@ -357,9 +355,7 @@ void gsEnableConstructorFunctions(void)
     gsOpIdNameRHead        = gsString2ATermAppl("rhead");
     gsOpIdNameRTail        = gsString2ATermAppl("rtail");
     gsOpIdNameSetComp      = gsString2ATermAppl("@set");
-    gsOpIdNameSet2Bag      = gsString2ATermAppl("Set2Bag");
     gsOpIdNameEmptySet     = gsString2ATermAppl("{}");
-    gsOpIdNameSetSize      = gsString2ATermAppl("#");
     gsOpIdNameSetIn        = gsString2ATermAppl("in");
     gsOpIdNameSubSetEq     = gsString2ATermAppl("<=");
     gsOpIdNameSubSet       = gsString2ATermAppl("<");
@@ -369,8 +365,8 @@ void gsEnableConstructorFunctions(void)
     gsOpIdNameSetCompl     = gsString2ATermAppl("!");
     gsOpIdNameBagComp      = gsString2ATermAppl("@bag");
     gsOpIdNameBag2Set      = gsString2ATermAppl("Bag2Set");
+    gsOpIdNameSet2Bag      = gsString2ATermAppl("Set2Bag");
     gsOpIdNameEmptyBag     = gsString2ATermAppl("{}");
-    gsOpIdNameBagSize      = gsString2ATermAppl("#");
     gsOpIdNameBagIn        = gsString2ATermAppl("in");
     gsOpIdNameCount        = gsString2ATermAppl("count");
     gsOpIdNameSubBagEq     = gsString2ATermAppl("<=");
@@ -511,9 +507,7 @@ void gsEnableConstructorFunctions(void)
     ATprotectAppl(&gsOpIdNameRHead);
     ATprotectAppl(&gsOpIdNameRTail);
     ATprotectAppl(&gsOpIdNameSetComp);
-    ATprotectAppl(&gsOpIdNameSet2Bag);
     ATprotectAppl(&gsOpIdNameEmptySet);
-    ATprotectAppl(&gsOpIdNameSetSize);
     ATprotectAppl(&gsOpIdNameSetIn);
     ATprotectAppl(&gsOpIdNameSubSetEq);
     ATprotectAppl(&gsOpIdNameSubSet);
@@ -523,8 +517,8 @@ void gsEnableConstructorFunctions(void)
     ATprotectAppl(&gsOpIdNameSetCompl);
     ATprotectAppl(&gsOpIdNameBagComp);
     ATprotectAppl(&gsOpIdNameBag2Set);
+    ATprotectAppl(&gsOpIdNameSet2Bag);
     ATprotectAppl(&gsOpIdNameEmptyBag);
-    ATprotectAppl(&gsOpIdNameBagSize);
     ATprotectAppl(&gsOpIdNameBagIn);
     ATprotectAppl(&gsOpIdNameCount);
     ATprotectAppl(&gsOpIdNameSubBagEq);
@@ -1616,19 +1610,9 @@ ATermAppl gsMakeOpIdNameSetComp() {
   return gsOpIdNameSetComp;
 }
 
-ATermAppl gsMakeOpIdNameSet2Bag() {
-  assert(gsConstructorFunctionsEnabled);
-  return gsOpIdNameSet2Bag;
-}
-
 ATermAppl gsMakeOpIdNameEmptySet() {
   assert(gsConstructorFunctionsEnabled);
   return gsOpIdNameEmptySet;
-}
-
-ATermAppl gsMakeOpIdNameSetSize() {
-  assert(gsConstructorFunctionsEnabled);
-  return gsOpIdNameSetSize;
 }
 
 ATermAppl gsMakeOpIdNameSetIn() {
@@ -1676,14 +1660,14 @@ ATermAppl gsMakeOpIdNameBag2Set() {
   return gsOpIdNameBag2Set;
 }
 
+ATermAppl gsMakeOpIdNameSet2Bag() {
+  assert(gsConstructorFunctionsEnabled);
+  return gsOpIdNameSet2Bag;
+}
+
 ATermAppl gsMakeOpIdNameEmptyBag() {
   assert(gsConstructorFunctionsEnabled);
   return gsOpIdNameEmptyBag;
-}
-
-ATermAppl gsMakeOpIdNameBagSize() {
-  assert(gsConstructorFunctionsEnabled);
-  return gsOpIdNameBagSize;
 }
 
 ATermAppl gsMakeOpIdNameBagIn() {
@@ -2314,13 +2298,6 @@ ATermAppl gsMakeOpIdEmptySet(ATermAppl SortExpr)
   return gsMakeOpId(gsOpIdNameEmptySet, SortExpr);
 }
 
-ATermAppl gsMakeOpIdSetSize(ATermAppl SortExpr)
-{
-  assert(gsConstructorFunctionsEnabled);
-  return gsMakeOpId(gsOpIdNameSetSize,
-    gsMakeSortArrow(SortExpr, gsMakeSortExprNat()));
-}
-
 ATermAppl gsMakeOpIdSetIn(ATermAppl SortExprLHS, ATermAppl SortExprRHS)
 {
   assert(gsConstructorFunctionsEnabled);
@@ -2383,13 +2360,6 @@ ATermAppl gsMakeOpIdEmptyBag(ATermAppl SortExpr)
   return gsMakeOpId(gsOpIdNameEmptyBag, SortExpr);
 }
 
-ATermAppl gsMakeOpIdBagSize(ATermAppl SortExpr)
-{
-  assert(gsConstructorFunctionsEnabled);
-  return gsMakeOpId(gsOpIdNameBagSize,
-    gsMakeSortArrow(SortExpr, gsMakeSortExprNat()));
-}
-
 ATermAppl gsMakeOpIdBagIn(ATermAppl SortExprLHS, ATermAppl SortExprRHS)
 {
   assert(gsConstructorFunctionsEnabled);
@@ -2439,19 +2409,19 @@ ATermAppl gsMakeOpIdBagIntersect(ATermAppl SortExpr)
     gsMakeSortArrow2(SortExpr, SortExpr, SortExpr));
 }
 
-ATermAppl gsMakeOpIdSet2Bag(ATermAppl SortExprDom,
-  ATermAppl SortExprResult)
-{
-  assert(gsConstructorFunctionsEnabled);
-  return gsMakeOpId(gsOpIdNameSet2Bag,
-    gsMakeSortArrow(SortExprDom, SortExprResult));
-}
-
 ATermAppl gsMakeOpIdBag2Set(ATermAppl SortExprDom,
   ATermAppl SortExprResult)
 {
   assert(gsConstructorFunctionsEnabled);
   return gsMakeOpId(gsOpIdNameBag2Set,
+    gsMakeSortArrow(SortExprDom, SortExprResult));
+}
+
+ATermAppl gsMakeOpIdSet2Bag(ATermAppl SortExprDom,
+  ATermAppl SortExprResult)
+{
+  assert(gsConstructorFunctionsEnabled);
+  return gsMakeOpId(gsOpIdNameSet2Bag,
     gsMakeSortArrow(SortExprDom, SortExprResult));
 }
 
@@ -2944,16 +2914,16 @@ ATermAppl gsMakeDataExprBagInterSect(ATermAppl DataExprLHS, ATermAppl DataExprRH
     gsMakeOpIdBagIntersect(gsGetSort(DataExprLHS)), DataExprLHS, DataExprRHS);
 }
 
-ATermAppl gsMakeDataExprSet2Bag(ATermAppl DataExpr, ATermAppl SortExpr)
-{
-  return gsMakeDataAppl(
-    gsMakeOpIdSet2Bag(gsGetSort(DataExpr), SortExpr), DataExpr);
-}
-
 ATermAppl gsMakeDataExprBag2Set(ATermAppl DataExpr, ATermAppl SortExpr)
 {
   return gsMakeDataAppl(
     gsMakeOpIdBag2Set(gsGetSort(DataExpr), SortExpr), DataExpr);
+}
+
+ATermAppl gsMakeDataExprSet2Bag(ATermAppl DataExpr, ATermAppl SortExpr)
+{
+  return gsMakeDataAppl(
+    gsMakeOpIdSet2Bag(gsGetSort(DataExpr), SortExpr), DataExpr);
 }
 
 //Auxiliary functions to create data expressions
@@ -3207,8 +3177,7 @@ bool gsIsOpIdPrefix(ATermAppl Term)
     ATermAppl OpIdName = ATAgetArgument(Term, 0);
     Result = (gsMaxDomainLength(ATAgetArgument(Term, 1)) == 1) && (
       (OpIdName == gsOpIdNameNot) || (OpIdName == gsOpIdNameNeg) ||
-      (OpIdName == gsOpIdNameListSize) || (OpIdName == gsOpIdNameSetSize) ||
-      (OpIdName == gsOpIdNameBagSize) || (OpIdName == gsOpIdNameSetCompl)
+      (OpIdName == gsOpIdNameListSize) || (OpIdName == gsOpIdNameSetCompl)
       );
   }
   return Result;
