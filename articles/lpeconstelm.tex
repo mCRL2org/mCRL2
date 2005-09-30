@@ -1,3 +1,8 @@
+% vrij variablen mogen maar 1x voorkomen aan de rechterkant van de LPE
+%
+%
+%
+
 \documentclass[a4paper,10pt]{article}
 \usepackage{textcomp,amsmath,amssymb,amsthm}%,stmaryrd}
 %\usepackage{geometry}
@@ -8,7 +13,7 @@
 \newcommand{\lpe}{linear process equation}
 \newcommand{\tool}{\textit{lpeconstelm}}
 \newcommand{\ovr}{\overrightarrow}
-\newcommand{\mcrl}{$\mu$CRL2}
+\newcommand{\mcrl}{mCRL2}
 \newcommand{\framework}{\textit{LPE framework} \cite{LPEframework}}
 \newcommand{\pp}{process parameter}
 \newcommand{\pps}{process parameters}
@@ -17,7 +22,7 @@
 \newcommand{\sv}{\textit{state vector}}
 \newcommand{\fv}{\textit{flag vector}}
 \newcommand{\svs}{\textit{new state vector set}}
-\newcommand{\fvs}{\textit{new flag vector set}}
+\newcommand{\nfv}{\textit{new flag vector}}
 \newcommand{\la}{$\leftarrow$}
 \newcommand{\ra}{$\rightarrow$}
 \newcommand{\sq}{$\square$}
@@ -41,38 +46,34 @@ Basically, \tool\ is a tool which eliminates constant parameters in a \lpe\ (LPE
 
 \tableofcontents
 
-\section{Intoduction}
+\section{Introduction}
 This \tool\ tool is a tool for the \mcrl\ studio. The tool is a
 filter which reads form a \ti{input.lpe}. The file \ti{input.lpe} is
 a file in \ti{.lpe} format \cite{LPEformat}. We make use of the
-\framework\ to read the \ti{input.lpe}. The filter substitutes for
-each constant \pp\ its constant value and removes the \pp\ from the
-\lpe . After the algorithm (section \ref{sec:alg}) ends, the \tool\
-will write the output to an output file \ti{output.lpe}. This file is
-a file in the \ti{.lpe} format \cite{LPEformat}.
+\framework\ to read the \ti{input.lpe}. For
+each constant \pp\ The filter substitutes its constant value and removes the \pp\ from the
+\lpe . After the algorithm (Section \ref{sec:alg}) terminates, \tool\
+will write the output to an output file \ti{output.lpe} in the \ti{.lpe} format \cite{LPEformat}.
 
 \section{definitions} \label{sec:def}
 
-The equation below is a representation of a \lpe\ in \mcrl\ . This definition simplified to describe the \tool\ tool.
+The equation below is a representation of a \lpe\ in \mcrl\ . This definition simplified\footnote{Multiactions and time are not taken into account} to describe the \tool\ tool.
 \begin{defn}[\lpe]\label{def:LPE}
 \begin{displaymath}
-X (\ovr{d}:\ovr{D}) = \sum_{i \in I} \sum_{e_i:E_i} c_i ( \ovr{d}, \ovr{e_i} ) \rightarrow a(\ovr{f_i}(\ovr{d},e_i)) \cdot X(\ovr{g_i}(\ovr{d},\ovr{e_i})) $$
+X (\ovr{d}:\ovr{D}) = \sum_{i \in I} \sum_{e_i:E_i} c_i ( \ovr{d}, \ovr{e_i} ) \rightarrow a(\ovr{f_i}(\ovr{d},e_i)) \cdot X(\ovr{g_i}(\ovr{d},e_i)) $$
 $$ X(\ovr{init})
-\end{displaymath}
+\end{displaymath}\\
+A \lpe\ is written as in Definition \ref{def:LPE}, the different states of the process are represented by the data vector parameter $\ovr{d}:\ovr{D}$. $\ovr{D}$ may be a Cartesian product of $n$ data types, meaning that $\ovr{d}$ may consist of a tuple $(d_1, \ldots, d_n)$. The \lpe expresses that in state $\ovr{d}$ it preforms action $a$, carrying data parameter $f_i(\ovr{d},e_i)$ and it can reach the new state $g_i(\ovr{d},e_i)$ under the conditions that $c_i(\ovr{d,e_i})$ is true. So for each summand $i:I$ we have a function $g_i: D \times E \rightarrow D$ and a function $c_i: D \times E $, which reduces to a normal form \ti{true}, \ti{false} or something else. 
 
-A \lpe\ is written as in Definition \ref{def:LPE}, the different states of the process are represented by the data vector parameter $\ovr{d:D}$. $D$ may be a Cartesian product of $n$ data types, meaning that $d$ may consist of a tuple $(d_1, \ldots, d_n)$. The \lpe expresses that in state $\ovr{d}$ it preforms action $a$, carrying data parameter $f_i(\ovr{d},e)$ and it can reach the new state $g_i(\ovr{d,e})$ under the conditions that $c_i(\ovr{d,e})$ is true. So for each summand $i:I$ we have a function $g_i: D \times E \rightarrow D$ and a function $c_i: D \times E $, which reduces to a normal form \ti{true}, \ti{false} or something else. 
-
-The data type $E$ helps to give the \lpe s a more general form. Not only the data parameter $\ovr{d:D}$, but also the data parameters $\ovr{e_i: E_i}$ can influence the condition $c_i$ and the and the resulting state $g_i$. Such a $e$ is often used in a \lpe to do a read or send action range over a domain. 
+The data type $E$ helps to give the \lpe s a more general form. Not only the data parameter $\ovr{d}:\ovr{D}$, but also the data parameters $e_i: E_i$ can influence the condition $c_i$ and the and the resulting state $g_i$. Such a $e_i$ is often used in a \lpe to do a read or send action range over a domain. 
 
 For an more detailed explanation of \lpe s  we refer to \cite{LPE_info}.
 \end{defn}
 
 \subsection{lpeconstelm definition}\label{subsec:lpedef}
 
-A parameter of a \lpe\ can be replaced by its intial value if it can be determined that this parameter remains constant throughout any run of the process. Thi elimination of constant parameters does not reduce the resulting state space, however it may shorten the time needed tot generate a state space from a \lpe. \\
-If we live in an ideal world and have all the time of the world we can inspected each state space and check if a \pp\ changes throughout the the run of the process. We can determine the reachability $R_{\psi}$ for each state given a certain input value ($\ovr{v_0}$). 
-
-We proceed to give a definition based upon a minimal fixed point $v_0$ with induction. 
+A parameter of a \lpe\ can be replaced by its initial value if it can be determined that this parameter remains constant throughout any run of the process. The elimination of constant parameters does not reduce the resulting state space, however it may shorten the time needed tot generate a state space from a \lpe. \\
+If we have infinite time and space we can inspected each state space and check if a \pp\ changes throughout the the run of the process. We define the reachability state set $R_{\psi}$ for each state, given a certain input value ($\ovr{v_0}$). So:
 \begin{defn}\label{def:lpe}
 $R_\psi$ is the smallest set which complies to:
 \begin{itemize}
@@ -82,112 +83,186 @@ $R_\psi$ is the smallest set which complies to:
 $S_\psi(\ovr{v_0}) = \lbrace j \in  \lbrace 1, \ldots, n \rbrace \vert \exists_u : D_j . \forall \ovr{v} \in R_\psi(\ovr{v_0}) . v_j = u \rbrace $
 \end{itemize}
 
-$S_\psi(\ovr{v_0})$ will give the set of indeces in for which the \pp\ is constant.
+$S_\psi(\ovr{v_0})$ will give the set of indices in for which the \pp\ is constant. Definition \ref{def:lpe} is based upon a minimal fixed point solution. 
 \end{defn}
 
-Note that definition \ref{def:lpe} has to generate the entire statespace. Generating an entire statespace can take a lot of time. In some cases generating the entire statespace and checking for constants can take forever. This is why we have to come up with a "faster" solution. However to create such a solution we have to make descisions which will influence the outcome of the filter. The outcome can contain a smaller set of constant \pps; will not detect all constant \pps .
+Note that definition \ref{def:lpe} has to generate the entire statespace. Generating the entire statespace can take a lot of time and space. In some cases generating the entire statespace and checking for constants can infinite time. If we can make an approximation of definition \ref{def:lpe} by making certain assumptions, we can come up with a "faster" solution. However this set of detected constants may be smaller, because it cannot detect all constant \pps .
 
-\subsection{Suggestions 1}
-We don't want to inspect all state spaces as mentioned in section \ref{subsec:lpedef}. This is why we have to aproximate the solution to definiton \ref{def:lpe}. Our first approximation we suggest will be:
+In our approximation proposals we define $S$:
+\begin{defn}
+The subset of $\lbrace 1, \ldots, n \rbrace$, where the elements of $S$ represent the indices of $d_0, \ldots d_1$ constant \pps .
+\end{defn}
+
+\subsection{Proposal 1} \label{sec:prop1}
+We do not want to inspect all statespaces, so a first approximation proposal will be:
 \begin{defn} \label{def:sug1}
-\label{defn:const}$S=$
+$S=$
 \begin{displaymath}
 \lbrace   
 j \in \lbrace 1, \ldots , n \rbrace \vert \forall_{i\in I}, \ovr{d}: \ovr{D} , e_i: E_i, ((c_i(\ovr{d},e_i) = true)  \rightarrow d_j = g_i^j(\ovr{d},e_i)))\rbrace
 \end{displaymath}
-This approximation is very basic and does not cover all possiple solutions. Let us take a look at example \ref{example:sug1}:
-\begin{example} \label{example:sug1}
-proc P($x$: Nat) = P($2 \times x$);
-init P(0);
-\end{example}
-By filling in example \ref{example:sug1} into definition \ref{def:sug1} this will result into $S = \oslash$. For all $x / 0 $ the outcome of the \pp\ is not constant. However for $x=0$ the \pp\ is constant in this \lpe . We have create an other sollution which is not as relax as definition \ref{def:sug1}.
-% { j | forall d : d=2*d }
+This approximation is very basic and does not cover all possible solutions. If we take example
+\ref{example:sug1}, we see the lack in definition \ref{def:sug1}.
+\begin{example} \label{example:sug1} The example \\
+\begin{verbatim}
+proc P(x : Nat) = P(x := 2 * x);
+init P(x : = 0);
+\end{verbatim}
 
+\end{example}
+If we fill in example \ref{example:sug1} in definition \ref{def:sug1}, this will result into $S = \o$. 
+Because we indicate no $\ovr{d}$, it has to hold for each $\ovr{d}$. If we substitute $\langle x=0 \rangle$ for $d$
+the result should be $S= \lbrace 1 \rbrace$. 
+%For all $x / 0 $ the outcome of the \pp\ is not constant. However for $x=0$ the \pp\ is constant in this \lpe . 
+%If we use $e_i$, we also have to examine the whole statespace. So we have to create another solution which is less relax then definition \ref{def:sug1}.
+% { j | forall d : d=2*d }
 \end{defn}
+
+\subsection{Proposal 2}
+In section \ref{sec:prop1} we see that definition \ref{def:sug1} is not sufficient, so we try to improve that approximation.
+We propose:
+\begin{defn} \label{def:sug2}
+$S(\ovr{d}:\ovr{D})=$
+\begin{displaymath}
+\lbrace   
+j \in \lbrace 1, \ldots , n \rbrace \vert \forall_{i\in I}, ((c_i(\ovr{d},e_i) = true) \rightarrow d_j = g_i^j(\ovr{d},e_i)))\rbrace
+\end{displaymath}
+%We elimate the problem for checking each state 
+If we take $\ovr{d}$ out of the formula and give it as a parameter to $S$ we can instantiate a particular problem.
+With this improvement to $S$ we can solve the example \ref{example:sug1}. However this this proposal, cannot as another lack. If we take a look at example \ref{example:sug2} we can see why:
+\begin{example} \label{example:sug2} The example \\
+\begin{verbatim} 
+proc P(x,y: Nat) = (x=0) -> P(x:= 1, y:= 0) +
+                   (x=1) -> P(x:= x, y:= 1);
+init P(0,0);
+\end{verbatim}
+
+\end{example}
+If we fill example \ref{example:sug2} into defintion \ref{def:sug2}, we get $j = \lbrace 2 \rbrace$. This indicates that the second \pp\ is constant. However this assumption is false. It seems that we only those state space spaces which are adjacent to the initial state.
+\end{defn}
+
+\subsection{Proposal 3}
+We don't want to inspect all statespaces, so a solution bases upon a minimum fixed point will not do. To give
+an approximation we start off with a proposal base upon a maximum fixed point. So we define: 
+\begin{defn} \label{def:sug3} So we are interested in the largest subset:
+
+\begin{flushleft}
+$ S \subseteq \lbrace 1, \ldots, n \rbrace $ \\
+
+such that:\\
+
+$\forall_{i \in I} NF( c_i ( \ovr{\otimes}, e_i ) ) \not\equiv false \rightarrow \forall_{j \in S}.d_j \equiv  NF( g^j(\ovr{\otimes}, e_i )) $
+\end{flushleft}
+ 
+The normal form of data parameter $p$ is defined $NF(p)$. $v_0$ is the initial \sv\ \ref{sv}. 
+$\ovr{\otimes}$ is used for constructing a \ti{new} \sv\ . Let $\ovr{\otimes}$ be a \ti{new} \sv .
+
+\begin{defn} \label{def:otimes} Let $\ovr{\otimes}$ be:
+\begin{displaymath}
+    \forall_{i:0<i\leqslant n}:\otimes_i = \left\{
+        \begin{array}{l l}
+            i \in S                      & d_i \\
+            i \not\in S                  & v_{0_i} \\
+        \end{array} \right.
+\end{displaymath}
+\end{defn}
+If we take a look at Definition \ref{def:sug3} a few modifications are made. 
+Note that we introduced the normal form. The introduction is needed, because we want to 
+evaluate open terms. If we rewrite a condition which contains an open term, it is possible
+that the term will not reduce to a normal form \ti{true} or \ti{false}. If the term reduces to a
+term that is not \ti{true} or \ti{false}, the condition might be \ti{true}. Therefore the summands of the conditions
+which are \ti{false} are not inspected.
+
+If we compare Definition \ref{def:sug3} to Definition \ref{def:LPE} we see that holds: $$S_{Def. \ref{def:sug3}} \subseteq
+S_{Def. \ref{def:LPE}} $$  For each condition that holds in Definition \ref{def:sug3} there is a condition that holds in Definition \ref{def:LPE}. So for each $i$ in Definition \ref{def:sug3} there is also a $i$ in Definition \ref{def:LPE}. However for each condition that holds in Definition \ref{def:LPE} there is a might be a condition in Definition \ref{def:sug3} which does not hold. Therefore for each $i$ in Definition \ref{def:LPE} there might be no $i$ in Definition \ref{def:sug3}. Because Definition \ref{def:sug3} is based upon a maximum fixed point and Definition \ref{def:LPE} is based upon a minimum fixed point we can conclude Definition \ref{def:sug3} is correct and sufficient.
+
+However free variables are not taken into account.
+\end{defn}
+
+\subsection{Proposal 4}
+Free variables are data parameters which are not bound to \pps\ of a \lpe\ but occur in a \lpe .
+\begin{defn} Let a free variable $fv$ be defined:
+\begin{displaymath}
+%fv = \lbrace i \vert \exist_i: i \not\in d \wedge i \in  \rbrace
+\end{displaymath}
+\end{defn}
+
+%Idea proposal: \\
+%Use LPE constelim, after termination, build adjacency matrix , and do cross compare on same  
+
 
 \subsection{Algorithm definitions}
 To calculate the set of constant \pps\ we use the algorithm
-\ref{sss:alg} Before we describe the algorithm we need to introduce
-some definitions. 
+\ref{sss:alg} Before we describe the algorithm we the introduce
+used definitions. 
 %These definitions are defined in \ref{sss:algdef}.
 %A more general explanation is given in \ref{sss:algdesc}
 
-\begin{itemize}
-\item \begin{defn} \textbf{- state vector}\\
+\begin{defn} \textbf{- state vector} \label{sv}\\
 This vector represents the \pps\ of the input of a \lpe . The vector is 
-$\langle d_0, \ldots, d_(n-1) \rangle$, where $n$ is the is the number
-of \pps . The state vector is denoted with: 
-
-\begin{displaymath}
-(\ovr{d})
-\end{displaymath}
+$\langle d_1, \ldots, d_n \rangle$, where $n$ is the is the number
+of \pps . 
 \end{defn}
 
-\item \begin{defn} \textbf{- flag vector}\\
-This vector is a vector of boolean values which represents if \pps\
+\begin{defn} \textbf{- flag vector}\\
+This vector of boolean values which represents if \pps\
 are constant or variable. If an element of this vector is \ti{true}
-this implies that the corresponding \pp\ is possible constant. If an element
+this implies that the corresponding \pp\ is possibly constant. If an element
 of this vector is \ti{false} this implies that the corresponding
 \pp\ is variable.
-\begin{displaymath}
-%\langle \cup_{d \in d_0 \ldots d_n} :: \langle \forall_{i \in I} :: Constant(d, e_i) \rangle \rangle
-(\ovr{\Bbb{B}})
-\end{displaymath}
 \end{defn}
 
-\item \begin{defn} \textbf{- new state set}\\
- This vector represents the outcome of the
-\pps\ for which the normal form of the condition is not \ti{false}. So
-the set is defined by:
+\begin{defn} \textbf{- new state vector set}\\
+ This set of vectors represents the result of the
+\pps\ for which the normal form of the condition is not \ti{false}
+\end{defn} 
 
-\begin{displaymath}\langle \cup_{i \in I}: c_i(\ovr{d},
-e_i) :\ovr{g_i}(\ovr{d},e_i) \rangle
-\end{displaymath}
+\begin{defn}
+\textbf{- new flag vector} \\
+This vector of boolean values indicates if the
+corresponding \pps\ are \ti{constant} or \ti{variable} after comparing each element from the \svs with all the other elements of \svs  and the \sv; and conjunction of the \fv and obtained result. 
+%\begin{displaymath}
+%\langle \cup_{i \in I}: c_i(\ovr{d, e_i}) : (\ovr{\Bbb{B}}) ) \rangle
+%\end{displaymath}
 \end{defn}
-
-\item \begin{defn}
-\textbf{- new flag set} \\
-This set represents the boolean values indicating if the
-corresponding \pps\ in the \svs\ are \ti{constant} or \ti{variable}. Only the summands for
-which the normal form of condition is not \ti{false} are in this set. The set is
-defined by:
-\begin{displaymath}
-\langle \cup_{i \in I}: c_i(\ovr{d, e_i}) : (\ovr{\Bbb{B}}) ) \rangle
-\end{displaymath}
-\end{defn}
-\end{itemize}
 
 \subsubsection{Description}\label{sss:desc}
-In this subsection the idea behind the algorithm is explained. First we take the \sv . The \sv\ is constructed from the \verb"init" of the \lpe (see \cite{LPE_info}). Next the \fv\ is constructed. The number of vector elements in this vector is equal to the number of \pps . Each \pp\ corresponds with an element in the \fv .  All elements in this vector are set \ti{true}.
+In this section the algorithm is explained informal. First \sv\ is constructed from the initial process of the \lpe (see \cite{LPE_info}). Next the \fv\ is "constructed".
+% The number of vector elements in this vector is equal to the number of \pps . Each \pp\ corresponds with an element in the \fv .  
+All elements in this vector are set \ti{true}.
 
- We start the iteration. In this step we evaluate for each summand its condition. We evaluate the condition by substituting the values of the \pp\ from the \sv\ in the condition. Only those \pp\ from the \sv\ are substituted for which the corresponding \pp\ in the \fv\ are true. 
+We start the iteration. We rewrite and evaluated for each summand its condition. We "evaluate" the condition after substituting the values of the \pp\ from the \sv\ in the condition and rewrite it. Only those \pp\ from the \sv\ are substituted for which the corresponding element in the \fv\ is true. 
 
-After substitution the condition is rewritten. If the rewritten condition is in a normal form other then \ti{false} the condition implies that it might be \ti{true}, so the summand will evaluated. 
+%After substitution the condition is rewritten. 
+If the rewritten condition is in a normal form other then \ti{false} the condition might be \ti{true} for some instations of a contained free variable, so the summand will evaluated. 
 
 In this step the \svs\ is constructed. This set of new state vectors contains the set of next state vectors which can be reached from the current \sv\ and for which the condition might be \ti{true}. 
 
-After the \svs\ is constructed, we construct the \fvs . Initally we set the the size of the set to the number of non false conditions. Each element within  these vectors is set true. Each vector of the \fvs\ corresponds with a vector of \svs . Each element of a vector in the \fvs\ is a comparison between the \sv and the element of the corrresponding vector in the \svs . If a element from the vector in the \svs\ is not equal to an element out of the \sv\ , the corresponding \fvs\ element is set to false. 
+After the \svs\ is constructed, we construct the \nfv . 
 
-Next we construct a \ti{new} \fv . For each element in this vector we take the conjunction of all the values of the same element in the vectors of the \fvs . Each element of a vector from the \svs\ is checked if they differ from other elements  in vectors of the \svs . The boolean outcome of both results is the \ti{new} \fv . The reason for this second check is needed on the \svs , because free variables might occur. %to be implemented CHECK LPECONSTELM
+%Initally we set \ the size of the set to the number of non false conditions. Each element within  these vectors is set true. Each vector of the \fvs\ corresponds with a vector of \svs . Each element of a vector in the \fvs\ is a comparison between the \sv and the element of the corrresponding vector in the \svs . If a element from the vector in the \svs\ is not equal to an element out of the \sv\ , the corresponding \fvs\ element is set to false. 
+
+%Next we construct a \ti{new} \fv . For each element in this vector we take the conjunction of all the values of the same element in the vectors of the \fvs . Each element of a vector from the \svs\ is checked if they differ from other elements  in vectors of the \svs . The boolean outcome of both results is the \ti{new} \fv . The reason for this second check is needed on the \svs , because free variables might occur. 
  
-If the \ti{new} \fv\ differs from the \fv , a \ti{new} \sv\ has to be created as well. The construction of the \ti{new} \sv\ contains all elements from the \sv\ with substition with the elements which differ from the \svs . 
+If the \nfv\ differs from the \fv , a \ti{new} \sv\ has to be created as well. The construction of the \ti{new} \sv\ contains all the elements from the \sv\ substituted with data parameters from the vectors out of the \svs which differ . 
 %These can be found in the \svs . 
-A next iteration is started in which the old \sv\ is substituted by the \ti{new} \sv\ and the old \fv\ is substituted by the \ti{new} \fv .
+A next iteration is started in which the old \sv\ is substituted by the \ti{new} \sv\ and the old \fv\ is substituted by the \nfv .
   
 If the \ti{new} \fv\ does not differ from the \fv\ the algorithm ends and all \pps\ which have a corresponding value true in the \fv\ are substituted by their constant values. Then these \pps list and all occurrences of \pp\ 
 
 \subsubsection{Free variables}
-In \mcrl\ it is possible to use free variables. Free variables are values which have no particular value and can therefore be threaded as don't care values. If a \pp\ is substituted by a free variable and the \pp\ has already got a value, the value remains the same. If a \pp\ , which is a free variable, is substituted by a variable with a specific value, the value is changed to that specific value. If a \pp , which is a free variable, is substituted by another free variable, the \pp\ remains a free variable. 
+In \mcrl\ it is possible to use free variables. %Free variables are values which have no particular value and can therefore be threaded as don't care values.
+If a \pp\ is substituted by a free variable and the \pp\ has already got a value, the value remains the same. If a \pp\ , which is a free variable, is substituted by a variable with a specific value, the value is changed to that specific value. If a \pp , which is a free variable, is substituted by another free variable, the \pp\ remains a free variable. 
 
 If we compare a free variable with another value, either a free variable or a specific value, the comparison always yields \ti{true}. Adding a check on the \svs\ solves the problem of the possibility of fake constants. At first this might seems strange, but is contributes to the validity of the algorithm. Let us concider example \ref{exmpl:freevar}:
 \begin{example}\label{exmpl:freevar} The LPE: 
 \begin{tabbing}
-$P(y = \_,x = 0) =$ \= $(c_1 = true) \rightarrow  P(y := x+1, x := x) + $ \\
-	    \> $(c_2 = true)
+$P(y = \_,x = 0) =$ \= $(true) \rightarrow  P(y := x+1, x := x) + $ \\
+	    \> $(true)
  \rightarrow P(y := x+2, x := x)$
 \end{tabbing}
 
-A free variable is denoted with $\_$. If we take a look at the LPE and build the \fvs\ we get:
+A free variable is denoted with $\_$. If we take a look at the LPE and build the \nfv\ we get:
 \begin{center}
 \begin{tabular}{cc} 
  $\lbrace \langle True, $ & $ True \rangle$\\
@@ -203,7 +278,7 @@ However the when we build the \svs , we get:
 \end{tabular}  
 \end{center}
 
-If we take the conjunction of the elements of each vector within the \fvs\ the \ti{new} \fv\ will be:
+If we take the conjunction of the elements of each vector within the \nfv\ the \ti{new} \fv\ will be:
 \begin{center}
 \begin{tabular}{cc} 
  $\langle True, $ & $ True \rangle$\\
@@ -221,44 +296,37 @@ This why have an additional check on the \svs\ to overcome this problem.
 \end{example}
 
 For further reading about \lpe\ and free variables please refer to \cite{LPEfreevar} 
-
+\newpage
 \section{Algorithm} \label{sec:alg}
+Not Finished yet
 \begin{tabbing} 
-statevector \la create\_statevector(\verb"P(init)"); \\
-flagvector \la create\_flagvector(statevector.size()); \\
-iteration \la \ti{true}; \\
-\tb{while} \= iteration \tb{do} \ra \\
-  \> \csvs .empty(); \\
-  \> \cfvs .empty(); \\
-  \> \tb{forall} \= i \la summands \tb{do} \ra \\
-  \>  \>   \tb{if} \= \\
-  \>  \>   \sq \> (true $=$ evaluate\_condition(i)) \ra \\
-  \>  \>       \> \csvs .add(compute\_next\_state\_vector(i)); \\
-  \>  \>       \> \cfvs .add(compute\_next\_state\_flag\_vector(i)); \\
-  \>  \>  \sq \>  (false $=$ evaluate\_condition(i)) \ra \\
-  \>  \>  \> \tb{skip};\\
-  \>  \tb{od llarof} \\
-  \>  newflagvector \la \csvs .flatten() $\wedge$  \\
-  \>  \> \cfvs .nextstate\_different\_check;\\
+StateVector := $\ovr{init}$; \\
+FlagVector := $\ovr{true}$; \\
+Iteration := \ti{true}; \\
+\tb{while} \= Iteration \tb{do} \ra \\
+  \> NewStateVectorSet := $\o$\\
+  \> \tb{forall} \= $i \in I$ \tb{do} \ra \\
+  \>  \>   \tb{if} \= \verb" " \=\\
+  \>  \>   \sq \> $(NV(c_i($Statevector$,e_i)) \neq false) \rightarrow$ \\
+  \>  \>       \> \>NewStateVectorSet := NewStateVectorSet $\cup \lbrace j \vert NV($Statevector$_j) = NV(g_i^j($Statevector$,e_i))) \rbrace$ \\
+  \>  \>  \sq \>  $(NV(c_i($Statevector$,e_i)) = false) \rightarrow$ \\
+  \>  \>  \> \>\tb{skip};\\
+  \>  \tb{od} \\
   \>  \tb{if}  \\
-  \>  \sq  \> (flagvector $\neq$ newflagvector) \ra \\ 
-  \>       \>	statevector \la \cfvs .flatten(); \\
-  \>       \>     flagvector \la newflagvector; \\
-        %iteration \la true
+  \>  \sq  \> (FlagVector $\neq$ Newflagvector) \ra \\ 
+  \>       \>  \> StateVector := MAGIC2; \\
+  \>       \>  \> FlagVector :=  NewFlagVector; \\
   \>  \sq \>  (flagvector $=$ newflagvector) \ra  \\
-  \>      \> iteration \la false;\\
+  \>      \> \> Iteration := \ti{false};\\
   \>  \tb{fi} \\
-  \tb{od elihw}\\
-  LPE.substitute\_values(flagvector, \verb"P(init)");
-\end{tabbing}
+  \tb{od}\\
+\end{tabbing} 
 
 \section{Examples}
 This section covers a few simple examples to illustrate the behavior of the algorithm. 
-\subsection{Example 1}
+\subsection{Example 1} The example \\
 \begin{verbatim}
-proc P(i,j: Nat) =
-	true -> P(i:= i + 1, j:=j);
-
+proc P(i,j: Nat) = true -> P(i:= i + 1, j:=j);
 init P(i := 0, j := 0)
 \end{verbatim} \footnote{\mcrl specifaction language}
 
@@ -271,15 +339,10 @@ Construct state vector and flag vector:
 Evaluate all the conditions of all summands.
 The condition of the first summand is \ti{true}.\\
 
-We constructed the \svs and the \fvs :
+We constructed the \svs and the \nfv :
 \begin{center}\begin{minipage}{250pt}
 \svs \la  $\lbrace \langle 1 , 0 \rangle \rbrace $\\
-\fvs \la  $\lbrace \langle False , True \rangle \rbrace $\\
-\end{minipage}\end{center}
-
-We flatten \fvs to \ti{new} \fv : 
-\begin{center}\begin{minipage}{250pt}
-\ti{new} \fv \la $\langle False , True \rangle $
+\nfv \la $\langle False , True \rangle $
 \end{minipage}\end{center}
 
 We compare \ti{new} \fv\ with \fv\ and see they are not equal so we continue:
@@ -289,20 +352,17 @@ We compare \ti{new} \fv\ with \fv\ and see they are not equal so we continue:
 \end{minipage}\end{center}
 
 In the second iteration the condition of the first summand is \ti{true}.\\
-So we construct again the \svs, the \fvs\ and flatten the \fvs\ to \ti{new} \fv: 
+So we construct again the \svs, the \nfv\ : 
 \begin{center}\begin{minipage}{250pt}
 \svs \la  $\lbrace \langle 2 , 0 \rangle \rbrace $\\
-\fvs \la  $\lbrace \langle False , True \rangle \rbrace $\\
-\ti{new} \fv \la  $\langle False , True \rangle $ \\
+\nfv \la  $\langle False , True \rangle $ \\
 \end{minipage}\end{center}
 
 If we compare the \fv\ with \ti{new} \fv\ we see they are equal and the iteration ends.
 In this example the second \pp\ (\verb"j") is substituted by \verb"0" and \verb"j" is removed from the \lpe.
-After applying the filter we get:
+After applying the filter we get:\\
 \begin{verbatim}
-proc P(i) 
-	true -> P(i := i + 1);
-
+proc P(i) = true -> P(i := i + 1);
 Init P(0);
 \end{verbatim}
 
@@ -322,15 +382,10 @@ Construct state vector and flag vector:
 Evaluate all the conditions of all summands.
 The condition of the first summand is \ti{true}.\\
 
-We constructed the \svs and the \fvs :
+We constructed the \svs and the \nfv :
 \begin{center}\begin{minipage}{250pt}
 \svs \la  $\lbrace \langle 1 , 0 \rangle \rbrace $\\
-\fvs \la  $\lbrace \langle False , True \rangle \rbrace $\\
-\end{minipage}\end{center}
-
-We flatten \fvs\ to \ti{new} \fv: 
-\begin{center}\begin{minipage}{250pt}
-\ti{new} \fv \la $\langle False , True \rangle $
+\nfv \la  $\lbrace False , True \rbrace $\\
 \end{minipage}\end{center}
 
 We compare \ti{new} \fv\ with \fv\ and see they are not equal so we continue:
@@ -340,11 +395,10 @@ We compare \ti{new} \fv\ with \fv\ and see they are not equal so we continue:
 \end{minipage}\end{center}
 
 In the second iteration the condition of the first summand is \ti{true}.\\
-So we construct again the \svs, the \fvs\ and flatten the \fvs to \ti{new} \fv: 
+So we construct again the \svs and the \nfv\: 
 \begin{center}\begin{minipage}{250pt}
 \svs \la  $\lbrace \langle 2 , 1 \rangle \rbrace $\\
-\fvs \la  $\lbrace \langle False , False \rangle \rbrace $\\
-\ti{new} \fv \la  $\langle False , False \rangle $ \\
+\nfv \la  $\langle False , False \rangle $ \\
 \end{minipage}\end{center}
 
 We compare \ti{new} \fv\ with \fv\ and see they are not equal so we continue:
@@ -354,11 +408,10 @@ We compare \ti{new} \fv\ with \fv\ and see they are not equal so we continue:
 \end{minipage}\end{center}
 
 In the third iteration the condition of the first summand is \ti{true}.\\
-So we construct again the \svs, the \fvs\ and flatten the \fvs\ to \ti{new} \fv: 
+So we construct again the \svs and the \nfv\ : 
 \begin{center}\begin{minipage}{250pt}
 \svs \la  $\lbrace \langle 3 , 2 \rangle \rbrace $\\
-\fvs \la  $\lbrace \langle False , False \rangle \rbrace $\\
-\ti{new} \fv \la  $\langle False , False \rangle $ \\
+\nfv \la  $\langle False , False \rangle $ \\
 \end{minipage}\end{center}
 
 If we compare the \fv\ with \ti{new} \fv\ we see they are equal and the iteration ends.
