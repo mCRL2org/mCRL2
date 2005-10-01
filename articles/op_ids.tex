@@ -622,14 +622,18 @@ Name          & \text{Type}                     & Description & External repr.\\
 \newpage
 \subsection*{Numbers}
 
-The system identifiers for positive numbers, natural numbers and integers are
-listed in table~\ref{tab:ptc:numbers}. Here, we assume $A,B \in \set{\srtpos,
-\srtnat, \srtint}$ with $A \neq B$. $A_{s}$ restricts $A$ to those sorts that
-have a prefix in the string $s$, e.g.\ $A_{\f{PN}} \in \set{srtpos, srtnat}$.
-Also for numeric sorts $X,Y$, $X \cap Y$ represent the intersection of the
-underlying data types, i.e.\ $\llbracket X \cap Y\rrbracket = \llbracket X
-\rrbracket \cap \llbracket Y \rrbracket$. Note that there always exists a
-unique sort for such an expression.
+The system identifiers for positive numbers, natural numbers and integers with
+the corresponding hierarchy $\llbracket \srtpos \rrbracket \subset \llbracket
+\srtnat \rrbracket \subset \llbracket \srtint \rrbracket$ are listed in
+table~\ref{tab:ptc:numbers}.  Here, we assume $A,B \in \set{\srtpos, \srtnat,
+\srtint}$ with $A \neq B$, and $A_{s}$ restricts $A$ to those sorts that have
+a prefix in the string $s$, e.g.\ $A_{\f{PN}} \in \set{\srtpos, \srtnat}$.
+Furthermore $X \cap Y$ represents the intersection of data types underlying
+sorts $X,Y$, i.e.\ $\llbracket X \cap Y\rrbracket = \llbracket X \rrbracket
+\cap \llbracket Y \rrbracket$. Note that for numeric sorts there always exists
+a unique sort for $X \cap Y$ because of the hierarchy. Finally, system
+identifiers that do not occur in the table are automatically casted up in the
+hierarchy by the type checker, e.g.\ $-1 + 0$ becomes $-1 + \f{Nat2Int}(0)$.
 
 \begin{table}[!htb]
 \centering
@@ -652,22 +656,18 @@ Name        & \text{Type}                  & Description      & External repr.\\
 \verb+>=+         & A \times A \To \srtbool& greater than or equal& infix\\
 \verb->-          & A \times A \To \srtbool& greater than         & infix\\
 \verb+max+        & A \times B \To A \cap B& maximum              & functional\\
-\verb+min+        & A \times B \To A \cup B& minimum              & functional\\
-\verb+abs+        & \srtint \To \srtnat    & absolute value       & functional\\
+\verb+min+        & A \times A \To A       & minimum              & functional\\
+\verb+abs+        & A \To A \cap \srtnat   & absolute value       & functional\\
 \verb+-+          & A \To \srtint          & negation             & prefix\\
-\verb+succ+       & \srtpos \To \srtpos    & successor            & functional\\
-\verb+succ+       & \srtnat \To \srtpos    & successor            & functional\\
+\verb+succ+       & A_{\f{PN}} \To \srtpos & successor            & functional\\
 \verb+succ+       & \srtint \To \srtint    & successor            & functional\\
 \verb+pred+       & \srtpos \To \srtnat    & predecessor          & functional\\
-\verb+pred+       & \srtnat \To \srtint    & predecessor          & functional\\
-\verb+pred+       & \srtint \To \srtint    & predecessor          & functional\\
+\verb+pred+       & A_{\f{NI}} \To \srtint & predecessor          & functional\\
 \verb+@dub+$^*$   & \srtbool \To A \To A   & double and add a bit & functional\\
 \verb+@double+$^*$& \srtint \To \srtint    & double               & functional\\
 \verb-+-          & A_{\f{PN}} \times B_{\f{PN}} \To A_{\f{PN}} \cap B_{\f{PN}}
                                            & addition             & infix\\
-\verb-+-          & A \times \srtint \To \srtint
-                                           & addition             & infix\\
-\verb-+-          & \srtint \times A \To \srtint
+\verb-+-          & \srtint \times \srtint \To \srtint
                                            & addition             & infix\\
 \verb+@addc+$^*$  & \srtbool \To \srtpos \To \srtpos \To \srtpos
                                            & addition with carry  & functional\\

@@ -1021,7 +1021,7 @@ ATermAppl gsImplSortList(ATermAppl SortList, ATermList *PSubsts,
       (ATerm) gsMakeOpIdCons(SortElt, SortId)
     ), PDataDecls->ConsOps);
   //Declare operations for sort SortId
-  PDataDecls->Ops = ATconcat(ATmakeList(14,
+  PDataDecls->Ops = ATconcat(ATmakeList(11,
       (ATerm) gsMakeOpIdEq(SortId),
       (ATerm) gsMakeOpIdNeq(SortId),
       (ATerm) gsMakeOpIdIf(SortId),
@@ -1032,10 +1032,7 @@ ATermAppl gsImplSortList(ATermAppl SortList, ATermList *PSubsts,
       (ATerm) gsMakeOpIdLHead(SortId, SortElt),
       (ATerm) gsMakeOpIdLTail(SortId),
       (ATerm) gsMakeOpIdRHead(SortId, SortElt),
-      (ATerm) gsMakeOpIdRTail(SortId),
-      (ATerm) gsMakeOpIdEq(SortId),
-      (ATerm) gsMakeOpIdNeq(SortId),
-      (ATerm) gsMakeOpIdIf(SortId)
+      (ATerm) gsMakeOpIdRTail(SortId)
     ), PDataDecls->Ops);
   //Declare data equations for sort SortId
   ATermList el = ATmakeList0();
