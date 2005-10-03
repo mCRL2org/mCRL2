@@ -4,7 +4,7 @@ extern "C" {
 
 #include "libprint_c.h"
 
-#define GS_PRINT_C
+#define PRINT_C
 #include "libprint_common.h"
 
 void PrintPart_C(FILE *OutStream, const ATerm Part)

@@ -1,7 +1,7 @@
 #include "libprint_cxx.h"
 #include <sstream>
 
-#define GS_PRINT_CXX 1
+#define PRINT_CXX
 #include "libprint_common.h"
 
 using namespace std;
