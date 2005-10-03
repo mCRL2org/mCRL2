@@ -19,7 +19,7 @@
  * - NextStates
  *   An ATermList that consist of a sequence of pairs (or
  *   actually a ATermList of length 2) of a transition and a
- *   state that describe enabled mulitaction and the resulting
+ *   state that describe enabled multiaction and the resulting
  *   state.
  *
  * Note that states may contain DataVarIds. These are free
@@ -124,7 +124,9 @@ public:
 	 * and the resulting states.
 	 * Note that this function is always called when the state
 	 * changes, even when, for example, Reset() has already
-	 * been called. */
+	 * been called.
+	 * Furthermore the function is called when a view is loaded
+	 * to initialise it with the current state. */
 
 	virtual void Reset(ATerm State) = 0;
 	/* Is called whenever the current trace is reset to the
@@ -147,8 +149,8 @@ public:
 	/* Is called whenever another element of the current trace
 	 * is selected. Note that Transition might be Nil in the
 	 * case that State is the initial state (i.e. Index is 0).
-	 * Note that this is aloso called when a view is loaded
-	 * to initialis it with the current position (if the trace
+	 * Note that this is also called when a view is loaded
+	 * to initialise it with the current position (if the trace
 	 * is not empty). */
 };
 

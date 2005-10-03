@@ -275,10 +275,10 @@ void XSimMain::Register(SimulatorViewInterface *View)
 {
 	views.push_back(View);
 	View->Registered(this);
-	View->Initialise(state_vars);
-        View->StateChanged(NULL, current_state, next_states);
 	if ( !ATisEmpty(trace) )
 	{
+	        View->Initialise(state_vars);
+                View->StateChanged(NULL, current_state, next_states);
 		View->TraceChanged(GetTrace(),0);
 		View->TracePosChanged(ATAgetFirst(ATLgetFirst(trace)),current_state,ATgetLength(trace)-1);
 	}
