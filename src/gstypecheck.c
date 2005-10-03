@@ -1343,7 +1343,7 @@ static ATermAppl gstcTraverseActProcVarConstP(ATermTable Vars, ATermAppl ProcTer
     ATermAppl NewProc=gstcTraverseActProcVarConstP(Vars,ATAgetArgument(ProcTerm,0));
     if(!NewProc) {return NULL;}
     ATermAppl Time=ATAgetArgument(ProcTerm,1);
-    ATermAppl NewType=gstcTraverseVarConsTypeD(Vars,&Time,gsMakeSortIdReal());
+    ATermAppl NewType=gstcTraverseVarConsTypeD(Vars,&Time,gsMakeUnknown());
     if(!NewType) {return NULL;}
 
     if(!gstcTypeMatchA(gsMakeSortIdReal(),NewType)){
