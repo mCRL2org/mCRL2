@@ -11,6 +11,7 @@ extern "C" {
 #include <aterm2.h>
 #include "gslowlevel.h"
 #include "gsfunc.h"
+#include "libprint_types.h"
 #include "libprint_c.h"
 #include "libgsalpha.h"
 
@@ -110,7 +111,7 @@ int main(int argc, char **argv)
 	{
 		ATwriteToTextFile((ATerm) Spec,OutStream);
 	} else {
-		PrintPart_C(OutStream, (ATerm) Spec);
+		PrintPart_C(OutStream, (ATerm) Spec, ppAdvanced);
 	}
 	if ( OutStream != stdout )
 	{

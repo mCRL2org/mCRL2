@@ -20,6 +20,7 @@
 #include "gsfunc.h"
 #include "libgsnextstate.h"
 #include "libgsrewrite.h"
+#include "libprint_types.h"
 #include "libprint_cxx.h"
 
 using namespace std;
@@ -617,7 +618,7 @@ void XSimMain::OnSaveTrace( wxCommandEvent &event )
 	    {
 		    for (ATermList l=ATconcat(ATgetNext(ATreverse(trace)),ecart); !ATisEmpty(l); l=ATgetNext(l))
 		    {
-			PrintPart_CXX(f, ATgetFirst(ATLgetFirst(l)));
+			PrintPart_CXX(f, ATgetFirst(ATLgetFirst(l)), ppAdvanced);
                         f << endl;
 		    }
 	    }
@@ -694,7 +695,7 @@ void XSimMain::SetCurrentState(ATerm state, bool showchange)
 		{
 			stateview->SetItem(i,1,wxT("_"));
 		} else {
-			stateview->SetItem(i,1,wxConvLocal.cMB2WX(PrintPart_CXX((ATerm) newval).c_str()));
+			stateview->SetItem(i,1,wxConvLocal.cMB2WX(PrintPart_CXX((ATerm) newval, ppAdvanced).c_str()));
 		}
 		if ( showchange && !(ATisEqual(oldval,newval) || (gsIsDataVarId(oldval) && gsIsDataVarId(newval)) ) )
 		{
@@ -749,7 +750,7 @@ void XSimMain::UpdateTransitions()
 	int i = 0;
 	for (ATermList l=next_states; !ATisEmpty(l); l=ATgetNext(l), i++)
 	{
-		actions.Add(wxConvLocal.cMB2WX(PrintPart_CXX(ATgetFirst(ATLgetFirst(l))).c_str()));
+		actions.Add(wxConvLocal.cMB2WX(PrintPart_CXX(ATgetFirst(ATLgetFirst(l)), ppAdvanced).c_str()));
 		indices.Add(i);
 //		transview->SetItemData(i,i);
 		stringstream ss;
@@ -770,13 +771,13 @@ void XSimMain::UpdateTransitions()
 				} else {
 					comma = true;
 				}
-				PrintPart_CXX(ss, ATgetFirst(o));
+				PrintPart_CXX(ss, ATgetFirst(o), ppAdvanced);
 				ss << " := ";
 				if ( gsIsDataVarId(newval) )
 				{
 					ss << "_";
 				} else {
-					PrintPart_CXX(ss, (ATerm) newval);
+					PrintPart_CXX(ss, (ATerm) newval, ppAdvanced);
 				}
 			}
 

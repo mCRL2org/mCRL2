@@ -11,6 +11,7 @@ extern "C" {
 #include <aterm2.h>
 #include "gsfunc.h"
 #include "gslowlevel.h"
+#include "libprint_types.h"
 #include "libprint_c.h"
 #include "gslexer.h"
 #include "gstypecheck.h"
@@ -214,7 +215,7 @@ int main(int argc, char **argv)
 
 	if ( human )
 	{
-		PrintPart_C(OutFile, (ATerm) Spec);
+		PrintPart_C(OutFile, (ATerm) Spec, ppAdvanced);
 	} else {
 		ATwriteToTextFile((ATerm) Spec,OutFile);
 	}

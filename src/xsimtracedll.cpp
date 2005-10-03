@@ -13,6 +13,7 @@
 #include "xsimtracedll.h"
 #include "gslowlevel.h"
 #include "gsfunc.h"
+#include "libprint_types.h"
 #include "libprint_cxx.h"
 #include "libgsnextstate.h"
 
@@ -43,7 +44,7 @@ static void PrintState(stringstream &ss ,ATerm state)
                 {
 			ss << "_";
                 } else {
-                        PrintPart_CXX(ss, (ATerm) a);
+                        PrintPart_CXX(ss, (ATerm) a, ppAdvanced);
                 }
         }
 }
@@ -103,7 +104,7 @@ void XSimTraceDLL::StateChanged(ATermAppl Transition, ATerm State, ATermList Nex
 		}
 		current_pos++;
 		traceview->InsertItem(current_pos,wxString::Format(wxT("%i"),current_pos));
-		traceview->SetItem(current_pos,1,wxConvLocal.cMB2WX(PrintPart_CXX((ATerm) Transition).c_str()));
+		traceview->SetItem(current_pos,1,wxConvLocal.cMB2WX(PrintPart_CXX((ATerm) Transition, ppAdvanced).c_str()));
 		PrintState(ss,State);
 		traceview->SetItem(current_pos,2,wxConvLocal.cMB2WX(ss.str().c_str()));
 		traceview->SetColumnWidth(2,wxLIST_AUTOSIZE);

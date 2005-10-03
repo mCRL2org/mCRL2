@@ -5,11 +5,11 @@ extern "C" {
 #include "libprint_c.h"
 
 #define PRINT_C
-#include "libprint_common.h"
+#include "libprint_impl.h"
 
-void PrintPart_C(FILE *OutStream, const ATerm Part)
+void PrintPart_C(FILE *OutStream, const ATerm Part, t_pp_format pp_format)
 {
-  PrintPart__C(OutStream, Part);
+  PrintPart__C(OutStream, Part, pp_format);
 }
 
 int gsprintf(const char *format, ...)
@@ -91,10 +91,11 @@ int gsvfprintf(FILE *stream, const char *format, va_list args)
 	break;
 
 	/*
-	 * MCRL2 specifics start here: "%P" to pretty print an ATerm
+	 * MCRL2 specifics start here: "%P" to pretty print an ATerm using
+         * the advanced method
 	 */
       case 'P':
-	PrintPart_C(stream, va_arg(args, ATerm));
+	PrintPart_C(stream, va_arg(args, ATerm), ppAdvanced);
 	break;
 
 	/*

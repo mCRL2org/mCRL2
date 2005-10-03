@@ -255,7 +255,7 @@ int main(int argc, char *argv[])
     //store the result
     if (opt_stdout) {
       gsVerboseMsg("saving result to stdout...\n");
-      ATwriteToTextFile((ATerm) result, stdout);
+      ATwriteToBinaryFile((ATerm) result, stdout);
       fprintf(stdout, "\n");
     } else { //!opt_stdout
       //determine output filename
@@ -268,7 +268,7 @@ int main(int argc, char *argv[])
         return 1;
       }
       gsVerboseMsg("saving result to '%s'...\n", outfilename);
-      ATwriteToTextFile((ATerm) result, outstream);
+      ATwriteToBinaryFile((ATerm) result, outstream);
       fclose(outstream);
     }
   }

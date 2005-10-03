@@ -1,5 +1,5 @@
 #define  NAME      "lpepp"
-#define  LVERSION  "0.3"
+#define  LVERSION  "0.4"
 #define  AUTHOR    "Aad Mathijssen"
 
 #ifdef __cplusplus
@@ -19,6 +19,7 @@ extern "C" {
 #include "lpepp.h"
 #include "gsfunc.h"
 #include "gslowlevel.h"
+#include "libprint_types.h"
 #include "libprint_c.h"
 
 //local declarations
@@ -37,25 +38,34 @@ static void PrintMoreInfo(FILE* Stream, char *Name);
 static void PrintVersion(FILE* Stream);
 //print version information to stream
 
-static bool PrintSpecificationFileName(char *SpecFileName, char *OutFileName);
+static bool PrintSpecificationFileName(char *SpecFileName, char *OutFileName,
+  t_pp_format pp_format);
 /*Pre: SpecFileName is the name of a file from which can be read, and which
        contains a specification that adheres to the internal format
        which can be read
        OutFileName is the name of a valid file to which can be written, or NULL
-  Post:the specification in SpecFileName is printed and saved to OutFileName
+  Post:the specification in SpecFileName is printed in the pp_format format
+       and saved to OutFileName
        If OutFileName is NULL, stdout is used.
   Ret: true, if everything went ok.
        false, otherwise; appropriate error messages have been shown.
 */ 
 
-static bool PrintSpecificationStream(FILE *SpecStream, FILE *OutStream);
+static bool PrintSpecificationStream(FILE *SpecStream, FILE *OutStream,
+  t_pp_format pp_format);
 /*Pre: SpecStream is a stream from which can be read, and which contains a
        specification that adheres to the internal format
        OutStream is the name of a valid stream to which can be written
-  Post:the specification in SpecStream is printed and saved to OutStream
+  Post:the specification in SpecStream is printed in the pp_format format
+       and saved to OutStream
   Ret: true, if everything went ok.
        false, otherwise; appropriate error messages have been shown.
 */ 
+
+static void PrintPPFormat(FILE *stream, t_pp_format pp_format);
+/*Pre: stream points to a stream to which can be written
+ *Ret: a string representation of pp_format is written to stream
+ */
 
 //implementation
 
@@ -64,10 +74,12 @@ int main(int argc, char* argv[]) {
   //declarations for parsing the specification
   char *SpecFileName   = NULL;
   char *OutputFileName = NULL;
+  t_pp_format opt_pp_format = ppAdvanced;
   //declarations for getopt  
-  #define ShortOptions      "hqvd"
+  #define ShortOptions      "f:hqvd"
   #define VersionOption     CHAR_MAX + 1
   struct option LongOptions[] = { 
+    {"format"    , required_argument, NULL, 'f'},
     {"help"      , no_argument,       NULL, 'h'},
     {"version"   , no_argument,       NULL, VersionOption},
     {"quiet"     , no_argument,       NULL, 'q'},
@@ -80,6 +92,18 @@ int main(int argc, char* argv[]) {
   Option = getopt_long(argc, argv, ShortOptions, LongOptions, NULL);
   while (Option != -1) {
     switch (Option) {
+      case 'f':
+        if (strcmp(optarg, "internal") == 0) {
+          opt_pp_format = ppInternal;
+        } else if (strcmp(optarg, "basic") == 0) {
+          opt_pp_format = ppBasic;
+        } else if (strcmp(optarg, "advanced") == 0) {
+          opt_pp_format = ppAdvanced;
+        } else {
+          gsErrorMsg("option -f has illegal argument '%s'\n", optarg);
+          return 1;
+        }
+        break;
       case 'h':
         PrintUsage(stdout, argv[0]);
         return 0; 
@@ -121,7 +145,7 @@ int main(int argc, char* argv[]) {
   ATerm StackBottom;
   ATinit(0, NULL, &StackBottom);
   //print specification  
-  if (!PrintSpecificationFileName(SpecFileName, OutputFileName))
+  if (!PrintSpecificationFileName(SpecFileName, OutputFileName, opt_pp_format))
   {
     Result = 1;  
   }       
@@ -131,7 +155,8 @@ int main(int argc, char* argv[]) {
   return Result;
 }
 
-bool PrintSpecificationFileName(char *SpecFileName, char *OutputFileName)
+bool PrintSpecificationFileName(char *SpecFileName, char *OutputFileName,
+  t_pp_format pp_format)
 {
   bool Result           = true;
   FILE *SpecStream      = NULL;
@@ -165,7 +190,8 @@ bool PrintSpecificationFileName(char *SpecFileName, char *OutputFileName)
         gsDebugMsg("output file %s is opened for writing.\n", OutputFileName);
       }
     }
-    if (Result && !PrintSpecificationStream(SpecStream, OutputStream))
+    if (Result &&
+          !PrintSpecificationStream(SpecStream, OutputStream, pp_format))
     {
       Result = false;
     }
@@ -180,7 +206,8 @@ bool PrintSpecificationFileName(char *SpecFileName, char *OutputFileName)
   return Result;
 }
 
-bool PrintSpecificationStream(FILE *SpecStream, FILE *OutputStream)
+bool PrintSpecificationStream(FILE *SpecStream, FILE *OutputStream,
+  t_pp_format pp_format)
 {
   assert(SpecStream != NULL);
   assert(OutputStream != NULL);
@@ -192,10 +219,15 @@ bool PrintSpecificationStream(FILE *SpecStream, FILE *OutputStream)
     Result = false;
   } else {
     //print specification to OutputStream
-    if (OutputStream != stdout) gsVerboseMsg(
-      "printing specification to file in a human readable format\n");
+    if (OutputStream != stdout) {
+      if (gsVerbose) {
+        fprintf(stderr, "printing specification to file in the ");
+        PrintPPFormat(stderr, pp_format);
+        fprintf(stderr, " format\n");
+      }
+    }
     gsEnableConstructorFunctions();
-    PrintPart_C(OutputStream, (ATerm) Spec);
+    PrintPart_C(OutputStream, (ATerm) Spec, pp_format);
     Result = true;
   }
   gsDebugMsg("all files are closed; return %s\n", Result?"true":"false");
@@ -209,6 +241,10 @@ void PrintUsage(FILE *Stream, char *Name) {
     "is not present, stdout is used. If LPEFILE is not present or -, stdin is used.\n"
     "\n"
     "The OPTIONS that can be used are:\n"
+    "  -f, --format=FORMAT    the LPE is printed using the supplied FORMAT:\n"
+    "                           'internal' for the internal format\n"
+    "                           'basic' for the basic structure (used for debugging)\n"
+    "                           'advanced' for an mCRL2 specification (default)\n"
     "  -h, --help             display this help\n"
     "      --version          display version information\n"
     "  -q, --quiet            do not display warning messages\n"
@@ -225,6 +261,17 @@ void PrintMoreInfo(FILE *Stream, char *Name) {
 void PrintVersion(FILE *Stream) {
   fprintf(Stream, "%s %s\nWritten by %s.\n", 
     NAME, LVERSION, AUTHOR);  
+}
+
+void PrintPPFormat(FILE *stream, t_pp_format pp_format)
+{
+  if (pp_format == ppInternal) {
+    fprintf(stream, "internal");
+  } else if (pp_format == ppBasic) {
+    fprintf(stream, "basic");
+  } else if (pp_format == ppAdvanced) {
+    fprintf(stream, "advanced");
+  }
 }
 
 #ifdef __cplusplus
