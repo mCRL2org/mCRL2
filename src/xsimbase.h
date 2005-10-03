@@ -154,24 +154,123 @@ public:
 	 * is not empty). */
 };
 
+
+/* Creating a dynamic library containing Views.
+ *
+ * It is assumed that every dynamically loaded library has the following
+ * function:
+ *
+ *   extern "C" void SimulatorViewDLLAddView(SimulatorInterface *);
+ *
+ * AFter loading the library, this function is called such that the DLL
+ * knowns with Simulator it is dealing with and to give it an opportunity
+ * to register one or more Views at this Simulator.
+ *
+ * Because of the dynamic nature of these libraries, one usually wishes
+ * to keep some administration of the registered Views. This is, for
+ * example, necessary to be able to cleanly unload a DLL or avoid problems
+ * if a library is loaded twice. For this prupose, the following classes
+ * are available.
+ *
+ * XSimViewsDLL is a class that stores Views and the Simulator where they
+ * are registered. On destruction of this class, all Views are unregistered
+ * (if needed) and destroyed.
+ *
+ * SimulatorViewDLLInterface is a SimulatorViewInterface with some added
+ * implementation to interact with a XSimViewsDLL object. The implementor
+ * of a subclass does not have to worry about this, except when he gives
+ * an implementation of Registered or Unregistered (see below).
+ *
+ * A typical DLL source file would look as follows:
+ *
+ *   static XSimViewsDLL *xsvdll;
+ *
+ *   extern "C" void SimulatorViewDLLAddView(SimulatorInterface *Simulator)
+ *   {
+ *     MyView *v;
+ *
+ *     // Create View with the main window of Simulator as parent
+ *     // and show it.
+ *     v = new MyView(Simulator->MainWindow());
+ *     v->Show();
+ *
+ *     // Let view know which XSimViewsDLL he is in and add him
+ *     v->SetXSimViewsDLL(xsvdll);
+ *     xsvdll->Add(v,Simulator);
+ *   }
+ *
+ *   extern "C" __attribute__((constructor)) void SimulatorViewDLLInit()
+ *   {
+ *     xsvdll = new XSimViewsDLL;
+ *   }
+ *
+ *   extern "C" __attribute__((destructor)) void SimulatorViewDLLCleanUp()
+ *   {
+ *     delete xsvdll; // This unregisters and destroys all Views in xsvdll
+ *   }
+ *
+ * If MyView would implement the Registered and/or Unregistered functions,
+ * they need to call the corresponding functions from
+ * SimulatorViewDLLInterface to assure the correctness of the information
+ * in the XSimViewsDLL. This means it should look like:
+ *
+ *   void MyView::Registered(SimulatorInterface *Simulator)
+ *   {
+ *     // Call function of superclass
+ *     SimulatorViewDLLInterface::Registered(Simulator)
+ *
+ *     // Own code
+ *     ...
+ *   }
+ *
+ *   void MyView::Unregistered()
+ *   {
+ *     // Call function of superclass
+ *     SimulatorViewDLLInterface::Unregistered()
+ *
+ *     // Own code
+ *     ...
+ *   }
+ */
+
 class SimulatorViewDLLInterface: public SimulatorViewInterface
 {
 	protected:
 		XSimViewsDLL *xsimdll;
 	public:
-		void SetXSimViewsDLL(XSimViewsDLL *dll);
+		virtual ~SimulatorViewDLLInterface();
+		
+		void Registered(SimulatorInterface *Simulator);
+		void Unregistered();
+
+		virtual void SetXSimViewsDLL(XSimViewsDLL *dll);
+		/* Sets xsimdll to dll */
 };
 
 class XSimViewsDLL
 {
 public:
 	XSimViewsDLL();
+	/* Constructor */
+
 	~XSimViewsDLL();
+	/* Destructor
+	 * Unregisters every View in views if it is linked to a
+	 * Simulator and the destroys the view
+	 */
 
 	void Add(SimulatorViewDLLInterface *View, SimulatorInterface *Simulator, bool Register = true);
+	/* Append View to views and Simulator to sims
+	 * If Register is true, then Simulator->Register(View) is called
+	 */
 	void Remove(SimulatorViewDLLInterface *View, bool Unregister = true);
+	/* Remove View from views and the corresponding Simulator from sims
+	 * If Unregister is true, then Simulator->Unregister(View) is called first
+	 */
 	void SetSimulator(SimulatorViewDLLInterface *View, SimulatorInterface *Simulator);
+	/* Set the simulator at which View is registered to Simulator */
 	void ClearSimulator(SimulatorViewDLLInterface *View);
+	/* Reset the simulator corresponding to View (i.e. make it NULL) */
 
 private:
 	list<SimulatorInterface *> sims;

@@ -69,25 +69,20 @@ XSimTraceDLL::XSimTraceDLL( wxWindow *parent ) :
     current_pos = -1;
 }
 
-
 void XSimTraceDLL::Registered(SimulatorInterface *Simulator)
 {
+	SimulatorViewDLLInterface::Registered(Simulator);
+
 	simulator = Simulator;
-	if ( xsimdll != NULL )
-	{
-		xsimdll->SetSimulator(this,Simulator);
-	}
 }
 
 void XSimTraceDLL::Unregistered()
 {
+	SimulatorViewDLLInterface::Unregistered();
+
 	simulator = NULL;
 	current_pos = -1;
 	traceview->DeleteAllItems();
-	if ( xsimdll != NULL )
-	{
-		xsimdll->ClearSimulator(this);
-	}
 }
 
 void XSimTraceDLL::Initialise(ATermList Pars)

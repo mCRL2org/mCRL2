@@ -9,6 +9,30 @@
 #include <list>
 #include "xsimbase.h"
 
+SimulatorViewDLLInterface::~SimulatorViewDLLInterface()
+{
+	if ( xsimdll != NULL )
+	{
+		xsimdll->Remove(this);
+	}
+}
+
+void SimulatorViewDLLInterface::Registered(SimulatorInterface *Simulator)
+{
+	if ( xsimdll != NULL )
+	{
+		xsimdll->SetSimulator(this,Simulator);
+	}
+}
+
+void SimulatorViewDLLInterface::Unregistered()
+{
+	if ( xsimdll != NULL )
+	{
+		xsimdll->ClearSimulator(this);
+	}
+}
+
 void SimulatorViewDLLInterface::SetXSimViewsDLL(XSimViewsDLL *dll)
 {
 	xsimdll = dll;
@@ -24,11 +48,12 @@ XSimViewsDLL::~XSimViewsDLL()
 	list<SimulatorViewDLLInterface *>::iterator i = views.begin();
 	for (; i != views.end(); i++, j++)
 	{
+		(*i)->SetXSimViewsDLL(NULL);
 		if ( (*j) != NULL )
 		{
-			(*i)->SetXSimViewsDLL(NULL);
 			(*j)->Unregister(*i);
 		}
+		delete *i;
 	}
 }
 
@@ -48,6 +73,7 @@ void XSimViewsDLL::Remove(SimulatorViewDLLInterface *View, bool Unregister)
 	list<SimulatorViewDLLInterface *>::iterator i = views.begin();
 	for (; i != views.end(); i++, j++)
 	{
+		*i;
 		if ( (*i) == View )
 		{
 			if ( Unregister && ((*j) != NULL) )
