@@ -204,11 +204,15 @@ ATermAppl gsMakeOpIdNameCNeg();
 ATermAppl gsMakeOpIdNameCInt();
 ATermAppl gsMakeOpIdNamePos2Nat();
 ATermAppl gsMakeOpIdNamePos2Int();
+ATermAppl gsMakeOpIdNamePos2Real();
 ATermAppl gsMakeOpIdNameNat2Pos();
 ATermAppl gsMakeOpIdNameNat2Int();
+ATermAppl gsMakeOpIdNameNat2Real();
 ATermAppl gsMakeOpIdNameInt2Pos();
 ATermAppl gsMakeOpIdNameInt2Nat();
 ATermAppl gsMakeOpIdNameInt2Real();
+ATermAppl gsMakeOpIdNameReal2Pos();
+ATermAppl gsMakeOpIdNameReal2Nat();
 ATermAppl gsMakeOpIdNameReal2Int();
 ATermAppl gsMakeOpIdNameLTE();
 ATermAppl gsMakeOpIdNameLT();
@@ -402,17 +406,35 @@ ATermAppl gsMakeOpIdPos2Nat(void);
 ATermAppl gsMakeOpIdPos2Int(void);
 //Ret: Operation identifier for the conversion of Pos to Int
 
+ATermAppl gsMakeOpIdPos2Real(void);
+//Ret: Operation identifier for the conversion of Pos to Real
+
 ATermAppl gsMakeOpIdNat2Pos(void);
 //Ret: Operation identifier for the conversion of Nat to Pos
 
 ATermAppl gsMakeOpIdNat2Int(void);
 //Ret: Operation identifier for the conversion of Nat to Int
 
+ATermAppl gsMakeOpIdNat2Real(void);
+//Ret: Operation identifier for the conversion of Nat to Real
+
 ATermAppl gsMakeOpIdInt2Pos(void);
 //Ret: Operation identifier for the conversion of Int to Pos
 
 ATermAppl gsMakeOpIdInt2Nat(void);
 //Ret: Operation identifier for the conversion of Int to Nat
+
+ATermAppl gsMakeOpIdInt2Real(void);
+//Ret: Operation identifier for the conversion of Int to Real
+
+ATermAppl gsMakeOpIdReal2Pos(void);
+//Ret: Operation identifier for the conversion of Real to Pos
+
+ATermAppl gsMakeOpIdReal2Nat(void);
+//Ret: Operation identifier for the conversion of Real to Nat
+
+ATermAppl gsMakeOpIdReal2Int(void);
+//Ret: Operation identifier for the conversion of Real to Int
 
 ATermAppl gsMakeOpIdLTE(ATermAppl SortExpr);
 //Pre: SortExpr is Pos, Nat or Int

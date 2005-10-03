@@ -155,11 +155,15 @@ static ATermAppl gsOpIdNameCNeg;
 static ATermAppl gsOpIdNameCInt;
 static ATermAppl gsOpIdNamePos2Nat;
 static ATermAppl gsOpIdNamePos2Int;
+static ATermAppl gsOpIdNamePos2Real;
 static ATermAppl gsOpIdNameNat2Pos;
 static ATermAppl gsOpIdNameNat2Int;
+static ATermAppl gsOpIdNameNat2Real;
 static ATermAppl gsOpIdNameInt2Pos;
 static ATermAppl gsOpIdNameInt2Nat;
 static ATermAppl gsOpIdNameInt2Real;
+static ATermAppl gsOpIdNameReal2Pos;
+static ATermAppl gsOpIdNameReal2Nat;
 static ATermAppl gsOpIdNameReal2Int;
 static ATermAppl gsOpIdNameLTE;
 static ATermAppl gsOpIdNameLT;
@@ -316,11 +320,15 @@ void gsEnableConstructorFunctions(void)
     gsOpIdNameCInt         = gsString2ATermAppl("@cInt");
     gsOpIdNamePos2Nat      = gsString2ATermAppl("Pos2Nat");
     gsOpIdNamePos2Int      = gsString2ATermAppl("Pos2Int");
+    gsOpIdNamePos2Real     = gsString2ATermAppl("Pos2Real");
     gsOpIdNameNat2Pos      = gsString2ATermAppl("Nat2Pos");
     gsOpIdNameNat2Int      = gsString2ATermAppl("Nat2Int");
+    gsOpIdNameNat2Real     = gsString2ATermAppl("Nat2Real");
     gsOpIdNameInt2Pos      = gsString2ATermAppl("Int2Pos");
     gsOpIdNameInt2Nat      = gsString2ATermAppl("Int2Nat");
     gsOpIdNameInt2Real     = gsString2ATermAppl("Int2Real");
+    gsOpIdNameReal2Pos     = gsString2ATermAppl("Real2Pos");
+    gsOpIdNameReal2Nat     = gsString2ATermAppl("Real2Nat");
     gsOpIdNameReal2Int     = gsString2ATermAppl("Real2Int");
     gsOpIdNameLTE          = gsString2ATermAppl("<=");
     gsOpIdNameLT           = gsString2ATermAppl("<");
@@ -468,11 +476,15 @@ void gsEnableConstructorFunctions(void)
     ATprotectAppl(&gsOpIdNameCInt);
     ATprotectAppl(&gsOpIdNamePos2Nat);
     ATprotectAppl(&gsOpIdNamePos2Int);
+    ATprotectAppl(&gsOpIdNamePos2Real);
     ATprotectAppl(&gsOpIdNameNat2Pos);
     ATprotectAppl(&gsOpIdNameNat2Int);
+    ATprotectAppl(&gsOpIdNameNat2Real);
     ATprotectAppl(&gsOpIdNameInt2Pos);
     ATprotectAppl(&gsOpIdNameInt2Nat);
     ATprotectAppl(&gsOpIdNameInt2Real);
+    ATprotectAppl(&gsOpIdNameReal2Pos);
+    ATprotectAppl(&gsOpIdNameReal2Nat);
     ATprotectAppl(&gsOpIdNameReal2Int);
     ATprotectAppl(&gsOpIdNameLTE);
     ATprotectAppl(&gsOpIdNameLT);
@@ -1415,6 +1427,11 @@ ATermAppl gsMakeOpIdNamePos2Int() {
   return gsOpIdNamePos2Int;
 }
 
+ATermAppl gsMakeOpIdNamePos2Real() {
+  assert(gsConstructorFunctionsEnabled);
+  return gsOpIdNamePos2Real;
+}
+
 ATermAppl gsMakeOpIdNameNat2Pos() {
   assert(gsConstructorFunctionsEnabled);
   return gsOpIdNameNat2Pos;
@@ -1423,6 +1440,11 @@ ATermAppl gsMakeOpIdNameNat2Pos() {
 ATermAppl gsMakeOpIdNameNat2Int() {
   assert(gsConstructorFunctionsEnabled);
   return gsOpIdNameNat2Int;
+}
+
+ATermAppl gsMakeOpIdNameNat2Real() {
+  assert(gsConstructorFunctionsEnabled);
+  return gsOpIdNameNat2Real;
 }
 
 ATermAppl gsMakeOpIdNameInt2Pos() {
@@ -1438,6 +1460,16 @@ ATermAppl gsMakeOpIdNameInt2Nat() {
 ATermAppl gsMakeOpIdNameInt2Real() {
   assert(gsConstructorFunctionsEnabled);
   return gsOpIdNameInt2Real;
+}
+
+ATermAppl gsMakeOpIdNameReal2Pos() {
+  assert(gsConstructorFunctionsEnabled);
+  return gsOpIdNameReal2Pos;
+}
+
+ATermAppl gsMakeOpIdNameReal2Nat() {
+  assert(gsConstructorFunctionsEnabled);
+  return gsOpIdNameReal2Nat;
 }
 
 ATermAppl gsMakeOpIdNameReal2Int() {
