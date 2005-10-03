@@ -47,7 +47,8 @@ int main(int argc, char *argv[])
   //declarations for getopt
   bool lm_chosen = false;
   t_lin_method opt_lin_method = lmRegular;
-  t_cluster_method opt_cluster_method = cmDefault;
+  t_cluster_method opt_intermediate_cluster_method = cmFull;
+  t_cluster_method opt_final_cluster_method = cmNone;
   bool opt_newstate = false;
   bool opt_binary = false;
   bool opt_statenames = false;
@@ -119,18 +120,10 @@ int main(int argc, char *argv[])
         opt_lin_method = lmAlternative;
         break;
       case 'c': /* cluster */ 
-        if (opt_cluster_method == cmNone) {
-          gsErrorMsg("only one clustering method is allowed\n");
-          return 1;
-        }
-        opt_cluster_method = cmFull;
+        opt_final_cluster_method = cmFull;
         break;
       case 'n': /* nocluster */
-        if (opt_cluster_method == cmFull) {
-          gsErrorMsg("only one clustering method is allowed\n");
-          return 1;
-        }
-        opt_cluster_method = cmNone;
+        opt_intermediate_cluster_method = cmNone;
         break;
       case 'w': /* newstate */ 
         opt_newstate = true;
@@ -197,8 +190,8 @@ int main(int argc, char *argv[])
     return 1;
   }
   if (opt_lin_method == lmAlternative) {
-    if (opt_cluster_method == cmFull) AltIllegalOptWarning('c');
-    if (opt_cluster_method == cmNone) AltIllegalOptWarning('n');
+    if (opt_final_cluster_method == cmFull) AltIllegalOptWarning('c');
+    if (opt_intermediate_cluster_method == cmNone) AltIllegalOptWarning('n');
     if (opt_newstate)                 AltIllegalOptWarning('w');
     if (opt_binary)                   AltIllegalOptWarning('b');
     if (opt_statenames)               AltIllegalOptWarning('a');
@@ -232,7 +225,8 @@ int main(int argc, char *argv[])
   //set linearisation parameters
   t_lin_options lin_options;
   lin_options.lin_method = opt_lin_method;
-  lin_options.cluster_method = opt_cluster_method;
+  lin_options.final_cluster_method = opt_final_cluster_method;
+  lin_options.intermediate_cluster_method = opt_intermediate_cluster_method;
   lin_options.newstate = opt_newstate;
   lin_options.binary = opt_binary;
   lin_options.statenames = opt_statenames;

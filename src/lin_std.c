@@ -847,23 +847,24 @@ static specificationbasictype *create_spec(ATermAppl t)
   
   /* t=Alpha(t); / * Apply alpha-beta axioms */
 
-  /* Store the sorts */
+  /* Store the sorts, but first reverse them, such that they appear
+     in the same order in the output */
   spec->sorts = ATempty;
-  for(ATermList sorts = ATLgetArgument(ATAgetArgument(t,0),0); 
+  for(ATermList sorts = ATreverse(ATLgetArgument(ATAgetArgument(t,0),0)); 
     !ATisEmpty(sorts); sorts = ATgetNext(sorts) )
   {
     insertsort(ATAgetFirst(sorts),spec); 
   }
-  /* Store the constructors */
+  /* Store the constructors, but reverse them first; cf. the sorts above */
   spec->funcs = ATempty;
-  for(ATermList constr = ATLgetArgument(ATAgetArgument(t,1),0);
+  for(ATermList constr = ATreverse(ATLgetArgument(ATAgetArgument(t,1),0));
     !ATisEmpty(constr); constr = ATgetNext(constr) )
   {
     insertconstructor(ATAgetFirst(constr),spec); 
   }
-  /* Store the functions */
+  /* Store the functions, but reverse them also; cf. the orst above. */
   spec->maps = ATempty;
-  for(ATermList maps = ATLgetArgument(ATAgetArgument(t,2),0);
+  for(ATermList maps = ATreverse(ATLgetArgument(ATAgetArgument(t,2),0));
     !ATisEmpty(maps); maps=ATgetNext(maps) )
   {
     insertmapping(ATAgetFirst(maps),spec); 
@@ -873,7 +874,7 @@ static specificationbasictype *create_spec(ATermAppl t)
     gsRewriteInit(gsMakeDataEqnSpec(ATempty),GS_REWR_INNER3);
   }
   spec->eqns = ATempty;
-  for(ATermList eqns = ATLgetArgument(ATAgetArgument(t,3),0);
+  for(ATermList eqns = ATreverse(ATLgetArgument(ATAgetArgument(t,3),0));
     !ATisEmpty(eqns); eqns = ATgetNext(eqns) )
   {
     ATermAppl eqn=ATAgetFirst(eqns);
@@ -7822,8 +7823,8 @@ ATermAppl linearise_std(ATermAppl spec, t_lin_options lin_options)
   //set global parameters
   regular    = (lin_options.lin_method != lmStack);
   regular2   = (lin_options.lin_method == lmRegular2);
-  cluster    = (lin_options.cluster_method == cmFull);
-  nocluster  = (lin_options.cluster_method == cmNone);
+  cluster    = (lin_options.final_cluster_method == cmFull);
+  nocluster  = (lin_options.intermediate_cluster_method == cmNone);
   oldstate   = !lin_options.newstate;
   binary     = lin_options.binary;
   statenames = lin_options.statenames;
@@ -7854,7 +7855,10 @@ ATermAppl linearise_std(ATermAppl spec, t_lin_options lin_options)
                    ATLgetArgument(result,2),
                    ATLgetArgument(result,1)),
       ATLgetArgument(result,1),
-      ATLgetArgument(result,2)),
+      ATreverse(ATLgetArgument(result,2))),  // reverse, to let the list
+                                             // of summands appear in the same
+                                             // order as in the input, if the 
+                                             // input were an LPE.
     gsMakeLPEInit(SieveProcDataVarsAssignments(
                    spec_int->procdatavars,
                    ATLgetArgument(result,0),
