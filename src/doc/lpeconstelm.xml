@@ -1,0 +1,58 @@
+<?xml version="1.0"?>
+
+<!DOCTYPE refentry PUBLIC "-//OASIS//DTD DocBook XML V4.2//EN" "http://www.oasis-open.org/docbook/xml/4.2/docbookx.dtd"[
+<!ENTITY % param SYSTEM "param.xml">
+%param;
+<!-- <!ENTITY x "<type>X</type>"> -->
+]>
+
+<refentry id="lpeconstelm">
+
+<refmeta>
+<refentrytitle>lpeconstelm</refentrytitle>
+<manvolnum>7</manvolnum>
+</refmeta>
+
+<refnamediv>
+<refname>libgsrewrite</refname>
+<refpurpose> lpeconstelm is a tool which eliminates constant parameters in a linear process equation.</refpurpose>
+</refnamediv>
+
+<refsynopsisdiv>
+<funcsynopsis>
+<funcsynopsisinfo>
+<!-- Needed includes-->
+</funcsynopsisinfo>
+<!--
+<funcprototype>
+  <funcdef>&type; &function;</funcdef>
+  <paramdef>&argument1; &OfType1;</paramdef>
+  <paramdef>&argument2; &OfType2;</paramdef>
+</funcprototype>
+-->
+</funcsynopsis>
+</refsynopsisdiv>
+
+<refsect1>
+<title>Description</title>
+<para>
+<!-- Needed description-->
+</para>
+<!--
+<refsect2>
+<title>sub sections</title>
+<para>
+
+</para>
+</refsect2>
+-->
+</refsect1>
+
+<refsect1>
+<title>Author</title>
+<para>
+Written by Frank Stappers. Please send all complaints, comments and bug fixes to f.p.m.stappers @at@ student.tue.nl (substitute ' @at@ ' with '@').
+</para>
+</refsect1>
+
+</refentry>
