@@ -1576,13 +1576,11 @@ static ATermAppl gstcTraverseVarConsTypeD(ATermTable Vars, ATermAppl *DataTerm, 
 	ATermAppl NeededType=ATAgetFirst(NeededArgumentTypes);
 	ATermAppl Type=ATAgetFirst(ArgumentTypes);
 
-	ATermAppl NewType=gstcTypeMatchA(Type,NeededType);
-	if(NewType) Type=NewType;
-	else{
+	if(!gstcEqTypesA(NeededType,Type)){
 	  //upcasting
 	  ATermAppl CastedNewType=gstcUpCastNumericType(NeededType,Type,&Arg);
 	  if(CastedNewType) Type=CastedNewType;
-	  else{
+	  if(!gstcEqTypesA(NeededType,Type)){
 	    gsDebugMsg("Doing again on %T, Type: %T, Needed type: %T\n",Arg,Type,NeededType);
 	    ATermAppl NewType=gstcTypeMatchA(NeededType,Type);
 	    if(!NewType) NewType=gstcTypeMatchA(NeededType,gstcExpandPosTypes(Type));
