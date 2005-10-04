@@ -1,7 +1,7 @@
-% vrij variablen mogen maar 1x voorkomen aan de rechterkant van de LPE
-%
-%
-%
+% ++value of free variables may only be have one value on the righthand side
+% constelim can reduce the  statespace if there are free variables in it (true?)
+% initial values are don't care
+% 
 
 \documentclass[a4paper,10pt]{article}
 \usepackage{textcomp,amsmath,amssymb,amsthm}%,stmaryrd}
@@ -57,93 +57,125 @@ will write the output to an output file \ti{output.lpe} in the \ti{.lpe} format 
 
 \section{definitions} \label{sec:def}
 
-The equation below is a representation of a \lpe\ in \mcrl\ . This definition simplified\footnote{Multiactions and time are not taken into account} to describe the \tool\ tool.
+The equation below is a simplified\footnote{Multiactions and time are not taken into account} representation of a \lpe\ in \mcrl\ .
 \begin{defn}[\lpe]\label{def:LPE}
 \begin{displaymath}
-X (\ovr{d}:\ovr{D}) = \sum_{i \in I} \sum_{e_i:E_i} c_i ( \ovr{d}, \ovr{e_i} ) \rightarrow a(\ovr{f_i}(\ovr{d},e_i)) \cdot X(\ovr{g_i}(\ovr{d},e_i)) $$
+X (\ovr{d}:\ovr{D}) = \sum_{i \in I} \sum_{e_i:E_i} \ovr{c_i} ( \ovr{d}, e_i ) \rightarrow a(\ovr{f_i}(\ovr{d},e_i)) \cdot X(\ovr{g_i}(\ovr{d},e_i)) $$
 $$ X(\ovr{init})
 \end{displaymath}\\
-A \lpe\ is written as in Definition \ref{def:LPE}, the different states of the process are represented by the data vector parameter $\ovr{d}:\ovr{D}$. $\ovr{D}$ may be a Cartesian product of $n$ data types, meaning that $\ovr{d}$ may consist of a tuple $(d_1, \ldots, d_n)$. The \lpe expresses that in state $\ovr{d}$ it preforms action $a$, carrying data parameter $f_i(\ovr{d},e_i)$ and it can reach the new state $g_i(\ovr{d},e_i)$ under the conditions that $c_i(\ovr{d,e_i})$ is true. So for each summand $i:I$ we have a function $g_i: D \times E \rightarrow D$ and a function $c_i: D \times E $, which reduces to a normal form \ti{true}, \ti{false} or something else. 
+A \lpe\ is written as in Definition \ref{def:LPE}. The different states are $\ovr{d}$ of the process are represented by the data vector parameter $\ovr{d}:\ovr{D}$. $\ovr{D}$ may be a Cartesian product of $n$ data types, meaning that $\ovr{d}$ may consist of a tuple $(d_1, \ldots, d_n)$. The \lpe expresses that in state $\ovr{d}$ it preforms action $a$, carrying data parameter $\ovr{f_i}(\ovr{d},e_i)$ and it can reach the new state $\ovr{g_i}(\ovr{d},e_i)$ under the condition that $\ovr{c_i}(\ovr{d},e_i)$ is \ti{true}. So for each summand $i$ from $I$ we have a function $\ovr{g_i}: \ovr{D} \times E \rightarrow \ovr{D}$ and a function $\ovr{c_i}: \ovr{D} \times E \rightarrow \mathbb{B}$
+%, which reduces to a normal form \ti{true}, \ti{false} or something else. 
 
-The data type $E$ helps to give the \lpe s a more general form. Not only the data parameter $\ovr{d}:\ovr{D}$, but also the data parameters $e_i: E_i$ can influence the condition $c_i$ and the and the resulting state $g_i$. Such a $e_i$ is often used in a \lpe to do a read or send action range over a domain. 
+The data type $E$ helps to give the \lpe s a more general form. Not only the data parameter $\ovr{d}:\ovr{D}$, but also the data parameter $e_i: E_i$ can influence the condition $\ovr{c_i}$ and the and the resulting state $\ovr{g_i}$. Such a $e_i$ is often used in a \lpe to do a read or send action range over a domain. 
+
+Free variables are data parameters which are not bound to \pps\ of a \lpe\ but occur in a \lpe .
 
 For an more detailed explanation of \lpe s  we refer to \cite{LPE_info}.
 \end{defn}
 
 \subsection{lpeconstelm definition}\label{subsec:lpedef}
 
+In this definition we don't concider free variables.
 A parameter of a \lpe\ can be replaced by its initial value if it can be determined that this parameter remains constant throughout any run of the process. The elimination of constant parameters does not reduce the resulting state space, however it may shorten the time needed tot generate a state space from a \lpe. \\
-If we have infinite time and space we can inspected each state space and check if a \pp\ changes throughout the the run of the process. We define the reachability state set $R_{\psi}$ for each state, given a certain input value ($\ovr{v_0}$). So:
-\begin{defn}\label{def:lpe}
-$R_\psi$ is the smallest set which complies to:
-\begin{itemize}
-\item $\ovr{v_0} \in R_\psi(\ovr{v_0})$
-\item For all $i \in I$ and $w_i \in E_i$ if $v \in R_\psi(\ovr{v_0})$ and $c_i(v, w_i$ holds, \\ then $g_i(v, w_i) \in R_\psi(\ovr{v_0})$ \\
-
-$S_\psi(\ovr{v_0}) = \lbrace j \in  \lbrace 1, \ldots, n \rbrace \vert \exists_u : D_j . \forall \ovr{v} \in R_\psi(\ovr{v_0}) . v_j = u \rbrace $
+If we have infinite time and space we can inspect each state space and check if a \pp\ changes throughout the the run of the process. We define the reachable state set $R$ for each state ($\ovr{v_0}$). So:
+\begin{defn}\label{def:lpe} Let there be an LPE, where\begin{itemize}
+\item $I$ is the set of summands.
+\item $\ovr{c_i}$ is the condition function of summand $i$.
+\item $\ovr{g_i}$ is the next state function of summand $i$.
+\item
+$R(\ovr{v_0})$ is the smallest set which complies to:
+  \begin{itemize}
+    \item $\ovr{v_0} \in R(\ovr{v_0})$
+    \item For all $i \in I$ and $w_i \in E_i$ if $v \in R(\ovr{v_0})$ and $c_i(v, w_i)$ holds, \\ then $\ovr{g_i}(v, w_i) \in R(\ovr{v_0})$ \\
+   \end{itemize}
 \end{itemize}
 
-$S_\psi(\ovr{v_0})$ will give the set of indices in for which the \pp\ is constant. Definition \ref{def:lpe} is based upon a minimal fixed point solution. 
 \end{defn}
 
-Note that definition \ref{def:lpe} has to generate the entire statespace. Generating the entire statespace can take a lot of time and space. In some cases generating the entire statespace and checking for constants can infinite time. If we can make an approximation of definition \ref{def:lpe} by making certain assumptions, we can come up with a "faster" solution. However this set of detected constants may be smaller, because it cannot detect all constant \pps .
+$S(\ovr{v_0})$ is the set of indices of \pps\ which are constant is defined:
 
-In our approximation proposals we define $S$:
-\begin{defn}
-The subset of $\lbrace 1, \ldots, n \rbrace$, where the elements of $S$ represent the indices of $d_0, \ldots d_1$ constant \pps .
+\begin{defn}\label{def:lpe_comp}
+$S(\ovr{v_0}) = \lbrace j \in  \lbrace 1, \ldots, n \rbrace \vert \exists_{u : D_j} (\forall_{\ovr{v} \in R(\ovr{v_0})}( v_j = u)) \rbrace $
 \end{defn}
+
+ Definition \ref{def:lpe_comp} has to be fully computed  with a minimal fixed point approach. 
+
+In order to computate  Definition \ref{def:lpe_comp}, we have to generate the entire state space for $R(\ovr{init})$. Generating the entire state space can take a lot of time and space. In some cases it can take infinite time and space. If we can make an approximation of definition \ref{def:lpe_comp} we don't have to inspect all states. However by approximating there can be cases in which not all constant parameters can be found. 
+
+A normal form is needed, because we evaluate open terms. 
+\begin{defn} 
+$NF(p)$ is the normal form of data parameter $p$. 
+\end{defn}
+
+%$S \subseteq \lbrace 1, \ldots, n \rbrace$ is the set of indices of constant \pps . 
+
+%If we rewrite a condition which is an open term, it is possible
+%that the term will not reduce to a normal form \ti{true} or \ti{false}. If the term reduces to a
+%term that is not \ti{true} or \ti{false}, the condition might be \ti{true}. Therefore the summands of the conditions
+%which are \ti{false} are not inspected. 
+
+Because $e_i$ is often used in a \lpe\ to let a read or send action range over a domain and it has influence on wether a \pp\ is constant or variable. If such a $e_i$ is not fixed the corresponding \pp\ is always variable.  This is why we assume $e_i$ is fixed and we use $e'$ as a fixed data parameter of $E_i$.
+%\begin{defn}
+%The subset of $\lbrace 1, \ldots, n \rbrace$, where the elements of $S$ represent the indices of $d_0, \ldots d_1$ constant \pps .
+%\end{defn}
 
 \subsection{Proposal 1} \label{sec:prop1}
-We do not want to inspect all statespaces, so a first approximation proposal will be:
+Let $j : 0 < j \leqslant n $. We assume $d_j$ is in its normal form. If $d_j$ is equal to $NF(\ovr{g_i^j}(\ovr{d},e'))$ for all $i \in I$ we can say that $d_j$ is constant. However some conditions $NF(\ovr{c_i}(\ovr{d},e'))$ might never be \ti{true}, so it useless to compare those $d_j$ with $NF(\ovr{g_i^j}(\ovr{d},e'))$  if $NF(\ovr{c_i}(\ovr{d},e'))$ is not  $"true"$. \\
+
+So we define $S$:
 \begin{defn} \label{def:sug1}
-$S=$
 \begin{displaymath}
 \lbrace   
-j \in \lbrace 1, \ldots , n \rbrace \vert \forall_{i\in I}, \ovr{d}: \ovr{D} , e_i: E_i, ((c_i(\ovr{d},e_i) = true)  \rightarrow d_j = g_i^j(\ovr{d},e_i)))\rbrace
+j \in \lbrace 1, \ldots , n \rbrace \vert \forall_{i\in I} (\forall_{(\ovr{d}: \ovr{D})}((NF(\ovr{c_i}(\ovr{d},e')) = "true")  \Rightarrow (d_j = NF(g_i^j(\ovr{d},e')))))\rbrace
 \end{displaymath}
 This approximation is very basic and does not cover all possible solutions. If we take example
-\ref{example:sug1}, we see the lack in definition \ref{def:sug1}.
-\begin{example} \label{example:sug1} The example \\
+\ref{cexample:sug1}, we see why.
+\begin{example} \label{cexample:sug1} The example \\
 \begin{verbatim}
-proc P(x : Nat) = P(x := 2 * x);
+proc P(x : Nat) = (true) -> P(x := 2 * x);
 init P(x : = 0);
 \end{verbatim}
 
 \end{example}
-If we fill in example \ref{example:sug1} in definition \ref{def:sug1}, this will result into $S = \o$. 
-Because we indicate no $\ovr{d}$, it has to hold for each $\ovr{d}$. If we substitute $\langle x=0 \rangle$ for $d$
-the result should be $S= \lbrace 1 \rbrace$. 
+If we use Definition \ref{def:sug1}, the result is $S = \emptyset$. 
+In Definition \ref{def:sug1} it has to hold for every $\ovr{d}$, however
+we don't want to take a look for every $\ovr{d}$ but for a given $\ovr{d}$, namely $\ovr{init}$.
 %For all $x / 0 $ the outcome of the \pp\ is not constant. However for $x=0$ the \pp\ is constant in this \lpe . 
 %If we use $e_i$, we also have to examine the whole statespace. So we have to create another solution which is less relax then definition \ref{def:sug1}.
 % { j | forall d : d=2*d }
 \end{defn}
 
 \subsection{Proposal 2}
-In section \ref{sec:prop1} we see that definition \ref{def:sug1} is not sufficient, so we try to improve that approximation.
-We propose:
+In section \ref{sec:prop1} we see that definition \ref{def:sug1} is not sufficient, so we try to improve that approximation, by giving $\ovr{d}$ a specific value.  
+
+So we define $S(\ovr{d}:\ovr{D})=$:
 \begin{defn} \label{def:sug2}
-$S(\ovr{d}:\ovr{D})=$
 \begin{displaymath}
 \lbrace   
-j \in \lbrace 1, \ldots , n \rbrace \vert \forall_{i\in I}, ((c_i(\ovr{d},e_i) = true) \rightarrow d_j = g_i^j(\ovr{d},e_i)))\rbrace
+j \in \lbrace 1, \ldots , n \rbrace \vert \forall_{i\in I} (NF(\ovr{c_i}(\ovr{d},e')) = "true") \rightarrow d_j = NF(g_i^j(\ovr{d},e'))))\rbrace
 \end{displaymath}
 %We elimate the problem for checking each state 
-If we take $\ovr{d}$ out of the formula and give it as a parameter to $S$ we can instantiate a particular problem.
-With this improvement to $S$ we can solve the example \ref{example:sug1}. However this this proposal, cannot as another lack. If we take a look at example \ref{example:sug2} we can see why:
-\begin{example} \label{example:sug2} The example \\
+We now can instantiate the $S$ with a $\ovr{d}$. If we instantiate $S$ with $\ovr{init}$ this there is a problem. If we take a look at example \ref{cexample:sug2} we can see why:
+\begin{example} \label{cexample:sug2} The example \\
 \begin{verbatim} 
 proc P(x,y: Nat) = (x=0) -> P(x:= 1, y:= 0) +
                    (x=1) -> P(x:= x, y:= 1);
-init P(0,0);
+init P(x := 0, y:= 0);
 \end{verbatim}
 
 \end{example}
-If we fill example \ref{example:sug2} into defintion \ref{def:sug2}, we get $j = \lbrace 2 \rbrace$. This indicates that the second \pp\ is constant. However this assumption is false. It seems that we only those state space spaces which are adjacent to the initial state.
+If we use defintion \ref{def:sug2}, we get $S(0,0) = \lbrace 2 \rbrace$. This indicates that the second \pp\ is constant. However the result is not correct. The reason for that is that we only inspect those state spaces which are adjacent to the initial state.
 \end{defn}
 
 \subsection{Proposal 3}
-We don't want to inspect all statespaces, so a solution bases upon a minimum fixed point will not do. To give
-an approximation we start off with a proposal base upon a maximum fixed point. So we define: 
+If we rewrite a condition which is an open term, it is possible
+that the term will not reduce to a normal form \ti{true} or \ti{false}. If the term reduces to a
+term that is not \ti{true} or \ti{false}, the condition might be \ti{true} for some values of the free variables in the that term and should be inspected. The summands of the conditions which are \ti{false} are therefore not inspected.
+ 
+If we use solution which is based upon a minimum fixed point, we have to inspect all state spaces in order to verify if a \pp\ is constant or variable. If we start of with a maximum fixed point (all \pps\ are constant) we are intrested in in the largest set in which for a given subset of \pps\ holds that those \pps\ are equal to their next state \pps . Let $j$ be $0 < j \leqslant $ and $\ovr{\otimes_S}$ be a vector generated from subset $S$. If for a all $NF(\ovr{c_i}(\ovr{\otimes_S},e'))$ are not equal to $"false"$, holds that all $\ovr{init}_j$ are equal to$ NF(g_i^j(\ovr{\otimes_S},e'))$, we have found a subset with constant \pps . If we start with the largest subset $S$ and only decrease subset $S$ if the comparison does not hold, we find the largest subset if the comparison holds with subset $S$.
+ 
+This will lead to the Definition \ref{def:sug3} 
+
 \begin{defn} \label{def:sug3} So we are interested in the largest subset:
 
 \begin{flushleft}
@@ -151,41 +183,35 @@ $ S \subseteq \lbrace 1, \ldots, n \rbrace $ \\
 
 such that:\\
 
-$\forall_{i \in I} NF( c_i ( \ovr{\otimes}, e_i ) ) \not\equiv false \rightarrow \forall_{j \in S}.d_j \equiv  NF( g^j(\ovr{\otimes}, e_i )) $
+$\forall_{i \in I} (NF( \ovr{c_i} ( \ovr{\otimes}, e' ) ) \not= "false" \rightarrow \forall_{j \in S}(d_j =  NF( g_i^j(\ovr{\otimes}, e' )))) $
 \end{flushleft}
  
-The normal form of data parameter $p$ is defined $NF(p)$. $v_0$ is the initial \sv\ \ref{sv}. 
-$\ovr{\otimes}$ is used for constructing a \ti{new} \sv\ . Let $\ovr{\otimes}$ be a \ti{new} \sv .
-
 \begin{defn} \label{def:otimes} Let $\ovr{\otimes}$ be:
+
 \begin{displaymath}
-    \forall_{i:0<i\leqslant n}:\otimes_i = \left\{
-        \begin{array}{l l}
-            i \in S                      & d_i \\
-            i \not\in S                  & v_{0_i} \\
-        \end{array} \right.
+\ovr{init} \otimes_S \ovr{d}
 \end{displaymath}
+
+%\begin{displaymath}
+%    \forall_{i:0<i\leqslant n}:\otimes_i = \left\{
+%        \begin{array}{l l}
+%            i \in S                      & d_i \\
+%            i \not\in S                  & v_{0_i} \\
+%        \end{array} \right.
+%\end{displaymath}
 \end{defn}
-If we take a look at Definition \ref{def:sug3} a few modifications are made. 
-Note that we introduced the normal form. The introduction is needed, because we want to 
-evaluate open terms. If we rewrite a condition which contains an open term, it is possible
-that the term will not reduce to a normal form \ti{true} or \ti{false}. If the term reduces to a
-term that is not \ti{true} or \ti{false}, the condition might be \ti{true}. Therefore the summands of the conditions
-which are \ti{false} are not inspected.
+Let $j$ be $ 0 < j\leqslant n$. The notation is $\otimes_S$ to construct a \sv\ for $S$. 
+If $j \not\in S$ then $\otimes_j := d_j$. If $j \in S$ then $\otimes_j := init_j$.
 
-If we compare Definition \ref{def:sug3} to Definition \ref{def:LPE} we see that holds: $$S_{Def. \ref{def:sug3}} \subseteq
-S_{Def. \ref{def:LPE}} $$  For each condition that holds in Definition \ref{def:sug3} there is a condition that holds in Definition \ref{def:LPE}. So for each $i$ in Definition \ref{def:sug3} there is also a $i$ in Definition \ref{def:LPE}. However for each condition that holds in Definition \ref{def:LPE} there is a might be a condition in Definition \ref{def:sug3} which does not hold. Therefore for each $i$ in Definition \ref{def:LPE} there might be no $i$ in Definition \ref{def:sug3}. Because Definition \ref{def:sug3} is based upon a maximum fixed point and Definition \ref{def:LPE} is based upon a minimum fixed point we can conclude Definition \ref{def:sug3} is correct and sufficient.
+If we compare Definition \ref{def:sug3} to Definition \ref{def:lpe_comp} we see the following: 
+$$S_{Def. \ref{def:sug3}} \subseteq S_{Def. \ref{def:lpe_comp}} $$  
+For each condition that holds in Definition \ref{def:sug3} there is a condition $c_i$ that holds in Definition \ref{def:lpe_comp}. So for each summand $i$ in Definition \ref{def:sug3} there is also a summand $i$ in Definition \ref{def:lpe_comp}. However not all conditions that hold in Definition \ref{def:lpe_comp} will hold in in Definition \ref{def:sug3}. Therefore 
+not all summands $i$ in Definition \ref{def:lpe_comp} will hold in Definition \ref{def:sug3}. Because Definition \ref{def:sug3} is based upon a maximum fixed point and Definition \ref{def:lpe_comp} is based upon a minimum fixed point, we can conclude that Definition \ref{def:sug3} is correct and sufficient.
 
-However free variables are not taken into account.
+%However free variables are not taken into account.
 \end{defn}
 
 \subsection{Proposal 4}
-Free variables are data parameters which are not bound to \pps\ of a \lpe\ but occur in a \lpe .
-\begin{defn} Let a free variable $fv$ be defined:
-\begin{displaymath}
-%fv = \lbrace i \vert \exist_i: i \not\in d \wedge i \in  \rbrace
-\end{displaymath}
-\end{defn}
 
 %Idea proposal: \\
 %Use LPE constelim, after termination, build adjacency matrix , and do cross compare on same  
@@ -193,7 +219,7 @@ Free variables are data parameters which are not bound to \pps\ of a \lpe\ but o
 
 \subsection{Algorithm definitions}
 To calculate the set of constant \pps\ we use the algorithm
-\ref{sss:alg} Before we describe the algorithm we the introduce
+\ref{def:sug3} Before we describe the algorithm we the introduce
 used definitions. 
 %These definitions are defined in \ref{sss:algdef}.
 %A more general explanation is given in \ref{sss:algdesc}
@@ -213,21 +239,21 @@ of this vector is \ti{false} this implies that the corresponding
 \end{defn}
 
 \begin{defn} \textbf{- new state vector set}\\
- This set of vectors represents the result of the
+ This set of state vectors represents the result of the
 \pps\ for which the normal form of the condition is not \ti{false}
 \end{defn} 
 
 \begin{defn}
 \textbf{- new flag vector} \\
 This vector of boolean values indicates if the
-corresponding \pps\ are \ti{constant} or \ti{variable} after comparing each element from the \svs with all the other elements of \svs  and the \sv; and conjunction of the \fv and obtained result. 
+corresponding \pps\ are \ti{constant} or \ti{variable} after comparing each element from the \svs with all the other elements of \svs  and the \sv; and conjunction of the \fv\ and obtained result. 
 %\begin{displaymath}
 %\langle \cup_{i \in I}: c_i(\ovr{d, e_i}) : (\ovr{\Bbb{B}}) ) \rangle
 %\end{displaymath}
 \end{defn}
 
 \subsubsection{Description}\label{sss:desc}
-In this section the algorithm is explained informal. First \sv\ is constructed from the initial process of the \lpe (see \cite{LPE_info}). Next the \fv\ is "constructed".
+In this section the algorithm is explained informal. First \sv\ is constructed from the initial process of the \lpe . Next the \fv\ is "constructed".
 % The number of vector elements in this vector is equal to the number of \pps . Each \pp\ corresponds with an element in the \fv .  
 All elements in this vector are set \ti{true}.
 
@@ -236,7 +262,7 @@ We start the iteration. We rewrite and evaluated for each summand its condition.
 %After substitution the condition is rewritten. 
 If the rewritten condition is in a normal form other then \ti{false} the condition might be \ti{true} for some instations of a contained free variable, so the summand will evaluated. 
 
-In this step the \svs\ is constructed. This set of new state vectors contains the set of next state vectors which can be reached from the current \sv\ and for which the condition might be \ti{true}. 
+In this step the \svs\ is constructed. This set contains the set of next state vectors which can be reached from the current \sv\ and for which the condition might be \ti{true}. 
 
 After the \svs\ is constructed, we construct the \nfv . 
 
@@ -244,7 +270,7 @@ After the \svs\ is constructed, we construct the \nfv .
 
 %Next we construct a \ti{new} \fv . For each element in this vector we take the conjunction of all the values of the same element in the vectors of the \fvs . Each element of a vector from the \svs\ is checked if they differ from other elements  in vectors of the \svs . The boolean outcome of both results is the \ti{new} \fv . The reason for this second check is needed on the \svs , because free variables might occur. 
  
-If the \nfv\ differs from the \fv , a \ti{new} \sv\ has to be created as well. The construction of the \ti{new} \sv\ contains all the elements from the \sv\ substituted with data parameters from the vectors out of the \svs which differ . 
+If the \nfv\ differs from the \fv , a \ti{new} \sv\ has to be created as well. The construction of the \ti{new} \sv\ contains all the elements from the \sv\ substituted with data parameters from the vectors of the \svs\ which are different . 
 %These can be found in the \svs . 
 A next iteration is started in which the old \sv\ is substituted by the \ti{new} \sv\ and the old \fv\ is substituted by the \nfv .
   
@@ -252,6 +278,18 @@ If the \ti{new} \fv\ does not differ from the \fv\ the algorithm ends and all \p
 
 \subsubsection{Free variables}
 In \mcrl\ it is possible to use free variables. %Free variables are values which have no particular value and can therefore be threaded as don't care values.
+Let $x$ be a free variable. $x$ can have any value out of domain $X$. However within the \lpe\ the value of free variable $x$ cannot be different from the value of another occurens of $x$.
+
+\begin{example}
+Let $x: \mathbb{B}$ be a free variable.
+\begin{tabbing}
+$P(x) =$ \verb"  " \= $ Q(\urcorner x) + Q(x) $ \\
+$Q(x) =$ \> $ x \rightarrow C $\
+\end{tabbing}
+
+\end{example}
+
+
 If a \pp\ is substituted by a free variable and the \pp\ has already got a value, the value remains the same. If a \pp\ , which is a free variable, is substituted by a variable with a specific value, the value is changed to that specific value. If a \pp , which is a free variable, is substituted by another free variable, the \pp\ remains a free variable. 
 
 If we compare a free variable with another value, either a free variable or a specific value, the comparison always yields \ti{true}. Adding a check on the \svs\ solves the problem of the possibility of fake constants. At first this might seems strange, but is contributes to the validity of the algorithm. Let us concider example \ref{exmpl:freevar}:
@@ -304,19 +342,25 @@ StateVector := $\ovr{init}$; \\
 FlagVector := $\ovr{true}$; \\
 Iteration := \ti{true}; \\
 \tb{while} \= Iteration \tb{do} \ra \\
-  \> NewStateVectorSet := $\o$\\
+  \> NewStateVectorSet := $\emptyset$;\\
+  \> NewFlagVector := FlagVector; \\
   \> \tb{forall} \= $i \in I$ \tb{do} \ra \\
   \>  \>   \tb{if} \= \verb" " \=\\
-  \>  \>   \sq \> $(NV(c_i($Statevector$,e_i)) \neq false) \rightarrow$ \\
-  \>  \>       \> \>NewStateVectorSet := NewStateVectorSet $\cup \lbrace j \vert NV($Statevector$_j) = NV(g_i^j($Statevector$,e_i))) \rbrace$ \\
+  \>  \>   \sq \> $(NV(c_i($Statevector$,e_i)) \not= false) \rightarrow$ \\
+  \>  \>       \> \>NewStateVectorSet := \\
+  \>  \>       \> \> \verb"    " \= NewStateVectorSet $\cup NV(g_i($Statevector$,e_i))$ ;\\  
+%  \>  \>       \>  \>NewFlagVector := \\
+  \>  \>       \>  \>             $\forall_{j : 0 \leqslant j \leq  n}:$ NewFlagVector$_j$ := \\
+  \>  \>       \>  \>   \> NewFlagVector$_j \wedge (NV($Statevector$_j) = NV(g_i^j($Statevector$,e_i))$);\\
+%  \>  \>       \> \> \>$\lbrace j \vert NV($Statevector$_j) = NV(g_i^j($Statevector$,e_i))) \rbrace$ \\
   \>  \>  \sq \>  $(NV(c_i($Statevector$,e_i)) = false) \rightarrow$ \\
   \>  \>  \> \>\tb{skip};\\
   \>  \tb{od} \\
   \>  \tb{if}  \\
   \>  \sq  \> (FlagVector $\neq$ Newflagvector) \ra \\ 
-  \>       \>  \> StateVector := MAGIC2; \\
+  \>       \>  \> $\forall_{j:0 \leqslant j \leq n} :(\exists_{s: s \in \text{NewStateVectorSet}}: ($StateVector$_j \not= s_j \rightarrow $StateVector$_j := s_j$)); \\
   \>       \>  \> FlagVector :=  NewFlagVector; \\
-  \>  \sq \>  (flagvector $=$ newflagvector) \ra  \\
+  \>  \sq \>  (flagvector $=$ NewFlagVector) \ra  \\
   \>      \> \> Iteration := \ti{false};\\
   \>  \tb{fi} \\
   \tb{od}\\
