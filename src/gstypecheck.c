@@ -1343,7 +1343,7 @@ static ATermAppl gstcTraverseActProcVarConstP(ATermTable Vars, ATermAppl ProcTer
     ATermAppl NewProc=gstcTraverseActProcVarConstP(Vars,ATAgetArgument(ProcTerm,0));
     if(!NewProc) {return NULL;}
     ATermAppl Time=ATAgetArgument(ProcTerm,1);
-    ATermAppl NewType=gstcTraverseVarConsTypeD(Vars,&Time,gsMakeUnknown());
+    ATermAppl NewType=gstcTraverseVarConsTypeD(Vars,&Time,gstcExpandResTypes(gsMakeSortIdReal()));
     if(!NewType) {return NULL;}
 
     if(!gstcTypeMatchA(gsMakeSortIdReal(),NewType)){
@@ -2306,19 +2306,23 @@ static ATermAppl gstcExpandPosTypes(ATermAppl Type){
 }
 
 static ATermAppl gstcExpandResTypes(ATermAppl Type){
+  // Expand Result types
   if(gsIsUnknown(Type)) return Type;
   if(gsIsSortId(Type)) Type=gstcUnwindType(Type);
   
-  if(!gsIsSortArrowProd(Type)) return Type;
-  ATermList Args=ATLgetArgument(Type,0);
-  
-  Type=ATAgetArgument(Type,1);
+  ATbool function=ATfalse;
+  ATermList Args;
+  if(gsIsSortArrowProd(Type)){
+    function=ATtrue;
+    Args=ATLgetArgument(Type,0);
+    Type=ATAgetArgument(Type,1);
+  }
   
   if(gstcEqTypesA(gsMakeSortIdReal(),Type)) Type=gstcMakeNotInferred(ATmakeList4((ATerm)gsMakeSortIdPos(),(ATerm)gsMakeSortIdNat(),(ATerm)gsMakeSortIdInt(),(ATerm)gsMakeSortIdReal()));
   if(gstcEqTypesA(gsMakeSortIdInt(),Type)) Type=gstcMakeNotInferred(ATmakeList3((ATerm)gsMakeSortIdPos(),(ATerm)gsMakeSortIdNat(),(ATerm)gsMakeSortIdInt()));
   if(gstcEqTypesA(gsMakeSortIdNat(),Type)) Type=gstcMakeNotInferred(ATmakeList2((ATerm)gsMakeSortIdPos(),(ATerm)gsMakeSortIdNat()));
   
-  return gsMakeSortArrowProd(Args,Type);
+  return (function)?gsMakeSortArrowProd(Args,Type):Type;
 }
 
 static ATermAppl gstcMinType(ATermList TypeList){
