@@ -143,6 +143,12 @@ ATermList gsAddSubstToSubsts(ATermAppl Subst, ATermList Substs);
 bool gsOccurs(ATerm Elt, ATerm Term);
 //Pre: Term is an ATerm containing ATermAppl's and ATermList's only
 //Ret: Elt occurs in Term
+//Note that this is a faster implementation than gsCount(Elt, Term) > 0 because
+//it is used at a crucial point in the rewriter
+
+int gsCount(ATerm Elt, ATerm Term);
+//Pre: Term is an ATerm containing ATermAppl's and ATermList's only
+//Ret: the number of times Elt occurs in Term
 
 //String representations of numbers
 //---------------------------------

@@ -300,6 +300,30 @@ bool gsOccurs(ATerm Elt, ATerm Term)
   return Result;
 }
 
+int gsCount(ATerm Elt, ATerm Term)
+{
+  int Result = 0;
+  if (ATisEqual(Elt, Term)) {
+    Result = 1;
+  } else {
+    //count occurrences of Elt in the arguments/elements of Term
+    if (ATgetType(Term) == AT_APPL) {
+      AFun Head = ATgetAFun((ATermAppl) Term);
+      int NrArgs = ATgetArity(Head);
+      for (int i = 0; i < NrArgs; i++) {
+        Result += gsCount(Elt, ATgetArgument((ATermAppl) Term, i));
+      }
+    } else if (ATgetType(Term) == AT_LIST) {
+      while (!ATisEmpty((ATermList) Term))
+      {
+        Result += gsCount(Elt, ATgetFirst((ATermList) Term));
+        Term = (ATerm) ATgetNext((ATermList) Term);
+      }
+    }
+  }
+  return Result;
+}
+
 //String representations of numbers
 //---------------------------------
 

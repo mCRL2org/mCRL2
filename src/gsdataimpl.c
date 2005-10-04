@@ -2451,6 +2451,11 @@ ATermAppl gsImplFunctionSorts(ATermAppl Spec)
 
 ATermAppl gsImplementData(ATermAppl Spec)
 {
+  int occ = gsCount((ATerm) gsMakeUnknown(), (ATerm) Spec);
+  if (occ > 0) {
+    gsErrorMsg("specification contains %d unknown type%s\n", occ, (occ != 1)?"s":"");
+    return NULL;
+  }
   Spec = gsImplExprs(Spec);
   Spec = gsImplSortRefs(Spec);
   Spec = gsImplFunctionSorts(Spec);
