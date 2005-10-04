@@ -136,9 +136,8 @@ static void print_help(FILE *f, char *Name)
 		  "                         information\n"
 	          "-v, --verbose            print information about the\n"
 		  "                         rewriting process\n"
-	          "-b, --benchmark [num]    rewrites specification num times\n"
-	          "                         (default is 1000 times)\n"
-	          "-R, --rewriter name      use rewriter 'name' (default inner3)\n"
+	          "-b, --benchmark=num      rewrites specification num times\n"
+	          "-R, --rewriter=name      use rewriter 'name' (default inner3)\n"
 	       );
 }
 
@@ -147,12 +146,12 @@ int main(int argc, char **argv)
 	FILE *InStream, *OutStream;
 	ATerm stackbot;
 	ATermAppl Spec;
-	#define sopts "hqvb::R:"
+	#define sopts "hqvb:R:"
 	struct option lopts[] = {
 		{ "help",		no_argument,		NULL,	'h' },
 		{ "quiet",		no_argument,		NULL,	'q' },
-		{ "verbose",		no_argument,		NULL,	'b' },
-		{ "benchmark",		optional_argument,	NULL,	'b' },
+		{ "verbose",		no_argument,		NULL,	'v' },
+		{ "benchmark",		required_argument,	NULL,	'b' },
 		{ "rewriter",		required_argument,	NULL,	'R' },
 		{ 0, 0, 0, 0 }
 	};
@@ -165,7 +164,7 @@ int main(int argc, char **argv)
 	quiet = false;
 	verbose = false;
 	benchmark = false;
-	bench_times = 1000;
+	bench_times = 0;
 	strat = GS_REWR_INNER3;
 	while ( (opt = getopt_long(argc,argv,sopts,lopts,NULL)) != -1 )
 	{
@@ -182,10 +181,7 @@ int main(int argc, char **argv)
 				break;
 			case 'b':
 				benchmark = true;
-				if ( optarg != NULL && (optarg[0] >= '0') && (optarg[0] <= '9') )
-				{
-					bench_times = strtoul(optarg,NULL,0);
-				}
+				bench_times = strtoul(optarg,NULL,0);
 				break;
 			case 'R':
 				strat = RewriteStrategyFromString(optarg);
