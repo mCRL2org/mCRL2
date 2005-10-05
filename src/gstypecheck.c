@@ -154,8 +154,8 @@ static ATermList gstcGetVarTypes(ATermList VarDecls);
 static ATermAppl gstcTypeMatchA(ATermAppl Type, ATermAppl PosType);
 static ATermList gstcTypeMatchL(ATermList TypeList, ATermList PosTypeList);
 static ATbool gstcHasUnknown(ATermAppl Type);
-static ATermAppl gstcExpandPosTypes(ATermAppl Type);
-static ATermAppl gstcExpandResTypes(ATermAppl Type);
+static ATermAppl gstcExpandNumTypesUp(ATermAppl Type);
+static ATermAppl gstcExpandNumTypesDown(ATermAppl Type);
 static ATermAppl gstcMinType(ATermList TypeList);
 static ATbool gstcMActIn(ATermList MAct, ATermList MActs);
 static ATbool gstcMActInSubEq(ATermList MAct, ATermList MActs);
@@ -1150,7 +1150,8 @@ static ATermAppl gstcRewrActProc(ATermTable Vars, ATermAppl ProcTerm){
   for(ATermList Pars=ATLgetArgument(ProcTerm,1);!ATisEmpty(Pars);Pars=ATgetNext(Pars),PosTypeList=ATgetNext(PosTypeList)){
     ATermAppl Par=ATAgetFirst(Pars);
     ATermAppl PosType=ATAgetFirst(PosTypeList);
-    ATermAppl NewPosType=gstcTraverseVarConsTypeD(Vars,&Par,PosType);
+
+    ATermAppl NewPosType=gstcTraverseVarConsTypeD(Vars,&Par,gstcExpandNumTypesDown(PosType));
 
     if(!NewPosType) {return NULL;}
     NewPars=ATinsert(NewPars,(ATerm)Par);
@@ -1176,7 +1177,7 @@ static ATermAppl gstcRewrActProc(ATermTable Vars, ATermAppl ProcTerm){
 	{gsErrorMsg("Cannot cast %P to %P (while typechecking %P)\n",NewPosType,PosType,Par);return NULL;}
       
       NewPars=ATinsert(NewPars,(ATerm)Par);
-      CastedPosTypeList=ATinsert(CastedPosTypeList,(ATerm)NewPosType);
+      CastedPosTypeList=ATinsert(CastedPosTypeList,(ATerm)CastedNewPosType);
     }
     NewPars=ATreverse(NewPars);
     NewPosTypeList=ATreverse(CastedPosTypeList);
@@ -1359,7 +1360,7 @@ static ATermAppl gstcTraverseActProcVarConstP(ATermTable Vars, ATermAppl ProcTer
     ATermAppl NewProc=gstcTraverseActProcVarConstP(Vars,ATAgetArgument(ProcTerm,0));
     if(!NewProc) {return NULL;}
     ATermAppl Time=ATAgetArgument(ProcTerm,1);
-    ATermAppl NewType=gstcTraverseVarConsTypeD(Vars,&Time,gstcExpandResTypes(gsMakeSortIdReal()));
+    ATermAppl NewType=gstcTraverseVarConsTypeD(Vars,&Time,gstcExpandNumTypesDown(gsMakeSortIdReal()));
     if(!NewType) {return NULL;}
 
     if(!gstcTypeMatchA(gsMakeSortIdReal(),NewType)){
@@ -1599,7 +1600,7 @@ static ATermAppl gstcTraverseVarConsTypeD(ATermTable Vars, ATermAppl *DataTerm, 
 	  if(!gstcEqTypesA(NeededType,Type)){
 	    gsDebugMsg("Doing again on %T, Type: %T, Needed type: %T\n",Arg,Type,NeededType);
 	    ATermAppl NewType=gstcTypeMatchA(NeededType,Type);
-	    if(!NewType) NewType=gstcTypeMatchA(NeededType,gstcExpandPosTypes(Type));
+	    if(!NewType) NewType=gstcTypeMatchA(NeededType,gstcExpandNumTypesUp(Type));
 	    if(!NewType) {gsErrorMsg("needed type %P does not match possible type %P (while typechecking %P in %P)\n",NeededType,Type,Arg,*DataTerm);return NULL;}
 	    Type=NewType;
 	    Type=gstcTraverseVarConsTypeD(Vars,&Arg,Type);
@@ -1774,7 +1775,7 @@ static ATermAppl gstcTraverseVarConsTypeDN(int nFactPars, ATermTable Vars, ATerm
 	
 	ParList=BackupParList;
 	gsDebugMsg("Trying casting for Op %T with %d arguments (ParList: %T; PosType: %T)\n",Name,nFactPars,ParList,PosType);
-	PosType=gstcExpandPosTypes(PosType);
+	PosType=gstcExpandNumTypesUp(PosType);
 	for(;!ATisEmpty(ParList);ParList=ATgetNext(ParList)){
 	  ATermAppl Par=ATAgetFirst(ParList);
 	  if((Par=gstcTypeMatchA(Par,PosType)))
@@ -1791,7 +1792,7 @@ static ATermAppl gstcTraverseVarConsTypeDN(int nFactPars, ATermTable Vars, ATerm
 	
 	ParList=BackupParList;
 	gsDebugMsg("Trying result casting for Op %T with %d arguments (ParList: %T; PosType: %T)\n",Name,nFactPars,ParList,PosType);
-	PosType=gstcExpandResTypes(gstcExpandPosTypes(PosType));
+	PosType=gstcExpandNumTypesDown(gstcExpandNumTypesUp(PosType));
 	for(;!ATisEmpty(ParList);ParList=ATgetNext(ParList)){
 	  ATermAppl Par=ATAgetFirst(ParList);
 	  if((Par=gstcTypeMatchA(Par,PosType)))
@@ -2294,33 +2295,33 @@ static ATbool gstcHasUnknown(ATermAppl Type){
   return ATtrue;
 }
 
-static ATermAppl gstcExpandPosTypes(ATermAppl Type){
+static ATermAppl gstcExpandNumTypesUp(ATermAppl Type){
   //Expand Pos.. to possible bigger types.
   if(gsIsUnknown(Type)) return Type;
   if(gstcEqTypesA(gsMakeSortIdPos(),Type)) return gstcMakeNotInferred(ATmakeList4((ATerm)gsMakeSortIdPos(),(ATerm)gsMakeSortIdNat(),(ATerm)gsMakeSortIdInt(),(ATerm)gsMakeSortIdReal()));
   if(gstcEqTypesA(gsMakeSortIdNat(),Type)) return gstcMakeNotInferred(ATmakeList3((ATerm)gsMakeSortIdNat(),(ATerm)gsMakeSortIdInt(),(ATerm)gsMakeSortIdReal()));
   if(gstcEqTypesA(gsMakeSortIdInt(),Type)) return gstcMakeNotInferred(ATmakeList2((ATerm)gsMakeSortIdInt(),(ATerm)gsMakeSortIdReal()));
   if(gsIsSortId(Type)) return Type;
-  if(gsIsSortList(Type) || gsIsSortSet(Type) || gsIsSortBag(Type)) return ATsetArgument(Type,(ATerm)gstcExpandPosTypes(ATAgetArgument(Type,0)),0);
+  if(gsIsSortList(Type) || gsIsSortSet(Type) || gsIsSortBag(Type)) return ATsetArgument(Type,(ATerm)gstcExpandNumTypesUp(ATAgetArgument(Type,0)),0);
   if(gsIsSortStruct(Type)) return Type;
 
   if(gsIsSortArrowProd(Type)){
     //the argument types, and if the resulting type is SortArrowProd -- recursively
     ATermList NewTypeList=ATmakeList0();
     for(ATermList TypeList=ATLgetArgument(Type,0);!ATisEmpty(TypeList);TypeList=ATgetNext(TypeList))
-      NewTypeList=ATinsert(NewTypeList,(ATerm)gstcExpandPosTypes(gstcUnwindType(ATAgetFirst(TypeList))));
+      NewTypeList=ATinsert(NewTypeList,(ATerm)gstcExpandNumTypesUp(gstcUnwindType(ATAgetFirst(TypeList))));
     ATermAppl ResultType=ATAgetArgument(Type,1);
     if(!gsIsSortArrowProd(ResultType))
       return ATsetArgument(Type,(ATerm)ATreverse(NewTypeList),0);
     else 
-      return gsMakeSortArrowProd(ATreverse(NewTypeList),gstcExpandPosTypes(gstcUnwindType(ResultType)));
+      return gsMakeSortArrowProd(ATreverse(NewTypeList),gstcExpandNumTypesUp(gstcUnwindType(ResultType)));
   } 
   
   return Type;
 }
 
-static ATermAppl gstcExpandResTypes(ATermAppl Type){
-  // Expand Result types
+static ATermAppl gstcExpandNumTypesDown(ATermAppl Type){
+  // Expand Numeric types down
   if(gsIsUnknown(Type)) return Type;
   if(gsIsSortId(Type)) Type=gstcUnwindType(Type);
   
@@ -2409,8 +2410,8 @@ static ATbool gstcMActSubEq(ATermList MAct1, ATermList MAct2){
 
 static ATermAppl gstcUnifyMinType(ATermAppl Type1, ATermAppl Type2){
   //Find the minimal type that Unifies the 2. If not possible, return NULL.
-  ATermAppl Res=gstcTypeMatchA(Type1,gstcExpandPosTypes(Type2));
-  if(!Res) Res=gstcTypeMatchA(Type2,gstcExpandPosTypes(Type1));
+  ATermAppl Res=gstcTypeMatchA(Type1,gstcExpandNumTypesUp(Type2));
+  if(!Res) Res=gstcTypeMatchA(Type2,gstcExpandNumTypesUp(Type1));
   if(!Res) return NULL;
   if(gstcIsNotInferred(Res)) Res=ATAgetFirst(ATLgetArgument(Res,0));
   gsDebugMsg("gstcUnifyMinType: Type1 %T; Type2 %T; Res: %T\n",Type1,Type2,Res);    
