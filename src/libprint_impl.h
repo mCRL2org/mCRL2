@@ -630,7 +630,8 @@ void PRINT_FUNC(PrintPart_Appl)(PRINT_OUTTYPE OutStream,
         //print 0
         PRINT_FUNC(fprints)(OutStream, "0");
       } else if ((ATisEqual(Head, gsMakeOpIdCNat()) ||
-          ATisEqual(Head, gsMakeOpIdCInt())) && ArgsLength == 1) {
+          ATisEqual(Head, gsMakeOpIdCInt()) ||
+          ATisEqual(Head, gsMakeOpIdCReal())) && ArgsLength == 1) {
         //print argument (ArgsLength == 1)
         PRINT_FUNC(PrintPart_Appl)(OutStream, ATAelementAt(Args, 0),
           pp_format, ShowSorts, PrecLevel);

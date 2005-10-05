@@ -217,6 +217,10 @@ static void gsImplSortInt(TDataDecls *PDataDecls);
 //Pre: PDataDecls represents a pointer to new data declarations
 //Post:an implementation of sort Int is added to *PDataDecls
 
+static void gsImplSortReal(TDataDecls *PDataDecls);
+//Pre: PDataDecls represents a pointer to new data declarations
+//Post:an implementation of sort Real is added to *PDataDecls
+
 static void gsSplitSortDecls(ATermList SortDecls, ATermList *PSortIds,
   ATermList *PSortRefs);
 //Pre: SortDecls is a list of SortId's and SortRef's
@@ -371,17 +375,21 @@ ATermAppl gsImplExprsPart(ATermAppl Part, ATermList *PSubsts,
     Part = gsImplSortBag(Part, PSubsts, PDataDecls);
   } else if (gsIsSortId(Part)) {
     //Part is a sort identifier; add data declarations for this sort, if needed
-    if (ATisEqual(Part, gsMakeSortIdInt())) {
-      //add implementation of sort Int, if necessary
-      if (ATindexOf(PDataDecls->Sorts, (ATerm) gsMakeSortIdInt(), 0) == -1) {
-        gsImplSortInt(PDataDecls);
-      }
-    }
-    if (ATisEqual(Part,gsMakeSortIdNat()) || ATisEqual(Part,gsMakeSortIdInt()))
+    if (ATisEqual(Part,gsMakeSortIdNat()))
     {
       //add implementation of sort Nat, if necessary
       if (ATindexOf(PDataDecls->Sorts, (ATerm) gsMakeSortIdNat(), 0) == -1) {
         gsImplSortNat(PDataDecls);
+      }
+    } else if (ATisEqual(Part, gsMakeSortIdInt())) {
+      //add implementation of sort Int, if necessary
+      if (ATindexOf(PDataDecls->Sorts, (ATerm) gsMakeSortIdInt(), 0) == -1) {
+        gsImplSortInt(PDataDecls);
+      }
+    } else if (ATisEqual(Part, gsMakeSortIdReal())) {
+      //add implementation of sort Int, if necessary
+      if (ATindexOf(PDataDecls->Sorts, (ATerm) gsMakeSortIdReal(), 0) == -1) {
+        gsImplSortReal(PDataDecls);
       }
     }
   } else if (gsIsDataApplProd(Part)) {
@@ -1004,10 +1012,6 @@ ATermAppl gsImplSortList(ATermAppl SortList, ATermList *PSubsts,
   TDataDecls *PDataDecls)
 {
   assert(gsIsSortList(SortList));
-  //add implementation of sort Nat, if necessary
-  if (ATindexOf(PDataDecls->Sorts, (ATerm) gsMakeSortIdNat(), 0) == -1) {
-    gsImplSortNat(PDataDecls);
-  }
   //declare fresh sort identifier for SortList
   ATermAppl SortId = gsMakeFreshListSortId((ATerm) PDataDecls->Sorts);
   PDataDecls->Sorts = ATinsert(PDataDecls->Sorts, (ATerm) SortId);
@@ -1144,6 +1148,10 @@ ATermAppl gsImplSortList(ATermAppl SortList, ATermList *PSubsts,
         gsMakeDataExprCons(dSortElt,
           gsMakeDataExprRTail(gsMakeDataExprCons(eSortElt, sSortId))))
     ), PDataDecls->DataEqns);
+  //add implementation of sort Nat, if necessary
+  if (ATindexOf(PDataDecls->Sorts, (ATerm) gsMakeSortIdNat(), 0) == -1) {
+    gsImplSortNat(PDataDecls);
+  }
   return SortId;
 }
 
@@ -1299,16 +1307,14 @@ ATermAppl gsImplSortBag(ATermAppl SortBag, ATermList *PSubsts,
   assert(gsIsSortBag(SortBag));
   ATermAppl SortElt = ATAgetArgument(SortBag, 0);  
   //add implementation of sort Set(SortElt), if necessary
+  // XXX This piece of code should somehow be moved to the end of the function
   ATermAppl SortSet = gsMakeSortSet(SortElt);
-  ATermAppl SortSetImpl = (ATermAppl) gsSubstValues(*PSubsts, (ATerm) SortSet, false);
+  ATermAppl SortSetImpl =
+    (ATermAppl) gsSubstValues(*PSubsts, (ATerm) SortSet, false);
   if (ATisEqual(SortSetImpl, SortSet)) {
     //Set(SortElt) is not implemented yet, because it does not occur as an lhs
     //in the list of substitutions in *PSubsts
     SortSetImpl = gsImplSortSet(SortSet, PSubsts, PDataDecls);
-  }
-  //add implementation of sort Nat, if necessary
-  if (ATindexOf(PDataDecls->Sorts, (ATerm) gsMakeSortIdNat(), 0) == -1) {
-    gsImplSortNat(PDataDecls);
   }
   //declare fresh sort identifier for SortBag
   ATermAppl SortId = gsMakeFreshBagSortId((ATerm) PDataDecls->Sorts);
@@ -1478,6 +1484,10 @@ ATermAppl gsImplSortBag(ATermAppl SortBag, ATermList *PSubsts,
         gsMakeDataExprSet2Bag(uSortSetImpl, SortId),
         gsMakeDataExprBagComp(Set2BagFunc, SortId))
     ), PDataDecls->DataEqns);
+  //add implementation of sort Nat, if necessary
+  if (ATindexOf(PDataDecls->Sorts, (ATerm) gsMakeSortIdNat(), 0) == -1) {
+    gsImplSortNat(PDataDecls);
+  }
   return SortId;
 }
 
@@ -1652,7 +1662,7 @@ void gsImplSortPos(TDataDecls *PDataDecls)
          gsMakeDataExprGT(p, q), gsMakeDataExprLT(q, p)),
       //maximum (Pos -> Pos -> Pos)
       (ATerm) gsMakeDataEqn(pql,nil, gsMakeDataExprMax(p, q),
-         gsMakeDataExprIf(gsMakeDataExprGTE(p, q), q, p)),
+         gsMakeDataExprIf(gsMakeDataExprLTE(p, q), q, p)),
       //minimum (Pos -> Pos -> Pos)
       (ATerm) gsMakeDataEqn(pql,nil, gsMakeDataExprMin(p, q),
          gsMakeDataExprIf(gsMakeDataExprLTE(p, q), p, q)),
@@ -2082,8 +2092,9 @@ void gsImplSortInt(TDataDecls *PDataDecls)
       (ATerm) gsMakeDataEqn(pl, nil,
          gsMakeDataExprPos2Int(p), gsMakeDataExprCInt(gsMakeDataExprCNat(p))),
       //convert Int to Pos (Int -> Pos)
-      (ATerm) gsMakeDataEqn(pl, nil,
-         gsMakeDataExprInt2Pos(gsMakeDataExprCInt(gsMakeDataExprCNat(p))), p),
+      (ATerm) gsMakeDataEqn(nl, nil,
+         gsMakeDataExprInt2Pos(gsMakeDataExprCInt(n)),
+         gsMakeDataExprNat2Pos(n)),
       //less than or equal (Int -> Int -> Bool)
       (ATerm) gsMakeDataEqn(mnl,nil, 
          gsMakeDataExprLTE(gsMakeDataExprCInt(m), gsMakeDataExprCInt(n)),
@@ -2268,6 +2279,157 @@ void gsImplSortInt(TDataDecls *PDataDecls)
          gsMakeDataExprExp(gsMakeDataExprCNeg(p), n),
          gsMakeDataExprCNeg(gsMakeDataExprExp(p, n)))
     ), PDataDecls->DataEqns);
+  //add implementation of sort Nat, if necessary
+  if (ATindexOf(PDataDecls->Sorts, (ATerm) gsMakeSortIdNat(), 0) == -1) {
+    gsImplSortNat(PDataDecls);
+  }
+}
+
+void gsImplSortReal(TDataDecls *PDataDecls)
+{
+  //Declare sort Real
+  PDataDecls->Sorts = ATinsert(PDataDecls->Sorts, (ATerm) gsMakeSortIdReal());
+  //Declare constructors for sort Real
+  PDataDecls->ConsOps =
+    ATconcat(ATmakeList1((ATerm) gsMakeOpIdCReal()), PDataDecls->ConsOps);
+  //Declare operations for sort Real
+  ATermAppl seReal = gsMakeSortExprReal();
+  PDataDecls->Ops = ATconcat(ATmakeList(23,
+      (ATerm) gsMakeOpIdEq(seReal),
+      (ATerm) gsMakeOpIdNeq(seReal),
+      (ATerm) gsMakeOpIdIf(seReal),
+      (ATerm) gsMakeOpIdPos2Real(),
+      (ATerm) gsMakeOpIdNat2Real(),
+      (ATerm) gsMakeOpIdInt2Real(),
+      (ATerm) gsMakeOpIdReal2Pos(),
+      (ATerm) gsMakeOpIdReal2Nat(),
+      (ATerm) gsMakeOpIdReal2Int(),
+      (ATerm) gsMakeOpIdLTE(seReal),
+      (ATerm) gsMakeOpIdLT(seReal),
+      (ATerm) gsMakeOpIdGTE(seReal),
+      (ATerm) gsMakeOpIdGT(seReal),
+      (ATerm) gsMakeOpIdMax(seReal, seReal),
+      (ATerm) gsMakeOpIdMin(seReal),
+      (ATerm) gsMakeOpIdAbs(seReal),
+      (ATerm) gsMakeOpIdNeg(seReal),
+      (ATerm) gsMakeOpIdSucc(seReal),
+      (ATerm) gsMakeOpIdPred(seReal),
+      (ATerm) gsMakeOpIdAdd(seReal, seReal),
+      (ATerm) gsMakeOpIdSubt(seReal),
+      (ATerm) gsMakeOpIdMult(seReal),
+      (ATerm) gsMakeOpIdExp(seReal)
+    ), PDataDecls->Ops);
+  //Declare data equations for sort Int
+  ATermList el = ATmakeList0();
+  ATermAppl nil = gsMakeNil();
+  ATermAppl t = gsMakeDataExprTrue();
+  ATermAppl f = gsMakeDataExprFalse();
+  ATermAppl b = gsMakeDataVarId(gsString2ATermAppl("b"), gsMakeSortExprBool());
+  ATermAppl p = gsMakeDataVarId(gsString2ATermAppl("p"), gsMakeSortExprPos());
+  ATermAppl n = gsMakeDataVarId(gsString2ATermAppl("n"), gsMakeSortExprNat());
+  ATermAppl x = gsMakeDataVarId(gsString2ATermAppl("x"), gsMakeSortExprInt());
+  ATermAppl y = gsMakeDataVarId(gsString2ATermAppl("y"), gsMakeSortExprInt());
+  ATermAppl r = gsMakeDataVarId(gsString2ATermAppl("r"), gsMakeSortExprReal());
+  ATermAppl s = gsMakeDataVarId(gsString2ATermAppl("s"), gsMakeSortExprReal());
+  ATermList pl = ATmakeList1((ATerm) p);
+  ATermList nl = ATmakeList1((ATerm) n);
+  ATermList brl = ATmakeList2((ATerm) b, (ATerm) r);
+  ATermList xl  = ATmakeList1((ATerm) x);
+  ATermList xyl = ATmakeList2((ATerm) x, (ATerm) y);
+  ATermList nxl = ATmakeList2((ATerm) n, (ATerm) x);
+  ATermList rl  = ATmakeList1((ATerm) r);
+  ATermList rsl = ATmakeList2((ATerm) r, (ATerm) s);
+  PDataDecls->DataEqns = ATconcat(ATmakeList(26,
+      //equality (Real -> Real -> Bool)
+      (ATerm) gsMakeDataEqn(xyl,nil, 
+         gsMakeDataExprEq(gsMakeDataExprCReal(x), gsMakeDataExprCReal(y)),
+         gsMakeDataExprEq(x, y)),
+      (ATerm) gsMakeDataEqn(rl, nil, gsMakeDataExprEq(r, r), t),
+      //inequality (Real -> Real -> Bool)
+      (ATerm) gsMakeDataEqn(rsl,nil,
+         gsMakeDataExprNeq(r, s), gsMakeDataExprNot(gsMakeDataExprEq(r, s))),
+      //conditional (Bool -> Real -> Real -> Real)
+      (ATerm) gsMakeDataEqn(rsl,nil, gsMakeDataExprIf(t, r, s), r),
+      (ATerm) gsMakeDataEqn(rsl,nil, gsMakeDataExprIf(f, r, s), s),
+      (ATerm) gsMakeDataEqn(brl,nil, gsMakeDataExprIf(b, r, r), r),
+      //convert Int to Real (Int -> Real)
+      (ATerm) gsMakeDataEqn(el, nil, gsMakeOpIdInt2Real(), gsMakeOpIdCReal()),
+      //convert Nat to Real (Nat -> Real)
+      (ATerm) gsMakeDataEqn(nl, nil,
+         gsMakeDataExprNat2Real(n),
+         gsMakeDataExprCReal(gsMakeDataExprCInt(n))),
+      //convert Pos to Real (Pos -> Real)
+      (ATerm) gsMakeDataEqn(pl, nil,
+         gsMakeDataExprPos2Real(p),
+         gsMakeDataExprCReal(gsMakeDataExprCInt(gsMakeDataExprCNat(p)))),
+      //convert Real to Int (Real -> Int)
+      (ATerm) gsMakeDataEqn(xl, nil,
+         gsMakeDataExprReal2Int(gsMakeDataExprCReal(x)), x),
+      //convert Real to Nat (Real -> Nat)
+      (ATerm) gsMakeDataEqn(xl, nil,
+         gsMakeDataExprReal2Nat(gsMakeDataExprCReal(x)),
+         gsMakeDataExprInt2Nat(x)),
+      //convert Real to Pos (Real -> Pos)
+      (ATerm) gsMakeDataEqn(xl, nil,
+         gsMakeDataExprReal2Pos(gsMakeDataExprCReal(x)),
+         gsMakeDataExprInt2Pos(x)),
+      //less than or equal (Real -> Real -> Bool)
+      (ATerm) gsMakeDataEqn(xyl,nil, 
+         gsMakeDataExprLTE(gsMakeDataExprCReal(x), gsMakeDataExprCReal(y)),
+         gsMakeDataExprLTE(x, y)),
+      //less than (Real -> Real -> Bool)
+      (ATerm) gsMakeDataEqn(xyl,nil, 
+         gsMakeDataExprLT(gsMakeDataExprCReal(x), gsMakeDataExprCReal(y)),
+         gsMakeDataExprLT(x, y)),
+      //greater than or equal (Real -> Real -> Bool)
+      (ATerm) gsMakeDataEqn(rsl,nil,
+         gsMakeDataExprGTE(r, s), gsMakeDataExprLTE(s, r)),
+      //greater than (Real -> Real -> Bool)
+      (ATerm) gsMakeDataEqn(rsl,nil,
+         gsMakeDataExprGT(r, s), gsMakeDataExprLT(s, r)),
+      //maximum (Real -> Real -> Real)
+      (ATerm) gsMakeDataEqn(rsl,nil, gsMakeDataExprMax(r, s),
+         gsMakeDataExprIf(gsMakeDataExprLTE(r, s), s, r)),
+      //minimum (Real -> Real -> Real)
+      (ATerm) gsMakeDataEqn(rsl,nil, gsMakeDataExprMin(r, s),
+         gsMakeDataExprIf(gsMakeDataExprLTE(r, s), r, s)),
+      //absolute value (Real -> Real) 
+      (ATerm) gsMakeDataEqn(xl,nil,
+         gsMakeDataExprAbs(gsMakeDataExprCReal(x)),
+         gsMakeDataExprCReal(gsMakeDataExprCInt(gsMakeDataExprAbs(x)))),
+      //negation (Real -> Real)
+      (ATerm) gsMakeDataEqn(xl,nil,
+         gsMakeDataExprNeg(gsMakeDataExprCReal(x)),
+         gsMakeDataExprCReal(gsMakeDataExprNeg(x))),
+      //successor (Real -> Real)
+      (ATerm) gsMakeDataEqn(xl,nil,
+         gsMakeDataExprSucc(gsMakeDataExprCReal(x)),
+         gsMakeDataExprCReal(gsMakeDataExprSucc(x))),
+      //predecessor (Real -> Real)
+      (ATerm) gsMakeDataEqn(xl,nil,
+         gsMakeDataExprPred(gsMakeDataExprCReal(x)),
+         gsMakeDataExprCReal(gsMakeDataExprPred(x))),
+      //addition (Real -> Real -> Real)
+      (ATerm) gsMakeDataEqn(xyl, nil,
+         gsMakeDataExprAdd(gsMakeDataExprCReal(x), gsMakeDataExprCReal(y)),
+         gsMakeDataExprCReal(gsMakeDataExprAdd(x, y))),
+      //subtraction (Real -> Real -> Real)
+      (ATerm) gsMakeDataEqn(xyl, nil,
+         gsMakeDataExprSubt(gsMakeDataExprCReal(x), gsMakeDataExprCReal(y)),
+         gsMakeDataExprCReal(gsMakeDataExprSubt(x, y))),
+      //multiplication (Real -> Real -> Real)
+      (ATerm) gsMakeDataEqn(xyl, nil,
+         gsMakeDataExprMult(gsMakeDataExprCReal(x), gsMakeDataExprCReal(y)),
+         gsMakeDataExprCReal(gsMakeDataExprMult(x, y))),
+      //exponentiation (Real -> Nat -> Real)
+      (ATerm) gsMakeDataEqn(nxl,nil,
+         gsMakeDataExprExp(gsMakeDataExprCReal(x), n),
+         gsMakeDataExprCReal(gsMakeDataExprExp(x, n)))
+    ), PDataDecls->DataEqns);
+  //add implementation of sort Int, if necessary
+  if (ATindexOf(PDataDecls->Sorts, (ATerm) gsMakeSortIdInt(), 0) == -1) {
+    gsImplSortInt(PDataDecls);
+  }
 }
 
 void gsImplFunctionSort(ATermAppl SortArrow, TDataDecls *PDataDecls)

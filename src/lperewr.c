@@ -97,7 +97,7 @@ static ATermAppl rewrite_lpe(ATermAppl Spec)
 		c = ATAgetArgument(ATAgetFirst(l),3);
 		if ( !gsIsNil(c) )
 		{
-			c = rewrite_proc(c);
+			c = gsRewriteTerm(c);
 		}
 		d = ATLgetArgument(ATAgetFirst(l),4);
 		n = ATmakeList0();

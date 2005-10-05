@@ -3,4 +3,4 @@
 
 act a;
 
-init a||a;
+init a || a;

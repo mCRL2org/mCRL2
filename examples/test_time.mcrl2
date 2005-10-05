@@ -3,6 +3,6 @@
 
 act a;
 
-proc P=a@1.P;
+proc P = a@1 . P;
 
 init P;

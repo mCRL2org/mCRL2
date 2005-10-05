@@ -674,13 +674,14 @@ Name        & \text{Type}                  & Description      & Ext. repr.\\
                                            & absolute value       & functional\\
 \verb+abs+        & \srtint \To \srtnat    & absolute value       & functional\\
 \verb+-+          & A \To A \cup \srtint   & negation             & prefix\\
-\verb+succ+       & \sub{A}{\f{PN}} \To \srtpos & successor       & functional\\
-\verb+succ+       & \sub{A}{\f{IR}} \To \sub{A}{\f{IR}}
+\verb+succ+       & \srtnat \To \srtpos    & successor            & functional\\
+\verb+succ+       & \sub{A}{\f{PIR}} \To \sub{A}{\f{PIR}}
                                            & successor            & functional\\
 \verb+pred+       & \srtpos \To \srtnat    & predecessor          & functional\\
 \verb+pred+       & \sub{A}{\f{NIR}} \To \sub{A}{\f{NIR}} \cup \srtint
                                            & predecessor     & functional\\
-\verb+@dub+$^*$   & \srtbool \To A \To A   & double and add a bit & functional\\
+\verb+@dub+$^*$   & \srtbool \To \sub{A}{\f{PNI}} \To \sub{A}{\f{PNI}}
+                                           & double and add a bit & functional\\
 \verb-+-          & \sub{A}{\f{PN}} \times \sub{B}{\f{PN}} \To
                     \sub{A}{\f{PN}} \cap \sub{B}{\f{PN}}
                                            & addition             & infix\\
