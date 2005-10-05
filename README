@@ -18,10 +18,11 @@ Copyright (C) 2005 Eindhoven University of Technology
 
 This file is part of the mCRL2 toolset.
 
-mCRL@ is free software; you can redistribute it and/or modify it under the
+mCRL2 is free software; you can redistribute it and/or modify it under the
 terms of the GNU General Public License as published by the Free Software
 Foundation; either version 2, or (at your option) any later version.
 
-mCRL@ is distributed in the hope that it will be useful, but WITHOUT ANY
+mCRL2 is distributed in the hope that it will be useful, but WITHOUT ANY
 WARRANTY; without even the implied warranty of MERCHANTABILITY or FITNESS FOR A
-PARTICULAR PURPOSE. See the GNU General Public License for more details.
+PARTICULAR PURPOSE. See the GNU General Public License for more details. A copy
+is provided in COPYING.
