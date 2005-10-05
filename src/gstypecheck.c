@@ -407,6 +407,14 @@ void gstcDataInit(void){
 			    gstcMakeSortArrowProd2(gsMakeSortIdReal(),gsMakeSortIdReal(),gsMakeSortIdBool()));
   //more
   gstcAddSystemFunctionProd(gsMakeOpIdNameMax(),
+			    gstcMakeSortArrowProd2(gsMakeSortIdPos(),gsMakeSortIdPos(),gsMakeSortIdPos()));
+  gstcAddSystemFunctionProd(gsMakeOpIdNameMax(),
+			    gstcMakeSortArrowProd2(gsMakeSortIdPos(),gsMakeSortIdNat(),gsMakeSortIdPos()));
+  gstcAddSystemFunctionProd(gsMakeOpIdNameMax(),
+			    gstcMakeSortArrowProd2(gsMakeSortIdNat(),gsMakeSortIdPos(),gsMakeSortIdPos()));
+  gstcAddSystemFunctionProd(gsMakeOpIdNameMax(),
+			    gstcMakeSortArrowProd2(gsMakeSortIdNat(),gsMakeSortIdNat(),gsMakeSortIdNat()));
+  gstcAddSystemFunctionProd(gsMakeOpIdNameMax(),
 			    gstcMakeSortArrowProd2(gsMakeSortIdPos(),gsMakeSortIdInt(),gsMakeSortIdPos()));
   gstcAddSystemFunctionProd(gsMakeOpIdNameMax(),
 			    gstcMakeSortArrowProd2(gsMakeSortIdInt(),gsMakeSortIdPos(),gsMakeSortIdPos()));
@@ -428,6 +436,10 @@ void gstcDataInit(void){
   gstcAddSystemFunctionProd(gsMakeOpIdNameMin(),
 			    gstcMakeSortArrowProd2(gsMakeSortIdReal(),gsMakeSortIdReal(),gsMakeSortIdReal()));
   //more
+  gstcAddSystemFunctionProd(gsMakeOpIdNameAbs(),
+			    gstcMakeSortArrowProd1(gsMakeSortIdPos(),gsMakeSortIdPos()));
+  gstcAddSystemFunctionProd(gsMakeOpIdNameAbs(),
+			    gstcMakeSortArrowProd1(gsMakeSortIdNat(),gsMakeSortIdNat()));
   gstcAddSystemFunctionProd(gsMakeOpIdNameAbs(),
 			    gstcMakeSortArrowProd1(gsMakeSortIdInt(),gsMakeSortIdNat()));
   gstcAddSystemFunctionProd(gsMakeOpIdNameAbs(),
@@ -488,9 +500,13 @@ void gstcDataInit(void){
 			    gstcMakeSortArrowProd2(gsMakeSortIdReal(),gsMakeSortIdReal(),gsMakeSortIdReal()));
   //more
   gstcAddSystemFunctionProd(gsMakeOpIdNameDiv(),
+			    gstcMakeSortArrowProd2(gsMakeSortIdPos(),gsMakeSortIdPos(),gsMakeSortIdNat()));
+  gstcAddSystemFunctionProd(gsMakeOpIdNameDiv(),
 			    gstcMakeSortArrowProd2(gsMakeSortIdNat(),gsMakeSortIdPos(),gsMakeSortIdNat()));
   gstcAddSystemFunctionProd(gsMakeOpIdNameDiv(),
 			    gstcMakeSortArrowProd2(gsMakeSortIdInt(),gsMakeSortIdPos(),gsMakeSortIdInt()));
+  gstcAddSystemFunctionProd(gsMakeOpIdNameMod(),
+			    gstcMakeSortArrowProd2(gsMakeSortIdPos(),gsMakeSortIdPos(),gsMakeSortIdNat()));
   gstcAddSystemFunctionProd(gsMakeOpIdNameMod(),
 			    gstcMakeSortArrowProd2(gsMakeSortIdNat(),gsMakeSortIdPos(),gsMakeSortIdNat()));
   gstcAddSystemFunctionProd(gsMakeOpIdNameMod(),

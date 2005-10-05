@@ -297,6 +297,9 @@ ATermAppl gsMakeSortExprNat(void);
 ATermAppl gsMakeSortExprInt(void);
 //Ret: Sort expression for `Int'
 
+ATermAppl gsMakeSortExprReal(void);
+//Ret: Sort expression for `Real'
+
 
 //Auxiliary functions concerning sort expressions
 ATermAppl gsMakeSortArrow2(ATermAppl SortExprDom1, ATermAppl SortExprDom2,
@@ -452,16 +455,19 @@ ATermAppl gsMakeOpIdGT(ATermAppl SortExpr);
 //Pre: SortExpr is Pos, Nat or Int
 //Ret: Operation identifier for `greater than' on SortExpr
 
-ATermAppl gsMakeOpIdMax(ATermAppl SortExpr);
-//Pre: SortExpr is Pos, Nat or Int
-//Ret: Operation identifier for `maximum' on SortExpr
+ATermAppl gsMakeOpIdMax(ATermAppl SortExprLHS, ATermAppl SortExprRHS);
+//Pre: SortExprLHS, SortExprRHS is Pos, Nat or Int
+//Ret: Operation identifier for `maximum' on SortExprLHS and SortExprRHS of
+//     sort intersect(SortExprLHS, SortExprRHS)
 
 ATermAppl gsMakeOpIdMin(ATermAppl SortExpr);
 //Pre: SortExpr is Pos, Nat or Int
 //Ret: Operation identifier for `minimum' on SortExpr
 
-ATermAppl gsMakeOpIdAbs(void);
-//Ret: Operation identifier for `absolute value' of sort Int -> Nat
+ATermAppl gsMakeOpIdAbs(ATermAppl SortExpr);
+//Pre: SortExpr is Pos, Nat or Int
+//Ret: Operation identifier for `absolute value' on SortExpr of sort
+//     intersect(SortExpr, Nat)
 
 ATermAppl gsMakeOpIdNeg(ATermAppl SortExpr);
 //Pre: SortExpr is Pos, Nat or Int
@@ -829,8 +835,9 @@ ATermAppl gsMakeDataExprMin(ATermAppl DataExprLHS, ATermAppl DataExprRHS);
 //Ret: Data expression for the minimum of DataExprLHS and DataExprRHS
 
 ATermAppl gsMakeDataExprAbs(ATermAppl DataExpr);
-//Pre: DataExpr is a data expression of sort Int 
-//Ret: Data expression for the absolute value of DataExpr, which has sort Nat
+//Pre: DataExpr is a data expression of sort Pos, Nat or Int
+//Ret: Data expression for the absolute value of DataExpr of sort
+//     intersect(SortExpr, Nat)
 
 ATermAppl gsMakeDataExprNeg(ATermAppl DataExpr);
 //Pre: DataExpr is a data expression of sort Pos, Nat or Int 
