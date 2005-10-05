@@ -1,0 +1,27 @@
+This directory contains the mCRL2 toolset.
+
+See the file INSTALL for compilation and installation instructions.
+
+At the moment Windows builds are only possible using the gcc/g++ compilers
+provided by MinGW and Cygwin.
+
+Send bug reports to <bug@mcrl2.org>. Please include the version number from
+`mcrl22lpe --version', and a complete, self-contained test case in each bug
+report.
+
+If you have questions about using the mCRL2 toolset which the documentation
+does not answer, send mail to <info@mcrl2.org>.
+
+-----
+
+Copyright (C) 2005 Eindhoven University of Technology
+
+This file is part of the mCRL2 toolset.
+
+mCRL@ is free software; you can redistribute it and/or modify it under the
+terms of the GNU General Public License as published by the Free Software
+Foundation; either version 2, or (at your option) any later version.
+
+mCRL@ is distributed in the hope that it will be useful, but WITHOUT ANY
+WARRANTY; without even the implied warranty of MERCHANTABILITY or FITNESS FOR A
+PARTICULAR PURPOSE. See the GNU General Public License for more details.
