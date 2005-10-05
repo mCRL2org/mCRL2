@@ -202,6 +202,7 @@ ATermAppl gsMakeOpIdName0();
 ATermAppl gsMakeOpIdNameCNat();
 ATermAppl gsMakeOpIdNameCNeg();
 ATermAppl gsMakeOpIdNameCInt();
+ATermAppl gsMakeOpIdNameCReal();
 ATermAppl gsMakeOpIdNamePos2Nat();
 ATermAppl gsMakeOpIdNamePos2Int();
 ATermAppl gsMakeOpIdNamePos2Real();
@@ -403,6 +404,9 @@ ATermAppl gsMakeOpIdCInt(void);
 //Ret: Operation identifier for the creation of an integer from a natural
 //     number
 
+ATermAppl gsMakeOpIdCReal(void);
+//Ret: Operation identifier for the creation of a real from an integer
+
 ATermAppl gsMakeOpIdPos2Nat(void);
 //Ret: Operation identifier for the conversion of Pos to Nat
 
@@ -440,19 +444,19 @@ ATermAppl gsMakeOpIdReal2Int(void);
 //Ret: Operation identifier for the conversion of Real to Int
 
 ATermAppl gsMakeOpIdLTE(ATermAppl SortExpr);
-//Pre: SortExpr is Pos, Nat or Int
+//Pre: SortExpr is Pos, Nat, Int or Real
 //Ret: Operation identifier for `less than or equal' on SortExpr
 
 ATermAppl gsMakeOpIdLT(ATermAppl SortExpr);
-//Pre: SortExpr is Pos, Nat or Int
+//Pre: SortExpr is Pos, Nat, Int or Real
 //Ret: Operation identifier for `less than' on SortExpr
 
 ATermAppl gsMakeOpIdGTE(ATermAppl SortExpr);
-//Pre: SortExpr is Pos, Nat or Int
+//Pre: SortExpr is Pos, Nat, Int or Real
 //Ret: Operation identifier for `greater than or equal' on SortExpr
 
 ATermAppl gsMakeOpIdGT(ATermAppl SortExpr);
-//Pre: SortExpr is Pos, Nat or Int
+//Pre: SortExpr is Pos, Nat, Int or Real
 //Ret: Operation identifier for `greater than' on SortExpr
 
 ATermAppl gsMakeOpIdMax(ATermAppl SortExprLHS, ATermAppl SortExprRHS);
@@ -777,6 +781,10 @@ ATermAppl gsMakeDataExprCNeg(ATermAppl DataExpr);
 ATermAppl gsMakeDataExprCInt(ATermAppl DataExpr);
 //Pre: DataExpr is a data expression of sort Nat 
 //Ret: DataExpr as a data expression of sort Int
+
+ATermAppl gsMakeDataExprCReal(ATermAppl DataExpr);
+//Pre: DataExpr is a data expression of sort Int
+//Ret: DataExpr as a data expression of sort Real
 
 ATermAppl gsMakeDataExprPos2Nat(ATermAppl DataExpr);
 //Pre: DataExpr is a data expression of sort Pos 

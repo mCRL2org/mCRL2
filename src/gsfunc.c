@@ -22,10 +22,29 @@ bool IsPNISort(ATermAppl SortExpr);
 bool IsPNIRSort(ATermAppl SortExpr);
 //Ret: SortExpr is a sort expression for Pos, Nat, Int or Real
 
+ATermAppl IntersectPNSorts(ATermAppl SortExpr1, ATermAppl SortExpr2);
+//Pre: IsPNSort(SortExpr1) and IsPNSort(SortExpr2)
+//Ret: the sort resulting from intersecting SortExpr1 and SortExpr2
+
 ATermAppl IntersectPNISorts(ATermAppl SortExpr1, ATermAppl SortExpr2);
-//Pre: SortExpr1 and SortExpr2 are sort expressions for Pos, Nat or Int
-//Ret: The sort which results from taking the intersection of SortExpr1 and
-//     SortExpr2
+//Pre: IsPNISort(SortExpr1) and IsPNISort(SortExpr2)
+//Ret: the sort resulting from intersecting SortExpr1 and SortExpr2
+
+ATermAppl IntersectPNIRSorts(ATermAppl SortExpr1, ATermAppl SortExpr2);
+//Pre: IsPNIRSort(SortExpr1) and IsPNIRSort(SortExpr2)
+//Ret: the sort resulting from intersecting SortExpr1 and SortExpr2
+
+ATermAppl UnitePNSorts(ATermAppl SortExpr1, ATermAppl SortExpr2);
+//Pre: IsPNSort(SortExpr1) and IsPNSort(SortExpr2)
+//Ret: the sort resulting from uniting SortExpr1 and SortExpr2
+
+ATermAppl UnitePNISorts(ATermAppl SortExpr1, ATermAppl SortExpr2);
+//Pre: IsPNISort(SortExpr1) and IsPNISort(SortExpr2)
+//Ret: the sort resulting from uniting SortExpr1 and SortExpr2
+
+ATermAppl UnitePNIRSorts(ATermAppl SortExpr1, ATermAppl SortExpr2);
+//Pre: IsPNIRSort(SortExpr1) and IsPNIRSort(SortExpr2)
+//Ret: the sort resulting from uniting SortExpr1 and SortExpr2
 
 //Functions for the internal ATerm structure
 //------------------------------------------
@@ -170,6 +189,7 @@ static ATermAppl gsOpIdName0;
 static ATermAppl gsOpIdNameCNat;
 static ATermAppl gsOpIdNameCNeg;
 static ATermAppl gsOpIdNameCInt;
+static ATermAppl gsOpIdNameCReal;
 static ATermAppl gsOpIdNamePos2Nat;
 static ATermAppl gsOpIdNamePos2Int;
 static ATermAppl gsOpIdNamePos2Real;
@@ -335,6 +355,7 @@ void gsEnableConstructorFunctions(void)
     gsOpIdNameCNat         = gsString2ATermAppl("@cNat");
     gsOpIdNameCNeg         = gsString2ATermAppl("@cNeg");
     gsOpIdNameCInt         = gsString2ATermAppl("@cInt");
+    gsOpIdNameCReal        = gsString2ATermAppl("@cReal");
     gsOpIdNamePos2Nat      = gsString2ATermAppl("Pos2Nat");
     gsOpIdNamePos2Int      = gsString2ATermAppl("Pos2Int");
     gsOpIdNamePos2Real     = gsString2ATermAppl("Pos2Real");
@@ -491,6 +512,7 @@ void gsEnableConstructorFunctions(void)
     ATprotectAppl(&gsOpIdNameCNat);
     ATprotectAppl(&gsOpIdNameCNeg);
     ATprotectAppl(&gsOpIdNameCInt);
+    ATprotectAppl(&gsOpIdNameCReal);
     ATprotectAppl(&gsOpIdNamePos2Nat);
     ATprotectAppl(&gsOpIdNamePos2Int);
     ATprotectAppl(&gsOpIdNamePos2Real);
@@ -1434,6 +1456,11 @@ ATermAppl gsMakeOpIdNameCInt() {
   return gsOpIdNameCInt;
 }
 
+ATermAppl gsMakeOpIdNameCReal() {
+  assert(gsConstructorFunctionsEnabled);
+  return gsOpIdNameCReal;
+}
+
 ATermAppl gsMakeOpIdNamePos2Nat() {
   assert(gsConstructorFunctionsEnabled);
   return gsOpIdNamePos2Nat;
@@ -2040,6 +2067,13 @@ ATermAppl gsMakeOpIdCInt(void)
   assert(gsConstructorFunctionsEnabled);
   return gsMakeOpId(gsOpIdNameCInt,
     gsMakeSortArrow(gsMakeSortExprNat(), gsMakeSortExprInt()));
+}
+
+ATermAppl gsMakeOpIdCReal(void)
+{
+  assert(gsConstructorFunctionsEnabled);
+  return gsMakeOpId(gsOpIdNameCReal,
+    gsMakeSortArrow(gsMakeSortExprInt(), gsMakeSortExprReal()));
 } 
 
 ATermAppl gsMakeOpIdPos2Nat(void)
@@ -2087,7 +2121,7 @@ ATermAppl gsMakeOpIdInt2Nat(void)
 ATermAppl gsMakeOpIdLTE(ATermAppl SortExpr)
 {
   assert(gsConstructorFunctionsEnabled);
-  assert(IsPNISort(SortExpr));
+  assert(IsPNIRSort(SortExpr));
   return gsMakeOpId(gsOpIdNameLTE,
     gsMakeSortArrow2(SortExpr, SortExpr, gsMakeSortExprBool()));
 }
@@ -2606,6 +2640,12 @@ ATermAppl gsMakeDataExprCInt(ATermAppl DataExpr)
 {
   assert(ATisEqual(gsGetSort(DataExpr), gsMakeSortExprNat()));
   return gsMakeDataAppl(gsMakeOpIdCInt(), DataExpr);
+}
+
+ATermAppl gsMakeDataExprCReal(ATermAppl DataExpr)
+{
+  assert(ATisEqual(gsGetSort(DataExpr), gsMakeSortExprInt()));
+  return gsMakeDataAppl(gsMakeOpIdCReal(), DataExpr);
 }
 
 ATermAppl gsMakeDataExprPos2Nat(ATermAppl DataExpr)
@@ -3451,25 +3491,96 @@ bool IsPNIRSort(ATermAppl SortExpr)
     ATisEqual(SortExpr, gsMakeSortExprReal());
 }
 
+ATermAppl IntersectPNSorts(ATermAppl SortExpr1, ATermAppl SortExpr2)
+{
+  assert(IsPNSort(SortExpr1));
+  assert(IsPNSort(SortExpr2));
+  ATermAppl seNat = gsMakeSortExprNat();
+  if (ATisEqual(SortExpr1, seNat)) {
+    //SortExpr1 is the biggest type, return SortExpr2
+    return SortExpr2;
+  } else if (ATisEqual(SortExpr2, seNat)) {
+    //SortExpr2 is the biggest type, return SortExpr1
+    return SortExpr1;
+  } else {
+    //SortExpr1 and SortExpr2 are both of sort Pos
+    return gsMakeSortExprPos();
+  }
+}
+
 ATermAppl IntersectPNISorts(ATermAppl SortExpr1, ATermAppl SortExpr2)
 {
   assert(IsPNISort(SortExpr1));
   assert(IsPNISort(SortExpr2));
-  if (ATisEqual(SortExpr1, gsMakeSortExprPos())) {
-    //SortExpr1 is the smallest type, return SortExpr1
-    return SortExpr1;
-  } else if (ATisEqual(SortExpr1, gsMakeSortExprInt())) {
+  ATermAppl seInt = gsMakeSortExprInt();
+  if (ATisEqual(SortExpr1, seInt)) {
     //SortExpr1 is the biggest type, return SortExpr2
     return SortExpr2;
+  } else if (ATisEqual(SortExpr2, seInt)) {
+    //SortExpr2 is the biggest type, return SortExpr1
+    return SortExpr1;
   } else {
-    //SortExpr1 is Nat
-    if (ATisEqual(SortExpr2, gsMakeSortExprPos())) {
-      //SortExpr2 is of a smaller type, return SortExpr2
-      return SortExpr2;
-    } else {
-      //SortExpr2 is of a bigger or equal type, return SortExpr1
-      return SortExpr1;
-    }
+    //SortExpr1 and SortExpr2 are both PN sorts
+    return IntersectPNSorts(SortExpr1, SortExpr2);
+  }
+}
+
+ATermAppl IntersectPNIRSorts(ATermAppl SortExpr1, ATermAppl SortExpr2)
+{
+  assert(IsPNIRSort(SortExpr1));
+  assert(IsPNIRSort(SortExpr2));
+  ATermAppl seReal = gsMakeSortExprReal();
+  if (ATisEqual(SortExpr1, seReal)) {
+    //SortExpr1 is the biggest type, return SortExpr2
+    return SortExpr2;
+  } else if (ATisEqual(SortExpr2, seReal)) {
+    //SortExpr2 is the biggest type, return SortExpr1
+    return SortExpr1;
+  } else {
+    //SortExpr1 and SortExpr2 are both PNI sorts
+    return IntersectPNISorts(SortExpr1, SortExpr2);
+  }
+}
+
+ATermAppl UnitePNSorts(ATermAppl SortExpr1, ATermAppl SortExpr2)
+{
+  assert(IsPNSort(SortExpr1));
+  assert(IsPNSort(SortExpr2));
+  ATermAppl seNat = gsMakeSortExprNat();
+  if (ATisEqual(SortExpr1, seNat) || ATisEqual(SortExpr2, seNat)) {
+    //SortExpr1 or SortExpr2 is the biggest type, return it
+    return seNat;
+  } else {
+    //SortExpr1 and SortExpr2 are both of sort Pos
+    return gsMakeSortExprPos();
+  }
+}
+
+ATermAppl UnitePNISorts(ATermAppl SortExpr1, ATermAppl SortExpr2)
+{
+  assert(IsPNISort(SortExpr1));
+  assert(IsPNISort(SortExpr2));
+  ATermAppl seInt = gsMakeSortExprInt();
+  if (ATisEqual(SortExpr1, seInt) || ATisEqual(SortExpr2, seInt)) {
+    //SortExpr1 or SortExpr2 is the biggest type, return it
+    return seInt;
+  } else {
+    //SortExpr1 and SortExpr2 are both PN sorts
+    return UnitePNSorts(SortExpr1, SortExpr2);
+  }
+}
+
+ATermAppl UnitePNIRSorts(ATermAppl SortExpr1, ATermAppl SortExpr2)
+{
+  assert(IsPNIRSort(SortExpr1));
+  assert(IsPNIRSort(SortExpr2));
+  ATermAppl seReal = gsMakeSortExprReal();
+  if (ATisEqual(SortExpr1, seReal) || ATisEqual(SortExpr2, seReal)) {
+    //SortExpr1 or SortExpr2 is the biggest type, return it
+    return seReal;
+  } else {
+    //SortExpr1 and SortExpr2 are both PNI sorts
+    return UnitePNISorts(SortExpr1, SortExpr2);
   }
 }
 

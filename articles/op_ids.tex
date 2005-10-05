@@ -507,6 +507,7 @@
 \newcommand{\srtpos}{\f{Pos}}
 \newcommand{\srtnat}{\f{Nat}}
 \newcommand{\srtint}{\f{Int}}
+\newcommand{\srtreal}{\f{Real}}
 
 % mCRL Operations
 \newcommand{\opzeronat}{{0n}}
@@ -558,12 +559,15 @@
 \newcommand{\qed}{\hfill\ensuremath{\quad\Box}}
 \newcommand{\leftmerge}{\underline {\parallel}}
 
-\newenvironment{genspect}%
+\newenvironment{mcrl2}%
 {\par\bigskip\noindent%
  \begin{tabular}{@{}>{\bf}p{2.3em}L@{\ }L@{\ }L@{\ }L@{\ }L@{\ }L@{\ }L@{\ }L}%
 }%
 {\end{tabular}\bigskip\par%
 }
+
+% A_{_{s}}
+\newcommand{\sub}[2]{\ensuremath{{#1}_{_{#2}}}}
 
 \begin{document}
 
@@ -598,7 +602,7 @@ Here, \frm{S} stands for an arbitrary sort expression.
 \begin{table}[!htb]
 \centering
 \begin{tabular}{l|L|l|l}
-Name          & \text{Type}                     & Description & External repr.\\
+Name          & \text{Type}                          & Description & Ext. repr.\\
 \hline
 \verb+true+   & \srtbool                              & true         & constant\\
 \verb+false+  & \srtbool                              & false        & constant\\
@@ -622,16 +626,18 @@ Name          & \text{Type}                     & Description & External repr.\\
 \newpage
 \subsection*{Numbers}
 
-The system identifiers for positive numbers, natural numbers and integers with
-the corresponding hierarchy $\llbracket \srtpos \rrbracket \subset \llbracket
-\srtnat \rrbracket \subset \llbracket \srtint \rrbracket$ are listed in
-table~\ref{tab:ptc:numbers}.  Here, we assume $A,B \in \set{\srtpos, \srtnat,
-\srtint}$ with $A \neq B$, and $A_{s}$ restricts $A$ to those sorts that have
-a prefix in the string $s$, e.g.\ $A_{\f{PN}} \in \set{\srtpos, \srtnat}$.
-Furthermore $X \cap Y$ represents the intersection of data types underlying
-sorts $X,Y$, i.e.\ $\llbracket X \cap Y\rrbracket = \llbracket X \rrbracket
-\cap \llbracket Y \rrbracket$. Note that for numeric sorts there always exists
-a unique sort for $X \cap Y$ because of the hierarchy. Finally, system
+The system identifiers for positive numbers, natural numbers, integers and
+reals with the corresponding hierarchy $\llbracket \srtpos \rrbracket \subset
+\llbracket \srtnat \rrbracket \subset \llbracket \srtint \rrbracket \subset
+\llbracket \srtreal \rrbracket$ are listed in table~\ref{tab:ptc:numbers}.
+Here, we assume $A,B \in \set{\srtpos, \srtnat, \srtint, \srtreal}$ with $A
+\neq B$, and $A_{s}$ restricts $A$ to those sorts that have a prefix in the
+string $s$, e.g.\ $A_{\f{PN}} \in \set{\srtpos, \srtnat}$.  Furthermore $A \cap
+B$ and $A \cup B$ are unique sorts that result from taking the
+intersection/union of the data types underlying $A,B$, i.e.\ the sorts that
+satisfy $\llbracket A \cap B\rrbracket = \llbracket A \rrbracket \cap
+\llbracket B \rrbracket$ and $\llbracket A \cup B\rrbracket = \llbracket A
+\rrbracket \cup \llbracket B \rrbracket$, respectively.  Finally, system
 identifiers that do not occur in the table are automatically casted \emph{up}
 in the hierarchy by the type checker, e.g.\ $-1 + 0$ becomes $-1 +
 \f{Nat2Int}(0)$.
@@ -639,7 +645,7 @@ in the hierarchy by the type checker, e.g.\ $-1 + 0$ becomes $-1 +
 \begin{table}[!htb]
 \centering
 \begin{tabular}{l|L|l|l}
-Name        & \text{Type}                  & Description      & External repr.\\
+Name        & \text{Type}                  & Description      & Ext. repr.\\
 \hline
 \verb+@1+$^*$     & \srtpos                & 1                    & number\\
 \verb+@cDub+$^*$  & \srtbool \To \srtpos \To \srtpos
@@ -650,41 +656,50 @@ Name        & \text{Type}                  & Description      & External repr.\\
 \verb+@cNeg+$^*$  & \srtpos \To \srtint    & negate positive      & number\\
 \verb+@cInt+$^*$  & \srtnat \To \srtint    & create integer from natural
                                                                   & number\\
+\verb+@cReal+$^*$ & \srtint \To \srtreal   & create real from integer
+                                                                  & number\\
 \verb+A2B+        & A \To B                & convert \frm{A} to \frm{B}
                                                                   & functional\\
 \verb+<=+         & A \times A \To \srtbool& less than or equal   & infix\\
 \verb-<-          & A \times A \To \srtbool& less than            & infix\\
 \verb+>=+         & A \times A \To \srtbool& greater than or equal& infix\\
 \verb->-          & A \times A \To \srtbool& greater than         & infix\\
-\verb+max+        & A \times B \To A \cap B& maximum              & functional\\
+\verb+max+        & \sub{A}{\f{PNI}} \times \sub{B}{\f{PNI}} \To
+                    \sub{A}{\f{PNI}} \cap \sub{B}{\f{PNI}}
+                                           & maximum              & functional\\
+\verb+max+        & \srtreal \times \srtreal \To \srtreal      
+                                           & maximum              & functional\\
 \verb+min+        & A \times A \To A       & minimum              & functional\\
-\verb+abs+        & A \To A \cap \srtnat   & absolute value       & functional\\
-\verb+-+          & A \To \srtint          & negation             & prefix\\
-\verb+succ+       & A_{\f{PN}} \To \srtpos & successor            & functional\\
-\verb+succ+       & \srtint \To \srtint    & successor            & functional\\
+\verb+abs+        & \sub{A}{\f{PNR}} \To \sub{A}{\f{PNR}}
+                                           & absolute value       & functional\\
+\verb+abs+        & \srtint \To \srtnat    & absolute value       & functional\\
+\verb+-+          & A \To A \cup \srtint   & negation             & prefix\\
+\verb+succ+       & \sub{A}{\f{PN}} \To \srtpos & successor       & functional\\
+\verb+succ+       & \sub{A}{\f{IR}} \To \sub{A}{\f{IR}}
+                                           & successor            & functional\\
 \verb+pred+       & \srtpos \To \srtnat    & predecessor          & functional\\
-\verb+pred+       & A_{\f{NI}} \To \srtint & predecessor          & functional\\
+\verb+pred+       & \sub{A}{\f{NIR}} \To \sub{A}{\f{NIR}} \cup \srtint
+                                           & predecessor     & functional\\
 \verb+@dub+$^*$   & \srtbool \To A \To A   & double and add a bit & functional\\
-\verb-+-          & A_{\f{PN}} \times B_{\f{PN}} \To A_{\f{PN}} \cap B_{\f{PN}}
+\verb-+-          & \sub{A}{\f{PN}} \times \sub{B}{\f{PN}} \To
+                    \sub{A}{\f{PN}} \cap \sub{B}{\f{PN}}
                                            & addition             & infix\\
-\verb-+-          & \srtint \times \srtint \To \srtint
+\verb-+-          & \sub{A}{\f{IR}} \times \sub{A}{\f{IR}} \To \sub{A}{\f{IR}}
                                            & addition             & infix\\
 \verb+@addc+$^*$  & \srtbool \To \srtpos \To \srtpos \To \srtpos
                                            & addition with carry  & functional\\
-\verb+-+          & A \times A \To \srtint & subtraction          & infix\\
-\verb+@gtesubt+   & A_{\f{PN}} \times A_{\f{PN}} \To \srtnat
+\verb+-+          & A \times A \To A \cup \srtint & subtraction   & infix\\
+\verb+@gtesubt+$^*$ & \sub{A}{\f{PN}} \times \sub{A}{\f{PN}} \To \srtnat
                                            & GTE subtraction      & functional\\
 \verb+@gtesubtb+$^*$ & \srtbool \To \srtpos \To \srtpos \To \srtnat
                                     & GTE subtraction with borrow & functional\\
 \verb+*+          & A \times A \To A       & multiplication       & infix\\
 \verb+@multir+$^*$& \srtbool \To \srtpos \To & multiplication with& functional\\
            &\hfill \srtpos \To \srtpos \To \srtpos &\hfill intermediate result\\
-\verb+div+        & A_{\f{PN}} \times \srtpos \To \srtnat
+\verb+div+   & \sub{A}{\f{PNI}} \times \srtpos \To \sub{A}{\f{PNI}} \cup \srtnat
                                         & quotient after division & infix\\
-\verb+div+        & \srtint \times \srtpos \To \srtint & quotient after division
-                                                                  & infix\\
-\verb+mod+        & A \times \srtpos \To \srtnat & remainder after division
-                                                                  & infix\\
+\verb+mod+        & \sub{A}{\f{PNI}} \times \srtpos \To \srtnat
+                                       & remainder after division & infix\\
 \verb+exp+        & A \times \srtnat \To A & exponentation        & functional\\
 \verb+@even+$^*$  & \srtnat \To \srtbool   & even                 & functional\\
 \end{tabular}
@@ -700,7 +715,7 @@ The system identifiers for lists are listed in table~\ref{tab:ptc:lists}. Here,
 \begin{table}[!htb]
 \centering
 \begin{tabular}{l|L|l|l}
-Name & \text{Type} & Description & External repr.\\
+Name & \text{Type} & Description & Ext. repr.\\
 \hline
 \verb+[]+    & \fa{List}{S}
 & empty list                     & constant\\
@@ -735,7 +750,7 @@ The system identifiers for sets are listed in table~\ref{tab:ptc:sets}. Here,
 \begin{table}[!htb]
 \centering
 \begin{tabular}{l|L|l|l}
-Name & \text{Type} & Description & External repr.\\
+Name & \text{Type} & Description & Ext. repr.\\
 \hline
 \verb+@set+$^*$& (S \To \srtbool) \To \fa{Set}{S}
 & set comprehension & set comprehension\\
@@ -768,7 +783,7 @@ The system identifiers for bags are listed in table~\ref{tab:ptc:bags}. Here,
 \begin{table}[!htb]
 \centering
 \begin{tabular}{l|L|l|l}
-Name & \text{Type} & Description & External repr.\\
+Name & \text{Type} & Description & Ext. repr.\\
 \hline
 \verb+@bag+$^*$& (S \To \srtnat) \To \fa{Bag}{S}
 & bag comprehension & bag comprehension\\
