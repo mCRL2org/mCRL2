@@ -632,8 +632,9 @@ Furthermore $X \cap Y$ represents the intersection of data types underlying
 sorts $X,Y$, i.e.\ $\llbracket X \cap Y\rrbracket = \llbracket X \rrbracket
 \cap \llbracket Y \rrbracket$. Note that for numeric sorts there always exists
 a unique sort for $X \cap Y$ because of the hierarchy. Finally, system
-identifiers that do not occur in the table are automatically casted up in the
-hierarchy by the type checker, e.g.\ $-1 + 0$ becomes $-1 + \f{Nat2Int}(0)$.
+identifiers that do not occur in the table are automatically casted \emph{up}
+in the hierarchy by the type checker, e.g.\ $-1 + 0$ becomes $-1 +
+\f{Nat2Int}(0)$.
 
 \begin{table}[!htb]
 \centering
@@ -664,7 +665,6 @@ Name        & \text{Type}                  & Description      & External repr.\\
 \verb+pred+       & \srtpos \To \srtnat    & predecessor          & functional\\
 \verb+pred+       & A_{\f{NI}} \To \srtint & predecessor          & functional\\
 \verb+@dub+$^*$   & \srtbool \To A \To A   & double and add a bit & functional\\
-\verb+@double+$^*$& \srtint \To \srtint    & double               & functional\\
 \verb-+-          & A_{\f{PN}} \times B_{\f{PN}} \To A_{\f{PN}} \cap B_{\f{PN}}
                                            & addition             & infix\\
 \verb-+-          & \srtint \times \srtint \To \srtint
