@@ -2,7 +2,7 @@
 " Language:   mCRL2
 " Extension:  mcrl2
 " Maintainer: Aad Mathijssen <A.H.J.Mathijssen@tue.nl>
-" Date:       24-06-2005
+" Date:       05-10-2005
 
 syntax clear
 
@@ -11,7 +11,7 @@ syntax case match
 syntax keyword gsSpecKW     sort cons map var eqn act proc init struct
 syntax keyword gsProcCKW    delta tau
 syntax keyword gsProcKW     sum restrict allow hide rename comm
-syntax keyword gsSortCKW    Bool Pos Nat Int
+syntax keyword gsSortCKW    Bool Pos Nat Int Real
 syntax keyword gsSortKW     List Set Bag
 syntax keyword gsDataCKW    true false
 syntax keyword gsDataKW     whr end lambda forall exists div mod in
