@@ -1084,6 +1084,14 @@ static ATermList linMergeMultiActionList(ATermList ma1, ATermList ma2)
 
 static ATermAppl linMergeMultiAction(ATermAppl ma1, ATermAppl ma2)
 {
+  if (gsIsDelta(ma1)) 
+  { return ma1;
+  }
+
+  if (gsIsDelta(ma2))
+  { return ma2;
+  }
+
   assert(gsIsMultAct(ma1));
   assert(gsIsMultAct(ma2));
  
@@ -6944,7 +6952,7 @@ static ATermList combinesumlist(
                           condition3,
                           gsMakeDataExprEq(actiontime1,actiontime2));
           }
-        }                         
+        }
   
         nextstate2=substitute_assignmentlist(
                      rename2_list,
@@ -6961,7 +6969,7 @@ static ATermList combinesumlist(
         ATermList nextstate3=ATconcat(nextstate1,nextstate2);
         
         condition3=RewriteTerm(condition3);
-        if (condition3!=gsMakeDataExprFalse())
+        if ((condition3!=gsMakeDataExprFalse()) && (!gsIsDelta(multiaction3)))
         { resultsumlist=
             ATinsertA(
               resultsumlist,
@@ -7253,9 +7261,6 @@ static void initialize_data(void)
   ATprotectList(&localequationvariables);
   ATprotectAppl(&realsort);
   realsort=gsMakeSortId(gsString2ATermAppl("Real"));
-  if (!existsort(gsMakeSortId(gsString2ATermAppl("Real"))))
-  { realsort=gsMakeSortId(gsString2ATermAppl("Nat"));
-  }
 }
 
 /**************** alphaconversion ********************************/
