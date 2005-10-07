@@ -25,6 +25,42 @@
 namespace atermpp
 {
 
+/// Returns a copy of aterm t in which all occurrences of src
+/// have been replaced with dest.
+///
+inline
+aterm aterm_replace(aterm t, aterm src, aterm dest)
+{
+  if (t == src)
+    return dest;
+
+  if (t.type() == AT_APPL)
+  {
+    if (t.to_aterm_appl().function().arity() == 0)
+      return t;
+    aterm_list args = t.to_aterm_appl().argument_list();
+    std::vector<aterm> v;
+    for (aterm_list::iterator i = args.begin(); i != args.end(); ++i)
+    {
+      v.push_back(aterm_replace(*i, src, dest));
+    }
+    return aterm_appl(t.to_aterm_appl().function(), aterm_list(v.begin(), v.end()));
+  }
+  else if (t.type() == AT_LIST)
+  {
+    if (t.to_aterm_list().size() == 0)
+      return t;
+    aterm_list args = t.to_aterm_list();
+    std::vector<aterm_appl> v;
+    for (aterm_list::iterator i = args.begin(); i != args.end(); ++i)
+    {
+      v.push_back(aterm_replace(*i, src, dest));
+    }
+    return aterm_list(v.begin(), v.end());
+  }
+  return t;
+}
+
 // returns true if s is a subterm of t
 inline
 bool is_subterm(aterm_appl s, aterm_appl t)
@@ -38,7 +74,7 @@ bool is_subterm(aterm_appl s, aterm_appl t)
   aterm_list args = t.argument_list();
   for (aterm_list::iterator i = args.begin(); i != args.end(); ++i)
   {
-    if (is_subterm(s, i->to_appl()))
+    if (is_subterm(s, i->to_aterm_appl()))
       return true;
   }
 
@@ -59,7 +95,7 @@ aterm_appl replace(aterm_appl t, aterm_appl src, aterm_appl dest)
   std::vector<aterm> v;
   for (aterm_list::iterator i = args.begin(); i != args.end(); ++i)
   {
-    v.push_back(replace(i->to_appl(), src, dest));
+    v.push_back(replace(i->to_aterm_appl(), src, dest));
   }
 
   aterm_appl result(t.function(), aterm_list(v.begin(), v.end()));
@@ -83,7 +119,7 @@ aterm_appl replace_non_recursive(aterm_appl t, aterm_appl src, aterm_appl dest)
   std::vector<aterm> v;
   for (aterm_list::iterator i = args.begin(); i != args.end(); ++i)
   {
-    v.push_back(replace(i->to_appl(), src, dest));
+    v.push_back(replace_non_recursive(i->to_aterm_appl(), src, dest));
   }
 
   aterm_appl result(t.function(), aterm_list(v.begin(), v.end()));
@@ -106,7 +142,7 @@ aterm_appl replace(aterm_appl t, Iter first, Iter last)
   std::vector<aterm> v;
   for (aterm_list::iterator i = args.begin(); i != args.end(); ++i)
   {
-    v.push_back(replace(i->to_appl(), first, last));
+    v.push_back(replace(i->to_aterm_appl(), first, last));
   }
 
   return aterm_appl(t.function(), aterm_list(v.begin(), v.end()));

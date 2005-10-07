@@ -14,16 +14,15 @@ SOURCES = gsfunc libgsrewrite gsrewr_inner gsrewr_inner2 gsrewr_inner3 gsrewr_in
    ;
 
 lib mcrl-gs
-    : ../../../src/$(SOURCES).c
+    : ../../$(SOURCES).c ../../libprint_cxx.cpp
     : <cflags>-std=c99
+      <os>linux:<linkflags>-ldl
     ;
 
 exe test1        : test1.cpp : ;
 exe test2        : test2.cpp : ;
 exe test3        : test3.cpp : ;
 exe spec         : spec.cpp mcrl-gs : ;
-exe lpeinfo      : lpeinfo.cpp mcrl-gs : ;
-exe lpeconstelm  : lpeconstelm.cpp mcrl-gs : ;
 
 install dist
    :
@@ -31,7 +30,5 @@ install dist
      test2
      test3
      spec
-     lpeinfo
-     lpeconstelm
    : 
    ;

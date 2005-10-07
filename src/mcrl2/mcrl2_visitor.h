@@ -206,13 +206,13 @@ class mcrl2_visitor
       visit_SpecV1(t);
       if (!stop(t))
       {
-        walk_SortSpec<Stop>((*i++).to_appl(), stop);
-        walk_ConsSpec<Stop>((*i++).to_appl(), stop);
-        walk_MapSpec<Stop>((*i++).to_appl(), stop);
-        walk_DataEqnSpec<Stop>((*i++).to_appl(), stop);
-        walk_ActSpec<Stop>((*i++).to_appl(), stop);
-        walk_ProcEqnSpec<Stop>((*i++).to_appl(), stop);
-        walk_Init<Stop>((*i++).to_appl(), stop);
+        walk_SortSpec<Stop>((*i++).to_aterm_appl(), stop);
+        walk_ConsSpec<Stop>((*i++).to_aterm_appl(), stop);
+        walk_MapSpec<Stop>((*i++).to_aterm_appl(), stop);
+        walk_DataEqnSpec<Stop>((*i++).to_aterm_appl(), stop);
+        walk_ActSpec<Stop>((*i++).to_aterm_appl(), stop);
+        walk_ProcEqnSpec<Stop>((*i++).to_aterm_appl(), stop);
+        walk_Init<Stop>((*i++).to_aterm_appl(), stop);
        }
       leave_SpecV1(t);
     }
@@ -225,13 +225,13 @@ class mcrl2_visitor
       assert(l.size() == 7);
       aterm_list::iterator i = l.begin();
       visit_SpecV1(t);
-      walk_SortSpec((*i++).to_appl());
-      walk_ConsSpec((*i++).to_appl());
-      walk_MapSpec((*i++).to_appl());
-      walk_DataEqnSpec((*i++).to_appl());
-      walk_ActSpec((*i++).to_appl());
-      walk_ProcEqnSpec((*i++).to_appl());
-      walk_Init((*i++).to_appl());
+      walk_SortSpec((*i++).to_aterm_appl());
+      walk_ConsSpec((*i++).to_aterm_appl());
+      walk_MapSpec((*i++).to_aterm_appl());
+      walk_DataEqnSpec((*i++).to_aterm_appl());
+      walk_ActSpec((*i++).to_aterm_appl());
+      walk_ProcEqnSpec((*i++).to_aterm_appl());
+      walk_Init((*i++).to_aterm_appl());
       leave_SpecV1(t);
     }
 
@@ -247,8 +247,8 @@ class mcrl2_visitor
       if (!stop(t))
       {
         {
-          aterm_list x = (*i++).to_list();
-          for (aterm_list::iterator i = x.begin(); i != x.end(); ++i) walk_SortDecl<Stop>((*i).to_appl(), stop);
+          aterm_list x = (*i++).to_aterm_list();
+          for (aterm_list::iterator i = x.begin(); i != x.end(); ++i) walk_SortDecl<Stop>((*i).to_aterm_appl(), stop);
         }
        }
       leave_SortSpec(t);
@@ -263,8 +263,8 @@ class mcrl2_visitor
       aterm_list::iterator i = l.begin();
       visit_SortSpec(t);
       {
-        aterm_list x = (*i++).to_list();
-        for (aterm_list::iterator i = x.begin(); i != x.end(); ++i) walk_SortDecl((*i).to_appl());
+        aterm_list x = (*i++).to_aterm_list();
+        for (aterm_list::iterator i = x.begin(); i != x.end(); ++i) walk_SortDecl((*i).to_aterm_appl());
       }
       leave_SortSpec(t);
     }
@@ -281,8 +281,8 @@ class mcrl2_visitor
       if (!stop(t))
       {
         {
-          aterm_list x = (*i++).to_list();
-          for (aterm_list::iterator i = x.begin(); i != x.end(); ++i) walk_OpId<Stop>((*i).to_appl(), stop);
+          aterm_list x = (*i++).to_aterm_list();
+          for (aterm_list::iterator i = x.begin(); i != x.end(); ++i) walk_OpId<Stop>((*i).to_aterm_appl(), stop);
         }
        }
       leave_ConsSpec(t);
@@ -297,8 +297,8 @@ class mcrl2_visitor
       aterm_list::iterator i = l.begin();
       visit_ConsSpec(t);
       {
-        aterm_list x = (*i++).to_list();
-        for (aterm_list::iterator i = x.begin(); i != x.end(); ++i) walk_OpId((*i).to_appl());
+        aterm_list x = (*i++).to_aterm_list();
+        for (aterm_list::iterator i = x.begin(); i != x.end(); ++i) walk_OpId((*i).to_aterm_appl());
       }
       leave_ConsSpec(t);
     }
@@ -315,8 +315,8 @@ class mcrl2_visitor
       if (!stop(t))
       {
         {
-          aterm_list x = (*i++).to_list();
-          for (aterm_list::iterator i = x.begin(); i != x.end(); ++i) walk_OpId<Stop>((*i).to_appl(), stop);
+          aterm_list x = (*i++).to_aterm_list();
+          for (aterm_list::iterator i = x.begin(); i != x.end(); ++i) walk_OpId<Stop>((*i).to_aterm_appl(), stop);
         }
        }
       leave_MapSpec(t);
@@ -331,8 +331,8 @@ class mcrl2_visitor
       aterm_list::iterator i = l.begin();
       visit_MapSpec(t);
       {
-        aterm_list x = (*i++).to_list();
-        for (aterm_list::iterator i = x.begin(); i != x.end(); ++i) walk_OpId((*i).to_appl());
+        aterm_list x = (*i++).to_aterm_list();
+        for (aterm_list::iterator i = x.begin(); i != x.end(); ++i) walk_OpId((*i).to_aterm_appl());
       }
       leave_MapSpec(t);
     }
@@ -349,8 +349,8 @@ class mcrl2_visitor
       if (!stop(t))
       {
         {
-          aterm_list x = (*i++).to_list();
-          for (aterm_list::iterator i = x.begin(); i != x.end(); ++i) walk_DataEqn<Stop>((*i).to_appl(), stop);
+          aterm_list x = (*i++).to_aterm_list();
+          for (aterm_list::iterator i = x.begin(); i != x.end(); ++i) walk_DataEqn<Stop>((*i).to_aterm_appl(), stop);
         }
        }
       leave_DataEqnSpec(t);
@@ -365,8 +365,8 @@ class mcrl2_visitor
       aterm_list::iterator i = l.begin();
       visit_DataEqnSpec(t);
       {
-        aterm_list x = (*i++).to_list();
-        for (aterm_list::iterator i = x.begin(); i != x.end(); ++i) walk_DataEqn((*i).to_appl());
+        aterm_list x = (*i++).to_aterm_list();
+        for (aterm_list::iterator i = x.begin(); i != x.end(); ++i) walk_DataEqn((*i).to_aterm_appl());
       }
       leave_DataEqnSpec(t);
     }
@@ -383,8 +383,8 @@ class mcrl2_visitor
       if (!stop(t))
       {
         {
-          aterm_list x = (*i++).to_list();
-          for (aterm_list::iterator i = x.begin(); i != x.end(); ++i) walk_ActId<Stop>((*i).to_appl(), stop);
+          aterm_list x = (*i++).to_aterm_list();
+          for (aterm_list::iterator i = x.begin(); i != x.end(); ++i) walk_ActId<Stop>((*i).to_aterm_appl(), stop);
         }
        }
       leave_ActSpec(t);
@@ -399,8 +399,8 @@ class mcrl2_visitor
       aterm_list::iterator i = l.begin();
       visit_ActSpec(t);
       {
-        aterm_list x = (*i++).to_list();
-        for (aterm_list::iterator i = x.begin(); i != x.end(); ++i) walk_ActId((*i).to_appl());
+        aterm_list x = (*i++).to_aterm_list();
+        for (aterm_list::iterator i = x.begin(); i != x.end(); ++i) walk_ActId((*i).to_aterm_appl());
       }
       leave_ActSpec(t);
     }
@@ -436,7 +436,7 @@ class mcrl2_visitor
       visit_SortId(t);
       if (!stop(t))
       {
-        walk_String<Stop>((*i++).to_appl(), stop);
+        walk_String<Stop>((*i++).to_aterm_appl(), stop);
        }
       leave_SortId(t);
     }
@@ -449,7 +449,7 @@ class mcrl2_visitor
       assert(l.size() == 1);
       aterm_list::iterator i = l.begin();
       visit_SortId(t);
-      walk_String((*i++).to_appl());
+      walk_String((*i++).to_aterm_appl());
       leave_SortId(t);
     }
 
@@ -464,8 +464,8 @@ class mcrl2_visitor
       visit_SortRef(t);
       if (!stop(t))
       {
-        walk_String<Stop>((*i++).to_appl(), stop);
-        walk_SortExpr<Stop>((*i++).to_appl(), stop);
+        walk_String<Stop>((*i++).to_aterm_appl(), stop);
+        walk_SortExpr<Stop>((*i++).to_aterm_appl(), stop);
        }
       leave_SortRef(t);
     }
@@ -478,8 +478,8 @@ class mcrl2_visitor
       assert(l.size() == 2);
       aterm_list::iterator i = l.begin();
       visit_SortRef(t);
-      walk_String((*i++).to_appl());
-      walk_SortExpr((*i++).to_appl());
+      walk_String((*i++).to_aterm_appl());
+      walk_SortExpr((*i++).to_aterm_appl());
       leave_SortRef(t);
     }
 
@@ -494,8 +494,8 @@ class mcrl2_visitor
       visit_OpId(t);
       if (!stop(t))
       {
-        walk_String<Stop>((*i++).to_appl(), stop);
-        walk_SortExpr<Stop>((*i++).to_appl(), stop);
+        walk_String<Stop>((*i++).to_aterm_appl(), stop);
+        walk_SortExpr<Stop>((*i++).to_aterm_appl(), stop);
        }
       leave_OpId(t);
     }
@@ -508,8 +508,8 @@ class mcrl2_visitor
       assert(l.size() == 2);
       aterm_list::iterator i = l.begin();
       visit_OpId(t);
-      walk_String((*i++).to_appl());
-      walk_SortExpr((*i++).to_appl());
+      walk_String((*i++).to_aterm_appl());
+      walk_SortExpr((*i++).to_aterm_appl());
       leave_OpId(t);
     }
 
@@ -525,12 +525,12 @@ class mcrl2_visitor
       if (!stop(t))
       {
         {
-          aterm_list x = (*i++).to_list();
-          for (aterm_list::iterator i = x.begin(); i != x.end(); ++i) walk_DataVarId<Stop>((*i).to_appl(), stop);
+          aterm_list x = (*i++).to_aterm_list();
+          for (aterm_list::iterator i = x.begin(); i != x.end(); ++i) walk_DataVarId<Stop>((*i).to_aterm_appl(), stop);
         }
-        walk_DataExprOrNil<Stop>((*i++).to_appl(), stop);
-        walk_DataExpr<Stop>((*i++).to_appl(), stop);
-        walk_DataExpr<Stop>((*i++).to_appl(), stop);
+        walk_DataExprOrNil<Stop>((*i++).to_aterm_appl(), stop);
+        walk_DataExpr<Stop>((*i++).to_aterm_appl(), stop);
+        walk_DataExpr<Stop>((*i++).to_aterm_appl(), stop);
        }
       leave_DataEqn(t);
     }
@@ -544,12 +544,12 @@ class mcrl2_visitor
       aterm_list::iterator i = l.begin();
       visit_DataEqn(t);
       {
-        aterm_list x = (*i++).to_list();
-        for (aterm_list::iterator i = x.begin(); i != x.end(); ++i) walk_DataVarId((*i).to_appl());
+        aterm_list x = (*i++).to_aterm_list();
+        for (aterm_list::iterator i = x.begin(); i != x.end(); ++i) walk_DataVarId((*i).to_aterm_appl());
       }
-      walk_DataExprOrNil((*i++).to_appl());
-      walk_DataExpr((*i++).to_appl());
-      walk_DataExpr((*i++).to_appl());
+      walk_DataExprOrNil((*i++).to_aterm_appl());
+      walk_DataExpr((*i++).to_aterm_appl());
+      walk_DataExpr((*i++).to_aterm_appl());
       leave_DataEqn(t);
     }
 
@@ -564,8 +564,8 @@ class mcrl2_visitor
       visit_DataVarId(t);
       if (!stop(t))
       {
-        walk_String<Stop>((*i++).to_appl(), stop);
-        walk_SortExpr<Stop>((*i++).to_appl(), stop);
+        walk_String<Stop>((*i++).to_aterm_appl(), stop);
+        walk_SortExpr<Stop>((*i++).to_aterm_appl(), stop);
        }
       leave_DataVarId(t);
     }
@@ -578,8 +578,8 @@ class mcrl2_visitor
       assert(l.size() == 2);
       aterm_list::iterator i = l.begin();
       visit_DataVarId(t);
-      walk_String((*i++).to_appl());
-      walk_SortExpr((*i++).to_appl());
+      walk_String((*i++).to_aterm_appl());
+      walk_SortExpr((*i++).to_aterm_appl());
       leave_DataVarId(t);
     }
 
@@ -640,10 +640,10 @@ class mcrl2_visitor
       visit_ActId(t);
       if (!stop(t))
       {
-        walk_String<Stop>((*i++).to_appl(), stop);
+        walk_String<Stop>((*i++).to_aterm_appl(), stop);
         {
-          aterm_list x = (*i++).to_list();
-          for (aterm_list::iterator i = x.begin(); i != x.end(); ++i) walk_SortExpr<Stop>((*i).to_appl(), stop);
+          aterm_list x = (*i++).to_aterm_list();
+          for (aterm_list::iterator i = x.begin(); i != x.end(); ++i) walk_SortExpr<Stop>((*i).to_aterm_appl(), stop);
         }
        }
       leave_ActId(t);
@@ -657,10 +657,10 @@ class mcrl2_visitor
       assert(l.size() == 2);
       aterm_list::iterator i = l.begin();
       visit_ActId(t);
-      walk_String((*i++).to_appl());
+      walk_String((*i++).to_aterm_appl());
       {
-        aterm_list x = (*i++).to_list();
-        for (aterm_list::iterator i = x.begin(); i != x.end(); ++i) walk_SortExpr((*i).to_appl());
+        aterm_list x = (*i++).to_aterm_list();
+        for (aterm_list::iterator i = x.begin(); i != x.end(); ++i) walk_SortExpr((*i).to_aterm_appl());
       }
       leave_ActId(t);
     }
@@ -697,15 +697,15 @@ class mcrl2_visitor
       if (!stop(t))
       {
         {
-          aterm_list x = (*i++).to_list();
-          for (aterm_list::iterator i = x.begin(); i != x.end(); ++i) walk_DataVarId<Stop>((*i).to_appl(), stop);
+          aterm_list x = (*i++).to_aterm_list();
+          for (aterm_list::iterator i = x.begin(); i != x.end(); ++i) walk_DataVarId<Stop>((*i).to_aterm_appl(), stop);
         }
-        walk_ProcVarId<Stop>((*i++).to_appl(), stop);
+        walk_ProcVarId<Stop>((*i++).to_aterm_appl(), stop);
         {
-          aterm_list x = (*i++).to_list();
-          for (aterm_list::iterator i = x.begin(); i != x.end(); ++i) walk_DataVarId<Stop>((*i).to_appl(), stop);
+          aterm_list x = (*i++).to_aterm_list();
+          for (aterm_list::iterator i = x.begin(); i != x.end(); ++i) walk_DataVarId<Stop>((*i).to_aterm_appl(), stop);
         }
-        walk_ProcExpr<Stop>((*i++).to_appl(), stop);
+        walk_ProcExpr<Stop>((*i++).to_aterm_appl(), stop);
        }
       leave_ProcEqn(t);
     }
@@ -719,15 +719,15 @@ class mcrl2_visitor
       aterm_list::iterator i = l.begin();
       visit_ProcEqn(t);
       {
-        aterm_list x = (*i++).to_list();
-        for (aterm_list::iterator i = x.begin(); i != x.end(); ++i) walk_DataVarId((*i).to_appl());
+        aterm_list x = (*i++).to_aterm_list();
+        for (aterm_list::iterator i = x.begin(); i != x.end(); ++i) walk_DataVarId((*i).to_aterm_appl());
       }
-      walk_ProcVarId((*i++).to_appl());
+      walk_ProcVarId((*i++).to_aterm_appl());
       {
-        aterm_list x = (*i++).to_list();
-        for (aterm_list::iterator i = x.begin(); i != x.end(); ++i) walk_DataVarId((*i).to_appl());
+        aterm_list x = (*i++).to_aterm_list();
+        for (aterm_list::iterator i = x.begin(); i != x.end(); ++i) walk_DataVarId((*i).to_aterm_appl());
       }
-      walk_ProcExpr((*i++).to_appl());
+      walk_ProcExpr((*i++).to_aterm_appl());
       leave_ProcEqn(t);
     }
 
@@ -742,10 +742,10 @@ class mcrl2_visitor
       visit_ProcVarId(t);
       if (!stop(t))
       {
-        walk_String<Stop>((*i++).to_appl(), stop);
+        walk_String<Stop>((*i++).to_aterm_appl(), stop);
         {
-          aterm_list x = (*i++).to_list();
-          for (aterm_list::iterator i = x.begin(); i != x.end(); ++i) walk_SortExpr<Stop>((*i).to_appl(), stop);
+          aterm_list x = (*i++).to_aterm_list();
+          for (aterm_list::iterator i = x.begin(); i != x.end(); ++i) walk_SortExpr<Stop>((*i).to_aterm_appl(), stop);
         }
        }
       leave_ProcVarId(t);
@@ -759,10 +759,10 @@ class mcrl2_visitor
       assert(l.size() == 2);
       aterm_list::iterator i = l.begin();
       visit_ProcVarId(t);
-      walk_String((*i++).to_appl());
+      walk_String((*i++).to_aterm_appl());
       {
-        aterm_list x = (*i++).to_list();
-        for (aterm_list::iterator i = x.begin(); i != x.end(); ++i) walk_SortExpr((*i).to_appl());
+        aterm_list x = (*i++).to_aterm_list();
+        for (aterm_list::iterator i = x.begin(); i != x.end(); ++i) walk_SortExpr((*i).to_aterm_appl());
       }
       leave_ProcVarId(t);
     }
@@ -779,15 +779,15 @@ class mcrl2_visitor
       if (!stop(t))
       {
         {
-          aterm_list x = (*i++).to_list();
-          for (aterm_list::iterator i = x.begin(); i != x.end(); ++i) walk_DataVarId<Stop>((*i).to_appl(), stop);
+          aterm_list x = (*i++).to_aterm_list();
+          for (aterm_list::iterator i = x.begin(); i != x.end(); ++i) walk_DataVarId<Stop>((*i).to_aterm_appl(), stop);
         }
-        walk_DataExpr<Stop>((*i++).to_appl(), stop);
-        walk_MultActOrDelta<Stop>((*i++).to_appl(), stop);
-        walk_DataExprOrNil<Stop>((*i++).to_appl(), stop);
+        walk_DataExpr<Stop>((*i++).to_aterm_appl(), stop);
+        walk_MultActOrDelta<Stop>((*i++).to_aterm_appl(), stop);
+        walk_DataExprOrNil<Stop>((*i++).to_aterm_appl(), stop);
         {
-          aterm_list x = (*i++).to_list();
-          for (aterm_list::iterator i = x.begin(); i != x.end(); ++i) walk_Assignment<Stop>((*i).to_appl(), stop);
+          aterm_list x = (*i++).to_aterm_list();
+          for (aterm_list::iterator i = x.begin(); i != x.end(); ++i) walk_Assignment<Stop>((*i).to_aterm_appl(), stop);
         }
        }
       leave_LPESummand(t);
@@ -802,15 +802,15 @@ class mcrl2_visitor
       aterm_list::iterator i = l.begin();
       visit_LPESummand(t);
       {
-        aterm_list x = (*i++).to_list();
-        for (aterm_list::iterator i = x.begin(); i != x.end(); ++i) walk_DataVarId((*i).to_appl());
+        aterm_list x = (*i++).to_aterm_list();
+        for (aterm_list::iterator i = x.begin(); i != x.end(); ++i) walk_DataVarId((*i).to_aterm_appl());
       }
-      walk_DataExpr((*i++).to_appl());
-      walk_MultActOrDelta((*i++).to_appl());
-      walk_DataExprOrNil((*i++).to_appl());
+      walk_DataExpr((*i++).to_aterm_appl());
+      walk_MultActOrDelta((*i++).to_aterm_appl());
+      walk_DataExprOrNil((*i++).to_aterm_appl());
       {
-        aterm_list x = (*i++).to_list();
-        for (aterm_list::iterator i = x.begin(); i != x.end(); ++i) walk_Assignment((*i).to_appl());
+        aterm_list x = (*i++).to_aterm_list();
+        for (aterm_list::iterator i = x.begin(); i != x.end(); ++i) walk_Assignment((*i).to_aterm_appl());
       }
       leave_LPESummand(t);
     }
@@ -846,10 +846,10 @@ class mcrl2_visitor
       visit_Action(t);
       if (!stop(t))
       {
-        walk_ActId<Stop>((*i++).to_appl(), stop);
+        walk_ActId<Stop>((*i++).to_aterm_appl(), stop);
         {
-          aterm_list x = (*i++).to_list();
-          for (aterm_list::iterator i = x.begin(); i != x.end(); ++i) walk_DataExpr<Stop>((*i).to_appl(), stop);
+          aterm_list x = (*i++).to_aterm_list();
+          for (aterm_list::iterator i = x.begin(); i != x.end(); ++i) walk_DataExpr<Stop>((*i).to_aterm_appl(), stop);
         }
        }
       leave_Action(t);
@@ -863,10 +863,10 @@ class mcrl2_visitor
       assert(l.size() == 2);
       aterm_list::iterator i = l.begin();
       visit_Action(t);
-      walk_ActId((*i++).to_appl());
+      walk_ActId((*i++).to_aterm_appl());
       {
-        aterm_list x = (*i++).to_list();
-        for (aterm_list::iterator i = x.begin(); i != x.end(); ++i) walk_DataExpr((*i).to_appl());
+        aterm_list x = (*i++).to_aterm_list();
+        for (aterm_list::iterator i = x.begin(); i != x.end(); ++i) walk_DataExpr((*i).to_aterm_appl());
       }
       leave_Action(t);
     }
@@ -882,8 +882,8 @@ class mcrl2_visitor
       visit_Assignment(t);
       if (!stop(t))
       {
-        walk_DataVarId<Stop>((*i++).to_appl(), stop);
-        walk_DataExpr<Stop>((*i++).to_appl(), stop);
+        walk_DataVarId<Stop>((*i++).to_aterm_appl(), stop);
+        walk_DataExpr<Stop>((*i++).to_aterm_appl(), stop);
        }
       leave_Assignment(t);
     }
@@ -896,8 +896,8 @@ class mcrl2_visitor
       assert(l.size() == 2);
       aterm_list::iterator i = l.begin();
       visit_Assignment(t);
-      walk_DataVarId((*i++).to_appl());
-      walk_DataExpr((*i++).to_appl());
+      walk_DataVarId((*i++).to_aterm_appl());
+      walk_DataExpr((*i++).to_aterm_appl());
       leave_Assignment(t);
     }
 
@@ -962,12 +962,12 @@ class mcrl2_visitor
       visit_StructCons(t);
       if (!stop(t))
       {
-        walk_String<Stop>((*i++).to_appl(), stop);
+        walk_String<Stop>((*i++).to_aterm_appl(), stop);
         {
-          aterm_list x = (*i++).to_list();
-          for (aterm_list::iterator i = x.begin(); i != x.end(); ++i) walk_StructProj<Stop>((*i).to_appl(), stop);
+          aterm_list x = (*i++).to_aterm_list();
+          for (aterm_list::iterator i = x.begin(); i != x.end(); ++i) walk_StructProj<Stop>((*i).to_aterm_appl(), stop);
         }
-        walk_StringOrNil<Stop>((*i++).to_appl(), stop);
+        walk_StringOrNil<Stop>((*i++).to_aterm_appl(), stop);
        }
       leave_StructCons(t);
     }
@@ -980,12 +980,12 @@ class mcrl2_visitor
       assert(l.size() == 3);
       aterm_list::iterator i = l.begin();
       visit_StructCons(t);
-      walk_String((*i++).to_appl());
+      walk_String((*i++).to_aterm_appl());
       {
-        aterm_list x = (*i++).to_list();
-        for (aterm_list::iterator i = x.begin(); i != x.end(); ++i) walk_StructProj((*i).to_appl());
+        aterm_list x = (*i++).to_aterm_list();
+        for (aterm_list::iterator i = x.begin(); i != x.end(); ++i) walk_StructProj((*i).to_aterm_appl());
       }
-      walk_StringOrNil((*i++).to_appl());
+      walk_StringOrNil((*i++).to_aterm_appl());
       leave_StructCons(t);
     }
 
@@ -1000,8 +1000,8 @@ class mcrl2_visitor
       visit_StructProj(t);
       if (!stop(t))
       {
-        walk_StringOrNil<Stop>((*i++).to_appl(), stop);
-        walk_SortExpr<Stop>((*i++).to_appl(), stop);
+        walk_StringOrNil<Stop>((*i++).to_aterm_appl(), stop);
+        walk_SortExpr<Stop>((*i++).to_aterm_appl(), stop);
        }
       leave_StructProj(t);
     }
@@ -1014,8 +1014,8 @@ class mcrl2_visitor
       assert(l.size() == 2);
       aterm_list::iterator i = l.begin();
       visit_StructProj(t);
-      walk_StringOrNil((*i++).to_appl());
-      walk_SortExpr((*i++).to_appl());
+      walk_StringOrNil((*i++).to_aterm_appl());
+      walk_SortExpr((*i++).to_aterm_appl());
       leave_StructProj(t);
     }
 
@@ -1124,8 +1124,8 @@ class mcrl2_visitor
       visit_BagEnumElt(t);
       if (!stop(t))
       {
-        walk_DataExpr<Stop>((*i++).to_appl(), stop);
-        walk_DataExpr<Stop>((*i++).to_appl(), stop);
+        walk_DataExpr<Stop>((*i++).to_aterm_appl(), stop);
+        walk_DataExpr<Stop>((*i++).to_aterm_appl(), stop);
        }
       leave_BagEnumElt(t);
     }
@@ -1138,8 +1138,8 @@ class mcrl2_visitor
       assert(l.size() == 2);
       aterm_list::iterator i = l.begin();
       visit_BagEnumElt(t);
-      walk_DataExpr((*i++).to_appl());
-      walk_DataExpr((*i++).to_appl());
+      walk_DataExpr((*i++).to_aterm_appl());
+      walk_DataExpr((*i++).to_aterm_appl());
       leave_BagEnumElt(t);
     }
 
@@ -1154,8 +1154,8 @@ class mcrl2_visitor
       visit_WhrDecl(t);
       if (!stop(t))
       {
-        walk_String<Stop>((*i++).to_appl(), stop);
-        walk_DataExpr<Stop>((*i++).to_appl(), stop);
+        walk_String<Stop>((*i++).to_aterm_appl(), stop);
+        walk_DataExpr<Stop>((*i++).to_aterm_appl(), stop);
        }
       leave_WhrDecl(t);
     }
@@ -1168,8 +1168,8 @@ class mcrl2_visitor
       assert(l.size() == 2);
       aterm_list::iterator i = l.begin();
       visit_WhrDecl(t);
-      walk_String((*i++).to_appl());
-      walk_DataExpr((*i++).to_appl());
+      walk_String((*i++).to_aterm_appl());
+      walk_DataExpr((*i++).to_aterm_appl());
       leave_WhrDecl(t);
     }
 
@@ -1239,8 +1239,8 @@ class mcrl2_visitor
       if (!stop(t))
       {
         {
-          aterm_list x = (*i++).to_list();
-          for (aterm_list::iterator i = x.begin(); i != x.end(); ++i) walk_String<Stop>((*i).to_appl(), stop);
+          aterm_list x = (*i++).to_aterm_list();
+          for (aterm_list::iterator i = x.begin(); i != x.end(); ++i) walk_String<Stop>((*i).to_aterm_appl(), stop);
         }
        }
       leave_MultActName(t);
@@ -1255,8 +1255,8 @@ class mcrl2_visitor
       aterm_list::iterator i = l.begin();
       visit_MultActName(t);
       {
-        aterm_list x = (*i++).to_list();
-        for (aterm_list::iterator i = x.begin(); i != x.end(); ++i) walk_String((*i).to_appl());
+        aterm_list x = (*i++).to_aterm_list();
+        for (aterm_list::iterator i = x.begin(); i != x.end(); ++i) walk_String((*i).to_aterm_appl());
       }
       leave_MultActName(t);
     }
@@ -1272,8 +1272,8 @@ class mcrl2_visitor
       visit_RenameExpr(t);
       if (!stop(t))
       {
-        walk_String<Stop>((*i++).to_appl(), stop);
-        walk_String<Stop>((*i++).to_appl(), stop);
+        walk_String<Stop>((*i++).to_aterm_appl(), stop);
+        walk_String<Stop>((*i++).to_aterm_appl(), stop);
        }
       leave_RenameExpr(t);
     }
@@ -1286,8 +1286,8 @@ class mcrl2_visitor
       assert(l.size() == 2);
       aterm_list::iterator i = l.begin();
       visit_RenameExpr(t);
-      walk_String((*i++).to_appl());
-      walk_String((*i++).to_appl());
+      walk_String((*i++).to_aterm_appl());
+      walk_String((*i++).to_aterm_appl());
       leave_RenameExpr(t);
     }
 
@@ -1302,8 +1302,8 @@ class mcrl2_visitor
       visit_CommExpr(t);
       if (!stop(t))
       {
-        walk_MultActName<Stop>((*i++).to_appl(), stop);
-        walk_StringOrNil<Stop>((*i++).to_appl(), stop);
+        walk_MultActName<Stop>((*i++).to_aterm_appl(), stop);
+        walk_StringOrNil<Stop>((*i++).to_aterm_appl(), stop);
        }
       leave_CommExpr(t);
     }
@@ -1316,8 +1316,8 @@ class mcrl2_visitor
       assert(l.size() == 2);
       aterm_list::iterator i = l.begin();
       visit_CommExpr(t);
-      walk_MultActName((*i++).to_appl());
-      walk_StringOrNil((*i++).to_appl());
+      walk_MultActName((*i++).to_aterm_appl());
+      walk_StringOrNil((*i++).to_aterm_appl());
       leave_CommExpr(t);
     }
 
@@ -1386,7 +1386,7 @@ class mcrl2_visitor
       visit_DataVarIdOpId(t);
       if (!stop(t))
       {
-        walk_String<Stop>((*i++).to_appl(), stop);
+        walk_String<Stop>((*i++).to_aterm_appl(), stop);
        }
       leave_DataVarIdOpId(t);
     }
@@ -1399,7 +1399,7 @@ class mcrl2_visitor
       assert(l.size() == 1);
       aterm_list::iterator i = l.begin();
       visit_DataVarIdOpId(t);
-      walk_String((*i++).to_appl());
+      walk_String((*i++).to_aterm_appl());
       leave_DataVarIdOpId(t);
     }
 
@@ -1414,10 +1414,10 @@ class mcrl2_visitor
       visit_DataApplProd(t);
       if (!stop(t))
       {
-        walk_DataExpr<Stop>((*i++).to_appl(), stop);
+        walk_DataExpr<Stop>((*i++).to_aterm_appl(), stop);
         {
-          aterm_list x = (*i++).to_list();
-          for (aterm_list::iterator i = x.begin(); i != x.end(); ++i) walk_DataExpr<Stop>((*i).to_appl(), stop);
+          aterm_list x = (*i++).to_aterm_list();
+          for (aterm_list::iterator i = x.begin(); i != x.end(); ++i) walk_DataExpr<Stop>((*i).to_aterm_appl(), stop);
         }
        }
       leave_DataApplProd(t);
@@ -1431,10 +1431,10 @@ class mcrl2_visitor
       assert(l.size() == 2);
       aterm_list::iterator i = l.begin();
       visit_DataApplProd(t);
-      walk_DataExpr((*i++).to_appl());
+      walk_DataExpr((*i++).to_aterm_appl());
       {
-        aterm_list x = (*i++).to_list();
-        for (aterm_list::iterator i = x.begin(); i != x.end(); ++i) walk_DataExpr((*i).to_appl());
+        aterm_list x = (*i++).to_aterm_list();
+        for (aterm_list::iterator i = x.begin(); i != x.end(); ++i) walk_DataExpr((*i).to_aterm_appl());
       }
       leave_DataApplProd(t);
     }
@@ -1450,8 +1450,8 @@ class mcrl2_visitor
       visit_DataAppl(t);
       if (!stop(t))
       {
-        walk_DataExpr<Stop>((*i++).to_appl(), stop);
-        walk_DataExpr<Stop>((*i++).to_appl(), stop);
+        walk_DataExpr<Stop>((*i++).to_aterm_appl(), stop);
+        walk_DataExpr<Stop>((*i++).to_aterm_appl(), stop);
        }
       leave_DataAppl(t);
     }
@@ -1464,8 +1464,8 @@ class mcrl2_visitor
       assert(l.size() == 2);
       aterm_list::iterator i = l.begin();
       visit_DataAppl(t);
-      walk_DataExpr((*i++).to_appl());
-      walk_DataExpr((*i++).to_appl());
+      walk_DataExpr((*i++).to_aterm_appl());
+      walk_DataExpr((*i++).to_aterm_appl());
       leave_DataAppl(t);
     }
 
@@ -1480,8 +1480,8 @@ class mcrl2_visitor
       visit_Number(t);
       if (!stop(t))
       {
-        walk_NumberString<Stop>((*i++).to_appl(), stop);
-        walk_SortExprOrUnknown<Stop>((*i++).to_appl(), stop);
+        walk_NumberString<Stop>((*i++).to_aterm_appl(), stop);
+        walk_SortExprOrUnknown<Stop>((*i++).to_aterm_appl(), stop);
        }
       leave_Number(t);
     }
@@ -1494,8 +1494,8 @@ class mcrl2_visitor
       assert(l.size() == 2);
       aterm_list::iterator i = l.begin();
       visit_Number(t);
-      walk_NumberString((*i++).to_appl());
-      walk_SortExprOrUnknown((*i++).to_appl());
+      walk_NumberString((*i++).to_aterm_appl());
+      walk_SortExprOrUnknown((*i++).to_aterm_appl());
       leave_Number(t);
     }
 
@@ -1511,10 +1511,10 @@ class mcrl2_visitor
       if (!stop(t))
       {
         {
-          aterm_list x = (*i++).to_list();
-          for (aterm_list::iterator i = x.begin(); i != x.end(); ++i) walk_DataExpr<Stop>((*i).to_appl(), stop);
+          aterm_list x = (*i++).to_aterm_list();
+          for (aterm_list::iterator i = x.begin(); i != x.end(); ++i) walk_DataExpr<Stop>((*i).to_aterm_appl(), stop);
         }
-        walk_SortExprOrUnknown<Stop>((*i++).to_appl(), stop);
+        walk_SortExprOrUnknown<Stop>((*i++).to_aterm_appl(), stop);
        }
       leave_ListEnum(t);
     }
@@ -1528,10 +1528,10 @@ class mcrl2_visitor
       aterm_list::iterator i = l.begin();
       visit_ListEnum(t);
       {
-        aterm_list x = (*i++).to_list();
-        for (aterm_list::iterator i = x.begin(); i != x.end(); ++i) walk_DataExpr((*i).to_appl());
+        aterm_list x = (*i++).to_aterm_list();
+        for (aterm_list::iterator i = x.begin(); i != x.end(); ++i) walk_DataExpr((*i).to_aterm_appl());
       }
-      walk_SortExprOrUnknown((*i++).to_appl());
+      walk_SortExprOrUnknown((*i++).to_aterm_appl());
       leave_ListEnum(t);
     }
 
@@ -1547,10 +1547,10 @@ class mcrl2_visitor
       if (!stop(t))
       {
         {
-          aterm_list x = (*i++).to_list();
-          for (aterm_list::iterator i = x.begin(); i != x.end(); ++i) walk_DataExpr<Stop>((*i).to_appl(), stop);
+          aterm_list x = (*i++).to_aterm_list();
+          for (aterm_list::iterator i = x.begin(); i != x.end(); ++i) walk_DataExpr<Stop>((*i).to_aterm_appl(), stop);
         }
-        walk_SortExprOrUnknown<Stop>((*i++).to_appl(), stop);
+        walk_SortExprOrUnknown<Stop>((*i++).to_aterm_appl(), stop);
        }
       leave_SetEnum(t);
     }
@@ -1564,10 +1564,10 @@ class mcrl2_visitor
       aterm_list::iterator i = l.begin();
       visit_SetEnum(t);
       {
-        aterm_list x = (*i++).to_list();
-        for (aterm_list::iterator i = x.begin(); i != x.end(); ++i) walk_DataExpr((*i).to_appl());
+        aterm_list x = (*i++).to_aterm_list();
+        for (aterm_list::iterator i = x.begin(); i != x.end(); ++i) walk_DataExpr((*i).to_aterm_appl());
       }
-      walk_SortExprOrUnknown((*i++).to_appl());
+      walk_SortExprOrUnknown((*i++).to_aterm_appl());
       leave_SetEnum(t);
     }
 
@@ -1583,10 +1583,10 @@ class mcrl2_visitor
       if (!stop(t))
       {
         {
-          aterm_list x = (*i++).to_list();
-          for (aterm_list::iterator i = x.begin(); i != x.end(); ++i) walk_BagEnumElt<Stop>((*i).to_appl(), stop);
+          aterm_list x = (*i++).to_aterm_list();
+          for (aterm_list::iterator i = x.begin(); i != x.end(); ++i) walk_BagEnumElt<Stop>((*i).to_aterm_appl(), stop);
         }
-        walk_SortExprOrUnknown<Stop>((*i++).to_appl(), stop);
+        walk_SortExprOrUnknown<Stop>((*i++).to_aterm_appl(), stop);
        }
       leave_BagEnum(t);
     }
@@ -1600,10 +1600,10 @@ class mcrl2_visitor
       aterm_list::iterator i = l.begin();
       visit_BagEnum(t);
       {
-        aterm_list x = (*i++).to_list();
-        for (aterm_list::iterator i = x.begin(); i != x.end(); ++i) walk_BagEnumElt((*i).to_appl());
+        aterm_list x = (*i++).to_aterm_list();
+        for (aterm_list::iterator i = x.begin(); i != x.end(); ++i) walk_BagEnumElt((*i).to_aterm_appl());
       }
-      walk_SortExprOrUnknown((*i++).to_appl());
+      walk_SortExprOrUnknown((*i++).to_aterm_appl());
       leave_BagEnum(t);
     }
 
@@ -1618,8 +1618,8 @@ class mcrl2_visitor
       visit_SetBagComp(t);
       if (!stop(t))
       {
-        walk_DataVarId<Stop>((*i++).to_appl(), stop);
-        walk_DataExpr<Stop>((*i++).to_appl(), stop);
+        walk_DataVarId<Stop>((*i++).to_aterm_appl(), stop);
+        walk_DataExpr<Stop>((*i++).to_aterm_appl(), stop);
        }
       leave_SetBagComp(t);
     }
@@ -1632,8 +1632,8 @@ class mcrl2_visitor
       assert(l.size() == 2);
       aterm_list::iterator i = l.begin();
       visit_SetBagComp(t);
-      walk_DataVarId((*i++).to_appl());
-      walk_DataExpr((*i++).to_appl());
+      walk_DataVarId((*i++).to_aterm_appl());
+      walk_DataExpr((*i++).to_aterm_appl());
       leave_SetBagComp(t);
     }
 
@@ -1649,10 +1649,10 @@ class mcrl2_visitor
       if (!stop(t))
       {
         {
-          aterm_list x = (*i++).to_list();
-          for (aterm_list::iterator i = x.begin(); i != x.end(); ++i) walk_DataVarId<Stop>((*i).to_appl(), stop);
+          aterm_list x = (*i++).to_aterm_list();
+          for (aterm_list::iterator i = x.begin(); i != x.end(); ++i) walk_DataVarId<Stop>((*i).to_aterm_appl(), stop);
         }
-        walk_DataExpr<Stop>((*i++).to_appl(), stop);
+        walk_DataExpr<Stop>((*i++).to_aterm_appl(), stop);
        }
       leave_Forall(t);
     }
@@ -1666,10 +1666,10 @@ class mcrl2_visitor
       aterm_list::iterator i = l.begin();
       visit_Forall(t);
       {
-        aterm_list x = (*i++).to_list();
-        for (aterm_list::iterator i = x.begin(); i != x.end(); ++i) walk_DataVarId((*i).to_appl());
+        aterm_list x = (*i++).to_aterm_list();
+        for (aterm_list::iterator i = x.begin(); i != x.end(); ++i) walk_DataVarId((*i).to_aterm_appl());
       }
-      walk_DataExpr((*i++).to_appl());
+      walk_DataExpr((*i++).to_aterm_appl());
       leave_Forall(t);
     }
 
@@ -1685,10 +1685,10 @@ class mcrl2_visitor
       if (!stop(t))
       {
         {
-          aterm_list x = (*i++).to_list();
-          for (aterm_list::iterator i = x.begin(); i != x.end(); ++i) walk_DataVarId<Stop>((*i).to_appl(), stop);
+          aterm_list x = (*i++).to_aterm_list();
+          for (aterm_list::iterator i = x.begin(); i != x.end(); ++i) walk_DataVarId<Stop>((*i).to_aterm_appl(), stop);
         }
-        walk_DataExpr<Stop>((*i++).to_appl(), stop);
+        walk_DataExpr<Stop>((*i++).to_aterm_appl(), stop);
        }
       leave_Exists(t);
     }
@@ -1702,10 +1702,10 @@ class mcrl2_visitor
       aterm_list::iterator i = l.begin();
       visit_Exists(t);
       {
-        aterm_list x = (*i++).to_list();
-        for (aterm_list::iterator i = x.begin(); i != x.end(); ++i) walk_DataVarId((*i).to_appl());
+        aterm_list x = (*i++).to_aterm_list();
+        for (aterm_list::iterator i = x.begin(); i != x.end(); ++i) walk_DataVarId((*i).to_aterm_appl());
       }
-      walk_DataExpr((*i++).to_appl());
+      walk_DataExpr((*i++).to_aterm_appl());
       leave_Exists(t);
     }
 
@@ -1721,10 +1721,10 @@ class mcrl2_visitor
       if (!stop(t))
       {
         {
-          aterm_list x = (*i++).to_list();
-          for (aterm_list::iterator i = x.begin(); i != x.end(); ++i) walk_DataVarId<Stop>((*i).to_appl(), stop);
+          aterm_list x = (*i++).to_aterm_list();
+          for (aterm_list::iterator i = x.begin(); i != x.end(); ++i) walk_DataVarId<Stop>((*i).to_aterm_appl(), stop);
         }
-        walk_DataExpr<Stop>((*i++).to_appl(), stop);
+        walk_DataExpr<Stop>((*i++).to_aterm_appl(), stop);
        }
       leave_Lambda(t);
     }
@@ -1738,10 +1738,10 @@ class mcrl2_visitor
       aterm_list::iterator i = l.begin();
       visit_Lambda(t);
       {
-        aterm_list x = (*i++).to_list();
-        for (aterm_list::iterator i = x.begin(); i != x.end(); ++i) walk_DataVarId((*i).to_appl());
+        aterm_list x = (*i++).to_aterm_list();
+        for (aterm_list::iterator i = x.begin(); i != x.end(); ++i) walk_DataVarId((*i).to_aterm_appl());
       }
-      walk_DataExpr((*i++).to_appl());
+      walk_DataExpr((*i++).to_aterm_appl());
       leave_Lambda(t);
     }
 
@@ -1756,10 +1756,10 @@ class mcrl2_visitor
       visit_Whr(t);
       if (!stop(t))
       {
-        walk_DataExpr<Stop>((*i++).to_appl(), stop);
+        walk_DataExpr<Stop>((*i++).to_aterm_appl(), stop);
         {
-          aterm_list x = (*i++).to_list();
-          for (aterm_list::iterator i = x.begin(); i != x.end(); ++i) walk_WhrDecl<Stop>((*i).to_appl(), stop);
+          aterm_list x = (*i++).to_aterm_list();
+          for (aterm_list::iterator i = x.begin(); i != x.end(); ++i) walk_WhrDecl<Stop>((*i).to_aterm_appl(), stop);
         }
        }
       leave_Whr(t);
@@ -1773,10 +1773,10 @@ class mcrl2_visitor
       assert(l.size() == 2);
       aterm_list::iterator i = l.begin();
       visit_Whr(t);
-      walk_DataExpr((*i++).to_appl());
+      walk_DataExpr((*i++).to_aterm_appl());
       {
-        aterm_list x = (*i++).to_list();
-        for (aterm_list::iterator i = x.begin(); i != x.end(); ++i) walk_WhrDecl((*i).to_appl());
+        aterm_list x = (*i++).to_aterm_list();
+        for (aterm_list::iterator i = x.begin(); i != x.end(); ++i) walk_WhrDecl((*i).to_aterm_appl());
       }
       leave_Whr(t);
     }
@@ -1821,16 +1821,16 @@ class mcrl2_visitor
       if (!stop(t))
       {
         {
-          aterm_list x = (*i++).to_list();
-          for (aterm_list::iterator i = x.begin(); i != x.end(); ++i) walk_DataVarId<Stop>((*i).to_appl(), stop);
+          aterm_list x = (*i++).to_aterm_list();
+          for (aterm_list::iterator i = x.begin(); i != x.end(); ++i) walk_DataVarId<Stop>((*i).to_aterm_appl(), stop);
         }
         {
-          aterm_list x = (*i++).to_list();
-          for (aterm_list::iterator i = x.begin(); i != x.end(); ++i) walk_DataVarId<Stop>((*i).to_appl(), stop);
+          aterm_list x = (*i++).to_aterm_list();
+          for (aterm_list::iterator i = x.begin(); i != x.end(); ++i) walk_DataVarId<Stop>((*i).to_aterm_appl(), stop);
         }
         {
-          aterm_list x = (*i++).to_list();
-          for (aterm_list::iterator i = x.begin(); i != x.end(); ++i) walk_LPESummand<Stop>((*i).to_appl(), stop);
+          aterm_list x = (*i++).to_aterm_list();
+          for (aterm_list::iterator i = x.begin(); i != x.end(); ++i) walk_LPESummand<Stop>((*i).to_aterm_appl(), stop);
         }
        }
       leave_LPE(t);
@@ -1845,16 +1845,16 @@ class mcrl2_visitor
       aterm_list::iterator i = l.begin();
       visit_LPE(t);
       {
-        aterm_list x = (*i++).to_list();
-        for (aterm_list::iterator i = x.begin(); i != x.end(); ++i) walk_DataVarId((*i).to_appl());
+        aterm_list x = (*i++).to_aterm_list();
+        for (aterm_list::iterator i = x.begin(); i != x.end(); ++i) walk_DataVarId((*i).to_aterm_appl());
       }
       {
-        aterm_list x = (*i++).to_list();
-        for (aterm_list::iterator i = x.begin(); i != x.end(); ++i) walk_DataVarId((*i).to_appl());
+        aterm_list x = (*i++).to_aterm_list();
+        for (aterm_list::iterator i = x.begin(); i != x.end(); ++i) walk_DataVarId((*i).to_aterm_appl());
       }
       {
-        aterm_list x = (*i++).to_list();
-        for (aterm_list::iterator i = x.begin(); i != x.end(); ++i) walk_LPESummand((*i).to_appl());
+        aterm_list x = (*i++).to_aterm_list();
+        for (aterm_list::iterator i = x.begin(); i != x.end(); ++i) walk_LPESummand((*i).to_aterm_appl());
       }
       leave_LPE(t);
     }
@@ -1871,8 +1871,8 @@ class mcrl2_visitor
       if (!stop(t))
       {
         {
-          aterm_list x = (*i++).to_list();
-          for (aterm_list::iterator i = x.begin(); i != x.end(); ++i) walk_Action<Stop>((*i).to_appl(), stop);
+          aterm_list x = (*i++).to_aterm_list();
+          for (aterm_list::iterator i = x.begin(); i != x.end(); ++i) walk_Action<Stop>((*i).to_aterm_appl(), stop);
         }
        }
       leave_MultAct(t);
@@ -1887,8 +1887,8 @@ class mcrl2_visitor
       aterm_list::iterator i = l.begin();
       visit_MultAct(t);
       {
-        aterm_list x = (*i++).to_list();
-        for (aterm_list::iterator i = x.begin(); i != x.end(); ++i) walk_Action((*i).to_appl());
+        aterm_list x = (*i++).to_aterm_list();
+        for (aterm_list::iterator i = x.begin(); i != x.end(); ++i) walk_Action((*i).to_aterm_appl());
       }
       leave_MultAct(t);
     }
@@ -1933,12 +1933,12 @@ class mcrl2_visitor
       if (!stop(t))
       {
         {
-          aterm_list x = (*i++).to_list();
-          for (aterm_list::iterator i = x.begin(); i != x.end(); ++i) walk_DataVarId<Stop>((*i).to_appl(), stop);
+          aterm_list x = (*i++).to_aterm_list();
+          for (aterm_list::iterator i = x.begin(); i != x.end(); ++i) walk_DataVarId<Stop>((*i).to_aterm_appl(), stop);
         }
         {
-          aterm_list x = (*i++).to_list();
-          for (aterm_list::iterator i = x.begin(); i != x.end(); ++i) walk_Assignment<Stop>((*i).to_appl(), stop);
+          aterm_list x = (*i++).to_aterm_list();
+          for (aterm_list::iterator i = x.begin(); i != x.end(); ++i) walk_Assignment<Stop>((*i).to_aterm_appl(), stop);
         }
        }
       leave_LPEInit(t);
@@ -1953,12 +1953,12 @@ class mcrl2_visitor
       aterm_list::iterator i = l.begin();
       visit_LPEInit(t);
       {
-        aterm_list x = (*i++).to_list();
-        for (aterm_list::iterator i = x.begin(); i != x.end(); ++i) walk_DataVarId((*i).to_appl());
+        aterm_list x = (*i++).to_aterm_list();
+        for (aterm_list::iterator i = x.begin(); i != x.end(); ++i) walk_DataVarId((*i).to_aterm_appl());
       }
       {
-        aterm_list x = (*i++).to_list();
-        for (aterm_list::iterator i = x.begin(); i != x.end(); ++i) walk_Assignment((*i).to_appl());
+        aterm_list x = (*i++).to_aterm_list();
+        for (aterm_list::iterator i = x.begin(); i != x.end(); ++i) walk_Assignment((*i).to_aterm_appl());
       }
       leave_LPEInit(t);
     }
@@ -1974,7 +1974,7 @@ class mcrl2_visitor
       visit_SortList(t);
       if (!stop(t))
       {
-        walk_SortExpr<Stop>((*i++).to_appl(), stop);
+        walk_SortExpr<Stop>((*i++).to_aterm_appl(), stop);
        }
       leave_SortList(t);
     }
@@ -1987,7 +1987,7 @@ class mcrl2_visitor
       assert(l.size() == 1);
       aterm_list::iterator i = l.begin();
       visit_SortList(t);
-      walk_SortExpr((*i++).to_appl());
+      walk_SortExpr((*i++).to_aterm_appl());
       leave_SortList(t);
     }
 
@@ -2002,7 +2002,7 @@ class mcrl2_visitor
       visit_SortSet(t);
       if (!stop(t))
       {
-        walk_SortExpr<Stop>((*i++).to_appl(), stop);
+        walk_SortExpr<Stop>((*i++).to_aterm_appl(), stop);
        }
       leave_SortSet(t);
     }
@@ -2015,7 +2015,7 @@ class mcrl2_visitor
       assert(l.size() == 1);
       aterm_list::iterator i = l.begin();
       visit_SortSet(t);
-      walk_SortExpr((*i++).to_appl());
+      walk_SortExpr((*i++).to_aterm_appl());
       leave_SortSet(t);
     }
 
@@ -2030,7 +2030,7 @@ class mcrl2_visitor
       visit_SortBag(t);
       if (!stop(t))
       {
-        walk_SortExpr<Stop>((*i++).to_appl(), stop);
+        walk_SortExpr<Stop>((*i++).to_aterm_appl(), stop);
        }
       leave_SortBag(t);
     }
@@ -2043,7 +2043,7 @@ class mcrl2_visitor
       assert(l.size() == 1);
       aterm_list::iterator i = l.begin();
       visit_SortBag(t);
-      walk_SortExpr((*i++).to_appl());
+      walk_SortExpr((*i++).to_aterm_appl());
       leave_SortBag(t);
     }
 
@@ -2059,8 +2059,8 @@ class mcrl2_visitor
       if (!stop(t))
       {
         {
-          aterm_list x = (*i++).to_list();
-          for (aterm_list::iterator i = x.begin(); i != x.end(); ++i) walk_StructCons<Stop>((*i).to_appl(), stop);
+          aterm_list x = (*i++).to_aterm_list();
+          for (aterm_list::iterator i = x.begin(); i != x.end(); ++i) walk_StructCons<Stop>((*i).to_aterm_appl(), stop);
         }
        }
       leave_SortStruct(t);
@@ -2075,8 +2075,8 @@ class mcrl2_visitor
       aterm_list::iterator i = l.begin();
       visit_SortStruct(t);
       {
-        aterm_list x = (*i++).to_list();
-        for (aterm_list::iterator i = x.begin(); i != x.end(); ++i) walk_StructCons((*i).to_appl());
+        aterm_list x = (*i++).to_aterm_list();
+        for (aterm_list::iterator i = x.begin(); i != x.end(); ++i) walk_StructCons((*i).to_aterm_appl());
       }
       leave_SortStruct(t);
     }
@@ -2093,10 +2093,10 @@ class mcrl2_visitor
       if (!stop(t))
       {
         {
-          aterm_list x = (*i++).to_list();
-          for (aterm_list::iterator i = x.begin(); i != x.end(); ++i) walk_SortExpr<Stop>((*i).to_appl(), stop);
+          aterm_list x = (*i++).to_aterm_list();
+          for (aterm_list::iterator i = x.begin(); i != x.end(); ++i) walk_SortExpr<Stop>((*i).to_aterm_appl(), stop);
         }
-        walk_SortExpr<Stop>((*i++).to_appl(), stop);
+        walk_SortExpr<Stop>((*i++).to_aterm_appl(), stop);
        }
       leave_SortArrowProd(t);
     }
@@ -2110,10 +2110,10 @@ class mcrl2_visitor
       aterm_list::iterator i = l.begin();
       visit_SortArrowProd(t);
       {
-        aterm_list x = (*i++).to_list();
-        for (aterm_list::iterator i = x.begin(); i != x.end(); ++i) walk_SortExpr((*i).to_appl());
+        aterm_list x = (*i++).to_aterm_list();
+        for (aterm_list::iterator i = x.begin(); i != x.end(); ++i) walk_SortExpr((*i).to_aterm_appl());
       }
-      walk_SortExpr((*i++).to_appl());
+      walk_SortExpr((*i++).to_aterm_appl());
       leave_SortArrowProd(t);
     }
 
@@ -2128,8 +2128,8 @@ class mcrl2_visitor
       visit_SortArrow(t);
       if (!stop(t))
       {
-        walk_SortExpr<Stop>((*i++).to_appl(), stop);
-        walk_SortExpr<Stop>((*i++).to_appl(), stop);
+        walk_SortExpr<Stop>((*i++).to_aterm_appl(), stop);
+        walk_SortExpr<Stop>((*i++).to_aterm_appl(), stop);
        }
       leave_SortArrow(t);
     }
@@ -2142,8 +2142,8 @@ class mcrl2_visitor
       assert(l.size() == 2);
       aterm_list::iterator i = l.begin();
       visit_SortArrow(t);
-      walk_SortExpr((*i++).to_appl());
-      walk_SortExpr((*i++).to_appl());
+      walk_SortExpr((*i++).to_aterm_appl());
+      walk_SortExpr((*i++).to_aterm_appl());
       leave_SortArrow(t);
     }
 
@@ -2186,10 +2186,10 @@ class mcrl2_visitor
       visit_ActionProcess(t);
       if (!stop(t))
       {
-        walk_String<Stop>((*i++).to_appl(), stop);
+        walk_String<Stop>((*i++).to_aterm_appl(), stop);
         {
-          aterm_list x = (*i++).to_list();
-          for (aterm_list::iterator i = x.begin(); i != x.end(); ++i) walk_DataExpr<Stop>((*i).to_appl(), stop);
+          aterm_list x = (*i++).to_aterm_list();
+          for (aterm_list::iterator i = x.begin(); i != x.end(); ++i) walk_DataExpr<Stop>((*i).to_aterm_appl(), stop);
         }
        }
       leave_ActionProcess(t);
@@ -2203,10 +2203,10 @@ class mcrl2_visitor
       assert(l.size() == 2);
       aterm_list::iterator i = l.begin();
       visit_ActionProcess(t);
-      walk_String((*i++).to_appl());
+      walk_String((*i++).to_aterm_appl());
       {
-        aterm_list x = (*i++).to_list();
-        for (aterm_list::iterator i = x.begin(); i != x.end(); ++i) walk_DataExpr((*i).to_appl());
+        aterm_list x = (*i++).to_aterm_list();
+        for (aterm_list::iterator i = x.begin(); i != x.end(); ++i) walk_DataExpr((*i).to_aterm_appl());
       }
       leave_ActionProcess(t);
     }
@@ -2222,10 +2222,10 @@ class mcrl2_visitor
       visit_Process(t);
       if (!stop(t))
       {
-        walk_ProcVarId<Stop>((*i++).to_appl(), stop);
+        walk_ProcVarId<Stop>((*i++).to_aterm_appl(), stop);
         {
-          aterm_list x = (*i++).to_list();
-          for (aterm_list::iterator i = x.begin(); i != x.end(); ++i) walk_DataExpr<Stop>((*i).to_appl(), stop);
+          aterm_list x = (*i++).to_aterm_list();
+          for (aterm_list::iterator i = x.begin(); i != x.end(); ++i) walk_DataExpr<Stop>((*i).to_aterm_appl(), stop);
         }
        }
       leave_Process(t);
@@ -2239,10 +2239,10 @@ class mcrl2_visitor
       assert(l.size() == 2);
       aterm_list::iterator i = l.begin();
       visit_Process(t);
-      walk_ProcVarId((*i++).to_appl());
+      walk_ProcVarId((*i++).to_aterm_appl());
       {
-        aterm_list x = (*i++).to_list();
-        for (aterm_list::iterator i = x.begin(); i != x.end(); ++i) walk_DataExpr((*i).to_appl());
+        aterm_list x = (*i++).to_aterm_list();
+        for (aterm_list::iterator i = x.begin(); i != x.end(); ++i) walk_DataExpr((*i).to_aterm_appl());
       }
       leave_Process(t);
     }
@@ -2287,10 +2287,10 @@ class mcrl2_visitor
       if (!stop(t))
       {
         {
-          aterm_list x = (*i++).to_list();
-          for (aterm_list::iterator i = x.begin(); i != x.end(); ++i) walk_DataVarId<Stop>((*i).to_appl(), stop);
+          aterm_list x = (*i++).to_aterm_list();
+          for (aterm_list::iterator i = x.begin(); i != x.end(); ++i) walk_DataVarId<Stop>((*i).to_aterm_appl(), stop);
         }
-        walk_ProcExpr<Stop>((*i++).to_appl(), stop);
+        walk_ProcExpr<Stop>((*i++).to_aterm_appl(), stop);
        }
       leave_Sum(t);
     }
@@ -2304,10 +2304,10 @@ class mcrl2_visitor
       aterm_list::iterator i = l.begin();
       visit_Sum(t);
       {
-        aterm_list x = (*i++).to_list();
-        for (aterm_list::iterator i = x.begin(); i != x.end(); ++i) walk_DataVarId((*i).to_appl());
+        aterm_list x = (*i++).to_aterm_list();
+        for (aterm_list::iterator i = x.begin(); i != x.end(); ++i) walk_DataVarId((*i).to_aterm_appl());
       }
-      walk_ProcExpr((*i++).to_appl());
+      walk_ProcExpr((*i++).to_aterm_appl());
       leave_Sum(t);
     }
 
@@ -2323,10 +2323,10 @@ class mcrl2_visitor
       if (!stop(t))
       {
         {
-          aterm_list x = (*i++).to_list();
-          for (aterm_list::iterator i = x.begin(); i != x.end(); ++i) walk_String<Stop>((*i).to_appl(), stop);
+          aterm_list x = (*i++).to_aterm_list();
+          for (aterm_list::iterator i = x.begin(); i != x.end(); ++i) walk_String<Stop>((*i).to_aterm_appl(), stop);
         }
-        walk_ProcExpr<Stop>((*i++).to_appl(), stop);
+        walk_ProcExpr<Stop>((*i++).to_aterm_appl(), stop);
        }
       leave_Restrict(t);
     }
@@ -2340,10 +2340,10 @@ class mcrl2_visitor
       aterm_list::iterator i = l.begin();
       visit_Restrict(t);
       {
-        aterm_list x = (*i++).to_list();
-        for (aterm_list::iterator i = x.begin(); i != x.end(); ++i) walk_String((*i).to_appl());
+        aterm_list x = (*i++).to_aterm_list();
+        for (aterm_list::iterator i = x.begin(); i != x.end(); ++i) walk_String((*i).to_aterm_appl());
       }
-      walk_ProcExpr((*i++).to_appl());
+      walk_ProcExpr((*i++).to_aterm_appl());
       leave_Restrict(t);
     }
 
@@ -2359,10 +2359,10 @@ class mcrl2_visitor
       if (!stop(t))
       {
         {
-          aterm_list x = (*i++).to_list();
-          for (aterm_list::iterator i = x.begin(); i != x.end(); ++i) walk_String<Stop>((*i).to_appl(), stop);
+          aterm_list x = (*i++).to_aterm_list();
+          for (aterm_list::iterator i = x.begin(); i != x.end(); ++i) walk_String<Stop>((*i).to_aterm_appl(), stop);
         }
-        walk_ProcExpr<Stop>((*i++).to_appl(), stop);
+        walk_ProcExpr<Stop>((*i++).to_aterm_appl(), stop);
        }
       leave_Hide(t);
     }
@@ -2376,10 +2376,10 @@ class mcrl2_visitor
       aterm_list::iterator i = l.begin();
       visit_Hide(t);
       {
-        aterm_list x = (*i++).to_list();
-        for (aterm_list::iterator i = x.begin(); i != x.end(); ++i) walk_String((*i).to_appl());
+        aterm_list x = (*i++).to_aterm_list();
+        for (aterm_list::iterator i = x.begin(); i != x.end(); ++i) walk_String((*i).to_aterm_appl());
       }
-      walk_ProcExpr((*i++).to_appl());
+      walk_ProcExpr((*i++).to_aterm_appl());
       leave_Hide(t);
     }
 
@@ -2395,10 +2395,10 @@ class mcrl2_visitor
       if (!stop(t))
       {
         {
-          aterm_list x = (*i++).to_list();
-          for (aterm_list::iterator i = x.begin(); i != x.end(); ++i) walk_RenameExpr<Stop>((*i).to_appl(), stop);
+          aterm_list x = (*i++).to_aterm_list();
+          for (aterm_list::iterator i = x.begin(); i != x.end(); ++i) walk_RenameExpr<Stop>((*i).to_aterm_appl(), stop);
         }
-        walk_ProcExpr<Stop>((*i++).to_appl(), stop);
+        walk_ProcExpr<Stop>((*i++).to_aterm_appl(), stop);
        }
       leave_Rename(t);
     }
@@ -2412,10 +2412,10 @@ class mcrl2_visitor
       aterm_list::iterator i = l.begin();
       visit_Rename(t);
       {
-        aterm_list x = (*i++).to_list();
-        for (aterm_list::iterator i = x.begin(); i != x.end(); ++i) walk_RenameExpr((*i).to_appl());
+        aterm_list x = (*i++).to_aterm_list();
+        for (aterm_list::iterator i = x.begin(); i != x.end(); ++i) walk_RenameExpr((*i).to_aterm_appl());
       }
-      walk_ProcExpr((*i++).to_appl());
+      walk_ProcExpr((*i++).to_aterm_appl());
       leave_Rename(t);
     }
 
@@ -2431,10 +2431,10 @@ class mcrl2_visitor
       if (!stop(t))
       {
         {
-          aterm_list x = (*i++).to_list();
-          for (aterm_list::iterator i = x.begin(); i != x.end(); ++i) walk_CommExpr<Stop>((*i).to_appl(), stop);
+          aterm_list x = (*i++).to_aterm_list();
+          for (aterm_list::iterator i = x.begin(); i != x.end(); ++i) walk_CommExpr<Stop>((*i).to_aterm_appl(), stop);
         }
-        walk_ProcExpr<Stop>((*i++).to_appl(), stop);
+        walk_ProcExpr<Stop>((*i++).to_aterm_appl(), stop);
        }
       leave_Comm(t);
     }
@@ -2448,10 +2448,10 @@ class mcrl2_visitor
       aterm_list::iterator i = l.begin();
       visit_Comm(t);
       {
-        aterm_list x = (*i++).to_list();
-        for (aterm_list::iterator i = x.begin(); i != x.end(); ++i) walk_CommExpr((*i).to_appl());
+        aterm_list x = (*i++).to_aterm_list();
+        for (aterm_list::iterator i = x.begin(); i != x.end(); ++i) walk_CommExpr((*i).to_aterm_appl());
       }
-      walk_ProcExpr((*i++).to_appl());
+      walk_ProcExpr((*i++).to_aterm_appl());
       leave_Comm(t);
     }
 
@@ -2467,10 +2467,10 @@ class mcrl2_visitor
       if (!stop(t))
       {
         {
-          aterm_list x = (*i++).to_list();
-          for (aterm_list::iterator i = x.begin(); i != x.end(); ++i) walk_MultActName<Stop>((*i).to_appl(), stop);
+          aterm_list x = (*i++).to_aterm_list();
+          for (aterm_list::iterator i = x.begin(); i != x.end(); ++i) walk_MultActName<Stop>((*i).to_aterm_appl(), stop);
         }
-        walk_ProcExpr<Stop>((*i++).to_appl(), stop);
+        walk_ProcExpr<Stop>((*i++).to_aterm_appl(), stop);
        }
       leave_Allow(t);
     }
@@ -2484,10 +2484,10 @@ class mcrl2_visitor
       aterm_list::iterator i = l.begin();
       visit_Allow(t);
       {
-        aterm_list x = (*i++).to_list();
-        for (aterm_list::iterator i = x.begin(); i != x.end(); ++i) walk_MultActName((*i).to_appl());
+        aterm_list x = (*i++).to_aterm_list();
+        for (aterm_list::iterator i = x.begin(); i != x.end(); ++i) walk_MultActName((*i).to_aterm_appl());
       }
-      walk_ProcExpr((*i++).to_appl());
+      walk_ProcExpr((*i++).to_aterm_appl());
       leave_Allow(t);
     }
 
@@ -2502,8 +2502,8 @@ class mcrl2_visitor
       visit_Sync(t);
       if (!stop(t))
       {
-        walk_ProcExpr<Stop>((*i++).to_appl(), stop);
-        walk_ProcExpr<Stop>((*i++).to_appl(), stop);
+        walk_ProcExpr<Stop>((*i++).to_aterm_appl(), stop);
+        walk_ProcExpr<Stop>((*i++).to_aterm_appl(), stop);
        }
       leave_Sync(t);
     }
@@ -2516,8 +2516,8 @@ class mcrl2_visitor
       assert(l.size() == 2);
       aterm_list::iterator i = l.begin();
       visit_Sync(t);
-      walk_ProcExpr((*i++).to_appl());
-      walk_ProcExpr((*i++).to_appl());
+      walk_ProcExpr((*i++).to_aterm_appl());
+      walk_ProcExpr((*i++).to_aterm_appl());
       leave_Sync(t);
     }
 
@@ -2532,8 +2532,8 @@ class mcrl2_visitor
       visit_AtTime(t);
       if (!stop(t))
       {
-        walk_ProcExpr<Stop>((*i++).to_appl(), stop);
-        walk_DataExpr<Stop>((*i++).to_appl(), stop);
+        walk_ProcExpr<Stop>((*i++).to_aterm_appl(), stop);
+        walk_DataExpr<Stop>((*i++).to_aterm_appl(), stop);
        }
       leave_AtTime(t);
     }
@@ -2546,8 +2546,8 @@ class mcrl2_visitor
       assert(l.size() == 2);
       aterm_list::iterator i = l.begin();
       visit_AtTime(t);
-      walk_ProcExpr((*i++).to_appl());
-      walk_DataExpr((*i++).to_appl());
+      walk_ProcExpr((*i++).to_aterm_appl());
+      walk_DataExpr((*i++).to_aterm_appl());
       leave_AtTime(t);
     }
 
@@ -2562,8 +2562,8 @@ class mcrl2_visitor
       visit_Seq(t);
       if (!stop(t))
       {
-        walk_ProcExpr<Stop>((*i++).to_appl(), stop);
-        walk_ProcExpr<Stop>((*i++).to_appl(), stop);
+        walk_ProcExpr<Stop>((*i++).to_aterm_appl(), stop);
+        walk_ProcExpr<Stop>((*i++).to_aterm_appl(), stop);
        }
       leave_Seq(t);
     }
@@ -2576,8 +2576,8 @@ class mcrl2_visitor
       assert(l.size() == 2);
       aterm_list::iterator i = l.begin();
       visit_Seq(t);
-      walk_ProcExpr((*i++).to_appl());
-      walk_ProcExpr((*i++).to_appl());
+      walk_ProcExpr((*i++).to_aterm_appl());
+      walk_ProcExpr((*i++).to_aterm_appl());
       leave_Seq(t);
     }
 
@@ -2592,9 +2592,9 @@ class mcrl2_visitor
       visit_Cond(t);
       if (!stop(t))
       {
-        walk_DataExpr<Stop>((*i++).to_appl(), stop);
-        walk_ProcExpr<Stop>((*i++).to_appl(), stop);
-        walk_ProcExpr<Stop>((*i++).to_appl(), stop);
+        walk_DataExpr<Stop>((*i++).to_aterm_appl(), stop);
+        walk_ProcExpr<Stop>((*i++).to_aterm_appl(), stop);
+        walk_ProcExpr<Stop>((*i++).to_aterm_appl(), stop);
        }
       leave_Cond(t);
     }
@@ -2607,9 +2607,9 @@ class mcrl2_visitor
       assert(l.size() == 3);
       aterm_list::iterator i = l.begin();
       visit_Cond(t);
-      walk_DataExpr((*i++).to_appl());
-      walk_ProcExpr((*i++).to_appl());
-      walk_ProcExpr((*i++).to_appl());
+      walk_DataExpr((*i++).to_aterm_appl());
+      walk_ProcExpr((*i++).to_aterm_appl());
+      walk_ProcExpr((*i++).to_aterm_appl());
       leave_Cond(t);
     }
 
@@ -2624,8 +2624,8 @@ class mcrl2_visitor
       visit_BInit(t);
       if (!stop(t))
       {
-        walk_ProcExpr<Stop>((*i++).to_appl(), stop);
-        walk_ProcExpr<Stop>((*i++).to_appl(), stop);
+        walk_ProcExpr<Stop>((*i++).to_aterm_appl(), stop);
+        walk_ProcExpr<Stop>((*i++).to_aterm_appl(), stop);
        }
       leave_BInit(t);
     }
@@ -2638,8 +2638,8 @@ class mcrl2_visitor
       assert(l.size() == 2);
       aterm_list::iterator i = l.begin();
       visit_BInit(t);
-      walk_ProcExpr((*i++).to_appl());
-      walk_ProcExpr((*i++).to_appl());
+      walk_ProcExpr((*i++).to_aterm_appl());
+      walk_ProcExpr((*i++).to_aterm_appl());
       leave_BInit(t);
     }
 
@@ -2654,8 +2654,8 @@ class mcrl2_visitor
       visit_Merge(t);
       if (!stop(t))
       {
-        walk_ProcExpr<Stop>((*i++).to_appl(), stop);
-        walk_ProcExpr<Stop>((*i++).to_appl(), stop);
+        walk_ProcExpr<Stop>((*i++).to_aterm_appl(), stop);
+        walk_ProcExpr<Stop>((*i++).to_aterm_appl(), stop);
        }
       leave_Merge(t);
     }
@@ -2668,8 +2668,8 @@ class mcrl2_visitor
       assert(l.size() == 2);
       aterm_list::iterator i = l.begin();
       visit_Merge(t);
-      walk_ProcExpr((*i++).to_appl());
-      walk_ProcExpr((*i++).to_appl());
+      walk_ProcExpr((*i++).to_aterm_appl());
+      walk_ProcExpr((*i++).to_aterm_appl());
       leave_Merge(t);
     }
 
@@ -2684,8 +2684,8 @@ class mcrl2_visitor
       visit_LMerge(t);
       if (!stop(t))
       {
-        walk_ProcExpr<Stop>((*i++).to_appl(), stop);
-        walk_ProcExpr<Stop>((*i++).to_appl(), stop);
+        walk_ProcExpr<Stop>((*i++).to_aterm_appl(), stop);
+        walk_ProcExpr<Stop>((*i++).to_aterm_appl(), stop);
        }
       leave_LMerge(t);
     }
@@ -2698,8 +2698,8 @@ class mcrl2_visitor
       assert(l.size() == 2);
       aterm_list::iterator i = l.begin();
       visit_LMerge(t);
-      walk_ProcExpr((*i++).to_appl());
-      walk_ProcExpr((*i++).to_appl());
+      walk_ProcExpr((*i++).to_aterm_appl());
+      walk_ProcExpr((*i++).to_aterm_appl());
       leave_LMerge(t);
     }
 
@@ -2714,8 +2714,8 @@ class mcrl2_visitor
       visit_Choice(t);
       if (!stop(t))
       {
-        walk_ProcExpr<Stop>((*i++).to_appl(), stop);
-        walk_ProcExpr<Stop>((*i++).to_appl(), stop);
+        walk_ProcExpr<Stop>((*i++).to_aterm_appl(), stop);
+        walk_ProcExpr<Stop>((*i++).to_aterm_appl(), stop);
        }
       leave_Choice(t);
     }
@@ -2728,8 +2728,8 @@ class mcrl2_visitor
       assert(l.size() == 2);
       aterm_list::iterator i = l.begin();
       visit_Choice(t);
-      walk_ProcExpr((*i++).to_appl());
-      walk_ProcExpr((*i++).to_appl());
+      walk_ProcExpr((*i++).to_aterm_appl());
+      walk_ProcExpr((*i++).to_aterm_appl());
       leave_Choice(t);
     }
 

@@ -31,7 +31,7 @@ class term_list_iterator: public boost::iterator_facade<
     {}
 
     term_list_iterator(aterm_list l)
-      : m_list(l.list())
+      : m_list(l.to_ATermList())
     {}
 
  private:
@@ -43,7 +43,9 @@ class term_list_iterator: public boost::iterator_facade<
 
     /// INTERNAL ONLY
     const Value dereference() const
-    { return Value(aterm_appl(void2appl(term2void(ATgetFirst(m_list))))); }
+    {
+      return Value(aterm_appl(void2appl(term2void(ATgetFirst(m_list)))));
+    }
 
     /// INTERNAL ONLY
     void increment()

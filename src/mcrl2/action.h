@@ -21,6 +21,7 @@ using atermpp::aterm_list_iterator;
 // action
 /// \brief Represents an action.
 ///
+// Action(ActId("r1",[SortId("D")]),[DataVarId("d2",SortId("D"))])
 class action: public aterm_wrapper
 {
   protected:
@@ -34,10 +35,16 @@ class action: public aterm_wrapper
     action(aterm_appl t)
      : aterm_wrapper(t)
     {
-      aterm_list_iterator i = term().argument_list().begin();
+      aterm_list_iterator i = to_appl().argument_list().begin();
       m_name      = *i++;
       m_arguments = data_expression_list(*i);
     }
+
+    action(const std::string& name, const data_expression_list& arguments)
+     : aterm_wrapper(gsMakeAction(gsString2ATermAppl(name.c_str()), arguments.to_ATermList())),
+       m_name(name),
+       m_arguments(arguments)
+    {}
 
     /// Returns the name of the action.
     ///
@@ -54,12 +61,12 @@ class action: public aterm_wrapper
     }
 
     /// Applies a substitution to this action and returns the result.
-    /// The Substitution object must supply the method aterm_appl operator()(aterm_appl).
+    /// The Substitution object must supply the method aterm operator()(aterm).
     ///
     template <typename Substitution>
     action substitute(Substitution f)
     {
-      return data_expression(f(term()));
+      return action(f(to_appl()));
     }     
 
     /// Applies a sequence of substitutions to this action and returns the result.
@@ -67,7 +74,7 @@ class action: public aterm_wrapper
     template <typename SubstIter>
     action substitute(SubstIter first, SubstIter last) const
     {
-      return action(aterm_appl_substitute(term(), first, last));
+      return action(substitute(to_appl(), first, last));
     }
 };
 

@@ -189,7 +189,7 @@ struct StopAtMatch
 int main()
 {
   string filename("data/abp_b.lpe");
-  aterm_appl t = read_from_named_file(filename).to_appl();
+  aterm_appl t = read_from_named_file(filename).to_aterm_appl();
   if (!t)
     cerr << "could not read file!" << endl;
   

@@ -9,9 +9,16 @@
 #include <vector>
 #include <boost/iterator/iterator_facade.hpp>
 #include "atermpp/aterm.h"
+#include "atermpp/aterm_algorithm.h"
 #include "mcrl2/term_list_iterator.h"
+#include "mcrl2/gs_init.h"
+#include "mcrl2/substitute.h"
 
 namespace mcrl2 {
+
+using atermpp::aterm;
+using atermpp::aterm_appl;
+using atermpp::aterm_list;
 
   ///////////////////////////////////////////////////////////////////////////////
   // term_list
@@ -19,6 +26,7 @@ namespace mcrl2 {
   ///
   /// N.B. This is intended as a replacement for the aterm_list of the atermpp library.
   ///
+  // Term must support: aterm_appl to_appl(), ATerm to_ATerm()
   template <typename Term>
   class term_list
   {
@@ -86,7 +94,7 @@ namespace mcrl2 {
       {
         m_list = ATmakeList0();
         while (first != last)
-          m_list = ATinsert(m_list, (--last)->term());
+          m_list = ATinsert(m_list, (--last)->to_ATerm());
           //m_list = ATinsert(m_list, convert_term(*(--last)));
       }
 
@@ -94,7 +102,7 @@ namespace mcrl2 {
         * Allow construction from an aterm.
         **/
       term_list(atermpp::aterm t)
-        : m_list(void2list(term2void(t.term())))
+        : m_list(void2list(term2void(t.to_ATerm())))
       {}
 
       /**
@@ -128,7 +136,7 @@ namespace mcrl2 {
       /**
         * Returns the size of the term_list.
         **/
-      size_type size()
+      size_type size() const
       { return ATgetLength(m_list); }     
 
       /**
@@ -185,54 +193,49 @@ namespace mcrl2 {
       void clear()
       { m_list = ATmakeList0(); }
 
-      /**
-        * Conversion to ATermList.
-        **/
-      operator ATermList() const
-      { return m_list; }
-  
-      /**
-        * Returns the ATermList that is contained by the term_list.
-        **/
-      ATermList list() const
-      { return m_list; }
+      /// Conversion to ATerm
+      ///
+      ATerm to_ATerm() const
+      {
+        return void2term(list2void(m_list));
+      }
 
-      /**
-        * Returns the ATermList that is contained by the term_list.
-        **/
-      ATermList term() const
-      { return m_list; }
+      /// Conversion to ATermList
+      ///
+      ATermList to_ATermList() const
+      {
+        return m_list;
+      }
 
       /// Applies a substitution to this term_list and returns the result.
-      /// The Substitution object must supply the method aterm_appl operator()(aterm_appl).
+      /// The Substitution object must supply the method aterm operator()(aterm).
       ///
-      // TODO: can this be done more efficiently (without a temporary vector)?
+      // TODO: do not assume existence of lhs()/rhs() methods
       template <typename Substitution>
-      term_list<Term> substitute(Substitution f)
+      term_list<Term> substitute(Substitution f) const
       {
-        std::vector<aterm_appl> tmp;
-        tmp.reserve(size());
-        for (iterator i = begin(); i != end(); ++i)
-        {
-          tmp.push_back(f(*i));
-        }
-        return term_list<Term>(tmp.begin(), tmp.end());
+        return term_list<Term>(atermpp::aterm_replace(aterm_list(m_list), f.lhs().to_aterm(), f.rhs().to_aterm()));
       }     
 
       /// Applies a sequence of substitutions to this term_list and returns the result.
-      /// The SubstIter objects must supply the method aterm_appl operator()(aterm_appl).
+      /// The SubstIter objects must supply the method aterm operator()(aterm).
       ///
+      // TODO: do not assume existence of lhs()/rhs() methods
       template <typename SubstIter>
-      term_list<Term> substitute(SubstIter first, SubstIter last)
+      term_list<Term> substitute(SubstIter first, SubstIter last) const
       {
-        std::vector<aterm_appl> tmp;
-        tmp.reserve(size());
-        for (iterator i = begin(); i != end(); ++i)
-        {
-          tmp.push_back(aterm_appl_substitute(i->term(), first, last));
-        }
-        return term_list<Term>(tmp.begin(), tmp.end());
+        term_list<Term> result = *this;
+        for (SubstIter i = first; i != last; ++i)
+          result = term_list<Term>(atermpp::aterm_replace(atermpp::aterm(result.to_ATerm()), i->lhs().to_aterm(), i->rhs().to_aterm()));
+        return result;
       }     
+
+      /// Returns a pretty print representation of the term_list.
+      ///
+      std::string pp() const
+      {
+        return pretty_print(to_ATerm());
+      }
 
       /// Returns a string representation of the term_list.
       ///
@@ -252,7 +255,7 @@ namespace mcrl2 {
   template <typename Term>
   inline
   term_list<Term> push_front(term_list<Term> l, Term elem)
-  { return term_list<Term>(ATinsert(l.list(), elem.term())); }
+  { return term_list<Term>(ATinsert(l.to_ATermList(), elem.to_ATerm())); }
 
   /**
     * Removes the first element.
@@ -260,7 +263,7 @@ namespace mcrl2 {
   template <typename Term>
   inline
   term_list<Term> pop_front(term_list<Term> l)
-  { return term_list<Term>(ATgetNext(l.list())); }
+  { return term_list<Term>(ATgetNext(l.to_ATermList())); }
 
   /**
     * Returns the next part (the tail) of list l.
@@ -269,7 +272,7 @@ namespace mcrl2 {
   inline
   term_list<Term> get_next(term_list<Term> l)
   {
-    return ATgetNext(l.list());
+    return ATgetNext(l.to_ATermList());
   }
 
   /**
@@ -278,7 +281,7 @@ namespace mcrl2 {
   template <typename Term>
   inline
   term_list<Term> tail(term_list<Term> l, int start)
-  { return ATgetTail(l.list(), start); }
+  { return ATgetTail(l.to_ATermList(), start); }
   
   /**
     * Replace the tail of list l from position start with new_tail.
@@ -286,7 +289,7 @@ namespace mcrl2 {
   template <typename Term>
   inline
   term_list<Term> replace_tail(term_list<Term> l, term_list<Term> new_tail, int start)
-  { return ATreplaceTail(l.list(), new_tail.list(), start); }
+  { return ATreplaceTail(l.to_ATermList(), new_tail.to_ATermList(), start); }
   
   /**
     * Return all but the last element of list l.
@@ -294,7 +297,7 @@ namespace mcrl2 {
   template <typename Term>
   inline
   term_list<Term> prefix(term_list<Term> l)
-  { return ATgetPrefix(l.list()); }
+  { return ATgetPrefix(l.to_ATermList()); }
   
   /**
     * Return the last element of list l.
@@ -302,7 +305,7 @@ namespace mcrl2 {
   template <typename Term>
   inline
   Term get_last(term_list<Term> l)
-  { return ATgetLast(l.list()); }
+  { return ATgetLast(l.to_ATermList()); }
   
   /**
     * Get a portion (slice) of list l.
@@ -312,7 +315,7 @@ namespace mcrl2 {
   template <typename Term>
   inline
   term_list<Term> slice(term_list<Term> l, int start, int end)
-  { return ATgetSlice(l.list(), start, end); }
+  { return ATgetSlice(l.to_ATermList(), start, end); }
   
   /**
     * Return list l with el inserted.
@@ -322,7 +325,7 @@ namespace mcrl2 {
   template <typename Term>
   inline
   term_list<Term> insert(term_list<Term> l, Term el)
-  { return ATinsert(l.list(), el.term()); }
+  { return ATinsert(l.to_ATermList(), el.to_ATerm()); }
   
   /**
     * Return list l with el inserted at position index.
@@ -330,7 +333,7 @@ namespace mcrl2 {
   template <typename Term>
   inline
   term_list<Term> insert_at(term_list<Term> l, Term el, int index)
-  { return ATinsertAt(l.list(), el.term(), index); }
+  { return ATinsertAt(l.to_ATermList(), el.to_ATerm(), index); }
   
   /**
     * Return list l with el appended to it.
@@ -343,7 +346,7 @@ namespace mcrl2 {
   template <typename Term>
   inline
   term_list<Term> append(term_list<Term> l, Term el)
-  { return ATappend(l.list(), el.term()); }
+  { return ATappend(l.to_ATermList(), el.to_ATerm()); }
   
   /**
     * Return the concatenation of the list l and m.
@@ -351,7 +354,7 @@ namespace mcrl2 {
   template <typename Term>
   inline
   term_list<Term> concat(term_list<Term> l, term_list<Term> m)
-  { return ATconcat(l.list(), m.list()); }
+  { return ATconcat(l.to_ATermList(), m.to_ATermList()); }
   
   /**
     * Return the index of an m_list in a list.
@@ -361,7 +364,7 @@ namespace mcrl2 {
   template <typename Term>
   inline
   int index_of(term_list<Term> l, Term el, int start)
-  { return ATindexOf(l.list(), el.term(), start); }
+  { return ATindexOf(l.to_ATermList(), el.to_ATerm(), start); }
   
   /**
     * Return the index of an m_list in a list (reverse).
@@ -371,7 +374,7 @@ namespace mcrl2 {
   template <typename Term>
   inline
   int last_index_of(term_list<Term> l, Term el, int start)
-  { return ATlastIndexOf(l.list(), el.term(), start); }
+  { return ATlastIndexOf(l.to_ATermList(), el.to_ATerm(), start); }
   
   /**
     * Return a specific element of a list.
@@ -381,7 +384,7 @@ namespace mcrl2 {
   template <typename Term>
   inline
   Term element_at(term_list<Term> l, int index)
-  { return ATelementAt(l.list(), index); }
+  { return ATelementAt(l.to_ATermList(), index); }
   
   /**
     * Return list with one occurrence of el removed.
@@ -389,7 +392,7 @@ namespace mcrl2 {
   template <typename Term>
   inline
   term_list<Term> remove_element(term_list<Term> l, Term elem)
-  { return ATremoveElement(l.list(), elem.term()); }
+  { return ATremoveElement(l.to_ATermList(), elem.to_ATerm()); }
   
   /**
     * Return list l with all occurrences of el removed.
@@ -398,7 +401,7 @@ namespace mcrl2 {
   inline
   term_list<Term> remove_all(term_list<Term> l, Term el)
   {
-    return ATremoveAll(l.list(), el.term());
+    return ATremoveAll(l.to_ATermList(), el.to_ATerm());
   }
 
   /**
@@ -407,7 +410,7 @@ namespace mcrl2 {
   template <typename Term>
   inline
   term_list<Term> remove_element_at(term_list<Term> l, int index)
-  { return ATremoveElementAt(l.list(), index); }
+  { return ATremoveElementAt(l.to_ATermList(), index); }
   
   /**
     * Return list l with the element at index replaced by el.
@@ -415,7 +418,7 @@ namespace mcrl2 {
   template <typename Term>
   inline
   term_list<Term> replace(term_list<Term> l, Term elem, int index)
-  { return ATreplace(l.list(), elem.term(), index); }
+  { return ATreplace(l.to_ATermList(), elem.to_ATerm(), index); }
   
   /**
     * Return list l with its elements in reversed order.
@@ -423,7 +426,15 @@ namespace mcrl2 {
   template <typename Term>
   inline
   term_list<Term> reverse(term_list<Term> l)
-  { return ATreverse(l.list()); }
+  { return ATreverse(l.to_ATermList()); }
+
+  /**
+    * Returns true if both lists wrap the same term.
+    **/
+  template <typename Term>
+  inline
+  bool operator==(const term_list<Term>& l, const term_list<Term>& m)
+  { return ATisEqual(l.to_ATerm(), m.to_ATerm()) == ATtrue; }
 
 } // namespace mcrl
 

@@ -8,9 +8,12 @@
 #include <list>
 #include <boost/iterator/iterator_facade.hpp>
 #include "atermpp/aterm.h"
+#include "mcrl2/gs_init.h"
+#include "mcrl2/pretty_print.h"
 
 namespace mcrl2 {
 
+using atermpp::aterm;
 using atermpp::aterm_appl;
 
   //---------------------------------------------------------//
@@ -18,53 +21,65 @@ using atermpp::aterm_appl;
   //---------------------------------------------------------//
   class aterm_wrapper
   {
-   protected:
+    protected:
       aterm_appl m_term;
 
-   public:
-    aterm_wrapper()
-    {}
-
-    aterm_wrapper(aterm_appl term)
-      : m_term(term)
-    {}
-
-    /// Two terms are considered equal if the underlying aterms are identical.
-    /// 
-    bool operator==(const aterm_wrapper& t) const
-    {
-      return m_term == t.m_term;
-    }
-
-    /// Returns a string representation of the term.
-    ///
-    std::string to_string() const
-    {
-      return m_term.to_string();
-    }
-
-    /// Returns the internal aterm representation.
-    ///
-    aterm_appl term() const
-    {
-      return m_term;
-    }
-
-/*    
-    /// Applies a sequence of substitutions to this term and returns the result.
-    /// The SubstIter objects must supply the method aterm_appl operator()(aterm_appl).
-    ///
-    template <typename SubstIter>
-    aterm_appl aterm_appl_substitute(SubstIter first, SubstIter last) const
-    {
-      aterm_appl result = m_term;
-      for (SubstIter i = first; i != last; ++i)
+    public:
+      aterm_wrapper()
+      {}
+      
+      aterm_wrapper(aterm_appl term)
+        : m_term(term)
+      {}
+      
+      /// Two terms are considered equal if the underlying aterms are identical.
+      /// 
+      bool operator==(const aterm_wrapper& t) const
       {
-        result = (*i)(result);
+        return m_term == t.m_term;
       }
-      return result;
-    }    
-*/  
+      
+      /// Returns a string representation of the term.
+      ///
+      std::string to_string() const
+      {
+        return m_term.to_string();
+      }
+      
+      /// Conversion to ATerm
+      ///
+      ATerm to_ATerm() const
+      {
+        return m_term;
+      }
+      
+      /// Conversion to ATermAppl
+      ///
+      ATermAppl to_ATermAppl() const
+      {
+        return m_term.to_ATermAppl();
+      }
+      
+      /// Conversion to aterm
+      ///
+      aterm to_aterm() const
+      {
+        return m_term;
+      }
+
+      /// Conversion to aterm_appl
+      ///
+      aterm_appl to_appl() const
+      {
+        return m_term;
+      }
+      
+      /// Returns a pretty print representation of the term.
+      ///
+      std::string pp() const
+      {
+        return pretty_print(to_ATerm());
+      }
   };
 
 } // namespace mcrl

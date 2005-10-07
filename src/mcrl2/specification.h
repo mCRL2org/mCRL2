@@ -9,6 +9,7 @@
 #include <iostream>
 #include <vector>
 #include <utility>
+
 #include "atermpp/aterm.h"
 #include "mcrl2/function.h"
 #include "mcrl2/lpe.h"
@@ -98,7 +99,7 @@ class specification: public aterm_wrapper
       aterm_list_iterator k       = lpe_init.argument_list().begin();
       m_init_variables            = data_variable_list(*k++);
       m_init_assignments          = data_assignment_list(*k);
-      data_expression_list d0(m_init_variables.list());
+      data_expression_list d0(m_init_variables.to_ATermList());
       m_initial_state = compute_initial_state(m_init_assignments);
     }
 

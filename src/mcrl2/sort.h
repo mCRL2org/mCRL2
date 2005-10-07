@@ -7,8 +7,10 @@
 
 #include <list>
 #include "atermpp/aterm.h"
-#include "mcrl2/list_iterator.h"
+//#include "mcrl2/predefined_symbols.h"
+#include "mcrl2/aterm_wrapper.h"
 #include "mcrl2/term_list.h"
+#include "gsfunc.h"
 
 namespace mcrl2 {
 
@@ -40,17 +42,20 @@ class sort: public aterm_wrapper
     sort(aterm_appl domain, aterm_appl range)
     {}
 
-    /// Constructs a sort from a string. Currently the aterm string representation is
-    /// used, but probably something like sort s("A-\>(B-\>C)"); should be supported.
+    /// Constructs a constant sort from a string. Currently the string s is converted
+    /// to a SortId("D").
+    /// Probably something more general like sort s("A-\>(B-\>C)"); should be supported.
     ///
     sort(std::string s)
-      : aterm_wrapper(make_term(s).to_appl())
+//      : aterm_wrapper(aterm_appl(func_SortId(), atermpp::quoted_string(s)))
+      : aterm_wrapper(gsMakeSortId(gsString2ATermAppl(s.c_str())))
     {}
 
     /// Returns the domain of the sort expression. Note that the domain is a list.
     /// For example the domain of the expression A -\> B -\> C is equal to [A,B].
     ///
     /// The domain of sort expression (A-\>B)-\>C-\>D is [A-\>B, C].
+/*
     std::list<sort> domain() const
     {
       return std::list<sort>();
@@ -80,13 +85,15 @@ class sort: public aterm_wrapper
     {
       return sort("rhs");
     }   
+*/
 
     /// Returns true if the sort is constant, i.e. has an empty domain.
     ///
     bool is_constant() const
     {
-      return term().function().name() == "SortID";
-    }
+      return true;
+      //return to_appl().function() == func_SortId();
+    }   
 };
 
 typedef term_list<sort> sort_list;
@@ -96,7 +103,7 @@ typedef term_list<sort> sort_list;
 inline
 sort make_sort(sort domain, sort range)
 {
-  return sort(domain.term(), range.term());
+  return sort(domain.to_appl(), range.to_appl());
 }
 
 } // namespace mcrl

@@ -47,6 +47,7 @@ namespace { // unnamed namespace
       // std::cerr << "ATerm library initialization called." << std::endl;
 #ifndef ATERM_USER_INITIALIZATION
       ATinit(0, 0, &bottom_of_stack);
+      ATprotect(&bottom_of_stack);
 #endif // ATERM_USER_INITIALIZATION
     }
   }

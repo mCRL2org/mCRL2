@@ -177,17 +177,16 @@ namespace atermpp
       aterm(const std::string& s)
         : m_term(ATmake(const_cast<char*>(s.c_str())))
       {}
-  
+
+      ATerm to_ATerm() const
+      { return reinterpret_cast<ATerm>(m_term); }
+
       const ATerm& term() const
       { return reinterpret_cast<const ATerm&>(m_term); }
   
       ATerm& term()
       { return reinterpret_cast<ATerm&>(m_term); }
-  
-      // allow conversion to ATerm
-      operator ATerm() const
-      { return term(); }
-  
+
       /**
         * Protect the aterm.
         * Protects the aterm from being freed at garbage collection.
@@ -219,38 +218,32 @@ namespace atermpp
         * Writes the term to a string.
         **/
       std::string to_string() const
-      { return std::string(ATwriteToString(term())); }
+      { return std::string(ATwriteToString(to_ATerm())); }
 
       /** Retrieve the annotation with the given label.
         *
         **/
       aterm annotation(aterm label) const
       {
-        return ATgetAnnotation(term(), label.term());
+        return ATgetAnnotation(to_ATerm(), label.to_ATerm());
       }
-      
-      aterm_blob to_blob() const;
-      aterm_real to_real() const;
-      aterm_int  to_int() const;
-      aterm_list to_list() const;
-      aterm_appl to_appl() const;
+
+      aterm_blob to_aterm_blob() const;
+      aterm_real to_aterm_real() const;
+      aterm_int  to_aterm_int() const;
+      aterm_list to_aterm_list() const;
+      aterm_appl to_aterm_appl() const;
+      aterm to_aterm() const { return *this; }
+
+      // allow conversion to ATerm
+      operator ATerm() const
+      { return to_ATerm(); } 
   };
   
   inline
   bool operator!(const aterm& x)
-  { return ATisEqual(x.term(), ATfalse); }
+  { return ATisEqual(x.to_ATerm(), ATfalse); }
   
-  /**
-    * Tests equality of aterms t1 and t2.
-    * As aterms are created using maximal sharing (see Section 2.1), testing equality
-    * is performed in constant time by comparing the addresses of t1 and t2.  Note however that
-    * operator== only returns true when t1 and t2 are completely equal, inclusive any annotations
-    * they might have!
-    **/
-  inline
-  bool operator==(const aterm& x, const aterm& y)
-  { return ATisEqual(x.term(), y.term()) == ATtrue; }
-
   /**
     * Returns !(x==y).
     **/
@@ -459,7 +452,7 @@ namespace atermpp
         * Allow construction from an aterm.
         **/
       aterm_list(aterm t)
-        : aterm(void2list(term2void(t.term())))
+        : aterm(void2list(term2void(t.to_ATerm())))
       {}
 
       /**
@@ -514,7 +507,7 @@ namespace atermpp
       /**
         * Returns the ATermList that is contained by the aterm_list.
         **/
-      ATermList list() const
+      ATermList to_ATermList() const
       { return void2list(m_term); }
   };
 
@@ -526,45 +519,45 @@ namespace atermpp
     * Inserts a new element at the beginning.
     **/
   aterm_list push_front(aterm_list l, aterm elem)
-  { return aterm_list(ATinsert(l.list(), elem.term())); }
+  { return aterm_list(ATinsert(l.to_ATermList(), elem.to_ATerm())); }
 
   /**
     * Removes the first element.
     **/
   aterm_list pop_front(aterm_list l)
-  { return aterm_list(ATgetNext(l.list())); }
+  { return aterm_list(ATgetNext(l.to_ATermList())); }
 
   /**
     * Returns the next part (the tail) of list l.
     **/
   aterm_list get_next(aterm_list l)
   {
-    return ATgetNext(l.list());
+    return ATgetNext(l.to_ATermList());
   }
 
   /**
     * Return the sublist from start to the end of list l.
     **/
   inline aterm_list tail(aterm_list l, int start)
-  { return ATgetTail(l.list(), start); }
+  { return ATgetTail(l.to_ATermList(), start); }
   
   /**
     * Replace the tail of list l from position start with new_tail.
     **/
   inline aterm_list replace_tail(aterm_list l, aterm_list new_tail, int start)
-  { return ATreplaceTail(l.list(), new_tail.list(), start); }
+  { return ATreplaceTail(l.to_ATermList(), new_tail.to_ATermList(), start); }
   
   /**
     * Return all but the last element of list l.
     **/
   inline aterm_list prefix(aterm_list l)
-  { return ATgetPrefix(l.list()); }
+  { return ATgetPrefix(l.to_ATermList()); }
   
   /**
     * Return the last element of list l.
     **/
   inline aterm get_last(aterm_list l)
-  { return ATgetLast(l.list()); }
+  { return ATgetLast(l.to_ATermList()); }
   
   /**
     * Get a portion (slice) of list l.
@@ -572,7 +565,7 @@ namespace atermpp
     * included, end is not.
     **/
   inline aterm_list slice(aterm_list l, int start, int end)
-  { return ATgetSlice(l.list(), start, end); }
+  { return ATgetSlice(l.to_ATermList(), start, end); }
   
   /**
     * Return list l with el inserted.
@@ -581,14 +574,14 @@ namespace atermpp
     **/
   inline
   aterm_list insert(aterm_list l, aterm el)
-  { return ATinsert(l.list(), el.term()); }
+  { return ATinsert(l.to_ATermList(), el.to_ATerm()); }
   
   /**
     * Return list l with el inserted at position index.
     **/
   inline
   aterm_list insert_at(aterm_list l, aterm el, int index)
-  { return ATinsertAt(l.list(), el.term(), index); }
+  { return ATinsertAt(l.to_ATermList(), el.to_ATerm(), index); }
   
   /**
     * Return list l with el appended to it.
@@ -600,14 +593,14 @@ namespace atermpp
     **/
   inline
   aterm_list append(aterm_list l, aterm el)
-  { return ATappend(l.list(), el.term()); }
+  { return ATappend(l.to_ATermList(), el.to_ATerm()); }
   
   /**
     * Return the concatenation of the list l and m.
     **/
   inline
   aterm_list concat(aterm_list l, aterm_list m)
-  { return ATconcat(l.list(), m.list()); }
+  { return ATconcat(l.to_ATermList(), m.to_ATermList()); }
   
   /**
     * Return the index of an aterm in a list.
@@ -616,7 +609,7 @@ namespace atermpp
     **/
   inline
   int index_of(aterm_list l, aterm el, int start)
-  { return ATindexOf(l.list(), el.term(), start); }
+  { return ATindexOf(l.to_ATermList(), el.to_ATerm(), start); }
   
   /**
     * Return the index of an aterm in a list (reverse).
@@ -625,7 +618,7 @@ namespace atermpp
     **/
   inline
   int last_index_of(aterm_list l, aterm elem, int start)
-  { return ATlastIndexOf(l.list(), elem.term(), start); }
+  { return ATlastIndexOf(l.to_ATermList(), elem.to_ATerm(), start); }
   
   /**
     * Return a specific element of a list.
@@ -634,14 +627,14 @@ namespace atermpp
     **/
   inline
   aterm element_at(aterm_list l, int index)
-  { return ATelementAt(l.list(), index); }
+  { return ATelementAt(l.to_ATermList(), index); }
   
   /**
     * Return list with one occurrence of el removed.
     **/
   inline
   aterm_list remove_element(aterm_list l, aterm elem)
-  { return ATremoveElement(l.list(), elem.term()); }
+  { return ATremoveElement(l.to_ATermList(), elem.to_ATerm()); }
   
   /**
     * Return list l with all occurrences of el removed.
@@ -649,7 +642,7 @@ namespace atermpp
   inline
   aterm_list remove_all(aterm_list l, aterm el)
   {
-    return ATremoveAll(l.list(), el.term());
+    return ATremoveAll(l.to_ATermList(), el.to_ATerm());
   }
 
   /**
@@ -657,21 +650,21 @@ namespace atermpp
     **/
   inline
   aterm_list remove_element_at(aterm_list l, int index)
-  { return ATremoveElementAt(l.list(), index); }
+  { return ATremoveElementAt(l.to_ATermList(), index); }
   
   /**
     * Return list l with the element at index replaced by el.
     **/
   inline
   aterm_list replace(aterm_list l, aterm elem, int index)
-  { return ATreplace(l.list(), elem.term(), index); }
+  { return ATreplace(l.to_ATermList(), elem.to_ATerm(), index); }
   
   /**
     * Return list l with its elements in reversed order.
     **/
   inline
   aterm_list reverse(aterm_list l)
-  { return ATreverse(l.list()); }
+  { return ATreverse(l.to_ATermList()); }
 
 
 //  /**
@@ -688,7 +681,7 @@ namespace atermpp
 //    **/
 //  aterm filter(aterm_list l, filter_predicate predicate)
 //  {
-//    return ATfilter(l.list(), predicate);
+//    return ATfilter(l.to_ATermList(), predicate);
 //  }
 
   //---------------------------------------------------------//
@@ -712,7 +705,7 @@ namespace atermpp
         * Allow construction from an aterm.
         **/
       aterm_appl(aterm t)
-        : aterm(void2appl(term2void(t.term())))
+        : aterm(void2appl(term2void(t.to_ATerm())))
       {}
 
 #include "atermpp/aterm_appl_constructor.h" // additional constructors generated by preprocessor
@@ -749,7 +742,7 @@ namespace atermpp
       /**
         * Returns the ATermAppl that is contained by the aterm_appl.
         **/
-      ATermAppl appl() const
+      ATermAppl to_ATermAppl() const
       { return void2appl(m_term); }
   };
   
@@ -768,7 +761,7 @@ namespace atermpp
         * parameter.
         **/
       aterm_place_holder(aterm type)
-        : aterm(ATmakePlaceholder(type.term()))
+        : aterm(ATmakePlaceholder(type.to_ATerm()))
       {}
       
       /**
@@ -836,7 +829,7 @@ namespace atermpp
         **/
       aterm get(aterm key)
       {
-        return ATdictGet(term(), key.term());
+        return ATdictGet(to_ATerm(), key.to_ATerm());
       }
       
       /**
@@ -846,7 +839,7 @@ namespace atermpp
         **/
       void put(aterm key, aterm value)
       {
-        m_term = ATdictPut(term(), key.term(), value.term());
+        m_term = ATdictPut(to_ATerm(), key.to_ATerm(), value.to_ATerm());
       }
       
       /**
@@ -855,7 +848,7 @@ namespace atermpp
         **/
       void dict_remove(aterm key)
       {
-        m_term = ATdictRemove(term(), key.term());
+        m_term = ATdictRemove(to_ATerm(), key.to_ATerm());
       }
   };
 
@@ -917,7 +910,7 @@ namespace atermpp
         **/
       void put(aterm key, aterm value)
       {
-        ATtablePut(m_table, key.term(), value.term());
+        ATtablePut(m_table, key.to_ATerm(), value.to_ATerm());
       }
       
       /**
@@ -925,7 +918,7 @@ namespace atermpp
         **/
       aterm get(aterm key)
       {
-        return ATtableGet(m_table, key.term());
+        return ATtableGet(m_table, key.to_ATerm());
       }
       
       /**
@@ -933,7 +926,7 @@ namespace atermpp
         **/
       void remove(aterm key)
       {
-        ATtableRemove(m_table, key.term());
+        ATtableRemove(m_table, key.to_ATerm());
       }
       
       /**
@@ -994,7 +987,7 @@ namespace atermpp
       std::pair<long, bool> put(aterm elem)
       {
         ATbool b;
-        long l = ATindexedSetPut(m_set, elem.term(), &b);
+        long l = ATindexedSetPut(m_set, elem.to_ATerm(), &b);
         return std::make_pair(l, b == ATtrue);
       }
       
@@ -1005,7 +998,7 @@ namespace atermpp
         **/
       long index(aterm elem)
       {
-        return ATindexedSetGetIndex(m_set, elem.term());
+        return ATindexedSetGetIndex(m_set, elem.to_ATerm());
       }
       
       /**
@@ -1025,7 +1018,7 @@ namespace atermpp
         **/
       void remove(aterm elem)
       {
-        ATindexedSetRemove(m_set, elem.term());
+        ATindexedSetRemove(m_set, elem.to_ATerm());
       }
       
       /**
@@ -1043,35 +1036,35 @@ namespace atermpp
   //                     implementations
   //---------------------------------------------------------//
   inline
-  aterm_list aterm::to_list() const
+  aterm_list aterm::to_aterm_list() const
   {
     assert(type() == AT_LIST);
     return aterm_list(void2list(m_term));
   }
   
   inline
-  aterm_appl aterm::to_appl() const
+  aterm_appl aterm::to_aterm_appl() const
   {
     assert(type() == AT_APPL);
     return aterm_appl(void2appl(m_term));
   }
   
   inline
-  aterm_int aterm::to_int() const
+  aterm_int aterm::to_aterm_int() const
   {
     assert(type() == AT_INT);
     return aterm_int(void2int(m_term));
   }
   
   inline
-  aterm_real aterm::to_real() const
+  aterm_real aterm::to_aterm_real() const
   {
     assert(type() == AT_REAL);
     return aterm_real(void2real(m_term));
   }
   
   inline
-  aterm_blob aterm::to_blob() const
+  aterm_blob aterm::to_aterm_blob() const
   {
     assert(type() == AT_BLOB);
     return aterm_blob(void2blob(m_term));
@@ -1126,7 +1119,7 @@ namespace atermpp
   inline
   bool write_to_named_text_file(aterm t, const std::string& filename)
   {
-    return ATwriteToNamedTextFile(t.term(), filename.c_str()) == ATtrue;
+    return ATwriteToNamedTextFile(t.to_ATerm(), filename.c_str()) == ATtrue;
   }
 
   /**
@@ -1135,7 +1128,7 @@ namespace atermpp
   inline
   bool write_to_named_binary_file(aterm t, const std::string& filename)
   {
-    return ATwriteToNamedBinaryFile(t.term(), filename.c_str()) == ATtrue;
+    return ATwriteToNamedBinaryFile(t.to_ATerm(), filename.c_str()) == ATtrue;
   }
 
   /**
@@ -1146,7 +1139,7 @@ namespace atermpp
   inline
   aterm set_annotation(aterm t, aterm label, aterm annotation)
   {
-    return ATsetAnnotation(t.term(), label.term(), annotation.term());
+    return ATsetAnnotation(t.to_ATerm(), label.to_ATerm(), annotation.to_ATerm());
   }
 
   /**
@@ -1158,7 +1151,7 @@ namespace atermpp
   inline
   aterm get_annotation(aterm t, aterm label)
   {
-    return ATgetAnnotation(t.term(), label.term());
+    return ATgetAnnotation(t.to_ATerm(), label.to_ATerm());
   }
 
   /**
@@ -1169,7 +1162,7 @@ namespace atermpp
   inline
   aterm remove_annotation(aterm t, aterm label)
   {
-    return ATremoveAnnotation(t.term(), label.term());
+    return ATremoveAnnotation(t.to_ATerm(), label.to_ATerm());
   }
 
   /**
@@ -1179,7 +1172,7 @@ namespace atermpp
   void init(int argc, char* argv[], aterm& bottom_of_stack)
   {
 #ifdef ATERM_USER_INITIALIZATION
-    ATinit(argc, argv, &bottom_of_stack.term());
+    ATinit(argc, argv, &bottom_of_stack.to_ATerm());
 #endif // ATERM_USER_INITIALIZATION
   }
 
@@ -1189,8 +1182,52 @@ namespace atermpp
     **/
   aterm_appl set_appl_argument(aterm_appl appl, unsigned int i, aterm term)
   {
-    return ATsetArgument(appl.appl(), term.term(), i);
+    return ATsetArgument(appl.to_ATermAppl(), term.to_ATerm(), i);
   }   
+
+  /**
+    * Returns a quoted string.
+    **/
+  inline
+  aterm_appl quoted_string(std::string s)
+  {
+    // TODO: this should be done more efficiently!
+    return aterm_appl("\"" + s + "\"");
+  }
+  
+  /**
+    * Tests equality of aterms t1 and t2.
+    * As aterms are created using maximal sharing (see Section 2.1), testing equality
+    * is performed in constant time by comparing the addresses of t1 and t2.  Note however that
+    * operator== only returns true when t1 and t2 are completely equal, inclusive any annotations
+    * they might have!
+    **/
+  inline
+  bool operator==(const aterm& x, const aterm& y)
+  {
+if ( (x.to_string() == y.to_string()) != (ATisEqual(x.to_ATerm(), y.to_ATerm()) == ATtrue) )
+{
+  std::cerr << "Error in bool operator==(const aterm& x, const aterm& y)\n"
+            << "x == " << x.to_string() << "\n"
+            << "y == " << y.to_string() << "\n"
+            << "&x == " << x.to_ATerm() << "\n"
+            << "&y == " << y.to_ATerm() << "\n"           
+            << "x.f() == y.f() == " << (x.to_aterm_appl().function() == y.to_aterm_appl().function()) << "\n"
+            << "x.q() == y.q() == " << (x.to_aterm_appl().is_quoted() == y.to_aterm_appl().is_quoted()) << "\n"
+            ;
+            // << "x.a() == y.a() == " << (x.to_aterm_appl().argument_list() == y.to_aterm_appl().argument_list()) << "\n"
+            aterm_list xx = x.to_aterm_appl().argument_list();
+            aterm_list yy = y.to_aterm_appl().argument_list();
+            for (aterm_list::iterator i = xx.begin(), j = yy.begin(); i != xx.end(), j != yy.end(); ++i, ++j)
+            {
+              std::cerr << "comparing arguments..." << i->to_string() << " " << j->to_string() << "\n";
+              std::cerr << (*i == *j ? "true" : "false") << "\n";
+              std::cerr << "done" << "\n";
+            }
+}
+    return ATisEqual(x.to_ATerm(), y.to_ATerm()) == ATtrue;
+  }
+
 } // namespace atermpp
 
 #include "atermpp/aterm_make_match.h"

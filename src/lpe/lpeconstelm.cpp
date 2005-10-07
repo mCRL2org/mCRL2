@@ -1,9 +1,4 @@
-/* 
-
-Version 0.1.1
-*) Added "new state vector set"-change check 
-
-*/
+// 1) Een type cast van iterators is overbodig/foutief! (zoals in data_expression_list(*i))
 
 #include <iostream>
 #include <vector>
@@ -52,12 +47,12 @@ bool cex(data_assignment init, data_assignment state){
 // if the right hand side of "state" is a don't care 
 // they the given assignments are equal 
 //
-  if (ATisEqual(init.rhs().term(), state.rhs().term())){
+  if (init.rhs() == state.rhs()){
     return true;
   }; 
   
   for (unsigned int i=0; i < lofv.size() ;i++){
-    if (ATisEqual(state.rhs().term(),lofv[i].term())) {
+    if (state.rhs() == lofv[i]) {
       return true;
     };
   };
@@ -79,7 +74,7 @@ int eval_datexp(const specification& spec, data_expression datexpr, int opt)
     *   Rewrite dataxpr.term to eval
     **/
   
-  ATerm rwcon = (ATerm) gsRewriteTerm(datexpr.term().appl());
+  ATerm rwcon = (ATerm) gsRewriteTerm(datexpr.to_Appl());
   
   ATerm t = (ATerm) gsMakeDataExprTrue();
   ATerm f = (ATerm) gsMakeDataExprFalse();
@@ -176,7 +171,7 @@ int const_main(string filename, int opt)
           sv.push_back(iv);          
           for (data_assignment_list::iterator c_obj = s_current->assignments().begin(); c_obj != s_current->assignments().end(); ++c_obj){
             for (unsigned int i=0; i < sv[sv.size()-1].size(); i++){
-              if (ATisEqual(sv[sv.size()-1][i].lhs().term(), data_assignment(*c_obj).lhs().term())){
+              if (sv[sv.size()-1][i].lhs() == data_assignment(*c_obj).lhs()){
                 
                 // Copy rhs of c_obj to sv
                 // sv[sv.end()][i].rhs() = data_assignment(*c_obj).rhs();
@@ -214,12 +209,11 @@ int const_main(string filename, int opt)
       }; //end summand loop	
   
       //
-      //flatten the set of new flag vectors and set of new state vector
+      //flattened the change vector and flag vector
       //
       vector<bool>          fcv = fv;      //create flattened change vector 
       vector<data_assignment> fsv = iv; //create flattened init vector
-      
-      //flatten the set of new flag vectors
+ 
       for (unsigned int i=0; i < cv[0].size(); i++){ 
         //Check only those vectors of which the flagvector elements are true/Constant
         if (fv[i]) {
@@ -231,29 +225,6 @@ int const_main(string filename, int opt)
           }
         };
       }
-      
-      //Additional check on new state vectors set
-      for (unsigned int i=0; i < sv[0].size(); i++){ 
-        if (fcv[i]) {
-          //2B coded
-          //data_assignment value = "don't care";
-          for (unsigned int j=0; j < sv.size(); j++)
-            //2B coded
-            //if (!Compare(sv[j][i], "don't care") 
-            {
-              //2B coded
-              //bool b = compare(sv[j][i], value);
-              //if (b) {
-              //  value = sv[j][i];
-              //} else {
-              //  fcv[i] := false
-              //  fsv[i] := sv[j][i]
-              //}
-            }
-   
-        };
-      };
-
 
       if (opt==2)
       {

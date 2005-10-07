@@ -5,21 +5,27 @@
 #ifndef MCRL2_DATA_H
 #define MCRL2_DATA_H
 
+#include <iostream> // for debugging
+
+#include <string>
 #include "atermpp/aterm.h"
 #include "atermpp/aterm_algorithm.h"
 #include "mcrl2/aterm_wrapper.h"
-#include "mcrl2/substitute.h"
 #include "mcrl2/sort.h"
 #include "mcrl2/term_list.h"
 #include "mcrl2/list_iterator.h"
 #include "mcrl2/predefined_symbols.h"
-#include "libgsrewrite.h"
+#include "mcrl2/detail/string_utility.h"
+#include "mcrl2/rewrite.h"
+#include "gsfunc.h"
 
 namespace mcrl2 {
 
 using atermpp::aterm_appl;
 using atermpp::aterm_list;
 using atermpp::aterm_list_iterator;
+
+using atermpp::aterm;
 
 ///////////////////////////////////////////////////////////////////////////////
 // data_expression
@@ -36,12 +42,12 @@ class data_expression: public aterm_wrapper
     {}
 
     /// Applies a substitution to this data_expression and returns the result.
-    /// The Substitution object must supply the method aterm_appl operator()(aterm_appl).
+    /// The Substitution object must supply the method aterm operator()(aterm).
     ///
     template <typename Substitution>
-    data_expression substitute(Substitution f)
+    data_expression substitute(Substitution f) const
     {
-      return data_expression(f(term()));
+      return data_expression(f(to_appl()));
     }     
 
     /// Applies a sequence of substitutions to this data_expression and returns the result.
@@ -49,24 +55,9 @@ class data_expression: public aterm_wrapper
     template <typename SubstIter>
     data_expression substitute(SubstIter first, SubstIter last) const
     {
-      return data_expression(aterm_appl_substitute(term(), first, last));
+      return data_expression(substitute(to_appl(), first, last));
     }
 };
-
-/// Rewrites the data expressions x an y, and then compares if they are equal.
-///
-bool compare(data_expression x, data_expression y)
-{
-  gsRewriteInit(x.term().appl(), GS_REWR_INNER3); 
-  ATerm x1 = (ATerm) gsRewriteTerm(x.term().appl());
-  gsRewriteFinalise();
-
-  gsRewriteInit(y.term().appl(), GS_REWR_INNER3); 
-  ATerm y1 = (ATerm) gsRewriteTerm(y.term().appl());
-  gsRewriteFinalise();
-  
-  return atermpp::aterm(x1) == atermpp::aterm(y1);
-}
 
 ///////////////////////////////////////////////////////////////////////////////
 // data_expression_list
@@ -78,6 +69,7 @@ typedef term_list<data_expression> data_expression_list;
 // data_variable
 /// \brief data variable.
 ///
+// DataVarId(<String>, <SortExpr>)
 class data_variable: public aterm_wrapper
 {
   public:
@@ -88,18 +80,27 @@ class data_variable: public aterm_wrapper
      : aterm_wrapper(t)
     {}
 
+    data_variable(const std::string& name, const sort& s)
+     : aterm_wrapper(gsMakeDataVarId(gsString2ATermAppl(name.c_str()), s.to_ATermAppl()))
+    {}
+
+    data_expression to_expr() const
+    {
+      return data_expression(to_appl());
+    }
+
     /// Returns the name of the data_variable.
     ///
     std::string name() const
     {
-      return term().argument(0).to_string();
+      return unquote(to_appl().argument(0).to_string());
     }
 
     /// Returns the sort of the data_variable.
     ///
     sort type() const
     {
-      return mcrl2::sort(term().argument(1));
+      return mcrl2::sort(to_appl().argument(1));
     }
 };
 
@@ -117,9 +118,9 @@ class data_equation: public aterm_wrapper
 {
   protected:
     data_variable_list m_variables;
-    aterm_appl m_condition;
-    aterm_appl m_lhs;
-    aterm_appl m_rhs;
+    data_expression m_condition;
+    data_expression m_lhs;
+    data_expression m_rhs;
 
   public:
     typedef list_iterator<data_variable> variable_iterator;
@@ -130,12 +131,24 @@ class data_equation: public aterm_wrapper
     data_equation(aterm_appl t)
      : aterm_wrapper(t)
     {
-      aterm_list_iterator i = term().argument_list().begin();
+      aterm_list_iterator i = t.argument_list().begin();
       m_variables = data_variable_list(*i++);
-      m_condition = *i++;
-      m_lhs       = *i++;
-      m_rhs       = *i;
+      m_condition = data_expression(*i++);
+      m_lhs       = data_expression(*i++);
+      m_rhs       = data_expression(*i);
     } 
+
+    data_equation(data_variable_list variables,
+                  data_expression    condition,
+                  data_expression    lhs,
+                  data_expression    rhs
+                 )
+     : aterm_wrapper(gsMakeDataEqn(variables.to_ATermList(), condition.to_ATermAppl(), lhs.to_ATermAppl(), rhs.to_ATermAppl())),
+       m_variables(variables),
+       m_condition(condition),
+       m_lhs(lhs),
+       m_rhs(rhs)     
+    {}
 
     /// Returns the sequence of variables.
     ///
@@ -148,30 +161,30 @@ class data_equation: public aterm_wrapper
     ///
     data_expression condition() const
     {
-      return data_expression(m_condition);
+      return m_condition;
     }
 
     /// Returns the left hand side of the Assignment.
     ///
     data_expression lhs() const
     {
-      return data_expression(m_lhs);
+      return m_lhs;
     }
 
     /// Returns the right hand side of the Assignment.
     ///
     data_expression rhs() const
     {
-      return data_expression(m_rhs);
+      return m_rhs;
     }
 
     /// Applies a substitution to this data_equation and returns the result.
-    /// The Substitution object must supply the method aterm_appl operator()(aterm_appl).
+    /// The Substitution object must supply the method aterm operator()(aterm).
     ///
     template <typename Substitution>
-    data_equation substitute(Substitution f)
+    data_equation substitute(Substitution f) const
     {
-      return data_expression(f(term()));
+      return data_equation(f(to_appl()));
     }     
 
     /// Applies a sequence of substitutions to this data_equation and returns the result.
@@ -179,7 +192,7 @@ class data_equation: public aterm_wrapper
     template <typename SubstIter>
     data_equation substitute(SubstIter first, SubstIter last) const
     {
-      return data_equation(aterm_appl_substitute(term(), first, last));
+      return data_equation(substitute(to_appl(), first, last));
     }
 };
 
@@ -197,45 +210,45 @@ typedef term_list<data_equation> data_equation_list;
 class data_assignment: public aterm_wrapper
 {
   protected:
-    aterm_appl m_lhs;         // left hand side of the assignment
-    aterm_appl m_rhs;         // right hand side of the assignment
+    data_variable   m_lhs;         // left hand side of the assignment
+    data_expression m_rhs;         // right hand side of the assignment
 
   public:
     data_assignment(aterm_appl t)
      : aterm_wrapper(t)
     {
-      aterm_list_iterator i = term().argument_list().begin();
-      m_lhs = *i++;
-      m_rhs = *i;
+      aterm_list_iterator i = t.argument_list().begin();
+      m_lhs = data_variable(*i++);
+      m_rhs = data_expression(*i);
     }
 
     data_assignment(data_variable lhs, data_expression rhs)
      : 
-       aterm_wrapper(aterm_appl(mcrl2::func_Assignment(), lhs.term(), rhs.term())),
-       m_lhs(lhs.term()),
-       m_rhs(rhs.term())
+       aterm_wrapper(gsMakeAssignment(lhs.to_ATermAppl(), rhs.to_ATermAppl())),
+       m_lhs(lhs),
+       m_rhs(rhs)
     {
     }
 
     /// Applies the assignment to t and returns the result.
     ///
-    aterm_appl operator()(aterm_appl t) const
+    aterm operator()(aterm t) const
     {
-      return atermpp::replace_non_recursive(t, m_lhs, m_rhs);
+      return atermpp::aterm_replace(t, m_lhs.to_aterm(), m_rhs.to_aterm());
     }
 
     /// Returns the left hand side of the data_assignment.
     ///
     data_variable lhs() const
     {
-      return data_variable(m_lhs);
+      return m_lhs;
     }
 
     /// Returns the right hand side of the data_assignment.
     ///
     data_expression rhs() const
     {
-      return data_expression(m_rhs);
+      return m_rhs;
     }
 };
 
