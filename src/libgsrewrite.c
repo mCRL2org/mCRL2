@@ -31,7 +31,7 @@ static RewriteStrategy strategy;
 ATermList opid_eqns;
 ATermList dataappl_eqns;
 
-bool gsRewriteIsInitialised = false;
+bool rewr_inited = false;
 
 void gsRewriteInit(ATermAppl Eqns, RewriteStrategy strat)
 {
@@ -89,7 +89,7 @@ void gsRewriteInit(ATermAppl Eqns, RewriteStrategy strat)
 			break;
 	}
 
-	gsRewriteIsInitialised = true;
+	rewr_inited = true;
 }
 
 void gsRewriteFinalise()
@@ -108,7 +108,12 @@ void gsRewriteFinalise()
 		default:
 			break;
 	}
-	gsRewriteIsInitialised = false;
+	rewr_inited = false;
+}
+
+bool gsRewriteIsInitialised()
+{
+	return rewr_inited;
 }
 
 void gsRewriteAddEqn(ATermAppl Eqn)

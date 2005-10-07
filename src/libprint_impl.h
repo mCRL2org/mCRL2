@@ -639,7 +639,7 @@ void PRINT_FUNC(PrintPart_Appl)(PRINT_OUTTYPE OutStream,
         PRINT_FUNC(fprints)(OutStream, " | ");        
         // TODO
         //ATfprintf(stderr, "Body = %t\n", Body);
-        //if (!gsIsDataVarId(Body) && gsRewriteIsInitialised) {
+        //if (!gsIsDataVarId(Body) && gsRewriteIsInitialised()) {
         //  ATfprintf(stderr, "Rewriting %t\n", gsMakeDataAppl(Body, Var));
         //  Body = gsRewriteTerm(gsMakeDataAppl(Body, Var));
         //} else {

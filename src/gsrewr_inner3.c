@@ -7,6 +7,7 @@ extern "C" {
 
 #include <stdio.h>
 #include <stdlib.h>
+#include <string.h>
 #include <aterm2.h>
 #include "gslowlevel.h"
 #include "gsfunc.h"
@@ -148,6 +149,41 @@ static ATermAppl fromInner(ATerm Term)
 	return a;
 }
 
+static char *rename_buf = NULL;
+static int rename_buf_size = 0;
+static ATermAppl rename_var(ATermAppl var)
+{
+	char *s = ATgetName(ATgetAFun((ATermAppl) ATgetArgument(var,0)));
+	int l = strlen(s);
+
+	if ( l > rename_buf_size )
+	{
+		rename_buf = realloc(rename_buf,rename_buf_size?rename_buf_size*2:16);
+		rename_buf[0] = '@';
+	}
+
+	strcpy(rename_buf+1,s);
+
+	return gsMakeDataVarId(gsString2ATermAppl(rename_buf),(ATermAppl) ATgetArgument(var,1));
+}
+
+static ATermList rename_vars(ATermList *vars)
+{
+	ATermList l = *vars;
+	ATermList m = ATmakeList0();
+	ATermList s = ATmakeList0();
+
+	for (; !ATisEmpty(l); l=ATgetNext(l))
+	{
+		ATerm newvar = (ATerm) rename_var((ATermAppl) ATgetFirst(l));
+		m = ATinsert(m,newvar);
+		s = ATinsert(s,(ATerm) gsMakeSubst(ATgetFirst(l),newvar));
+	}
+
+	vars = &m;
+	return s;
+}
+
 void rewrite_init_inner3()
 {
 	ATermList l,m,n;
@@ -197,12 +233,14 @@ void rewrite_init_inner3()
 		{
 			n = ATmakeList0();
 		}
-		if ( ATgetLength(ATgetArgument(ATAgetFirst(l),0)) > max_vars)
+		ATermList rule_vars = (ATermList) ATgetArgument((ATermAppl) ATgetFirst(l),0);
+		ATermList rule_substs = rename_vars(&rule_vars);
+		if ( ATgetLength(rule_vars) > max_vars)
 		{
-			max_vars = ATgetLength(ATgetArgument(ATAgetFirst(l),0));
+			max_vars = ATgetLength(rule_vars);
 		}
 //		n = ATinsert(n,(ATerm) ATmakeList4(ATgetArgument(ATAgetFirst(l),0),toInner(ATAgetArgument(ATAgetFirst(l),1),true),(ATerm) ATgetNext(m),toInner(ATAgetArgument(ATAgetFirst(l),3),true)));
-		n = ATinsert(n,(ATerm) ATmakeAppl4(ruleAFun,ATgetArgument(ATAgetFirst(l),0),toInner(ATAgetArgument(ATAgetFirst(l),1),true),(ATerm) ATgetNext(m),toInner(ATAgetArgument(ATAgetFirst(l),3),true)));
+		n = ATinsert(n,(ATerm) ATmakeAppl4(ruleAFun,(ATerm) rule_vars,gsSubstValues(rule_substs,toInner(ATAgetArgument(ATAgetFirst(l),1),true),true),gsSubstValues(rule_substs,(ATerm) ATgetNext(m),true),gsSubstValues(rule_substs,toInner(ATAgetArgument(ATAgetFirst(l),3),true),true)));
 		ATtablePut(tmp_eqns,ATgetFirst(m),(ATerm) n);
 	}
 
@@ -455,7 +493,7 @@ static ATermList build_args(ATermList args, int buildargs, ATermAppl *vars, ATer
 
 static ATerm build(ATerm Term, int buildargs, ATermAppl *vars, ATerm *vals, int len)
 {
-//gsfprintf(stderr,"build(%T,%i)\n\n",Term,buildargs);
+//gsfprintf(stderr,"build(%T,%i,%i)\n\n",Term,buildargs,len);
 
 	if ( ATisList(Term) )
 	{
