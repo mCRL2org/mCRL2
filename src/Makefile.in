@@ -178,7 +178,7 @@ LIB_NAMES          =  $(XSIMTRACE_NAME)
 OBJECTS           := $(sort $(OBJECTS))
 
 #Make rules
-.PHONY: all install clean distclean
+.PHONY: all install clean distclean boost
 .PRECIOUS: gsparser.c gslexer.c
 
 all : boost $(EXE_NAMES) $(LIB_NAMES)

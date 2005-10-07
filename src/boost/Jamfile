@@ -175,7 +175,7 @@ if $(lib-sources)
     local gUNVERSIONED_VARIANT_TAG = [ cond $(layout-system) : TRUE ] ;
     
     local lib-build =
-        debug release
+        release
         [ cond $(with-debug-python) : debug-python ]
         [ cond $(NT) : <runtime-link>static/dynamic ]
         <threading>single/multi

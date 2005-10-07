@@ -175,39 +175,26 @@ AC_ARG_WITH(
 )
 AC_MSG_CHECKING([for the Boost C++ libraries])
 if test $with_boost; then
-  AC_TRY_COMPILE(
+  AC_COMPILE_IFELSE(
      [
       #include "$with_boost/include/boost/version.hpp"
      ],
-     [],
      [
        AC_SUBST([BOOST_PREFIX],[$with_boost])
+       AC_MSG_RESULT(yes)
        USE_BOOST=1
      ],
      [
+       AC_MSG_RESULT(no)
+       AC_SUBST([USE_BOOST],[])
+       AC_MSG_NOTICE(The Boost C++ libraries are required for certain tools in the toolset.)
+       AC_MSG_NOTICE(They can be obtained from http://www.boost.org.)
      ])
 else 
-  AC_TRY_COMPILE(
-     [
-      #include <boost/version.hpp>
-     ],
-     [],
-     [
-       AC_SUBST([BOOST_PREFIX],[])
-       USE_BOOST=1
-     ],
-     [
-     ])
-#  AC_CHECK_PROG([BOOST_CONFIG],[boost-config],[wx-config])
-fi
-
-if test $USE_BOOST; then
   AC_MSG_RESULT(yes)
-else
-  AC_MSG_RESULT(no)
-  AC_SUBST([USE_BOOST],[])
-  AC_MSG_NOTICE(The Boost C++ libraries are required for certain tools in the toolset.)
-  AC_MSG_NOTICE(They can be obtained from http://www.boost.org.)
+  AC_MSG_NOTICE(using local Boost libraries.)
+  AC_SUBST([BOOST_PREFIX],[boost])
+  USE_BOOST=1
 fi
 
 # Check for wxWidgets
