@@ -184,6 +184,13 @@ class specification: public aterm_wrapper
     {
       return m_init_variables;
     }
+
+    /// Returns the initial assingments of the LPE.
+    ///
+    data_assignment_list init_assignments() const
+    {
+      return data_assignment_list(m_init_assignments);
+    }
 };
 
 } // namespace mcrl
