@@ -19,10 +19,18 @@ static void print_help(FILE *f)
     "OUTFILE. If OUTFILE is not present, stdout is used. If INFILE is not present,\n"
     "stdin is used. To use stdin and save the output to a file, use '-' for INFILE.\n"
     "\n"
+    "Note that the following conversions on the data specification will be applied:\n"
+    "- Constructors 'F' and 'T' of type 'Bool' are replaced with 'false' and 'true'\n"
+    "- Functions 'and' and 'or' of type Bool#Bool->Bool are replaced with '&&'\n"
+    "  and '||'\n"
+    "- For all sorts S, functions 'eq' of type S#S->Bool are replaced with '=='\n"
+    "\n"
     "The OPTIONS that can be used are:\n"
     "-h, --help               display this help message\n"
     "-q, --quiet              do not print any unrequested information\n"
     "-v, --verbose            display extra information about the conversion process\n"
+    "-n, --no-conv            do not apply the conversion of functions and,or and eq\n"
+    "    --no-conv-bool       do not apply the conversion of the Bool constructors\n"
       );
 }
 
@@ -30,15 +38,17 @@ int main(int argc, char **argv)
 {
 	FILE *InStream, *OutStream;
 	ATerm bot;
-	#define sopts "hqv"
+	#define sopts "hqvn"
 	struct option lopts[] = {
 		{ "help",		no_argument,	NULL,	'h' },
 		{ "quiet",		no_argument,	NULL,	'q' },
 		{ "verbose",		no_argument,	NULL,	'v' },
+		{ "no-conv",		no_argument,	NULL,	'n' },
+		{ "no-conv-bool",	no_argument,	NULL,	0x1 },
  		{ 0, 0, 0, 0 }
 	};
 	int opt;
-	bool opt_quiet,opt_verbose;
+	bool opt_quiet,opt_verbose,convert_funcs,convert_bools;
 	ATerm mu_spec,spec;
 
 	ATinit(argc,argv,&bot);
@@ -46,6 +56,8 @@ int main(int argc, char **argv)
 
 	opt_quiet = false;
 	opt_verbose = false;
+	convert_funcs = true;
+	convert_bools = true;
 	while ( (opt = getopt_long(argc,argv,sopts,lopts,NULL)) != -1 )
 	{
 		switch ( opt )
@@ -58,6 +70,12 @@ int main(int argc, char **argv)
 				break;
 			case 'v':
 				opt_verbose = true;
+				break;
+			case 'n':
+				convert_funcs = false;
+				break;
+			case 0x1:
+				convert_bools = false;
 				break;
 			default:
 				break;
@@ -104,7 +122,7 @@ int main(int argc, char **argv)
 		return 1;
 	}
 
-	spec = (ATerm) translate((ATermAppl) mu_spec);
+	spec = (ATerm) translate((ATermAppl) mu_spec,convert_bools,convert_funcs);
 
 	if ( OutStream == stdout )
 		gsVerboseMsg("writing mCRL2 LPE to stdout...\n");

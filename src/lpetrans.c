@@ -327,7 +327,7 @@ static ATermList convert_init(ATermAppl spec, ATermList typelist, ATermList *ids
  ******************* Main function *******************
  *****************************************************/
 
-ATermAppl translate(ATermAppl spec)
+ATermAppl translate(ATermAppl spec, bool convert_bools, bool convert_funcs)
 {
 	ATermAppl sorts,cons,maps,datas,acts,lpe,init;
 	ATermList typelist, ids;
@@ -359,22 +359,59 @@ ATermAppl translate(ATermAppl spec)
 
 	ATermAppl r = gsMakeSpecV1(sorts,cons,maps,datas,acts,lpe,init);
 
-	r = (ATermAppl) gsSubstValues(get_substs(ids),(ATerm) r,true);
+	ATermList substs = get_substs(ids);
 
-	r = (ATermAppl) gsSubstValues(
-			 ATmakeList2(
-				(ATerm) gsMakeSubst(
-					(ATerm) gsMakeOpId(gsString2ATermAppl("T"),gsMakeSortId(gsString2ATermAppl("Bool"))),
-					(ATerm) gsMakeDataExprTrue()
-					),
-				(ATerm) gsMakeSubst(
-					(ATerm) gsMakeOpId(gsString2ATermAppl("F"),gsMakeSortId(gsString2ATermAppl("Bool"))),
-					(ATerm) gsMakeDataExprFalse()
-					)
-				),
-	 		(ATerm) r,
-			true
+	r = (ATermAppl) gsSubstValues(substs,(ATerm) r,true);
+
+	substs = ATmakeList0();
+
+	if ( convert_bools )
+	{
+		substs = ATinsert(substs,
+			(ATerm) gsMakeSubst(
+				(ATerm) gsMakeOpId(gsString2ATermAppl("F"),gsMakeSortIdBool()),
+				(ATerm) gsMakeDataExprFalse()
+				)
 			);
+		substs = ATinsert(substs,
+			(ATerm) gsMakeSubst(
+				(ATerm) gsMakeOpId(gsString2ATermAppl("T"),gsMakeSortIdBool()),
+				(ATerm) gsMakeOpIdTrue()
+				)
+			);
+	}
+
+	if ( convert_funcs )
+	{
+		ATermAppl bool_func_sort = gsGetSort(gsMakeOpIdAnd());
+
+		substs = ATinsert(substs,
+			(ATerm) gsMakeSubst(
+				(ATerm) gsMakeOpId(gsString2ATermAppl("and"),bool_func_sort),
+				(ATerm) gsMakeOpIdAnd()
+				)
+			);
+		substs = ATinsert(substs,
+			(ATerm) gsMakeSubst(
+				(ATerm) gsMakeOpId(gsString2ATermAppl("or"),bool_func_sort),
+				(ATerm) gsMakeOpIdOr()
+				)
+			);
+
+		ATermAppl eq_str = gsString2ATermAppl("eq");
+		ATermAppl s_bool = gsMakeSortIdBool();
+
+		for (ATermList l=ATLgetArgument(sorts,0); !ATisEmpty(l); l=ATgetNext(l))
+		{
+			ATermAppl s = ATAgetFirst(l);
+			substs = ATinsert(substs,(ATerm) gsMakeSubst(
+						(ATerm) gsMakeOpId(eq_str,gsMakeSortArrow(s,gsMakeSortArrow(s,s_bool))),
+						(ATerm) gsMakeOpIdEq(s)
+						));
+		}
+	}
+
+	r = (ATermAppl) gsSubstValues(substs,(ATerm) r,true);
 
 	return r;
 }
