@@ -7,6 +7,8 @@ extern "C" {
 
 #include <aterm2.h>
 
+extern bool gsRewriteIsInitialised;
+
 typedef enum { GS_REWR_INNER
 	     , GS_REWR_INNER2
 	     , GS_REWR_INNER3

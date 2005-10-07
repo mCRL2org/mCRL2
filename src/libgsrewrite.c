@@ -31,6 +31,8 @@ static RewriteStrategy strategy;
 ATermList opid_eqns;
 ATermList dataappl_eqns;
 
+bool gsRewriteIsInitialised = false;
+
 void gsRewriteInit(ATermAppl Eqns, RewriteStrategy strat)
 {
 	ATermList eqns;
@@ -86,6 +88,8 @@ void gsRewriteInit(ATermAppl Eqns, RewriteStrategy strat)
 			rewrite_init_inner3();
 			break;
 	}
+
+	gsRewriteIsInitialised = true;
 }
 
 void gsRewriteFinalise()
@@ -95,12 +99,16 @@ void gsRewriteFinalise()
 	RWclearAllVariables();
 	switch ( strategy )
 	{
+		case GS_REWR_INNER:
+			rewrite_finalise_inner();
+			break;
 		case GS_REWR_INNER3:
 			rewrite_finalise_inner3();
 			break;
 		default:
 			break;
 	}
+	gsRewriteIsInitialised = false;
 }
 
 void gsRewriteAddEqn(ATermAppl Eqn)
@@ -214,7 +222,7 @@ ATermAppl gsRewriteTerm(ATermAppl Term)
 	switch ( strategy )
 	{
 		case GS_REWR_INNER:
-			return (ATermAppl) rewrite_inner((ATerm) Term,&b);
+			return from_rewrite_format_inner(rewrite_inner(to_rewrite_format_inner(Term)));
 		case GS_REWR_INNER2:
 			return (ATermAppl) rewrite_inner2((ATerm) Term,&b);
 		case GS_REWR_INNERC2:
@@ -252,6 +260,7 @@ ATerm gsToRewriteFormat(ATermAppl Term)
 	switch ( strategy )
 	{
 		case GS_REWR_INNER:
+			return to_rewrite_format_inner(Term);
 		case GS_REWR_INNER2:
 			return (ATerm) Term;
 		case GS_REWR_JITTY:
@@ -278,6 +287,7 @@ ATermAppl gsFromRewriteFormat(ATerm Term)
 	switch ( strategy )
 	{
 		case GS_REWR_INNER:
+			return from_rewrite_format_inner(Term);
 		case GS_REWR_INNER2:
 			return (ATermAppl) Term;
 		case GS_REWR_JITTY:
@@ -306,7 +316,7 @@ ATerm gsRewriteInternal(ATerm Term)
 	switch ( strategy )
 	{
 		case GS_REWR_INNER:
-			return rewrite_inner(Term,&b);
+			return rewrite_inner(Term);
 		case GS_REWR_INNER2:
 			return rewrite_inner2(Term,&b);
 		case GS_REWR_INNERC2:

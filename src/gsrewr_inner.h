@@ -1,4 +1,3 @@
-/* $Id: gsrewr_inner.h,v 1.2 2005/04/08 12:33:51 muck Exp $ */
 #ifdef __cplusplus
 extern "C" {
 #endif
@@ -10,11 +9,15 @@ extern "C" {
 #include "gsfunc.h"
 
 void rewrite_init_inner();
+void rewrite_finalise_inner();
 
 void rewrite_add_inner(ATermAppl eqn);
 void rewrite_remove_inner(ATermAppl eqn);
 
-ATerm rewrite_inner(ATerm Term, int *b);
+ATerm rewrite_inner(ATerm Term);
+
+ATerm to_rewrite_format_inner(ATermAppl Term);
+ATermAppl from_rewrite_format_inner(ATerm Term);
 
 #ifdef __cplusplus
 }

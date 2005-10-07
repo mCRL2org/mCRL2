@@ -176,7 +176,7 @@ static ATbool (*destructors[MAX_DESTRUCTORS])(ATermBlob) = { NULL };
  * Static arrays are not guaranteed to be sizeof(double)-aligned.
  */
 static MachineWord *protoTerm = NULL;
-static ATerm *arg_buffer = NULL;
+#define arg_buffer ((ATerm *) (protoTerm+2))
 
 static ATerm protected_buffer[MAX_ARITY] = { NULL };
 
@@ -490,7 +490,6 @@ void AT_initMemory(int argc, char *argv[])
   HashNumber hnr;
 
   protoTerm  = (MachineWord *) calloc(MAX_TERM_SIZE, sizeof(MachineWord));
-  arg_buffer = (ATerm *) (protoTerm + 2);
 
   /*{{{  Analyze arguments */
 
