@@ -21,8 +21,12 @@
 #include <assert.h>
 #include <aterm2.h>
 #include "libprint_types.h"
+#include "libgsrewrite.h"
 #include "gsfunc.h"
 #include "gslowlevel.h"
+
+//declarations
+//------------
 
 static void PRINT_FUNC(PrintPart_)(PRINT_OUTTYPE OutStream, const ATerm Part,
   t_pp_format pp_format);
@@ -177,6 +181,33 @@ static bool gsHasConsistentContextList(const ATermTable DataVarDecls,
 
 static bool gsIsListEnumImpl(ATermAppl DataExpr);
 //Ret: DataExpr is the implementation of a list enumeration
+
+static bool gsIsOpIdSetBagComp(ATermAppl Term);
+//Ret: DataExpr is an operation identifier of a set/bag comprehension
+
+static bool gsIsOpIdQuant(ATermAppl Term);
+//Ret: DataExpr is an operation identifier of a universal/existential quantifier
+
+static bool gsIsOpIdPrefix(ATermAppl Term);
+//Ret: DataExpr is a prefix operation identifier
+
+static bool gsIsOpIdInfix(ATermAppl Term);
+//Ret: DataExpr is an infix operation identifier
+
+static int gsPrecOpIdInfix(ATermAppl OpIdName);
+//Pre: OpIdName is the name of an infix operation identifier
+//Ret: Precedence of the operation itself
+
+static int gsPrecOpIdInfixLeft(ATermAppl OpIdName);
+//Pre: OpIdInfix is the name of an infix operation identifier
+//Ret: Precedence of the left argument of the operation
+
+static int gsPrecOpIdInfixRight(ATermAppl OpIdName);
+//Pre: OpIdInfix is the name of an infix operation identifier
+//Ret: Precedence of the right argument of the operation
+
+//implementation
+//--------------
 
 inline static void PRINT_FUNC(fprints)(PRINT_OUTTYPE OutStream,
   const char *Value)
@@ -596,6 +627,49 @@ void PRINT_FUNC(PrintPart_Appl)(PRINT_OUTTYPE OutStream,
         PRINT_FUNC(fprints)(OutStream, "[");
         PRINT_FUNC(PrintListEnumElts)(OutStream, Part, pp_format, ShowSorts);
         PRINT_FUNC(fprints)(OutStream, "]");
+      } else if (gsIsOpIdSetBagComp(Head) && ArgsLength == 1) {
+        //set/bag comprehension
+        PRINT_FUNC(fprints)(OutStream, "{ ");
+        ATermAppl Body = ATAelementAt(Args, 0);
+        ATermAppl Var =
+          gsMakeDataVarId(gsFreshString2ATermAppl("x", (ATerm) Body, true),
+            ATAgetArgument(gsGetSort(Body), 0)
+          );
+        PRINT_FUNC(PrintDecl)(OutStream, Var, pp_format, true);
+        PRINT_FUNC(fprints)(OutStream, " | ");        
+        // TODO
+        //ATfprintf(stderr, "Body = %t\n", Body);
+        //if (!gsIsDataVarId(Body) && gsRewriteIsInitialised) {
+        //  ATfprintf(stderr, "Rewriting %t\n", gsMakeDataAppl(Body, Var));
+        //  Body = gsRewriteTerm(gsMakeDataAppl(Body, Var));
+        //} else {
+          Body = gsMakeDataAppl(Body, Var);
+        //}
+        PRINT_FUNC(PrintPart_Appl)(OutStream, Body, pp_format, ShowSorts, 0);
+        PRINT_FUNC(fprints)(OutStream, " }");
+      } else if (gsIsOpIdQuant(Head) && ArgsLength == 1) {
+        //quantification
+        if (PrecLevel > 12) PRINT_FUNC(fprints)(OutStream, "(");
+        PRINT_FUNC(PrintPart_Appl)(OutStream, Head,
+          pp_format, ShowSorts, PrecLevel);
+        PRINT_FUNC(fprints)(OutStream, " ");
+        ATermAppl Body = ATAelementAt(Args, 0);
+        ATermAppl Var =
+          gsMakeDataVarId(gsFreshString2ATermAppl("x", (ATerm) Body, true),
+            ATAgetArgument(gsGetSort(Body), 0)
+          );
+        PRINT_FUNC(PrintDecl)(OutStream, Var, pp_format, true);
+        PRINT_FUNC(fprints)(OutStream, ". ");        
+        // TODO
+        //ATfprintf(stderr, "Body = %t\n", Body);
+        //if (!gsIsDataVarId(Body) && gsRewriteIsInitialised) {
+        //  ATfprintf(stderr, "Rewriting %t\n", gsMakeDataAppl(Body, Var));
+        //  Body = gsRewriteTerm(gsMakeDataAppl(Body, Var));
+        //} else {
+          Body = gsMakeDataAppl(Body, Var);
+        //}
+        PRINT_FUNC(PrintPart_Appl)(OutStream, Body, pp_format, ShowSorts, 12);
+        if (PrecLevel > 12) PRINT_FUNC(fprints)(OutStream, ")");
       } else if (gsIsOpIdPrefix(Head) && ArgsLength == 1) {
         //print prefix expression
         PRINT_FUNC(dbg_prints)("printing prefix expression\n");
@@ -1261,5 +1335,200 @@ bool gsIsListEnumImpl(ATermAppl DataExpr)
     }
   } else {
     return ATisEqual(HeadName, gsMakeOpIdNameEmptyList());
+  }
+}
+
+bool gsIsOpIdSetBagComp(ATermAppl Term)
+{
+  if (!gsIsOpId(Term)) {
+    return false;
+  }
+  ATermAppl OpIdName = ATAgetArgument(Term, 0);
+  return (OpIdName == gsMakeOpIdNameSetComp()) || (OpIdName == gsMakeOpIdNameBagComp());
+}
+
+bool gsIsOpIdQuant(ATermAppl Term)
+{
+  if (!gsIsOpId(Term)) {
+    return false;
+  }
+  ATermAppl OpIdName = ATAgetArgument(Term, 0);
+  return (OpIdName == gsMakeOpIdNameForall()) || (OpIdName == gsMakeOpIdNameExists());
+}
+
+bool gsIsOpIdPrefix(ATermAppl Term)
+{
+  if (!gsIsOpId(Term)) {
+    return false;
+  }
+  ATermAppl OpIdName = ATAgetArgument(Term, 0);
+  return (gsMaxDomainLength(ATAgetArgument(Term, 1)) == 1) && (
+    (OpIdName == gsMakeOpIdNameNot()) || (OpIdName == gsMakeOpIdNameNeg()) ||
+    (OpIdName == gsMakeOpIdNameListSize()) || (OpIdName == gsMakeOpIdNameSetCompl())
+    );
+}
+
+bool gsIsOpIdInfix(ATermAppl Term)
+{
+  if (!gsIsOpId(Term)) {
+    return false;
+  }
+  ATermAppl OpIdName = ATAgetArgument(Term, 0);
+  return (gsMaxDomainLength(ATAgetArgument(Term, 1)) == 2) &&
+    ((OpIdName == gsMakeOpIdNameImp())          ||
+     (OpIdName == gsMakeOpIdNameAnd())          ||
+     (OpIdName == gsMakeOpIdNameOr())           ||
+     (OpIdName == gsMakeOpIdNameEq())           ||
+     (OpIdName == gsMakeOpIdNameNeq())          ||
+     (OpIdName == gsMakeOpIdNameLT())           ||
+     (OpIdName == gsMakeOpIdNameLTE())          ||
+     (OpIdName == gsMakeOpIdNameGT())           ||
+     (OpIdName == gsMakeOpIdNameGTE())          ||
+     (OpIdName == gsMakeOpIdNameSetIn())        ||
+     (OpIdName == gsMakeOpIdNameBagIn())        ||
+     (OpIdName == gsMakeOpIdNameSubSetEq())     ||
+     (OpIdName == gsMakeOpIdNameSubSet())       ||
+     (OpIdName == gsMakeOpIdNameSubBagEq())     ||
+     (OpIdName == gsMakeOpIdNameSubBag())       ||
+     (OpIdName == gsMakeOpIdNameCons())         ||
+     (OpIdName == gsMakeOpIdNameSnoc())         ||
+     (OpIdName == gsMakeOpIdNameConcat())       ||
+     (OpIdName == gsMakeOpIdNameAdd())          ||
+     (OpIdName == gsMakeOpIdNameSubt())         ||
+     (OpIdName == gsMakeOpIdNameSetUnion())     ||
+     (OpIdName == gsMakeOpIdNameSetDiff())      ||
+     (OpIdName == gsMakeOpIdNameBagUnion())     ||
+     (OpIdName == gsMakeOpIdNameBagDiff())      ||
+     (OpIdName == gsMakeOpIdNameDiv())          ||
+     (OpIdName == gsMakeOpIdNameMod())          ||
+     (OpIdName == gsMakeOpIdNameMult())         ||
+     (OpIdName == gsMakeOpIdNameEltAt())        ||
+     (OpIdName == gsMakeOpIdNameSetIntersect()) ||
+     (OpIdName == gsMakeOpIdNameBagIntersect()));
+}
+
+int gsPrecOpIdInfix(ATermAppl OpIdName)
+{
+  if (OpIdName == gsMakeOpIdNameImp()) {
+    return 2;
+  } else if ((OpIdName == gsMakeOpIdNameAnd()) || (OpIdName == gsMakeOpIdNameOr())) {
+    return 3;
+  } else if ((OpIdName == gsMakeOpIdNameEq()) || (OpIdName == gsMakeOpIdNameNeq())) {
+    return 4;
+  } else if (
+      (OpIdName == gsMakeOpIdNameLT()) || (OpIdName == gsMakeOpIdNameLTE()) ||
+      (OpIdName == gsMakeOpIdNameGT()) || (OpIdName == gsMakeOpIdNameGTE()) ||
+      (OpIdName == gsMakeOpIdNameSetIn()) || (OpIdName == gsMakeOpIdNameBagIn()) ||
+      (OpIdName == gsMakeOpIdNameSubSetEq()) || (OpIdName == gsMakeOpIdNameSubSet()) ||
+      (OpIdName == gsMakeOpIdNameSubBagEq()) || (OpIdName == gsMakeOpIdNameSubBag())
+      ) {
+    return 5;
+  } else if ((OpIdName == gsMakeOpIdNameCons())) {
+    return 6;
+  } else if ((OpIdName == gsMakeOpIdNameSnoc())) {
+    return 7;
+  } else if ((OpIdName == gsMakeOpIdNameConcat())) {
+    return 8;
+  } else if (
+      (OpIdName == gsMakeOpIdNameAdd()) || (OpIdName == gsMakeOpIdNameSubt()) ||
+      (OpIdName == gsMakeOpIdNameSetUnion()) || (OpIdName == gsMakeOpIdNameSetDiff()) ||
+      (OpIdName == gsMakeOpIdNameBagUnion()) || (OpIdName == gsMakeOpIdNameBagDiff())
+      ) {
+    return 9;
+  } else if ((OpIdName == gsMakeOpIdNameDiv()) || (OpIdName == gsMakeOpIdNameMod())) {
+    return 10;
+  } else if (
+      (OpIdName == gsMakeOpIdNameMult()) || (OpIdName == gsMakeOpIdNameEltAt()) ||
+      (OpIdName == gsMakeOpIdNameSetIntersect()) ||
+      (OpIdName == gsMakeOpIdNameBagIntersect())
+      ){
+    return 11;
+  } else {
+    //something went wrong
+    return -1;
+  }
+}
+
+int gsPrecOpIdInfixLeft(ATermAppl OpIdName)
+{
+  if (OpIdName == gsMakeOpIdNameImp()) {
+    return 3;
+  } else if ((OpIdName == gsMakeOpIdNameAnd()) || (OpIdName == gsMakeOpIdNameOr())) {
+    return 3;
+  } else if ((OpIdName == gsMakeOpIdNameEq()) || (OpIdName == gsMakeOpIdNameNeq())) {
+    return 4;
+  } else if (
+      (OpIdName == gsMakeOpIdNameLT()) || (OpIdName == gsMakeOpIdNameLTE()) ||
+      (OpIdName == gsMakeOpIdNameGT()) || (OpIdName == gsMakeOpIdNameGTE()) ||
+      (OpIdName == gsMakeOpIdNameSetIn()) || (OpIdName == gsMakeOpIdNameBagIn()) ||
+      (OpIdName == gsMakeOpIdNameSubSetEq()) || (OpIdName == gsMakeOpIdNameSubSet()) ||
+      (OpIdName == gsMakeOpIdNameSubBagEq()) || (OpIdName == gsMakeOpIdNameSubBag())
+      ) {
+    return 6;
+  } else if ((OpIdName == gsMakeOpIdNameCons())) {
+    return 9;
+  } else if ((OpIdName == gsMakeOpIdNameSnoc())) {
+    return 7;
+  } else if ((OpIdName == gsMakeOpIdNameConcat())) {
+    return 8;
+  } else if (
+      (OpIdName == gsMakeOpIdNameAdd()) || (OpIdName == gsMakeOpIdNameSubt()) ||
+      (OpIdName == gsMakeOpIdNameSetUnion()) || (OpIdName == gsMakeOpIdNameSetDiff()) ||
+      (OpIdName == gsMakeOpIdNameBagUnion()) || (OpIdName == gsMakeOpIdNameBagDiff())
+      ) {
+    return 9;
+  } else if ((OpIdName == gsMakeOpIdNameDiv()) || (OpIdName == gsMakeOpIdNameMod())) {
+    return 10;
+  } else if (
+      (OpIdName == gsMakeOpIdNameMult()) || (OpIdName == gsMakeOpIdNameEltAt()) ||
+      (OpIdName == gsMakeOpIdNameSetIntersect()) ||
+      (OpIdName == gsMakeOpIdNameBagIntersect())
+      ){
+    return 11;
+  } else {
+    //something went wrong
+    return -1;
+  }
+}
+
+int gsPrecOpIdInfixRight(ATermAppl OpIdName)
+{
+  if (OpIdName == gsMakeOpIdNameImp()) {
+    return 2;
+  } else if ((OpIdName == gsMakeOpIdNameAnd()) || (OpIdName == gsMakeOpIdNameOr())) {
+    return 4;
+  } else if ((OpIdName == gsMakeOpIdNameEq()) || (OpIdName == gsMakeOpIdNameNeq())) {
+    return 5;
+  } else if (
+      (OpIdName == gsMakeOpIdNameLT()) || (OpIdName == gsMakeOpIdNameLTE()) ||
+      (OpIdName == gsMakeOpIdNameGT()) || (OpIdName == gsMakeOpIdNameGTE()) ||
+      (OpIdName == gsMakeOpIdNameSetIn()) || (OpIdName == gsMakeOpIdNameBagIn()) ||
+      (OpIdName == gsMakeOpIdNameSubSetEq()) || (OpIdName == gsMakeOpIdNameSubSet()) ||
+      (OpIdName == gsMakeOpIdNameSubBagEq()) || (OpIdName == gsMakeOpIdNameSubBag())
+      ) {
+    return 6;
+  } else if ((OpIdName == gsMakeOpIdNameCons())) {
+    return 6;
+  } else if ((OpIdName == gsMakeOpIdNameSnoc())) {
+    return 9;
+  } else if ((OpIdName == gsMakeOpIdNameConcat())) {
+    return 9;
+  } else if (
+      (OpIdName == gsMakeOpIdNameAdd()) || (OpIdName == gsMakeOpIdNameSubt()) ||
+      (OpIdName == gsMakeOpIdNameSetUnion()) || (OpIdName == gsMakeOpIdNameSetDiff()) ||
+      (OpIdName == gsMakeOpIdNameBagUnion()) || (OpIdName == gsMakeOpIdNameBagDiff())
+      ) {
+    return 10;
+  } else if ((OpIdName == gsMakeOpIdNameDiv()) || (OpIdName == gsMakeOpIdNameMod())) {
+    return 11;
+  } else if (
+      (OpIdName == gsMakeOpIdNameMult()) || (OpIdName == gsMakeOpIdNameEltAt()) ||
+      (OpIdName == gsMakeOpIdNameSetIntersect()) ||
+      (OpIdName == gsMakeOpIdNameBagIntersect())
+      ){
+    return 12;
+  } else {
+    //something went wrong
+    return -1;
   }
 }

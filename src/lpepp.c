@@ -21,6 +21,7 @@ extern "C" {
 #include "gslowlevel.h"
 #include "libprint_types.h"
 #include "libprint_c.h"
+#include "libgsrewrite.h"
 
 //local declarations
 
@@ -227,7 +228,9 @@ bool PrintSpecificationStream(FILE *SpecStream, FILE *OutputStream,
       }
     }
     gsEnableConstructorFunctions();
+    gsRewriteInit(ATAgetArgument(Spec,3),GS_REWR_INNER3);
     PrintPart_C(OutputStream, (ATerm) Spec, pp_format);
+    gsRewriteFinalise();
     Result = true;
   }
   gsDebugMsg("all files are closed; return %s\n", Result?"true":"false");

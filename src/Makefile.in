@@ -74,7 +74,7 @@ MCRL22LPE_LDFLAGS  = -lgsrewrite -l$(ATERM) -lm -ldl
 LPEPP_NAME         = lpepp
 LPEPP_OBJECTS      = lpepp.o libprint_c.o gsfunc.o gslowlevel.o
 OBJECTS           += $(LPEPP_OBJECTS)
-LPEPP_LDFLAGS      = -l$(ATERM) -lm
+LPEPP_LDFLAGS      = -lgsrewrite -l$(ATERM) -lm -ldl
 
 #sim definitions
 SIM_NAME           = sim
@@ -150,7 +150,7 @@ LPE2LTS_LDFLAGS    = -lgsrewrite -lsvc -l$(ATERM) -lm -ldl
 TBF2LPE_NAME       = tbf2lpe
 TBF2LPE_OBJECTS    = tbf2lpe.o lpetrans.o libprint_c.o gsfunc.o gslowlevel.o
 OBJECTS           += $(TBF2LPE_OBJECTS)
-TBF2LPE_LDFLAGS    = -l$(ATERM) -lm
+TBF2LPE_LDFLAGS    = -lgsrewrite -l$(ATERM) -lm -ldl
 
 #pnml2mcrl2 definitions
 PNML2MCRL2_NAME    = pnml2mcrl2
@@ -158,13 +158,13 @@ PNML2MCRL2_OBJECTS = pnml2mcrl2.o gstypecheck.o libprint_c.o gsfunc.o gslowlevel
 ifdef USE_XML2
 OBJECTS           += $(PNML2MCRL2_OBJECTS)
 endif
-PNML2MCRL2_LDFLAGS = -l$(ATERM) -lxml2 -lm
+PNML2MCRL2_LDFLAGS = -lgsrewrite -l$(ATERM) -lxml2 -lm -ldl
 
 #alpha definitions
 ALPHA_NAME         = alpha
 ALPHA_OBJECTS      = alpha.o libgsalpha.o gsparser.o gslexer.o gstypecheck.o libprint_c.o gsfunc.o gslowlevel.o
 OBJECTS           += $(ALPHA_OBJECTS)
-ALPHA_LDFLAGS      = -l$(ATERM) -lm
+ALPHA_LDFLAGS      = -lgsrewrite -l$(ATERM) -lm -ldl
 
 #lin definitions
 LIN_NAME           = lin

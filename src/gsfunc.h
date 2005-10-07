@@ -1187,24 +1187,6 @@ ATermList gsGetDataExprArgs(ATermAppl DataExpr);
 //Pre: DataExpr is a data expression
 //Ret: the arguments of the data expression
 
-bool gsIsOpIdPrefix(ATermAppl Term);
-//Ret: DataExpr is a prefix operation identifier
-
-bool gsIsOpIdInfix(ATermAppl Term);
-//Ret: DataExpr is an infix operation identifier
-
-int gsPrecOpIdInfix(ATermAppl OpIdName);
-//Pre: OpIdName is the name of an infix operation identifier
-//Ret: Precedence of the operation itself
-
-int gsPrecOpIdInfixLeft(ATermAppl OpIdName);
-//Pre: OpIdInfix is the name of an infix operation identifier
-//Ret: Precedence of the left argument of the operation
-
-int gsPrecOpIdInfixRight(ATermAppl OpIdName);
-//Pre: OpIdInfix is the name of an infix operation identifier
-//Ret: Precedence of the right argument of the operation
-
 #ifdef __cplusplus
 }
 #endif
