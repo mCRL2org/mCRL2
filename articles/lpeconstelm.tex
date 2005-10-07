@@ -9,7 +9,12 @@
 \usepackage{geometry}
 %\usepackage[ps2pdf]{hyperref} % remove for printing
 %\usepackage[active]{srcltx}
-\usepackage{mymath,mythm, mytest}
+\usepackage{mymath,mythm}
+
+\theoremstyle{plain}
+\newtheorem{thmfs}{Theorem}[section]
+\theoremstyle{definition}
+\newtheorem{tcase}[thmfs]{Test case}
 
 \newcommand{\lpe}{linear process equation}
 \newcommand{\tool}{\textit{lpeconstelm}}
@@ -27,6 +32,9 @@
 \newcommand{\la}{$\leftarrow$}
 \newcommand{\ra}{$\rightarrow$}
 \newcommand{\sq}{$\square$}
+
+\font \aap cmmi10        
+\newcommand{\at}[1]{\mbox{\aap ,} #1}
 
 \newcommand{\csvs}{new\_state\_vector\_set}
 \newcommand{\cfvs}{new\_flag\_vector\_set}
@@ -63,7 +71,7 @@ The equation below is a \lpe\ in \mcrl :
 %\at werkt niet
 \begin{displaymath}
 X (\ovr{d}:\ovr{D}) = \sum_{i \in I} \sum_{e_i:E_i} \ovr{c_i} ( \ovr{d}, e_i ) \rightarrow 
-(a_i^0 (\ovr{f_{i,0}}(\ovr{d},e_i)) \vert \ldots \vert a_i^{n(i)}(\ovr{f_{i,n(i)}}(\ovr{d},e_i))) t_i(\ovr{d},e_i)  \cdot X(\ovr{g_i}(\ovr{d},e_i)) 
+(a_i^0 (\ovr{f_{i,0}}(\ovr{d},e_i)) \vert \ldots \vert a_i^{n(i)}(\ovr{f_{i,n(i)}}(\ovr{d},e_i))) \at \text{ } t_i(\ovr{d},e_i)  \cdot X(\ovr{g_i}(\ovr{d},e_i)) 
 \end{displaymath}\\
 \end{defn}
 
