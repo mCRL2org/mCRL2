@@ -181,7 +181,10 @@ OBJECTS           := $(sort $(OBJECTS))
 .PHONY: all install clean distclean
 .PRECIOUS: gsparser.c gslexer.c
 
-all : $(EXE_NAMES) $(LIB_NAMES)
+all : boost $(EXE_NAMES) $(LIB_NAMES)
+
+boost:
+	$(MAKE) -C boost
 
 install: all
 	$(INSTALL) -d $(bindir)
@@ -220,6 +223,7 @@ clean :
 
 distclean : clean
 	$(RM) -r autom4te.cache Makefile config gsrewr_innerc_aux.h
+	$(RM) -rf boost/lib boost/tools/build/jam_src/bin*
 
 $(ATERM_NAME): $(ATERM_OBJECTS)
 	$(AR) $(ARFLAGS) $@ $(ATERM_OBJECTS)
