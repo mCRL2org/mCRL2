@@ -74,7 +74,7 @@ int eval_datexp(const specification& spec, data_expression datexpr, int opt)
     *   Rewrite dataxpr.term to eval
     **/
   
-  ATerm rwcon = (ATerm) gsRewriteTerm(datexpr.to_Appl());
+  ATerm rwcon = (ATerm) gsRewriteTerm(datexpr.to_ATermAppl());
   
   ATerm t = (ATerm) gsMakeDataExprTrue();
   ATerm f = (ATerm) gsMakeDataExprFalse();
