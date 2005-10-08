@@ -23,7 +23,7 @@ endif
 .PHONY: all bjam clean
 
 all: bjam
-	tools/build/jam_src/bin/bjam -sTOOLS=gcc --prefix=. install --layout=system
+	tools/build/jam_src/bin/bjam --prefix=. install --layout=system
 
 bjam:
 	cd tools/build/jam_src; \
