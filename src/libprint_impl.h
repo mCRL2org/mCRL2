@@ -637,14 +637,10 @@ void PRINT_FUNC(PrintPart_Appl)(PRINT_OUTTYPE OutStream,
           );
         PRINT_FUNC(PrintDecl)(OutStream, Var, pp_format, true);
         PRINT_FUNC(fprints)(OutStream, " | ");        
-        // TODO
-        //ATfprintf(stderr, "Body = %t\n", Body);
-        //if (!gsIsDataVarId(Body) && gsRewriteIsInitialised()) {
-        //  ATfprintf(stderr, "Rewriting %t\n", gsMakeDataAppl(Body, Var));
-        //  Body = gsRewriteTerm(gsMakeDataAppl(Body, Var));
-        //} else {
-          Body = gsMakeDataAppl(Body, Var);
-        //}
+        Body = gsMakeDataAppl(Body, Var);
+        if (gsRewriteIsInitialised()) {
+          Body = gsRewriteTerm(Body);
+        }
         PRINT_FUNC(PrintPart_Appl)(OutStream, Body, pp_format, ShowSorts, 0);
         PRINT_FUNC(fprints)(OutStream, " }");
       } else if (gsIsOpIdQuant(Head) && ArgsLength == 1) {
@@ -660,14 +656,10 @@ void PRINT_FUNC(PrintPart_Appl)(PRINT_OUTTYPE OutStream,
           );
         PRINT_FUNC(PrintDecl)(OutStream, Var, pp_format, true);
         PRINT_FUNC(fprints)(OutStream, ". ");        
-        // TODO
-        //ATfprintf(stderr, "Body = %t\n", Body);
-        //if (!gsIsDataVarId(Body) && gsRewriteIsInitialised) {
-        //  ATfprintf(stderr, "Rewriting %t\n", gsMakeDataAppl(Body, Var));
-        //  Body = gsRewriteTerm(gsMakeDataAppl(Body, Var));
-        //} else {
-          Body = gsMakeDataAppl(Body, Var);
-        //}
+        Body = gsMakeDataAppl(Body, Var);
+        if (gsRewriteIsInitialised()) {
+          Body = gsRewriteTerm(Body);
+        }
         PRINT_FUNC(PrintPart_Appl)(OutStream, Body, pp_format, ShowSorts, 12);
         if (PrecLevel > 12) PRINT_FUNC(fprints)(OutStream, ")");
       } else if (gsIsOpIdPrefix(Head) && ArgsLength == 1) {
