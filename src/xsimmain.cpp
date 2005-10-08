@@ -605,7 +605,7 @@ void XSimMain::OnSaveTrace( wxCommandEvent &event )
     wxFileDialog dialog( this, wxT("Save trace..."), wxT(""), wxT(""), wxT("Traces (*.trc)|*.trc|All Files|*.*"),wxSAVE);
     if ( dialog.ShowModal() == wxID_OK )
     {
-	    ofstream f(dialog.GetPath().c_str());
+	    ofstream f(dialog.GetPath().mb_str());
 
 	    if ( !f.is_open() )
             {

@@ -1,4 +1,4 @@
-AC_INIT([mCRL2 toolset], [0.2], [A.H.J.Mathijssen@tue.nl])
+AC_INIT([mCRL2 toolset], [0.2], [J.v.d.Wulp@tue.nl])
 AC_CANONICAL_HOST
 AC_PREFIX_DEFAULT([$HOME])
 AC_CONFIG_SRCDIR([gslowlevel.h])

@@ -30,30 +30,30 @@ bool XSim::OnInit()
     gsEnableConstructorFunctions();
 
     wxCmdLineParser cmdln(argc,argv);
-    cmdln.AddSwitch("h","help","Displays this message");
-    cmdln.AddSwitch("y","dummy","Replace free variables in the LPE with dummy values");
-    cmdln.AddOption("R","rewriter","Use specified rewriter (default inner3)");
-    cmdln.AddParam("LPE to simulate",wxCMD_LINE_VAL_STRING,wxCMD_LINE_PARAM_OPTIONAL);
+    cmdln.AddSwitch(wxT("h"),wxT("help"),wxT("Displays this message"));
+    cmdln.AddSwitch(wxT("y"),wxT("dummy"),wxT("Replace free variables in the LPE with dummy values"));
+    cmdln.AddOption(wxT("R"),wxT("rewriter"),wxT("Use specified rewriter (default inner3)"));
+    cmdln.AddParam(wxT("LPE to simulate"),wxCMD_LINE_VAL_STRING,wxCMD_LINE_PARAM_OPTIONAL);
     if ( cmdln.Parse() )
     {
 	    return FALSE;
     }
 
-    if ( cmdln.Found("h") )
+    if ( cmdln.Found(wxT("h")) )
     {
 	    cmdln.Usage();
 	    return FALSE;
     }
     bool dummies = false;
     RewriteStrategy strat = GS_REWR_INNER3;
-    if ( cmdln.Found("y") )
+    if ( cmdln.Found(wxT("y")) )
     {
 	    dummies = true;
     }
     wxString s;
-    if ( cmdln.Found("R",&s) )
+    if ( cmdln.Found(wxT("R"),&s) )
     {
-	    strat = RewriteStrategyFromString(s);
+	    strat = RewriteStrategyFromString(s.mb_str());
 	    if ( strat == GS_REWR_INVALID )
 	    {
 		    cerr << "error: invalid rewrite strategy '" << s << "'" << endl;;

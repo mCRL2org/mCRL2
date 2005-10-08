@@ -25,6 +25,7 @@ WX_LIBS              = @WX_LIBS@
 USE_BOOST            = @USE_BOOST@
 BOOST_PREFIX         = @BOOST_PREFIX@
 BOOST_LIBRARY_SUFFIX = @BOOST_LIBRARY_SUFFIX@
+BJAM                 = boost/tools/build/jam_src/bin/bjam
 
 #installation directories
 prefix             = @prefix@
@@ -109,15 +110,11 @@ ifdef USE_BOOST
   BOOST_LIBRARIES = -L$(BOOST_PREFIX)/lib
  endif
 
- BOOST_LIBRARIES += -lboost_program_options
-
-#######################################################
-# Will be fixed when configure script works properly
-#######################################################
-# ifneq ($(BOOST_LIBRARY_SUFFIX),none)
-#  # This appears to be necessary for boost 1.33 on Linux
-#  BOOST_LIBRARIES += -lboost_program_options$(BOOST_LIBRARY_SUFFIX)
-# endif
+ ifeq ($(BOOST_PREFIX),boost)
+   BOOST_LIBRARIES += -static -lboost_program_options
+ else
+   BOOST_LIBRARIES += -lboost_program_options
+ endif
 
  #lpeinfo definitions
  LPEINFO_NAME        = lpeinfo
@@ -178,12 +175,13 @@ LIB_NAMES          =  $(XSIMTRACE_NAME)
 OBJECTS           := $(sort $(OBJECTS))
 
 #Make rules
-.PHONY: all install clean distclean boost
+.PHONY: all install clean distclean
 .PRECIOUS: gsparser.c gslexer.c
 
-all : boost $(EXE_NAMES) $(LIB_NAMES)
+all : $(BJAM) $(EXE_NAMES) $(LIB_NAMES)
 
-boost:
+# Build bjam and boost libraries
+boost/tools/build/jam_src/bin/bjam:
 	$(MAKE) -C boost
 
 install: all
@@ -224,6 +222,7 @@ clean :
 distclean : clean
 	$(RM) -r autom4te.cache Makefile config gsrewr_innerc_aux.h
 	$(RM) -rf boost/lib boost/tools/build/jam_src/bin*
+	$(MAKE) -C boost clean
 
 $(ATERM_NAME): $(ATERM_OBJECTS)
 	$(AR) $(ARFLAGS) $@ $(ATERM_OBJECTS)
@@ -247,6 +246,8 @@ $(SIM_NAME) : $(SIM_OBJECTS) $(ATERM_DEP) $(LIBREWR_NAME)
 ifdef USE_WX
 $(XSIM_NAME): $(XSIM_OBJECTS) $(ATERM_DEP) $(LIBREWR_NAME)
 	$(CXX) -o $@ $(XSIM_OBJECTS) $(LDFLAGS) $(XSIM_LDFLAGS)
+
+xsimtracedll.o: CXXFLAGS += -fPIC
 
 $(XSIMTRACE_NAME): $(XSIMTRACE_OBJECTS) $(ATERM_DEP) $(LIBREWR_NAME)
 	$(CXX) -o $@ $(XSIMTRACE_OBJECTS) $(LDFLAGS) $(XSIMTRACE_LDFLAGS)
