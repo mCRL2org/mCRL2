@@ -23,11 +23,11 @@ endif
 .PHONY: all bjam clean
 
 all: bjam
-	tools/build/jam_src/bin.linuxx86/bjam -sTOOLS=gcc --prefix=. install --layout=system
+	tools/build/jam_src/bin/bjam -sTOOLS=gcc --prefix=. install --layout=system
 
 bjam:
 	cd tools/build/jam_src; \
 	$(bjam_builder)
 
 clean:
-	@rm -rf bin lib tools/build/jam_src/bin* tools/build/jam_src/bootstrap
+	@$(RM) -rf bin lib tools/build/jam_src/bin tools/build/jam_src/bootstrap
