@@ -220,9 +220,9 @@ clean :
 	$(RM) $(EXE_NAMES) $(LIB_NAMES) *.o *.a *.d *.dpp aterm/*.o aterm/*.a aterm/*.d svc/*.o svc/*.a svc/*.d gslexer.c gsparser.c gsparser.h gsparser.output lpeinfo lpeconstelm config.status config.log *~ core core.*
 
 distclean : clean
+	$(MAKE) -C boost clean
 	$(RM) -r autom4te.cache Makefile config gsrewr_innerc_aux.h
 	$(RM) -rf boost/lib boost/tools/build/jam_src/bin*
-	$(MAKE) -C boost clean
 
 $(ATERM_NAME): $(ATERM_OBJECTS)
 	$(AR) $(ARFLAGS) $@ $(ATERM_OBJECTS)
