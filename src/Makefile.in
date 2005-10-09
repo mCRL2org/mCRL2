@@ -25,7 +25,9 @@ WX_LIBS              = @WX_LIBS@
 USE_BOOST            = @USE_BOOST@
 BOOST_PREFIX         = @BOOST_PREFIX@
 BOOST_LIBRARY_SUFFIX = @BOOST_LIBRARY_SUFFIX@
-BJAM                 = boost/tools/build/jam_src/bin/bjam
+ifeq ($(BOOST_PREFIX),boost)
+  BJAM                 = boost/tools/build/jam_src/bin/bjam
+endif
 
 #installation directories
 prefix             = @prefix@
@@ -181,7 +183,7 @@ OBJECTS           := $(sort $(OBJECTS))
 all : $(BJAM) $(EXE_NAMES) $(LIB_NAMES)
 
 # Build bjam and boost libraries
-boost/tools/build/jam_src/bin/bjam:
+$(BJAM):
 	$(MAKE) -C boost
 
 install: all

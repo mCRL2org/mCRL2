@@ -191,10 +191,21 @@ if test $with_boost; then
        AC_MSG_NOTICE(They can be obtained from http://www.boost.org.)
      ])
 else 
-  AC_MSG_RESULT(yes)
-  AC_MSG_NOTICE(using local Boost libraries.)
-  AC_SUBST([BOOST_PREFIX],[boost])
   USE_BOOST=1
+  AC_MSG_RESULT(yes)
+
+  AC_COMPILE_IFELSE(
+     [
+      #include <boost/version.hpp>
+     ],
+     [
+       AC_SUBST([BOOST_PREFIX],[])
+       AC_MSG_NOTICE(using system Boost libraries.)
+     ],
+     [
+       AC_SUBST([BOOST_PREFIX],[boost])
+       AC_MSG_NOTICE(using local Boost libraries.)
+     ])
 fi
 
 # Check for wxWidgets
