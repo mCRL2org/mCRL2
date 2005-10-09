@@ -6,10 +6,13 @@ CPP                  = @CPP@
 CPPFLAGS             = @CPPFLAGS@
 CXX                  = @CXX@
 CXXFLAGS             = @CXXFLAGS@
+ifneq ($(HOST_OS),WINDOWS)
+ LIBDL               = -ldl
+endif
 ifeq ($(HOST_OS),MACOSX)
-LDFLAGS              = @LDFLAGS@
+ LDFLAGS              = @LDFLAGS@
 else
-LDFLAGS              = -Wl,-rpath,$(libdir) -rdynamic @LDFLAGS@
+ LDFLAGS              = -Wl,-rpath,$(libdir) -rdynamic @LDFLAGS@
 endif
 ARFLAGS              = crs
 INSTALL              = install
@@ -71,19 +74,19 @@ LIBREWR_LDFLAGS    = -l$(ATERM) -lm
 MCRL22LPE_NAME     = mcrl22lpe
 MCRL22LPE_OBJECTS  = mcrl22lpe.o lin_std.o lin_alt.o gsparser.o gslexer.o gstypecheck.o gsdataimpl.o libprint_c.o gsfunc.o gslowlevel.o
 OBJECTS           += $(MCRL22LPE_OBJECTS)
-MCRL22LPE_LDFLAGS  = -lgsrewrite -l$(ATERM) -lm -ldl
+MCRL22LPE_LDFLAGS  = -lgsrewrite -l$(ATERM) -lm $(LIBDL)
 
 #lpepp definitions
 LPEPP_NAME         = lpepp
 LPEPP_OBJECTS      = lpepp.o libprint_c.o gsfunc.o gslowlevel.o
 OBJECTS           += $(LPEPP_OBJECTS)
-LPEPP_LDFLAGS      = -lgsrewrite -l$(ATERM) -lm -ldl
+LPEPP_LDFLAGS      = -lgsrewrite -l$(ATERM) -lm $(LIBDL)
 
 #sim definitions
 SIM_NAME           = sim
 SIM_OBJECTS        = sim.o libgsnextstate.o libgsprover.o libprint_c.o gsfunc.o gslowlevel.o
 OBJECTS           += $(SIM_OBJECTS)
-SIM_LDFLAGS        = -lgsrewrite -l$(ATERM) -lm -ldl
+SIM_LDFLAGS        = -lgsrewrite -l$(ATERM) -lm $(LIBDL)
 
 #xsim definitions
 XSIM_NAME          = xsim
@@ -91,7 +94,7 @@ XSIM_OBJECTS       = xsim.o xsimbase.o xsimmain.o xsimtrace.o libgsnextstate.o l
 ifdef USE_WX
 OBJECTS           += $(XSIM_OBJECTS)
 endif
-XSIM_LDFLAGS       = -lgsrewrite -l$(ATERM) -lm -ldl $(WX_LIBS)
+XSIM_LDFLAGS       = -lgsrewrite -l$(ATERM) -lm $($LIBDL) $(WX_LIBS)
 
 #xsimtrace library definitions
 XSIMTRACE_NAME     = xsimtrace.so
@@ -123,33 +126,33 @@ ifdef USE_BOOST
  LPEINFO_OBJECTS     = gsfunc.o libgsrewrite.o gsrewr_inner.o gsrewr_inner2.o gsrewr_inner3.o gsrewr_innerc.o \
 		       gsrewr_jitty.o gssubstitute.o libprint_c.o gslowlevel.o
  OBJECTS            += $(LPEINFO_OBJECTS)
- LPEINFO_LDFLAGS     = -lgsrewrite -l$(ATERM) -lm -ldl
+ LPEINFO_LDFLAGS     = -lgsrewrite -l$(ATERM) -lm $(LIBDL)
 
  #lpconstelm definitions
  LPECONSTELM_NAME    = lpeconstelm
  LPECONSTELM_OBJECTS = gsfunc.o libgsrewrite.o gsrewr_inner.o gsrewr_inner2.o gsrewr_inner3.o gsrewr_innerc.o \
 		       gsrewr_jitty.o gssubstitute.o libprint_c.o gslowlevel.o
  OBJECTS            += $(LPECONSTELM_OBJECTS)
- LPECONSTELM_LDFLAGS = -lgsrewrite -l$(ATERM) -lm -ldl
+ LPECONSTELM_LDFLAGS = -lgsrewrite -l$(ATERM) -lm $(LIBDL)
 endif
 
 #lperewr definitions
 LPEREWR_NAME       = lperewr
 LPEREWR_OBJECTS    = lperewr.o gsparser.o gslexer.o gstypecheck.o gsdataimpl.o libprint_c.o gsfunc.o gslowlevel.o
 OBJECTS           += $(LPEREWR_OBJECTS)
-LPEREWR_LDFLAGS    = -lgsrewrite -l$(ATERM) -lm -ldl
+LPEREWR_LDFLAGS    = -lgsrewrite -l$(ATERM) -lm $(LIBDL)
 
 #lpe2lts definitions
 LPE2LTS_NAME       = lpe2lts
 LPE2LTS_OBJECTS    = lpe2lts.o libgsnextstate.o libgsprover.o gssubstitute.o libprint_c.o gsfunc.o gslowlevel.o
 OBJECTS           += $(LPE2LTS_OBJECTS)
-LPE2LTS_LDFLAGS    = -lgsrewrite -lsvc -l$(ATERM) -lm -ldl
+LPE2LTS_LDFLAGS    = -lgsrewrite -lsvc -l$(ATERM) -lm $(LIBDL)
 
 #tbf2lpe definitions
 TBF2LPE_NAME       = tbf2lpe
 TBF2LPE_OBJECTS    = tbf2lpe.o lpetrans.o libprint_c.o gsfunc.o gslowlevel.o
 OBJECTS           += $(TBF2LPE_OBJECTS)
-TBF2LPE_LDFLAGS    = -lgsrewrite -l$(ATERM) -lm -ldl
+TBF2LPE_LDFLAGS    = -lgsrewrite -l$(ATERM) -lm $(LIBDL)
 
 #pnml2mcrl2 definitions
 PNML2MCRL2_NAME    = pnml2mcrl2
@@ -157,19 +160,19 @@ PNML2MCRL2_OBJECTS = pnml2mcrl2.o gstypecheck.o libprint_c.o gsfunc.o gslowlevel
 ifdef USE_XML2
 OBJECTS           += $(PNML2MCRL2_OBJECTS)
 endif
-PNML2MCRL2_LDFLAGS = -lgsrewrite -l$(ATERM) -lxml2 -lm -ldl
+PNML2MCRL2_LDFLAGS = -lgsrewrite -l$(ATERM) -lxml2 -lm $(LIBDL)
 
 #alpha definitions
 ALPHA_NAME         = alpha
 ALPHA_OBJECTS      = alpha.o libgsalpha.o gsparser.o gslexer.o gstypecheck.o libprint_c.o gsfunc.o gslowlevel.o
 OBJECTS           += $(ALPHA_OBJECTS)
-ALPHA_LDFLAGS      = -lgsrewrite -l$(ATERM) -lm -ldl
+ALPHA_LDFLAGS      = -lgsrewrite -l$(ATERM) -lm $(LIBDL)
 
 #lin definitions
 LIN_NAME           = lin
 LIN_OBJECTS        = lin.o lin_alt.o gsparser.o gslexer.o gstypecheck.o gsdataimpl.o libprint_c.o gsfunc.o gslowlevel.o
 OBJECTS           += $(LIN_OBJECTS)
-LIN_LDFLAGS        = -lgsrewrite -l$(ATERM) -lm -ldl
+LIN_LDFLAGS        = -lgsrewrite -l$(ATERM) -lm $(LIBDL)
 
 #Group definitions
 EXE_NAMES          =  $(MCRL22LPE_NAME) $(LPEINFO_NAME) $(LPECONSTELM_NAME) $(LPEPP_NAME) $(LPE2LTS_NAME) $(SIM_NAME) $(XSIM_NAME) $(TBF2LPE_NAME) $(PNML2MCRL2_NAME) $(LPEREWR_NAME) $(ALPHA_NAME) $(LIN_NAME) 
@@ -231,6 +234,10 @@ $(ATERM_NAME): $(ATERM_OBJECTS)
 
 $(LIBSVC_NAME): $(LIBSVC_OBJECTS)
 	$(AR) $(ARFLAGS) $@ $(LIBSVC_OBJECTS)
+
+ifeq ($(HOST_OS),WINDOWS)
+  gsrewr_inner.o: CFLAGS += -DNO_DYNLOAD
+endif
 
 $(LIBREWR_NAME) : $(LIBREWR_OBJECTS) $(ATERM_DEP)
 	$(AR) $(ARFLAGS) $@ $(LIBREWR_OBJECTS)

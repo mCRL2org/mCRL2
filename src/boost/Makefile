@@ -30,4 +30,4 @@ bjam:
 	$(bjam_builder)
 
 clean:
-	@$(RM) -rf bin lib tools/build/jam_src/bin tools/build/jam_src/bootstrap
+	@-$(RM) -rf bin lib tools/build/jam_src/bin tools/build/jam_src/bootstrap
