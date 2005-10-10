@@ -207,10 +207,8 @@ ATerm gsSubstValues(ATermList Substs, ATerm Term, bool Recursive)
   ATermList l = Substs;
   while (!ATisEmpty(l)) {
     ATermAppl Subst = ATAgetFirst(l);
-    if (ATisEqual(ATgetArgument(Subst, 0), Term))
-    {
-      Term = ATgetArgument(Subst, 1);
-      Recursive = false;
+    if (ATisEqual(ATgetArgument(Subst, 0), Term)) {
+      return ATgetArgument(Subst, 1);
     }
     l = ATgetNext(l);
   }
@@ -257,6 +255,47 @@ ATermAppl gsSubstValues_Appl(ATermList Substs, ATermAppl Appl, bool Recursive)
 ATermList gsSubstValues_List(ATermList Substs, ATermList List, bool Recursive)
 {
   return (ATermList) gsSubstValues(Substs, (ATerm) List, Recursive);
+}
+
+ATerm gsSubstValuesTable(ATermTable Substs, ATerm Term, bool Recursive)
+{
+  ATerm Result = ATtableGet(Substs, Term);
+  if ((Result) != NULL) {
+    return Result;
+  }
+  if (!Recursive) {
+    return Term;
+  } else {
+    //Recursive; distribute substitutions over the arguments/elements of Term
+    if (ATgetType(Term) == AT_APPL) {
+      //Term is an ATermAppl; distribute substitutions over the arguments
+      AFun Head = ATgetAFun((ATermAppl) Term);
+      int NrArgs = ATgetArity(Head);
+      if (NrArgs > 0) {
+      	DECL_A(Args,ATerm,NrArgs);
+        for (int i = 0; i < NrArgs; i++) {
+          Args[i] = gsSubstValuesTable(Substs, ATgetArgument((ATermAppl) Term, i),
+            Recursive);
+        }
+        ATerm a = (ATerm) ATmakeApplArray(Head, Args);
+        FREE_A(Args);
+        return a;
+      } else {
+        return Term;
+      }
+    } else if (ATgetType(Term) == AT_LIST) {
+      //Term is an ATermList; distribute substitutions over the elements
+      ATermList Result = ATmakeList0();
+      while (!ATisEmpty((ATermList) Term)) {
+        Result = ATinsert(Result,
+          gsSubstValuesTable(Substs, ATgetFirst((ATermList) Term), Recursive));
+        Term = (ATerm) ATgetNext((ATermList) Term);
+      }
+      return (ATerm) ATreverse(Result);
+    } else {
+      return Term;
+    }
+  }
 }
 
 ATermList gsAddSubstToSubsts(ATermAppl Subst, ATermList Substs)

@@ -1012,6 +1012,7 @@ ATermAppl gsImplSortList(ATermAppl SortList, ATermList *PSubsts,
   TDataDecls *PDataDecls)
 {
   assert(gsIsSortList(SortList));
+  //gsfprintf(stderr, "implementing sort %P\n", (ATerm) SortList);
   //declare fresh sort identifier for SortList
   ATermAppl SortId = gsMakeFreshListSortId((ATerm) PDataDecls->Sorts);
   PDataDecls->Sorts = ATinsert(PDataDecls->Sorts, (ATerm) SortId);

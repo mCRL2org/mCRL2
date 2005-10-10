@@ -171,98 +171,58 @@ static ATermAppl gstcMatchListOpEltAt(ATermAppl Type);
 static ATermAppl gstcMatchListOpHead(ATermAppl Type);
 static ATermAppl gstcMatchListOpTail(ATermAppl Type);
 
-static ATermTable revsorts;
-static ATerm gstcFold(ATerm t);
-static ATermAppl gstcFoldSpec(ATermAppl s);
+static ATermAppl gstcFoldSpec(ATermAppl Spec);
+//Pre: Spec is a specification that adheres to the internal format after type
+//     checking
+//Ret: Spec in which all sort references are folded in maximally
 
-ATerm gstcFold(ATerm t)
+ATermAppl gstcFoldSpec(ATermAppl Spec)
 {
-	if ( ATgetType(t) == AT_LIST )
-	{
-		ATermList l,m;
-
-		l = (ATermList) t;
-		m = ATmakeList0();
-		for (;!ATisEmpty(l);l=ATgetNext(l))
-		{
-			m = ATinsert(m,gstcFold(ATgetFirst(l)));
-		}
-		m = ATreverse(m);
-
-		// Shouldn't be necessary
-		/*if ( ATtableGet(revsorts,(ATerm) m) != NULL )
-		{
-			m = (ATermList) ATtableGet(revsorts,(ATerm) m);
-		}*/
-
-		return (ATerm) m;
-	} else {
-		ATermAppl a;
-		ATermList l;
-		ATerm u;
-
-		a = (ATermAppl) t;
-		l = ATgetArguments(a);
-		l = (ATermList) gstcFold((ATerm) l);
-		a = ATmakeApplList(ATgetAFun(a),l);
-		
-		if ( (u = ATtableGet(revsorts,(ATerm) a)) != NULL )
-		{
-			a = (ATermAppl) u;
-		}
-
-		return (ATerm) a;
-	}
-}
-
-ATermAppl gstcFoldSpec(ATermAppl s)
-{
-	ATermAppl SortDecl = ATAgetArgument(s,0);
-	ATermList Sorts = ATLgetArgument(SortDecl,0);
-	ATermList l;
-
-	revsorts = ATtableCreate(100,50);
-	l = ATreverse(ATtableKeys(context.defined_sorts));
-	for (; !ATisEmpty(l); l=ATgetNext(l))
-	{
-		ATerm t = ATtableGet(context.defined_sorts,ATgetFirst(l));
-		
-		if ( gsIsSortId((ATermAppl) t) )
-		{
-			ATtablePut(revsorts,(ATerm) gsMakeSortId(ATAgetFirst(l)),t);
-		} else {
-			ATtablePut(revsorts,t,(ATerm) gsMakeSortId(ATAgetFirst(l)));
-		}
-	}
-
-	l = ATmakeList0();
-	for (; !ATisEmpty(Sorts); Sorts=ATgetNext(Sorts))
-	{
-		if ( gsIsSortRef(ATAgetFirst(Sorts)) )
-		{
-			ATermAppl sort = ATAgetArgument(ATAgetFirst(Sorts),0);
-			ATermAppl def = ATAgetArgument(ATAgetFirst(Sorts),1);
-			ATermAppl t = (ATermAppl) gstcFold((ATerm) def);
-
-			if ( ATisEqual(gsMakeSortId(sort),t) )
-			{
-				l = ATinsert(l,(ATerm) gsMakeSortRef(sort,def));
-			} else {
-				l = ATinsert(l,(ATerm) gsMakeSortRef(sort,t));
-			}
-		} else {
-			l = ATinsert(l,ATgetFirst(Sorts));
-		}
-	}
-	Sorts = ATreverse(l);
-
-	s = (ATermAppl) gstcFold((ATerm) s);
-	SortDecl = ATsetArgument(SortDecl,(ATerm) Sorts,0);
-	s = ATsetArgument(s,(ATerm) SortDecl,0);
-
-	ATtableDestroy(revsorts);
-
-	return s;
+  ATermAppl SortDecl = ATAgetArgument(Spec, 0);
+  ATermList Sorts = ATLgetArgument(SortDecl,0);
+  ATermTable revsorts = ATtableCreate(100,50);
+  ATermList l = ATreverse(ATtableKeys(context.defined_sorts));        
+  for (; !ATisEmpty(l); l=ATgetNext(l))
+  {
+    ATerm t = ATtableGet(context.defined_sorts,ATgetFirst(l));
+    //gsfprintf(stderr, "Sort %P = %P\n", ATgetFirst(l), t);
+    
+    if ( gsIsSortId((ATermAppl) t) )
+    {
+    	ATtablePut(revsorts,(ATerm) gsMakeSortId(ATAgetFirst(l)),t);
+    } else {
+    	ATtablePut(revsorts,t,(ATerm) gsMakeSortId(ATAgetFirst(l)));
+    }
+  }
+  
+  l = ATmakeList0();
+  for (; !ATisEmpty(Sorts); Sorts=ATgetNext(Sorts))
+  {
+    if ( gsIsSortRef(ATAgetFirst(Sorts)) )
+    {
+      ATermAppl sort = ATAgetArgument(ATAgetFirst(Sorts),0);
+      ATermAppl def = ATAgetArgument(ATAgetFirst(Sorts),1);
+      ATermAppl t = (ATermAppl) gsSubstValuesTable(revsorts, (ATerm) def, true);
+    
+      if ( ATisEqual(gsMakeSortId(sort),t) )
+      {
+      	l = ATinsert(l,(ATerm) gsMakeSortRef(sort,def));
+      } else {
+      	l = ATinsert(l,(ATerm) gsMakeSortRef(sort,t));
+      }
+    } else {
+      l = ATinsert(l,ATgetFirst(Sorts));
+    }
+  }
+  Sorts = ATreverse(l);
+  
+  Spec = (ATermAppl) gsSubstValuesTable(revsorts, (ATerm) Spec, true);
+  SortDecl = ATsetArgument(SortDecl, (ATerm) Sorts,0);
+  Spec = ATsetArgument(Spec, (ATerm) SortDecl,0);
+  
+  ATtableDestroy(revsorts);
+  
+  return Spec;
 }
 
 // Main function

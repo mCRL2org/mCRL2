@@ -130,6 +130,11 @@ ATermList gsSubstValues_List(ATermList Substs, ATermList List,
   bool Recursive);
 //ATermList variant of gsSubstValues
 
+ATerm gsSubstValuesTable(ATermTable Substs, ATerm Term, bool Recursive);
+//Pre: Substs is a table containing substitutions from ATerm's to ATerm's
+//     Term is an ATerm consisting of ATermAppl's and ATermList's only
+//Ret: Term in which all substitutions from Substs are performed recursively
+
 ATermList gsAddSubstToSubsts(ATermAppl Subst, ATermList Substs);
 //Pre: Subst is a substitution
 //     Substs is a list of substitions
