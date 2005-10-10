@@ -863,17 +863,6 @@ ATermAppl ApplyAlpha(ATermAppl a)
 		l = (ATermList) ATtableGet(alphas,(ATerm) p);
 
 		a = PushAllow(ATLgetArgument(a,0),p);
-	} else if ( gsIsSync(a) )
-	{
-		ATermAppl p = ATAgetArgument(a,0);
-		ATermAppl q = ATAgetArgument(a,1);
-
-		p = ApplyAlpha(p);
-		q = ApplyAlpha(q);
-
-		l = sync_list((ATermList) ATtableGet(alphas,(ATerm) p),(ATermList) ATtableGet(alphas,(ATerm) q));
-
-		a = gsMakeSync(p,q);
 	} else if ( gsIsAtTime(a) )
 	{
 		ATermAppl p = ATAgetArgument(a,0);
@@ -927,7 +916,10 @@ ATermAppl ApplyAlpha(ATermAppl a)
 		p = ApplyAlpha(p);
 		q = ApplyAlpha(q);
 
-		l = merge_list((ATermList) ATtableGet(alphas,(ATerm) p),(ATermList) ATtableGet(alphas,(ATerm) q));
+		ATermList l1=ATLtableGet(alphas,(ATerm) p);
+		ATermList l2=ATLtableGet(alphas,(ATerm) q);
+
+		l = merge_list(merge_list(l1,l2),sync_list(l1,l2));
 
 		a = gsMakeMerge(p,q);
 	} else if ( gsIsLMerge(a) )
@@ -938,9 +930,26 @@ ATermAppl ApplyAlpha(ATermAppl a)
 		p = ApplyAlpha(p);
 		q = ApplyAlpha(q);
 
-		l = merge_list((ATermList) ATtableGet(alphas,(ATerm) p),(ATermList) ATtableGet(alphas,(ATerm) q));
+		ATermList l1=ATLtableGet(alphas,(ATerm) p);
+		ATermList l2=ATLtableGet(alphas,(ATerm) q);
+
+		l = merge_list(merge_list(l1,l2),sync_list(l1,l2));
 
 		a = gsMakeLMerge(p,q);
+	} else if ( gsIsSync(a) )
+	{
+		ATermAppl p = ATAgetArgument(a,0);
+		ATermAppl q = ATAgetArgument(a,1);
+
+		p = ApplyAlpha(p);
+		q = ApplyAlpha(q);
+
+		ATermList l1=ATLtableGet(alphas,(ATerm) p);
+		ATermList l2=ATLtableGet(alphas,(ATerm) q);
+
+		l = merge_list(merge_list(l1,l2),sync_list(l1,l2));
+
+		a = gsMakeSync(p,q);
 	} else if ( gsIsChoice(a) )
 	{
 		ATermAppl p = ATAgetArgument(a,0);
