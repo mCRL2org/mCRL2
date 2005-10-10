@@ -227,7 +227,7 @@ clean :
 distclean : clean
 	$(MAKE) -C boost clean
 	$(RM) -r autom4te.cache Makefile config gsrewr_innerc_aux.h
-	$(RM) -rf boost/lib boost/tools/build/jam_src/bin*
+	$(RM) -r boost/lib boost/tools/build/jam_src/bin*
 
 $(ATERM_NAME): $(ATERM_OBJECTS)
 	$(AR) $(ARFLAGS) $@ $(ATERM_OBJECTS)
