@@ -12,30 +12,24 @@ of the packages is mentioned (required, recommended or optional):
 - flex: package flex [required]
 - wxWidgets >= 2.6: package libwxgtk2.6-dev [recommended]
 - xml2 development libraries: package libxml2-dev [optional]
-- Boost libraries and program options: package libboost-program-options-dev,
-  [optional]
 - default icon locations: package gnome-themes, gnome-themes-extras or
   hicolor-icon-theme [optional]
 
 The required packages enable the following tools:
 + mcrl22lpe:   translate mCRL2 specifications into LPEs
 + lpepp:       pretty print an LPE as an mCRL2 specification
++ lpeinfo:     print basic information of an LPE
 + sim:         text based simulator
 + lperewr:     rewrite data expressions in an LPE
 + lpe2lts:     generate a state space (LTS) from an LPE
 + tbf2lpe:     convert mCRL LPEs to mCRL2 LPEs
-+ experimental tools alpha and lin
++ experimental tools alpha, lin and lpeconstelem
 
 The recommended package libwxgtk2.6-dev enables the following tool:
 + xsim:        graphical simulator
 
 The optional package libxml2-dev enables the following tool:
 + pnml2mcrl2:  convert classic Petri nets in the PNML language to mCRL2
-
-The optional package libboost-program-options-dev enables the
-following tools:
-+ lpeinfo:     print basic information of an LPE
-+ lpeconstelm: eliminate constants from an LPE
 
 Any of the default icon location packages ensures that xsim doesn't generate
 warnings on missing icons.
