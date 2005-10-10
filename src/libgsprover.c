@@ -47,7 +47,7 @@ void gsProverInit(ATermAppl Spec, int RewriteStrategy)
 	gsProverFalse = gsToRewriteFormat(gsMakeDataExprFalse());
 	ATprotect(&gsProverFalse);
 
-	if ( RewriteStrategy == GS_REWR_INNER3 )
+	if ( RewriteStrategy == GS_REWR_INNER3 || RewriteStrategy == GS_REWR_INNER )
 	{
 		FindEquality = FindInner3Equality;
 		opidAnd = gsToRewriteFormat(gsMakeOpIdAnd());
@@ -441,7 +441,7 @@ ATermList FindSolutions(ATermList Vars, ATerm Expr, FindSolutionsCallBack f)
 			for (; !ATisEmpty(n); n=ATgetNext(n))
 			{
 				o = ATLgetFirst(n);
-				if ( ATisEmpty(ATLgetFirst(o)) )
+				if ( ATisEmpty(ATLgetFirst(o)) || ATisEmpty(ATLgetFirst(o = EliminateVars(o))) )
 				{
 					o = ATgetNext(o);
 					if ( ATisEqual(ATgetFirst(ATgetNext(o)),gsProverTrue) )
@@ -461,7 +461,6 @@ ATermList FindSolutions(ATermList Vars, ATerm Expr, FindSolutionsCallBack f)
 						}
 					}
 				} else {
-					o = EliminateVars(o);
 					l = ATinsert(l,(ATerm) o);
 				}
 			}
