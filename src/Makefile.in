@@ -116,7 +116,7 @@ ifdef USE_BOOST
  endif
 
  ifeq ($(BOOST_PREFIX),boost)
-   BOOST_LIBRARIES += -static -lboost_program_options
+   BOOST_LIBRARIES += boost/lib/libboost_program_options.a
  else
    BOOST_LIBRARIES += -lboost_program_options
  endif
