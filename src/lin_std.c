@@ -4832,9 +4832,10 @@ static int mergeoccursin(
        ATermAppl var1=ATAgetFirst(v);
        if (strequal(ATSgetArgument(*var,0),
                     ATSgetArgument(var1,0)))
-       { *var=getfreshvariable(ATSgetArgument(*var,0),
+       { 
+         *pars=ATinsertA(*pars,*var); 
+         *var=getfreshvariable(ATSgetArgument(*var,0),
                                ATAgetArgument(*var,1));
-         *pars=ATinsertA(*pars,var1); 
          *args=ATinsertA(*args,*var); 
          v=ATempty;
        }
@@ -5120,7 +5121,7 @@ static ATermAppl collect_sum_arg_arg_cond(
           
   { ATermAppl summand=ATAgetFirst(walker);
     ATermList sumvars=linGetSumVars(summand);
-
+    
     resultsum=merge_var(sumvars,resultsum,&rename_list,&conditionlist,spec); 
   }
   
