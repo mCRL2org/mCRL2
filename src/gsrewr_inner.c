@@ -224,10 +224,10 @@ static ATermList create_sequence(ATermList rule)
 	for (; !ATisEmpty(pars); pars=ATgetNext(pars))
 	{
 		term2seq(ATgetFirst(pars),&rseq);
-		//if ( !ATisEmpty(ATgetNext(pars)) )
-		//{
+		if ( !ATisEmpty(ATgetNext(pars)) )
+		{
 			rseq = ATinsert(rseq, (ATerm) ATmakeAppl1(afunN,dummy));
-		//}
+		}
 	}
 //	ATprintf("rseq: %t\n",rseq);
 	if ( ATisAppl(ATgetArgument(rule,1)) )
@@ -555,7 +555,8 @@ static ATermAppl optimise_tree_aux(ATermAppl tree, ATermList stored, int len)
 		return ATmakeAppl1(afunN,(ATerm) optimise_tree_aux(ATAgetArgument(tree,0),stored,len));
 	} else if ( isD(tree) )
 	{
-		return ATmakeAppl1(afunD,(ATerm) optimise_tree_aux(ATAgetArgument(tree,0),stored,len));
+		return optimise_tree_aux(ATAgetArgument(tree,0),stored,len);
+		//return ATmakeAppl1(afunD,(ATerm) optimise_tree_aux(ATAgetArgument(tree,0),stored,len));
 	} else if ( isC(tree) )
 	{
 		return ATmakeAppl3(afunC,ATgetArgument(tree,0),(ATerm) optimise_tree_aux(ATAgetArgument(tree,1),stored,len),(ATerm) optimise_tree_aux(ATAgetArgument(tree,2),stored,len));
@@ -648,26 +649,48 @@ static ATermList tree_matcher_aux(ATerm t, ATermAppl *tree, ATermAppl *vars, ATe
 	if ( ATisList(t) )
 	{
 		args = ATgetNext((ATermList) t);
+#ifdef TMA_DEBUG
+		t = ATgetFirst((ATermList) t);
+#endif
 	}
 
 #ifdef TMA_DEBUG
-ATprintf("aux: %t %t\n",t,args);
+ATfprintf(stderr,"aux: %t %t\n",t,args);
 #endif
 	while ( !ATisEmpty(args) || isD(*tree) || isC(*tree) )
 	{
-		if ( isS(*tree) )
+#ifdef TMA_DEBUG
+ATfprintf(stderr,"loop: %t\n",args);
+#endif
+		if ( isN(*tree) )
 		{
 #ifdef TMA_DEBUG
-ATprintf("S %t\n",ATgetArgument(*tree,0));
+ATfprintf(stderr,"N\n");
+#endif
+			args = ATgetNext(args);
+			if ( !ATisEmpty(args) )
+			{
+				*tree = ATAgetArgument(*tree,0);
+			}
+		} else if ( isS(*tree) )
+		{
+#ifdef TMA_DEBUG
+ATfprintf(stderr,"S %t\n",ATgetArgument(*tree,0));
 #endif
 			vars[*len] = (ATermAppl) ATgetArgument(*tree,0);
 			vals[*len] = ATgetFirst(args);
 			(*len)++;
 			*tree = ATAgetArgument(*tree,1);
+		} else if ( isR(*tree) )
+		{
+#ifdef TMA_DEBUG
+ATfprintf(stderr,"R\n");
+#endif
+			return args;
 		} else if ( isM(*tree) )
 		{
 #ifdef TMA_DEBUG
-ATprintf("M %t\n",ATgetArgument(*tree,0));
+ATfprintf(stderr,"M %t\n",ATgetArgument(*tree,0));
 #endif
 /*			bool b = true;
 			for (int i=0; i<*len; i++)
@@ -677,7 +700,7 @@ ATprintf("M %t\n",ATgetArgument(*tree,0));
 					if ( ATisEqual(ATgetFirst(args),vals[i]) )
 					{
 #ifdef TMA_DEBUG
-ATprintf("true\n");
+ATfprintf(stderr,"true\n");
 #endif
 						*tree = ATAgetArgument(*tree,1);
 						b = false;
@@ -689,7 +712,7 @@ ATprintf("true\n");
 			if ( b )
 			{
 #ifdef TMA_DEBUG
-ATprintf("false\n");
+ATfprintf(stderr,"false\n");
 #endif
 				*tree = ATAgetArgument(*tree,2);
 			}*/
@@ -699,45 +722,44 @@ ATprintf("false\n");
 			} else {
 				*tree = ATAgetArgument(*tree,2);
 			}
+/*		} else if ( isD(*tree) )
+		{
+#ifdef TMA_DEBUG
+ATfprintf(stderr,"D\n");
+#endif
+			*tree = ATAgetArgument(*tree,0);
+#ifdef TMA_DEBUG
+ATfprintf(stderr,"return\n");
+#endif
+			return args;*/
 		} else if ( isF(*tree) )
 		{
 #ifdef TMA_DEBUG
-ATprintf("F %t\n",ATgetArgument(*tree,0));
+ATfprintf(stderr,"F %t\n",ATgetArgument(*tree,0));
 #endif
 			if ( ATisEqual(ATgetFirst(args),ATgetArgument(*tree,0)) || (ATisList(ATgetFirst(args)) && ATisEqual(ATgetFirst(ATLgetFirst(args)),ATgetArgument(*tree,0))) )
 			{
 #ifdef TMA_DEBUG
-ATprintf("true\n");
+ATfprintf(stderr,"true\n");
 #endif
 				*tree = ATAgetArgument(*tree,1);
 				tree_matcher_aux(ATgetFirst(args),tree,vars,vals,len);
 			} else {
 #ifdef TMA_DEBUG
-ATprintf("false\n");
+ATfprintf(stderr,"false\n");
 #endif
 				*tree = ATAgetArgument(*tree,2);
 			}
-		} else if ( isN(*tree) )
+		} else if ( isX(*tree) )
 		{
 #ifdef TMA_DEBUG
-ATprintf("N\n");
-#endif
-			*tree = ATAgetArgument(*tree,0);
-			args = ATgetNext(args);
-		} else if ( isD(*tree) )
-		{
-#ifdef TMA_DEBUG
-ATprintf("D\n");
-#endif
-			*tree = ATAgetArgument(*tree,0);
-#ifdef TMA_DEBUG
-ATprintf("return\n");
+ATfprintf(stderr,"X\n");
 #endif
 			return args;
 		} else if ( isC(*tree) )
 		{
 #ifdef TMA_DEBUG
-ATprintf("C\n");
+ATfprintf(stderr,"C\n");
 #endif
 //			int len = ATgetLength(*vars);
 //			DECL_A(vars_a,ATermAppl,len);
@@ -754,12 +776,12 @@ ATprintf("C\n");
 			if ( ATisEqual(build(ATgetArgument(*tree,0),-1,vars,vals,*len),trueint) )
 			{
 #ifdef TMA_DEBUG
-ATprintf("true\n");
+ATfprintf(stderr,"true\n");
 #endif
 				*tree = ATAgetArgument(*tree,1);
 			} else {
 #ifdef TMA_DEBUG
-ATprintf("false\n");
+ATfprintf(stderr,"false\n");
 #endif
 				*tree = ATAgetArgument(*tree,2);
 			}
@@ -768,14 +790,13 @@ ATprintf("false\n");
 //			FREE_A(vars_a);
 		} else {
 #ifdef TMA_DEBUG
-ATprintf("R/X? %t\n",*tree);
+ATfprintf(stderr,"? %t\n",*tree);
 #endif
-			assert(isR(*tree) || isX(*tree));
-			return args;
+			assert(false);
 		}
 	}
 #ifdef TMA_DEBUG
-ATprintf("no more args\n");
+ATfprintf(stderr,"no more args\n");
 #endif
 	return args;
 }
@@ -788,7 +809,25 @@ static ATerm tree_matcher(ATermList t, ATermAppl tree)
 //	ATermList vars = ATmakeList0();
 //	ATermList vals = ATmakeList0();
 
-	ATermList rargs = tree_matcher_aux((ATerm) t,&tree,vars,vals,&len);
+	while ( isC(tree) )
+	{
+		if ( ATisEqual(build(ATgetArgument(tree,0),-1,vars,vals,len),trueint) )
+		{
+			tree = (ATermAppl) ATgetArgument(tree,0);
+		} else {
+			tree = (ATermAppl) ATgetArgument(tree,1);
+		}
+	}
+
+	ATermList rargs;
+	if ( isR(tree) )
+	{
+		rargs = ATgetNext((ATermList) t);
+	} else {
+		rargs = tree_matcher_aux((ATerm) t,&tree,vars,vals,&len);
+		assert(!ATisEmpty(rargs));
+		rargs = ATgetNext(rargs);
+	}
 
 	if ( isR(tree) )
 	{
