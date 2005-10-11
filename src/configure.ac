@@ -243,11 +243,6 @@ if test $USE_XML2; then
 else
   AC_MSG_NOTICE(libXML2       :  MISSING)
 fi
-if test $USE_BOOST; then
-  AC_MSG_NOTICE(Boost         :  FOUND)
-else
-  AC_MSG_NOTICE(Boost         :  MISSING)
-fi
 
 AC_MSG_NOTICE()
 AC_MSG_NOTICE(Some tools will not be built if any of these libraries are missing.)

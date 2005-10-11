@@ -6195,13 +6195,6 @@ else
   { echo "$as_me:$LINENO: libXML2       :  MISSING" >&5
 echo "$as_me: libXML2       :  MISSING" >&6;}
 fi
-if test $USE_BOOST; then
-  { echo "$as_me:$LINENO: Boost         :  FOUND" >&5
-echo "$as_me: Boost         :  FOUND" >&6;}
-else
-  { echo "$as_me:$LINENO: Boost         :  MISSING" >&5
-echo "$as_me: Boost         :  MISSING" >&6;}
-fi
 
 { echo "$as_me:$LINENO: " >&5
 echo "$as_me: " >&6;}
