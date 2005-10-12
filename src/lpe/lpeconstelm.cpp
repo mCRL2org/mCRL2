@@ -1,14 +1,24 @@
-// 1) Een type cast van iterators is overbodig/foutief! (zoals in data_expression_list(*i))
-
+//C++
 #include <iostream>
 #include <vector>
-#include <boost/program_options.hpp>
+#include <set>
 #include <stdbool.h>
-#include <aterm2.h>
+#include <string>
+#include <iterator>
+#include <fstream>
 
+//Boost
+#include <boost/program_options.hpp>
+#include <boost/format.hpp>
+
+//mCRL2
+#include <aterm2.h>
 #include "atermpp/aterm.h"
 #include "mcrl2/mcrl2_visitor.h"
 #include "mcrl2/specification.h"
+#include "mcrl2/predefined_symbols.h"
+#include "mcrl2/sort.h"
+
 #include "libgsrewrite.h"
 #include "gsfunc.h"
 #include "gslowlevel.h"
@@ -17,103 +27,59 @@ using namespace std;
 using namespace mcrl2;
 using namespace atermpp;
 
+//Maximum number of proces parameters: 4294967295 [@AMD 1700+, Linux-FC4, 256 MB RAM]
+
+using namespace std;
+using namespace mcrl2;
+using namespace atermpp;
+
 namespace po = boost::program_options;
 po::variables_map vm;
 
+//Customtypes
+//typedef data_assignment_list            Tsv;
+//typedef set < data_assignment_list >    Tnsv;
+
 //Constanten
-string version = "Version 0.1";
+string version = "Version 0.2";
 
-//Global Vars
-vector<data_assignment>           iv;		//init vector
-vector<bool> 		                  fv;		//flag vector (C= True, V= False)
-vector< vector<data_assignment> > sv; 	//(new) state vector
-vector< vector<bool> >            cv;		//change vector	
+//Global variables
+data_assignment_list          sv; 	//state vector
+data_assignment_list          vinit; //init vector
+set< data_assignment_list >   nsvs;  //set of newstate variables
+int                           n;    //number of process parameters
 
-vector< data_variable >            lofv; //list of free variables
-//ATermAppl                         rwcon; //rewritten condition 
-
-//debug vars
-int                               noi = 0 ;  //number of iterations                               
-
-bool substitute(data_assignment x){
-  cout << x.lhs().name() << " by value " << x.rhs().to_string()<< endl;
-  return true;
-}
-
-
-bool cex(data_assignment init, data_assignment state){
-//
-// Compares if two given assignments are equal
-// if the right hand side of "state" is a don't care 
-// they the given assignments are equal 
-//
-  if (init.rhs() == state.rhs()){
-    return true;
-  }; 
+bool eval_cond(data_expression datexpr, data_assignment_list statevector, data_equation_list equations, set<int> S){
+  //trace
+  bool b;
   
-  for (unsigned int i=0; i < lofv.size() ;i++){
-    if (state.rhs() == lofv[i]) {
-      return true;
-    };
+  set<int>::iterator i;
+  data_assignment_list::iterator j;
+
+  data_assignment_list conditionvector; 
+  
+  i = S.begin();
+  while (i == S.end()) {
+    //Consercie wordt niet ondersteunt van Assignement naar ATerm;
+    //conditionvector = append(conditionvector, ( element_at(statevector, *i )));// << endl;
+    i++;
   };
-
-  return false;  
+  
+  // Substitutie van op data_expression wordt niet ondersteunt
+  // datexpr = datexpr.substitute(conditionvector);
+  
+  // compare functie op Atermen???
+  // isFalse is een aterm representatie voor false
+  // b = compare(isFalse,  rewrite(datexpr.to_ATermAppl(), gsMakeDataEqnSpec(equations.to_ATermList() ) ) );
+   
+   // voor het compileren en testen voor t gemak maar b = true
+   b = true;
+   return b;
 }
 
-int eval_datexp(const specification& spec, data_expression datexpr, int opt)
+set< int > constelm(string filename, int option)
 {
-  if (opt==3) {return(true);};
-
-  for (unsigned int i=0; i < iv.size(); i++){
-    if (fv[i]) {
-//      datexpr.substitute(iv[i]);  // NOT YET IMPLEMENTED
-    }
-  }
-
-  /**
-    *   Rewrite dataxpr.term to eval
-    **/
-  
-  ATerm rwcon = (ATerm) gsRewriteTerm(datexpr.to_ATermAppl());
-  
-  ATerm t = (ATerm) gsMakeDataExprTrue();
-  ATerm f = (ATerm) gsMakeDataExprFalse();
-
-
- 
-  if (ATisEqual(rwcon,t)){ 
-    return 0;
-  } else {
-    if (ATisEqual(rwcon,f)){ 
-      return 1;
-    } else {
-      return 2;
-    }; 
-  } 
-  
-}
-
-int const_main(string filename, int opt)
-{
-
-  //vector<bool>                      pcv;  //partial change vector
-  vector<string>                    sovp; //set of variable process parameters
-  int                               nopp; //number of process parameters
-  int                               nos;  //number of summands
-  int                               noa;  //number of assignments in the init
-  
-
-  // Init vars
-/** 
-  **/ 
- 
-  int outputvar =  0;
-  outputvar++;
-  gsEnableConstructorFunctions();
-  
-/**
-  **/
-
+  //Read input file
   specification spec;
   if (!spec.load(filename))
   {
@@ -121,178 +87,66 @@ int const_main(string filename, int opt)
   }
   LPE lpe = spec.lpe();
 
-  if ((opt == 0) || (opt == 1) || (opt == 2) || (opt == 3))
-  {
-    lofv.insert(lofv.end(), lpe.free_variables().begin(), lpe.free_variables().end());
-    lofv.insert(lofv.end(), spec.initial_free_variables().begin(), spec.initial_free_variables().end());
-    
-    //print list of free vars
-    for (unsigned int i=0; i < lofv.size(); i++){
-      cout << lofv[i].name() << " ";
-    }
-    cout << endl;
-    
-    //Define rewrite rules on conditons
-//    gsRewriteInit(spec.equations().term(), GS_REWR_INNER3);
-
-    //Get number of process parameters
-    nopp = lpe.process_parameters().size();
-    
-    //Build "init vector" Step 1
-
-    //#assignments == #process parameters 
-//   N.B. The initial assignments are not available through the interface!
-//    noa = spec.initial_assignments().size();   
-//    if(nopp!=noa){cout << "Error: #assignments != #process parameters"<< endl; return 1;}; 
-    
-    //Build "flag vector" Step 2
-    for (int i=0; i < nopp; i++){
-      fv.push_back(true);
-    }
-    
-    bool iteration = true;
-    //Begin Iteration
-    while(iteration==true){
-      //Build new state vector and change vector
-      
-      //Get number of summands
-      nos = lpe.summands().size();
-
-      for(summand_list::iterator s_current = lpe.summands().begin(); s_current != lpe.summands().end(); ++s_current){
-        //Summand Loop
-        //Each pcv should be empty
-        //pcv.clear();
-        
-        int c = eval_datexp(spec, s_current->condition() , opt);
-
-        if ((c == 0) || (c== 2)){
-          //Summand is rewritten
-          //Create a new state vector
-          sv.push_back(iv);          
-          for (data_assignment_list::iterator c_obj = s_current->assignments().begin(); c_obj != s_current->assignments().end(); ++c_obj){
-            for (unsigned int i=0; i < sv[sv.size()-1].size(); i++){
-              if (sv[sv.size()-1][i].lhs() == data_assignment(*c_obj).lhs()){
-                
-                // Copy rhs of c_obj to sv
-                // sv[sv.end()][i].rhs() = data_assignment(*c_obj).rhs();
-                // Fill in the values
-                //
-                // No Code
-                //
-                // Rewrite the rhs of the current sv element
-                
-                // Due missing above implementation the algorithm is not working proberly
-                cout << cex(sv[sv.size()-1][i],data_assignment(*c_obj)) << endl; 
-                // Algorithm however detect possible changes between init vector and statevector 
-                // Only new assignments connot be made 
-                //
-              }
-              ;
-            };
-          };
-          //New state vector is computed
-           
-          //Create a new change vector from the flag vector
-          cv.push_back(fv);
-          for (unsigned int i=0; i < cv[cv.size()-1].size(); i++) {
-            if (cv[cv.size()-1][i]){
-              //compare if state vector elements are equal to init vector elements
-              cv[cv.size()-1][i] = cv[cv.size()-1][i] && cex(iv[i], sv[sv.size()-1][i]); 
-            };
-          }
-          //change vector is created
-        };
-        if (c == 1) {
-            //skip;          
-        };
-        
-      }; //end summand loop	
+//assert(false);
+  n = lpe.process_parameters().size();
+  vinit = spec.init_assignments();
+  sv = vinit;
   
-      //
-      //flattened the change vector and flag vector
-      //
-      vector<bool>          fcv = fv;      //create flattened change vector 
-      vector<data_assignment> fsv = iv; //create flattened init vector
- 
-      for (unsigned int i=0; i < cv[0].size(); i++){ 
-        //Check only those vectors of which the flagvector elements are true/Constant
-        if (fv[i]) {
-          for(unsigned int j=0; j < cv.size(); j++){ 
-            if (!cv[j][i]) { 
-              fcv[i] = false;
-              fsv[i] = sv[j][i];
-            }
-          }
-        };
-      }
+  set< int > V; 
+  set< int > S;
 
-      if (opt==2)
-      {
-        for (unsigned int i=0; i < cv.size(); i++) {
-          for (unsigned int j=0; j < cv[i].size(); j++) {
-            cout << cv[i][j]; 
-          }
-          cout << endl;
-        }
-        cout << endl;
-      }
-     
-
-      // change vector and state vector are flattened
-     
-
-      //Actual compare flattened change vector with flag vector
-      if (fcv.size()!= fv.size()) 
-        {cout << "fch != fv" << endl; return 1;}
-
-      //Display change vector
-      if (opt==2)
-      {
-        for (unsigned int i=0; i < fv.size(); i++){
-          cout << fv[i];
-        };
-        cout << " -- ";
-        for (unsigned int i=0; i < fcv.size(); i++){
-          cout << fcv[i];
-        };
-      cout << endl;
-      }       
-      
-      //While condition :)
-      bool b = true;
-      for (unsigned int i=0; i < fcv.size(); i++){
-        b = b && (fcv[i]==fv[i]);  
-      }
-      //If all elements equal -> No more iteration, set iteration false
-      //If a element differs -> Iteration needed, set iteration true
-      iteration = !b ;
-      if (iteration){
-        fv = fcv; //flag vector is replaced by the flattend change vector
-        iv = fsv; //init vector is replaced by the flattend state vector
-      }
-    noi++;
-    }
-  //End Iteration 
-  } 
-  //Subtitute all constant values
-  for (unsigned int i  = 0; i != fv.size(); i++){
-    if (fv[i]){ 
-      substitute(iv[i]);
-    };
+  for(int j=0; j <= (n-1) ; j++){
+    V.insert(j);
   };
-   
-  //cout << "noi " << noi <<endl;
-  cerr << "einde" << endl;
   
-  return 0;
+  set< int > D;
+  cout << lpe.summands().size() << endl;;
+
+  while(S.size()!=V.size()) {
+    //nsvs = emptyset; 
+    nsvs.erase(nsvs.begin(),nsvs.end());
+    S = V;
+    
+    set< int > S_dummy;        
+    
+    for(summand_list::iterator s_current = lpe.summands().begin(); s_current != lpe.summands().end(); ++s_current){ 
+      if (eval_cond(s_current->condition(), sv, spec.equations(), S)){
+        //data_assignment_list nextstate = s_current->assignments().substitute(sv);
+	//nsvs.insert(nextstate);
+	set< int >::iterator j = S.begin();
+	while (j != S.end()){
+          //Compare functie werkt niet
+	  //if (compare(element_at(sv, *j), element_at(nextstate, *j) ) ){
+            S_dummy.insert(*j);
+	  //};
+	  j++;
+        };
+      }; 
+    };  
+    
+    //
+    //S_dummy = Sort(S_dummy)
+    
+    set_difference(S.begin(), S.end(), S_dummy.begin(), S_dummy.end(), inserter(V, V.begin()));
+    
+    ////
+    // Als V <  S dan zijn er variabele process parameters gevonden
+    ////
+    
+    if (S.size() != V.size()){
+      //data_assignment nsv = vinit;
+      set_difference(S.begin(), S.end(), S_dummy.begin(), S_dummy.end(), inserter(D, D.begin()));
+      
+      set< int >::iterator j = D.begin();
+      while (j != D.end() ) {
+        //sv = replace(sv, element_at(nextstate, *j), *j);
+        j++;
+      };      
+    };
+  }; 
+  return S;
 }
 
-template<class T>
-ostream& operator<<(ostream& os, const vector<T>& v)
-{
-    copy(v.begin(), v.end(), ostream_iterator<T>(cout, " ")); 
-    return os;
-}
 
 int main(int ac, char* av[])
 {
@@ -328,7 +182,6 @@ int main(int ac, char* av[])
                   options(cmdline_options).positional(p).run(), vm);
         po::notify(vm);
         
-	// If no arguments are ac==1, so print help
         if (vm.count("help") || ac == 1) {
             cout << "Usage: "<< av[0] << " [options] input-file\n";
             cout << desc;
@@ -360,7 +213,7 @@ int main(int ac, char* av[])
           filename = vm["input-file"].as<string>();
 	      }
 
-        const_main(filename, opt);       
+        constelm(filename, opt);       
 	
     }
     catch(exception& e)
@@ -370,3 +223,27 @@ int main(int ac, char* av[])
     }    
     return 0;
 }
+
+/*class Sum {
+public:
+    Sum(double d) : total(d) {}
+    double operator()(double val) {
+        total += val;
+        return total;
+    }
+    double getTotal() {
+        return total;
+    }
+private:
+    double total;
+}; */
+
+  //Test vars
+  /*
+  cout << D.size() << endl;
+
+   Sum summer(0.0);
+   summer = for_each(V.begin(), V.end(), summer);
+   cout << summer.getTotal() << endl;
+  */
+
