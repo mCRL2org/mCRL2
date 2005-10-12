@@ -171,7 +171,7 @@ static ATermAppl gstcMatchListOpEltAt(ATermAppl Type);
 static ATermAppl gstcMatchListOpHead(ATermAppl Type);
 static ATermAppl gstcMatchListOpTail(ATermAppl Type);
 
-static ATermAppl gstcFoldSpec(ATermAppl Spec);
+//static ATermAppl gstcFoldSpec(ATermAppl Spec);
 //Pre: Spec is a specification that adheres to the internal format after type
 //     checking
 //Ret: Spec in which all sort references are folded in maximally
@@ -185,7 +185,6 @@ ATermAppl gstcFoldSpec(ATermAppl Spec)
   for (; !ATisEmpty(l); l=ATgetNext(l))
   {
     ATerm t = ATtableGet(context.defined_sorts,ATgetFirst(l));
-    //gsfprintf(stderr, "Sort %P = %P\n", ATgetFirst(l), t);
     
     if ( gsIsSortId((ATermAppl) t) )
     {
@@ -258,7 +257,7 @@ ATermAppl gsTypeCheck (ATermAppl input){
   Result=ATsetArgument(Result,(ATerm)gsMakeInit(ATmakeList0(),
     ATAtableGet(body.proc_bodies,(ATerm)INIT_KEY())),6);
 
-  Result=gstcFoldSpec(Result);
+  //Result=gstcFoldSpec(Result);
 
   gsDebugMsg ("type checking phase finished\n");
   }}}}}}}
