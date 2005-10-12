@@ -42,9 +42,9 @@ void print_help(FILE *f, char *Name)
 		  "(Enter '-1' or use CTRL-d to end simulation.)\n"
 		  "\n"
 	          "The OPTIONS that can be used are:\n"
-	          "-h, --help               Display this help message\n"
-	          "-y, --dummy              Replace free variables in the LPE with dummy values\n"
-	          "-R, --rewriter name      Use rewriter 'name' (default inner3)\n"
+	          "  -h, --help             Display this help message\n"
+	          "  -y, --dummy            Replace free variables in the LPE with dummy values\n"
+	          "  -R, --rewriter name    Use rewriter 'name' (default inner3)\n"
       );
 }
 

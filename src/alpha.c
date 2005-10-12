@@ -26,9 +26,9 @@ void print_help(FILE *f, char *Name)
 		  "used. To use stdin and save the output into a file, use '-' for SPECFILE.\n"
 	          "\n"
 	          "The OPTIONS that can be used are:\n"
-	          "-h, --help               display this help message\n"
-	          "-a, --read-aterm         SPECFILE is an ATerm\n"
-	          "-w, --write-aterm        OUTFILE should be an ATerm\n"
+	          "  -h, --help             display this help message\n"
+	          "  -a, --read-aterm       SPECFILE is an ATerm\n"
+	          "  -w, --write-aterm      OUTFILE should be an ATerm\n"
 	       );
 }
 

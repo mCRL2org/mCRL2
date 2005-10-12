@@ -130,11 +130,11 @@ static void print_help(FILE *f, char *Name)
 		  "stdin and save the output into a file, use '-' for INFILE.\n"
 	          "\n"
 	          "The OPTIONS that can be used are:\n"
-	          "-h, --help               display this help message\n"
-	          "-q, --quiet              do not print any unrequested information\n"
-	          "-v, --verbose            print information about the rewriting process\n"
-	          "-b, --benchmark=num      rewrites specification num times\n"
-	          "-R, --rewriter=name      use rewriter 'name' (default inner3)\n"
+	          "  -h, --help             display this help message\n"
+	          "  -q, --quiet            do not print any unrequested information\n"
+	          "  -v, --verbose          print information about the rewriting process\n"
+	          "  -b, --benchmark=num    rewrites specification num times\n"
+	          "  -R, --rewriter=name    use rewriter 'name' (default inner3)\n"
 	       );
 }
 
