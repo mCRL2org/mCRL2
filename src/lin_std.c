@@ -5798,6 +5798,12 @@ static int gsIsDataExprOr(ATermAppl t)
   return 0;
 }
 
+static int gsIsDataExprTrue(ATermAppl t)
+{
+  return t==gsMakeOpIdTrue();
+}
+
+
 static int implies_condition(ATermAppl c1, ATermAppl c2)
 {
   if (c1==c2)
@@ -6138,27 +6144,6 @@ static int occursinvarandremove(ATermAppl var, ATermList *vl)
   return result;
 }
 
-/* static int sumelimination(
-                   ATermAppl u1, 
-                   ATermAppl u2,
-                   ATermList *sumlist, 
-                   ATermList *subargs,
-                   ATermList *subpars)
-{ int result=0;
-  
-  if (gsIsDataVarId(u1) && (occursinvarandremove(u1,sumlist)))
-  { result=1;
-    *subargs=ATinsertA(*subargs,u2); 
-    *subpars=ATinsertA(*subpars,u1);
-  }
-  else if (gsIsDataVarId(u2) && (occursinvarandremove(u2,sumlist)))
-  { result=1;
-    *subargs=ATinsertA(*subargs,u1);
-    *subpars=ATinsertA(*subpars,u2);
-  }
-  return result;
-} */
-
 /********************** construct renaming **************************/
 
 static ATermList construct_renaming(
@@ -6446,6 +6431,7 @@ static void ApplySumElimination(ATermList *sumvars,
                                 ATermAppl *actiontime,
                                 ATermList *nextstate,
                                 ATermAppl communicationcondition,
+                                ATermAppl remainingcommunicationcondition,
                                 ATermList parameters)
 { /* Apply sumelimination on the summand consisting of 
      sumvars, condition, multiaction, actiontime and nextstate,
@@ -6455,6 +6441,10 @@ static void ApplySumElimination(ATermList *sumvars,
      whether they are of the form x==t, or t==x, where x is a variable
      occuring in sumvars. If so, x is removed from sumvars and
      t is substituted for x in the summand */
+
+  if (gsIsDataExprTrue(communicationcondition))
+  { return;
+  }
    
   if (gsIsDataExprAnd(communicationcondition))
   { ApplySumElimination(sumvars,
@@ -6463,13 +6453,11 @@ static void ApplySumElimination(ATermList *sumvars,
                         actiontime,
                         nextstate,
                         ATAgetArgument(ATAgetArgument(communicationcondition,0),1),
-                        parameters);
-    ApplySumElimination(sumvars,
-                        condition,
-                        multiaction,
-                        actiontime,
-                        nextstate,
-                        ATAgetArgument(communicationcondition,1),
+                        (gsIsDataExprTrue(remainingcommunicationcondition)?
+                                    ATAgetArgument(communicationcondition,1):
+                                    gsMakeDataExprAnd(
+                                        ATAgetArgument(communicationcondition,1),
+                                        remainingcommunicationcondition)),
                         parameters);
     return;
   }
@@ -6500,6 +6488,10 @@ static void ApplySumElimination(ATermList *sumvars,
                         ATinsertA(ATempty,righthandside),
                         ATinsertA(ATempty,lefthandside),
                         *condition);
+      remainingcommunicationcondition=substitute_data(
+                        ATinsertA(ATempty,righthandside),
+                        ATinsertA(ATempty,lefthandside),
+                        remainingcommunicationcondition);
       *multiaction=substitute_multiaction(
                         ATinsertA(ATempty,righthandside),
                         ATinsertA(ATempty,lefthandside),
@@ -6516,6 +6508,15 @@ static void ApplySumElimination(ATermList *sumvars,
                         *nextstate,
                         parameters,
                         0,1);
+      ApplySumElimination(sumvars,
+                          condition,
+                          multiaction,
+                          actiontime,
+                          nextstate,
+                          remainingcommunicationcondition,
+                          gsMakeDataExprTrue(),
+                          parameters);
+
       return;
     }
   }
@@ -6525,9 +6526,11 @@ static void ApplySumElimination(ATermList *sumvars,
      of the form x==t, or t==x with x a variable in sumvars.
      In this case no sum elimination is applied */
 
-  *condition=gsMakeDataExprAnd(
+  if (!gsIsDataExprTrue(communicationcondition))
+  { *condition=gsMakeDataExprAnd(
                        *condition,
                        communicationcondition);
+  }
   return; 
 }
 
@@ -6607,6 +6610,7 @@ static ATermAppl communicationcomposition(
                             &newactiontime,
                             &newnextstate,
                             communicationcondition,
+                            gsMakeOpIdTrue(),
                             linGetParameters(ips));
 
         newcondition=RewriteTerm(newcondition);
