@@ -21,7 +21,7 @@ extern "C" {
 void print_help(FILE *f, char *Name)
 {
 	fprintf(f,"Usage: %s OPTIONS SPECFILE [OUTFILE]\n",Name);
-	fprintf(f,"Linearises SPECFILE and writes the result to OUTFILE. If OUTFILE is not XXXXXXX\n"
+	fprintf(f,"Linearises SPECFILE and writes the result to OUTFILE. If OUTFILE is not\n"
 		  "specified, SPECFILE with its extension replaced by 'lpe' is assumed. If OUTFILE\n"
 		  "is -, stdout is used.\n"
 		  "The default is to generate a LPE.\n"
