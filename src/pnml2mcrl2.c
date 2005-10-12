@@ -1621,8 +1621,9 @@ extern "C" {
     struct option lopts[] = {
       {"read-aterm"  , no_argument,      NULL, 'a'},
       {"debug"       , no_argument,      NULL, 'd'},
-      {"quiet"       , no_argument,      NULL, 'q'},
+      {"help"        , no_argument,      NULL, 'h'},
       {"no_rec_par"  , no_argument,      NULL, 'p'},
+      {"quiet"       , no_argument,      NULL, 'q'},
       {0, 0, 0, 0}
     };
     int opt,read_aterm;
@@ -1636,12 +1637,15 @@ extern "C" {
       case 'd': 
 	gsSetDebugMsg();
 	break;
-      case 'q':
-        gsSetQuietMsg();
-        break;
+      case 'h':
+	PrintHelp(argv[0]);
+	return 0;
       case 'p': 
 	rec_par=ATfalse;
 	break;
+      case 'q':
+        gsSetQuietMsg();
+        break;
       default:
 	break;
       }
@@ -1713,6 +1717,31 @@ extern "C" {
 
     if(Spec) PrintPart_C(stdout, (ATerm) Spec, ppAdvanced);
     return 0;
+  }
+
+  //==================================================
+  // PrintHelp prints and contains the Help-text.
+  //==================================================
+  void PrintHelp(char *Name){
+    fprintf(stderr,
+	    "Usage: ./pnml2mcrl2 OPTIONS [INFILE] [OUTFILE]\n"
+	    "pnml2mcrl2 converts a Petri net from pnml to mcrl2.\n"
+            "INFILE is supposed to be in EPNML 1.1. However, pnml2mcrl2\n"
+	    "might work with other pnml/epnml standards as well.\n"
+	    "If OUTFILE is not present, stdout is used.\n"
+	    "\n"
+	    "Note: Currently pnml2mcrl2 only translates classical Petri nets:\n"
+	    "      places, transitions and arcs.\n"
+	    "      Timing, coloring, inhibitor arcs, hierarchy, and other\n"
+	    "      advanced modeling constructs will not be translated!\n"
+	    "\n"
+	    "The OPTIONS that can be used are:\n"
+	    "  -h, --help             Display this help message\n"
+	    "  -q, --quiet            Do not print any unrequested information\n"
+	    "  -d, --debug            Show debug messages\n"
+	    "  -p, --no_rec_par       Use alternative generation of places, without mcrl2-recursion\n"
+	    "  -a, --read-aterm       I have no idea what this does!\n",
+	    Name);
   }
 
 
