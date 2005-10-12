@@ -10,28 +10,26 @@
 #include "libprint_c.h"
 #include "lpetrans.h"
 
-static void print_help(FILE *f)
+static void print_help(FILE *f, char *Name)
 {
   fprintf(f,
-    "Usage: %s OPTIONS [INFILE [OUTFILE]]\n", NAME);
-  fprintf(f,
+    "Usage: %s OPTIONS [INFILE [OUTFILE]]\n"
     "Read mCRL LPE from INFILE, convert it to a mCRL2 LPE and save the result to\n"
     "OUTFILE. If OUTFILE is not present, stdout is used. If INFILE is not present,\n"
     "stdin is used. To use stdin and save the output to a file, use '-' for INFILE.\n"
     "\n"
-    "Note that the following conversions on the data specification will be applied:\n"
-    "- Constructors 'F' and 'T' of type 'Bool' are replaced with 'false' and 'true'\n"
-    "- Functions 'and' and 'or' of type Bool#Bool->Bool are replaced with '&&'\n"
-    "  and '||'\n"
-    "- For all sorts S, functions 'eq' of type S#S->Bool are replaced with '=='\n"
+    "The following conversions on the data specification will be applied:\n"
+    "- constructors T, F: -> Bool are replaced by true, false\n"
+    "- mappings and, or: Bool # Bool -> Bool are replaced by &&, ||\n"
+    "- mapping eq: S # S -> Bool is replaced by ==, for all sorts S\n"
     "\n"
     "The OPTIONS that can be used are:\n"
     "-h, --help               display this help message\n"
     "-q, --quiet              do not print any unrequested information\n"
     "-v, --verbose            display extra information about the conversion process\n"
-    "-n, --no-conv            do not apply the conversion of functions and,or and eq\n"
-    "    --no-conv-bool       do not apply the conversion of the Bool constructors\n"
-      );
+    "-n, --no-conv-map        do not apply the conversion of mappings and, or and eq\n"
+    "    --no-conv-cons       do not apply the conversion of constructors T and F\n",
+    Name);
 }
 
 int main(int argc, char **argv)
@@ -43,8 +41,8 @@ int main(int argc, char **argv)
 		{ "help",		no_argument,	NULL,	'h' },
 		{ "quiet",		no_argument,	NULL,	'q' },
 		{ "verbose",		no_argument,	NULL,	'v' },
-		{ "no-conv",		no_argument,	NULL,	'n' },
-		{ "no-conv-bool",	no_argument,	NULL,	0x1 },
+		{ "no-conv-map",        no_argument,	NULL,	'n' },
+		{ "no-conv-cons",	no_argument,	NULL,	0x1 },
  		{ 0, 0, 0, 0 }
 	};
 	int opt;
@@ -63,7 +61,7 @@ int main(int argc, char **argv)
 		switch ( opt )
 		{
 			case 'h':
-				print_help(stderr);
+				print_help(stderr, argv[0]);
 				return 0;
 			case 'q':
 				opt_quiet = true;
