@@ -1609,7 +1609,32 @@ extern "C" {
   /*               */
   /*               */
 
-  
+
+  //==================================================
+  // PrintHelp prints and contains the Help-text.
+  //==================================================
+  void PrintHelp(char *Name){
+    fprintf(stderr,
+	    "Usage: ./pnml2mcrl2 OPTIONS [INFILE] [OUTFILE]\n"
+	    "pnml2mcrl2 converts a Petri net from pnml to mcrl2.\n"
+            "INFILE is supposed to be in EPNML 1.1. However, pnml2mcrl2\n"
+	    "might work with other pnml/epnml standards as well.\n"
+	    "If OUTFILE is not present, stdout is used.\n"
+	    "\n"
+	    "Note: Currently pnml2mcrl2 only translates classical Petri nets:\n"
+	    "      places, transitions and arcs.\n"
+	    "      Timing, coloring, inhibitor arcs, hierarchy, and other\n"
+	    "      advanced modeling constructs will not be translated!\n"
+	    "\n"
+	    "The OPTIONS that can be used are:\n"
+	    "  -h, --help             Display this help message\n"
+	    "  -q, --quiet            Do not print any unrequested information\n"
+	    "  -d, --debug            Show debug messages\n"
+	    "  -p, --no_rec_par       Use alternative generation of places, without mcrl2-recursion\n"
+	    "  -a, --read-aterm       I have no idea what this does!\n");
+  }
+
+
   //==================================================
   // main
   //==================================================
@@ -1617,7 +1642,7 @@ extern "C" {
     ATerm stackbot;
     ATinit(0,NULL,&stackbot);
     
-#define sopts "adqp"
+#define sopts "adhpq"
     struct option lopts[] = {
       {"read-aterm"  , no_argument,      NULL, 'a'},
       {"debug"       , no_argument,      NULL, 'd'},
@@ -1718,32 +1743,6 @@ extern "C" {
     if(Spec) PrintPart_C(stdout, (ATerm) Spec, ppAdvanced);
     return 0;
   }
-
-  //==================================================
-  // PrintHelp prints and contains the Help-text.
-  //==================================================
-  void PrintHelp(char *Name){
-    fprintf(stderr,
-	    "Usage: ./pnml2mcrl2 OPTIONS [INFILE] [OUTFILE]\n"
-	    "pnml2mcrl2 converts a Petri net from pnml to mcrl2.\n"
-            "INFILE is supposed to be in EPNML 1.1. However, pnml2mcrl2\n"
-	    "might work with other pnml/epnml standards as well.\n"
-	    "If OUTFILE is not present, stdout is used.\n"
-	    "\n"
-	    "Note: Currently pnml2mcrl2 only translates classical Petri nets:\n"
-	    "      places, transitions and arcs.\n"
-	    "      Timing, coloring, inhibitor arcs, hierarchy, and other\n"
-	    "      advanced modeling constructs will not be translated!\n"
-	    "\n"
-	    "The OPTIONS that can be used are:\n"
-	    "  -h, --help             Display this help message\n"
-	    "  -q, --quiet            Do not print any unrequested information\n"
-	    "  -d, --debug            Show debug messages\n"
-	    "  -p, --no_rec_par       Use alternative generation of places, without mcrl2-recursion\n"
-	    "  -a, --read-aterm       I have no idea what this does!\n",
-	    Name);
-  }
-
 
   // Added by Yarick: alternative generation of Places:
   static ATermAppl pn2gsGenerateP_pi_ar(int in, int out, ATermList In, ATermList Out);
