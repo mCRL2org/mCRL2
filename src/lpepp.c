@@ -30,14 +30,14 @@ int main(int argc, char *argv[]);
 //  argc represents the number of arguments
 //  argv represents the arguments
 
-static void PrintUsage(FILE* Stream, char *Name);
-//print usage information to stream
+static void PrintUsage(char *Name);
+//print usage information
 
-static void PrintMoreInfo(FILE* Stream, char *Name);
-//print --help suggestion to stream
+static void PrintMoreInfo(char *Name);
+//print --help suggestion
 
-static void PrintVersion(FILE* Stream);
-//print version information to stream
+static void PrintVersion(void);
+//print version information
 
 static bool PrintSpecificationFileName(char *SpecFileName, char *OutFileName,
   t_pp_format pp_format);
@@ -106,10 +106,10 @@ int main(int argc, char* argv[]) {
         }
         break;
       case 'h':
-        PrintUsage(stdout, argv[0]);
+        PrintUsage(argv[0]);
         return 0; 
       case VersionOption: 
-        PrintVersion(stdout); 
+        PrintVersion(); 
         return 0;
       case 'q':
         gsSetQuietMsg();
@@ -121,7 +121,7 @@ int main(int argc, char* argv[]) {
         gsSetDebugMsg();
         break;
       default:
-      	PrintMoreInfo(stderr, argv[0]);
+      	PrintMoreInfo(argv[0]);
       	return 1;
     }
     Option = getopt_long(argc, argv, ShortOptions, LongOptions, NULL);
@@ -130,7 +130,7 @@ int main(int argc, char* argv[]) {
   NoArgc = argc - optind;
   if (NoArgc > 2) {
     fprintf(stderr, "%s: too many arguments\n", NAME);
-   	PrintMoreInfo(stderr, argv[0]);
+   	PrintMoreInfo(argv[0]);
    	return 1;
   } else {
     //NoArgc >= 0 && NoArgc <= 2
@@ -237,8 +237,8 @@ bool PrintSpecificationStream(FILE *SpecStream, FILE *OutputStream,
   return Result;
 }
 
-void PrintUsage(FILE *Stream, char *Name) {
-  fprintf(Stream, 
+void PrintUsage(char *Name) {
+  fprintf(stderr, 
     "Usage: %s OPTIONS [LPEFILE [OUTFILE]]\n"
     "Print the mCRL2 LPE in LPEFILE to OUTFILE in a human readable format. If OUTFILE\n"
     "is not present, stdout is used. If LPEFILE is not present or -, stdin is used.\n"
@@ -257,12 +257,12 @@ void PrintUsage(FILE *Stream, char *Name) {
   );
 }
 
-void PrintMoreInfo(FILE *Stream, char *Name) {
-  fprintf(Stream, "Try \'%s --help\' for more information.\n", Name);
+void PrintMoreInfo(char *Name) {
+  fprintf(stderr, "Try \'%s --help\' for more information.\n", Name);
 }
 
-void PrintVersion(FILE *Stream) {
-  fprintf(Stream, "%s %s\nWritten by %s.\n", 
+void PrintVersion(void) {
+  fprintf(stderr, "%s %s\nWritten by %s.\n", 
     NAME, LVERSION, AUTHOR);  
 }
 
