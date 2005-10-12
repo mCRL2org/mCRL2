@@ -29,13 +29,13 @@ void PrintUsage(FILE *f, char *Name)
                   "used. To use stdin and save the output into a file, use '-' for SPECFILE.\n"
                   "\n"
                   "The OPTIONS that can be used are:\n"
-		  "-a, --read-aterm         SPECFILE is an ATerm\n"
-		  "-w, --write-aterm        OUTFILE should be an ATerm\n"
-		  "-h, --help             display this help\n"
-		  "    --version          display version information\n"
-		  "-q, --quiet            do not display warning messages\n"
-		  "-v, --verbose          turn on the display of short intermediate messages\n"
-		  "-d, --debug            turn on the display of detailed intermediate messages\n"
+		  "  -a, --read-aterm       SPECFILE is an ATerm\n"
+		  "  -w, --write-aterm      OUTFILE should be an ATerm\n"
+		  "  -h, --help             display this help\n"
+		  "      --version          display version information\n"
+		  "  -q, --quiet            do not display warning messages\n"
+		  "  -v, --verbose          turn on the display of short intermediate messages\n"
+		  "  -d, --debug            turn on the display of detailed intermediate messages\n"
 	       );
 }
 
