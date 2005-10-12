@@ -1615,10 +1615,11 @@ extern "C" {
   //==================================================
   void PrintHelp(char *Name){
     fprintf(stderr,
-	    "Usage: ./pnml2mcrl2 OPTIONS [INFILE] [OUTFILE]\n"
-	    "pnml2mcrl2 converts a Petri net from pnml to mcrl2.\n"
+	    "Usage: %s OPTIONS INFILE [OUTFILE]\n", Name);
+    fprintf(stderr,
+	    "pnml2mcrl2 converts a Petri net from PNML to mCRL2.\n"
             "INFILE is supposed to be in EPNML 1.1. However, pnml2mcrl2\n"
-	    "might work with other pnml/epnml standards as well.\n"
+	    "might work with other PNML/EPNML standards as well.\n"
 	    "If OUTFILE is not present, stdout is used.\n"
 	    "\n"
 	    "Note: Currently pnml2mcrl2 only translates classical Petri nets:\n"
@@ -1630,7 +1631,8 @@ extern "C" {
 	    "  -h, --help             Display this help message\n"
 	    "  -q, --quiet            Do not print any unrequested information\n"
 	    "  -d, --debug            Show debug messages\n"
-	    "  -p, --no_rec_par       Use alternative generation of places, without mcrl2-recursion\n"
+	    "  -p, --no_rec_par       Use alternative generation of places,\n"
+            "                         without mcrl2-recursion\n"
 	    "  -a, --read-aterm       I have no idea what this does!\n");
   }
 
@@ -1639,6 +1641,7 @@ extern "C" {
   // main
   //==================================================
   int main(int argc, char **argv){
+    FILE *OutStream;
     ATerm stackbot;
     ATinit(0,NULL,&stackbot);
     
@@ -1686,6 +1689,16 @@ extern "C" {
       }
     }
     
+    OutStream = stdout;
+    if ( optind+1 < argc )
+      {
+	if ( (OutStream = fopen(argv[optind+1],"w")) == NULL )
+	  {
+	    gsErrorMsg("cannot open file '%s' for writing\n",argv[optind+1]);
+	    return 1;
+	  }
+      }
+
     xmlDocPtr doc = xmlParseFile(SpecStream);
     if(!doc) {
       gsErrorMsg("Document not parsed succesfully. \n");
@@ -1740,8 +1753,12 @@ extern "C" {
 
     Spec=gsTypeCheck(Spec);
 
-    if(Spec) PrintPart_C(stdout, (ATerm) Spec, ppAdvanced);
+    if(Spec){
+      PrintPart_C(OutStream, (ATerm) Spec, ppAdvanced);
+      fclose(OutStream);
+    }
     return 0;
+
   }
 
   // Added by Yarick: alternative generation of Places:
