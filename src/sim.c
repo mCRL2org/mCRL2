@@ -43,8 +43,7 @@ void print_help(FILE *f, char *Name)
 		  "\n"
 	          "The OPTIONS that can be used are:\n"
 	          "-h, --help               Display this help message\n"
-	          "-y, --dummy              Replace free variables in the LPE\n"
-		  "                         with dummy values\n"
+	          "-y, --dummy              Replace free variables in the LPE with dummy values\n"
 	          "-R, --rewriter name      Use rewriter 'name' (default inner3)\n"
       );
 }

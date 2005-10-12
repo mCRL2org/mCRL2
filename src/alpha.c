@@ -21,11 +21,9 @@ extern ATermAppl gsTypeCheck(ATermAppl);
 void print_help(FILE *f, char *Name)
 {
 	fprintf(f,"Usage: %s OPTIONS [SPECFILE [OUTFILE]]\n",Name);
-	fprintf(f,"Apply alphabet axioms to processes in SPECFILE and save\n"
-		  "the result to OUTFILE. If OUTFILE is not present, stdout\n"
-		  "is used. If SPECFILE is not present, stdin is used. To\n"
-		  "use stdin and save the output into a file, use '-' for\n"
-		  "SPECFILE.\n"
+	fprintf(f,"Apply alphabet axioms to processes in SPECFILE and save the result to OUTFILE.\n"
+		  "If OUTFILE is not present, stdout is used. If SPECFILE is not present, stdin is\n"
+		  "used. To use stdin and save the output into a file, use '-' for SPECFILE.\n"
 	          "\n"
 	          "The OPTIONS that can be used are:\n"
 	          "-h, --help               display this help message\n"

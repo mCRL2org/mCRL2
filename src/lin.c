@@ -21,28 +21,22 @@ extern "C" {
 void print_help(FILE *f, char *Name)
 {
 	fprintf(f,"Usage: %s OPTIONS SPECFILE [OUTFILE]\n",Name);
-	fprintf(f,"Linearises SPECFILE and writes the result to OUTFILE. If\n"
-		  "OUTFILE is not specified, SPECFILE with its extension\n"
-		  "replaced by 'lpe' is assumed. If OUTFILE is -, stdout is\n"
-		  "used.\n"
+	fprintf(f,"Linearises SPECFILE and writes the result to OUTFILE. If OUTFILE is not XXXXXXX\n"
+		  "specified, SPECFILE with its extension replaced by 'lpe' is assumed. If OUTFILE\n"
+		  "is -, stdout is used.\n"
 		  "The default is to generate a LPE.\n"
 	          "\n"
 	          "The OPTIONS that can be used are:\n"
 	          "    --help               display this help message\n"
 	          "-c, --nocluster          Do not cluster the LPE\n"
-	          "-l, --linear             Do not write a LPE but a linear\n"
-		  "                         specification\n"
-	          "-2, --linear2            Same as -l, but substitute\n"
-		  "                         processes if possible\n"
-	          "-r, --reuse-cycles       Improves result of -2 but can take\n"
-		  "                         longer to calculate\n"
-	          "-s, --state-space        Generate state-space. Useful if the\n"
-		  "                         system is very complex in general,\n"
-		  "                         but because of the initial state has\n"
-		  "                         a small state-space.\n"
+	          "-l, --linear             Do not write a LPE but a linear specification\n"
+	          "-2, --linear2            Same as -l, but substitute processes if possible\n"
+	          "-r, --reuse-cycles       Improves result of -2 but can take longer to calculate\n"
+	          "-s, --state-space        Generate state-space. Useful if the system is very\n"
+		  "                         complex in general, but because of the initial state\n"
+		  "                         has a small state-space.\n"
 	          "-a, --read-aterm         SPECFILE is an ATerm\n"
-	          "-h, --human              Write the result in human readable\n"
-		  "                         format\n"
+	          "-h, --human              Write the result in human readable format\n"
 	       );
 }
 

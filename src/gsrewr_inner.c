@@ -20,13 +20,15 @@ extern ATermList dataappl_eqns;
 static ATermTable term2int;
 static unsigned int num_opids;
 static ATermAppl *int2term;
-static ATermAppl *inner_eqns;
+static ATermList *inner_eqns;
+static ATermAppl *inner_trees;
 static ATermInt trueint;
 static AFun nilAFun;
 static AFun opidAFun;
 static AFun ruleAFun;
 static int max_vars;
 static bool is_initialised = false;
+static bool need_rebuild;
 
 static AFun afunS, afunM, afunF, afunN, afunD, afunR, afunCR, afunC, afunX;
 static ATerm dummy;
@@ -213,7 +215,7 @@ static void term2seq(ATerm t, ATermList *s)
 
 }
 
-static ATermList create_sequence(ATermList rule)
+static ATermList create_sequence(ATermAppl rule)
 {
 	ATermAppl pat = (ATermAppl) ATgetArgument(rule,2);
 	ATermList pars = ATmakeList0();
@@ -581,7 +583,7 @@ static ATermAppl create_tree(ATermList rules, int opid, int *max_vars)
 	rule_seqs = ATmakeList0();
 	for (; !ATisEmpty(rules); rules=ATgetNext(rules))
 	{
-		rule_seqs = ATinsert(rule_seqs, (ATerm) create_sequence((ATermList) ATgetFirst(rules)));
+		rule_seqs = ATinsert(rule_seqs, (ATerm) create_sequence((ATermAppl) ATgetFirst(rules)));
 	}
 
 	ATermAppl r = NULL;
@@ -634,8 +636,6 @@ static ATermAppl create_tree(ATermList rules, int opid, int *max_vars)
 	sprintf(s,"tree_%i_%s",opid,ATgetName(ATgetAFun(ATAgetArgument(int2term[opid],0))));
 	sprintf(t,"tree_%i_%s.dot",opid,ATgetName(ATgetAFun(ATAgetArgument(int2term[opid],0))));
 	tree2dot(tree,s,t);*/
-
-	// XXX remove sequences of Ss!
 
 	return tree;
 }
@@ -869,9 +869,6 @@ static ATerm tree_matcher(ATermList t, ATermAppl tree)
 	}
 }
 
-
-
-
 static ATerm OpId2Int(ATermAppl Term, bool add_opids)
 {
 	ATermInt i;
@@ -984,6 +981,7 @@ void rewrite_init_inner()
 		ATunprotect(&dummy);
 		ATunprotectArray((ATerm *) int2term);
 		ATunprotectArray((ATerm *) inner_eqns);
+		ATunprotectArray((ATerm *) inner_trees);
 	}
 	is_initialised = true;
 
@@ -999,8 +997,8 @@ void rewrite_init_inner()
 	ATprotectAFun(nilAFun);
 	opidAFun = ATgetAFun(gsMakeDataExprTrue());
 	ATprotectAFun(opidAFun);
-	ruleAFun = ATmakeAFun("@RULE@",4,false);
-	ATprotectAFun(opidAFun);
+	ruleAFun = ATmakeAFun("@RULE@",4,ATfalse);
+	ATprotectAFun(ruleAFun);
 
 	afunS = ATmakeAFun("@@S",2,ATfalse); // Store term ( target_variable, result_tree )
 	ATprotectAFun(afunS);
@@ -1046,14 +1044,17 @@ void rewrite_init_inner()
 	}
 
 	int2term = (ATermAppl *) malloc(num_opids*sizeof(ATermAppl));
-	inner_eqns = (ATermAppl *) malloc(num_opids*sizeof(ATermAppl));
+	inner_eqns = (ATermList *) malloc(num_opids*sizeof(ATermList));
+	inner_trees = (ATermAppl *) malloc(num_opids*sizeof(ATermAppl));
 	for (int i=0; i<num_opids; i++)
 	{
 		int2term[i] = NULL;
 		inner_eqns[i] = NULL;
+		inner_trees[i] = NULL;
 	}
 	ATprotectArray((ATerm *) int2term,num_opids);
 	ATprotectArray((ATerm *) inner_eqns,num_opids);
+	ATprotectArray((ATerm *) inner_trees,num_opids);
 
 	l = ATtableKeys(term2int);
 	for (; !ATisEmpty(l); l=ATgetNext(l))
@@ -1068,11 +1069,14 @@ void rewrite_init_inner()
 		i = (ATermInt) ATtableGet(term2int,ATgetFirst(l));
 		if ( (m = (ATermList) ATtableGet(tmp_eqns,(ATerm) i)) != NULL )
 		{
-			inner_eqns[ATgetInt(i)] = create_tree(m,ATgetInt(i),&max_vars);
+			inner_eqns[ATgetInt(i)] = m;
+			inner_trees[ATgetInt(i)] = create_tree(m,ATgetInt(i),&max_vars);
 		}
 	}
 			
 	ATtableDestroy(tmp_eqns);
+
+	need_rebuild = false;
 }
 
 void rewrite_finalise_inner()
@@ -1094,12 +1098,13 @@ void rewrite_finalise_inner()
 	ATunprotect(&dummy);
 	ATunprotectArray((ATerm *) int2term);
 	ATunprotectArray((ATerm *) inner_eqns);
+	ATunprotectArray((ATerm *) inner_trees);
 	is_initialised = false;
 }
 
 void rewrite_add_inner(ATermAppl eqn)
 {
-/*	ATermList l;
+	ATermList l;
 	ATermAppl a,m;
 	ATermInt i,j;
 	unsigned int old_num;
@@ -1110,12 +1115,10 @@ void rewrite_add_inner(ATermAppl eqn)
 	if ( gsIsOpId(a) )
 	{
 		j = (ATermInt) OpId2Int(a,true);
-//		m = ATmakeList4((ATerm) ATmakeList0(),toInner(ATAgetArgument(eqn,1),true),(ATerm) ATmakeList0(),toInner(ATAgetArgument(eqn,3),true));
 		m = ATmakeAppl4(ruleAFun,(ATerm) ATmakeList0(),toInner(ATAgetArgument(eqn,1),true),(ATerm) ATmakeList0(),toInner(ATAgetArgument(eqn,3),true));
 	} else {
 		l = (ATermList) toInner(a,true);
 		j = (ATermInt) ATgetFirst(l);
-//		m = ATmakeList4(ATgetArgument(eqn,0),toInner(ATAgetArgument(eqn,1),true),(ATerm) ATgetNext(l),toInner(ATAgetArgument(eqn,3),true));
 		m = ATmakeAppl4(ruleAFun,ATgetArgument(eqn,0),toInner(ATAgetArgument(eqn,1),true),(ATerm) ATgetNext(l),toInner(ATAgetArgument(eqn,3),true));
 	}
 
@@ -1123,16 +1126,20 @@ void rewrite_add_inner(ATermAppl eqn)
 	{
 		ATunprotectArray((ATerm *) int2term);
 		ATunprotectArray((ATerm *) inner_eqns);
+		ATunprotectArray((ATerm *) inner_trees);
 
 		int2term = (ATermAppl *) realloc(int2term,num_opids*sizeof(ATermAppl));
 		inner_eqns = (ATermList *) realloc(inner_eqns,num_opids*sizeof(ATermList));
+		inner_trees = (ATermAppl *) realloc(inner_trees,num_opids*sizeof(ATermAppl));
 		for (int i=old_num; i<num_opids; i++)
 		{
 			int2term[i] = NULL;
 			inner_eqns[i] = NULL;
+			inner_trees[i] = NULL;
 		}
 		ATprotectArray((ATerm *) int2term,num_opids);
 		ATprotectArray((ATerm *) inner_eqns,num_opids);
+		ATprotectArray((ATerm *) inner_trees,num_opids);
 
 		l = ATtableKeys(term2int);
 		for (; !ATisEmpty(l); l=ATgetNext(l))
@@ -1141,29 +1148,23 @@ void rewrite_add_inner(ATermAppl eqn)
 			if ( ATgetInt(i) >= old_num )
 			{
 				int2term[ATgetInt(i)] = ATAgetFirst(l);
-				inner_eqns[ATgetInt(i)] = NULL;
 			}
 		}
-	}
-
-	if ( ATgetLength(ATgetArgument(eqn,0)) > max_vars)
-	{
-		max_vars = ATgetLength(ATgetArgument(eqn,0));
 	}
 
 	if ( inner_eqns[ATgetInt(j)] == NULL )
 	{
 		inner_eqns[ATgetInt(j)] = ATmakeList1((ATerm) m);
 	} else {
-// order should not matter
-//		inner_eqns[ATgetInt(j)] = ATappend(inner_eqns[ATgetInt(j)],(ATerm) m);
 		inner_eqns[ATgetInt(j)] = ATinsert(inner_eqns[ATgetInt(j)],(ATerm) m);
-	}*/
+	}
+
+	need_rebuild = true;
 }
 
 void rewrite_remove_inner(ATermAppl eqn)
 {
-/*	ATermList l,n;
+	ATermList l,n;
 	ATermAppl a,m;
 	ATerm t;
 
@@ -1171,12 +1172,10 @@ void rewrite_remove_inner(ATermAppl eqn)
 	if ( gsIsOpId(a) )
 	{
 		t = OpId2Int(a,false);
-//		m = ATmakeList4((ATerm) ATmakeList0(),toInner(ATAgetArgument(eqn,1),true),(ATerm) ATmakeList0(),toInner(ATAgetArgument(eqn,3),true));
 		m = ATmakeAppl4(ruleAFun,(ATerm) ATmakeList0(),toInner(ATAgetArgument(eqn,1),true),(ATerm) ATmakeList0(),toInner(ATAgetArgument(eqn,3),true));
 	} else {
 		l = (ATermList) toInner(a,false);
 		t = ATgetFirst(l);
-//		m = ATmakeList4(ATgetArgument(eqn,0),toInner(ATAgetArgument(eqn,1),true),(ATerm) ATgetNext(l),toInner(ATAgetArgument(eqn,3),true));
 		m = ATmakeAppl4(ruleAFun,ATgetArgument(eqn,0),toInner(ATAgetArgument(eqn,1),true),(ATerm) ATgetNext(l),toInner(ATAgetArgument(eqn,3),true));
 	}
 
@@ -1195,11 +1194,11 @@ void rewrite_remove_inner(ATermAppl eqn)
 		{
 			inner_eqns[ATgetInt((ATermInt) t)] = NULL;
 		} else {
-// order should not matter
-//			inner_eqns[ATgetInt((ATermInt) t)] = ATreverse(n);
 			inner_eqns[ATgetInt((ATermInt) t)] = n;
 		}
-	}*/
+
+		need_rebuild = true;
+	}
 }
 
 static ATerm subst_values(ATermAppl *vars, ATerm *vals, int len, ATerm t)
@@ -1376,7 +1375,7 @@ static ATerm rewrite_func(ATermInt op, ATermList args)
 //	int pos;
 //gsfprintf(stderr,"rewrite_func(%T,%T)\n\n",op,args);
 
-	if ( (tree = inner_eqns[ATgetInt(op)]) != NULL )
+	if ( (tree = inner_trees[ATgetInt(op)]) != NULL )
 	{
 		ATerm r = tree_matcher(ATinsert(args,(ATerm) op),tree);
 
@@ -1513,6 +1512,17 @@ static ATerm rewrite(ATerm Term)
 
 ATerm rewrite_inner(ATerm Term)
 {
+	if ( need_rebuild )
+	{
+		for (int i=0; i<num_opids; i++)
+		{
+			if ( (inner_trees[i] == NULL) && (inner_eqns[i] != NULL) )
+			{
+				inner_trees[i] = create_tree(inner_eqns[i],i,&max_vars);
+			}
+		}
+	}
+
 	return rewrite(Term);
 }
 
