@@ -67,12 +67,12 @@ int main(int ac, char* av[])
       int opt = NO_OPTION;
 
       try {
-        po::options_description desc("Allowed options");
+        po::options_description desc;
         desc.add_options()
             ("help,h",    "display this help")
             ("version,v", "display version information")
             ("pars",      "print process parameters")
-	    ("npars",     "print the number of process parameters")
+	          ("npars",     "print the number of process parameters")
         ;
 	
 	po::options_description hidden("Hidden options");

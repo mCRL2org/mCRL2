@@ -384,7 +384,7 @@ using atermpp::aterm_list;
   template <typename Term>
   inline
   Term element_at(term_list<Term> l, int index)
-  { return ATelementAt(l.to_ATermList(), index); }
+ { return (Term) aterm_appl(ATelementAt(l.to_ATermList(), index)) ; }
   
   /**
     * Return list with one occurrence of el removed.

@@ -32,7 +32,7 @@ MCRL2_HEADERS   = -I../
 MCRL2_LIBRARIES = -L../ ../gsfunc.o ../libgsrewrite.o ../gsrewr_inner.o \
 		  ../gsrewr_inner2.o ../gsrewr_inner3.o ../gsrewr_innerc.o \
 		  ../gsrewr_jitty.o ../gssubstitute.o ../libprint_c.o \
-		  ../gslowlevel.o -lgsrewrite
+		  ../gslowlevel.o -lgsrewrite ../libprint_cxx.o
 
 CXXFLAGS       += -ftemplate-depth-256 -g -Wall
 

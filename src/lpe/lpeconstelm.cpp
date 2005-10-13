@@ -1,3 +1,7 @@
+// TODO
+// BRACKETS VERWIJDEREN IN BOOST OM DE OPTIES!!!!!
+// GOED MAKEN VAN LAYOUT (UITLIJNING)
+
 //C++
 #include <iostream>
 #include <vector>
@@ -35,50 +39,67 @@ using namespace atermpp;
 namespace po = boost::program_options;
 po::variables_map vm;
 
-//Customtypes
-//typedef data_assignment_list            Tsv;
-//typedef set < data_assignment_list >    Tnsv;
-
 //Constanten
 string version = "Version 0.2";
 
 //Global variables
-data_assignment_list          sv; 	//state vector
-data_assignment_list          vinit; //init vector
-set< data_assignment_list >   nsvs;  //set of newstate variables
+data_expression_list          sv; 	//state vector
+data_expression_list          vinit; //init vector
+data_expression_list          newstatevector; // newstate vector
 int                           n;    //number of process parameters
+int                           tab= 0;  
 
-bool eval_cond(data_expression datexpr, data_assignment_list statevector, data_equation_list equations, set<int> S){
-  //trace
+bool compare(data_expression x, data_expression y, data_equation_list equations)
+{
+  printf("Compare ");
+  ATermAppl x1 = rewrite(x.to_ATermAppl(), gsMakeDataEqnSpec(equations.to_ATermList()));
+  ATermAppl y1 = rewrite(y.to_ATermAppl(), gsMakeDataEqnSpec(equations.to_ATermList()));
+
+  printf("- Done \n");  
+  return atermpp::aterm(x1) == atermpp::aterm(y1);
+}
+
+bool eval_cond(data_expression datexpr, data_expression_list statevector, data_equation_list equations, set<int> S){
+  printf("Eval_cond\n"  );
   bool b;
   
   set<int>::iterator i;
-  data_assignment_list::iterator j;
+  data_expression_list::iterator j;
 
-  data_assignment_list conditionvector; 
+  data_expression_list conditionvector; 
   
+  //
+  //ORDE N^3
+  //
+  
+  // TODO:
+  //   Beter: end() -> begin() /\ push_front gebruiken
+  //   Element_at = N
+  //   Append = N
+  //   begin-> end = N
   i = S.begin();
-  while (i == S.end()) {
-    //Consercie wordt niet ondersteunt van Assignement naar ATerm;
-    //conditionvector = append(conditionvector, ( element_at(statevector, *i )));// << endl;
+  while (i != S.end()) {
+
+    conditionvector = append(conditionvector, element_at(statevector, *i ));
+
     i++;
   };
   
-  // Substitutie van op data_expression wordt niet ondersteunt
-  // datexpr = datexpr.substitute(conditionvector);
+  //datexpr.substitute(datexpr.begin(), conditionvector.begin());
   
-  // compare functie op Atermen???
-  // isFalse is een aterm representatie voor false
-  // b = compare(isFalse,  rewrite(datexpr.to_ATermAppl(), gsMakeDataEqnSpec(equations.to_ATermList() ) ) );
-   
-   // voor het compileren en testen voor t gemak maar b = true
-   b = true;
-   return b;
+  // 
+  // !!!!!!! data_expression(gsMakeOpIdFalse()) !!!!!! DIRECTE AANROEP UIT GSFUNC
+  //
+  b = compare(data_expression(gsMakeOpIdFalse()), datexpr, equations);
+
+  b = true;
+  
+  printf("- Done \n");
+  return b;
 }
 
 set< int > constelm(string filename, int option)
 {
-  //Read input file
   specification spec;
   if (!spec.load(filename))
   {
@@ -86,10 +107,9 @@ set< int > constelm(string filename, int option)
   }
   LPE lpe = spec.lpe();
 
-//assert(false);
   n = lpe.process_parameters().size();
-  vinit = spec.init_assignments();
-  sv = vinit;
+  vinit = spec.initial_state();
+  newstatevector = vinit;
   
   set< int > V; 
   set< int > S;
@@ -100,38 +120,52 @@ set< int > constelm(string filename, int option)
   
   set< int > D;
   cout << lpe.summands().size() << endl;;
-
+  
   while(S.size()!=V.size()) {
-    //nsvs = emptyset; 
-    nsvs.erase(nsvs.begin(),nsvs.end());
+    sv = newstatevector;
     S = V;
     
     set< int > S_dummy;        
     
     for(summand_list::iterator s_current = lpe.summands().begin(); s_current != lpe.summands().end(); ++s_current){ 
       if (eval_cond(s_current->condition(), sv, spec.equations(), S)){
-        //data_assignment_list nextstate = s_current->assignments().substitute(sv);
-	//nsvs.insert(nextstate);
-	set< int >::iterator j = S.begin();
-	while (j != S.end()){
-          //Compare functie werkt niet
-	  //if (compare(element_at(sv, *j), element_at(nextstate, *j) ) ){
+        data_expression_list nextstate = sv;
+        data_assignment_list ass_nextstate = s_current->assignments();
+
+
+        cout << "initvector "<< lpe.process_parameters().pp() << endl; 
+        cout << "assignment "<< s_current->assignments().pp() << endl;
+
+	      //
+        // Doe hier nexstate kunstje
+        //
+        for (data_assignment_list::iterator i = ass_nextstate.begin(); i != ass_nextstate.end(); i++){
+          nextstate = nextstate.substitute(*i);
+          nextstate.pp();
+	      };
+
+        cout << sv.pp() << "  -  " << nextstate.pp() << endl;
+
+        //assert(false);
+        set< int >::iterator j = S.begin();
+        while (j != S.end()){
+          if (compare(element_at(sv, *j), element_at(nextstate, *j), spec.equations() ) ){
             S_dummy.insert(*j);
-	  //};
-	  j++;
+            newstatevector = replace(newstatevector, element_at(nextstate, *j), *j);
+          };
+          j++;
         };
       }; 
-    };  
-    
-    //
-    //S_dummy = Sort(S_dummy)
+    }; 
     
     set_difference(S.begin(), S.end(), S_dummy.begin(), S_dummy.end(), inserter(V, V.begin()));
-    
+ 
     ////
     // Als V <  S dan zijn er variabele process parameters gevonden
     ////
-    
+
+/*  Overbodig geworden door bijhouden van apparte "newstate vector"    
+
     if (S.size() != V.size()){
       //data_assignment nsv = vinit;
       set_difference(S.begin(), S.end(), S_dummy.begin(), S_dummy.end(), inserter(D, D.begin()));
@@ -141,11 +175,10 @@ set< int > constelm(string filename, int option)
         //sv = replace(sv, element_at(nextstate, *j), *j);
         j++;
       };      
-    };
+    }; */
   }; 
   return S;
 }
-
 
 int main(int ac, char* av[])
 {
@@ -153,7 +186,7 @@ int main(int ac, char* av[])
       int opt = 0;
 
       try {
-        po::options_description desc("Allowed options");
+        po::options_description desc;
         desc.add_options()
             ("help,h",      "display this help")
             ("version,v",   "display version information")
@@ -225,27 +258,4 @@ int main(int ac, char* av[])
     }    
     return 0;
 }
-
-/*class Sum {
-public:
-    Sum(double d) : total(d) {}
-    double operator()(double val) {
-        total += val;
-        return total;
-    }
-    double getTotal() {
-        return total;
-    }
-private:
-    double total;
-}; */
-
-  //Test vars
-  /*
-  cout << D.size() << endl;
-
-   Sum summer(0.0);
-   summer = for_each(V.begin(), V.end(), summer);
-   cout << summer.getTotal() << endl;
-  */
 
