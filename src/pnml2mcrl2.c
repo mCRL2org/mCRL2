@@ -1685,7 +1685,7 @@ extern "C" {
     OutStream = stdout;
     if ( optind+1 < argc )
       {
-	if ( (OutStream = fopen(argv[optind+1],"w")) == NULL )
+	if ( (OutStream = fopen(argv[optind+1],"wb")) == NULL )
 	  {
 	    gsErrorMsg("cannot open file '%s' for writing\n",argv[optind+1]);
 	    return 1;

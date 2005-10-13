@@ -207,7 +207,7 @@ int main(int argc, char **argv)
 	InStream = stdin;
 	if ( optind < argc && strcmp(argv[optind],"-") )
 	{
-		if ( (InStream = fopen(argv[optind],"r")) == NULL )
+		if ( (InStream = fopen(argv[optind],"rb")) == NULL )
 		{
 			gsErrorMsg("cannot open '%s' for reading\n",argv[optind]);
 			return 1;
@@ -219,7 +219,7 @@ int main(int argc, char **argv)
 	{
 		if ( optind+1 < argc )
 		{
-			if ( (OutStream = fopen(argv[optind+1],"w")) == NULL )
+			if ( (OutStream = fopen(argv[optind+1],"wb")) == NULL )
 			{
 				gsErrorMsg("cannot open '%s' for writing\n",argv[optind+1]);
 				return 1;

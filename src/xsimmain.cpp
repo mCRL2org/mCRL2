@@ -10,6 +10,7 @@
 
 #include <wx/dynlib.h>
 #include <wx/config.h>
+#include <wx/textfile.h>
 #include <wx/dynarray.h>
 #include <fstream>
 #include <sstream>
@@ -202,7 +203,7 @@ void XSimMain::LoadFile(const wxString &filename)
 {
     FILE *f;
     
-    if ( (f = fopen(filename.fn_str(),"r")) == NULL )
+    if ( (f = fopen(filename.fn_str(),"rb")) == NULL )
     {
 	    wxMessageDialog msg(this, wxT("Failed to open file."),
 		wxT("Error"), wxOK|wxICON_ERROR);

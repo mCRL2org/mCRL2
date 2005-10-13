@@ -252,7 +252,7 @@ int main(int argc, char **argv)
 		return 1;
 	}
 
-	if ( (SpecStream = fopen(argv[optind],"r")) == NULL )
+	if ( (SpecStream = fopen(argv[optind],"rb")) == NULL )
 	{
 		gsErrorMsg("cannot open '%s' for reading\n",argv[optind]);
 		return 1;
@@ -292,7 +292,7 @@ int main(int argc, char **argv)
 			case OF_AUT:
 				gsVerboseMsg("writing state space in AUT format to '%s'.\n",argv[optind+1]);
 				outinfo = false;
-				if ( (aut = fopen(argv[optind+1],"w")) == NULL )
+				if ( (aut = fopen(argv[optind+1],"wb")) == NULL )
 				{
 					gsErrorMsg("cannot open '%s' for writing\n",argv[optind+1]);
 					return 1;

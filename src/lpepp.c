@@ -167,7 +167,7 @@ bool PrintSpecificationFileName(char *SpecFileName, char *OutputFileName,
     SpecStream = stdin;
     gsDebugMsg("input from stdin.\n");
   } else {
-    SpecStream = fopen(SpecFileName, "r");
+    SpecStream = fopen(SpecFileName, "rb");
   }
   if (SpecStream == NULL) {
     gsErrorMsg(
@@ -182,7 +182,7 @@ bool PrintSpecificationFileName(char *SpecFileName, char *OutputFileName,
       OutputStream = stdout;
       gsDebugMsg("output to stdout.\n");
     } else {  
-      OutputStream = fopen(OutputFileName, "w");
+      OutputStream = fopen(OutputFileName, "wb");
       if (!OutputStream) {
         gsErrorMsg("could not open output file '%s' for writing (error %d)\n", 
           OutputFileName, errno);

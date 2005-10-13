@@ -256,7 +256,7 @@ int main(int argc, char *argv[])
       char outfilename[strlen(infilename) + strlen(OUTFILEEXT) + 1];
       calc_outfilename(outfilename, infilename);
       //open output filename
-      FILE *outstream = fopen(outfilename, "w");
+      FILE *outstream = fopen(outfilename, "wb");
       if (outstream == NULL) {
         gsErrorMsg("cannot open output file '%s'\n", outfilename);
         return 1;
@@ -274,7 +274,7 @@ ATermAppl linearise_file(char *infilename, t_lin_options lin_options,
 {
   assert(infilename != NULL);
   //open input filename
-  FILE *instream = fopen(infilename, "r");
+  FILE *instream = fopen(infilename, "rb");
   if (instream == NULL) {
     gsErrorMsg("cannot open input file '%s'\n", infilename);
     return NULL;

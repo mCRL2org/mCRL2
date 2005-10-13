@@ -100,7 +100,7 @@ int main(int argc, char **argv)
 		return 1;
 	}
 
-	if ( (SpecStream = fopen(argv[optind],"r")) == NULL )
+	if ( (SpecStream = fopen(argv[optind],"rb")) == NULL )
 	{
 		perror(NAME);
 		return 1;

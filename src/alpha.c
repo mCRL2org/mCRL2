@@ -105,7 +105,7 @@ int main(int argc, char **argv)
 	SpecStream = stdin;
 	if ( optind < argc && strcmp(argv[optind],"-") )
 	{
-		if ( (SpecStream = fopen(argv[optind],"r")) == NULL )
+		if ( (SpecStream = fopen(argv[optind],"rb")) == NULL )
 		{
 			perror(NAME);
 			return 1;
@@ -115,7 +115,7 @@ int main(int argc, char **argv)
 	OutStream = stdout;
 	if ( optind+1 < argc )
 	{
-		if ( (OutStream = fopen(argv[optind+1],"w")) == NULL )
+		if ( (OutStream = fopen(argv[optind+1],"wb")) == NULL )
 		{
 			perror(NAME);
 			return 1;

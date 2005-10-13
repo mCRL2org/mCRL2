@@ -109,7 +109,7 @@ int main(int argc, char **argv)
 		return 0;
 	}
 
-	if ( (SpecStream = fopen(argv[optind],"r")) == NULL )
+	if ( (SpecStream = fopen(argv[optind],"rb")) == NULL )
 	{
 		perror(NAME);
 		return 1;
@@ -149,7 +149,7 @@ int main(int argc, char **argv)
 		{
 			OutFile = stdout;
 		} else {
-			if ( (OutFile = fopen(argv[optind+1],"w")) == NULL )
+			if ( (OutFile = fopen(argv[optind+1],"wb")) == NULL )
 			{
 				perror(NAME);
 				return 1;
@@ -184,7 +184,7 @@ int main(int argc, char **argv)
 			s[++i] = 0;
 		}
 
-		if ( (OutFile = fopen(s,"w")) == NULL )
+		if ( (OutFile = fopen(s,"wb")) == NULL )
 		{
 			perror(NAME);
 			return 1;
