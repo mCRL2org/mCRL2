@@ -171,57 +171,152 @@ static ATermAppl gstcMatchListOpEltAt(ATermAppl Type);
 static ATermAppl gstcMatchListOpHead(ATermAppl Type);
 static ATermAppl gstcMatchListOpTail(ATermAppl Type);
 
-//static ATermAppl gstcFoldSpec(ATermAppl Spec);
-//Pre: Spec is a specification that adheres to the internal format after type
-//     checking
-//Ret: Spec in which all sort references are folded in maximally
+static ATermAppl gstcFoldSortRefs(ATermAppl Spec);
+//Pre: Spec is a specification that adheres to the internal syntax after
+//     type checking
+//Ret: Spec in which all sort references are maximally folded, i.e.:
+//     - sort references to SortId's and SortArrow's are removed from the
+//       rest of Spec (including the other sort references) by means of
+//       forward substitition
+//     - other sort references are removed from the rest of Spec by means of
+//       backward substitution
+//     - self references are removed, i.e. sort references of the form A = A
 
-ATermAppl gstcFoldSpec(ATermAppl Spec)
+static ATermList gstcFoldSortRefsInSortRefs(ATermList SortRefs);
+//Pre: SortRefs is a list of sort references
+//Ret: SortRefs in which all sort references are maximally folded
+
+static void gstcSplitSortDecls(ATermList SortDecls, ATermList *PSortIds,
+  ATermList *PSortRefs);
+//Pre: SortDecls is a list of SortId's and SortRef's
+//Post:*PSortIds and *PSortRefs contain the SortId's and SortRef's from
+//     SortDecls, in the same order
+
+void gstcSplitSortDecls(ATermList SortDecls, ATermList *PSortIds,
+  ATermList *PSortRefs)
 {
-  ATermAppl SortDecl = ATAgetArgument(Spec, 0);
-  ATermList Sorts = ATLgetArgument(SortDecl,0);
-  ATermTable revsorts = ATtableCreate(100,50);
-  ATermList l = ATreverse(ATtableKeys(context.defined_sorts));        
-  for (; !ATisEmpty(l); l=ATgetNext(l))
+  ATermList SortIds = ATmakeList0();
+  ATermList SortRefs = ATmakeList0();
+  while (!ATisEmpty(SortDecls))
   {
-    ATerm t = ATtableGet(context.defined_sorts,ATgetFirst(l));
-    
-    if ( gsIsSortId((ATermAppl) t) )
-    {
-    	ATtablePut(revsorts,(ATerm) gsMakeSortId(ATAgetFirst(l)),t);
-    } else {
-    	ATtablePut(revsorts,t,(ATerm) gsMakeSortId(ATAgetFirst(l)));
+    ATermAppl SortDecl = ATAgetFirst(SortDecls);
+    if (gsIsSortRef(SortDecl)) {
+      SortRefs = ATinsert(SortRefs, (ATerm) SortDecl);
+    } else { //gsIsSortId(SortDecl)
+      SortIds = ATinsert(SortIds, (ATerm) SortDecl);
     }
+    SortDecls = ATgetNext(SortDecls);
   }
-  
-  l = ATmakeList0();
-  for (; !ATisEmpty(Sorts); Sorts=ATgetNext(Sorts))
-  {
-    if ( gsIsSortRef(ATAgetFirst(Sorts)) )
-    {
-      ATermAppl sort = ATAgetArgument(ATAgetFirst(Sorts),0);
-      ATermAppl def = ATAgetArgument(ATAgetFirst(Sorts),1);
-      ATermAppl t = (ATermAppl) gsSubstValuesTable(revsorts, (ATerm) def, true);
-    
-      if ( ATisEqual(gsMakeSortId(sort),t) )
-      {
-      	l = ATinsert(l,(ATerm) gsMakeSortRef(sort,def));
-      } else {
-      	l = ATinsert(l,(ATerm) gsMakeSortRef(sort,t));
-      }
+  *PSortIds = ATreverse(SortIds);  
+  *PSortRefs = ATreverse(SortRefs);
+}
+
+ATermAppl gstcFoldSortRefs(ATermAppl Spec)
+{
+  assert(gsIsSpecV1(Spec));
+  //get sort declarations
+  ATermAppl SortSpec = ATAgetArgument(Spec, 0);
+  ATermList SortDecls = ATLgetArgument(SortSpec, 0);
+  //split sort declarations in sort id's and sort references
+  ATermList SortIds = NULL;
+  ATermList SortRefs = NULL;
+  gstcSplitSortDecls(SortDecls, &SortIds, &SortRefs);
+  //fold sort references in the sort references themselves 
+  SortRefs = gstcFoldSortRefsInSortRefs(SortRefs);
+  //substitute sort references in the rest of Spec, i.e.
+  //(a) remove sort references from Spec
+  SortDecls = SortIds;
+  SortSpec = ATsetArgument(SortSpec, (ATerm) SortDecls, 0);
+  Spec = ATsetArgument(Spec, (ATerm) SortSpec, 0);
+  //(b) build substitution table
+  ATermTable Substs = ATtableCreate(2*ATgetLength(SortRefs),50);
+  ATermList l = SortRefs;
+  while (!ATisEmpty(l)) {
+    ATermAppl SortRef = ATAgetFirst(l);
+    //add substitution for SortRef
+    ATermAppl LHS = gsMakeSortId(ATAgetArgument(SortRef, 0));
+    ATermAppl RHS = ATAgetArgument(SortRef, 1);
+    if (gsIsSortId(RHS) || gsIsSortArrowProd(RHS) || gsIsSortArrow(RHS)) {
+      //add forward substitution
+      ATtablePut(Substs, (ATerm) LHS, (ATerm) RHS);
     } else {
-      l = ATinsert(l,ATgetFirst(Sorts));
+      //add backward substitution
+      ATtablePut(Substs, (ATerm) RHS, (ATerm) LHS);
     }
+    l = ATgetNext(l);
   }
-  Sorts = ATreverse(l);
-  
-  Spec = (ATermAppl) gsSubstValuesTable(revsorts, (ATerm) Spec, true);
-  SortDecl = ATsetArgument(SortDecl, (ATerm) Sorts,0);
-  Spec = ATsetArgument(Spec, (ATerm) SortDecl,0);
-  
-  ATtableDestroy(revsorts);
-  
+  //(c) perform substitutions until the specification becomes stable
+  ATermAppl NewSpec = Spec;
+  do {
+    gsDebugMsg("substituting sort references in specification\n");
+    Spec = NewSpec;
+    NewSpec = (ATermAppl) gsSubstValuesTable(Substs, (ATerm) Spec, true);
+  } while (!ATisEqual(NewSpec, Spec));
+  ATtableDestroy(Substs);
+  //add the removed sort references back to Spec
+  SortDecls = ATconcat(SortIds, SortRefs);
+  SortSpec = ATsetArgument(SortSpec, (ATerm) SortDecls, 0);
+  Spec = ATsetArgument(Spec, (ATerm) SortSpec, 0);
   return Spec;
+}
+
+ATermList gstcFoldSortRefsInSortRefs(ATermList SortRefs)
+{
+  //fold sort references in SortRefs by means of repeated forward and backward
+  //substitution
+  ATermList NewSortRefs = SortRefs;
+  int n = ATgetLength(SortRefs);
+  //perform substitutions until the list of sort references becomes stable
+  do {
+    SortRefs = NewSortRefs;
+    gsDebugMsg("SortRefs contains the following sort references:\n%P",
+      gsMakeSortSpec(SortRefs));
+    //perform substitutions implied by sort references in NewSortRefs to the
+    //other elements in NewSortRefs
+    for (int i = 0; i < n; i++) {
+      ATermAppl SortRef = ATAelementAt(NewSortRefs, i);
+      //turn SortRef into a substitution
+      ATermAppl LHS = gsMakeSortId(ATAgetArgument(SortRef, 0));
+      ATermAppl RHS = ATAgetArgument(SortRef, 1);
+      ATermAppl Subst;
+      if (gsIsSortId(RHS) || gsIsSortArrowProd(RHS) || gsIsSortArrow(RHS)) {
+        //make forward substitution
+        Subst = gsMakeSubst_Appl(LHS, RHS);
+      } else {
+        //make backward substitution
+        Subst = gsMakeSubst_Appl(RHS, LHS);
+      }
+      gsDebugMsg("performing substition %P  :=  %P\n",
+        ATgetArgument(Subst, 0), ATgetArgument(Subst, 1));
+      //perform Subst on all elements of NewSortRefs except for the i'th
+      ATermList Substs = ATmakeList1((ATerm) Subst);
+      for (int j = 0; j < n; j++) {
+        if (i != j) {
+          ATermAppl OldSortRef = ATAelementAt(NewSortRefs, j);
+          ATermAppl NewSortRef = gsSubstValues_Appl(Substs, OldSortRef, true);
+          if (!ATisEqual(NewSortRef, OldSortRef)) {
+            NewSortRefs = ATreplace(NewSortRefs, (ATerm) NewSortRef, j);
+          }
+        }
+      }
+    }
+    gsDebugMsg("\n");
+  } while (!ATisEqual(NewSortRefs, SortRefs));
+  //remove self references
+  ATermList l = ATmakeList0();
+  while (!ATisEmpty(SortRefs)) {
+    ATermAppl SortRef = ATAgetFirst(SortRefs);
+    if (!ATisEqual(gsMakeSortId(ATAgetArgument(SortRef, 0)),
+      ATAgetArgument(SortRef, 1)))
+    {
+      l = ATinsert(l, (ATerm) SortRef);
+    }
+    SortRefs = ATgetNext(SortRefs);
+  }
+  SortRefs = ATreverse(l);
+  gsDebugMsg("SortRefs, after removing self references:\n%P",
+    gsMakeSortSpec(SortRefs));
+  return SortRefs;
 }
 
 // Main function
@@ -257,7 +352,7 @@ ATermAppl gsTypeCheck (ATermAppl input){
   Result=ATsetArgument(Result,(ATerm)gsMakeInit(ATmakeList0(),
     ATAtableGet(body.proc_bodies,(ATerm)INIT_KEY())),6);
 
-  //Result=gstcFoldSpec(Result);
+  Result=gstcFoldSortRefs(Result);
 
   gsDebugMsg ("type checking phase finished\n");
   }}}}}}}
