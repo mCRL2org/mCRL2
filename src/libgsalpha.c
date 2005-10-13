@@ -270,7 +270,7 @@ static ATermList apply_comm_list(ATermList l, ATermList C)
 	return m;
 }
 
-static ATermAppl PushRestrict(ATermList H, ATermAppl a)
+static ATermAppl PushBlock(ATermList H, ATermAppl a)
 {
 //gsprintf("%T ",H);PrintPart_C(stdout,a);printf("\n\n");
 	if ( gsIsAction(a) )
@@ -288,7 +288,7 @@ static ATermAppl PushRestrict(ATermList H, ATermAppl a)
 		l = filter(l,H);
 		// XXX also adjust H
 
-		a = gsMakeRestrict(H,a);
+		a = gsMakeBlock(H,a);
 
 		ATtablePut(alphas,(ATerm) a,(ATerm) l);
 
@@ -301,7 +301,7 @@ static ATermAppl PushRestrict(ATermList H, ATermAppl a)
 		ATermAppl p = ATAgetArgument(a,1);
 		ATermList l;
 
-		p = PushRestrict(H,p);
+		p = PushBlock(H,p);
 
 		l = (ATermList) ATtableGet(alphas,(ATerm) p);
 
@@ -310,9 +310,9 @@ static ATermAppl PushRestrict(ATermList H, ATermAppl a)
 		ATtablePut(alphas,(ATerm) a,(ATerm) l);
 
 		return a;
-	} else if ( gsIsRestrict(a) )
+	} else if ( gsIsBlock(a) )
 	{
-		a = PushRestrict(merge_list(H,ATLgetArgument(a,0)),ATAgetArgument(a,1));
+		a = PushBlock(merge_list(H,ATLgetArgument(a,0)),ATAgetArgument(a,1));
 
 		return a;
 	} else if ( gsIsHide(a) )
@@ -325,7 +325,7 @@ static ATermAppl PushRestrict(ATermList H, ATermAppl a)
 		l = (ATermList) ATtableGet(alphas,(ATerm) p);
 		l = filter(l,H);
 
-		p = PushRestrict(H,p);
+		p = PushBlock(H,p);
 
 		a = gsMakeHide(ATLgetArgument(a,0),p);
 
@@ -336,7 +336,7 @@ static ATermAppl PushRestrict(ATermList H, ATermAppl a)
 	{
 		// XXX
 		ATermList l = (ATermList) ATtableGet(alphas,(ATerm) a);
-		a = gsMakeRestrict(H,a);
+		a = gsMakeBlock(H,a);
 		ATtablePut(alphas,(ATerm) a,(ATerm) l);
 		return a;
 	} else if ( gsIsComm(a) )
@@ -361,7 +361,7 @@ static ATermAppl PushRestrict(ATermList H, ATermAppl a)
 
 		if ( !ATisEmpty(Hc) )
 		{
-			a = PushRestrict(Hc,ATAgetArgument(a,1));
+			a = PushBlock(Hc,ATAgetArgument(a,1));
 			l = (ATermList) ATtableGet(alphas,(ATerm) a);
 			a = gsMakeComm(C,a);
 			ATtablePut(alphas,(ATerm) a,(ATerm) apply_comm_list(l,C));
@@ -371,7 +371,7 @@ static ATermAppl PushRestrict(ATermList H, ATermAppl a)
 
 		if ( !ATisEmpty(Ha) )
 		{
-			a = gsMakeRestrict(Ha,a);
+			a = gsMakeBlock(Ha,a);
 			ATtablePut(alphas,(ATerm) a,(ATerm) filter(l,Ha));
 		}
 
@@ -380,7 +380,7 @@ static ATermAppl PushRestrict(ATermList H, ATermAppl a)
 	{
 		//XXX
 		ATermList l = (ATermList) ATtableGet(alphas,(ATerm) a);
-		a = gsMakeRestrict(H,a);
+		a = gsMakeBlock(H,a);
 		ATtablePut(alphas,(ATerm) a,(ATerm) l);
 		return a;
 	} else if ( gsIsSync(a) )
@@ -389,8 +389,8 @@ static ATermAppl PushRestrict(ATermList H, ATermAppl a)
 		ATermAppl q = ATAgetArgument(a,1);
 		ATermList l;
 
-		p = PushRestrict(H,p);
-		q = PushRestrict(H,q);
+		p = PushBlock(H,p);
+		q = PushBlock(H,q);
 
 		l = sync_list((ATermList) ATtableGet(alphas,(ATerm) p),(ATermList) ATtableGet(alphas,(ATerm) q));
 
@@ -405,7 +405,7 @@ static ATermAppl PushRestrict(ATermList H, ATermAppl a)
 		ATermAppl c = ATAgetArgument(a,1);
 		ATermList l;
 
-		p = PushRestrict(H,p);
+		p = PushBlock(H,p);
 
 		l = (ATermList) ATtableGet(alphas,(ATerm) p);
 
@@ -420,8 +420,8 @@ static ATermAppl PushRestrict(ATermList H, ATermAppl a)
 		ATermAppl q = ATAgetArgument(a,1);
 		ATermList l;
 
-		p = PushRestrict(H,p);
-		q = PushRestrict(H,q);
+		p = PushBlock(H,p);
+		q = PushBlock(H,q);
 
 		l = merge_list((ATermList) ATtableGet(alphas,(ATerm) p),(ATermList) ATtableGet(alphas,(ATerm) q));
 
@@ -437,8 +437,8 @@ static ATermAppl PushRestrict(ATermList H, ATermAppl a)
 		ATermAppl q = ATAgetArgument(a,2);
 		ATermList l;
 
-		p = PushRestrict(H,p);
-		q = PushRestrict(H,q);
+		p = PushBlock(H,p);
+		q = PushBlock(H,q);
 
 		l = merge_list((ATermList) ATtableGet(alphas,(ATerm) p),(ATermList) ATtableGet(alphas,(ATerm) q));
 
@@ -454,8 +454,8 @@ static ATermAppl PushRestrict(ATermList H, ATermAppl a)
 		ATermAppl q = ATAgetArgument(a,1);
 		ATermList l;
 
-		p = PushRestrict(H,p);
-		q = PushRestrict(H,q);
+		p = PushBlock(H,p);
+		q = PushBlock(H,q);
 
 		l = merge_list((ATermList) ATtableGet(alphas,(ATerm) p),(ATermList) ATtableGet(alphas,(ATerm) q));
 
@@ -470,8 +470,8 @@ static ATermAppl PushRestrict(ATermList H, ATermAppl a)
 		ATermAppl q = ATAgetArgument(a,1);
 		ATermList l;
 
-		p = PushRestrict(H,p);
-		q = PushRestrict(H,q);
+		p = PushBlock(H,p);
+		q = PushBlock(H,q);
 
 		l = merge_list((ATermList) ATtableGet(alphas,(ATerm) p),(ATermList) ATtableGet(alphas,(ATerm) q));
 
@@ -486,8 +486,8 @@ static ATermAppl PushRestrict(ATermList H, ATermAppl a)
 		ATermAppl q = ATAgetArgument(a,1);
 		ATermList l;
 
-		p = PushRestrict(H,p);
-		q = PushRestrict(H,q);
+		p = PushBlock(H,p);
+		q = PushBlock(H,q);
 
 		l = merge_list((ATermList) ATtableGet(alphas,(ATerm) p),(ATermList) ATtableGet(alphas,(ATerm) q));
 
@@ -502,8 +502,8 @@ static ATermAppl PushRestrict(ATermList H, ATermAppl a)
 		ATermAppl q = ATAgetArgument(a,1);
 		ATermList l;
 
-		p = PushRestrict(H,p);
-		q = PushRestrict(H,q);
+		p = PushBlock(H,p);
+		q = PushBlock(H,q);
 
 		l = merge_list((ATermList) ATtableGet(alphas,(ATerm) p),(ATermList) ATtableGet(alphas,(ATerm) q));
 
@@ -557,7 +557,7 @@ static ATermAppl PushComm(ATermList C, ATermAppl a)
 		ATtablePut(alphas,(ATerm) a,(ATerm) l);
 
 		return a;
-	} else if ( gsIsRestrict(a) )
+	} else if ( gsIsBlock(a) )
 	{
 		//XXX
 		ATermList l = (ATermList) ATtableGet(alphas,(ATerm) a);
@@ -818,7 +818,7 @@ ATermAppl ApplyAlpha(ATermAppl a)
 		l = (ATermList) ATtableGet(alphas,(ATerm) p);
 
 		a = ATsetArgument(a,(ATerm) p, 1);
-	} else if ( gsIsRestrict(a) )
+	} else if ( gsIsBlock(a) )
 	{
 		ATermAppl p = ATAgetArgument(a,1);
 
@@ -826,7 +826,7 @@ ATermAppl ApplyAlpha(ATermAppl a)
 
 		l = NULL;
 
-		a = PushRestrict(ATLgetArgument(a,0),p);
+		a = PushBlock(ATLgetArgument(a,0),p);
 	} else if ( gsIsHide(a) )
 	{
 		ATermAppl p = ATAgetArgument(a,1);

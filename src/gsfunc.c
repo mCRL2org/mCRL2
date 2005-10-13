@@ -147,7 +147,7 @@ static AFun gsAFunActionProcess;
 static AFun gsAFunProcess;
 static AFun gsAFunTau;
 static AFun gsAFunSum;
-static AFun gsAFunRestrict;
+static AFun gsAFunBlock;
 static AFun gsAFunAllow;
 static AFun gsAFunHide;
 static AFun gsAFunRename;
@@ -230,8 +230,8 @@ static ATermAppl gsOpIdNameCons;
 static ATermAppl gsOpIdNameSnoc;
 static ATermAppl gsOpIdNameConcat;
 static ATermAppl gsOpIdNameEltAt;
-static ATermAppl gsOpIdNameLHead;
-static ATermAppl gsOpIdNameLTail;
+static ATermAppl gsOpIdNameHead;
+static ATermAppl gsOpIdNameTail;
 static ATermAppl gsOpIdNameRHead;
 static ATermAppl gsOpIdNameRTail;
 static ATermAppl gsOpIdNameSetComp;
@@ -314,7 +314,7 @@ void gsEnableConstructorFunctions(void)
     gsAFunProcess          = ATmakeAFun("Process", 2, ATfalse);
     gsAFunTau              = ATmakeAFun("Tau", 0, ATfalse);
     gsAFunSum              = ATmakeAFun("Sum", 2, ATfalse);
-    gsAFunRestrict         = ATmakeAFun("Restrict", 2, ATfalse);
+    gsAFunBlock         = ATmakeAFun("Block", 2, ATfalse);
     gsAFunAllow            = ATmakeAFun("Allow", 2, ATfalse);
     gsAFunHide             = ATmakeAFun("Hide", 2, ATfalse);
     gsAFunRename           = ATmakeAFun("Rename", 2, ATfalse);
@@ -396,8 +396,8 @@ void gsEnableConstructorFunctions(void)
     gsOpIdNameSnoc         = gsString2ATermAppl("<|");
     gsOpIdNameConcat       = gsString2ATermAppl("++");
     gsOpIdNameEltAt        = gsString2ATermAppl(".");
-    gsOpIdNameLHead        = gsString2ATermAppl("lhead");
-    gsOpIdNameLTail        = gsString2ATermAppl("ltail");
+    gsOpIdNameHead        = gsString2ATermAppl("head");
+    gsOpIdNameTail        = gsString2ATermAppl("tail");
     gsOpIdNameRHead        = gsString2ATermAppl("rhead");
     gsOpIdNameRTail        = gsString2ATermAppl("rtail");
     gsOpIdNameSetComp      = gsString2ATermAppl("@set");
@@ -472,7 +472,7 @@ void gsEnableConstructorFunctions(void)
     ATprotectAFun(gsAFunProcess);
     ATprotectAFun(gsAFunTau);
     ATprotectAFun(gsAFunSum);
-    ATprotectAFun(gsAFunRestrict);
+    ATprotectAFun(gsAFunBlock);
     ATprotectAFun(gsAFunAllow);
     ATprotectAFun(gsAFunHide);
     ATprotectAFun(gsAFunRename);
@@ -553,8 +553,8 @@ void gsEnableConstructorFunctions(void)
     ATprotectAppl(&gsOpIdNameSnoc);
     ATprotectAppl(&gsOpIdNameConcat);
     ATprotectAppl(&gsOpIdNameEltAt);
-    ATprotectAppl(&gsOpIdNameLHead);
-    ATprotectAppl(&gsOpIdNameLTail);
+    ATprotectAppl(&gsOpIdNameHead);
+    ATprotectAppl(&gsOpIdNameTail);
     ATprotectAppl(&gsOpIdNameRHead);
     ATprotectAppl(&gsOpIdNameRTail);
     ATprotectAppl(&gsOpIdNameSetComp);
@@ -910,10 +910,10 @@ ATermAppl gsMakeSum(ATermList DataVarIds, ATermAppl ProcExpr)
   return ATmakeAppl2(gsAFunSum, (ATerm) DataVarIds, (ATerm) ProcExpr);
 }
 
-ATermAppl gsMakeRestrict(ATermList ActNames, ATermAppl ProcExpr)
+ATermAppl gsMakeBlock(ATermList ActNames, ATermAppl ProcExpr)
 {
   assert(gsConstructorFunctionsEnabled);
-  return ATmakeAppl2(gsAFunRestrict, (ATerm) ActNames, (ATerm) ProcExpr);
+  return ATmakeAppl2(gsAFunBlock, (ATerm) ActNames, (ATerm) ProcExpr);
 }
 
 ATermAppl gsMakeHide(ATermList ActNames, ATermAppl ProcExpr)
@@ -1264,9 +1264,9 @@ bool gsIsSum(ATermAppl Term) {
   return ATgetAFun(Term) == gsAFunSum;
 }
 
-bool gsIsRestrict(ATermAppl Term) {
+bool gsIsBlock(ATermAppl Term) {
   assert(gsConstructorFunctionsEnabled);
-  return ATgetAFun(Term) == gsAFunRestrict;
+  return ATgetAFun(Term) == gsAFunBlock;
 }
 
 bool gsIsHide(ATermAppl Term) {
@@ -1661,14 +1661,14 @@ ATermAppl gsMakeOpIdNameEltAt() {
   return gsOpIdNameEltAt;
 }
 
-ATermAppl gsMakeOpIdNameLHead() {
+ATermAppl gsMakeOpIdNameHead() {
   assert(gsConstructorFunctionsEnabled);
-  return gsOpIdNameLHead;
+  return gsOpIdNameHead;
 }
 
-ATermAppl gsMakeOpIdNameLTail() {
+ATermAppl gsMakeOpIdNameTail() {
   assert(gsConstructorFunctionsEnabled);
-  return gsOpIdNameLTail;
+  return gsOpIdNameTail;
 }
 
 ATermAppl gsMakeOpIdNameRHead() {
@@ -2419,17 +2419,17 @@ ATermAppl gsMakeOpIdEltAt(ATermAppl SortExprDom, ATermAppl SortExprResult)
     gsMakeSortArrow2(SortExprDom, gsMakeSortExprNat(), SortExprResult));
 }
 
-ATermAppl gsMakeOpIdLHead(ATermAppl SortExprDom, ATermAppl SortExprResult)
+ATermAppl gsMakeOpIdHead(ATermAppl SortExprDom, ATermAppl SortExprResult)
 {
   assert(gsConstructorFunctionsEnabled);
-  return gsMakeOpId(gsOpIdNameLHead,
+  return gsMakeOpId(gsOpIdNameHead,
     gsMakeSortArrow(SortExprDom, SortExprResult));
 }
 
-ATermAppl gsMakeOpIdLTail(ATermAppl SortExpr)
+ATermAppl gsMakeOpIdTail(ATermAppl SortExpr)
 {
   assert(gsConstructorFunctionsEnabled);
-  return gsMakeOpId(gsOpIdNameLTail,
+  return gsMakeOpId(gsOpIdNameTail,
     gsMakeSortArrow(SortExpr, SortExpr));
 }
 
@@ -2970,16 +2970,16 @@ ATermAppl gsMakeDataExprEltAt(ATermAppl DataExprLHS, ATermAppl DataExprRHS,
     DataExprLHS, DataExprRHS);
 }
 
-ATermAppl gsMakeDataExprLHead(ATermAppl DataExpr, ATermAppl SortExpr)
+ATermAppl gsMakeDataExprHead(ATermAppl DataExpr, ATermAppl SortExpr)
 {
   return gsMakeDataAppl(
-    gsMakeOpIdLHead(gsGetSort(DataExpr), SortExpr), DataExpr);
+    gsMakeOpIdHead(gsGetSort(DataExpr), SortExpr), DataExpr);
 }
 
-ATermAppl gsMakeDataExprLTail(ATermAppl DataExpr)
+ATermAppl gsMakeDataExprTail(ATermAppl DataExpr)
 {
   return gsMakeDataAppl(
-    gsMakeOpIdLTail(gsGetSort(DataExpr)), DataExpr);
+    gsMakeOpIdTail(gsGetSort(DataExpr)), DataExpr);
 }
 
 ATermAppl gsMakeDataExprRHead(ATermAppl DataExpr, ATermAppl SortExpr)

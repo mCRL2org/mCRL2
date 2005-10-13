@@ -34,6 +34,6 @@ P_cs(pid:Pos,t:Time,x:Time)=
 
 ID(id:Nat) = sum n:Nat.(set(n).ID(n)) + get(id).ID(id);
 
-init allow({cs_in,cs_out},hide({__get,__set},restrict({get,_get,set,_set},
+init allow({cs_in,cs_out},hide({__get,__set},block({get,_get,set,_set},
   comm({get|_get->__get,set|_set->__set},ID(0)||P(1)||P(2)||P(3)||P(4)))));
 

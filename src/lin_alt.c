@@ -581,7 +581,7 @@ static ATermList get_vars(ATermAppl a)
 		return l;
 	}
 	else
-	if ( gsIsRestrict(a) || gsIsHide(a) || gsIsRename(a) || gsIsComm(a) ||  gsIsAllow(a) )
+	if ( gsIsBlock(a) || gsIsHide(a) || gsIsRename(a) || gsIsComm(a) ||  gsIsAllow(a) )
 	{
 		return get_vars(ATAgetArgument(a,1));
 	}
@@ -1534,7 +1534,7 @@ static ATbool match_proc(ATermAppl a, ATermAppl m, ATermList l, ATermTable r)
 		return match_proc(ATAgetArgument(a,1),ATAgetArgument(m,1),list_minus(l,ATLgetArgument(a,0)),r);
 	}
 	else
-	if ( gsIsRestrict(a) || gsIsHide(a) || gsIsRename(a) || gsIsComm(a) ||  gsIsAllow(a) )
+	if ( gsIsBlock(a) || gsIsHide(a) || gsIsRename(a) || gsIsComm(a) ||  gsIsAllow(a) )
 	{
 		return match_proc(ATAgetArgument(a,1),ATAgetArgument(m,1),l,r);
 	}
@@ -1741,7 +1741,7 @@ static ATermList get_firsts(ATermAppl t)
 		}
 		return ATreverse(m);
 	}
-	if ( gsIsRestrict(t) )
+	if ( gsIsBlock(t) )
 	{
 		l = get_firsts(ATAgetArgument(t,1));
 		m = ATmakeList0();
@@ -1753,7 +1753,7 @@ static ATermList get_firsts(ATermAppl t)
 				{
 					m = ATinsert(m,(ATerm) ATLgetFirst(l));
 				} else {
-					m = ATinsert(m,(ATerm) ATreplace(ATLgetFirst(l),(ATerm) gsMakeRestrict(ATLgetArgument(t,0),ATAelementAt(ATLgetFirst(l),2)),2));
+					m = ATinsert(m,(ATerm) ATreplace(ATLgetFirst(l),(ATerm) gsMakeBlock(ATLgetArgument(t,0),ATAelementAt(ATLgetFirst(l),2)),2));
 				}
 			}
 		}
@@ -2129,7 +2129,7 @@ static ATermAppl subst_procs(ATermAppl a, ATermList nosubst)
 		return gsMakeSum(ATLgetArgument(a,0),subst_procs(ATAgetArgument(a,1),nosubst));
 	}
 	else
-	if ( gsIsRestrict(a) || gsIsHide(a) || gsIsRename(a) || gsIsComm(a) ||  gsIsAllow(a) )
+	if ( gsIsBlock(a) || gsIsHide(a) || gsIsRename(a) || gsIsComm(a) ||  gsIsAllow(a) )
 	{
 		return ATmakeAppl2(ATgetAFun(a),ATgetArgument(a,0),(ATerm) subst_procs(ATAgetArgument(a,1),nosubst));
 	}

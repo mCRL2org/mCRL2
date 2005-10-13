@@ -924,12 +924,12 @@ void PRINT_FUNC(PrintPart_Appl)(PRINT_OUTTYPE OutStream,
     PRINT_FUNC(PrintPart_Appl)(OutStream, ATAgetArgument(Part, 1),
       pp_format, ShowSorts, 7);
     if (PrecLevel > 7) PRINT_FUNC(fprints)(OutStream, ")");
-  } else if (gsIsRestrict(Part) || gsIsHide(Part) || gsIsRename(Part) ||
+  } else if (gsIsBlock(Part) || gsIsHide(Part) || gsIsRename(Part) ||
       gsIsComm(Part) || gsIsAllow(Part)) {
     //print process quantification
     PRINT_FUNC(dbg_prints)("printing process quantification\n");
-    if (gsIsRestrict(Part)) {
-      PRINT_FUNC(fprints)(OutStream, "restrict");
+    if (gsIsBlock(Part)) {
+      PRINT_FUNC(fprints)(OutStream, "block");
     } else if (gsIsHide(Part)) {
       PRINT_FUNC(fprints)(OutStream, "hide");
     } else if (gsIsRename(Part)) {

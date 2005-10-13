@@ -748,21 +748,13 @@ We also have the following operations:
 \hline
 Operator                       & \textit{Rich}          & \verb+Plain+\\\hline
 empty predicate                & \fa{isempty}{\_}       & \verb+isempty(_)+\\
-the first element of a list    & \fa{lhead}{\_}         & \verb+lhead(_)+\\
-list without its first element & \fa{ltail}{\_}         & \verb+ltail(_)+\\
+the first element of a list    & \fa{head}{\_}          & \verb+head(_)+\\
+list without its first element & \fa{tail}{\_}          & \verb+tail(_)+\\
 the last element of a list     & \fa{rhead}{\_}         & \verb+rhead(_)+\\
 list without its last element  & \fa{rtail}{\_}         & \verb+rtail(_)+\\
 \hline
 \end{tabular}
 \end{center}
-
-\bigskip
-Operations \emph{isempty}, \emph{ltail} and \emph{ltail} have constant time complexity\\
-The other operations have linear time complexity.
-
-\bigskip
-The introduced syntax can be used for both cons and snoc lists.\\
-Should we leave the choice to the user?
 \end{slidetop}
 
 \begin{slidetop}
@@ -802,7 +794,6 @@ We also have the following operations:
 \begin{tabular}{|l@{\qquad}L@{\qquad}l|}
 \hline
 Operator                       & \textit{Rich}                          & \verb+Plain+\\\hline
-size (cardinality)             & \# \_                                  & \verb+#_+\\
 bag multiplicity / set element test & \_\ .\ \_                         & \verb+_ . _+\\
 element test                   & \_ \in \_                              & \verb+_ in _+\\
 subset/subbag                  & \_ \subseteq \_                        & \verb+_ <= _+\\

@@ -1033,8 +1033,8 @@ ATermAppl gsImplSortList(ATermAppl SortList, ATermList *PSubsts,
       (ATerm) gsMakeOpIdSnoc(SortId, SortElt),
       (ATerm) gsMakeOpIdConcat(SortId),
       (ATerm) gsMakeOpIdEltAt(SortId, SortElt),
-      (ATerm) gsMakeOpIdLHead(SortId, SortElt),
-      (ATerm) gsMakeOpIdLTail(SortId),
+      (ATerm) gsMakeOpIdHead(SortId, SortElt),
+      (ATerm) gsMakeOpIdTail(SortId),
       (ATerm) gsMakeOpIdRHead(SortId, SortElt),
       (ATerm) gsMakeOpIdRTail(SortId)
     ), PDataDecls->Ops);
@@ -1122,13 +1122,13 @@ ATermAppl gsImplSortList(ATermAppl SortList, ATermList *PSubsts,
       (ATerm) gsMakeDataEqn(dspl, nil,
         gsMakeDataExprEltAt(ds, gsMakeDataExprCNat(p), SortElt),
         gsMakeDataExprEltAt(sSortId, gsMakeDataExprPred(p), SortElt)),
-      //left head (SortId -> SortElt)
+      //head (SortId -> SortElt)
       (ATerm) gsMakeDataEqn(dsl, nil,
-         gsMakeDataExprLHead(ds, SortElt),
+         gsMakeDataExprHead(ds, SortElt),
          dSortElt),
-      //left tail (SortId -> SortId)
+      //tail (SortId -> SortId)
       (ATerm) gsMakeDataEqn(dsl, nil,
-         gsMakeDataExprLTail(ds),
+         gsMakeDataExprTail(ds),
          sSortId),
       //right head (SortId -> SortElt)
       (ATerm) gsMakeDataEqn(dl, nil,

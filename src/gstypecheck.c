@@ -585,9 +585,9 @@ void gstcDataInit(void){
 			    gstcMakeSortArrowProd2(gsMakeSortList(gsMakeUnknown()),gsMakeSortList(gsMakeUnknown()),gsMakeSortList(gsMakeUnknown())));
   gstcAddSystemFunctionProd(gsMakeOpIdNameEltAt(),
 			    gstcMakeSortArrowProd2(gsMakeSortList(gsMakeUnknown()),gsMakeSortExprNat(),gsMakeUnknown()));
-  gstcAddSystemFunctionProd(gsMakeOpIdNameLHead(),
+  gstcAddSystemFunctionProd(gsMakeOpIdNameHead(),
 			    gstcMakeSortArrowProd1(gsMakeSortList(gsMakeUnknown()), gsMakeUnknown()));
-  gstcAddSystemFunctionProd(gsMakeOpIdNameLTail(),
+  gstcAddSystemFunctionProd(gsMakeOpIdNameTail(),
 			    gstcMakeSortArrowProd1(gsMakeSortList(gsMakeUnknown()),gsMakeSortList(gsMakeUnknown())));
   gstcAddSystemFunctionProd(gsMakeOpIdNameRHead(),
 			    gstcMakeSortArrowProd1(gsMakeSortList(gsMakeUnknown()),gsMakeUnknown()));
@@ -1267,12 +1267,12 @@ static ATermAppl gstcTraverseActProcVarConstP(ATermTable Vars, ATermAppl ProcTer
     return gstcRewrActProc(Vars,ProcTerm);
   }
 
-  if(gsIsRestrict(ProcTerm) || gsIsHide(ProcTerm) || 
+  if(gsIsBlock(ProcTerm) || gsIsHide(ProcTerm) || 
      gsIsRename(ProcTerm) || gsIsComm(ProcTerm) || gsIsAllow(ProcTerm)){
 
-    //restrict & hide
-    if(gsIsRestrict(ProcTerm) || gsIsHide(ProcTerm)){
-      char *msg=gsIsRestrict(ProcTerm)?"Restricting":"Hiding";
+    //block & hide
+    if(gsIsBlock(ProcTerm) || gsIsHide(ProcTerm)){
+      char *msg=gsIsBlock(ProcTerm)?"Blocking":"Hiding";
       ATermList ActList=ATLgetArgument(ProcTerm,0);
       if(ATisEmpty(ActList)) gsWarningMsg("%s empty set of actions (typechecking %P)\n",msg,ProcTerm);
 
@@ -1934,7 +1934,7 @@ static ATermAppl gstcTraverseVarConsTypeDN(int nFactPars, ATermTable Vars, ATerm
 	Type=NewType;
       }
       
-      if(ATisEqual(gsMakeOpIdNameLHead(),ATAgetArgument(*DataTerm,0))||
+      if(ATisEqual(gsMakeOpIdNameHead(),ATAgetArgument(*DataTerm,0))||
 	 ATisEqual(gsMakeOpIdNameRHead(),ATAgetArgument(*DataTerm,0))){
 	gsDebugMsg("Doing {R,L}head matching Type %T, PosType %T\n",Type,PosType);    
 	ATermAppl NewType=gstcMatchListOpHead(Type);
@@ -1945,7 +1945,7 @@ static ATermAppl gstcTraverseVarConsTypeDN(int nFactPars, ATermTable Vars, ATerm
 	Type=NewType;
       }
 
-      if(ATisEqual(gsMakeOpIdNameLTail(),ATAgetArgument(*DataTerm,0))||
+      if(ATisEqual(gsMakeOpIdNameTail(),ATAgetArgument(*DataTerm,0))||
 	 ATisEqual(gsMakeOpIdNameRTail(),ATAgetArgument(*DataTerm,0))){
 	gsDebugMsg("Doing {R,L}tail matching Type %T, PosType %T\n",Type,PosType);    
 	ATermAppl NewType=gstcMatchListOpTail(Type);

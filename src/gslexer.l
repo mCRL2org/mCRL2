@@ -107,7 +107,7 @@ in         { gsProcessString(); return IN; }
 delta      { gsProcessString(); return DELTA; }
 tau        { gsProcessString(); return TAU; }
 sum        { gsProcessString(); return SUM; }
-restrict   { gsProcessString(); return RESTRICT; }
+block      { gsProcessString(); return BLOCK; }
 allow      { gsProcessString(); return ALLOW; }
 hide       { gsProcessString(); return HIDE; }
 rename     { gsProcessString(); return RENAME; }

@@ -32,7 +32,7 @@ static ATermAppl rewrite_proc(ATermAppl p)
 	} else if ( gsIsAtTime(p) )
 	{
 		return ATmakeAppl2(ATgetAFun(p),ATgetArgument(p,0),(ATerm) gsRewriteTerm(ATAgetArgument(p,1)));
-	} else if ( gsIsSum(p) || gsIsAllow(p) || gsIsRestrict(p) || gsIsHide(p) || gsIsRename(p) || gsIsComm(p) )
+	} else if ( gsIsSum(p) || gsIsAllow(p) || gsIsBlock(p) || gsIsHide(p) || gsIsRename(p) || gsIsComm(p) )
 	{
 		return ATmakeAppl2(ATgetAFun(p),ATgetArgument(p,0),(ATerm) rewrite_proc(ATAgetArgument(p,1)));
 	} else if ( gsIsCond(p) )

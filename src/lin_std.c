@@ -1319,9 +1319,9 @@ static processstatustype determine_process_statusterm(
     return mCRL;
   }
 
-  if (gsIsRestrict(body))
+  if (gsIsBlock(body))
   { if (status!=mCRL) 
-    { gsErrorMsg("A restrict operator occurs in the scope of pCRL operators\n");
+    { gsErrorMsg("A block operator occurs in the scope of pCRL operators\n");
       stop();
     }
     s1=determine_process_statusterm(ATAgetArgument(body,1),mCRL);
@@ -1427,7 +1427,7 @@ static void collectPcrlProcesses_term(ATermAppl body, ATermIndexedSet visited)
       (gsIsRename(body))||
       (gsIsAllow(body))||
       (gsIsComm(body))||
-      (gsIsRestrict(body)))
+      (gsIsBlock(body)))
   { 
     collectPcrlProcesses_term(ATAgetArgument(body,1),visited);
     return;
@@ -2993,7 +2993,7 @@ static ATermAppl procstorealGNFbody(
   if (gsIsHide(body)|| 
       gsIsRename(body)||
       gsIsAllow(body)||
-      gsIsRestrict(body)||
+      gsIsBlock(body)||
       gsIsComm(body))
   { procstorealGNFbody(ATAgetArgument(body,1),later,
                    todo,regular,mode,freevars);
@@ -7109,7 +7109,7 @@ static ATermAppl generateLPEmCRLterm(
     return allowcomposition(ATLgetArgument(t,0),t2);
   }
 
-  if (gsIsRestrict(t)) 
+  if (gsIsBlock(t)) 
   { ATermAppl t2=generateLPEmCRLterm(
                           ATAgetArgument(t,1),
                           canterminate,
@@ -7382,7 +7382,7 @@ static ATermAppl alphaconversionterm(
     return NULL; 
   }  
   
-  if (gsIsRestrict(t))
+  if (gsIsBlock(t))
   { alphaconversionterm(ATAgetArgument(t,1),parameters,varlist,tl);
     return NULL;
   }  
@@ -7460,7 +7460,7 @@ static int canterminatebody(
   { return (canterminatebody(ATAgetArgument(t,1),stable,visited,allowrecursion));
   }
 
-  if (gsIsRestrict(t))
+  if (gsIsBlock(t))
   { return (canterminatebody(ATAgetArgument(t,1),stable,visited,allowrecursion));
   }
 
@@ -7658,8 +7658,8 @@ static ATermAppl split_body(
                  split_body(ATAgetArgument(t,1),visited,parameters));
     }
     else
-    if (gsIsRestrict(t))
-    { result=gsMakeRestrict(
+    if (gsIsBlock(t))
+    { result=gsMakeBlock(
                    ATLgetArgument(t,0),
                    split_body(ATAgetArgument(t,1),visited,parameters));
     }

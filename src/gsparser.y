@@ -61,7 +61,7 @@ ATermAppl gsSpecEltsToSpec(ATermList SpecElts);
 %token <appl> KWSORT KWCONS KWMAP KWVAR KWEQN KWACT KWPROC KWINIT KWSTRUCT
 %token <appl> BOOL POS NAT INT LIST SET BAG
 %token <appl> TRUE FALSE WHR END LAMBDA FORALL EXISTS DIV MOD IN
-%token <appl> DELTA TAU SUM RESTRICT ALLOW HIDE RENAME COMM
+%token <appl> DELTA TAU SUM BLOCK ALLOW HIDE RENAME COMM
 %token <appl> ID NUMBER
 
 //non-terminals
@@ -1265,9 +1265,9 @@ act_proc_ref:
 
 //process quantification
 proc_quant:
-  RESTRICT LPAR act_names_set COMMA proc_expr RPAR
+  BLOCK LPAR act_names_set COMMA proc_expr RPAR
     {
-      $$ = gsMakeRestrict($3, $5);
+      $$ = gsMakeBlock($3, $5);
       gsDebugMsg("parsed process quantification\n  %t\n", $$);
     }
   | HIDE LPAR act_names_set COMMA proc_expr RPAR

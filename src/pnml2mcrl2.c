@@ -1086,9 +1086,10 @@ extern "C" {
   }
 
   //==================================================
-  // pn2gsRestrictList generates a list with all the actions that should be restricted
+  // pn2gsBlockList generates a list with all the actions that should be
+  // blocked
   //==================================================
-  static ATermList pn2gsRestrictList(ATermList List) {
+  static ATermList pn2gsBlockList(ATermList List) {
     // input: a list
     // output: a list in which all the elements of the inputed list are present twice, once preceded by an underscore.
 
@@ -1227,11 +1228,11 @@ extern "C" {
     //                  + sum z:Pos. (z<=min(m,X)) -> P_pi_rem(z) . P_pi(max(0,X-z))
     //                  + sum y,z:Pos. (y<=n && z<=min(m,X)) -> (P_pi_add(y) | P_pi_rem(z)) . P_pi(max(0,X+y-z))
     //
-    // P_pi_add(y:Pos) = restrict({"set of synchronisation of each incoming arc with itself"}, (y>1) -> (P_pi_in | P_pi_add(max(1, y-1))) : P_pi_in)
+    // P_pi_add(y:Pos) = block({"set of synchronisation of each incoming arc with itself"}, (y>1) -> (P_pi_in | P_pi_add(max(1, y-1))) : P_pi_in)
     //
     // P_pi_in = "choice of the incoming arcs"
     //
-    // P_pi_rem(z:Pos) = restrict({"set of synchronisation of each outgoing arc with itself"}, (z>1) -> (P_pi_out | P_pi_rem(max(1, z-1))) : P_pi_out)
+    // P_pi_rem(z:Pos) = block({"set of synchronisation of each outgoing arc with itself"}, (z>1) -> (P_pi_out | P_pi_rem(max(1, z-1))) : P_pi_out)
     //
     // P_pi_out = "choice of the outgoing arcs" 
 
@@ -1271,7 +1272,7 @@ extern "C" {
     }
     gsDebugMsg("Process Trans created.\n");
     
-    // PetriNet("...") = hide(I, restrict(H, comm(C, ("..." || Trans))));
+    // PetriNet("...") = hide(I, block(H, comm(C, ("..." || Trans))));
     // the first "..." are the parameters of PetriNet; one for every place
     // the second "..." is the parallelisation of all the places in the PetriNet
     ATermAppl Process;
@@ -1280,17 +1281,17 @@ extern "C" {
     if(rec_par){
       ATermList AllArcs=ATconcat(ATtableKeys(context.arc_in), ATtableKeys(context.arc_out));
       Process = gsMakeHide(pn2gsHideList(AllArcs), 
-			   gsMakeRestrict(pn2gsRestrictList(AllArcs),
+			   gsMakeBlock(pn2gsBlockList(AllArcs),
 					  gsMakeComm(pn2gsCommList(AllArcs),
 						     gsMakeMerge(pn2gsMerge(context.places), 
 								 gsMakeActionProcess(gsString2ATermAppl("Trans"), 
 										     ATmakeList0())))));
     }
     else{
-      //hide(In,restric(Hn,comm(Cn,
+      //hide(In,block(Hn,comm(Cn,
       //....
-      //  hide(I2,restrict(H2,comm(C2,
-      //    hide(I1,restrict(H1,comm(C1,Trans||P1)))||P2)))||...Pn)))
+      //  hide(I2,block(H2,comm(C2,
+      //    hide(I1,block(H1,comm(C1,Trans||P1)))||P2)))||...Pn)))
       Process=gsMakeActionProcess(gsString2ATermAppl("Trans"), ATmakeList0());
       for(ATermList Places=ATtableKeys(context.place_process_name);!ATisEmpty(Places);Places=ATgetNext(Places)){
 	ATermAppl PlaceID=ATAgetFirst(Places);
@@ -1309,7 +1310,7 @@ extern "C" {
 	if(ATisEmpty(AssocArcs)) continue;
 
 	Process=gsMakeHide(pn2gsHideList(AssocArcs), 
-			   gsMakeRestrict(pn2gsRestrictList(AssocArcs), 
+			   gsMakeBlock(pn2gsBlockList(AssocArcs), 
 					  gsMakeComm(pn2gsCommList(AssocArcs), 
 						     Process)));
       }

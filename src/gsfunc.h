@@ -90,7 +90,7 @@ ATermAppl gsMakeActionProcess(ATermAppl Name, ATermList DataExprs);
 ATermAppl gsMakeProcess(ATermAppl ProcVarId, ATermList DataExprs);
 ATermAppl gsMakeTau();
 ATermAppl gsMakeSum(ATermList DataVarIds, ATermAppl ProcExpr);
-ATermAppl gsMakeRestrict(ATermList ActNames, ATermAppl ProcExpr);
+ATermAppl gsMakeBlock(ATermList ActNames, ATermAppl ProcExpr);
 ATermAppl gsMakeHide(ATermList ActNames, ATermAppl ProcExpr);
 ATermAppl gsMakeRename(ATermList RenameExprs, ATermAppl ProcExpr);
 ATermAppl gsMakeComm(ATermList CommExprs, ATermAppl ProcExpr);
@@ -160,7 +160,7 @@ bool gsIsActionProcess(ATermAppl Term);
 bool gsIsProcess(ATermAppl Term);
 bool gsIsTau(ATermAppl Term);
 bool gsIsSum(ATermAppl Term);
-bool gsIsRestrict(ATermAppl Term);
+bool gsIsBlock(ATermAppl Term);
 bool gsIsHide(ATermAppl Term);
 bool gsIsRename(ATermAppl Term);
 bool gsIsComm(ATermAppl Term);
@@ -243,8 +243,8 @@ ATermAppl gsMakeOpIdNameCons();
 ATermAppl gsMakeOpIdNameSnoc();
 ATermAppl gsMakeOpIdNameConcat();
 ATermAppl gsMakeOpIdNameEltAt();
-ATermAppl gsMakeOpIdNameLHead();
-ATermAppl gsMakeOpIdNameLTail();
+ATermAppl gsMakeOpIdNameHead();
+ATermAppl gsMakeOpIdNameTail();
 ATermAppl gsMakeOpIdNameRHead();
 ATermAppl gsMakeOpIdNameRTail();
 ATermAppl gsMakeOpIdNameSetComp();
@@ -581,14 +581,14 @@ ATermAppl gsMakeOpIdEltAt(ATermAppl SortExprDom, ATermAppl SortExprResult);
 //Ret: Operation identifier for 'element at position', which has sort
 //     S -> Nat -> T, where S and T stand for SortExprDom and SortExprResult
 
-ATermAppl gsMakeOpIdLHead(ATermAppl SortExprDom, ATermAppl SortExprResult);
+ATermAppl gsMakeOpIdHead(ATermAppl SortExprDom, ATermAppl SortExprResult);
 //Pre: SortExprDom and SortExprResult are sort expressions
-//Ret: Operation identifier for 'left head', which has sort S -> T, where S and
+//Ret: Operation identifier for 'head', which has sort S -> T, where S and
 //     T stand for SortExprLHS and SortExprRHS
 
-ATermAppl gsMakeOpIdLTail(ATermAppl SortExpr);
+ATermAppl gsMakeOpIdTail(ATermAppl SortExpr);
 //Pre: SortExpr is a sort expression
-//Ret: Operation identifier for 'left tail', which has sort S -> S, where S
+//Ret: Operation identifier for 'tail', which has sort S -> S, where S
 //     stands for SortExpr
 
 ATermAppl gsMakeOpIdRHead(ATermAppl SortExprDom, ATermAppl SortExprResult);
@@ -986,13 +986,13 @@ ATermAppl gsMakeDataExprEltAt(ATermAppl DataExprLHS, ATermAppl DataExprRHS,
 //Ret: Data expression for the 'element at position' of DataExprLHS and
 //     DataExprRHS with result sort SortExpr
      
-ATermAppl gsMakeDataExprLHead(ATermAppl DataExpr, ATermAppl SortExpr);
+ATermAppl gsMakeDataExprHead(ATermAppl DataExpr, ATermAppl SortExpr);
 //Pre: DataExpr is a data expression and SortExpr is a sort expression
-//Ret: Data expression for the left head of DataExpr of result sort SortExpr
+//Ret: Data expression for the head of DataExpr of result sort SortExpr
 
-ATermAppl gsMakeDataExprLTail(ATermAppl DataExpr);
+ATermAppl gsMakeDataExprTail(ATermAppl DataExpr);
 //Pre: DataExpr is a data expression
-//Ret: Data expression for the left tail of DataExpr
+//Ret: Data expression for the tail of DataExpr
 
 ATermAppl gsMakeDataExprRHead(ATermAppl DataExpr, ATermAppl SortExpr);
 //Pre: DataExpr is a data expression and SortExpr is a sort expression
