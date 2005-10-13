@@ -9,7 +9,6 @@
 
 //Boost
 #include <boost/program_options.hpp>
-#include <boost/format.hpp>
 
 //mCRL2
 #include <aterm2.h>
@@ -183,28 +182,28 @@ int main(int ac, char* av[])
         po::notify(vm);
         
         if (vm.count("help") || ac == 1) {
-            cout << "Usage: "<< av[0] << " [options] input-file\n";
-            cout << desc;
+            cerr << "Usage: "<< av[0] << " [options] INPUTFILE\n";
+            cerr << desc;
             return 0;
         }
         
         if (vm.count("version")) {
-	        cout << version << endl;
+	        cerr << version << endl;
 	        return 0;
 	      }
 
         if (vm.count("monitor")) {
-          cout << "Displaying progress" << endl;
+          cerr << "Displaying progress" << endl;
           opt = 1;
 	      }
 
         if (vm.count("nosingleton")) {
-          cout << "Active: no removal of process parameters which have sorts of cardinatilty one" << endl;
+          cerr << "Active: no removal of process parameters which have sorts of cardinatilty one" << endl;
           opt = 2;
 	      }
 
         if (vm.count("nocondition")) {
-          cout << "Active: All conditions are true" << endl;
+          cerr << "Active: All conditions are true" << endl;
           opt = 3;
 	      }
 
@@ -218,7 +217,7 @@ int main(int ac, char* av[])
     }
     catch(exception& e)
     {
-        cout << e.what() << "\n";
+        cerr << e.what() << "\n";
         return 1;
     }    
     return 0;
