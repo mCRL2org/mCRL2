@@ -889,7 +889,7 @@ static ATermAppl PushAllow(ATermList V, ATermAppl a)
 		ATtablePut(alphas,(ATerm) a,(ATerm) l);
 
 		return a;
-	} else if ( gsIsRestrict(a) )
+	} else if ( gsIsBlock(a) )
 	{
 		//XXX
 		ATermList l = (ATermList) ATtableGet(alphas,(ATerm) a);
