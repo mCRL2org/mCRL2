@@ -72,7 +72,7 @@ LIBREWR_LDFLAGS    = -l$(ATERM) -lm
 
 #mcrl22lpe definitions
 MCRL22LPE_NAME     = mcrl22lpe
-MCRL22LPE_OBJECTS  = mcrl22lpe.o lin_std.o lin_alt.o gsparser.o gslexer.o gstypecheck.o gsdataimpl.o libprint_c.o gsfunc.o gslowlevel.o
+MCRL22LPE_OBJECTS  = mcrl22lpe.o lin_std.o lin_alt.o gsparser.o gslexer.o gstypecheck.o gsdataimpl.o libprint_c.o gsfunc.o gslowlevel.o libgsalpha.o
 OBJECTS           += $(MCRL22LPE_OBJECTS)
 MCRL22LPE_LDFLAGS  = -lgsrewrite -l$(ATERM) -lm $(LIBDL)
 

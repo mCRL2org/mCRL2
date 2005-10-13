@@ -845,7 +845,7 @@ static specificationbasictype *create_spec(ATermAppl t)
   spec->init=NULL;
   ATprotect((ATerm *)&(spec->init));
   
-  /* t=Alpha(t); / * Apply alpha-beta axioms */
+  t=gsAlpha(t); /* Apply alpha-beta axioms */
 
   /* Store the sorts, but first reverse them, such that they appear
      in the same order in the output */

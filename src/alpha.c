@@ -137,7 +137,7 @@ int main(int argc, char **argv)
 		return 1;
 	}
 
-	Spec = Alpha(Spec);
+	Spec = gsAlpha(Spec);
 
 	if ( write_aterm )
 	{

@@ -4,9 +4,8 @@ extern "C" {
 
 #include <aterm2.h>
 
-ATermAppl ApplyAlpha(ATermAppl Expr);
-
-ATermAppl Alpha(ATermAppl Spec);
+// apply alphabeth reductions to a specification
+ATermAppl gsAlpha(ATermAppl Spec);
 
 #ifdef __cplusplus
 }
