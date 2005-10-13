@@ -37,15 +37,17 @@ static void gsPrintState(ATerm state)
 
 void print_help(FILE *f, char *Name)
 {
-	fprintf(f,"Usage: %s OPTIONS LPEFILE\n",Name);
-	fprintf(f,"Simulates the LPE in LPEFILE.\n"
-		  "(Enter '-1' or use CTRL-d to end simulation.)\n"
-		  "\n"
-	          "The OPTIONS that can be used are:\n"
-	          "  -h, --help             Display this help message\n"
-	          "  -y, --dummy            Replace free variables in the LPE with dummy values\n"
-	          "  -R, --rewriter name    Use rewriter 'name' (default inner3)\n"
-      );
+  fprintf(f,
+    "Usage: %s [OPTION]... INFILE\n"
+    "Simulates the LPE in INFILE.\n"
+    "To end simulation, enter '-1' or press CTRL-d.\n"
+    "\n"
+    "Mandatory arguments to long options are mandatory for short options too.\n"
+    "  -h, --help            display this help message\n"
+    "  -y, --dummy           replace free variables in the LPE with dummy values\n"
+    "  -R, --rewriter=NAME   use rewriter NAME (default 'inner3')\n",
+    Name
+  );
 }
 
 int main(int argc, char **argv)

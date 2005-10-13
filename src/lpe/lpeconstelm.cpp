@@ -155,16 +155,16 @@ int main(int ac, char* av[])
       try {
         po::options_description desc("Allowed options");
         desc.add_options()
-            ("help,h", "produce help message")
-            ("version,v", "gets the version number of the current release of this mCRL2 tool")
-            ("monitor,m", "displays progressing information")
-            ("nosingleton", "displays progressing information")
-            ("nocondition", "Saves computing time. No check if conditions are rewritten to false")
+            ("help,h",      "display this help")
+            ("version,v",   "display version information")
+            ("monitor,m",   "display progress information")
+            ("nosingleton", "do not remove sorts consisting of a single element")
+            ("nocondition", "do not use conditions during elimination (faster)")
         ;
 	
 	po::options_description hidden("Hidden options");
 	hidden.add_options()
-	    ("input-file", po::value<string>(), "input file" )
+	    ("INFILE", po::value<string>(), "input file" )
 	;
 	
 	po::options_description cmdline_options;
@@ -174,7 +174,7 @@ int main(int ac, char* av[])
 	visible.add(desc);
 	
 	po::positional_options_description p;
-	p.add("input-file", -1);
+	p.add("INFILE", -1);
 	
 	po::variables_map vm;
         po::store(po::command_line_parser(ac, av).
@@ -182,7 +182,10 @@ int main(int ac, char* av[])
         po::notify(vm);
         
         if (vm.count("help") || ac == 1) {
-            cerr << "Usage: "<< av[0] << " [options] INPUTFILE\n";
+            cerr << "Usage: "<< av[0] << " [OPTION]... INFILE\n";
+            cerr << "Remove constant process parameters from the LPE in INFILE, and write the result" << endl;
+            cerr << "to stdout." << endl;
+            cerr << endl;
             cerr << desc;
             return 0;
         }
@@ -193,23 +196,23 @@ int main(int ac, char* av[])
 	      }
 
         if (vm.count("monitor")) {
-          cerr << "Displaying progress" << endl;
+          //cerr << "Displaying progress" << endl;
           opt = 1;
 	      }
 
         if (vm.count("nosingleton")) {
-          cerr << "Active: no removal of process parameters which have sorts of cardinatilty one" << endl;
+          //cerr << "Active: no removal of process parameters which have sorts of cardinatilty one" << endl;
           opt = 2;
 	      }
 
         if (vm.count("nocondition")) {
-          cerr << "Active: All conditions are true" << endl;
+          //cerr << "Active: All conditions are true" << endl;
           opt = 3;
 	      }
 
-        if (vm.count("input-file"))
+        if (vm.count("INFILE"))
         {
-          filename = vm["input-file"].as<string>();
+          filename = vm["INFILE"].as<string>();
 	      }
 
         constelm(filename, opt);       

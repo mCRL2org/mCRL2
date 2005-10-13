@@ -239,20 +239,20 @@ bool PrintSpecificationStream(FILE *SpecStream, FILE *OutputStream,
 
 void PrintUsage(char *Name) {
   fprintf(stderr, 
-    "Usage: %s OPTIONS [LPEFILE [OUTFILE]]\n"
-    "Print the mCRL2 LPE in LPEFILE to OUTFILE in a human readable format. If OUTFILE\n"
-    "is not present, stdout is used. If LPEFILE is not present or -, stdin is used.\n"
+    "Usage: %s [OPTION]... [INFILE [OUTFILE]]\n"
+    "Print the mCRL2 LPE in INFILE to OUTFILE in a human readable format. If OUTFILE\n"
+    "is not present, stdout is used. If INFILE is not present or -, stdin is used.\n"
     "\n"
-    "The OPTIONS that can be used are:\n"
-    "  -f, --format=FORMAT    the LPE is printed using the supplied FORMAT:\n"
-    "                           'internal' for the internal format\n"
-    "                           'basic' for the basic structure (used for debugging)\n"
-    "                           'advanced' for an mCRL2 specification (default)\n"
-    "  -h, --help             display this help\n"
-    "      --version          display version information\n"
-    "  -q, --quiet            do not display warning messages\n"
-    "  -v, --verbose          turn on the display of short intermediate messages\n"
-    "  -d, --debug            turn on the display of detailed intermediate messages\n",
+    "Mandatory arguments to long options are mandatory for short options too.\n"
+    "  -f, --format=FORMAT   the LPE is printed using the supplied FORMAT:\n"
+    "                          'internal' for the internal format\n"
+    "                          'basic' for the basic structure (used for debugging)\n"
+    "                          'advanced' for an mCRL2 specification (default)\n"
+    "  -h, --help            display this help\n"
+    "      --version         display version information\n"
+    "  -q, --quiet           do not display warning messages\n"
+    "  -v, --verbose         turn on the display of short intermediate messages\n"
+    "  -d, --debug           turn on the display of detailed intermediate messages\n",
     Name
   );
 }

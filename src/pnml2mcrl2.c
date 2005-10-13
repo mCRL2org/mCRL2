@@ -1615,25 +1615,21 @@ extern "C" {
   //==================================================
   void PrintHelp(char *Name){
     fprintf(stderr,
-	    "Usage: %s OPTIONS INFILE [OUTFILE]\n", Name);
-    fprintf(stderr,
-	    "pnml2mcrl2 converts a Petri net from PNML to mCRL2.\n"
-            "INFILE is supposed to be in EPNML 1.1. However, pnml2mcrl2\n"
-	    "might work with other PNML/EPNML standards as well.\n"
-	    "If OUTFILE is not present, stdout is used.\n"
-	    "\n"
-	    "Note: Currently pnml2mcrl2 only translates classical Petri nets:\n"
-	    "      places, transitions and arcs.\n"
-	    "      Timing, coloring, inhibitor arcs, hierarchy, and other\n"
-	    "      advanced modeling constructs will not be translated!\n"
-	    "\n"
-	    "The OPTIONS that can be used are:\n"
-	    "  -h, --help             Display this help message\n"
-	    "  -q, --quiet            Do not print any unrequested information\n"
-	    "  -d, --debug            Show debug messages\n"
-	    "  -p, --no_rec_par       Use alternative generation of places,\n"
-            "                         without mcrl2-recursion\n"
-	    "  -a, --read-aterm       I have no idea what this does!\n");
+      "Usage: %s [OPTION]... INFILE [OUTFILE]\n"
+      "Convert a Petri net in INFILE to an mCRL2 specification, and write it to\n"
+      "OUTFILE. If OUTFILE is not present, stdout is used. INFILE is supposed to\n"
+      "conform to the EPNML 1.1 standard. However, other PNML/EPNML standards might\n"
+      "work as well.\n"
+      "\n"
+      "Only classical Petri nets are translated, i.e. places, transitions and arcs.\n"
+      "Other constructs such as timing, coloring, inhibitor arcs and hierarchy are not\n"
+      "taken into account.\n"
+      "\n"
+      "  -h, --help            display this help message\n"
+      "  -q, --quiet           do not print any unrequested information\n"
+      "  -d, --debug           show debug messages\n"
+      "  -p, --no_rec_par      generate places in which the result is non-recursive\n",
+      Name);
   }
 
 
@@ -1654,14 +1650,10 @@ extern "C" {
       {"quiet"       , no_argument,      NULL, 'q'},
       {0, 0, 0, 0}
     };
-    int opt,read_aterm;
+    int opt;
     
-    read_aterm = 0;
     while ( (opt = getopt_long(argc,argv,sopts,lopts,NULL)) != -1 ){
       switch ( opt ){
-      case 'a':
-	read_aterm = 1;
-	break;
       case 'd': 
 	gsSetDebugMsg();
 	break;

@@ -30,10 +30,11 @@ bool XSim::OnInit()
     gsEnableConstructorFunctions();
 
     wxCmdLineParser cmdln(argc,argv);
-    cmdln.AddSwitch(wxT("h"),wxT("help"),wxT("Displays this message"));
-    cmdln.AddSwitch(wxT("y"),wxT("dummy"),wxT("Replace free variables in the LPE with dummy values"));
-    cmdln.AddOption(wxT("R"),wxT("rewriter"),wxT("Use specified rewriter (default inner3)"));
-    cmdln.AddParam(wxT("LPE to simulate"),wxCMD_LINE_VAL_STRING,wxCMD_LINE_PARAM_OPTIONAL);
+    cmdln.AddSwitch(wxT("h"),wxT("help"),wxT("displays this message"));
+    cmdln.AddSwitch(wxT("y"),wxT("dummy"),wxT("replace free variables in the LPE with dummy values"));
+    cmdln.AddOption(wxT("R"),wxT("rewriter"),wxT("use specified rewriter (default 'inner3')"));
+    cmdln.AddParam(wxT("INFILE"),wxCMD_LINE_VAL_STRING,wxCMD_LINE_PARAM_OPTIONAL);
+    cmdln.SetLogo(wxT("Graphical simulator for mCRL2 LPEs."));
     if ( cmdln.Parse() )
     {
 	    return FALSE;

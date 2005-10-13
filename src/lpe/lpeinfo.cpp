@@ -19,7 +19,7 @@ namespace po = boost::program_options;
 po::variables_map vm;
 
 //Constanten
-string version = "Version 0.3.1";
+string version = "Version 0.3.2";
 enum {
   NO_OPTION = 0,
   PARS = 1,
@@ -32,32 +32,25 @@ int display(string filename, int opt)
   specification spec;
   if (!spec.load(filename))
   {
-    cerr << "Could not read given inputfile: " << filename << endl;
+    cerr << "Could not read input file " << filename << endl;
     return 1;
   }
   LPE lpe = spec.lpe();
     
-  if (opt == NO_OPTION)
-  {
-    cout << "Number of summands          :" << lpe.summands().size() <<endl;
-    cout << "Number of free variables    :" << spec.initial_free_variables().size() + lpe.free_variables().size() <<endl;
-    cout << "Number of process variables :" << lpe.process_parameters().size() <<endl; 
-    cout << "Number of actions           :" << lpe.actions().size() << endl;
-  }
-
-  if (opt== PARS)
-  {
+  if (opt == NO_OPTION) {
+    cout << "Number of summands          : " << lpe.summands().size() <<endl;
+    cout << "Number of free variables    : " << spec.initial_free_variables().size() + lpe.free_variables().size() <<endl;
+    cout << "Number of process parameters: " << lpe.process_parameters().size() <<endl; 
+    cout << "Number of actions           : " << lpe.actions().size() << endl;
+  } else if (opt== PARS) {
     for (data_variable_list::iterator i = lpe.process_parameters().begin(); i != lpe.process_parameters().end(); ++i)
     {
-      cout << i->name() << " " << i->type().to_string() << endl;
+      cout << i->pp() << ": " << i->type().pp() << endl;
     }
-  }
-
-  if (opt== NPARS )
+  } else if (opt== NPARS )
   {
-    cout << lpe.process_parameters().size(); 
+    cout << lpe.process_parameters().size();
   }
-
   return 0;
 }
 
@@ -76,15 +69,15 @@ int main(int ac, char* av[])
       try {
         po::options_description desc("Allowed options");
         desc.add_options()
-            ("help,h", "produce help message")
-            ("version,v", "get the version number of the current release of the mCRL2 tools")
-	    ("pars","prints only the number of parameters")
-            ("npars","prints the list of parameters")	
+            ("help,h",    "display this help")
+            ("version,v", "display version information")
+            ("pars",      "print process parameters")
+	    ("npars",     "print the number of process parameters")
         ;
 	
 	po::options_description hidden("Hidden options");
 	hidden.add_options()
-	    ("input-file", po::value<string>(), "input file" )
+	    ("INFILE", po::value<string>(), "input file" )
 	;
 	
 	po::options_description cmdline_options;
@@ -94,7 +87,7 @@ int main(int ac, char* av[])
 	visible.add(desc);
 	
 	po::positional_options_description p;
-	p.add("input-file", -1);
+	p.add("INFILE", -1);
 	
 	po::variables_map vm;
         po::store(po::command_line_parser(ac, av).
@@ -103,8 +96,10 @@ int main(int ac, char* av[])
         
 	// If no arguments are ac==1, so print help
         if (vm.count("help") || ac == 1) {
-            cout << "Usage: "<< av[0] << " [options] input-file\n";
-            cout << desc;
+            cerr << "Usage: "<< av[0] << " [OPTION]... INFILE" << endl;
+            cerr << "Print basic information on the LPE in INFILE." << endl;
+            cerr << endl;
+            cerr << desc;
             return 0;
         }
         
@@ -113,9 +108,9 @@ int main(int ac, char* av[])
 	    return 0;
 	}
 
-        if (vm.count("input-file"))
+        if (vm.count("INFILE"))
         {
-          filename = vm["input-file"].as<string>();
+          filename = vm["INFILE"].as<string>();
 	}
 
 	if (vm.count("pars"))

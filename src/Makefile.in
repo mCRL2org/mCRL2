@@ -123,7 +123,7 @@ ifdef USE_BOOST
 
  #lpeinfo definitions
  LPEINFO_NAME        = lpeinfo
- LPEINFO_OBJECTS     = gsfunc.o libgsrewrite.o gsrewr_inner.o gsrewr_inner2.o gsrewr_inner3.o gsrewr_innerc.o \
+ LPEINFO_OBJECTS     = libprint_cxx.o gsfunc.o libgsrewrite.o gsrewr_inner.o gsrewr_inner2.o gsrewr_inner3.o gsrewr_innerc.o \
 		       gsrewr_jitty.o gssubstitute.o libprint_c.o gslowlevel.o
  OBJECTS            += $(LPEINFO_OBJECTS)
  LPEINFO_LDFLAGS     = -lgsrewrite -l$(ATERM) -lm $(LIBDL)

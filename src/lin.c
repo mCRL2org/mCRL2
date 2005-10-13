@@ -20,24 +20,24 @@ extern "C" {
 
 void print_help(FILE *f, char *Name)
 {
-	fprintf(f,"Usage: %s OPTIONS SPECFILE [OUTFILE]\n",Name);
-	fprintf(f,"Linearises SPECFILE and writes the result to OUTFILE. If OUTFILE is not\n"
-		  "specified, SPECFILE with its extension replaced by 'lpe' is assumed. If OUTFILE\n"
-		  "is -, stdout is used.\n"
-		  "The default is to generate a LPE.\n"
-	          "\n"
-	          "The OPTIONS that can be used are:\n"
-	          "      --help             display this help message\n"
-	          "  -c, --nocluster        Do not cluster the LPE\n"
-	          "  -l, --linear           Do not write a LPE but a linear specification\n"
-	          "  -2, --linear2          Same as -l, but substitute processes if possible\n"
-	          "  -r, --reuse-cycles     Improves result of -2 but can take longer to calculate\n"
-	          "  -s, --state-space      Generate state-space. Useful if the system is very\n"
-		  "                         complex in general, but because of the initial state\n"
-		  "                         has a small state-space.\n"
-	          "  -a, --read-aterm       SPECFILE is an ATerm\n"
-	          "  -h, --human            Write the result in human readable format\n"
-	       );
+  fprintf(f,
+    "Usage: %s [OPTION]... INFILE [OUTFILE]\n"
+    "Linearises the mCRL2 specification in INFILE and writes the result to OUTFILE.\n"
+    "If OUTFILE is not specified, INFILE with its extension replaced by 'lpe' is\n"
+    "assumed. If OUTFILE is -, stdout used.\n"
+    "The default is to generate a LPE.\n"
+    "\n"
+    "      --help            display this help message\n"
+    "  -c, --nocluster       do not cluster the LPE\n"
+    "  -l, --linear          do not write a LPE but a linear specification\n"
+    "  -2, --linear2         same as -l, but substitute processes if possible\n"
+    "  -r, --reuse-cycles    improves result of -2 but can take longer to calculate\n"
+    "  -s, --state-space     generate state-space. Useful if the system is very\n"
+    "                        complex in general, but because of the initial state\n"
+    "                        has a small state-space.\n"
+    "  -a, --read-aterm      INFILE is an ATerm\n"
+    "  -h, --human           write the result in human readable format\n",
+    Name);
 }
 
 int main(int argc, char **argv)

@@ -23,20 +23,20 @@ extern ATermAppl gsTypeCheck(ATermAppl);
 
 void PrintUsage(FILE *f, char *Name)
 {
-	fprintf(f,"Usage: %s OPTIONS [SPECFILE [OUTFILE]]\n",Name);
-        fprintf(f,"Apply alphabet axioms to processes in SPECFILE and save the result to OUTFILE.\n"
-                  "If OUTFILE is not present, stdout is used. If SPECFILE is not present, stdin is\n"
-                  "used. To use stdin and save the output into a file, use '-' for SPECFILE.\n"
-                  "\n"
-                  "The OPTIONS that can be used are:\n"
-		  "  -a, --read-aterm       SPECFILE is an ATerm\n"
-		  "  -w, --write-aterm      OUTFILE should be an ATerm\n"
-		  "  -h, --help             display this help\n"
-		  "      --version          display version information\n"
-		  "  -q, --quiet            do not display warning messages\n"
-		  "  -v, --verbose          turn on the display of short intermediate messages\n"
-		  "  -d, --debug            turn on the display of detailed intermediate messages\n"
-	       );
+  fprintf(f,
+    "Usage: %s [OPTION]... [INFILE [OUTFILE]]\n"
+    "Apply alphabet axioms to processes in INFILE and save the result to OUTFILE.\n"
+    "If OUTFILE is not present, stdout is used. If INFILE is not present, stdin is\n"
+    "used. To use stdin and save the output into a file, use '-' for INFILE.\n"
+    "\n"
+    "  -a, --read-aterm      INFILE is an ATerm\n"
+    "  -w, --write-aterm     OUTFILE should be an ATerm\n"
+    "  -h, --help            display this help\n"
+    "      --version         display version information\n"
+    "  -q, --quiet           do not display warning messages\n"
+    "  -v, --verbose         turn on the display of short intermediate messages\n"
+    "  -d, --debug           turn on the display of detailed intermediate messages\n",
+    Name);
 }
 
 void PrintMoreInfo(FILE *Stream, char *Name) {
@@ -83,10 +83,10 @@ int main(int argc, char **argv)
 		write_aterm = 1;
 		break;
 	      case 'h':
-		PrintUsage(stdout, argv[0]);
+		PrintUsage(stderr, argv[0]);
 		return 0;
 	      case VersionOption:
-		PrintVersion(stdout);
+		PrintVersion(stderr);
 		return 0;
 	      case 'q':
 		gsSetQuietMsg();

@@ -13,7 +13,7 @@
 static void print_help(FILE *f, char *Name)
 {
   fprintf(f,
-    "Usage: %s OPTIONS [INFILE [OUTFILE]]\n"
+    "Usage: %s [OPTION]... [INFILE [OUTFILE]]\n"
     "Read mCRL LPE from INFILE, convert it to a mCRL2 LPE and save the result to\n"
     "OUTFILE. If OUTFILE is not present, stdout is used. If INFILE is not present,\n"
     "stdin is used. To use stdin and save the output to a file, use '-' for INFILE.\n"
@@ -23,12 +23,11 @@ static void print_help(FILE *f, char *Name)
     "- mappings and, or: Bool # Bool -> Bool are replaced by &&, ||\n"
     "- mapping eq: S # S -> Bool is replaced by ==, for all sorts S\n"
     "\n"
-    "The OPTIONS that can be used are:\n"
-    "  -h, --help             display this help message\n"
-    "  -q, --quiet            do not print any unrequested information\n"
-    "  -v, --verbose          display extra information about the conversion process\n"
-    "  -n, --no-conv-map      do not apply the conversion of mappings and, or and eq\n"
-    "      --no-conv-cons     do not apply the conversion of constructors T and F\n",
+    "  -h, --help            display this help message\n"
+    "  -q, --quiet           do not print any unrequested information\n"
+    "  -v, --verbose         display extra information about the conversion process\n"
+    "  -n, --no-conv-map     do not apply the conversion of mappings and, or and eq\n"
+    "      --no-conv-cons    do not apply the conversion of constructors T and F\n",
     Name);
 }
 
