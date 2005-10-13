@@ -1,52 +1,5 @@
 #Redefine default definitions using autoconf
-HOST_OS              = @HOST_OS@
-CC                   = @CC@
-CFLAGS               = @CFLAGS@
-CPP                  = @CPP@
-CPPFLAGS             = @CPPFLAGS@
-CXX                  = @CXX@
-CXXFLAGS             = @CXXFLAGS@
-ifneq ($(HOST_OS),WINDOWS)
- LIBDL               = -ldl
-endif
-ifeq ($(HOST_OS),MACOSX)
- LDFLAGS              = @LDFLAGS@
-else
- LDFLAGS              = -Wl,-rpath,$(libdir) -rdynamic @LDFLAGS@
-endif
-ARFLAGS              = crs
-INSTALL              = install
-LEX                  = @LEX@
-LFLAGS               = -I -Pgsyy
-BISON                = @BISON@
-BFLAGS               = -d -pgsyy
-ATERM                = @ATERM_NAME@ 
-BUILD_ATERM          = @BUILD_ATERM@
-USE_XML2             = @USE_XML2@
-USE_WX               = @USE_WX@
-WX_LIBS              = @WX_LIBS@
-USE_BOOST            = @USE_BOOST@
-BOOST_PREFIX         = @BOOST_PREFIX@
-BOOST_LIBRARY_SUFFIX = @BOOST_LIBRARY_SUFFIX@
-ifeq ($(BOOST_PREFIX),boost)
-  BJAM                 = boost/tools/build/jam_src/bin/bjam
-endif
-
-#installation directories
-prefix             = @prefix@
-exec_prefix        = @exec_prefix@
-bindir             = @bindir@
-libdir             = @libdir@
-datadir            = @datadir@
-includedir         = @includedir@
-infodir            = @infodir@
-mandir             = @mandir@
-
-#Environment variable for Mac
-ifeq ($(HOST_OS),MACOSX)
-MACOSX_DEPLOYMENT_TARGET = 10.3
-export MACOSX_DEPLOYMENT_TARGET
-endif
+include config
 
 #All objects that are used
 OBJECTS            =
@@ -122,16 +75,14 @@ ifdef USE_BOOST
  endif
 
  #lpeinfo definitions
- LPEINFO_NAME        = lpeinfo
- LPEINFO_OBJECTS     = libprint_cxx.o gsfunc.o libgsrewrite.o gsrewr_inner.o gsrewr_inner2.o gsrewr_inner3.o gsrewr_innerc.o \
-		       gsrewr_jitty.o gssubstitute.o libprint_c.o gslowlevel.o
+ LPEINFO_NAME        = lpe/lpeinfo
+ LPEINFO_OBJECTS     = libprint_cxx.o gsfunc.o libprint_c.o gslowlevel.o lpe/lpeinfo.o
  OBJECTS            += $(LPEINFO_OBJECTS)
  LPEINFO_LDFLAGS     = -lgsrewrite -l$(ATERM) -lm $(LIBDL)
 
  #lpconstelm definitions
- LPECONSTELM_NAME    = lpeconstelm
- LPECONSTELM_OBJECTS = gsfunc.o libgsrewrite.o gsrewr_inner.o gsrewr_inner2.o gsrewr_inner3.o gsrewr_innerc.o \
-		       gsrewr_jitty.o gssubstitute.o libprint_c.o gslowlevel.o
+ LPECONSTELM_NAME    = lpe/lpeconstelm
+ LPECONSTELM_OBJECTS = libprint_cxx.o gsfunc.o libgsrewrite.o libprint_c.o gslowlevel.o lpe/lpeconstelm.o
  OBJECTS            += $(LPECONSTELM_OBJECTS)
  LPECONSTELM_LDFLAGS = -lgsrewrite -l$(ATERM) -lm $(LIBDL)
 endif
@@ -222,7 +173,7 @@ endif
 	done
 
 clean :
-	$(RM) $(EXE_NAMES) $(LIB_NAMES) *.o *.a *.d *.dpp aterm/*.o aterm/*.a aterm/*.d svc/*.o svc/*.a svc/*.d gslexer.c gsparser.c gsparser.h gsparser.output lpeinfo lpeconstelm config.status config.log *~ core core.*
+	$(RM) $(EXE_NAMES) $(LIB_NAMES) *.o *.a *.d *.dpp lpe/*.o lpe/*.dpp aterm/*.o aterm/*.a aterm/*.d svc/*.o svc/*.a svc/*.d gslexer.c gsparser.c gsparser.h gsparser.output lpeinfo lpeconstelm config.status config.log *~ core core.*
 
 distclean : clean
 	$(MAKE) -C boost clean
@@ -234,10 +185,6 @@ $(ATERM_NAME): $(ATERM_OBJECTS)
 
 $(LIBSVC_NAME): $(LIBSVC_OBJECTS)
 	$(AR) $(ARFLAGS) $@ $(LIBSVC_OBJECTS)
-
-ifeq ($(HOST_OS),WINDOWS)
-  gsrewr_inner.o: CFLAGS += -DNO_DYNLOAD
-endif
 
 $(LIBREWR_NAME) : $(LIBREWR_OBJECTS) $(ATERM_DEP)
 	$(AR) $(ARFLAGS) $@ $(LIBREWR_OBJECTS)
@@ -270,11 +217,13 @@ endif
 
 # Targets that depend on any of the boost libraries
 ifdef USE_BOOST
+lpe/lpe%: CPPFLAGS += $(BOOST_HEADERS) -I./ -Iaterm
+
 $(LPEINFO_NAME) : $(LPEINFO_OBJECTS) $(ATERM_DEP) $(LIBREWR_NAME)
-	$(CXX) $(CXXFLAGS) -ftemplate-depth-256 -o $@ lpe/lpeinfo.cpp $(BOOST_HEADERS) -I./ -Iaterm $(BOOST_LIBRARIES) $(LPEINFO_OBJECTS) $(LDFLAGS) $(LPEINFO_LDFLAGS)
+	$(CXX) $(CXXFLAGS) -ftemplate-depth-256 -o $@ $(CPPFLAGS) $(LPEINFO_OBJECTS) $(BOOST_LIBRARIES) $(LDFLAGS) $(LPEINFO_LDFLAGS)
 
 $(LPECONSTELM_NAME) : $(LPECONSTELM_OBJECTS) $(ATERM_DEP) $(LIBREWR_NAME)
-	$(CXX) $(CXXFLAGS) -ftemplate-depth-256 -o $@ lpe/lpeconstelm.cpp $(BOOST_HEADERS) -I./ -Iaterm $(BOOST_LIBRARIES) $(LPECONSTELM_OBJECTS) $(LDFLAGS) $(LPECONSTELM_LDFLAGS)
+	$(CXX) $(CXXFLAGS) -ftemplate-depth-256 -o $@ $(CPPFLAGS) $(LPECONSTELM_OBJECTS) $(BOOST_LIBRARIES) $(LDFLAGS) $(LPECONSTELM_LDFLAGS)
 else
 $(LPEINFO_NAME) :
 	@echo "Missing Boost libraries so skipping build of lpeinfo."
@@ -311,7 +260,7 @@ $(LIN_NAME) : $(LIN_OBJECTS) $(ATERM_DEP) $(LIBREWR_NAME)
 %.c : %.l
 	$(LEX) $(LFLAGS) -o$@ $<
 
-*.* aterm/*.* svc/*.* : Makefile
+*.* aterm/*.* svc/*.* lpe/*.*: Makefile
 
 %.d : %.c
 	@echo generating dependencies for $<

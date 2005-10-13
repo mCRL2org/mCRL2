@@ -6,11 +6,20 @@ CPP                = @CPP@
 CPPFLAGS           = @CPPFLAGS@
 CXX                = @CXX@
 CXXFLAGS           = @CXXFLAGS@
+
+ifeq ($(HOST_OS),WINDOWS)
+ # Windows does not have a libdl equivalent
+ CFLAGS             += -DNO_DYNLOAD
+else
+ LIBDL               = -ldl
+endif
+
 ifeq ($(HOST_OS),MACOSX)
 LDFLAGS            = @LDFLAGS@
 else
 LDFLAGS            = -Wl,-rpath,$(libdir) -rdynamic @LDFLAGS@
 endif
+
 ARFLAGS            = crs
 INSTALL            = install
 LEX                = @LEX@
@@ -23,7 +32,14 @@ USE_XML2           = @USE_XML2@
 USE_WX             = @USE_WX@
 WX_LIBS            = @WX_LIBS@
 USE_BOOST          = @USE_BOOST@
-BOOST_PREFIX       = @BOOST_PREFIX@
+
+ifeq ($(USE_BOOST),1)
+ BOOST_PREFIX      = @BOOST_PREFIX@
+
+ ifeq ($(BOOST_PREFIX),boost)
+  BJAM             = boost/tools/build/jam_src/bin/bjam
+ endif
+endif
 
 #installation directories
 prefix             = @prefix@
