@@ -1,0 +1,88 @@
+% Bounded retransmission protocol
+%
+% Article:
+% J.F. Groote and J. van de Pol. A bounded retransmission protocol 
+% for large data packets. In M. Wirsing and M. Nivat,editors,
+% Algebraic Methodology and Software Technology, LNCS, pages 536-550
+% Springer Verlag, 1996 
+
+sort Bit = struct e0?is_e0 | e1?is_e1;
+sort D = struct d0 | d1 | d2;
+sort Ind = struct I_fst | I_ok | I_nok | I_inc | I_dk;
+sort TComm = struct set | reset | ready | signal | lost;
+
+map  inv: Bit -> Bit;
+     indl: List(D) -> Bit;
+     last: List(D) -> Bool;
+     C_ind: List(D) -> Ind;
+     I_ind: Bit # Bit -> Ind;
+     
+var  l: List(D);
+     b0,b1: Bit;
+eqn  inv(e0)       = e1;
+     inv(e1)       = e0;
+     indl(l)       = if(#l < 2, e1, e0);
+     last(l)       = #l < 2;
+     C_ind(l)      = if( is_e0(indl(l)), I_nok, I_dk );
+     I_ind(b0, e1) = I_ok;
+     I_ind(e0, e0) = I_inc;
+     I_ind(e1, e0) = I_fst;
+
+% Dirty hack to make it work
+var  p,q: Pos;
+eqn  succ(p) < q  =  p < pred(q);
+
+act  r1: List(D);
+     s1,s4: Ind;
+     s4: D # Ind;
+     r2,s2,c2,s3,r3,c3: Bit # Bit #Bit # D;
+     r7,s7,c7,r8,s8,c8,r9,s9,c9,r10,s10,c10: TComm;
+     r5,s5,c5,r6,s6,c6,a;
+     
+proc K = sum b0:Bit, b1:Bit, b2:Bit, d:D.
+       r2(b0,b1,b2,d).(a.s3(b0,b1,b2,d) + a.s9(lost)).K;
+     
+     L = r5.(a.s6 + a.s9(lost)).L;
+     
+     S(b2:Bit,max:Nat) = sum l:List(D). (#l < 4) -> r1(l).S1(l,e1,b2,0,max);
+      
+     S1(l:List(D), b0:Bit, b2:Bit, rn:Nat, max:Nat) =
+       s7(set).s2(b0,indl(l),b2,head(l)).S2(l,b0,b2,rn,max);
+     
+     S2(l:List(D), b0:Bit, b2:Bit, rn:Nat, max:Nat) =
+       r6.s7(reset).
+        ( last(l) -> s1(I_ok).S(inv(b2),max) +
+        !last(l) -> S1(tail(l),e0,inv(b2),rn,max) ) +
+       r7(signal).S3(l,b0,b2,rn,max,C_ind(l));
+     
+     S3(l:List(D) , b0:Bit, b2:Bit, rn:Nat ,max:Nat , c:Ind) =
+       (rn == max) -> s1(c) . s10(ready) . r10(signal) . S(inv(b2),max) +
+       (rn < max)  -> S1(l,b0, b2, rn + 1, max);
+     
+     T1 = 
+       ( r7(set).(r9(lost).(s7(signal) + r7(reset)) + r7(reset)) +
+       r7(reset) + r9(lost) ).T1;
+     
+     R =
+      sum b1:Bit, b2:Bit, d:D. r3(e1,b1,b2,d).R2(b1, b2, d, I_ind(e1,b1));
+     
+     R1(b0:Bit,b2:Bit) =
+       sum b1:Bit, d:D. (r3(b0,b1,b2,d) . s8(reset) . R2(b1,b2,d,I_ind(b0,b1)) + 
+         sum ff:Bit. r3(ff,b1,inv(b2),d).s5.R1(b0,b2)) +
+       r8(signal).(is_e0(b0) -> s4(I_nok).s8(ready).R + is_e1(b0) -> s8(ready).R);
+     
+     R2(b1:Bit, b2:Bit, d:D, i:Ind) =
+       s4(d,i).s8(set).s5.R1(b1,inv(b2));
+     
+     T2 = 
+       ( r8(set).
+         ( r10(ready).( s8(signal).r8(ready) + r8(reset) ). s10(signal) +
+           r8(reset) ) +
+       r10(ready).s10(signal) + r8(reset) ).T2;
+
+init hide({c2,c3,c5,c6,c7,c8,c9,c10,a,r1,s4},
+     allow({c2,c3,c5,c6,c7,c8,c9,c10,a,r1,s1,s4},
+     comm({r2|s2->c2, r3|s3->c3, r5|s5->c5, r6|s6->c6, r7|s7->c7, s8|r8->c8,
+           r9|s9->c9, r10|s10->c10 },
+     T1 || S(e0,3) || K || L || R || T2
+     )));
