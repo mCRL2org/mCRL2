@@ -1,0 +1,4 @@
+% This is one of the smallest examples of a specification that does absolutely
+% nothing. It is useful for test purposes.
+
+init delta;
