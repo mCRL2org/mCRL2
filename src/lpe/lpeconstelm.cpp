@@ -43,30 +43,92 @@ po::variables_map vm;
 string version = "Version 0.2";
 
 //Global variables
-data_expression_list          sv; 	//state vector
 data_expression_list          vinit; //init vector
-data_expression_list          newstatevector; // newstate vector
+data_assignment_list          newstatevector; // newstate vector
+data_assignment_list          tvector;
+data_assignment_list          sv;
+data_assignment_list          ainit;
 int                           n;    //number of process parameters
-int                           tab= 0;  
+
 
 bool compare(data_expression x, data_expression y, data_equation_list equations)
 {
-  printf("Compare ");
   ATermAppl x1 = rewrite(x.to_ATermAppl(), gsMakeDataEqnSpec(equations.to_ATermList()));
   ATermAppl y1 = rewrite(y.to_ATermAppl(), gsMakeDataEqnSpec(equations.to_ATermList()));
-
-  printf("- Done \n");  
   return atermpp::aterm(x1) == atermpp::aterm(y1);
 }
 
-bool eval_cond(data_expression datexpr, data_expression_list statevector, data_equation_list equations, set<int> S){
-  printf("Eval_cond\n"  );
-  bool b;
+data_assignment_list nextstate(data_assignment_list currentstate, data_assignment_list assignments, data_equation_list equations)
+{
+  data_assignment_list out;
   
-  set<int>::iterator i;
-  data_expression_list::iterator j;
+  data_assignment_list::iterator i = currentstate.begin();
+  while( i!= currentstate.end()){
+    data_assignment_list::iterator j = assignments.begin(); 
+    while (j != assignments.end()){
+      if (i->lhs() == j->lhs()){
+        data_expression z = j->rhs();
+        data_assignment_list::iterator k = currentstate.begin();
+        while (k != currentstate.end()){
+          z = z.substitute(*k);
+          k++;
+        };
+        out = append(
+                out, 
+                data_assignment( 
+                  i->lhs(), 
+                  data_expression(
+                    aterm ( 
+                      rewrite(
+                        z.to_ATermAppl(), 
+                        gsMakeDataEqnSpec(
+                          equations.to_ATermList()
+                        )  
+                      )
+                    ) 
+                  )
+                )
+              );
+      } else {
+        out = append(out,*i);
+      }
+    j++;
+    } 
+    i++;
+  }
+  
+ return out; 
+}
 
-  data_expression_list conditionvector; 
+data_expression_list rhsl(data_assignment_list x)
+{
+  data_expression_list y;
+  data_assignment_list::iterator i = x.begin();
+  while (i != x.end()) {
+    y = append(y, i->rhs() );
+    i++;
+  };
+
+  return y;
+}
+
+data_variable_list lhsl(data_assignment_list x)
+{
+  data_variable_list y;
+  data_assignment_list::iterator i = x.begin();
+  while (i != x.end()) {
+    y = append(y, i->lhs() );
+    i++;
+  };
+
+  return y;
+}
+
+bool eval_cond(data_expression datexpr, data_assignment_list statevector, data_equation_list equations, set<int> S){
+
+  bool b;
+  set<int>::iterator i;
+  data_assignment_list conditionvector; 
   
   //
   //ORDE N^3
@@ -77,39 +139,71 @@ bool eval_cond(data_expression datexpr, data_expression_list statevector, data_e
   //   Element_at = N
   //   Append = N
   //   begin-> end = N
+
+  
   i = S.begin();
   while (i != S.end()) {
-
-    conditionvector = append(conditionvector, element_at(statevector, *i ));
-
+    conditionvector = append(conditionvector, data_assignment(  element_at(lhsl(statevector), *i) , element_at( rhsl(statevector), *i  )));
     i++;
   };
-  
-  //datexpr.substitute(datexpr.begin(), conditionvector.begin());
+
+  //assert(false);
+    
+  data_assignment_list::iterator j = conditionvector.begin();
+  while (j != conditionvector.end() ){;
+    datexpr = datexpr.substitute(*j);
+    j++;
+  };
+
+  //cout << conditionvector.pp() << endl;
   
   // 
   // !!!!!!! data_expression(gsMakeOpIdFalse()) !!!!!! DIRECTE AANROEP UIT GSFUNC
   //
-  b = compare(data_expression(gsMakeOpIdFalse()), datexpr, equations);
 
-  b = true;
-  
-  printf("- Done \n");
+  b = !compare(data_expression(gsMakeOpIdFalse()), datexpr, equations);
+
+  //cout << conditionvector.pp() << endl << datexpr.pp() << endl << b << endl << endl;
+
   return b;
 }
 
-set< int > constelm(string filename, int option)
+void print_const(specification spec , set< int > S)
+{  
+
+  LPE lpe = spec.lpe();
+
+  set< int >::iterator i;
+  data_assignment_list sub = spec.init_assignments();
+  data_assignment_list result;
+  
+  i = S.begin();
+  while (i != S.end()) {
+    result = append(result, data_assignment(  element_at(lhsl(sub), *i) , element_at( rhsl(sub), *i  )));
+    i++;
+  };
+
+  //Display constants
+  cout << result.pp() << endl;
+  
+  return;
+}
+
+void constelm(string filename, int option)
 {
   specification spec;
   if (!spec.load(filename))
   {
     cerr << "could not read " << filename << endl;
+    return;
   }
   LPE lpe = spec.lpe();
 
   n = lpe.process_parameters().size();
-  vinit = spec.initial_state();
-  newstatevector = vinit;
+  sv = spec.init_assignments();
+  ainit = spec.init_assignments();
+  newstatevector = sv;  
+
   
   set< int > V; 
   set< int > S;
@@ -119,65 +213,49 @@ set< int > constelm(string filename, int option)
   };
   
   set< int > D;
-  cout << lpe.summands().size() << endl;;
-  
+  //cout << lpe.summands().size() << endl;;
+
+  ////
+  // Als V <  S dan zijn er variabele process parameters gevonden
+  ////
+
+
   while(S.size()!=V.size()) {
     sv = newstatevector;
     S = V;
-    
+    V.clear();
+
     set< int > S_dummy;        
     
     for(summand_list::iterator s_current = lpe.summands().begin(); s_current != lpe.summands().end(); ++s_current){ 
       if (eval_cond(s_current->condition(), sv, spec.equations(), S)){
-        data_expression_list nextstate = sv;
+        
         data_assignment_list ass_nextstate = s_current->assignments();
-
-
-        cout << "initvector "<< lpe.process_parameters().pp() << endl; 
-        cout << "assignment "<< s_current->assignments().pp() << endl;
-
-	      //
-        // Doe hier nexstate kunstje
-        //
-        for (data_assignment_list::iterator i = ass_nextstate.begin(); i != ass_nextstate.end(); i++){
-          nextstate = nextstate.substitute(*i);
-          nextstate.pp();
-	      };
-
-        cout << sv.pp() << "  -  " << nextstate.pp() << endl;
-
-        //assert(false);
+        tvector = nextstate(sv, ass_nextstate, spec.equations() );
+      
         set< int >::iterator j = S.begin();
         while (j != S.end()){
-          if (compare(element_at(sv, *j), element_at(nextstate, *j), spec.equations() ) ){
+          if (element_at(rhsl(ainit), *j) != (element_at(rhsl(tvector), *j)  ) ){
             S_dummy.insert(*j);
-            newstatevector = replace(newstatevector, element_at(nextstate, *j), *j);
+            newstatevector = replace(newstatevector, element_at(tvector, *j), *j);
+            
           };
           j++;
         };
-      }; 
+        cout << sv.pp() << " -- " << tvector.pp() << " -- " << newstatevector.pp() << endl; 
+     };
+         
     }; 
     
     set_difference(S.begin(), S.end(), S_dummy.begin(), S_dummy.end(), inserter(V, V.begin()));
- 
-    ////
-    // Als V <  S dan zijn er variabele process parameters gevonden
-    ////
 
-/*  Overbodig geworden door bijhouden van apparte "newstate vector"    
-
-    if (S.size() != V.size()){
-      //data_assignment nsv = vinit;
-      set_difference(S.begin(), S.end(), S_dummy.begin(), S_dummy.end(), inserter(D, D.begin()));
-      
-      set< int >::iterator j = D.begin();
-      while (j != D.end() ) {
-        //sv = replace(sv, element_at(nextstate, *j), *j);
-        j++;
-      };      
-    }; */
+    cout << endl;
   }; 
-  return S;
+  //cout << V.size() << endl; 
+
+  print_const(spec , S);
+
+  return;
 }
 
 int main(int ac, char* av[])
@@ -247,8 +325,8 @@ int main(int ac, char* av[])
         {
           filename = vm["INFILE"].as<string>();
 	      }
-
-        constelm(filename, opt);       
+        //set< int > S = constelm(filename, opt);
+        constelm(filename, opt);      
 	
     }
     catch(exception& e)
