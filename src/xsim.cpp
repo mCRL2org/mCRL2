@@ -16,10 +16,22 @@
 #include "gsfunc.h"
 #include "libgsrewrite.h"
 
+#define PROGRAM_NAME "xsim"
+
 //------------------------------------------------------------------------------
 // XSim
 //------------------------------------------------------------------------------
 
+void print_help() {
+  cout << "Usage: %s [OPTION]... INFILE\n"
+       << "Simulates the LPE in INFILE.\n"
+       << "\n"
+       << "Mandatory arguments to long options are mandatory for short options too.\n"
+       << "  -h, --help            display this help message\n"
+       << "  -y, --dummy           replace free variables in the LPE with dummy values\n"
+       << "  -R, --rewriter=NAME   use rewriter NAME (default 'inner3')\n"
+       << PROGRAM_NAME;
+}
 
 XSim::XSim()
 {
@@ -27,6 +39,9 @@ XSim::XSim()
 
 bool XSim::OnInit()
 {
+    bool     dummies = false;
+    wxString strategy;
+
     gsEnableConstructorFunctions();
 
     wxCmdLineParser cmdln(argc,argv);
@@ -35,6 +50,7 @@ bool XSim::OnInit()
     cmdln.AddOption(wxT("R"),wxT("rewriter"),wxT("use specified rewriter (default 'inner3')"));
     cmdln.AddParam(wxT("INFILE"),wxCMD_LINE_VAL_STRING,wxCMD_LINE_PARAM_OPTIONAL);
     cmdln.SetLogo(wxT("Graphical simulator for mCRL2 LPEs."));
+
     if ( cmdln.Parse() )
     {
 	    return FALSE;
@@ -42,22 +58,23 @@ bool XSim::OnInit()
 
     if ( cmdln.Found(wxT("h")) )
     {
-	    cmdln.Usage();
+            print_help();
 	    return FALSE;
     }
-    bool dummies = false;
+
     RewriteStrategy strat = GS_REWR_INNER3;
+
     if ( cmdln.Found(wxT("y")) )
     {
 	    dummies = true;
     }
-    wxString s;
-    if ( cmdln.Found(wxT("R"),&s) )
+
+    if ( cmdln.Found(wxT("R"),&strategy) )
     {
-	    strat = RewriteStrategyFromString(s.mb_str());
+	    strat = RewriteStrategyFromString(strategy.mb_str());
 	    if ( strat == GS_REWR_INVALID )
 	    {
-		    cerr << "error: invalid rewrite strategy '" << s << "'" << endl;;
+		    cerr << "error: invalid rewrite strategy '" << strategy << "'" << endl;;
 		    return FALSE;
 	    }
     }

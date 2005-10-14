@@ -96,12 +96,10 @@ private:
     wxSplitterWindow *split;
     wxPanel *toppanel;
     wxBoxSizer *topsizer;
-    wxStaticBox *topbox;
     wxBoxSizer *topboxsizer;
     wxListView *stateview;
     wxPanel *bottompanel;
     wxBoxSizer *bottomsizer;
-    wxStaticBox *bottombox;
     wxBoxSizer *bottomboxsizer;
     wxListView *transview;
     XSimTrace *tracewin;

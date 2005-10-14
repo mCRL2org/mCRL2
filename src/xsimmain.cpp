@@ -160,43 +160,44 @@ void XSimMain::CreateStatus()
 void XSimMain::CreateContent()
 {
     mainsizer = new wxBoxSizer(wxVERTICAL);
-    split = new wxSplitterWindow(this,ID_SPLITTER,wxDefaultPosition,wxSize(0,0),wxCLIP_CHILDREN);
+    split     = new wxSplitterWindow(this,ID_SPLITTER,wxDefaultPosition,wxDefaultSize,wxCLIP_CHILDREN);
 
-    toppanel = new wxPanel(split,-1);
-    topsizer = new wxBoxSizer(wxVERTICAL);
-    topbox = new wxStaticBox(toppanel,-1,wxT("Current State"));
-    topboxsizer = new wxStaticBoxSizer(topbox,wxVERTICAL);
-    stateview = new wxListView(toppanel,ID_LISTCTRL1,wxDefaultPosition,wxSize(0,0),wxLC_REPORT|wxSUNKEN_BORDER|wxLC_HRULES|wxLC_VRULES|wxLC_SINGLE_SEL);
-    topboxsizer->Add(stateview,1,wxGROW|wxALIGN_CENTER|wxALL,5);
-    topsizer->Add(topboxsizer,1,wxGROW|wxALIGN_CENTER|wxALL,5);
+    toppanel    = new wxPanel(split,-1);
+    topsizer    = new wxBoxSizer(wxVERTICAL);
+    topboxsizer = new wxStaticBoxSizer(wxVERTICAL,toppanel,wxT("Current State"));
+    stateview   = new wxListView(toppanel,ID_LISTCTRL1,wxDefaultPosition,wxDefaultSize,wxLC_REPORT|wxSUNKEN_BORDER|wxLC_HRULES|wxLC_VRULES|wxLC_SINGLE_SEL);
+
+    topboxsizer->Add(stateview,1,wxEXPAND|wxALIGN_CENTER|wxALL,5);
+    topsizer->Add(topboxsizer,1,wxEXPAND|wxALIGN_CENTER|wxALL,5);
     toppanel->SetSizer(topsizer);
 
-    bottompanel = new wxPanel(split,-1);
-    bottomsizer = new wxBoxSizer(wxVERTICAL);
-    bottombox = new wxStaticBox(bottompanel,-1,wxT("Transitions"));
-    bottomboxsizer = new wxStaticBoxSizer(bottombox,wxVERTICAL);
-    transview = new wxListView(bottompanel,ID_LISTCTRL2,wxDefaultPosition,wxSize(0,0),wxLC_REPORT|wxSUNKEN_BORDER|wxLC_HRULES|wxLC_VRULES|wxLC_SINGLE_SEL);
-    bottomboxsizer->Add(transview,1,wxGROW|wxALIGN_CENTER|wxALL,5);
-    bottomsizer->Add(bottomboxsizer,1,wxGROW|wxALIGN_CENTER|wxALL,5);
+    bottompanel    = new wxPanel(split,-1);
+    bottomsizer    = new wxBoxSizer(wxVERTICAL);
+    bottomboxsizer = new wxStaticBoxSizer(wxVERTICAL,bottompanel,wxT("Transitions"));
+    transview      = new wxListView(bottompanel,ID_LISTCTRL2,wxDefaultPosition,wxDefaultSize,wxLC_REPORT|wxSUNKEN_BORDER|wxLC_HRULES|wxLC_VRULES|wxLC_SINGLE_SEL);
+
+    bottomboxsizer->Add(transview,1,wxEXPAND|wxALIGN_CENTER|wxALL,5);
+    bottomsizer->Add(bottomboxsizer,1,wxEXPAND|wxALIGN_CENTER|wxALL,5);
     bottompanel->SetSizer(bottomsizer);
 
-    split->SplitHorizontally(toppanel,bottompanel);
+    split->SplitHorizontally(bottompanel,toppanel);
     split->SetMinimumPaneSize(27);
-    mainsizer->Add(split,1,wxALIGN_CENTER|wxALL,5);
+    mainsizer->Add(split,1,wxEXPAND|wxALIGN_CENTER|wxALL,5);
     
-    wxSize s(240,160);
-    SetMinSize(s);
+    SetMinSize(wxSize(240,160));
 
-    stateview->InsertColumn(0,wxT("Parameter"));
-    stateview->SetColumnWidth(0,120);
-    stateview->InsertColumn(1,wxT("Value"));
-    stateview->SetColumnWidth(1,120);
+    stateview->InsertColumn(0,wxT("Parameter"), wxLIST_FORMAT_CENTRE, 120);
+    stateview->InsertColumn(1,wxT("Value"), wxLIST_FORMAT_LEFT, wxLIST_AUTOSIZE_USEHEADER|wxLIST_AUTOSIZE);
 
-    transview->InsertColumn(0,wxT("Action"));
-    transview->SetColumnWidth(0,120);
-    transview->InsertColumn(1,wxT("State Change"));
-    transview->SetColumnWidth(1,120);
+    transview->InsertColumn(0,wxT("Action"), wxLIST_FORMAT_CENTRE, 120);
+    transview->InsertColumn(1,wxT("State Change"), wxLIST_AUTOSIZE_USEHEADER|wxLIST_AUTOSIZE);
     transview->SetFocus();
+
+    /* Show in order to be able to query client width */
+    Show();
+
+    stateview->SetColumnWidth(1,stateview->GetClientSize().GetWidth() - stateview->GetColumnWidth(0));
+    transview->SetColumnWidth(1,transview->GetClientSize().GetWidth() - transview->GetColumnWidth(0));
 }
 
 void XSimMain::LoadFile(const wxString &filename)
@@ -707,7 +708,8 @@ void XSimMain::SetCurrentState(ATerm state, bool showchange)
 		        stateview->SetItemBackgroundColour(i,col);
 		}
 	}
-	stateview->SetColumnWidth(1,wxLIST_AUTOSIZE);
+
+        stateview->SetColumnWidth(1,stateview->GetClientSize().GetWidth() - stateview->GetColumnWidth(0));
 }
 
 static void sort_transitions(wxArrayString &actions, wxArrayString &statechanges, wxArrayInt &indices)
@@ -800,7 +802,10 @@ void XSimMain::UpdateTransitions()
 	{
 		transview->Select(0);
 	}
+
+        /* Adapt column width */
 	transview->SetColumnWidth(1,wxLIST_AUTOSIZE);
+        transview->SetColumnWidth(1,transview->GetClientSize().GetWidth() - transview->GetColumnWidth(0));
 }
 
 
