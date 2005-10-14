@@ -74,52 +74,91 @@ static ATermAppl rewrite_nolpe(ATermAppl Spec)
 
 static ATermAppl rewrite_lpe(ATermAppl Spec)
 {
-	ATermAppl a,b,c;
-	ATermList l,m,n,o,d;
+  ATermList l;
+  //rewrite data equations
+  ATermAppl DataEqnSpec = ATAgetArgument(Spec, 3);
+  ATermList DataEqns = ATLgetArgument(DataEqnSpec, 0);
+  l = ATmakeList0();
+  for (; !ATisEmpty(DataEqns); DataEqns = ATgetNext(DataEqns)) {
+    //rewrite data equation
+    ATermAppl DataEqn = ATAgetFirst(DataEqns);
+    //rewrite condition
+    ATermAppl Cond = ATAgetArgument(DataEqn, 1);
+    if (!gsIsNil(Cond)) {
+      Cond = gsRewriteTerm(Cond);
+      DataEqn = ATsetArgument(DataEqn, (ATerm) Cond, 1);
+    }
+    //rewrite right hand side
+    ATermAppl RHS = ATAgetArgument(DataEqn, 3);
+    RHS = gsRewriteTerm(RHS);
+    DataEqn = ATsetArgument(DataEqn, (ATerm) RHS, 3);
+    l = ATinsert(l, (ATerm) DataEqn);
+  }
+  DataEqns = ATreverse(l);
+  DataEqnSpec = ATsetArgument(DataEqnSpec, (ATerm) DataEqns, 0);
+  Spec = ATsetArgument(Spec, (ATerm) DataEqnSpec, 3);
 
-	l = ATLgetArgument(ATAgetArgument(Spec,5),2);
-	m = ATmakeList0();
-	for (; !ATisEmpty(l); l=ATgetNext(l))
-	{
-		a = ATAgetArgument(ATAgetFirst(l),1);
-		a = gsRewriteTerm(a);
-		b = ATAgetArgument(ATAgetFirst(l),2);
-		if ( gsIsMultAct(b) )
-		{
-			n = ATLgetArgument(b,0);
-			o = ATmakeList0();
-			for (; !ATisEmpty(n); n=ATgetNext(n))
-			{
-				o = ATinsert(o,(ATerm) rewrite_proc(ATAgetFirst(n)));
-			}
-			b = gsMakeMultAct(ATreverse(o));
-		}
-		c = ATAgetArgument(ATAgetFirst(l),3);
-		if ( !gsIsNil(c) )
-		{
-			c = gsRewriteTerm(c);
-		}
-		d = ATLgetArgument(ATAgetFirst(l),4);
-		n = ATmakeList0();
-		for (; !ATisEmpty(d); d=ATgetNext(d))
-		{
-			n = ATinsert(n,(ATerm) gsMakeAssignment(ATAgetArgument(ATAgetFirst(d),0),gsRewriteTerm(ATAgetArgument(ATAgetFirst(d),1))));
-		}
-		d = ATreverse(n);
-		m = ATinsert(m,(ATerm) gsMakeLPESummand(ATLgetArgument(ATAgetFirst(l),0),a,b,c,d));
-	}
-	m = ATreverse(m);
-	Spec = ATsetArgument(Spec,(ATerm) ATsetArgument(ATAgetArgument(Spec,5),(ATerm) m,2),5);
-
-	l = ATLgetArgument(ATAgetArgument(Spec,6),1);
-	m = ATmakeList0();
-	for (; !ATisEmpty(l); l=ATgetNext(l))
-	{
-		m = ATinsert(m,(ATerm) gsMakeAssignment(ATAgetArgument(ATAgetFirst(l),0),gsRewriteTerm(ATAgetArgument(ATAgetFirst(l),1))));
-	}
-	Spec = ATsetArgument(Spec,(ATerm) gsMakeLPEInit(ATLgetArgument(ATAgetArgument(Spec,6),0),ATreverse(m)),6);
-
-	return Spec;
+  //rewrite LPE summands
+  ATermAppl LPE = ATAgetArgument(Spec, 5);
+  ATermList LPESummands = ATLgetArgument(LPE, 2);
+  l = ATmakeList0();
+  for (; !ATisEmpty(LPESummands); LPESummands = ATgetNext(LPESummands)) {
+    //rewrite LPE summand
+    ATermAppl LPESummand = ATAgetFirst(LPESummands);
+    ATermList LPEVars = ATLgetArgument(LPESummand, 0);
+    ATermAppl Cond = ATAgetArgument(LPESummand, 1);
+    Cond = gsRewriteTerm(Cond);
+    ATermAppl MultAct = ATAgetArgument(LPESummand, 2);
+    if ( gsIsMultAct(MultAct) ) {
+      ATermList Acts = ATLgetArgument(MultAct, 0);
+      ATermList m = ATmakeList0();
+      for (; !ATisEmpty(Acts); Acts = ATgetNext(Acts))
+      {
+        ATermAppl Act = ATAgetFirst(Acts);
+        ATermList Pars = ATLgetArgument(Act, 1);
+        Pars = gsRewriteTerms(Pars);
+        Act = ATsetArgument(Act, (ATerm) Pars, 1);
+      	m = ATinsert(m, (ATerm) Act);
+      }
+      MultAct = gsMakeMultAct(ATreverse(m));
+    }
+    ATermAppl Time = ATAgetArgument(LPESummand, 3);
+    if ( !gsIsNil(Time) ) {
+    	Time = gsRewriteTerm(Time);
+    }
+    ATermList Assignments = ATLgetArgument(LPESummand, 4);
+    ATermList m = ATmakeList0();
+    for (; !ATisEmpty(Assignments); Assignments = ATgetNext(Assignments)) {
+      ATermAppl Assignment = ATAgetFirst(Assignments);
+      ATermAppl RHS = ATAgetArgument(Assignment, 1);
+      RHS = gsRewriteTerm(RHS);
+      Assignment = ATsetArgument(Assignment, (ATerm) RHS, 1);
+      m = ATinsert(m, (ATerm) Assignment);
+    }
+    Assignments = ATreverse(m);
+    LPESummand = gsMakeLPESummand(LPEVars, Cond, MultAct, Time, Assignments);
+    l = ATinsert(l, (ATerm) LPESummand);
+  }
+  LPESummands = ATreverse(l);
+  LPE = ATsetArgument(LPE, (ATerm) LPESummands, 2);
+  Spec = ATsetArgument(Spec, (ATerm) LPE, 5);
+ 
+  //rewrite initial state
+  ATermAppl LPEInit = ATAgetArgument(Spec, 6);
+  ATermList Assignments = ATLgetArgument(LPEInit, 1);
+  l = ATmakeList0();
+  for (; !ATisEmpty(Assignments); Assignments = ATgetNext(Assignments)) {
+    ATermAppl Assignment = ATAgetFirst(Assignments);
+    ATermAppl RHS = ATAgetArgument(Assignment, 1);
+    RHS = gsRewriteTerm(RHS);
+    Assignment = ATsetArgument(Assignment, (ATerm) RHS, 1);
+    l = ATinsert(l, (ATerm) Assignment);
+  }
+  Assignments = ATreverse(l);
+  LPEInit = ATsetArgument(LPEInit, (ATerm) Assignments, 1);
+  Spec = ATsetArgument(Spec, (ATerm) LPEInit, 6);
+ 
+  return Spec;
 }
 
 static void print_help(FILE *f, char *Name)
