@@ -30,7 +30,7 @@ static int max_vars;
 static bool is_initialised = false;
 static bool need_rebuild;
 
-static AFun afunS, afunM, afunF, afunN, afunD, afunR, afunCR, afunC, afunX;
+static AFun afunS, afunM, afunF, afunN, afunD, afunR, afunCR, afunC, afunX, afunRe, afunCRe, afunMe;
 static ATerm dummy;
 
 #define isS(x) ATisEqualAFun(ATgetAFun(x),afunS)
@@ -42,6 +42,9 @@ static ATerm dummy;
 #define isCR(x) ATisEqualAFun(ATgetAFun(x),afunCR)
 #define isC(x) ATisEqualAFun(ATgetAFun(x),afunC)
 #define isX(x) ATisEqualAFun(ATgetAFun(x),afunX)
+#define isRe(x) ATisEqualAFun(ATgetAFun(x),afunRe)
+#define isCRe(x) ATisEqualAFun(ATgetAFun(x),afunCRe)
+#define isMe(x) ATisEqualAFun(ATgetAFun(x),afunMe)
 
 static ATermAppl fromInner(ATerm Term);
 static ATerm build(ATerm Term, int buildargs, ATermAppl *vars, ATerm *vals, int len);
@@ -145,10 +148,6 @@ static int write_tree(FILE *f, ATermAppl tree, int *num_states)
 	{
 		gsfprintf(f,"n%i [label=\"R(%P)\"]\n",*num_states,fromInner(ATgetArgument(tree,0)));
 		return (*num_states)++;
-	} else if ( isCR(tree) )
-	{
-		gsfprintf(f,"n%i [label=\"CR(%P,%P)\"]\n",*num_states,fromInner(ATgetArgument(tree,0)),fromInner(ATgetArgument(tree,1)));
-		return (*num_states)++;
 	} else if ( isX(tree) )
 	{
 		ATfprintf(f,"n%i [label=\"X\"]\n",*num_states);
@@ -163,7 +162,7 @@ static void tree2dot(ATermAppl tree, char *name, char *filename)
 	FILE *f;
 	int num_states = 0;
 
-	if ( (f = fopen(filename,"w")) == NULL )
+	if ( (f = fopen(filename,"wb")) == NULL )
 	{
 		perror("fopen");
 		return;
@@ -176,7 +175,7 @@ static void tree2dot(ATermAppl tree, char *name, char *filename)
 	fclose(f);
 }
 
-static void term2seq(ATerm t, ATermList *s)
+static void term2seq(ATerm t, ATermList *s, int *var_cnt)
 {
 	if ( ATisList(t) )
 	{
@@ -189,7 +188,7 @@ static void term2seq(ATerm t, ATermList *s)
 
 		for (; !ATisEmpty(l); l=ATgetNext(l))
 		{
-			term2seq(ATgetFirst(l),s);
+			term2seq(ATgetFirst(l),s,var_cnt);
 			if ( !ATisEmpty(ATgetNext(l)) )
 			{
 				*s = ATinsert(*s, (ATerm) ATmakeAppl1(afunN,dummy));
@@ -198,7 +197,7 @@ static void term2seq(ATerm t, ATermList *s)
 		*s = ATinsert(*s, (ATerm) ATmakeAppl1(afunD,dummy));
 	} else if ( ATisInt(t) )
 	{
-		term2seq((ATerm) ATmakeList1(t),s);
+		term2seq((ATerm) ATmakeList1(t),s,var_cnt);
 	} else if ( gsIsDataVarId((ATermAppl) t) )
 	{
 		ATerm store = (ATerm) ATmakeAppl2(afunS,(ATerm) t,dummy);
@@ -207,6 +206,7 @@ static void term2seq(ATerm t, ATermList *s)
 		{
 			*s = ATinsert(*s, (ATerm) ATmakeAppl3(afunM,(ATerm) t,dummy,dummy));
 		} else {
+			(*var_cnt)++;
 			*s = ATinsert(*s, store);
 		}
 	} else {
@@ -215,32 +215,90 @@ static void term2seq(ATerm t, ATermList *s)
 
 }
 
-static ATermList create_sequence(ATermAppl rule)
+static void get_used_vars_aux(ATerm t, ATermList *vars)
+{
+	if ( ATisList(t) )
+	{
+		for (; !ATisEmpty((ATermList) t); t=(ATerm) ATgetNext((ATermList) t))
+		{
+			get_used_vars_aux(ATgetFirst((ATermList) t),vars);
+		}
+	} else if ( ATisAppl(t) )
+	{
+		if ( gsIsDataVarId((ATermAppl) t) )
+		{
+			if ( ATindexOf(*vars,t,0) == -1 )
+			{
+				*vars = ATinsert(*vars,t);
+			}
+		} else {
+			int a = ATgetArity(ATgetAFun((ATermAppl) t));
+			for (int i=0; i<a; i++)
+			{
+				get_used_vars_aux(ATgetArgument((ATermAppl) t,i),vars);
+			}
+		}
+	}
+}
+
+static ATermList get_used_vars(ATerm t)
+{
+	ATermList l = ATmakeList0();
+
+	get_used_vars_aux(t,&l);
+
+	return l;
+}
+
+static ATermList create_sequence(ATermAppl rule, int *var_cnt)
 {
 	ATermAppl pat = (ATermAppl) ATgetArgument(rule,2);
+	ATerm cond = ATgetArgument(rule,1);
+	ATerm rslt = ATgetArgument(rule,3);
 	ATermList pars = ATmakeList0();
 	ATermList rseq = ATmakeList0();
-
+	
 	pars = (ATermList) pat;
-//	ATprintf("pattern pars: %t\n",pars);
+	//ATfprintf(stderr,"pattern pars: %t\n",pars);
 	for (; !ATisEmpty(pars); pars=ATgetNext(pars))
 	{
-		term2seq(ATgetFirst(pars),&rseq);
+		term2seq(ATgetFirst(pars),&rseq,var_cnt);
 		if ( !ATisEmpty(ATgetNext(pars)) )
 		{
 			rseq = ATinsert(rseq, (ATerm) ATmakeAppl1(afunN,dummy));
 		}
 	}
-//	ATprintf("rseq: %t\n",rseq);
-	if ( ATisAppl(ATgetArgument(rule,1)) )
-		rseq = ATinsert(rseq,(ATerm) ATmakeAppl1(afunR,ATgetArgument(rule,3)));
+	//ATfprintf(stderr,"rseq: %t\n",rseq);
+	if ( ATisAppl(cond) )
+		rseq = ATinsert(rseq,(ATerm) ATmakeAppl2(afunRe,rslt,(ATerm) get_used_vars(rslt)));
 	else
-		rseq = ATinsert(rseq,(ATerm) ATmakeAppl2(afunCR,ATgetArgument(rule,1),ATgetArgument(rule,3)));
+		rseq = ATinsert(rseq,(ATerm) ATmakeAppl4(afunCRe,cond,rslt,(ATerm) get_used_vars(cond),(ATerm) get_used_vars(rslt)));
 
 	return ATreverse(rseq);
 }
 
-static ATermList add_to_stack(ATermList stack,ATermList seqs, ATermAppl *r, ATermList *rc)
+
+// Structure for build_tree paramters
+typedef struct {
+	ATermList Flist;   // List of sequences of which the first action is an F
+	ATermList Slist;   // List of sequences of which the first action is an S
+	ATermList Mlist;   // List of sequences of which the first action is an M
+	ATermList stack;   // Stack to maintain the sequences that do not have to
+	                   // do anything in the current term
+	ATermList upstack; // List of sequences that have done an F at the current
+	                   // level
+} build_pars;
+
+static void initialise_build_pars(build_pars *p)
+{
+	p->Flist = ATmakeList0();
+	p->Slist = ATmakeList0();
+	p->Mlist = ATmakeList0();
+	p->stack = ATmakeList1((ATerm) ATmakeList0());
+	p->upstack = ATmakeList0();
+}
+
+static ATermList add_to_stack(ATermList stack, ATermList seqs, ATermAppl *r, ATermList *cr)
 {
 	if ( ATisEmpty(stack) )
 	{
@@ -260,15 +318,46 @@ static ATermList add_to_stack(ATermList stack,ATermList seqs, ATermAppl *r, ATer
 		} else if ( isN(ATAgetFirst(e)) )
 		{
 			h = ATinsert(h,(ATerm) ATgetNext(e));
-		} else if ( isR(ATAgetFirst(e)) )
+		} else if ( isRe(ATAgetFirst(e)) )
 		{
 			*r = ATAgetFirst(e);
 		} else {
-			*rc = ATinsert(*rc,ATgetFirst(e));
+			*cr = ATinsert(*cr,ATgetFirst(e));
 		}
 	}
 	
-	return ATinsert(add_to_stack(ATgetNext(stack),l,r,rc),(ATerm) h);
+	return ATinsert(add_to_stack(ATgetNext(stack),l,r,cr),(ATerm) h);
+}
+
+static void add_to_build_pars(build_pars *pars,ATermList seqs, ATermAppl *r, ATermList *cr)
+{
+	ATermList l = ATmakeList0();
+
+	for (; !ATisEmpty(seqs); seqs=ATgetNext(seqs))
+	{
+		ATermList e = ATLgetFirst(seqs);
+
+		if ( isD(ATAgetFirst(e)) || isN(ATAgetFirst(e)) )
+		{
+			l = ATinsert(l,(ATerm) e);
+		} else if ( isS(ATAgetFirst(e)) )
+		{
+			pars->Slist = ATinsert(pars->Slist,(ATerm) e);
+		} else if ( isMe(ATAgetFirst(e)) ) // M should not appear at the head of a seq
+		{
+			pars->Mlist = ATinsert(pars->Mlist,(ATerm) e);
+		} else if ( isF(ATAgetFirst(e)) )
+		{
+			pars->Flist = ATinsert(pars->Flist,(ATerm) e);
+		} else if ( isRe(ATAgetFirst(e)) )
+		{
+			*r = ATAgetFirst(e);
+		} else {
+			*cr = ATinsert(*cr,ATgetFirst(e));
+		}
+	}
+
+	pars->stack = add_to_stack(pars->stack,l,r,cr);
 }
 
 static char tree_var_str[20];
@@ -278,7 +367,7 @@ static ATermAppl createFreshVar(ATermAppl sort,int *i)
 	return gsMakeDataVarId(gsString2ATermAppl(tree_var_str),sort);
 }
 
-static ATermList subst_var(ATermList l, ATermAppl old, ATermAppl new, ATermList substs)
+static ATermList subst_var(ATermList l, ATermAppl old, ATerm new, ATerm num, ATermList substs)
 {
 	if ( ATisEmpty(l) )
 	{
@@ -292,43 +381,90 @@ static ATermList subst_var(ATermList l, ATermAppl old, ATermAppl new, ATermList 
 	{
 		if ( ATisEqual(ATgetArgument(head,0),old) )
 		{
-			head = ATmakeAppl3(afunM,(ATerm) new,dummy,dummy);
+			head = ATmakeAppl2(afunMe,new,num);
 		}
-	} else if ( isCR(head) )
+	} else if ( isCRe(head) )
 	{
-		head = ATmakeAppl2(afunCR,gsSubstValues(substs,ATgetArgument(head,0),true),gsSubstValues(substs,ATgetArgument(head,1),true));
-	} else if ( isR(head) )
+		ATermList l = (ATermList) ATgetArgument(head,2);
+		ATermList m = ATmakeList0();
+		for (; !ATisEmpty(l); l=ATgetNext(l))
+		{
+			if ( ATisEqual(ATgetFirst(l),old) )
+			{
+				m = ATinsert(m,num);
+			} else {
+				m = ATinsert(m,ATgetFirst(l));
+			}
+		}
+		l = (ATermList) ATgetArgument(head,3);
+		ATermList n = ATmakeList0();
+		for (; !ATisEmpty(l); l=ATgetNext(l))
+		{
+			if ( ATisEqual(ATgetFirst(l),old) )
+			{
+				n = ATinsert(n,num);
+			} else {
+				n = ATinsert(n,ATgetFirst(l));
+			}
+		}
+		head = ATmakeAppl4(afunCRe,gsSubstValues(substs,ATgetArgument(head,0),true),gsSubstValues(substs,ATgetArgument(head,1),true),(ATerm) m, (ATerm) n);
+	} else if ( isRe(head) )
 	{
-		head = ATmakeAppl1(afunR,gsSubstValues(substs,ATgetArgument(head,0),true));
+		ATermList l = (ATermList) ATgetArgument(head,1);
+		ATermList m = ATmakeList0();
+		for (; !ATisEmpty(l); l=ATgetNext(l))
+		{
+			if ( ATisEqual(ATgetFirst(l),old) )
+			{
+				m = ATinsert(m,num);
+			} else {
+				m = ATinsert(m,ATgetFirst(l));
+			}
+		}
+		head = ATmakeAppl2(afunRe,gsSubstValues(substs,ATgetArgument(head,0),true),(ATerm) m);
 	}
 
-	return ATinsert(subst_var(l,old,new,substs),(ATerm) head);
+	return ATinsert(subst_var(l,old,new,num,substs),(ATerm) head);
 }
 
-//#define print_return(x,y) ATermAppl a = y; ATprintf(x "return %t\n\n",a); return a;
+//#define BT_DEBUG
+#ifdef BT_DEBUG
+#define print_return(x,y) ATermAppl a = y; ATfprintf(stderr,x "return %t\n\n",a); return a;
+#else
 #define print_return(x,y) return y;
-static int max_tree_vars;
-static ATermAppl build_tree(ATermList Flist, ATermList Slist, ATermList Mlist, ATermList stack, ATermList upstack, int i)
-{
-//ATprintf("build_tree(  %t  ,  %t  ,  %t  ,  %t  ,  %t  ,  %i  )\n\n",Flist,Slist,Mlist,stack,upstack,i);
+#endif
+//static int max_tree_vars;
+static int *treevars_usedcnt;
 
-	if ( !ATisEmpty(Slist) )
+static void inc_usedcnt(ATermList l)
+{
+	for (; !ATisEmpty(l); l=ATgetNext(l))
+	{
+		treevars_usedcnt[ATgetInt((ATermInt) ATgetFirst(l))]++;
+	}
+}
+
+static ATermAppl build_tree(build_pars pars, int i)
+{
+#ifdef BT_DEBUG
+ATfprintf(stderr,"build_tree(  %t  ,  %t  ,  %t  ,  %t  ,  %t  ,  %i  )\n\n",pars.Flist,pars.Slist,pars.Mlist,pars.stack,pars.upstack,i);
+#endif
+
+	if ( !ATisEmpty(pars.Slist) )
 	{
 		ATermList l,m;
 
-		ATermAppl v = createFreshVar(ATAgetArgument(ATAgetArgument(ATAgetFirst(ATLgetFirst(Slist)),0),1),&i); // XXX get sort from Slist
-		if ( i > max_tree_vars )
-		{
-			max_tree_vars = i;
-		}
+		int k = i;
+		ATermAppl v = createFreshVar(ATAgetArgument(ATAgetArgument(ATAgetFirst(ATLgetFirst(pars.Slist)),0),1),&i); 
+		treevars_usedcnt[k] = 0;
 
 		l = ATmakeList0();
 		m = ATmakeList0();
-		for (; !ATisEmpty(Slist); Slist=ATgetNext(Slist))
+		for (; !ATisEmpty(pars.Slist); pars.Slist=ATgetNext(pars.Slist))
 		{
-			ATermList e = ATLgetFirst(Slist);
+			ATermList e = ATLgetFirst(pars.Slist);
 
-			e = subst_var(e,ATAgetArgument(ATAgetFirst(e),0),v,ATmakeList1((ATerm) gsMakeSubst(ATgetArgument(ATAgetFirst(e),0),(ATerm) v)));
+			e = subst_var(e,ATAgetArgument(ATAgetFirst(e),0),(ATerm) v,(ATerm) ATmakeInt(k),ATmakeList1((ATerm) gsMakeSubst(ATgetArgument(ATAgetFirst(e),0),(ATerm) v)));
 //			e = gsSubstValues_List(ATmakeList1((ATerm) gsMakeSubst(ATgetArgument(ATAgetFirst(e),0),(ATerm) v)),e,true);
 
 			l = ATinsert(l,ATgetFirst(e));
@@ -338,87 +474,100 @@ static ATermAppl build_tree(ATermList Flist, ATermList Slist, ATermList Mlist, A
 		ATermAppl r = NULL;
 		ATermList readies = ATmakeList0();
 
-		stack = add_to_stack(stack,m,&r,&readies);
+		pars.stack = add_to_stack(pars.stack,m,&r,&readies);
 
 		if ( r == NULL )
 		{
 			ATermAppl tree;
-			
-			tree = build_tree(Flist,ATmakeList0(),Mlist,stack,upstack,i);
+
+			tree = build_tree(pars,i);
 			for (; !ATisEmpty(readies); readies=ATgetNext(readies))
 			{
+				inc_usedcnt((ATermList) ATgetArgument(ATAgetFirst(readies),2));
+				inc_usedcnt((ATermList) ATgetArgument(ATAgetFirst(readies),3));
 				tree = ATmakeAppl3(afunC,ATgetArgument(ATAgetFirst(readies),0),(ATerm) ATmakeAppl1(afunR,ATgetArgument(ATAgetFirst(readies),1)),(ATerm) tree);
 			}
-			print_return("",ATmakeAppl2(afunS,(ATerm) v,(ATerm) tree));
+			r = tree;
 		} else {
-			print_return("",ATmakeAppl2(afunS,(ATerm) v,(ATerm) r));
+			inc_usedcnt((ATermList) ATgetArgument(r,1));
+			r = ATmakeAppl1(afunR,ATgetArgument(r,0));
 		}
-	} else if ( !ATisEmpty(Mlist) )
+
+		if ( (treevars_usedcnt[k] > 0) || ((k == 0) && isR(r)) )
+		{
+			print_return("",ATmakeAppl2(afunS,(ATerm) v,(ATerm) r));
+		} else {
+			print_return("",r);
+		}
+	} else if ( !ATisEmpty(pars.Mlist) )
 	{
-		ATerm M = ATgetFirst(ATLgetFirst(Mlist));
+		ATerm M = ATgetFirst(ATLgetFirst(pars.Mlist));
 
 		ATermList l = ATmakeList0();
 		ATermList m = ATmakeList0();
-		for (; !ATisEmpty(Mlist); Mlist=ATgetNext(Mlist))
+		for (; !ATisEmpty(pars.Mlist); pars.Mlist=ATgetNext(pars.Mlist))
 		{
-			if ( ATisEqual(M,ATgetFirst(ATLgetFirst(Mlist))) )
+			if ( ATisEqual(M,ATgetFirst(ATLgetFirst(pars.Mlist))) )
 			{
-				l = ATinsert(l,(ATerm) ATgetNext(ATLgetFirst(Mlist)));
+				l = ATinsert(l,(ATerm) ATgetNext(ATLgetFirst(pars.Mlist)));
 			} else {
-				m = ATinsert(m,ATgetFirst(Mlist));
+				m = ATinsert(m,ATgetFirst(pars.Mlist));
 			}
 		}
-		Mlist = m;
+		pars.Mlist = m;
 
 		ATermAppl true_tree,false_tree;
 		ATermAppl r = NULL;
 		ATermList readies = ATmakeList0();
 
-		ATermList newstack = add_to_stack(stack,l,&r,&readies);
+		ATermList newstack = add_to_stack(pars.stack,l,&r,&readies);
 
-		false_tree = build_tree(Flist,Slist,Mlist,stack,upstack,i);
+		false_tree = build_tree(pars,i);
 
 		if  ( r == NULL )
 		{
-			true_tree = build_tree(Flist,Slist,Mlist,newstack,upstack,i);
+			pars.stack = newstack;
+			true_tree = build_tree(pars,i);
 			for (; !ATisEmpty(readies); readies=ATgetNext(readies))
 			{
+				inc_usedcnt((ATermList) ATgetArgument(ATAgetFirst(readies),2));
+				inc_usedcnt((ATermList) ATgetArgument(ATAgetFirst(readies),3));
 				true_tree = ATmakeAppl3(afunC,ATgetArgument(ATAgetFirst(readies),0),(ATerm) ATmakeAppl1(afunR,ATgetArgument(ATAgetFirst(readies),1)),(ATerm) true_tree);
 			}
 		} else {
-			true_tree = r;
+			inc_usedcnt((ATermList) ATgetArgument(r,1));
+			true_tree = ATmakeAppl1(afunR,ATgetArgument(r,0));
 		}
 
 		if ( ATisEqual(true_tree,false_tree) )
 		{
 			print_return("",true_tree);
 		} else {
+			treevars_usedcnt[ATgetInt((ATermInt) ATgetArgument((ATermAppl) M,1))]++;
 			print_return("",ATmakeAppl3(afunM,ATgetArgument((ATermAppl) M,0),(ATerm) true_tree,(ATerm) false_tree));
 		}
-	} else if ( !ATisEmpty(Flist) ) {
-		ATermList F = ATLgetFirst(Flist);
+	} else if ( !ATisEmpty(pars.Flist) ) {
+		ATermList F = ATLgetFirst(pars.Flist);
 		ATermAppl true_tree,false_tree;
 
-		ATermList newupstack = upstack;
+		ATermList newupstack = pars.upstack;
 		ATermList l = ATmakeList0();
 
-		for (; !ATisEmpty(Flist); Flist=ATgetNext(Flist))
+		for (; !ATisEmpty(pars.Flist); pars.Flist=ATgetNext(pars.Flist))
 		{
-			if ( ATisEqual(ATgetFirst(ATLgetFirst(Flist)),ATgetFirst(F)) )
+			if ( ATisEqual(ATgetFirst(ATLgetFirst(pars.Flist)),ATgetFirst(F)) )
 			{
-				newupstack = ATinsert(newupstack, (ATerm) ATgetNext(ATLgetFirst(Flist)));
+				newupstack = ATinsert(newupstack, (ATerm) ATgetNext(ATLgetFirst(pars.Flist)));
 			} else {
-				l = ATinsert(l,ATgetFirst(Flist));
+				l = ATinsert(l,ATgetFirst(pars.Flist));
 			}
 		}
 		
-		false_tree = build_tree(l,Slist,Mlist,stack,upstack,i);
-		true_tree = build_tree(ATmakeList0(),Slist,Mlist,stack,newupstack,i);
-
-		if ( isCR(ATAgetFirst(ATgetNext(F))) )
-		{
-			true_tree = ATmakeAppl3(afunC,ATgetArgument(ATAgetFirst(ATgetNext(F)),0),(ATerm) ATmakeAppl1(afunR,ATgetArgument(ATAgetFirst(ATgetNext(F)),1)),(ATerm) true_tree);
-		}
+		pars.Flist = l;
+		false_tree = build_tree(pars,i);
+		pars.Flist = ATmakeList0();
+		pars.upstack = newupstack;
+		true_tree = build_tree(pars,i);
 
 		if ( ATisEqual(true_tree,false_tree) )
 		{
@@ -426,114 +575,66 @@ static ATermAppl build_tree(ATermList Flist, ATermList Slist, ATermList Mlist, A
 		} else {
 			print_return("",ATmakeAppl3(afunF,ATgetArgument(ATAgetFirst(F),0),(ATerm) true_tree,(ATerm) false_tree));
 		}
-	} else if ( !ATisEmpty(upstack) ) {
+	} else if ( !ATisEmpty(pars.upstack) ) {
 		ATermList l;
-		
-		l = ATmakeList0();
-		for (; !ATisEmpty(upstack); upstack=ATgetNext(upstack))
-		{
-			ATermList e = ATLgetFirst(upstack);
-
-			if ( isF(ATAgetFirst(e)) )
-			{
-				Flist = ATinsert(Flist,(ATerm) e);
-			} else if ( isS(ATAgetFirst(e)) )
-			{
-				Slist = ATinsert(Slist,(ATerm) e);
-			} else if ( isM(ATAgetFirst(e)) )
-			{
-				Mlist = ATinsert(Mlist,(ATerm) e);
-			} else {
-				l = ATinsert(l,(ATerm) e);
-			}
-		}
 		
 		ATermAppl r = NULL;
 		ATermList readies = ATmakeList0();
 
-		stack = add_to_stack(ATinsert(stack,(ATerm) ATmakeList0()),l,&r,&readies);
+		pars.stack = ATinsert(pars.stack,(ATerm) ATmakeList0());
+		l = pars.upstack;
+		pars.upstack = ATmakeList0();
+		add_to_build_pars(&pars,l,&r,&readies);
+		
 
 		if ( r == NULL )
 		{
-			ATermAppl t = build_tree(Flist,Slist,Mlist,stack,ATmakeList0(),i);
+			ATermAppl t = build_tree(pars,i);
 
 			for (; !ATisEmpty(readies); readies=ATgetNext(readies))
 			{
+				inc_usedcnt((ATermList) ATgetArgument(ATAgetFirst(readies),2));
+				inc_usedcnt((ATermList) ATgetArgument(ATAgetFirst(readies),3));
 				t = ATmakeAppl3(afunC,ATgetArgument(ATAgetFirst(readies),0),(ATerm) ATmakeAppl1(afunR,ATgetArgument(ATAgetFirst(readies),1)),(ATerm) t);
 			}
 
 			print_return("",t);
 		} else {
-			print_return("",r);
+			inc_usedcnt((ATermList) ATgetArgument(r,1));
+			print_return("",ATmakeAppl1(afunR,ATgetArgument(r,0)));
 		}
 	} else {
-		if ( ATisEmpty(ATLgetFirst(stack)) )
+		if ( ATisEmpty(ATLgetFirst(pars.stack)) )
 		{
-			if ( ATisEmpty(ATgetNext(stack)) )
+			if ( ATisEmpty(ATgetNext(pars.stack)) )
 			{
 				print_return("",ATmakeAppl0(afunX));
-				//print_return("",ATmakeAppl1(afunRC,(ATerm) ATmakeList0()));
 			} else {
-				print_return("",ATmakeAppl1(afunD,(ATerm) build_tree(Flist,Slist,Mlist,ATgetNext(stack),upstack,i)));
+				pars.stack = ATgetNext(pars.stack);
+//				print_return("",ATmakeAppl1(afunD,(ATerm) build_tree(pars,i)));
+				print_return("",build_tree(pars,i));
 			}
 		} else {
-			ATermList l;
-		
-			l = ATLgetFirst(stack);
-			stack = ATinsert(ATgetNext(stack),(ATerm) ATmakeList0());
-
+			ATermList l = ATLgetFirst(pars.stack);
 			ATermAppl r = NULL;
 			ATermList readies = ATmakeList0();
-	
-			for (; !ATisEmpty(l); l=ATgetNext(l))
-			{
-				ATermList e = ATLgetFirst(l);
-	
-				/*if ( isR(ATAgetFirst(e)) )
-				{
-					print_return("",ATmakeAppl1(afunR,(ATerm) ATgetArgument(ATAgetFirst(e),0)));
-				} else if ( isRC(ATAgetFirst(e)) )
-				{
-					ATermList m = ATmakeList0();
 
-					for (; !ATisEmpty(l); l=ATgetNext(l))
-					{
-						if ( isR(ATAgetFirst(ATLgetFirst(l))) )
-						{
-							print_return("",ATmakeAppl1(afunR,(ATerm) ATgetArgument(ATAgetFirst(ATLgetFirst(l)),0)));
-						}
-						m = ATinsert(m,ATgetFirst(ATLgetArgument(ATAgetFirst(ATLgetFirst(l)),0)));
-					}
-					
-					print_return("",ATmakeAppl1(afunRC,(ATerm) m));
-				} else */if ( isF(ATAgetFirst(e)) )
-				{
-					Flist = ATinsert(Flist,(ATerm) e);
-				} else if ( isS(ATAgetFirst(e)) )
-				{
-					Slist = ATinsert(Slist,(ATerm) e);
-				} else if ( isM(ATAgetFirst(e)) )
-				{
-					Mlist = ATinsert(Mlist,(ATerm) e);
-				} else if ( isR(ATAgetFirst(e)) )
-				{
-					r = ATAgetFirst(e);
-					break;
-				} else {
-					readies = ATinsert(readies, ATgetFirst(e));
-				}
-			}
+			pars.stack = ATinsert(ATgetNext(pars.stack),(ATerm) ATmakeList0());
+			add_to_build_pars(&pars,l,&r,&readies);
 
 			ATermAppl tree;
 			if ( r == NULL )
 			{
-				tree = build_tree(Flist,Slist,Mlist,stack,upstack,i);
+				tree = build_tree(pars,i);
 				for (; !ATisEmpty(readies); readies=ATgetNext(readies))
 				{
+					inc_usedcnt((ATermList) ATgetArgument(ATAgetFirst(readies),2));
+					inc_usedcnt((ATermList) ATgetArgument(ATAgetFirst(readies),3));
 					tree = ATmakeAppl3(afunC,ATgetArgument(ATAgetFirst(readies),0),(ATerm) ATmakeAppl1(afunR,ATgetArgument(ATAgetFirst(readies),1)),(ATerm) tree);
 				}
 			} else {
-				tree = r;
+				inc_usedcnt((ATermList) ATgetArgument(r,1));
+				tree = ATmakeAppl(afunR,ATgetArgument(r,0));
 			}
 	
 			print_return("",ATmakeAppl1(afunN,(ATerm) tree));
@@ -541,27 +642,31 @@ static ATermAppl build_tree(ATermList Flist, ATermList Slist, ATermList Mlist, A
 	}
 }
 
-static ATermAppl optimise_tree_aux(ATermAppl tree, ATermList stored, int len)
+static ATermAppl optimise_tree_aux(ATermAppl tree, ATermList stored, int len, int *max)
 {
 	if ( isS(tree) )
 	{
-		return ATmakeAppl2(afunS,ATgetArgument(tree,0),(ATerm) optimise_tree_aux(ATAgetArgument(tree,1),ATinsert(stored,ATgetArgument(tree,0)),len+1));
+		if ( len+2 > *max )
+		{
+			*max = len+2;
+		}
+		return ATmakeAppl2(afunS,ATgetArgument(tree,0),(ATerm) optimise_tree_aux(ATAgetArgument(tree,1),ATinsert(stored,ATgetArgument(tree,0)),len+1,max));
 	} else if ( isM(tree) )
 	{
-		return ATmakeAppl3(afunM,(ATerm) ATmakeInt(len-ATindexOf(stored,ATgetArgument(tree,0),0)),(ATerm) optimise_tree_aux(ATAgetArgument(tree,1),stored,len),(ATerm) optimise_tree_aux(ATAgetArgument(tree,2),stored,len));
+		return ATmakeAppl3(afunM,(ATerm) ATmakeInt(len-ATindexOf(stored,ATgetArgument(tree,0),0)),(ATerm) optimise_tree_aux(ATAgetArgument(tree,1),stored,len,max),(ATerm) optimise_tree_aux(ATAgetArgument(tree,2),stored,len,max));
 	} else if ( isF(tree) )
 	{
-		return ATmakeAppl3(afunF,ATgetArgument(tree,0),(ATerm) optimise_tree_aux(ATAgetArgument(tree,1),stored,len),(ATerm) optimise_tree_aux(ATAgetArgument(tree,2),stored,len));
+		return ATmakeAppl3(afunF,ATgetArgument(tree,0),(ATerm) optimise_tree_aux(ATAgetArgument(tree,1),stored,len,max),(ATerm) optimise_tree_aux(ATAgetArgument(tree,2),stored,len,max));
 	} else if ( isN(tree) )
 	{
-		return ATmakeAppl1(afunN,(ATerm) optimise_tree_aux(ATAgetArgument(tree,0),stored,len));
+		return ATmakeAppl1(afunN,(ATerm) optimise_tree_aux(ATAgetArgument(tree,0),stored,len,max));
 	} else if ( isD(tree) )
 	{
-		return optimise_tree_aux(ATAgetArgument(tree,0),stored,len);
+		return optimise_tree_aux(ATAgetArgument(tree,0),stored,len,max);
 		//return ATmakeAppl1(afunD,(ATerm) optimise_tree_aux(ATAgetArgument(tree,0),stored,len));
 	} else if ( isC(tree) )
 	{
-		return ATmakeAppl3(afunC,ATgetArgument(tree,0),(ATerm) optimise_tree_aux(ATAgetArgument(tree,1),stored,len),(ATerm) optimise_tree_aux(ATAgetArgument(tree,2),stored,len));
+		return ATmakeAppl3(afunC,ATgetArgument(tree,0),(ATerm) optimise_tree_aux(ATAgetArgument(tree,1),stored,len,max),(ATerm) optimise_tree_aux(ATAgetArgument(tree,2),stored,len,max));
 	} else if ( isR(tree) )
 	{
 		return tree;
@@ -571,66 +676,67 @@ static ATermAppl optimise_tree_aux(ATermAppl tree, ATermList stored, int len)
 	}
 }
 
-static ATermAppl optimise_tree(ATermAppl tree)
+static ATermAppl optimise_tree(ATermAppl tree,int *max)
 {
-	return optimise_tree_aux(tree,ATmakeList0(),-1);
+	return optimise_tree_aux(tree,ATmakeList0(),-1,max);
 }
 
 static ATermAppl create_tree(ATermList rules, int opid, int *max_vars)
+	// Create a match tree for OpId int2term[opid] and update the value of
+	// *max_vars accordingly.
+	//
+	// Pre:  rules is a list of rewrite rules for int2term[opid] in the
+	//       INNER internal format
+	//       opid is a valid entry in int2term
+	//       max_vars is a valid pointer to an integer
+	// Post: *max_vars is the maximum of the original *max_vars value and
+	//       the number of variables in the result tree
+	// Ret:  A match tree for int2term[opid]
 {
-	ATermList rule_seqs;
-
-	rule_seqs = ATmakeList0();
+//gsfprintf(stderr,"%P (%i)\n",int2term[opid],opid);
+	// Create sequences representing the trees for each rewrite rule and
+	// store the total number of variables used in these sequences.
+	// (The total number of variables in all sequences should be an upper
+	// bound for the number of variable in the final tree.)
+	ATermList rule_seqs = ATmakeList0();
+	int total_rule_vars = 0;
 	for (; !ATisEmpty(rules); rules=ATgetNext(rules))
 	{
-		rule_seqs = ATinsert(rule_seqs, (ATerm) create_sequence((ATermAppl) ATgetFirst(rules)));
+		rule_seqs = ATinsert(rule_seqs, (ATerm) create_sequence((ATermAppl) ATgetFirst(rules),&total_rule_vars));
 	}
 
+	// Generate initial parameters for built_tree
+	build_pars init_pars;
 	ATermAppl r = NULL;
-	ATermList Flist, Slist, Mlist, readies;
-	Flist = ATmakeList0();
-	Slist = ATmakeList0();
-	Mlist = ATmakeList0();
-	readies = ATmakeList0();
+	ATermList readies = ATmakeList0();
 
-	for (; !ATisEmpty(rule_seqs); rule_seqs=ATgetNext(rule_seqs))
-	{
-		ATermList rule = ATLgetFirst(rule_seqs);
-
-		if ( isF(ATAgetFirst(rule)) )
-		{
-			Flist = ATinsert(Flist,(ATerm) rule);
-		} else if ( isS(ATAgetFirst(rule)) )
-		{
-			Slist = ATinsert(Slist,(ATerm) rule);
-		} else if ( isM(ATAgetFirst(rule)) )
-		{
-			Mlist = ATinsert(Mlist,(ATerm) rule);
-		} else if ( isR(ATAgetFirst(rule)) )
-		{
-			r = ATAgetFirst(rule);
-		} else if ( isCR(ATAgetFirst(rule)) )
-		{
-			readies = ATinsert(readies,ATgetFirst(rule));
-		}
-	}
+	initialise_build_pars(&init_pars);
+	add_to_build_pars(&init_pars,rule_seqs,&r,&readies);
 
 	ATermAppl tree;
 	if ( r == NULL )
 	{
-		max_tree_vars = *max_vars;
-		tree = build_tree(Flist,Slist,Mlist,ATmakeList1((ATerm) ATmakeList0()),ATmakeList0(),0);
-		*max_vars = max_tree_vars;
+		DECL_A(a,int,total_rule_vars);
+		treevars_usedcnt = a;
+//		treevars_usedcnt = (int *) malloc(total_rule_vars*sizeof(int));
+		tree = build_tree(init_pars,0);
+//		free(treevars_usedcnt);
+		FREE_A(a);
 		for (; !ATisEmpty(readies); readies=ATgetNext(readies))
 		{
 			tree = ATmakeAppl3(afunC,ATgetArgument(ATAgetFirst(readies),0),(ATerm) ATmakeAppl1(afunR,ATgetArgument(ATAgetFirst(readies),1)),(ATerm) tree);
 		}
 	} else {
-		tree = r;
+		tree = ATmakeAppl1(afunR,ATgetArgument(r,0));
 	}
 	//ATprintf("tree: %t\n",tree);
 	
-	tree = optimise_tree(tree);
+	int max_tree_vars = 0;
+	tree = optimise_tree(tree,&max_tree_vars);
+	if ( max_tree_vars > *max_vars )
+	{
+		*max_vars = max_tree_vars;
+	}
 
 	/*char s[100],t[100];
 	sprintf(s,"tree_%i_%s",opid,ATgetName(ATgetAFun(ATAgetArgument(int2term[opid],0))));
@@ -692,30 +798,6 @@ ATfprintf(stderr,"R\n");
 #ifdef TMA_DEBUG
 ATfprintf(stderr,"M %t\n",ATgetArgument(*tree,0));
 #endif
-/*			bool b = true;
-			for (int i=0; i<*len; i++)
-			{
-				if ( ATisEqual(vars[i],ATgetArgument(*tree,0)) )
-				{
-					if ( ATisEqual(ATgetFirst(args),vals[i]) )
-					{
-#ifdef TMA_DEBUG
-ATfprintf(stderr,"true\n");
-#endif
-						*tree = ATAgetArgument(*tree,1);
-						b = false;
-					}
-					break;
-				}
-
-			}
-			if ( b )
-			{
-#ifdef TMA_DEBUG
-ATfprintf(stderr,"false\n");
-#endif
-				*tree = ATAgetArgument(*tree,2);
-			}*/
 			if ( ATisEqual(ATgetFirst(args),vals[ATgetInt((ATermInt) ATgetArgument(*tree,0))]) )
 			{
 				*tree = ATAgetArgument(*tree,1);
@@ -761,33 +843,18 @@ ATfprintf(stderr,"X\n");
 #ifdef TMA_DEBUG
 ATfprintf(stderr,"C\n");
 #endif
-//			int len = ATgetLength(*vars);
-//			DECL_A(vars_a,ATermAppl,len);
-//			DECL_A(vals_a,ATerm,len);
-//			ATermList l = *vars;
-//			ATermList m = *vals;
-
-//			for (len=0; !ATisEmpty(l); l=ATgetNext(l),m=ATgetNext(m),len++)
-//			{
-//				vars_a[len] = ATAgetFirst(l);
-//				vals_a[len] = ATgetFirst(m);
-//			}
-
 			if ( ATisEqual(build(ATgetArgument(*tree,0),-1,vars,vals,*len),trueint) )
 			{
 #ifdef TMA_DEBUG
-ATfprintf(stderr,"true\n");
+ATfprintf(stderr,"true (c)\n");
 #endif
 				*tree = ATAgetArgument(*tree,1);
 			} else {
 #ifdef TMA_DEBUG
-ATfprintf(stderr,"false\n");
+ATfprintf(stderr,"false (c)\n");
 #endif
 				*tree = ATAgetArgument(*tree,2);
 			}
-
-//			FREE_A(vals_a);
-//			FREE_A(vars_a);
 		} else {
 #ifdef TMA_DEBUG
 ATfprintf(stderr,"? %t\n",*tree);
@@ -803,11 +870,9 @@ ATfprintf(stderr,"no more args\n");
 
 static ATerm tree_matcher(ATermList t, ATermAppl tree)
 {
-	ATermAppl vars[max_vars];
-	ATerm vals[max_vars];
+	DECL_A(vars,ATermAppl,max_vars);
+	DECL_A(vals,ATerm,max_vars);
 	int len = 0;
-//	ATermList vars = ATmakeList0();
-//	ATermList vals = ATmakeList0();
 
 	while ( isC(tree) )
 	{
@@ -825,21 +890,11 @@ static ATerm tree_matcher(ATermList t, ATermAppl tree)
 		rargs = ATgetNext((ATermList) t);
 	} else {
 		rargs = tree_matcher_aux((ATerm) t,&tree,vars,vals,&len);
-		assert(!ATisEmpty(rargs));
 		rargs = ATgetNext(rargs);
 	}
 
 	if ( isR(tree) )
 	{
-//		int len = ATgetLength(vars);
-//		DECL_A(vars_a,ATermAppl,len);
-//		DECL_A(vals_a,ATerm,len);
-
-//		for (len=0; !ATisEmpty(vars); vars=ATgetNext(vars),vals=ATgetNext(vals),len++)
-//		{
-//			vars_a[len] = ATAgetFirst(vars);
-//			vals_a[len] = ATgetFirst(vals);
-//		}
 
 		ATerm rslt = ATgetArgument(tree,0);
 		int rslt_len;
@@ -860,11 +915,16 @@ static ATerm tree_matcher(ATermList t, ATermAppl tree)
 
 		ATerm r = build(rslt,rslt_len,vars,vals,len);
 
-//		FREE_A(vals_a);
-//		FREE_A(vars_a);
+		assert(gsGetSort(fromInner((ATerm) t))==gsGetSort(fromInner(r)));
+
+		FREE_A(vals);
+		FREE_A(vars);
 
 		return r;
 	} else {
+		FREE_A(vals);
+		FREE_A(vars);
+
 		return NULL;
 	}
 }
@@ -978,6 +1038,9 @@ void rewrite_init_inner()
 		ATunprotectAFun(afunCR);
 		ATunprotectAFun(afunC);
 		ATunprotectAFun(afunX);
+		ATunprotectAFun(afunRe);
+		ATunprotectAFun(afunCRe);
+		ATunprotectAFun(afunMe);
 		ATunprotect(&dummy);
 		ATunprotectArray((ATerm *) int2term);
 		ATunprotectArray((ATerm *) inner_eqns);
@@ -1012,12 +1075,18 @@ void rewrite_init_inner()
 	ATprotectAFun(afunD);
 	afunR = ATmakeAFun("@@R",1,ATfalse); // End of tree ( matching_rule )
 	ATprotectAFun(afunR);
-	afunCR = ATmakeAFun("@@CR",2,ATfalse); // End of tree ( matching_rule* )
+	afunCR = ATmakeAFun("@@CR",2,ATfalse); // End of tree ( condition, matching_rule )
 	ATprotectAFun(afunCR);
 	afunC = ATmakeAFun("@@C",3,ATfalse); // Check condition ( condition, true_tree, false_tree )
 	ATprotectAFun(afunC);
 	afunX = ATmakeAFun("@@X",0,ATfalse); // End of tree
 	ATprotectAFun(afunX);
+	afunRe = ATmakeAFun("@@Re",2,ATfalse); // End of tree ( matching_rule , vars_of_rule)
+	ATprotectAFun(afunRe);
+	afunCRe = ATmakeAFun("@@CRe",4,ATfalse); // End of tree ( condition, matching_rule, vars_of_condition, vars_of_rule )
+	ATprotectAFun(afunCRe);
+	afunMe = ATmakeAFun("@@Me",2,ATfalse); // Match term ( match_variable, variable_index )
+	ATprotectAFun(afunMe);
 	dummy = (ATerm) gsMakeNil();
 	ATprotect(&dummy);
 
@@ -1095,6 +1164,9 @@ void rewrite_finalise_inner()
 	ATunprotectAFun(afunCR);
 	ATunprotectAFun(afunC);
 	ATunprotectAFun(afunX);
+	ATunprotectAFun(afunRe);
+	ATunprotectAFun(afunCRe);
+	ATunprotectAFun(afunMe);
 	ATunprotect(&dummy);
 	ATunprotectArray((ATerm *) int2term);
 	ATunprotectArray((ATerm *) inner_eqns);
@@ -1315,17 +1387,6 @@ static ATerm build(ATerm Term, int buildargs, ATermAppl *vars, ATerm *vals, int 
 			buildargs = ATgetLength(args);
 		}
 
-/*		l = ATmakeList0();
-		for (int i=0; i<buildargs; i++)
-		{
-			l = ATinsert(l,build(ATgetFirst(args),-1,vars,vals,len));
-			args = ATgetNext(args);
-		}
-		for (;!ATisEmpty(args);args=ATgetNext(args))
-		{
-			l = ATinsert(l,ATgetFirst(args));
-		}
-		args = ATreverse(l);*/
 		args = build_args(args,buildargs,vars,vals,len);
 
 		int b = 1;
@@ -1370,9 +1431,6 @@ static ATerm build(ATerm Term, int buildargs, ATermAppl *vars, ATerm *vals, int 
 static ATerm rewrite_func(ATermInt op, ATermList args)
 {
 	ATermAppl tree;
-//	DECL_A(vars,ATermAppl,max_vars);
-//	DECL_A(vals,ATerm,max_vars);
-//	int pos;
 //gsfprintf(stderr,"rewrite_func(%T,%T)\n\n",op,args);
 
 	if ( (tree = inner_trees[ATgetInt(op)]) != NULL )
@@ -1384,68 +1442,6 @@ static ATerm rewrite_func(ATermInt op, ATermList args)
 			return r;
 		}
 	}
-
-/*		for (; !ATisEmpty(m); m=ATgetNext(m))
-		{
-//			ATermList rule = ATgetNext(ATLgetFirst(m));
-//			ATerm cond = ATgetFirst(rule); rule=ATgetNext(rule);
-//			ATermList rargs = ATLgetFirst(rule); rule=ATgetNext(rule);
-//			ATerm rslt = ATgetFirst(rule);
-			ATermAppl rule = (ATermAppl) ATgetFirst(m);
-			ATermList rargs = (ATermList) ATgetArgument(rule,2);
-			ATermList l2 = args;
-
-			bool match = true;
-			pos = 0;
-			while ( !ATisEmpty(rargs) )
-			{
-				if ( ATisEmpty(l2) )
-				{
-					match = false;
-					break;
-				}
-	
-				if ( !match_inner(ATgetFirst(l2),ATgetFirst(rargs),vars,vals,&pos) )
-				{
-					match = false;
-					break;
-				}
-	
-				rargs = ATgetNext(rargs);
-				l2 = ATgetNext(l2);
-			}
-			if ( match )
-			{
-				ATerm cond = ATgetArgument(rule,1);
-				if ( is_nil(cond) || ATisEqual(build(cond,-1,vars,vals,pos),trueint) )
-				{
-					ATerm rslt = ATgetArgument(rule,3);
-					int rslt_len;
-					if ( ATisList(rslt) )
-					{
-						rslt_len = ATgetLength(rslt)-1;
-						if ( !ATisEmpty(l2) )
-						{
-							rslt = (ATerm) ATconcat((ATermList) rslt,l2);
-						}
-					} else {
-						rslt_len = 0;
-						if ( !ATisEmpty(l2) )
-						{
-							rslt = (ATerm) ATinsert(l2,rslt);
-						}
-					}
-					ATerm t = build(rslt,rslt_len,vars,vals,pos);
-					FREE_A(vals)
-					FREE_A(vars)
-					return t;
-				}		
-			}
-		}
-	}
-
-	FREE_A(vals)
-	FREE_A(vars)*/
 
 	if ( ATisEmpty(args) )
 	{
@@ -1472,12 +1468,6 @@ static ATerm rewrite(ATerm Term)
 	{
 		ATermList l = ATgetNext((ATermList) Term);
 
-/*		m = ATmakeList0();
-		for (; !ATisEmpty(l); l=ATgetNext(l))
-		{
-			m = ATinsert(m,rewrite(ATgetFirst(l)));
-		}
-		l = ATreverse(m);*/
 		l = rewrite_listelts(l);
 
 		if ( !ATisInt(ATgetFirst((ATermList) Term)) )
