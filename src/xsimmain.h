@@ -122,6 +122,7 @@ private:
     void OnCloseWindow( wxCloseEvent &event );
     void stateOnListItemSelected( wxListEvent &event );
     void transOnListItemActivated( wxListEvent &event );
+    void UpdateSizes( wxCommandEvent &event );
     
 private:
     void SetCurrentState(ATerm state, bool showchange = false);

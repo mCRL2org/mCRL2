@@ -58,6 +58,9 @@ XSimMain::XSimMain( wxWindow *parent, wxWindowID id, const wxString &title,
     CreateStatus();
     CreateContent();
 
+    /* Attach resize event handler */
+    Connect(id, wxEVT_SIZE, wxCommandEventHandler(XSimMain::UpdateSizes), NULL, this);
+
     state_vars = ATmakeList0();
     ATprotectList(&state_vars);
     state_varnames = ATmakeList0();
@@ -198,6 +201,36 @@ void XSimMain::CreateContent()
 
     stateview->SetColumnWidth(1,stateview->GetClientSize().GetWidth() - stateview->GetColumnWidth(0));
     transview->SetColumnWidth(1,transview->GetClientSize().GetWidth() - transview->GetColumnWidth(0));
+}
+
+void XSimMain::UpdateSizes(wxCommandEvent &event) {
+  int s  = stateview->GetClientSize().GetWidth() - stateview->GetColumnWidth(0);
+
+  event.Skip();
+
+  if (s <= 80) {
+    s = wxLIST_AUTOSIZE;
+  }
+
+  /* Set column width of stateview, if necessary */
+  if (stateview->GetColumnWidth(1) != s) { 
+    stateview->SetColumnWidth(1, s);
+  }
+
+  s  = transview->GetClientSize().GetWidth() - transview->GetColumnWidth(0);
+
+  if (s <= 80) {
+    s = wxLIST_AUTOSIZE;
+  }
+
+  /* Set column width of transview, if necessary */
+  if (transview->GetColumnWidth(1) != s) { 
+    transview->SetColumnWidth(1, s);
+  }
+
+  s = split->GetClientSize().GetHeight() >> 1;
+
+  split->SetSashPosition(s);
 }
 
 void XSimMain::LoadFile(const wxString &filename)
