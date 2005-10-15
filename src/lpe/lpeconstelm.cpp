@@ -1,6 +1,7 @@
 // TODO
 // BRACKETS VERWIJDEREN IN BOOST OM DE OPTIES!!!!!
 // GOED MAKEN VAN LAYOUT (UITLIJNING)
+// ON WINDOWS ansi.sys DRIVER NEEDS TO BE INSTALLED TO DISPLAY COLOR
 
 //C++
 #include <iostream>
@@ -48,8 +49,8 @@ data_assignment_list          newstatevector; // newstate vector
 data_assignment_list          tvector;
 data_assignment_list          sv;
 data_assignment_list          ainit;
+data_variable_list            freevars;
 int                           n;    //number of process parameters
-
 
 bool compare(data_expression x, data_expression y, data_equation_list equations)
 {
@@ -58,46 +59,46 @@ bool compare(data_expression x, data_expression y, data_equation_list equations)
   return atermpp::aterm(x1) == atermpp::aterm(y1);
 }
 
-data_assignment_list nextstate(data_assignment_list currentstate, data_assignment_list assignments, data_equation_list equations)
+data_assignment_list nextstate(data_assignment_list currentstate, data_assignment_list assignments, data_equation_list equations, LPE lpe)
 {
   data_assignment_list out;
+  data_assignment_list out1;
+  data_assignment_list out2;
+  data_expression z;
   
   data_assignment_list::iterator i = currentstate.begin();
-  while( i!= currentstate.end()){
-    data_assignment_list::iterator j = assignments.begin(); 
-    while (j != assignments.end()){
-      if (i->lhs() == j->lhs()){
-        data_expression z = j->rhs();
-        data_assignment_list::iterator k = currentstate.begin();
-        while (k != currentstate.end()){
-          z = z.substitute(*k);
-          k++;
-        };
-        out = append(
-                out, 
-                data_assignment( 
-                  i->lhs(), 
-                  data_expression(
-                    aterm ( 
-                      rewrite(
-                        z.to_ATermAppl(), 
-                        gsMakeDataEqnSpec(
-                          equations.to_ATermList()
-                        )  
-                      )
-                    ) 
-                  )
-                )
-              );
-      } else {
-        out = append(out,*i);
-      }
-    j++;
-    } 
+  while(i != currentstate.end() ){
+    z = i->lhs().to_expr();
+    //cout << z.s << endl;
+    out = append(out, data_assignment(i->lhs(), z ) );
     i++;
   }
   
- return out; 
+  i = out.begin();
+  while(i != out.end() ){
+    data_assignment_list::iterator j = assignments.begin();
+    z = i->lhs().to_expr();
+    while( j != assignments.end() ){
+      z = z.substitute( *j );    
+      j++;
+    } 
+    out1 = append(out1, data_assignment(i->lhs(), z));
+    i++;
+  }
+
+  i = out1.begin();
+  while(i != out1.end() ){
+    data_assignment_list::iterator j = currentstate.begin();
+    z = i->rhs();
+    while( j != currentstate.end() ){
+      z = z.substitute( *j );    
+      j++;
+    } 
+    out2 = append(out2, data_assignment(i->lhs(),data_expression( rewrite(z.to_ATermAppl(), gsMakeDataEqnSpec(equations.to_ATermList())))));
+    i++;
+  }
+ 
+ return out2; 
 }
 
 data_expression_list rhsl(data_assignment_list x)
@@ -155,15 +156,11 @@ bool eval_cond(data_expression datexpr, data_assignment_list statevector, data_e
     j++;
   };
 
-  //cout << conditionvector.pp() << endl;
-  
   // 
   // !!!!!!! data_expression(gsMakeOpIdFalse()) !!!!!! DIRECTE AANROEP UIT GSFUNC
   //
 
   b = !compare(data_expression(gsMakeOpIdFalse()), datexpr, equations);
-
-  //cout << conditionvector.pp() << endl << datexpr.pp() << endl << b << endl << endl;
 
   return b;
 }
@@ -182,29 +179,38 @@ void print_const(specification spec , set< int > S)
     result = append(result, data_assignment(  element_at(lhsl(sub), *i) , element_at( rhsl(sub), *i  )));
     i++;
   };
-
-  //Display constants
-  cout << result.pp() << endl;
+  
+  { 
+  cout << "\033[0;1;37m Constant Process parameters : \033[m" << endl;
+  cout << "     "<< result.pp() << endl;
+  };
   
   return;
 }
 
 void constelm(string filename, int option)
 {
+  // Load LPE input file
   specification spec;
   if (!spec.load(filename))
   {
     cerr << "could not read " << filename << endl;
     return;
   }
+  
   LPE lpe = spec.lpe();
-
+  
+  //
+  // Determine the inital processes
+  // 
   n = lpe.process_parameters().size();
   sv = spec.init_assignments();
   ainit = spec.init_assignments();
   newstatevector = sv;  
-
   
+  freevars = concat(spec.initial_free_variables(), lpe.free_variables());
+  
+
   set< int > V; 
   set< int > S;
 
@@ -219,30 +225,58 @@ void constelm(string filename, int option)
   // Als V <  S dan zijn er variabele process parameters gevonden
   ////
 
+  cout << endl << " Output of: "<< filename <<endl << endl;
 
+  int count = 1; 
   while(S.size()!=V.size()) {
     sv = newstatevector;
     S = V;
     V.clear();
-
     set< int > S_dummy;        
     
+    {
+    cout << "\033[0;1;37m Iteration           : \033[m" << count++ << endl; 
+    cout << "\033[0;1;37m Current statevector : \033[m" << sv.pp() << endl;
+    cout << "\033[0;1;37m Resulting Nextstates: \033[m" << endl;
+    };
+    
     for(summand_list::iterator s_current = lpe.summands().begin(); s_current != lpe.summands().end(); ++s_current){ 
-      if (eval_cond(s_current->condition(), sv, spec.equations(), S)){
+      if (eval_cond(s_current->condition(), sv, spec.equations(), S)) {
         
         data_assignment_list ass_nextstate = s_current->assignments();
-        tvector = nextstate(sv, ass_nextstate, spec.equations() );
+        tvector = nextstate(sv, ass_nextstate, spec.equations(), lpe );
       
         set< int >::iterator j = S.begin();
         while (j != S.end()){
-          if (element_at(rhsl(ainit), *j) != (element_at(rhsl(tvector), *j)  ) ){
-            S_dummy.insert(*j);
-            newstatevector = replace(newstatevector, element_at(tvector, *j), *j);
-            
-          };
+          
+	  bool skip = false; 
+	  //Begin freevar hack  
+	  data_variable_list::iterator f = freevars.begin();
+	  while (f != freevars.end()){
+	    if ( compare(element_at(rhsl(tvector), *j) , f->to_expr(), spec.equations() ) || 
+	         compare(element_at(rhsl(ainit), *j) , f->to_expr(), spec.equations() ) ){
+	      skip = true;
+	      if (compare(element_at(rhsl(ainit), *j) , f->to_expr(), spec.equations() )){ 
+	        ainit = replace(ainit, element_at(tvector, *j), *j);
+	      };    
+	    };
+	    f++;
+	  };
+	  // End Freevar hack
+	   
+	  if (!skip){ 
+	    if (element_at(rhsl(ainit), *j) != (element_at(rhsl(tvector), *j)  ) ){
+              S_dummy.insert(*j);
+              newstatevector = replace(newstatevector, element_at(tvector, *j), *j);
+            };
+	  };
           j++;
         };
-        cout << sv.pp() << " -- " << tvector.pp() << " -- " << newstatevector.pp() << endl; 
+        //Debug print
+	
+	{
+    	cout << "     " << newstatevector.pp() << endl; 
+        };
      };
          
     }; 
@@ -251,8 +285,7 @@ void constelm(string filename, int option)
 
     cout << endl;
   }; 
-  //cout << V.size() << endl; 
-
+  
   print_const(spec , S);
 
   return;

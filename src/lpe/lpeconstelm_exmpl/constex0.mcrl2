@@ -1,0 +1,7 @@
+% simple test
+act action :Nat;
+
+proc P(i: Nat) = action(i). P(i+1);
+
+init P(0);
+
