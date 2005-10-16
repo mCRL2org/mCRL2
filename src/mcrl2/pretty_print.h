@@ -9,7 +9,7 @@ namespace mcrl2 {
   inline
   std::string pretty_print(ATerm t)
   {
-    return PrintPart_CXX(t, ppBasic);
+    return PrintPart_CXX(t, ppAdvanced);
   }
 
 } // namespace mcrl
