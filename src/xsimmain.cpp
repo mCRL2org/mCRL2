@@ -185,15 +185,17 @@ void XSimMain::CreateContent()
 
     split->SplitHorizontally(bottompanel,toppanel);
     split->SetMinimumPaneSize(27);
-    mainsizer->Add(split,1,wxEXPAND|wxALIGN_CENTER|wxALL,5);
+    mainsizer->Add(split, 1, wxEXPAND|wxALIGN_CENTER|wxALL, 5);
     
     SetMinSize(wxSize(240,160));
 
-    stateview->InsertColumn(0,wxT("Parameter"), wxLIST_FORMAT_CENTRE, 120);
-    stateview->InsertColumn(1,wxT("Value"), wxLIST_FORMAT_LEFT, wxLIST_AUTOSIZE_USEHEADER|wxLIST_AUTOSIZE);
+    stateview->InsertColumn(0, wxT("Parameter"), wxLIST_FORMAT_CENTRE, 120);
+    stateview->InsertColumn(1, wxT("Value"), wxLIST_FORMAT_LEFT);
+    stateview->SetColumnWidth(1, wxLIST_AUTOSIZE_USEHEADER|wxLIST_AUTOSIZE);
 
-    transview->InsertColumn(0,wxT("Action"), wxLIST_FORMAT_CENTRE, 120);
-    transview->InsertColumn(1,wxT("State Change"), wxLIST_AUTOSIZE_USEHEADER|wxLIST_AUTOSIZE);
+    transview->InsertColumn(0, wxT("Action"), wxLIST_FORMAT_CENTRE, 120);
+    transview->InsertColumn(1, wxT("State Change"), wxLIST_FORMAT_LEFT);
+    transview->SetColumnWidth(1, wxLIST_AUTOSIZE_USEHEADER|wxLIST_AUTOSIZE);
     transview->SetFocus();
 
     /* Show in order to be able to query client width */
