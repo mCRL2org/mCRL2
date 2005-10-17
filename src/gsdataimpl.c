@@ -2456,9 +2456,9 @@ void gsImplFunctionSort(ATermAppl SortArrow, TDataDecls *PDataDecls)
       (ATerm) gsMakeDataEqn(fl, nil,
         gsMakeDataExprEq(fSortArrow, fSortArrow), t),
       //inequality (SortArrow -> SortArrow -> Bool)
-      (ATerm) gsMakeDataEqn(fl,nil,
-        gsMakeDataExprNeq(fSortArrow, fSortArrow), 
-        gsMakeDataExprNot(gsMakeDataExprEq(fSortArrow, fSortArrow))),
+      (ATerm) gsMakeDataEqn(fgl,nil,
+        gsMakeDataExprNeq(fSortArrow, gSortArrow), 
+        gsMakeDataExprNot(gsMakeDataExprEq(fSortArrow, gSortArrow))),
       //conditional (Bool -> SortArrow -> SortArrow -> SortArrow)
       (ATerm) gsMakeDataEqn(fgl,nil,
         gsMakeDataExprIf(t, fSortArrow, gSortArrow),
