@@ -52,8 +52,54 @@ data_assignment_list          ainit;
 data_variable_list            freevars;
 int                           n;    //number of process parameters
 
+
+string findfile(string path)
+{
+  string token = "";
+  string::size_type begIdx;
+  string::size_type endIdx;
+
+  // Find first position after last appearance
+  //  of forward- or backslash
+
+  begIdx = path.find_last_of( "\\\/" );
+  if ( begIdx == string::npos )
+    begIdx = 0;
+  else
+    ++begIdx;
+
+  endIdx = path.size();
+  token = path.substr( begIdx, endIdx );
+  
+  return token;
+
+}
+
+string findpath(string path)
+{
+  string token = "";
+  string::size_type begIdx;
+  string::size_type endIdx;
+
+  // Find first position after last appearance
+  //  of forward- or backslash
+
+  endIdx = path.find_last_of( "\\\/" );
+  if ( endIdx == string::npos )
+    endIdx = 0;
+  else
+    ++endIdx;
+
+  begIdx = 0;
+  token = path.substr( begIdx, endIdx );
+  
+  return token;
+
+}
+
 bool compare(data_expression x, data_expression y, data_equation_list equations)
 {
+  return x==y;
   ATermAppl x1 = rewrite(x.to_ATermAppl(), gsMakeDataEqnSpec(equations.to_ATermList()));
   ATermAppl y1 = rewrite(y.to_ATermAppl(), gsMakeDataEqnSpec(equations.to_ATermList()));
   return atermpp::aterm(x1) == atermpp::aterm(y1);
@@ -148,8 +194,6 @@ bool eval_cond(data_expression datexpr, data_assignment_list statevector, data_e
     i++;
   };
 
-  //assert(false);
-    
   data_assignment_list::iterator j = conditionvector.begin();
   while (j != conditionvector.end() ){;
     datexpr = datexpr.substitute(*j);
@@ -163,6 +207,39 @@ bool eval_cond(data_expression datexpr, data_assignment_list statevector, data_e
   b = !compare(data_expression(gsMakeOpIdFalse()), datexpr, equations);
 
   return b;
+}
+
+void  save_const(specification spec,string  outfile, set< int > S){
+
+  LPE lpe = spec.lpe();
+
+  set< int >::iterator i;
+  data_assignment_list sub = spec.init_assignments();
+  data_assignment_list result;
+  
+  i = S.begin();
+  while (i != S.end()) {
+    result = append(result, data_assignment(  element_at(lhsl(sub), *i) , element_at( rhsl(sub), *i  )));
+    i++;
+  };
+  
+  data_assignment_list::iterator j = result.begin();
+  while(j != result.end() ){
+    lpe = lpe.substitute(*j);
+    j++;
+  }
+
+ // spec2 = specification()
+
+  
+  if  (spec.save(outfile)){
+    cout << " Written output file: " << outfile << endl;
+  } else
+  {
+    cout << " \033[0;31mUnsuccefully\033[0m written to output file: " << outfile << endl;
+  }
+
+  return;
 }
 
 void print_const(specification spec , set< int > S)
@@ -181,14 +258,14 @@ void print_const(specification spec , set< int > S)
   };
   
   { 
-  cout << "\033[0;1;37m Constant Process parameters : \033[m" << endl;
-  cout << "     "<< result.pp() << endl;
+    cout << "\033[0;1;37m Constant Process parameters : \033[m" << endl;
+    cout << "     "<< result.pp() << endl <<endl;
   };
   
   return;
 }
 
-void constelm(string filename, int option)
+void constelm(string filename, string outfile, int option)
 {
   // Load LPE input file
   specification spec;
@@ -197,9 +274,16 @@ void constelm(string filename, int option)
     cerr << "could not read " << filename << endl;
     return;
   }
-  
+ 
+  cout << "Read from input file : " << filename << endl;
   LPE lpe = spec.lpe();
-  
+
+
+  int bla = 0;   
+
+  //cout << outfile << endl; 
+
+ // assert(false);
   //
   // Determine the inital processes
   // 
@@ -210,6 +294,9 @@ void constelm(string filename, int option)
   
   freevars = concat(spec.initial_free_variables(), lpe.free_variables());
   
+  cout << freevars.size() << endl; 
+  cout << freevars.pp() << endl;
+ 
 
   set< int > V; 
   set< int > S;
@@ -235,49 +322,64 @@ void constelm(string filename, int option)
     set< int > S_dummy;        
     
     {
-    cout << "\033[0;1;37m Iteration           : \033[m" << count++ << endl; 
-    cout << "\033[0;1;37m Current statevector : \033[m" << sv.pp() << endl;
-    cout << "\033[0;1;37m Resulting Nextstates: \033[m" << endl;
+      cout << "\033[0;1;37m Iteration           : \033[m" << count++ << endl; 
+      cout << "\033[0;1;37m Current statevector : \033[m" << sv.pp() << endl;
+      cout << "\033[0;1;37m Resulting Nextstates: \033[m" << endl;
     };
     
     for(summand_list::iterator s_current = lpe.summands().begin(); s_current != lpe.summands().end(); ++s_current){ 
       if (eval_cond(s_current->condition(), sv, spec.equations(), S)) {
         
+        cout << sv.pp() << endl;
+        cout << s_current->condition().pp() << endl;   
+
         data_assignment_list ass_nextstate = s_current->assignments();
         tvector = nextstate(sv, ass_nextstate, spec.equations(), lpe );
       
         set< int >::iterator j = S.begin();
+        
         while (j != S.end()){
           
-	  bool skip = false; 
-	  //Begin freevar hack  
-	  data_variable_list::iterator f = freevars.begin();
-	  while (f != freevars.end()){
-	    if ( compare(element_at(rhsl(tvector), *j) , f->to_expr(), spec.equations() ) || 
-	         compare(element_at(rhsl(ainit), *j) , f->to_expr(), spec.equations() ) ){
-	      skip = true;
-	      if (compare(element_at(rhsl(ainit), *j) , f->to_expr(), spec.equations() )){ 
-	        ainit = replace(ainit, element_at(tvector, *j), *j);
-	      };    
-	    };
-	    f++;
-	  };
-	  // End Freevar hack
-	   
-	  if (!skip){ 
-	    if (element_at(rhsl(ainit), *j) != (element_at(rhsl(tvector), *j)  ) ){
+         
+
+	        bool skip = false; 
+	        //Begin freevar hack  
+	    	
+          data_variable_list::iterator f = freevars.begin();
+          
+	        while (f != freevars.end()){
+          //bla++;
+          //cout << bla << "--" << f->pp() << endl; 
+	        if ( compare(element_at(rhsl(tvector), *j) , f->to_expr(), spec.equations() ) || 
+	          compare(element_at(rhsl(ainit), *j) , f->to_expr(), spec.equations() ) ){
+	            skip = true;
+            //  cout << bla << "skipped" << endl;
+	            if (compare(element_at(rhsl(ainit), *j) , f->to_expr(), spec.equations() )){ 
+	              ainit = replace(ainit, element_at(tvector, *j), *j);
+	          //    cout << bla << "if" << endl;
+                };    
+	          };
+            //cout << bla << "no freevar" << endl;
+	          f++;
+	        };
+	        // End Freevar hack 
+
+
+	        
+	        if (!skip){ 
+	          if (element_at(rhsl(ainit), *j) != (element_at(rhsl(tvector), *j)  ) ){
               S_dummy.insert(*j);
               newstatevector = replace(newstatevector, element_at(tvector, *j), *j);
             };
-	  };
+	        };
           j++;
         };
         //Debug print
 	
-	{
-    	cout << "     " << newstatevector.pp() << endl; 
+	      {
+    	    cout << "     " << newstatevector.pp() << endl; 
         };
-     };
+      };
          
     }; 
     
@@ -287,13 +389,18 @@ void constelm(string filename, int option)
   }; 
   
   print_const(spec , S);
+ // save_const(spec, outfile, S);
 
   return;
 }
 
 int main(int ac, char* av[])
 {
-      string filename;
+   ATerm bot;
+   ATinit(0,0,&bot);
+   gsEnableConstructorFunctions();
+  
+      vector< string > filename;
       int opt = 0;
 
       try {
@@ -308,7 +415,7 @@ int main(int ac, char* av[])
 	
 	po::options_description hidden("Hidden options");
 	hidden.add_options()
-	    ("INFILE", po::value<string>(), "input file" )
+    ("INFILE", po::value< vector<string> >(), "input file")
 	;
 	
 	po::options_description cmdline_options;
@@ -319,14 +426,13 @@ int main(int ac, char* av[])
 	
 	po::positional_options_description p;
 	p.add("INFILE", -1);
-	
-	po::variables_map vm;
-        po::store(po::command_line_parser(ac, av).
-                  options(cmdline_options).positional(p).run(), vm);
-        po::notify(vm);
-        
+
+        po::variables_map vm;
+        store(po::command_line_parser(ac, av).
+              options(cmdline_options).positional(p).run(), vm);
+     
         if (vm.count("help") || ac == 1) {
-            cerr << "Usage: "<< av[0] << " [OPTION]... INFILE\n";
+            cerr << "Usage: "<< av[0] << " [OPTION]... INFILE [OUTFILE] \n";
             cerr << "Remove constant process parameters from the LPE in INFILE, and write the result" << endl;
             cerr << "to stdout." << endl;
             cerr << endl;
@@ -356,11 +462,29 @@ int main(int ac, char* av[])
 
         if (vm.count("INFILE"))
         {
-          filename = vm["INFILE"].as<string>();
+          filename = vm["INFILE"].as< vector<string> >();
+                 //<< vm["input-file"].as< vector<string> >() << "\n";
 	      }
         //set< int > S = constelm(filename, opt);
-        constelm(filename, opt);      
+
+        if (filename.size() > 2)
+        {
+          cerr << "Specify only INPUT and/or OUTPUT file (Too many arguments)."<< endl;
+        };
+             
+
+        if (filename.size() == 2)
+        {
+          constelm(filename[0], filename[1], opt); 
+        };
 	
+        if(filename.size() == 1)
+        {
+          string temp = "constelm_";
+          temp = findpath(filename[0]).append(temp.append(findfile(filename[0])));
+          constelm(filename[0], temp , opt);
+        };
+
     }
     catch(exception& e)
     {
