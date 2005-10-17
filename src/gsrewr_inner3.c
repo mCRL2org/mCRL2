@@ -279,6 +279,8 @@ void rewrite_finalise_inner3()
 	ATunprotectAFun(ruleAFun);
 	ATunprotectArray((ATerm *) int2term);
 	ATunprotectArray((ATerm *) inner3_eqns);
+	free(int2term);
+	free(inner3_eqns);
 	is_initialised = false;
 }
 

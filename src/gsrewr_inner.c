@@ -1171,6 +1171,9 @@ void rewrite_finalise_inner()
 	ATunprotectArray((ATerm *) int2term);
 	ATunprotectArray((ATerm *) inner_eqns);
 	ATunprotectArray((ATerm *) inner_trees);
+	free(int2term);
+	free(inner_eqns);
+	free(inner_trees);
 	is_initialised = false;
 }
 
