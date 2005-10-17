@@ -265,6 +265,7 @@ void PRINT_FUNC(PrintPart_)(PRINT_OUTTYPE OutStream, const ATerm Part,
 #elif defined(PRINT_CXX)
       std::cerr  << "error: ATerm Part is not an ATermAppl or an ATermList\n";
 #endif
+      assert(false);
     }
   }
 }
@@ -987,6 +988,7 @@ void PRINT_FUNC(PrintPart_Appl)(PRINT_OUTTYPE OutStream,
       << ATwriteToString((ATerm) Part)
       << " is not part of the internal format\n";
 #endif
+    assert(false);
   }
 }
 
