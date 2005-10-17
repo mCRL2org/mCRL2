@@ -40,6 +40,8 @@ using namespace atermpp;
 namespace po = boost::program_options;
 po::variables_map vm;
 
+
+
 //Constanten
 string version = "Version 0.2";
 
@@ -62,7 +64,7 @@ string findfile(string path)
   // Find first position after last appearance
   //  of forward- or backslash
 
-  begIdx = path.find_last_of( "\\\/" );
+  begIdx = path.find_last_of( "\\/" );
   if ( begIdx == string::npos )
     begIdx = 0;
   else
@@ -84,7 +86,7 @@ string findpath(string path)
   // Find first position after last appearance
   //  of forward- or backslash
 
-  endIdx = path.find_last_of( "\\\/" );
+  endIdx = path.find_last_of( "\\/" );
   if ( endIdx == string::npos )
     endIdx = 0;
   else
@@ -94,12 +96,13 @@ string findpath(string path)
   token = path.substr( begIdx, endIdx );
   
   return token;
-
 }
 
 bool compare(data_expression x, data_expression y, data_equation_list equations)
 {
   return x==y;
+
+
   ATermAppl x1 = rewrite(x.to_ATermAppl(), gsMakeDataEqnSpec(equations.to_ATermList()));
   ATermAppl y1 = rewrite(y.to_ATermAppl(), gsMakeDataEqnSpec(equations.to_ATermList()));
   return atermpp::aterm(x1) == atermpp::aterm(y1);
@@ -174,6 +177,9 @@ data_variable_list lhsl(data_assignment_list x)
 bool eval_cond(data_expression datexpr, data_assignment_list statevector, data_equation_list equations, set<int> S){
 
   bool b;
+  
+  return true;
+
   set<int>::iterator i;
   data_assignment_list conditionvector; 
   
@@ -279,7 +285,7 @@ void constelm(string filename, string outfile, int option)
   LPE lpe = spec.lpe();
 
 
-  int bla = 0;   
+  //int bla = 0;   
 
   //cout << outfile << endl; 
 
@@ -294,8 +300,8 @@ void constelm(string filename, string outfile, int option)
   
   freevars = concat(spec.initial_free_variables(), lpe.free_variables());
   
-  cout << freevars.size() << endl; 
-  cout << freevars.pp() << endl;
+  //cout << freevars.size() << endl; 
+  //cout << freevars.pp() << endl;
  
 
   set< int > V; 
@@ -330,8 +336,8 @@ void constelm(string filename, string outfile, int option)
     for(summand_list::iterator s_current = lpe.summands().begin(); s_current != lpe.summands().end(); ++s_current){ 
       if (eval_cond(s_current->condition(), sv, spec.equations(), S)) {
         
-        cout << sv.pp() << endl;
-        cout << s_current->condition().pp() << endl;   
+        //cout << sv.pp() << endl;
+        //cout << s_current->condition().pp() << endl;   
 
         data_assignment_list ass_nextstate = s_current->assignments();
         tvector = nextstate(sv, ass_nextstate, spec.equations(), lpe );
@@ -339,8 +345,6 @@ void constelm(string filename, string outfile, int option)
         set< int >::iterator j = S.begin();
         
         while (j != S.end()){
-          
-         
 
 	        bool skip = false; 
 	        //Begin freevar hack  
@@ -359,7 +363,7 @@ void constelm(string filename, string outfile, int option)
 	          //    cout << bla << "if" << endl;
                 };    
 	          };
-            //cout << bla << "no freevar" << endl;
+                 //cout << bla << "no freevar" << endl;
 	          f++;
 	        };
 	        // End Freevar hack 
@@ -369,6 +373,11 @@ void constelm(string filename, string outfile, int option)
 	        if (!skip){ 
 	          if (element_at(rhsl(ainit), *j) != (element_at(rhsl(tvector), *j)  ) ){
               S_dummy.insert(*j);
+              int x = *j;
+              cout << x << endl;
+              if (0 > x) {cout << x << endl;};
+              if (x >= n) {cout << x << endl;};
+              //assert(( 0 > x) || (x >= n ));
               newstatevector = replace(newstatevector, element_at(tvector, *j), *j);
             };
 	        };
@@ -389,7 +398,7 @@ void constelm(string filename, string outfile, int option)
   }; 
   
   print_const(spec , S);
- // save_const(spec, outfile, S);
+  save_const(spec, outfile, S);
 
   return;
 }
