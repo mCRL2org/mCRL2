@@ -264,13 +264,13 @@ $(LIN_NAME) : $(LIN_OBJECTS) $(ATERM_DEP) $(LIBREWR_NAME)
 
 %.d : %.c
 	@echo generating dependencies for $<
-	@$(CC) -MM $(CPPFLAGS) $< > $@.$$$$; \
+	@$(CC) -MT '$*.o' -MM $(CPPFLAGS) $< > $@.$$$$; \
 	sed 's,\($*\)\.o[ :]*,\1.o $@ : ,g' < $@.$$$$ > $@; \
 	$(RM) $@.$$$$
 
 %.dpp : %.cpp
 	@echo generating dependencies for $<
-	@$(CXX) -MM $(CPPFLAGS) $< > $@.$$$$; \
+	@$(CXX) -MT '$*.o' -MM $(CPPFLAGS) $< > $@.$$$$; \
 	sed 's,\($*\)\.o[ :]*,\1.o $@ : ,g' < $@.$$$$ > $@; \
 	$(RM) $@.$$$$
 

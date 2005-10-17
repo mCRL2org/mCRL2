@@ -43,8 +43,8 @@ BEGIN_EVENT_TABLE(XSimMain,wxFrame)
     EVT_MENU(ID_LOADVIEW, XSimMain::OnLoadView)
     EVT_MENU(wxID_ABOUT, XSimMain::OnAbout)
     EVT_CLOSE(XSimMain::OnCloseWindow)
-    EVT_LIST_ITEM_SELECTED(ID_LISTCTRL1,XSimMain::stateOnListItemSelected)
-    EVT_LIST_ITEM_ACTIVATED(ID_LISTCTRL2,XSimMain::transOnListItemActivated)
+    EVT_LIST_ITEM_SELECTED(ID_LISTCTRL1, XSimMain::stateOnListItemSelected)
+    EVT_LIST_ITEM_ACTIVATED(ID_LISTCTRL2, XSimMain::transOnListItemActivated)
 END_EVENT_TABLE()
 
 XSimMain::XSimMain( wxWindow *parent, wxWindowID id, const wxString &title,
@@ -60,6 +60,7 @@ XSimMain::XSimMain( wxWindow *parent, wxWindowID id, const wxString &title,
 
     /* Attach resize event handler */
     Connect(id, wxEVT_SIZE, wxCommandEventHandler(XSimMain::UpdateSizes), NULL, this);
+    Connect(id, wxEVT_MAXIMIZE, wxCommandEventHandler(XSimMain::UpdateSizes), NULL, this);
 
     state_vars = ATmakeList0();
     ATprotectList(&state_vars);
@@ -193,7 +194,7 @@ void XSimMain::CreateContent()
     stateview->InsertColumn(1, wxT("Value"), wxLIST_FORMAT_LEFT);
     stateview->SetColumnWidth(1, wxLIST_AUTOSIZE_USEHEADER|wxLIST_AUTOSIZE);
 
-    transview->InsertColumn(0, wxT("Action"), wxLIST_FORMAT_CENTRE, 120);
+    transview->InsertColumn(0, wxT("Action"), wxLIST_FORMAT_LEFT, 120);
     transview->InsertColumn(1, wxT("State Change"), wxLIST_FORMAT_LEFT);
     transview->SetColumnWidth(1, wxLIST_AUTOSIZE_USEHEADER|wxLIST_AUTOSIZE);
     transview->SetFocus();
