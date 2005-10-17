@@ -11,7 +11,6 @@
 #include "atermpp/aterm.h"
 #include "atermpp/aterm_algorithm.h"
 #include "mcrl2/term_list_iterator.h"
-#include "mcrl2/gs_init.h"
 #include "mcrl2/substitute.h"
 
 namespace mcrl2 {
@@ -384,7 +383,7 @@ using atermpp::aterm_list;
   template <typename Term>
   inline
   Term element_at(term_list<Term> l, int index)
- { return (Term) aterm_appl(ATelementAt(l.to_ATermList(), index)) ; }
+ { return Term(aterm_appl(ATelementAt(l.to_ATermList(), index))); }
   
   /**
     * Return list with one occurrence of el removed.

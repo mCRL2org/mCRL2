@@ -1,28 +1,17 @@
-project lpe/example
+project src/lpe/example
    : requirements
-       <include>../../../..
+       <include>../..
        <include>../../../../boost
-       <include>../../../src
-       <include>../../../src/nt
-       <source>/aterm//libaterm
+       <source>../../build//mcrl-gs
        <source>/boost/program_options//boost_program_options
-       <define>BOOST_ALL_NO_LIB    # do not use automatic library selection
+       <os>LINUX:<linkflags>-ldl
    ;
 
-SOURCES = gsfunc libgsrewrite gsrewr_inner gsrewr_inner2 gsrewr_inner3 gsrewr_innerc
-		  gsrewr_jitty gssubstitute libprint_c gslowlevel
-   ;
-
-lib mcrl-gs
-    : ../../$(SOURCES).c ../../libprint_cxx.cpp
-    : <cflags>-std=c99
-      <os>linux:<linkflags>-ldl
-    ;
-
+exe lpeconstelm  : lpeconstelm.cpp : ;
 exe test1        : test1.cpp : ;
 exe test2        : test2.cpp : ;
 exe test3        : test3.cpp : ;
-exe spec         : spec.cpp mcrl-gs : ;
+exe spec         : spec.cpp  : ;
 
 install dist
    :
@@ -30,5 +19,6 @@ install dist
      test2
      test3
      spec
-   : 
+     lpeconstelm
+   :
    ;

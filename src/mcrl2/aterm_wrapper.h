@@ -8,7 +8,6 @@
 #include <list>
 #include <boost/iterator/iterator_facade.hpp>
 #include "atermpp/aterm.h"
-#include "mcrl2/gs_init.h"
 #include "mcrl2/pretty_print.h"
 
 namespace mcrl2 {

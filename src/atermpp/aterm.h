@@ -26,7 +26,6 @@
 #include <boost/iterator/iterator_facade.hpp>
 #include "aterm2.h"
 #include "atermpp/aterm_conversion.h"
-#include "atermpp/aterm_init.h"
 
 namespace atermpp
 {
