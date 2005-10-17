@@ -5,6 +5,9 @@ AC_CONFIG_SRCDIR([gslowlevel.h])
 
 # Setting host OS
 case $host in
+  *-*-mingw32*)
+    HOST_OS="MINGW"
+    ;;
   *-*-msdos* | *-*-go32* | *-*-mingw32* | *-*-cygwin* | *-*-windows*)
     HOST_OS="WINDOWS"
     ;;

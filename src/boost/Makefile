@@ -22,12 +22,27 @@ endif
 
 .PHONY: all bjam clean
 
+ifeq ($(HOST_OS),MINGW)
+
+all: bjam
+	tools/build/jam_src/bin/bjam.exe -sTOOLS=mingw --prefix=. install --layout=system
+
+bjam:
+	echo "Please manually close command window, when build has completed!"
+	cd tools/build/jam_src; \
+	start build.bat mingw; \
+	while [ ! -e "bin/bjam.exe" ]; do \
+	  sleep 3; \
+	done
+else
+
 all: bjam
 	tools/build/jam_src/bin/bjam --prefix=. install --layout=system
-
 bjam:
 	cd tools/build/jam_src; \
 	$(bjam_builder)
+endif
 
 clean:
 	@-$(RM) -rf bin lib tools/build/jam_src/bin tools/build/jam_src/bootstrap
+

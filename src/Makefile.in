@@ -62,16 +62,18 @@ else
 endif
 
 ifdef USE_BOOST
- # Boost library configuration
- ifneq ($(BOOST_PREFIX),)
-  BOOST_HEADERS   = -I$(BOOST_PREFIX)/include
-  BOOST_LIBRARIES = -L$(BOOST_PREFIX)/lib
- endif
+ # Static link to boost libraries
+ BOOST_LIBRARIES = -lboost_program_options
 
  ifeq ($(BOOST_PREFIX),boost)
-   BOOST_LIBRARIES += boost/lib/libboost_program_options.a
- else
-   BOOST_LIBRARIES += -lboost_program_options
+   ifneq ($(HOST_OS),WINDOWS)
+     BOOST_LIBRARIES = -Wl,-static -lboost_program_options -Wl,-call_shared
+   endif
+ endif
+
+ ifneq ($(BOOST_PREFIX),)
+  BOOST_HEADERS    = -I$(BOOST_PREFIX)/include
+  BOOST_LIBRARIES := -L$(BOOST_PREFIX)/lib $(BOOST_LIBRARIES)
  endif
 
  #lpeinfo definitions
@@ -135,6 +137,7 @@ OBJECTS           := $(sort $(OBJECTS))
 .PRECIOUS: gsparser.c gslexer.c
 
 all : $(BJAM) $(EXE_NAMES) $(LIB_NAMES)
+	$(MAKE) -C doc
 
 # Build bjam and boost libraries
 $(BJAM):
@@ -177,6 +180,7 @@ clean :
 
 distclean : clean
 	$(MAKE) -C boost clean
+	$(MAKE) -C doc clean
 	$(RM) -r autom4te.cache Makefile config gsrewr_innerc_aux.h
 	$(RM) -r boost/lib boost/tools/build/jam_src/bin*
 
