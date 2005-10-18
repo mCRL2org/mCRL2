@@ -109,6 +109,8 @@ XSimMain::XSimMain( wxWindow *parent, wxWindowID id, const wxString &title,
     interactive = true;
     stopper_cnt = 0;
     timer_interval = 1000;
+
+    seen_states = ATindexedSetCreate(100,80);
 }
 
 XSimMain::~XSimMain()
@@ -524,18 +526,49 @@ bool XSimMain::ChooseTransition(int index)
 		}
 
 		long i;
+		bool last = true;
 		if ( tau_prior->IsChecked() && ((i = transview->FindItem(-1,wxT("tau"))) >= 0) )
 		{
-			Update();
-			wxYield();
-			if ( !stopped )
+			ATbool b;
+			ATindexedSetPut(seen_states,current_state,&b);
+
+			bool found = false;
+			i=0;
+			for (ATermList l=next_states; !ATisEmpty(l); l=ATgetNext(l),i++)
 			{
-				ChooseTransition(transview->GetItemData(i));
+				ATermList trans = ATLgetFirst(l);
+				if ( ATisEmpty(ATLgetArgument(ATAgetFirst(trans),0)) )
+				{
+					if ( ATindexedSetGetIndex(seen_states,ATgetFirst(ATgetNext(trans))) < 0 )
+					{
+						found = true;
+						break;
+					}
+				}
+			}
+			if ( found )
+			{
+				last = false;
+				Update();
+				wxYield();
+				if ( !stopped )
+				{
+					ChooseTransition(i);
+//					ChooseTransition(transview->GetItemData(i));
+				}
+			}
+		}
+		if ( last )
+		{
+			if ( tau_prior->IsChecked() )
+			{
+				ATindexedSetReset(seen_states);
 			}
 			/* Should be done after (last) Stopper_Exit(), so not needed here
- 			} else if ( interactive ) {
-			undo->Enable();
-			redo->Enable(false);*/
+ 			if ( interactive ) {
+				undo->Enable();
+				redo->Enable(false);
+			}*/
 		}
 		
 		Stopper_Exit();

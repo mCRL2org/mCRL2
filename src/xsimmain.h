@@ -132,6 +132,7 @@ private:
     bool interactive;
     play_func_enum timer_func;
     int timer_interval;
+    ATermIndexedSet seen_states;
     
 private:
     // WDR: handler declarations for XSimMain

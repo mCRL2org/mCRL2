@@ -111,8 +111,11 @@ static ATermList get_lpe_acts(ATermAppl lpe, ATermList *ids)
 		if ( !ATisEmpty(ATLgetArgument(ATAgetArgument(ATAgetFirst(sums),2),0)) )
 		{
 			ATermAppl a = ATAgetArgument(ATAgetFirst(ATLgetArgument(ATAgetArgument(ATAgetFirst(sums),2),0)),0);
-			acts = ATinsert(acts,(ATerm) a);
-			add_id(ids,ATAgetArgument(a,0));
+			if ( ATindexOf(acts,(ATerm) a,0) == -1 )
+			{
+				acts = ATinsert(acts,(ATerm) a);
+				add_id(ids,ATAgetArgument(a,0));
+			}
 		}
 	}
 
@@ -269,7 +272,7 @@ static ATermAppl convert_lpe(ATermAppl spec, ATermList typelist, ATermList *ids)
 			al = ATinsert(al,
 				(ATerm) dataterm2ATermAppl(ATAgetFirst(l),o,typelist)
 			);
-			as = ATinsert(as,ATgetArgument(ATAgetFirst(al),1));
+			as = ATinsert(as,(ATerm) gsGetSort(ATAgetFirst(al)));
 		}
 		ATermAppl a = gsMakeAction(gsMakeActId(ATAgetArgument(s,1),as),al);
 		if ( ATisEmpty(as) && !strcmp("tau",ATgetName(ATgetAFun(ATAgetArgument(ATAgetArgument(a,0),0)))) )
