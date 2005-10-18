@@ -33,6 +33,16 @@ const int ID_TRACE = 10008;
 const int ID_LOADVIEW = 10009;
 const int ID_LOADTRACE = 10010;
 const int ID_SAVETRACE = 10011;
+const int ID_TAU = 10012;
+const int ID_SHOWDC = 10013;
+const int ID_DELAY = 10014;
+const int ID_PLAYI = 10015;
+const int ID_PLAYC = 10016;
+const int ID_PLAYRI = 10017;
+const int ID_PLAYRC = 10018;
+const int ID_STOP = 10019;
+
+enum play_func_enum { FUNC_NONE, FUNC_PLAY, FUNC_RANDOM };
 
 class XSimMain: public wxFrame, public SimulatorInterface
 {
@@ -79,9 +89,13 @@ private:
     void traceSetNext(ATermList transition);
     ATermList traceUndo();
     ATermList traceRedo();
+    void Stopper_Enter();
+    void Stopper_Exit();
+    void SetInteractiveness(bool interactive);
     
 private:
     // WDR: member variable declarations for XSimMain
+    wxTimer timer;
     ATermList state_vars;
     ATermList state_varnames;
     ATerm initial_state;
@@ -90,8 +104,17 @@ private:
     ATermList trace;
     ATermList ecart;
     wxMenuBar *menu;
+    wxMenuItem *openitem;
+    wxMenu *editmenu;
     wxMenuItem *undo;
     wxMenuItem *redo;
+    wxMenuItem *tau_prior;
+    wxMenuItem *showdc;
+    wxMenuItem *playiitem;
+    wxMenuItem *playcitem;
+    wxMenuItem *playriitem;
+    wxMenuItem *playrcitem;
+    wxMenuItem *stopitem;
     wxBoxSizer *mainsizer;
     wxSplitterWindow *split;
     wxPanel *toppanel;
@@ -104,6 +127,11 @@ private:
     wxListView *transview;
     XSimTrace *tracewin;
     viewlist views;
+    bool stopped;
+    int stopper_cnt;
+    bool interactive;
+    play_func_enum timer_func;
+    int timer_interval;
     
 private:
     // WDR: handler declarations for XSimMain
@@ -117,6 +145,14 @@ private:
     void OnFitCurrentState( wxCommandEvent &event );
     void OnTrace( wxCommandEvent &event );
     void OnLoadView( wxCommandEvent &event );
+    void OnShowDCChanged( wxCommandEvent &event );
+    void OnSetDelay( wxCommandEvent &event );
+    void OnResetAndPlay( wxCommandEvent &event );
+    void OnPlay( wxCommandEvent &event );
+    void OnResetAndPlayRandom( wxCommandEvent &event );
+    void OnPlayRandom( wxCommandEvent &event );
+    void OnTimer( wxTimerEvent &event );
+    void OnStop( wxCommandEvent &event );
     void OnAbout( wxCommandEvent &event );
     void OnTraceClose( wxCloseEvent &event );
     void OnCloseWindow( wxCloseEvent &event );
@@ -126,7 +162,7 @@ private:
     
 private:
     void SetCurrentState(ATerm state, bool showchange = false);
-    void UpdateTransitions();
+    void UpdateTransitions(bool update_next_states = true);
 
 private:
     DECLARE_EVENT_TABLE()

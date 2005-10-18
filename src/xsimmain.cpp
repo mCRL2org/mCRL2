@@ -14,6 +14,7 @@
 #include <wx/dynarray.h>
 #include <fstream>
 #include <sstream>
+#include <stdlib.h>
 #include <aterm2.h>
 #include "xsimbase.h"
 #include "xsimmain.h"
@@ -41,7 +42,15 @@ BEGIN_EVENT_TABLE(XSimMain,wxFrame)
     EVT_MENU(ID_FITCS, XSimMain::OnFitCurrentState)
     EVT_MENU(ID_TRACE, XSimMain::OnTrace)
     EVT_MENU(ID_LOADVIEW, XSimMain::OnLoadView)
+    EVT_MENU(ID_SHOWDC, XSimMain::OnShowDCChanged)
+    EVT_MENU(ID_DELAY, XSimMain::OnSetDelay)
+    EVT_MENU(ID_PLAYI, XSimMain::OnResetAndPlay)
+    EVT_MENU(ID_PLAYC, XSimMain::OnPlay)
+    EVT_MENU(ID_PLAYRI, XSimMain::OnResetAndPlayRandom)
+    EVT_MENU(ID_PLAYRC, XSimMain::OnPlayRandom)
+    EVT_MENU(ID_STOP, XSimMain::OnStop)
     EVT_MENU(wxID_ABOUT, XSimMain::OnAbout)
+    EVT_TIMER(-1, XSimMain::OnTimer)
     EVT_CLOSE(XSimMain::OnCloseWindow)
     EVT_LIST_ITEM_SELECTED(ID_LISTCTRL1, XSimMain::stateOnListItemSelected)
     EVT_LIST_ITEM_ACTIVATED(ID_LISTCTRL2, XSimMain::transOnListItemActivated)
@@ -49,7 +58,8 @@ END_EVENT_TABLE()
 
 XSimMain::XSimMain( wxWindow *parent, wxWindowID id, const wxString &title,
     const wxPoint &position, const wxSize& size, long style ) :
-    wxFrame( parent, id, title, position, size, style )
+    wxFrame( parent, id, title, position, size, style ) ,
+    timer( this )
 {
     use_dummies = false;
     rewr_strat = GS_REWR_INNER3; // XXX add to constructor?
@@ -95,6 +105,10 @@ XSimMain::XSimMain( wxWindow *parent, wxWindowID id, const wxString &title,
 		    b = config.GetNextEntry(s,i);
 	    }
     }
+
+    interactive = true;
+    stopper_cnt = 0;
+    timer_interval = 1000;
 }
 
 XSimMain::~XSimMain()
@@ -120,28 +134,42 @@ void XSimMain::CreateMenu()
     menu = new wxMenuBar;
 
     wxMenu *file = new wxMenu;
-    file->Append( wxID_OPEN, wxT("&Open...	CTRL-o"), wxT("") );
+    openitem = file->Append( wxID_OPEN, wxT("&Open...	CTRL-o"), wxT("") );
     file->AppendSeparator();
     file->Append( wxID_EXIT, wxT("&Quit	CTRL-q"), wxT("") );
     menu->Append( file, wxT("&File") );
 
-    wxMenu *edit = new wxMenu;
-    undo = edit->Append( ID_UNDO, wxT("&Undo	CTRL-LEFT"), wxT("") );
+    editmenu = new wxMenu;
+    undo = editmenu->Append( ID_UNDO, wxT("&Undo	CTRL-LEFT"), wxT("") );
     undo->Enable(false);
-    redo = edit->Append( ID_REDO, wxT("Re&do	CTRL-RIGHT"), wxT("") );
+    redo = editmenu->Append( ID_REDO, wxT("Re&do	CTRL-RIGHT"), wxT("") );
     redo->Enable(false);
-    edit->Append( ID_RESET, wxT("&Reset	CTRL-r"), wxT("") );
-    edit->AppendSeparator();
-    edit->Append( ID_LOADTRACE, wxT("&Load trace...	CTRL-l"), wxT("") );
-    edit->Append( ID_SAVETRACE, wxT("&Save trace...	CTRL-s"), wxT("") );
-    edit->AppendSeparator();
-#ifdef __WINDOWS__
-    edit->Append( ID_FITCS, wxT("F&it to Current State	CTRL-f"), wxT("") )->Enable(false);
-#else
-    edit->Append( ID_FITCS, wxT("F&it to Current State	CTRL-f"), wxT("") );
-#endif
-    menu->Append( edit, wxT("&Edit") );
+    editmenu->Append( ID_RESET, wxT("&Reset	CTRL-r"), wxT("") );
+    editmenu->AppendSeparator();
+    editmenu->Append( ID_LOADTRACE, wxT("&Load trace...	CTRL-l"), wxT("") );
+    editmenu->Append( ID_SAVETRACE, wxT("&Save trace...	CTRL-s"), wxT("") );
+    menu->Append( editmenu, wxT("&Edit") );
     
+    wxMenu *sim = new wxMenu;
+    playiitem = sim->Append( ID_PLAYI, wxT("Play Trace from Initial State"), wxT(""));
+    playcitem = sim->Append( ID_PLAYC, wxT("Play Trace from Current State"), wxT(""));
+    playriitem = sim->Append( ID_PLAYRI, wxT("Random Play from Initial State"), wxT(""));
+    playrcitem = sim->Append( ID_PLAYRC, wxT("Random Play from Current State"), wxT(""));
+    stopitem = sim->Append( ID_STOP, wxT("Stop	DEL"), wxT("") );
+    stopitem->Enable(false);
+    menu->Append( sim, wxT("&Automation") );
+    
+    wxMenu *opts = new wxMenu;
+    tau_prior = opts->Append( ID_TAU, wxT("Enable Tau Prioritisation"), wxT(""), wxITEM_CHECK );
+    showdc = opts->Append( ID_SHOWDC, wxT("Show Don't Cares in State Changes"), wxT(""), wxITEM_CHECK );
+    opts->Append( ID_DELAY, wxT("Set Play Delay"), wxT("") );
+#ifdef __WINDOWS__
+    opts->Append( ID_FITCS, wxT("F&it to Current State	CTRL-f"), wxT("") )->Enable(false);
+#else
+    opts->Append( ID_FITCS, wxT("F&it to Current State	CTRL-f"), wxT("") );
+#endif
+    menu->Append( opts, wxT("&Options") );
+
     wxMenu *views = new wxMenu;
     views->Append( ID_TRACE, wxT("&Trace	CTRL-t"), wxT("") );
     views->Append( ID_MENU, wxT("&Graph"), wxT("") )->Enable(false);
@@ -190,7 +218,7 @@ void XSimMain::CreateContent()
     
     SetMinSize(wxSize(240,160));
 
-    stateview->InsertColumn(0, wxT("Parameter"), wxLIST_FORMAT_CENTRE, 120);
+    stateview->InsertColumn(0, wxT("Parameter"), wxLIST_FORMAT_LEFT, 120);
     stateview->InsertColumn(1, wxT("Value"), wxLIST_FORMAT_LEFT);
     stateview->SetColumnWidth(1, wxLIST_AUTOSIZE_USEHEADER|wxLIST_AUTOSIZE);
 
@@ -234,6 +262,45 @@ void XSimMain::UpdateSizes(wxCommandEvent &event) {
   s = split->GetClientSize().GetHeight() >> 1;
 
   split->SetSashPosition(s);
+}
+
+void XSimMain::SetInteractiveness(bool interactive)
+{
+	int s = editmenu->GetMenuItemCount();
+	wxMenuItemList edits = editmenu->GetMenuItems();
+
+	if ( interactive )
+	{
+		openitem->Enable(true);
+		for (int i=0; i<s; i++)
+		{
+			edits[i]->Enable(true);
+		}
+		playiitem->Enable(true);
+		playcitem->Enable(true);
+		playriitem->Enable(true);
+		playrcitem->Enable(true);
+		if ( ATisEmpty(trace) || ATisEmpty(ATgetNext(trace)) )
+		{
+			undo->Enable(false);
+		}
+		if ( ATisEmpty(ecart) )
+		{
+			redo->Enable(false);
+		}
+	} else {
+		openitem->Enable(false);
+		for (int i=0; i<s; i++)
+		{
+			edits[i]->Enable(false);
+		}
+		playiitem->Enable(false);
+		playcitem->Enable(false);
+		playriitem->Enable(false);
+		playrcitem->Enable(false);
+	}
+
+	this->interactive = interactive;
 }
 
 void XSimMain::LoadFile(const wxString &filename)
@@ -380,11 +447,14 @@ bool XSimMain::Undo()
 			(*i)->StateChanged(NULL,state,next_states);
 		}
 
-		if ( ATisEmpty(ATgetNext(trace)) )
+		if ( interactive )
 		{
-			undo->Enable(false);
+			if ( ATisEmpty(ATgetNext(trace)) )
+			{
+				undo->Enable(false);
+			}
+			redo->Enable();
 		}
-		redo->Enable();
 
 		return true;
 	} else {
@@ -408,11 +478,14 @@ bool XSimMain::Redo()
 			(*i)->StateChanged(NULL,state,next_states);
 		}
 
-		if ( ATisEmpty(ecart) )
+		if ( interactive )
 		{
-			redo->Enable(false);
+			if ( ATisEmpty(ecart) )
+			{
+				redo->Enable(false);
+			}
+			undo->Enable();
 		}
-		undo->Enable();
 
 		return true;
 	} else {
@@ -434,6 +507,8 @@ bool XSimMain::ChooseTransition(int index)
 {
 	if ( !ATisEmpty(next_states) && (index < ATgetLength(next_states)) )
 	{
+		Stopper_Enter();
+
 		ATermList l = ATLelementAt(next_states,index);
 		ATermAppl trans = ATAgetFirst(l);
 		ATerm state = ATgetFirst(ATgetNext(l));
@@ -448,8 +523,22 @@ bool XSimMain::ChooseTransition(int index)
 			(*i)->StateChanged(trans,state,next_states);
 		}
 
-		undo->Enable();
-		redo->Enable(false);
+		long i;
+		if ( tau_prior->IsChecked() && ((i = transview->FindItem(-1,wxT("tau"))) >= 0) )
+		{
+			Update();
+			wxYield();
+			if ( !stopped )
+			{
+				ChooseTransition(transview->GetItemData(i));
+			}
+			/* Should be done after (last) Stopper_Exit(), so not needed here
+ 			} else if ( interactive ) {
+			undo->Enable();
+			redo->Enable(false);*/
+		}
+		
+		Stopper_Exit();
 
 		return true;
 	} else {
@@ -604,7 +693,12 @@ void XSimMain::OnLoadTrace( wxCommandEvent &event )
 
 	    f.Open(dialog.GetPath());
 
+	    //SetInteractiveness(false);
+	    Stopper_Enter();
 	    Reset();
+
+	    ATerm state = current_state;
+	    ATermList newtrace = ATmakeList0();
 
 	    if ( f.GetLineCount() > 0 )
 	    {
@@ -613,6 +707,8 @@ void XSimMain::OnLoadTrace( wxCommandEvent &event )
 		    f.AddLine(wxT(""));
 		    for (s=f.GetFirstLine(); !f.Eof(); s=f.GetNextLine())
 		    {
+			    if ( stopped )
+				    break;
 			    if ( s.Length() > 0 )
 			    {
 				    if ( s[0u] == wxT('"') )
@@ -620,19 +716,43 @@ void XSimMain::OnLoadTrace( wxCommandEvent &event )
 					    s = s.Mid(1,s.Length()-2);
 				    }
 				    
-				    long l = transview->FindItem(-1,s);
-				    if ( l >= 0 )
+				    ATermList nexts = gsNextState(state,NULL);
+				    
+				    bool found = false;
+				    for (ATermList l=nexts; !ATisEmpty(l); l=ATgetNext(l))
 				    {
-					    ChooseTransition(transview->GetItemData(l));
-					    Update();
-				    } else {
-					    wxMessageDialog dialog(this,wxString::Format(wxT("Cannot execute transition '%s'.\n"),s.c_str()),wxT("Error in trace"),wxOK|wxICON_ERROR);
+					    string t = wxConvLocal.cMB2WX(PrintPart_CXX(ATgetFirst(ATLgetFirst(l)), ppAdvanced).c_str());
+					    if ( s == t )
+					    {
+						    newtrace = ATinsert(newtrace,ATgetFirst(l));
+						    state = ATgetFirst(ATgetNext(ATLgetFirst(l)));
+						    found = true;
+						    break;
+					    }
+				    }
+
+				    if ( !found )
+				    {
+					    wxMessageDialog dialog(this,wxString::Format(wxT("Cannot append transition '%s' to trace.\n"),s.c_str()),wxT("Error in trace"),wxOK|wxICON_ERROR);
 					    dialog.ShowModal();
 					    break;
 				    }
 			    }
 		    }
 	    }
+
+	    for (ATermList l=newtrace; !ATisEmpty(l); l=ATgetNext(l) )
+	    {
+		    ecart = ATinsert(ecart,ATgetFirst(l));
+	    }
+	    newtrace = ATinsert(ecart,ATgetFirst(trace));
+	    for (viewlist::iterator i = views.begin(); i != views.end(); i++)
+	    {
+		    (*i)->TraceChanged(newtrace,0);
+	    }
+
+	    Stopper_Exit();
+	    //SetInteractiveness(true);
 
 	    f.Close();
     }
@@ -672,7 +792,7 @@ void XSimMain::OnFitCurrentState( wxCommandEvent &event )
 
     n = stateview->GetViewRect().GetHeight()+stateview->m_headerHeight;
     stateview->GetClientSize(&w,&h);
-    split->SetSashPosition(split->GetSashPosition()+n-h);
+    split->SetSashPosition(split->GetSashPosition()-(n-h));
 #endif
 }
 
@@ -688,6 +808,145 @@ void XSimMain::OnLoadView( wxCommandEvent &event )
     {
 	    LoadDLL(dialog.GetPath());
     }
+}
+
+void XSimMain::OnShowDCChanged( wxCommandEvent &event )
+{
+	UpdateTransitions(false);
+}
+
+void XSimMain::OnSetDelay( wxCommandEvent &event )
+{
+	wxTextEntryDialog dialog(this,wxT("Enter the delay in milliseconds."),wxT("Set Delay"),wxString::Format("%d",timer_interval));
+
+	if ( dialog.ShowModal() == wxID_OK )
+	{
+		long new_value;
+		bool conv = dialog.GetValue().ToLong(&new_value);
+
+		if ( conv && (((int) new_value) >= 1) )
+		{
+			timer_interval = new_value;
+			if ( timer.IsRunning() )
+			{
+				wxMessageDialog dialog2(this,wxT("New delay will be applied after current run."),wxT("Information"),wxOK|wxICON_INFORMATION);
+				dialog2.ShowModal();
+			}
+		} else {
+			wxMessageDialog dialog2(this,wxT("Invalid value supplied."),wxT("Invalid value"),wxOK|wxICON_ERROR);
+			dialog2.ShowModal();
+		}
+	}
+}
+
+void XSimMain::OnResetAndPlay( wxCommandEvent &event )
+{
+	if ( !ATisEmpty(trace) )
+	{
+		SetTracePos(0);
+		OnPlay(event);
+	}
+}
+
+void XSimMain::OnPlay( wxCommandEvent &event )
+{
+	if ( !ATisEmpty(trace) )
+	{
+		//SetInteractiveness(false);
+		Stopper_Enter();
+		timer_func = FUNC_PLAY;
+		timer.Start(timer_interval);
+	}
+}
+
+void XSimMain::OnResetAndPlayRandom( wxCommandEvent &event )
+{
+	if ( !ATisEmpty(trace) )
+	{
+		Reset();
+		OnPlayRandom(event);
+	}
+}
+
+void XSimMain::OnPlayRandom( wxCommandEvent &event )
+{
+	if ( !ATisEmpty(trace) )
+	{
+		//SetInteractiveness(false);
+		Stopper_Enter();
+		timer_func = FUNC_RANDOM;
+		timer.Start(timer_interval);
+	}
+}
+
+void XSimMain::OnTimer( wxTimerEvent &event )
+{
+	switch ( timer_func )
+	{
+		case FUNC_PLAY:
+			if ( !ATisEmpty(ecart) && !stopped )
+			{
+				Redo();
+				while ( tau_prior->IsChecked() && !ATisEmpty(ecart) && ATisEmpty(ATgetArgument(ATAgetFirst(ATLgetFirst(ecart)),0)))
+				{
+					Redo();
+				}
+				Update();
+				wxYield();
+			} else {
+				timer.Stop();
+				timer_func = FUNC_NONE;
+				Stopper_Exit();
+				//SetInteractiveness(true);
+			}
+			break;
+		case FUNC_RANDOM:
+			if ( !ATisEmpty(next_states) && !stopped )
+			{
+				ChooseTransition(rand() % ATgetLength(next_states));
+				Update();
+				wxYield();
+			} else {
+				timer.Stop();
+				timer_func = FUNC_NONE;
+				Stopper_Exit();
+				//SetInteractiveness(true);
+			}
+			break;
+		default:
+			break;
+	}
+}
+
+void XSimMain::Stopper_Enter()
+{
+	if ( stopper_cnt == 0 )
+	{
+		stopped = false;
+		stopitem->Enable(true);
+		SetInteractiveness(false);
+	}
+	stopper_cnt++;
+}
+
+void XSimMain::Stopper_Exit()
+{
+	if ( stopper_cnt > 0 )
+	{
+		stopper_cnt--;
+	}
+	if ( stopper_cnt == 0 )
+	{
+		stopped = true;
+		stopitem->Enable(false);
+		SetInteractiveness(true);
+	}
+}
+
+void XSimMain::OnStop( wxCommandEvent &event )
+{
+	stopper_cnt = 0;
+	Stopper_Exit();
 }
 
 void XSimMain::OnAbout( wxCommandEvent &event )
@@ -777,13 +1036,16 @@ static void sort_transitions(wxArrayString &actions, wxArrayString &statechanges
 	}
 }
 
-void XSimMain::UpdateTransitions()
+void XSimMain::UpdateTransitions(bool update_next_states)
 {
 	wxArrayString actions;
 	wxArrayString statechanges;
 	wxArrayInt indices;
 
-	next_states = gsNextState(current_state,NULL);
+	if ( update_next_states )
+	{
+		next_states = gsNextState(current_state,NULL);
+	}
 
 	transview->DeleteAllItems();
 	int i = 0;
@@ -802,7 +1064,7 @@ void XSimMain::UpdateTransitions()
 			ATermAppl oldval = gsGetStateArgument(m,i);
 			ATermAppl newval = gsGetStateArgument(n,i);
 
-			if ( !ATisEqual(oldval,newval) )
+			if ( !ATisEqual(oldval,newval) && (!gsIsDataVarId(newval) || showdc->IsChecked()) )
 			{
 				if ( comma )
 				{
