@@ -754,7 +754,7 @@ void XSimMain::OnLoadTrace( wxCommandEvent &event )
 				    bool found = false;
 				    for (ATermList l=nexts; !ATisEmpty(l); l=ATgetNext(l))
 				    {
-					    string t = wxConvLocal.cMB2WX(PrintPart_CXX(ATgetFirst(ATLgetFirst(l)), ppAdvanced).c_str());
+					    wxString t = wxConvLocal.cMB2WX(PrintPart_CXX(ATgetFirst(ATLgetFirst(l)), ppAdvanced).c_str());
 					    if ( s == t )
 					    {
 						    newtrace = ATinsert(newtrace,ATgetFirst(l));
@@ -850,7 +850,7 @@ void XSimMain::OnShowDCChanged( wxCommandEvent &event )
 
 void XSimMain::OnSetDelay( wxCommandEvent &event )
 {
-	wxTextEntryDialog dialog(this,wxT("Enter the delay in milliseconds."),wxT("Set Delay"),wxString::Format("%d",timer_interval));
+	wxTextEntryDialog dialog(this,wxT("Enter the delay in milliseconds."),wxT("Set Delay"),wxString::Format(wxT("%d"),timer_interval));
 
 	if ( dialog.ShowModal() == wxID_OK )
 	{
