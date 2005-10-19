@@ -1480,7 +1480,7 @@ extern "C" {
     gsDebugMsg("\n  Arcs that are not inserted into the tables: %T\n", (ATerm)AArcs);
     
     gsDebugMsg("  ID's of the two read-in arc tables. The first list contains the in-arcs, the second one the out-arcs. \n");
-    gsDebugMsg("  NO TWO ID'S SHOULD BE IN BOTH TABLES!\n");
+    gsDebugMsg("  NO ID SHOULD BE IN BOTH TABLES!\n");
     gsDebugMsg("%T\n  %T\n\n", (ATerm)ATtableKeys(context.arc_in), (ATerm)ATtableKeys(context.arc_out));
     
     //==================================================
