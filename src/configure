@@ -312,7 +312,7 @@ ac_includes_default="\
 # include <unistd.h>
 #endif"
 
-ac_subst_vars='SHELL PATH_SEPARATOR PACKAGE_NAME PACKAGE_TARNAME PACKAGE_VERSION PACKAGE_STRING PACKAGE_BUGREPORT exec_prefix prefix program_transform_name bindir sbindir libexecdir datadir sysconfdir sharedstatedir localstatedir libdir includedir oldincludedir infodir mandir build_alias host_alias target_alias DEFS ECHO_C ECHO_N ECHO_T LIBS build build_cpu build_vendor build_os host host_cpu host_vendor host_os HOST_OS CC CFLAGS LDFLAGS CPPFLAGS ac_ct_CC EXEEXT OBJEXT CPP CXX CXXFLAGS ac_ct_CXX LEX LEXLIB LEX_OUTPUT_ROOT BISON EGREP ATERM_NAME BUILD_ATERM USE_XML2 BOOST_PREFIX USE_BOOST WX_CONFIG USE_WX WX_LIBS LIBOBJS LTLIBOBJS'
+ac_subst_vars='SHELL PATH_SEPARATOR PACKAGE_NAME PACKAGE_TARNAME PACKAGE_VERSION PACKAGE_STRING PACKAGE_BUGREPORT exec_prefix prefix program_transform_name bindir sbindir libexecdir datadir sysconfdir sharedstatedir localstatedir libdir includedir oldincludedir infodir mandir build_alias host_alias target_alias DEFS ECHO_C ECHO_N ECHO_T LIBS build build_cpu build_vendor build_os host host_cpu host_vendor host_os HOST_OS CC CFLAGS LDFLAGS CPPFLAGS ac_ct_CC EXEEXT OBJEXT CPP CXX CXXFLAGS ac_ct_CXX LEX LEXLIB LEX_OUTPUT_ROOT BISON EGREP ATERM_NAME BUILD_ATERM USE_XML2 XMLTO USE_XMLTO BOOST_PREFIX USE_BOOST WX_CONFIG USE_WX WX_LIBS LIBOBJS LTLIBOBJS'
 ac_subst_files=''
 
 # Initialize some variables set by options.
@@ -872,6 +872,8 @@ Optional Packages:
   --with-xml2-header=dir  use xml2 headers from dir/libxml; defaults to
                           /usr/include/libxml2
 
+  --with-xmlto=prefix     try this for the xmlto prefix install directory
+
   --with-boost=prefix     try this for the boost prefix install directory
 
   --with-wx=dir           use wxWidgets configuration program wx-config in dir
@@ -1424,7 +1426,7 @@ case $host in
   *-*-mingw32*)
     HOST_OS="MINGW"
     ;;
-  *-*-msdos* | *-*-go32* | *-*-mingw32* | *-*-cygwin* | *-*-windows*)
+  *-*-msdos* | *-*-go32* | *-*-cygwin* | *-*-windows*)
     HOST_OS="WINDOWS"
     ;;
   *-*-linux*)
@@ -5035,6 +5037,96 @@ if test $have_libxml2; then
 fi
 
 
+# Check for xmlto
+
+# Check whether --with-xmlto or --without-xmlto was given.
+if test "${with_xmlto+set}" = set; then
+  withval="$with_xmlto"
+
+fi;
+if test $with_xmlto; then
+  # Extract the first word of "xmlto", so it can be a program name with args.
+set dummy xmlto; ac_word=$2
+echo "$as_me:$LINENO: checking for $ac_word" >&5
+echo $ECHO_N "checking for $ac_word... $ECHO_C" >&6
+if test "${ac_cv_prog_XMLTO+set}" = set; then
+  echo $ECHO_N "(cached) $ECHO_C" >&6
+else
+  if test -n "$XMLTO"; then
+  ac_cv_prog_XMLTO="$XMLTO" # Let the user override the test.
+else
+as_save_IFS=$IFS; IFS=$PATH_SEPARATOR
+for as_dir in $with_xmlto
+do
+  IFS=$as_save_IFS
+  test -z "$as_dir" && as_dir=.
+  for ac_exec_ext in '' $ac_executable_extensions; do
+  if $as_executable_p "$as_dir/$ac_word$ac_exec_ext"; then
+    ac_cv_prog_XMLTO="$with_xmlto/xmlto"
+    echo "$as_me:$LINENO: found $as_dir/$ac_word$ac_exec_ext" >&5
+    break 2
+  fi
+done
+done
+
+fi
+fi
+XMLTO=$ac_cv_prog_XMLTO
+if test -n "$XMLTO"; then
+  echo "$as_me:$LINENO: result: $XMLTO" >&5
+echo "${ECHO_T}$XMLTO" >&6
+else
+  echo "$as_me:$LINENO: result: no" >&5
+echo "${ECHO_T}no" >&6
+fi
+
+else
+  # Extract the first word of "xmlto", so it can be a program name with args.
+set dummy xmlto; ac_word=$2
+echo "$as_me:$LINENO: checking for $ac_word" >&5
+echo $ECHO_N "checking for $ac_word... $ECHO_C" >&6
+if test "${ac_cv_prog_XMLTO+set}" = set; then
+  echo $ECHO_N "(cached) $ECHO_C" >&6
+else
+  if test -n "$XMLTO"; then
+  ac_cv_prog_XMLTO="$XMLTO" # Let the user override the test.
+else
+as_save_IFS=$IFS; IFS=$PATH_SEPARATOR
+for as_dir in $PATH
+do
+  IFS=$as_save_IFS
+  test -z "$as_dir" && as_dir=.
+  for ac_exec_ext in '' $ac_executable_extensions; do
+  if $as_executable_p "$as_dir/$ac_word$ac_exec_ext"; then
+    ac_cv_prog_XMLTO="xmlto"
+    echo "$as_me:$LINENO: found $as_dir/$ac_word$ac_exec_ext" >&5
+    break 2
+  fi
+done
+done
+
+fi
+fi
+XMLTO=$ac_cv_prog_XMLTO
+if test -n "$XMLTO"; then
+  echo "$as_me:$LINENO: result: $XMLTO" >&5
+echo "${ECHO_T}$XMLTO" >&6
+else
+  echo "$as_me:$LINENO: result: no" >&5
+echo "${ECHO_T}no" >&6
+fi
+
+fi
+if test $XMLTO; then
+  USE_XMLTO=1
+else
+  { echo "$as_me:$LINENO: documentation cannot be build because xmlto was not found." >&5
+echo "$as_me: documentation cannot be build because xmlto was not found." >&6;}
+  { echo "$as_me:$LINENO: xmlto can be obtained from http://cyberelk.net/tim/xmlto/." >&5
+echo "$as_me: xmlto can be obtained from http://cyberelk.net/tim/xmlto/." >&6;}
+fi
+
+
 # Check for Boost C++ library
 
 # Check whether --with-boost or --without-boost was given.
@@ -5087,10 +5179,10 @@ sed 's/^/| /' conftest.$ac_ext >&5
        echo "$as_me:$LINENO: result: no" >&5
 echo "${ECHO_T}no" >&6
 
-       { echo "$as_me:$LINENO: The Boost C++ libraries are required for certain tools in the toolset." >&5
-echo "$as_me: The Boost C++ libraries are required for certain tools in the toolset." >&6;}
-       { echo "$as_me:$LINENO: They can be obtained from http://www.boost.org." >&5
-echo "$as_me: They can be obtained from http://www.boost.org." >&6;}
+       { echo "$as_me:$LINENO: the Boost C++ libraries are required for certain tools in the toolset." >&5
+echo "$as_me: the Boost C++ libraries are required for certain tools in the toolset." >&6;}
+       { echo "$as_me:$LINENO: they can be obtained from http://www.boost.org." >&5
+echo "$as_me: they can be obtained from http://www.boost.org." >&6;}
 
 fi
 rm -f conftest.err conftest.$ac_objext conftest.$ac_ext
@@ -6872,6 +6964,8 @@ s,@EGREP@,$EGREP,;t t
 s,@ATERM_NAME@,$ATERM_NAME,;t t
 s,@BUILD_ATERM@,$BUILD_ATERM,;t t
 s,@USE_XML2@,$USE_XML2,;t t
+s,@XMLTO@,$XMLTO,;t t
+s,@USE_XMLTO@,$USE_XMLTO,;t t
 s,@BOOST_PREFIX@,$BOOST_PREFIX,;t t
 s,@USE_BOOST@,$USE_BOOST,;t t
 s,@WX_CONFIG@,$WX_CONFIG,;t t

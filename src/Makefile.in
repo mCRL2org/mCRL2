@@ -67,7 +67,11 @@ ifdef USE_BOOST
 
  ifeq ($(BOOST_PREFIX),boost)
    ifneq ($(HOST_OS),WINDOWS)
-     BOOST_LIBRARIES = -Wl,-static -lboost_program_options -Wl,-call_shared
+     ifeq ($(HOST_OS),MACOSX)
+       BOOST_LIBRARIES = -Wl,-static -lboost_program_options
+     else
+       BOOST_LIBRARIES = -Wl,-static -lboost_program_options -Wl,-call_shared
+     endif
    endif
  endif
 
@@ -136,14 +140,13 @@ OBJECTS           := $(sort $(OBJECTS))
 .PHONY: all install clean distclean
 .PRECIOUS: gsparser.c gslexer.c
 
-all : $(BJAM) $(EXE_NAMES) $(LIB_NAMES)
-	$(MAKE) -C doc
+all:: $(BJAM) $(EXE_NAMES) $(LIB_NAMES)
 
 # Build bjam and boost libraries
 $(BJAM):
 	$(MAKE) -C boost
 
-install: all
+install:: all
 	$(INSTALL) -d $(bindir)
 	@for f in $(EXE_NAMES); do\
 	  if test -f $$f; then\
@@ -152,6 +155,7 @@ install: all
 	    $$c;\
 	  fi;\
 	done
+
 ifdef USE_WX
 ifeq ($(HOST_OS),MACOSX)
 	/Developer/Tools/Rez -t APPL -o xsim sample.r
@@ -175,12 +179,11 @@ endif
 	  fi;\
 	done
 
-clean :
+clean::
 	$(RM) $(EXE_NAMES) $(LIB_NAMES) *.o *.a *.d *.dpp lpe/*.o lpe/*.dpp aterm/*.o aterm/*.a aterm/*.d svc/*.o svc/*.a svc/*.d gslexer.c gsparser.c gsparser.h gsparser.output lpeinfo lpeconstelm config.status config.log *~ core core.*
 
-distclean : clean
+distclean:: clean
 	$(MAKE) -C boost clean
-	$(MAKE) -C doc clean
 	$(RM) -r autom4te.cache Makefile config gsrewr_innerc_aux.h
 	$(RM) -r boost/lib boost/tools/build/jam_src/bin*
 
@@ -281,6 +284,21 @@ $(LIN_NAME) : $(LIN_OBJECTS) $(ATERM_DEP) $(LIBREWR_NAME)
 ifeq (,$(findstring $(MAKECMDGOALS),clean distclean))
 -include $(foreach s,$(OBJECTS),$(shell if test -f $(basename $s).c; then echo -n $(basename $s).d; fi))
 -include $(foreach s,$(OBJECTS),$(shell if test -f $(basename $s).cpp; then echo -n $(basename $s).dpp; fi))
+endif
+
+# Build documentation?
+ifeq ($(USE_XMLTO),1)
+all::
+	@echo Building documentation
+	@$(MAKE) -C doc all
+
+distclean::
+	@echo Cleaning documentation
+	@$(MAKE) -C doc clean
+
+install::
+	@echo Installing documentation
+	@$(MAKE) -C doc install
 endif
 
 #Note: to make a shared version of the gsrewr library instead of a static one, do the following:

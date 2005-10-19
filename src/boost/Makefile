@@ -30,10 +30,7 @@ all: bjam
 bjam:
 	echo "Please manually close command window, when build has completed!"
 	cd tools/build/jam_src; \
-	start build.bat mingw; \
-	while [ ! -e "bin/bjam.exe" ]; do \
-	  sleep 3; \
-	done
+	start //WAIT mbuild.bat mingw;
 else
 
 all: bjam

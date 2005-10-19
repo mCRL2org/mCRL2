@@ -8,7 +8,7 @@ case $host in
   *-*-mingw32*)
     HOST_OS="MINGW"
     ;;
-  *-*-msdos* | *-*-go32* | *-*-mingw32* | *-*-cygwin* | *-*-windows*)
+  *-*-msdos* | *-*-go32* | *-*-cygwin* | *-*-windows*)
     HOST_OS="WINDOWS"
     ;;
   *-*-linux*)
@@ -168,6 +168,27 @@ if test $have_libxml2; then
 fi
 AC_SUBST([USE_XML2],[])
 
+# Check for xmlto
+AC_ARG_WITH(
+  [xmlto],
+  AC_HELP_STRING(
+    [--with-xmlto=prefix],
+    [try this for the xmlto prefix install directory]
+  )
+)
+if test $with_xmlto; then
+  AC_CHECK_PROG([XMLTO],[xmlto],[$with_xmlto/xmlto],[],[$with_xmlto])
+else 
+  AC_CHECK_PROG([XMLTO],[xmlto],[xmlto])
+fi
+if test $XMLTO; then
+  USE_XMLTO=1
+else
+  AC_MSG_NOTICE(documentation cannot be build because xmlto was not found.)
+  AC_MSG_NOTICE(xmlto can be obtained from http://cyberelk.net/tim/xmlto/.)
+fi
+AC_SUBST([USE_XMLTO],[])
+
 # Check for Boost C++ library
 AC_ARG_WITH(
   [boost],
@@ -190,8 +211,8 @@ if test $with_boost; then
      [
        AC_MSG_RESULT(no)
        AC_SUBST([USE_BOOST],[])
-       AC_MSG_NOTICE(The Boost C++ libraries are required for certain tools in the toolset.)
-       AC_MSG_NOTICE(They can be obtained from http://www.boost.org.)
+       AC_MSG_NOTICE(the Boost C++ libraries are required for certain tools in the toolset.)
+       AC_MSG_NOTICE(they can be obtained from http://www.boost.org.)
      ])
 else 
   USE_BOOST=1

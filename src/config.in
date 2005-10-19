@@ -11,13 +11,17 @@ ifeq ($(HOST_OS),WINDOWS)
  # Windows does not have a libdl equivalent
  CFLAGS             += -DNO_DYNLOAD
 else
- LIBDL               = -ldl
+ ifeq ($(HOST_OS),MINGW)
+  CFLAGS             += -DNO_DYNLOAD
+ else
+  LIBDL               = -ldl
+ endif
 endif
 
 ifeq ($(HOST_OS),MACOSX)
-LDFLAGS            = @LDFLAGS@
+ LDFLAGS            = @LDFLAGS@
 else
-LDFLAGS            = -Wl,-rpath,$(libdir) -rdynamic @LDFLAGS@
+ LDFLAGS            = -Wl,-rpath,$(libdir) -rdynamic @LDFLAGS@
 endif
 
 ARFLAGS            = crs
@@ -29,6 +33,8 @@ BFLAGS             = -d -pgsyy
 ATERM              = @ATERM_NAME@ 
 BUILD_ATERM        = @BUILD_ATERM@
 USE_XML2           = @USE_XML2@
+USE_XMLTO          = @USE_XMLTO@
+XMLTO              = @XMLTO@
 USE_WX             = @USE_WX@
 WX_LIBS            = @WX_LIBS@
 USE_BOOST          = @USE_BOOST@
@@ -41,7 +47,7 @@ ifeq ($(USE_BOOST),1)
  endif
 endif
 
-#installation directories
+# Installation directories
 prefix             = @prefix@
 exec_prefix        = @exec_prefix@
 bindir             = @bindir@
@@ -51,9 +57,9 @@ includedir         = @includedir@
 infodir            = @infodir@
 mandir             = @mandir@
 
-#Environment variable for Mac
+# Environment variable for Mac
 ifeq ($(HOST_OS),MACOSX)
-MACOSX_DEPLOYMENT_TARGET = 10.3
-export MACOSX_DEPLOYMENT_TARGET
+ MACOSX_DEPLOYMENT_TARGET = 10.3
+ export MACOSX_DEPLOYMENT_TARGET
 endif
 
