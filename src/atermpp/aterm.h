@@ -1204,7 +1204,7 @@ namespace atermpp
   inline
   bool operator==(const aterm& x, const aterm& y)
   {
-if ( (x.to_string() == y.to_string()) != (ATisEqual(x.to_ATerm(), y.to_ATerm()) == ATtrue) )
+/*if ( (x.to_string() == y.to_string()) != (ATisEqual(x.to_ATerm(), y.to_ATerm()) == ATtrue) )
 {
   std::cerr << "Error in bool operator==(const aterm& x, const aterm& y)\n"
             << "x == " << x.to_string() << "\n"
@@ -1223,7 +1223,7 @@ if ( (x.to_string() == y.to_string()) != (ATisEqual(x.to_ATerm(), y.to_ATerm()) 
               std::cerr << (*i == *j ? "true" : "false") << "\n";
               std::cerr << "done" << "\n";
             }
-}
+}*/
     return ATisEqual(x.to_ATerm(), y.to_ATerm()) == ATtrue;
   }
 
