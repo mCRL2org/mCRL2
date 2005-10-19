@@ -2,6 +2,7 @@
 // BRACKETS VERWIJDEREN IN BOOST OM DE OPTIES!!!!!
 // GOED MAKEN VAN LAYOUT (UITLIJNING)
 // ON WINDOWS ansi.sys DRIVER NEEDS TO BE INSTALLED TO DISPLAY COLOR
+// data_expression(_list), data_variable(_list), data_assignment(_list) and other ATerms should be protected or reside as local variables 
 
 //C++
 #include <iostream>
@@ -11,6 +12,7 @@
 #include <string>
 #include <iterator>
 #include <fstream>
+#include <stdio.h>
 
 //Boost
 #include <boost/program_options.hpp>
@@ -40,19 +42,23 @@ using namespace atermpp;
 namespace po = boost::program_options;
 po::variables_map vm;
 
-
-
 //Constanten
-string version = "Version 0.2";
+string version = "Version 0.3";
+bool verbose    = false; 
+bool alltrue    = false;
 
-//Global variables
-data_expression_list          vinit; //init vector
-data_assignment_list          newstatevector; // newstate vector
-data_assignment_list          tvector;
-data_assignment_list          sv;
-data_assignment_list          ainit;
-data_variable_list            freevars;
-int                           n;    //number of process parameters
+const int geen        = 0;
+const int links       = 1;
+const int rechts      = 2;
+const int beide       = 3;
+
+
+ATermAppl rew2(ATermAppl t, ATermAppl rewrite_terms)
+{
+  gsEnableConstructorFunctions();
+  ATermAppl result = gsRewriteTerm(t);
+  return result;
+}
 
 
 string findfile(string path)
@@ -98,14 +104,52 @@ string findpath(string path)
   return token;
 }
 
-bool compare(data_expression x, data_expression y, data_equation_list equations)
+void print_set(set< int > S)
 {
-  return x==y;
+  cout << "\033[0;1;37m Set : \033[m";
+  
+  set< int >::iterator i = S.begin();
+  int j = 0;
+  while(i != S.end()){
+    if (*i ==j){
+      cout << j << " ";
+      i++;
+    }
+  j++;
+  }
+  cout << endl;
 
+}
 
-  ATermAppl x1 = rewrite(x.to_ATermAppl(), gsMakeDataEqnSpec(equations.to_ATermList()));
-  ATermAppl y1 = rewrite(y.to_ATermAppl(), gsMakeDataEqnSpec(equations.to_ATermList()));
-  return atermpp::aterm(x1) == atermpp::aterm(y1);
+bool compare(data_expression x, data_expression y, data_equation_list equations, int option)
+{
+  if (option == geen ){
+    return x==y;
+  };
+ 
+ if (option == links){
+    ATermAppl x1 = rew2(x.to_ATermAppl(), gsMakeDataEqnSpec(equations.to_ATermList()));
+    ATermAppl y1 = y.to_ATermAppl() ;
+    return atermpp::aterm(x1) == atermpp::aterm(y1);     
+  };
+ 
+ if (option == rechts){
+    ATermAppl x1 = x.to_ATermAppl() ;
+    ATermAppl y1 = rew2(y.to_ATermAppl(), gsMakeDataEqnSpec(equations.to_ATermList()));
+    return atermpp::aterm(x1) == atermpp::aterm(y1);     
+  };
+ 
+ if (option == beide){
+    ATermAppl x1 = rew2(x.to_ATermAppl(), gsMakeDataEqnSpec(equations.to_ATermList()));
+    ATermAppl y1 = rew2(y.to_ATermAppl(), gsMakeDataEqnSpec(equations.to_ATermList()));
+    return atermpp::aterm(x1) == atermpp::aterm(y1);     
+  };
+
+  cout << "\033[0;31mError in Rewrite\033[0m" << endl;
+  ATermAppl x1 = rew2(x.to_ATermAppl(), gsMakeDataEqnSpec(equations.to_ATermList()));
+  ATermAppl y1 = rew2(y.to_ATermAppl(), gsMakeDataEqnSpec(equations.to_ATermList()));
+  return atermpp::aterm(x1) == atermpp::aterm(y1);  
+  
 }
 
 data_assignment_list nextstate(data_assignment_list currentstate, data_assignment_list assignments, data_equation_list equations, LPE lpe)
@@ -115,14 +159,30 @@ data_assignment_list nextstate(data_assignment_list currentstate, data_assignmen
   data_assignment_list out2;
   data_expression z;
   
+  /*//Origineel
   data_assignment_list::iterator i = currentstate.begin();
   while(i != currentstate.end() ){
     z = i->lhs().to_expr();
-    //cout << z.s << endl;
     out = append(out, data_assignment(i->lhs(), z ) );
     i++;
   }
+  */
+
+  //Speedup
+  data_variable d;
+  data_assignment_list::iterator i = currentstate.begin();
+  while(i != currentstate.end() ){
+    d = i->lhs();
+    out = push_front(out, data_assignment(d, d.to_expr() ));
+    i++;
   
+  }
+  //Keep in mind list is reversed -- Does not match set S!!!!
+  out = reverse(out);
+  //End speedup
+ 
+ /*
+  //  Original
   i = out.begin();
   while(i != out.end() ){
     data_assignment_list::iterator j = assignments.begin();
@@ -134,7 +194,26 @@ data_assignment_list nextstate(data_assignment_list currentstate, data_assignmen
     out1 = append(out1, data_assignment(i->lhs(), z));
     i++;
   }
+  */
+  
+  
+  //data_variable d;
+  i = out.begin();
+  while(i != out.end() ){
+    data_assignment_list::iterator j = assignments.begin();
+    d = i->lhs();
+    z = d.to_expr();
+    while( j != assignments.end() ){
+      z = z.substitute( *j );    
+      j++;
+    } 
+    out1 = push_front(out1, data_assignment(d , z));
+    i++;
+  } 
+  out1 = reverse(out1);
+  
 
+  /* Original 
   i = out1.begin();
   while(i != out1.end() ){
     data_assignment_list::iterator j = currentstate.begin();
@@ -146,6 +225,19 @@ data_assignment_list nextstate(data_assignment_list currentstate, data_assignmen
     out2 = append(out2, data_assignment(i->lhs(),data_expression( rewrite(z.to_ATermAppl(), gsMakeDataEqnSpec(equations.to_ATermList())))));
     i++;
   }
+  */
+  i = out1.begin();
+  while(i != out1.end() ){
+    data_assignment_list::iterator j = currentstate.begin();
+    z = i->rhs();
+    while( j != currentstate.end() ){
+      z = z.substitute( *j );    
+      j++;
+    } 
+    out2 = push_front(out2, data_assignment(i->lhs(),data_expression( rew2(z.to_ATermAppl(), gsMakeDataEqnSpec(equations.to_ATermList())))));
+    i++;
+  }
+  out2 = reverse(out2);
  
  return out2; 
 }
@@ -155,10 +247,10 @@ data_expression_list rhsl(data_assignment_list x)
   data_expression_list y;
   data_assignment_list::iterator i = x.begin();
   while (i != x.end()) {
-    y = append(y, i->rhs() );
+    y = push_front(y, i->rhs() );
     i++;
   };
-
+  y = reverse(y);  
   return y;
 }
 
@@ -167,10 +259,10 @@ data_variable_list lhsl(data_assignment_list x)
   data_variable_list y;
   data_assignment_list::iterator i = x.begin();
   while (i != x.end()) {
-    y = append(y, i->lhs() );
+    y = push_front(y, i->lhs() );
     i++;
   };
-
+  y = reverse(y);
   return y;
 }
 
@@ -178,28 +270,39 @@ bool eval_cond(data_expression datexpr, data_assignment_list statevector, data_e
 
   bool b;
   
-  return true;
+  if (alltrue){
+    return true;
+  };
 
   set<int>::iterator i;
   data_assignment_list conditionvector; 
   
-  //
-  //ORDE N^3
-  //
-  
-  // TODO:
-  //   Beter: end() -> begin() /\ push_front gebruiken
-  //   Element_at = N
-  //   Append = N
-  //   begin-> end = N
-
-  
+  /* Origninal
   i = S.begin();
   while (i != S.end()) {
     conditionvector = append(conditionvector, data_assignment(  element_at(lhsl(statevector), *i) , element_at( rhsl(statevector), *i  )));
     i++;
   };
+  */
 
+  //Speedup
+  data_variable_list    sv1 = lhsl(statevector);
+  data_expression_list  sv2 = rhsl(statevector);
+  data_variable_list::iterator isv1 = sv1.begin();
+  data_expression_list::iterator isv2 = sv2.begin();
+
+  i = S.begin();
+  int z = 0;
+  while (i != S.end()) {
+    if(z == *i) {
+      conditionvector = push_front(conditionvector, data_assignment(  *isv1 , *isv2 ));
+      i++;
+    }
+    isv1++; 
+    isv2++;
+    z++; 
+  };
+  
   data_assignment_list::iterator j = conditionvector.begin();
   while (j != conditionvector.end() ){;
     datexpr = datexpr.substitute(*j);
@@ -210,7 +313,7 @@ bool eval_cond(data_expression datexpr, data_assignment_list statevector, data_e
   // !!!!!!! data_expression(gsMakeOpIdFalse()) !!!!!! DIRECTE AANROEP UIT GSFUNC
   //
 
-  b = !compare(data_expression(gsMakeOpIdFalse()), datexpr, equations);
+  b = !compare(data_expression(gsMakeOpIdFalse()), datexpr, equations, rechts);
 
   return b;
 }
@@ -262,7 +365,7 @@ void print_const(specification spec , set< int > S)
     result = append(result, data_assignment(  element_at(lhsl(sub), *i) , element_at( rhsl(sub), *i  )));
     i++;
   };
-  
+
   { 
     cout << "\033[0;1;37m Constant Process parameters : \033[m" << endl;
     cout << "     "<< result.pp() << endl <<endl;
@@ -271,8 +374,27 @@ void print_const(specification spec , set< int > S)
   return;
 }
 
+data_assignment make_var(data_variable datavar, int n){
+  char buffer [99];
+  sprintf(buffer, "%s^%d",datavar.name().c_str(), n);
+  
+  data_variable w(buffer, datavar.type() );
+  data_assignment a(datavar , w.to_expr() );
+  return a;
+}
+
 void constelm(string filename, string outfile, int option)
 {
+  data_expression_list          vinit; //init vector
+  data_assignment_list          newstatevector; // newstate vector
+  data_assignment_list          tvector;
+  data_assignment_list          sv;
+  data_assignment_list          ainit; 
+  data_variable_list            freevars;
+  int                           n;    //number of process parameters
+  int                           newdatvar = 0 ;
+  data_expression_list          listofnonconst;
+  
   // Load LPE input file
   specification spec;
   if (!spec.load(filename))
@@ -284,12 +406,6 @@ void constelm(string filename, string outfile, int option)
   cout << "Read from input file : " << filename << endl;
   LPE lpe = spec.lpe();
 
-
-  //int bla = 0;   
-
-  //cout << outfile << endl; 
-
- // assert(false);
   //
   // Determine the inital processes
   // 
@@ -297,13 +413,13 @@ void constelm(string filename, string outfile, int option)
   sv = spec.init_assignments();
   ainit = spec.init_assignments();
   newstatevector = sv;  
+
+  data_equation_list equations = spec.equations();
   
   freevars = concat(spec.initial_free_variables(), lpe.free_variables());
   
-  //cout << freevars.size() << endl; 
-  //cout << freevars.pp() << endl;
- 
-
+  gsRewriteInit(gsMakeDataEqnSpec(equations.to_ATermList()), GS_REWR_INNER3); 
+  
   set< int > V; 
   set< int > S;
 
@@ -312,7 +428,6 @@ void constelm(string filename, string outfile, int option)
   };
   
   set< int > D;
-  //cout << lpe.summands().size() << endl;;
 
   ////
   // Als V <  S dan zijn er variabele process parameters gevonden
@@ -323,83 +438,91 @@ void constelm(string filename, string outfile, int option)
   int count = 1; 
   while(S.size()!=V.size()) {
     sv = newstatevector;
+
     S = V;
     V.clear();
     set< int > S_dummy;        
     
+    if (verbose)
     {
+      print_set(S);
       cout << "\033[0;1;37m Iteration           : \033[m" << count++ << endl; 
       cout << "\033[0;1;37m Current statevector : \033[m" << sv.pp() << endl;
       cout << "\033[0;1;37m Resulting Nextstates: \033[m" << endl;
     };
     
     for(summand_list::iterator s_current = lpe.summands().begin(); s_current != lpe.summands().end(); ++s_current){ 
-      if (eval_cond(s_current->condition(), sv, spec.equations(), S)) {
+      if (eval_cond(s_current->condition(), sv, equations , S)) {
         
-        //cout << sv.pp() << endl;
-        //cout << s_current->condition().pp() << endl;   
 
         data_assignment_list ass_nextstate = s_current->assignments();
-        tvector = nextstate(sv, ass_nextstate, spec.equations(), lpe );
+        tvector = nextstate(sv, ass_nextstate, equations, lpe );
+
+        data_expression_list rhstv = rhsl(tvector);
+        data_variable_list lhstv = lhsl(tvector);
+        data_expression_list rhsnsv = rhsl(newstatevector);      
       
         set< int >::iterator j = S.begin();
+
+        
+        
         
         while (j != S.end()){
-
+          data_expression rhs_tv_j = element_at(rhstv, *j);
+          data_expression rhs_nsv_j = element_at(rhsnsv, *j);
 	        bool skip = false; 
-	        //Begin freevar hack  
-	    	
+
+	        //Begin freevar treatment  
           data_variable_list::iterator f = freevars.begin();
-          
 	        while (f != freevars.end()){
-          //bla++;
-          //cout << bla << "--" << f->pp() << endl; 
-	        if ( compare(element_at(rhsl(tvector), *j) , f->to_expr(), spec.equations() ) || 
-	          compare(element_at(rhsl(ainit), *j) , f->to_expr(), spec.equations() ) ){
+
+          data_expression foe = f->to_expr(); 
+	        if ( compare(rhs_tv_j  , foe, equations, rechts ) || 
+	             compare(rhs_nsv_j , foe ,equations, rechts ) ){
 	            skip = true;
-            //  cout << bla << "skipped" << endl;
-	            if (compare(element_at(rhsl(ainit), *j) , f->to_expr(), spec.equations() )){ 
-	              ainit = replace(ainit, element_at(tvector, *j), *j);
-	          //    cout << bla << "if" << endl;
-                };    
+	            if (compare(rhs_nsv_j , foe , spec.equations(), rechts )){ 
+	              newstatevector = replace(newstatevector, element_at(tvector, *j), *j);
+              };    
+              if (-1 != index_of(listofnonconst, rhs_tv_j, 0) ) {
+                S_dummy.insert(*j);
+              }
 	          };
-                 //cout << bla << "no freevar" << endl;
 	          f++;
 	        };
-	        // End Freevar hack 
-
-
+	        // End Freevar treatment 
 	        
 	        if (!skip){ 
-	          if (element_at(rhsl(ainit), *j) != (element_at(rhsl(tvector), *j)  ) ){
-              S_dummy.insert(*j);
-              int x = *j;
-              cout << x << endl;
-              if (0 > x) {cout << x << endl;};
-              if (x >= n) {cout << x << endl;};
-              //assert(( 0 > x) || (x >= n ));
-              newstatevector = replace(newstatevector, element_at(tvector, *j), *j);
-            };
+	          if (element_at(rhsl(ainit), *j) != rhs_tv_j ){
+                    S_dummy.insert(*j);
+                    data_assignment newass = make_var(element_at(lhstv, *j), newdatvar++);
+                    newstatevector = replace(newstatevector, newass, *j);
+                    listofnonconst = push_front(listofnonconst, newass.rhs());
+                    
+                  };
 	        };
           j++;
         };
-        //Debug print
-	
+
+        if(verbose)	
 	      {
-    	    cout << "     " << newstatevector.pp() << endl; 
+  	      cout << "     " << newstatevector.pp() << endl; 
         };
       };
          
     }; 
     
     set_difference(S.begin(), S.end(), S_dummy.begin(), S_dummy.end(), inserter(V, V.begin()));
-
-    cout << endl;
+    if (verbose){
+      cout << endl;
+    };
   }; 
-  
-  print_const(spec , S);
+  if (verbose){
+    print_const(spec , S);
+  }
   save_const(spec, outfile, S);
 
+  // Finalise
+  gsRewriteFinalise();
   return;
 }
 
@@ -408,98 +531,95 @@ int main(int ac, char* av[])
    ATerm bot;
    ATinit(0,0,&bot);
    gsEnableConstructorFunctions();
+
   
-      vector< string > filename;
-      int opt = 0;
+   vector< string > filename;
+   int opt = 0;
 
-      try {
-        po::options_description desc;
-        desc.add_options()
-            ("help,h",      "display this help")
-            ("version,v",   "display version information")
-            ("monitor,m",   "display progress information")
-            ("nosingleton", "do not remove sorts consisting of a single element")
-            ("nocondition", "do not use conditions during elimination (faster)")
-        ;
+   try {
+     po::options_description desc;
+     desc.add_options()
+       ("help,h",      "display this help")
+       ("version,v",   "display version information")
+       ("monitor,m",   "display progress information")
+       ("nosingleton", "do not remove sorts consisting of a single element")
+       ("nocondition", "do not use conditions during elimination (faster)")
+     ;
 	
-	po::options_description hidden("Hidden options");
-	hidden.add_options()
-    ("INFILE", po::value< vector<string> >(), "input file")
-	;
+	   po::options_description hidden("Hidden options");
+	   hidden.add_options()
+       ("INFILE", po::value< vector<string> >(), "input file")
+	   ;
 	
-	po::options_description cmdline_options;
-	cmdline_options.add(desc).add(hidden);
+	   po::options_description cmdline_options;
+	   cmdline_options.add(desc).add(hidden);
 	
-	po::options_description visible("Allowed options");
-	visible.add(desc);
+	   po::options_description visible("Allowed options");
+	   visible.add(desc);
 	
-	po::positional_options_description p;
-	p.add("INFILE", -1);
+	   po::positional_options_description p;
+	   p.add("INFILE", -1);
 
-        po::variables_map vm;
-        store(po::command_line_parser(ac, av).
-              options(cmdline_options).positional(p).run(), vm);
+     po::variables_map vm;
+     store(po::command_line_parser(ac, av).
+       options(cmdline_options).positional(p).run(), vm);
      
-        if (vm.count("help") || ac == 1) {
-            cerr << "Usage: "<< av[0] << " [OPTION]... INFILE [OUTFILE] \n";
-            cerr << "Remove constant process parameters from the LPE in INFILE, and write the result" << endl;
-            cerr << "to stdout." << endl;
-            cerr << endl;
-            cerr << desc;
-            return 0;
-        }
+     if (vm.count("help") || ac == 1) {
+       cerr << "Usage: "<< av[0] << " [OPTION]... INFILE [OUTFILE] \n";
+       cerr << "Remove constant process parameters from the LPE in INFILE, and write the result" << endl;
+       cerr << "to stdout." << endl;
+       cerr << endl;
+       cerr << desc;
+       return 0;
+     }
         
-        if (vm.count("version")) {
-	        cerr << version << endl;
-	        return 0;
-	      }
+     if (vm.count("version")) {
+	     cerr << version << endl;
+	     return 0;
+	   }
 
-        if (vm.count("monitor")) {
-          //cerr << "Displaying progress" << endl;
-          opt = 1;
-	      }
+     if (vm.count("monitor")) {
+       //cerr << "Displaying progress" << endl;
+       verbose = true;
+	   }
 
-        if (vm.count("nosingleton")) {
-          //cerr << "Active: no removal of process parameters which have sorts of cardinatilty one" << endl;
-          opt = 2;
-	      }
+     if (vm.count("nosingleton")) {
+       //cerr << "Active: no removal of process parameters which have sorts of cardinatilty one" << endl;
+       opt = 2;
+	   }
 
-        if (vm.count("nocondition")) {
-          //cerr << "Active: All conditions are true" << endl;
-          opt = 3;
-	      }
+     if (vm.count("nocondition")) {
+       //cerr << "Active: All conditions are true" << endl;
+       alltrue = true;
+	   }
 
-        if (vm.count("INFILE"))
-        {
-          filename = vm["INFILE"].as< vector<string> >();
-                 //<< vm["input-file"].as< vector<string> >() << "\n";
-	      }
-        //set< int > S = constelm(filename, opt);
+     if (vm.count("INFILE")){
+       filename = vm["INFILE"].as< vector<string> >();
+       //<< vm["input-file"].as< vector<string> >() << "\n";
+	   }
+     //set< int > S = constelm(filename, opt);
 
-        if (filename.size() > 2)
-        {
-          cerr << "Specify only INPUT and/or OUTPUT file (Too many arguments)."<< endl;
-        };
+     if (filename.size() > 2){
+        cerr << "Specify only INPUT and/or OUTPUT file (Too many arguments)."<< endl;
+     };
              
 
-        if (filename.size() == 2)
-        {
-          constelm(filename[0], filename[1], opt); 
-        };
+     if (filename.size() == 2){
+       constelm(filename[0], filename[1], opt); 
+     };
 	
-        if(filename.size() == 1)
-        {
-          string temp = "constelm_";
-          temp = findpath(filename[0]).append(temp.append(findfile(filename[0])));
-          constelm(filename[0], temp , opt);
-        };
+     if(filename.size() == 1){
+       string temp = "constelm_";
+       temp = findpath(filename[0]).append(temp.append(findfile(filename[0])));
+       constelm(filename[0], temp , opt);
+     };
 
     }
-    catch(exception& e)
-    {
-        cerr << e.what() << "\n";
-        return 1;
+    catch(exception& e){
+      cerr << e.what() << "\n";
+      return 1;
     }    
+    
     return 0;
 }
 
