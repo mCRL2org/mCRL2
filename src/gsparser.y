@@ -11,7 +11,6 @@
 
 #include <stdio.h>
 #include <string.h>
-#include <stdbool.h>
 
 #include <aterm2.h>
 #include "gsfunc.h"
@@ -24,7 +23,6 @@
 extern ATermAppl gsTree;        /* declared in gslexer.l */
 extern void gsyyerror(char *s); /* declared in gslexer.l */
 extern int gsyylex(void);       /* declared in gslexer.c */
-extern bool gsDebug;            /* declared in libgsparse.c */
 
 #ifdef _MSC_VER
 #define yyfalse 0
@@ -97,7 +95,7 @@ spec:
   spec_elts
     {
       $$ = gsSpecEltsToSpec(ATreverse($1));
-      gsDebugMsg("parsed specification\n  %t\n", $$);
+      gsDebugMsg("parsed specification\n  %T\n", $$);
       gsTree = $$;
     }
   ;
@@ -107,12 +105,12 @@ spec_elts:
   spec_elt
     {
       $$ = ATmakeList1((ATerm) $1);
-      gsDebugMsg("parsed specification elements\n  %t\n", $$);
+      gsDebugMsg("parsed specification elements\n  %T\n", $$);
     }
    | spec_elts spec_elt
     {
       $$ = ATinsert($1, (ATerm) $2);
-      gsDebugMsg("parsed specification elements\n  %t\n", $$);
+      gsDebugMsg("parsed specification elements\n  %T\n", $$);
     }
    ;
 
@@ -121,37 +119,37 @@ spec_elt:
   sort_spec
     {
       $$ = $1;
-      gsDebugMsg("parsed specification element\n  %t\n", $$);
+      gsDebugMsg("parsed specification element\n  %T\n", $$);
     } 
   | cons_spec
     {
       $$ = $1;
-      gsDebugMsg("parsed specification element\n  %t\n", $$);
+      gsDebugMsg("parsed specification element\n  %T\n", $$);
     }
   | map_spec
     {
       $$ = $1;
-      gsDebugMsg("parsed specification element\n  %t\n", $$);
+      gsDebugMsg("parsed specification element\n  %T\n", $$);
     }
   | eqn_spec
     {
       $$ = $1;
-      gsDebugMsg("parsed specification element\n  %t\n", $$);
+      gsDebugMsg("parsed specification element\n  %T\n", $$);
     }
   | act_spec
     {
       $$ = $1;
-      gsDebugMsg("parsed specification element\n  %t\n", $$);
+      gsDebugMsg("parsed specification element\n  %T\n", $$);
     }
   | proc_spec
     {
       $$ = $1;
-      gsDebugMsg("parsed specification element\n  %t\n", $$);
+      gsDebugMsg("parsed specification element\n  %T\n", $$);
     }
   | initialisation
     {
       $$ = $1;
-      gsDebugMsg("parsed specification element\n  %t\n", $$);
+      gsDebugMsg("parsed specification element\n  %T\n", $$);
     }
   ;
 
@@ -160,7 +158,7 @@ sort_spec:
   KWSORT sorts_decls_scs
     {
       $$ = gsMakeSortSpec($2);
-      gsDebugMsg("parsed sort specification\n  %t\n", $$);
+      gsDebugMsg("parsed sort specification\n  %T\n", $$);
     }
   ;
 
@@ -169,12 +167,12 @@ sorts_decls_scs:
   sorts_decl SEMICOLON
     {
       $$ = $1;
-      gsDebugMsg("parsed sort declarations\n  %t\n", $$);
+      gsDebugMsg("parsed sort declarations\n  %T\n", $$);
     }
   | sorts_decls_scs sorts_decl SEMICOLON
     {
       $$ = ATconcat($1, $2);
-      gsDebugMsg("parsed sort declarations\n  %t\n", $$);
+      gsDebugMsg("parsed sort declarations\n  %T\n", $$);
     }
   ;
 
@@ -187,12 +185,12 @@ sorts_decl:
       for (int i = 0; i < n; i++) {
         $$ = ATinsert($$, (ATerm) gsMakeSortId(ATAelementAt($1, i)));
       }
-      gsDebugMsg("parsed standard sort declarations\n  %t\n", $$);
+      gsDebugMsg("parsed standard sort declarations\n  %T\n", $$);
     }
   | ID EQUALS sort_expr
     {
       $$ = ATmakeList1((ATerm) gsMakeSortRef($1, $3));
-      gsDebugMsg("parsed reference sort declarations\n  %t\n", $$);
+      gsDebugMsg("parsed reference sort declarations\n  %T\n", $$);
     }
   ;
 
@@ -201,12 +199,12 @@ ids_cs:
   ID
     {
       $$ = ATmakeList1((ATerm) $1);
-      gsDebugMsg("parsed id's\n  %t\n", $$);
+      gsDebugMsg("parsed id's\n  %T\n", $$);
     }
   | ids_cs COMMA ID
     {
       $$ = ATinsert($1, (ATerm) $3);
-      gsDebugMsg("parsed id's\n  %t\n", $$);
+      gsDebugMsg("parsed id's\n  %T\n", $$);
     }
   ;
 
@@ -215,12 +213,12 @@ domain:
   domain_no_arrow
     {
       $$ = $1;
-      gsDebugMsg("parsed domain\n  %t\n", $$);
+      gsDebugMsg("parsed domain\n  %T\n", $$);
     }
   | domain_no_arrow ARROW sort_expr
     {
       $$ = ATmakeList1((ATerm) gsMakeSortArrowProd($1, $3));
-      gsDebugMsg("parsed domain\n  %t\n", $$);
+      gsDebugMsg("parsed domain\n  %T\n", $$);
     }
   ;
 
@@ -229,7 +227,7 @@ cons_spec:
   KWCONS ops_decls_scs
     {
       $$ = gsMakeConsSpec($2);
-      gsDebugMsg("parsed constructor operation specification\n  %t\n", $$);
+      gsDebugMsg("parsed constructor operation specification\n  %T\n", $$);
     }
   ;
 
@@ -238,7 +236,7 @@ map_spec:
   KWMAP ops_decls_scs
     {
       $$ = gsMakeMapSpec($2);
-      gsDebugMsg("parsed operation specification\n  %t\n", $$);
+      gsDebugMsg("parsed operation specification\n  %T\n", $$);
     }
   ;
 
@@ -248,12 +246,12 @@ ops_decls_scs:
   ops_decl SEMICOLON
     {
       $$ = $1;
-      gsDebugMsg("parsed operation declarations\n  %t\n", $$);
+      gsDebugMsg("parsed operation declarations\n  %T\n", $$);
     }
   | ops_decls_scs ops_decl SEMICOLON
     {
       $$ = ATconcat($1, $2);
-      gsDebugMsg("parsed operation declarations\n  %t\n", $$);
+      gsDebugMsg("parsed operation declarations\n  %T\n", $$);
     }
   ;
 
@@ -266,7 +264,7 @@ ops_decl:
       for (int i = 0; i < n; i++) {
         $$ = ATinsert($$, (ATerm) gsMakeOpId(ATAelementAt($1, i), $3));
       }
-      gsDebugMsg("parsed operation declarations\n  %t\n", $$);
+      gsDebugMsg("parsed operation declarations\n  %T\n", $$);
     }
   ;
 
@@ -275,7 +273,7 @@ eqn_spec:
   eqn_sect    
     {
       $$ = gsMakeDataEqnSpec($1);
-      gsDebugMsg("parsed equation specification\n  %t\n", $$);
+      gsDebugMsg("parsed equation specification\n  %T\n", $$);
     }
   ;
 
@@ -284,7 +282,7 @@ eqn_sect:
   KWEQN eqn_decls_scs
     {
       $$ = ATreverse($2);
-      gsDebugMsg("parsed equation section\n  %t\n", $$);
+      gsDebugMsg("parsed equation section\n  %T\n", $$);
     }
   | KWVAR data_vars_decls_scs KWEQN eqn_decls_scs
     {
@@ -295,7 +293,7 @@ eqn_sect:
         $$ = ATinsert($$, (ATerm) gsMakeDataEqn($2, ATAgetArgument(DataEqn, 1),
           ATAgetArgument(DataEqn, 2), ATAgetArgument(DataEqn, 3)));
       }
-      gsDebugMsg("parsed equation section\n  %t\n", $$);
+      gsDebugMsg("parsed equation section\n  %T\n", $$);
     }
   ;
 
@@ -304,12 +302,12 @@ eqn_decls_scs:
   eqn_decl SEMICOLON
     {
       $$ = ATmakeList1((ATerm) $1);
-      gsDebugMsg("parsed equation declarations\n  %t\n", $$);
+      gsDebugMsg("parsed equation declarations\n  %T\n", $$);
     }
   | eqn_decls_scs eqn_decl SEMICOLON
     {
       $$ = ATinsert($1, (ATerm) $2);
-      gsDebugMsg("parsed equation declarations\n  %t\n", $$);
+      gsDebugMsg("parsed equation declarations\n  %T\n", $$);
     }
   ;
 
@@ -318,12 +316,12 @@ eqn_decl:
   data_expr EQUALS data_expr
     {
       $$ = gsMakeDataEqn(ATmakeList0(), gsMakeNil(), $1, $3);
-      gsDebugMsg("parsed equation declaration\n  %t\n", $$);
+      gsDebugMsg("parsed equation declaration\n  %T\n", $$);
     }
   | data_expr ARROW data_expr EQUALS data_expr
     {
       $$ = gsMakeDataEqn(ATmakeList0(), $1, $3, $5);
-      gsDebugMsg("parsed equation declaration\n  %t\n", $$);
+      gsDebugMsg("parsed equation declaration\n  %T\n", $$);
     }
   ;
 
@@ -333,12 +331,12 @@ data_vars_decls_scs:
   data_vars_decl SEMICOLON
     {
       $$ = $1;
-      gsDebugMsg("parsed data variable declarations\n  %t\n", $$);
+      gsDebugMsg("parsed data variable declarations\n  %T\n", $$);
     }
   | data_vars_decls_scs data_vars_decl SEMICOLON
     {
       $$ = ATconcat($1, $2);
-      gsDebugMsg("parsed data variable declarations\n  %t\n", $$);
+      gsDebugMsg("parsed data variable declarations\n  %T\n", $$);
     }
   ;
 
@@ -351,7 +349,7 @@ data_vars_decl:
       for (int i = 0; i < n; i++) {
         $$ = ATinsert($$, (ATerm) gsMakeDataVarId(ATAelementAt($1, i), $3));
       }
-      gsDebugMsg("parsed data variable declarations\n  %t\n", $$);
+      gsDebugMsg("parsed data variable declarations\n  %T\n", $$);
     }
   ;
 
@@ -360,7 +358,7 @@ act_spec:
   KWACT acts_decls_scs
     {
       $$ = gsMakeActSpec($2);
-      gsDebugMsg("parsed action specification\n  %t\n", $$);
+      gsDebugMsg("parsed action specification\n  %T\n", $$);
     }
   ;
 
@@ -369,12 +367,12 @@ acts_decls_scs:
   acts_decl SEMICOLON
     {
       $$ = $1;
-      gsDebugMsg("parsed action declarations\n  %t\n", $$);
+      gsDebugMsg("parsed action declarations\n  %T\n", $$);
     }
   | acts_decls_scs acts_decl SEMICOLON
     {
       $$ = ATconcat($1, $2);
-      gsDebugMsg("parsed action declarations\n  %t\n", $$);
+      gsDebugMsg("parsed action declarations\n  %T\n", $$);
     }
   ;
 
@@ -388,7 +386,7 @@ acts_decl:
         $$ = ATinsert($$,
           (ATerm) gsMakeActId(ATAelementAt($1, i), ATmakeList0()));
       }
-      gsDebugMsg("parsed action declarations\n  %t\n", $$);
+      gsDebugMsg("parsed action declarations\n  %T\n", $$);
     }
   | ids_cs COLON domain
     {
@@ -397,7 +395,7 @@ acts_decl:
       for (int i = 0; i < n; i++) {
         $$ = ATinsert($$, (ATerm) gsMakeActId(ATAelementAt($1, i), $3));
       }
-      gsDebugMsg("parsed action declarations\n  %t\n", $$);
+      gsDebugMsg("parsed action declarations\n  %T\n", $$);
     }
   ;
 
@@ -406,7 +404,7 @@ proc_spec:
   KWPROC proc_decls_scs
     {
       $$ = gsMakeProcEqnSpec(ATreverse($2));
-      gsDebugMsg("parsed process specification\n  %t\n", $$);
+      gsDebugMsg("parsed process specification\n  %T\n", $$);
     }
   ;
 
@@ -415,12 +413,12 @@ proc_decls_scs:
   proc_decl SEMICOLON
     {
       $$ = ATmakeList1((ATerm) $1);
-      gsDebugMsg("parsed process declarations\n  %t\n", $$);
+      gsDebugMsg("parsed process declarations\n  %T\n", $$);
     }
   | proc_decls_scs proc_decl SEMICOLON
     {
       $$ = ATinsert($1, (ATerm) $2);
-      gsDebugMsg("parsed process declarations\n  %t\n", $$);
+      gsDebugMsg("parsed process declarations\n  %T\n", $$);
     }
   ;
 
@@ -430,7 +428,7 @@ proc_decl:
     {
       $$ = gsMakeProcEqn(
         ATmakeList0(), gsMakeProcVarId($1, ATmakeList0()), ATmakeList0(), $3);
-      gsDebugMsg("parsed process declaration\n  %t\n", $$);
+      gsDebugMsg("parsed process declaration\n  %T\n", $$);
     }
   | ID LPAR data_vars_decls_cs RPAR EQUALS proc_expr
     {
@@ -441,7 +439,7 @@ proc_decl:
       }      
       $$ = gsMakeProcEqn(
         ATmakeList0(), gsMakeProcVarId($1, ATreverse(SortExprs)), $3, $6);
-      gsDebugMsg("parsed process declaration\n  %t\n", $$);
+      gsDebugMsg("parsed process declaration\n  %T\n", $$);
     }
   ;
 
@@ -451,12 +449,12 @@ data_vars_decls_cs:
   data_vars_decl
     {
       $$ = $1;
-      gsDebugMsg("parsed data variable declarations\n  %t\n", $$);
+      gsDebugMsg("parsed data variable declarations\n  %T\n", $$);
     }
   | data_vars_decls_cs COMMA data_vars_decl
     {
       $$ = ATconcat($1, $3);
-      gsDebugMsg("parsed data variable declarations\n  %t\n", $$);
+      gsDebugMsg("parsed data variable declarations\n  %T\n", $$);
     }
   ;
 
@@ -465,7 +463,7 @@ initialisation:
   KWINIT proc_expr SEMICOLON
     {
       $$ = gsMakeInit(ATmakeList0(), $2);
-      gsDebugMsg("parsed initialisation\n  %t\n", $$);
+      gsDebugMsg("parsed initialisation\n  %T\n", $$);
     }
   ;
 
@@ -474,7 +472,7 @@ sort_expr:
   sort_expr_arrow
     {
       $$ = $1;
-      gsDebugMsg("parsed sort expression\n  %t\n", $$);
+      gsDebugMsg("parsed sort expression\n  %T\n", $$);
     }
   ;
 
@@ -487,7 +485,7 @@ sort_expr_arrow:
   | domain_no_arrow ARROW sort_expr_arrow
     {
       $$ = gsMakeSortArrowProd($1, $3);
-      gsDebugMsg("parsed arrow sort\n  %t\n", $$);
+      gsDebugMsg("parsed arrow sort\n  %T\n", $$);
     }
   ;
 
@@ -496,7 +494,7 @@ domain_no_arrow:
   domain_no_arrow_elts_hs
     {
       $$ = ATreverse($1);
-      gsDebugMsg("parsed non-arrow domain\n  %t\n", $$);
+      gsDebugMsg("parsed non-arrow domain\n  %T\n", $$);
     }
   ;
 
@@ -505,12 +503,12 @@ domain_no_arrow_elts_hs:
   domain_no_arrow_elt
     {
       $$ = ATmakeList1((ATerm) $1);
-      gsDebugMsg("parsed non-arrow domain elements\n  %t\n", $$);
+      gsDebugMsg("parsed non-arrow domain elements\n  %T\n", $$);
     }
   | domain_no_arrow_elts_hs HASH domain_no_arrow_elt
     {
       $$ = ATinsert($1, (ATerm) $3);
-      gsDebugMsg("parsed non-arrow domain elements\n  %t\n", $$);
+      gsDebugMsg("parsed non-arrow domain elements\n  %T\n", $$);
     }
   ;
 
@@ -519,7 +517,7 @@ domain_no_arrow_elt:
   sort_expr_struct
     {
       $$ = $1;
-      gsDebugMsg("parsed non-arrow domain element\n  %t\n", $$);
+      gsDebugMsg("parsed non-arrow domain element\n  %T\n", $$);
     }
   ;
 
@@ -532,7 +530,7 @@ sort_expr_struct:
   | KWSTRUCT struct_constructors_bs
     {
       $$ = gsMakeSortStruct(ATreverse($2));
-      gsDebugMsg("parsed structured sort\n  %t\n", $$);
+      gsDebugMsg("parsed structured sort\n  %T\n", $$);
     }
   ;
 
@@ -541,12 +539,12 @@ struct_constructors_bs:
   struct_constructor
     {
       $$ = ATmakeList1((ATerm) $1);
-      gsDebugMsg("parsed structured sort constructors\n  %t\n", $$);
+      gsDebugMsg("parsed structured sort constructors\n  %T\n", $$);
     }
   | struct_constructors_bs BAR struct_constructor
     {
       $$ = ATinsert($1, (ATerm) $3);
-      gsDebugMsg("parsed structured sort constructors\n  %t\n", $$);
+      gsDebugMsg("parsed structured sort constructors\n  %T\n", $$);
     }
   ;
 
@@ -555,12 +553,12 @@ struct_constructor:
   ID recogniser
     {
       $$ = gsMakeStructCons($1, ATmakeList0(), $2);
-      gsDebugMsg("parsed structured sort constructor\n  %t\n", $$);
+      gsDebugMsg("parsed structured sort constructor\n  %T\n", $$);
     }
   | ID LPAR struct_projections_cs RPAR recogniser
     {
       $$ = gsMakeStructCons($1, ATreverse($3), $5);
-      gsDebugMsg("parsed structured sort constructor\n  %t\n", $$);
+      gsDebugMsg("parsed structured sort constructor\n  %T\n", $$);
     }
   ;
 
@@ -569,12 +567,12 @@ recogniser:
   /* empty */ 
     {
       $$ = gsMakeNil();
-      gsDebugMsg("parsed recogniser\n  %t\n", $$);
+      gsDebugMsg("parsed recogniser\n  %T\n", $$);
     }
   | QMARK ID
     {
       $$ = $2;
-      gsDebugMsg("parsed recogniser id\n  %t\n", $$);
+      gsDebugMsg("parsed recogniser id\n  %T\n", $$);
     }
   ;
 
@@ -583,12 +581,12 @@ struct_projections_cs:
   struct_projection
     {
       $$ = ATmakeList1((ATerm) $1);
-      gsDebugMsg("parsed structured sort projections\n  %t\n", $$);
+      gsDebugMsg("parsed structured sort projections\n  %T\n", $$);
     }
   | struct_projections_cs COMMA struct_projection
     {
       $$ = ATinsert($1, (ATerm) $3);
-      gsDebugMsg("parsed structured sort projections\n  %t\n", $$);
+      gsDebugMsg("parsed structured sort projections\n  %T\n", $$);
     }
   ;
 
@@ -597,12 +595,12 @@ struct_projection:
   sort_expr
     {
       $$ = gsMakeStructProj(gsMakeNil(), $1);
-      gsDebugMsg("parsed structured sort projection\n  %t\n", $$);
+      gsDebugMsg("parsed structured sort projection\n  %T\n", $$);
     }
   | ID COLON sort_expr
     {
       $$ = gsMakeStructProj($1, $3);
-      gsDebugMsg("parsed structured sort projection\n  %t\n", $$);
+      gsDebugMsg("parsed structured sort projection\n  %T\n", $$);
     }
   ;
 
@@ -611,17 +609,17 @@ sort_expr_primary:
   ID
     {
       $$ = gsMakeSortId($1);
-      gsDebugMsg("parsed primary sort\n  %t\n", $$);
+      gsDebugMsg("parsed primary sort\n  %T\n", $$);
     }
   | sort_constant
     {
       $$ = $1;
-      gsDebugMsg("parsed sort constant\n  %t\n", $$);
+      gsDebugMsg("parsed sort constant\n  %T\n", $$);
     }
   | sort_constructor
     {
       $$ = $1;
-      gsDebugMsg("parsed sort constructor\n  %t\n", $$);
+      gsDebugMsg("parsed sort constructor\n  %T\n", $$);
     }
   | LPAR sort_expr RPAR
     {
@@ -670,7 +668,7 @@ data_expr:
   data_expr_whr
     {
       $$ = $1;
-      gsDebugMsg("parsed data expression\n  %t\n", $$);
+      gsDebugMsg("parsed data expression\n  %T\n", $$);
     }
   ;
 
@@ -683,7 +681,7 @@ data_expr_whr:
   | data_expr_whr WHR whr_decls_cs END
     {
       $$ = gsMakeWhr($1, ATreverse($3));
-      gsDebugMsg("parsed where clause\n  %t\n", $$);
+      gsDebugMsg("parsed where clause\n  %T\n", $$);
     }
   ;
 
@@ -692,12 +690,12 @@ whr_decls_cs:
   whr_decl
     {
       $$ = ATmakeList1((ATerm) $1);
-      gsDebugMsg("parsed where clause declarations\n  %t\n", $$);
+      gsDebugMsg("parsed where clause declarations\n  %T\n", $$);
     }
   | whr_decls_cs COMMA whr_decl
     {
       $$ = ATinsert($1, (ATerm) $3);
-      gsDebugMsg("parsed where clause declarations\n  %t\n", $$);
+      gsDebugMsg("parsed where clause declarations\n  %T\n", $$);
     }
   ;
 
@@ -706,7 +704,7 @@ whr_decl:
   ID EQUALS data_expr
     {
       $$ = gsMakeWhrDecl($1, $3);
-      gsDebugMsg("parsed where clause declaration\n  %t\n", $$);
+      gsDebugMsg("parsed where clause declaration\n  %T\n", $$);
     }
   ;
 
@@ -719,7 +717,7 @@ data_expr_lambda:
   | LAMBDA data_vars_decls_cs DOT data_expr_lambda
     {
       $$ = gsMakeLambda($2, $4);
-      gsDebugMsg("parsed lambda abstraction\n  %t\n", $$);
+      gsDebugMsg("parsed lambda abstraction\n  %T\n", $$);
     }
   ;
 
@@ -733,7 +731,7 @@ data_expr_imp:
     {
       $$ = gsMakeDataApplProd(gsMakeDataVarIdOpId($2),
         ATmakeList2((ATerm) $1, (ATerm) $3));
-      gsDebugMsg("parsed implication\n  %t\n", $$);
+      gsDebugMsg("parsed implication\n  %T\n", $$);
     }
   ;
 
@@ -747,13 +745,13 @@ data_expr_and:
     {
       $$ = gsMakeDataApplProd(gsMakeDataVarIdOpId($2),
         ATmakeList2((ATerm) $1, (ATerm) $3));
-      gsDebugMsg("parsed conjunction\n  %t\n", $$);
+      gsDebugMsg("parsed conjunction\n  %T\n", $$);
     }
   | data_expr_and BARS data_expr_eq
     {
       $$ = gsMakeDataApplProd(gsMakeDataVarIdOpId($2),
         ATmakeList2((ATerm) $1, (ATerm) $3));
-      gsDebugMsg("parsed disjunction\n  %t\n", $$);
+      gsDebugMsg("parsed disjunction\n  %T\n", $$);
     }
   ;
 
@@ -767,13 +765,13 @@ data_expr_eq:
     {
       $$ = gsMakeDataApplProd(gsMakeDataVarIdOpId($2),
         ATmakeList2((ATerm) $1, (ATerm) $3));
-      gsDebugMsg("parsed equality expression\n  %t\n", $$);
+      gsDebugMsg("parsed equality expression\n  %T\n", $$);
     }
   | data_expr_eq NEQ data_expr_rel
     {
       $$ = gsMakeDataApplProd(gsMakeDataVarIdOpId($2),
         ATmakeList2((ATerm) $1, (ATerm) $3));
-      gsDebugMsg("parsed equality expression\n  %t\n", $$);
+      gsDebugMsg("parsed equality expression\n  %T\n", $$);
     }
   ;
 
@@ -787,31 +785,31 @@ data_expr_rel:
     {
       $$ = gsMakeDataApplProd(gsMakeDataVarIdOpId($2),
         ATmakeList2((ATerm) $1, (ATerm) $3));
-      gsDebugMsg("parsed relational expression\n  %t\n", $$);
+      gsDebugMsg("parsed relational expression\n  %T\n", $$);
     }
   | data_expr_cons LTE data_expr_cons
     {
       $$ = gsMakeDataApplProd(gsMakeDataVarIdOpId($2),
         ATmakeList2((ATerm) $1, (ATerm) $3));
-      gsDebugMsg("parsed relational expression\n  %t\n", $$);
+      gsDebugMsg("parsed relational expression\n  %T\n", $$);
     }
   | data_expr_cons RANG data_expr_cons
     {
       $$ = gsMakeDataApplProd(gsMakeDataVarIdOpId($2),
         ATmakeList2((ATerm) $1, (ATerm) $3));
-      gsDebugMsg("parsed relational expression\n  %t\n", $$);
+      gsDebugMsg("parsed relational expression\n  %T\n", $$);
     }
   | data_expr_cons LANG data_expr_cons
     {
       $$ = gsMakeDataApplProd(gsMakeDataVarIdOpId($2),
         ATmakeList2((ATerm) $1, (ATerm) $3));
-      gsDebugMsg("parsed relational expression\n  %t\n", $$);
+      gsDebugMsg("parsed relational expression\n  %T\n", $$);
     }
   | data_expr_cons IN data_expr_cons
     {
       $$ = gsMakeDataApplProd(gsMakeDataVarIdOpId($2),
         ATmakeList2((ATerm) $1, (ATerm) $3));
-      gsDebugMsg("parsed relational expression\n  %t\n", $$);
+      gsDebugMsg("parsed relational expression\n  %T\n", $$);
     }
   ;
 
@@ -825,7 +823,7 @@ data_expr_cons:
     {
       $$ = gsMakeDataApplProd(gsMakeDataVarIdOpId($2),
         ATmakeList2((ATerm) $1, (ATerm) $3));
-      gsDebugMsg("parsed list cons expression\n  %t\n", $$);
+      gsDebugMsg("parsed list cons expression\n  %T\n", $$);
     }
   ;
 
@@ -839,7 +837,7 @@ data_expr_snoc:
     {
       $$ = gsMakeDataApplProd(gsMakeDataVarIdOpId($2),
         ATmakeList2((ATerm) $1, (ATerm) $3));
-      gsDebugMsg("parsed list snoc expression\n  %t\n", $$);
+      gsDebugMsg("parsed list snoc expression\n  %T\n", $$);
     }
   ; 
 
@@ -853,7 +851,7 @@ data_expr_concat:
     {
       $$ = gsMakeDataApplProd(gsMakeDataVarIdOpId($2),
         ATmakeList2((ATerm) $1, (ATerm) $3));
-      gsDebugMsg("parsed list concat expression\n  %t\n", $$);
+      gsDebugMsg("parsed list concat expression\n  %T\n", $$);
     }
   ;
 
@@ -867,13 +865,13 @@ data_expr_add:
     {
       $$ = gsMakeDataApplProd(gsMakeDataVarIdOpId($2),
         ATmakeList2((ATerm) $1, (ATerm) $3));
-      gsDebugMsg("parsed addition or set union\n  %t\n", $$);
+      gsDebugMsg("parsed addition or set union\n  %T\n", $$);
     }
   | data_expr_add MINUS data_expr_div
     {
       $$ = gsMakeDataApplProd(gsMakeDataVarIdOpId($2),
         ATmakeList2((ATerm) $1, (ATerm) $3));
-      gsDebugMsg("parsed subtraction or set difference\n  %t\n", $$);
+      gsDebugMsg("parsed subtraction or set difference\n  %T\n", $$);
     }
   ;
 
@@ -887,13 +885,13 @@ data_expr_div:
     {
       $$ = gsMakeDataApplProd(gsMakeDataVarIdOpId($2),
         ATmakeList2((ATerm) $1, (ATerm) $3));
-      gsDebugMsg("parsed div expression\n  %t\n", $$);
+      gsDebugMsg("parsed div expression\n  %T\n", $$);
     }
   | data_expr_div MOD data_expr_mult
     {
       $$ = gsMakeDataApplProd(gsMakeDataVarIdOpId($2),
         ATmakeList2((ATerm) $1, (ATerm) $3));
-      gsDebugMsg("parsed mod expression\n  %t\n", $$);
+      gsDebugMsg("parsed mod expression\n  %T\n", $$);
     }
   ;
 
@@ -907,13 +905,13 @@ data_expr_mult:
     {
       $$ = gsMakeDataApplProd(gsMakeDataVarIdOpId($2),
         ATmakeList2((ATerm) $1, (ATerm) $3));
-      gsDebugMsg("parsed multiplication or set intersection\n  %t\n", $$);
+      gsDebugMsg("parsed multiplication or set intersection\n  %T\n", $$);
     }
   | data_expr_mult DOT data_expr_quant_prefix
     {
       $$ = gsMakeDataApplProd(gsMakeDataVarIdOpId($2),
         ATmakeList2((ATerm) $1, (ATerm) $3));
-      gsDebugMsg("parsed list at expression\n  %t\n", $$);
+      gsDebugMsg("parsed list at expression\n  %T\n", $$);
     }
   ;
 
@@ -926,27 +924,27 @@ data_expr_quant_prefix:
   | FORALL data_vars_decls_cs DOT data_expr_quant_prefix
     {
       $$ = gsMakeForall($2, $4);
-      gsDebugMsg("parsed quantification\n  %t\n", $$);
+      gsDebugMsg("parsed quantification\n  %T\n", $$);
     }
   | EXISTS data_vars_decls_cs DOT data_expr_quant_prefix
     {
       $$ = gsMakeExists($2, $4);
-      gsDebugMsg("parsed quantification\n  %t\n", $$);
+      gsDebugMsg("parsed quantification\n  %T\n", $$);
     }
   | EXCLAM data_expr_quant_prefix
     {
       $$ = gsMakeDataApplProd(gsMakeDataVarIdOpId($1), ATmakeList1((ATerm) $2));
-      gsDebugMsg("parsed prefix data expression\n  %t\n", $$);
+      gsDebugMsg("parsed prefix data expression\n  %T\n", $$);
     }
   | MINUS data_expr_quant_prefix
     {
       $$ = gsMakeDataApplProd(gsMakeDataVarIdOpId($1), ATmakeList1((ATerm) $2));
-      gsDebugMsg("parsed prefix data expression\n  %t\n", $$);
+      gsDebugMsg("parsed prefix data expression\n  %T\n", $$);
     }
   | HASH data_expr_quant_prefix
     {
       $$ = gsMakeDataApplProd(gsMakeDataVarIdOpId($1), ATmakeList1((ATerm) $2));
-      gsDebugMsg("parsed prefix data expression\n  %t\n", $$);
+      gsDebugMsg("parsed prefix data expression\n  %T\n", $$);
     }
   ;
 
@@ -959,7 +957,7 @@ data_expr_postfix:
   | data_expr_postfix LPAR data_exprs_cs RPAR
     {
       $$ = gsMakeDataApplProd($1, ATreverse($3));
-      gsDebugMsg("parsed postfix data expression\n  %t\n", $$);
+      gsDebugMsg("parsed postfix data expression\n  %T\n", $$);
     }
   ;
 
@@ -968,12 +966,12 @@ data_exprs_cs:
   data_expr
     {
       $$ = ATmakeList1((ATerm) $1);
-      gsDebugMsg("parsed data expressions\n  %t\n", $$);
+      gsDebugMsg("parsed data expressions\n  %T\n", $$);
     }
   | data_exprs_cs COMMA data_expr
     {
       $$ = ATinsert($1, (ATerm) $3);
-      gsDebugMsg("parsed data expressions\n  %t\n", $$);
+      gsDebugMsg("parsed data expressions\n  %T\n", $$);
     }
   ;
   
@@ -982,7 +980,7 @@ data_expr_primary:
   ID
     {
       $$ = gsMakeDataVarIdOpId($1);
-      gsDebugMsg("parsed primary data expression\n  %t\n", $$);
+      gsDebugMsg("parsed primary data expression\n  %T\n", $$);
     }
   | data_constant
     {
@@ -1007,27 +1005,27 @@ data_constant:
   TRUE
     {
       $$ = gsMakeDataVarIdOpId($1);
-      gsDebugMsg("parsed data constant\n  %t\n", $$);
+      gsDebugMsg("parsed data constant\n  %T\n", $$);
     }
   | FALSE
     {
       $$ = gsMakeDataVarIdOpId($1);
-      gsDebugMsg("parsed data constant\n  %t\n", $$);
+      gsDebugMsg("parsed data constant\n  %T\n", $$);
     }
   | NUMBER
     {
       $$ = gsMakeNumber($1, gsMakeUnknown());
-      gsDebugMsg("parsed data constant\n  %t\n", $$);
+      gsDebugMsg("parsed data constant\n  %T\n", $$);
     }
   | PBRACK
     {
       $$ = gsMakeDataVarIdOpId($1);
-      gsDebugMsg("parsed data constant\n  %t\n", $$);
+      gsDebugMsg("parsed data constant\n  %T\n", $$);
     }
   | PBRACE
     {
       $$ = gsMakeDataVarIdOpId($1);
-      gsDebugMsg("parsed data constant\n  %t\n", $$);
+      gsDebugMsg("parsed data constant\n  %T\n", $$);
     }
   ;
 
@@ -1036,17 +1034,17 @@ data_enumeration:
   LBRACK data_exprs_cs RBRACK
     {
       $$ = gsMakeListEnum(ATreverse($2), gsMakeUnknown());
-      gsDebugMsg("parsed data enumeration\n  %t\n", $$);
+      gsDebugMsg("parsed data enumeration\n  %T\n", $$);
     }
   | LBRACE data_exprs_cs RBRACE
     {
       $$ = gsMakeSetEnum(ATreverse($2), gsMakeUnknown());
-      gsDebugMsg("parsed data enumeration\n  %t\n", $$);
+      gsDebugMsg("parsed data enumeration\n  %T\n", $$);
     }
   | LBRACE bag_enum_elts_cs RBRACE
     {
       $$ = gsMakeBagEnum(ATreverse($2), gsMakeUnknown());
-      gsDebugMsg("parsed data enumeration\n  %t\n", $$);
+      gsDebugMsg("parsed data enumeration\n  %T\n", $$);
     }
   ;
 
@@ -1055,12 +1053,12 @@ bag_enum_elts_cs:
   bag_enum_elt
     {
       $$ = ATmakeList1((ATerm) $1);
-      gsDebugMsg("parsed bag enumeration elements\n  %t\n", $$);
+      gsDebugMsg("parsed bag enumeration elements\n  %T\n", $$);
     }
   | bag_enum_elts_cs COMMA bag_enum_elt
     {
       $$ = ATinsert($1, (ATerm) $3);
-      gsDebugMsg("parsed bag enumeration elements\n  %t\n", $$);
+      gsDebugMsg("parsed bag enumeration elements\n  %T\n", $$);
     }
   ;
 
@@ -1069,7 +1067,7 @@ bag_enum_elt:
   data_expr COLON data_expr
     {
       $$ = gsMakeBagEnumElt($1, $3);
-      gsDebugMsg("parsed bag enumeration element\n  %t\n", $$);
+      gsDebugMsg("parsed bag enumeration element\n  %T\n", $$);
     }
   ;
 
@@ -1078,7 +1076,7 @@ data_comprehension:
   LBRACE data_var_decl BAR data_expr RBRACE
     {
       $$ = gsMakeSetBagComp($2, $4);
-      gsDebugMsg("parsed data comprehension\n  %t\n", $$);
+      gsDebugMsg("parsed data comprehension\n  %T\n", $$);
     }
   ;
 
@@ -1087,7 +1085,7 @@ data_var_decl:
   ID COLON sort_expr
     {
       $$ = gsMakeDataVarId($1, $3);
-      gsDebugMsg("parsed data variable declaration\n  %t\n", $$);
+      gsDebugMsg("parsed data variable declaration\n  %T\n", $$);
     }
   ;
 
@@ -1096,7 +1094,7 @@ proc_expr:
   proc_expr_choice
     {
       $$ = $1;
-      gsDebugMsg("parsed process expression\n  %t\n", $$);
+      gsDebugMsg("parsed process expression\n  %T\n", $$);
     }
   ;
 
@@ -1109,7 +1107,7 @@ proc_expr_choice:
   | proc_expr_sum PLUS proc_expr_choice
     {
       $$ = gsMakeChoice($1, $3);
-      gsDebugMsg("parsed choice expression\n  %t\n", $$);
+      gsDebugMsg("parsed choice expression\n  %T\n", $$);
     }
   ;
 
@@ -1122,7 +1120,7 @@ proc_expr_sum:
   | SUM data_vars_decls_cs DOT proc_expr_sum
     {
       $$ = gsMakeSum($2, $4);
-      gsDebugMsg("parsed summation\n  %t\n", $$);
+      gsDebugMsg("parsed summation\n  %T\n", $$);
     }
   ;
 
@@ -1135,12 +1133,12 @@ proc_expr_merge:
   | proc_expr_binit BARS proc_expr_merge
     {
       $$ = gsMakeMerge($1, $3);
-      gsDebugMsg("parsed merge expression\n  %t\n", $$);
+      gsDebugMsg("parsed merge expression\n  %T\n", $$);
     }
   | proc_expr_binit LMERGE proc_expr_merge
     {
       $$ = gsMakeLMerge($1, $3);
-      gsDebugMsg("parsed left merge expression\n  %t\n", $$);
+      gsDebugMsg("parsed left merge expression\n  %T\n", $$);
     }
   ;
 
@@ -1153,7 +1151,7 @@ proc_expr_binit:
   | proc_expr_cond BINIT proc_expr_binit
     {
       $$ = gsMakeBInit($1, $3);
-      gsDebugMsg("parsed bounded initialisation expression\n  %t\n", $$);
+      gsDebugMsg("parsed bounded initialisation expression\n  %T\n", $$);
     }
   ;
 
@@ -1166,12 +1164,12 @@ proc_expr_cond:
   | data_expr_quant_prefix ARROW proc_expr_seq
     {
       $$ = gsMakeCond($1, $3, gsMakeDelta());
-      gsDebugMsg("parsed conditional expression\n  %t\n", $$);
+      gsDebugMsg("parsed conditional expression\n  %T\n", $$);
     }
   | data_expr_quant_prefix ARROW proc_expr_seq COMMA proc_expr_seq
     {
       $$ = gsMakeCond($1, $3, $5);
-      gsDebugMsg("parsed conditional expression\n  %t\n", $$);
+      gsDebugMsg("parsed conditional expression\n  %T\n", $$);
     }
   ;
 
@@ -1185,7 +1183,7 @@ proc_expr_seq:
   | proc_expr_at DOT proc_expr_seq
     {
       $$ = gsMakeSeq($1, $3);
-      gsDebugMsg("parsed sequential expression\n  %t\n", $$);
+      gsDebugMsg("parsed sequential expression\n  %T\n", $$);
     }
   ;
 
@@ -1198,7 +1196,7 @@ proc_expr_at:
   | proc_expr_at AT data_expr_quant_prefix
     {
       $$ = gsMakeAtTime($1, $3);
-      gsDebugMsg("parsed at time expression\n  %t\n", $$);
+      gsDebugMsg("parsed at time expression\n  %T\n", $$);
     }
   ;
 
@@ -1211,7 +1209,7 @@ proc_expr_sync:
   | proc_expr_primary BAR proc_expr_sync
     {
       $$ = gsMakeSync($1, $3);
-      gsDebugMsg("parsed sync expression\n  %t\n", $$);
+      gsDebugMsg("parsed sync expression\n  %T\n", $$);
     }
   ;
 
@@ -1240,12 +1238,12 @@ proc_constant:
   DELTA
     {
       $$ = gsMakeDelta();
-      gsDebugMsg("parsed process constant\n  %t\n", $$);
+      gsDebugMsg("parsed process constant\n  %T\n", $$);
     }
   | TAU
     {
       $$ = gsMakeTau();
-      gsDebugMsg("parsed process constant\n  %t\n", $$);
+      gsDebugMsg("parsed process constant\n  %T\n", $$);
     }
   ;
 
@@ -1254,12 +1252,12 @@ act_proc_ref:
   ID
     {
       $$ = gsMakeActionProcess($1, ATmakeList0());
-      gsDebugMsg("parsed action or process\n  %t\n", $$);
+      gsDebugMsg("parsed action or process\n  %T\n", $$);
     }
   | ID LPAR data_exprs_cs RPAR
     {
       $$ = gsMakeActionProcess($1, ATreverse($3));
-      gsDebugMsg("parsed action or process\n  %t\n", $$);
+      gsDebugMsg("parsed action or process\n  %T\n", $$);
     }
   ;
 
@@ -1268,27 +1266,27 @@ proc_quant:
   BLOCK LPAR act_names_set COMMA proc_expr RPAR
     {
       $$ = gsMakeBlock($3, $5);
-      gsDebugMsg("parsed process quantification\n  %t\n", $$);
+      gsDebugMsg("parsed process quantification\n  %T\n", $$);
     }
   | HIDE LPAR act_names_set COMMA proc_expr RPAR
     {
       $$ = gsMakeHide($3, $5);
-      gsDebugMsg("parsed process quantification\n  %t\n", $$);
+      gsDebugMsg("parsed process quantification\n  %T\n", $$);
     }
   | RENAME LPAR ren_expr_set COMMA proc_expr RPAR
     {
       $$ = gsMakeRename($3, $5);
-      gsDebugMsg("parsed process quantification\n  %t\n", $$);
+      gsDebugMsg("parsed process quantification\n  %T\n", $$);
     }
   | COMM LPAR comm_expr_set COMMA proc_expr RPAR
     {
       $$ = gsMakeComm($3, $5);
-      gsDebugMsg("parsed process quantification\n  %t\n", $$);
+      gsDebugMsg("parsed process quantification\n  %T\n", $$);
     }
   | ALLOW LPAR mult_act_names_set COMMA proc_expr RPAR
     {
       $$ = gsMakeAllow($3, $5);
-      gsDebugMsg("parsed process quantification\n  %t\n", $$);
+      gsDebugMsg("parsed process quantification\n  %T\n", $$);
     }
   ;
 
@@ -1297,12 +1295,12 @@ act_names_set:
   PBRACE
     {
       $$ = ATmakeList0();
-      gsDebugMsg("parsed action name set\n  %t\n", $$);
+      gsDebugMsg("parsed action name set\n  %T\n", $$);
     }
   | LBRACE ids_cs RBRACE
     {
       $$ = ATreverse($2);
-      gsDebugMsg("parsed action name set\n  %t\n", $$);
+      gsDebugMsg("parsed action name set\n  %T\n", $$);
     }
   ;
 
@@ -1311,12 +1309,12 @@ ren_expr_set:
   PBRACE
     {
       $$ = ATmakeList0();
-      gsDebugMsg("parsed renaming expression set\n  %t\n", $$);
+      gsDebugMsg("parsed renaming expression set\n  %T\n", $$);
     }
   | LBRACE ren_exprs_cs RBRACE
     {
       $$ = ATreverse($2);
-      gsDebugMsg("parsed renaming expression set\n  %t\n", $$);
+      gsDebugMsg("parsed renaming expression set\n  %T\n", $$);
     }
   ;
 
@@ -1325,12 +1323,12 @@ ren_exprs_cs:
   ren_expr 
     {
       $$ = ATmakeList1((ATerm) $1);
-      gsDebugMsg("parsed renaming expressions\n  %t\n", $$);
+      gsDebugMsg("parsed renaming expressions\n  %T\n", $$);
     }
   | ren_exprs_cs COMMA ren_expr
     {
       $$ = ATinsert($1, (ATerm) $3);
-      gsDebugMsg("parsed renaming expressions\n  %t\n", $$);
+      gsDebugMsg("parsed renaming expressions\n  %T\n", $$);
     }
   ;
 
@@ -1339,7 +1337,7 @@ ren_expr:
   ID ARROW ID
     {
       $$ = gsMakeRenameExpr($1, $3);
-      gsDebugMsg("parsed renaming expression\n  %t\n", $$);
+      gsDebugMsg("parsed renaming expression\n  %T\n", $$);
     }
   ;
 
@@ -1348,12 +1346,12 @@ comm_expr_set:
   PBRACE
     {
       $$ = ATmakeList0();
-      gsDebugMsg("parsed communication expression set\n  %t\n", $$);
+      gsDebugMsg("parsed communication expression set\n  %T\n", $$);
     }
   | LBRACE comm_exprs_cs RBRACE
     {
       $$ = ATreverse($2);
-      gsDebugMsg("parsed communication expression set\n  %t\n", $$);
+      gsDebugMsg("parsed communication expression set\n  %T\n", $$);
     }
   ;
 
@@ -1362,12 +1360,12 @@ comm_exprs_cs:
   comm_expr 
     {
       $$ = ATmakeList1((ATerm) $1);
-      gsDebugMsg("parsed communication expressions\n  %t\n", $$);
+      gsDebugMsg("parsed communication expressions\n  %T\n", $$);
     }
   | comm_exprs_cs COMMA comm_expr
     {
       $$ = ATinsert($1, (ATerm) $3);
-      gsDebugMsg("parsed communication expressions\n  %t\n", $$);
+      gsDebugMsg("parsed communication expressions\n  %T\n", $$);
     }
   ;
 
@@ -1376,12 +1374,12 @@ comm_expr:
   mult_act_name
     {
       $$ = gsMakeCommExpr($1, gsMakeNil());
-      gsDebugMsg("parsed communication expression\n  %t\n", $$);
+      gsDebugMsg("parsed communication expression\n  %T\n", $$);
     }
   | mult_act_name ARROW ID
     {
       $$ = gsMakeCommExpr($1, $3);
-      gsDebugMsg("parsed communication expression\n  %t\n", $$);
+      gsDebugMsg("parsed communication expression\n  %T\n", $$);
     }
   ;
 
@@ -1390,12 +1388,12 @@ mult_act_names_set:
   PBRACE
     {
       $$ = ATmakeList0();
-      gsDebugMsg("parsed multi action name set\n  %t\n", $$);
+      gsDebugMsg("parsed multi action name set\n  %T\n", $$);
     }
   | LBRACE mult_act_names_cs RBRACE
     {
       $$ = ATreverse($2);
-      gsDebugMsg("parsed multi action name set\n  %t\n", $$);
+      gsDebugMsg("parsed multi action name set\n  %T\n", $$);
     }
   ;
 
@@ -1404,12 +1402,12 @@ mult_act_names_cs:
   mult_act_name
     {
       $$ = ATmakeList1((ATerm) $1);
-      gsDebugMsg("parsed multi action names\n  %t\n", $$);
+      gsDebugMsg("parsed multi action names\n  %T\n", $$);
     }
   | mult_act_names_cs COMMA mult_act_name
     {
       $$ = ATinsert($1, (ATerm) $3);
-      gsDebugMsg("parsed multi action names\n  %t\n", $$);
+      gsDebugMsg("parsed multi action names\n  %T\n", $$);
     }
   ;
 
@@ -1418,7 +1416,7 @@ mult_act_name:
   ids_bs
     {
       $$ = gsMakeMultActName(ATreverse($1));
-      gsDebugMsg("parsed multi action name\n  %t\n", $$);
+      gsDebugMsg("parsed multi action name\n  %T\n", $$);
     }
   ;
 
@@ -1427,12 +1425,12 @@ ids_bs:
   ID
     {
       $$ = ATmakeList1((ATerm) $1);
-      gsDebugMsg("parsed id's\n  %t\n", $$);
+      gsDebugMsg("parsed id's\n  %T\n", $$);
     }
   | ids_bs BAR ID
     {
       $$ = ATinsert($1, (ATerm) $3);
-      gsDebugMsg("parsed id's\n  %t\n", $$);
+      gsDebugMsg("parsed id's\n  %T\n", $$);
     }
   ;
 

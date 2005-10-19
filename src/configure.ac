@@ -41,7 +41,20 @@ AC_MSG_CHECKING([whether bison option %glr-parser is available])
 if $BISON test.y -o/dev/null &> /dev/null; then
   AC_MSG_RESULT([yes]);
 else
+  AC_MSG_RESULT([no])
   AC_MSG_ERROR([bison option %glr-parser not available]);
+fi
+AC_MSG_CHECKING([whether bison GLR parser can be used])
+$BISON test.y -o test.c
+if $CC -c test.c &> /dev/null; then
+  glr_usable="yes"
+fi
+rm -f test.c
+if test $glr_usable; then
+  AC_MSG_RESULT([yes]);
+else
+  AC_MSG_RESULT([no])
+  AC_MSG_ERROR([bison GLR parser cannot be used with the $CC compiler; please upgrade to bison 1.875a or later]);
 fi
 
 # Set flags
@@ -62,6 +75,7 @@ AC_RUN_IFELSE(
     ]
   ),
   AC_MSG_RESULT([yes]),
+  AC_MSG_RESULT([no])
   AC_MSG_ERROR([C99 standard not supported])
 )
 
