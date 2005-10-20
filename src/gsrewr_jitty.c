@@ -558,7 +558,7 @@ static bool match_jitty(ATerm t, ATerm p, ATermAppl *vars, ATerm *vals, int *len
 		return ATisEqual(p,t);
 	} else if ( gsIsDataVarId((ATermAppl) p) )
 	{
-		t = RWapplySubstitution(t); //XXX dirty (t is not a variable)
+//		t = RWapplySubstitution(t); //XXX dirty (t is not a variable)
 		for (int i=0; i<*len; i++)
 		{
 			if ( ATisEqual(p,vars[i]) )
@@ -576,12 +576,12 @@ static bool match_jitty(ATerm t, ATerm p, ATermAppl *vars, ATerm *vals, int *len
 		(*len)++;
 		return true;
 	} else {
-		t = RWapplySubstitution(t); //XXX dirty (t is not a variable)
+//		t = RWapplySubstitution(t); //XXX dirty (t is not a variable)
 		if ( ATisInt(t) || gsIsDataVarId((ATermAppl) t) )
 		{
 			return false; 
 		}
-		ATerm head = ATgetArgument((ATermAppl) t, 0);
+/*		ATerm head = ATgetArgument((ATermAppl) t, 0);
 		if ( !ATisInt(head) )
 		{
 			head = RWapplySubstitution(head);
@@ -614,7 +614,7 @@ static bool match_jitty(ATerm t, ATerm p, ATermAppl *vars, ATerm *vals, int *len
 				}
 				return true;
 			}
-		}
+		}*/
 		if ( !ATisEqualAFun(ATgetAFun((ATermAppl) p),ATgetAFun((ATermAppl) t)) )
 		{
 			return false;
@@ -730,41 +730,74 @@ static ATermAppl rewrite(ATermAppl Term)
 					{
 						ATermAppl rhs = ATAelementAt(rule,3);
 
-						if ( gsIsDataVarId(rhs) )
+						if ( arity == rule_arity )
 						{
 							return rewrite((ATermAppl) subst_values(vars,vals,len,(ATerm) rhs));
 						}
 
-						int rhs_arity = ATgetArity(ATgetAFun(rhs));
-						int new_arity = rhs_arity+arity-rule_arity;
-						ATerm arg0 = subst_values(vars,vals,len,ATgetArgument(rhs,0));
-						if ( !(ATisInt(arg0) || gsIsDataVarId((ATermAppl) arg0)))
+						int rhs_arity;
+						int new_arity;
+						ATerm arg0;
+
+						if ( gsIsDataVarId(rhs) )
 						{
-							new_arity += ATgetArity(ATgetAFun((ATermAppl) arg0))-1;
-						}
-						DECL_A(newargs,ATerm,rhs_arity+arity-rule_arity);
-						int i;
-						if ( ATisInt(arg0) || gsIsDataVarId((ATermAppl) arg0))
-						{
-							newargs[0] = arg0;
-							i = 1;
-						} else {
-							i = 0;
-							int arg0_arity = ATgetArity(ATgetAFun((ATermAppl) arg0));
-							while ( i < arg0_arity ) 
+							arg0 = subst_values(vars,vals,len,(ATerm) rhs);
+							if ( gsIsDataVarId((ATermAppl) arg0) )
 							{
-								newargs[0] = ATgetArgument((ATermAppl) arg0,i);
+								rhs_arity = 0;
+								new_arity = 1+arity-rule_arity;
+							} else {
+								rhs_arity = ATgetArity(ATgetAFun((ATermAppl) arg0));
+								new_arity = rhs_arity+arity-rule_arity;
+							}
+						} else {
+							rhs_arity = ATgetArity(ATgetAFun(rhs));
+							new_arity = rhs_arity+arity-rule_arity;
+							arg0 = subst_values(vars,vals,len,ATgetArgument(rhs,0));
+							if ( !(ATisInt(arg0) || gsIsDataVarId((ATermAppl) arg0)))
+							{
+								new_arity += ATgetArity(ATgetAFun((ATermAppl) arg0))-1;
+							}
+						}
+						DECL_A(newargs,ATerm,new_arity);
+						int i;
+						if ( gsIsDataVarId(rhs) )
+						{
+							if ( gsIsDataVarId((ATermAppl) arg0) )
+							{
+								newargs[0] = arg0;
+								i = 1;
+							} else {
+								i = 0;
+								while ( i < rhs_arity )
+								{
+									newargs[i] = ATgetArgument((ATermAppl) arg0,i);
+									i++;
+								}
+							}
+						} else {
+							if ( ATisInt(arg0) || gsIsDataVarId((ATermAppl) arg0))
+							{
+								newargs[0] = arg0;
+								i = 1;
+							} else {
+								i = 0;
+								int arg0_arity = ATgetArity(ATgetAFun((ATermAppl) arg0));
+								while ( i < arg0_arity ) 
+								{
+									newargs[i] = ATgetArgument((ATermAppl) arg0,i);
+									i++;
+								}
+							}
+							for (int j=1; j<rhs_arity; j++)
+							{
+//gsfprintf(stderr,"pre %T\n\n",ATgetArgument(rhs,i));
+								newargs[i] = subst_values(vars,vals,len,ATgetArgument(rhs,j));
 								i++;
+//gsfprintf(stderr,"post %T\n\n",args[i]);
 							}
 						}
 
-						for (int j=1; j<rhs_arity; j++)
-						{
-//gsfprintf(stderr,"pre %T\n\n",ATgetArgument(rhs,i));
-							newargs[i] = subst_values(vars,vals,len,ATgetArgument(rhs,j));
-							i++;
-//gsfprintf(stderr,"post %T\n\n",args[i]);
-						}
 						for (int j=0; j<arity-rule_arity; j++)
 						{
 							newargs[i] = (ATerm) args[rule_arity+j];
