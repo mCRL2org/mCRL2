@@ -262,6 +262,36 @@ static void newobject(int n)
 
 }
 
+static int gsIsDataExprAnd(ATermAppl t)
+{ 
+  if (gsIsDataAppl(t))
+  { ATermAppl t1=ATAgetArgument(t,0);
+    if (gsIsDataAppl(t1))
+    { if (ATAgetArgument(t1,0)==gsMakeOpIdAnd())
+      { 
+       return 1;
+      };
+    }
+  } 
+  return 0;
+}
+
+static int gsIsDataExprOr(ATermAppl t)
+{ 
+  if (gsIsDataAppl(t))
+  { ATermAppl t1=ATAgetArgument(t,0);
+    if (gsIsDataAppl(t1))
+    { return ATAgetArgument(t1,0)==gsMakeOpIdOr();
+    }
+  } 
+  return 0;
+}
+
+static int gsIsDataExprTrue(ATermAppl t)
+{
+  return t==gsMakeOpIdTrue();
+}
+
 static int strequal(char *s1,char *s2)
 { 
   return (strcmp(s1,s2)==0);
@@ -723,7 +753,7 @@ static ATermAppl pCRLrewrite(ATermAppl t)
 
   if (gsIsCond(t))
   { ATermAppl newcond=RewriteTerm(ATAgetArgument(t,0));
-    if (newcond==gsMakeDataExprTrue())
+    if (gsIsDataExprTrue(newcond))
     { return pCRLrewrite(ATAgetArgument(t,1));
     }
     if (newcond==gsMakeDataExprFalse())
@@ -5773,36 +5803,6 @@ static int gsIsDataExprEquality(ATermAppl t)
 }
 
 
-static int gsIsDataExprAnd(ATermAppl t)
-{ 
-  if (gsIsDataAppl(t))
-  { ATermAppl t1=ATAgetArgument(t,0);
-    if (gsIsDataAppl(t1))
-    { if (ATAgetArgument(t1,0)==gsMakeOpIdAnd())
-      { 
-       return 1;
-      };
-    }
-  } 
-  return 0;
-}
-
-static int gsIsDataExprOr(ATermAppl t)
-{ 
-  if (gsIsDataAppl(t))
-  { ATermAppl t1=ATAgetArgument(t,0);
-    if (gsIsDataAppl(t1))
-    { return ATAgetArgument(t1,0)==gsMakeOpIdOr();
-    }
-  } 
-  return 0;
-}
-
-static int gsIsDataExprTrue(ATermAppl t)
-{
-  return t==gsMakeOpIdTrue();
-}
-
 
 static int implies_condition(ATermAppl c1, ATermAppl c2)
 {
@@ -6443,7 +6443,17 @@ static void ApplySumElimination(ATermList *sumvars,
      t is substituted for x in the summand */
 
   if (gsIsDataExprTrue(communicationcondition))
-  { return;
+  { 
+      if (!gsIsDataExprTrue(remainingcommunicationcondition))
+      { ApplySumElimination(sumvars,
+                          condition,
+                          multiaction,
+                          actiontime,
+                          nextstate,
+                          remainingcommunicationcondition,
+                          gsMakeDataExprTrue(),
+                          parameters);
+      }
   }
    
   if (gsIsDataExprAnd(communicationcondition))
@@ -6508,7 +6518,8 @@ static void ApplySumElimination(ATermList *sumvars,
                         *nextstate,
                         parameters,
                         0,1);
-      ApplySumElimination(sumvars,
+      if (gsIsDataExprTrue(remainingcommunicationcondition))
+      { ApplySumElimination(sumvars,
                           condition,
                           multiaction,
                           actiontime,
@@ -6516,6 +6527,7 @@ static void ApplySumElimination(ATermList *sumvars,
                           remainingcommunicationcondition,
                           gsMakeDataExprTrue(),
                           parameters);
+      }
 
       return;
     }
@@ -6615,6 +6627,14 @@ static ATermAppl communicationcomposition(
         ATermAppl newactiontime=actiontime;
         ATermList newnextstate=nextstate;
 
+
+//        gsfprintf(stderr,"newsumvars, %P\n",newsumvars);
+//        gsfprintf(stderr,"newcondition, %P\n",newcondition);
+//        gsfprintf(stderr,"newmultiaction, %P\n",newmultiaction);
+//        gsfprintf(stderr,"newactiontime, %P\n",newactiontime);
+//        gsfprintf(stderr,"newnextstate, %P\n",newnextstate);
+//        gsfprintf(stderr,"communicationcondition, %P\n",communicationcondition);
+
         ApplySumElimination(&newsumvars,
                             &newcondition,
                             &newmultiaction,
@@ -6623,6 +6643,13 @@ static ATermAppl communicationcomposition(
                             communicationcondition,
                             gsMakeOpIdTrue(),
                             linGetParameters(ips));
+
+//        gsfprintf(stderr,"2newsumvars, %P\n",newsumvars);
+//        gsfprintf(stderr,"2newcondition, %P\n",newcondition);
+//        gsfprintf(stderr,"2newmultiaction, %P\n",newmultiaction);
+//        gsfprintf(stderr,"2newactiontime, %P\n",newactiontime);
+//        gsfprintf(stderr,"2newnextstate, %P\n",newnextstate);
+//        gsfprintf(stderr,"2communicationcondition, %P\n\n",communicationcondition);
 
         newcondition=RewriteTerm(newcondition);
         if (newcondition!=gsMakeDataExprFalse())
@@ -6769,7 +6796,7 @@ static ATermList combinesumlist(
     if (multiaction1!=terminationAction)
     { 
       if (actiontime1==gsMakeNil())
-      { if (ultimatedelaycondition!=gsMakeDataExprTrue())
+      { if (!gsIsDataExprTrue(ultimatedelaycondition))
         { actiontime1=timevar;
           sumvars1new=ATinsertA(sumvars1new,timevar);
           condition1=gsMakeDataExprAnd(ultimatedelaycondition,condition1);
@@ -6835,7 +6862,7 @@ static ATermList combinesumlist(
                      substitute_data(rename2_list,sums2renaming,condition2));
 
       if (actiontime2==gsMakeNil())
-      { if (ultimatedelaycondition!=gsMakeDataExprTrue())
+      { if (!gsIsDataExprTrue(ultimatedelaycondition))
         { actiontime2=timevar;
           sumvars2new=ATinsertA(sumvars2new,timevar);
           condition2=gsMakeDataExprAnd(ultimatedelaycondition,condition2);
