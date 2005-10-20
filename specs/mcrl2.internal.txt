@@ -1,4 +1,4 @@
-// Date: 24-06-2005
+// Date: 20-10-2005
 // This document describes the internal format of the mCRL2 language. Here:
 // - three phases of implementation are distinguised, namely type checking (tc),
 //   data implementation (di) and linearisation (lin)
@@ -156,7 +156,7 @@
                 | Delta
                 | Tau 
                 | Sum(<DataVarId>+, <ProcExpr>) 
-                | Restrict(<String>*, <ProcExpr>)
+                | Block(<String>*, <ProcExpr>)
                 | Hide(<String>*, <ProcExpr>)
                 | Rename(<RenameExpr>*, <ProcExpr>)
                 | Comm(<CommExpr>*, <ProcExpr>)
