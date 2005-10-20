@@ -177,10 +177,10 @@ AC_CHECK_LIB([xml2], [xmlParseFile], [have_libxml2=1])
 AC_CHECK_HEADERS([libxml/parser.h], [have_headerxml2=1])
 if test $have_libxml2; then
   if test $have_headerxml2; then
-    USE_XML2=1
+    USE_LIBXML2=1
   fi
 fi
-AC_SUBST([USE_XML2],[])
+AC_SUBST([USE_LIBXML2],[])
 
 # Check for xmlto
 AC_ARG_WITH(
@@ -276,7 +276,7 @@ if test $USE_WX; then
 else
   AC_MSG_NOTICE(wxWidgets     :  MISSING)
 fi
-if test $USE_XML2; then
+if test $USE_LIBXML2; then
   AC_MSG_NOTICE(libXML2       :  FOUND)
 else
   AC_MSG_NOTICE(libXML2       :  MISSING)

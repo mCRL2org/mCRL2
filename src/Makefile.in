@@ -114,7 +114,7 @@ TBF2LPE_LDFLAGS    = -lgsrewrite -l$(ATERM) -lm $(LIBDL)
 #pnml2mcrl2 definitions
 PNML2MCRL2_NAME    = pnml2mcrl2
 PNML2MCRL2_OBJECTS = pnml2mcrl2.o gstypecheck.o libprint_c.o gsfunc.o gslowlevel.o
-ifdef USE_XML2
+ifdef USE_LIBXML2
 OBJECTS           += $(PNML2MCRL2_OBJECTS)
 endif
 PNML2MCRL2_LDFLAGS = -lgsrewrite -l$(ATERM) -lxml2 -lm $(LIBDL)
@@ -140,13 +140,14 @@ OBJECTS           := $(sort $(OBJECTS))
 .PHONY: all install clean distclean
 .PRECIOUS: gsparser.c gslexer.c
 
-all:: $(BJAM) $(EXE_NAMES) $(LIB_NAMES)
+all: $(BJAM) $(EXE_NAMES) $(LIB_NAMES)
+	@$(MAKE) -C doc
 
 # Build bjam and boost libraries
 $(BJAM):
-	$(MAKE) -C boost
+	@$(MAKE) -C boost
 
-install:: all
+install: all
 	$(INSTALL) -d $(bindir)
 	@for f in $(EXE_NAMES); do\
 	  if test -f $$f; then\
@@ -155,7 +156,15 @@ install:: all
 	    $$c;\
 	  fi;\
 	done
-
+	$(INSTALL) -d $(libdir)
+	@for f in $(LIB_NAMES); do\
+	  if test -f $$f; then\
+	    c="$(INSTALL) $$f $(libdir)";\
+	    echo $$c;\
+	    $$c;\
+	  fi;\
+	done
+	@$(MAKE) -C doc install
 ifdef USE_WX
 ifeq ($(HOST_OS),MACOSX)
 	/Developer/Tools/Rez -t APPL -o xsim sample.r
@@ -170,22 +179,14 @@ ifeq ($(HOST_OS),MACOSX)
 	cp -f xsim.icns ../xsim.app/Contents/Resources/xsim.icns
 endif
 endif
-	$(INSTALL) -d $(libdir)
-	@for f in $(LIB_NAMES); do\
-	  if test -f $$f; then\
-	    c="$(INSTALL) $$f $(libdir)";\
-	    echo $$c;\
-	    $$c;\
-	  fi;\
-	done
 
-clean::
+clean:
 	$(RM) $(EXE_NAMES) $(LIB_NAMES) *.o *.a *.d *.dpp lpe/*.o lpe/*.dpp aterm/*.o aterm/*.a aterm/*.d svc/*.o svc/*.a svc/*.d gslexer.c gsparser.c gsparser.h gsparser.output lpeinfo lpeconstelm config.status config.log *~ core core.*
 
-distclean:: clean
+distclean: clean
 	$(MAKE) -C boost clean
+	$(MAKE) -C doc clean
 	$(RM) -r autom4te.cache Makefile config gsrewr_innerc_aux.h
-	$(RM) -r boost/lib boost/tools/build/jam_src/bin*
 
 $(ATERM_NAME): $(ATERM_OBJECTS)
 	$(AR) $(ARFLAGS) $@ $(ATERM_OBJECTS)
@@ -247,7 +248,7 @@ $(LPE2LTS_NAME) : $(LPE2LTS_OBJECTS) $(ATERM_DEP) $(LIBSVC_NAME) $(LIBREWR_NAME)
 $(TBF2LPE_NAME) : $(TBF2LPE_OBJECTS) $(ATERM_DEP) $(LIBREWR_NAME)
 	$(CC) -o $@ $(TBF2LPE_OBJECTS) $(LDFLAGS) $(TBF2LPE_LDFLAGS)
 
-ifdef USE_XML2
+ifdef USE_LIBXML2
 $(PNML2MCRL2_NAME) : $(PNML2MCRL2_OBJECTS) $(ATERM_DEP) $(LIBREWR_NAME)
 	$(CC) -o $@ $(PNML2MCRL2_OBJECTS) $(LDFLAGS) $(PNML2MCRL2_LDFLAGS)
 else
@@ -284,21 +285,6 @@ $(LIN_NAME) : $(LIN_OBJECTS) $(ATERM_DEP) $(LIBREWR_NAME)
 ifeq (,$(findstring $(MAKECMDGOALS),clean distclean))
 -include $(foreach s,$(OBJECTS),$(shell if test -f $(basename $s).c; then echo -n $(basename $s).d; fi))
 -include $(foreach s,$(OBJECTS),$(shell if test -f $(basename $s).cpp; then echo -n $(basename $s).dpp; fi))
-endif
-
-# Build documentation?
-ifeq ($(USE_XMLTO),1)
-all::
-	@echo Building documentation
-	@$(MAKE) -C doc all
-
-distclean::
-	@echo Cleaning documentation
-	@$(MAKE) -C doc clean
-
-install::
-	@echo Installing documentation
-	@$(MAKE) -C doc install
 endif
 
 #Note: to make a shared version of the gsrewr library instead of a static one, do the following:

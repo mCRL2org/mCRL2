@@ -10,7 +10,7 @@
 #
 # Then create boost/include and move the boost/boost directory to /boost/include/boost.
 
-include ../config
+-include ../config
 
 # Build boost build tool
 ifeq ($(HOST_OS),WINDOWS)
