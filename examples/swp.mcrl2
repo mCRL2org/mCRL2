@@ -12,8 +12,14 @@
 % the buffers in the sender and the receiver has now become a function
 % instead of a list. This seems to make the specification more
 % compact and insightful. 
+%
+% This specification contains a NON TERMINATING rewrite rule.
+% That means it can only be linearised with the flag
+% --no-rewrite. Also the generation of a state space will not
+% work for this reason.
 
 map  n: Pos;
+eqn  n=2;
 
 sort D = struct d1 | d2;
      Buf = Nat -> struct data(getdata:D) | empty;
@@ -57,4 +63,7 @@ proc S(l,m:Nat,q:Buf) =
 
 init allow({cB,cC,cE,cF,j,rA,sD},
         comm({rB|sB->cB, rC|sC->cC, rE|sE->cE, rF|sF->cF},
-           S(0,0,emptyBuf) || K || L || R(0,emptyBuf)));
+           S(0,0,emptyBuf) || 
+           K || 
+           L || 
+           R(0,emptyBuf)));
