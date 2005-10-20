@@ -6454,6 +6454,7 @@ static void ApplySumElimination(ATermList *sumvars,
                           gsMakeDataExprTrue(),
                           parameters);
       }
+      return;
   }
    
   if (gsIsDataExprAnd(communicationcondition))
