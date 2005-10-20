@@ -435,7 +435,16 @@ ATermList FindSolutions(ATermList Vars, ATerm Expr, FindSolutionsCallBack f)
 			n = calcNext(ATLgetFirst(t));
 			if ( used_vars > max_vars )
 			{
-				gsfprintf(stderr,"warning: Need more than %i variables to find all solutions for %P\n",max_vars,gsFromRewriteFormat(Expr));
+				gsfprintf(stderr,"warning: Need more than %i variables to find all valuations of ",max_vars);
+				for (ATermList k=Vars; !ATisEmpty(k); k=ATgetNext(k))
+				{
+					if ( k != Vars )
+					{
+						gsfprintf(stderr,", ");
+					}
+					gsfprintf(stderr,"%P: %P",ATgetFirst(k),ATgetArgument((ATermAppl) ATgetFirst(k),1));
+				}
+				gsfprintf(stderr," that satisfy %P\n",gsFromRewriteFormat(gsRewriteInternal(Expr)));
 				max_vars *= MAX_VARS_FACTOR;
 			}
 			for (; !ATisEmpty(n); n=ATgetNext(n))
