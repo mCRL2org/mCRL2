@@ -91,62 +91,49 @@ static inline ATermList typeMAL(ATermList LMAct){
   return ATreverse(r);
 }
 
-static ATermList sync_mact(ATermList a, ATermList b)
-{
-	ATermList c;
-
-	c = ATmakeList0();
-	while ( !(ATisEmpty(a) || ATisEmpty(b)) )
-	{
-	  if ( ATcompare(ATgetFirst(a), ATgetFirst(b)) <=0 ) 
-		{
-			c = ATinsert(c,ATgetFirst(a));
-			a = ATgetNext(a);
-		} else {
-			c = ATinsert(c,ATgetFirst(b));
-			b = ATgetNext(b);
-		}
-	}
-	if ( !ATisEmpty(a) )
-	{
-		c = ATconcat(c,a);
-	} else if ( !ATisEmpty(b) )
-	{
-		c = ATconcat(c,b);
-	}
-
-	return c;
+static ATermList sync_mact(ATermList a, ATermList b){
+  ATermList c = ATmakeList0();
+  while ( !(ATisEmpty(a) || ATisEmpty(b)) ){
+    ATermAppl aa=ATAgetFirst(a);
+    ATermAppl bb=ATAgetFirst(b);
+    if ( ATcompare((ATerm)aa,(ATerm)bb) <=0 ) {
+      c = ATinsert(c,(ATerm)aa);
+      a = ATgetNext(a);
+    } 
+    else {
+      c = ATinsert(c,(ATerm)bb);
+      b = ATgetNext(b);
+    }
+  }
+  c=ATreverse(c);
+  if ( !ATisEmpty(a) ){
+    c = ATconcat(c,a);
+  } else if ( !ATisEmpty(b) )
+    {
+      c = ATconcat(c,b);
+    }
+  return c;
 }
 
-static ATermList merge_list(ATermList l, ATermList m)
-{
-//	gsprintf("merge_list(%p,%p)\n\n",l,m);
-	for (; !ATisEmpty(l); l=ATgetNext(l))
-	{
-		if ( ATindexOf(m,ATgetFirst(l),0) < 0 )
-		{
-			m = ATinsert(m,ATgetFirst(l));
-		}
-	}
-
-	return m;
+static ATermList merge_list(ATermList l, ATermList m){
+  ATermList r=ATmakeList0();
+  for (; !ATisEmpty(m); m=ATgetNext(m)){
+    ATerm el=ATgetFirst(m);
+    if(ATindexOf(l,el,0) < 0 ){
+      r = ATinsert(r,el);
+    }
+  }
+  return ATconcat(l,ATreverse(r));
 }
 
-static ATermList list_minus(ATermList l, ATermList m)
-{
-	ATermList n;
-
-	n = ATmakeList0();
-	for (; !ATisEmpty(l); l=ATgetNext(l))
-	{
-		if ( ATindexOf(m,ATgetFirst(l),0) < 0 )
-		{
-			n = ATinsert(n,ATgetFirst(l));
-		}
-	}
-	n = ATreverse(n);
-
-	return n;
+static ATermList list_minus(ATermList l, ATermList m){
+  ATermList n = ATmakeList0();
+  for (; !ATisEmpty(l); l=ATgetNext(l)){
+    if ( ATindexOf(m,ATgetFirst(l),0) < 0 ){
+      n = ATinsert(n,ATgetFirst(l));
+    }
+  }
+  return ATreverse(n);
 }
 
 static ATermList filter_block_list(ATermList l, ATermList H){
@@ -248,38 +235,24 @@ static ATermList split_allow(ATermList V, ATermList ulp, ATermList ulq){
 static ATermList sync_list(ATermList l, ATermList m){
   ATermList n = ATmakeList0();
   for (; !ATisEmpty(l); l=ATgetNext(l)){
+    ATermList ll=ATLgetFirst(l);
     for (ATermList o=m; !ATisEmpty(o); o=ATgetNext(o)){
-      ATermList ma=sync_mact(ATLgetFirst(l),ATLgetFirst(o));
+      ATermList ma=sync_mact(ll,ATLgetFirst(o));
       if(ATindexOf(n,(ATerm)ma,0)<0)
-	n = ATinsert(n,(ATerm) sync_mact(ATLgetFirst(l),ATLgetFirst(o)));
+	n = ATinsert(n,(ATerm)ma);
     }
   }
-  return n;
+  return ATreverse(n);
 }
 
-static bool disjoint(ATermList l, ATermList m)
-{
-	for (; !ATisEmpty(m); m=ATgetNext(m) )
-	{
-		if ( ATindexOf(l,ATgetArgument(ATAgetFirst(m),0),0) >= 0 )
-		{
-			return false;
-		}
-	}
-
-	return true;
-}
-
-static bool disjoint_list(ATermList l, ATermList m)
-{
-	for (; !ATisEmpty(m); m=ATgetNext(m))
-	{
-		if ( !disjoint(l,ATLgetFirst(m)) )
-		{
-			return false;
-		}
-	}
-	return true;
+static bool disjoint_multiaction(ATermList MAct, ATermList MActL){
+  // true if no part of multiaction MAct is in a submultiaction of a multiaction from MActL (all untyped)
+  for (; !ATisEmpty(MActL); MActL=ATgetNext(MActL)){
+    if ( !gsaATisDisjoint(MAct,ATLgetFirst(MActL)) ){
+      return false;
+    }
+  }
+  return true;
 }
 
 static ATermList apply_hide(ATermList I, ATermList MAct){
@@ -427,23 +400,25 @@ static ATermList apply_comms(ATermList l, ATermList C){
 }
 
 static ATermList extend_comm(ATermList V, ATermList C, ATermList l){
-  // Extend V to contain communications of L with C
+  //Extend V to contain communications of L with C
   //gsWarningMsg("extend_comm: V: %T; C: %P; l: %T\n",V,C,untypeMAL(l));
   ATermList r=ATreverse(V);
 
-  V=ATinsert(V,(ATerm)gsMakeMultActName(ATmakeList0())); //to include possible communications to tau
+  {
+    //make V a list of multiactions actions
+    ATermList nV=ATmakeList0();
+    for (; !ATisEmpty(V); V=ATgetNext(V) ){
+      nV=ATinsert(nV,(ATerm)ATLgetArgument(ATAgetFirst(V),0));
+    }
+    V=ATreverse(nV);
+  }
+  V=ATinsert(V,(ATerm)ATmakeList0()); //to include possible communications to tau
+  
   for (; !ATisEmpty(l); l=ATgetNext(l) ){
     ATermAppl ma=gsMakeMultActName(untypeMA(ATLgetFirst(l)));
     if(ATindexOf(r,(ATerm)ma,0)<0){
       ATermList mas=untypeMAL(apply_comms(ATLgetFirst(l),C));
-      mas=ATremoveElement(mas,(ATerm)ATmakeList1((ATerm)ATmakeList0()));
-      //gsWarningMsg("mas: %T\n",mas);
-      
-      ATermList mas1=ATmakeList0();
-      for (; !ATisEmpty(mas); mas=ATgetNext(mas) ){
-	mas1=ATinsert(mas1,(ATerm)gsMakeMultActName(ATLgetFirst(mas)));
-      }
-      if(!gsaATisDisjoint(V,mas1)) 
+      if(!gsaATisDisjoint(V,mas)) 
 	r=ATinsert(r,(ATerm)ma);
     }
   }
@@ -675,7 +650,7 @@ static ATermAppl PushHide(ATermList I, ATermAppl a){
 }
 
 static ATermAppl PushAllow(ATermList V, ATermAppl a){
-  gsWarningMsg("push allow\n");//: V: %T; a:%P\n",V,a);
+  //gsWarningMsg("push allow\n");//: V: %T; a:%P\n",V,a);
   V=sort_multiactions_allow(V);
   if ( gsIsDelta(a) || gsIsTau(a) ){
     return a;
@@ -831,216 +806,145 @@ static ATermAppl PushAllow(ATermList V, ATermAppl a){
 
 static ATermAppl PushComm(ATermList C, ATermAppl a){
   C=sort_multiactions_comm(C);
-  gsWarningMsg("push comm\n");//: C: %P; a:%P\n",C,a);
-	if ( gsIsAction(a) )
-	{
-		return a;
-	} else if ( gsIsProcess(a) )
-	{
-		ATermList l = ATLtableGet(alphas,(ATerm) a);
+  //gsWarningMsg("push comm\n");//: C: %P; a:%P\n",C,a);
+  if ( gsIsDelta(a) || gsIsTau(a) || gsIsAction(a) ){
+    return a;
+  } 
+  else if ( gsIsProcess(a) ){
+    ATermList l = ATLtableGet(alphas,(ATerm) a);
+    
+    l = filter_comm_list(l,C);
+    // XXX also adjust C?
 
-		l = filter_comm_list(l,C);
-		// XXX also adjust C?
+    a = gsMakeComm(C,a);
 
-		a = gsMakeComm(C,a);
+    ATtablePut(alphas,(ATerm) a,(ATerm) l);
 
-		ATtablePut(alphas,(ATerm) a,(ATerm) l);
-
-		return a;
-	} else if ( gsIsDelta(a) || gsIsTau(a) )
-	{
-		return a;
-	} else if ( gsIsSum(a) )
-	{
-		ATermAppl p = ATAgetArgument(a,1);
-		ATermList l;
-
-		p = PushComm(C,p);
-
-		l = (ATermList) ATtableGet(alphas,(ATerm) p);
-
-		a = ATsetArgument(a,(ATerm) p, 1);
-
-		ATtablePut(alphas,(ATerm) a,(ATerm) l);
-
-		return a;
-	} else if ( gsIsBlock(a) )
-	{
-		//XXX
-		ATermList l = (ATermList) ATtableGet(alphas,(ATerm) a);
-		a = gsMakeComm(C,a);
-		ATtablePut(alphas,(ATerm) a,(ATerm) filter_comm_list(l,C));
-		return a;
-	} else if ( gsIsHide(a) )
-	{
-		//XXX
-		ATermList l = (ATermList) ATtableGet(alphas,(ATerm) a);
-		a = gsMakeComm(C,a);
-		ATtablePut(alphas,(ATerm) a,(ATerm) filter_comm_list(l,C));
-		return a;
-	} else if ( gsIsRename(a) )
-	{
-		//XXX
-		ATermList l = (ATermList) ATtableGet(alphas,(ATerm) a);
-		a = gsMakeComm(C,a);
-		ATtablePut(alphas,(ATerm) a,(ATerm) filter_comm_list(l,C));
-		return a;
-	} else if ( gsIsComm(a) )
-	{
-		//XXX
-		ATermList l = (ATermList) ATtableGet(alphas,(ATerm) a);
-		a = gsMakeComm(C,a);
-		ATtablePut(alphas,(ATerm) a,(ATerm) filter_comm_list(l,C));
-		return a;
-	} else if ( gsIsAllow(a) )
-	{
-		//XXX
-		ATermList l = (ATermList) ATtableGet(alphas,(ATerm) a);
-		a = gsMakeComm(C,a);
-		ATtablePut(alphas,(ATerm) a,(ATerm) filter_comm_list(l,C));
-		return a;
-	} else if ( gsIsSync(a) || gsIsMerge(a) || gsIsLMerge(a) )
-	{
-	  if ( can_split_comm(C) ){
-	    ATermAppl p = ATAgetArgument(a,0);
-	    ATermAppl q = ATAgetArgument(a,1);
-	    ATermList lp = ATLtableGet(alphas,(ATerm) p);
-	    ATermList lq = ATLtableGet(alphas,(ATerm) q);
-	    ATermList Cp = ATmakeList0();
-	    ATermList Cq = ATmakeList0();
-	    ATermList Ca = ATmakeList0();
-	    ATermList l;
-
-	    for (; !ATisEmpty(C); C=ATgetNext(C)){
-	      bool bp = disjoint_list(ATLgetArgument(ATAgetArgument(ATAgetFirst(C),0),0),lp);
-	      bool bq = disjoint_list(ATLgetArgument(ATAgetArgument(ATAgetFirst(C),0),0),lq);
-				
-	      if ( !bp ){
-		if ( !bq ){
-		  Ca = ATinsert(Ca,ATgetFirst(C));
-		} 
-		else {
-		  Cp = ATinsert(Cp,ATgetFirst(C));
-		}
-	      } 
-	      else 
-		if ( !bq ){
-		  Cq = ATinsert(Cq,ATgetFirst(C));
-		}
-	    }
-	    if ( !(ATisEmpty(Cp) && ATisEmpty(Cq)) ){
-	      if ( !ATisEmpty(Cp) ){
-		p = PushComm(Cp,p);
-	      }
-	      if ( !ATisEmpty(Cq) ){
-		q = PushComm(Cq,q);
-	      }
-	      l=ATLtableGet(alphas,(ATerm) p);
-	      ATermList l2=ATLtableGet(alphas,(ATerm) q);
-	      l=merge_list(merge_list(l,l2),sync_list(l,l2));
-	      a=ATsetArgument(ATsetArgument(a,(ATerm)q,1),(ATerm)p,0);
-	      ATtablePut(alphas,(ATerm) a,(ATerm) l);
-	    } 
-	    else {
-	      l = ATLtableGet(alphas,(ATerm) a);
-	    }
-
-	    if ( !ATisEmpty(Ca) ){
-	      a = gsMakeComm(Ca,a);
-	      ATtablePut(alphas,(ATerm) a,(ATerm) filter_comm_list(l,Ca));
-	    }
-	    return a;
+    return a;
+  } 
+  else if ( gsIsBlock(a) ){
+    //XXX
+    ATermList l = (ATermList) ATtableGet(alphas,(ATerm) a);
+    a = gsMakeComm(C,a);
+    ATtablePut(alphas,(ATerm) a,(ATerm) filter_comm_list(l,C));
+    return a;
+  } else if ( gsIsHide(a) ){
+    //XXX
+    ATermList l = (ATermList) ATtableGet(alphas,(ATerm) a);
+    a = gsMakeComm(C,a);
+    ATtablePut(alphas,(ATerm) a,(ATerm) filter_comm_list(l,C));
+    return a;
+  } else if ( gsIsRename(a) ){
+    //XXX
+    ATermList l = (ATermList) ATtableGet(alphas,(ATerm) a);
+    a = gsMakeComm(C,a);
+    ATtablePut(alphas,(ATerm) a,(ATerm) filter_comm_list(l,C));
+    return a;
+  } else if ( gsIsComm(a) ){
+    //XXX
+    ATermList l = (ATermList) ATtableGet(alphas,(ATerm) a);
+    a = gsMakeComm(C,a);
+    ATtablePut(alphas,(ATerm) a,(ATerm) filter_comm_list(l,C));
+    return a;
+  } else if ( gsIsAllow(a) ){
+    //XXX
+    ATermList l = (ATermList) ATtableGet(alphas,(ATerm) a);
+    a = gsMakeComm(C,a);
+    ATtablePut(alphas,(ATerm) a,(ATerm) filter_comm_list(l,C));
+    return a;
+  } 
+  else if ( gsIsSync(a) || gsIsMerge(a) || gsIsLMerge(a) ){
+    if ( can_split_comm(C) ){
+      ATermAppl p = ATAgetArgument(a,0);
+      ATermAppl q = ATAgetArgument(a,1);
+      ATermList ulp = untypeMAL(ATLtableGet(alphas,(ATerm) p));
+      ATermList ulq = untypeMAL(ATLtableGet(alphas,(ATerm) q));
+      ATermList Cp = ATmakeList0();
+      ATermList Cq = ATmakeList0();
+      ATermList Ca = ATmakeList0();
+      ATermList l;
+      
+      for (; !ATisEmpty(C); C=ATgetNext(C)){
+	ATermAppl c=ATAgetFirst(C);
+	ATermList lhs=ATLgetArgument(ATAgetArgument(c,0),0);
+	bool bp = disjoint_multiaction(lhs,ulp);
+	bool bq = disjoint_multiaction(lhs,ulq);
+	
+	if ( !bp ){
+	  if ( !bq ){
+	    Ca = ATinsert(Ca,(ATerm)c);
 	  } 
 	  else {
-	    ATermList l = (ATermList) ATtableGet(alphas,(ATerm) a);
-	    a = gsMakeComm(C,a);
-	    ATtablePut(alphas,(ATerm) a,(ATerm) filter_comm_list(l,C));
-	    return a;
+	    Cp = ATinsert(Cp,(ATerm)c);
 	  }
 	} 
-	else if ( gsIsAtTime(a) ){
-	  ATermAppl p = ATAgetArgument(a,0);
-	  ATermAppl c = ATAgetArgument(a,1);
-	  ATermList l;
-
-		p = PushComm(C,p);
-
-		l = (ATermList) ATtableGet(alphas,(ATerm) p);
-
-		a = gsMakeAtTime(p,c);
-
-		ATtablePut(alphas,(ATerm) a,(ATerm) l);
-
-		return a;
-	} else if ( gsIsSeq(a) )
-	{
-		ATermAppl p = ATAgetArgument(a,0);
-		ATermAppl q = ATAgetArgument(a,1);
-		ATermList l;
-
-		p = PushComm(C,p);
-		q = PushComm(C,q);
-
-		l = merge_list((ATermList) ATtableGet(alphas,(ATerm) p),(ATermList) ATtableGet(alphas,(ATerm) q));
-
-		a = gsMakeSeq(p,q);
-
-		ATtablePut(alphas,(ATerm) a,(ATerm) l);
-
-		return a;
-	} else if ( gsIsCond(a) )
-	{
-		ATermAppl c = ATAgetArgument(a,0);
-		ATermAppl p = ATAgetArgument(a,1);
-		ATermAppl q = ATAgetArgument(a,2);
-		ATermList l;
-
-		p = PushComm(C,p);
-		q = PushComm(C,q);
-
-		l = merge_list((ATermList) ATtableGet(alphas,(ATerm) p),(ATermList) ATtableGet(alphas,(ATerm) q));
-
-		a = gsMakeCond(c,p,q);
-
-		ATtablePut(alphas,(ATerm) a,(ATerm) l);
-
-		return a;
-	} else if ( gsIsBInit(a) )
-	{
-		// XXX
-		ATermAppl p = ATAgetArgument(a,0);
-		ATermAppl q = ATAgetArgument(a,1);
-		ATermList l;
-
-		p = PushComm(C,p);
-		q = PushComm(C,q);
-
-		l = merge_list((ATermList) ATtableGet(alphas,(ATerm) p),(ATermList) ATtableGet(alphas,(ATerm) q));
-
-		a = gsMakeBInit(p,q);
-
-		ATtablePut(alphas,(ATerm) a,(ATerm) l);
-
-		return a;
-	} else if ( gsIsChoice(a) )
-	{
-		ATermAppl p = ATAgetArgument(a,0);
-		ATermAppl q = ATAgetArgument(a,1);
-		ATermList l;
-
-		p = PushComm(C,p);
-		q = PushComm(C,q);
-
-		l = merge_list((ATermList) ATtableGet(alphas,(ATerm) p),(ATermList) ATtableGet(alphas,(ATerm) q));
-
-		a = gsMakeChoice(p,q);
-
-		ATtablePut(alphas,(ATerm) a,(ATerm) l);
-
-		return a;
+	else 
+	  if ( !bq ){
+	    Cq = ATinsert(Cq,(ATerm)c);
+	  }
+      }
+      if ( !(ATisEmpty(Cp) && ATisEmpty(Cq)) ){
+	if ( !ATisEmpty(Cp) ){
+	  p = PushComm(Cp,p);
 	}
-
-	return NULL;
+	if ( !ATisEmpty(Cq) ){
+	  q = PushComm(Cq,q);
+	}
+	l=ATLtableGet(alphas,(ATerm) p);
+	ATermList l2=ATLtableGet(alphas,(ATerm) q);
+	//gsWarningMsg("tick l: %d\n", ATgetLength(l));
+	l=merge_list(merge_list(l,l2),sync_list(l,l2));
+	//gsWarningMsg("tick l: %d\n\n", ATgetLength(l));
+	a=ATsetArgument(ATsetArgument(a,(ATerm)q,1),(ATerm)p,0);
+	ATtablePut(alphas,(ATerm) a,(ATerm) l);
+      } 
+      else {
+	l = ATLtableGet(alphas,(ATerm) a);
+      }
+      
+      if ( !ATisEmpty(Ca) ){
+	a = gsMakeComm(Ca,a);
+	//gsWarningMsg("tick2 l: %d\n",ATgetLength(l));
+	l = filter_comm_list(l,Ca);
+	ATtablePut(alphas,(ATerm) a,(ATerm) l);
+ 	//gsWarningMsg("tick2 l: %d\n\n",ATgetLength(l));
+     }
+      return a;
+    } 
+    else {
+      ATermList l = (ATermList) ATtableGet(alphas,(ATerm) a);
+      a = gsMakeComm(C,a);
+      ATtablePut(alphas,(ATerm) a,(ATerm) filter_comm_list(l,C));
+      return a;
+    }
+  } 
+  else if ( gsIsSum(a) || gsIsAtTime(a) || gsIsChoice(a) || gsIsSeq(a) 
+	    || gsIsCond(a) || gsIsSync(a) || gsIsMerge(a) || gsIsLMerge(a) || gsIsBInit(a)){
+    // all distributing rules together
+    short ia1=0,ia2=1,args=2;
+    if(gsIsCond(a) || gsIsSum(a)) { ia1=1; ia2=2; }
+    if(gsIsSum(a) || gsIsAtTime(a) || gsIsBInit(a)) args=1; //second argument of BInit does not matter 
+    
+    ATermAppl p,q;
+    p = PushComm(C,ATAgetArgument(a,ia1));
+    if(args==2) q = PushComm(C,ATAgetArgument(a,ia2));
+    
+    ATermList l,l1,l2;
+    l=l1=ATLtableGet(alphas,(ATerm) p);
+    if(args==2) l2=ATLtableGet(alphas,(ATerm) q);
+    
+    if(args==2) l = merge_list(l,l2);
+    if(gsIsSync(a) || gsIsMerge(a) || gsIsLMerge(a)) 
+      l = merge_list(l,sync_list(l1,l2));
+    
+    a=ATsetArgument(a,(ATerm)p,ia1);
+    if(args==2) a=ATsetArgument(a,(ATerm)q,ia2);
+    
+    ATtablePut(alphas,(ATerm) a,(ATerm) l);
+    
+    return a;
+  }
+  assert(0);
 }
   
 static ATermAppl gsApplyAlpha(ATermAppl a){
@@ -1168,7 +1072,13 @@ ATermAppl gsAlpha(ATermAppl Spec){
   }
   all_stable=true;
 
-  // apply alpha to init
+  // apply alpha to once more and to init
+  for(ATermList pr=ATLgetArgument(ATAgetArgument(Spec,5),0); !ATisEmpty(pr); pr=ATgetNext(pr)){
+    ATermAppl pn=ATAgetArgument(ATAgetFirst(pr),1);
+    ATermAppl new_p=gsApplyAlpha(ATAtableGet(procs,(ATerm)pn));
+    ATtablePut(alphas,(ATerm)pn,(ATerm)ATLtableGet(alphas,(ATerm)new_p));
+  }
+
   ATermAppl init=ATAgetArgument(ATAgetArgument(Spec,6),1);;
   init = gsApplyAlpha(init);
 
