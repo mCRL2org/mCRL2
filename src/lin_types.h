@@ -24,6 +24,7 @@ typedef struct {
   bool statenames;
   bool norewrite;
   bool nofreevars;
+  short alpha;
 } t_lin_options;
 //t_lin_options represents the options of the lineariser
 

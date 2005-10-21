@@ -22,11 +22,12 @@ extern "C" {
 #include "libprint_c.h"
 #include "gslexer.h"
 #include "gstypecheck.h"
+#include "libgsalpha.h"
 #include "gsdataimpl.h"
 
 //Type definitions
 
-typedef enum { phNone, phParse, phTypeCheck, phDataImpl } t_phase;
+typedef enum { phNone, phParse, phTypeCheck, phAlpha, phDataImpl } t_phase;
 //t_phase represents the phases at which the program should be able to stop
 
 //Functions used by the main program
@@ -52,12 +53,13 @@ int main(int argc, char *argv[])
   bool opt_newstate = false;
   bool opt_binary = false;
   bool opt_statenames = false;
+  short opt_alpha = 1;
   bool opt_norewrite = false;
   bool opt_nofreevars = false;
   bool opt_check_only = false;
   t_phase opt_end_phase = phNone;
   bool opt_stdout = false;
-  #define ShortOptions   "0123cnwbaofep:hqvd"
+  #define ShortOptions   "0123cnrwbaofep:hqvd"
   #define StdOutOption   CHAR_MAX + 1
   #define VersionOption  StdOutOption + 1
   struct option LongOptions[] = {
@@ -67,6 +69,7 @@ int main(int argc, char *argv[])
     { "alternative", no_argument,       NULL, '3' },
     { "cluster",     no_argument,       NULL, 'c' },
     { "no-cluster",  no_argument,       NULL, 'n' },
+    { "no-alpha",    no_argument,       NULL, 'r' },
     { "newstate",    no_argument,       NULL, 'w' },
     { "binary",      no_argument,       NULL, 'b' },
     { "statenames",  no_argument,       NULL, 'a' },
@@ -125,6 +128,9 @@ int main(int argc, char *argv[])
       case 'n': /* nocluster */
         opt_intermediate_cluster_method = cmNone;
         break;
+      case 'r': /* noalpha */
+        opt_alpha = 0;
+        break;
       case 'w': /* newstate */ 
         opt_newstate = true;
         break;
@@ -148,6 +154,8 @@ int main(int argc, char *argv[])
           opt_end_phase = phParse;
         } else if (strcmp(optarg, "tc") == 0) {
           opt_end_phase = phTypeCheck;
+        } else if (strcmp(optarg, "al") == 0) {
+          opt_end_phase = phAlpha;
         } else if (strcmp(optarg, "di") == 0) {
           opt_end_phase = phDataImpl;
         } else {
@@ -232,6 +240,7 @@ int main(int argc, char *argv[])
   lin_options.statenames = opt_statenames;
   lin_options.norewrite = opt_norewrite;
   lin_options.nofreevars = opt_nofreevars;
+  lin_options.alpha = opt_alpha;
 
   //linearise infilename with options lin_options
   ATermAppl result =
@@ -301,6 +310,21 @@ ATermAppl linearise_file(char *infilename, t_lin_options lin_options,
   }
   if (end_phase == phTypeCheck) {
     return result;
+  }
+  //perform alphabeth reductions 
+  if(lin_options.alpha){
+    gsVerboseMsg("performing alphabeth reductions...\n");
+    result = gsAlpha(result);
+    if (result == NULL){
+      gsErrorMsg("alphabeth reductions failed\n");
+      return NULL;
+    }
+    if (end_phase == phAlpha) {
+      return result;
+    }
+  }
+  else {
+        gsVerboseMsg("alphabeth reductions are switched off.\n");
   }
   //implement standard data types and type constructors on the result
   gsVerboseMsg("implementing standard data types and type constructors...\n");
@@ -415,6 +439,9 @@ void PrintHelp(char *Name)
     "  -n, --no-cluster      the actions in intermediate LPEs are not clustered\n"
     "                        (default behaviour is that intermediate LPEs are\n"
     "                        clustered and the final LPE is not clustered)\n"
+    "  -r, --no-alpha        the alpha reductions are not applied\n"
+    "                        (default behaviour is that the alpha reductions\n" 
+    "                        applied\n"
     "  -w, --newstate        state variables are encoded using enumerated types\n"
     "                        (requires -1 or -2); without -w numbers are used\n"
     "  -b, --binary          when clustering use binary case functions instead of\n"
@@ -428,8 +455,8 @@ void PrintHelp(char *Name)
     "                        instead of modelling them by free variables\n"
     "  -e  --check-only      check syntax and static semantics; do not linearise\n"
     "  -p  --end-phase=PHASE stop linearisation after phase PHASE and output the\n"
-    "                        result; PHASE can be 'pa' (parse), 'tc' (type check)\n"
-    "                        or 'di' (data implementation)\n"
+    "                        result; PHASE can be 'pa' (parse), 'tc' (type check),\n"
+    "                        'al' (alpha reduction) or 'di' (data implementation)\n"
     "      --stdout          the generated LPE is written to stdout\n"
     "  -h, --help            display this help\n"    
     "      --version         display version information\n"
