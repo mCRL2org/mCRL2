@@ -1,44 +1,42 @@
-#Redefine default definitions using autoconf
-CC              = gcc
-CFLAGS          = -g -O2 -std=c99 -Wall -pedantic
-WX_CONFIG 	= wx-config
-CPP             = gcc -E
-CPPFLAGS        = -I.. -I../aterm -I../svc `$(WX_CONFIG) --cxxflags`
-CXX             = g++
-CXXFLAGS        = -g -Wall
-LDFLAGS         = -Wl,--as-needed -L. $(shell $(WX_CONFIG) --libs)
+CXXFLAGS                       = -std=c++98 -O3 -g -fPIC -Wall
+LDFLAGS                        = -lxml2
+CPPFLAGS                       = -I/usr/include/libxml2 -DPARSER_SCHEMA_VALIDATION -DTOOL_RUN_SUCCESSFUL -DDISABLE_TOOLBAR
 
-#mCRL2 studio definitions
-STUDIO_NAME     = mcrl2studio
-STUDIO_OBJECTS  = mcrl2studio.o proj.o anal.o project.o general.o object.o tagdialog.o analysis.o types.o simtool.o lintool.o common.o ../xsimbase.o ../xsimmain.o ../xsimtrace.o ../libgsnextstate.o ../libgsprover.o ../gsparser.o ../gslexer.o ../gstypecheck.o ../gsdataimpl.o ../lin_alt.o ../gslowlevel.o ../gsfunc.o ../libprint_cxx.o
-STUDIO_LDFLAGS  = -L.. -L../aterm -lATerm -lm -lgsrewrite
+WX_OBJECTS                     = studio.o studio_overview.o new_model_dialog.o
+WX_DEFINES                     = -D__WXDEBUG__ -D__WXGTK__ -D_FILE_OFFSET_BITS=64 -D_LARGE_FILES -D_LARGEFILE_SOURCE=1 -DNO_GCC_PRAGMA
+WX_INCLUDES                    = -I/usr/lib/wx/include/gtk2-unicode-debug-2.6 -I/usr/include/wx-2.6 
+WX_LIBRARIES                   = -lwx_gtk2ud_xrc-2.6 -lwx_gtk2ud_html-2.6 -lwx_gtk2ud_adv-2.6 -lwx_gtk2ud_core-2.6 -lwx_baseud_xml-2.6 \
+                                 -lwx_baseud_net-2.6 -lwx_baseud-2.6
 
-#Make rules
-.PHONY: all clean
+STUDIO_OBJECTS                 = studio.o studio_overview.o new_model_dialog.o project_manager.o
+PROJECT_MANAGER_TESTER_OBJECTS = project_manager_tester.o project_manager.o
+TOOL_MANAGER_TESTER_OBJECTS    = tool_manager_tester.o tool_manager.o
+OBJECTS                        = $(STUDIO_OBJECTS) $(PROJECT_MANAGER_TESTER_OBJECTS) $(TOOL_MANAGER_TESTER_OBJECTS)
 
-all : $(STUDIO_NAME)
+TEST_TARGETS                   = project_manager_tester tool_manager_tester
+TARGETS                        = studio
 
-$(STUDIO_NAME) : $(STUDIO_OBJECTS) $(STUDIOBASE_NAME)
-	$(CXX) $(CXX_FLAGS) -o $@ $(STUDIO_OBJECTS) $(LDFLAGS) $(STUDIO_LDFLAGS)
+.PHONY: all clean test
 
-%.d : %.c
-	@echo generating dependencies for $<
-	@$(CC) -MM $(CPPFLAGS) $< > $@.$$$$; \
-	sed 's,\($*\)\.o[ :]*,\1.o $@ : ,g' < $@.$$$$ > $@; \
-	$(RM) $@.$$$$
+all: $(TARGETS)
 
-%.dpp : %.cpp
-	@echo generating dependencies for $<
-	@$(CXX) -MM $(CPPFLAGS) $< > $@.$$$$; \
-	sed 's,\($*\)\.o[ :]*,\1.o $@ : ,g' < $@.$$$$ > $@; \
-	$(RM) $@.$$$$
+test: all $(TEST_TARGETS)
 
-ifeq (,$(findstring $(MAKECMDGOALS),clean))
--include $(foreach s,$(STUDIO_OBJECTS),$(shell if test -f $(basename $s).c; then echo -n $(basename $s).d; fi))
--include $(foreach s,$(STUDIO_OBJECTS),$(shell if test -f $(basename $s).cpp; then echo -n $(basename $s).dpp; fi))
-#-include $(patsubst %.c,%.d,$(wildcard *.c))
-#-include $(patsubst %.cpp,%.dpp,$(wildcard *.cpp))
-endif
+$(WX_OBJECTS): CPPFLAGS += $(WX_DEFINES) $(WX_INCLUDES)
+
+tool_manager_tester: $(TOOL_MANAGER_TESTER_OBJECTS)
+	$(CXX) $(CXXFLAGS) $(CPPFLAGS) $(LDFLAGS) $(WX_LIBRARIES) $(TOOL_MANAGER_TESTER_OBJECTS) -o $@
+
+project_manager_tester: $(PROJECT_MANAGER_TESTER_OBJECTS)
+	$(CXX) $(CXXFLAGS) $(CPPFLAGS) $(LDFLAGS) $(WX_LIBRARIES) $(PROJECT_MANAGER_TESTER_OBJECTS) -o $@
+
+studio: $(STUDIO_OBJECTS) project_manager.h studio_overview.h
+	$(CXX) $(CXXFLAGS) $(CPPFLAGS) $(LDFLAGS) $(WX_LIBRARIES) $(STUDIO_OBJECTS) -o $@
+
+%.o: %.c
+	$(CXX) $(CXXFLAGS) $(CPPFLAGS) -c $*
+
+$(OBJECTS) $(TARGETS): Makefile
 
 clean:
-	rm -f mcrl2studio *.o *.d *.dpp
+	$(RM) -f *.o $(TARGETS) $(TEST_TARGETS) core

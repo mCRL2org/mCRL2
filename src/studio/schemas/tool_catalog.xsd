@@ -1,0 +1,54 @@
+<?xml version="1.0" encoding="ISO-8859-1" ?>
+<xs:schema xmlns:xs="http://www.w3.org/2001/XMLSchema">
+ <!-- Data type for tool/specification identification -->
+ <xs:simpleType name="identifier">
+  <xs:restriction base="xs:token">
+   <xs:pattern value="[a-z][a-z0-9_]+"/>
+  </xs:restriction>
+ </xs:simpleType>
+ <!-- Element used to relate a command line option to the format of an object -->
+ <xs:complexType name="format-selector">
+  <xs:simpleContent>
+   <xs:extension base="xs:token">
+    <xs:attribute name="format" type="xs:token" use="required"/>
+   </xs:extension>
+  </xs:simpleContent>
+ </xs:complexType>
+ <!-- Type of an object either input or output -->
+ <xs:simpleType name="object-type">
+  <xs:restriction base="xs:string">
+   <xs:pattern value="input|output"/>
+  </xs:restriction>
+ </xs:simpleType>
+ <!-- Element for specification of tool input and output objects -->
+ <xs:complexType name="object-specifier">
+  <xs:sequence>
+   <xs:element name="format-selector" type="format-selector" minOccurs="0" maxOccurs="unbounded"/>
+  </xs:sequence>
+  <xs:attribute name="type" type="object-type" use="required"/>
+  <xs:attribute name="selector" type="xs:token" use="optional"/>
+  <xs:attribute name="name" type="xs:token" use="optional"/>
+  <xs:attribute name="formalism" type="xs:token" use="required"/>
+  <xs:attribute name="default-format" type="xs:token" use="optional"/>
+ </xs:complexType>
+ <!-- Element for specification of a single tool profile -->
+ <xs:complexType name="tool-profile">
+  <xs:sequence>
+   <xs:element name="description" type="xs:token"/>
+   <xs:element name="object" type="object-specifier" maxOccurs="unbounded"/>
+  </xs:sequence>
+  <xs:attribute name="name" type="xs:token" use="required"/>
+  <xs:attribute name="identifier" type="identifier" use="required"/>
+  <xs:attribute name="category" type="xs:token" use="required"/>
+  <xs:attribute name="location" type="xs:token" use="required"/>
+ </xs:complexType>
+ <!-- Root element the tool-catalog -->
+ <xs:element name="tool-catalog">
+  <xs:complexType>
+   <xs:sequence>
+    <xs:element name="tool" type="tool-profile" maxOccurs="unbounded"/>
+   </xs:sequence>
+  </xs:complexType>
+ </xs:element>
+</xs:schema>
+

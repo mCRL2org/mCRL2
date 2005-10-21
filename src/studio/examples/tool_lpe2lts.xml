@@ -1,0 +1,10 @@
+<?xml version="1.0" encoding="ISO-8859-1"?>
+<tool-catalog xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:noNamespaceSchemaLocation="tool_catalog.xsd">
+ <tool name="lpe2lts" location="/some/path/bin/lpe2lts">
+  <object type="input" name="%.lpe" formalism="LPE" default-format="lpe"/>
+  <object type="output" name="%.aut" formalism="LTS" default-format="aut">
+   <format-selector format="svc">--svc</format-selector>
+  </object>
+ </tool>
+</tool-catalog>
+

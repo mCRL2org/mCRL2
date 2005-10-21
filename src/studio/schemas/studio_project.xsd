@@ -1,0 +1,47 @@
+<?xml version="1.0" encoding="ISO-8859-1" ?>
+<xs:schema xmlns:xs="http://www.w3.org/2001/XMLSchema">
+ <!-- Data type for tool/specification identification -->
+ <xs:complexType name="input-object">
+  <xs:simpleContent>
+   <xs:extension base="xs:token">
+    <xs:attribute name="identifier" type="xs:nonNegativeInteger" use="required"/>
+   </xs:extension>
+  </xs:simpleContent>
+ </xs:complexType>
+ <!-- Data type for tool/specification identification -->
+ <xs:simpleType name="tool-identifier">
+  <xs:restriction base="xs:token">
+   <xs:pattern value="[a-z][a-z0-9_]+"/>
+  </xs:restriction>
+ </xs:simpleType>
+ <!-- Element for tool/tool command specification -->
+ <xs:complexType name="tool-configuration">
+  <xs:simpleContent>
+   <xs:extension base="xs:token">
+    <xs:attribute name="tool-identifier" type="tool-identifier" use="required"/>
+   </xs:extension>
+  </xs:simpleContent>
+ </xs:complexType>
+ <!-- Element for specification of a manual/generated specification -->
+ <xs:complexType name="specification">
+  <xs:sequence>
+   <xs:element name="description" type="xs:token" minOccurs="0"/>
+   <xs:element name="tool-configuration" type="tool-configuration" minOccurs="0"/>
+   <xs:element name="input-object" type="input-object" minOccurs="0" maxOccurs="unbounded"/>
+   <xs:element name="output-object" type="xs:token" minOccurs="0" maxOccurs="unbounded"/>
+  </xs:sequence>
+  <xs:attribute name="identifier" type="xs:nonNegativeInteger" use="required"/>
+  <xs:attribute name="name" type="xs:token" use="required"/>
+  <xs:attribute name="uptodate" type="xs:boolean" use="optional"/>
+ </xs:complexType>
+ <!-- Root element the studio-project -->
+ <xs:element name="studio-project">
+  <xs:complexType>
+   <xs:sequence>
+    <xs:element name="description" type="xs:token" minOccurs="0"/>
+    <xs:element name="specification" type="specification" maxOccurs="unbounded"/>
+   </xs:sequence>
+  </xs:complexType>
+ </xs:element>
+</xs:schema>
+
