@@ -379,7 +379,7 @@ void Specification::Print(std::ostream& stream) {
       stream << "  Dependencies      :\n\n";
 
       while (i != b) {
-        NOTICE("    - " << (*i).second << std::endl);
+        std::cerr << "    - " << (*i).second << std::endl;
 
         ++i;
       }
