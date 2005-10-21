@@ -37,6 +37,7 @@ USE_XMLTO          = @USE_XMLTO@
 XMLTO              = @XMLTO@
 USE_WX             = @USE_WX@
 WX_LIBS            = @WX_LIBS@
+WX_CPPFLAGS        = @WX_CPPFLAGS@
 USE_BOOST          = @USE_BOOST@
 
 ifeq ($(USE_BOOST),1)

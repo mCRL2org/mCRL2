@@ -250,10 +250,12 @@ else
 fi
 if test $WX_CONFIG; then
   USE_WX=1
+  WX_CPPFLAGS="$($WX_CONFIG --cppflags)"
   CPPFLAGS="$($WX_CONFIG --cppflags) $CPPFLAGS"
   WX_LIBS="$($WX_CONFIG --libs)"
 fi
 AC_SUBST([USE_WX],[])
+AC_SUBST([WX_CPPFLAGS],[])
 AC_SUBST([WX_LIBS],[])
 
 # Checks for header files.

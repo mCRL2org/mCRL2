@@ -96,7 +96,7 @@ bool ProjectManager::Load() {
   }
 
 #if defined(PARSER_SCHEMA_VALIDATION)
-  if (xmlTextReaderSchemaValidate(reader,"schemas/studio_project.xsd.gz") < 0) {
+  if (xmlTextReaderSchemaValidate(reader,"schemas/studio_project.xsd") < 0) {
     /* TODO Errors should be logged somewhere, but for the time std::cerr suffices */
     std::cerr << "Error: schema is not usable.\n";
 

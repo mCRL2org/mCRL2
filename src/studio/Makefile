@@ -1,10 +1,27 @@
-CXXFLAGS                       = -std=c++98 -O3 -g -fPIC -Wall
+-include ../config
+
+CXXFLAGS                       = -std=c++98 -O3 -fPIC
+
+ifeq ($(findstring -DNDEBUG,$(CPPFLAGS)),)
+ CXXFLAGS                     += -g -Wall
+ CPPFLAGS                      =
+else
+ CPPFLAGS                      = -DNDEBUG
+endif
+
+CPPFLAGS                      += -I/usr/include/libxml2
 LDFLAGS                        = -lxml2
-CPPFLAGS                       = -I/usr/include/libxml2 -DPARSER_SCHEMA_VALIDATION -DTOOL_RUN_SUCCESSFUL -DDISABLE_TOOLBAR
+
+STUDIO_CPPFLAGS                = -DDISABLE_TOOLBAR
+
+ifeq ($(findstring enable-debug,$(MAKECMDGOALS)),)
+ PROJECT_MANAGER_CPPFLAGS      = -DTOOL_RUN_SUCCESSFUL
+else
+ PROJECT_MANAGER_CPPFLAGS      = -DPARSER_SCHEMA_VALIDATION -DTOOL_RUN_SUCCESSFUL
+endif
 
 WX_OBJECTS                     = studio.o studio_overview.o new_model_dialog.o
-WX_CFLAGS                      = $$(wx-config --cflags)
-WX_LIBRARIES                   = $$(wx-config --libs)
+WX_LIBRARIES                   = $(WX_LIBS)
 
 STUDIO_OBJECTS                 = studio.o studio_overview.o new_model_dialog.o project_manager.o
 PROJECT_MANAGER_TESTER_OBJECTS = project_manager_tester.o project_manager.o
@@ -14,13 +31,15 @@ OBJECTS                        = $(STUDIO_OBJECTS) $(PROJECT_MANAGER_TESTER_OBJE
 TEST_TARGETS                   = project_manager_tester tool_manager_tester
 TARGETS                        = studio
 
-.PHONY: all clean test
+.PHONY: all clean test enable-debug
 
 all: $(TARGETS)
 
 test: all $(TEST_TARGETS)
 
-$(WX_OBJECTS): CPPFLAGS += $(WX_CFLAGS)
+$(WX_OBJECTS):     CPPFLAGS += $(WX_CPPFLAGS)
+project_manager.o: CPPFLAGS += $(PROJECT_MANAGER_CPPFLAGS)
+studio.o:          CPPFLAGS += $(STUDIO_FLAGS)
 
 tool_manager_tester: $(TOOL_MANAGER_TESTER_OBJECTS)
 	$(CXX) $(CXXFLAGS) $(CPPFLAGS) $(LDFLAGS) $(WX_LIBRARIES) $(TOOL_MANAGER_TESTER_OBJECTS) -o $@
