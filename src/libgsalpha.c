@@ -82,13 +82,14 @@ static inline ATermList add_typeMA(ATermList ma, ATermList s){
 
 static inline ATermList untypeMAL(ATermList LMAct){
   //returns List of "untyped multiaction name" of List(MAct)
-  ATermList r=ATmakeList0();
+  ATermIndexedSet m=ATindexedSetCreate(10000,80);
+  ATbool b;
   for(;!ATisEmpty(LMAct);LMAct=ATgetNext(LMAct)){
-    ATermList ma=untypeMA(ATLgetFirst(LMAct));
-    if(ATindexOf(r,(ATerm)ma,0)<0) 
-      r=ATinsert(r,(ATerm)ma);
+    ATindexedSetPut(m,(ATerm)untypeMA(ATLgetFirst(LMAct)),&b);
   }
-  return ATreverse(r);
+  LMAct = ATindexedSetElements(m);
+  ATindexedSetDestroy(m);
+  return LMAct;
 }
 
 static inline ATermList typeMAL(ATermList LMAct){
@@ -121,6 +122,38 @@ static ATermList sync_mact(ATermList a, ATermList b){
       c = ATconcat(c,b);
     }
   return c;
+/*   //return gsaATsortList(ATconcat(a,b)); */
+/*   int n = ATgetLength(a); */
+/*   int m = ATgetLength(b); */
+/*   ATermAppl *c = malloc((n+m+1)*sizeof(ATermAppl)); */
+
+/*   int i=-1; //current pos */
+/*   while ( !(ATisEmpty(a) || ATisEmpty(b)) ){ */
+/*     ATermAppl aa=ATAgetFirst(a); */
+/*     ATermAppl bb=ATAgetFirst(b); */
+/*     i++; */
+/*     if ( ATcompare((ATerm)aa,(ATerm)bb) <=0 ) { */
+/*       c[i] = aa; */
+/*       a = ATgetNext(a); */
+/*     }  */
+/*     else { */
+/*       c[i] = bb; */
+/*       b = ATgetNext(b); */
+/*     } */
+/*   } */
+
+/*   if(ATisEmpty(a)) a=b; */
+/*   while ( !ATisEmpty(a) ){ */
+/*     i++; */
+/*     c[i] = ATAgetFirst(a); */
+/*     a = ATgetNext(a); */
+/*  } */
+  
+/*   ATermList r=ATmakeList0(); */
+/*   for (;i>=0;i--) */
+/*     r=ATinsert(r,(ATerm)c[i]); */
+/*   free(c); */
+/*   return r; */
 }
 
 static ATermList merge_list(ATermList l, ATermList m){
@@ -226,18 +259,22 @@ static ATermList sort_multiactions_comm(ATermList C){
 static ATermList split_allow(ATermList V, ATermList ulp, ATermList ulq){
   ATermList m = ATmakeList0();
 
+  ATermIndexedSet VV=ATindexedSetCreate(10000,80);
+  gsaATindexedSetPutList(VV,V);
+
   for (; !ATisEmpty(ulp); ulp=ATgetNext(ulp)){
     ATermList up=ATLgetFirst(ulp);
     ATermAppl ma=gsMakeMultActName(ATLgetFirst(ulp));
     ATermList tulq=ulq;
     for (; !ATisEmpty(ulq); ulq=ATgetNext(ulq)){
-      if(ATindexOf(V,(ATerm)gsMakeMultActName(sync_mact(up,ATLgetFirst(ulq))),0)>=0){
+      if(ATindexedSetGetIndex(VV,(ATerm)gsMakeMultActName(sync_mact(up,ATLgetFirst(ulq))))>=0){
 	m = ATinsert(m,(ATerm)ma);
 	break;
       }
     }
     ulq=tulq;
   }
+  ATindexedSetDestroy(VV);
 
   return ATreverse(m);
 }
@@ -452,14 +489,7 @@ static ATermList filter_comm_list(ATermList l, ATermList C){
   //gsWarningMsg("filter_comm_list: l: %d; C: %P\n",ATgetLength(l),C);
 
   ATermIndexedSet m=ATindexedSetCreate(10000,80);
-  {  
-    ATermList tl=l;
-    for (; !ATisEmpty(l); l=ATgetNext(l)){
-      ATbool b;
-      ATindexedSetPut(m,(ATerm)ATLgetFirst(l),&b);
-    }
-    l=tl;
-  }
+  gsaATindexedSetPutList(m,l);
   //ATermList m=l;
 
   for (; !ATisEmpty(l); l=ATgetNext(l)){
