@@ -2,6 +2,7 @@
 
 #include <ctype.h>
 #include <stdlib.h>
+#include <stdint.h>
 #include <stdarg.h>
 #include <assert.h>
 #include "_aterm.h"
@@ -703,7 +704,7 @@ static void allocate_block(int size)
   at_blocks[size] = newblock;
   top_at_blocks[size] = newblock->data;
   assert(at_blocks[size] != NULL);
-  assert(((int)top_at_blocks[size] % MAX(sizeof(double), sizeof(void *))) == 0);
+  assert(((intptr_t)top_at_blocks[size] % MAX(sizeof(double), sizeof(void *))) == 0);
   
     /* [pem: Feb 14 02] TODO: fast allocation */
   assert(at_freelist[size] == NULL);
@@ -1004,7 +1005,7 @@ void AT_freeTerm(int size, ATerm t)
   do {
     if(!cur) {
         /*printf("freeterm = %d\n",t);*/
-      fprintf(stderr,"### cannot find term %x in hashtable at pos %d header = %x\n", (unsigned int)t, hnr, t->header);
+      fprintf(stderr,"### cannot find term %x in hashtable at pos %d header = %x\n", (unsigned int) (intptr_t) t, (int) hnr, (unsigned int) t->header);
 
       ATabort("### cannot find term %n at %p in hashtable at pos %d"
 	      ", header = %d\n", t, t, hnr, t->header);

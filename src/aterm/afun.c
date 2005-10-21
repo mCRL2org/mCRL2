@@ -115,7 +115,7 @@ unsigned int AT_symbolTableSize()
 /*{{{  void AT_initSymbol(int argc, char *argv[]) */
 void AT_initSymbol(int argc, char *argv[])
 {
-  int i;
+  unsigned long i;
   AFun sym;
 
   for (i = 1; i < argc; i++) {

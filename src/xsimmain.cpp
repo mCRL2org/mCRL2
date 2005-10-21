@@ -744,7 +744,7 @@ void XSimMain::OnLoadTrace( wxCommandEvent &event )
 				    break;
 			    if ( s.Length() > 0 )
 			    {
-				    if ( s[0u] == wxT('"') )
+				    if ( s[0] == wxT('"') )
 				    {
 					    s = s.Mid(1,s.Length()-2);
 				    }

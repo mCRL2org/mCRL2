@@ -2,6 +2,7 @@
 
 
 #include <stdlib.h>
+#include <stdint.h>
 #include <limits.h>
 #include <assert.h>
 #include <setjmp.h>
@@ -219,11 +220,6 @@ VOIDCDECL mark_phase()
   ATerm *start, *stop;
   ProtEntry *prot;
 
-#ifdef AT_64BIT
-  ATerm oddTerm;
-  AFun oddSym;
-#endif
-
 #ifdef WIN32
 
   unsigned int r_eax, r_ebx, r_ecx, r_edx, \
@@ -330,11 +326,6 @@ VOIDCDECL mark_phase_young()
   ATerm *stackTop;
   ATerm *start, *stop;
   ProtEntry *prot;
-
-#ifdef AT_64BIT
-  ATerm oddTerm;
-  AFun oddSym;
-#endif
 
 #ifdef WIN32
 
@@ -1030,7 +1021,7 @@ void minor_sweep_phase_young()
       /*fprintf(stderr,"minor_sweep_phase_young: ensure empty freelist[%d]\n",size);*/
       for(data = at_freelist[size] ; data ; data=data->next) {
         if(!EQUAL_HEADER(data->header,FREE_HEADER)) {
-          fprintf(stderr,"data = %x header = %x\n",(unsigned int)data,data->header);
+          fprintf(stderr,"data = %x header = %x\n",(unsigned int) (intptr_t) data,(unsigned int) data->header);
         }
         assert(EQUAL_HEADER(data->header,FREE_HEADER)); 
         assert(ATgetType(data) == AT_FREE);   

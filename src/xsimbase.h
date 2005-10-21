@@ -53,6 +53,8 @@ typedef viewlist::iterator viewlistiterator;
 class SimulatorInterface
 {
 public:
+	virtual ~SimulatorInterface() {};
+
 	virtual void Register(SimulatorViewInterface *View) = 0;
 	/* Register *View to this Simulator */
 	virtual void Unregister(SimulatorViewInterface *View) = 0;
@@ -101,6 +103,8 @@ public:
 class SimulatorViewInterface
 {
 public:
+	virtual ~SimulatorViewInterface() {};
+
 	virtual void Registered(SimulatorInterface *Simulator) = 0;
 	/* Is called when this View is added to *Simulator by a call
 	 * to Simulator->Register(View). */

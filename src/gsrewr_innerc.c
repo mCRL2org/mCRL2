@@ -7,6 +7,7 @@ extern "C" {
 
 #include <stdio.h>
 #include <stdlib.h>
+#include <stdint.h>
 #include <unistd.h>
 #include <string.h>
 #include <dlfcn.h>
@@ -29,7 +30,7 @@ extern "C" {
 #define INNERC_LDFLAGS  ""
 #endif
 
-#define ATXgetArgument(x,y) ((unsigned int) ATgetArgument(x,y))
+#define ATXgetArgument(x,y) ((unsigned int) (intptr_t) ATgetArgument(x,y))
 
 extern ATermList opid_eqns;
 extern ATermList dataappl_eqns;
