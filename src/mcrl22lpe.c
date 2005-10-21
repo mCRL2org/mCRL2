@@ -3,7 +3,7 @@ extern "C" {
 #endif
 
 #define NAME "mcrl22lpe"
-#define VERSION "0.1.0"
+#define VERSION "0.1.1"
 #define INFILEEXT ".mcrl2"
 #define OUTFILEEXT ".lpe"
 
@@ -27,12 +27,12 @@ extern "C" {
 
 //Type definitions
 
-typedef enum { phNone, phParse, phTypeCheck, phAlpha, phDataImpl } t_phase;
+typedef enum { phNone, phParse, phTypeCheck, phAlphaRed, phDataImpl } t_phase;
 //t_phase represents the phases at which the program should be able to stop
 
 //Functions used by the main program
 static ATermAppl linearise_file(char *infilename, t_lin_options lin_options,
-  t_phase end_phase);
+  t_phase end_phase, bool alpha);
 static void calc_infilename(char *infilename, char *specname);
 static void calc_outfilename(char *outfilename, char *infilename);
 static void AltIllegalOptWarning(char opt);
@@ -48,12 +48,12 @@ int main(int argc, char *argv[])
   //declarations for getopt
   bool lm_chosen = false;
   t_lin_method opt_lin_method = lmRegular;
-  t_cluster_method opt_intermediate_cluster_method = cmFull;
-  t_cluster_method opt_final_cluster_method = cmNone;
+  bool opt_no_intermediate_cluster = false;
+  bool opt_final_cluster = false;
   bool opt_newstate = false;
   bool opt_binary = false;
   bool opt_statenames = false;
-  short opt_alpha = 1;
+  bool opt_noalpha = false;
   bool opt_norewrite = false;
   bool opt_nofreevars = false;
   bool opt_check_only = false;
@@ -123,13 +123,13 @@ int main(int argc, char *argv[])
         opt_lin_method = lmAlternative;
         break;
       case 'c': /* cluster */ 
-        opt_final_cluster_method = cmFull;
+        opt_final_cluster = true;
         break;
-      case 'n': /* nocluster */
-        opt_intermediate_cluster_method = cmNone;
+      case 'n': /* no-cluster */
+        opt_no_intermediate_cluster = true;
         break;
-      case 'r': /* noalpha */
-        opt_alpha = 0;
+      case 'r': /* no-alpha */
+        opt_noalpha = true;
         break;
       case 'w': /* newstate */ 
         opt_newstate = true;
@@ -154,8 +154,8 @@ int main(int argc, char *argv[])
           opt_end_phase = phParse;
         } else if (strcmp(optarg, "tc") == 0) {
           opt_end_phase = phTypeCheck;
-        } else if (strcmp(optarg, "al") == 0) {
-          opt_end_phase = phAlpha;
+        } else if (strcmp(optarg, "ar") == 0) {
+          opt_end_phase = phAlphaRed;
         } else if (strcmp(optarg, "di") == 0) {
           opt_end_phase = phDataImpl;
         } else {
@@ -197,14 +197,18 @@ int main(int argc, char *argv[])
     gsErrorMsg("options -e and -p may not be used in conjunction\n");
     return 1;
   }
+  if (opt_noalpha && (opt_end_phase == phAlphaRed)) {
+    gsErrorMsg("options -r and -p ar may not be used in conjunction\n");
+    return 1;
+  }
   if (opt_lin_method == lmAlternative) {
-    if (opt_final_cluster_method == cmFull) AltIllegalOptWarning('c');
-    if (opt_intermediate_cluster_method == cmNone) AltIllegalOptWarning('n');
-    if (opt_newstate)                 AltIllegalOptWarning('w');
-    if (opt_binary)                   AltIllegalOptWarning('b');
-    if (opt_statenames)               AltIllegalOptWarning('a');
-    if (opt_norewrite)                AltIllegalOptWarning('n');
-    if (opt_nofreevars)               AltIllegalOptWarning('f');
+    if (opt_final_cluster)           AltIllegalOptWarning('c');
+    if (opt_no_intermediate_cluster) AltIllegalOptWarning('n');
+    if (opt_newstate)                AltIllegalOptWarning('w');
+    if (opt_binary)                  AltIllegalOptWarning('b');
+    if (opt_statenames)              AltIllegalOptWarning('a');
+    if (opt_norewrite)               AltIllegalOptWarning('n');
+    if (opt_nofreevars)              AltIllegalOptWarning('f');
   }
   //check for wrong number of arguments
   int noargc; //non-option argument count
@@ -233,19 +237,18 @@ int main(int argc, char *argv[])
   //set linearisation parameters
   t_lin_options lin_options;
   lin_options.lin_method = opt_lin_method;
-  lin_options.final_cluster_method = opt_final_cluster_method;
-  lin_options.intermediate_cluster_method = opt_intermediate_cluster_method;
+  lin_options.final_cluster = opt_final_cluster;
+  lin_options.no_intermediate_cluster = opt_no_intermediate_cluster;
   lin_options.newstate = opt_newstate;
   lin_options.binary = opt_binary;
   lin_options.statenames = opt_statenames;
   lin_options.norewrite = opt_norewrite;
   lin_options.nofreevars = opt_nofreevars;
-  lin_options.alpha = opt_alpha;
 
   //linearise infilename with options lin_options
   ATermAppl result =
     linearise_file(infilename, lin_options,
-      opt_check_only?phTypeCheck:opt_end_phase);
+      opt_check_only?phTypeCheck:opt_end_phase, !opt_noalpha);
   if (result == NULL) {
     return 1;
   }
@@ -279,7 +282,7 @@ int main(int argc, char *argv[])
 }
 
 ATermAppl linearise_file(char *infilename, t_lin_options lin_options,
-  t_phase end_phase)
+  t_phase end_phase, bool alpha)
 {
   assert(infilename != NULL);
   //open input filename
@@ -311,20 +314,18 @@ ATermAppl linearise_file(char *infilename, t_lin_options lin_options,
   if (end_phase == phTypeCheck) {
     return result;
   }
-  //perform alphabeth reductions 
-  if(lin_options.alpha){
-    gsVerboseMsg("performing alphabeth reductions...\n");
+  //perform alphabet reductions 
+  if (alpha) {
+    gsVerboseMsg("performing alphabet reductions...\n");
     result = gsAlpha(result);
-    if (result == NULL){
-      gsErrorMsg("alphabeth reductions failed\n");
+    if (result == NULL)
+    {
+      gsErrorMsg("alphabet reductions failed\n");
       return NULL;
     }
-    if (end_phase == phAlpha) {
+    if (end_phase == phAlphaRed) {
       return result;
     }
-  }
-  else {
-        gsVerboseMsg("alphabeth reductions are switched off.\n");
   }
   //implement standard data types and type constructors on the result
   gsVerboseMsg("implementing standard data types and type constructors...\n");
@@ -439,9 +440,7 @@ void PrintHelp(char *Name)
     "  -n, --no-cluster      the actions in intermediate LPEs are not clustered\n"
     "                        (default behaviour is that intermediate LPEs are\n"
     "                        clustered and the final LPE is not clustered)\n"
-    "  -r, --no-alpha        the alpha reductions are not applied\n"
-    "                        (default behaviour is that the alpha reductions\n" 
-    "                        applied\n"
+    "  -r, --no-alpha        alphabet reductions are not applied\n"
     "  -w, --newstate        state variables are encoded using enumerated types\n"
     "                        (requires -1 or -2); without -w numbers are used\n"
     "  -b, --binary          when clustering use binary case functions instead of\n"
@@ -456,7 +455,7 @@ void PrintHelp(char *Name)
     "  -e  --check-only      check syntax and static semantics; do not linearise\n"
     "  -p  --end-phase=PHASE stop linearisation after phase PHASE and output the\n"
     "                        result; PHASE can be 'pa' (parse), 'tc' (type check),\n"
-    "                        'al' (alpha reduction) or 'di' (data implementation)\n"
+    "                        'ar' (alphabet reduction) or 'di' (data implementation)\n"
     "      --stdout          the generated LPE is written to stdout\n"
     "  -h, --help            display this help\n"    
     "      --version         display version information\n"

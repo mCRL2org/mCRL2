@@ -7872,8 +7872,8 @@ ATermAppl linearise_std(ATermAppl spec, t_lin_options lin_options)
   //set global parameters
   regular    = (lin_options.lin_method != lmStack);
   regular2   = (lin_options.lin_method == lmRegular2);
-  cluster    = (lin_options.final_cluster_method == cmFull);
-  nocluster  = (lin_options.intermediate_cluster_method == cmNone);
+  cluster    = (lin_options.final_cluster);
+  nocluster  = (lin_options.no_intermediate_cluster);
   oldstate   = !lin_options.newstate;
   binary     = lin_options.binary;
   statenames = lin_options.statenames;

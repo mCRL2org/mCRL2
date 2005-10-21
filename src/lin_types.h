@@ -12,19 +12,15 @@ extern "C" {
 typedef enum { lmStack, lmRegular, lmRegular2, lmAlternative } t_lin_method;
 //t_lin_method represents the available linearisation methods
 
-typedef enum { cmFull, cmNone } t_cluster_method;
-//t_cluster_method represents the available clustering methods
-
 typedef struct {
   t_lin_method lin_method;
-  t_cluster_method intermediate_cluster_method;
-  t_cluster_method final_cluster_method;
+  bool no_intermediate_cluster;
+  bool final_cluster;
   bool newstate;
   bool binary;
   bool statenames;
   bool norewrite;
   bool nofreevars;
-  short alpha;
 } t_lin_options;
 //t_lin_options represents the options of the lineariser
 
