@@ -63,6 +63,11 @@ ostream& operator<<(ostream& os, const vector<T>& v)
 
 int main(int ac, char* av[])
 {
+
+   ATerm bot;
+   ATinit(0,0,&bot);
+   gsEnableConstructorFunctions();
+
       string filename;
       int opt = NO_OPTION;
 
