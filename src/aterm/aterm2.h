@@ -261,10 +261,10 @@ ATbool ATgetChecking(void);
 extern int at_gc_count;
 #define ATgetGCCount()    (at_gc_count)
 
-int  ATcalcUniqueSubterms(ATerm t);
-int  ATcalcUniqueSymbols(ATerm t);
+unsigned long ATcalcUniqueSubterms(ATerm t);
+unsigned long ATcalcUniqueSymbols(ATerm t);
 
-int  ATcalcTextSize(ATerm t);
+unsigned long ATcalcTextSize(ATerm t);
 
 void AT_writeToStringBuffer(ATerm t, char *buffer);
 #define ATwriteToStringBuffer(t,b) AT_writeToStringBuffer((t),(b))

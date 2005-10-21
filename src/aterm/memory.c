@@ -132,13 +132,21 @@ FINISH(COMBINE(START( (AT_INT<<SHIFT_TYPE) ), val))
 
 #endif /* HASHPEM */
 
+#define PROTO_APPL_ARGS ((ATerm *) (protoTerm + ARG_OFFSET))
+
+#define SET_PROTO_APPL_ARG(i, a) \
+  (PROTO_APPL_ARGS[(i)] = (a))
+
+#define GET_PROTO_APPL_ARG(i) \
+  (PROTO_APPL_ARGS[(i)])
+
 #define CHECK_TERM(t) assert(!at_check || \
 			     (AT_isValidTerm(t) && "term is invalid"))
 
 /*}}}  */
 /*{{{  globals */
 
-char memory_id[] = "$Id: memory.c,v 1.107 2004/06/09 08:52:33 uid506 Exp $";
+char memory_id[] = "$Id: memory.c,v 1.110 2005/10/11 11:19:25 jong Exp $";
 
 Block *at_blocks[MAX_TERM_SIZE]  = { NULL };
 Block *at_old_blocks[MAX_TERM_SIZE]  = { NULL };
@@ -176,7 +184,6 @@ static ATbool (*destructors[MAX_DESTRUCTORS])(ATermBlob) = { NULL };
  * Static arrays are not guaranteed to be sizeof(double)-aligned.
  */
 static MachineWord *protoTerm = NULL;
-#define arg_buffer ((ATerm *) (protoTerm+2))
 
 static ATerm protected_buffer[MAX_ARITY] = { NULL };
 
@@ -479,7 +486,6 @@ void resize_hashtable()
 /*}}}  */
 
 /*{{{  void AT_initMemory(int argc, char *argv[]) */
-
 /**
  * Initialize memory allocation datastructures
  */
@@ -763,7 +769,17 @@ static void allocate_block(int size)
 
 /*}}}  */
 
-static int nb_at_allocate=0;
+static unsigned long nb_at_allocate=0;
+
+/*{{{  unsigned_long AT_getAllocatedCount() */
+
+unsigned long AT_getAllocatedCount()
+{
+  return nb_at_allocate;
+}
+
+/*}}}  */
+
 /*{{{  void AT_statistics()  */
 
 void AT_statistics() 
@@ -1029,9 +1045,9 @@ ATermAppl ATmakeAppl(Symbol sym, ...)
 
   va_start(args, sym);
   for (i=0; i<arity; i++) {
-    arg_buffer[i] = va_arg(args, ATerm);
-    protected_buffer[i] = arg_buffer[i];
-    CHECK_TERM(arg_buffer[i]);
+    SET_PROTO_APPL_ARG(i, va_arg(args, ATerm));
+    protected_buffer[i] = GET_PROTO_APPL_ARG(i);
+    CHECK_TERM(protected_buffer[i]);
   }
   va_end(args);
 
@@ -1049,7 +1065,7 @@ ATermAppl ATmakeAppl(Symbol sym, ...)
       appl = (ATermAppl)cur;
       found = ATtrue;
       for (i=0; i<arity; i++) {
-	if (!ATisEqual(ATgetArgument(appl, i), arg_buffer[i])) {
+	if (!ATisEqual(ATgetArgument(appl, i), GET_PROTO_APPL_ARG(i))) {
 	  found = ATfalse;
 	  break;
 	}
@@ -1067,7 +1083,7 @@ ATermAppl ATmakeAppl(Symbol sym, ...)
     cur->header = header;
     CHECK_HEADER(cur->header);
     for (i=0; i<arity; i++) {
-      ATgetArgument(cur, i) = arg_buffer[i];
+      ATgetArgument(cur, i) = GET_PROTO_APPL_ARG(i);
       CHECK_ARGUMENT(cur, i);
     }
     cur->next = hashtable[hnr];
@@ -1158,7 +1174,7 @@ ATermAppl ATmakeAppl1(Symbol sym, ATerm arg0)
   protoAppl = (ATermAppl) protoTerm;
   protoAppl->header = header;
   CHECK_HEADER(protoAppl->header);
-  arg_buffer[0] = arg0;
+  SET_PROTO_APPL_ARG(0, arg0);
   hnr = HASHNUMBER3((ATerm) protoAppl);
   
   prev = NULL;
@@ -1219,8 +1235,8 @@ ATermAppl ATmakeAppl2(Symbol sym, ATerm arg0, ATerm arg1)
   protoAppl = (ATermAppl) protoTerm;
   protoAppl->header = header;
   CHECK_HEADER(protoAppl->header);
-  arg_buffer[0] = arg0;
-  arg_buffer[1] = arg1;
+  SET_PROTO_APPL_ARG(0, arg0);
+  SET_PROTO_APPL_ARG(1, arg1);
   hnr = HASHNUMBER4((ATerm) protoAppl);
 
   prev = NULL;
@@ -1281,9 +1297,9 @@ ATermAppl ATmakeAppl3(Symbol sym, ATerm arg0, ATerm arg1, ATerm arg2)
   protoAppl = (ATermAppl) protoTerm;
   protoAppl->header = header;
   CHECK_HEADER(protoAppl->header);
-  arg_buffer[0] = arg0;
-  arg_buffer[1] = arg1;
-  arg_buffer[2] = arg2;
+  SET_PROTO_APPL_ARG(0, arg0);
+  SET_PROTO_APPL_ARG(1, arg1);
+  SET_PROTO_APPL_ARG(2, arg2);
   hnr = hash_number((ATerm) protoAppl, 5);
 
   cur = hashtable[hnr & table_mask];
@@ -1341,10 +1357,10 @@ ATermAppl ATmakeAppl4(Symbol sym, ATerm arg0, ATerm arg1, ATerm arg2, ATerm arg3
   protoAppl = (ATermAppl) protoTerm;
   protoAppl->header = header;
   CHECK_HEADER(protoAppl->header);
-  arg_buffer[0] = arg0;
-  arg_buffer[1] = arg1;
-  arg_buffer[2] = arg2;
-  arg_buffer[3] = arg3;
+  SET_PROTO_APPL_ARG(0, arg0);
+  SET_PROTO_APPL_ARG(1, arg1);
+  SET_PROTO_APPL_ARG(2, arg2);
+  SET_PROTO_APPL_ARG(3, arg3);
   hnr = hash_number((ATerm) protoAppl, 6);
 
   cur = hashtable[hnr & table_mask];
@@ -1405,11 +1421,11 @@ ATermAppl ATmakeAppl5(Symbol sym, ATerm arg0, ATerm arg1, ATerm arg2,
   protoAppl = (ATermAppl) protoTerm;
   protoAppl->header = header;
   CHECK_HEADER(protoAppl->header);
-  arg_buffer[0] = arg0;
-  arg_buffer[1] = arg1;
-  arg_buffer[2] = arg2;
-  arg_buffer[3] = arg3;
-  arg_buffer[4] = arg4;
+  SET_PROTO_APPL_ARG(0, arg0);
+  SET_PROTO_APPL_ARG(1, arg1);
+  SET_PROTO_APPL_ARG(2, arg2);
+  SET_PROTO_APPL_ARG(3, arg3);
+  SET_PROTO_APPL_ARG(4, arg4);
   hnr = hash_number((ATerm) protoAppl, 7);
 
   cur = hashtable[hnr & table_mask];
@@ -1473,12 +1489,12 @@ ATermAppl ATmakeAppl6(Symbol sym, ATerm arg0, ATerm arg1, ATerm arg2,
   protoAppl = (ATermAppl) protoTerm;
   protoAppl->header = header;
   CHECK_HEADER(protoAppl->header);
-  arg_buffer[0] = arg0;
-  arg_buffer[1] = arg1;
-  arg_buffer[2] = arg2;
-  arg_buffer[3] = arg3;
-  arg_buffer[4] = arg4;
-  arg_buffer[5] = arg5;
+  SET_PROTO_APPL_ARG(0, arg0);
+  SET_PROTO_APPL_ARG(1, arg1);
+  SET_PROTO_APPL_ARG(2, arg2);
+  SET_PROTO_APPL_ARG(3, arg3);
+  SET_PROTO_APPL_ARG(4, arg4);
+  SET_PROTO_APPL_ARG(5, arg5);
   hnr = hash_number((ATerm) protoAppl, 8);
 
   cur = hashtable[hnr & table_mask];
@@ -1546,7 +1562,7 @@ ATermAppl ATmakeApplList(Symbol sym, ATermList args)
   CHECK_HEADER(protoAppl->header);
 
   for (i=0; i<arity; i++) {
-    arg_buffer[i] = ATgetFirst(args);
+    SET_PROTO_APPL_ARG(i, ATgetFirst(args));
     args = ATgetNext(args);
   }
 
@@ -1561,7 +1577,7 @@ ATermAppl ATmakeApplList(Symbol sym, ATermList args)
       found = ATtrue;
       for(i=0; i<arity; i++)
       {
-	if(!ATisEqual(ATgetArgument(appl, i), arg_buffer[i]))
+	if(!ATisEqual(ATgetArgument(appl, i), GET_PROTO_APPL_ARG(i)))
 	{
 	  found = ATfalse;
 	  break;
@@ -1581,7 +1597,7 @@ ATermAppl ATmakeApplList(Symbol sym, ATermList args)
     cur->header = header;
     CHECK_HEADER(cur->header);
     for (i=0; i<arity; i++) {
-      ATgetArgument(cur, i) = arg_buffer[i];
+      ATgetArgument(cur, i) = GET_PROTO_APPL_ARG(i);
       CHECK_ARGUMENT(cur, i);
     }
     cur->next = hashtable[hnr];
@@ -1617,10 +1633,10 @@ ATermAppl ATmakeApplArray(Symbol sym, ATerm args[])
   protoAppl->header = header;
   CHECK_HEADER(protoAppl->header);
 
-  if (args != arg_buffer) {
+  if (args != PROTO_APPL_ARGS) {
     for (i=0; i<arity; i++) {
       CHECK_TERM(args[i]);
-      arg_buffer[i] = args[i];
+      SET_PROTO_APPL_ARG(i, args[i]);
       protected_buffer[i] = args[i];
     }
   }
@@ -1633,7 +1649,7 @@ ATermAppl ATmakeApplArray(Symbol sym, ATerm args[])
       appl = (ATermAppl)cur;
       found = ATtrue;
       for(i=0; i<arity; i++) {
-	if(!ATisEqual(ATgetArgument(appl, i), arg_buffer[i])) {
+	if(!ATisEqual(ATgetArgument(appl, i), GET_PROTO_APPL_ARG(i))) {
 	  found = ATfalse;
 	  break;
 	}
@@ -1651,14 +1667,14 @@ ATermAppl ATmakeApplArray(Symbol sym, ATerm args[])
     cur->header = header;
     CHECK_HEADER(cur->header);
     for (i=0; i<arity; i++) {
-      ATgetArgument(cur, i) = arg_buffer[i];
+      ATgetArgument(cur, i) = GET_PROTO_APPL_ARG(i);
       CHECK_ARGUMENT(cur, i);
     }
     cur->next = hashtable[hnr];
     hashtable[hnr] = cur;
   }
 
-  if (args != arg_buffer) {
+  if (args != PROTO_APPL_ARGS) {
     for (i=0; i<arity; i++) {
       protected_buffer[i] = NULL;
     }
@@ -2116,11 +2132,11 @@ ATermAppl ATsetArgument(ATermAppl appl, ATerm arg, int n)
   assert(n >= 0 && n < arity);
 
   for (i=0; i<arity; i++) {
-    arg_buffer[i] = ATgetArgument(appl, i);
+    SET_PROTO_APPL_ARG(i, ATgetArgument(appl, i));
   }
-  arg_buffer[n] = arg;
+  SET_PROTO_APPL_ARG(n, arg);
 
-  result = ATmakeApplArray(sym, arg_buffer);
+  result = ATmakeApplArray(sym, PROTO_APPL_ARGS);
   annos = AT_getAnnotations((ATerm)appl);
   if (annos != NULL) {
     result = (ATermAppl)AT_setAnnotations((ATerm)result, annos);
@@ -2555,10 +2571,10 @@ void AT_printAllAFunCounts(FILE *file)
  * Calculate all allocated bytes containing ATerms.
  */
 
-int AT_calcAllocatedSize()
+unsigned long AT_calcAllocatedSize()
 {
   int i;
-  int total = 0;
+  unsigned long total = 0;
 
   for(i=0; i<MAX_TERM_SIZE; i++)
     total += at_nrblocks[i]*sizeof(Block);

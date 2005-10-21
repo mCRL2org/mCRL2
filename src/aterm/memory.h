@@ -90,6 +90,7 @@ void  AT_validateFreeList(int size);
 int AT_inAnyFreeList(ATerm t);
 void AT_printAllTerms(FILE *file);
 void AT_printAllAFunCounts(FILE *file);
+unsigned long AT_getAllocatedCount();
 
 #ifdef __cplusplus
 }
