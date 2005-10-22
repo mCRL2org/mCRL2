@@ -459,7 +459,7 @@ void StudioOverview::RenameSpecification(wxTreeEvent &event) {
 
     specification->name = event.GetLabel().fn_str();
 
-#if !defined(NDEBUG)
+#ifndef NDEBUG
     std::cerr << "Renamed specification\n\n";
 
     specification->Print();

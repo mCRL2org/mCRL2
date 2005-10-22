@@ -86,7 +86,9 @@ bool ProjectManager::Load() {
   /* From here on assume that the XML file satisfies the project-catalog XML schema. */
   if (reader == 0) {
     /* TODO Errors should be logged somewhere, but for the time std::cerr suffices */
+#ifndef NDEBUG
     std::cerr << "Fatal: Unable to open project master file. (" << project_file << ")\n";
+#endif
 
     /* Clean up */
     xmlTextReaderClose(reader);
@@ -98,7 +100,9 @@ bool ProjectManager::Load() {
 #if defined(PARSER_SCHEMA_VALIDATION)
   if (xmlTextReaderSchemaValidate(reader,"schemas/studio_project.xsd") < 0) {
     /* TODO Errors should be logged somewhere, but for the time std::cerr suffices */
+#ifndef NDEBUG
     std::cerr << "Error: schema is not usable.\n";
+#endif
 
     /* Clean up */
     xmlTextReaderClose(reader);
@@ -155,7 +159,9 @@ bool ProjectManager::Load() {
   catch(int status) {
     if (status != 0) {
       /* TODO Errors should be logged somewhere, but for the time std::cerr suffices */
+#ifndef NDEBUG
       std::cerr << "Fatal: Parse error(s) or unknown exception with parsing studio-project.xsd.\n";
+#endif
 
       return_value = false;
     }

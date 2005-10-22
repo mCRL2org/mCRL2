@@ -3,6 +3,7 @@
 
 #include <string>
 #include <list>
+#include <iostream>
 #include <ostream>
 
 extern "C" {
