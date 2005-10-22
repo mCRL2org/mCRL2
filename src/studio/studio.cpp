@@ -8,7 +8,7 @@
 
 /* Studio class declaration */
 class Studio : public wxApp {
-  DECLARE_CLASS(Studio);
+  DECLARE_CLASS(Studio)
   
   public:
 
@@ -26,14 +26,14 @@ IMPLEMENT_WX_THEME_SUPPORT
 
 /* Studio class implementation */
 Studio::Studio() {
-};
+}
   
 bool Studio::OnInit() {
   StudioOverview* window = new StudioOverview(NULL, STUDIO_OVERVIEW);
   
   /* Make sure the main window is visible */
   return (window->Show(true));
-};
+}
   
 int Studio::OnExit() {
   return (wxApp::OnExit());

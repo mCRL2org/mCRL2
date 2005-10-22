@@ -1,5 +1,4 @@
 #include "new_model_dialog.h"
-#include <wx/dirctrl.h>
 #include <wx/statline.h>
 
 IMPLEMENT_CLASS(NewModelDialog, wxDialog)

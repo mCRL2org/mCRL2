@@ -96,16 +96,16 @@ class ProjectManager {
     ProjectManager();
 
     /* Set a project directory */
-    void ProjectManager::SetProjectDirectory(std::string directory);
+    void SetProjectDirectory(std::string directory);
 
     /* Get project directory */
-    std::string ProjectManager::GetProjectDirectory();
+    std::string GetProjectDirectory();
 
     /* Set project description */
-    void ProjectManager::SetDescription(std::string description);
+    void SetDescription(std::string description);
 
     /* Get project description */
-    const std::string ProjectManager::GetDescription();
+    const std::string GetDescription();
 
     /* Get a pointer to the list of specifications in this project */
     const std::list < Specification >* GetSpecifications();

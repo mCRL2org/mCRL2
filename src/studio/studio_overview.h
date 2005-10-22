@@ -19,7 +19,7 @@ class StudioOverview : public wxFrame {
 
   private:
     wxTreeCtrl*  specifications;
-    wxImageList* modeliconlist;
+    wxImageList* main_icon_list;
     wxPanel*     progress;
 
     /* The project manager */

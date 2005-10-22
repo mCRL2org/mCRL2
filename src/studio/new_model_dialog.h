@@ -3,6 +3,7 @@
 
 #include <wx/wx.h>
 #include <wx/dialog.h>
+#include <wx/dirctrl.h>
 
 class NewModelDialog : public wxDialog {
   DECLARE_CLASS(NewModelDialog)

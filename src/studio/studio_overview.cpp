@@ -2,32 +2,28 @@
 #include <wx/splitter.h>
 #include <wx/treectrl.h>
 
+#include "resources.h"
+
 #include "studio_overview.h"
 #include "new_model_dialog.h"
-
-#include "pixmaps/stock_new.xpm"
-#include "pixmaps/stock_delete.xpm"
-#include "pixmaps/stock_open.xpm"
-#include "pixmaps/stock_save.xpm"
-#include "pixmaps/stock_refresh.xpm"
 
 IMPLEMENT_CLASS(StudioOverview, wxFrame)
 
 /* IDs for menu items */
-#define ID_NEW                  81
-#define ID_OPEN                 82
-#define ID_CLOSE                83
-#define ID_SAVE                 84
-#define ID_SAVEAS               85
-#define ID_UNDO                 87
-#define ID_REDO                 88
-#define ID_CUT                  89
-#define ID_COPY                 90
-#define ID_PASTE                91
-#define ID_ABOUT                92
-#define ID_ADD                  93
-#define ID_REMOVE               94
-#define ID_HELP                 95
+#define ID_NEW                      81
+#define ID_OPEN                     82
+#define ID_CLOSE                    83
+#define ID_SAVE                     84
+#define ID_SAVEAS                   85
+#define ID_UNDO                     87
+#define ID_REDO                     88
+#define ID_CUT                      89
+#define ID_COPY                     90
+#define ID_PASTE                    91
+#define ID_ABOUT                    92
+#define ID_ADD                      93
+#define ID_REMOVE                   94
+#define ID_HELP                     95
 
 #define ID_SETTINGS                 100
 #define ID_PROJECT_NEW              101
@@ -86,16 +82,12 @@ StudioOverview::StudioOverview(wxWindow* parent, wxWindowID id) :
   wxBoxSizer*       mainSizer    = new wxBoxSizer(wxVERTICAL);
   wxSplitterWindow* mainSplitter = new wxSplitterWindow(this);
 
-  /* Icons for model specifications */
-  modeliconlist = new wxImageList(24,24, false, 3);
-  modeliconlist->Add(wxIcon(stock_new_xpm));
-  modeliconlist->Add(wxIcon(stock_open_xpm));
-  modeliconlist->Add(wxIcon(stock_save_xpm));
-  modeliconlist->Add(wxIcon(stock_refresh_xpm));
+  /* Load main icons */
+  main_icon_list = LoadMainIcons();
 
   /* Generate model view */
   specifications = new wxTreeCtrl(mainSplitter, ID_FRAME_MODEL, wxDefaultPosition, wxDefaultSize, wxTR_EDIT_LABELS|wxTR_HAS_BUTTONS|wxTR_HIDE_ROOT|wxTR_SINGLE|wxSUNKEN_BORDER);
-  specifications->AssignImageList(modeliconlist);
+  specifications->AssignImageList(main_icon_list);
   specifications->AddRoot(wxT("Leonard of Quirm!"));
 
   /* Generate progress view */
@@ -125,10 +117,10 @@ StudioOverview::StudioOverview(wxWindow* parent, wxWindowID id) :
   /* Create status bar and set it to empty explicitly */
   CreateStatusBar();
   SetStatusText(wxT("ready"));
-};
+}
 
 StudioOverview::~StudioOverview() {
-};
+}
 
 /* Convenience function to fill the menu */
 inline void StudioOverview::GenerateMenuBar() {
@@ -196,10 +188,10 @@ inline void StudioOverview::GenerateToolBar() {
   /* Create toolbar */
   wxToolBar* toolbar = new wxToolBar(this, wxID_ANY, wxDefaultPosition, wxDefaultSize, wxTB_HORIZONTAL);
 
-  /* Add 'new model' tool */
-  toolbar->AddTool(ID_SPECIFICATION_NEW, wxBitmap(stock_new_xpm), wxT("New specification"));
-  toolbar->AddTool(ID_SPECIFICATION_LOAD, wxBitmap(stock_open_xpm), wxT("Add specification"));
-  toolbar->AddTool(ID_SPECIFICATION_REMOVE, wxBitmap(stock_delete_xpm), wxT("Remove specification"));
+  /* Add tools */
+  toolbar->AddTool(ID_SPECIFICATION_NEW, main_icon_list->GetBitmap(0), wxT("New specification"));
+  toolbar->AddTool(ID_SPECIFICATION_LOAD, main_icon_list->GetBitmap(1), wxT("Add specification"));
+  toolbar->AddTool(ID_SPECIFICATION_REMOVE, main_icon_list->GetBitmap(2), wxT("Remove specification"));
   toolbar->Realize();
 
   SetToolBar(toolbar);
@@ -294,14 +286,14 @@ void StudioOverview::ProjectLoad(wxCommandEvent &event) {
   }
 
   directory_dialog->~wxDirDialog();
-};
+}
 
 void StudioOverview::ProjectStore(wxCommandEvent &event) {
   project_manager.Store();
-};
+}
 
 void StudioOverview::ModelsRefresh(wxCommandEvent &event) {
-};
+}
 
 /*
  * Adds a new specification as a child of the selected specification
@@ -355,7 +347,7 @@ void StudioOverview::NewSpecification(wxCommandEvent &event) {
 
   specifications->SelectItem(new_item);
   specifications->EditLabel(new_item);
-};
+}
 
 /* Handlers for operations on specifications */
 void StudioOverview::AddSpecification(wxCommandEvent &event) {
@@ -379,7 +371,7 @@ void StudioOverview::AddSpecification(wxCommandEvent &event) {
   }
 
   dialog->~NewModelDialog();
-};
+}
 
 void StudioOverview::MarkDirty(wxCommandEvent &event) {
   Specification* specification = ((SpecificationData*) specifications->GetItemData(specifications->GetSelection()))->specification;
@@ -395,17 +387,17 @@ void StudioOverview::RemoveSpecification(wxCommandEvent &event) {
     specifications->DeleteChildren(selected);
     specifications->Delete(selected);
   }
-};
+}
 
 /* Handlers for operations on progress */
 void StudioOverview::AddAnalysis(wxCommandEvent &event) {
-};
+}
 
 void StudioOverview::RemoveAnalysis(wxCommandEvent &event) {
-};
+}
 
 void StudioOverview::PerformAnalysis(wxCommandEvent &event) {
-};
+}
 
 void StudioOverview::SpawnContextMenu(wxTreeEvent &event) {
   /* Set selected tree item, for communication with menu event handlers */
@@ -469,5 +461,5 @@ void StudioOverview::RenameSpecification(wxTreeEvent &event) {
 
 void StudioOverview::Quit(wxCommandEvent &event) {
   Destroy();
-};
+}
 
