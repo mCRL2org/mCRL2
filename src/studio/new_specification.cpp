@@ -1,33 +1,34 @@
-#include "new_model_dialog.h"
 #include <wx/statline.h>
 
-IMPLEMENT_CLASS(NewModelDialog, wxDialog)
+#include "new_specification.h"
 
-BEGIN_EVENT_TABLE(NewModelDialog, wxDialog)
+IMPLEMENT_CLASS(NewSpecificationDialog, wxDialog)
+
+BEGIN_EVENT_TABLE(NewSpecificationDialog, wxDialog)
 END_EVENT_TABLE()
 
-NewModelDialog::NewModelDialog(wxWindow* parent, wxWindowID id) :
-  wxDialog(parent, id, wxT("Add a model to the project"), wxDefaultPosition, wxSize(400,400), wxCAPTION) {
+NewSpecificationDialog::NewSpecificationDialog(wxWindow* parent, wxWindowID id) :
+  wxDialog(parent, id, wxT("Add a specification to the project"), wxDefaultPosition, wxSize(400,400), wxCAPTION) {
 
   /* Create controls */
   wxBoxSizer*   sizer       = new wxBoxSizer(wxVERTICAL);
   wxStaticText* file_text   = new wxStaticText(this, wxID_ANY, wxT("Select a file to add to the project:"));
   wxStaticText* name_text   = new wxStaticText(this, wxID_ANY, wxT("The name for the specification in the project:"));
 
-  /* The text control that holds the new name for the model */
+  /* The text control that holds the new name for the specification */
   name_field = new wxTextCtrl(this, wxID_ANY);
 
   /* TODO, start from the project directory */
-  file_field   = new wxGenericDirCtrl(this, wxID_ANY, wxT("~/"), wxDefaultPosition, wxDefaultSize, wxDIRCTRL_3D_INTERNAL|wxSUNKEN_BORDER|wxDIRCTRL_SHOW_FILTERS, wxT("All files (*.*)|*.*|mCRL2 files (*.mcrl2)|*.mcrl2"));
+  file_field   = new wxGenericDirCtrl(this, wxID_ANY, wxT("~/"), wxDefaultPosition, wxDefaultSize, wxDIRCTRL_3D_INTERNAL|wxSUNKEN_BORDER|wxDIRCTRL_SHOW_FILTERS, wxT("All files (*.*)|*.*|mCRL2 files (*.mcrl2)|*.mcrl2|mCRL2 files (*.lpe)|*.lpe"));
   select_field = new wxTextCtrl(this, wxID_ANY);
 
   /* Tie event to update the select field to the tree control of file_field */
   wxTreeCtrl* selectiontree = file_field->GetTreeCtrl();
 
-  selectiontree->Connect(selectiontree->GetId(), wxEVT_COMMAND_TREE_SEL_CHANGED, wxCommandEventHandler(NewModelDialog::UpdateSelectField), NULL, this);
+  selectiontree->Connect(selectiontree->GetId(), wxEVT_COMMAND_TREE_SEL_CHANGED, wxCommandEventHandler(NewSpecificationDialog::UpdateSelectField), NULL, this);
 
-  wxStaticBoxSizer* boxtsizer = new wxStaticBoxSizer(wxVERTICAL, this, wxT("Model specification file"));
-  wxStaticBoxSizer* boxmsizer = new wxStaticBoxSizer(wxVERTICAL, this, wxT("New model name"));
+  wxStaticBoxSizer* boxtsizer = new wxStaticBoxSizer(wxVERTICAL, this, wxT("Select specification file"));
+  wxStaticBoxSizer* boxmsizer = new wxStaticBoxSizer(wxVERTICAL, this, wxT("A name for the specification"));
 
   boxtsizer->Add(file_text, 0, wxALL|wxEXPAND, 2);
   boxtsizer->Add(file_field, 1, wxALL|wxEXPAND, 2);
@@ -51,11 +52,8 @@ NewModelDialog::NewModelDialog(wxWindow* parent, wxWindowID id) :
   Centre();
 }
 
-NewModelDialog::~NewModelDialog() {
-}
-
 /* Precondition the user has pushed the OK button */
-wxString NewModelDialog::GetModelName() {
+wxString NewSpecificationDialog::GetName() {
   wxString name = name_field->GetValue();
 
   if (name == wxT("")) {
@@ -79,16 +77,16 @@ wxString NewModelDialog::GetModelName() {
 }
 
 /* Precondition the user has pushed the OK button */
-wxString NewModelDialog::GetModelFileName() {
+wxString NewSpecificationDialog::GetFileName() {
   return(select_field->GetValue());
 }
 
 /* Precondition the user has pushed the OK button */
-wxString NewModelDialog::GetModelPath() {
+wxString NewSpecificationDialog::GetPath() {
   return(file_field->GetFilePath().BeforeLast('/'));
 }
 
-void NewModelDialog::UpdateSelectField(wxCommandEvent& event) {
+void NewSpecificationDialog::UpdateSelectField(wxCommandEvent& event) {
   wxString filepath = file_field->GetFilePath();
 
   if (filepath == wxT("")) {

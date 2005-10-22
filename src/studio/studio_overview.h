@@ -57,6 +57,7 @@ class StudioOverview : public wxFrame {
     /* Activate rename label from context menu */
     void ActivateRename(wxCommandEvent &event);
     void MarkDirty(wxCommandEvent &event);
+    void ShowSpecificationProperties(wxCommandEvent &event);
 
     /* Generic GUI only operations */
     void Quit(wxCommandEvent &event);

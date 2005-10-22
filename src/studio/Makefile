@@ -16,10 +16,10 @@ LDFLAGS                        = -lxml2
 
 GUI_CPPFLAGS                   = -DDISABLE_TOOLBAR
 
-WX_OBJECTS                     = studio.o studio_overview.o new_model_dialog.o resources.o
+WX_OBJECTS                     = studio.o studio_overview.o new_specification.o specification_properties.o resources.o
 WX_LIBRARIES                   = $(WX_LIBS)
 
-GUI_OBJECTS                    = studio.o studio_overview.o new_model_dialog.o resources.o
+GUI_OBJECTS                    = studio.o studio_overview.o new_specification.o specification_properties.o resources.o
 PROJECT_MANAGER_OBJECTS        = project_manager.o
 TOOL_MANAGER_OBJECTS           = tool_manager.o
 OBJECTS                        = $(GUI_OBJECTS) $(PROJECT_MANAGER_OBJECTS) $(TOOL_MANAGER_OBJECTS)

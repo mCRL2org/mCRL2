@@ -5,7 +5,8 @@
 #include "resources.h"
 
 #include "studio_overview.h"
-#include "new_model_dialog.h"
+#include "new_specification.h"
+#include "specification_properties.h"
 
 IMPLEMENT_CLASS(StudioOverview, wxFrame)
 
@@ -36,11 +37,12 @@ IMPLEMENT_CLASS(StudioOverview, wxFrame)
 #define ID_SPECIFICATION_RENAME     108
 #define ID_SPECIFICATION_LOAD       109
 #define ID_SPECIFICATION_MARK_DIRTY 110
-#define ID_ANALYSIS_NEW             111
-#define ID_ANALYSIS_REMOVE          112
-#define ID_ANALYSIS_PERFORM         113
-#define ID_MODEL                    114
-#define ID_ANALYSIS                 115
+#define ID_SPECIFICATION_PROPERTIES 111
+#define ID_ANALYSIS_NEW             112
+#define ID_ANALYSIS_REMOVE          113
+#define ID_ANALYSIS_PERFORM         114
+#define ID_MODEL                    115
+#define ID_ANALYSIS                 116
 
 #define ID_FRAME_MODEL              151
 #define ID_FRAME_ANALYSIS           152
@@ -56,6 +58,7 @@ BEGIN_EVENT_TABLE(StudioOverview, wxFrame)
   EVT_MENU(ID_SPECIFICATION_RENAME,         StudioOverview::ActivateRename)
   EVT_MENU(ID_SPECIFICATION_LOAD,           StudioOverview::AddSpecification)
   EVT_MENU(ID_SPECIFICATION_MARK_DIRTY,     StudioOverview::MarkDirty)
+  EVT_MENU(ID_SPECIFICATION_PROPERTIES,     StudioOverview::ShowSpecificationProperties)
   EVT_MENU(ID_ANALYSIS_NEW,                 StudioOverview::AddAnalysis)
   EVT_MENU(ID_ANALYSIS_REMOVE,              StudioOverview::RemoveAnalysis)
   EVT_MENU(ID_ANALYSIS_PERFORM,             StudioOverview::PerformAnalysis)
@@ -351,13 +354,13 @@ void StudioOverview::NewSpecification(wxCommandEvent &event) {
 
 /* Handlers for operations on specifications */
 void StudioOverview::AddSpecification(wxCommandEvent &event) {
-  NewModelDialog* dialog = new NewModelDialog(this, wxID_ANY);
+  NewSpecificationDialog* dialog = new NewSpecificationDialog(this, wxID_ANY);
 
   if (dialog->ShowModal() == wxID_OK) {
-    wxString name = dialog->GetModelName();
+    wxString name = dialog->GetName();
 
     if (name != wxT("")) {
-      wxString file_name = dialog->GetModelFileName();
+      wxString file_name = dialog->GetFileName();
 
       if (file_name != wxT("")) {
         /* Insert new specification into tree */
@@ -370,13 +373,25 @@ void StudioOverview::AddSpecification(wxCommandEvent &event) {
     }
   }
 
-  dialog->~NewModelDialog();
+  dialog->~NewSpecificationDialog();
 }
 
 void StudioOverview::MarkDirty(wxCommandEvent &event) {
-  Specification* specification = ((SpecificationData*) specifications->GetItemData(specifications->GetSelection()))->specification;
+  ((SpecificationData*) specifications->GetItemData(specifications->GetSelection()))->specification->SetNotUpToDate();
+}
 
-  specification->SetNotUpToDate();
+void StudioOverview::ShowSpecificationProperties(wxCommandEvent &event) {
+  wxString                       name   = wxString(((SpecificationData*) specifications->GetItemData(specifications->GetSelection()))->specification->name.c_str(), wxConvLocal);
+  wxString                       title  = wxString(wxT("Properties of `")).Append(name).Append(wxT("'"));
+  SpecificationPropertiesDialog* dialog = new SpecificationPropertiesDialog(this, wxID_ANY, title);
+
+  /* TODO set proper icon when a format can be resolved to an icon */
+  dialog->SetIcon(main_icon_list->GetIcon(0));
+
+  if (dialog->ShowModal() == wxID_OK) {
+  }
+
+  dialog->~SpecificationPropertiesDialog();
 }
 
 void StudioOverview::RemoveSpecification(wxCommandEvent &event) {
@@ -432,7 +447,7 @@ void StudioOverview::SpawnContextMenu(wxTreeEvent &event) {
 
   context_menu->Append(ID_SETTINGS, wxT("&Analyse..."), analysis_menu);
   context_menu->AppendSeparator();
-  context_menu->Append(ID_SETTINGS, wxT("&Properties"));
+  context_menu->Append(ID_SPECIFICATION_PROPERTIES, wxT("&Properties"));
 
   PopupMenu(context_menu);
 
