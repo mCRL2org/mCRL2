@@ -62,6 +62,20 @@ install: all
 	$(INSTALL) -d $(bindir)
 	$(INSTALL) studio $(bindir)
 
+ifeq ($(HOST_OS),MACOSX)
+	/Developer/Tools/Rez -t APPL -o studio ../sample.r
+	/Developer/Tools/SetFile -a C studio
+	mkdir -p ../../studio.app/Contents
+	mkdir -p ../../studio.app/Contents/MacOS
+	mkdir -p ../../studio.app/Contents/Resources
+	cp studio.plist ../../studio.app/Contents/Info.plist
+	echo -n "APPL????" > ../../studio.app/Contents/PkgInfo
+	cp studio $(bindir)/studio
+	ln -f $(bindir)/studio ../../studio.app/Contents/MacOS/studio
+	cp -f ../xsim.icns ../../studio.app/Contents/Resources/studio.icns
+endif
+
+
 clean:
 	$(RM) *.o $(TARGETS) $(TEST_TARGETS) core
 
