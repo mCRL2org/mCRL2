@@ -312,7 +312,7 @@ ac_includes_default="\
 # include <unistd.h>
 #endif"
 
-ac_subst_vars='SHELL PATH_SEPARATOR PACKAGE_NAME PACKAGE_TARNAME PACKAGE_VERSION PACKAGE_STRING PACKAGE_BUGREPORT exec_prefix prefix program_transform_name bindir sbindir libexecdir datadir sysconfdir sharedstatedir localstatedir libdir includedir oldincludedir infodir mandir build_alias host_alias target_alias DEFS ECHO_C ECHO_N ECHO_T LIBS build build_cpu build_vendor build_os host host_cpu host_vendor host_os HOST_OS CC CFLAGS LDFLAGS CPPFLAGS ac_ct_CC EXEEXT OBJEXT CPP CXX CXXFLAGS ac_ct_CXX LEX LEXLIB LEX_OUTPUT_ROOT BISON EGREP ATERM_NAME BUILD_ATERM USE_LIBXML2 XMLTO USE_XMLTO BOOST_PREFIX USE_BOOST WX_CONFIG USE_WX WX_CPPFLAGS WX_LIBS LIBOBJS LTLIBOBJS'
+ac_subst_vars='SHELL PATH_SEPARATOR PACKAGE_NAME PACKAGE_TARNAME PACKAGE_VERSION PACKAGE_STRING PACKAGE_BUGREPORT exec_prefix prefix program_transform_name bindir sbindir libexecdir datadir sysconfdir sharedstatedir localstatedir libdir includedir oldincludedir infodir mandir build_alias host_alias target_alias DEFS ECHO_C ECHO_N ECHO_T LIBS build build_cpu build_vendor build_os host host_cpu host_vendor host_os HOST_OS CC CFLAGS LDFLAGS CPPFLAGS ac_ct_CC EXEEXT OBJEXT CPP CXX CXXFLAGS ac_ct_CXX LEX LEXLIB LEX_OUTPUT_ROOT BISON EGREP ATERM_NAME BUILD_ATERM LIBXML2_CPPFLAGS XML2_CONFIG USE_LIBXML2 XMLTO USE_XMLTO BOOST_PREFIX USE_BOOST WX_CONFIG USE_WX WX_CPPFLAGS WX_LIBS LIBOBJS LTLIBOBJS'
 ac_subst_files=''
 
 # Initialize some variables set by options.
@@ -869,8 +869,7 @@ Optional Packages:
                           use ATerm headers from dir/include[/suf] and
                           the ATerm library from dir/lib[/suf]
 
-  --with-xml2-header=dir  use xml2 headers from dir/libxml; defaults to
-                          /usr/include/libxml2
+  --with-libxml2=prefix   try this for the libxml2 prefix install directory
 
   --with-xmlto=prefix     try this for the xmlto prefix install directory
 
@@ -1443,6 +1442,13 @@ case $host in
     ;;
 esac
 
+
+# Default is 32 bits, test is probably very incomplete
+case $host in
+  *64*-*-*)
+    USE_64_BIT=1
+    ;;
+esac
 
 # Checks for programs.
 ac_ext=c
@@ -4115,6 +4121,9 @@ fi;
 if test $enable_debug; then
   { echo "$as_me:$LINENO: compiling with debugging information" >&5
 echo "$as_me: compiling with debugging information" >&6;}
+  if test $USE_64_BIT; then
+    CPPFLAGS="-DAT_64BIT $CPPFLAGS"
+  fi
   CFLAGS="-g -Wall -pedantic $CFLAGS"
   CXXFLAGS="-g -Wall $CXXFLAGS"
 else
@@ -4827,104 +4836,13 @@ if test "${with_xml2+set}" = set; then
   withval="$with_xml2"
 
 fi;
-if test $with_xml2_header; then
-  xml_h_dir=$with_xml2_header
-else
-  xml_h_dir=/usr/include/libxml2
-fi
-CPPFLAGS="-I$xml_h_dir $CPPFLAGS"
-echo "$as_me:$LINENO: checking for xmlParseFile in -lxml2" >&5
-echo $ECHO_N "checking for xmlParseFile in -lxml2... $ECHO_C" >&6
-if test "${ac_cv_lib_xml2_xmlParseFile+set}" = set; then
-  echo $ECHO_N "(cached) $ECHO_C" >&6
-else
-  ac_check_lib_save_LIBS=$LIBS
-LIBS="-lxml2  $LIBS"
-cat >conftest.$ac_ext <<_ACEOF
-/* confdefs.h.  */
-_ACEOF
-cat confdefs.h >>conftest.$ac_ext
-cat >>conftest.$ac_ext <<_ACEOF
-/* end confdefs.h.  */
+if test $with_libxml2; then
+  echo "$as_me:$LINENO: checking for libXML2 in $with_libxml2" >&5
+echo $ECHO_N "checking for libXML2 in $with_libxml2... $ECHO_C" >&6
+  cat >conftest.$ac_ext <<_ACEOF
 
-/* Override any gcc2 internal prototype to avoid an error.  */
-#ifdef __cplusplus
-extern "C"
-#endif
-/* We use char because int might match the return type of a gcc2
-   builtin and then its argument prototype would still apply.  */
-char xmlParseFile ();
-int
-main ()
-{
-xmlParseFile ();
-  ;
-  return 0;
-}
-_ACEOF
-rm -f conftest.$ac_objext conftest$ac_exeext
-if { (eval echo "$as_me:$LINENO: \"$ac_link\"") >&5
-  (eval $ac_link) 2>conftest.er1
-  ac_status=$?
-  grep -v '^ *+' conftest.er1 >conftest.err
-  rm -f conftest.er1
-  cat conftest.err >&5
-  echo "$as_me:$LINENO: \$? = $ac_status" >&5
-  (exit $ac_status); } &&
-	 { ac_try='test -z "$ac_c_werror_flag"
-			 || test ! -s conftest.err'
-  { (eval echo "$as_me:$LINENO: \"$ac_try\"") >&5
-  (eval $ac_try) 2>&5
-  ac_status=$?
-  echo "$as_me:$LINENO: \$? = $ac_status" >&5
-  (exit $ac_status); }; } &&
-	 { ac_try='test -s conftest$ac_exeext'
-  { (eval echo "$as_me:$LINENO: \"$ac_try\"") >&5
-  (eval $ac_try) 2>&5
-  ac_status=$?
-  echo "$as_me:$LINENO: \$? = $ac_status" >&5
-  (exit $ac_status); }; }; then
-  ac_cv_lib_xml2_xmlParseFile=yes
-else
-  echo "$as_me: failed program was:" >&5
-sed 's/^/| /' conftest.$ac_ext >&5
+      #include "$with_xml2/include/libxml2/libxml/xmlversion.h"
 
-ac_cv_lib_xml2_xmlParseFile=no
-fi
-rm -f conftest.err conftest.$ac_objext \
-      conftest$ac_exeext conftest.$ac_ext
-LIBS=$ac_check_lib_save_LIBS
-fi
-echo "$as_me:$LINENO: result: $ac_cv_lib_xml2_xmlParseFile" >&5
-echo "${ECHO_T}$ac_cv_lib_xml2_xmlParseFile" >&6
-if test $ac_cv_lib_xml2_xmlParseFile = yes; then
-  have_libxml2=1
-fi
-
-
-for ac_header in libxml/parser.h
-do
-as_ac_Header=`echo "ac_cv_header_$ac_header" | $as_tr_sh`
-if eval "test \"\${$as_ac_Header+set}\" = set"; then
-  echo "$as_me:$LINENO: checking for $ac_header" >&5
-echo $ECHO_N "checking for $ac_header... $ECHO_C" >&6
-if eval "test \"\${$as_ac_Header+set}\" = set"; then
-  echo $ECHO_N "(cached) $ECHO_C" >&6
-fi
-echo "$as_me:$LINENO: result: `eval echo '${'$as_ac_Header'}'`" >&5
-echo "${ECHO_T}`eval echo '${'$as_ac_Header'}'`" >&6
-else
-  # Is the header compilable?
-echo "$as_me:$LINENO: checking $ac_header usability" >&5
-echo $ECHO_N "checking $ac_header usability... $ECHO_C" >&6
-cat >conftest.$ac_ext <<_ACEOF
-/* confdefs.h.  */
-_ACEOF
-cat confdefs.h >>conftest.$ac_ext
-cat >>conftest.$ac_ext <<_ACEOF
-/* end confdefs.h.  */
-$ac_includes_default
-#include <$ac_header>
 _ACEOF
 rm -f conftest.$ac_objext
 if { (eval echo "$as_me:$LINENO: \"$ac_compile\"") >&5
@@ -4948,114 +4866,74 @@ if { (eval echo "$as_me:$LINENO: \"$ac_compile\"") >&5
   ac_status=$?
   echo "$as_me:$LINENO: \$? = $ac_status" >&5
   (exit $ac_status); }; }; then
-  ac_header_compiler=yes
+
+       echo "$as_me:$LINENO: result: yes" >&5
+echo "${ECHO_T}yes" >&6
+       USE_LIBXML2=1
+       LIBXML2_CPPFLAGS=-I$with_libxml2/include/libxml2
+
+
 else
   echo "$as_me: failed program was:" >&5
 sed 's/^/| /' conftest.$ac_ext >&5
 
-ac_header_compiler=no
+
+       echo "$as_me:$LINENO: result: no" >&5
+echo "${ECHO_T}no" >&6
+
 fi
 rm -f conftest.err conftest.$ac_objext conftest.$ac_ext
-echo "$as_me:$LINENO: result: $ac_header_compiler" >&5
-echo "${ECHO_T}$ac_header_compiler" >&6
-
-# Is the header present?
-echo "$as_me:$LINENO: checking $ac_header presence" >&5
-echo $ECHO_N "checking $ac_header presence... $ECHO_C" >&6
-cat >conftest.$ac_ext <<_ACEOF
-/* confdefs.h.  */
-_ACEOF
-cat confdefs.h >>conftest.$ac_ext
-cat >>conftest.$ac_ext <<_ACEOF
-/* end confdefs.h.  */
-#include <$ac_header>
-_ACEOF
-if { (eval echo "$as_me:$LINENO: \"$ac_cpp conftest.$ac_ext\"") >&5
-  (eval $ac_cpp conftest.$ac_ext) 2>conftest.er1
-  ac_status=$?
-  grep -v '^ *+' conftest.er1 >conftest.err
-  rm -f conftest.er1
-  cat conftest.err >&5
-  echo "$as_me:$LINENO: \$? = $ac_status" >&5
-  (exit $ac_status); } >/dev/null; then
-  if test -s conftest.err; then
-    ac_cpp_err=$ac_c_preproc_warn_flag
-    ac_cpp_err=$ac_cpp_err$ac_c_werror_flag
-  else
-    ac_cpp_err=
-  fi
 else
-  ac_cpp_err=yes
-fi
-if test -z "$ac_cpp_err"; then
-  ac_header_preproc=yes
-else
-  echo "$as_me: failed program was:" >&5
-sed 's/^/| /' conftest.$ac_ext >&5
-
-  ac_header_preproc=no
-fi
-rm -f conftest.err conftest.$ac_ext
-echo "$as_me:$LINENO: result: $ac_header_preproc" >&5
-echo "${ECHO_T}$ac_header_preproc" >&6
-
-# So?  What about this header?
-case $ac_header_compiler:$ac_header_preproc:$ac_c_preproc_warn_flag in
-  yes:no: )
-    { echo "$as_me:$LINENO: WARNING: $ac_header: accepted by the compiler, rejected by the preprocessor!" >&5
-echo "$as_me: WARNING: $ac_header: accepted by the compiler, rejected by the preprocessor!" >&2;}
-    { echo "$as_me:$LINENO: WARNING: $ac_header: proceeding with the compiler's result" >&5
-echo "$as_me: WARNING: $ac_header: proceeding with the compiler's result" >&2;}
-    ac_header_preproc=yes
-    ;;
-  no:yes:* )
-    { echo "$as_me:$LINENO: WARNING: $ac_header: present but cannot be compiled" >&5
-echo "$as_me: WARNING: $ac_header: present but cannot be compiled" >&2;}
-    { echo "$as_me:$LINENO: WARNING: $ac_header:     check for missing prerequisite headers?" >&5
-echo "$as_me: WARNING: $ac_header:     check for missing prerequisite headers?" >&2;}
-    { echo "$as_me:$LINENO: WARNING: $ac_header: see the Autoconf documentation" >&5
-echo "$as_me: WARNING: $ac_header: see the Autoconf documentation" >&2;}
-    { echo "$as_me:$LINENO: WARNING: $ac_header:     section \"Present But Cannot Be Compiled\"" >&5
-echo "$as_me: WARNING: $ac_header:     section \"Present But Cannot Be Compiled\"" >&2;}
-    { echo "$as_me:$LINENO: WARNING: $ac_header: proceeding with the preprocessor's result" >&5
-echo "$as_me: WARNING: $ac_header: proceeding with the preprocessor's result" >&2;}
-    { echo "$as_me:$LINENO: WARNING: $ac_header: in the future, the compiler will take precedence" >&5
-echo "$as_me: WARNING: $ac_header: in the future, the compiler will take precedence" >&2;}
-    (
-      cat <<\_ASBOX
-## -------------------------------- ##
-## Report this to J.v.d.Wulp@tue.nl ##
-## -------------------------------- ##
-_ASBOX
-    ) |
-      sed "s/^/$as_me: WARNING:     /" >&2
-    ;;
-esac
-echo "$as_me:$LINENO: checking for $ac_header" >&5
-echo $ECHO_N "checking for $ac_header... $ECHO_C" >&6
-if eval "test \"\${$as_ac_Header+set}\" = set"; then
+  #Headers may be in a standard location, ask xml2-config
+  # Extract the first word of "xml2-config", so it can be a program name with args.
+set dummy xml2-config; ac_word=$2
+echo "$as_me:$LINENO: checking for $ac_word" >&5
+echo $ECHO_N "checking for $ac_word... $ECHO_C" >&6
+if test "${ac_cv_prog_XML2_CONFIG+set}" = set; then
   echo $ECHO_N "(cached) $ECHO_C" >&6
 else
-  eval "$as_ac_Header=\$ac_header_preproc"
-fi
-echo "$as_me:$LINENO: result: `eval echo '${'$as_ac_Header'}'`" >&5
-echo "${ECHO_T}`eval echo '${'$as_ac_Header'}'`" >&6
-
-fi
-if test `eval echo '${'$as_ac_Header'}'` = yes; then
-  cat >>confdefs.h <<_ACEOF
-#define `echo "HAVE_$ac_header" | $as_tr_cpp` 1
-_ACEOF
- have_headerxml2=1
-fi
-
+  if test -n "$XML2_CONFIG"; then
+  ac_cv_prog_XML2_CONFIG="$XML2_CONFIG" # Let the user override the test.
+else
+as_save_IFS=$IFS; IFS=$PATH_SEPARATOR
+for as_dir in $PATH
+do
+  IFS=$as_save_IFS
+  test -z "$as_dir" && as_dir=.
+  for ac_exec_ext in '' $ac_executable_extensions; do
+  if $as_executable_p "$as_dir/$ac_word$ac_exec_ext"; then
+    ac_cv_prog_XML2_CONFIG="xml2-config"
+    echo "$as_me:$LINENO: found $as_dir/$ac_word$ac_exec_ext" >&5
+    break 2
+  fi
+done
 done
 
-if test $have_libxml2; then
-  if test $have_headerxml2; then
+fi
+fi
+XML2_CONFIG=$ac_cv_prog_XML2_CONFIG
+if test -n "$XML2_CONFIG"; then
+  echo "$as_me:$LINENO: result: $XML2_CONFIG" >&5
+echo "${ECHO_T}$XML2_CONFIG" >&6
+else
+  echo "$as_me:$LINENO: result: no" >&5
+echo "${ECHO_T}no" >&6
+fi
+
+
+  if test $XML2_CONFIG; then
     USE_LIBXML2=1
+    LIBXML2_CPPFLAGS="$($XML2_CONFIG --cflags)"
   fi
 fi
+
+if test -z $USE_LIBXML2; then
+  { echo "$as_me:$LINENO: libXML2 is required for some tools in the toolset." >&5
+echo "$as_me: libXML2 is required for some tools in the toolset." >&6;}
+  { echo "$as_me:$LINENO: it can be obtained from http://www.xmlsoft.org." >&5
+echo "$as_me: it can be obtained from http://www.xmlsoft.org." >&6;}
+fi
+
 
 
 # Check for xmlto
@@ -5199,7 +5077,6 @@ sed 's/^/| /' conftest.$ac_ext >&5
 
        echo "$as_me:$LINENO: result: no" >&5
 echo "${ECHO_T}no" >&6
-
        { echo "$as_me:$LINENO: the Boost C++ libraries are required for certain tools in the toolset." >&5
 echo "$as_me: the Boost C++ libraries are required for certain tools in the toolset." >&6;}
        { echo "$as_me:$LINENO: they can be obtained from http://www.boost.org." >&5
@@ -5216,6 +5093,7 @@ echo "${ECHO_T}yes" >&6
   { echo "$as_me:$LINENO: using local Boost libraries." >&5
 echo "$as_me: using local Boost libraries." >&6;}
 fi
+
 
 # Check for wxWidgets
 
@@ -6986,6 +6864,8 @@ s,@BISON@,$BISON,;t t
 s,@EGREP@,$EGREP,;t t
 s,@ATERM_NAME@,$ATERM_NAME,;t t
 s,@BUILD_ATERM@,$BUILD_ATERM,;t t
+s,@LIBXML2_CPPFLAGS@,$LIBXML2_CPPFLAGS,;t t
+s,@XML2_CONFIG@,$XML2_CONFIG,;t t
 s,@USE_LIBXML2@,$USE_LIBXML2,;t t
 s,@XMLTO@,$XMLTO,;t t
 s,@USE_XMLTO@,$USE_XMLTO,;t t

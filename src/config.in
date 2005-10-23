@@ -9,19 +9,22 @@ CXXFLAGS           = @CXXFLAGS@
 
 ifeq ($(HOST_OS),WINDOWS)
  # Windows does not have a libdl equivalent
- CFLAGS             += -DNO_DYNLOAD
+ CPPFLAGS            += -DNO_DYNLOAD
 else
  ifeq ($(HOST_OS),MINGW)
-  CFLAGS             += -DNO_DYNLOAD
+  CPPFLAGS           += -DNO_DYNLOAD
  else
   LIBDL               = -ldl
  endif
 endif
 
+LDFLAGS            = -Wl,-rpath,$(libdir) -rdynamic @LDFLAGS@
+
 ifeq ($(HOST_OS),MACOSX)
- LDFLAGS            = @LDFLAGS@
-else
- LDFLAGS            = -Wl,-rpath,$(libdir) -rdynamic @LDFLAGS@
+ LDFLAGS           = @LDFLAGS@
+endif
+ifeq ($(HOST_OS),MINGW)
+ LDFLAGS           = -Wl,-rpath,$(libdir) @LDFLAGS@
 endif
 
 ARFLAGS            = crs
@@ -33,20 +36,14 @@ BFLAGS             = -d -pgsyy
 ATERM              = @ATERM_NAME@ 
 BUILD_ATERM        = @BUILD_ATERM@
 USE_LIBXML2        = @USE_LIBXML2@
+LIBXML2_CPPFLAGS   = @LIBXML2_CPPFLAGS@
 USE_XMLTO          = @USE_XMLTO@
 XMLTO              = @XMLTO@
 USE_WX             = @USE_WX@
 WX_LIBS            = @WX_LIBS@
 WX_CPPFLAGS        = @WX_CPPFLAGS@
 USE_BOOST          = @USE_BOOST@
-
-ifeq ($(USE_BOOST),1)
- BOOST_PREFIX      = @BOOST_PREFIX@
-
- ifeq ($(BOOST_PREFIX),boost)
-  BJAM             = boost/tools/build/jam_src/bin/bjam
- endif
-endif
+BOOST_PREFIX      = @BOOST_PREFIX@
 
 # Installation directories
 prefix             = @prefix@

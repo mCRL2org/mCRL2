@@ -26,6 +26,13 @@ case $host in
 esac
 AC_SUBST([HOST_OS])
 
+# Default is 32 bits, test is probably very incomplete
+case $host in
+  *64*-*-*)
+    USE_64_BIT=1
+    ;;
+esac
+
 # Checks for programs.
 AC_PROG_CPP
 AC_PROG_CC
@@ -89,6 +96,9 @@ AC_ARG_ENABLE(
 )
 if test $enable_debug; then
   AC_MSG_NOTICE([compiling with debugging information])
+  if test $USE_64_BIT; then
+    CPPFLAGS="-DAT_64BIT $CPPFLAGS"
+  fi
   CFLAGS="-g -Wall -pedantic $CFLAGS"
   CXXFLAGS="-g -Wall $CXXFLAGS"
 else
@@ -163,23 +173,39 @@ AC_SUBST([BUILD_ATERM],[])
 AC_ARG_WITH(
   [xml2],
   AC_HELP_STRING(
-    [--with-xml2-header=dir],
-    [use xml2 headers from dir/libxml; defaults to /usr/include/libxml2]
+    [--with-libxml2=prefix],
+    [try this for the libxml2 prefix install directory]
   )  
 )
-if test $with_xml2_header; then
-  xml_h_dir=$with_xml2_header
+if test $with_libxml2; then
+  AC_MSG_CHECKING([for libXML2 in $with_libxml2])
+  AC_COMPILE_IFELSE(
+     [
+      #include "$with_xml2/include/libxml2/libxml/xmlversion.h"
+     ],
+     [
+       AC_MSG_RESULT(yes)
+       USE_LIBXML2=1
+       AC_SUBST([LIBXML2_CPPFLAGS],[-I$with_libxml2/include/libxml2])
+     ],
+     [
+       AC_MSG_RESULT(no)
+     ])
 else
-  xml_h_dir=/usr/include/libxml2
-fi
-CPPFLAGS="-I$xml_h_dir $CPPFLAGS"
-AC_CHECK_LIB([xml2], [xmlParseFile], [have_libxml2=1])
-AC_CHECK_HEADERS([libxml/parser.h], [have_headerxml2=1])
-if test $have_libxml2; then
-  if test $have_headerxml2; then
+  #Headers may be in a standard location, ask xml2-config
+  AC_CHECK_PROG([XML2_CONFIG],[xml2-config],[xml2-config])
+
+  if test $XML2_CONFIG; then
     USE_LIBXML2=1
+    LIBXML2_CPPFLAGS="$($XML2_CONFIG --cflags)"
   fi
 fi
+
+if test -z $USE_LIBXML2; then
+  AC_MSG_NOTICE(libXML2 is required for some tools in the toolset.)
+  AC_MSG_NOTICE(it can be obtained from http://www.xmlsoft.org.)
+fi
+AC_SUBST([LIBXML2_CPPFLAGS],[])
 AC_SUBST([USE_LIBXML2],[])
 
 # Check for xmlto
@@ -224,7 +250,6 @@ if test $with_boost; then
      ],
      [
        AC_MSG_RESULT(no)
-       AC_SUBST([USE_BOOST],[])
        AC_MSG_NOTICE(the Boost C++ libraries are required for certain tools in the toolset.)
        AC_MSG_NOTICE(they can be obtained from http://www.boost.org.)
      ])
@@ -234,6 +259,7 @@ else
   AC_SUBST([BOOST_PREFIX],[boost])
   AC_MSG_NOTICE(using local Boost libraries.)
 fi
+AC_SUBST([USE_BOOST],[])
 
 # Check for wxWidgets
 AC_ARG_WITH(
