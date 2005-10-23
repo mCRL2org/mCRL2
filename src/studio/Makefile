@@ -27,7 +27,7 @@ OBJECTS                        = $(GUI_OBJECTS) $(PROJECT_MANAGER_OBJECTS) $(TOO
 TEST_TARGETS                   = project_manager_tester tool_manager_tester
 TARGETS                        = studio
 
-.PHONY: all clean test enable-debug
+.PHONY: all install clean distclean test
 
 all: $(TARGETS)
 
@@ -56,4 +56,6 @@ install:
 	$(INSTALL) studio $(bindir)
 
 clean:
-	$(RM) -f *.o $(TARGETS) $(TEST_TARGETS) core
+	$(RM) *.o $(TARGETS) $(TEST_TARGETS) core
+
+distclean: clean

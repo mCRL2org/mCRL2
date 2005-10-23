@@ -12,34 +12,34 @@
 
 -include ../config
 
+BJAM          = tools/build/jam_src/bin/bjam
+BJAM_BUILD    = ./build.sh
+BJAM_TOOLS    =
+
 # Build boost build tool
 ifeq ($(HOST_OS),WINDOWS)
- bjam_builder=build.bat
-else
- # Assume a platform on which a decent shell is available
- bjam_builder=./build.sh
+ BJAM         = tools/build/jam_src/bin/bjam.exe
+ BJAM_BUILD   = build.bat
 endif
-
-.PHONY: all bjam clean
 
 ifeq ($(HOST_OS),MINGW)
-
-all: bjam
-	tools/build/jam_src/bin/bjam.exe -sTOOLS=mingw --prefix=. install --layout=system
-
-bjam:
-	echo "Please manually close command window, when build has completed!"
-	cd tools/build/jam_src; \
-	start //WAIT mbuild.bat mingw;
-else
-
-all: bjam
-	tools/build/jam_src/bin/bjam --prefix=. install --layout=system
-bjam:
-	cd tools/build/jam_src; \
-	$(bjam_builder)
+ BJAM         = tools/build/jam_src/bin/bjam.exe
+ BJAM_BUILD   = start //WAIT mbuild.bat mingw;
+ BJAM_TOOLS   = -sTOOLS=mingw
 endif
+
+.PHONY: all bjam install clean distclean
+
+all: $(BJAM)
+	$(BJAM) $(BJAM_TOOLS) --prefix=. install --layout=system
+
+$(BJAM):
+	cd tools/build/jam_src; \
+	$(BJAM_BUILD)
+
+install:
 
 clean:
 	@-$(RM) -rf bin lib tools/build/jam_src/bin tools/build/jam_src/bootstrap
 
+distclean: clean

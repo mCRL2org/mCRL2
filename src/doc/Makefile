@@ -9,7 +9,7 @@ OBJECTS         = $(MAN_OBJECTS)
 MAN_OBJECT_SUFFIXES = $(patsubst .%,%, $(sort $(suffix $(MAN_OBJECTS))))
 MAN_INSTALL_TARGETS = $(patsubst %,%.install,$(MAN_OBJECT_SUFFIXES))
 
-.PHONY: all clean install
+.PHONY: all clean distclean install
 
 ifdef USE_XMLTO
 all: $(OBJECTS)
@@ -17,12 +17,16 @@ all: $(OBJECTS)
 clean:
 	$(RM) $(OBJECTS)
 
+distclean: clean
+
 install: all $(MAN_INSTALL_TARGETS)
 
 else
 all:
 
 clean:
+
+distclean:
 
 install:
 endif

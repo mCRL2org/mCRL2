@@ -137,15 +137,37 @@ LIB_NAMES          =  $(XSIMTRACE_NAME)
 OBJECTS           := $(sort $(OBJECTS))
 
 #Make rules
-.PHONY: all install clean distclean
+.PHONY: all install clean distclean boost documentation studio
 .PRECIOUS: gsparser.c gslexer.c
 
-all: $(BJAM) $(EXE_NAMES) $(LIB_NAMES)
-	@$(MAKE) -C doc
+# Build bjam and local boost 
+ifeq ($(BOOST_PREFIX),boost)
+all distclean: boost
+endif
 
-# Build bjam and boost libraries
-$(BJAM):
-	@$(MAKE) -C boost
+all: $(EXE_NAMES) $(LIB_NAMES)
+
+# Build/clean/install documentation
+ifdef USE_XMLTO
+all distclean install: documentation
+endif
+
+# Build/clean/install libxml2 dependent targets
+ifdef USE_LIBXML2
+all clean distclean install: studio
+endif
+
+# For building documentation
+documentation:
+	@$(MAKE) -C doc $(MAKECMDGOALS)
+
+# For building studio
+studio:
+	@$(MAKE) -C studio $(MAKECMDGOALS)
+
+# For building bjam and boost libraries
+boost:
+	@$(MAKE) -C boost $(MAKECMDGOALS); \
 
 install: all
 	$(INSTALL) -d $(bindir)
@@ -164,7 +186,6 @@ install: all
 	    $$c;\
 	  fi;\
 	done
-	@$(MAKE) -C doc install
 ifdef USE_WX
 ifeq ($(HOST_OS),MACOSX)
 	/Developer/Tools/Rez -t APPL -o xsim sample.r
@@ -184,8 +205,6 @@ clean:
 	$(RM) $(EXE_NAMES) $(LIB_NAMES) *.o *.a *.d *.dpp lpe/*.o lpe/*.dpp aterm/*.o aterm/*.a aterm/*.d svc/*.o svc/*.a svc/*.d gslexer.c gsparser.c gsparser.h gsparser.output lpeinfo lpeconstelm config.status config.log *~ core core.*
 
 distclean: clean
-	$(MAKE) -C boost clean
-	$(MAKE) -C doc clean
 	$(RM) -r autom4te.cache Makefile config gsrewr_innerc_aux.h
 
 $(ATERM_NAME): $(ATERM_OBJECTS)
@@ -226,12 +245,13 @@ endif
 # Targets that depend on any of the boost libraries
 ifdef USE_BOOST
 lpe/lpe%: CPPFLAGS += $(BOOST_HEADERS) -I./ -Iaterm
+lpe/lpe%: CXXFLAGS += -ftemplate-depth-256
 
 $(LPEINFO_NAME) : $(LPEINFO_OBJECTS) $(ATERM_DEP) $(LIBREWR_NAME)
-	$(CXX) $(CXXFLAGS) -ftemplate-depth-256 -o $@ $(CPPFLAGS) $(LPEINFO_OBJECTS) $(BOOST_LIBRARIES) $(LDFLAGS) $(LPEINFO_LDFLAGS)
+	$(CXX) $(CXXFLAGS) -o $@ $(CPPFLAGS) $(LPEINFO_OBJECTS) $(BOOST_LIBRARIES) $(LDFLAGS) $(LPEINFO_LDFLAGS)
 
 $(LPECONSTELM_NAME) : $(LPECONSTELM_OBJECTS) $(ATERM_DEP) $(LIBREWR_NAME)
-	$(CXX) $(CXXFLAGS) -ftemplate-depth-256 -o $@ $(CPPFLAGS) $(LPECONSTELM_OBJECTS) $(BOOST_LIBRARIES) $(LDFLAGS) $(LPECONSTELM_LDFLAGS)
+	$(CXX) $(CXXFLAGS) -o $@ $(CPPFLAGS) $(LPECONSTELM_OBJECTS) $(BOOST_LIBRARIES) $(LDFLAGS) $(LPECONSTELM_LDFLAGS)
 else
 $(LPEINFO_NAME) :
 	@echo "Missing Boost libraries so skipping build of lpeinfo."
