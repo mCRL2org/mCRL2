@@ -1,10 +1,11 @@
 #include <map>
+
+#include "studio_overview.h"
+
 #include <wx/splitter.h>
 #include <wx/treectrl.h>
 
 #include "resources.h"
-
-#include "studio_overview.h"
 #include "new_specification.h"
 #include "specification_properties.h"
 

@@ -1,6 +1,6 @@
-#include <wx/statline.h>
-
 #include "new_specification.h"
+
+#include <wx/statline.h>
 
 IMPLEMENT_CLASS(NewSpecificationDialog, wxDialog)
 

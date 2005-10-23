@@ -1,3 +1,4 @@
+#include <wx/wx.h>
 #include <wx/imaglist.h>
 
 #if defined(__WXGTK__) || defined(__WXMAC__)
