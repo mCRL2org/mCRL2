@@ -120,7 +120,7 @@ PNML2MCRL2_OBJECTS = pnml2mcrl2.o gstypecheck.o libprint_c.o gsfunc.o gslowlevel
 ifdef USE_LIBXML2
 OBJECTS           += $(PNML2MCRL2_OBJECTS)
 endif
-PNML2MCRL2_LDFLAGS = -lgsrewrite -l$(ATERM) -lxml2 -lm $(LIBDL)
+PNML2MCRL2_LDFLAGS = -lgsrewrite -l$(ATERM) $(LIBXML2_LDFLAGS) $(LIBDL)
 $(PNML2MCRL2_OBJECTS) $(patsubst %.o,%.d,$(PNML2MCRL2_OBJECTS)): CPPFLAGS += $(LIBXML2_CPPFLAGS)
 
 #alpha definitions

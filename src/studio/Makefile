@@ -10,13 +10,13 @@ endif
 ifeq ($(findstring -DNDEBUG,$(CPPFLAGS)),)
  CXXFLAGS                     += -g -Wall
  CPPFLAGS                      =
- PROJECT_MANAGER_CPPFLAGS      = -DTOOL_RUN_SUCCESSFUL
+ PROJECT_MANAGER_CPPFLAGS      = -DTOOL_RUN_SUCCESSFUL #-DPARSER_SCHEMA_VALIDATION 
 else
  CPPFLAGS                      = -DNDEBUG
- PROJECT_MANAGER_CPPFLAGS      = -DPARSER_SCHEMA_VALIDATION -DTOOL_RUN_SUCCESSFUL
+ PROJECT_MANAGER_CPPFLAGS      = -DTOOL_RUN_SUCCESSFUL
 endif
 
-LDFLAGS                        = -lxml2
+LDFLAGS                        = $(LIBXML2_LDFLAGS)
 
 GUI_CPPFLAGS                   = -DDISABLE_TOOLBAR
 
@@ -61,7 +61,6 @@ $(OBJECTS) $(TARGETS): Makefile
 install: all
 	$(INSTALL) -d $(bindir)
 	$(INSTALL) studio $(bindir)
-
 ifeq ($(HOST_OS),MACOSX)
 	/Developer/Tools/Rez -t APPL -o studio ../sample.r
 	/Developer/Tools/SetFile -a C studio

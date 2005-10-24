@@ -198,6 +198,7 @@ else
   if test $XML2_CONFIG; then
     USE_LIBXML2=1
     LIBXML2_CPPFLAGS="$($XML2_CONFIG --cflags)"
+    LIBXML2_LDFLAGS="$($XML2_CONFIG --libs)"
   fi
 fi
 
@@ -206,6 +207,7 @@ if test -z $USE_LIBXML2; then
   AC_MSG_NOTICE(it can be obtained from http://www.xmlsoft.org.)
 fi
 AC_SUBST([LIBXML2_CPPFLAGS],[])
+AC_SUBST([LIBXML2_LDFLAGS],[])
 AC_SUBST([USE_LIBXML2],[])
 
 # Check for xmlto
