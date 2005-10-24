@@ -4,6 +4,9 @@ include config
 #All objects that are used
 OBJECTS            =
 
+# Objects that require wxWidgets CPPFLAGS to compile
+WX_OBJECTS         = xsim.o xsimbase.o xsimmain.o xsimtrace.o xsimtracedll.o
+
 #ATerm definitions
 ATERM_NAME         = aterm/libATerm.a
 ATERM_OBJECTS      = aterm/afun.o aterm/aterm.o aterm/bafio.o aterm/byteio.o aterm/gc.o aterm/hash.o aterm/list.o aterm/make.o aterm/md5c.o aterm/memory.o aterm/tafio.o aterm/version.o
@@ -230,10 +233,11 @@ $(SIM_NAME) : $(SIM_OBJECTS) $(ATERM_DEP) $(LIBREWR_NAME)
 	$(CC) -o $@ $(SIM_OBJECTS) $(LDFLAGS) $(SIM_LDFLAGS)
 
 ifdef USE_WX
+$(WX_OBJECTS) $(patsubst %o,%dpp,$(WX_OBJECTS)): CPPFLAGS += $(WX_CPPFLAGS)
+xsimtracedll.o: CXXFLAGS += -fPIC
+
 $(XSIM_NAME): $(XSIM_OBJECTS) $(ATERM_DEP) $(LIBREWR_NAME)
 	$(CXX) -o $@ $(XSIM_OBJECTS) $(LDFLAGS) $(XSIM_LDFLAGS)
-
-xsimtracedll.o: CXXFLAGS += -fPIC
 
 $(XSIMTRACE_NAME): $(XSIMTRACE_OBJECTS) $(ATERM_DEP) $(LIBREWR_NAME)
 	$(CXX) -o $@ $(XSIMTRACE_OBJECTS) $(LDFLAGS) $(XSIMTRACE_LDFLAGS)
