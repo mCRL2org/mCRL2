@@ -33,8 +33,6 @@ using namespace std;
 using namespace mcrl2;
 using namespace atermpp;
 
-//Maximum number of proces parameters: 4294967295 [@AMD 1700+, Linux-FC4, 256 MB RAM]
-
 using namespace std;
 using namespace mcrl2;
 using namespace atermpp;
@@ -43,14 +41,16 @@ namespace po = boost::program_options;
 po::variables_map vm;
 
 //Constanten
-string version = "Version 0.3";
+string version = "Version 0.4";
 bool verbose    = false; 
 bool alltrue    = false;
+bool reachable  = false;
+bool nosingleton = false;
 
-const int geen        = 0;
-const int links       = 1;
-const int rechts      = 2;
-const int beide       = 3;
+const int opt_none        = 0;
+const int opt_left       = 1;
+const int opt_right      = 2;
+const int opt_both       = 3;
 
 
 ATermAppl rew2(ATermAppl t, ATermAppl rewrite_terms)
@@ -104,9 +104,31 @@ string findpath(string path)
   return token;
 }
 
+string addconstelm(string filename)
+{
+  string token = "";
+  string::size_type begIdx;
+  string::size_type endIdx;
+
+  // Find first position after last appearance
+  //  of forward- or backslash
+
+  endIdx = filename.find_last_of( "." );
+  if ( endIdx == string::npos )
+    endIdx = 0;
+  else
+    ++endIdx;
+
+  begIdx = 0;
+  token = filename.substr( begIdx, endIdx ).append("lpeconstelm.lpe");
+  
+  return token;
+
+}
+
 void print_set(set< int > S)
 {
-  cout << "\033[0;1;37m Set : \033[m";
+  cout << "\033[0;1m Set : \033[m";
   
   set< int >::iterator i = S.begin();
   int j = 0;
@@ -123,23 +145,23 @@ void print_set(set< int > S)
 
 bool compare(data_expression x, data_expression y, data_equation_list equations, int option)
 {
-  if (option == geen ){
+  if (option == opt_none ){
     return x==y;
   };
  
- if (option == links){
+ if (option == opt_left){
     ATermAppl x1 = rew2(x.to_ATermAppl(), gsMakeDataEqnSpec(equations.to_ATermList()));
     ATermAppl y1 = y.to_ATermAppl() ;
     return atermpp::aterm(x1) == atermpp::aterm(y1);     
   };
  
- if (option == rechts){
+ if (option == opt_right){
     ATermAppl x1 = x.to_ATermAppl() ;
     ATermAppl y1 = rew2(y.to_ATermAppl(), gsMakeDataEqnSpec(equations.to_ATermList()));
     return atermpp::aterm(x1) == atermpp::aterm(y1);     
   };
  
- if (option == beide){
+ if (option == opt_both){
     ATermAppl x1 = rew2(x.to_ATermAppl(), gsMakeDataEqnSpec(equations.to_ATermList()));
     ATermAppl y1 = rew2(y.to_ATermAppl(), gsMakeDataEqnSpec(equations.to_ATermList()));
     return atermpp::aterm(x1) == atermpp::aterm(y1);     
@@ -313,12 +335,12 @@ bool eval_cond(data_expression datexpr, data_assignment_list statevector, data_e
   // !!!!!!! data_expression(gsMakeOpIdFalse()) !!!!!! DIRECTE AANROEP UIT GSFUNC
   //
 
-  b = !compare(data_expression(gsMakeOpIdFalse()), datexpr, equations, rechts);
+  b = !compare(data_expression(gsMakeOpIdFalse()), datexpr, equations, opt_right);
 
   return b;
 }
 
-void  save_const(specification spec,string  outfile, set< int > S){
+void  rebuild_lpe(specification spec,string  outfile, set< int > S, bool single){
 
   LPE lpe = spec.lpe();
 
@@ -328,7 +350,9 @@ void  save_const(specification spec,string  outfile, set< int > S){
   
   i = S.begin();
   while (i != S.end()) {
-    result = append(result, data_assignment(  element_at(lhsl(sub), *i) , element_at( rhsl(sub), *i  )));
+    if (!single){ //&& element_at(lhsl(sub), *i).type().size() == 1){
+      result = append(result, data_assignment(  element_at(lhsl(sub), *i) , element_at( rhsl(sub), *i  )));
+     };
     i++;
   };
   
@@ -338,11 +362,11 @@ void  save_const(specification spec,string  outfile, set< int > S){
     j++;
   }
 
- // spec2 = specification()
+  //spec2 = specification(spec.sorts(), spec.constructors(), spec.mappings(), spec.equations(), spec.initial_state(), spec.init_variables(), spec.init_assignments, spec.lpe().to_ATermAppl() );
 
   
   if  (spec.save(outfile)){
-    cout << " Written output file: " << outfile << endl;
+    cout << " Written output file: " << outfile << endl << endl;
   } else
   {
     cout << " \033[0;31mUnsuccefully\033[0m written to output file: " << outfile << endl;
@@ -367,7 +391,7 @@ void print_const(specification spec , set< int > S)
   };
 
   { 
-    cout << "\033[0;1;37m Constant Process parameters : \033[m" << endl;
+    cout << "\033[0;1m Constant Process parameters : \033[m" << endl;
     cout << "     "<< result.pp() << endl <<endl;
   };
   
@@ -394,6 +418,7 @@ void constelm(string filename, string outfile, int option)
   int                           n;    //number of process parameters
   int                           newdatvar = 0 ;
   data_expression_list          listofnonconst;
+  vector< summand_list::iterator > sum_true;
   
   // Load LPE input file
   specification spec;
@@ -403,9 +428,11 @@ void constelm(string filename, string outfile, int option)
     return;
   }
  
-  cout << "Read from input file : " << filename << endl;
+  cout << endl <<" Read from input file : " << filename << endl;
   LPE lpe = spec.lpe();
 
+
+  //spec.m_sorts = spec.m_sorts;
   //
   // Determine the inital processes
   // 
@@ -432,8 +459,9 @@ void constelm(string filename, string outfile, int option)
   ////
   // Als V <  S dan zijn er variabele process parameters gevonden
   ////
-
-  cout << endl << " Output of: "<< filename <<endl << endl;
+  if (verbose){
+    cout << endl << " Output of: "<< filename <<endl << endl;
+  };
 
   int count = 1; 
   while(S.size()!=V.size()) {
@@ -441,18 +469,21 @@ void constelm(string filename, string outfile, int option)
 
     S = V;
     V.clear();
-    set< int > S_dummy;        
+    set< int > S_dummy;  
+    sum_true.clear();      
     
     if (verbose)
     {
       print_set(S);
-      cout << "\033[0;1;37m Iteration           : \033[m" << count++ << endl; 
-      cout << "\033[0;1;37m Current statevector : \033[m" << sv.pp() << endl;
-      cout << "\033[0;1;37m Resulting Nextstates: \033[m" << endl;
+      cout << "\033[0;1m Iteration           : \033[m" << count++ << endl; 
+      cout << "\033[0;1m Current statevector : \033[m" << sv.pp() << endl;
+      cout << "\033[0;1m Resulting Nextstates: \033[m" << endl;
     };
     
     for(summand_list::iterator s_current = lpe.summands().begin(); s_current != lpe.summands().end(); ++s_current){ 
       if (eval_cond(s_current->condition(), sv, equations , S)) {
+        
+        sum_true.push_back(s_current);
         
 
         data_assignment_list ass_nextstate = s_current->assignments();
@@ -463,24 +494,21 @@ void constelm(string filename, string outfile, int option)
         data_expression_list rhsnsv = rhsl(newstatevector);      
       
         set< int >::iterator j = S.begin();
-
-        
-        
-        
+       
         while (j != S.end()){
           data_expression rhs_tv_j = element_at(rhstv, *j);
           data_expression rhs_nsv_j = element_at(rhsnsv, *j);
-	        bool skip = false; 
+	  bool skip = false; 
 
-	        //Begin freevar treatment  
+	   //Begin freevar treatment  
           data_variable_list::iterator f = freevars.begin();
-	        while (f != freevars.end()){
+	  while (f != freevars.end()){
 
-          data_expression foe = f->to_expr(); 
-	        if ( compare(rhs_tv_j  , foe, equations, rechts ) || 
-	             compare(rhs_nsv_j , foe ,equations, rechts ) ){
+            data_expression foe = f->to_expr(); 
+	        if ( compare(rhs_tv_j  , foe, equations, opt_right ) || 
+	             compare(rhs_nsv_j , foe ,equations, opt_right ) ){
 	            skip = true;
-	            if (compare(rhs_nsv_j , foe , spec.equations(), rechts )){ 
+	            if (compare(rhs_nsv_j , foe , spec.equations(), opt_right )){ 
 	              newstatevector = replace(newstatevector, element_at(tvector, *j), *j);
               };    
               if (-1 != index_of(listofnonconst, rhs_tv_j, 0) ) {
@@ -516,10 +544,17 @@ void constelm(string filename, string outfile, int option)
       cout << endl;
     };
   }; 
+    
+
+  if (reachable){
+   // rebuild_summands(lpe,sum_true); 
+  }
+
   if (verbose){
     print_const(spec , S);
+    //cout << sum_true.size() << endl;
   }
-  save_const(spec, outfile, S);
+  rebuild_lpe(spec, outfile, S, nosingleton);
 
   // Finalise
   gsRewriteFinalise();
@@ -544,6 +579,7 @@ int main(int ac, char* av[])
        ("monitor,m",   "display progress information")
        ("nosingleton", "do not remove sorts consisting of a single element")
        ("nocondition", "do not use conditions during elimination (faster)")
+       ("reachable,r", "elimantes summands which cannot be reached")
      ;
 	
 	   po::options_description hidden("Hidden options");
@@ -585,7 +621,7 @@ int main(int ac, char* av[])
 
      if (vm.count("nosingleton")) {
        //cerr << "Active: no removal of process parameters which have sorts of cardinatilty one" << endl;
-       opt = 2;
+       nosingleton = true;
 	   }
 
      if (vm.count("nocondition")) {
@@ -593,11 +629,13 @@ int main(int ac, char* av[])
        alltrue = true;
 	   }
 
+     if (vm.count("reachable")) {
+       reachable = true;
+	}
+
      if (vm.count("INFILE")){
        filename = vm["INFILE"].as< vector<string> >();
-       //<< vm["input-file"].as< vector<string> >() << "\n";
 	   }
-     //set< int > S = constelm(filename, opt);
 
      if (filename.size() > 2){
         cerr << "Specify only INPUT and/or OUTPUT file (Too many arguments)."<< endl;
@@ -609,10 +647,9 @@ int main(int ac, char* av[])
      };
 	
      if(filename.size() == 1){
-       string temp = "constelm_";
-       temp = findpath(filename[0]).append(temp.append(findfile(filename[0])));
-       constelm(filename[0], temp , opt);
-     };
+      constelm(filename[0], addconstelm(filename[0]) , opt);
+        
+    };
 
     }
     catch(exception& e){
