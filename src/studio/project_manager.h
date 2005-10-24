@@ -22,7 +22,8 @@ extern "C" {
 class Specification;
 
 /* Pairs to assign storage locations to output objects */
-typedef std::pair < Specification*, std::string > ObjectPair;
+typedef std::pair < Specification*, std::string > InputPair;
+typedef std::pair < std::string,    std::string > OutputPair;
 
 /*
  * A specification is either provided, in this case it is not generated from
@@ -65,8 +66,8 @@ class Specification {
     std::string  tool_identifier;             /* Identifies the tool that is required to run the command */
     std::string  description;                 /* Optional description */
 
-    std::list < ObjectPair >  input_objects;  /* Specifications that this specification depends on */
-    std::list < std::string > output_objects; /* Specifications that this specification depends on */
+    std::list < InputPair >  input_objects;   /* Specifications that this specification depends on */
+    std::list < OutputPair > output_objects;  /* Specifications that this specification depends on */
 
     Specification();
 

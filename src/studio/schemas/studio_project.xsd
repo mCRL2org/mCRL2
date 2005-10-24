@@ -1,6 +1,6 @@
 <?xml version="1.0" encoding="ISO-8859-1" ?>
 <xs:schema xmlns:xs="http://www.w3.org/2001/XMLSchema">
- <!-- Data type for tool/specification identification -->
+ <!-- Data type for input specification -->
  <xs:complexType name="input-object">
   <xs:simpleContent>
    <xs:extension base="xs:token">
@@ -8,7 +8,15 @@
    </xs:extension>
   </xs:simpleContent>
  </xs:complexType>
- <!-- Data type for tool/specification identification -->
+ <!-- Data type for output specification -->
+ <xs:complexType name="output-object">
+  <xs:simpleContent>
+   <xs:extension base="xs:token">
+    <xs:attribute name="format" type="xs:token" use="required"/>
+   </xs:extension>
+  </xs:simpleContent>
+ </xs:complexType>
+ <!-- Data type for specification identification -->
  <xs:simpleType name="tool-identifier">
   <xs:restriction base="xs:token">
    <xs:pattern value="[a-z][a-z0-9_]+"/>
@@ -28,7 +36,7 @@
    <xs:element name="description" type="xs:token" minOccurs="0"/>
    <xs:element name="tool-configuration" type="tool-configuration" minOccurs="0"/>
    <xs:element name="input-object" type="input-object" minOccurs="0" maxOccurs="unbounded"/>
-   <xs:element name="output-object" type="xs:token" minOccurs="0" maxOccurs="unbounded"/>
+   <xs:element name="output-object" type="output-object" minOccurs="0" maxOccurs="unbounded"/>
   </xs:sequence>
   <xs:attribute name="identifier" type="xs:nonNegativeInteger" use="required"/>
   <xs:attribute name="name" type="xs:token" use="required"/>

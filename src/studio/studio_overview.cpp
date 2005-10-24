@@ -4,6 +4,8 @@
 
 #include <wx/splitter.h>
 #include <wx/treectrl.h>
+#include <wx/process.h>
+#include <wx/textdlg.h>
 
 #include "resources.h"
 #include "new_specification.h"
@@ -34,32 +36,34 @@ IMPLEMENT_CLASS(StudioOverview, wxFrame)
 #define ID_PROJECT_STORE            104
 #define ID_PROJECT_BUILD            105
 #define ID_SPECIFICATION_NEW        106
-#define ID_SPECIFICATION_REMOVE     107
-#define ID_SPECIFICATION_RENAME     108
-#define ID_SPECIFICATION_LOAD       109
-#define ID_SPECIFICATION_MARK_DIRTY 110
-#define ID_SPECIFICATION_PROPERTIES 111
-#define ID_ANALYSIS_NEW             112
-#define ID_ANALYSIS_REMOVE          113
-#define ID_ANALYSIS_PERFORM         114
-#define ID_MODEL                    115
-#define ID_ANALYSIS                 116
+#define ID_SPECIFICATION_EDIT       107
+#define ID_SPECIFICATION_REMOVE     108
+#define ID_SPECIFICATION_RENAME     109
+#define ID_SPECIFICATION_LOAD       110
+#define ID_SPECIFICATION_MARK_DIRTY 111
+#define ID_SPECIFICATION_PROPERTIES 112
+#define ID_ANALYSIS_NEW             113
+#define ID_ANALYSIS_REMOVE          114
+#define ID_ANALYSIS_PERFORM         115
+#define ID_MODEL                    116
+#define ID_ANALYSIS                 117
 
 #define ID_FRAME_MODEL              151
 #define ID_FRAME_ANALYSIS           152
 
 BEGIN_EVENT_TABLE(StudioOverview, wxFrame)
-  EVT_MENU(wxID_NEW,                        StudioOverview::ProjectNew)
-  EVT_MENU(wxID_OPEN,                       StudioOverview::ProjectLoad)
-  EVT_MENU(wxID_CLOSE,                      StudioOverview::ProjectClose)
-  EVT_MENU(ID_PROJECT_LOAD,                 StudioOverview::ProjectLoad)
-  EVT_MENU(ID_PROJECT_STORE,                StudioOverview::ProjectStore)
+  EVT_MENU(wxID_NEW,                        StudioOverview::NewProject)
+  EVT_MENU(wxID_OPEN,                       StudioOverview::LoadProject)
+  EVT_MENU(wxID_CLOSE,                      StudioOverview::CloseProject)
+  EVT_MENU(ID_PROJECT_LOAD,                 StudioOverview::LoadProject)
+  EVT_MENU(ID_PROJECT_STORE,                StudioOverview::StoreProject)
   EVT_MENU(ID_SPECIFICATION_NEW,            StudioOverview::NewSpecification)
+  EVT_MENU(ID_SPECIFICATION_EDIT,           StudioOverview::EditSpecification)
   EVT_MENU(ID_SPECIFICATION_REMOVE,         StudioOverview::RemoveSpecification)
   EVT_MENU(ID_SPECIFICATION_RENAME,         StudioOverview::ActivateRename)
   EVT_MENU(ID_SPECIFICATION_LOAD,           StudioOverview::AddSpecification)
   EVT_MENU(ID_SPECIFICATION_MARK_DIRTY,     StudioOverview::MarkDirty)
-  EVT_MENU(ID_SPECIFICATION_PROPERTIES,     StudioOverview::ShowSpecificationProperties)
+  EVT_MENU(ID_SPECIFICATION_PROPERTIES,     StudioOverview::EditSpecificationProperties)
   EVT_MENU(ID_ANALYSIS_NEW,                 StudioOverview::AddAnalysis)
   EVT_MENU(ID_ANALYSIS_REMOVE,              StudioOverview::RemoveAnalysis)
   EVT_MENU(ID_ANALYSIS_PERFORM,             StudioOverview::PerformAnalysis)
@@ -69,7 +73,7 @@ BEGIN_EVENT_TABLE(StudioOverview, wxFrame)
 END_EVENT_TABLE()
 
 StudioOverview::StudioOverview(wxWindow* parent, wxWindowID id) :
-  wxFrame(parent, id, wxT("Studio - Automated Parking Garage"), wxDefaultPosition, wxDefaultSize, STUDIO_OVERVIEW_STYLE), project_manager() {
+  wxFrame(parent, id, wxT("Studio - No project"), wxDefaultPosition, wxDefaultSize, STUDIO_OVERVIEW_STYLE), project_manager() {
 
   /* Resize and centre frame on display */
   Centre();
@@ -202,7 +206,7 @@ inline void StudioOverview::GenerateToolBar() {
 }
 
 /* Handlers for operations of project level */
-void StudioOverview::ProjectNew(wxCommandEvent &event) {
+void StudioOverview::NewProject(wxCommandEvent &event) {
   wxDirDialog* directory_dialog  = new wxDirDialog(this, wxT("Select a project directory"));
 
   if (directory_dialog->ShowModal() == wxID_OK) {
@@ -226,7 +230,7 @@ void StudioOverview::ProjectNew(wxCommandEvent &event) {
   directory_dialog->~wxDirDialog();
 }
 
-void StudioOverview::ProjectClose(wxCommandEvent &event) {
+void StudioOverview::CloseProject(wxCommandEvent &event) {
   /* Reset title bar */
   SetTitle(wxT("Studio - No project"));
 
@@ -235,7 +239,7 @@ void StudioOverview::ProjectClose(wxCommandEvent &event) {
   specifications->DeleteChildren(specifications->GetRootItem());
 }
 
-void StudioOverview::ProjectLoad(wxCommandEvent &event) {
+void StudioOverview::LoadProject(wxCommandEvent &event) {
   wxDirDialog* directory_dialog  = new wxDirDialog(this, wxT("Select a project directory"));
 
   if (directory_dialog->ShowModal() == wxID_OK) {
@@ -245,7 +249,7 @@ void StudioOverview::ProjectLoad(wxCommandEvent &event) {
     wxString project_directory = directory_dialog->GetPath();
  
     /* Clean up an open project and clear specification view */
-    ProjectClose(event);
+    CloseProject(event);
 
     /* Communicate project directory with project manager */
     project_manager.SetProjectDirectory(std::string(project_directory.fn_str()));
@@ -292,11 +296,8 @@ void StudioOverview::ProjectLoad(wxCommandEvent &event) {
   directory_dialog->~wxDirDialog();
 }
 
-void StudioOverview::ProjectStore(wxCommandEvent &event) {
+void StudioOverview::StoreProject(wxCommandEvent &event) {
   project_manager.Store();
-}
-
-void StudioOverview::ModelsRefresh(wxCommandEvent &event) {
 }
 
 /*
@@ -313,7 +314,7 @@ inline wxTreeItemId StudioOverview::CreateSpecification(Specification& specifica
   /* Add dependencies */
   if (root_item != selected) {
     Specification* dependency = ((SpecificationData*) specifications->GetItemData(selected))->specification;
-    ObjectPair     new_pair(dependency, dependency->output_objects.back());
+    InputPair      new_pair(dependency, dependency->output_objects.back().second);
 
     /* Only one output of the parent at this time */
     specification.input_objects.push_back(new_pair);
@@ -322,9 +323,10 @@ inline wxTreeItemId StudioOverview::CreateSpecification(Specification& specifica
   try {
     SpecificationData* specification_data;
     wxString           name(specification.name.c_str(), wxConvLocal);
+    OutputPair         new_pair("Banana", specification.name);
 
     /* Determine outputs, using tool characteristics TODO */
-    specification.output_objects.push_back(specification.name.append(""));
+    specification.output_objects.push_back(new_pair);
 
     specification_data = new SpecificationData(project_manager.Add(specification));
 
@@ -336,21 +338,41 @@ inline wxTreeItemId StudioOverview::CreateSpecification(Specification& specifica
     }
   }
   catch (int) {
+    /* TODO */
   }
 
   return (new_item);
 }
 
 void StudioOverview::NewSpecification(wxCommandEvent &event) {
-  Specification new_specification;
-  wxTreeItemId  new_item;
+  Specification     new_specification;
+  wxTreeItemId      new_item;
+  wxTextEntryDialog dialog(this, wxT("File name for specification"), wxT("Please enter a file name"));
 
-  new_specification.name = "New specification"; 
+  if (dialog.ShowModal() == wxID_OK) {
+    std::string name(dialog.GetValue().fn_str());
+    OutputPair  new_pair("Mango", name);
 
-  new_item = CreateSpecification(new_specification);
+    new_specification.output_objects.push_back(new_pair);
+    new_specification.name = name; 
 
-  specifications->SelectItem(new_item);
-  specifications->EditLabel(new_item);
+    new_item = CreateSpecification(new_specification);
+
+    specifications->SelectItem(new_item);
+    specifications->EditLabel(new_item);
+  }
+}
+
+void StudioOverview::EditSpecification(wxCommandEvent &event) {
+  wxProcess* editor = new wxProcess();
+
+  /* TODO only takes the last output object */
+  wxString filename = wxString(((SpecificationData*) specifications->GetItemData(specifications->GetSelection()))->specification->output_objects.back().second.c_str(), wxConvLocal);
+
+  filename.Prepend(wxT("/")).Prepend(wxString(project_manager.GetProjectDirectory().c_str(), wxConvLocal));
+
+  /* Test with gVim as editor */
+  editor->Open(filename.Prepend(wxT("gvim ")));
 }
 
 /* Handlers for operations on specifications */
@@ -381,13 +403,16 @@ void StudioOverview::MarkDirty(wxCommandEvent &event) {
   ((SpecificationData*) specifications->GetItemData(specifications->GetSelection()))->specification->SetNotUpToDate();
 }
 
-void StudioOverview::ShowSpecificationProperties(wxCommandEvent &event) {
-  wxString                       name   = wxString(((SpecificationData*) specifications->GetItemData(specifications->GetSelection()))->specification->name.c_str(), wxConvLocal);
-  wxString                       title  = wxString(wxT("Properties of `")).Append(name).Append(wxT("'"));
-  SpecificationPropertiesDialog* dialog = new SpecificationPropertiesDialog(this, wxID_ANY, title);
+void StudioOverview::EditSpecificationProperties(wxCommandEvent &event) {
+  Specification*                 specification = ((SpecificationData*) specifications->GetItemData(specifications->GetSelection()))->specification;
+  wxString                       name          = wxString(specification->name.c_str(), wxConvLocal);
+  wxString                       title         = wxString(wxT("Properties of `")).Append(name).Append(wxT("'"));
+  SpecificationPropertiesDialog* dialog        = new SpecificationPropertiesDialog(this, wxID_ANY, title, specification);
 
   /* TODO set proper icon when a format can be resolved to an icon */
   dialog->SetIcon(main_icon_list->GetIcon(0));
+  dialog->Show(true);
+  dialog->UpdateSizes();
 
   if (dialog->ShowModal() == wxID_OK) {
   }
@@ -422,7 +447,11 @@ void StudioOverview::SpawnContextMenu(wxTreeEvent &event) {
   /* Build popup menu */
   wxMenu* context_menu = new wxMenu();
 
-  context_menu->Append(ID_SETTINGS, wxT("&Edit"));
+  if (0 < specification->output_objects.size()) {
+    /* Analyses, for instance, do not have output objects */
+    context_menu->Append(ID_SPECIFICATION_EDIT, wxT("&Edit"));
+  }
+
   context_menu->Append(ID_SPECIFICATION_RENAME, wxT("&Rename"));
   context_menu->Append(ID_SPECIFICATION_REMOVE, wxT("&Delete"));
 

@@ -43,9 +43,9 @@ NewSpecificationDialog::NewSpecificationDialog(wxWindow* parent, wxWindowID id) 
   wxBoxSizer* asizer = new wxBoxSizer(wxHORIZONTAL);
 
   /* Add control buttons */
-  asizer->Add(new wxButton(this, wxID_OK), 0, wxALIGN_RIGHT, 5);
-  asizer->Add(new wxButton(this, wxID_CANCEL), 0, wxALIGN_RIGHT, 5);
-  sizer->Add(asizer, 0, wxALIGN_RIGHT, 5);
+  asizer->Add(new wxButton(this, wxID_OK), 0, wxALL|wxALIGN_RIGHT, 3);
+  asizer->Add(new wxButton(this, wxID_CANCEL), 0, wxALL|wxALIGN_RIGHT, 3);
+  sizer->Add(asizer, 0, wxALL|wxALIGN_RIGHT, 3);
 
   SetSizer(sizer);
 

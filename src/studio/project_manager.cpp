@@ -7,8 +7,6 @@
 
 #include "project_manager.h"
 
-#define MESSAGE_PREFIX "[tool manager]"
-
 /* Macro to convert constant C-type strings to const xmlChar* */
 #define TO_XML_STRING(c_string) reinterpret_cast < const unsigned char* > (c_string)
 
@@ -177,8 +175,8 @@ bool ProjectManager::Load() {
           std::list < Specification >::iterator i = specifications.begin();
 
     while (i != b) {
-      const std::list < ObjectPair >::iterator c = (*i).input_objects.end();
-            std::list < ObjectPair >::iterator j = (*i).input_objects.begin();
+      const std::list < InputPair >::iterator c = (*i).input_objects.end();
+            std::list < InputPair >::iterator j = (*i).input_objects.begin();
 
       while (j != c) {
         (*j).first = identifier_resolution[(unsigned int) (*j).first];
@@ -379,8 +377,8 @@ void Specification::Print(std::ostream& stream) {
 
   if (0 < input_objects.size()) {
     if (1 < input_objects.size()) {
-      const std::list < ObjectPair >::iterator b = input_objects.end();
-            std::list < ObjectPair >::iterator i = input_objects.begin();
+      const std::list < InputPair >::iterator b = input_objects.end();
+            std::list < InputPair >::iterator i = input_objects.begin();
 
       stream << "  Dependencies      :\n\n";
 
@@ -404,8 +402,8 @@ void Specification::Print(std::ostream& stream) {
  */
 bool Specification::CheckStatus() {
   if (uptodate) {
-    const std::list < ObjectPair >::iterator b = input_objects.end();
-          std::list < ObjectPair >::iterator i = input_objects.begin();
+    const std::list < InputPair >::iterator b = input_objects.end();
+          std::list < InputPair >::iterator i = input_objects.begin();
 
     /* Recursively check status */
     while (i != b && (*i).first->CheckStatus()) {
@@ -425,8 +423,8 @@ bool Specification::CheckStatus() {
  * Throws a pointer to the first specification that fails to be generated.
  */
 bool Specification::Generate() throw (void*) {
-  const std::list < ObjectPair >::iterator b = input_objects.end();
-        std::list < ObjectPair >::iterator i = input_objects.begin();
+  const std::list < InputPair >::iterator b = input_objects.end();
+        std::list < InputPair >::iterator i = input_objects.begin();
 
   uptodate = false;
 
@@ -447,17 +445,17 @@ bool Specification::Generate() throw (void*) {
 }
 
 bool Specification::Delete() {
-  const std::list < std::string >::iterator b = output_objects.end();
-        std::list < std::string >::iterator i = output_objects.begin();
+  const std::list < OutputPair >::iterator b = output_objects.end();
+        std::list < OutputPair >::iterator i = output_objects.begin();
   bool  result = false;
 
   while (i != b) {
-    FILE* handle = fopen((*i).c_str(), "r");
+    FILE* handle = fopen((*i).second.c_str(), "r");
  
     if (handle != NULL) {
       /* File exists */
       fclose(handle);
-      remove((*i).c_str());
+      remove((*i).second.c_str());
  
       result = true;
     }
@@ -542,9 +540,9 @@ bool Specification::Read(xmlTextReaderPtr reader) throw (int) {
 
     if (xmlTextReaderNodeType(reader) != XML_READER_TYPE_END_ELEMENT && xmlStrEqual(xmlTextReaderName(reader),TO_XML_STRING("input-object"))) {
       /* Dependent specifications follow until node type is XML_READER_TYPE_END_ELEMENT */
-      ObjectPair new_pair;
-
       do {
+        InputPair new_pair;
+
         /* Resolve object identifier to pointer, works only if there are no dependency cycles */
         temporary       = xmlTextReaderGetAttribute(reader, TO_XML_STRING("identifier"));
         new_pair.first  = (Specification*) atoi((char*) temporary);
@@ -570,11 +568,21 @@ bool Specification::Read(xmlTextReaderPtr reader) throw (int) {
     if (xmlTextReaderNodeType(reader) != XML_READER_TYPE_END_ELEMENT && xmlStrEqual(xmlTextReaderName(reader),TO_XML_STRING("output-object"))) {
       /* Dependent specifications follow until node type is XML_READER_TYPE_END_ELEMENT */
       do {
+        OutputPair new_pair;
+
+        /* Set file format */
+        temporary       = xmlTextReaderGetAttribute(reader, TO_XML_STRING("format"));
+        new_pair.first  = std::string((char*) temporary);
+        free(temporary);
+
         GetNextXMLElement(reader);
 
+        /* Set file name */
         temporary = xmlTextReaderValue(reader);
-        output_objects.push_back(std::string((char*) temporary));
+        new_pair.second = std::string((char*) temporary);
         free(temporary);
+
+        output_objects.push_back(new_pair);
 
         /* To end tag*/
         GetNextXMLElement(reader);
@@ -606,8 +614,8 @@ bool Specification::Write(std::ostream& stream) {
   stream << ">\n";
 
   if (0 < input_objects.size()) {
-    std::list < ObjectPair >::iterator b = input_objects.end();
-    std::list < ObjectPair >::iterator i = input_objects.begin();
+    std::list < InputPair >::iterator b = input_objects.end();
+    std::list < InputPair >::iterator i = input_objects.begin();
 
     stream << "  <tool-configuration tool-identifier=\"" << tool_identifier << "\">"
            << tool_configuration << "</tool-configuration>\n";
@@ -620,11 +628,11 @@ bool Specification::Write(std::ostream& stream) {
   }
 
   if (0 < output_objects.size()) {
-    std::list < std::string >::iterator b = output_objects.end();
-    std::list < std::string >::iterator i = output_objects.begin();
+    std::list < OutputPair >::iterator b = output_objects.end();
+    std::list < OutputPair >::iterator i = output_objects.begin();
  
     while (i != b) {
-      stream << "  <output-object>" << (*i) << "</output-object>\n";
+      stream << "  <output-object format=\"" << (*i).first << "\">" << (*i).second << "</output-object>\n";
  
       ++i;
     }

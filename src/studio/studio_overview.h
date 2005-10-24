@@ -1,5 +1,5 @@
-#ifndef STUDIO_OVERVIEW_H_
-#define STUDIO_OVERVIEW_H_
+#ifndef STUDIO_OVERVIEW_H
+#define STUDIO_OVERVIEW_H
 
 #include <wx/wx.h>
 #include <wx/treectrl.h>
@@ -19,7 +19,6 @@ class StudioOverview : public wxFrame {
 
   private:
     wxTreeCtrl*  specifications;
-    wxImageList* main_icon_list;
     wxPanel*     progress;
 
     /* The project manager */
@@ -33,16 +32,16 @@ class StudioOverview : public wxFrame {
     inline wxTreeItemId CreateSpecification(Specification& specification);
 
     /* Handlers for operations of project level */
-    void ProjectNew(wxCommandEvent &event);
-    void ProjectClose(wxCommandEvent &event);
-    void ProjectLoad(wxCommandEvent &event);
-    void ProjectStore(wxCommandEvent &event);
-
-    void ModelsRefresh(wxCommandEvent &event);
+    void NewProject(wxCommandEvent &event);
+    void CloseProject(wxCommandEvent &event);
+    void LoadProject(wxCommandEvent &event);
+    void StoreProject(wxCommandEvent &event);
 
     /* Handlers for operations on models */
     void NewSpecification(wxCommandEvent &event);
+    void EditSpecification(wxCommandEvent &event);
     void AddSpecification(wxCommandEvent &event);
+    void EditSpecificationProperties(wxCommandEvent &event);
     void RemoveSpecification(wxCommandEvent &event);
     void RenameSpecification(wxTreeEvent &event);
 
@@ -57,7 +56,6 @@ class StudioOverview : public wxFrame {
     /* Activate rename label from context menu */
     void ActivateRename(wxCommandEvent &event);
     void MarkDirty(wxCommandEvent &event);
-    void ShowSpecificationProperties(wxCommandEvent &event);
 
     /* Generic GUI only operations */
     void Quit(wxCommandEvent &event);

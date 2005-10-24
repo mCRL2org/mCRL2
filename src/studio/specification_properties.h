@@ -3,6 +3,7 @@
 
 #include <wx/wx.h>
 #include <wx/dialog.h>
+#include <wx/listctrl.h>
 
 class SpecificationPropertiesDialog : public wxDialog {
   DECLARE_CLASS(SpecificationPropertiesDialog)
@@ -10,9 +11,13 @@ class SpecificationPropertiesDialog : public wxDialog {
 
   public:
     SpecificationPropertiesDialog();
-    SpecificationPropertiesDialog(wxWindow*, wxWindowID, wxString);
+    SpecificationPropertiesDialog(wxWindow*, wxWindowID, wxString, Specification*&);
+
+    void SpecificationPropertiesDialog::UpdateSizes();
 
   private:
+    Specification* specification;
+    wxListCtrl*    inputs;
 };
 
 #endif

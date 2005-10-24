@@ -20,7 +20,7 @@ LDFLAGS                        = $(LIBXML2_LDFLAGS)
 
 GUI_CPPFLAGS                   = -DDISABLE_TOOLBAR
 
-LIBXML2_OBJECTS                = studio.o studio_overview.o project_manager.o tool_manager.o
+LIBXML2_OBJECTS                = studio.o studio_overview.o project_manager.o tool_manager.o specification_properties.o
 
 WX_OBJECTS                     = studio.o studio_overview.o new_specification.o specification_properties.o resources.o
 WX_LIBRARIES                   = $(WX_LIBS)

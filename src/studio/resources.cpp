@@ -1,6 +1,8 @@
 #include <wx/wx.h>
 #include <wx/imaglist.h>
 
+wxImageList* main_icon_list;
+
 #if defined(__WXGTK__) || defined(__WXMAC__)
   /* Images for GTK and MACOS */
   #include "pixmaps/stock_new.xpm"
