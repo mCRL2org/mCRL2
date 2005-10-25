@@ -5,17 +5,15 @@
 #ifndef MCRL2_ACTION_H
 #define MCRL2_ACTION_H
 
-#include "atermpp/aterm.h"
+#include "atermpp/atermpp.h"
 #include "mcrl2/substitute.h"
-#include "mcrl2/term_list.h"
 #include "mcrl2/data.h"
 #include "mcrl2/list_iterator.h"
 
 namespace mcrl2 {
 
 using atermpp::aterm_appl;
-using atermpp::aterm_list;
-using atermpp::aterm_list_iterator;
+using atermpp::term_list;
 
 ///////////////////////////////////////////////////////////////////////////////
 // action
@@ -35,13 +33,13 @@ class action: public aterm_wrapper
     action(aterm_appl t)
      : aterm_wrapper(t)
     {
-      aterm_list_iterator i = to_appl().argument_list().begin();
+      aterm_list::iterator i = aterm_appl(*this).argument_list().begin();
       m_name      = *i++;
       m_arguments = data_expression_list(*i);
     }
 
     action(const std::string& name, const data_expression_list& arguments)
-     : aterm_wrapper(gsMakeAction(gsString2ATermAppl(name.c_str()), arguments.to_ATermList())),
+     : aterm_wrapper(gsMakeAction(gsString2ATermAppl(name.c_str()), arguments)),
        m_name(name),
        m_arguments(arguments)
     {}
@@ -66,7 +64,7 @@ class action: public aterm_wrapper
     template <typename Substitution>
     action substitute(Substitution f)
     {
-      return action(f(to_appl()));
+      return action(f(aterm_appl(*this)));
     }     
 
     /// Applies a sequence of substitutions to this action and returns the result.
@@ -74,7 +72,7 @@ class action: public aterm_wrapper
     template <typename SubstIter>
     action substitute(SubstIter first, SubstIter last) const
     {
-      return action(substitute(to_appl(), first, last));
+      return action(substitute(*this, first, last));
     }
 };
 

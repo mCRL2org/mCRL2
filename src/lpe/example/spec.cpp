@@ -6,6 +6,7 @@
 
 #include "mcrl2/specification.h"
 #include "mcrl2/predefined_symbols.h"
+#include "mcrl2/rewrite.h"
 #include "mcrl2/sort.h"
 #include "gsfunc.h"
 
@@ -18,14 +19,18 @@ using boost::format;
 ///
 bool compare(data_expression x, data_expression y, data_equation_list equations)
 {
-  ATermAppl x1 = rewrite(x.to_ATermAppl(), gsMakeDataEqnSpec(equations.to_ATermList()));
-  ATermAppl y1 = rewrite(y.to_ATermAppl(), gsMakeDataEqnSpec(equations.to_ATermList()));
+  ATermAppl x1 = rewrite(x, gsMakeDataEqnSpec(equations));
+  ATermAppl y1 = rewrite(y, gsMakeDataEqnSpec(equations));
   
   return atermpp::aterm(x1) == atermpp::aterm(y1);
 }
 
 int main()
 {
+  ATerm bottom_of_stack;
+  ATinit(0, 0, &bottom_of_stack);
+  gsEnableConstructorFunctions(); 
+  
   specification spec;
   if (!spec.load("data/abp_b.lpe"))
   {
@@ -52,9 +57,17 @@ int main()
   }
   cout << endl;
 
-  LPE lpe = spec.lpe();
+  cout << "--- act ------------" << endl;
+  for (action_list::iterator i = spec.actions().begin(); i != spec.actions().end(); ++i)
+  {
+    cout << str(format("%5s        %s") % i->pp() % i->to_string()) << endl;
+  }
+  cout << endl;
 
-  cout << "free variables: " << lpe.free_variables().pp() << " " << lpe.free_variables().to_string() << endl;
+  LPE lpe = spec.lpe();
+  cout << "lpe = " << lpe.to_string() << endl;
+
+  cout << "free variables: " << pp(lpe.free_variables()) << " " << lpe.free_variables().to_string() << endl;
   cout << endl;
 
   cout << "--- process parameters: ---" << endl;
@@ -74,10 +87,10 @@ int main()
 
   // test substitution
   data_expression_list d0 = spec.initial_state();
-  cout << "d0 = " << d0.pp() << " " << d0.to_string() << endl;
+  cout << "d0 = " << pp(d0) << " " << d0.to_string() << endl;
 
-  data_expression_list d1 = d0.substitute(a);
-  cout << "d1 = " << d1.pp() << " " << d1.to_string() << endl;
+  data_expression_list d1 = substitute(d0, a);
+  cout << "d1 = " << pp(d1) << " " << d1.to_string() << endl;
 
   // test comparison (using rewrite)
   cout << endl;
@@ -102,6 +115,5 @@ int main()
   ofstream o2("lpe2.txt");
   o2 << lpe.substitute(a).to_string(); 
 
-  cin.get();
   return 0;
 }

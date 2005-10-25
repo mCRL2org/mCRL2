@@ -15,14 +15,15 @@
 #include "mcrl2/aterm_wrapper.h"
 #include "mcrl2/action.h"
 #include "mcrl2/list_iterator.h"
-#include "mcrl2/term_list.h"
+#include "atermpp/aterm_list.h"
 #include "mcrl2/predefined_symbols.h"
+#include "mcrl2/pretty_print.h"
+#include "mcrl2/substitute.h"
 
 namespace mcrl2 {
 
 using namespace std::rel_ops; // for definition of operator!= in terms of operator==
 using atermpp::aterm_appl;
-using atermpp::aterm_list_iterator;
 using atermpp::read_from_named_file;
 
 ///////////////////////////////////////////////////////////////////////////////
@@ -46,7 +47,7 @@ class LPE_summand: public aterm_wrapper
     LPE_summand(aterm_appl t)
      : aterm_wrapper(t)
     {
-      aterm_list_iterator i = m_term.argument_list().begin();
+      aterm_list::iterator i = m_term.argument_list().begin();
 
       m_summation_variables = data_variable_list(*i++);
       m_condition           = data_expression(*i++);
@@ -55,7 +56,7 @@ class LPE_summand: public aterm_wrapper
       if (!m_delta)
       {
         assert(x.function().name() == "MultAct");
-        m_actions = action_list(x.argument(0).to_aterm_list());
+        m_actions = action_list(x.argument(0));
       }
       m_time                = data_expression(*i++);
       m_assignments         = data_assignment_list(*i);
@@ -70,11 +71,11 @@ class LPE_summand: public aterm_wrapper
                 data_expression      time,
                 data_assignment_list assignments
                )
-      : aterm_wrapper(gsMakeLPESummand(summation_variables.to_ATermList(),
-               condition.to_ATermAppl(),
-               (delta ? gsMakeDelta() : gsMakeMultAct(actions.to_ATermList())),
-               time.to_ATermAppl(),
-               assignments.to_ATermList())
+      : aterm_wrapper(gsMakeLPESummand(summation_variables,
+               condition,
+               (delta ? gsMakeDelta() : gsMakeMultAct(actions)),
+               time,
+               assignments)
         ),
         m_summation_variables(summation_variables),
         m_condition          (condition),
@@ -83,50 +84,6 @@ class LPE_summand: public aterm_wrapper
         m_time               (time),
         m_assignments        (assignments)
     {}
-
-/*
-    /// Constructs an LPE_summand with a multi-action.
-    ///
-    LPE_summand(data_variable_list   summation_variables,
-                data_expression      condition,
-                action_list          actions,
-                data_expression      time,
-                data_assignment_list assignments
-               )
-      : aterm_wrapper(gsMakeLPESummand(summation_variables.to_ATermList(),
-               condition.to_ATermAppl(),
-               gsMakeMultAct(actions.to_ATermList()),
-               time.to_ATermAppl(),
-               assignments.to_ATermList())
-        ),
-        m_summation_variables(summation_variables),
-        m_condition          (condition),
-        m_delta              (false),
-        m_actions            (actions),
-        m_time               (time),
-        m_assignments        (assignments)
-    {}
-
-    /// Constructs an LPE_summand with a 'delta' action.
-    ///
-    LPE_summand(data_variable_list   summation_variables,
-                data_expression      condition,
-                data_expression      time,
-                data_assignment_list assignments
-               )
-      : aterm_wrapper(gsMakeLPESummand(summation_variables.to_ATermList(),
-               condition.to_ATermAppl(),
-               gsMakeDelta(),
-               time.to_ATermAppl(),
-               assignments.to_ATermList())
-        ),
-        m_summation_variables(summation_variables),
-        m_condition          (condition),
-        m_delta              (true),
-        m_time               (time),
-        m_assignments        (assignments)
-    {}
-*/
 
     /// Returns the sequence of summation variables.
     ///
@@ -189,7 +146,7 @@ class LPE_summand: public aterm_wrapper
       data_expression condition = m_condition.substitute(f);
       if (!m_delta)
       {
-        actions = m_actions.substitute(f);
+        actions = substitute(m_actions, f);
       }
       data_expression time = m_time.substitute(f);
 
@@ -204,7 +161,9 @@ class LPE_summand: public aterm_wrapper
       action_list actions;
       data_expression condition = m_condition.substitute(first, last);
       if (!m_delta)
-        actions = m_actions.substitute(first, last);
+      {
+        actions = substitute(m_actions, first, last);
+      }
       data_expression time = m_time.substitute(first, last);
 
       return LPE_summand(m_summation_variables, condition, m_delta, actions, time, m_assignments);
@@ -223,7 +182,7 @@ typedef term_list<LPE_summand> summand_list;
 // LPE
 /// \brief linear process equation.
 ///
-class LPE
+class LPE: public aterm_wrapper
 {
   protected:
     data_variable_list m_free_variables;
@@ -240,16 +199,18 @@ class LPE
         summand_list       summands,
         action_list        actions
        )
-     : m_free_variables    (free_variables    ),
+     : aterm_wrapper(gsMakeLPE(free_variables, process_parameters, summands)),
+       m_free_variables    (free_variables    ),
        m_process_parameters(process_parameters),
        m_summands          (summands          ),
        m_actions           (actions           )
     {}
 
-    LPE(aterm_appl LPE, action_list actions)
+    LPE(aterm_appl lpe, action_list actions)
+      : aterm_wrapper(lpe)
     {
       // unpack LPE(.,.,.) term     
-      aterm_list_iterator i = LPE.argument_list().begin();
+      aterm_list::iterator i = lpe.argument_list().begin();
       m_free_variables     = data_variable_list(*i++);
       m_process_parameters = data_variable_list(*i++);
       m_summands           = summand_list(*i);
@@ -290,10 +251,10 @@ class LPE
     template <typename Substitution>
     LPE substitute(Substitution f)
     {
-      data_variable_list d = m_free_variables    .substitute(f);
-      data_variable_list p = m_process_parameters.substitute(f);
-      summand_list       s = m_summands          .substitute(f);
-      action_list        a = m_actions           .substitute(f);
+      data_variable_list d = mcrl2::substitute(m_free_variables    , f);
+      data_variable_list p = mcrl2::substitute(m_process_parameters, f);
+      summand_list       s = mcrl2::substitute(m_summands          , f);
+      action_list        a = mcrl2::substitute(m_actions           , f);
       return LPE(d, p, s, a);
     }     
 
@@ -302,10 +263,10 @@ class LPE
     template <typename SubstIter>
     LPE substitute(SubstIter first, SubstIter last) const
     {
-      data_variable_list d = m_free_variables    .substitute(first, last);
-      data_variable_list p = m_process_parameters.substitute(first, last);
-      summand_list       s = m_summands          .substitute(first, last);
-      action_list        a = m_actions           .substitute(first, last);
+      data_variable_list d = mcrl2::substitute(m_free_variables    , first, last);
+      data_variable_list p = mcrl2::substitute(m_process_parameters, first, last);
+      summand_list       s = mcrl2::substitute(m_summands          , first, last);
+      action_list        a = mcrl2::substitute(m_actions           , first, last);
       return LPE(d, p, s, a);
     }
 
@@ -313,10 +274,10 @@ class LPE
     ///
     std::string pp() const
     {
-      std::string s1 = m_free_variables    .pp();
-      std::string s2 = m_process_parameters.pp();
-      std::string s3 = m_summands          .pp();
-      std::string s4 = m_actions           .pp();
+      std::string s1 = mcrl2::pp(m_free_variables    );
+      std::string s2 = mcrl2::pp(m_process_parameters);
+      std::string s3 = mcrl2::pp(m_summands          );
+      std::string s4 = mcrl2::pp(m_actions           );
       return s1 + "\n" + s2 + "\n" + s3 + "\n" + s4;
     }
 

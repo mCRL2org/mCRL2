@@ -9,7 +9,7 @@
 #include "atermpp/aterm.h"
 //#include "mcrl2/predefined_symbols.h"
 #include "mcrl2/aterm_wrapper.h"
-#include "mcrl2/term_list.h"
+#include "atermpp/aterm_list.h"
 #include "gsfunc.h"
 
 namespace mcrl2 {
@@ -103,7 +103,7 @@ typedef term_list<sort> sort_list;
 inline
 sort make_sort(sort domain, sort range)
 {
-  return sort(domain.to_appl(), range.to_appl());
+  return sort(aterm_appl(domain), aterm_appl(range));
 }
 
 } // namespace mcrl

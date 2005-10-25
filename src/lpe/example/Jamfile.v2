@@ -7,18 +7,12 @@ project src/lpe/example
        <os>LINUX:<linkflags>-ldl
    ;
 
-exe lpeconstelm  : lpeconstelm.cpp : ;
-exe test1        : test1.cpp : ;
-exe test2        : test2.cpp : ;
-exe test3        : test3.cpp : ;
+exe constructors : constructors.cpp : ;
 exe spec         : spec.cpp  : ;
 
 install dist
    :
-     test1
-     test2
-     test3
+     constructors
      spec
-     lpeconstelm
    :
    ;

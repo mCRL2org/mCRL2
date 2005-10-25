@@ -5,8 +5,8 @@
 // ----------------------------------------------------------------------
 //
 // file          : atermpp/aterm_match.h
-// date          : 04/25/05
-// version       : 0.3
+// date          : 25-10-2005
+// version       : 1.0
 //
 // author(s)     : Wieger Wesselink  <J.W.Wesselink@tue.nl>
 //

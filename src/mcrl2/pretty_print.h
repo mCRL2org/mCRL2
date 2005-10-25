@@ -1,8 +1,9 @@
 #ifndef MCRL2_PRETTY_PRINT_H
 #define MCRL2_PRETTY_PRINT_H
 
-#include "atermpp/aterm.h"
+#include "atermpp/atermpp.h"
 #include "libprint_cxx.h"
+#include <string>
 
 namespace mcrl2 {
 
@@ -10,6 +11,14 @@ namespace mcrl2 {
   std::string pretty_print(ATerm t)
   {
     return PrintPart_CXX(t, ppAdvanced);
+  }
+
+  /// Returns a pretty print representation of the term_list.
+  ///
+  template <typename Term>
+  std::string pp(atermpp::term_list<Term> l)
+  {
+    return pretty_print(atermpp::aterm(l));
   }
 
 } // namespace mcrl

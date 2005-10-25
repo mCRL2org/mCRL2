@@ -1,6 +1,6 @@
 ///////////////////////////////////////////////////////////////////////////////
-/// \file mcrl2/list_iterator.h
-/// Contains a general aterm_wrapper iterator.
+/// \file mcrl2/aterm_wrapper.h
+/// Contains a wrapper for ATerms with pretty print functionality.
 
 #ifndef MCRL2_ATERM_WRAPPER_H
 #define MCRL2_ATERM_WRAPPER_H
@@ -44,40 +44,22 @@ using atermpp::aterm_appl;
       {
         return m_term.to_string();
       }
-      
-      /// Conversion to ATerm
-      ///
-      ATerm to_ATerm() const
-      {
-        return m_term;
-      }
-      
-      /// Conversion to ATermAppl
-      ///
-      ATermAppl to_ATermAppl() const
-      {
-        return m_term.to_ATermAppl();
-      }
-      
-      /// Conversion to aterm
-      ///
-      aterm to_aterm() const
+
+      operator ATermAppl() const
       {
         return m_term;
       }
 
-      /// Conversion to aterm_appl
-      ///
-      aterm_appl to_appl() const
+      bool operator==(aterm_wrapper other)
       {
-        return m_term;
+        return aterm_appl(m_term) == other.m_term;
       }
-      
+
       /// Returns a pretty print representation of the term.
       ///
       std::string pp() const
       {
-        return pretty_print(to_ATerm());
+        return pretty_print(m_term);
       }
   };
 

@@ -5,8 +5,8 @@
 // ----------------------------------------------------------------------
 //
 // file          : atermpp/aterm_make_match.h
-// date          : 04/25/05
-// version       : 0.3
+// date          : 25-10-2005
+// version       : 1.0
 //
 // author(s)     : Wieger Wesselink  <J.W.Wesselink@tue.nl>
 //
@@ -19,7 +19,9 @@
   * This file contains implementations for aterm_make and aterm_match.
   */
 
-namespace { // unnamed namespace
+#include "atermpp/aterm.h"
+
+namespace atermpp {
 
   //---------------------------------------------------------//
   //         conversion between pointer and reference
@@ -76,7 +78,7 @@ namespace { // unnamed namespace
     return aterm_ptr(const_cast<atermpp::aterm&>(t));
   }
 
-} // unnamed namespace
+} // namespace atermpp
 
 namespace atermpp
 {

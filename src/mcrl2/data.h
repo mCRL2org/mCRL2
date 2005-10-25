@@ -8,11 +8,9 @@
 #include <iostream> // for debugging
 
 #include <string>
-#include "atermpp/aterm.h"
-#include "atermpp/aterm_algorithm.h"
+#include "atermpp/atermpp.h"
 #include "mcrl2/aterm_wrapper.h"
 #include "mcrl2/sort.h"
-#include "mcrl2/term_list.h"
 #include "mcrl2/list_iterator.h"
 #include "mcrl2/predefined_symbols.h"
 #include "mcrl2/detail/string_utility.h"
@@ -23,7 +21,6 @@ namespace mcrl2 {
 
 using atermpp::aterm_appl;
 using atermpp::aterm_list;
-using atermpp::aterm_list_iterator;
 
 using atermpp::aterm;
 
@@ -47,7 +44,7 @@ class data_expression: public aterm_wrapper
     template <typename Substitution>
     data_expression substitute(Substitution f) const
     {
-      return data_expression(f(to_appl()));
+      return data_expression(f(aterm_appl(*this)));
     }     
 
     /// Applies a sequence of substitutions to this data_expression and returns the result.
@@ -55,7 +52,7 @@ class data_expression: public aterm_wrapper
     template <typename SubstIter>
     data_expression substitute(SubstIter first, SubstIter last) const
     {
-      return data_expression(substitute(to_appl(), first, last));
+      return data_expression(substitute(*this, first, last));
     }
 };
 
@@ -81,26 +78,26 @@ class data_variable: public aterm_wrapper
     {}
 
     data_variable(const std::string& name, const sort& s)
-     : aterm_wrapper(gsMakeDataVarId(gsString2ATermAppl(name.c_str()), s.to_ATermAppl()))
+     : aterm_wrapper(gsMakeDataVarId(gsString2ATermAppl(name.c_str()), s))
     {}
 
     data_expression to_expr() const
     {
-      return data_expression(to_appl());
+      return data_expression(aterm_appl(*this));
     }
 
     /// Returns the name of the data_variable.
     ///
     std::string name() const
     {
-      return unquote(to_appl().argument(0).to_string());
+      return unquote(aterm_appl(*this).argument(0).to_string());
     }
 
     /// Returns the sort of the data_variable.
     ///
     sort type() const
     {
-      return mcrl2::sort(to_appl().argument(1));
+      return mcrl2::sort(aterm_appl(*this).argument(1));
     }
 };
 
@@ -131,7 +128,7 @@ class data_equation: public aterm_wrapper
     data_equation(aterm_appl t)
      : aterm_wrapper(t)
     {
-      aterm_list_iterator i = t.argument_list().begin();
+      aterm_list::iterator i = t.argument_list().begin();
       m_variables = data_variable_list(*i++);
       m_condition = data_expression(*i++);
       m_lhs       = data_expression(*i++);
@@ -143,7 +140,7 @@ class data_equation: public aterm_wrapper
                   data_expression    lhs,
                   data_expression    rhs
                  )
-     : aterm_wrapper(gsMakeDataEqn(variables.to_ATermList(), condition.to_ATermAppl(), lhs.to_ATermAppl(), rhs.to_ATermAppl())),
+     : aterm_wrapper(gsMakeDataEqn(variables, condition, lhs, rhs)),
        m_variables(variables),
        m_condition(condition),
        m_lhs(lhs),
@@ -184,7 +181,7 @@ class data_equation: public aterm_wrapper
     template <typename Substitution>
     data_equation substitute(Substitution f) const
     {
-      return data_equation(f(to_appl()));
+      return data_equation(f(aterm_appl(*this)));
     }     
 
     /// Applies a sequence of substitutions to this data_equation and returns the result.
@@ -192,7 +189,7 @@ class data_equation: public aterm_wrapper
     template <typename SubstIter>
     data_equation substitute(SubstIter first, SubstIter last) const
     {
-      return data_equation(substitute(to_appl(), first, last));
+      return data_equation(substitute(*this, first, last));
     }
 };
 
@@ -217,14 +214,14 @@ class data_assignment: public aterm_wrapper
     data_assignment(aterm_appl t)
      : aterm_wrapper(t)
     {
-      aterm_list_iterator i = t.argument_list().begin();
+      aterm_list::iterator i = t.argument_list().begin();
       m_lhs = data_variable(*i++);
       m_rhs = data_expression(*i);
     }
 
     data_assignment(data_variable lhs, data_expression rhs)
      : 
-       aterm_wrapper(gsMakeAssignment(lhs.to_ATermAppl(), rhs.to_ATermAppl())),
+       aterm_wrapper(gsMakeAssignment(lhs, rhs)),
        m_lhs(lhs),
        m_rhs(rhs)
     {
@@ -234,7 +231,7 @@ class data_assignment: public aterm_wrapper
     ///
     aterm operator()(aterm t) const
     {
-      return atermpp::aterm_replace(t, m_lhs.to_aterm(), m_rhs.to_aterm());
+      return atermpp::replace(aterm_appl(m_lhs), aterm_appl(m_rhs), t);
     }
 
     /// Returns the left hand side of the data_assignment.

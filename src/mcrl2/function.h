@@ -6,13 +6,13 @@
 #define MCRL2_FUNCTION_H
 
 #include "atermpp/aterm.h"
+#include "atermpp/aterm_list.h"
 #include "mcrl2/aterm_wrapper.h"
-#include "mcrl2/term_list.h"
 
 namespace mcrl2 {
 
 using atermpp::aterm_appl;
-using atermpp::aterm_list;
+using atermpp::term_list;
 using atermpp::make_term;
 
 ///////////////////////////////////////////////////////////////////////////////

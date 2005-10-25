@@ -31,7 +31,7 @@ class list_iterator: public boost::iterator_facade<
     {}
 
     list_iterator(aterm_list l)
-      : m_list(l.to_ATermList())
+      : m_list(l)
     {}
 
  private:

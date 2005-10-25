@@ -9,17 +9,17 @@
 #include <iostream>
 #include <vector>
 #include <utility>
+#include <cassert>
 
 #include "atermpp/aterm.h"
 #include "mcrl2/function.h"
 #include "mcrl2/lpe.h"
-#include "mcrl2/predefined_symbols.h"
+#include "mcrl2/pretty_print.h"
 #include "mcrl2/aterm_wrapper.h"
 
 namespace mcrl2 {
 
 using atermpp::aterm_appl;
-using atermpp::aterm_list_iterator;
 using atermpp::read_from_named_file;
 
 ///////////////////////////////////////////////////////////////////////////////
@@ -53,21 +53,32 @@ using atermpp::read_from_named_file;
 class specification: public aterm_wrapper
 {
   protected:
-    sort_list       m_sorts;
-    function_list   m_constructors;
-    function_list   m_mappings;
+    sort_list            m_sorts;
+    function_list        m_constructors;
+    function_list        m_mappings;
     data_equation_list   m_equations;
-    action_list     m_actions;
-    data_variable_list   m_init_variables;
-    data_assignment_list m_init_assignments;
-
-    // DataDeclaration m_data_declaration;
+    action_list          m_actions;
+    LPE                  m_lpe;
+    data_variable_list   m_initial_free_variables;
+    data_assignment_list m_initial_assignments;
     data_expression_list m_initial_state;
-    LPE m_lpe;
+
+    /// Create a list containing the left hand sides of the initial assignments.
+    ///
+    data_variable_list compute_initial_variables(data_assignment_list assignments) const
+    {
+      std::vector<data_variable> variables;
+      variables.reserve(assignments.size());
+      for (data_assignment_list::iterator i = assignments.begin(); i != assignments.end(); ++i)
+      {
+        variables.push_back(i->lhs());
+      }
+      return data_variable_list(variables.begin(), variables.end());
+    }
 
     /// Create a list containing the right hand sides of the initial assignments.
     ///
-    data_expression_list compute_initial_state(data_assignment_list assignments)
+    data_expression_list compute_initial_state(data_assignment_list assignments) const
     {
       std::vector<data_expression> expressions;
       expressions.reserve(assignments.size());
@@ -78,17 +89,31 @@ class specification: public aterm_wrapper
       return data_expression_list(expressions.begin(), expressions.end());
     }
 
+    /// Create assignments for the initial state.
+    ///
+    data_assignment_list compute_initial_assignments(data_variable_list variables, data_expression_list initial_state) const
+    {
+      std::vector<data_assignment> assignments;
+      assignments.reserve(variables.size());
+      data_expression_list::iterator j = initial_state.begin();
+      for (data_variable_list::iterator i = variables.begin(); i != variables.end(); ++i, ++j)
+      {
+        assignments.push_back(data_assignment(*i, *j));
+      }
+      return data_assignment_list(assignments.begin(), assignments.end());
+    }
+
     /// Initialize the LPE with an aterm_appl.
     ///
     void init_term(aterm_appl t)
     {
       m_term = t;
-      aterm_list_iterator i = m_term.argument_list().begin();
+      aterm_list::iterator i = m_term.argument_list().begin();
       m_sorts               = sort_list(aterm_appl(*i++).argument(0));
       m_constructors        = function_list(aterm_appl(*i++).argument(0));
       m_mappings            = function_list(aterm_appl(*i++).argument(0));
       m_equations           = data_equation_list(aterm_appl(*i++).argument(0));
-      m_actions             = action_list(*i++);
+      m_actions             = action_list(aterm_appl(*i++).argument(0));
       aterm_appl lpe        = *i++;
       aterm_appl lpe_init   = *i;
 
@@ -96,18 +121,17 @@ class specification: public aterm_wrapper
 
       // unpack LPEInit(.,.) term
       // compute m_initial_state from lpe_init
-      aterm_list_iterator k       = lpe_init.argument_list().begin();
-      m_init_variables            = data_variable_list(*k++);
-      m_init_assignments          = data_assignment_list(*k);
-      data_expression_list d0(m_init_variables.to_ATermList());
-      m_initial_state = compute_initial_state(m_init_assignments);
+      aterm_list::iterator k         = lpe_init.argument_list().begin();
+      m_initial_free_variables            = data_variable_list(*k++);
+      m_initial_assignments          = data_assignment_list(*k);
+      data_expression_list d0(m_initial_free_variables);
     }
 
     /// Returns the assignments of the initial state.
     ///
     data_assignment_list initial_assignments() const
     {
-      return m_init_assignments;
+      return m_initial_assignments;
     }
 
   public:
@@ -118,6 +142,38 @@ class specification: public aterm_wrapper
       : aterm_wrapper(t)
     {
       init_term(t);
+    }
+
+    specification(
+        sort_list            sorts            ,
+        function_list        constructors     ,
+        function_list        mappings         ,
+        data_equation_list   equations        ,
+        action_list          actions          ,
+        LPE                  lpe              ,
+        data_variable_list   initial_free_variables,
+        data_variable_list   initial_variables,
+        data_expression_list initial_state)
+      :
+        m_sorts         (sorts         ),
+        m_constructors  (constructors  ),
+        m_mappings      (mappings      ),
+        m_equations     (equations     ),
+        m_actions       (actions       ),
+        m_lpe           (lpe           ),
+        m_initial_free_variables(initial_free_variables),        
+        m_initial_assignments(compute_initial_assignments(initial_variables, initial_state))
+    {
+      assert(initial_variables.size() == initial_state.size());
+      m_term = gsMakeSpecV1(
+          gsMakeSortSpec(sorts),
+          gsMakeConsSpec(constructors),
+          gsMakeMapSpec(mappings),
+          gsMakeDataEqnSpec(equations),
+          gsMakeActSpec(actions),
+          lpe,
+          gsMakeLPEInit(initial_free_variables, m_initial_assignments)
+      );        
     }
 
     /// Reads the LPE from file. Returns true if the operation succeeded.
@@ -172,25 +228,30 @@ class specification: public aterm_wrapper
     data_equation_list equations()
     { return m_equations; }
 
+    /// Returns the sequence of actions.
+    ///
+    action_list actions()
+    { return m_actions; }
+
     /// Returns the initial state of the LPE.
     ///
     data_expression_list initial_state() const
     {
-      return data_expression_list(m_initial_state);
+      return compute_initial_state(m_initial_assignments);
+    }
+
+    /// Returns the variables of the initial state of the LPE.
+    ///
+    data_expression_list initial_variables() const
+    {
+      return compute_initial_variables(m_initial_assignments);
     }
 
     /// Returns the sequence of free variables of the initial state.
     ///
     data_variable_list initial_free_variables() const
     {
-      return m_init_variables;
-    }
-
-    /// Returns the initial assingments of the LPE.
-    ///
-    data_assignment_list init_assignments() const
-    {
-      return data_assignment_list(m_init_assignments);
+      return m_initial_free_variables;
     }
 };
 
