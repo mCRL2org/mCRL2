@@ -14,6 +14,8 @@ extern "C" {
 #include "gssubstitute.h"
 #include <assert.h>
 
+//#define _INNER_STORE_TREES
+
 extern ATermList opid_eqns;
 extern ATermList dataappl_eqns;
 
@@ -88,6 +90,7 @@ static bool ATisInt(ATerm a)
 }*/
 
 
+#ifdef _INNER_STORE_TREES
 static int write_tree(FILE *f, ATermAppl tree, int *num_states)
 {
 	int n,m;
@@ -174,6 +177,7 @@ static void tree2dot(ATermAppl tree, char *name, char *filename)
 
 	fclose(f);
 }
+#endif
 
 static void term2seq(ATerm t, ATermList *s, int *var_cnt)
 {
@@ -738,10 +742,12 @@ static ATermAppl create_tree(ATermList rules, int opid, int *max_vars)
 		*max_vars = max_tree_vars;
 	}
 
-	/*char s[100],t[100];
+#ifdef _INNER_STORE_TREES
+	char s[100],t[100];
 	sprintf(s,"tree_%i_%s",opid,ATgetName(ATgetAFun(ATAgetArgument(int2term[opid],0))));
 	sprintf(t,"tree_%i_%s.dot",opid,ATgetName(ATgetAFun(ATAgetArgument(int2term[opid],0))));
-	tree2dot(tree,s,t);*/
+	tree2dot(tree,s,t);
+#endif
 
 	return tree;
 }
@@ -914,8 +920,6 @@ static ATerm tree_matcher(ATermList t, ATermAppl tree)
 		}
 
 		ATerm r = build(rslt,rslt_len,vars,vals,len);
-
-		assert(gsGetSort(fromInner((ATerm) t))==gsGetSort(fromInner(r)));
 
 		FREE_A(vals);
 		FREE_A(vars);

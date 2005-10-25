@@ -23,6 +23,7 @@ extern "C" {
 bool FindSolutionsError;
 
 static ATermAppl current_spec;
+static ATermTable constructors;
 static ATerm gsProverTrue, gsProverFalse;
 
 static int used_vars;
@@ -32,52 +33,76 @@ static int used_vars;
 static int max_vars = MAX_VARS_INIT;
 
 static bool (*FindEquality)(ATerm,ATermList,ATerm*,ATerm*);
+static ATerm (*build_solution_aux)(ATerm,ATermList);
 static bool FindInner3Equality(ATerm t, ATermList vars, ATerm *v, ATerm *e);
 static bool FindInnerCEquality(ATerm t, ATermList vars, ATerm *v, ATerm *e);
+static ATerm build_solution_aux_inner3(ATerm t, ATermList substs);
+static ATerm build_solution_aux_innerc(ATerm t, ATermList substs);
 static ATerm opidAnd,eqstr;
 static AFun tupAFun;
 
-void gsProverInit(ATermAppl Spec, int RewriteStrategy)
-{
-	current_spec = Spec;
-	ATprotectAppl(&current_spec);
-	gsRewriteInit(ATAgetArgument(Spec,3),RewriteStrategy);
-	gsProverTrue = gsToRewriteFormat(gsMakeDataExprTrue());
-	ATprotect(&gsProverTrue);
-	gsProverFalse = gsToRewriteFormat(gsMakeDataExprFalse());
-	ATprotect(&gsProverFalse);
+typedef struct {
+	ATermList vars;
+	ATermList vals;
+	ATerm expr;
+} fs_expr;
 
-	if ( RewriteStrategy == GS_REWR_INNER3 || RewriteStrategy == GS_REWR_INNER )
+fs_expr *fs_stack;
+int fs_stack_size = 0;
+int fs_stack_pos = 0;
+
+static void fs_reset()
+{
+	fs_stack_pos = 0;
+}
+
+static void fs_push(ATermList vars, ATermList vals, ATerm expr)
+{
+	if  ( fs_stack_size <= fs_stack_pos )
 	{
-		FindEquality = FindInner3Equality;
-		opidAnd = gsToRewriteFormat(gsMakeOpIdAnd());
-		ATprotect(&opidAnd);
-		eqstr = (ATerm) gsString2ATermAppl("==");
-		ATprotect(&eqstr);
-	} else {
-		FindEquality = FindInnerCEquality;
-		opidAnd = ATgetArgument((ATermAppl) gsToRewriteFormat(gsMakeOpIdAnd()),0);
-		ATprotect(&opidAnd);
-		eqstr = (ATerm) gsString2ATermAppl("==");
-		ATprotect(&eqstr);
+		int i = fs_stack_size;
+		if ( fs_stack_size == 0 )
+		{
+			fs_stack_size = 512;
+		} else {
+			fs_stack_size = fs_stack_size * 2;
+			ATunprotectArray((ATerm *) fs_stack);
+		}
+		fs_stack = (fs_expr *) realloc(fs_stack,fs_stack_size*sizeof(fs_expr));
+		for (; i<fs_stack_size; i++)
+		{
+			fs_stack[i].vars = NULL;
+			fs_stack[i].vals = NULL;
+			fs_stack[i].expr = NULL;
+		}
+		ATprotectArray((ATerm *) fs_stack,3*fs_stack_size);
 	}
 
-	tupAFun = ATmakeAFun("@tup@",2,ATfalse);
-	ATprotectAFun(tupAFun);
+	fs_stack[fs_stack_pos].vars = vars;
+	fs_stack[fs_stack_pos].vals = vals;
+	fs_stack[fs_stack_pos].expr = expr;
+	fs_stack_pos++;
 }
 
-void gsProverFinalise()
+static void fs_pop(fs_expr *e)
 {
-	ATunprotectAppl(&current_spec);
-	gsRewriteFinalise();
-	ATunprotect(&gsProverTrue);
-	ATunprotect(&gsProverFalse);
-
-	ATunprotect(&opidAnd);
-	ATunprotect(&eqstr);
-	
-	ATunprotectAFun(tupAFun);
+	fs_stack_pos--;
+	if ( e != NULL )
+	{
+		e->vars = fs_stack[fs_stack_pos].vars;
+		e->vals = fs_stack[fs_stack_pos].vals;
+		e->expr = fs_stack[fs_stack_pos].expr;
+	}
+	fs_stack[fs_stack_pos].vars = NULL;
+	fs_stack[fs_stack_pos].vals = NULL;
+	fs_stack[fs_stack_pos].expr = NULL;
 }
+
+#define fs_bottom() (fs_stack[0])
+#define fs_top() (fs_stack[fs_stack_pos-1])
+
+#define fs_filled() (fs_stack_pos > 0)
+
 
 static ATermAppl gsGetResult(ATermAppl sort)
 {
@@ -104,64 +129,62 @@ static ATermList gsGetDomain(ATermAppl sort)
 	return l;
 }
 
-static ATermList calcNext(ATermList l)
+void gsProverInit(ATermAppl Spec, int RewriteStrategy)
 {
-	ATermList a1,a2,m,r,s,d,na1;
-	ATermAppl var,sort,t;
-	ATerm e,a3;
+	current_spec = Spec;
+	ATprotectAppl(&current_spec);
+	gsRewriteInit(ATAgetArgument(Spec,3),RewriteStrategy);
+	gsProverTrue = gsToRewriteFormat(gsMakeDataExprTrue());
+	ATprotect(&gsProverTrue);
+	gsProverFalse = gsToRewriteFormat(gsMakeDataExprFalse());
+	ATprotect(&gsProverFalse);
 
-	a1 = ATLgetFirst(l);
-	l = ATgetNext(l);
-	a2 = ATLgetFirst(l);
-	l = ATgetNext(l);
-	a3 = ATgetFirst(l);
-
-	var = ATAgetFirst(a1); // XXX is in internal format!
-	a1 = ATgetNext(a1);
-	sort = ATAgetArgument(var,1);
-
-	if ( gsIsSortArrow(sort) )
+	if ( RewriteStrategy == GS_REWR_INNER3 || RewriteStrategy == GS_REWR_INNER )
 	{
-		gsErrorMsg("cannot enumerate all elements of functions sorts\n");
-		exit(1);
+		FindEquality = FindInner3Equality;
+		build_solution_aux = build_solution_aux_inner3;
+		opidAnd = gsToRewriteFormat(gsMakeOpIdAnd());
+		ATprotect(&opidAnd);
+		eqstr = (ATerm) gsString2ATermAppl("==");
+		ATprotect(&eqstr);
+	} else {
+		FindEquality = FindInnerCEquality;
+		build_solution_aux = build_solution_aux_innerc;
+		opidAnd = ATgetArgument((ATermAppl) gsToRewriteFormat(gsMakeOpIdAnd()),0);
+		ATprotect(&opidAnd);
+		eqstr = (ATerm) gsString2ATermAppl("==");
+		ATprotect(&eqstr);
 	}
 
-	r = ATmakeList0();
+	tupAFun = ATmakeAFun("@tup@",2,ATfalse);
+	ATprotectAFun(tupAFun);
 
-	m = ATLgetArgument(ATAgetArgument(current_spec,1),0);
-	for (; !ATisEmpty(m); m=ATgetNext(m))
+	constructors = ATtableCreate(ATgetLength(ATLgetArgument(ATAgetArgument(Spec,0),0)),50);
+	for (ATermList sorts=ATLgetArgument(ATAgetArgument(Spec,0),0); !ATisEmpty(sorts); sorts=ATgetNext(sorts))
 	{
-		if ( ATisEqual(gsGetResult(ATAgetArgument(ATAgetFirst(m),1)),sort) )
-		{
-//gsfprintf(stderr,"cons: %T\n\n",ATgetFirst(m));
-			na1 = a1;
-			d = gsGetDomain(ATAgetArgument(ATAgetFirst(m),1));
-			t = ATAgetFirst(m);
-			for (; !ATisEmpty(d); d=ATgetNext(d))
-			{
-				ATermAppl v = gsMakeDataVarId(gsFreshString2ATermAppl("@enum@",(ATerm) ATmakeAppl2(tupAFun,(ATerm) na1,(ATerm) var),false),ATAgetFirst(d));
-				used_vars++;
-				na1 = ATappend(na1,(ATerm) v);
-				t = gsMakeDataAppl(t,v);
-			}
-//gsfprintf(stderr,"%T\n\n",t);
-			ATerm t_rf = gsToRewriteFormat(t);
-			RWsetVariable((ATerm) var,t_rf);
-//PrintPart_C(stderr,gsFromRewriteFormat(a3)); fprintf(stderr,"\n");
-			e = gsRewriteInternal(a3);
-//PrintPart_C(stderr,gsFromRewriteFormat(e)); fprintf(stderr,"\n\n");
-			if ( !ATisEqual(e,gsProverFalse) )
-			{
-				s = ATmakeList1((ATerm) gsMakeSubst((ATerm) var, t_rf));
-//				r = ATinsert(r,(ATerm) ATmakeList3((ATerm) na1,gsRewriteInternals(gsSubstValues(s,(ATerm) a2,true)),(ATerm) e));
-				r = ATinsert(r,(ATerm) ATmakeList3((ATerm) na1,(ATerm) gsRewriteInternals(a2),(ATerm) e));
-			}
-			RWclearVariable((ATerm) var);
-		}
+		ATtablePut(constructors,ATgetFirst(sorts),(ATerm) ATmakeList0());
 	}
-	r = ATreverse(r);
+	for (ATermList conss = ATLgetArgument(ATAgetArgument(Spec,1),0); !ATisEmpty(conss); conss=ATgetNext(conss))
+	{
+		ATermAppl cons = ATAgetFirst(conss);
+		ATerm sort = (ATerm) gsGetResult(ATAgetArgument(cons,1));
+		ATtablePut(constructors,sort,(ATerm) ATinsert((ATermList) ATtableGet(constructors,sort),(ATerm) ATmakeAppl2(tupAFun,(ATerm) cons,(ATerm) gsGetDomain(ATAgetArgument(cons,1)))));
+	}
+}
 
-	return r;
+void gsProverFinalise()
+{
+	ATunprotectAppl(&current_spec);
+	gsRewriteFinalise();
+	ATunprotect(&gsProverTrue);
+	ATunprotect(&gsProverFalse);
+
+	ATunprotect(&opidAnd);
+	ATunprotect(&eqstr);
+	
+	ATunprotectAFun(tupAFun);
+
+	ATtableDestroy(constructors);
 }
 
 static bool IsInner3Eq(ATerm a)
@@ -316,82 +339,167 @@ static bool FindInnerCEquality(ATerm t, ATermList vars, ATerm *v, ATerm *e)
 	return false;
 }
 
-static ATermList EliminateVars(ATermList l)
+static void EliminateVars(fs_expr *e)
 {
-	ATermList vars,vals,m;//,removed_vars;
-	ATerm t, v, e;
+	ATermList vars = e->vars;
+	ATermList vals = e->vals;
+	ATerm expr = e->expr;
 
-	vars = ATLgetFirst(l);
-	m = ATgetNext(l);
-	vals = ATLgetFirst(m);
-	m = ATgetNext(m);
-	t = ATgetFirst(m);
-
-//	t = gsRewriteInternal(t);
-//	removed_vars = ATmakeList0();
-	while ( !ATisEmpty(vars) && FindEquality(t,vars,&v,&e) )
+	ATerm var,val;
+	while ( !ATisEmpty(vars) && FindEquality(expr,vars,&var,&val) )
 	{
-		vars = ATremoveElement(vars, v);
-		RWsetVariable(v,e);
-//		removed_vars = ATinsert(removed_vars,v);
-//		vals = (ATermList) gsSubstValues(ATmakeList1((ATerm) gsMakeSubst(v,e)),(ATerm) vals,true);
-		vals = gsRewriteInternals(vals);		
-//		t = gsSubstValues(ATmakeList1((ATerm) gsMakeSubst(v,e)),t,true);
-		t = gsRewriteInternal(t);
-		RWclearVariable(v);
+		vars = ATremoveElement(vars, var);
+		RWsetVariable(var,val);
+		vals = ATinsert(vals,(ATerm) ATmakeAppl2(tupAFun,var,val));		
+		expr = gsRewriteInternal(expr);
+		RWclearVariable(var);
 	}
 
-/*	if ( ATisEmpty(removed_vars) )
-	{
-		return l;
-	}*/
-//	l = ATmakeList3((ATerm) vars, (ATerm) gsRewriteInternals(vals), (ATerm) t);
-	l = ATmakeList3((ATerm) vars, (ATerm) vals, (ATerm) t);
-/*	for (; !ATisEmpty(removed_vars); removed_vars=ATgetNext(removed_vars))
-	{
-		RWclearVariable(ATgetFirst(removed_vars));
-	}*/
-	return l;
+	e->vars = vars;
+	e->vals = vals;
+	e->expr = expr;
 }
 
-static ATermList makeSubsts(ATermList vars, ATermList exprs)
+static ATerm build_solution_single(ATerm t, ATermList substs)
 {
-	ATermList l;
-
-	l = ATmakeList0();
-	for (; !ATisEmpty(vars); vars=ATgetNext(vars),exprs=ATgetNext(exprs))
+	while ( !ATisEmpty(substs) && !ATisEqual(t, ATgetArgument((ATermAppl) ATgetFirst(substs),0)) )
 	{
-		l = ATinsert(l,(ATerm) gsMakeSubst(ATgetFirst(vars),ATgetFirst(exprs)));
+		substs = ATgetNext(substs);
 	}
-	l = ATreverse(l);
 
-	return l;
+	if ( ATisEmpty(substs) )
+	{
+		return t;
+	} else {
+		return build_solution_aux(ATgetArgument((ATermAppl) ATgetFirst(substs),1),ATgetNext(substs));
+	}
+}
+
+static ATerm build_solution_aux_inner3(ATerm t, ATermList substs)
+{
+	if ( ATisInt(t) )
+	{
+		return t;
+	} else if ( ATisList(t) )
+	{
+		ATerm head = ATgetFirst((ATermList) t);
+		ATermList args = ATmakeList0();
+
+		if ( !ATisInt(head) )
+		{
+			head = build_solution_single(head,substs);
+			if ( ATisList(head) )
+			{
+				for (ATermList l=ATgetNext((ATermList) head); !ATisEmpty(l); l=ATgetNext(l))
+				{
+					args = ATinsert(args, ATgetFirst(l));
+				}
+				head = ATgetFirst((ATermList) head);
+			}
+		}
+
+		for (ATermList l=ATgetNext((ATermList) t); !ATisEmpty(l); l=ATgetNext(l))
+		{
+			args = ATinsert(args,build_solution_aux_inner3(ATgetFirst(l),substs));
+		}
+
+		return (ATerm) ATinsert(ATreverse(args),head);
+	} else {
+		if ( gsIsDataVarId((ATermAppl) t) )
+		{
+			return build_solution_single(t,substs);
+		} else {
+			return t;
+		}
+	}
+}
+
+static ATerm build_solution_aux_innerc(ATerm t, ATermList substs)
+{
+	if ( gsIsDataVarId((ATermAppl) t) )
+	{
+		return build_solution_single(t,substs);
+	} else {
+		ATerm head = ATgetArgument((ATermAppl) t,0);
+		int arity = ATgetArity(ATgetAFun((ATermAppl) t));
+		int extra_arity = 0;
+
+		if ( !ATisInt(head) )
+		{
+			head = build_solution_single(head,substs);
+			if ( !gsIsDataVarId((ATermAppl) head) )
+			{
+				extra_arity = ATgetArity(ATgetAFun((ATermAppl) head))-1;
+			}
+		}
+
+		DECL_A(args,ATerm,arity+extra_arity);
+		AFun fun = ATgetAFun((ATermAppl) t);
+		int k = 1;
+
+		if ( !ATisInt(head) && !gsIsDataVarId((ATermAppl) head) )
+		{
+			fun = ATmakeAFun("@appl_bs@",arity+extra_arity,ATfalse);
+			k = extra_arity+1;
+			for (int i=1; i<k; i++)
+			{
+				args[i] = ATgetArgument((ATermAppl) head,i);
+			}
+			head = ATgetArgument((ATermAppl) head,0);
+		}
+
+		args[0] = head;
+		for (int i=1; i<arity; i++,k++)
+		{
+			args[k] = build_solution_aux_innerc(ATgetArgument((ATermAppl) t,i),substs);
+		}
+
+		ATerm r = (ATerm) ATmakeApplArray(fun,args);
+		FREE_A(args);
+		return r;
+	}
+}
+
+static ATermList build_solution2(ATermList vars, ATermList substs)
+{
+	if ( ATisEmpty(vars) )
+	{
+		return vars;
+	} else {
+		return ATinsert(build_solution2(ATgetNext(vars),substs),(ATerm) gsMakeSubst(ATgetFirst(vars),build_solution_single(ATgetFirst(vars),substs)));
+	}
+}
+static ATermList build_solution(ATermList vars, ATermList substs)
+{
+	return build_solution2(vars,ATreverse(substs));
 }
 
 ATermList FindSolutions(ATermList Vars, ATerm Expr, FindSolutionsCallBack f)
 {
-	ATermList l,t,m,n,o;
-
 	FindSolutionsError = false;
-
 	used_vars = 0;
+	fs_reset();
 
-	if ( ATisEmpty(Vars) )
+	fs_push(Vars,ATmakeList0(),gsRewriteInternal(Expr));
+	if ( !ATisEmpty(Vars) )
 	{
-		Expr = gsRewriteInternal(Expr);
-		if ( ATisEqual(Expr,gsProverTrue) )
+		EliminateVars(&fs_bottom());
+	}
+
+	if ( ATisEmpty(fs_bottom().vars) )
+	{
+		if ( ATisEqual(fs_bottom().expr,gsProverTrue) )
 		{
 			if ( f == NULL )
 			{
-				return ATmakeList1((ATerm) ATmakeList0());
+				return ATmakeList1((ATerm) build_solution(Vars,fs_bottom().vals));
 			} else {
-				f(ATmakeList0());
+				f(build_solution(Vars,fs_bottom().vals));
 				return ATmakeList0();
 			}
 		} else {
-			if ( !ATisEqual(Expr,gsProverFalse) )
+			if ( !ATisEqual(fs_bottom().expr,gsProverFalse) )
 			{
-//				gsWarningMsg("term does not evaluate to true or false (%T)\n",ATgetFirst(ATgetNext(o)));
 				gsfprintf(stderr,"Term does not evaluate to true or false: %P\n",gsFromRewriteFormat(Expr));
 				FindSolutionsError = true;
 			}
@@ -399,85 +507,91 @@ ATermList FindSolutions(ATermList Vars, ATerm Expr, FindSolutionsCallBack f)
 		}
 	}
 
-//	o = ATmakeList3((ATerm) Vars,(ATerm) Vars,(ATerm) Expr);
-	o = ATmakeList3((ATerm) Vars,(ATerm) Vars,gsRewriteInternal((ATerm) Expr));
-	o = EliminateVars(o);
-	if ( ATisEmpty(ATLgetFirst(o)) )
+	ATermList r = ATmakeList0();
+
+	while ( fs_filled() )
 	{
-		o = ATgetNext(o);
-		if ( ATisEqual(ATgetFirst(ATgetNext(o)),gsProverTrue) )
+		fs_expr e;
+
+		fs_pop(&e);
+
+		ATermAppl var = (ATermAppl) ATgetFirst(e.vars);
+		ATermAppl sort = (ATermAppl) ATgetArgument(var,1);
+
+		if ( gsIsSortArrow(sort) )
 		{
-			if ( f == NULL )
-			{
-				return ATmakeList1((ATerm) makeSubsts(Vars,ATLgetFirst(o)));
-			} else {
-				f(makeSubsts(Vars,ATLgetFirst(o)));
-				return ATmakeList0();
-			}
-		} else {
-			if ( !ATisEqual(ATgetFirst(ATgetNext(o)),gsProverFalse) )
-			{
-//				gsWarningMsg("term does not evaluate to true or false (%T)\n",ATgetFirst(ATgetNext(o)));
-				gsfprintf(stderr,"Term does not evaluate to true or false: %P\n",gsFromRewriteFormat(ATgetFirst(ATgetNext(o))));
-				FindSolutionsError = true;
-			}
+			gsErrorMsg("cannot enumerate all elements of functions sorts\n");
+			FindSolutionsError = true;
 			return ATmakeList0();
 		}
-	}
-	l = ATmakeList1((ATerm) o);
-	m = ATmakeList0();
-	while ( !ATisEmpty(l) )
-	{
-		t = l;
-		l = ATmakeList0();
-		for (; !ATisEmpty(t); t=ATgetNext(t))
+
+		ATermList r = ATmakeList0();
+
+		for (ATermList l=(ATermList) ATtableGet(constructors,(ATerm) sort); !ATisEmpty(l); l=ATgetNext(l))
 		{
-			n = calcNext(ATLgetFirst(t));
-			if ( used_vars > max_vars )
+			ATermAppl cons_tup = (ATermAppl) ATgetFirst(l);
+			ATermAppl cons_term = (ATermAppl) ATgetArgument(cons_tup,0);
+			ATermList dom_sorts = (ATermList) ATgetArgument(cons_tup,1);
+			
+			ATermList uvars = ATreverse(e.vars);
+			
+			for (; !ATisEmpty(dom_sorts); dom_sorts=ATgetNext(dom_sorts))
 			{
-				gsfprintf(stderr,"warning: Need more than %i variables to find all valuations of ",max_vars);
-				for (ATermList k=Vars; !ATisEmpty(k); k=ATgetNext(k))
+				ATermAppl fv = gsMakeDataVarId(gsFreshString2ATermAppl("@enum@",(ATerm) uvars,false),ATAgetFirst(dom_sorts));
+				
+				uvars = ATinsert(uvars,(ATerm) fv);
+				cons_term = gsMakeDataAppl(cons_term,fv);
+				
+				used_vars++;
+				if ( used_vars > max_vars )
 				{
-					if ( k != Vars )
+					gsfprintf(stderr,"warning: Need more than %i variables to find all valuations of ",max_vars);
+					for (ATermList k=Vars; !ATisEmpty(k); k=ATgetNext(k))
 					{
-						gsfprintf(stderr,", ");
+						if ( k != Vars )
+						{
+							gsfprintf(stderr,", ");
+						}
+						gsfprintf(stderr,"%P: %P",ATgetFirst(k),ATgetArgument((ATermAppl) ATgetFirst(k),1));
 					}
-					gsfprintf(stderr,"%P: %P",ATgetFirst(k),ATgetArgument((ATermAppl) ATgetFirst(k),1));
+					gsfprintf(stderr," that satisfy %P\n",gsFromRewriteFormat(gsRewriteInternal(Expr)));
+					max_vars *= MAX_VARS_FACTOR;
 				}
-				gsfprintf(stderr," that satisfy %P\n",gsFromRewriteFormat(gsRewriteInternal(Expr)));
-				max_vars *= MAX_VARS_FACTOR;
 			}
-			for (; !ATisEmpty(n); n=ATgetNext(n))
+			ATerm term_rf = gsToRewriteFormat(cons_term);
+			
+			RWsetVariable((ATerm) var,term_rf);
+			ATerm new_expr = gsRewriteInternal(e.expr);
+			if ( !ATisEqual(new_expr,gsProverFalse) )
 			{
-				o = ATLgetFirst(n);
-				if ( ATisEmpty(ATLgetFirst(o)) || ATisEmpty(ATLgetFirst(o = EliminateVars(o))) )
+				fs_push(ATgetNext(ATreverse(uvars)),ATinsert(e.vals,(ATerm) ATmakeAppl2(tupAFun,(ATerm) var,(ATerm) term_rf)),new_expr);
+				if ( ATisEmpty(fs_top().vars) || (EliminateVars(&fs_top()), ATisEmpty(fs_top().vars)) )
 				{
-					o = ATgetNext(o);
-					if ( ATisEqual(ATgetFirst(ATgetNext(o)),gsProverTrue) )
+					if ( ATisEqual(fs_top().expr,gsProverTrue) )
 					{
 						if ( f == NULL )
 						{
-							m = ATinsert(m,(ATerm) makeSubsts(Vars,ATLgetFirst(o)));
+							r = ATinsert(r,(ATerm) build_solution(Vars,fs_top().vals));
 						} else {
-							f(makeSubsts(Vars,ATLgetFirst(o)));
+							f(build_solution(Vars,fs_top().vals));
 						}
 					} else {
-						if ( !ATisEqual(ATgetFirst(ATgetNext(o)),gsProverFalse) )
+						if ( !ATisEqual(fs_top().expr,gsProverFalse) )
 						{
-//							gsfprintf(stderr,"Term does not evaluate to true or false (%T)\n",ATgetFirst(ATgetNext(o)));
-							gsfprintf(stderr,"Term does not evaluate to true or false: %P\n",gsFromRewriteFormat(ATgetFirst(ATgetNext(o))));
+							gsfprintf(stderr,"Term does not evaluate to true or false: %P\n",gsFromRewriteFormat(fs_top().expr));
 							FindSolutionsError = true;
+							return ATmakeList0();
 						}
 					}
-				} else {
-					l = ATinsert(l,(ATerm) o);
+					fs_pop(NULL);
 				}
 			}
+			RWclearVariable((ATerm) var);
 		}
+		
 	}
-	m = ATreverse(m);
 
-	return m;
+	return r;
 }
 
 #ifdef __cplusplus
