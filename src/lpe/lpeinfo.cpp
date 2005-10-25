@@ -7,13 +7,13 @@ Version 0.3.1
 */
 
 #include <iostream>
-#include "atermpp/aterm.h"
-#include "mcrl2/specification.h"
+//#include "atermpp/aterm.h"
+//#include "mcrl2/specification.h"
 #include <boost/program_options.hpp>
 
 using namespace std;
-using namespace mcrl2;
-using namespace atermpp;
+//using namespace mcrl2;
+//using namespace atermpp;
 
 namespace po = boost::program_options;
 po::variables_map vm;
@@ -29,7 +29,7 @@ enum {
 
 int display(string filename, int opt)
 {
-  specification spec;
+/*  specification spec;
   if (!spec.load(filename))
   {
     cerr << "Could not read input file " << filename << endl;
@@ -50,24 +50,24 @@ int display(string filename, int opt)
   } else if (opt== NPARS )
   {
     cout << lpe.process_parameters().size();
-  }
+  }*/
   return 0;
 }
 
-template<class T>
+/*template<class T>
 ostream& operator<<(ostream& os, const vector<T>& v)
 {
     copy(v.begin(), v.end(), ostream_iterator<T>(cout, " ")); 
     return os;
-}
+} */
 
 int main(int ac, char* av[])
 {
 
-   ATerm bot;
+/*   ATerm bot;
    ATinit(0,0,&bot);
    gsEnableConstructorFunctions();
-
+*/
       string filename;
       int opt = NO_OPTION;
 

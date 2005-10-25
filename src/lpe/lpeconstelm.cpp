@@ -18,24 +18,20 @@
 #include <boost/program_options.hpp>
 
 //mCRL2
-#include <aterm2.h>
-#include "atermpp/aterm.h"
-#include "mcrl2/mcrl2_visitor.h"
-#include "mcrl2/specification.h"
-#include "mcrl2/predefined_symbols.h"
-#include "mcrl2/sort.h"
+//#include <aterm2.h>
+//#include "atermpp/aterm.h"
+//#include "mcrl2/mcrl2_visitor.h"
+//#include "mcrl2/specification.h"
+//#include "mcrl2/predefined_symbols.h"
+//#include "mcrl2/sort.h"
 
 #include "libgsrewrite.h"
 #include "gsfunc.h"
 #include "gslowlevel.h"
 
 using namespace std;
-using namespace mcrl2;
-using namespace atermpp;
-
-using namespace std;
-using namespace mcrl2;
-using namespace atermpp;
+//using namespace mcrl2;
+//using namespace atermpp;
 
 namespace po = boost::program_options;
 po::variables_map vm;
@@ -52,15 +48,15 @@ const int opt_left       = 1;
 const int opt_right      = 2;
 const int opt_both       = 3;
 
-
+/*
 ATermAppl rew2(ATermAppl t, ATermAppl rewrite_terms)
 {
   gsEnableConstructorFunctions();
   ATermAppl result = gsRewriteTerm(t);
   return result;
 }
-
-
+*/
+/*
 string findfile(string path)
 {
   string token = "";
@@ -82,7 +78,8 @@ string findfile(string path)
   return token;
 
 }
-
+*/
+/*
 string findpath(string path)
 {
   string token = "";
@@ -103,7 +100,8 @@ string findpath(string path)
   
   return token;
 }
-
+*/
+/*
 string addconstelm(string filename)
 {
   string token = "";
@@ -125,7 +123,8 @@ string addconstelm(string filename)
   return token;
 
 }
-
+*/
+/*
 void print_set(set< int > S)
 {
   cout << "\033[0;1m Set : \033[m";
@@ -142,7 +141,9 @@ void print_set(set< int > S)
   cout << endl;
 
 }
+*/
 
+/*
 bool compare(data_expression x, data_expression y, data_equation_list equations, int option)
 {
   if (option == opt_none ){
@@ -171,24 +172,16 @@ bool compare(data_expression x, data_expression y, data_equation_list equations,
   ATermAppl x1 = rew2(x.to_ATermAppl(), gsMakeDataEqnSpec(equations.to_ATermList()));
   ATermAppl y1 = rew2(y.to_ATermAppl(), gsMakeDataEqnSpec(equations.to_ATermList()));
   return atermpp::aterm(x1) == atermpp::aterm(y1);  
-  
+ 
 }
-
+*/ 
+/*
 data_assignment_list nextstate(data_assignment_list currentstate, data_assignment_list assignments, data_equation_list equations, LPE lpe)
 {
   data_assignment_list out;
   data_assignment_list out1;
   data_assignment_list out2;
   data_expression z;
-  
-  /*//Origineel
-  data_assignment_list::iterator i = currentstate.begin();
-  while(i != currentstate.end() ){
-    z = i->lhs().to_expr();
-    out = append(out, data_assignment(i->lhs(), z ) );
-    i++;
-  }
-  */
 
   //Speedup
   data_variable d;
@@ -203,22 +196,6 @@ data_assignment_list nextstate(data_assignment_list currentstate, data_assignmen
   out = reverse(out);
   //End speedup
  
- /*
-  //  Original
-  i = out.begin();
-  while(i != out.end() ){
-    data_assignment_list::iterator j = assignments.begin();
-    z = i->lhs().to_expr();
-    while( j != assignments.end() ){
-      z = z.substitute( *j );    
-      j++;
-    } 
-    out1 = append(out1, data_assignment(i->lhs(), z));
-    i++;
-  }
-  */
-  
-  
   //data_variable d;
   i = out.begin();
   while(i != out.end() ){
@@ -234,20 +211,6 @@ data_assignment_list nextstate(data_assignment_list currentstate, data_assignmen
   } 
   out1 = reverse(out1);
   
-
-  /* Original 
-  i = out1.begin();
-  while(i != out1.end() ){
-    data_assignment_list::iterator j = currentstate.begin();
-    z = i->rhs();
-    while( j != currentstate.end() ){
-      z = z.substitute( *j );    
-      j++;
-    } 
-    out2 = append(out2, data_assignment(i->lhs(),data_expression( rewrite(z.to_ATermAppl(), gsMakeDataEqnSpec(equations.to_ATermList())))));
-    i++;
-  }
-  */
   i = out1.begin();
   while(i != out1.end() ){
     data_assignment_list::iterator j = currentstate.begin();
@@ -260,10 +223,11 @@ data_assignment_list nextstate(data_assignment_list currentstate, data_assignmen
     i++;
   }
   out2 = reverse(out2);
- 
+
  return out2; 
 }
-
+*/ 
+/*
 data_expression_list rhsl(data_assignment_list x)
 {
   data_expression_list y;
@@ -275,7 +239,9 @@ data_expression_list rhsl(data_assignment_list x)
   y = reverse(y);  
   return y;
 }
+*/
 
+/*
 data_variable_list lhsl(data_assignment_list x)
 {
   data_variable_list y;
@@ -284,10 +250,12 @@ data_variable_list lhsl(data_assignment_list x)
     y = push_front(y, i->lhs() );
     i++;
   };
-  y = reverse(y);
+  y = reverse(y); 
   return y;
 }
+*/
 
+/*
 bool eval_cond(data_expression datexpr, data_assignment_list statevector, data_equation_list equations, set<int> S){
 
   bool b;
@@ -299,14 +267,6 @@ bool eval_cond(data_expression datexpr, data_assignment_list statevector, data_e
   set<int>::iterator i;
   data_assignment_list conditionvector; 
   
-  /* Origninal
-  i = S.begin();
-  while (i != S.end()) {
-    conditionvector = append(conditionvector, data_assignment(  element_at(lhsl(statevector), *i) , element_at( rhsl(statevector), *i  )));
-    i++;
-  };
-  */
-
   //Speedup
   data_variable_list    sv1 = lhsl(statevector);
   data_expression_list  sv2 = rhsl(statevector);
@@ -339,7 +299,8 @@ bool eval_cond(data_expression datexpr, data_assignment_list statevector, data_e
 
   return b;
 }
-
+*/
+/*
 void  rebuild_lpe(specification spec,string  outfile, set< int > S, bool single){
 
   LPE lpe = spec.lpe();
@@ -374,7 +335,8 @@ void  rebuild_lpe(specification spec,string  outfile, set< int > S, bool single)
 
   return;
 }
-
+*/
+/*
 void print_const(specification spec , set< int > S)
 {  
 
@@ -394,19 +356,19 @@ void print_const(specification spec , set< int > S)
     cout << "\033[0;1m Constant Process parameters : \033[m" << endl;
     cout << "     "<< result.pp() << endl <<endl;
   };
-  
+ 
   return;
 }
-
-data_assignment make_var(data_variable datavar, int n){
+*/ 
+/*data_assignment make_var(data_variable datavar, int n){
   char buffer [99];
   sprintf(buffer, "%s^%d",datavar.name().c_str(), n);
   
   data_variable w(buffer, datavar.type() );
   data_assignment a(datavar , w.to_expr() );
   return a;
-}
-
+} */
+/*
 void constelm(string filename, string outfile, int option)
 {
   data_expression_list          vinit; //init vector
@@ -554,16 +516,16 @@ void constelm(string filename, string outfile, int option)
     print_const(spec , S);
     //cout << sum_true.size() << endl;
   }
-  rebuild_lpe(spec, outfile, S, nosingleton);
+  rebuild_lpe(spec, outfile, S, nosingleton); 
 
   // Finalise
   gsRewriteFinalise();
   return;
 }
-
+*/
 int main(int ac, char* av[])
 {
-   ATerm bot;
+/*   ATerm bot;
    ATinit(0,0,&bot);
    gsEnableConstructorFunctions();
 
@@ -656,7 +618,7 @@ int main(int ac, char* av[])
       cerr << e.what() << "\n";
       return 1;
     }    
-    
+ */   
     return 0;
 }
 
