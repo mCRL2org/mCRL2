@@ -11,9 +11,6 @@ extern "C" {
 #include <aterm2.h>
 #include "gslowlevel.h"
 #include "gsfunc.h"
-#include "gslexer.h"
-#include "gstypecheck.h"
-#include "gsdataimpl.h"
 #include "libprint_c.h"
 #include "libgsrewrite.h"
 

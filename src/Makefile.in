@@ -91,14 +91,14 @@ ifdef USE_BOOST
 
  #lpconstelm definitions
  LPECONSTELM_NAME    = lpe/lpeconstelm
- LPECONSTELM_OBJECTS = libprint_cxx.o gsfunc.o libgsrewrite.o libprint_c.o gslowlevel.o lpe/lpeconstelm.o
+ LPECONSTELM_OBJECTS = libprint_cxx.o gsfunc.o libprint_c.o gslowlevel.o lpe/lpeconstelm.o
  OBJECTS            += $(LPECONSTELM_OBJECTS)
  LPECONSTELM_LDFLAGS = -lgsrewrite -l$(ATERM) -lm $(LIBDL)
 endif
 
 #lperewr definitions
 LPEREWR_NAME       = lperewr
-LPEREWR_OBJECTS    = lperewr.o gsparser.o gslexer.o gstypecheck.o gsdataimpl.o libprint_c.o gsfunc.o gslowlevel.o
+LPEREWR_OBJECTS    = lperewr.o libprint_c.o gsfunc.o gslowlevel.o
 OBJECTS           += $(LPEREWR_OBJECTS)
 LPEREWR_LDFLAGS    = -lgsrewrite -l$(ATERM) -lm $(LIBDL)
 
