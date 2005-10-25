@@ -6,11 +6,9 @@
 #include <iostream>
 #include <ostream>
 
-extern "C" {
- #include <libxml/xmlreader.h>
-}
-
 #define UNSPECIFIED_TOOL ""
+
+class XMLTextReader;
 
 /*
  * A project is a collection of specifications objects along with meta
@@ -50,7 +48,7 @@ class Specification {
     bool Delete();
 
     /* Read from XML using a libXML2 reader */
-    bool Read(xmlTextReaderPtr reader) throw (int);
+    bool Read(XMLTextReader& reader) throw (int);
 
     /* Write as XML to stream */
     bool Write(std::ostream& stream = std::cout);

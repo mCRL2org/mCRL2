@@ -3,36 +3,9 @@
 #include <map>
 
 #include <stdio.h>
-#include <stdlib.h>
 
 #include "project_manager.h"
-
-/* Macro to convert constant C-type strings to const xmlChar* */
-#define TO_XML_STRING(c_string) reinterpret_cast < const unsigned char* > (c_string)
-
-/* Helper function for traversal of the XML document tree */
-inline void GetNextXMLElement(xmlTextReaderPtr& reader) throw (int) {
-  int status = xmlTextReaderRead(reader);
-
-  do {
-    if (status <= 0) {
-      /* Process error, or end of file */
-      throw (status);
-    }
-    else {
-      /* Skip white space */
-      if (xmlTextReaderNodeType(reader) == XML_READER_TYPE_SIGNIFICANT_WHITESPACE) {
-        /* Text is no profile, skip */
-        status = xmlTextReaderRead(reader);
-
-        continue;
-      }
-    }
-   
-    break;
-  }
-  while (1);
-}
+#include "xml_text_reader.h"
 
 ProjectManager::ProjectManager() {
   free_identifier = 0;
@@ -70,70 +43,60 @@ bool ProjectManager::Close() {
 
 /* Loads project configuration from XML file, project directory must be set in advance */
 bool ProjectManager::Load() {
-  std::string      project_file(project_root);
-  bool             return_value = true;
-  xmlTextReaderPtr reader;
-
-  project_file.append("/studio.project");
-
-  reader = xmlNewTextReaderFilename(project_file.c_str());
+  std::string   project_file(project_root);
+  bool          return_value = true;
+  XMLTextReader reader(project_file.append("/studio.project").c_str());
 
   /* Maps an identifier to a pointer to a specification object */
   std::map < unsigned int, Specification* > identifier_resolution;
 
   /* From here on assume that the XML file satisfies the project-catalog XML schema. */
-  if (reader == 0) {
+  if (!reader.StreamIsOpened()) {
     /* TODO Errors should be logged somewhere, but for the time std::cerr suffices */
 #ifndef NDEBUG
     std::cerr << "Fatal: Unable to open project master file. (" << project_file << ")\n";
 #endif
 
     /* Clean up */
-    xmlTextReaderClose(reader);
-    xmlFreeTextReader(reader);
+    reader.~XMLTextReader();
 
     return(false);
   }
 
 #if defined(PARSER_SCHEMA_VALIDATION)
-  if (xmlTextReaderSchemaValidate(reader,"schemas/studio_project.xsd") < 0) {
+  if (!reader.SetSchemaForValidation("schemas/studio_project.xsd")) {
     /* TODO Errors should be logged somewhere, but for the time std::cerr suffices */
 #ifndef NDEBUG
     std::cerr << "Error: schema is not usable.\n";
 #endif
 
     /* Clean up */
-    xmlTextReaderClose(reader);
-    xmlFreeTextReader(reader);
+    reader.~XMLTextReader();
 
     return (false);
   }
 #endif
 
   try {
-    unsigned char* temporary;
-    Specification  dummy;
+    Specification dummy;
 
     /* Read root element (studio-project) */
-    GetNextXMLElement(reader);
+    reader.Read();
  
-    GetNextXMLElement(reader);
+    reader.Read();
 
     /* Active node, must be either an optional project description or a specification element */
-    if (xmlStrEqual(xmlTextReaderName(reader),TO_XML_STRING("description"))) {
+    if (reader.IsElement("description")) {
       /* Proceed to content */
-      GetNextXMLElement(reader);
+      reader.Read();
 
-      temporary = xmlTextReaderValue(reader);
-
-      project_description = std::string((char*) temporary);
-
-      free(temporary);
+      /* Read attribute value */
+      reader.GetValue(&project_description);
 
       /* To end tag */
-      GetNextXMLElement(reader);
+      reader.Read();
 
-      GetNextXMLElement(reader);
+      reader.Read();
     }
 
     do {
@@ -146,13 +109,8 @@ bool ProjectManager::Load() {
       /* Update identifier resolution map */
       identifier_resolution[specifications.back().identifier] = &specifications.back();
 
-      GetNextXMLElement(reader);
- 
-      if (xmlTextReaderNodeType(reader) == XML_READER_TYPE_END_ELEMENT) {
-        /* Last element of studio-project*/
-        break;
-      }
-    } while (1);
+      reader.Read();
+    } while (!reader.IsEndElement());
   }
   catch(int status) {
     if (status != 0) {
@@ -166,8 +124,8 @@ bool ProjectManager::Load() {
   }
 
   /* Clean up */
-  xmlTextReaderClose(reader);
-  xmlFreeTextReader(reader);
+  reader.Close();
+  reader.Destroy();
 
   if (return_value) {
     /* Input completely parsed, replace identifiers by pointers to specifications */
@@ -476,120 +434,84 @@ bool Specification::Delete() {
  * TODO :
  *  - Exception handling what if writing to stream fails
  */
-bool Specification::Read(xmlTextReaderPtr reader) throw (int) {
-  unsigned char* temporary;
+bool Specification::Read(XMLTextReader& reader) throw (int) {
+  std::string temporary;
 
-  temporary = xmlTextReaderGetAttribute(reader, TO_XML_STRING("name"));
-  name = std::string((char*) temporary);
-  free(temporary);
-
-  temporary  = xmlTextReaderGetAttribute(reader, TO_XML_STRING("identifier"));
-  identifier = atoi((char*) temporary);
-  free(temporary);
-
-  temporary = xmlTextReaderGetAttribute(reader, TO_XML_STRING("uptodate"));
+  reader.GetAttribute(&name, "name");
+  reader.GetAttribute(&identifier, "identifier");
 
   /* Is specification explicitly marked up to date, or not */
-  if (temporary != 0) {
-    if (xmlStrEqual(temporary,TO_XML_STRING("true")) || xmlStrEqual(temporary,TO_XML_STRING("1"))) {
-      uptodate = true;
-    }
-    else {
-      uptodate = false;
-    }
-
-    free(temporary);
+  if (reader.GetAttribute(&temporary, "uptodate")) {
+    uptodate = (temporary == "true" || temporary == "1");
+  }
+  else {
+    uptodate = false;
   }
 
-  if (!xmlTextReaderIsEmptyElement(reader)) {
-    GetNextXMLElement(reader);
+  if (!reader.IsEmptyElement()) {
+    reader.Read();
 
     /* Active node, must be either an optional description for a specification or a tool-configuration */
-    if (xmlStrEqual(xmlTextReaderName(reader),TO_XML_STRING("description"))) {
+    if (reader.IsElement("description")) {
       /* Proceed to content */
-      GetNextXMLElement(reader);
+      reader.Read();
 
-      temporary   = xmlTextReaderValue(reader);
-      description = std::string((char*) temporary);
-      free(temporary);
+      reader.GetValue(&description);
    
       /* To end tag*/
-      GetNextXMLElement(reader);
-   
-      GetNextXMLElement(reader);
+      reader.Read();
+      reader.Read();
     }
 
     /* Process tool-configuration tag */
-    if (xmlStrEqual(xmlTextReaderName(reader),TO_XML_STRING("tool-configuration"))) {
+    if (reader.IsElement("tool-configuration")) {
       /* Retrieve command: the value of the tool name */
-      temporary       = xmlTextReaderGetAttribute(reader, TO_XML_STRING("tool-identifier"));
-      tool_identifier = std::string((char*) temporary);
-      free(temporary);
+      reader.GetAttribute(&tool_identifier, "tool-identifier");
      
-      GetNextXMLElement(reader);
+      reader.Read();
      
-      temporary          = xmlTextReaderValue(reader);
-      tool_configuration = std::string((char*) temporary);
-      free(temporary);
+      reader.GetValue(&tool_configuration);
 
       /* To end tag*/
-      GetNextXMLElement(reader);
-     
-      GetNextXMLElement(reader);
+      reader.Read();
+      reader.Read();
     }
 
-    if (xmlTextReaderNodeType(reader) != XML_READER_TYPE_END_ELEMENT && xmlStrEqual(xmlTextReaderName(reader),TO_XML_STRING("input-object"))) {
-      /* Dependent specifications follow until node type is XML_READER_TYPE_END_ELEMENT */
-      do {
-        InputPair new_pair;
+    /* Dependent specifications follow until node type is XML_READER_TYPE_END_ELEMENT */
+    while (!reader.IsEndElement() && reader.IsElement("input-object")) {
+      InputPair new_pair;
 
-        /* Resolve object identifier to pointer, works only if there are no dependency cycles */
-        temporary       = xmlTextReaderGetAttribute(reader, TO_XML_STRING("identifier"));
-        new_pair.first  = (Specification*) atoi((char*) temporary);
-        free(temporary);
-     
-        GetNextXMLElement(reader);
+      /* Resolve object identifier to pointer, works only if there are no dependency cycles */
+      reader.GetAttribute((unsigned int*) &new_pair.first, "identifier");
+    
+      reader.Read();
 
-        temporary = xmlTextReaderValue(reader);
-        new_pair.second = (char*) temporary;
-        free(temporary);
+      reader.GetValue(&new_pair.second);
 
-        input_objects.push_back(new_pair);
+      input_objects.push_back(new_pair);
 
-        /* To end tag*/
-        GetNextXMLElement(reader);
-     
-        GetNextXMLElement(reader);
-      }
-      while (xmlTextReaderNodeType(reader) != XML_READER_TYPE_END_ELEMENT && xmlStrEqual(xmlTextReaderName(reader),TO_XML_STRING("input-object")));
+      /* To end tag*/
+      reader.Read();
+      reader.Read();
     }
 
-    /* Read output objects */
-    if (xmlTextReaderNodeType(reader) != XML_READER_TYPE_END_ELEMENT && xmlStrEqual(xmlTextReaderName(reader),TO_XML_STRING("output-object"))) {
-      /* Dependent specifications follow until node type is XML_READER_TYPE_END_ELEMENT */
-      do {
-        OutputPair new_pair;
+    /* Dependent specifications follow until node type is XML_READER_TYPE_END_ELEMENT */
+    while (!reader.IsEndElement() && reader.IsElement("output-object")) {
+      OutputPair new_pair;
 
-        /* Set file format */
-        temporary       = xmlTextReaderGetAttribute(reader, TO_XML_STRING("format"));
-        new_pair.first  = std::string((char*) temporary);
-        free(temporary);
+      /* Set file format */
+      reader.GetAttribute(&new_pair.first, "format");
 
-        GetNextXMLElement(reader);
+      reader.Read();
 
-        /* Set file name */
-        temporary = xmlTextReaderValue(reader);
-        new_pair.second = std::string((char*) temporary);
-        free(temporary);
+      /* Set file name */
+      reader.GetValue(&new_pair.second);
 
-        output_objects.push_back(new_pair);
+      output_objects.push_back(new_pair);
 
-        /* To end tag*/
-        GetNextXMLElement(reader);
-     
-        GetNextXMLElement(reader);
-      }
-      while (xmlTextReaderNodeType(reader) != XML_READER_TYPE_END_ELEMENT);
+      /* To end tag*/
+      reader.Read();
+      reader.Read();
     }
   }
 

@@ -44,7 +44,7 @@ USE_WX             = @USE_WX@
 WX_LIBS            = @WX_LIBS@
 WX_CPPFLAGS        = @WX_CPPFLAGS@
 USE_BOOST          = @USE_BOOST@
-BOOST_PREFIX      = @BOOST_PREFIX@
+BOOST_PREFIX       = @BOOST_PREFIX@
 
 # Installation directories
 prefix             = @prefix@
