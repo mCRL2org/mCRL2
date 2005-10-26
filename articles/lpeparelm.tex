@@ -1,0 +1,139 @@
+\documentclass[a4paper,10pt]{article}
+\usepackage{textcomp,amsmath,amssymb,amsthm,stmaryrd}
+\usepackage{geometry}
+\usepackage{mymath,mythm}
+
+\theoremstyle{plain}
+\newtheorem{thmfs}{Theorem}[section]
+\theoremstyle{definition}
+\newtheorem{tcase}[thmfs]{Test case}
+
+\newcommand{\mcrl}{mCRL2}
+\newcommand{\lpe}{linear process equation}
+\newcommand{\tool}{\textit{lpeparelm}}
+\newcommand{\ti}{\textit}
+
+\newcommand{\ovr}{\overrightarrow}
+
+\newcommand{\pp}{process parameter}
+\newcommand{\pps}{process parameters}
+\newcommand{\framework}{\textit{LPE framework} \cite{LPEframework}}
+
+\newcommand{\bisim}{\frac{\leftrightarrow}{}}
+
+\newcommand{\tab}{\hspace*{5.mm} \= \hspace*{5.mm} \= \hspace*{5.mm} \= \hspace*{5.mm} \= \hspace*{5.mm} \= \hspace*{5.mm}  \= \hspace*{5.mm}  \= \hspace*{5.mm}  \= \hspace*{5.mm} \= \hspace*{5.mm} \= \hspace*{5.mm}  \= \hspace*{5.mm}  \= \hspace*{5.mm}\kill}
+
+\font \aap cmmi10        
+\newcommand{\at}[1]{\mbox{\aap ,} #1}
+
+%opening
+\title{lpeparelm\\DRAFT}
+\author{F.P.M.Stappers}
+
+\begin{document}
+
+\maketitle
+
+\begin{abstract}
+This documentation describes the usage and implementation of the tool \tool\ within the \mcrl\ toolset.
+Basically, \tool\ is a tool which removes parameters and non occurring sum variables, which are not used in a \lpe\ (LPE).
+\end{abstract}
+
+\section{Introduction}
+This \tool\ tool is a tool for the \mcrl\ studio. The tool is a
+filter which reads from a \ti{input.lpe}. The file \ti{input.lpe} is
+a file in \ti{.lpe} format \cite{LPEformat}. We make use of the
+\framework\ to read the \ti{input.lpe}. For
+each constant \pp\ The filter removes \pp\ and sum variables which are not used, from the
+\lpe . After the algorithm (Section \ref{sec:alg}) terminates, \tool\
+will write the output to an output file \ti{output.lpe} in the \ti{.lpe} format \cite{LPEformat}.
+
+\section{Definitions} \label{sec:def}
+
+The equation below is a \lpe\ in \mcrl : 
+\begin{defn}\label{def}[\lpe\ (LPE)]$\newline$
+%\at werkt niet
+\begin{tabbing}
+\tab
+$X (\ovr{d}:\ovr{D}) = \sum_{i \in I} \sum_{\ovr{e_i}:\ovr{E_i}} \ovr{c_i} ( \ovr{d}, \ovr{e_i} ) \rightarrow $\\
+\> \> $(a_i^0 (\ovr{f_{i,0}}(\ovr{d},\ovr{e_i})) \vert \ldots \vert a_i^{n(i)}(\ovr{f_{i,n(i)}}(\ovr{d},\ovr{e_i}))) \at \text{ } t_i(\ovr{d},\ovr{e_i})  \cdot X(\ovr{g_i}(\ovr{d},\ovr{e_i})) $
+\end{tabbing}
+\end{defn}
+
+If we speak about an LPE in this article we refer to Definition \ref{def}.  The different states 
+%are $\ovr{d}$ 
+of the process are represented by the data vector parameter $\ovr{d}:\ovr{D}$. $\ovr{D}$ may be a Cartesian product of $n$ data types, meaning that $\ovr{d}$ may consist of a tuple $(d_1, \ldots, d_n)$. The LPE expresses that in state $\ovr{d}$ it preforms (multi)actions $\rbrace a_i^0, \ldots , a_i^n \rbrace$, carrying data parameters $\ovr{f_{i,0}}(\ovr{d},\ovr{e_i}), \ldots , \ovr{f_{i,n(i)}}(\ovr{d},\ovr{e_i})$ and 
+it can reach the new state $\ovr{g_i}(\ovr{d},e_i)$ under the condition that $\ovr{c_i}(\ovr{d},\ovr{e_i})$ is \ti{true}. So for each summand $i$ from $I$ we have a function $\ovr{g_i}: \ovr{D} \times E \rightarrow \ovr{D}$ and a function $\ovr{c_i}: \ovr{D} \times \ovr{E} \rightarrow \mathbb{B}$.
+Data parameters $\ovr{e_i} : \ovr{E_i}$ are sum variables. These variables are used to let a read or send action range over a data domain. 
+
+For an more detailed explanation of \lpe s  we refer to \cite{LPE_info}.
+%\end{defn}
+
+\section{Definition}
+A parameter of an LPE that has no influence on the parmeters actions, (time)conditions and the behavior of LPE are removed in the \tool . Elimination of  inert parameters can lead to a reduction when generating a state space of an LPE. If a inert \pp\ ranges over an infinite domain, the number of generated states can even be reduced to a finite domain, using this operation. This typically happens after hiding parts of a specification.
+
+%Let $1 \leq m \leq n$;
+%We define the original vector as $\ovr{p}$:\\
+%$\ovr{p} = \langle p_1, \ldots, p_n \rangle$\\
+%We define the derived vector from $\ovr{p}$ as $\ovr{p'}$: \\
+%$\ovr{p'} = \langle p_1', \ldots, p_m' \rangle$\\
+%For which holds:\\
+%$\forall_{i: 1 \leq i \leq m}\exists_{j: \leq j \leq n}(p_i'= p_j) $\\
+
+\begin{defn} Let $S$ be the set of indices of a vector.\\ 
+We define $\ovr{v'}_S$:\\
+$$\ovr{v'}_S = \ovr{v} \setminus S$$
+Explanation: If an index $j$ occurs in $S$ the new constructed $\ovr{v'}_S$ does not contains $v_j$.
+\end{defn}
+
+Next we want to find the largest set $T \subseteq \lbrace 1, \ldots , \vert \ovr{d} \vert \rbrace$  and $U_i \subseteq \lbrace 1, \ldots, \vert {e_i} \vert \rbrace$ for which holds:
+
+\begin{tabbing}
+\tab
+\> $\sum_{i \in I} \sum_{\ovr{e_i}:\ovr{E_i}} \ovr{c_i} ( \ovr{d}, \ovr{e_i} ) \rightarrow $\\
+\> \> \> $(a_i^0 (\ovr{f_{i,0}}(\ovr{d},\ovr{e_i})) \vert \ldots \vert a_i^{n(i)}(\ovr{f_{i,n(i)}}(\ovr{d},\ovr{e_i}))) \at \text{ } t_i(\ovr{d},\ovr{e_i})  \cdot X(\ovr{g_i}(\ovr{d},\ovr{e_i})) 
+$ \\
+$\bisim$ \\
+\> $\sum_{i \in I} \sum_{\ovr{e_i'}_{U_i}:\ovr{E_i'}_{U_i}} \ovr{c_i} ( \ovr{d'}_T, \ovr{e_i'}_{U_i} ) \rightarrow $\\
+\> \> \> 
+$(a_i^0 (\ovr{f_{i,0}}(\ovr{d'}_T,\ovr{e_i'}_{U_i})) \vert \ldots \vert a_i^{n(i)}(\ovr{f_{i,n(i)}}(\ovr{d'}_T,\ovr{e_i'}_{U_i}))) \at \text{ } t_i(\ovr{d'}_T,\ovr{e_i'}_{U_i})  \cdot X(\ovr{g_i}(\ovr{d'}_T,\ovr{e_i'}_{U_i})) 
+$ \\
+\end{tabbing}
+
+\section{Proposals}
+
+\section{Description}
+In this section we describe the algorithm informally. Throughout the run of the algorithm \pps\ get marked if they are used in an action or condition. Process parameters which do not get marked are candidates for being removed. If a \pp\ gets marked it should not be removed. Initally, all parameters in the LPE are unmarked. A \pp\ is marked if it occurs in one of the following places:
+
+\begin{itemize}
+\item In a condition: $c_i(\ovr{d},{e_i})$ for some $i \in I$
+\item In an argument: $f_i(\ovr{d},{e_i})$ for some $i \in I$
+\item In a timecondition: $t_i(\ovr{d},{e_i})$ for some $i \in I$
+\item In an argument: $g_i(\ovr{d},{e_i})_j$ for some $i \in I$ and $j \in \lbrace 1, \ldots , m \rbrace$ where the $j$-th \pp\ is marked.
+
+\end{itemize}
+
+\section{Algorithms} \label{sec:alg}
+
+\begin{thebibliography}{99}  \bibitem{LPE_info} auteur\\
+   \textit{article},
+   Extra info.
+  \bibitem{LPEframework} J.W. Wesselink,
+   \textit{http://www.win.tue.nl/~wieger/mcrl2/html/index.html}\\
+   A C++ wrapper for the ATerm library.
+  \bibitem{LPEformat} auteur,
+   \textit{article}
+   Extra info.
+  \bibitem{LPEfreevar} auteur,
+   \textit{article}
+   Extra info.
+  \bibitem{rewrite} M. v. Weerdenburg (e.a??),
+   \textit{gsrewrite}
+   Extra info.
+  \bibitem{lin} J.F. Groote,
+   \textit{linear}
+   Extra info.
+
+\end{thebibliography}
+
+\end{document}

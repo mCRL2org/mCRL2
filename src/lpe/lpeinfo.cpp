@@ -38,6 +38,7 @@ int display(string filename, int opt)
   LPE lpe = spec.lpe();
     
   if (opt == NO_OPTION) {
+    cout << "Output of                   : " << filename << endl << endl;
     cout << "Number of summands          : " << lpe.summands().size() <<endl;
     cout << "Number of free variables    : " << spec.initial_free_variables().size() + lpe.free_variables().size() <<endl;
     cout << "Number of process parameters: " << lpe.process_parameters().size() <<endl; 
@@ -61,7 +62,7 @@ int main(int ac, char* av[])
    ATinit(0,0,&bot);
    gsEnableConstructorFunctions();
 
-      string filename;
+   vector< string > filename;
       int opt = NO_OPTION;
 
       try {
@@ -75,7 +76,7 @@ int main(int ac, char* av[])
 	
 	po::options_description hidden("Hidden options");
 	hidden.add_options()
-	    ("INFILE", po::value<string>(), "input file" )
+       ("INFILE", po::value< vector<string> >(), "input file")
 	;
 	
 	po::options_description cmdline_options;
@@ -108,15 +109,24 @@ int main(int ac, char* av[])
 
         if (vm.count("INFILE"))
         {
-          filename = vm["INFILE"].as<string>();
+       filename = vm["INFILE"].as< vector<string> >();
 	}
 
 	if (vm.count("pars"))
 		{opt = PARS;}
 	if (vm.count("npars"))
 		{opt = NPARS;}
-  display(filename, opt);       
-    }
+
+  vector< string >::iterator z;
+  z = filename.begin();
+  while (z != filename.end()){
+    cout << endl;
+    display(*z, opt);
+    z++;       
+    cout << endl;
+  };
+
+  }
     catch(exception& e)
     {
         cout << e.what() << "\n";

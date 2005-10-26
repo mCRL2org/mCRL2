@@ -26,6 +26,11 @@
 \newcommand{\sq}{$\square$}
 \newcommand{\ifs}{\ti{influence set}}
 
+\newcommand{\Sig}{\nm{Sig}}
+\newcommand{\Sort}{\nm{Sort}}
+\newcommand{\Fun}{\nm{Fun}}
+\newcommand{\ap}{{:}}
+
 \newcommand{\tab}{\hspace*{5.mm} \= \hspace*{5.mm} \= \hspace*{5.mm} \= \hspace*{5.mm} \= \hspace*{5.mm} \= \hspace*{5.mm}  \= \hspace*{5.mm}  \= \hspace*{5.mm}  \= \hspace*{5.mm} \= \hspace*{5.mm} \= \hspace*{5.mm}  \= \hspace*{5.mm}  \= \hspace*{5.mm}\kill}
 
 \font \aap cmmi10        
@@ -36,7 +41,7 @@
 
 
 %opening
-\title{lpeconstelm \\ DRAFT \\ work in progress}
+\title{lpeconstelm \\ DRAFT}
 \author{F.P.M. Stappers}
 
 \begin{document}
@@ -154,6 +159,21 @@ $S_L^{NF}(\ovr{v_0}) = \lbrace j \in  \lbrace 1, \ldots, n \rbrace \vert \forall
 \end{defn}
 
 To get $S_L^{NF} (\ovr{v_0})$ we have to compute $R_L^{FV}(\ovr{v_0})$, and this means we have to generate the entire state space starting from state $\ovr{init}$. However we interested in an approximation. We take proposal 3 (Section \ref{def:sug3}) as a starting point for constructing Proposal 4 (Section \ref{def:sug4}).
+
+\subsection{lpeconstelm no singleton removal}
+Each \pp\ used within an LPE is specified on a domain. The size of such a domain can range from very small (empty domains) to very large (infinite domains). By counting the number of constructors we can determine if a sort belongs to a singleton domain or domain which does not exists out of only one element. Note that we don't have empty domains. If we use the \tool\ filter and we have a domain which consist out of only one element, this domain will be removed from the LPE. If you don't want to remove singleton domains an additional check can be preformed, which prohibits the \tool\ filter to remove these \pps .
+
+\begin{defn}
+Let $\Sig$ be a signature. We call a {\tt Name} $T$ a {\it constructor sort}
+iff $T\in\Sig.\Sort$ and there exists {\tt Name}s $T_1,\ldots, T_k, f$ ($k\geq 0$)
+such that $f\ap T_1\times \cdots\times T_k\rightarrow T\in \Sig.\Fun$.
+\end{defn}
+
+To detect if $T$ is a singleton, it has to full fill the following criteria:
+\begin{itemize}
+\item $T$ has only one constructor sort. \\
+\item $\forall_{i: 1 \leq i \leq n}(T_{i} = \text{singleton}) $.
+\end{itemize}
 
 \section{Proposals}
 \subsection{Proposal 1 - without free variables} \label{sec:prop1}
@@ -298,8 +318,11 @@ So $\otimes_X = \odot_X(d_j)$; next we prove:
 \> $\Rightarrow$ \> \> \\
 \> \> $j \in \lbrace k \vert \forall_{i \in I} (\forall_{e_i:E_i} (\forall_{d\in D_k} (\ovr{c_i}( \ovr{\odot_{S_L^3}}(d), e_i) \rightarrow (init_k = g_i (\ovr{\odot_{S_L^3}}(d), e_i )_k))  \rbrace $ \\
 %\> $=$ \> $\forall_{ i \in I }\forall_{ e_i \in E_i} ( \ovr{v} \in R_L(\ovr{v_0}) \wedge \ovr{c_i}(\ovr{v}, e_i) ) \rightarrow  \ovr{g_i}(\ovr{v}, e_i) \in R_L(\ovr{v_0})$ \\
-\> $=$ \>  \>$\forall_{i\in I}(\forall_{e_i:E_i}(\forall_{d:D}( g_i(\odot(d),e_i) \in R_L(\ovr{init})))) $ and $\forall_{i\in I}(\forall_{e_i:E_i}(\forall_{d:D}( \odot(d),e_i) \in R_L(\ovr{init})))$\\
+\> $=$ \>  \>$ \forall_{i\in I}\forall_{e_i:E_i}\forall_{d:D} : (\odot_{S_L^3}(d),e_i) \in R_L(\ovr{init})) $ and 
+$\ovr{c_i}(\odot_{S_L^3}(d),e_i)$ holds, \\
+\> \> \> \> then $ g_i( \odot_{S_L^3}(d),e_i) \in R_L(\ovr{init})$ \\
 %\> \> $j \in \lbrace k \vert \forall_{\ovr{v} \in \lbrace \ovr{init} \rbrace \cup \lbrace R_L(\ovr{init})\rbrace }(v_k = init_k) \rbrace$ \\
+%\> \> \> \> if $(\odot_{S_L^3}}(d),e_i) \in R_L(\ovr{init})$ and $\ovr{c_i}(\odot_{S_L^3}}(d),e_i)$ holds, \\ \> \> \> \>then $\ovr{g_i}(\odot_{S_L^3}}(d),e_i) \in R_L(\ovr{init})$ \\
 %\> $=$ \> \\
 \> \> $j \in \lbrace k \vert \forall_{\ovr{v} \in R_L(\ovr{init})} (v_k = init_k)) \rbrace$\\
 \> $=$ \> \>Definition \ref{def:lpe_comp}\\
@@ -322,34 +345,38 @@ If $j \not\in X$ then $\oplus_{X_j} = d_j$.
 If $j \in X$ then $\oplus_{X_j} = v$.
 \end{defn}
 
-In order find the largest subset we give: % to the following definition: 
+\begin{defn} We define $Y(\ovr{m})$:
+\begin{tabbing}
+\tab
+$\forall_{i \in I}($\\
+\> $NF(c_i(\ovr{m}) \neq false) \rightarrow$ \\
+\> ( \> 		\> ( $NF(g_i(\ovr{m})_j) \not\in FV \wedge NF(m_j) \not\in FV \rightarrow (NF(m_j) = NF(g_i(\ovr{m})_j))$ )\\
+\> \> $\vee$ 	\> ( $NF( m_j) \in FV $)\\
+\> \> $\vee$ 	\>	( $NF(g_i(\ovr{m})_j) \in FV \wedge NF(m_j) \not\in FV \rightarrow Y(g_i(\ovr{m}))$ )\\
+\> ) \\
+$)$
+\end{tabbing}
+\end{defn}
 
+\noindent In order find the largest subset we give: % to the following definition: 
 \begin{defn} \label{def:sug4} Let $L$ be an LPE. We define $S_L^4$:
-
 \begin{tabbing}
 \tab
 $ S_L^4 \subseteq \lbrace 1, \ldots, n \rbrace $ \\ \\
 such that:\\ \\
-$\exists_{z}( \forall_{i \in I}$ \\
-\>$(NF( \ovr{c_i} ( \ovr{\otimes{S_L^4}}, e' ) ) \not= "false" \rightarrow $\\
-\> \> $\forall_{j \in S_L^4}$\\
-\>\>\>$(NF(g_i(\ovr{\oplus_{S_L^4}}(z), e' )_j \not\in FV$ \>\>\>\>\>\>\> $\rightarrow  z =  NF( g_i(\ovr{\oplus_{S_L^4}}(z), e' )_j))$\\
-\>\>$\wedge$\\
-\>\>\>$NF(\ovr{\oplus_{S_L^4}}(z), e' )_j \not\in FV$ \>\>\>\>\>\>\> $\rightarrow z = NF((\ovr{\oplus_{S_L^4}}(z), e' )_j))))$
+$\exists_{z}( \forall_{J \in S_L^4} (Y((\ovr{\oplus_X}(z), e')))$ \\
 \end{tabbing}
-
 \end{defn}
-
 If we compare Definition \ref{def:sug4} to Definition \ref{def:lpe_comp_fv} we see the following:
 \begin{thm} Let $L$ be an LPE. \label{thm:sub_fv}
-$$S_L^4(\ovr{init}) \subseteq S_L^NF(\ovr{init}) $$
+$$S_L^4(\ovr{init}) \subseteq S_L^{FV}(\ovr{init}) $$
 \end{thm} 
 \begin{flushleft}
 \tb{Proof. \ref{thm:sub_fv}}
 \end{flushleft}
 We do case distinction on $S_L^4$
-Let $S_L^4(\ovr{init})$ be $\emptyset$, then $S_L^4 \subseteq S_L^{NF}$ holds trivially.
-Let $S_L^4(\ovr{init})$ not be $\emptyset$. We prove there is an element in $S_L^4(\ovr{init})$, which is also in $S_L^{NF}(\ovr{init})$.
+Let $S_L^4(\ovr{init})$ be $\emptyset$, then $S_L^4 \subseteq S_L^{FV}$ holds trivially.
+Let $S_L^4(\ovr{init})$ not be $\emptyset$. We prove there is an element in $S_L^4(\ovr{init})$, which is also in $S_L^{FV}(\ovr{init})$.
 \begin{tabbing}
 $\vdots$ Bewijs
 \end{tabbing}
@@ -400,6 +427,10 @@ First we rewrite and evaluate all the conditions of all the summands. We "evalua
 If the rewritten condition is in a normal form other then \ti{false} the condition might be \ti{true}, thus we calculate the nextstate of the current summand.  We compare each element from the \sv\ with the nextstate vector for which the indices are is in $S$. When we compare we use the rules associated with free variables. If an element is not equal, the corresponding index is removed from the set $S$. The corresponding \pp\ in the \sv\ gets a special value, for indicating that the variable is not constant. Note: When comparing these special values with other variables, these always yield false. 
 
 If no elements are removed from $S$ during the last iteration - either there are no more constant \pps\ or all \pps\ are constant - the algorithm ends. Next all constant \pps\ are substituted with their constant values and are removed from the LPE. 
+
+\subsection{no singleton removal}
+Here we describe how singleton domains are begin detected.
+
 
 \newpage
 \section{Algorithms}

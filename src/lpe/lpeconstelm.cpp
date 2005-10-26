@@ -19,9 +19,9 @@
 
 //mCRL2
 //#include <aterm2.h>
-//#include "atermpp/aterm.h"
+#include "atermpp/aterm.h"
 //#include "mcrl2/mcrl2_visitor.h"
-//#include "mcrl2/specification.h"
+#include "mcrl2/specification.h"
 //#include "mcrl2/predefined_symbols.h"
 //#include "mcrl2/sort.h"
 
@@ -30,8 +30,8 @@
 #include "gslowlevel.h"
 
 using namespace std;
-//using namespace mcrl2;
-//using namespace atermpp;
+using namespace mcrl2;
+using namespace atermpp;
 
 namespace po = boost::program_options;
 po::variables_map vm;
@@ -48,16 +48,15 @@ const int opt_left       = 1;
 const int opt_right      = 2;
 const int opt_both       = 3;
 
-/*
+
 ATermAppl rew2(ATermAppl t, ATermAppl rewrite_terms)
 {
   gsEnableConstructorFunctions();
   ATermAppl result = gsRewriteTerm(t);
   return result;
 }
-*/
-/*
-string findfile(string path)
+
+/*string findfile(string path)
 {
   string token = "";
   string::size_type begIdx;
@@ -78,8 +77,8 @@ string findfile(string path)
   return token;
 
 }
-*/
-/*
+
+
 string findpath(string path)
 {
   string token = "";
@@ -99,9 +98,9 @@ string findpath(string path)
   token = path.substr( begIdx, endIdx );
   
   return token;
-}
-*/
-/*
+}*/
+
+
 string addconstelm(string filename)
 {
   string token = "";
@@ -123,8 +122,8 @@ string addconstelm(string filename)
   return token;
 
 }
-*/
-/*
+
+
 void print_set(set< int > S)
 {
   cout << "\033[0;1m Set : \033[m";
@@ -141,40 +140,42 @@ void print_set(set< int > S)
   cout << endl;
 
 }
-*/
 
-/*
+
+
 bool compare(data_expression x, data_expression y, data_equation_list equations, int option)
 {
   if (option == opt_none ){
     return x==y;
   };
+
+  return true;
  
  if (option == opt_left){
-    ATermAppl x1 = rew2(x.to_ATermAppl(), gsMakeDataEqnSpec(equations.to_ATermList()));
-    ATermAppl y1 = y.to_ATermAppl() ;
+    ATermAppl x1 = rew2(aterm_appl(x) , gsMakeDataEqnSpec(aterm_list(equations) ));
+    ATermAppl y1 = aterm_appl(y) ;
     return atermpp::aterm(x1) == atermpp::aterm(y1);     
   };
  
  if (option == opt_right){
-    ATermAppl x1 = x.to_ATermAppl() ;
-    ATermAppl y1 = rew2(y.to_ATermAppl(), gsMakeDataEqnSpec(equations.to_ATermList()));
+    ATermAppl x1 = aterm_appl(x);
+    ATermAppl y1 = rew2(aterm_appl(y) , gsMakeDataEqnSpec(aterm_list(equations) ));
     return atermpp::aterm(x1) == atermpp::aterm(y1);     
   };
  
  if (option == opt_both){
-    ATermAppl x1 = rew2(x.to_ATermAppl(), gsMakeDataEqnSpec(equations.to_ATermList()));
-    ATermAppl y1 = rew2(y.to_ATermAppl(), gsMakeDataEqnSpec(equations.to_ATermList()));
+    ATermAppl x1 = rew2(aterm_appl(x), gsMakeDataEqnSpec(aterm_list(equations) ));
+    ATermAppl y1 = rew2(aterm_appl(y), gsMakeDataEqnSpec(aterm_list(equations) ));
     return atermpp::aterm(x1) == atermpp::aterm(y1);     
   };
 
   cout << "\033[0;31mError in Rewrite\033[0m" << endl;
-  ATermAppl x1 = rew2(x.to_ATermAppl(), gsMakeDataEqnSpec(equations.to_ATermList()));
-  ATermAppl y1 = rew2(y.to_ATermAppl(), gsMakeDataEqnSpec(equations.to_ATermList()));
+  ATermAppl x1 = rew2(aterm_appl(x), gsMakeDataEqnSpec(aterm_list(equations) ));
+  ATermAppl y1 = rew2(aterm_appl(y), gsMakeDataEqnSpec(aterm_list(equations) ));
   return atermpp::aterm(x1) == atermpp::aterm(y1);  
- 
+
 }
-*/ 
+ 
 /*
 data_assignment_list nextstate(data_assignment_list currentstate, data_assignment_list assignments, data_equation_list equations, LPE lpe)
 {
@@ -182,6 +183,8 @@ data_assignment_list nextstate(data_assignment_list currentstate, data_assignmen
   data_assignment_list out1;
   data_assignment_list out2;
   data_expression z;
+
+  return currentstate;
 
   //Speedup
   data_variable d;
@@ -219,7 +222,7 @@ data_assignment_list nextstate(data_assignment_list currentstate, data_assignmen
       z = z.substitute( *j );    
       j++;
     } 
-    out2 = push_front(out2, data_assignment(i->lhs(),data_expression( rew2(z.to_ATermAppl(), gsMakeDataEqnSpec(equations.to_ATermList())))));
+    out2 = push_front(out2, data_assignment(i->lhs(),data_expression( rew2(aterm_appl(z), gsMakeDataEqnSpec(aterm_list(equations))))));
     i++;
   }
   out2 = reverse(out2);
@@ -227,8 +230,8 @@ data_assignment_list nextstate(data_assignment_list currentstate, data_assignmen
  return out2; 
 }
 */ 
-/*
-data_expression_list rhsl(data_assignment_list x)
+
+/*data_expression_list rhsl(data_assignment_list x)
 {
   data_expression_list y;
   data_assignment_list::iterator i = x.begin();
@@ -255,11 +258,12 @@ data_variable_list lhsl(data_assignment_list x)
 }
 */
 
-/*
+
 bool eval_cond(data_expression datexpr, data_assignment_list statevector, data_equation_list equations, set<int> S){
 
   bool b;
-  
+
+/*  
   if (alltrue){
     return true;
   };
@@ -296,10 +300,10 @@ bool eval_cond(data_expression datexpr, data_assignment_list statevector, data_e
   //
 
   b = !compare(data_expression(gsMakeOpIdFalse()), datexpr, equations, opt_right);
-
+*/
   return b;
 }
-*/
+
 /*
 void  rebuild_lpe(specification spec,string  outfile, set< int > S, bool single){
 
@@ -407,7 +411,7 @@ void constelm(string filename, string outfile, int option)
   
   freevars = concat(spec.initial_free_variables(), lpe.free_variables());
   
-  gsRewriteInit(gsMakeDataEqnSpec(equations.to_ATermList()), GS_REWR_INNER3); 
+  gsRewriteInit(gsMakeDataEqnSpec(aterm_list(equations)), GS_REWR_INNER3); 
   
   set< int > V; 
   set< int > S;
