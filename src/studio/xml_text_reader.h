@@ -27,7 +27,9 @@ class XMLTextReader {
     /* Traverses of the XML document tree */
     void Read() throw (int);
 
+#if defined(PARSER_SCHEMA_VALIDATION)
     bool SetSchemaForValidation(const char* file_name);
+#endif
 
     /* Returns the name of the current element */
     inline char* ElementName();

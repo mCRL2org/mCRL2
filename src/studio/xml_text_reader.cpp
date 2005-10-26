@@ -4,9 +4,11 @@ XMLTextReader::XMLTextReader(const char* file_name) {
   reader = xmlNewTextReaderFilename(file_name);
 }
 
+#if defined(PARSER_SCHEMA_VALIDATION)
 bool XMLTextReader::SetSchemaForValidation(const char* file_name) {
   return (0 <= xmlTextReaderSchemaValidate(reader, file_name));
 }
+#endif
 
 void XMLTextReader::Close() {
   xmlTextReaderClose(reader);
