@@ -1,25 +1,25 @@
-% This is the dining philosophers problem with two philosophers
+% This is the dining philosophers problem
+% Variable K indicates the number of philosophers (and forks)
+%
+% Note: When changing the value of K, change the KForkPhil process accordingly!
 
-act
-    get_f1;  get_f2;
-    put_f1;  put_f2;
-    down_f1; up_f1;
-    down_f2; up_f2;
-    lock_f1; lock_f2;
-    free_f1; free_f2;
+map K: Pos;
+eqn K = 2;
 
+act  get,put,up,down,lock,free: Nat;
 
-proc P1	= get_f1 . get_f2 . put_f1 . put_f2 . P1;
+proc Phil(n:Nat) = get(n).get((n+1) mod K).put(n).put((n+1) mod K).Phil(n);
 
-proc P2 = get_f2 .  get_f1 .  put_f2 .  put_f1 . P2;
+proc Fork(n:Nat) =  up(n).down(n).Fork(n);
 
-proc F1 =  up_f1 . down_f1 . F1;
+proc ForkPhil(n:Nat) = Fork(n) || Phil(n);
 
-proc F2 = up_f2 . down_f2 . F2;
+proc KForkPhil =
+       % ForkPhil(0) || ... || ForkPhil(K-1);
+       ForkPhil(0) || ForkPhil(1);
 
 init
-    allow( { lock_f1, lock_f2, free_f1, free_f2},
-    comm( { get_f1|up_f1->lock_f1, get_f2|up_f2->lock_f2, put_f1|down_f1->free_f1,
-	    put_f2|down_f2->free_f2 },
-      P1 || P2 || F1 ||  F2
+    allow( { lock, free },
+    comm( { get|up->lock, put|down->free },
+      KForkPhil
     ));
