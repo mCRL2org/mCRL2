@@ -26,7 +26,6 @@
 #include "atermpp/aterm_list_iterator.h"
 
 namespace {
-
   // In the ATerm library the following functions are #define's:
   
   // #define   ATgetNext(l)  ((l)->tail)
@@ -46,6 +45,13 @@ namespace {
   int aterm_get_length(ATermList l)
   {
     return ATgetLength(l);
+  }
+
+  // needed to avoid conversion problems with push_front
+  inline
+  ATermList aterm_insert(ATermList l, ATermAppl elem)
+  {
+    return ATinsert(l, (ATerm) elem);
   }
 }
 
@@ -214,7 +220,7 @@ namespace atermpp {
   template <typename Term>
   inline
   term_list<Term> push_front(term_list<Term> l, Term elem)
-  { return term_list<Term>(ATinsert(l, elem)); }
+  { return term_list<Term>(aterm_insert(l, elem)); }
 
   ///
   /// Returns the list obtained by removing the first element.

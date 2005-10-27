@@ -15,7 +15,7 @@
 namespace mcrl2 {
 
 using atermpp::aterm_appl;
-using atermpp::aterm_list;
+using atermpp::term_list;
 using atermpp::make_term;
 
 ///////////////////////////////////////////////////////////////////////////////

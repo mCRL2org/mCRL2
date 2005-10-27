@@ -33,9 +33,9 @@ using atermpp::aterm_appl;
       
       /// Two terms are considered equal if the underlying aterms are identical.
       /// 
-      bool operator==(const aterm_wrapper& t) const
+      bool operator==(const aterm_wrapper& other) const
       {
-        return m_term == t.m_term;
+        return m_term == other.m_term;
       }
       
       /// Returns a string representation of the term.
@@ -48,11 +48,6 @@ using atermpp::aterm_appl;
       operator ATermAppl() const
       {
         return m_term;
-      }
-
-      bool operator==(aterm_wrapper other)
-      {
-        return aterm_appl(m_term) == other.m_term;
       }
 
       /// Returns a pretty print representation of the term.
