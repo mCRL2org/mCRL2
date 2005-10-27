@@ -1,0 +1,142 @@
+<?xml version="1.0"?>
+
+<!DOCTYPE refentry PUBLIC "-//OASIS//DTD DocBook XML V4.2//EN" "http://www.oasis-open.org/docbook/xml/4.2/docbookx.dtd"[
+<!ENTITY % param SYSTEM "param.xml">
+%param;
+<!ENTITY tbf2lpe "<function>tbf2lpe</function>">
+<!ENTITY input_lpe "<parameter>input_lpe</parameter>">
+<!ENTITY output_lpe "<parameter>output_lpe</parameter>">
+<!ENTITY opt_h "<option>-h</option>">
+<!ENTITY opt_q "<option>-q</option>">
+<!ENTITY opt_v "<option>-v</option>">
+<!ENTITY opt_n "<option>-n</option>">
+<!ENTITY opt_help "<option>-help</option>">
+<!ENTITY opt_quiet "<option>-quiet</option>">
+<!ENTITY opt_verbose "<option>-verbose</option>">
+<!ENTITY opt_noconvmaps "<option>-no-conv-maps</option>">
+<!ENTITY opt_noconvcons "<option>-no-conv-cons</option>">
+<!ENTITY Bool "<constant>Bool</constant>">
+<!ENTITY Bool_F "<constant>F</constant>">
+<!ENTITY Bool_T "<constant>T</constant>">
+<!ENTITY Bool_and "<constant>and</constant>">
+<!ENTITY Bool_or "<constant>or</constant>">
+<!ENTITY Bool_eq "<constant>eq</constant>">
+<!ENTITY Bool_false "<constant>false</constant>">
+<!ENTITY Bool_true "<constant>true</constant>">
+<!ENTITY Bool_and2 "<constant>&amp;&amp;</constant>">
+<!ENTITY Bool_or2 "<constant>||</constant>">
+<!ENTITY Bool_eq2 "<constant>==</constant>">
+]>
+
+<refentry id="tbf2lpe">
+
+<refmeta>
+  <refentrytitle>tbf2lpe</refentrytitle>
+  <manvolnum>1</manvolnum>
+</refmeta>
+
+<refnamediv>
+  <refname>tbf2lpe</refname>
+  <refpurpose>convert muCRL LPEs to mCRL2 LPEs</refpurpose>
+</refnamediv>
+
+<refsynopsisdiv>
+  <cmdsynopsis>
+    <command>&tbf2lpe;</command>
+    <arg choice="plain">&input_lpe;</arg>
+    <arg choice="plain">&output_lpe;</arg>
+  </cmdsynopsis>
+</refsynopsisdiv>
+
+<refsect1>
+  <title>Description</title>
+  <para>
+    The &tbf2lpe; tool translates linear process expressions (LPEs) from the
+    muCRL format (.tbf) to the mCRL2 format (.lpe).
+  </para>
+  <para>
+    Although the basic translation only changes the storage format of the LPE,
+    some conversions are applied to generate an LPE that all mCRL2 tools can
+    use as can be expected. Specifically, this means that the constructors
+    &Bool_F; and &Bool_T; of sort &Bool; are converted to their mCRL2
+    counterparts (&Bool_false; and &Bool_true;) as well as the functions
+    &Bool_and; and &Bool_or; (to &Bool_and2; and &Bool_or2;) and all equalities
+    &Bool_eq; (to &Bool_eq2;). The conversion of &Bool_F; and &Bool_T; is
+    needed for detecting whether or not a boolean expression is equal to true or
+    false, which is necessary for simulation and state space generation, for
+    example. The other conversions (of &Bool_and;, &Bool_or; and &Bool_eq;) are
+    not necessary, but allow for elimination of sum variables (which can
+    significantly speed up state space generation).
+  </para>
+</refsect1>
+
+<refsect1>
+  <title>Options</title>
+  <para>
+    <variablelist>
+
+      <varlistentry>
+        <term>&opt_h;</term>
+        <term>&opt_help;</term>
+	<listitem>
+	  <para>
+	    display help message and terminate
+	  </para>
+	</listitem>
+      </varlistentry>
+
+      <varlistentry>
+        <term>&opt_q;</term>
+        <term>&opt_quiet;</term>
+	<listitem>
+	  <para>
+	    do not print any (unrequested) information
+	  </para>
+	</listitem>
+      </varlistentry>
+
+      <varlistentry>
+        <term>&opt_v;</term>
+        <term>&opt_verbose;</term>
+	<listitem>
+	  <para>
+	    display extra information during execution of the program
+	  </para>
+	</listitem>
+      </varlistentry>
+
+      <varlistentry>
+        <term>&opt_n;</term>
+        <term>&opt_noconvmaps;</term>
+	<listitem>
+	  <para>
+	    do not apply conversions of mappings (i.e. &Bool_and;, &Bool_or;
+	    and &Bool_eq;)
+	  </para>
+	</listitem>
+      </varlistentry>
+
+      <varlistentry>
+        <term>&opt_noconvcons;</term>
+	<listitem>
+	  <para>
+	    do not apply conversions of the &Bool; constructors (i.e. &Bool_F;
+	    and &Bool_T;); note that this conversion is really needed for the
+	    toolset to know what true and false are (e.g. simulation and state
+	    space generation will not be possible)
+	  </para>
+	</listitem>
+      </varlistentry>
+
+    </variablelist>
+  </para>
+</refsect1>
+
+<refsect1>
+<title>Author</title>
+<para>
+Written by Muck van Weerdenburg. Please send all complaints, comments and bug fixes to me.
+</para>
+</refsect1>
+
+</refentry>

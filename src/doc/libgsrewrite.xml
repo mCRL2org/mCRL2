@@ -25,11 +25,11 @@
 <!ENTITY parTerm "<parameter>Term</parameter>">
 <!ENTITY parTerms "<parameter>Terms</parameter>">
 <!ENTITY parS "<parameter>s</parameter>">
-<!ENTITY stratINNER3 "<literal>GS_REWR_INNER3</literal>">
-<!ENTITY stratINNER3string "<literal>inner3</literal>">
-<!ENTITY stratINNERC "<literal>GS_REWR_INNERC</literal>">
-<!ENTITY stratJITTY "<literal>GS_REWR_JITTY</literal>">
-<!ENTITY stratINVALID "<literal>GS_REWR_INVALID</literal>">
+<!ENTITY stratINNER3 "<constant>GS_REWR_INNER3</constant>">
+<!ENTITY stratINNER3string "<constant>inner3</constant>">
+<!ENTITY stratINNERC "<constant>GS_REWR_INNERC</constant>">
+<!ENTITY stratJITTY "<constant>GS_REWR_JITTY</constant>">
+<!ENTITY stratINVALID "<constant>GS_REWR_INVALID</constant>">
 <!ENTITY gsEnableConstructorFunctions "<function>gsEnableConstructorFunctions</function>">
 <!ENTITY RWapplySubstitution "<function>RWapplySubstitution</function>">
 ]>
