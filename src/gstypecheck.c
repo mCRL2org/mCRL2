@@ -1628,7 +1628,7 @@ static ATermAppl gstcTraverseVarConsTypeD(ATermTable Vars, ATermAppl *DataTerm, 
     ATermAppl Data=ATAgetArgument(*DataTerm,0);
     ATermAppl NewType=gstcTraverseVarConsTypeDN(nArguments,Vars,
 						&Data,gsMakeSortArrowProd(ArgumentTypes,PosType));
-    if(!NewType) {gsErrorMsg("(the type error above occurred in DataTerm %P while trying to cast it to type %P)\n",gsMakeDataApplProd(Data,Arguments),PosType);return NULL;}
+    if(!NewType) {gsErrorMsg("type error while trying to cast %P to type %P)\n",gsMakeDataApplProd(Data,Arguments),PosType);return NULL;}
     
     //it is possible that:
     //1) a cast has happened
@@ -1732,7 +1732,7 @@ static ATermAppl gstcTraverseVarConsTypeD(ATermTable Vars, ATermAppl *DataTerm, 
     else if(ParListS) ParList=ATconcat(ParListS,ParList);
 
     if(!ParList){
-      gsErrorMsg("unknown Op %P\n",Name);
+      gsErrorMsg("unknown operation %P\n",Name);
       return NULL;
     }
     
@@ -1742,7 +1742,7 @@ static ATermAppl gstcTraverseVarConsTypeD(ATermTable Vars, ATermAppl *DataTerm, 
       return Type;
     }
     else{
-      gsWarningMsg("unknown Op %P\n",Name);    
+      gsWarningMsg("unknown operation %P\n",Name);    
       *DataTerm=gsMakeOpId(Name,gsMakeUnknown());
       return gsMakeUnknown();
     }
@@ -1795,7 +1795,7 @@ static ATermAppl gstcTraverseVarConsTypeDN(int nFactPars, ATermTable Vars, ATerm
     else if(ParListS) ParList=ATconcat(ParListS,ParList);
 
     if(!ParList) {
-      gsErrorMsg("unknown Op %P with %d parameters\n",Name,nFactPars);
+      gsErrorMsg("unknown operation %P with %d parameters\n",Name,nFactPars);
       return NULL;
     }
     gsDebugMsg("Possible types for Op %T with %d arguments are (ParList: %T; PosType: %T)\n",Name,nFactPars,ParList,PosType);
@@ -1860,7 +1860,7 @@ static ATermAppl gstcTraverseVarConsTypeDN(int nFactPars, ATermTable Vars, ATerm
     }
 	
     if(ATisEmpty(ParList)) {
-      gsErrorMsg("unknown Op %P with %d arguments that matches %P\n",Name,nFactPars,PosType);    
+      gsErrorMsg("unknown operation %P with %d arguments that matches type %P\n",Name,nFactPars,PosType);    
       return NULL;
     }
     
@@ -1960,7 +1960,7 @@ static ATermAppl gstcTraverseVarConsTypeDN(int nFactPars, ATermTable Vars, ATerm
       return Type;
     }
     else{
-      gsWarningMsg("ambiguous Op %P with %d parameters\n",Name,nFactPars);    
+      gsWarningMsg("ambiguous operation %P with %d parameters\n",Name,nFactPars);    
       *DataTerm=gsMakeOpId(Name,gsMakeUnknown());
       return gsMakeUnknown();
     }

@@ -20,6 +20,33 @@ static ATermTable alphas;
 static ATermTable procs;
 static bool all_stable;
 
+static AFun afunPair;
+static ATermTable syncs;
+static ATermTable untypes;
+
+static inline ATermAppl Pair(ATermList ma1, ATermList ma2){
+  return ATmakeAppl2(afunPair,(ATerm)ma1,(ATerm)ma2);
+}
+
+static inline void sPut(ATermList ma1, ATermList ma2, ATermList Result){
+  ATtablePut(syncs,(ATerm)Pair(ma1,ma2),(ATerm)Result);
+}
+
+static inline ATermList sGet(ATermList ma1, ATermList ma2){
+  return (ATermList) ATtableGet(syncs,(ATerm)Pair(ma1,ma2));
+}
+
+static inline void utPut(ATermList ma, ATermList Result){
+  ATtablePut(untypes,(ATerm)ma,(ATerm)Result);
+}
+
+static inline ATermList utGet(ATermList ma){
+  return (ATermList) ATtableGet(untypes,(ATerm)ma);
+}
+
+
+
+
 static ATermAppl gsApplyAlpha(ATermAppl a);
 
 static inline ATermList gsaATsortList(ATermList l){
@@ -58,10 +85,20 @@ static inline ATermList typeA(ATermAppl Act){
 
 static inline ATermList untypeMA(ATermList MAct){
   //returns "untyped multiaction name" of MAct
-  ATermList r=ATmakeList0();
-  for(;!ATisEmpty(MAct);MAct=ATgetNext(MAct))
-    r=ATinsert(r,(ATerm)untypeA(ATAgetFirst(MAct)));
-  return ATreverse(r);
+  
+  //ATermList r=ATmakeList0();
+  //for(;!ATisEmpty(MAct);MAct=ATgetNext(MAct))
+  // r=ATinsert(r,(ATerm)untypeA(ATAgetFirst(MAct)));
+  //return ATreverse(r);
+  
+  if(ATisEmpty(MAct)) return ATmakeList0(); 
+  
+  ATermList r=utGet(MAct);
+  if(r) return r;
+
+  r=ATinsert(untypeMA(ATgetNext(MAct)),(ATerm)untypeA(ATAgetFirst(MAct)));
+  utPut(MAct,r);
+  return r;
 }
 
 static inline ATermList typeMA(ATermList MAct){
@@ -101,27 +138,30 @@ static inline ATermList typeMAL(ATermList LMAct){
 }
 
 static ATermList sync_mact(ATermList a, ATermList b){
-  ATermList c = ATmakeList0();
-  while ( !(ATisEmpty(a) || ATisEmpty(b)) ){
-    ATermAppl aa=ATAgetFirst(a);
-    ATermAppl bb=ATAgetFirst(b);
-    if ( ATcompare((ATerm)aa,(ATerm)bb) <=0 ) {
-      c = ATinsert(c,(ATerm)aa);
-      a = ATgetNext(a);
-    } 
-    else {
-      c = ATinsert(c,(ATerm)bb);
-      b = ATgetNext(b);
-    }
-  }
-  c=ATreverse(c);
-  if ( !ATisEmpty(a) ){
-    c = ATconcat(c,a);
-  } else if ( !ATisEmpty(b) )
-    {
-      c = ATconcat(c,b);
-    }
-  return c;
+/*   ATermList c = ATmakeList0(); */
+/*   while ( !(ATisEmpty(a) || ATisEmpty(b)) ){ */
+/*     ATermAppl aa=ATAgetFirst(a); */
+/*     ATermAppl bb=ATAgetFirst(b); */
+/*     if ( ATcompare((ATerm)aa,(ATerm)bb) <=0 ) { */
+/*       c = ATinsert(c,(ATerm)aa); */
+/*       a = ATgetNext(a); */
+/*     }  */
+/*     else { */
+/*       c = ATinsert(c,(ATerm)bb); */
+/*       b = ATgetNext(b); */
+/*     } */
+/*   } */
+/*   c=ATreverse(c); */
+/*   if ( !ATisEmpty(a) ){ */
+/*     c = ATconcat(c,a); */
+/*   } else if ( !ATisEmpty(b) ) */
+/*     { */
+/*       c = ATconcat(c,b); */
+/*     } */
+/*   return c; */
+
+
+
 /*   //return gsaATsortList(ATconcat(a,b)); */
 /*   int n = ATgetLength(a); */
 /*   int m = ATgetLength(b); */
@@ -148,12 +188,38 @@ static ATermList sync_mact(ATermList a, ATermList b){
 /*     c[i] = ATAgetFirst(a); */
 /*     a = ATgetNext(a); */
 /*  } */
-  
 /*   ATermList r=ATmakeList0(); */
 /*   for (;i>=0;i--) */
 /*     r=ATinsert(r,(ATerm)c[i]); */
 /*   free(c); */
 /*   return r; */
+
+  assert(a && b);
+
+  if(ATisEmpty(a)) return b;
+  if(ATisEmpty(b)) return a;
+  
+  ATermList c = sGet(a,b);
+  if(c) return c;
+
+  ATermAppl aa=ATAgetFirst(a); 
+  ATermAppl bb=ATAgetFirst(b); 
+
+  if ( ATcompare((ATerm)aa,(ATerm)bb) > 0 ) {
+    ATermList t=a; a=b; b=t; //swap a and b
+    aa=bb; //no need for bb
+  } 
+  
+  c=ATgetNext(a);
+  if(ATisEmpty(c))
+    c=ATinsert(b,(ATerm)aa);
+  else {
+    c=ATinsert(sync_mact(c,b),(ATerm)aa);
+  }
+
+  sPut(a,b,c);
+  sPut(b,a,c);
+  return c; 
 }
 
 static ATermList merge_list(ATermList l, ATermList m){
@@ -1121,6 +1187,11 @@ static ATermAppl gsApplyAlpha(ATermAppl a){
 
 ATermAppl gsAlpha(ATermAppl Spec){
   //create the tables
+  afunPair=ATmakeAFun("p",2,ATfalse);
+  ATprotectAFun(afunPair);
+  syncs = ATtableCreate(10000,80);
+  untypes = ATtableCreate(10000,80);
+
   procs = ATtableCreate(10000,80);
   alphas = ATtableCreate(10000,80);
 
@@ -1173,6 +1244,8 @@ ATermAppl gsAlpha(ATermAppl Spec){
 
   ATtableDestroy(alphas);
   ATtableDestroy(procs);
+  ATtableDestroy(syncs);
+  ATtableDestroy(untypes);
   
   Spec = ATsetArgument(Spec,(ATerm) gsMakeProcEqnSpec(new_pr),5);
   Spec = ATsetArgument(Spec,(ATerm) gsMakeInit(ATLgetArgument(ATAgetArgument(Spec,6),0),init),6);

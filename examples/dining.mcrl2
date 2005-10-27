@@ -3,23 +3,26 @@
 %
 % Note: When changing the value of K, change the KForkPhil process accordingly!
 
-map K: Pos;
 eqn K = 2;
 
-act  get,put,up,down,lock,free: Nat;
+cons K: Pos;
 
-proc Phil(n:Nat) = get(n).get((n+1) mod K).put(n).put((n+1) mod K).Phil(n);
+act get,put,up,down,lock,free: Pos#Pos;
+    eat: Pos;
 
-proc Fork(n:Nat) =  up(n).down(n).Fork(n);
+proc 
+  Phil(n:Pos) = get(n,n).get(n,if(n==K,1,n+1)).eat(n).put(n,n).put(n,if(n==K,1,n+1)).Phil(n);
+  Fork(n:Pos) = sum m:Pos.up(m,n).down(m,n).Fork(n);
 
-proc ForkPhil(n:Nat) = Fork(n) || Phil(n);
+  ForkPhil(n:Pos) = Fork(n) || Phil(n);
+  KForkPhil(k:Pos) =
+       % ForkPhil(1) || ... || ForkPhil(k);
+       % or 
+       % (k>1) -> (ForkPhil(k)||KForkPhil(max(k-1,1))),ForkPhil(k);
+       ForkPhil(1) || ForkPhil(2);
 
-proc KForkPhil =
-       % ForkPhil(0) || ... || ForkPhil(K-1);
-       ForkPhil(0) || ForkPhil(1);
+init allow( { lock, free, eat },
+       comm( { get|up->lock, put|down->free },
+         KForkPhil(K)
+     ));
 
-init
-    allow( { lock, free },
-    comm( { get|up->lock, put|down->free },
-      KForkPhil
-    ));
