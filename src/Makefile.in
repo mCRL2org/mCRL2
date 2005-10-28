@@ -146,7 +146,7 @@ OBJECTS           := $(sort $(OBJECTS))
 
 # Build bjam and local boost 
 ifeq ($(BOOST_PREFIX),boost)
-all: boost
+all distclean install: boost
 endif
 
 all: $(EXE_NAMES) $(LIB_NAMES)
@@ -210,7 +210,7 @@ endif
 clean:
 	$(RM) $(EXE_NAMES) $(LIB_NAMES) *.o *.a *.d *.dpp lpe/*.o lpe/*.dpp aterm/*.o aterm/*.a aterm/*.d svc/*.o svc/*.a svc/*.d gslexer.c gsparser.c gsparser.h gsparser.output lpeinfo lpeconstelm config.status config.log *~ core core.*
 
-distclean: clean boost
+distclean: clean
 	$(RM) -r autom4te.cache Makefile config gsrewr_innerc_aux.h
 
 $(ATERM_NAME): $(ATERM_OBJECTS)

@@ -37,7 +37,7 @@ $(BJAM):
 	cd tools/build/jam_src; \
 	$(BJAM_BUILD)
 
-install:
+install: all
 
 clean:
 	@-$(RM) -rf bin lib tools/build/jam_src/bin tools/build/jam_src/bootstrap
