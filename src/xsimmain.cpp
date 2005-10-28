@@ -351,6 +351,7 @@ void XSimMain::LoadFile(const wxString &filename)
     }
     initial_state = gsNextStateInit(Spec,!use_dummies,GS_STATE_VECTOR,rewr_strat);
 
+    current_state = NULL;
     InitialiseViews();
     Reset(initial_state);
 }
@@ -1008,7 +1009,7 @@ void XSimMain::SetCurrentState(ATerm state, bool showchange)
 {
 	ATerm old;
 
-	if ( (current_state == NULL) || (ATgetLength(current_state) != ATgetLength(state)) )
+	if ( current_state == NULL )
 	{
 		old = state;
 	} else {

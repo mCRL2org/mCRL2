@@ -42,6 +42,7 @@ public:
 
 private:
     // WDR: method declarations for XSimMain
+    void AddState(ATermAppl Transition, ATerm State, bool enabled);
     
 private:
     // WDR: member variable declarations for XSimMain

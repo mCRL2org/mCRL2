@@ -90,11 +90,34 @@ void XSimTraceDLL::Initialise(ATermList Pars)
 {
 }
 
-void XSimTraceDLL::StateChanged(ATermAppl Transition, ATerm State, ATermList NextStates)
+void XSimTraceDLL::AddState(ATermAppl Transition, ATerm State, bool enabled)
 {
 	if ( Transition != NULL )
 	{
 		stringstream ss;
+		int l = traceview->GetItemCount();
+
+		traceview->InsertItem(l,wxString::Format(wxT("%i"),current_pos));
+		traceview->SetItem(l,1,wxConvLocal.cMB2WX(PrintPart_CXX((ATerm) Transition, ppAdvanced).c_str()));
+		traceview->SetItem(l,2,wxConvLocal.cMB2WX(ss.str().c_str()));
+		traceview->SetColumnWidth(2,wxLIST_AUTOSIZE);
+		if ( enabled )
+		{
+			wxColor col(255,255,255);
+			PrintState(ss,State);
+			traceview->SetItemBackgroundColour(l,col);
+		} else {
+			wxColor col(245,245,245);
+			PrintState(ss,State);
+			traceview->SetItemBackgroundColour(l,col);
+		}
+	}
+}
+
+void XSimTraceDLL::StateChanged(ATermAppl Transition, ATerm State, ATermList NextStates)
+{
+	if ( Transition != NULL )
+	{
 		int l = traceview->GetItemCount()-1;
 
 		while ( l > current_pos )
@@ -102,12 +125,8 @@ void XSimTraceDLL::StateChanged(ATermAppl Transition, ATerm State, ATermList Nex
 			traceview->DeleteItem(l);
 			l--;
 		}
+		AddState(Transition,State,true);
 		current_pos++;
-		traceview->InsertItem(current_pos,wxString::Format(wxT("%i"),current_pos));
-		traceview->SetItem(current_pos,1,wxConvLocal.cMB2WX(PrintPart_CXX((ATerm) Transition, ppAdvanced).c_str()));
-		PrintState(ss,State);
-		traceview->SetItem(current_pos,2,wxConvLocal.cMB2WX(ss.str().c_str()));
-		traceview->SetColumnWidth(2,wxLIST_AUTOSIZE);
 	}
 }
 
@@ -162,7 +181,7 @@ void XSimTraceDLL::TraceChanged(ATermList Trace, int From)
 		{
 			Reset(ATgetFirst(ATgetNext(ATLgetFirst(Trace))));
 		} else {
-			StateChanged(ATAgetFirst(ATLgetFirst(Trace)),ATgetFirst(ATgetNext(ATLgetFirst(Trace))),NULL);
+			AddState(ATAgetFirst(ATLgetFirst(Trace)),ATgetFirst(ATgetNext(ATLgetFirst(Trace))),current_pos >= From);
 		}
 		From++;
 	}
