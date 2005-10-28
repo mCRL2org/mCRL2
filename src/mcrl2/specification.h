@@ -127,13 +127,6 @@ class specification: public aterm_wrapper
       data_expression_list d0(m_initial_free_variables);
     }
 
-    /// Returns the assignments of the initial state.
-    ///
-    data_assignment_list initial_assignments() const
-    {
-      return m_initial_assignments;
-    }
-
   public:
     specification()
     {}
@@ -252,6 +245,13 @@ class specification: public aterm_wrapper
     data_variable_list initial_free_variables() const
     {
       return m_initial_free_variables;
+    }
+
+    /// Returns the assignments of the initial state.
+    ///
+    data_assignment_list initial_assignments() const
+    {
+      return m_initial_assignments;
     }
 };
 

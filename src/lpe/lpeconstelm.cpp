@@ -18,12 +18,8 @@
 #include <boost/program_options.hpp>
 
 //mCRL2
-//#include <aterm2.h>
 #include "atermpp/aterm.h"
-//#include "mcrl2/mcrl2_visitor.h"
 #include "mcrl2/specification.h"
-//#include "mcrl2/predefined_symbols.h"
-//#include "mcrl2/sort.h"
 
 #include "libgsrewrite.h"
 #include "gsfunc.h"
@@ -43,7 +39,7 @@ bool alltrue    = false;
 bool reachable  = false;
 bool nosingleton = false;
 
-const int opt_none        = 0;
+const int opt_none       = 0;
 const int opt_left       = 1;
 const int opt_right      = 2;
 const int opt_both       = 3;
@@ -56,7 +52,7 @@ ATermAppl rew2(ATermAppl t, ATermAppl rewrite_terms)
   return result;
 }
 
-/*string findfile(string path)
+string findfile(string path)
 {
   string token = "";
   string::size_type begIdx;
@@ -98,7 +94,7 @@ string findpath(string path)
   token = path.substr( begIdx, endIdx );
   
   return token;
-}*/
+}
 
 
 string addconstelm(string filename)
@@ -138,9 +134,15 @@ void print_set(set< int > S)
   j++;
   }
   cout << endl;
-
 }
 
+void print_statevector(vector< data_assignment > sv  )
+{
+  for(vector< data_assignment >::iterator i =sv.begin();i != sv.end();i++){
+    cout <<"[" << i->pp() <<"]";
+  }
+  cout << endl;
+}
 
 
 bool compare(data_expression x, data_expression y, data_equation_list equations, int option)
@@ -148,8 +150,6 @@ bool compare(data_expression x, data_expression y, data_equation_list equations,
   if (option == opt_none ){
     return x==y;
   };
-
-  return true;
  
  if (option == opt_left){
     ATermAppl x1 = rew2(aterm_appl(x) , gsMakeDataEqnSpec(aterm_list(equations) ));
@@ -176,94 +176,87 @@ bool compare(data_expression x, data_expression y, data_equation_list equations,
 
 }
  
-/*
-data_assignment_list nextstate(data_assignment_list currentstate, data_assignment_list assignments, data_equation_list equations, LPE lpe)
+vector< data_assignment > nextstate(vector< data_assignment > currentstate, vector< data_assignment > assignments, data_equation_list equations, LPE lpe)
 {
-  data_assignment_list out;
-  data_assignment_list out1;
-  data_assignment_list out2;
+  vector< data_assignment > out;
+  vector< data_assignment > out1;
+  vector< data_assignment > out2;
   data_expression z;
 
-  return currentstate;
+ // return currentstate;
 
   //Speedup
   data_variable d;
-  data_assignment_list::iterator i = currentstate.begin();
+  vector< data_assignment >::iterator i = currentstate.begin();
   while(i != currentstate.end() ){
     d = i->lhs();
-    out = push_front(out, data_assignment(d, d.to_expr() ));
+    out.push_back( data_assignment(d, data_expression(aterm_appl(d) )));
     i++;
   
   }
-  //Keep in mind list is reversed -- Does not match set S!!!!
-  out = reverse(out);
   //End speedup
  
   //data_variable d;
   i = out.begin();
   while(i != out.end() ){
-    data_assignment_list::iterator j = assignments.begin();
+    vector< data_assignment >::iterator j = assignments.begin();
     d = i->lhs();
     z = d.to_expr();
     while( j != assignments.end() ){
       z = z.substitute( *j );    
       j++;
     } 
-    out1 = push_front(out1, data_assignment(d , z));
+    out1.push_back( data_assignment(d , z));
     i++;
   } 
-  out1 = reverse(out1);
   
   i = out1.begin();
   while(i != out1.end() ){
-    data_assignment_list::iterator j = currentstate.begin();
+    vector< data_assignment >::iterator j = currentstate.begin();
     z = i->rhs();
     while( j != currentstate.end() ){
       z = z.substitute( *j );    
       j++;
     } 
-    out2 = push_front(out2, data_assignment(i->lhs(),data_expression( rew2(aterm_appl(z), gsMakeDataEqnSpec(aterm_list(equations))))));
+    out2.push_back(data_assignment(i->lhs(),data_expression( rew2(aterm_appl(z), gsMakeDataEqnSpec(aterm_list(equations))))));
     i++;
   }
-  out2 = reverse(out2);
 
  return out2; 
 }
-*/ 
+ 
 
-/*data_expression_list rhsl(data_assignment_list x)
+vector< data_expression > rhsl(vector < data_assignment > x)
 {
-  data_expression_list y;
-  data_assignment_list::iterator i = x.begin();
+  vector< data_expression > y;
+  vector< data_assignment >::iterator i = x.begin();
   while (i != x.end()) {
-    y = push_front(y, i->rhs() );
+    y.push_back(i->rhs());
     i++;
   };
-  y = reverse(y);  
   return y;
 }
-*/
 
-/*
-data_variable_list lhsl(data_assignment_list x)
+
+vector< data_variable > lhsl(vector < data_assignment > x)
 {
-  data_variable_list y;
-  data_assignment_list::iterator i = x.begin();
+  vector< data_variable > y;
+  vector< data_assignment >::iterator i = x.begin();
   while (i != x.end()) {
-    y = push_front(y, i->lhs() );
+    y.push_back(i->lhs());
     i++;
   };
-  y = reverse(y); 
   return y;
 }
-*/
 
 
-bool eval_cond(data_expression datexpr, data_assignment_list statevector, data_equation_list equations, set<int> S){
+
+bool eval_cond(data_expression datexpr, vector< data_assignment > statevector, data_equation_list equations, set<int> S){
 
   bool b;
 
-/*  
+ // return true;
+  
   if (alltrue){
     return true;
   };
@@ -272,20 +265,16 @@ bool eval_cond(data_expression datexpr, data_assignment_list statevector, data_e
   data_assignment_list conditionvector; 
   
   //Speedup
-  data_variable_list    sv1 = lhsl(statevector);
-  data_expression_list  sv2 = rhsl(statevector);
-  data_variable_list::iterator isv1 = sv1.begin();
-  data_expression_list::iterator isv2 = sv2.begin();
+  vector< data_variable >    sv1 = lhsl(statevector);
+  vector< data_expression >  sv2 = rhsl(statevector);
 
   i = S.begin();
   int z = 0;
   while (i != S.end()) {
     if(z == *i) {
-      conditionvector = push_front(conditionvector, data_assignment(  *isv1 , *isv2 ));
+      conditionvector = push_front(conditionvector, data_assignment(  sv1[*i] , sv2[*i] ));
       i++;
     }
-    isv1++; 
-    isv2++;
     z++; 
   };
   
@@ -300,35 +289,33 @@ bool eval_cond(data_expression datexpr, data_assignment_list statevector, data_e
   //
 
   b = !compare(data_expression(gsMakeOpIdFalse()), datexpr, equations, opt_right);
-*/
   return b;
 }
 
-/*
+
 void  rebuild_lpe(specification spec,string  outfile, set< int > S, bool single){
 
   LPE lpe = spec.lpe();
-
+  
+  vector< data_assignment > result;
   set< int >::iterator i;
-  data_assignment_list sub = spec.init_assignments();
-  data_assignment_list result;
-  
-  i = S.begin();
-  while (i != S.end()) {
-    if (!single){ //&& element_at(lhsl(sub), *i).type().size() == 1){
-      result = append(result, data_assignment(  element_at(lhsl(sub), *i) , element_at( rhsl(sub), *i  )));
-     };
-    i++;
-  };
-  
-  data_assignment_list::iterator j = result.begin();
-  while(j != result.end() ){
-    lpe = lpe.substitute(*j);
-    j++;
+  data_assignment_list sub = spec.initial_assignments();
+  if (!S.empty()){
+    i = S.begin(); 
+    int k = 0;
+    for(data_assignment_list::iterator j = sub.begin() ;j != sub.end() ;j++){
+      if (*i==k){
+        result.push_back(*j);
+        i++;
+      };
+      k++;
+    }
   }
-
-  //spec2 = specification(spec.sorts(), spec.constructors(), spec.mappings(), spec.equations(), spec.initial_state(), spec.init_variables(), spec.init_assignments, spec.lpe().to_ATermAppl() );
-
+  if (!result.empty()){
+    lpe = lpe.substitute(result.begin(), result.end());
+  }
+  
+  cout << lpe.pp() << endl;
   
   if  (spec.save(outfile)){
     cout << " Written output file: " << outfile << endl << endl;
@@ -339,51 +326,54 @@ void  rebuild_lpe(specification spec,string  outfile, set< int > S, bool single)
 
   return;
 }
-*/
-/*
+
+
 void print_const(specification spec , set< int > S)
 {  
 
   LPE lpe = spec.lpe();
 
   set< int >::iterator i;
-  data_assignment_list sub = spec.init_assignments();
-  data_assignment_list result;
+  data_assignment_list sub = spec.initial_assignments();
+  cout << "\033[0;1m The constant process parameters \033[0m" << endl;
+  if (!S.empty()){
+    i = S.begin(); 
+    int k = 0;
+    for(data_assignment_list::iterator j = sub.begin() ;j != sub.end() ;j++){
+      if (*i==k){
+      // result.push_back(*j);
+        cout << "[" << j->pp() << "]" ;
+        i++;
+      };
+      k++;
+    }
+    cout << endl;
+  } else
+  {cout << "[]" << endl;}
   
-  i = S.begin();
-  while (i != S.end()) {
-    result = append(result, data_assignment(  element_at(lhsl(sub), *i) , element_at( rhsl(sub), *i  )));
-    i++;
-  };
-
-  { 
-    cout << "\033[0;1m Constant Process parameters : \033[m" << endl;
-    cout << "     "<< result.pp() << endl <<endl;
-  };
- 
   return;
 }
-*/ 
-/*data_assignment make_var(data_variable datavar, int n){
+ 
+data_assignment make_var(data_variable datavar, int n){
   char buffer [99];
   sprintf(buffer, "%s^%d",datavar.name().c_str(), n);
   
   data_variable w(buffer, datavar.type() );
   data_assignment a(datavar , w.to_expr() );
   return a;
-} */
-/*
+} 
+
 void constelm(string filename, string outfile, int option)
 {
   data_expression_list          vinit; //init vector
-  data_assignment_list          newstatevector; // newstate vector
-  data_assignment_list          tvector;
-  data_assignment_list          sv;
-  data_assignment_list          ainit; 
+  vector< data_assignment >newstatevector; // newstate vector
+  vector< data_assignment >tvector;
+  vector< data_assignment >sv;
+  vector< data_assignment >ainit; 
   data_variable_list            freevars;
   int                           n;    //number of process parameters
   int                           newdatvar = 0 ;
-  data_expression_list          listofnonconst;
+  set < data_expression >          listofnonconst;
   vector< summand_list::iterator > sum_true;
   
   // Load LPE input file
@@ -403,13 +393,24 @@ void constelm(string filename, string outfile, int option)
   // Determine the inital processes
   // 
   n = lpe.process_parameters().size();
-  sv = spec.init_assignments();
-  ainit = spec.init_assignments();
+  
+  for(data_assignment_list::iterator i = spec.initial_assignments().begin(); i != spec.initial_assignments().end() ; i++ ){
+    sv.push_back(*i);
+  }
+  //sv = spec.initial_assignments();
+  
+  ainit = sv;
   newstatevector = sv;  
 
   data_equation_list equations = spec.equations();
   
-  freevars = concat(spec.initial_free_variables(), lpe.free_variables());
+  for (data_variable_list::iterator di = spec.initial_free_variables().begin(); di != spec.initial_free_variables().end(); di++){
+    push_front(freevars, *di);
+  }
+  for (data_variable_list::iterator di = lpe.free_variables().begin(); di != lpe.free_variables().end(); di++){
+    push_front(freevars, *di);
+  }  
+  //freevars = concat(spec.initial_free_variables(), lpe.free_variables());
   
   gsRewriteInit(gsMakeDataEqnSpec(aterm_list(equations)), GS_REWR_INNER3); 
   
@@ -442,28 +443,33 @@ void constelm(string filename, string outfile, int option)
     {
       print_set(S);
       cout << "\033[0;1m Iteration           : \033[m" << count++ << endl; 
-      cout << "\033[0;1m Current statevector : \033[m" << sv.pp() << endl;
+      cout << "\033[0;1m Current statevector : \033[m"; print_statevector(sv);
       cout << "\033[0;1m Resulting Nextstates: \033[m" << endl;
     };
     
     for(summand_list::iterator s_current = lpe.summands().begin(); s_current != lpe.summands().end(); ++s_current){ 
       if (eval_cond(s_current->condition(), sv, equations , S)) {
-        
+        //assert(false);
         sum_true.push_back(s_current);
         
+        vector< data_assignment > ass_nextstate;
+	for(data_assignment_list::iterator i = s_current->assignments().begin(); i != s_current->assignments().end() ; i++ ){
+	  ass_nextstate.push_back(*i);
+	 // cout << i -> pp() << "--------" << endl;
+	}
 
-        data_assignment_list ass_nextstate = s_current->assignments();
-        tvector = nextstate(sv, ass_nextstate, equations, lpe );
+	tvector = nextstate(sv, ass_nextstate, equations, lpe );
 
-        data_expression_list rhstv = rhsl(tvector);
-        data_variable_list lhstv = lhsl(tvector);
-        data_expression_list rhsnsv = rhsl(newstatevector);      
+        vector< data_expression > rhstv = rhsl(tvector);
+        vector< data_variable > lhstv = lhsl(tvector);
+        vector< data_expression > rhsnsv = rhsl(newstatevector);      
       
         set< int >::iterator j = S.begin();
-       
+        
+       	
         while (j != S.end()){
-          data_expression rhs_tv_j = element_at(rhstv, *j);
-          data_expression rhs_nsv_j = element_at(rhsnsv, *j);
+	  data_expression rhs_tv_j  = rhstv[*j];
+	  data_expression rhs_nsv_j = rhsnsv[*j];
 	  bool skip = false; 
 
 	   //Begin freevar treatment  
@@ -475,9 +481,10 @@ void constelm(string filename, string outfile, int option)
 	             compare(rhs_nsv_j , foe ,equations, opt_right ) ){
 	            skip = true;
 	            if (compare(rhs_nsv_j , foe , spec.equations(), opt_right )){ 
-	              newstatevector = replace(newstatevector, element_at(tvector, *j), *j);
+	              newstatevector[*j] = tvector[*j];
               };    
-              if (-1 != index_of(listofnonconst, rhs_tv_j, 0) ) {
+              if (0 != listofnonconst.count(rhs_tv_j) )
+	      {
                 S_dummy.insert(*j);
               }
 	          };
@@ -486,11 +493,11 @@ void constelm(string filename, string outfile, int option)
 	        // End Freevar treatment 
 	        
 	        if (!skip){ 
-	          if (element_at(rhsl(ainit), *j) != rhs_tv_j ){
+	          if ((rhsl(ainit)[*j]) != rhs_tv_j ){
                     S_dummy.insert(*j);
-                    data_assignment newass = make_var(element_at(lhstv, *j), newdatvar++);
-                    newstatevector = replace(newstatevector, newass, *j);
-                    listofnonconst = push_front(listofnonconst, newass.rhs());
+                    data_assignment newass = make_var(lhstv[*j], newdatvar++);
+                    newstatevector[*j] = newass;
+                    listofnonconst.insert(newass.rhs());
                     
                   };
 	        };
@@ -499,7 +506,11 @@ void constelm(string filename, string outfile, int option)
 
         if(verbose)	
 	      {
-  	      cout << "     " << newstatevector.pp() << endl; 
+	      cout << "     ";
+              for(vector<data_assignment>::iterator i = newstatevector.begin();i != newstatevector.end() ;i++){
+                cout << "[" << i->pp() << "]" ;
+	      }	      
+  	      cout << endl; 
         };
       };
          
@@ -518,7 +529,7 @@ void constelm(string filename, string outfile, int option)
 
   if (verbose){
     print_const(spec , S);
-    //cout << sum_true.size() << endl;
+   // cout << sum_true.size() << endl;
   }
   rebuild_lpe(spec, outfile, S, nosingleton); 
 
@@ -526,10 +537,10 @@ void constelm(string filename, string outfile, int option)
   gsRewriteFinalise();
   return;
 }
-*/
+
 int main(int ac, char* av[])
 {
-/*   ATerm bot;
+   ATerm bot;
    ATinit(0,0,&bot);
    gsEnableConstructorFunctions();
 
@@ -550,7 +561,7 @@ int main(int ac, char* av[])
 	
 	   po::options_description hidden("Hidden options");
 	   hidden.add_options()
-       ("INFILE", po::value< vector<string> >(), "input file")
+             ("INFILE", po::value< vector<string> >(), "input file")
 	   ;
 	
 	   po::options_description cmdline_options;
@@ -622,7 +633,7 @@ int main(int ac, char* av[])
       cerr << e.what() << "\n";
       return 1;
     }    
- */   
+    
     return 0;
 }
 
