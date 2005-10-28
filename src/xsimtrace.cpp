@@ -94,7 +94,7 @@ void XSimTrace::AddState(ATermAppl Transition, ATerm State, bool enabled)
 		stringstream ss;
 		int l = traceview->GetItemCount();
 
-		traceview->InsertItem(l,wxString::Format(wxT("%i"),current_pos));
+		traceview->InsertItem(l,wxString::Format(wxT("%i"),l));
 		traceview->SetItem(l,1,wxConvLocal.cMB2WX(PrintPart_CXX((ATerm) Transition, ppAdvanced).c_str()));
 		traceview->SetItem(l,2,wxConvLocal.cMB2WX(ss.str().c_str()));
 		traceview->SetColumnWidth(2,wxLIST_AUTOSIZE);
