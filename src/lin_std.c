@@ -6441,7 +6441,7 @@ static void ApplySumElimination(ATermList *sumvars,
      whether they are of the form x==t, or t==x, where x is a variable
      occuring in sumvars. If so, x is removed from sumvars and
      t is substituted for x in the summand */
-
+ 
   if (gsIsDataExprTrue(communicationcondition))
   { 
       if (!gsIsDataExprTrue(remainingcommunicationcondition))
@@ -6519,7 +6519,7 @@ static void ApplySumElimination(ATermList *sumvars,
                         *nextstate,
                         parameters,
                         0,1);
-      if (gsIsDataExprTrue(remainingcommunicationcondition))
+      if (!gsIsDataExprTrue(remainingcommunicationcondition))
       { ApplySumElimination(sumvars,
                           condition,
                           multiaction,
