@@ -1,7 +1,7 @@
 /* 
 
 Version 0.3.1
-*) Program exits after illigal input file
+*) Program exits after illegal input file
 *) Added enumerated types for options
 
 */
