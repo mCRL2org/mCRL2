@@ -28,6 +28,7 @@ map  emptyBuf: Buf;
      remove: Nat#Buf -> Buf;
      release: Nat#Nat#Buf -> Buf;
      nextempty: Nat#Buf -> Nat;
+     nextempty_rec: Nat#Buf#Nat -> Nat;
      inWindow: Nat#Nat#Nat -> Bool;
 var  i,j,k: Nat; d: D; q: Buf;
 eqn  emptyBuf = lambda j:Nat.empty;
@@ -37,7 +38,10 @@ eqn  emptyBuf = lambda j:Nat.empty;
         if((i mod 2*n)==(j mod 2*n),
            q,
            release((i+1) mod 2*n,j,remove(i,q)));
-     nextempty(i,q) = if(q(i)==empty,i,nextempty((i+1) mod n,q));
+     k<n -> nextempty_rec(i,q,k) = 
+               if(q(i)==empty,i,nextempty_rec((i+1) mod n,q,k+1));
+     k==n -> nextempty_rec(i,q,k)=i;
+     nextempty(i,q) = nextempty_rec(i,q,0);
      inWindow(i,j,k) = (i<=j && j<k) || (k<i && i<=j) || (j<k && k<i);
 
 act  sA,rA,sD,rD: D;
@@ -48,7 +52,7 @@ act  sA,rA,sD,rD: D;
 proc S(l,m:Nat,q:Buf) =
         sum d:D. inWindow(l,m,(l+n) mod 2*n) -> 
                 rA(d).S(l,(m+1) mod 2*n,insert(d,m,q))+
-        sum k:Nat. (q(k)!=empty) -> sB(getdata(q(k)),k).S(l,m,q)+
+        sum k:Nat. (q(k)!=empty && k<2*n) -> sB(getdata(q(k)),k).S(l,m,q)+
         sum k:Nat. rF(k).S(k,m,release(l,k,q));
 
      R(l:Nat,q:Buf) =
