@@ -654,6 +654,7 @@ static ATerm rewrite(ATerm Term)
 //gsfprintf(stderr,"rewrite(%T)\n\n",Term);
 	if ( ATisList(Term) )
 	{
+		ATerm head = ATgetFirst((ATermList) Term);
 		ATermList l = ATgetNext((ATermList) Term);
 
 /*		m = ATmakeList0();
@@ -664,17 +665,17 @@ static ATerm rewrite(ATerm Term)
 		l = ATreverse(m);*/
 		l = rewrite_listelts(l);
 
-		if ( !ATisInt(ATgetFirst((ATermList) Term)) )
+		if ( !ATisInt(head) )
 		{
-			if ( (ATisAppl(ATgetFirst((ATermList) Term))) && gsIsDataVarId(ATAgetFirst((ATermList) Term)) ) 
+			if ( ATisAppl(head) && gsIsDataVarId((ATermAppl) head) ) 
 			{
-				ATerm a = RWapplySubstitution(ATgetFirst((ATermList) Term));
+				ATerm a = RWapplySubstitution(head);
 				if ( ATisList(a) )
 				{
-					a = (ATerm) ATinsert(rewrite_listelts(ATgetNext((ATermList) a)),ATgetFirst((ATermList) a));
-					Term = (ATerm) ATconcat((ATermList) a,l);
+					head = ATgetFirst((ATermList) a);
+					l = ATconcat(ATgetNext((ATermList) a),l);
 				} else {
-					Term = (ATerm) ATinsert(l,a);
+					head = a;
 				}
 			} else {
 				Term = (ATerm) ATinsert(l,ATgetFirst((ATermList) Term));
@@ -682,7 +683,9 @@ static ATerm rewrite(ATerm Term)
 		}
 		if ( ATisInt(ATgetFirst((ATermList) Term)) )
 		{
-			Term = rewrite_func((ATermInt) ATgetFirst((ATermList) Term), l);
+			Term = rewrite_func((ATermInt) head, l);
+		} else {
+			Term = (ATerm) ATinsert(l,head);
 		}
 
 		return Term;
