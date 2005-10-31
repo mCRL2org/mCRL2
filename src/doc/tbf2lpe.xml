@@ -10,11 +10,11 @@
 <!ENTITY opt_q "<option>-q</option>">
 <!ENTITY opt_v "<option>-v</option>">
 <!ENTITY opt_n "<option>-n</option>">
-<!ENTITY opt_help "<option>-help</option>">
-<!ENTITY opt_quiet "<option>-quiet</option>">
-<!ENTITY opt_verbose "<option>-verbose</option>">
-<!ENTITY opt_noconvmaps "<option>-no-conv-maps</option>">
-<!ENTITY opt_noconvcons "<option>-no-conv-cons</option>">
+<!ENTITY opt_help "<option>--help</option>">
+<!ENTITY opt_quiet "<option>--quiet</option>">
+<!ENTITY opt_verbose "<option>--verbose</option>">
+<!ENTITY opt_noconvmaps "<option>--no-conv-maps</option>">
+<!ENTITY opt_noconvcons "<option>--no-conv-cons</option>">
 <!ENTITY Bool "<constant>Bool</constant>">
 <!ENTITY Bool_F "<constant>F</constant>">
 <!ENTITY Bool_T "<constant>T</constant>">

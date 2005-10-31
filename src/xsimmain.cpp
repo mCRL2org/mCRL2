@@ -1044,15 +1044,60 @@ void XSimMain::SetCurrentState(ATerm state, bool showchange)
 static void sort_transitions(wxArrayString &actions, wxArrayString &statechanges, wxArrayInt &indices)
 {
 	int len = indices.GetCount();
+	int end = len;
 
-	for (int i=1; i<len; i++)
+	for (int i=0; i<end; i++)
 	{
-		int j = i;
-		while ( (j > 0) && ( (actions[j] < actions[j-1]) || ((actions[j] == actions[j-1]) && (statechanges[j] < statechanges[j-1])) ) )
+		if ( actions[i] == wxT("tau") )
 		{
 			wxString s;
 			int h;
+
+			s = actions[i];
+			actions[i] = actions[end-1];
+			actions[end-1] = s;
+
+			s = statechanges[i];
+			statechanges[i] = statechanges[end-1];
+			statechanges[end-1] = s;
+
+			h = indices[i];
+			indices[i] = indices[end-1];
+			indices[end-1] = h;
+
+			end--;
+			i--;
+		} else {
+			int j = i;
+			while ( (j > 0) && ( (actions[j] < actions[j-1]) || ((actions[j] == actions[j-1]) && (statechanges[j] < statechanges[j-1])) ) )
+			{
+				wxString s;
+				int h;
 			
+				s = actions[j];
+				actions[j] = actions[j-1];
+				actions[j-1] = s;
+
+				s = statechanges[j];
+				statechanges[j] = statechanges[j-1];
+				statechanges[j-1] = s;
+
+				h = indices[j];
+				indices[j] = indices[j-1];
+				indices[j-1] = h;
+
+				j--;
+			}
+		}
+	}
+	for (int i=end+1; i<len; i++)
+	{
+		int j = i;
+		while ( (j > end) && ( (actions[j] < actions[j-1]) || ((actions[j] == actions[j-1]) && (statechanges[j] < statechanges[j-1])) ) )
+		{
+			wxString s;
+			int h;
+		
 			s = actions[j];
 			actions[j] = actions[j-1];
 			actions[j-1] = s;
