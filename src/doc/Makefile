@@ -35,7 +35,7 @@ endif
 	$(INSTALL) -d $(mandir)/man$*
 	@for f in $(filter %.$*,$(OBJECTS)); do\
 	  if test -f $$f; then\
-	    c="$(INSTALL) $$f $(mandir)/man$*";\
+	    c="$(INSTALL) -m 444 $$f $(mandir)/man$*";\
 	    echo $$c;\
 	    $$c;\
 	  fi;\
