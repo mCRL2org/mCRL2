@@ -371,7 +371,7 @@ static ATermAppl createFreshVar(ATermAppl sort,int *i)
 	return gsMakeDataVarId(gsString2ATermAppl(tree_var_str),sort);
 }
 
-static ATermList subst_var(ATermList l, ATermAppl old, ATerm new, ATerm num, ATermList substs)
+static ATermList subst_var(ATermList l, ATermAppl old, ATerm new_term, ATerm num, ATermList substs)
 {
 	if ( ATisEmpty(l) )
 	{
@@ -385,7 +385,7 @@ static ATermList subst_var(ATermList l, ATermAppl old, ATerm new, ATerm num, ATe
 	{
 		if ( ATisEqual(ATgetArgument(head,0),old) )
 		{
-			head = ATmakeAppl2(afunMe,new,num);
+			head = ATmakeAppl2(afunMe,new_term,num);
 		}
 	} else if ( isCRe(head) )
 	{
@@ -428,7 +428,7 @@ static ATermList subst_var(ATermList l, ATermAppl old, ATerm new, ATerm num, ATe
 		head = ATmakeAppl2(afunRe,gsSubstValues(substs,ATgetArgument(head,0),true),(ATerm) m);
 	}
 
-	return ATinsert(subst_var(l,old,new,num,substs),(ATerm) head);
+	return ATinsert(subst_var(l,old,new_term,num,substs),(ATerm) head);
 }
 
 //#define BT_DEBUG
@@ -1119,7 +1119,7 @@ void rewrite_init_inner()
 	int2term = (ATermAppl *) malloc(num_opids*sizeof(ATermAppl));
 	inner_eqns = (ATermList *) malloc(num_opids*sizeof(ATermList));
 	inner_trees = (ATermAppl *) malloc(num_opids*sizeof(ATermAppl));
-	for (int i=0; i<num_opids; i++)
+	for (int i=0; i<(int)num_opids; i++)
 	{
 		int2term[i] = NULL;
 		inner_eqns[i] = NULL;
@@ -1210,11 +1210,11 @@ void rewrite_add_inner(ATermAppl eqn)
 		int2term = (ATermAppl *) realloc(int2term,num_opids*sizeof(ATermAppl));
 		inner_eqns = (ATermList *) realloc(inner_eqns,num_opids*sizeof(ATermList));
 		inner_trees = (ATermAppl *) realloc(inner_trees,num_opids*sizeof(ATermAppl));
-		for (int i=old_num; i<num_opids; i++)
+		for (int k=old_num; k<(int)num_opids; k++)
 		{
-			int2term[i] = NULL;
-			inner_eqns[i] = NULL;
-			inner_trees[i] = NULL;
+			int2term[k] = NULL;
+			inner_eqns[k] = NULL;
+			inner_trees[k] = NULL;
 		}
 		ATprotectArray((ATerm *) int2term,num_opids);
 		ATprotectArray((ATerm *) inner_eqns,num_opids);
@@ -1224,7 +1224,7 @@ void rewrite_add_inner(ATermAppl eqn)
 		for (; !ATisEmpty(l); l=ATgetNext(l))
 		{
 			i = (ATermInt) ATtableGet(term2int,ATgetFirst(l));
-			if ( ATgetInt(i) >= old_num )
+			if ( ATgetInt(i) >= (int)old_num )
 			{
 				int2term[ATgetInt(i)] = ATAgetFirst(l);
 			}
@@ -1514,7 +1514,7 @@ ATerm rewrite_inner(ATerm Term)
 {
 	if ( need_rebuild )
 	{
-		for (int i=0; i<num_opids; i++)
+		for (int i=0; i<(int)num_opids; i++)
 		{
 			if ( (inner_trees[i] == NULL) && (inner_eqns[i] != NULL) )
 			{
