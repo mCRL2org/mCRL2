@@ -129,17 +129,17 @@ static ATermList gsGetDomain(ATermAppl sort)
 	return l;
 }
 
-void gsProverInit(ATermAppl Spec, int RewriteStrategy)
+void gsProverInit(ATermAppl Spec, RewriteStrategy strat)
 {
 	current_spec = Spec;
 	ATprotectAppl(&current_spec);
-	gsRewriteInit(ATAgetArgument(Spec,3),RewriteStrategy);
+	gsRewriteInit(ATAgetArgument(Spec,3), strat);
 	gsProverTrue = gsToRewriteFormat(gsMakeDataExprTrue());
 	ATprotect(&gsProverTrue);
 	gsProverFalse = gsToRewriteFormat(gsMakeDataExprFalse());
 	ATprotect(&gsProverFalse);
 
-	if ( RewriteStrategy == GS_REWR_INNER3 || RewriteStrategy == GS_REWR_INNER )
+	if ( strat == GS_REWR_INNER3 || strat == GS_REWR_INNER )
 	{
 		FindEquality = FindInner3Equality;
 		build_solution_aux = build_solution_aux_inner3;

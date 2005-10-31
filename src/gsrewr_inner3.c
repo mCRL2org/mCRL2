@@ -158,7 +158,7 @@ static ATermAppl rename_var(ATermAppl var)
 
 	if ( l > rename_buf_size )
 	{
-		rename_buf = realloc(rename_buf,rename_buf_size?rename_buf_size*2:16);
+		rename_buf = (char *) realloc(rename_buf,rename_buf_size?rename_buf_size*2:16);
 		rename_buf[0] = '@';
 	}
 
@@ -214,7 +214,7 @@ void rewrite_init_inner3()
 	ATprotectAFun(nilAFun);
 	opidAFun = ATgetAFun(gsMakeDataExprTrue());
 	ATprotectAFun(opidAFun);
-	ruleAFun = ATmakeAFun("@RULE@",4,false);
+	ruleAFun = ATmakeAFun("@RULE@",4,ATfalse);
 	ATprotectAFun(opidAFun);
 
 	l = opid_eqns;
@@ -246,7 +246,7 @@ void rewrite_init_inner3()
 
 	int2term = (ATermAppl *) malloc(num_opids*sizeof(ATermAppl));
 	inner3_eqns = (ATermList *) malloc(num_opids*sizeof(ATermList));
-	for (int i=0; i<num_opids; i++)
+	for (int i=0; i< (int) num_opids; i++)
 	{
 		int2term[i] = NULL;
 		inner3_eqns[i] = NULL;
@@ -313,10 +313,10 @@ void rewrite_add_inner3(ATermAppl eqn)
 
 		int2term = (ATermAppl *) realloc(int2term,num_opids*sizeof(ATermAppl));
 		inner3_eqns = (ATermList *) realloc(inner3_eqns,num_opids*sizeof(ATermList));
-		for (int i=old_num; i<num_opids; i++)
+		for (int k=old_num; k< (int) num_opids; k++)
 		{
-			int2term[i] = NULL;
-			inner3_eqns[i] = NULL;
+			int2term[k] = NULL;
+			inner3_eqns[k] = NULL;
 		}
 		ATprotectArray((ATerm *) int2term,num_opids);
 		ATprotectArray((ATerm *) inner3_eqns,num_opids);
@@ -325,7 +325,7 @@ void rewrite_add_inner3(ATermAppl eqn)
 		for (; !ATisEmpty(l); l=ATgetNext(l))
 		{
 			i = (ATermInt) ATtableGet(term2int,ATgetFirst(l));
-			if ( ATgetInt(i) >= old_num )
+			if ( ATgetInt(i) >= (int) old_num )
 			{
 				int2term[ATgetInt(i)] = ATAgetFirst(l);
 				inner3_eqns[ATgetInt(i)] = NULL;

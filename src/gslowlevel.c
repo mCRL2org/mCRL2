@@ -438,11 +438,11 @@ char *gsStringDub(const char *n, const int inc)
 int NrOfChars(int n)
 {
   if (n > 0)
-    return ceil(log10((double) n));
+    return (int) ceil(log10((double) n));
   else if (n == 0)
     return 1;
   else //n < 0
-    return ceil(log10((double) abs(n))) + 1;
+    return (int) ceil(log10((double) abs(n))) + 1;
 }
 
 #ifdef __cplusplus

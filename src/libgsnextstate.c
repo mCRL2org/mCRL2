@@ -386,7 +386,7 @@ ATerm AssignsToRewriteFormat(ATermList assigns, ATermList free_vars)
 	return (ATerm) ATmakeApplArray(stateAFun,stateargs);
 }
 
-ATerm gsNextStateInit(ATermAppl Spec, bool AllowFreeVars, int StateFormat, int RewriteStrategy)
+ATerm gsNextStateInit(ATermAppl Spec, bool AllowFreeVars, int StateFormat, RewriteStrategy strat)
 {
 	ATermList l,m,n,free_vars;
 	bool set;
@@ -402,7 +402,7 @@ ATerm gsNextStateInit(ATermAppl Spec, bool AllowFreeVars, int StateFormat, int R
 	nil = gsMakeNil();
 	ATprotectAppl(&nil);
 	
-	gsProverInit(Spec,RewriteStrategy);
+	gsProverInit(Spec, strat);
 
 	free_vars = ATLgetArgument(ATAgetArgument(current_spec,5),0);
 

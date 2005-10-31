@@ -1482,14 +1482,14 @@ static ATbool match_data(ATermAppl a, ATermAppl m, ATermList l, ATermTable r)
 	return ATfalse;
 }
 
-static ATbool match_proc(ATermAppl a, ATermAppl m, ATermList l, ATermTable r)
+static bool match_proc(ATermAppl a, ATermAppl m, ATermList l, ATermTable r)
 {
 	ATermList l1,l2;
 
 	if ( !ATisEqualAFun(ATgetAFun(a),ATgetAFun(m)) )
 	{
 //fprintf(stderr,"i!\n");
-		return ATfalse;
+		return false;
 	}
 
 	if ( gsIsAction(a) || gsIsProcess(a) )
@@ -1497,7 +1497,7 @@ static ATbool match_proc(ATermAppl a, ATermAppl m, ATermList l, ATermTable r)
 		if ( !ATisEqual(ATgetArgument(a,0),ATgetArgument(m,0)) )
 		{
 //fprintf(stderr,"h!\n");
-			return ATfalse;
+			return false;
 		}
 
 		l1 = ATLgetArgument(a,1);
@@ -1505,22 +1505,22 @@ static ATbool match_proc(ATermAppl a, ATermAppl m, ATermList l, ATermTable r)
 		if ( ATgetLength(l1) != ATgetLength(l2) )
 		{
 //fprintf(stderr,"g!\n");
-			return ATfalse;
+			return false;
 		}
 		for (;!ATisEmpty(l1); l1=ATgetNext(l1), l2=ATgetNext(l2))
 		{
 			if ( !match_data(ATAgetFirst(l1),ATAgetFirst(l2),l,r) )
 			{
 //gsfprintf(stderr,"f! %T    %T\n",ATAgetFirst(l1),ATAgetFirst(l2));
-				return ATfalse;
+				return false;
 			}
 		}
-		return ATtrue;
+		return true;
 	}
 	else
 	if ( gsIsDelta(a) || gsIsTau(a) )
 	{
-		return ATtrue;
+		return true;
 	}
 	else
 	if ( gsIsSum(a) )
@@ -1528,7 +1528,7 @@ static ATbool match_proc(ATermAppl a, ATermAppl m, ATermList l, ATermTable r)
 		if ( !list_eq(ATLgetArgument(a,0),ATLgetArgument(m,0)) )
 		{
 //fprintf(stderr,"e!\n");
-			return ATfalse;
+			return false;
 		}
 
 		return match_proc(ATAgetArgument(a,1),ATAgetArgument(m,1),list_minus(l,ATLgetArgument(a,0)),r);
@@ -1546,7 +1546,7 @@ static ATbool match_proc(ATermAppl a, ATermAppl m, ATermList l, ATermTable r)
 			return match_proc(ATAgetArgument(a,1),ATAgetArgument(m,1),l,r);
 		} else {
 //fprintf(stderr,"d!\n");
-			return ATfalse;
+			return false;
 		}
 	}
 	else
@@ -1557,15 +1557,15 @@ static ATbool match_proc(ATermAppl a, ATermAppl m, ATermList l, ATermTable r)
 			return match_proc(ATAgetArgument(a,1),ATAgetArgument(m,1),l,r) && match_proc(ATAgetArgument(a,2),ATAgetArgument(m,2),l,r);
 		} else {
 //fprintf(stderr,"c!\n");
-			return ATfalse;
+			return false;
 		}
 	}
 	
 	gsWarningMsg("unknown process (%T)\n",a);
-	return ATfalse;
+	return false;
 }
 
-static ATbool match(ATermAppl a, ATermList l, ATermList *r)
+static bool match(ATermAppl a, ATermList l, ATermList *r)
 {
 	ATermList m = ATLelementAt(l,1);
 	ATermTable t = ATtableCreate(ATgetLength(m),100);
@@ -1581,13 +1581,13 @@ static ATbool match(ATermAppl a, ATermList l, ATermList *r)
 			{
 //fprintf(stderr,"a!\n");
 				ATtableDestroy(t);
-				return ATfalse;
+				return false;
 			}
 			*r = ATinsert(*r,v);
 		}
 		*r = ATreverse(*r);
 		ATtableDestroy(t);
-		return ATtrue;
+		return true;
 	} else if ( match_proc(ATAelementAt(l,2),a,m,t) )
 	{
 		*r = ATmakeList0();
@@ -1598,16 +1598,16 @@ static ATbool match(ATermAppl a, ATermList l, ATermList *r)
 			{
 //gsfprintf(stderr,"b! %T %T\n",ATelementAt(l,1),ATtableKeys(t));
 				ATtableDestroy(t);
-				return ATfalse;
+				return false;
 			}
 			*r = ATinsert(*r,v);
 		}
 		*r = ATreverse(*r);
 		ATtableDestroy(t);
-		return ATtrue;
+		return true;
 	} else {
 		ATtableDestroy(t);
-		return ATfalse;
+		return false;
 	}
 }
 
@@ -2454,7 +2454,7 @@ static ATermAppl cluster_lpe(ATermAppl spec)
 	return ATsetArgument(spec,(ATerm) gsMakeLPE(ATLgetArgument(ATAgetArgument(spec,4),0),newsums),4); */
 }
 
-static ATermAppl get_unique_var(ATermAppl var, ATermTable names, ATermList *substs, ATermList *new)
+static ATermAppl get_unique_var(ATermAppl var, ATermTable names, ATermList *substs, ATermList *new_list)
 {
 	char name[100];
 	char namebase[100];
@@ -2466,7 +2466,7 @@ static ATermAppl get_unique_var(ATermAppl var, ATermTable names, ATermList *subs
 	strcpy(name,namebase);
 	n =gsString2ATermAppl(name);
 	i = 0;
-	while ( (ATtableGet(names,(ATerm) n) != NULL) || ((new != NULL) && (ATindexOf(*new,(ATerm) n,0) >= 0)) )
+	while ( (ATtableGet(names,(ATerm) n) != NULL) || ((new_list != NULL) && (ATindexOf(*new_list,(ATerm) n,0) >= 0)) )
 	{
 		if ( i == INT_MAX )
 		{
@@ -2479,10 +2479,10 @@ static ATermAppl get_unique_var(ATermAppl var, ATermTable names, ATermList *subs
 		i++;
 	}
 
-	if ( new == NULL )
+	if ( new_list == NULL )
 		ATtablePut(names,(ATerm) n,(ATerm) n);
 	else
-		*new = ATinsert(*new,(ATerm) n);
+		*new_list = ATinsert(*new_list,(ATerm) n);
 	n = gsMakeDataVarId(n,ATAgetArgument(var,1));
 	*substs = ATinsert(*substs,(ATerm) gsMakeSubst((ATerm) var,(ATerm) n));
 

@@ -86,7 +86,7 @@ extern "C" {
     // output: an AFun prepended with str
 
     char *name=ATgetName(id);
-    char *buf=malloc(strlen(str)+strlen(name)+1);
+    char *buf = (char *) malloc(strlen(str)+strlen(name)+1);
     assert(buf);
     
     strcpy(buf,str);
@@ -106,7 +106,7 @@ extern "C" {
     // output: an AFun appended with str
 
     char *name=ATgetName(id);
-    char *buf=malloc(strlen(str)+strlen(name)+1);
+    char *buf = (char *) malloc(strlen(str)+strlen(name)+1);
     assert(buf);
     
     strcpy(buf,name);
@@ -151,7 +151,7 @@ extern "C" {
 
     String=strdup(ATgetName(id));
 
-    for(int i=0; i<strlen(String); i++){
+    for(int i=0; i< (int)strlen(String); i++){
       if(!(isalnum(String[i]))) {
 	// if a character in the string is not [a-zA-Z0-9_], replace it by an '_'
 	String[i]='_';

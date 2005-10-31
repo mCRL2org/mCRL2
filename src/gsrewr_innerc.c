@@ -554,7 +554,7 @@ static ATermAppl createFreshVar(ATermAppl sort,int *i)
 	return gsMakeDataVarId(gsString2ATermAppl(tree_var_str),sort);
 }
 
-static ATermList subst_var(ATermList l, ATermAppl old, ATerm new, ATerm num, ATermList substs)
+static ATermList subst_var(ATermList l, ATermAppl old, ATerm new_list, ATerm num, ATermList substs)
 {
 	if ( ATisEmpty(l) )
 	{
@@ -568,7 +568,7 @@ static ATermList subst_var(ATermList l, ATermAppl old, ATerm new, ATerm num, ATe
 	{
 		if ( ATisEqual(ATgetArgument(head,0),old) )
 		{
-			head = ATmakeAppl2(afunMe,new,num);
+			head = ATmakeAppl2(afunMe,new_list,num);
 		}
 	} else if ( isCRe(head) )
 	{
@@ -611,7 +611,7 @@ static ATermList subst_var(ATermList l, ATermAppl old, ATerm new, ATerm num, ATe
 		head = ATmakeAppl2(afunRe,gsSubstValues(substs,ATgetArgument(head,0),true),(ATerm) m);
 	}
 
-	return ATinsert(subst_var(l,old,new,num,substs),(ATerm) head);
+	return ATinsert(subst_var(l,old,new_list,num,substs),(ATerm) head);
 }
 
 //#define BT_DEBUG
@@ -1462,7 +1462,7 @@ static void CompileRewriteSystem(void)
   // Forward declarations of rewr_* functions
   //
   int max_arity = 0;
-  for (j=0;j<num_opids;j++)
+  for (j=0;j<(int)num_opids;j++)
   {
     /* if ( innerc_eqns[j] != NULL )
     { */
@@ -1510,7 +1510,7 @@ static void CompileRewriteSystem(void)
       "#define isAppl(x) (ATgetAFun(x) != varAFun)\n"
       "\n"
          );
-  for (int i=0; i<num_opids; i++)
+  for (int i=0; i<(int)num_opids; i++)
   {
   fprintf(f,  "static ATerm int2ATerm%i;\n",i);
   fprintf(f,  "static ATermAppl rewrAppl%i;\n",i);
@@ -1669,7 +1669,7 @@ static void CompileRewriteSystem(void)
   //
   // Implement the equations of every operation.
   //
-  for (j=0;j<num_opids;j++)
+  for (j=0;j<(int)num_opids;j++)
   {
     /* if ( innerc_eqns[j] != NULL ) */
 
@@ -1786,7 +1786,7 @@ static void CompileRewriteSystem(void)
   fprintf(f,  "  appl%i = apples[%i];\n",i,i);
   }
   fprintf(f,  "\n");
-  for (int i=0; i<num_opids; i++)
+  for (int i=0; i<(int)num_opids; i++)
   {
   fprintf(f,  "  int2ATerm%i = (ATerm) ATmakeInt(%i);\n",i,i);
   fprintf(f,  "  ATprotect(&int2ATerm%i);\n",i);
@@ -1808,14 +1808,14 @@ static void CompileRewriteSystem(void)
   fprintf(f,  "\n");
   fprintf(f,  "\n");
   fprintf(f,  "  int2func = (ftype1 *) malloc(%i*sizeof(ftype1));\n",num_opids);
-  for (j=0;j<num_opids;j++)
+  for (j=0;j<(int)num_opids;j++)
   { gsfprintf(f,  "  int2func[%i] = rewr_%i_nnf; // %T\n",j,j,int2term[j]);
   }
   fprintf(f,  "\n");
   for (int i=0;i<max_arity;i++)
   {
   fprintf(f,  "  int2func%i = (ftype%i *) malloc(%i*sizeof(ftype%i));\n",i,i,num_opids,i);
-  for (j=0;j<num_opids;j++)
+  for (j=0;j<(int)num_opids;j++)
   { if ( i <= getArity(int2term[j]) )
   { gsfprintf(f,  "  int2func%i[%i] = rewr_%i_%i;\n",i,j,j,i);
   }

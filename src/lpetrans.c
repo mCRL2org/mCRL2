@@ -74,7 +74,7 @@ static ATermAppl dataterm2ATermAppl(ATermAppl t, ATermList args, ATermList typel
 	ATermList m;
 	ATermAppl t2,r;
 	
-	t2 = ATmakeAppl0(ATmakeAFun(ATgetName(ATgetAFun(t)),0,true));
+	t2 = ATmakeAppl0(ATmakeAFun(ATgetName(ATgetAFun(t)),0,ATtrue));
 
 	if ( ATisEmpty(l) )
 	{
@@ -138,7 +138,7 @@ static ATermList get_substs(ATermList ids)
 		for (t=s; (*t)!='#'; t++);
 		*t = 0;
 
-		substs = ATinsert(substs,(ATerm) gsMakeSubst(ATgetFirst(ids),(ATerm) ATmakeAppl0(ATmakeAFun(s,0,true))));
+		substs = ATinsert(substs,(ATerm) gsMakeSubst(ATgetFirst(ids),(ATerm) ATmakeAppl0(ATmakeAFun(s,0,ATtrue))));
 	}
 
 	return substs;

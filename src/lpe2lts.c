@@ -307,7 +307,10 @@ int main(int argc, char **argv)
 					b = outinfo?SVCfalse:SVCtrue;
 					SVCopen(svc,argv[optind+1],SVCwrite,&b); // XXX check result
 					SVCsetCreator(svc,NAME);
-					SVCsetType(svc,outinfo?"mCRL2+info":"mCRL2");
+                                        if (outinfo)
+					  SVCsetType(svc, "mCRL2+info");
+                                        else
+					  SVCsetType(svc, "mCRL2");
 					svcparam = SVCnewParameter(svc,(ATerm) ATmakeList0(),&b);
 				}
 			default:

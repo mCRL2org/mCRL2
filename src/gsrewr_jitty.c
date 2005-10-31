@@ -190,7 +190,7 @@ ATermList create_strategy(ATermList rules)
 	int max_arity = 0;
 	for (ATermList l=rules; !ATisEmpty(l); l=ATgetNext(l))
 	{
-		if ( ATgetArity(ATgetAFun(ATAelementAt(ATLgetFirst(l),2)))-1 > max_arity )
+		if ( (int)ATgetArity(ATgetAFun(ATAelementAt(ATLgetFirst(l),2)))-1 > max_arity )
 		{
 			max_arity = ATgetArity(ATgetAFun(ATAelementAt(ATLgetFirst(l),2)))-1;
 		}
@@ -217,7 +217,7 @@ ATermList create_strategy(ATermList rules)
 
 		for (; !ATisEmpty(rules); rules=ATgetNext(rules))
 		{
-			if ( ATgetArity(ATgetAFun(ATAelementAt(ATLgetFirst(rules),2)))-1 == arity )
+			if ( (int)ATgetArity(ATgetAFun(ATAelementAt(ATLgetFirst(rules),2)))-1 == arity )
 			{
 				ATermList vars = ATmakeList0();
 				ATermAppl pars = ATAelementAt(ATLgetFirst(rules),2);
@@ -872,15 +872,15 @@ ATerm to_rewrite_format_jitty(ATermAppl Term)
 
 	old_opids = num_opids;
 	a = toInner((ATermAppl) Term,true);
-	if ( old_opids < num_opids )
+	if ( old_opids < (int)num_opids )
 	{
 		ATunprotectArray((ATerm *) int2term);
 		int2term = (ATermAppl *) realloc(int2term,num_opids*sizeof(ATermAppl));
-		for (int k=old_opids; k<num_opids; k++) int2term[k] = NULL;
+		for (int k=old_opids; k<(int)num_opids; k++) int2term[k] = NULL;
 		ATprotectArray((ATerm *) int2term,num_opids);
 		ATunprotectArray((ATerm *) jitty_eqns);
 		jitty_eqns = (ATermList *) realloc(jitty_eqns,num_opids*sizeof(ATermList));
-		for (int k=old_opids; k<num_opids; k++) jitty_eqns[k] = NULL;
+		for (int k=old_opids; k<(int)num_opids; k++) jitty_eqns[k] = NULL;
 		ATprotectArray((ATerm *) jitty_eqns,num_opids);
 		l = ATtableKeys(term2int);
 		c = 0;
@@ -912,3 +912,7 @@ fprintf(stderr,"return  ");PrintPart_C(stderr,fromInner(a));fprintf(stderr,"  )\
 return (ATerm) a;*/
 	return (ATerm) rewrite((ATermAppl) Term);
 }
+
+#ifdef __cplusplus
+}
+#endif

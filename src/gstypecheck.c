@@ -1168,7 +1168,7 @@ static ATermAppl gstcRewrActProc(ATermTable Vars, ATermAppl ProcTerm){
   assert(!ATisEmpty(ParList));
   
   int nFactPars=ATgetLength(ATLgetArgument(ProcTerm,1));
-  char *msg=(action)?"action":"process";
+  const char *msg=(action)?"action":"process";
   
   //filter the list of lists ParList to keep only the lists of lenth nFactPars
   {
@@ -1272,7 +1272,7 @@ static ATermAppl gstcTraverseActProcVarConstP(ATermTable Vars, ATermAppl ProcTer
 
     //block & hide
     if(gsIsBlock(ProcTerm) || gsIsHide(ProcTerm)){
-      char *msg=gsIsBlock(ProcTerm)?"Blocking":"Hiding";
+      const char *msg=gsIsBlock(ProcTerm)?"Blocking":"Hiding";
       ATermList ActList=ATLgetArgument(ProcTerm,0);
       if(ATisEmpty(ActList)) gsWarningMsg("%s empty set of actions (typechecking %P)\n",msg,ProcTerm);
 

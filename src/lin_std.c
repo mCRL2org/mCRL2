@@ -3438,8 +3438,11 @@ static stacklisttype *new_stack(
     no_of_states++;
     last = pCRLprocs;
   }
-
-  s3 = (statenames ? ATSgetArgument(ATAgetFirst(last),0) : "s");
+  if (statenames) {
+    s3 = ATSgetArgument(ATAgetFirst(last),0);
+  } else {
+    s3 = "s3";
+  }
   
   stack=(stacklisttype *) malloc(sizeof(stacklisttype));
   if (stack==NULL)
