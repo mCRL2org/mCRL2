@@ -19,7 +19,7 @@ extern ATermList opid_eqns;
 extern ATermList dataappl_eqns;
 
 static ATermTable term2int;
-static unsigned int num_opids;
+static int num_opids;
 static ATermAppl *int2term;
 static ATermList *inner3_eqns;
 static ATermInt trueint;
@@ -246,7 +246,7 @@ void rewrite_init_inner3()
 
 	int2term = (ATermAppl *) malloc(num_opids*sizeof(ATermAppl));
 	inner3_eqns = (ATermList *) malloc(num_opids*sizeof(ATermList));
-	for (int i=0; i< (int) num_opids; i++)
+	for (int i=0; i < num_opids; i++)
 	{
 		int2term[i] = NULL;
 		inner3_eqns[i] = NULL;
@@ -289,7 +289,7 @@ void rewrite_add_inner3(ATermAppl eqn)
 	ATermList l;
 	ATermAppl a,m;
 	ATermInt i,j;
-	unsigned int old_num;
+	int old_num;
 
 	old_num = num_opids;
 
@@ -313,7 +313,7 @@ void rewrite_add_inner3(ATermAppl eqn)
 
 		int2term = (ATermAppl *) realloc(int2term,num_opids*sizeof(ATermAppl));
 		inner3_eqns = (ATermList *) realloc(inner3_eqns,num_opids*sizeof(ATermList));
-		for (int k=old_num; k< (int) num_opids; k++)
+		for (int k = old_num; k < num_opids; k++)
 		{
 			int2term[k] = NULL;
 			inner3_eqns[k] = NULL;
@@ -325,7 +325,7 @@ void rewrite_add_inner3(ATermAppl eqn)
 		for (; !ATisEmpty(l); l=ATgetNext(l))
 		{
 			i = (ATermInt) ATtableGet(term2int,ATgetFirst(l));
-			if ( ATgetInt(i) >= (int) old_num )
+			if ( ATgetInt(i) >= old_num )
 			{
 				int2term[ATgetInt(i)] = ATAgetFirst(l);
 				inner3_eqns[ATgetInt(i)] = NULL;
