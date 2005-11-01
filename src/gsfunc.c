@@ -1880,6 +1880,36 @@ ATermAppl gsMakeSortArrowList(ATermList SortExprDomain,
   return Result;
 }
 
+ATermAppl gsGetSortExprResult(ATermAppl SortExpr)
+{
+  while (gsIsSortArrow(SortExpr)) {
+    SortExpr = ATAgetArgument(SortExpr, 1);
+  }
+  while (gsIsSortArrowProd(SortExpr)) {
+    SortExpr = ATAgetArgument(SortExpr, 1);
+  }
+  return SortExpr;
+}
+
+ATermList gsGetSortExprDomain(ATermAppl SortExpr)
+{
+  ATermList l = ATmakeList0();
+  while (gsIsSortArrow(SortExpr)) {
+    l = ATinsert(l, ATgetArgument(SortExpr, 0));
+    SortExpr = ATAgetArgument(SortExpr, 1);
+  }
+  while (gsIsSortArrowProd(SortExpr)) {
+    ATermList m = ATLgetArgument(SortExpr, 0);
+    while (!ATisEmpty(m)) {
+      l = ATinsert(l, ATgetFirst(m));
+      m = ATgetNext(m);
+    }
+    SortExpr = ATAgetArgument(SortExpr, 1);
+  }
+  l = ATreverse(l);
+  return l;
+}
+
 ATermAppl gsGetSort(ATermAppl DataExpr)
 {
   ATermAppl Result;
@@ -1939,18 +1969,6 @@ ATermAppl gsGetSort(ATermAppl DataExpr)
     Result = gsMakeUnknown();
   }
   return Result;
-}
-
-int gsMaxDomainLength(ATermAppl SortExpr)
-{
-  if (gsIsSortArrow(SortExpr)) {
-    return gsMaxDomainLength(ATAgetArgument(SortExpr, 1)) + 1; 
-  } else if (gsIsSortArrowProd(SortExpr)) {
-    return gsMaxDomainLength(ATAgetArgument(SortExpr, 1)) +
-      ATgetLength(ATLgetArgument(SortExpr, 0));
-  } else {
-    return 0;
-  }
 }
 
 //Creation of operation identifiers for system defined operations.
@@ -3358,24 +3376,27 @@ int gsIntValue_int(const ATermAppl IntConstant)
 
 ATermAppl gsGetDataExprHead(ATermAppl DataExpr)
 {
-  if (gsIsDataAppl(DataExpr) || gsIsDataApplProd(DataExpr)) {
-    return gsGetDataExprHead(ATAgetArgument(DataExpr, 0));
-  } else {
-    return DataExpr;
+  while (gsIsDataAppl(DataExpr)) {
+   DataExpr = ATAgetArgument(DataExpr, 0);
   }
+  while (gsIsDataApplProd(DataExpr)) {
+   DataExpr = ATAgetArgument(DataExpr, 0);
+  }
+  return DataExpr;
 }
 
 ATermList gsGetDataExprArgs(ATermAppl DataExpr)
 {
-  if (gsIsDataAppl(DataExpr)) {
-    return ATappend(gsGetDataExprArgs(ATAgetArgument(DataExpr, 0)),
-      ATgetArgument(DataExpr, 1));
-  } else if (gsIsDataApplProd(DataExpr)) {
-    return ATconcat(gsGetDataExprArgs(ATAgetArgument(DataExpr, 0)),
-      ATLgetArgument(DataExpr, 1));
-  } else {
-    return ATmakeList0();
+  ATermList l = ATmakeList0();
+  while (gsIsDataAppl(DataExpr)) {
+    l = ATinsert(l, ATgetArgument(DataExpr, 1));
+    DataExpr = ATAgetArgument(DataExpr, 0);
   }
+  while (gsIsDataApplProd(DataExpr)) {
+    l = ATconcat(ATLgetArgument(DataExpr, 1), l);
+    DataExpr = ATAgetArgument(DataExpr, 0);
+  }
+  return l;
 }
 
 //Local declarations

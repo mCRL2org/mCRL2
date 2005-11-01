@@ -216,7 +216,7 @@ bool PrintSpecificationStream(FILE *SpecStream, FILE *OutputStream,
   //read specification from SpecStream
   ATermAppl Spec = (ATermAppl) ATreadFromFile(SpecStream);
   if (Spec == NULL) {
-    gsErrorMsg("error: could not read specification from stream\n");
+    gsErrorMsg("could not read specification from stream\n");
     Result = false;
   } else {
     //print specification to OutputStream

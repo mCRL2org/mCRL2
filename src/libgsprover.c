@@ -104,31 +104,6 @@ static void fs_pop(fs_expr *e)
 #define fs_filled() (fs_stack_pos > 0)
 
 
-static ATermAppl gsGetResult(ATermAppl sort)
-{
-	while ( gsIsSortArrow(sort) )
-	{
-		sort = ATAgetArgument(sort,1);
-	}
-
-	return sort;
-}
-
-static ATermList gsGetDomain(ATermAppl sort)
-{
-	ATermList l;
-
-	l = ATmakeList0();
-	while ( gsIsSortArrow(sort) )
-	{
-		l = ATinsert(l,ATgetArgument(sort,0));
-		sort = ATAgetArgument(sort,1);
-	}
-	l = ATreverse(l);
-
-	return l;
-}
-
 void gsProverInit(ATermAppl Spec, RewriteStrategy strat)
 {
 	current_spec = Spec;
@@ -167,8 +142,8 @@ void gsProverInit(ATermAppl Spec, RewriteStrategy strat)
 	for (ATermList conss = ATLgetArgument(ATAgetArgument(Spec,1),0); !ATisEmpty(conss); conss=ATgetNext(conss))
 	{
 		ATermAppl cons = ATAgetFirst(conss);
-		ATerm sort = (ATerm) gsGetResult(ATAgetArgument(cons,1));
-		ATtablePut(constructors,sort,(ATerm) ATinsert((ATermList) ATtableGet(constructors,sort),(ATerm) ATmakeAppl2(tupAFun,(ATerm) cons,(ATerm) gsGetDomain(ATAgetArgument(cons,1)))));
+		ATerm sort = (ATerm) gsGetSortExprResult(ATAgetArgument(cons,1));
+		ATtablePut(constructors,sort,(ATerm) ATinsert((ATermList) ATtableGet(constructors,sort),(ATerm) ATmakeAppl2(tupAFun,(ATerm) cons,(ATerm) gsGetSortExprDomain(ATAgetArgument(cons,1)))));
 	}
 }
 

@@ -334,15 +334,19 @@ ATermAppl gsMakeSortArrowList(ATermList SortExprDomain,
 //Ret: Internal representation of the sort expression e_0 -> ... -> e_n -> e,
 //     where -> is right associative.
 
+ATermAppl gsGetSortExprResult(ATermAppl SortExpr);
+//Pre: SortExpr is a sort expression
+//ret: the result of the sort expression
+
+ATermList gsGetSortExprDomain(ATermAppl SortExpr);
+//Pre: SortExpr is a sort expression
+//Ret: the domain of the sort expression
+
 ATermAppl gsGetSort(ATermAppl DataExpr);
 //Pre: DataExpr is a data expression
 //Ret: the sort of DataExpr, if the sort can be inferred from the sort
 //     information in DataExpr
 //     Unknown, otherwise
-
-int gsMaxDomainLength(ATermAppl SortExpr);
-//Pre: SortExpr is a sort expression
-//Ret: the maximum number of sort expressions that can serve as a domain
 
 //Creation of operation identifiers for system defined operations.
 ATermAppl gsMakeOpIdTrue(void);

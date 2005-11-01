@@ -461,13 +461,13 @@ void PRINT_FUNC(PrintPart_Appl)(PRINT_OUTTYPE OutStream,
     if (ATgetLength(SumVarDecls) > 0) {
       PRINT_FUNC(fprints)(OutStream, "sum ");
       PRINT_FUNC(PrintDecls)(OutStream, SumVarDecls, pp_format, NULL, ",");
-      PRINT_FUNC(fprints)(OutStream, ". ");
+      PRINT_FUNC(fprints)(OutStream, ".\n         ");
     }
     //print condition
     ATermAppl Cond = ATAgetArgument(Part, 1);
     if (!gsIsNil(Cond)) {
-      PRINT_FUNC(PrintPart_Appl)(OutStream, Cond, pp_format, ShowSorts, 0);
-      PRINT_FUNC(fprints)(OutStream, " -> ");
+      PRINT_FUNC(PrintPart_Appl)(OutStream, Cond, pp_format, ShowSorts, 12);
+      PRINT_FUNC(fprints)(OutStream, " ->\n         ");
     }
     //print multiaction
     ATermAppl MultAct = ATAgetArgument(Part, 2);
@@ -482,7 +482,7 @@ void PRINT_FUNC(PrintPart_Appl)(PRINT_OUTTYPE OutStream,
     }
     //print process reference
     if (!gsIsDelta(MultAct)) {
-      PRINT_FUNC(fprints)(OutStream, " . ");
+      PRINT_FUNC(fprints)(OutStream, " .\n         ");
       ATermList Assignments = ATLgetArgument(Part, 4);
       int AssignmentsLength = ATgetLength(Assignments);
       PRINT_FUNC(fprints)(OutStream, "P");
@@ -1356,7 +1356,7 @@ bool gsIsOpIdPrefix(ATermAppl Term)
     return false;
   }
   ATermAppl OpIdName = ATAgetArgument(Term, 0);
-  return (gsMaxDomainLength(ATAgetArgument(Term, 1)) == 1) && (
+  return (ATgetLength(gsGetSortExprDomain(ATAgetArgument(Term, 1))) == 1) && (
     (OpIdName == gsMakeOpIdNameNot()) || (OpIdName == gsMakeOpIdNameNeg()) ||
     (OpIdName == gsMakeOpIdNameListSize()) || (OpIdName == gsMakeOpIdNameSetCompl())
     );
@@ -1368,7 +1368,7 @@ bool gsIsOpIdInfix(ATermAppl Term)
     return false;
   }
   ATermAppl OpIdName = ATAgetArgument(Term, 0);
-  return (gsMaxDomainLength(ATAgetArgument(Term, 1)) == 2) &&
+  return (ATgetLength(gsGetSortExprDomain(ATAgetArgument(Term, 1))) == 2) &&
     ((OpIdName == gsMakeOpIdNameImp())          ||
      (OpIdName == gsMakeOpIdNameAnd())          ||
      (OpIdName == gsMakeOpIdNameOr())           ||

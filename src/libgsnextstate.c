@@ -25,31 +25,6 @@ static bool ATisList(ATerm a)
 	return (ATgetType(a) == AT_LIST);
 }
 
-static ATermAppl gsGetResult(ATermAppl sort)
-{
-	while ( gsIsSortArrow(sort) )
-	{
-		sort = ATAgetArgument(sort,1);
-	}
-
-	return sort;
-}
-
-static ATermList gsGetDomain(ATermAppl sort)
-{
-	ATermList l;
-
-	l = ATmakeList0();
-	while ( gsIsSortArrow(sort) )
-	{
-		l = ATinsert(l,ATgetArgument(sort,0));
-		sort = ATAgetArgument(sort,1);
-	}
-	l = ATreverse(l);
-
-	return l;
-}
-
 
 static ATermAppl current_spec;
 static int stateformat;
@@ -211,9 +186,9 @@ ATermAppl FindDummy(ATermAppl sort)
 	for (; !ATisEmpty(l); l=ATgetNext(l))
 	{
 		ATermAppl conssort = ATAgetArgument(ATAgetFirst(l),1);
-		if ( ATisEqual(gsGetResult(conssort),sort) )
+		if ( ATisEqual(gsGetSortExprResult(conssort),sort) )
 		{
-			ATermList domain = gsGetDomain(conssort);
+			ATermList domain = gsGetSortExprDomain(conssort);
 			ATermAppl t = ATAgetFirst(l);
 
 			if ( ATindexOf(domain,(ATerm) sort,0) == -1)
@@ -232,9 +207,9 @@ ATermAppl FindDummy(ATermAppl sort)
 	for (; !ATisEmpty(l); l=ATgetNext(l))
 	{
 		ATermAppl mapsort = ATAgetArgument(ATAgetFirst(l),1);
-		if ( ATisEqual(gsGetResult(mapsort),sort) )
+		if ( ATisEqual(gsGetSortExprResult(mapsort),sort) )
 		{
-			ATermList domain = gsGetDomain(mapsort);
+			ATermList domain = gsGetSortExprDomain(mapsort);
 			ATermAppl t = ATAgetFirst(l);
 
 			for (; !ATisEmpty(domain); domain=ATgetNext(domain))
