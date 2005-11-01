@@ -2,26 +2,40 @@
 #define MCRL2_REWRITE_H
 
 #include "atermpp/aterm.h"
+#include "mcrl2/data.h"
 #include "libgsrewrite.h"
 #include "gsfunc.h"
 
 namespace mcrl2 {
 
-  /// Rewrite the term t using the given 'rewrite terms'. A possible
-  /// choice for rewrite terms is the result of specification::equations().
+  using atermpp::aterm_appl;
+
+  /// This class can be used to rewrite terms.
   ///
-  inline
-  ATermAppl rewrite(ATermAppl t, ATermAppl rewrite_terms)
+  class rewriter
   {
-    gsEnableConstructorFunctions();
-    gsRewriteInit(rewrite_terms, GS_REWR_INNER3); 
-    ATermAppl result = gsRewriteTerm(t);
-    gsRewriteFinalise();
-    return result;
-  }
+    protected:
+      data_equation_list m_equations;
+
+    public:
+      rewriter(data_equation_list equations)
+        : m_equations(equations)
+      {
+        gsEnableConstructorFunctions();
+        gsRewriteInit(gsMakeDataEqnSpec(equations), GS_REWR_INNER3); 
+      }
+      
+      ~rewriter()
+      {
+        gsRewriteFinalise();
+      }
+      
+      aterm_appl rewrite(aterm_appl t)
+      {
+        return gsRewriteTerm(t);
+      }
+  };
 
 } // namespace mcrl
 
 #endif // MCRL2_REWRITE_H
-
-

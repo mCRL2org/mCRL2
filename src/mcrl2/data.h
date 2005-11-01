@@ -10,6 +10,7 @@
 #include <string>
 #include "atermpp/atermpp.h"
 #include "mcrl2/aterm_wrapper.h"
+#include "mcrl2/substitute.h"
 #include "mcrl2/sort.h"
 #include "mcrl2/list_iterator.h"
 #include "mcrl2/predefined_symbols.h"
@@ -21,7 +22,7 @@ namespace mcrl2 {
 
 using atermpp::aterm_appl;
 using atermpp::aterm_list;
-
+using atermpp::term_list;
 using atermpp::aterm;
 
 ///////////////////////////////////////////////////////////////////////////////
@@ -32,6 +33,10 @@ class data_expression: public aterm_wrapper
 {
   public:
     data_expression()
+    {}
+
+    data_expression(ATermAppl term)
+      : aterm_wrapper(aterm_appl(term))
     {}
 
     data_expression(aterm_appl term)
@@ -52,7 +57,7 @@ class data_expression: public aterm_wrapper
     template <typename SubstIter>
     data_expression substitute(SubstIter first, SubstIter last) const
     {
-      return data_expression(substitute(*this, first, last));
+      return data_expression(mcrl2::substitute(*this, first, last));
     }
 };
 
@@ -189,7 +194,7 @@ class data_equation: public aterm_wrapper
     template <typename SubstIter>
     data_equation substitute(SubstIter first, SubstIter last) const
     {
-      return data_equation(substitute(*this, first, last));
+      return data_equation(mcrl2::substitute(*this, first, last));
     }
 };
 

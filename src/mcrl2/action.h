@@ -72,7 +72,7 @@ class action: public aterm_wrapper
     template <typename SubstIter>
     action substitute(SubstIter first, SubstIter last) const
     {
-      return action(substitute(*this, first, last));
+      return action(mcrl2::substitute(*this, first, last));
     }
 };
 

@@ -13,7 +13,7 @@
 // ======================================================================
 
 ///////////////////////////////////////////////////////////////////////////////
-/// \file atermpp/term_list_iterator.h
+/// \file atermpp/aterm_list_iterator.h
 /// Contains a general term_list iterator.
 
 #ifndef ATERMPP_TERM_LIST_ITERATOR_H

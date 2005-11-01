@@ -104,7 +104,7 @@ class LPE_summand: public aterm_wrapper
     ///
     bool has_time()
     {
-      return m_time != data_expression();
+      return m_time != data_expression(gsMakeNil());
     }
 
     /// Returns the condition expression.
@@ -114,7 +114,7 @@ class LPE_summand: public aterm_wrapper
       return m_condition;
     }
 
-    /// Returns the sequence of actions.
+    /// Returns the sequence of actions. Returns an empty list if is_delta() holds.
     ///
     action_list actions() const
     {
@@ -126,6 +126,7 @@ class LPE_summand: public aterm_wrapper
     ///
     data_expression time() const
     {
+      assert(has_time());
       return m_time;
     }
 

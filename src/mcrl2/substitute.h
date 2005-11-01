@@ -14,6 +14,27 @@ namespace mcrl2 {
 using atermpp::aterm_appl;
 using atermpp::term_list;
 
+    /// Applies a substitution to this aterm_wrapper and returns the result.
+    /// The Substitution object must supply the method aterm operator()(aterm).
+    ///
+    template <typename Substitution>
+    aterm_wrapper substitute(aterm_wrapper t, Substitution f)
+    {
+      return aterm_wrapper(f(t));
+    }     
+
+    /// Applies a sequence of substitutions to this aterm_wrapper and returns the result.
+    /// The SubstIter objects must supply the method aterm operator()(aterm).
+    ///
+    template <typename SubstIter>
+    aterm_wrapper substitute(aterm_wrapper t, SubstIter first, SubstIter last)
+    {
+      aterm_appl result(t);
+      for (SubstIter i = first; i != last; ++i)
+          result = (*i)(result);
+      return aterm_wrapper(result);
+    }
+
     /// Applies a substitution to this term_list and returns the result.
     /// The Substitution object must supply the method aterm operator()(aterm).
     ///
@@ -33,7 +54,7 @@ using atermpp::term_list;
       for (SubstIter i = first; i != last; ++i)
           result = (*i)(result);
       return term_list<Term>(result);
-    }     
+    }
 
 } // namespace mcrl
 
