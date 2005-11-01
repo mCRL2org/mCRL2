@@ -19,7 +19,7 @@ extern ATermList opid_eqns;
 extern ATermList dataappl_eqns;
 
 static ATermTable term2int;
-static unsigned num_opids;
+static int num_opids;
 static ATermAppl *int2term;
 static ATermList *jitty_eqns;
 static ATermAppl jitty_true;
@@ -184,10 +184,10 @@ static ATermList get_vars(ATerm a)
 ATermList create_strategy(ATermList rules)
 {
 	ATermList strat = ATmakeList0();
-	unsigned arity;
+	unsigned int arity;
 
 //gsfprintf(stderr,"rules: %T\n\n",rules);
-	unsigned max_arity = 0;
+	unsigned int max_arity = 0;
 	for (ATermList l=rules; !ATisEmpty(l); l=ATgetNext(l))
 	{
 		if ( ATgetArity(ATgetAFun(ATAelementAt(ATLgetFirst(l),2))) > max_arity + 1 )
@@ -196,7 +196,7 @@ ATermList create_strategy(ATermList rules)
 		}
 	}
 	DECL_A(used,bool,max_arity);
-	for (unsigned i = 0; i < max_arity; i++)
+	for (unsigned int i = 0; i < max_arity; i++)
 	{
 		used[i] = false;
 	}
@@ -210,7 +210,7 @@ ATermList create_strategy(ATermList rules)
 		DECL_A(bs,bool,arity);
 //printf("arity = %i\n",arity);
 
-		for (unsigned i = 0; i < arity; i++)
+		for (unsigned int i = 0; i < arity; i++)
 		{
 			args[i] = -1;
 		}
@@ -227,19 +227,19 @@ ATermList create_strategy(ATermList rules)
 //gsfprintf(stderr,"rule: "); PrintPart_C(stderr,fromInner(ATAelementAt(ATgetFirst(rules),2))); gsfprintf(stderr,"\n");
 //gsprintf("pars: %T\n",pars);
 
-				for (unsigned i = 0; i < arity; i++)
+				for (unsigned int i = 0; i < arity; i++)
 				{
 					bs[i] = false;
 				}
 
-				for (unsigned i = 0; i < arity; i++)
+				for (unsigned int i = 0; i < arity; i++)
 				{
 					if ( !gsIsDataVarId(ATAgetArgument(pars,i+1)) )
 					{
 						bs[i] = true;
 						vars = ATappend(vars,(ATerm) get_vars(ATgetArgument(pars,i+1)));
 					} else {
-						unsigned j = 0;
+						unsigned int j = 0;
 						bool b = false;
 						for (ATermList o=vars; !ATisEmpty(o); o=ATgetNext(o))
 						{
@@ -259,7 +259,7 @@ ATermList create_strategy(ATermList rules)
 				}
 
 				ATermList deps = ATmakeList0();
-				for (unsigned i = 0; i < arity; i++)
+				for (unsigned int i = 0; i < arity; i++)
 				{
 					if ( bs[i] && !used[i] )
 					{
@@ -300,7 +300,7 @@ ATermList create_strategy(ATermList rules)
 			int max = -1;
 			int maxidx = -1;
 
-			for (unsigned i = 0; i < arity; i++)
+			for (unsigned int i = 0; i < arity; i++)
 			{
 				if ( args[i] > max )
 				{
@@ -425,7 +425,7 @@ void rewrite_add_jitty(ATermAppl eqn)
 /*	ATermList l,m;
 	ATermAppl a;
 	ATermInt i,j;
-	unsigned old_num;
+	int old_num;
 
 	old_num = num_opids;
 
@@ -864,7 +864,7 @@ static ATermAppl rewrite(ATermAppl Term)
 
 ATerm to_rewrite_format_jitty(ATermAppl Term)
 {
-	unsigned old_opids;
+	int old_opids;
 	ATermAppl a;
 	int c;
 	ATermList l;
@@ -876,11 +876,11 @@ ATerm to_rewrite_format_jitty(ATermAppl Term)
 	{
 		ATunprotectArray((ATerm *) int2term);
 		int2term = (ATermAppl *) realloc(int2term,num_opids*sizeof(ATermAppl));
-		for (unsigned k = old_opids; k < num_opids; k++) int2term[k] = NULL;
+		for (int k = old_opids; k < num_opids; k++) int2term[k] = NULL;
 		ATprotectArray((ATerm *) int2term,num_opids);
 		ATunprotectArray((ATerm *) jitty_eqns);
 		jitty_eqns = (ATermList *) realloc(jitty_eqns,num_opids*sizeof(ATermList));
-		for (unsigned k = old_opids; k < num_opids; k++) jitty_eqns[k] = NULL;
+		for (int k = old_opids; k < num_opids; k++) jitty_eqns[k] = NULL;
 		ATprotectArray((ATerm *) jitty_eqns,num_opids);
 		l = ATtableKeys(term2int);
 		c = 0;

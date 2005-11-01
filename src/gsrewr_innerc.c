@@ -554,7 +554,7 @@ static ATermAppl createFreshVar(ATermAppl sort,int *i)
 	return gsMakeDataVarId(gsString2ATermAppl(tree_var_str),sort);
 }
 
-static ATermList subst_var(ATermList l, ATermAppl old, ATerm new_list, ATerm num, ATermList substs)
+static ATermList subst_var(ATermList l, ATermAppl old, ATerm new_val, ATerm num, ATermList substs)
 {
 	if ( ATisEmpty(l) )
 	{
@@ -568,7 +568,7 @@ static ATermList subst_var(ATermList l, ATermAppl old, ATerm new_list, ATerm num
 	{
 		if ( ATisEqual(ATgetArgument(head,0),old) )
 		{
-			head = ATmakeAppl2(afunMe,new_list,num);
+			head = ATmakeAppl2(afunMe,new_val,num);
 		}
 	} else if ( isCRe(head) )
 	{
@@ -611,7 +611,7 @@ static ATermList subst_var(ATermList l, ATermAppl old, ATerm new_list, ATerm num
 		head = ATmakeAppl2(afunRe,gsSubstValues(substs,ATgetArgument(head,0),true),(ATerm) m);
 	}
 
-	return ATinsert(subst_var(l,old,new_list,num,substs),(ATerm) head);
+	return ATinsert(subst_var(l,old,new_val,num,substs),(ATerm) head);
 }
 
 //#define BT_DEBUG
