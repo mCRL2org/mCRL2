@@ -235,7 +235,7 @@ class specification: public aterm_wrapper
 
     /// Returns the variables of the initial state of the LPE.
     ///
-    data_expression_list initial_variables() const
+    data_variable_list initial_variables() const
     {
       return compute_initial_variables(m_initial_assignments);
     }
