@@ -8,7 +8,10 @@ case $host in
   *-*-mingw32*)
     HOST_OS="MINGW"
     ;;
-  *-*-msdos* | *-*-go32* | *-*-cygwin* | *-*-windows*)
+  *-*-cygwin*)
+    HOST_OS="CYGWIN"
+    ;;
+  *-*-msdos* | *-*-go32* | *-*-windows*)
     HOST_OS="WINDOWS"
     ;;
   *-*-linux*)
@@ -280,7 +283,7 @@ if test $WX_CONFIG; then
   USE_WX=1
   WX_CPPFLAGS="$($WX_CONFIG --cppflags)"
 #  CPPFLAGS="$($WX_CONFIG --cppflags) $CPPFLAGS"
-  WX_LIBS="$($WX_CONFIG --libs)"
+  WX_LIBS="$($WX_CONFIG --libs core base)"
 fi
 AC_SUBST([USE_WX],[])
 AC_SUBST([WX_CPPFLAGS],[])
