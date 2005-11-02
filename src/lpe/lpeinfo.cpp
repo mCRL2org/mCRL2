@@ -23,7 +23,6 @@ string version = "Version 0.3.3";
 enum {
   NO_OPTION = 0,
   PARS = 1,
-  NPARS = 2
 };
 
 
@@ -48,9 +47,6 @@ int display(string filename, int opt)
     {
       cout << i->pp() << ": " << i->type().pp() << endl;
     }
-  } else if (opt== NPARS )
-  {
-    cout << lpe.process_parameters().size();
   }
   return 0;
 }
@@ -71,7 +67,6 @@ int main(int ac, char* av[])
             ("help,h",    "display this help")
             ("version,v", "display version information")
             ("pars",      "print process parameters")
-            ("npars",     "print the number of process parameters")
         ;
 	
 	po::options_description hidden("Hidden options");
@@ -114,8 +109,6 @@ int main(int ac, char* av[])
 
 	if (vm.count("pars"))
 		{opt = PARS;}
-	if (vm.count("npars"))
-		{opt = NPARS;}
 
   vector< string >::iterator z;
   z = filename.begin();
