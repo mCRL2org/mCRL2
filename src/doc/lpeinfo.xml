@@ -1,0 +1,118 @@
+<?xml version="1.0"?>
+
+<!DOCTYPE refentry PUBLIC "-//OASIS//DTD DocBook XML V4.2//EN" "http://www.oasis-open.org/docbook/xml/4.2/docbookx.dtd"[
+<!ENTITY % param SYSTEM "param.xml">
+%param;
+<!ENTITY lpeinfo "<function>lpeinfo</function>">
+<!ENTITY input_lpe "<parameter>input_lpe</parameter>">
+<!ENTITY opt_h "<option>-h</option>">
+<!ENTITY opt_v "<option>-v</option>">
+<!ENTITY opt_help "<option>--help</option>">
+<!ENTITY opt_version "<option>--version</option>">
+<!ENTITY opt_pars "<option>--pars</option>">
+<!ENTITY opt_npars "<option>--npars</option>">
+<!ENTITY LPE-framework "<application>LPE-Framework</application>">
+]>
+
+<refentry id="lpeinfo">
+
+<refmeta>
+  <refentrytitle>lpeinfo</refentrytitle>
+  <manvolnum>1</manvolnum>
+</refmeta>
+
+<refnamediv>
+  <refname>lpeinfo</refname>
+  <refpurpose>Displays information about an LPE</refpurpose>
+</refnamediv>
+
+<refsynopsisdiv>
+  <cmdsynopsis>
+    <command>&lpeinfo;</command>
+    <arg choice="plain">&input_lpe;</arg>
+  </cmdsynopsis>
+</refsynopsisdiv>
+
+<refsect1>
+  <title>Description</title>
+  <para>
+    The &lpeinfo; programm displays information of a linear process equation (LPE) from the
+    LPE format (.lpe).
+  </para>
+  <para>
+    The &lpeinfo; program displays information about an LPE. To retrieve information about 
+    an LPE, we make use of the &LPE-framework; . This programm will display the following information:
+    <itemizedlist>
+	    <listitem>
+        <para>
+	      Number of summands.
+        </para>
+      </listitem>
+      <listitem>
+	      <para> Number of free variables. </para>
+      </listitem>
+	    <listitem>
+	      <para> Number of process parameters. </para>
+      </listitem>
+      <listitem>
+	      <para> Number of actions. </para>
+      </listitem>
+    </itemizedlist>
+  </para>
+</refsect1>
+
+<refsect1>
+  <title>Options</title>
+  <para>
+    <variablelist>
+
+      <varlistentry>
+        <term>&opt_h;</term>
+        <term>&opt_help;</term>
+	      <listitem>
+	        <para>
+	          displays the help message and terminates
+	        </para>
+	      </listitem>
+      </varlistentry>
+
+      <varlistentry>
+        <term>&opt_v;</term>
+        <term>&opt_version;</term>
+	      <listitem>
+	        <para>
+	          displays the version of the programm and terminates
+	        </para>
+	      </listitem>
+      </varlistentry>
+
+      <varlistentry>
+        <term>&opt_pars;</term>
+	      <listitem>
+	        <para>
+	          displays the process parameters which are used within the LPE.
+	        </para>
+	      </listitem>
+      </varlistentry>
+
+      <varlistentry>
+        <term>&opt_pars;</term>
+	      <listitem>
+	        <para>
+	          displays the number of process parameters of the LPE.
+	        </para>
+	      </listitem>
+      </varlistentry>
+
+    </variablelist>
+  </para>
+</refsect1>
+
+<refsect1>
+<title>Author</title>
+<para>
+Written by Frank Stappers. Please send all complaints, comments and bug fixes to f.p.m.stappers@student.tue.nl.
+</para>
+</refsect1>
+
+</refentry>

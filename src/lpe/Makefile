@@ -36,7 +36,7 @@ MCRL2_LIBRARIES = -L../ ../gsfunc.o ../libgsrewrite.o ../gsrewr_inner.o \
 
 CXXFLAGS       += -ftemplate-depth-256 -g -Wall
 
-all: ../lpeconstelm ../lpeinfo
+all: ../lpeconstelm ../lpeinfo ../lpeparelm
 
 ../lpeconstelm: lpeconstelm.cpp Makefile
 	$(CXX) $(CXXFLAGS) $(ATERM_HEADERS) $(MCRL2_HEADERS) $(BOOST_HEADERS) $(MCRL2_LIBRARIES) $(ATERM_LIBRARIES) -lm -ldl -o $@ $< $(BOOST_LIBRARIES)
@@ -44,5 +44,8 @@ all: ../lpeconstelm ../lpeinfo
 ../lpeinfo: lpeinfo.cpp Makefile
 	$(CXX) $(CXXFLAGS) $(ATERM_HEADERS) $(MCRL2_HEADERS) $(BOOST_HEADERS) $(MCRL2_LIBRARIES) $(ATERM_LIBRARIES) -ldl -o $@ $< $(BOOST_LIBRARIES)
 
+../lpeinfo: lpeparelm.cpp Makefile
+	$(CXX) $(CXXFLAGS) $(ATERM_HEADERS) $(MCRL2_HEADERS) $(BOOST_HEADERS) $(MCRL2_LIBRARIES) $(ATERM_LIBRARIES) -ldl -o $@ $< $(BOOST_LIBRARIES)
+
 clean:
-	@rm -f ../lpeconstelm ../lpeinfo
+	@rm -f ../lpeconstelm ../lpeinfo ../lpeparelm

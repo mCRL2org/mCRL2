@@ -78,11 +78,23 @@ void  rebuild_lpe(specification spec,string  outfile, set< data_variable > S ){
         rebuild_process_parameters = push_front(rebuild_process_parameters, j->lhs() );
       } 
     }  
+    //Construct the new summation_variable_list
+    //
+    data_variable_list rebuild_summation_variables;
+    for(data_variable_list::iterator j = i->summation_variables().begin(); j != i->summation_variables().end(); j++ ){
+      bool b = false;
+      for(set<data_variable>::iterator k = S.begin(); k != S.end(); k++){
+        b = b || (*k == *j);
+      }
+      if (!b){
+        rebuild_summation_variables = push_front(rebuild_summation_variables, *j);
+      }    
+    }
     //LPE_summand(data_variable_list summation_variables, data_expression condition, 
     //          bool delta, action_list actions, data_expression time, 
     //          data_assignment_list assignments);
     LPE_summand rebuild_summand; 
-    rebuild_summand = LPE_summand(i->summation_variables(), i->condition(),
+    rebuild_summand = LPE_summand(reverse(rebuild_summation_variables), i->condition(),
       i->is_delta(), i->actions(), i-> time(), reverse(rebuild_assignments));  
     rebuild_summandlist = push_front(rebuild_summandlist, rebuild_summand);
   }
