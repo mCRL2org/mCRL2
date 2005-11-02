@@ -1,14 +1,11 @@
 #ifndef MCRL2_REWRITE_H
 #define MCRL2_REWRITE_H
 
-#include "atermpp/aterm.h"
 #include "mcrl2/data.h"
 #include "libgsrewrite.h"
 #include "gsfunc.h"
 
 namespace mcrl2 {
-
-  using atermpp::aterm_appl;
 
   /// This class can be used to rewrite terms.
   ///
@@ -30,7 +27,7 @@ namespace mcrl2 {
         gsRewriteFinalise();
       }
       
-      aterm_appl rewrite(aterm_appl t)
+      ATermAppl rewrite(ATermAppl t)
       {
         return gsRewriteTerm(t);
       }

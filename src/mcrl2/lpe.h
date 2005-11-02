@@ -102,7 +102,7 @@ class LPE_summand: public aterm_wrapper
 
     /// Returns true if time is available.
     ///
-    bool has_time()
+    bool has_time() const
     {
       return m_time != data_expression(gsMakeNil());
     }

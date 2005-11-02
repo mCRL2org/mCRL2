@@ -19,9 +19,9 @@ using boost::format;
 ///
 bool compare(data_expression x, data_expression y, data_equation_list equations)
 {
-  ATermAppl x1 = rewrite(x, gsMakeDataEqnSpec(equations));
-  ATermAppl y1 = rewrite(y, gsMakeDataEqnSpec(equations));
-  
+  rewriter r(equations);
+  ATermAppl x1 = r.rewrite(x);
+  ATermAppl y1 = r.rewrite(y); 
   return atermpp::aterm(x1) == atermpp::aterm(y1);
 }
 
