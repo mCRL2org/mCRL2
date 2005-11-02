@@ -16,9 +16,15 @@
 #include <stdio.h>
 #include <string.h>
 #include <aterm2.h>
+#include <assert.h>
 #include "gsfunc.h"
 #include "gslowlevel.h"
 #include "libprint_c.h"
+
+bool is_mCRL_spec(ATermAppl spec)
+{
+  return ATgetAFun(spec) == ATmakeAFun("spec2gen", 2, ATfalse);
+}
 
 static void add_id(ATermList *ids, ATermAppl id)
 {
@@ -332,6 +338,7 @@ static ATermList convert_init(ATermAppl spec, ATermList typelist, ATermList *ids
 
 ATermAppl translate(ATermAppl spec, bool convert_bools, bool convert_funcs)
 {
+        assert(is_mCRL_spec(spec));
 	ATermAppl sorts,cons,maps,datas,acts,lpe,init;
 	ATermList typelist, ids;
 

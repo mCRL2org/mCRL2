@@ -33,7 +33,7 @@ namespace po = boost::program_options;
 po::variables_map vm;
 
 //Constanten
-string version = "Version 0.4";
+string version = "Version 0.4.1";
 bool verbose    = false; 
 bool alltrue    = false;
 bool reachable  = false;
@@ -382,7 +382,7 @@ void  rebuild_lpe(specification spec,string  outfile, set< int > S, bool single,
     cout << " Written output file: " << outfile << endl << endl;
   } else
   {
-    cout << " \033[0;31mUnsuccefully\033[0m written to output file: " << outfile << endl;
+    cout << " \033[0;31mUnsuccessfully\033[0m written to output file '" << outfile << "'" << endl;
   }
 
   return;
@@ -444,7 +444,7 @@ void constelm(string filename, string outfile, int option)
   specification spec;
   if (!spec.load(filename))
   {
-    cerr << " \033[0;31mCould not read " << filename << "\033[0m" << endl;
+    cerr << "error: could not read input file '" << filename << "'" << endl;
     return;
   }
  

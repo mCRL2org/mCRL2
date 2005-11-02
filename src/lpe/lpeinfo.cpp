@@ -1,6 +1,6 @@
 /* 
 
-Version 0.3.1
+Version 0.3.3
 *) Program exits after illegal input file
 *) Added enumerated types for options
 
@@ -19,7 +19,7 @@ namespace po = boost::program_options;
 po::variables_map vm;
 
 //Constanten
-string version = "Version 0.3.2";
+string version = "Version 0.3.3";
 enum {
   NO_OPTION = 0,
   PARS = 1,
@@ -32,7 +32,7 @@ int display(string filename, int opt)
   specification spec;
   if (!spec.load(filename))
   {
-    cerr << "Could not read input file " << filename << endl;
+    cerr << "error: could not read input file '" << filename << "'" << endl;
     return 1;
   }
   LPE lpe = spec.lpe();
@@ -71,7 +71,7 @@ int main(int ac, char* av[])
             ("help,h",    "display this help")
             ("version,v", "display version information")
             ("pars",      "print process parameters")
-	          ("npars",     "print the number of process parameters")
+            ("npars",     "print the number of process parameters")
         ;
 	
 	po::options_description hidden("Hidden options");

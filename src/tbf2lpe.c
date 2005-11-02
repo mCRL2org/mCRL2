@@ -1,10 +1,12 @@
 #define NAME "tbf2lpe"
 
 #include <stdio.h>
+#include <errno.h>
 #include <stdlib.h>
 #include <string.h>
 #include <getopt.h>
 #include <aterm2.h>
+#include <assert.h>
 #include "gsfunc.h"
 #include "gslowlevel.h"
 #include "libprint_c.h"
@@ -33,99 +35,133 @@ static void print_help(FILE *f, char *Name)
 
 int main(int argc, char **argv)
 {
-	FILE *InStream, *OutStream;
-	ATerm bot;
-	#define sopts "hqvn"
-	struct option lopts[] = {
-		{ "help",		no_argument,	NULL,	'h' },
-		{ "quiet",		no_argument,	NULL,	'q' },
-		{ "verbose",		no_argument,	NULL,	'v' },
-		{ "no-conv-map",        no_argument,	NULL,	'n' },
-		{ "no-conv-cons",	no_argument,	NULL,	0x1 },
- 		{ 0, 0, 0, 0 }
-	};
-	int opt;
-	bool opt_quiet,opt_verbose,convert_funcs,convert_bools;
-	ATerm mu_spec,spec;
+  FILE *InStream, *OutStream;
+  ATerm bot;
+  #define sopts "hqvn"
+  struct option lopts[] = {
+    { "help",    no_argument,  NULL,  'h' },
+    { "quiet",    no_argument,  NULL,  'q' },
+    { "verbose",    no_argument,  NULL,  'v' },
+    { "no-conv-map",        no_argument,  NULL,  'n' },
+    { "no-conv-cons",  no_argument,  NULL,  0x1 },
+     { 0, 0, 0, 0 }
+  };
+  int opt;
+  bool opt_quiet,opt_verbose,convert_funcs,convert_bools;
+  ATerm mu_spec,spec;
 
-	ATinit(argc,argv,&bot);
-	gsEnableConstructorFunctions();
+  ATinit(argc,argv,&bot);
+  gsEnableConstructorFunctions();
 
-	opt_quiet = false;
-	opt_verbose = false;
-	convert_funcs = true;
-	convert_bools = true;
-	while ( (opt = getopt_long(argc,argv,sopts,lopts,NULL)) != -1 )
-	{
-		switch ( opt )
-		{
-			case 'h':
-				print_help(stderr, argv[0]);
-				return 0;
-			case 'q':
-				opt_quiet = true;
-				break;
-			case 'v':
-				opt_verbose = true;
-				break;
-			case 'n':
-				convert_funcs = false;
-				break;
-			case 0x1:
-				convert_bools = false;
-				break;
-			default:
-				break;
-		}
-	}
-	if ( opt_quiet && opt_verbose )
-	{
-		gsErrorMsg("options -q/--quiet and -v/--verbose cannot be used together\n");
-		return 1;
-	}
-	if ( opt_quiet )
-		gsSetQuietMsg();
-	if ( opt_verbose )
-		gsSetVerboseMsg();
+  opt_quiet = false;
+  opt_verbose = false;
+  convert_funcs = true;
+  convert_bools = true;
+  while ( (opt = getopt_long(argc,argv,sopts,lopts,NULL)) != -1 )
+  {
+    switch ( opt )
+    {
+      case 'h':
+        print_help(stderr, argv[0]);
+        return 0;
+      case 'q':
+        opt_quiet = true;
+        break;
+      case 'v':
+        opt_verbose = true;
+        break;
+      case 'n':
+        convert_funcs = false;
+        break;
+      case 0x1:
+        convert_bools = false;
+        break;
+      default:
+        break;
+    }
+  }
+  if ( opt_quiet && opt_verbose )
+  {
+    gsErrorMsg("options -q/--quiet and -v/--verbose cannot be used together\n");
+    return 1;
+  }
+  if ( opt_quiet )
+    gsSetQuietMsg();
+  if ( opt_verbose )
+    gsSetVerboseMsg();
 
-	InStream = stdin;
-	if ( optind < argc && strcmp(argv[optind],"-") )
-	{
-		if ( (InStream = fopen(argv[optind],"rb")) == NULL )
-		{
-			gsErrorMsg("cannot open file '%s' for reading\n",argv[optind]);
-			return 1;
-		}
-	}
+  InStream = stdin;
+  char *InFileName = NULL;
+  if ( optind < argc && strcmp(argv[optind],"-") )
+  {
+    InFileName = argv[optind];
+    if ( (InStream = fopen(InFileName, "rb")) == NULL )
+    {
+      gsErrorMsg("cannot open input file '%s' for reading: ",
+        InFileName);
+      perror(NULL);
+      return 1;
+    }
+  }
 
-	OutStream = stdout;
-	if ( optind+1 < argc )
-	{
-		if ( (OutStream = fopen(argv[optind+1],"wb")) == NULL )
-		{
-			gsErrorMsg("cannot open file '%s' for writing\n",argv[optind+1]);
-			return 1;
-		}
-	}
+  if ( InStream == stdin )
+    gsVerboseMsg("reading mCRL LPE from stdin...\n");
+  else
+    gsVerboseMsg("reading mCRL LPE from '%s'...\n", InFileName);
+  mu_spec = ATreadFromFile(InStream);
+  if ( mu_spec == NULL )
+  {
+    if (InStream == stdin) {
+      gsErrorMsg("could not read mCRL LPE from stdin\n");
+    } else {
+      gsErrorMsg("could not read mCRL LPE from '%s'\n", InFileName);
+      fclose(InStream);
+    }
+    return 1;
+  }
+  assert(mu_spec != NULL);
 
-	if ( InStream == stdin )
-		gsVerboseMsg("reading mCRL LPE from stdin...\n");
-	else
-		gsVerboseMsg("reading mCRL LPE from '%s'...\n",argv[optind]);
-	mu_spec = ATreadFromFile(InStream);
-	if ( mu_spec == NULL )
-	{
-		gsErrorMsg("input is not a valid mCRL LPE file\n");
-		return 1;
-	}
+  if (!is_mCRL_spec(mu_spec)) {
+    if (mu_spec == stdin) {
+      gsErrorMsg("stdin does not contain a mCRL LPE\n");
+    } else {
+      gsErrorMsg("'%s' does not contain a mCRL LPE\n", InFileName);
+      fclose(InStream);
+    }
+    return false;
+  }
+  assert(is_mCRL_spec(mu_spec));
 
-	spec = (ATerm) translate((ATermAppl) mu_spec,convert_bools,convert_funcs);
+  spec = (ATerm) translate((ATermAppl) mu_spec,convert_bools,convert_funcs);
 
-	if ( OutStream == stdout )
-		gsVerboseMsg("writing mCRL2 LPE to stdout...\n");
-	else
-		gsVerboseMsg("writing mCRL2 LPE to '%s'...\n",argv[optind+1]);
-	ATwriteToBinaryFile(spec,OutStream);
+  OutStream = stdout;
+  char *OutFileName = NULL;
+  if ( optind+1 < argc )
+  {
+    OutFileName = argv[optind+1];
+    if ( (OutStream = fopen(OutFileName, "wb")) == NULL )
+    {
+      gsErrorMsg("cannot open output file '%s' for writing: ",
+        OutFileName);
+      perror(NULL);
+      if (InStream != stdin) {
+        fclose(InStream);
+      }
+      return 1;
+    }
+  }
 
-  	return 0;
+  if ( OutStream == stdout )
+    gsVerboseMsg("writing mCRL2 LPE to stdout...\n");
+  else
+    gsVerboseMsg("writing mCRL2 LPE to '%s'...\n", OutFileName);
+  ATwriteToBinaryFile(spec,OutStream);
+  if (InStream != stdin) {
+    fclose(InStream);
+  }
+  if (OutStream != stdout) {
+    fclose(OutStream);
+  }
+
+  return 0;
 }

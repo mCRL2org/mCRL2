@@ -1,5 +1,5 @@
 #define  NAME      "lpepp"
-#define  LVERSION  "0.4"
+#define  LVERSION  "0.4.1"
 #define  AUTHOR    "Aad Mathijssen"
 
 #ifdef __cplusplus
@@ -52,17 +52,6 @@ static bool PrintSpecificationFileName(char *SpecFileName, char *OutFileName,
        false, otherwise; appropriate error messages have been shown.
 */ 
 
-static bool PrintSpecificationStream(FILE *SpecStream, FILE *OutStream,
-  t_pp_format pp_format);
-/*Pre: SpecStream is a stream from which can be read, and which contains a
-       specification that adheres to the internal format
-       OutStream is the name of a valid stream to which can be written
-  Post:the specification in SpecStream is printed in the pp_format format
-       and saved to OutStream
-  Ret: true, if everything went ok.
-       false, otherwise; appropriate error messages have been shown.
-*/ 
-
 static void PrintPPFormat(FILE *stream, t_pp_format pp_format);
 /*Pre: stream points to a stream to which can be written
  *Ret: a string representation of pp_format is written to stream
@@ -71,7 +60,6 @@ static void PrintPPFormat(FILE *stream, t_pp_format pp_format);
 //implementation
 
 int main(int argc, char* argv[]) {
-  int  Result          = 0;
   //declarations for parsing the specification
   char *SpecFileName   = NULL;
   char *OutputFileName = NULL;
@@ -146,23 +134,19 @@ int main(int argc, char* argv[]) {
   ATerm StackBottom;
   ATinit(0, NULL, &StackBottom);
   //print specification  
-  if (!PrintSpecificationFileName(SpecFileName, OutputFileName, opt_pp_format))
-  {
-    Result = 1;  
-  }       
+  bool Result =
+    PrintSpecificationFileName(SpecFileName, OutputFileName, opt_pp_format);
   free(SpecFileName);
   free(OutputFileName);
-  gsDebugMsg("all objects are freed; return %d.\n", Result);
-  return Result;
+  return Result?0:1;
 }
 
 bool PrintSpecificationFileName(char *SpecFileName, char *OutputFileName,
   t_pp_format pp_format)
 {
-  bool Result           = true;
   FILE *SpecStream      = NULL;
   FILE *OutputStream    = NULL;
-  //open specification file for reading
+  //open SpecFileName for reading
   if (SpecFileName == NULL ) {
     SpecStream = stdin;
     gsDebugMsg("input from stdin.\n");
@@ -171,70 +155,82 @@ bool PrintSpecificationFileName(char *SpecFileName, char *OutputFileName,
   }
   if (SpecStream == NULL) {
     gsErrorMsg(
-      "could not open specification file '%s' for reading (error %d)\n",
-      SpecFileName, errno);
-    Result = false;
-  } else {
-    if ( SpecStream != stdin )
-      gsDebugMsg("specification file %s is opened for reading.\n", SpecFileName);
-    //open output file for writing or set to stdout
-    if (OutputFileName == NULL) {
-      OutputStream = stdout;
-      gsDebugMsg("output to stdout.\n");
-    } else {  
-      OutputStream = fopen(OutputFileName, "wb");
-      if (!OutputStream) {
-        gsErrorMsg("could not open output file '%s' for writing (error %d)\n", 
-          OutputFileName, errno);
-        Result = false;
-      } else {
-        gsDebugMsg("output file %s is opened for writing.\n", OutputFileName);
-      }
-    }
-    if (Result &&
-          !PrintSpecificationStream(SpecStream, OutputStream, pp_format))
-    {
-      Result = false;
-    }
+      "could not open input file '%s' for reading: ", SpecFileName);
+    perror(NULL);
+    return false;
   }
-  if ((SpecStream != NULL) && (SpecStream != stdin)) {
-    fclose(SpecStream);
-  }
-  if ((OutputStream != NULL) && (OutputStream != stdout)) {
-    fclose(OutputStream);
-  }
-  gsDebugMsg("all files are closed; return %s\n", Result?"true":"false");
-  return Result;
-}
-
-bool PrintSpecificationStream(FILE *SpecStream, FILE *OutputStream,
-  t_pp_format pp_format)
-{
   assert(SpecStream != NULL);
-  assert(OutputStream != NULL);
-  bool Result;
   //read specification from SpecStream
+  if ( SpecStream != stdin )
+    gsDebugMsg("input file '%s' is opened for reading.\n", SpecFileName);
   ATermAppl Spec = (ATermAppl) ATreadFromFile(SpecStream);
   if (Spec == NULL) {
-    gsErrorMsg("could not read specification from stream\n");
-    Result = false;
-  } else {
-    //print specification to OutputStream
-    if (OutputStream != stdout) {
-      if (gsVerbose) {
-        fprintf(stderr, "printing specification to file in the ");
-        PrintPPFormat(stderr, pp_format);
-        fprintf(stderr, " format\n");
-      }
+    if (SpecStream == stdin) {
+      gsErrorMsg("could not read LPE from stdin\n");
+    } else {
+      gsErrorMsg("could not read LPE from '%s'\n", SpecFileName);
+      fclose(SpecStream);
     }
-    gsEnableConstructorFunctions();
-    gsRewriteInit(ATAgetArgument(Spec,3),GS_REWR_INNER3);
-    PrintPart_C(OutputStream, (ATerm) Spec, pp_format);
-    gsRewriteFinalise();
-    Result = true;
+    return false;
   }
-  gsDebugMsg("all files are closed; return %s\n", Result?"true":"false");
-  return Result;
+  assert(Spec != NULL);
+  gsEnableConstructorFunctions();
+  if (!gsIsSpecV1(Spec)) {
+    if (SpecStream == stdin) {
+      gsErrorMsg("stdin does not contain an LPE\n");
+    } else {
+      gsErrorMsg("'%s' does not contain an LPE\n", SpecFileName);
+      fclose(SpecStream);
+    }
+    return false;
+  }
+  assert(gsIsSpecV1(Spec));
+  //open output file for writing or set to stdout
+  if (OutputFileName == NULL) {
+    OutputStream = stdout;
+    gsDebugMsg("output to stdout.\n");
+  } else {  
+    OutputStream = fopen(OutputFileName, "wb");
+    if (OutputStream == NULL) {
+      gsErrorMsg("could not open output file '%s' for writing ",
+        OutputFileName);
+      perror(NULL);
+      if (SpecStream != stdin) {
+        fclose(SpecStream);
+      }
+      return false;
+    }
+    gsDebugMsg("output file '%s' is opened for writing.\n", OutputFileName);
+  }
+  assert(OutputStream != NULL);
+  //print Spec to OutputStream
+  if (gsVerbose) {
+    fprintf(stderr, "printing LPE from ");
+    if (SpecStream == stdin) {
+      fprintf(stderr, "stdin");
+    } else {
+      fprintf(stderr, "'%s'", SpecFileName);
+    }
+    fprintf(stderr, " to ");
+    if (OutputStream == stdout) {
+      fprintf(stderr, "stdout");
+    } else {
+      fprintf(stderr, "'%s'", OutputFileName);
+    }
+    fprintf(stderr, " in the ");
+    PrintPPFormat(stderr, pp_format);
+    fprintf(stderr, " format\n");
+  }
+  gsRewriteInit(ATAgetArgument(Spec,3),GS_REWR_INNER3);
+  PrintPart_C(OutputStream, (ATerm) Spec, pp_format);
+  gsRewriteFinalise();
+  if (SpecStream != stdin) {
+    fclose(SpecStream);
+  }
+  if (OutputStream != stdout) {
+    fclose(OutputStream);
+  }
+  return true;
 }
 
 void PrintUsage(char *Name) {

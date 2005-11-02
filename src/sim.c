@@ -6,10 +6,12 @@ extern "C" {
 #define NAME "sim"
 
 #include <stdio.h>
+#include <errno.h>
 #include <stdlib.h>
 #include <string.h>
 #include <getopt.h>
 #include <aterm2.h>
+#include <assert.h>
 #include "gslowlevel.h"
 #include "gsfunc.h"
 #include "libprint_c.h"
@@ -100,17 +102,29 @@ int main(int argc, char **argv)
 		return 1;
 	}
 
-	if ( (SpecStream = fopen(argv[optind],"rb")) == NULL )
+        char *SpecFileName = argv[optind];
+	if ( (SpecStream = fopen(SpecFileName, "rb")) == NULL )
 	{
-		perror(NAME);
+                gsErrorMsg("could not open input file '%s' for reading: ",
+                  argv[optind]);
+		perror(NULL);
 		return 1;
 	}
-	gsEnableConstructorFunctions();
 	Spec = (ATermAppl) ATreadFromFile(SpecStream);
 	if ( Spec == NULL )
 	{
+                gsErrorMsg("could not read LPE from '%s'\n", SpecFileName);
+                fclose(SpecStream);
 		return 1;
 	}
+        assert(Spec != NULL);
+        gsEnableConstructorFunctions();
+        if (!gsIsSpecV1(Spec)) {
+          gsErrorMsg("'%s' does not contain an LPE\n", SpecFileName);
+          fclose(SpecStream);
+          return false;
+        }
+        assert(gsIsSpecV1(Spec));
 
 	state = gsNextStateInit(Spec,!usedummy,GS_STATE_VECTOR,strat);
 

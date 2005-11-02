@@ -254,7 +254,7 @@ int main(int argc, char *argv[])
   }
   if (opt_check_only) {
     fprintf(stdout,
-      "The file %s contains a well-formed mCRL2 specification.\n",
+      "The file '%s' contains a well-formed mCRL2 specification.\n",
       infilename);
     return 0;
   } else {
