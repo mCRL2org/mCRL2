@@ -15,7 +15,6 @@
 #include "mcrl2/list_iterator.h"
 #include "mcrl2/predefined_symbols.h"
 #include "mcrl2/detail/string_utility.h"
-#include "mcrl2/rewrite.h"
 #include "gsfunc.h"
 
 namespace mcrl2 {
