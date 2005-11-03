@@ -461,6 +461,11 @@ ATermList FindSolutions(ATermList Vars, ATerm Expr, FindSolutionsCallBack f)
 		EliminateVars(&fs_bottom());
 	}
 
+	if ( ATisEqual(fs_bottom().expr,gsProverFalse) )
+	{
+		return ATmakeList0();
+	}
+
 	if ( ATisEmpty(fs_bottom().vars) )
 	{
 		if ( ATisEqual(fs_bottom().expr,gsProverTrue) )
@@ -475,7 +480,7 @@ ATermList FindSolutions(ATermList Vars, ATerm Expr, FindSolutionsCallBack f)
 		} else {
 			if ( !ATisEqual(fs_bottom().expr,gsProverFalse) )
 			{
-				gsfprintf(stderr,"Term does not evaluate to true or false: %P\n",gsFromRewriteFormat(Expr));
+				gsfprintf(stderr,"Term does not evaluate to true or false: %P\n",gsFromRewriteFormat(fs_bottom().expr));
 				FindSolutionsError = true;
 			}
 			return ATmakeList0();
@@ -490,7 +495,7 @@ ATermList FindSolutions(ATermList Vars, ATerm Expr, FindSolutionsCallBack f)
 
 		fs_pop(&e);
 
-		ATermAppl var = (ATermAppl) ATgetFirst(e.vars);
+		ATermAppl var = ATgetFirst(e.vars);
 		ATermAppl sort = (ATermAppl) ATgetArgument(var,1);
 
 		if ( gsIsSortArrow(sort) )
@@ -533,7 +538,7 @@ ATermList FindSolutions(ATermList Vars, ATerm Expr, FindSolutionsCallBack f)
 					max_vars *= MAX_VARS_FACTOR;
 				}
 			}
-			ATerm term_rf = gsToRewriteFormat(cons_term);
+			ATerm term_rf = gsRewriteInternal(gsToRewriteFormat(cons_term));
 			
 			RWsetVariable((ATerm) var,term_rf);
 			ATerm new_expr = gsRewriteInternal(e.expr);
