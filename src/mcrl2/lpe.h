@@ -126,7 +126,6 @@ class LPE_summand: public aterm_wrapper
     ///
     data_expression time() const
     {
-      assert(has_time());
       return m_time;
     }
 
