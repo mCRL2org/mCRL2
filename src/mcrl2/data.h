@@ -42,6 +42,32 @@ class data_expression: public aterm_wrapper
       : aterm_wrapper(term)
     {}
 
+    /// Returns true if the data expression equals 'nil' (meaning it has no
+    /// sensible value).
+    ///
+    bool is_nil() const
+    {
+      return *this == gsMakeNil();
+    }     
+
+    /// Returns true if the data expression equals 'true'.
+    /// Note that the term will not be rewritten first.
+    ///
+    bool is_true() const
+    {
+      assert(!is_nil());
+      return *this == gsMakeDataExprTrue();
+    }     
+
+    /// Returns true if the data expression equals 'false'.
+    /// Note that the term will not be rewritten first.
+    ///
+    bool is_false() const
+    {
+      assert(!is_nil());
+      return *this == gsMakeDataExprFalse();
+    }     
+
     /// Applies a substitution to this data_expression and returns the result.
     /// The Substitution object must supply the method aterm operator()(aterm).
     ///

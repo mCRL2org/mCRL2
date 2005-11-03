@@ -104,7 +104,7 @@ class LPE_summand: public aterm_wrapper
     ///
     bool has_time() const
     {
-      return m_time != data_expression(gsMakeNil());
+      return !m_time.is_nil();
     }
 
     /// Returns the condition expression.
@@ -121,8 +121,7 @@ class LPE_summand: public aterm_wrapper
       return m_actions;
     }
 
-    /// Returns the time expression. This function may only be called if has_time
-    /// returns true.
+    /// Returns the time expression.
     ///
     data_expression time() const
     {
