@@ -38,6 +38,8 @@ $(BJAM):
 	$(BJAM_BUILD)
 
 install: all
+	$(INSTALL) -d $(libdir)
+	$(INSTALL) lib/* $(libdir)
 
 clean:
 	@-$(RM) -rf bin lib tools/build/jam_src/bin tools/build/jam_src/bootstrap
