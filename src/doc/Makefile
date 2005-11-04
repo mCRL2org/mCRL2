@@ -1,8 +1,8 @@
 -include ../config
 
-MAN_OBJECTS  = libgsrewrite.7 tbf2lpe.1 
-TXT_OBJECTS  = libgsrewrite.txt tbf2lpe.txt
-HTML_OBJECTS = libgsrewrite.html tbf2lpe.html
+MAN_OBJECTS  = libgsrewrite.7 tbf2lpe.1 lpeinfo.1
+TXT_OBJECTS  = libgsrewrite.txt tbf2lpe.txt lpeinfo.txt
+HTML_OBJECTS = libgsrewrite.html tbf2lpe.html lpeinfo.html
 
 # For now build only man objects
 OBJECTS         = $(MAN_OBJECTS)
