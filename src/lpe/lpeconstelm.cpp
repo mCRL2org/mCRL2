@@ -33,7 +33,7 @@ namespace po = boost::program_options;
 po::variables_map vm;
 
 //Constanten
-string version = "Version 0.4.1";
+string version = "Version 0.4.2";
 bool verbose    = false; 
 bool alltrue    = false;
 bool reachable  = false;
@@ -78,7 +78,7 @@ string addconstelm(string filename)
 
 void print_set(set< int > S)
 {
-  cout << "\033[0;1m Set : \033[m";
+  cout << " Set : ";
   
   set< int >::iterator i = S.begin();
   int j = 0;
@@ -126,7 +126,7 @@ bool compare(data_expression x, data_expression y, data_equation_list equations,
     return atermpp::aterm(x1) == atermpp::aterm(y1);     
   };
 
-  cout << "\033[0;31mError in compare function\033[0m" << endl;
+  cout << "  << Error in compare function >> " << endl;
   ATermAppl x1 = rew2(aterm_appl(x), gsMakeDataEqnSpec(aterm_list(equations) ));
   ATermAppl y1 = rew2(aterm_appl(y), gsMakeDataEqnSpec(aterm_list(equations) ));
   return atermpp::aterm(x1) == atermpp::aterm(y1);  
@@ -210,9 +210,6 @@ vector< data_variable > lhsl(vector < data_assignment > x)
 bool eval_cond(data_expression datexpr, vector< data_assignment > statevector, data_equation_list equations, set<int> S){
 
   bool b;
-
- // return true;
-  
   if (alltrue){
     return true;
   };
@@ -233,18 +230,11 @@ bool eval_cond(data_expression datexpr, vector< data_assignment > statevector, d
     }
     z++; 
   };
+  datexpr = datexpr.substitute(conditionvector.begin(), conditionvector.end());
+  datexpr = data_expression( rew2(datexpr, gsMakeDataEqnSpec(aterm_list(equations))));
   
-  data_assignment_list::iterator j = conditionvector.begin();
-  while (j != conditionvector.end() ){;
-    datexpr = datexpr.substitute(*j);
-    j++;
-  };
+  b = !(datexpr.is_false());
 
-  // 
-  // !!!!!!! data_expression(gsMakeOpIdFalse()) !!!!!! DIRECTE AANROEP UIT GSFUNC
-  //
-
-  b = !compare(data_expression(gsMakeOpIdFalse()), datexpr, equations, opt_right);
   return b;
 }
 
@@ -328,9 +318,7 @@ void  rebuild_lpe(specification spec,string  outfile, set< int > S, bool single,
     
     //Rewrite condition
     data_expression rebuild_condition = j->condition();
-    for(vector< data_assignment>::iterator i = const_parameters.begin();i != const_parameters.end() ;i++){
-      rebuild_condition = rebuild_condition.substitute(*i);
-    }
+    rebuild_condition = rebuild_condition.substitute(const_parameters.begin(), const_parameters.end());
     rebuild_condition = data_expression( rew2(rebuild_condition, gsMakeDataEqnSpec(aterm_list(rebuild_equations)))) ;
 
     //LPE_summand(data_variable_list summation_variables, data_expression condition, 
@@ -382,7 +370,7 @@ void  rebuild_lpe(specification spec,string  outfile, set< int > S, bool single,
     cout << " Written output file: " << outfile << endl << endl;
   } else
   {
-    cout << " \033[0;31mUnsuccessfully\033[0m written to output file '" << outfile << "'" << endl;
+    cout << " Unsuccessfully written to output file '" << outfile << "'" << endl;
   }
 
   return;
@@ -395,7 +383,7 @@ void print_const(specification spec , set< int > S)
   LPE lpe = spec.lpe();
   set< int >::iterator i;
   data_assignment_list sub = spec.initial_assignments();
-  cout << "\033[0;1m The constant process parameters \033[0m" << endl << "   ";
+  cout << " The constant process parameters " << endl << "   ";
   if (!S.empty()){
     i = S.begin(); 
     int k = 0;
@@ -410,7 +398,7 @@ void print_const(specification spec , set< int > S)
   } else
   {cout << "[]" << endl;} 
   } else {
-    cout << "\033[0;1m Number of found constants:  \033[0m" << S.size();
+    cout << " Number of found constants:  " << S.size();
   }
   cout << endl;
   return;
@@ -483,8 +471,8 @@ void constelm(string filename, string outfile, int option)
   set< int > D;
 
   ////
-  // Als V <  S dan zijn er variabele process parameters gevonden
-  ////
+  // If |V| <  |S| then variable process are found
+  //
   if (verbose){
     cout << endl << " Output of: "<< filename <<endl << endl;
   };
@@ -500,9 +488,9 @@ void constelm(string filename, string outfile, int option)
     
     if (verbose){
       print_set(S);
-      cout << "\033[0;1m Iteration           : \033[m" << count++ << endl; 
-      cout << "\033[0;1m Current statevector : \033[m"; print_statevector(sv);
-      cout << "\033[0;1m Resulting Nextstates: \033[m" << endl;
+      cout << " Iteration           : " << count++ << endl; 
+      cout << " Current statevector : "; print_statevector(sv);
+      cout << " Resulting Nextstates: " << endl;
     };
     
     for(summand_list::iterator s_current = lpe.summands().begin(); s_current != lpe.summands().end(); ++s_current){ 
@@ -519,7 +507,8 @@ void constelm(string filename, string outfile, int option)
         vector< data_expression > rhsnsv = rhsl(newstatevector);      
         set< int >::iterator j = S.begin();
        	
-        while (j != S.end()){
+        bool hack = true;
+        while (j != S.end() && hack){
 	        data_expression rhs_tv_j  = rhstv[*j];
 	        data_expression rhs_nsv_j = rhsnsv[*j];
 	        bool skip = false; 
@@ -536,6 +525,8 @@ void constelm(string filename, string outfile, int option)
               };    
               if (0 != listofnonconst.count(rhs_tv_j) ){
                 S_dummy.insert(*j);
+                hack = false;
+                break;
               }
             };
             f++;
@@ -563,6 +554,8 @@ void constelm(string filename, string outfile, int option)
     }; 
     
     set_difference(S.begin(), S.end(), S_dummy.begin(), S_dummy.end(), inserter(V, V.begin()));
+
+    
     if (verbose){
       cout << endl;
     };
