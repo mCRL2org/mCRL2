@@ -1,17 +1,17 @@
-<?xml version="1.0" encoding="ISO-8859-1"?>
+<?xml version="1.0" encoding="utf-8"?>
 <studio-project xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:noNamespaceSchemaLocation="tool_catalog.xsd">
  <description>This is a short description of the project.</description>
- <specification name="An Example" identifier="0">
+ <specification name="root.mcrl2" identifier="0">
   <output-object format="mcrl2">root.mcrl2</output-object>
  </specification>
- <specification name="Another Example" identifier="1" uptodate="true">
+ <specification name="root.lpe" identifier="1" uptodate="true">
   <tool-configuration tool-identifier="mcrl22lpe">--options root.mcrl2 root-0.lpe</tool-configuration>
-  <input-object identifier="0">root.mcrl2</input-object>
+  <input-object identifier="0" output-number="0"/>
   <output-object format="lpe">root-0.lpe</output-object>
  </specification>
- <specification name="Another Example" identifier="2" uptodate="true">
+ <specification name="root.lts" identifier="2" uptodate="true">
   <tool-configuration tool-identifier="lpe2lts">--options root-0.lpe root-0.lts</tool-configuration>
-  <input-object identifier="1">root-0.lpe</input-object>
+  <input-object identifier="1" output-number="0"/>
   <output-object format="lts">root-0.lts</output-object>
  </specification>
 </studio-project>

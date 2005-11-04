@@ -21,15 +21,15 @@ SpecificationPropertiesDialog::SpecificationPropertiesDialog(wxWindow* parent, w
 
   specification = aspecification;
 
-  if (specification->description != "") {
+  if (specification->GetDescription() != "") {
     wxStaticBoxSizer* descriptionbox = new wxStaticBoxSizer(wxVERTICAL, this, wxT("Description"));
 
-    descriptionbox->Add(new wxStaticText(this, wxID_ANY, wxString(specification->description.c_str(), wxConvLocal)), 1, wxALL|wxALIGN_LEFT, 5);
+    descriptionbox->Add(new wxStaticText(this, wxID_ANY, wxString(specification->GetDescription().c_str(), wxConvLocal)), 1, wxALL|wxALIGN_LEFT, 5);
 
     sizer->Add(descriptionbox, 1, wxALL|wxEXPAND, 8);
   }
 
-  if (0 < specification->input_objects.size()) {
+  if (0 < specification->GetNumberOfInputObjects()) {
     /* Specification has output objects (of course) */
     wxStaticBoxSizer* inputbox = new wxStaticBoxSizer(wxVERTICAL, this, wxT("Input objects"));
 
@@ -39,7 +39,7 @@ SpecificationPropertiesDialog::SpecificationPropertiesDialog(wxWindow* parent, w
     inputs = new wxListCtrl(this, wxID_ANY, wxDefaultPosition, wxDefaultSize, wxLC_REPORT|wxLC_VRULES|wxLC_HRULES);
 
     /* Assign iconlist (TODO type icon list) */
-    inputs->SetImageList(main_icon_list, wxIMAGE_LIST_SMALL);
+    inputs->SetImageList(format_icon_list, wxIMAGE_LIST_SMALL);
 
     inputs->InsertColumn(0, wxT("Name"));
     inputs->InsertColumn(1, wxT("Location"));
@@ -53,18 +53,20 @@ SpecificationPropertiesDialog::SpecificationPropertiesDialog(wxWindow* parent, w
     wxFlexGridSizer*  textgrid = new wxFlexGridSizer(2, 2, 5, 5);
 
     textgrid->Add(new wxStaticText(this, wxID_ANY, wxT("Name : ")), 1);
-    textgrid->Add(new wxStaticText(this, wxID_ANY, wxString(specification->tool_identifier.c_str(), wxConvLocal)), 2);
+    textgrid->Add(new wxStaticText(this, wxID_ANY, wxString(specification->GetToolIdentifier().c_str(), wxConvLocal)), 2);
     textgrid->Add(new wxStaticText(this, wxID_ANY, wxT("Arguments : ")), 1);
-    textgrid->Add(new wxStaticText(this, wxID_ANY, wxString(specification->tool_configuration.c_str(), wxConvLocal)), 2);
+    textgrid->Add(new wxStaticText(this, wxID_ANY, wxString(specification->GetToolConfiguration().c_str(), wxConvLocal)), 2);
     toolbox->Add(textgrid, 1, wxALL|wxEXPAND, 8);
 
-    std::list < InputPair >::iterator b = specification->input_objects.end();
-    std::list < InputPair >::iterator i = specification->input_objects.begin();
+    std::vector < SpecificationInputType >::const_iterator b = specification->GetInputObjects().end();
+    std::vector < SpecificationInputType >::const_iterator i = specification->GetInputObjects().begin();
     unsigned int c = 0;
 
     while (i != b) {
-      inputs->InsertItem(c, wxString((*i).first->name.c_str(), wxConvLocal), 0);
-      inputs->SetItem(c, 1, wxString((*i).second.c_str(), wxConvLocal));
+      Specification* parent = (*i).derived_from.pointer;
+
+      inputs->InsertItem(c, wxString(parent->GetName().c_str(), wxConvLocal), 0);
+      inputs->SetItem(c, 1, wxString(parent->GetOutputObjects()[(*i).output_number].file_name.c_str(), wxConvLocal));
 
       ++c;
       ++i;
@@ -97,7 +99,7 @@ SpecificationPropertiesDialog::SpecificationPropertiesDialog(wxWindow* parent, w
 
 void SpecificationPropertiesDialog::UpdateSizes() {
   /* Compute proper size for columns */
-  if (0 < specification->input_objects.size()) {
+  if (0 < specification->GetNumberOfInputObjects()) {
     inputs->SetColumnWidth(0, wxLIST_AUTOSIZE);
     inputs->SetColumnWidth(1, (inputs->GetClientSize().GetWidth() - inputs->GetColumnWidth(0)));
   }

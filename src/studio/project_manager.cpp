@@ -1,10 +1,9 @@
-#include <iostream>
 #include <fstream>
 #include <map>
 
-#include <stdio.h>
-
 #include "project_manager.h"
+#include "settings_manager.h"
+#include "specification.h"
 #include "xml_text_reader.h"
 
 ProjectManager::ProjectManager() {
@@ -45,7 +44,7 @@ bool ProjectManager::Close() {
 bool ProjectManager::Load() {
   std::string   project_file(project_root);
   bool          return_value = true;
-  XMLTextReader reader(project_file.append("/studio.project").c_str());
+  XMLTextReader reader(project_file.append("/").append(settings->GetProjectFileName()).c_str());
 
   /* Maps an identifier to a pointer to a specification object */
   std::map < unsigned int, Specification* > identifier_resolution;
@@ -57,9 +56,6 @@ bool ProjectManager::Load() {
     std::cerr << "Fatal: Unable to open project master file. (" << project_file << ")\n";
 #endif
 
-    /* Clean up */
-    reader.~XMLTextReader();
-
     return(false);
   }
 
@@ -69,9 +65,6 @@ bool ProjectManager::Load() {
 #ifndef NDEBUG
     std::cerr << "Error: schema is not usable.\n";
 #endif
-
-    /* Clean up */
-    reader.~XMLTextReader();
 
     return (false);
   }
@@ -133,11 +126,11 @@ bool ProjectManager::Load() {
           std::list < Specification >::iterator i = specifications.begin();
 
     while (i != b) {
-      const std::list < InputPair >::iterator c = (*i).input_objects.end();
-            std::list < InputPair >::iterator j = (*i).input_objects.begin();
+      const std::vector < SpecificationInputType >::iterator c = (*i).GetModifiableInputObjects().end();
+            std::vector < SpecificationInputType >::iterator j = (*i).GetModifiableInputObjects().begin();
 
       while (j != c) {
-        (*j).first = identifier_resolution[(unsigned int) (*j).first];
+        (*j).derived_from.pointer = identifier_resolution[(*j).derived_from.identifier];
 
         ++j;
       }
@@ -169,40 +162,47 @@ bool ProjectManager::Load() {
  *  - atomicity of writing
  */
 bool ProjectManager::Store() {
-  const std::list < Specification >::iterator b = specifications.end();
-        std::list < Specification >::iterator i = specifications.begin();
-
   std::string   project_file(project_root);
   std::ofstream project_stream;
 
-  project_file.append("/studio.project");
+  project_file.append("/").append(settings->GetProjectFileName());
 
   project_stream.open(project_file.c_str(), std::ios::out | std::ios::trunc);
 
+  bool return_value = Write(project_stream);
+
+  project_stream.close();
+
+  return (return_value);
+}
+
+bool ProjectManager::Write(std::ostream& stream) {
+  const std::list < Specification >::iterator b = specifications.end();
+        std::list < Specification >::iterator i = specifications.begin();
+
   /* Write header */
-  project_stream << "<?xml version=\"1.0\" encoding=\"ISO-8859-1\"?>\n"
-                 << "<studio-project xmlns:xsi=\"http://www.w3.org/2001/XMLSchema-instance\""
-                 << "xsi:noNamespaceSchemaLocation=\"tool_catalog.xsd\">\n";
+  stream << "<?xml version=\"1.0\" encoding=\"utf-8\"?>\n"
+         << "<studio-project xmlns:xsi=\"http://www.w3.org/2001/XMLSchema-instance\""
+         << " xsi:noNamespaceSchemaLocation=\"studio_project.xsd\">\n";
 
   while (i != b) {
-    i->Write(project_stream);
+    i->Write(stream);
 
     ++i;
   }
 
   /* Write footer */
-  project_stream << "</studio-project>\n";
-
-  project_stream.close();
+  stream << "</studio-project>\n";
 
   return (true);
 }
+
 
 /* Pretty print specification information */
 void ProjectManager::Print(std::ostream& stream) {
   const std::list < Specification >::iterator b = specifications.end();
         std::list < Specification >::iterator i = specifications.begin();
-  unsigned int                                n = 0;
+        unsigned int                          n = 0;
 
   while (i != b) {
     stream << "Specification <" << n++ << ">" << std::endl << std::endl;
@@ -290,282 +290,3 @@ bool ProjectManager::UpdateAll() {
   return (changed);
 }
 
-/**************************************************************************
- * Implementation of Specification methods
- **************************************************************************/
-Specification::Specification() {
-  uptodate           = false;
-  name               = "";
-  tool_configuration = "";
-  tool_identifier    = UNSPECIFIED_TOOL;
-}
-
-bool Specification::IsUpToDate() {
-  return (uptodate);
-}
-
-void Specification::SetNotUpToDate() {
-  uptodate = false;
-}
-
-/*
- * Pretty prints the information about a specification
- *
- */
-void Specification::Print(std::ostream& stream) {
-  stream << " Pretty printed specification \\\n\n"
-         << "  Name              : " << name << std::endl
-         << "  Identifier        : " << identifier << std::endl
-         << std::endl;
-  if (0 < input_objects.size()) {
-    stream << "  Command           : "
-           << ((tool_configuration == "") ? "#unspecified#" : tool_configuration)
-           << std::endl
-           << "  Tool identifier   : ";
-  }
-
-  if (tool_identifier == UNSPECIFIED_TOOL) {
-    stream << "#unspecified#";
-  }
-  else {
-    stream << tool_identifier;
-  }
-
-  stream << " (should query tool manager to add tool name)\n";
-
-  if (0 < input_objects.size()) {
-    if (1 < input_objects.size()) {
-      const std::list < InputPair >::iterator b = input_objects.end();
-            std::list < InputPair >::iterator i = input_objects.begin();
-
-      stream << "  Dependencies      :\n\n";
-
-      while (i != b) {
-        std::cerr << "    - " << (*i).second << std::endl;
-
-        ++i;
-      }
-    }
-    else {
-      stream << "  Single dependency : " << input_objects.back().second << "\n";
-    }
-  }
-
-  stream << " /\n";
-}
-
-/*
- * Recursively verifies whether specification is up to date by considering the
- * status of all specifications that it depends on.
- */
-bool Specification::CheckStatus() {
-  if (uptodate) {
-    const std::list < InputPair >::iterator b = input_objects.end();
-          std::list < InputPair >::iterator i = input_objects.begin();
-
-    /* Recursively check status */
-    while (i != b && (*i).first->CheckStatus()) {
-      i++;
-    }
-
-    uptodate = (i != b);
-  }
-  
-  return (uptodate);
-}
-
-/*
- * Recursively generates the specification and all not up to date
- * specifications it depends on. 
- *
- * Throws a pointer to the first specification that fails to be generated.
- */
-bool Specification::Generate() throw (void*) {
-  const std::list < InputPair >::iterator b = input_objects.end();
-        std::list < InputPair >::iterator i = input_objects.begin();
-
-  uptodate = false;
-
-  /* Recursively generate specifications */
-  while (i != b && (*i).first->Generate()) {
-    i++;
-  }
- 
-  if (i == b) {
-    /* Run tool via the tool executor with command using the tool_identifier to lookup the name of a tool */
-    if (TOOL_RUN_SUCCESSFUL) {
-      /* For the moment this is in place instead of a call to the tool executor. Reason being that the tool executor has not been built yet. */
-      uptodate = true;
-    }
-  }
-
-  return (uptodate);
-}
-
-bool Specification::Delete() {
-  const std::list < OutputPair >::iterator b = output_objects.end();
-        std::list < OutputPair >::iterator i = output_objects.begin();
-  bool  result = false;
-
-  while (i != b) {
-    FILE* handle = fopen((*i).second.c_str(), "r");
- 
-    if (handle != NULL) {
-      /* File exists */
-      fclose(handle);
-      remove((*i).second.c_str());
- 
-      result = true;
-    }
-  }
-
-  uptodate = false;
-
-  return (result);
-}
-
-/*
- * Read from XML
- *
- * Precondition: should xmlTextReaderPtr should point to a specification element
- *
- * Notice that pointers in input_objects are NOT restored via this function.
- *
- * TODO :
- *  - Exception handling what if writing to stream fails
- */
-bool Specification::Read(XMLTextReader& reader) throw (int) {
-  std::string temporary;
-
-  reader.GetAttribute(&name, "name");
-  reader.GetAttribute(&identifier, "identifier");
-
-  /* Is specification explicitly marked up to date, or not */
-  if (reader.GetAttribute(&temporary, "uptodate")) {
-    uptodate = (temporary == "true" || temporary == "1");
-  }
-  else {
-    uptodate = false;
-  }
-
-  if (!reader.IsEmptyElement()) {
-    reader.Read();
-
-    /* Active node, must be either an optional description for a specification or a tool-configuration */
-    if (reader.IsElement("description")) {
-      /* Proceed to content */
-      reader.Read();
-
-      reader.GetValue(&description);
-   
-      /* To end tag*/
-      reader.Read();
-      reader.Read();
-    }
-
-    /* Process tool-configuration tag */
-    if (reader.IsElement("tool-configuration")) {
-      /* Retrieve command: the value of the tool name */
-      reader.GetAttribute(&tool_identifier, "tool-identifier");
-     
-      reader.Read();
-     
-      reader.GetValue(&tool_configuration);
-
-      /* To end tag*/
-      reader.Read();
-      reader.Read();
-    }
-
-    /* Dependent specifications follow until node type is XML_READER_TYPE_END_ELEMENT */
-    while (!reader.IsEndElement() && reader.IsElement("input-object")) {
-      InputPair new_pair;
-
-      /* Resolve object identifier to pointer, works only if there are no dependency cycles */
-      reader.GetAttribute((unsigned int*) &new_pair.first, "identifier");
-    
-      reader.Read();
-
-      reader.GetValue(&new_pair.second);
-
-      input_objects.push_back(new_pair);
-
-      /* To end tag*/
-      reader.Read();
-      reader.Read();
-    }
-
-    /* Dependent specifications follow until node type is XML_READER_TYPE_END_ELEMENT */
-    while (!reader.IsEndElement() && reader.IsElement("output-object")) {
-      OutputPair new_pair;
-
-      /* Set file format */
-      reader.GetAttribute(&new_pair.first, "format");
-
-      reader.Read();
-
-      /* Set file name */
-      reader.GetValue(&new_pair.second);
-
-      output_objects.push_back(new_pair);
-
-      /* To end tag*/
-      reader.Read();
-      reader.Read();
-    }
-  }
-
-  return (true);
-}
-
-/*
- * Write as XML to stream
- *
- * TODO :
- *  - Exception handling what if writing to stream fails
- */
-bool Specification::Write(std::ostream& stream) {
-  /* Complex block */
-  stream << " <specification name=\"" << name << "\" identifier=\""
-         << identifier << "\"";
-
-  if (uptodate) {
-    stream << " uptodate=\"true\"";
-  }
-
-  stream << ">\n";
-
-  if (0 < input_objects.size()) {
-    std::list < InputPair >::iterator b = input_objects.end();
-    std::list < InputPair >::iterator i = input_objects.begin();
-
-    stream << "  <tool-configuration tool-identifier=\"" << tool_identifier << "\">"
-           << tool_configuration << "</tool-configuration>\n";
-
-    while (i != b) {
-      stream << "  <input-object identifier=\"" << (*i).first->identifier << "\">" << (*i).second << "</input-object>\n";
- 
-      ++i;
-    }
-  }
-
-  if (0 < output_objects.size()) {
-    std::list < OutputPair >::iterator b = output_objects.end();
-    std::list < OutputPair >::iterator i = output_objects.begin();
- 
-    while (i != b) {
-      stream << "  <output-object format=\"" << (*i).first << "\">" << (*i).second << "</output-object>\n";
- 
-      ++i;
-    }
-  }
-
-  stream << " </specification>\n";
-
-  return (true);
-}
-
-bool Specification::Commit() {
-  /* Will be implemented at a later time */
-  return (false);
-}

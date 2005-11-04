@@ -1,14 +1,9 @@
-#ifndef TOOL_MANAGER_H_
-#define TOOL_MANAGER_H_
+#ifndef PROJECT_MANAGER_H_
+#define PROJECT_MANAGER_H_
 
-#include <string>
 #include <list>
-#include <iostream>
-#include <ostream>
 
-#define UNSPECIFIED_TOOL ""
-
-class XMLTextReader;
+#include "specification.h"
 
 /*
  * A project is a collection of specifications objects along with meta
@@ -17,68 +12,6 @@ class XMLTextReader;
  * that are in the project.
  *
  */
-class Specification;
-
-/* Pairs to assign storage locations to output objects */
-typedef std::pair < Specification*, std::string > InputPair;
-typedef std::pair < std::string,    std::string > OutputPair;
-
-/*
- * A specification is either provided, in this case it is not generated from
- * other specifications, or generated.
- *
- * A generated specification is build using some tool with a particular
- * configuration from some input objects. The result is one or more output
- * objects that represent this specification on storage.
- */
-class Specification {
-  friend class ProjectManager;
-
-  private:
-    /* Whether the specification is up to date */
-    bool uptodate;
-
-    /* Checks if specification is up to date */
-    bool CheckStatus();
-
-    /* Generate the specification (instantiation on storage) */
-    bool Generate() throw (void*);
-
-    /* Remove specification from storage */
-    bool Delete();
-
-    /* Read from XML using a libXML2 reader */
-    bool Read(XMLTextReader& reader) throw (int);
-
-    /* Write as XML to stream */
-    bool Write(std::ostream& stream = std::cout);
-
-    /* Store changes to the configuration of this specification to storage (TODO) */
-    bool Commit();
-
-  public:
-
-    std::string  name;                        /* A name for the specification (need not be unique) */
-    unsigned int identifier;                  /* A number that uniquely identifies this specification */
-    std::string  tool_configuration;          /* A string of command line arguments that should be passed at tool execution */
-    std::string  tool_identifier;             /* Identifies the tool that is required to run the command */
-    std::string  description;                 /* Optional description */
-
-    std::list < InputPair >  input_objects;   /* Specifications that this specification depends on */
-    std::list < OutputPair > output_objects;  /* Specifications that this specification depends on */
-
-    Specification();
-
-    /* Returns the value of uptodate */
-    bool IsUpToDate();
-
-    /* Resets up-to-date status to false */
-    void SetNotUpToDate();
-
-    /* Pretty prints the fields of the specification */
-    void Print(std::ostream& stream = std::cerr);
-};
-
 class ProjectManager {
   private:
 
@@ -89,6 +22,9 @@ class ProjectManager {
 
     std::string  project_root;
     std::string  project_description;
+
+    /* Writes project configuration in XML format to stream */
+    bool Write(std::ostream& stream = std::cout);
 
   public:
 
@@ -118,7 +54,7 @@ class ProjectManager {
     /* Write project information to storage */
     bool Store();
 
-    /* Write project information to storage */
+    /* Write project information to stream */
     void Print(std::ostream& stream = std::cerr);
 
     /* Add a new specification to the project */

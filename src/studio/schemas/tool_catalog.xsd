@@ -1,4 +1,4 @@
-<?xml version="1.0" encoding="ISO-8859-1" ?>
+<?xml version="1.0" encoding="utf-8" ?>
 <xs:schema xmlns:xs="http://www.w3.org/2001/XMLSchema">
  <!-- Data type for tool/specification identification -->
  <xs:simpleType name="identifier">
@@ -20,13 +20,22 @@
    <xs:pattern value="input|output"/>
   </xs:restriction>
  </xs:simpleType>
+ <!-- Type for a tool mode of operation specification -->
+ <xs:complexType name="mode-specifier">
+  <xs:sequence>
+   <xs:element name="description" type="xs:token" minOccurs="0"/>
+   <xs:element name="object" type="object-specifier" maxOccurs="unbounded"/>
+  </xs:sequence>
+  <xs:attribute name="category" type="xs:token" use="required"/>
+  <xs:attribute name="selector" type="xs:string" use="optional"/>
+ </xs:complexType>
  <!-- Element for specification of tool input and output objects -->
  <xs:complexType name="object-specifier">
   <xs:sequence>
    <xs:element name="format-selector" type="format-selector" minOccurs="0" maxOccurs="unbounded"/>
   </xs:sequence>
   <xs:attribute name="type" type="object-type" use="required"/>
-  <xs:attribute name="selector" type="xs:token" use="optional"/>
+  <xs:attribute name="selector" type="xs:string" use="optional"/>
   <xs:attribute name="name" type="xs:token" use="optional"/>
   <xs:attribute name="formalism" type="xs:token" use="required"/>
   <xs:attribute name="default-format" type="xs:token" use="optional"/>
@@ -35,11 +44,10 @@
  <xs:complexType name="tool-profile">
   <xs:sequence>
    <xs:element name="description" type="xs:token"/>
-   <xs:element name="object" type="object-specifier" maxOccurs="unbounded"/>
+   <xs:element name="mode" type="mode-specifier" maxOccurs="unbounded"/>
   </xs:sequence>
   <xs:attribute name="name" type="xs:token" use="required"/>
   <xs:attribute name="identifier" type="identifier" use="required"/>
-  <xs:attribute name="category" type="xs:token" use="required"/>
   <xs:attribute name="location" type="xs:token" use="required"/>
  </xs:complexType>
  <!-- Root element the tool-catalog -->

@@ -1,6 +1,8 @@
 -include ../config
 
-CXXFLAGS                       = -std=c++98 -O3
+CXXFLAGS                       = -std=c++98 -O3 -Winline --param max-inline-insns-single=8000 \
+				 --param large-function-growth=5000 --param inline-unit-growth=5000
+
 
 #`-std=c++98' is to strict for the default mingw gcc
 ifeq ($(HOST_OS),MINGW)
@@ -20,15 +22,17 @@ LDFLAGS                        = $(LIBXML2_LDFLAGS)
 
 GUI_CPPFLAGS                   = -DDISABLE_TOOLBAR
 
-LIBXML2_OBJECTS                = xml_text_reader.o project_manager.o
+LIBXML2_OBJECTS                = xml_text_reader.o project_manager.o tool_manager.o tool.o specification.o \
+				 project_manager_tester tool_manager_tester
 
-WX_OBJECTS                     = studio.o studio_overview.o new_specification.o specification_properties.o resources.o
+WX_OBJECTS                     = studio.o studio_overview.o new_specification.o specification_properties.o resources.o settings_manager.o
 WX_LIBRARIES                   = $(WX_LIBS)
 
-GUI_OBJECTS                    = studio.o studio_overview.o new_specification.o specification_properties.o resources.o xml_text_reader.o
-PROJECT_MANAGER_OBJECTS        = project_manager.o
-TOOL_MANAGER_OBJECTS           = tool_manager.o
-OBJECTS                        = $(GUI_OBJECTS) $(PROJECT_MANAGER_OBJECTS) $(TOOL_MANAGER_OBJECTS)
+PROJECT_MANAGER_OBJECTS        = project_manager.o specification.o xml_text_reader.o settings_manager.o
+TOOL_MANAGER_OBJECTS           = tool_manager.o tool.o xml_text_reader.o settings_manager.o
+GUI_OBJECTS                    = studio.o studio_overview.o new_specification.o specification_properties.o \
+				 resources.o $(sort $(PROJECT_MANAGER_OBJECTS) $(TOOL_MANAGER_OBJECTS))
+OBJECTS                        = $(sort $(GUI_OBJECTS) $(PROJECT_MANAGER_OBJECTS) $(TOOL_MANAGER_OBJECTS))
 
 TEST_TARGETS                   = project_manager_tester tool_manager_tester
 TARGETS                        = studio
@@ -45,15 +49,15 @@ $(PROJECT_MANAGER_OBJECTS): CPPFLAGS += $(PROJECT_MANAGER_CPPFLAGS)
 $(GUI_OBJECTS):             CPPFLAGS += $(GUI_CPPFLAGS)
 
 tool_manager_tester: tool_manager_tester.cpp $(TOOL_MANAGER_OBJECTS)
-	$(CXX) $(CXXFLAGS) $(CPPFLAGS) $(LDFLAGS) $(TOOL_MANAGER_OBJECTS) $(WX_LIBRARIES) -o $@
+	$(CXX) $(CXXFLAGS) $(CPPFLAGS) $(LDFLAGS) $(TOOL_MANAGER_OBJECTS) $(WX_LIBRARIES) -o $@ $<
 
 project_manager_tester: project_manager_tester.cpp $(PROJECT_MANAGER_OBJECTS) 
-	$(CXX) $(CXXFLAGS) $(CPPFLAGS) $(LDFLAGS) $(PROJECT_MANAGER_OBJECTS) $(WX_LIBRARIES) -o $@
+	$(CXX) $(CXXFLAGS) $(CPPFLAGS) $(LDFLAGS) $(PROJECT_MANAGER_OBJECTS) $(WX_LIBRARIES) -o $@ $<
 
-studio: $(GUI_OBJECTS) $(PROJECT_MANAGER_OBJECTS)
-	$(CXX) $(CXXFLAGS) $(CPPFLAGS) $(LDFLAGS) $(GUI_OBJECTS) $(PROJECT_MANAGER_OBJECTS) $(WX_LIBRARIES) -o $@
+studio: $(GUI_OBJECTS)
+	$(CXX) $(CXXFLAGS) $(CPPFLAGS) $(LDFLAGS) $(GUI_OBJECTS) $(WX_LIBRARIES) -o $@
 
-%.o: %.c
+%.o: %.cpp
 	$(CXX) -c $(CXXFLAGS) $(CPPFLAGS) $<
 
 $(OBJECTS) $(TARGETS): Makefile

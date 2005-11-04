@@ -1,12 +1,15 @@
 #ifndef STUDIO_OVERVIEW_H
 #define STUDIO_OVERVIEW_H
 
+#include <set>
+#include <map>
+
 #include <wx/wx.h>
+#include <wx/menu.h>
 #include <wx/treectrl.h>
 
 #include "project_manager.h"
-
-#define STUDIO_OVERVIEW_STYLE wxCAPTION | wxRESIZE_BORDER | wxCLOSE_BOX
+#include "tool_manager.h"
 
 class StudioOverview : public wxFrame {
   DECLARE_CLASS(StudioOverview)
@@ -15,21 +18,37 @@ class StudioOverview : public wxFrame {
   public:
     StudioOverview();
     ~StudioOverview();
-    StudioOverview(wxWindow* parent, wxWindowID id);
+    StudioOverview(ToolManager&, wxWindow* parent, wxWindowID id);
+
+    void SetToolManager(ToolManager&);
 
   private:
     wxTreeCtrl*  specifications;
     wxPanel*     progress;
+    wxMenu*      tree_popup_menu;
+
+    /* The tool categories in the system, sorted lexicographically */
+    std::set < std::string > tool_categories;
+
+    /* Pre-created context menus per format and per category for all specification formats */
+    std::map < std::pair < std::string, std::string >, wxMenu* > context_menus;
+
+    /* The tool manager */
+    ToolManager&   tool_manager;
 
     /* The project manager */
     ProjectManager project_manager;
 
     /* Convenience functions */
     inline void GenerateMenuBar();
+    inline void GenerateContextMenus();
     inline void GenerateToolBar();
 
+    /* Handler for tool selection */
+    void ToolSelected(wxCommandEvent &event);
+
     /* Adds a new specification tot the project manager and specification tree view */
-    inline wxTreeItemId CreateSpecification(Specification& specification);
+    inline wxTreeItemId CreateSpecification(wxTreeItemId parent, Specification& specification);
 
     /* Handlers for operations of project level */
     void NewProject(wxCommandEvent &event);

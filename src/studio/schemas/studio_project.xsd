@@ -2,11 +2,8 @@
 <xs:schema xmlns:xs="http://www.w3.org/2001/XMLSchema">
  <!-- Data type for input specification -->
  <xs:complexType name="input-object">
-  <xs:simpleContent>
-   <xs:extension base="xs:token">
-    <xs:attribute name="identifier" type="xs:nonNegativeInteger" use="required"/>
-   </xs:extension>
-  </xs:simpleContent>
+  <xs:attribute name="identifier" type="xs:nonNegativeInteger" use="required"/>
+  <xs:attribute name="output-number" type="xs:nonNegativeInteger" use="required"/>
  </xs:complexType>
  <!-- Data type for output specification -->
  <xs:complexType name="output-object">
@@ -27,6 +24,7 @@
   <xs:simpleContent>
    <xs:extension base="xs:token">
     <xs:attribute name="tool-identifier" type="tool-identifier" use="required"/>
+    <xs:attribute name="tool-mode" type="xs:nonNegativeInteger" use="optional"/>
    </xs:extension>
   </xs:simpleContent>
  </xs:complexType>

@@ -29,24 +29,24 @@ IMPLEMENT_CLASS(StudioOverview, wxFrame)
 #define ID_REMOVE                   94
 #define ID_HELP                     95
 
-#define ID_SETTINGS                 100
-#define ID_PROJECT_NEW              101
-#define ID_PROJECT_CLOSE            102
-#define ID_PROJECT_LOAD             103
-#define ID_PROJECT_STORE            104
-#define ID_PROJECT_BUILD            105
-#define ID_SPECIFICATION_NEW        106
-#define ID_SPECIFICATION_EDIT       107
-#define ID_SPECIFICATION_REMOVE     108
-#define ID_SPECIFICATION_RENAME     109
-#define ID_SPECIFICATION_LOAD       110
-#define ID_SPECIFICATION_MARK_DIRTY 111
-#define ID_SPECIFICATION_PROPERTIES 112
-#define ID_ANALYSIS_NEW             113
-#define ID_ANALYSIS_REMOVE          114
-#define ID_ANALYSIS_PERFORM         115
-#define ID_MODEL                    116
-#define ID_ANALYSIS                 117
+#define ID_MENU_TOOLS               100
+#define ID_SETTINGS                 101
+#define ID_PROJECT_NEW              102
+#define ID_PROJECT_CLOSE            103
+#define ID_PROJECT_LOAD             104
+#define ID_PROJECT_STORE            105
+#define ID_PROJECT_BUILD            106
+#define ID_SPECIFICATION_NEW        107
+#define ID_SPECIFICATION_EDIT       108
+#define ID_SPECIFICATION_REMOVE     109
+#define ID_SPECIFICATION_RENAME     110
+#define ID_SPECIFICATION_MARK_DIRTY 112
+#define ID_SPECIFICATION_PROPERTIES 113
+#define ID_ANALYSIS_NEW             114
+#define ID_ANALYSIS_REMOVE          115
+#define ID_ANALYSIS_PERFORM         116
+#define ID_MODEL                    117
+#define ID_ANALYSIS                 118
 
 #define ID_FRAME_MODEL              151
 #define ID_FRAME_ANALYSIS           152
@@ -61,7 +61,6 @@ BEGIN_EVENT_TABLE(StudioOverview, wxFrame)
   EVT_MENU(ID_SPECIFICATION_EDIT,           StudioOverview::EditSpecification)
   EVT_MENU(ID_SPECIFICATION_REMOVE,         StudioOverview::RemoveSpecification)
   EVT_MENU(ID_SPECIFICATION_RENAME,         StudioOverview::ActivateRename)
-  EVT_MENU(ID_SPECIFICATION_LOAD,           StudioOverview::AddSpecification)
   EVT_MENU(ID_SPECIFICATION_MARK_DIRTY,     StudioOverview::MarkDirty)
   EVT_MENU(ID_SPECIFICATION_PROPERTIES,     StudioOverview::EditSpecificationProperties)
   EVT_MENU(ID_ANALYSIS_NEW,                 StudioOverview::AddAnalysis)
@@ -72,8 +71,8 @@ BEGIN_EVENT_TABLE(StudioOverview, wxFrame)
   EVT_MENU(wxID_EXIT,                       StudioOverview::Quit)
 END_EVENT_TABLE()
 
-StudioOverview::StudioOverview(wxWindow* parent, wxWindowID id) :
-  wxFrame(parent, id, wxT("Studio - No project"), wxDefaultPosition, wxDefaultSize, STUDIO_OVERVIEW_STYLE), project_manager() {
+StudioOverview::StudioOverview(ToolManager& new_tool_manager, wxWindow* parent, wxWindowID id) :
+  wxFrame(parent, id, wxT("Studio - No project"), wxDefaultPosition, wxDefaultSize), tool_manager(new_tool_manager), project_manager() {
 
   /* Resize and centre frame on display */
   Centre();
@@ -81,6 +80,8 @@ StudioOverview::StudioOverview(wxWindow* parent, wxWindowID id) :
 
   /* Create menubar & toolbar */
   GenerateMenuBar();
+
+  GenerateContextMenus();
 
 #if !defined(DISABLE_TOOLBAR)
   GenerateToolBar();
@@ -93,9 +94,15 @@ StudioOverview::StudioOverview(wxWindow* parent, wxWindowID id) :
   /* Load main icons */
   main_icon_list = LoadMainIcons();
 
+  /* Load default icons for file formats */
+  format_icon_list = LoadFormatIcons();
+
+  /* Load default small icons for file formats */
+  format_small_icon_list = LoadSmallFormatIcons();
+
   /* Generate model view */
   specifications = new wxTreeCtrl(mainSplitter, ID_FRAME_MODEL, wxDefaultPosition, wxDefaultSize, wxTR_EDIT_LABELS|wxTR_HAS_BUTTONS|wxTR_HIDE_ROOT|wxTR_SINGLE|wxSUNKEN_BORDER);
-  specifications->AssignImageList(main_icon_list);
+  specifications->AssignImageList(format_icon_list);
   specifications->AddRoot(wxT("Leonard of Quirm!"));
 
   /* Generate progress view */
@@ -128,6 +135,27 @@ StudioOverview::StudioOverview(wxWindow* parent, wxWindowID id) :
 }
 
 StudioOverview::~StudioOverview() {
+  const std::map < std::pair < std::string, std::string >, wxMenu* >::const_iterator b = context_menus.end();
+        std::map < std::pair < std::string, std::string >, wxMenu* >::const_iterator i = context_menus.begin();
+
+  /* Cleanup context menus */
+  while (i != b) {
+    delete (*i).second;
+
+    ++i;
+  }
+
+  delete tree_popup_menu;
+}
+
+void StudioOverview::SetToolManager(ToolManager& new_tool_manager) {
+  tool_manager = new_tool_manager;
+
+  context_menus.clear();
+  tool_categories.clear();
+
+  /* Regenerate context menus */
+  GenerateContextMenus();
 }
 
 /* Convenience function to fill the menu */
@@ -165,7 +193,6 @@ inline void StudioOverview::GenerateMenuBar() {
   wxMenu* project_specification_menu = new wxMenu();
 
   project_specification_menu->Append(ID_SPECIFICATION_NEW, wxT("&New\tCTRL-n"), wxT("Create new specification"));
-  project_specification_menu->Append(ID_SPECIFICATION_LOAD, wxT("&Add"), wxT("Add existing specification to project"));
   project_menu->Append(ID_MODEL, wxT("&Specification"), project_specification_menu);
 
   wxMenu* project_analysis_menu = new wxMenu();
@@ -178,17 +205,99 @@ inline void StudioOverview::GenerateMenuBar() {
 
   wxMenu* settings_menu  = new wxMenu();
 
-  settings_menu->Append(ID_SETTINGS, wxT("&Defaults"));
+  settings_menu->Append(wxID_PREFERENCES, wxT("&Defaults"));
   menu->Append(settings_menu, wxT("&Settings"));
 
   wxMenu* help_menu  = new wxMenu();
 
-  help_menu->Append(ID_HELP, wxT("&User Manual"));
+  help_menu->Append(wxID_HELP, wxT("&User Manual"));
   help_menu->AppendSeparator();
-  help_menu->Append(ID_ABOUT, wxT("&About"));
+  help_menu->Append(wxID_ABOUT, wxT("&About"));
   menu->Append(help_menu, wxT("&Help"));
 
   SetMenuBar(menu);
+}
+
+/* Generate context menus for all tool-categories for all input types */
+inline void StudioOverview::GenerateContextMenus() {
+  const std::list < Tool* >                 tools               = tool_manager.GetTools();
+  const std::list < Tool* >::const_iterator b                   = tools.end();
+        std::list < Tool* >::const_iterator i                   = tools.begin();
+        unsigned int                        tool_category_pairs = 0;
+
+  /* Build popup menu */
+  tree_popup_menu = new wxMenu();
+
+  /* Add standard menu entries */
+  tree_popup_menu->Append(ID_SPECIFICATION_EDIT, wxT("&Edit"));
+  tree_popup_menu->Append(ID_SPECIFICATION_RENAME, wxT("&Rename"));
+  tree_popup_menu->Append(ID_SPECIFICATION_REMOVE, wxT("&Delete"));
+  tree_popup_menu->Append(ID_SPECIFICATION_MARK_DIRTY, wxT("&Regenerate"));
+  tree_popup_menu->AppendSeparator();
+
+  /* For all unique input formats add a menu-item to a context menu */
+  while (i != b) {
+    const std::vector < ToolMode* >                 modes = (*i)->GetModes();
+    const std::vector < ToolMode* >::const_iterator c     = modes.end();
+          std::vector < ToolMode* >::const_iterator j     = modes.begin();
+
+    /* Do this for all tool modes */
+    while (j != c) {
+      const std::list < ToolObject* >                 objects  = (*j)->GetObjects();
+      const std::list < ToolObject* >::const_iterator d        = objects.end();
+            std::list < ToolObject* >::const_iterator k        = objects.begin();
+      const std::string                               category = (*j)->GetCategory();
+
+      /* Do this for all input objects */
+      while (k != d) {
+        if ((*k)->GetType() == input) {
+          const std::map < std::string, std::string >                 formats = (*k)->GetFormatSelectors();
+          const std::map < std::string, std::string >::const_iterator l       = formats.end();
+                std::map < std::string, std::string >::const_iterator e       = formats.begin();
+                std::pair < std::string, std::string >                new_pair("", category);
+          
+          if ((*k)->HasDefaultFormat()) {
+            new_pair.first = (*k)->GetDefaultFormat();
+
+            if (context_menus.count(new_pair) == 0) {
+              /* Create menu for default format */
+              context_menus[new_pair] = new wxMenu();
+            }
+           
+            context_menus[new_pair]->Append(wxID_HIGHEST, wxString((*i)->GetName().c_str(), wxConvLocal), wxString((*i)->GetDescription().c_str(), wxConvLocal));
+
+            ++tool_category_pairs;
+          }
+
+          /* Do this for all selectable formats */
+          while (l != e) {
+            new_pair.first = (*l).first;
+          
+            if (context_menus.count(new_pair) == 0) {
+              /* No menu created for this pair */
+              context_menus[new_pair] = new wxMenu();
+            }
+
+            context_menus[new_pair]->Append(wxID_HIGHEST, wxString((*i)->GetName().c_str(), wxConvLocal), wxString((*i)->GetDescription().c_str(), wxConvLocal));
+
+            ++tool_category_pairs;
+          }
+        }
+
+        /* Register tool category */
+        tool_categories.insert(category);
+
+        ++k;
+      }
+
+      ++j;
+    }
+
+    ++i;
+  }
+
+  /* Connect event handler for pop-up menu entries */
+  Connect(wxID_HIGHEST, wxID_HIGHEST + tool_category_pairs, wxEVT_COMMAND_MENU_SELECTED, wxCommandEventHandler(StudioOverview::ToolSelected));
 }
 
 /* Convenience function to fill the menu */
@@ -198,11 +307,49 @@ inline void StudioOverview::GenerateToolBar() {
 
   /* Add tools */
   toolbar->AddTool(ID_SPECIFICATION_NEW, main_icon_list->GetBitmap(0), wxT("New specification"));
-  toolbar->AddTool(ID_SPECIFICATION_LOAD, main_icon_list->GetBitmap(1), wxT("Add specification"));
   toolbar->AddTool(ID_SPECIFICATION_REMOVE, main_icon_list->GetBitmap(2), wxT("Remove specification"));
   toolbar->Realize();
 
   SetToolBar(toolbar);
+}
+
+/*
+ * A tool was selected to add a new specification
+ *
+ * Need :
+ *  - the selected tool
+ *  - the selected category (to determine compatible tool modes)
+ *  - the selected specification (via specification->GetSelection())
+ */
+void StudioOverview::ToolSelected(wxCommandEvent &event) {
+//  wxTreeItemId   selected      = specifications->GetSelection();
+//  Specification* specification = ((SpecificationData*) specifications->GetItemData(selected))->specification;
+
+  /* event.GetId() is an integer that identifies a tool and a category */
+  std::cerr << "Selected tool : " << event.GetId() << std::endl;
+/* TODO
+  Specification     new_specification;
+  wxTreeItemId      new_item;
+  wxTextEntryDialog dialog(this, wxT("File name for specification"), wxT("Please enter a file name"));
+
+  if (dialog.ShowModal() == wxID_OK) {
+    std::string             name(dialog.GetValue().fn_str());
+    SpecificationOutputType new_output = { "Mango", name, "MD5 hash" };
+
+    new_specification.output_objects.push_back(new_output);
+    new_specification.SetName(name);
+
+    new_item = CreateSpecification(specifications->GetSelection(), new_specification);
+
+    specifications->SelectItem(new_item);
+    specifications->EditLabel(new_item);
+  }
+*/
+  /* Specification is not yet available and not up-to-date */
+//  new_specification->ToggleRegeneration();
+
+  /* Set corresponding status of new object */
+//  specifications->SetItemImage(selected, (specifications->GetItemImage(selected) >> 2) + not_up_to_date);
 }
 
 /* Handlers for operations of project level */
@@ -269,14 +416,14 @@ void StudioOverview::LoadProject(wxCommandEvent &event) {
             SpecificationData* specification_data = new SpecificationData(const_cast < Specification* > (specification));
       const wxTreeItemId       root               = this->specifications->GetRootItem();
             wxTreeItemId       new_item;
-      const wxString           name(specification->name.c_str(), wxConvLocal);
+      const wxString           name(specification->GetName().c_str(), wxConvLocal);
  
-      if (specification->input_objects.size() == 0) {
+      if (specification->GetNumberOfInputObjects() == 0) {
         /* Specification is provided (not generated) */
         new_item = this->specifications->AppendItem(root, name, 0, -1, specification_data);
       }
       else {
-        const wxTreeItemId parent = to_tree_id[specification->input_objects.back().first];
+        const wxTreeItemId parent = to_tree_id[specification->GetInputObjects().front().derived_from.pointer];
  
         /* Specification is or must be generated; connect to inputs (currently only one input object is allowed) */
         new_item = this->specifications->AppendItem(parent, name, 0, -1, specification_data);
@@ -306,35 +453,38 @@ void StudioOverview::StoreProject(wxCommandEvent &event) {
  * TODO
  *  A new specification relies on a single input only; must be extended.
  */
-inline wxTreeItemId StudioOverview::CreateSpecification(Specification& specification) {
-  wxTreeItemId   selected   = specifications->GetSelection();
+inline wxTreeItemId StudioOverview::CreateSpecification(wxTreeItemId parent, Specification& specification) {
   wxTreeItemId   root_item  = specifications->GetRootItem();
   wxTreeItemId   new_item;
 
   /* Add dependencies */
-  if (root_item != selected) {
-    Specification* dependency = ((SpecificationData*) specifications->GetItemData(selected))->specification;
-    InputPair      new_pair(dependency, dependency->output_objects.back().second);
+  if (root_item != parent) {
+    Specification*         dependency = ((SpecificationData*) specifications->GetItemData(parent))->specification;
+    SpecificationInputType new_input;
+
+    /* Dependens on the first output of <|dependency|> */
+    new_input.derived_from.pointer = dependency;
+    new_input.output_number        = 0;
 
     /* Only one output of the parent at this time */
-    specification.input_objects.push_back(new_pair);
+    specification.GetModifiableInputObjects().push_back(new_input);
   }
 
   try {
-    SpecificationData* specification_data;
-    wxString           name(specification.name.c_str(), wxConvLocal);
-    OutputPair         new_pair("Banana", specification.name);
+    SpecificationData*      specification_data;
+    wxString                name(specification.GetName().c_str(), wxConvLocal);
+    SpecificationOutputType new_output = { "Banana", specification.GetName(), "MD5 hash" };
 
-    /* Determine outputs, using tool characteristics TODO */
-    specification.output_objects.push_back(new_pair);
+    /* TODO Determine outputs, using tool characteristics and selected tool mode */
+    specification.GetModifiableOutputObjects().push_back(new_output);
 
     specification_data = new SpecificationData(project_manager.Add(specification));
 
     /* Add new item to (local) project manager and tree-control */
-    new_item = specifications->AppendItem(selected, name, 0, -1, specification_data);
+    new_item = specifications->AppendItem(parent, name, 0, -1, specification_data);
 
-    if (!specifications->IsExpanded(selected) && root_item != selected) {
-      specifications->Expand(selected);
+    if (!specifications->IsExpanded(parent) && root_item != parent) {
+      specifications->Expand(parent);
     }
   }
   catch (int) {
@@ -344,30 +494,11 @@ inline wxTreeItemId StudioOverview::CreateSpecification(Specification& specifica
   return (new_item);
 }
 
-void StudioOverview::NewSpecification(wxCommandEvent &event) {
-  Specification     new_specification;
-  wxTreeItemId      new_item;
-  wxTextEntryDialog dialog(this, wxT("File name for specification"), wxT("Please enter a file name"));
-
-  if (dialog.ShowModal() == wxID_OK) {
-    std::string name(dialog.GetValue().fn_str());
-    OutputPair  new_pair("Mango", name);
-
-    new_specification.output_objects.push_back(new_pair);
-    new_specification.name = name; 
-
-    new_item = CreateSpecification(new_specification);
-
-    specifications->SelectItem(new_item);
-    specifications->EditLabel(new_item);
-  }
-}
-
 void StudioOverview::EditSpecification(wxCommandEvent &event) {
   wxProcess* editor = new wxProcess();
 
   /* TODO only takes the last output object */
-  wxString filename = wxString(((SpecificationData*) specifications->GetItemData(specifications->GetSelection()))->specification->output_objects.back().second.c_str(), wxConvLocal);
+  wxString filename = wxString(((SpecificationData*) specifications->GetItemData(specifications->GetSelection()))->specification->GetOutputObjects().back().file_name.c_str(), wxConvLocal);
 
   filename.Prepend(wxT("/")).Prepend(wxString(project_manager.GetProjectDirectory().c_str(), wxConvLocal));
 
@@ -376,7 +507,7 @@ void StudioOverview::EditSpecification(wxCommandEvent &event) {
 }
 
 /* Handlers for operations on specifications */
-void StudioOverview::AddSpecification(wxCommandEvent &event) {
+void StudioOverview::NewSpecification(wxCommandEvent &event) {
   NewSpecificationDialog* dialog = new NewSpecificationDialog(this, wxID_ANY);
 
   if (dialog->ShowModal() == wxID_OK) {
@@ -387,11 +518,12 @@ void StudioOverview::AddSpecification(wxCommandEvent &event) {
 
       if (file_name != wxT("")) {
         /* Insert new specification into tree */
-        Specification  new_specification;
+        std::string   std_name(name.fn_str());
+        Specification new_specification;
 
-        new_specification.name     = name.fn_str();
+        new_specification.SetName(std_name);
 
-        specifications->SelectItem(CreateSpecification(new_specification));
+        specifications->SelectItem(CreateSpecification(specifications->GetRootItem(), new_specification));
       }
     }
   }
@@ -400,12 +532,18 @@ void StudioOverview::AddSpecification(wxCommandEvent &event) {
 }
 
 void StudioOverview::MarkDirty(wxCommandEvent &event) {
-  ((SpecificationData*) specifications->GetItemData(specifications->GetSelection()))->specification->SetNotUpToDate();
+  const wxTreeItemId selected = specifications->GetSelection();
+
+  /* Make that the specification will be regenerated */
+  ((SpecificationData*) specifications->GetItemData(selected))->specification->ToggleRegeneration();
+
+  /* Set Specification state */
+  specifications->SetItemImage(selected, (specifications->GetItemImage(selected) >> 2) + not_up_to_date);
 }
 
 void StudioOverview::EditSpecificationProperties(wxCommandEvent &event) {
   Specification*                 specification = ((SpecificationData*) specifications->GetItemData(specifications->GetSelection()))->specification;
-  wxString                       name          = wxString(specification->name.c_str(), wxConvLocal);
+  wxString                       name          = wxString(specification->GetName().c_str(), wxConvLocal);
   wxString                       title         = wxString(wxT("Properties of `")).Append(name).Append(wxT("'"));
   SpecificationPropertiesDialog* dialog        = new SpecificationPropertiesDialog(this, wxID_ANY, title, specification);
 
@@ -427,6 +565,8 @@ void StudioOverview::RemoveSpecification(wxCommandEvent &event) {
     /* Invisible root is not selected */
     specifications->DeleteChildren(selected);
     specifications->Delete(selected);
+
+    /* TODO, remove specifications associated to node and node children */
   }
 }
 
@@ -442,47 +582,72 @@ void StudioOverview::PerformAnalysis(wxCommandEvent &event) {
 
 void StudioOverview::SpawnContextMenu(wxTreeEvent &event) {
   /* Set selected tree item, for communication with menu event handlers */
-  Specification* specification = ((SpecificationData*) specifications->GetItemData(event.GetItem()))->specification;
+  Specification*              specification        = ((SpecificationData*) specifications->GetItemData(event.GetItem()))->specification;
+  unsigned int                generated_categories = 0;
+  std::vector < wxMenuItem* > attached_menus;
 
-  /* Build popup menu */
-  wxMenu* context_menu = new wxMenu();
+  /* Analyses, for instance, do not have output objects */
+  tree_popup_menu->Enable(ID_SPECIFICATION_EDIT, 0 < specification->GetNumberOfOutputObjects());
+  tree_popup_menu->Enable(ID_SPECIFICATION_MARK_DIRTY, specification->IsUpToDate());
 
-  if (0 < specification->output_objects.size()) {
-    /* Analyses, for instance, do not have output objects */
-    context_menu->Append(ID_SPECIFICATION_EDIT, wxT("&Edit"));
+  /* Add tool categories if there are tools in this category that operate on this type of specification */
+  const std::set < std::string >::const_iterator b      = tool_categories.end();
+        std::set < std::string >::const_iterator i      = tool_categories.begin();
+        std::string                              format = specification->GetModifiableOutputObjects().front().format;
+
+  /* TODO when tree visualisation changes... do something better here */
+  while (i != b) {
+    std::pair < std::string, std::string > new_pair(format, *i);
+
+    if (context_menus.count(new_pair) != 0) {
+      /* Recursively copy the menu to circumvent wxGTK bugs in wxMenu, and wxMenuItem */
+      wxMenu*         new_menu = new wxMenu();
+
+      wxMenuItemList::compatibility_iterator node = context_menus[new_pair]->GetMenuItems().GetFirst();
+
+      /* For all menu items */
+      while (node != 0) {
+        wxMenuItem* item     = node->GetData();
+        wxMenuItem* new_item = new wxMenuItem(new_menu, wxID_HIGHEST + generated_categories, item->GetLabel(), item->GetHelp());
+
+        new_menu->Append(new_item);
+
+        node = node->GetNext();
+      }
+
+      attached_menus.push_back(tree_popup_menu->Append(new wxMenuItem(tree_popup_menu, ID_MENU_TOOLS, wxString((*i).c_str(), wxConvLocal), wxT(""), wxITEM_NORMAL, new_menu)));
+
+      ++generated_categories;
+    }
+
+    ++i;
   }
 
-  context_menu->Append(ID_SPECIFICATION_RENAME, wxT("&Rename"));
-  context_menu->Append(ID_SPECIFICATION_REMOVE, wxT("&Delete"));
-
-  if (specification->IsUpToDate()) {
-    context_menu->Append(ID_SPECIFICATION_MARK_DIRTY, wxT("&Mark dirty"));
+  if (generated_categories) {
+    attached_menus.push_back(tree_popup_menu->AppendSeparator());
   }
 
-  context_menu->AppendSeparator();
+  tree_popup_menu->Append(ID_SPECIFICATION_PROPERTIES, wxT("&Properties"));
 
-  wxMenu* visualise_menu  = new wxMenu();
+  PopupMenu(tree_popup_menu);
 
-  context_menu->Append(ID_SETTINGS, wxT("&Visualise..."), visualise_menu);
+  /* Remove separator */
+  if (generated_categories) {
+    tree_popup_menu->Remove(attached_menus.back());
 
-  wxMenu* convert_menu  = new wxMenu();
+    attached_menus.pop_back();
+  }
+  
+  /* Remove properties item */
+  tree_popup_menu->Remove(ID_SPECIFICATION_PROPERTIES);
 
-  context_menu->Append(ID_SETTINGS, wxT("&Convert..."), convert_menu);
+  /* Remove attached context_menus for categories to prevent deletion */
+  while (0 < attached_menus.size()) {
+    /* Member functions Remove and Delete are not functional under wxGTK */
+    tree_popup_menu->Destroy(attached_menus.back());
 
-  wxMenu* transform_menu  = new wxMenu();
-
-  context_menu->Append(ID_SETTINGS, wxT("&Transform..."), transform_menu);
-
-  wxMenu* analysis_menu  = new wxMenu();
-
-  context_menu->Append(ID_SETTINGS, wxT("&Analyse..."), analysis_menu);
-  context_menu->AppendSeparator();
-  context_menu->Append(ID_SPECIFICATION_PROPERTIES, wxT("&Properties"));
-
-  PopupMenu(context_menu);
-
-  /* Clean up */
-  context_menu->~wxMenu();
+    attached_menus.pop_back();
+  }
 }
 
 void StudioOverview::ActivateRename(wxCommandEvent &event) {
@@ -492,9 +657,10 @@ void StudioOverview::ActivateRename(wxCommandEvent &event) {
 void StudioOverview::RenameSpecification(wxTreeEvent &event) {
   /* Communicate change of name with Project Manager */
   if (!event.IsEditCancelled()) {
+    std::string    name(event.GetLabel().fn_str());
     Specification* specification = ((SpecificationData*) specifications->GetItemData(event.GetItem()))->specification;
 
-    specification->name = event.GetLabel().fn_str();
+    specification->SetName(name);
 
 #ifndef NDEBUG
     std::cerr << "Renamed specification\n\n";

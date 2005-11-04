@@ -32,11 +32,11 @@ class XMLTextReader {
 #endif
 
     /* Returns the name of the current element */
-    inline char* ElementName();
+    inline std::string ElementName();
 
     /* Get the value of an attribute as ... */
-    inline bool GetAttribute(std::string* astring, char* attribute_name);
-    inline bool GetAttribute(unsigned int* aninteger, char* attribute_name);
+    inline bool GetAttribute(std::string* string, char* attribute_name);
+    inline bool GetAttribute(unsigned int* integer, char* attribute_name);
 
     /* Get the value of an element as ... */
     inline bool GetValue(std::string* astring);
@@ -60,8 +60,13 @@ class XMLTextReader {
  ****************************************************************************/
 
 /* Returns the name of the current element */
-inline char* XMLTextReader::ElementName() {
-  return ((char*) xmlTextReaderName(reader));
+inline std::string XMLTextReader::ElementName() {
+  char*       temporary = (char*) xmlTextReaderName(reader);
+  std::string name      = std::string(temporary);
+
+  xmlFree(temporary);
+
+  return (name);
 }
 
 /* Get the value of an attribute as ... */
@@ -120,7 +125,12 @@ inline bool XMLTextReader::GetValue(unsigned int* aninteger) {
 
 /* Whether the current element matches element_name */
 inline bool XMLTextReader::IsElement(char* element_name) {
-  return (xmlStrEqual(xmlTextReaderName(reader), TO_XML_STRING(element_name)) != 0);
+  xmlChar* temporary    = xmlTextReaderName(reader);
+  bool     return_value = xmlStrEqual(temporary, TO_XML_STRING(element_name)) != 0;
+
+  xmlFree(temporary);
+
+  return (return_value);
 }
 
 /* Whether the current element is an end of element tag */
