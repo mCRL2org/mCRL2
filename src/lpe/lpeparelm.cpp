@@ -94,6 +94,7 @@ void  rebuild_lpe(specification spec,string  outfile, set< data_variable > S ){
     //          bool delta, action_list actions, data_expression time, 
     //          data_assignment_list assignments);
     LPE_summand rebuild_summand; 
+   
     rebuild_summand = LPE_summand(reverse(rebuild_summation_variables), i->condition(),
       i->is_delta(), i->actions(), i-> time(), reverse(rebuild_assignments));  
     rebuild_summandlist = push_front(rebuild_summandlist, rebuild_summand);
@@ -200,10 +201,12 @@ void parelm(string filename, string outputfile )
     }
     //Time
     //
-    z = getDataVarIDs(aterm_appl(s_current->time()));
-    for(vector< aterm_appl>::iterator i = z.begin(); i != z.end(); i++){
-      S.insert(data_variable(*i));
-    };
+    if (s_current->has_time()){
+      z = getDataVarIDs(aterm_appl(s_current->time()));
+      for(vector< aterm_appl>::iterator i = z.begin(); i != z.end(); i++){
+        S.insert(data_variable(*i));
+      };
+    }
     //Actions
     //
     for(action_list::iterator i = s_current->actions().begin(); i != s_current->actions().end(); i++){
