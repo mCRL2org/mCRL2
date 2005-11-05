@@ -48,7 +48,7 @@ int main(int argc, char **argv)
   };
   int opt;
   bool opt_quiet,opt_verbose,convert_funcs,convert_bools;
-  ATerm mu_spec,spec;
+  ATermAppl mu_spec,spec;
 
   ATinit(argc,argv,&bot);
   gsEnableConstructorFunctions();
@@ -108,7 +108,7 @@ int main(int argc, char **argv)
     gsVerboseMsg("reading mCRL LPE from stdin...\n");
   else
     gsVerboseMsg("reading mCRL LPE from '%s'...\n", InFileName);
-  mu_spec = ATreadFromFile(InStream);
+  mu_spec = (ATermAppl) ATreadFromFile(InStream);
   if ( mu_spec == NULL )
   {
     if (InStream == stdin) {
@@ -122,7 +122,7 @@ int main(int argc, char **argv)
   assert(mu_spec != NULL);
 
   if (!is_mCRL_spec(mu_spec)) {
-    if (mu_spec == stdin) {
+    if (InStream == stdin) {
       gsErrorMsg("stdin does not contain a mCRL LPE\n");
     } else {
       gsErrorMsg("'%s' does not contain a mCRL LPE\n", InFileName);
@@ -132,7 +132,7 @@ int main(int argc, char **argv)
   }
   assert(is_mCRL_spec(mu_spec));
 
-  spec = (ATerm) translate((ATermAppl) mu_spec,convert_bools,convert_funcs);
+  spec = translate(mu_spec,convert_bools,convert_funcs);
 
   OutStream = stdout;
   char *OutFileName = NULL;
@@ -155,7 +155,7 @@ int main(int argc, char **argv)
     gsVerboseMsg("writing mCRL2 LPE to stdout...\n");
   else
     gsVerboseMsg("writing mCRL2 LPE to '%s'...\n", OutFileName);
-  ATwriteToBinaryFile(spec,OutStream);
+  ATwriteToBinaryFile((ATerm) spec,OutStream);
   if (InStream != stdin) {
     fclose(InStream);
   }
