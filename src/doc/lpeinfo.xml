@@ -10,7 +10,6 @@
 <!ENTITY opt_help "<option>--help</option>">
 <!ENTITY opt_version "<option>--version</option>">
 <!ENTITY opt_pars "<option>--pars</option>">
-<!ENTITY opt_npars "<option>--npars</option>">
 <!ENTITY LPE-framework "<application>LPE-Framework</application>">
 ]>
 
@@ -91,15 +90,6 @@
 	      <listitem>
 	        <para>
 	          displays the process parameters which are used within the LPE.
-	        </para>
-	      </listitem>
-      </varlistentry>
-
-      <varlistentry>
-        <term>&opt_pars;</term>
-	      <listitem>
-	        <para>
-	          displays the number of process parameters of the LPE.
 	        </para>
 	      </listitem>
       </varlistentry>
