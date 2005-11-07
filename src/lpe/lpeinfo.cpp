@@ -19,7 +19,7 @@ namespace po = boost::program_options;
 po::variables_map vm;
 
 //Constanten
-string version = "Version 0.3.3";
+string version = "Version 0.3.4";
 enum {
   NO_OPTION = 0,
   PARS = 1,
@@ -64,9 +64,9 @@ int main(int ac, char* av[])
       try {
         po::options_description desc;
         desc.add_options()
-            ("help,h",    "display this help")
-            ("version,v", "display version information")
-            ("pars",      "print process parameters")
+            ("pars",    "display process parameters")
+            ("help,h",  "display this help")
+            ("version", "display version information")
         ;
 	
 	po::options_description hidden("Hidden options");

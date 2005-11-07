@@ -4,13 +4,11 @@
 <!ENTITY % param SYSTEM "param.xml">
 %param;
 <!ENTITY lpeinfo "<function>lpeinfo</function>">
-<!ENTITY input_lpe "<parameter>input_lpe</parameter>">
+<!ENTITY infile "<parameter>INFILE</parameter>">
 <!ENTITY opt_h "<option>-h</option>">
-<!ENTITY opt_v "<option>-v</option>">
 <!ENTITY opt_help "<option>--help</option>">
 <!ENTITY opt_version "<option>--version</option>">
 <!ENTITY opt_pars "<option>--pars</option>">
-<!ENTITY LPE-framework "<application>LPE-Framework</application>">
 ]>
 
 <refentry id="lpeinfo">
@@ -22,39 +20,33 @@
 
 <refnamediv>
   <refname>lpeinfo</refname>
-  <refpurpose>Displays information about an LPE</refpurpose>
+  <refpurpose>display basic information about an LPE</refpurpose>
 </refnamediv>
 
 <refsynopsisdiv>
   <cmdsynopsis>
     <command>&lpeinfo;</command>
-    <arg choice="plain">&input_lpe;</arg>
+    <arg choice="plain">&infile;</arg>
   </cmdsynopsis>
 </refsynopsisdiv>
 
 <refsect1>
   <title>Description</title>
   <para>
-    The &lpeinfo; programm displays information of a linear process equation (LPE) from the
-    LPE format (.lpe).
-  </para>
-  <para>
-    The &lpeinfo; program displays information about an LPE. To retrieve information about 
-    an LPE, we make use of the &LPE-framework; . This programm will display the following information:
+    Display basic information about the linear process equation (LPE) in &infile;.
+    By default, the following information is shown:
     <itemizedlist>
-	    <listitem>
-        <para>
-	      Number of summands.
-        </para>
+      <listitem>
+        <para>number of summands</para>
       </listitem>
       <listitem>
-	      <para> Number of free variables. </para>
-      </listitem>
-	    <listitem>
-	      <para> Number of process parameters. </para>
+        <para>number of free variables</para>
       </listitem>
       <listitem>
-	      <para> Number of actions. </para>
+        <para>number of process parameters</para>
+      </listitem>
+      <listitem>
+        <para>number of actions</para>
       </listitem>
     </itemizedlist>
   </para>
@@ -66,32 +58,25 @@
     <variablelist>
 
       <varlistentry>
+        <term>&opt_pars;</term>
+          <listitem>
+            <para>display the process parameters of the LPE</para>
+        </listitem>
+      </varlistentry>
+
+      <varlistentry>
         <term>&opt_h;</term>
         <term>&opt_help;</term>
-	      <listitem>
-	        <para>
-	          displays the help message and terminates
-	        </para>
-	      </listitem>
+          <listitem>
+            <para>display help information and exit</para>
+          </listitem>
       </varlistentry>
 
       <varlistentry>
-        <term>&opt_v;</term>
         <term>&opt_version;</term>
-	      <listitem>
-	        <para>
-	          displays the version of the programm and terminates
-	        </para>
-	      </listitem>
-      </varlistentry>
-
-      <varlistentry>
-        <term>&opt_pars;</term>
-	      <listitem>
-	        <para>
-	          displays the process parameters which are used within the LPE.
-	        </para>
-	      </listitem>
+        <listitem>
+          <para>display version information and exit</para>
+        </listitem>
       </varlistentry>
 
     </variablelist>
@@ -100,9 +85,8 @@
 
 <refsect1>
 <title>Author</title>
-<para>
-Written by Frank Stappers. Please send all complaints, comments and bug fixes to f.p.m.stappers@student.tue.nl.
-</para>
+<para>Written by Frank Stappers. Please send all complaints, comments and bug
+fixes to <email>bug@mcrl2.org</email>.</para>
 </refsect1>
 
 </refentry>
