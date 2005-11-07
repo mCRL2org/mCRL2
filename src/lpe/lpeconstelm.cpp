@@ -1,9 +1,3 @@
-// TODO
-// BRACKETS VERWIJDEREN IN BOOST OM DE OPTIES!!!!!
-// GOED MAKEN VAN LAYOUT (UITLIJNING)
-// ON WINDOWS ansi.sys DRIVER NEEDS TO BE INSTALLED TO DISPLAY COLOR
-// data_expression(_list), data_variable(_list), data_assignment(_list) and other ATerms should be protected or reside as local variables 
-
 //C++
 #include <iostream>
 #include <vector>
@@ -33,48 +27,40 @@ namespace po = boost::program_options;
 po::variables_map vm;
 
 //Constanten
-string version = "Version 0.4.2";
+string version = "Version 0.5";
 bool verbose    = false; 
 bool alltrue    = false;
 bool reachable  = false;
 bool nosingleton = false;
 
-const int opt_none       = 0;
-const int opt_left       = 1;
-const int opt_right      = 2;
-const int opt_both       = 3;
+vector< data_expression >             nextState;
+vector< data_expression >             currentState;
+vector< data_expression >             newCurrentState;
+set< int >                            V;                //Set of indices of process parameters which are variable
+vector< LPE_summand>                  visitedSummands;
+bool                                  same;             //Flag for detecting change;
+vector< data_expression >             freeVarList;
+map< data_variable, int  >            lookupIndex;
+map< int, data_variable >             lookupDataVarIndex;
+vector< data_assignment >             assignmentVector;
+int                                   numOfnewVars;                          
 
-
-ATermAppl rew2(ATermAppl t, ATermAppl rewrite_terms)
+//Begin Debug print 
+void pe(vector< data_expression > x)
 {
-  gsEnableConstructorFunctions();
-  ATermAppl result = gsRewriteTerm(t);
-  return result;
+  for(vector< data_expression >::iterator i = x.begin(); i != x.end(); i++){
+    cout << "[" << i->pp() << "]" ;
+  }
+  cout << endl;
 }
 
-
-string addconstelm(string filename)
+void pa(vector< data_assignment > x)
 {
-  string token = "";
-  string::size_type begIdx;
-  string::size_type endIdx;
-
-  // Find first position after last appearance
-  //  of forward- or backslash
-
-  endIdx = filename.find_last_of( "." );
-  if ( endIdx == string::npos )
-    endIdx = 0;
-  else
-    ++endIdx;
-
-  begIdx = 0;
-  token = filename.substr( begIdx, endIdx ).append("lpeconstelm.lpe");
-  
-  return token;
-
+  for(vector< data_assignment >::iterator i = x.begin(); i != x.end(); i++){
+    cout << "[" << i->pp() << "]" ;
+  }
+  cout << endl;
 }
-
 
 void print_set(set< int > S)
 {
@@ -92,152 +78,93 @@ void print_set(set< int > S)
   cout << endl;
 }
 
+//End Debug print
 
-void print_statevector(vector< data_assignment > sv  )
+
+ATermAppl rewrite(ATermAppl t)
 {
-  for(vector< data_assignment >::iterator i =sv.begin();i != sv.end();i++){
-    cout <<"[" << i->pp() <<"]";
-  }
-  cout << endl;
+  //gsEnableConstructorFunctions();
+  ATermAppl result = gsRewriteTerm(t);
+  return result;
 }
 
-
-bool compare(data_expression x, data_expression y, data_equation_list equations, int option)
+bool compare(data_expression x, data_expression y)
 {
-  if (option == opt_none ){
     return x==y;
-  };
- 
- if (option == opt_left){
-    ATermAppl x1 = rew2(aterm_appl(x) , gsMakeDataEqnSpec(aterm_list(equations) ));
-    ATermAppl y1 = aterm_appl(y) ;
-    return atermpp::aterm(x1) == atermpp::aterm(y1);     
-  };
- 
- if (option == opt_right){
-    ATermAppl x1 = aterm_appl(x);
-    ATermAppl y1 = rew2(aterm_appl(y) , gsMakeDataEqnSpec(aterm_list(equations) ));
-    return atermpp::aterm(x1) == atermpp::aterm(y1);     
-  };
- 
- if (option == opt_both){
-    ATermAppl x1 = rew2(aterm_appl(x), gsMakeDataEqnSpec(aterm_list(equations) ));
-    ATermAppl y1 = rew2(aterm_appl(y), gsMakeDataEqnSpec(aterm_list(equations) ));
-    return atermpp::aterm(x1) == atermpp::aterm(y1);     
-  };
-
-  cout << "  << Error in compare function >> " << endl;
-  ATermAppl x1 = rew2(aterm_appl(x), gsMakeDataEqnSpec(aterm_list(equations) ));
-  ATermAppl y1 = rew2(aterm_appl(y), gsMakeDataEqnSpec(aterm_list(equations) ));
-  return atermpp::aterm(x1) == atermpp::aterm(y1);  
-
 }
 
- 
-vector< data_assignment > nextstate(vector< data_assignment > currentstate, vector< data_assignment > assignments, data_equation_list equations, LPE lpe)
-{
-  vector< data_assignment > out;
-  vector< data_assignment > out1;
-  vector< data_assignment > out2;
-  data_expression z;
+// calculates NextState
+//
+vector< data_expression > calculateNextState(vector< data_expression > oldVector, data_assignment_list assignments, set< int > V){
+  vector< data_expression > newVector = oldVector;
+  vector< data_assignment > tmp_ass;
 
-  // return currentstate;
-
-  //Speedup
-  data_variable d;
-  vector< data_assignment >::iterator i = currentstate.begin();
-  while(i != currentstate.end() ){
-    d = i->lhs();
-    out.push_back( data_assignment(d, data_expression(aterm_appl(d) )));
-    i++;
-  
+  for(vector< data_expression >::iterator i = oldVector.begin(); i != oldVector.end() ; i++ ){
+    tmp_ass.push_back(data_assignment(lookupDataVarIndex[i-oldVector.begin()], *i ));
   }
-  //End speedup
- 
-  //data_variable d;
-  i = out.begin();
-  while(i != out.end() ){
-    vector< data_assignment >::iterator j = assignments.begin();
-    d = i->lhs();
-    z = d.to_expr();
-    while( j != assignments.end() ){
-      z = z.substitute( *j );    
-      j++;
-    } 
-    out1.push_back( data_assignment(d , z));
-    i++;
-  } 
   
-  i = out1.begin();
-  while(i != out1.end() ){
-    vector< data_assignment >::iterator j = currentstate.begin();
-    z = i->rhs();
-    while( j != currentstate.end() ){
-      z = z.substitute( *j );    
-      j++;
-    } 
-    out2.push_back(data_assignment(i->lhs(),data_expression( rew2(aterm_appl(z), gsMakeDataEqnSpec(aterm_list(equations))))));
-    i++;
-  }
-
- return out2; 
-}
- 
-
-vector< data_expression > rhsl(vector < data_assignment > x)
-{
-  vector< data_expression > y;
-  vector< data_assignment >::iterator i = x.begin();
-  while (i != x.end()) {
-    y.push_back(i->rhs());
-    i++;
-  };
-  return y;
-}
-
-
-vector< data_variable > lhsl(vector < data_assignment > x)
-{
-  vector< data_variable > y;
-  vector< data_assignment >::iterator i = x.begin();
-  while (i != x.end()) {
-    y.push_back(i->lhs());
-    i++;
-  };
-  return y;
-}
-
-bool eval_cond(data_expression datexpr, vector< data_assignment > statevector, data_equation_list equations, set<int> S){
-
-  bool b;
-  if (alltrue){
-    return true;
-  };
-
-  set<int>::iterator i;
-  data_assignment_list conditionvector; 
+   //pa(tmp_ass); 
   
-  //Speedup
-  vector< data_variable >    sv1 = lhsl(statevector);
-  vector< data_expression >  sv2 = rhsl(statevector);
-
-  i = S.begin();
-  int z = 0;
-  while (i != S.end()) {
-    if(z == *i) {
-      conditionvector = push_front(conditionvector, data_assignment(  sv1[*i] , sv2[*i] ));
-      i++;
+  for(data_assignment_list::iterator j = assignments.begin(); j != assignments.end(); j++ ){
+    if (V.find(lookupIndex[j->lhs()]) == V.end()){
+      newVector[lookupIndex[j->lhs()]] = j->rhs().substitute(tmp_ass.begin(), tmp_ass.end()); 
     }
-    z++; 
-  };
-  datexpr = datexpr.substitute(conditionvector.begin(), conditionvector.end());
-  datexpr = data_expression( rew2(datexpr, gsMakeDataEqnSpec(aterm_list(equations))));
-  
-  b = !(datexpr.is_false());
+  }
+  return newVector;
+};
 
+// free Variable check
+//
+bool inFreeVarList(data_expression item){
+  bool b = false;
+  for(vector< data_expression >::iterator i = freeVarList.begin(); i != freeVarList.end() ; i++ ){
+    b = (item == *i) || b;
+  }
   return b;
 }
 
+data_expression calcCondition(vector< data_expression > currentState, data_expression conditionExpression )
+{
+  for(vector< data_expression >::iterator i = currentState.begin(); i != currentState.end()  ;i++){
+    conditionExpression = conditionExpression.substitute( data_assignment(lookupDataVarIndex[i - currentState.begin()], *i ));
+  } 
+  return rewrite(conditionExpression);
+}
+
+
+void print_const(specification spec , set< int > S)
+{  
+  //if (verbose)
+  {
+  LPE lpe = spec.lpe();
+  set< int >::iterator i;
+  data_assignment_list sub = spec.initial_assignments();
+  cout << " The constant process parameters " << endl << "   ";
+  if (!S.empty()){
+    i = S.begin(); 
+    int k = 0;
+    for(data_assignment_list::iterator j = sub.begin() ;j != sub.end() ;j++){
+      if (*i ==k){
+        cout << "[" << j->pp() << "]" ;
+        i++;
+      };
+      k++;
+    }
+    cout << endl;
+  } else
+  {cout << "[]" << endl;} 
+  }
+}
+
+data_expression newExpression(data_assignment ass)
+{
+  char buffer [99];
+  sprintf(buffer, "%s^%d", ass.lhs().name().c_str(), numOfnewVars);
+  numOfnewVars++;
+  data_variable w(buffer, ass.lhs().type() );
+  //data_assignment a(datavar , w.to_expr() );
+  return w.to_expr();
+}
 
 summand_list rebuild_summands(vector< LPE_summand > sum_true) 
 {
@@ -248,7 +175,6 @@ summand_list rebuild_summands(vector< LPE_summand > sum_true)
   sout = reverse(sout);
   return sout;
 }
-
 
 void  rebuild_lpe(specification spec,string  outfile, set< int > S, bool single, vector< LPE_summand > sum_true){
 
@@ -262,6 +188,10 @@ void  rebuild_lpe(specification spec,string  outfile, set< int > S, bool single,
     rebuild_summandlist = rebuild_summands(sum_true); 
   } else {
     rebuild_summandlist = lpe.summands();
+  }
+
+  if (verbose) {
+    cout << "  Number of summand "<<  sum_true.size() << endl;
   }
 
   //Singleton sort process parameters
@@ -319,7 +249,7 @@ void  rebuild_lpe(specification spec,string  outfile, set< int > S, bool single,
     //Rewrite condition
     data_expression rebuild_condition = j->condition();
     rebuild_condition = rebuild_condition.substitute(const_parameters.begin(), const_parameters.end());
-    rebuild_condition = data_expression( rew2(rebuild_condition, gsMakeDataEqnSpec(aterm_list(rebuild_equations)))) ;
+    rebuild_condition = data_expression(rewrite(rebuild_condition)) ;
 
     //LPE_summand(data_variable_list summation_variables, data_expression condition, 
     //            bool delta, action_list actions, data_expression time, 
@@ -377,196 +307,136 @@ void  rebuild_lpe(specification spec,string  outfile, set< int > S, bool single,
 }
 
 
-void print_const(specification spec , set< int > S)
-{  
-  if (verbose){
-  LPE lpe = spec.lpe();
-  set< int >::iterator i;
-  data_assignment_list sub = spec.initial_assignments();
-  cout << " The constant process parameters " << endl << "   ";
-  if (!S.empty()){
-    i = S.begin(); 
-    int k = 0;
-    for(data_assignment_list::iterator j = sub.begin() ;j != sub.end() ;j++){
-      if (*i==k){
-        cout << "[" << j->pp() << "]" ;
-        i++;
-      };
-      k++;
-    }
-    cout << endl;
-  } else
-  {cout << "[]" << endl;} 
-  } else {
-    cout << " Number of found constants:  " << S.size();
-  }
-  cout << endl;
-  return;
-}
-
- 
-data_assignment make_var(data_variable datavar, int n){
-  char buffer [99];
-  sprintf(buffer, "%s^%d",datavar.name().c_str(), n);
-  
-  data_variable w(buffer, datavar.type() );
-  data_assignment a(datavar , w.to_expr() );
-  return a;
-} 
-
-
 void constelm(string filename, string outfile, int option)
 {
-  data_expression_list          vinit;            //init vector
-  vector< data_assignment >     newstatevector;   // newstate vector
-  vector< data_assignment >     tvector;
-  vector< data_assignment >     sv;
-  vector< data_assignment >     ainit; 
-  data_variable_list            freevars;
-  int                           n;                 //number of process parameters
-  int                           newdatvar = 0 ;
-  set < data_expression >       listofnonconst;
-  vector< LPE_summand >         sum_true;
+  ATerm bot;
+  ATinit(0,0,&bot);
+  gsEnableConstructorFunctions();
+  int cycle =0 ; 
   
-  // Load LPE input file
   specification spec;
   if (!spec.load(filename))
   {
     cerr << "error: could not read input file '" << filename << "'" << endl;
     return;
   }
- 
-  cout << endl <<" Read from input file : " << filename << endl;
-  LPE lpe = spec.lpe();
 
-  //
-  // Determine the inital processes
-  // 
-  n = lpe.process_parameters().size();  
-  for(data_assignment_list::iterator i = spec.initial_assignments().begin(); i != spec.initial_assignments().end() ; i++ ){
-    sv.push_back(*i);
-  }
-  
-  ainit = sv;
-  newstatevector = sv;  
-
+  LPE lpe = spec.lpe(); 
   data_equation_list equations = spec.equations();
-  
+  gsRewriteInit(gsMakeDataEqnSpec(aterm_list(equations)), GS_REWR_INNER3); 
+
+
+  // Create assignmentVector
+  int counter = 0;
+  for(data_assignment_list::iterator i = spec.initial_assignments().begin(); i != spec.initial_assignments().end() ; i++ ){
+    assignmentVector.push_back(*i);
+    lookupIndex[i->lhs()] = counter;
+    //lookupExpression[]
+    currentState.push_back(i->rhs());
+    //overbodig
+    lookupDataVarIndex[counter] = i->lhs();
+    //
+    counter++;
+  }
+
+  // Create freevariable list
   for (data_variable_list::iterator di = spec.initial_free_variables().begin(); di != spec.initial_free_variables().end(); di++){
-   freevars = push_front(freevars, *di);
+    freeVarList.push_back(di->to_expr());
   }
   for (data_variable_list::iterator di = lpe.free_variables().begin(); di != lpe.free_variables().end(); di++){
-   freevars = push_front(freevars, *di);
-  }  
+    freeVarList.push_back(di->to_expr());
+  } 
 
-  gsRewriteInit(gsMakeDataEqnSpec(aterm_list(equations)), GS_REWR_INNER3); 
-  
-  set< int > V; 
+//----------- 
+same = false;
+while (!same){
+  same = true;
+  cout << "Cycle:" << cycle++ << endl;
+  int summandnr = 0;
+  for(summand_list::iterator currentSummand = lpe.summands().begin(); currentSummand != lpe.summands().end() ;currentSummand++ ){
+    if (!calcCondition(currentState, currentSummand->condition()).is_false()){
+      //Add currentSummand to list of visitedSummands
+      visitedSummands.push_back(*currentSummand); 
+
+      int counter = 0;
+
+      cout << "Summand: "<< summandnr++ << endl;
+      //Calculate nextState
+
+      nextState = calculateNextState(currentState, currentSummand->assignments(), V);
+      vector< data_expression >::iterator j = nextState.begin();
+
+      //pe(nextState);
+
+      newCurrentState.clear();
+      for(vector< data_expression >::iterator i = currentState.begin() ; i != currentState.end() ; i++ ){
+        if (inFreeVarList(*i)){
+          newCurrentState.push_back(*j);
+          //cout << i->pp() << "in free var " <<endl;
+        } else {
+        if (inFreeVarList(*j)){
+            //skip
+            newCurrentState.push_back(*i);
+        } else {  
+          //cout << "cmp " << i->pp()  << " --- " << j->pp() << endl;
+          if (compare(*i,*j) ){
+            newCurrentState.push_back(*i);
+          } else {
+            if (V.find(counter) == V.end()){
+              V.insert(counter);
+              newCurrentState.push_back(newExpression( assignmentVector[counter] )); 
+              same = false;
+            }
+          }
+        }
+        j++;
+        counter++;
+      }
+      }
+      currentState = newCurrentState;
+    }
+  }
+  }
+
   set< int > S;
+  set< int > R;
 
-  for(int j=0; j <= (n-1) ; j++){
-    V.insert(j);
+  int  n = lpe.process_parameters().size(); 
+  for(int j=0; j < n ; j++){
+    S.insert(j);
   };
+ 
+  set_difference(S.begin(), S.end(), V.begin(), V.end(), inserter(R, R.begin()));
+  print_set(R);
+  print_const(spec, R);
   
-  set< int > D;
+  bool b = false;
+  rebuild_lpe(spec, outfile, R , b, visitedSummands);
 
-  ////
-  // If |V| <  |S| then variable process are found
-  //
-  if (verbose){
-    cout << endl << " Output of: "<< filename <<endl << endl;
-  };
-
-  int count = 1; 
-  while(S.size()!=V.size()){
-    sv = newstatevector;
-
-    S = V;
-    V.clear();
-    set< int > S_dummy;  
-    sum_true.clear();      
-    
-    if (verbose){
-      print_set(S);
-      cout << " Iteration           : " << count++ << endl; 
-      cout << " Current statevector : "; print_statevector(sv);
-      cout << " Resulting Nextstates: " << endl;
-    };
-    
-    for(summand_list::iterator s_current = lpe.summands().begin(); s_current != lpe.summands().end(); ++s_current){ 
-      if (eval_cond(s_current->condition(), sv, equations , S)) {
-        sum_true.push_back(*s_current);
-        vector< data_assignment > ass_nextstate;
-	      for(data_assignment_list::iterator i = s_current->assignments().begin(); i != s_current->assignments().end() ; i++ ){
-	        ass_nextstate.push_back(*i);
-	      }
-
-	      tvector = nextstate(sv, ass_nextstate, equations, lpe );
-        vector< data_expression > rhstv = rhsl(tvector);
-        vector< data_variable > lhstv = lhsl(tvector);
-        vector< data_expression > rhsnsv = rhsl(newstatevector);      
-        set< int >::iterator j = S.begin();
-       	
-        bool hack = true;
-        while (j != S.end() && hack){
-	        data_expression rhs_tv_j  = rhstv[*j];
-	        data_expression rhs_nsv_j = rhsnsv[*j];
-	        bool skip = false; 
-
-	        //Begin freevar treatment  
-          data_variable_list::iterator f = freevars.begin();
-	        while (f != freevars.end()){
-            data_expression foe = f->to_expr(); 
-            if ( compare(rhs_tv_j  , foe, equations, opt_right ) || 
-              compare(rhs_nsv_j , foe ,equations, opt_right ) ){
-              skip = true;
-              if (compare(rhs_nsv_j , foe , spec.equations(), opt_right )){ 
-                newstatevector[*j] = tvector[*j];
-              };    
-              if (0 != listofnonconst.count(rhs_tv_j) ){
-                S_dummy.insert(*j);
-                hack = false;
-                break;
-              }
-            };
-            f++;
-          };
-          // End Freevar treatment 
-          if (!skip){ 
-            if ((rhsl(ainit)[*j]) != rhs_tv_j ){
-              S_dummy.insert(*j);
-              data_assignment newass = make_var(lhstv[*j], newdatvar++);
-              newstatevector[*j] = newass;
-              listofnonconst.insert(newass.rhs());
-            };
-          };
-          j++;
-        };
-
-        if(verbose){
-          cout << "     ";
-          for(vector<data_assignment>::iterator i = newstatevector.begin();i != newstatevector.end() ;i++){
-            cout << "[" << i->pp() << "]" ;
-          }	      
-          cout << endl; 
-        };
-      };
-    }; 
-    
-    set_difference(S.begin(), S.end(), S_dummy.begin(), S_dummy.end(), inserter(V, V.begin()));
-
-    
-    if (verbose){
-      cout << endl;
-    };
-  }; 
-
-  print_const(spec , S);
-  rebuild_lpe(spec, outfile, S, nosingleton, sum_true ); 
-
-  // Finalise
-  gsRewriteFinalise();
   return;
+}
+
+
+string addconstelm(string filename)
+{
+  string token = "";
+  string::size_type begIdx;
+  string::size_type endIdx;
+
+  // Find first position after last appearance
+  //  of forward- or backslash
+
+  endIdx = filename.find_last_of( "." );
+  if ( endIdx == string::npos )
+    endIdx = 0;
+  else
+    ++endIdx;
+
+  begIdx = 0;
+  token = filename.substr( begIdx, endIdx ).append("lpeconstelm.lpe");
+  
+  return token;
+
 }
 
 
@@ -668,4 +538,5 @@ int main(int ac, char* av[])
     
     return 0;
 }
+
 
