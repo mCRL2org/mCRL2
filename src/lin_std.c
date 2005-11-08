@@ -18,11 +18,9 @@ extern "C" {
 */
 
 /* TODO:
- * Put renaming, hiding, encapsulation, and visibility
- * operators as far inside the parallel operators as
- * is possible.
- *
- * The program should be extensively tested */
+ * The program should be extensively tested,
+   and some points could be optimised
+ */
 
 #include <stdlib.h>
 #include <stdbool.h>
@@ -1566,8 +1564,12 @@ static int occursintermlist(ATermAppl var, ATermList l)
   return 0;
 }
 
-static int occursinmultiaction(ATermAppl var, ATermList ma)
+static int occursinmultiaction(ATermAppl var, ATermAppl a)
 { 
+  if (gsIsDelta(a))
+  { return 0;
+  }
+  ATermList ma=ATLgetArgument(a,0); 
   for( ; ma!=ATempty ; ma=ATgetNext(ma) )
   { if (occursintermlist(var,ATLgetArgument(ATAgetFirst(ma),1)))
     { return 1; 
@@ -1626,7 +1628,7 @@ static int occursinpCRLterm(ATermAppl var, ATermAppl p, int strict)
   { return occursintermlist(var,ATLgetArgument(p,1));
   }
   if (gsIsMultAct(p)) 
-  { return occursinmultiaction(var,ATLgetArgument(p,0));
+  { return occursinmultiaction(var,p);
   }
   if (gsIsAtTime(p))
   { return occursinterm(var,ATAgetArgument(p,1)) ||
@@ -4724,7 +4726,20 @@ static void create_case_function_on_enumeratedtype(
 
   /* The function does not exist;
      Create a new function of enumeratedtype e, on sort */
-       
+
+  if (((e->sortId==gsMakeSortIdBool()) && (e->size==2)) &&
+      (( sort==gsMakeSortIdBool()) ||
+       ( sort==gsMakeSortIdPos()) ||
+       ( sort==gsMakeSortIdNat()) ||
+       ( sort==gsMakeSortIdInt()) ||
+       ( sort==gsMakeSortIdReal())))
+      
+  { /* take the if function on sort 'sort' */ 
+
+    e->functions=ATinsertA(e->functions,gsMakeOpIdIf(sort));
+    return;
+  }
+  // else 
   ATermAppl newsort=sort;
   ATermAppl casefunction=NULL;
   w=ATempty;
@@ -5493,6 +5508,7 @@ static ATermList cluster_actions(
                        int withAssignmentsInNextState)
 { enumtype *enumeratedtype=NULL; 
   int n=0;
+
    /* We cluster first the summands with the action
       occurring in the first summand of sums. 
       These summands are first stored in w1. 
@@ -5634,7 +5650,7 @@ static ATermAppl generateLPEpCRL(ATermAppl procId, int canterminate,
   alphaconversion(procId,parameters);
   /* We reverse the pCRLprocslist to give the processes that occur first the 
      lowest index. In particular initial states get value 1, instead of the
-     highest conceivable value, as happened hitherto (29/905) */
+     highest conceivable value, as happened hitherto (29/9/05) */
   pCRLprocs=ATreverse(pCRLprocs);
   if ((!singlecontrolstate)||(!regular)) 
   { declare_control_state(spec,pCRLprocs);
@@ -5651,21 +5667,17 @@ static ATermAppl generateLPEpCRL(ATermAppl procId, int canterminate,
   if (regular)
   { if (!nocluster) 
     { 
-      if (binary)
+      if ((binary) && (!oldstate))
       { ATermList l=NULL;
         ATermList vars=stack->parameterlist;
-        for(l=stack->booleanStateVariables; !ATisEmpty(l) ; l=ATgetNext(l))
-        { vars=ATinsertA(vars,ATAgetFirst(l));
+        if (!singlecontrolstate)
+        { for(l=stack->booleanStateVariables; !ATisEmpty(l) ; l=ATgetNext(l))
+          { vars=ATinsertA(vars,ATAgetFirst(l));
+          }
         }
         sums=cluster_actions(sums,vars,spec,0);
-        create_enumeratedtype(stack->no_of_states,spec);
-        sums=cluster_actions(sums,
-                 ((!singlecontrolstate)?
-                    ATinsertA(stack->parameterlist,stack->stackvar):
-                    stack->parameterlist),
-                 spec,0);
       }
-      else /* if (oldstate)  and newstate ????? XXXXXXXXX */
+      else 
       { sums=cluster_actions(sums,
               ((!singlecontrolstate)?
                     ATinsertA(stack->parameterlist,stack->stackvar):
@@ -5683,9 +5695,10 @@ static ATermAppl generateLPEpCRL(ATermAppl procId, int canterminate,
   /* now the summands have been collected in the variable sums. We only
      need to put the result in `initprocspec' and return it.
   */
-
   if (regular)
-  { if (oldstate)
+  { 
+    
+    if (oldstate)
     { return linMakeInitProcSpec(
                     initial,
                     (singlecontrolstate?
@@ -5842,33 +5855,59 @@ static int implies_condition(ATermAppl c1, ATermAppl c2)
 
 }
 
-static ATermList insert_timed_delta_summand(ATermList l, ATermAppl s)
+static ATermList insert_timed_delta_summand(
+                    ATermList l, 
+                    ATermAppl s,
+                    ATermList parameters)
 { 
   assert(linGetMultiAction(s)==gsMakeDelta());
   ATermList result=ATempty;
+
+  /* first remove superfluous sum operators from s */
   
+  ATermList sumvars=linGetSumVars(s);
   ATermAppl cond=linGetCondition(s);
+  ATermAppl multiaction=linGetMultiAction(s);
+  ATermAppl actiontime=linGetActionTime(s);
+
+  ATermList newsumvars=ATempty;
+  for( ; sumvars!=ATempty ; sumvars=ATgetNext(sumvars))
+  { ATermAppl sumvar=ATAgetFirst(sumvars);
+    if (occursinterm(sumvar,cond) ||
+        occursinmultiaction(sumvar,multiaction) ||
+        ((actiontime!=gsMakeNil()) && occursinterm(sumvar,actiontime)))
+    { newsumvars=ATinsertA(newsumvars,sumvar);
+    }
+  }
+  
+  sumvars=newsumvars;
 
   for( ; l!=ATempty ; l=ATgetNext(l) )
   { ATermAppl summand=ATAgetFirst(l);
     ATermAppl cond1=linGetCondition(summand);
     if ((implies_condition(cond,cond1)) &&
-        ((linGetActionTime(s)==linGetActionTime(summand))||
+        ((actiontime==linGetActionTime(summand))||
          (linGetActionTime(summand)==gsMakeNil())))
     { 
       return ATconcat(l,result);
     }
     if ((linGetMultiAction(summand)==gsMakeDelta()) &&
                 implies_condition(cond1,cond) &&
-                ((linGetActionTime(s)==linGetActionTime(summand))||
-                 (linGetActionTime(s)==gsMakeNil())))
+                ((actiontime==linGetActionTime(summand))||
+                 (actiontime==gsMakeNil())))
     { /* do not add summand to result, as it is superseded by s */
     }
     else 
     { result=ATinsertA(result,summand);
     }
   }
-  result=ATinsertA(result,s);
+  result=ATinsertA(result,
+                   gsMakeLPESummand(
+                      sumvars,
+                      cond,
+                      multiaction,
+                      actiontime,
+                      ATempty));
   return result;
 }
 
@@ -5971,7 +6010,8 @@ static ATermAppl allowcomposition(ATermList allowlist, ATermAppl ips)
              resultdeltasumlist=ATgetNext(resultdeltasumlist))    
   { resultsumlist=insert_timed_delta_summand(
                       resultsumlist,
-                      ATAgetFirst(resultdeltasumlist));
+                      ATAgetFirst(resultdeltasumlist),
+                      linGetParameters(ips));
   }
   return linMakeInitProcSpec(
              linGetInit(ips),linGetParameters(ips),resultsumlist);
@@ -6053,7 +6093,8 @@ static ATermAppl encapcomposition(ATermList encaplist , ATermAppl ips)
   { 
       resultsumlist=insert_timed_delta_summand(
                     resultsumlist,
-                    ATAgetFirst(resultdeltasumlist));
+                    ATAgetFirst(resultdeltasumlist),
+                    linGetParameters(ips));
   }
   return linMakeInitProcSpec(
              linGetInit(ips),linGetParameters(ips),resultsumlist);
@@ -7194,7 +7235,8 @@ static ATermList replaceArgumentsByAssignments(ATermList args,ATermList pars)
 { ATermList resultargs=ATempty;
 
   for( ; pars!=ATempty ; pars=ATgetNext(pars))
-  { ATermAppl par=ATAgetFirst(pars);
+  { assert(args!=ATempty);
+    ATermAppl par=ATAgetFirst(pars);
     ATermAppl arg=ATAgetFirst(args);
 
     if (par!=arg)
@@ -7797,7 +7839,7 @@ static ATermList SieveProcDataVarsSummands(
       ATermList nextstate=linGetNextState(smd);
 
       if (((multiaction!=gsMakeDelta()) &&
-              (occursinmultiaction(var,ATLgetArgument(multiaction,0))))||
+              (occursinmultiaction(var,multiaction)))||
           (((actiontime!=gsMakeNil()) && (occursinterm(var,actiontime))))||
           (occursinterm(var,condition))||
           (occursinassignmentlist(var,nextstate,parameters)))
