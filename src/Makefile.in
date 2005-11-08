@@ -306,9 +306,11 @@ $(LIN_NAME) : $(LIN_OBJECTS) $(ATERM_DEP) $(LIBREWR_NAME)
 %.c : %.l
 	$(LEX) $(LFLAGS) -o$@ $<
 
+ifeq ($(findstring distclean,$(MAKEFLAGS)),)
 Makefile: Makefile.in config.in
 	@echo "You must (re)configure your source tree first."
 	@exit 1
+endif
 
 *.c *.h *.cpp *.hpp *.y *.l aterm/*.* svc/*.* lpe/*.*: Makefile
 
