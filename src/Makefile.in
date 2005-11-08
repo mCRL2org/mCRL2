@@ -306,7 +306,11 @@ $(LIN_NAME) : $(LIN_OBJECTS) $(ATERM_DEP) $(LIBREWR_NAME)
 %.c : %.l
 	$(LEX) $(LFLAGS) -o$@ $<
 
-*.* aterm/*.* svc/*.* lpe/*.*: Makefile
+Makefile: Makefile.in config.in
+	@echo "You must (re)configure your source tree first."
+	@exit 1
+
+*.c *.h *.cpp *.hpp *.y *.l aterm/*.* svc/*.* lpe/*.*: Makefile
 
 %.d : %.c
 	@echo generating dependencies for $<
