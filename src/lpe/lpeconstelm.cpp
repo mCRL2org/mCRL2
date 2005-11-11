@@ -54,18 +54,20 @@ private:
   specification               p_spec;
 
   inline ATermAppl rewrite(ATermAppl t)
-  {
-    ATermAppl result = gsRewriteTerm(t);
-    return result;
+  { 
+    return gsRewriteTerm(t);
   }
 
-  inline void printNextState()
-  {
-    for(vector< data_assignment >::iterator i = p_nextState.begin(); i != p_nextState.end() ; i++ ){
-      cout << "[" << i->pp() << "]";
-    
+  inline ATermAppl p_substitute(ATermAppl t, vector< data_assignment > &y )
+  { 
+    for(vector< data_assignment >::iterator i = y.begin() ; i != y.end() ; i++){
+      RWsetVariable(aterm(i->lhs()) , aterm(i->rhs()));
     }
-    cout << endl;
+    ATermAppl result = gsRewriteTerm(t);
+    for(vector< data_assignment >::iterator i = y.begin() ; i != y.end() ; i++){
+      RWclearVariable(aterm(i->lhs()));
+    }
+    return result;
   }
 
   inline void calculateNextState(data_assignment_list assignments)
@@ -73,12 +75,21 @@ private:
     for(vector< data_assignment >::iterator i = p_currentState.begin(); i != p_currentState.end(); i++ ){
       int index = p_lookupIndex[i->lhs()];
       if (p_V.find(index) == p_V.end()){
-      p_nextState[index] = 
+/*      p_nextState.at(index) = 
            data_assignment( i->lhs(), 
-                            rewrite(i->lhs().to_expr().substitute(assignments.begin(), assignments.end()).substitute(p_currentState.begin(), p_currentState.end()))
+                            rewrite(i->lhs().to_expr().substitute(assignments.begin(), assignments.end()), p_currentState)
                           );
+*/
+data_expression tmp = i->lhs().to_expr(); 
+for (data_assignment_list::iterator j = assignments.begin(); j != assignments.end() ; j++){
+  if (j->lhs() == i->lhs()){
+    tmp = j->rhs();
+    break;
+  }
+}
+p_nextState.at(index) = data_assignment(i->lhs(), p_substitute(tmp, p_currentState));
       } else {
-        p_nextState[index] = *i;
+        p_nextState.at(index) = *i;
       }    
     }
   }  
@@ -107,11 +118,18 @@ private:
   inline bool conditionTest(data_expression x)
   {
    //cout << endl <<" cd " << data_expression(rewrite(x.substitute(p_currentState.begin(), p_currentState.end()))).pp() ;
-   if (data_expression(rewrite(x.substitute(p_currentState.begin(), p_currentState.end()))).is_false())
-     {
+   //if (data_expression(rewrite(x, p_currentState)).is_false())
+   //return (!data_expression(p_substitute(x, p_currentState)).is_false());
+//
+//   cout << "\033[33m " << x.pp() << endl;
+//   cout << "\033[30m " << data_expression(rewrite(data_expression(p_substitute(x, p_currentState)))).pp() << endl;
+//   cout << "\033[0m";
+
+   return (!(data_expression(rewrite(data_expression(p_substitute(x, p_currentState)))).is_false()));
+/*     {
        return false;
      };
-   return true;
+   return true;*/
   }
 
   inline bool cmpCurrToNext()
@@ -124,18 +142,24 @@ private:
         if (inFreeVarList(i->rhs())) { 
           if (p_variableList.find(p_nextState.at(index).rhs()) != p_variableList.end()){
             p_V.insert(p_lookupIndex[i->lhs()]); 
+//----------          Debug
 //            cout << "\033[34m OLD:    "<< i->pp() << endl;
 //            cout << "\033[32m NEW:    "<< p_nextState.at(index).pp() << endl;
 //            cout << "\033[0m";
+//----------          Debug
           };
           p_newCurrentState.at(index) = p_nextState.at(index) ;
           p_currentState.at(index) = p_nextState.at(index);  
         } else {
           if (!inFreeVarList( p_nextState.at(index).rhs() )){
              if (!compare(i->rhs(), p_nextState.at(index).rhs())){
+//----------          Debug
+//
 //                cout << "\033[34m OLD:    "<< i->pp() << endl;
 //                cout << "\033[32m NEW:    "<< p_nextState.at(index).pp() << endl;
 //                cout << "\033[0m";
+//----------          Debug
+
                 p_newCurrentState.at(index) = newExpression(*i) ;
                 p_V.insert(index);
                 p_variableList.insert(p_newCurrentState.at(index).rhs());
@@ -177,6 +201,14 @@ private:
 //---------------------------------------------------------------
 //---------------------   Debug begin  --------------------------
 //---------------------------------------------------------------
+  inline void printNextState()
+  {
+    for(vector< data_assignment >::iterator i = p_nextState.begin(); i != p_nextState.end() ; i++ ){
+      cout << "[" << i->pp() << "]";
+    
+    }
+    cout << endl;
+  }
 
   void inline printVar()
   {
@@ -283,7 +315,7 @@ void inline outputConstelm()
     
       //Rewrite condition
       data_expression rebuild_condition = j->condition();
-      rebuild_condition = data_expression(rewrite(rebuild_condition.substitute(constantPP.begin(), constantPP.end())));
+      rebuild_condition = data_expression(p_substitute(rebuild_condition, constantPP));
 
       //LPE_summand(data_variable_list summation_variables, data_expression condition, 
       //            bool delta, action_list actions, data_expression time, 
@@ -294,7 +326,10 @@ void inline outputConstelm()
         rebuild_summandlist_no_cp = push_front(rebuild_summandlist_no_cp, tmp); 
     }
       
-    rebuild_summandlist = substitute(reverse(rebuild_summandlist_no_cp), constantPP.begin(), constantPP.end() );
+    for(summand_list::iterator i = rebuild_summandlist_no_cp.begin() ; i != rebuild_summandlist_no_cp.end() ; i++){
+      rebuild_summandlist = push_front(rebuild_summandlist, LPE_summand(p_substitute(*i, constantPP ))); 
+    }
+    //rebuild_summandlist = rewrite((ATermList) reverse(rebuild_summandlist_no_cp), constantPP);
   
     //construct new specfication
     //
@@ -464,9 +499,11 @@ void inline outputConstelm()
             cout << "Summand: "<< summandnr++ << endl;
           }
           p_visitedSummands.insert(*currentSummand); 
+          //printCurrentState();
           calculateNextState(currentSummand->assignments());
+          //printCurrentState();
           same = cmpCurrToNext() && same ;  
-          //if (!same) {break;}                                           //Break reduces time to complete 
+          if (!same) {break;}                                           //Break reduces time to complete 
         }
       }
       p_currentState = p_newCurrentState;
