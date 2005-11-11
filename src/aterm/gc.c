@@ -152,7 +152,9 @@ static void mark_memory(ATerm *start, ATerm *stop)
     odd_term = *((ATerm *)((MachineWord)cur)+4);
     real_term = AT_isInsideValidTerm(odd_term);
     if (real_term != NULL) {
-      AT_markTerm(odd_term);
+      if(!IS_MARKED((real_term)->header)) {
+        AT_markTerm(real_term);
+      }
     }
 
     odd_sym = *((AFun *)((MachineWord)cur)+4);
@@ -196,7 +198,9 @@ static void mark_memory_young(ATerm *start, ATerm *stop)
     odd_term = *((ATerm *)((MachineWord)cur)+4);
     real_term = AT_isInsideValidTerm(odd_term);
     if (real_term != NULL) {
-      AT_markTerm_young(odd_term);
+      if(!IS_MARKED(real_term->header)) {
+        AT_markTerm_young(real_term);
+      }
     }
 
     odd_sym = *((AFun *)((MachineWord)cur)+4);
