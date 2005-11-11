@@ -127,7 +127,7 @@ static inline ATermAppl gstcMakeOpIdSet2Bag(ATermAppl Type){
     return gsMakeOpId(gsMakeOpIdNameSet2Bag(),gstcMakeSortArrowProd1(gsMakeSortSet(Type),gsMakeSortBag(Type)));
 }
 
-static inline ATermAppl INIT_KEY(void){return gsMakeProcVarId(ATmakeAppl0(ATmakeAFun("init",0,ATtrue)),ATmakeList0());}
+static inline ATermAppl INIT_KEY(void){return gsMakeProcVarId(gsString2ATermAppl("init"),ATmakeList0());}
 
 static inline ATermAppl gstcMakeNotInferred(ATermList PossibleTypes){
   assert(PossibleTypes);
