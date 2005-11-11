@@ -1,7 +1,3 @@
-#ifdef __cplusplus
-extern "C" {
-#endif
-
 /* This file contains the implementation of an mCRL2 lineariser.
 
    It is based on the implementation of the mCRL lineariser, on which work
@@ -7961,7 +7957,3 @@ ATermAppl linearise_std(ATermAppl spec, t_lin_options lin_options)
   );
   return result;
 }
-
-#ifdef __cplusplus
-}
-#endif

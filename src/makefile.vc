@@ -45,7 +45,7 @@ GSPARSE_OBJECTS =  \
 	gsparse_libgsparse.obj \
 	gsparse_gsparser.obj \
 	gsparse_gstypecheck.obj \
-	gsparse_gsdataimpl.obj \
+	gsparse_dataimpl.obj \
 	gsparse_gsfunc.obj \
 	gsparse_gslowlevel.obj \
 	gsparse_gslexer.obj
@@ -231,7 +231,7 @@ gsparse_gsparser.obj: .\gsparser.c
 gsparse_gstypecheck.obj: .\gstypecheck.c
 	$(CC) /c /nologo /TC /Fo$@ $(GSPARSE_CFLAGS) $**
 
-gsparse_gsdataimpl.obj: .\gsdataimpl.c
+gsparse_dataimpl.obj: .\dataimpl.c
 	$(CC) /c /nologo /TC /Fo$@ $(GSPARSE_CFLAGS) $**
 
 gsparse_gsfunc.obj: .\gsfunc.c

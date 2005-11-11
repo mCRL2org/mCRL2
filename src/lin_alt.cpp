@@ -1,7 +1,3 @@
-#ifdef __cplusplus
-extern "C" {
-#endif
-
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
@@ -2748,7 +2744,3 @@ ATermAppl linearise_alt(ATermAppl Spec, t_lin_options lin_options)
 
 	return Spec;
 }
-
-#ifdef __cplusplus
-}
-#endif

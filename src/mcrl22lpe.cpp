@@ -19,7 +19,7 @@
 #include "gslexer.h"
 #include "gstypecheck.h"
 #include "libgsalpha.h"
-#include "gsdataimpl.h"
+#include "dataimpl.h"
 
 //Type definitions
 

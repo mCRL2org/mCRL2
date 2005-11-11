@@ -11,7 +11,7 @@
 #include "libprint_c.h"
 #include "gslexer.h"
 #include "gstypecheck.h"
-#include "gsdataimpl.h"
+#include "dataimpl.h"
 #include "lin_alt.h"
 
 void print_help(FILE *f, char *Name)
