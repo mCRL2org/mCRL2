@@ -1,7 +1,3 @@
-#ifdef __cplusplus
-extern "C" {
-#endif
-
 #define NAME "lin"
 
 #include <stdio.h>
@@ -214,6 +210,3 @@ int main(int argc, char **argv)
 		ATwriteToTextFile((ATerm) Spec,OutFile);
 	}
 }
-#ifdef __cplusplus
-}
-#endif

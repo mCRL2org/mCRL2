@@ -1,7 +1,3 @@
-#ifdef __cplusplus
-extern "C" {
-#endif
-
 #define NAME "lpe2lts"
 
 #include <stdio.h>
@@ -503,7 +499,3 @@ int main(int argc, char **argv)
 
   gsNextStateFinalise();
 }
-
-#ifdef __cplusplus
-}
-#endif

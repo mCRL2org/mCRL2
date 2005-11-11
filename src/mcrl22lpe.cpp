@@ -1,7 +1,3 @@
-#ifdef __cplusplus
-extern "C" {
-#endif
-
 #define NAME "mcrl22lpe"
 #define VERSION "0.1.1"
 #define INFILEEXT ".mcrl2"
@@ -464,7 +460,3 @@ void PrintHelp(char *Name)
     "  -d, --debug           turn on the display of detailed intermediate messages\n",
     Name);
 }
-
-#ifdef __cplusplus
-}
-#endif

@@ -1,3 +1,7 @@
+#ifdef __cplusplus
+extern "C" {
+#endif
+
 /* <muCRL LPE> ::= spec2gen(<DataSpec>,<LPE>)
  * <LPE>       ::= initprocspec(<DataExpr>*,<Var>*,<Sum>*)
  * <DataSpec>  ::= d(<DataDecl>,<EqnDecl>*)
@@ -425,3 +429,7 @@ ATermAppl translate(ATermAppl spec, bool convert_bools, bool convert_funcs)
 
 	return r;
 }
+
+#ifdef __cplusplus
+}
+#endif

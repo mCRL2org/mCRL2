@@ -8,6 +8,7 @@
 <!ENTITY opt_h "<option>-h</option>">
 <!ENTITY opt_help "<option>--help</option>">
 <!ENTITY opt_version "<option>--version</option>">
+<!ENTITY opt_p "<option>-p</option>">
 <!ENTITY opt_pars "<option>--pars</option>">
 ]>
 
@@ -58,6 +59,7 @@
     <variablelist>
 
       <varlistentry>
+        <term>&opt_p;</term>
         <term>&opt_pars;</term>
           <listitem>
             <para>display the process parameters of the LPE</para>

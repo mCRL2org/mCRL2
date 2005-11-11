@@ -1,10 +1,6 @@
 #define  NAME      "lpepp"
-#define  LVERSION  "0.4.1"
+#define  LVERSION  "0.4.2"
 #define  AUTHOR    "Aad Mathijssen"
-
-#ifdef __cplusplus
-extern "C" {
-#endif
 
 #include <stdio.h>
 #include <stdlib.h>
@@ -16,7 +12,6 @@ extern "C" {
 #include <assert.h>
 
 #include <aterm2.h>
-#include "lpepp.h"
 #include "gsfunc.h"
 #include "gslowlevel.h"
 #include "libprint_types.h"
@@ -272,7 +267,3 @@ void PrintPPFormat(FILE *stream, t_pp_format pp_format)
     fprintf(stream, "advanced");
   }
 }
-
-#ifdef __cplusplus
-}
-#endif

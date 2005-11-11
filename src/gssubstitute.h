@@ -1,3 +1,6 @@
+#ifdef __cplusplus
+extern "C" {
+#endif
 
 void RWsetVariable(ATerm v, ATerm t);
 /* The variable v, which must be of the form DataVarId("name"),
@@ -17,3 +20,7 @@ void RWclearAllVariables();
 ATerm RWapplySubstitution(ATerm v);
 /* Return the term to be substituted for variable v, or variable
    v itself if no value is associated with v. */
+
+#ifdef __cplusplus
+}
+#endif

@@ -64,7 +64,7 @@ int main(int ac, char* av[])
       try {
         po::options_description desc;
         desc.add_options()
-            ("pars",    "display process parameters")
+            ("pars,p",    "display process parameters")
             ("help,h",  "display this help")
             ("version", "display version information")
         ;

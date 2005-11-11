@@ -1,7 +1,3 @@
-#ifdef __cplusplus
-extern "C" {
-#endif
-
 #define NAME      "alpha"
 #define LVERSION  "0.1"
 #define AUTHOR    "Yaroslav S. Usenko and Muck van Weerdenburg"
@@ -16,10 +12,9 @@ extern "C" {
 #include "gsfunc.h"
 #include "libprint_types.h"
 #include "libprint_c.h"
+#include "gslexer.h"
+#include "gstypecheck.h"
 #include "libgsalpha.h"
-
-extern ATermAppl gsParse(FILE *);
-extern ATermAppl gsTypeCheck(ATermAppl);
 
 void PrintUsage(FILE *f, char *Name)
 {
@@ -51,7 +46,8 @@ void PrintVersion(FILE *Stream) {
 
 int main(int argc, char **argv)
 {
-	FILE *SpecStream, *OutStream;
+	FILE *SpecStream;
+        FILE *OutStream;
 	ATerm stackbot;
 	ATermAppl Spec;
         #define sopts      "aw:hqvd"
@@ -150,7 +146,3 @@ int main(int argc, char **argv)
 		fclose(OutStream);
 	}
 }
-
-#ifdef __cplusplus
-}
-#endif

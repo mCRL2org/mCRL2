@@ -1,8 +1,3 @@
-/* $Id: sim.c,v 1.1 2005/05/03 15:44:47 muck Exp $ */
-#ifdef __cplusplus
-extern "C" {
-#endif
-
 #define NAME "sim"
 
 #include <stdio.h>
@@ -170,7 +165,3 @@ harm:
 		gsprintf(" ]\n\n");
 	}
 }
-
-#ifdef __cplusplus
-}
-#endif

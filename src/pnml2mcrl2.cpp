@@ -1,7 +1,3 @@
-#ifdef __cplusplus
-extern "C" {
-#endif
-
 #define NAME "pnml2mcrl2"
 
 #include <ctype.h>
@@ -2063,10 +2059,3 @@ extern "C" {
     }
     return ATreverse(SendActions);
   }
-
-
-
-
-#ifdef __cplusplus
-}
-#endif

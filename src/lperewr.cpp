@@ -1,7 +1,3 @@
-#ifdef __cplusplus
-extern "C" {
-#endif
-
 #define NAME "lperewr"
 
 #include <stdio.h>
@@ -338,7 +334,3 @@ int main(int argc, char **argv)
     }
   }
 }
-
-#ifdef __cplusplus
-}
-#endif
