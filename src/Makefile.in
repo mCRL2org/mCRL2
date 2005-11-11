@@ -22,7 +22,7 @@ OBJECTS           += $(LIBSVC_OBJECTS)
 
 #rewrite library definitions
 LIBREWR_NAME       = libgsrewrite.a
-LIBREWR_OBJECTS    = libgsrewrite.o gsrewr_inner.o gsrewr_inner2.o gsrewr_inner3.o gsrewr_innerc.o gsrewr_jitty.o gssubstitute.o
+LIBREWR_OBJECTS    = libgsrewrite.o librewrite.o rewr_inner.o rewr_jitty.o rewr_innerc.o
 OBJECTS           += $(LIBREWR_OBJECTS)
 LIBREWR_LDFLAGS    = -l$(ATERM) -lm
 
@@ -110,7 +110,7 @@ LPEREWR_LDFLAGS    = -lgsrewrite -l$(ATERM) -lm $(LIBDL)
 
 #lpe2lts definitions
 LPE2LTS_NAME       = lpe2lts
-LPE2LTS_OBJECTS    = lpe2lts.o libgsnextstate.o libgsprover.o gssubstitute.o libprint_c.o gsfunc.o gslowlevel.o
+LPE2LTS_OBJECTS    = lpe2lts.o libgsnextstate.o libgsprover.o libprint_c.o gsfunc.o gslowlevel.o
 OBJECTS           += $(LPE2LTS_OBJECTS)
 LPE2LTS_LDFLAGS    = -lgsrewrite -lsvc -l$(ATERM) -lm $(LIBDL)
 
@@ -230,13 +230,13 @@ $(LIBREWR_NAME) : $(LIBREWR_OBJECTS) $(ATERM_DEP)
 #	$(CC) -shared -o $@ $(LIBREWR_OBJECTS)
 
 $(MCRL22LPE_NAME) : $(MCRL22LPE_OBJECTS) $(ATERM_DEP) $(LIBREWR_NAME)
-	$(CC) -o $@ $(MCRL22LPE_OBJECTS) $(LDFLAGS) $(MCRL22LPE_LDFLAGS)
+	$(CXX) -o $@ $(MCRL22LPE_OBJECTS) $(LDFLAGS) $(MCRL22LPE_LDFLAGS)
 
 $(LPEPP_NAME) : $(LPEPP_OBJECTS) $(ATERM_DEP) $(LIBREWR_NAME)
-	$(CC) -o $@ $(LPEPP_OBJECTS) $(LDFLAGS) $(LPEPP_LDFLAGS)
+	$(CXX) -o $@ $(LPEPP_OBJECTS) $(LDFLAGS) $(LPEPP_LDFLAGS)
 
 $(SIM_NAME) : $(SIM_OBJECTS) $(ATERM_DEP) $(LIBREWR_NAME)
-	$(CC) -o $@ $(SIM_OBJECTS) $(LDFLAGS) $(SIM_LDFLAGS)
+	$(CXX) -o $@ $(SIM_OBJECTS) $(LDFLAGS) $(SIM_LDFLAGS)
 
 ifdef USE_WX
 $(WX_OBJECTS) $(patsubst %o,%dpp,$(WX_OBJECTS)): CPPFLAGS += $(WX_CPPFLAGS)
@@ -278,27 +278,27 @@ $(LPEPARELM_NAME) :
 endif
 
 $(LPEREWR_NAME) : $(LPEREWR_OBJECTS) $(ATERM_DEP) $(LIBREWR_NAME)
-	$(CC) -o $@ $(LPEREWR_OBJECTS) $(LDFLAGS) $(LPEREWR_LDFLAGS)
+	$(CXX) -o $@ $(LPEREWR_OBJECTS) $(LDFLAGS) $(LPEREWR_LDFLAGS)
 
 $(LPE2LTS_NAME) : $(LPE2LTS_OBJECTS) $(ATERM_DEP) $(LIBSVC_NAME) $(LIBREWR_NAME)
-	$(CC) -o $@ $(LPE2LTS_OBJECTS) $(LDFLAGS) $(LPE2LTS_LDFLAGS)
+	$(CXX) -o $@ $(LPE2LTS_OBJECTS) $(LDFLAGS) $(LPE2LTS_LDFLAGS)
 
 $(TBF2LPE_NAME) : $(TBF2LPE_OBJECTS) $(ATERM_DEP) $(LIBREWR_NAME)
-	$(CC) -o $@ $(TBF2LPE_OBJECTS) $(LDFLAGS) $(TBF2LPE_LDFLAGS)
+	$(CXX) -o $@ $(TBF2LPE_OBJECTS) $(LDFLAGS) $(TBF2LPE_LDFLAGS)
 
 ifdef USE_LIBXML2
 $(PNML2MCRL2_NAME) : $(PNML2MCRL2_OBJECTS) $(ATERM_DEP) $(LIBREWR_NAME)
-	$(CC) -o $@ $(PNML2MCRL2_OBJECTS) $(LDFLAGS) $(PNML2MCRL2_LDFLAGS)
+	$(CXX) -o $@ $(PNML2MCRL2_OBJECTS) $(LDFLAGS) $(PNML2MCRL2_LDFLAGS)
 else
 $(PNML2MCRL2_NAME) :
 	@echo cannot make target $@ because the xml2 library cannot be used
 endif
 
 $(ALPHA_NAME) : $(ALPHA_OBJECTS) $(ATERM_DEP) $(LIBREWR_NAME)
-	$(CC) -o $@ $(ALPHA_OBJECTS) $(LDFLAGS) $(ALPHA_LDFLAGS)
+	$(CXX) -o $@ $(ALPHA_OBJECTS) $(LDFLAGS) $(ALPHA_LDFLAGS)
 
 $(LIN_NAME) : $(LIN_OBJECTS) $(ATERM_DEP) $(LIBREWR_NAME)
-	$(CC) -o $@ $(LIN_OBJECTS) $(LDFLAGS) $(LIN_LDFLAGS)
+	$(CXX) -o $@ $(LIN_OBJECTS) $(LDFLAGS) $(LIN_LDFLAGS)
 
 %.c : %.y
 	$(BISON) $(BFLAGS) -o $@ $<

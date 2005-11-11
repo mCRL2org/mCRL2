@@ -495,7 +495,7 @@ ATermList FindSolutions(ATermList Vars, ATerm Expr, FindSolutionsCallBack f)
 
 		fs_pop(&e);
 
-		ATermAppl var = ATgetFirst(e.vars);
+		ATermAppl var = (ATermAppl) ATgetFirst(e.vars);
 		ATermAppl sort = (ATermAppl) ATgetArgument(var,1);
 
 		if ( gsIsSortArrow(sort) )

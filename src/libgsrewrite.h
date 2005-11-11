@@ -1,6 +1,6 @@
-/* $Id: libgsrewrite.h,v 1.3 2005/04/08 09:49:58 muck Exp $ */
 #ifndef __LIBGSREWRITE_H
 #define __LIBGSREWRITE_H
+
 #ifdef __cplusplus
 extern "C" {
 #endif
@@ -34,7 +34,13 @@ ATermList gsRewriteInternals(ATermList Terms);
 
 RewriteStrategy RewriteStrategyFromString(const char *s);
 
+void RWsetVariable(ATerm v, ATerm t);
+void RWclearVariable(ATerm v);
+void RWclearAllVariables();
+ATerm RWapplySubstitution(ATerm v);
+
 #ifdef __cplusplus
 }
 #endif
+
 #endif

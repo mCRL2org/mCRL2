@@ -7,6 +7,7 @@ extern "C" {
 #include <stdio.h>
 #include <errno.h>
 #include <stdlib.h>
+#include <limits.h>
 #include <string.h>
 #include <getopt.h>
 #include <aterm2.h>
@@ -49,7 +50,7 @@ static void gsinst_callback(ATermAppl transition, ATerm state)
   i = ATindexedSetPut(states, state, &new_state);
   if ( new_state )
   {
-    if ( (max_states == 0) || (num_states < max_states) )
+    if ( num_states < max_states )
     {
       num_states++;
       if ( trace )
@@ -88,8 +89,8 @@ static void gsinst_callback(ATermAppl transition, ATerm state)
       default:
         break;
     }
-    trans++;
   }
+    trans++;
 }
 
 
@@ -171,7 +172,7 @@ int main(int argc, char **argv)
   stateformat = GS_STATE_VECTOR;
   outformat = OF_UNKNOWN;
   outinfo = true;
-  max_states = 0;
+  max_states = ULONG_MAX;
   trace = false;
   trace_deadlock = false;
   monitor = false;
@@ -335,6 +336,7 @@ int main(int argc, char **argv)
   states = ATindexedSetCreate(10000,50);
   num_states = 0;
   trans = 0;
+  level = 1;
   if ( trace )
   {
     backpointers = ATtableCreate(10000,50);
@@ -367,11 +369,12 @@ int main(int argc, char **argv)
   current_state = ATindexedSetPut(states,state,&new_state);
   num_states++;
 
-  level = 1;
+  bool err = false;
+  if ( max_states != 0 )
+  {
   unsigned long nextlevelat = 1;
   unsigned long prevtrans = 0;
   unsigned long prevcurrent = 0;
-  bool err = false;
   orig_state = &state;
   gsVerboseMsg("generating state space...\n");
   while ( current_state < num_states )
@@ -396,13 +399,13 @@ int main(int argc, char **argv)
         ATerm s = state;
         ATerm ns;
         ATermList tr = ATmakeList0();
-
+  
         while ( (ns = ATtableGet(backpointers, s)) != NULL )
         {
           tr = ATinsert(tr, s);
           s = ns;
         }
-
+  
         for (; !ATisEmpty(tr); tr=ATgetNext(tr))
         {
           ATermList l = gsNextState(s, NULL);
@@ -469,6 +472,7 @@ int main(int argc, char **argv)
       nextlevelat = num_states;
     }*/
   }
+  }
 
   switch ( outformat )
   {
@@ -496,6 +500,8 @@ int main(int argc, char **argv)
       (trans==1)?"":"s"
     );
   }
+
+  gsNextStateFinalise();
 }
 
 #ifdef __cplusplus
