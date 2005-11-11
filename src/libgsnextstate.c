@@ -11,7 +11,6 @@ extern "C" {
 #include "libgsprover.h"
 #include "libgsrewrite.h"
 #include "libgsnextstate.h"
-#include "gssubstitute.h"
 
 #define ATAgetFirst(x) ((ATermAppl) ATgetFirst(x))
 #define ATLgetFirst(x) ((ATermList) ATgetFirst(x))

@@ -9,7 +9,6 @@ extern "C" {
 #include "libprint_c.h"
 #include "libgsrewrite.h"
 #include "libgsprover.h"
-#include "gssubstitute.h"
 
 #define ATisList(x) (ATgetType(x) == AT_LIST)
 #define ATisAppl(x) (ATgetType(x) == AT_APPL)

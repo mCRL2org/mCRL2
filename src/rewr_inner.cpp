@@ -9,7 +9,6 @@
 #include "gsfunc.h"
 #include "rewr_inner.h"
 #include "libprint_c.h"
-#include "gssubstitute.h"
 
 //#define _INNER_STORE_TREES
 

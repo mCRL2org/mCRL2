@@ -8,7 +8,6 @@
 #include "gslowlevel.h"
 #include "gsfunc.h"
 #include "libprint_c.h"
-#include "gssubstitute.h"
 #include "rewr_jitty.h"
 
 static AFun nilAFun;
