@@ -1,7 +1,3 @@
-#ifdef __cplusplus
-extern "C" {
-#endif
-
 #include <aterm2.h>
 #include "lin_types.h"
 
@@ -14,8 +10,3 @@ ATermAppl linearise_std(ATermAppl spec, t_lin_options lin_options);
 //      lin_options
 //Ret:  the linearised specification is everything went ok,
 //      NULL, otherwise
-
-#ifdef __cplusplus
-}
-#endif
-

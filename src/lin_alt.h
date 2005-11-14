@@ -1,7 +1,3 @@
-#ifdef __cplusplus
-extern "C" {
-#endif
-
 #include <aterm2.h>
 #include "lin_types.h"
 
@@ -19,7 +15,3 @@ ATermAppl linearise_alt(ATermAppl Spec, t_lin_options lin_options);
 ATermAppl linearise_alt_nolpe(ATermAppl Spec);
 ATermAppl linearise_alt_nolpe_subst(ATermAppl Spec, int reuse_cycles);
 ATermAppl linearise_alt_statespace(ATermAppl Spec, bool lpe);
-
-#ifdef __cplusplus
-}
-#endif

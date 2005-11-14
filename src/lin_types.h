@@ -1,10 +1,6 @@
 #ifndef __LIN_TYPES_H
 #define __LIN_TYPES_H
 
-#ifdef __cplusplus
-extern "C" {
-#endif
-
 #include <stdbool.h>
 
 //Type definitions for all linearisers
@@ -23,9 +19,5 @@ typedef struct {
   bool nofreevars;
 } t_lin_options;
 //t_lin_options represents the options of the lineariser
-
-#ifdef __cplusplus
-}
-#endif
 
 #endif //__LIN_TYPES_H

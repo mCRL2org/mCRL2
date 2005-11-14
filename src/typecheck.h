@@ -1,7 +1,3 @@
-#ifdef __cplusplus
-extern "C" {
-#endif
-
 #include <aterm2.h>
 
 //Global preconditions:
@@ -16,7 +12,3 @@ ATermAppl gsTypeCheck(ATermAppl Spec);
  *     if something went wrong, an appriopriate error message is printed and
  *     NULL is returned.
  */
-
-#ifdef __cplusplus
-}
-#endif

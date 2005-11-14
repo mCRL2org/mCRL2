@@ -1,8 +1,3 @@
-#ifdef __cplusplus
-extern "C"
-{
-#endif
-
 #include <string.h>
 #include <stdlib.h>
 #include <assert.h>
@@ -2668,9 +2663,3 @@ static ATermAppl gstcMatchListOpTail(ATermAppl Type){
 
   return gsMakeSortArrowProd(ATmakeList1((ATerm)gsMakeSortList(Res)),gsMakeSortList(Res));
 }
-
-
-#ifdef __cplusplus
-}
-#endif
-

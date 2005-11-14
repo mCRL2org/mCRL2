@@ -1,7 +1,3 @@
-#ifdef __cplusplus
-extern "C" {
-#endif
-
 #include <string.h>
 #include <stdlib.h>
 #include <assert.h>
@@ -2649,7 +2645,3 @@ ATermAppl gsImplementData(ATermAppl Spec)
   Spec = gsImplFunctionSorts(Spec);
   return Spec;
 }
-
-#ifdef __cplusplus
-}
-#endif

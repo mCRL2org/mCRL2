@@ -1,8 +1,3 @@
-/* $Id: gsrewr.c,v 1.2 2005/04/08 12:33:51 muck Exp $ */
-#ifdef __cplusplus
-extern "C" {
-#endif
-
 #define NAME "libalpha"
 
 #include <stdio.h>
@@ -1709,7 +1704,3 @@ ATermAppl gsAlpha(ATermAppl Spec){
   ATtableDestroy(untypes);
   return Spec;
 }
-
-#ifdef __cplusplus
-}
-#endif

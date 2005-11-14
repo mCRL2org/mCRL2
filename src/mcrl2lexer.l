@@ -22,12 +22,8 @@ int LineNr = 1;                  /* line number in source file */
 int ColNr  = 1;                  /* column number in source file */
 void gsProcessString(void);      /* default action to be taken when a string is
                                     scanned */
-void mcrl2yyerror(char *s);         /* display error message (needed by yacc) */
-#ifdef __cplusplus
-extern "C" int mcrl2yywrap(void);   /* action taken after an EOF (needed by yacc) */
-#else
-int mcrl2yywrap(void);              /* action taken after an EOF (needed by yacc) */
-#endif
+void mcrl2yyerror(char *s);      /* display error message (needed by yacc) */
+extern "C" int mcrl2yywrap(void);/* action taken after an EOF (needed by yacc) */
 
 %}
 Id         [a-zA-Z\_][a-zA-Z0-9\_]*
