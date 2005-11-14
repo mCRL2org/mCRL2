@@ -44,7 +44,7 @@ GSPARSE_CFLAGS = /MD /DWIN32 /Iaterm /Int /I"C:\Program Files\Microsoft Visual C
 GSPARSE_OBJECTS =  \
 	gsparse_libgsparse.obj \
 	gsparse_gsparser.obj \
-	gsparse_gstypecheck.obj \
+	gsparse_typecheck.obj \
 	gsparse_dataimpl.obj \
 	gsparse_gsfunc.obj \
 	gsparse_gslowlevel.obj \
@@ -228,7 +228,7 @@ gsparse_libgsparse.obj: .\libgsparse.c
 gsparse_gsparser.obj: .\gsparser.c
 	$(CC) /c /nologo /TC /Fo$@ $(GSPARSE_CFLAGS) $**
 
-gsparse_gstypecheck.obj: .\gstypecheck.c
+gsparse_typecheck.obj: .\typecheck.c
 	$(CC) /c /nologo /TC /Fo$@ $(GSPARSE_CFLAGS) $**
 
 gsparse_dataimpl.obj: .\dataimpl.c

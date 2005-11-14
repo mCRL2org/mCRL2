@@ -12,7 +12,7 @@
 #include "gslowlevel.h"
 #include "gsfunc.h"
 #include "libprint_c.h"
-#include "gstypecheck.h"
+#include "typecheck.h"
   
   typedef struct {
     ATbool Abort;                 // if an element has no ID, this boolean is used to grant abortion of the conversion

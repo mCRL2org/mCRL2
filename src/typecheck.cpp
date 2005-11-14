@@ -8,7 +8,7 @@ extern "C"
 #include <assert.h>
 #include <ctype.h>
 
-#include "gstypecheck.h"
+#include "typecheck.h"
 #include "gsfunc.h"
 #include "gslowlevel.h"
 #include "libprint_c.h"

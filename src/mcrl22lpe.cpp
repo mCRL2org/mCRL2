@@ -17,8 +17,8 @@
 #include "gsfunc.h"
 #include "libprint_c.h"
 #include "gslexer.h"
-#include "gstypecheck.h"
-#include "libgsalpha.h"
+#include "typecheck.h"
+#include "libalpha.h"
 #include "dataimpl.h"
 
 //Type definitions

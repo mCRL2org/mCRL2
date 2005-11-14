@@ -10,7 +10,7 @@
 #include "libprint_types.h"
 #include "libprint_c.h"
 #include "gslexer.h"
-#include "gstypecheck.h"
+#include "typecheck.h"
 #include "dataimpl.h"
 #include "lin_alt.h"
 

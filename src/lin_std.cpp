@@ -27,7 +27,7 @@
 #include "gslowlevel.h"
 #include "libprint_c.h"
 #include "libgsrewrite.h"
-#include "libgsalpha.h"
+#include "libalpha.h"
 
 #define STRINGLENGTH 256
 

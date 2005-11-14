@@ -3,7 +3,7 @@
 extern "C" {
 #endif
 
-#define NAME "libgsalpha"
+#define NAME "libalpha"
 
 #include <stdio.h>
 #include <stdlib.h>
@@ -14,7 +14,7 @@ extern "C" {
 #include "gslowlevel.h"
 #include "gsfunc.h"
 #include "libprint_c.h"
-#include "libgsalpha.h"
+#include "libalpha.h"
 
 static inline ATermAppl INIT_KEY(void){return gsMakeProcVarId(gsString2ATermAppl("init"),ATmakeList0());}
 

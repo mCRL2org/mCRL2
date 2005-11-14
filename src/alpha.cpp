@@ -13,8 +13,8 @@
 #include "libprint_types.h"
 #include "libprint_c.h"
 #include "gslexer.h"
-#include "gstypecheck.h"
-#include "libgsalpha.h"
+#include "typecheck.h"
+#include "libalpha.h"
 
 void PrintUsage(FILE *f, char *Name)
 {

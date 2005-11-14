@@ -34,7 +34,7 @@ LIBREWR_LDFLAGS    = -l$(ATERM) -lm
 
 #mcrl22lpe definitions
 MCRL22LPE_NAME     = mcrl22lpe
-MCRL22LPE_OBJECTS  = mcrl22lpe.o lin_std.o lin_alt.o gsparser.o gslexer.o gstypecheck.o dataimpl.o libprint_c.o gsfunc.o gslowlevel.o libgsalpha.o
+MCRL22LPE_OBJECTS  = mcrl22lpe.o lin_std.o lin_alt.o gsparser.o gslexer.o typecheck.o dataimpl.o libprint_c.o gsfunc.o gslowlevel.o libalpha.o
 OBJECTS           += $(MCRL22LPE_OBJECTS)
 MCRL22LPE_LDFLAGS  = -lgsrewrite -l$(ATERM) -lm $(LIBDL)
 
@@ -128,7 +128,7 @@ TBF2LPE_LDFLAGS    = -lgsrewrite -l$(ATERM) -lm $(LIBDL)
 
 #pnml2mcrl2 definitions
 PNML2MCRL2_NAME    = pnml2mcrl2
-PNML2MCRL2_OBJECTS = pnml2mcrl2.o gstypecheck.o libprint_c.o gsfunc.o gslowlevel.o
+PNML2MCRL2_OBJECTS = pnml2mcrl2.o typecheck.o libprint_c.o gsfunc.o gslowlevel.o
 ifdef USE_LIBXML2
 OBJECTS           += $(PNML2MCRL2_OBJECTS)
 endif
@@ -137,13 +137,13 @@ $(PNML2MCRL2_OBJECTS) $(patsubst %.o,%.d,$(PNML2MCRL2_OBJECTS)): CPPFLAGS += $(L
 
 #alpha definitions
 ALPHA_NAME         = alpha
-ALPHA_OBJECTS      = alpha.o libgsalpha.o gsparser.o gslexer.o gstypecheck.o libprint_c.o gsfunc.o gslowlevel.o
+ALPHA_OBJECTS      = alpha.o libalpha.o gsparser.o gslexer.o typecheck.o libprint_c.o gsfunc.o gslowlevel.o
 OBJECTS           += $(ALPHA_OBJECTS)
 ALPHA_LDFLAGS      = -lgsrewrite -l$(ATERM) -lm $(LIBDL)
 
 #lin definitions
 LIN_NAME           = lin
-LIN_OBJECTS        = lin.o lin_alt.o gsparser.o gslexer.o gstypecheck.o dataimpl.o libprint_c.o gsfunc.o gslowlevel.o
+LIN_OBJECTS        = lin.o lin_alt.o gsparser.o gslexer.o typecheck.o dataimpl.o libprint_c.o gsfunc.o gslowlevel.o
 OBJECTS           += $(LIN_OBJECTS)
 LIN_LDFLAGS        = -lgsrewrite -l$(ATERM) -lm $(LIBDL)
 
