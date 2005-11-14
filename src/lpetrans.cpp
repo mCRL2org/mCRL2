@@ -17,8 +17,8 @@
 #include <string.h>
 #include <aterm2.h>
 #include <assert.h>
-#include "gsfunc.h"
-#include "gslowlevel.h"
+#include "libstruct.h"
+#include "liblowlevel.h"
 #include "libprint_c.h"
 
 bool is_mCRL_spec(ATermAppl spec)

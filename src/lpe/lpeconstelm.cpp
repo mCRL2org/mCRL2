@@ -16,8 +16,8 @@
 #include "mcrl2/specification.h"
 
 #include "libgsrewrite.h"
-#include "gsfunc.h"
-#include "gslowlevel.h"
+#include "libstruct.h"
+#include "liblowlevel.h"
 
 using namespace std;
 using namespace mcrl2;

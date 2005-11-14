@@ -9,8 +9,8 @@
 #include <libxml/xmlmemory.h>
 #include <libxml/parser.h>
 #include <aterm2.h>
-#include "gslowlevel.h"
-#include "gsfunc.h"
+#include "liblowlevel.h"
+#include "libstruct.h"
 #include "libprint_c.h"
 #include "typecheck.h"
   

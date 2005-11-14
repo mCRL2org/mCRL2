@@ -7,8 +7,8 @@
 #include <getopt.h>
 #include <aterm2.h>
 #include <assert.h>
-#include "gsfunc.h"
-#include "gslowlevel.h"
+#include "libstruct.h"
+#include "liblowlevel.h"
 #include "libprint_c.h"
 #include "lpetrans.h"
 

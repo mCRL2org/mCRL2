@@ -1,10 +1,6 @@
 #ifndef __LOWLEVEL_H
 #define __LOWLEVEL_H
 
-#ifdef __cplusplus
-extern "C" {
-#endif
-
 #include <stdbool.h>
 #include <stdarg.h>
 #include <aterm2.h>
@@ -175,9 +171,5 @@ char *gsStringDub(const char *n, const int inc);
 
 int NrOfChars(int n);
 //Ret: the number of characters of the decimal representation of n
-
-#ifdef __cplusplus
-}
-#endif
 
 #endif

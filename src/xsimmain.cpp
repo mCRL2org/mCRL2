@@ -18,8 +18,8 @@
 #include <aterm2.h>
 #include "xsimbase.h"
 #include "xsimmain.h"
-#include "gslowlevel.h"
-#include "gsfunc.h"
+#include "liblowlevel.h"
+#include "libstruct.h"
 #include "libnextstate.h"
 #include "libgsrewrite.h"
 #include "libprint_types.h"

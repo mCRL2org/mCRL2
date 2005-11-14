@@ -12,8 +12,8 @@
 #include <assert.h>
 
 #include <aterm2.h>
-#include "gsfunc.h"
-#include "gslowlevel.h"
+#include "libstruct.h"
+#include "liblowlevel.h"
 #include "libprint_types.h"
 #include "libprint_c.h"
 #include "libgsrewrite.h"

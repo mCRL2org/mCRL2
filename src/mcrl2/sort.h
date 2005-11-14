@@ -10,7 +10,7 @@
 //#include "mcrl2/predefined_symbols.h"
 #include "mcrl2/aterm_wrapper.h"
 #include "atermpp/aterm_list.h"
-#include "gsfunc.h"
+#include "libstruct.h"
 
 namespace mcrl2 {
 

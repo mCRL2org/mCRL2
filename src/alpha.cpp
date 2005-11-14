@@ -8,8 +8,8 @@
 #include <limits.h>
 #include <getopt.h>
 #include <aterm2.h>
-#include "gslowlevel.h"
-#include "gsfunc.h"
+#include "liblowlevel.h"
+#include "libstruct.h"
 #include "libprint_types.h"
 #include "libprint_c.h"
 #include "mcrl2lexer.h"

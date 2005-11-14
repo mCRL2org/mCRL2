@@ -1,7 +1,3 @@
-#ifdef __cplusplus
-extern "C" {
-#endif
-
 #include "libprint_c.h"
 
 #define PRINT_C
@@ -134,7 +130,3 @@ int gsvfprintf(FILE *stream, const char *format, va_list args)
   }
   return result;
 }
-
-#ifdef __cplusplus
-}
-#endif

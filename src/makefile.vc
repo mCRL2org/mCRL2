@@ -46,8 +46,8 @@ GSPARSE_OBJECTS =  \
 	gsparse_mcrl2parser.obj \
 	gsparse_typecheck.obj \
 	gsparse_dataimpl.obj \
-	gsparse_gsfunc.obj \
-	gsparse_gslowlevel.obj \
+	gsparse_libstruct.obj \
+	gsparse_liblowlevel.obj \
 	gsparse_mcrl2lexer.obj
 GSREWRITE_CFLAGS = /MD /DWIN32 /Iaterm /Int /I"C:\Program Files\Microsoft Visual \
 	C++ Toolkit 2003\include" /I"C:\Program Files\Microsoft SDK\include" /TP \
@@ -57,8 +57,8 @@ GSREWRITE_OBJECTS =  \
 	gsrewrite_gsrewr_inner.obj \
 	gsrewrite_gsrewr_inner2.obj \
 	gsrewrite_gsrewr_inner3.obj \
-	gsrewrite_gsfunc.obj \
-	gsrewrite_gslowlevel.obj
+	gsrewrite_libstruct.obj \
+	gsrewrite_liblowlevel.obj
 PARSER_CFLAGS = /MD /DWIN32 /Iaterm /Int /I"C:\Program Files\Microsoft Visual C++ \
 	Toolkit 2003\include" /I"C:\Program Files\Microsoft SDK\include" /TP \
 	$(CPPFLAGS) $(CFLAGS)
@@ -234,10 +234,10 @@ gsparse_typecheck.obj: .\typecheck.c
 gsparse_dataimpl.obj: .\dataimpl.c
 	$(CC) /c /nologo /TC /Fo$@ $(GSPARSE_CFLAGS) $**
 
-gsparse_gsfunc.obj: .\gsfunc.c
+gsparse_libstruct.obj: .\libstruct.c
 	$(CC) /c /nologo /TC /Fo$@ $(GSPARSE_CFLAGS) $**
 
-gsparse_gslowlevel.obj: .\gslowlevel.c
+gsparse_liblowlevel.obj: .\liblowlevel.c
 	$(CC) /c /nologo /TC /Fo$@ $(GSPARSE_CFLAGS) $**
 
 gsparse_mcrl2lexer.obj: .\mcrl2lexer.c
@@ -255,10 +255,10 @@ gsrewrite_gsrewr_inner2.obj: .\gsrewr_inner2.c
 gsrewrite_gsrewr_inner3.obj: .\gsrewr_inner3.c
 	$(CC) /c /nologo /TC /Fo$@ $(GSREWRITE_CFLAGS) $**
 
-gsrewrite_gsfunc.obj: .\gsfunc.c
+gsrewrite_libstruct.obj: .\libstruct.c
 	$(CC) /c /nologo /TC /Fo$@ $(GSREWRITE_CFLAGS) $**
 
-gsrewrite_gslowlevel.obj: .\gslowlevel.c
+gsrewrite_liblowlevel.obj: .\liblowlevel.c
 	$(CC) /c /nologo /TC /Fo$@ $(GSREWRITE_CFLAGS) $**
 
 parser_gsparse.obj: .\gsparse.c

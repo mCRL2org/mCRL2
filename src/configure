@@ -274,7 +274,7 @@ PACKAGE_STRING='mCRL2 toolset 0.2'
 PACKAGE_BUGREPORT='J.v.d.Wulp@tue.nl'
 
 ac_default_prefix=$HOME
-ac_unique_file="gslowlevel.h"
+ac_unique_file="liblowlevel.h"
 # Factoring default headers for most tests.
 ac_includes_default="\
 #include <stdio.h>

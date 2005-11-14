@@ -6,8 +6,8 @@
 #include <assert.h>
 #include <getopt.h>
 #include <aterm2.h>
-#include "gslowlevel.h"
-#include "gsfunc.h"
+#include "liblowlevel.h"
+#include "libstruct.h"
 #include "libprint_c.h"
 #include "libalpha.h"
 

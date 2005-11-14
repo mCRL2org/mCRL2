@@ -1,7 +1,7 @@
 #include <stdlib.h>
 #include <aterm2.h>
-#include "gslowlevel.h"
-#include "gsfunc.h"
+#include "liblowlevel.h"
+#include "libstruct.h"
 #include "libprint_c.h"
 #include "libgsrewrite.h"
 #include "libprover.h"

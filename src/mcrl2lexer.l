@@ -2,8 +2,8 @@
 #include <string.h>
 #include "mcrl2lexer.h"
 #include "mcrl2parser.hpp"
-#include "gsfunc.h"
-#include "gslowlevel.h"
+#include "libstruct.h"
+#include "liblowlevel.h"
 
 //Global precondition: the ATerm library has been initialised
 

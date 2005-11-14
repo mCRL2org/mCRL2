@@ -1,12 +1,8 @@
-#ifdef __cplusplus
-extern "C" {
-#endif
-
 #include <stdio.h>
 #include <aterm2.h>
 #include <ctype.h>
 #include "libprint_types.h"
-#include "gslowlevel.h"
+#include "liblowlevel.h"
 
 //This file contains C specific printing functions
 
@@ -96,7 +92,3 @@ inline static void gsDebugMsgFunc(const char *FuncName, char *Format, ...)
 {
   GS_DEBUG_MSG_FUNC(FuncName,Format)
 }
-
-#ifdef __cplusplus
-}
-#endif

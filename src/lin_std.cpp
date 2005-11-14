@@ -23,8 +23,8 @@
 #include <assert.h>
 #include <string.h>
 #include "lin_std.h"
-#include "gsfunc.h"
-#include "gslowlevel.h"
+#include "libstruct.h"
+#include "liblowlevel.h"
 #include "libprint_c.h"
 #include "libgsrewrite.h"
 #include "libalpha.h"

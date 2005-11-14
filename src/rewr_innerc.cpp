@@ -10,8 +10,8 @@
 #include <dlfcn.h>
 #include <assert.h>
 #include "aterm2.h"
-#include "gslowlevel.h"
-#include "gsfunc.h"
+#include "liblowlevel.h"
+#include "libstruct.h"
 #include "libprint_c.h"
 #include "rewr_innerc_aux.h"
 #include "rewr_innerc.h"
@@ -1513,8 +1513,8 @@ void RewriterCompilingInnermost::CompileRewriteSystem(ATermAppl DataEqnSpec)
       "#include <string.h>\n"
       "#include \"aterm2.h\"\n"
       "#include \"assert.h\"\n"
-//      "#include \"gsfunc.h\"\n"
-//      "#include \"gslowlevel.h\"\n"
+//      "#include \"libstruct.h\"\n"
+//      "#include \"liblowlevel.h\"\n"
 //      "#include \"gssubstitute.h\"\n"
       "#ifndef ATprotectAppl\n"
       "extern void ATprotectAppl(ATermAppl *a);\n"

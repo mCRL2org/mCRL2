@@ -3,8 +3,8 @@
 #include <string.h>
 #include <limits.h>
 #include "lin_alt.h"
-#include "gsfunc.h"
-#include "gslowlevel.h"
+#include "libstruct.h"
+#include "liblowlevel.h"
 #include "libprint_c.h"
 #include "libgsrewrite.h"
 

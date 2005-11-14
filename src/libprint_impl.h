@@ -22,8 +22,8 @@
 #include <aterm2.h>
 #include "libprint_types.h"
 #include "libgsrewrite.h"
-#include "gsfunc.h"
-#include "gslowlevel.h"
+#include "libstruct.h"
+#include "liblowlevel.h"
 
 //declarations
 //------------

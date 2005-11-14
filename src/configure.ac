@@ -1,7 +1,7 @@
 AC_INIT([mCRL2 toolset], [0.2], [J.v.d.Wulp@tue.nl])
 AC_CANONICAL_HOST
 AC_PREFIX_DEFAULT([$HOME])
-AC_CONFIG_SRCDIR([gslowlevel.h])
+AC_CONFIG_SRCDIR([liblowlevel.h])
 
 # Setting host OS
 case $host in

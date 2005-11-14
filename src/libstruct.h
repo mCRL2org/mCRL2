@@ -1,7 +1,3 @@
-#ifdef __cplusplus
-extern "C" {
-#endif
-
 #include <stdbool.h>
 #include <aterm2.h>
 
@@ -1190,7 +1186,3 @@ ATermAppl gsGetDataExprHead(ATermAppl DataExpr);
 ATermList gsGetDataExprArgs(ATermAppl DataExpr);
 //Pre: DataExpr is a data expression
 //Ret: the arguments of the data expression
-
-#ifdef __cplusplus
-}
-#endif

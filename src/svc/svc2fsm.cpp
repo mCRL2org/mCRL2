@@ -5,7 +5,7 @@
 #include <string.h>
 #include "aterm2.h"
 #include "svc.h"
-#include "gsfunc.h"
+#include "libstruct.h"
 #include "libprint_c.h"
 #include "libprint_cxx.h"
 

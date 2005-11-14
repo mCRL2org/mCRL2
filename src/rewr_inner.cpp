@@ -5,8 +5,8 @@
 #include <aterm2.h>
 #include <memory.h>
 #include <assert.h>
-#include "gslowlevel.h"
-#include "gsfunc.h"
+#include "liblowlevel.h"
+#include "libstruct.h"
 #include "rewr_inner.h"
 #include "libprint_c.h"
 

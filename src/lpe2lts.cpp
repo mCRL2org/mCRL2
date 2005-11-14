@@ -9,8 +9,8 @@
 #include <aterm2.h>
 #include <assert.h>
 #include "svc/svc.h" //XXX
-#include "gslowlevel.h"
-#include "gsfunc.h"
+#include "liblowlevel.h"
+#include "libstruct.h"
 #include "libprint_c.h"
 #include "libnextstate.h"
 #include "libgsrewrite.h"

@@ -57,11 +57,11 @@
   </template>
 
   <lib id="gsparse" template="clib">
-    <sources>libgsparse.c mcrl2parser.c typecheck.c dataimpl.c gsfunc.c gslowlevel.c mcrl2lexer.c</sources>
+    <sources>libgsparse.c mcrl2parser.c typecheck.c dataimpl.c libstruct.c liblowlevel.c mcrl2lexer.c</sources>
   </lib>
 
   <lib id="gsrewrite" template="clib">
-    <sources>libgsrewrite.c gsrewr_inner.c gsrewr_inner2.c gsrewr_inner3.c gsfunc.c gslowlevel.c</sources>
+    <sources>libgsrewrite.c gsrewr_inner.c gsrewr_inner2.c gsrewr_inner3.c libstruct.c liblowlevel.c</sources>
   </lib>
 
   <exe id="mcrl2parse" template="cexe">

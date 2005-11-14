@@ -13,8 +13,8 @@
 #include <string.h>
 
 #include <aterm2.h>
-#include "gsfunc.h"
-#include "gslowlevel.h"
+#include "libstruct.h"
+#include "liblowlevel.h"
 #include "libprint_c.h"
 
 //Global precondition: the ATerm library has been initialised

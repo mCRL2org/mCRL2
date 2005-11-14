@@ -1,14 +1,10 @@
-#ifdef __cplusplus
-extern "C" {
-#endif
-
 #include <string.h>
 #include <stdlib.h>
 #include <assert.h>
 #include <math.h>
 #include <ctype.h>
 
-#include "gslowlevel.h"
+#include "liblowlevel.h"
 
 //String manipulation
 //-------------------
@@ -444,7 +440,3 @@ int NrOfChars(int n)
   else //n < 0
     return (int) ceil(log10((double) abs(n))) + 1;
 }
-
-#ifdef __cplusplus
-}
-#endif

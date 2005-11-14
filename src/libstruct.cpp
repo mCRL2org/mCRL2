@@ -1,14 +1,10 @@
-#ifdef __cplusplus
-extern "C" {
-#endif
-
 #include <string.h>
 #include <stdlib.h>
 #include <assert.h>
 #include <limits.h>
 
-#include "gsfunc.h"
-#include "gslowlevel.h"
+#include "libstruct.h"
+#include "liblowlevel.h"
 
 //Local declarations
 //------------------
@@ -3513,7 +3509,3 @@ ATermAppl UnitePNIRSorts(ATermAppl SortExpr1, ATermAppl SortExpr2)
     return UnitePNISorts(SortExpr1, SortExpr2);
   }
 }
-
-#ifdef __cplusplus
-}
-#endif

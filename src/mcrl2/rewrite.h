@@ -3,7 +3,7 @@
 
 #include "mcrl2/data.h"
 #include "libgsrewrite.h"
-#include "gsfunc.h"
+#include "libstruct.h"
 
 namespace mcrl2 {
 

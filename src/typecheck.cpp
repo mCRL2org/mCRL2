@@ -4,8 +4,8 @@
 #include <ctype.h>
 
 #include "typecheck.h"
-#include "gsfunc.h"
-#include "gslowlevel.h"
+#include "libstruct.h"
+#include "liblowlevel.h"
 #include "libprint_c.h"
 
 

@@ -13,7 +13,7 @@
 #include <aterm2.h>
 #include "xsim.h"
 #include "xsimmain.h"
-#include "gsfunc.h"
+#include "libstruct.h"
 #include "libgsrewrite.h"
 
 #define PROGRAM_NAME "xsim"

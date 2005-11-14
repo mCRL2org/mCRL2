@@ -4,8 +4,8 @@
 #include <limits.h>
 
 #include "dataimpl.h"
-#include "gsfunc.h"
-#include "gslowlevel.h"
+#include "libstruct.h"
+#include "liblowlevel.h"
 #include "libprint_c.h"
 
 //local declarations
