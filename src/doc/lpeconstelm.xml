@@ -14,7 +14,7 @@
 </refmeta>
 
 <refnamediv>
-<refname>libgsrewrite</refname>
+<refname>librewrite_c</refname>
 <refpurpose> lpeconstelm is a tool which eliminates constant parameters in a linear process equation.</refpurpose>
 </refnamediv>
 

@@ -13,7 +13,7 @@
 #include "libstruct.h"
 #include "libprint_c.h"
 #include "libnextstate.h"
-#include "libgsrewrite.h"
+#include "librewrite_c.h"
 
 #define OF_UNKNOWN  0
 #define OF_AUT    1

@@ -21,7 +21,7 @@
 #include <assert.h>
 #include <aterm2.h>
 #include "libprint_types.h"
-#include "libgsrewrite.h"
+#include "librewrite_c.h"
 #include "libstruct.h"
 #include "liblowlevel.h"
 

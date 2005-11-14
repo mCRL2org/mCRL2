@@ -6,7 +6,7 @@
 #include "libstruct.h"
 #include "liblowlevel.h"
 #include "libprint_c.h"
-#include "libgsrewrite.h"
+#include "librewrite_c.h"
 
 /* Global variables */
 

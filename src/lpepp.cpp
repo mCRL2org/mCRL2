@@ -16,7 +16,7 @@
 #include "liblowlevel.h"
 #include "libprint_types.h"
 #include "libprint_c.h"
-#include "libgsrewrite.h"
+#include "librewrite_c.h"
 
 //local declarations
 

@@ -53,12 +53,12 @@ GSREWRITE_CFLAGS = /MD /DWIN32 /Iaterm /Int /I"C:\Program Files\Microsoft Visual
 	C++ Toolkit 2003\include" /I"C:\Program Files\Microsoft SDK\include" /TP \
 	$(CPPFLAGS) $(CFLAGS)
 GSREWRITE_OBJECTS =  \
-	gsrewrite_libgsrewrite.obj \
-	gsrewrite_gsrewr_inner.obj \
-	gsrewrite_gsrewr_inner2.obj \
-	gsrewrite_gsrewr_inner3.obj \
-	gsrewrite_libstruct.obj \
-	gsrewrite_liblowlevel.obj
+	rewrite_librewrite_c.obj \
+	rewrite_gsrewr_inner.obj \
+	rewrite_gsrewr_inner2.obj \
+	rewrite_gsrewr_inner3.obj \
+	rewrite_libstruct.obj \
+	rewrite_liblowlevel.obj
 PARSER_CFLAGS = /MD /DWIN32 /Iaterm /Int /I"C:\Program Files\Microsoft Visual C++ \
 	Toolkit 2003\include" /I"C:\Program Files\Microsoft SDK\include" /TP \
 	$(CPPFLAGS) $(CFLAGS)
@@ -121,7 +121,7 @@ XSIM_OBJECTS =  \
 
 ### Targets: ###
 
-all: sub_aterm sub_nt gsparse.lib gsrewrite.lib gsparse.exe gsprint.exe linearise.exe lin.exe gsrewr.exe gsinstantiate.exe sim.exe xsim.exe
+all: sub_aterm sub_nt gsparse.lib rewrite.lib gsparse.exe gsprint.exe linearise.exe lin.exe gsrewr.exe gsinstantiate.exe sim.exe xsim.exe
 
 clean: 
 	-if exist .\*.obj del .\*.obj
@@ -134,7 +134,7 @@ clean:
 	$(MAKE) -f makefile.vc $(MAKEARGS) clean
 	cd $(MAKEDIR)
 	-if exist gsparse.lib del gsparse.lib
-	-if exist gsrewrite.lib del gsrewrite.lib
+	-if exist rewrite.lib del rewrite.lib
 	-if exist gsparse.exe del gsparse.exe
 	-if exist gsparse.ilk del gsparse.ilk
 	-if exist gsparse.pdb del gsparse.pdb
@@ -176,7 +176,7 @@ gsparse.lib: $(GSPARSE_OBJECTS)
 	$(GSPARSE_OBJECTS)
 <<
 
-gsrewrite.lib: $(GSREWRITE_OBJECTS)
+rewrite.lib: $(GSREWRITE_OBJECTS)
 	if exist $@ del $@
 	lib /NOLOGO /OUT:$@ @<<
 	$(GSREWRITE_OBJECTS)
@@ -192,9 +192,9 @@ gsprint.exe: $(GSPRINT_OBJECTS) gsparse.lib
 	$(GSPRINT_OBJECTS)  ATerm.lib ntutil.lib gsparse.lib
 <<
 
-linearise.exe: $(LINEARISE_OBJECTS) gsparse.lib gsrewrite.lib
+linearise.exe: $(LINEARISE_OBJECTS) gsparse.lib rewrite.lib
 	link /NOLOGO /OUT:$@ $(LDFLAGS) /LIBPATH:nt /LIBPATH:aterm /LIBPATH:"C:\Program Files\Microsoft Visual C++ Toolkit 2003\lib" /LIBPATH:"C:\Program Files\Microsoft SDK\lib" @<<
-	$(LINEARISE_OBJECTS)  ATerm.lib ntutil.lib gsparse.lib gsrewrite.lib
+	$(LINEARISE_OBJECTS)  ATerm.lib ntutil.lib gsparse.lib rewrite.lib
 <<
 
 lin.exe: $(LIN_OBJECTS) gsparse.lib
@@ -202,24 +202,24 @@ lin.exe: $(LIN_OBJECTS) gsparse.lib
 	$(LIN_OBJECTS)  ATerm.lib ntutil.lib gsparse.lib
 <<
 
-gsrewr.exe: $(GSREWR_OBJECTS) gsparse.lib gsrewrite.lib
+gsrewr.exe: $(GSREWR_OBJECTS) gsparse.lib rewrite.lib
 	link /NOLOGO /OUT:$@ $(LDFLAGS) /LIBPATH:nt /LIBPATH:aterm /LIBPATH:"C:\Program Files\Microsoft Visual C++ Toolkit 2003\lib" /LIBPATH:"C:\Program Files\Microsoft SDK\lib" @<<
-	$(GSREWR_OBJECTS)  ATerm.lib ntutil.lib gsparse.lib gsrewrite.lib
+	$(GSREWR_OBJECTS)  ATerm.lib ntutil.lib gsparse.lib rewrite.lib
 <<
 
-gsinstantiate.exe: $(GSINSTANTIATE_OBJECTS) gsparse.lib gsrewrite.lib
+gsinstantiate.exe: $(GSINSTANTIATE_OBJECTS) gsparse.lib rewrite.lib
 	link /NOLOGO /OUT:$@ $(LDFLAGS) /LIBPATH:nt /LIBPATH:aterm /LIBPATH:"C:\Program Files\Microsoft Visual C++ Toolkit 2003\lib" /LIBPATH:"C:\Program Files\Microsoft SDK\lib" @<<
-	$(GSINSTANTIATE_OBJECTS)  ATerm.lib ntutil.lib gsparse.lib gsrewrite.lib
+	$(GSINSTANTIATE_OBJECTS)  ATerm.lib ntutil.lib gsparse.lib rewrite.lib
 <<
 
-sim.exe: $(SIM_OBJECTS) gsparse.lib gsrewrite.lib
+sim.exe: $(SIM_OBJECTS) gsparse.lib rewrite.lib
 	link /NOLOGO /OUT:$@ $(LDFLAGS) /LIBPATH:nt /LIBPATH:aterm /LIBPATH:"C:\Program Files\Microsoft Visual C++ Toolkit 2003\lib" /LIBPATH:"C:\Program Files\Microsoft SDK\lib" @<<
-	$(SIM_OBJECTS)  ATerm.lib ntutil.lib gsparse.lib gsrewrite.lib
+	$(SIM_OBJECTS)  ATerm.lib ntutil.lib gsparse.lib rewrite.lib
 <<
 
-xsim.exe: $(XSIM_OBJECTS) gsparse.lib gsrewrite.lib
+xsim.exe: $(XSIM_OBJECTS) gsparse.lib rewrite.lib
 	link /NOLOGO /OUT:$@ $(LDFLAGS) /LIBPATH:c:\wxWidgets-2.6.0\lib\vc_lib wxmsw26_xrc.lib wxmsw26_html.lib wxmsw26_adv.lib wxmsw26_core.lib wxbase26_xml.lib wxbase26_net.lib wxbase26.lib wxexpat.lib wxregex.lib wxzlib.lib wxjpeg.lib wxtiff.lib wxpng.lib /LIBPATH:. kernel32.lib user32.lib gdi32.lib comdlg32.lib winspool.lib winmm.lib shell32.lib comctl32.lib ole32.lib oleaut32.lib uuid.lib rpcrt4.lib advapi32.lib wsock32.lib oleacc.lib odbc32.lib /LIBPATH:nt /LIBPATH:aterm /LIBPATH:"C:\Program Files\Microsoft Visual C++ Toolkit 2003\lib" /LIBPATH:"C:\Program Files\Microsoft SDK\lib" @<<
-	$(XSIM_OBJECTS)  ATerm.lib ntutil.lib gsparse.lib gsrewrite.lib
+	$(XSIM_OBJECTS)  ATerm.lib ntutil.lib gsparse.lib rewrite.lib
 <<
 
 gsparse_libgsparse.obj: .\libgsparse.c
@@ -243,22 +243,22 @@ gsparse_liblowlevel.obj: .\liblowlevel.c
 gsparse_mcrl2lexer.obj: .\mcrl2lexer.c
 	$(CC) /c /nologo /TC /Fo$@ $(GSPARSE_CFLAGS) $**
 
-gsrewrite_libgsrewrite.obj: .\libgsrewrite.c
+rewrite_librewrite_c.obj: .\librewrite_c.c
 	$(CC) /c /nologo /TC /Fo$@ $(GSREWRITE_CFLAGS) $**
 
-gsrewrite_gsrewr_inner.obj: .\gsrewr_inner.c
+rewrite_gsrewr_inner.obj: .\gsrewr_inner.c
 	$(CC) /c /nologo /TC /Fo$@ $(GSREWRITE_CFLAGS) $**
 
-gsrewrite_gsrewr_inner2.obj: .\gsrewr_inner2.c
+rewrite_gsrewr_inner2.obj: .\gsrewr_inner2.c
 	$(CC) /c /nologo /TC /Fo$@ $(GSREWRITE_CFLAGS) $**
 
-gsrewrite_gsrewr_inner3.obj: .\gsrewr_inner3.c
+rewrite_gsrewr_inner3.obj: .\gsrewr_inner3.c
 	$(CC) /c /nologo /TC /Fo$@ $(GSREWRITE_CFLAGS) $**
 
-gsrewrite_libstruct.obj: .\libstruct.c
+rewrite_libstruct.obj: .\libstruct.c
 	$(CC) /c /nologo /TC /Fo$@ $(GSREWRITE_CFLAGS) $**
 
-gsrewrite_liblowlevel.obj: .\liblowlevel.c
+rewrite_liblowlevel.obj: .\liblowlevel.c
 	$(CC) /c /nologo /TC /Fo$@ $(GSREWRITE_CFLAGS) $**
 
 parser_gsparse.obj: .\gsparse.c

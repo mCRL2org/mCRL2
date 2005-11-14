@@ -2,7 +2,7 @@
 #define MCRL2_REWRITE_H
 
 #include "mcrl2/data.h"
-#include "libgsrewrite.h"
+#include "librewrite_c.h"
 #include "libstruct.h"
 
 namespace mcrl2 {

@@ -15,7 +15,7 @@
 #include "atermpp/aterm.h"
 #include "mcrl2/specification.h"
 
-#include "libgsrewrite.h"
+#include "librewrite_c.h"
 #include "libstruct.h"
 #include "liblowlevel.h"
 

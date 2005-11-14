@@ -3,7 +3,7 @@
 #include "liblowlevel.h"
 #include "libstruct.h"
 #include "libprint_c.h"
-#include "libgsrewrite.h"
+#include "librewrite_c.h"
 #include "libprover.h"
 
 #define ATisList(x) (ATgetType(x) == AT_LIST)

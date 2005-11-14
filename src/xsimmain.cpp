@@ -21,7 +21,7 @@
 #include "liblowlevel.h"
 #include "libstruct.h"
 #include "libnextstate.h"
-#include "libgsrewrite.h"
+#include "librewrite_c.h"
 #include "libprint_types.h"
 #include "libprint_cxx.h"
 

@@ -60,8 +60,8 @@
     <sources>libgsparse.c mcrl2parser.c typecheck.c dataimpl.c libstruct.c liblowlevel.c mcrl2lexer.c</sources>
   </lib>
 
-  <lib id="gsrewrite" template="clib">
-    <sources>libgsrewrite.c gsrewr_inner.c gsrewr_inner2.c gsrewr_inner3.c libstruct.c liblowlevel.c</sources>
+  <lib id="rewrite" template="clib">
+    <sources>librewrite_c.c gsrewr_inner.c gsrewr_inner2.c gsrewr_inner3.c libstruct.c liblowlevel.c</sources>
   </lib>
 
   <exe id="mcrl2parse" template="cexe">
@@ -78,7 +78,7 @@
   <exe id="mcrl22lpe" template="cexe">
     <sources>mcrl22lpe.c</sources>
     <library>gsparse</library>
-    <library>gsrewrite</library>
+    <library>rewrite</library>
   </exe>
 
   <exe id="lin" template="cexe">
@@ -90,28 +90,28 @@
   <exe id="lperewr" template="cexe">
     <sources>lperewr.c</sources>
     <library>gsparse</library>
-    <library>gsrewrite</library>
+    <library>rewrite</library>
   </exe>
 
   <exe id="lpe2lts" template="cexe">
     <sources>lpe2lts.c</sources>
     <sources>libnextstate.c libprover.c</sources>
     <library>gsparse</library>
-    <library>gsrewrite</library>
+    <library>rewrite</library>
   </exe>
 
   <exe id="sim" template="cexe">
     <sources>sim.c</sources>
     <sources>libnextstate.c libprover.c</sources>
     <library>gsparse</library>
-    <library>gsrewrite</library>
+    <library>rewrite</library>
   </exe>
 
   <exe id="xsim" template="cxxexe">
     <sources>xsim.cpp</sources>
     <sources>xsimbase.cpp xsimmain.cpp xsimtrace.cpp libnextstate.c libprover.c</sources>
     <library>gsparse</library>
-    <library>gsrewrite</library>
+    <library>rewrite</library>
   </exe>
 
 </bakefile>

@@ -5,7 +5,7 @@
 #include "libstruct.h"
 #include "libprint_c.h"
 #include "libprover.h"
-#include "libgsrewrite.h"
+#include "librewrite_c.h"
 #include "libnextstate.h"
 
 #define ATAgetFirst(x) ((ATermAppl) ATgetFirst(x))

@@ -10,7 +10,7 @@
 #include "liblowlevel.h"
 #include "libstruct.h"
 #include "libprint_c.h"
-#include "libgsrewrite.h"
+#include "librewrite_c.h"
 
 static bool gsIsLPESpec(ATermAppl Spec)
 {

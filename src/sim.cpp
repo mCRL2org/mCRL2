@@ -11,7 +11,7 @@
 #include "libstruct.h"
 #include "libprint_c.h"
 #include "libnextstate.h"
-#include "libgsrewrite.h"
+#include "librewrite_c.h"
 
 static void gsPrintState(ATerm state)
 {

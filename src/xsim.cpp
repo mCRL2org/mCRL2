@@ -14,7 +14,7 @@
 #include "xsim.h"
 #include "xsimmain.h"
 #include "libstruct.h"
-#include "libgsrewrite.h"
+#include "librewrite_c.h"
 
 #define PROGRAM_NAME "xsim"
 

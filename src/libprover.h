@@ -1,5 +1,5 @@
 #include <aterm2.h>
-#include "libgsrewrite.h"
+#include "librewrite_c.h"
 
 extern bool FindSolutionsError;
 

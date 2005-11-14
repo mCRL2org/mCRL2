@@ -2,7 +2,7 @@
 #define __LIBREWRITE_H
 
 #include <aterm2.h>
-#include "libgsrewrite.h"
+#include "librewrite_c.h"
 
 class Rewriter
 {
