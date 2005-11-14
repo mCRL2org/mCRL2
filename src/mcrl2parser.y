@@ -20,9 +20,9 @@
 //Global precondition: the ATerm library has been initialised
 
 //external declarations
-extern ATermAppl gsTree;        /* declared in gslexer.l */
-extern void mcrl2yyerror(char *s); /* declared in gslexer.l */
-extern int mcrl2yylex(void);       /* declared in gslexer.c */
+extern ATermAppl gsTree;        /* declared in mcrl2lexer.l */
+extern void mcrl2yyerror(char *s); /* declared in mcrl2lexer.l */
+extern int mcrl2yylex(void);       /* declared in mcrl2lexer.c */
 
 #ifdef _MSC_VER
 #define yyfalse 0

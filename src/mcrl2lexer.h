@@ -3,7 +3,7 @@
 
 //Global precondition: the ATerm library has been initialised
 
-ATermAppl gsParse(FILE *FormStream);
+ATermAppl mcrl2Parse(FILE *FormStream);
 /*Pre: FormStream is a valid formula stream from which can be read       
   Post:the mCRL2 specification in formStream is parsed
   Ret: the parsed formula, if everything went ok

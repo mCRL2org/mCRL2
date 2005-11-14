@@ -57,7 +57,7 @@
   </template>
 
   <lib id="gsparse" template="clib">
-    <sources>libgsparse.c gsparser.c typecheck.c dataimpl.c gsfunc.c gslowlevel.c gslexer.c</sources>
+    <sources>libgsparse.c mcrl2parser.c typecheck.c dataimpl.c gsfunc.c gslowlevel.c mcrl2lexer.c</sources>
   </lib>
 
   <lib id="gsrewrite" template="clib">

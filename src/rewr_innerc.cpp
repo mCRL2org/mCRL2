@@ -13,7 +13,7 @@
 #include "gslowlevel.h"
 #include "gsfunc.h"
 #include "libprint_c.h"
-#include "gsrewr_innerc_aux.h"
+#include "rewr_innerc_aux.h"
 #include "rewr_innerc.h"
 
 

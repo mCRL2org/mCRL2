@@ -9,7 +9,7 @@
 #include "gslowlevel.h"
 #include "libprint_types.h"
 #include "libprint_c.h"
-#include "gslexer.h"
+#include "mcrl2lexer.h"
 #include "typecheck.h"
 #include "dataimpl.h"
 #include "lin_alt.h"
@@ -117,7 +117,7 @@ int main(int argc, char **argv)
 	} else {
                 //parse specification
                 gsVerboseMsg("parsing...\n");
-                Spec = gsParse(SpecStream);
+                Spec = mcrl2Parse(SpecStream);
 		fclose(SpecStream);
                 if (Spec == NULL) {
                   gsErrorMsg("parsing failed\n");

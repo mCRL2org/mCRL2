@@ -43,12 +43,12 @@ GSPARSE_CFLAGS = /MD /DWIN32 /Iaterm /Int /I"C:\Program Files\Microsoft Visual C
 	$(CPPFLAGS) $(CFLAGS)
 GSPARSE_OBJECTS =  \
 	gsparse_libgsparse.obj \
-	gsparse_gsparser.obj \
+	gsparse_mcrl2parser.obj \
 	gsparse_typecheck.obj \
 	gsparse_dataimpl.obj \
 	gsparse_gsfunc.obj \
 	gsparse_gslowlevel.obj \
-	gsparse_gslexer.obj
+	gsparse_mcrl2lexer.obj
 GSREWRITE_CFLAGS = /MD /DWIN32 /Iaterm /Int /I"C:\Program Files\Microsoft Visual \
 	C++ Toolkit 2003\include" /I"C:\Program Files\Microsoft SDK\include" /TP \
 	$(CPPFLAGS) $(CFLAGS)
@@ -225,7 +225,7 @@ xsim.exe: $(XSIM_OBJECTS) gsparse.lib gsrewrite.lib
 gsparse_libgsparse.obj: .\libgsparse.c
 	$(CC) /c /nologo /TC /Fo$@ $(GSPARSE_CFLAGS) $**
 
-gsparse_gsparser.obj: .\gsparser.c
+gsparse_mcrl2parser.obj: .\mcrl2parser.c
 	$(CC) /c /nologo /TC /Fo$@ $(GSPARSE_CFLAGS) $**
 
 gsparse_typecheck.obj: .\typecheck.c
@@ -240,7 +240,7 @@ gsparse_gsfunc.obj: .\gsfunc.c
 gsparse_gslowlevel.obj: .\gslowlevel.c
 	$(CC) /c /nologo /TC /Fo$@ $(GSPARSE_CFLAGS) $**
 
-gsparse_gslexer.obj: .\gslexer.c
+gsparse_mcrl2lexer.obj: .\mcrl2lexer.c
 	$(CC) /c /nologo /TC /Fo$@ $(GSPARSE_CFLAGS) $**
 
 gsrewrite_libgsrewrite.obj: .\libgsrewrite.c

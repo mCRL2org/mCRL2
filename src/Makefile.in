@@ -34,7 +34,7 @@ LIBREWR_LDFLAGS    = -l$(ATERM) -lm
 
 #mcrl22lpe definitions
 MCRL22LPE_NAME     = mcrl22lpe
-MCRL22LPE_OBJECTS  = mcrl22lpe.o lin_std.o lin_alt.o gsparser.o gslexer.o typecheck.o dataimpl.o libprint_c.o gsfunc.o gslowlevel.o libalpha.o
+MCRL22LPE_OBJECTS  = mcrl22lpe.o lin_std.o lin_alt.o mcrl2parser.o mcrl2lexer.o typecheck.o dataimpl.o libprint_c.o gsfunc.o gslowlevel.o libalpha.o
 OBJECTS           += $(MCRL22LPE_OBJECTS)
 MCRL22LPE_LDFLAGS  = -lgsrewrite -l$(ATERM) -lm $(LIBDL)
 
@@ -137,13 +137,13 @@ $(PNML2MCRL2_OBJECTS) $(patsubst %.o,%.d,$(PNML2MCRL2_OBJECTS)): CPPFLAGS += $(L
 
 #alpha definitions
 ALPHA_NAME         = alpha
-ALPHA_OBJECTS      = alpha.o libalpha.o gsparser.o gslexer.o typecheck.o libprint_c.o gsfunc.o gslowlevel.o
+ALPHA_OBJECTS      = alpha.o libalpha.o mcrl2parser.o mcrl2lexer.o typecheck.o libprint_c.o gsfunc.o gslowlevel.o
 OBJECTS           += $(ALPHA_OBJECTS)
 ALPHA_LDFLAGS      = -lgsrewrite -l$(ATERM) -lm $(LIBDL)
 
 #lin definitions
 LIN_NAME           = lin
-LIN_OBJECTS        = lin.o lin_alt.o gsparser.o gslexer.o typecheck.o dataimpl.o libprint_c.o gsfunc.o gslowlevel.o
+LIN_OBJECTS        = lin.o lin_alt.o mcrl2parser.o mcrl2lexer.o typecheck.o dataimpl.o libprint_c.o gsfunc.o gslowlevel.o
 OBJECTS           += $(LIN_OBJECTS)
 LIN_LDFLAGS        = -lgsrewrite -l$(ATERM) -lm $(LIBDL)
 
@@ -154,7 +154,7 @@ OBJECTS           := $(sort $(OBJECTS))
 
 #Make rules
 .PHONY: all install clean distclean boost documentation studio
-.PRECIOUS: gsparser.cpp gslexer.cpp
+.PRECIOUS: mcrl2parser.cpp mcrl2lexer.cpp
 
 # Build bjam and local boost 
 ifeq ($(BOOST_PREFIX),boost)
@@ -220,10 +220,10 @@ endif
 endif
 
 clean:
-	$(RM) $(EXE_NAMES) $(LIB_NAMES) *.o *.a *.d *.dpp lpe/*.o lpe/*.dpp aterm/*.o aterm/*.a aterm/*.d svc/*.o svc/*.a svc/*.d svc/*.dpp gslexer.cpp gsparser.cpp gsparser.hpp gsparser.output lpeinfo lpeparelm lpeconstelm config.status config.log *~ core core.*
+	$(RM) $(EXE_NAMES) $(LIB_NAMES) *.o *.a *.d *.dpp lpe/*.o lpe/*.dpp aterm/*.o aterm/*.a aterm/*.d svc/*.o svc/*.a svc/*.d svc/*.dpp mcrl2lexer.cpp mcrl2parser.cpp mcrl2parser.hpp mcrl2parser.output lpeinfo lpeparelm lpeconstelm config.status config.log *~ core core.*
 
 distclean: clean
-	$(RM) -r autom4te.cache Makefile config gsrewr_innerc_aux.h
+	$(RM) -r autom4te.cache Makefile config rewr_innerc_aux.h
 
 $(ATERM_NAME): $(ATERM_OBJECTS)
 	$(AR) $(ARFLAGS) $@ $(ATERM_OBJECTS)

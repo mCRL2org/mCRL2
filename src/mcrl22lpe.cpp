@@ -16,7 +16,7 @@
 #include "gslowlevel.h"
 #include "gsfunc.h"
 #include "libprint_c.h"
-#include "gslexer.h"
+#include "mcrl2lexer.h"
 #include "typecheck.h"
 #include "libalpha.h"
 #include "dataimpl.h"
@@ -289,7 +289,7 @@ ATermAppl linearise_file(char *infilename, t_lin_options lin_options,
   }
   //parse specification from instream
   gsVerboseMsg("parsing input file '%s'...\n", infilename);
-  ATermAppl result = gsParse(instream);
+  ATermAppl result = mcrl2Parse(instream);
   fclose(instream);
   if (result == NULL) 
   {

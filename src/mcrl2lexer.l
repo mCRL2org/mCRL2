@@ -1,7 +1,7 @@
 %{
 #include <string.h>
-#include "gslexer.h"
-#include "gsparser.hpp"
+#include "mcrl2lexer.h"
+#include "mcrl2parser.hpp"
 #include "gsfunc.h"
 #include "gslowlevel.h"
 
@@ -11,8 +11,8 @@
 ATermAppl gsTree = NULL;         /* the parse tree */
 
 //external declarations
-int mcrl2yyparse(void);             /* declared in gsparser.c */
-extern YYSTYPE mcrl2yylval;         /* declared in gsparser.c */
+int mcrl2yyparse(void);             /* declared in mcrl2parser.c */
+extern YYSTYPE mcrl2yylval;         /* declared in mcrl2parser.c */
 #ifndef _MSC_VER
 extern int fileno(FILE *stream); /* declared in stdio.h (forgotten by lex) */
 #endif
@@ -145,7 +145,7 @@ int mcrl2yywrap(void) {
   return 1;
 }
 
-ATermAppl gsParse(FILE *FormStream) {
+ATermAppl mcrl2Parse(FILE *FormStream) {
   ATermAppl Result = NULL;
   gsTree = NULL;
   ATprotectAppl(&gsTree);

@@ -12,7 +12,7 @@
 #include "gsfunc.h"
 #include "libprint_types.h"
 #include "libprint_c.h"
-#include "gslexer.h"
+#include "mcrl2lexer.h"
 #include "typecheck.h"
 #include "libalpha.h"
 
@@ -124,7 +124,7 @@ int main(int argc, char **argv)
 		Spec = (ATermAppl) ATreadFromFile(SpecStream);
 	} else {
 		gsEnableConstructorFunctions();
-		Spec = gsParse(SpecStream);
+		Spec = mcrl2Parse(SpecStream);
 		Spec = gsTypeCheck(Spec);
 		fclose(SpecStream);
 	}
