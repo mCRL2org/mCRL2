@@ -1138,6 +1138,9 @@ static ATermTable gstcAddVars2Table(ATermTable Vars, ATermList VarDecls){
     ATermAppl VarDecl=ATAgetFirst(VarDecls);
     ATermAppl VarName=ATAgetArgument(VarDecl,0);
     ATermAppl VarType=ATAgetArgument(VarDecl,1);
+    //test the type
+    if(!gstcIsSortExprDeclared(VarType)) return NULL;
+
     // if already defined -- replace (other option -- warning)
     // if variable name is a constant name -- it has more priority (other options -- warning, error)
     ATtablePut(Vars, (ATerm)VarName, (ATerm)VarType);
@@ -1443,7 +1446,11 @@ static ATermAppl gstcTraverseActProcVarConstP(ATermTable Vars, ATermAppl ProcTer
     gstcATermTableCopy(Vars,CopyVars);
 
     ATermTable NewVars=gstcAddVars2Table(CopyVars,ATLgetArgument(ProcTerm,0));
-    if(!NewVars) {ATtableDestroy(CopyVars); return NULL;}
+    if(!NewVars) {
+      ATtableDestroy(CopyVars); 
+      gsErrorMsg("type error while typechecking %P\n",ProcTerm);    
+      return NULL;
+    }
     ATermAppl NewProc=gstcTraverseActProcVarConstP(NewVars,ATAgetArgument(ProcTerm,1));
     ATtableDestroy(CopyVars);
     if(!NewProc) {gsErrorMsg("while typechecking %P\n",ProcTerm);return NULL;}
