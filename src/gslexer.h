@@ -1,7 +1,3 @@
-#ifdef __cplusplus
-extern "C" {
-#endif
-
 #include <stdio.h>
 #include <aterm2.h>
 
@@ -13,8 +9,3 @@ ATermAppl gsParse(FILE *FormStream);
   Ret: the parsed formula, if everything went ok
        NULL, otherwise
 */ 
-
-#ifdef __cplusplus
-}
-#endif
-

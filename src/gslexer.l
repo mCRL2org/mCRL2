@@ -1,7 +1,7 @@
 %{
 #include <string.h>
 #include "gslexer.h"
-#include "gsparser.h"
+#include "gsparser.hpp"
 #include "gsfunc.h"
 #include "gslowlevel.h"
 
@@ -11,8 +11,8 @@
 ATermAppl gsTree = NULL;         /* the parse tree */
 
 //external declarations
-int gsyyparse(void);             /* declared in gsparser.c */
-extern YYSTYPE gsyylval;         /* declared in gsparser.c */
+int mcrl2yyparse(void);             /* declared in gsparser.c */
+extern YYSTYPE mcrl2yylval;         /* declared in gsparser.c */
 #ifndef _MSC_VER
 extern int fileno(FILE *stream); /* declared in stdio.h (forgotten by lex) */
 #endif
@@ -22,11 +22,11 @@ int LineNr = 1;                  /* line number in source file */
 int ColNr  = 1;                  /* column number in source file */
 void gsProcessString(void);      /* default action to be taken when a string is
                                     scanned */
-void gsyyerror(char *s);         /* display error message (needed by yacc) */
+void mcrl2yyerror(char *s);         /* display error message (needed by yacc) */
 #ifdef __cplusplus
-extern "C" int gsyywrap(void);   /* action taken after an EOF (needed by yacc) */
+extern "C" int mcrl2yywrap(void);   /* action taken after an EOF (needed by yacc) */
 #else
-int gsyywrap(void);              /* action taken after an EOF (needed by yacc) */
+int mcrl2yywrap(void);              /* action taken after an EOF (needed by yacc) */
 #endif
 
 %}
@@ -35,11 +35,11 @@ Number     "0"|([1-9][0-9]*)
 
 %%
 
-[ \t]      { ColNr += gsyyleng; /* whitespace */ }
+[ \t]      { ColNr += mcrl2yyleng; /* whitespace */ }
 
 \r?\n      { LineNr++; ColNr = 1; /* newline */ }
 
-"%".*      { ColNr += gsyyleng; /* comment */ }
+"%".*      { ColNr += mcrl2yyleng; /* comment */ }
 
 "||_"      { gsProcessString(); return LMERGE; }
 "->"       { gsProcessString(); return ARROW; }
@@ -118,30 +118,30 @@ comm       { gsProcessString(); return COMM; }
 {Number}   { gsProcessString(); return NUMBER; }
 
 .          { 
-             ColNr += gsyyleng; gsyyerror("unknown character");
+             ColNr += mcrl2yyleng; mcrl2yyerror("unknown character");
              /* remaining characters */
 	   }
 
 %%
 
 void gsProcessString(void) {
-  ColNr += gsyyleng;
-  gsyylval.appl = gsString2ATermAppl(gsyytext);
+  ColNr += mcrl2yyleng;
+  mcrl2yylval.appl = gsString2ATermAppl(mcrl2yytext);
 }
 
-void gsyyerror(char *s) {
-  int oldColNr = ColNr - gsyyleng;
+void mcrl2yyerror(char *s) {
+  int oldColNr = ColNr - mcrl2yyleng;
   if (oldColNr < 0) {
     oldColNr = 0;
   }
   fprintf(
     stderr,
     "token '%s' at position %d, %d caused the following error: %s\n", 
-    gsyytext, LineNr, oldColNr, s
+    mcrl2yytext, LineNr, oldColNr, s
   ); 
 }
 
-int gsyywrap(void) {
+int mcrl2yywrap(void) {
   return 1;
 }
 
@@ -151,8 +151,8 @@ ATermAppl gsParse(FILE *FormStream) {
   ATprotectAppl(&gsTree);
   LineNr = 1;
   ColNr = 1;
-  gsyyrestart(FormStream);
-  if (gsyyparse() != 0) {
+  mcrl2yyrestart(FormStream);
+  if (mcrl2yyparse() != 0) {
     Result = NULL;
   } else {
     //gsTree contains the parsed formula

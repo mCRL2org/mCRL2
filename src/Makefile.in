@@ -154,7 +154,7 @@ OBJECTS           := $(sort $(OBJECTS))
 
 #Make rules
 .PHONY: all install clean distclean boost documentation studio
-.PRECIOUS: gsparser.c gslexer.c
+.PRECIOUS: gsparser.cpp gslexer.cpp
 
 # Build bjam and local boost 
 ifeq ($(BOOST_PREFIX),boost)
@@ -220,7 +220,7 @@ endif
 endif
 
 clean:
-	$(RM) $(EXE_NAMES) $(LIB_NAMES) *.o *.a *.d *.dpp lpe/*.o lpe/*.dpp aterm/*.o aterm/*.a aterm/*.d svc/*.o svc/*.a svc/*.d svc/*.dpp gslexer.c gsparser.c gsparser.h gsparser.output lpeinfo lpeparelm lpeconstelm config.status config.log *~ core core.*
+	$(RM) $(EXE_NAMES) $(LIB_NAMES) *.o *.a *.d *.dpp lpe/*.o lpe/*.dpp aterm/*.o aterm/*.a aterm/*.d svc/*.o svc/*.a svc/*.d svc/*.dpp gslexer.cpp gsparser.cpp gsparser.hpp gsparser.output lpeinfo lpeparelm lpeconstelm config.status config.log *~ core core.*
 
 distclean: clean
 	$(RM) -r autom4te.cache Makefile config gsrewr_innerc_aux.h
@@ -313,10 +313,10 @@ $(ALPHA_NAME) : $(ALPHA_OBJECTS) $(ATERM_DEP) $(LIBREWR_NAME)
 $(LIN_NAME) : $(LIN_OBJECTS) $(ATERM_DEP) $(LIBREWR_NAME)
 	$(CXX) -o $@ $(LIN_OBJECTS) $(LDFLAGS) $(LIN_LDFLAGS)
 
-%.c : %.y
+%.cpp : %.y
 	$(BISON) $(BFLAGS) -o $@ $<
 
-%.c : %.l
+%.cpp : %.l
 	$(LEX) $(LFLAGS) -o$@ $<
 
 ifeq (,$(findstring $(MAKECMDGOALS),clean distclean))

@@ -21,8 +21,8 @@
 
 //external declarations
 extern ATermAppl gsTree;        /* declared in gslexer.l */
-extern void gsyyerror(char *s); /* declared in gslexer.l */
-extern int gsyylex(void);       /* declared in gslexer.c */
+extern void mcrl2yyerror(char *s); /* declared in gslexer.l */
+extern int mcrl2yylex(void);       /* declared in gslexer.c */
 
 #ifdef _MSC_VER
 #define yyfalse 0
