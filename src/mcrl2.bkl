@@ -95,21 +95,21 @@
 
   <exe id="lpe2lts" template="cexe">
     <sources>lpe2lts.c</sources>
-    <sources>libgsnextstate.c libgsprover.c</sources>
+    <sources>libnextstate.c libprover.c</sources>
     <library>gsparse</library>
     <library>gsrewrite</library>
   </exe>
 
   <exe id="sim" template="cexe">
     <sources>sim.c</sources>
-    <sources>libgsnextstate.c libgsprover.c</sources>
+    <sources>libnextstate.c libprover.c</sources>
     <library>gsparse</library>
     <library>gsrewrite</library>
   </exe>
 
   <exe id="xsim" template="cxxexe">
     <sources>xsim.cpp</sources>
-    <sources>xsimbase.cpp xsimmain.cpp xsimtrace.cpp libgsnextstate.c libgsprover.c</sources>
+    <sources>xsimbase.cpp xsimmain.cpp xsimtrace.cpp libnextstate.c libprover.c</sources>
     <library>gsparse</library>
     <library>gsrewrite</library>
   </exe>

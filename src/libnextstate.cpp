@@ -1,16 +1,12 @@
-#ifdef __cplusplus
-extern "C" {
-#endif
-
 #include <stdio.h>
 #include <stdlib.h>
 #include <aterm2.h>
 #include "gslowlevel.h"
 #include "gsfunc.h"
 #include "libprint_c.h"
-#include "libgsprover.h"
+#include "libprover.h"
 #include "libgsrewrite.h"
-#include "libgsnextstate.h"
+#include "libnextstate.h"
 
 #define ATAgetFirst(x) ((ATermAppl) ATgetFirst(x))
 #define ATLgetFirst(x) ((ATermList) ATgetFirst(x))
@@ -696,7 +692,3 @@ ATermList gsNextState(ATerm State, gsNextStateCallBack f)
 
 	return states;
 }
-
-#ifdef __cplusplus
-}
-#endif

@@ -12,7 +12,7 @@
 #include "gslowlevel.h"
 #include "gsfunc.h"
 #include "libprint_c.h"
-#include "libgsnextstate.h"
+#include "libnextstate.h"
 #include "libgsrewrite.h"
 
 #define OF_UNKNOWN  0

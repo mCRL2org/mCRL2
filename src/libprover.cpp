@@ -1,14 +1,10 @@
-#ifdef __cplusplus
-extern "C" {
-#endif
-
 #include <stdlib.h>
 #include <aterm2.h>
 #include "gslowlevel.h"
 #include "gsfunc.h"
 #include "libprint_c.h"
 #include "libgsrewrite.h"
-#include "libgsprover.h"
+#include "libprover.h"
 
 #define ATisList(x) (ATgetType(x) == AT_LIST)
 #define ATisAppl(x) (ATgetType(x) == AT_APPL)
@@ -572,7 +568,3 @@ ATermList FindSolutions(ATermList Vars, ATerm Expr, FindSolutionsCallBack f)
 
 	return r;
 }
-
-#ifdef __cplusplus
-}
-#endif

@@ -46,13 +46,13 @@ LPEPP_LDFLAGS      = -lgsrewrite -l$(ATERM) -lm $(LIBDL)
 
 #sim definitions
 SIM_NAME           = sim
-SIM_OBJECTS        = sim.o libgsnextstate.o libgsprover.o libprint_c.o gsfunc.o gslowlevel.o
+SIM_OBJECTS        = sim.o libnextstate.o libprover.o libprint_c.o gsfunc.o gslowlevel.o
 OBJECTS           += $(SIM_OBJECTS)
 SIM_LDFLAGS        = -lgsrewrite -l$(ATERM) -lm $(LIBDL)
 
 #xsim definitions
 XSIM_NAME          = xsim
-XSIM_OBJECTS       = xsim.o xsimbase.o xsimmain.o xsimtrace.o libgsnextstate.o libgsprover.o libprint_cxx.o libprint_c.o gsfunc.o gslowlevel.o
+XSIM_OBJECTS       = xsim.o xsimbase.o xsimmain.o xsimtrace.o libnextstate.o libprover.o libprint_cxx.o libprint_c.o gsfunc.o gslowlevel.o
 ifdef USE_WX
 OBJECTS           += $(XSIM_OBJECTS)
 endif
@@ -116,7 +116,7 @@ LPEREWR_LDFLAGS    = -lgsrewrite -l$(ATERM) -lm $(LIBDL)
 
 #lpe2lts definitions
 LPE2LTS_NAME       = lpe2lts
-LPE2LTS_OBJECTS    = lpe2lts.o libgsnextstate.o libgsprover.o libprint_c.o gsfunc.o gslowlevel.o
+LPE2LTS_OBJECTS    = lpe2lts.o libnextstate.o libprover.o libprint_c.o gsfunc.o gslowlevel.o
 OBJECTS           += $(LPE2LTS_OBJECTS)
 LPE2LTS_LDFLAGS    = -lgsrewrite -lsvc -l$(ATERM) -lm $(LIBDL)
 
@@ -220,7 +220,7 @@ endif
 endif
 
 clean:
-	$(RM) $(EXE_NAMES) $(LIB_NAMES) *.o *.a *.d *.dpp lpe/*.o lpe/*.dpp aterm/*.o aterm/*.a aterm/*.d svc/*.o svc/*.a svc/*.d gslexer.c gsparser.c gsparser.h gsparser.output lpeinfo lpeparelm lpeconstelm config.status config.log *~ core core.*
+	$(RM) $(EXE_NAMES) $(LIB_NAMES) *.o *.a *.d *.dpp lpe/*.o lpe/*.dpp aterm/*.o aterm/*.a aterm/*.d svc/*.o svc/*.a svc/*.d svc/*.dpp gslexer.c gsparser.c gsparser.h gsparser.output lpeinfo lpeparelm lpeconstelm config.status config.log *~ core core.*
 
 distclean: clean
 	$(RM) -r autom4te.cache Makefile config gsrewr_innerc_aux.h
@@ -319,7 +319,7 @@ $(LIN_NAME) : $(LIN_OBJECTS) $(ATERM_DEP) $(LIBREWR_NAME)
 %.c : %.l
 	$(LEX) $(LFLAGS) -o$@ $<
 
-ifeq ($(findstring distclean,$(MAKEFLAGS)),)
+ifeq (,$(findstring $(MAKECMDGOALS),clean distclean))
 Makefile: Makefile.in config.in
 	@echo "You must (re)configure your source tree first."
 	@exit 1

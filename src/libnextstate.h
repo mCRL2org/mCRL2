@@ -1,7 +1,3 @@
-#ifdef __cplusplus
-extern "C" {
-#endif
-
 #include <aterm2.h>
 #include "libgsrewrite.h"
 
@@ -19,7 +15,3 @@ void gsNextStateFinalise();
 int gsGetStateLength();
 ATermAppl gsGetStateArgument(ATerm State, int index);
 ATermAppl gsMakeStateVector(ATerm State);
-
-#ifdef __cplusplus
-}
-#endif

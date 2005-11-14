@@ -10,7 +10,7 @@
 #include "gslowlevel.h"
 #include "gsfunc.h"
 #include "libprint_c.h"
-#include "libgsnextstate.h"
+#include "libnextstate.h"
 #include "libgsrewrite.h"
 
 static void gsPrintState(ATerm state)

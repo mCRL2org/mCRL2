@@ -15,7 +15,7 @@
 #include "gsfunc.h"
 #include "libprint_types.h"
 #include "libprint_cxx.h"
-#include "libgsnextstate.h"
+#include "libnextstate.h"
 
 using namespace std;
 

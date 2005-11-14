@@ -90,15 +90,15 @@ GSINSTANTIATE_CFLAGS = /MD /DWIN32 /Iaterm /Int /I"C:\Program Files\Microsoft \
 	$(CPPFLAGS) $(CFLAGS)
 GSINSTANTIATE_OBJECTS =  \
 	gsinstantiate_gsinstantiate.obj \
-	gsinstantiate_libgsnextstate.obj \
-	gsinstantiate_libgsprover.obj
+	gsinstantiate_libnextstate.obj \
+	gsinstantiate_libprover.obj
 SIM_CFLAGS = /MD /DWIN32 /Iaterm /Int /I"C:\Program Files\Microsoft Visual C++ \
 	Toolkit 2003\include" /I"C:\Program Files\Microsoft SDK\include" /TP \
 	$(CPPFLAGS) $(CFLAGS)
 SIM_OBJECTS =  \
 	sim_sim.obj \
-	sim_libgsnextstate.obj \
-	sim_libgsprover.obj
+	sim_libnextstate.obj \
+	sim_libprover.obj
 XSIM_CFLAGS = /MD /DWIN32 /Iaterm /Int /I"C:\Program Files\Microsoft Visual C++ \
 	Toolkit 2003\include" /I"C:\Program Files\Microsoft SDK\include" /TP /DNOPCH \
 	/GR /EHsc $(CPPFLAGS) $(CFLAGS)
@@ -112,8 +112,8 @@ XSIM_OBJECTS =  \
 	xsim_xsimbase.obj \
 	xsim_xsimmain.obj \
 	xsim_xsimtrace.obj \
-	xsim_libgsnextstate.obj \
-	xsim_libgsprover.obj
+	xsim_libnextstate.obj \
+	xsim_libprover.obj
 
 ### Conditionally set variables: ###
 
@@ -282,19 +282,19 @@ gsrewr_gsrewr.obj: .\gsrewr.c
 gsinstantiate_gsinstantiate.obj: .\gsinstantiate.c
 	$(CC) /c /nologo /TC /Fo$@ $(GSINSTANTIATE_CFLAGS) $**
 
-gsinstantiate_libgsnextstate.obj: .\libgsnextstate.c
+gsinstantiate_libnextstate.obj: .\libnextstate.c
 	$(CC) /c /nologo /TC /Fo$@ $(GSINSTANTIATE_CFLAGS) $**
 
-gsinstantiate_libgsprover.obj: .\libgsprover.c
+gsinstantiate_libprover.obj: .\libprover.c
 	$(CC) /c /nologo /TC /Fo$@ $(GSINSTANTIATE_CFLAGS) $**
 
 sim_sim.obj: .\sim.c
 	$(CC) /c /nologo /TC /Fo$@ $(SIM_CFLAGS) $**
 
-sim_libgsnextstate.obj: .\libgsnextstate.c
+sim_libnextstate.obj: .\libnextstate.c
 	$(CC) /c /nologo /TC /Fo$@ $(SIM_CFLAGS) $**
 
-sim_libgsprover.obj: .\libgsprover.c
+sim_libprover.obj: .\libprover.c
 	$(CC) /c /nologo /TC /Fo$@ $(SIM_CFLAGS) $**
 
 xsim_xsim.obj: .\xsim.cpp
@@ -309,9 +309,9 @@ xsim_xsimmain.obj: .\xsimmain.cpp
 xsim_xsimtrace.obj: .\xsimtrace.cpp
 	$(CXX) /c /nologo /TP /Fo$@ $(XSIM_CXXFLAGS) $**
 
-xsim_libgsnextstate.obj: .\libgsnextstate.c
+xsim_libnextstate.obj: .\libnextstate.c
 	$(CC) /c /nologo /TC /Fo$@ $(XSIM_CFLAGS) $**
 
-xsim_libgsprover.obj: .\libgsprover.c
+xsim_libprover.obj: .\libprover.c
 	$(CC) /c /nologo /TC /Fo$@ $(XSIM_CFLAGS) $**
 

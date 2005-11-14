@@ -20,7 +20,7 @@
 #include "xsimmain.h"
 #include "gslowlevel.h"
 #include "gsfunc.h"
-#include "libgsnextstate.h"
+#include "libnextstate.h"
 #include "libgsrewrite.h"
 #include "libprint_types.h"
 #include "libprint_cxx.h"
