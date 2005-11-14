@@ -15,7 +15,7 @@ class RewriterCompilingInnermost: public Rewriter
 		ATerm toRewriteFormat(ATermAppl Term);
 		ATermAppl fromRewriteFormat(ATerm Term);
 		ATerm rewriteInternal(ATerm Term);
-		ATermList rewriteInternalList(ATermList Term);
+		ATermList rewriteInternalList(ATermList Terms);
 
 		void setSubstitution(ATermAppl Var, ATerm Expr);
 		ATerm getSubstitution(ATermAppl Var);

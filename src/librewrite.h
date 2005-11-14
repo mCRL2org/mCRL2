@@ -11,12 +11,12 @@ class Rewriter
 		virtual ~Rewriter();
 
 		virtual ATermAppl rewrite(ATermAppl Term) = 0;
-		virtual ATermList rewriteList(ATermList Term);
+		virtual ATermList rewriteList(ATermList Terms);
 
 		virtual ATerm toRewriteFormat(ATermAppl Term);
 		virtual ATermAppl fromRewriteFormat(ATerm Term);
 		virtual ATerm rewriteInternal(ATerm Term);
-		virtual ATermList rewriteInternalList(ATermList Term);
+		virtual ATermList rewriteInternalList(ATermList Terms);
 
 		virtual bool addRewriteRule(ATermAppl Rule);
 		virtual bool removeRewriteRule(ATermAppl Rule);
