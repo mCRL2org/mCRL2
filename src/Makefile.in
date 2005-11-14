@@ -20,6 +20,12 @@ LIBSVC_NAME        = svc/libsvc.a
 LIBSVC_OBJECTS     = svc/blocklist.o svc/code.o svc/compress.o svc/hashtable.o svc/huffman.o svc/lz.o svc/ptable.o svc/svc1.o svc/svc2.o 
 OBJECTS           += $(LIBSVC_OBJECTS)
 
+#svc2fsm definitions
+SVC2FSM_NAME       = svc/svc2fsm
+SVC2FSM_OBJECTS    = svc/svc2fsm.o libprint_c.o libprint_cxx.o gsfunc.o gslowlevel.o
+OBJECTS           += $(SVC2FSM_OBJECTS)
+SVC2FSM_LDFLAGS    = -lgsrewrite -lsvc -l$(ATERM) -lm $(LIBDL)
+
 #rewrite library definitions
 LIBREWR_NAME       = libgsrewrite.a
 LIBREWR_OBJECTS    = libgsrewrite.o librewrite.o rewr_inner.o rewr_jitty.o rewr_innerc.o
@@ -255,6 +261,8 @@ $(XSIMTRACE_NAME):
 	@echo cannot make target $@ because the wxWidgets library cannot be used
 endif
 
+svc/%: CPPFLAGS += -I./ -Iaterm
+
 # Targets that depend on any of the boost libraries
 ifdef USE_BOOST
 lpe/lpe%: CPPFLAGS += $(BOOST_HEADERS) -I./ -Iaterm
@@ -276,6 +284,9 @@ $(LPECONSTELM_NAME) :
 $(LPEPARELM_NAME) :
 	@echo "Missing Boost libraries so skipping build of lpeparelm."
 endif
+
+$(SVC2FSM_NAME) : $(SVC2FSM_OBJECTS) $(ATERM_DEP) $(LIBSVC_NAME) $(LIBREWR_NAME)
+	$(CXX) -o $@ $(SVC2FSM_OBJECTS) $(LDFLAGS) $(SVC2FSM_LDFLAGS)
 
 $(LPEREWR_NAME) : $(LPEREWR_OBJECTS) $(ATERM_DEP) $(LIBREWR_NAME)
 	$(CXX) -o $@ $(LPEREWR_OBJECTS) $(LDFLAGS) $(LPEREWR_LDFLAGS)

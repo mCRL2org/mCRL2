@@ -426,6 +426,7 @@ ATerm gsNextStateInit(ATermAppl Spec, bool AllowFreeVars, int StateFormat, Rewri
 	}
 
 	l = pars;
+	free_vars = ATLgetArgument(ATAgetArgument(Spec,6),0);
 	m = ATLgetArgument(ATAgetArgument(Spec,6),1);
 
 	for (int i=0; !ATisEmpty(l); l=ATgetNext(l), i++)
