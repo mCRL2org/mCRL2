@@ -1,0 +1,130 @@
+<?xml version="1.0"?>
+
+<!DOCTYPE refentry PUBLIC "-//OASIS//DTD DocBook XML V4.2//EN" "http://www.oasis-open.org/docbook/xml/4.2/docbookx.dtd"[
+<!ENTITY % param SYSTEM "param.xml">
+%param;
+<!ENTITY lpeparelm "<function>lpeparelm</function>">
+<!ENTITY infile "<parameter>INFILE</parameter>">
+<!ENTITY outfile "<parameter>OUTFILE</parameter>">
+<!ENTITY opt_h "<option>-h</option>">
+<!ENTITY opt_help "<option>--help</option>">
+<!ENTITY opt_version "<option>--version</option>">
+<!ENTITY opt_m "<option>-m</option>">
+<!ENTITY opt_monitor "<option>--monitor</option>">
+
+<!ENTITY stdin "<option>STDIN</option>">
+<!ENTITY stdout "<option>STDOUT</option>">
+
+]>
+
+<refentry id="lpeparelm">
+
+<refmeta>
+<refentrytitle>lpeparelm</refentrytitle>
+<manvolnum>1</manvolnum>
+</refmeta>
+
+<refnamediv>
+<refname>lpeparelm</refname>
+<refpurpose> lpeparelm is a filter which removes inert parameters in a 
+linear process equation.</refpurpose>
+</refnamediv>
+
+<refsynopsisdiv>
+  <cmdsynopsis>
+    <command>&lpeparelm;</command>
+    <arg choice="plain">[[&opt_h; | &opt_help;] | &opt_version; |[ &opt_m; | &opt_monitor;]]</arg>
+    <arg choice="plain">[[&infile;] &outfile;]</arg>
+  </cmdsynopsis>
+</refsynopsisdiv>
+
+<refsect1>
+  <title>Description</title>
+  <para>
+   This tools removes parameters, who will have no influence on condition, action 
+   or time arguments of an LPE. Removing these parameters form the LPE can lead
+   to a reduction when generating a state space of an LPE.
+  </para>
+</refsect1>
+
+<refsect1>
+  <title>File</title>
+  <para>
+    <variablelist>
+      <varlistentry>
+        <term>no files</term>
+          <listitem>
+            <para> &lpeparelm; read from &stdin;, and writes an LPE to &stdout;.
+            </para>
+          </listitem>
+      </varlistentry>
+      
+      <varlistentry>
+        <term>&infile;</term>
+          <listitem>
+            <para> &lpeparelm; read from file &infile;, and writes an LPE to &stdout;.
+            </para>
+          </listitem>
+      </varlistentry>
+  
+  
+      <varlistentry>
+        <term>&infile; &outfile;</term>
+          <listitem>
+            <para> &lpeparelm; read from file &infile;, and writes an LPE to file &outfile;.
+            </para>
+          </listitem>
+      </varlistentry>
+    </variablelist>
+  </para>
+  
+  <para>
+    Note that &lpeparelm; reads and writes in LPE-format.
+  </para>
+
+</refsect1>
+
+<refsect1>
+  <title>Options</title>
+  <para>
+    <variablelist>
+
+      <varlistentry>
+        <term>&opt_h;</term>
+        <term>&opt_help;</term>
+          <listitem>
+            <para>Displays help information and exits.</para>
+          </listitem>
+      </varlistentry>
+
+      <varlistentry>
+        <term>&opt_version;</term>
+        <listitem>
+          <para>Displays version information and exits.</para>
+        </listitem>
+      </varlistentry>
+      
+      <varlistentry>
+        <term>&opt_m;</term>
+        <term>&opt_monitor;</term>
+        <listitem>
+          <para>
+          Displays progress information during the run of the program.
+          If a outputfile is given, &lpeparelm; writes the LPE to a that
+          given file. If no outputfile is given it will only display process
+          information.
+          </para>
+        </listitem>
+      </varlistentry>
+      
+    </variablelist>
+  </para>
+</refsect1>
+
+<refsect1>
+<title>Author</title>
+<para>Written by Frank Stappers. Please send all complaints, comments and bug
+fixes to <email>bug@mcrl2.org</email>.</para>
+</refsect1>
+
+</refentry>

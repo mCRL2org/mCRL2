@@ -10,6 +10,9 @@
 <!ENTITY opt_version "<option>--version</option>">
 <!ENTITY opt_p "<option>-p</option>">
 <!ENTITY opt_pars "<option>--pars</option>">
+
+<!ENTITY stdin "<option>STDIN</option>">
+<!ENTITY stdout "<option>STDOUT</option>">
 ]>
 
 <refentry id="lpeinfo">
@@ -51,6 +54,34 @@
       </listitem>
     </itemizedlist>
   </para>
+</refsect1>
+
+<refsect1>
+  <title>File</title>
+  <para>
+    <variablelist>
+      <varlistentry>
+        <term> </term>
+          <listitem>
+            <para> &lpeinfo; read from &stdin;, and displays information to &stdout;.
+            </para>
+          </listitem>
+      </varlistentry>
+      
+      <varlistentry>
+        <term>&infile;</term>
+          <listitem>
+            <para> &lpeinfo; read from file &infile; and displays information to &stdout;.
+            </para>
+          </listitem>
+      </varlistentry>
+    </variablelist>
+  </para>
+  
+  <para>
+    Note that &lpeinfo; reads LPE-format.
+  </para>
+
 </refsect1>
 
 <refsect1>

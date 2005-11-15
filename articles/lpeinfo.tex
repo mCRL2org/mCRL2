@@ -1,0 +1,100 @@
+\documentclass[a4paper,10pt]{article}
+\usepackage{textcomp,amsmath,amssymb,amsthm,stmaryrd}
+\usepackage{geometry}
+\usepackage{mymath,mythm}
+
+\theoremstyle{plain}
+\newtheorem{thmfs}{Theorem}[section]
+\theoremstyle{definition}
+\newtheorem{tcase}[thmfs]{Test case}
+
+\newcommand{\mcrl}{mCRL2}
+\newcommand{\lpe}{linear process equation}
+\newcommand{\tool}{\textit{lpeinfo}}
+\newcommand{\ti}{\textit}
+\newcommand{\tb}{\textbf}
+
+\newcommand{\ovr}{\overrightarrow}
+
+\newcommand{\pp}{process parameter}
+\newcommand{\pps}{process parameters}
+\newcommand{\framework}{\textit{LPE framework} \cite{LPEframework}}
+
+\newcommand{\bisim}{\frac{\leftrightarrow}{}}
+
+\newcommand{\tab}{\hspace*{5.mm} \= \hspace*{5.mm} \= \hspace*{5.mm} \= \hspace*{5.mm} \= \hspace*{5.mm} \= \hspace*{5.mm}  \= \hspace*{5.mm}  \= \hspace*{5.mm}  \= \hspace*{5.mm} \= \hspace*{5.mm} \= \hspace*{5.mm}  \= \hspace*{5.mm}  \= \hspace*{5.mm}\kill}
+
+\font \aap cmmi10        
+\newcommand{\at}[1]{\mbox{\aap ,} #1}
+
+%opening
+\title{lpeinfo\\DRAFT}
+\author{F.P.M.Stappers}
+
+\begin{document}
+
+\maketitle
+
+\begin{abstract}
+This documentation describes the usage and implementation of the tool \tool\ within the \mcrl\ toolset.
+Basically, \tool\ is a tool which displays information about a \lpe\ (LPE).
+\end{abstract}
+
+\section{Introduction}
+This \tool\ tool is a tool for the \mcrl\ studio. The tool is a program which reads from a \ti{input.lpe}. The file \ti{input.lpe} is
+a file in \ti{.lpe} format \cite{LPEformat}. We make use of the
+\framework\ to read the \ti{input.lpe}. The \tool\ will write
+information about an \lpe\ to stdout. 
+\section{Definitions} \label{sec:def}
+
+The equation below is a \lpe\ in \mcrl : 
+\begin{defn}\label{def}[\lpe\ (LPE)]$\newline$
+%\at werkt niet
+\begin{tabbing}
+\tab
+$X (\ovr{d}:\ovr{D}) = \sum_{i \in I} \sum_{\ovr{e_i}:\ovr{E_i}} \ovr{c_i} ( \ovr{d}, \ovr{e_i} ) \rightarrow $\\
+\> \> $(a_i^0 (\ovr{f_{i,0}}(\ovr{d},\ovr{e_i})) \vert \ldots \vert a_i^{n(i)}(\ovr{f_{i,n(i)}}(\ovr{d},\ovr{e_i}))) \at \text{ } t_i(\ovr{d},\ovr{e_i})  \cdot X(\ovr{g_i}(\ovr{d},\ovr{e_i})) $\\
+\end{tabbing}
+\end{defn}
+\noindent If we speak about an LPE in this article we refer to Definition \ref{def}.  The different states 
+%are $\ovr{d}$ 
+of the process are represented by the data vector parameter $\ovr{d}:\ovr{D}$. $\ovr{D}$ may be a Cartesian product of $n$ data types, meaning that $\ovr{d}$ may consist of a tuple $(d_1, \ldots, d_n)$. The LPE expresses that in state $\ovr{d}$ it preforms (multi)actions $\rbrace a_i^0, \ldots , a_i^n \rbrace$, carrying data parameters $\ovr{f_{i,0}}(\ovr{d},\ovr{e_i}), \ldots , \ovr{f_{i,n(i)}}(\ovr{d},\ovr{e_i})$ and 
+it can reach the new state $\ovr{g_i}(\ovr{d},e_i)$ under the condition that $\ovr{c_i}(\ovr{d},\ovr{e_i})$ is \ti{true}. So for each summand $i$ from $I$ we have at least a function $\ovr{g_i}: \ovr{D} \times \ovr{E} \rightarrow \ovr{D}$ and a function $\ovr{c_i}: \ovr{D} \times \ovr{E} \rightarrow \mathbb{B}$.
+Data parameters $\ovr{e_i} : \ovr{E_i}$ are sum variables. These variables are used to let a read or send action range over a data domain. 
+
+\noindent For an more detailed explanation of \lpe s  we refer to \cite{LPE_info}.
+%\end{defn}
+
+\section{Definition}\label{Def}
+The \tool\ displays information about an LPE. To retrieve information about an LPE we make use of the \framework .  The \tool\ will display the following information\footnote{If a option is used, other information is displayed}:
+\begin{itemize}
+\item Number of summands.
+\item Number of free variables.
+\item Number of process parameters.
+\item Number of actions.
+\end{itemize}
+
+\section{Usage}
+This section describes the options which can be used.
+\begin{tabbing}
+\tab
+\> \tb{-h} \> \> \tb{--help} \> \> \> Displays help about the \tool .\\
+\> \tb{-v} \> \> \tb{--version} \> \> \> Dispays the version of the \tool .\\
+\>         \> \> \tb{--pars} \> \> \> Prints the \pps\ of an LPE.\\
+\>         \> \>  \tb{--npars} \> \> \> Prints the number of \pps\ of an LPE.\\
+\end{tabbing}
+If no option is given the \tool\ displays the information as described in Section \ref{Def}.
+
+\begin{thebibliography}{99}  \bibitem{LPE_info} auteur\\
+   \textit{article},
+   Extra info.
+  \bibitem{LPEframework} J.W. Wesselink,
+   \textit{http://www.win.tue.nl/~wieger/mcrl2/html/index.html}\\
+   A C++ wrapper for the ATerm library.
+  \bibitem{LPEformat} auteur,
+   \textit{article}
+   Extra info.
+
+\end{thebibliography}
+
+\end{document}

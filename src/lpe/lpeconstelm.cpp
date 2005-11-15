@@ -1,3 +1,17 @@
+// ======================================================================
+//
+// Copyright (c) 2004, 2005 TU/e
+//
+// ----------------------------------------------------------------------
+//
+// file          : lpeconstelm 
+// date          : 15-11-2005
+// version       : 0.5
+//
+// author(s)     : Frank Stappers  <f.p.m.stappers@student.tue.nl>
+//
+// ======================================================================
+
 //C++
 #include <iostream>
 #include <vector>
@@ -26,7 +40,10 @@ using namespace atermpp;
 namespace po = boost::program_options;
 po::variables_map vm;
 
-const string version = "lpeconstelm - version 0.5 ";
+//Constanten
+//Private:
+  #define p_version "lpeconstelm - version 0.5 ";
+//Public:
 
 class ConstelmObj
 {
@@ -50,14 +67,19 @@ private:
   bool                        p_alltrue;
   bool                        p_reachable; 
   string                      p_filenamein;
-  
   specification               p_spec;
-
+  
+  // Rewrites an ATerm to a normal form
+  //
+  // pre : input is an AtermAppl
+  // post: result is an ATermAppl in normal form
   inline ATermAppl rewrite(ATermAppl t)
   { 
     return gsRewriteTerm(t);
   }
 
+  // Subsitutes a vectorlist of data assignements to a ATermAppl
+  //
   inline ATermAppl p_substitute(ATermAppl t, vector< data_assignment > &y )
   { 
     for(vector< data_assignment >::iterator i = y.begin() ; i != y.end() ; i++){
@@ -69,38 +91,40 @@ private:
     }
     return result;
   }
-
+  
+  // calculates a nextstate given the current 
+  // stores the next state information in p_nextState 
+  // 
   inline void calculateNextState(data_assignment_list assignments)
   {
     for(vector< data_assignment >::iterator i = p_currentState.begin(); i != p_currentState.end(); i++ ){
       int index = p_lookupIndex[i->lhs()];
       if (p_V.find(index) == p_V.end()){
-/*      p_nextState.at(index) = 
-           data_assignment( i->lhs(), 
-                            rewrite(i->lhs().to_expr().substitute(assignments.begin(), assignments.end()), p_currentState)
-                          );
-*/
-data_expression tmp = i->lhs().to_expr(); 
-for (data_assignment_list::iterator j = assignments.begin(); j != assignments.end() ; j++){
-  if (j->lhs() == i->lhs()){
-    tmp = j->rhs();
-    break;
-  }
-}
-p_nextState.at(index) = data_assignment(i->lhs(), p_substitute(tmp, p_currentState));
+        data_expression tmp = i->lhs().to_expr(); 
+        for (data_assignment_list::iterator j = assignments.begin(); j != assignments.end() ; j++){
+          if (j->lhs() == i->lhs()){
+            tmp = j->rhs();
+            break;
+          }
+        }
+        p_nextState.at(index) = data_assignment(i->lhs(), p_substitute(tmp, p_currentState));
       } else {
         p_nextState.at(index) = *i;
       }    
     }
   }  
-    
-
   
+  // returns if a expression occurs in the list of free variables
+  //  
   inline bool inFreeVarList(data_expression dexpr)
   {
     return (p_freeVarSet.find(dexpr) != p_freeVarSet.end());
   }
-  
+
+  // Creates an unique expression:
+  // these date_expressions are used to model that a process parameter has a 
+  // value which is not constant
+  //
   inline data_assignment newExpression(data_assignment ass)
   {
     char buffer [99];
@@ -110,56 +134,54 @@ p_nextState.at(index) = data_assignment(i->lhs(), p_substitute(tmp, p_currentSta
     return a;
   }
   
+  // returns if two data_expressions are equal
+  //
   inline bool compare(data_expression x, data_expression y)
   {
     return (x==y);
   }
   
+  // returns if the given data_expression is false
+  //  
   inline bool conditionTest(data_expression x)
   {
-   //cout << endl <<" cd " << data_expression(rewrite(x.substitute(p_currentState.begin(), p_currentState.end()))).pp() ;
-   //if (data_expression(rewrite(x, p_currentState)).is_false())
-   //return (!data_expression(p_substitute(x, p_currentState)).is_false());
-//
-//   cout << "\033[33m " << x.pp() << endl;
-//   cout << "\033[30m " << data_expression(rewrite(data_expression(p_substitute(x, p_currentState)))).pp() << endl;
-//   cout << "\033[0m";
-
-   return (!(data_expression(rewrite(data_expression(p_substitute(x, p_currentState)))).is_false()));
-/*     {
-       return false;
-     };
-   return true;*/
+    if (p_alltrue){return true;};
+    //----------          Debug  
+    //    cout << "\033[33m " << x.pp() << endl;
+    //    cout << "\033[30m " << data_expression(rewrite(data_expression(p_substitute(x, p_currentState)))).pp() << endl;
+    //    cout << "\033[0m";
+    //----------          Debug
+    return (!(data_expression(rewrite(data_expression(p_substitute(x, p_currentState)))).is_false()));
   }
 
+  // returns if the currentState and NextState differ
+  //
   inline bool cmpCurrToNext()
   {
-
     bool differs = false;
     for(vector< data_assignment>::iterator i= p_currentState.begin(); i != p_currentState.end() ;i++){
       int index = p_lookupIndex[i->lhs()]; 
-      if (p_V.find(index) == p_V.end()) { //possible constant
+      if (p_V.find(index) == p_V.end()) { 
         if (inFreeVarList(i->rhs())) { 
           if (p_variableList.find(p_nextState.at(index).rhs()) != p_variableList.end()){
             p_V.insert(p_lookupIndex[i->lhs()]); 
-//----------          Debug
-//            cout << "\033[34m OLD:    "<< i->pp() << endl;
-//            cout << "\033[32m NEW:    "<< p_nextState.at(index).pp() << endl;
-//            cout << "\033[0m";
-//----------          Debug
+            //----------          Debug
+            //            cout << "\033[34m OLD:    "<< i->pp() << endl;
+            //            cout << "\033[32m NEW:    "<< p_nextState.at(index).pp() << endl;
+            //            cout << "\033[0m";
+            //----------          Debug
           };
           p_newCurrentState.at(index) = p_nextState.at(index) ;
           p_currentState.at(index) = p_nextState.at(index);  
         } else {
           if (!inFreeVarList( p_nextState.at(index).rhs() )){
              if (!compare(i->rhs(), p_nextState.at(index).rhs())){
-//----------          Debug
-//
-//                cout << "\033[34m OLD:    "<< i->pp() << endl;
-//                cout << "\033[32m NEW:    "<< p_nextState.at(index).pp() << endl;
-//                cout << "\033[0m";
-//----------          Debug
-
+                //----------          Debug
+                //
+                //                cout << "\033[34m OLD:    "<< i->pp() << endl;
+                //                cout << "\033[32m NEW:    "<< p_nextState.at(index).pp() << endl;
+                //                cout << "\033[0m";
+                //----------          Debug
                 p_newCurrentState.at(index) = newExpression(*i) ;
                 p_V.insert(index);
                 p_variableList.insert(p_newCurrentState.at(index).rhs());
@@ -172,7 +194,9 @@ p_nextState.at(index) = data_assignment(i->lhs(), p_substitute(tmp, p_currentSta
     }
     return !differs;
   }
-
+  
+  // template for changing a vector into a list
+  //
   template <typename Term>
   inline
   term_list<Term> vectorToList(vector<Term> y)
@@ -185,6 +209,8 @@ p_nextState.at(index) = data_assignment(i->lhs(), p_substitute(tmp, p_currentSta
     return reverse(result); 
   } 
 
+  // template for changing a set into a list
+  //  
   template <typename Term>
   inline
   term_list<Term> setToList(set<Term> y)
@@ -197,10 +223,9 @@ p_nextState.at(index) = data_assignment(i->lhs(), p_substitute(tmp, p_currentSta
     return reverse(result); 
   } 
 
-
-//---------------------------------------------------------------
-//---------------------   Debug begin  --------------------------
-//---------------------------------------------------------------
+  //---------------------------------------------------------------
+  //---------------------   Debug begin  --------------------------
+  //---------------------------------------------------------------
   inline void printNextState()
   {
     for(vector< data_assignment >::iterator i = p_nextState.begin(); i != p_nextState.end() ; i++ ){
@@ -228,12 +253,11 @@ p_nextState.at(index) = data_assignment(i->lhs(), p_substitute(tmp, p_currentSta
   void inline printState()
   {
     for(set< int >::iterator i = p_S.begin(); i != p_S.end() ; i++ ){
-      cout << "  [" << p_currentState[*i].pp() << "]" << endl;
+      cout << "   " << p_currentState[*i].pp() << endl;
       
     }
     cout << endl;
   }
-  
   
   void inline printCurrentState()
   {
@@ -243,18 +267,21 @@ p_nextState.at(index) = data_assignment(i->lhs(), p_substitute(tmp, p_currentSta
     }
     cout << endl;
   }
-  
-//---------------------------------------------------------------
-//---------------------   Debug end  --------------------------
-//---------------------------------------------------------------
+  //---------------------------------------------------------------
+  //---------------------   Debug end  --------------------------
+  //---------------------------------------------------------------
 
 public:
-
-void inline outputConstelm()
+  
+  // Writes an LPE to a file or sdtout
+  // Substituting occurences of constant parameters with their constant value
+  // and removing the constant process parameters from the list of process. 
+  // Constant parameters (stored in p_S)
+  //
+  void inline output()
   {
     LPE lpe = p_spec.lpe();
     summand_list rebuild_summandlist;
-    //rebuild_summandlist = lpe.summands();
 
     //Remove the summands that are never visited
     //
@@ -272,7 +299,6 @@ void inline outputConstelm()
     //
     sort_list rebuild_sort = p_spec.sorts();
     // 2B implemented
-
 
     vector< data_assignment > constantPP;
     for(set< int >::iterator i = p_S.begin(); i != p_S.end(); i++){
@@ -308,9 +334,9 @@ void inline outputConstelm()
           rebuild_sum_ass = push_front(rebuild_sum_ass, *k);
         }
 	    }  
+
       //construct new LPE_summand
       //
-
       LPE_summand tmp;
     
       //Rewrite condition
@@ -329,7 +355,6 @@ void inline outputConstelm()
     for(summand_list::iterator i = rebuild_summandlist_no_cp.begin() ; i != rebuild_summandlist_no_cp.end() ; i++){
       rebuild_summandlist = push_front(rebuild_summandlist, LPE_summand(p_substitute(*i, constantPP ))); 
     }
-    //rebuild_summandlist = rewrite((ATermList) reverse(rebuild_summandlist_no_cp), constantPP);
   
     //construct new specfication
     //
@@ -375,13 +400,17 @@ void inline outputConstelm()
     } else {
       rebuild_spec.save(p_outputfile);
     }
-}
+  }
 
+  // Set output file
+  //
   void inline setSaveFile(string x)
-{
-  p_outputfile = x;
-}
+  {
+    p_outputfile = x;
+  }
 
+  // Print the set of constant process parameters
+  //  
   void inline printSet()
   {
     cout << "Constant indices: ";
@@ -397,12 +426,23 @@ void inline outputConstelm()
     cout << endl;
   }
   
-  void inline loadFile(string filename)
+  // Loads an LPE from file
+  // returns true if succeeds
+  //  
+  bool inline loadFile(string filename)
   {
     p_filenamein = filename;
-    p_spec.load(p_filenamein);   
+    if (!p_spec.load(p_filenamein))
+    {
+      cerr << "error: could not read input file '" << filename << "'" << endl;
+      return false;
+    } 
+    return true;
   }
-
+  
+  // Reads an LPE from stdin
+  // returns true if succeeds
+  //  
   bool inline readStream()
   {
     ATermAppl p_spec = (ATermAppl) ATreadFromFile(stdin);
@@ -417,37 +457,55 @@ void inline outputConstelm()
     return true;
   }
 
+  // Writes file to stdout
+  //
   void writeStream(specification newSpec)
   {
     assert(gsIsSpecV1((ATermAppl) newSpec));
     ATwriteToBinaryFile(aterm(newSpec) , stdout);
   }
 
+  // Sets verbose option
+  // Note: Has to be set
+  //
   void inline setVerbose(bool b)
   {
     p_verbose = b;
   }
   
+  // Sets no singleton option
+  // Note: Has to be set
+  //  
   void inline setNoSingleton(bool b)
   {
     p_nosingleton = b;
   }
-  
+
+  // Sets all conditions to true
+  // Note: Has to be set
+  //  
   void inline setAllTrue(bool b)
   {
     p_alltrue = b;
   }
   
+  // Sets the option if not inspected summands have to removed 
+  // Note: Has to be set
+  //  
   void inline setReachable(bool b)
   {
     p_reachable = b;
   }
   
+  // Prints the data_variable which are constant
+  //  
   void printSetVar()
   {
     printState();
   }  
-
+  
+  // The constelm filter
+  //
   void filter()
   {
 
@@ -499,21 +557,20 @@ void inline outputConstelm()
             cout << "Summand: "<< summandnr++ << endl;
           }
           p_visitedSummands.insert(*currentSummand); 
-          //printCurrentState();
+          //----------          Debug
+          //          printCurrentState();
           calculateNextState(currentSummand->assignments());
-          //printCurrentState();
+          //----------          Debug
+          //          printCurrentState();
           same = cmpCurrToNext() && same ;  
           if (!same) {break;}                                           //Break reduces time to complete 
         }
       }
       p_currentState = p_newCurrentState;
     }
-    
     //---------------------------------------------------------------
     //---------------------   Body end   ----------------------------
     //---------------------------------------------------------------
-
-
 
     //---------------------FeeVar aftercheck-------------------------
     //
@@ -539,7 +596,6 @@ void inline outputConstelm()
     }
     //---------------------------------------------------------------
 
-    
     //---------------------------------------------------------------
     // Construct S    
     //
@@ -554,6 +610,13 @@ void inline outputConstelm()
       printSet(); 
       printSetVar();  
     }
+  }
+  
+  // Gets the version of the tool
+  //    
+  string inline getVersion()
+  {
+    return p_version;
   }
 };
 
@@ -573,9 +636,9 @@ int main(int ac, char* av[])
       desc.add_options()
         ("help,h",      "display this help")
         ("version",     "display version information")
-        ("monitor,m",   "display progress information")
+        ("verbose,v",   "display progress information")
         ("nosingleton", "do not remove sorts consisting of a single element")
-        ("nocondition", "do not use conditions during elimination (faster)")
+        ("nocondition", "all summand conditions are set true (faster)")
         ("noreachable", "does not remove summands which are not visited")
       ;
 	
@@ -607,11 +670,11 @@ int main(int ac, char* av[])
     }
         
     if (vm.count("version")) {
-	    cerr << version << endl;
+	    cerr << obj.getVersion() << endl;
 	    return 0;
 	  }
 
-    if (vm.count("monitor")) {
+    if (vm.count("verbose")) {
       obj.setVerbose(true);
 	  } else {
 	    obj.setVerbose(false);
@@ -638,7 +701,8 @@ int main(int ac, char* av[])
     if (vm.count("INFILE")){
       filename = vm["INFILE"].as< vector<string> >();
 	  }
-	  
+
+     	  
 	  if (filename.size() == 0){
 	    if (!obj.readStream()){return 0;}
 	  }
@@ -646,16 +710,17 @@ int main(int ac, char* av[])
     if (filename.size() > 2){
       cerr << "Specify only INPUT and/or OUTPUT file (Too many arguments)."<< endl;
     }
-             
+    
+        
     if((filename.size() <= 2) && (filename.size() != 0)){
-      obj.loadFile(filename[0]);
+      if(!obj.loadFile(filename[0])){return 0;};
     } ; 
     if(filename.size() == 2){
       obj.setSaveFile(filename[1]);
     };
      
     obj.filter();
-    obj.outputConstelm(); 
+    obj.output(); 
     
     gsRewriteFinalise();
 

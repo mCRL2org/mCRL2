@@ -3,7 +3,21 @@
 <!DOCTYPE refentry PUBLIC "-//OASIS//DTD DocBook XML V4.2//EN" "http://www.oasis-open.org/docbook/xml/4.2/docbookx.dtd"[
 <!ENTITY % param SYSTEM "param.xml">
 %param;
-<!-- <!ENTITY x "<type>X</type>"> -->
+<!ENTITY lpeconstelm "<function>lpeconstelm</function>">
+<!ENTITY infile "<parameter>INFILE</parameter>">
+<!ENTITY outfile "<parameter>OUTFILE</parameter>">
+<!ENTITY opt_h "<option>-h</option>">
+<!ENTITY opt_help "<option>--help</option>">
+<!ENTITY opt_version "<option>--version</option>">
+<!ENTITY opt_v "<option>-v</option>">
+<!ENTITY opt_verbose "<option>--verbose</option>">
+<!ENTITY opt_nosingleton "<option>--nosingleton</option>">
+<!ENTITY opt_noreachable "<option>--noreachable</option>">
+<!ENTITY opt_nocondition "<option>--nocondition</option>">
+
+<!ENTITY stdin "<option>STDIN</option>">
+<!ENTITY stdout "<option>STDOUT</option>">
+
 ]>
 
 <refentry id="lpeconstelm">
@@ -14,45 +28,151 @@
 </refmeta>
 
 <refnamediv>
-<refname>librewrite_c</refname>
-<refpurpose> lpeconstelm is a tool which eliminates constant parameters in a linear process equation.</refpurpose>
+<refname>lpeconstelm</refname>
+<refpurpose> lpeconstelm is a filter which removes constant parameters in a 
+linear process equation.</refpurpose>
 </refnamediv>
 
 <refsynopsisdiv>
-<funcsynopsis>
-<funcsynopsisinfo>
-<!-- Needed includes-->
-</funcsynopsisinfo>
-<!--
-<funcprototype>
-  <funcdef>&type; &function;</funcdef>
-  <paramdef>&argument1; &OfType1;</paramdef>
-  <paramdef>&argument2; &OfType2;</paramdef>
-</funcprototype>
--->
-</funcsynopsis>
+  <cmdsynopsis>
+    <command>&lpeconstelm;</command>
+    <arg choice="plain">[[&opt_h; | &opt_help;] | &opt_version; | [&opt_v; | &opt_verbose;] | &opt_nosingleton; | &opt_noreachable; | &opt_nocondition; ]</arg>
+    <arg choice="plain">[[&infile;] &outfile;]</arg>
+  </cmdsynopsis>
 </refsynopsisdiv>
 
 <refsect1>
-<title>Description</title>
-<para>
-<!-- Needed description-->
-</para>
-<!--
-<refsect2>
-<title>sub sections</title>
-<para>
+  <title>Description</title>
+  <para>
+  If it can be determined that a parameter an LPE remains constant throughout 
+  any run of the process, all occurrences of that process parameter are replaced
+  by the initial value and process parameter is removed from the list of process
+  parameters.
+  </para>
+  <para>
+  If the initial value of a process parameter is a free variable and remains a 
+  free variable throughout the run of the process, the process variable is 
+  constant and the process parameter is replaced by the last assigned, 
+  free variable.
+  </para>
+  <para> 
+  If the initial value of a process parameter is a free variable and is only 
+  changed ones to a certain value, the process parameter is constant, and the
+  certain value is used for substitution. If the process parameter changes to
+  various values, the process parameter is marked variable.
+  </para>
+</refsect1>
 
-</para>
-</refsect2>
--->
+<refsect1>
+  <title>File</title>
+  <para>
+    <variablelist>
+      <varlistentry>
+        <term>no files</term>
+          <listitem>
+            <para> &lpeconstelm; read from &stdin;, and writes an LPE to &stdout;.
+            </para>
+          </listitem>
+      </varlistentry>
+      
+      <varlistentry>
+        <term>&infile;</term>
+          <listitem>
+            <para> &lpeconstelm; read from file &infile;, and writes an LPE to &stdout;.
+            </para>
+          </listitem>
+      </varlistentry>
+  
+  
+      <varlistentry>
+        <term>&infile; &outfile;</term>
+          <listitem>
+            <para> &lpeconstelm; read from file &infile;, and writes an LPE to file &outfile;.
+            </para>
+          </listitem>
+      </varlistentry>
+    </variablelist>
+  </para>
+  
+  <para>
+    Note that &lpeconstelm; reads and writes in LPE-format.
+  </para>
+
+</refsect1>
+
+<refsect1>
+  <title>Options</title>
+  <para>
+    <variablelist>
+
+      <varlistentry>
+        <term>&opt_h;</term>
+        <term>&opt_help;</term>
+          <listitem>
+            <para>Displays help information and exits.</para>
+          </listitem>
+      </varlistentry>
+
+      <varlistentry>
+        <term>&opt_version;</term>
+        <listitem>
+          <para>Displays version information and exits.</para>
+        </listitem>
+      </varlistentry>
+      
+      <varlistentry>
+        <term>&opt_v;</term>
+        <term>&opt_verbose;</term>
+        <listitem>
+          <para>
+          Displays progress information during the run of the program.
+          If a &outfile; is given, &lpeconstelm; writes the LPE to a that
+          given file. If no &outfile; is given it will only display process
+          information.
+          </para>
+        </listitem>
+      </varlistentry>
+      
+      <varlistentry>
+        <term>&opt_noreachable;</term>
+        <listitem>
+          <para>
+          &lpeconstelm; will not remove the summands which are not visited.
+          By default, summands which are not visited are removed from the LPE.
+          </para>
+        </listitem>
+      </varlistentry>
+      
+      <varlistentry>
+        <term>&opt_nocondition;</term>
+        <listitem>
+          <para>
+          &lpeconstelm; will not determine if a condition of a summand is false 
+          or not. All conditions are to be true if this option is used. This
+          option may take less time and may find less constant constant process
+          parameters.
+          </para>
+        </listitem>
+      </varlistentry>
+      
+      <varlistentry>
+        <term>&opt_nosingleton;</term>
+        <listitem>
+          <para>
+          &lpeconstelm; will not remove process parameters which have values 
+          from which the sort only contains one element. 
+          </para>
+        </listitem>
+      </varlistentry>
+
+    </variablelist>
+  </para>
 </refsect1>
 
 <refsect1>
 <title>Author</title>
-<para>
-Written by Frank Stappers. Please send all complaints, comments and bug fixes to f.p.m.stappers @at@ student.tue.nl (substitute ' @at@ ' with '@').
-</para>
+<para>Written by Frank Stappers. Please send all complaints, comments and bug
+fixes to <email>bug@mcrl2.org</email>.</para>
 </refsect1>
 
 </refentry>
