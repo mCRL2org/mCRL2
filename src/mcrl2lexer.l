@@ -22,7 +22,7 @@ int LineNr = 1;                  /* line number in source file */
 int ColNr  = 1;                  /* column number in source file */
 void gsProcessString(void);      /* default action to be taken when a string is
                                     scanned */
-void mcrl2yyerror(char *s);      /* display error message (needed by yacc) */
+void mcrl2yyerror(const char *s);/* display error message (needed by yacc) */
 extern "C" int mcrl2yywrap(void);/* action taken after an EOF (needed by yacc) */
 
 %}
@@ -125,7 +125,7 @@ void gsProcessString(void) {
   mcrl2yylval.appl = gsString2ATermAppl(mcrl2yytext);
 }
 
-void mcrl2yyerror(char *s) {
+void mcrl2yyerror(const char *s) {
   int oldColNr = ColNr - mcrl2yyleng;
   if (oldColNr < 0) {
     oldColNr = 0;
