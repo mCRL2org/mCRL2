@@ -14,7 +14,7 @@
 #include "liblowlevel.h"
 #include "libstruct.h"
 #include "libprint_types.h"
-#include "libprint_cxx.h"
+#include "libprint.h"
 #include "libnextstate.h"
 
 using namespace std;

@@ -23,7 +23,7 @@
 #include "libnextstate.h"
 #include "librewrite_c.h"
 #include "libprint_types.h"
-#include "libprint_cxx.h"
+#include "libprint.h"
 
 using namespace std;
 

@@ -2,7 +2,7 @@
 #define MCRL2_PRETTY_PRINT_H
 
 #include "atermpp/atermpp.h"
-#include "libprint_cxx.h"
+#include "libprint.h"
 #include <string>
 
 namespace mcrl2 {

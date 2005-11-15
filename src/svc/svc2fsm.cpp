@@ -7,7 +7,7 @@
 #include "svc.h"
 #include "libstruct.h"
 #include "libprint_c.h"
-#include "libprint_cxx.h"
+#include "libprint.h"
 
 char** names=NULL; // array of parameter names
 char** types=NULL; // array of parameter types

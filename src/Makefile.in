@@ -22,12 +22,12 @@ OBJECTS           += $(LIBSVC_OBJECTS)
 
 #svc2fsm definitions
 SVC2FSM_NAME       = svc/svc2fsm
-SVC2FSM_OBJECTS    = svc/svc2fsm.o libprint_c.o libprint_cxx.o libstruct.o liblowlevel.o
+SVC2FSM_OBJECTS    = svc/svc2fsm.o libprint_c.o libprint.o libstruct.o liblowlevel.o
 OBJECTS           += $(SVC2FSM_OBJECTS)
-SVC2FSM_LDFLAGS    = -lrewrite_c -lsvc -l$(ATERM) -lm $(LIBDL)
+SVC2FSM_LDFLAGS    = -lrewrite -lsvc -l$(ATERM) -lm $(LIBDL)
 
 #rewrite library definitions
-LIBREWR_NAME       = librewrite_c.a
+LIBREWR_NAME       = librewrite.a
 LIBREWR_OBJECTS    = librewrite_c.o librewrite.o rewr_inner.o rewr_jitty.o rewr_innerc.o
 OBJECTS           += $(LIBREWR_OBJECTS)
 LIBREWR_LDFLAGS    = -l$(ATERM) -lm
@@ -36,27 +36,27 @@ LIBREWR_LDFLAGS    = -l$(ATERM) -lm
 MCRL22LPE_NAME     = mcrl22lpe
 MCRL22LPE_OBJECTS  = mcrl22lpe.o lin_std.o lin_alt.o mcrl2parser.o mcrl2lexer.o typecheck.o dataimpl.o libprint_c.o libstruct.o liblowlevel.o libalpha.o
 OBJECTS           += $(MCRL22LPE_OBJECTS)
-MCRL22LPE_LDFLAGS  = -lrewrite_c -l$(ATERM) -lm $(LIBDL)
+MCRL22LPE_LDFLAGS  = -lrewrite -l$(ATERM) -lm $(LIBDL)
 
 #lpepp definitions
 LPEPP_NAME         = lpepp
 LPEPP_OBJECTS      = lpepp.o libprint_c.o libstruct.o liblowlevel.o
 OBJECTS           += $(LPEPP_OBJECTS)
-LPEPP_LDFLAGS      = -lrewrite_c -l$(ATERM) -lm $(LIBDL)
+LPEPP_LDFLAGS      = -lrewrite -l$(ATERM) -lm $(LIBDL)
 
 #sim definitions
 SIM_NAME           = sim
 SIM_OBJECTS        = sim.o libnextstate.o libprover.o libprint_c.o libstruct.o liblowlevel.o
 OBJECTS           += $(SIM_OBJECTS)
-SIM_LDFLAGS        = -lrewrite_c -l$(ATERM) -lm $(LIBDL)
+SIM_LDFLAGS        = -lrewrite -l$(ATERM) -lm $(LIBDL)
 
 #xsim definitions
 XSIM_NAME          = xsim
-XSIM_OBJECTS       = xsim.o xsimbase.o xsimmain.o xsimtrace.o libnextstate.o libprover.o libprint_cxx.o libprint_c.o libstruct.o liblowlevel.o
+XSIM_OBJECTS       = xsim.o xsimbase.o xsimmain.o xsimtrace.o libnextstate.o libprover.o libprint.o libprint_c.o libstruct.o liblowlevel.o
 ifdef USE_WX
 OBJECTS           += $(XSIM_OBJECTS)
 endif
-XSIM_LDFLAGS       = -lrewrite_c -l$(ATERM) -lm $($LIBDL) $(WX_LIBS)
+XSIM_LDFLAGS       = -lrewrite -l$(ATERM) -lm $($LIBDL) $(WX_LIBS)
 
 #xsimtrace library definitions
 XSIMTRACE_NAME     = xsimtrace.so
@@ -91,40 +91,40 @@ ifdef USE_BOOST
 
  #lpeinfo definitions
  LPEINFO_NAME        = lpe/lpeinfo
- LPEINFO_OBJECTS     = libprint_cxx.o libstruct.o libprint_c.o liblowlevel.o lpe/lpeinfo.o
+ LPEINFO_OBJECTS     = libprint.o libstruct.o libprint_c.o liblowlevel.o lpe/lpeinfo.o
  OBJECTS            += $(LPEINFO_OBJECTS)
- LPEINFO_LDFLAGS     = -lrewrite_c -l$(ATERM) -lm $(LIBDL)
+ LPEINFO_LDFLAGS     = -lrewrite -l$(ATERM) -lm $(LIBDL)
 
  #lpconstelm definitions
  LPECONSTELM_NAME    = lpe/lpeconstelm
- LPECONSTELM_OBJECTS = libprint_cxx.o libstruct.o libprint_c.o liblowlevel.o lpe/lpeconstelm.o
+ LPECONSTELM_OBJECTS = libprint.o libstruct.o libprint_c.o liblowlevel.o lpe/lpeconstelm.o
  OBJECTS            += $(LPECONSTELM_OBJECTS)
- LPECONSTELM_LDFLAGS = -lrewrite_c -l$(ATERM) -lm $(LIBDL)
+ LPECONSTELM_LDFLAGS = -lrewrite -l$(ATERM) -lm $(LIBDL)
 
  #lpeparelm definitions
  LPEPARELM_NAME    = lpe/lpeparelm
- LPEPARELM_OBJECTS = libprint_cxx.o libstruct.o libprint_c.o liblowlevel.o lpe/lpeparelm.o
+ LPEPARELM_OBJECTS = libprint.o libstruct.o libprint_c.o liblowlevel.o lpe/lpeparelm.o
  OBJECTS            += $(LPEPARELM_OBJECTS)
- LPEPARELM_LDFLAGS = -lrewrite_c -l$(ATERM) -lm $(LIBDL)
+ LPEPARELM_LDFLAGS = -lrewrite -l$(ATERM) -lm $(LIBDL)
 endif
 
 #lperewr definitions
 LPEREWR_NAME       = lperewr
 LPEREWR_OBJECTS    = lperewr.o libprint_c.o libstruct.o liblowlevel.o
 OBJECTS           += $(LPEREWR_OBJECTS)
-LPEREWR_LDFLAGS    = -lrewrite_c -l$(ATERM) -lm $(LIBDL)
+LPEREWR_LDFLAGS    = -lrewrite -l$(ATERM) -lm $(LIBDL)
 
 #lpe2lts definitions
 LPE2LTS_NAME       = lpe2lts
 LPE2LTS_OBJECTS    = lpe2lts.o libnextstate.o libprover.o libprint_c.o libstruct.o liblowlevel.o
 OBJECTS           += $(LPE2LTS_OBJECTS)
-LPE2LTS_LDFLAGS    = -lrewrite_c -lsvc -l$(ATERM) -lm $(LIBDL)
+LPE2LTS_LDFLAGS    = -lrewrite -lsvc -l$(ATERM) -lm $(LIBDL)
 
 #tbf2lpe definitions
 TBF2LPE_NAME       = tbf2lpe
 TBF2LPE_OBJECTS    = tbf2lpe.o lpetrans.o libprint_c.o libstruct.o liblowlevel.o
 OBJECTS           += $(TBF2LPE_OBJECTS)
-TBF2LPE_LDFLAGS    = -lrewrite_c -l$(ATERM) -lm $(LIBDL)
+TBF2LPE_LDFLAGS    = -lrewrite -l$(ATERM) -lm $(LIBDL)
 
 #pnml2mcrl2 definitions
 PNML2MCRL2_NAME    = pnml2mcrl2
@@ -132,20 +132,20 @@ PNML2MCRL2_OBJECTS = pnml2mcrl2.o typecheck.o libprint_c.o libstruct.o liblowlev
 ifdef USE_LIBXML2
 OBJECTS           += $(PNML2MCRL2_OBJECTS)
 endif
-PNML2MCRL2_LDFLAGS = -lrewrite_c -l$(ATERM) $(LIBXML2_LDFLAGS) $(LIBDL)
+PNML2MCRL2_LDFLAGS = -lrewrite -l$(ATERM) $(LIBXML2_LDFLAGS) $(LIBDL)
 $(PNML2MCRL2_OBJECTS) $(patsubst %.o,%.d,$(PNML2MCRL2_OBJECTS)): CPPFLAGS += $(LIBXML2_CPPFLAGS)
 
 #alpha definitions
 ALPHA_NAME         = alpha
 ALPHA_OBJECTS      = alpha.o libalpha.o mcrl2parser.o mcrl2lexer.o typecheck.o libprint_c.o libstruct.o liblowlevel.o
 OBJECTS           += $(ALPHA_OBJECTS)
-ALPHA_LDFLAGS      = -lrewrite_c -l$(ATERM) -lm $(LIBDL)
+ALPHA_LDFLAGS      = -lrewrite -l$(ATERM) -lm $(LIBDL)
 
 #lin definitions
 LIN_NAME           = lin
 LIN_OBJECTS        = lin.o lin_alt.o mcrl2parser.o mcrl2lexer.o typecheck.o dataimpl.o libprint_c.o libstruct.o liblowlevel.o
 OBJECTS           += $(LIN_OBJECTS)
-LIN_LDFLAGS        = -lrewrite_c -l$(ATERM) -lm $(LIBDL)
+LIN_LDFLAGS        = -lrewrite -l$(ATERM) -lm $(LIBDL)
 
 #Group definitions
 EXE_NAMES          =  $(MCRL22LPE_NAME) $(LPEINFO_NAME) $(LPEPARELM_NAME) $(LPECONSTELM_NAME) $(LPEPP_NAME) $(LPE2LTS_NAME) $(SIM_NAME) $(XSIM_NAME) $(TBF2LPE_NAME) $(PNML2MCRL2_NAME) $(LPEREWR_NAME) $(ALPHA_NAME) $(LIN_NAME) 
