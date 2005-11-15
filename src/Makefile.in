@@ -325,7 +325,8 @@ Makefile: Makefile.in config.in
 	@exit 1
 endif
 
-*.c *.h *.cpp *.hpp *.y *.l aterm/*.* svc/*.* lpe/*.*: Makefile
+# *.cpp is needed for generated code (e.g. by bison)
+*.cpp *.o aterm/*.o svc/*.o lpe/*.o: Makefile
 
 %.d : %.c
 	@echo generating dependencies for $<
