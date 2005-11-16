@@ -41,7 +41,7 @@ class ToolManager {
     bool QueryTools() const;
 
     /* Load tool configuration from the default location */
-    bool Load();
+    bool Load() throw (int);
 
     /* Store tool configuration to the default location */
     bool Store() const;

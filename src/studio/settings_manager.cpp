@@ -4,6 +4,12 @@
 
 #include "settings_manager.h"
 
+#define TOOL_CATALOG_SCHEMA    "tool_catalog.xsd.gz"
+#define PROJECT_STORAGE_SCHEMA "project.xsd.gz"
+
+#define TOOL_CATALOG_NAME      "tool_catalog.xml"
+#define PROJECT_STORAGE_NAME   "project.xml"
+
 /* Compile with the following macros defined:
  *
  *  The following specifies the data directory of the distribution (where xsd files can be found)
@@ -15,35 +21,39 @@
  *   TOOL_DATA
  *
  */
-SettingsManager::SettingsManager(const char* ahome_directory) {
+SettingsManager::SettingsManager(const char* ahome_directory, const char* profile_directory) {
   boost::filesystem::path settings_path(ahome_directory, &boost::filesystem::portable_posix_name);
 
-  settings_path /= boost::filesystem::path(".studio", &boost::filesystem::portable_posix_name);
+  if (profile_directory != "") {
+    settings_path /= boost::filesystem::path(profile_directory, &boost::filesystem::portable_posix_name);
+  }
 
   home_directory     = ahome_directory;
   settings_directory = settings_path.string();
 
-  if (!boost::filesystem::exists(settings_path)) {
-    /* Create directories */
-    boost::filesystem::create_directory(settings_path);
-  }
-  else if (!boost::filesystem::is_directory(settings_path)) {
-    /* Perhaps a fallback mechanism should be put into place here */
-    std::cerr << "Fatal: Cannot write to settings directory.\n";
-  }
-
-  settings_path /= boost::filesystem::path(TOOL_CATALOG_NAME);
-
-  try {
+  if (ahome_directory != "") {
     if (!boost::filesystem::exists(settings_path)) {
-      /* Copy default settings */
-      boost::filesystem::copy_file(boost::filesystem::path(SCHEMA_DATA)/boost::filesystem::path(TOOL_CATALOG_NAME), settings_path);
+      /* Create directories */
+      boost::filesystem::create_directory(settings_path);
     }
-  }
-  catch (...) {
-    std::cerr << "Fatal: Cannot load tool configuration.\n";
-
-    exit(1);
+    else if (!boost::filesystem::is_directory(settings_path)) {
+      /* Perhaps a fallback mechanism should be put into place here */
+      std::cerr << "Fatal: Cannot write to settings directory.\n";
+    }
+ 
+    settings_path /= boost::filesystem::path(TOOL_CATALOG_NAME);
+ 
+    try {
+      if (!boost::filesystem::exists(settings_path)) {
+        /* Copy default settings */
+        boost::filesystem::copy_file(boost::filesystem::path(SCHEMA_DATA)/boost::filesystem::path(TOOL_CATALOG_NAME), settings_path);
+      }
+    }
+    catch (...) {
+      std::cerr << "Fatal: Cannot load tool configuration.\n";
+ 
+      exit(1);
+    }
   }
 
   tool_catalog_name = TOOL_CATALOG_NAME;

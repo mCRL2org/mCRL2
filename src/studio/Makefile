@@ -53,6 +53,7 @@ $(WX_OBJECTS):              CPPFLAGS += $(WX_CPPFLAGS)
 $(PROJECT_MANAGER_OBJECTS): CPPFLAGS += $(PROJECT_MANAGER_CPPFLAGS)
 $(GUI_OBJECTS):             CPPFLAGS += $(GUI_CPPFLAGS)
 settings_manager.o:         CPPFLAGS += -DSCHEMA_DATA=\"$(datadir)\" -DTOOL_DATA=\"$(datadir)\"
+utility/relocator.o:        CPPFLAGS += $(BOOST_CPPFLAGS)
 
 tool_manager_tester: tool_manager_tester.cpp $(TOOL_MANAGER_OBJECTS)
 	$(CXX) $(CXXFLAGS) $(CPPFLAGS) $(LDFLAGS) $(TOOL_MANAGER_OBJECTS) $(WX_LIBRARIES) -o $@ $<
@@ -63,12 +64,15 @@ project_manager_tester: project_manager_tester.cpp $(PROJECT_MANAGER_OBJECTS)
 studio: $(GUI_OBJECTS)
 	$(CXX) $(CXXFLAGS) $(CPPFLAGS) $(LDFLAGS) $(GUI_OBJECTS) $(WX_LIBRARIES) $(BOOST_LIBRARIES) -o $@
 
+utility/relocator: utility/relocator.o settings_manager.o $(TOOL_MANAGER_OBJECTS)
+	$(CXX) $(CXXFLAGS) $(CPPFLAGS) $(LDFLAGS) $(BOOST_LIBRARIES) $^ -o $@
+
 %.o: %.cpp
-	$(CXX) -c $(CXXFLAGS) $(CPPFLAGS) $<
+	$(CXX) -c $(CXXFLAGS) $(CPPFLAGS) $< -o $@
 
 $(OBJECTS) $(TARGETS): Makefile
 
-install: all
+install: all utility/relocator
 	$(INSTALL) -d $(bindir)
 	$(INSTALL) studio $(bindir)
 	$(INSTALL) -d $(datadir)
@@ -77,6 +81,7 @@ install: all
 	$(INSTALL) -m 0644 schemas/studio_project.xsd $(datadir)
 	$(GZIP) $(datadir)/studio_project.xsd
 	$(INSTALL) -m 0644 examples/tool_catalog.xml $(datadir)
+	utility/relocator $(bindir) $(datadir)/tool_catalog.xml
 ifeq ($(HOST_OS),MACOSX)
 	/Developer/Tools/Rez -t APPL -o studio ../sample.r
 	/Developer/Tools/SetFile -a C studio
@@ -91,6 +96,6 @@ ifeq ($(HOST_OS),MACOSX)
 endif
 
 clean:
-	$(RM) *.o $(TARGETS) $(TEST_TARGETS) core
+	$(RM) *.o $(TARGETS) $(TEST_TARGETS) utility/*.o utility/relocator core
 
 distclean: clean

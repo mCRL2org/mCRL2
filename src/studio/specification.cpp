@@ -25,18 +25,21 @@ void Specification::Print(std::ostream& stream) const {
          << "  Name              : " << name << std::endl
          << "  Identifier        : " << identifier << std::endl
          << std::endl;
+
   if (0 < input_objects.size()) {
     stream << "  Command           : "
            << ((tool_configuration == "") ? "#unspecified#" : tool_configuration)
            << std::endl
            << "  Tool identifier   : ";
-  }
 
-  if (tool_identifier == UNSPECIFIED_TOOL) {
-    stream << "#unspecified#";
-  }
-  else {
-    stream << tool_identifier;
+    if (tool_identifier == UNSPECIFIED_TOOL) {
+      stream << "#unspecified#";
+    }
+    else {
+      stream << tool_identifier;
+    }
+
+    stream << std::endl;
   }
 
   if (0 < input_objects.size()) {

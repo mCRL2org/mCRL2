@@ -23,11 +23,13 @@ class ToolMode;
 class Tool {
   friend class ToolManager;
 
-  private:
+  protected:
     std::string name;               /* A, not necessarily unique, name for the tool */
-    std::string identifier;         /* A unique identifier for the tool as: [a-z][a-z0-9_]+ */
     std::string location;           /* A location where the tool can be found (URI to the tool) */
     std::string description;        /* A description for the tool */
+
+  private:
+    std::string identifier;         /* A unique identifier for the tool as: [a-z][a-z0-9_]+ */
 
     /* Modes connected to the input/output descriptor objects */
     std::vector < ToolMode* > modes;

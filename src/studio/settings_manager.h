@@ -3,11 +3,8 @@
 
 #include <string>
 
-#define TOOL_CATALOG_SCHEMA    "tool_catalog.xsd.gz"
-#define PROJECT_STORAGE_SCHEMA "project.xsd.gz"
-
-#define TOOL_CATALOG_NAME      "tool_catalog.xml"
-#define PROJECT_STORAGE_NAME   "project.xml"
+/* The default name of the profile directory */
+#define PROFILE_DIRECTORY      ".studio"
 
 /*
  * Stores the runtime configuration settings for all components.
@@ -22,10 +19,15 @@ class SettingsManager {
 
   public:
 
-    SettingsManager(const char* the_home_directory);
+    SettingsManager(const char* the_home_directory, const char* profile_directory = PROFILE_DIRECTORY);
 
     /* The personal directory for the user */
     void SetHomeDirectory(const std::string);
+
+    /* Set the (basename) of the tool catalog file (name may not contain directory separators) */
+    inline void SetToolCatalogName(const std::string name) {
+      tool_catalog_name = name;
+    }
 
     /* The (base)name of the directory in which settings are stored */
     void SetSettingsDirectory(const std::string);
