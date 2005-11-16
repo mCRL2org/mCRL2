@@ -857,11 +857,11 @@ if test -n "$ac_init_help"; then
 Optional Features:
   --disable-FEATURE       do not include FEATURE (same as --enable-FEATURE=no)
   --enable-FEATURE[=ARG]  include FEATURE [ARG=yes]
-  --enable-debug    compile with debugging information
+  --enable-debug          compile with debugging information
 
-  --enable-profiling compile with profiling support
+  --enable-profiling      compile with profiling support
 
-  --enable-experimentals also build experimental tools
+  --enable-experimentals  also build experimental tools
 
 
 Optional Packages:

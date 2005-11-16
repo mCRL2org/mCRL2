@@ -110,7 +110,7 @@ AC_LANG_POP(C++)
 AC_ARG_ENABLE(
   [debug],
   AC_HELP_STRING(
-    [[[[--enable-debug]]]],
+    [--enable-debug],
     [compile with debugging information]
   )
 )
@@ -130,7 +130,7 @@ fi
 AC_ARG_ENABLE(
   [profiling],
   AC_HELP_STRING(
-    [[[[--enable-profiling]]]],
+    [--enable-profiling],
     [compile with profiling support]
   )
 )
@@ -144,7 +144,7 @@ fi
 AC_ARG_ENABLE(
   [experimental],
   AC_HELP_STRING(
-    [[[[--enable-experimentals]]]],
+    [--enable-experimentals],
     [also build experimental tools]
   )
 )
