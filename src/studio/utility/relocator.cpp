@@ -55,7 +55,7 @@ void processCommandLineOptions (const int argc, char** argv) {
             case 0:
               unsigned int svn_revision;
 
-              sscanf("$Revision$", "$Revision$", &svn_revision);
+              sscanf("$Revision$", "$%*s: %u $", &svn_revision);
 
               printf("%s %s revision %u copyright (c) 2005\n", PROGRAM_NAME, PROGRAM_VERSION, svn_revision);
               exit(0);
