@@ -70,7 +70,7 @@ fi
 # Set flags
 CPPFLAGS=""
 CFLAGS="-std=c99"
-CXXFLAGS=""
+CXXFLAGS="-std=c++98"
 LDFLAGS="-L. -Lsvc"
 
 # Check for C99 standard
@@ -88,6 +88,23 @@ AC_RUN_IFELSE(
   AC_MSG_RESULT([no])
   AC_MSG_ERROR([C99 standard not supported])
 )
+
+AC_MSG_CHECKING([for C++ 98 standard])
+AC_LANG_PUSH(C++)
+AC_RUN_IFELSE(
+  AC_LANG_PROGRAM(,
+    [#if defined __cplusplus && (__cplusplus == 199711L || __cplusplus == 1)
+     return 0;
+     #else
+     return 1;
+     #endif
+    ]
+  ),
+  AC_MSG_RESULT([yes]),
+  AC_MSG_RESULT([no])
+  CXXFLAGS=""
+)
+AC_LANG_POP(C++)
 
 # Check for debug/profiling options
 AC_ARG_ENABLE(
@@ -122,6 +139,19 @@ if test $enable_profiling; then
   CPPFLAGS="-pg $CPPFLAGS"
   LDFLAGS="-pg $LDFLAGS"
 fi
+
+# Check whether dymbol table stripping from binaries is requested
+AC_ARG_ENABLE(
+  [experimental],
+  AC_HELP_STRING(
+    [[[[--enable-experimentals]]]],
+    [also build experimental tools]
+  )
+)
+if test $enable_experimentals; then
+  BUILD_EXPERIMENTALS="1"
+fi
+AC_SUBST([BUILD_EXPERIMENTALS])
 
 # Check for ATerm library and header files
 AC_ARG_WITH(

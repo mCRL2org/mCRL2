@@ -33,6 +33,10 @@ ifeq ($(HOST_OS),MACOSX)
  export MACOSX_DEPLOYMENT_TARGET
 endif
 
+ifeq (@BUILD_EXPERIMENTALS@,1)
+ EXE_NAMES = $(EXPERIMENTALS)
+endif
+
 ARFLAGS            = crs
 INSTALL            = install
 LEX                = @LEX@

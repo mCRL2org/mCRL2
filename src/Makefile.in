@@ -1,8 +1,8 @@
-#Redefine default definitions using autoconf
-include config
-
 #All objects that are used
 OBJECTS            =
+
+#Redefine default definitions using autoconf
+include config
 
 # Objects that require wxWidgets CPPFLAGS to compile
 WX_OBJECTS         = xsim.o xsimbase.o xsimmain.o xsimtrace.o xsimtracedll.o
@@ -148,7 +148,8 @@ OBJECTS           += $(LIN_OBJECTS)
 LIN_LDFLAGS        = -lrewrite -l$(ATERM) -lm $(LIBDL)
 
 #Group definitions
-EXE_NAMES          =  $(MCRL22LPE_NAME) $(LPEINFO_NAME) $(LPEPARELM_NAME) $(LPECONSTELM_NAME) $(LPEPP_NAME) $(LPE2LTS_NAME) $(SIM_NAME) $(XSIM_NAME) $(TBF2LPE_NAME) $(PNML2MCRL2_NAME) $(LPEREWR_NAME) $(ALPHA_NAME) $(LIN_NAME) 
+EXPERIMENTALS      = $(LIN_NAME) $(ALPHA_NAME)
+EXE_NAMES         +=  $(MCRL22LPE_NAME) $(LPEINFO_NAME) $(LPEPARELM_NAME) $(LPECONSTELM_NAME) $(LPEPP_NAME) $(LPE2LTS_NAME) $(SIM_NAME) $(XSIM_NAME) $(TBF2LPE_NAME) $(PNML2MCRL2_NAME) $(LPEREWR_NAME)
 LIB_NAMES          =  $(XSIMTRACE_NAME)
 OBJECTS           := $(sort $(OBJECTS))
 
@@ -162,6 +163,8 @@ all distclean install: boost
 endif
 
 all: $(EXE_NAMES) $(LIB_NAMES)
+
+experimentals: $(EXPERIMENTALS)
 
 # Build/clean/install documentation
 ifdef USE_XMLTO
@@ -220,7 +223,7 @@ endif
 endif
 
 clean:
-	$(RM) $(EXE_NAMES) $(LIB_NAMES) *.o *.a *.d *.dpp lpe/*.o lpe/*.dpp aterm/*.o aterm/*.a aterm/*.d svc/*.o svc/*.a svc/*.d svc/*.dpp mcrl2lexer.cpp mcrl2parser.cpp mcrl2parser.hpp mcrl2parser.output lpeinfo lpeparelm lpeconstelm config.status config.log *~ core core.*
+	$(RM) $(EXE_NAMES) $(EXPERIMENTALS) $(LIB_NAMES) *.o *.a *.d *.dpp lpe/*.o lpe/*.dpp aterm/*.o aterm/*.a aterm/*.d svc/*.o svc/*.a svc/*.d svc/*.dpp mcrl2lexer.cpp mcrl2parser.cpp mcrl2parser.hpp mcrl2parser.output lpeinfo lpeparelm lpeconstelm config.status config.log *~ core core.*
 
 distclean: clean
 	$(RM) -r autom4te.cache Makefile config rewr_innerc_aux.h
