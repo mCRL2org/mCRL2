@@ -5,8 +5,8 @@
 // ----------------------------------------------------------------------
 //
 // file          : lpeconstelm 
-// date          : 15-11-2005
-// version       : 0.5
+// date          : 16-11-2005
+// version       : 0.5.1
 //
 // author(s)     : Frank Stappers  <f.p.m.stappers@student.tue.nl>
 //
@@ -42,7 +42,7 @@ po::variables_map vm;
 
 //Constanten
 //Private:
-  #define p_version "lpeconstelm - version 0.5 ";
+  #define p_version "lpeconstelm - version 0.5.1 ";
 //Public:
 
 class ConstelmObj
@@ -68,6 +68,7 @@ private:
   bool                        p_reachable; 
   string                      p_filenamein;
   specification               p_spec;
+  set< mcrl2::sort >          p_singletonSort;
   
   // Rewrites an ATerm to a normal form
   //
@@ -222,6 +223,57 @@ private:
       }
     return reverse(result); 
   } 
+  
+  // Find all sorts which have a singleton domain
+  //
+  void findSingleton()
+  {
+
+    map< mcrl2::sort, int >     p_countSort;
+    //set< mcrl2::sort > result;
+    for(sort_list::iterator i = p_spec.sorts().begin(); i != p_spec.sorts().end() ; i++){
+      p_countSort[*i] = 0;
+      p_singletonSort.insert(*i);
+    }
+    
+    for(function_list::iterator i= p_spec.constructors().begin() ; i != p_spec.constructors().end() ; i++){
+      p_countSort[i->result_type()]++;
+    }
+
+    unsigned int n = p_singletonSort.size()+1;
+    while (n != p_singletonSort.size()){
+      n = p_singletonSort.size();
+      for(sort_list::iterator i = p_spec.sorts().begin(); i != p_spec.sorts().end() ; i++){
+        int b = 1;
+        //if p_countSort[*i] == 0 then there are sorts declared which are never used!!!!
+        assert(p_countSort[*i] != 0);
+        if (p_countSort[*i] == 1){
+          for(function_list::iterator j = p_spec.constructors().begin() ; j != p_spec.constructors().end() ;j++){
+            if (j->result_type() == *i){
+              for(sort_list::iterator k = j->input_types().begin() ; k != j->input_types().end() ; k++ ){
+                b = max(p_countSort[*k], b);
+              }
+            }
+          }
+        if (b!=1) {p_singletonSort.erase(*i); p_countSort[*i] = b;}        
+        } else {
+          p_singletonSort.erase(*i);
+        }
+        ;    
+      }
+    }
+    //p_singletonSort = result;
+    
+    if (p_verbose){
+      cout << "Sorts which have singleton constructors:"<< endl;
+      for(set<mcrl2::sort>::iterator i = p_singletonSort.begin(); i != p_singletonSort.end(); i++){
+        cout <<"  "<< i->pp() << endl;
+      }
+      if (p_singletonSort.empty()) {
+        cout <<"  []"<< endl;      
+      }
+    }
+  } 
 
   //---------------------------------------------------------------
   //---------------------   Debug begin  --------------------------
@@ -237,7 +289,7 @@ private:
 
   void inline printVar()
   {
-    cout << " Variable indices : ";
+    cout << " Variable indices : {";
     set< int >::iterator i = p_V.begin();
     int j = 0;
     while(i != p_V.end()){
@@ -247,16 +299,18 @@ private:
        }
       j++;
     }
-    cout << endl;
+    cout << "}" << endl;
   }
 
   void inline printState()
   {
     for(set< int >::iterator i = p_S.begin(); i != p_S.end() ; i++ ){
-      cout << "   " << p_currentState[*i].pp() << endl;
-      
+      if (!p_nosingleton){
+        cout << "  " << p_currentState[*i].pp() << endl;
+      } else {
+        cout << "  " << p_currentState[*i].pp() << " :  " << p_currentState[*i].lhs().type().pp()  <<endl;
+      }  
     }
-    cout << endl;
   }
   
   void inline printCurrentState()
@@ -270,9 +324,25 @@ private:
   //---------------------------------------------------------------
   //---------------------   Debug end  --------------------------
   //---------------------------------------------------------------
-
 public:
-  
+
+  // sorts with singleton constructors are removed from p_S
+  // pre:  p_S is calculated && p_initAssignments is set
+  // post: p_S contains the indices without the process parameters which have a singleton constructor
+  void removeSingleton()
+  {
+    sort_list rebuild_sort = p_spec.sorts();
+    findSingleton();
+    for(set< int >::iterator i = p_S.begin(); i != p_S.end(); i++){
+      if (p_singletonSort.find(p_initAssignments[*i].lhs().type())  != p_singletonSort.end()){
+        p_S.erase(*i);
+        if (p_verbose){
+          cout << "  Constant process parameter " << p_initAssignments[*i].lhs().pp() << " will not be subtituted and removed. (--nosingleton) " << endl;
+        }
+      }
+    }
+  }
+
   // Writes an LPE to a file or sdtout
   // Substituting occurences of constant parameters with their constant value
   // and removing the constant process parameters from the list of process. 
@@ -292,13 +362,9 @@ public:
     }
 
     if (p_verbose) {
-      cout << "Number of written summands :"<<  rebuild_summandlist.size() << endl;
+      cout << "Number of summands of old LPE: " << lpe.summands().size() << endl;
+      cout << "Number of summands of new LPE: " <<  rebuild_summandlist.size() << endl;
     }
-
-    //Singleton sort process parameters
-    //
-    sort_list rebuild_sort = p_spec.sorts();
-    // 2B implemented
 
     vector< data_assignment > constantPP;
     for(set< int >::iterator i = p_S.begin(); i != p_S.end(); i++){
@@ -391,7 +457,7 @@ public:
     );
     
     assert(gsIsSpecV1((ATermAppl) rebuild_spec));
-  
+/*  
     if (p_outputfile.size() == 0){
       if(!p_verbose){
         assert(!p_verbose);
@@ -399,9 +465,9 @@ public:
       };
     } else {
       rebuild_spec.save(p_outputfile);
-    }
+    } */
   }
-
+  
   // Set output file
   //
   void inline setSaveFile(string x)
@@ -413,7 +479,7 @@ public:
   //  
   void inline printSet()
   {
-    cout << "Constant indices: ";
+    cout << "Constant indices: { ";
     set< int >::iterator i = p_S.begin();
     int j = 0;
     while(i != p_S.end()){
@@ -423,7 +489,7 @@ public:
        }
       j++;
     }
-    cout << endl;
+    cout << "}"<< endl;
   }
   
   // Loads an LPE from file
@@ -550,11 +616,11 @@ public:
       if (p_verbose){
         cout << "Cycle:" << cycle++ << endl;
       }
-      int summandnr = 0;
+      int summandnr = 1;
       for(summand_list::iterator currentSummand = lpe.summands().begin(); currentSummand != lpe.summands().end() ;currentSummand++ ){
         if ( (p_visitedSummands.find(*currentSummand) != p_visitedSummands.end()) || (conditionTest(currentSummand->condition()))) {
           if(p_verbose){
-            cout << "Summand: "<< summandnr++ << endl;
+            cout << "  Summand: "<< summandnr++ << endl;
           }
           p_visitedSummands.insert(*currentSummand); 
           //----------          Debug
@@ -584,15 +650,19 @@ public:
     // 
     //                                Each _ is a unique FreeVariable
     // The arrow is detected with the FeeVar aftercheck
-    if(p_freeVarSet.size() != 0){
+    if(!p_freeVarSet.empty()){
       if (p_verbose){
-        cout << "Free Variable checkup" << endl;
+        cout << "Free Variable checkup:" << endl;
       }
       for(set< LPE_summand>::iterator i = p_visitedSummands.begin(); i != p_visitedSummands.end() ; i++){
         calculateNextState(i->assignments());
         cmpCurrToNext();
       }
+      int n = p_V.size();
       p_currentState = p_newCurrentState;
+      if (p_verbose){
+        cout << "  Found "<<p_V.size() - n << " fake constant process parameters" <<endl;
+      }      
     }
     //---------------------------------------------------------------
 
@@ -605,6 +675,12 @@ public:
       S.insert(j);
     };
     set_difference(S.begin(), S.end(), p_V.begin(), p_V.end(), inserter(p_S, p_S.begin()));
+    
+    //Singleton sort process parameters
+    //
+    if(p_nosingleton){
+       removeSingleton();
+    }    
     
     if (p_verbose){
       printSet(); 
