@@ -3,7 +3,6 @@
 CXXFLAGS                       = -std=c++98 -O3 -Winline --param max-inline-insns-single=8000 \
 				 --param large-function-growth=5000 --param inline-unit-growth=5000
 
-
 #`-std=c++98' is to strict for the default mingw gcc
 ifeq ($(HOST_OS),MINGW)
  CXXFLAGS                      = -O3
@@ -12,10 +11,10 @@ endif
 ifeq ($(findstring -DNDEBUG,$(CPPFLAGS)),)
  CXXFLAGS                     += -g -Wall
  CPPFLAGS                      =
- PROJECT_MANAGER_CPPFLAGS      = -DTOOL_RUN_SUCCESSFUL #-DPARSER_SCHEMA_VALIDATION 
+ PROJECT_MANAGER_CPPFLAGS      = #-DPARSER_SCHEMA_VALIDATION 
 else
  CPPFLAGS                      = -DNDEBUG
- PROJECT_MANAGER_CPPFLAGS      = -DTOOL_RUN_SUCCESSFUL
+ PROJECT_MANAGER_CPPFLAGS      =
 endif
 
 LDFLAGS                        = $(LIBXML2_LDFLAGS)
@@ -25,13 +24,18 @@ GUI_CPPFLAGS                   = -DDISABLE_TOOLBAR
 LIBXML2_OBJECTS                = xml_text_reader.o project_manager.o tool_manager.o tool.o specification.o \
 				 project_manager_tester tool_manager_tester
 
-WX_OBJECTS                     = studio.o studio_overview.o new_specification.o specification_properties.o resources.o settings_manager.o
+BOOST_OBJECTS                  = specification_properties.o settings_manager.o
+BOOST_CPPFLAGS                 = -I$(BOOST_PREFIX)
+BOOST_LIBRARIES                = -lboost_filesystem
+WX_OBJECTS                     = studio.o studio_overview.o new_specification.o specification_properties.o \
+				 resources.o tool_executor.o
 WX_LIBRARIES                   = $(WX_LIBS)
 
 PROJECT_MANAGER_OBJECTS        = project_manager.o specification.o xml_text_reader.o settings_manager.o
 TOOL_MANAGER_OBJECTS           = tool_manager.o tool.o xml_text_reader.o settings_manager.o
 GUI_OBJECTS                    = studio.o studio_overview.o new_specification.o specification_properties.o \
-				 resources.o $(sort $(PROJECT_MANAGER_OBJECTS) $(TOOL_MANAGER_OBJECTS))
+				 resources.o $(sort $(PROJECT_MANAGER_OBJECTS) $(TOOL_MANAGER_OBJECTS)) \
+				 tool_executor.o
 OBJECTS                        = $(sort $(GUI_OBJECTS) $(PROJECT_MANAGER_OBJECTS) $(TOOL_MANAGER_OBJECTS))
 
 TEST_TARGETS                   = project_manager_tester tool_manager_tester
@@ -44,9 +48,11 @@ all: $(TARGETS)
 test: all $(TEST_TARGETS)
 
 $(LIBXML2_OBJECTS):         CPPFLAGS += $(LIBXML2_CPPFLAGS)
+$(BOOST_OBJECTS):           CPPFLAGS += $(BOOST_CPPFLAGS)
 $(WX_OBJECTS):              CPPFLAGS += $(WX_CPPFLAGS)
 $(PROJECT_MANAGER_OBJECTS): CPPFLAGS += $(PROJECT_MANAGER_CPPFLAGS)
 $(GUI_OBJECTS):             CPPFLAGS += $(GUI_CPPFLAGS)
+settings_manager.o:         CPPFLAGS += -DSCHEMA_DATA=\"$(datadir)\" -DTOOL_DATA=\"$(datadir)\"
 
 tool_manager_tester: tool_manager_tester.cpp $(TOOL_MANAGER_OBJECTS)
 	$(CXX) $(CXXFLAGS) $(CPPFLAGS) $(LDFLAGS) $(TOOL_MANAGER_OBJECTS) $(WX_LIBRARIES) -o $@ $<
@@ -55,7 +61,7 @@ project_manager_tester: project_manager_tester.cpp $(PROJECT_MANAGER_OBJECTS)
 	$(CXX) $(CXXFLAGS) $(CPPFLAGS) $(LDFLAGS) $(PROJECT_MANAGER_OBJECTS) $(WX_LIBRARIES) -o $@ $<
 
 studio: $(GUI_OBJECTS)
-	$(CXX) $(CXXFLAGS) $(CPPFLAGS) $(LDFLAGS) $(GUI_OBJECTS) $(WX_LIBRARIES) -o $@
+	$(CXX) $(CXXFLAGS) $(CPPFLAGS) $(LDFLAGS) $(GUI_OBJECTS) $(WX_LIBRARIES) $(BOOST_LIBRARIES) -o $@
 
 %.o: %.cpp
 	$(CXX) -c $(CXXFLAGS) $(CPPFLAGS) $<
@@ -65,6 +71,12 @@ $(OBJECTS) $(TARGETS): Makefile
 install: all
 	$(INSTALL) -d $(bindir)
 	$(INSTALL) studio $(bindir)
+	$(INSTALL) -d $(datadir)
+	$(INSTALL) -m 0644 schemas/tool_catalog.xsd $(datadir)
+	$(GZIP) $(datadir)/tool_catalog.xsd
+	$(INSTALL) -m 0644 schemas/studio_project.xsd $(datadir)
+	$(GZIP) $(datadir)/studio_project.xsd
+	$(INSTALL) -m 0644 examples/tool_catalog.xml $(datadir)
 ifeq ($(HOST_OS),MACOSX)
 	/Developer/Tools/Rez -t APPL -o studio ../sample.r
 	/Developer/Tools/SetFile -a C studio
@@ -77,7 +89,6 @@ ifeq ($(HOST_OS),MACOSX)
 	ln -f $(bindir)/studio ../../studio.app/Contents/MacOS/studio
 	cp -f ../xsim.icns ../../studio.app/Contents/Resources/studio.icns
 endif
-
 
 clean:
 	$(RM) *.o $(TARGETS) $(TEST_TARGETS) core

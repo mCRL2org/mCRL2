@@ -9,9 +9,11 @@
 class XMLTextReader;
 
 /* Distinguished object types */
-typedef enum { input, intermediate, output } ToolType;
+typedef enum { input, intermediate, output } ToolObjectType;
 
 class ToolObject;
+class ToolInputObject;
+class ToolOutputObject;
 class ToolMode;
 
 /*
@@ -24,7 +26,7 @@ class Tool {
   private:
     std::string name;               /* A, not necessarily unique, name for the tool */
     std::string identifier;         /* A unique identifier for the tool as: [a-z][a-z0-9_]+ */
-    std::string location;           /* A location on local storage where the tool can be found */
+    std::string location;           /* A location where the tool can be found (URI to the tool) */
     std::string description;        /* A description for the tool */
 
     /* Modes connected to the input/output descriptor objects */
@@ -44,16 +46,13 @@ class Tool {
     /* Pretty print tool configuration */
     void Print(std::ostream& stream = std::cerr) const;
 
-    /* Get the operational mode specifications of the tool */
-    const std::vector < ToolMode* >& GetModes() const;
-
     /* Get the name */
     inline const std::string& GetName() const {
       return (name);
     }
 
     /* Get the indentifier */
-    inline const std::string& GetIndentifier() const {
+    inline const std::string& GetIdentifier() const {
       return (identifier);
     }
 
@@ -65,6 +64,16 @@ class Tool {
     /* Get the description */
     inline const std::string& GetDescription() const {
       return (description);
+    }
+
+    /* Get the operational mode specifications of the tool */
+    inline const std::vector < ToolMode* >& GetModes() const {
+      return (modes);
+    }
+
+    /* Get the operational mode specifications of the tool */
+    inline const ToolMode& GetMode(const size_t mode_number) const {
+      return (*modes[mode_number]);
     }
 };
 
@@ -102,6 +111,10 @@ class ToolMode {
     /* Pretty print tool mode configuration */
     void Print(std::ostream& stream = std::cerr) const;
 
+    inline bool HasSelector() const {
+      return (selector != "");
+    }
+
     /* Get the current selector */
     inline const std::string& GetSelector() const {
       return (selector);
@@ -121,6 +134,21 @@ class ToolMode {
     inline const std::list < ToolObject* >& GetObjects() const {
       return (objects);
     }
+
+    /* Return output object number <|object_number|> (must exist) */
+    const ToolOutputObject& GetOutputObject(size_t object_number) const;
+
+    /* Return input object number <|object_number|> (must exist) */
+    const ToolInputObject& GetInputObject(size_t object_number) const;
+
+    /* Returns whether the mode produces output objects */
+    const bool HasOutputObjects() const;
+
+    /* Returns whether the mode requires input objects */
+    const bool HasInputObjects() const;
+
+    /* Generates a name based on <|name|> and the restrictions of output with respect to input objects of this mode */
+    const std::string ChooseName(size_t output_number, std::string name) const;
 };
 
 /* Abstract type that describes an object of a tool */
@@ -147,7 +175,7 @@ class ToolObject {
 
   public:
 
-    ToolType type;
+    ToolObjectType type;
 
     virtual ~ToolObject();
 
@@ -155,7 +183,7 @@ class ToolObject {
     virtual void Print(std::ostream& stream = std::cerr) const;
 
     /* Returns the type of the object */
-    virtual ToolType GetType() const = 0;
+    virtual ToolObjectType GetType() const = 0;
 
     /* Returns the name of the object */
     inline const std::string& GetName() const {
@@ -187,19 +215,48 @@ class ToolObject {
       return (selector != "");
     }
 
-    /* Get the objects default format */
+    /* Get the objects default format (command line default) */
     inline const std::string& GetDefaultFormat() const {
       return (default_format);
+    }
+
+    /* Get the default format, or some other format if there is no default */
+    inline const std::string& GetSomeFormat() const {
+      if (default_format != "") {
+        return (default_format);
+      }
+      else {
+        std::map < std::string, std::string >::const_iterator i = format_selectors.begin();
+
+        return ((*i).first);
+      }
     }
 
     /* Whether the option has a default format, or a format must be specified */
     inline const bool HasDefaultFormat() const {
       return (default_format != "");
     }
+
+    /* Print argument string prefixed with a space, such as it would occur on the command line */
+    inline const std::string String(const std::string& file_name, const std::string& format) const {
+      std::string return_value(" ");
+
+      if (selector != "") {
+        return_value.append(selector);
+       
+        /* May also add a `=' here, or quotes ... */
+        return_value.append(" ");
+      }
+
+      /* Could use the format in the name */
+      return_value.append(file_name);
+
+      return(return_value);
+    }
 };
 
 /* Type that describes an input object of a tool */
-class ToolInputObject : private ToolObject {
+class ToolInputObject : public ToolObject {
   friend class ToolMode;
 
   private:
@@ -219,13 +276,13 @@ class ToolInputObject : private ToolObject {
     void Print(std::ostream& stream = std::cerr) const;
 
     /* Returns the type of the object */
-    inline ToolType GetType() const {
+    inline ToolObjectType GetType() const {
       return (input);
     }
 };
 
 /* Type that describes an output object of a tool */
-class ToolOutputObject : private ToolObject {
+class ToolOutputObject : public ToolObject {
   friend class ToolMode;
 
   private:
@@ -245,7 +302,7 @@ class ToolOutputObject : private ToolObject {
     void Print(std::ostream& stream = std::cerr) const;
 
     /* Returns the type of the object */
-    inline ToolType GetType() const {
+    inline ToolObjectType GetType() const {
       return (output);
     }
 };

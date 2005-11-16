@@ -51,6 +51,7 @@ WX_LIBS            = @WX_LIBS@
 WX_CPPFLAGS        = @WX_CPPFLAGS@
 USE_BOOST          = @USE_BOOST@
 BOOST_PREFIX       = @BOOST_PREFIX@
+GZIP               = gzip -f
 
 # Installation directories
 prefix             = @prefix@

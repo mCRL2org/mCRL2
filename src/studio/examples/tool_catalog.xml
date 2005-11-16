@@ -1,6 +1,6 @@
 <?xml version="1.0" encoding="utf-8"?>
 <tool-catalog xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:noNamespaceSchemaLocation="tool_catalog.xsd">
- <tool name="lpe2lts" identifier="lpe2lts" location="/some/path/bin/lpe2lts">
+ <tool name="lpe2lts" identifier="lpe2lts" location="/tmp/mcrl2/bin/lpe2lts">
   <description>A tool computes the instantiation of an LPE.</description>
   <mode category="Translation">
    <object type="input" name="%.lpe" formalism="LPE" default-format="lpe"/>
@@ -13,14 +13,14 @@
    <object type="input" name="%.lpe" formalism="LPE" default-format="lpe"/>
   </mode>
  </tool>
- <tool name="mcrl22lpe" identifier="mcrl22lpe" location="/some/path/bin/mcrl22lpe">
+ <tool name="mcrl22lpe" identifier="mcrl22lpe" location="/tmp/mcrl2/bin/mcrl22lpe">
   <mode category="Translation">
    <description>A tool that transforms mCRL2 specification to an LPE.</description>
    <object type="input" name="%.mcrl2" formalism="mCRL2" default-format="mcrl2"/>
    <object type="output" name="%.lpe" formalism="LPE" default-format="lpe"/>
   </mode>
  </tool>
- <tool name="lpeconstelm" identifier="lpeconstelm" location="/some/path/bin/mcrl22lpe">
+ <tool name="lpeconstelm" identifier="lpeconstelm" location="/tmp/mcrl2/bin/lpeconstelm">
   <mode category="Transformation">
    <description>A tool that transforms an LPE to an LPE where constants are eliminated.</description>
    <object type="input" formalism="LPE" default-format="lpe"/>

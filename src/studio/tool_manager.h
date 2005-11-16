@@ -56,7 +56,25 @@ class ToolManager {
     bool RemoveTool(std::string name);
 
     /* Get the list of known tools */
-    const std::list < Tool* >& GetTools() const;
+    inline const std::list < Tool* >& GetTools() const {
+      return (tools);
+    }
+
+    /* Get tool number i (where i < tools.size() ) */
+    inline const Tool* GetTool(unsigned int index) const {
+      std::list < Tool* >::const_iterator i = tools.begin();
+
+      while (0 < index--) {
+        ++i;
+      }
+
+      return (*i);
+    }
+
+    /* Get the number of known tools */
+    inline const unsigned int GetNumberOfTools() const {
+      return (tools.size());
+    }
 };
 
 #endif

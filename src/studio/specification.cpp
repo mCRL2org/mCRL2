@@ -2,12 +2,18 @@
 
 #include "specification.h"
 #include "xml_text_reader.h"
+#include "tool_executor.h"
+#include "tool_manager.h"
+#include "ui_core.h"
+
+SpecificationVisualiser Specification::dummy_visualiser;
 
 Specification::Specification() {
   status             = non_existent;
   name               = "";
   tool_configuration = "";
   tool_identifier    = UNSPECIFIED_TOOL;
+  visualiser         = &dummy_visualiser;
 }
 
 /*
@@ -32,8 +38,6 @@ void Specification::Print(std::ostream& stream) const {
   else {
     stream << tool_identifier;
   }
-
-  stream << " (should query tool manager to add tool name)\n";
 
   if (0 < input_objects.size()) {
     if (1 < input_objects.size()) {
@@ -60,7 +64,7 @@ void Specification::Print(std::ostream& stream) const {
  * Recursively verifies whether specification is up to date by considering the
  * status of all specifications that it depends on.
  */
-specification_status Specification::CheckStatus() {
+SpecificationStatus Specification::CheckStatus() {
   const std::vector < SpecificationInputType >::iterator b = input_objects.end();
         std::vector < SpecificationInputType >::iterator i = input_objects.begin();
 
@@ -77,6 +81,8 @@ specification_status Specification::CheckStatus() {
     /* TODO verify minimum output object date is not before than maximum input object date */
     if (go_condition && status == not_up_to_date) {
       status = up_to_date;
+
+      visualiser->VisualiseStatusChange(status);
     }
   }
   
@@ -87,35 +93,83 @@ specification_status Specification::CheckStatus() {
  * Recursively generates the specification and all not up to date
  * specifications it depends on. 
  *
- * Throws a pointer to the first specification that fails to be generated.
+ * TODO Throws a pointer to the first specification that fails to be generated.
  */
 bool Specification::Generate() throw (void*) {
   const std::vector < SpecificationInputType >::iterator b            = input_objects.end();
         std::vector < SpecificationInputType >::iterator i            = input_objects.begin();
-        bool                                             go_condition = true;
-
-  status = being_computed;
+        bool                                             go_condition = false;
 
   /* Recursively generate specifications */
-  while (i != b && go_condition) {
-    go_condition = (*i).derived_from.pointer->Generate();
+  try {
+    while (i != b) {
+      go_condition |= (*i).derived_from.pointer->Generate();
+ 
+      i++;
+    }
+  }
+  catch (void* p) {
+    throw (p);
 
-    i++;
+    return (false);
   }
  
-  if (go_condition) {
+  if (go_condition || status != up_to_date) {
+    const Tool*     tool = tool_manager.GetTool(tool_identifier);
+    const ToolMode& mode = tool->GetMode(tool_mode);
+
+    const std::list < ToolObject* >::const_iterator b = mode.GetObjects().end();
+          std::list < ToolObject* >::const_iterator i = mode.GetObjects().begin();
+          size_t it = 0;
+          size_t ot = 0;
+
+    std::string final_configuration = tool_configuration;
+
+    if (mode.HasSelector()) {
+      final_configuration.append(" ").append(mode.GetSelector());
+    }
+
+    /* Generate input output object arguments */
+    while (i != b) {
+      SpecificationOutputType* aoutput;
+
+      if ((*i)->GetType() == input) {
+        aoutput = const_cast < SpecificationOutputType* > (&input_objects[it].derived_from.pointer->GetOutputObjects()[input_objects[it].output_number]);
+
+        ++it;
+      }
+      else {
+        aoutput = &(output_objects[ot]);
+
+        ++ot;
+      }
+
+      final_configuration.append((*i)->String(aoutput->file_name, aoutput->format));
+
+      ++i;
+    }
+
+    /* Set status, for the convenience of the user */
+    status = being_computed;
+ 
+    visualiser->VisualiseStatusChange(status);
+
     /* Run tool via the tool executor with command using the tool_identifier to lookup the name of a tool */
-    if (TOOL_RUN_SUCCESSFUL) {
+    if (tool_executor.Execute(tool_manager, tool_identifier, final_configuration, std::cerr)) {
       /* For the moment this is in place instead of a call to the tool executor. Reason being that the tool executor has not been built yet. */
       status = up_to_date;
     }
     else {
       /* Give user some error */
       status = not_up_to_date;
+
+      throw (&*(--i));
     }
+
+    visualiser->VisualiseStatusChange(status);
   }
 
-  return (status == up_to_date);
+  return (go_condition);
 }
 
 bool Specification::Delete() {
@@ -196,6 +250,11 @@ bool Specification::Read(XMLTextReader& reader) throw (int) {
       reader.Read();
     }
 
+    if (!reader.IsElement("input-object")) {
+      /* No input objects, so set status accordingly */
+      status = up_to_date;
+    }
+
     /* Dependent specifications follow until node type is XML_READER_TYPE_END_ELEMENT */
     while (!reader.IsEndElement() && reader.IsElement("input-object")) {
       SpecificationInputType new_input;
@@ -267,7 +326,7 @@ bool Specification::Write(std::ostream& stream) {
     stream << "\">" << tool_configuration << "</tool-configuration>\n";
 
     while (i != b) {
-      stream << "  <input-object identifier=\"" << (*i).derived_from.pointer->identifier << "\" output-number=\"" << (*i).output_number << "\"/>\n";
+      stream << "  <input-object identifier=\"" << tool_manager.GetTool((*i).derived_from.pointer->identifier)->GetIdentifier() << "\" output-number=\"" << (*i).output_number << "\"/>\n";
  
       ++i;
     }

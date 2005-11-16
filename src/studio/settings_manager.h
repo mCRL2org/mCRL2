@@ -3,6 +3,12 @@
 
 #include <string>
 
+#define TOOL_CATALOG_SCHEMA    "tool_catalog.xsd.gz"
+#define PROJECT_STORAGE_SCHEMA "project.xsd.gz"
+
+#define TOOL_CATALOG_NAME      "tool_catalog.xml"
+#define PROJECT_STORAGE_NAME   "project.xml"
+
 /*
  * Stores the runtime configuration settings for all components.
  */
@@ -33,7 +39,5 @@ class SettingsManager {
     /* Get the base name of a project file */
     const std::string GetProjectFileName() const;
 };
-
-extern SettingsManager* settings;
 
 #endif

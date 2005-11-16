@@ -5,6 +5,8 @@ wxImageList* main_icon_list;
 wxImageList* format_icon_list;
 wxImageList* format_small_icon_list;
 
+wxIcon* gui_icon;
+
 /* Images */
 #include "pixmaps/stock_new.xpm"
 #include "pixmaps/stock_new_red.xpm"
@@ -18,6 +20,8 @@ wxImageList* format_small_icon_list;
 #include "pixmaps/stock_cancel.xpm"
 #include "pixmaps/stock_new_small.xpm"
 
+#include "pixmaps/elephant.xpm"
+
 /* General of GUI Icons */
 wxImageList* LoadMainIcons() {
   wxImageList* list = new wxImageList(24, 24, false, 7);
@@ -30,6 +34,8 @@ wxImageList* LoadMainIcons() {
   list->Add(wxIcon(stock_ok_xpm));
   list->Add(wxIcon(stock_cancel_xpm));
 
+  gui_icon = new wxIcon(elephant_xpm);
+
   return(list);
 }
 
@@ -37,10 +43,10 @@ wxImageList* LoadMainIcons() {
 wxImageList* LoadFormatIcons() {
   wxImageList* list = new wxImageList(24, 24, false, 4);
 
-  list->Add(wxIcon(stock_new_xpm));
-  list->Add(wxIcon(stock_new_red_xpm));
   list->Add(wxIcon(stock_new_green_xpm));
   list->Add(wxIcon(stock_new_blue_xpm));
+  list->Add(wxIcon(stock_new_red_xpm));
+  list->Add(wxIcon(stock_new_xpm));
 
   return(list);
 }

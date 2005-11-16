@@ -74,9 +74,7 @@ inline bool XMLTextReader::GetAttribute(std::string* astring, char* attribute_na
   char* temporary = (char*) xmlTextReaderGetAttribute(reader, TO_XML_STRING(attribute_name));
   bool  return_value = temporary != NULL;
 
-  if (return_value) {
-    *astring = std::string(temporary);
-  }
+  *astring = (return_value) ? std::string(temporary) : "";
 
   xmlFree(temporary);
 
@@ -87,9 +85,7 @@ inline bool XMLTextReader::GetAttribute(unsigned int* aninteger, char* attribute
   char* temporary    = (char*) xmlTextReaderGetAttribute(reader, TO_XML_STRING(attribute_name));
   bool  return_value = temporary != NULL;
 
-  if (return_value) {
-    *aninteger = atoi(temporary);
-  }
+  *aninteger = (return_value) ? atoi(temporary) : 0;
 
   xmlFree(temporary);
 
@@ -101,9 +97,7 @@ inline bool XMLTextReader::GetValue(std::string* astring) {
   char* temporary    = (char*) xmlTextReaderValue(reader);
   bool  return_value = temporary != NULL;
 
-  if (return_value) {
-    *astring = std::string(temporary);
-  }
+  *astring = (return_value) ? std::string(temporary) : "";
 
   xmlFree(temporary);
 
@@ -114,9 +108,7 @@ inline bool XMLTextReader::GetValue(unsigned int* aninteger) {
   char* temporary    = (char*) xmlTextReaderValue(reader);
   bool  return_value = temporary != NULL;
 
-  if (return_value) {
-    *aninteger = atoi(temporary);
-  }
+  *aninteger = (return_value) ? atoi(temporary) : 0;
 
   xmlFree(temporary);
 

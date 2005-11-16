@@ -18,9 +18,10 @@
  * visualisation at all so we stick to the name specification.
  */
 
-#define UNSPECIFIED_TOOL ""
+#define UNSPECIFIED_TOOL UINT_MAX
 
 class XMLTextReader;
+class ToolManager;
 class Specification;
 
 /* Type that is used to keep the status of a specification */
@@ -29,7 +30,7 @@ typedef enum {
   being_computed,       /* outputs are being generated */
   not_up_to_date,       /* outputs exist but are not up to date */
   up_to_date            /* outputs exist and are up-to-date */
-} specification_status;
+} SpecificationStatus;
 
 typedef union {
   Specification* pointer;
@@ -49,6 +50,14 @@ typedef struct {
   std::string md5_hash;
 } SpecificationOutputType;
 
+/* Interface class that contains functions for processing GUI update events */
+class SpecificationVisualiser {
+  public:
+    /* Callback function for updating a user interface */
+    inline virtual void VisualiseStatusChange(SpecificationStatus) {
+    }
+};
+
 /*
  * A specification is either provided, in this case it is not generated from
  * other specifications, or generated.
@@ -66,20 +75,23 @@ class Specification {
     unsigned int identifier;                  /* A number that uniquely identifies this specification */
     std::string  tool_configuration;          /* A string of command line arguments that should be passed at tool execution */
     unsigned int tool_mode;                   /* What mode the tool is configured to run in */
-    std::string  tool_identifier;             /* Identifies the tool that is required to run the command */
+    unsigned int tool_identifier;             /* Identifies the tool that is required to run the command */
     std::string  description;                 /* Optional description */
 
     std::vector < SpecificationInputType >  input_objects;   /* Storage objects that this specification depends on */
     std::vector < SpecificationOutputType > output_objects;  /* Storage objects that this specification is comprised of */
 
     /* Whether the specification is up to date */
-    specification_status status;
+    SpecificationStatus status;
+
+    /* Object used to update visualisations of a specification */
+    SpecificationVisualiser* visualiser;
+
+    /* dummy specification initialiser, for when no visualisation is needed */
+    static SpecificationVisualiser dummy_visualiser;
 
     /* Recursively checks whether specification is up to date (ignores the set status) */
-    specification_status CheckStatus();
-
-    /* Generate the specification (instantiation on storage) */
-    bool Generate() throw (void*);
+    SpecificationStatus CheckStatus();
 
     /* Remove specification from storage */
     bool Delete();
@@ -96,6 +108,13 @@ class Specification {
   public:
 
     Specification();
+
+    /* Generate the specification (instantiation on storage) */
+    bool Generate() throw (void*);
+
+    inline void SetVisualiser(SpecificationVisualiser* avisualiser) {
+      visualiser = avisualiser;
+    }
 
     /* Get name */
     inline std::string GetName() const {
@@ -118,7 +137,7 @@ class Specification {
     }
 
     /* Get tool mode of operation */
-    inline unsigned int GetToolMode() const {
+    inline const unsigned int GetToolMode() const {
       return (tool_mode);
     }
 
@@ -128,12 +147,12 @@ class Specification {
     }
 
     /* Get tool identifier */
-    inline std::string GetToolIdentifier() const {
+    inline const unsigned int GetToolIdentifier() const {
       return (tool_identifier);
     }
 
     /* Set tool idenfier */
-    inline void SetToolIdentifier(std::string new_identifier) {
+    inline void SetToolIdentifier(unsigned int new_identifier) {
       tool_identifier = new_identifier;
     }
 
@@ -197,6 +216,8 @@ class Specification {
     /* Sets status to one of the not-available ones and removes the instances of specification from storage */
     inline void ResetAvailability() {
       status = non_existent;
+
+      visualiser->VisualiseStatusChange(status);
     }
 
     /* If a specification is up-to-date this toggles the state to */
@@ -207,6 +228,24 @@ class Specification {
       else {
         status = CheckStatus();
       }
+
+      visualiser->VisualiseStatusChange(status);
+    }
+
+    inline void ForceRegeneration() {
+      if (status == up_to_date) {
+        status = not_up_to_date;
+      }
+      else {
+        status = non_existent;
+      }
+
+      visualiser->VisualiseStatusChange(status);
+    }
+
+    /* Recursively set the status of specification and */
+    inline const SpecificationStatus GetStatus() const {
+      return(status);
     }
 
     /* Pretty prints the fields of the specification */

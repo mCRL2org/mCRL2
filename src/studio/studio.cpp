@@ -4,18 +4,24 @@
 /* Include definition of the studio overview window */
 #include "studio_overview.h"
 
+#include "tool_executor.h"
 #include "tool_manager.h"
 #include "settings_manager.h"
 
-/* Global settings manager component */
-SettingsManager* settings;
+/* Global Settings Manager component */
+SettingsManager  settings_manager(wxFileName::GetHomeDir().fn_str());
+
+/* Global Tool Manager component */
+ToolManager      tool_manager;
+
+/* Global Tool Executor component (TODO run a single instance per machine) */
+ToolExecutor     tool_executor;
 
 /* Studio class declaration */
 class Studio : public wxApp {
   DECLARE_CLASS(Studio)
   
   private:
-    ToolManager     tool_manager;
 
   public:
 
@@ -38,22 +44,18 @@ Studio::Studio() {
 bool Studio::OnInit() {
   /* TODO show a splash here */
 
-
-  /* Export the settings_manager */
-  settings = new SettingsManager(wxFileName::GetHomeDir().fn_str());
-
   /* Load tool configuration from storage */
   tool_manager.Load();
 
   StudioOverview* window = new StudioOverview(tool_manager, NULL, 1000);
 
   /* Make sure the main window is visible */
-  return (window->Show(true));
+  window->Show(true);
+
+  return (true);
 }
   
 int Studio::OnExit() {
-  delete settings;
-
   return (wxApp::OnExit());
 }
 

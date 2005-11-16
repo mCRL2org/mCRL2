@@ -7,6 +7,8 @@ extern wxImageList* main_icon_list;
 extern wxImageList* format_icon_list;
 extern wxImageList* format_small_icon_list;
 
+extern wxIcon* gui_icon;
+
 /* Function to load the icons */
 wxImageList* LoadMainIcons();
 wxImageList* LoadFormatIcons();

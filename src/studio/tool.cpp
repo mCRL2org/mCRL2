@@ -89,10 +89,6 @@ void Tool::Print(std::ostream& stream) const {
   stream << " /\n";
 }
 
-const std::vector < ToolMode* >& Tool::GetModes() const {
-  return (modes);
-}
-
 Tool::Tool() {
   modes.clear();
 }
@@ -217,6 +213,91 @@ void ToolMode::Print(std::ostream& stream) const {
   }
 
   stream << "  /\n";
+}
+
+/* Return output object number <|object_number|> (must exist) */
+const ToolOutputObject& ToolMode::GetOutputObject(size_t object_number) const {
+  std::list < ToolObject* >::const_iterator i = objects.begin();
+  bool                                      b = (*i)->GetType() != output;
+
+  while (b || 0 < object_number) {
+    if (!b) {
+      --object_number;
+    }
+
+    ++i;
+
+    b = (*i)->GetType() != output;
+  }
+
+  return (reinterpret_cast < const ToolOutputObject& > (*(*i)));
+}
+
+/* Generates a name based on <|name|> and the restrictions of output with respect to input objects of this mode */
+const std::string ToolMode::ChooseName(size_t object_number, std::string name) const {
+  std::list < ToolObject* >::const_iterator i = objects.begin();
+  bool                                      b = (*i)->GetType() != output;
+
+  while (b || 0 < object_number) {
+    if (!b) {
+      --object_number;
+    }
+
+    ++i;
+
+    b = (*i)->GetType() != output;
+  }
+
+  /* name is taken to be the prefix of the chosen name */
+  return (name.append(".").append((*i)->GetSomeFormat()));
+}
+
+/* Return input object number <|object_number|> (must exist) */
+const ToolInputObject& ToolMode::GetInputObject(size_t object_number) const {
+  std::list < ToolObject* >::const_iterator i = objects.begin();
+  bool                                      b = (*i)->GetType() != input;
+
+  while (b || 0 < object_number) {
+    if (!b) {
+      --object_number;
+    }
+
+    ++i;
+
+    b = (*i)->GetType() != input;
+  }
+
+  return (reinterpret_cast < const ToolInputObject& > (*(*i)));
+}
+
+/* Returns whether the mode produces output objects */
+const bool ToolMode::HasOutputObjects() const {
+  std::list < ToolObject* >::const_iterator i = objects.begin();
+
+  while (i != objects.end()) {
+    if ((*i)->GetType() == output) {
+      break;
+    }
+
+    ++i;
+  }
+
+  return (i != objects.end());
+}
+
+/* Returns whether the mode requires input objects */
+const bool ToolMode::HasInputObjects() const {
+  std::list < ToolObject* >::const_iterator i = objects.begin();
+
+  while (i != objects.end()) {
+    if ((*i)->GetType() == input) {
+      break;
+    }
+
+    ++i;
+  }
+
+  return (i != objects.end());
 }
 
 ToolMode::~ToolMode() {

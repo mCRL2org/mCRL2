@@ -5,6 +5,9 @@
 
 #include "specification.h"
 
+class ToolManager;
+
+static Specification empty_specification;
 /*
  * A project is a collection of specifications objects along with meta
  * information about those specifications and how specifications that are not
@@ -15,7 +18,7 @@
 class ProjectManager {
   private:
 
-    std::list <Specification> specifications;
+    std::list < Specification > specifications;
 
     /* Keeps the smallest natural number that has not yet been assigned as identifier */
     unsigned int free_identifier;
@@ -58,10 +61,13 @@ class ProjectManager {
     void Print(std::ostream& stream = std::cerr);
 
     /* Add a new specification to the project */
-    Specification* Add(Specification& specification);
+    Specification* Add(Specification& specification = empty_specification);
 
     /* Remove a specification from the project */
     bool Remove(Specification* specification);
+
+    /* Specifications are required to be present in the list */
+    bool Remove(std::vector < Specification* >& some_specifications);
 
     /* Remove instance from a specification from storage */
     bool Flush(Specification* specification);

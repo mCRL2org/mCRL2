@@ -4,6 +4,7 @@
 #include "tool_manager.h"
 #include "settings_manager.h"
 #include "xml_text_reader.h"
+#include "ui_core.h"
 
 ToolManager::ToolManager() {
 }
@@ -113,14 +114,14 @@ inline bool ToolManager::Read(std::string file_name) {
 
 /* Loads tool configurations from XML file */
 bool ToolManager::Load() {
-  std::string catalog_file = settings->GetToolCatalogPath();
+  std::string catalog_file = settings_manager.GetToolCatalogPath();
 
   return (Read(catalog_file));
 }
 
 /* TODO ensure atomicity */
 bool ToolManager::Store() const {
-  std::string   catalog_file = settings->GetToolCatalogPath();
+  std::string   catalog_file = settings_manager.GetToolCatalogPath();
   std::ofstream catalog_stream;
 
   catalog_file.append(".ghost");
@@ -132,9 +133,5 @@ bool ToolManager::Store() const {
   catalog_stream.close();
 
   return (return_value);
-}
-
-const std::list < Tool* >& ToolManager::GetTools() const {
-  return (tools);
 }
 

@@ -1,10 +1,13 @@
 #include <fstream>
 #include <map>
 
+#include <boost/filesystem/operations.hpp>
+
 #include "project_manager.h"
 #include "settings_manager.h"
 #include "specification.h"
 #include "xml_text_reader.h"
+#include "ui_core.h"
 
 ProjectManager::ProjectManager() {
   free_identifier = 0;
@@ -44,7 +47,7 @@ bool ProjectManager::Close() {
 bool ProjectManager::Load() {
   std::string   project_file(project_root);
   bool          return_value = true;
-  XMLTextReader reader(project_file.append("/").append(settings->GetProjectFileName()).c_str());
+  XMLTextReader reader(project_file.append("/").append(settings_manager.GetProjectFileName()).c_str());
 
   /* Maps an identifier to a pointer to a specification object */
   std::map < unsigned int, Specification* > identifier_resolution;
@@ -165,7 +168,7 @@ bool ProjectManager::Store() {
   std::string   project_file(project_root);
   std::ofstream project_stream;
 
-  project_file.append("/").append(settings->GetProjectFileName());
+  project_file.append("/").append(settings_manager.GetProjectFileName());
 
   project_stream.open(project_file.c_str(), std::ios::out | std::ios::trunc);
 
@@ -241,7 +244,45 @@ bool ProjectManager::Remove(Specification* specification) {
     ++i;
   }
 
+        std::vector < SpecificationOutputType >::const_iterator k = (*i).GetOutputObjects().begin();
+  const std::vector < SpecificationOutputType >::const_iterator d = (*i).GetOutputObjects().end();
+
+  while (k != d) {
+    if (boost::filesystem::exists(boost::filesystem::path((*k).file_name))) {
+      boost::filesystem::remove(boost::filesystem::path((*k).file_name));
+    }
+  }
+
   specifications.erase(i);
+
+  return (true);
+}
+
+/* Specifications are required to be present in the list */
+bool ProjectManager::Remove(std::vector < Specification* >& some_specifications) {
+  std::list   < Specification >::iterator        i = specifications.begin();
+  std::vector < Specification* >::const_iterator j = some_specifications.begin();
+  std::vector < Specification* >::const_iterator c = some_specifications.end();
+
+  /* Specification that a specification depends on must be stored on a lower index */
+  while (j != c) {
+    if (&(*i) == *j) {
+            std::vector < SpecificationOutputType >::const_iterator k = (*i).GetOutputObjects().begin();
+      const std::vector < SpecificationOutputType >::const_iterator d = (*i).GetOutputObjects().end();
+
+      while (k != d) {
+        if (boost::filesystem::exists(boost::filesystem::path((*k).file_name))) {
+          boost::filesystem::remove(boost::filesystem::path((*k).file_name));
+        }
+      }
+
+      specifications.erase(i);
+
+      ++j;
+    }
+
+    ++i;
+  }
 
   return (true);
 }
