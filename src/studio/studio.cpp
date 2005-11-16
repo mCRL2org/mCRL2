@@ -1,5 +1,6 @@
 #include <wx/wx.h>
 #include <wx/filename.h>
+#include <cstdio>
 
 /* Include definition of the studio overview window */
 #include "studio_overview.h"
@@ -7,6 +8,8 @@
 #include "tool_executor.h"
 #include "tool_manager.h"
 #include "settings_manager.h"
+
+unsigned int svn_revision = UINT_MAX;
 
 /* Global Settings Manager component */
 SettingsManager  settings_manager(wxFileName::GetHomeDir().fn_str());
@@ -43,6 +46,9 @@ Studio::Studio() {
   
 bool Studio::OnInit() {
   /* TODO show a splash here */
+
+  /* Get svn revision */
+  sscanf("$Revision$", "$%*s %u $", &svn_revision);
 
   /* Load tool configuration from storage */
   tool_manager.Load();
