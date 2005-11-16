@@ -1,6 +1,7 @@
 #include <getopt.h>
 #include <string.h>
 #include <iostream>
+#include <cstdio>
 
 #include "../tool_manager.h"
 #include "../settings_manager.h"
@@ -9,7 +10,6 @@
 
 #define PROGRAM_NAME    "relocator"
 #define PROGRAM_VERSION "1.0.0"
-#define SVN_REVISION    "$Revision$"
 
 SettingsManager settings_manager("", "");
 
@@ -53,7 +53,11 @@ void processCommandLineOptions (const int argc, char** argv) {
       case 0:
           switch (i) {
             case 0:
-              printf("%s %s revision %s copyright (c) 2005\n", PROGRAM_NAME, PROGRAM_VERSION, SVN_REVISION);
+              unsigned int svn_revision;
+
+              sscanf("$Revision$", "$Revision$", &svn_revision);
+
+              printf("%s %s revision %u copyright (c) 2005\n", PROGRAM_NAME, PROGRAM_VERSION, svn_revision);
               exit(0);
               break;
             case 1:
