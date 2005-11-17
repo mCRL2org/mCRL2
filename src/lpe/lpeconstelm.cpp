@@ -457,7 +457,7 @@ public:
     );
     
     assert(gsIsSpecV1((ATermAppl) rebuild_spec));
-/*  
+  
     if (p_outputfile.size() == 0){
       if(!p_verbose){
         assert(!p_verbose);
@@ -465,7 +465,7 @@ public:
       };
     } else {
       rebuild_spec.save(p_outputfile);
-    } */
+    } 
   }
   
   // Set output file
