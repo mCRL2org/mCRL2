@@ -90,22 +90,22 @@ ifdef USE_BOOST
  endif
 
  #lpeinfo definitions
- LPEINFO_NAME        = lpe/lpeinfo
- LPEINFO_OBJECTS     = libprint.o libstruct.o libprint_c.o liblowlevel.o lpe/lpeinfo.o
+ LPEINFO_NAME        = lpeinfo
+ LPEINFO_OBJECTS     = libprint.o libstruct.o libprint_c.o liblowlevel.o lpeinfo.o
  OBJECTS            += $(LPEINFO_OBJECTS)
  LPEINFO_LDFLAGS     = -lrewrite -l$(ATERM) -lm $(LIBDL)
 
  #lpconstelm definitions
- LPECONSTELM_NAME    = lpe/lpeconstelm
- LPECONSTELM_OBJECTS = libprint.o libstruct.o libprint_c.o liblowlevel.o lpe/lpeconstelm.o
+ LPECONSTELM_NAME    = lpeconstelm
+ LPECONSTELM_OBJECTS = libprint.o libstruct.o libprint_c.o liblowlevel.o lpeconstelm.o
  OBJECTS            += $(LPECONSTELM_OBJECTS)
  LPECONSTELM_LDFLAGS = -lrewrite -l$(ATERM) -lm $(LIBDL)
 
  #lpeparelm definitions
- LPEPARELM_NAME    = lpe/lpeparelm
- LPEPARELM_OBJECTS = libprint.o libstruct.o libprint_c.o liblowlevel.o lpe/lpeparelm.o
+ LPEPARELM_NAME      = lpeparelm
+ LPEPARELM_OBJECTS   = libprint.o libstruct.o libprint_c.o liblowlevel.o lpeparelm.o
  OBJECTS            += $(LPEPARELM_OBJECTS)
- LPEPARELM_LDFLAGS = -lrewrite -l$(ATERM) -lm $(LIBDL)
+ LPEPARELM_LDFLAGS   = -lrewrite -l$(ATERM) -lm $(LIBDL)
 endif
 
 #lperewr definitions
@@ -268,8 +268,8 @@ svc/%: CPPFLAGS += -I./ -Iaterm
 
 # Targets that depend on any of the boost libraries
 ifdef USE_BOOST
-lpe/lpe%: CPPFLAGS += $(BOOST_HEADERS) -I./ -Iaterm
-lpe/lpe%: CXXFLAGS += -ftemplate-depth-256
+lpe%: CPPFLAGS += $(BOOST_HEADERS) -I./ -Iaterm
+lpe%: CXXFLAGS += -ftemplate-depth-256
 
 $(LPEINFO_NAME) : $(LPEINFO_OBJECTS) $(ATERM_DEP) $(LIBREWR_NAME)
 	$(CXX) $(CXXFLAGS) -o $@ $(CPPFLAGS) $(LPEINFO_OBJECTS) $(BOOST_LIBRARIES) $(LDFLAGS) $(LPEINFO_LDFLAGS)

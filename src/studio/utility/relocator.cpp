@@ -69,7 +69,7 @@ void processCommandLineOptions (const int argc, char** argv) {
         usage();
     }
 
-    c = getopt_long(argc, argv, "lrhv", long_options, &i);
+    c = getopt_long(argc, argv, "h", long_options, &i);
   }
 
   if (argc - optind != 2) {

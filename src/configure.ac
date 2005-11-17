@@ -144,7 +144,7 @@ fi
 AC_ARG_ENABLE(
   [experimental],
   AC_HELP_STRING(
-    [--enable-experimentals],
+    [--enable-experimental],
     [also build experimental tools]
   )
 )

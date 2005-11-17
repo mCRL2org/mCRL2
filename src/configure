@@ -861,7 +861,7 @@ Optional Features:
 
   --enable-profiling      compile with profiling support
 
-  --enable-experimentals  also build experimental tools
+  --enable-experimental   also build experimental tools
 
 
 Optional Packages:

@@ -366,7 +366,7 @@ void StudioOverview::AddSpecifications(wxCommandEvent &event) {
   file_helper.ClearExt();
 
   /* A new basename */
-  std::string name = std::string(file_helper.GetFullName().Append(wxString::Format(wxT("-%u"), specifications->GetChildrenCount(selected, false))).fn_str());
+  std::string name = std::string(file_helper.GetFullName().Append(wxString::Format(wxT("-%u"), (unsigned int) specifications->GetChildrenCount(selected, false))).fn_str());
 
   /* Connect input object to compatible position (TODO generalise to multiple inputs and outputs) */
   std::vector < SpecificationInputType >& input_objects = new_specification->GetModifiableInputObjects();
