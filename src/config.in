@@ -58,6 +58,7 @@ USE_BOOST          = @USE_BOOST@
 BOOST_PREFIX       = @BOOST_PREFIX@
 
 ifeq (${BOOST_PREFIX},boost)
+ BUILD_BOOST       = 1
  BOOST_PREFIX     := @abs_top_srcdir@/${BOOST_PREFIX}
 endif
 

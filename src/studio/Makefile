@@ -23,7 +23,7 @@ all: get_revision
 CPPFLAGS := -DREVISION=$(shell ../get_revision 2> /dev/null) $(CPPFLAGS)
 
 get_revision:
-	$(CXX) -I$(BOOST_PREFIX)/include $(LIBXML2_CPPFLAGS) -lboost_filesystem utility/get_revision.cpp xml_text_reader.cpp $(LIBXML2_LDFLAGS) -o utility/get_revision
+	$(CXX) -I$(BOOST_PREFIX)/include $(LIBXML2_CPPFLAGS) -L$(BOOST_PREFIX)/lib -lboost_filesystem utility/get_revision.cpp xml_text_reader.cpp $(LIBXML2_LDFLAGS) -o utility/get_revision
 
 # Other flags
 GUI_CPPFLAGS                   = -DDISABLE_TOOLBAR

@@ -74,7 +74,7 @@ ifdef USE_BOOST
  # Static link to boost libraries
  BOOST_LIBRARIES = -lboost_program_options
 
- ifeq ($(BOOST_PREFIX),boost)
+ ifdef BUILD_BOOST
    ifneq ($(HOST_OS),WINDOWS)
      ifeq ($(HOST_OS),MACOSX)
        BOOST_LIBRARIES = -lboost_program_options
@@ -164,8 +164,8 @@ all: studio/utility/get_revision
 
 CPPFLAGS := -DREVISION=$(shell ./get_revision 2> /dev/null) $(CPPFLAGS)
 
-studio/utility/get_revision:
-	$(CXX) -I$(BOOST_PREFIX)/include $(LIBXML2_CPPFLAGS) -lboost_filesystem studio/utility/get_revision.cpp studio/xml_text_reader.cpp $(LIBXML2_LDFLAGS) -o studio/utility/get_revision
+studio/utility/get_revision: boost
+	$(CXX) -I$(BOOST_PREFIX)/include $(LIBXML2_CPPFLAGS) -L$(BOOST_PREFIX)/lib -lboost_filesystem studio/utility/get_revision.cpp studio/xml_text_reader.cpp $(LIBXML2_LDFLAGS) -o studio/utility/get_revision
 endif
 endif
 
@@ -195,7 +195,7 @@ documentation:
 	@$(MAKE) -C doc $(MAKECMDGOALS)
 
 # For building studio
-studio:
+studio: boost
 	@$(MAKE) -C studio $(MAKECMDGOALS)
 
 # For building bjam and boost libraries
@@ -283,13 +283,13 @@ ifdef USE_BOOST
 lpe%: CPPFLAGS += $(BOOST_HEADERS) -I./ -Iaterm
 lpe%: CXXFLAGS += -ftemplate-depth-256
 
-$(LPEINFO_NAME) : $(LPEINFO_OBJECTS) $(ATERM_DEP) $(LIBREWR_NAME)
+$(LPEINFO_NAME) : $(LPEINFO_OBJECTS) $(ATERM_DEP) $(LIBREWR_NAME) boost
 	$(CXX) $(CXXFLAGS) -o $@ $(CPPFLAGS) $(LPEINFO_OBJECTS) $(BOOST_LIBRARIES) $(LDFLAGS) $(LPEINFO_LDFLAGS)
 
-$(LPECONSTELM_NAME) : $(LPECONSTELM_OBJECTS) $(ATERM_DEP) $(LIBREWR_NAME)
+$(LPECONSTELM_NAME) : $(LPECONSTELM_OBJECTS) $(ATERM_DEP) $(LIBREWR_NAME) boost
 	$(CXX) $(CXXFLAGS) -o $@ $(CPPFLAGS) $(LPECONSTELM_OBJECTS) $(BOOST_LIBRARIES) $(LDFLAGS) $(LPECONSTELM_LDFLAGS)
 
-$(LPEPARELM_NAME) : $(LPEPARELM_OBJECTS) $(ATERM_DEP) $(LIBREWR_NAME)
+$(LPEPARELM_NAME) : $(LPEPARELM_OBJECTS) $(ATERM_DEP) $(LIBREWR_NAME) boost
 	$(CXX) $(CXXFLAGS) -o $@ $(CPPFLAGS) $(LPEPARELM_OBJECTS) $(BOOST_LIBRARIES) $(LDFLAGS) $(LPEPARELM_LDFLAGS)
 else
 $(LPEINFO_NAME) :
