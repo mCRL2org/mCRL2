@@ -26,7 +26,7 @@ LIBXML2_OBJECTS                = xml_text_reader.o project_manager.o tool_manage
 
 BOOST_OBJECTS                  = studio_overview.o tool_manager.o project_manager.o specification_properties.o settings_manager.o
 BOOST_CPPFLAGS                 = -I$(BOOST_PREFIX)/include
-BOOST_LIBRARIES                = -lboost_filesystem
+BOOST_LIBRARIES                = -L$(BOOST_PREFIX)/lib -lboost_filesystem
 WX_OBJECTS                     = studio.o studio_overview.o new_specification.o specification_properties.o \
 				 resources.o tool_executor.o
 WX_LIBRARIES                   = $(WX_LIBS)
