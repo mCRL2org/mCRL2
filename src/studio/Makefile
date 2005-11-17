@@ -10,15 +10,22 @@ endif
 
 ifeq ($(findstring -DNDEBUG,$(CPPFLAGS)),)
  CXXFLAGS                     += -g -Wall
- CPPFLAGS                      =
  PROJECT_MANAGER_CPPFLAGS      = #-DPARSER_SCHEMA_VALIDATION 
 else
- CPPFLAGS                      = -DNDEBUG
  PROJECT_MANAGER_CPPFLAGS      =
 endif
 
 LDFLAGS                        = $(LIBXML2_LDFLAGS)
 
+# Add revision number
+all: get_revision
+
+CPPFLAGS := -DREVISION=$(shell ../get_revision 2> /dev/null) $(CPPFLAGS)
+
+get_revision:
+	$(CXX) -I$(BOOST_PREFIX)/include $(LIBXML2_CPPFLAGS) -lboost_filesystem utility/get_revision.cpp xml_text_reader.cpp $(LIBXML2_LDFLAGS) -o utility/get_revision
+
+# Other flags
 GUI_CPPFLAGS                   = -DDISABLE_TOOLBAR
 
 LIBXML2_OBJECTS                = xml_text_reader.o project_manager.o tool_manager.o tool.o specification.o \
@@ -96,6 +103,6 @@ ifeq ($(HOST_OS),MACOSX)
 endif
 
 clean:
-	$(RM) *.o $(TARGETS) $(TEST_TARGETS) utility/*.o utility/relocator core
+	$(RM) *.o $(TARGETS) $(TEST_TARGETS) utility/*.o utility/relocator utility/get_revision core
 
 distclean: clean

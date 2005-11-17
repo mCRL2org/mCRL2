@@ -149,13 +149,25 @@ LIN_LDFLAGS        = -lrewrite -l$(ATERM) -lm $(LIBDL)
 
 #Group definitions
 EXPERIMENTALS      = $(LIN_NAME) $(ALPHA_NAME)
-EXE_NAMES         +=  $(MCRL22LPE_NAME) $(LPEINFO_NAME) $(LPEPARELM_NAME) $(LPECONSTELM_NAME) $(LPEPP_NAME) $(LPE2LTS_NAME) $(SIM_NAME) $(XSIM_NAME) $(TBF2LPE_NAME) $(PNML2MCRL2_NAME) $(LPEREWR_NAME)
-LIB_NAMES          =  $(XSIMTRACE_NAME)
+EXE_NAMES         += $(MCRL22LPE_NAME) $(LPEINFO_NAME) $(LPEPARELM_NAME) $(LPECONSTELM_NAME) $(LPEPP_NAME) $(LPE2LTS_NAME) $(SIM_NAME) $(XSIM_NAME) $(TBF2LPE_NAME) $(PNML2MCRL2_NAME) $(LPEREWR_NAME)
+LIB_NAMES          = $(XSIMTRACE_NAME)
 OBJECTS           := $(sort $(OBJECTS))
 
 #Make rules
 .PHONY: all install clean distclean boost documentation studio
 .PRECIOUS: mcrl2parser.cpp mcrl2lexer.cpp
+
+# Add revision number
+ifdef USE_LIBXML2
+ifdef USE_BOOST
+all: studio/utility/get_revision
+
+CPPFLAGS := -DREVISION=$(shell ./get_revision 2> /dev/null) $(CPPFLAGS)
+
+studio/utility/get_revision:
+	$(CXX) -I$(BOOST_PREFIX)/include $(LIBXML2_CPPFLAGS) -lboost_filesystem studio/utility/get_revision.cpp studio/xml_text_reader.cpp $(LIBXML2_LDFLAGS) -o studio/utility/get_revision
+endif
+endif
 
 # Build bjam and local boost 
 ifeq ($(BOOST_PREFIX),boost)
@@ -188,7 +200,7 @@ studio:
 
 # For building bjam and boost libraries
 boost:
-	@$(MAKE) -C boost $(MAKECMDGOALS); \
+	@$(MAKE) -C boost $(MAKECMDGOALS)
 
 install: all
 	$(INSTALL) -d $(bindir)
