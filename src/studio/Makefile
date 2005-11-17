@@ -24,8 +24,8 @@ GUI_CPPFLAGS                   = -DDISABLE_TOOLBAR
 LIBXML2_OBJECTS                = xml_text_reader.o project_manager.o tool_manager.o tool.o specification.o \
 				 project_manager_tester tool_manager_tester
 
-BOOST_OBJECTS                  = specification_properties.o settings_manager.o
-BOOST_CPPFLAGS                 = -I$(BOOST_PREFIX)
+BOOST_OBJECTS                  = studio_overview.o tool_manager.o project_manager.o specification_properties.o settings_manager.o
+BOOST_CPPFLAGS                 = -I$(BOOST_PREFIX)/include
 BOOST_LIBRARIES                = -lboost_filesystem
 WX_OBJECTS                     = studio.o studio_overview.o new_specification.o specification_properties.o \
 				 resources.o tool_executor.o

@@ -40,6 +40,7 @@ endif
 ARFLAGS            = crs
 INSTALL            = install
 LEX                = @LEX@
+GZIP               = gzip -f
 LFLAGS             = -I -Pmcrl2yy
 BISON              = @BISON@
 BFLAGS             = -d -pmcrl2yy
@@ -55,7 +56,10 @@ WX_LIBS            = @WX_LIBS@
 WX_CPPFLAGS        = @WX_CPPFLAGS@
 USE_BOOST          = @USE_BOOST@
 BOOST_PREFIX       = @BOOST_PREFIX@
-GZIP               = gzip -f
+
+ifeq (${BOOST_PREFIX},boost)
+ BOOST_PREFIX     := @abs_top_srcdir@/${BOOST_PREFIX}
+endif
 
 # Installation directories
 prefix             = @prefix@
