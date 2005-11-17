@@ -10,6 +10,7 @@
 #include <stdio.h>
 #include <aterm2.h>
 #include <string.h>
+#include <cstdio>
 #include "lin_types.h"
 #include "lin_std.h"
 #include "lin_alt.h"
@@ -411,7 +412,9 @@ void PrintMoreInfo(char *Name)
 
 void PrintVersion(void)
 {
-  fprintf(stderr,"%s version %s\n", NAME, VERSION);
+  unsigned int svn_revision;
+  sscanf("$Revision$", "$%*s %u $", &svn_revision);
+  fprintf(stderr,"%s version: %d (SVN)\n", NAME, svn_revision);
 }
 
 void PrintHelp(char *Name)
