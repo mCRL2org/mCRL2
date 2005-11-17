@@ -436,7 +436,7 @@ static ATermList build_solution2(ATermList vars, ATermList substs)
 	{
 		return vars;
 	} else {
-		return ATinsert(build_solution2(ATgetNext(vars),substs),(ATerm) gsMakeSubst(ATgetFirst(vars),build_solution_single(ATgetFirst(vars),substs)));
+		return ATinsert(build_solution2(ATgetNext(vars),substs),(ATerm) gsMakeSubst(ATgetFirst(vars),gsRewriteInternal(build_solution_single(ATgetFirst(vars),substs))));
 	}
 }
 static ATermList build_solution(ATermList vars, ATermList substs)
