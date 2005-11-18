@@ -1,8 +1,0 @@
-% simple test
-act action: Nat;
-
-proc X(i: Nat)   = (i <  5) -> action(i).X(i+1) +
-                   (i == 5) -> action(i).Y(i, i);
-     Y(i,j: Nat) = action(j).Y(i,j+1);               
-
-init X(0);

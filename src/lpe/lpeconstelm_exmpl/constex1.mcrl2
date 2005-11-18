@@ -1,7 +1,0 @@
-% simple test
-act action :Nat;
-
-proc P(i,j: Nat) = action(i). P(i+1,j);
-
-init P(0,0);
-

@@ -1,7 +1,0 @@
-% simple test
-act action: Nat;
-
-proc P(i,j: Nat) = (i <  5) -> action(i).P(i+1,j) +
-            (i == 5) -> action(i).P(i,j+1);
-
-init P(0,0);
