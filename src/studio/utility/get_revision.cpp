@@ -1,14 +1,15 @@
 #include <getopt.h>
 #include <string.h>
 #include <iostream>
+#include <fstream>
 #include <cstdio>
 
 #include <boost/filesystem/operations.hpp>
 
-#include "../xml_text_reader.h"
-
 #define PROGRAM_NAME    "svn_revision"
-#define PROGRAM_VERSION "1.0.0"
+#define PROGRAM_VERSION "1.0.1"
+
+/* Works under the assumption of valid XML as input */
 
 void usage() {
   std::cout << "Usage: " << PROGRAM_NAME << " [options]\n";
@@ -62,6 +63,8 @@ void processCommandLineOptions (const int argc, char** argv) {
 
 using namespace boost::filesystem;
 
+const char*  target = "committed-rev=\"";
+
 /* Returns the maximum found in <|path|> */
 unsigned int ExplorePath(path apath) {
   unsigned int return_value = 0;
@@ -72,22 +75,38 @@ unsigned int ExplorePath(path apath) {
     while (i != directory_iterator()) {
       if (is_directory(*i)) {
         if ((*i).leaf() == ".svn") {
-          XMLTextReader reader((*i / path("entries")).string().c_str());
-
           try {
-            while (1) {
-              reader.Read();
+            std::fstream file((*i / path("entries")).string().c_str(), std::ios_base::in);
 
-              if (reader.IsElement("entry")) {
-                unsigned int number;
+            while (file) {
+              size_t i = 0;
+              char   c;
+              
+              file.get(c);
+           
+              while (file && target[i] != '\0' && c == target[i]) {
+                ++i;
+           
+                file.get(c);
+              }
+           
+              if (target[i] == '\0') {
+                /* We have a match, read the number */
+                i = 0;
 
-                if (reader.GetAttribute(&number, "committed-rev")) {
-                  if (return_value < number) {
-                    return_value = number;
-                  }
+                while (c != '"') {
+                  i = i * 10 + (c - '0');
+
+                  file.get(c);
+                }
+           
+                if (return_value < i) {
+                  return_value = i;
                 }
               }
             }
+
+            file.close();
           }
           catch (int n) {
             if (n < 0) {

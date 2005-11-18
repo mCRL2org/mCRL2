@@ -43,6 +43,6 @@ install: all
 	$(INSTALL) lib/* $(libdir)
 
 clean:
-	@-$(RM) -rf bin lib tools/build/jam_src/bin tools/build/jam_src/bootstrap
 
-distclean: clean
+distclean:
+	@-$(RM) -rf bin lib tools/build/jam_src/bin tools/build/jam_src/bootstrap

@@ -85,7 +85,7 @@ ifdef USE_BOOST
  endif
 
  ifneq ($(BOOST_PREFIX),)
-  BOOST_HEADERS    = -I$(BOOST_PREFIX)/include
+  BOOST_INCLUDES   = -I$(BOOST_PREFIX)/include
   BOOST_LIBRARIES := -L$(BOOST_PREFIX)/lib $(BOOST_LIBRARIES)
  endif
 
@@ -154,29 +154,18 @@ LIB_NAMES          = $(XSIMTRACE_NAME)
 OBJECTS           := $(sort $(OBJECTS))
 
 #Make rules
-.PHONY: all install clean distclean boost documentation studio
+.PHONY: all install clean distclean boost documentation studio experimental
 .PRECIOUS: mcrl2parser.cpp mcrl2lexer.cpp
 
-# Add revision number
-ifdef USE_LIBXML2
-ifdef USE_BOOST
-all: studio/utility/get_revision
+all: $(EXE_NAMES) $(LIB_NAMES)
+	@$(RM) revision
 
-CPPFLAGS := -DREVISION=$(shell ./get_revision 2> /dev/null) $(CPPFLAGS)
-
-studio/utility/get_revision: boost
-	$(CXX) -I$(BOOST_PREFIX)/include $(LIBXML2_CPPFLAGS) -L$(BOOST_PREFIX)/lib -lboost_filesystem studio/utility/get_revision.cpp studio/xml_text_reader.cpp $(LIBXML2_LDFLAGS) -o studio/utility/get_revision
-endif
-endif
+experimental: $(EXPERIMENTALS)
 
 # Build bjam and local boost 
 ifeq ($(BOOST_PREFIX),boost)
 all distclean install: boost
 endif
-
-all: $(EXE_NAMES) $(LIB_NAMES)
-
-experimentals: $(EXPERIMENTALS)
 
 # Build/clean/install documentation
 ifdef USE_XMLTO
@@ -201,6 +190,26 @@ studio: boost
 # For building bjam and boost libraries
 boost:
 	@$(MAKE) -C boost $(MAKECMDGOALS)
+
+# Add revision number
+ifdef USE_LIBXML2
+ifdef USE_BOOST
+%.o: revision
+
+revision: studio/utility/get_revision
+	@echo "CPPFLAGS += -DREVISION=$$(studio/utility/get_revision)" > revision
+
+# Force local boost build because adding `studio/utility/get_revision: boost' does not work
+studio/utility/get_revision: studio/utility/get_revision.cpp
+ifdef BUILD_BOOST
+	@$(MAKE) -C boost
+endif
+	$(CXX) -I$(BOOST_PREFIX)/include -Wl,-rpath=$(BOOST_PREFIX)/lib -L$(BOOST_PREFIX)/lib -lboost_filesystem $< -o $@
+
+-include revision
+
+endif
+endif
 
 install: all
 	$(INSTALL) -d $(bindir)
@@ -238,7 +247,7 @@ clean:
 	$(RM) $(EXE_NAMES) $(EXPERIMENTALS) $(LIB_NAMES) *.o *.a *.d *.dpp lpe/*.o lpe/*.dpp aterm/*.o aterm/*.a aterm/*.d svc/*.o svc/*.a svc/*.d svc/*.dpp mcrl2lexer.cpp mcrl2parser.cpp mcrl2parser.hpp mcrl2parser.output lpeinfo lpeparelm lpeconstelm config.status config.log *~ core core.*
 
 distclean: clean
-	$(RM) -r autom4te.cache Makefile config rewr_innerc_aux.h
+	$(RM) -r autom4te.cache Makefile config rewr_innerc_aux.h revision
 
 $(ATERM_NAME): $(ATERM_OBJECTS)
 	$(AR) $(ARFLAGS) $@ $(ATERM_OBJECTS)
@@ -280,7 +289,7 @@ svc/%: CPPFLAGS += -I./ -Iaterm
 
 # Targets that depend on any of the boost libraries
 ifdef USE_BOOST
-lpe%: CPPFLAGS += $(BOOST_HEADERS) -I./ -Iaterm
+lpe%: CPPFLAGS += $(BOOST_INCLUDES) -I./ -Iaterm
 lpe%: CXXFLAGS += -ftemplate-depth-256
 
 $(LPEINFO_NAME) : $(LPEINFO_OBJECTS) $(ATERM_DEP) $(LIBREWR_NAME) boost

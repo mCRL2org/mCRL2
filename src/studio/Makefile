@@ -17,14 +17,6 @@ endif
 
 LDFLAGS                        = $(LIBXML2_LDFLAGS)
 
-# Add revision number
-all: get_revision
-
-CPPFLAGS := -DREVISION=$(shell ../get_revision 2> /dev/null) $(CPPFLAGS)
-
-get_revision:
-	$(CXX) -I$(BOOST_PREFIX)/include $(LIBXML2_CPPFLAGS) -L$(BOOST_PREFIX)/lib -lboost_filesystem utility/get_revision.cpp xml_text_reader.cpp $(LIBXML2_LDFLAGS) -o utility/get_revision
-
 # Other flags
 GUI_CPPFLAGS                   = -DDISABLE_TOOLBAR
 
@@ -51,6 +43,18 @@ TARGETS                        = studio
 .PHONY: all install clean distclean test
 
 all: $(TARGETS)
+	@$(RM) revision
+
+# Add revision number
+%.o: revision
+
+revision: utility/get_revision
+	@echo "CPPFLAGS += -DREVISION=$$(utility/get_revision)" > revision
+
+utility/get_revision: utility/get_revision.cpp
+	$(CXX) -I$(BOOST_PREFIX)/include -L$(BOOST_PREFIX)/lib -lboost_filesystem $< -o $@ 
+
+-include revision
 
 test: all $(TEST_TARGETS)
 
@@ -103,6 +107,6 @@ ifeq ($(HOST_OS),MACOSX)
 endif
 
 clean:
-	$(RM) *.o $(TARGETS) $(TEST_TARGETS) utility/*.o utility/relocator utility/get_revision core
+	$(RM) *.o $(TARGETS) $(TEST_TARGETS) utility/*.o utility/relocator utility/get_revision core revision
 
 distclean: clean
