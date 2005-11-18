@@ -194,24 +194,22 @@ ifdef BUILD_BOOST
 endif
 
 # Add revision number
+ifeq ($(findstring $(MAKECMDGOALS),clean distclean),)
 ifdef USE_LIBXML2
 ifdef USE_BOOST
-ifeq (,$(findstring $(MAKECMDGOALS),clean distclean))
-%.o: revision
-endif
-
-revision: studio/utility/get_revision
-	@echo "CPPFLAGS += -DREVISION=$$(studio/utility/get_revision)" > revision
+revision: utility/get_revision
+	@echo "CPPFLAGS += -DREVISION=$$(utility/get_revision)" > revision
 
 # Force local boost build because adding `studio/utility/get_revision: boost' does not work
-studio/utility/get_revision: studio/utility/get_revision.cpp
+utility/get_revision: utility/get_revision.cpp
 ifdef BUILD_BOOST
 	@$(MAKE) -C boost
 endif
-	$(CXX) -I$(BOOST_PREFIX)/include -Wl,-rpath=$(BOOST_PREFIX)/lib -L$(BOOST_PREFIX)/lib -lboost_filesystem $< -o $@
+	$(CXX) -I$(BOOST_PREFIX)/include -Wl,-rpath=$(libdir) -L$(BOOST_PREFIX)/lib -lboost_filesystem $< -o $@
 
 -include revision
 
+endif
 endif
 endif
 
@@ -248,7 +246,7 @@ endif
 endif
 
 clean:
-	$(RM) $(EXE_NAMES) $(EXPERIMENTALS) $(LIB_NAMES) *.o *.a *.d *.dpp lpe/*.o lpe/*.dpp aterm/*.o aterm/*.a aterm/*.d svc/*.o svc/*.a svc/*.d svc/*.dpp mcrl2lexer.c mcrl2parser.c mcrl2parser.h mcrl2parser.output lpeinfo lpeparelm lpeconstelm config.status config.log *~ core core.*
+	$(RM) $(EXE_NAMES) $(EXPERIMENTALS) $(LIB_NAMES) *.o *.a *.d *.dpp lpe/*.o lpe/*.dpp aterm/*.o aterm/*.a aterm/*.d svc/*.o svc/*.a svc/*.d svc/*.dpp mcrl2lexer.c mcrl2parser.c mcrl2parser.h mcrl2parser.output lpeinfo lpeparelm lpeconstelm config.status config.log *~ core core.* utility/get_revision
 
 distclean: clean
 	$(RM) -r autom4te.cache Makefile config rewr_innerc_aux.h revision

@@ -15,6 +15,7 @@ class NewSpecificationDialog : public wxDialog {
 
     wxString GetName();
     wxString GetFileName();
+    wxString GetFilePath();
     wxString GetPath();
 
   private:

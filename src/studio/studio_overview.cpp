@@ -438,6 +438,9 @@ void StudioOverview::NewProject(wxCommandEvent &event) {
 
     chdir(project_directory.fn_str());
 
+    /* Store default configuration */
+    project_manager.Store();
+
     GetMenuBar()->Enable(ID_PROJECT_STORE, true);
     GetMenuBar()->Enable(ID_SPECIFICATION_NEW, true);
     GetMenuBar()->Enable(wxID_CLOSE, true);
@@ -448,6 +451,7 @@ void StudioOverview::CloseProject(wxCommandEvent &event) {
   /* Reset title bar */
   SetTitle(wxT("Studio - No project"));
 
+  project_manager.Store();
   project_manager.Close();
 
   specifications->DeleteChildren(specifications->GetRootItem());
@@ -461,9 +465,6 @@ void StudioOverview::LoadProject(wxCommandEvent &event) {
   wxDirDialog directory_dialog(this, wxT("Select a project directory"));
 
   if (directory_dialog.ShowModal() == wxID_OK) {
-    const std::list < Specification >*               specification_list = project_manager.GetSpecifications();
-          std::map  < Specification*, wxTreeItemId > to_tree_id;
-
     wxString project_directory = directory_dialog.GetPath();
  
     /* Clean up an open project and clear specification view */
@@ -480,8 +481,9 @@ void StudioOverview::LoadProject(wxCommandEvent &event) {
     /* Set window title (TODO check whether portable)*/
     SetTitle(project_directory.AfterLast('/').Prepend(wxT("Studio - ")));
 
-    std::list < Specification >::const_iterator b = specification_list->end();
-    std::list < Specification >::const_iterator i = specification_list->begin();
+    std::list < Specification >::const_iterator b = project_manager.GetSpecifications()->end();
+    std::list < Specification >::const_iterator i = project_manager.GetSpecifications()->begin();
+    std::map  < Specification*, wxTreeItemId > to_tree_id;
  
     /* Connect a graphic representation to each specification */
     while (i != b) {
@@ -569,7 +571,7 @@ void StudioOverview::NewSpecification(wxCommandEvent &event) {
     wxString name = dialog->GetName();
 
     if (name != wxT("")) {
-      boost::filesystem::path file_name(std::string(dialog->GetFileName().fn_str()));
+      boost::filesystem::path file_name(std::string(dialog->GetFilePath().fn_str()));
 
       if (file_name.string() != "") {
         boost::filesystem::path target_name(project_manager.GetProjectDirectory());
@@ -610,9 +612,14 @@ void StudioOverview::NewSpecification(wxCommandEvent &event) {
               }
               else {
                 target_name = boost::filesystem::path(std::string(project_manager.GetProjectDirectory())) / std::string(target_name.leaf());
-              
-                boost::filesystem::remove(target_name);
-                boost::filesystem::copy_file(boost::filesystem::path(file_name.string()), target_name);
+
+                if (file_name != target_name) {
+                  boost::filesystem::remove(target_name);
+                  boost::filesystem::copy_file(boost::filesystem::path(file_name.string()), target_name);
+                }
+                else {
+                  /* Do something to avoid circular dependencies on a file to be added */
+                }
               }
             }
             else {

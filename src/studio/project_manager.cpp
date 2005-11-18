@@ -95,7 +95,7 @@ bool ProjectManager::Load() {
       reader.Read();
     }
 
-    do {
+    while (!reader.IsEndElement()) {
       /* Add new specification */
       specifications.push_back(dummy);
 
@@ -106,7 +106,7 @@ bool ProjectManager::Load() {
       identifier_resolution[specifications.back().identifier] = &specifications.back();
 
       reader.Read();
-    } while (!reader.IsEndElement());
+    }
   }
   catch(int status) {
     if (status != 0) {

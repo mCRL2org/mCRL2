@@ -72,3 +72,8 @@ includedir         = @includedir@
 infodir            = @infodir@
 mandir             = @mandir@
 
+# Add revision number
+ifeq ($(findstring $(MAKECMDGOALS),clean distclean),)
+%.o: revision
+endif
+

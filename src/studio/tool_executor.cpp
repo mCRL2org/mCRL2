@@ -1,5 +1,7 @@
 #include <algorithm>
 
+#include <boost/filesystem/operations.hpp>
+
 #include "tool_executor.h"
 #include "tool_manager.h"
 #include "child_process.h"
@@ -18,17 +20,21 @@ ToolExecutor::~ToolExecutor() {
 }
 
 bool ToolExecutor::Execute(ToolManager& tool_manager, unsigned int tool_identifier, std::string arguments, std::ostream& stream) {
-  wxString      command(tool_manager.GetTool(tool_identifier)->GetLocation().c_str(), wxConvLocal);
-  ChildProcess* new_process = new ChildProcess(wxPROCESS_REDIRECT);
-  long          process_id  = wxExecute(command.Append(wxT(" ")).Append(wxString(arguments.c_str(), wxConvLocal)), wxEXEC_ASYNC, new_process);
+  boost::filesystem::path tool_path(tool_manager.GetTool(tool_identifier)->GetLocation());
 
-  if (0 <= process_id) {
-    processes[new_process] = process_id;
-
-    return (true);
-  }
-  else {
-    delete new_process;
+  if (tool_path.string() != tool_path.leaf()) {
+    wxString      command(tool_path.string().c_str(), wxConvLocal);
+    ChildProcess* new_process = new ChildProcess(wxPROCESS_REDIRECT);
+    long          process_id  = wxExecute(command.Append(wxT(" ")).Append(wxString(arguments.c_str(), wxConvLocal)), wxEXEC_SYNC, new_process);
+ 
+    if (0 <= process_id) {
+      processes[new_process] = process_id;
+ 
+      return (true);
+    }
+    else {
+      delete new_process;
+    }
   }
 
   return (false);

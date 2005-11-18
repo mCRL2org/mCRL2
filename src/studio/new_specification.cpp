@@ -86,6 +86,11 @@ wxString NewSpecificationDialog::GetPath() {
   return(file_field->GetFilePath().BeforeLast('/'));
 }
 
+/* Precondition the user has pushed the OK button */
+wxString NewSpecificationDialog::GetFilePath() {
+  return(file_field->GetFilePath());
+}
+
 void NewSpecificationDialog::UpdateSelectField(wxCommandEvent& event) {
   wxString filepath = file_field->GetFilePath();
 

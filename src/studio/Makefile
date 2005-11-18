@@ -23,7 +23,8 @@ GUI_CPPFLAGS                   = -DDISABLE_TOOLBAR
 LIBXML2_OBJECTS                = xml_text_reader.o project_manager.o tool_manager.o tool.o specification.o \
 				 project_manager_tester tool_manager_tester
 
-BOOST_OBJECTS                  = studio_overview.o tool_manager.o project_manager.o specification_properties.o settings_manager.o
+BOOST_OBJECTS                  = studio_overview.o tool_manager.o project_manager.o specification_properties.o \
+				 settings_manager.o tool_executor.o
 BOOST_CPPFLAGS                 = -I$(BOOST_PREFIX)/include
 BOOST_LIBRARIES                = -L$(BOOST_PREFIX)/lib -lboost_filesystem
 WX_OBJECTS                     = studio.o studio_overview.o new_specification.o specification_properties.o \
@@ -46,15 +47,15 @@ all: $(TARGETS)
 	@$(RM) revision
 
 # Add revision number
-%.o: revision
+ifeq ($(findstring $(MAKECMDGOALS),clean distclean),)
+revision: ../utility/get_revision
+	@echo "CPPFLAGS += -DREVISION=$$(../utility/get_revision)" > revision
 
-revision: utility/get_revision
-	@echo "CPPFLAGS += -DREVISION=$$(utility/get_revision)" > revision
-
-utility/get_revision: utility/get_revision.cpp
-	$(CXX) -I$(BOOST_PREFIX)/include -L$(BOOST_PREFIX)/lib -lboost_filesystem $< -o $@ 
+../utility/get_revision: ../utility/get_revision.cpp
+	$(CXX) -I$(BOOST_PREFIX)/include -Wl,-rpath=${libdir} -L$(BOOST_PREFIX)/lib -lboost_filesystem $< -o $@ 
 
 -include revision
+endif
 
 test: all $(TEST_TARGETS)
 
@@ -76,7 +77,7 @@ studio: $(GUI_OBJECTS)
 	$(CXX) $(CXXFLAGS) $(CPPFLAGS) $(LDFLAGS) $(GUI_OBJECTS) $(WX_LIBRARIES) $(BOOST_LIBRARIES) -o $@
 
 utility/relocator: utility/relocator.o settings_manager.o $(TOOL_MANAGER_OBJECTS)
-	$(CXX) $(CXXFLAGS) $(CPPFLAGS) $(LDFLAGS) $(BOOST_LIBRARIES) $^ -o $@
+	$(CXX) $(CXXFLAGS) $(CPPFLAGS) $(LDFLAGS) -Wl,-rpath=$(BOOST_PREFIX)/lib -L$(BOOST_PREFIX)/lib -lboost_filesystem $^ -o $@
 
 %.o: %.cpp
 	$(CXX) -c $(CXXFLAGS) $(CPPFLAGS) $< -o $@
@@ -107,6 +108,6 @@ ifeq ($(HOST_OS),MACOSX)
 endif
 
 clean:
-	$(RM) *.o $(TARGETS) $(TEST_TARGETS) utility/*.o utility/relocator utility/get_revision core revision
+	$(RM) *.o $(TARGETS) $(TEST_TARGETS) utility/*.o utility/relocator core revision
 
 distclean: clean
