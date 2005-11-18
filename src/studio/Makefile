@@ -52,7 +52,11 @@ revision: ../utility/get_revision
 	@echo "CPPFLAGS += -DREVISION=$$(../utility/get_revision)" > revision
 
 ../utility/get_revision: ../utility/get_revision.cpp
+ifeq ($(HOST_OS),MACOSX)
+	$(CXX) -I$(BOOST_PREFIX)/include -L$(BOOST_PREFIX)/lib -lboost_filesystem $< -o $@ 
+else
 	$(CXX) -I$(BOOST_PREFIX)/include -Wl,-rpath=${libdir} -L$(BOOST_PREFIX)/lib -lboost_filesystem $< -o $@ 
+endif
 
 -include revision
 endif
@@ -77,8 +81,11 @@ studio: $(GUI_OBJECTS)
 	$(CXX) $(CXXFLAGS) $(CPPFLAGS) $(LDFLAGS) $(GUI_OBJECTS) $(WX_LIBRARIES) $(BOOST_LIBRARIES) -o $@
 
 utility/relocator: utility/relocator.o settings_manager.o $(TOOL_MANAGER_OBJECTS)
+ifeq ($(HOST_OS),MACOSX)
+	$(CXX) $(CXXFLAGS) $(CPPFLAGS) $(LDFLAGS) -L$(BOOST_PREFIX)/lib -lboost_filesystem $^ -o $@
+else
 	$(CXX) $(CXXFLAGS) $(CPPFLAGS) $(LDFLAGS) -Wl,-rpath=$(BOOST_PREFIX)/lib -L$(BOOST_PREFIX)/lib -lboost_filesystem $^ -o $@
-
+endif
 %.o: %.cpp
 	$(CXX) -c $(CXXFLAGS) $(CPPFLAGS) $< -o $@
 
