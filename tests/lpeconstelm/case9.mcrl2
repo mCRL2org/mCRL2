@@ -1,6 +1,6 @@
 % Test Case 9 -- Free Variables
 %
-% In this expample we consider "case9.lpe"
+% In this example we consider "case9.lpe"
 % This is a modified LPE to test the fake found constants: 
 %
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
@@ -25,4 +25,4 @@
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 %
 % if "--nocondition" is used all summands are inspected.
-% The algorithm schould indicate that x is not true.
+% The algorithm should indicate that x is not true.

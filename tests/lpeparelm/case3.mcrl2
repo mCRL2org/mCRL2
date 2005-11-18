@@ -1,6 +1,7 @@
 % Test Case 3
 %
 % Process parameter i should be removed.
+
 act a;
 
 proc X(i: Nat) = a.X(i);

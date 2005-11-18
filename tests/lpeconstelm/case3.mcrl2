@@ -1,7 +1,7 @@
 % Test Case 3 -- No Free Variables
 %  
-% Process parameter i will not be removed. Occurences of proces parameter j are 
-% subtituted by 5 and removed from the process parameter list.
+% Process parameter i will not be removed. Occurrences of process parameter j are 
+% substituted by 5 and removed from the process parameter list.
 
 act action :Nat;
 

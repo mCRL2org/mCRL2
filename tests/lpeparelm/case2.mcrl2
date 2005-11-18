@@ -23,8 +23,8 @@ proc X(i,z,j: Nat)   = (i <  5) -> act1(i)@z.X(i+1,z, j) +
 
 init X(0,5, 1);
 
-% In this LPE proces parameters j can be eliminated
-% Because no occurence of j is can be found in either an
+% In this LPE process parameters j can be eliminated
+% Because no occurrences of j is can be found in either an
 % action, time or condition arguments.
 %
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%

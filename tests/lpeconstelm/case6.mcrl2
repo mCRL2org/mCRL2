@@ -1,6 +1,6 @@
 % Test Case 6 -- No Free Variables
 %  
-% Process parameter i is subtitued by 0 and removed from the list of process
+% Process parameter i is substituted by 0 and removed from the list of process
 % parameters.
 
 act action :Nat;

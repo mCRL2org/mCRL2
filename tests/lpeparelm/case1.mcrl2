@@ -26,7 +26,7 @@ proc X(i: Nat)   = (i <  5) -> act1(i).X(i+1) +
 
 init X(0);
 
-% In this LPE no proces parameters can be eliminated
+% In this LPE no process parameters can be eliminated
 % Because all process parameters are used
 %
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%

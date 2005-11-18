@@ -1,9 +1,9 @@
 % Test Case 4 -- No Free Variables
 %  
-% Process parameter i will not be removed. Occurences of proces parameter j are 
+% Process parameter i will not be removed. Occurrences of process parameter j are 
 % subtituted by 5 and removed from the process parameter list.
 %
-% If --nocondition is used, occurences of process parameters j are NOT 
+% If --nocondition is used, occurrences of process parameters j are NOT 
 % substituted and removed. If --noreachable are summand 
 % "false -> action(j). P(i+1,j+1);" will not be removed. If both options are 
 % used, the LPE remains the same.
