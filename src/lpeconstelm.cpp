@@ -467,14 +467,16 @@ public:
     );
     
     assert(gsIsSpecV1((ATermAppl) rebuild_spec));
-  
+    
     if (p_outputfile.size() == 0){
       if(!p_verbose){
         assert(!p_verbose);
         writeStream(rebuild_spec);
       };
     } else {
-      rebuild_spec.save(p_outputfile);
+      if(!rebuild_spec.save(p_outputfile)){
+         cerr << "Unsuccessfully written outputfile: " << p_outputfile << endl;
+      };
     } 
   }
   

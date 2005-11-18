@@ -101,26 +101,6 @@ private:
     return reverse(result); 
   } 
   
-  /* Debug
-  //
-  bool inline test()
-  {
-    specification rebuild_spec;
-    rebuild_spec = specification(
-      p_spec.sorts(), 
-      p_spec.constructors(),
-      p_spec.mappings(), 
-      p_spec.equations(), 
-      p_spec.actions(), 
-      p_spec.lpe(),
-      p_spec.initial_free_variables(), 
-      p_spec.initial_variables(),
-      p_spec.initial_state()
-    );
-    return (p_spec == rebuild_spec );
-  }
-  */
-  
 public:
 
   // Set output file
@@ -193,7 +173,7 @@ public:
     // In a timecondition: t_i(d,e_i) for some i \in I
     //
     if(p_verbose){
-      cout << "  Searching for used proces parameters:" << endl;
+      cout << "  Searching for used process parameters:" << endl;
     }
     int counter = 0;
     int n = lpe.summands().size();
@@ -242,7 +222,7 @@ public:
     // Needed all process parameters which are not marked have to be eliminated
     //
     if(p_verbose){
-      cout << "  Searching for dependant process parameters" << endl;
+      cout << "  Searching for dependent process parameters" << endl;
     } 
     counter = 0; 
     for(summand_list::iterator currentSummand = lpe.summands().begin(); currentSummand != lpe.summands().end(); currentSummand++){
@@ -283,7 +263,7 @@ public:
         cout << " No process parameters are removed. " << endl;
       }
     } else {  
-      cout << " Number of removed proces parameters : " << p_S.size() << endl;
+      cout << " Number of removed process parameters : " << p_S.size() << endl;
     }
   }
   
@@ -389,16 +369,10 @@ public:
       if(!p_verbose){
         assert(!p_verbose);
         writeStream(rebuild_spec);
-        
-        if (p_outputfile.size() != 0){
-          if(!rebuild_spec.save(p_outputfile)){
-            cerr << "Unsuccesfully written outputfile: " << p_outputfile << endl;
-          };       
-        }
       };
     } else {
       if(!rebuild_spec.save(p_outputfile)){
-         cerr << "Unsuccesfully written outputfile: " << p_outputfile << endl;
+         cerr << "Unsuccessfully written output file: " << p_outputfile << endl;
       };
     }
   }
