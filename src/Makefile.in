@@ -189,12 +189,16 @@ studio: boost
 
 # For building bjam and boost libraries
 boost:
+ifdef BUILD_BOOST
 	@$(MAKE) -C boost $(MAKECMDGOALS)
+endif
 
 # Add revision number
 ifdef USE_LIBXML2
 ifdef USE_BOOST
+ifeq (,$(findstring $(MAKECMDGOALS),clean distclean))
 %.o: revision
+endif
 
 revision: studio/utility/get_revision
 	@echo "CPPFLAGS += -DREVISION=$$(studio/utility/get_revision)" > revision
