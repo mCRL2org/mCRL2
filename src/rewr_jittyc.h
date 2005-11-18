@@ -1,14 +1,16 @@
-#ifndef __REWR_INNERC_H
-#define __REWR_INNERC_H
+#ifndef __REWR_JITTYC_H
+#define __REWR_JITTYC_H
+
+//#define _JITTYC_STORE_TREES
 
 #include <aterm2.h>
 #include "librewrite.h"
 
-class RewriterCompilingInnermost: public Rewriter
+class RewriterCompilingJitty: public Rewriter
 {
 	public:
-		RewriterCompilingInnermost(ATermAppl DataEqnSpec);
-		~RewriterCompilingInnermost();
+		RewriterCompilingJitty(ATermAppl DataEqnSpec);
+		~RewriterCompilingJitty();
 
 		ATermAppl rewrite(ATermAppl Term);
 
@@ -29,7 +31,7 @@ class RewriterCompilingInnermost: public Rewriter
 
 		ATermTable term2int;
 		ATermAppl *int2term;
-		ATermList *innerc_eqns;
+		ATermList *jittyc_eqns;
 
 		void (*so_rewr_init)();
 		ATermAppl (*so_rewr)(ATermAppl);
@@ -38,9 +40,17 @@ class RewriterCompilingInnermost: public Rewriter
 		void (*so_clear_subst)(ATermAppl);
 		void (*so_clear_substs)();
 
-		void calcTerm(FILE *f, ATerm t, int startarg);
-		void implement_tree_aux(FILE *f, ATermAppl tree, int cur_arg, int parent, int level, int cnt, int d, int arity);
-		void implement_tree(FILE *f, ATermAppl tree, int arity, int d, int opid);
+#ifdef _JITTYC_STORE_TREES
+		int write_tree(FILE *f, ATermAppl tree, int *num_states);
+		void tree2dot(ATermAppl tree, char *name, char *filename);
+#endif
+		ATermAppl create_tree(ATermList rules, int opid, int arity);
+		ATermList create_strategy(ATermList rules, int opid);
+
+		void calcTerm(FILE *f, ATerm t, int startarg, ATermList nnfvars, bool rewr = true);
+		void implement_tree_aux(FILE *f, ATermAppl tree, int cur_arg, int parent, int level, int cnt, int d, int arity, bool *used, ATermList nnfvars);
+		void implement_tree(FILE *f, ATermAppl tree, int arity, int d, int opid, bool *used);
+		void implement_strategy(FILE *f, ATermList strat, int arity, int d, int opid);
 		void CompileRewriteSystem(ATermAppl DataEqnSpec);
 
 		ATerm OpId2Int(ATermAppl Term, bool add_opids);

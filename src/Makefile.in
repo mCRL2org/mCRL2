@@ -28,7 +28,7 @@ SVC2FSM_LDFLAGS    = -lrewrite -lsvc -l$(ATERM) -lm $(LIBDL)
 
 #rewrite library definitions
 LIBREWR_NAME       = librewrite.a
-LIBREWR_OBJECTS    = librewrite_c.o librewrite.o rewr_inner.o rewr_jitty.o rewr_innerc.o
+LIBREWR_OBJECTS    = librewrite_c.o librewrite.o rewr_inner.o rewr_jitty.o rewr_innerc.o rewr_jittyc.o
 OBJECTS           += $(LIBREWR_OBJECTS)
 LIBREWR_LDFLAGS    = -l$(ATERM) -lm
 

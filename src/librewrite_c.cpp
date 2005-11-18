@@ -94,6 +94,9 @@ extern "C" RewriteStrategy RewriteStrategyFromString(const char *s)
 	} else if ( !strcmp(s,"jitty") )
 	{
 		return GS_REWR_JITTY;
+	} else if ( !strcmp(s,"jittyc") )
+	{
+		return GS_REWR_JITTYC;
 	} else {
 		return GS_REWR_INVALID;
 	}

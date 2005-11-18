@@ -14,6 +14,8 @@ static AFun nilAFun;
 static AFun opidAFun;
 static unsigned int is_initialised = 0;
 
+#define ATAgetArgument(x,y) ((ATermAppl) ATgetArgument(x,y))
+#define ATLgetArgument(x,y) ((ATermList) ATgetArgument(x,y))
 #define ATAgetFirst(x) ((ATermAppl) ATgetFirst(x))
 #define ATLgetFirst(x) ((ATermList) ATgetFirst(x))
 #define gsIsOpId(x) (ATgetAFun(x) == opidAFun)
@@ -73,7 +75,8 @@ ATerm RewriterJitty::OpId2Int(ATermAppl Term, bool add_opids)
 static AFun *apples;
 static int num_apples = 0;
 
-static AFun getAppl(int arity)
+#define getAppl(x) ((x < num_apples)?apples[x]:getAppl2(x))
+static AFun getAppl2(int arity)
 {
 	int old_apples = num_apples;
 

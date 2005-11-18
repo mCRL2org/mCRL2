@@ -5,6 +5,7 @@
 #include "rewr_inner.h"
 #include "rewr_jitty.h"
 #include "rewr_innerc.h"
+#include "rewr_jittyc.h"
 
 Rewriter::Rewriter()
 {
@@ -159,6 +160,8 @@ Rewriter *createRewriter(ATermAppl DataEqnSpec, RewriteStrategy Strategy)
 		case GS_REWR_INNERC:
 		case GS_REWR_INNERC2:
 			return new RewriterCompilingInnermost(DataEqnSpec);
+		case GS_REWR_JITTYC:
+			return new RewriterCompilingJitty(DataEqnSpec);
 		default:
 			return NULL;
 	}
