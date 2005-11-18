@@ -155,7 +155,7 @@ OBJECTS           := $(sort $(OBJECTS))
 
 #Make rules
 .PHONY: all install clean distclean boost documentation studio experimental
-.PRECIOUS: mcrl2parser.cpp mcrl2lexer.cpp
+.PRECIOUS: mcrl2parser.c mcrl2lexer.c
 
 all: $(EXE_NAMES) $(LIB_NAMES)
 	@$(RM) revision
@@ -244,7 +244,7 @@ endif
 endif
 
 clean:
-	$(RM) $(EXE_NAMES) $(EXPERIMENTALS) $(LIB_NAMES) *.o *.a *.d *.dpp lpe/*.o lpe/*.dpp aterm/*.o aterm/*.a aterm/*.d svc/*.o svc/*.a svc/*.d svc/*.dpp mcrl2lexer.cpp mcrl2parser.cpp mcrl2parser.hpp mcrl2parser.output lpeinfo lpeparelm lpeconstelm config.status config.log *~ core core.*
+	$(RM) $(EXE_NAMES) $(EXPERIMENTALS) $(LIB_NAMES) *.o *.a *.d *.dpp lpe/*.o lpe/*.dpp aterm/*.o aterm/*.a aterm/*.d svc/*.o svc/*.a svc/*.d svc/*.dpp mcrl2lexer.c mcrl2parser.c mcrl2parser.h mcrl2parser.output lpeinfo lpeparelm lpeconstelm config.status config.log *~ core core.*
 
 distclean: clean
 	$(RM) -r autom4te.cache Makefile config rewr_innerc_aux.h revision
@@ -337,10 +337,10 @@ $(ALPHA_NAME) : $(ALPHA_OBJECTS) $(ATERM_DEP) $(LIBREWR_NAME)
 $(LIN_NAME) : $(LIN_OBJECTS) $(ATERM_DEP) $(LIBREWR_NAME)
 	$(CXX) -o $@ $(LIN_OBJECTS) $(LDFLAGS) $(LIN_LDFLAGS)
 
-%.cpp : %.y
+%.c : %.y
 	$(BISON) $(BFLAGS) -o $@ $<
 
-%.cpp : %.l
+%.c : %.l
 	$(LEX) $(LFLAGS) -o$@ $<
 
 ifeq (,$(findstring $(MAKECMDGOALS),clean distclean))

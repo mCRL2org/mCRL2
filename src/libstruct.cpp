@@ -6,6 +6,8 @@
 #include "libstruct.h"
 #include "liblowlevel.h"
 
+extern "C" {
+
 //Local declarations
 //------------------
 
@@ -3508,4 +3510,6 @@ ATermAppl UnitePNIRSorts(ATermAppl SortExpr1, ATermAppl SortExpr2)
     //SortExpr1 and SortExpr2 are both PNI sorts
     return UnitePNISorts(SortExpr1, SortExpr2);
   }
+}
+
 }

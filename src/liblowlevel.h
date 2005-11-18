@@ -9,6 +9,10 @@
 #include <nt.h>
 #endif
 
+#ifdef __cplusplus
+extern "C" {
+#endif
+
 //Global precondition: the ATerm library has been initialised
 
 //String manipulation
@@ -171,5 +175,9 @@ char *gsStringDub(const char *n, const int inc);
 
 int NrOfChars(int n);
 //Ret: the number of characters of the decimal representation of n
+
+#ifdef __cplusplus
+}
+#endif
 
 #endif

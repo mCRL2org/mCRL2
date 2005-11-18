@@ -4,6 +4,10 @@
 #include "libprint_types.h"
 #include "liblowlevel.h"
 
+#ifdef __cplusplus
+extern "C" {
+#endif
+
 //This file contains C specific printing functions
 
 //Global preconditions:
@@ -92,3 +96,7 @@ inline static void gsDebugMsgFunc(const char *FuncName, char *Format, ...)
 {
   GS_DEBUG_MSG_FUNC(FuncName,Format)
 }
+
+#ifdef __cplusplus
+}
+#endif

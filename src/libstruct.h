@@ -1,6 +1,10 @@
 #include <stdbool.h>
 #include <aterm2.h>
 
+#ifdef __cplusplus
+extern "C" {
+#endif
+
 //Global precondition: the ATerm library has been initialised
 
 //Functions for the internal ATerm structure
@@ -1186,3 +1190,7 @@ ATermAppl gsGetDataExprHead(ATermAppl DataExpr);
 ATermList gsGetDataExprArgs(ATermAppl DataExpr);
 //Pre: DataExpr is a data expression
 //Ret: the arguments of the data expression
+
+#ifdef __cplusplus
+}
+#endif

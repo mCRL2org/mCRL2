@@ -3,6 +3,8 @@
 #define PRINT_C
 #include "libprint_impl.h"
 
+extern "C" {
+
 void PrintPart_C(FILE *OutStream, const ATerm Part, t_pp_format pp_format)
 {
   PrintPart__C(OutStream, Part, pp_format);
@@ -129,4 +131,6 @@ int gsvfprintf(FILE *stream, const char *format, va_list args)
     }
   }
   return result;
+}
+
 }

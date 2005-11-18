@@ -6,6 +6,8 @@
 
 #include "liblowlevel.h"
 
+extern "C" {
+
 //String manipulation
 //-------------------
 
@@ -439,4 +441,6 @@ int NrOfChars(int n)
     return 1;
   else //n < 0
     return (int) ceil(log10((double) abs(n))) + 1;
+}
+
 }
