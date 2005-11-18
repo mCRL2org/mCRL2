@@ -1,0 +1,9 @@
+% Test Case 4
+%
+% Process parameter j should be removed
+
+act a: Nat; 
+
+proc X(i,j: Nat) = a(i). X(i,j);
+            
+init X(0,1);

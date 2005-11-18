@@ -1,0 +1,28 @@
+% Test Case 9 -- Free Variables
+%
+% In this expample we consider "case9.lpe"
+% This is a modified LPE to test the fake found constants: 
+%
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+% 
+% act  a;
+%
+% var  freevar1,freevar2: Nat;
+% proc P(s3: Pos, y,x: Nat) =
+%       (s3 == 2) ->
+%         a .
+%         P(s3 := 1, y := freevar1)
+%     + (s3 == 2) ->
+%         a .
+%         P(s3 := 1, y := freevar2, x := y)
+%     + (s3 == 1 || s3 == 2) ->
+%         a .
+%         P(s3 := 1, y := 2, x := 1);
+%
+% var  freevar,freevar0: Nat;
+% init P(s3 := 1, y := freevar, x := freevar0);
+%
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+%
+% if "--nocondition" is used all summands are inspected.
+% The algorithm schould indicate that x is not true.

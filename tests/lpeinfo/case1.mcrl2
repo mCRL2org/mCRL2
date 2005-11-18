@@ -1,0 +1,17 @@
+% Test Case 1
+% 
+% Output should be:
+%  
+% Number of summands          : 3
+% Number of free variables    : 2
+% Number of process parameters: 3
+% Number of actions           : 3
+
+
+act act1, act2, act3: Nat;
+
+proc X(i: Nat)   = (i <  5) -> act1(i).X(i+1) +
+                   (i == 5) -> act3(i).Y(i, i);
+     Y(i,j: Nat) = act2(j).Y(i,j+1);               
+
+init X(0);

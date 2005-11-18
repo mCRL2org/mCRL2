@@ -1,0 +1,9 @@
+% Test Case 2 -- No Free Variables
+%  
+% Process parameter i will not be removed.
+
+act action :Nat;
+
+proc P(i: Nat) = action(i). P(i+1);
+
+init P(0);

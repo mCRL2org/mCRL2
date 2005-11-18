@@ -1,0 +1,10 @@
+% Test Case 1 -- No Free Variables
+%  
+% Process parameter i is subtitued by 0 and removed from the list of process
+% parameters.
+
+act action :Nat;
+
+proc P(i: Nat) = action(i). P(i);
+
+init P(0);

@@ -1,0 +1,36 @@
+% Test Case 2
+%
+% The following LPE is generated:  
+% 
+% act  act1,act2,act3: Nat;
+%
+% proc P(i,z,j: Nat) =
+%       (i == 5) ->
+%         act3(i) .
+%         P(z := i,j := 4)
+%     + (i < 5) ->
+%         act1(i) @ Nat2Real(z) .
+%         P(i := i + 1);
+%
+% init P(i := 0, z := Pos2Nat(5), j := Pos2Nat(1));
+%
+% from this mcrl2 specification:
+
+act act1, act2, act3: Nat;
+
+proc X(i,z,j: Nat)   = (i <  5) -> act1(i)@z.X(i+1,z, j) +
+                       (i == 5) -> act3(i).X(i, j, 4);
+
+init X(0,5, 1);
+
+% In this LPE proces parameters j can be eliminated
+% Because no occurence of j is can be found in either an
+% action, time or condition arguments.
+%
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+%% NOTE:                                                  %%
+%% =====                                                  %%
+%%                                                        %%
+%% Use: mcrl22lpe --no-cluster $DIR$/case2.mcrl2          %%
+%%                                                        %%
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%

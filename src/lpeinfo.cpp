@@ -5,8 +5,8 @@
 // ----------------------------------------------------------------------
 //
 // file          : lpeinfo 
-// date          : 15-11-2005
-// version       : 0.5
+// date          : 18-11-2005
+// version       : 0.5.1
 //
 // author(s)     : Frank Stappers  <f.p.m.stappers@student.tue.nl>
 //
@@ -168,7 +168,7 @@ int main(int ac, char* av[])
     if (vm.count("pars"))
 		  {obj.setPars(true);} else
 		  {obj.setPars(false);}
-    cout << filename << endl;
+
     if(filename.size() != 0 ){
       if (obj.loadFile(filename)){obj.display() ;};
     } else {

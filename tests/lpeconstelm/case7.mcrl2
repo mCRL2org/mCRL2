@@ -1,0 +1,41 @@
+% Test Case 7 -- Free Variables
+%  
+% Process parameters s3, j and i are marked constant and all occurenses are
+% substituted. 
+% 
+% If "--no-condition" is used only j is marked constant and all ocurences of j
+% are substituted.
+
+act action :Nat;
+
+proc P(i,j: Nat) = (i > 5) -> action(i). P(i+1,j) +
+                   (i == 5) -> action(j). Q(j);
+     Q(i: Nat)   = action(i). Q(i);
+
+init P(0,0);
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+%% NOTE:                                                  %%
+%% =====                                                  %%
+%%                                                        %%
+%% Use: mcrl22lpe --no-cluster $DIR$/case7.mcrl2          %%
+%%                                                        %%
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+%%                                                        %%
+%% var  freevar,freevar0: Nat;                            %%
+%% proc P(s3: Pos, j,i: Nat) =                            %%
+%%        (s3 == 2) ->                                    %%
+%%          action(i) .                                   %%
+%%          P(s3 := 2, j := freevar0)                     %%
+%%      + (s3 == 1 && 5 < i ) ->                          %%
+%%          action(i) .                                   %%
+%%          P(s3 := 1, i := i + 1)                        %%
+%%      + (s3 == 1 && i == 5) ->                          %%
+%%          action(j) .                                   %%
+%%          P(s3 := 2, j := freevar, i := j);             %%
+%%                                                        %%
+%% init P(s3 := 1, j := 0, i := 0);                       %%
+%%                                                        %%
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%

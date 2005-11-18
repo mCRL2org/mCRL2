@@ -6,7 +6,7 @@
 //
 // file          : lpeconstelm 
 // date          : 16-11-2005
-// version       : 0.5.1
+// version       : 0.5.2
 //
 // author(s)     : Frank Stappers  <f.p.m.stappers@student.tue.nl>
 //
@@ -42,7 +42,7 @@ po::variables_map vm;
 
 //Constanten
 //Private:
-  #define p_version "lpeconstelm - version 0.5.1 ";
+  #define p_version "lpeconstelm - version 0.5.2 ";
 //Public:
 
 class ConstelmObj
@@ -331,15 +331,25 @@ public:
   // post: p_S contains the indices without the process parameters which have a singleton constructor
   void removeSingleton()
   {
+    bool empty = true;
     sort_list rebuild_sort = p_spec.sorts();
     findSingleton();
+    if(p_verbose){
+    cout <<
+      "Constant process parameters which are not substituted and " << endl <<
+      "removed [--nosingleton]:" << endl;
+    }
     for(set< int >::iterator i = p_S.begin(); i != p_S.end(); i++){
       if (p_singletonSort.find(p_initAssignments[*i].lhs().type())  != p_singletonSort.end()){
         p_S.erase(*i);
         if (p_verbose){
-          cout << "  Constant process parameter " << p_initAssignments[*i].lhs().pp() << " will not be subtituted and removed. (--nosingleton) " << endl;
+          cout << "  " << p_initAssignments[*i].lhs().pp() << " : " << p_initAssignments[*i].lhs().type().pp() << endl;
+          empty = false;
         }
       }
+    }
+    if (empty){
+      cout << "  []" << endl;
     }
   }
 
@@ -580,9 +590,11 @@ public:
     //---------------------------------------------------------------
   
     bool    same        ;
+    bool    foundFake = true;
     int     counter  = 0;
     int     cycle    = 0;
     p_newVarCounter  = 0;
+    
     LPE lpe          = p_spec.lpe();
     gsRewriteInit(gsMakeDataEqnSpec(aterm_list(p_spec.equations())), GS_REWR_INNER3); 
 
@@ -602,75 +614,91 @@ public:
     for (data_variable_list::iterator di = lpe.free_variables().begin(); di != lpe.free_variables().end(); di++){
       p_freeVarSet.insert(di->to_expr());
     } 
+    
+    int n = p_spec.initial_assignments().size();
 
-    //---------------------------------------------------------------
-    //---------------------   Init end     --------------------------
-    //---------------------------------------------------------------
 
-    //---------------------------------------------------------------
-    //---------------------   Body begin   --------------------------
-    //---------------------------------------------------------------
-    same = false;
-    while (!same){
-      same = true;
-      if (p_verbose){
-        cout << "Cycle:" << cycle++ << endl;
-      }
-      int summandnr = 1;
-      for(summand_list::iterator currentSummand = lpe.summands().begin(); currentSummand != lpe.summands().end() ;currentSummand++ ){
-        if ( (p_visitedSummands.find(*currentSummand) != p_visitedSummands.end()) || (conditionTest(currentSummand->condition()))) {
-          if(p_verbose){
-            cout << "  Summand: "<< summandnr++ << endl;
-          }
-          p_visitedSummands.insert(*currentSummand); 
-          //----------          Debug
-          //          printCurrentState();
-          calculateNextState(currentSummand->assignments());
-          //----------          Debug
-          //          printCurrentState();
-          same = cmpCurrToNext() && same ;  
-          if (!same) {break;}                                           //Break reduces time to complete 
+    while (foundFake){
+      foundFake = false;
+      //---------------------------------------------------------------
+      //---------------------   Init end     --------------------------
+      //---------------------------------------------------------------
+  
+      //---------------------------------------------------------------
+      //---------------------   Body begin   --------------------------
+      //---------------------------------------------------------------  
+  
+      same = false;  
+      while (!same){
+        same = true;
+        if (p_verbose){
+          cout << "Cycle:" << cycle++ << endl;
         }
+        int summandnr = 1;
+        for(summand_list::iterator currentSummand = lpe.summands().begin(); currentSummand != lpe.summands().end() ;currentSummand++ ){
+          if ( (p_visitedSummands.find(*currentSummand) != p_visitedSummands.end()) || (conditionTest(currentSummand->condition()))) {
+            if(p_verbose){
+              cout << "  Summand: "<< summandnr++ << endl;
+            }
+            p_visitedSummands.insert(*currentSummand); 
+            //----------          Debug
+            //          printCurrentState();
+            calculateNextState(currentSummand->assignments());
+            //----------          Debug  
+            //          printCurrentState();
+            same = cmpCurrToNext() && same ; 
+            //ischanged = ischanged || !cmpCurrToNext();
+            //if (!same) {break;}                                           //Break reduces time to complete; need to find out when to brake
+          }
+        }
+        p_currentState = p_newCurrentState;
       }
-      p_currentState = p_newCurrentState;
-    }
-    //---------------------------------------------------------------
-    //---------------------   Body end   ----------------------------
-    //---------------------------------------------------------------
 
-    //---------------------FeeVar aftercheck-------------------------
-    //
-    //                      |
-    //                      |
-    // Covers:              V
-    //   proc: P(a,b)  = (_,a)+
-    //                   (1,8)
-    //                     
-    //   init: P(_,_)
-    // 
-    //                                Each _ is a unique FreeVariable
-    // The arrow is detected with the FeeVar aftercheck
-    if(!p_freeVarSet.empty()){
-      if (p_verbose){
-        cout << "Free Variable checkup:" << endl;
+      //---------------------------------------------------------------
+      //---------------------   Body end   ----------------------------
+      //---------------------------------------------------------------
+
+      //---------------------FeeVar aftercheck-------------------------
+      //
+      //                      |
+      //                      |
+      // Covers:              V
+      //   proc: P(a,b)  = (_,a)+
+      //                   (1,8)
+      //                     
+      //   init: P(_,_)
+      // 
+      //                                Each _ is a unique FreeVariable
+      // The arrow is detected with the FeeVar aftercheck
+    
+      if(!p_freeVarSet.empty()){
+        if (p_verbose){
+          cout << "Free Variable checkup:" << endl;
+        }
+      
+        int n = p_V.size();
+        for(set< LPE_summand>::iterator i = p_visitedSummands.begin(); i != p_visitedSummands.end() ; i++){
+          calculateNextState(i->assignments());
+          cmpCurrToNext();
+        }
+
+        p_currentState = p_newCurrentState;
+        if (p_verbose){
+          cout << "  Detected "<<p_V.size() - n << " fake constant process parameters" <<endl;
+          foundFake = ((p_V.size() - n) != 0);
+        }         
+
       }
-      for(set< LPE_summand>::iterator i = p_visitedSummands.begin(); i != p_visitedSummands.end() ; i++){
-        calculateNextState(i->assignments());
-        cmpCurrToNext();
-      }
-      int n = p_V.size();
-      p_currentState = p_newCurrentState;
-      if (p_verbose){
-        cout << "  Found "<<p_V.size() - n << " fake constant process parameters" <<endl;
-      }      
+
     }
+    
     //---------------------------------------------------------------
 
     //---------------------------------------------------------------
     // Construct S    
     //
     set< int > S;
-    int  n = lpe.process_parameters().size(); 
+    n = lpe.process_parameters().size(); 
     for(int j=0; j < n ; j++){
       S.insert(j);
     };

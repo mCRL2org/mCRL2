@@ -1,0 +1,10 @@
+% Test Case 3 -- No Free Variables
+%  
+% Process parameter i will not be removed. Occurences of proces parameter j are 
+% subtituted by 5 and removed from the process parameter list.
+
+act action :Nat;
+
+proc P(i, j: Nat) = action(j). P(i+1, j);
+
+init P(0,5);

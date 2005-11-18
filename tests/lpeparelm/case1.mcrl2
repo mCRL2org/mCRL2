@@ -1,0 +1,38 @@
+% Test Case 1
+%
+% The following LPE is generated:  
+% 
+% proc P(s3: Pos, i,j: Nat) =
+%       (s3 == 1 && i < 5) ->
+%         act1(i) .
+%         P(s3 := 1, i := i + 1, j := freevar0)
+%     + (s3 == 1 && i == 5) ->
+%         act3(i) .
+%         P(s3 := 2, j := i)
+%     + (s3 == 2) ->
+%         act2(j) .
+%         P(s3 := 2, j := j + 1);
+%
+% var  freevar: Nat;
+% init P(s3 := 1, i := 0, j := freevar);
+%
+% from this mcrl2 specification:
+
+act act1, act2, act3: Nat;
+
+proc X(i: Nat)   = (i <  5) -> act1(i).X(i+1) +
+                   (i == 5) -> act3(i).Y(i, i);
+     Y(i,j: Nat) = act2(j).Y(i,j+1);               
+
+init X(0);
+
+% In this LPE no proces parameters can be eliminated
+% Because all process parameters are used
+%
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+%% NOTE:                                                  %%
+%% =====                                                  %%
+%%                                                        %%
+%% Use: mcrl22lpe --no-cluster $DIR$/case1.mcrl2          %%
+%%                                                        %%
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%

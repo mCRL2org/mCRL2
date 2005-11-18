@@ -1,0 +1,23 @@
+% Test Case 6 -- No Free Variables
+%  
+% Process parameter i is subtitued by 0 and removed from the list of process
+% parameters.
+
+act action :Nat;
+
+proc P(i: Nat) = action(i). Q(i);
+     Q(i: Nat) = action(i). P(i);
+
+init P(0);
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+%% NOTE:                                                  %%
+%% =====                                                  %%
+%%                                                        %%
+%% Usage of: mcrl22lpe $DIR$/case6.mcrl2                  %%
+%% + indicates the second process parameter is constant   %%
+%% Usage of: mcrl22lpe --no-cluster $DIR$/case6.mcrl2     %%
+%% + indicates the second process parameter is constant   %%
+%% In this case they are the same                         %%
+%%                                                        %%
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
