@@ -81,3 +81,15 @@ augroup filetypedetect
   au! BufRead,BufNewFile *.mcrl         setfiletype mcrl
   au! BufRead,BufNewFile *.mcrl2        setfiletype mcrl2
 augroup END
+
+Installation under MACOSX
+=========================
+In order to install the toolset under MACOS10.3 or higher 
+the environment variable MACOSX_DEPLOYMENT_TARGET must be set to
+10.3. You can achieve this by adding a line
+
+setenv MACOSX_DEPLOYMENT_TARGET=10.3
+
+to the .cshrc file in your home directory.
+
+
