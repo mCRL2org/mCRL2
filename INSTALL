@@ -88,7 +88,7 @@ In order to install the toolset under MACOS10.3 or higher
 the environment variable MACOSX_DEPLOYMENT_TARGET must be set to
 10.3. You can achieve this by adding a line
 
-setenv MACOSX_DEPLOYMENT_TARGET=10.3
+setenv MACOSX_DEPLOYMENT_TARGET 10.3
 
 to the .cshrc file in your home directory.
 
