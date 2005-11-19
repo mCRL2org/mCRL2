@@ -1,5 +1,5 @@
 #define NAME "mcrl22lpe"
-#define VERSION "0.1.1"
+#define VERSION "0.2"
 #define INFILEEXT ".mcrl2"
 #define OUTFILEEXT ".lpe"
 
@@ -30,8 +30,6 @@ typedef enum { phNone, phParse, phTypeCheck, phAlphaRed, phDataImpl } t_phase;
 //Functions used by the main program
 static ATermAppl linearise_file(char *infilename, t_lin_options lin_options,
   t_phase end_phase, bool alpha);
-static void calc_infilename(char *infilename, char *specname);
-static void calc_outfilename(char *outfilename, char *infilename);
 static void AltIllegalOptWarning(char opt);
 static void PrintMoreInfo(char *Name);
 static void PrintVersion(void);
@@ -55,10 +53,8 @@ int main(int argc, char *argv[])
   bool opt_nofreevars = false;
   bool opt_check_only = false;
   t_phase opt_end_phase = phNone;
-  bool opt_stdout = false;
   #define ShortOptions   "0123cnrwbaofep:hqvd"
-  #define StdOutOption   CHAR_MAX + 1
-  #define VersionOption  StdOutOption + 1
+  #define VersionOption  CHAR_MAX + 1
   struct option LongOptions[] = {
     { "stack",       no_argument,       NULL, '0' },
     { "regular",     no_argument,       NULL, '1' },
@@ -74,7 +70,6 @@ int main(int argc, char *argv[])
     { "no-freevars", no_argument,       NULL, 'f' },
     { "check-only",  no_argument,       NULL, 'e' },
     { "end-phase",   required_argument, NULL, 'p' },
-    { "stdout",      no_argument,       NULL, StdOutOption },
     { "help",        no_argument,       NULL, 'h' },
     { "version",     no_argument,       NULL, VersionOption },
     { "quiet",       no_argument,       NULL, 'q' },
@@ -160,9 +155,6 @@ int main(int argc, char *argv[])
           return 1;
         }
         break;
-      case StdOutOption:  /* stdout */
-        opt_stdout = true;
-        break;
       case 'h': /* help */
         PrintHelp(argv[0]);
         return 0;
@@ -208,28 +200,30 @@ int main(int argc, char *argv[])
     if (opt_nofreevars)              AltIllegalOptWarning('f');
   }
   //check for wrong number of arguments
+  char *infilename   = NULL;
+  char *outfilename = NULL;
   int noargc; //non-option argument count
   noargc = argc - optind;
-  if (noargc <= 0) {
-    fprintf(stderr, "%s: too few arguments\n", NAME);
-    PrintMoreInfo(argv[0]);
-    return 1;
-  } else if (noargc > 1) {
+  if (noargc > 2) {
     fprintf(stderr, "%s: too many arguments\n", NAME);
-    PrintMoreInfo(argv[0]);
-    return 1;
+   	PrintMoreInfo(argv[0]);
+   	return 1;
+  } else {
+    //noargc >= 0 && noargc <= 2
+    if (noargc > 0) {
+      if (strcmp(argv[optind],"-") != 0)
+        infilename = strdup(argv[optind]);
+    }
+    if (noargc == 2) {
+      outfilename = strdup(argv[optind + 1]);
+    }
   }
-  assert(noargc == 1);
 
   //initialise ATerm library
   ATerm stack_bottom;
   ATinit(argc,argv,&stack_bottom);
   //enable constructor functions
   gsEnableConstructorFunctions();
-
-  //determine input filename
-  char infilename[strlen(argv[optind]) + strlen(INFILEEXT) + 1];
-  calc_infilename(infilename, argv[optind]);
 
   //set linearisation parameters
   t_lin_options lin_options;
@@ -250,20 +244,20 @@ int main(int argc, char *argv[])
     return 1;
   }
   if (opt_check_only) {
-    fprintf(stdout,
-      "The file '%s' contains a well-formed mCRL2 specification.\n",
-      infilename);
+    if (infilename == NULL) {
+      fprintf(stdout, "stdin");
+    } else {
+      fprintf(stdout, "The file '%s'", infilename);
+    }
+    fprintf(stdout, " contains a well-formed mCRL2 specification.\n");
     return 0;
   } else {
     //store the result
-    if (opt_stdout) {
+    if (outfilename == NULL) {
       gsVerboseMsg("saving result to stdout...\n");
       ATwriteToBinaryFile((ATerm) result, stdout);
       fprintf(stdout, "\n");
-    } else { //!opt_stdout
-      //determine output filename
-      char outfilename[strlen(infilename) + strlen(OUTFILEEXT) + 1];
-      calc_outfilename(outfilename, infilename);
+    } else { //outfilename != NULL
       //open output filename
       FILE *outstream = fopen(outfilename, "wb");
       if (outstream == NULL) {
@@ -281,17 +275,29 @@ int main(int argc, char *argv[])
 ATermAppl linearise_file(char *infilename, t_lin_options lin_options,
   t_phase end_phase, bool alpha)
 {
-  assert(infilename != NULL);
   //open input filename
-  FILE *instream = fopen(infilename, "rb");
-  if (instream == NULL) {
-    gsErrorMsg("cannot open input file '%s'\n", infilename);
-    return NULL;
+  FILE *instream;
+  if (infilename == NULL) {
+    instream = stdin;
+  } else {
+    instream = fopen(infilename, "rb");
+    if (instream == NULL) {
+      gsErrorMsg("cannot open input file '%s'\n", infilename);
+      return NULL;
+    }
   }
+  assert(instream != NULL);
   //parse specification from instream
-  gsVerboseMsg("parsing input file '%s'...\n", infilename);
+  gsVerboseMsg("parsing input ");
+  if (infilename == NULL) {
+    gsVerboseMsg("from stdin...\n");
+  } else {
+    gsVerboseMsg("file '%s'...\n", infilename);
+  }
   ATermAppl result = mcrl2Parse(instream);
-  fclose(instream);
+  if (infilename != NULL) {
+    fclose(instream);
+  }
   if (result == NULL) 
   {
     gsErrorMsg("parsing failed\n");
@@ -354,38 +360,6 @@ ATermAppl linearise_file(char *infilename, t_lin_options lin_options,
   return result; 
 }
 
-void calc_infilename(char *infilename, char *specname)
-{
-  //Pre : infilename is able to store specname appended with INFILEEXT
-  //Post: infilename represents specname, in which INFILEEXT is appended
-  //      if it didn't already end with it
-  strcpy(infilename, specname);
-  char *file_ext = strrchr(infilename, '.');
-  if (file_ext == NULL) {
-    //'.' does not occur in infilename, append INFILEEXT 
-    strcat(infilename, INFILEEXT);
-  } else { //file_ext != NULL
-    if (strcmp(file_ext, INFILEEXT) != 0) {
-      //file_ext is not equal to INFILEEXT, append INFILEEXT
-      strcat(infilename, INFILEEXT);
-    }
-  }
-}
-
-void calc_outfilename(char *outfilename, char *infilename)
-{
-  //Pre: infilename ends with INFILEEXT
-  strcpy(outfilename, infilename);
-  //replace suffix INFILEEXT by OUTFILEEXT
-  outfilename[strlen(outfilename) - strlen(INFILEEXT)] = '\0';
-  strcat(outfilename, OUTFILEEXT);
-  //strip path
-  char *no_path = strrchr(outfilename, '/');
-  if (no_path != NULL) {
-    strcpy(outfilename, no_path + 1);
-  }
-}
-
 void AltIllegalOptWarning(char opt)
 {
   gsWarningMsg(
@@ -412,18 +386,16 @@ void PrintMoreInfo(char *Name)
 
 void PrintVersion(void)
 {
-  unsigned int svn_revision;
-  sscanf("$Revision$", "$%*s %u $", &svn_revision);
-  fprintf(stderr,"%s version: %d (SVN)\n", NAME, svn_revision);
+  fprintf(stderr,"%s %s (revision %d)\n", NAME, VERSION, REVISION);
 }
 
 void PrintHelp(char *Name)
 {
   fprintf(stderr,
-    "Usage: %s [OPTION]... INFILE\n"
-    "Linearises the mCRL2 specification in INFILE and writes the resulting LPE to a\n"
-    "file. If INFILE does not have the extension 'mcrl2', INFILE.mcrl2 is used. In\n"
-    "the name of the output file, the extension 'mcrl2' is replaced by 'lpe'.\n"
+    "Usage: %s [OPTION]... [INFILE [OUTFILE]]\n"
+    "Linearises the mCRL2 specification in INFILE tand writes the resulting LPE to\n"
+    "OUTFILE. If OUTFILE is not present, stdout is used. If INFILE is not present,\n"
+    "stdin is used.\n"
     "\n"
     "Mandatory arguments to long options are mandatory for short options too.\n"
     "  -0, --stack           the LPE is generated using stack datatypes;\n"
@@ -455,7 +427,6 @@ void PrintHelp(char *Name)
     "  -p  --end-phase=PHASE stop linearisation after phase PHASE and output the\n"
     "                        result; PHASE can be 'pa' (parse), 'tc' (type check),\n"
     "                        'ar' (alphabet reduction) or 'di' (data implementation)\n"
-    "      --stdout          the generated LPE is written to stdout\n"
     "  -h, --help            display this help\n"    
     "      --version         display version information\n"
     "  -q, --quiet           do not display warning messages\n"

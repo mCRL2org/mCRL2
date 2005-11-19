@@ -1,5 +1,5 @@
 #define  NAME      "lpepp"
-#define  LVERSION  "0.4.2"
+#define  VERSION   "0.4.3"
 #define  AUTHOR    "Aad Mathijssen"
 
 #include <stdio.h>
@@ -118,8 +118,7 @@ int main(int argc, char* argv[]) {
   } else {
     //NoArgc >= 0 && NoArgc <= 2
     if (NoArgc > 0) {
-      if (strcmp(argv[optind],"-") != 0)
-        SpecFileName = strdup(argv[optind]);
+      SpecFileName = strdup(argv[optind]);
     }
     if (NoArgc == 2) {
       OutputFileName = strdup(argv[optind + 1]);
@@ -232,7 +231,7 @@ void PrintUsage(char *Name) {
   fprintf(stderr, 
     "Usage: %s [OPTION]... [INFILE [OUTFILE]]\n"
     "Print the mCRL2 LPE in INFILE to OUTFILE in a human readable format. If OUTFILE\n"
-    "is not present, stdout is used. If INFILE is not present or -, stdin is used.\n"
+    "is not present, stdout is used. If INFILE is not present, stdin is used.\n"
     "\n"
     "Mandatory arguments to long options are mandatory for short options too.\n"
     "  -f, --format=FORMAT   the LPE is printed using the supplied FORMAT:\n"
@@ -253,8 +252,7 @@ void PrintMoreInfo(char *Name) {
 }
 
 void PrintVersion(void) {
-  fprintf(stderr, "%s %s\nWritten by %s.\n", 
-    NAME, LVERSION, AUTHOR);  
+  fprintf(stderr,"%s %s (revision %d)\n", NAME, VERSION, REVISION);
 }
 
 void PrintPPFormat(FILE *stream, t_pp_format pp_format)
