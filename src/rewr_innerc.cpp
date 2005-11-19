@@ -2044,12 +2044,18 @@ void RewriterCompilingInnermost::CompileRewriteSystem(ATermAppl DataEqnSpec)
 
   fclose(f);
   fprintf(stderr,"Compiling rewriter...");fflush(stderr);
-#ifdef __WXMAC__
+#ifdef __APPLE__
+// for this to work use: "setenv MACOSX_DEPLOYMENT_TARGET 10.3" to
+// set the environment variable setenv MACOSX_DEPLOYMENT_TARGET to 10.3
   sprintf(t,"gcc -c %s %s %s.c",INNERC_CPPFLAGS,INNERC_CFLAGS,s);
-  gsfprintf(stderr,"%s\n",t);
+#ifndef NDEBUG
+  gsfprintf(stderr,"\n%s\n",t);
+#endif
   system(t);
-  sprintf(t,"gcc %s -bundle -undefined dynamic_lookup -o %s.so %s.o",INNERC_LDFLAGS,s,s);
+  sprintf(t,"gcc -bundle -undefined dynamic_lookup -o %s.so %s.o",s,s);
+#ifndef NDEBUG
   gsfprintf(stderr,"%s\n",t);
+#endif
   system(t);
 #else
   sprintf(t,"gcc -c %s %s -Wno-unused -O3 -rdynamic %s.c",INNERC_CPPFLAGS,INNERC_CFLAGS,s);
