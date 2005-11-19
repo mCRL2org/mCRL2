@@ -393,7 +393,7 @@ void PrintHelp(char *Name)
 {
   fprintf(stderr,
     "Usage: %s [OPTION]... [INFILE [OUTFILE]]\n"
-    "Linearises the mCRL2 specification in INFILE tand writes the resulting LPE to\n"
+    "Linearises the mCRL2 specification in INFILE and writes the resulting LPE to\n"
     "OUTFILE. If OUTFILE is not present, stdout is used. If INFILE is not present,\n"
     "stdin is used.\n"
     "\n"
