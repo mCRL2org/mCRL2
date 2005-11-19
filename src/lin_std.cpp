@@ -29,6 +29,7 @@
 #include "librewrite_c.h"
 #include "libalpha.h"
 
+
 #define STRINGLENGTH 256
 
 static bool timeIsBeingUsed = false;
@@ -2129,6 +2130,10 @@ static ATermAppl wraptime(
   if (gsIsMultAct(body))
   { return gsMakeAtTime(body,time);
   }
+ 
+  if (gsIsDelta(body))
+  { return gsMakeAtTime(body,time);
+  }
 
   gsErrorMsg("Expect pCRL process in wraptime %T\n",body);
   stop();
@@ -2872,6 +2877,10 @@ static ATermAppl distributeTime(
   }
 
   if (gsIsMultAct(body))
+  { return gsMakeAtTime(body,time);
+  }
+  
+  if (gsIsDelta(body))
   { return gsMakeAtTime(body,time);
   }
 
