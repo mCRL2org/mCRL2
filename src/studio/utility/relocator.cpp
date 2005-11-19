@@ -1,7 +1,6 @@
 #include <getopt.h>
 #include <string.h>
 #include <iostream>
-#include <cstdio>
 
 #include "../tool_manager.h"
 #include "../settings_manager.h"

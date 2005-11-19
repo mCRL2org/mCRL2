@@ -163,6 +163,7 @@ class ToolObject {
     std::string selector;       /* Optional command line argument that selects this object (e.g. `--input-file') */
     std::string formalism;      /* The formalism of the object */
     std::string default_format; /* An optional default format */
+    bool        optional;       /* Whether the input should be represented in the final command */
  
     /* Maps a format to a selector (e.g. trs is mapped to `--type trs') */
     std::map < std::string, std::string > format_selectors;

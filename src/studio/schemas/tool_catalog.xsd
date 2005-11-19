@@ -39,6 +39,7 @@
   <xs:attribute name="name" type="xs:token" use="optional"/>
   <xs:attribute name="formalism" type="xs:token" use="required"/>
   <xs:attribute name="default-format" type="xs:token" use="optional"/>
+  <xs:attribute name="optional" type="xs:boolean" use="optional"/>
  </xs:complexType>
  <!-- Element for specification of a single tool profile -->
  <xs:complexType name="tool-profile">
