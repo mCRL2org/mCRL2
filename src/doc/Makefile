@@ -1,8 +1,11 @@
 -include ../config
 
-MAN_OBJECTS  = librewrite_c.7 librewrite.7 tbf2lpe.1 lpeinfo.1
-TXT_OBJECTS  = librewrite_c.txt librewrite.txt tbf2lpe.txt lpeinfo.txt
-HTML_OBJECTS = librewrite_c.html librewrite.html tbf2lpe.html lpeinfo.html
+MAN_OBJECTS  = librewrite_c.7 librewrite.7 tbf2lpe.1 lpeinfo.1 lpeconstelm.1 \
+	       lpeparelm.1
+TXT_OBJECTS  = librewrite_c.txt librewrite.txt tbf2lpe.txt lpeinfo.txt \
+	       lpeconstelm.txt lpeparelm.txt
+HTML_OBJECTS = librewrite_c.html librewrite.html tbf2lpe.html lpeinfo.html \
+	       lpeconstelm.html lpeparelm.html
 
 # For now build only man objects
 OBJECTS         = $(MAN_OBJECTS)
