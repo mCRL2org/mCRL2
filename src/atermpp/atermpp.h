@@ -12,16 +12,20 @@
 //
 // ======================================================================
 
+///////////////////////////////////////////////////////////////////////////////
+/// \file atermpp.h
+/// Contains includes for the most commonly used aterm files.
+
 #ifndef ATERM_ATERMPP_H
 #define ATERM_ATERMPP_H
-
-/** @file
-  * This is a C++ wrapper around the ATerm library.
-  */
 
 #include "atermpp/aterm.h"
 #include "atermpp/aterm_list.h"
 #include "atermpp/aterm_appl.h"
+#include "atermpp/aterm_real.h"
+#include "atermpp/aterm_int.h"
+#include "atermpp/aterm_blob.h"
 #include "atermpp/replace.h"
+#include "atermpp/transform.h"
 
 #endif // ATERM_ATERMPP_H

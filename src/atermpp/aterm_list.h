@@ -22,7 +22,8 @@
 #include <cassert>
 #include <boost/iterator/iterator_facade.hpp>
 #include "atermpp/aterm.h"
-#include "atermpp/aterm_conversion.h"
+#include "atermpp/aterm_make_match.h"
+#include "atermpp/detail/aterm_conversion.h"
 #include "atermpp/aterm_list_iterator.h"
 
 namespace {
@@ -31,27 +32,23 @@ namespace {
   // #define   ATgetNext(l)  ((l)->tail)
   // #define   ATgetFirst(l) ((l)->head)
   
+  /// INTERNAL ONLY
   inline ATermList aterm_get_next(ATermList l)
   {
     return ATgetNext(l);
   }
   
+  /// INTERNAL ONLY
   inline ATerm aterm_get_first(ATermList l)
   {
     return ATgetFirst(l);
   }
 
+  /// INTERNAL ONLY
   inline
   int aterm_get_length(ATermList l)
   {
     return ATgetLength(l);
-  }
-
-  // needed to avoid conversion problems with push_front
-  inline
-  ATermList aterm_insert(ATermList l, ATermAppl elem)
-  {
-    return ATinsert(l, (ATerm) elem);
   }
 }
 
@@ -120,9 +117,8 @@ namespace atermpp {
         assert(type() == AT_LIST);
       }
 
-      /**
-        * Allow construction from an aterm.
-        **/
+      /// Allow construction from an aterm. The aterm must be of the right type.
+      ///
       term_list(aterm t)
         : aterm(t)
       {
@@ -220,7 +216,9 @@ namespace atermpp {
   template <typename Term>
   inline
   term_list<Term> push_front(term_list<Term> l, Term elem)
-  { return term_list<Term>(aterm_insert(l, elem)); }
+  {
+    return term_list<Term>(ATinsert(l, aterm(elem)));
+  }
 
   ///
   /// Returns the list obtained by removing the first element.
@@ -413,6 +411,20 @@ namespace atermpp {
   term_list<Term> replace(term_list<Term> l, Term elem, int index)
   { return term_list<Term>(ATreplace(l, elem, index)); } 
 */
+
+  /// INTERNAL ONLY
+  template <typename T>
+  ATerm aterm_ptr(atermpp::term_list<T>& t)
+  {
+    return t;
+  }
+  
+  /// INTERNAL ONLY
+  template <typename T>
+  ATerm aterm_ptr(const atermpp::term_list<T>& t)
+  {
+    return t;
+  }
 
 } // namespace atermpp
 

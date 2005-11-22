@@ -12,21 +12,22 @@
 //
 // ======================================================================
 
+///////////////////////////////////////////////////////////////////////////////
+/// \file aterm_real.h
+/// Contains the definition of the aterm_real class.
+
 #ifndef ATERM_REAL_H
 #define ATERM_REAL_H
-
-/** @file
-  * This is a C++ wrapper around the ATerm library.
-  */
 
 #include <cassert>
 #include "atermpp/aterm.h"
 
 namespace atermpp
 {
-  //---------------------------------------------------------//
-  //                    aterm_real
-  //---------------------------------------------------------//
+  ///////////////////////////////////////////////////////////////////////////////
+  // aterm_real
+  /// \brief Represents an term containing a real value.
+  ///
   class aterm_real: public aterm
   {
     public:
@@ -44,17 +45,36 @@ namespace atermpp
         assert(type() == AT_REAL);
       }
   
-      /**
-        * Get the real value of the aterm_real.
-        **/
+      /// Allow construction from an aterm. The aterm must be of the right type.
+      ///
+      aterm_real(aterm t)
+        : aterm(t)
+      {
+        assert(type() == AT_REAL);
+      }
+
+      /// Get the real value of the aterm_real.
+      ///
       double value() const
       {
         return ATgetReal(reinterpret_cast<ATermReal>(m_term));
       }
   }; 
 
-} // namespace atermpp
+  /// INTERNAL ONLY
+  inline
+  ATerm aterm_ptr(aterm_real& t)
+  {
+    return t;
+  }
+  
+  /// INTERNAL ONLY
+  inline
+  ATerm aterm_ptr(const aterm_real& t)
+  {
+    return t;
+  }
 
-#include "atermpp/aterm_make_match.h"
+} // namespace atermpp
 
 #endif // ATERM_REAL_H

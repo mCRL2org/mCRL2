@@ -12,11 +12,12 @@
 //
 // ======================================================================
 
+///////////////////////////////////////////////////////////////////////////////
+/// \file replace.h
+/// Contains the replace algorithm.
+
 #ifndef ATERM_REPLACE_H
 #define ATERM_REPLACE_H
-
-/** @file
-  */
 
 #include <iostream>
 #include <vector>

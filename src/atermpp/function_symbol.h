@@ -12,6 +12,10 @@
 //
 // ======================================================================
 
+///////////////////////////////////////////////////////////////////////////////
+/// \file aterm_function_symbol.h
+/// Contains the definition of the aterm_function_symbol class.
+
 #ifndef ATERM_FUNCTION_SYMBOL_H
 #define ATERM_FUNCTION_SYMBOL_H
 
@@ -37,62 +41,55 @@ namespace atermpp
         m_function(function)
       {}
   
-      /**
-        * Protect the function symbol.
-        * Just as aterms which are not on the stack or in registers must be protected through
-        * a call to protect, so must function_symbols be protected by calling protect.
-        **/
+      /// Protect the function symbol.
+      /// Just as aterms which are not on the stack or in registers must be protected through
+      /// a call to protect, so must function_symbols be protected by calling protect.
+      ///
       void protect()
       {
         ATprotectAFun(m_function);
       }
   
-      /**
-        * Release an function_symbol's protection.
-        **/
+      /// Release an function_symbol's protection.
+      ///
       void unprotect()
       {
         ATunprotectAFun(m_function);
       }
       
-      /**
-        * Return the name of the function_symbol.
-        **/
+      /// Return the name of the function_symbol.
+      ///
       std::string name() const
       {
         return std::string(ATgetName(m_function));
       }
       
-      /**
-        * Return the arity (number of arguments) of the function symbol (function_symbol).
-        **/
+      /// Return the arity (number of arguments) of the function symbol (function_symbol).
+      ///
       unsigned int arity() const
       {
         return ATgetArity(m_function);
       }
       
-      /**
-        * Determine if the function symbol (function_symbol) is quoted or not.
-        **/
+      /// Determine if the function symbol (function_symbol) is quoted or not.
+      ///
       bool is_quoted() const
       {
         return ATisQuoted(m_function);
       }
 
-      /**
-        * Conversion to AFun.
-        **/
+      /// Conversion to AFun.
+      ///
       operator AFun() const
       { return m_function; }
       
       friend bool operator!=(const function_symbol& x, const function_symbol& y);
   };
 
-  /**
-    * Tests equality of function symbols f1 and f2.
-    * Function symbols f1 and f2 are considered equal if they have the same name,
-    * the same arity and the same value for the quoted attribute.
-    **/
+  /// Tests equality of function symbols f1 and f2.
+  /// Function symbols f1 and f2 are considered equal if they have the same name,
+  /// the same arity and the same value for the quoted attribute.
+  ///
   inline
   bool operator==(const function_symbol& x, const function_symbol& y)
   { 
@@ -100,9 +97,8 @@ namespace atermpp
     return AFun(x) == AFun(y);
   }
   
-  /**
-    * Returns !(x==y).
-    **/
+  /// Returns !(x==y).
+  ///
   inline
   bool operator!=(const function_symbol& x, const function_symbol& y)
   { return !(x == y); }

@@ -12,12 +12,12 @@
 //
 // ======================================================================
 
+///////////////////////////////////////////////////////////////////////////////
+/// \file aterm_place_holder.h
+/// Contains the definition of the aterm_place_holder class.
+
 #ifndef ATERM_PLACE_HOLDER_H
 #define ATERM_PLACE_HOLDER_H
-
-/** @file
-  * This is a C++ wrapper around the ATerm library.
-  */
 
 #include "atermpp/aterm.h"
 
@@ -37,17 +37,15 @@ namespace atermpp
         : aterm(t)
       {}
   
-      /**
-        * Build an aterm_place_holder of a specific type. The type is taken from the type
-        * parameter.
-        **/
+      /// Build an aterm_place_holder of a specific type. The type is taken from the type
+      /// parameter.
+      ///
       aterm_place_holder(aterm type)
         : aterm(ATmakePlaceholder(type.to_ATerm()))
       {}
       
-      /**
-        * Get the type of the aterm_place_holder.
-        **/
+      /// Get the type of the aterm_place_holder.
+      ///
       aterm type()
       {
         return aterm(ATgetPlaceholder(void2place_holder(m_term)));
