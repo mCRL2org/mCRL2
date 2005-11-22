@@ -507,6 +507,7 @@
 \newcommand{\srtpos}{\f{Pos}}
 \newcommand{\srtnat}{\f{Nat}}
 \newcommand{\srtint}{\f{Int}}
+\newcommand{\srtreal}{\f{Real}}
 
 % mCRL Operations
 \newcommand{\opzeronat}{{0n}}
@@ -665,8 +666,9 @@ conditional                & \faaa{if}{\_}{\_}{\_}  & \verb+if(_,_,_)+\\
 \subsection{Numbers}
 
 Positive numbers, natural numbers and integers are represented by the sorts
-\frm{\srtpos}, \frm{\srtnat} and \frm{\srtint}. For these sorts, we have the
-following operations, where \frm{A,B \in \set{\srtpos, \srtnat, \srtint}}:
+\frm{\srtpos}, \frm{\srtnat}, \frm{\srtint} and \frm{\srtreal}. For these
+sorts, we have the following operations, where \frm{A,B \in \set{\srtpos,
+\srtnat, \srtint, \srtreal}}:
 
 \bigskip
 \begin{tabular}{|l@{\qquad}L@{\qquad}l|}
@@ -1077,7 +1079,6 @@ controlling the evaluation order. This can be achieved by the use of
 \emph{Predefined data types} that could be desirable include the following:
 \begin{tdefinitions}{-}
 \item rational numbers (\frm{\mathbb{Q}})
-\item real numbers (\frm{\mathbb{R}})
 \item characters
 \item strings
 \end{tdefinitions}
