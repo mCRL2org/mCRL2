@@ -1,8 +1,8 @@
 #include <wx/wx.h>
 #include <wx/filename.h>
 
-/* Include definition of the studio overview window */
-#include "studio_overview.h"
+/* Include definition of the project overview window */
+#include "gui_project_overview.h"
 
 #include "tool_executor.h"
 #include "tool_manager.h"
@@ -49,7 +49,7 @@ bool Studio::OnInit() {
   /* Load tool configuration from storage */
   tool_manager.Load();
 
-  StudioOverview* window = new StudioOverview(tool_manager, NULL, 1000);
+  ProjectOverview* window = new ProjectOverview(tool_manager, NULL, 1000);
 
   /* Make sure the main window is visible */
   window->Show(true);

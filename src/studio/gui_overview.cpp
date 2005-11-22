@@ -5,7 +5,7 @@
 /* Non portable header file for chdir() ? Windows equivalent ? */
 #include <unistd.h>
 
-#include "studio_overview.h"
+#include "gui_project_overview.h"
 #include "ui_core.h"
 #include "tool_executor.h"
 
@@ -24,7 +24,7 @@
 #include "new_specification.h"
 #include "specification_properties.h"
 
-IMPLEMENT_CLASS(StudioOverview, wxFrame)
+IMPLEMENT_CLASS(ProjectOverview, wxFrame)
 
 /* IDs for menu items */
 #define ID_NEW                      81
@@ -59,25 +59,25 @@ IMPLEMENT_CLASS(StudioOverview, wxFrame)
 #define ID_FRAME_MODEL              151
 #define ID_FRAME_ANALYSIS           152
 
-BEGIN_EVENT_TABLE(StudioOverview, wxFrame)
-  EVT_MENU(wxID_NEW,                        StudioOverview::NewProject)
-  EVT_MENU(wxID_OPEN,                       StudioOverview::LoadProject)
-  EVT_MENU(wxID_CLOSE,                      StudioOverview::CloseProject)
-  EVT_MENU(ID_PROJECT_LOAD,                 StudioOverview::LoadProject)
-  EVT_MENU(ID_PROJECT_STORE,                StudioOverview::StoreProject)
-  EVT_MENU(ID_PROJECT_BUILD,                StudioOverview::BuildProject)
-  EVT_MENU(ID_SPECIFICATION_NEW,            StudioOverview::NewSpecification)
-  EVT_MENU(ID_SPECIFICATION_EDIT,           StudioOverview::EditSpecification)
-  EVT_MENU(ID_SPECIFICATION_REMOVE,         StudioOverview::RemoveSpecification)
-  EVT_MENU(ID_SPECIFICATION_RENAME,         StudioOverview::ActivateRename)
-  EVT_MENU(ID_SPECIFICATION_MARK_DIRTY,     StudioOverview::MarkDirty)
-  EVT_MENU(ID_SPECIFICATION_PROPERTIES,     StudioOverview::EditSpecificationProperties)
-  EVT_TREE_ITEM_RIGHT_CLICK(ID_FRAME_MODEL, StudioOverview::SpawnContextMenu)
-  EVT_TREE_END_LABEL_EDIT(ID_FRAME_MODEL,   StudioOverview::RenameSpecification)
-  EVT_MENU(wxID_EXIT,                       StudioOverview::Quit)
+BEGIN_EVENT_TABLE(ProjectOverview, wxFrame)
+  EVT_MENU(wxID_NEW,                        ProjectOverview::NewProject)
+  EVT_MENU(wxID_OPEN,                       ProjectOverview::LoadProject)
+  EVT_MENU(wxID_CLOSE,                      ProjectOverview::CloseProject)
+  EVT_MENU(ID_PROJECT_LOAD,                 ProjectOverview::LoadProject)
+  EVT_MENU(ID_PROJECT_STORE,                ProjectOverview::StoreProject)
+  EVT_MENU(ID_PROJECT_BUILD,                ProjectOverview::BuildProject)
+  EVT_MENU(ID_SPECIFICATION_NEW,            ProjectOverview::NewSpecification)
+  EVT_MENU(ID_SPECIFICATION_EDIT,           ProjectOverview::EditSpecification)
+  EVT_MENU(ID_SPECIFICATION_REMOVE,         ProjectOverview::RemoveSpecification)
+  EVT_MENU(ID_SPECIFICATION_RENAME,         ProjectOverview::ActivateRename)
+  EVT_MENU(ID_SPECIFICATION_MARK_DIRTY,     ProjectOverview::MarkDirty)
+  EVT_MENU(ID_SPECIFICATION_PROPERTIES,     ProjectOverview::EditSpecificationProperties)
+  EVT_TREE_ITEM_RIGHT_CLICK(ID_FRAME_MODEL, ProjectOverview::SpawnContextMenu)
+  EVT_TREE_END_LABEL_EDIT(ID_FRAME_MODEL,   ProjectOverview::RenameSpecification)
+  EVT_MENU(wxID_EXIT,                       ProjectOverview::Quit)
 END_EVENT_TABLE()
 
-StudioOverview::StudioOverview(ToolManager& new_tool_manager, wxWindow* parent, wxWindowID id) :
+ProjectOverview::ProjectOverview(ToolManager& new_tool_manager, wxWindow* parent, wxWindowID id) :
   wxFrame(parent, id, wxT("Studio - No project"), wxDefaultPosition, wxDefaultSize), tool_manager(new_tool_manager), project_manager() {
 
   /* Resize and centre frame on display */
@@ -138,7 +138,7 @@ StudioOverview::StudioOverview(ToolManager& new_tool_manager, wxWindow* parent, 
   SetStatusText(wxT("ready"));
 }
 
-StudioOverview::~StudioOverview() {
+ProjectOverview::~ProjectOverview() {
   const std::map < std::pair < std::string, std::string >, wxMenu* >::const_iterator b = context_menus.end();
         std::map < std::pair < std::string, std::string >, wxMenu* >::const_iterator i = context_menus.begin();
 
@@ -152,7 +152,7 @@ StudioOverview::~StudioOverview() {
   delete tree_popup_menu;
 }
 
-void StudioOverview::SetToolManager(ToolManager& new_tool_manager) {
+void ProjectOverview::SetToolManager(ToolManager& new_tool_manager) {
   tool_manager = new_tool_manager;
 
   context_menus.clear();
@@ -163,7 +163,7 @@ void StudioOverview::SetToolManager(ToolManager& new_tool_manager) {
 }
 
 /* Convenience function to fill the menu */
-inline void StudioOverview::GenerateMenuBar() {
+inline void ProjectOverview::GenerateMenuBar() {
   wxMenuBar* menu = new wxMenuBar();
 
   /* File menu */
@@ -227,7 +227,7 @@ inline void StudioOverview::GenerateMenuBar() {
 }
 
 /* Generate context menus for all tool-categories for all input types */
-inline void StudioOverview::GenerateContextMenus() {
+inline void ProjectOverview::GenerateContextMenus() {
   const std::list < Tool* >                 tools                 = tool_manager.GetTools();
   const std::list < Tool* >::const_iterator b                     = tools.end();
         std::list < Tool* >::const_iterator i                     = tools.begin();
@@ -317,11 +317,11 @@ inline void StudioOverview::GenerateContextMenus() {
   }
 
   /* Connect event handler for pop-up menu entries */
-  Connect(wxID_HIGHEST, wxID_HIGHEST + tool_categories.size() * number_of_tools, wxEVT_COMMAND_MENU_SELECTED, wxCommandEventHandler(StudioOverview::AddSpecifications));
+  Connect(wxID_HIGHEST, wxID_HIGHEST + tool_categories.size() * number_of_tools, wxEVT_COMMAND_MENU_SELECTED, wxCommandEventHandler(ProjectOverview::AddSpecifications));
 }
 
 /* Convenience function to fill the menu */
-inline void StudioOverview::GenerateToolBar() {
+inline void ProjectOverview::GenerateToolBar() {
   /* Create toolbar */
   wxToolBar* toolbar = new wxToolBar(this, wxID_ANY, wxDefaultPosition, wxDefaultSize, wxTB_HORIZONTAL);
 
@@ -338,7 +338,7 @@ inline void StudioOverview::GenerateToolBar() {
  *
  * event.GetId() is an integer that identifies a tool and a category
  */
-void StudioOverview::AddSpecifications(wxCommandEvent &event) {
+void ProjectOverview::AddSpecifications(wxCommandEvent &event) {
         wxTreeItemId   selected          = specifications->GetSelection();    /* The selected specification */
         Specification& specification     = ((SpecificationData*) specifications->GetItemData(selected))->specification;
         wxTreeItemId   new_item;
@@ -419,7 +419,7 @@ void StudioOverview::AddSpecifications(wxCommandEvent &event) {
 }
 
 /* Handlers for operations of project level */
-void StudioOverview::NewProject(wxCommandEvent &event) {
+void ProjectOverview::NewProject(wxCommandEvent &event) {
   wxDirDialog directory_dialog(this, wxT("Select a project directory"));
 
   if (directory_dialog.ShowModal() == wxID_OK) {
@@ -450,7 +450,7 @@ void StudioOverview::NewProject(wxCommandEvent &event) {
   }
 }
 
-void StudioOverview::CloseProject(wxCommandEvent &event) {
+void ProjectOverview::CloseProject(wxCommandEvent &event) {
   /* Reset title bar */
   SetTitle(wxT("Studio - No project"));
 
@@ -464,7 +464,7 @@ void StudioOverview::CloseProject(wxCommandEvent &event) {
   GetMenuBar()->Enable(wxID_CLOSE, false);
 }
 
-void StudioOverview::LoadProject(wxCommandEvent &event) {
+void ProjectOverview::LoadProject(wxCommandEvent &event) {
   wxDirDialog directory_dialog(this, wxT("Select a project directory"));
 
   if (directory_dialog.ShowModal() == wxID_OK) {
@@ -523,12 +523,12 @@ void StudioOverview::LoadProject(wxCommandEvent &event) {
   GetMenuBar()->Enable(wxID_CLOSE, true);
 }
 
-void StudioOverview::StoreProject(wxCommandEvent &event) {
+void ProjectOverview::StoreProject(wxCommandEvent &event) {
   project_manager.Store();
 }
 
 /* Build all specifications that are not up to date */
-void StudioOverview::BuildProject(wxCommandEvent &event) {
+void ProjectOverview::BuildProject(wxCommandEvent &event) {
   /* Recursively traverse the tree for specifications to be build */
   wxTreeItemIdValue cookie = 0;
   wxTreeItemId      an_id  = specifications->GetFirstChild(specifications->GetRootItem(), cookie);
@@ -567,7 +567,7 @@ void StudioOverview::BuildProject(wxCommandEvent &event) {
 }
 
 /* Adds a new specification */
-void StudioOverview::NewSpecification(wxCommandEvent &event) {
+void ProjectOverview::NewSpecification(wxCommandEvent &event) {
   NewSpecificationDialog* dialog = new NewSpecificationDialog(this, wxID_ANY);
 
   if (dialog->ShowModal() == wxID_OK) {
@@ -677,7 +677,7 @@ void StudioOverview::NewSpecification(wxCommandEvent &event) {
   dialog->~NewSpecificationDialog();
 }
 
-void StudioOverview::EditSpecification(wxCommandEvent &event) {
+void ProjectOverview::EditSpecification(wxCommandEvent &event) {
   wxProcess* editor = new wxProcess();
 
   /* TODO only takes the last output object */
@@ -689,7 +689,7 @@ void StudioOverview::EditSpecification(wxCommandEvent &event) {
   editor->Open(filename.Prepend(wxT("gvim ")));
 }
 
-void StudioOverview::MarkDirty(wxCommandEvent &event) {
+void ProjectOverview::MarkDirty(wxCommandEvent &event) {
   wxTreeItemIdValue cookie = 0;
 
   std::vector < wxTreeItemId > stack;
@@ -719,7 +719,7 @@ void StudioOverview::MarkDirty(wxCommandEvent &event) {
   }
 }
 
-void StudioOverview::EditSpecificationProperties(wxCommandEvent &event) {
+void ProjectOverview::EditSpecificationProperties(wxCommandEvent &event) {
   Specification&                 specification = ((SpecificationData*) specifications->GetItemData(specifications->GetSelection()))->specification;
   wxString                       name          = wxString(specification.GetName().c_str(), wxConvLocal);
   wxString                       title         = wxString(wxT("Properties of `")).Append(name).Append(wxT("'"));
@@ -737,7 +737,7 @@ void StudioOverview::EditSpecificationProperties(wxCommandEvent &event) {
   dialog->Destroy();
 }
 
-void StudioOverview::RemoveSpecification(wxCommandEvent &event) {
+void ProjectOverview::RemoveSpecification(wxCommandEvent &event) {
   wxTreeItemId selected = specifications->GetSelection();
 
   if (selected != specifications->GetRootItem()) {
@@ -781,7 +781,7 @@ void StudioOverview::RemoveSpecification(wxCommandEvent &event) {
   }
 }
 
-void StudioOverview::SpawnContextMenu(wxTreeEvent &event) {
+void ProjectOverview::SpawnContextMenu(wxTreeEvent &event) {
   /* Set selected tree item, for communication with menu event handlers */
   Specification&              specification        = ((SpecificationData*) specifications->GetItemData(event.GetItem()))->specification;
   unsigned int                generated_categories = 0;
@@ -864,11 +864,11 @@ void StudioOverview::SpawnContextMenu(wxTreeEvent &event) {
   }
 }
 
-void StudioOverview::ActivateRename(wxCommandEvent &event) {
+void ProjectOverview::ActivateRename(wxCommandEvent &event) {
   specifications->EditLabel(specifications->GetSelection());
 }
 
-void StudioOverview::RenameSpecification(wxTreeEvent &event) {
+void ProjectOverview::RenameSpecification(wxTreeEvent &event) {
   /* Communicate change of name with Project Manager */
   if (!event.IsEditCancelled()) {
     std::string    name(event.GetLabel().fn_str());
@@ -884,7 +884,7 @@ void StudioOverview::RenameSpecification(wxTreeEvent &event) {
   }
 }
 
-void StudioOverview::Quit(wxCommandEvent &event) {
+void ProjectOverview::Quit(wxCommandEvent &event) {
   tool_executor.TerminateAll();
 
   Close();

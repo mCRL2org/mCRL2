@@ -23,17 +23,17 @@ GUI_CPPFLAGS                   = -DDISABLE_TOOLBAR
 LIBXML2_OBJECTS                = xml_text_reader.o project_manager.o tool_manager.o tool.o specification.o \
 				 project_manager_tester tool_manager_tester
 
-BOOST_OBJECTS                  = studio_overview.o tool_manager.o project_manager.o specification_properties.o \
+BOOST_OBJECTS                  = gui_project_overview.o tool_manager.o project_manager.o gui_specification_properties.o \
 				 settings_manager.o tool_executor.o
 BOOST_CPPFLAGS                 = -I$(BOOST_PREFIX)/include
 BOOST_LIBRARIES                = -L$(BOOST_PREFIX)/lib -lboost_filesystem
-WX_OBJECTS                     = studio.o studio_overview.o new_specification.o specification_properties.o \
+WX_OBJECTS                     = studio.o gui_project_overview.o gui_new_specification.o gui_specification_properties.o \
 				 resources.o tool_executor.o
 WX_LIBRARIES                   = $(WX_LIBS)
 
 PROJECT_MANAGER_OBJECTS        = project_manager.o specification.o xml_text_reader.o settings_manager.o
 TOOL_MANAGER_OBJECTS           = tool_manager.o tool.o xml_text_reader.o settings_manager.o
-GUI_OBJECTS                    = studio.o studio_overview.o new_specification.o specification_properties.o \
+GUI_OBJECTS                    = studio.o gui_project_overview.o gui_new_specification.o gui_specification_properties.o \
 				 resources.o $(sort $(PROJECT_MANAGER_OBJECTS) $(TOOL_MANAGER_OBJECTS)) \
 				 tool_executor.o
 OBJECTS                        = $(sort $(GUI_OBJECTS) $(PROJECT_MANAGER_OBJECTS) $(TOOL_MANAGER_OBJECTS))

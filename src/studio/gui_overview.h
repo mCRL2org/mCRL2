@@ -1,5 +1,5 @@
-#ifndef STUDIO_OVERVIEW_H
-#define STUDIO_OVERVIEW_H
+#ifndef PROJECT_OVERVIEW_H
+#define PROJECT_OVERVIEW_H
 
 #include <vector>
 #include <map>
@@ -12,8 +12,8 @@
 #include "project_manager.h"
 #include "tool_manager.h"
 
-class StudioOverview : public wxFrame {
-  DECLARE_CLASS(StudioOverview)
+class ProjectOverview : public wxFrame {
+  DECLARE_CLASS(ProjectOverview)
   DECLARE_EVENT_TABLE()
 
   private:
@@ -91,9 +91,9 @@ class StudioOverview : public wxFrame {
 
   public:
 
-    StudioOverview();
-    ~StudioOverview();
-    StudioOverview(ToolManager&, wxWindow* parent, wxWindowID id);
+    ProjectOverview();
+    ~ProjectOverview();
+    ProjectOverview(ToolManager&, wxWindow* parent, wxWindowID id);
 
     void SetToolManager(ToolManager&);
 
@@ -102,4 +102,4 @@ class StudioOverview : public wxFrame {
     }
 };
 
-#endif /* STUDIO_OVERVIEW_H_ */
+#endif /* PROJECT_OVERVIEW_H_ */
