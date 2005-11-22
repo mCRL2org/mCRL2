@@ -4,26 +4,24 @@
 #include <fstream>
 #include <boost/format.hpp>
 
-#include "mcrl2/specification.h"
-#include "mcrl2/predefined_symbols.h"
-#include "mcrl2/rewrite.h"
-#include "mcrl2/sort.h"
-#include "gsfunc.h"
+#include "lpe/specification.h"
+#include "lpe/predefined_symbols.h"
+#include "lpe/sort.h"
 
 using namespace std;
 using namespace atermpp;
-using namespace mcrl2;
+using namespace lpe;
 using boost::format;
 
 /// Rewrites the data expressions x an y, and then compares if they are equal.
 ///
-bool compare(data_expression x, data_expression y, data_equation_list equations)
-{
-  rewriter r(equations);
-  ATermAppl x1 = r.rewrite(x);
-  ATermAppl y1 = r.rewrite(y); 
-  return atermpp::aterm(x1) == atermpp::aterm(y1);
-}
+//bool compare(data_expression x, data_expression y, data_equation_list equations)
+//{
+//  rewriter r(equations);
+//  ATermAppl x1 = r.rewrite(x);
+//  ATermAppl y1 = r.rewrite(y); 
+//  return atermpp::aterm(x1) == atermpp::aterm(y1);
+//}
 
 int main()
 {
@@ -77,7 +75,7 @@ int main()
   }
   cout << endl;
 
-  mcrl2::sort D("D");
+  lpe::sort D("D");
   data_variable v("d1", D);
   cout << "v  = " << v.pp() << " " << v.to_string() << endl;
 
@@ -93,9 +91,9 @@ int main()
   cout << "d1 = " << pp(d1) << " " << d1.to_string() << endl;
 
   // test comparison (using rewrite)
-  cout << endl;
-  bool c = compare(d0.front(), d1.front(), spec.equations());
-  cout << "compare(d0.front(), d1.front(), spec) == " << c << endl;
+  //cout << endl;
+  //bool c = compare(d0.front(), d1.front(), spec.equations());
+  //cout << "compare(d0.front(), d1.front(), spec) == " << c << endl;
 
   for (summand_list::iterator i = spec.lpe().summands().begin(); i != spec.lpe().summands().end(); ++i)
   {

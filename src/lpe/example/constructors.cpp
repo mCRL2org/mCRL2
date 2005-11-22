@@ -1,9 +1,9 @@
 #include <iostream>
-#include "mcrl2/specification.h"
+#include "lpe/specification.h"
 
 using namespace std;
 using namespace atermpp;
-using namespace mcrl2;
+using namespace lpe;
 
 int main()
 {

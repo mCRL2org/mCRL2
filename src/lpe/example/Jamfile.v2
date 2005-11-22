@@ -9,10 +9,12 @@ project src/lpe/example
 
 exe constructors : constructors.cpp : ;
 exe spec         : spec.cpp  : ;
+exe substitute   : substitute.cpp : ;
 
 install dist
    :
      constructors
      spec
+     substitute
    :
    ;
