@@ -20,10 +20,10 @@
 
 //mCRL2
 #include "atermpp/aterm.h"
-#include "mcrl2/specification.h"
+#include "lpe/specification.h"
 
 using namespace std;
-using namespace mcrl2;
+using namespace lpe;
 using namespace atermpp;
 
 namespace po = boost::program_options;

@@ -19,12 +19,12 @@
 #include <boost/program_options.hpp>
 
 //mCRL2
-#include "mcrl2/specification.h"
+#include "lpe/specification.h"
 #include "atermpp/aterm.h"
-#include "mcrl2/mcrl2_error.h"
+#include "lpe/lpe_error.h"
 
 using namespace std;
-using namespace mcrl2;
+using namespace lpe;
 using namespace atermpp;
 
 using atermpp::aterm;

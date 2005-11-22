@@ -27,14 +27,14 @@
 
 //mCRL2
 #include "atermpp/aterm.h"
-#include "mcrl2/specification.h"
+#include "lpe/specification.h"
 
 #include "librewrite_c.h"
 #include "libstruct.h"
 #include "liblowlevel.h"
 
 using namespace std;
-using namespace mcrl2;
+using namespace lpe;
 using namespace atermpp;
 
 namespace po = boost::program_options;
@@ -68,7 +68,7 @@ private:
   bool                        p_reachable; 
   string                      p_filenamein;
   specification               p_spec;
-  set< mcrl2::sort >          p_singletonSort;
+  set< lpe::sort >          p_singletonSort;
   
   // Rewrites an ATerm to a normal form
   //
@@ -229,8 +229,8 @@ private:
   void findSingleton()
   {
 
-    map< mcrl2::sort, int >     p_countSort;
-    //set< mcrl2::sort > result;
+    map< lpe::sort, int >     p_countSort;
+    //set< lpe::sort > result;
     for(sort_list::iterator i = p_spec.sorts().begin(); i != p_spec.sorts().end() ; i++){
       p_countSort[*i] = 0;
       p_singletonSort.insert(*i);
@@ -266,7 +266,7 @@ private:
     
     if (p_verbose){
       cout << "Sorts which have singleton constructors:"<< endl;
-      for(set<mcrl2::sort>::iterator i = p_singletonSort.begin(); i != p_singletonSort.end(); i++){
+      for(set<lpe::sort>::iterator i = p_singletonSort.begin(); i != p_singletonSort.end(); i++){
         cout <<"  "<< i->pp() << endl;
       }
       if (p_singletonSort.empty()) {
