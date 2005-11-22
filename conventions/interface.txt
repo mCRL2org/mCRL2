@@ -48,6 +48,7 @@ extensions should be used only for corresponding purpose:
   .trc                  trace for simulation
   .mcrl                 mCRL specification
   .tbf                  mCRL LPE
+  .pnml                 PNML specification
 
 
 Feedback
