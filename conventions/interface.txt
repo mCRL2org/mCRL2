@@ -51,6 +51,17 @@ extensions should be used only for corresponding purpose:
   .pnml                 PNML specification
 
 
+Version information
+-------------------
+
+Version information should be displayed as follows:
+
+tool VERSION (revision REV)
+
+Here VERSION is the version of the toolset and REV the latest revision number
+of the whole toolset.
+
+
 Feedback
 --------
 
