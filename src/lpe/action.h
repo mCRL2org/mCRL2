@@ -8,7 +8,6 @@
 #include "atermpp/atermpp.h"
 #include "lpe/substitute.h"
 #include "lpe/data.h"
-#include "lpe/list_iterator.h"
 
 namespace lpe {
 

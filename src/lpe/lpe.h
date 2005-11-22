@@ -14,9 +14,7 @@
 #include "atermpp/aterm.h"
 #include "lpe/aterm_wrapper.h"
 #include "lpe/action.h"
-#include "lpe/list_iterator.h"
 #include "atermpp/aterm_list.h"
-#include "lpe/predefined_symbols.h"
 #include "lpe/pretty_print.h"
 #include "lpe/substitute.h"
 

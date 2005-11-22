@@ -12,7 +12,6 @@
 #include "lpe/aterm_wrapper.h"
 #include "lpe/substitute.h"
 #include "lpe/sort.h"
-#include "lpe/list_iterator.h"
 #include "lpe/predefined_symbols.h"
 #include "lpe/detail/string_utility.h"
 #include "libstruct.h"
@@ -142,7 +141,7 @@ class data_equation: public aterm_wrapper
     data_expression m_rhs;
 
   public:
-    typedef list_iterator<data_variable> variable_iterator;
+    typedef data_variable_list::iterator variable_iterator;
 
     data_equation()
     {}

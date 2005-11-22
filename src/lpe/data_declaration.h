@@ -8,7 +8,6 @@
 #include "atermpp/aterm.h"
 #include "lpe/data.h"
 #include "lpe/sort.h"
-#include "lpe/list_iterator.h"
 
 namespace lpe {
 
@@ -31,8 +30,8 @@ class DataDeclaration
     aterm_list m_equations;             // elements are of type data_equation
 
   public:
-    typedef list_iterator<sort>          sort_iterator;
-    typedef list_iterator<data_equation>  equation_iterator;
+    typedef sort_list::iterator     sort_iterator;
+    typedef equation_list::iterator equation_iterator;
 
     DataDeclaration()
     {}
