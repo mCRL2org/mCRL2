@@ -19,14 +19,16 @@ IMPLEMENT_CLASS(SpecificationPropertiesDialog, wxDialog)
 BEGIN_EVENT_TABLE(SpecificationPropertiesDialog, wxDialog)
 END_EVENT_TABLE()
 
-SpecificationPropertiesDialog::SpecificationPropertiesDialog(wxWindow* parent, wxWindowID id, wxString title, Specification& aspecification, wxString aproject_root) :
-  wxDialog(parent, id, title, wxDefaultPosition, wxSize(450,450), wxCAPTION|wxSTAY_ON_TOP), specification(aspecification), project_root(aproject_root) {
+SpecificationPropertiesDialog::SpecificationPropertiesDialog(wxWindow* parent, wxWindowID id, wxString title, Specification& aspecification, std::string aproject_root) :
+  wxDialog(parent, id, title, wxDefaultPosition, wxSize(450,450), wxCAPTION|wxSTAY_ON_TOP), specification(aspecification) {
 
   /* Create controls */
   wxBoxSizer* sizer      = new wxBoxSizer(wxVERTICAL);
   wxBoxSizer* controlbox = new wxBoxSizer(wxHORIZONTAL);
 
   description   = new wxTextCtrl(this, wxID_ANY, wxString(specification.GetDescription().c_str(), wxConvLocal), wxDefaultPosition, wxDefaultSize, wxTE_PROCESS_ENTER|wxTE_MULTILINE|wxTE_BESTWRAP);
+
+  project_root = aproject_root;
 
   /* Control to add or edit a description */
   wxStaticBoxSizer* descriptionbox   = new wxStaticBoxSizer(wxVERTICAL, this, wxT("Description"));
@@ -108,24 +110,31 @@ SpecificationPropertiesDialog::SpecificationPropertiesDialog(wxWindow* parent, w
     while (i != b) {
       wxString                file_name((*i).file_name.c_str(), wxConvLocal);
       wxString                file_format((*i).format.c_str(), wxConvLocal);
-      wxString                full_file_name(project_root);
-      boost::filesystem::path boost_name(std::string(full_file_name.fn_str()));
+      boost::filesystem::path full_path(project_root);
 
-      full_file_name.Append(wxT("/")).Append(file_name);
-
-      wxFileName name(full_file_name);
+      full_path /= boost::filesystem::path((*i).file_name);
 
       outputs->InsertItem(c, file_name, 0);
       outputs->SetItem(c, 1, file_format);
-      outputs->SetItem(c, 2, name.GetModificationTime().Format(wxT("%D")));
 
-      try {
-        size_t size = boost::filesystem::file_size(boost_name);
+      if (boost::filesystem::exists(full_path)) {
+        /* Outputs exist on storage */
+        wxFileName name(wxString(full_path.string().c_str(), wxConvLocal));
 
-        outputs->SetItem(c, 3, wxString::Format(wxT("%u"), size));
+        outputs->SetItem(c, 2, name.GetModificationTime().Format(wxT("%D")));
+
+        try {
+          size_t size = boost::filesystem::file_size(full_path);
+
+          outputs->SetItem(c, 3, wxString::Format(wxT("%u"), size));
+        }
+        catch (...) {
+          outputs->SetItem(c, 3, wxT("0"));
+        }
       }
-      catch (...) {
-        outputs->SetItem(c, 3, wxT("0"));
+      else {
+        outputs->SetItem(c, 2, wxT("N.A."));
+        outputs->SetItem(c, 3, wxT("N.A."));
       }
 
       ++c;

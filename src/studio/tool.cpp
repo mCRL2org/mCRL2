@@ -335,7 +335,8 @@ inline void ToolInputObject::Read(XMLTextReader& reader) {
   reader.GetAttribute(&name, "name");
   reader.GetAttribute(&selector, "selector");
   reader.GetAttribute(&default_format, "default-format");
-  reader.GetAttribute(&optional, "optional");
+
+  obligatory = !reader.GetAttribute("virtual");
 
   /* Read format selectors */
   if (!reader.IsEmptyElement()) {
@@ -378,8 +379,8 @@ inline bool ToolInputObject::Write(std::ostream& stream) const {
   if (default_format != "") {
     stream << " default-format=\"" << default_format << "\"";
   }
-  if (optional) {
-    stream << " optional=\"true\"";
+  if (!obligatory) {
+    stream << " virtual=\"true\"";
   }
 
   if (0 < format_selectors.size()) {
@@ -416,8 +417,8 @@ void ToolInputObject::Print(std::ostream& stream) const {
   if (default_format != "") {
     stream << "    Default format : " << default_format << std::endl;
   }
-  if (optional) {
-    stream << "    Optional :       yes\n";
+  if (!obligatory) {
+    stream << "    Virtual        : yes\n";
   }
 
   if (0 < format_selectors.size()) {
@@ -448,7 +449,8 @@ inline void ToolOutputObject::Read(XMLTextReader& reader) {
   reader.GetAttribute(&name, "name");
   reader.GetAttribute(&selector, "selector");
   reader.GetAttribute(&default_format, "default-format");
-  reader.GetAttribute(&optional, "optional");
+
+  obligatory = !reader.GetAttribute("virtual");
 
   /* Read format selectors */
   if (!reader.IsEmptyElement()) {
@@ -491,8 +493,8 @@ inline bool ToolOutputObject::Write(std::ostream& stream) const {
   if (default_format != "") {
     stream << " default-format=\"" << default_format << "\"";
   }
-  if (optional) {
-    stream << " optional=\"true\"";
+  if (!obligatory) {
+    stream << " virtual=\"true\"";
   }
 
   if (0 < format_selectors.size()) {
@@ -529,8 +531,8 @@ void ToolOutputObject::Print(std::ostream& stream) const {
   if (default_format != "") {
     stream << "    Default format : " << default_format << std::endl;
   }
-  if (optional) {
-    stream << "    Optional :       yes\n";
+  if (!obligatory) {
+    stream << "    Virtual        : yes\n";
   }
 
   if (0 < format_selectors.size()) {

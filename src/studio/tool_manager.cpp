@@ -116,14 +116,16 @@ inline bool ToolManager::Read(std::string file_name) {
 
 /* Loads tool configurations from XML file */
 bool ToolManager::Load() throw (int) {
+  using namespace boost::filesystem;
+
   std::string catalog_file = settings_manager.GetToolCatalogPath();
 
-  if (!boost::filesystem::exists(boost::filesystem::path(catalog_file, boost::filesystem::portable_posix_name))) {
-    boost::filesystem::path ghost_catalog(catalog_file + ".ghost", boost::filesystem::portable_posix_name);
+  if (!exists(path(catalog_file, portable_posix_name))) {
+    path ghost_catalog(catalog_file + ".ghost", portable_posix_name);
  
-    if (boost::filesystem::exists(ghost_catalog)) {
+    if (exists(ghost_catalog)) {
       /* Recover */
-      boost::filesystem::rename(ghost_catalog, boost::filesystem::path(catalog_file, boost::filesystem::portable_posix_name));
+      rename(ghost_catalog, path(catalog_file, portable_posix_name));
     }
     else {
       throw (-1);
@@ -135,6 +137,8 @@ bool ToolManager::Load() throw (int) {
 
 /* TODO ensure atomicity */
 bool ToolManager::Store() const {
+  using namespace boost::filesystem;
+
   std::string   ghost_catalog_file = settings_manager.GetToolCatalogPath();
   std::ofstream catalog_stream;
 
@@ -147,13 +151,13 @@ bool ToolManager::Store() const {
   catalog_stream.close();
 
   /* Replace original with newly generated copy */
-  boost::filesystem::path original_catalog(settings_manager.GetToolCatalogPath(), boost::filesystem::portable_posix_name);
-  boost::filesystem::path temporary(settings_manager.GetToolCatalogPath() + ".obsolete", boost::filesystem::portable_posix_name);
-  boost::filesystem::path ghost_catalog(ghost_catalog_file, boost::filesystem::portable_posix_name);
+  path original_catalog(settings_manager.GetToolCatalogPath(), portable_posix_name);
+  path temporary(settings_manager.GetToolCatalogPath() + ".obsolete", portable_posix_name);
+  path ghost_catalog(ghost_catalog_file, portable_posix_name);
 
-  boost::filesystem::rename(original_catalog, temporary);
-  boost::filesystem::rename(ghost_catalog, original_catalog);
-  boost::filesystem::remove(temporary);
+  rename(original_catalog, temporary);
+  rename(ghost_catalog, original_catalog);
+  remove(temporary);
 
   return (return_value);
 }

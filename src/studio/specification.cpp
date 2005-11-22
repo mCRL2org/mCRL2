@@ -134,20 +134,22 @@ bool Specification::Generate() throw (void*) {
 
     /* Generate input output object arguments */
     while (i != b) {
-      SpecificationOutputType* aoutput;
+      SpecificationOutputType* aobject;
 
-      if ((*i)->GetType() == input) {
-        aoutput = const_cast < SpecificationOutputType* > (&input_objects[it].derived_from.pointer->GetOutputObjects()[input_objects[it].output_number]);
-
-        ++it;
+      if ((*i)->IsObligatory()) {
+        if ((*i)->GetType() == input) {
+          aobject = const_cast < SpecificationOutputType* > (&input_objects[it].derived_from.pointer->GetOutputObjects()[input_objects[it].output_number]);
+       
+          ++it;
+        }
+        else {
+          aobject = &(output_objects[ot]);
+       
+          ++ot;
+        }
+       
+        final_configuration.append((*i)->String(aobject->file_name, aobject->format));
       }
-      else {
-        aoutput = &(output_objects[ot]);
-
-        ++ot;
-      }
-
-      final_configuration.append((*i)->String(aoutput->file_name, aoutput->format));
 
       ++i;
     }
@@ -250,7 +252,10 @@ bool Specification::Read(XMLTextReader& reader) throw (int) {
 
       /* To end tag*/
       reader.Read();
-      reader.Read();
+
+      if (!reader.IsEmptyElement()) {
+        reader.Read();
+      }
     }
 
     if (!reader.IsElement("input-object")) {
@@ -329,7 +334,8 @@ bool Specification::Write(std::ostream& stream) {
     stream << "\">" << tool_configuration << "</tool-configuration>\n";
 
     while (i != b) {
-      stream << "  <input-object identifier=\"" << tool_manager.GetTool((*i).derived_from.pointer->identifier)->GetIdentifier() << "\" output-number=\"" << (*i).output_number << "\"/>\n";
+      stream << "  <input-object identifier=\"" << (*i).derived_from.pointer->identifier
+             << "\" output-number=\"" << (*i).output_number << "\"/>\n";
  
       ++i;
     }

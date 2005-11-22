@@ -12,7 +12,7 @@ class SpecificationPropertiesDialog : public wxDialog {
 
   private:
     Specification& specification;
-    wxString       project_root;
+    std::string    project_root;
     wxListCtrl*    inputs;
     wxListCtrl*    outputs;
     wxTextCtrl*    description;
@@ -20,7 +20,7 @@ class SpecificationPropertiesDialog : public wxDialog {
 
   public:
 
-    SpecificationPropertiesDialog(wxWindow*, wxWindowID, wxString, Specification&, wxString);
+    SpecificationPropertiesDialog(wxWindow*, wxWindowID, wxString, Specification&, std::string);
 
     void SpecificationPropertiesDialog::UpdateSizes();
 

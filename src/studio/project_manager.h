@@ -61,13 +61,13 @@ class ProjectManager {
     void Print(std::ostream& stream = std::cerr);
 
     /* Add a new specification to the project */
-    Specification* Add(Specification& specification = empty_specification);
+    Specification& Add(Specification& specification = empty_specification) throw (Specification&);
 
     /* Remove a specification from the project */
-    bool Remove(Specification* specification);
+    bool Remove(const Specification* specification);
 
     /* Specifications are required to be present in the list */
-    bool Remove(std::vector < Specification* >& some_specifications);
+    bool Remove(const std::vector < Specification* >& some_specifications);
 
     /* Remove instance from a specification from storage */
     bool Flush(Specification* specification);

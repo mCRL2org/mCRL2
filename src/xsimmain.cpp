@@ -138,6 +138,9 @@ void XSimMain::CreateMenu()
     wxMenu *file = new wxMenu;
     openitem = file->Append( wxID_OPEN, wxT("&Open...	CTRL-o"), wxT("") );
     file->AppendSeparator();
+    file->Append( ID_LOADTRACE, wxT("&Load trace...	CTRL-l"), wxT("") );
+    file->Append( ID_SAVETRACE, wxT("&Save trace...	CTRL-s"), wxT("") );
+    file->AppendSeparator();
     file->Append( wxID_EXIT, wxT("&Quit	CTRL-q"), wxT("") );
     menu->Append( file, wxT("&File") );
 
@@ -147,9 +150,6 @@ void XSimMain::CreateMenu()
     redo = editmenu->Append( ID_REDO, wxT("Re&do	CTRL-RIGHT"), wxT("") );
     redo->Enable(false);
     editmenu->Append( ID_RESET, wxT("&Reset	CTRL-r"), wxT("") );
-    editmenu->AppendSeparator();
-    editmenu->Append( ID_LOADTRACE, wxT("&Load trace...	CTRL-l"), wxT("") );
-    editmenu->Append( ID_SAVETRACE, wxT("&Save trace...	CTRL-s"), wxT("") );
     menu->Append( editmenu, wxT("&Edit") );
     
     wxMenu *sim = new wxMenu;

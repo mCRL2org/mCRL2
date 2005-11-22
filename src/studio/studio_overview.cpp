@@ -1,5 +1,6 @@
 #include <set>
 #include <map>
+#include <stack>
 
 /* Non portable header file for chdir() ? Windows equivalent ? */
 #include <unistd.h>
@@ -341,12 +342,12 @@ void StudioOverview::AddSpecifications(wxCommandEvent &event) {
         wxTreeItemId   selected          = specifications->GetSelection();    /* The selected specification */
         Specification& specification     = ((SpecificationData*) specifications->GetItemData(selected))->specification;
         wxTreeItemId   new_item;
-        Specification* new_specification = new Specification();
+        Specification  new_specification;
         unsigned int   mode_number       = event.GetId() - wxID_HIGHEST;      /* Will hold mode number, is used to hold a tool number first */
         std::string    category          = tool_categories[mode_number / tool_manager.GetNumberOfTools()];
   const Tool*          tool              = tool_manager.GetTool(mode_number % tool_manager.GetNumberOfTools());
 
-  new_specification->SetToolIdentifier(mode_number % tool_manager.GetNumberOfTools());
+  new_specification.SetToolIdentifier(mode_number % tool_manager.GetNumberOfTools());
 
   /* Find first compatible mode */
   std::vector < ToolMode* >::const_iterator i = tool->GetModes().begin(); 
@@ -358,7 +359,7 @@ void StudioOverview::AddSpecifications(wxCommandEvent &event) {
 
   mode_number = i - tool->GetModes().begin();
 
-  new_specification->SetToolMode(mode_number);
+  new_specification.SetToolMode(mode_number);
 
   /* Find a name for the new specification (should not exist in project directory) */
   wxFileName file_helper(wxString(specification.GetOutputObjects().front().file_name.c_str(), wxConvLocal));
@@ -369,7 +370,7 @@ void StudioOverview::AddSpecifications(wxCommandEvent &event) {
   std::string name = std::string(file_helper.GetFullName().Append(wxString::Format(wxT("-%u"), (unsigned int) specifications->GetChildrenCount(selected, false))).fn_str());
 
   /* Connect input object to compatible position (TODO generalise to multiple inputs and outputs) */
-  std::vector < SpecificationInputType >& input_objects = new_specification->GetModifiableInputObjects();
+  std::vector < SpecificationInputType >& input_objects = new_specification.GetModifiableInputObjects();
   SpecificationInputType                  new_input;
 
   new_input.derived_from.pointer = &specification;
@@ -381,7 +382,7 @@ void StudioOverview::AddSpecifications(wxCommandEvent &event) {
 
   /* The format of the new specification */
   if (tool_mode.HasOutputObjects()) {
-    std::vector < SpecificationOutputType >& output_objects = new_specification->GetModifiableOutputObjects();
+    std::vector < SpecificationOutputType >& output_objects = new_specification.GetModifiableOutputObjects();
     SpecificationOutputType                  new_output;
 
     /* Connect output object to compatible position (TODO generalise to multiple inputs and outputs) */
@@ -400,10 +401,12 @@ void StudioOverview::AddSpecifications(wxCommandEvent &event) {
   }
 
   /* Set the name of the specification to the name of the main output file */
-  new_specification->SetName(name);
+  new_specification.SetName(name);
 
   /* Add new item to (local) project manager and tree-control */
-  new_item = specifications->AppendItem(selected, wxString(name.c_str(), wxConvLocal), 0, -1, new SpecificationData(*specifications, *project_manager.Add(*new_specification)));
+  Specification& added_specification = project_manager.Add(new_specification);
+
+  new_item = specifications->PrependItem(selected, wxString(name.c_str(), wxConvLocal), 0, -1, new SpecificationData(*specifications, added_specification));
 
   if (!specifications->IsExpanded(selected)) {
     specifications->Expand(selected);
@@ -412,7 +415,7 @@ void StudioOverview::AddSpecifications(wxCommandEvent &event) {
   specifications->SelectItem(new_item);
 
   /* Specification is not yet available and not up-to-date */
-  new_specification->ForceRegeneration();
+  added_specification.ForceRegeneration();
 }
 
 /* Handlers for operations of project level */
@@ -637,23 +640,23 @@ void StudioOverview::NewSpecification(wxCommandEvent &event) {
 
         if (valid) {
           /* Insert new specification into tree */
-          Specification*     new_specification  = project_manager.Add();
-          SpecificationData* specification_data = new SpecificationData(*specifications, *new_specification);
-          wxTreeItemId       root_item          = specifications->GetRootItem();
+          Specification      new_specification  = empty_specification;
           std::string        base_name          = target_name.leaf();
+          wxTreeItemId       new_item;
 
-          new_specification->SetName(base_name);
+          new_specification.SetName(base_name);
 
           /* TODO add mime type/file format database to determine the type of an input file */
           try {
+            wxTreeItemId            root_item  = specifications->GetRootItem();
             std::string             format     = boost::filesystem::extension(base_name);
             SpecificationOutputType new_output = { format.erase(0,1), target_name.leaf(), "MD5 hash" };
 
             /* TODO Determine outputs, using tool characteristics and selected tool mode */
-            new_specification->GetModifiableOutputObjects().push_back(new_output);
+            new_specification.GetModifiableOutputObjects().push_back(new_output);
          
             /* Add new item to (local) project manager and tree-control */
-            specifications->AppendItem(root_item, wxString(base_name.c_str(), wxConvLocal), up_to_date, -1, specification_data);
+            new_item = specifications->AppendItem(root_item, wxString(base_name.c_str(), wxConvLocal), up_to_date, -1);
          
             if (!specifications->IsExpanded(root_item)) {
               specifications->Expand(root_item);
@@ -662,6 +665,10 @@ void StudioOverview::NewSpecification(wxCommandEvent &event) {
           catch (int) {
             /* TODO */
           }
+
+          SpecificationData* specification_data = new SpecificationData(*specifications, project_manager.Add(new_specification));
+
+          specifications->SetItemData(new_item, specification_data);
         }
       }
     }
@@ -716,7 +723,7 @@ void StudioOverview::EditSpecificationProperties(wxCommandEvent &event) {
   Specification&                 specification = ((SpecificationData*) specifications->GetItemData(specifications->GetSelection()))->specification;
   wxString                       name          = wxString(specification.GetName().c_str(), wxConvLocal);
   wxString                       title         = wxString(wxT("Properties of `")).Append(name).Append(wxT("'"));
-  SpecificationPropertiesDialog* dialog        = new SpecificationPropertiesDialog(this, wxID_ANY, title, specification, wxString(project_manager.GetProjectDirectory().c_str(), wxConvLocal));
+  SpecificationPropertiesDialog* dialog        = new SpecificationPropertiesDialog(this, wxID_ANY, title, specification, project_manager.GetProjectDirectory());
 
   /* TODO set proper icon when a format can be resolved to an icon */
   dialog->SetIcon(main_icon_list->GetIcon(0));
@@ -735,45 +742,36 @@ void StudioOverview::RemoveSpecification(wxCommandEvent &event) {
 
   if (selected != specifications->GetRootItem()) {
     /* Invisible root is not selected */
-    std::vector < wxTreeItemId >   stack;
-    std::set    < Specification* > depricated;
+    std::stack  < wxTreeItemId >   stack;
+    std::set    < Specification* > sdepricated;
+    std::vector < Specification* > vdepricated;
 
     wxTreeItemIdValue cookie = 0;
  
-    stack.push_back(selected);
+    stack.push(selected);
     
     /* Find all specifications that must be deleted */
     while (0 < stack.size()) {
-      wxTreeItemId&  descendant = stack.back();
+      wxTreeItemId&  descendant = stack.top();
  
-      depricated.insert(&((SpecificationData*) specifications->GetItemData(descendant))->specification);
- 
+      vdepricated.push_back(&((SpecificationData*) specifications->GetItemData(descendant))->specification);
+      sdepricated.insert(vdepricated.back());
+
       /* Proceed recursively */
-      stack.pop_back();
+      stack.pop();
  
       if (specifications->ItemHasChildren(descendant)) {
         wxTreeItemId an_id = specifications->GetFirstChild(descendant, cookie);
  
         while (an_id.IsOk()) {
-          stack.push_back(an_id);
+          stack.push(an_id);
  
           an_id = specifications->GetNextChild(descendant, cookie);
         }
       }
     }
 
-    /* Convert set to vector */
-    std::set    < Specification* >::const_iterator b = depricated.end();
-    std::set    < Specification* >::const_iterator i = depricated.begin();
-    std::vector < Specification* >                 vdepricated;
-
-    while (i != b) {
-      vdepricated.push_back(*i);
-
-      ++i;
-    }
-
-    depricated.clear();
+    sdepricated.clear();
 
     /* Delete from project manager */
     project_manager.Remove(vdepricated);

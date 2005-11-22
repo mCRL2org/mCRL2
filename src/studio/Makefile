@@ -97,8 +97,8 @@ install: all utility/relocator
 	$(INSTALL) -d $(datadir)
 	$(INSTALL) -m 0644 schemas/tool_catalog.xsd $(datadir)
 	$(GZIP) $(datadir)/tool_catalog.xsd
-	$(INSTALL) -m 0644 schemas/studio_project.xsd $(datadir)
-	$(GZIP) $(datadir)/studio_project.xsd
+	$(INSTALL) -m 0644 schemas/project.xsd $(datadir)
+	$(GZIP) $(datadir)/project.xsd
 	$(INSTALL) -m 0644 examples/tool_catalog.xml $(datadir)
 	utility/relocator $(bindir) $(datadir)/tool_catalog.xml
 ifeq ($(HOST_OS),MACOSX)

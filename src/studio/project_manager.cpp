@@ -63,7 +63,7 @@ bool ProjectManager::Load() {
   }
 
 #if defined(PARSER_SCHEMA_VALIDATION)
-  if (!reader.SetSchemaForValidation("schemas/studio_project.xsd")) {
+  if (!reader.SetSchemaForValidation("schemas/project.xsd")) {
     /* TODO Errors should be logged somewhere, but for the time std::cerr suffices */
 #ifndef NDEBUG
     std::cerr << "Error: schema is not usable.\n";
@@ -186,7 +186,7 @@ bool ProjectManager::Write(std::ostream& stream) {
   /* Write header */
   stream << "<?xml version=\"1.0\" encoding=\"utf-8\"?>\n"
          << "<studio-project xmlns:xsi=\"http://www.w3.org/2001/XMLSchema-instance\""
-         << " xsi:noNamespaceSchemaLocation=\"studio_project.xsd\">\n";
+         << " xsi:noNamespaceSchemaLocation=\"project.xsd\">\n";
 
   while (i != b) {
     i->Write(stream);
@@ -222,21 +222,24 @@ void ProjectManager::Print(std::ostream& stream) {
  * - The specification.location must be a basename and is taken relative to the project root
  * - if specificaiton.location is not specified then a suitable location is determined
  *
- * TODO
+ * TODO exception handling
  *
- * - If the a file exists that matches specification.location then NULL is returned
+ * - If the a file exists that matches specification.location
  * - Verify that the location is a relative path that points to a place in the project directory
  */
-Specification* ProjectManager::Add(Specification& specification) {
+Specification& ProjectManager::Add(Specification& specification) throw (Specification&) {
   /* Set identifier */
   specification.identifier = free_identifier++;
 
   specifications.push_back(specification);
 
-  return (&specifications.back());
+  /* TODO store in a smarter way */
+  Store();
+
+  return (specifications.back());
 }
 
-bool ProjectManager::Remove(Specification* specification) {
+bool ProjectManager::Remove(const Specification* specification) {
   std::list < Specification >::iterator i = specifications.begin();
 
   /* Specification is required to be present in the list */
@@ -255,14 +258,17 @@ bool ProjectManager::Remove(Specification* specification) {
 
   specifications.erase(i);
 
+  /* TODO store in a smarter way */
+  Store();
+
   return (true);
 }
 
 /* Specifications are required to be present in the list */
-bool ProjectManager::Remove(std::vector < Specification* >& some_specifications) {
-  std::list   < Specification >::iterator        i = specifications.begin();
-  std::vector < Specification* >::const_iterator j = some_specifications.begin();
-  std::vector < Specification* >::const_iterator c = some_specifications.end();
+bool ProjectManager::Remove(const std::vector < Specification* >& some_specifications) {
+        std::list   < Specification >::iterator        i = specifications.begin();
+        std::vector < Specification* >::const_iterator j = some_specifications.begin();
+  const std::vector < Specification* >::const_iterator c = some_specifications.end();
 
   /* Specification that a specification depends on must be stored on a lower index */
   while (j != c) {
@@ -274,14 +280,17 @@ bool ProjectManager::Remove(std::vector < Specification* >& some_specifications)
         if (boost::filesystem::exists(boost::filesystem::path((*k).file_name))) {
           boost::filesystem::remove(boost::filesystem::path((*k).file_name));
         }
+
+        ++k;
       }
 
-      specifications.erase(i);
+      i = specifications.erase(i);
 
       ++j;
     }
-
-    ++i;
+    else {
+      ++i;
+    }
   }
 
   return (true);
