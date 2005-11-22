@@ -1,4 +1,4 @@
-#include "new_specification.h"
+#include "gui_new_specification.h"
 
 #include <wx/statline.h>
 

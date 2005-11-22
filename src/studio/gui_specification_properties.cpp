@@ -7,11 +7,13 @@
 
 #include <boost/filesystem/operations.hpp>
 
-#include "studio_overview.h"
+#include "gui_project_overview.h"
+#include "gui_specification_properties.h"
+#include "gui_resources.h"
+
 #include "project_manager.h"
 #include "tool_manager.h"
-#include "specification_properties.h"
-#include "resources.h"
+
 #include "ui_core.h"
 
 IMPLEMENT_CLASS(SpecificationPropertiesDialog, wxDialog)

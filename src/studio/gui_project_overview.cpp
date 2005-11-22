@@ -20,9 +20,9 @@
 #include <boost/filesystem/operations.hpp>
 #include <boost/filesystem/convenience.hpp>
 
-#include "resources.h"
-#include "new_specification.h"
-#include "specification_properties.h"
+#include "gui_resources.h"
+#include "gui_new_specification.h"
+#include "gui_specification_properties.h"
 
 IMPLEMENT_CLASS(ProjectOverview, wxFrame)
 
