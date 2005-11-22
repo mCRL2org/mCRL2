@@ -1,0 +1,65 @@
+Interface conventions
+---------------------
+---------------------
+
+Default options
+---------------
+
+Every tool should provide the following options:
+  -h, --help            display help information
+      --version         display version information
+  -q, --quiet           do not display warning messages
+  -v, --verbose         turn on the display of short intermediate messages
+  -d, --debug           turn on the display of detailed intermediate messages
+
+
+Input and output files
+----------------------
+
+Every non-interactive tool that provides non-trivial input and output, should
+be of the following form:
+
+tool [OPTION]... [INFILE [OUTFILE]]
+
+If the user does not specify OUTFILE, the output has to be written to stdout.
+If the user also does not specify INFILE, the input has to be read from stdin.
+
+It is only allowed to deviate from this rule if it is technically infeasible
+to read from stdin or write to stdout.
+
+Furthermore, the following features are forbidden:
+- designate the input file without its extension, e.g.
+    wrong: "mcrl22lpe abp"
+    right: "mcrl22lpe abp.mcrl2"
+- option '-' to indicate input should be read from stdin, e.g.
+    wrong: "... | lperewr - abp.rewr.lpe"
+    right: "... | lperewr > abp.rewr.lpe"
+
+
+File formats
+------------
+
+To provide users with a consistent way of handling files, the following
+extensions should be used only for corresponding purpose:
+  .mcrl2                mCRL2 specification
+  .lpe                  mCRL2 LPE
+  .svc                  LTS in SVC format
+  .aut                  LTS in AUT format
+  .trc                  trace for simulation
+  .mcrl                 mCRL specification
+  .tbf                  mCRL LPE
+
+
+Feedback
+--------
+
+To provide users with a consistent way of giving feedback, the address
+bug@mcrl2.org should be used.
+
+
+Referring to mCRL
+-----------------
+
+When referring to mCRL, type it as such. Do not use muCRL.
+When referring to mCRL LPEs, type it as such. Do not use LPO, or tbf. tbf may
+only be used to indicate the file format.
