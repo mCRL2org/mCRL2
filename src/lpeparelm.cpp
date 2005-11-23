@@ -221,27 +221,40 @@ public:
     
     // Needed all process parameters which are not marked have to be eliminated
     //
+    int cycle = 0;
     if(p_verbose){
       cout << "  Searching for dependent process parameters" << endl;
     } 
-    counter = 0; 
-    for(summand_list::iterator currentSummand = lpe.summands().begin(); currentSummand != lpe.summands().end(); currentSummand++){
+    bool reset = true;
+    while (reset){
       if (p_verbose){
-        cout << "    Summand :" << ++counter << "/" << n << endl;    
+        cout << "  Cycle:"<< ++cycle << endl;
       }
-      for(data_assignment_list::iterator i = currentSummand->assignments().begin(); i !=  currentSummand->assignments().end() ;i++){
-        if (p_usedVars.find(i->lhs()) == p_usedVars.end()){
-          foundVariables = getDataVarIDs(aterm_appl(i->rhs()));
-          set< data_variable > result; 
-          set_intersection(foundVariables.begin(), foundVariables.end(), p_usedVars.begin(), p_usedVars.end(), inserter(result, result.begin()));
-          if (result.end() != result.begin()){
-            p_usedVars.insert(i->lhs());
-            //          cout << "\033[39m Match added: " << i->lhs().to_string() << "\033[0m" << endl; 
-          };  
+      reset = false;
+      counter = 0; 
+      for(summand_list::iterator currentSummand = lpe.summands().begin(); currentSummand != lpe.summands().end(); currentSummand++){
+        if (p_verbose){
+          cout << "    Summand :" << ++counter << "/" << n << endl;    
+        }
+        for(data_assignment_list::iterator i = currentSummand->assignments().begin(); i !=  currentSummand->assignments().end() ;i++){
+          if (p_usedVars.find(i->lhs()) != p_usedVars.end()){
+            foundVariables = getDataVarIDs(aterm_appl(i->rhs()));
+            //cout << i->rhs().pp() << endl;
+            int z = p_usedVars.size();
+            for(set< data_variable >::iterator k = foundVariables.begin(); k != foundVariables.end(); k++){
+  	          p_usedVars.insert(*k);
+  	          //cout << k->pp() << endl;
+  	        }
+  	        //cout << z << "----" << p_usedVars.size() << endl;
+            if (p_usedVars.size() != z){
+              reset = true;
+              //          cout << "\033[39m Match added: " << i->lhs().to_string() << "\033[0m" << endl; 
+            };  
+          }
         }
       }
+      //cout << setToList(p_usedVars).to_string() << endl;
     }
-    //cout << setToList(p_usedVars).to_string() << endl;
   
     for(data_variable_list::iterator di = lpe.process_parameters().begin(); di != lpe.process_parameters().end() ; di++){
       T.insert(*di);	  

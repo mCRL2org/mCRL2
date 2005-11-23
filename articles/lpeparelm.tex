@@ -54,7 +54,7 @@ The equation below is a \lpe\ in \mcrl :
 %\at werkt niet
 \begin{tabbing}
 \tab
-$X (\ovr{d}:\ovr{D}) = \sum_{i \in I} \sum_{\ovr{e_i}:\ovr{E_i}} \ovr{c_i} ( \ovr{d}, \ovr{e_i} ) \rightarrow $\\
+$X (\ovr{d}:\ovr{D}) = \sum_{i \in I} \sum_{\ovr{e_i}:\ovr{E_i}} c_i ( \ovr{d}, \ovr{e_i} ) \rightarrow $\\
 \> \> $(a_i^1 (\ovr{f_{i,1}}(\ovr{d},\ovr{e_i})) \vert \ldots \vert a_i^{n(i)}(\ovr{f_{i,n(i)}}(\ovr{d},\ovr{e_i}))) \at \text{ } t_i(\ovr{d},\ovr{e_i})  \cdot X(\ovr{g_i}(\ovr{d},\ovr{e_i})) $
 
 
@@ -91,11 +91,11 @@ Next we want to find the largest set $T \subseteq \lbrace 1, \ldots , \vert \ovr
 
 \begin{tabbing}
 \tab
-\> $\sum_{i \in I} \sum_{\ovr{e_i}:\ovr{E_i}} \ovr{c_i} ( \ovr{d}, \ovr{e_i} ) \rightarrow $\\
+\> $\sum_{i \in I} \sum_{\ovr{e_i}:\ovr{E_i}} c_i ( \ovr{d}, \ovr{e_i} ) \rightarrow $\\
 \> \> \> $(a_i^1 (\ovr{f_{i,1}}(\ovr{d},\ovr{e_i})) \vert \ldots \vert a_i^{n(i)}(\ovr{f_{i,n(i)}}(\ovr{d},\ovr{e_i}))) \at \text{ } t_i(\ovr{d},\ovr{e_i})  \cdot X(\ovr{g_i}(\ovr{d},\ovr{e_i})) 
 $ \\
 $\bisim$ \\
-\> $\sum_{i \in I} \sum_{\ovr{e_i'}_{U_i}:\ovr{E_i'}_{U_i}} \ovr{c_i} ( \ovr{d'}_T, \ovr{e_i'}_{U_i} ) \rightarrow $\\
+\> $\sum_{i \in I} \sum_{\ovr{e_i'}_{U_i}:\ovr{E_i'}_{U_i}} c_i( \ovr{d'}_T, \ovr{e_i'}_{U_i} ) \rightarrow $\\
 \> \> \> 
 $(a_i^1 (\ovr{f_{i,1}}(\ovr{d'}_T,\ovr{e_i'}_{U_i})) \vert \ldots \vert a_i^{n(i)}(\ovr{f_{i,n(i)}}(\ovr{d'}_T,\ovr{e_i'}_{U_i}))) \at \text{ } t_i(\ovr{d'}_T,\ovr{e_i'}_{U_i})  \cdot X(\ovr{g_i}(\ovr{d'}_T,\ovr{e_i'}_{U_i})) 
 $ \\
@@ -108,9 +108,9 @@ In this section we describe the algorithm informally. Throughout the run of the 
 
 \begin{itemize}
 \item In a condition: $c_i(\ovr{d},\ovr{e_i})$ for some $i \in I$
-\item In an action argument: $f_{i,j}(\ovr{d},\ovr{e_i})$ for some $i \in I$
+\item In an action argument: $a_i^j(\ovr{f_{i,j}}(\ovr{d},\ovr{e_i}))$ for some $i \in I$ and $j \in \lbrace 1, \ldots , \vert \ovr{vect^i} \vert \rbrace$
 \item In a time argument: $t_i(\ovr{d},\ovr{e_i})$ for some $i \in I$
-\item In an argument: $\ovr{g_i}(\ovr{d},\ovr{e_i})_j$ for some $i \in I$ and $j \in \lbrace 1, \ldots , n \rbrace$ where the $j$-th \pp\ is marked.
+\item In an argument: $\ovr{g_i}(\ovr{d},\ovr{e_i})_j$ for some $i \in I$ and $j \in \lbrace 1, \ldots , \vert \ovr{vect^i} \vert \rbrace$ where the $j$-th \pp\ is marked.
 
 \end{itemize}
 
@@ -122,9 +122,9 @@ In this section we describe the algorithm informally. Throughout the run of the 
   \bibitem{LPEframework} J.W. Wesselink,
    \textit{http://www.win.tue.nl/~wieger/mcrl2/html/index.html}\\
    A C++ wrapper for the ATerm library.
-  \bibitem{LPEformat} auteur,
-   \textit{article}
-   Extra info.
+\bibitem{LPEformat} Aad Mathijssen\\
+   \textit{https://svn.win.tue.nl/viewcvs-checkout/MCRL2/trunk/specs/mcrl2.internal.txt},
+   A description of the internal format of the mCRL2 language.
   \bibitem{LPEfreevar} auteur,
    \textit{article}
    Extra info.

@@ -58,9 +58,9 @@ $X (\ovr{d}:\ovr{D}) = \sum_{i \in I} \sum_{\ovr{e_i}:\ovr{E_i}} \ovr{c_i} ( \ov
 \end{defn}
 \noindent If we speak about an LPE in this article we refer to Definition \ref{def}.  The different states 
 %are $\ovr{d}$ 
-of the process are represented by the data vector parameter $\ovr{d}:\ovr{D}$. $\ovr{D}$ may be a Cartesian product of $n$ data types, meaning that $\ovr{d}$ may consist of a tuple $(d_1, \ldots, d_n)$. The LPE expresses that in state $\ovr{d}$ it preforms (multi)actions $\rbrace a_i^0, \ldots , a_i^n \rbrace$, carrying data parameters $\ovr{f_{i,0}}(\ovr{d},\ovr{e_i}), \ldots , \ovr{f_{i,n(i)}}(\ovr{d},\ovr{e_i})$ and 
+of the process are represented by the data vector parameter $\ovr{d}:\ovr{D}$. $\ovr{D}$ may be a Cartesian product of $n$ data types, meaning that $\ovr{d}$ may consist of a tuple $(d_1, \ldots, d_n)$. The LPE expresses that in state $\ovr{d}$, it preforms (multi)actions $\rbrace a_i^0, \ldots , a_i^n \rbrace$, carrying data parameters $\ovr{f_{i,0}}(\ovr{d},\ovr{e_i}), \ldots , \ovr{f_{i,n(i)}}(\ovr{d},\ovr{e_i})$ and 
 it can reach the new state $\ovr{g_i}(\ovr{d},e_i)$ under the condition that $\ovr{c_i}(\ovr{d},\ovr{e_i})$ is \ti{true}. So for each summand $i$ from $I$ we have at least a function $\ovr{g_i}: \ovr{D} \times \ovr{E} \rightarrow \ovr{D}$ and a function $\ovr{c_i}: \ovr{D} \times \ovr{E} \rightarrow \mathbb{B}$.
-Data parameters $\ovr{e_i} : \ovr{E_i}$ are sum variables. These variables are used to let a read or send action range over a data domain. 
+Data parameters $\ovr{e_i} : \ovr{E_i}$ are sum variables. These variables are used to range parameters over a data domain. 
 
 \noindent For an more detailed explanation of \lpe s  we refer to \cite{LPE_info}.
 %\end{defn}
@@ -81,17 +81,17 @@ This section describes the options which can be used.
 \> \tb{-h} \> \> \tb{--help} \> \> \> Displays help about the \tool .\\
 \> \tb{-v} \> \> \tb{--version} \> \> \> Dispays the version of the \tool .\\
 \>         \> \> \tb{--pars} \> \> \> Prints the \pps\ of an LPE.\\
-\>         \> \>  \tb{--npars} \> \> \> Prints the number of \pps\ of an LPE.\\
+\>         \> \> \tb{--npars} \> \> \> Prints the number of \pps\ of an LPE.\\
 \end{tabbing}
 If no option is given the \tool\ displays the information as described in Section \ref{Def}.
 
-\begin{thebibliography}{99}  \bibitem{LPE_info} auteur\\
-   \textit{article},
-   Extra info.
+\begin{thebibliography}{99}  \bibitem{LPEformat} Aad Mathijssen\\
+   \textit{https://svn.win.tue.nl/viewcvs-checkout/MCRL2/trunk/specs/mcrl2.internal.txt},
+   A description of the internal format of the mCRL2 language.
   \bibitem{LPEframework} J.W. Wesselink,
    \textit{http://www.win.tue.nl/~wieger/mcrl2/html/index.html}\\
    A C++ wrapper for the ATerm library.
-  \bibitem{LPEformat} auteur,
+  \bibitem{LPE_info} auteur,
    \textit{article}
    Extra info.
 

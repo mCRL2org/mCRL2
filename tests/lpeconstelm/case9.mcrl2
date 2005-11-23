@@ -25,4 +25,4 @@
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 %
 % if "--nocondition" is used all summands are inspected.
-% The algorithm should indicate that x is not true.
+% The algorithm should indicate that x is not constant.

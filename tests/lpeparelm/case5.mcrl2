@@ -1,9 +1,11 @@
 % Test Case 5
 %
-% Process parameter j should be removed
+% No process parameter should be removed
 
-act a; 
+act a: Nat;
+act b;
 
-proc X(i,j: Nat)   = (i == 5) -> a. X(i,j);
+proc X(i,j,k: Nat) =  a(i).X(k,j,k) + 
+                         b.X(j,j,k);
             
-init X(0,1);
+init X(1,2,3);
