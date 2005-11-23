@@ -23,14 +23,13 @@
 //------------------------------------------------------------------------------
 
 void print_help() {
-  cout << "Usage: %s [OPTION]... INFILE\n"
+  cout << "Usage: " << PROGRAM_NAME << " [OPTION]... INFILE\n"
        << "Simulates the LPE in INFILE.\n"
        << "\n"
        << "Mandatory arguments to long options are mandatory for short options too.\n"
        << "  -h, --help            display this help message\n"
        << "  -y, --dummy           replace free variables in the LPE with dummy values\n"
-       << "  -R, --rewriter=NAME   use rewriter NAME (default 'inner3')\n"
-       << PROGRAM_NAME;
+       << "  -R, --rewriter=NAME   use rewriter NAME (default 'inner3')\n";
 }
 
 XSim::XSim()

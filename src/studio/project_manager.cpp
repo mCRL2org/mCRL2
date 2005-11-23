@@ -293,6 +293,9 @@ bool ProjectManager::Remove(const std::vector < Specification* >& some_specifica
     }
   }
 
+  /* TODO store in a smarter way */
+  Store();
+
   return (true);
 }
 

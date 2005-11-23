@@ -22,9 +22,28 @@
  </tool>
  <tool name="lpeconstelm" identifier="lpeconstelm" location="/tmp/mcrl2/bin/lpeconstelm">
   <mode category="Transformation">
-   <description>A tool that transforms an LPE to an LPE where constants are eliminated.</description>
+   <description>A tool that transforms an LPE to one where constant process parameters are eliminated.</description>
    <object type="input" formalism="LPE" default-format="lpe"/>
    <object type="output" formalism="LPE" default-format="lpe"/>
+  </mode>
+ </tool>
+ <tool name="lpeparelm" identifier="lpeparelm" location="/tmp/mcrl2/bin/lpeparelm">
+  <mode category="Transformation">
+   <description>A tool that removes inert parameters from an LPE.</description>
+   <object type="input" formalism="LPE" default-format="lpe"/>
+   <object type="output" formalism="LPE" default-format="lpe"/>
+  </mode>
+ </tool>
+ <tool name="lpeinfo" identifier="lpeinfo" location="/tmp/mcrl2/bin/lpeinfo">
+  <mode category="Analysis">
+   <description>A tool that retrieves some basic information aboute an LPE.</description>
+   <object type="input" formalism="LPE" default-format="lpe"/>
+  </mode>
+ </tool>
+ <tool name="xsim" identifier="xsim" location="/tmp/mcrl2/bin/xsim">
+  <mode category="Analysis">
+   <description>Simulates an LPE.</description>
+   <object type="input" formalism="LPE" default-format="lpe"/>
   </mode>
  </tool>
 </tool-catalog>
