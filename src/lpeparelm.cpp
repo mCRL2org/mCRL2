@@ -128,15 +128,16 @@ public:
   //  
   bool inline readStream()
   {
-    ATermAppl p_spec = (ATermAppl) ATreadFromFile(stdin);
-    if (p_spec == NULL){
+    ATermAppl z = (ATermAppl) ATreadFromFile(stdin);
+    if (z == NULL){
       cout << "Could not read LPE from stdin"<< endl;
       return false;
     };
-    if (!gsIsSpecV1(p_spec)){
+    if (!gsIsSpecV1(z)){
       cout << "Stdin does not contain an LPE" << endl;
       return false;
     }
+    p_spec = specification(z);
     return true;
   }
 
@@ -240,7 +241,7 @@ public:
           if (p_usedVars.find(i->lhs()) != p_usedVars.end()){
             foundVariables = getDataVarIDs(aterm_appl(i->rhs()));
             //cout << i->rhs().pp() << endl;
-            int z = p_usedVars.size();
+            unsigned int  z = p_usedVars.size();
             for(set< data_variable >::iterator k = foundVariables.begin(); k != foundVariables.end(); k++){
   	          p_usedVars.insert(*k);
   	          //cout << k->pp() << endl;
@@ -275,9 +276,9 @@ public:
       } else {
         cout << " No process parameters are removed. " << endl;
       }
-    } else {  
-      cout << " Number of removed process parameters : " << p_S.size() << endl;
-    }
+    }// else {  
+     // cout << " Number of removed process parameters : " << p_S.size() << endl;
+    //}
   }
   
   void inline output()
@@ -370,14 +371,17 @@ public:
       p_spec.mappings(), 
       p_spec.equations(), 
       p_spec.actions(), 
+      //p_spec.lpe(),
       rebuild_lpe,
       p_spec.initial_free_variables(), 
       reverse(rebuild_initial_variables),
       reverse(rebuild_initial_state)
+      //p_spec.initial_variables(),
+      //p_spec.initial_state()
     );
     
     assert(gsIsSpecV1((ATermAppl) rebuild_spec));
-    
+   
     if (p_outputfile.size() == 0){
       if(!p_verbose){
         assert(!p_verbose);
@@ -385,9 +389,9 @@ public:
       };
     } else {
       if(!rebuild_spec.save(p_outputfile)){
-         cerr << "Unsuccessfully written output file: " << p_outputfile << endl;
+         cerr << "Unsuccessfully written outputfile: " << p_outputfile << endl;
       };
-    }
+    } 
   }
     
   string inline getVersion()
@@ -464,7 +468,7 @@ int main(int ac, char* av[])
       cerr << "Specify only INPUT and/or OUTPUT file (Too many arguments)."<< endl;
     }
              
-    if((filename.size() <= 2) && (filename.size() != 0)){
+    if(filename.size() >= 1) {
       if (!obj.loadFile(filename[0])){return 0;};
     } ; 
     if(filename.size() == 2){

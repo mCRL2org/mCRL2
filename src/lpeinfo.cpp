@@ -67,15 +67,16 @@ public:
   //  
   bool inline readStream()
   {
-    ATermAppl p_spec = (ATermAppl) ATreadFromFile(stdin);
-    if (p_spec == NULL){
+    ATermAppl z = (ATermAppl) ATreadFromFile(stdin);
+    if (z == NULL){
       cout << "Could not read LPE from stdin"<< endl;
       return false;
     };
-    if (!gsIsSpecV1(p_spec)){
+    if (!gsIsSpecV1(z)){
       cout << "Stdin does not contain an LPE" << endl;
       return false;
     }
+    p_spec = specification(z);
     return true;
   }
 

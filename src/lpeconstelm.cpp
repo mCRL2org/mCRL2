@@ -68,7 +68,7 @@ private:
   bool                        p_reachable; 
   string                      p_filenamein;
   specification               p_spec;
-  set< lpe::sort >          p_singletonSort;
+  set< lpe::sort >            p_singletonSort;
   
   // Rewrites an ATerm to a normal form
   //
@@ -79,7 +79,7 @@ private:
     return gsRewriteTerm(t);
   }
 
-  // Subsitutes a vectorlist of data assignements to a ATermAppl
+  // Subsitutes a vectorlist of data assignements to a ATermAppl 
   //
   inline ATermAppl p_substitute(ATermAppl t, vector< data_assignment > &y )
   { 
@@ -360,7 +360,7 @@ public:
   //
   void inline output()
   {
-    LPE lpe = p_spec.lpe();
+    lpe::LPE p_lpe = p_spec.lpe();
     summand_list rebuild_summandlist;
 
     //Remove the summands that are never visited
@@ -368,11 +368,11 @@ public:
     if (p_reachable){
       rebuild_summandlist = setToList(p_visitedSummands); 
     } else {
-      rebuild_summandlist = lpe.summands();
+      rebuild_summandlist = p_lpe.summands();
     }
 
     if (p_verbose) {
-      cout << "Number of summands of old LPE: " << lpe.summands().size() << endl;
+      cout << "Number of summands of old LPE: " << p_lpe.summands().size() << endl;
       cout << "Number of summands of new LPE: " <<  rebuild_summandlist.size() << endl;
     }
 
@@ -427,21 +427,22 @@ public:
 	      reverse(rebuild_sum_ass));
         rebuild_summandlist_no_cp = push_front(rebuild_summandlist_no_cp, tmp); 
     }
-      
+    
+    summand_list rebuild_summandlist2;
     for(summand_list::iterator i = rebuild_summandlist_no_cp.begin() ; i != rebuild_summandlist_no_cp.end() ; i++){
-      rebuild_summandlist = push_front(rebuild_summandlist, LPE_summand(p_substitute(*i, constantPP ))); 
+      rebuild_summandlist2 = push_front(rebuild_summandlist2, LPE_summand(p_substitute(*i, constantPP ))); 
     }
   
     //construct new specfication
     //
     //LPE(data_variable_list free_variables, data_variable_list process_parameters, 
     //  summand_list summands, action_list actions);
-    LPE rebuild_lpe;
-    rebuild_lpe = LPE(
-      lpe.free_variables(), 
+    lpe::LPE rebuild_lpe;
+    rebuild_lpe = lpe::LPE(
+      p_lpe.free_variables(), 
       vectorToList(variablePPvar), 
-      rebuild_summandlist,
-      lpe.actions()
+      rebuild_summandlist2,
+      p_lpe.actions()
     );
 
     // Rebuild spec
@@ -467,6 +468,8 @@ public:
     );
     
     assert(gsIsSpecV1((ATermAppl) rebuild_spec));
+    
+    //cout << p_lpe.pp() << endl;
     
     if (p_outputfile.size() == 0){
       if(!p_verbose){
@@ -515,6 +518,10 @@ public:
       cerr << "error: could not read input file '" << filename << "'" << endl;
       return false;
     } 
+    //LPE x = p_spec.lpe(); 
+    //cout << x.pp() << endl;
+    //p_spec.save("/scratch/dump.lpe");
+    //assert(false);
     return true;
   }
   
@@ -523,15 +530,17 @@ public:
   //  
   bool inline readStream()
   {
-    ATermAppl p_spec = (ATermAppl) ATreadFromFile(stdin);
-    if (p_spec == NULL){
+    ATermAppl z = (ATermAppl) ATreadFromFile(stdin);
+    if (z == NULL){
       cout << "Could not read LPE from stdin"<< endl;
       return false;
     };
-    if (!gsIsSpecV1(p_spec)){
+    if (!gsIsSpecV1(z)){
       cout << "Stdin does not contain an LPE" << endl;
       return false;
     }
+    p_spec = specification(z);
+    //cout << p_spec.lpe().pp() << endl;
     return true;
   }
 
@@ -597,7 +606,7 @@ public:
     int     cycle    = 0;
     p_newVarCounter  = 0;
     
-    LPE lpe          = p_spec.lpe();
+    lpe::LPE p_lpe          = p_spec.lpe();
     gsRewriteInit(gsMakeDataEqnSpec(aterm_list(p_spec.equations())), GS_REWR_INNER3); 
 
     for(data_assignment_list::iterator i = p_spec.initial_assignments().begin(); i != p_spec.initial_assignments().end() ; i++ ){
@@ -613,7 +622,7 @@ public:
     for (data_variable_list::iterator di = p_spec.initial_free_variables().begin(); di != p_spec.initial_free_variables().end(); di++){
       p_freeVarSet.insert(di->to_expr());
     }
-    for (data_variable_list::iterator di = lpe.free_variables().begin(); di != lpe.free_variables().end(); di++){
+    for (data_variable_list::iterator di = p_lpe.free_variables().begin(); di != p_lpe.free_variables().end(); di++){
       p_freeVarSet.insert(di->to_expr());
     } 
     
@@ -637,7 +646,7 @@ public:
           cout << "Cycle:" << cycle++ << endl;
         }
         int summandnr = 1;
-        for(summand_list::iterator currentSummand = lpe.summands().begin(); currentSummand != lpe.summands().end() ;currentSummand++ ){
+        for(summand_list::iterator currentSummand = p_lpe.summands().begin(); currentSummand != p_lpe.summands().end() ;currentSummand++ ){
           if ( (p_visitedSummands.find(*currentSummand) != p_visitedSummands.end()) || (conditionTest(currentSummand->condition()))) {
             if(p_verbose){
               cout << "  Summand: "<< summandnr++ << endl;
@@ -700,7 +709,7 @@ public:
     // Construct S    
     //
     set< int > S;
-    n = lpe.process_parameters().size(); 
+    n = p_lpe.process_parameters().size(); 
     for(int j=0; j < n ; j++){
       S.insert(j);
     };
@@ -808,7 +817,7 @@ int main(int ac, char* av[])
       filename = vm["INFILE"].as< vector<string> >();
 	  }
 
-     	  
+    //printf("%d",filename.size()); 	  
 	  if (filename.size() == 0){
 	    if (!obj.readStream()){return 0;}
 	  }
@@ -817,8 +826,7 @@ int main(int ac, char* av[])
       cerr << "Specify only INPUT and/or OUTPUT file (Too many arguments)."<< endl;
     }
     
-        
-    if((filename.size() <= 2) && (filename.size() != 0)){
+    if(filename.size() >= 1){
       if(!obj.loadFile(filename[0])){return 0;};
     } ; 
     if(filename.size() == 2){
