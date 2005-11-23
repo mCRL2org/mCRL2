@@ -208,7 +208,7 @@ endif
 ifeq ($(HOST_OS),MACOSX)
 	$(CXX) -I$(BOOST_PREFIX)/include -L$(BOOST_PREFIX)/lib -lboost_filesystem $< -o $@
 else
-	$(CXX) -I$(BOOST_PREFIX)/include -Wl,-rpath=$(libdir) -L$(BOOST_PREFIX)/lib -lboost_filesystem $< -o $@
+	$(CXX) -I$(BOOST_PREFIX)/include -Wl,-rpath=$(BOOST_PREFIX)/lib -L$(BOOST_PREFIX)/lib -lboost_filesystem $< -o $@
 endif
 
 -include revision
