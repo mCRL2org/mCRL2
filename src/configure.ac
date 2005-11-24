@@ -316,6 +316,7 @@ if test $WX_CONFIG; then
   WX_LIBS="$($WX_CONFIG --libs core base)"
 fi
 AC_SUBST([USE_WX],[])
+AC_SUBST([WX_CONFIG],[])
 AC_SUBST([WX_CPPFLAGS],[])
 AC_SUBST([WX_LIBS],[])
 

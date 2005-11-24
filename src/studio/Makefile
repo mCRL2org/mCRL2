@@ -28,14 +28,14 @@ BOOST_OBJECTS                  = gui_project_overview.o tool_manager.o project_m
 BOOST_CPPFLAGS                 = -I$(BOOST_PREFIX)/include
 BOOST_LIBRARIES                = -L$(BOOST_PREFIX)/lib -lboost_filesystem
 WX_OBJECTS                     = studio.o gui_project_overview.o gui_new_specification.o gui_specification_properties.o \
-				 gui_resources.o tool_executor.o
-WX_LIBRARIES                   = $(WX_LIBS)
+				 gui_resources.o tool_executor.o logger.o process.o
+WX_LIBRARIES                   = $$($(WX_CONFIG) --libs core base adv net)
 
-PROJECT_MANAGER_OBJECTS        = project_manager.o specification.o xml_text_reader.o settings_manager.o
-TOOL_MANAGER_OBJECTS           = tool_manager.o tool.o xml_text_reader.o settings_manager.o
+PROJECT_MANAGER_OBJECTS        = project_manager.o specification.o xml_text_reader.o settings_manager.o logger.o
+TOOL_MANAGER_OBJECTS           = tool_manager.o tool.o xml_text_reader.o settings_manager.o logger.o
 GUI_OBJECTS                    = studio.o gui_project_overview.o gui_new_specification.o gui_specification_properties.o \
 				 gui_resources.o $(sort $(PROJECT_MANAGER_OBJECTS) $(TOOL_MANAGER_OBJECTS)) \
-				 tool_executor.o
+				 tool_executor.o process.o
 OBJECTS                        = $(sort $(GUI_OBJECTS) $(PROJECT_MANAGER_OBJECTS) $(TOOL_MANAGER_OBJECTS))
 
 TEST_TARGETS                   = project_manager_tester tool_manager_tester

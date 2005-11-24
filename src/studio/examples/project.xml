@@ -1,5 +1,5 @@
 <?xml version="1.0" encoding="utf-8"?>
-<studio-project xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:noNamespaceSchemaLocation="tool_catalog.xsd">
+<project xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:noNamespaceSchemaLocation="tool_catalog.xsd" version="1.0">
  <description>This is a short description of the project.</description>
  <specification name="root.mcrl2" identifier="0">
   <output-object format="mcrl2">root.mcrl2</output-object>

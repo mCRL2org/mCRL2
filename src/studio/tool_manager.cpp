@@ -44,7 +44,7 @@ inline bool ToolManager::Write(std::ostream& stream) const {
   /* Write header */
   stream << "<?xml version=\"1.0\" encoding=\"utf-8\"?>\n"
          << "<tool-catalog xmlns:xsi=\"http://www.w3.org/2001/XMLSchema-instance\""
-         << " xsi:noNamespaceSchemaLocation=\"tool_catalog.xsd\">\n";
+         << " xsi:noNamespaceSchemaLocation=\"tool_catalog.xsd\" version=\"1.0\">\n";
 
   while (i != b) {
     (*i)->Write(stream);

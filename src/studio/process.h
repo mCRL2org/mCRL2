@@ -14,7 +14,8 @@
 class Process : public wxProcess {
   public:
 
-    Process(int flags) : wxProcess(flags) {
+    Process(int flags = wxPROCESS_DEFAULT) : wxProcess(flags) {
+      Redirect();
     }
  
     static inline Process* Open(const wxString& cmd, int flags = wxEXEC_ASYNC) {

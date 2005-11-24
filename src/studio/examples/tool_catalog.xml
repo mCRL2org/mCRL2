@@ -1,5 +1,5 @@
 <?xml version="1.0" encoding="utf-8"?>
-<tool-catalog xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:noNamespaceSchemaLocation="tool_catalog.xsd">
+<tool-catalog xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:noNamespaceSchemaLocation="tool_catalog.xsd" version="1.0">
  <tool name="lpe2lts" identifier="lpe2lts" location="/tmp/mcrl2/bin/lpe2lts">
   <description>A tool computes the instantiation of an LPE.</description>
   <mode category="Translation">

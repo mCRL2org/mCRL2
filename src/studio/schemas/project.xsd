@@ -1,5 +1,11 @@
 <?xml version="1.0" encoding="ISO-8859-1" ?>
 <xs:schema xmlns:xs="http://www.w3.org/2001/XMLSchema">
+ <!-- A version specification type -->
+ <xs:simpleType name="identifier">
+  <xs:restriction base="xs:token">
+   <xs:pattern value="[0-9]+\.[0-9]+"/>
+  </xs:restriction>
+ </xs:simpleType>
  <!-- Data type for input specification -->
  <xs:complexType name="input-object">
   <xs:attribute name="identifier" type="xs:nonNegativeInteger" use="required"/>
@@ -41,12 +47,13 @@
   <xs:attribute name="uptodate" type="xs:boolean" use="optional"/>
  </xs:complexType>
  <!-- Root element the studio-project -->
- <xs:element name="studio-project">
+ <xs:element name="project">
   <xs:complexType>
    <xs:sequence>
     <xs:element name="description" type="xs:token" minOccurs="0"/>
     <xs:element name="specification" type="specification" maxOccurs="unbounded"/>
    </xs:sequence>
+   <xs:attribute name="version" type="version-type" use="required"/>
   </xs:complexType>
  </xs:element>
 </xs:schema>

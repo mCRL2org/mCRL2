@@ -76,7 +76,7 @@ bool ProjectManager::Load() {
   try {
     Specification dummy;
 
-    /* Read root element (studio-project) */
+    /* Read root element (project) */
     reader.Read();
  
     reader.Read();
@@ -112,7 +112,7 @@ bool ProjectManager::Load() {
     if (status != 0) {
       /* TODO Errors should be logged somewhere, but for the time std::cerr suffices */
 #ifndef NDEBUG
-      std::cerr << "Fatal: Parse error(s) or unknown exception with parsing studio-project.xsd.\n";
+      std::cerr << "Fatal: Parse error(s) or unknown exception with parsing project.xsd.\n";
 #endif
 
       return_value = false;
@@ -185,8 +185,8 @@ bool ProjectManager::Write(std::ostream& stream) {
 
   /* Write header */
   stream << "<?xml version=\"1.0\" encoding=\"utf-8\"?>\n"
-         << "<studio-project xmlns:xsi=\"http://www.w3.org/2001/XMLSchema-instance\""
-         << " xsi:noNamespaceSchemaLocation=\"project.xsd\">\n";
+         << "<project xmlns:xsi=\"http://www.w3.org/2001/XMLSchema-instance\""
+         << " xsi:noNamespaceSchemaLocation=\"project.xsd\" version=\"1.0\">\n";
 
   while (i != b) {
     i->Write(stream);
@@ -195,7 +195,7 @@ bool ProjectManager::Write(std::ostream& stream) {
   }
 
   /* Write footer */
-  stream << "</studio-project>\n";
+  stream << "</project>\n";
 
   return (true);
 }
