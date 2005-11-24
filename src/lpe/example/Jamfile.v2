@@ -7,14 +7,18 @@ project src/lpe/example
        <os>LINUX:<linkflags>-ldl
    ;
 
-exe constructors : constructors.cpp : ;
-exe spec         : spec.cpp  : ;
-exe substitute   : substitute.cpp : ;
+exe constructors    : constructors.cpp : ;
+exe spec            : spec.cpp  : ;
+exe substitute      : substitute.cpp : ;
+exe filter_template : filter_template.cpp : ;
+exe lpeupdate       : lpeupdate.cpp : ;
 
 install dist
    :
      constructors
      spec
      substitute
+     lpeupdate
+     filter_template
    :
    ;
