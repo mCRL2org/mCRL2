@@ -8,7 +8,7 @@ act action: Nat;
 
 proc X(i: Nat)   = (i <  5) -> action(i).X(i+1) +
                    (i == 5) -> action(i).Y(i, i);
-     Y(i,j: Nat) = action(j).Y(i,j+1);               
+     Y(i,j: Nat) = action(j).Y(i,j);               
 
 init X(0);
 
@@ -22,17 +22,19 @@ init X(0);
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 %%                                                        %%
+%% act  action: Nat;                                      %%
+%%                                                        %%
 %% var  freevar0: Nat;                                    %%
 %% proc P(s3: Pos, i,j: Nat) =                            %%
-%%        (s3 == 2) ->                                    %%
-%%          action(j) .                                   %%
-%%          P(s3 := 2, j := j + 1)                        %%
-%%      + (s3 == 1 && i < 5) ->                           %%
-%%          action(i) .                                   %%
-%%           P(s3 := 1, i := i + 1, j := freevar0)        %%
-%%      + (s3 == 1 && i == 5) ->                          %%
-%%          action(i) .                                   %%
-%%          P(s3 := 2, j := i);                           %%
+%%       (s3 == 2) ->                                     %%
+%%         action(j) .                                    %%
+%%         P(s3 := 2)                                     %%
+%%     + (s3 == 1 && i < 5) ->                            %%
+%%         action(i) .                                    %%
+%%         P(s3 := 1, i := i + 1, j := freevar0)          %%
+%%     + (s3 == 1 && i == 5) ->                           %%
+%%         action(i) .                                    %%
+%%         P(s3 := 2, j := i);                            %%
 %%                                                        %%
 %% var  freevar: Nat;                                     %%
 %% init P(s3 := 1, i := 0, j := freevar);                 %%
