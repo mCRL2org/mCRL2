@@ -461,15 +461,16 @@ int main(int ac, char* av[])
 	  }
 	  
 	  if (filename.size() == 0){
-	    if (!obj.readStream()){return 0;}
+	    if (!obj.readStream()){return 1;}
 	  }
 
     if (filename.size() > 2){
       cerr << "Specify only INPUT and/or OUTPUT file (Too many arguments)."<< endl;
+      return 1;
     }
              
     if(filename.size() >= 1) {
-      if (!obj.loadFile(filename[0])){return 0;};
+      if (!obj.loadFile(filename[0])){return 1;};
     } ; 
     if(filename.size() == 2){
       obj.setSaveFile(filename[1]);
