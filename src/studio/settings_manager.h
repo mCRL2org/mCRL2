@@ -40,6 +40,12 @@ class SettingsManager {
 
     /* Get the base name of a project file */
     const std::string GetProjectFileName() const;
+
+    inline const std::string GetLogFileName() const {
+      std::string return_value = settings_directory;
+
+      return (return_value.append("/log"));
+    }
 };
 
 #endif

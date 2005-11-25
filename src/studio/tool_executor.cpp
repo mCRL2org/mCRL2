@@ -41,7 +41,7 @@ bool ToolExecutor::Execute(ToolManager& tool_manager, unsigned int tool_identifi
 }
 
 void ToolExecutor::Remove(Process* process_pointer) {
-//  processes.erase(processes.find(process_pointer));
+  processes.erase(processes.find(process_pointer));
 }
 
 void ToolExecutor::Terminate(Process* process_pointer) {

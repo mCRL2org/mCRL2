@@ -8,19 +8,26 @@
 #include <wx/menu.h>
 #include <wx/textctrl.h>
 #include <wx/treectrl.h>
+#include <wx/splitter.h>
 
 #include "project_manager.h"
 #include "tool_manager.h"
+
+class wxSplitterWindow;
+class wxTreeCtrl;
+class wxMenu;
+class wxPanel;
 
 class ProjectOverview : public wxFrame {
   DECLARE_CLASS(ProjectOverview)
   DECLARE_EVENT_TABLE()
 
   private:
-    wxTreeCtrl*  specifications;
-    wxPanel*     progress;
-    wxMenu*      tree_popup_menu;
-    wxTextCtrl*  log_display;
+    wxSplitterWindow* top_splitter;
+    wxTreeCtrl*       specifications;
+    wxPanel*          progress;
+    wxMenu*           tree_popup_menu;
+    wxTextCtrl*       log_display;
 
     /* The tool categories in the system, sorted lexicographically */
     std::vector < std::string > tool_categories;

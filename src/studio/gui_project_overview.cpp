@@ -6,10 +6,10 @@
 #include <unistd.h>
 
 #include "gui_project_overview.h"
-#include "ui_core.h"
 #include "tool_executor.h"
+#include "logger.h"
+#include "ui_core.h"
 
-#include <wx/splitter.h>
 #include <wx/textctrl.h>
 #include <wx/process.h>
 #include <wx/textdlg.h>
@@ -95,7 +95,8 @@ ProjectOverview::ProjectOverview(ToolManager& new_tool_manager, wxWindow* parent
 
   /* Upper level window splitter */
   wxBoxSizer*       mainSizer    = new wxBoxSizer(wxVERTICAL);
-  wxSplitterWindow* mainSplitter = new wxSplitterWindow(this);
+
+  top_splitter = new wxSplitterWindow(this);
 
   /* Load main icons */
   main_icon_list = LoadMainIcons();
@@ -109,12 +110,12 @@ ProjectOverview::ProjectOverview(ToolManager& new_tool_manager, wxWindow* parent
   format_small_icon_list = LoadSmallFormatIcons();
 
   /* Generate model view */
-  specifications = new wxTreeCtrl(mainSplitter, ID_FRAME_MODEL, wxDefaultPosition, wxDefaultSize, wxTR_EDIT_LABELS|wxTR_HAS_BUTTONS|wxTR_HIDE_ROOT|wxTR_SINGLE|wxSUNKEN_BORDER);
+  specifications = new wxTreeCtrl(top_splitter, ID_FRAME_MODEL, wxDefaultPosition, wxDefaultSize, wxTR_EDIT_LABELS|wxTR_HAS_BUTTONS|wxTR_HIDE_ROOT|wxTR_SINGLE|wxSUNKEN_BORDER);
   specifications->AssignImageList(format_icon_list);
   specifications->AddRoot(wxT("Leonard of Quirm!"));
 
   /* Generate progress view */
-  progress = new wxPanel(mainSplitter, ID_FRAME_ANALYSIS, wxDefaultPosition, wxDefaultSize, wxRAISED_BORDER);
+  progress = new wxPanel(top_splitter, ID_FRAME_ANALYSIS, wxDefaultPosition, wxDefaultSize, wxRAISED_BORDER);
 
   wxBoxSizer*       csizer            = new wxBoxSizer(wxVERTICAL);
   wxStaticBoxSizer* asizer            = new wxStaticBoxSizer(wxVERTICAL, progress, wxT("Progress log"));
@@ -126,16 +127,28 @@ ProjectOverview::ProjectOverview(ToolManager& new_tool_manager, wxWindow* parent
   csizer->Add(asizer, 1, wxALL|wxEXPAND, 5);
   progress->SetSizer(csizer);
 
-  mainSplitter->SetSplitMode(wxSPLIT_VERTICAL);
-  mainSplitter->SplitVertically(specifications,progress,0);
+  top_splitter->SetSplitMode(wxSPLIT_VERTICAL);
+  top_splitter->SplitVertically(specifications,progress,0);
 
-  mainSizer->Add(mainSplitter, 1, wxALL|wxEXPAND, 2);
+  mainSizer->Add(top_splitter, 1, wxALL|wxEXPAND, 2);
 
   SetSizer(mainSizer);
 
   /* Create status bar and set it to empty explicitly */
   CreateStatusBar();
   SetStatusText(wxT("ready"));
+
+  /* Force calculation of sizes */
+  Show(true);
+
+  GetSizer()->Detach(top_splitter);
+  GetSizer()->Add(new wxPanel(this, wxID_ANY), 1, wxALL|wxEXPAND, 2);
+  GetSizer()->RecalcSizes();
+  top_splitter->Show(false);
+  Update();
+
+  /* Connect log display to logger */
+  logger->SetLogWindow(log_display);
 }
 
 ProjectOverview::~ProjectOverview() {
@@ -175,7 +188,6 @@ inline void ProjectOverview::GenerateMenuBar() {
   file_new_menu->Append(wxID_NEW, wxT("&Project"));
   file_new_menu->AppendSeparator();
   file_new_menu->Append(ID_SPECIFICATION_NEW, wxT("&Specification\tCTRL-n"));
-//  file_new_menu->Append(ID_ANALYSIS_NEW, wxT("&New Analysis"));
   file_menu->Append(ID_NEW, wxT("&New\tSHIFT-ALT-n"), file_new_menu);
 
   file_menu->Append(wxID_OPEN, wxT("&Open...\tCTRL-o"));
@@ -188,22 +200,8 @@ inline void ProjectOverview::GenerateMenuBar() {
 
   wxMenu* project_menu  = new wxMenu();
 
-//  project_menu->Append(wxID_NEW, wxT("&New"), wxT("Create new project"));
-//  project_menu->Append(ID_PROJECT_LOAD, wxT("&Open"), wxT("Open existing project"));
   project_menu->Append(ID_PROJECT_BUILD, wxT("&Build"), wxT("Generate all specification that are not up to date"));
-//  project_menu->AppendSeparator();
 
-//  wxMenu* project_specification_menu = new wxMenu();
-
-//  project_specification_menu->Append(ID_SPECIFICATION_NEW, wxT("&New\tCTRL-n"), wxT("Create new specification"));
-//  project_menu->Append(ID_SPECIFICATION_NEW, wxT("&Specification"), project_specification_menu);
-
-//  wxMenu* project_analysis_menu = new wxMenu();
-
-//  project_analysis_menu->Append(ID_ANALYSIS_NEW, wxT("&New"));
-//  project_analysis_menu->Append(ID_ANALYSIS_REMOVE, wxT("&Remove"));
-//  project_analysis_menu->Append(ID_ANALYSIS_PERFORM, wxT("&Perform\tCTRL-P"));
-//  project_menu->Append(ID_ANALYSIS, wxT("&Analysis"), project_analysis_menu);
   menu->Append(project_menu, wxT("&Project"));
 
   wxMenu* settings_menu  = new wxMenu();
@@ -444,6 +442,12 @@ void ProjectOverview::NewProject(wxCommandEvent &event) {
     /* Store default configuration */
     project_manager.Store();
 
+    GetSizer()->Remove(0);
+    GetSizer()->Add(top_splitter, 1, wxALL|wxEXPAND, 2);
+    GetSizer()->RecalcSizes();
+    top_splitter->Show(true);
+    Update();
+
     GetMenuBar()->Enable(ID_PROJECT_STORE, true);
     GetMenuBar()->Enable(ID_SPECIFICATION_NEW, true);
     GetMenuBar()->Enable(wxID_CLOSE, true);
@@ -453,6 +457,15 @@ void ProjectOverview::NewProject(wxCommandEvent &event) {
 void ProjectOverview::CloseProject(wxCommandEvent &event) {
   /* Reset title bar */
   SetTitle(wxT("Studio - No project"));
+
+  /* Clear log window */
+  log_display->Clear();
+
+  GetSizer()->Detach(top_splitter);
+  GetSizer()->Add(new wxPanel(this, wxID_ANY), 1, wxALL|wxEXPAND, 2);
+  GetSizer()->RecalcSizes();
+  top_splitter->Show(false);
+  Update();
 
   project_manager.Store();
   project_manager.Close();
@@ -471,7 +484,10 @@ void ProjectOverview::LoadProject(wxCommandEvent &event) {
     wxString project_directory = directory_dialog.GetPath();
  
     /* Clean up an open project and clear specification view */
-    CloseProject(event);
+    project_manager.Store();
+    project_manager.Close();
+
+    specifications->DeleteChildren(specifications->GetRootItem());
 
     /* Communicate project directory with project manager */
     project_manager.SetProjectDirectory(std::string(project_directory.fn_str()));
@@ -516,11 +532,17 @@ void ProjectOverview::LoadProject(wxCommandEvent &event) {
  
       ++i;
     }
-  }
 
-  GetMenuBar()->Enable(ID_PROJECT_STORE, true);
-  GetMenuBar()->Enable(ID_SPECIFICATION_NEW, true);
-  GetMenuBar()->Enable(wxID_CLOSE, true);
+    GetSizer()->Remove(0);
+    GetSizer()->Add(top_splitter, 1, wxALL|wxEXPAND, 2);
+    GetSizer()->RecalcSizes();
+    top_splitter->Show(true);
+    Update();
+
+    GetMenuBar()->Enable(ID_PROJECT_STORE, true);
+    GetMenuBar()->Enable(ID_SPECIFICATION_NEW, true);
+    GetMenuBar()->Enable(wxID_CLOSE, true);
+  }
 }
 
 void ProjectOverview::StoreProject(wxCommandEvent &event) {
@@ -886,6 +908,8 @@ void ProjectOverview::RenameSpecification(wxTreeEvent &event) {
 
 void ProjectOverview::Quit(wxCommandEvent &event) {
   tool_executor.TerminateAll();
+
+  logger->~Logger();
 
   Close();
 }

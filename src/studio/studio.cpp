@@ -2,6 +2,8 @@
 #include <wx/splash.h>
 #include <wx/filename.h>
 
+#include <fstream>
+
 /* Include definition of the project overview window */
 #include "gui_project_overview.h"
 
@@ -21,7 +23,9 @@ ToolManager      tool_manager;
 /* Global Tool Executor component (TODO run a single instance per machine) */
 ToolExecutor     tool_executor;
 
-Logger           logger;
+std::ofstream    log_stream(settings_manager.GetLogFileName().c_str(), std::ios::app);
+
+Logger*          logger;
 
 /* Studio class declaration */
 class Studio : public wxApp {
@@ -48,6 +52,8 @@ Studio::Studio() {
 }
 
 bool Studio::OnInit() {
+  logger = new Logger((log_stream) ? log_stream : std::cerr);
+
   /* Load tool configuration from storage */
   ProjectOverview* window = new ProjectOverview(tool_manager, NULL, 1000);
 

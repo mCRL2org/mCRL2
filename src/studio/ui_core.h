@@ -16,7 +16,7 @@ extern ToolManager      tool_manager;
 extern ToolExecutor     tool_executor;
 
 /* Global log component */
-extern Logger           logger;
+extern Logger*          logger;
 
 #endif
 

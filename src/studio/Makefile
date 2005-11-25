@@ -8,17 +8,12 @@ ifeq ($(HOST_OS),MINGW)
  CXXFLAGS                      = -O3
 endif
 
+
 ifeq ($(findstring -DNDEBUG,$(CPPFLAGS)),)
  CXXFLAGS                     += -g -Wall
- PROJECT_MANAGER_CPPFLAGS      = #-DPARSER_SCHEMA_VALIDATION 
-else
- PROJECT_MANAGER_CPPFLAGS      =
 endif
 
 LDFLAGS                        = $(LIBXML2_LDFLAGS)
-
-# Other flags
-GUI_CPPFLAGS                   = -DDISABLE_TOOLBAR
 
 LIBXML2_OBJECTS                = xml_text_reader.o project_manager.o tool_manager.o tool.o specification.o \
 				 project_manager_tester tool_manager_tester
@@ -26,10 +21,15 @@ LIBXML2_OBJECTS                = xml_text_reader.o project_manager.o tool_manage
 BOOST_OBJECTS                  = gui_project_overview.o tool_manager.o project_manager.o gui_specification_properties.o \
 				 settings_manager.o tool_executor.o
 BOOST_CPPFLAGS                 = -I$(BOOST_PREFIX)/include
-BOOST_LIBRARIES                = -L$(BOOST_PREFIX)/lib -lboost_filesystem
+BOOST_LDFLAGS = -L$(BOOST_PREFIX)/lib
+
+ifneq ($(HOST_OS),MACOSX)
+ BOOST_LDFLAGS := -Wl,-rpath=$(BOOST_PREFIX)/lib $(BOOST_LDFLAGS)
+endif
+
 WX_OBJECTS                     = studio.o gui_project_overview.o gui_new_specification.o gui_specification_properties.o \
 				 gui_resources.o tool_executor.o logger.o process.o
-WX_LIBRARIES                   = $$($(WX_CONFIG) --libs core base adv net)
+WX_LIBRARIES                  := $(shell $(WX_CONFIG) --libs core base adv net)
 
 PROJECT_MANAGER_OBJECTS        = project_manager.o specification.o xml_text_reader.o settings_manager.o logger.o
 TOOL_MANAGER_OBJECTS           = tool_manager.o tool.o xml_text_reader.o settings_manager.o logger.o
@@ -41,24 +41,29 @@ OBJECTS                        = $(sort $(GUI_OBJECTS) $(PROJECT_MANAGER_OBJECTS
 TEST_TARGETS                   = project_manager_tester tool_manager_tester
 TARGETS                        = studio
 
-.PHONY: all install clean distclean test
+.PHONY: all install clean distclean test strip
 
 all: $(TARGETS)
-	@$(RM) revision
+	@$(RM) revision dependencies
 
-# Add revision number
 ifeq ($(findstring $(MAKECMDGOALS),clean distclean),)
+# Add revision number
 revision: ../utility/get_revision
 	@echo "CPPFLAGS += -DREVISION=$$(../utility/get_revision)" > revision
 
 ../utility/get_revision: ../utility/get_revision.cpp
-ifeq ($(HOST_OS),MACOSX)
-	$(CXX) -I$(BOOST_PREFIX)/include -L$(BOOST_PREFIX)/lib -lboost_filesystem $< -o $@ 
-else
-	$(CXX) -I$(BOOST_PREFIX)/include -Wl,-rpath=$(BOOST_PREFIX)/lib -L$(BOOST_PREFIX)/lib -lboost_filesystem $< -o $@ 
-endif
+	$(CXX) -I$(BOOST_PREFIX)/include $(BOOST_LDFLAGS) -lboost_filesystem $< -o $@ 
 
 -include revision
+
+# Include dependencies 
+%.o: dependencies
+
+dependencies: $(patsubst %.o,%.cpp,$(OBJECTS))
+	$(CXX) -MM $(CPPFLAGS) $(BOOST_CPPFLAGS) $(LIBXML2_CPPFLAGS) $(WX_CPPFLAGS) $^ > $@
+
+-include dependencies
+
 endif
 
 test: all $(TEST_TARGETS)
@@ -66,10 +71,13 @@ test: all $(TEST_TARGETS)
 $(LIBXML2_OBJECTS):         CPPFLAGS += $(LIBXML2_CPPFLAGS)
 $(BOOST_OBJECTS):           CPPFLAGS += $(BOOST_CPPFLAGS)
 $(WX_OBJECTS):              CPPFLAGS += $(WX_CPPFLAGS)
-$(PROJECT_MANAGER_OBJECTS): CPPFLAGS += $(PROJECT_MANAGER_CPPFLAGS)
-$(GUI_OBJECTS):             CPPFLAGS += $(GUI_CPPFLAGS)
+gui_project_overview.o:     CPPFLAGS += -DDISABLE_TOOLBAR
 settings_manager.o:         CPPFLAGS += -DSCHEMA_DATA=\"$(datadir)\" -DTOOL_DATA=\"$(datadir)\"
 utility/relocator.o:        CPPFLAGS += $(BOOST_CPPFLAGS)
+
+# XML schema validation can be triggered by adding to tool_manager project_manager
+#$(PROJECT_MANAGER_OBJECTS): CPPFLAGS += -DPARSER_SCHEMA_VALIDATION
+#$(TOOL_MANAGER_OBJECTS):    CPPFLAGS += -DPARSER_SCHEMA_VALIDATION
 
 tool_manager_tester: tool_manager_tester.cpp $(TOOL_MANAGER_OBJECTS)
 	$(CXX) $(CXXFLAGS) $(CPPFLAGS) $(LDFLAGS) $(TOOL_MANAGER_OBJECTS) $(WX_LIBRARIES) -o $@ $<
@@ -78,18 +86,18 @@ project_manager_tester: project_manager_tester.cpp $(PROJECT_MANAGER_OBJECTS)
 	$(CXX) $(CXXFLAGS) $(CPPFLAGS) $(LDFLAGS) $(PROJECT_MANAGER_OBJECTS) $(WX_LIBRARIES) -o $@ $<
 
 studio: $(GUI_OBJECTS)
-	$(CXX) $(CXXFLAGS) $(CPPFLAGS) $(LDFLAGS) $(GUI_OBJECTS) $(WX_LIBRARIES) $(BOOST_LIBRARIES) -o $@
+	$(CXX) $(CXXFLAGS) $(CPPFLAGS) $(LDFLAGS) $(GUI_OBJECTS) $(WX_LIBRARIES) $(BOOST_LDFLAGS) -lboost_filesystem -o $@
 
 utility/relocator: utility/relocator.o settings_manager.o $(TOOL_MANAGER_OBJECTS)
-ifeq ($(HOST_OS),MACOSX)
-	$(CXX) $(CXXFLAGS) $(CPPFLAGS) $(LDFLAGS) -L$(BOOST_PREFIX)/lib -lboost_filesystem $^ -o $@
-else
-	$(CXX) $(CXXFLAGS) $(CPPFLAGS) $(LDFLAGS) -Wl,-rpath=$(BOOST_PREFIX)/lib -L$(BOOST_PREFIX)/lib -lboost_filesystem $^ -o $@
-endif
+	$(CXX) $(CXXFLAGS) $(CPPFLAGS) $(LDFLAGS) $(BOOST_LDFLAGS) -lboost_filesystem $^ -o $@
+
 %.o: %.cpp
 	$(CXX) -c $(CXXFLAGS) $(CPPFLAGS) $< -o $@
 
 $(OBJECTS) $(TARGETS): Makefile
+
+strip: $(TARGETS)
+	$(STRIP) --strip-unneeded --strip-debug $^
 
 install: all utility/relocator
 	$(INSTALL) -d $(bindir)
@@ -115,6 +123,6 @@ ifeq ($(HOST_OS),MACOSX)
 endif
 
 clean:
-	$(RM) *.o $(TARGETS) $(TEST_TARGETS) utility/*.o utility/relocator core revision
+	$(RM) *.o $(TARGETS) $(TEST_TARGETS) utility/*.o utility/relocator core revision dependencies
 
 distclean: clean
