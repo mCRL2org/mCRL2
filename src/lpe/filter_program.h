@@ -72,7 +72,11 @@ namespace lpe {
       ///
       std::string input_file() const
       {
-        if (m_input_file.empty() || boost::ends_with(m_input_file, m_input_extension))
+        if (m_input_file.empty())
+        {
+          return "<stdin>";
+        }
+        else if(boost::ends_with(m_input_file, m_input_extension))
         {
           return m_input_file;
         }
@@ -86,7 +90,11 @@ namespace lpe {
       ///
       std::string output_file() const
       {
-        if (m_output_file.empty() || boost::ends_with(m_output_file, m_output_extension))
+        if (m_output_file.empty())
+        {
+          return "<stdout>";
+        }
+        else if(boost::ends_with(m_output_file, m_output_extension))
         {
           return m_output_file;
         }
@@ -124,11 +132,13 @@ namespace lpe {
         specification result;
         if (m_input_file.empty())
         {
-          result = specification(ATreadFromFile(stdin));
+          ATerm t = ATreadFromFile(stdin);
+          if (t)
+            result = specification(t);
         }
         else
         {
-          result.load(m_input_file);
+          result.load(input_file());
         }
         return result;
       }
@@ -145,7 +155,7 @@ namespace lpe {
         }
         else
         {
-          result = spec.save(m_output_file);
+          result = spec.save(output_file());
         }
         return result;
       }

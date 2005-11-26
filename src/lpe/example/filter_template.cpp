@@ -6,6 +6,7 @@
 #include "lpe/filter_program.h"
 
 using namespace std;
+using namespace lpe;
 namespace po = boost::program_options;
 
 /// The version of the program.
@@ -20,7 +21,7 @@ const char* input_extension = ".lpe";
 ///
 const char* output_extension = ".lpe";
 
-/// The lpeupdate program.
+/// The filter program.
 ///
 class my_program: public lpe::filter_program
 {
@@ -49,11 +50,25 @@ class my_program: public lpe::filter_program
                 << "quiet:   " << (quiet() ? "true" : "false") << "\n"
                 << "verbose: " << (verbose() ? "true" : "false") << "\n"
                 << "debug:   " << (debug() ? "true" : "false") << std::endl;
+
+      specification spec = read_specification();
+      if (!spec)
+      {
+        throw std::runtime_error("failed to read specification from " + input_file());
+      }
+      if (!write_specification(spec))
+      {
+        throw std::runtime_error("failed to write specification to " + output_file());
+      }
     }
 };
 
 int main(int argc, char* argv[])
 {
+  aterm bottom_of_stack;
+  aterm_init(bottom_of_stack);
+  gsEnableConstructorFunctions();
+
   std::string input_filename;
   std::string output_filename;
 

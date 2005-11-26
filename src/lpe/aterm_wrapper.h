@@ -30,7 +30,14 @@ using atermpp::aterm_appl;
       aterm_wrapper(aterm_appl term)
         : m_term(term)
       {}
-      
+
+      /// Returns true if the underlying aterm has not been initialized (i.e. is equal to ATfalse).
+      /// 
+      bool operator!() const
+      {
+        return !m_term;
+      }
+
       /// Two terms are considered equal if the underlying aterms are identical.
       /// 
       bool operator==(const aterm_wrapper& other) const
