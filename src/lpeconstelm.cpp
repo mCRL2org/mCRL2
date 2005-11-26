@@ -42,7 +42,7 @@ po::variables_map vm;
 
 //Constanten
 //Private:
-  #define p_version "lpeconstelm - version 0.5.2 ";
+  #define p_version "lpeconstelm 0.5.2";
 //Public:
 
 class ConstelmObj
@@ -63,12 +63,35 @@ private:
   set< data_expression >      p_variableList; 
   int                         p_newVarCounter;
   bool                        p_verbose;
+  bool                        p_debug;
   bool                        p_nosingleton;
   bool                        p_alltrue;
   bool                        p_reachable; 
   string                      p_filenamein;
   specification               p_spec;
   set< lpe::sort >            p_singletonSort;
+  
+  //Only used by getDataVarIDs  
+  set< data_variable >        p_foundFreeVars;       
+  
+  void getDatVarRec(aterm_appl t)
+  {
+    if(gsIsDataVarId(t) && (p_freeVarSet.find(data_variable(t).to_expr()) != p_freeVarSet.end())){
+      p_foundFreeVars.insert(t);
+    };
+    for(aterm_list::iterator i = t.argument_list().begin(); i!= t.argument_list().end();i++) {
+      getDatVarRec((aterm_appl) *i);
+    } 
+  } 
+  
+  // Returns a vector in which each element is a AtermsAppl (DataVarID)  
+  //
+  set< data_variable > inline getUsedFreeVars(aterm_appl input)
+  {
+    p_foundFreeVars.clear();
+    getDatVarRec(input);
+    return p_foundFreeVars;
+  }
   
   // Rewrites an ATerm to a normal form
   //
@@ -376,55 +399,73 @@ public:
       cout << "Number of summands of new LPE: " <<  rebuild_summandlist.size() << endl;
     }
 
+    set< data_variable > constantVar;
+    for(set< int >::iterator i = p_S.begin(); i != p_S.end(); i++){
+      constantVar.insert(p_initAssignments.at(*i).lhs());
+    }
+
     vector< data_assignment > constantPP;
     for(set< int >::iterator i = p_S.begin(); i != p_S.end(); i++){
-      constantPP.push_back(p_initAssignments.at(*i));
+      constantPP.push_back(p_currentState.at(*i));
     }
     
     vector< data_assignment > variablePP;
     for(set< int >::iterator i = p_V.begin(); i != p_V.end(); i++){
-      variablePP.push_back(p_initAssignments.at(*i));
+      variablePP.push_back(p_currentState.at(*i));
     }
     
     vector< data_variable > variablePPvar;
     for(set< int >::iterator i = p_V.begin(); i != p_V.end(); i++){
-      variablePPvar.push_back(p_initAssignments.at(*i).lhs());
+      variablePPvar.push_back(p_currentState.at(*i).lhs());
     }
 
     vector< data_expression > variablePPexpr;
     for(set< int >::iterator i = p_V.begin(); i != p_V.end(); i++){
       variablePPexpr.push_back(p_initAssignments.at(*i).rhs());
     }    
-      
+
     //Remove process parameters in in summand
     // 
-    summand_list rebuild_summandlist_no_cp;
-    for(summand_list::iterator j = rebuild_summandlist.begin(); j != rebuild_summandlist.end(); j++){
-      data_assignment_list rebuild_sum_ass; 
-      for(data_assignment_list::iterator k = j->assignments().begin(); k != j->assignments().end() ; k++){
-        bool b = false;
-        for(vector< data_assignment>::iterator l = constantPP.begin(); l != constantPP.end() ; l++ ){
-          b = b || (k->lhs() == l->lhs() );
-        }
-        if (!b){
-          rebuild_sum_ass = push_front(rebuild_sum_ass, *k);
-        }
-	    }  
+      
+	  summand_list rebuild_summandlist_no_cp;
+    for(summand_list::iterator currentSummand = rebuild_summandlist.begin(); currentSummand != rebuild_summandlist.end(); currentSummand++){
 
       //construct new LPE_summand
       //
       LPE_summand tmp;
-    
+
+      //Remove constant process parameters from the summands assignments 
+      //
+      data_assignment_list rebuildAssignments; 
+      for(data_assignment_list::iterator currentAssignment = currentSummand->assignments().begin(); currentAssignment != currentSummand->assignments().end() ; currentAssignment++){
+        if( constantVar.find(currentAssignment->lhs() ) == constantVar.end()){
+          rebuildAssignments  = push_front(rebuildAssignments, data_assignment(currentAssignment->lhs(), data_expression(p_substitute(currentAssignment->rhs(), constantPP ))));
+        }
+      } 
+      
+      //Rebuild actions
+      //
+
+      action_list rebuild_actions;
+      for(action_list::iterator i = currentSummand->actions().begin(); i != currentSummand->actions().end() ; i++){
+        data_expression_list argumentList;
+        for(data_expression_list::iterator j = (i->arguments().begin()); j != i->arguments().end(); j++){
+          argumentList = push_front(argumentList, data_expression(p_substitute(*j, constantPP)));
+        }
+        rebuild_actions = push_front(rebuild_actions, action( i -> name(), reverse(argumentList)));
+      };
+      
       //Rewrite condition
-      data_expression rebuild_condition = j->condition();
+      //
+      data_expression rebuild_condition = currentSummand->condition();
       rebuild_condition = data_expression(p_substitute(rebuild_condition, constantPP));
 
       //LPE_summand(data_variable_list summation_variables, data_expression condition, 
       //            bool delta, action_list actions, data_expression time, 
       //            data_assignment_list assignments);    
-      tmp = LPE_summand(j->summation_variables(), rebuild_condition, 
-        j->is_delta(), j->actions(), j->time(), 
-	      reverse(rebuild_sum_ass));
+      tmp = LPE_summand(currentSummand->summation_variables(), rebuild_condition, 
+        currentSummand->is_delta(), reverse(rebuild_actions) , currentSummand->time(), 
+	      reverse(rebuildAssignments));
         rebuild_summandlist_no_cp = push_front(rebuild_summandlist_no_cp, tmp); 
     }
     
@@ -432,6 +473,17 @@ public:
     for(summand_list::iterator i = rebuild_summandlist_no_cp.begin() ; i != rebuild_summandlist_no_cp.end() ; i++){
       rebuild_summandlist2 = push_front(rebuild_summandlist2, LPE_summand(p_substitute(*i, constantPP ))); 
     }
+    
+     set< data_variable > usedFreeVars;
+     set< data_variable > foundVars;
+     for(summand_list::iterator currentSummand = rebuild_summandlist2.begin(); currentSummand != rebuild_summandlist2.end(); currentSummand++){ 
+       for(data_assignment_list::iterator i = currentSummand->assignments().begin(); i !=  currentSummand->assignments().end() ;i++){
+         foundVars = getUsedFreeVars(aterm_appl(i->rhs()));
+         for(set< data_variable >::iterator k = foundVars.begin(); k != foundVars.end(); k++){
+           usedFreeVars.insert(*k);
+        }
+       }
+     }
   
     //construct new specfication
     //
@@ -439,11 +491,22 @@ public:
     //  summand_list summands, action_list actions);
     lpe::LPE rebuild_lpe;
     rebuild_lpe = lpe::LPE(
-      p_lpe.free_variables(), 
+      setToList(usedFreeVars),
       vectorToList(variablePPvar), 
       rebuild_summandlist2,
       p_lpe.actions()
     );
+     
+     //cout <<  p_spec.initial_free_variables() << endl;
+     
+    set< data_variable > initial_free_variables;
+    usedFreeVars.empty();
+    for(vector< data_expression >::iterator i = variablePPexpr.begin(); i != variablePPexpr.end(); i++){
+         foundVars = getUsedFreeVars(aterm_appl(*i));
+         for(set< data_variable >::iterator k = foundVars.begin(); k != foundVars.end(); k++){
+           initial_free_variables.insert(*k); 
+         }           
+    }
 
     // Rebuild spec
     //
@@ -462,7 +525,7 @@ public:
       p_spec.equations(), 
       p_spec.actions(), 
       rebuild_lpe, 
-      p_spec.initial_free_variables(), 
+      setToList(initial_free_variables), 
       vectorToList(variablePPvar), 
       vectorToList(variablePPexpr)
     );
@@ -558,6 +621,14 @@ public:
   void inline setVerbose(bool b)
   {
     p_verbose = b;
+  }
+  
+  // Sets debug option
+  // Note: Has to be set
+  //
+  void inline setDebug(bool b)
+  {
+    p_debug = b;
   }
   
   // Sets no singleton option
@@ -750,11 +821,12 @@ int main(int ac, char* av[])
       po::options_description desc;
       desc.add_options()
         ("help,h",      "display this help")
+        ("verbose,v",   "turn on the display of short intermediate messages")
+        ("debug,d",    "turn on the display of detailed intermediate messages")
         ("version",     "display version information")
-        ("verbose,v",   "display progress information")
-        ("nosingleton", "do not remove sorts consisting of a single element")
-        ("nocondition", "all summand conditions are set true (faster)")
-        ("noreachable", "does not remove summands which are not visited")
+        ("no-singleton", "do not remove sorts consisting of a single element")
+        ("no-condition", "all summand conditions are set true (faster)")
+        ("no-reachable", "does not remove summands which are not visited")
       ;
 	
     po::options_description hidden("Hidden options");
@@ -776,7 +848,7 @@ int main(int ac, char* av[])
     options(cmdline_options).positional(p).run(), vm);
      
     if (vm.count("help")) {
-      cerr << "Usage: "<< av[0] << " [OPTION]... INFILE [OUTFILE] \n";
+      cerr << "Usage: "<< av[0] << " [OPTION]... [INFILE [OUTFILE]] \n";
       cerr << "Remove constant process parameters from the LPE in INFILE, and write the result" << endl;
       cerr << "to stdout." << endl;
       cerr << endl;
@@ -785,7 +857,7 @@ int main(int ac, char* av[])
     }
         
     if (vm.count("version")) {
-	    cerr << obj.getVersion() << endl;
+	    cerr << obj.getVersion() << " (revision " << REVISION << ")" << endl;
 	    return 0;
 	  }
 
@@ -794,20 +866,26 @@ int main(int ac, char* av[])
 	  } else {
 	    obj.setVerbose(false);
 	  }
+	  
+	  if (vm.count("debug")) {
+      obj.setDebug(true);
+	  } else {
+	    obj.setDebug(false);
+	  }
 
-    if (vm.count("nosingleton")) {
+    if (vm.count("no-singleton")) {
       obj.setNoSingleton(true);
 	  } else {
 	    obj.setNoSingleton(false);
 	  }
 
-    if (vm.count("nocondition")) {
+    if (vm.count("no-condition")) {
       obj.setAllTrue(true);
 	  } else {
 	    obj.setAllTrue(false);
 	  }
 
-    if (vm.count("noreachable")) {
+    if (vm.count("no-reachable")) {
       obj.setReachable(false);
 	  } else {
 	    obj.setReachable(true);
@@ -828,7 +906,12 @@ int main(int ac, char* av[])
     }
     
     if(filename.size() >= 1){
-      if(!obj.loadFile(filename[0])){return 1;};
+      if (filename[0] == ">"){
+        if (!obj.readStream()){return 1;}
+      }
+      else{
+        if(!obj.loadFile(filename[0])){return 1;};
+      }
     } ; 
     if(filename.size() == 2){
       obj.setSaveFile(filename[1]);

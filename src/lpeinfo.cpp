@@ -29,15 +29,35 @@ using namespace atermpp;
 namespace po = boost::program_options;
 po::variables_map vm;
 
-#define p_version "lpeinfo - version 0.5"
+#define p_version "lpeinfo 0.5"
 
 class InfoObj
 {
 private:
   specification     p_spec;
   bool              p_pars;
+  bool              p_debug;
+  bool              p_verbose;
   string            p_filename;
+  
+
 public:
+  // Sets verbose option
+  // Note: Has to be set
+  //
+  void inline setVerbose(bool b)
+  {
+    p_verbose = b;
+  }
+
+  // Sets debug option
+  // Note: Has to be set
+  //  
+  void inline setDebug(bool b)
+  {
+    p_debug = b;
+  }
+
   // Displays the in information about an LPE
   //
   int display()
@@ -125,9 +145,10 @@ int main(int ac, char* av[])
   try {
     po::options_description desc;
     desc.add_options()
-      ("pars,p",  "display process parameters")
-      ("help,h",  "display this help")
-      ("version", "display version information")
+        ("help,h",      "display this help")
+        ("verbose,v",   "turn on the display of short intermediate messages")
+        ("debug,d",    "turn on the display of detailed intermediate messages")
+        ("version",     "display version information")
     ;
 	
   	po::options_description hidden("Hidden options");
@@ -150,7 +171,7 @@ int main(int ac, char* av[])
     po::notify(vm);
         
     if (vm.count("help")) {
-      cerr << "Usage: "<< av[0] << " [OPTION]... INFILE" << endl;
+      cerr << "Usage: "<< av[0] << " [OPTION]... [INFILE]" << endl;
       cerr << "Print basic information on the LPE in INFILE." << endl;
       cerr << endl;
       cerr << desc;
@@ -158,9 +179,21 @@ int main(int ac, char* av[])
     }
         
     if (vm.count("version")) {
-	    cout << obj.getVersion() << endl;
+	    cerr << obj.getVersion() << " (revision " << REVISION << ")" << endl;
 	    return 0;
-    }
+	  }
+	  
+	  if (vm.count("verbose")) {
+      obj.setVerbose(true);
+	  } else {
+	    obj.setVerbose(false);
+	  }
+	  
+	  if (vm.count("debug")) {
+      obj.setDebug(true);
+	  } else {
+	    obj.setDebug(false);
+	  }
 
     if (vm.count("INFILE")){
       filename = vm["INFILE"].as< string >();
@@ -171,7 +204,12 @@ int main(int ac, char* av[])
 		  {obj.setPars(false);}
 
     if(filename.size() != 0 ){
-      if (obj.loadFile(filename)){obj.display() ;};
+      if (filename == ">"){
+        if (obj.readStream()){obj.display();};
+      }  
+      else{
+        if (obj.loadFile(filename)){obj.display() ;};
+      }
     } else {
       if (obj.readStream()){obj.display() ;};
     }

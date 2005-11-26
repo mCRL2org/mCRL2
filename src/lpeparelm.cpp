@@ -37,7 +37,7 @@ po::variables_map vm;
 
 //Constanten
 //Private:
-  #define p_version "lpeparelm - version 0.5";
+  #define p_version "lpeparelm 0.5";
 //Public:
 
 class ParElmObj
@@ -49,6 +49,7 @@ private:
   set< data_variable >        p_S;                // <-inhert process parameters
   set< data_variable >        p_usedVars;
   bool                        p_verbose;
+  bool                        p_debug;
   specification               p_spec;
 
   //Only used by getDataVarIDs  
@@ -103,6 +104,22 @@ private:
   
 public:
 
+  // Sets verbose option
+  // Note: Has to be set
+  //
+  void inline setVerbose(bool b)
+  {
+    p_verbose = b;
+  }
+
+  // Sets verbose option
+  // Note: Has to be set
+  //  
+  void inline setDebug(bool b)
+  {
+    p_debug = b;
+  }
+
   // Set output file
   //  
   void inline setSaveFile(string x)
@@ -147,14 +164,6 @@ public:
   {
     assert(gsIsSpecV1((ATermAppl) newSpec));
     ATwriteToBinaryFile(aterm(newSpec) , stdout);
-  }
-
-  // Sets verbose option
-  // Note: Has to be set
-  //
-  void inline setVerbose(bool b)
-  {
-    p_verbose = b;
   }
 
   // The lpeparelm filter
@@ -371,13 +380,10 @@ public:
       p_spec.mappings(), 
       p_spec.equations(), 
       p_spec.actions(), 
-      //p_spec.lpe(),
       rebuild_lpe,
       p_spec.initial_free_variables(), 
       reverse(rebuild_initial_variables),
       reverse(rebuild_initial_state)
-      //p_spec.initial_variables(),
-      //p_spec.initial_state()
     );
     
     assert(gsIsSpecV1((ATermAppl) rebuild_spec));
@@ -414,8 +420,9 @@ int main(int ac, char* av[])
       po::options_description desc;
       desc.add_options()
         ("help,h",      "display this help")
+        ("verbose,v",   "turn on the display of short intermediate messages")
+        ("debug,d",    "turn on the display of detailed intermediate messages")
         ("version",     "display version information")
-        ("verbose,v",   "display progress information")
       ;
 	
     po::options_description hidden("Hidden options");
@@ -437,7 +444,7 @@ int main(int ac, char* av[])
     options(cmdline_options).positional(p).run(), vm);
      
     if (vm.count("help")) {
-       cerr << "Usage: "<< av[0] << " [OPTION]... INFILE [OUTFILE] \n";
+       cerr << "Usage: "<< av[0] << " [OPTION]... [INFILE [OUTFILE]] \n";
        cerr << "Remove inert parameters from the LPE in INFILE, and write the result" << endl;
        cerr << "to stdout." << endl;
        cerr << endl;
@@ -446,7 +453,7 @@ int main(int ac, char* av[])
     }
         
     if (vm.count("version")) {
-	    cerr << obj.getVersion() << endl;
+	    cerr << obj.getVersion() << " (revision " << REVISION << ")" << endl;
 	    return 0;
 	  }
 
@@ -454,6 +461,12 @@ int main(int ac, char* av[])
       obj.setVerbose(true);
 	  } else {
 	    obj.setVerbose(false);
+	  }
+	  
+	  if (vm.count("debug")) {
+      obj.setDebug(true);
+	  } else {
+	    obj.setDebug(false);
 	  }
 
     if (vm.count("INFILE")){
@@ -469,8 +482,13 @@ int main(int ac, char* av[])
       return 1;
     }
              
-    if(filename.size() >= 1) {
-      if (!obj.loadFile(filename[0])){return 1;};
+    if(filename.size() >= 1){
+      if (filename[0] == ">"){
+        if (!obj.readStream()){return 1;}
+      }
+      else{
+        if(!obj.loadFile(filename[0])){return 1;};
+      }
     } ; 
     if(filename.size() == 2){
       obj.setSaveFile(filename[1]);
