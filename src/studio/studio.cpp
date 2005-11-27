@@ -57,6 +57,8 @@ bool Studio::OnInit() {
   /* Load tool configuration from storage */
   ProjectOverview* window = new ProjectOverview(tool_manager, NULL, 1000);
 
+  wxInitAllImageHandlers();
+
   /* Show a splash */
   wxBitmap        splash_image;
   wxSplashScreen* splash;
