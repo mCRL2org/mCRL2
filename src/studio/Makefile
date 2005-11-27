@@ -31,11 +31,11 @@ WX_OBJECTS                     = studio.o gui_project_overview.o gui_new_specifi
 				 gui_resources.o tool_executor.o logger.o process.o
 WX_LIBRARIES                  := $(shell $(WX_CONFIG) --libs core base adv net)
 
-PROJECT_MANAGER_OBJECTS        = project_manager.o specification.o xml_text_reader.o settings_manager.o logger.o
-TOOL_MANAGER_OBJECTS           = tool_manager.o tool.o xml_text_reader.o settings_manager.o logger.o
+PROJECT_MANAGER_OBJECTS        = project_manager.o specification.o xml_text_reader.o settings_manager.o
+TOOL_MANAGER_OBJECTS           = tool_manager.o tool.o xml_text_reader.o settings_manager.o
 GUI_OBJECTS                    = studio.o gui_project_overview.o gui_new_specification.o gui_specification_properties.o \
 				 gui_resources.o $(sort $(PROJECT_MANAGER_OBJECTS) $(TOOL_MANAGER_OBJECTS)) \
-				 tool_executor.o process.o
+				 tool_executor.o process.o logger.o
 OBJECTS                        = $(sort $(GUI_OBJECTS) $(PROJECT_MANAGER_OBJECTS) $(TOOL_MANAGER_OBJECTS))
 
 TEST_TARGETS                   = project_manager_tester tool_manager_tester
