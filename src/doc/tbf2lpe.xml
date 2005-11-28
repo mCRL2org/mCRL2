@@ -4,8 +4,9 @@
 <!ENTITY % param SYSTEM "param.xml">
 %param;
 <!ENTITY tbf2lpe "<function>tbf2lpe</function>">
-<!ENTITY input_lpe "<parameter>input_lpe</parameter>">
-<!ENTITY output_lpe "<parameter>output_lpe</parameter>">
+<!ENTITY option "<parameter>OPTION</parameter>">
+<!ENTITY input_lpe "<parameter>INFILE</parameter>">
+<!ENTITY output_lpe "<parameter>OUTFILE</parameter>">
 <!ENTITY opt_h "<option>-h</option>">
 <!ENTITY opt_q "<option>-q</option>">
 <!ENTITY opt_v "<option>-v</option>">
@@ -43,8 +44,10 @@
 <refsynopsisdiv>
   <cmdsynopsis>
     <command>&tbf2lpe;</command>
-    <arg choice="plain">&input_lpe;</arg>
-    <arg choice="plain">&output_lpe;</arg>
+    <arg choice="plain" rep="repeat"><arg choice="opt">&option;</arg></arg>
+    <arg choice="opt">&input_lpe;
+    <arg choice="opt">&output_lpe;</arg>
+    </arg>
   </cmdsynopsis>
 </refsynopsisdiv>
 
@@ -135,7 +138,7 @@
 <refsect1>
 <title>Author</title>
 <para>
-Written by Muck van Weerdenburg. Please send all complaints, comments and bug fixes to me.
+Written by Muck van Weerdenburg. Please send all complaints, comments and bug fixes to <email>bug@mcrl2.org</email>.
 </para>
 </refsect1>
 
