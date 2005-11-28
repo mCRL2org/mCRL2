@@ -45,8 +45,6 @@ IMPLEMENT_APP(Studio)
 
 IMPLEMENT_CLASS(Studio, wxApp)
 
-IMPLEMENT_WX_THEME_SUPPORT
-
 /* Studio class implementation */
 Studio::Studio() {
 }

@@ -24,7 +24,7 @@ BOOST_CPPFLAGS                 = -I$(BOOST_PREFIX)/include
 BOOST_LDFLAGS = -L$(BOOST_PREFIX)/lib
 
 ifneq ($(HOST_OS),MACOSX)
- BOOST_LDFLAGS := -Wl,-rpath=$(BOOST_PREFIX)/lib $(BOOST_LDFLAGS)
+ BOOST_LDFLAGS := -Wl,-rpath=$(libdir) $(BOOST_LDFLAGS)
 endif
 
 WX_OBJECTS                     = studio.o gui_project_overview.o gui_new_specification.o gui_specification_properties.o \
@@ -80,13 +80,13 @@ utility/relocator.o:        CPPFLAGS += $(BOOST_CPPFLAGS)
 #$(TOOL_MANAGER_OBJECTS):    CPPFLAGS += -DPARSER_SCHEMA_VALIDATION
 
 tool_manager_tester: tool_manager_tester.cpp $(TOOL_MANAGER_OBJECTS)
-	$(CXX) $(CXXFLAGS) $(CPPFLAGS) $(LDFLAGS) $(TOOL_MANAGER_OBJECTS) $(WX_LIBRARIES) -o $@ $<
+	$(CXX) $(CXXFLAGS) $(CPPFLAGS) $(TOOL_MANAGER_OBJECTS) $(LDFLAGS) $(WX_LIBRARIES) -o $@ $<
 
 project_manager_tester: project_manager_tester.cpp $(PROJECT_MANAGER_OBJECTS) 
-	$(CXX) $(CXXFLAGS) $(CPPFLAGS) $(LDFLAGS) $(PROJECT_MANAGER_OBJECTS) $(WX_LIBRARIES) -o $@ $<
+	$(CXX) $(CXXFLAGS) $(CPPFLAGS) $(PROJECT_MANAGER_OBJECTS) $(LDFLAGS) $(WX_LIBRARIES) -o $@ $<
 
 studio: $(GUI_OBJECTS)
-	$(CXX) $(CXXFLAGS) $(CPPFLAGS) $(LDFLAGS) $(GUI_OBJECTS) $(WX_LIBRARIES) $(BOOST_LDFLAGS) -lboost_filesystem -o $@
+	$(CXX) $(CXXFLAGS) $(CPPFLAGS) $(GUI_OBJECTS) $(LDFLAGS) $(WX_LIBRARIES) $(BOOST_LDFLAGS) -lboost_filesystem -o $@
 
 utility/relocator: utility/relocator.o settings_manager.o $(TOOL_MANAGER_OBJECTS)
 	$(CXX) $(CXXFLAGS) $(CPPFLAGS) $(LDFLAGS) $(BOOST_LDFLAGS) -lboost_filesystem $^ -o $@

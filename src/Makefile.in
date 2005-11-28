@@ -195,8 +195,6 @@ endif
 
 # Add revision number
 ifeq ($(findstring $(MAKECMDGOALS),clean distclean),)
-ifdef USE_LIBXML2
-ifdef USE_BOOST
 revision: utility/get_revision
 	@echo "CPPFLAGS += -DREVISION=$$(utility/get_revision)" > revision
 
@@ -213,8 +211,6 @@ endif
 
 -include revision
 
-endif
-endif
 endif
 
 install: all

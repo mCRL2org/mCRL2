@@ -619,7 +619,7 @@ void ProjectOverview::NewSpecification(wxCommandEvent &event) {
               }
 
               if (!valid) {
-                wxMessageDialog error_dialog(this, wxT("Invalid response, cancelling addition..."), wxT("Error ..."), wxID_OK|wxICON_ERROR);
+                wxMessageDialog error_dialog(this, wxT("Invalid response, cancelling addition..."), wxT("Error ..."), wxOK|wxICON_ERROR);
 
                 error_dialog.ShowModal();
               }
