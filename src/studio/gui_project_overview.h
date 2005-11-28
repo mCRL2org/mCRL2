@@ -33,17 +33,13 @@ class ProjectOverview : public wxFrame {
     std::vector < std::string > tool_categories;
 
     /* Pre-created context menus per format and per category for all specification formats */
-    std::map < std::pair < std::string, std::string >, wxMenu* > context_menus;
-
-    /* The tool manager */
-    ToolManager&   tool_manager;
+    static std::map < std::pair < std::string, std::string >, wxMenu* > context_menus;
 
     /* The project manager */
     ProjectManager project_manager;
 
     /* Convenience functions */
     inline void GenerateMenuBar();
-    inline void GenerateContextMenus();
     inline void GenerateToolBar();
 
     /*******************************
@@ -100,13 +96,14 @@ class ProjectOverview : public wxFrame {
 
     ProjectOverview();
     ~ProjectOverview();
-    ProjectOverview(ToolManager&, wxWindow* parent, wxWindowID id);
+    ProjectOverview(wxWindow* parent, wxWindowID id);
 
-    void SetToolManager(ToolManager&);
-
-    inline ToolManager& GetToolManager() {
-      return (tool_manager);
+    inline wxTextCtrl* GetLogDisplay() const {
+      return (log_display);
     }
+
+    /* Used to generate appropriate context menus using the tools in <|tool_manager|> */
+    void GenerateToolContextMenus();
 };
 
 #endif /* PROJECT_OVERVIEW_H_ */

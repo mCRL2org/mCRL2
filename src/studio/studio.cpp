@@ -52,12 +52,12 @@ Studio::Studio() {
 }
 
 bool Studio::OnInit() {
+  wxInitAllImageHandlers();
+
   logger = new Logger((log_stream) ? log_stream : std::cerr);
 
   /* Load tool configuration from storage */
-  ProjectOverview* window = new ProjectOverview(tool_manager, NULL, 1000);
-
-  wxInitAllImageHandlers();
+  ProjectOverview* window = new ProjectOverview(NULL, 1000);
 
   /* Show a splash */
   wxBitmap        splash_image;
@@ -71,6 +71,13 @@ bool Studio::OnInit() {
   window->Show(true);
 
   tool_manager.Load();
+
+  window->GenerateToolContextMenus();
+
+  /* Connect log display to logger */
+  if (window->GetLogDisplay()) {
+    logger->SetLogWindow(window->GetLogDisplay());
+  }
 
   return (true);
 }

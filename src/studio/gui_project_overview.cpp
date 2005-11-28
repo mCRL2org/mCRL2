@@ -77,8 +77,11 @@ BEGIN_EVENT_TABLE(ProjectOverview, wxFrame)
   EVT_MENU(wxID_EXIT,                       ProjectOverview::Quit)
 END_EVENT_TABLE()
 
-ProjectOverview::ProjectOverview(ToolManager& new_tool_manager, wxWindow* parent, wxWindowID id) :
-  wxFrame(parent, id, wxT("Studio - No project"), wxDefaultPosition, wxDefaultSize), tool_manager(new_tool_manager), project_manager() {
+/* Mapping: (format,category) -> wxMenu* (shared for all project overviews) */
+std::map < std::pair < std::string, std::string >, wxMenu* > ProjectOverview::context_menus;
+
+ProjectOverview::ProjectOverview(wxWindow* parent, wxWindowID id) :
+  wxFrame(parent, id, wxT("Studio - No project"), wxDefaultPosition, wxDefaultSize), project_manager() {
 
   /* Resize and centre frame on display */
   Centre();
@@ -86,8 +89,6 @@ ProjectOverview::ProjectOverview(ToolManager& new_tool_manager, wxWindow* parent
 
   /* Create menubar & toolbar */
   GenerateMenuBar();
-
-  GenerateContextMenus();
 
 #if !defined(DISABLE_TOOLBAR)
   GenerateToolBar();
@@ -146,9 +147,6 @@ ProjectOverview::ProjectOverview(ToolManager& new_tool_manager, wxWindow* parent
   GetSizer()->RecalcSizes();
   top_splitter->Show(false);
   Update();
-
-  /* Connect log display to logger */
-  logger->SetLogWindow(log_display);
 }
 
 ProjectOverview::~ProjectOverview() {
@@ -163,16 +161,6 @@ ProjectOverview::~ProjectOverview() {
   }
 
   delete tree_popup_menu;
-}
-
-void ProjectOverview::SetToolManager(ToolManager& new_tool_manager) {
-  tool_manager = new_tool_manager;
-
-  context_menus.clear();
-  tool_categories.clear();
-
-  /* Regenerate context menus */
-  GenerateContextMenus();
 }
 
 /* Convenience function to fill the menu */
@@ -225,7 +213,7 @@ inline void ProjectOverview::GenerateMenuBar() {
 }
 
 /* Generate context menus for all tool-categories for all input types */
-inline void ProjectOverview::GenerateContextMenus() {
+void ProjectOverview::GenerateToolContextMenus() {
   const std::list < Tool* >                 tools                 = tool_manager.GetTools();
   const std::list < Tool* >::const_iterator b                     = tools.end();
         std::list < Tool* >::const_iterator i                     = tools.begin();
