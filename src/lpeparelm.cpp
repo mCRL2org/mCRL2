@@ -85,7 +85,7 @@ private:
       { 
         result = push_front(result,*i); 
       }
-    return reverse(result); 
+    return atermpp::reverse(result); 
   } 
 
   // template for changing a set into a list
@@ -99,7 +99,7 @@ private:
       { 
         result = push_front(result,*i); 
       }
-    return reverse(result); 
+    return atermpp::reverse(result); 
   } 
   
 public:
@@ -334,8 +334,8 @@ public:
       //          data_assignment_list assignments);
       LPE_summand rebuild_summand; 
      
-      rebuild_summand = LPE_summand(reverse(rebuild_summation_variables), i->condition(),
-        i->is_delta(), i->actions(), i-> time(), reverse(rebuild_assignments));  
+      rebuild_summand = LPE_summand(atermpp::reverse(rebuild_summation_variables), i->condition(),
+        i->is_delta(), i->actions(), i-> time(), atermpp::reverse(rebuild_assignments));  
       rebuild_summandlist = push_front(rebuild_summandlist, rebuild_summand);
     }
     
@@ -346,8 +346,8 @@ public:
     LPE rebuild_lpe;
     rebuild_lpe = LPE(
       lpe.free_variables(), 
-      reverse(rebuild_process_parameters), 
-      reverse(rebuild_summandlist),
+      atermpp::reverse(rebuild_process_parameters), 
+      atermpp::reverse(rebuild_summandlist),
       lpe.actions()
     );
   
@@ -382,8 +382,8 @@ public:
       p_spec.actions(), 
       rebuild_lpe,
       p_spec.initial_free_variables(), 
-      reverse(rebuild_initial_variables),
-      reverse(rebuild_initial_state)
+      atermpp::reverse(rebuild_initial_variables),
+      atermpp::reverse(rebuild_initial_state)
     );
     
     assert(gsIsSpecV1((ATermAppl) rebuild_spec));

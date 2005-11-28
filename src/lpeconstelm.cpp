@@ -230,7 +230,7 @@ private:
       { 
         result = push_front(result,*i); 
       }
-    return reverse(result); 
+    return atermpp::reverse(result); 
   } 
 
   // template for changing a set into a list
@@ -244,7 +244,7 @@ private:
       { 
         result = push_front(result,*i); 
       }
-    return reverse(result); 
+    return atermpp::reverse(result); 
   } 
   
   // Find all sorts which have a singleton domain
@@ -452,7 +452,7 @@ public:
         for(data_expression_list::iterator j = (i->arguments().begin()); j != i->arguments().end(); j++){
           argumentList = push_front(argumentList, data_expression(p_substitute(*j, constantPP)));
         }
-        rebuild_actions = push_front(rebuild_actions, action( i -> name(), reverse(argumentList)));
+        rebuild_actions = push_front(rebuild_actions, action( i -> name(), atermpp::reverse(argumentList)));
       };
       
       //Rewrite condition
@@ -464,8 +464,8 @@ public:
       //            bool delta, action_list actions, data_expression time, 
       //            data_assignment_list assignments);    
       tmp = LPE_summand(currentSummand->summation_variables(), rebuild_condition, 
-        currentSummand->is_delta(), reverse(rebuild_actions) , currentSummand->time(), 
-	      reverse(rebuildAssignments));
+        currentSummand->is_delta(), atermpp::reverse(rebuild_actions) , currentSummand->time(), 
+	      atermpp::reverse(rebuildAssignments));
         rebuild_summandlist_no_cp = push_front(rebuild_summandlist_no_cp, tmp); 
     }
     
