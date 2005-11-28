@@ -1,4 +1,62 @@
-#ifndef NO_DYNLOAD
+#ifdef NO_DYNLOAD
+
+#include "stdlib.h"
+#include "libprint_c.h"
+#include "rewr_innerc.h"
+
+RewriterCompilingInnermost::RewriterCompilingInnermost(ATermAppl DataEqnSpec)
+{
+	gsfprintf(stderr,"error: compiling Innermost rewriter is not available\n");
+	exit(1);
+}
+
+RewriterCompilingInnermost::~RewriterCompilingInnermost()
+{
+}
+
+ATermAppl RewriterCompilingInnermost::rewrite(ATermAppl Term)
+{
+	return NULL;
+}
+
+ATerm RewriterCompilingInnermost::toRewriteFormat(ATermAppl Term)
+{
+	return NULL;
+}
+
+ATermAppl RewriterCompilingInnermost::fromRewriteFormat(ATerm Term)
+{
+	return NULL;
+}
+
+ATerm RewriterCompilingInnermost::rewriteInternal(ATerm Term)
+{
+	return NULL;
+}
+
+ATermList RewriterCompilingInnermost::rewriteInternalList(ATermList Terms)
+{
+	return NULL;
+}
+
+void RewriterCompilingInnermost::setSubstitution(ATermAppl Var, ATerm Expr)
+{
+}
+
+ATerm RewriterCompilingInnermost::getSubstitution(ATermAppl Var)
+{
+	return NULL;
+}
+
+void RewriterCompilingInnermost::clearSubstitution(ATermAppl Var)
+{
+}
+
+void RewriterCompilingInnermost::clearSubstitutions()
+{
+}
+
+#else
 
 #define NAME "rewr_innerc"
 

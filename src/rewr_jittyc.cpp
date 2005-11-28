@@ -1,4 +1,62 @@
-#ifndef NO_DYNLOAD
+#ifdef NO_DYNLOAD
+
+#include "stdlib.h"
+#include "libprint_c.h"
+#include "rewr_jittyc.h"
+
+RewriterCompilingJitty::RewriterCompilingJitty(ATermAppl DataEqnSpec)
+{
+	gsfprintf(stderr,"error: compiling JITty rewriter is not available\n");
+	exit(1);
+}
+
+RewriterCompilingJitty::~RewriterCompilingJitty()
+{
+}
+
+ATermAppl RewriterCompilingJitty::rewrite(ATermAppl Term)
+{
+	return NULL;
+}
+
+ATerm RewriterCompilingJitty::toRewriteFormat(ATermAppl Term)
+{
+	return NULL;
+}
+
+ATermAppl RewriterCompilingJitty::fromRewriteFormat(ATerm Term)
+{
+	return NULL;
+}
+
+ATerm RewriterCompilingJitty::rewriteInternal(ATerm Term)
+{
+	return NULL;
+}
+
+ATermList RewriterCompilingJitty::rewriteInternalList(ATermList Terms)
+{
+	return NULL;
+}
+
+void RewriterCompilingJitty::setSubstitution(ATermAppl Var, ATerm Expr)
+{
+}
+
+ATerm RewriterCompilingJitty::getSubstitution(ATermAppl Var)
+{
+	return NULL;
+}
+
+void RewriterCompilingJitty::clearSubstitution(ATermAppl Var)
+{
+}
+
+void RewriterCompilingJitty::clearSubstitutions()
+{
+}
+
+#else
 
 #define NAME "rewr_jittyc"
 

@@ -24,6 +24,7 @@ class RewriterCompilingJitty: public Rewriter
 		void clearSubstitution(ATermAppl Var);
 		void clearSubstitutions();
 
+#ifndef NO_DYNLOAD
 	private:
 		int num_opids;
 
@@ -56,6 +57,7 @@ class RewriterCompilingJitty: public Rewriter
 		ATerm OpId2Int(ATermAppl Term, bool add_opids);
 		ATerm toInner(ATermAppl Term, bool add_opids);
 		ATermAppl fromInner(ATerm Term);
+#endif
 };
 
 #endif
