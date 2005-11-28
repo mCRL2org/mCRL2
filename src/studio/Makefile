@@ -23,8 +23,10 @@ BOOST_OBJECTS                  = gui_project_overview.o tool_manager.o project_m
 BOOST_CPPFLAGS                 = -I$(BOOST_PREFIX)/include
 BOOST_LDFLAGS = -L$(BOOST_PREFIX)/lib
 
-ifneq ($(HOST_OS),MACOSX)
- BOOST_LDFLAGS := -Wl,-rpath=$(libdir) $(BOOST_LDFLAGS)
+ifdef BUILD_BOOST
+ ifneq ($(HOST_OS),MACOSX)
+  BOOST_LDFLAGS := -Wl,-rpath=$(libdir) $(BOOST_LDFLAGS)
+ endif
 endif
 
 WX_OBJECTS                     = studio.o gui_project_overview.o gui_new_specification.o gui_specification_properties.o \
