@@ -107,7 +107,7 @@ class Specification {
 
   public:
 
-    Specification();
+    Specification(bool);
 
     /* Generate the specification (instantiation on storage) */
     bool Generate() throw (void*);
@@ -210,7 +210,7 @@ class Specification {
 
     /* Returns the value of uptodate */
     inline bool IsUpToDate() const {
-      return (status == up_to_date);
+      return (input_objects.size() == 0 || status == up_to_date);
     }
 
     /* Sets status to one of the not-available ones and removes the instances of specification from storage */

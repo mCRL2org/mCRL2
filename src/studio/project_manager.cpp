@@ -74,7 +74,7 @@ bool ProjectManager::Load() {
 #endif
 
   try {
-    Specification dummy;
+    Specification dummy(false);
 
     /* Read root element (project) */
     reader.Read();

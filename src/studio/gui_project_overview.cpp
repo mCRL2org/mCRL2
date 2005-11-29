@@ -319,91 +319,6 @@ inline void ProjectOverview::GenerateToolBar() {
   SetToolBar(toolbar);
 }
 
-/*
- * A tool was selected, that should produce new specifications
- *
- * event.GetId() is an integer that identifies a tool and a category
- */
-void ProjectOverview::AddSpecifications(wxCommandEvent &event) {
-        wxTreeItemId   selected          = specifications->GetSelection();    /* The selected specification */
-        Specification& specification     = ((SpecificationData*) specifications->GetItemData(selected))->specification;
-        wxTreeItemId   new_item;
-        Specification  new_specification;
-        unsigned int   mode_number       = event.GetId() - wxID_HIGHEST;      /* Will hold mode number, is used to hold a tool number first */
-        std::string    category          = tool_categories[mode_number / tool_manager.GetNumberOfTools()];
-  const Tool*          tool              = tool_manager.GetTool(mode_number % tool_manager.GetNumberOfTools());
-
-  new_specification.SetToolIdentifier(mode_number % tool_manager.GetNumberOfTools());
-
-  /* Find first compatible mode */
-  std::vector < ToolMode* >::const_iterator i = tool->GetModes().begin(); 
-
-  /* A suitable category must exist */
-  while ((*i)->GetCategory() != category) {
-    ++i;
-  }
-
-  mode_number = i - tool->GetModes().begin();
-
-  new_specification.SetToolMode(mode_number);
-
-  /* Find a name for the new specification (should not exist in project directory) */
-  wxFileName file_helper(wxString(specification.GetOutputObjects().front().file_name.c_str(), wxConvLocal));
-
-  file_helper.ClearExt();
-
-  /* A new basename */
-  std::string name = std::string(file_helper.GetFullName().Append(wxString::Format(wxT("-%u"), (unsigned int) specifications->GetChildrenCount(selected, false))).fn_str());
-
-  /* Connect input object to compatible position (TODO generalise to multiple inputs and outputs) */
-  std::vector < SpecificationInputType >& input_objects = new_specification.GetModifiableInputObjects();
-  SpecificationInputType                  new_input;
-
-  new_input.derived_from.pointer = &specification;
-  new_input.output_number        = 0;
-
-  input_objects.push_back(new_input);
-
-  const ToolMode& tool_mode = tool->GetMode(mode_number);
-
-  /* The format of the new specification */
-  if (tool_mode.HasOutputObjects()) {
-    std::vector < SpecificationOutputType >& output_objects = new_specification.GetModifiableOutputObjects();
-    SpecificationOutputType                  new_output;
-
-    /* Connect output object to compatible position (TODO generalise to multiple inputs and outputs) */
-    new_output.format    = tool_mode.GetOutputObject(0).GetSomeFormat();
-    new_output.file_name = tool->GetMode(mode_number).ChooseName(0, name);
-    new_output.md5_hash  = "MD5 hash";
- 
-    /* Append an extension to the basename */
-    name.append(".").append(tool_mode.GetOutputObject(0).GetSomeFormat());
-
-    output_objects.push_back(new_output);
-  }
-  else {
-    /* Tool performs an analysis of some kind and does not produce outputs */
-    name.append(".report");
-  }
-
-  /* Set the name of the specification to the name of the main output file */
-  new_specification.SetName(name);
-
-  /* Add new item to (local) project manager and tree-control */
-  Specification& added_specification = project_manager.Add(new_specification);
-
-  new_item = specifications->PrependItem(selected, wxString(name.c_str(), wxConvLocal), 0, -1, new SpecificationData(*specifications, added_specification));
-
-  if (!specifications->IsExpanded(selected)) {
-    specifications->Expand(selected);
-  }
-
-  specifications->SelectItem(new_item);
-
-  /* Specification is not yet available and not up-to-date */
-  added_specification.ForceRegeneration();
-}
-
 /* Handlers for operations of project level */
 void ProjectOverview::NewProject(wxCommandEvent &event) {
   wxDirDialog directory_dialog(this, wxT("Select a project directory"));
@@ -551,13 +466,13 @@ void ProjectOverview::BuildProject(wxCommandEvent &event) {
 
     an_id = specifications->GetNextChild(specifications->GetRootItem(), cookie);
   }
-  
+
   while (0 < stack.size()) {
     /* Set state to regeneration */
     wxTreeItemId&  descendant    = stack.back();
     Specification& specification = ((SpecificationData*) specifications->GetItemData(descendant))->specification;
 
-    if (specification.GetStatus() != up_to_date) {
+    if (!specification.IsUpToDate()) {
       specification.Generate();
     }
 
@@ -650,7 +565,7 @@ void ProjectOverview::NewSpecification(wxCommandEvent &event) {
 
         if (valid) {
           /* Insert new specification into tree */
-          Specification      new_specification  = empty_specification;
+          Specification      new_specification  = primary_specification;
           std::string        base_name          = target_name.leaf();
           wxTreeItemId       new_item;
 
@@ -685,6 +600,91 @@ void ProjectOverview::NewSpecification(wxCommandEvent &event) {
   }
 
   dialog->~NewSpecificationDialog();
+}
+
+/*
+ * A tool was selected, that should produce new specifications
+ *
+ * event.GetId() is an integer that identifies a tool and a category
+ */
+void ProjectOverview::AddSpecifications(wxCommandEvent &event) {
+        wxTreeItemId   selected          = specifications->GetSelection();    /* The selected specification */
+        Specification& specification     = ((SpecificationData*) specifications->GetItemData(selected))->specification;
+        wxTreeItemId   new_item;
+        Specification  new_specification(false);
+        unsigned int   mode_number       = event.GetId() - wxID_HIGHEST;      /* Will hold mode number, is used to hold a tool number first */
+        std::string    category          = tool_categories[mode_number / tool_manager.GetNumberOfTools()];
+  const Tool*          tool              = tool_manager.GetTool(mode_number % tool_manager.GetNumberOfTools());
+
+  new_specification.SetToolIdentifier(mode_number % tool_manager.GetNumberOfTools());
+
+  /* Find first compatible mode */
+  std::vector < ToolMode* >::const_iterator i = tool->GetModes().begin(); 
+
+  /* A suitable category must exist */
+  while ((*i)->GetCategory() != category) {
+    ++i;
+  }
+
+  mode_number = i - tool->GetModes().begin();
+
+  new_specification.SetToolMode(mode_number);
+
+  /* Find a name for the new specification (should not exist in project directory) */
+  wxFileName file_helper(wxString(specification.GetOutputObjects().front().file_name.c_str(), wxConvLocal));
+
+  file_helper.ClearExt();
+
+  /* A new basename */
+  std::string name = std::string(file_helper.GetFullName().Append(wxString::Format(wxT("-%u"), (unsigned int) specifications->GetChildrenCount(selected, false))).fn_str());
+
+  /* Connect input object to compatible position (TODO generalise to multiple inputs and outputs) */
+  std::vector < SpecificationInputType >& input_objects = new_specification.GetModifiableInputObjects();
+  SpecificationInputType                  new_input;
+
+  new_input.derived_from.pointer = &specification;
+  new_input.output_number        = 0;
+
+  input_objects.push_back(new_input);
+
+  const ToolMode& tool_mode = tool->GetMode(mode_number);
+
+  /* The format of the new specification */
+  if (tool_mode.HasOutputObjects()) {
+    std::vector < SpecificationOutputType >& output_objects = new_specification.GetModifiableOutputObjects();
+    SpecificationOutputType                  new_output;
+
+    /* Connect output object to compatible position (TODO generalise to multiple inputs and outputs) */
+    new_output.format    = tool_mode.GetOutputObject(0).GetSomeFormat();
+    new_output.file_name = tool->GetMode(mode_number).ChooseName(0, name);
+    new_output.md5_hash  = "MD5 hash";
+ 
+    /* Append an extension to the basename */
+    name.append(".").append(tool_mode.GetOutputObject(0).GetSomeFormat());
+
+    output_objects.push_back(new_output);
+  }
+  else {
+    /* Tool performs an analysis of some kind and does not produce outputs */
+    name.append(".report");
+  }
+
+  /* Set the name of the specification to the name of the main output file */
+  new_specification.SetName(name);
+
+  /* Add new item to (local) project manager and tree-control */
+  Specification& added_specification = project_manager.Add(new_specification);
+
+  new_item = specifications->PrependItem(selected, wxString(name.c_str(), wxConvLocal), 0, -1, new SpecificationData(*specifications, added_specification));
+
+  if (!specifications->IsExpanded(selected)) {
+    specifications->Expand(selected);
+  }
+
+  specifications->SelectItem(new_item);
+
+  /* Specification is not yet available and not up-to-date */
+  added_specification.ForceRegeneration();
 }
 
 void ProjectOverview::EditSpecification(wxCommandEvent &event) {

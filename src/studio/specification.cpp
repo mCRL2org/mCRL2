@@ -8,8 +8,9 @@
 
 SpecificationVisualiser Specification::dummy_visualiser;
 
-Specification::Specification() {
-  status             = non_existent;
+Specification::Specification(bool exists) {
+  status = (exists) ? up_to_date : non_existent;
+
   name               = "";
   tool_configuration = "";
   tool_identifier    = UNSPECIFIED_TOOL;
@@ -118,6 +119,8 @@ bool Specification::Generate() throw (void*) {
   }
  
   if (go_condition || status != up_to_date) {
+std::cerr << "bal" << status << std::endl;
+Print();
     const Tool*     tool = tool_manager.GetTool(tool_identifier);
     const ToolMode& mode = tool->GetMode(tool_mode);
 

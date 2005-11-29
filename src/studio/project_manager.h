@@ -7,7 +7,9 @@
 
 class ToolManager;
 
-static Specification empty_specification;
+static Specification primary_specification(true);
+static Specification generated_specification(false);
+
 /*
  * A project is a collection of specifications objects along with meta
  * information about those specifications and how specifications that are not
@@ -61,7 +63,7 @@ class ProjectManager {
     void Print(std::ostream& stream = std::cerr);
 
     /* Add a new specification to the project */
-    Specification& Add(Specification& specification = empty_specification) throw (Specification&);
+    Specification& Add(Specification& specification = generated_specification) throw (Specification&);
 
     /* Remove a specification from the project */
     bool Remove(const Specification* specification);

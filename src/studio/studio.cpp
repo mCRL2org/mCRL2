@@ -1,6 +1,7 @@
 #include <wx/wx.h>
 #include <wx/splash.h>
 #include <wx/filename.h>
+#include <wx/image.h>
 
 #include <fstream>
 
