@@ -119,8 +119,6 @@ bool Specification::Generate() throw (void*) {
   }
  
   if (go_condition || status != up_to_date) {
-std::cerr << "bal" << status << std::endl;
-Print();
     const Tool*     tool = tool_manager.GetTool(tool_identifier);
     const ToolMode& mode = tool->GetMode(tool_mode);
 

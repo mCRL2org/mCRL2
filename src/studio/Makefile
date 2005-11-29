@@ -21,13 +21,6 @@ LIBXML2_OBJECTS                = xml_text_reader.o project_manager.o tool_manage
 BOOST_OBJECTS                  = gui_project_overview.o tool_manager.o project_manager.o gui_specification_properties.o \
 				 settings_manager.o tool_executor.o
 BOOST_CPPFLAGS                 = -I$(BOOST_PREFIX)/include
-BOOST_LDFLAGS = -L$(BOOST_PREFIX)/lib
-
-ifdef BUILD_BOOST
- ifneq ($(HOST_OS),MACOSX)
-  BOOST_LDFLAGS := -Wl,-rpath=$(libdir) $(BOOST_LDFLAGS)
- endif
-endif
 
 WX_OBJECTS                     = studio.o gui_project_overview.o gui_new_specification.o gui_specification_properties.o \
 				 gui_resources.o tool_executor.o logger.o process.o
@@ -54,7 +47,7 @@ revision: ../utility/get_revision
 	@echo "CPPFLAGS += -DREVISION=$$(../utility/get_revision)" > revision
 
 ../utility/get_revision: ../utility/get_revision.cpp
-	$(CXX) -I$(BOOST_PREFIX)/include $(BOOST_LDFLAGS) -lboost_filesystem $< -o $@ 
+	$(CXX) -I$(BOOST_PREFIX)/include $< $(BOOST_LDFLAGS) -lboost_filesystem -o $@ 
 
 -include revision
 
@@ -74,7 +67,7 @@ $(LIBXML2_OBJECTS):         CPPFLAGS += $(LIBXML2_CPPFLAGS)
 $(BOOST_OBJECTS):           CPPFLAGS += $(BOOST_CPPFLAGS)
 $(WX_OBJECTS):              CPPFLAGS += $(WX_CPPFLAGS)
 gui_project_overview.o:     CPPFLAGS += -DDISABLE_TOOLBAR
-settings_manager.o:         CPPFLAGS += -DSCHEMA_DATA=\"$(datadir)\" -DTOOL_DATA=\"$(datadir)\"
+settings_manager.o:         CPPFLAGS += -DDATA_DIRECTORY=\"$(datadir)\"
 utility/relocator.o:        CPPFLAGS += $(BOOST_CPPFLAGS)
 
 # XML schema validation can be triggered by adding to tool_manager project_manager
@@ -105,12 +98,16 @@ install: all utility/relocator
 	$(INSTALL) -d $(bindir)
 	$(INSTALL) studio $(bindir)
 	$(INSTALL) -d $(datadir)
-	$(INSTALL) -m 0644 schemas/tool_catalog.xsd $(datadir)
-	$(GZIP) $(datadir)/tool_catalog.xsd
-	$(INSTALL) -m 0644 schemas/project.xsd $(datadir)
-	$(GZIP) $(datadir)/project.xsd
-	$(INSTALL) -m 0644 examples/tool_catalog.xml $(datadir)
-	utility/relocator $(bindir) $(datadir)/tool_catalog.xml
+	$(INSTALL) -d $(datadir)/images
+	$(INSTALL) -d $(datadir)/schemas
+	$(INSTALL) -d $(datadir)/configuration
+	$(INSTALL) -m 0644 pixmaps/TUElogo.xpm $(datadir)/images
+	$(INSTALL) -m 0644 schemas/tool_catalog.xsd $(datadir)/schemas
+	$(GZIP) $(datadir)/schemas/tool_catalog.xsd
+	$(INSTALL) -m 0644 schemas/project.xsd $(datadir)/schemas
+	$(GZIP) $(datadir)/schemas/project.xsd
+	$(INSTALL) -m 0644 examples/tool_catalog.xml $(datadir)/configuration
+	utility/relocator $(bindir) $(datadir)/configuration/tool_catalog.xml
 ifeq ($(HOST_OS),MACOSX)
 	/Developer/Tools/Rez -t APPL -o studio ../sample.r
 	/Developer/Tools/SetFile -a C studio

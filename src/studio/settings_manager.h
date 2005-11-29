@@ -33,13 +33,22 @@ class SettingsManager {
     void SetSettingsDirectory(const std::string);
 
     /* Get the the settings directory */
-    const std::string GetSettingsDirectory() const;
+    std::string GetSettingsPath() const;
+
+    /* Get the path to the directory containing the image file(s) */
+    std::string GetImagePath() const;
+
+    /* Get the path to the directory containing the XML schema file(s) */
+    std::string GetSchemaPath() const;
+
+    /* Get the path to where the user independent and default configurations are stored */
+    std::string GetConfigurationPath() const;
 
     /* Get the path to the tool catalog file(s) */
-    const std::string GetToolCatalogPath() const;
+    std::string GetToolCatalogPath() const;
 
     /* Get the base name of a project file */
-    const std::string GetProjectFileName() const;
+    std::string GetProjectFileName() const;
 
     inline const std::string GetLogFileName() const {
       std::string return_value = settings_directory;

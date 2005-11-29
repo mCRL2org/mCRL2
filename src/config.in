@@ -58,11 +58,6 @@ WX_CPPFLAGS        = @WX_CPPFLAGS@
 USE_BOOST          = @USE_BOOST@
 BOOST_PREFIX       = @BOOST_PREFIX@
 
-ifeq ($(BOOST_PREFIX),boost)
- BUILD_BOOST       = 1
- BOOST_PREFIX     := @abs_top_srcdir@/$(BOOST_PREFIX)
-endif
-
 # Installation directories
 prefix             = @prefix@
 exec_prefix        = @exec_prefix@
@@ -72,6 +67,22 @@ datadir            = @datadir@
 includedir         = @includedir@
 infodir            = @infodir@
 mandir             = @mandir@
+
+ifeq ($(BOOST_PREFIX),boost)
+ BUILD_BOOST       = 1
+
+ BOOST_LDFLAGS = -L$(BOOST_PREFIX)/lib
+
+ ifeq ($(HOST_OS),LINUX)
+  BOOST_LDFLAGS := -Wl,-rpath=$(libdir) $(BOOST_LDFLAGS)
+ else
+  ifneq ($(HOST_OS),MACOSX)
+   BOOST_LDFLAGS := -Wl,-static $(BOOST_LDFLAGS)
+  endif
+ endif
+
+ BOOST_PREFIX     := @abs_top_srcdir@/$(BOOST_PREFIX)
+endif
 
 # Add revision number
 ifeq ($(findstring $(MAKECMDGOALS),clean distclean),)

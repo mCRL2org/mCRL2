@@ -61,8 +61,9 @@ bool Studio::OnInit() {
   /* Show a splash */
   wxBitmap        splash_image;
   wxSplashScreen* splash;
+  wxString        logo(settings_manager.GetImagePath().append("/TUElogo.xpm").c_str(), wxConvLocal);
   
-  if (splash_image.LoadFile(wxT("pixmaps/TUElogo.xpm"), wxBITMAP_TYPE_XPM)) {
+  if (splash_image.LoadFile(logo, wxBITMAP_TYPE_XPM)) {
     splash = new wxSplashScreen(splash_image, wxSPLASH_CENTRE_ON_PARENT|wxSPLASH_TIMEOUT, 600, window, wxID_ANY);
   }
 
