@@ -13,26 +13,28 @@
 
 -include ../config
 
-BJAM          = tools/build/jam_src/bin/bjam
-BJAM_BUILD    = ./build.sh
-BJAM_TOOLS    =
+BJAM           = tools/build/jam_src/bin/bjam
+BJAM_BUILD     = ./build.sh
+BJAM_ARGUMENTS = "-sBUILD=release <threading>single/multi <optimization>speed <runtime-link>dynamic"
 
 # Build boost build tool
 ifeq ($(HOST_OS),WINDOWS)
  BJAM         = tools/build/jam_src/bin/bjam.exe
  BJAM_BUILD   = build.bat
 endif
-
+ifeq ($(HOST_OS),CYGWIN)
+ BJAM_ARGUMENTS = -sTOOLS=cygwin "-sBUILD=release <threading>single <optimization>speed <runtime-link>static"
+endif
 ifeq ($(HOST_OS),MINGW)
- BJAM         = tools/build/jam_src/bin/bjam.exe
- BJAM_BUILD   = start //WAIT mbuild.bat mingw;
- BJAM_TOOLS   = -sTOOLS=mingw
+ BJAM           = tools/build/jam_src/bin/bjam.exe
+ BJAM_BUILD     = start //WAIT mbuild.bat mingw;
+ BJAM_ARGUMENTS = "-sBUILD=release <threading>single <optimization>speed <runtime-link>static"
 endif
 
 .PHONY: all bjam install clean distclean
 
 all: $(BJAM)
-	$(BJAM) $(BJAM_TOOLS) --prefix=. install --layout=system
+	$(BJAM) $(BJAM_ARGUMENTS) --prefix=. --layout=system install
 
 $(BJAM):
 	cd tools/build/jam_src; \
