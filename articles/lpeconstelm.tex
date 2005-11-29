@@ -2,6 +2,7 @@
 \usepackage{textcomp,amsmath,amssymb,amsthm,stmaryrd}
 \usepackage{geometry}
 \usepackage{mymath,mythm}
+\usepackage{algorithm,algorithmic}
 
 \theoremstyle{plain}
 \newtheorem{thmfs}{Theorem}[section]
@@ -30,6 +31,8 @@
 \newcommand{\Sort}{\nm{Sort}}
 \newcommand{\Fun}{\nm{Fun}}
 \newcommand{\ap}{{:}}
+
+\newcommand{\tabw}{\hspace*{15.mm} \= \hspace*{20.mm} \= \hspace*{5.mm} \= \hspace*{5.mm} \= \hspace*{5.mm} \= \hspace*{5.mm}  \= \hspace*{5.mm}  \= \hspace*{5.mm}  \= \hspace*{5.mm} \= \hspace*{5.mm} \= \hspace*{5.mm}  \= \hspace*{5.mm}  \= \hspace*{5.mm}\kill}
 
 \newcommand{\tab}{\hspace*{5.mm} \= \hspace*{5.mm} \= \hspace*{5.mm} \= \hspace*{5.mm} \= \hspace*{5.mm} \= \hspace*{5.mm}  \= \hspace*{5.mm}  \= \hspace*{5.mm}  \= \hspace*{5.mm} \= \hspace*{5.mm} \= \hspace*{5.mm}  \= \hspace*{5.mm}  \= \hspace*{5.mm}\kill}
 
@@ -71,11 +74,11 @@ The equation below is a \lpe\ in \mcrl :
 %\at werkt niet
 \begin{tabbing}
 \tab
-$X (\ovr{d: D}) = $ \> \> \> $ \sum_{i \in I} \sum_{\ovr{e_i: E_i}} \ovr{c_i} ( \ovr{d, e_i }) \rightarrow 
+$X (\ovr{d: D}) = $ \> \> \> $ \sum_{i \in I} \sum_{\ovr{e_i: E_i}} c_i ( \ovr{d, e_i }) \rightarrow 
 (a_i^1 (\ovr{f_{i,1}}(\ovr{d,e_i})) \vert \ldots \vert a_i^{n(i)}(\ovr{f_{i,n(i)}}(\ovr{d,e_i}))) \at \text{ } t_i(\ovr{d,e_i})  \cdot X(\ovr{g_i}(\ovr{d,e_i})) +$ \\ \\
-\> \> \> $ \sum_{j \in j} \sum_{\ovr{e_j: E_j}} \ovr{c_j} ( \ovr{d, e_j} ) \rightarrow 
+\> \> \> $ \sum_{j \in J} \sum_{\ovr{e_j: E_j}} c_j ( \ovr{d, e_j} ) \rightarrow 
 (a_j^1 (\ovr{f_{j,1}}(\ovr{d,e_j})) \vert \ldots \vert a_j^{n(j)}(\ovr{f_{j,n(j)}}(\ovr{d,e_j}))) \at \text{ } t_j(\ovr{d,e_j}) + $ \\ \\
-\> \> \> $\sum_{\ovr{e_\delta}:\ovr{E_\delta}} \ovr{c_\delta} ( \ovr{d, e_\delta}) \rightarrow 
+\> \> \> $\sum_{\ovr{e_\delta:E_\delta}} \ovr{c_\delta} ( \ovr{d, e_\delta}) \rightarrow 
 \delta \at \text{ } t_\delta(\ovr{d,e_\delta})$ 
 \end{tabbing}
 
@@ -85,14 +88,14 @@ Where $I$ and $J$ are disjoint.\\
 \noindent For the description of the \tool\ tool we only use those elements of an LPE which are relevant. So we use a simplified\footnote{Multiactions and time are not taken into account} representation of an LPE .
 \begin{defn}[Simplyfied LPE]\label{def:LPE}
 \begin{displaymath}
-X (\ovr{d:D}) = \sum_{i \in I} \sum_{\ovr{e_i:E_i}} \ovr{c_i} ( \ovr{d, e_i}) \rightarrow X(\ovr{g_i}(\ovr{d,e_i}))
+X (\ovr{d:D}) = \sum_{i \in I} \sum_{\ovr{e_i:E_i}} c_i ( \ovr{d, e_i}) \rightarrow X(\ovr{g_i}(\ovr{d,e_i}))
 \end{displaymath}\\
 If we speak about an LPE in this article we refer to Definition \ref{def:LPE}.  The different states 
 %are $\ovr{d}$ 
 of the process are represented by the data vector parameter $\ovr{d: D}$. $\ovr{D}$ may be a Cartesian product of $n$ data types, meaning that $\ovr{d}$ may consist of a tuple $(d_1, \ldots, d_n)$. 
-Let $x \in \lbrace 1, \ldots , \vert \ovr{d} \vert$; The $x^{th}$ element in the tuple is notated: $\ovr{d}._x$.
+Let $x \in \lbrace 1, \ldots , \vert \ovr{d} \vert \rbrace$; The $x^{th}$ element in the tuple is notated: $\ovr{d}._x$.
 The LPE expresses that in state $\ovr{d}$ %it preforms action $a$, carrying data parameter $\ovr{f_i}(\ovr{d},e_i)$ and 
-it can reach the new state $\ovr{g_i}(\ovr{d,e_i})$ under the condition that $\ovr{c_i}(\ovr{d,e_i})$ is \ti{true}. So for each summand $i$ from $I$ we have a function $\ovr{g_i}: \ovr{D} \times \ovr{E_i} \rightarrow \ovr{D}$ and a function $\ovr{c_i}: \ovr{D} \times \ovr{E_i} \rightarrow \mathbb{B}$
+it can reach the new state $\ovr{g_i}(\ovr{d,e_i})$ under the condition that $c_i(\ovr{d,e_i})$ is \ti{true}. So for each summand $i$ from $I$ we have a function $\ovr{g_i}: \ovr{D} \times \ovr{E_i} \rightarrow \ovr{D}$ and a function $c_i: \ovr{D} \times \ovr{E_i} \rightarrow \mathbb{B}$
 Data parameters $\ovr{e_i : E_i}$ are sum variables. These variables are used to let a action range over a data domain. 
 If we want to speak about a certain LPE we can instantiate such an LPE with $X(\ovr{init})$. \\
 
@@ -102,7 +105,7 @@ If we want to speak about a certain LPE we can instantiate such an LPE with $X(\
 \section{Free Variables}
 \subsection{Explanation}
 
-If in a parameter in a certain state, does not influence the bahavior of an LPE we can assign to this parameter a \ti{free variable} at this state. With these \ti{free variables} we are able to model that \pp\ can have values, which will not influence the behavior of an LPE. %Note: Free variables are not sum variables.\ti{Free variables} are introduced when a \mcrl\ specification is linearized \cite{lin}.
+If a parameter at a certain state, does not influence the behavior of an LPE we can assign to this \pp\ a \ti{free variable}. With these \ti{free variables} we are able to model that \pp\ can have values, which will not influence the behavior of an LPE. %Note: Free variables are not sum variables.\ti{Free variables} are introduced when a \mcrl\ specification is linearized \cite{lin}.
 
 \subsection{Assumptions}
 If \ti{free variables} occur in an LPE we make certain assumptions about these variables, otherwise \ti{free variables} would be to complicated. The first assumption is that the value of these variables will not influence the behavior of the LPE. Another assumption is that \ti{free variables} only occur once in an LPE. Therefore each \ti{free variable} is unique. %If a \ti{free variable} would occur more than once a rightside expression, this could lead to unpredictable behavior. That is why we assume that each \ti{free variable} is unique.
@@ -116,18 +119,18 @@ For further reading about \lpe\ and free variables please refer to \cite{LPEfree
 \subsection{lpeconstelm definition - without free variables}\label{subsec:lpedef}
 
 In this definition we do not consider free variables.
-A parameter of an LPE can be replaced by its initial value if it can be determined that this parameter remains constant throughout any run of the process, starting at the initial state. The elimination of constant parameters does not reduce the resulting state space, it may however reduce the time and space needed to generate a state space from an LPE. \\
+A parameter of an LPE can be replaced by its initial value if it can be determined that this parameter remains constant throughout the run of any process, starting at the initial state. The elimination of constant parameters does not reduce the resulting state space, it may however reduce the time and space needed to generate a state space from an LPE. \\
 If we have infinite time and space we can inspect each state and check whether a \pp\ changes throughout the execution of the process. For this we define the reachable state set $R$ for each state ($\ovr{v_0}$). 
 
 \begin{defn}\label{def:lpe} Let $L$ be an LPE, where: \\ 
 \begin{itemize}
-\item $I$ is the set of summand indices, \\ $\ovr{E_i}$ is the set of sum variables of summand $i$, \\ $\ovr{c_i}$ is the condition function of summand $i$ and \\ $\ovr{g_i}$ is the next state function of summand $i$.
+\item $I$ is the set of summand indices, \\ $\ovr{E_i}$ is the set of sum variables of summand $i$, \\ $c_i$ is the condition function of summand $i$ and \\ $\ovr{g_i}$ is the next state function of summand $i$.
 \end{itemize}
 
 $R_L(\ovr{v_0})$ is the smallest for which the following holds:
   \begin{itemize}
     \item[-] $\ovr{v_0} \in R_L(\ovr{v_0})$
-    \item[-] For all $i \in I$ and $\ovr{e_i} \in \ovr{E_i}$, if $\ovr{v} \in R_L(\ovr{v_0})$ and $\ovr{c_i}(\ovr{v, e_i})$ holds, \\ then $\ovr{g_i}(\ovr{v, e_i}) \in R_L(\ovr{v_0})$ \\
+    \item[-] For all $i \in I$ and $\ovr{e_i} \in \ovr{E_i}$, if $\ovr{v} \in R_L(\ovr{v_0})$ and $c_i(\ovr{v, e_i})$ holds, \\ then $\ovr{g_i}(\ovr{v, e_i}) \in R_L(\ovr{v_0})$ \\
    \end{itemize}
 \end{defn}
 
@@ -136,9 +139,7 @@ $R_L(\ovr{v_0})$ is the smallest for which the following holds:
 $S_L(\ovr{v_0}) = \lbrace j \in  \lbrace 1, \ldots, n \rbrace \vert (\forall_{\ovr{v} \in R_L(\ovr{v_0})}( \ovr{v}._j = \ovr{v_{0}}._j)) \rbrace $
 \end{defn}
 
-To get $S_L(\ovr{v_0})$ we have to compute $R_L(\ovr{v_0})$. This means we have to generate the entire state space starting from state $\ovr{init}$. Generating the entire state space can take a lot of time and space; it might take infinite time and/or space. However if we can make an approximation of Definition \ref{def:lpe_comp} we do not necessarily have to inspect all states. Note that if we use an approximation there are cases in which not all constant parameters can be found. In practice we don't mind, because these are hard to find.
-
-Because variables can occur in many foms we introduce a form which allows us to take the normal form of such a data term. 
+To get $S_L(\ovr{v_0})$ we have to compute $R_L(\ovr{v_0})$. This means we have to generate the entire state space starting at state $\ovr{init}$. Generating the entire state space can take a lot of time and space; it might take infinite time and/or space. However if we can make an approximation of Definition \ref{def:lpe_comp} we do not necessarily have to inspect all states. Note that if we use an approximation there are cases in which not all constant parameters can be found. In practice we don't mind, because these are hard to find.
 
 \subsection{lpeconstelm definition - with free variables}
 
@@ -146,14 +147,14 @@ A \pp\ of an LPE can be replaced by its constant value if it can be determined t
 
 We define the reachable state set $R^{FV}$ for each state ($\ovr{v_0}$). 
 \begin{defn}\label{def:lpe} Let $L$ be an LPE, where\begin{itemize}
-\item $I$ is the set of summand indices, \\ $\ovr{E_i}$ is the set of sum variables of summand $i$, \\ $\ovr{c_i}$ is the condition function of summand $i$ and \\ $\ovr{g_i}$ is the next state function of summand $i$. \\
+\item $I$ is the set of summand indices, \\ $\ovr{E_i}$ is the set of sum variables of summand $i$, \\ $c_i$ is the condition function of summand $i$ and \\ $\ovr{g_i}$ is the next state function of summand $i$. \\
 $FV$ is the set of \ti{free variables}.\\
 \end{itemize}
 
 $R_L^{FV}(\ovr{v_0})$ is the smallest set which is defined as:
   \begin{itemize}
     \item[-] $\ovr{v_0} \in R_L^{FV}(\ovr{v_0})$
-    \item[-] For all $i \in I$ and $\ovr{e_i} \in \ovr{E_i}$, if $\ovr{v} \in R_L^{FV}(\ovr{v_0})$ and $\ovr{c_i}(\ovr{v, e_i})$ holds, \\ then $\ovr{g_i}(\ovr{v, e_i}) \in R_L^{FV}(\ovr{v_0})$ \\
+    \item[-] For all $i \in I$ and $\ovr{e_i} \in \ovr{E_i}$, if $\ovr{v} \in R_L^{FV}(\ovr{v_0})$ and $c_i(\ovr{v, e_i})$ holds, \\ then $\ovr{g_i}(\ovr{v, e_i}) \in R_L^{FV}(\ovr{v_0})$ \\
    \end{itemize}
 \end{defn}
 
@@ -183,15 +184,16 @@ To get $S_L^{NF} (\ovr{v_0})$ we have to compute $R_L^{FV}(\ovr{v_0})$, and this
 \section{Proposals}
 \subsection{Proposal 1 - without free variables} \label{sec:prop1}
 %Sum variables ($e_i$) can range over an infinite domain so we don't want to fill in all these specific values. These sum variables can range over an infinite domain. We know at forehand that they are not constant, therefore we notate these sum variables as the open data variables $e'$.
+Because variables can occur in many forms we introduce a form which allows us to take the normal form of such a data term. 
 We write $NF(t)$ for the normal form of data term $t$. 
-We notate sum variables as open data variables $\ovr{e'}$, because these values can range over an infinite domain.
-Let $j \in \lbrace 1, \ldots,  n \rbrace $. We assume $\ovr{d}._j$ is a normal form. If $\ovr{d}._j$ is equal to $NF(\ovr{g_i}(\ovr{d,e'})._j)$ for all $i \in I$ we know that $\ovr{d}._j$ is constant. However some conditions $NF(\ovr{c_i}(\ovr{d,e'}))$  might never be \ti{true}, so it useless to compare $NF(\ovr{d}._j)$ with $NF(\ovr{g_i}(\ovr{d,e'})._j)$  if $NF(\ovr{c_i}(\ovr{d,e'}))$ is not  $"true"$. \\
+% We notate sum variables as open data variables $\ovr{e'}$, because these values can range over an infinite domain.
+Let $j \in \lbrace 1, \ldots,  n \rbrace $. We assume $\ovr{d}._j$ is a normal form. If $\ovr{d}._j$ is equal to $NF(\ovr{g_i}(\ovr{d,e_i})._j)$ for all $i \in I$ we know that $\ovr{d}._j$ is constant. However some conditions $NF(c_i(\ovr{d,e_i}))$ might never be \ti{true}, so it useless to compare $NF(\ovr{d}._j)$ with $NF(\ovr{g_i}(\ovr{d,e_i})._j)$  if $NF(c_i(\ovr{d,e_i}))$ is not  $"true"$. \\
 
 \begin{defn} \label{def:sug1} Let $L$ be an LPE and we define $S_L^1$:
 \begin{displaymath}
 S_L^1 =
 \lbrace   
-j \in \lbrace 1, \ldots , n \rbrace \vert \forall_{i\in I} (\forall_{\ovr{d}: \ovr{D}}((NF(\ovr{c_i}(\ovr{d,e'})) = "true")  \Rightarrow (NF(\ovr{d}._j) = NF(\ovr{g_i}(\ovr{d,e'})._j))))\rbrace
+j \in \lbrace 1, \ldots , n \rbrace \vert \forall_{i\in I} (\forall_{\ovr{d}: \ovr{D}}((NF(c_i(\ovr{d,e_i})) = "true")  \Rightarrow (NF(\ovr{d}._j) = NF(\ovr{g_i}(\ovr{d,e_i})._j))))\rbrace
 \end{displaymath}
 If we take a look at Example \ref{cexample:sug1}, it might be possible to improve our proposal to detect more constant \pps .
 \begin{example}Let $CE1$ be \label{cexample:sug1}\begin{verbatim}
@@ -225,7 +227,7 @@ In Section \ref{sec:prop1} we see that Definition \ref{def:sug1} can be improved
 \begin{displaymath}
 S_L^2(\ovr{d})=
 \lbrace   
-j \in \lbrace 1, \ldots , n \rbrace \vert \forall_{i\in I} (NF(\ovr{c_i}(\ovr{d,e'})) = "true") \Rightarrow \ovr{d}._j = NF(\ovr{g_i}(\ovr{d,e'})._j)))\rbrace
+j \in \lbrace 1, \ldots , n \rbrace \vert \forall_{i\in I} (NF(c_i(\ovr{d,e_i})) = "true") \Rightarrow \ovr{d}._j = NF(\ovr{g_i}(\ovr{d,e_i})._j)))\rbrace
 \end{displaymath}
 %We elimate the problem for checking each state 
 We now can "instantiate" the $S^2$ with a $\ovr{d}$. If we instantiate $S^2$ with $\ovr{init}$, there is a problem. If we take a look at Example \ref{cexample:sug2} we can see why:
@@ -242,7 +244,7 @@ If we use Defintion \ref{def:sug2}, we get:
 \hspace*{5.mm} \= \hspace*{5.mm} \= \hspace*{5.mm} \= \hspace*{5.mm} \= \hspace*{5.mm} \= \hspace*{5.mm}  \= \hspace*{5.mm}  \= \hspace*{5.mm}  \= \hspace*{5.mm} \= \hspace*{5.mm} \= \hspace*{5.mm}\kill
 \> \> $S_{E2}^2(\langle 0, 0 \rangle)$\\
 \> $\equiv$\\
-\> \> $\lbrace j \in \lbrace 1, 2 \rbrace \vert \forall_{i\in I} (NF(\ovr{c_i}( \langle  0,  0\rangle ) = "true") \Rightarrow  \langle  0,  0\rangle._j = NF(\ovr{g_i}( \langle  0,  0\rangle)._j))\rbrace $\\\
+\> \> $\lbrace j \in \lbrace 1, 2 \rbrace \vert \forall_{i\in I} (NF(c_i( \langle  0,  0\rangle ) = "true") \Rightarrow  \langle  0,  0\rangle._j = NF(\ovr{g_i}( \langle  0,  0\rangle)._j))\rbrace $\\\
 \> $\equiv$ \\
 \> \>$\lbrace j \in \lbrace 1, 2 \rbrace \vert $ \\
 \> \> \> $(NF(\ovr{c_1}( \langle  0,  0\rangle ) = "true") \Rightarrow  \langle  0,  0\rangle._j = NF(\ovr{g_{1}}( \langle  0,  0\rangle)._j)) $\\
@@ -272,16 +274,19 @@ $S_{E2}^2(\langle 0,0 \rangle) = \lbrace 2 \rbrace$. This indicates that the sec
 \end{defn}
 
 \subsection{Proposal 3 - without free variables}
-To overcome the problem in which only the states adjecent to the initial state are compared, we suggest this proposal. First we redefine when a summands should inspected. If we rewrite a condition which is an open term, it might be that this condition will not reduce to a normal form that is either \ti{true} or \ti{false}. In such a case we do not know for certain if the condition holds or not. If this happens we know the condition might be \ti{true} and the corresponding summand next state should be inspected. The summands for which the conditions are \ti{false} are not inspected. \\
+To overcome the problem in which only the states adjacent to the initial state are compared, we suggest this proposal. First we redefine when a summands should inspected. If we rewrite a condition which is an open term, it might be that this condition will not reduce to a normal form which is either \ti{true} or \ti{false}. In such a case, there might be an instantiation that the condition holds. If this happens we know the condition of a particular summand might be \ti{true}, so the corresponding next state should be inspected. The summands for which the conditions are \ti{false} are not inspected. \\
+
+\begin{defn}[$\bot$] Let $x$ be a \pp . We define $\bot$ to be the value of \pp\ $x$, if $x$ is not constant. 
+\end{defn}
 
 We are interested in the largest subset of constant \pps\ so:
 
 Let $X \subseteq \lbrace 1, \ldots, n \rbrace$ be a set of indices of constant \pps\ of an LPE:
 
-\begin{defn} We define $\ovr{\otimes_X}(\ovr{z})$:\\
-Let $j \in \lbrace 1, \dots, n \rbrace $. 
-If $j \not\in X$ then $\ovr{\otimes_X}._j = \ovr{z}._j$. 
-If $j \in X$ then $ovr{\otimes_X}._j = \ovr{init}._j$.
+\begin{defn} We define $\ovr{\otimes_X(\ovr{d})}$:\\
+Let $j \in \lbrace 1, \dots, \vert \ovr{d} \vert \rbrace $. \\
+If $j \not\in X$ then $\ovr{\otimes_X(\ovr{d})}._j = \bot $. \\
+If $j \in X$ then $\ovr{\otimes_X(\ovr{d})}._j = \ovr{d}._j$.\\
 \end{defn}
 
 In order find the largest subset we give: % to the following definition: 
@@ -290,51 +295,54 @@ In order find the largest subset we give: % to the following definition:
 
 \begin{tabbing}
 \tab
-\> $ S_L^3(\ovr(init)) \subseteq \lbrace 1, \ldots, n \rbrace $ \\ \\
+\> $ S_L^3(\ovr{init}) \subseteq \lbrace 1, \ldots, n \rbrace $ \\ \\
  \> as the biggest possible set such that:\\ \\
-\> $\forall_{i \in I} (NF( \ovr{c_i} ( \ovr{\otimes_{S_L^3}, e'} ) ) \not= "false" \rightarrow \forall_{j \in S_L^3}(ovr{init}._j =  NF( \ovr{g_i}(\ovr{\otimes_{S_L^3}, e'} )._j))) $
+\> $\forall_{i \in I} (NF( c_i ( \ovr{\otimes_{S_L^3}(\ovr{init}), e_i} ) ) \not= "false" \rightarrow \forall_{j \in S_L^3}(\ovr{init}._j =  NF( \ovr{g_i}(\ovr{\otimes_{S_L^3}(\ovr{init}), e_i} )._j))) $
 \end{tabbing}
-%If we compare Definition \ref{def:sug3} to Definition \ref{def:lpe_comp} we see the following:
+\end{defn}
+
+\begin{defn}[$@$] Let $\ovr{d} = (d_1, \dots d_n)$, let $j \in \lbrace 1, \ldots , \vert \ovr{d} \vert \rbrace$ and let $x$ be a value.\\
+$\ovr{d}@_j(x)$ is defined as the substitution of the $j^{th}$ element of $\ovr{d}$ with the value of $x$.
+\end{defn}
+
+\begin{defn}[$\ovr{d}:\ovr{\Bbb{D}}._j$] Let $\ovr{d} = (d_1, \dots d_n)$ and $j \in \lbrace 1, \ldots \vert \ovr{d} \vert \rbrace$.\\
+$\ovr{d}:\ovr{\Bbb{D}}._j$ is defined as the domain of the $j^{th}$ element in vector $\ovr{d}$.
+\end{defn}
+
 \begin{thm} Let $L$ be an LPE. \label{thm:sub}
 $$S_L^3(\ovr{init}) \subseteq S_L(\ovr{init}) $$
 \end{thm} 
 \begin{flushleft}
+
 \tb{Proof. \ref{thm:sub}}
 \end{flushleft}
 We do case distinction on $S_L^3(\ovr{init})$:\\
 \begin{itemize}
-\item[-] Let $S_L^3(\ovr{init})$ be empty, then $S_L^3 \subseteq S_L$ holds trivially.
-\item[-] Let $S_L^3(\ovr{init})$ not be empty. We prove that if there is an element in $S_L^3(\ovr{init})$, then this element is also in $S_L(\ovr{init})$.
-\begin{defn} We define $\ovr{\odot_X}(d)$:\\
-Let $j \in \lbrace 1, \dots, n \rbrace $. 
-If $j \not\in X$ then $\odot_{X_j} = d$. 
-If $j \in X$ then $\odot_{X_j} = init_j$.
-\end{defn}
-So $\otimes_X = \odot_X(d_j)$; next we prove:
-\begin{tabbing}
-\tab
-\> \> $j \in S_L^3(\ovr{init})$\\
-\> = \> \> \\
-\> \> $j \in \lbrace k \vert \forall_{i \in I} NF(\ovr{c_i}( \ovr{\otimes_{S_L^3}}, e')) \neq false \rightarrow (init_k = NF(\ovr{g_i} (\ovr{\otimes_{S_L^3}}, e' )_k)  \rbrace$\\
-\> $\Rightarrow$ \> \> \\
-\> \> $j \in \lbrace k \vert \forall_{i \in I} (\forall_{e_i:E_i} (\ovr{c_i}( \ovr{\otimes_{S_L^3}}, e_i) \rightarrow (init_k = \ovr{g_i} (\ovr{\otimes_{S_L^3}}, e_i )_k))  \rbrace$\\
-\> $\Rightarrow$ \> \> \\
-\> \> $j \in \lbrace k \vert \forall_{i \in I} (\forall_{e_i:E_i} (\forall_{d\in D_k} (\ovr{c_i}( \ovr{\odot_{S_L^3}}(d), e_i) \rightarrow (init_k = \ovr{g_i} (\ovr{\odot_{S_L^3}}(d), e_i )_k))  \rbrace $ \\
-%\> $=$ \> $\forall_{ i \in I }\forall_{ e_i \in E_i} ( \ovr{v} \in R_L(\ovr{v_0}) \wedge \ovr{c_i}(\ovr{v}, e_i) ) \rightarrow  \ovr{g_i}(\ovr{v}, e_i) \in R_L(\ovr{v_0})$ \\
-\> $=$ \>  \>$ \forall_{i\in I}\forall_{e_i:E_i}\forall_{d:D} : (\odot_{S_L^3}(d),e_i) \in R_L(\ovr{init})) $ and 
-$\ovr{c_i}(\odot_{S_L^3}(d),e_i)$ holds, \\
-\> \> \> \> then $ \ovr{g_i}( \odot_{S_L^3}(d),e_i) \in R_L(\ovr{init})$ \\
-%\> \> $j \in \lbrace k \vert \forall_{\ovr{v} \in \lbrace \ovr{init} \rbrace \cup \lbrace R_L(\ovr{init})\rbrace }(v_k = init_k) \rbrace$ \\
-%\> \> \> \> if $(\odot_{S_L^3}}(d),e_i) \in R_L(\ovr{init})$ and $\ovr{c_i}(\odot_{S_L^3}}(d),e_i)$ holds, \\ \> \> \> \>then $\ovr{g_i}(\odot_{S_L^3}}(d),e_i) \in R_L(\ovr{init})$ \\
-%\> $=$ \> \\
-\> \> $j \in \lbrace k \vert \forall_{\ovr{v} \in R_L(\ovr{init})} (v_k = init_k)) \rbrace$\\
-\> $=$ \> \>Definition \ref{def:lpe_comp}\\
-\> \> $j \in S_L(\ovr{init})$
- \end{tabbing}
+\newcommand{\tmp}{\vspace{8pt}}
+
+\item[-] Let $S_L^3(\ovr{init})$ be empty, then $S_L^3(\ovr{init}) \subseteq S_L(\ovr{init})$ holds trivially.
+\item[-] Let $S_L^3(\ovr{init})$ not be empty. We prove that if there is an element in $S_L^3(\ovr{init})$, then this element is also in $S_L(\ovr{init})$. \newline \newline
+% \begin{vspace}{20pt}
+% \begin{tabbing} 
+% \tab
+ \tmp $ S_L^3(\ovr{init})$ \\ 
+ \tmp $ \equiv $ \hspace{20pt} $\lbrace$ Def \ref{def:sug3} of $S_L^3 \rbrace$ \\ 
+ \tmp $ \lbrace k \in \lbrace 1, \ldots, n \rbrace \vert \forall_{i \in I}(NF(c_i(\ovr{\otimes_{S_L^3}(\ovr{init}), e_i})) \neq false \rightarrow \ovr{init}._k = NF(\ovr{g_i}(\ovr{\otimes_{S_L^3}(\ovr{init}), e_i})._k) ) \rbrace$ \\
+\tmp $ \equiv $ \hspace{20pt} $\lbrace$ Def of $\ovr{\otimes_{S_L^3}(\ovr{init})}\rbrace$ \\ 
+\tmp $ \lbrace k \in \lbrace 1, \ldots, n \rbrace \vert \forall_{i \in I}(\forall_{\ovr{x} \in \lbrace \bigcup_{z \not\in S_l^3 } \forall_{y \in \ovr{init}:\ovr{\Bbb{D}}._{z}} (\ovr{init}@_{z}(y) ) \rbrace}(c_i(\ovr{x, e_i}) \rightarrow \ovr{init}._k = \ovr{g_i}(\ovr{x, e_i})._k )) \rbrace$\\
+\tmp $ \Rightarrow$ \hspace{20pt} $\lbrace \bigcup_{z \not\in S_L^3 } \forall_{y \in \ovr{init}:\ovr{\Bbb{D}}._{z}} (\ovr{init}@_{z}(y) ) \supseteq R_L(\ovr{init}) \rbrace$  \\
+\tmp $ \lbrace k \in \lbrace 1, \ldots, n \rbrace \vert \forall_{i \in I}(\forall_{x \in R_L(\ovr{init})}( c_i(\ovr{x, e_i})  \rightarrow \ovr{init}._k = \ovr{g_i}(\ovr{x, e_i})._k )) \rbrace$\\
+\tmp $ \Rightarrow$ \hspace{20pt} $\lbrace \forall_{i \in I} \forall_{x \in R_L(\ovr{init})} c_i(\ovr{x,e_i}) \rightarrow \ovr{g_i}(\ovr{x, e_i}) \in R_L(\ovr{init}) ) \rbrace$\\
+$ \lbrace k \in \lbrace 1, \ldots, n \rbrace \vert \forall_{x \in R_L(\ovr{init})}(\ovr{x}._k = \ovr{init}._k) \rbrace$\\
+\tmp $ \equiv$ \hspace{20pt} $\lbrace$ Def \ref{def:lpe_comp} of $S_L\rbrace$\\
+\tmp $S_L(\ovr{init})$
+
+%  \end{tabbing}
+% \end{vspace}
 \end{itemize}
 So we have derived that each element in $S_L^3(\ovr{init})$, is also in $S_L(\ovr{init})$.
 \\ \sq
-\end{defn}
+
 
 \subsection{Proposal 4 - with free variables}
 
@@ -342,49 +350,52 @@ We are interested in the largest subset of constant \pps ; for each \pp\ it shou
 
 Let $X \subseteq \lbrace 1, \ldots, n \rbrace$ of constant \pps\ of an LPE:
 
-\begin{defn} We define $\ovr{\oplus_X}(v)$:\\
-Let $j \in \lbrace 1, \dots, n \rbrace $. 
-If $j \not\in X$ then $\oplus_{X_j} = d_j$. 
-If $j \in X$ then $\oplus_{X_j} = v$.
+\begin{defn} We define $\ovr{\oplus_X^{FV}(\ovr{d})}$:\\
+Let $j \in \lbrace 1, \dots, \vert \ovr{d} \vert \rbrace $ and let $y$ be an element out of a proper domain.\\
+If $j \in X$ and $\ovr{d}._j \in FV $ then $\ovr{\oplus_X^{FV}(\ovr{d})}._j = y$. \\
+If $j \in X$ and $\ovr{d}._j \not\in FV $ then $\ovr{\oplus_X^{FV}(\ovr{d}})._j = \ovr{d}._j$.\\
+If $j \not\in X$ then $\ovr{\oplus_X^{FV}(\ovr{d}})._j = \bot$\\
 \end{defn}
 
-\begin{defn} We define $Y(\ovr{m})$:
-\begin{tabbing}
-\tab
-$\forall_{i \in I}($\\
-\> $NF(c_i(\ovr{m})) \neq false \rightarrow$ \\
-\> ( \> 		\> ( $NF(\ovr{g_i}(\ovr{m})_j) \not\in FV \wedge NF(m_j) \not\in FV \rightarrow (NF(m_j) = NF(\ovr{g_i}(\ovr{m})_j))$ )\\
-\> \> $\vee$ 	\> ( $NF( m_j) \in FV $)\\
-\> \> $\vee$ 	\>	( $NF(\ovr{g_i}(\ovr{m})_j) \in FV \wedge NF(m_j) \not\in FV \rightarrow Y(\ovr{g_i}(\ovr{m}))$ )\\
-\> ) \\
-$)$
-\end{tabbing}
-\end{defn}
+\newcommand{\z}{(\ovr{\oplus_{S_L^4}^{FV}(\ovr{init}),e_i})}
 
 \noindent In order find the largest subset we give: % to the following definition: 
 \begin{defn} \label{def:sug4} Let $L$ be an LPE. We define $S_L^4$:
 \begin{tabbing}
 \tab
-$ S_L^4 \subseteq \lbrace 1, \ldots, n \rbrace $ \\ \\
-such that:\\ \\
-$\exists_{z}( \forall_{j \in S_L^4} (Y((\ovr{\oplus_X}(z), e')))$ \\
+$ S_L^4(\ovr{init}) \subseteq \lbrace 1 \ldots n  \rbrace $ \\ \\
+is the biggest subset, for which holds:\\
+% $\exists_{\z} ( $\\
+\> $\forall_{i \in I }($ \\ 
+\> \> $\forall_{j \in S^L_4(\ovr{init})}($\\
+\> \> \> $ \forall_{c_i\z \neq false}( $ \\
+\> \> \> \> $(\ovr{init}._j \not\in FV \rightarrow \forall_{\ovr{g_i}\z._j \not\in FV}( \ovr{g_i}\z._j = \ovr{init}._j ))$\\
+\> \> \> $\wedge$\\
+\> \> \> \> $(\ovr{init}._j \in FV \rightarrow \exists_k(\forall_{\ovr{g_i}\z._j \not\in FV }(\ovr{g_i}\z._j = k))) $\\
+\> \> \> $)$ \\
+\> \>$)$\\
+\> $)$ \\
+% $)$
 \end{tabbing}
 \end{defn}
-If we compare Definition \ref{def:sug4} to Definition \ref{def:lpe_comp_fv} we see the following:
+
+%If we compare Definition \ref{def:sug4} to Definition \ref{def:lpe_comp_fv} we see the following:
 \begin{thm} Let $L$ be an LPE. \label{thm:sub_fv}
 $$S_L^4(\ovr{init}) \subseteq S_L^{FV}(\ovr{init}) $$
 \end{thm} 
 \begin{flushleft}
+We do case distinction on $S_L^3(\ovr{init})$:\\
 \tb{Proof. \ref{thm:sub_fv}}
 \end{flushleft}
-We do case distinction on $S_L^4$
-Let $S_L^4(\ovr{init})$ be $\emptyset$, then $S_L^4 \subseteq S_L^{FV}$ holds trivially.
-Let $S_L^4(\ovr{init})$ not be $\emptyset$. We prove there is an element in $S_L^4(\ovr{init})$, which is also in $S_L^{FV}(\ovr{init})$.
-\begin{tabbing}
-$\vdots$ Bewijs
-\end{tabbing}
+\begin{itemize}
+\newcommand{\tmp}{\vspace{8pt}}
 
-So we have derived that each element in $S_L^4(\ovr{init})$, is also in $S_L^NF(\ovr{init})$.
+\item[-] Let $S_L^4(\ovr{init})$ be empty, then $S_L^3(\ovr{init}) \subseteq S_L^{FV}(\ovr{init})$ holds trivially.
+\item[-] Let $S_L^4(\ovr{init})$ not be empty. We prove that if there is an element in $S_L^4(\ovr{init})$, then this element is also in $S_L^{FV}(\ovr{init})$. \newline \newline
+$\vdots$
+\end{itemize}
+
+So we have derived that each element in $S_L^4(\ovr{init})$, is also in $S_L^{FV}(\ovr{init})$.
 
 
 \section{Algorithm description}
@@ -422,7 +433,7 @@ If the substituted value differs from the original value, the \pp\ becomes marke
 If they are equal, the \pp\ remains in the set $S$ if it already had been in the set $S$.
 \end{enumerate}
 
-In this part we only describe the difference between the algorithm without \ti{free variables}. The algorithm remains basicly the same. We only extend Algorithm Description \ref{alg:org} when comparing elements from the current state with the corresponding next state. When comparing we use the rules associated with \ti{free variables}.
+In this part we only describe the difference between the algorithm without \ti{free variables}. The algorithm remains basically the same. We only extend Algorithm Description \ref{alg:org} when comparing elements from the current state with the corresponding next state. When comparing we use the rules associated with \ti{free variables}.
 
 %\subsection{no singleton removal}
 %Here we describe how singleton domains are begin detected.
@@ -460,171 +471,283 @@ $S$ := $\emptyset$;\\
 
 \newpage
 \subsection{with free variables}
-\begin{tabbing} 
-\hspace*{5.mm} \= \hspace*{5.mm} \= \hspace*{5.mm} \= \hspace*{5.mm} \= \hspace*{5.mm} \= \hspace*{5.mm}  \= \hspace*{5.mm}  \= \hspace*{5.mm}  \= \hspace*{5.mm} \= \hspace*{5.mm} \= \hspace*{5.mm}\kill
-StateVector := $\ovr{init}$; \\
-$S_b$ := $\lbrace 1, \ldots, n \rbrace$; \\
-$S$ := $\emptyset$;\\ 
-\tb{while}  ($ (S \setminus S_b) = \emptyset $) \tb{do} \ra \\
-  \> $S$ := $S_b$; \\
-  \> \tb{forall} $i \in I$ \tb{do} \ra \\
-  \>	\>	\tb{if} \\
-  \>	\>	\sq \> $(NF(c_i(\ovr{\otimes_S},e')) \not= false) \rightarrow$ \\
-  \>	\>	\>  	\>  \tb{forall} $j \in S \tb{do} \rightarrow$ \\
-  \>	\>	\>  	\>	\>  	    \tb{if} \\
-  \>	\>	\>  	\>   	\>         $\square$  \> $(NF($init$_j) \neq NF(\ovr{g_i}(\ovr{\otimes_S}, e')_j)) \rightarrow$ \\
-  \>	\>	\>  	\>    	\>       \>    \>       $S$ := $S\setminus \lbrace j \rbrace$;\\
-  \> 	\>	\>	\>	\>	\>	\>	StateVector$_j$ := $NF(\ovr{g_i}(\ovr{\otimes_S}, e')_j)$\\
- \>	\>	\>  	\>    	\>        $\square$ \> $ (NF($init$_j) = NF(\ovr{g_i}(\ovr{\otimes_S}, e')_j)) \rightarrow$\\
-  \>	\>	\> 	\>    	\>        \> 	\>  	\tb{if}\\
-  \>	\>	\>	\>	\>	  \>	\>	\sq 	\> $NF($init$_j) \in FreeVar \wedge NF(\ovr{g_i}(\ovr{\otimes_S}, e')_j) \in FreeVar$ \ra \\
-  \>	\>	\>	\>	\>	  \>	\>		\>	\>	init$_j$ := $NF(\ovr{g_i}(\ovr{\otimes_S}, e')_j)$\\ 
-
-  \>	\>	\>	\>	\>	  \>	\>	\sq 	\> $NF($init$_j) \in FreeVar \wedge NF(\ovr{g_i}(\ovr{\otimes_S}, e')_j) \not\in FreeVar$ \ra \\
-  \>	\>	\>	\>	\>	  \>	\>		\>	\>	init$_j := NF(\ovr{g_i}(\ovr{\otimes_S}, e')_j)$\\ 
-
-  \>	\>	\>	\>	\>	  \>	\>	\sq 	\> $NF($init$_j) \not\in FreeVar \wedge NF(\ovr{g_i}(\ovr{\otimes_S}, e')_j) \in FreeVar$ \ra \\
-  \>	\>	\>	\>	\>	  \>	\>		\>	\>	\tb{skip};\\ 
-
-  \>	\>	\>	\>	\>	  \>	\>	\sq 	\> $NF($init$_j) \not\in FreeVar \wedge NF(\ovr{g_i}(\ovr{\otimes_S}, e')_j) \not\in FreeVar$ \ra \\
-  \>	\>	\>	\>	\>	  \>	\>		\>	\>	\tb{skip};\\ 
-
- \>	\>	\>	\>	\>	\>	\>	\tb{fi}	\\
-  \>	\>	\> 	\> 	\>          \tb{fi}; \\
-  \>	\>	\>	\> \tb{od}\\
-  \>	\>	\sq 	\>  $(NF(c_i(\ovr{\otimes_S},e')) = false) \rightarrow$ \\
-  \>	\>	\> 	\>\tb{skip};\\
-  \>	\>	\tb{fi}\\
-  \>	\tb{od} \\
- \tb{return} $S$
-\end{tabbing} 
+\begin{algorithm}[h]
+\caption{lpeconstelm}
+\begin{algorithmic}[1]
+\STATE $cur = initAssignment$
+\STATE $S = \lbrace 1 \ldots n \rbrace $
+\STATE $R = \emptyset $
+\REPEAT
+  \WHILE{$S \setminus R = \emptyset $}
+    \STATE $S := R$
+    \FORALL{$ i \in I $}
+      \IF{$ c_i(curr) \neq false $}
+        \FORALL{$j \in S $}
+          \IF{$ curr._j \in FV$}
+            \IF{$ g_i(curr)._j \neq \bot $}
+              \STATE $ newcurr._j := g_i(curr)._j $
+            \ELSE
+              \STATE $ newcurr._j := \bot $
+              \STATE $ R:= R \setminus \lbrace j \rbrace $
+            \ENDIF
+          \ELSE %curr._j \not\in FV
+            \IF{$ (g_i(curr)._j = \bot) \vee (g_i(curr)._j \neq curr._j)$}
+              \STATE $curr._j = \bot$
+              \STATE $R := R \setminus \lbrace j \rbrace$
+            \ELSIF{$ (g_i(curr)._j = curr._j) \vee (g_i(curr)._j \in FV)$}
+              \STATE $newcurr._j := curr._j$
+            \ENDIF
+          \ENDIF 
+        \ENDFOR
+      \ENDIF
+    \ENDFOR 
+  \ENDWHILE \newline
+  \algorithmiccomment{Free Variable Checkup}
+  \FORALL{$ j \in R $}
+    \STATE $t := curr._j$
+    \FORALL{$ i \in I$}
+    \IF{$t \in FV \wedge g_i(curr)._j \in FV $}
+        \STATE $ t := g_i(curr)._j $
+      \ELSIF{$t \not\in FV \wedge g_i(curr)._j \in FV $}
+        \STATE $skip$
+      \ELSIF{$t \not\in FV \wedge g_i(curr)._j \in FV \wedge t \neq g_i(curr)._j$}
+        \STATE $ R := R \setminus \lbrace j \rbrace$
+      \ELSIF{$t \not\in FV \wedge g_i(curr)._j \in FV \wedge t = g_i(curr)._j$}
+        \STATE $skip$
+      \ENDIF
+    \ENDFOR
+  \ENDFOR
+\UNTIL{$S \setminus R = \emptyset$}
+\end{algorithmic}
+\end{algorithm}
 \newpage
 
 \section{Test Cases}
 All specifications are given in \mcrl\ specification.
-\verb"x_1", $\ldots$ , \verb"x_n" the set of process parameters.
-Let \verb"action_1", $\ldots$, \verb "action_n" the set of actions.
-Let $S$ be the set of indices for which the \pps\ are constant. 
+Transformation from a \mcrl\ specification to an LPE file is done with the tool:
+$mcrl22lpe$. Each transformation is executed with the \verb"-no-cluster" option, unless
+mentioned otherwise.
 
-\subsection{Function tests}
+\subsection*{Case 1}
+inputfile: \verb"$DIR$/tests/lpeconstelm/case1.mcrl2"
+\begin{tabbing}
+\tabw
+\ti{info} \> This case is designed to detect if the \tool\ can detect a simple constant \\
+\> \pp .\\
+\line(1,0){120}\\
 
-\subsection{Application tests}
+\tb{act}  \> action: Nat;\\
+\tb{proc} \> P(i: Nat) \> = \> action(i).P(i);\\
+\tb{init} \> P(0);\\
 
-\subsubsection{Simple without free variables}
-\begin{itemize}
+\line(1,0){120}\\
+\ti{Result} 
+\> All occurrences of i should be substituted by 0 and i should be removed from the list of \\
+\> \pps . \\ 
+\end{tabbing}
 
-\item inputfile: \verb"test_swofv1.mcrl" 
-\begin{tcase}
-For any given \verb"x" in:
-\begin{verbatim}
-P(x_1 : Nat) = true -> action_1 . P(x_1 := x_1);
-\end{verbatim}
-The testcase should give:
-$$ S = \lbrace 1 \rbrace $$
-\end{tcase}
+\subsection*{Case 2}
+inputfile: \verb"$DIR$/tests/lpeconstelm/case2.mcrl2"
+\begin{tabbing}
+\tabw
+\ti{info} 
+\> This case is designed to detect if the \tool\ can detect a simple non constant \\
+\> \pp .\\
+\line(1,0){120}\\
+\tb{act}  \> action: Nat;\\
+\tb{proc} \> P(i: Nat) \> = \> action(i).P(i+1);\\
+\tb{init} \> P(0);\\
+\line(1,0){120}\\
+\ti{Result} \> $i$ is not constant, therefor $i$ should not be substituted and removed. The LPE \\
+\> remains the same. \\ 
+\end{tabbing}
 
-\item inputfile: \verb"test_swofv2.mcrl" 
-\begin{tcase} 
-For any given \verb"x_1" in:
-\begin{verbatim}
-P(x_1 : Nat) = true -> action_1 . P(x_1 := x_1 + 1);
-\end{verbatim}
-The testcase should give:
-$$ S = \emptyset $$
-\end{tcase}
+\subsection*{Case 3}
+inputfile: \verb"$DIR$/tests/lpeconstelm/case3.mcrl2"
+\begin{tabbing}
+\tabw
+\ti{info} 
+\> This case is designed to detect if the \tool\ can detect a simple non constant \\
+\> and a simple constant \pp .\\
+\line(1,0){120}\\
+\tb{act}  \> action: Nat;\\
+\tb{proc} \> P(i,j: Nat) \> = \> action(j).P(i+1, j);\\
+\tb{init} \> P(0,5);\\
+\line(1,0){120}\\
+\ti{Result} \> $i$ is not constant, $i$ is not constant.$i$ is not to be removed, occurrences of \\
+\> $j$ should be substituted by 5 and $j$ should be removed from the list of \pps .\\ 
+\end{tabbing}
 
-\item inputfile: \verb"test_swofv3.mcrl" 
-\begin{tcase}
-For any given \verb"x_1" in:
-\begin{verbatim}
-P(x_1, x_2 : Nat) = true -> action_1 . P(x_1 := x_1 + 1 , x_2 := x_1);
-\end{verbatim}
-The testcase should give:
-$$ S = \emptyset $$
-\end{tcase}
+\subsection*{Case 4}
+inputfile: \verb"$DIR$/tests/lpeconstelm/case4.mcrl2"
+\begin{tabbing}
+\tabw
+\ti{info} \> This case is to designed to test the arguments \verb"-no condition", \\
+\> \verb"-noreachable" and the the way the tool deals with multiple simple summands. \\
+\line(1,0){120}\\
+\tb{act}  \> action: Nat;\\
+\tb{proc} \> P(i,j: Nat) \> = \> true  $\rightarrow$ action(j).P(i+1, j)+\\
+          \>             \>   \> false $\rightarrow$ action(j).P(i+1, j+1);\\
+\tb{init} \> P(0,5);\\
+\line(1,0){120}\\
+\ti{Result} 
+\> \verb"-": \> \> Only the fist summand is not false, therefor $j$ is constant and $i$ \\
+\> \> \> is not constant. All occurrences of $j$ should be substituted by 5 and \\
+\> \> \> $j$ should be removed from the list of \pps. Only the \\
+\> \> \> first summand is written to the new LPE, because the \\
+\> \> \> second summand is never evaluated.\\
+\> \verb"-no-condition": \> \> All the conditions of the summands are to be not false. If \\
+\> \> \> this argument is used $i$ and $j$ are not constant and therefore no \\
+\> \> \> \pp\ should be substituted and to be removed.\\
+\> \verb"-noreachable": \> \> Only the fist summand is not false, therefor $j$ is constant \\
+\> \> \> and $i$ is not constant. All occurrences of $j$ should be substituted by \\
+\> \> \> 5 and $j$ should be removed from the list of \pps. \\
+\> \> \> Both summands are written to in the new LPE, allthough the second \\
+\> \> \> summand is never inspected. Note that in the second summand $j$ is \\
+\> \> \> the occurrences of $j$ is substituted with 5.\\
+\end{tabbing}
 
-\item inputfile: \verb"test_swofv4.mcrl" 
-\begin{tcase}
-For any given \verb"x_1, x_2 : Nat" in:
-\begin{verbatim}
-P(x_1 : Nat) = false -> action_1 . P(x_1 := x_1);
-\end{verbatim}
-The testcase should give:
-$$ S = \lbrace 1 \rbrace $$
-\end{tcase}
+\subsection*{Case 5}
+inputfile: \verb"$DIR$/tests/lpeconstelm/case5.mcrl2"
+\begin{tabbing}
+\tabw
+\ti{info} \> This case is designed to test the \verb"-no-singleton" argument. 
+\line(1,0){120}\\
+\tb{sort} \> Singleton = struct x; \\
+\tb{act}  \> action :Nat; \\
+\tb{proc} \>  P(i : Nat, j : Singleton ) = true $\rightarrow$ action(i). P(i+1,j); \\
+\tb{init} \>  P(0,x); \\
+\line(1,0){120}\\
+\ti{Result} \> 
+\verb"-": \> \> $j$ is found to be constant, so all occurrences of $j$ are substituted  \\
+\> \> \> by the value $x$\\
+\> \verb"-no-singleton" : \> \> "Singleton" has only one constructor. So all \pps\  \\
+\> \> \>                       of type "Singleton" are not to be substituted and removed  \\
+\> \> \>                       from the list of \pps . So in this case no  \\
+\> \> \>                       modification is made to the LPE.
+\end{tabbing}
+\newpage
+\subsection*{Case 6}
+inputfile: \verb"$DIR$/tests/lpeconstelm/case6.mcrl2"
+\begin{tabbing}
+\tabw
+\ti{info} \> This test is designed to test some summands. \\
+\line(1,0){120}\\
+\tb{act} \> action :Nat;\\
+\tb{proc} \> P(i: Nat) = \>  action(i). Q(i);\\
+     \> \> Q(i: Nat) = action(i). P(i);\\
 
-\item inputfile: \verb"test_swofv5.mcrl" 
-\begin{tcase}
-For any given \verb"x_1, x_2 : Nat" in:
-\begin{verbatim}
-P(x_1 : Nat) = false -> action_1 . P(x_1 := x_1 + 1);
-\end{verbatim}
-The testcase should give:
-$$ S = \lbrace 1 \rbrace  $$
-\end{tcase}
+\tb{init} \> P(0);\\
+\line(1,0){120}\\
+\ti{Result} \> From the generated LPE we see that $i$ is constant. All occurrences of $i$ are to substituted \\
+ \> by 0 and $i$ is removed from the list of \pps .
+\end{tabbing}
 
-\item inputfile: \verb"test_swofv6.mcrl" 
-\begin{tcase}
-For any given \verb"x_1" in:
-\begin{verbatim}
-P(x_1 : Nat) = false -> action_1 . P(x_1 := x_1) +
-               true  -> action_2 . P(x_1 := x_1 + 1);
-\end{verbatim}
-The testcase should give:
-$$ S = \emptyset $$
-\end{tcase}
+\subsection*{Case 7}
+inputfile: \verb"$DIR$/tests/lpeconstelm/case7.mcrl2"
+\begin{tabbing}
+\tabw
+\tb{into} \> This case is designed to test if guards will influence the \tool\ correctly.\\
+\line(1,0){120}\\
+\tb{act}  \> action :Nat;\\
+\tb{proc} \> P(i,j: Nat) =  \>  (i \verb">" 5) $\rightarrow$ action(i). P(i+1,j) +\\
+          \>                \> (i == 5)        $\rightarrow$ action(j). Q(j);\\
+          \> Q(i: Nat)   = \>                                action(i). Q(i);\\
 
-\item inputfile: \verb"test_swofv7.mcrl" 
-\begin{tcase}
-For any given \verb"x_1" in:
-\begin{verbatim}
-P(x_1 : Nat) = true  -> action_1 . P(x_1 := x_1) +
-               false -> action_2 . P(x_1 := x_1 + 1);
-\end{verbatim}
-The testcase should give:
-$$ S = \lbrace 1 \rbrace $$
-\end{tcase}
+\tb{init} \>  P(0,0);\\
+\line(1,0){120}\\
+\ti{Result} \> \verb"-": \> \> If no argument is used, all the conditions are false. So $s3, j$ and $i$ are \\
+\> \> \>  marked constant. All occurrences are substituted and removed from \\
+\> \> \> the list of \pps .\\
+\> \verb"-no-condition": \> \> If this argument is used only $j$ will be marked constant. All \\ 
+\> \> \> occurrences of $j$ are substituted by 0 and $j$ is removed from the \\
+\> \> \> list of \pps .\\
+\line(1,0){120}\\
+\ti{Genarated LPE} \\
+\>  \verb" var  freevar,freevar0: Nat;"\\                            
+\>  \verb" proc P(s3: Pos, j,i: Nat) = "\\                           
+\>  \verb"        (s3 == 2) ->          "\\                          
+\>  \verb"          action(i) .          "\\                         
+\>  \verb"          P(s3 := 2, j := freevar0)"\\                     
+\>  \verb"      + (s3 == 1 && 5 < i ) ->      "\\                    
+\>  \verb"          action(i) .               "\\                    
+\>  \verb"          P(s3 := 1, i := i + 1)  "\\                      
+\>  \verb"      + (s3 == 1 && i == 5) ->   "\\                       
+\>  \verb"          action(j) .          "\\                         
+\>  \verb"          P(s3 := 2, j := freevar, i := j);"\\             
+\>  \verb"                 "\\                                       
+\>  \verb" init P(s3 := 1, j := 0, i := 0);"\\  
+\end{tabbing}
+\newpage
+\subsection*{Case 8}
+inputfile: \verb"$DIR$/tests/lpeconstelm/case8.mcrl2"
+\begin{tabbing}
+\tabw
+\ti{info} \> This case is designed to show the lack of the algorithm. The \tool \ \\
+	\> cannot detect equality of ($i$==5). It will detect that $i$ becomes $\bot$. \\ 
+\tb{act} \> action: Nat;\\
+\tb{proc} \> X(i: Nat)   = \>  (i \verb"<"  5) $\rightarrow$ action(i).X(i+1) +\\
+                   \> (i == 5) $\rightarrow$ action(i).Y(i, i);\\
+    \>  Y(i,j: Nat) = \>  action(j).Y(i,j+1);               \\
+\tb{init} X(0);\\
+\line(1,0){120}\\
+\ti{Result} \> All \pps\ are not constant, so none of the occurrences of a \\
+\> \pp\ are substituted by their value and are removed from the list of \\
+\> \pps.\\
+\line(1,0){120}\\
+\ti{Genarated LPE} \\
+\>  \verb" var  freevar0: Nat;"                              \\      %%
+\>  \verb" proc P(s3: Pos, i,j: Nat) = "                       \\    %%
+\>  \verb"        (s3 == 2) ->        "                        \\    %%
+\>  \verb"          action(j) .     "                          \\    %%
+\>  \verb"          P(s3 := 2, j := j + 1)"                    \\    %%
+\>  \verb"      + (s3 == 1 && i < 5) ->"                       \\    %%
+\>  \verb"          action(i) . "                              \\    %%
+\>  \verb"           P(s3 := 1, i := i + 1, j := freevar0) "   \\    %%
+\>  \verb"      + (s3 == 1 && i == 5) -> "                     \\    %%
+\>  \verb"          action(i) .       "                        \\    %%
+\>  \verb"          P(s3 := 2, j := i);"                       \\    %%
+\>  \verb"                            "                        \\    %%
+\>  \verb" var  freevar: Nat;      "                           \\    %%
+\>  \verb" init P(s3 := 1, i := 0, j := freevar);"             \\    %%
+\end{tabbing}
+\newpage
+\subsection*{Case 9}
+inputfile: \verb"$DIR$/tests/lpeconstelm/case8.lpe"
+\begin{tabbing}
+\tabw
+\ti{info} \> This test is designed to find fake constant \pps . It can \\
+\> be the case that \pps\ appear to be constant, due the usage \\
+\> of free variables. However they may be dependant upon other \pps , \\
+\> for which there is a combination, that a constant marked \pp\ \\
+\> is not a constant \pp . Note that this LPE is self build LPE, to \\
+\> ensure that the "free variable check" is conducted. The test will only work when \\
+\> the argument \verb"-no-condition" is used.\\
+\line(1,0){120}\\
+\ti{Result} \> All \pps\ are not constant, so none of the occurrences of a \\
+\> \pp\ are substituted by their value and are removed from the list of \\ 
+\> \pps . 
+\line(1,0){120}\\
+\ti{Genarated LPE} \\
+\>  \verb" act  a;"\\
+\>  \verb""\\
+\>  \verb" var  freevar1,freevar2: Nat;"\\
+\>  \verb" proc P(s3: Pos, y,x: Nat) ="\\
+\>  \verb"       (s3 == 2) ->"\\
+\>  \verb"         a ."\\
+\>  \verb"         P(s3 := 1, y := freevar1)"\\
+\>  \verb"     + (s3 == 2) ->"\\
+\>  \verb"         a ."\\
+\>  \verb"         P(s3 := 1, y := freevar2, x := y)"\\
+\>  \verb"     + (s3 == 1 || s3 == 2) ->"\\
+\>  \verb"         a ."\\
+\>  \verb"         P(s3 := 1, y := 2, x := 1);"\\
+\>  \verb""
+\>  \verb" var  freevar,freevar0: Nat;"\\
+\>  \verb" init P(s3 := 1, y := freevar, x := freevar0);"\\
+\end{tabbing}
 
-\item inputfile: \verb"test_swofv8.mcrl" 
-\begin{tcase}
-For any given \verb"x_1" in:
-\begin{verbatim}
-P(x_1 : Nat)	= true -> action_1 . P(x_1 :=  2 * x_1) +
-\end{verbatim}
-The testcase should give:
-\begin{displaymath}
-    S = \left\{
-        \begin{array}{l l}
-            \verb"x_1" = 0                      & \lbrace 1 \rbrace \\
-            \verb"x_1" \neq 0                   & \emptyset \\
-        \end{array} \right.
-\end{displaymath}
-\end{tcase}
-
-\item inputfile: \verb"test_swofv9.mcrl" 
-\begin{tcase}
-For any given \verb"x_1" in:
-\begin{verbatim}
-P(x_1 : Bool, x_2, x_3) = b      -> action_1 . P(x_1 := 2 * x_1) +
-                          not(b) -> action_2 . P(x_1 :=  
-\end{verbatim}
-The testcase should give:
-\begin{displaymath}
-    S = \left\{
-        \begin{array}{l l}
-            \verb"x_1" = 0                      & \lbrace 1 \rbrace \\
-            \verb"x_1" \neq 0                   & \emptyset \\
-        \end{array} \right.
-\end{displaymath}
-\end{tcase}
-
-\end{itemize}
-
-\subsubsection{Simple with free variables}
-
-\subsubsection{Complex without free variables}
-
-\subsubsection{Complex with free variables}
+\section{Know Issues}
 
 \newpage
 \begin{thebibliography}{99}  \bibitem{LPE_info} auteur\\
