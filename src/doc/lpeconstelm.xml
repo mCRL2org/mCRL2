@@ -10,10 +10,12 @@
 <!ENTITY opt_help "<option>--help</option>">
 <!ENTITY opt_version "<option>--version</option>">
 <!ENTITY opt_v "<option>-v</option>">
+<!ENTITY opt_d "<option>-d</option>">
+<!ENTITY opt_debug "<option>--debug</option>">
 <!ENTITY opt_verbose "<option>--verbose</option>">
-<!ENTITY opt_nosingleton "<option>--nosingleton</option>">
-<!ENTITY opt_noreachable "<option>--noreachable</option>">
-<!ENTITY opt_nocondition "<option>--nocondition</option>">
+<!ENTITY opt_nosingleton "<option>--no-singleton</option>">
+<!ENTITY opt_noreachable "<option>--no-reachable</option>">
+<!ENTITY opt_nocondition "<option>--no-condition</option>">
 
 <!ENTITY stdin "<option>STDIN</option>">
 <!ENTITY stdout "<option>STDOUT</option>">
@@ -37,7 +39,7 @@ linear process equation.</refpurpose>
   <cmdsynopsis>
     <command>&lpeconstelm;</command>
     <arg choice="plain">[[&opt_h; | &opt_help;] | &opt_version; | [&opt_v; | &opt_verbose;] | &opt_nosingleton; | &opt_noreachable; | &opt_nocondition; ]</arg>
-    <arg choice="plain">[[&infile;] &outfile;]</arg>
+    <arg choice="plain">[&infile; [&outfile;]]</arg>
   </cmdsynopsis>
 </refsynopsisdiv>
 
@@ -70,7 +72,7 @@ linear process equation.</refpurpose>
       <varlistentry>
         <term>no files</term>
           <listitem>
-            <para> &lpeconstelm; read from &stdin;, and writes an LPE to &stdout;.
+            <para> &lpeconstelm; reads from &stdin;, and writes an LPE to &stdout;.
             </para>
           </listitem>
       </varlistentry>
@@ -78,7 +80,7 @@ linear process equation.</refpurpose>
       <varlistentry>
         <term>&infile;</term>
           <listitem>
-            <para> &lpeconstelm; read from file &infile;, and writes an LPE to &stdout;.
+            <para> &lpeconstelm; reads from file &infile;, and writes an LPE to &stdout;.
             </para>
           </listitem>
       </varlistentry>
@@ -87,10 +89,19 @@ linear process equation.</refpurpose>
       <varlistentry>
         <term>&infile; &outfile;</term>
           <listitem>
-            <para> &lpeconstelm; read from file &infile;, and writes an LPE to file &outfile;.
+            <para> &lpeconstelm; reads from file &infile;, and writes an LPE to file &outfile;.
             </para>
           </listitem>
       </varlistentry>
+      
+      <varlistentry>
+        <term> &gt; &outfile;</term>
+          <listitem>
+            <para> &lpeconstelm; reads from file &stdin;, and writes an LPE to file &outfile;.
+            </para>
+          </listitem>
+      </varlistentry>
+    
     </variablelist>
   </para>
   
@@ -104,29 +115,29 @@ linear process equation.</refpurpose>
   <title>Options</title>
   <para>
     <variablelist>
-
+    
       <varlistentry>
         <term>&opt_h;</term>
         <term>&opt_help;</term>
           <listitem>
             <para>Displays help information and exits.</para>
           </listitem>
-      </varlistentry>
-
+      </varlistentry> 
+      
       <varlistentry>
         <term>&opt_version;</term>
         <listitem>
           <para>Displays version information and exits.</para>
         </listitem>
-      </varlistentry>
+      </varlistentry>   
       
       <varlistentry>
         <term>&opt_v;</term>
         <term>&opt_verbose;</term>
         <listitem>
           <para>
-          Displays progress information during the run of the program.
-          If a &outfile; is given, &lpeconstelm; writes the LPE to a that
+          Displays short intermediate information during the run of the program.
+          If a &outfile; is given, &lpeconstelm; writes the LPE to that
           given file. If no &outfile; is given it will only display process
           information.
           </para>
@@ -134,11 +145,14 @@ linear process equation.</refpurpose>
       </varlistentry>
       
       <varlistentry>
-        <term>&opt_noreachable;</term>
+        <term>&opt_d;</term>
+        <term>&opt_debug;</term>
         <listitem>
           <para>
-          &lpeconstelm; will not remove the summands which are not visited.
-          By default, summands which are not visited are removed from the LPE.
+          Displays detailed intermediate information during the run of the program.
+          If a &outfile; is given, &lpeconstelm; writes the LPE to that
+          given file. If no &outfile; is given it will only display process
+          information.
           </para>
         </listitem>
       </varlistentry>
@@ -148,31 +162,42 @@ linear process equation.</refpurpose>
         <listitem>
           <para>
           &lpeconstelm; will not determine if a condition of a summand is false 
-          or not. All conditions are to be true if this option is used. This
-          option may take less time and may find less constant constant process
-          parameters.
+          or not. All conditions are be threated true if this option is 
+          used. This option may take less time, however it may find less constant 
+          constant process parameters.
           </para>
         </listitem>
-      </varlistentry>
-      
+      </varlistentry>      
+
+      <varlistentry>
+        <term>&opt_noreachable;</term>
+        <listitem>
+          <para>
+          &lpeconstelm; will not remove the summands which are not visited.
+          By default, summands which are not visited are removed from the LPE.
+          </para>
+        </listitem>
+      </varlistentry>  
+
       <varlistentry>
         <term>&opt_nosingleton;</term>
         <listitem>
           <para>
           &lpeconstelm; will not remove process parameters which have values 
-          from which the sort only contains one element. 
+          from which the sort only contain one element. 
           </para>
         </listitem>
       </varlistentry>
-
+            
     </variablelist>
   </para>
-</refsect1>
+</refsect1> 
+
+      
 
 <refsect1>
 <title>Author</title>
 <para>Written by Frank Stappers. Please send all complaints, comments and bug
 fixes to <email>bug@mcrl2.org</email>.</para>
 </refsect1>
-
 </refentry>

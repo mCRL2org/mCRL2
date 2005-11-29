@@ -9,8 +9,10 @@
 <!ENTITY opt_h "<option>-h</option>">
 <!ENTITY opt_help "<option>--help</option>">
 <!ENTITY opt_version "<option>--version</option>">
-<!ENTITY opt_m "<option>-m</option>">
-<!ENTITY opt_monitor "<option>--monitor</option>">
+<!ENTITY opt_d "<option>-d</option>">
+<!ENTITY opt_debug "<option>--debug</option>">
+<!ENTITY opt_v "<option>-d</option>">
+<!ENTITY opt_verbose "<option>--verbose</option>">
 
 <!ENTITY stdin "<option>STDIN</option>">
 <!ENTITY stdout "<option>STDOUT</option>">
@@ -33,8 +35,8 @@ linear process equation.</refpurpose>
 <refsynopsisdiv>
   <cmdsynopsis>
     <command>&lpeparelm;</command>
-    <arg choice="plain">[[&opt_h; | &opt_help;] | &opt_version; |[ &opt_m; | &opt_monitor;]]</arg>
-    <arg choice="plain">[[&infile;] &outfile;]</arg>
+    <arg choice="plain">[[&opt_h; | &opt_help;] | &opt_version; | [ &opt_v; | &opt_verbose;] | [ &opt_d; | &opt_debug; ] ]</arg>
+    <arg choice="plain">[&infile; [&outfile;]]</arg>
   </cmdsynopsis>
 </refsynopsisdiv>
 
@@ -75,6 +77,14 @@ linear process equation.</refpurpose>
             </para>
           </listitem>
       </varlistentry>
+      
+      <varlistentry>
+        <term> &gt; &outfile;</term>
+          <listitem>
+            <para> &lpeparelm; reads from file &stdin;, and writes an LPE to file &outfile;.
+            </para>
+          </listitem>
+      </varlistentry>
     </variablelist>
   </para>
   
@@ -105,13 +115,26 @@ linear process equation.</refpurpose>
       </varlistentry>
       
       <varlistentry>
-        <term>&opt_m;</term>
-        <term>&opt_monitor;</term>
+        <term>&opt_v;</term>
+        <term>&opt_verbose;</term>
         <listitem>
           <para>
-          Displays progress information during the run of the program.
-          If a outputfile is given, &lpeparelm; writes the LPE to a that
-          given file. If no outputfile is given it will only display process
+          Displays short intermediate information during the run of the program.
+          If a &outfile; is given, &lpeparelm; writes the LPE to that
+          given file. If no &outfile; is given it will only display process
+          information.
+          </para>
+        </listitem>
+      </varlistentry>
+      
+      <varlistentry>
+        <term>&opt_d;</term>
+        <term>&opt_debug;</term>
+        <listitem>
+          <para>
+          Displays detailed intermediate information during the run of the program.
+          If a &outfile; is given, &lpeparelm; writes the LPE to that
+          given file. If no &outfile; is given it will only display process
           information.
           </para>
         </listitem>

@@ -10,6 +10,10 @@
 <!ENTITY opt_version "<option>--version</option>">
 <!ENTITY opt_p "<option>-p</option>">
 <!ENTITY opt_pars "<option>--pars</option>">
+<!ENTITY opt_d "<option>-d</option>">
+<!ENTITY opt_debug "<option>--debug</option>">
+<!ENTITY opt_v "<option>-d</option>">
+<!ENTITY opt_verbose "<option>--verbose</option>">
 
 <!ENTITY stdin "<option>STDIN</option>">
 <!ENTITY stdout "<option>STDOUT</option>">
@@ -30,7 +34,8 @@
 <refsynopsisdiv>
   <cmdsynopsis>
     <command>&lpeinfo;</command>
-    <arg choice="plain">&infile;</arg>
+    <arg choice="plain">[[&opt_h; | &opt_help;] | &opt_version; | [ &opt_p; | &opt_pars;] | [ &opt_d; | &opt_debug; ] | [ &opt_v; | &opt_verbose; ]]  </arg>
+    <arg choice="plain">[&infile;]</arg>
   </cmdsynopsis>
 </refsynopsisdiv>
 
@@ -62,8 +67,9 @@
     <variablelist>
       <varlistentry>
         <term> </term>
+        <term>&gt;</term>
           <listitem>
-            <para> &lpeinfo; read from &stdin;, and displays information to &stdout;.
+            <para> &lpeinfo; reads from &stdin;, and displays information to &stdout;.
             </para>
           </listitem>
       </varlistentry>
@@ -71,7 +77,7 @@
       <varlistentry>
         <term>&infile;</term>
           <listitem>
-            <para> &lpeinfo; read from file &infile; and displays information to &stdout;.
+            <para> &lpeinfo; reads from file &infile; and displays information to &stdout;.
             </para>
           </listitem>
       </varlistentry>
@@ -109,6 +115,26 @@
         <term>&opt_version;</term>
         <listitem>
           <para>display version information and exit</para>
+        </listitem>
+      </varlistentry>
+      
+      <varlistentry>
+        <term>&opt_v;</term>
+        <term>&opt_verbose;</term>
+        <listitem>
+          <para>
+          Displays short intermediate information during the run of the program.
+          </para>
+        </listitem>
+      </varlistentry>
+      
+      <varlistentry>
+        <term>&opt_d;</term>
+        <term>&opt_debug;</term>
+        <listitem>
+          <para>
+          Displays detailed intermediate information during the run of the program.
+          </para>
         </listitem>
       </varlistentry>
 
