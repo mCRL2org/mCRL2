@@ -1,0 +1,141 @@
+<?xml version="1.0"?>
+
+<!DOCTYPE refentry PUBLIC "-//OASIS//DTD DocBook XML V4.2//EN" "http://www.oasis-open.org/docbook/xml/4.2/docbookx.dtd"[
+<!ENTITY % param SYSTEM "param.xml">
+%param;
+<!ENTITY pnml2mcrl2 "<function>pnml2mcrl2</function>">
+<!ENTITY option "<parameter>OPTION</parameter>">
+<!ENTITY infile "<parameter>INFILE</parameter>">
+<!ENTITY outfile "<parameter>OUTFILE</parameter>">
+
+<!ENTITY opt_h "<option>-h</option>">
+<!ENTITY opt_help "<option>--help</option>">
+<!ENTITY opt_q "<option>-q</option>">
+<!ENTITY opt_quiet "<option>--quiet</option>">
+<!ENTITY opt_d "<option>-d</option>">
+<!ENTITY opt_debug "<option>--debug</option>">
+<!ENTITY opt_p "<option>-p</option>">
+<!ENTITY opt_no_rec_par "<option>--no_rec_par</option>">
+<!ENTITY opt_v "<option>-d</option>">
+<!ENTITY opt_verbose "<option>--verbose</option>">
+<!ENTITY opt_version "<option>--version</option>">
+<!ENTITY stdin "<option>STDIN</option>">
+<!ENTITY stdout "<option>STDOUT</option>">
+]>
+
+<refentry id="pnml2mcrl2">
+
+<refmeta>
+  <refentrytitle>pnml2mcrl2</refentrytitle>
+  <manvolnum>1</manvolnum>
+</refmeta>
+
+<refnamediv>
+  <refname>pnml2mcrl2</refname>
+  <refpurpose>converts a Petri net to a matching mCRL2 specification</refpurpose>
+</refnamediv>
+
+<refsynopsisdiv>
+  <cmdsynopsis>
+    <command>&pnml2mcrl2;</command>
+    <arg choice="plain" rep="repeat"><arg choice="opt">&option;</arg></arg>
+    <arg choice="opt">&infile;
+    <arg choice="opt">&outfile;</arg>
+    </arg>
+  </cmdsynopsis>
+</refsynopsisdiv>
+
+<refsect1>
+  <title>Description</title>
+  <para>
+    &pnml2mcrl2; converts a Petri net in EPNML format to a matching mCRL2
+    specification. It does so without looking into the structure of the Petri net.
+    Instead, it translates each place, transition and arc to (one or more) processes
+    and/or variables, corresponding to that place, transition or arc.
+  </para>
+  <para>
+    Only classical Petri nets are translated, i.e. places, transitions and arcs.
+    Other constructs, such as timing, coloring, inhibitor arcs and hierarchy will
+    simply be ignored while translating.
+  </para>
+</refsect1>
+
+<refsect1>
+  <title>Options</title>
+  <para>
+    <variablelist>
+
+      <varlistentry>
+        <term>&opt_h;</term>
+        <term>&opt_help;</term>
+	<listitem>
+	  <para>
+	    Display help message and terminate.
+	  </para>
+	</listitem>
+      </varlistentry>
+
+      <varlistentry>
+        <term>&opt_q;</term>
+        <term>&opt_quiet;</term>
+	<listitem>
+	  <para>
+	    Do not print any (unrequested) information.
+	  </para>
+	</listitem>
+      </varlistentry>
+
+      <varlistentry>
+        <term>&opt_d;</term>
+        <term>&opt_debug;</term>
+        <listitem>
+          <para>
+            Displays detailed intermediate information during the run of the program.
+          </para>
+        </listitem>
+      </varlistentry>
+
+      <varlistentry>
+        <term>&opt_p;</term>
+        <term>&opt_no_rec_par;</term>
+        <listitem>
+          <para>
+            If this option is not turned on, the mcrl2 processes that correspond to the
+            places of the Petri net are recursive. When this recursion is not desired,
+            this option is used in order to create non-recursive mcrl2 processes for the
+            entire Petri net.
+          </para>
+        </listitem>
+      </varlistentry>
+
+      <varlistentry>
+        <term>&opt_v;</term>
+        <term>&opt_verbose;</term>
+	<listitem>
+	  <para>
+	    Displays short intermediate information during the run of the program.
+	  </para>
+	</listitem>
+      </varlistentry>
+
+      <varlistentry>
+        <term>&opt_version;</term>
+        <listitem>
+          <para>
+            Display version information and terminate.
+          </para>
+        </listitem>
+      </varlistentry>
+
+    </variablelist>
+  </para>
+</refsect1>
+
+<refsect1>
+<title>Author</title>
+<para>
+Written by Johfra Kamphuis. Please send all complaints, comments and bug fixes to <email>bug@mcrl2.org</email>.
+</para>
+</refsect1>
+
+</refentry>
