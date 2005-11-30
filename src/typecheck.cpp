@@ -51,7 +51,7 @@ static ATbool gstcReadInProcsAndInit (ATermList, ATermAppl);
 static ATbool gstcTransformVarConsTypeData(void);
 static ATbool gstcTransformActProcVarConst(void);
 
-static ATermList gstcWriteProcs(void);
+static ATermList gstcWriteProcs(ATermList);
 
 static ATbool gstcInTypesA(ATermAppl, ATermList);
 static ATbool gstcEqTypesA(ATermAppl, ATermAppl);
@@ -339,11 +339,8 @@ ATermAppl gsTypeCheck (ATermAppl input){
   if(gstcTransformActProcVarConst()){
   gsDebugMsg ("type checking transform ActProc+VarConst phase finished\n");
 
-  //if(!gstcInferTypesData()) {throw;} //names and # of arguments
-  //if(!gstcInferTypesProc()) {throw;} //names and # of arguments
-
   Result=ATsetArgument(input,(ATerm)gsMakeDataEqnSpec(body.equations),3);
-  Result=ATsetArgument(Result,(ATerm)gsMakeProcEqnSpec(gstcWriteProcs()),5);
+  Result=ATsetArgument(Result,(ATerm)gsMakeProcEqnSpec(gstcWriteProcs(ATLgetArgument(ATAgetArgument(input,5),0))),5);
   Result=ATsetArgument(Result,(ATerm)gsMakeInit(ATmakeList0(),
     ATAtableGet(body.proc_bodies,(ATerm)INIT_KEY())),6);
 
@@ -802,10 +799,10 @@ static ATbool gstcReadInProcsAndInit (ATermList Procs, ATermAppl Init){
   return Result;
 } 
 
-static ATermList gstcWriteProcs(void){
+static ATermList gstcWriteProcs(ATermList oldprocs){
   ATermList Result=ATmakeList0();
-  for(ATermList ProcVars=ATtableKeys(body.proc_pars);!ATisEmpty(ProcVars);ProcVars=ATgetNext(ProcVars)){
-    ATermAppl ProcVar=ATAgetFirst(ProcVars);
+  for(ATermList ProcVars=oldprocs;!ATisEmpty(ProcVars);ProcVars=ATgetNext(ProcVars)){
+    ATermAppl ProcVar=ATAgetArgument(ATAgetFirst(ProcVars),1);
     if(ProcVar==INIT_KEY()) continue;
     Result=ATinsert(Result,(ATerm)gsMakeProcEqn(ATmakeList0(),
                                                 ProcVar,
@@ -814,7 +811,7 @@ static ATermList gstcWriteProcs(void){
 						)
 		    );
   }
-  return Result;
+  return ATreverse(Result);
 }
 
 static ATbool gstcTransformVarConsTypeData(void){
