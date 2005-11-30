@@ -17,6 +17,9 @@ static ATermList gsaGetAlpha(ATermAppl a, unsigned length=0, ATermList ignore=AT
 static inline ATermAppl INIT_KEY(void){return gsMakeProcVarId(gsString2ATermAppl("init"),ATmakeList0());}
 
 static ATermTable alphas;
+static ATermTable subs_alpha;
+static ATermTable subs_alpha_rev;
+static ATermTable form_pars;
 static ATermTable procs;
 static bool all_stable;
 
@@ -70,6 +73,10 @@ static ATermTable deps;
 
 static inline ATermAppl Pair(ATerm ma1, ATerm ma2){
   return ATmakeAppl2(afunPair,ma1,ma2);
+}
+
+static inline ATermAppl Pair_allow(ATerm ma1, ATerm ma2){
+  return ATmakeAppl2(ATappendAFun(afunPair,"allow"),ma1,ma2);
 }
 
 static inline void sPut(ATermList ma1, ATermList ma2, ATermList Result){
@@ -942,6 +949,7 @@ static ATermAppl PushAllow(ATermList V, ATermAppl a){
     return gsApplyAlpha(a);
   }
   else if ( gsIsProcess(a) ){
+    ATermAppl pn=ATAgetArgument(a,0);
     ATermList l = ATLtableGet(alphas,(ATerm) ATAgetArgument(a,0));
     if(!l)
       l = gsaGetAlpha(a,get_max_allowed_length(V));
@@ -957,7 +965,35 @@ static ATermAppl PushAllow(ATermList V, ATermAppl a){
     
     ATermList ul=untypeMAL(l);
     V = optimize_allow_list(V,ul);
-    a = gsMakeAllow(V,a);
+    
+    // here we create a new process equation to replace gsMakeAllow(V,a);
+    // we call it pn_allow_i, where is is such that pn_allow_i is a fresh process name.
+    // the parameters are the same as in pn.
+    
+    ATermAppl new_pn=ATAtableGet(subs_alpha,(ATerm)Pair_allow((ATerm)V,(ATerm)pn));
+    if(!new_pn){
+      //create a new 
+      //process name with type pn, add _i 
+      short i=1;
+      do{
+	new_pn=ATsetArgument(pn,(ATerm)ATmakeAppl0(ATappendAFun(ATappendAFun(ATgetAFun(ATAgetArgument(pn,0)),"_allow_"),ATgetName(ATmakeAFunInt0(i)))),0);
+	i++;
+      } while(ATtableGet(procs,(ATerm)new_pn));
+      
+      ATermAppl p=ATAtableGet(procs,(ATerm)pn);
+      assert(p);
+      p=PushAllow(V,p);
+
+      ATtablePut(procs,(ATerm)new_pn,(ATerm)p);
+      l=ATLtableGet(alphas,(ATerm)p);
+      ATtablePut(alphas,(ATerm)new_pn,(ATerm)l);
+
+      // we save both direct and reverse mappings
+      ATtablePut(subs_alpha,(ATerm)Pair_allow((ATerm)V,(ATerm)pn),(ATerm)new_pn);
+      ATtablePut(subs_alpha_rev,(ATerm)new_pn,(ATerm)pn);
+    }
+    
+    a = ATsetArgument(a,(ATerm)new_pn,0);
     ATtablePut(alphas,(ATerm) a,(ATerm) l);
     
     return a;
@@ -1637,6 +1673,7 @@ ATermAppl gsAlpha(ATermAppl Spec){
   ATprotectAFun(afunPair);
   syncs = ATtableCreate(10000,80);
   untypes = ATtableCreate(10000,80);
+  form_pars= ATtableCreate(10000,80);
 
   procs = ATtableCreate(10000,80);
   tmpIndexedSet = ATindexedSetCreate(63,50);
@@ -1646,6 +1683,7 @@ ATermAppl gsAlpha(ATermAppl Spec){
     ATermAppl p=ATAgetFirst(pr);
     ATermAppl pn=ATAgetArgument(p,1);
     ATtablePut(procs,(ATerm)pn,(ATerm)ATAgetArgument(p,3));
+    ATtablePut(form_pars,(ATerm)pn,(ATerm)ATLgetArgument(p,2));
   }
   
   ATtablePut(procs,(ATerm)INIT_KEY(),(ATerm)ATAgetArgument(ATAgetArgument(Spec,6),1));
@@ -1869,6 +1907,8 @@ ATermAppl gsAlpha(ATermAppl Spec){
   //calculate the alphabets of the processes iteratively
   //for pCRL processes (for || processes this may be too expensive)
   alphas = ATtableCreate(10000,80);
+  subs_alpha = ATtableCreate(10000,80);
+  subs_alpha_rev = ATtableCreate(10000,80);
 
   todo=ATLtableGet(deps,(ATerm)INIT_KEY());
   if(todo) todo=ATinsert(todo,(ATerm)INIT_KEY());
@@ -1914,8 +1954,31 @@ ATermAppl gsAlpha(ATermAppl Spec){
     ATtablePut(alphas,(ATerm)pn,(ATerm)ATLtableGet(alphas,(ATerm)new_p));
   }
   
-  //recalculate the new dependensies for init.
+  //recalculate the new dependensies again
+  ATtableReset(deps); //process dependensies : P(Pname,type) -> List(P(Pname,type))
+  stable=false;
+  while(!stable){
+    //apply to each and compare with the old values.
+    stable=true;
+    ATermList todo=ATLtableGet(deps,(ATerm)INIT_KEY());
+    if(todo) todo=ATinsert(todo,(ATerm)INIT_KEY());
+    else todo=ATmakeList1((ATerm)INIT_KEY());
 
+    for(; !ATisEmpty(todo); todo=ATgetNext(todo)){
+      ATermAppl pn=ATAgetFirst(todo);
+      ATermList old_dep=ATLtableGet(deps,(ATerm)pn);
+      if(!old_dep){
+	old_dep=ATmakeList0();
+	ATtablePut(deps,(ATerm)pn,(ATerm)old_dep);
+      }
+      ATermList dep=gsaGetDeps(ATAtableGet(procs,(ATerm)pn));
+      //gsWarningMsg("proc: %T, dep: %T; old_dep: %T\n\n", pn, dep, old_dep);
+      if(!ATisEqual(dep,old_dep)){
+	stable=false;
+	ATtablePut(deps,(ATerm)pn,(ATerm)dep);
+      }
+    }
+  }
 
   //== write out the process equations
   //first the original ones (except deleted)
@@ -1930,12 +1993,20 @@ ATermAppl gsAlpha(ATermAppl Spec){
     }
   }
   //now the generated ones
-  for(ATermList pr=ATtableKeys(procs); !ATisEmpty(pr); pr=ATgetNext(pr)){
+  todo=ATLtableGet(deps,(ATerm)INIT_KEY());
+  for(ATermList pr=todo; !ATisEmpty(pr); pr=ATgetNext(pr)){
     ATermAppl pn=ATAgetFirst(pr);
     if(ATisEqual(pn,INIT_KEY())) continue;
     ATermAppl res=ATAtableGet(procs,(ATerm)pn);
     if(res){
-      new_pr=ATinsert(new_pr,(ATerm)gsMakeProcEqn(ATmakeList0(),pn,ATmakeList0(),ATAtableGet(procs,(ATerm)pn)));
+      ATermList fpars=ATmakeList0();
+      //if generated during the alpha substitutions
+      ATermAppl old_pn=ATAtableGet(subs_alpha_rev,(ATerm)pn);
+      if(old_pn){
+	ATermList fpars1=ATLtableGet(form_pars,(ATerm)old_pn);
+	if(fpars1) fpars = fpars1;
+      }
+      new_pr=ATinsert(new_pr,(ATerm)gsMakeProcEqn(ATmakeList0(),pn,fpars,ATAtableGet(procs,(ATerm)pn)));
     }
   }
   new_pr=ATreverse(new_pr);
@@ -1950,6 +2021,9 @@ ATermAppl gsAlpha(ATermAppl Spec){
   ATtableDestroy(procs);
   ATtableDestroy(props);
   ATtableDestroy(deps);
+  ATtableDestroy(form_pars);
+  ATtableDestroy(subs_alpha);
+  ATtableDestroy(subs_alpha_rev);
   ATtableDestroy(syncs);
   ATtableDestroy(untypes);
   return Spec;
