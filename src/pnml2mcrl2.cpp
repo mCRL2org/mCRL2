@@ -1622,11 +1622,11 @@
 	    "Other constructs such as timing, coloring, inhibitor arcs and hierarchy are\n"
 	    "not taken into account.\n"
 	    "\n"
-	    "  -h, --help            display this help message\n"
-	    "  -q, --quiet           do not print any unrequested information\n"
-	    "  -d, --debug           show debug messages\n"
+	    "  -h, --help            display help information\n"
+	    "  -q, --quiet           do not display warning messages\n"
+	    "  -d, --debug           turn on the display of detailed intermediate messages\n"
 	    "  -p, --no_rec_par      generate places in which the result is non-recursive\n"
-	    "  -v, --verbose         show verbose messages\n"
+	    "  -v, --verbose         turn on the display of short intermediate messages\n"
 	    "      --version         display version information\n",
 	    Name);
   }
