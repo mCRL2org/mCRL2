@@ -23,7 +23,7 @@ ATermList Rewriter::rewriteList(ATermList Terms)
 	ATermList l = ATmakeList0();
 	for (; !ATisEmpty(Terms); Terms=ATgetNext(Terms))
 	{
-		ATinsert(l,(ATerm) rewrite((ATermAppl) ATgetFirst(Terms)));
+		l = ATinsert(l,(ATerm) rewrite((ATermAppl) ATgetFirst(Terms)));
 	}
 	return ATreverse(l);
 }
@@ -48,7 +48,7 @@ ATermList Rewriter::rewriteInternalList(ATermList Terms)
 	ATermList l = ATmakeList0();
 	for (; !ATisEmpty(Terms); Terms=ATgetNext(Terms))
 	{
-		ATinsert(l,rewriteInternal(ATgetFirst(Terms)));
+		l = ATinsert(l,rewriteInternal(ATgetFirst(Terms)));
 	}
 	return ATreverse(l);
 }

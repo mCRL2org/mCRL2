@@ -19,77 +19,6 @@
 #define OF_AUT    1
 #define OF_SVC    2
 
-static unsigned long num_states;
-static unsigned long trans;
-static unsigned long level;
-static unsigned long max_states;
-static bool trace;
-static bool monitor;
-static unsigned long current_state;
-static ATermIndexedSet states;
-static ATermTable backpointers;
-static bool deadlockstate;
-static ATerm *orig_state;
-static int outformat;
-static bool outinfo;
-static FILE *aut;
-static SVCfile svcf, *svc;
-static SVCparameterIndex svcparam;
-
-static void gsinst_callback(ATermAppl transition, ATerm state)
-{
-  ATbool new_state;
-  unsigned long i;
-
-  deadlockstate = false;
-
-  i = ATindexedSetPut(states, state, &new_state);
-  if ( new_state )
-  {
-    if ( num_states < max_states )
-    {
-      num_states++;
-      if ( trace )
-      {
-        ATtablePut(backpointers, state, *orig_state);
-      }
-    }
-  }
-
-  if ( i < num_states )
-  {
-    switch ( outformat )
-    {
-      case OF_AUT:
-        gsfprintf(aut,"(%lu,\"%P\",%lu)\n",current_state,transition,i);
-        fflush(aut);
-        break;
-      case OF_SVC:
-        if ( outinfo )
-        {
-          SVCbool b;
-          SVCputTransition(svc,
-            SVCnewState(svc,(ATerm) gsMakeStateVector(ATindexedSetGetElem(states,current_state)),&b),
-            SVCnewLabel(svc,(ATerm) transition,&b),
-            SVCnewState(svc,(ATerm) gsMakeStateVector(ATindexedSetGetElem(states,i)),&b),
-            svcparam);
-        } else {
-          SVCbool b;
-          SVCputTransition(svc,
-            SVCnewState(svc,(ATerm) ATmakeInt(current_state),&b),
-            SVCnewLabel(svc,(ATerm) transition,&b),
-            SVCnewState(svc,(ATerm) ATmakeInt(i),&b),
-            svcparam);
-        }
-        break;
-      default:
-        break;
-    }
-  }
-    trans++;
-}
-
-
 static void print_help_suggestion(FILE *f, char *Name)
 {
   fprintf(f,"Try '%s --help' for more information.\n",Name);
@@ -157,7 +86,9 @@ int main(int argc, char **argv)
   };
   int opt, stateformat;
   RewriteStrategy strat;
-  bool usedummies,trace_deadlock,explore,quiet,verbose;
+  bool usedummies,trace,trace_deadlock,monitor,explore,quiet,verbose,outinfo;
+  int outformat;
+  unsigned long max_states;
 
   ATinit(argc,argv,&stackbot);
 
@@ -272,6 +203,9 @@ int main(int argc, char **argv)
   }
   assert(gsIsSpecV1(Spec));
 
+  FILE *aut;
+  SVCfile svcf, *svc;
+  SVCparameterIndex svcparam;
   if ( argc-optind > 1 )
   {
     if ( outformat == OF_UNKNOWN )
@@ -329,10 +263,11 @@ int main(int argc, char **argv)
   }
 
   gsVerboseMsg("initialising...\n");
-  states = ATindexedSetCreate(10000,50);
-  num_states = 0;
-  trans = 0;
-  level = 1;
+  ATermIndexedSet states = ATindexedSetCreate(10000,50);
+  unsigned long num_states = 0;
+  unsigned long trans = 0;
+  unsigned long level = 1;
+  ATermTable backpointers;
   if ( trace )
   {
     backpointers = ATtableCreate(10000,50);
@@ -362,7 +297,7 @@ int main(int argc, char **argv)
   }
 
   ATbool new_state;
-  current_state = ATindexedSetPut(states,state,&new_state);
+  unsigned long current_state = ATindexedSetPut(states,state,&new_state);
   num_states++;
 
   bool err = false;
@@ -371,13 +306,70 @@ int main(int argc, char **argv)
   unsigned long nextlevelat = 1;
   unsigned long prevtrans = 0;
   unsigned long prevcurrent = 0;
-  orig_state = &state;
   gsVerboseMsg("generating state space...\n");
+
   while ( current_state < num_states )
   {
     state = ATindexedSetGetElem(states,current_state);
-    deadlockstate = true;
-    gsNextState(state, gsinst_callback); // XXX state may contain Nils instead of free vars
+    bool deadlockstate = true;
+
+    NextStateFrom(state);
+    ATermAppl Transition;
+    ATerm NewState;
+    while ( NextState(&Transition,&NewState) )
+    {
+      ATbool new_state;
+      unsigned long i;
+
+      deadlockstate = false;
+
+      i = ATindexedSetPut(states, NewState, &new_state);
+
+      if ( new_state )
+      {
+        if ( num_states < max_states )
+        {
+                num_states++;
+                if ( trace )
+                {
+                        ATtablePut(backpointers, NewState, state);
+                }
+        }
+      }
+
+      if ( i < num_states )
+      {
+        switch ( outformat )
+        {
+          case OF_AUT:
+            gsfprintf(aut,"(%lu,\"%P\",%lu)\n",current_state,Transition,i);
+            fflush(aut);
+            break;
+          case OF_SVC:
+            if ( outinfo )
+            {
+              SVCbool b;
+              SVCputTransition(svc,
+                SVCnewState(svc,(ATerm) gsMakeStateVector(ATindexedSetGetElem(states,current_state)),&b),
+                SVCnewLabel(svc,(ATerm) Transition,&b),
+                SVCnewState(svc,(ATerm) gsMakeStateVector(ATindexedSetGetElem(states,i)),&b),
+                svcparam);
+            } else {
+              SVCbool b;
+              SVCputTransition(svc,
+                SVCnewState(svc,(ATerm) ATmakeInt(current_state),&b),
+                SVCnewLabel(svc,(ATerm) Transition,&b),
+                SVCnewState(svc,(ATerm) ATmakeInt(i),&b),
+                svcparam);
+            }
+            break;
+          default:
+            break;
+        }
+      }
+      trans++;
+    }
+    
     if ( NextStateError )
     {
       err = true;
