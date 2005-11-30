@@ -164,4 +164,6 @@ harm:
 		gsPrintState(state);
 		gsprintf(" ]\n\n");
 	}
+
+	gsNextStateFinalise();
 }

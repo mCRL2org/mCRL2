@@ -122,6 +122,8 @@ XSimMain::~XSimMain()
 	
 	delete tracewin;
 
+	gsNextStateFinalise();
+
 	ATunprotectList(&state_vars);
 	ATunprotectList(&state_varnames);
 	ATunprotect(&initial_state);

@@ -32,6 +32,10 @@ class RewriterCompilingInnermost: public Rewriter
 		ATermAppl *int2term;
 		ATermList *innerc_eqns;
 
+		char *file_c;
+		char *file_o;
+		char *file_so;
+
 		void (*so_rewr_init)();
 		ATermAppl (*so_rewr)(ATermAppl);
 		void (*so_set_subst)(ATermAppl, ATerm);

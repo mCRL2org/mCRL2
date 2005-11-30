@@ -1,6 +1,6 @@
 #ifdef NO_DYNLOAD
 
-#include "stdlib.h"
+#include <stdlib.h>
 #include "libprint_c.h"
 #include "rewr_innerc.h"
 
@@ -64,6 +64,7 @@ void RewriterCompilingInnermost::clearSubstitutions()
 #include <stdlib.h>
 #include <stdint.h>
 #include <unistd.h>
+#include <errno.h>
 #include <string.h>
 #include <dlfcn.h>
 #include <assert.h>
@@ -1556,8 +1557,15 @@ void RewriterCompilingInnermost::CompileRewriteSystem(ATermAppl DataEqnSpec)
   s = (char *) malloc(20);
   sprintf(s,"innerc_%i",getpid());
   t = (char *) malloc(100+strlen(INNERC_LDFLAGS)+strlen(INNERC_CFLAGS)+strlen(INNERC_CPPFLAGS));
+
   sprintf(t,"%s.c",s);
-  f = fopen(t,"wb");
+  file_c = strdup(t);
+  sprintf(t,"%s.o",s);
+  file_o = strdup(t);
+  sprintf(t,"%s.so",s);
+  file_so = strdup(t);
+
+  f = fopen(file_c,"wb");
   if ( f == NULL )
   {
 	  perror("fopen");
@@ -1700,7 +1708,7 @@ void RewriterCompilingInnermost::CompileRewriteSystem(ATermAppl DataEqnSpec)
 	      "    \n"
 	      "    if ( substs == NULL )\n"
 	      "    {\n"
-	      "      fprintf(stderr,\"Failed to increase the size of a substitution array to %%d\\n\",newsize);\n"
+	      "      fprintf(stderr,\"Failed to increase the size of a substitution array to %%ld\\n\",newsize);\n"
 	      "      exit(1);\n"
 	      "    }\n"
 	      "\n"
@@ -2147,9 +2155,21 @@ RewriterCompilingInnermost::RewriterCompilingInnermost(ATermAppl DataEqnSpec)
   CompileRewriteSystem(DataEqnSpec);
 }
 
+static void cleanup_file(char *f)
+{
+  if ( unlink(f) )
+  {
+	  fprintf(stderr,"unable to remove file %s: %s\n",f,strerror(errno));
+  }
+  free(f);
+}
+
 RewriterCompilingInnermost::~RewriterCompilingInnermost()
 {
   finalise_common();
+  cleanup_file(file_c);
+  cleanup_file(file_o);
+  cleanup_file(file_so);
 }
 
 ATermList RewriterCompilingInnermost::rewriteInternalList(ATermList l)
