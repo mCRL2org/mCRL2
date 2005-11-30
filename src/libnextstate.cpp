@@ -4,8 +4,8 @@
 #include "liblowlevel.h"
 #include "libstruct.h"
 #include "libprint_c.h"
-#include "libprover.h"
-#include "librewrite_c.h"
+#include "libenum.h"
+#include "librewrite.h"
 #include "libnextstate.h"
 
 #define ATAgetFirst(x) ((ATermAppl) ATgetFirst(x))
@@ -33,6 +33,9 @@ static AFun smndAFun;
 static ATermList procvars;
 static ATermList pars;
 static ATermAppl nil;
+
+static Rewriter *rewr_obj;
+static Enumerator *enum_obj;
 
 static bool usedummies;
 
@@ -139,9 +142,9 @@ ATermAppl gsGetStateArgument(ATerm state, int index)
 	switch ( stateformat )
 	{
 		case GS_STATE_VECTOR:
-			return gsFromRewriteFormat(ATgetArgument((ATermAppl) state,index));
+			return rewr_obj->fromRewriteFormat(ATgetArgument((ATermAppl) state,index));
 		case GS_STATE_TREE:
-			return gsFromRewriteFormat(getTreeElement(state,index));
+			return rewr_obj->fromRewriteFormat(getTreeElement(state,index));
 		default:
 			return NULL;
 	}
@@ -151,7 +154,7 @@ ATermAppl gsGetStateArgument(ATerm state, int index)
 {
 	if ( (0 <= index) && (index < ATgetLength((ATermList) state)) )
 	{
-		return gsFromRewriteFormat(ATelementAt((ATermList) state,index));
+		return rewr_obj->fromRewriteFormat(ATelementAt((ATermList) state,index));
 	} else {
 		return NULL;
 	}
@@ -292,7 +295,7 @@ ATermList ListToFormat(ATermList l,ATermList free_vars)
 	ATermList m = ATmakeList0();
 	for (; !ATisEmpty(l); l=ATgetNext(l))
 	{
-		m = ATinsert(m,gsToRewriteFormat((ATermAppl) SetVars(ATgetFirst(l),free_vars)));
+		m = ATinsert(m,rewr_obj->toRewriteFormat((ATermAppl) SetVars(ATgetFirst(l),free_vars)));
 	}
 	return ATreverse(m);
 }
@@ -302,7 +305,7 @@ ATermList ListFromFormat(ATermList l)
 	ATermList m = ATmakeList0();
 	for (; !ATisEmpty(l); l=ATgetNext(l))
 	{
-		m = ATinsert(m,(ATerm) gsFromRewriteFormat(ATgetFirst(l)));
+		m = ATinsert(m,(ATerm) rewr_obj->fromRewriteFormat(ATgetFirst(l)));
 	}
 	return ATreverse(m);
 }
@@ -329,7 +332,7 @@ ATerm AssignsToRewriteFormat(ATermList assigns, ATermList free_vars)
 	for (; !ATisEmpty(assigns); assigns=ATgetNext(assigns))
 	{
 		ATermAppl a = ATAgetFirst(assigns);
-		l = ATinsert(l,(ATerm) ATmakeAppl2(ATgetAFun(a),gsToRewriteFormat(ATAgetArgument(a,0)),gsToRewriteFormat(ATAgetArgument(a,1))));
+		l = ATinsert(l,(ATerm) ATmakeAppl2(ATgetAFun(a),rewr_obj->toRewriteFormat(ATAgetArgument(a,0)),rewr_obj->toRewriteFormat(ATAgetArgument(a,1))));
 	}
 	return ATreverse(l); */
 
@@ -342,7 +345,7 @@ ATerm AssignsToRewriteFormat(ATermList assigns, ATermList free_vars)
 		{
 			if ( ATisEqual(ATAgetArgument(ATAgetFirst(m),0),ATAgetFirst(l)) )
 			{
-				stateargs[i] = gsToRewriteFormat((ATermAppl) SetVars(ATgetArgument(ATAgetFirst(m),1),free_vars));
+				stateargs[i] = rewr_obj->toRewriteFormat((ATermAppl) SetVars(ATgetArgument(ATAgetFirst(m),1),free_vars));
 				set = true;
 				break;
 			}
@@ -371,8 +374,9 @@ ATerm gsNextStateInit(ATermAppl Spec, bool AllowFreeVars, int StateFormat, Rewri
 
 	nil = gsMakeNil();
 	ATprotectAppl(&nil);
-	
-	gsProverInit(Spec, strat);
+
+	rewr_obj = createRewriter(ATAgetArgument(Spec,3),strat);
+	enum_obj = createEnumerator(Spec,rewr_obj);
 
 	free_vars = ATLgetArgument(ATAgetArgument(current_spec,5),0);
 
@@ -418,7 +422,7 @@ ATerm gsNextStateInit(ATermAppl Spec, bool AllowFreeVars, int StateFormat, Rewri
 	ATprotectArray((ATerm *) summands,num_summands);
 	for (int i=0; !ATisEmpty(sums); sums=ATgetNext(sums),i++)
 	{
-		summands[i] = ATmakeAppl4(smndAFun,ATgetArgument(ATAgetFirst(sums),0),gsToRewriteFormat((ATermAppl) SetVars(ATgetArgument(ATAgetFirst(sums),1),free_vars)),(ATerm) ActionToRewriteFormat(ATAgetArgument(ATAgetFirst(sums),2),free_vars),(ATerm) AssignsToRewriteFormat(ATLgetArgument(ATAgetFirst(sums),4),free_vars));
+		summands[i] = ATmakeAppl4(smndAFun,ATgetArgument(ATAgetFirst(sums),0),rewr_obj->toRewriteFormat((ATermAppl) SetVars(ATgetArgument(ATAgetFirst(sums),1),free_vars)),(ATerm) ActionToRewriteFormat(ATAgetArgument(ATAgetFirst(sums),2),free_vars),(ATerm) AssignsToRewriteFormat(ATLgetArgument(ATAgetFirst(sums),4),free_vars));
 	}
 
 	l = pars;
@@ -433,7 +437,7 @@ ATerm gsNextStateInit(ATermAppl Spec, bool AllowFreeVars, int StateFormat, Rewri
 		{
 			if ( ATisEqual(ATAgetArgument(ATAgetFirst(n),0),ATAgetFirst(l)) )
 			{
-				stateargs[i] = gsRewriteInternal(gsToRewriteFormat((ATermAppl) SetVars(ATgetArgument(ATAgetFirst(n),1),free_vars)));
+				stateargs[i] = rewr_obj->rewriteInternal(rewr_obj->toRewriteFormat((ATermAppl) SetVars(ATgetArgument(ATAgetFirst(n),1),free_vars)));
 				set = true;
 				break;
 			}
@@ -460,7 +464,9 @@ void gsNextStateFinalise()
 {
 	ATunprotectAppl(&current_spec);
 	ATunprotectAppl(&nil);
-	gsProverFinalise();
+
+	delete enum_obj;
+	delete rewr_obj;
 	
 	ATunprotectAFun(pairAFun);
 
@@ -498,12 +504,12 @@ static ATerm makeNewState(ATerm old, ATerm assigns)
 					break;
 				case GS_STATE_TREE:
 //					stateargs[i] = getTreeElement(old,i);
-					stateargs[i] = RWapplySubstitution(ATgetFirst(l));
+					stateargs[i] = rewr_obj->getSubstitution((ATermAppl) ATgetFirst(l));
 					break;
 			}
 		} else {
-			stateargs[i] = gsRewriteInternal(a);
-//			stateargs[i] = gsRewriteInternal(SetVars(a));
+			stateargs[i] = rewr_obj->rewriteInternal(a);
+//			stateargs[i] = rewr_obj->rewriteInternal(SetVars(a));
 		}
 		l = ATgetNext(l);
 	}
@@ -526,7 +532,7 @@ ATermAppl rewrActionArgs(ATermAppl act)
 	for (; !ATisEmpty(l); l=ATgetNext(l))
 	{
 		ATermAppl a = ATAgetFirst(l);
-		a = gsMakeAction(ATAgetArgument(a,0),ListFromFormat(gsRewriteInternals(ATLgetArgument(a,1))));
+		a = gsMakeAction(ATAgetArgument(a,0),ListFromFormat(rewr_obj->rewriteInternalList(ATLgetArgument(a,1))));
 		m = ATinsert(m,(ATerm) a);
 	}
 	m = ATreverse(m);
@@ -545,7 +551,7 @@ static void gsns_callback(ATermList solution)
 /*for (ATermList l=solution; !ATisEmpty(l); l=ATgetNext(l))
 {
 	gsfprintf(stderr,"%T := ",ATgetArgument(ATAgetFirst(l),0)); 
-	PrintPart_C(stderr,gsFromRewriteFormat(ATgetArgument(ATgetFirst(l),1)));
+	PrintPart_C(stderr,(ATerm)rewr_obj->fromRewriteFormat(ATgetArgument(ATgetFirst(l),1)),ppBasic);
 	if ( !ATisEmpty(ATgetNext(l)) )
 		fprintf(stderr,", "); 
 }
@@ -554,18 +560,18 @@ fprintf(stderr,"\n");*/
 	{
 		for (ATermList l=solution; !ATisEmpty(l); l=ATgetNext(l))
 		{
-			RWsetVariable(ATgetArgument((ATermAppl) ATgetFirst(l),0),ATgetArgument((ATermAppl) ATgetFirst(l),1));
+			rewr_obj->setSubstitution((ATermAppl) ATgetArgument((ATermAppl) ATgetFirst(l),0),ATgetArgument((ATermAppl) ATgetFirst(l),1));
 		}
 //		fscb(rewrActionArgs((ATermAppl) gsSubstValues(ATconcat(*params_l_p,solution),*act_p,true)),(ATerm) makeNewState(*State_p,*newstate_p,ATconcat(*params_l_p,solution)));
 		fscb(rewrActionArgs((ATermAppl) *act_p),(ATerm) makeNewState(*State_p,*newstate_p));
 		for (ATermList l=solution; !ATisEmpty(l); l=ATgetNext(l))
 		{
-			RWclearVariable(ATgetArgument((ATermAppl) ATgetFirst(l),0));
+			rewr_obj->clearSubstitution((ATermAppl) ATgetArgument((ATermAppl) ATgetFirst(l),0));
 		}
 	} else {
 		for (ATermList l=solution; !ATisEmpty(l); l=ATgetNext(l))
 		{
-			RWsetVariable(ATgetArgument((ATermAppl) ATgetFirst(l),0),ATgetArgument((ATermAppl) ATgetFirst(l),1));
+			rewr_obj->setSubstitution((ATermAppl) ATgetArgument((ATermAppl) ATgetFirst(l),0),ATgetArgument((ATermAppl) ATgetFirst(l),1));
 		}
 		*states_p = ATinsert(*states_p, (ATerm)
 				ATmakeList2(
@@ -577,7 +583,7 @@ fprintf(stderr,"\n");*/
 				);
 		for (ATermList l=solution; !ATisEmpty(l); l=ATgetNext(l))
 		{
-			RWclearVariable(ATgetArgument((ATermAppl) ATgetFirst(l),0));
+			rewr_obj->clearSubstitution((ATermAppl) ATgetArgument((ATermAppl) ATgetFirst(l),0));
 		}
 	}
 }
@@ -589,7 +595,7 @@ static void SetTreeStateVars(ATerm tree, ATermList *vars)
 		SetTreeStateVars(ATgetArgument((ATermAppl) tree,0),vars);
 		SetTreeStateVars(ATgetArgument((ATermAppl) tree,1),vars);
 	} else {
-		RWsetVariable(ATgetFirst(*vars),tree);
+		rewr_obj->setSubstitution((ATermAppl) ATgetFirst(*vars),tree);
 		*vars = ATgetNext(*vars);
 	}
 }
@@ -622,7 +628,7 @@ ATermList gsNextState(ATerm State, gsNextStateCallBack f)
 				if ( !ATisEqual(a,nil) )
 				{
 //			ATtablePut(params,ATgetFirst(l),ATgetFirst(m));
-					RWsetVariable(ATgetFirst(l),a);
+					rewr_obj->setSubstitution((ATermAppl) ATgetFirst(l),a);
 //			params_l = ATinsert(params_l,(ATerm) gsMakeSubst(ATgetFirst(l),ATgetFirst(m)));
 				}
 			}
@@ -650,27 +656,27 @@ ATermList gsNextState(ATerm State, gsNextStateCallBack f)
 //		ATermList newstate = (ATermList) gsSubstValues(params_l,ATgetArgument(sum,4),true);
 		act = ATgetArgument(sum,2);
 		newstate = ATgetArgument(sum,3);
-//gsfprintf(stderr,"\n%T  ",ATLgetArgument(sum,0)); PrintPart_C(stderr,gsFromRewriteFormat(ATgetArgument(sum,1))); fprintf(stderr,"\n\n");
-		l = FindSolutions(ATLgetArgument(sum,0),ATgetArgument(sum,1),gsns_callback);
-		NextStateError |= FindSolutionsError;
+//gsfprintf(stderr,"\n%T  ",ATLgetArgument(sum,0)); PrintPart_C(stderr,rewr_obj->fromRewriteFormat(ATgetArgument(sum,1))); fprintf(stderr,"\n\n");
+		l = enum_obj->FindSolutions(ATLgetArgument(sum,0),ATgetArgument(sum,1),gsns_callback);
+		NextStateError |= enum_obj->errorOccurred();
 		for (; !ATisEmpty(l); l=ATgetNext(l))
 		{
 			if ( f != NULL )
 			{
 				for (ATermList m=(ATermList) ATgetFirst(l); !ATisEmpty(m); m=ATgetNext(m))
 				{
-					RWsetVariable(ATgetArgument((ATermAppl) ATgetFirst(m),0),ATgetArgument((ATermAppl) ATgetFirst(m),1));
+					rewr_obj->setSubstitution((ATermAppl) ATgetArgument((ATermAppl) ATgetFirst(m),0),ATgetArgument((ATermAppl) ATgetFirst(m),1));
 				}
 //				f(rewrActionArgs((ATermAppl) gsSubstValues(ATconcat(params_l,ATLgetFirst(l)),act,true)),(ATerm) makeNewState(State,newstate,ATconcat(params_l,ATLgetFirst(l))));
 				f(rewrActionArgs((ATermAppl) *act_p),(ATerm) makeNewState(*State_p,*newstate_p));
 				for (ATermList m=(ATermList) ATgetFirst(l); !ATisEmpty(m); m=ATgetNext(m))
 				{
-					RWclearVariable(ATgetArgument((ATermAppl) ATgetFirst(m),0));
+					rewr_obj->clearSubstitution((ATermAppl) ATgetArgument((ATermAppl) ATgetFirst(m),0));
 				}
 			} else {
 				for (ATermList m=(ATermList) ATgetFirst(l); !ATisEmpty(m); m=ATgetNext(m))
 				{
-					RWsetVariable(ATgetArgument((ATermAppl) ATgetFirst(m),0),ATgetArgument((ATermAppl) ATgetFirst(m),1));
+					rewr_obj->setSubstitution((ATermAppl) ATgetArgument((ATermAppl) ATgetFirst(m),0),ATgetArgument((ATermAppl) ATgetFirst(m),1));
 				}
 				states = ATinsert(states, (ATerm)
 						ATmakeList2(
@@ -682,7 +688,7 @@ ATermList gsNextState(ATerm State, gsNextStateCallBack f)
 						);
 				for (ATermList m=(ATermList) ATgetFirst(l); !ATisEmpty(m); m=ATgetNext(m))
 				{
-					RWclearVariable(ATgetArgument((ATermAppl) ATgetFirst(m),0));
+					rewr_obj->clearSubstitution((ATermAppl) ATgetArgument((ATermAppl) ATgetFirst(m),0));
 				}
 			}
 		}

@@ -10,6 +10,8 @@ class RewriterJitty: public Rewriter
 		RewriterJitty(ATermAppl DataEqnSpec);
 		~RewriterJitty();
 
+		RewriteStrategy getStrategy();
+
 		ATermAppl rewrite(ATermAppl Term);
 
 		ATerm toRewriteFormat(ATermAppl Term);

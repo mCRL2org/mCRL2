@@ -32,6 +32,12 @@ LIBREWR_OBJECTS    = librewrite_c.o librewrite.o rewr_inner.o rewr_jitty.o rewr_
 OBJECTS           += $(LIBREWR_OBJECTS)
 LIBREWR_LDFLAGS    = -l$(ATERM) -lm
 
+#enum library definitions
+LIBENUM_NAME       = libenum.a
+LIBENUM_OBJECTS    = libenum.o enum_standard.o
+OBJECTS           += $(LIBENUM_OBJECTS)
+LIBENUM_LDFLAGS    = -l$(ATERM) -lm
+
 #mcrl22lpe definitions
 MCRL22LPE_NAME     = mcrl22lpe
 MCRL22LPE_OBJECTS  = mcrl22lpe.o lin_std.o lin_alt.o mcrl2parser.o mcrl2lexer.o typecheck.o dataimpl.o libprint_c.o libstruct.o liblowlevel.o libalpha.o
@@ -46,17 +52,17 @@ LPEPP_LDFLAGS      = -lrewrite -l$(ATERM) -lm $(LIBDL)
 
 #sim definitions
 SIM_NAME           = sim
-SIM_OBJECTS        = sim.o libnextstate.o libprover.o libprint_c.o libstruct.o liblowlevel.o
+SIM_OBJECTS        = sim.o libnextstate.o libprint_c.o libstruct.o liblowlevel.o
 OBJECTS           += $(SIM_OBJECTS)
-SIM_LDFLAGS        = -lrewrite -l$(ATERM) -lm $(LIBDL)
+SIM_LDFLAGS        = -lenum -lrewrite -l$(ATERM) -lm $(LIBDL)
 
 #xsim definitions
 XSIM_NAME          = xsim
-XSIM_OBJECTS       = xsim.o xsimbase.o xsimmain.o xsimtrace.o libnextstate.o libprover.o libprint.o libprint_c.o libstruct.o liblowlevel.o
+XSIM_OBJECTS       = xsim.o xsimbase.o xsimmain.o xsimtrace.o libnextstate.o libprint.o libprint_c.o libstruct.o liblowlevel.o
 ifdef USE_WX
 OBJECTS           += $(XSIM_OBJECTS)
 endif
-XSIM_LDFLAGS       = -lrewrite -l$(ATERM) -lm $($LIBDL) $(WX_LIBS)
+XSIM_LDFLAGS       = -lenum -lrewrite -l$(ATERM) -lm $($LIBDL) $(WX_LIBS)
 
 #xsimtrace library definitions
 XSIMTRACE_NAME     = xsimtrace.so
@@ -102,9 +108,9 @@ LPEREWR_LDFLAGS    = -lrewrite -l$(ATERM) -lm $(LIBDL)
 
 #lpe2lts definitions
 LPE2LTS_NAME       = lpe2lts
-LPE2LTS_OBJECTS    = lpe2lts.o libnextstate.o libprover.o libprint_c.o libstruct.o liblowlevel.o
+LPE2LTS_OBJECTS    = lpe2lts.o libnextstate.o libprint_c.o libstruct.o liblowlevel.o
 OBJECTS           += $(LPE2LTS_OBJECTS)
-LPE2LTS_LDFLAGS    = -lrewrite -lsvc -l$(ATERM) -lm $(LIBDL)
+LPE2LTS_LDFLAGS    = -lenum -lrewrite -lsvc -l$(ATERM) -lm $(LIBDL)
 
 #tbf2lpe definitions
 TBF2LPE_NAME       = tbf2lpe
@@ -239,9 +245,12 @@ $(ATERM_NAME): $(ATERM_OBJECTS)
 $(LIBSVC_NAME): $(LIBSVC_OBJECTS)
 	$(AR) $(ARFLAGS) $@ $(LIBSVC_OBJECTS)
 
-$(LIBREWR_NAME) : $(LIBREWR_OBJECTS) $(ATERM_DEP)
+$(LIBREWR_NAME) : $(LIBREWR_OBJECTS)
 	$(AR) $(ARFLAGS) $@ $(LIBREWR_OBJECTS)
 #	$(CC) -shared -o $@ $(LIBREWR_OBJECTS)
+
+$(LIBENUM_NAME) : $(LIBENUM_OBJECTS)
+	$(AR) $(ARFLAGS) $@ $(LIBENUM_OBJECTS)
 
 $(MCRL22LPE_NAME) : $(MCRL22LPE_OBJECTS) $(ATERM_DEP) $(LIBREWR_NAME)
 	$(CXX) -o $@ $(MCRL22LPE_OBJECTS) $(LDFLAGS) $(MCRL22LPE_LDFLAGS)
@@ -249,14 +258,14 @@ $(MCRL22LPE_NAME) : $(MCRL22LPE_OBJECTS) $(ATERM_DEP) $(LIBREWR_NAME)
 $(LPEPP_NAME) : $(LPEPP_OBJECTS) $(ATERM_DEP) $(LIBREWR_NAME)
 	$(CXX) -o $@ $(LPEPP_OBJECTS) $(LDFLAGS) $(LPEPP_LDFLAGS)
 
-$(SIM_NAME) : $(SIM_OBJECTS) $(ATERM_DEP) $(LIBREWR_NAME)
+$(SIM_NAME) : $(SIM_OBJECTS) $(ATERM_DEP) $(LIBREWR_NAME) $(LIBENUM_NAME)
 	$(CXX) -o $@ $(SIM_OBJECTS) $(LDFLAGS) $(SIM_LDFLAGS)
 
 ifdef USE_WX
 $(WX_OBJECTS) $(patsubst %o,%dpp,$(WX_OBJECTS)): CPPFLAGS += $(WX_CPPFLAGS)
 xsimtracedll.o: CXXFLAGS += -fPIC
 
-$(XSIM_NAME): $(XSIM_OBJECTS) $(ATERM_DEP) $(LIBREWR_NAME)
+$(XSIM_NAME): $(XSIM_OBJECTS) $(ATERM_DEP) $(LIBREWR_NAME) $(LIBENUM_NAME)
 	$(CXX) -o $@ $(XSIM_OBJECTS) $(LDFLAGS) $(XSIM_LDFLAGS)
 
 $(XSIMTRACE_NAME): $(XSIMTRACE_OBJECTS) $(ATERM_DEP) $(LIBREWR_NAME)
@@ -303,7 +312,7 @@ $(SVC2FSM_NAME) : $(SVC2FSM_OBJECTS) $(ATERM_DEP) $(LIBSVC_NAME) $(LIBREWR_NAME)
 $(LPEREWR_NAME) : $(LPEREWR_OBJECTS) $(ATERM_DEP) $(LIBREWR_NAME)
 	$(CXX) -o $@ $(LPEREWR_OBJECTS) $(LDFLAGS) $(LPEREWR_LDFLAGS)
 
-$(LPE2LTS_NAME) : $(LPE2LTS_OBJECTS) $(ATERM_DEP) $(LIBSVC_NAME) $(LIBREWR_NAME)
+$(LPE2LTS_NAME) : $(LPE2LTS_OBJECTS) $(ATERM_DEP) $(LIBSVC_NAME) $(LIBREWR_NAME) $(LIBENUM_NAME)
 	$(CXX) -o $@ $(LPE2LTS_OBJECTS) $(LDFLAGS) $(LPE2LTS_LDFLAGS)
 
 $(TBF2LPE_NAME) : $(TBF2LPE_OBJECTS) $(ATERM_DEP) $(LIBREWR_NAME)

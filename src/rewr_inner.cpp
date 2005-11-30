@@ -1435,3 +1435,9 @@ ATermAppl RewriterInnermost::fromRewriteFormat(ATerm Term)
 {
 	return fromInner(Term);
 }
+
+RewriteStrategy RewriterInnermost::getStrategy()
+{
+	return GS_REWR_INNER;
+}
+

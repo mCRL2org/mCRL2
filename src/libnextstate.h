@@ -1,5 +1,5 @@
 #include <aterm2.h>
-#include "librewrite_c.h"
+#include "librewrite.h"
 
 #define GS_STATE_VECTOR 0
 #define GS_STATE_TREE 1

@@ -10,6 +10,8 @@ class RewriterCompilingInnermost: public Rewriter
 		RewriterCompilingInnermost(ATermAppl DataEqnSpec);
 		~RewriterCompilingInnermost();
 
+		RewriteStrategy getStrategy();
+
 		ATermAppl rewrite(ATermAppl Term);
 
 		ATerm toRewriteFormat(ATermAppl Term);

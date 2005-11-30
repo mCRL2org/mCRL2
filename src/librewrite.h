@@ -10,6 +10,8 @@ class Rewriter
 		Rewriter();
 		virtual ~Rewriter();
 
+		virtual RewriteStrategy getStrategy() = 0;
+
 		virtual ATermAppl rewrite(ATermAppl Term) = 0;
 		virtual ATermList rewriteList(ATermList Terms);
 
@@ -34,6 +36,6 @@ class Rewriter
 		long substs_size;
 };
 
-Rewriter *createRewriter(ATermAppl DataEqnSpec, RewriteStrategy Strategy);
+Rewriter *createRewriter(ATermAppl DataEqnSpec, RewriteStrategy Strategy = GS_REWR_INNER);
 
 #endif

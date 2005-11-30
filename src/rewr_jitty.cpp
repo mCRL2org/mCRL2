@@ -815,3 +815,8 @@ ATerm RewriterJitty::rewriteInternal(ATerm Term)
 {
 	return (ATerm) rewrite_aux((ATermAppl) Term);
 }
+
+RewriteStrategy RewriterJitty::getStrategy()
+{
+	return GS_REWR_JITTY;
+}

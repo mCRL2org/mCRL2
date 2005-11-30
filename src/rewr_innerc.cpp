@@ -2213,4 +2213,9 @@ void RewriterCompilingInnermost::clearSubstitutions()
   so_clear_substs();
 }
 
+RewriteStrategy RewriterCompilingInnermost::getStrategy()
+{
+	return GS_REWR_INNERC;
+}
+
 #endif

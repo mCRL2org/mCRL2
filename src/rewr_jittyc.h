@@ -12,6 +12,8 @@ class RewriterCompilingJitty: public Rewriter
 		RewriterCompilingJitty(ATermAppl DataEqnSpec);
 		~RewriterCompilingJitty();
 
+		RewriteStrategy getStrategy();
+
 		ATermAppl rewrite(ATermAppl Term);
 
 		ATerm toRewriteFormat(ATermAppl Term);
