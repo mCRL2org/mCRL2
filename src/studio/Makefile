@@ -47,7 +47,7 @@ revision: ../utility/get_revision
 	@echo "CPPFLAGS += -DREVISION=$$(../utility/get_revision)" > revision
 
 ../utility/get_revision: ../utility/get_revision.cpp
-	$(CXX) -I$(BOOST_PREFIX)/include $< $(BOOST_LDFLAGS) -lboost_filesystem -o $@ 
+	$(CXX) -I$(BOOST_PREFIX)/include $< $(BOOST_LDFLAGS) $(BOOST_FILESYSTEM) -o $@ 
 
 -include revision
 
@@ -81,10 +81,10 @@ project_manager_tester: project_manager_tester.cpp $(PROJECT_MANAGER_OBJECTS)
 	$(CXX) $(CXXFLAGS) $(CPPFLAGS) $(PROJECT_MANAGER_OBJECTS) $(LDFLAGS) $(WX_LIBRARIES) -o $@ $<
 
 studio: $(GUI_OBJECTS)
-	$(CXX) $(CXXFLAGS) $(CPPFLAGS) $(GUI_OBJECTS) $(LDFLAGS) $(WX_LIBRARIES) $(BOOST_LDFLAGS) -lboost_filesystem -o $@
+	$(CXX) $(CXXFLAGS) $(CPPFLAGS) $(GUI_OBJECTS) $(LDFLAGS) $(WX_LIBRARIES) $(BOOST_LDFLAGS) $(BOOST_FILESYSTEM) -o $@
 
 utility/relocator: utility/relocator.o settings_manager.o $(TOOL_MANAGER_OBJECTS)
-	$(CXX) $(CXXFLAGS) $(CPPFLAGS) $(LDFLAGS) $(BOOST_LDFLAGS) -lboost_filesystem $^ -o $@
+	$(CXX) $(CXXFLAGS) $(CPPFLAGS) $(LDFLAGS) $(BOOST_LDFLAGS) $(BOOST_FILESYSTEM) $^ -o $@
 
 %.o: %.cpp
 	$(CXX) -c $(CXXFLAGS) $(CPPFLAGS) $< -o $@

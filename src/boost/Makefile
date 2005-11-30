@@ -15,7 +15,7 @@
 
 BJAM           = tools/build/jam_src/bin/bjam
 BJAM_BUILD     = ./build.sh
-BJAM_ARGUMENTS = "-sBUILD=release <threading>single/multi <optimization>speed <runtime-link>dynamic"
+BJAM_ARGUMENTS = "-sBUILD=release <threading>single <optimization>speed <runtime-link>dynamic"
 
 # Build boost build tool
 ifeq ($(HOST_OS),WINDOWS)
@@ -23,12 +23,12 @@ ifeq ($(HOST_OS),WINDOWS)
  BJAM_BUILD   = build.bat
 endif
 ifeq ($(HOST_OS),CYGWIN)
- BJAM_ARGUMENTS = -sTOOLS=cygwin "-sBUILD=release <threading>single <optimization>speed <runtime-link>static"
+ BJAM_ARGUMENTS = "-sBUILD=release <threading>single <optimization>speed <runtime-link>static"
 endif
 ifeq ($(HOST_OS),MINGW)
  BJAM           = tools/build/jam_src/bin/bjam.exe
  BJAM_BUILD     = start //WAIT mbuild.bat mingw;
- BJAM_ARGUMENTS = "-sBUILD=release <threading>single <optimization>speed <runtime-link>static"
+ BJAM_ARGUMENTS = "-sTOOLS=mingw" "-sBUILD=release <threading>single <optimization>speed <runtime-link>static"
 endif
 
 .PHONY: all bjam install clean distclean
