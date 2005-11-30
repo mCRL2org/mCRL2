@@ -39,30 +39,30 @@
 \maketitle
 
 \begin{abstract}
-This documentation describes the usage and implementation of the tool \tool\ within the \mcrl\ toolset.
-Basically, \tool\ is a tool which removes unused \pp\ and unused sum variables, from a \lpe\ (LPE).
+This documentation describes the implementation and test cases of the tool \tool\ in  the \mcrl\ toolset.
+Basically, \tool\ is a tool which removes unused \pp\ and unused sum variables from a \lpe\ (LPE).
 \end{abstract}
 
 \tableofcontents
 
 \section{Introduction}
-This \tool\ tool is a tool for the \mcrl\ studio. The tool is a
-filter which reads from a \ti{input.lpe}. The file \ti{input.lpe} is
-a file in \ti{.lpe} format \cite{LPEformat}. We use the
-\framework\ to read the \ti{input.lpe}. The filter removes \pps\ and sum variables, which are not used, from the
-\lpe . After the algorithm (Section \ref{sec:alg}) terminates, \tool\
-will write the output to an output file \ti{output.lpe} in the \ti{.lpe} format \cite{LPEformat}.
+The \tool\ tool is a tool for \mcrl\ studio. The tool is a
+filter which reads from file \ti{input.lpe}, which is
+a file in \ti{.lpe} format \cite{LPEformat}. We make use of the
+\framework\ to read \ti{input.lpe}. The filter removes \pps\ and sum variables, which are not used, from the
+\lpe. After the algorithm (Section \ref{sec:alg}) terminates, \tool\
+will write the output to an output file \ti{output.lpe} (in the \ti{.lpe} format.)
+
 
 \section{Definitions} \label{sec:def}
 
 The equation below is a \lpe\ in \mcrl : 
 \begin{defn}\lpe\ (LPE) \newline
-%\at werkt niet
 \begin{tabbing}
 \tab
 $X (\ovr{d: D}) = $ \> \> \> $ \sum_{i \in I} \sum_{\ovr{e_i: E_i}} \ovr{c_i} ( \ovr{d, e_i }) \rightarrow 
 (a_i^1 (\ovr{f_{i,1}}(\ovr{d,e_i})) \vert \ldots \vert a_i^{n(i)}(\ovr{f_{i,n(i)}}(\ovr{d,e_i}))) \at \text{ } t_i(\ovr{d,e_i})  \cdot X(\ovr{g_i}(\ovr{d,e_i})) +$ \\ \\
-\> \> \> $ \sum_{j \in j} \sum_{\ovr{e_j: E_j}} \ovr{c_j} ( \ovr{d, e_j} ) \rightarrow 
+\> \> \> $ \sum_{j \in J} \sum_{\ovr{e_j: E_j}} \ovr{c_j} ( \ovr{d, e_j} ) \rightarrow 
 (a_j^1 (\ovr{f_{j,1}}(\ovr{d,e_j})) \vert \ldots \vert a_j^{n(j)}(\ovr{f_{j,n(j)}}(\ovr{d,e_j}))) \at \text{ } t_j(\ovr{d,e_j}) + $ \\ \\
 \> \> \> $\sum_{\ovr{e_\delta}:\ovr{E_\delta}} \ovr{c_\delta} ( \ovr{d, e_\delta}) \rightarrow 
 \delta \at \text{ } t_\delta(\ovr{d,e_\delta})$ 
@@ -71,49 +71,49 @@ $X (\ovr{d: D}) = $ \> \> \> $ \sum_{i \in I} \sum_{\ovr{e_i: E_i}} \ovr{c_i} ( 
 Where $I$ and $J$ are disjoint.\\
 \end{defn}
 
-If we speak about an LPE in this article we refer to Definition \ref{def}.  The different states 
-%are $\ovr{d}$ 
-of the process are represented by the data vector parameter $\ovr{d}:\ovr{D}$. $\ovr{D}$ may be a Cartesian product of $n$ data types, meaning that $\ovr{d}$ consist of a tuple $(d_1, \ldots, d_n)$. The LPE expresses that in state $\ovr{d}$ it performs (multi)actions $\lbrace a_i^1, \ldots , a_i^{n(i)} \rbrace$, carrying data parameters $\ovr{f_{i,1}}(\ovr{d,e_i}), \ldots , \ovr{f_{i,n(i)}}(\ovr{d, e_i})$ and 
+If we speak about an LPE in this article we refer to Definition \ref{sec:def}.  The different states 
+of the process are represented by the data vector parameter $\ovr{d}:\ovr{D}$. $\ovr{D}$ may be a Cartesian product of $n$ data types, meaning that $\ovr{d}$ consist of a tuple $(d_1, \ldots, d_n)$. The LPE expresses that in state $\ovr{d}$ it performs (multi)actions $a_i^1, \ldots , a_i^{n(i)}$, carrying data parameters $\ovr{f_{i,1}}(\ovr{d,e_i}), \ldots , \ovr{f_{i,n(i)}}(\ovr{d, e_i})$ and 
 it can reach the new state $\ovr{g_i}(\ovr{d ,e_i})$ under the condition that $c_i(\ovr{d , e_i})$ is \ti{true}. So for each summand $i$ from $I$ we have a function $\ovr{g_i}: \ovr{D} \times \ovr{E_i} \rightarrow \ovr{D}$ and a function $c_i: \ovr{D} \times \ovr{E_i} \rightarrow \mathbb{B}$.
 Data parameters $\ovr{e_i : E_i}$ are sum variables. These variables are used to action range over a data domain. 
 
 For an more detailed explanation of \lpe s  we refer to \cite{LPE_info}.
-%\end{defn}
 
-\section{Definition}
-A parameter of an LPE has which has no influence on condition, action and time arguments is removed from the LPE in the \tool filter. Elimination of parameters can lead to a reduction when generating a state space of an LPE. If a \pp\ ranges over an infinite domain, the number of generated states can even be reduced to a finite domain, using this operation. %This typically happens after hiding parts of a specification.
-
-%Let $1 \leq m \leq n$;
-%We define the original vector as $\ovr{p}$:\\
-%$\ovr{p} = \langle p_1, \ldots, p_n \rangle$\\
-%We define the derived vector from $\ovr{p}$ as $\ovr{p'}$: \\
-%$\ovr{p'} = \langle p_1', \ldots, p_m' \rangle$\\
-%For which holds:\\
-%$\forall_{i: 1 \leq i \leq m}\exists_{j: \leq j \leq n}(p_i'= p_j) $\\
-
-%\begin{defn} Let $S$ be the set of indices of a vector.\\ 
-%We define $\ovr{v'}_S$:\\
-%$$\ovr{v'}_S = \ovr{v} \setminus S$$
-%Explanation: If an index $j$ occurs in $S$ the new constructed $\ovr{v'}_S$ does not contains $v_j$.
-%\end{defn}
+\section{Definition lpeparelm}
+A parameter of an LPE which has no influence on condition, action arguments and time is removed from the LPE in the \tool\ filter. Elimination of parameters can lead to a reduction when generating a state space of an LPE. If a \pp\ ranges over an infinite domain, the number of generated states can even be reduced to a finite domain, using this operation. %This typically happens after hiding parts of a specification.
 
 \begin{defn}
-Let $\ovr{x}$ be a vector and  $n$ be $\vert \ovr{x} \vert$. If we want to adress the $j^{th}$ element ($ 1 \leq j \leq \vert x \vert $) of vector $\ovr{x}$, the do so by:
+Let $\ovr{x}$ be a vector and  $n$ be $\vert \ovr{x} \vert$. If we want to address the $j^{th}$ element ($ 1 \leq j \leq \vert \ovr{x} \vert $) of vector $\ovr{x}$, the do so by:
 $\ovr{x}._j$
 \end{defn}
 
 \begin{defn}
-We define $\ovr{vect^i}$;\\
-$\ovr{vect^i} = 
-( \ovr{d}._1:\ovr{D}._1 , \ldots , \ovr{d}._k: \ovr{D}._k , \ovr{e}._{i_{(k+1)}}:\ovr{E}._{i_{(k+1)}} , \ldots , e_{i_{(k+z)}}:E_{i_{(k+z)}} ) $\\
-where $k = \vert \ovr{d} \vert$ and $z = \vert \ovr{e_i} \vert$. The length of $ \vert \ovr{vect^i} \vert = n$, which is equal to $k + z$.
+Let $w \in I \cup J$, where $I$ and $J$ are the set of summand indices; We define \\
+ $\ovr{vect^w} = (\ovr(d , e_w))$\\
+where $k = \vert \ovr{d} \vert$ and $z = \vert \ovr{e_w} \vert$. The length of $ \ovr{vect^w}$ is equal to $k + z$.
 \end{defn}
 
-\begin{defn} Let $S$ be the set of inert \pps\ indices, let $I \cap J = \emptyset $:
+\begin{defn}[$\ovr{\boxtimes}^w_X(e)$]
+Let $w \in W$, where $W$ is the set of summand indices.\\
+We define $\ovr{\boxtimes}^w_X(e)$:\\
+Let $j \in \lbrace 1, \dots, \vert \ovr{vect^w} \vert \rbrace.$\\
+If $j \in X$ then $\ovr{\boxtimes^w_X(e)}._j = e$ \\
+If $j \not\in X$ then $\ovr{\boxtimes^w_X(e)}._j = \ovr{vect^w}._j$ \\
+\end{defn}
+
+\begin{defn}[\texttt{Dom($x$)}] Let $x$ be an variable, then \texttt{Dom$(x)$} is the collection of all values which variable $x$ can be. 
+\end{defn}
+
+\newcommand{\zi}{\ovr{\boxtimes}^l_{S_L}(s)}
+\newcommand{\zj}{\ovr{\boxtimes}^k_{S_L}(s)}
+\newcommand{\zd}{\ovr{\boxtimes}^\delta1_{S_L}(s)}
+
+\begin{defn} \label{def:sug3} Let $M$ be an LPE. We define:
 \begin{tabbing}
 \tab
-$S = \lbrace s \in \lbrace 1, \ldots n \rbrace \vert$ 
-$\forall_{\ovr{vert^i}._s}($  \\
+\> $ UsedPP_M \subseteq \lbrace 1, \ldots, n \rbrace $ \\ \\
+\> as the biggest possible set such that:\\ \\
+\> $\forall_{z \not\in S_L}\forall_{s \in \texttt{Dom}(\ovr{vect^i}._z)  \cup  \texttt{Dom}(\ovr{vect^j}._z)  \cup  \texttt{Dom}(\ovr{vect^\delta})}$\\
+
 \> \>$\sum_{i \in I} \sum_{\ovr{e_i:E_i}} c_i ( \ovr{vect^i} ) \rightarrow $
 $ a_i^1 (\ovr{f_{i,1}}(\ovr{vect^i})) \vert \ldots \vert a_i^{n(i)}(\ovr{f_{i,n(i)}}(\ovr{vect^i})) \at \text{ } t_i(\ovr{vect^i})  \cdot X(\ovr{g_i}(\ovr{vect^i}))
 $ \\
@@ -125,29 +125,59 @@ $ \\
 
 \> $\bisim$ \\
 
-\> \>$\sum_{i \in I} \sum_{\ovr{e_i:E_i}} c_i ( \ovr{vect^i}._s ) \rightarrow $
-$ a_i^1 (\ovr{f_{i,1}}(\ovr{vect^i}._s)) \vert \ldots \vert a_i^{n(i)}(\ovr{f_{i,n(i)}}(\ovr{vect^i}._s)) \at \text{ } t_i(\ovr{vect^i._s})  \cdot X(\ovr{g_i}(\ovr{vect^i}._s))
+\> \>$\sum_{k \in K} \sum_{\ovr{e_k:E_k}} c_k ( \zi ) \rightarrow $
+$ a_k^1 (\ovr{f_{k,1}}(\zi) \vert \ldots \vert a_k^{n(k)}(\ovr{f_{k,n(k)}}(\zi) \at \text{ } t_{k}(\zi)  \cdot Y(\ovr{g_{k}}(\zi)
 $ \\
-\> \> $+ \sum_{j \in J} \sum_{\ovr{e_j:E_j}} c_j ( \ovr{vect^j}._s ) \rightarrow $
-$ a_j^1 (\ovr{f_{j,1}}(\ovr{vect^j}._s)) \vert \ldots \vert a_j^{n(j)}(\ovr{f_{j,n(j)}}(\ovr{vect^j}._s)) \at \text{ } t_j(\ovr{vect^j}._s)
+\> \> $+ \sum_{l \in L} \sum_{\ovr{e_l:E_L}} c_l ( \zj ) \rightarrow $
+$ a_{l}^1 (\ovr{f_{l,1}}(\zj) \vert \ldots \vert a_{l}^{n(l)}(\ovr{f_{l,n(l)}}(\zj) \at \text{ } t_{l}(\zj)
 $ \\
-\> \> $ + \sum_{\ovr{e_\delta:E_\delta}} c_\delta ( \ovr{d, e_\delta}) \rightarrow 
-\delta \at \text{ } t_\delta(\ovr{vect^{\delta}}._s)$\\
+\> \> $ + \sum_{\ovr{e_{\delta^1}:E_{\delta^1}}} c_{\delta^1} ( \zd ) \rightarrow 
+{\delta} \at \text{ } t_{\delta}(\zd)$\\
 $)$ \\
+
 \end{tabbing}
 \end{defn}
 
-\section{Proof}
+Proof by contradiction:
+\begin{itemize}
+\item If there is a $q = \lbrace x \in \lbrace 1, \ldots, \vert \ovr{vect^i} \vert \rbrace \vert \exists_{i \in I}\exists_{k \in \lbrace 0, \ldots , n(i) \rbrace}\exists_{z \not\in S_L}\exists_{s \in  \texttt{Dom}(\ovr{vect^i}._z)}\\ 
+c_i(\zi) \rightarrow a_i^k(\ovr{f_{i,k}}(\zi)) \at t(\zi) \cdot X(\ovr{g_i}(vect^i))\models c_i(\ovr{vect^i})a_i^k(\ovr{f_{i,k}}(\ovr{vect^i})) \at t(\ovr{vect_i}) \cdot X(\ovr{g_i}(\zi))\rbrace$.\\ 
 
+So $S_L$ is not the biggest subset, because $q$ can be added to $S_L$. This yields to contradiction, theirefore holds:\\ 
+$\forall_{x \in S}\forall_{s \in  \texttt{Dom}} c_i(\zi) \rightarrow (\ovr{vect^i}_z) (a(\zi)) \at t(\zi) \cdot X(\ovr{g_i}(vect^i)) \models \\
+c_i(\ovr{vect^i}) \rightarrow a_i^k (\ovr{f_{i,k}}(\ovr{vect^i})) \at t(vect^i) X(\ovr{g_i}(\zi))$ 
 
-\section{Description}
-In this section we describe the algorithm informally. Throughout the run of the algorithm \pps\ get marked if they are used in an action, time or condition. Process parameters which are dependant of other marked \pps\ also get marked. If a \pp\ gets marked it should not be removed. Initally, all parameters in the LPE are unmarked. After the algorithm terminates all unmarked \pps\ are removed. A \pp\ gets marked if it occurs in one of the following places:
+\item If there is a $q = \lbrace x \in \lbrace 1, \ldots, \vert \ovr{vect^j} \vert \rbrace \vert \exists_{j \in J}\exists_{k \in \lbrace 0, \ldots , n(j) \rbrace}\exists_{z \not\in S_L}\exists_{s \in \texttt{Dom}(\ovr{vect^j}._z)  } \\
+c_j(\zj) \rightarrow a_j^k(\ovr{f_{j,k}}(\zj)) \at t(\zj)\models c_j(\ovr{vect^j})a_j^k(\ovr{f_{j,k}}(\ovr{vect^j})) \at t(\ovr{vect_j}) \rbrace$.\\ \
+
+So $S_L$ is not the biggest subset, because $q$ can be added to $S_L$. This yields to contradiction, theirefore holds:\\
+$\forall_{x \in S}\forall_{s \in  \texttt{Dom}} c_j(\zj) \rightarrow (\ovr{vect^j}_z) (a(\zj)) \at t(\zj) \models \\
+c_j(\ovr{vect^j}) \rightarrow a_j^k (\ovr{f_{j,k}}(\ovr{vect^j})) \at t(vect^j)$
+
+\item If there is a $q = \lbrace x \in \lbrace 1, \ldots, \vert \ovr{vect^\delta} \vert \rbrace \vert 
+\exists_{z \not\in S_L}\exists_{s \in \texttt{Dom}(\ovr{vect^\delta}._z)  } c_\delta(\zd)  \rightarrow \delta \at t(\zd) \rbrace \models c_\delta(\ovr{vect^\delta}) \rightarrow \delta \at t(\ovr{vect^\delta})$ .\\
+
+So $S_L$ is not the biggest subset, because $q$ can be added to $S_L$. This yields to contradiction, theirefore holds:\\
+$\forall_{x \in S}\forall_{s \in  \texttt{Dom}(\ovr{vect^\delta}._z)}
+ (c_\delta(\zd )) \rightarrow \delta \at t_\delta(\zd) \models
+(c_\delta(\ovr{vect^\delta})) \rightarrow \delta \at t_\delta(vect^\delta) $
+\end{itemize}
+
+\section{Description} \label{sec:desc}
+It is possible having \pps\ which can have any value without influencing the behavior of the LPE. 
+If we look at an LPE in the LPE-format, we see that the LPE only contains \pps\ which influence the behavior and it omits those \pps\ which do not influence the behavior. So if \pps\ do not occur in condition, action arguments or time tags, they do not influence the behavior in a direct way. So if we collect all \pps , which are used in the condition, action arguments and time tags, we know which \pps\ are used. To indicate which \pps are used, we keep a set $UsedPP$ which contains all indices used \pps . To find all \pps in a condition, action argument of time tag we have function called $FindUsedPP$. This function returns a set of  \pp\ indices which occur in a given condition, argument argument or time tag. 
+
+A next state is always used as an input state, to calculate another next state. So for each \pp we have to check, if all \pps\ which are used to construct a next state are in the set of used \pps . If a \pp\ is used as an input and is not in the set of used \pps\ this \pp\ is added to the set of indices. 
+Also we have to check, that all \pps for which the added \pp\ depends on, are also in the in the list of used \pps. We continue adding \pps\ dependant on other \pps\ which are also in the set of set of used \pp\ indices.
+
+In short: Throughout the run of the algorithm \pps\ get marked if they are used in an action, time or condition. Process parameters which are dependant of other marked \pps\ also get marked. If a \pp\ gets marked it should not be removed. Initially, all parameters in the LPE are unmarked. After the algorithm terminates all unmarked \pps\ are removed. A \pp\ gets marked if it occurs in one of the following places:
 
 \begin{itemize}
-\item In a condition: $c_i(\ovr{vect^i})$ for some $i \in I$
-\item In an action argument: $a_i^j(\ovr{f_{i,j}}(\ovr{vect^i})$ for some $i \in I$ and $j \in \lbrace 1, \ldots , n \rbrace$
-\item In a time argument: $t_i(\ovr{vect^i})$ for some $i \in I$
-\item In an argument: $\ovr{g_i}(\ovr{vect^i})_j$ for some $i \in I$ and $j \in \lbrace 1, \ldots , n \rbrace $ where the $j$-th \pp\ is marked.
+\item In a condition: $c_i(\ovr{vect^i})$ for some $i \in I \cup J$
+\item In an action argument: %$a_i^j
+$(\ovr{f_{i,j}}(\ovr{vect^i})$ for some $i \in I \cup J$ and $j \in \lbrace 1, \ldots , n \rbrace$
+\item In a time tag: $t_i(\ovr{vect^i})$ for some $i \in I$
+\item In an argument: $\ovr{g_i}(\ovr{vect^i})_j$ for some $i \in I \cup J$ and $j \in \lbrace 1, \ldots , n \rbrace $ where the $j$-th \pp\ is marked.
 \end{itemize}
 
 \newpage
@@ -155,37 +185,31 @@ In this section we describe the algorithm informally. Throughout the run of the 
 \begin{algorithm}[h]
 \caption{lpeparelm}
 \begin{algorithmic}[1]
-\STATE $S := \lbrace 1 \ldots n \rbrace;$
 \STATE $UsedPP := \emptyset $
-  \FORALL{$i \in I$}
-    \STATE $UsedPP = UsedPP \cup FindUsedPP(\ovr{c_i}(\ovr{vect^i}));$
+  \FORALL{$i \in I \cup J $}
+    \STATE $UsedPP := UsedPP \cup FindUsedPP(\ovr{c_i}(\ovr{vect^i}))$
     \FOR{$j := 1$ to $n(i) $}
-      \STATE $UsedPP = UsedPP \cup FindUsedPP(a_i^{j}(\ovr{f_{i,j}}(\ovr{vect^i}));$
+      \STATE $UsedPP = UsedPP \cup FindUsedPP(\ovr{f_{i,j}}(\ovr{vect^i})$
     \ENDFOR
-    \STATE $UsedPP = UsedPP \cup FindUsedPP(\ovr{t_i}(\ovr{vect^i}));$
+    \STATE $UsedPP := UsedPP \cup FindUsedPP(\ovr{t_i}(\ovr{vect^i}))$
   \ENDFOR
-\STATE $Change = true;$
-\WHILE{$Change$}
-\STATE $Change = false;$
-  \FORALL{$ i \in I$}
-    \FORALL{$j := 1$ to $ n $}
-      \IF{$(\ovr{g_i}(\ovr{vert^i})._j ) \in UsedPP$}
-        \IF{$ FindUsedPP(\ovr{g_i}(\ovr{vert^i})._j ) > 0 $}
-          \STATE $UsedPP = UsedPP \cup FindUsedPP(\ovr{g_i}(\ovr{vert^i})._j) ;$
-          \STATE $Change = true;$
-        \ENDIF
-      \ENDIF
+\STATE $n := 0$
+\WHILE{$\vert UsedPP \vert > n $}
+\STATE $n := \vert UsedPP \vert$
+  \FORALL{$ i \in I \cup J$}
+    \FORALL{$j \in UsedPP$}
+      \STATE $UsedPP = UsedPP \cup FindUsedPP(\ovr{g_i}(\ovr{vect^i})._j) $
     \ENDFOR
   \ENDFOR
 \ENDWHILE
-\STATE $S := S \setminus UsedPP;$
+\RETURN $UsedPP$
 \end{algorithmic}
 \line(1,0){120}
 \begin{tabbing}
 \tab
 $UsedPP$ \> \> \> \> : \> The set of indices of used \pps .\\
 $FindUsedPP$ \> \> \> \> : \> A routine which returns a set of indices of used\\
-\> \> \> \> \> \pps\ which occure in a given argument.
+\> \> \> \> \> \pps, which occur in a given argument.
 \end{tabbing}
 \end{algorithm}
 
@@ -200,7 +224,7 @@ mentioned otherwise.
 inputfile: \verb"$DIR$/tests/lpeparelm/case1.mcrl2"
 \begin{tabbing}
 \tabw
-\ti{info} \> This case test will show if if the \tool\ works without condition, action and time arguments.\\
+\ti{info} \> This test case will show if if the \tool\ works without condition, action and time arguments.\\
 \line(1,0){120}\\
 \tb{act} \> a; \\
 \tb{proc} \> X(i:Nat) = \> a.X(i)\\
@@ -213,7 +237,7 @@ inputfile: \verb"$DIR$/tests/lpeparelm/case1.mcrl2"
 inputfile: \verb"$DIR$/tests/lpeparelm/case2.mcrl2"
 \begin{tabbing}
 \tabw
-\ti{info} \> This case test will show if if the \tool\ works with an action argument.\\
+\ti{info} \> This test case will show if if the \tool\ works with an action argument.\\
 \line(1,0){120}\\
 \tb{act} \> a: Nat; \\
 \tb{proc} \> X(i,j:Nat) = \> a(i). X(i,j)\\
@@ -226,7 +250,7 @@ inputfile: \verb"$DIR$/tests/lpeparelm/case2.mcrl2"
 inputfile: \verb"$DIR$/tests/lpeparelm/case3.mcrl2"
 \begin{tabbing}
 \tabw
-\ti{info} \> This case test will show if if the \tool\ works with a condition argument.\\
+\ti{info} \> This test case will show if if the \tool\ works with a condition argument.\\
 \line(1,0){120}\\
 \tb{act} \> a; \\
 \tb{proc} \> X(i,j:Nat) = \> (i == 5 ) $\rightarrow$ a. X(i,j)\\
@@ -239,7 +263,7 @@ inputfile: \verb"$DIR$/tests/lpeparelm/case3.mcrl2"
 inputfile: \verb"$DIR$/tests/lpeparelm/case4.mcrl2"
 \begin{tabbing}
 \tabw
-\ti{info} \> This case test will show if if the \tool\ works with a time argument.\\
+\ti{info} \> This test case will show if if the \tool\ works with a time argument.\\
 \line(1,0){120}\\
 \tb{act} \> a; \\
 \tb{proc} \> X(i,j:Nat) = \> a$@$i. X(i,j)\\
@@ -252,22 +276,22 @@ inputfile: \verb"$DIR$/tests/lpeparelm/case4.mcrl2"
 inputfile: \verb"$DIR$/tests/lpeparelm/case5.mcrl2"
 \begin{tabbing}
 \tabw
-\ti{info} \> This case test will show if if the \tool\ works to check if inert \pps\ are dependant of other \pps .\\
+\ti{info} \> This test case will show if the \tool\ checks for dependant \pps .\\
 \line(1,0){120}\\
 \tb{act} \> a: Nat ; \\
 \tb{act} \> b; \\
-\tb{proc} \> X(i,j:Nat) = \> a(i).X(k,j,k) + \\
+\tb{proc} \> X(i,j,k:Nat) = \> a(i).X(k,j,k) + \\
           \> \>              b.X(j,j,k);\\
 \tb{init} \> X(1,2,3); \\  
 \line(1,0){120}\\
-\ti{Result} \> Process parameter $j$ should be removed.\\ 
+\ti{Result} \> No process parameters should be removed.\\ 
 \end{tabbing}
 
 \subsection*{Case 6}
 inputfile: \verb"$DIR$/tests/lpeparelm/case6.mcrl2"
 \begin{tabbing}
 \tabw
-\ti{info} \> This case test will show how the tool reacts on free variables and multiple summands.\\
+\ti{info} \> This test case will show how the tool reacts on free variables and multiple summands.\\
 \line(1,0){120}\\
 \tb{act} \> act1, act2, act3: Nat; \\
 \tb{proc} \> X(i: Nat) \>  = \> (i \verb"<" 5) $\rightarrow$ act1(i).X(i+1) + \\
@@ -276,6 +300,7 @@ inputfile: \verb"$DIR$/tests/lpeparelm/case6.mcrl2"
 \tb{init} X(0); \\
 \line(1,0){120}\\
 \ti{Result} \> No \pp\ should be removed.\\ 
+\> \textbf{Note:} Different linearization might lead to other results.
 \line(1,0){120}\\
 \ti{Genarated LPE} \\
 \>  \verb"var  freevar0: Nat;"\\
@@ -298,8 +323,8 @@ inputfile: \verb"$DIR$/tests/lpeparelm/case6.mcrl2"
 inputfile: \verb"$DIR$/tests/lpeparelm/case7.mcrl2"
 \begin{tabbing}
 \tabw
-\ti{info} \> This case test will show how the tool reacts on time, actions, conditions, multiple \\
-	\> summands and depandant \pps of an inert.\\
+\ti{info} \> This test case will show how the tool reacts on time, actions, conditions, multiple \\
+	\> summands and dependant \pps.\\
 \line(1,0){120}\\
 \tb{act}  \> act1, act2, act3: Nat;\\
 \tb{proc} \> X(i,z,j: Nat) \>    = \>  (i \verb"<"  5) $\rightarrow$ act1(i)$@$z.X(i+1,z, j) +\\
@@ -320,52 +345,17 @@ inputfile: \verb"$DIR$/tests/lpeparelm/case7.mcrl2"
 \>  \verb" init P(i := 0, z := Pos2Nat(5), j := Pos2Nat(1));"\\
 \end{tabbing}
 
-\subsection*{Case 8}
-inputfile: \verb"$DIR$/tests/lpeparelm/case7.mcrl2"
-\begin{tabbing}
-\tabw
-\ti{info} \> This case test will show how the tool reacts on time, actions, conditions, multiple \\
-	\> summands and depandant \pps of an inert.\\
-\line(1,0){120}\\
-\tb{act}  \> act1, act2, act3: Nat;\\
-\tb{proc} \> X(i,z,j: Nat) \>    = \>  (i \verb"<"  5) $\rightarrow$ act1(i)$@$z.X(i+1,z, j) +\\
-          \>               \>  \> (i == 5) $\rightarrow$ act3(i).X(i, j, 4); \\
-\tb{init} X(0,5, 1);\\
-\line(1,0){120}\\
-\ti{Result} \> No \pp\ should be removed.\\ 
-\line(1,0){120}\\
-\ti{Genarated LPE} \\
-\>  \verb" var  freevar0: Nat;     "               \\                %%
-\>  \verb" proc P(s3: Pos, i,j: Nat) ="              \\              %%
-\>  \verb"         (s3 == 2) ->        "               \\             %%
-\>  \verb"           action(j) .        "                \\           %%
-\>  \verb"          P(s3 := 2, j := j + 1)"                \\        %%
-\>  \verb"       + (s3 == 1 && i < 5) ->   "                 \\       %%
-\>  \verb"           action(i) .            "                  \\     %%
-\>  \verb"            P(s3 := 1, i := i + 1, j := freevar0)"     \\   %%
-\>  \verb"      + (s3 == 1 && i == 5) -> "                         \\%%
-\>  \verb"           action(i) . "                 \\                 %%
-\>  \verb"           P(s3 := 2, j := i);"            \\               %%
-\>  \verb"       "                                     \\             %%
-\>  \verb"  var  freevar: Nat;"                          \\           %%
-\>  \verb"  init P(s3 := 1, i := 0, j := freevar);"        \\         %%
-\end{tabbing}
-
-\begin{thebibliography}{99}  \bibitem{LPE_info} auteur\\
-   \textit{article},
-   Extra info.
+\begin{thebibliography}{99}  
+   \bibitem{LPE_info} unknown author \\
+   \textit{Article not ready at the moment},
   \bibitem{LPEframework} J.W. Wesselink,
    \textit{http://www.win.tue.nl/~wieger/mcrl2/html/index.html}\\
    A C++ wrapper for the ATerm library.
-\bibitem{LPEformat} Aad Mathijssen\\
+   \bibitem{LPEformat} Aad Mathijssen\\
    \textit{https://svn.win.tue.nl/viewcvs-checkout/MCRL2/trunk/specs/mcrl2.internal.txt},
    A description of the internal format of the mCRL2 language.
-  \bibitem{LPEfreevar} auteur,
-   \textit{article}
-   Extra info.
-  \bibitem{lin} J.F. Groote,
-   \textit{linear}
-   Extra info.
+
+
 
 \end{thebibliography}
 
