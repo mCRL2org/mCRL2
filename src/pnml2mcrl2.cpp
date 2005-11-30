@@ -1,4 +1,5 @@
 #define NAME "pnml2mcrl2"
+#define VERSION "1.1"
 
 #include <ctype.h>
 #include <stdio.h>
@@ -1612,21 +1613,22 @@
   //==================================================
   void PrintHelp(char *Name){
     fprintf(stderr,
-      "Usage: %s [OPTION]... INFILE [OUTFILE]\n"
-      "Convert a Petri net in INFILE to an mCRL2 specification, and write it to\n"
-      "OUTFILE. If OUTFILE is not present, stdout is used. INFILE is supposed to\n"
-      "conform to the EPNML 1.1 standard. However, other PNML/EPNML standards might\n"
-      "work as well.\n"
-      "\n"
-      "Only classical Petri nets are translated, i.e. places, transitions and arcs.\n"
-      "Other constructs such as timing, coloring, inhibitor arcs and hierarchy are not\n"
-      "taken into account.\n"
-      "\n"
-      "  -h, --help            display this help message\n"
-      "  -q, --quiet           do not print any unrequested information\n"
-      "  -d, --debug           show debug messages\n"
-      "  -p, --no_rec_par      generate places in which the result is non-recursive\n",
-      Name);
+	    "Usage: %s [OPTION]... [INFILE [OUTFILE]]\n"
+	    "Convert a Petri net in INFILE to an mCRL2 specification, and write it to\n"
+	    "OUTFILE. If INFILE is not present, stdin is used. If OUTFILE is not present,\n"
+	    "stdout is used. INFILE is supposed to conform to the EPNML 1.1 standard.\n"
+	    "\n"
+	    "Only classical Petri nets are translated, i.e. places, transitions and arcs.\n"
+	    "Other constructs such as timing, coloring, inhibitor arcs and hierarchy are\n"
+	    "not taken into account.\n"
+	    "\n"
+	    "  -h, --help            display this help message\n"
+	    "  -q, --quiet           do not print any unrequested information\n"
+	    "  -d, --debug           show debug messages\n"
+	    "  -p, --no_rec_par      generate places in which the result is non-recursive\n"
+	    "  -v, --verbose         show verbose messages\n"
+	    "      --version         display version information\n",
+	    Name);
   }
 
 
@@ -1638,31 +1640,39 @@
     ATerm stackbot;
     ATinit(0,NULL,&stackbot);
     
-#define sopts "adhpq"
+  #define sopts "adhpqv"
     struct option lopts[] = {
       {"read-aterm"  , no_argument,      NULL, 'a'},
       {"debug"       , no_argument,      NULL, 'd'},
       {"help"        , no_argument,      NULL, 'h'},
       {"no_rec_par"  , no_argument,      NULL, 'p'},
       {"quiet"       , no_argument,      NULL, 'q'},
+      {"verbose"     , no_argument,      NULL, 'v'},
+      {"version"     , no_argument,      NULL, 0},
       {0, 0, 0, 0}
     };
     int opt;
     
     while ( (opt = getopt_long(argc,argv,sopts,lopts,NULL)) != -1 ){
       switch ( opt ){
-      case 'd': 
+      case 'd': /* debug */
 	gsSetDebugMsg();
 	break;
-      case 'h':
+      case 'h': /* help */
 	PrintHelp(argv[0]);
 	return 0;
-      case 'p': 
+      case 'p': /* no_rec_par */
 	rec_par=ATfalse;
 	break;
-      case 'q':
+      case 'q': /* quiet */
         gsSetQuietMsg();
         break;
+      case 'v': /* verbose */
+        gsSetVerboseMsg();
+        break;
+      case 0: /* version */
+	fprintf(stderr, "%s %s (revision %d)\n", NAME, VERSION, REVISION);
+	return 0;
       default:
 	break;
       }
@@ -1677,16 +1687,6 @@
 	return 1;
       }
     }
-    
-    OutStream = stdout;
-    if ( optind+1 < argc )
-      {
-	if ( (OutStream = fopen(argv[optind+1],"wb")) == NULL )
-	  {
-	    gsErrorMsg("cannot open file '%s' for writing\n",argv[optind+1]);
-	    return 1;
-	  }
-      }
 
     xmlDocPtr doc = xmlParseFile(SpecStream);
     if(!doc) {
@@ -1743,6 +1743,16 @@
     Spec=gsTypeCheck(Spec);
 
     if(Spec){
+      OutStream = stdout;
+      if ( optind+1 < argc )
+	{
+	  if ( (OutStream = fopen(argv[optind+1],"wb")) == NULL )
+	    {
+	      gsErrorMsg("cannot open file '%s' for writing\n",argv[optind+1]);
+	      return 1;
+	    }
+	}
+      
       PrintPart_C(OutStream, (ATerm) Spec, ppAdvanced);
       fclose(OutStream);
     }
