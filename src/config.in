@@ -68,17 +68,12 @@ includedir         = @includedir@
 infodir            = @infodir@
 mandir             = @mandir@
 
-BOOST_LDFLAGS = -L$(BOOST_PREFIX)/lib
-
 ifeq ($(BOOST_PREFIX),boost)
  BUILD_BOOST       = 1
 
  ifeq ($(HOST_OS),LINUX)
-  BOOST_LDFLAGS := -Wl,-rpath=$(libdir) $(BOOST_LDFLAGS)
+  BOOST_LDFLAGS = -Wl,-rpath=$(libdir)
  endif
-
- BOOST_FILESYSTEM      = -lboost_filesystem
- BOOST_PROGRAM_OPTIONS = -lboost_program_options
 
  ifeq ($(HOST_OS),MINGW)
   BOOST_FILESYSTEM      = boost/lib/libboost_filesystem-s.lib
@@ -91,6 +86,10 @@ ifeq ($(BOOST_PREFIX),boost)
 
  BOOST_PREFIX     := @abs_top_srcdir@/$(BOOST_PREFIX)
 endif
+
+BOOST_LDFLAGS        += -L$(BOOST_PREFIX)/lib
+BOOST_FILESYSTEM      = -lboost_filesystem
+BOOST_PROGRAM_OPTIONS = -lboost_program_options
 
 # Add revision number
 ifeq ($(findstring $(MAKECMDGOALS),clean distclean),)
