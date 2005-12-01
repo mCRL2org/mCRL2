@@ -966,35 +966,41 @@ static ATermAppl PushAllow(ATermList V, ATermAppl a){
     ATermList ul=untypeMAL(l);
     V = optimize_allow_list(V,ul);
     
-    // here we create a new process equation to replace gsMakeAllow(V,a);
+    // here we create (in case pn is not recursive) a new process equation to replace gsMakeAllow(V,a);
     // we call it pn_allow_i, where is is such that pn_allow_i is a fresh process name.
     // the parameters are the same as in pn.
-    
-    ATermAppl new_pn=ATAtableGet(subs_alpha,(ATerm)Pair_allow((ATerm)V,(ATerm)pn));
-    if(!new_pn){
-      //create a new 
-      //process name with type pn, add _i 
-      short i=1;
-      do{
-	new_pn=ATsetArgument(pn,(ATerm)ATmakeAppl0(ATappendAFun(ATappendAFun(ATgetAFun(ATAgetArgument(pn,0)),"_allow_"),ATgetName(ATmakeAFunInt0(i)))),0);
-	i++;
-      } while(ATtableGet(procs,(ATerm)new_pn));
-      
-      ATermAppl p=ATAtableGet(procs,(ATerm)pn);
-      assert(p);
-      p=PushAllow(V,p);
 
-      ATtablePut(procs,(ATerm)new_pn,(ATerm)p);
-      l=ATLtableGet(alphas,(ATerm)p);
-      ATtablePut(alphas,(ATerm)new_pn,(ATerm)l);
-
-      // we save both direct and reverse mappings
-      ATtablePut(subs_alpha,(ATerm)Pair_allow((ATerm)V,(ATerm)pn),(ATerm)new_pn);
-      ATtablePut(subs_alpha_rev,(ATerm)new_pn,(ATerm)pn);
+    if(ATisEqual(ATAgetArgument(ATAtableGet(props,(ATerm)pn),1),nrec_aterm)){
+      ATermAppl new_pn=ATAtableGet(subs_alpha,(ATerm)Pair_allow((ATerm)V,(ATerm)pn));
+      if(!new_pn){
+	//create a new 
+	//process name with type pn, add _i 
+	short i=1;
+	do{
+	  new_pn=ATsetArgument(pn,(ATerm)ATmakeAppl0(ATappendAFun(ATappendAFun(ATgetAFun(ATAgetArgument(pn,0)),"_allow_"),ATgetName(ATmakeAFunInt0(i)))),0);
+	  i++;
+	} while(ATtableGet(procs,(ATerm)new_pn));
+	
+	gsVerboseMsg("Created process %P\n", new_pn);
+	ATermAppl p=ATAtableGet(procs,(ATerm)pn);
+	assert(p);
+	p=PushAllow(V,p);
+	
+	ATtablePut(procs,(ATerm)new_pn,(ATerm)p);
+	l=ATLtableGet(alphas,(ATerm)p);
+	ATtablePut(alphas,(ATerm)new_pn,(ATerm)l);
+	
+	// we save both direct and reverse mappings
+	ATtablePut(subs_alpha,(ATerm)Pair_allow((ATerm)V,(ATerm)pn),(ATerm)new_pn);
+	ATtablePut(subs_alpha_rev,(ATerm)new_pn,(ATerm)pn);
+      }
+      a = ATsetArgument(a,(ATerm)new_pn,0);
+      ATtablePut(alphas,(ATerm) a,(ATerm) l);
     }
-    
-    a = ATsetArgument(a,(ATerm)new_pn,0);
-    ATtablePut(alphas,(ATerm) a,(ATerm) l);
+    else{
+      a = gsMakeAllow(V,a);
+      ATtablePut(alphas,(ATerm) a,(ATerm) filter_allow_list(l,V));
+    }
     
     return a;
   } 
