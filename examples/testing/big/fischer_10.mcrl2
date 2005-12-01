@@ -1,0 +1,42 @@
+% This is an MCRL2 description of Fischer's mutual exclusion protocol
+% for two processes. The idea is that two processes communicate within
+% certain time bounds to obtain exclusive access to a mututal resource.
+% This protocol is particularly interesting, because it crucially 
+% relies on time, and is quite simple. This version has been made by
+% Yaroslav Usenko using a similar model in UPPAAL.
+
+eqn k=10;
+
+map k:Pos; 
+
+sort Time=Real;
+
+act
+  get,_get,__get:Nat;
+  set,_set,__set:Nat;
+  cs_in,cs_out:Pos;
+
+proc
+
+P(pid:Pos)=P_init(pid,0,0);
+
+P_init(pid:Pos,t:Time,x:Time)=
+  sum u:Time._get(0)@(t+u).P_req(pid,t+u,0);
+
+P_req(pid:Pos,t:Time,x:Time)=
+  sum u:Time.(u<k)->_set(pid)@(t+u).P_wait(pid,t+u,0);
+
+P_wait(pid:Pos,t:Time,x:Time)=
+  sum u:Time.(x+u>=k)->_get(pid)@(t+u).cs_in(pid)@(t+u).P_cs(pid,t+u,x+u)
+ +sum u:Time._get(0)@(t+u).P_req(pid,t+u,0);
+
+P_cs(pid:Pos,t:Time,x:Time)=
+  sum u:Time.cs_out(pid)@(t+u)._set(0)@(t+u).P_init(pid,t+u,x+u);
+
+
+ID(id:Nat) = sum n:Nat.set(n).ID(n) + get(id).ID(id);
+
+kP(p:Pos)=(p>1) -> (P(p)||kP(max(p-1,1))),P(1);
+
+init hide({__get,__set},allow({cs_in,cs_out,__get,__set},comm({get|_get->__get,set|_set->__set},allow({cs_in,cs_out,get|_get,set|_set},kP(k)||ID(0)))));
+
