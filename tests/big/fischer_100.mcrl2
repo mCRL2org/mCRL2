@@ -5,11 +5,13 @@
 % relies on time, and is quite simple. This version has been made by
 % Yaroslav Usenko using a similar model in UPPAAL.
 
-eqn k=100;
-
-map k:Pos; 
+eqn n=100;
+eqn k=2;
 
 sort Time=Real;
+map 
+  n:Pos;
+  k:Time; 
 
 act
   get,_get,__get:Nat;
@@ -36,7 +38,7 @@ P_cs(pid:Pos,t:Time,x:Time)=
 
 ID(id:Nat) = sum n:Nat.set(n).ID(n) + get(id).ID(id);
 
-kP(p:Pos)=(p>1) -> (P(p)||kP(max(p-1,1))),P(1);
+nP(p:Pos)=(p>1) -> (P(p)||nP(max(p-1,1))),P(1);
 
-init hide({__get,__set},allow({cs_in,cs_out,__get,__set},comm({get|_get->__get,set|_set->__set},allow({cs_in,cs_out,get|_get,set|_set},kP(k)||ID(0)))));
+init hide({__get,__set},allow({cs_in,cs_out,__get,__set},comm({get|_get->__get,set|_set->__set},allow({cs_in,cs_out,get|_get,set|_set},nP(n)||ID(0)))));
 

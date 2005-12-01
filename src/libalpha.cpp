@@ -1870,7 +1870,7 @@ ATermAppl gsAlpha(ATermAppl Spec){
       ATermAppl pair=ATAgetFirst(l);
       ATermAppl name=ATAgetArgument(pair,1);
       ATtablePut(procs,(ATerm)name,(ATerm)gsaGenNInst(ATAgetArgument(pair,0),P));
-      ATtablePut(props,(ATerm)name,(ATerm)ATsetArgument(ATAtableGet(props,(ATerm)P),(ATerm)nrec_aterm,1));
+      ATtablePut(props,(ATerm)name,(ATerm)ATmakeAppl2(props_afun,(ATerm)mCRL_aterm,(ATerm)nrec_aterm));
       ATtablePut(deps,(ATerm)name,(ATerm)merge_list(ATmakeList1((ATerm)P),ATLtableGet(deps,(ATerm)P)));
     }
     if(success){

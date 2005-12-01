@@ -5,7 +5,9 @@
 % relies on time, and is quite simple. This version has been made by
 % Yaroslav Usenko using a similar model in UPPAAL.
 
-map k:Time; eqn k=2;
+eqn k=2;
+
+map k:Time;
 
 sort Time=Real;
 
