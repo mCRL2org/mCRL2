@@ -950,9 +950,13 @@ static ATermAppl PushAllow(ATermList V, ATermAppl a){
   }
   else if ( gsIsProcess(a) ){
     ATermAppl pn=ATAgetArgument(a,0);
-    ATermList l = ATLtableGet(alphas,(ATerm) ATAgetArgument(a,0));
-    if(!l)
-      l = gsaGetAlpha(a,get_max_allowed_length(V));
+    ATermList l = ATLtableGet(alphas,(ATerm)pn);
+    if(!l){
+      unsigned max_len=get_max_allowed_length(V);
+      l = ATLtableGet(alphas,(ATerm)Pair((ATerm)ATmakeAppl0(ATmakeAFunInt0(max_len)),(ATerm)pn));
+      if(!l)
+	l = gsaGetAlpha(a,max_len);
+    }
     else
       ATtablePut(alphas,(ATerm) a,(ATerm) l);
      
@@ -1329,6 +1333,10 @@ static ATermList gsaGetAlpha(ATermAppl a, unsigned length, ATermList ignore){
       //we apply the alphabeth reductions to its body and then we know the alphabet
       //gsWarningMsg("Exploring new mCRL process %T\n\n",pn);
       l=gsaGetAlpha(ATAtableGet(procs,(ATerm)pn),length,ignore);
+      if(!length)
+	ATtablePut(alphas,(ATerm)pn,(ATerm) l);
+      else
+	ATtablePut(alphas,(ATerm)Pair((ATerm)ATmakeAppl0(ATmakeAFunInt0(length)),(ATerm)pn),(ATerm)l);
     }
     assert(l);
   }
