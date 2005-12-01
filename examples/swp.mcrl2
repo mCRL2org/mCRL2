@@ -1,4 +1,4 @@
-% This file contains a mCRL2/genspect version of the sliding window protocol
+% This file contains an mCRL2 version of the sliding window protocol
 % as used in Fokkink, Groote, Pang, Badban and van de Pol,
 % Verifying a sliding window protocol in mCRL, Report SENR0308, CWI,
 % Amsterdam, 2003. 
