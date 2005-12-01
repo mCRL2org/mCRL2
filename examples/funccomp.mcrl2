@@ -1,7 +1,7 @@
 %                                   Function composition
 %                                   --------------------
 %
-% This is a GenSpect specification of the composition f ° g for function f of
+% This is an mCRL2 specification of the composition f ° g for function f of
 % type B -> C and function g of type A -> B.
 
 sort

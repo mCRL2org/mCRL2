@@ -1,6 +1,5 @@
-% This is based on the GenSpect example from Section 10.1 of the TU/e Computer
-% Science master's thesis titled 'GenSpect Process Algebra' by Muck van
-% Weerdenburg.
+% This is based on the example from Section 10.1 of the TU/e Computer Science
+% master's thesis titled 'GenSpect Process Algebra' by Muck van Weerdenburg.
 
 act
   get_i, put_k, get_l, put_j: Nat;
