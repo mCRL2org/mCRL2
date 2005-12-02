@@ -31,7 +31,7 @@
 \newcommand{\at}[1]{\mbox{\aap ,} #1}
 
 %opening
-\title{lpeparelm\\DRAFT}
+\title{lpeparelm}
 \author{F.P.M.Stappers}
 
 \begin{document}
@@ -88,87 +88,64 @@ $\ovr{x}._j$
 
 \begin{defn}
 Let $w \in I \cup J$, where $I$ and $J$ are the set of summand indices; We define \\
- $\ovr{vect^w} = (\ovr(d , e_w))$\\
+ $\ovr{vect^w} = (\ovr{d , e_w})$\\
 where $k = \vert \ovr{d} \vert$ and $z = \vert \ovr{e_w} \vert$. The length of $ \ovr{vect^w}$ is equal to $k + z$.
 \end{defn}
 
-\begin{defn}[$\ovr{\boxtimes}^w_X(e)$]
-Let $w \in W$, where $W$ is the set of summand indices.\\
-We define $\ovr{\boxtimes}^w_X(e)$:\\
+\begin{defn}[$\boxtimes^w_X$]
+Let $w \in W$, where $W$ is a set of summand indices.\\
+We define $\boxtimes^w_X$:\\
 Let $j \in \lbrace 1, \dots, \vert \ovr{vect^w} \vert \rbrace.$\\
-If $j \in X$ then $\ovr{\boxtimes^w_X(e)}._j = e$ \\
-If $j \not\in X$ then $\ovr{\boxtimes^w_X(e)}._j = \ovr{vect^w}._j$ \\
+If $j \not\in X$ then $\boxtimes^w_X._j = y \hspace{40pt} \text{where }y \in \ovr{D}._j$ \\
+If $j \in X$ then $\boxtimes^w_X._j = \ovr{vect^w}._j$ \\
 \end{defn}
 
-\begin{defn}[\texttt{Dom($x$)}] Let $x$ be an variable, then \texttt{Dom$(x)$} is the collection of all values which variable $x$ can be. 
-\end{defn}
+% \begin{defn}[\texttt{Dom($x$)}] Let $x$ be an variable, then \texttt{Dom$(x)$} is the collection of all values which variable $x$ can be. 
+% \end{defn}
 
-\newcommand{\zi}{\ovr{\boxtimes}^l_{S_L}(s)}
-\newcommand{\zj}{\ovr{\boxtimes}^k_{S_L}(s)}
-\newcommand{\zd}{\ovr{\boxtimes}^\delta1_{S_L}(s)}
+\newcommand{\zi}{{\boxtimes}^k_{S_L}}
+\newcommand{\zj}{{\boxtimes}^l_{S_L}}
+\newcommand{\zd}{{\boxtimes}^\delta_{S_L}}
 
-\begin{defn} \label{def:sug3} Let $M$ be an LPE. We define:
+% \begin{defn}(L) \label{def:lpe:L} We define $M$:
+% \begin{tabbing}
+% \tab
+%  \>$\sum_{i \in I} \sum_{\ovr{e_i:E_i}} c_i ( \ovr{vect^i} ) \rightarrow $
+% $ a_i^1 (\ovr{f_{i,1}}(\ovr{vect^i})) \vert \ldots \vert a_i^{n(i)}(\ovr{f_{i,n(i)}}(\ovr{vect^i})) \at \text{ } t_i(\ovr{vect^i})  \cdot X(\ovr{g_i}(\ovr{vect^i}))
+% $ \\
+%  \> $+ \sum_{j \in J} \sum_{\ovr{e_j:E_j}} c_j ( \ovr{vect^j} ) \rightarrow $
+% $ a_j^1 (\ovr{f_{j,1}}(\ovr{vect^j})) \vert \ldots \vert a_j^{n(j)}(\ovr{f_{j,n(j)}}(\ovr{vect^j})) \at \text{ } t_j(\ovr{vect^j})
+% $ \\
+%  \> $ + \sum_{\ovr{e_\delta:E_\delta}} c_\delta ( \ovr{d, e_\delta}) \rightarrow 
+% \delta \at \text{ } t_\delta(\ovr{vect^{\delta}})$ \\
+% \end{tabbing}
+% \end{defn}
+
+\begin{defn}(M) \label{def:lpe:M} Let $M$ and $L$ be an LPE. We define $M$:
 \begin{tabbing}
 \tab
-\> $ UsedPP_M \subseteq \lbrace 1, \ldots, n \rbrace $ \\ \\
-\> as the biggest possible set such that:\\ \\
-\> $\forall_{z \not\in S_L}\forall_{s \in \texttt{Dom}(\ovr{vect^i}._z)  \cup  \texttt{Dom}(\ovr{vect^j}._z)  \cup  \texttt{Dom}(\ovr{vect^\delta})}$\\
-
-\> \>$\sum_{i \in I} \sum_{\ovr{e_i:E_i}} c_i ( \ovr{vect^i} ) \rightarrow $
-$ a_i^1 (\ovr{f_{i,1}}(\ovr{vect^i})) \vert \ldots \vert a_i^{n(i)}(\ovr{f_{i,n(i)}}(\ovr{vect^i})) \at \text{ } t_i(\ovr{vect^i})  \cdot X(\ovr{g_i}(\ovr{vect^i}))
+$ S_L \subseteq \lbrace 1, \ldots, n \rbrace $ \\ \\
+as the biggest possible set such that:\\ \\
+$\forall_{z \not\in S_M}$\\
+\>$\sum_{k \in I} \sum_{\ovr{e_k:E_k}} c_k ( \zi ) \rightarrow $
+$ a_k^1 (\ovr{f_{k,1}}(\zi) \vert \ldots \vert a_k^{n(k)}(\ovr{f_{k,n(k)}}(\zi) \at \text{ } t_{k}(\zi)  \cdot X(\ovr{g_{k}}(\zi)
 $ \\
-\> \> $+ \sum_{j \in J} \sum_{\ovr{e_j:E_j}} c_j ( \ovr{vect^j} ) \rightarrow $
-$ a_j^1 (\ovr{f_{j,1}}(\ovr{vect^j})) \vert \ldots \vert a_j^{n(j)}(\ovr{f_{j,n(j)}}(\ovr{vect^j})) \at \text{ } t_j(\ovr{vect^j})
-$ \\
-\> \> $ + \sum_{\ovr{e_\delta:E_\delta}} c_\delta ( \ovr{d, e_\delta}) \rightarrow 
-\delta \at \text{ } t_\delta(\ovr{vect^{\delta}})$ \\
-
-\> $\bisim$ \\
-
-\> \>$\sum_{k \in K} \sum_{\ovr{e_k:E_k}} c_k ( \zi ) \rightarrow $
-$ a_k^1 (\ovr{f_{k,1}}(\zi) \vert \ldots \vert a_k^{n(k)}(\ovr{f_{k,n(k)}}(\zi) \at \text{ } t_{k}(\zi)  \cdot Y(\ovr{g_{k}}(\zi)
-$ \\
-\> \> $+ \sum_{l \in L} \sum_{\ovr{e_l:E_L}} c_l ( \zj ) \rightarrow $
+\> $+ \sum_{l \in J} \sum_{\ovr{e_l:E_L}} c_l ( \zj ) \rightarrow $
 $ a_{l}^1 (\ovr{f_{l,1}}(\zj) \vert \ldots \vert a_{l}^{n(l)}(\ovr{f_{l,n(l)}}(\zj) \at \text{ } t_{l}(\zj)
 $ \\
-\> \> $ + \sum_{\ovr{e_{\delta^1}:E_{\delta^1}}} c_{\delta^1} ( \zd ) \rightarrow 
+\> $ + \sum_{\ovr{e_{\delta}:E_{\delta^1}}} c_{\delta} ( \zd ) \rightarrow 
 {\delta} \at \text{ } t_{\delta}(\zd)$\\
 $)$ \\
-
 \end{tabbing}
+\noindent Then $M \bisim L$
 \end{defn}
-
-Proof by contradiction:
-\begin{itemize}
-\item If there is a $q = \lbrace x \in \lbrace 1, \ldots, \vert \ovr{vect^i} \vert \rbrace \vert \exists_{i \in I}\exists_{k \in \lbrace 0, \ldots , n(i) \rbrace}\exists_{z \not\in S_L}\exists_{s \in  \texttt{Dom}(\ovr{vect^i}._z)}\\ 
-c_i(\zi) \rightarrow a_i^k(\ovr{f_{i,k}}(\zi)) \at t(\zi) \cdot X(\ovr{g_i}(vect^i))\models c_i(\ovr{vect^i})a_i^k(\ovr{f_{i,k}}(\ovr{vect^i})) \at t(\ovr{vect_i}) \cdot X(\ovr{g_i}(\zi))\rbrace$.\\ 
-
-So $S_L$ is not the biggest subset, because $q$ can be added to $S_L$. This yields to contradiction, theirefore holds:\\ 
-$\forall_{x \in S}\forall_{s \in  \texttt{Dom}} c_i(\zi) \rightarrow (\ovr{vect^i}_z) (a(\zi)) \at t(\zi) \cdot X(\ovr{g_i}(vect^i)) \models \\
-c_i(\ovr{vect^i}) \rightarrow a_i^k (\ovr{f_{i,k}}(\ovr{vect^i})) \at t(vect^i) X(\ovr{g_i}(\zi))$ 
-
-\item If there is a $q = \lbrace x \in \lbrace 1, \ldots, \vert \ovr{vect^j} \vert \rbrace \vert \exists_{j \in J}\exists_{k \in \lbrace 0, \ldots , n(j) \rbrace}\exists_{z \not\in S_L}\exists_{s \in \texttt{Dom}(\ovr{vect^j}._z)  } \\
-c_j(\zj) \rightarrow a_j^k(\ovr{f_{j,k}}(\zj)) \at t(\zj)\models c_j(\ovr{vect^j})a_j^k(\ovr{f_{j,k}}(\ovr{vect^j})) \at t(\ovr{vect_j}) \rbrace$.\\ \
-
-So $S_L$ is not the biggest subset, because $q$ can be added to $S_L$. This yields to contradiction, theirefore holds:\\
-$\forall_{x \in S}\forall_{s \in  \texttt{Dom}} c_j(\zj) \rightarrow (\ovr{vect^j}_z) (a(\zj)) \at t(\zj) \models \\
-c_j(\ovr{vect^j}) \rightarrow a_j^k (\ovr{f_{j,k}}(\ovr{vect^j})) \at t(vect^j)$
-
-\item If there is a $q = \lbrace x \in \lbrace 1, \ldots, \vert \ovr{vect^\delta} \vert \rbrace \vert 
-\exists_{z \not\in S_L}\exists_{s \in \texttt{Dom}(\ovr{vect^\delta}._z)  } c_\delta(\zd)  \rightarrow \delta \at t(\zd) \rbrace \models c_\delta(\ovr{vect^\delta}) \rightarrow \delta \at t(\ovr{vect^\delta})$ .\\
-
-So $S_L$ is not the biggest subset, because $q$ can be added to $S_L$. This yields to contradiction, theirefore holds:\\
-$\forall_{x \in S}\forall_{s \in  \texttt{Dom}(\ovr{vect^\delta}._z)}
- (c_\delta(\zd )) \rightarrow \delta \at t_\delta(\zd) \models
-(c_\delta(\ovr{vect^\delta})) \rightarrow \delta \at t_\delta(vect^\delta) $
-\end{itemize}
 
 \section{Description} \label{sec:desc}
 It is possible having \pps\ which can have any value without influencing the behavior of the LPE. 
-If we look at an LPE in the LPE-format, we see that the LPE only contains \pps\ which influence the behavior and it omits those \pps\ which do not influence the behavior. So if \pps\ do not occur in condition, action arguments or time tags, they do not influence the behavior in a direct way. So if we collect all \pps , which are used in the condition, action arguments and time tags, we know which \pps\ are used. To indicate which \pps are used, we keep a set $UsedPP$ which contains all indices used \pps . To find all \pps in a condition, action argument of time tag we have function called $FindUsedPP$. This function returns a set of  \pp\ indices which occur in a given condition, argument argument or time tag. 
+If we look at the next states in an LPE in the LPE-format, we see that the LPE only contains \pps\ which influence the behavior and it omits those \pps\ which do not influence the behavior. So, if \pps\ do not occur in condition, action arguments or time tags, they do not influence the behavior in a direct way. If we collect all \pps , which are used in the condition, action arguments and time tags, we know which \pps\ are used. To indicate which \pps\ are used, we keep a set $UsedPP$\footnote{$UsedPP = S_M$ : Due the length off the word $UsedPP$ the Definition \ref{def:lpe:M} would get to long and clipped} which contains all indices used \pps . To find all \pps in a condition, action argument or time tag we have function called $FindUsedPP$. This function returns a set of  \pp\ indices which occur in a given condition, action argument or time tag. 
 
-A next state is always used as an input state, to calculate another next state. So for each \pp we have to check, if all \pps\ which are used to construct a next state are in the set of used \pps . If a \pp\ is used as an input and is not in the set of used \pps\ this \pp\ is added to the set of indices. 
-Also we have to check, that all \pps for which the added \pp\ depends on, are also in the in the list of used \pps. We continue adding \pps\ dependant on other \pps\ which are also in the set of set of used \pp\ indices.
+A next state is always used as an input state, to calculate another next state. So for each \pp\ we have to check while  all \pps\ which are used to construct a next state are in the set of used \pps . If a \pp\ is used as an input and is not in the set of used \pps\ this \pp\ is added to the set of indices. 
+Also, we have to check, that all \pps\ on which the added \pp\ depends, are also in the list of used \pps. We continue adding \pps\ dependant on other \pps\ which are also in the set of used \pp\ indices.
 
 In short: Throughout the run of the algorithm \pps\ get marked if they are used in an action, time or condition. Process parameters which are dependant of other marked \pps\ also get marked. If a \pp\ gets marked it should not be removed. Initially, all parameters in the LPE are unmarked. After the algorithm terminates all unmarked \pps\ are removed. A \pp\ gets marked if it occurs in one of the following places:
 
@@ -189,16 +166,16 @@ $(\ovr{f_{i,j}}(\ovr{vect^i})$ for some $i \in I \cup J$ and $j \in \lbrace 1, \
   \FORALL{$i \in I \cup J $}
     \STATE $UsedPP := UsedPP \cup FindUsedPP(\ovr{c_i}(\ovr{vect^i}))$
     \FOR{$j := 1$ to $n(i) $}
-      \STATE $UsedPP = UsedPP \cup FindUsedPP(\ovr{f_{i,j}}(\ovr{vect^i})$
+      \STATE $UsedPP := UsedPP \cup FindUsedPP(\ovr{f_{i,j}}(\ovr{vect^i})$
     \ENDFOR
     \STATE $UsedPP := UsedPP \cup FindUsedPP(\ovr{t_i}(\ovr{vect^i}))$
   \ENDFOR
 \STATE $n := 0$
 \WHILE{$\vert UsedPP \vert > n $}
 \STATE $n := \vert UsedPP \vert$
-  \FORALL{$ i \in I \cup J$}
+  \FORALL{$ i \in I$}
     \FORALL{$j \in UsedPP$}
-      \STATE $UsedPP = UsedPP \cup FindUsedPP(\ovr{g_i}(\ovr{vect^i})._j) $
+      \STATE $UsedPP := UsedPP \cup FindUsedPP(\ovr{g_i}(\ovr{vect^i})._j) $
     \ENDFOR
   \ENDFOR
 \ENDWHILE
@@ -300,7 +277,7 @@ inputfile: \verb"$DIR$/tests/lpeparelm/case6.mcrl2"
 \tb{init} X(0); \\
 \line(1,0){120}\\
 \ti{Result} \> No \pp\ should be removed.\\ 
-\> \textbf{Note:} Different linearization might lead to other results.
+\> \textbf{Note:} Different linearization might lead to other results.\\
 \line(1,0){120}\\
 \ti{Genarated LPE} \\
 \>  \verb"var  freevar0: Nat;"\\
