@@ -108,7 +108,7 @@ LPEREWR_LDFLAGS    = -lrewrite -l$(ATERM) -lm $(LIBDL)
 
 #lpe2lts definitions
 LPE2LTS_NAME       = lpe2lts
-LPE2LTS_OBJECTS    = lpe2lts.o libnextstate.o libprint_c.o libstruct.o liblowlevel.o
+LPE2LTS_OBJECTS    = lpe2lts.o libnextstate.o libtrace.o libprint.o libprint_c.o libstruct.o liblowlevel.o
 OBJECTS           += $(LPE2LTS_OBJECTS)
 LPE2LTS_LDFLAGS    = -lenum -lrewrite -lsvc -l$(ATERM) -lm $(LIBDL)
 

@@ -4,6 +4,8 @@
 #include <aterm2.h>
 #include "librewrite.h"
 
+//#define _INNERC_STORE_TREES
+
 class RewriterCompilingInnermost: public Rewriter
 {
 	public:
@@ -44,6 +46,12 @@ class RewriterCompilingInnermost: public Rewriter
 		ATerm (*so_get_subst)(ATermAppl);
 		void (*so_clear_subst)(ATermAppl);
 		void (*so_clear_substs)();
+
+#ifdef _INNERC_STORE_TREES
+		int write_tree(FILE *f, ATermAppl tree, int *num_states);
+		void tree2dot(ATermAppl tree, char *name, char *filename);
+		ATermAppl create_tree(ATermList rules, int opid, int arity);
+#endif
 
 		void calcTerm(FILE *f, ATerm t, int startarg);
 		void implement_tree_aux(FILE *f, ATermAppl tree, int cur_arg, int parent, int level, int cnt, int d, int arity);

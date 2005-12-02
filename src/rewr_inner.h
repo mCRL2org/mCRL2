@@ -4,6 +4,8 @@
 #include <aterm2.h>
 #include "librewrite.h"
 
+//#define _INNER_STORE_TREES
+
 class RewriterInnermost: public Rewriter
 {
 	public:
@@ -39,6 +41,12 @@ class RewriterInnermost: public Rewriter
 		ATerm rewrite_func(ATermInt op, ATermList args);
 		ATerm rewrite_aux(ATerm Term);
 		ATermList rewrite_listelts(ATermList l);
+
+#ifdef _INNER_STORE_TREES
+		int write_tree(FILE *f, ATermAppl tree, int *num_states);
+		void tree2dot(ATermAppl tree, char *name, char *filename);
+		ATermAppl create_tree(ATermList rules, int opid, int *max_vars);
+#endif
 
 		ATermList tree_matcher_aux(ATerm t, ATermAppl *tree, ATermAppl *vars, ATerm *vals, int *len);
 		ATerm tree_matcher(ATermList t, ATermAppl tree);

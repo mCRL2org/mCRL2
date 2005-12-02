@@ -8,12 +8,16 @@
 #include <getopt.h>
 #include <aterm2.h>
 #include <assert.h>
+#include <sstream>
 #include "svc/svc.h" //XXX
 #include "liblowlevel.h"
 #include "libstruct.h"
 #include "libprint_c.h"
 #include "libnextstate.h"
 #include "librewrite_c.h"
+#include "libtrace.h"
+
+using namespace std;
 
 #define OF_UNKNOWN  0
 #define OF_AUT    1
@@ -306,6 +310,8 @@ int main(int argc, char **argv)
   unsigned long nextlevelat = 1;
   unsigned long prevtrans = 0;
   unsigned long prevcurrent = 0;
+  unsigned long deadlockcnt = 0;
+  char *basefilename = NULL;
   gsVerboseMsg("generating state space...\n");
 
   while ( current_state < num_states )
@@ -332,7 +338,7 @@ int main(int argc, char **argv)
                 num_states++;
                 if ( trace )
                 {
-                        ATtablePut(backpointers, NewState, state);
+                        ATtablePut(backpointers, NewState, (ATerm) ATmakeList2(state,(ATerm) Transition));
                 }
         }
       }
@@ -377,11 +383,6 @@ int main(int argc, char **argv)
     }
     if ( deadlockstate )
     {
-      if ( explore )
-      {
-        fprintf(stderr,"deadlock-detect: deadlock found.\n");
-        fflush(stderr);
-      }
       if ( trace_deadlock )
       {
         ATerm s = state;
@@ -390,23 +391,41 @@ int main(int argc, char **argv)
   
         while ( (ns = ATtableGet(backpointers, s)) != NULL )
         {
-          tr = ATinsert(tr, s);
-          s = ns;
+          tr = ATinsert(tr, (ATerm) ATmakeList2(ATgetFirst(ATgetNext((ATermList) ns)),s));
+          s = ATgetFirst((ATermList) ns);
         }
   
+        Trace trace;
+	trace.setState(gsMakeStateVector(s));
         for (; !ATisEmpty(tr); tr=ATgetNext(tr))
         {
-          ATermList l = gsNextState(s, NULL);
-          for (; !ATisEmpty(l); l=ATgetNext(l))
-          {
-            if ( ATisEqual(ATgetFirst(ATgetNext(ATLgetFirst(l))),ATgetFirst(tr)) )
-            {
-              gsfprintf(stderr, "%P\n",ATAgetFirst(ATLgetFirst(l)));
-              break;
-            }
-          }
-          s = ATgetFirst(tr);
+          ATermList e = (ATermList) ATgetFirst(tr);
+          trace.addAction((ATermAppl) ATgetFirst(e));
+	  e = ATgetNext(e);
+	  trace.setState(gsMakeStateVector(ATgetFirst(e)));
         }
+
+	if ( basefilename == NULL )
+	{
+		basefilename = strdup(SpecFileName);
+      		char *s = strrchr(basefilename,'.');
+		if ( s != NULL )
+		{
+			*s = '\0';
+		}
+	}
+        stringstream ss;
+	ss << basefilename << "_" << deadlockcnt << ".dlk";
+	string sss(ss.str());
+        trace.save(sss);
+        if ( explore )
+        {
+          fprintf(stderr,"deadlock-detect: deadlock found and saved to '%s_%i.dlk'.\n",basefilename,deadlockcnt);
+          fflush(stderr);
+        }
+	deadlockcnt++;
+      } else {
+        fprintf(stderr,"deadlock-detect: deadlock found.\n");
         fflush(stderr);
       }
     }
@@ -460,6 +479,7 @@ int main(int argc, char **argv)
       nextlevelat = num_states;
     }*/
   }
+  free(basefilename);
   }
 
   switch ( outformat )

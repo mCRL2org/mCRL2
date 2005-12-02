@@ -86,8 +86,6 @@ void RewriterCompilingInnermost::clearSubstitutions()
 #define INNERC_LDFLAGS  ""
 #endif
 
-//#define _INNERC_STORE_TREES
-
 #define ATXgetArgument(x,y) ((unsigned int) (intptr_t) ATgetArgument(x,y))
 
 static ATermList ATinsertA(ATermList l, ATermAppl a)
@@ -413,7 +411,7 @@ static char *whitespace(int len)
 
 
 #ifdef _INNERC_STORE_TREES
-static int write_tree(FILE *f, ATermAppl tree, int *num_states)
+int RewriterCompilingInnermost::write_tree(FILE *f, ATermAppl tree, int *num_states)
 {
 	int n,m;
 
@@ -482,7 +480,7 @@ static int write_tree(FILE *f, ATermAppl tree, int *num_states)
 	return -1;
 }
 
-static void tree2dot(ATermAppl tree, char *name, char *filename)
+void RewriterCompilingInnermost::tree2dot(ATermAppl tree, char *name, char *filename)
 {
 	FILE *f;
 	int num_states = 0;
@@ -968,7 +966,11 @@ ATfprintf(stderr,"build_tree(  %t  ,  %t  ,  %t  ,  %t  ,  %t  ,  %i  )\n\n",par
 	}
 }
 
+#ifdef _INNERC_STORE_TREES
+ATermAppl RewriterCompilingInnermost::create_tree(ATermList rules, int opid, int arity)
+#else
 static ATermAppl create_tree(ATermList rules, int opid, int arity)
+#endif
 	// Create a match tree for OpId int2term[opid] and update the value of
 	// *max_vars accordingly.
 	//

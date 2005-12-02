@@ -968,7 +968,11 @@ ATfprintf(stderr,"build_tree(  %t  ,  %t  ,  %t  ,  %t  ,  %t  ,  %i  )\n\n",par
 	}
 }
 
+#ifdef _JITTYC_STORE_TREES
 ATermAppl RewriterCompilingJitty::create_tree(ATermList rules, int opid, int arity)
+#else
+static ATermAppl create_tree(ATermList rules, int opid, int arity)
+#endif
 	// Create a match tree for OpId int2term[opid] and update the value of
 	// *max_vars accordingly.
 	//
@@ -1048,7 +1052,11 @@ static ATermList get_vars(ATerm a)
 	}
 }
 
+#ifdef _JITTYC_STORE_TREES
 ATermList RewriterCompilingJitty::create_strategy(ATermList rules, int opid)
+#else
+static ATermList create_strategy(ATermList rules, int opid)
+#endif
 {
 	ATermList strat = ATmakeList0();
 	unsigned int arity;

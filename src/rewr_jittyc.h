@@ -50,9 +50,9 @@ class RewriterCompilingJitty: public Rewriter
 #ifdef _JITTYC_STORE_TREES
 		int write_tree(FILE *f, ATermAppl tree, int *num_states);
 		void tree2dot(ATermAppl tree, char *name, char *filename);
-#endif
 		ATermAppl create_tree(ATermList rules, int opid, int arity);
 		ATermList create_strategy(ATermList rules, int opid);
+#endif
 
 		void calcTerm(FILE *f, ATerm t, int startarg, ATermList nnfvars, bool rewr = true);
 		void implement_tree_aux(FILE *f, ATermAppl tree, int cur_arg, int parent, int level, int cnt, int d, int arity, bool *used, ATermList nnfvars);

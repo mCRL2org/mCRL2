@@ -10,8 +10,6 @@
 #include "rewr_inner.h"
 #include "libprint_c.h"
 
-//#define _INNER_STORE_TREES
-
 static AFun nilAFun;
 static AFun opidAFun;
 static AFun ruleAFun;
@@ -117,7 +115,7 @@ static void finalise_common()
 
 
 #ifdef _INNER_STORE_TREES
-static int write_tree(FILE *f, ATermAppl tree, int *num_states)
+int RewriterInnermost::write_tree(FILE *f, ATermAppl tree, int *num_states)
 {
 	int n,m;
 
@@ -186,7 +184,7 @@ static int write_tree(FILE *f, ATermAppl tree, int *num_states)
 	return -1;
 }
 
-static void tree2dot(ATermAppl tree, char *name, char *filename)
+void RewriterInnermost::tree2dot(ATermAppl tree, char *name, char *filename)
 {
 	FILE *f;
 	int num_states = 0;
@@ -725,7 +723,11 @@ static ATermAppl optimise_tree(ATermAppl tree,int *max)
 	return optimise_tree_aux(tree,ATmakeList0(),-1,max);
 }
 
+#ifdef _INNER_STORE_TREES
+ATermAppl RewriterInnermost::create_tree(ATermList rules, int opid, int *max_vars)
+#else
 static ATermAppl create_tree(ATermList rules, int opid, int *max_vars)
+#endif
 	// Create a match tree for OpId int2term[opid] and update the value of
 	// *max_vars accordingly.
 	//
