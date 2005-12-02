@@ -46,7 +46,7 @@
   <xs:attribute name="name" type="xs:token" use="required"/>
   <xs:attribute name="uptodate" type="xs:boolean" use="optional"/>
  </xs:complexType>
- <!-- Root element the studio-project -->
+ <!-- Root element of the project -->
  <xs:element name="project">
   <xs:complexType>
    <xs:sequence>

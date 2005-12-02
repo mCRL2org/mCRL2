@@ -4,7 +4,7 @@
 #include <string>
 
 /* The default name of the profile directory */
-#define PROFILE_DIRECTORY      ".studio"
+#define PROFILE_DIRECTORY      ".squadt"
 
 /*
  * Stores the runtime configuration settings for all components.

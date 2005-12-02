@@ -146,7 +146,7 @@ LIB_NAMES          = $(XSIMTRACE_NAME)
 OBJECTS           := $(sort $(OBJECTS))
 
 #Make rules
-.PHONY: all install clean distclean boost documentation studio experimental
+.PHONY: all install clean distclean boost documentation squadt experimental
 .PRECIOUS: mcrl2parser.c mcrl2lexer.c
 
 all: $(EXE_NAMES) $(LIB_NAMES)
@@ -167,7 +167,7 @@ endif
 # Build/clean/install libxml2 dependent targets
 ifdef USE_LIBXML2
 ifdef USE_WX
-all clean distclean install: studio
+all clean distclean install: squadt
 endif
 endif
 
@@ -175,9 +175,9 @@ endif
 documentation:
 	@$(MAKE) -C doc $(MAKECMDGOALS)
 
-# For building studio
-studio: boost
-	@$(MAKE) -C studio $(MAKECMDGOALS)
+# For building squadt
+squadt: boost
+	@$(MAKE) -C squadt $(MAKECMDGOALS)
 
 # For building bjam and boost libraries
 boost:
@@ -190,7 +190,7 @@ ifeq ($(findstring $(MAKECMDGOALS),clean distclean),)
 revision: utility/get_revision
 	@echo "CPPFLAGS += -DREVISION=$$(utility/get_revision)" > revision
 
-# Force local boost build because adding `studio/utility/get_revision: boost' does not work
+# Force local boost build because adding `squadt/utility/get_revision: boost' does not work
 utility/get_revision: utility/get_revision.cpp
 ifdef BUILD_BOOST
 	@$(MAKE) -C boost

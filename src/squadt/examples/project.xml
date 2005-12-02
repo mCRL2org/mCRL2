@@ -14,5 +14,5 @@
   <input-object identifier="1" output-number="0"/>
   <output-object format="lts">root-0.lts</output-object>
  </specification>
-</studio-project>
+</project>
 

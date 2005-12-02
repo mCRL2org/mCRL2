@@ -9,11 +9,11 @@
 	<key>CFBundleDevelopmentRegion</key>
 	<string>English</string>
 	<key>CFBundleExecutable</key>
-	<string>studio</string>
+	<string>squadt</string>
 	<key>CFBundleIconFile</key>
-	<string>studio.icns</string>
+	<string>squadt.icns</string>
 	<key>CFBundleName</key>
-	<string>studio</string>
+	<string>squadt</string>
 	<key>CFBundlePackageType</key>
 	<string>APPL</string>
 	<key>CFBundleSignature</key>
@@ -23,7 +23,7 @@
 	<key>CFBundleShortVersionString</key>
 	<string>0.1.1</string>
 	<key>CFBundleGetInfoString</key>
-	<string>studio version 0.1.1, (c) 2005 OAS, Computer Science, TUE, NL</string>
+	<string>squadt version 0.1.1, (c) 2005 OAS, Computer Science, TUE, NL</string>
 	<key>CFBundleLongVersionString</key>
 	<string>0.1.1, (c) 2005 oas, tue, nl</string>
 	<key>NSHumanReadableCopyright</key>
