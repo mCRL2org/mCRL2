@@ -81,7 +81,7 @@ END_EVENT_TABLE()
 std::map < std::pair < std::string, std::string >, wxMenu* > ProjectOverview::context_menus;
 
 ProjectOverview::ProjectOverview(wxWindow* parent, wxWindowID id) :
-  wxFrame(parent, id, wxT("Studio - No project"), wxDefaultPosition, wxDefaultSize), project_manager() {
+  wxFrame(parent, id, wxT("Squadt - No project"), wxDefaultPosition, wxDefaultSize), project_manager() {
 
   /* Resize and centre frame on display */
   Centre();
@@ -338,7 +338,7 @@ void ProjectOverview::NewProject(wxCommandEvent &event) {
     project_manager.SetProjectDirectory(std::string(project_directory.fn_str()));
  
     /* Project name is derived from project directory name (TODO check whether portable)*/
-    SetTitle(project_directory.AfterLast('/').Prepend(wxT("Studio - ")));
+    SetTitle(project_directory.AfterLast('/').Prepend(wxT("Squadt - ")));
 
     chdir(project_directory.fn_str());
 
@@ -359,7 +359,7 @@ void ProjectOverview::NewProject(wxCommandEvent &event) {
 
 void ProjectOverview::CloseProject(wxCommandEvent &event) {
   /* Reset title bar */
-  SetTitle(wxT("Studio - No project"));
+  SetTitle(wxT("Squadt - No project"));
 
   /* Clear log window */
   log_display->Clear();
@@ -401,7 +401,7 @@ void ProjectOverview::LoadProject(wxCommandEvent &event) {
     project_manager.Load();
  
     /* Set window title (TODO check whether portable)*/
-    SetTitle(project_directory.AfterLast('/').Prepend(wxT("Studio - ")));
+    SetTitle(project_directory.AfterLast('/').Prepend(wxT("Squadt - ")));
 
     std::list < Specification >::const_iterator b = project_manager.GetSpecifications()->end();
     std::list < Specification >::const_iterator i = project_manager.GetSpecifications()->begin();

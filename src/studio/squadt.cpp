@@ -28,29 +28,29 @@ std::ofstream    log_stream(settings_manager.GetLogFileName().c_str(), std::ios:
 
 Logger*          logger;
 
-/* Studio class declaration */
-class Studio : public wxApp {
-  DECLARE_CLASS(Studio)
+/* Squadt class declaration */
+class Squadt : public wxApp {
+  DECLARE_CLASS(Squadt)
   
   private:
 
   public:
 
-    Studio();
+    Squadt();
   
     virtual bool OnInit();
     virtual int  OnExit();
 };
 
-IMPLEMENT_APP(Studio)
+IMPLEMENT_APP(Squadt)
 
-IMPLEMENT_CLASS(Studio, wxApp)
+IMPLEMENT_CLASS(Squadt, wxApp)
 
-/* Studio class implementation */
-Studio::Studio() {
+/* Squadt class implementation */
+Squadt::Squadt() {
 }
 
-bool Studio::OnInit() {
+bool Squadt::OnInit() {
   wxInitAllImageHandlers();
 
   logger = new Logger((log_stream) ? log_stream : std::cerr);
@@ -82,7 +82,7 @@ bool Studio::OnInit() {
   return (true);
 }
   
-int Studio::OnExit() {
+int Squadt::OnExit() {
   return (wxApp::OnExit());
 }
 

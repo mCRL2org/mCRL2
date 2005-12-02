@@ -22,19 +22,19 @@ BOOST_OBJECTS                  = gui_project_overview.o tool_manager.o project_m
 				 settings_manager.o tool_executor.o
 BOOST_CPPFLAGS                 = -I$(BOOST_PREFIX)/include
 
-WX_OBJECTS                     = studio.o gui_project_overview.o gui_new_specification.o gui_specification_properties.o \
+WX_OBJECTS                     = squadt.o gui_project_overview.o gui_new_specification.o gui_specification_properties.o \
 				 gui_resources.o tool_executor.o logger.o process.o
 WX_LIBRARIES                  := $(shell $(WX_CONFIG) --libs core base adv net)
 
 PROJECT_MANAGER_OBJECTS        = project_manager.o specification.o xml_text_reader.o settings_manager.o
 TOOL_MANAGER_OBJECTS           = tool_manager.o tool.o xml_text_reader.o settings_manager.o
-GUI_OBJECTS                    = studio.o gui_project_overview.o gui_new_specification.o gui_specification_properties.o \
+GUI_OBJECTS                    = squadt.o gui_project_overview.o gui_new_specification.o gui_specification_properties.o \
 				 gui_resources.o $(sort $(PROJECT_MANAGER_OBJECTS) $(TOOL_MANAGER_OBJECTS)) \
 				 tool_executor.o process.o logger.o
 OBJECTS                        = $(sort $(GUI_OBJECTS) $(PROJECT_MANAGER_OBJECTS) $(TOOL_MANAGER_OBJECTS))
 
 TEST_TARGETS                   = project_manager_tester tool_manager_tester
-TARGETS                        = studio
+TARGETS                        = squadt
 
 .PHONY: all install clean distclean test strip
 
@@ -80,7 +80,7 @@ tool_manager_tester: tool_manager_tester.cpp $(TOOL_MANAGER_OBJECTS)
 project_manager_tester: project_manager_tester.cpp $(PROJECT_MANAGER_OBJECTS) 
 	$(CXX) $(CXXFLAGS) $(CPPFLAGS) $(PROJECT_MANAGER_OBJECTS) $(LDFLAGS) $(WX_LIBRARIES) -o $@ $<
 
-studio: $(GUI_OBJECTS)
+squadt: $(GUI_OBJECTS)
 	$(CXX) $(CXXFLAGS) $(CPPFLAGS) $(GUI_OBJECTS) $(LDFLAGS) $(WX_LIBRARIES) $(BOOST_LDFLAGS) $(BOOST_FILESYSTEM) -o $@
 
 utility/relocator: utility/relocator.o settings_manager.o $(TOOL_MANAGER_OBJECTS)
@@ -96,7 +96,7 @@ strip: $(TARGETS)
 
 install: all utility/relocator
 	$(INSTALL) -d $(bindir)
-	$(INSTALL) studio $(bindir)
+	$(INSTALL) squadt $(bindir)
 	$(INSTALL) -d $(datadir)
 	$(INSTALL) -d $(datadir)/images
 	$(INSTALL) -d $(datadir)/schemas
@@ -109,16 +109,16 @@ install: all utility/relocator
 	$(INSTALL) -m 0644 examples/tool_catalog.xml $(datadir)/configuration
 	utility/relocator $(bindir) $(datadir)/configuration/tool_catalog.xml
 ifeq ($(HOST_OS),MACOSX)
-	/Developer/Tools/Rez -t APPL -o studio ../sample.r
-	/Developer/Tools/SetFile -a C studio
-	mkdir -p ../../studio.app/Contents
-	mkdir -p ../../studio.app/Contents/MacOS
-	mkdir -p ../../studio.app/Contents/Resources
-	cp studio.plist ../../studio.app/Contents/Info.plist
-	echo -n "APPL????" > ../../studio.app/Contents/PkgInfo
-	cp studio $(bindir)/studio
-	ln -f $(bindir)/studio ../../studio.app/Contents/MacOS/studio
-	cp -f ../xsim.icns ../../studio.app/Contents/Resources/studio.icns
+	/Developer/Tools/Rez -t APPL -o squadt ../sample.r
+	/Developer/Tools/SetFile -a C squadt
+	mkdir -p ../../squadt.app/Contents
+	mkdir -p ../../squadt.app/Contents/MacOS
+	mkdir -p ../../squadt.app/Contents/Resources
+	cp squadt.plist ../../squadt.app/Contents/Info.plist
+	echo -n "APPL????" > ../../squadt.app/Contents/PkgInfo
+	cp squadt $(bindir)/squadt
+	ln -f $(bindir)/squadt ../../squadt.app/Contents/MacOS/squadt
+	cp -f ../xsim.icns ../../squadt.app/Contents/Resources/squadt.icns
 endif
 
 clean:

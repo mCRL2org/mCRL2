@@ -107,6 +107,15 @@ void Logger::OnSocketEvent(wxSocketEvent& event) {
 }
 
 Logger::~Logger() {
+  const std::list < wxSocketBase* >::const_iterator b = connections.end();
+        std::list < wxSocketBase* >::const_iterator i = connections.begin();
+
+  while (i != b) {
+    (*i)->Destroy();
+
+    ++i;
+  }
+
   listener->Destroy();
 }
 
