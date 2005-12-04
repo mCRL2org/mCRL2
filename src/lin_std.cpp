@@ -293,7 +293,7 @@ static int strequal(char *s1,char *s2)
 }
 
 
-static int variablesequal(ATermList t1, ATermList t2, /* XXXXXXXXXXXXXXX */
+static int variablesequal(ATermList t1, ATermList t2, 
                 ATermList *renamingvariablelist,
                 ATermList *renamingtermlist)
 { /* return 1 iff t1 equals t2, modulo a renaming; */
@@ -709,6 +709,8 @@ static int upperpowerof2(int i)
 
 static ATermAppl RewriteTerm(ATermAppl t)
 { 
+  // gsfprintf(stderr,"REWRITE %T\n",t);
+  // gsfprintf(stderr,"REWRITE %P\n",t);
   if (mayrewrite) t=gsRewriteTerm(t);
   return t;
 }
@@ -6741,6 +6743,15 @@ static ATermAppl makesingleultimatedelaycondition(
     }
   } 
 
+  for(ATermList p=spec->procdatavars ; p!=ATempty ; p=ATgetNext(p))
+  { ATermAppl freevar=ATAgetFirst(p);
+    if (occursinterm(freevar,result))
+    { variables=ATinsertA(variables,freevar);
+    }
+  }
+
+  // gsfprintf(stderr,"Result %P\nvariables%P\nsumvars %P\n\n",result,variables,sumvars);
+
   for ( ; sumvars!=ATempty ; sumvars=ATgetNext(sumvars) )
   { ATermAppl sumvar=ATAgetFirst(sumvars);
     if (occursinterm(sumvar,result))
@@ -6748,10 +6759,13 @@ static ATermAppl makesingleultimatedelaycondition(
       ATermList extendedvariables=ATappend(
                                     ATconcat(variables,ATgetNext(sumvars)),
                                     (ATerm)sumvar);
+
       declare_equation_variables(extendedvariables); 
+      // gsfprintf(stderr,"VVVV %P\n",extendedvariables);
       ATermAppl newfunction=gsMakeOpId(fresh_name("ExistsFun"),
               gsMakeSortArrowList(getsorts(extendedvariables),gsMakeSortExprBool()));
       
+      // gsfprintf(stderr,"NEWEQUATION %P\nresult %P\n%T\n\n",gsMakeDataApplList(newfunction,extendedvariables),result,result);
       newequation(NULL,gsMakeDataApplList(newfunction,extendedvariables),result,spec);
       end_equation_section();
       result=gsMakeDataExprExists(
@@ -7098,7 +7112,7 @@ static ATermAppl parallelcomposition(
   init2=linGetInit(t2);
   pars1=linGetParameters(t1);
   pars2=linGetParameters(t2);
-
+  
   renaming=construct_renaming(pars1,pars2,&pars3,&pars2renaming); 
 
   gsVerboseMsg(
