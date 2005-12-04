@@ -424,7 +424,7 @@ int main(int argc, char **argv)
           fflush(stderr);
         }
 	deadlockcnt++;
-      } else {
+      } else if ( explore ) {
         fprintf(stderr,"deadlock-detect: deadlock found.\n");
         fflush(stderr);
       }
