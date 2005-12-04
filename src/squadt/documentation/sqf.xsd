@@ -1,0 +1,170 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<xs:schema xmlns:xs="http://www.w3.org/2001/XMLSchema" targetNamespace="http://www.squadt.org/schema/2005/sqf.xsd" elementFormDefault="unqualified" attributeFormDefault="unqualified">
+ <!-- A version specification type -->
+ <xs:simpleType name="version">
+  <xs:restriction base="xs:token">
+   <xs:pattern value="[0-9]+\.[0-9]+"/>
+  </xs:restriction>
+ </xs:simpleType>
+  <!-- Data type for tool/specification identification -->
+ <xs:simpleType name="identifier">
+  <xs:restriction base="xs:token">
+   <xs:pattern value="[a-z][a-z0-9_]+"/>
+  </xs:restriction>
+ </xs:simpleType>
+ <!-- Data type for item type specification -->
+ <xs:simpleType name="item-type">
+  <xs:restriction base="xs:string">
+   <xs:enumeration value="input"/>
+   <xs:enumeration value="output"/>
+  </xs:restriction>
+ </xs:simpleType>
+ <!-- Data type for use type specification -->
+ <xs:simpleType name="use-type">
+  <xs:restriction base="xs:string">
+   <xs:enumeration value="required"/>
+   <xs:enumeration value="optional"/>
+  </xs:restriction>
+ </xs:simpleType>
+ <!-- Data type for number system specification -->
+ <xs:simpleType name="number-system">
+  <xs:restriction base="xs:string">
+   <xs:enumeration value="binary" />
+   <xs:enumeration value="octagonal" />
+   <xs:enumeration value="decimal" />
+   <xs:enumeration value="hexadecimal" />
+  </xs:restriction>
+ </xs:simpleType>
+ <!-- Integer data type -->
+ <xs:complexType name="integer">
+  <xs:attribute name="system" type="xs:string" use="optional" />
+  <xs:attribute name="minimum" type="xs:integer" use="optional" />
+  <xs:attribute name="maximum" type="xs:integer" use="optional" />
+ </xs:complexType>
+ <!-- Real data type -->
+ <xs:complexType name="real">
+  <xs:attribute name="minimum" type="xs:integer" use="optional" />
+  <xs:attribute name="maximum" type="xs:integer" use="optional" />
+ </xs:complexType>
+ <!-- Enumeration type -->
+ <xs:complexType name="enumeration">
+  <xs:sequence>
+   <xs:element name="alternative" type="alternative" minOccurs="1" maxOccurs="unbounded">
+    <xs:complexType>
+     <xs:simpleContent>
+      <xs:extension base="xs:string">
+      </xs:extension>
+     </xs:simpleContent>
+    </xs:complexType>
+   </xs:element>
+  </xs:sequence>
+  <xs:attribute name="minimum-selection" type="xs:integer" use="optional" />
+  <xs:attribute name="maximum-selection" type="xs:integer" use="optional" />
+ </xs:complexType>
+ <!-- String data type -->
+ <xs:complexType name="string">
+  <xs:attribute name="minimum-length" type="xs:integer" use="optional" />
+  <xs:attribute name="maximum-length" type="xs:integer" use="optional" />
+ </xs:complexType>
+ <!-- String data type -->
+ <xs:complexType name="list">
+  <xs:sequence>
+   <xs:choice minOccurs="1" maxOccurs="unbounded">
+    <xs:element name="integer" />
+    <xs:element name="real" />
+    <xs:element name="enumeration" />
+    <xs:element name="string" />
+    <xs:element name="list" />
+   </xs:choice>
+  </xs:sequence>
+  <xs:attribute name="minimum-length" type="xs:integer" use="optional" />
+  <xs:attribute name="maximum-length" type="xs:integer" use="optional" />
+  <xs:attribute name="left-separator" type="xs:string" use="optional" />
+  <xs:attribute name="right-separator" type="xs:string" use="optional" />
+  <xs:attribute name="left-value-separator" type="xs:string" use="optional" />
+  <xs:attribute name="right-value-separator" type="xs:string" use="optional" />
+ </xs:complexType>
+ <!-- Data type for a remaining argument -->
+ <xs:complexType name="basic-argument">
+  <xs:sequence>
+   <xs:element name="description" type="xs:string"/>
+   <xs:choice>
+    <xs:element name="integer"     type="integer"/>
+    <xs:element name="real"        type="real"/>
+    <xs:element name="enumeration" type="enumeration"/>
+    <xs:element name="string"      type="string"/>
+    <xs:element name="list"        type="item"/>
+   </xs:choice>
+  </xs:sequence>
+  <xs:attribute name="id" type="identifier" use="required"/>
+  <xs:attribute name="use" type="use-type" default="required"/>
+ </xs:complexType>
+ <!-- Data type for an option -->
+ <xs:complexType name="option">
+  <xs:sequence maxOccurs="unbounded">
+   <xs:element name="description" type="xs:string"/>
+   <xs:element name="arguments" minOccurs="0" maxOccurs="unbounded">
+    <xs:complexType>
+     <xs:sequence maxOccurs="unbounded">
+      <xs:choice>
+       <xs:element name="integer"     type="integer"/>
+       <xs:element name="real"        type="real"/>
+       <xs:element name="enumeration" type="enumeration"/>
+       <xs:element name="string"      type="string"/>
+       <xs:element name="list"        type="item"/>
+      </xs:choice>
+     </xs:sequence>
+    </xs:complexType>
+   </xs:element>
+  </xs:sequence>
+  <xs:attribute name="id" type="identifier" use="required"/>
+  <xs:attribute name="use" type="use-type" default="required"/>
+  <xs:attribute name="representation" type="xs:string" use="required"/>
+  <xs:attribute name="option-separator" type="xs:string" default="="/>
+ </xs:complexType>
+ <!-- Data type for an input/output item -->
+ <xs:complexType name="item">
+  <xs:sequence>
+   <xs:element name="description" type="xs:string"/>
+  </xs:sequence>
+  <xs:attribute name="id" type="identifier" use="required"/>
+  <xs:attribute name="use" type="use-type" default="required"/>
+  <xs:attribute name="type" type="item-type" use="required"/>
+  <xs:attribute name="format" type="xs:token" use="required"/>
+  <xs:attribute name="location" type="xs:anyURI" use="required"/>
+ </xs:complexType>
+ <!-- Element used to relate a command line option to the format of an object -->
+ <xs:complexType name="category">
+  <xs:sequence maxOccurs="unbounded">
+   <xs:choice>
+    <xs:element name="category"  type="category"/>
+    <xs:element name="option"    type="option"/>
+    <xs:element name="item"      type="item"/>
+    <xs:element name="basic"     type="basic-argument"/>
+    <xs:element name="condition" type="condition"/>
+   </xs:choice>
+  </xs:sequence>
+  <xs:attribute name="name" type="xs:token" use="required"/>
+ </xs:complexType>
+ <!-- Condition -->
+ <xs:complexType name="condition">
+  <xs:sequence>
+   <xs:choice>
+    <xs:element name="not"  type="condition"/>
+    <xs:element name="and"  type="condition" minOccurs="2" maxOccurs="unbounded"/>
+    <xs:element name="or"   type="condition" minOccurs="2" maxOccurs="unbounded"/>
+    <xs:element name="atom" type="identifier"/>
+   </xs:choice>
+  </xs:sequence>
+ </xs:complexType>
+ <!-- Root element the tool-catalog -->
+ <xs:element name="interface-bridge">
+  <xs:complexType>
+   <xs:sequence>
+    <xs:element name="category" type="category" maxOccurs="unbounded"/>
+   </xs:sequence>
+   <xs:attribute name="version" type="version" use="required"/>
+  </xs:complexType>
+ </xs:element>
+</xs:schema>
+
