@@ -162,7 +162,7 @@ $S_L^{FV}(\ovr{v_0}) = \lbrace j \in  \lbrace 1, \ldots, n \rbrace \vert \forall
 \rbrace $
 \end{defn}
 
-To get $S_L^{NF} (\ovr{v_0})$ we have to compute $R_L^{FV}(\ovr{v_0})$, and this means we have to generate the entire state space starting from state $\ovr{v_0}$. However we interested in an approximation. We take proposal 3 (Section \ref{def:sug3}) as a starting point for constructing Proposal 4 (Section \ref{def:sug4}).
+To get $S_L^{FV} (\ovr{v_0})$ we have to compute $R_L^{FV}(\ovr{v_0})$, and this means we have to generate the entire state space starting from state $\ovr{v_0}$. However we interested in an approximation. We take proposal 3 (Section \ref{def:sug3}) as a starting point for constructing Proposal 4 (Section \ref{def:sug4}).
 
 \section{Proposals}
 In this section we speak about different techniques to find an algorithm that find as many constant \pps\ in polynomial time. These proposals are all estimations, so we can reduce complexity of the given definitions in Section \ref{subsec:lpedef}. Each proposal contains a small description, which describes how a certain proposal was born. 
@@ -299,12 +299,12 @@ $\ovr{d}@_j(x)$ is defined as the substitution of the $j^{th}$ element of $\ovr{
 % \end{defn}
 
 \begin{defn}[$\varphi(\ovr{d},X)$] 
-$\varphi$ is a function of $\ovr{D} \times \cup_{Nat} \rightarrow {D}$:
+$\varphi$ is a function of $\ovr{D} \times \mathcal{P}(Nat) \rightarrow \mathcal{P}(\ovr{D})$:
 \begin{displaymath}
     \varphi(\ovr{d},X) = \left \{
         \begin{array}{l l}
             X = \emptyset                       & \rightarrow \lbrace \ovr{d} \rbrace \\
-            X \neq \emptyset \wedge z \in S     & \rightarrow \cup_{y \in \ovr{D}._z} \varphi(\ovr{d}@(y), S\setminus \lbrace z \rbrace ) \\
+            X \neq \emptyset                    & \rightarrow \cup_{y \in \ovr{D}._z} \varphi(\ovr{d}@(y), X \setminus \lbrace z \rbrace ) \hspace{20pt} \text{with } z \in X \\
         \end{array} \right.
 \end{displaymath}
 
@@ -322,7 +322,7 @@ We do case distinction on $S_L^3(\ovr{v_0})$:\\
 \tmp $ \equiv $ \hspace{20pt} $\lbrace$ Def \ref{def:sug3} of $S_L^3 \rbrace$ \\ 
 \tmp $ j \in \lbrace k \in \lbrace 1, \ldots, n \rbrace \vert \forall_{i \in I}(NF(c_i(\ovr{\otimes_{S_L^3}(\ovr{v_0}), e_i})) \neq false \Rightarrow \ovr{v_0}._k = NF(\ovr{g_i}(\otimes_{S_L^3}(\ovr{v_0}), e_i)._k) ) \rbrace$ \\
 \tmp $ \equiv $ \hspace{20pt} $\lbrace$ Property of $\ovr{\otimes_{S_L^3}(\ovr{v_0},e_i})\rbrace$ \\ 
-\tmp $ j \in \lbrace k \in \lbrace 1, \ldots, n \rbrace \vert \forall_{i \in I, \ovr{e_i} \in \ovr{E_i}}(\forall_{\ovr{x} \in \lbrace
+\tmp $ j \in \lbrace k \in \lbrace 1, \ldots, n \rbrace \vert \forall_{i \in I, \ovr{e_i} \in \ovr{E_i}}(\forall_{\ovr{x} \in
  \varphi(\ovr{v_0},S_L^3)
  ) \rbrace}(c_i(\ovr{x, e_i}) \Rightarrow \ovr{v_0}._k = \ovr{g_i}(\ovr{x, e_i})._k )) \rbrace$\\
 \tmp $ \Rightarrow$ \hspace{20pt} $\lbrace  \varphi(\ovr{v_0},S_L^3) \supseteq R_L(\ovr{v_0}) \footnote{See Example \ref{example:proof3}} \rbrace$  \\
@@ -332,7 +332,7 @@ We do case distinction on $S_L^3(\ovr{v_0})$:\\
 \tmp $j \in \lbrace k \in \lbrace 1, \ldots, n \rbrace \vert \forall_{i \in I, \ovr{e_i} \in \ovr{E_i}}(\forall_{x \in R_L(\ovr{v_0})} \forall_{y \in R_L(\ovr{v_0})} (y = \ovr{g_i}(x,e_i) \wedge c_i(x, e_i) \Rightarrow \ovr{v_0}._k = y_.k )  \rbrace $\\
 % \tmp $ j \in \lbrace k \in \lbrace 1, \ldots, n \rbrace \vert \forall_{i \in I, \ovr{e_i} \in \ovr{E_i}}(\forall_{x \in R_L(\ovr{v_0})}( c_i(\ovr{x, e_i})  \Rightarrow \ovr{v_0}._k = \ovr{x}.k) \rbrace$\\
 % \tmp $\Rightarrow$ \hspace*{20pt} $\lbrace \forall_{x,y \in R_L(\ovr{v_0})\ovr{e_i} \in \ovr{E_i}}(c(\ovr{x,e_i}) \Rightarrow \ovr{v_0}._k = \ovr{y}._k)\rbrace$ \\
-\tmp $ \equiv$ \hspace{20pt} $\lbrace y._k = \ovr{x}._k  \rbrace$\\
+\tmp $ \equiv$ \hspace{20pt} $\lbrace \ovr{v_0}  \in R_L(\ovr{v_0}) \rbrace$\\
 \tmp $ j \in \lbrace k \in \lbrace 1, \ldots, n \rbrace \vert \forall_{x \in R_L(\ovr{v_0})}(\ovr{x}._k = \ovr{v_0}._k) \rbrace$\\
 \tmp $ \equiv$ \hspace{20pt} $\lbrace$ Def \ref{def:lpe_comp} of $S_L\rbrace$\\
 \tmp $ j \in S_L(\ovr{v_0})$
@@ -384,9 +384,9 @@ is the biggest subset, for which holds:\\
 \> $\forall_{i \in I }($ \\ 
 \> \> $\forall_{j \in S^L_4(\ovr{v_0})}($\\
 \> \> \> $ c_i\z \neq false \Rightarrow $ \\
-\> \> \> \> $(\ovr{v_0}._j \not\in FV \rightarrow {\ovr{g_i}\z._j \not\in FV} \Rightarrow ( \ovr{g_i}\z._j = \ovr{v_0}._j ))$\\
+\> \> \> \> $(NF(\ovr{v_0}._j) \not\in FV \rightarrow {NF(\ovr{g_i}\z._j) \not\in FV} \Rightarrow ( NF(\ovr{g_i}\z._j) = NF(\ovr{v_0}._j )))$\\
 \> \> \> $\wedge$\\
-\> \> \> \> $(\ovr{v_0}._j \in FV \rightarrow \exists_k(\ovr{g_i}\z._j \not\in FV   \Rightarrow (\ovr{g_i}\z._j = k))) $\\
+\> \> \> \> $(NF(\ovr{v_0}._j) \in FV \rightarrow \exists_k( NF(\ovr{g_i}\z._j) \not\in FV \Rightarrow ( NF(\ovr{g_i}\z._j = k)))) $\\
 % \> \> \> $)$ \\
 \> \>$)$\\
 \> $)$ \\
@@ -438,14 +438,31 @@ The values of \pps\ can either be given a specific value or a \ti{free variable}
 If \ti{free variable} is assigned to a \pp\ with a specific value, the value of this \pp\ remains unchanged. If the index of \pp\ is in $S$, it will not be removed from $S$. If we would allow replacement of a specific value with a \ti{free variable}, this might lead to a fault result. Consider the next example; Let $x_1$ and $x_2$ be two specific values which are not equal to each other. Let $v_1$ be a \ti{free variable}. Let the index of \pp\ be in $S$. This \pp\ has the value $x_1$ and is replaced with $v_1$, the index of \pp\ stays in $S$. If in a next state this \pp\ is substituted with $x_2$, the index remains in $S$. This indicates that the \pp\ would remain constant. Clearly this observation is wrong. So we prohibited assigning \ti{free variables} by specific values.
 
 \item A \pp\ which is a \ti{free variable} is substituted with a specific value:\\
-The \pp\ gets the value which is substituted. 
-The \pp\ remains in $S$.
-
+The \pp\ gets the value which is substituted and the \pp\ remains in $S$ if the specific value is not $\bot$. If the \pp\ gets the value $\bot$ the \pp\ is removed from $S$.
 
 \item The \pp\ which is specific value is substituted with another specific value:\\
 If the substituted value differs from the original value, the \pp\ becomes marked variable and is removed from the set $S$.
 If they are equal, the \pp\ remains in the set $S$ if it already had been in the set $S$.
 \end{enumerate}
+
+If we have a situation simular to Example \ref{freevarcheckup}, we see that the algorithm detects the $3^{th}$ element as a constant \pp. However the $3^{th}$ is not a constant \pp . To overcome the detection of fake \pps , we have to take an extra pass on the LPE. This pass is called the "Free Variable Checkup". If the "Free Variable Checkup" finds a fake constant, the algorithm starts over with:
+\begin{itemize}
+\item $S$ without the indices of found fake constant \pps .
+\item All the \pps\ which are fake constant \pps\ are substituted with the value $\bot$. 
+\end{itemize}
+If the "Free Variable Checkup" does not find fake constants the algorithm ends.
+
+\begin{example}\label{freevarcheckup} This LPE contains fake constant \pps .  $FV_x$ indicates the $x^{th}$ element in the set of $FV$. 
+\begin{tabbing}
+\tabw
+\tb{act} \> a; \\
+\tb{proc} \> X(a, b , c) =     \>  a. X( $FV_4$, $FV_5$, a) + \\
+\>                             \>  a. X( $FV_6$, $FV_7$, b) + \\
+\>                             \>  a. X(   8 ,   9,  $FV_8$);  \\
+\tb{init} \> X($FV_1$, $FV_2$, $FV_3$);
+\end{tabbing}
+\end{example}
+
 
 In this part we only describe the difference between the algorithm without \ti{free variables}. The algorithm remains basically the same. We only extend Algorithm Description \ref{alg:org} when comparing elements from the current state with the corresponding next state. When comparing we use the rules associated with \ti{free variables}.
 
