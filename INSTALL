@@ -22,15 +22,18 @@ The required packages enable the following tools:
 + lpeinfo:     print basic information of an LPE
 + sim:         text based simulator
 + lperewr:     rewrite data expressions in an LPE
++ lpeconstelm: remove constant process parameters from an LPE
++ lpeparelm:   remove unused process parameters from an LPE
 + lpe2lts:     generate a state space (LTS) from an LPE
 + tbf2lpe:     convert mCRL LPEs to mCRL2 LPEs
-+ experimental tools alpha, lin and lpeconstelem
++ experimental tools alpha and lin
 
 The recommended package libwxgtk2.6-dev enables the following tool:
 + xsim:        graphical simulator
++ squadt:      systems quality analysis and design tool
 
 The optional package libxml2-dev enables the following tool:
-+ pnml2mcrl2:  convert classic Petri nets in the PNML language to mCRL2
++ pnml2mcrl2:  convert classic Petri nets in the PNML format to mCRL2
 
 Any of the default icon location packages ensures that xsim doesn't generate
 warnings on missing icons.
