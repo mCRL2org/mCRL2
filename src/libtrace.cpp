@@ -21,6 +21,7 @@ void Trace::init()
 	actions = (ATermAppl *) malloc(INIT_BUF_SIZE*sizeof(ATermAppl));
 	buf_size = INIT_BUF_SIZE;
 	len = 0;
+	pos = 0;
 	for (unsigned int i=0; i<buf_size; i++)
 	{
 		states[i] = NULL;
@@ -141,6 +142,24 @@ bool Trace::canSetState()
 	return (states[pos] == NULL);
 }
 
+
+ATermAppl Trace::getAction()
+{
+	ATermAppl act = actions[pos];
+	
+	if ( pos < len )
+	{
+		pos++;
+	}
+
+	return act;
+}
+
+ATermAppl Trace::getState()
+{
+	return states[pos];
+}
+
 TraceFormat Trace::detectFormat(istream &is)
 {
 	char buf[TRACE_V1_MARKER_SIZE];
@@ -224,6 +243,8 @@ void Trace::loadPlain(istream &is)
 			addAction(ATmakeAppl0(ATmakeAFun(buf,0,ATfalse)));
 		}
 	}
+
+	resetPosition();
 }
 
 void Trace::load(istream &is, TraceFormat tf)

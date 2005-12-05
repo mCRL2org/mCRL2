@@ -24,6 +24,7 @@
 #include "librewrite_c.h"
 #include "libprint_types.h"
 #include "libprint.h"
+#include "libtrace.h"
 
 using namespace std;
 
@@ -122,7 +123,10 @@ XSimMain::~XSimMain()
 	
 	delete tracewin;
 
-	gsNextStateFinalise();
+	if ( initial_state != NULL )
+	{
+		gsNextStateFinalise();
+	}
 
 	ATunprotectList(&state_vars);
 	ATunprotectList(&state_varnames);
@@ -140,8 +144,10 @@ void XSimMain::CreateMenu()
     wxMenu *file = new wxMenu;
     openitem = file->Append( wxID_OPEN, wxT("&Open...	CTRL-o"), wxT("") );
     file->AppendSeparator();
-    file->Append( ID_LOADTRACE, wxT("&Load trace...	CTRL-l"), wxT("") );
-    file->Append( ID_SAVETRACE, wxT("&Save trace...	CTRL-s"), wxT("") );
+    ldtrcitem = file->Append( ID_LOADTRACE, wxT("&Load trace...	CTRL-l"), wxT("") );
+    ldtrcitem->Enable(false);
+    svtrcitem = file->Append( ID_SAVETRACE, wxT("&Save trace...	CTRL-s"), wxT("") );
+    svtrcitem->Enable(false);
     file->AppendSeparator();
     file->Append( wxID_EXIT, wxT("&Quit	CTRL-q"), wxT("") );
     menu->Append( file, wxT("&File") );
@@ -276,6 +282,8 @@ void XSimMain::SetInteractiveness(bool interactive)
 	if ( interactive )
 	{
 		openitem->Enable(true);
+		ldtrcitem->Enable(true);
+		svtrcitem->Enable(true);
 		for (int i=0; i<s; i++)
 		{
 			edits[i]->Enable(true);
@@ -294,6 +302,8 @@ void XSimMain::SetInteractiveness(bool interactive)
 		}
 	} else {
 		openitem->Enable(false);
+    		ldtrcitem->Enable(false);
+    		svtrcitem->Enable(false);
 		for (int i=0; i<s; i++)
 		{
 			edits[i]->Enable(false);
@@ -356,6 +366,9 @@ void XSimMain::LoadFile(const wxString &filename)
     current_state = NULL;
     InitialiseViews();
     Reset(initial_state);
+    
+    ldtrcitem->Enable(true);
+    svtrcitem->Enable(true);
 }
 
 void XSimMain::LoadDLL(const wxString &filename)
@@ -725,9 +738,9 @@ void XSimMain::OnLoadTrace( wxCommandEvent &event )
     wxFileDialog dialog( this, wxT("Load trace..."), wxT(""), wxT(""), wxT("Traces (*.trc)|*.trc|All Files|*.*"));
     if ( dialog.ShowModal() == wxID_OK )
     {
-	    wxTextFile f;
-
-	    f.Open(dialog.GetPath());
+	    ifstream f(dialog.GetPath());
+	    Trace tr(f);
+	    f.close();
 
 	    //SetInteractiveness(false);
 	    Stopper_Enter();
@@ -736,44 +749,68 @@ void XSimMain::OnLoadTrace( wxCommandEvent &event )
 	    ATerm state = current_state;
 	    ATermList newtrace = ATmakeList0();
 
-	    if ( f.GetLineCount() > 0 )
+	    if ( (tr.getState() != NULL) && !ATisEqual(tr.getState(),gsMakeStateVector(state)) )
 	    {
-		    wxString s;
-		    
-		    f.AddLine(wxT(""));
-		    for (s=f.GetFirstLine(); !f.Eof(); s=f.GetNextLine())
+		    wxMessageDialog dialog(this,wxT("Initial state of trace does not match initial state of state space.\n"),wxT("Error in trace"),wxOK|wxICON_ERROR);
+		    dialog.ShowModal();
+	    } else {
+		    ATermAppl act;
+		    while ( (act = tr.getAction()) != NULL )
 		    {
-			    if ( stopped )
-				    break;
-			    if ( s.Length() > 0 )
+			    NextStateFrom(state);
+			    if ( gsIsMultAct(act) )
 			    {
-				    if ( s[0] == wxT('"') )
-				    {
-					    s = s.Mid(1,s.Length()-2);
-				    }
-				    
-				    ATermList nexts = gsNextState(state,NULL);
-				    
+				    ATermAppl Transition;
+				    ATerm NewState;
 				    bool found = false;
-				    for (ATermList l=nexts; !ATisEmpty(l); l=ATgetNext(l))
+				    while ( NextState(&Transition,&NewState) )
 				    {
-					    wxString t = wxConvLocal.cMB2WX(PrintPart_CXX(ATgetFirst(ATLgetFirst(l)), ppAdvanced).c_str());
-					    if ( s == t )
+					    if ( ATisEqual(Transition,act) )
 					    {
-						    newtrace = ATinsert(newtrace,ATgetFirst(l));
-						    state = ATgetFirst(ATgetNext(ATLgetFirst(l)));
-						    found = true;
-						    break;
+						    if ( (tr.getState() == NULL) || ATisEqual(tr.getState(),gsMakeStateVector(NewState)) )
+						    {
+							    newtrace = ATinsert(newtrace,(ATerm) ATmakeList2((ATerm) Transition,NewState));
+							    state = NewState;
+							    found = true;
+							    break;
+						    }
 					    }
 				    }
-
+				    if ( !found )
+				    {
+					    wxString s = wxConvLocal.cMB2WX(PrintPart_CXX((ATerm) act, ppAdvanced).c_str());
+					    wxMessageDialog dialog(this,wxString::Format(wxT("Cannot append transition '%s' to trace.\n"),s.c_str()),wxT("Error in trace"),wxOK|wxICON_ERROR);
+					    dialog.ShowModal();
+					    break;
+				    }
+			    } else {
+				    // Perhaps trace was in plain text format; try pp-ing actions
+				    // XXX Only because libtrace cannot parse text (yet)
+				    ATermAppl Transition;
+				    ATerm NewState;
+				    wxString s(ATgetName(ATgetAFun(act)),wxConvLocal);
+				    bool found = false;
+				    while ( NextState(&Transition,&NewState) )
+				    {
+					    wxString t = wxConvLocal.cMB2WX(PrintPart_CXX((ATerm) Transition, ppAdvanced).c_str());
+					    if ( s == t )
+					    {
+						    if ( (tr.getState() == NULL) || ATisEqual(tr.getState(),gsMakeStateVector(NewState)) )
+						    {
+							    newtrace = ATinsert(newtrace,(ATerm) ATmakeList2((ATerm) Transition,NewState));
+							    state = NewState;
+							    found = true;
+							    break;
+						    }
+					    }
+				    }
 				    if ( !found )
 				    {
 					    wxMessageDialog dialog(this,wxString::Format(wxT("Cannot append transition '%s' to trace.\n"),s.c_str()),wxT("Error in trace"),wxOK|wxICON_ERROR);
 					    dialog.ShowModal();
 					    break;
 				    }
-			    }
+			    }	    
 		    }
 	    }
 
@@ -789,8 +826,6 @@ void XSimMain::OnLoadTrace( wxCommandEvent &event )
 
 	    Stopper_Exit();
 	    //SetInteractiveness(true);
-
-	    f.Close();
     }
 }
 
@@ -808,14 +843,20 @@ void XSimMain::OnSaveTrace( wxCommandEvent &event )
               return;
             }
 
+	    Trace tr;
 	    if ( !ATisEmpty(trace) )
 	    {
-		    for (ATermList l=ATconcat(ATgetNext(ATreverse(trace)),ecart); !ATisEmpty(l); l=ATgetNext(l))
+		    ATermList m = ATreverse(trace);
+		    tr.setState(gsMakeStateVector(ATgetFirst(ATgetNext(ATLgetFirst(m)))));
+		    for (ATermList l=ATconcat(ATgetNext(m),ecart); !ATisEmpty(l); l=ATgetNext(l))
 		    {
-			PrintPart_CXX(f, ATgetFirst(ATLgetFirst(l)), ppAdvanced);
-                        f << endl;
+			    tr.addAction(ATAgetFirst(ATLgetFirst(l)));
+			    tr.setState(gsMakeStateVector(ATgetFirst(ATgetNext(ATLgetFirst(l)))));
+/*			PrintPart_CXX(f, ATgetFirst(ATLgetFirst(l)), ppAdvanced);
+                        f << endl;*/
 		    }
 	    }
+	    tr.save(f);
 	    
             f.close();
     }

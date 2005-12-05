@@ -96,16 +96,15 @@ void XSimTrace::AddState(ATermAppl Transition, ATerm State, bool enabled)
 
 		traceview->InsertItem(l,wxString::Format(wxT("%i"),l));
 		traceview->SetItem(l,1,wxConvLocal.cMB2WX(PrintPart_CXX((ATerm) Transition, ppAdvanced).c_str()));
+		PrintState(ss,State);
 		traceview->SetItem(l,2,wxConvLocal.cMB2WX(ss.str().c_str()));
 		traceview->SetColumnWidth(2,wxLIST_AUTOSIZE);
 		if ( enabled )
 		{
 			wxColor col(255,255,255);
-			PrintState(ss,State);
 			traceview->SetItemBackgroundColour(l,col);
 		} else {
 			wxColor col(245,245,245);
-			PrintState(ss,State);
 			traceview->SetItemBackgroundColour(l,col);
 		}
 	}

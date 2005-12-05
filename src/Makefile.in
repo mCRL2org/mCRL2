@@ -58,7 +58,7 @@ SIM_LDFLAGS        = -lenum -lrewrite -l$(ATERM) -lm $(LIBDL)
 
 #xsim definitions
 XSIM_NAME          = xsim
-XSIM_OBJECTS       = xsim.o xsimbase.o xsimmain.o xsimtrace.o libnextstate.o libprint.o libprint_c.o libstruct.o liblowlevel.o
+XSIM_OBJECTS       = xsim.o xsimbase.o xsimmain.o xsimtrace.o libnextstate.o libtrace.o libprint.o libprint_c.o libstruct.o liblowlevel.o
 ifdef USE_WX
 OBJECTS           += $(XSIM_OBJECTS)
 endif

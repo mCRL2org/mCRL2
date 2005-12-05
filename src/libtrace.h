@@ -26,8 +26,11 @@ class Trace
 		bool setState(ATermAppl state);
 		bool canSetState();
 
-		void load(std::istream &is, TraceFormat tf = tfVer1);
-		void load(std::string &filename, TraceFormat tf = tfVer1);
+		ATermAppl getAction();
+		ATermAppl getState();
+
+		void load(std::istream &is, TraceFormat tf = tfUnknown);
+		void load(std::string &filename, TraceFormat tf = tfUnknown);
 		void save(std::ostream &os, TraceFormat tf = tfVer1);
 		void save(std::string &filename, TraceFormat tf = tfVer1);
 

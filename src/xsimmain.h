@@ -105,6 +105,8 @@ private:
     ATermList ecart;
     wxMenuBar *menu;
     wxMenuItem *openitem;
+    wxMenuItem *ldtrcitem;
+    wxMenuItem *svtrcitem;
     wxMenu *editmenu;
     wxMenuItem *undo;
     wxMenuItem *redo;
