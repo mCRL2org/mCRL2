@@ -1,4 +1,4 @@
-<?xml version="1.0" encoding="ISO-8859-1" ?>
+<?xml version="1.0" encoding="UTF-8" ?>
 <xs:schema xmlns:xs="http://www.w3.org/2001/XMLSchema">
  <!-- A version specification type -->
  <xs:simpleType name="version-type">
@@ -6,7 +6,7 @@
    <xs:pattern value="[0-9]+\.[0-9]+"/>
   </xs:restriction>
  </xs:simpleType>
- <!-- A version specification type -->
+ <!-- A type for node identification -->
  <xs:simpleType name="identifier">
   <xs:restriction base="xs:token">
    <xs:pattern value="[0-9]+\.[0-9]+"/>

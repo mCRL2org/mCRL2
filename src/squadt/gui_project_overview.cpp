@@ -90,7 +90,7 @@ ProjectOverview::ProjectOverview(wxWindow* parent, wxWindowID id) :
   /* Create menubar & toolbar */
   GenerateMenuBar();
 
-#if !defined(DISABLE_TOOLBAR)
+#if defined(ENABLE_TOOLBAR)
   GenerateToolBar();
 #endif
 

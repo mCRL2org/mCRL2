@@ -66,7 +66,6 @@ test: all $(TEST_TARGETS)
 $(LIBXML2_OBJECTS):         CPPFLAGS += $(LIBXML2_CPPFLAGS)
 $(BOOST_OBJECTS):           CPPFLAGS += $(BOOST_CPPFLAGS)
 $(WX_OBJECTS):              CPPFLAGS += $(WX_CPPFLAGS)
-gui_project_overview.o:     CPPFLAGS += -DDISABLE_TOOLBAR
 settings_manager.o:         CPPFLAGS += -DDATA_DIRECTORY=\"$(datadir)\"
 utility/relocator.o:        CPPFLAGS += $(BOOST_CPPFLAGS)
 
