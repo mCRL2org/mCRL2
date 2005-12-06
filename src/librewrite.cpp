@@ -1,6 +1,8 @@
 #include <stdlib.h>
 #include <aterm2.h>
+#include <assert.h>
 #include "libprint_c.h"
+#include "libstruct.h"
 #include "librewrite.h"
 #include "rewr_inner.h"
 #include "rewr_jitty.h"
@@ -165,4 +167,45 @@ Rewriter *createRewriter(ATermAppl DataEqnSpec, RewriteStrategy Strategy)
 		default:
 			return NULL;
 	}
+}
+
+static bool checkVars(ATermAppl Expr, ATermList Vars, ATermList *UsedVars = NULL)
+{
+	assert(ATgetType(Expr) == AT_APPL);
+
+	if ( gsIsNil(Expr) || gsIsOpId(Expr) )
+	{
+		return true;
+	} else if ( gsIsDataAppl(Expr) )
+	{
+		return checkVars((ATermAppl) ATgetArgument(Expr,0),Vars,UsedVars) && checkVars((ATermAppl) ATgetArgument(Expr,1),Vars,UsedVars);
+	} else { // gsIsDataVarId(Expr)
+		assert(gsIsDataVarId(Expr));
+
+		if ( (UsedVars != NULL) && (ATindexOf(*UsedVars,(ATerm) Expr,0) < 0) )
+		{
+			*UsedVars = ATinsert(*UsedVars,(ATerm) Expr);
+		}
+
+		return (ATindexOf(Vars,(ATerm) Expr,0) >= 0);
+	}
+}
+
+bool isValidRewriteRule(ATermAppl DataEqn)
+{
+	assert(gsIsDataEqn(DataEqn));
+
+	ATermList vars = ATLgetArgument(DataEqn,0);
+	ATermList lhs_vars = ATmakeList0();
+	if ( !checkVars(ATAgetArgument(DataEqn,2),vars,&lhs_vars) )
+	{
+		return false;
+	}
+
+	if ( !checkVars(ATAgetArgument(DataEqn,1),lhs_vars) )
+	{
+		return false;
+	}
+
+	return checkVars(ATAgetArgument(DataEqn,3),lhs_vars);
 }

@@ -1171,6 +1171,8 @@ bool RewriterInnermost::addRewriteRule(ATermAppl Rule)
 	ATermInt i,j;
 	int old_num;
 
+	assert(isValidRewriteRule(Rule));
+
 	old_num = num_opids;
 
 	a = ATAgetArgument(Rule,2);

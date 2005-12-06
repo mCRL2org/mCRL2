@@ -27,8 +27,10 @@
 <!ENTITY Rewriter_clearsubst "<function>Rewriter::clearSubstitution</function>">
 <!ENTITY Rewriter_clearsubsts "<function>Rewriter::clearSubstitutions</function>">
 <!ENTITY createRewriter "<function>createRewriter</function>">
+<!ENTITY isValidRewriteRule "<function>isValidRewriteRule</function>">
 <!ENTITY RewriteStrategyFromString "<function>RewriteStrategyFromString</function>">
 <!ENTITY parDataEqnSpec "<parameter>DataEqnSpec</parameter>">
+<!ENTITY parDataEqn "<parameter>DataEqn</parameter>">
 <!ENTITY parStrategy "<parameter>Strategy</parameter>">
 <!ENTITY parVar "<parameter>Var</parameter>">
 <!ENTITY parExpr "<parameter>Expr</parameter>">
@@ -127,13 +129,17 @@
   <paramdef>&tatermappl; &parDataEqnSpec;</paramdef>
   <paramdef>&trewrstrat; &parStrategy;</paramdef>
 </funcprototype>
+<funcprototype>
+  <funcdef>&tcbool; &isValidRewriteRule;</funcdef>
+  <paramdef>&tatermappl; &parDataEqn;</paramdef>
+</funcprototype>
 </funcsynopsis>
 </refsynopsisdiv>
 
 <refsect1>
 <title>Description</title>
 <para>
-The librewrite library provides a rewrite system for mCRL2 data expressions (only after data implementation). To use it, one creates a &tRewriter; class through the &createRewriter; function. The created rewriter is initialised with the equations from &parDataEqnSpec;, which are used as rewrite rules, and a rewriter strategy &parStrategy; (see below). After creation, one can still add or remove an rewrite rule &parRule; with the functions &Rewriter_addRule; and &Rewriter_remRule;. The latter removes (all occurrences of) &parRule; from the rules used by the rewrite system.
+The librewrite library provides a rewrite system for mCRL2 data expressions (only after data implementation). To use it, one creates a &tRewriter; class through the &createRewriter; function. The created rewriter is initialised with the equations from &parDataEqnSpec;, which are used as rewrite rules, and a rewriter strategy &parStrategy; (see below). After creation, one can still add or remove an rewrite rule &parRule; with the functions &Rewriter_addRule; and &Rewriter_remRule;. The latter removes (all occurrences of) &parRule; from the rules used by the rewrite system. To check whether a &parDataEqn; is a valid rewrite rule the function &isValidRewriteRule; can be used.
 </para>
 <para>
 To actually rewrite a data expression, the functions &Rewriter_rewr; and &Rewriter_rewrlist; can be used. The function &Rewriter_rewr; rewrites a single mCRL2 data expression &parTerm;, while &Rewriter_rewrlist; rewrites every expression in the list &parTerms;. Because the rewriters use their own internal format for data expressions (for more efficient rewriting), every call to &Rewriter_rewr; or &Rewriter_rewrlist; results in an implicit conversion to and from the internal format before, respectively after the actual rewriting. When rewriting is a critical part of an application, it is wise to explicitly convert the data expressions before repeated calls on such an expression. This is done with the functions &Rewriter_toInt; and &Rewriter_fromInt;. (Note that the expression in the internal format is an &taterm; instead of an &tatermappl;.) Terms in the internal format can be rewritten with the function &Rewriter_rewrInt; and &Rewriter_rewrIntlist; (analogous to &Rewriter_rewr; and &Rewriter_rewrlist;).
@@ -241,6 +247,14 @@ The following precondition has to be satisfied for &Rewriter_setsubst;:
 <itemizedlist>
   <listitem>
     <para>&parExpr; is a data expression in the internal rewriter format</para>
+  </listitem>
+</itemizedlist>
+</para>
+<para>
+The following precondition has to be satisfied for &isValidRewriteRule;:
+<itemizedlist>
+  <listitem>
+    <para>&parDataEqn; is a DataEqn (after data implementation)</para>
   </listitem>
 </itemizedlist>
 </para>

@@ -38,4 +38,6 @@ class Rewriter
 
 Rewriter *createRewriter(ATermAppl DataEqnSpec, RewriteStrategy Strategy = GS_REWR_INNER);
 
+bool isValidRewriteRule(ATermAppl DataEqn);
+
 #endif
