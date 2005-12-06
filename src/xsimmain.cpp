@@ -738,7 +738,7 @@ void XSimMain::OnLoadTrace( wxCommandEvent &event )
     wxFileDialog dialog( this, wxT("Load trace..."), wxT(""), wxT(""), wxT("Traces (*.trc)|*.trc|All Files|*.*"));
     if ( dialog.ShowModal() == wxID_OK )
     {
-	    ifstream f(dialog.GetPath());
+	    ifstream f(dialog.GetPath().fn_str());
 	    Trace tr(f);
 	    f.close();
 
