@@ -6756,10 +6756,11 @@ static ATermAppl makesingleultimatedelaycondition(
                                     ATconcat(variables,ATgetNext(sumvars)),
                                     (ATerm)sumvar);
 
-      declare_equation_variables(extendedvariables); 
       ATermAppl newfunction=gsMakeOpId(fresh_name("ExistsFun"),
               gsMakeSortArrowList(getsorts(extendedvariables),gsMakeSortExprBool()));
       
+      insertmapping(newfunction,spec);
+      declare_equation_variables(extendedvariables); 
       newequation(NULL,gsMakeDataApplList(newfunction,extendedvariables),result,spec);
       end_equation_section();
       result=gsMakeDataExprExists(
