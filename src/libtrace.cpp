@@ -1,4 +1,5 @@
 #include <aterm2.h>
+#include <assert.h>
 #include <iostream>
 #include <fstream>
 #include <ext/stdio_filebuf.h>
