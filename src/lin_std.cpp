@@ -709,8 +709,6 @@ static int upperpowerof2(int i)
 
 static ATermAppl RewriteTerm(ATermAppl t)
 { 
-  // gsfprintf(stderr,"REWRITE %T\n",t);
-  // gsfprintf(stderr,"REWRITE %P\n",t);
   if (mayrewrite) t=gsRewriteTerm(t);
   return t;
 }
@@ -6750,8 +6748,6 @@ static ATermAppl makesingleultimatedelaycondition(
     }
   }
 
-  // gsfprintf(stderr,"Result %P\nvariables%P\nsumvars %P\n\n",result,variables,sumvars);
-
   for ( ; sumvars!=ATempty ; sumvars=ATgetNext(sumvars) )
   { ATermAppl sumvar=ATAgetFirst(sumvars);
     if (occursinterm(sumvar,result))
@@ -6761,11 +6757,9 @@ static ATermAppl makesingleultimatedelaycondition(
                                     (ATerm)sumvar);
 
       declare_equation_variables(extendedvariables); 
-      // gsfprintf(stderr,"VVVV %P\n",extendedvariables);
       ATermAppl newfunction=gsMakeOpId(fresh_name("ExistsFun"),
               gsMakeSortArrowList(getsorts(extendedvariables),gsMakeSortExprBool()));
       
-      // gsfprintf(stderr,"NEWEQUATION %P\nresult %P\n%T\n\n",gsMakeDataApplList(newfunction,extendedvariables),result,result);
       newequation(NULL,gsMakeDataApplList(newfunction,extendedvariables),result,spec);
       end_equation_section();
       result=gsMakeDataExprExists(
@@ -6869,12 +6863,12 @@ static ATermList combinesumlist(
       else
       { /* actiontime1!=nil. Substitute the time expression for
            timevar in ultimatedelaycondition, and extend the condition */
-        ultimatedelaycondition=
+        ATermAppl intermediateultimatedelaycondition=
                 substitute_data(
                    ATinsertA(ATempty,actiontime1),
                    ATinsertA(ATempty,timevar),
                    ultimatedelaycondition);
-        condition1=gsMakeDataExprAnd(ultimatedelaycondition,condition1);
+        condition1=gsMakeDataExprAnd(intermediateultimatedelaycondition,condition1);
       }
   
       condition1=RewriteTerm(condition1);
@@ -6935,12 +6929,12 @@ static ATermList combinesumlist(
       else
       { /* actiontime1!=gsMakeNil(). Substitute the time expression for
            timevar in ultimatedelaycondition, and extend the condition */
-        ultimatedelaycondition=
+        ATermAppl intermediateultimatedelaycondition=
                 substitute_data(
                    ATinsertA(ATempty,actiontime2),
                    ATinsertA(ATempty,timevar),
                    ultimatedelaycondition);
-        condition2=gsMakeDataExprAnd(ultimatedelaycondition,condition2);
+        condition2=gsMakeDataExprAnd(intermediateultimatedelaycondition,condition2);
       }
   
       condition2=RewriteTerm(condition2);
