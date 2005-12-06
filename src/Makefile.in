@@ -98,6 +98,18 @@ ifdef USE_BOOST
  LPEPARELM_OBJECTS   = libprint.o libstruct.o libprint_c.o liblowlevel.o lpeparelm.o
  OBJECTS            += $(LPEPARELM_OBJECTS)
  LPEPARELM_LDFLAGS   = -lrewrite -l$(ATERM) -lm $(LIBDL)
+
+ #lpedataelm definitions
+ LPEDATAELM_NAME     = lpedataelm
+ LPEDATAELM_OBJECTS  = libprint.o libstruct.o libprint_c.o liblowlevel.o lpedataelm.o libdataelm.o
+ OBJECTS            += $(LPEDATAELM_OBJECTS)
+ LPEDATAELM_LDFLAGS  = -lrewrite -l$(ATERM) -lm $(LIBDL)
+
+ #lpe2lts definitions
+ LPE2LTS_NAME       = lpe2lts
+ LPE2LTS_OBJECTS    = lpe2lts.o libnextstate.o libtrace.o libdataelm.o libprint.o libprint_c.o libstruct.o liblowlevel.o
+ OBJECTS           += $(LPE2LTS_OBJECTS)
+ LPE2LTS_LDFLAGS    = -lenum -lrewrite -lsvc -l$(ATERM) -lm $(LIBDL)
 endif
 
 #lperewr definitions
@@ -105,12 +117,6 @@ LPEREWR_NAME       = lperewr
 LPEREWR_OBJECTS    = lperewr.o libprint_c.o libstruct.o liblowlevel.o
 OBJECTS           += $(LPEREWR_OBJECTS)
 LPEREWR_LDFLAGS    = -lrewrite -l$(ATERM) -lm $(LIBDL)
-
-#lpe2lts definitions
-LPE2LTS_NAME       = lpe2lts
-LPE2LTS_OBJECTS    = lpe2lts.o libnextstate.o libtrace.o libprint.o libprint_c.o libstruct.o liblowlevel.o
-OBJECTS           += $(LPE2LTS_OBJECTS)
-LPE2LTS_LDFLAGS    = -lenum -lrewrite -lsvc -l$(ATERM) -lm $(LIBDL)
 
 #tbf2lpe definitions
 TBF2LPE_NAME       = tbf2lpe
@@ -141,7 +147,7 @@ LIN_LDFLAGS        = -lrewrite -l$(ATERM) -lm $(LIBDL)
 
 #Group definitions
 EXPERIMENTALS      = $(LIN_NAME) $(ALPHA_NAME)
-EXE_NAMES         += $(MCRL22LPE_NAME) $(LPEINFO_NAME) $(LPEPARELM_NAME) $(LPECONSTELM_NAME) $(LPEPP_NAME) $(LPE2LTS_NAME) $(SIM_NAME) $(XSIM_NAME) $(TBF2LPE_NAME) $(PNML2MCRL2_NAME) $(LPEREWR_NAME)
+EXE_NAMES         += $(MCRL22LPE_NAME) $(LPEINFO_NAME) $(LPEDATAELM_NAME) $(LPEPARELM_NAME) $(LPECONSTELM_NAME) $(LPEPP_NAME) $(LPE2LTS_NAME) $(SIM_NAME) $(XSIM_NAME) $(TBF2LPE_NAME) $(PNML2MCRL2_NAME) $(LPEREWR_NAME)
 LIB_NAMES          = $(XSIMTRACE_NAME)
 OBJECTS           := $(sort $(OBJECTS))
 
@@ -182,7 +188,11 @@ squadt: boost
 # For building bjam and boost libraries
 boost:
 ifdef BUILD_BOOST
+ifeq ($(findstring $(MAKECMDGOALS),clean distclean),)
+	@$(MAKE) -C boost 
+else
 	@$(MAKE) -C boost $(MAKECMDGOALS)
+endif
 endif
 
 # Add revision number
@@ -282,8 +292,8 @@ svc/%: CPPFLAGS += -I./ -Iaterm
 
 # Targets that depend on any of the boost libraries
 ifdef USE_BOOST
-lpe%: CPPFLAGS += $(BOOST_CPPFLAGS) -I./ -Iaterm
-lpe%: CXXFLAGS += -ftemplate-depth-256
+lpe% libdataelm.%: CPPFLAGS += $(BOOST_CPPFLAGS) -I./ -Iaterm
+lpe% libdataelm.%: CXXFLAGS += -ftemplate-depth-256
 
 ifdef BUILD_BOOST
  BOOST=boost
@@ -297,6 +307,12 @@ $(LPECONSTELM_NAME) : $(LPECONSTELM_OBJECTS) $(ATERM_DEP) $(LIBREWR_NAME) $(BOOS
 
 $(LPEPARELM_NAME) : $(LPEPARELM_OBJECTS) $(ATERM_DEP) $(LIBREWR_NAME) $(BOOST)
 	$(CXX) $(CXXFLAGS) -o $@ $(CPPFLAGS) $(LPEPARELM_OBJECTS) $(BOOST_LDFLAGS) $(BOOST_PROGRAM_OPTIONS) $(LDFLAGS) $(LPEPARELM_LDFLAGS)
+
+$(LPEDATAELM_NAME) : $(LPEDATAELM_OBJECTS) $(ATERM_DEP) $(LIBREWR_NAME) $(BOOST)
+	$(CXX) $(CXXFLAGS) -o $@ $(CPPFLAGS) $(LPEDATAELM_OBJECTS) $(BOOST_LDFLAGS) $(BOOST_PROGRAM_OPTIONS) $(LDFLAGS) $(LPEDATAELM_LDFLAGS)
+
+$(LPE2LTS_NAME) : $(LPE2LTS_OBJECTS) $(ATERM_DEP) $(LIBSVC_NAME) $(LIBREWR_NAME) $(LIBENUM_NAME)
+	$(CXX) -o $@ $(LPE2LTS_OBJECTS) $(LDFLAGS) $(LPE2LTS_LDFLAGS)
 else
 $(LPEINFO_NAME) :
 	@echo "Missing Boost libraries so skipping build of lpeinfo."
@@ -304,6 +320,10 @@ $(LPECONSTELM_NAME) :
 	@echo "Missing Boost libraries so skipping build of lpeconstelm."
 $(LPEPARELM_NAME) :
 	@echo "Missing Boost libraries so skipping build of lpeparelm."
+$(LPEDATAELM_NAME) :
+	@echo "Missing Boost libraries so skipping build of lpedataelm."
+$(LPE2LTS_NAME) :
+	@echo "Missing Boost libraries so skipping build of lpe2lts."
 endif
 
 $(SVC2FSM_NAME) : $(SVC2FSM_OBJECTS) $(ATERM_DEP) $(LIBSVC_NAME) $(LIBREWR_NAME)
@@ -311,9 +331,6 @@ $(SVC2FSM_NAME) : $(SVC2FSM_OBJECTS) $(ATERM_DEP) $(LIBSVC_NAME) $(LIBREWR_NAME)
 
 $(LPEREWR_NAME) : $(LPEREWR_OBJECTS) $(ATERM_DEP) $(LIBREWR_NAME)
 	$(CXX) -o $@ $(LPEREWR_OBJECTS) $(LDFLAGS) $(LPEREWR_LDFLAGS)
-
-$(LPE2LTS_NAME) : $(LPE2LTS_OBJECTS) $(ATERM_DEP) $(LIBSVC_NAME) $(LIBREWR_NAME) $(LIBENUM_NAME)
-	$(CXX) -o $@ $(LPE2LTS_OBJECTS) $(LDFLAGS) $(LPE2LTS_LDFLAGS)
 
 $(TBF2LPE_NAME) : $(TBF2LPE_OBJECTS) $(ATERM_DEP) $(LIBREWR_NAME)
 	$(CXX) -o $@ $(TBF2LPE_OBJECTS) $(LDFLAGS) $(TBF2LPE_LDFLAGS)
@@ -347,7 +364,7 @@ Makefile: Makefile.in config.in
 endif
 
 # *.cpp is needed for generated code (e.g. by bison)
-*.cpp *.o aterm/*.o svc/*.o lpe/*.o: Makefile
+*.cpp *.o aterm/*.o svc/*.o: Makefile
 
 %.d : %.c
 	@echo generating dependencies for $<

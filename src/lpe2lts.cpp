@@ -16,6 +16,7 @@
 #include "libnextstate.h"
 #include "librewrite_c.h"
 #include "libtrace.h"
+#include "libdataelm.h"
 
 using namespace std;
 
@@ -47,6 +48,7 @@ static void print_help(FILE *f, char *Name)
     "                        values\n"
     "  -y, --dummy           replace free variables in the LPE with dummy values\n"
     "                        (default)\n"
+    "  -u, --unused-data     do not remove unused parts of the data specification\n"
     "  -c, --vector          store state in a vector (fastest, default)\n"
     "  -r, --tree            store state in a tree (for memory efficiency)\n"
     "  -l, --max=NUM         explore at most NUM states\n"
@@ -68,13 +70,14 @@ int main(int argc, char **argv)
   FILE *SpecStream;
   ATerm stackbot;
   ATermAppl Spec;
-  #define sopts "hqvfycrl:demR:"
+  #define sopts "hqvfyucrl:demR:"
   struct option lopts[] = {
     { "help",            no_argument,       NULL, 'h' },
     { "quiet",           no_argument,       NULL, 'q' },
     { "verbose",         no_argument,       NULL, 'v' },
     { "freevar",         no_argument,       NULL, 'f' },
     { "dummy",           no_argument,       NULL, 'y' },
+    { "unused-data",     no_argument,       NULL, 'u' },
     { "vector",          no_argument,       NULL, 'c' },
     { "tree",            no_argument,       NULL, 'r' },
     { "max",             required_argument, NULL, 'l' },
@@ -88,26 +91,23 @@ int main(int argc, char **argv)
     { "no-info",         no_argument,       NULL, 2   },
     { 0, 0, 0, 0 }
   };
-  int opt, stateformat;
-  RewriteStrategy strat;
-  bool usedummies,trace,trace_deadlock,monitor,explore,quiet,verbose,outinfo;
-  int outformat;
-  unsigned long max_states;
 
   ATinit(argc,argv,&stackbot);
 
-  quiet = false;
-  verbose = false;
-  strat = GS_REWR_INNER3;
-  usedummies = true;
-  stateformat = GS_STATE_VECTOR;
-  outformat = OF_UNKNOWN;
-  outinfo = true;
-  max_states = ULONG_MAX;
-  trace = false;
-  trace_deadlock = false;
-  monitor = false;
-  explore = false;
+  bool quiet = false;
+  bool verbose = false;
+  RewriteStrategy strat = GS_REWR_INNER3;
+  bool usedummies = true;
+  bool removeunused = true;
+  int stateformat = GS_STATE_VECTOR;
+  int outformat = OF_UNKNOWN;
+  bool outinfo = true;
+  unsigned long max_states = ULONG_MAX;
+  bool trace = false;
+  bool trace_deadlock = false;
+  bool monitor = false;
+  bool explore = false;
+  int opt;
   while ( (opt = getopt_long(argc,argv,sopts,lopts,NULL)) != -1 )
   {
     switch ( opt )
@@ -126,6 +126,9 @@ int main(int argc, char **argv)
         break;
       case 'y':
         usedummies = true;
+        break;
+      case 'u':
+        removeunused = false;
         break;
       case 'c':
         stateformat = GS_STATE_VECTOR;
@@ -206,6 +209,12 @@ int main(int argc, char **argv)
     return 1;
   }
   assert(gsIsSpecV1(Spec));
+
+  if ( removeunused )
+  {
+    gsVerboseMsg("removing unused parts of the data specification.\n");
+    Spec = removeUnusedData(Spec);
+  }
 
   FILE *aut;
   SVCfile svcf, *svc;
