@@ -9,8 +9,31 @@
 #include "libprint_c.h"
 #include "libtrace.h"
 
-#define TRACE_V1_MARKER "mCRL2TraceV1"
-#define TRACE_V1_MARKER_SIZE 12
+
+/* mCRL2 Trace Format
+ *
+ *   Bytes      Information
+ *
+ *    0 -  9    Marker "mCRL2Trace"
+ *   10 - 11    Version number (little endian)
+ *   12 -       Binary ATermList representing the trace
+ *
+ * The contents of the trace ATermList have the following form.
+ *
+ *   T   ::=  T'  |  State |> T'  |  State
+ *   T'  ::=  Action |> T  |  Action
+ *
+ * This means that a trace is a sequence of Actions with at most one
+ * State between every action and at the beginning and end of the trace.
+ * Actions are in the mCRL2 MultAct(<Action>*) format and States are
+ * ATermAppls with "STATE" as function symbol and mCRL2 <DataExpr>s as
+ * arguments.
+ */
+
+#define TRACE_MCRL2_MARKER "mCRL2Trace"
+#define TRACE_MCRL2_MARKER_SIZE 10
+#define TRACE_MCRL2_VERSION "\x01\x00"
+#define TRACE_MCRL2_VERSION_SIZE 2
 
 #define INIT_BUF_SIZE 64
 
@@ -163,14 +186,14 @@ ATermAppl Trace::getState()
 
 TraceFormat Trace::detectFormat(istream &is)
 {
-	char buf[TRACE_V1_MARKER_SIZE];
+	char buf[TRACE_MCRL2_MARKER_SIZE];
 	TraceFormat fmt = tfPlain;
 
-	is.read(buf,TRACE_V1_MARKER_SIZE);
+	is.read(buf,TRACE_MCRL2_MARKER_SIZE);
 
-	if ( (is.gcount() == TRACE_V1_MARKER_SIZE) && !strncmp(buf,TRACE_V1_MARKER,TRACE_V1_MARKER_SIZE) )
+	if ( (is.gcount() == TRACE_MCRL2_MARKER_SIZE) && !strncmp(buf,TRACE_MCRL2_MARKER,TRACE_MCRL2_MARKER_SIZE) )
 	{
-		fmt = tfVer1;
+		fmt = tfMcrl2;
 	}
 
 	is.seekg(-is.gcount(),ios::cur);
@@ -201,12 +224,12 @@ ATerm readATerm(istream &is)
 	return t;
 }
 
-void Trace::loadVer1(istream &is)
+void Trace::loadMcrl2(istream &is)
 {
-	char buf[TRACE_V1_MARKER_SIZE];
-	is.read(buf,TRACE_V1_MARKER_SIZE);
+	char buf[TRACE_MCRL2_MARKER_SIZE+TRACE_MCRL2_VERSION_SIZE];
+	is.read(buf,TRACE_MCRL2_MARKER_SIZE+TRACE_MCRL2_VERSION_SIZE);
 
-	assert(!strncmp(buf,TRACE_V1_MARKER,TRACE_V1_MARKER_SIZE));
+	assert(!strncmp(buf,TRACE_MCRL2_MARKER,TRACE_MCRL2_MARKER_SIZE));
 
 	resetPosition();
 	truncate();
@@ -257,8 +280,8 @@ void Trace::load(istream &is, TraceFormat tf)
 
 	switch ( tf )
 	{
-		case tfVer1:
-			loadVer1(is);
+		case tfMcrl2:
+			loadMcrl2(is);
 			break;
 		case tfPlain:
 			loadPlain(is);
@@ -277,7 +300,7 @@ void Trace::load(string &filename, TraceFormat tf)
 	is.close();
 }
 
-void Trace::saveVer1(ostream &os)
+void Trace::saveMcrl2(ostream &os)
 {
 	ATermList trace = ATmakeList0();
 
@@ -301,7 +324,8 @@ void Trace::saveVer1(ostream &os)
 		}
 	}
 
-	os << TRACE_V1_MARKER;
+	os << TRACE_MCRL2_MARKER;
+	os.write(TRACE_MCRL2_VERSION,TRACE_MCRL2_VERSION_SIZE);
 	int len;
 	char *bs = ATwriteToBinaryString((ATerm) trace,&len); //XXX
 	os.write(bs,len);
@@ -325,8 +349,8 @@ void Trace::save(ostream &os, TraceFormat tf)
 {
 	switch ( tf )
 	{
-		case tfVer1:
-			saveVer1(os);
+		case tfMcrl2:
+			saveMcrl2(os);
 			break;
 		case tfPlain:
 			savePlain(os);

@@ -14,7 +14,7 @@
 
 using namespace std;
 
-enum output_type { otPlain, otVer1, otDot, otAut, /*otSvc,*/ otNone };
+enum output_type { otPlain, otMcrl2, otDot, otAut, /*otSvc,*/ otNone };
 
 static void print_state(ostream &os, ATermAppl state)
 {
@@ -106,8 +106,8 @@ static void print_help(FILE *f, char *Name)
     "assumed.\n"
     "\n"
     "  -p, --plain           write trace in plain format (default)\n"
-    "  -1, --version1        write trace in trace format version 1\n"
-    "  -d, --dot             write trace in dotty format\n"
+    "  -m, --mcrl2           write trace in mCRL2 trace format\n"
+    "  -d, --dot             write trace in dot format\n"
     "  -a, --aut             write trace in aut format\n"
 /*    "  -s, --svc             write trace in svc format\n"*/,
     Name
@@ -121,15 +121,15 @@ static void print_version(FILE *f)
 
 int main(int argc, char **argv)
 {
-  #define sopts "hqvp1da"
-//  #define sopts "hqvp1das"
+  #define sopts "hqvpmda"
+//  #define sopts "hqvpmdas"
   struct option lopts[] = {
     { "help",     no_argument,  NULL,  'h' },
     { "version",  no_argument,  NULL,  0x1 },
     { "quiet",    no_argument,  NULL,  'q' },
     { "verbose",  no_argument,  NULL,  'v' },
     { "plain",    no_argument,  NULL,  'p' },
-    { "version1", no_argument,  NULL,  '1' },
+    { "mcrl2",    no_argument,  NULL,  'm' },
     { "dot",      no_argument,  NULL,  'd' },
     { "aut",      no_argument,  NULL,  'a' },
 //    { "svc",      no_argument,  NULL,  's' },
@@ -168,13 +168,13 @@ int main(int argc, char **argv)
         }
         outtype = otPlain;
         break;
-      case '1':
+      case 'm':
         if ( outtype != otNone )
         {
           gsErrorMsg("cannot set multiple output formats\n");
           return 1;
         }
-        outtype = otVer1;
+        outtype = otMcrl2;
         break;
       case 'd':
         if ( outtype != otNone )
@@ -270,9 +270,9 @@ int main(int argc, char **argv)
       gsVerboseMsg("writing result in plain text...\n");
       trace.save(*OutStream,tfPlain);
       break;
-    case otVer1:
-      gsVerboseMsg("writing result in trace format version 1...\n");
-      trace.save(*OutStream,tfVer1);
+    case otMcrl2:
+      gsVerboseMsg("writing result in mCRL2 trace format...\n");
+      trace.save(*OutStream,tfMcrl2);
       break;
     case otDot:
       gsVerboseMsg("writing result in dot format...\n");
