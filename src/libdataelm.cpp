@@ -12,18 +12,9 @@
 //
 // ======================================================================
 
-//mCRL2
 #include "lpe/specification.h"
-#include "atermpp/aterm.h"
-#include "lpe/lpe_error.h"
 
 using namespace lpe;
-using namespace atermpp;
-
-using atermpp::aterm;
-using atermpp::aterm_appl;
-using atermpp::aterm_list;
-
 
 static bool add_used_sort(ATermAppl expr, ATermIndexedSet s)
 {

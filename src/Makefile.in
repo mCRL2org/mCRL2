@@ -50,6 +50,12 @@ LPEPP_OBJECTS      = lpepp.o libprint_c.o libstruct.o liblowlevel.o
 OBJECTS           += $(LPEPP_OBJECTS)
 LPEPP_LDFLAGS      = -lrewrite -l$(ATERM) -lm $(LIBDL)
 
+#tracepp definitions
+TRACEPP_NAME       = tracepp
+TRACEPP_OBJECTS    = tracepp.o libtrace.o libprint.o libprint_c.o libstruct.o liblowlevel.o
+OBJECTS           += $(TRACEPP_OBJECTS)
+TRACEPP_LDFLAGS    = -lrewrite -l$(ATERM) -lm $(LIBDL)
+
 #sim definitions
 SIM_NAME           = sim
 SIM_OBJECTS        = sim.o libnextstate.o libprint_c.o libstruct.o liblowlevel.o
@@ -147,7 +153,7 @@ LIN_LDFLAGS        = -lrewrite -l$(ATERM) -lm $(LIBDL)
 
 #Group definitions
 EXPERIMENTALS      = $(LIN_NAME) $(ALPHA_NAME)
-EXE_NAMES         += $(MCRL22LPE_NAME) $(LPEINFO_NAME) $(LPEDATAELM_NAME) $(LPEPARELM_NAME) $(LPECONSTELM_NAME) $(LPEPP_NAME) $(LPE2LTS_NAME) $(SIM_NAME) $(XSIM_NAME) $(TBF2LPE_NAME) $(PNML2MCRL2_NAME) $(LPEREWR_NAME)
+EXE_NAMES         += $(MCRL22LPE_NAME) $(LPEINFO_NAME) $(LPEDATAELM_NAME) $(LPEPARELM_NAME) $(LPECONSTELM_NAME) $(LPEPP_NAME) $(TRACEPP_NAME) $(LPE2LTS_NAME) $(SIM_NAME) $(XSIM_NAME) $(TBF2LPE_NAME) $(PNML2MCRL2_NAME) $(LPEREWR_NAME)
 LIB_NAMES          = $(XSIMTRACE_NAME)
 OBJECTS           := $(sort $(OBJECTS))
 
@@ -267,6 +273,9 @@ $(MCRL22LPE_NAME) : $(MCRL22LPE_OBJECTS) $(ATERM_DEP) $(LIBREWR_NAME)
 
 $(LPEPP_NAME) : $(LPEPP_OBJECTS) $(ATERM_DEP) $(LIBREWR_NAME)
 	$(CXX) -o $@ $(LPEPP_OBJECTS) $(LDFLAGS) $(LPEPP_LDFLAGS)
+
+$(TRACEPP_NAME) : $(TRACEPP_OBJECTS) $(ATERM_DEP) $(LIBREWR_NAME)
+	$(CXX) -o $@ $(TRACEPP_OBJECTS) $(LDFLAGS) $(TRACEPP_LDFLAGS)
 
 $(SIM_NAME) : $(SIM_OBJECTS) $(ATERM_DEP) $(LIBREWR_NAME) $(LIBENUM_NAME)
 	$(CXX) -o $@ $(SIM_OBJECTS) $(LDFLAGS) $(SIM_LDFLAGS)

@@ -1,4 +1,5 @@
 #define NAME "lpe2lts"
+#define VERSION "0.5"
 
 #include <stdio.h>
 #include <errno.h>
@@ -41,6 +42,7 @@ static void print_help(FILE *f, char *Name)
     "\n"
     "Mandatory arguments to long options are mandatory for short options too.\n"
     "  -h, --help            display this help message\n"
+    "      --version         display version information\n"
     "  -q, --quiet           do not print any unrequested information\n"
     "  -v, --verbose         display extra information about the state space\n"
     "                        generation\n"
@@ -65,6 +67,11 @@ static void print_help(FILE *f, char *Name)
     Name);
 }
 
+static void print_version(FILE *f)
+{
+  fprintf(f,NAME " " VERSION " (revision %i)\n", REVISION);
+}
+
 int main(int argc, char **argv)
 {
   FILE *SpecStream;
@@ -73,6 +80,7 @@ int main(int argc, char **argv)
   #define sopts "hqvfyucrl:demR:"
   struct option lopts[] = {
     { "help",            no_argument,       NULL, 'h' },
+    { "version",         no_argument,       NULL, 0   },
     { "quiet",           no_argument,       NULL, 'q' },
     { "verbose",         no_argument,       NULL, 'v' },
     { "freevar",         no_argument,       NULL, 'f' },
@@ -86,9 +94,9 @@ int main(int argc, char **argv)
     { "deadlock-trace",  no_argument,       NULL, 'e' },
     { "monitor",         no_argument,       NULL, 'm' },
     { "rewriter",        required_argument, NULL, 'R' },
-    { "aut",             no_argument,       NULL, 0   },
-    { "svc",             no_argument,       NULL, 1   },
-    { "no-info",         no_argument,       NULL, 2   },
+    { "aut",             no_argument,       NULL, 1   },
+    { "svc",             no_argument,       NULL, 2   },
+    { "no-info",         no_argument,       NULL, 3   },
     { 0, 0, 0, 0 }
   };
 
@@ -114,6 +122,9 @@ int main(int argc, char **argv)
     {
       case 'h':
         print_help(stderr, argv[0]);
+        return 0;
+      case 0:
+        print_version(stderr);
         return 0;
       case 'q':
         quiet = true;
@@ -160,13 +171,13 @@ int main(int argc, char **argv)
           return 1;
         }
         break;
-      case 0:
+      case 1:
         outformat = OF_AUT;
         break;
-      case 1:
+      case 2:
         outformat = OF_SVC;
         break;
-      case 2:
+      case 3:
         outinfo = false;
         break;
       default:
@@ -405,34 +416,34 @@ int main(int argc, char **argv)
         }
   
         Trace trace;
-	trace.setState(gsMakeStateVector(s));
+        trace.setState(gsMakeStateVector(s));
         for (; !ATisEmpty(tr); tr=ATgetNext(tr))
         {
           ATermList e = (ATermList) ATgetFirst(tr);
           trace.addAction((ATermAppl) ATgetFirst(e));
-	  e = ATgetNext(e);
-	  trace.setState(gsMakeStateVector(ATgetFirst(e)));
+          e = ATgetNext(e);
+          trace.setState(gsMakeStateVector(ATgetFirst(e)));
         }
 
-	if ( basefilename == NULL )
-	{
-		basefilename = strdup(SpecFileName);
-      		char *s = strrchr(basefilename,'.');
-		if ( s != NULL )
-		{
-			*s = '\0';
-		}
-	}
+        if ( basefilename == NULL )
+        {
+          basefilename = strdup(SpecFileName);
+          char *s = strrchr(basefilename,'.');
+          if ( s != NULL )
+          {
+            *s = '\0';
+          }
+        }
         stringstream ss;
-	ss << basefilename << "_" << deadlockcnt << ".dlk";
-	string sss(ss.str());
+        ss << basefilename << "_dlk_" << deadlockcnt << ".trc";
+        string sss(ss.str());
         trace.save(sss);
         if ( explore )
         {
-          fprintf(stderr,"deadlock-detect: deadlock found and saved to '%s_%i.dlk'.\n",basefilename,deadlockcnt);
+          fprintf(stderr,"deadlock-detect: deadlock found and saved to '%s_dlk_%i.trc'.\n",basefilename,deadlockcnt);
           fflush(stderr);
         }
-	deadlockcnt++;
+        deadlockcnt++;
       } else if ( explore ) {
         fprintf(stderr,"deadlock-detect: deadlock found.\n");
         fflush(stderr);

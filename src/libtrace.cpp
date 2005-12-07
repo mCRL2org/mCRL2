@@ -281,12 +281,18 @@ void Trace::saveVer1(ostream &os)
 {
 	ATermList trace = ATmakeList0();
 
+	bool error_shown = false;
 	unsigned int i=len+1;
 	while ( i > 0 )
 	{
 		i--;
 		if ( actions[i] != NULL )
 		{
+			if ( !gsIsMultAct(actions[i]) && !error_shown )
+			{
+				gsErrorMsg("saving trace that is not in mCRL2 format to a mCRL2 trace format\n");
+				error_shown = true;
+			}
 			trace = ATinsert(trace,(ATerm) actions[i]);
 		}
 		if ( states[i] != NULL )
