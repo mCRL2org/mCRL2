@@ -19,11 +19,10 @@
  </xs:complexType>
  <!-- Data type for output specification -->
  <xs:complexType name="output-object">
-  <xs:simpleContent>
-   <xs:extension base="xs:token">
-    <xs:attribute name="format" type="xs:token" use="required"/>
-   </xs:extension>
-  </xs:simpleContent>
+  <xs:attribute name="checksum" type="xs:token" use="optional"/>
+  <xs:attribute name="format" type="xs:token" use="required"/>
+  <xs:attribute name="name" type="xs:token" use="required"/>
+  <xs:attribute name="timestamp" type="xs:token" use="optional"/>
  </xs:complexType>
  <!-- Data type for specification identification -->
  <xs:simpleType name="tool-identifier">

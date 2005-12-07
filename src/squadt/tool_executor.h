@@ -10,6 +10,9 @@
 class ToolManager;
 class Process;
 
+class ExecutionError {
+};
+
 class ToolExecutor {
   private:
     std::map < Process*, long > processes; /* Maps a reference to a process id */
@@ -22,7 +25,7 @@ class ToolExecutor {
     ~ToolExecutor();
 
     /* Execute a tool */
-    bool Execute(ToolManager& tool_manager, unsigned int tool_identifier, std::string arguments, std::ostream&);
+    long Execute(ToolManager& tool_manager, unsigned int tool_identifier, std::string arguments, std::ostream&) throw (ExecutionError);
 
     /* Remove a process from the list */
     void Remove(Process* process_pointer);

@@ -19,25 +19,24 @@ ToolExecutor::~ToolExecutor() {
   }
 }
 
-bool ToolExecutor::Execute(ToolManager& tool_manager, unsigned int tool_identifier, std::string arguments, std::ostream& stream) {
+long ToolExecutor::Execute(ToolManager& tool_manager, unsigned int tool_identifier, std::string arguments, std::ostream& stream) throw (ExecutionError) {
   boost::filesystem::path tool_path(tool_manager.GetTool(tool_identifier)->GetLocation());
 
-  if (tool_path.string() != tool_path.leaf()) {
-    wxString  command(tool_path.string().c_str(), wxConvLocal);
-    Process*  new_process = new Process(wxPROCESS_REDIRECT);
-    long      process_id  = wxExecute(command.Append(wxT(" ")).Append(wxString(arguments.c_str(), wxConvLocal)), wxEXEC_ASYNC, new_process);
+  wxString  command(tool_path.string().c_str(), wxConvLocal);
+  Process*  new_process = new Process(wxPROCESS_REDIRECT);
+
+  long process_id = wxExecute(command.Append(wxT(" ")).Append(wxString(arguments.c_str(), wxConvLocal)), wxEXEC_ASYNC, new_process);
  
-    if (0 <= process_id) {
-      processes[new_process] = process_id;
+  if (0 <= process_id) {
+    processes[new_process] = process_id;
  
-      return (true);
-    }
-    else {
-      delete new_process;
-    }
+    throw (ExecutionError());
+  }
+  else {
+    delete new_process;
   }
 
-  return (false);
+  return (process_id);
 }
 
 void ToolExecutor::Remove(Process* process_pointer) {

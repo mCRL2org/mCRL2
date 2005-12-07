@@ -188,7 +188,7 @@ inline void ProjectOverview::GenerateMenuBar() {
 
   wxMenu* project_menu  = new wxMenu();
 
-  project_menu->Append(ID_PROJECT_BUILD, wxT("&Build"), wxT("Generate all specification that are not up to date"));
+  project_menu->Append(ID_PROJECT_BUILD, wxT("&Build"), wxT("Generate all specifications that are not up to date"));
 
   menu->Append(project_menu, wxT("&Project"));
 
@@ -631,7 +631,7 @@ void ProjectOverview::AddSpecifications(wxCommandEvent &event) {
   new_specification.SetToolMode(mode_number);
 
   /* Find a name for the new specification (should not exist in project directory) */
-  wxFileName file_helper(wxString(specification.GetOutputObjects().front().file_name.c_str(), wxConvLocal));
+  wxFileName file_helper(wxString(specification.GetOutputObjects().front().location.c_str(), wxConvLocal));
 
   file_helper.ClearExt();
 
@@ -655,9 +655,10 @@ void ProjectOverview::AddSpecifications(wxCommandEvent &event) {
     SpecificationOutputType                  new_output;
 
     /* Connect output object to compatible position (TODO generalise to multiple inputs and outputs) */
-    new_output.format    = tool_mode.GetOutputObject(0).GetSomeFormat();
-    new_output.file_name = tool->GetMode(mode_number).ChooseName(0, name);
-    new_output.md5_hash  = "MD5 hash";
+    new_output.format   = tool_mode.GetOutputObject(0).GetSomeFormat();
+    new_output.location = tool->GetMode(mode_number).ChooseName(0, name);
+
+    md5::zero_out(new_output.checksum);
  
     /* Append an extension to the basename */
     name.append(".").append(tool_mode.GetOutputObject(0).GetSomeFormat());
@@ -691,7 +692,7 @@ void ProjectOverview::EditSpecification(wxCommandEvent &event) {
   wxProcess* editor = new wxProcess();
 
   /* TODO only takes the last output object */
-  wxString filename = wxString(((SpecificationData*) specifications->GetItemData(specifications->GetSelection()))->specification.GetOutputObjects().back().file_name.c_str(), wxConvLocal);
+  wxString filename = wxString(((SpecificationData*) specifications->GetItemData(specifications->GetSelection()))->specification.GetOutputObjects().back().location.c_str(), wxConvLocal);
 
   filename.Prepend(wxT("/")).Prepend(wxString(project_manager.GetProjectDirectory().c_str(), wxConvLocal));
 

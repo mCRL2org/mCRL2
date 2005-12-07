@@ -77,7 +77,7 @@ SpecificationPropertiesDialog::SpecificationPropertiesDialog(wxWindow* parent, w
       Specification* parent = (*i).derived_from.pointer;
 
       inputs->InsertItem(c, wxString(parent->GetName().c_str(), wxConvLocal), 0);
-      inputs->SetItem(c, 1, wxString(parent->GetOutputObjects()[(*i).output_number].file_name.c_str(), wxConvLocal));
+      inputs->SetItem(c, 1, wxString(parent->GetOutputObjects()[(*i).output_number].location.c_str(), wxConvLocal));
 
       ++c;
       ++i;
@@ -110,11 +110,11 @@ SpecificationPropertiesDialog::SpecificationPropertiesDialog(wxWindow* parent, w
     unsigned int c = 0;
 
     while (i != b) {
-      wxString                file_name((*i).file_name.c_str(), wxConvLocal);
+      wxString                file_name((*i).location.c_str(), wxConvLocal);
       wxString                file_format((*i).format.c_str(), wxConvLocal);
       boost::filesystem::path full_path(project_root);
 
-      full_path /= boost::filesystem::path((*i).file_name);
+      full_path /= boost::filesystem::path((*i).location);
 
       outputs->InsertItem(c, file_name, 0);
       outputs->SetItem(c, 1, file_format);

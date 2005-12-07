@@ -12,7 +12,7 @@ of the packages is mentioned (required, recommended or optional):
 - flex: package flex [required]
 - make >= 3.80 package make [required]
 - wxWidgets >= 2.6: package libwxgtk2.6-dev or libwxgtk2.6-dbg [recommended]
-- xml2 development libraries: package libxml2-dev [optional]
+- xml2 development libraries >= 2.6.22: package libxml2-dev [optional]
 - default icon locations: package gnome-themes, gnome-themes-extras or
   hicolor-icon-theme [optional]
 

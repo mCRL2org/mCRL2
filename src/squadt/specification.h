@@ -5,6 +5,9 @@
 #include <vector>
 #include <iostream>
 #include <ostream>
+#include <ctime>
+
+#include "libmd5/md5pp.h"
 
 /*
  * A specification is a container that specifies the dependencies on other
@@ -45,9 +48,10 @@ typedef struct {
 
 /* Type to hold information about output objects */
 typedef struct {
-  std::string format;
-  std::string file_name;
-  std::string md5_hash;
+  std::string         format;
+  std::string         location;
+  md5::compact_digest checksum;   /* Checksum for the object */
+  std::time_t         timestamp;  /* Time just before the last checksum was computed */
 } SpecificationOutputType;
 
 /* Interface class that contains functions for processing GUI update events */
@@ -92,6 +96,9 @@ class Specification {
 
     /* Recursively checks whether specification is up to date (ignores the set status) */
     SpecificationStatus CheckStatus();
+
+    /* Checks whether the status of files matches that of the specification object */
+    inline bool CheckInstances();
 
     /* Remove specification from storage */
     bool Delete();

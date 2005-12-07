@@ -251,8 +251,10 @@ bool ProjectManager::Remove(const Specification* specification) {
   const std::vector < SpecificationOutputType >::const_iterator d = (*i).GetOutputObjects().end();
 
   while (k != d) {
-    if (boost::filesystem::exists(boost::filesystem::path((*k).file_name))) {
-      boost::filesystem::remove(boost::filesystem::path((*k).file_name));
+    using namespace boost::filesystem;
+
+    if (exists(path((*k).location))) {
+      remove(path((*k).location));
     }
   }
 
@@ -277,8 +279,10 @@ bool ProjectManager::Remove(const std::vector < Specification* >& some_specifica
       const std::vector < SpecificationOutputType >::const_iterator d = (*i).GetOutputObjects().end();
 
       while (k != d) {
-        if (boost::filesystem::exists(boost::filesystem::path((*k).file_name))) {
-          boost::filesystem::remove(boost::filesystem::path((*k).file_name));
+        using namespace boost::filesystem;
+
+        if (exists(path((*k).location))) {
+          remove(path((*k).location));
         }
 
         ++k;

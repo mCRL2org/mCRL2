@@ -1,0 +1,59 @@
+<?xml version="1.0"?>
+<!-- This example is taken from http://www.petriweb.org/ See the website
+     for more information -->
+<pnml>
+    <net type="http://www.petriweb.org/specs/epnml11" id="n4">
+        <name>
+            <text>simple.vsd/Page-1</text>
+        </name>
+        <graphics>
+            <dimension x="496" y="702"/>
+            <position x="0" y="0"/>
+        </graphics>
+        <place id="pl24">
+            <name>
+                <text>45</text>
+            </name>
+            <graphics>
+                <position x="84" y="40"/>
+            </graphics>
+            <type>
+                <text>channel</text>
+            </type>
+        </place>
+        <place id="pl25">
+            <name>
+                <text>45</text>
+            </name>
+            <graphics>
+                <position x="84" y="87"/>
+            </graphics>
+            <type>
+                <text>channel</text>
+            </type>
+        </place>
+        <transition id="tr19">
+            <graphics>
+                <position x="131" y="63"/>
+            </graphics>
+            <type>
+                <text>AND</text>
+            </type>
+        </transition>
+        <transition id="tr20">
+            <graphics>
+                <position x="36" y="63"/>
+            </graphics>
+            <type>
+                <text>AND</text>
+            </type>
+        </transition>
+        <arc id="ar55" target="tr19" source="pl24"/>
+        <arc id="ar56" source="tr19" target="pl25"/>
+        <arc id="ar57" source="tr19" target="pl25"/>
+        <arc id="ar58" source="tr20" target="pl24"/>
+        <arc id="ar59" source="tr20" target="pl25"/>
+        <arc id="ar60" target="tr20" source="pl25"/>
+    </net>
+</pnml>
+

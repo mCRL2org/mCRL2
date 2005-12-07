@@ -1,0 +1,222 @@
+<?xml version="1.0"?>
+<!-- This example is taken from http://www.petriweb.org/ See the website
+     for more information -->
+<pnml>
+    <net type="http://www.petriweb.org/specs/epnml11" id="n7">
+        <name>
+            <text>desel-esparza-5-2.vsd/Page-1</text>
+        </name>
+        <graphics>
+            <dimension x="496" y="702"/>
+            <position x="0" y="0"/>
+        </graphics>
+        <place id="pl42">
+            <name>
+                <text>s1</text>
+            </name>
+            <graphics>
+                <position x="224" y="63"/>
+            </graphics>
+            <type>
+                <text>channel</text>
+            </type>
+            <initialMarking>
+                <text>0</text>
+            </initialMarking>
+        </place>
+        <transition id="tr35">
+            <name>
+                <text>t1</text>
+            </name>
+            <graphics>
+                <position x="141" y="111"/>
+            </graphics>
+            <type>
+                <text>AND</text>
+            </type>
+        </transition>
+        <place id="pl43">
+            <name>
+                <text>s2</text>
+            </name>
+            <graphics>
+                <position x="295" y="63"/>
+            </graphics>
+            <type>
+                <text>channel</text>
+            </type>
+            <initialMarking>
+                <text>0</text>
+            </initialMarking>
+        </place>
+        <transition id="tr36">
+            <name>
+                <text>t2</text>
+            </name>
+            <graphics>
+                <position x="378" y="111"/>
+            </graphics>
+            <type>
+                <text>AND</text>
+            </type>
+        </transition>
+        <transition id="tr37">
+            <name>
+                <text>t3</text>
+            </name>
+            <graphics>
+                <position x="106" y="241"/>
+            </graphics>
+            <type>
+                <text>AND</text>
+            </type>
+        </transition>
+        <transition id="tr38">
+            <name>
+                <text>t6</text>
+            </name>
+            <graphics>
+                <position x="413" y="241"/>
+            </graphics>
+            <type>
+                <text>AND</text>
+            </type>
+        </transition>
+        <place id="pl44">
+            <name>
+                <text>s3</text>
+            </name>
+            <graphics>
+                <position x="107" y="170"/>
+            </graphics>
+            <type>
+                <text>channel</text>
+            </type>
+            <initialMarking>
+                <text>1</text>
+            </initialMarking>
+        </place>
+        <transition id="tr39">
+            <name>
+                <text>t5</text>
+            </name>
+            <graphics>
+                <position x="343" y="241"/>
+            </graphics>
+            <type>
+                <text>AND</text>
+            </type>
+        </transition>
+        <place id="pl45">
+            <name>
+                <text>s4</text>
+            </name>
+            <graphics>
+                <position x="177" y="170"/>
+            </graphics>
+            <type>
+                <text>channel</text>
+            </type>
+            <initialMarking>
+                <text>0</text>
+            </initialMarking>
+        </place>
+        <place id="pl46">
+            <name>
+                <text>s6</text>
+            </name>
+            <graphics>
+                <position x="414" y="170"/>
+            </graphics>
+            <type>
+                <text>channel</text>
+            </type>
+            <initialMarking>
+                <text>1</text>
+            </initialMarking>
+        </place>
+        <transition id="tr40">
+            <name>
+                <text>t7</text>
+            </name>
+            <graphics>
+                <position x="260" y="347"/>
+            </graphics>
+            <type>
+                <text>AND</text>
+            </type>
+        </transition>
+        <place id="pl47">
+            <name>
+                <text>s8</text>
+            </name>
+            <graphics>
+                <position x="366" y="312"/>
+            </graphics>
+            <type>
+                <text>channel</text>
+            </type>
+            <initialMarking>
+                <text>0</text>
+            </initialMarking>
+        </place>
+        <place id="pl48">
+            <name>
+                <text>s5</text>
+            </name>
+            <graphics>
+                <position x="342" y="170"/>
+            </graphics>
+            <type>
+                <text>channel</text>
+            </type>
+            <initialMarking>
+                <text>0</text>
+            </initialMarking>
+        </place>
+        <place id="pl49">
+            <name>
+                <text>s7</text>
+            </name>
+            <graphics>
+                <position x="153" y="312"/>
+            </graphics>
+            <type>
+                <text>channel</text>
+            </type>
+            <initialMarking>
+                <text>0</text>
+            </initialMarking>
+        </place>
+        <transition id="tr41">
+            <graphics>
+                <position x="177" y="241"/>
+            </graphics>
+            <type>
+                <text>AND</text>
+            </type>
+        </transition>
+        <arc id="ar103" target="tr35" source="pl42"/>
+        <arc id="ar104" target="tr35" source="pl43"/>
+        <arc id="ar105" target="tr36" source="pl43"/>
+        <arc id="ar106" target="tr36" source="pl42"/>
+        <arc id="ar107" target="tr37" source="pl44"/>
+        <arc id="ar108" source="tr35" target="pl44"/>
+        <arc id="ar109" source="tr39" target="pl43"/>
+        <arc id="ar110" source="tr35" target="pl45"/>
+        <arc id="ar111" source="tr36" target="pl46"/>
+        <arc id="ar112" target="tr38" source="pl46"/>
+        <arc id="ar113" source="tr40" target="pl42"/>
+        <arc id="ar114" source="tr40" target="pl43"/>
+        <arc id="ar115" target="tr40" source="pl47"/>
+        <arc id="ar116" source="tr38" target="pl47"/>
+        <arc id="ar117" target="tr39" source="pl48"/>
+        <arc id="ar118" source="tr36" target="pl48"/>
+        <arc id="ar119" source="tr39" target="pl49"/>
+        <arc id="ar120" source="tr37" target="pl49"/>
+        <arc id="ar121" target="tr40" source="pl49"/>
+        <arc id="ar122" source="tr41" target="pl47"/>
+        <arc id="ar123" target="tr41" source="pl45"/>
+    </net>
+</pnml>
+

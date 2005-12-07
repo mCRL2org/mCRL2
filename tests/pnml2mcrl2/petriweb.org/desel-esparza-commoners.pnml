@@ -1,0 +1,260 @@
+<?xml version="1.0"?>
+<!-- This example is taken from http://www.petriweb.org/ See the website
+     for more information -->
+<pnml>
+    <net type="http://www.petriweb.org/specs/epnml11" id="n1">
+        <name>
+            <text>drawing2/Page-1</text>
+        </name>
+        <graphics>
+            <dimension x="496" y="702"/>
+            <position x="0" y="0"/>
+        </graphics>
+        <transition id="tr1">
+            <name>
+                <text>x1</text>
+            </name>
+            <graphics>
+                <position x="23" y="158"/>
+            </graphics>
+            <type>
+                <text>AND</text>
+            </type>
+        </transition>
+        <place id="pl1">
+            <name>
+                <text>A1</text>
+            </name>
+            <graphics>
+                <position x="47" y="111"/>
+            </graphics>
+            <type>
+                <text>channel</text>
+            </type>
+            <initialMarking>
+                <text>1</text>
+            </initialMarking>
+        </place>
+        <transition id="tr2">
+            <name>
+                <text>~x1</text>
+            </name>
+            <graphics>
+                <position x="71" y="158"/>
+            </graphics>
+            <type>
+                <text>AND</text>
+            </type>
+        </transition>
+        <transition id="tr3">
+            <name>
+                <text>x2</text>
+            </name>
+            <graphics>
+                <position x="165" y="158"/>
+            </graphics>
+            <type>
+                <text>AND</text>
+            </type>
+        </transition>
+        <place id="pl2">
+            <name>
+                <text>A2</text>
+            </name>
+            <graphics>
+                <position x="189" y="111"/>
+            </graphics>
+            <type>
+                <text>channel</text>
+            </type>
+            <initialMarking>
+                <text>1</text>
+            </initialMarking>
+        </place>
+        <transition id="tr4">
+            <name>
+                <text>~x2</text>
+            </name>
+            <graphics>
+                <position x="212" y="159"/>
+            </graphics>
+            <type>
+                <text>AND</text>
+            </type>
+        </transition>
+        <transition id="tr5">
+            <name>
+                <text>x3</text>
+            </name>
+            <graphics>
+                <position x="307" y="158"/>
+            </graphics>
+            <type>
+                <text>AND</text>
+            </type>
+        </transition>
+        <transition id="tr6">
+            <name>
+                <text>~x3</text>
+            </name>
+            <graphics>
+                <position x="354" y="158"/>
+            </graphics>
+            <type>
+                <text>AND</text>
+            </type>
+        </transition>
+        <transition id="tr7">
+            <name>
+                <text>~C1</text>
+            </name>
+            <graphics>
+                <position x="59" y="276"/>
+            </graphics>
+            <type>
+                <text>AND</text>
+            </type>
+        </transition>
+        <place id="pl3">
+            <graphics>
+                <position x="35" y="229"/>
+            </graphics>
+            <type>
+                <text>channel</text>
+            </type>
+        </place>
+        <place id="pl4">
+            <graphics>
+                <position x="82" y="229"/>
+            </graphics>
+            <type>
+                <text>channel</text>
+            </type>
+        </place>
+        <transition id="tr8">
+            <name>
+                <text>~C2</text>
+            </name>
+            <graphics>
+                <position x="189" y="277"/>
+            </graphics>
+            <type>
+                <text>AND</text>
+            </type>
+        </transition>
+        <place id="pl5">
+            <graphics>
+                <position x="153" y="229"/>
+            </graphics>
+            <type>
+                <text>channel</text>
+            </type>
+        </place>
+        <place id="pl6">
+            <graphics>
+                <position x="224" y="229"/>
+            </graphics>
+            <type>
+                <text>channel</text>
+            </type>
+        </place>
+        <transition id="tr9">
+            <name>
+                <text>~C3</text>
+            </name>
+            <graphics>
+                <position x="319" y="276"/>
+            </graphics>
+            <type>
+                <text>AND</text>
+            </type>
+        </transition>
+        <place id="pl7">
+            <graphics>
+                <position x="295" y="229"/>
+            </graphics>
+            <type>
+                <text>channel</text>
+            </type>
+        </place>
+        <place id="pl8">
+            <graphics>
+                <position x="343" y="229"/>
+            </graphics>
+            <type>
+                <text>channel</text>
+            </type>
+        </place>
+        <place id="pl9">
+            <graphics>
+                <position x="189" y="229"/>
+            </graphics>
+            <type>
+                <text>channel</text>
+            </type>
+        </place>
+        <transition id="tr10">
+            <name>
+                <text>Back</text>
+            </name>
+            <graphics>
+                <position x="413" y="52"/>
+            </graphics>
+            <type>
+                <text>AND</text>
+            </type>
+        </transition>
+        <place id="pl10">
+            <name>
+                <text>A3</text>
+            </name>
+            <graphics>
+                <position x="330" y="111"/>
+            </graphics>
+            <type>
+                <text>channel</text>
+            </type>
+            <initialMarking>
+                <text>1</text>
+            </initialMarking>
+        </place>
+        <place id="pl11">
+            <name>
+                <text>False</text>
+            </name>
+            <graphics>
+                <position x="413" y="323"/>
+            </graphics>
+            <type>
+                <text>channel</text>
+            </type>
+        </place>
+        <arc id="ar1" target="tr1" source="pl1"/>
+        <arc id="ar2" source="tr2" target="pl3"/>
+        <arc id="ar3" target="tr2" source="pl1"/>
+        <arc id="ar4" source="tr2" target="pl5"/>
+        <arc id="ar5" target="tr3" source="pl2"/>
+        <arc id="ar6" source="tr4" target="pl7"/>
+        <arc id="ar7" source="tr3" target="pl9"/>
+        <arc id="ar8" target="tr4" source="pl2"/>
+        <arc id="ar9" target="tr5" source="pl10"/>
+        <arc id="ar10" target="tr6" source="pl10"/>
+        <arc id="ar11" target="tr7" source="pl3"/>
+        <arc id="ar12" target="tr7" source="pl4"/>
+        <arc id="ar13" target="tr8" source="pl5"/>
+        <arc id="ar14" target="tr8" source="pl6"/>
+        <arc id="ar15" target="tr8" source="pl9"/>
+        <arc id="ar16" source="tr7" target="pl11"/>
+        <arc id="ar17" source="tr8" target="pl11"/>
+        <arc id="ar18" source="tr9" target="pl11"/>
+        <arc id="ar19" source="tr5" target="pl8"/>
+        <arc id="ar20" source="tr6" target="pl6"/>
+        <arc id="ar21" target="tr9" source="pl7"/>
+        <arc id="ar22" target="tr9" source="pl8"/>
+        <arc id="ar23" source="tr10" target="pl1"/>
+        <arc id="ar24" source="tr10" target="pl2"/>
+        <arc id="ar25" source="tr10" target="pl10"/>
+        <arc id="ar26" target="tr10" source="pl11"/>
+    </net>
+</pnml>
+

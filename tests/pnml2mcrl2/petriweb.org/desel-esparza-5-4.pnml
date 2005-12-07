@@ -1,0 +1,115 @@
+<?xml version="1.0"?>
+<!-- This example is taken from http://www.petriweb.org/ See the website
+     for more information -->
+<pnml>
+    <net type="http://www.petriweb.org/specs/epnml11" id="n3">
+        <name>
+            <text>desel-esparza-5-4.vsd/Page-1</text>
+        </name>
+        <graphics>
+            <dimension x="496" y="702"/>
+            <position x="0" y="0"/>
+        </graphics>
+        <transition id="tr15">
+            <graphics>
+                <position x="283" y="28"/>
+            </graphics>
+            <type>
+                <text>AND</text>
+            </type>
+        </transition>
+        <transition id="tr16">
+            <graphics>
+                <position x="165" y="87"/>
+            </graphics>
+            <type>
+                <text>AND</text>
+            </type>
+        </transition>
+        <place id="pl18">
+            <graphics>
+                <position x="165" y="146"/>
+            </graphics>
+            <type>
+                <text>channel</text>
+            </type>
+        </place>
+        <transition id="tr17">
+            <graphics>
+                <position x="165" y="206"/>
+            </graphics>
+            <type>
+                <text>AND</text>
+            </type>
+        </transition>
+        <place id="pl19">
+            <graphics>
+                <position x="213" y="135"/>
+            </graphics>
+            <type>
+                <text>channel</text>
+            </type>
+        </place>
+        <place id="pl20">
+            <graphics>
+                <position x="165" y="28"/>
+            </graphics>
+            <type>
+                <text>channel</text>
+            </type>
+            <initialMarking>
+                <text>1</text>
+            </initialMarking>
+        </place>
+        <transition id="tr18">
+            <graphics>
+                <position x="283" y="146"/>
+            </graphics>
+            <type>
+                <text>AND</text>
+            </type>
+        </transition>
+        <place id="pl21">
+            <graphics>
+                <position x="236" y="99"/>
+            </graphics>
+            <type>
+                <text>channel</text>
+            </type>
+            <initialMarking>
+                <text>1</text>
+            </initialMarking>
+        </place>
+        <place id="pl22">
+            <graphics>
+                <position x="283" y="87"/>
+            </graphics>
+            <type>
+                <text>channel</text>
+            </type>
+        </place>
+        <place id="pl23">
+            <graphics>
+                <position x="283" y="206"/>
+            </graphics>
+            <type>
+                <text>channel</text>
+            </type>
+        </place>
+        <arc id="ar41" source="tr15" target="pl20"/>
+        <arc id="ar42" source="tr16" target="pl18"/>
+        <arc id="ar43" target="tr16" source="pl20"/>
+        <arc id="ar44" source="tr16" target="pl19"/>
+        <arc id="ar45" target="tr18" source="pl19"/>
+        <arc id="ar46" target="tr17" source="pl18"/>
+        <arc id="ar47" source="tr16" target="pl20"/>
+        <arc id="ar48" target="tr16" source="pl21"/>
+        <arc id="ar49" source="tr18" target="pl21"/>
+        <arc id="ar50" source="tr18" target="pl22"/>
+        <arc id="ar51" target="tr15" source="pl22"/>
+        <arc id="ar52" source="tr18" target="pl23"/>
+        <arc id="ar53" target="tr18" source="pl23"/>
+        <arc id="ar54" source="tr17" target="pl23"/>
+    </net>
+</pnml>
+

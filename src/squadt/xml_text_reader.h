@@ -37,6 +37,7 @@ class XMLTextReader {
     /* Get the value of an attribute as ... */
     inline bool GetAttribute(std::string* string, char* attribute_name);
     inline bool GetAttribute(unsigned int* integer, char* attribute_name);
+    inline bool GetAttribute(unsigned long* integer, char* attribute_name);
     inline bool GetAttribute(char* attribute_name);
 
     /* Get the value of an element as ... */
@@ -84,6 +85,17 @@ inline bool XMLTextReader::GetAttribute(std::string* astring, char* attribute_na
 }
 
 inline bool XMLTextReader::GetAttribute(unsigned int* aninteger, char* attribute_name) {
+  char* temporary    = (char*) xmlTextReaderGetAttribute(reader, TO_XML_STRING(attribute_name));
+  bool  return_value = temporary != NULL;
+
+  *aninteger = (return_value) ? atoi(temporary) : 0;
+
+  xmlFree(temporary);
+
+  return (return_value);
+}
+
+inline bool XMLTextReader::GetAttribute(unsigned long* aninteger, char* attribute_name) {
   char* temporary    = (char*) xmlTextReaderGetAttribute(reader, TO_XML_STRING(attribute_name));
   bool  return_value = temporary != NULL;
 

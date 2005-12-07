@@ -1,4 +1,7 @@
 #include <list>
+#include <fstream>
+
+#include <boost/filesystem/operations.hpp>
 
 #include "specification.h"
 #include "xml_text_reader.h"
@@ -51,13 +54,13 @@ void Specification::Print(std::ostream& stream) const {
       stream << "  Dependencies      :\n\n";
 
       while (i != b) {
-        std::cerr << "    - " << (*i).derived_from.pointer->GetOutputObjects()[(*i).output_number].file_name << std::endl;
+        std::cerr << "    - " << (*i).derived_from.pointer->GetOutputObjects()[(*i).output_number].location << std::endl;
 
         ++i;
       }
     }
     else {
-      stream << "  Single dependency : " << input_objects.front().derived_from.pointer->GetOutputObjects()[0].file_name << "\n";
+      stream << "  Single dependency : " << input_objects.front().derived_from.pointer->GetOutputObjects()[0].location << "\n";
     }
   }
 
@@ -65,14 +68,62 @@ void Specification::Print(std::ostream& stream) const {
 }
 
 /*
+ * Checks whether the status of the instances (files) match the status of the
+ * specification. Returns a boolean: whether there was a match. Updates the status.
+ */
+inline bool Specification::CheckInstances() {
+  const std::vector < SpecificationOutputType >::iterator c = output_objects.end();
+        std::vector < SpecificationOutputType >::iterator j = output_objects.begin();
+ 
+  using namespace boost::filesystem;
+ 
+  assert(status == up_to_date);
+ 
+  /* Verify status of output files */
+  while (j != c) {
+    path location = path((*j).location);
+ 
+    if ((*j).timestamp < last_write_time(location)) {
+      /* Verify checksum for changes */
+      std::ifstream object;
+ 
+      object.open(location.string().c_str());
+     
+      if (object.good()) {
+        /* File exists */
+        md5::compact_digest old;
+     
+        (*j).timestamp = last_write_time(location);
+        (*j).checksum  = md5::MD5::MD5_Sum(object);
+     
+        object.close();
+ 
+        if (!(old == (*j).checksum)) {
+          status = not_up_to_date;
+
+          return (false);
+        }
+      }
+      else {
+        status = not_up_to_date;
+
+        return (false);
+      }
+    }
+ 
+    ++j;
+  }
+}
+
+/*
  * Recursively verifies whether specification is up to date by considering the
  * status of all specifications that it depends on.
  */
 SpecificationStatus Specification::CheckStatus() {
-  const std::vector < SpecificationInputType >::iterator b = input_objects.end();
-        std::vector < SpecificationInputType >::iterator i = input_objects.begin();
-
   if (status != non_existent && status != being_computed) {
+    const std::vector < SpecificationInputType >::iterator b = input_objects.end();
+          std::vector < SpecificationInputType >::iterator i = input_objects.begin();
+
     bool go_condition = true;
 
     /* Recursively check status */
@@ -82,11 +133,10 @@ SpecificationStatus Specification::CheckStatus() {
       i++;
     }
 
-    /* TODO verify minimum output object date is not before than maximum input object date */
-    if (go_condition && status == not_up_to_date) {
-      status = up_to_date;
-
-      visualiser->VisualiseStatusChange(status);
+    if (go_condition && status == up_to_date) {
+      if (!CheckInstances()) {
+        visualiser->VisualiseStatusChange(status);
+      }
     }
   }
   
@@ -95,30 +145,24 @@ SpecificationStatus Specification::CheckStatus() {
 
 /*
  * Recursively generates the specification and all not up to date
- * specifications it depends on. 
+ * specifications it depends on. Returns true if and only if any of the outputs
+ * was changed
  *
  * TODO Throws a pointer to the first specification that fails to be generated.
  */
 bool Specification::Generate() throw (void*) {
   const std::vector < SpecificationInputType >::iterator b            = input_objects.end();
         std::vector < SpecificationInputType >::iterator i            = input_objects.begin();
-        bool                                             go_condition = false;
+        bool                                             go_condition = true;
 
   /* Recursively generate specifications */
-  try {
-    while (i != b) {
-      go_condition |= (*i).derived_from.pointer->Generate();
+  while (i != b) {
+    go_condition |= (*i).derived_from.pointer->Generate();
  
-      i++;
-    }
+    i++;
   }
-  catch (void* p) {
-    throw (p);
 
-    return (false);
-  }
- 
-  if (go_condition || status != up_to_date) {
+  if (go_condition && status != up_to_date) {
     const Tool*     tool = tool_manager.GetTool(tool_identifier);
     const ToolMode& mode = tool->GetMode(tool_mode);
 
@@ -149,7 +193,7 @@ bool Specification::Generate() throw (void*) {
           ++ot;
         }
        
-        final_configuration.append((*i)->String(aobject->file_name, aobject->format));
+        final_configuration.append((*i)->String(aobject->location, aobject->format));
       }
 
       ++i;
@@ -162,7 +206,6 @@ bool Specification::Generate() throw (void*) {
 
     /* Run tool via the tool executor with command using the tool_identifier to lookup the name of a tool */
     if (tool_executor.Execute(tool_manager, tool_identifier, final_configuration, std::cerr)) {
-      /* For the moment this is in place instead of a call to the tool executor. Reason being that the tool executor has not been built yet. */
       status = up_to_date;
     }
     else {
@@ -173,9 +216,11 @@ bool Specification::Generate() throw (void*) {
     }
 
     visualiser->VisualiseStatusChange(status);
+
+    return (true);
   }
 
-  return (go_condition);
+  return (CheckStatus() != up_to_date);
 }
 
 bool Specification::Delete() {
@@ -184,15 +229,20 @@ bool Specification::Delete() {
   bool  result = false;
 
   while (i != b) {
-    FILE* handle = fopen((*i).file_name.c_str(), "r");
+    FILE* handle = fopen((*i).location.c_str(), "r");
  
     if (handle != NULL) {
       /* File exists */
       fclose(handle);
-      remove((*i).file_name.c_str());
+      remove((*i).location.c_str());
  
       result = true;
     }
+
+    /* Reset checksum and timestamp */
+    md5::zero_out((*i).checksum);
+
+    (*i).timestamp = 0;
   }
 
   status = non_existent;
@@ -284,20 +334,30 @@ bool Specification::Read(XMLTextReader& reader) throw (int) {
 
     /* Dependent specifications follow until node type is XML_READER_TYPE_END_ELEMENT */
     while (!reader.IsEndElement() && reader.IsElement("output-object")) {
+      std::string checksum;
+
       SpecificationOutputType new_output;
 
       /* Set file format */
       reader.GetAttribute(&new_output.format, "format");
 
-      reader.Read();
+      md5::zero_out(new_output.checksum);
+
+      if (reader.GetAttribute(&checksum, "checksum")) {
+        md5::convert(new_output.checksum, checksum.c_str());
+      }
 
       /* Set file name */
-      reader.GetValue(&new_output.file_name);
+      reader.GetAttribute(&new_output.location, "name");
+
+      /* Set file name */
+      if (!reader.GetAttribute((unsigned long*) &new_output.timestamp, "timestamp")) {
+        new_output.timestamp = 0;
+      }
 
       output_objects.push_back(new_output);
 
       /* To end tag*/
-      reader.Read();
       reader.Read();
     }
   }
@@ -343,11 +403,40 @@ bool Specification::Write(std::ostream& stream) {
   }
 
   if (0 < output_objects.size()) {
-    std::vector < SpecificationOutputType >::const_iterator b = output_objects.end();
-    std::vector < SpecificationOutputType >::const_iterator i = output_objects.begin();
+    std::vector < SpecificationOutputType >::iterator b = output_objects.end();
+    std::vector < SpecificationOutputType >::iterator i = output_objects.begin();
  
     while (i != b) {
-      stream << "  <output-object format=\"" << (*i).format << "\">" << (*i).file_name << "</output-object>\n";
+      stream << "  <output-object format=\"" << (*i).format;
+
+      if (is_zero((*i).checksum)) {
+        /* For objects stored locally... */
+        std::ifstream object;
+        
+        object.open((*i).location.c_str());
+
+        if (object.good()) {
+          /* File exists */
+          using namespace md5;
+          using namespace boost::filesystem;
+
+          (*i).timestamp = last_write_time(path((*i).location));
+          (*i).checksum  = MD5::MD5_Sum(object);
+
+          object.close();
+        }
+      }
+      else {
+        stream << "\" checksum=\"" << (*i).checksum;
+      }
+
+      stream << "\" name=\"" << (*i).location;
+
+      if ((*i).timestamp != 0) {
+        stream << "\" timestamp=\"" << (*i).timestamp;
+      }
+
+      stream << "\"/>\n";
  
       ++i;
     }

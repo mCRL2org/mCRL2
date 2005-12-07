@@ -1,0 +1,28 @@
+<?xml version="1.0"?>
+<!-- A basic Petri net in which, in one firing step, a token is taken from a
+     place and a token is returned to that same place -->
+<pnml>
+	<net type="EPNML11" id="example2">
+		<place id="pl01">
+			<name>
+				<text>place01</text>
+			</name>
+			<type>
+				<text>channel</text>
+			</type>
+			<initialMarking>
+				<text>1</text>
+			</initialMarking>
+		</place>
+		<transition id="tr01">
+			<name>
+				<text>trans01</text>
+			</name>
+			<type>
+				<text>AND</text>
+			</type>
+		</transition>
+		<arc id="arc01" source="pl01" target="tr01"/>
+		<arc id="arc02" target="pl01" source="tr01"/>
+	</net>
+</pnml>
