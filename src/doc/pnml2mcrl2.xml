@@ -100,10 +100,9 @@
         <term>&opt_no_rec_par;</term>
         <listitem>
           <para>
-            If this option is not turned on, the mcrl2 processes that correspond to the
-            places of the Petri net are recursive. When this recursion is not desired,
-            this option is used in order to create non-recursive mcrl2 processes for the
-            entire Petri net.
+            If this option is turned on, non-recursive mCRL2 processes for the places
+            are generated. If this option is not turned on, the mCRL2 processes that
+            correspond to the places of the Petri net are recursive.
           </para>
         </listitem>
       </varlistentry>
