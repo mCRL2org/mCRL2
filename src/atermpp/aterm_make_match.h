@@ -94,6 +94,7 @@ namespace atermpp
   //             aterm_make / aterm_match
   //---------------------------------------------------------//
   
+  inline
   aterm make_term(const std::string& pattern)
   {
     return aterm(ATreadFromString(const_cast<char*>(pattern.c_str())));
