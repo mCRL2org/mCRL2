@@ -1,0 +1,143 @@
+<?xml version="1.0"?>
+
+<!DOCTYPE refentry PUBLIC "-//OASIS//DTD DocBook XML V4.3//EN" "http://www.oasis-open.org/docbook/xml/4.3/docbookx.dtd"[
+<!ENTITY lpepp "<function>lpepp</function>">
+<!ENTITY option "<parameter>OPTION</parameter>">
+<!ENTITY infile "<parameter>INFILE</parameter>">
+<!ENTITY outfile "<parameter>OUTFILE</parameter>">
+<!ENTITY format "<parameter>FORMAT</parameter>">
+<!ENTITY internal "<parameter>internal</parameter>">
+<!ENTITY basic "<parameter>basic</parameter>">
+<!ENTITY advanced "<parameter>advanced</parameter>">
+<!ENTITY opt_f "<option>-f</option>">
+<!ENTITY opt_h "<option>-h</option>">
+<!ENTITY opt_q "<option>-q</option>">
+<!ENTITY opt_v "<option>-v</option>">
+<!ENTITY opt_d "<option>-d</option>">
+<!ENTITY opt_format "<option>--format</option>">
+<!ENTITY opt_help "<option>--help</option>">
+<!ENTITY opt_version "<option>--version</option>">
+<!ENTITY opt_quiet "<option>--quiet</option>">
+<!ENTITY opt_verbose "<option>--verbose</option>">
+<!ENTITY opt_debug "<option>--debug</option>">
+<!ENTITY stdin "<constant>stdin</constant>">
+<!ENTITY stdout "<constant>stdout</constant>">
+]>
+
+<refentry id="lpepp">
+
+<refmeta>
+  <refentrytitle>lpepp</refentrytitle>
+  <manvolnum>1</manvolnum>
+</refmeta>
+
+<refnamediv>
+  <refname>lpepp</refname>
+  <refpurpose>pretty print LPEs</refpurpose>
+</refnamediv>
+
+<refsynopsisdiv>
+  <cmdsynopsis>
+    <command>&lpepp;</command>
+    <arg choice="plain" rep="repeat"><arg choice="opt">&option;</arg></arg>
+    <arg choice="opt">&infile;
+    <arg choice="opt">&outfile;</arg>
+    </arg>
+  </cmdsynopsis>
+</refsynopsisdiv>
+
+<refsect1>
+  <title>Description</title>
+  <para>
+    The &lpepp; tool prints the linear process equation (LPE) from &infile; to
+    &outfile; in a human readable format. If &outfile; is not present,
+    &stdout; is used. If &infile; is not present, &stdin; is used.
+  </para>
+</refsect1>
+
+<refsect1>
+<title>Options</title>
+<para>
+  <variablelist>
+  <varlistentry>
+    <term>&opt_f;</term>
+    <term>&opt_format;=&format;</term>
+    <listitem>
+      <para>
+        the LPE is printed using the supplied &format;:
+        <itemizedlist spacing='compact'>
+        <listitem>
+          <para>&internal; for the internal format</para>
+        </listitem>
+        <listitem>
+          <para>&basic; for the basic structure (used for debugging)</para>
+        </listitem>
+        <listitem>
+          <para>&advanced; for an mCRL2 specification (default)</para>
+        </listitem>
+        </itemizedlist>
+      </para>
+    </listitem>
+  </varlistentry>
+
+  <varlistentry>
+    <term>&opt_h;</term>
+    <term>&opt_help;</term>
+    <listitem>
+      <para>
+        display help message and terminate
+      </para>
+    </listitem>
+  </varlistentry>
+
+  <varlistentry>
+    <term>&opt_version;</term>
+    <listitem>
+      <para>
+        display version information and terminate
+      </para>
+    </listitem>
+  </varlistentry>
+
+  <varlistentry>
+    <term>&opt_q;</term>
+    <term>&opt_quiet;</term>
+    <listitem>
+      <para>
+        do not display warning messages
+      </para>
+    </listitem>
+  </varlistentry>
+
+  <varlistentry>
+    <term>&opt_v;</term>
+    <term>&opt_verbose;</term>
+    <listitem>
+      <para>
+        turn on the display of short intermediate messages
+      </para>
+    </listitem>
+  </varlistentry>
+
+  <varlistentry>
+    <term>&opt_d;</term>
+    <term>&opt_debug;</term>
+    <listitem>
+      <para>
+        turn on the display of detailed intermediate messages
+      </para>
+    </listitem>
+  </varlistentry>
+  </variablelist>
+</para>
+</refsect1>
+
+<refsect1>
+<title>Author</title>
+<para>
+  Written by Aad Mathijssen. Please send all complaints, comments and bug fixes
+  to <email>bug@mcrl2.org</email>.
+</para>
+</refsect1>
+
+</refentry>

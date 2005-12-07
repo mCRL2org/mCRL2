@@ -1,8 +1,6 @@
 <?xml version="1.0"?>
 
 <!DOCTYPE refentry PUBLIC "-//OASIS//DTD DocBook XML V4.2//EN" "http://www.oasis-open.org/docbook/xml/4.2/docbookx.dtd"[
-<!ENTITY % param SYSTEM "param.xml">
-%param;
 <!ENTITY tbf2lpe "<function>tbf2lpe</function>">
 <!ENTITY option "<parameter>OPTION</parameter>">
 <!ENTITY input_lpe "<parameter>INFILE</parameter>">
@@ -38,7 +36,7 @@
 
 <refnamediv>
   <refname>tbf2lpe</refname>
-  <refpurpose>convert muCRL LPEs to mCRL2 LPEs</refpurpose>
+  <refpurpose>convert mCRL LPEs to mCRL2 LPEs</refpurpose>
 </refnamediv>
 
 <refsynopsisdiv>
@@ -54,8 +52,8 @@
 <refsect1>
   <title>Description</title>
   <para>
-    The &tbf2lpe; tool translates linear process expressions (LPEs) from the
-    muCRL format (.tbf) to the mCRL2 format (.lpe).
+    The &tbf2lpe; tool translates linear process equations (LPEs) from the
+    mCRL format (.tbf) to the mCRL2 format (.lpe).
   </para>
   <para>
     Although the basic translation only changes the storage format of the LPE,
