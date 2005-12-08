@@ -21,10 +21,14 @@
 #include <boost/program_options.hpp>
 
 //mCRL2
+#include "liblowlevel.h"
 #include "libstruct.h"
+#include "libprint_c.h"
 #include "libdataelm.h"
+#include "lpe/specification.h"
 
 using namespace std;
+using namespace lpe;
 
 namespace po = boost::program_options;
 
@@ -42,7 +46,7 @@ static ATerm readSpec(string filename)
 	f = fopen(filename.c_str(),"rb");
 	if ( f == NULL )
 	{
-		cerr << "Cannot read input: " << strerror(errno) << endl;
+		cerr << "cannot read input: " << strerror(errno) << endl;
 		return NULL;
 	}
 
@@ -65,7 +69,7 @@ static void writeSpec(string filename, ATerm Spec)
 	f = fopen(filename.c_str(),"wb");
 	if ( f == NULL )
 	{
-		cerr << "Cannot write output: " << strerror(errno) << endl;
+		cerr << "cannot write output: " << strerror(errno) << endl;
 		return;
 	}
 
@@ -86,8 +90,8 @@ int main(int argc, char** argv)
 		po::options_description desc;
 		desc.add_options()
 			("help,h",      "display this help")
-			("verbose,v",   "turn on the display of short intermediate messages")
-			("debug,d",    "turn on the display of detailed intermediate messages")
+			("quiet,q",     "do not print any unrequested information")
+			("verbose,v",   "display extra information about the data elimination")
 			("version",     "display version information")
 			;
 
@@ -126,14 +130,23 @@ int main(int argc, char** argv)
 			return 0;
 		}
 
+		bool verbose = false;
 		if ( vm.count("verbose") > 0 )
 		{
-		} else {
+			verbose = true;
+			gsSetVerboseMsg();
 		}
 
-		if ( vm.count("debug") > 0 )
+		bool quiet = false;
+		if ( vm.count("quiet") > 0 )
 		{
-		} else {
+			if ( verbose )
+			{
+				cerr << "conflicting options used (-q/--quiet and -v/--verbose)" << endl;
+				return 1;
+			}
+			quiet = true;
+			gsSetQuietMsg();
 		}
 
 		if ( vm.count("FILES") > 0 )
@@ -142,12 +155,13 @@ int main(int argc, char** argv)
 		}
 
 		ATerm Spec;
+		gsVerboseMsg("reading input LPE...\n");
 		if ( filenames.size() == 0 )
 		{
 			Spec = readSpec(stdin);
 		} else if ( filenames.size() > 2 )
 		{
-			cerr << "Specify only INPUT and OUTPUT file. (Too many arguments.)" << endl;
+			cerr << "too many arguments" << endl;
 			return 1;
 		} else {
 			Spec = readSpec(filenames[0]);
@@ -155,12 +169,34 @@ int main(int argc, char** argv)
 
 		if ( (Spec == NULL) || (ATgetType(Spec) != AT_APPL) || !gsIsSpecV1((ATermAppl) Spec) )
 		{
-			cerr << "Input is not a valid LPE." << endl;
+			cerr << "input is not a valid LPE" << endl;
 			return 1;
 		}
 
+		if ( verbose )
+		{
+			specification s(Spec);
+			gsVerboseMsg("input LPE information\n");
+			gsVerboseMsg("number of sorts: %i\n",s.sorts().size());
+			gsVerboseMsg("number of constructors: %i\n",s.constructors().size());
+			gsVerboseMsg("number of mappings: %i\n",s.mappings().size());
+			gsVerboseMsg("number of equations: %i\n",s.equations().size());
+		}
+
+		gsVerboseMsg("removing unused data...\n");
 		Spec = (ATerm) removeUnusedData((ATermAppl) Spec);
 
+		if ( verbose )
+		{
+			specification s(Spec);
+			gsVerboseMsg("output LPE information\n");
+			gsVerboseMsg("number of sorts: %i\n",s.sorts().size());
+			gsVerboseMsg("number of constructors: %i\n",s.constructors().size());
+			gsVerboseMsg("number of mappings: %i\n",s.mappings().size());
+			gsVerboseMsg("number of equations: %i\n",s.equations().size());
+		}
+
+		gsVerboseMsg("writing output LPE...\n");
 		if( filenames.size() == 2 )
 		{
 			writeSpec(filenames[1],Spec);

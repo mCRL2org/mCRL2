@@ -35,6 +35,9 @@ static void print_state(ostream &os, ATermAppl state)
 static void trace2dot(ostream &os, Trace &trace, char *name)
 {
   os << "digraph \"" << name << "\" {" << endl;
+  os << "center = TRUE;" << endl;
+  os << "mclimit = 10.0;" << endl;
+  os << "nodesep = 0.05;" << endl;
   ATermAppl act;
   int i = 0;
   while ( (act = trace.getAction()) != NULL )
@@ -44,7 +47,12 @@ static void trace2dot(ostream &os, Trace &trace, char *name)
     {
       print_state(os,trace.getState());
     }
-    os << "\"];" << endl;
+    if ( i == 0 )
+    {
+      os << "\",peripheries=2];" << endl;
+    } else {
+      os << "\"];" << endl;
+    }
     os << i << " -> " << i+1 << " [label=\"";
     if ( gsIsMultAct(act) )
     {
