@@ -39,6 +39,7 @@ endif
 
 ARFLAGS            = crs
 INSTALL            = install
+STRIP              = strip
 LEX                = @LEX@
 GZIP               = gzip -f
 LFLAGS             = -I -Pmcrl2yy
