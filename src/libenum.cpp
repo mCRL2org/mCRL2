@@ -2,22 +2,15 @@
 #include "libenum.h"
 #include "enum_standard.h"
 
+EnumeratorSolutions::~EnumeratorSolutions()
+{
+}
+
 Enumerator::~Enumerator()
 {
 }
 
-Enumerator *createEnumerator(ATermAppl spec, Rewriter &r, EnumerateStrategy strategy)
-{
-	switch ( strategy )
-	{
-		case ENUM_STANDARD:
-			return new EnumeratorStandard(spec, r);
-		default:
-			return NULL;
-	}
-}
-
-Enumerator *createEnumerator(ATermAppl spec, Rewriter *r, EnumerateStrategy strategy, bool clean_up_rewriter)
+Enumerator *createEnumerator(ATermAppl spec, Rewriter *r, bool clean_up_rewriter, EnumerateStrategy strategy)
 {
 	switch ( strategy )
 	{

@@ -30,16 +30,16 @@ BEGIN_EVENT_TABLE(XSimTrace,wxFrame)
     EVT_LIST_ITEM_ACTIVATED(ID_LISTVIEW,XSimTrace::OnListItemActivated)
 END_EVENT_TABLE()
 
-static void PrintState(stringstream &ss ,ATerm state)
+static void PrintState(stringstream &ss, ATerm state, NextState *ns)
 {
-        for (int i=0; i<gsGetStateLength(); i++)
+        for (int i=0; i<ns->getStateLength(); i++)
         {
                 if ( i > 0 )
                 {
 			ss << ", ";
                 }
 
-                ATermAppl a = gsGetStateArgument(state,i);
+                ATermAppl a = ns->getStateArgument(state,i);
                 if ( gsIsDataVarId(a) )
                 {
 			ss << "_";
@@ -96,7 +96,7 @@ void XSimTrace::AddState(ATermAppl Transition, ATerm State, bool enabled)
 
 		traceview->InsertItem(l,wxString::Format(wxT("%i"),l));
 		traceview->SetItem(l,1,wxConvLocal.cMB2WX(PrintPart_CXX((ATerm) Transition, ppAdvanced).c_str()));
-		PrintState(ss,State);
+		PrintState(ss,State,simulator->GetNextState());
 		traceview->SetItem(l,2,wxConvLocal.cMB2WX(ss.str().c_str()));
 		traceview->SetColumnWidth(2,wxLIST_AUTOSIZE);
 		if ( enabled )
@@ -133,7 +133,7 @@ void XSimTrace::Reset(ATerm State)
 	traceview->DeleteAllItems();
 	traceview->InsertItem(0,wxT("0"));
 	traceview->SetItem(0,1,wxT(""));
-	PrintState(ss,State);
+	PrintState(ss,State,simulator->GetNextState());
 	traceview->SetItem(0,2,wxConvLocal.cMB2WX(ss.str().c_str()));
 	traceview->SetColumnWidth(2,wxLIST_AUTOSIZE);
 	current_pos = 0;

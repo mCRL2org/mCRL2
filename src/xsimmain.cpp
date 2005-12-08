@@ -112,6 +112,9 @@ XSimMain::XSimMain( wxWindow *parent, wxWindowID id, const wxString &title,
     timer_interval = 1000;
 
     seen_states = ATindexedSetCreate(100,80);
+
+    nextstate = NULL;
+    nextstategen = NULL;
 }
 
 XSimMain::~XSimMain()
@@ -125,7 +128,8 @@ XSimMain::~XSimMain()
 
 	if ( initial_state != NULL )
 	{
-		gsNextStateFinalise();
+		delete nextstategen;
+		delete nextstate;
 	}
 
 	ATunprotectList(&state_vars);
@@ -357,11 +361,11 @@ void XSimMain::LoadFile(const wxString &filename)
     }
     state_varnames = ATreverse(m);
     state_vars = ATreverse(n);
-    if ( initial_state != NULL )
-    {
-	    gsNextStateFinalise();
-    }
-    initial_state = gsNextStateInit(Spec,!use_dummies,GS_STATE_VECTOR,rewr_strat);
+    
+    delete nextstategen;
+    delete nextstate;
+    nextstate = createNextState(Spec,!use_dummies,GS_STATE_VECTOR,rewr_strat);
+    initial_state = nextstate->getInitialState();
 
     current_state = NULL;
     InitialiseViews();
@@ -519,6 +523,11 @@ ATerm XSimMain::GetState()
 ATermList XSimMain::GetNextStates()
 {
 	return next_states;
+}
+
+NextState *XSimMain::GetNextState()
+{
+	return nextstate;
 }
 
 bool XSimMain::ChooseTransition(int index)
@@ -749,7 +758,7 @@ void XSimMain::OnLoadTrace( wxCommandEvent &event )
 	    ATerm state = current_state;
 	    ATermList newtrace = ATmakeList0();
 
-	    if ( (tr.getState() != NULL) && !ATisEqual(tr.getState(),gsMakeStateVector(state)) )
+	    if ( (tr.getState() != NULL) && !ATisEqual(tr.getState(),nextstate->makeStateVector(state)) )
 	    {
 		    wxMessageDialog dialog(this,wxT("Initial state of trace does not match initial state of state space.\n"),wxT("Error in trace"),wxOK|wxICON_ERROR);
 		    dialog.ShowModal();
@@ -757,17 +766,17 @@ void XSimMain::OnLoadTrace( wxCommandEvent &event )
 		    ATermAppl act;
 		    while ( (act = tr.getAction()) != NULL )
 		    {
-			    NextStateFrom(state);
+			    nextstategen = nextstate->getNextStates(state,nextstategen);
 			    if ( gsIsMultAct(act) )
 			    {
 				    ATermAppl Transition;
 				    ATerm NewState;
 				    bool found = false;
-				    while ( NextState(&Transition,&NewState) )
+				    while ( nextstategen->next(&Transition,&NewState) )
 				    {
 					    if ( ATisEqual(Transition,act) )
 					    {
-						    if ( (tr.getState() == NULL) || ATisEqual(tr.getState(),gsMakeStateVector(NewState)) )
+						    if ( (tr.getState() == NULL) || ATisEqual(tr.getState(),nextstate->makeStateVector(NewState)) )
 						    {
 							    newtrace = ATinsert(newtrace,(ATerm) ATmakeList2((ATerm) Transition,NewState));
 							    state = NewState;
@@ -790,12 +799,12 @@ void XSimMain::OnLoadTrace( wxCommandEvent &event )
 				    ATerm NewState;
 				    wxString s(ATgetName(ATgetAFun(act)),wxConvLocal);
 				    bool found = false;
-				    while ( NextState(&Transition,&NewState) )
+				    while ( nextstategen->next(&Transition,&NewState) )
 				    {
 					    wxString t = wxConvLocal.cMB2WX(PrintPart_CXX((ATerm) Transition, ppAdvanced).c_str());
 					    if ( s == t )
 					    {
-						    if ( (tr.getState() == NULL) || ATisEqual(tr.getState(),gsMakeStateVector(NewState)) )
+						    if ( (tr.getState() == NULL) || ATisEqual(tr.getState(),nextstate->makeStateVector(NewState)) )
 						    {
 							    newtrace = ATinsert(newtrace,(ATerm) ATmakeList2((ATerm) Transition,NewState));
 							    state = NewState;
@@ -847,11 +856,11 @@ void XSimMain::OnSaveTrace( wxCommandEvent &event )
 	    if ( !ATisEmpty(trace) )
 	    {
 		    ATermList m = ATreverse(trace);
-		    tr.setState(gsMakeStateVector(ATgetFirst(ATgetNext(ATLgetFirst(m)))));
+		    tr.setState(nextstate->makeStateVector(ATgetFirst(ATgetNext(ATLgetFirst(m)))));
 		    for (ATermList l=ATconcat(ATgetNext(m),ecart); !ATisEmpty(l); l=ATgetNext(l))
 		    {
 			    tr.addAction(ATAgetFirst(ATLgetFirst(l)));
-			    tr.setState(gsMakeStateVector(ATgetFirst(ATgetNext(ATLgetFirst(l)))));
+			    tr.setState(nextstate->makeStateVector(ATgetFirst(ATgetNext(ATLgetFirst(l)))));
 /*			PrintPart_CXX(f, ATgetFirst(ATLgetFirst(l)), ppAdvanced);
                         f << endl;*/
 		    }
@@ -1062,8 +1071,8 @@ void XSimMain::SetCurrentState(ATerm state, bool showchange)
 
 	for (int i=0; i<ATgetLength(state_vars); i++)
 	{
-		ATermAppl oldval = gsGetStateArgument(old,i);
-		ATermAppl newval = gsGetStateArgument(state,i);
+		ATermAppl oldval = nextstate->getStateArgument(old,i);
+		ATermAppl newval = nextstate->getStateArgument(state,i);
 
 		if ( gsIsDataVarId(newval) )
 		{
@@ -1166,7 +1175,14 @@ void XSimMain::UpdateTransitions(bool update_next_states)
 
 	if ( update_next_states )
 	{
-		next_states = gsNextState(current_state,NULL);
+		nextstategen = nextstate->getNextStates(current_state,nextstategen);
+		next_states = ATmakeList0();
+		ATermAppl transition;
+		ATerm newstate;
+		while ( nextstategen->next(&transition,&newstate) )
+		{
+			next_states = ATinsert(next_states,(ATerm) ATmakeList2((ATerm) transition,newstate));
+		}
 	}
 
 	transview->DeleteAllItems();
@@ -1183,8 +1199,8 @@ void XSimMain::UpdateTransitions(bool update_next_states)
 		bool comma = false;
 		for (int i=0; i<ATgetLength(state_vars); i++)
 		{
-			ATermAppl oldval = gsGetStateArgument(m,i);
-			ATermAppl newval = gsGetStateArgument(n,i);
+			ATermAppl oldval = nextstate->getStateArgument(m,i);
+			ATermAppl newval = nextstate->getStateArgument(n,i);
 
 			if ( !ATisEqual(oldval,newval) && (!gsIsDataVarId(newval) || showdc->IsChecked()) )
 			{

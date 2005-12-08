@@ -1,20 +1,55 @@
+#ifndef _LIBNEXTSTATE_H
+#define _LIBNEXTSTATE_H
+
 #include <aterm2.h>
-#include "librewrite.h"
+#include "libenum.h"
 
 #define GS_STATE_VECTOR 0
 #define GS_STATE_TREE 1
 
-extern bool NextStateError;
+enum NextStateStrategy { nsStandard };
 
-typedef void (*gsNextStateCallBack)(ATermAppl, ATerm);
+class NextStateGenerator
+{
+	public:
+		virtual ~NextStateGenerator();
 
-ATerm gsNextStateInit(ATermAppl Spec, bool AllowFreeVars, int StateFormat, RewriteStrategy strat);
-ATermList gsNextState(ATerm State, gsNextStateCallBack f);
-void gsNextStateFinalise();
+		virtual bool next(ATermAppl *Transition, ATerm *State) = 0;
+		virtual bool errorOccurred() = 0;
+};
 
-int gsGetStateLength();
-ATermAppl gsGetStateArgument(ATerm State, int index);
-ATermAppl gsMakeStateVector(ATerm State);
+class NextState
+{
+	public:
+		virtual ~NextState();
 
-void NextStateFrom(ATerm State);
-bool NextState(ATermAppl *Transition, ATerm *State);
+		virtual ATerm getInitialState() = 0;
+		virtual NextStateGenerator *getNextStates(
+					ATerm state,
+					NextStateGenerator *old = NULL
+					) = 0;
+
+		virtual int getStateLength() = 0;
+		virtual ATermAppl getStateArgument(ATerm state, int index) = 0;
+		virtual ATermAppl makeStateVector(ATerm state) = 0;
+};
+
+NextState *createNextState(
+		ATermAppl spec,
+		bool allow_free_vars,
+		int state_format,
+		Enumerator *e,
+		bool clean_up_enumerator = false,
+		NextStateStrategy strategy = nsStandard
+		);
+
+NextState *createNextState(
+		ATermAppl spec,
+		bool allow_free_vars = true,
+		int state_format = GS_STATE_VECTOR,
+		RewriteStrategy rewrite_strategy = GS_REWR_INNER,
+		EnumerateStrategy enumerator_strategy = ENUM_STANDARD,
+		NextStateStrategy strategy = nsStandard
+		);
+
+#endif

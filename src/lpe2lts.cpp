@@ -15,7 +15,8 @@
 #include "libstruct.h"
 #include "libprint_c.h"
 #include "libnextstate.h"
-#include "librewrite_c.h"
+#include "libenum.h"
+#include "librewrite.h"
 #include "libtrace.h"
 #include "libdataelm.h"
 
@@ -299,7 +300,8 @@ int main(int argc, char **argv)
     backpointers = NULL;
   }
 
-  ATerm state = gsNextStateInit(Spec,!usedummies,stateformat,strat);
+  NextState *nstate = createNextState(Spec,!usedummies,stateformat,createEnumerator(Spec,createRewriter(ATAgetArgument(Spec,3),strat),true),true);
+  ATerm state = nstate->getInitialState();
   switch ( outformat )
   {
     case OF_AUT:
@@ -310,7 +312,7 @@ int main(int argc, char **argv)
         SVCbool b;
         if ( outinfo )
         {
-          SVCsetInitialState(svc,SVCnewState(svc,(ATerm) gsMakeStateVector(state),&b));
+          SVCsetInitialState(svc,SVCnewState(svc,(ATerm) nstate->makeStateVector(state),&b));
         } else {
           SVCsetInitialState(svc,SVCnewState(svc,(ATerm) ATmakeInt(0),&b));
         }
@@ -334,15 +336,16 @@ int main(int argc, char **argv)
   char *basefilename = NULL;
   gsVerboseMsg("generating state space...\n");
 
+  NextStateGenerator *nsgen = NULL;
   while ( current_state < num_states )
   {
     state = ATindexedSetGetElem(states,current_state);
     bool deadlockstate = true;
 
-    NextStateFrom(state);
+    nsgen = nstate->getNextStates(state,nsgen);
     ATermAppl Transition;
     ATerm NewState;
-    while ( NextState(&Transition,&NewState) )
+    while ( nsgen->next(&Transition,&NewState) )
     {
       ATbool new_state;
       unsigned long i;
@@ -376,9 +379,9 @@ int main(int argc, char **argv)
             {
               SVCbool b;
               SVCputTransition(svc,
-                SVCnewState(svc,(ATerm) gsMakeStateVector(ATindexedSetGetElem(states,current_state)),&b),
+                SVCnewState(svc,(ATerm) nstate->makeStateVector(ATindexedSetGetElem(states,current_state)),&b),
                 SVCnewLabel(svc,(ATerm) Transition,&b),
-                SVCnewState(svc,(ATerm) gsMakeStateVector(ATindexedSetGetElem(states,i)),&b),
+                SVCnewState(svc,(ATerm) nstate->makeStateVector(ATindexedSetGetElem(states,i)),&b),
                 svcparam);
             } else {
               SVCbool b;
@@ -396,7 +399,7 @@ int main(int argc, char **argv)
       trans++;
     }
     
-    if ( NextStateError )
+    if ( nsgen->errorOccurred() )
     {
       err = true;
       break;
@@ -416,13 +419,13 @@ int main(int argc, char **argv)
         }
   
         Trace trace;
-        trace.setState(gsMakeStateVector(s));
+        trace.setState(nstate->makeStateVector(s));
         for (; !ATisEmpty(tr); tr=ATgetNext(tr))
         {
           ATermList e = (ATermList) ATgetFirst(tr);
           trace.addAction((ATermAppl) ATgetFirst(e));
           e = ATgetNext(e);
-          trace.setState(gsMakeStateVector(ATgetFirst(e)));
+          trace.setState(nstate->makeStateVector(ATgetFirst(e)));
         }
 
         if ( basefilename == NULL )
@@ -499,6 +502,8 @@ int main(int argc, char **argv)
       nextlevelat = num_states;
     }*/
   }
+  delete nsgen;
+  delete nstate;
   free(basefilename);
   }
 
@@ -528,6 +533,4 @@ int main(int argc, char **argv)
       (trans==1)?"":"s"
     );
   }
-
-  gsNextStateFinalise();
 }

@@ -8,6 +8,15 @@ enum EnumerateStrategy { ENUM_STANDARD };
 
 typedef void (*FindSolutionsCallBack)(ATermList);
 
+class EnumeratorSolutions
+{
+	public:
+		virtual ~EnumeratorSolutions();
+
+		virtual bool next(ATermList *solution) = 0;
+		virtual bool errorOccurred() = 0;
+};
+
 class Enumerator
 {
 	public:
@@ -15,12 +24,11 @@ class Enumerator
 
 		virtual ATermList FindSolutions(ATermList Vars, ATerm Expr, FindSolutionsCallBack f = NULL) = 0;
 
-		virtual void initialise(ATermList Vars, ATerm Expr) = 0;
-		virtual bool next(ATermList *solution) = 0;
-		virtual bool errorOccurred() = 0;
+		virtual EnumeratorSolutions *findSolutions(ATermList Vars, ATerm Expr, EnumeratorSolutions *old = NULL) = 0;
+		
+		virtual Rewriter *getRewriter() = 0;
 };
 
-Enumerator *createEnumerator(ATermAppl spec, Rewriter &r, EnumerateStrategy strategy = ENUM_STANDARD);
-Enumerator *createEnumerator(ATermAppl spec, Rewriter *r, EnumerateStrategy strategy = ENUM_STANDARD, bool clean_up_rewriter = false);
+Enumerator *createEnumerator(ATermAppl spec, Rewriter *r, bool clean_up_rewriter = false, EnumerateStrategy strategy = ENUM_STANDARD);
 
 #endif

@@ -13,7 +13,8 @@
 #include <wx/listctrl.h>
 #include <aterm2.h>
 
-#include "librewrite_c.h"
+#include "libnextstate.h"
+#include "librewrite.h"
 #include "xsimbase.h"
 #include "xsimtrace.h"
 
@@ -72,6 +73,7 @@ public:
     virtual bool Redo();
     virtual ATerm GetState();
     virtual ATermList GetNextStates();
+    virtual NextState *GetNextState();
     virtual bool ChooseTransition(int index);
     virtual int GetTraceLength();
     virtual int GetTracePos();
@@ -135,6 +137,8 @@ private:
     play_func_enum timer_func;
     int timer_interval;
     ATermIndexedSet seen_states;
+    NextState *nextstate;
+    NextStateGenerator *nextstategen;
     
 private:
     // WDR: handler declarations for XSimMain

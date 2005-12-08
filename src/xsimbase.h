@@ -39,6 +39,7 @@
 
 #include <list>
 #include <aterm2.h>
+#include "libnextstate.h"
 
 using namespace std;
 
@@ -79,6 +80,9 @@ public:
 	virtual ATerm GetState() = 0;
 	/* Returns the current state. */
 	virtual ATermList GetNextStates() = 0;
+	/* Returns the NextState currently in use by the
+	 * simulator. */
+	virtual NextState *GetNextState() = 0;
 	/* Returns the currently enabled transitions and the
 	 * resulting states. */
 	virtual bool ChooseTransition(int index) = 0;

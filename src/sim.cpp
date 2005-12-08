@@ -13,16 +13,16 @@
 #include "libnextstate.h"
 #include "librewrite_c.h"
 
-static void gsPrintState(ATerm state)
+static void PrintState(ATerm state, NextState *ns)
 {
-	for (int i=0; i<gsGetStateLength(); i++)
+	for (int i=0; i<ns->getStateLength(); i++)
 	{
 		if ( i > 0 )
 		{
 			gsprintf(", ");
 		}
 
-		ATermAppl a = gsGetStateArgument(state,i);
+		ATermAppl a = ns->getStateArgument(state,i);
 		if ( gsIsDataVarId(a) )
 		{
 			gsprintf("_");
@@ -52,7 +52,7 @@ int main(int argc, char **argv)
 	FILE *SpecStream;
 	ATerm stackbot, state;
 	ATermAppl Spec;
-	ATermList states, l;
+	ATermList states;
 	#define sopts "hyR:"
 	struct option lopts[] = {
 		{ "help",	no_argument,	NULL,	'h' },
@@ -121,25 +121,38 @@ int main(int argc, char **argv)
         }
         assert(gsIsSpecV1(Spec));
 
-	state = gsNextStateInit(Spec,!usedummy,GS_STATE_VECTOR,strat);
+	NextState *nstate = createNextState(Spec,!usedummy,GS_STATE_VECTOR,strat);
+	state = nstate->getInitialState();
 
 	gsprintf("initial state: [ ");
-	gsPrintState(state);
+	PrintState(state,nstate);
 	gsprintf(" ]\n\n");
 
+	NextStateGenerator *nsgen = NULL;
 	while ( 1 )
 	{
-		states = gsNextState(state,NULL);
+		nsgen = nstate->getNextStates(state,nsgen);
+
+		ATermAppl Transition;
+		ATerm NewState;
+		i = 0;
+		states = ATmakeList0();
+		while ( nsgen->next(&Transition,&NewState) )
+		{
+			gsprintf("%i: %P  ->  [ ",i,Transition);
+			PrintState(NewState,nstate);
+			gsprintf(" ]\n\n");
+
+			states = ATinsert(states,(ATerm) ATmakeList2((ATerm) Transition,NewState));
+			i++;
+		}
+		states = ATreverse(states);
+
 		if ( ATisEmpty(states) )
 		{
 			printf("deadlock\n\n");
 		}
-		for (l=states,i=0; !ATisEmpty(l); l=ATgetNext(l), i++)
-		{
-			gsprintf("%i: %P  ->  [ ",i,ATAgetFirst(ATLgetFirst(l)));
-			gsPrintState(ATgetFirst(ATgetNext(ATLgetFirst(l))));
-			gsprintf(" ]\n\n");
-		}
+
 harm:
 		printf("? "); fflush(stdout);
 		r = 0;
@@ -161,9 +174,10 @@ harm:
 		gsprintf("\ntransition: %P\n\n",ATAgetFirst(ATLelementAt(states,i)));
 		state = ATgetFirst(ATgetNext(ATLelementAt(states,i)));
 		gsprintf("current state: [ ");
-		gsPrintState(state);
+		PrintState(state,nstate);
 		gsprintf(" ]\n\n");
 	}
 
-	gsNextStateFinalise();
+	delete nsgen;
+	delete nstate;
 }
