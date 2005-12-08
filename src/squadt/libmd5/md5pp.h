@@ -9,8 +9,8 @@
 namespace md5 {
 
   typedef union {
-    uint8_t bytes[16];
-    uint8_t dwords[4];
+    uint8_t  bytes[16];
+    uint32_t dwords[4];
   } compact_digest;
 
   /* Set to the zero checksum */

@@ -29,11 +29,11 @@ long ToolExecutor::Execute(ToolManager& tool_manager, unsigned int tool_identifi
  
   if (0 <= process_id) {
     processes[new_process] = process_id;
- 
-    throw (ExecutionError());
   }
   else {
     delete new_process;
+
+    throw (ExecutionError());
   }
 
   return (process_id);

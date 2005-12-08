@@ -99,13 +99,19 @@ inline bool Specification::CheckInstances() {
         object.close();
  
         if (!(old == (*j).checksum)) {
-          status = not_up_to_date;
+          if (0 < input_objects.size()) {
+            /* Not a primary object */
+            status = not_up_to_date;
+          }
 
           return (false);
         }
       }
       else {
-        status = not_up_to_date;
+        if (0 < input_objects.size()) {
+          /* Not a primary object */
+          status = not_up_to_date;
+        }
 
         return (false);
       }
@@ -113,13 +119,27 @@ inline bool Specification::CheckInstances() {
  
     ++j;
   }
+
+  return (false);
 }
 
 /*
  * Recursively verifies whether specification is up to date by considering the
  * status of all specifications that it depends on.
+ *
+ * Returns implied status
  */
 SpecificationStatus Specification::CheckStatus() {
+  if (input_objects.size() == 0) {
+    if (CheckInstances()) {
+      return (up_to_date);
+    }
+    else {
+std::cerr << "name : " << name << std::endl;
+      return (not_up_to_date);
+    }
+  }
+
   if (status != non_existent && status != being_computed) {
     const std::vector < SpecificationInputType >::iterator b = input_objects.end();
           std::vector < SpecificationInputType >::iterator i = input_objects.begin();
@@ -127,17 +147,22 @@ SpecificationStatus Specification::CheckStatus() {
     bool go_condition = true;
 
     /* Recursively check status */
-    while (i != b) {
-      go_condition = (*i).derived_from.pointer->CheckStatus();
+    while (i != b && go_condition) {
+      go_condition = (*i).derived_from.pointer->CheckStatus() == up_to_date;
  
       i++;
     }
 
-    if (go_condition && status == up_to_date) {
-      if (!CheckInstances()) {
-        visualiser->VisualiseStatusChange(status);
+    if (go_condition) {
+      if (status == up_to_date && !CheckInstances()) {
+        status = not_up_to_date;
       }
     }
+    else {
+      status = not_up_to_date;
+    }
+
+    visualiser->VisualiseStatusChange(status);
   }
   
   return (status);
@@ -160,6 +185,10 @@ bool Specification::Generate() throw (void*) {
     go_condition |= (*i).derived_from.pointer->Generate();
  
     i++;
+  }
+
+  if (status == up_to_date) {
+    CheckInstances();
   }
 
   if (go_condition && status != up_to_date) {
@@ -220,7 +249,7 @@ bool Specification::Generate() throw (void*) {
     return (true);
   }
 
-  return (CheckStatus() != up_to_date);
+  return (false);
 }
 
 bool Specification::Delete() {
@@ -395,7 +424,7 @@ bool Specification::Write(std::ostream& stream) {
     stream << "\">" << tool_configuration << "</tool-configuration>\n";
 
     while (i != b) {
-      stream << "  <input-object identifier=\"" << (*i).derived_from.pointer->identifier
+      stream << "  <input-object identifier=\"" << std::dec << (*i).derived_from.pointer->identifier
              << "\" output-number=\"" << (*i).output_number << "\"/>\n";
  
       ++i;
@@ -433,7 +462,7 @@ bool Specification::Write(std::ostream& stream) {
       stream << "\" name=\"" << (*i).location;
 
       if ((*i).timestamp != 0) {
-        stream << "\" timestamp=\"" << (*i).timestamp;
+        stream << "\" timestamp=\"" << std::dec << (*i).timestamp;
       }
 
       stream << "\"/>\n";
