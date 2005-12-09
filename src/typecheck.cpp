@@ -1627,7 +1627,7 @@ static ATermAppl gstcTraverseVarConsTypeD(ATermTable Vars, ATermAppl *DataTerm, 
     ATermAppl Data=ATAgetArgument(*DataTerm,0);
     ATermAppl NewType=gstcTraverseVarConsTypeDN(nArguments,Vars,
 						&Data,gsMakeSortArrowProd(ArgumentTypes,PosType));
-    if(!NewType) {gsErrorMsg("type error while trying to cast %P to type %P)\n",gsMakeDataApplProd(Data,Arguments),PosType);return NULL;}
+    if(!NewType) {gsErrorMsg("type error while trying to cast %P to type %P\n",gsMakeDataApplProd(Data,Arguments),PosType);return NULL;}
     
     //it is possible that:
     //1) a cast has happened
@@ -1761,6 +1761,10 @@ static ATermAppl gstcTraverseVarConsTypeDN(int nFactPars, ATermTable Vars, ATerm
     ATermAppl Name=ATAgetArgument(*DataTerm,0);
     ATermAppl Type=ATAtableGet(Vars,(ATerm)Name);
     if(Type){
+      if(!gstcTypeMatchA(Type,PosType)){
+	gsErrorMsg("The type %P of variable %P is incompartible with %P (typechecking %P)\n",Name,Type,PosType,*DataTerm); 
+	return NULL;
+      }
       *DataTerm=gsMakeDataVarId(Name,Type);
       return Type;
     }
@@ -1956,6 +1960,7 @@ static ATermAppl gstcTraverseVarConsTypeDN(int nFactPars, ATermTable Vars, ATerm
       }
 
       *DataTerm=gsMakeOpId(Name,Type);
+      assert(Type);
       return Type;
     }
     else{
@@ -1964,7 +1969,9 @@ static ATermAppl gstcTraverseVarConsTypeDN(int nFactPars, ATermTable Vars, ATerm
       return gsMakeUnknown();
     }
   }
-  else return gstcTraverseVarConsTypeD(Vars,DataTerm,PosType);
+  else {
+    return gstcTraverseVarConsTypeD(Vars,DataTerm,PosType);
+  }
 }
 
 // ================================================================================
