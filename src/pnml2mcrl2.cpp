@@ -17,17 +17,24 @@
   
   typedef struct {
     ATbool Abort;                 // if an element has no ID, this boolean is used to grant abortion of the conversion
+
     // read-in
     ATermTable place_name;	// place_id -> name
     ATermTable place_mark;	// place_id -> Nat
     ATermTable trans_name;	// trans_id -> name
     ATermTable arc_in;	        // arc_id -> trans_id x place_id
     ATermTable arc_out;	        // arc_id -> place_id x trans_id
+    ATermTable arc_inhibit;	// arc_id -> place_id x trans_id (always this way)
+
     // generate
     ATermTable place_in;	        // place_id -> List(arc_id) (arc_in)
     ATermTable trans_in;	        // trans_id -> List(arc_id) (arc_out)
     ATermTable place_out;	        // place_id -> List(arc_id) (arc_out)
     ATermTable trans_out;	        // trans_id -> List(arc_id) (arc_in)
+    ATermTable place_inhibit;	        // place_inhibit -> List(arc_id) (arc_inhibit)
+    // not needed as thay are the same as arc_out 
+    //ATermTable transition_inhibit;	// transition_inhibit -> List(arc_id) (arc_inhibit)
+    
     // needed for the creation of general mCRL2 processes
     ATermList transitions;      // store all the mCRL2 processes (involving transitions) needed for the Trans-process
     ATermList places;           // store all the mCRL2 processes (involving places) needed for the PetriNet-process
@@ -428,7 +435,13 @@
 	if (!(Atype=pn2gsRetrieveText(cur))) {
 	  Atype = ATparse("some_strange`type=that n0b0dy u5e5...");
 	}
-	if (!ATisEqual(Atype, ATparse("some_strange`type=that n0b0dy u5e5..."))) {
+	if (ATisEqual(Atype, ATparse("inhibitor"))) {
+	  // the type should be omitted
+	  // otherwise the arc does not need to be translated!
+	  // gsWarningMsg("Arc with id '%T' has type '%T' and will not be translated.\n", Aid, Atype);
+	  return ATmakeAppl4(ATmakeAFun("arc", 4, ATfalse), (ATerm)Aid, (ATerm)Asource, (ATerm)Atarget, (ATerm)gsString2ATermAppl("inhibitor"));
+	}
+	else if (!ATisEqual(Atype, ATparse("some_strange`type=that n0b0dy u5e5..."))) {
 	  // the type should be omitted
 	  // otherwise the arc does not need to be translated!
 	  gsWarningMsg("Arc with id '%T' has type '%T' and will not be translated.\n", Aid, Atype);
@@ -443,7 +456,7 @@
     }
     
     // argument order of returnvalue is id - source - target
-    return ATmakeAppl3(ATmakeAFun("arc", 3, ATfalse), (ATerm)Aid, (ATerm)Asource, (ATerm)Atarget);
+    return ATmakeAppl4(ATmakeAFun("arc", 4, ATfalse), (ATerm)Aid, (ATerm)Asource, (ATerm)Atarget, (ATerm)gsString2ATermAppl("default"));
   }
   
   /*                        */
@@ -639,9 +652,10 @@
     ATermList Ids;
 
     //==================================================
-    // create actions from context.arc_in and context.arc_out
+    // create actions from context.arc_in, context.arc_out and context.arc_inhibit
     //==================================================
     Ids = ATconcat(ATtableKeys(context.arc_in), ATtableKeys(context.arc_out));
+    Ids = ATconcat(Ids, ATtableKeys(context.arc_inhibit));
     while (ATisEmpty(Ids) == ATfalse) {
       // make the action: arcID
       CurrentAction = ATmakeAppl0(ATgetAFun(ATgetFirst(Ids)));
@@ -1302,6 +1316,9 @@
 
 	  MoreArcs=ATLtableGet(context.place_out,(ATerm)PlaceID);
 	  if(MoreArcs) AssocArcs=ATconcat(AssocArcs,MoreArcs);
+
+	  MoreArcs=ATLtableGet(context.place_inhibit,(ATerm)PlaceID);
+	  if(MoreArcs) AssocArcs=ATconcat(AssocArcs,MoreArcs);
 	}
 
 	if(ATisEmpty(AssocArcs)) continue;
@@ -1354,9 +1371,9 @@
     gsDebugMsg("\n====================\n\nStart generating the necessary data. \n \n");
     
     // put the places, transitions and arcs in the lists again
-    ATermList APlaces = (ATermList)ATgetArgument(Spec, 0);
-    ATermList ATransitions = (ATermList)ATgetArgument(Spec, 1);
-    ATermList AArcs = (ATermList)ATgetArgument(Spec, 2);
+    ATermList APlaces = ATLgetArgument(Spec, 0);
+    ATermList ATransitions = ATLgetArgument(Spec, 1);
+    ATermList AArcs = ATLgetArgument(Spec, 2);
     
     // temporary variable to store the current key
     // used for Places, Transitions and Arcs!!!
@@ -1420,9 +1437,6 @@
     gsDebugMsg("\n  Transitions that are not inserted into the tables: %T\n", (ATerm)ATransitions);
     gsDebugMsg("  ID's of the read-in transition table.\n  %T\n", (ATerm)ATtableKeys(context.trans_name));
     
-    // temporary variables to store the current source and target
-    ATerm CurrentSource;
-    ATerm CurrentTarget;
     gsDebugMsg("> Insert the data of the arcs that will be translated into tables...  \n");
     while (ATisEmpty(AArcs) == ATfalse) {
       // this loop itterates all arcs that will be translated
@@ -1448,24 +1462,53 @@
 	// this is an error in the input, and thus termination takes place!
 	gsErrorMsg("The id: '%T' appears more than once!\n", CurrentKey);
 	return NULL;
+      } else if (ATtableGet(context.arc_inhibit, CurrentKey)) {
+	// the ID of the current arc appeared already in the inhibitor_arcs.
+	// this is an error in the input, and thus termination takes place!
+	gsErrorMsg("The id: '%T' appears more than once!\n", CurrentKey);
+	return NULL;
       } else {
 	// the arc's ID did not appear in the transitions, places or arcs that will be translated
 	// check the source and the target from the arc to see if the arc is used in the translation!
-	CurrentSource = ATgetArgument(ATgetFirst(AArcs),1);
-	CurrentTarget = ATgetArgument(ATgetFirst(AArcs),2);
-	if (ATtableGet(context.place_name, CurrentSource) && ATtableGet(context.trans_name, CurrentTarget)) {
-	  // The arc is an arc_out; it goes from a place to a transition
-	  // insert the data into context.arc_out
-	  // key = id
-	  // value = arc_out(source, target)
-	  ATtablePut(context.arc_out, CurrentKey, (ATerm)ATmakeAppl2(ATmakeAFun("arc_out",2,ATfalse),CurrentSource,CurrentTarget));
-	} else if (ATtableGet(context.place_name, CurrentTarget) && ATtableGet(context.trans_name, CurrentSource)) {
-	  // The arc is an arc_in; it goes from a transition to a place
-	  // insert the data into context.arc_in
-	  // key = id
-	  // value = arc_in(source, target)
-	  ATtablePut(context.arc_in, CurrentKey, (ATerm)ATmakeAppl2(ATmakeAFun("arc_in",2,ATfalse),CurrentSource,CurrentTarget));
-	} else {
+	
+	// temporary variables to store the current source and target
+	ATermAppl CurrentSource = ATAgetArgument(ATAgetFirst(AArcs),1);
+	ATermAppl CurrentTarget = ATAgetArgument(ATAgetFirst(AArcs),2);
+	ATermAppl CurrentType = ATAgetArgument(ATAgetFirst(AArcs),3);
+	if (ATtableGet(context.place_name, (ATerm)CurrentSource) && ATtableGet(context.trans_name, (ATerm)CurrentTarget)) {
+	  if(ATisEqual(CurrentType,gsString2ATermAppl("default"))){
+	    // The arc is an arc_out; it goes from a place to a transition
+	    // insert the data into context.arc_out
+	    // key = id
+	    // value = arc_out(source, target)
+	    ATtablePut(context.arc_out, (ATerm)CurrentKey, (ATerm)ATmakeAppl2(ATmakeAFun("arc_out",2,ATfalse),(ATerm)CurrentSource,(ATerm)CurrentTarget));
+	  }
+	  else if(ATisEqual(CurrentType,gsString2ATermAppl("inhibitor"))){
+	    // The arc is an arc_inhibitor; it goes from a place to a transition
+	    // insert the data into context.arc_out
+	    // key = id
+	    // value = arc_out(source, target)
+	    ATtablePut(context.arc_inhibit, (ATerm)CurrentKey, (ATerm)ATmakeAppl2(ATmakeAFun("arc_out",2,ATfalse),(ATerm)CurrentSource,(ATerm)CurrentTarget));
+	  }
+	} 
+	else if (ATtableGet(context.place_name, (ATerm)CurrentTarget) && ATtableGet(context.trans_name, (ATerm)CurrentSource)) {
+	  if(ATisEqual(CurrentType,gsString2ATermAppl("default"))){
+	    // The arc is an arc_in; it goes from a transition to a place
+	    // insert the data into context.arc_in
+	    // key = id
+	    // value = arc_in(source, target)
+	    ATtablePut(context.arc_in, (ATerm)CurrentKey, (ATerm)ATmakeAppl2(ATmakeAFun("arc_in",2,ATfalse),(ATerm)CurrentSource,(ATerm)CurrentTarget));
+	  } 	  
+	  else if(ATisEqual(CurrentType,gsString2ATermAppl("inhibitor"))){
+	    // The arc is an arc_inhibitor; it goes from a transition to a place (which is wrong)
+	    // insert the data into context.arc_in
+	    // key = id
+	    // value = arc_in(source, target)
+	    gsWarningMsg("The inhibitor arc %T going from transition %T to place %T is reversed (buggy pnml?)\n", CurrentKey, CurrentSource, CurrentTarget);
+	    ATtablePut(context.arc_inhibit, (ATerm)CurrentKey, (ATerm)ATmakeAppl2(ATmakeAFun("arc_in",2,ATfalse),(ATerm)CurrentTarget,(ATerm)CurrentSource));
+	  }
+	}
+	else {
 	  // either the source or the target (or both) of the arc will not be translated
 	  // therefore the arc will not be translated either!
 	  gsWarningMsg("The source or target of arc with id '%T' will not be translated, and thus this arc will not be translated either.\n", CurrentKey);
@@ -1580,6 +1623,46 @@
     gsDebugMsg("context.trans_in contains the following keys: %T\n", Arcs);
     while (ATisEmpty(Arcs) == ATfalse) {
       gsDebugMsg("Transition '%T' has the following incoming arcs: %T\n", ATgetFirst(Arcs), ATtableGet(context.trans_in, ATgetFirst(Arcs)));
+      Arcs = ATgetNext(Arcs);
+    }
+
+    // Generate context.trans_in - context.place_inhibit
+    Arcs = ATtableKeys(context.arc_inhibit);
+    while (ATisEmpty(Arcs) == ATfalse) {
+      CurrentArc = ATgetFirst(Arcs);
+      CurrentPlace = ATgetArgument(ATAtableGet(context.arc_inhibit, CurrentArc), 0);
+      CurrentTrans = ATgetArgument(ATAtableGet(context.arc_inhibit, CurrentArc), 1);
+      // insert CurrentPlace and CurrentArc in context.place_inhibit
+      if (!(ATtableGet(context.place_inhibit, CurrentPlace))) {
+	// if the CurrentPlace was not yet present in context.place_inhibit, insert it
+	// key = CurrentPlace.id
+	// value = [CurrentArc.id]
+	ATtablePut(context.place_inhibit, CurrentPlace, (ATerm)ATmakeList1(CurrentArc));
+      } else {
+	// if the CurrentPlace was already present in context.place_inhibit, insert CurrentArc.id in the value-list
+	ArcValueList = (ATermList)ATtableGet(context.place_inhibit, CurrentPlace);
+	ArcValueList = ATinsert(ArcValueList, CurrentArc);
+	ATtablePut(context.place_inhibit, CurrentPlace, (ATerm)ArcValueList);
+      }
+      
+      // insert CurrentTrans and CurrentArc in context.trans_in
+      if (!(ATtableGet(context.trans_in, CurrentTrans))) {
+	// if the CurrentTrans was not yet present in context.trans_in, insert it
+	// key = CurrentTrans.id
+	// value = [CurrentArc.id]
+	ATtablePut(context.trans_in, CurrentTrans, (ATerm)ATmakeList1(CurrentArc));
+      } else {
+	// if the CurrentTrans was already present in context.trans_in, insert CurrentArc.id in the value-list
+	ArcValueList = (ATermList)ATtableGet(context.trans_in, CurrentTrans);
+	ArcValueList = ATinsert(ArcValueList, CurrentArc);
+	ATtablePut(context.trans_in, CurrentTrans, (ATerm)ArcValueList);
+      }
+      Arcs = ATgetNext(Arcs);
+    }
+    Arcs = ATtableKeys(context.place_inhibit);
+    gsDebugMsg("context.place_inhibit contains the following keys: %T\n", Arcs);
+    while (ATisEmpty(Arcs) == ATfalse) {
+      gsDebugMsg("Place '%T' has the following outgoing arcs: %T\n", ATgetFirst(Arcs), ATtableGet(context.place_inhibit, ATgetFirst(Arcs)));
       Arcs = ATgetNext(Arcs);
     }
     
@@ -1709,11 +1792,13 @@
     context.trans_name=ATtableCreate(63,50); 
     context.arc_in=ATtableCreate(63,50);  
     context.arc_out=ATtableCreate(63,50);    
+    context.arc_inhibit=ATtableCreate(63,50);    
     
     context.place_in=ATtableCreate(63,50);   
     context.trans_in=ATtableCreate(63,50);   
     context.place_out=ATtableCreate(63,50);  
     context.trans_out=ATtableCreate(63,50);  
+    context.place_inhibit=ATtableCreate(63,50);   
 
     context.transitions=ATmakeList0();
     context.places=ATmakeList0();
@@ -1726,11 +1811,13 @@
     ATtableDestroy(context.trans_name); 
     ATtableDestroy(context.arc_in);  
     ATtableDestroy(context.arc_out);    
+    ATtableDestroy(context.arc_inhibit);    
     
     ATtableDestroy(context.place_in);   
     ATtableDestroy(context.trans_in);   
     ATtableDestroy(context.place_out);  
     ATtableDestroy(context.trans_out);
+    ATtableDestroy(context.place_inhibit);   
     ATtableDestroy(context.place_process_name);
     
     if(!Spec) {
@@ -1762,6 +1849,7 @@
 
   // Added by Yarick: alternative generation of Places:
   static ATermAppl pn2gsGenerateP_pi_ar(int in, int out, ATermList In, ATermList Out);
+  static ATermAppl pn2gsGenerateP_pi_ai(int in, ATermList In, ATermList InhibitorActionLists);
   static ATermList pn2gsGetActionLists(int n, ATermList ActList);
   static ATermAppl pn2gsMakeMultiAction(ATermList ActionList);
   static ATermList pn2gsMakeSendActions(ATermList ReadActions);
@@ -1777,19 +1865,22 @@
     //==================================================
     // retrieve the maximum concurrency
     //==================================================
-    int n=0;
     ATermList ActsIn=ATLtableGet(context.place_in, PlaceID);
     if(!ActsIn) ActsIn=ATmakeList0();
-    if (ActsIn) n=ATgetLength(ActsIn);
+    int n=ATgetLength(ActsIn);
 
-    int m=0;
     ATermList ActsOut=ATLtableGet(context.place_out, PlaceID);
     if(!ActsOut) ActsOut=ATmakeList0();
     else ActsOut=pn2gsMakeSendActions(ActsOut);
-    if (ActsOut) m=ATgetLength(ActsOut);
+    int m=ATgetLength(ActsOut);
 
-    gsDebugMsg("Place %T has maximum concurrency in: '%d' and out: '%d'\n", PlaceID, n,m);
+    ATermList ActsInhibit=ATLtableGet(context.place_inhibit, PlaceID);
+    if(!ActsInhibit) ActsInhibit=ATmakeList0();
+    else ActsInhibit=pn2gsMakeSendActions(ActsInhibit);
+    int k=ATgetLength(ActsInhibit);
 
+    gsDebugMsg("Place %T has maximum concurrency in: '%d', out: '%d', and inhibit: '%d'\n", PlaceID, n,m,k);
+    
     //==================================================
     // generate the processes
     //==================================================
@@ -1832,6 +1923,18 @@
     // P_pi_ar_i_j = all possible multiactions with i incoming and j outgoing arcs.
     // need to be generated for all 0=<i<=n,0<=j<=m,i+j>0.
     // variables to store the name and id of the place
+    //
+    // For the case with k inhibitor arcs (k>0):
+    // additional summands for P_pi:
+    //                   +x==0 ->(P_pi_ai_0.P_pi(x)
+    //                           +P_pi_ai_1.P_pi(x+1)
+    //                           ...
+    //                           +P_pi_ai_n.P_pi(x+n))
+    //
+    // P_pi_ai_i = all possible multiactions with i incoming and inhibitor arcs.
+    // need to be generated for all 0=<i<=n
+    // variables to store the name and id of the place
+
 
     //Calculate the name of the process 
     AFun CurrentPlaceId = ATgetAFun(PlaceID);
@@ -1868,11 +1971,14 @@
       ATermAppl VarX=gsMakeDataVarId(ATmakeAppl0(ATmakeAFunId("x")),gsMakeSortIdNat());;
       //ATermAppl Number0=gsMakeNumber(gsString2ATermAppl("0"),gsMakeSortIdNat());
       AFun CurrentPlaceARId=ATappendAFun(CurrentPlaceId,"_ar_");
+      AFun CurrentPlaceAIId=ATappendAFun(CurrentPlaceId,"_ai_");
       ATermAppl OpAdd=gsMakeDataVarIdOpId(gsMakeOpIdNameAdd());
       ATermAppl OpSubt=gsMakeDataVarIdOpId(gsMakeOpIdNameSubt());
       //ATermAppl OpMax=gsMakeDataVarIdOpId(gsMakeOpIdNameMax());
       ATermAppl OpLTE=gsMakeDataVarIdOpId(gsMakeOpIdNameLTE());
+      ATermAppl OpEq=gsMakeDataVarIdOpId(gsMakeOpIdNameEq());
       ATermAppl OpInt2Nat=gsMakeDataVarIdOpId(gsMakeOpIdNameInt2Nat());
+      ATermAppl Number0=gsMakeNumber(gsString2ATermAppl("0"),gsMakeSortIdNat());
 
       ATermAppl Body=NULL;
       for(int j=m;j>-1;j--){
@@ -1918,7 +2024,47 @@
 	else Body=Summand;
       }
       
-      // handle the case m+n=0.
+      //add inhibitor arcs
+      if(k>0){
+	ATermAppl Summand=NULL;
+
+	//Calculate a list of all inhibirot multiactions
+	ATermList InhibitorActionLists=ATmakeList0();
+	for(int i=1; i<=k; i++)
+	  InhibitorActionLists=ATconcat(InhibitorActionLists,pn2gsGetActionLists(i,ActsInhibit));
+		
+	for(int i=n;i>-1;i--){
+	  AFun NumberIId=ATmakeAFunInt0(i);
+	  ATermAppl LeftName=ATmakeAppl0(ATappendAFun(CurrentPlaceAIId,ATgetName(NumberIId)));
+	  ATermAppl Left=gsMakeActionProcess(LeftName,ATmakeList0());//make name P_pi_ai_i
+
+	  ATermAppl RightExpr=VarX;  //x;
+	  if(i>0) RightExpr=pn2gsMakeDataApplProd2(OpAdd,RightExpr,gsMakeNumber(ATmakeAppl0(ATmakeAFunInt0(i)),gsMakeSortIdPos()));//RightExpr=RightExpr+i;
+	  
+	  ATermAppl Right=gsMakeActionProcess(CurrentPlace,ATmakeList1((ATerm)RightExpr));//make P_pi(x+i)
+	  ATermAppl Sec=gsMakeSeq(Left,Right);
+	  if(Summand) Summand=gsMakeChoice(Sec,Summand);
+	  else Summand=Sec; 
+
+	  //generate the additional process
+	  EquationList = ATinsert(EquationList, 
+				  (ATerm)gsMakeProcEqn(ATmakeList0(), 
+						       gsMakeProcVarId(LeftName, ATmakeList0()), 
+						       ATmakeList0(), 
+						       pn2gsGenerateP_pi_ai(i,ActsIn,InhibitorActionLists)));
+	}
+	
+	//generate the condition
+	ATermAppl Cond=pn2gsMakeDataApplProd2(OpEq,VarX,Number0);//make j<=x
+	Summand=gsMakeCond(Cond,Summand,gsMakeDelta());
+		
+	if(Body){
+	  if(Summand) Body=gsMakeChoice(Summand,Body);
+	}
+	else Body=Summand;	
+      }
+
+      // handle the case m+n+k=0.
       if(!Body) Body=gsMakeDelta();
 
       //make process P_pi and add it
@@ -1951,6 +2097,29 @@
       ATermList CurInActList=ATLgetFirst(InActionLists);
       for(OutActionLists=TmpOutActionLists;!ATisEmpty(OutActionLists);OutActionLists=ATgetNext(OutActionLists)){
 	ATermList CurOutActList=ATLgetFirst(OutActionLists);
+	ATermAppl Res=pn2gsMakeMultiAction(ATconcat(CurInActList,CurOutActList));
+	if(Body) Body=gsMakeChoice(Res,Body);
+	else Body=Res;
+      }
+    }
+    return Body;
+  }
+
+  static ATermAppl pn2gsGenerateP_pi_ai(int in, ATermList In, ATermList InhibitorActionLists){
+    //input: the exact numbers of in actions, the set of these actions (as lists), the set of all inhibitor multiactions.
+    //output: a process that is the choice of all multiactions (order not important)
+
+    if(!in) In=ATmakeList0();
+
+    ATermAppl Body=NULL;
+    ATermList InActionLists=pn2gsGetActionLists(in,In);
+
+    //pairwise merge the elements of the 2 lists into 1 big list. 
+    ATermList TmpInhibitorActionLists=InhibitorActionLists;
+    for(;!ATisEmpty(InActionLists);InActionLists=ATgetNext(InActionLists)){
+      ATermList CurInActList=ATLgetFirst(InActionLists);
+      for(InhibitorActionLists=TmpInhibitorActionLists;!ATisEmpty(InhibitorActionLists);InhibitorActionLists=ATgetNext(InhibitorActionLists)){
+	ATermList CurOutActList=ATLgetFirst(InhibitorActionLists);
 	ATermAppl Res=pn2gsMakeMultiAction(ATconcat(CurInActList,CurOutActList));
 	if(Body) Body=gsMakeChoice(Res,Body);
 	else Body=Res;
