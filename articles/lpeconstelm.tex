@@ -384,16 +384,16 @@ is the biggest subset, for which holds:\\
 % \> $\forall_{i \in I }($ \\ 
 \> $\forall_{j \in S^L_4(\ovr{v_0})}($\\
 % \> \> \> $ c_i\z \neq false \Rightarrow $ \\
-\> \>$NF(\ovr{v_0}._j) \not\in FV \wedge$\\
+\> \>$NF(\ovr{v_0}._j) \not\in FV \Rightarrow $\\
 \> \>$\forall_{i \in I} (c_i\z \neq \text{false } \wedge$ \\
 \> \>$NF(\ovr{g_i}\z._j) \not\in FV \Rightarrow$\\
 \> \> \> $NF(\ovr{g_i}\z._j)= NF(\ovr{v_0}._j)$\\
 \> \> $)$\\
 \> $\land$\\
-\> \> $NF(\ovr{v_0}._j) \not\in FV \wedge$ \\
-\> \>$ \exists_k(\forall_{i \in I}c_i\z \neq \text{false } \wedge $\\
+\> \> $NF(\ovr{v_0}._j) \in FV \wedge$ \\
+\> \>$ \exists_k(\forall_{i \in I} (NF(c_i\z \neq \text{false }) \wedge $\\
 \> \>$ NF(\ovr{g_i}\z._j) \not\in FV \Rightarrow $ \\
-\> \> \> $ NF(\ovr{g_i}\z._j)= k$\\
+\> \> \> $ NF(\ovr{g_i}\z._j)= k)$\\
 \> \> $)$\\ 
 % \> \> \> $)$ \\
 \> $)$\\
@@ -453,7 +453,7 @@ If the substituted value differs from the original value, the \pp\ becomes marke
 If they are equal, the \pp\ remains in the set $S$ if it already had been in the set $S$.
 \end{enumerate}
 
-If no constant \pps\ can be removed, the algorithm ends. However it is possible that we end in a situation like in Example \ref{freevarcheckup}. If we follow the algorithm, we see that the algorithm detects the $3^{th}$ element as a constant \pp. However the $3^{th}$ is not a constant \pp . To overcome the detection of fake \pps , we have to take an extra pass on the LPE. The current state vector is compared to the nextstates of summands on which the condition is not false.
+If no constant \pps\ can be removed, the algorithm ends. However it is possible that we end in a situation like in Example \ref{freevarcheckup}. If we follow the algorithm, we see that the algorithm detects the $3^{th}$ element as a constant \pp. However the $3^{th}$ is not a constant \pp . To overcome the detection of fake constant \pps , we have to take an extra pass on the LPE. The current state vector is compared to the nextstates of summands on which the condition is not false.
 If all \pps\ of all nextstates are equal\footnote{with respect to the extended rules on \ti{free variables}} to the current state, then there are no fake constant \pps . If the pass detects a \pp\ which is not the same in the nextstate as in the current state, the algorithm starts over with:
 \begin{itemize}
 \item $S$ without the indices of found fake constant \pps .
