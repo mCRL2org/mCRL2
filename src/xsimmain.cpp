@@ -365,6 +365,7 @@ void XSimMain::LoadFile(const wxString &filename)
     delete nextstategen;
     delete nextstate;
     nextstate = createNextState(Spec,!use_dummies,GS_STATE_VECTOR,rewr_strat);
+    nextstategen = NULL;
     initial_state = nextstate->getInitialState();
 
     current_state = NULL;
