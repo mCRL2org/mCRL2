@@ -33,7 +33,7 @@ long ToolExecutor::Execute(ToolManager& tool_manager, unsigned int tool_identifi
   else {
     delete new_process;
 
-    throw (ExecutionError());
+    throw (new ExecutionError());
   }
 
   return (process_id);
