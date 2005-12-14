@@ -2245,16 +2245,16 @@ void gsImplSortInt(TDataDecls *PDataDecls)
          gsMakeDataExprNeg(gsMakeDataExprMult(gsMakeDataExprCNat(p), n))),
       (ATerm) gsMakeDataEqn(pql, nil,
          gsMakeDataExprMult(gsMakeDataExprCNeg(p), gsMakeDataExprCNeg(q)),
-        gsMakeDataExprMult(p, q)),
+         gsMakeDataExprCInt(gsMakeDataExprCNat(gsMakeDataExprMult(p, q)))),
       //quotient after division (Int -> Pos -> Int)
       (ATerm) gsMakeDataEqn(pnl, nil,
          gsMakeDataExprDiv(gsMakeDataExprCInt(n), p),
-         gsMakeDataExprDiv(n, p)),
+         gsMakeDataExprCInt(gsMakeDataExprDiv(n, p))),
       (ATerm) gsMakeDataEqn(pql, nil,
          gsMakeDataExprDiv(gsMakeDataExprCNeg(p), q),
          gsMakeDataExprCNeg(gsMakeDataExprSucc(
            gsMakeDataExprDiv(gsMakeDataExprPred(p), q)))),
-      //remainder after division (Int -> Pos -> Int)
+      //remainder after division (Int -> Pos -> Nat)
       (ATerm) gsMakeDataEqn(pnl, nil,
          gsMakeDataExprMod(gsMakeDataExprCInt(n), p),
          gsMakeDataExprMod(n, p)),
