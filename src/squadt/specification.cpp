@@ -1,5 +1,6 @@
 #include <list>
 #include <fstream>
+#include <cassert>
 
 #include <boost/filesystem/operations.hpp>
 
@@ -86,18 +87,20 @@ inline bool Specification::CheckInstances() {
     if ((*j).timestamp < last_write_time(location)) {
       /* Verify checksum for changes */
       std::ifstream object;
- 
+
       object.open(location.string().c_str());
-     
+std::cerr << "file name" <<  location.string().c_str() << std::endl;
       if (object.good()) {
         /* File exists */
-        md5::compact_digest old;
-     
+        using namespace md5;
+
+        compact_digest old = (*j).checksum;
+
         (*j).timestamp = last_write_time(location);
-        (*j).checksum  = md5::MD5::MD5_Sum(object);
+        (*j).checksum  = MD5::MD5_Sum(object);
      
         object.close();
- 
+std::cerr << old << std::endl << (*j).checksum << std::endl << std::endl;
         if (!(old == (*j).checksum)) {
           if (0 < input_objects.size()) {
             /* Not a primary object */
@@ -135,7 +138,6 @@ SpecificationStatus Specification::CheckStatus() {
       return (up_to_date);
     }
     else {
-std::cerr << "name : " << name << std::endl;
       return (not_up_to_date);
     }
   }
@@ -228,23 +230,17 @@ bool Specification::Generate() throw (void*) {
       ++i;
     }
 
-    /* Set status, for the convenience of the user */
-    status = being_computed;
- 
-    visualiser->VisualiseStatusChange(status);
-
     /* Run tool via the tool executor with command using the tool_identifier to lookup the name of a tool */
-    if (tool_executor.Execute(tool_manager, tool_identifier, final_configuration, std::cerr)) {
-      status = up_to_date;
+    if (tool_manager.Execute(tool_identifier, final_configuration, this)) {
+      /* Set status, for the convenience of the user */
+      status = being_computed;
+ 
+      visualiser->VisualiseStatusChange(status);
     }
     else {
-      /* Give user some error */
-      status = not_up_to_date;
-
-      throw (&*(--i));
+      /* Signal error */
+      throw (this);
     }
-
-    visualiser->VisualiseStatusChange(status);
 
     return (true);
   }
@@ -269,7 +265,7 @@ bool Specification::Delete() {
     }
 
     /* Reset checksum and timestamp */
-    md5::zero_out((*i).checksum);
+    (*i).checksum.zero_out();
 
     (*i).timestamp = 0;
   }
@@ -370,10 +366,10 @@ bool Specification::Read(XMLTextReader& reader) throw (int) {
       /* Set file format */
       reader.GetAttribute(&new_output.format, "format");
 
-      md5::zero_out(new_output.checksum);
+      new_output.checksum.zero_out();
 
       if (reader.GetAttribute(&checksum, "checksum")) {
-        md5::convert(new_output.checksum, checksum.c_str());
+        new_output.checksum.read(checksum.c_str());
       }
 
       /* Set file name */
@@ -438,7 +434,7 @@ bool Specification::Write(std::ostream& stream) {
     while (i != b) {
       stream << "  <output-object format=\"" << (*i).format;
 
-      if (is_zero((*i).checksum)) {
+      if ((*i).checksum.is_zero()) {
         /* For objects stored locally... */
         std::ifstream object;
         
@@ -479,5 +475,13 @@ bool Specification::Write(std::ostream& stream) {
 bool Specification::Commit() {
   /* Will be implemented at a later time */
   return (false);
+}
+
+void Specification::SetStatus(SpecificationStatus new_status) {
+  if (status != new_status) {
+    status = new_status;
+
+    visualiser->VisualiseStatusChange(status);
+  }
 }
 

@@ -1,12 +1,17 @@
 #include <iostream>
 #include <fstream>
 
+#include "project_manager.h"
+#include "tool_executor.h"
 #include "tool_manager.h"
 #include "settings_manager.h"
 #include "xml_text_reader.h"
 #include "ui_core.h"
 
 #include <boost/filesystem/operations.hpp>
+
+/* A tool executor per instance, will be replaced in the future */
+ToolExecutor ToolManager::tool_executor;
 
 ToolManager::ToolManager() {
 }
@@ -160,5 +165,28 @@ bool ToolManager::Store() const {
   remove(temporary);
 
   return (return_value);
+}
+
+bool ToolManager::Execute(unsigned int tool_identifier, std::string arguments, Specification* plan) {
+  using namespace boost::filesystem;
+
+  try {
+    std::string command = path(tool_manager.GetTool(tool_identifier)->GetLocation()).string();
+
+    tool_executor.Execute(command.append(" ").append(arguments).c_str(), plan);
+  }
+  catch (ExecutionError* exception) {
+    return (false);
+  }
+  catch (ExecutionDelayed* exception) {
+    return (true);
+  }
+
+  return (true);
+}
+
+/* Have the tool executor terminate all running tools */
+void ToolManager::TerminateAll() {
+  tool_executor.TerminateAll();
 }
 

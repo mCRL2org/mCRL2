@@ -72,6 +72,7 @@ class SpecificationVisualiser {
  */
 class Specification {
   friend class ProjectManager;
+  friend class ToolManager;
 
   private:
 
@@ -111,6 +112,8 @@ class Specification {
 
     /* Store changes to the configuration of this specification to storage (TODO) */
     bool Commit();
+
+    void SetStatus(SpecificationStatus);
 
   public:
 

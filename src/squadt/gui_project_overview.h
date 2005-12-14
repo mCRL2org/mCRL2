@@ -70,7 +70,10 @@ class ProjectOverview : public wxFrame {
     void MarkDirty(wxCommandEvent &event);
 
     /* Generic GUI only operations */
-    void Quit(wxCommandEvent &event);
+    void MenuQuit(wxCommandEvent &event);
+    void Quit(wxCloseEvent &event);
+
+    void CleanUp();
 
     /* To connect Specification objects to elements in the tree view */
     class SpecificationData : public wxTreeItemData, public SpecificationVisualiser {

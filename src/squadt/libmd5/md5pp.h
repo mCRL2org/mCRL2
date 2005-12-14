@@ -8,39 +8,53 @@
 
 namespace md5 {
 
-  typedef union {
+  union compact_digest {
     uint8_t  bytes[16];
     uint32_t dwords[4];
-  } compact_digest;
 
-  /* Set to the zero checksum */
-  inline void zero_out(compact_digest& digest) {
-    digest.dwords[0] = 0;
-    digest.dwords[1] = 0;
-    digest.dwords[2] = 0;
-    digest.dwords[3] = 0;
-  }
+    /* Read digest from a string and convert to compact format */
+    void read(const char*);
+
+    /* Whether digest is the zero checksum */
+    inline bool is_zero() const;
+
+    /* Fill with zeroes */
+    inline void zero_out();
+
+    /* Compare two compact digests for equality */
+    inline bool operator== (const compact_digest& r) const;
+
+    /* Assign to ... */
+    inline void operator= (const compact_digest& r);
+  };
+
+  extern compact_digest zero_digest;
 
   /* Whether digest is the zero checksum */
-  inline bool is_zero(const compact_digest& digest) {
-    return (digest.dwords[0] == 0 && digest.dwords[1] == 0 && digest.dwords[2] == 0 && digest.dwords[3] == 0);
+  inline bool compact_digest::is_zero() const {
+    return (dwords[0] == 0 && dwords[1] == 0 && dwords[2] == 0 && dwords[3] == 0);
+  }
+
+  /* Set to the zero checksum */
+  inline void compact_digest::zero_out() {
+    dwords[0] = 0;
+    dwords[1] = 0;
+    dwords[2] = 0;
+    dwords[3] = 0;
   }
 
   /* Compare to MD5 checksums in compact format */
-  inline bool   operator== (const compact_digest& l, const compact_digest& r) {
-    return (l.dwords[0] == r.dwords[0] && l.dwords[1] == r.dwords[1] && l.dwords[2] == r.dwords[2] && l.dwords[3] == r.dwords[3]);
+  inline bool compact_digest::operator== (const compact_digest& r) const {
+    return (dwords[0] == r.dwords[0] && dwords[1] == r.dwords[1] && dwords[2] == r.dwords[2] && dwords[3] == r.dwords[3]);
   }
 
   /* Assign MD5 checksums in compact format */
-  inline void assign(compact_digest& l, const compact_digest& r) {
-    l.dwords[0] = r.dwords[0];
-    l.dwords[1] = r.dwords[1];
-    l.dwords[2] = r.dwords[2];
-    l.dwords[3] = r.dwords[3];
+  inline void compact_digest::operator= (const compact_digest& r) {
+    dwords[0] = r.dwords[0];
+    dwords[1] = r.dwords[1];
+    dwords[2] = r.dwords[2];
+    dwords[3] = r.dwords[3];
   }
-
-  /* Read digest from a string and convert to compact format */
-  void convert(compact_digest& space, const char*);
 
   std::ostream& operator<< (std::ostream&, const compact_digest&);
 

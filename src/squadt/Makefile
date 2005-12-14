@@ -19,18 +19,19 @@ LIBXML2_OBJECTS                = xml_text_reader.o project_manager.o tool_manage
 				 project_manager_tester tool_manager_tester
 
 BOOST_OBJECTS                  = gui_project_overview.o tool_manager.o project_manager.o gui_specification_properties.o \
-				 settings_manager.o tool_executor.o specification.o
+				 settings_manager.o specification.o
 BOOST_CPPFLAGS                 = -I$(BOOST_PREFIX)/include
 
 WX_OBJECTS                     = squadt.o gui_project_overview.o gui_new_specification.o gui_specification_properties.o \
-				 gui_resources.o tool_executor.o logger.o process.o
+				 gui_resources.o tool_executor.o logger.o process.o socket_proxy.o
 WX_LIBRARIES                  := $(shell $(WX_CONFIG) --libs core base adv net)
 
 PROJECT_MANAGER_OBJECTS        = project_manager.o specification.o xml_text_reader.o settings_manager.o
 TOOL_MANAGER_OBJECTS           = tool_manager.o tool.o xml_text_reader.o settings_manager.o
+TOOL_EXECUTOR_OBJECTS          = tool_executor.o process.o# proxy.o socket_proxy.o 
 GUI_OBJECTS                    = squadt.o gui_project_overview.o gui_new_specification.o gui_specification_properties.o \
-				 gui_resources.o $(sort $(PROJECT_MANAGER_OBJECTS) $(TOOL_MANAGER_OBJECTS)) \
-				 tool_executor.o process.o logger.o
+				 $(sort $(TOOL_EXECUTOR_OBJECTS) $(PROJECT_MANAGER_OBJECTS) $(TOOL_MANAGER_OBJECTS)) \
+				 gui_resources.o logger.o
 OBJECTS                        = $(sort $(GUI_OBJECTS) $(PROJECT_MANAGER_OBJECTS) $(TOOL_MANAGER_OBJECTS))
 
 TEST_TARGETS                   = project_manager_tester tool_manager_tester

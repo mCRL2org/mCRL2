@@ -8,21 +8,15 @@
 /* Include definition of the project overview window */
 #include "gui_project_overview.h"
 
-#include "tool_executor.h"
 #include "tool_manager.h"
 #include "settings_manager.h"
 #include "logger.h"
-
-unsigned int svn_revision = UINT_MAX;
 
 /* Global Settings Manager component */
 SettingsManager  settings_manager(wxFileName::GetHomeDir().fn_str());
 
 /* Global Tool Manager component */
 ToolManager      tool_manager;
-
-/* Global Tool Executor component (TODO run a single instance per machine) */
-ToolExecutor     tool_executor;
 
 std::ofstream    log_stream(settings_manager.GetLogFileName().c_str(), std::ios::app);
 

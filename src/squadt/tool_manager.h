@@ -8,6 +8,9 @@
 
 #include "tool.h"
 
+class ToolExecutor;
+class Specification;
+
 /*
  * Updating the tool catalog proceeds atomically:
  *
@@ -21,7 +24,11 @@
  */
 
 class ToolManager {
+  friend class Specification;
+
   private:
+
+    static ToolExecutor tool_executor;
 
     std::list < Tool* > tools;            /* List of known tools */
 
@@ -30,6 +37,8 @@ class ToolManager {
 
     /* Read configuration from file */
     bool Read(std::string);
+
+    bool ToolManager::Execute(unsigned int tool_identifier, std::string arguments, Specification* plan);
 
   public:
 
@@ -75,6 +84,9 @@ class ToolManager {
     inline const unsigned int GetNumberOfTools() const {
       return (tools.size());
     }
+
+    /* Have the tool executor terminate all running tools */
+    void TerminateAll();
 };
 
 #endif

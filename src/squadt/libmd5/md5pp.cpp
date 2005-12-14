@@ -5,7 +5,9 @@
 
 namespace md5 {
 
-  void convert(compact_digest& space, const char* string) {
+  compact_digest zero_digest = { 0, 0, 0, 0, 0, 0, 0, 0 };
+
+  void compact_digest::read(const char* string) {
     unsigned char* pointer = (unsigned char*) string;
     unsigned char  buffer[3];
 
@@ -19,7 +21,7 @@ namespace md5 {
 
       sscanf((const char*) buffer, "%x", &value);
 
-      space.bytes[i] = value;
+      bytes[i] = value;
  
       pointer += 2;
     }

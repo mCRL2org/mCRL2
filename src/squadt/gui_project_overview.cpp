@@ -74,7 +74,8 @@ BEGIN_EVENT_TABLE(ProjectOverview, wxFrame)
   EVT_MENU(ID_SPECIFICATION_PROPERTIES,     ProjectOverview::EditSpecificationProperties)
   EVT_TREE_ITEM_RIGHT_CLICK(ID_FRAME_MODEL, ProjectOverview::SpawnContextMenu)
   EVT_TREE_END_LABEL_EDIT(ID_FRAME_MODEL,   ProjectOverview::RenameSpecification)
-  EVT_MENU(wxID_EXIT,                       ProjectOverview::Quit)
+  EVT_MENU(wxID_EXIT,                       ProjectOverview::MenuQuit)
+  EVT_CLOSE(ProjectOverview::Quit)
 END_EVENT_TABLE()
 
 /* Mapping: (format,category) -> wxMenu* (shared for all project overviews) */
@@ -565,9 +566,9 @@ void ProjectOverview::NewSpecification(wxCommandEvent &event) {
 
         if (valid) {
           /* Insert new specification into tree */
-          Specification      new_specification  = primary_specification;
-          std::string        base_name          = target_name.leaf();
-          wxTreeItemId       new_item;
+          Specification new_specification  = primary_specification;
+          std::string   base_name          = target_name.leaf();
+          wxTreeItemId  new_item;
 
           new_specification.SetName(base_name);
 
@@ -575,7 +576,7 @@ void ProjectOverview::NewSpecification(wxCommandEvent &event) {
           try {
             wxTreeItemId            root_item  = specifications->GetRootItem();
             std::string             format     = boost::filesystem::extension(base_name);
-            SpecificationOutputType new_output = { format.erase(0,1), target_name.leaf(), "MD5 hash" };
+            SpecificationOutputType new_output = { format.erase(0,1), target_name.leaf(), md5::zero_digest, 0 };
 
             /* TODO Determine outputs, using tool characteristics and selected tool mode */
             new_specification.GetModifiableOutputObjects().push_back(new_output);
@@ -655,10 +656,10 @@ void ProjectOverview::AddSpecifications(wxCommandEvent &event) {
     SpecificationOutputType                  new_output;
 
     /* Connect output object to compatible position (TODO generalise to multiple inputs and outputs) */
-    new_output.format   = tool_mode.GetOutputObject(0).GetSomeFormat();
-    new_output.location = tool->GetMode(mode_number).ChooseName(0, name);
-
-    md5::zero_out(new_output.checksum);
+    new_output.format    = tool_mode.GetOutputObject(0).GetSomeFormat();
+    new_output.location  = tool->GetMode(mode_number).ChooseName(0, name);
+    new_output.checksum  = md5::zero_digest;
+    new_output.timestamp = 0;
  
     /* Append an extension to the basename */
     name.append(".").append(tool_mode.GetOutputObject(0).GetSomeFormat());
@@ -895,11 +896,19 @@ void ProjectOverview::RenameSpecification(wxTreeEvent &event) {
   }
 }
 
-void ProjectOverview::Quit(wxCommandEvent &event) {
-  tool_executor.TerminateAll();
+void ProjectOverview::Quit(wxCloseEvent &event) {
+  CleanUp();
+
+  Destroy();
+}
+
+void ProjectOverview::MenuQuit(wxCommandEvent &event) {
+  Close();
+}
+
+void ProjectOverview::CleanUp() {
+  tool_manager.TerminateAll();
 
   logger->~Logger();
-
-  Close();
 }
 
