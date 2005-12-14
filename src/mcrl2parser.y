@@ -29,6 +29,8 @@ extern int mcrl2yylex(void);             /* declared in mcrl2lexer.c */
 #define yytrue 1
 #endif
 
+#define YYMAXDEPTH 20000
+
 //local declarations
 ATermAppl gsSpecEltsToSpec(ATermList SpecElts);
 //Pre: SpecElts contains one initialisation and zero or more occurrences of

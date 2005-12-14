@@ -841,7 +841,7 @@
 
     ATermAppl choice;
     if (ATgetLength(Ids) > 1) {
-      choice = gsMakeChoice(pn2gsChoiceIn(ATgetNext(Ids)), gsMakeActionProcess(ATmakeAppl0(ATgetAFun(ATgetFirst(Ids))), ATmakeList0()));
+      choice = gsMakeChoice(gsMakeActionProcess(ATmakeAppl0(ATgetAFun(ATgetFirst(Ids))), ATmakeList0()), pn2gsChoiceIn(ATgetNext(Ids)));
     } else {
       // ATgetLength(Ids) == 1, since the input-list is not-empty!
       choice = gsMakeActionProcess(ATmakeAppl0(ATgetAFun(ATgetFirst(Ids))), ATmakeList0());
@@ -858,7 +858,7 @@
 
     ATermAppl choice;
     if (ATgetLength(Ids) > 1) {
-      choice = gsMakeChoice(pn2gsChoiceOut(ATgetNext(Ids)), gsMakeActionProcess(ATmakeAppl0(ATprependAFun("_", ATgetAFun(ATgetFirst(Ids)))), ATmakeList0()));
+      choice = gsMakeChoice(gsMakeActionProcess(ATmakeAppl0(ATprependAFun("_", ATgetAFun(ATgetFirst(Ids)))), ATmakeList0()), pn2gsChoiceOut(ATgetNext(Ids)));
     } else {
       // ATgetLength(Ids) == 1, since the input-list is not-empty!
       choice = gsMakeActionProcess(ATmakeAppl0(ATprependAFun("_", ATgetAFun(ATgetFirst(Ids)))), ATmakeList0());
