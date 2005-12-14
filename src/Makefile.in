@@ -217,7 +217,7 @@ utility/get_revision: utility/get_revision.cpp
 ifdef BUILD_BOOST
 	@$(MAKE) -C boost
 endif
-	$(CXX) -I$(BOOST_PREFIX)/include $< $(BOOST_LDFLAGS) $(BOOST_FILESYSTEM) -o $@
+	$(CXX) -I$(BOOST_PREFIX)/include $< $(subst $(libdir),$(BOOST_PREFIX)/lib,$(BOOST_LDFLAGS)) $(BOOST_FILESYSTEM) -o $@
 
 -include revision
 

@@ -47,7 +47,7 @@ revision: ../utility/get_revision
 	@echo "CPPFLAGS += -DREVISION=$$(../utility/get_revision)" > revision
 
 ../utility/get_revision: ../utility/get_revision.cpp
-	$(CXX) -I$(BOOST_PREFIX)/include $< $(BOOST_LDFLAGS) $(BOOST_FILESYSTEM) -o $@ 
+	$(CXX) -I$(BOOST_PREFIX)/include $< $(subst $(libdir),$(BOOST_PREFIX)/lib,$(BOOST_LDFLAGS)) $(BOOST_FILESYSTEM) -o $@ 
 
 -include revision
 
@@ -88,7 +88,7 @@ squadt: $(GUI_OBJECTS) libmd5.a
 	$(CXX) $(CXXFLAGS) $(CPPFLAGS) $(GUI_OBJECTS) $(LDFLAGS) $(WX_LIBRARIES) libmd5.a $(BOOST_LDFLAGS) $(BOOST_FILESYSTEM) -o $@
 
 utility/relocator: utility/relocator.o settings_manager.o $(TOOL_MANAGER_OBJECTS)
-	$(CXX) $(CXXFLAGS) $(CPPFLAGS) $(LDFLAGS) $(BOOST_LDFLAGS) $(BOOST_FILESYSTEM) $^ -o $@
+	$(CXX) $(CXXFLAGS) $(CPPFLAGS) $(LDFLAGS) $(subst $(libdir),$(BOOST_PREFIX)/lib,$(BOOST_LDFLAGS)) $(BOOST_FILESYSTEM) $^ -o $@
 
 %.o: %.cpp
 	$(CXX) -c $(CXXFLAGS) $(CPPFLAGS) $< -o $@
