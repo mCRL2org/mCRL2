@@ -11,8 +11,6 @@ class ToolManager;
 class Process;
 
 class ExecutionError {
-  public:
-    ExecutionError();
 };
 
 class ToolExecutor {
