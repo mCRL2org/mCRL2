@@ -40,11 +40,12 @@ endif
 ARFLAGS            = crs
 INSTALL            = install
 STRIP              = strip
+RM                 = rm -fr
 LEX                = @LEX@
 GZIP               = gzip -f
 LFLAGS             = -I -Pmcrl2yy
 BISON              = @BISON@
-BFLAGS             = -d -pmcrl2yy
+BFLAGS             = @BFLAGS@ -d -pmcrl2yy
 ATERM              = @ATERM_NAME@ 
 BUILD_ATERM        = @BUILD_ATERM@
 USE_LIBXML2        = @USE_LIBXML2@

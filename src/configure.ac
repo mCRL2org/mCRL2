@@ -72,6 +72,7 @@ CPPFLAGS=""
 CFLAGS="-std=c99"
 CXXFLAGS="-std=c++98"
 LDFLAGS="-L. -Lsvc"
+BFLAGS=""
 
 # Check for C99 standard
 AC_MSG_CHECKING([for C99 standard])
@@ -121,11 +122,13 @@ if test $enable_debug; then
   fi
   CFLAGS="-g -Wall -pedantic $CFLAGS"
   CXXFLAGS="-g -Wall $CXXFLAGS"
+  BFLAGS="-t $BFLAGS"
 else
   CPPFLAGS="-DNDEBUG $CPPFLAGS"
   CFLAGS="-O2 -w $CFLAGS"
   CXXFLAGS="-O2 -w $CXXFLAGS"
 fi
+AC_SUBST([BFLAGS],[])
 
 AC_ARG_ENABLE(
   [profiling],
