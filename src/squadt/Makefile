@@ -32,7 +32,7 @@ TOOL_EXECUTOR_OBJECTS          = tool_executor.o process.o# proxy.o socket_proxy
 GUI_OBJECTS                    = squadt.o gui_project_overview.o gui_new_specification.o gui_specification_properties.o \
 				 $(sort $(TOOL_EXECUTOR_OBJECTS) $(PROJECT_MANAGER_OBJECTS) $(TOOL_MANAGER_OBJECTS)) \
 				 gui_resources.o logger.o
-OBJECTS                        = $(sort $(GUI_OBJECTS) $(PROJECT_MANAGER_OBJECTS) $(TOOL_MANAGER_OBJECTS))
+OBJECTS                        = $(sort $(GUI_OBJECTS) $(PROJECT_MANAGER_OBJECTS) $(TOOL_MANAGER_OBJECTS) $(TOOL_EXECUTOR_OBJECTS))
 
 TEST_TARGETS                   = project_manager_tester tool_manager_tester
 TARGETS                        = squadt libmd5.a
@@ -40,7 +40,7 @@ TARGETS                        = squadt libmd5.a
 .PHONY: all install clean distclean test strip
 
 all: $(TARGETS)
-	@$(RM) revision dependencies
+	@$(RM) revision
 
 ifeq ($(findstring $(MAKECMDGOALS),clean distclean),)
 # Add revision number
@@ -55,8 +55,8 @@ revision: ../utility/get_revision
 # Include dependencies 
 %.o: dependencies
 
-dependencies: $(patsubst %.o,%.cpp,$(OBJECTS))
-	$(CXX) -MM $(CPPFLAGS) $(BOOST_CPPFLAGS) $(LIBXML2_CPPFLAGS) $(WX_CPPFLAGS) $^ > $@
+dependencies: *.cpp *.h
+	$(CXX) -MM $(CPPFLAGS) $(BOOST_CPPFLAGS) $(LIBXML2_CPPFLAGS) $(WX_CPPFLAGS) $(patsubst %o,%cpp,$(OBJECTS)) > $@
 
 -include dependencies
 
