@@ -1,7 +1,6 @@
 #include <iostream>
 #include <fstream>
 
-#include "project_manager.h"
 #include "tool_executor.h"
 #include "tool_manager.h"
 #include "settings_manager.h"

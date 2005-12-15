@@ -3,6 +3,7 @@
 #include <iostream>
 
 #include "../tool_manager.h"
+#include "../tool_executor.h"
 #include "../settings_manager.h"
 
 #include <boost/filesystem/operations.hpp>
@@ -11,6 +12,23 @@
 #define PROGRAM_VERSION "1.0.0"
 
 SettingsManager settings_manager("", "");
+ToolManager     tool_manager;
+
+class ToolExecutor;
+class Specification;
+
+/* Stubs */
+ToolExecutor::ToolExecutor(unsigned int) {
+}
+
+ToolExecutor::~ToolExecutor() {
+}
+
+void ToolExecutor::Execute(std::string, Specification*) throw (ExecutionException*) {
+}
+
+void ToolExecutor::TerminateAll() {
+}
 
 /* Holds filename for the input */
 char*         file_name = "examples/tool_catalog.xml";
@@ -87,8 +105,6 @@ void processCommandLineOptions (const int argc, char** argv) {
  * Validation with respect to the XML schema file is assumed
  *****************************************************************/
 int main(int argc, char **argv) {
-  ToolManager             tool_manager;
-
   processCommandLineOptions(argc, argv);
 
   boost::filesystem::path input_file(file_name, boost::filesystem::portable_posix_name);
