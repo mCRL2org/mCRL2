@@ -1926,7 +1926,7 @@
   }
 
   // Added by Yarick: alternative generation of Places:
-  static ATermAppl pn2gsGenerateP_pi_a(ATermList InActionLists, ATermList OutActionLists, ATermList ResetActionLists);
+//  static ATermAppl pn2gsGenerateP_pi_a(ATermList InActionLists, ATermList OutActionLists, ATermList ResetActionLists);
   static ATermList pn2gsGetActionLists(int n, ATermList ActList);
   static ATermAppl pn2gsMakeMultiAction(ATermList ActionList);
   static ATermList pn2gsMakeSendActions(ATermList ReadActions);
@@ -2045,209 +2045,335 @@
 
     //added by Yarick: we need a table to relate PlaceId and CurrentPlace.
     ATtablePut(context.place_process_name,PlaceID,(ATerm)CurrentPlace);
-   
-    //calclate the reset multiactions (if any)
-    ATermList ResetActionLists=ATmakeList0();
-    for(int i=1; i<=l; i++)
-      ResetActionLists=ATconcat(ResetActionLists,pn2gsGetActionLists(i,ActsReset));
     
-    ATermList EquationList=ATmakeList0();
-    {
-      //generate the main process
-      ATermAppl VarX=gsMakeDataVarId(ATmakeAppl0(ATmakeAFunId("x")),gsMakeSortIdNat());;
-      //ATermAppl Number0=gsMakeNumber(gsString2ATermAppl("0"),gsMakeSortIdNat());
-      AFun CurrentPlaceARId=ATappendAFun(CurrentPlaceId,"_ar_");
-      AFun CurrentPlaceAIId=ATappendAFun(CurrentPlaceId,"_ai_");
-      AFun CurrentPlaceARRId=ATappendAFun(CurrentPlaceId,"_arr_");
-      AFun CurrentPlaceAIRId=ATappendAFun(CurrentPlaceId,"_air_");
-      ATermAppl OpAdd=gsMakeDataVarIdOpId(gsMakeOpIdNameAdd());
-      ATermAppl OpSubt=gsMakeDataVarIdOpId(gsMakeOpIdNameSubt());
-      //ATermAppl OpMax=gsMakeDataVarIdOpId(gsMakeOpIdNameMax());
-      ATermAppl OpLTE=gsMakeDataVarIdOpId(gsMakeOpIdNameLTE());
-      ATermAppl OpEq=gsMakeDataVarIdOpId(gsMakeOpIdNameEq());
-      ATermAppl OpInt2Nat=gsMakeDataVarIdOpId(gsMakeOpIdNameInt2Nat());
-      ATermAppl Number0=gsMakeNumber(gsString2ATermAppl("0"),gsMakeSortIdNat());
+    ATermList EquationList=ATmakeList0(); //the result
+    ATermAppl Body=NULL;                  //the body of the main equation
 
-      ATermAppl Body=NULL;
-      for(int j=m;j>-1;j--){
-	ATermAppl Summand=NULL;
-	AFun NumberJId=ATmakeAFunInt0(j);
-	ATermAppl NumberJ=gsMakeNumber(ATmakeAppl0(NumberJId),(j)?gsMakeSortIdPos():gsMakeSortIdNat());
-        ATermList OutActionLists=NULL;
-	if(j>0) OutActionLists=pn2gsGetActionLists(j,ActsOut);
-	for(int i=n;i>-1;i--){
-	  if(j==0 && i==0 && l==0) continue;
-	  AFun NumberIId=ATmakeAFunInt0(i);
-	  ATermAppl LeftName=ATmakeAppl0(ATappendAFun(ATappendAFun(ATappendAFun(CurrentPlaceARId,
-										ATgetName(NumberIId)),
-								   "_"),
-						      ATgetName(NumberJId)));
-	  ATermAppl LeftNameResets=ATmakeAppl0(ATappendAFun(ATappendAFun(ATappendAFun(CurrentPlaceARRId,
-										ATgetName(NumberIId)),
-								   "_"),
-						      ATgetName(NumberJId)));
-	  ATermAppl Left=gsMakeActionProcess(LeftName,ATmakeList0());//make name P_pi_ar_i_j
-	  ATermAppl LeftResets=gsMakeActionProcess(LeftNameResets,ATmakeList0());//make name P_pi_arr_i_j
+    // ++++++++++++++++++ begin generation of minimal number of summands
+    // This is yet another alternative method. We try to only generate 
+    // the full multiactions between a place and a transition.
 
-	  ATermAppl RightExpr=VarX;  //x;
-	  {
-	    int d=i-j;
-	    if(d>0) RightExpr=pn2gsMakeDataApplProd2(OpAdd,RightExpr,gsMakeNumber(ATmakeAppl0(ATmakeAFunInt0(d)),gsMakeSortIdPos()));//RightExpr=RightExpr+d;
-	    else if(d<0) RightExpr=gsMakeDataApplProd(OpInt2Nat,ATmakeList1((ATerm)pn2gsMakeDataApplProd2(OpSubt,RightExpr,gsMakeNumber(ATmakeAppl0(ATmakeAFunInt0(-d)),gsMakeSortIdPos()))));//RightExpr=max(RightExpr-d,0);
-	  }
-	  ATermAppl Right=gsMakeActionProcess(CurrentPlace,ATmakeList1((ATerm)RightExpr));//make P_pi(max(x+i-j,0))
-	  ATermAppl RightResets=gsMakeActionProcess(CurrentPlace,ATmakeList1((ATerm)Number0));//make P_pi(0)
-	  ATermAppl Sec=gsMakeSeq(Left,Right);
-	  ATermAppl SecResets=gsMakeSeq(LeftResets,RightResets);
-	  if(i>0 || j>0){
-	    if(Summand) Summand=gsMakeChoice(Sec,Summand);
-	    else Summand=Sec; 
-	  }
-	  
-	  //in case there are resets
-	  if(l>0){
-	    if(Summand) Summand=gsMakeChoice(SecResets,Summand);
-	    else Summand=SecResets; 
-	  }
-
-	  ATermList InActionLists=NULL;
-	  if(i>0) InActionLists=pn2gsGetActionLists(i,ActsIn);
-	  //generate the additional process
-	  if(i>0 || j>0)
-	    EquationList = ATinsert(EquationList, 
-				    (ATerm)gsMakeProcEqn(ATmakeList0(), 
-							 gsMakeProcVarId(LeftName, ATmakeList0()), 
-							 ATmakeList0(), 
-							 pn2gsGenerateP_pi_a(InActionLists,OutActionLists,NULL)));
-	  //in case there are resets
-	  if(l>0) 
-	    EquationList = ATinsert(EquationList, 
-				    (ATerm)gsMakeProcEqn(ATmakeList0(), 
-							 gsMakeProcVarId(LeftNameResets, ATmakeList0()), 
-							 ATmakeList0(), 
-							 pn2gsGenerateP_pi_a(InActionLists,OutActionLists,ResetActionLists)));
-	}
-	
-	if(j>0){ //generate the condition
-	  ATermAppl Cond=pn2gsMakeDataApplProd2(OpLTE,NumberJ,VarX);//make j<=x
-	  Summand=gsMakeCond(Cond,Summand,gsMakeDelta());
-	}
-	
-	if(Body){
-	  if(Summand) Body=gsMakeChoice(Summand,Body);
-	}
-	else Body=Summand;
+    // foreach transition t : find all arks between p and t
+    // calculate its value n input arcs - m out arcs, take into account the inhibitor and reset arcs.
+    ATermAppl VarX=gsMakeDataVarId(ATmakeAppl0(ATmakeAFunId("x")),gsMakeSortIdNat());;
+    ATermAppl Number0=gsMakeNumber(gsString2ATermAppl("0"),gsMakeSortIdNat());
+    ATermAppl OpAdd=gsMakeDataVarIdOpId(gsMakeOpIdNameAdd());
+    ATermAppl OpSubt=gsMakeDataVarIdOpId(gsMakeOpIdNameSubt());
+    //ATermAppl OpMax=gsMakeDataVarIdOpId(gsMakeOpIdNameMax());
+    ATermAppl OpLTE=gsMakeDataVarIdOpId(gsMakeOpIdNameLTE());
+    ATermAppl OpEq=gsMakeDataVarIdOpId(gsMakeOpIdNameEq());
+    ATermAppl OpInt2Nat=gsMakeDataVarIdOpId(gsMakeOpIdNameInt2Nat());
+    for(ATermList Lt=ATtableKeys(context.trans_name);!ATisEmpty(Lt);Lt=ATgetNext(Lt)){
+      ATermAppl TransID=ATAgetFirst(Lt);
+      
+      //find all arcs connecting PlaceId and TransId
+      ATermList mult_i=ATmakeList0(); //current multiactions
+      ATermList mult_o=ATmakeList0(); //current multiactions
+      for(ATermList La=ATLtableGet(context.place_in,(ATerm)PlaceID);La && !ATisEmpty(La);La=ATgetNext(La)){
+	ATermAppl ArcID=ATAgetFirst(La);
+	ATermAppl Arc=ATAtableGet(context.arc_in,(ATerm)ArcID);
+	if(!ATisEqual(ATAgetArgument(Arc,1),PlaceID)) continue;
+	if(!ATisEqual(ATAgetArgument(Arc,0),TransID)) continue;
+	mult_i=ATinsert(mult_i,(ATerm)ArcID);
+      }
+      int nIn=ATgetLength(mult_i); //the number of tokens that adds/removes
+      
+      for(ATermList La=ATLtableGet(context.place_out,(ATerm)PlaceID);La && !ATisEmpty(La);La=ATgetNext(La)){
+	ATermAppl ArcID=ATAgetFirst(La);
+	ATermAppl Arc=ATAtableGet(context.arc_out,(ATerm)ArcID);
+	if(!ATisEqual(ATAgetArgument(Arc,0),PlaceID)) continue;
+	if(!ATisEqual(ATAgetArgument(Arc,1),TransID)) continue;
+	mult_o=ATinsert(mult_o,(ATerm)ArcID);
+      }
+      int nOut=ATgetLength(mult_o);
+      
+      bool inhib=false;
+      for(ATermList La=ATLtableGet(context.place_inhibit,(ATerm)PlaceID);La && !ATisEmpty(La);La=ATgetNext(La)){
+	ATermAppl ArcID=ATAgetFirst(La);
+	ATermAppl Arc=ATAtableGet(context.arc_inhibit,(ATerm)ArcID);
+	if(!ATisEqual(ATAgetArgument(Arc,0),PlaceID)) continue;
+	if(!ATisEqual(ATAgetArgument(Arc,1),TransID)) continue;
+	mult_o=ATinsert(mult_o,(ATerm)ArcID);
+	inhib=true;
       }
       
-      //add inhibitor arcs
-      if(k>0){
-	ATermAppl Summand=NULL;
+      bool reset=false;
+      for(ATermList La=ATLtableGet(context.place_reset,(ATerm)PlaceID);La && !ATisEmpty(La);La=ATgetNext(La)){
+	ATermAppl ArcID=ATAgetFirst(La);
+	ATermAppl Arc=ATAtableGet(context.arc_reset,(ATerm)ArcID);
+	if(!ATisEqual(ATAgetArgument(Arc,1),PlaceID)) continue;
+	if(!ATisEqual(ATAgetArgument(Arc,0),TransID)) continue;
+	mult_i=ATinsert(mult_i,(ATerm)ArcID);
+	reset=true;
+      }
+      
+      mult_i=ATreverse(mult_i);
+      mult_o=ATreverse(mult_o);
 
-	//Calculate a list of all inhibirot multiactions
-	ATermList InhibitorActionLists=ATmakeList0();
-	for(int i=1; i<=k; i++)
-	  InhibitorActionLists=ATconcat(InhibitorActionLists,pn2gsGetActionLists(i,ActsInhibit));
-		
-	for(int i=n;i>-1;i--){
-	  AFun NumberIId=ATmakeAFunInt0(i);
-	  ATermAppl LeftName=ATmakeAppl0(ATappendAFun(CurrentPlaceAIId,ATgetName(NumberIId)));
-	  ATermAppl LeftNameResets=ATmakeAppl0(ATappendAFun(CurrentPlaceAIRId,ATgetName(NumberIId)));
-	  ATermAppl Left=gsMakeActionProcess(LeftName,ATmakeList0());//make name P_pi_ai_i
-	  ATermAppl LeftResets=gsMakeActionProcess(LeftNameResets,ATmakeList0());//make name P_pi_ai_i
+      if(!nIn && !nOut && !inhib && !reset) continue;
 
-	  ATermAppl RightExpr=VarX;  //x;
-	  if(i>0) RightExpr=pn2gsMakeDataApplProd2(OpAdd,RightExpr,gsMakeNumber(ATmakeAppl0(ATmakeAFunInt0(i)),gsMakeSortIdPos()));//RightExpr=RightExpr+i;
-	  
-	  ATermAppl Right=gsMakeActionProcess(CurrentPlace,ATmakeList1((ATerm)RightExpr));//make P_pi(x+i)
-	  ATermAppl RightResets=gsMakeActionProcess(CurrentPlace,ATmakeList1((ATerm)Number0));//make P_pi(x+i)
-	  ATermAppl Sec=gsMakeSeq(Left,Right);
-	  ATermAppl SecResets=gsMakeSeq(LeftResets,RightResets);
-	  if(Summand) Summand=gsMakeChoice(Sec,Summand);
-	  else Summand=Sec; 
-	  //in case there are resets
-	  if(l>0) Summand=gsMakeChoice(SecResets,Summand);
-
-	  ATermList InActionLists=NULL;
-	  if(i>0) InActionLists=pn2gsGetActionLists(i,ActsIn);
-	  //generate the additional process
-	  EquationList = ATinsert(EquationList, 
-				  (ATerm)gsMakeProcEqn(ATmakeList0(), 
-						       gsMakeProcVarId(LeftName, ATmakeList0()), 
-						       ATmakeList0(), 
-						       pn2gsGenerateP_pi_a(InActionLists,InhibitorActionLists,NULL)));
-	  if(l>0)
-	    EquationList = ATinsert(EquationList, 
-				    (ATerm)gsMakeProcEqn(ATmakeList0(), 
-							 gsMakeProcVarId(LeftNameResets, ATmakeList0()), 
-							 ATmakeList0(), 
-							 pn2gsGenerateP_pi_a(InActionLists,InhibitorActionLists,ResetActionLists)));
-	}
-	
-	//generate the condition
-	ATermAppl Cond=pn2gsMakeDataApplProd2(OpEq,VarX,Number0);//make j<=x
-	Summand=gsMakeCond(Cond,Summand,gsMakeDelta());
-		
-	if(Body){
-	  if(Summand) Body=gsMakeChoice(Summand,Body);
-	}
-	else Body=Summand;	
+      if(nOut>0 && inhib){
+	gsWarningMsg("Both output and inhibitor arcs connect place %T with transition %T. This transition can never fire.\n");
+	continue;
       }
 
-      // handle the case m+n+k=0.
-      if(!Body) Body=gsMakeDelta();
+      mult_i=ATreverse(mult_i);
+      mult_o=ATreverse(mult_o);
 
-      //make process P_pi and add it
+      ATermList mult=ATconcat(mult_i,pn2gsMakeSendActions(mult_o));
+      
+      //summand
+      AFun AR=ATappendAFun(CurrentPlaceId,"_ar_");
+      if(inhib && reset) AR=ATappendAFun(CurrentPlaceId,"_air_");
+      else{
+	if(inhib) AR=ATappendAFun(CurrentPlaceId,"_ai_");
+	else if(reset) AR=ATappendAFun(CurrentPlaceId,"_arr_");
+      }
+      
+      ATermAppl LeftName=ATmakeAppl0(ATappendAFun(AR,ATgetName(ATgetAFun(TransID))));
+      ATermAppl Left=gsMakeActionProcess(LeftName,ATmakeList0());//make name P_pi_ar_i_j
+      ATermAppl RightExpr=VarX;  //x;
+      int d=nIn-nOut;
+      if(!reset) {
+	if(d>0) RightExpr=pn2gsMakeDataApplProd2(OpAdd,RightExpr,gsMakeNumber(ATmakeAppl0(ATmakeAFunInt0(d)),gsMakeSortIdPos()));//RightExpr=RightExpr+d;
+	else if(d<0) RightExpr=gsMakeDataApplProd(OpInt2Nat,ATmakeList1((ATerm)pn2gsMakeDataApplProd2(OpSubt,RightExpr,gsMakeNumber(ATmakeAppl0(ATmakeAFunInt0(-d)),gsMakeSortIdPos()))));//RightExpr=max(RightExpr-d,0);
+      }
+      else {
+	if(d>0) RightExpr=gsMakeNumber(ATmakeAppl0(ATmakeAFunInt0(d)),gsMakeSortIdPos());//RightExpr=d;
+	else RightExpr=Number0;
+      }
+
+      ATermAppl Right=gsMakeActionProcess(CurrentPlace,ATmakeList1((ATerm)RightExpr));//make P_pi(max(x+i-j,0))
+      ATermAppl Summand=gsMakeSeq(Left,Right);
+      
+      //condition
+      if(nOut>0){
+	ATermAppl Cond=pn2gsMakeDataApplProd2(OpLTE,gsMakeNumber(ATmakeAppl0(ATmakeAFunInt0(nOut)),gsMakeSortIdPos()),VarX);//make nOut<=x
+	Summand=gsMakeCond(Cond,Summand,gsMakeDelta());
+      }
+      else /*never together */ if(inhib){
+	ATermAppl Cond=pn2gsMakeDataApplProd2(OpEq,VarX,Number0);//make x==0
+	Summand=gsMakeCond(Cond,Summand,gsMakeDelta());
+      }	
+      
+      if(Body) Body=gsMakeChoice(Summand,Body);
+      else Body=Summand; 
+    
+      // extra equation
       EquationList = ATinsert(EquationList, 
 			      (ATerm)gsMakeProcEqn(ATmakeList0(), 
-						   gsMakeProcVarId(CurrentPlace, 
-								   ATmakeList1((ATerm)gsMakeSortIdNat())), 
-						   ATmakeList1((ATerm)VarX), 
-						   Body));
-    }
+						   gsMakeProcVarId(LeftName, ATmakeList0()), 
+						   ATmakeList0(), 
+						   pn2gsMakeMultiAction(mult)));
+    } //For loop
+
+    // ++++++++++++++++++ end generation of minimal number of summands
+
+
+//     // +++++++++++++++++ begin normal alternative generation 
+   
+//     //calculate the reset multiactions (if any)
+//     ATermList ResetActionLists=ATmakeList0();
+//     for(int i=1; i<=l; i++)
+//       ResetActionLists=ATconcat(ResetActionLists,pn2gsGetActionLists(i,ActsReset));
+    
+    
+//     //generate the main process
+//     ATermAppl VarX=gsMakeDataVarId(ATmakeAppl0(ATmakeAFunId("x")),gsMakeSortIdNat());;
+//     //ATermAppl Number0=gsMakeNumber(gsString2ATermAppl("0"),gsMakeSortIdNat());
+//     AFun CurrentPlaceARId=ATappendAFun(CurrentPlaceId,"_ar_");
+//     AFun CurrentPlaceAIId=ATappendAFun(CurrentPlaceId,"_ai_");
+//     AFun CurrentPlaceARRId=ATappendAFun(CurrentPlaceId,"_arr_");
+//     AFun CurrentPlaceAIRId=ATappendAFun(CurrentPlaceId,"_air_");
+//     ATermAppl OpAdd=gsMakeDataVarIdOpId(gsMakeOpIdNameAdd());
+//     ATermAppl OpSubt=gsMakeDataVarIdOpId(gsMakeOpIdNameSubt());
+//     //ATermAppl OpMax=gsMakeDataVarIdOpId(gsMakeOpIdNameMax());
+//     ATermAppl OpLTE=gsMakeDataVarIdOpId(gsMakeOpIdNameLTE());
+//     ATermAppl OpEq=gsMakeDataVarIdOpId(gsMakeOpIdNameEq());
+//     ATermAppl OpInt2Nat=gsMakeDataVarIdOpId(gsMakeOpIdNameInt2Nat());
+//     ATermAppl Number0=gsMakeNumber(gsString2ATermAppl("0"),gsMakeSortIdNat());
+    
+//     for(int j=m;j>-1;j--){
+//       ATermAppl Summand=NULL;
+//       AFun NumberJId=ATmakeAFunInt0(j);
+//       ATermAppl NumberJ=gsMakeNumber(ATmakeAppl0(NumberJId),(j)?gsMakeSortIdPos():gsMakeSortIdNat());
+//       ATermList OutActionLists=NULL;
+//       if(j>0) OutActionLists=pn2gsGetActionLists(j,ActsOut);
+//       for(int i=n;i>-1;i--){
+// 	if(j==0 && i==0 && l==0) continue;
+// 	AFun NumberIId=ATmakeAFunInt0(i);
+// 	ATermAppl LeftName=ATmakeAppl0(ATappendAFun(ATappendAFun(ATappendAFun(CurrentPlaceARId,
+// 									      ATgetName(NumberIId)),
+// 								 "_"),
+// 						    ATgetName(NumberJId)));
+// 	ATermAppl LeftNameResets=ATmakeAppl0(ATappendAFun(ATappendAFun(ATappendAFun(CurrentPlaceARRId,
+// 										    ATgetName(NumberIId)),
+// 								       "_"),
+// 							  ATgetName(NumberJId)));
+// 	ATermAppl Left=gsMakeActionProcess(LeftName,ATmakeList0());//make name P_pi_ar_i_j
+// 	ATermAppl LeftResets=gsMakeActionProcess(LeftNameResets,ATmakeList0());//make name P_pi_arr_i_j
+	
+// 	ATermAppl RightExpr=VarX;  //x;
+// 	{
+// 	  int d=i-j;
+// 	  if(d>0) RightExpr=pn2gsMakeDataApplProd2(OpAdd,RightExpr,gsMakeNumber(ATmakeAppl0(ATmakeAFunInt0(d)),gsMakeSortIdPos()));//RightExpr=RightExpr+d;
+// 	  else if(d<0) RightExpr=gsMakeDataApplProd(OpInt2Nat,ATmakeList1((ATerm)pn2gsMakeDataApplProd2(OpSubt,RightExpr,gsMakeNumber(ATmakeAppl0(ATmakeAFunInt0(-d)),gsMakeSortIdPos()))));//RightExpr=max(RightExpr-d,0);
+// 	}
+// 	ATermAppl Right=gsMakeActionProcess(CurrentPlace,ATmakeList1((ATerm)RightExpr));//make P_pi(max(x+i-j,0))
+// 	ATermAppl RightResets=gsMakeActionProcess(CurrentPlace,ATmakeList1((ATerm)Number0));//make P_pi(0)
+// 	ATermAppl Sec=gsMakeSeq(Left,Right);
+// 	ATermAppl SecResets=gsMakeSeq(LeftResets,RightResets);
+// 	if(i>0 || j>0){
+// 	  if(Summand) Summand=gsMakeChoice(Sec,Summand);
+// 	  else Summand=Sec; 
+// 	}
+	
+// 	//in case there are resets
+// 	if(l>0){
+// 	  if(Summand) Summand=gsMakeChoice(SecResets,Summand);
+// 	  else Summand=SecResets; 
+// 	}
+	
+// 	ATermList InActionLists=NULL;
+// 	if(i>0) InActionLists=pn2gsGetActionLists(i,ActsIn);
+// 	//generate the additional process
+// 	if(i>0 || j>0)
+// 	  EquationList = ATinsert(EquationList, 
+// 				    (ATerm)gsMakeProcEqn(ATmakeList0(), 
+// 							 gsMakeProcVarId(LeftName, ATmakeList0()), 
+// 							 ATmakeList0(), 
+// 							 pn2gsGenerateP_pi_a(InActionLists,OutActionLists,NULL)));
+// 	//in case there are resets
+// 	if(l>0) 
+// 	  EquationList = ATinsert(EquationList, 
+// 				  (ATerm)gsMakeProcEqn(ATmakeList0(), 
+// 						       gsMakeProcVarId(LeftNameResets, ATmakeList0()), 
+// 						       ATmakeList0(), 
+// 						       pn2gsGenerateP_pi_a(InActionLists,OutActionLists,ResetActionLists)));
+//       }
+      
+//       if(j>0){ //generate the condition
+// 	ATermAppl Cond=pn2gsMakeDataApplProd2(OpLTE,NumberJ,VarX);//make j<=x
+// 	Summand=gsMakeCond(Cond,Summand,gsMakeDelta());
+//       }
+      
+//       if(Body){
+// 	if(Summand) Body=gsMakeChoice(Summand,Body);
+//       }
+//       else Body=Summand;
+//     }
+    
+//     //add inhibitor arcs
+//     if(k>0){
+//       ATermAppl Summand=NULL;
+      
+//       //Calculate a list of all inhibirot multiactions
+//       ATermList InhibitorActionLists=ATmakeList0();
+//       for(int i=1; i<=k; i++)
+// 	InhibitorActionLists=ATconcat(InhibitorActionLists,pn2gsGetActionLists(i,ActsInhibit));
+      
+//       for(int i=n;i>-1;i--){
+// 	AFun NumberIId=ATmakeAFunInt0(i);
+// 	ATermAppl LeftName=ATmakeAppl0(ATappendAFun(CurrentPlaceAIId,ATgetName(NumberIId)));
+// 	ATermAppl LeftNameResets=ATmakeAppl0(ATappendAFun(CurrentPlaceAIRId,ATgetName(NumberIId)));
+// 	ATermAppl Left=gsMakeActionProcess(LeftName,ATmakeList0());//make name P_pi_ai_i
+// 	ATermAppl LeftResets=gsMakeActionProcess(LeftNameResets,ATmakeList0());//make name P_pi_ai_i
+	
+// 	ATermAppl RightExpr=VarX;  //x;
+// 	if(i>0) RightExpr=pn2gsMakeDataApplProd2(OpAdd,RightExpr,gsMakeNumber(ATmakeAppl0(ATmakeAFunInt0(i)),gsMakeSortIdPos()));//RightExpr=RightExpr+i;
+	
+// 	ATermAppl Right=gsMakeActionProcess(CurrentPlace,ATmakeList1((ATerm)RightExpr));//make P_pi(x+i)
+// 	ATermAppl RightResets=gsMakeActionProcess(CurrentPlace,ATmakeList1((ATerm)Number0));//make P_pi(x+i)
+// 	ATermAppl Sec=gsMakeSeq(Left,Right);
+// 	ATermAppl SecResets=gsMakeSeq(LeftResets,RightResets);
+// 	if(Summand) Summand=gsMakeChoice(Sec,Summand);
+// 	else Summand=Sec; 
+// 	//in case there are resets
+// 	if(l>0) Summand=gsMakeChoice(SecResets,Summand);
+	
+// 	ATermList InActionLists=NULL;
+// 	if(i>0) InActionLists=pn2gsGetActionLists(i,ActsIn);
+// 	//generate the additional process
+// 	EquationList = ATinsert(EquationList, 
+// 				(ATerm)gsMakeProcEqn(ATmakeList0(), 
+// 						     gsMakeProcVarId(LeftName, ATmakeList0()), 
+// 						     ATmakeList0(), 
+// 						     pn2gsGenerateP_pi_a(InActionLists,InhibitorActionLists,NULL)));
+// 	if(l>0)
+// 	  EquationList = ATinsert(EquationList, 
+// 				  (ATerm)gsMakeProcEqn(ATmakeList0(), 
+// 						       gsMakeProcVarId(LeftNameResets, ATmakeList0()), 
+// 						       ATmakeList0(), 
+// 						       pn2gsGenerateP_pi_a(InActionLists,InhibitorActionLists,ResetActionLists)));
+//       }
+      
+//       //generate the condition
+//       ATermAppl Cond=pn2gsMakeDataApplProd2(OpEq,VarX,Number0);//make j<=x
+//       Summand=gsMakeCond(Cond,Summand,gsMakeDelta());
+      
+//       if(Body){
+// 	if(Summand) Body=gsMakeChoice(Summand,Body);
+//       }
+//       else Body=Summand;	
+//     }
+//     // +++++++++++++++++ end normal alternative generation 
+    
+
+    // handle the case m+n+k+l=0.
+    if(!Body) Body=gsMakeDelta();
+    
+    //make process P_pi and add it
+    EquationList = ATinsert(EquationList, 
+			    (ATerm)gsMakeProcEqn(ATmakeList0(), 
+						 gsMakeProcVarId(CurrentPlace, 
+								 ATmakeList1((ATerm)gsMakeSortIdNat())), 
+						 ATmakeList1((ATerm)VarX), 
+						 Body));
+    
     return EquationList;
   }
 
-static ATermList concat_lists(ATermList l, ATermList m){
-  //concats the elements of the lists of lists
-  //no checks
-  ATermList r=ATmakeList0();
-  for(;!ATisEmpty(l);l=ATgetNext(l)){
-    ATermList el=ATLgetFirst(l);
-    for(ATermList k=m;!ATisEmpty(k);k=ATgetNext(k))
-      r=ATinsert(r,(ATerm)ATconcat(el,ATLgetFirst(k)));
-  }
-  return ATreverse(r);
-}
+// static ATermList concat_lists(ATermList l, ATermList m){
+//   //concats the elements of the lists of lists
+//   //no checks
+//   ATermList r=ATmakeList0();
+//   for(;!ATisEmpty(l);l=ATgetNext(l)){
+//     ATermList el=ATLgetFirst(l);
+//     for(ATermList k=m;!ATisEmpty(k);k=ATgetNext(k))
+//       r=ATinsert(r,(ATerm)ATconcat(el,ATLgetFirst(k)));
+//   }
+//   return ATreverse(r);
+// }
 
-static ATermAppl pn2gsGenerateP_pi_a(ATermList InActionLists, ATermList OutActionLists, ATermList ResetActionLists){
-  //input: sets of multiactions to be combined 
-  //output: a process that is the choice of all multiactions (order not important)
+// static ATermAppl pn2gsGenerateP_pi_a(ATermList InActionLists, ATermList OutActionLists, ATermList ResetActionLists){
+//   //input: sets of multiactions to be combined 
+//   //output: a process that is the choice of all multiactions (order not important)
 
-  ATermList BigList=NULL;
-  ATermList BigList1=NULL;
+//   ATermList BigList=NULL;
+//   ATermList BigList1=NULL;
 
-  BigList1=InActionLists;
-  if(!BigList) BigList=BigList1;
-  else if(BigList1) BigList=concat_lists(BigList,BigList1);
+//   BigList1=InActionLists;
+//   if(!BigList) BigList=BigList1;
+//   else if(BigList1) BigList=concat_lists(BigList,BigList1);
 
-  BigList1=OutActionLists;
-  if(!BigList) BigList=BigList1;
-  else if(BigList1) BigList=concat_lists(BigList,BigList1);
+//   BigList1=OutActionLists;
+//   if(!BigList) BigList=BigList1;
+//   else if(BigList1) BigList=concat_lists(BigList,BigList1);
 
-  BigList1=ResetActionLists;
-  if(!BigList) BigList=BigList1;
-  else if(BigList1) BigList=concat_lists(BigList,BigList1);
+//   BigList1=ResetActionLists;
+//   if(!BigList) BigList=BigList1;
+//   else if(BigList1) BigList=concat_lists(BigList,BigList1);
 
-  if(!BigList) return gsMakeDelta();
+//   if(!BigList) return gsMakeDelta();
 
-  ATermAppl Body=NULL;
-  for(;!ATisEmpty(BigList);BigList=ATgetNext(BigList)){
-    ATermAppl Res=pn2gsMakeMultiAction(ATLgetFirst(BigList));
-    if(Body) Body=gsMakeChoice(Res,Body);
-    else Body=Res;
-  }
-  return Body;
-}
+//   ATermAppl Body=NULL;
+//   for(;!ATisEmpty(BigList);BigList=ATgetNext(BigList)){
+//     ATermAppl Res=pn2gsMakeMultiAction(ATLgetFirst(BigList));
+//     if(Body) Body=gsMakeChoice(Res,Body);
+//     else Body=Res;
+//   }
+//   return Body;
+// }
 
 static ATermList pn2gsGetActionLists(int n, ATermList ActList){
     //returns all sublists (not necessarily consecutive) of length n
