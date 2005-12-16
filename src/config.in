@@ -70,6 +70,9 @@ includedir         = @includedir@
 infodir            = @infodir@
 mandir             = @mandir@
 
+BOOST_FILESYSTEM      = -lboost_filesystem
+BOOST_PROGRAM_OPTIONS = -lboost_program_options
+
 ifeq ($(BOOST_PREFIX),boost)
  BUILD_BOOST       = 1
 
@@ -90,8 +93,6 @@ ifeq ($(BOOST_PREFIX),boost)
 endif
 
 BOOST_LDFLAGS        += -L$(BOOST_PREFIX)/lib
-BOOST_FILESYSTEM      = -lboost_filesystem
-BOOST_PROGRAM_OPTIONS = -lboost_program_options
 
 # Add revision number
 ifeq ($(findstring $(MAKECMDGOALS),clean distclean),)
