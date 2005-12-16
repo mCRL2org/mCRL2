@@ -13,6 +13,7 @@
 
 static ATermAppl gsApplyAlpha(ATermAppl a);
 static ATermList gsaGetAlpha(ATermAppl a, unsigned length=0, ATermList ignore=ATmakeList0());
+static ATermList gsaGetSyncAlpha(ATermAppl a, unsigned length=0, ATermList ignore=ATmakeList0());
 
 static inline ATermAppl INIT_KEY(void){return gsMakeProcVarId(gsString2ATermAppl("init"),ATmakeList0());}
 
@@ -545,6 +546,11 @@ static ATermList apply_rename(ATermList l, ATermList R){
 }
 
 static ATermList apply_comms(ATermList l, ATermList C){
+  //can be optimized 
+  //filter out actions nor in lhs of C;
+  //split the rest f l to a composition of subactions of a similar type
+  //to those apply a simplified procedure??
+
   //gives all possible results of application of C to a multiaction l
   //explanation: applying {a:Nat|b:Nat-c:Nat} to a|b can either give c, or a|b,
   //depending on the parameters of a and b. (in case a,b have no parameters,
@@ -785,41 +791,33 @@ static ATermAppl PushBlock(ATermList H, ATermAppl a){
     return a;
   } 
   else if ( gsIsComm(a) ){
-    //XXX
-    ATermList l = ATLtableGet(alphas,(ATerm) a);
-    if(!l) l=gsaGetAlpha(a);
     ATermList C = sort_multiactions_comm(ATLgetArgument(a,0));
     ATermList lhs = comm_lhs(C);
     ATermList rhs = comm_rhs(C);
     ATermList Ha = ATmakeList0();
     ATermList Hc = ATmakeList0();
-
-    for (; !ATisEmpty(H); H=ATgetNext(H))
-      {
-	if ( (ATindexOf(lhs,ATgetFirst(H),0) >= 0) || (ATindexOf(rhs,ATgetFirst(H),0) >= 0) )
-	  {
-	    Ha = ATinsert(Ha,ATgetFirst(H));
-	  } else {
-	  Hc = ATinsert(Hc,ATgetFirst(H));
-	}
-      }
     
-    if ( !ATisEmpty(Hc) )
-      {
-	a = PushBlock(Hc,ATAgetArgument(a,1));
-	l = ATLtableGet(alphas,(ATerm) a);
-	assert(l);
-	a = gsMakeComm(C,a);
-	ATtablePut(alphas,(ATerm) a,(ATerm) filter_comm_list(l,C));
-      } else {
-      l = ATLtableGet(alphas,(ATerm) a);
+    for (; !ATisEmpty(H); H=ATgetNext(H)){
+      if ( (ATindexOf(lhs,ATgetFirst(H),0) >= 0) || (ATindexOf(rhs,ATgetFirst(H),0) >= 0) ){
+	Ha = ATinsert(Ha,ATgetFirst(H));
+      } 
+      else {
+	Hc = ATinsert(Hc,ATgetFirst(H));
+      }
     }
     
-    if ( !ATisEmpty(Ha) )
-      {
-	a = gsMakeBlock(Ha,a);
-	ATtablePut(alphas,(ATerm) a,(ATerm) filter_block_list(l,Ha));
-      }
+    if ( !ATisEmpty(Hc) ){
+      a = PushBlock(Hc,ATAgetArgument(a,1));
+      a = gsMakeComm(C,a);
+    } 
+
+    a = gsApplyAlpha(a);
+    ATermList l = ATLtableGet(alphas,(ATerm) a);
+    
+    if ( !ATisEmpty(Ha) ){
+      a = gsMakeBlock(Ha,a);
+      ATtablePut(alphas,(ATerm) a,(ATerm) filter_block_list(l,Ha));
+    }
     
     return a;
   } 
@@ -883,9 +881,8 @@ static ATermAppl PushHide(ATermList I, ATermAppl a){
     return a;
   } 
   else if ( gsIsBlock(a) ){
-    //XXX
+    a = gsApplyAlpha(a);
     ATermList l = ATLtableGet(alphas,(ATerm) a);
-    if(!l) l=gsaGetAlpha(a);
     a = gsMakeHide(I,a);
     ATtablePut(alphas,(ATerm) a,(ATerm) filter_hide_list(l,I));
     return a;
@@ -894,17 +891,15 @@ static ATermAppl PushHide(ATermList I, ATermAppl a){
     return PushHide(merge_list(I,ATLgetArgument(a,0)),ATAgetArgument(a,1));
   } 
   else if ( gsIsRename(a) ){
-    //XXX
+    a = gsApplyAlpha(a);
     ATermList l = ATLtableGet(alphas,(ATerm) a);
-    if(!l) l=gsaGetAlpha(a);
     a = gsMakeHide(I,a);
     ATtablePut(alphas,(ATerm) a,(ATerm) filter_hide_list(l,I));
     return a;
   } 
   else if ( gsIsComm(a) ){
-    //XXX
+    a = gsApplyAlpha(a);
     ATermList l = ATLtableGet(alphas,(ATerm) a);
-    if(!l) l=gsaGetAlpha(a);
     a = gsMakeHide(I,a);
     ATtablePut(alphas,(ATerm) a,(ATerm) filter_hide_list(l,I));
     return a;
@@ -1340,10 +1335,21 @@ static ATermList gsaGetAlpha(ATermAppl a, unsigned length, ATermList ignore){
   // XXX ignore parameter not implemented yet
   ATermList l=NULL; //result
 
+  if ( gsIsSync (a)  ){
+    //try to apply a special procedure
+    l = gsaGetSyncAlpha(a,length,ignore);
+    if(l){
+      if(!length){
+	ATtablePut(alphas,(ATerm) a,(ATerm) l); 
+      }
+      return l;
+    }
+  }
+
   if ( gsIsDelta (a) || gsIsTau(a) ){
     l = ATmakeList0();
   }
-  else if ( gsIsAction(a) || gsIsDelta (a) || gsIsTau(a) ){
+  else if ( gsIsAction(a) ){
     l = ATLtableGet(alphas,(ATerm)ATAgetArgument(a,0));
     if(!l)
       l = ATmakeList1((ATerm)ATmakeList1(ATgetArgument(a,0)));
@@ -1452,7 +1458,56 @@ static ATermList gsaGetAlpha(ATermAppl a, unsigned length, ATermList ignore){
   if(!length){
     ATtablePut(alphas,(ATerm) a,(ATerm) l); 
   }
+
+  gsVerboseMsg("gsaGetAlpha: a: %P; l:%d\n\n", a, ATgetLength(l));
+  return l;
+}
+
+static ATermList gsaGetSyncAlpha(ATermAppl a, unsigned length, ATermList ignore){
+  // calculate the alphabeth only of it is a single multiaction.
+  ATermList l=NULL; //result
+
+  if ( gsIsDelta (a) || gsIsTau(a) ){
+    l = ATmakeList0();
+  }
+  else if ( gsIsAction(a) ){
+    l = ATLtableGet(alphas,(ATerm)ATAgetArgument(a,0));
+    if(!l)
+      l = ATmakeList1((ATerm)ATmakeList1(ATgetArgument(a,0)));
+  } 
+  else if ( gsIsProcess(a) ){
+    // XXX
+  }
+  else if ( gsIsBlock(a) || gsIsHide(a) || gsIsRename(a) || gsIsAllow(a) || gsIsComm(a)){
+    // XXX
+  } 
+  else if ( gsIsSum(a) || gsIsAtTime(a) || gsIsChoice(a) || gsIsCond(a) || gsIsBInit(a)){
+    // XXX
+  } 
+  else if ( gsIsSeq(a) || gsIsMerge(a) || gsIsLMerge(a)){
+    return NULL;
+  }
+  else if ( gsIsSync(a) ){
+    l = gsaGetSyncAlpha(ATAgetArgument(a,0),length);
+    if(!l) return NULL;
+    
+    ATermList l2 = gsaGetSyncAlpha(ATAgetArgument(a,1),length);
+    if(!l2) return NULL;
+
+    l=sync_list(l,l2,length);
+  }
+  else {
+    gsWarningMsg("a: %T\n\n", a);
+    assert(0);
+  }
   
+  if(!l) return l;
+
+  if(!length){
+    ATtablePut(alphas,(ATerm) a,(ATerm) l); 
+  }
+
+  gsVerboseMsg("gsaGetSyncAlpha: a: %P; l:%d\n\n", a, ATgetLength(l));
   return l;
 }
 
