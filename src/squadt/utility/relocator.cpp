@@ -18,7 +18,7 @@ class ToolExecutor;
 class Specification;
 
 /* Stubs */
-ToolExecutor::ToolExecutor(unsigned int) {
+ToolExecutor::ToolExecutor(size_t) {
 }
 
 ToolExecutor::~ToolExecutor() {
