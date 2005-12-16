@@ -1173,7 +1173,7 @@
     ATermAppl merge;
     char * CurrentElement = ATgetName(ATgetAFun(ATgetFirst(Ids)));
     if (ATgetLength(Ids) > 1) {
-      merge = gsMakeMerge(pn2gsMerge(ATgetNext(Ids)), gsMakeActionProcess(ATmakeAppl0(ATmakeAFun(CurrentElement, 0, ATtrue)), ATmakeList1((ATerm)pn2gsPlaceParameterNat(CurrentElement))));
+      merge = gsMakeMerge(gsMakeActionProcess(ATmakeAppl0(ATmakeAFun(CurrentElement, 0, ATtrue)), ATmakeList1((ATerm)pn2gsPlaceParameterNat(CurrentElement))), pn2gsMerge(ATgetNext(Ids)));
     } else {
       // ATgetLength(Ids) == 1, since the input-list is not-empty!
       merge = gsMakeActionProcess(ATmakeAppl0(ATmakeAFun(CurrentElement, 0, ATtrue)), ATmakeList1((ATerm)pn2gsPlaceParameterNat(CurrentElement)));
@@ -1305,9 +1305,10 @@
       Process = gsMakeHide(pn2gsHideList(AllArcs), 
 			   gsMakeBlock(pn2gsBlockList(AllArcs),
 					  gsMakeComm(pn2gsCommList(AllArcs),
-						     gsMakeMerge(pn2gsMerge(context.places), 
-								 gsMakeActionProcess(gsString2ATermAppl("Trans"), 
-										     ATmakeList0())))));
+						     gsMakeMerge(
+							     gsMakeActionProcess(gsString2ATermAppl("Trans"),ATmakeList0()),
+							     pn2gsMerge(context.places) 
+								 ))));
     }
     else{
       //hide(In,block(Hn,comm(Cn,
