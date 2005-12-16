@@ -6390,6 +6390,31 @@ static ATermAppl can_communicate(ATermList m,ATermList C)
   }
   return NULL;
 }
+
+static bool might_communicate(ATermList m,ATermList C)
+{ /* this function indicates whether the actions in m
+     consisting of actions and data occur in C, such that
+     a communication might take place (i.e. m is a subbag
+     of the lhs of a communication in C). */
+ 
+  for( ; C!=ATempty ; C=ATgetNext(C))
+  { ATermAppl commExpr=ATAgetFirst(C);
+    assert(gsIsCommExpr(commExpr));
+    ATermList lhs=ATLgetArgument(ATAgetArgument(commExpr,0),0);
+    ATermList mwalker=m;
+    for( ; ((lhs!=ATempty) && (mwalker!=ATempty)) ; lhs=ATgetNext(lhs))
+    { 
+      ATermAppl actionname=ATAgetArgument(ATAgetArgument(ATAgetFirst(mwalker),0),0);
+      ATermAppl commname=ATAgetFirst(lhs);
+      if (actionname==commname)
+        mwalker=ATgetNext(mwalker);
+    }
+    if (mwalker==ATempty)
+    { return true;
+    }
+  }
+  return false;
+}
   
 
 static ATermList makeMultiActionConditionList(
@@ -6410,6 +6435,10 @@ static ATermList phi(ATermList m,
      communication. d is the data parameter of the communication
      and C contains a list of multiaction action pairs indicating
      possible commmunications */
+
+  if (!might_communicate(m,C))
+  { return ATempty;
+  }
 
   if (n==ATempty)
   { ATermAppl c=can_communicate(m,C); /* returns NULL if no communication
