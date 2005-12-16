@@ -41,8 +41,8 @@ linear process equation.</refpurpose>
 <refsect1>
   <title>Description</title>
   <para>
-   This tools removes parameters, who will have no influence on condition, action 
-   or time arguments of an LPE. Removing these parameters form the LPE can lead
+   This tool removes parameters which have no influence on condition, action 
+   or time arguments of an LPE. Removing these parameters from the LPE can lead
    to a reduction when generating a state space of an LPE.
   </para>
 </refsect1>
