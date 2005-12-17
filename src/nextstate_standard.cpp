@@ -16,6 +16,29 @@
 #define ATisList(x) (ATgetType(x) == AT_LIST)
 
 
+/* Explanation of the tree building algorithm.
+ *
+ * If len(l) is a power of 2, than building the tree is easy. One just
+ * pairs every element in the list with its neighbor, giving again a list
+ * with the length a power of 2, repeating until there is only one element
+ * (the result). For example, [0,1,2,3] -> [(0,1),(2,3)] -> ((0,1),(2,3)).
+ *
+ * With an odd number of elements, our first goal is to pair just a few
+ * elements to get a list with the length a power of 2. We do this in such
+ * a way that it is as easy as possible to lookup an element.
+ * 
+ * The easiest way of looking up an element in a tree is probably when, for
+ * a tree with n leafs, we know that numbers up to n/2 are on the left and
+ * numbers above n/2 are on the right. This way we can just compare the
+ * index we are looking for with n/2 and choose the right tree and repeat
+ * the process.
+ *
+ * We will use an array tree_init to determine which elements to pair to
+ * get a list with the length a power of 2. More specifically, if
+ * tree_init[i] is true, then we pair element i-1 and i. It easy to
+ * determine which elements should be true by recursively "dividing" the
+ * array in two parts using /2.
+ */
 static void fill_tree_init(bool *init, int n, int l)
 {
 	if ( l == 0 )
@@ -302,6 +325,8 @@ NextStateStandard::NextStateStandard(ATermAppl spec, bool allow_free_vars, int s
 {
 	ATermList l,m,n,free_vars;
 
+	info.parent = this;
+
 	info.enum_obj = e;
 	clean_up_enum_obj = clean_up_enumerator;
 	info.rewr_obj = e->getRewriter();
@@ -468,6 +493,7 @@ ATerm NextStateGeneratorStandard::makeNewState(ATerm old, ATerm assigns)
 		{
 			switch ( info.stateformat )
 			{
+				default:
 				case GS_STATE_VECTOR:
 					stateargs[i] = ATgetArgument((ATermAppl) old,i);
 					break;
