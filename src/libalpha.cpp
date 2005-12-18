@@ -303,6 +303,16 @@ static ATermList list_minus(ATermList l, ATermList m){
   return ATreverse(n);
 }
 
+static ATermList list_minus_ignore_type(ATermList l, ATermList m){
+  ATermList n = ATmakeList0();
+  for (; !ATisEmpty(l); l=ATgetNext(l)){
+    if ( ATindexOf(m,(ATerm)ATAgetArgument(ATAgetFirst(l),0),0) < 0 ){
+      n = ATinsert(n,ATgetFirst(l));
+    }
+  }
+  return ATreverse(n);
+}
+
 static ATermList filter_block_list(ATermList l, ATermList H){
   //filters l not to contain untyped actions from H
   
@@ -545,12 +555,19 @@ static ATermList apply_rename(ATermList l, ATermList R){
   return gsaATsortList(m);
 }
 
-static ATermList apply_comms(ATermList l, ATermList C){
+static ATermList apply_comms(ATermList l, ATermList C, ATermList lhs){
   //can be optimized 
   //filter out actions nor in lhs of C;
   //split the rest f l to a composition of subactions of a similar type
   //to those apply a simplified procedure??
 
+  //gsWarningMsg("apply_comms: C: %P\n l: %d, %T;\n\n",C,ATgetLength(l),l);
+  //filter out l
+  ATermList ll=list_minus_ignore_type(l,lhs);
+  if(ATisEqual(l,ll)) return ATmakeList1((ATerm)l); //C does not apply
+  if(!ATisEmpty(ll))
+    l=list_minus(l,ll); //apply to the rest 
+  
   //gives all possible results of application of C to a multiaction l
   //explanation: applying {a:Nat|b:Nat-c:Nat} to a|b can either give c, or a|b,
   //depending on the parameters of a and b. (in case a,b have no parameters,
@@ -612,6 +629,11 @@ static ATermList apply_comms(ATermList l, ATermList C){
     //sync_list_into_ht(m,ATmakeList1((ATerm)r));
     m=sync_list(m,ATmakeList1((ATerm)r));
   }
+  
+  if(!ATisEmpty(ll))
+    m=sync_list(ATmakeList1((ATerm)ll),m);
+
+  //gsWarningMsg("finished apply_comms: C: %P\n l: %d, %T; \n m: %d, %T \n\n",C,ATgetLength(l),l,ATgetLength(m),m);
 
   //l = ATindexedSetElements(m);
   //ATindexedSetDestroy(m);
@@ -634,11 +656,13 @@ static ATermList extend_allow_comm_with_alpha(ATermList V, ATermList C, ATermLis
     V=ATreverse(nV);
   }
   V=ATinsert(V,(ATerm)ATmakeList0()); //to include possible communications to tau
+
+  ATermList lhs=comm_lhs(C); //should be a set because of properties of C
   
   for (; !ATisEmpty(l); l=ATgetNext(l) ){
     ATermAppl ma=gsMakeMultActName(untypeMA(ATLgetFirst(l)));
     if(ATindexOf(r,(ATerm)ma,0)<0){
-      ATermList mas=untypeMAL(apply_comms(ATLgetFirst(l),C));
+      ATermList mas=untypeMAL(apply_comms(ATLgetFirst(l),C,lhs));
       if(!gsaATisDisjoint(V,mas)) 
 	r=ATinsert(r,(ATerm)ma);
     }
@@ -716,11 +740,13 @@ static ATermList filter_comm_list(ATermList l, ATermList C){
   //gsWarningMsg("filter_comm_list: l: %d; C: %P\n",ATgetLength(l),C);
 
   ATermIndexedSet m=ATindexedSetCreate(10000,80);
-  gsaATindexedSetPutList(m,l);
-  //ATermList m=l;
+  // wrong gsaATindexedSetPutList(m,l);
+  // wrong ATermList m=l;
+
+  ATermList lhs=comm_lhs(C); //should be a set because of properties of C
 
   for (; !ATisEmpty(l); l=ATgetNext(l)){
-    ATermList mas=apply_comms(ATLgetFirst(l),C);
+    ATermList mas=apply_comms(ATLgetFirst(l),C,lhs);
     mas=ATremoveElement(mas,(ATerm)ATmakeList0());
     //m = merge_list(m,mas);
     gsaATindexedSetPutList(m,mas);
@@ -1459,7 +1485,7 @@ static ATermList gsaGetAlpha(ATermAppl a, unsigned length, ATermList ignore){
     ATtablePut(alphas,(ATerm) a,(ATerm) l); 
   }
 
-  gsVerboseMsg("gsaGetAlpha: a: %P; l:%d\n\n", a, ATgetLength(l));
+  //gsVerboseMsg("gsaGetAlpha: a: %P; l:%d\n\n", a, ATgetLength(l));
   return l;
 }
 
@@ -1507,7 +1533,7 @@ static ATermList gsaGetSyncAlpha(ATermAppl a, unsigned length, ATermList ignore)
     ATtablePut(alphas,(ATerm) a,(ATerm) l); 
   }
 
-  gsVerboseMsg("gsaGetSyncAlpha: a: %P; l:%d\n\n", a, ATgetLength(l));
+  //gsVerboseMsg("gsaGetSyncAlpha: a: %P; l:%d\n\n", a, ATgetLength(l));
   return l;
 }
 
