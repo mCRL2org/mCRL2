@@ -26,16 +26,16 @@
 SettingsManager::SettingsManager(const char* ahome_directory, const char* profile_directory) {
   using namespace boost::filesystem;
 
-  path settings_path(ahome_directory, &portable_posix_name);
-
-  if (profile_directory != "") {
-    settings_path /= path(profile_directory, &portable_posix_name);
-  }
-
-  home_directory     = ahome_directory;
-  settings_directory = settings_path.string();
-
   if (ahome_directory != "") {
+    path settings_path(ahome_directory, &portable_posix_name);
+
+    if (profile_directory != "") {
+      settings_path /= path(profile_directory, &portable_posix_name);
+    }
+
+    home_directory     = ahome_directory;
+    settings_directory = settings_path.string();
+
     if (!exists(settings_path)) {
       /* Create directories */
       create_directory(settings_path);
