@@ -124,12 +124,12 @@ bool ToolManager::Load() throw (int) {
 
   std::string catalog_file = settings_manager.GetToolCatalogPath();
 
-  if (!exists(path(catalog_file, portable_posix_name))) {
-    path ghost_catalog(catalog_file + ".ghost", portable_posix_name);
+  if (!exists(path(catalog_file, no_check))) {
+    path ghost_catalog(catalog_file + ".ghost", no_check);
  
     if (exists(ghost_catalog)) {
       /* Recover */
-      rename(ghost_catalog, path(catalog_file, portable_posix_name));
+      rename(ghost_catalog, path(catalog_file, no_check));
     }
     else {
       throw (-1);
@@ -155,9 +155,9 @@ bool ToolManager::Store() const {
   catalog_stream.close();
 
   /* Replace original with newly generated copy */
-  path original_catalog(settings_manager.GetToolCatalogPath(), portable_posix_name);
-  path temporary(settings_manager.GetToolCatalogPath() + ".obsolete", portable_posix_name);
-  path ghost_catalog(ghost_catalog_file, portable_posix_name);
+  path original_catalog(settings_manager.GetToolCatalogPath(), no_check);
+  path temporary(settings_manager.GetToolCatalogPath() + ".obsolete", no_check);
+  path ghost_catalog(ghost_catalog_file, no_check);
 
   rename(original_catalog, temporary);
   rename(ghost_catalog, original_catalog);

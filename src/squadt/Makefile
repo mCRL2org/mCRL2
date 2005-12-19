@@ -64,10 +64,10 @@ endif
 
 test: all $(TEST_TARGETS)
 
-$(LIBXML2_OBJECTS):         CPPFLAGS += $(LIBXML2_CPPFLAGS)
-$(BOOST_OBJECTS):           CPPFLAGS += $(BOOST_CPPFLAGS)
-$(WX_OBJECTS):              CPPFLAGS += $(WX_CPPFLAGS)
-settings_manager.o:         CPPFLAGS += -DDATA_DIRECTORY=\"$(datadir)\"
+$(LIBXML2_OBJECTS):         CPPFLAGS += $(BOOST_CPPFLAGS) $(WX_CPPFLAGS) $(LIBXML2_CPPFLAGS)
+$(BOOST_OBJECTS):           CPPFLAGS += $(BOOST_CPPFLAGS) $(WX_CPPFLAGS) $(LIBXML2_CPPFLAGS)
+$(WX_OBJECTS):              CPPFLAGS += $(BOOST_CPPFLAGS) $(WX_CPPFLAGS) $(LIBXML2_CPPFLAGS)
+settings_manager.o:         CPPFLAGS += $(BOOST_CPPFLAGS) $(WX_CPPFLAGS) $(LIBXML2_CPPFLAGS) -DDATA_DIRECTORY=\"$(datadir)\"
 utility/relocator.o:        CPPFLAGS += $(BOOST_CPPFLAGS)
 
 # XML schema validation can be triggered by adding to tool_manager project_manager
@@ -89,7 +89,7 @@ squadt: $(GUI_OBJECTS) libmd5.a
 	$(CXX) $(CXXFLAGS) $(CPPFLAGS) $(GUI_OBJECTS) $(LDFLAGS) $(WX_LIBRARIES) libmd5.a $(BOOST_LDFLAGS) $(BOOST_FILESYSTEM) -o $@
 
 utility/relocator: utility/relocator.o settings_manager.o $(TOOL_MANAGER_OBJECTS)
-	$(CXX) $(CXXFLAGS) $(CPPFLAGS) $(LDFLAGS) $(subst $(libdir),$(BOOST_PREFIX)/lib,$(BOOST_LDFLAGS)) $(BOOST_FILESYSTEM) $^ -o $@
+	$(CXX) $(CXXFLAGS) $(CPPFLAGS) $(LDFLAGS) $(subst $(libdir),$(BOOST_PREFIX)/lib,$(BOOST_LDFLAGS)) $^ $(BOOST_FILESYSTEM) -lxml2 -o $@
 
 %.o: %.cpp
 	$(CXX) -c $(CXXFLAGS) $(CPPFLAGS) $< -o $@

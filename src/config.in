@@ -80,16 +80,16 @@ ifeq ($(BOOST_PREFIX),boost)
   BOOST_LDFLAGS = -Wl,-rpath=$(libdir)
  endif
 
+ BOOST_PREFIX     := @abs_top_srcdir@/$(BOOST_PREFIX)
+
  ifeq ($(HOST_OS),MINGW)
-  BOOST_FILESYSTEM      = boost/lib/libboost_filesystem-s.lib
-  BOOST_PROGRAM_OPTIONS = boost/lib/libboost_program_options-s.lib
+  BOOST_FILESYSTEM      = $(BOOST_PREFIX)/lib/libboost_filesystem-s.lib
+  BOOST_PROGRAM_OPTIONS = $(BOOST_PREFIX)/lib/libboost_program_options-s.lib
  endif
  ifeq ($(HOST_OS),CYGWIN)
-  BOOST_FILESYSTEM      = boost/lib/libboost_filesystem-s.lib
-  BOOST_PROGRAM_OPTIONS = boost/lib/libboost_program_options-s.lib
+  BOOST_FILESYSTEM      = $(BOOST_PREFIX)/lib/libboost_filesystem-s.lib
+  BOOST_PROGRAM_OPTIONS = $(BOOST_PREFIX)/lib/libboost_program_options-s.lib
  endif
-
- BOOST_PREFIX     := @abs_top_srcdir@/$(BOOST_PREFIX)
 endif
 
 BOOST_LDFLAGS        += -L$(BOOST_PREFIX)/lib

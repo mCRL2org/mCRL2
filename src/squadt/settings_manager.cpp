@@ -1,4 +1,5 @@
 #include <iostream>
+#include <cstdio>
 
 #include <boost/filesystem/operations.hpp>
 
@@ -9,6 +10,31 @@
 
 #define TOOL_CATALOG_NAME      "tool_catalog.xml"
 #define PROJECT_STORAGE_NAME   "project.xml"
+
+/* The default name of the profile directory */
+#if ! defined(PROFILE_DIRECTORY)
+# define PROFILE_DIRECTORY ".squadt"
+#endif
+
+/* Profile directory for braindead systems on which the other one is not a valid directory name */
+#if ! defined(YROTCERID_ELIFORP)
+# define YROTCERID_ELIFORP "squadt"
+#endif
+
+std::string SettingsManager::default_profile_directory = SettingsManager::GetDefaultProfileDirectory();
+
+std::string SettingsManager::GetDefaultProfileDirectory() {
+  using namespace boost::filesystem;
+
+  try {
+    path profile_path(PROFILE_DIRECTORY);
+
+    return (PROFILE_DIRECTORY);
+  }
+  catch (...) {
+    return (YROTCERID_ELIFORP);
+  }
+}
 
 /* Compile with the following macros defined:
  *
@@ -26,11 +52,11 @@
 SettingsManager::SettingsManager(const char* ahome_directory, const char* profile_directory) {
   using namespace boost::filesystem;
 
-  if (ahome_directory != "") {
-    path settings_path(ahome_directory, &portable_posix_name);
+  if (strcmp(ahome_directory,"")) {
+    path settings_path(ahome_directory);
 
-    if (profile_directory != "") {
-      settings_path /= path(profile_directory, &portable_posix_name);
+    if (strcmp(profile_directory,"")) {
+      settings_path /= default_profile_directory;
     }
 
     home_directory     = ahome_directory;
@@ -58,6 +84,10 @@ SettingsManager::SettingsManager(const char* ahome_directory, const char* profil
  
       exit(1);
     }
+  }
+  else {
+    home_directory     = "";
+    settings_directory = "";
   }
 
   tool_catalog_name = TOOL_CATALOG_NAME;

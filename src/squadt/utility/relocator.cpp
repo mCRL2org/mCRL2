@@ -32,7 +32,7 @@ void ToolExecutor::TerminateAll() {
 
 /* Holds filename for the input */
 char*         file_name = "examples/tool_catalog.xml";
-char*         path;
+char*         new_path;
 
 class MTool : private Tool {
   public:
@@ -88,11 +88,12 @@ void processCommandLineOptions (const int argc, char** argv) {
 
   if (argc - optind != 2) {
     std::cerr << "Error: invalid number of arguments.\n";
+    exit (1);
   }
 
-  path      = new char[strlen(argv[optind]) + 1];
+  new_path = new char[strlen(argv[optind]) + 1];
 
-  strcpy(path, argv[optind]);
+  strcpy(new_path, argv[optind]);
 
   ++optind;
 
@@ -105,9 +106,13 @@ void processCommandLineOptions (const int argc, char** argv) {
  * Validation with respect to the XML schema file is assumed
  *****************************************************************/
 int main(int argc, char **argv) {
+  using namespace boost::filesystem;
+
   processCommandLineOptions(argc, argv);
 
-  boost::filesystem::path input_file(file_name, boost::filesystem::portable_posix_name);
+  path input_file;
+
+  input_file = path(file_name, no_check);
 
   settings_manager.SetHomeDirectory(input_file.branch_path().string().c_str());
   settings_manager.SetToolCatalogName(input_file.leaf());
@@ -120,9 +125,9 @@ int main(int argc, char **argv) {
     std::list < Tool* >::const_iterator b = tool_manager.GetTools().end();
 
     while (i != b) {
-      std::string new_path(path);
+      path prefix(new_path, no_check);
 
-      reinterpret_cast < MTool* > (*i)->SetLocation(new_path.append("/").append(boost::filesystem::path((*i)->GetLocation(), boost::filesystem::portable_posix_name).leaf()));
+      reinterpret_cast < MTool* > (*i)->SetLocation((prefix / path(path((*i)->GetLocation(), no_check).leaf())).string());
 
       ++i;
     }

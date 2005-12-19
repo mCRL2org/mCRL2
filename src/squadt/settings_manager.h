@@ -3,9 +3,6 @@
 
 #include <string>
 
-/* The default name of the profile directory */
-#define PROFILE_DIRECTORY      ".squadt"
-
 /*
  * Stores the runtime configuration settings for all components.
  */
@@ -17,9 +14,16 @@ class SettingsManager {
     std::string tool_catalog_name;       /* The name of the tool catalog file */
     std::string project_file_name;       /* The base name of a project file */
 
+    static std::string default_profile_directory;
+
+  protected:
+
+    /* Determine the default name that is used for the profile directory (depends on host system) */
+    static std::string SettingsManager::GetDefaultProfileDirectory();
+
   public:
 
-    SettingsManager(const char* the_home_directory, const char* profile_directory = PROFILE_DIRECTORY);
+    SettingsManager(const char* the_home_directory, const char* profile_directory = default_profile_directory.c_str());
 
     /* The personal directory for the user */
     void SetHomeDirectory(const std::string);
