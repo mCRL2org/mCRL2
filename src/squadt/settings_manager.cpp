@@ -53,7 +53,7 @@ SettingsManager::SettingsManager(const char* ahome_directory, const char* profil
   using namespace boost::filesystem;
 
   if (strcmp(ahome_directory,"")) {
-    path settings_path(ahome_directory);
+    path settings_path(ahome_directory, no_check);
 
     if (strcmp(profile_directory,"")) {
       settings_path /= default_profile_directory;
@@ -76,7 +76,7 @@ SettingsManager::SettingsManager(const char* ahome_directory, const char* profil
     try {
       if (!exists(settings_path)) {
         /* Copy default settings */
-        copy_file(path(DATA_DIRECTORY)/ path ("configuration") / path(TOOL_CATALOG_NAME), settings_path);
+        copy_file(path(DATA_DIRECTORY, no_check)/ path ("configuration") / path(TOOL_CATALOG_NAME), settings_path);
       }
     }
     catch (...) {
@@ -115,33 +115,50 @@ std::string SettingsManager::GetSettingsPath() const {
 
 /* Get the path to where the images are stored */
 std::string SettingsManager::GetImagePath() const {
-  using boost::filesystem::path;
+  using namespace boost::filesystem;
 
-  return ((path(DATA_DIRECTORY)/ path ("images")).string());
+  return ((path(DATA_DIRECTORY, no_check) / path ("images")).string());
+}
+
+/* Get the path image in the directory where all images are stored */
+std::string SettingsManager::GetImagePath(const std::string image) const {
+  using namespace boost::filesystem;
+
+  return ((path(DATA_DIRECTORY, no_check) / path ("images") / path(image, no_check)).string());
 }
 
 /* Get the path to where the XML schemas are stored */
 std::string SettingsManager::GetSchemaPath() const {
-  using boost::filesystem::path;
+  using namespace boost::filesystem;
 
-  return ((path(DATA_DIRECTORY)/ path ("schemas")).string());
+  return ((path(DATA_DIRECTORY, no_check) / path ("schemas")).string());
 }
 
 /* Get the path to where the user independent and default configurations are stored */
 std::string SettingsManager::GetConfigurationPath() const {
-  using boost::filesystem::path;
+  using namespace boost::filesystem;
 
-  return ((path(DATA_DIRECTORY)/ path ("configuration")).string());
+  return ((path(DATA_DIRECTORY, no_check) / path ("configuration")).string());
 }
 
 /* Get the path to the tool catalog file(s) */
 std::string SettingsManager::GetToolCatalogPath() const {
-  std::string path(settings_directory);
+  using namespace boost::filesystem;
 
-  return (path.append("/").append(tool_catalog_name));
+  path apath(settings_directory, no_check);
+
+  return ((apath / path(tool_catalog_name, no_check)).string());
 }
 
 std::string SettingsManager::GetProjectFileName() const {
   return (project_file_name);
+}
+
+const std::string SettingsManager::GetLogFileName() const {
+  using namespace boost::filesystem;
+
+  path a_path(settings_directory, no_check);
+
+  return ((a_path / path("log")).string());
 }
 

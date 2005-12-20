@@ -55,8 +55,8 @@ bool Squadt::OnInit() {
   /* Show a splash */
   wxBitmap        splash_image;
   wxSplashScreen* splash;
-  wxString        logo(settings_manager.GetImagePath().append("/logo.jpg").c_str(), wxConvLocal);
-  
+  wxString        logo(settings_manager.GetImagePath("logo.jpg").c_str(), wxConvLocal);
+
   if (splash_image.LoadFile(logo, wxBITMAP_TYPE_JPEG)) {
     splash = new wxSplashScreen(splash_image, wxSPLASH_CENTRE_ON_PARENT|wxSPLASH_TIMEOUT, 600, window, wxID_ANY);
   }

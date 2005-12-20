@@ -42,6 +42,9 @@ class SettingsManager {
     /* Get the path to the directory containing the image file(s) */
     std::string GetImagePath() const;
 
+    /* Get the path to image, in the directory containing the image file(s) */
+    std::string GetImagePath(const std::string image) const;
+
     /* Get the path to the directory containing the XML schema file(s) */
     std::string GetSchemaPath() const;
 
@@ -54,11 +57,7 @@ class SettingsManager {
     /* Get the base name of a project file */
     std::string GetProjectFileName() const;
 
-    inline const std::string GetLogFileName() const {
-      std::string return_value = settings_directory;
-
-      return (return_value.append("/log"));
-    }
+    const std::string GetLogFileName() const;
 };
 
 #endif

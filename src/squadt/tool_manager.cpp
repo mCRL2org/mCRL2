@@ -170,7 +170,7 @@ bool ToolManager::Execute(unsigned int tool_identifier, std::string arguments, S
   using namespace boost::filesystem;
 
   try {
-    std::string command = path(tool_manager.GetTool(tool_identifier)->GetLocation()).string();
+    std::string command = path(tool_manager.GetTool(tool_identifier)->GetLocation(), no_check).string();
 
     tool_executor.Execute(command.append(" ").append(arguments).c_str(), plan);
   }
