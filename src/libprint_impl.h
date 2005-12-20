@@ -90,7 +90,7 @@ static void PRINT_FUNC(PrintDecls)(PRINT_OUTTYPE OutStream,
        declarations from a mCRL2 specification
        pp_format != ppInternal
   Ret: A textual representation of the declarations is written to OutStream,
-       in which, if pp_format == ppAdvanced:
+       in which, if pp_format == ppDefault:
        - of two consecutive declarations Decl(x, S) and Decl(y, T), the first
          is printed as:
          + "x,", if S = T
@@ -597,7 +597,7 @@ void PRINT_FUNC(PrintPart_Appl)(PRINT_OUTTYPE OutStream,
       gsIsDataAppl(Part) || gsIsDataApplProd(Part)) {
     //print data expression
     PRINT_FUNC(dbg_prints)("printing data expression\n");
-    if (pp_format == ppBasic) {
+    if (pp_format == ppDebug) {
       PRINT_FUNC(PrintPart_Appl)(OutStream, ATAgetArgument(Part, 0),
         pp_format, ShowSorts, 0);
       if (gsIsDataAppl(Part) || gsIsDataApplProd(Part)) {
@@ -611,7 +611,7 @@ void PRINT_FUNC(PrintPart_Appl)(PRINT_OUTTYPE OutStream,
         }
         PRINT_FUNC(fprints)(OutStream, ")");
       }
-    } else { //pp_format == ppAdvanced
+    } else { //pp_format == ppDefault
       //print data expression in the external format, if possible
       ATermAppl Head;
       ATermList Args;
@@ -1013,7 +1013,7 @@ void PRINT_FUNC(PrintPart_List)(PRINT_OUTTYPE OutStream,
 void PRINT_FUNC(PrintEqns)(PRINT_OUTTYPE OutStream, const ATermList Eqns,
   t_pp_format pp_format, bool ShowSorts, int PrecLevel)
 {
-  if (pp_format == ppBasic) {
+  if (pp_format == ppDebug) {
     ATermList l = Eqns;
     while (!ATisEmpty(l)) {
       ATermAppl Eqn = ATAgetFirst(l);
@@ -1033,7 +1033,7 @@ void PRINT_FUNC(PrintEqns)(PRINT_OUTTYPE OutStream, const ATermList Eqns,
       PRINT_FUNC(fprints)(OutStream, ";\n\n");
       l = ATgetNext(l);
     }
-  } else { //pp_format == ppAdvanced
+  } else { //pp_format == ppDefault
     int EqnsLength = ATgetLength(Eqns);
     if (EqnsLength > 0) {
       int StartPrefix = 0;
@@ -1202,13 +1202,13 @@ void PRINT_FUNC(PrintPosMult)(PRINT_OUTTYPE OutStream, const ATermAppl PosExpr, 
       } else if (strcmp(Mult, "1") == 0) {
         //Mult*v(b) = v(b)
         PRINT_FUNC(PrintPart_Appl)(OutStream, BoolArg,
-          ppAdvanced, false, gsPrecOpIdInfixRight(gsMakeOpIdNameAdd()));
+          ppDefault, false, gsPrecOpIdInfixRight(gsMakeOpIdNameAdd()));
       } else {
         //print Mult*v(b)
         PRINT_FUNC(fprints)(OutStream, Mult);
         PRINT_FUNC(fprints)(OutStream, "*");
         PRINT_FUNC(PrintPart_Appl)(OutStream, BoolArg,
-          ppAdvanced, false, gsPrecOpIdInfixRight(gsMakeOpIdNameMult()));
+          ppDefault, false, gsPrecOpIdInfixRight(gsMakeOpIdNameMult()));
       }
       if (PrecLevel > gsPrecOpIdInfix(gsMakeOpIdNameAdd())) {
         PRINT_FUNC(fprints)(OutStream, ")");
@@ -1219,12 +1219,12 @@ void PRINT_FUNC(PrintPosMult)(PRINT_OUTTYPE OutStream, const ATermAppl PosExpr, 
     //PosExpr is not a Pos constructor
     if (strcmp(Mult, "1") == 0) {
       PRINT_FUNC(PrintPart_Appl)(OutStream, PosExpr,
-        ppAdvanced, false, PrecLevel);
+        ppDefault, false, PrecLevel);
     } else {
       PRINT_FUNC(fprints)(OutStream, Mult);
       PRINT_FUNC(fprints)(OutStream, "*");
       PRINT_FUNC(PrintPart_Appl)(OutStream, PosExpr,
-        ppAdvanced, false, gsPrecOpIdInfixRight(gsMakeOpIdNameMult()));
+        ppDefault, false, gsPrecOpIdInfixRight(gsMakeOpIdNameMult()));
     }
   }
 }

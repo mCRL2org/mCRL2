@@ -269,8 +269,8 @@ static void readParameterNames2(char* filename, char*** names, char*** types)
 	{
 		ATerm at = ATgetFirst(param);
 		
-		(*names)[i  ] = strdup(PrintPart_CXX(at,ppAdvanced).c_str());
-		(*types)[i++] = strdup(PrintPart_CXX(ATgetArgument((ATermAppl) at,1),ppAdvanced).c_str());
+		(*names)[i  ] = strdup(PrintPart_CXX(at,ppDefault).c_str());
+		(*types)[i++] = strdup(PrintPart_CXX(ATgetArgument((ATermAppl) at,1),ppDefault).c_str());
 
 		param = ATgetNext(param);
 	}

@@ -27,7 +27,7 @@ static void print_state(ostream &os, ATermAppl state)
     {
       os << ",";
     }
-    PrintPart_CXX(os,ATgetArgument(state,i),ppAdvanced);
+    PrintPart_CXX(os,ATgetArgument(state,i),ppDefault);
   }
   os << ")";
 }
@@ -56,7 +56,7 @@ static void trace2dot(ostream &os, Trace &trace, char *name)
     os << i << " -> " << i+1 << " [label=\"";
     if ( gsIsMultAct(act) )
     {
-      PrintPart_CXX(os,(ATerm) act,ppAdvanced);
+      PrintPart_CXX(os,(ATerm) act,ppDefault);
     } else {
       // needed because trace library cannot parse strings
       os << ATgetName(ATgetAFun(act));
@@ -83,7 +83,7 @@ static void trace2aut(ostream &os, Trace &trace)
     os << "(" << i << ",\"";
     if ( gsIsMultAct(act) )
     {
-      PrintPart_CXX(os,(ATerm) act,ppAdvanced);
+      PrintPart_CXX(os,(ATerm) act,ppDefault);
     } else {
       // needed because trace library cannot parse strings
       os << ATgetName(ATgetAFun(act));

@@ -93,7 +93,7 @@ int gsvfprintf(FILE *stream, const char *format, va_list args)
          * the advanced method
 	 */
       case 'P':
-	PrintPart_C(stream, va_arg(args, ATerm), ppAdvanced);
+	PrintPart_C(stream, va_arg(args, ATerm), ppDefault);
 	break;
 
 	/*

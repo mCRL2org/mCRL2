@@ -205,7 +205,7 @@ int main(int argc, char **argv)
 
 	if ( human )
 	{
-		PrintPart_C(OutFile, (ATerm) Spec, ppAdvanced);
+		PrintPart_C(OutFile, (ATerm) Spec, ppDefault);
 	} else {
 		ATwriteToTextFile((ATerm) Spec,OutFile);
 	}

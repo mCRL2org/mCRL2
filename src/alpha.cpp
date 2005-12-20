@@ -139,7 +139,7 @@ int main(int argc, char **argv)
 	{
 		ATwriteToTextFile((ATerm) Spec,OutStream);
 	} else {
-		PrintPart_C(OutStream, (ATerm) Spec, ppAdvanced);
+		PrintPart_C(OutStream, (ATerm) Spec, ppDefault);
 	}
 	if ( OutStream != stdout )
 	{

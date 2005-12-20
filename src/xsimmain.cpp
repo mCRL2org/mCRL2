@@ -788,7 +788,7 @@ void XSimMain::OnLoadTrace( wxCommandEvent &event )
 				    }
 				    if ( !found )
 				    {
-					    wxString s = wxConvLocal.cMB2WX(PrintPart_CXX((ATerm) act, ppAdvanced).c_str());
+					    wxString s = wxConvLocal.cMB2WX(PrintPart_CXX((ATerm) act, ppDefault).c_str());
 					    wxMessageDialog dialog(this,wxString::Format(wxT("Cannot append transition '%s' to trace.\n"),s.c_str()),wxT("Error in trace"),wxOK|wxICON_ERROR);
 					    dialog.ShowModal();
 					    break;
@@ -802,7 +802,7 @@ void XSimMain::OnLoadTrace( wxCommandEvent &event )
 				    bool found = false;
 				    while ( nextstategen->next(&Transition,&NewState) )
 				    {
-					    wxString t = wxConvLocal.cMB2WX(PrintPart_CXX((ATerm) Transition, ppAdvanced).c_str());
+					    wxString t = wxConvLocal.cMB2WX(PrintPart_CXX((ATerm) Transition, ppDefault).c_str());
 					    if ( s == t )
 					    {
 						    if ( (tr.getState() == NULL) || ATisEqual(tr.getState(),nextstate->makeStateVector(NewState)) )
@@ -862,7 +862,7 @@ void XSimMain::OnSaveTrace( wxCommandEvent &event )
 		    {
 			    tr.addAction(ATAgetFirst(ATLgetFirst(l)));
 			    tr.setState(nextstate->makeStateVector(ATgetFirst(ATgetNext(ATLgetFirst(l)))));
-/*			PrintPart_CXX(f, ATgetFirst(ATLgetFirst(l)), ppAdvanced);
+/*			PrintPart_CXX(f, ATgetFirst(ATLgetFirst(l)), ppDefault);
                         f << endl;*/
 		    }
 	    }
@@ -1079,7 +1079,7 @@ void XSimMain::SetCurrentState(ATerm state, bool showchange)
 		{
 			stateview->SetItem(i,1,wxT("_"));
 		} else {
-			stateview->SetItem(i,1,wxConvLocal.cMB2WX(PrintPart_CXX((ATerm) newval, ppAdvanced).c_str()));
+			stateview->SetItem(i,1,wxConvLocal.cMB2WX(PrintPart_CXX((ATerm) newval, ppDefault).c_str()));
 		}
 		if ( showchange && !(ATisEqual(oldval,newval) || (gsIsDataVarId(oldval) && gsIsDataVarId(newval)) ) )
 		{
@@ -1190,7 +1190,7 @@ void XSimMain::UpdateTransitions(bool update_next_states)
 	int i = 0;
 	for (ATermList l=next_states; !ATisEmpty(l); l=ATgetNext(l), i++)
 	{
-		actions.Add(wxConvLocal.cMB2WX(PrintPart_CXX(ATgetFirst(ATLgetFirst(l)), ppAdvanced).c_str()));
+		actions.Add(wxConvLocal.cMB2WX(PrintPart_CXX(ATgetFirst(ATLgetFirst(l)), ppDefault).c_str()));
 		indices.Add(i);
 //		transview->SetItemData(i,i);
 		stringstream ss;
@@ -1211,13 +1211,13 @@ void XSimMain::UpdateTransitions(bool update_next_states)
 				} else {
 					comma = true;
 				}
-				PrintPart_CXX(ss, ATgetFirst(o), ppAdvanced);
+				PrintPart_CXX(ss, ATgetFirst(o), ppDefault);
 				ss << " := ";
 				if ( gsIsDataVarId(newval) )
 				{
 					ss << "_";
 				} else {
-					PrintPart_CXX(ss, (ATerm) newval, ppAdvanced);
+					PrintPart_CXX(ss, (ATerm) newval, ppDefault);
 				}
 			}
 

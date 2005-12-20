@@ -44,7 +44,7 @@ static void PrintState(stringstream &ss, ATerm state, NextState *ns)
                 {
 			ss << "_";
                 } else {
-                        PrintPart_CXX(ss, (ATerm) a, ppAdvanced);
+                        PrintPart_CXX(ss, (ATerm) a, ppDefault);
                 }
         }
 }
@@ -95,7 +95,7 @@ void XSimTrace::AddState(ATermAppl Transition, ATerm State, bool enabled)
 		int l = traceview->GetItemCount();
 
 		traceview->InsertItem(l,wxString::Format(wxT("%i"),l));
-		traceview->SetItem(l,1,wxConvLocal.cMB2WX(PrintPart_CXX((ATerm) Transition, ppAdvanced).c_str()));
+		traceview->SetItem(l,1,wxConvLocal.cMB2WX(PrintPart_CXX((ATerm) Transition, ppDefault).c_str()));
 		PrintState(ss,State,simulator->GetNextState());
 		traceview->SetItem(l,2,wxConvLocal.cMB2WX(ss.str().c_str()));
 		traceview->SetColumnWidth(2,wxLIST_AUTOSIZE);

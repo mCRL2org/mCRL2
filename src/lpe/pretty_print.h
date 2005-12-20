@@ -10,7 +10,7 @@ namespace lpe {
   inline
   std::string pretty_print(ATerm t)
   {
-    return PrintPart_CXX(t, ppAdvanced);
+    return PrintPart_CXX(t, ppDefault);
   }
 
   /// Returns a pretty print representation of the term_list.

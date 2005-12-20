@@ -6,9 +6,9 @@
 <!ENTITY infile "<parameter>INFILE</parameter>">
 <!ENTITY outfile "<parameter>OUTFILE</parameter>">
 <!ENTITY format "<parameter>FORMAT</parameter>">
+<!ENTITY default "<parameter>default</parameter>">
+<!ENTITY debug "<parameter>debug</parameter>">
 <!ENTITY internal "<parameter>internal</parameter>">
-<!ENTITY basic "<parameter>basic</parameter>">
-<!ENTITY advanced "<parameter>advanced</parameter>">
 <!ENTITY opt_f "<option>-f</option>">
 <!ENTITY opt_h "<option>-h</option>">
 <!ENTITY opt_q "<option>-q</option>">
@@ -67,20 +67,19 @@
         print the LPE in the specified &format;:
         <itemizedlist spacing='compact'>
         <listitem>
-          <para>&internal; for a textual ATerm representation of the internal format</para>
+          <para>&default; for an mCRL2 specification (default)</para>
         </listitem>
         <listitem>
-          <para>&basic; is like &advanced;, with the following exceptions
-            (useful for debugging):</para>
+          <para>&debug; is like &default;, with the following exceptions:</para>
           <itemizedlist>
           <listitem><para>data expressions are printed in prefix notation using
             identifiers from the internal format</para></listitem>
-          <listitem><para>data equations are not grouped into sections with
-            non-overlapping variable declarations</para></listitem>
+          <listitem><para>each data equation is put in a separate data equation
+            section</para></listitem>
           </itemizedlist>
         </listitem>
         <listitem>
-          <para>&advanced; for an mCRL2 specification (default)</para>
+          <para>&internal; for a textual ATerm representation of the internal format</para>
         </listitem>
         </itemizedlist>
       </para>
@@ -121,7 +120,7 @@
     <term>&opt_verbose;</term>
     <listitem>
       <para>
-        display short intermediate messages
+        display concise intermediate messages
       </para>
     </listitem>
   </varlistentry>
@@ -136,6 +135,15 @@
     </listitem>
   </varlistentry>
   </variablelist>
+</para>
+</refsect1>
+
+<refsect1>
+<title>Known Issues</title>
+<para>
+  The LPE printed in the &default; format is not a well-formed mCRL2
+  specification, because it contains system defined sorts, operations and
+  equations.
 </para>
 </refsect1>
 

@@ -3,7 +3,7 @@
 
 //Type definitions for both pretty pretty printers
 
-typedef enum { ppInternal, ppBasic, ppAdvanced } t_pp_format;
+typedef enum { ppDefault, ppDebug, ppInternal } t_pp_format;
 //t_pp_format represents the available pretty print formats
 
 #endif //__LIBPRINT_TYPES_H

@@ -337,7 +337,7 @@ void Trace::savePlain(ostream &os)
 	{
 		if ( gsIsMultAct(actions[i]) )
 		{
-			PrintPart_CXX(os,(ATerm) actions[i],ppAdvanced);
+			PrintPart_CXX(os,(ATerm) actions[i],ppDefault);
 		} else {
 			os << ATwriteToString((ATerm) actions[i]);
 		}

@@ -58,7 +58,7 @@ int main(int argc, char* argv[]) {
   //declarations for parsing the specification
   char *SpecFileName   = NULL;
   char *OutputFileName = NULL;
-  t_pp_format opt_pp_format = ppAdvanced;
+  t_pp_format opt_pp_format = ppDefault;
   //declarations for getopt  
   #define ShortOptions      "f:hqvd"
   #define VersionOption     CHAR_MAX + 1
@@ -77,12 +77,12 @@ int main(int argc, char* argv[]) {
   while (Option != -1) {
     switch (Option) {
       case 'f':
-        if (strcmp(optarg, "internal") == 0) {
+        if (strcmp(optarg, "default") == 0) {
+          opt_pp_format = ppDefault;
+        } else if (strcmp(optarg, "debug") == 0) {
+          opt_pp_format = ppDebug;
+        } else if (strcmp(optarg, "internal") == 0) {
           opt_pp_format = ppInternal;
-        } else if (strcmp(optarg, "basic") == 0) {
-          opt_pp_format = ppBasic;
-        } else if (strcmp(optarg, "advanced") == 0) {
-          opt_pp_format = ppAdvanced;
         } else {
           gsErrorMsg("option -f has illegal argument '%s'\n", optarg);
           return 1;
@@ -235,19 +235,19 @@ void PrintUsage(char *Name) {
     "\n"
     "Mandatory arguments to long options are mandatory for short options too.\n"
     "  -f, --format=FORMAT   print the LPE in the specificied FORMAT:\n"
-    "                        - 'internal' for a textual ATerm representation of the\n"
-    "                          internal format\n"
-    "                        - 'basic' is like 'advanced' with the following\n"
-    "                          exceptions (useful for debugging):\n"
+    "                        - 'default' for an mCRL2 specification (default)\n"
+    "                        - 'debug' is like 'default' with the following\n"
+    "                          exceptions:\n"
     "                          + data expressions are printed in prefix notation\n"
     "                            using identifiers from the internal format\n"
-    "                          + data equations are not grouped into sections with\n"
-    "                            non-overlapping variable declarations\n"
-    "                        - 'advanced' for an mCRL2 specification (default)\n"
+    "                          + each data equation is put in a separate data\n"
+    "                            equation section\n"
+    "                        - 'internal' for a textual ATerm representation of the\n"
+    "                          internal format\n"
     "  -h, --help            display this help and terminate\n"
     "      --version         display version information and terminate\n"
     "  -q, --quiet           do not display warning messages\n"
-    "  -v, --verbose         display short intermediate messages\n"
+    "  -v, --verbose         display concise intermediate messages\n"
     "  -d, --debug           display detailed intermediate messages\n",
     Name
   );
@@ -263,11 +263,11 @@ void PrintVersion(void) {
 
 void PrintPPFormat(FILE *stream, t_pp_format pp_format)
 {
-  if (pp_format == ppInternal) {
+  if (pp_format == ppDefault) {
+    fprintf(stream, "default");
+  } else if (pp_format == ppDebug) {
+    fprintf(stream, "debug");
+  } else if (pp_format == ppInternal) {
     fprintf(stream, "internal");
-  } else if (pp_format == ppBasic) {
-    fprintf(stream, "basic");
-  } else if (pp_format == ppAdvanced) {
-    fprintf(stream, "advanced");
   }
 }

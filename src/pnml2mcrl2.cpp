@@ -1919,7 +1919,7 @@
 	    }
 	}
       
-      PrintPart_C(OutStream, (ATerm) Spec, ppAdvanced);
+      PrintPart_C(OutStream, (ATerm) Spec, ppDefault);
       fclose(OutStream);
     }
     return 0;
