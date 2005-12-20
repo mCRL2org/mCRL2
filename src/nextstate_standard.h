@@ -86,7 +86,7 @@ class NextStateStandard : public NextState
 		ATerm buildTree(ATerm *args);
 		ATerm getTreeElement(ATerm tree, int index);
 
-		ATermAppl FindDummy(ATermAppl sort);
+		ATermAppl FindDummy(ATermAppl sort, ATermList no_dummy = ATempty);
 		ATerm SetVars(ATerm a, ATermList free_vars);
 		ATermList ListToFormat(ATermList l,ATermList free_vars);
 		ATermList ListFromFormat(ATermList l);

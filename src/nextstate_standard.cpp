@@ -158,9 +158,11 @@ ATermAppl NextStateStandard::makeStateVector(ATerm state)
 	return ATmakeApplArray(info.stateAFun,stateargs);
 }
 
-ATermAppl NextStateStandard::FindDummy(ATermAppl sort)
+ATermAppl NextStateStandard::FindDummy(ATermAppl sort, ATermList no_dummy)
 {
 	ATermList l;
+
+	no_dummy = ATinsert(no_dummy,(ATerm) sort);
 
 	if ( gsIsSortArrow(sort) )
 	{
@@ -177,13 +179,19 @@ ATermAppl NextStateStandard::FindDummy(ATermAppl sort)
 			ATermList domain = gsGetSortExprDomain(conssort);
 			ATermAppl t = ATAgetFirst(l);
 
-			if ( ATindexOf(domain,(ATerm) sort,0) == -1)
+			bool found = true;
+			for (; !ATisEmpty(domain); domain=ATgetNext(domain))
 			{
-				for (; !ATisEmpty(domain); domain=ATgetNext(domain))
+				if ( ATindexOf(no_dummy,ATgetFirst(domain),0) >= 0 )
 				{
-					t = gsMakeDataAppl(t,FindDummy(ATAgetFirst(domain)));
+					found = false;
+					break;
 				}
+				t = gsMakeDataAppl(t,FindDummy(ATAgetFirst(domain),no_dummy));
+			}
 
+			if ( found )
+			{
 				return t;
 			}
 		}
@@ -198,12 +206,21 @@ ATermAppl NextStateStandard::FindDummy(ATermAppl sort)
 			ATermList domain = gsGetSortExprDomain(mapsort);
 			ATermAppl t = ATAgetFirst(l);
 
+			bool found = true;
 			for (; !ATisEmpty(domain); domain=ATgetNext(domain))
 			{
-				t = gsMakeDataAppl(t,FindDummy(ATAgetFirst(domain)));
+				if ( ATindexOf(no_dummy,ATgetFirst(domain),0) >= 0 )
+				{
+					found = false;
+					break;
+				}
+				t = gsMakeDataAppl(t,FindDummy(ATAgetFirst(domain),no_dummy));
 			}
 
-			return t;
+			if ( found )
+			{
+				return t;
+			}
 		}
 	}
 
