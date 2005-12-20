@@ -1,5 +1,5 @@
 #define  NAME      "lpepp"
-#define  VERSION   "0.4.3"
+#define  VERSION   "0.4.4"
 #define  AUTHOR    "Aad Mathijssen"
 
 #include <stdio.h>
@@ -234,15 +234,21 @@ void PrintUsage(char *Name) {
     "is not present, stdout is used. If INFILE is not present, stdin is used.\n"
     "\n"
     "Mandatory arguments to long options are mandatory for short options too.\n"
-    "  -f, --format=FORMAT   the LPE is printed using the supplied FORMAT:\n"
-    "                          'internal' for the internal format\n"
-    "                          'basic' for the basic structure (used for debugging)\n"
-    "                          'advanced' for an mCRL2 specification (default)\n"
-    "  -h, --help            display this help\n"
-    "      --version         display version information\n"
+    "  -f, --format=FORMAT   print the LPE in the specificied FORMAT:\n"
+    "                        - 'internal' for a textual ATerm representation of the\n"
+    "                          internal format\n"
+    "                        - 'basic' is like 'advanced' with the following\n"
+    "                          exceptions (useful for debugging):\n"
+    "                          + data expressions are printed in prefix notation\n"
+    "                            using identifiers from the internal format\n"
+    "                          + data equations are not grouped into sections with\n"
+    "                            non-overlapping variable declarations\n"
+    "                        - 'advanced' for an mCRL2 specification (default)\n"
+    "  -h, --help            display this help and terminate\n"
+    "      --version         display version information and terminate\n"
     "  -q, --quiet           do not display warning messages\n"
-    "  -v, --verbose         turn on the display of short intermediate messages\n"
-    "  -d, --debug           turn on the display of detailed intermediate messages\n",
+    "  -v, --verbose         display short intermediate messages\n"
+    "  -d, --debug           display detailed intermediate messages\n",
     Name
   );
 }

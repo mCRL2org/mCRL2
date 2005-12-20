@@ -22,7 +22,7 @@ clean:
 
 distclean: clean
 
-install: all $(MAN_INSTALL_TARGETS) $(HTML_OBJECTS)
+install: all $(MAN_INSTALL_TARGETS)
 
 else
 all:

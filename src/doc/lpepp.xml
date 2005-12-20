@@ -64,13 +64,20 @@
     <term>&opt_format;=&format;</term>
     <listitem>
       <para>
-        the LPE is printed using the supplied &format;:
+        print the LPE in the specified &format;:
         <itemizedlist spacing='compact'>
         <listitem>
-          <para>&internal; for the internal format</para>
+          <para>&internal; for a textual ATerm representation of the internal format</para>
         </listitem>
         <listitem>
-          <para>&basic; for the basic structure (used for debugging)</para>
+          <para>&basic; is like &advanced;, with the following exceptions
+            (useful for debugging):</para>
+          <itemizedlist>
+          <listitem><para>data expressions are printed in prefix notation using
+            identifiers from the internal format</para></listitem>
+          <listitem><para>data equations are not grouped into sections with
+            non-overlapping variable declarations</para></listitem>
+          </itemizedlist>
         </listitem>
         <listitem>
           <para>&advanced; for an mCRL2 specification (default)</para>
@@ -114,7 +121,7 @@
     <term>&opt_verbose;</term>
     <listitem>
       <para>
-        turn on the display of short intermediate messages
+        display short intermediate messages
       </para>
     </listitem>
   </varlistentry>
@@ -124,7 +131,7 @@
     <term>&opt_debug;</term>
     <listitem>
       <para>
-        turn on the display of detailed intermediate messages
+        display detailed intermediate messages
       </para>
     </listitem>
   </varlistentry>
@@ -135,8 +142,8 @@
 <refsect1>
 <title>Author</title>
 <para>
-  Written by Aad Mathijssen. Please send all complaints, comments and bug fixes
-  to <email>bug@mcrl2.org</email>.
+  Written by Aad Mathijssen. Please send all complaints, comments and bug
+  reports to <email>bug@mcrl2.org</email>.
 </para>
 </refsect1>
 

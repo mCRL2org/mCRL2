@@ -1,5 +1,5 @@
 #define NAME "mcrl22lpe"
-#define VERSION "0.2"
+#define VERSION "0.2.1"
 #define INFILEEXT ".mcrl2"
 #define OUTFILEEXT ".lpe"
 
@@ -427,10 +427,10 @@ void PrintHelp(char *Name)
     "  -p  --end-phase=PHASE stop linearisation after phase PHASE and output the\n"
     "                        result; PHASE can be 'pa' (parse), 'tc' (type check),\n"
     "                        'ar' (alphabet reduction) or 'di' (data implementation)\n"
-    "  -h, --help            display this help\n"    
-    "      --version         display version information\n"
+    "  -h, --help            display this help and terminate\n"
+    "      --version         display version information and terminate\n"
     "  -q, --quiet           do not display warning messages\n"
-    "  -v, --verbose         turn on the display of short intermediate messages\n"
-    "  -d, --debug           turn on the display of detailed intermediate messages\n",
+    "  -v, --verbose         display short intermediate messages\n"
+    "  -d, --debug           display detailed intermediate messages\n",
     Name);
 }
