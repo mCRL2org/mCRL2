@@ -110,9 +110,7 @@ int main(int argc, char **argv) {
 
   processCommandLineOptions(argc, argv);
 
-  path input_file;
-
-  input_file = path(file_name, no_check);
+  path input_file(file_name, no_check);
 
   settings_manager.SetHomeDirectory(input_file.branch_path().string().c_str());
   settings_manager.SetToolCatalogName(input_file.leaf());

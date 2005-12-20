@@ -46,7 +46,7 @@
   name is not interesting for our specification format. The reason is that we
   want to have a tool return a specification of its interface as a part of its
   behaviour. But if a tool is invoked then its name is already known... With a
-  special command line switch: `\texttt{--sqf-interface}' the tool may return a
+  special command line switch: `\texttt{--sqi-interface}' the tool may return a
   specification of its interface and terminate.
   \\[5pt]
   To run a tool, a number of arguments is specified as a string, which
@@ -598,7 +598,7 @@
 \subsection{Standing Issues}
 \begin{itemize}
  \item We should find a proper name for this specification format.
- \item Using an XML name space for instance sqf looks good.
+ \item Using an XML name space for instance sqi looks good.
  \item Predefined names for categories and sub-categories.
  \item Should there be a data type for dates?
  \item Other common numeric representations: hexadecimal, octagonal, binary?
@@ -607,7 +607,7 @@
 
 \subsection{Undiscussed Things}
 \begin{itemize}
- \item Adopted \texttt{sqf} as preliminary name of specification format.
+ \item Adopted \texttt{sqi} as preliminary name of specification format.
  \item Options that may take a variable number of arguments.
  \item Multiplicity of arguments (an argument may be specified a number of times to increase effect).
 \end{itemize}

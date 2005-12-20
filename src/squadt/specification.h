@@ -60,6 +60,9 @@ class SpecificationVisualiser {
     /* Callback function for updating a user interface */
     inline virtual void VisualiseStatusChange(SpecificationStatus) {
     }
+
+    virtual ~SpecificationVisualiser() {
+    }
 };
 
 /*

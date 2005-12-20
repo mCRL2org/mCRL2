@@ -77,13 +77,13 @@ void ToolExecutor::TerminateAll() {
   std::vector < Process*>::const_iterator b = processes.end();
   std::vector < Process*>::const_iterator i = processes.begin();
 
+  queue.clear();
+
   while (i != b) {
     Process::Kill((*i)->GetId(), wxSIGTERM);
 
     ++i;
   }
-
-  processes.clear();
 }
 
 /* Signal a change is status for a process */
