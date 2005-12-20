@@ -1758,7 +1758,9 @@ fflush(f);
 
 			used[arg] = true;
 		} else {
-			implement_tree(f,(ATermAppl) ATgetFirst(strat),arity,d,opid,used);
+			fprintf(f,"%s{\n",whitespace(2*d));
+			implement_tree(f,(ATermAppl) ATgetFirst(strat),arity,d+1,opid,used);
+			fprintf(f,"%s}\n",whitespace(2*d));
 		}
 
 		strat = ATgetNext(strat);
