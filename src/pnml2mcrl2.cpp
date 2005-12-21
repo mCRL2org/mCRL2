@@ -1838,7 +1838,7 @@
     
     char *SpecStream;
     if ( argc-optind < 1 ){
-      SpecStream = "stdin";
+      SpecStream = "-";
     } else {
       if ( (SpecStream = argv[optind]) == NULL ){
 	perror(NAME);
