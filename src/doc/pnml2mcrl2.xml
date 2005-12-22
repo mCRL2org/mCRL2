@@ -101,6 +101,8 @@
             If this option is turned on, non-recursive mCRL2 processes for the places
             are generated. If this option is not turned on, the mCRL2 processes that
             correspond to the places of the Petri net are recursive.
+            This option also enables the translation of inhibitor arcs and reset
+            arcs.
           </para>
         </listitem>
       </varlistentry>
