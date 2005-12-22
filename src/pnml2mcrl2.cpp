@@ -1779,11 +1779,14 @@
 	    "Only classical Petri nets are translated, i.e. places, transitions and arcs.\n"
 	    "Other constructs such as timing, coloring, inhibitor arcs and hierarchy are\n"
 	    "not taken into account.\n"
+	    "With the -p option turned on, more functionality is supported.\n"
 	    "\n"
 	    "  -h, --help            display help information\n"
 	    "  -q, --quiet           do not display warning messages\n"
 	    "  -d, --debug           turn on the display of detailed intermediate messages\n"
 	    "  -p, --no_rec_par      generate places in which the result is non-recursive\n"
+	    "                        with this flag turned on, inhibitor and reset arcs\n"
+	    "                        are translated!\n"
 	    "  -v, --verbose         turn on the display of short intermediate messages\n"
 	    "      --version         display version information\n",
 	    Name);
@@ -1840,13 +1843,13 @@
     if ( argc-optind < 1 ){
       SpecStream = "-";
     } else {
-      if ( (SpecStream = argv[optind]) == NULL ){
+      if ( (SpecStream = argv[optind]) == NULL ){ 
 	perror(NAME);
 	return 1;
       }
     }
-
     xmlDocPtr doc = xmlParseFile(SpecStream);
+
     if(!doc) {
       gsErrorMsg("Document not parsed succesfully. \n");
       return 1;
