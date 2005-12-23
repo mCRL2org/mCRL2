@@ -1839,16 +1839,16 @@
       }
     }
     
-    char *SpecStream;
+    char *InFileName;
     if ( argc-optind < 1 ){
-      SpecStream = "-";
+      InFileName = "-";
     } else {
-      if ( (SpecStream = argv[optind]) == NULL ){ 
+      if ( (InFileName = argv[optind]) == NULL ){ 
 	perror(NAME);
 	return 1;
       }
     }
-    xmlDocPtr doc = xmlParseFile(SpecStream);
+    xmlDocPtr doc = xmlParseFile(InFileName);
 
     if(!doc) {
       gsErrorMsg("Document not parsed succesfully. \n");
