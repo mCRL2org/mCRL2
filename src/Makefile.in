@@ -89,6 +89,8 @@ else
 endif
 
 ifdef USE_BOOST
+ BOOST_CPPFLAGS = -I$(BOOST_PREFIX)/include
+
  ifneq ($(BOOST_PREFIX),)
   BOOST_CPPFLAGS = -I$(BOOST_PREFIX)/include
  endif

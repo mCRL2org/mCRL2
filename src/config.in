@@ -80,7 +80,8 @@ ifeq ($(BOOST_PREFIX),boost)
   BOOST_LDFLAGS = -Wl,-rpath=$(libdir)
  endif
 
- BOOST_PREFIX     := @abs_top_srcdir@/$(BOOST_PREFIX)
+ BOOST_PREFIX   := @abs_top_srcdir@/$(BOOST_PREFIX)
+ BOOST_CPPFLAGS  = -I$(BOOST_PREFIX)
 
  ifeq ($(HOST_OS),MINGW)
   BOOST_FILESYSTEM      = $(BOOST_PREFIX)/lib/libboost_filesystem-s.lib
@@ -90,9 +91,11 @@ ifeq ($(BOOST_PREFIX),boost)
   BOOST_FILESYSTEM      = $(BOOST_PREFIX)/lib/libboost_filesystem-s.lib
   BOOST_PROGRAM_OPTIONS = $(BOOST_PREFIX)/lib/libboost_program_options-s.lib
  endif
+else
+ BOOST_CPPFLAGS = -I$(BOOST_PREFIX)/include
 endif
 
-BOOST_LDFLAGS        += -L$(BOOST_PREFIX)/lib
+BOOST_LDFLAGS  += -L$(BOOST_PREFIX)/lib
 
 # Add revision number
 ifeq ($(findstring $(MAKECMDGOALS),clean distclean),)

@@ -10,7 +10,7 @@ lib boost_program_options
      : ../src/$(SOURCES).cpp
      : # build requirements
        [ common-names ] # magic for install and auto-link features
-       <include>$(BOOST_ROOT)/include <sysinclude>$(BOOST_ROOT)
+       <include>$(BOOST_ROOT) <sysinclude>$(BOOST_ROOT)
        std::locale-support
      : debug release  # build variants
      ;
@@ -21,7 +21,7 @@ dll boost_program_options
        [ common-names ]  # magic for install and auto-link features
        <define>BOOST_ALL_DYN_LINK=1  # tell source we're building dll's
        <runtime-link>dynamic  # build only for dynamic runtimes
-       <include>$(BOOST_ROOT)/include <sysinclude>$(BOOST_ROOT)
+       <include>$(BOOST_ROOT) <sysinclude>$(BOOST_ROOT)
        # The following really turns on static runtime linking
        # which leads to runtime crashes when using DLL, so
        # seem DLL is not usable on Metrowerks 8
