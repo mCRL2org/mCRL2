@@ -20,21 +20,20 @@ LIBXML2_OBJECTS                = xml_text_reader.o project_manager.o tool_manage
 
 BOOST_OBJECTS                  = gui_project_overview.o tool_manager.o project_manager.o gui_specification_properties.o \
 				 settings_manager.o specification.o
-BOOST_CPPFLAGS                 = -I$(BOOST_PREFIX)/include
 
 WX_OBJECTS                     = squadt.o gui_project_overview.o gui_new_specification.o gui_specification_properties.o \
-				 gui_resources.o tool_executor.o logger.o process.o socket_proxy.o
+				 gui_resources.o tool_executor.o logger.o process.o
 WX_LIBRARIES                  := $(shell $(WX_CONFIG) --libs core base adv net)
 
 PROJECT_MANAGER_OBJECTS        = project_manager.o specification.o xml_text_reader.o settings_manager.o
 TOOL_MANAGER_OBJECTS           = tool_manager.o tool.o xml_text_reader.o settings_manager.o
-TOOL_EXECUTOR_OBJECTS          = tool_executor.o process.o# proxy.o socket_proxy.o 
+TOOL_EXECUTOR_OBJECTS          = tool_executor.o process.o
 GUI_OBJECTS                    = squadt.o gui_project_overview.o gui_new_specification.o gui_specification_properties.o \
 				 $(sort $(TOOL_EXECUTOR_OBJECTS) $(PROJECT_MANAGER_OBJECTS) $(TOOL_MANAGER_OBJECTS)) \
 				 gui_resources.o logger.o
 OBJECTS                        = $(sort $(GUI_OBJECTS) $(PROJECT_MANAGER_OBJECTS) $(TOOL_MANAGER_OBJECTS) $(TOOL_EXECUTOR_OBJECTS))
 
-TEST_TARGETS                   = project_manager_tester tool_manager_tester
+TEST_TARGETS                   = project_manager_tester tool_manager_tester tests/messenger/connection_test
 TARGETS                        = squadt libmd5.a
 
 .PHONY: all install clean distclean test strip
@@ -48,7 +47,7 @@ revision: ../utility/get_revision
 	@echo "CPPFLAGS += -DREVISION=$$(../utility/get_revision)" > revision
 
 ../utility/get_revision: ../utility/get_revision.cpp
-	$(CXX) -I$(BOOST_PREFIX)/include $< $(subst $(libdir),$(BOOST_PREFIX)/lib,$(BOOST_LDFLAGS)) $(BOOST_FILESYSTEM) -o $@ 
+	$(CXX) $(BOOST_CPPFLAGS) $< $(subst $(libdir),$(BOOST_PREFIX)/lib,$(BOOST_LDFLAGS)) $(BOOST_FILESYSTEM) -o $@ 
 
 -include revision
 
@@ -63,6 +62,7 @@ dependencies: *.cpp *.h
 endif
 
 test: all $(TEST_TARGETS)
+	@tests/messenger/connection_test
 
 $(LIBXML2_OBJECTS):         CPPFLAGS += $(BOOST_CPPFLAGS) $(WX_CPPFLAGS) $(LIBXML2_CPPFLAGS)
 $(BOOST_OBJECTS):           CPPFLAGS += $(BOOST_CPPFLAGS) $(WX_CPPFLAGS) $(LIBXML2_CPPFLAGS)
@@ -80,10 +80,10 @@ libmd5.a: libmd5/md5pp.cpp libmd5/md5pp.h
 	$(AR) $(ARFLAGS) $@ libmd5/md5pp.o libmd5/md5.o
 
 tool_manager_tester: tool_manager_tester.cpp $(TOOL_MANAGER_OBJECTS)
-	$(CXX) $(CXXFLAGS) $(CPPFLAGS) $(TOOL_MANAGER_OBJECTS) $(LDFLAGS) $(WX_LIBRARIES) -o $@ $<
+	$(CXX) $(CXXFLAGS) $(CPPFLAGS) $(BOOST_CPPFLAGS) $(TOOL_MANAGER_OBJECTS) $(BOOST_LDFLAGS) $(LDFLAGS) libmd5.a $(BOOST_FILESYSTEM) $(WX_LIBRARIES) -o $@ $<
 
-project_manager_tester: project_manager_tester.cpp $(PROJECT_MANAGER_OBJECTS) 
-	$(CXX) $(CXXFLAGS) $(CPPFLAGS) $(PROJECT_MANAGER_OBJECTS) $(LDFLAGS) $(WX_LIBRARIES) -o $@ $<
+project_manager_tester: project_manager_tester.cpp $(PROJECT_MANAGER_OBJECTS)
+	$(CXX) $(CXXFLAGS) $(CPPFLAGS) $(BOOST_CPPFLAGS) $(PROJECT_MANAGER_OBJECTS) $(BOOST_LDFLAGS) $(LDFLAGS) libmd5.a $(BOOST_FILESYSTEM) $(WX_LIBRARIES) -o $@ $<
 
 squadt: $(GUI_OBJECTS) libmd5.a
 	$(CXX) $(CXXFLAGS) $(CPPFLAGS) $(GUI_OBJECTS) $(LDFLAGS) $(WX_LIBRARIES) libmd5.a $(BOOST_LDFLAGS) $(BOOST_FILESYSTEM) -o $@
@@ -93,6 +93,12 @@ utility/relocator: utility/relocator.o settings_manager.o $(TOOL_MANAGER_OBJECTS
 
 %.o: %.cpp
 	$(CXX) -c $(CXXFLAGS) $(CPPFLAGS) $< -o $@
+
+tests/messenger/connection_test: messenger.o tests/messenger/connection_test.cpp
+	$(CXX) $(CXXFLAGS) $(CPPFLAGS) -I../boost/include -I. -lpthread -lboost_unit_test_framework $^ -o $@
+
+messenger.o: messenger.cpp
+	$(CXX) -c $(CXXFLAGS) $(CPPFLAGS) -I../boost/include $< -o $@
 
 $(OBJECTS) $(TARGETS): Makefile
 

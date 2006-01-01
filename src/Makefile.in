@@ -89,12 +89,6 @@ else
 endif
 
 ifdef USE_BOOST
- BOOST_CPPFLAGS = -I$(BOOST_PREFIX)/include
-
- ifneq ($(BOOST_PREFIX),)
-  BOOST_CPPFLAGS = -I$(BOOST_PREFIX)/include
- endif
-
  #lpeinfo definitions
  LPEINFO_NAME        = lpeinfo
  LPEINFO_OBJECTS     = libprint.o libstruct.o libprint_c.o liblowlevel.o lpeinfo.o
@@ -219,7 +213,7 @@ utility/get_revision: utility/get_revision.cpp
 ifdef BUILD_BOOST
 	@$(MAKE) -C boost
 endif
-	$(CXX) -I$(BOOST_PREFIX)/include $< $(subst $(libdir),$(BOOST_PREFIX)/lib,$(BOOST_LDFLAGS)) $(BOOST_FILESYSTEM) -o $@
+	$(CXX) $(BOOST_CPPFLAGS) $< $(subst $(libdir),$(BOOST_PREFIX)/lib,$(BOOST_LDFLAGS)) $(BOOST_FILESYSTEM) -o $@
 
 -include revision
 
