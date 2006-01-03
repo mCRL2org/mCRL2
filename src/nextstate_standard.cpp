@@ -1,5 +1,6 @@
 #include <stdio.h>
 #include <stdlib.h>
+#include <string.h>
 #include <aterm2.h>
 #include "liblowlevel.h"
 #include "libstruct.h"
@@ -399,6 +400,7 @@ NextStateStandard::NextStateStandard(ATermAppl spec, bool allow_free_vars, int s
 	}
 	sums = ATreverse(l);
 	info.num_summands = ATgetLength(sums);
+	info.num_prioritised = 0;
 	info.summands = (ATermAppl *) malloc(info.num_summands*sizeof(ATermAppl));
 	for (int i=0; i<info.num_summands; i++)
 	{
@@ -477,6 +479,49 @@ NextStateStandard::~NextStateStandard()
 	free(info.summands);
 
 	free(tree_init);
+}
+
+static bool only_action(ATermList ma, char *action)
+{
+	if ( ATisEmpty(ma) )
+	{
+		return false;
+	}
+
+	for (;!ATisEmpty(ma); ma=ATgetNext(ma))
+	{
+		if ( strcmp(ATgetName(ATgetAFun(ATAgetArgument(ATAgetArgument(ATAgetFirst(ma),0),0))),action) )
+		{
+			return false;
+		}
+	}
+	return true;
+}
+void NextStateStandard::prioritise(char *action)
+{
+	// XXX this function invalidates currently used generators!
+	// perhaps
+	bool is_tau = !strcmp(action,"tau");
+	int pos = 0;
+	int rest = 0;
+
+	while ( pos < info.num_summands )
+	{
+		ATermAppl s = info.summands[pos];
+		ATermList ma = ATLgetArgument(ATAgetArgument(s,2),0);
+		if ( (is_tau && ATisEmpty(ma)) || (!is_tau && only_action(ma,action)) )
+		{
+			//if ( rest < pos )
+			//{
+				info.summands[pos] = info.summands[rest];
+				info.summands[rest] = s;
+			//}
+			rest++;
+		}
+		pos++;
+	}
+	
+	info.num_prioritised += rest;
 }
 
 ATerm NextStateStandard::getInitialState()
@@ -635,7 +680,7 @@ void NextStateGeneratorStandard::reset(ATerm State)
 	sum_idx = 1;
 }
 
-bool NextStateGeneratorStandard::next(ATermAppl *Transition, ATerm *State)
+bool NextStateGeneratorStandard::next(ATermAppl *Transition, ATerm *State, bool *prioritised)
 {
 	ATermList sol;
 
@@ -662,6 +707,10 @@ bool NextStateGeneratorStandard::next(ATermAppl *Transition, ATerm *State)
 		}
 		*Transition = rewrActionArgs((ATermAppl) cur_act);
 		*State = (ATerm) makeNewState(cur_state,cur_nextstate);
+		if ( prioritised != NULL )
+		{
+			*prioritised = (sum_idx <= info.num_prioritised);
+		}
 		for (ATermList m=sol; !ATisEmpty(m); m=ATgetNext(m))
 		{
 			info.rewr_obj->clearSubstitution((ATermAppl) ATgetArgument((ATermAppl) ATgetFirst(m),0));

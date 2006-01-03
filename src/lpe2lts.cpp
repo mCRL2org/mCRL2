@@ -26,6 +26,76 @@ using namespace std;
 #define OF_AUT    1
 #define OF_SVC    2
 
+static ATermAppl *parse_action_list(char *s, int *len)
+{
+  char *p;
+
+  *len = 0;
+  p = s;
+  while ( p != NULL )
+  {
+    *len = (*len)+1;
+    p = strstr(p+1,",");
+  }
+
+  ATermAppl *r = (ATermAppl *) malloc((*len)*sizeof(ATermAppl));
+  for (int i=0; i<(*len); i++)
+  {
+    r[i] = NULL;
+  }
+  ATprotectArray((ATerm *) r,*len);
+
+  char *t = strdup(s);
+  p = strtok(t,",");
+  int i=0;
+  while ( p != NULL )
+  {
+    r[i] = gsString2ATermAppl(p);
+    i++;
+    p = strtok(NULL,",");
+  }
+  free(t);
+
+  return r;
+}
+
+static bool occurs_in(ATermAppl name, ATermList ma)
+{
+  for (; !ATisEmpty(ma); ma=ATgetNext(ma))
+  {
+    if ( ATisEqual(name,ATgetArgument(ATAgetArgument(ATAgetFirst(ma),0),0)) )
+    {
+      return true;
+    }
+  }
+  return false;
+}
+
+static void save_trace(string &filename, ATerm state, ATermTable backpointers, NextState *nstate)
+{
+  ATerm s = state;
+  ATerm ns;
+  ATermList tr = ATmakeList0();
+  
+  while ( (ns = ATtableGet(backpointers, s)) != NULL )
+  {
+    tr = ATinsert(tr, (ATerm) ATmakeList2(ATgetFirst(ATgetNext((ATermList) ns)),s));
+    s = ATgetFirst((ATermList) ns);
+  }
+  
+  Trace trace;
+  trace.setState(nstate->makeStateVector(s));
+  for (; !ATisEmpty(tr); tr=ATgetNext(tr))
+  {
+    ATermList e = (ATermList) ATgetFirst(tr);
+    trace.addAction((ATermAppl) ATgetFirst(e));
+    e = ATgetNext(e);
+    trace.setState(nstate->makeStateVector(ATgetFirst(e)));
+  }
+
+  trace.save(filename);
+}
+
 static void print_help_suggestion(FILE *f, char *Name)
 {
   fprintf(f,"Try '%s --help' for more information.\n",Name);
@@ -59,6 +129,14 @@ static void print_help(FILE *f, char *Name)
     "  -d, --deadlock-detect detect deadlocks (i.e. for every deadlock a message is\n"
     "                        printed)\n"
     "  -e, --deadlock-trace  write trace to each deadlock state to a file\n"
+    "  -D, --detect=NAME*    detect actions from NAME* (i.e. print a message for\n"
+    "                        every occurence)\n"
+    "  -t, --trace=NAME*     write trace to each state that is reached with an\n"
+    "                        action from NAME* to a file\n"
+    "  -p, --priority=NAME   give priority to action NAME (i.e. if it is\n"
+    "                        possible to execute an action NAME in some state,\n"
+    "                        than make it the only executable action from that\n"
+    "                        state)\n"
     "  -m, --monitor         print detailed status of generation\n"
     "  -R, --rewriter=NAME   use rewriter NAME (default 'inner3')\n"
     "      --aut             force OUTFILE to be in the aut format (implies\n"
@@ -78,7 +156,7 @@ int main(int argc, char **argv)
   FILE *SpecStream;
   ATerm stackbot;
   ATermAppl Spec;
-  #define sopts "hqvfyucrl:demR:"
+  #define sopts "hqvfyucrl:deD:t:mp:R:"
   struct option lopts[] = {
     { "help",            no_argument,       NULL, 'h' },
     { "version",         no_argument,       NULL, 0   },
@@ -93,7 +171,10 @@ int main(int argc, char **argv)
     { "deadlock",        no_argument,       NULL, 'd' },
     { "deadlock-detect", no_argument,       NULL, 'd' },
     { "deadlock-trace",  no_argument,       NULL, 'e' },
+    { "detect",          required_argument, NULL, 'D' },
+    { "trace",           required_argument, NULL, 't' },
     { "monitor",         no_argument,       NULL, 'm' },
+    { "priority",        required_argument, NULL, 'p' },
     { "rewriter",        required_argument, NULL, 'R' },
     { "aut",             no_argument,       NULL, 1   },
     { "svc",             no_argument,       NULL, 2   },
@@ -112,10 +193,15 @@ int main(int argc, char **argv)
   int outformat = OF_UNKNOWN;
   bool outinfo = true;
   unsigned long max_states = ULONG_MAX;
+  char *priority_action = NULL;
   bool trace = false;
   bool trace_deadlock = false;
+  bool trace_action = false;
+  int num_trace_actions = 0;
+  ATermAppl *trace_actions = NULL;
   bool monitor = false;
-  bool explore = false;
+  bool detect_deadlock = false;
+  bool detect_action = false;
   int opt;
   while ( (opt = getopt_long(argc,argv,sopts,lopts,NULL)) != -1 )
   {
@@ -155,14 +241,26 @@ int main(int argc, char **argv)
         }
         break;
       case 'd':
-        explore = true;
+        detect_deadlock = true;
         break;
       case 'e':
         trace = true;
         trace_deadlock = true;
         break;
+      case 'D':
+        detect_action = true;
+        trace_actions = parse_action_list(optarg,&num_trace_actions);
+        break;
+      case 't':
+        trace = true;
+        trace_action = true;
+        trace_actions = parse_action_list(optarg,&num_trace_actions);
+        break;
       case 'm':
         monitor = true;
+        break;
+      case 'p':
+        priority_action = strdup(optarg);
         break;
       case 'R':
         strat = RewriteStrategyFromString(optarg);
@@ -194,6 +292,12 @@ int main(int argc, char **argv)
     gsSetQuietMsg();
   if ( verbose )
     gsSetVerboseMsg();
+  
+  if ( detect_action && trace_action )
+  { // because of possibly incompatible action list arguments (XXX)
+    gsWarningMsg("options -D/--detect and -t/--trace cannot be used together\n");
+    return 1;
+  }
 
   if ( argc-optind < 1 )
   {
@@ -301,6 +405,12 @@ int main(int argc, char **argv)
   }
 
   NextState *nstate = createNextState(Spec,!usedummies,stateformat,createEnumerator(Spec,createRewriter(ATAgetArgument(Spec,3),strat),true),true);
+  if ( priority_action != NULL )
+  {
+          gsVerboseMsg("prioritising action '%s'...\n",priority_action);
+          nstate->prioritise(priority_action);
+  }
+
   ATerm state = nstate->getInitialState();
   switch ( outformat )
   {
@@ -332,7 +442,7 @@ int main(int argc, char **argv)
   unsigned long nextlevelat = 1;
   unsigned long prevtrans = 0;
   unsigned long prevcurrent = 0;
-  unsigned long deadlockcnt = 0;
+  unsigned long tracecnt = 0;
   char *basefilename = NULL;
   gsVerboseMsg("generating state space...\n");
 
@@ -345,7 +455,8 @@ int main(int argc, char **argv)
     nsgen = nstate->getNextStates(state,nsgen);
     ATermAppl Transition;
     ATerm NewState;
-    while ( nsgen->next(&Transition,&NewState) )
+    bool prioritised_action;
+    while ( nsgen->next(&Transition,&NewState,&prioritised_action) )
     {
       ATbool new_state;
       unsigned long i;
@@ -363,6 +474,40 @@ int main(int argc, char **argv)
                 {
                         ATtablePut(backpointers, NewState, (ATerm) ATmakeList2(state,(ATerm) Transition));
                 }
+        }
+      }
+
+      for (int i=0; i<num_trace_actions; i++)
+      {
+        if ( occurs_in(trace_actions[i],ATLgetArgument(Transition,0)) )
+        {
+          if ( trace_action )
+          {
+            if ( basefilename == NULL )
+            {
+              basefilename = strdup(SpecFileName);
+              char *s = strrchr(basefilename,'.');
+              if ( s != NULL )
+              {
+                *s = '\0';
+              }
+            }
+            stringstream ss;
+            ss << basefilename << "_act_" << tracecnt << "_" << ATgetName(ATgetAFun(trace_actions[i])) << ".trc";
+            string sss(ss.str());
+            save_trace(sss,state,backpointers,nstate);
+    
+            if ( detect_action || gsVerbose )
+            {
+              gsfprintf(stderr,"detect: action '%P' found and saved to '%s_act_%i_%P.trc'.\n",trace_actions[i],basefilename,tracecnt,trace_actions[i]);
+              fflush(stderr);
+            }
+            tracecnt++;
+          } else //if ( detect_action )
+          {
+            gsfprintf(stderr,"detect: action '%P' found.\n",trace_actions[i]);
+            fflush(stderr);
+          }
         }
       }
 
@@ -397,6 +542,10 @@ int main(int argc, char **argv)
         }
       }
       trans++;
+      if ( prioritised_action )
+      {
+              break;
+      }
     }
     
     if ( nsgen->errorOccurred() )
@@ -408,26 +557,6 @@ int main(int argc, char **argv)
     {
       if ( trace_deadlock )
       {
-        ATerm s = state;
-        ATerm ns;
-        ATermList tr = ATmakeList0();
-  
-        while ( (ns = ATtableGet(backpointers, s)) != NULL )
-        {
-          tr = ATinsert(tr, (ATerm) ATmakeList2(ATgetFirst(ATgetNext((ATermList) ns)),s));
-          s = ATgetFirst((ATermList) ns);
-        }
-  
-        Trace trace;
-        trace.setState(nstate->makeStateVector(s));
-        for (; !ATisEmpty(tr); tr=ATgetNext(tr))
-        {
-          ATermList e = (ATermList) ATgetFirst(tr);
-          trace.addAction((ATermAppl) ATgetFirst(e));
-          e = ATgetNext(e);
-          trace.setState(nstate->makeStateVector(ATgetFirst(e)));
-        }
-
         if ( basefilename == NULL )
         {
           basefilename = strdup(SpecFileName);
@@ -438,16 +567,17 @@ int main(int argc, char **argv)
           }
         }
         stringstream ss;
-        ss << basefilename << "_dlk_" << deadlockcnt << ".trc";
+        ss << basefilename << "_dlk_" << tracecnt << ".trc";
         string sss(ss.str());
-        trace.save(sss);
-        if ( explore )
+        save_trace(sss,state,backpointers,nstate);
+
+        if ( detect_deadlock || gsVerbose )
         {
-          fprintf(stderr,"deadlock-detect: deadlock found and saved to '%s_dlk_%i.trc'.\n",basefilename,deadlockcnt);
+          fprintf(stderr,"deadlock-detect: deadlock found and saved to '%s_dlk_%i.trc'.\n",basefilename,tracecnt);
           fflush(stderr);
         }
-        deadlockcnt++;
-      } else if ( explore ) {
+        tracecnt++;
+      } else if ( detect_deadlock ) {
         fprintf(stderr,"deadlock-detect: deadlock found.\n");
         fflush(stderr);
       }

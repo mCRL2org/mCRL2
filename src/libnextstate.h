@@ -14,7 +14,7 @@ class NextStateGenerator
 	public:
 		virtual ~NextStateGenerator();
 
-		virtual bool next(ATermAppl *Transition, ATerm *State) = 0;
+		virtual bool next(ATermAppl *Transition, ATerm *State, bool *prioritised = NULL) = 0;
 		virtual bool errorOccurred() = 0;
 };
 
@@ -22,6 +22,8 @@ class NextState
 {
 	public:
 		virtual ~NextState();
+
+		virtual void prioritise(char *action) = 0;
 
 		virtual ATerm getInitialState() = 0;
 		virtual NextStateGenerator *getNextStates(

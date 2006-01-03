@@ -14,6 +14,7 @@ typedef struct {
 
 	int num_summands;
 	ATermAppl *summands;
+	int num_prioritised;
 	ATermList procvars;
 	int stateformat;
 	ATermAppl nil;
@@ -28,7 +29,7 @@ class NextStateGeneratorStandard : public NextStateGenerator
 		NextStateGeneratorStandard(ATerm State, ns_info &Info);
 		~NextStateGeneratorStandard();
 
-		bool next(ATermAppl *Transition, ATerm *State);
+		bool next(ATermAppl *Transition, ATerm *State, bool *prioritised = NULL);
 
 		bool errorOccurred();
 		
@@ -61,6 +62,8 @@ class NextStateStandard : public NextState
 	public:
 		NextStateStandard(ATermAppl spec, bool allow_free_vars, int state_format, Enumerator *e, bool clean_up_enumerator, NextStateStrategy strategy = nsStandard);
 		~NextStateStandard();
+
+		void prioritise(char *action);
 
 		ATerm getInitialState();
 		NextStateGenerator *getNextStates(ATerm state, NextStateGenerator *old = NULL);
