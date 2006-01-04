@@ -833,10 +833,10 @@ static ATbool gstcTransformVarConsTypeData(void){
     if(!gsIsNil(Cond) && !(gstcTraverseVarConsTypeD(Vars,&Cond,gsMakeSortIdBool()))){ b = false; break; }
     ATermAppl Left=ATAgetArgument(Eqn,2);
     ATermAppl LeftType=gstcTraverseVarConsTypeD(Vars,&Left,gsMakeUnknown());
-    if(!LeftType){ b = false; gsErrorMsg("the previous error occured while typechecking %P as left hand side of equation %P\n",Left,Eqn); break;}
+    if(!LeftType){ b = false; gsErrorMsg("the previous error occurred while typechecking %P as left hand side of equation %P\n",Left,Eqn); break;}
     ATermAppl Right=ATAgetArgument(Eqn,3);
     ATermAppl RightType=gstcTraverseVarConsTypeD(Vars,&Right,LeftType);
-    if(!RightType){ b = false; gsErrorMsg("the previous error occured while typechecking %P as left hand side of equation %P\n",Right,Eqn); break; }
+    if(!RightType){ b = false; gsErrorMsg("the previous error occurred while typechecking %P as left hand side of equation %P\n",Right,Eqn); break; }
 
     //If the types are not uniquly the same now: do once more:
     if(!gstcEqTypesA(LeftType,RightType)){

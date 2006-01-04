@@ -1123,7 +1123,7 @@ static ATermList create_strategy(ATermList rules, int opid)
 						// Argument is not a variable, so it needs to be rewritten
 						bs[i] = true;
 					} else {
-						// Argument is a variable; check whether it occured before
+						// Argument is a variable; check whether it occurred before
 						unsigned int j = 0;
 						bool b = false;
 						for (ATermList o=vars; !ATisEmpty(o); o=ATgetNext(o))
