@@ -103,9 +103,22 @@ AC_RUN_IFELSE(
   ),
   AC_MSG_RESULT([yes]),
   AC_MSG_RESULT([no])
-  CXXFLAGS=""
 )
 AC_LANG_POP(C++)
+
+# Check whether -fno-pre-tree can be passed for gcc 4*
+AC_MSG_CHECKING([whether gcc accepts -fno-pre-tree])
+CXXFLAGS="-fno-pre-tree"
+AC_COMPILE_IFELSE(
+   [
+   ],
+   [
+     AC_MSG_RESULT(yes)
+   ],
+   [
+     AC_MSG_RESULT(no)
+     CXXFLAGS=""
+   ])
 
 # Check for debug/profiling options
 AC_ARG_ENABLE(
