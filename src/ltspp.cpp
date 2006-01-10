@@ -20,14 +20,14 @@
 
  $Id: svc2dot.c,v 1.1.1.1 2004/09/07 15:06:33 uid523 Exp $ */
 
-#define NAME     "lts2dot"
+#define NAME     "ltspp"
 #define VERSION  "0.1"
 
 #include <getopt.h>
 #include "liblowlevel.h"
 #include "libstruct.h"
 #include "libprint_c.h"
-#include "lts2dot.h"
+#include "ltspp.h"
 
 int main(int argc, char *argv[])
 { FILE *fpOut=NULL;
@@ -64,10 +64,10 @@ int main(int argc, char *argv[])
 
 
 int parseArgs(int argc, char *argv[], FILE **fpOut, int *traceLevel){
-   int c, ret, cautious;
+   int c,/* ret,*/ cautious;
    extern int optind;
-   char *inFilename=NULL, *outFilename=NULL;
-   SVCbool indexed, allocatedFileName = SVCfalse;
+//   char *inFilename=NULL, *outFilename=NULL;
+   SVCbool indexed/*, allocatedFileName = SVCfalse*/;
    #define ShortOptions      "hqv"
    #define VersionOption     0x1
    struct option LongOptions[] = { 

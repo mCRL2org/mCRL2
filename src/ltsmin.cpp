@@ -84,9 +84,9 @@ int main(int argc, char *argv[]) {
 int parseArgs(int argc, char *argv[], int *traceLevel, int *optimal, int
 *classes)
    {
-   int c, ret, i, cautious = 0, nInputFiles = 0, branching = 0;
+   int c, ret,/* i, cautious = 0,*/ nInputFiles = 0, branching = 0;
    extern int optind;
-   char *inFilename=NULL, *outFilename = NULL;
+//   char *inFilename=NULL, *outFilename = NULL;
    SVCbool indexed=SVCtrue;
    *traceLevel = 0; *optimal = 0;
    #define ShortOptions      "hqvsb"
