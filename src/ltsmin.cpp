@@ -81,7 +81,6 @@ int main(int argc, char *argv[]) {
 } /* main */
 
 
-
 int parseArgs(int argc, char *argv[], int *traceLevel, int *optimal, int
 *classes)
    {
@@ -89,12 +88,42 @@ int parseArgs(int argc, char *argv[], int *traceLevel, int *optimal, int
    extern int optind;
    char *inFilename=NULL, *outFilename = NULL;
    SVCbool indexed=SVCtrue;
-   *traceLevel = 1; *optimal = 0;
-   while ((c = getopt(argc, argv, "hcsbvOCo:")) != EOF) 
+   *traceLevel = 0; *optimal = 0;
+   #define ShortOptions      "hqvsb"
+   #define VersionOption     0x1
+   struct option LongOptions[] = { 
+     {"help"      , no_argument,       NULL, 'h'},
+     {"version"   , no_argument,       NULL, VersionOption},
+     {"quiet"     , no_argument,       NULL, 'q'},
+     {"verbose"   , no_argument,       NULL, 'v'},
+     {"strong"    , no_argument,       NULL, 's'},
+     {"branching" , no_argument,       NULL, 'b'},
+     {0, 0, 0, 0}
+   };
+
+   while ((c = getopt_long(argc, argv, ShortOptions, LongOptions, NULL)) != -1) 
       {
       switch(c)
-         {        
-         case 'c': cautious=1;
+         {  
+         case 'h':
+		 return CMD_HELP;
+         case VersionOption:
+		 return CMD_VERSION;
+         case 'q':
+		 *traceLevel=0;
+		 break;
+         case 'v':
+		 *traceLevel=1;
+		 break;
+         case 's':
+		 branching=0;
+		 break;
+         case 'b':
+		 branching=1;
+		 break;
+         default:
+		 return ERR_ARGS;
+/*         case 'c': cautious=1;
                    break;
          case 's': *traceLevel=0;
                    break;
@@ -111,18 +140,34 @@ int parseArgs(int argc, char *argv[], int *traceLevel, int *optimal, int
                    strlen(OUTFILE_EXT)+strlen(SVC_EXT)+1));
                    strcpy(outFilename, optarg);
                    break;
-         case '?': return ERR_ARGS;
+         case '?': return ERR_ARGS; */
          }
       }
       nInputFiles = argc-optind;
-      if (nInputFiles == 0) {
-          doHelp(argv[0]);
+      if (nInputFiles != 2) {
+//          doHelp(argv[0]);
+          fprintf(stderr,NAME ": incorrect number of arguments (see --help)\n");
 	  return ERR_FILE;
       }
       ret = branching?CMD_BRANCH_REDUCE:CMD_REDUCE;
-      for (i=0;i<MAX_INFILES && i<nInputFiles && ret != ERR_FILE; i++)
+
+      if ( SVCopen(inFile, argv[optind], SVCread, readIndex) )
+      {
+	      fprintf(stderr, "%s: %s\n", argv[optind], SVCerror(SVCerrno));
+	      return ERR_FILE;
+      } else {
+	      if ( SVCopen(outFile, argv[optind+1], SVCwrite, &indexed) )
+	      {
+                fprintf(stderr, "%s: %s\n", argv[optind+1], SVCerror(SVCerrno));
+                return ERR_FILE;
+	      } else {
+                SVCsetVersion(outFile , VERSION); 
+	      }
+      }
+
+/*      for (i=0;i<MAX_INFILES && i<nInputFiles && ret != ERR_FILE; i++)
            {
-           /* Open the one or more filenames given as arguments */
+           // Open the one or more filenames given as arguments
            int n = 
            sizeof(char)*strlen(argv[optind+i])+strlen(SVC_EXT)+2;
            inFilename = (char*) malloc(n);
@@ -136,8 +181,8 @@ int parseArgs(int argc, char *argv[], int *traceLevel, int *optimal, int
                 fprintf(stderr, "%s: %s\n", argv[optind+i], SVCerror(SVCerrno));
                 ret = ERR_FILE;
                 }
-           /* readIndex[i] = ATtrue; For the time being: 
-           Ignorance of the presence of state vectors in SVC files */
+           // readIndex[i] = ATtrue; For the time being: 
+           // Ignorance of the presence of state vectors in SVC files
            }
       if (ret == ERR_FILE) return ret;       
       if (nInputFiles == 2) 
@@ -161,7 +206,7 @@ int parseArgs(int argc, char *argv[], int *traceLevel, int *optimal, int
                 char *tail = strrchr(outFilename,'.');
                 if (!tail || strcmp(tail, SVC_EXT)) strcat(outFilename, SVC_EXT);
                 }
-           /* Open the output file */
+           // Open the output file 
            if (cautious && access(outFilename,F_OK)==0) 
                 {
                 fprintf(stderr, "%s: file already exists\n", outFilename);
@@ -176,23 +221,27 @@ int parseArgs(int argc, char *argv[], int *traceLevel, int *optimal, int
                      }
                 SVCsetVersion(outFile , VERSION); 
                 }
-            }      
+            }      */
       return ret;
       } /* parseArgs */
 
 
 void doHelp(char *cmd) {
-   fprintf(stdout, "Usage: %s [-c][-v][-h][-s][-O][-o outfile] infile [infile2]\n", cmd);
-   fprintf(stdout, "The files \"infile\" and \"infile2\" must have \".svc\" format\n");
-   fprintf(stdout, "\n");
-   fprintf(stdout, "Flags:\n");
-   fprintf(stdout, "-c  Cautious mode: don't overwrite existing files\n");
-   fprintf(stdout, "-v  Print version number\n");
-   fprintf(stdout, "-b  Branching bisimulations w.r.t. \"tau\" or i\n");
-   fprintf(stdout, "-h  Print this help info\n");
-   fprintf(stdout, "-s  Silent: no logging is printed\n");
-   fprintf(stdout, "-o  Output to `outfile'\n");
-   fprintf(stdout, "-C  Print equivalence classes\n");
+   fprintf(stderr, "Usage: %s [OPTION] INFILE OUTFILE\n"
+                   "Minimise the LTS from INFILE and write the resulting LTS to OUTFILE.\n"
+		   "Note that this tool currently only works on SVC files.\n"
+                   "\n"
+                   "  -h, --help            display this help and terminate\n"
+                   "      --version         display version information and terminate\n"
+		   "  -q, --quiet           do not display warning messages\n"
+		   "  -v, --verbose         display concise intermediate messages\n"
+                   "  -s, --strong          minimise using strong bisimulation (default)\n"
+                   "  -b, --branching       minimise using branching bisimulation\n"
+//                   "  -c  Cautious mode: don't overwrite existing files\n"
+//                   "  -s  Silent: no logging is printed\n"
+//                   "  -o  Output to `outfile'\n"
+//                   "  -C  Print equivalence classes\n"
+		   , cmd);
 } /* doHelp */
 
 

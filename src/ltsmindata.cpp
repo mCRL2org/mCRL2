@@ -603,7 +603,8 @@ int WriteData(SVCstateIndex initState, int omit_tauloops)
     SVCstateIndex newState = SVCnewState(outFile, 
     (ATerm) ATmakeInt(ReturnEquivalenceClasses(initState, omit_tauloops?ATtrue:ATfalse)), &nnew);
     SVCsetInitialState(outFile, newState); 
-    SVCsetCreator(outFile, "bsim");
+    SVCsetType(outFile, "mCRL2+info");
+    SVCsetCreator(outFile, "ltsmin");
     n_tau_transitions = WriteTransitions();
     if (omit_tauloops == DELETE_TAULOOPS) {
          sprintf(buf, 

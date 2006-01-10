@@ -23,6 +23,10 @@
 #define NAME     "lts2dot"
 #define VERSION  "0.1"
 
+#include <getopt.h>
+#include "liblowlevel.h"
+#include "libstruct.h"
+#include "libprint_c.h"
 #include "lts2dot.h"
 
 int main(int argc, char *argv[])
@@ -30,10 +34,12 @@ int main(int argc, char *argv[])
   int traceLevel;
   ATerm bottom;
   ATinit(argc,argv,&bottom);
+  gsEnableConstructorFunctions();
 
    switch(parseArgs(argc, argv,&fpOut,&traceLevel)) {
       case ERR_ARGS:
-         doHelp(argv[0]);
+	 fprintf(stderr,NAME ": incorrect number of arguments supplied (see --help)\n");
+    //     doHelp(argv[0]);
          exit(EXIT_ERR_ARGS);
          break;
       case ERR_FILE:
@@ -62,13 +68,33 @@ int parseArgs(int argc, char *argv[], FILE **fpOut, int *traceLevel){
    extern int optind;
    char *inFilename=NULL, *outFilename=NULL;
    SVCbool indexed, allocatedFileName = SVCfalse;
+   #define ShortOptions      "hqv"
+   #define VersionOption     0x1
+   struct option LongOptions[] = { 
+     {"help"      , no_argument,       NULL, 'h'},
+     {"version"   , no_argument,       NULL, VersionOption},
+     {"quiet"     , no_argument,       NULL, 'q'},
+     {"verbose"   , no_argument,       NULL, 'v'},
+     {0, 0, 0, 0}
+   };
 
-
-   *traceLevel=1;
+   *traceLevel=0;
    cautious=0;
-   while ((c = getopt(argc, argv, "cho:sv")) != EOF) {
+   while ((c = getopt_long(argc, argv, ShortOptions, LongOptions, NULL)) != -1) {
       switch(c){
-         case 'c': cautious=1;
+	 case 'h':
+		 return CMD_HELP;
+	 case VersionOption:
+		 return CMD_VERSION;
+	 case 'q':
+		 *traceLevel=0;
+		 break;
+	 case 'v':
+		 *traceLevel=1;
+		 break;
+	 default:
+		 return ERR_ARGS;
+/*         case 'c': cautious=1;
                    break;
          case 'h': return CMD_HELP;
          case 'o': outFilename=optarg;
@@ -76,22 +102,31 @@ int parseArgs(int argc, char *argv[], FILE **fpOut, int *traceLevel){
          case 's': *traceLevel=0;
                    break;
          case 'v': return CMD_VERSION;
-         case '?': return ERR_ARGS;
+         case '?': return ERR_ARGS;*/
       }
    }
 
-   if (optind == argc-1) {
+   if ( (optind >= argc) || (optind+2 < argc) ) {
+
+      /* No filename is given as argument: this is an error */
+
+      return ERR_ARGS;
+
+   }
 
       /* Open the filename given as argument */
 
-      inFilename = (char*)malloc(sizeof(char)*(strlen(argv[optind])+strlen(INFILE_EXT)+2));
-      strcpy(inFilename, argv[optind]);
+//      inFilename = (char*)malloc(sizeof(char)*(strlen(argv[optind])+strlen(INFILE_EXT)+2));
+//      strcpy(inFilename, argv[optind]);
 
-      if (SVCopen(&inFile, inFilename, SVCread, &indexed) ==0) {
-         ret= CMD_CONVERT;
-      } else {
+      if (SVCopen(&inFile, argv[optind], SVCread, &indexed) !=0) {
+            fprintf(stderr, "%s: %s\n", argv[optind],strerror(errno));
+            return ERR_FILE;
+	      
+      }
+/*      } else {
 
-         /* Open the filename given as argument with extension */
+         // Open the filename given as argument with extension
 
          if (SVCerrno==EACCESS){
 
@@ -108,28 +143,29 @@ int parseArgs(int argc, char *argv[], FILE **fpOut, int *traceLevel){
             ret= ERR_FILE;
          }
 
-      }
+      }*/
 
+   if (optind+2 == argc) {
+         if ((*fpOut=fopen(argv[optind+1],"wb"))==NULL) {
+            fprintf(stderr, "%s: %s\n", argv[optind+1],strerror(errno));
+            return ERR_FILE;
+	 }
    } else {
-
-      /* No filename is given as argument: this is an error */
-
-      ret=ERR_ARGS;
-
+	   *fpOut = stdout;
    }
 
-   if (ret==CMD_CONVERT) {
+/*   if (ret==CMD_CONVERT) {
 
       if (outFilename==NULL){
 
-         /* Remove the extension from the input filename */
+         // Remove the extension from the input filename
 
          if(strlen(inFilename)>strlen(INFILE_EXT) &&
             strcmp(inFilename+strlen(inFilename)-strlen(INFILE_EXT),INFILE_EXT)==0) {
             inFilename[strlen(inFilename)-strlen(INFILE_EXT)]='\0';
          } 
 
-         /* Compose output filename */
+         // Compose output filename
 
          outFilename=(char*) malloc(sizeof(char)*(strlen(inFilename)+strlen(OUTFILE_EXT)+1));
          allocatedFileName = SVCtrue;
@@ -149,12 +185,12 @@ int parseArgs(int argc, char *argv[], FILE **fpOut, int *traceLevel){
          }
       }
 
-   }
+   }*/
 
-   free(inFilename);
-   if (allocatedFileName) free(outFilename);
+//   free(inFilename);
+//   if (allocatedFileName) free(outFilename);
 
-   return ret;
+   return CMD_CONVERT;
 
 } /* parseArgs */
 
@@ -162,16 +198,19 @@ int parseArgs(int argc, char *argv[], FILE **fpOut, int *traceLevel){
 
 void doHelp(char *cmd) {
 
-   fprintf(stdout, "Usage: %s [-c][-v][-h][-s][-o outfile] infile\n", cmd);
-   fprintf(stdout, "\n");
-   fprintf(stdout, "Flags:\n");
-   fprintf(stdout, "-c  Cautious mode: don't overwrite existing files\n");
-   fprintf(stdout, "-v  Print version number\n");
-   fprintf(stdout, "-h  Print this help info\n");
-   fprintf(stdout, "-s  Silent: no logging is printed\n");
-   fprintf(stdout, "-o  Output to `outfile'\n");
-
-
+   fprintf(stdout, "Usage: %s [OPTION] INFILE [OUTFILE]\n"
+		   "Convert the LTS in INFILE to .dot format and save it to OUTFILE. If OUTFILE is\n"
+		   "not supplied, then stdout is used.\n"
+		   "Note that this tool currently only works on SVC files.\n"
+                   "\n"
+                   "  -h, --help            display this help and terminate\n"
+                   "      --version         display version information and terminate\n"
+		   "  -q, --quiet           do not display warning messages\n"
+		   "  -v, --verbose         display concise intermediate messages\n"
+  //                 "-s  Silent: no logging is printed\n");
+//                   "-c  Cautious mode: don't overwrite existing files\n");
+//                   "-o  Output to `outfile'\n");
+		   , cmd);
 } /* doHelp */
 
 
@@ -241,12 +280,18 @@ int doConvert(FILE *fpOut, int traceLevel) {
   fprintf(fpOut,"node[width=0.25,height=0.25,label=\"\"];\n");
   fprintf(fpOut,"%d[peripheries=2];\n",SVCgetInitialState(&inFile));
   while (SVCgetNextTransition(&inFile, &fromState, &label, &toState, &parameter)) {
-      ATerm t = SVClabel2ATerm(&inFile,label);
-      AFun s = ATgetAFun(t);
+      ATermAppl t = (ATermAppl) SVClabel2ATerm(&inFile,label);
+/*      AFun s = ATgetAFun(t);
       if (ATisQuoted(s) && ATgetArity(s)==0) 
         ATfprintf(fpOut, "%d->%d[label=%t];\n",fromState, toState, t);
       else
-        ATfprintf(fpOut, "%d->%d[label=\"%t\"];\n",fromState, toState, t);
+        ATfprintf(fpOut, "%d->%d[label=\"%t\"];\n",fromState, toState, t);*/
+      if ( ATisEmpty(ATLgetArgument(t,0)) )
+      {
+        gsfprintf(fpOut, "%d->%d[label=\"tau\"];\n",fromState, toState);
+      } else {
+        gsfprintf(fpOut, "%d->%d[label=\"%P\"];\n",fromState, toState, t);
+      }
       /*
       if (label==taulabel)
        ATfprintf(fpOut,"color=\"grey\",fontsize=\"18\"]\n");

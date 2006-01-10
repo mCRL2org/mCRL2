@@ -145,13 +145,13 @@ $(PNML2MCRL2_OBJECTS) $(patsubst %.o,%.d,$(PNML2MCRL2_OBJECTS)): CPPFLAGS += $(L
 LTSMIN_NAME        = ltsmin
 LTSMIN_OBJECTS     = ltsmin.o ltsmindata.o ltsminkernel.o libstruct.o liblowlevel.o
 OBJECTS           += $(LTSMIN_OBJECTS)
-LTSMIN_LDFLAGS     = -lsvc -l$(ATERM)
+LTSMIN_LDFLAGS     = -lsvc -l$(ATERM) -lm
 
 #lts2dot definitions
 LTS2DOT_NAME       = lts2dot
-LTS2DOT_OBJECTS    = lts2dot.o libstruct.o liblowlevel.o
+LTS2DOT_OBJECTS    = lts2dot.o libprint_c.o libstruct.o liblowlevel.o
 OBJECTS           += $(LTS2DOT_OBJECTS)
-LTS2DOT_LDFLAGS    = -lsvc -l$(ATERM)
+LTS2DOT_LDFLAGS    = -lrewrite -lsvc -l$(ATERM) -lm $(LIBDL)
 
 #alpha definitions
 ALPHA_NAME         = alpha
@@ -374,7 +374,7 @@ endif
 $(LTSMIN_NAME) : $(LTSMIN_OBJECTS) $(ATERM_DEP) $(LIBSVC_DEP)
 	$(CXX) -o $@ $(LTSMIN_OBJECTS) $(LDFLAGS) $(LTSMIN_LDFLAGS)
 
-$(LTS2DOT_NAME) : $(LTS2DOT_OBJECTS) $(ATERM_DEP) $(LIBSVC_DEP)
+$(LTS2DOT_NAME) : $(LTS2DOT_OBJECTS) $(ATERM_DEP) $(LIBSVC_DEP) $(LIBREWR_NAME)
 	$(CXX) -o $@ $(LTS2DOT_OBJECTS) $(LDFLAGS) $(LTS2DOT_LDFLAGS)
 
 $(ALPHA_NAME) : $(ALPHA_OBJECTS) $(ATERM_DEP) $(LIBREWR_NAME)
