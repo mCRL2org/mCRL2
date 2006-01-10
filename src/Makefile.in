@@ -141,6 +141,18 @@ endif
 PNML2MCRL2_LDFLAGS = -lrewrite -l$(ATERM) $(LIBXML2_LDFLAGS) $(LIBDL)
 $(PNML2MCRL2_OBJECTS) $(patsubst %.o,%.d,$(PNML2MCRL2_OBJECTS)): CPPFLAGS += $(LIBXML2_CPPFLAGS)
 
+#ltsmin definitions
+LTSMIN_NAME        = ltsmin
+LTSMIN_OBJECTS     = ltsmin.o ltsmindata.o ltsminkernel.o libstruct.o liblowlevel.o
+OBJECTS           += $(LTSMIN_OBJECTS)
+LTSMIN_LDFLAGS     = -lsvc -l$(ATERM)
+
+#lts2dot definitions
+LTS2DOT_NAME       = lts2dot
+LTS2DOT_OBJECTS    = lts2dot.o libstruct.o liblowlevel.o
+OBJECTS           += $(LTS2DOT_OBJECTS)
+LTS2DOT_LDFLAGS    = -lsvc -l$(ATERM)
+
 #alpha definitions
 ALPHA_NAME         = alpha
 ALPHA_OBJECTS      = alpha.o libalpha.o mcrl2parser.o mcrl2lexer.o typecheck.o libprint_c.o libstruct.o liblowlevel.o
@@ -155,7 +167,7 @@ LIN_LDFLAGS        = -lrewrite -l$(ATERM) -lm $(LIBDL)
 
 #Group definitions
 EXPERIMENTALS      = $(LIN_NAME) $(ALPHA_NAME)
-EXE_NAMES         += $(MCRL22LPE_NAME) $(LPEINFO_NAME) $(LPEDATAELM_NAME) $(LPEPARELM_NAME) $(LPECONSTELM_NAME) $(LPEPP_NAME) $(TRACEPP_NAME) $(LPE2LTS_NAME) $(SIM_NAME) $(XSIM_NAME) $(TBF2LPE_NAME) $(PNML2MCRL2_NAME) $(LPEREWR_NAME)
+EXE_NAMES         += $(MCRL22LPE_NAME) $(LPEINFO_NAME) $(LPEDATAELM_NAME) $(LPEPARELM_NAME) $(LPECONSTELM_NAME) $(LPEPP_NAME) $(TRACEPP_NAME) $(LPE2LTS_NAME) $(SIM_NAME) $(XSIM_NAME) $(TBF2LPE_NAME) $(PNML2MCRL2_NAME) $(LPEREWR_NAME) $(LTSMIN_NAME) $(LTS2DOT_NAME)
 LIB_NAMES          = $(XSIMTRACE_NAME)
 OBJECTS           := $(sort $(OBJECTS))
 
@@ -358,6 +370,12 @@ else
 $(PNML2MCRL2_NAME) :
 	@echo cannot make target $@ because the xml2 library cannot be used
 endif
+
+$(LTSMIN_NAME) : $(LTSMIN_OBJECTS) $(ATERM_DEP) $(LIBSVC_DEP)
+	$(CXX) -o $@ $(LTSMIN_OBJECTS) $(LDFLAGS) $(LTSMIN_LDFLAGS)
+
+$(LTS2DOT_NAME) : $(LTS2DOT_OBJECTS) $(ATERM_DEP) $(LIBSVC_DEP)
+	$(CXX) -o $@ $(LTS2DOT_OBJECTS) $(LDFLAGS) $(LTS2DOT_LDFLAGS)
 
 $(ALPHA_NAME) : $(ALPHA_OBJECTS) $(ATERM_DEP) $(LIBREWR_NAME)
 	$(CXX) -o $@ $(ALPHA_OBJECTS) $(LDFLAGS) $(ALPHA_LDFLAGS)
