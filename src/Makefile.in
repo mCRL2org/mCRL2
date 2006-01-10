@@ -209,9 +209,9 @@ squadt: boost
 boost:
 ifdef BUILD_BOOST
 ifeq ($(findstring $(MAKECMDGOALS),clean distclean),)
-	@$(MAKE) -C boost 
-else
 	@$(MAKE) -C boost $(MAKECMDGOALS)
+else
+	@$(MAKE) -C boost 
 endif
 endif
 
