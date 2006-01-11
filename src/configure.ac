@@ -70,7 +70,6 @@ fi
 # Set flags
 CPPFLAGS=""
 CFLAGS="-std=c99"
-CXXFLAGS="-std=c++98"
 LDFLAGS="-L. -Lsvc"
 BFLAGS=""
 
@@ -90,6 +89,29 @@ AC_RUN_IFELSE(
   AC_MSG_ERROR([C99 standard not supported])
 )
 
+# Check whether -fno-pre-tree can be passed (for buggy gcc 4*)
+AC_MSG_CHECKING([whether C++ compiler accepts -fno-tree-pre])
+CXXFLAGS="-fno-tree-pre"
+AC_LANG_PUSH(C++)
+AC_COMPILE_IFELSE(
+  AC_LANG_PROGRAM(,
+     [
+       return (0);
+     ]
+   ),
+   [
+     AC_MSG_RESULT(yes)
+   ],
+   [
+     AC_MSG_RESULT(no)
+     CXXFLAGS=""
+   ]
+)
+AC_LANG_POP(C++)
+
+TEMPFLAGS="$CXXFLAGS"
+CXXFLAGS="$TEMPFLAGS -std=c++98"
+
 AC_MSG_CHECKING([for C++ 98 standard])
 AC_LANG_PUSH(C++)
 AC_RUN_IFELSE(
@@ -101,24 +123,15 @@ AC_RUN_IFELSE(
      #endif
     ]
   ),
-  AC_MSG_RESULT([yes]),
-  AC_MSG_RESULT([no])
+  [
+    AC_MSG_RESULT([yes])
+  ],
+  [
+    AC_MSG_RESULT([no])
+    CXXFLAGS="$TEMPFLAGS"
+  ]
 )
 AC_LANG_POP(C++)
-
-# Check whether -fno-pre-tree can be passed for gcc 4*
-AC_MSG_CHECKING([whether gcc accepts -fno-tree-pre])
-CXXFLAGS="-fno-tree-pre"
-AC_COMPILE_IFELSE(
-   [
-   ],
-   [
-     AC_MSG_RESULT(yes)
-   ],
-   [
-     AC_MSG_RESULT(no)
-     CXXFLAGS=""
-   ])
 
 # Check for debug/profiling options
 AC_ARG_ENABLE(
