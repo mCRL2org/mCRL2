@@ -4188,9 +4188,9 @@ ac_compiler_gnu=$ac_cv_c_compiler_gnu
 
 
 # Check whether -fno-pre-tree can be passed for gcc 4*
-echo "$as_me:$LINENO: checking whether gcc accepts -fno-pre-tree" >&5
-echo $ECHO_N "checking whether gcc accepts -fno-pre-tree... $ECHO_C" >&6
-CXXFLAGS="-fno-pre-tree"
+echo "$as_me:$LINENO: checking whether gcc accepts -fno-tree-pre" >&5
+echo $ECHO_N "checking whether gcc accepts -fno-tree-pre... $ECHO_C" >&6
+CXXFLAGS="-fno-tree-pre"
 cat >conftest.$ac_ext <<_ACEOF
 
 

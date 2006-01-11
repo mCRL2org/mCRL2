@@ -107,8 +107,8 @@ AC_RUN_IFELSE(
 AC_LANG_POP(C++)
 
 # Check whether -fno-pre-tree can be passed for gcc 4*
-AC_MSG_CHECKING([whether gcc accepts -fno-pre-tree])
-CXXFLAGS="-fno-pre-tree"
+AC_MSG_CHECKING([whether gcc accepts -fno-tree-pre])
+CXXFLAGS="-fno-tree-pre"
 AC_COMPILE_IFELSE(
    [
    ],
