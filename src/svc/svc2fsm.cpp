@@ -59,6 +59,9 @@ static void print_states(SVCfile file, int* in, int* out) {
                             // of the parameters
     int *a;
     ATermList* state = (ATermList*) malloc(nos*sizeof(ATermList));
+    for (i=0; i<nos; i++)
+	    state[i] = NULL;
+    ATprotectArray((ATerm *) state,nos);
     fprintf(stderr,"collect state data ...\n");
 
     // create array of states
@@ -181,6 +184,7 @@ static void print_states(SVCfile file, int* in, int* out) {
       fprintf(stdout,"%d\r\n",i+1);
     }
    fprintf(stderr,"\n");
+   ATunprotectArray((ATerm *) state);
    free(state);free(a);free(set);
 }
 
