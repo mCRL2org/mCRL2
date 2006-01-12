@@ -2559,9 +2559,9 @@ void RewriterCompilingJitty::clearSubstitutions()
   so_clear_substs();
 }
 
+#endif
+
 RewriteStrategy RewriterCompilingJitty::getStrategy()
 {
 	return GS_REWR_JITTYC;
 }
-
-#endif
