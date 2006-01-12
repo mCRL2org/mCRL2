@@ -298,7 +298,7 @@ static void compute_in_out(SVCfile file,int** in, int** out)
 
     notr=SVCnumTransitions(&file);
 
-    fprintf(stderr,"read transactions");
+    fprintf(stderr,"read transactions ");
     // compute fan in, fan out, and edges
     for(i = 0 ; i < notr; i++)
     {
@@ -322,7 +322,7 @@ static void compute_in_out(SVCfile file,int** in, int** out)
 //
 static void print_edges(SVCfile file) {
     int notr=SVCnumTransitions(&file), i;
-    fprintf(stderr,"print edges");
+    fprintf(stderr,"print edges ");
     fprintf(stdout,"---\r\n");
     for(i = 0 ; i < notr; i++) {
         SVCparameterIndex pi;
@@ -330,7 +330,7 @@ static void print_edges(SVCfile file) {
         SVCstateIndex source,dest;
         SVCgetNextTransition(&file, &source, &li, &dest, &pi) ;
 	if ( is_mcrl2 )
-           gsfprintf(stdout,"%1d %1d %P\r\n",source+1,dest+1,SVClabel2ATerm(&file,li));
+           gsfprintf(stdout,"%1d %1d \"%P\"\r\n",source+1,dest+1,SVClabel2ATerm(&file,li));
 	else
            gsfprintf(stdout,"%1d %1d %T\r\n",source+1,dest+1,SVClabel2ATerm(&file,li));
         if ((i+1)%100000==0 || i+1==notr)  {
