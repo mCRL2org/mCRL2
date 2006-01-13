@@ -171,9 +171,9 @@ private:
   {
     if (p_alltrue){return true;};
     //----------          Debug  
-    //    cout << "\033[33m " << x.pp() << endl;
-    //    cout << "\033[30m " << data_expression(rewrite(data_expression(p_substitute(x, p_currentState)))).pp() << endl;
-    //    cout << "\033[0m";
+    //    cerr << "\033[33m " << x.pp() << endl;
+    //    cerr << "\033[30m " << data_expression(rewrite(data_expression(p_substitute(x, p_currentState)))).pp() << endl;
+    //    cerr << "\033[0m";
     //----------          Debug
     return (!(data_expression(rewrite(data_expression(p_substitute(x, p_currentState)))).is_false()));
   }
@@ -190,9 +190,9 @@ private:
           if (p_variableList.find(p_nextState.at(index).rhs()) != p_variableList.end()){
             p_V.insert(p_lookupIndex[i->lhs()]); 
             //----------          Debug
-            //            cout << "\033[34m OLD:    "<< i->pp() << endl;
-            //            cout << "\033[32m NEW:    "<< p_nextState.at(index).pp() << endl;
-            //            cout << "\033[0m";
+            //            cerr << "\033[34m OLD:    "<< i->pp() << endl;
+            //            cerr << "\033[32m NEW:    "<< p_nextState.at(index).pp() << endl;
+            //            cerr << "\033[0m";
             //----------          Debug
           };
           p_newCurrentState.at(index) = p_nextState.at(index) ;
@@ -202,9 +202,9 @@ private:
              if (!compare(i->rhs(), p_nextState.at(index).rhs())){
                 //----------          Debug
                 //
-                //                cout << "\033[34m OLD:    "<< i->pp() << endl;
-                //                cout << "\033[32m NEW:    "<< p_nextState.at(index).pp() << endl;
-                //                cout << "\033[0m";
+                //                cerr << "\033[34m OLD:    "<< i->pp() << endl;
+                //                cerr << "\033[32m NEW:    "<< p_nextState.at(index).pp() << endl;
+                //                cerr << "\033[0m";
                 //----------          Debug
                 p_newCurrentState.at(index) = newExpression(*i) ;
                 p_V.insert(index);
@@ -288,12 +288,12 @@ private:
     //p_singletonSort = result;
     
     if (p_verbose){
-      cout << "Sorts which have singleton constructors:"<< endl;
+      cerr << "Sorts which have singleton constructors:"<< endl;
       for(set<lpe::sort>::iterator i = p_singletonSort.begin(); i != p_singletonSort.end(); i++){
-        cout <<"  "<< i->pp() << endl;
+        cerr <<"  "<< i->pp() << endl;
       }
       if (p_singletonSort.empty()) {
-        cout <<"  []"<< endl;      
+        cerr <<"  []"<< endl;      
       }
     }
   } 
@@ -304,34 +304,34 @@ private:
   inline void printNextState()
   {
     for(vector< data_assignment >::iterator i = p_nextState.begin(); i != p_nextState.end() ; i++ ){
-      cout << "[" << i->pp() << "]";
+      cerr << "[" << i->pp() << "]";
     
     }
-    cout << endl;
+    cerr << endl;
   }
 
   void inline printVar()
   {
-    cout << " Variable indices : {";
+    cerr << " Variable indices : {";
     set< int >::iterator i = p_V.begin();
     int j = 0;
     while(i != p_V.end()){
       if (*i ==j){
-        cout << j+1 << " ";
+        cerr << j+1 << " ";
         i++;
        }
       j++;
     }
-    cout << "}" << endl;
+    cerr << "}" << endl;
   }
 
   void inline printState()
   {
     for(set< int >::iterator i = p_S.begin(); i != p_S.end() ; i++ ){
       if (!p_nosingleton){
-        cout << "  " << p_currentState[*i].pp() << endl;
+        cerr << "  " << p_currentState[*i].pp() << endl;
       } else {
-        cout << "  " << p_currentState[*i].pp() << " :  " << p_currentState[*i].lhs().type().pp()  <<endl;
+        cerr << "  " << p_currentState[*i].pp() << " :  " << p_currentState[*i].lhs().type().pp()  <<endl;
       }  
     }
   }
@@ -339,10 +339,10 @@ private:
   void inline printCurrentState()
   {
     for(vector< data_assignment >::iterator i = p_currentState.begin(); i != p_currentState.end() ; i++ ){
-      cout << "[" << i->pp() << "]";
+      cerr << "[" << i->pp() << "]";
     
     }
-    cout << endl;
+    cerr << endl;
   }
   //---------------------------------------------------------------
   //---------------------   Debug end  --------------------------
@@ -358,7 +358,7 @@ public:
     sort_list rebuild_sort = p_spec.sorts();
     findSingleton();
     if(p_verbose){
-    cout <<
+    cerr <<
       "Constant process parameters which are not substituted and " << endl <<
       "removed [--nosingleton]:" << endl;
     }
@@ -366,13 +366,13 @@ public:
       if (p_singletonSort.find(p_initAssignments[*i].lhs().type())  != p_singletonSort.end()){
         p_S.erase(*i);
         if (p_verbose){
-          cout << "  " << p_initAssignments[*i].lhs().pp() << " : " << p_initAssignments[*i].lhs().type().pp() << endl;
+          cerr << "  " << p_initAssignments[*i].lhs().pp() << " : " << p_initAssignments[*i].lhs().type().pp() << endl;
           empty = false;
         }
       }
     }
     if (empty){
-      cout << "  []" << endl;
+      cerr << "  []" << endl;
     }
   }
 
@@ -395,8 +395,8 @@ public:
     }
 
     if (p_verbose) {
-      cout << "Number of summands of old LPE: " << p_lpe.summands().size() << endl;
-      cout << "Number of summands of new LPE: " <<  rebuild_summandlist.size() << endl;
+      cerr << "Number of summands of old LPE: " << p_lpe.summands().size() << endl;
+      cerr << "Number of summands of new LPE: " <<  rebuild_summandlist.size() << endl;
     }
 
     set< data_variable > constantVar;
@@ -497,7 +497,7 @@ public:
       p_lpe.actions()
     );
      
-     //cout <<  p_spec.initial_free_variables() << endl;
+     //cerr <<  p_spec.initial_free_variables() << endl;
      
     set< data_variable > initial_free_variables;
     usedFreeVars.empty();
@@ -532,13 +532,13 @@ public:
     
     assert(gsIsSpecV1((ATermAppl) rebuild_spec));
     
-    //cout << p_lpe.pp() << endl;
+    //cerr << p_lpe.pp() << endl;
     
     if (p_outputfile.size() == 0){
-      if(!p_verbose){
-        assert(!p_verbose);
+      //if(!p_verbose){
+      //  assert(!p_verbose);
         writeStream(rebuild_spec);
-      };
+      //};
     } else {
       if(!rebuild_spec.save(p_outputfile)){
          cerr << "Unsuccessfully written outputfile: " << p_outputfile << endl;
@@ -557,17 +557,17 @@ public:
   //  
   void inline printSet()
   {
-    cout << "Constant indices: { ";
+    cerr << "Constant indices: { ";
     set< int >::iterator i = p_S.begin();
     int j = 0;
     while(i != p_S.end()){
       if (*i ==j){
-        cout << j+1 << " ";
+        cerr << j+1 << " ";
         i++;
        }
       j++;
     }
-    cout << "}"<< endl;
+    cerr << "}"<< endl;
   }
   
   // Loads an LPE from file
@@ -582,7 +582,7 @@ public:
       return false;
     } 
     //LPE x = p_spec.lpe(); 
-    //cout << x.pp() << endl;
+    //cerr << x.pp() << endl;
     //p_spec.save("/scratch/dump.lpe");
     //assert(false);
     return true;
@@ -595,15 +595,15 @@ public:
   {
     ATermAppl z = (ATermAppl) ATreadFromFile(stdin);
     if (z == NULL){
-      cout << "Could not read LPE from stdin"<< endl;
+      cerr << "Could not read LPE from stdin"<< endl;
       return false;
     };
     if (!gsIsSpecV1(z)){
-      cout << "Stdin does not contain an LPE" << endl;
+      cerr << "Stdin does not contain an LPE" << endl;
       return false;
     }
     p_spec = specification(z);
-    //cout << p_spec.lpe().pp() << endl;
+    //cerr << p_spec.lpe().pp() << endl;
     return true;
   }
 
@@ -714,13 +714,15 @@ public:
       while (!same){
         same = true;
         if (p_verbose){
-          cout << "Cycle:" << cycle++ << endl;
+          //cerr << "Cycle:" << cycle++ << endl;
+          cerr << "Cycle " << cycle++ << ": ";
         }
-        int summandnr = 1;
+        //int summandnr = 1;
         for(summand_list::iterator currentSummand = p_lpe.summands().begin(); currentSummand != p_lpe.summands().end() ;currentSummand++ ){
           if ( (p_visitedSummands.find(*currentSummand) != p_visitedSummands.end()) || (conditionTest(currentSummand->condition()))) {
             if(p_verbose){
-              cout << "  Summand: "<< summandnr++ << endl;
+              //cerr << "  Summand: "<< summandnr++ << endl;
+	      cerr << ".";
             }
             p_visitedSummands.insert(*currentSummand); 
             //----------          Debug
@@ -733,6 +735,7 @@ public:
             //if (!same) {break;}                                           //Break reduces time to complete; need to find out when to brake
           }
         }
+	if (p_verbose) cerr << endl;
         p_currentState = p_newCurrentState;
       }
 
@@ -755,7 +758,7 @@ public:
     
       if(!p_freeVarSet.empty()){
         if (p_verbose){
-          cout << "Free Variable checkup:" << endl;
+          cerr << "Free Variable checkup:" << endl;
         }
       
         int n = p_V.size();
@@ -766,7 +769,7 @@ public:
 
         p_currentState = p_newCurrentState;
         if (p_verbose){
-          cout << "  Detected "<<p_V.size() - n << " fake constant process parameters" <<endl;
+          cerr << "  Detected "<<p_V.size() - n << " fake constant process parameters" <<endl;
           foundFake = ((p_V.size() - n) != 0);
         }         
 
@@ -793,7 +796,7 @@ public:
     }    
     
     if (p_verbose){
-      cout << "Number of found constant process parameters: "<< p_S.size() << endl ;//printSet(); 
+      cerr << "Number of found constant process parameters: "<< p_S.size() << endl ;//printSet(); 
       printSetVar();  
     }
   }

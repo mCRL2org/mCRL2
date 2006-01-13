@@ -147,11 +147,11 @@ public:
   {
     ATermAppl z = (ATermAppl) ATreadFromFile(stdin);
     if (z == NULL){
-      cout << "Could not read LPE from stdin"<< endl;
+      cerr << "Could not read LPE from stdin"<< endl;
       return false;
     };
     if (!gsIsSpecV1(z)){
-      cout << "Stdin does not contain an LPE" << endl;
+      cerr << "Stdin does not contain an LPE" << endl;
       return false;
     }
     p_spec = specification(z);
@@ -183,20 +183,21 @@ public:
     // In a timecondition: t_i(d,e_i) for some i \in I
     //
     if(p_verbose){
-      cout << "  Searching for used process parameters:" << endl;
+      cerr << "Searching for used process parameters: ";
     }
-    int counter = 0;
-    int n = lpe.summands().size();
+    //int counter = 0;
+    //int n = lpe.summands().size();
     for(summand_list::iterator currentSummand = lpe.summands().begin(); currentSummand != lpe.summands().end(); currentSummand++){ 
       
       if (p_verbose){
-        cout << "    Summand :" << ++counter << "/" << n << endl;    
+        //cerr << "    Summand :" << ++counter << "/" << n << endl;    
+        cerr << ".";
       }
       //Condition
       //
       foundVariables = getDataVarIDs(aterm_appl(currentSummand->condition()));
-      //      cout << currentSummand->condition().pp()<< endl;
-      //      cout << "\033[36m" << setToList(foundVariables).to_string() << "\033[0m" <<endl;
+      //      cerr << currentSummand->condition().pp()<< endl;
+      //      cerr << "\033[36m" << setToList(foundVariables).to_string() << "\033[0m" <<endl;
       for(set< data_variable>::iterator i = foundVariables.begin(); i != foundVariables.end(); i++){
          p_usedVars.insert(data_variable(*i));
       }
@@ -205,8 +206,8 @@ public:
       //
       if (currentSummand->has_time()){
         foundVariables = getDataVarIDs(aterm_appl(currentSummand->time()));
-        //        cout << currentSummand->time().pp() << endl;        
-        //        cout << "\033[39m" << setToList(foundVariables).to_string() << "\033[0m" <<endl; 
+        //        cerr << currentSummand->time().pp() << endl;        
+        //        cerr << "\033[39m" << setToList(foundVariables).to_string() << "\033[0m" <<endl; 
         for(set< data_variable >::iterator i = foundVariables.begin(); i != foundVariables.end(); i++){
            p_usedVars.insert(data_variable(*i));
         };
@@ -218,52 +219,54 @@ public:
       for(action_list::iterator i = currentSummand->actions().begin(); i != currentSummand->actions().end(); i++){
         for(data_expression_list::iterator j = i->arguments().begin(); j != i->arguments().end(); j++){
           foundVariables = getDataVarIDs(aterm_appl(*j));
-          //          cout << i->to_string() << endl;
-          //          cout << "\033[31m" << setToList(foundVariables).to_string() << "\033[0m" <<endl;  
+          //          cerr << i->to_string() << endl;
+          //          cerr << "\033[31m" << setToList(foundVariables).to_string() << "\033[0m" <<endl;  
           for(set< data_variable >::iterator k = foundVariables.begin(); k != foundVariables.end(); k++){
   	         p_usedVars.insert(*k);
   	      };
         };  
       };
-      //      cout << "\033[32m" << setToList(p_usedVars).to_string() << "\033[0m" <<endl;     
+      //      cerr << "\033[32m" << setToList(p_usedVars).to_string() << "\033[0m" <<endl;     
     }
-  
+    if (p_verbose) cerr << endl;
     
     // Needed all process parameters which are not marked have to be eliminated
     //
     int cycle = 0;
     if(p_verbose){
-      cout << "  Searching for dependent process parameters" << endl;
+      cerr << "Searching for dependent process parameters" << endl;
     } 
     bool reset = true;
     while (reset){
       if (p_verbose){
-        cout << "  Cycle:"<< ++cycle << endl;
+        cerr << "  Cycle "<< ++cycle << ": ";
       }
       reset = false;
-      counter = 0; 
+      //counter = 0; 
       for(summand_list::iterator currentSummand = lpe.summands().begin(); currentSummand != lpe.summands().end(); currentSummand++){
         if (p_verbose){
-          cout << "    Summand :" << ++counter << "/" << n << endl;    
+          //cerr << "    Summand :" << ++counter << "/" << n << endl;    
+          cerr << ".";
         }
         for(data_assignment_list::iterator i = currentSummand->assignments().begin(); i !=  currentSummand->assignments().end() ;i++){
           if (p_usedVars.find(i->lhs()) != p_usedVars.end()){
             foundVariables = getDataVarIDs(aterm_appl(i->rhs()));
-            //cout << i->rhs().pp() << endl;
+            //cerr << i->rhs().pp() << endl;
             unsigned int  z = p_usedVars.size();
             for(set< data_variable >::iterator k = foundVariables.begin(); k != foundVariables.end(); k++){
   	          p_usedVars.insert(*k);
-  	          //cout << k->pp() << endl;
+  	          //cerr << k->pp() << endl;
   	        }
-  	        //cout << z << "----" << p_usedVars.size() << endl;
+  	        //cerr << z << "----" << p_usedVars.size() << endl;
             if (p_usedVars.size() != z){
               reset = true;
-              //          cout << "\033[39m Match added: " << i->lhs().to_string() << "\033[0m" << endl; 
+              //          cerr << "\033[39m Match added: " << i->lhs().to_string() << "\033[0m" << endl; 
             };  
           }
         }
       }
-      //cout << setToList(p_usedVars).to_string() << endl;
+      if (p_verbose) cerr << endl;
+      //cerr << setToList(p_usedVars).to_string() << endl;
     }
   
     for(data_variable_list::iterator di = lpe.process_parameters().begin(); di != lpe.process_parameters().end() ; di++){
@@ -276,17 +279,16 @@ public:
     //}
 
     if (p_verbose) {
+      cerr << "Number of removed process parameters: " << p_S.size() << endl;
       if (p_S.size() !=0){
-        cout << " Removed process parameters: " << endl << "    " ;
+	cout << "  ";
         for(set< data_variable >::iterator i = p_S.begin(); i != (--p_S.end()); i++){
-          cout << i->name() << ", ";
+          cerr << i->name() << ", ";
         }
-        cout << (*(--p_S.end())).name() << endl;
-      } else {
-        cout << " No process parameters are removed. " << endl;
+        cerr << (*(--p_S.end())).name() << endl;
       }
     }// else {  
-     // cout << " Number of removed process parameters : " << p_S.size() << endl;
+     // cerr << " Number of removed process parameters : " << p_S.size() << endl;
     //}
   }
   
@@ -389,10 +391,10 @@ public:
     assert(gsIsSpecV1((ATermAppl) rebuild_spec));
    
     if (p_outputfile.size() == 0){
-      if(!p_verbose){
-        assert(!p_verbose);
+      //if(!p_verbose){
+      //  assert(!p_verbose);
         writeStream(rebuild_spec);
-      };
+      //};
     } else {
       if(!rebuild_spec.save(p_outputfile)){
          cerr << "Unsuccessfully written outputfile: " << p_outputfile << endl;
