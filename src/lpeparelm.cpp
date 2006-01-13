@@ -281,11 +281,11 @@ public:
     if (p_verbose) {
       cerr << "Number of removed process parameters: " << p_S.size() << endl;
       if (p_S.size() !=0){
-	cout << "  ";
+	cerr << "  [ ";
         for(set< data_variable >::iterator i = p_S.begin(); i != (--p_S.end()); i++){
           cerr << i->name() << ", ";
         }
-        cerr << (*(--p_S.end())).name() << endl;
+        cerr << (*(--p_S.end())).name() << " ]" << endl;
       }
     }// else {  
      // cerr << " Number of removed process parameters : " << p_S.size() << endl;
