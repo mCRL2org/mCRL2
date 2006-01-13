@@ -80,7 +80,9 @@ XSIM_LDFLAGS       = -lnextstate -lenum -lrewrite -l$(ATERM) -lm $($LIBDL) $(WX_
 XSIMTRACE_NAME     = xsimtrace.so
 XSIMTRACE_OBJECTS  = xsimtracedll.o
 ifdef USE_WX
+ifneq ($(HOST_OS),MINGW)
 OBJECTS           += $(XSIMTRACE_OBJECTS)
+endif
 endif
 ifeq ($(HOST_OS),MACOSX)
   XSIMTRACE_LDFLAGS = -bundle -undefined dynamic_lookup
@@ -208,11 +210,7 @@ squadt: boost
 # For building bjam and boost libraries
 boost:
 ifdef BUILD_BOOST
-ifeq ($(findstring $(MAKECMDGOALS),clean distclean),)
 	@$(MAKE) -C boost $(MAKECMDGOALS)
-else
-	@$(MAKE) -C boost 
-endif
 endif
 
 # Add revision number
@@ -305,7 +303,9 @@ $(XSIM_NAME): $(XSIM_OBJECTS) $(ATERM_DEP) $(LIBREWR_NAME) $(LIBENUM_NAME) $(LIB
 	$(CXX) -o $@ $(XSIM_OBJECTS) $(LDFLAGS) $(XSIM_LDFLAGS)
 
 $(XSIMTRACE_NAME): $(XSIMTRACE_OBJECTS) $(ATERM_DEP) $(LIBREWR_NAME)
+ifneq ($(HOST_OS),MINGW)
 	$(CXX) -o $@ $(XSIMTRACE_OBJECTS) $(LDFLAGS) $(XSIMTRACE_LDFLAGS)
+endif
 else
 $(XSIM_NAME):
 	@echo cannot make target $@ because the wxWidgets library cannot be used
@@ -314,11 +314,11 @@ $(XSIMTRACE_NAME):
 	@echo cannot make target $@ because the wxWidgets library cannot be used
 endif
 
-svc/%: CPPFLAGS += -I./ -Iaterm
+svc/%: CPPFLAGS += -I. -Iaterm
 
 # Targets that depend on any of the boost libraries
 ifdef USE_BOOST
-lpe% libdataelm.%: CPPFLAGS += $(BOOST_CPPFLAGS) -I./ -Iaterm
+lpe% libdataelm.%: CPPFLAGS += $(BOOST_CPPFLAGS) -I. -Iaterm
 lpe% libdataelm.%: CXXFLAGS += -ftemplate-depth-256
 
 ifdef BUILD_BOOST

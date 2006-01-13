@@ -13,15 +13,18 @@ LIBDL              = -ldl
 ifeq ($(HOST_OS),WINDOWS)
  # Windows does not have a libdl equivalent
  CPPFLAGS         += -DNO_DYNLOAD
+ CXXFLAGS         := $(filter-out -std=c++98,$(CXXFLAGS))
  LIBDL             =
 endif
 ifeq ($(HOST_OS),MINGW)
- CPPFLAGS         += -DNO_DYNLOAD
+ CPPFLAGS         += -DNO_DYNLOAD -DNO_TIMES_H
+ CXXFLAGS         := $(filter-out -std=c++98,$(CXXFLAGS))
  LIBDL             =
  LDFLAGS           = -Wl,-rpath,$(libdir) @LDFLAGS@
 endif
 ifeq ($(HOST_OS),CYGWIN)
  CPPFLAGS         += -DNO_DYNLOAD
+ CXXFLAGS         := $(filter-out -std=c++98,$(CXXFLAGS))
  LIBDL             =
  LDFLAGS           = -Wl,-rpath,$(libdir) @LDFLAGS@
 endif
