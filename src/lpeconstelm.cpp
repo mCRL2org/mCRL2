@@ -138,7 +138,7 @@ private:
     }
   }  
   
-  // returns if a expression occurs in the list of free variables
+  // returns whether a expression occurs in the list of free variables
   //  
   inline bool inFreeVarList(data_expression dexpr)
   {
@@ -158,14 +158,14 @@ private:
     return a;
   }
   
-  // returns if two data_expressions are equal
+  // returns whether two data_expressions are equal
   //
   inline bool compare(data_expression x, data_expression y)
   {
     return (x==y);
   }
   
-  // returns if the given data_expression is false
+  // returns whether the given data_expression is false
   //  
   inline bool conditionTest(data_expression x)
   {
@@ -178,7 +178,7 @@ private:
     return (!(data_expression(rewrite(data_expression(p_substitute(x, p_currentState)))).is_false()));
   }
 
-  // returns if the currentState and NextState differ
+  // returns whether the currentState and NextState differ
   //
   inline bool cmpCurrToNext()
   {
@@ -218,7 +218,32 @@ private:
     }
     return !differs;
   }
-  
+ 
+  void detectVar()
+  {
+   for(set< int >::iterator i = p_S.begin(); i != p_S.end() ; i++ ){
+     bool b = recDetectVar(p_currentState.at(*i).rhs());
+     if (b) {
+       p_S.erase(i);
+     }
+   }
+  }
+
+  bool recDetectVar(data_expression t)
+  {
+     bool b = false;
+     if(gsIsDataVarId(t)){
+       b = true;
+     }
+     if ( gsIsDataAppl(t) ) {
+       for(aterm_list::iterator i = ((aterm_appl) t).argument_list().begin(); i!= ((aterm_appl) t).argument_list().end();i++) {
+         b = b || recDetectVar((aterm_appl) *i);
+       }
+     }
+     return b;
+  }
+
+
   // template for changing a vector into a list
   //
   template <typename Term>
@@ -789,6 +814,9 @@ public:
     };
     set_difference(S.begin(), S.end(), p_V.begin(), p_V.end(), inserter(p_S, p_S.begin()));
     
+    // remove detected constants in case the value contains variables
+    detectVar();
+
     //Singleton sort process parameters
     //
     if(p_nosingleton){

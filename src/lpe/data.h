@@ -67,6 +67,13 @@ class data_expression: public aterm_wrapper
       return *this == gsMakeDataExprFalse();
     }     
 
+    /// Returns the sort of the data_expression.
+    ///
+    sort type() const
+    {
+      return lpe::sort(gsGetSort(m_term));
+    }
+
     /// Applies a substitution to this data_expression and returns the result.
     /// The Substitution object must supply the method aterm operator()(aterm).
     ///
@@ -82,6 +89,11 @@ class data_expression: public aterm_wrapper
 /// \brief singly linked list of data expressions
 ///
 typedef term_list<data_expression> data_expression_list;
+
+inline term_list<ATermAppl> get_sorts(term_list<ATermAppl> l)
+{
+  return apply(l,gsGetSort);
+}
 
 ///////////////////////////////////////////////////////////////////////////////
 // data_variable

@@ -38,8 +38,8 @@ class action: public aterm_wrapper
     }
 
     action(const std::string& name, const data_expression_list& arguments)
-     : aterm_wrapper(gsMakeAction(gsString2ATermAppl(name.c_str()), arguments)),
-       m_name(name),
+     : aterm_wrapper(gsMakeAction(gsMakeActId(gsString2ATermAppl(name.c_str()),get_sorts(arguments)), arguments)),
+       m_name(gsMakeActId(gsString2ATermAppl(name.c_str()),get_sorts(arguments))),
        m_arguments(arguments)
     {}
 
