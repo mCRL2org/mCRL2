@@ -33,8 +33,13 @@ endif
 
 .PHONY: all bjam install clean distclean
 
-all: $(BJAM)
+all: bjam build_completed
+
+build_completed:
 	$(BJAM) $(BJAM_ARGUMENTS) --prefix=. --layout=system install
+	touch build_completed
+
+bjam: $(BJAM)
 
 $(BJAM):
 	cd tools/build/jam_src; \
@@ -47,4 +52,4 @@ install: all
 clean:
 
 distclean:
-	@-$(RM) -rf bin lib tools/build/jam_src/bin tools/build/jam_src/bootstrap
+	@-$(RM) -rf bin lib build_completed tools/build/jam_src/bin tools/build/jam_src/bootstrap

@@ -168,6 +168,7 @@ int main(int argc, char **argv)
   bool removeunused = true;
   int stateformat = GS_STATE_VECTOR;
   int opt;
+  char *SpecFileName;
   while ( (opt = getopt_long(argc,argv,sopts,lopts,NULL)) != -1 )
   {
     switch ( opt )
@@ -229,7 +230,7 @@ int main(int argc, char **argv)
 
   if ( argc-optind == 1 )
   {
-    char *SpecFileName = argv[optind];
+    SpecFileName = argv[optind];
     if ( (SpecStream = fopen(SpecFileName, "rb")) == NULL )
     {
       gsErrorMsg("could not open input file '%s' for reading: ", SpecFileName);
