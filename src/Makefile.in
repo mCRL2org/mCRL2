@@ -273,6 +273,8 @@ clean:
 distclean: clean
 	$(RM) -r config.status Makefile config rewr_innerc_aux.h revision
 
+mcrl2lexer.o: mcrl2parser.c
+
 $(ATERM_NAME): $(ATERM_OBJECTS)
 	$(AR) $(ARFLAGS) $@ $(ATERM_OBJECTS)
 
