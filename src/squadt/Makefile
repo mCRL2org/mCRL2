@@ -23,7 +23,7 @@ BOOST_OBJECTS                  = gui_project_overview.o tool_manager.o project_m
 
 WX_OBJECTS                     = squadt.o gui_project_overview.o gui_new_specification.o gui_specification_properties.o \
 				 gui_resources.o tool_executor.o logger.o process.o
-WX_LIBRARIES                  := $(shell $(WX_CONFIG) --libs core base adv net)
+WX_LIBRARIES                  := $(filter-out -mthreads,$(shell $(WX_CONFIG) --libs core base adv net))
 
 PROJECT_MANAGER_OBJECTS        = project_manager.o specification.o xml_text_reader.o settings_manager.o
 TOOL_MANAGER_OBJECTS           = tool_manager.o tool.o xml_text_reader.o settings_manager.o
