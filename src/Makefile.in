@@ -180,7 +180,7 @@ LIB_NAMES          = $(XSIMTRACE_NAME)
 OBJECTS           := $(sort $(OBJECTS))
 
 #Make rules
-.PHONY: all install clean distclean boost documentation squadt experimental
+.PHONY: all install clean distclean boost boost_relay documentation squadt experimental
 .PRECIOUS: mcrl2parser.c mcrl2lexer.c
 
 all: $(EXE_NAMES) $(LIB_NAMES)
@@ -189,8 +189,15 @@ all: $(EXE_NAMES) $(LIB_NAMES)
 experimental: $(EXPERIMENTALS)
 
 # Build bjam and local boost 
-ifeq ($(BOOST_PREFIX),boost)
-all distclean install: boost
+ifdef BUILD_BOOST
+all : boost
+distclean install: boost_relay
+
+boost_relay:
+	@$(MAKE) -C boost $(MAKECMDGOALS)
+
+boost/build_completed:
+	@$(MAKE) -C boost
 endif
 
 # Build/clean/install documentation
@@ -215,9 +222,6 @@ squadt: boost
 
 # For building bjam and boost libraries
 boost: $(BUILD_BOOST)
-
-boost/build_completed:
-	@$(MAKE) -C boost $(MAKECMDGOALS)
 
 # Add revision number
 ifeq ($(findstring $(MAKECMDGOALS),clean distclean),)
