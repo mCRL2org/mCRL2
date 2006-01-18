@@ -313,12 +313,12 @@ private:
     //p_singletonSort = result;
     
     if (p_verbose){
-      cerr << "Sorts which have singleton constructors:"<< endl;
+      cerr << "lpeconstelm: Sorts which have singleton constructors:"<< endl;
       for(set<lpe::sort>::iterator i = p_singletonSort.begin(); i != p_singletonSort.end(); i++){
-        cerr <<"  "<< i->pp() << endl;
+        cerr <<"lpeconstelm:   "<< i->pp() << endl;
       }
       if (p_singletonSort.empty()) {
-        cerr <<"  []"<< endl;      
+        cerr <<"lpeconstelm:   []"<< endl;      
       }
     }
   } 
@@ -337,7 +337,7 @@ private:
 
   void inline printVar()
   {
-    cerr << " Variable indices : {";
+    cerr << "lpeconstelm: Variable indices : {";
     set< int >::iterator i = p_V.begin();
     int j = 0;
     while(i != p_V.end()){
@@ -352,12 +352,17 @@ private:
 
   void inline printState()
   {
-    for(set< int >::iterator i = p_S.begin(); i != p_S.end() ; i++ ){
-      if (!p_nosingleton){
-        cerr << "  " << p_currentState[*i].pp() << endl;
-      } else {
-        cerr << "  " << p_currentState[*i].pp() << " :  " << p_currentState[*i].lhs().type().pp()  <<endl;
-      }  
+    if ( p_S.size() > 0 )
+    {
+      cerr << "lpeconstelm:   [ ";
+      for(set< int >::iterator i = p_S.begin(); i != (--p_S.end()) ; i++ ){
+	if (!p_nosingleton){
+	  cerr << p_currentState[*i].pp() << ", ";
+	} else {
+	  cerr << p_currentState[*i].pp() << ": " << p_currentState[*i].lhs().type().pp() << ", ";
+	}  
+      }
+      cerr << p_currentState[*(--p_S.end())].pp() << " ]" << endl;
     }
   }
   
@@ -384,20 +389,20 @@ public:
     findSingleton();
     if(p_verbose){
     cerr <<
-      "Constant process parameters which are not substituted and " << endl <<
-      "removed [--nosingleton]:" << endl;
+      "lpeconstelm: Constant process parameters which are not substituted and " << endl <<
+      "lpeconstelm: removed [--nosingleton]:" << endl;
     }
     for(set< int >::iterator i = p_S.begin(); i != p_S.end(); i++){
       if (p_singletonSort.find(p_initAssignments[*i].lhs().type())  != p_singletonSort.end()){
         p_S.erase(*i);
         if (p_verbose){
-          cerr << "  " << p_initAssignments[*i].lhs().pp() << " : " << p_initAssignments[*i].lhs().type().pp() << endl;
+          cerr << "lpeconstelm:   " << p_initAssignments[*i].lhs().pp() << " : " << p_initAssignments[*i].lhs().type().pp() << endl;
           empty = false;
         }
       }
     }
     if (empty){
-      cerr << "  []" << endl;
+      cerr << "lpeconstelm:   []" << endl;
     }
   }
 
@@ -420,8 +425,8 @@ public:
     }
 
     if (p_verbose) {
-      cerr << "Number of summands of old LPE: " << p_lpe.summands().size() << endl;
-      cerr << "Number of summands of new LPE: " <<  rebuild_summandlist.size() << endl;
+      cerr << "lpeconstelm: Number of summands of old LPE: " << p_lpe.summands().size() << endl;
+      cerr << "lpeconstelm: Number of summands of new LPE: " <<  rebuild_summandlist.size() << endl;
     }
 
     set< data_variable > constantVar;
@@ -566,7 +571,7 @@ public:
       //};
     } else {
       if(!rebuild_spec.save(p_outputfile)){
-         cerr << "Unsuccessfully written outputfile: " << p_outputfile << endl;
+         cerr << "lpeconstelm: Unsuccessfully written outputfile: " << p_outputfile << endl;
       };
     } 
   }
@@ -582,7 +587,7 @@ public:
   //  
   void inline printSet()
   {
-    cerr << "Constant indices: { ";
+    cerr << "lpeconstelm: Constant indices: { ";
     set< int >::iterator i = p_S.begin();
     int j = 0;
     while(i != p_S.end()){
@@ -603,7 +608,7 @@ public:
     p_filenamein = filename;
     if (!p_spec.load(p_filenamein))
     {
-      cerr << "error: could not read input file '" << filename << "'" << endl;
+      cerr << "lpeconstelm: error: could not read input file '" << filename << "'" << endl;
       return false;
     } 
     //LPE x = p_spec.lpe(); 
@@ -620,11 +625,11 @@ public:
   {
     ATermAppl z = (ATermAppl) ATreadFromFile(stdin);
     if (z == NULL){
-      cerr << "Could not read LPE from stdin"<< endl;
+      cerr << "lpeconstelm: Could not read LPE from stdin"<< endl;
       return false;
     };
     if (!gsIsSpecV1(z)){
-      cerr << "Stdin does not contain an LPE" << endl;
+      cerr << "lpeconstelm: Stdin does not contain an LPE" << endl;
       return false;
     }
     p_spec = specification(z);
@@ -740,7 +745,7 @@ public:
         same = true;
         if (p_verbose){
           //cerr << "Cycle:" << cycle++ << endl;
-          cerr << "Cycle " << cycle++ << ": ";
+          cerr << "lpeconstelm: Cycle " << cycle++ << ": ";
         }
         //int summandnr = 1;
         for(summand_list::iterator currentSummand = p_lpe.summands().begin(); currentSummand != p_lpe.summands().end() ;currentSummand++ ){
@@ -783,7 +788,7 @@ public:
     
       if(!p_freeVarSet.empty()){
         if (p_verbose){
-          cerr << "Free Variable checkup:" << endl;
+          cerr << "lpeconstelm: Free Variable checkup:" << endl;
         }
       
         int n = p_V.size();
@@ -794,7 +799,7 @@ public:
 
         p_currentState = p_newCurrentState;
         if (p_verbose){
-          cerr << "  Detected "<<p_V.size() - n << " fake constant process parameters" <<endl;
+          cerr << "lpeconstelm:   Detected "<<p_V.size() - n << " fake constant process parameters" <<endl;
           foundFake = ((p_V.size() - n) != 0);
         }         
 
@@ -824,7 +829,7 @@ public:
     }    
     
     if (p_verbose){
-      cerr << "Number of found constant process parameters: "<< p_S.size() << endl ;//printSet(); 
+      cerr << "lpeconstelm: Number of removed process parameters: "<< p_S.size() << endl ;//printSet(); 
       printSetVar();  
     }
   }
@@ -932,7 +937,7 @@ int main(int ac, char* av[])
 	  }
 
     if (filename.size() > 2){
-      cerr << "Specify only INPUT and/or OUTPUT file (Too many arguments)."<< endl;
+      cerr << "lpeconstelm: Specify only INPUT and/or OUTPUT file (Too many arguments)."<< endl;
       return 1;
     }
     
@@ -955,7 +960,7 @@ int main(int ac, char* av[])
 
     }
     catch(exception& e){
-      cerr << e.what() << "\n";
+      cerr << "lpeconstelm: " << e.what() << "\n";
       return 1;
     }    
     

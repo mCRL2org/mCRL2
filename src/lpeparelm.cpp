@@ -134,7 +134,7 @@ public:
   {
     p_inputfile = filename;
     if (!p_spec.load(p_inputfile)){
-      cerr << "error: could not read input file '" << filename << "'" << endl;
+      cerr << "lpeparelm: error: could not read input file '" << filename << "'" << endl;
       return false;      
     };
     return true;   
@@ -147,11 +147,11 @@ public:
   {
     ATermAppl z = (ATermAppl) ATreadFromFile(stdin);
     if (z == NULL){
-      cerr << "Could not read LPE from stdin"<< endl;
+      cerr << "lpeparelm: Could not read LPE from stdin"<< endl;
       return false;
     };
     if (!gsIsSpecV1(z)){
-      cerr << "Stdin does not contain an LPE" << endl;
+      cerr << "lpeparelm: Stdin does not contain an LPE" << endl;
       return false;
     }
     p_spec = specification(z);
@@ -183,7 +183,7 @@ public:
     // In a timecondition: t_i(d,e_i) for some i \in I
     //
     if(p_verbose){
-      cerr << "Searching for used process parameters: ";
+      cerr << "lpeparelm: Searching for used process parameters: ";
     }
     //int counter = 0;
     //int n = lpe.summands().size();
@@ -234,12 +234,12 @@ public:
     //
     int cycle = 0;
     if(p_verbose){
-      cerr << "Searching for dependent process parameters" << endl;
+      cerr << "lpeparelm: Searching for dependent process parameters" << endl;
     } 
     bool reset = true;
     while (reset){
       if (p_verbose){
-        cerr << "  Cycle "<< ++cycle << ": ";
+        cerr << "lpeparelm:   Cycle "<< ++cycle << ": ";
       }
       reset = false;
       //counter = 0; 
@@ -279,9 +279,9 @@ public:
     //}
 
     if (p_verbose) {
-      cerr << "Number of removed process parameters: " << p_S.size() << endl;
+      cerr << "lpeparelm: Number of removed process parameters: " << p_S.size() << endl;
       if (p_S.size() !=0){
-	cerr << "  [ ";
+	cerr << "lpeparelm:   [ ";
         for(set< data_variable >::iterator i = p_S.begin(); i != (--p_S.end()); i++){
           cerr << i->name() << ", ";
         }
@@ -397,7 +397,7 @@ public:
       //};
     } else {
       if(!rebuild_spec.save(p_outputfile)){
-         cerr << "Unsuccessfully written outputfile: " << p_outputfile << endl;
+         cerr << "lpeparelm: Unsuccessfully written outputfile: " << p_outputfile << endl;
       };
     } 
   }
@@ -447,7 +447,7 @@ int main(int ac, char* av[])
      
     if (vm.count("help")) {
        cerr << "Usage: "<< av[0] << " [OPTION]... [INFILE [OUTFILE]] \n";
-       cerr << "Remove inert parameters from the LPE in INFILE, and write the result" << endl;
+       cerr << "Remove unused parameters from the LPE in INFILE, and write the result" << endl;
        cerr << "to stdout." << endl;
        cerr << endl;
        cerr << desc;
@@ -480,7 +480,7 @@ int main(int ac, char* av[])
 	  }
 
     if (filename.size() > 2){
-      cerr << "Specify only INPUT and/or OUTPUT file (Too many arguments)."<< endl;
+      cerr << "lpeparelm: Specify only INPUT and/or OUTPUT file (Too many arguments)."<< endl;
       return 1;
     }
              
@@ -501,7 +501,7 @@ int main(int ac, char* av[])
 
   }
   catch(exception& e){
-      cerr << e.what() << "\n";
+      cerr << "lpeparelm: " << e.what() << "\n";
       return 1;
   }    
   return 0;
