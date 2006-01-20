@@ -153,7 +153,6 @@ static ATermAppl gstcExpandNumTypesUp(ATermAppl Type);
 static ATermAppl gstcExpandNumTypesDown(ATermAppl Type);
 static ATermAppl gstcMinType(ATermList TypeList);
 static ATbool gstcMActIn(ATermList MAct, ATermList MActs);
-static ATbool gstcMActInSubEq(ATermList MAct, ATermList MActs);
 static ATbool gstcMActEq(ATermList MAct1, ATermList MAct2);
 static ATbool gstcMActSubEq(ATermList MAct1, ATermList MAct2);
 static ATermAppl gstcUnifyMinType(ATermAppl Type1, ATermAppl Type2);
@@ -1323,7 +1322,7 @@ static ATermAppl gstcTraverseActProcVarConstP(ATermTable Vars, ATermAppl ProcTer
 
       if(ATisEmpty(CommList)) gsWarningMsg("synchronizing empty set of (multi)actions (typechecking %P)\n",ProcTerm);
       else{
-	ATermList MActsFrom=ATmakeList0();
+	ATermList ActsFrom=ATmakeList0();
 
 	for(;!ATisEmpty(CommList);CommList=ATgetNext(CommList)){
 	  ATermAppl Comm=ATAgetFirst(CommList);
@@ -1357,9 +1356,20 @@ static ATermAppl gstcTraverseActProcVarConstP(ATermTable Vars, ATermAppl ProcTer
 	  }
 	  MActFrom=BackupMActFrom;
 
-	  if(gstcMActInSubEq(MActFrom,MActsFrom))
-	    {gsErrorMsg("synchronizing (multi)action %P twice (typechecking %P)\n",MActFrom,ProcTerm);return NULL;}
-	  else MActsFrom=ATinsert(MActsFrom,(ATerm)MActFrom);
+	  //the multiactions in the lhss of comm should not intersect.
+	  //make the list of unique actions
+	  ATermList Acts=ATmakeList0();
+	  for(;!ATisEmpty(MActFrom);MActFrom=ATgetNext(MActFrom)){
+	    ATermAppl Act=ATAgetFirst(MActFrom);
+	    if(ATindexOf(Acts,(ATerm)Act,0)<0)
+	      Acts=ATinsert(Acts,(ATerm)Act);
+	  }
+	  for(;!ATisEmpty(Acts);Acts=ATgetNext(Acts)){
+	    ATermAppl Act=ATAgetFirst(Acts);
+	    if(ATindexOf(ActsFrom,(ATerm)Act,0)>=0)
+	      {gsErrorMsg("synchronizing action %P in different ways (typechecking %P)\n",Act,ProcTerm);return NULL;}
+	    else ActsFrom=ATinsert(ActsFrom,(ATerm)Act);
+	  }
 	}
       }
     }
@@ -2410,14 +2420,6 @@ static ATbool gstcMActIn(ATermList MAct, ATermList MActs){
   //returns true if MAct is in MActs
   for(;!ATisEmpty(MActs);MActs=ATgetNext(MActs))
     if(gstcMActEq(MAct,ATLgetFirst(MActs))) return ATtrue;
-       
-  return ATfalse;
-}
-
-static ATbool gstcMActInSubEq(ATermList MAct, ATermList MActs){
-  //returns true if a supermultiaction of MAct is in MActs
-  for(;!ATisEmpty(MActs);MActs=ATgetNext(MActs))
-    if(gstcMActSubEq(MAct,ATLgetFirst(MActs))) return ATtrue;
        
   return ATfalse;
 }
