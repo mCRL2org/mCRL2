@@ -499,7 +499,7 @@ int main(int argc, char **argv)
     
             if ( detect_action || gsVerbose )
             {
-              gsfprintf(stderr,"detect: action '%P' found and saved to '%s_act_%i_%P.trc'.\n",trace_actions[i],basefilename,tracecnt,trace_actions[i]);
+              gsfprintf(stderr,"detect: action '%P' found and saved to '%s_act_%lu_%P.trc'.\n",trace_actions[i],basefilename,tracecnt,trace_actions[i]);
               fflush(stderr);
             }
             tracecnt++;
@@ -573,7 +573,7 @@ int main(int argc, char **argv)
 
         if ( detect_deadlock || gsVerbose )
         {
-          fprintf(stderr,"deadlock-detect: deadlock found and saved to '%s_dlk_%i.trc'.\n",basefilename,tracecnt);
+          fprintf(stderr,"deadlock-detect: deadlock found and saved to '%s_dlk_%lu.trc'.\n",basefilename,tracecnt);
           fflush(stderr);
         }
         tracecnt++;

@@ -199,12 +199,12 @@ static void newobject(int n)
     { 
       for(long i=0 ; i<maxobject ; i++)
       { 
-        ATunprotect((ATerm *)&(objectdata[i].objectname));
+        ATunprotectAppl(&(objectdata[i].objectname));
         ATunprotect(&(objectdata[i].representedprocess));
         ATunprotect(&(objectdata[i].representedprocesses));
         ATunprotectAppl(&(objectdata[i].targetsort));
-        ATunprotect((ATerm*)&(objectdata[i].processbody));
-        ATunprotect((ATerm*)&(objectdata[i].parameters));
+        ATunprotectAppl(&(objectdata[i].processbody));
+        ATunprotectList(&(objectdata[i].parameters));
       }
       objectdata=(objectdatatype *) (
                  realloc(objectdata,newsize*sizeof(objectdatatype)));
@@ -216,17 +216,17 @@ static void newobject(int n)
     
     for(long i=0 ; i<maxobject ; i++)
     { 
-      ATprotect((ATerm *)&(objectdata[i].objectname));
+      ATprotectAppl(&(objectdata[i].objectname));
       ATprotect(&(objectdata[i].representedprocess));
       ATprotect(&(objectdata[i].representedprocesses));
       ATprotectAppl(&(objectdata[i].targetsort));
-      ATprotect((ATerm*)&(objectdata[i].processbody));
-      ATprotect((ATerm*)&(objectdata[i].parameters));
+      ATprotectAppl(&(objectdata[i].processbody));
+      ATprotectList(&(objectdata[i].parameters));
     }
 
     for(long i=maxobject ; i<newsize ; i++)
     { objectdata[i].objectname=NULL;
-      ATprotect((ATerm *)&(objectdata[i].objectname));
+      ATprotectAppl(&(objectdata[i].objectname));
       objectdata[i].constructor=0;
       objectdata[i].representedprocess=NULL;
       ATprotect(&(objectdata[i].representedprocess));
@@ -235,9 +235,9 @@ static void newobject(int n)
       objectdata[i].targetsort=NULL;
       ATprotectAppl(&(objectdata[i].targetsort));
       objectdata[i].processbody=NULL;
-      ATprotect((ATerm*)&(objectdata[i].processbody));
+      ATprotectAppl(&(objectdata[i].processbody));
       objectdata[i].parameters=NULL;
-      ATprotect((ATerm*)&(objectdata[i].parameters));
+      ATprotectList(&(objectdata[i].parameters));
       objectdata[i].processstatus=unknown;
       objectdata[i].object=none;
       objectdata[i].canterminate=0; 
@@ -852,23 +852,23 @@ static specificationbasictype *create_spec(ATermAppl t)
   specificationbasictype *spec =
     (specificationbasictype *) malloc(sizeof(specificationbasictype));
   spec->sorts=NULL;
-  ATprotect((ATerm *)&(spec->sorts));
+  ATprotectList(&(spec->sorts));
   spec->funcs=NULL;
-  ATprotect((ATerm *)&(spec->funcs));
+  ATprotectList(&(spec->funcs));
   spec->maps=NULL;
-  ATprotect((ATerm *)&(spec->maps));
+  ATprotectList(&(spec->maps));
   spec->eqns=NULL;
-  ATprotect((ATerm *)&(spec->eqns));
+  ATprotectList(&(spec->eqns));
   spec->acts=NULL;
-  ATprotect((ATerm *)&(spec->acts));
+  ATprotectList(&(spec->acts));
   spec->procdatavars=NULL;
-  ATprotect((ATerm *)&(spec->procdatavars));
+  ATprotectList(&(spec->procdatavars));
   spec->procs=NULL;
-  ATprotect((ATerm *)&(spec->procs));
+  ATprotectList(&(spec->procs));
   spec->initdatavars=NULL;
-  ATprotect((ATerm *)&(spec->initdatavars));
+  ATprotectList(&(spec->initdatavars));
   spec->init=NULL;
-  ATprotect((ATerm *)&(spec->init));
+  ATprotectAppl(&(spec->init));
   
   /* t=gsAlpha(t);  / * Apply alpha-beta axioms */
 
@@ -3457,11 +3457,11 @@ static stacklisttype *new_stack(
     stop();
   }
   stack->parameterlist=ATempty; 
-  ATprotect((ATerm *)&stack->parameterlist); 
+  ATprotectList(&stack->parameterlist); 
   stack->parameterlist=parameterlist;
   stack->no_of_states=no_of_states;
   stack->booleanStateVariables=ATempty;
-  ATprotect((ATerm *)&stack->booleanStateVariables);
+  ATprotectList(&stack->booleanStateVariables);
   if ((binary==1) && (oldstate==0))
   { i=upperpowerof2(no_of_states);
     for( ; i>0 ; i--)
