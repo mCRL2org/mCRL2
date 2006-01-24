@@ -147,7 +147,7 @@ if test $enable_debug; then
     CPPFLAGS="-DAT_64BIT $CPPFLAGS"
   fi
   CFLAGS="-g -Wall -O2 -W -pedantic $CFLAGS"
-  CXXFLAGS="-g -Wall -W $CXXFLAGS"
+  CXXFLAGS="-g -Wall -O2 -W $CXXFLAGS"
   BFLAGS="-t $BFLAGS"
 else
   CPPFLAGS="-DNDEBUG $CPPFLAGS"
