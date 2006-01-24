@@ -146,8 +146,8 @@ if test $enable_debug; then
   if test $USE_64_BIT; then
     CPPFLAGS="-DAT_64BIT $CPPFLAGS"
   fi
-  CFLAGS="-g -Wall -pedantic $CFLAGS"
-  CXXFLAGS="-g -Wall $CXXFLAGS"
+  CFLAGS="-g -Wall -O2 -W -pedantic $CFLAGS"
+  CXXFLAGS="-g -Wall -W $CXXFLAGS"
   BFLAGS="-t $BFLAGS"
 else
   CPPFLAGS="-DNDEBUG $CPPFLAGS"
@@ -374,6 +374,9 @@ if test $USE_LIBXML2; then
 else
   AC_MSG_NOTICE(libXML2       :  MISSING)
 fi
+
+eval DATADIR="$datadir"
+AC_SUBST([DATADIR],[])
 
 AC_MSG_NOTICE()
 AC_MSG_NOTICE(Some tools will not be built if any of these libraries are missing.)

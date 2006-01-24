@@ -180,7 +180,7 @@ LIB_NAMES          = $(XSIMTRACE_NAME)
 OBJECTS           := $(sort $(OBJECTS))
 
 #Make rules
-.PHONY: all install clean distclean boost boost_relay documentation squadt experimental
+.PHONY: all install clean distclean boost boost_relay documentation squadt experimental distribution
 .PRECIOUS: mcrl2parser.c mcrl2lexer.c
 
 all: $(EXE_NAMES) $(LIB_NAMES)
@@ -223,18 +223,19 @@ squadt: boost
 # For building bjam and boost libraries
 boost: $(BUILD_BOOST)
 
-# Add revision number
+# Add revision number (if not building a source distribution)
+ifndef SOURCE_DISTRIBUTION
 ifeq ($(findstring $(MAKECMDGOALS),clean distclean),)
 revision: utility/get_revision
 	@echo "CPPFLAGS += -DREVISION=$$(utility/get_revision)" > revision
 
-# Force local boost build because adding `squadt/utility/get_revision: boost' does not work
 utility/get_revision: utility/get_revision.cpp $(BUILD_BOOST)
 	$(CXX) $(BOOST_CPPFLAGS) $< $(subst $(libdir),$(BOOST_PREFIX)/lib,$(BOOST_LDFLAGS)) $(BOOST_FILESYSTEM) -o $@
 
--include revision
-
 endif
+endif
+
+-include revision
 
 install: all
 	$(INSTALL) -d $(bindir)
@@ -420,7 +421,7 @@ endif
 	sed 's,\($*\)\.o[ :]*,\1.o $@ : ,g' < $@.$$$$ > $@; \
 	$(RM) $@.$$$$
 
-ifeq (,$(findstring $(MAKECMDGOALS),clean distclean))
+ifeq (,$(findstring $(MAKECMDGOALS),revision clean distclean))
 -include $(foreach s,$(OBJECTS),$(shell if test -f $(basename $s).c; then echo -n $(basename $s).d; fi))
 -include $(foreach s,$(OBJECTS),$(shell if test -f $(basename $s).cpp; then echo -n $(basename $s).dpp; fi))
 endif

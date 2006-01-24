@@ -42,12 +42,14 @@ all: $(TARGETS)
 	@$(RM) revision
 
 ifeq ($(findstring $(MAKECMDGOALS),clean distclean),)
-# Add revision number
+# Add revision number (when not building a source distribution)
+ifndef SOURCE_DISTRIBUTION
 revision: ../utility/get_revision
 	@echo "CPPFLAGS += -DREVISION=$$(../utility/get_revision)" > revision
 
 ../utility/get_revision: ../utility/get_revision.cpp
 	$(CXX) $(BOOST_CPPFLAGS) $< $(subst $(libdir),$(BOOST_PREFIX)/lib,$(BOOST_LDFLAGS)) $(BOOST_FILESYSTEM) -o $@ 
+endif
 
 -include revision
 
