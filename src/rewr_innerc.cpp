@@ -2049,9 +2049,11 @@ void RewriterCompilingInnermost::CompileRewriteSystem(ATermAppl DataEqnSpec)
       "\n"
       "ATermAppl rewrite(ATermAppl t)\n"
       "{\n"
+         // t is an "APPL" or a var
       "  if ( isAppl(t) )\n"
       "  {\n"
       "    ATerm head = ATgetArgument(t,0);\n"
+           // if head is int, just apply rewriter
       "    if ( ATisInt(head) )\n"
       "    {\n"
       "      long function_index = ATgetInt((ATermInt)head);\n"
@@ -2069,39 +2071,60 @@ void RewriterCompilingInnermost::CompileRewriteSystem(ATermAppl DataEqnSpec)
       "        return ATmakeApplArray(ATgetAFun(t),args);\n"
       "      }\n"
       "    } else {\n"
+             // head is a var, get value
       "      ATerm u = get_subst((ATermAppl) head);\n"
       "      long arity_t = ATgetArity(ATgetAFun(t));\n"
-      "      ATerm newhead = ATgetArgument((ATermAppl) u,0);\n"
-      "      long arity_h = ATgetArity(ATgetAFun((ATermAppl) u));\n"
-      "      ATerm args[arity_h+arity_t-1];\n"
-      "      args[0] = newhead;\n"
-      "      long function_index;\n"
-      "      if ( ATisInt(newhead) && ((function_index = ATgetInt((ATermInt) newhead)) < %i) )\n"
+      "      long arity_u;\n"
+      "      if ( isAppl(u) )\n"
       "      {\n"
-      "        for (int i=1; i<arity_h; i++)\n"
+               // new head is an APPL, get new head and arity of u
+      "        head = ATgetArgument((ATermAppl) u,0);\n"
+      "        arity_u = ATgetArity(ATgetAFun((ATermAppl) u));\n"
+      "      } else {\n"
+               // still a var
+      "        head = u;\n"
+      "        arity_u = 1;\n"
+      "      }\n"
+             // nead space for head (1), arguments of u (arity_u-1) and
+	     // arguments of t (arity_t-1)
+      "      ATerm args[arity_u+arity_t-1];\n"
+             // set new head
+      "      args[0] = head;\n"
+      "      long function_index;\n"
+             // is head a function symbol?
+      "      if ( ATisInt(head) && ((function_index = ATgetInt((ATermInt) head)) < %i) )\n"
+      "      {\n"
+               // add arguments of u to new args
+      "        for (int i=1; i<arity_u; i++)\n"
       "        {\n"
       "          args[i] = ATgetArgument((ATermAppl) u,i);\n"
       "        }\n"
-      "        int k = arity_h;\n"
+      "        int k = arity_u;\n"
+               // add arguments of t to new args
       "        for (int i=1; i<arity_t; i++,k++)\n"
       "        {\n"
       "          args[k] = ATgetArgument((ATermAppl) t,i);\n"
       "        }\n"
-      "        return int2func[function_index](ATmakeApplArray(getAppl(arity_h+arity_t-1),args));\n"
+               // call rewrite function of head with new term
+      "        return int2func[function_index](ATmakeApplArray(getAppl(arity_u+arity_t-2),args));\n"
       "      } else {\n"
-      "        for (int i=1; i<arity_h; i++)\n"
+               // add rewritten arguments of u to new args
+      "        for (int i=1; i<arity_u; i++)\n"
       "        {\n"
       "          args[i] = (ATerm) rewrite((ATermAppl) ATgetArgument((ATermAppl) u,i));\n"
       "        }\n"
-      "        int k = arity_h;\n"
+      "        int k = arity_u;\n"
+               // add rewritten arguments of t to new args
       "        for (int i=1; i<arity_t; i++,k++)\n"
       "        {\n"
       "          args[k] = (ATerm) rewrite((ATermAppl) ATgetArgument((ATermAppl) t,i));\n"
       "        }\n"
-      "        return ATmakeApplArray(getAppl(arity_h+arity_t-1),args);\n"
+               // done; return new term
+      "        return ATmakeApplArray(getAppl(arity_u+arity_t-2),args);\n"
       "      }\n"
       "    }\n"
       "  } else {\n"
+           // t is a var: just return it(s value)
       "    ATermAppl r=(ATermAppl) get_subst(t);\n"
       "    return r;\n"
       "  }\n"

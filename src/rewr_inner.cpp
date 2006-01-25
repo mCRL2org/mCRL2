@@ -1375,28 +1375,36 @@ ATerm RewriterInnermost::rewrite_aux(ATerm Term)
 		ATerm head = ATgetFirst((ATermList) Term);
 		ATermList l = ATgetNext((ATermList) Term);
 
+		// rewrite arguments
 		l = rewrite_listelts(l);
 
+		// head is should be a int or a var
+		// if it's a var, see if it needs to be substituted
 		if ( !ATisInt(head) )
 		{
-			if ( ATisAppl(head) && gsIsDataVarId((ATermAppl) head) ) 
+			assert(ATisAppl(head) && gsIsDataVarId((ATermAppl) head));
+
+			ATerm a = lookupSubstitution((ATermAppl) head);
+			
+			// if a is a list, concatenate the arguments
+			// always set head again, as 'a' might have been changed
+			if ( ATisList(a) )
 			{
-				ATerm a = lookupSubstitution((ATermAppl) head);
-				if ( ATisList(a) )
-				{
-					head = ATgetFirst((ATermList) a);
-					l = ATconcat(ATgetNext((ATermList) a),l);
-				} else {
-					head = a;
-				}
+				head = ATgetFirst((ATermList) a);
+				l = ATconcat(ATgetNext((ATermList) a),l);
 			} else {
-				Term = (ATerm) ATinsert(l,ATgetFirst((ATermList) Term));
+				head = a;
 			}
 		}
-		if ( ATisInt(ATgetFirst((ATermList) Term)) )
+		
+		// head is should be a int or a var
+		if ( ATisInt(head) )
 		{
+			// head is a int, thus we can try to rewrite further
 			Term = rewrite_func((ATermInt) head, l);
 		} else {
+			// head is a var, so there is nothing left to do but to
+			// reattach the head
 			Term = (ATerm) ATinsert(l,head);
 		}
 

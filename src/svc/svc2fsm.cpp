@@ -16,9 +16,8 @@
 
 char** names=NULL; // array of parameter names
 char** types=NULL; // array of parameter types
+int num_names = 0;
 static bool is_mcrl2;
-static bool quiet = false;
-static bool verbose = false;
 
 static void print_version(FILE *f)
 {
@@ -60,12 +59,13 @@ static void print_states(FILE *f, SVCfile file, int* in, int* out) {
     for (i=0; i<nos; i++)
 	    state[i] = NULL;
     ATprotectArray((ATerm *) state,nos);
-    if ( verbose )
-      fprintf(stderr,"collect state data ...\n");
+    gsVerboseMsg("collecting state data...\n");
 
     // create array of states
-    if (state==NULL) {
-	fprintf(stderr,"malloc failed");exit(2);
+    if (state==NULL)
+    {
+      gsErrorMsg("malloc failed");
+      exit(2);
     }
 
     // gather state information
@@ -73,16 +73,14 @@ static void print_states(FILE *f, SVCfile file, int* in, int* out) {
     {
        for(i = 0 ; i < nos; i++) {
             state[i]=ATgetArguments((ATermAppl)SVCstate2ATerm(&file,i)); 
-            if (state[i]==NULL) fprintf(stderr,"\nstate[%d]==null\n",i);
+            if (state[i]==NULL) gsErrorMsg("\nstate[%d]==null\n",i);
        }
     } else {
        for(i = 0 ; i < nos; i++) {
             state[i]=(ATermList)SVCstate2ATerm(&file,i); 
-            if (state[i]==NULL) fprintf(stderr,"\nstate[%d]==null\n",i);
+            if (state[i]==NULL) gsErrorMsg("\nstate[%d]==null\n",i);
        }
     }
-    if ( verbose )
-      fprintf(stderr,"\n");
 
 
     // collect state variable values ///////////////////////////////////////
@@ -92,14 +90,17 @@ static void print_states(FILE *f, SVCfile file, int* in, int* out) {
         nov=0;                          // same number of variables
     
     set = (ATermIndexedSet*) malloc(nov*sizeof(ATermIndexedSet));
-    if (set==NULL) {
-	fprintf(stderr,"malloc set failed %d", nov);exit(2);
+    if (set==NULL)
+    {
+      gsErrorMsg("malloc set failed %d", nov);
+      exit(2);
     }   
-    if ( verbose )
-      fprintf(stderr,"collect state variable values ...");
+    gsVerboseMsg("collecting state parameter values...\n");
     a = (int*) malloc(nov*sizeof(int));
-    if (a==NULL) {
-	fprintf(stderr,"malloc a failed %d", nov);exit(2);
+    if (a==NULL)
+    {
+      gsErrorMsg("malloc a failed %d", nov);
+      exit(2);
     }                // number of different values per variable
     for(j = 0 ; j < nov; j++)
     {
@@ -121,36 +122,30 @@ static void print_states(FILE *f, SVCfile file, int* in, int* out) {
          state[i]=ATgetNext(state[i]);
       }
     }
-    if ( verbose )
-      fprintf(stderr,"\n");
 
     // restore state data
-    if ( verbose )
-      fprintf(stderr,"restore state data ...");
+    gsVerboseMsg("restoring state data...\n");
     if ( is_mcrl2 )
     {
        for(i = 0 ; i < nos; i++) {
             state[i]=ATgetArguments((ATermAppl)SVCstate2ATerm(&file,i)); 
-            if (state[i]==NULL) fprintf(stderr,"\nstate[%d]==null\n",i);
+            if (state[i]==NULL) gsErrorMsg("\nstate[%d]==null\n",i);
        }
     } else {
        for(i = 0 ; i < nos; i++) {
             state[i]=(ATermList)SVCstate2ATerm(&file,i); 
-            if (state[i]==NULL) fprintf(stderr,"\nstate[%d]==null\n",i);
+            if (state[i]==NULL) gsErrorMsg("\nstate[%d]==null\n",i);
        }
     }
-    if ( verbose )
-      fprintf(stderr,"\n");
 
     // print the variables with name and type from names and types /////////
     // if these are not available use "si" and "unknown"
-    if ( verbose )
-      fprintf(stderr,"print variable table ...");
+    gsVerboseMsg("writing parameter table...\n");
     for(j = 0 ; j < nov; j++) {
-      if (names==NULL)
-         fprintf(f,"s%1d(%d) %s ",j,a[j], "unknown");
-      else
+      if ( j < num_names )
          fprintf(f,"%s(%d) %s ",names[j],a[j], types[j]);
+      else
+         fprintf(f,"unknown%1d(%d) %s ",j,a[j], "unknown");
       if ( is_mcrl2 )
       {
         for(k=0;k<a[j];k++) 
@@ -163,77 +158,44 @@ static void print_states(FILE *f, SVCfile file, int* in, int* out) {
     }
     if (in!=NULL)
     {
-	    int max = 0;
-	    for (int i=0; i<nos; i++)
-	    {
-		    if ( in[i] > max )
-		    {
-			    max = in[i];
-		    }
-	    }
-	    max++;
-	    DECL_A(fan_in_used,bool,max);
-	    for (int i=0; i<max; i++)
-	    {
-		    fan_in_used[i] = false;
-	    }
-	    for (int i=0; i<nos; i++)
-	    {
-		    fan_in_used[in[i]] = true;
-	    }
-	    fprintf(f,"fan_in(%i) Nat ",max-1);
-	    for (int i=0; i<nos; i++)
-	    {
-		    if ( fan_in_used[in[i]] )
-		    {
-			    fprintf(f," \"%i\"",in[i]);
-			    fan_in_used[in[i]] = false;
-		    }
-	    }
-	    fprintf(f,"\n");
-	    FREE_A(fan_in_used);
+      int max = 0;
+      for (int i=0; i<nos; i++)
+      {
+        if ( in[i] > max )
+        {
+          max = in[i];
+        }
+      }
+      fprintf(f,"fan_in(%i) Nat ",max+1);
+      for (int i=0; i<=max; i++)
+      {
+        fprintf(f," \"%i\"",i);
+      }
+      fprintf(f,"\n");
     }
     if (out!=NULL)
     {
-	    int max = 0;
-	    for (int i=0; i<nos; i++)
-	    {
-		    if ( out[i] > max )
-		    {
-			    max = out[i];
-		    }
-	    }
-	    max++;
-	    DECL_A(fan_out_used,bool,max);
-	    for (int i=0; i<max; i++)
-	    {
-		    fan_out_used[i] = false;
-	    }
-	    for (int i=0; i<nos; i++)
-	    {
-		    fan_out_used[out[i]] = true;
-	    }
-	    fprintf(f,"fan_out(%i) Nat ",max-1);
-	    for (int i=0; i<nos; i++)
-	    {
-		    if ( fan_out_used[out[i]] )
-		    {
-			    fprintf(f," \"%i\"",out[i]);
-			    fan_out_used[out[i]] = false;
-		    }
-	    }
-	    fprintf(f,"\n");
-	    FREE_A(fan_out_used);
+      int max = 0;
+      for (int i=0; i<nos; i++)
+      {
+        if ( out[i] > max )
+        {
+          max = out[i];
+        }
+      }
+      fprintf(f,"fan_out(%i) Nat ",max+1);
+      for (int i=0; i<=max; i++)
+      {
+        fprintf(f," \"%i\"",i);
+      }
+      fprintf(f,"\n");
     }
     fprintf(f,"node_nr(0)\n");
-    if ( verbose )
-      fprintf(stderr,"\n");
  
     fprintf(f,"---\n");
  
     // for each state
-    if ( verbose )
-      fprintf(stderr,"print states ...");
+    gsVerboseMsg("writing states...\n");
     for(i = 0 ; i < nos; i++)
     {
       //for each state variable
@@ -252,8 +214,6 @@ static void print_states(FILE *f, SVCfile file, int* in, int* out) {
       if (out!=NULL) fprintf(f,"%d ",out[i]);
       fprintf(f,"%d\n",i+1);
     }
-    if ( verbose )
-      fprintf(stderr,"\n");
     ATunprotectArray((ATerm *) state);
     free(state);free(a);free(set);
 }
@@ -265,7 +225,7 @@ static void readParameterNames(char* filename, char*** names, char*** types)
   FILE* file=fopen(filename,"rb");
   if (file==NULL)
   {
-    fprintf(stderr,"Unable to open TBF-file %s.\n",filename);
+    gsErrorMsg("unable to open TBF-file %s.\n",filename);
     *names = *types = NULL;
     return;
   }
@@ -293,7 +253,8 @@ static void readParameterNames(char* filename, char*** names, char*** types)
   //gsfprintf(stderr,"parameters=%T\n",param);
   
   // peel of parameters one by one
-   n=ATgetLength(param);
+  n=ATgetLength(param);
+  num_names = n;
   *names=(char**) malloc(n*sizeof(char*));
   *types=(char**) malloc(n*sizeof(char*));
   while (!ATisEmpty(param))
@@ -311,8 +272,6 @@ static void readParameterNames(char* filename, char*** names, char*** types)
     (*types)[i++] =type;
     param=ATgetNext(param);
   }
-  if ( verbose )
-    fprintf(stderr,"\n");
 }
 
 static void readParameterNames2(char* filename, char*** names, char*** types)
@@ -320,7 +279,7 @@ static void readParameterNames2(char* filename, char*** names, char*** types)
   FILE* file = fopen(filename,"rb");
   if ( file == NULL )
   {
-    fprintf(stderr,"Unable to open LPE-file %s.\n",filename);
+    gsErrorMsg("unable to open LPE-file %s.\n",filename);
     *names = *types = NULL;
     return;
   }
@@ -330,7 +289,7 @@ static void readParameterNames2(char* filename, char*** names, char*** types)
   
   if ( (t == NULL) || (ATgetType(t) != AT_APPL) || !gsIsSpecV1((ATermAppl) t) )
   {
-    fprintf(stderr,"Invalid LPE-file %s.\n",filename);
+    gsErrorMsg("invalid LPE-file %s.\n",filename);
     *names = *types = NULL;
     return;
   }
@@ -339,7 +298,8 @@ static void readParameterNames2(char* filename, char*** names, char*** types)
   //gsfprintf(stderr,"parameters=%T\n",param);
   
   // peel of parameters one by one
-   n=ATgetLength(param);
+  n=ATgetLength(param);
+  num_names = n;
   *names=(char**) malloc(n*sizeof(char*));
   *types=(char**) malloc(n*sizeof(char*));
   while (!ATisEmpty(param))
@@ -351,8 +311,6 @@ static void readParameterNames2(char* filename, char*** names, char*** types)
 
     param = ATgetNext(param);
   }
-  if ( verbose )
-    fprintf(stderr,"\n");
 }
 
 // compute number of ingoing and outgoing edges
@@ -363,8 +321,10 @@ static void compute_in_out(SVCfile file,int** in, int** out)
     // create arrays
     *in =(int*)malloc(nos*sizeof(int));
     *out=(int*)malloc(nos*sizeof(int));
-     if(in==NULL || out==NULL) {
-         fprintf(stderr,"malloc failed"); exit(2);
+     if(in==NULL || out==NULL)
+     {
+        gsErrorMsg("malloc failed"); 
+        exit(2);
      }
 
     // initialize arrays
@@ -372,8 +332,7 @@ static void compute_in_out(SVCfile file,int** in, int** out)
 
     notr=SVCnumTransitions(&file);
 
-    if ( verbose )
-      fprintf(stderr,"read transactions ");
+    gsVerboseMsg("reading transitions...");
     // compute fan in, fan out, and edges
     for(i = 0 ; i < notr; i++)
     {
@@ -381,16 +340,15 @@ static void compute_in_out(SVCfile file,int** in, int** out)
       SVClabelIndex     li;
       SVCstateIndex source,dest;
       SVCgetNextTransition(&file, &source, &li, &dest, &pi) ;
-      if ( verbose && ((i+1)%100000==0 || i+1==notr) )  {
+      if ((i+1)%100000==0 || i+1==notr)  {
         if ((i+1)%1000000==0 || i+1==notr) 
-  	     fprintf(stderr,"(%d)",i+1);
-        else fprintf(stderr,".");
+  	     gsVerboseMsg(" (%d) ",i+1);
+        else gsVerboseMsg(".");
       }
       (*out)[source]++;
       (*in )[dest]++;
     }
-    if ( verbose )
-      fprintf(stderr,"\n");
+    gsVerboseMsg("\n");
 }
 
 // 
@@ -399,8 +357,7 @@ static void compute_in_out(SVCfile file,int** in, int** out)
 static void print_edges(FILE *f, SVCfile file)
 {
   int notr=SVCnumTransitions(&file), i;
-  if ( verbose )
-    fprintf(stderr,"print edges ");
+  gsVerboseMsg("writing edges...");
   fprintf(f,"---\n");
   for(i = 0 ; i < notr; i++)
   {
@@ -412,15 +369,14 @@ static void print_edges(FILE *f, SVCfile file)
        gsfprintf(f,"%1d %1d \"%P\"\n",source+1,dest+1,SVClabel2ATerm(&file,li));
     else
        gsfprintf(f,"%1d %1d %T\n",source+1,dest+1,SVClabel2ATerm(&file,li));
-    if ( verbose && ((i+1)%100000==0 || i+1==notr) )
+    if ((i+1)%100000==0 || i+1==notr)
     {
       if ((i+1)%1000000==0 || i+1==notr) 
-             fprintf(stderr,"(%d)",i+1);
-      else fprintf(stderr,".");
+             gsVerboseMsg(" (%d) ",i+1);
+      else gsVerboseMsg(".");
     }
   }
-  if ( verbose )
-    fprintf(stderr,"\n\n");
+  gsVerboseMsg("\n");
 }
 
 
@@ -440,6 +396,8 @@ int main(int argc,char** argv)
     { 0, 0, 0, 0 }
   };
 
+  bool quiet = false;
+  bool verbose = false;
   char *lpefile = NULL;
   int opt;
   while ( (opt = getopt_long(argc,argv,sopts,lopts,NULL)) != -1 )
@@ -477,6 +435,14 @@ int main(int argc,char** argv)
     gsErrorMsg("options -q/--quiet and -v/--verbose cannot be used together\n");
     return 1;
   }
+  if ( quiet )
+  {
+    gsSetDebugMsg();
+  }
+  if ( verbose )
+  {
+    gsSetVerboseMsg();
+  }
 
   SVCbool tmpBool=SVCfalse;
   SVCfile file;
@@ -484,13 +450,13 @@ int main(int argc,char** argv)
   // Open the file and start reading all objects.
   if( SVCopen(&file, argv[optind], SVCread, &tmpBool) != 0 )
   {
-    fprintf(stderr,"unable to open SVC file '%s' for reading.\n",argv[optind]);
+    gsErrorMsg("unable to open SVC file '%s' for reading.\n",argv[optind]);
     return 1;
   }
   FILE *outf = stdout;
   if ( (argc-optind == 2) && ((outf = fopen(argv[optind+1],"w")) == NULL) )
   {
-    fprintf(stderr,"unable to open FSM file '%s' for writing.\n",argv[optind+1]);
+    gsErrorMsg("unable to open FSM file '%s' for writing.\n",argv[optind+1]);
     return 1;
   }
 
@@ -498,21 +464,15 @@ int main(int argc,char** argv)
   int* out; // array of outgoing edges
   // do something with file
   // ...
-  if ( verbose )
-  {
-          fprintf(stderr,"Number of parameters : %d\n", SVCnumParameters(&file));
-          fprintf(stderr,"Number of states     : %d\n", SVCnumStates(&file));
-          fprintf(stderr,"Number of labels     : %d\n", SVCnumLabels(&file));
-          fprintf(stderr,"Number of transitions: %d\n", SVCnumTransitions(&file));
-  }
+  gsVerboseMsg("number of parameters : %d\n", SVCnumParameters(&file));
+  gsVerboseMsg("number of states     : %d\n", SVCnumStates(&file));
+  gsVerboseMsg("number of action     : %d\n", SVCnumLabels(&file));
+  gsVerboseMsg("number of transitions: %d\n", SVCnumTransitions(&file));
 
   is_mcrl2 = !strcmp("mCRL2+info",SVCgetType(&file));
   if ( !strcmp("mCRL2",SVCgetType(&file)) )
   {
-     if ( !quiet )
-     {
-             gsfprintf(stderr,"state space does not contain state information\n");
-     }
+     gsWarningMsg("state space does not contain state information\n");
      is_mcrl2 = true;
   }
   if ( is_mcrl2 )
@@ -528,7 +488,9 @@ int main(int argc,char** argv)
         readParameterNames(lpefile,&names,&types);
      free(lpefile);
   } else { 
+     gsWarningMsg("parameter names are unknown (use -l/--lpe option)\n");
      names=types=NULL;
+     num_names = 0;
   }
 
   //
