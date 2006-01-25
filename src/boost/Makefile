@@ -42,7 +42,7 @@ build_completed:
 bjam: $(BJAM)
 
 boost_filesystem: bjam
-	$(BJAM) $(BJAM_ARGUMENTS) --prefix=. --layout=system libs/filesystem/build/ boost_filesystem
+	$(BJAM) $(BJAM_ARGUMENTS) --prefix=. --layout=system --with-filesystem install
 
 $(BJAM):
 	cd tools/build/jam_src; \

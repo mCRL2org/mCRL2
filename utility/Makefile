@@ -1,10 +1,13 @@
-BJAM = ../src/boost/tools/build/jam_src/bin/bjam
+# This is the default, that does not work for MacOSX (../config overrides it)
+BOOST_LDFLAGS = -Wl,-rpath=../src/boost/lib
 
-all: $(BJAM) maximum_revision
+-include ../config
+
+all: maximum_revision
 
 maximum_revision: maximum_revision.cpp
 	$(MAKE) -C ../src/boost boost_filesystem
-	$(CXX) -I../src/boost/boost $< -L../src/boost/lib -lboost_filesystem -o $@
+	$(CXX) $(BOOST_LDFLAGS) -I../src/boost $< -L../src/boost/lib -lboost_filesystem -o $@
 
-.PHONY: all bjam
+.PHONY: all
 

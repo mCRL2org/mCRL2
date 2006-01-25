@@ -76,6 +76,7 @@ mandir             = @mandir@
 
 BOOST_FILESYSTEM      = -lboost_filesystem
 BOOST_PROGRAM_OPTIONS = -lboost_program_options
+BOOST_LDFLAGS         =
 
 ifeq ($(BOOST_PREFIX),boost)
  BUILD_BOOST       = boost/build_completed
