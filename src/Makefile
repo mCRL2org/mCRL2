@@ -221,7 +221,11 @@ squadt: boost
 	@$(MAKE) -C squadt $(MAKECMDGOALS)
 
 # For building bjam and boost libraries
+ifeq (,$(findstring $(MAKECMDGOALS),clean distclean revision))
 boost: $(BUILD_BOOST)
+else
+boost:
+endif
 
 # Rules for building the maximum_revision tool and to generate a `revision' file
 SOURCE_ROOT = ../
