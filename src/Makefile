@@ -2,7 +2,8 @@
 OBJECTS            =
 
 #Redefine default definitions using autoconf
-include ../config
+-include ../config
+-include ../distribution
 
 # Objects that require wxWidgets CPPFLAGS to compile
 WX_OBJECTS         = xsim.o xsimbase.o xsimmain.o xsimtrace.o xsimtracedll.o
@@ -184,7 +185,6 @@ OBJECTS           := $(sort $(OBJECTS))
 .PRECIOUS: mcrl2parser.c mcrl2lexer.c
 
 all: $(EXE_NAMES) $(LIB_NAMES)
-	@$(RM) revision
 
 experimental: $(EXPERIMENTALS)
 
@@ -223,19 +223,10 @@ squadt: boost
 # For building bjam and boost libraries
 boost: $(BUILD_BOOST)
 
-# Add revision number (if not building a source distribution)
-ifndef SOURCE_DISTRIBUTION
-ifeq ($(findstring $(MAKECMDGOALS),clean distclean),)
-revision: ../utility/get_revision
-	@echo "CPPFLAGS += -DREVISION=$$(../utility/get_revision)" > revision
+# Rules for building the maximum_revision tool and to generate a `revision' file
+SOURCE_ROOT = ../
 
-../utility/get_revision: ../utility/get_revision.cpp $(BUILD_BOOST)
-	$(CXX) $(BOOST_CPPFLAGS) $< $(subst $(libdir),$(BOOST_PREFIX)/lib,$(BOOST_LDFLAGS)) $(BOOST_FILESYSTEM) -o $@
-
-endif
-endif
-
--include revision
+include $(SOURCE_ROOT)/utility/revision.mk
 
 install: all
 	$(INSTALL) -d $(bindir)
@@ -273,7 +264,7 @@ clean:
 	$(RM) $(EXE_NAMES) $(EXPERIMENTALS) $(LIB_NAMES) *.o *.a *.d *.dpp lpe/*.o lpe/*.dpp aterm/*.o aterm/*.a aterm/*.d svc/*.o svc/*.a svc/*.d svc/*.dpp mcrl2lexer.c mcrl2parser.c mcrl2parser.h mcrl2parser.output lpeinfo lpeparelm lpeconstelm autom4te.cache *~ core core.* utility/get_revision
 
 distclean: clean
-	$(RM) -r Makefile rewr_innerc_aux.h revision
+	$(RM) -r rewr_innerc_aux.h
 
 mcrl2lexer.o: mcrl2parser.c
 
@@ -400,12 +391,6 @@ $(LIN_NAME) : $(LIN_OBJECTS) $(ATERM_DEP) $(LIBREWR_NAME)
 %.c : %.l
 	$(LEX) $(LFLAGS) -o$@ $<
 
-ifeq (,$(findstring $(MAKECMDGOALS),clean distclean))
-Makefile: Makefile.in ../config.in
-	@echo "You must (re)configure your source tree first."
-	@exit 1
-endif
-
 # *.cpp is needed for generated code (e.g. by bison)
 *.cpp *.o aterm/*.o svc/*.o: Makefile
 
@@ -421,9 +406,16 @@ endif
 	sed 's,\($*\)\.o[ :]*,\1.o $@ : ,g' < $@.$$$$ > $@; \
 	$(RM) $@.$$$$
 
-ifeq (,$(findstring $(MAKECMDGOALS),revision clean distclean))
+ifeq (,$(findstring $(MAKECMDGOALS),clean distclean revision))
+Makefile: ../config
+
+../config: ../config.in ../configure
+	$(error You must (re)configure your source tree first)
+
+ifeq (,$(findstring $(MAKECMDGOALS),clean distclean))
 -include $(foreach s,$(OBJECTS),$(shell if test -f $(basename $s).c; then echo -n $(basename $s).d; fi))
 -include $(foreach s,$(OBJECTS),$(shell if test -f $(basename $s).cpp; then echo -n $(basename $s).dpp; fi))
+endif
 endif
 
 #Note: to make a shared version of the gsrewr library instead of a static one, do the following:

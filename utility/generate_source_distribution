@@ -1,0 +1,103 @@
+#!/bin/bash
+
+# Assumes that the current working directory contains the trunk directory as checked out from the svn repository
+
+if [[ ! -d trunk ]]; then
+  echo "Error:";
+  echo "";
+  echo " This script should be run from a directory containing";
+  echo " the trunk directory of a checked out svn repository.";
+  echo "";
+  exit 0;
+fi
+
+source_files="./mcrl2/articles \
+              ./mcrl2/conventions \
+              ./mcrl2/COPYING \
+              ./mcrl2/INSTALL \
+              ./mcrl2/README \
+              ./mcrl2/configure \
+              ./mcrl2/config.guess \
+              ./mcrl2/config.sub \
+              ./mcrl2/install-sh \
+              ./mcrl2/config.in \
+              ./mcrl2/Makefile \
+              ./mcrl2/examples \
+              ./mcrl2/test.y \
+              ./mcrl2/tests \
+              ./mcrl2/specs \
+              ./mcrl2/src"
+
+svn_update="$(svn update 2>&1 | tail -n 1)"
+
+# The following works based on assumption that the source tree is configured
+if $(expr "${svn_update}" : "At revision" &> /dev/null ); then
+  # Regenerate tarballs for source distribution
+  sh -c 'cd trunk/src; make revision' &> /dev/null
+
+  # alternative method of obtaining the last revision that does not require
+  # trunk/utility/get_revision (but has a potential for not being accurate)
+  # svn log -q -r HEAD https://svn.win.tue.nl/repos/MCRL2/ \
+  #  | grep --only-matching -e "^r[[:digit:]]*\ " \
+  #  | tr -d "r \n"
+
+  revision="$(trunk/utility/get_revision)"
+  archive_name="mcrl2-${revision}.tar"
+
+  ln -sf ./trunk ./mcrl2
+
+  # Find binaries and other files with no extension that should be filtered out
+  find -L ./mcrl2 -mindepth 2 -type f \
+       -not -name '*.*' \
+       -not -name 'Makefile' \
+       -not -wholename '*src/revision' \
+       -not -wholename '*boost*' > excludes
+
+  # Find directories to filter out
+  find -L ./mcrl2 -type d \
+       -name 'html' \
+       -or -name 'latex' \
+       -or -name 'bin*' \
+       -or -wholename '*mcrl2/utility' \
+       -or -wholename '*jam_src/bootstrap' \
+       -or -wholename '*boost/stage' \
+       -or -wholename '*boost/lib' >> excludes
+
+  tar cf ${archive_name} \
+           --exclude '.svn' \
+           --exclude '*.ps' \
+           --exclude '*.dvi' \
+           --exclude '*.ps' \
+           --exclude '*.log' \
+           --exclude '*.pdf' \
+           --exclude 'core*' \
+           --exclude 'vgcore*' \
+           --exclude '*.d' \
+           --exclude '*.dpp' \
+           --exclude '*.o' \
+           --exclude '*.a' \
+           --exclude '*.so' \
+           --exclude-from excludes ${source_files}
+
+  unlink mcrl2
+
+  # Mark distribution as source distribution
+  mkdir mcrl2
+
+  echo -e  "# This definition is needed to deactivate computation of maximum revision" \
+           "\n# numbers just before builds. This computation would fail since the a source" \
+           "\n# distribution does not contain the svn meta data. The file is included from" \
+           "\n# the make file ./config ." \
+           "\n" \
+           "\nSOURCE_DISTRIBUTION = 1" > mcrl2/distribution
+
+  tar rf ${archive_name} ./mcrl2/distribution
+
+  unlink mcrl2/distribution
+  rmdir mcrl2
+
+  bzip2 -f ${archive_name}
+
+  unlink excludes
+fi
+

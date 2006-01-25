@@ -382,6 +382,6 @@ AC_MSG_NOTICE()
 AC_MSG_NOTICE(Some tools will not be built if any of these libraries are missing.)
 AC_MSG_NOTICE()
 
-AC_CONFIG_FILES([src/Makefile src/rewr_innerc_aux.h config])
+AC_CONFIG_FILES([src/rewr_innerc_aux.h config])
 AC_OUTPUT
 

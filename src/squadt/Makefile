@@ -1,4 +1,5 @@
 -include ../../config
+-include ../../distribution
 
 CXXFLAGS                       = -std=c++98 -O3# -Winline --param max-inline-insns-single=8000 \
 				 --param large-function-growth=5000 --param inline-unit-growth=5000
@@ -21,9 +22,11 @@ LIBXML2_OBJECTS                = xml_text_reader.o project_manager.o tool_manage
 BOOST_OBJECTS                  = gui_project_overview.o tool_manager.o project_manager.o gui_specification_properties.o \
 				 settings_manager.o specification.o
 
+ifdef WX_CONFIG
 WX_OBJECTS                     = squadt.o gui_project_overview.o gui_new_specification.o gui_specification_properties.o \
 				 gui_resources.o tool_executor.o logger.o process.o
 WX_LIBRARIES                  := $(filter-out -mthreads,$(shell $(WX_CONFIG) --libs core base adv net))
+endif
 
 PROJECT_MANAGER_OBJECTS        = project_manager.o specification.o xml_text_reader.o settings_manager.o
 TOOL_MANAGER_OBJECTS           = tool_manager.o tool.o xml_text_reader.o settings_manager.o
@@ -39,38 +42,30 @@ TARGETS                        = squadt libmd5.a
 .PHONY: all install clean distclean test strip
 
 all: $(TARGETS)
-	@$(RM) revision
 
-ifeq ($(findstring $(MAKECMDGOALS),clean distclean),)
-# Add revision number (when not building a source distribution)
-ifndef SOURCE_DISTRIBUTION
-revision: ../../utility/get_revision
-	@echo "CPPFLAGS += -DREVISION=$$(../../utility/get_revision)" > revision
+# Rules for building the maximum_revision tool and to generate a `revision' file
+SOURCE_ROOT = ../../
 
-../../utility/get_revision: ../../utility/get_revision.cpp
-	$(CXX) $(BOOST_CPPFLAGS) $< $(subst $(libdir),$(BOOST_PREFIX)/lib,$(BOOST_LDFLAGS)) $(BOOST_FILESYSTEM) -o $@ 
-endif
-
--include revision
+include $(SOURCE_ROOT)/utility/revision.mk
 
 # Include dependencies 
+ifeq ($(findstring $(MAKECMDGOALS),clean distclean),)
 %.o: dependencies
 
 dependencies: *.cpp *.h
 	$(CXX) -MM $(CPPFLAGS) $(BOOST_CPPFLAGS) $(LIBXML2_CPPFLAGS) $(WX_CPPFLAGS) $(patsubst %o,%cpp,$(OBJECTS)) > $@
 
 -include dependencies
-
 endif
 
 test: all $(TEST_TARGETS)
 	@tests/messenger/connection_test
 
-$(LIBXML2_OBJECTS):         CPPFLAGS += $(BOOST_CPPFLAGS) $(WX_CPPFLAGS) $(LIBXML2_CPPFLAGS)
-$(BOOST_OBJECTS):           CPPFLAGS += $(BOOST_CPPFLAGS) $(WX_CPPFLAGS) $(LIBXML2_CPPFLAGS)
-$(WX_OBJECTS):              CPPFLAGS += $(BOOST_CPPFLAGS) $(WX_CPPFLAGS) $(LIBXML2_CPPFLAGS)
-settings_manager.o:         CPPFLAGS += $(BOOST_CPPFLAGS) $(WX_CPPFLAGS) $(LIBXML2_CPPFLAGS) -DDATA_DIRECTORY=\"$(datadir)\"
-utility/relocator.o:        CPPFLAGS += $(BOOST_CPPFLAGS)
+$(LIBXML2_OBJECTS):  CPPFLAGS += $(BOOST_CPPFLAGS) $(WX_CPPFLAGS) $(LIBXML2_CPPFLAGS)
+$(BOOST_OBJECTS):    CPPFLAGS += $(BOOST_CPPFLAGS) $(WX_CPPFLAGS) $(LIBXML2_CPPFLAGS)
+$(WX_OBJECTS):       CPPFLAGS += $(BOOST_CPPFLAGS) $(WX_CPPFLAGS) $(LIBXML2_CPPFLAGS)
+settings_manager.o:  CPPFLAGS += $(BOOST_CPPFLAGS) $(WX_CPPFLAGS) $(LIBXML2_CPPFLAGS) -DDATA_DIRECTORY=\"$(datadir)\"
+utility/relocator.o: CPPFLAGS += $(BOOST_CPPFLAGS)
 
 # XML schema validation can be triggered by adding to tool_manager project_manager
 #$(PROJECT_MANAGER_OBJECTS): CPPFLAGS += -DPARSER_SCHEMA_VALIDATION

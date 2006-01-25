@@ -41,6 +41,9 @@ build_completed:
 
 bjam: $(BJAM)
 
+boost_filesystem: bjam
+	$(BJAM) $(BJAM_ARGUMENTS) --prefix=. --layout=system libs/filesystem/build/ boost_filesystem
+
 $(BJAM):
 	cd tools/build/jam_src; \
 	$(BJAM_BUILD)
@@ -52,4 +55,5 @@ install: all
 clean:
 
 distclean:
-	@-$(RM) -rf bin lib build_completed tools/build/jam_src/bin tools/build/jam_src/bootstrap
+	@-$(RM) -rf bin lib stage build_completed tools/build/jam_src/bin tools/build/jam_src/bootstrap
+
