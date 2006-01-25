@@ -2,7 +2,7 @@
 OBJECTS            =
 
 #Redefine default definitions using autoconf
-include config
+include ../config
 
 # Objects that require wxWidgets CPPFLAGS to compile
 WX_OBJECTS         = xsim.o xsimbase.o xsimmain.o xsimtrace.o xsimtracedll.o
@@ -180,7 +180,7 @@ LIB_NAMES          = $(XSIMTRACE_NAME)
 OBJECTS           := $(sort $(OBJECTS))
 
 #Make rules
-.PHONY: all install clean distclean boost boost_relay documentation squadt experimental distribution
+.PHONY: all install clean distclean boost boost_relay documentation squadt experimental
 .PRECIOUS: mcrl2parser.c mcrl2lexer.c
 
 all: $(EXE_NAMES) $(LIB_NAMES)
@@ -226,10 +226,10 @@ boost: $(BUILD_BOOST)
 # Add revision number (if not building a source distribution)
 ifndef SOURCE_DISTRIBUTION
 ifeq ($(findstring $(MAKECMDGOALS),clean distclean),)
-revision: utility/get_revision
-	@echo "CPPFLAGS += -DREVISION=$$(utility/get_revision)" > revision
+revision: ../utility/get_revision
+	@echo "CPPFLAGS += -DREVISION=$$(../utility/get_revision)" > revision
 
-utility/get_revision: utility/get_revision.cpp $(BUILD_BOOST)
+../utility/get_revision: ../utility/get_revision.cpp $(BUILD_BOOST)
 	$(CXX) $(BOOST_CPPFLAGS) $< $(subst $(libdir),$(BOOST_PREFIX)/lib,$(BOOST_LDFLAGS)) $(BOOST_FILESYSTEM) -o $@
 
 endif
@@ -270,10 +270,10 @@ endif
 endif
 
 clean:
-	$(RM) $(EXE_NAMES) $(EXPERIMENTALS) $(LIB_NAMES) *.o *.a *.d *.dpp lpe/*.o lpe/*.dpp aterm/*.o aterm/*.a aterm/*.d svc/*.o svc/*.a svc/*.d svc/*.dpp mcrl2lexer.c mcrl2parser.c mcrl2parser.h mcrl2parser.output lpeinfo lpeparelm lpeconstelm autom4te.cache config.log *~ core core.* utility/get_revision
+	$(RM) $(EXE_NAMES) $(EXPERIMENTALS) $(LIB_NAMES) *.o *.a *.d *.dpp lpe/*.o lpe/*.dpp aterm/*.o aterm/*.a aterm/*.d svc/*.o svc/*.a svc/*.d svc/*.dpp mcrl2lexer.c mcrl2parser.c mcrl2parser.h mcrl2parser.output lpeinfo lpeparelm lpeconstelm autom4te.cache *~ core core.* utility/get_revision
 
 distclean: clean
-	$(RM) -r config.status Makefile config rewr_innerc_aux.h revision
+	$(RM) -r Makefile rewr_innerc_aux.h revision
 
 mcrl2lexer.o: mcrl2parser.c
 
@@ -401,7 +401,7 @@ $(LIN_NAME) : $(LIN_OBJECTS) $(ATERM_DEP) $(LIBREWR_NAME)
 	$(LEX) $(LFLAGS) -o$@ $<
 
 ifeq (,$(findstring $(MAKECMDGOALS),clean distclean))
-Makefile: Makefile.in config.in
+Makefile: Makefile.in ../config.in
 	@echo "You must (re)configure your source tree first."
 	@exit 1
 endif

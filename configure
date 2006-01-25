@@ -274,7 +274,7 @@ PACKAGE_STRING='mCRL2 toolset 0.2'
 PACKAGE_BUGREPORT='J.v.d.Wulp@tue.nl'
 
 ac_default_prefix=$HOME
-ac_unique_file="liblowlevel.h"
+ac_unique_file="src/liblowlevel.h"
 # Factoring default headers for most tests.
 ac_includes_default="\
 #include <stdio.h>
@@ -4987,8 +4987,8 @@ done
 else
   { echo "$as_me:$LINENO: using local ATerm library" >&5
 echo "$as_me: using local ATerm library" >&6;}
-  CPPFLAGS="-I$PWD/aterm $CPPFLAGS"
-  LDFLAGS="-L$PWD/aterm $LDFLAGS"
+  CPPFLAGS="-I$PWD/src/aterm $CPPFLAGS"
+  LDFLAGS="-L$PWD/src/aterm $LDFLAGS"
   ATERM_NAME="ATerm"
   BUILD_ATERM=1
 fi
@@ -6373,7 +6373,7 @@ echo "$as_me: Some tools will not be built if any of these libraries are missing
 { echo "$as_me:$LINENO: " >&5
 echo "$as_me: " >&6;}
 
-                              ac_config_files="$ac_config_files Makefile rewr_innerc_aux.h config"
+                              ac_config_files="$ac_config_files src/Makefile src/rewr_innerc_aux.h config"
 
 cat >confcache <<\_ACEOF
 # This file is a shell script that caches the results of configure
@@ -6925,8 +6925,8 @@ for ac_config_target in $ac_config_targets
 do
   case "$ac_config_target" in
   # Handling of arguments.
-  "Makefile" ) CONFIG_FILES="$CONFIG_FILES Makefile" ;;
-  "rewr_innerc_aux.h" ) CONFIG_FILES="$CONFIG_FILES rewr_innerc_aux.h" ;;
+  "src/Makefile" ) CONFIG_FILES="$CONFIG_FILES src/Makefile" ;;
+  "src/rewr_innerc_aux.h" ) CONFIG_FILES="$CONFIG_FILES src/rewr_innerc_aux.h" ;;
   "config" ) CONFIG_FILES="$CONFIG_FILES config" ;;
   *) { { echo "$as_me:$LINENO: error: invalid argument: $ac_config_target" >&5
 echo "$as_me: error: invalid argument: $ac_config_target" >&2;}

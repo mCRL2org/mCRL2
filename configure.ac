@@ -1,7 +1,7 @@
 AC_INIT([mCRL2 toolset], [0.2], [J.v.d.Wulp@tue.nl])
 AC_CANONICAL_HOST
 AC_PREFIX_DEFAULT([$HOME])
-AC_CONFIG_SRCDIR([liblowlevel.h])
+AC_CONFIG_SRCDIR([src/liblowlevel.h])
 
 # Setting host OS
 case $host in
@@ -221,8 +221,8 @@ if test $with_aterm; then
   AC_CHECK_HEADERS([aterm2.h], , [AC_MSG_ERROR([cannot find ATerm headers])])
 else
   AC_MSG_NOTICE([using local ATerm library])
-  CPPFLAGS="-I$PWD/aterm $CPPFLAGS"
-  LDFLAGS="-L$PWD/aterm $LDFLAGS"
+  CPPFLAGS="-I$PWD/src/aterm $CPPFLAGS"
+  LDFLAGS="-L$PWD/src/aterm $LDFLAGS"
   ATERM_NAME="ATerm"
   BUILD_ATERM=1
 fi
@@ -382,6 +382,6 @@ AC_MSG_NOTICE()
 AC_MSG_NOTICE(Some tools will not be built if any of these libraries are missing.)
 AC_MSG_NOTICE()
 
-AC_CONFIG_FILES([Makefile rewr_innerc_aux.h config])
+AC_CONFIG_FILES([src/Makefile src/rewr_innerc_aux.h config])
 AC_OUTPUT
 

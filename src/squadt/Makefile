@@ -1,4 +1,4 @@
--include ../config
+-include ../../config
 
 CXXFLAGS                       = -std=c++98 -O3# -Winline --param max-inline-insns-single=8000 \
 				 --param large-function-growth=5000 --param inline-unit-growth=5000
@@ -10,7 +10,7 @@ endif
 
 
 ifeq ($(findstring -DNDEBUG,$(CPPFLAGS)),)
- CXXFLAGS                     += -g -Wall
+ CXXFLAGS                     += -g -Wall -W
 endif
 
 LDFLAGS                        = $(LIBXML2_LDFLAGS)
@@ -44,10 +44,10 @@ all: $(TARGETS)
 ifeq ($(findstring $(MAKECMDGOALS),clean distclean),)
 # Add revision number (when not building a source distribution)
 ifndef SOURCE_DISTRIBUTION
-revision: ../utility/get_revision
-	@echo "CPPFLAGS += -DREVISION=$$(../utility/get_revision)" > revision
+revision: ../../utility/get_revision
+	@echo "CPPFLAGS += -DREVISION=$$(../../utility/get_revision)" > revision
 
-../utility/get_revision: ../utility/get_revision.cpp
+../../utility/get_revision: ../../utility/get_revision.cpp
 	$(CXX) $(BOOST_CPPFLAGS) $< $(subst $(libdir),$(BOOST_PREFIX)/lib,$(BOOST_LDFLAGS)) $(BOOST_FILESYSTEM) -o $@ 
 endif
 
