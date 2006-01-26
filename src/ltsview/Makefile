@@ -48,6 +48,6 @@ clean:
 
 distclean: clean
 
-install:
+install: all
 	$(INSTALL) -d $(bindir)
 	$(INSTALL) ltsview $(bindir)

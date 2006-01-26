@@ -15,7 +15,7 @@ ifdef BUILD_BOOST # local boost was configured
  BOOST_LDFLAGS  = -L../src/boost/lib
 
  ifeq ($(HOST_OS),LINUX)
-  BOOST_LDFLAGS += -Wl,-rpath=../src/boost/lib
+  BOOST_LDFLAGS += -static
  endif
 
 boost_filesystem:
