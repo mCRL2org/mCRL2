@@ -14,9 +14,12 @@ clean:
 	@${MAKE} -C src $(MAKECMDGOALS)
 	$(RM) -r autom4te.cache config.log *~ core core.*
 
-distclean: clean
-	@$(RM) src/revision src/squadt/revision src/ltsview/revision
+distclean: clean distribution
 	$(RM) -r config.status config utility/maximum_revision
+
+# Uses the fact that distribution only exists in an official source distribution
+distribution:
+	@$(RM) src/revision src/squadt/revision src/ltsview/revision
 
 config:
 	$(error You must configure your source tree first.)

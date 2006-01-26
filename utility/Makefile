@@ -1,6 +1,7 @@
 # This is the default, that does not work for MacOSX (../config overrides it)
-BOOST_LDFLAGS  = -L../src/boost/lib -Wl,-rpath=../src/boost/lib
-BOOST_CPPFLAGS = -I../src/boost 
+BOOST_LDFLAGS    = -L../src/boost/lib -Wl,-rpath=../src/boost/lib
+BOOST_CPPFLAGS   = -I../src/boost 
+BOOST_FILESYSTEM = -lboost_filesystem
 
 -include ../config
 
@@ -22,7 +23,7 @@ boost_filesystem:
 endif
 
 maximum_revision: maximum_revision.cpp boost_filesystem
-	$(CXX) $(BOOST_CPPFLAGS) $(BOOST_LDFLAGS) $< -lboost_filesystem -o $@
+	$(CXX) $(BOOST_CPPFLAGS) $(BOOST_LDFLAGS) $< $(BOOST_FILESYSTEM) -o $@
 
 .PHONY: all boost_filesystem
 

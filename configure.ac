@@ -177,10 +177,10 @@ AC_ARG_ENABLE(
     [also build experimental tools]
   )
 )
-if test $enable_experimentals; then
-  BUILD_EXPERIMENTALS=1
+if test $enable_experimental; then
+  BUILD_EXPERIMENTAL="experimental"
 fi
-AC_SUBST([BUILD_EXPERIMENTALS])
+AC_SUBST([BUILD_EXPERIMENTAL])
 
 # Check for ATerm library and header files
 AC_ARG_WITH(

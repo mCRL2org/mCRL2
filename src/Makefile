@@ -176,7 +176,7 @@ LIN_LDFLAGS        = -lrewrite -l$(ATERM) -lm $(LIBDL)
 
 #Group definitions
 EXPERIMENTALS      = $(LIN_NAME) $(ALPHA_NAME)
-EXE_NAMES         += $(MCRL22LPE_NAME) $(LPEINFO_NAME) $(LPEDATAELM_NAME) $(LPEPARELM_NAME) $(LPECONSTELM_NAME) $(LPEPP_NAME) $(TRACEPP_NAME) $(LPE2LTS_NAME) $(LPE2TORX_NAME) $(SIM_NAME) $(XSIM_NAME) $(TBF2LPE_NAME) $(PNML2MCRL2_NAME) $(LPEREWR_NAME) $(LTSMIN_NAME) $(LTSPP_NAME) $(SVC2FSM_NAME)
+EXE_NAMES          = $(MCRL22LPE_NAME) $(LPEINFO_NAME) $(LPEDATAELM_NAME) $(LPEPARELM_NAME) $(LPECONSTELM_NAME) $(LPEPP_NAME) $(TRACEPP_NAME) $(LPE2LTS_NAME) $(LPE2TORX_NAME) $(SIM_NAME) $(XSIM_NAME) $(TBF2LPE_NAME) $(PNML2MCRL2_NAME) $(LPEREWR_NAME) $(LTSMIN_NAME) $(LTSPP_NAME) $(SVC2FSM_NAME)
 LIB_NAMES          = $(XSIMTRACE_NAME)
 OBJECTS           := $(sort $(OBJECTS))
 
@@ -184,7 +184,7 @@ OBJECTS           := $(sort $(OBJECTS))
 .PHONY: all install clean distclean boost boost_relay documentation squadt ltsview experimental
 .PRECIOUS: mcrl2parser.c mcrl2lexer.c
 
-all: $(EXE_NAMES) $(LIB_NAMES)
+all: $(EXE_NAMES) $(LIB_NAMES) $(BUILD_EXPERIMENTAL)
 
 experimental: $(EXPERIMENTALS)
 
@@ -203,9 +203,9 @@ all install: documentation
 endif
 
 # Build/clean/install libxml2 dependent targets
-ifdef BUILD_EXPERIMENTALS
+ifdef BUILD_EXPERIMENTAL
 ifdef USE_WX
-experimental install: ltsview
+all install: ltsview
 ifdef USE_LIBXML2
 all  install: squadt
 endif
