@@ -4308,7 +4308,7 @@ if test "${enable_experimental+set}" = set; then
 
 fi;
 if test $enable_experimentals; then
-  BUILD_EXPERIMENTALS="1"
+  BUILD_EXPERIMENTALS=1
 fi
 
 

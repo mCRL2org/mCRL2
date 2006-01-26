@@ -206,10 +206,12 @@ all install: documentation
 endif
 
 # Build/clean/install libxml2 dependent targets
+ifdef BUILD_EXPERIMENTALS
 ifdef USE_WX
 experimental install: ltsview
 ifdef USE_LIBXML2
 all  install: squadt
+endif
 endif
 endif
 

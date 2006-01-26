@@ -178,7 +178,7 @@ AC_ARG_ENABLE(
   )
 )
 if test $enable_experimentals; then
-  BUILD_EXPERIMENTALS="1"
+  BUILD_EXPERIMENTALS=1
 fi
 AC_SUBST([BUILD_EXPERIMENTALS])
 
