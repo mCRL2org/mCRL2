@@ -64,6 +64,7 @@ WX_CPPFLAGS        = $(filter-out -mthreads,@WX_CPPFLAGS@)
 USE_BOOST          = @USE_BOOST@
 BOOST_PREFIX       = @BOOST_PREFIX@
 BJAM               = @abs_top_srcdir@/boost/tools/build/jam_src/bin/bjam
+USE_GLUT           = @USE_GLUT@
 GLUT_LDFLAGS       = -lglut
 
 # Installation directories

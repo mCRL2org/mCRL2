@@ -202,16 +202,18 @@ endif
 
 # Build/clean/install documentation
 ifdef USE_XMLTO
-all distclean install: documentation
+all install: documentation
 endif
 
 # Build/clean/install libxml2 dependent targets
 ifdef USE_WX
-experimental clean distclean install: ltsview
+experimental install: ltsview
 ifdef USE_LIBXML2
-all clean distclean install: squadt
+all  install: squadt
 endif
 endif
+
+clean distclean: squadt boost_relay ltsview documentation
 
 # For building documentation
 documentation:
@@ -234,7 +236,7 @@ endif
 # Rules for building the maximum_revision tool and to generate a `revision' file
 SOURCE_ROOT = ../
 
-include $(SOURCE_ROOT)/utility/revision.mk
+include $(SOURCE_ROOT)utility/revision.mk
 
 install: all
 	$(INSTALL) -d $(bindir)
@@ -269,7 +271,7 @@ endif
 endif
 
 clean:
-	$(RM) $(EXE_NAMES) $(EXPERIMENTALS) $(LIB_NAMES) *.o *.a *.d *.dpp lpe/*.o lpe/*.dpp aterm/*.o aterm/*.a aterm/*.d svc/*.o svc/*.a svc/*.d svc/*.dpp mcrl2lexer.c mcrl2parser.c mcrl2parser.h mcrl2parser.output lpeinfo lpeparelm lpeconstelm autom4te.cache *~ core core.* utility/get_revision
+	$(RM) $(EXE_NAMES) $(EXPERIMENTALS) $(LIB_NAMES) *.o *.a *.d *.dpp lpe/*.o lpe/*.dpp aterm/*.o aterm/*.a aterm/*.d svc/*.o svc/*.a svc/*.d svc/*.dpp mcrl2lexer.c mcrl2parser.c mcrl2parser.h mcrl2parser.output lpeinfo lpeparelm lpeconstelm autom4te.cache *~ core core.* utility/maximum_revision
 
 distclean: clean
 	$(RM) -r rewr_innerc_aux.h

@@ -46,7 +46,7 @@ all: $(TARGETS)
 # Rules for building the maximum_revision tool and to generate a `revision' file
 SOURCE_ROOT = ../../
 
-include $(SOURCE_ROOT)/utility/revision.mk
+include $(SOURCE_ROOT)utility/revision.mk
 
 # Include dependencies 
 ifeq ($(findstring $(MAKECMDGOALS),clean distclean),)
@@ -130,6 +130,6 @@ ifeq ($(HOST_OS),MACOSX)
 endif
 
 clean:
-	$(RM) *.o $(TARGETS) $(TEST_TARGETS) utility/*.o utility/relocator core revision dependencies
+	$(RM) *.o $(TARGETS) $(TEST_TARGETS) utility/*.o utility/relocator core dependencies
 
 distclean: clean
