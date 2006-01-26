@@ -33,8 +33,8 @@ $(CPP_OBJECTS) : %.o: %.cpp
 %.cpp : %.h
 
 fsmparser.cpp : fsmparser.y fsmlexer.c
-	$(CC) -c fsmlexer.c -o fsmlexer.o
 	$(BISON) --defines=fsmlexer.h -o fsmparser.cpp -p fsm $<
+	$(CC) -c fsmlexer.c -o fsmlexer.o
 
 fsmlexer.c : fsmlexer.l
 	$(LEX) -o$@ -Pfsm $<
