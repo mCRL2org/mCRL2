@@ -31,17 +31,17 @@ source_files="./mcrl2/articles \
 svn_update="$(svn update 2>&1 | tail -n 1)"
 
 # The following works based on assumption that the source tree is configured
-if $(expr "${svn_update}" : "At revision" &> /dev/null ); then
+if (! test -e ${archive}.bz2) || ! $(expr "${svn_update}" : "At revision" &> /dev/null ); then
   # Regenerate tarballs for source distribution
   sh -c 'cd trunk/src; make revision' &> /dev/null
 
   # alternative method of obtaining the last revision that does not require
-  # trunk/utility/get_revision (but has a potential for not being accurate)
+  # trunk/utility/maximum_revision (but has a potential for not being accurate)
   # svn log -q -r HEAD https://svn.win.tue.nl/repos/MCRL2/ \
   #  | grep --only-matching -e "^r[[:digit:]]*\ " \
   #  | tr -d "r \n"
 
-  revision="$(trunk/utility/get_revision)"
+  revision="$(trunk/utility/maximum_revision)"
   archive_name="mcrl2-${revision}.tar"
 
   ln -sf ./trunk ./mcrl2
@@ -50,7 +50,7 @@ if $(expr "${svn_update}" : "At revision" &> /dev/null ); then
   find -L ./mcrl2 -mindepth 2 -type f \
        -not -name '*.*' \
        -not -name 'Makefile' \
-       -not -wholename '*src/revision' \
+       -not -name '*revision' \
        -not -wholename '*boost*' > excludes
 
   # Find directories to filter out
