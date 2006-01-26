@@ -44,7 +44,6 @@ Installation
 
 To install the toolset to the specified directory DIR (use full names in this
 path, do not use ~) with debugging information enabled, do the following:
-> cd src
 > ./configure --prefix=DIR --enable-debug
 > make
 > make install
