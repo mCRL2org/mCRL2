@@ -23,6 +23,7 @@
 #include <iostream>
 #include <cassert>
 #include "aterm2.h"
+#include "atermpp/aterm_conversion.h"
 
 namespace atermpp
 {
@@ -35,7 +36,7 @@ namespace atermpp
     friend class aterm_appl;
 
     protected:
-      void* m_term;
+      ATerm m_term;
   
     public:
       aterm()
@@ -46,45 +47,40 @@ namespace atermpp
         : m_term(term)
       {
       }
-  
+
       aterm(ATermList term)
-        : m_term(term)
+        : m_term(void2term(list2void(term)))
       {}
   
       aterm(ATermInt term)
-        : m_term(term)
+        : m_term(void2term(int2void(term)))
       {
       }
   
       aterm(ATermReal term)
-        : m_term(term)
+        : m_term(void2term(real2void(term)))
       {
       }
   
       aterm(ATermBlob term)
-        : m_term(term)
+        : m_term(void2term(blob2void(term)))
       {
       }
   
       aterm(ATermAppl term)
-        : m_term(term)
+        : m_term(void2term(appl2void(term)))
       {
       }
 
-      aterm(ATermPlaceholder term)
-        : m_term(term)
-      {
-      }
-  
       aterm(const std::string& s)
         : m_term(ATmake(const_cast<char*>(s.c_str())))
       {}
 
       const ATerm& term() const
-      { return reinterpret_cast<const ATerm&>(m_term); }
+      { return m_term; }
   
       ATerm& term()
-      { return reinterpret_cast<ATerm&>(m_term); }
+      { return m_term; }
 
       /// Protect the aterm.
       /// Protects the aterm from being freed at garbage collection.

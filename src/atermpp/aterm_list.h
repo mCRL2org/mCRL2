@@ -64,11 +64,11 @@ namespace atermpp {
   class term_list: public aterm
   {
     protected:
-      const ATermList& list() const
-      { return reinterpret_cast<const ATermList&>(m_term); }
+      const ATermList list() const
+      { return reinterpret_cast<const ATermList>(m_term); }
   
-      ATermList& list()
-      { return reinterpret_cast<ATermList&>(m_term); }
+      ATermList list()
+      { return reinterpret_cast<ATermList>(m_term); }
 
     public:
       /// The type of object, T stored in the term_list.
@@ -133,7 +133,7 @@ namespace atermpp {
         : aterm(ATmakeList0())
       {
         while (first != last)
-          list() = ATinsert(list(), aterm(*(--last)));
+          m_term = void2term(list2void(ATinsert(list(), aterm(*(--last)))));
       }
 
       /// The destructor.
