@@ -50,6 +50,7 @@ LFLAGS             = -I -Pmcrl2yy
 BISON              = @BISON@
 BFLAGS             = @BFLAGS@ -d -pmcrl2yy
 ATERM              = @ATERM_NAME@ 
+ATERM_CPPFLAGS     = @ATERM_CPPFLAGS@
 BUILD_ATERM        = @BUILD_ATERM@
 USE_LIBXML2        = @USE_LIBXML2@
 LIBXML2_CPPFLAGS   = @LIBXML2_CPPFLAGS@
@@ -63,6 +64,7 @@ WX_CPPFLAGS        = $(filter-out -mthreads,@WX_CPPFLAGS@)
 USE_BOOST          = @USE_BOOST@
 BOOST_PREFIX       = @BOOST_PREFIX@
 BJAM               = @abs_top_srcdir@/boost/tools/build/jam_src/bin/bjam
+GLUT_LDFLAGS       = -lglut
 
 # Installation directories
 prefix             = @prefix@
@@ -73,6 +75,10 @@ datadir            = @datadir@
 includedir         = @includedir@
 infodir            = @infodir@
 mandir             = @mandir@
+
+ifndef BUILD_ATERM
+ ATERM_CPPFLAGS    = @CPPFLAGS@
+endif
 
 BOOST_FILESYSTEM      = -lboost_filesystem
 BOOST_PROGRAM_OPTIONS = -lboost_program_options

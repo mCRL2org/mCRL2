@@ -221,11 +221,13 @@ if test $with_aterm; then
   AC_CHECK_HEADERS([aterm2.h], , [AC_MSG_ERROR([cannot find ATerm headers])])
 else
   AC_MSG_NOTICE([using local ATerm library])
+  ATERM_CPPFLAGS="-I$PWD/src"
   CPPFLAGS="-I$PWD/src/aterm $CPPFLAGS"
   LDFLAGS="-L$PWD/src/aterm $LDFLAGS"
   ATERM_NAME="ATerm"
   BUILD_ATERM=1
 fi
+AC_SUBST([ATERM_CPPFLAGS],[])
 AC_SUBST([ATERM_NAME],[])
 AC_SUBST([BUILD_ATERM],[])
 # debug: AC_MSG_RESULT([CPPFLAGS=$CPPFLAGS])

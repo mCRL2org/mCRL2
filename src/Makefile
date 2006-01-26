@@ -181,7 +181,7 @@ LIB_NAMES          = $(XSIMTRACE_NAME)
 OBJECTS           := $(sort $(OBJECTS))
 
 #Make rules
-.PHONY: all install clean distclean boost boost_relay documentation squadt experimental
+.PHONY: all install clean distclean boost boost_relay documentation squadt ltsview experimental
 .PRECIOUS: mcrl2parser.c mcrl2lexer.c
 
 all: $(EXE_NAMES) $(LIB_NAMES)
@@ -206,8 +206,9 @@ all distclean install: documentation
 endif
 
 # Build/clean/install libxml2 dependent targets
-ifdef USE_LIBXML2
 ifdef USE_WX
+all clean distclean install: ltsview
+ifdef USE_LIBXML2
 all clean distclean install: squadt
 endif
 endif
@@ -215,6 +216,9 @@ endif
 # For building documentation
 documentation:
 	@$(MAKE) -C doc $(MAKECMDGOALS)
+
+ltsview:
+	@$(MAKE) -C ltsview $(MAKECMDGOALS)
 
 # For building squadt
 squadt: boost

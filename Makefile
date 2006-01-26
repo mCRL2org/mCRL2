@@ -6,6 +6,7 @@ all: config
 revision:
 	@${MAKE} -C src revision
 	@${MAKE} -C src/squadt revision
+	@${MAKE} -C src/ltsview revision
 
 install: all
 
