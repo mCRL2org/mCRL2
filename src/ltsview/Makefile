@@ -1,4 +1,4 @@
-include ../../config
+-include ../../config
 
 WX_LIBS		:= `$(WX_CONFIG) --libs core base gl`
 WX_CXXFLAGS	:= `$(WX_CONFIG) --cxxflags`

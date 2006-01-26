@@ -6,17 +6,23 @@ BOOST_CPPFLAGS = -I../src/boost
 
 all: maximum_revision
 
+ifndef HOST_OS # ../config does not exist
+boost_filesystem:
+	$(MAKE) -C ../src/boost boost_filesystem
+endif
+ifdef BUILD_BOOST # local boost was configured
+ BOOST_LDFLAGS  = -L../src/boost/lib
+
+ ifeq ($(HOST_OS),LINUX)
+  BOOST_LDFLAGS += -Wl,-rpath=../src/boost/lib
+ endif
+
+boost_filesystem:
+	$(MAKE) -C ../src/boost boost_filesystem
+endif
+
 maximum_revision: maximum_revision.cpp boost_filesystem
 	$(CXX) $(BOOST_CPPFLAGS) $(BOOST_LDFLAGS) $< -lboost_filesystem -o $@
-
-ifndef HOST_OS
-boost_filesystem:
-	$(MAKE) -C ../src/boost boost_filesystem
-endif
-ifdef BUILD_BOOST
-boost_filesystem:
-	$(MAKE) -C ../src/boost boost_filesystem
-endif
 
 .PHONY: all boost_filesystem
 

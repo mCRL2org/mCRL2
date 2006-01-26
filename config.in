@@ -38,6 +38,7 @@ endif
 
 ifeq (@BUILD_EXPERIMENTALS@,1)
  EXE_NAMES = $(EXPERIMENTALS)
+ all : experimental
 endif
 
 ARFLAGS            = crs
