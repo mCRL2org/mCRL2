@@ -97,7 +97,7 @@ void Visualizer::positionClusters()
   int ratio = Utils::round( 10.0 * lts->getInitialState()->getCluster()->getSize() / ( lts->getNumberOfRanks() - 1 ) );
   
   defaultVisSettings.clusterHeight = 0.4f * ratio ;
-  visSettings = defaultVisSettings;
+  visSettings.clusterHeight = defaultVisSettings.clusterHeight;
   
   refreshDisplayList = true;
 }
