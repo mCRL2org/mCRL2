@@ -20,12 +20,12 @@ MarkStateRuleDialog::MarkStateRuleDialog( wxWindow* parent, Mediator* owner,
   {
     ATermAppl paramId = ATermAppl( ATelementAt( stateVectorSpec, i ) );
     wxString paramName = wxString( strdup( ATwriteToString( ATgetArgument(
-	      paramId, 0 ) ) ) );
+	      paramId, 0 ) ) ) , wxConvLocal);
     paramChoices.Add( paramName );
     parameterTypes[ paramName ] = (ATermAppl) ATgetArgument( paramId, 1 );
   }
   paramChoices.Sort();
-  wxString relChoices[2] = { "is an element of", "is not an element of" };
+  wxString relChoices[2] = { wxT("is an element of"), wxT("is not an element of") };
 
   parameterChoice = new wxChoice( this, myID_PARAMETER_CHOICE,
       wxDefaultPosition, wxDefaultSize, paramChoices );
@@ -62,7 +62,7 @@ void MarkStateRuleDialog::loadValues( wxString paramName )
     ATermList valueList = (ATermList) ATgetArgument( parameterTypes[ paramName ], 1 );
     for ( int i = 0 ; i < ATgetLength( valueList ) ; ++i )
     {
-      values.Add( wxString( strdup( ATwriteToString( ATelementAt( valueList, i ) ) ) ) );
+      values.Add( wxString( strdup( ATwriteToString( ATelementAt( valueList, i ) ) ), wxConvLocal ) );
     }
     valuesListBox->Clear();
     valuesListBox->Append( values );

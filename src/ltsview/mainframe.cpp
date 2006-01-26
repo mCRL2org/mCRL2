@@ -583,8 +583,8 @@ void MainFrame::loadTitle()
 
 void MainFrame::setNumberInfo( int nstates, int ntransitions, int nclusters, int nranks )
 {
-  numberOfStatesLabel->SetLabel( wxString::Format( "%d", nstates ) );
-  numberOfTransitionsLabel->SetLabel( wxString::Format( "%d", ntransitions ) );
-  numberOfClustersLabel->SetLabel( wxString::Format( "%d", nclusters ) );
-  numberOfRanksLabel->SetLabel( wxString::Format( "%d", nranks ) );
+  numberOfStatesLabel->SetLabel( wxString::Format( wxT("%d"), nstates ) );
+  numberOfTransitionsLabel->SetLabel( wxString::Format( wxT("%d"), ntransitions ) );
+  numberOfClustersLabel->SetLabel( wxString::Format( wxT("%d"), nclusters ) );
+  numberOfRanksLabel->SetLabel( wxString::Format( wxT("%d"), nranks ) );
 }
