@@ -44,7 +44,7 @@ $(ICON_OBJECTS) : icons.h icons/*.xpm
 $(OBJECTS) $(TARGETS) : Makefile
 
 clean:
-	-rm -f $(OBJECTS) $(TARGETS) fsmparser.cpp fsmlexer.c fsmlexer.h core core.*
+	-rm -f *.o $(TARGETS) fsmparser.cpp fsmlexer.c fsmlexer.h core core.*
 
 distclean: clean
 

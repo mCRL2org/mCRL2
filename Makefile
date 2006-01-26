@@ -11,10 +11,11 @@ revision:
 install: all
 
 clean:
-	$(RM) -r autom4te.cache config.log *~ core core.*
 	@${MAKE} -C src $(MAKECMDGOALS)
+	$(RM) -r autom4te.cache config.log *~ core core.*
 
 distclean: clean
+	@$(RM) src/revision src/squadt/revision src/ltsview/revision
 	$(RM) -r config.status config utility/maximum_revision
 
 config:

@@ -4,7 +4,7 @@
 CXXFLAGS                       = -std=c++98 -O3# -Winline --param max-inline-insns-single=8000 \
 				 --param large-function-growth=5000 --param inline-unit-growth=5000
 
-#`-std=c++98' is to strict for the default mingw gcc
+#`-std=c++98' is too strict for the default mingw gcc
 ifeq ($(HOST_OS),MINGW)
  CXXFLAGS                      = -O3
 endif

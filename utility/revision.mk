@@ -1,4 +1,6 @@
+#
 # The variable SOURCE_ROOT should be a relative path to the root of the source tree
+#
 ifndef SOURCE_ROOT
   $(error SOURCE_ROOT must be a relative path to the root of the source tree)
 endif
@@ -15,6 +17,7 @@ $(MAXIMUM_REVISION):
 	$(MAKE) -C $(dir $(MAXIMUM_REVISION)) maximum_revision
 
 %.o: revision
+
 endif
 endif
 

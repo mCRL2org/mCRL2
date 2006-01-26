@@ -193,9 +193,6 @@ ifdef BUILD_BOOST
 all : boost
 distclean install: boost_relay
 
-boost_relay:
-	@$(MAKE) -C boost $(MAKECMDGOALS)
-
 boost/build_completed:
 	@$(MAKE) -C boost
 endif
@@ -220,6 +217,9 @@ clean distclean: squadt boost_relay ltsview documentation
 # For building documentation
 documentation:
 	@$(MAKE) -C doc $(MAKECMDGOALS)
+
+boost_relay:
+	@$(MAKE) -C boost $(MAKECMDGOALS)
 
 ltsview:
 	@$(MAKE) -C ltsview $(MAKECMDGOALS)
@@ -273,7 +273,7 @@ endif
 endif
 
 clean:
-	$(RM) $(EXE_NAMES) $(EXPERIMENTALS) $(LIB_NAMES) *.o *.a *.d *.dpp lpe/*.o lpe/*.dpp aterm/*.o aterm/*.a aterm/*.d svc/*.o svc/*.a svc/*.d svc/*.dpp mcrl2lexer.c mcrl2parser.c mcrl2parser.h mcrl2parser.output lpeinfo lpeparelm lpeconstelm autom4te.cache *~ core core.* utility/maximum_revision
+	$(RM) $(EXE_NAMES) $(EXPERIMENTALS) $(LIB_NAMES) *.o *.a *.d* *.dpp* lpe/*.o lpe/*.dpp aterm/*.o aterm/*.a aterm/*.d svc/*.o svc/*.a svc/*.d svc/*.dpp mcrl2lexer.c mcrl2parser.c mcrl2parser.h mcrl2parser.output lpeinfo lpeparelm lpeconstelm autom4te.cache *~ core core.* utility/maximum_revision
 
 distclean: clean
 	$(RM) -r rewr_innerc_aux.h

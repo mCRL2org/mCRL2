@@ -17,7 +17,6 @@ MAN_INSTALL_TARGETS = $(patsubst %,%.install,$(MAN_OBJECT_SUFFIXES))
 
 .PHONY: all clean distclean install
 
-ifdef USE_XMLTO
 all: $(OBJECTS)
 
 clean:
@@ -26,16 +25,6 @@ clean:
 distclean: clean
 
 install: all $(MAN_INSTALL_TARGETS)
-
-else
-all:
-
-clean:
-
-distclean:
-
-install:
-endif
 
 %.install:
 	$(INSTALL) -d $(mandir)/man$*
