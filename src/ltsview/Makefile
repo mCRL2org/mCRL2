@@ -8,7 +8,11 @@ WX_OBJECTS	 = ltsviewapp.o mainframe.o glcanvas.o wxthings/spinctld.o markstater
 AT_OBJECTS	 = ltsviewapp.o action.o fsmparser.o lts.o state.o
 CPP_OBJECTS	 = fileloader.o visualizer.o lts.o state.o transition.o action.o \
 		   cluster.o fsmparser.o utils.o glutils.o
+ifeq ($(HOST_OS),MACOSX)
 GLUT_LDFLAGS     = -framework GLUT -framework OpenGL -lobjc
+else
+GLUT_LDFLAGS     = -lglut
+endif
 
 OBJECTS		 = $(WX_OBJECTS) $(CPP_OBJECTS)
 TARGETS		 = ltsview
