@@ -13,7 +13,6 @@ bool LTSViewApp::OnInit()
   visualizer	  = new Visualizer( this );
   lts		  = NULL;
   glCanvas	  = mainFrame->getGLCanvas();
-  glCanvas->initialize();
   
   mainFrame->setVisSettings( visualizer->getVisSettings() );
   mainFrame->Show( true );

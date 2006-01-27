@@ -3,6 +3,7 @@
 
 #include "icons/main_window.xpm"
 #include "icons/file_open.xpm"
+#include "icons/file_open_mask.xpm"
 #include "icons/select_tool.xpm"
 #include "icons/select_cursor.xpm"
 #include "icons/select_cursor_mask.xpm"
