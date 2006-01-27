@@ -6,7 +6,9 @@ END_EVENT_TABLE()
 
 MarkStateRuleDialog::MarkStateRuleDialog( wxWindow* parent, Mediator* owner,
     ATermList svspec )
-  : wxDialog( parent, wxID_ANY, wxT("Add mark state rule") )
+ : wxDialog( parent, wxID_ANY, wxT("Add mark state rule"), wxDefaultPosition )
+
+/*   : wxDialog( parent, wxID_ANY, wxT("Add mark state rule") )  oud  */
 {
   stateVectorSpec = svspec;
 
