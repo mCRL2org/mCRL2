@@ -215,7 +215,8 @@ static ATermList create_strategy(ATermList rules)
 		{
 			if ( ATgetArity(ATgetAFun(ATAelementAt(ATLgetFirst(rules),2))) == arity + 1 )
 			{
-				ATermList vars = ATmakeList0();
+				ATermAppl cond = ATAelementAt(ATLgetFirst(rules),1);
+				ATermList vars = gsIsNil(cond)?ATmakeList1((ATerm) ATmakeList0()):ATmakeList1((ATerm) get_vars((ATerm) cond));
 				ATermAppl pars = ATAelementAt(ATLgetFirst(rules),2);
 
 //gsfprintf(stderr,"rule: %T\n",ATgetFirst(rules));
@@ -235,13 +236,14 @@ static ATermList create_strategy(ATermList rules)
 						bs[i] = true;
 						vars = ATappend(vars,(ATerm) get_vars(ATgetArgument(pars,i+1)));
 					} else {
-						unsigned int j = 0;
+						unsigned int j = -1;
 						bool b = false;
 						for (ATermList o=vars; !ATisEmpty(o); o=ATgetNext(o))
 						{
 							if ( ATindexOf(ATLgetFirst(o),ATgetArgument(pars,i+1),0) >= 0 )
 							{
-								bs[j] = true;
+								if ( j >= 0 )
+									bs[j] = true;
 								b = true;
 							}
 							j++;
@@ -563,7 +565,7 @@ ATermAppl RewriterJitty::rewrite_aux(ATermAppl Term)
 	if ( gsIsDataVarId(Term) )
 	{
 //gsfprintf(stderr,"return %T\n\n",Term);
-//gsfprintf(stderr,"return1  %P\n\n",fromInner((ATermAppl) RWapplySubstitution((ATerm) Term)));
+//gsfprintf(stderr,"return1  %P\n\n",fromInner((ATermAppl) lookupSubstitution(Term)));
 		return (ATermAppl) lookupSubstitution(Term);
 	} else {
 		ATerm op = ATgetArgument(Term,0);

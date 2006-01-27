@@ -1036,14 +1036,54 @@ static ATermAppl create_tree(ATermList rules, int opid, int arity)
 }
 
 
+static ATermList get_doubles(ATerm a, ATermList &vars)
+{
+	if ( ATisInt(a) )
+	{
+		return ATmakeList0();
+	} else if ( ATisAppl(a) && gsIsDataVarId((ATermAppl) a) )
+	{
+		if ( ATindexOf(vars,a,0) >= 0 )
+		{
+			return ATmakeList1(a);
+		} else {
+			vars = ATinsert(vars,a);
+			return ATmakeList0();
+		}
+	} else {
+		ATermList l = ATmakeList0();
+		ATermList m;
+		if ( ATisList(a) )
+		{
+			m = (ATermList) a;
+		} else {
+			m = ATgetArguments((ATermAppl) a);
+		}
+		for (;!ATisEmpty(m); m=ATgetNext(m))
+		{
+			l = ATconcat(l,get_doubles(ATgetFirst(m),vars));
+		}
+		return l;
+	}
+}
+
 static ATermList get_vars(ATerm a)
 {
-	if ( gsIsDataVarId((ATermAppl) a) )
+	if ( ATisInt(a) )
+	{
+		return ATmakeList0();
+	} else if ( ATisAppl(a) && gsIsDataVarId((ATermAppl) a) )
 	{
 		return ATmakeList1(a);
 	} else {
 		ATermList l = ATmakeList0();
-		ATermList m = ATgetArguments((ATermAppl) a);
+		ATermList m;
+		if ( ATisList(a) )
+		{
+			m = (ATermList) a;
+		} else {
+			m = ATgetArguments((ATermAppl) a);
+		}
 		for (;!ATisEmpty(m); m=ATgetNext(m))
 		{
 			l = ATconcat(l,get_vars(ATgetFirst(m)));
@@ -1101,11 +1141,16 @@ static ATermList create_strategy(ATermList rules, int opid)
 		{
 			if ( ATgetArity(ATgetAFun(ATAelementAt(ATLgetFirst(rules),2))) == arity + 1 )
 			{
+				ATermAppl cond = ATAelementAt(ATLgetFirst(rules),1);
 				ATermAppl pars = ATAelementAt(ATLgetFirst(rules),2); // arguments of lhs
-				ATermList vars = ATmakeList0(); // List of variables occurring in this each argument of the lhs
+				ATermList t = ATmakeList0();
+				ATermList vars = ATmakeList1((ATerm) ATconcat(
+							get_doubles(ATelementAt(ATLgetFirst(rules),3),t),
+							(gsIsNil(cond)?ATmakeList0():get_vars((ATerm) cond))
+							)); // List of variables occurring in this each argument of the lhs (except the first element which contains variables from the condition and variables which occur more than once in the result)
 
 //gsfprintf(stderr,"rule: %T\n",ATgetFirst(rules));
-//gsfprintf(stderr,"rule: %T\n",ATAelementAt(ATgetFirst(rules),2));
+//gsfprintf(stderr,"rule: %T\n",ATAelementAt(ATLgetFirst(rules),2));
 //gsfprintf(stderr,"rule: "); PrintPart_C(stderr,fromInner(ATAelementAt(ATgetFirst(rules),2))); gsfprintf(stderr,"\n");
 //gsprintf("pars: %T\n",pars);
 
@@ -1124,14 +1169,15 @@ static ATermList create_strategy(ATermList rules, int opid)
 						bs[i] = true;
 					} else {
 						// Argument is a variable; check whether it occurred before
-						unsigned int j = 0;
+						int j = -1;
 						bool b = false;
 						for (ATermList o=vars; !ATisEmpty(o); o=ATgetNext(o))
 						{
 							if ( ATindexOf(ATLgetFirst(o),ATgetArgument(pars,i+1),0) >= 0 )
 							{
 								// Same variable, mark it
-								bs[j] = true;
+								if ( j >= 0 )
+									bs[j] = true;
 								b = true;
 							}
 							j++;
