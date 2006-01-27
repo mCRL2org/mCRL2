@@ -31,8 +31,10 @@ MarkStateRuleDialog::MarkStateRuleDialog( wxWindow* parent, Mediator* owner,
 
   parameterChoice = new wxChoice( this, myID_PARAMETER_CHOICE,
       wxDefaultPosition, wxDefaultSize, paramChoices );
+  parameterChoice->SetSelection( 0 );
   relationChoice = new wxChoice( this, wxID_ANY, wxDefaultPosition,
       wxDefaultSize, 2, relChoices );
+  relationChoice->SetSelection( 0 );
   valuesListBox = new wxCheckListBox( this, wxID_ANY, wxDefaultPosition,
       wxDefaultSize, 0, NULL, wxLB_SINGLE | wxLB_HSCROLL | wxLB_NEEDED_SB |
       wxLB_SORT );

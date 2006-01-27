@@ -320,8 +320,10 @@ void MainFrame::setupSettingsPanel( wxPanel* panel )
   rankstyleSizer->Add( new wxStaticText( panel, wxID_ANY, wxT("Rank style:") ),
       1, flags, border );
   wxString choices[2] = { wxT("Iterative"), wxT("Cyclic") };
-  rankstyleSizer->Add( new wxChoice( panel, myID_RANK_STYLE, wxDefaultPosition,
-      wxDefaultSize, 2, choices ), 1, flags, border );
+  wxChoice* rankstyleChoice = new wxChoice( panel, myID_RANK_STYLE,
+      wxDefaultPosition, wxDefaultSize, 2, choices );
+  rankstyleChoice->SetSelection( 0 );
+  rankstyleSizer->Add( rankstyleChoice, 1, flags, border );
   
   panelSizer->Add( rankstyleSizer, 0, wxEXPAND | wxALL, border );
   panelSizer->Add( new wxButton( panel, wxID_RESET, wxT("Default settings")
@@ -352,8 +354,10 @@ void MainFrame::setupMarkPanel( wxPanel* panel )
       wxT("Mark states") );
   wxString choices[2] = { wxT("Match all of the following"),
       wxT("Match any of the following") };
-  markStatesSizer->Add( new wxChoice( panel, myID_MARK_ANYALL,
-	wxDefaultPosition, wxDefaultSize, 2, choices ), 0, flags, border );
+  wxChoice* anyallChoice = new wxChoice( panel, myID_MARK_ANYALL,
+      wxDefaultPosition, wxDefaultSize, 2, choices );
+  anyallChoice->SetSelection( 0 );
+  markStatesSizer->Add( anyallChoice, 0, flags, border );
   
   markStatesSizer->Add( new wxListBox( panel, myID_MARK_RULES,
 	wxDefaultPosition, wxDefaultSize, 0, NULL, wxLB_EXTENDED |
