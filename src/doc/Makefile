@@ -1,4 +1,4 @@
--include ../config
+-include ../../config
 
 MAN_OBJECTS  = librewrite_c.7 librewrite.7 tbf2lpe.1 lpeinfo.1 \
                lpeconstelm.1 lpeparelm.1 pnml2mcrl2.1 lpepp.1 \
@@ -25,6 +25,8 @@ clean:
 distclean: clean
 
 install: all $(MAN_INSTALL_TARGETS)
+
+documentation: all
 
 %.install:
 	$(INSTALL) -d $(mandir)/man$*

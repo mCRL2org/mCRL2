@@ -207,7 +207,7 @@ ifdef BUILD_EXPERIMENTAL
 ifdef USE_WX
 all install: ltsview
 ifdef USE_LIBXML2
-all  install: squadt
+all install: squadt
 endif
 endif
 endif
