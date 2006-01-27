@@ -56,7 +56,7 @@ else
 fi
 AC_MSG_CHECKING([whether bison GLR parser can be used])
 $BISON test.y -o test.c
-if $CC -c test.c &> /dev/null; then
+if $CC -c test.c -o /dev/null &> /dev/null; then
   glr_usable="yes"
 fi
 rm -f test.c
