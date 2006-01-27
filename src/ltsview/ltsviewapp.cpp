@@ -7,6 +7,8 @@ bool LTSViewApp::OnInit()
   // initialize the ATerm library
   ATerm stackbot;
   ATinit( 0, NULL, &stackbot );
+  int c = 0;
+  glutInit( &c, NULL );
   
   mainFrame	  = new MainFrame( this );
   fileLoader	  = new FileLoader( this );

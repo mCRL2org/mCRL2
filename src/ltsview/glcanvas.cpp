@@ -46,17 +46,11 @@ void GLCanvas::initialize()
   glShadeModel( GL_SMOOTH );
   
   GLfloat gray[] = { 0.5f, 0.5f, 0.5f, 1.0f };
-  GLfloat white[] = { 1.0f, 1.0f, 1.0f, 1.0f };
-  GLfloat b[] = { 128.0f };
-  GLfloat light_pos[]	= { 50.0f, 50.0f, 50.0f, 1.0f };
+  GLfloat light_pos[] = { 50.0f, 50.0f, 50.0f, 1.0f };
   glEnable( GL_NORMALIZE );
   glLightfv( GL_LIGHT0, GL_AMBIENT, gray );
-  //glLightfv( GL_LIGHT0, GL_DIFFUSE, gray );
-  //glLightfv( GL_LIGHT0, GL_SPECULAR, white );
+  glLightfv( GL_LIGHT0, GL_DIFFUSE, gray );
   glLightfv( GL_LIGHT0, GL_POSITION, light_pos );
-  
-  //GLfloat lm[] = { 0.2f, 0.2f, 0.2f, 1.0f };
-  //glLightModelfv( GL_LIGHT_MODEL_AMBIENT, lm );
   
   glBlendFunc( GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA );
   

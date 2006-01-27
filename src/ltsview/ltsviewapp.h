@@ -1,6 +1,11 @@
 #ifndef LTSVIEWAPP_H
 #define LTSVIEWAPP_H
 #include <wx/wx.h>
+#ifdef __APPLE__
+    #include <GLUT/glut.h>
+#else
+    #include <GL/glut.h>
+#endif
 #include <string>
 #include <iostream>
 #include "aterm/aterm1.h"
