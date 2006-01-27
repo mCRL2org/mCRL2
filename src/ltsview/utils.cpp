@@ -27,12 +27,12 @@ bool Utils::operator!=( VisSettings vs1, VisSettings vs2 )
   return !( vs1 == vs2 );
 }
 
-bool Utils::operator==( RGBColor c1, RGBColor c2 )
+bool Utils::operator==( RGB_Color c1, RGB_Color c2 )
 {
   return c1.r == c2.r && c1.g == c2.g && c1.b == c2.b;
 }
 
-bool Utils::operator!=( RGBColor c1, RGBColor c2 )
+bool Utils::operator!=( RGB_Color c1, RGB_Color c2 )
 {
   return !( c1 == c2 );
 }

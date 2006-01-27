@@ -1,13 +1,13 @@
 #include "glutils.h"
 
-void GLUtils::setColor( RGBColor c, int transp )
+void GLUtils::setColor( RGB_Color c, int transp )
 {
   GLfloat fc[] = { c.r / 255.0f, c.g / 255.0f, c.b / 255.0f, (100-transp) / 100.0f };
   glColor4fv( fc );
 }
 
 void GLUtils::coloredCylinder( float baserad, float toprad, float height,
-      int slices, int stacks, RGBColor basecol, RGBColor topcol, int transp,
+      int slices, int stacks, RGB_Color basecol, RGB_Color topcol, int transp,
       bool baseclosed, bool topclosed )
 {
   float nxg = height;
@@ -104,7 +104,7 @@ void GLUtils::coloredCylinder( float baserad, float toprad, float height,
   }
 }
 
-void GLUtils::coloredSphere( float rad, int slices, int stacks, RGBColor color,
+void GLUtils::coloredSphere( float rad, int slices, int stacks, RGB_Color color,
     int transp )
 {
   /*

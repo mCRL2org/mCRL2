@@ -8,12 +8,15 @@ namespace Utils
 
   enum RankStyle { Iterative, Cyclic };
 
-  struct RGBColor
+  struct RGB_Color    /* The name is not RGBColor because
+                         this leads to a naming conflict with
+                         the built-in name RGBColor on 
+                         MacOsX (Jan Friso Groote, 27-1-2006) */
   {
     unsigned char r;
     unsigned char g;
     unsigned char b;
-  };
+  }; 
 
   struct Point3D
   {
@@ -24,30 +27,30 @@ namespace Utils
 
   struct VisSettings
   {
-    RGBColor  backgroundColor;
+    RGB_Color  backgroundColor;
     float     backpointerCurve;
 //    int	      branchRotation;
 //    int	      branchScale;
     int	      branchSpread;
     float     clusterHeight;
-    RGBColor  downEdgeColor;
-    RGBColor  interpolateColor1;
-    RGBColor  interpolateColor2;
+    RGB_Color downEdgeColor;
+    RGB_Color interpolateColor1;
+    RGB_Color interpolateColor2;
     bool      levelDividers;
     bool      longInterpolation;
-    RGBColor  markedColor;
+    RGB_Color markedColor;
     float     nodeSize;
     int	      outerBranchTilt;
     int	      quality;
-    RGBColor  stateColor;
+    RGB_Color stateColor;
     int	      transparency;
-    RGBColor  upEdgeColor;
+    RGB_Color upEdgeColor;
   };
 
   bool operator==( VisSettings, VisSettings );
   bool operator!=( VisSettings, VisSettings );
-  bool operator==( RGBColor, RGBColor );
-  bool operator!=( RGBColor, RGBColor );
+  bool operator==( RGB_Color, RGB_Color );
+  bool operator!=( RGB_Color, RGB_Color );
   
   template< class T > const T& maximum( const T& a, const T& b )
   {

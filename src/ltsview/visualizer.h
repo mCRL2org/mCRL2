@@ -3,9 +3,7 @@
 
 #include "mediator.h"
 #ifdef __APPLE__
-    #include <OpenGL/gl.h>
-    #include <OpenGL/glu.h>
-    #include <OpenGL/glut.h>
+    #include <GLUT/glut.h>
 #else
     #include <GL/gl.h>
     #include <GL/glu.h>
@@ -30,7 +28,7 @@ class Visualizer
     float	    structWidth;
     VisSettings	    visSettings;
 
-    void drawSubtree( Cluster* root, RGBColor col, RGBColor delta_col, bool
+    void drawSubtree( Cluster* root, RGB_Color col, RGB_Color delta_col, bool
 	topClosed, float &boundWidth, float &boundHeight );
   
   public:

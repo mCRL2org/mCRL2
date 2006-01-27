@@ -8,6 +8,7 @@ WX_OBJECTS	 = ltsviewapp.o mainframe.o glcanvas.o wxthings/spinctld.o markstater
 AT_OBJECTS	 = ltsviewapp.o action.o fsmparser.o lts.o state.o
 CPP_OBJECTS	 = fileloader.o visualizer.o lts.o state.o transition.o action.o \
 		   cluster.o fsmparser.o utils.o glutils.o
+GLUT_LDFLAGS     = -framework GLUT -framework OpenGL -lobjc
 
 OBJECTS		 = $(WX_OBJECTS) $(CPP_OBJECTS)
 TARGETS		 = ltsview
@@ -51,3 +52,16 @@ distclean: clean
 install: all
 	$(INSTALL) -d $(bindir)
 	$(INSTALL) ltsview $(bindir)
+ifeq ($(HOST_OS),MACOSX)
+	/Developer/Tools/Rez -t APPL -o ltsview ../sample.r
+	/Developer/Tools/SetFile -a C ltsview
+	mkdir -p ../../ltsview.app/Contents
+	mkdir -p ../../ltsview.app/Contents/MacOS
+	mkdir -p ../../ltsview.app/Contents/Resources
+	cp ltsview.plist ../../ltsview.app/Contents/Info.plist
+	echo -n "APPL????" > ../../ltsview.app/Contents/PkgInfo
+	cp ltsview $(bindir)/ltsview
+	ln -f $(bindir)/ltsview ../../ltsview.app/Contents/MacOS/ltsview
+	cp -f ltsview.icns ../../ltsview.app/Contents/Resources/ltsview.icns
+endif
+

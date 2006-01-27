@@ -118,7 +118,7 @@ void Visualizer::drawLTS()
 	glEnable( GL_COLOR_MATERIAL );
 	glColorMaterial( GL_FRONT_AND_BACK, GL_AMBIENT_AND_DIFFUSE );
 
-	RGBColor delta_col;
+	RGB_Color delta_col;
 	//if ( visSettings.longInterpolation )
 	delta_col.r = ( visSettings.interpolateColor2.r - 
 	    visSettings.interpolateColor1.r ) / lts->getNumberOfRanks();
@@ -169,7 +169,7 @@ void Visualizer::drawLTS()
 }
 
 // draws the subtree with cluster *root (being the root of the tree)
-void Visualizer::drawSubtree( Cluster* root, RGBColor col, RGBColor delta_col,
+void Visualizer::drawSubtree( Cluster* root, RGB_Color col, RGB_Color delta_col,
     bool topClosed, float &boundWidth, float &boundHeight )
 {
   if ( !root->hasDescendants() )
@@ -181,7 +181,7 @@ void Visualizer::drawSubtree( Cluster* root, RGBColor col, RGBColor delta_col,
   }
   else
   {
-    RGBColor desccol = 
+    RGB_Color desccol = 
       { col.r + delta_col.r, col.g + delta_col.g, col.b + delta_col.b };
     
     vector< Cluster* > descendants;

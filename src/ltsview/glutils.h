@@ -2,6 +2,7 @@
 #define GLUTILS_H
 #ifdef __APPLE__
     #include <OpenGL/gl.h>
+    #include <GLUT/glut.h>
 #else
   #include <GL/gl.h>
 #endif
@@ -14,11 +15,11 @@ using namespace Utils;
 
 namespace GLUtils
 {
-  void setColor( RGBColor c, int transp );
+  void setColor( RGB_Color c, int transp );
   void coloredCylinder( float baserad, float toprad, float height, 
-      int slices, int stacks, RGBColor basecol, RGBColor topcol, int transp,
+      int slices, int stacks, RGB_Color basecol, RGB_Color topcol, int transp,
       bool baseclosed, bool topclosed );
-  void coloredSphere( float rad, int slices, int stacks, RGBColor color, int
+  void coloredSphere( float rad, int slices, int stacks, RGB_Color color, int
       transp );
 }
 #endif

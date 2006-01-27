@@ -449,43 +449,43 @@ void MainFrame::onRemoveMarkStateRuleButton( wxCommandEvent& event )
 
 VisSettings MainFrame::getVisSettings() const
 {
-  RGBColor bgC =
+  RGB_Color bgC =
   {
     backgroundButton->GetBackgroundColour().Red(),
     backgroundButton->GetBackgroundColour().Green(),
     backgroundButton->GetBackgroundColour().Blue()
   };
-  RGBColor downC =
+  RGB_Color downC =
   {
     downEdgeButton->GetBackgroundColour().Red(),
     downEdgeButton->GetBackgroundColour().Green(),
     downEdgeButton->GetBackgroundColour().Blue()
   };
-  RGBColor intC1 =
+  RGB_Color intC1 =
   {
     interpolate1Button->GetBackgroundColour().Red(),
     interpolate1Button->GetBackgroundColour().Green(),
     interpolate1Button->GetBackgroundColour().Blue()
   };
-  RGBColor intC2 =
+  RGB_Color intC2 =
   {
     interpolate2Button->GetBackgroundColour().Red(),
     interpolate2Button->GetBackgroundColour().Green(),
     interpolate2Button->GetBackgroundColour().Blue()
   };
-  RGBColor markC =
+  RGB_Color markC =
   {
     markButton->GetBackgroundColour().Red(),
     markButton->GetBackgroundColour().Green(),
     markButton->GetBackgroundColour().Blue()
   };
-  RGBColor stateC =
+  RGB_Color stateC =
   {
     nodeButton->GetBackgroundColour().Red(),
     nodeButton->GetBackgroundColour().Green(),
     nodeButton->GetBackgroundColour().Blue()
   };
-  RGBColor upC =
+  RGB_Color upC =
   {
     upEdgeButton->GetBackgroundColour().Red(),
     upEdgeButton->GetBackgroundColour().Green(),
