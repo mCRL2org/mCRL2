@@ -206,7 +206,7 @@ void MainFrame::setupSettingsPanel( wxPanel* panel )
 	wxT("Outer branch tilt:") ), 0, flags, border );
   parsubSizer->Add( outerbranchtiltSpinCtrl, 0, flags, border );
   parsubSizer->Add( new wxStaticText( panel, wxID_ANY, 
-	wxT("\302\272") ), 0, flags, 0 );
+	wxString("\xc2\xb0", wxConvUTF8) ), 0, flags, 0 );
   
   qualitySpinCtrl = new wxSpinCtrl( panel, myID_SETTINGS_CONTROL, wxEmptyString,
       wxDefaultPosition );
