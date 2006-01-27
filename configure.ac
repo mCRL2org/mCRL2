@@ -89,26 +89,6 @@ AC_RUN_IFELSE(
   AC_MSG_ERROR([C99 standard not supported])
 )
 
-# Check whether -fno-pre-tree can be passed (for buggy gcc 4*)
-AC_MSG_CHECKING([whether C++ compiler accepts -fno-tree-pre])
-CXXFLAGS="-fno-tree-pre"
-AC_LANG_PUSH(C++)
-AC_COMPILE_IFELSE(
-  AC_LANG_PROGRAM(,
-     [
-       return (0);
-     ]
-   ),
-   [
-     AC_MSG_RESULT(yes)
-   ],
-   [
-     AC_MSG_RESULT(no)
-     CXXFLAGS=""
-   ]
-)
-AC_LANG_POP(C++)
-
 TEMPFLAGS="$CXXFLAGS"
 CXXFLAGS="$TEMPFLAGS -std=c++98"
 
