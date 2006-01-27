@@ -10,6 +10,7 @@
 #include <wx/progdlg.h>
 #include <wx/notebook.h>
 #include <wx/spinctrl.h>
+#include <wx/bitmap.h>
 #include "wxthings/spinctld.h"
 #include "icons.h"
 #include "mediator.h"
