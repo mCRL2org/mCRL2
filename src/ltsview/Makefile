@@ -27,7 +27,7 @@ SOURCE_ROOT = ../../
 include $(SOURCE_ROOT)utility/revision.mk
 
 ltsview : $(OBJECTS)
-	$(CXX) $(GLUT_LDFLAGS) $(WX_LIBS) $(LDFLAGS) $(OBJECTS) -lATerm -o $@
+	$(CXX) $(GLUT_LDFLAGS) $(LDFLAGS) $(OBJECTS) $(WX_LIBS) -lATerm -o $@
 
 $(WX_OBJECTS) : %.o: %.cpp
 	$(CXX) -c $(WX_CXXFLAGS) $(ATERM_CPPFLAGS) $< -o $@
