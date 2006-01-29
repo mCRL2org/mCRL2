@@ -8,7 +8,8 @@ bool LTSViewApp::OnInit()
   ATerm stackbot;
   ATinit( 0, NULL, &stackbot );
   int c = 0;
-  glutInit( &c, NULL );
+  char* v = "";
+  glutInit( &c, &v );
   
   mainFrame	  = new MainFrame( this );
   fileLoader	  = new FileLoader( this );

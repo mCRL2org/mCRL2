@@ -351,8 +351,10 @@ void MainFrame::setupMarkPanel( wxPanel* panel )
   int flags = wxALIGN_LEFT | wxALIGN_CENTER_VERTICAL | wxALL;
   int border = 3;
   
-  markSizer->Add( new wxRadioButton( panel, wxID_ANY, wxT("No marks"),
-	wxDefaultPosition, wxDefaultSize, wxRB_GROUP ), 0, flags, border );
+  wxRadioButton* radiobtn = new wxRadioButton( panel, wxID_ANY, wxT("No marks"),
+      wxDefaultPosition, wxDefaultSize, wxRB_GROUP );
+  radiobtn->SetValue( true );
+  markSizer->Add( radiobtn, 0, flags, border );
   markSizer->Add( new wxRadioButton( panel, wxID_ANY, wxT("Mark deadlocks") ),
       0, flags, border );
   markSizer->Add( new wxRadioButton( panel, wxID_ANY, wxT("Mark states") ),
