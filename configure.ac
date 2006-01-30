@@ -1,4 +1,4 @@
-AC_INIT([mCRL2 toolset], [0.2], [J.v.d.Wulp@tue.nl])
+AC_INIT([mCRL2 toolset], [0.2], [bug@mcrl2.org])
 AC_CANONICAL_HOST
 AC_PREFIX_DEFAULT([$HOME])
 AC_CONFIG_SRCDIR([src/liblowlevel.h])
