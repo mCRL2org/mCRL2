@@ -72,6 +72,8 @@ class NextStateStandard : public NextState
 		ATermAppl getStateArgument(ATerm state, int index);
 		ATermAppl makeStateVector(ATerm state);
 
+		Rewriter *getRewriter();
+
 	private:
 		ns_info info;
 

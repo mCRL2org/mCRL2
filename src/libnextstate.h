@@ -3,6 +3,7 @@
 
 #include <aterm2.h>
 #include "libenum.h"
+#include "librewrite.h"
 
 #define GS_STATE_VECTOR 0
 #define GS_STATE_TREE 1
@@ -34,6 +35,8 @@ class NextState
 		virtual int getStateLength() = 0;
 		virtual ATermAppl getStateArgument(ATerm state, int index) = 0;
 		virtual ATermAppl makeStateVector(ATerm state) = 0;
+
+		virtual Rewriter *getRewriter() = 0;
 };
 
 NextState *createNextState(

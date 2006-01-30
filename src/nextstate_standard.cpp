@@ -540,6 +540,11 @@ NextStateGenerator *NextStateStandard::getNextStates(ATerm state, NextStateGener
 	}
 }
 
+Rewriter *NextStateStandard::getRewriter()
+{
+	return info.rewr_obj;
+}
+
 
 
 
