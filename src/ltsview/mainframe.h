@@ -11,7 +11,7 @@
 #include <wx/notebook.h>
 #include <wx/spinctrl.h>
 #include <wx/bitmap.h>
-#include "wxthings/spinctld.h"
+#include "spinctrlfloat.h"
 #include "icons.h"
 #include "mediator.h"
 #include "glcanvas.h"
@@ -43,9 +43,9 @@ class MainFrame : public wxFrame
     void	updateProgressDialog( int val, string msg );
   private:
     wxButton*	      backgroundButton;
-    wxSpinCtrlDbl*    backpointerSpinCtrl;
+    wxSpinCtrlFloat*    backpointerSpinCtrl;
     wxSpinCtrl*	      branchspreadSpinCtrl;
-    wxSpinCtrlDbl*    clusterheightSpinCtrl;
+    wxSpinCtrlFloat*    clusterheightSpinCtrl;
     VisSettings	      defaultSettings;
     wxString	      directory;
     wxButton*	      downEdgeButton;
@@ -58,7 +58,7 @@ class MainFrame : public wxFrame
     wxButton*	      markButton;
     Mediator*	      mediator;
     wxButton*	      nodeButton;
-    wxSpinCtrlDbl*    nodesizeSpinCtrl;
+    wxSpinCtrlFloat*    nodesizeSpinCtrl;
     wxStaticText*     numberOfClustersLabel;
     wxStaticText*     numberOfRanksLabel;
     wxStaticText*     numberOfStatesLabel;

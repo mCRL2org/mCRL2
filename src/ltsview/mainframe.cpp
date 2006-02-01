@@ -159,24 +159,24 @@ void MainFrame::setupSettingsPanel( wxPanel* panel )
 
   wxSize spinctrlSize( 50, -1 );
 
-  nodesizeSpinCtrl = new wxSpinCtrlDbl( panel, myID_SETTINGS_CONTROL,
-      wxEmptyString, wxDefaultPosition, spinctrlSize );
+  nodesizeSpinCtrl = new wxSpinCtrlFloat( panel, myID_SETTINGS_CONTROL,
+      0.0f, 100.0f, 0.1f, 0.0f, wxDefaultPosition, spinctrlSize );
   nodesizeSpinCtrl->SetSizeHints( spinctrlSize, spinctrlSize );
   parsubSizer->Add( new wxStaticText( panel, wxID_ANY, 
 	wxT("Node size:") ), 0, flags, border );
   parsubSizer->Add( nodesizeSpinCtrl, 0, flags, border );
   parsubSizer->AddSpacer( 0 );
   
-  backpointerSpinCtrl = new wxSpinCtrlDbl( panel, myID_SETTINGS_CONTROL,
-      wxEmptyString, wxDefaultPosition, spinctrlSize  );
+  backpointerSpinCtrl = new wxSpinCtrlFloat( panel, myID_SETTINGS_CONTROL,
+      0.0f, 100.0f, 0.1f, 0.0f, wxDefaultPosition, spinctrlSize  );
   backpointerSpinCtrl->SetSizeHints( spinctrlSize, spinctrlSize );
   parsubSizer->Add( new wxStaticText( panel, wxID_ANY, 
 	wxT("Backpointer curve:") ), 0, flags, border );
   parsubSizer->Add( backpointerSpinCtrl, 0, flags, border );
   parsubSizer->AddSpacer( 0 );
   
-  clusterheightSpinCtrl = new wxSpinCtrlDbl( panel, myID_SETTINGS_CONTROL,
-      wxEmptyString, wxDefaultPosition, spinctrlSize  );
+  clusterheightSpinCtrl = new wxSpinCtrlFloat( panel, myID_SETTINGS_CONTROL,
+      0.0f, 1000.0f, 0.1f, 0.0f, wxDefaultPosition, spinctrlSize  );
   clusterheightSpinCtrl->SetSizeHints( spinctrlSize, spinctrlSize );
   parsubSizer->Add( new wxStaticText( panel, wxID_ANY, 
 	wxT("Cluster height:") ), 0, flags, border );
@@ -550,9 +550,9 @@ void MainFrame::setVisSettings( VisSettings ss )
 	ss.interpolateColor2.g, ss.interpolateColor2.b ) );
   longinterpolateCheckBox->SetValue( ss.longInterpolation );
   //transparencySpinCtrl->SetValue( ss.transparency );
-  nodesizeSpinCtrl->SetValue( ss.nodeSize, 0.0, 100.0, 0.1 );
-  backpointerSpinCtrl->SetValue( ss.backpointerCurve, 0.0, 100.0, 0.1 );
-  clusterheightSpinCtrl->SetValue( ss.clusterHeight, 0.0, 100.0, 0.1 );
+  nodesizeSpinCtrl->SetValue( ss.nodeSize );
+  backpointerSpinCtrl->SetValue( ss.backpointerCurve );
+  clusterheightSpinCtrl->SetValue( ss.clusterHeight );
   branchspreadSpinCtrl->SetValue( ss.branchSpread );
   outerbranchtiltSpinCtrl->SetValue( ss.outerBranchTilt );
   qualitySpinCtrl->SetValue( ss.quality );

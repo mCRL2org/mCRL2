@@ -7,7 +7,7 @@ WX_LIBS		:= `$(WX_CONFIG) --libs core base gl`
 WX_CXXFLAGS	:= `$(WX_CONFIG) --cxxflags`
 
 ICON_OBJECTS	 = mainframe.o glcanvas.o
-WX_OBJECTS	 = ltsviewapp.o mainframe.o glcanvas.o wxthings/spinctld.o markstateruledialog.o
+WX_OBJECTS	 = ltsviewapp.o mainframe.o glcanvas.o spinctrlfloat.o markstateruledialog.o
 AT_OBJECTS	 = ltsviewapp.o action.o fsmparser.o lts.o state.o
 CPP_OBJECTS	 = fileloader.o visualizer.o lts.o state.o transition.o action.o \
 		   cluster.o fsmparser.o utils.o glutils.o
