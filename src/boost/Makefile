@@ -11,7 +11,9 @@
 #
 # Then create boost/include and move the boost/boost directory to /boost/include/boost.
 
--include ../../config
+TREE_ROOT = ../../../
+
+-include $(TREE_ROOT)config
 
 BJAM           = tools/build/jam_src/bin/bjam
 BJAM_BUILD     = ./build.sh

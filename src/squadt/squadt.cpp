@@ -24,8 +24,6 @@ Logger*          logger;
 
 /* Squadt class declaration */
 class Squadt : public wxApp {
-  DECLARE_CLASS(Squadt)
-  
   private:
 
   public:
@@ -37,8 +35,6 @@ class Squadt : public wxApp {
 };
 
 IMPLEMENT_APP(Squadt)
-
-IMPLEMENT_CLASS(Squadt, wxApp)
 
 /* Squadt class implementation */
 Squadt::Squadt() {

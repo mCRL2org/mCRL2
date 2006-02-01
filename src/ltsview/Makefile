@@ -1,4 +1,7 @@
--include ../../config
+# Relative path to the root of the source tree
+TREE_ROOT = ../../
+
+-include $(TREE_ROOT)config
 
 WX_LIBS		:= `$(WX_CONFIG) --libs core base gl`
 WX_CXXFLAGS	:= `$(WX_CONFIG) --cxxflags`
@@ -22,9 +25,7 @@ TARGETS		 = ltsview
 
 all : $(TARGETS)
 
-SOURCE_ROOT = ../../
-
-include $(SOURCE_ROOT)utility/revision.mk
+include $(TREE_ROOT)utility/revision.mk
 
 ltsview : $(OBJECTS)
 	$(CXX) $(GLUT_LDFLAGS) $(LDFLAGS) $(OBJECTS) $(WX_LIBS) -lATerm -o $@
@@ -46,7 +47,7 @@ fsmlexer.c : fsmlexer.l
 
 $(ICON_OBJECTS) : icons.h icons/*.xpm
 
-$(OBJECTS) $(TARGETS) : Makefile
+$(OBJECTS) $(TARGETS) : Makefile $(CONFIG)
 
 clean:
 	-rm -f *.o $(TARGETS) fsmparser.cpp fsmlexer.c fsmlexer.h core core.*

@@ -1,3 +1,6 @@
+# Relative path to the root of the source tree
+TREE_ROOT = ../../
+
 -include ../../config
 
 MAN_OBJECTS  = librewrite_c.7 librewrite.7 tbf2lpe.1 lpeinfo.1 \

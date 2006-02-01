@@ -1,6 +1,9 @@
 #All objects that are used
 OBJECTS            =
 
+# Relative path to the root of the source tree
+TREE_ROOT = ../
+
 #Redefine default definitions using autoconf
 -include ../config
 -include ../distribution
@@ -215,17 +218,17 @@ endif
 clean distclean: squadt boost_relay ltsview documentation
 
 # For building documentation
-documentation:
+documentation: $(CONFIG)
 	@$(MAKE) -C doc $(MAKECMDGOALS)
 
 boost_relay:
 	@$(MAKE) -C boost $(MAKECMDGOALS)
 
-ltsview:
+ltsview: $(CONFIG) 
 	@$(MAKE) -C ltsview $(MAKECMDGOALS)
 
 # For building squadt
-squadt: boost
+squadt: boost $(CONFIG)
 	@$(MAKE) -C squadt $(MAKECMDGOALS)
 
 # For building bjam and boost libraries
@@ -236,9 +239,7 @@ boost:
 endif
 
 # Rules for building the maximum_revision tool and to generate a `revision' file
-SOURCE_ROOT = ../
-
-include $(SOURCE_ROOT)utility/revision.mk
+include $(TREE_ROOT)utility/revision.mk
 
 install: all
 	$(INSTALL) -d $(bindir)
@@ -404,7 +405,7 @@ $(LIN_NAME) : $(LIN_OBJECTS) $(ATERM_DEP) $(LIBREWR_NAME)
 	$(LEX) $(LFLAGS) -o$@ $<
 
 # *.cpp is needed for generated code (e.g. by bison)
-*.cpp *.o aterm/*.o svc/*.o: Makefile
+*.cpp *.o aterm/*.o svc/*.o: Makefile $(CONFIG)
 
 %.d : %.c
 	@echo generating dependencies for $<

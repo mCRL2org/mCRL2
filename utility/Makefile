@@ -3,6 +3,8 @@ BOOST_LDFLAGS    = -L../src/boost/lib -Wl,-rpath=../src/boost/lib
 BOOST_CPPFLAGS   = -I../src/boost 
 BOOST_FILESYSTEM = -lboost_filesystem
 
+TREE_ROOT = ../
+
 -include ../config
 
 all: maximum_revision

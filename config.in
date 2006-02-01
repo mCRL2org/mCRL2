@@ -1,3 +1,9 @@
+ifndef TREE_ROOT
+ $(error Please define TREE_ROOT)
+endif
+
+CONFIG             = $(TREE_ROOT)/config
+
 #Redefine default definitions using autoconf
 HOST_OS            = @HOST_OS@
 CC                 = @CC@
