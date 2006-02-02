@@ -113,3 +113,4 @@ endif
 
 BOOST_LDFLAGS  += -L$(BOOST_PREFIX)/lib
 
+-include $(TREE_ROOT)/distribution

@@ -5,8 +5,7 @@ OBJECTS            =
 TREE_ROOT = ../
 
 #Redefine default definitions using autoconf
--include ../config
--include ../distribution
+-include $(TREE_ROOT)config
 
 # Objects that require wxWidgets CPPFLAGS to compile
 WX_OBJECTS         = xsim.o xsimbase.o xsimmain.o xsimtrace.o xsimtracedll.o
@@ -239,7 +238,11 @@ boost:
 endif
 
 # Rules for building the maximum_revision tool and to generate a `revision' file
+ifndef SOURCE_DISTRIBUTION
 include $(TREE_ROOT)utility/revision.mk
+else
+include revision
+endif
 
 install: all
 	$(INSTALL) -d $(bindir)

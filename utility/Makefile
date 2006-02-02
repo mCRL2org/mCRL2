@@ -1,5 +1,5 @@
 # This is the default, that does not work for MacOSX (../config overrides it)
-BOOST_LDFLAGS    = -L../src/boost/lib -Wl,-rpath=../src/boost/lib
+BOOST_LDFLAGS    = -L../src/boost/lib -Wl,-rpath=$(shell pwd)/../src/boost/lib
 BOOST_CPPFLAGS   = -I../src/boost 
 BOOST_FILESYSTEM = -lboost_filesystem
 

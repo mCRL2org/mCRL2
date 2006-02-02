@@ -33,7 +33,8 @@ svn_update="$(svn update 2>&1 | tail -n 1)"
 # The following works based on assumption that the source tree is configured
 if (! test -e ${archive}.bz2) || ! $(expr "${svn_update}" : "At revision" &> /dev/null ); then
   # Regenerate tarballs for source distribution
-  sh -c 'cd trunk/src; make revision' &> /dev/null
+  sh -c 'cd trunk/utility; make maximum_revision' &> /dev/null
+  sh -c 'cd trunk; make revision' &> /dev/null
 
   # alternative method of obtaining the last revision that does not require
   # trunk/utility/maximum_revision (but has a potential for not being accurate)
@@ -89,7 +90,9 @@ if (! test -e ${archive}.bz2) || ! $(expr "${svn_update}" : "At revision" &> /de
            "\n# distribution does not contain the svn meta data. The file is included from" \
            "\n# the make file ./config ." \
            "\n" \
-           "\nSOURCE_DISTRIBUTION = 1" > mcrl2/distribution
+           "\nSOURCE_DISTRIBUTION = 1" \
+           "\n" \
+           "\nREVISION := -DREVISION=${revision}" > mcrl2/distribution
 
   tar rf ${archive_name} ./mcrl2/distribution
 

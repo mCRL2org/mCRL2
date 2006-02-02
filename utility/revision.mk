@@ -5,8 +5,6 @@ ifndef TREE_ROOT
   $(error TREE_ROOT must be a relative path to the root of the source tree)
 endif
 
-.PHONY: revision
-
 # Add revision number (if not building a source distribution)
 ifndef SOURCE_DISTRIBUTION
 ifeq ($(findstring $(MAKECMDGOALS),clean distclean),)
@@ -18,10 +16,8 @@ revision: $(MAXIMUM_REVISION)
 $(MAXIMUM_REVISION):
 	$(MAKE) -C $(dir $(MAXIMUM_REVISION)) maximum_revision
 
-*.o: revision
+REVISION := -DREVISION=$(shell $(MAXIMUM_REVISION))
 
+CPPFLAGS += $(REVISION)
 endif
 endif
-
--include revision
-

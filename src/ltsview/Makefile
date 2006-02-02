@@ -25,7 +25,11 @@ TARGETS		 = ltsview
 
 all : $(TARGETS)
 
+ifndef SOURCE_DISTRIBUTION
 include $(TREE_ROOT)utility/revision.mk
+else
+include revision
+endif
 
 ltsview : $(OBJECTS)
 	$(CXX) $(GLUT_LDFLAGS) $(LDFLAGS) $(OBJECTS) $(WX_LIBS) -lATerm -o $@

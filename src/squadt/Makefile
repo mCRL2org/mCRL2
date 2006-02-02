@@ -2,7 +2,6 @@
 TREE_ROOT = ../../
 
 -include $(TREE_ROOT)config
--include $(TREE_ROOT)distribution
 
 CXXFLAGS                       = -std=c++98 -O3# -Winline --param max-inline-insns-single=8000 \
 				 --param large-function-growth=5000 --param inline-unit-growth=5000
@@ -47,8 +46,11 @@ TARGETS                        = squadt libmd5.a
 all: $(TARGETS)
 
 # Rules for building the maximum_revision tool and to generate a `revision' file
-
+ifndef SOURCE_DISTRIBUTION
 include $(TREE_ROOT)utility/revision.mk
+else
+include revision
+endif
 
 # Include dependencies 
 ifeq ($(findstring $(MAKECMDGOALS),clean distclean),)
