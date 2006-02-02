@@ -862,11 +862,11 @@ static ATermAppl PushBlock(ATermList H, ATermAppl a){
     if(gsIsCond(a) || gsIsSum(a)) { ia1=1; ia2=2; }
     if(gsIsSum(a) || gsIsAtTime(a) || gsIsBInit(a)) args=1; //second argument of BInit does not matter 
     
-    ATermAppl p,q;
+    ATermAppl p,q=NULL;
     p = PushBlock(H,ATAgetArgument(a,ia1));
     if(args==2) q = PushBlock(H,ATAgetArgument(a,ia2));
     
-    ATermList l,l1,l2;
+    ATermList l,l1,l2=0;
     l=l1=ATLtableGet(alphas,(ATerm) p);
     if(args==2) l2=ATLtableGet(alphas,(ATerm) q);
     
@@ -944,11 +944,11 @@ static ATermAppl PushHide(ATermList I, ATermAppl a){
     if(gsIsCond(a) || gsIsSum(a)) { ia1=1; ia2=2; }
     if(gsIsSum(a) || gsIsAtTime(a) || gsIsBInit(a)) args=1; //second argument of BInit does not matter 
     
-    ATermAppl p,q;
+    ATermAppl p,q=NULL;
     p = PushHide(I,ATAgetArgument(a,ia1));
     if(args==2) q = PushHide(I,ATAgetArgument(a,ia2));
     
-    ATermList l,l1,l2;
+    ATermList l,l1,l2=0;
     l=l1=ATLtableGet(alphas,(ATerm) p);
     if(args==2) l2=ATLtableGet(alphas,(ATerm) q);
     
@@ -1168,11 +1168,11 @@ static ATermAppl PushAllow(ATermList V, ATermAppl a){
     if(gsIsCond(a) || gsIsSum(a)) { ia1=1; ia2=2; }
     if(gsIsSum(a) || gsIsAtTime(a) || gsIsBInit(a)) args=1; //second argument of BInit does not matter 
     
-    ATermAppl p,q;
+    ATermAppl p,q=NULL;
     p = PushAllow(V,ATAgetArgument(a,ia1));
     if(args==2) q = PushAllow(V,ATAgetArgument(a,ia2));
     
-    ATermList l,l1,l2;
+    ATermList l,l1,l2=NULL;
     l=l1=ATLtableGet(alphas,(ATerm) p);
     if(args==2) l2=ATLtableGet(alphas,(ATerm) q);
     
@@ -1332,11 +1332,11 @@ static ATermAppl PushComm(ATermList C, ATermAppl a){
     if(gsIsCond(a) || gsIsSum(a)) { ia1=1; ia2=2; }
     if(gsIsSum(a) || gsIsAtTime(a) || gsIsBInit(a)) args=1; //second argument of BInit does not matter 
     
-    ATermAppl p,q;
+    ATermAppl p,q=NULL;
     p = PushComm(C,ATAgetArgument(a,ia1));
     if(args==2) q = PushComm(C,ATAgetArgument(a,ia2));
     
-    ATermList l,l1,l2;
+    ATermList l,l1,l2=0;
     l=l1=ATLtableGet(alphas,(ATerm) p);
     if(args==2) l2=ATLtableGet(alphas,(ATerm) q);
     
@@ -1489,7 +1489,7 @@ static ATermList gsaGetAlpha(ATermAppl a, unsigned length, ATermList ignore){
   return l;
 }
 
-static ATermList gsaGetSyncAlpha(ATermAppl a, unsigned length, ATermList ignore){
+static ATermList gsaGetSyncAlpha(ATermAppl a, unsigned length, ATermList /* ignore */){
   // calculate the alphabeth only of it is a single multiaction.
   ATermList l=NULL; //result
 
@@ -1601,7 +1601,7 @@ static ATermAppl gsApplyAlpha(ATermAppl a){
     if(gsIsCond(a) || gsIsSum(a)) { ia1=1; ia2=2; }
     if(gsIsSum(a) || gsIsAtTime(a) || gsIsBInit(a)) args=1; //second argument of BInit does not matter 
     
-    ATermAppl p,q;
+    ATermAppl p,q=NULL;
     p = gsApplyAlpha(ATAgetArgument(a,ia1));
     if(args==2) q = gsApplyAlpha(ATAgetArgument(a,ia2));
 
@@ -1686,7 +1686,7 @@ ATermAppl gsaGetProp(ATermAppl a, ATermAppl context){
        || gsIsBlock(a) || gsIsHide(a) || gsIsRename(a) || gsIsAllow(a) || gsIsComm(a)
        ) args=1; 
     
-    ATermAppl p,q;
+    ATermAppl p,q=NULL;
     p = gsaGetProp(ATAgetArgument(a,ia1),context);
     if(args==2) q = gsaGetProp(ATAgetArgument(a,ia2),context);
 
@@ -1765,7 +1765,7 @@ ATermAppl gsaSubstNP(ATermTable subs_npCRL, ATermTable consts, ATermAppl a){
        || gsIsBlock(a) || gsIsHide(a) || gsIsRename(a) || gsIsAllow(a) || gsIsComm(a)
        ) args=1; 
     
-    ATermAppl p,q;
+    ATermAppl p,q=NULL;
     p = gsaSubstNP(subs_npCRL,consts,ATAgetArgument(a,ia1));
     if(args==2) q = gsaSubstNP(subs_npCRL,consts,ATAgetArgument(a,ia2));
 

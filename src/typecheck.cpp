@@ -2396,7 +2396,7 @@ static ATermAppl gstcExpandNumTypesDown(ATermAppl Type){
   if(gsIsSortId(Type)) Type=gstcUnwindType(Type);
   
   ATbool function=ATfalse;
-  ATermList Args;
+  ATermList Args=NULL;
   if(gsIsSortArrowProd(Type)){
     function=ATtrue;
     Args=ATLgetArgument(Type,0);
