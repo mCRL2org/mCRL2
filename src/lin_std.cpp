@@ -6349,8 +6349,8 @@ static ATermList addActionCondition(
   { ATermAppl firsttuple=ATAgetFirst(L);
     S=ATinsertA(S,
         linMakeTuple(
-          ((firstaction!=NULL)?
-               ATinsertA(ATLgetArgument(firsttuple,0), firstaction):
+          ((firstaction!=NULL)?  
+               linInsertActionInMultiActionList(firstaction,ATLgetArgument(firsttuple,0)):
                ATLgetArgument(firsttuple,0)),
           gsMakeDataExprAnd(ATAgetArgument(firsttuple,1),condition)));
   }
