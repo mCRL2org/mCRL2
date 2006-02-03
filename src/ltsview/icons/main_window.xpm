@@ -1,5 +1,5 @@
 /* XPM */
-static char * main_window_xpm[] = {
+static char * main_window[] = {
 "32 32 11 1",
 " 	c None",
 ".	c #000000",

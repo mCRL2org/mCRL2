@@ -8,6 +8,7 @@ using namespace std;
 class Mediator
 {
   public:
+    virtual ~Mediator() {}
     virtual void applyDefaultSettings() = 0;
     virtual void applySettings() = 0;
     virtual void drawLTS() = 0;

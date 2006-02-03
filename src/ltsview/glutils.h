@@ -19,7 +19,5 @@ namespace GLUtils
   void coloredCylinder( float baserad, float toprad, float height, 
       int slices, int stacks, RGB_Color basecol, RGB_Color topcol, int transp,
       bool baseclosed, bool topclosed );
-  void coloredSphere( float rad, int slices, int stacks, RGB_Color color, int
-      transp );
 }
 #endif

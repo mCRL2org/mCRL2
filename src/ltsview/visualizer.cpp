@@ -80,7 +80,7 @@ void Visualizer::positionClusters()
   {
     // iterate over the clusters in this rank
     vector< Cluster* > clusters;
-    lts->getClustersAtRank( rank, clusters );
+    lts->getClustersAtRank( (unsigned int) rank, clusters );
     vector< Cluster* >::iterator clusit;
     
     for ( clusit = clusters.begin() ; clusit != clusters.end() ; ++clusit )

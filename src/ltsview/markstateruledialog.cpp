@@ -10,6 +10,7 @@ MarkStateRuleDialog::MarkStateRuleDialog( wxWindow* parent, Mediator* owner,
 
 /*   : wxDialog( parent, wxID_ANY, wxT("Add mark state rule") )  oud  */
 {
+  mediator = owner;
   stateVectorSpec = svspec;
 
   wxBoxSizer* mainSizer = new wxBoxSizer( wxVERTICAL );

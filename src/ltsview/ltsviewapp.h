@@ -20,7 +20,7 @@
 using namespace std;
 using namespace Utils;
 
-class LTSViewApp : public wxApp, Mediator
+class LTSViewApp : public wxApp, public Mediator
 {
   private:
     int		      currentJobNr;

@@ -12,7 +12,6 @@
 #include <wx/spinctrl.h>
 #include <wx/bitmap.h>
 #include "spinctrlfloat.h"
-#include "icons.h"
 #include "mediator.h"
 #include "glcanvas.h"
 #include "ids.h"

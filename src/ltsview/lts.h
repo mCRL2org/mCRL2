@@ -22,7 +22,7 @@ class LTS
     void	applyIterativeRanking();
     void	applyCyclicRanking();
     void	clusterComrades();
-    void	getClustersAtRank( int r, vector< Cluster* > &cs ) const;
+    void	getClustersAtRank( unsigned int r, vector< Cluster* > &cs ) const;
     State*	getInitialState() const;
     int		getNumberOfClusters() const;
     int		getNumberOfRanks() const;

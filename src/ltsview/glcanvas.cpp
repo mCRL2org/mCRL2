@@ -1,4 +1,12 @@
 #include "glcanvas.h"
+#include "icons/select_cursor.xpm"
+#include "icons/select_cursor_mask.xpm"
+#include "icons/zoom_cursor.xpm"
+#include "icons/zoom_cursor_mask.xpm"
+#include "icons/pan_cursor.xpm"
+#include "icons/pan_cursor_mask.xpm"
+#include "icons/rotate_cursor.xpm"
+#include "icons/rotate_cursor_mask.xpm"
 
 BEGIN_EVENT_TABLE( GLCanvas, wxGLCanvas )
     EVT_MOTION( GLCanvas::onMouseMove )
@@ -142,18 +150,18 @@ void GLCanvas::reshape()
   glMatrixMode( GL_MODELVIEW );
 }
 
-void GLCanvas::onPaint( wxPaintEvent& event )
+void GLCanvas::onPaint( wxPaintEvent& /*event*/ )
 {
   wxPaintDC dc( this );
   display();
 }
 
-void GLCanvas::onSize( wxSizeEvent& event )
+void GLCanvas::onSize( wxSizeEvent& /*event*/ )
 {
   reshape();
 }
 
-void GLCanvas::OnEraseBackground( wxEraseEvent& event )
+void GLCanvas::OnEraseBackground( wxEraseEvent& /*event*/ )
 {
 }
 

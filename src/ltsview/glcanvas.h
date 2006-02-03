@@ -14,7 +14,6 @@
 #include <cmath>
 #include "mediator.h"
 #include "utils.h"
-#include "icons.h"
 #include "ids.h"
 
 using namespace IDs;

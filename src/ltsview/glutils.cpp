@@ -103,30 +103,3 @@ void GLUtils::coloredCylinder( float baserad, float toprad, float height,
     glEnd();
   }
 }
-
-void GLUtils::coloredSphere( float rad, int slices, int stacks, RGB_Color color,
-    int transp )
-{
-  /*
-  vector< float > sin_tab;
-  vector< float > cos_tab;
-  for ( int i = 0 ; i <= slices ; ++i )
-  {
-    float angle = 2.0f * i * PI / slices;
-    sin_tab.push_back( sin( angle ) );
-    cos_tab.push_back( cos( angle ) );
-  }
-
-  vector< float > rad_tab;
-  float factor = PI / ( 2 * rad );
-  for ( int i = 0 ; i <= stacks ; ++i )
-  {
-    rad_tab.push_back( rad * sin( i * factor ) );
-  }
-  
-  
-  for ( int i = 0 ; i < stacks ; ++i )
-  {
-    
-  }*/
-}

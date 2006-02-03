@@ -50,7 +50,7 @@ fsmparser.cpp : fsmparser.y fsmlexer.c
 fsmlexer.c : fsmlexer.l
 	$(LEX) -o$@ -Pfsm $<
 
-$(ICON_OBJECTS) : icons.h icons/*.xpm
+$(ICON_OBJECTS) : icons/*.xpm
 
 $(OBJECTS) $(TARGETS) : Makefile $(CONFIG)
 

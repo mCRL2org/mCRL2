@@ -11,22 +11,14 @@ LTS::~LTS()
   ATunprotectList( &transitionLabels );
   ATunprotectList( &stateVectorSpec );
   
-  /*
-  for ( int i = 0 ; i < dataTypes.size() ; ++i )
-  {
-    delete dataTypes[i];
-  }
-  dataTypes.clear();
-  */
-
-  for ( int i = 0 ; i < states.size() ; ++i )
+  for ( unsigned int i = 0 ; i < states.size() ; ++i )
   {
     delete states[i];
   }
   states.clear();
   initialState = NULL;
   
-  for ( int i = 0 ; i < transitions.size() ; ++i )
+  for ( unsigned int i = 0 ; i < transitions.size() ; ++i )
   {
     delete transitions[i];
   }
@@ -72,9 +64,9 @@ void LTS::addTransitionLabels( ATermList labels )
   ATprotectList( &transitionLabels );
 }
 
-void LTS::getClustersAtRank( int r, vector< Cluster* > &cs ) const
+void LTS::getClustersAtRank( unsigned int r, vector< Cluster* > &cs ) const
 {
-  if ( 0 <= r && r < clustersInRank.size() )
+  if ( r < clustersInRank.size() )
     cs = clustersInRank[ r ];
 }
 
@@ -91,7 +83,7 @@ int LTS::getNumberOfRanks() const
 int LTS::getNumberOfClusters() const
 {
   int result = 0;
-  for ( int i = 0 ; i < clustersInRank.size() ; ++i )
+  for ( unsigned int i = 0 ; i < clustersInRank.size() ; ++i )
     result += clustersInRank[i].size();
   return result;
 }
@@ -260,8 +252,8 @@ void LTS::clearRanksAndClusters()
     state->clearHierarchyInfo();
   }
 
-  for ( int r = 0 ; r < clustersInRank.size() ; ++r )
-    for ( int c = 0 ; c < clustersInRank[r].size() ; ++c )
+  for ( unsigned int r = 0 ; r < clustersInRank.size() ; ++r )
+    for ( unsigned int c = 0 ; c < clustersInRank[r].size() ; ++c )
       delete clustersInRank[r][c];
   
   vector< vector< State* > > temp1;
@@ -387,7 +379,7 @@ void LTS::printStructure()
 {
   // give every state an id
   map< State*, int > stateId;
-  for ( int i = 0 ; i < states.size() ; ++i )
+  for ( unsigned int i = 0 ; i < states.size() ; ++i )
   {
     stateId[ states[i] ] = i;
   }
@@ -395,7 +387,7 @@ void LTS::printStructure()
   // give every cluster an id
   map< Cluster*, int > clusterId;
   int n = 0;
-  for ( int i = 0 ; i < clustersInRank.size() ; ++i )
+  for ( unsigned int i = 0 ; i < clustersInRank.size() ; ++i )
   {
     vector< Cluster* >::iterator j;
     for ( j = clustersInRank[i].begin() ; j != clustersInRank[i].end() ; ++j )
@@ -404,7 +396,7 @@ void LTS::printStructure()
     }
   }
 
-  for ( int s = 0 ; s < states.size() ; ++s )
+  for ( unsigned int s = 0 ; s < states.size() ; ++s )
   {
     State* state = states[s];
     cout << stateId[state] << "\t";
@@ -438,7 +430,7 @@ void LTS::printStructure()
     cout << state->getRank() << endl;
   }
 
-  for ( int r = 0 ; r < clustersInRank.size() ; ++r )
+  for ( unsigned int r = 0 ; r < clustersInRank.size() ; ++r )
   {
     vector< Cluster* >::iterator clusit;
     for ( clusit = clustersInRank[r].begin() ; clusit != clustersInRank[r].end() ; ++clusit )
@@ -472,7 +464,7 @@ void LTS::printStructure()
 
 void LTS::printClusterSizesPositions()
 {
-  for ( int i = 0 ; i < clustersInRank.size() ; ++i )
+  for ( unsigned int i = 0 ; i < clustersInRank.size() ; ++i )
   {
     cout << "Clusters in rank " << i << ": ";
     vector< Cluster* >::iterator j;

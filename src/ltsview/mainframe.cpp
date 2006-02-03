@@ -1,4 +1,16 @@
 #include "mainframe.h"
+// include the icons
+#include "icons/main_window.xpm"
+#include "icons/file_open.xpm"
+#include "icons/file_open_mask.xpm"
+#include "icons/select_tool.xpm"
+#include "icons/select_cursor_mask.xpm"
+#include "icons/zoom_tool.xpm"
+#include "icons/zoom_cursor_mask.xpm"
+#include "icons/pan_tool.xpm"
+#include "icons/pan_cursor_mask.xpm"
+#include "icons/rotate_tool.xpm"
+#include "icons/rotate_cursor_mask.xpm"
 
 // Event table
 BEGIN_EVENT_TABLE( MainFrame, wxFrame )
@@ -25,7 +37,7 @@ MainFrame::MainFrame( Mediator* owner )
   filename = wxEmptyString;
   progDialog = NULL;
 
-  SetIcon( wxIcon( main_window_xpm ) );
+  SetIcon( wxIcon( main_window ) );
   CentreOnScreen();
 
   setupMenuBar();
@@ -397,7 +409,7 @@ GLCanvas* MainFrame::getGLCanvas() const
   return glCanvas;
 }
 
-void MainFrame::onOpen( wxCommandEvent& event )
+void MainFrame::onOpen( wxCommandEvent& /*event*/ )
 {
   wxString filemask = wxT("FSM files (*.fsm)|*.fsm");
   wxFileDialog dialog( this, wxT("Open LTS"), directory, filename, filemask, wxOPEN );
@@ -419,7 +431,7 @@ void MainFrame::onChoice( wxCommandEvent& event )
   mediator->setRankStyle( string(event.GetString().fn_str()) );
 }
 
-void MainFrame::onResetView( wxCommandEvent& event )
+void MainFrame::onResetView( wxCommandEvent& /*event*/ )
 {
   glCanvas->resetView();
 }
@@ -439,22 +451,22 @@ void MainFrame::onColorButton( wxCommandEvent& event )
   }
 }
 
-void MainFrame::onSettingChanged( wxSpinEvent& event )
+void MainFrame::onSettingChanged( wxSpinEvent& /*event*/ )
 {
   mediator->applySettings();
 }
 
-void MainFrame::onResetButton( wxCommandEvent& event )
+void MainFrame::onResetButton( wxCommandEvent& /*event*/ )
 {
   mediator->applyDefaultSettings();
 }
 
-void MainFrame::onAddMarkStateRuleButton( wxCommandEvent& event )
+void MainFrame::onAddMarkStateRuleButton( wxCommandEvent& /*event*/ )
 {
   mediator->showMarkStateRuleDialog();
 }
 
-void MainFrame::onRemoveMarkStateRuleButton( wxCommandEvent& event )
+void MainFrame::onRemoveMarkStateRuleButton( wxCommandEvent& /*event*/ )
 {
   wxArrayInt selections;
   wxListBox* markstatesListBox = (wxListBox*) this->FindWindowById( myID_MARK_RULES );

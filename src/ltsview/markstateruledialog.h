@@ -16,6 +16,7 @@ class MarkStateRuleDialog : public wxDialog
     ~MarkStateRuleDialog();
     void onParameterChoice( wxCommandEvent& event );
   private:
+    Mediator*			mediator;
     wxChoice*			parameterChoice;
     map< wxString, ATermAppl >	parameterTypes;
     wxChoice*			relationChoice;
