@@ -3,7 +3,7 @@
 wxSpinCtrlFloat::wxSpinCtrlFloat(wxWindow* parent, wxWindowID id, float p_Min, float
     p_Max, float p_Rate, float p_Init, const wxPoint& pos, const wxSize&
     size)
-  : wxPanel(parent, -1, pos, size, wxNO_BORDER  ), 
+  : wxPanel(parent, -1, pos, size, wxNO_BORDER ), 
   m_Rate(p_Rate) , m_ID(id)
 {
   wxBoxSizer* Sizer = new wxBoxSizer( wxHORIZONTAL );
@@ -28,24 +28,21 @@ END_EVENT_TABLE()
 
 void wxSpinCtrlFloat::OnEnter( wxCommandEvent& event )
 {
-  // Todo: does not obey maximum.
   string str( event.GetString().fn_str() );
+  
   float f;
-  //if( sscanf( str.c_str(), "%f", &f ) )
   sscanf( str.c_str(), "%f", &f );
-  //{
-    //cout << str << endl;
-    f = minimum( m_SpinButton->GetMax() * m_Rate, maximum( f, m_SpinButton->GetMin() * m_Rate ) );
-    SetValue( f );
 
-    // Create new event with the user specified event id m_ID
-    wxCommandEvent NewEvent( wxEVT_COMMAND_SPINCTRL_UPDATED, m_ID );
-    NewEvent.SetEventObject( this );
-    GetParent()->ProcessEvent( NewEvent );
-  //}
+  f = minimum( m_SpinButton->GetMax() * m_Rate, maximum( f, m_SpinButton->GetMin() * m_Rate ) );
+  SetValue( f );
+
+  // Create new event with the user specified event id m_ID
+  wxCommandEvent NewEvent( wxEVT_COMMAND_SPINCTRL_UPDATED, m_ID );
+  NewEvent.SetEventObject( this );
+  GetParent()->ProcessEvent( NewEvent );
 }
 
-void wxSpinCtrlFloat::OnSpin(wxSpinEvent & event)
+void wxSpinCtrlFloat::OnSpin( wxSpinEvent& event )
 {
   int i = event.GetInt();
   m_TextCtrl->SetValue( wxString::Format( wxT("%2.1f"), i * m_Rate ) );

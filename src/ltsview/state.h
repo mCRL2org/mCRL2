@@ -3,7 +3,8 @@
 
 #include <vector>
 #include <set>
-#include "aterm/aterm1.h"
+#include "aterm/aterm2.h"
+#include "liblowlevel.h"
 
 #ifndef TRANSITION_H
   #include "transition.h"
@@ -17,10 +18,12 @@
   class Cluster;
 #endif
 
+using namespace std;
+
 class State
 {
   public:
-    State( ATermAppl sv );
+    State( ATermList sv );
     ~State();
     void      addComrade( State* s );
     void      addInTransition( Transition* trans );
@@ -56,7 +59,7 @@ class State
     vector< Transition* > outTransitions;
     int			  rank;
     bool		  selected;
-    ATermAppl		  stateVector;
+    ATermList		  stateVector;
     set< State* >	  subordinates;
     set< State* >	  superiors;
 };

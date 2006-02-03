@@ -7,21 +7,24 @@
 
 LTS* fsmparserlts = NULL;
 
-map< string, set< string > > dataTypes;
-vector< string > paramNames;
-vector< string > paramTypes;
-vector< ATermAppl > paramsAT;
+//ATermList parnameList;
+//ATermList partypeList;
 
-vector< ATermAppl > stateVector;
-vector< string > values;
-vector< vector< string > > valueTable;
-
-string fullAction;
-map< string, Action* > actions;
-int paramNo, nodeId;
-map< int, State* > states;
+ATermList stateVector;
+ATermList valueTable;
 ATermList stateId;
+ATermList typeValues;
+ATermAppl typeId;
+//int nofValues;
+//vector< int > offset;
 
+ATermIndexedSet actions;
+vector< State* > states;
+
+AFun const_ATtypeid;
+AFun const_ATparmid;
+AFun const_ATstate;
+AFun const_ATparam;
 // Function declarations
 
 void fsmerror(const char* c);
@@ -46,45 +49,79 @@ char* intToCString(int i);
 
 fsm_file : 
 	params
-	  {
-	    map< string, ATermAppl > dataTypesAT;
-	    AFun typeId = ATmakeAFun( "TypeId", 2, ATfalse );
-	    for ( map< string, set< string > >::iterator it = dataTypes.begin() ;
-		  it != dataTypes.end() ; ++it )
+	  { /*
+	    valueTable = ATreverse( valueTable );
+	    parnameList = ATreverse( parnameList );
+	    partypeList = ATreverse( partypeList );
+	    
+	    int nofParams = ATgetLength( partypeList );
+	    ATermTable datatypes = ATtableCreate( 2*nofParams, 50 );
+	    
+	    ATermList rem_partypeList = partypeList;
+	    ATerm type;
+	    ATermList values;
+	    int i = 0;
+	    
+	    while( !ATisEmpty( rem_partypeList ) )
 	    {
-	      ATermList valuesAT = ATempty;
-	      for ( set< string >::reverse_iterator it1 = it->second.rbegin() ;
-		it1 != it->second.rend() ; ++it1 )
+	      type = ATgetFirst( rem_partypeList );
+	      values = ATgetSlice( valueTable, offset[i], offset[i+1] );
+	      ATermList tableValues = (ATermList)ATtableGet( datatypes, type );
+	      
+	      if ( tableValues == NULL )
 	      {
-		valuesAT = ATinsert(valuesAT, ATmake( "<appl>", it1->c_str() ));
+		ATtablePut( datatypes, type, (ATerm)values );
 	      }
-	      dataTypesAT[ it->first ] = ATmakeAppl2( typeId, ATmake( "<appl>",
-	        it->first.c_str() ), (ATerm)valuesAT );
+	      else
+	      {
+		ATerm value;
+		while ( !ATisEmpty( values ) )
+		{
+		  value = ATgetFirst( values );
+		  if ( ATindexOf( tableValues, value, 0 ) == -1 )
+		  {
+		    tableValues = ATinsert( tableValues, value );
+		  }
+		  values = ATgetNext( values );
+		}
+		ATtablePut( datatypes, type, (ATerm)tableValues );
+	      }
+	      rem_partypeList = ATgetNext( rem_partypeList );
+	      ++i;
 	    }
-	    dataTypes.clear();
 
-	    AFun paramId = ATmakeAFun( "ParamId", 2, ATfalse );
-	    for ( int i = 0 ; i < paramNames.size() ; ++i )
+	    ATermList stateId = ATempty;
+	    AFun const_typeId = ATmakeAFun( "TypeId", 2, ATfalse );
+	    AFun const_parmId = ATmakeAFun( "ParamId", 2, ATfalse );
+	    
+	    cout << ATgetLength( parnameList ) << endl
+	      << ATgetLength( partypeList ) << endl;
+	    ATfprintf( stderr, "Keys: %t\n", ATtableKeys( datatypes ) );
+	    ATfprintf( stderr, "Values: %t\n", ATtableValues( datatypes ) );
+	    int j = 0;
+	    while ( !ATisEmpty( parnameList ) )
 	    {
-	      paramsAT.push_back( ATmakeAppl2( paramId, ATmake( "<appl>",
-		paramNames[i].c_str() ), (ATerm)dataTypesAT[ paramTypes[i] ] ) );
+	      cout << j << endl;
+	      ATerm valuelist = ATtableGet( datatypes, ATgetFirst( partypeList ) );
+	      assert( valuelist != NULL );
+	      stateId = ATinsert( stateId, (ATerm)ATmakeAppl2( const_parmId,
+		ATgetFirst( parnameList ), (ATerm)ATmakeAppl2( const_typeId,
+		ATgetFirst( partypeList ), valuelist ) ) );
+	      parnameList = ATgetNext( parnameList );
+	      partypeList = ATgetNext( partypeList );
+	      j++;
 	    }
-	    paramNames.clear();
-	    paramTypes.clear();
-	    dataTypesAT.clear();
-
-	    stateId = ATempty;
-	    for ( int i = paramsAT.size()-1 ; i >= 0 ; --i )
-	    {
-	      stateId = ATinsert( stateId, (ATerm)paramsAT[i] );
-	    }
+	    cout << "ok";
 	    fsmparserlts->setStateVectorSpec( stateId );
+	    */
+	    valueTable = ATreverse( valueTable );
+	    stateId = ATreverse( stateId );
+	    fsmparserlts->setStateVectorSpec( stateId )
 	  }
 	SECSEP EOLN
-	  { nodeId = 1; }
 	states
-	  { paramsAT.clear() }
 	SECSEP EOLN transitions
+	  { fsmparserlts->addTransitionLabels( ATindexedSetElements( actions ) ) }
 	;
 
 // --------- Section containing the state vector ----------
@@ -96,18 +133,19 @@ params :
 	;
 
 param :
-	param_name cardinality type_def
-	;
-
-param_name :
 	ID
-	  { paramNames.push_back( static_cast<string>($1) ) }
+	  // { parnameList = ATinsert( parnameList, ATmake( "<appl>", $1 ) ) }
+	cardinality type_def
+	  {
+	    stateId = ATinsert( stateId, (ATerm)ATmakeAppl2( const_ATparmid,
+	      ATmake( "<appl>", $1 ), (ATerm)typeId ) )
+	  }
 	|
-	FANIN
+	FANIN cardinality
 	|
-	FANOUT
+	FANOUT cardinality
 	|
-	NODENR
+	NODENR cardinality
 	;
 
 cardinality :
@@ -116,20 +154,22 @@ cardinality :
 	LBRACK NUMBER RBRACK
 	;
 	
-  // Note: it is important that the type name is added to the paramTypes vector
-  // BEFORE the type values are parsed! See the type_value entry below.
 type_def : 
 	type_name
-	  { paramTypes.push_back( static_cast<string>($1) ) }
+	  { /* 
+	    partypeList = ATinsert( partypeList, ATmake( "<appl>", $1 ) );
+	    nofValues = 0;
+	    */
+	    typeValues = ATempty
+	  }
 	type_values
 	  { 
-	    if ( values.size() == 0 )
-	    {
-	      dataTypes[ paramTypes.back() ].insert( "" );
-	      values.push_back( "" );
-	    }
-	    valueTable.push_back( values );
-	    values.clear();
+	    /*offset.push_back( nofValues + offset.back() );
+	    nofValues = 0;*/
+	    typeValues = ATreverse( typeValues );
+	    typeId = ATmakeAppl2( const_ATtypeid, ATmake( "<appl>", $1 ),
+	      (ATerm) typeValues );
+	    valueTable = ATinsert( valueTable, (ATerm)typeValues )
 	  }
 	;
 
@@ -152,8 +192,9 @@ type_value :
 	  {
 	    string value = static_cast<string>($1);
 	    value = value.substr( 1, value.length() - 2 );
-	    dataTypes[ paramTypes.back() ].insert( value );
-	    values.push_back( value )
+	    ATerm valueAT = ATmake( "<appl>", value.c_str() );
+	    typeValues = ATinsert( typeValues, valueAT )
+	    //++nofValues;
 	  }
 	;
 /*
@@ -182,23 +223,15 @@ states :
 	/* empty */
 	|
 	states
-	  { paramNo = 0 }
 	state
 	  {
-	    ATermList stateVectorAT = ATempty;
-	    for ( int i = stateVector.size()-1 ; i >= 0 ; --i )
-	    {
-	      stateVectorAT = ATinsert( stateVectorAT, (ATerm)stateVector[i] );
-	    }
-	       
-	    AFun state = ATmakeAFun( "State", 2, ATfalse );
-	    State* s = new State( ATmakeAppl2( state, (ATerm)stateId, (ATerm)stateVectorAT ) );
+	    stateVector = ATreverse( stateVector ); 
+	    State* s = new State( stateVector );
 	    fsmparserlts->addState( s );
-	    states[nodeId] = s;
-	    if ( nodeId == 1 ) 
+	    states.push_back( s );
+	    if ( states.size() == 1 ) 
 	      fsmparserlts->setInitialState( s );
-	    ++nodeId;
-	    stateVector.clear()
+	    stateVector = ATempty
 	  }
 	EOLN
 	;
@@ -208,23 +241,12 @@ state :
 	|
 	state NUMBER
 	  { 
-	    if ( paramNo < paramsAT.size() )
+	    int paramNo = ATgetLength( stateVector );
+	    if ( paramNo < ATgetLength( valueTable ) )
 	    {
-	      // use range checked access of the valueTable vector of vectors
-	      // catch any out-of-range errors
-	      string value = "";
-	      try
-	      {
-		value = valueTable.at(paramNo).at($2); 
-	      }
-	      catch ( out_of_range )
-	      {
-	      }
-	      AFun param = ATmakeAFun( "Param", 2, ATfalse );
-	      stateVector.push_back( ATmakeAppl2( param, (ATerm)paramsAT[ paramNo ],
-		ATmake( "<appl>", value.c_str() ) ) );
+	      stateVector = ATinsert( stateVector, ATelementAt(
+		(ATermList)ATelementAt( valueTable, paramNo ), $2 ) );
 	    }
-	    ++paramNo
 	  }
 	;
 
@@ -234,21 +256,18 @@ transitions:
 	/* empty */
 	|
 	transitions transition
-//	  { values.clear() }
 	EOLN
 	;
 
 transition:
 	NUMBER NUMBER action
 	  {
-	    if ( actions.find(fullAction) == actions.end() )
-	    {
-	      actions[fullAction] = new Action( static_cast<string>($3), values );
-	      fsmparserlts->addAction( actions[fullAction] );
-	    }
-	    State* frState = states[$1];
-	    State* toState = states[$2];
-	    Transition* t = new Transition( frState, toState, actions[fullAction] );
+	    State* frState = states[$1-1];
+	    State* toState = states[$2-1];
+	    ATerm action = ATmake( "<appl>", $3 );
+	    Transition* t = new Transition( frState, toState, action );
+	    ATbool b;
+	    ATindexedSetPut( actions, action, &b );
 	    fsmparserlts->addTransition( t );
 	    if ( $1 != $2 )
 	    {
@@ -259,8 +278,6 @@ transition:
 	    {
 	      frState->addLoop( t );
 	    }
-
-	    fullAction = ""
 	  }
 	;
 
@@ -271,7 +288,7 @@ action :
 	QUOTED
 	  {
 	    string value = static_cast<string>($1);
-	    $$ = strdup( value.substr( 1, value.length() - 2 ).c_str() );
+	    $$ = strdup( value.substr( 1, value.length() - 2 ).c_str() )
 	  }
 	;
 /*	
@@ -334,16 +351,56 @@ void parseFSMfile( string fileName, LTS* const lts )
     throw "Cannot open file " + fileName + " for reading";
   else
   {
+    // INITIALISE
     fsmparserlts = lts;
     fsmrestart( infile );
     
+    ATprotectAFun( const_ATtypeid );
+    ATprotectAFun( const_ATparmid );
+    ATprotectAFun( const_ATstate );
+    ATprotectAFun( const_ATparam );
+    ATprotectList( &stateVector );
+    ATprotectList( &valueTable );
+    ATprotectList( &stateId );
+    ATprotectList( &typeValues );
+    ATprotectAppl( &typeId );
+    //ATprotectList( &parnameList );
+    //ATprotectList( &partypeList );
+    
+    const_ATtypeid = ATmakeAFun( "TypeId", 2, ATfalse );
+    const_ATparmid = ATmakeAFun( "ParamId", 2, ATfalse );
+    const_ATstate = ATmakeAFun( "State", 2, ATfalse );
+    const_ATparam = ATmakeAFun( "Param", 2, ATfalse );
+    stateVector = ATempty;
+    stateId = ATempty;
+    valueTable = ATempty;
+    //parnameList = ATempty;
+    //partypeList = ATempty;
+    actions = ATindexedSetCreate( 100, 50 );
+
+    //offset.clear();
+    //offset.push_back( 0 );
+    
+    // PARSE
     fsmparse();
     
-    valueTable.clear();
+    // CLEAN UP
+    ATunprotectAFun( const_ATtypeid );
+    ATunprotectAFun( const_ATparmid );
+    ATunprotectAFun( const_ATstate );
+    ATunprotectAFun( const_ATparam );
+    ATunprotectList( &stateVector );
+    ATunprotectList( &valueTable );
+    //ATunprotectList( &parnameList );
+    //ATunprotectList( &partypeList );
+    ATunprotectList( &stateId );
+    ATunprotectList( &typeValues );
+    ATunprotectAppl( &typeId );
+    
+    ATindexedSetDestroy( actions );
+    //offset.clear();
     states.clear();
-    actions.clear();
     fsmparserlts = NULL;
-    stateId = ATempty;
   }
 } 
 

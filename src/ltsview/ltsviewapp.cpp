@@ -28,7 +28,8 @@ void LTSViewApp::openFile( string fileName )
 {
   glCanvas->disableDisplay();
 
-  mainFrame->createProgressDialog( "Opening file", "Loading file" );
+  mainFrame->createProgressDialog( "Opening file", "Parsing file" );
+  mainFrame->updateProgressDialog( 0, "Parsing file" );
   try
   {
     LTS* newlts = new LTS( this );
@@ -135,6 +136,7 @@ void LTSViewApp::setRankStyle( string rss )
       glCanvas->disableDisplay();
 
       mainFrame->createProgressDialog( "Structuring LTS", "Applying ranking" );
+      mainFrame->updateProgressDialog( 0, "Applying ranking" );
 
       applyRanking( rs );
       

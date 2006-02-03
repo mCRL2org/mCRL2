@@ -5,11 +5,12 @@ TREE_ROOT = ../../
 
 WX_LIBS		:= `$(WX_CONFIG) --libs core base gl`
 WX_CXXFLAGS	:= `$(WX_CONFIG) --cxxflags`
+ATERM_CPPFLAGS	+= -I$(TREE_ROOT)src/aterm
 
 ICON_OBJECTS	 = mainframe.o glcanvas.o
 WX_OBJECTS	 = ltsviewapp.o mainframe.o glcanvas.o spinctrlfloat.o markstateruledialog.o
 AT_OBJECTS	 = ltsviewapp.o action.o fsmparser.o lts.o state.o
-CPP_OBJECTS	 = fileloader.o visualizer.o lts.o state.o transition.o action.o \
+CPP_OBJECTS	 = fileloader.o visualizer.o lts.o state.o transition.o \
 		   cluster.o fsmparser.o utils.o glutils.o
 ifeq ($(HOST_OS),MACOSX)
 GLUT_LDFLAGS     = -framework GLUT -framework OpenGL -lobjc
@@ -17,7 +18,7 @@ else
 GLUT_LDFLAGS     = -lglut
 endif
 
-OBJECTS		 = $(WX_OBJECTS) $(CPP_OBJECTS)
+OBJECTS		 = $(WX_OBJECTS) $(CPP_OBJECTS) ../liblowlevel.o
 TARGETS		 = ltsview
 
 .PHONY: all clean

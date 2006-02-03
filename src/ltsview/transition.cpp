@@ -2,16 +2,18 @@
 
 // Constructor and Destructor
 
-Transition::Transition(State* bs, State* es, Action* a)
+Transition::Transition(State* bs, State* es, ATerm lbl )
 {
   beginState = bs;
   endState = es;
-  action = a;
+  label = lbl;
+  ATprotect( &label );
   backpointer = false;
 }
 
 Transition::~Transition()
 {
+  ATunprotect( &label );
 }
 
 State* Transition::getBeginState() const
@@ -22,11 +24,6 @@ State* Transition::getBeginState() const
 State* Transition::getEndState() const
 {
   return endState;
-}
-
-Action* Transition::getAction() const
-{
-  return action;
 }
 
 bool Transition::isBackpointer() const

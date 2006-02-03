@@ -24,7 +24,7 @@ class MainFrame : public wxFrame
 {
   public:
     MainFrame( Mediator* owner );
-    void	createProgressDialog( string title, string text );
+    void	createProgressDialog( const string title, const string text );
     GLCanvas*	getGLCanvas() const;
     VisSettings	getVisSettings() const;
     void	loadTitle();

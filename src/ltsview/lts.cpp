@@ -8,8 +8,8 @@ LTS::LTS( Mediator* owner)
 
 LTS::~LTS()
 {
-  ATunprotect( (ATerm*) &stateVectorSpec );
-  stateVectorSpec = ATempty;
+  ATunprotectList( &transitionLabels );
+  ATunprotectList( &stateVectorSpec );
   
   /*
   for ( int i = 0 ; i < dataTypes.size() ; ++i )
@@ -31,18 +31,12 @@ LTS::~LTS()
     delete transitions[i];
   }
   transitions.clear();
-  
-  for ( int i = 0 ; i < actions.size() ; ++i )
-  {
-    delete actions[i];
-  }
-  actions.clear();
 }
 
 void LTS::setStateVectorSpec( ATermList spec )
 {
   stateVectorSpec = spec;
-  ATprotect( (ATerm*) &stateVectorSpec );
+  ATprotectList( &stateVectorSpec );
 }
 
 ATermList LTS::getStateVectorSpec()
@@ -72,9 +66,10 @@ void LTS::addTransition( Transition* t )
   transitions.push_back( t );
 }
 
-void LTS::addAction( Action* a )
+void LTS::addTransitionLabels( ATermList labels )
 {
-  actions.push_back( a );
+  transitionLabels = labels;
+  ATprotectList( &transitionLabels );
 }
 
 void LTS::getClustersAtRank( int r, vector< Cluster* > &cs ) const

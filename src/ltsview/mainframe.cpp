@@ -561,11 +561,11 @@ void MainFrame::setVisSettings( VisSettings ss )
   //branchrotationSpinCtrl->SetValue( ss.branchRotation );
 }
 
-void MainFrame::createProgressDialog( string title, string text )
+void MainFrame::createProgressDialog( const string title, const string text )
 {
-  progDialog = new wxProgressDialog( (wxChar*)(title.c_str()),
-      (wxChar*)(text.c_str()), 100, this, wxPD_APP_MODAL | wxPD_AUTO_HIDE | 
-      wxPD_ELAPSED_TIME );
+  progDialog = new wxProgressDialog( wxString( title.c_str(), wxConvUTF8 ),
+      wxString( text.c_str(), wxConvUTF8 ), 100, this, wxPD_APP_MODAL |
+      wxPD_AUTO_HIDE | wxPD_ELAPSED_TIME );
   progDialog->SetSize( wxSize( 400, 100 ) );
 }
 
@@ -573,7 +573,7 @@ void MainFrame::updateProgressDialog( int val, string msg )
 {
   if ( progDialog != NULL )
   {
-    progDialog->Update( val, (wxChar*)(msg.c_str()) );
+    progDialog->Update( val, wxString( msg.c_str(), wxConvUTF8 ) );
     if ( val == 100 )
     {
       delete progDialog;
@@ -584,8 +584,8 @@ void MainFrame::updateProgressDialog( int val, string msg )
 
 void MainFrame::showMessage( string title, string text )
 {
-  wxMessageDialog msgDialog( this, (wxChar*)(text.c_str()),
-      (wxChar*)(title.c_str()), wxOK );
+  wxMessageDialog msgDialog( this, wxString( text.c_str(), wxConvUTF8 ),
+      wxString( title.c_str(), wxConvUTF8 ), wxOK );
   msgDialog.ShowModal();
 }
 

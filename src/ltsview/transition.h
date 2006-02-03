@@ -1,7 +1,7 @@
 #ifndef TRANSITION_H
 #define TRANSITION_H
 
-#include "action.h"
+#include "aterm/aterm1.h"
 
 #ifndef STATE_H
   #include "state.h"
@@ -13,9 +13,8 @@
 class Transition
 {
   public:
-    Transition( State* bs, State* es, Action* a );
+    Transition( State* bs, State* es, ATerm lbl );
     ~Transition();
-    Action* getAction() const;
     State*  getBeginState() const;
     State*  getEndState() const;
     bool    isBackpointer() const;
@@ -25,10 +24,10 @@ class Transition
     void    unmark();
       
   private:
-    Action* action;
     bool    backpointer;
     State*  beginState;
     State*  endState;
+    ATerm   label;
     bool    marked;
 };
 

@@ -1,7 +1,7 @@
 #ifndef CLUSTER_H
 #define CLUSTER_H
 #include <vector>
-#include <set>
+#include <algorithm>
 #include <math.h>
 #include "utils.h"
 
@@ -12,6 +12,7 @@
 #endif
 
 using namespace Utils;
+using namespace std;
 
 // forward declaration
 class Cluster;

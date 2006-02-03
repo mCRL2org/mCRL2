@@ -3,14 +3,12 @@
 
 #include <iostream>
 #include <vector>
-#include <set>
 #include <map>
-#include "aterm/aterm1.h"
+#include "aterm/aterm2.h"
+#include "liblowlevel.h"
 #include "mediator.h"
 #include "state.h"
-#include "action.h"
 #include "transition.h"
-//#include "datatype.h"
 #include "cluster.h"
 
 class LTS
@@ -18,10 +16,9 @@ class LTS
   public:
     LTS( Mediator* owner );
     ~LTS();
-    void	addAction( Action* a );
-    // void    addDataType( DataType* dt );
     void	addState( State* s );
     void	addTransition( Transition* t );
+    void	addTransitionLabels( ATermList labels );
     void	applyIterativeRanking();
     void	applyCyclicRanking();
     void	clusterComrades();
@@ -39,15 +36,14 @@ class LTS
     void	setStateVectorSpec( ATermList spec );
 
   private:
-    vector< Action* >		  actions;
     vector< vector< Cluster* > >  clustersInRank;
-    //vector< DataType* >		  dataTypes;
     State*			  initialState;
     Mediator*			  mediator;
     vector< State* >		  states;
     vector< vector< State* > >	  statesInRank;
     ATermList			  stateVectorSpec;
     vector< Transition* >	  transitions;
+    ATermList			  transitionLabels;
 
     void addComradesToCluster( Cluster* c, State* s );
     void clearRanksAndClusters();

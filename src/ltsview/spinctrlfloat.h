@@ -18,8 +18,8 @@ class wxSpinCtrlFloat : public wxPanel
     float GetValue();
     void SetValue(float v);
 protected:
-    void OnSpin(wxSpinEvent & event);
     void OnEnter(wxCommandEvent & event);
+    void OnSpin(wxSpinEvent & event);
     wxTextCtrl* m_TextCtrl;
     wxSpinButton* m_SpinButton;
 	

@@ -1,16 +1,16 @@
 #include "state.h"
 
-State::State( ATermAppl sv )
+State::State( ATermList sv )
 {
   stateVector = sv;
-  ATprotect( (ATerm*) &stateVector );
+  ATprotectList( &stateVector );
   cluster = NULL;
   rank = 0;
 }
 
 State::~State()
 {
-  ATunprotect( (ATerm*) &stateVector );
+  ATunprotectList( &stateVector );
 }
 
 void State::addSuperior( State* s )
