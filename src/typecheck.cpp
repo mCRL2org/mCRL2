@@ -1350,12 +1350,12 @@ static ATermAppl gstcTraverseActProcVarConstP(ATermTable Vars, ATermAppl ProcTer
 	    if(!Types)
 	      {gsErrorMsg("synchronizing an undefined action %P in (multi)action %P (typechecking %P)\n",Act,MActFrom,ProcTerm);return NULL;}
 	    ResTypes=(ResTypes)?gstcTypeListsIntersect(ResTypes,Types):Types;
-	    if(!Types || ATisEmpty(Types))
-	      {gsErrorMsg("synchronizing action %P from (multi)action into action %P: these have no common type (typechecking %P)\n",
-		      Act,BackupMActFrom,ActTo,ProcTerm);return NULL;}
+	    if(!ResTypes || ATisEmpty(ResTypes))
+	      {gsErrorMsg("synchronizing action %P from (multi)action %P into action %P: these have no common type (typechecking %P), ResTypes: %T\n",
+			  Act,BackupMActFrom,ActTo,ProcTerm,ResTypes);return NULL;}
 	  }
 	  MActFrom=BackupMActFrom;
-
+	  
 	  //the multiactions in the lhss of comm should not intersect.
 	  //make the list of unique actions
 	  ATermList Acts=ATmakeList0();
@@ -1426,7 +1426,7 @@ static ATermAppl gstcTraverseActProcVarConstP(ATermTable Vars, ATermAppl ProcTer
       //upcasting
       ATermAppl CastedNewType=gstcUpCastNumericType(gsMakeSortIdReal(),NewType,&Time);
       if(!CastedNewType)
-	{gsErrorMsg("Cannot upcast time value %P to type Real\n",Time);return NULL;}
+	{gsErrorMsg("Cannot (up)cast time value %P to type Real\n",Time);return NULL;}
     }
     
     return gsMakeAtTime(NewProc,Time);
@@ -1481,7 +1481,7 @@ static ATermAppl gstcTraverseVarConsTypeD(ATermTable Vars, ATermAppl *DataTerm, 
     //upcasting
     ATermAppl CastedNewType=gstcUpCastNumericType(PosType,Sort,DataTerm);
     if(!CastedNewType)
-      {gsErrorMsg("Cannot upcast number %P to type %P\n",*DataTerm, PosType);return NULL;}
+      {gsErrorMsg("Cannot (up)cast number %P to type %P\n",*DataTerm, PosType);return NULL;}
     return CastedNewType;
   }
 
@@ -1699,7 +1699,7 @@ static ATermAppl gstcTraverseVarConsTypeD(ATermTable Vars, ATermAppl *DataTerm, 
 	//upcasting
 	ATermAppl CastedNewType=gstcUpCastNumericType(PosType,Type,DataTerm);
 	if(!CastedNewType)
-	  {gsErrorMsg("Cannot upcast variable %P to type %P\n",*DataTerm,PosType);return NULL;}
+	  {gsErrorMsg("Cannot (up)cast variable %P to type %P\n",*DataTerm,PosType);return NULL;}
       
 	Type=CastedNewType;
       }
@@ -2025,7 +2025,7 @@ static ATermAppl gstcUpCastNumericType(ATermAppl NeededType, ATermAppl Type, ATe
 
   // Try Upcasting to Pos
   if(gstcTypeMatchA(NeededType,gsMakeSortIdPos())){
-    if(gstcTypeMatchA(Type,gsMakeSortIdNat())) return gsMakeSortIdPos();
+    if(gstcTypeMatchA(Type,gsMakeSortIdPos())) return gsMakeSortIdPos();
   }
 
   // Try Upcasting to Nat
