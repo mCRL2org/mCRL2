@@ -36,10 +36,10 @@ ltsview : $(OBJECTS)
 	$(CXX) $(GLUT_LDFLAGS) $(LDFLAGS) $(OBJECTS) $(WX_LIBS) -lATerm -o $@
 
 $(WX_OBJECTS) : %.o: %.cpp
-	$(CXX) -c $(WX_CXXFLAGS) $(ATERM_CPPFLAGS) $< -o $@
+	$(CXX) -c $(CPPFLAGS) $(CXXFLAGS) $(WX_CXXFLAGS) $(ATERM_CPPFLAGS) $< -o $@
 
 $(CPP_OBJECTS) : %.o: %.cpp
-	$(CXX) -c $< $(ATERM_CPPFLAGS) -o $@
+	$(CXX) -c $(CPPFLAGS) $(CXXFLAGS) $(ATERM_CPPFLAGS) $< -o $@
 
 %.cpp : %.h
 
