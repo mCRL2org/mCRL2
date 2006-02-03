@@ -2,6 +2,7 @@
 #include <stdio.h>
 #include <string.h>
 #include "fsmlexer.h"
+#define YY_NO_UNPUT
 
 int lineNo=1, posNo=1;
 extern void fsmerror(const char* s);
