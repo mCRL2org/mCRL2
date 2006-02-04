@@ -436,9 +436,11 @@ void resize_hashtable()
   newhalf = hashtable + oldsize;
   for(p=hashtable; p < newhalf; p++) {
     ATerm marked = *p;
+    ATerm prev = NULL;
     /*{{{  Loop over marked part */
     while(marked && IS_MARKED(marked->header)) {
       CLR_MARK(marked->header);
+      prev = marked;
       marked = marked->next;
     }
     /*}}}  */
@@ -455,8 +457,8 @@ void resize_hashtable()
 	*p = NULL;
       } else {
 	/* disconnect unmarked terms from rest */
-	unmarked = marked->next;
-	marked->next = NULL;
+	unmarked = marked;
+	prev->next = NULL;
       }
 
       while(unmarked) {
