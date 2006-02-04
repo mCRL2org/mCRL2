@@ -26,7 +26,7 @@ void mcrl2yyerror(const char *s);/* display error message (needed by yacc) */
 int mcrl2yywrap(void);           /* action taken after an EOF (needed by yacc) */
 
 %}
-Id         [a-zA-Z\_][a-zA-Z0-9\_]*
+Id         [a-zA-Z\_][a-zA-Z0-9\_']*
 Number     "0"|([1-9][0-9]*) 
 
 %%
