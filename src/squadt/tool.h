@@ -241,7 +241,7 @@ class ToolObject {
     }
 
     /* Print argument string prefixed with a space, such as it would occur on the command line */
-    inline const std::string String(const std::string& file_name, const std::string& format) const {
+    inline const std::string String(const std::string& file_name, const std::string&) const {
       std::string return_value(" ");
 
       if (selector != "") {

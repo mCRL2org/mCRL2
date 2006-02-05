@@ -11,19 +11,17 @@ ifeq ($(findstring $(MAKECMDGOALS),clean distclean),)
 MAXIMUM_REVISION := $(TREE_ROOT)/utility/maximum_revision
 
 revision: $(MAXIMUM_REVISION)
-	@echo "CPPFLAGS += -DREVISION=$$($(MAXIMUM_REVISION))" > revision
+	@echo "REVISION := -DREVISION=$$($(MAXIMUM_REVISION))" > revision
 
 $(MAXIMUM_REVISION):
 	$(MAKE) -C $(dir $(MAXIMUM_REVISION)) maximum_revision
 
 *.o: revision
 
+# This makes make reload, such that REVISION is initialised properly
 -include revision
 
-ifdef REVISION
 REVISION := -DREVISION=$(shell $(MAXIMUM_REVISION))
 
-CPPFLAGS += $(REVISION)
-endif
 endif
 endif

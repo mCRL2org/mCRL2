@@ -87,7 +87,7 @@ void ToolExecutor::TerminateAll() {
 }
 
 /* Signal a change is status for a process */
-void ToolExecutor::Signal(Process* process_pointer, ProcessStatus status) {
+void ToolExecutor::Signal(Process* /* process_pointer */, ProcessStatus status) {
   switch (status) {
     case Completed:
       /* Have a tool_manager update the status */

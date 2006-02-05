@@ -91,7 +91,7 @@ wxString NewSpecificationDialog::GetFilePath() {
   return(file_field->GetFilePath());
 }
 
-void NewSpecificationDialog::UpdateSelectField(wxCommandEvent& event) {
+void NewSpecificationDialog::UpdateSelectField(wxCommandEvent&) {
   wxString filepath = file_field->GetFilePath();
 
   if (filepath == wxT("")) {

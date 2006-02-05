@@ -16,7 +16,7 @@ Process* Process::Execute(ToolExecutor& t, const std::string& acommand, Specific
   return (new_process);
 }
 
-void Process::OnTerminate(int pid, int status) {
+void Process::OnTerminate(int /* pid */, int /* status */) {
   /* Clean up */
   tool_executor.Signal(this, Completed);
   tool_executor.Remove(this);

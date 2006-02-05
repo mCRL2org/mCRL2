@@ -244,6 +244,8 @@ else
 include revision
 endif
 
+CPPFLAGS += $(REVISION)
+
 install: all
 	$(INSTALL) -d $(bindir)
 	@for f in $(EXE_NAMES); do\

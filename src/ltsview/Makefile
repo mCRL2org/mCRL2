@@ -32,6 +32,8 @@ else
 include revision
 endif
 
+CPPFLAGS += $(REVISION)
+
 ltsview : $(OBJECTS)
 	$(CXX) $(GLUT_LDFLAGS) $(LDFLAGS) $(OBJECTS) $(WX_LIBS) -lATerm -o $@
 

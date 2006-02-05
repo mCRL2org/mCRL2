@@ -52,6 +52,8 @@ else
 include revision
 endif
 
+CPPFLAGS += $(REVISION)
+
 # Include dependencies 
 ifeq ($(findstring $(MAKECMDGOALS),clean distclean),)
 %.o: dependencies

@@ -321,7 +321,7 @@ inline void ProjectOverview::GenerateToolBar() {
 }
 
 /* Handlers for operations of project level */
-void ProjectOverview::NewProject(wxCommandEvent &event) {
+void ProjectOverview::NewProject(wxCommandEvent&) {
   wxDirDialog directory_dialog(this, wxT("Select a project directory"));
 
   if (directory_dialog.ShowModal() == wxID_OK) {
@@ -358,7 +358,7 @@ void ProjectOverview::NewProject(wxCommandEvent &event) {
   }
 }
 
-void ProjectOverview::CloseProject(wxCommandEvent &event) {
+void ProjectOverview::CloseProject(wxCommandEvent&) {
   /* Reset title bar */
   SetTitle(wxT("Squadt - No project"));
 
@@ -381,7 +381,7 @@ void ProjectOverview::CloseProject(wxCommandEvent &event) {
   GetMenuBar()->Enable(wxID_CLOSE, false);
 }
 
-void ProjectOverview::LoadProject(wxCommandEvent &event) {
+void ProjectOverview::LoadProject(wxCommandEvent&) {
   wxDirDialog directory_dialog(this, wxT("Select a project directory"));
 
   if (directory_dialog.ShowModal() == wxID_OK) {
@@ -449,12 +449,12 @@ void ProjectOverview::LoadProject(wxCommandEvent &event) {
   }
 }
 
-void ProjectOverview::StoreProject(wxCommandEvent &event) {
+void ProjectOverview::StoreProject(wxCommandEvent&) {
   project_manager.Store();
 }
 
 /* Build all specifications that are not up to date */
-void ProjectOverview::BuildProject(wxCommandEvent &event) {
+void ProjectOverview::BuildProject(wxCommandEvent&) {
   /* Recursively traverse the tree for specifications to be build */
   wxTreeItemIdValue cookie = 0;
   wxTreeItemId      an_id  = specifications->GetFirstChild(specifications->GetRootItem(), cookie);
@@ -493,7 +493,7 @@ void ProjectOverview::BuildProject(wxCommandEvent &event) {
 }
 
 /* Adds a new specification */
-void ProjectOverview::NewSpecification(wxCommandEvent &event) {
+void ProjectOverview::NewSpecification(wxCommandEvent&) {
   NewSpecificationDialog* dialog = new NewSpecificationDialog(this, wxID_ANY);
 
   if (dialog->ShowModal() == wxID_OK) {
@@ -608,7 +608,7 @@ void ProjectOverview::NewSpecification(wxCommandEvent &event) {
  *
  * event.GetId() is an integer that identifies a tool and a category
  */
-void ProjectOverview::AddSpecifications(wxCommandEvent &event) {
+void ProjectOverview::AddSpecifications(wxCommandEvent& event) {
         wxTreeItemId   selected          = specifications->GetSelection();    /* The selected specification */
         Specification& specification     = ((SpecificationData*) specifications->GetItemData(selected))->specification;
         wxTreeItemId   new_item;
@@ -689,7 +689,7 @@ void ProjectOverview::AddSpecifications(wxCommandEvent &event) {
   added_specification.ForceRegeneration();
 }
 
-void ProjectOverview::EditSpecification(wxCommandEvent &event) {
+void ProjectOverview::EditSpecification(wxCommandEvent&) {
   wxProcess* editor = new wxProcess();
 
   /* TODO only takes the last output object */
@@ -701,7 +701,7 @@ void ProjectOverview::EditSpecification(wxCommandEvent &event) {
   editor->Open(filename.Prepend(wxT("gvim ")));
 }
 
-void ProjectOverview::MarkDirty(wxCommandEvent &event) {
+void ProjectOverview::MarkDirty(wxCommandEvent&) {
   wxTreeItemIdValue cookie = 0;
 
   std::vector < wxTreeItemId > stack;
@@ -731,7 +731,7 @@ void ProjectOverview::MarkDirty(wxCommandEvent &event) {
   }
 }
 
-void ProjectOverview::EditSpecificationProperties(wxCommandEvent &event) {
+void ProjectOverview::EditSpecificationProperties(wxCommandEvent&) {
   Specification&                 specification = ((SpecificationData*) specifications->GetItemData(specifications->GetSelection()))->specification;
   wxString                       name          = wxString(specification.GetName().c_str(), wxConvLocal);
   wxString                       title         = wxString(wxT("Properties of `")).Append(name).Append(wxT("'"));
@@ -749,7 +749,7 @@ void ProjectOverview::EditSpecificationProperties(wxCommandEvent &event) {
   dialog->Destroy();
 }
 
-void ProjectOverview::RemoveSpecification(wxCommandEvent &event) {
+void ProjectOverview::RemoveSpecification(wxCommandEvent&) {
   wxTreeItemId selected = specifications->GetSelection();
 
   if (selected != specifications->GetRootItem()) {
@@ -793,7 +793,7 @@ void ProjectOverview::RemoveSpecification(wxCommandEvent &event) {
   }
 }
 
-void ProjectOverview::SpawnContextMenu(wxTreeEvent &event) {
+void ProjectOverview::SpawnContextMenu(wxTreeEvent& event) {
   /* Set selected tree item, for communication with menu event handlers */
   Specification&              specification        = ((SpecificationData*) specifications->GetItemData(event.GetItem()))->specification;
   unsigned int                generated_categories = 0;
@@ -876,11 +876,11 @@ void ProjectOverview::SpawnContextMenu(wxTreeEvent &event) {
   }
 }
 
-void ProjectOverview::ActivateRename(wxCommandEvent &event) {
+void ProjectOverview::ActivateRename(wxCommandEvent&) {
   specifications->EditLabel(specifications->GetSelection());
 }
 
-void ProjectOverview::RenameSpecification(wxTreeEvent &event) {
+void ProjectOverview::RenameSpecification(wxTreeEvent& event) {
   /* Communicate change of name with Project Manager */
   if (!event.IsEditCancelled()) {
     std::string    name(event.GetLabel().fn_str());
@@ -896,13 +896,13 @@ void ProjectOverview::RenameSpecification(wxTreeEvent &event) {
   }
 }
 
-void ProjectOverview::Quit(wxCloseEvent &event) {
+void ProjectOverview::Quit(wxCloseEvent&) {
   CleanUp();
 
   Destroy();
 }
 
-void ProjectOverview::MenuQuit(wxCommandEvent &event) {
+void ProjectOverview::MenuQuit(wxCommandEvent&) {
   Close();
 }
 
