@@ -536,7 +536,7 @@ static ATermList apply_rename(ATermList l, ATermList R){
     return l;
   
   ATermList m=ATmakeList0();
-  for (; !ATisEmpty(l); m=ATgetNext(l)){
+  for (; !ATisEmpty(l); l=ATgetNext(l)){
     ATermList tR = R;
     ATermAppl a=ATAgetFirst(l);
     bool b=false;
