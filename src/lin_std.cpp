@@ -4336,7 +4336,7 @@ static ATermList insert_summand(
 static void add_summands(
                ATermAppl procId,
                ATermAppl summandterm, 
-               ATermList pars, 
+ /*              ATermList pars,  */
                ATermList pCRLprocs, 
                stacklisttype *stack,
                int canterminate, 
@@ -4533,7 +4533,7 @@ static void collectsumlistterm(
     return;
   }
   else 
-  { add_summands(procId,body,pars,pCRLprocs,stack,
+  { add_summands(procId,body,/* pars,*/pCRLprocs,stack,
                  canterminate,regular,singlestate,spec);
   }   
 }
@@ -5862,8 +5862,7 @@ static int implies_condition(ATermAppl c1, ATermAppl c2)
 
 static ATermList insert_timed_delta_summand(
                     ATermList l, 
-                    ATermAppl s,
-                    ATermList parameters)
+                    ATermAppl s)
 { 
   assert(linGetMultiAction(s)==gsMakeDelta());
   ATermList result=ATempty;
@@ -6015,8 +6014,7 @@ static ATermAppl allowcomposition(ATermList allowlist, ATermAppl ips)
              resultdeltasumlist=ATgetNext(resultdeltasumlist))    
   { resultsumlist=insert_timed_delta_summand(
                       resultsumlist,
-                      ATAgetFirst(resultdeltasumlist),
-                      linGetParameters(ips));
+                      ATAgetFirst(resultdeltasumlist));
   }
   return linMakeInitProcSpec(
              linGetInit(ips),linGetParameters(ips),resultsumlist);
@@ -6098,8 +6096,7 @@ static ATermAppl encapcomposition(ATermList encaplist , ATermAppl ips)
   { 
       resultsumlist=insert_timed_delta_summand(
                     resultsumlist,
-                    ATAgetFirst(resultdeltasumlist),
-                    linGetParameters(ips));
+                    ATAgetFirst(resultdeltasumlist));
   }
   return linMakeInitProcSpec(
              linGetInit(ips),linGetParameters(ips),resultsumlist);
@@ -7122,7 +7119,6 @@ static ATermList combinesumlist(
 static ATermAppl parallelcomposition(
                      ATermAppl t1, 
                      ATermAppl t2, 
-                     int canterminate,
                      specificationbasictype *spec)
 { 
   ATermList init1=NULL, pars1=NULL;
@@ -7214,7 +7210,7 @@ static ATermAppl generateLPEmCRLterm(
                           canterminate,
                           spec,
                           regular);
-    return parallelcomposition(t1,t2,canterminate,spec);
+    return parallelcomposition(t1,t2,spec);
   }
   
   if (gsIsHide(t)) 
