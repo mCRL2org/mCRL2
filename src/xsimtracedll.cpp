@@ -86,7 +86,7 @@ void XSimTraceDLL::Unregistered()
 	traceview->DeleteAllItems();
 }
 
-void XSimTraceDLL::Initialise(ATermList Pars)
+void XSimTraceDLL::Initialise(ATermList /* Pars */)
 {
 }
 
@@ -113,7 +113,7 @@ void XSimTraceDLL::AddState(ATermAppl Transition, ATerm State, bool enabled)
 	}
 }
 
-void XSimTraceDLL::StateChanged(ATermAppl Transition, ATerm State, ATermList NextStates)
+void XSimTraceDLL::StateChanged(ATermAppl Transition, ATerm State, ATermList /* NextStates */)
 {
 	if ( Transition != NULL )
 	{
@@ -186,7 +186,7 @@ void XSimTraceDLL::TraceChanged(ATermList Trace, int From)
 	}
 }
 
-void XSimTraceDLL::TracePosChanged(ATermAppl Transition, ATerm State, int Index)
+void XSimTraceDLL::TracePosChanged(ATermAppl /* Transition */, ATerm /* State */, int Index)
 {
 	while ( current_pos > Index )
 	{
@@ -199,7 +199,7 @@ void XSimTraceDLL::TracePosChanged(ATermAppl Transition, ATerm State, int Index)
 }
 
 
-void XSimTraceDLL::OnCloseWindow( wxCloseEvent &event )
+void XSimTraceDLL::OnCloseWindow( wxCloseEvent& /* event */)
 {
 	if ( xsimdll != NULL )
 	{

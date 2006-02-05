@@ -83,7 +83,7 @@ void XSimTrace::Unregistered()
 	traceview->DeleteAllItems();
 }
 
-void XSimTrace::Initialise(ATermList Pars)
+void XSimTrace::Initialise(ATermList /* Pars */)
 {
 }
 
@@ -110,7 +110,7 @@ void XSimTrace::AddState(ATermAppl Transition, ATerm State, bool enabled)
 	}
 }
 
-void XSimTrace::StateChanged(ATermAppl Transition, ATerm State, ATermList NextStates)
+void XSimTrace::StateChanged(ATermAppl Transition, ATerm State, ATermList /* NextStates */)
 {
 	if ( Transition != NULL )
 	{
@@ -183,7 +183,7 @@ void XSimTrace::TraceChanged(ATermList Trace, int From)
 	}
 }
 
-void XSimTrace::TracePosChanged(ATermAppl Transition, ATerm State, int Index)
+void XSimTrace::TracePosChanged(ATermAppl /* Transition */, ATerm /* State */, int Index)
 {
 	while ( current_pos > Index )
 	{

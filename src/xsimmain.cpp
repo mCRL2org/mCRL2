@@ -248,7 +248,7 @@ void XSimMain::CreateContent()
     transview->SetColumnWidth(1,transview->GetClientSize().GetWidth() - transview->GetColumnWidth(0));
 }
 
-void XSimMain::UpdateSizes(wxCommandEvent &event) {
+void XSimMain::UpdateSizes(wxCommandEvent& event) {
   int s  = stateview->GetClientSize().GetWidth() - stateview->GetColumnWidth(0);
 
   event.Skip();
@@ -670,7 +670,7 @@ ATermList XSimMain::GetTrace()
 	return l;
 }
 
-bool XSimMain::SetTrace(ATermList Trace, int From)
+bool XSimMain::SetTrace(ATermList /* Trace */, int /* From */)
 {
 	// XXX
 	return false;
@@ -714,7 +714,7 @@ ATermList XSimMain::traceRedo()
 	return ATLgetFirst(trace);
 }
 
-void XSimMain::OnOpen( wxCommandEvent &event )
+void XSimMain::OnOpen( wxCommandEvent& /* event */ )
 {
     wxFileDialog dialog( this, wxT("Select a LPE file..."), wxT(""), wxT(""), wxT("LPEs (*.lpe)|*.lpe|All files|*"));
     if ( dialog.ShowModal() == wxID_OK )
@@ -723,27 +723,27 @@ void XSimMain::OnOpen( wxCommandEvent &event )
     }
 }
 
-void XSimMain::OnQuit( wxCommandEvent &event )
+void XSimMain::OnQuit( wxCommandEvent& /* event */ )
 {
      Close( TRUE );
 }
 
-void XSimMain::OnUndo( wxCommandEvent &event )
+void XSimMain::OnUndo( wxCommandEvent& /* event */ )
 {
 	Undo();
 }
 
-void XSimMain::OnRedo( wxCommandEvent &event )
+void XSimMain::OnRedo( wxCommandEvent& /* event */ )
 {
 	Redo();
 }
 
-void XSimMain::OnReset( wxCommandEvent &event )
+void XSimMain::OnReset( wxCommandEvent& /* event */ )
 {
 	Reset();
 }
 
-void XSimMain::OnLoadTrace( wxCommandEvent &event )
+void XSimMain::OnLoadTrace( wxCommandEvent& /* event */ )
 {
     wxFileDialog dialog( this, wxT("Load trace..."), wxT(""), wxT(""), wxT("Traces (*.trc)|*.trc|All Files|*.*"));
     if ( dialog.ShowModal() == wxID_OK )
@@ -839,7 +839,7 @@ void XSimMain::OnLoadTrace( wxCommandEvent &event )
     }
 }
 
-void XSimMain::OnSaveTrace( wxCommandEvent &event )
+void XSimMain::OnSaveTrace( wxCommandEvent& /* event */ )
 {
     wxFileDialog dialog( this, wxT("Save trace..."), wxT(""), wxT(""), wxT("Traces (*.trc)|*.trc|All Files|*.*"),wxSAVE);
     if ( dialog.ShowModal() == wxID_OK )
@@ -872,7 +872,7 @@ void XSimMain::OnSaveTrace( wxCommandEvent &event )
     }
 }
 
-void XSimMain::OnFitCurrentState( wxCommandEvent &event )
+void XSimMain::OnFitCurrentState( wxCommandEvent& /* event */ )
 {
 #ifndef __WINDOWS__
     int w,h,n;
@@ -883,12 +883,12 @@ void XSimMain::OnFitCurrentState( wxCommandEvent &event )
 #endif
 }
 
-void XSimMain::OnTrace( wxCommandEvent &event )
+void XSimMain::OnTrace( wxCommandEvent& /* event */ )
 {
     tracewin->Show(!tracewin->IsShown());
 }
 
-void XSimMain::OnLoadView( wxCommandEvent &event )
+void XSimMain::OnLoadView( wxCommandEvent& /* event */ )
 {
     wxFileDialog dialog( this, wxT("Select a View DLL..."), wxT(""), wxT(""), wxT("Dynamic Libraries (*.so,*.dll)|*.so;*.dll|All Files|*.*"));
     if ( dialog.ShowModal() == wxID_OK )
@@ -897,12 +897,12 @@ void XSimMain::OnLoadView( wxCommandEvent &event )
     }
 }
 
-void XSimMain::OnShowDCChanged( wxCommandEvent &event )
+void XSimMain::OnShowDCChanged( wxCommandEvent& /* event */ )
 {
 	UpdateTransitions(false);
 }
 
-void XSimMain::OnSetDelay( wxCommandEvent &event )
+void XSimMain::OnSetDelay( wxCommandEvent& /* event */ )
 {
 	wxTextEntryDialog dialog(this,wxT("Enter the delay in milliseconds."),wxT("Set Delay"),wxString::Format(wxT("%d"),timer_interval));
 
@@ -926,7 +926,7 @@ void XSimMain::OnSetDelay( wxCommandEvent &event )
 	}
 }
 
-void XSimMain::OnResetAndPlay( wxCommandEvent &event )
+void XSimMain::OnResetAndPlay( wxCommandEvent& event )
 {
 	if ( !ATisEmpty(trace) )
 	{
@@ -935,7 +935,7 @@ void XSimMain::OnResetAndPlay( wxCommandEvent &event )
 	}
 }
 
-void XSimMain::OnPlay( wxCommandEvent &event )
+void XSimMain::OnPlay( wxCommandEvent& /* event */ )
 {
 	if ( !ATisEmpty(trace) )
 	{
@@ -946,7 +946,7 @@ void XSimMain::OnPlay( wxCommandEvent &event )
 	}
 }
 
-void XSimMain::OnResetAndPlayRandom( wxCommandEvent &event )
+void XSimMain::OnResetAndPlayRandom( wxCommandEvent& event )
 {
 	if ( !ATisEmpty(trace) )
 	{
@@ -955,7 +955,7 @@ void XSimMain::OnResetAndPlayRandom( wxCommandEvent &event )
 	}
 }
 
-void XSimMain::OnPlayRandom( wxCommandEvent &event )
+void XSimMain::OnPlayRandom( wxCommandEvent& /* event */ )
 {
 	if ( !ATisEmpty(trace) )
 	{
@@ -966,7 +966,7 @@ void XSimMain::OnPlayRandom( wxCommandEvent &event )
 	}
 }
 
-void XSimMain::OnTimer( wxTimerEvent &event )
+void XSimMain::OnTimer( wxTimerEvent& /* event */ )
 {
 	switch ( timer_func )
 	{
@@ -1030,30 +1030,30 @@ void XSimMain::Stopper_Exit()
 	}
 }
 
-void XSimMain::OnStop( wxCommandEvent &event )
+void XSimMain::OnStop( wxCommandEvent& /* event */ )
 {
 	stopper_cnt = 0;
 	Stopper_Exit();
 }
 
-void XSimMain::OnAbout( wxCommandEvent &event )
+void XSimMain::OnAbout( wxCommandEvent& /* event */ )
 {
     wxMessageDialog dialog( this, wxT("mCRL2 Simulator GUI"),
         wxT("About XSim"), wxOK|wxICON_INFORMATION );
     dialog.ShowModal();
 }
 
-void XSimMain::OnCloseWindow( wxCloseEvent &event )
+void XSimMain::OnCloseWindow( wxCloseEvent& /* event */ )
 {
     Destroy();
 }
 
-void XSimMain::stateOnListItemSelected( wxListEvent &event )
+void XSimMain::stateOnListItemSelected( wxListEvent& event )
 {
 	stateview->Select(event.GetIndex(),FALSE);
 }
 
-void XSimMain::transOnListItemActivated( wxListEvent &event )
+void XSimMain::transOnListItemActivated( wxListEvent& event )
 {
 	ChooseTransition(event.GetData());
 }
