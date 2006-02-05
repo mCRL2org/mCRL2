@@ -75,29 +75,33 @@
 <refsect1>
   <title>Description</title>
   <para>
-    The tool &mcrl22lpe; translates an mcrl2 file to a linear process (i.e. an .lpe
-    file). The source comes from &infile; and the result is written into
+    The tool &mcrl22lpe; translates an mCRL2 specification to a linear process equation
+(LPE). The input is read from &infile; and the output is written to
     &outfile;. If &outfile; is not present,
     &stdout; is used. If &infile; is not present, &stdin; is used.
   </para>
   <para>
-    The input of consists of a behavioral description in mcrl2 (milli Common 
-    Representation Language 2). For the language description see the directory
-    articles (when this manual page was written, no proper tutorial reference to 
-    mCRL2 was available). 
+    The input consists of a behavioural description in mCRL2 (milli Common 
+    Representation Language 2). For the language description see the tutorial
+    Process Algebra and mCRL2, by
+    J.F. Groote, A.H.J. Mathijssen, S.C.W. Ploeger, 
+    M.A. Reniers, M.J. van Weerdenburg and J. van der Wulp to be found
+    at <filename>www.mcrl2.org</filename>.
   </para>
   <para>
     The process in the input must be in parallel pCRL format. This means
     that it must consist of the parallel composition of a set of processes
     that are described using actions, conditions, sum operators, timing, sequential
-    and alternative composition operators only. The parallel, communication,
+    and alternative composition operators only. The parallel, communication
     and renaming operators can only be used on the outer level.
-    Typical input examples are found in the directory examples.
+    Typical input examples are found in the directory <filename>examples</filename>
+    of the mCRL2 repository.
   </para>
   <para>
-    All the datatypes needed for the linearisation will be added to the
-    specification. Furthermore, all the complex datatypes in the mcrl2 
-    specification are translated to elementary sorts with only
+    All datatypes needed for the linearisation will be added to the
+    generated linear process. Furthermore, all the datatypes in the mCRL2 specification, 
+    such as natural numbers, sets and functions,
+    are translated to elementary sorts with only
     constructors, mappings and equations.
   </para>
 </refsect1>
@@ -113,13 +117,13 @@
       <para>
         The LPE is generated using stack datatypes. The non parallel processes
         are transformed to restricted Greibach Normal Form and straightforwardly
-        translated to linear processes using a stack. Then the resulting linear
-        processes are put in parallel. This works for
-        all allowed input. Unfortunately, the linear process that is the
+        translated to linear processes using a stack. The resulting linear
+        processes are then put in parallel. This works for
+        any allowed input. Unfortunately, the linear process that is the
         result of this operation can basically only be used for state
         space generation. Symbolic operations on the stacks are generally
-        not very fruitful, because the stack datatype is too complex. For
-        symbolic analysis, the flags &opt_regular; or &opt_regular2; must be used.
+        not very effective, because the stack datatype is too complex. For
+        symbolic analysis, the options &opt_regular; or &opt_regular2; can be used.
       </para>
     </listitem>
   </varlistentry>
@@ -130,47 +134,48 @@
     <listitem>
       <para>
         The non parallel processes are translated to restricted Greibach
-        Normal Forms. Instead of using a stack, these processes are translated
-        to a LPEs with finite control variables. If
+        Normal Form. Instead of using a stack, these processes are translated
+        to an LPE with finite control variables. If
         some process has an infinite number of control states, the tool will
         attempt to generate all of them, causing
-        this tool to run out of memory. In such a case the &opt_stack; 
-        option should be used as it will produce a linear process.
+        it to run out of memory. In such a case the &opt_stack; 
+        option can be used to produce a linear process.
       </para>
       <para>
-        The &opt_regular; flag is almost the same as the &opt_regular2; flag.
-        The only difference is in the way new process variables are generated.
-        The essential difference boils down to &opt_regular; generating less
-        parameters in the linear process, whereas &opt_regular2; will 
-        generate an LPE in a few cases where the use of &opt_regular; leads to
-        a loop.
+        The &opt_regular; option is almost the same as the &opt_regular2; option.
+        The only difference is in the way new process variables are generated:
+        &opt_regular; generates less
+        parameters in the linear process than &opt_regular;, but &opt_regular2; 
+        generates an LPE in a few cases where the use of &opt_regular; leads to
+        non-termination.
       </para>
       <para>
-        In difference between the two is best explained by an example. 
+        The difference between the two is explained best by an example. 
         The tool &mcrl22lpe; sometimes has to replace a sequence of process
-        variables by a single new variable. For instance 
+        variables by a single new variable. For instance, 
         P1(f(x)).P2(g(x)) must be replaced by a new process P.
-        With the flag &opt_regular; the new process has a single parameter
+        With the option &opt_regular;, the new process has a single parameter
         x, matching the single free variable x. I.e. the definition of P
-        is P(x)=P1(f(x)).P2(g(x)). With the flag &opt_regular2; for every term a
-        variable is introduced. In the latter case P will have the definition
+        is P(x)=P1(f(x)).P2(g(x)). With the option &opt_regular2; a
+        variable is introduced for every term. In this latter 
+        case P is defined by
         P(y,z)=P1(y).P2(z) and the expression P1(f(x)).P2(g(x)) is replaced by
         P(f(x),g(x)). 
       </para>
       <para>
-        It is instructive to see where linearisation with &opt_regular; fails
+        We give an example in which linearisation with &opt_regular; fails
         to terminate and the use of &opt_regular2; succeeds. Consider the 
-        example 
-        <simplelist type='inline'>
-           <member>proc P(n:Nat)=a.P(n+1)+b; </member>
-           <member>init P(0).delta;</member> 
-        </simplelist>
-        Here with the option &opt_regular; new processes are generated for
-        P(0).delta, P(1).delta, etc. With &opt_regular; only one new process
+        process definition 
+           proc P(n:Nat)=a.P(n+1)+b
+        and let the initial process be defined by
+           init P(0).delta.
+        Now with &opt_regular; infinitely many new processes are generated namely
+        one for each of the following form:
+        P(0).delta, P(1).delta, etc. With &opt_regular2; only one new process
         is generated, namely one for P(n).delta.
       </para>
       <para>
-        The flag &opt_regular; is used by default.
+        The option &opt_regular; is used by default.
       </para>
     </listitem>
   </varlistentry>
@@ -180,7 +185,7 @@
     <term>&opt_regular2;</term>
     <listitem>
       <para>
-        see the explanation of &opt_regular;.
+        See the explanation of &opt_regular;.
       </para>
     </listitem>
   </varlistentry>
@@ -190,14 +195,14 @@
     <term>&opt_alternative;</term>
     <listitem>
       <para>
-        This causes the use of a classical method of linearisation that can handle
-        a wider range of specifications than the flag &opt_regular;. 
+        This option causes the use of a classical method of linearisation that can handle
+        a wider range of specifications than &opt_regular;. 
         In essence it calculates Milner's expansion and introduces new
         processes for the process expression after the initial actions.
         These are in turn expanded again. 
       </para> 
       <para>
-        This technique can handle mcrl2 processes in its full generality
+        This technique can handle any mCRL2 specification
         as long as there are only a finite number of processes involved.
         It cannot handle time and does not accept the &opt_cluster; and
         &opt_no-freevars; options.
@@ -210,16 +215,16 @@
     <term>&opt_cluster;</term>
     <listitem>
       <para>
-        This option causes the final linear process to be clustered.
-        By default this is not carried out. Clustering means that
+        This option causes the output linear process to be clustered.
+        This option is not used by default. Clustering means that
         summands with the same action labels are taken together.
-        For instance a(f1).P(g1)+a(f2).P(g2) is replaced by 
+        For instance, a(f1).P(g1)+a(f2).P(g2) is replaced by 
         sum b:Bool.a(if(b,f1,f2)).P(if(b,g1,g2)). The advantage is
         that the number of summands can be reduced substantially in this
         way. The disadvantage is that sum operators are introduced and
-        new sorts with auxiliary functions are generated. In order to
-        avoid the generation of new sorts the flag &opt_binary; can be
-        used, which will encode all the sorts using booleans.
+        new data sorts with auxiliary functions are generated. In order to
+        avoid the generation of new sorts, the option &opt_binary; can be
+        used which causes all new sorts to be encoded using booleans.
       </para>
     </listitem>
   </varlistentry>
@@ -229,14 +234,15 @@
     <term>&opt_no-cluster;</term>
     <listitem>
       <para>
-        This options prevents clustering of linear processes before they
+        This option prevents clustering of linear processes before they
         are put in parallel. By default these processes are clustered to 
-        avoid a blow up in the number of summands when calculating the 
-        parallel composition. If a process with n summands is put in parallel
-        with a process with m summands the resulting process has m*n+m+n 
-        summands. Both m and n can be substantially reduced by clustering
-        at the cost of introducing new sorts and functions and by complicating
-        the linear process. See also &opt_cluster;, esp. for a short explanation
+        avoid a blow-up in the number of summands when transforming two
+        parallel linear processes into a single linear process.
+        If a linear process with M summands is put in parallel
+        with a linear process with N summands the resulting process has M*N+M+N 
+        summands. Both M and N can be substantially reduced by clustering
+        at the cost of introducing new sorts and functions.
+        See &opt_cluster;, esp. for a short explanation
         of the clustering process.
       </para>
     </listitem>
@@ -248,8 +254,8 @@
     <listitem>
       <para>
         By default &mcrl22lpe; attempts to distribute communication, hiding and
-        allow operators over the parallel operator as this reduces the size
-        of intermediate linear processes. By using this flag, this step can be
+        allow operators over the parallel composition operator as this reduces the size
+        of intermediate linear processes. By using this option, this step can be
         avoided. The name stems from the alphabet axioms in process algebra.
       </para>
     </listitem>
@@ -260,11 +266,11 @@
     <term>&opt_newstate;</term>
     <listitem>
       <para>
-        The sort of state variables is by default Pos, i.e. the sort of positive
-        natural numbers. By using this flag new finite sorts of the form Enumk
-        are generated with k the size of the domain. Also auxiliary case functions
-        and equalities (with k*k defining equations) are defined. In combination
-        with the flag &opt_binary; the finite sorts are encoded by booleans.
+        The sort of state variables is by default Pos, i.e. positive
+        natural numbers. By using this option new finite sorts named Enumk
+        are generated where k is the size of the domain. Also, auxiliary case functions
+        and equalities are defined. In combination
+        with the option &opt_binary; the finite sorts are encoded by booleans.
       </para>
     </listitem>
   </varlistentry>
@@ -274,9 +280,10 @@
     <term>&opt_binary;</term>
     <listitem>
       <para>
-        This flag prevents the generation of finite sorts but instead
-        causes these to be encoded using booleans. These finite sorts are
+        This option causes all generated finite sorts to be encoded using boolean.
+        These finite sorts are
         generated when clustering and when generating state variables.
+        See &opt_cluster; and &opt_newstate;.
       </para>
     </listitem>
   </varlistentry>
@@ -286,9 +293,9 @@
     <term>&opt_statenames;</term>
     <listitem>
       <para>
-        Using this flag, the names of generated data variables are 
+        Using this option, the names of generated data parameters are 
         extended with the name of the process in which they occur. In this
-        way it is easier to determine where the variable comes from.
+        way it is easier to determine where the parameter comes from.
       </para>
     </listitem>
   </varlistentry>
@@ -298,7 +305,7 @@
     <term>&opt_no-rewrite;</term>
     <listitem>
       <para>
-        This flag prevents intermediate rewriting of terms. This is
+        This option prevents intermediate rewriting of terms. This is
         especially useful when the equations in the input specification
         are not terminating, as in this case the lineariser will not
         terminate. 
@@ -311,15 +318,15 @@
     <term>&opt_no-freevars;</term>
     <listitem>
       <para>
-        When linearizing, there are several places where the values
+        When linearising, there are several places where the values
         of data variables are irrelevant for the behaviour of the 
-        process. E.g. when linearizing the process 
+        process. E.g. when linearising the process 
         X=sum d:D.read(d).send(d).X, the value of the variable d has
         no meaning after the send action. In this case a 'free variable'
         is introduced to indicate that the value of this variable can
-        be freely chosen. As the number of free variables can be 
+        be chosen freely. As the number of free variables can be 
         quite large, the generation of such variables can be 
-        avoided by using the flag &opt_no-freevars;. In this case a
+        avoided by using this option. In this case a
         dummy value is chosen, which is the same for each sort.
       </para>
     </listitem>
@@ -330,9 +337,9 @@
     <term>&opt_check-only;</term>
     <listitem>
       <para>
-        Using this flag &mcrl22lpe; only checks the syntax and the 
-        static semantics of the input, but it will not commence the linearisation
-        process. This is useful to check whether the input is proper mcrl2.
+        Using this option &mcrl22lpe; only checks the syntax and the 
+        static semantics of the input, but it will not execute the linearisation
+        process. This is useful to check whether the input is proper mCRL2.
       </para>
     </listitem>
   </varlistentry>
@@ -342,9 +349,9 @@
     <term>&opt_end-phase;=PHASE</term>
     <listitem>
       <para>
-        This flag causes the linearisation to stop after a particular phase.
+        This option causes the linearisation to stop after a particular phase.
         Phases can be 'pa' (parse), 'tc' (type check), 'ar' (alphabet reduction)
-        or 'di' (data implementation). This flag is primarily provided for 
+        or 'di' (data implementation). This option is primarily provided for 
         debugging and developing purposes.
       </para>
     </listitem>
@@ -355,7 +362,7 @@
     <term>&opt_help;</term>
     <listitem>
       <para>
-        Display a help message, indicating all the available flags.
+        Display a help message.
       </para>
     </listitem>
   </varlistentry>
@@ -364,7 +371,7 @@
     <term>&opt_version;</term>
     <listitem>
       <para>
-        Display version information and terminate.
+        Display version information.
       </para>
     </listitem>
   </varlistentry>
@@ -374,8 +381,7 @@
     <term>&opt_quiet;</term>
     <listitem>
       <para>
-        Do not display warning messages. Especially provided for use
-        with the websquadt tool.
+        Do not display warning messages. 
       </para>
     </listitem>
   </varlistentry>
@@ -385,7 +391,7 @@
     <term>&opt_verbose;</term>
     <listitem>
       <para>
-        Turn on the display of short intermediate messages.
+        Display short intermediate messages.
       </para>
     </listitem>
   </varlistentry>
@@ -395,7 +401,7 @@
     <term>&opt_debug;</term>
     <listitem>
       <para>
-        Turn on the display of detailed intermediate messages.
+        Display detailed intermediate messages.
       </para>
     </listitem>
   </varlistentry>
