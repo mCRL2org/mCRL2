@@ -19,7 +19,7 @@ syntax keyword gsTodo       contained TODO FIXME XXX
 
 syntax region gsComment     start=/%/ end='$' contains=gsTodo
 
-syntax match gsIdentifier   /[a-zA-Z_][a-zA-Z0-9_]*/
+syntax match gsIdentifier   /[a-zA-Z_][a-zA-Z0-9_']*/
 syntax match gsOperator     /[.+|&<>:;=#@(){}\[\],!*?\\\-]/
 syntax match gsOperator     /||_/
 syntax match gsOperator     /->/
