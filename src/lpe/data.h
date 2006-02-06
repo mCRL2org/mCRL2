@@ -92,7 +92,7 @@ typedef term_list<data_expression> data_expression_list;
 
 inline term_list<ATermAppl> get_sorts(term_list<ATermAppl> l)
 {
-  return apply(l,gsGetSort);
+  return apply(l,&gsGetSort);
 }
 
 ///////////////////////////////////////////////////////////////////////////////
