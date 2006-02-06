@@ -1338,6 +1338,7 @@ ATerm RewriterInnermost::rewrite_func(ATermInt op, ATermList args)
 {
 	ATermAppl tree;
 //gsfprintf(stderr,"rewrite_func(%T,%T)\n\n",op,args);
+//gsfprintf(stderr,"rewrite_func(%P)\n\n",fromInner((ATerm) ATinsert(args,(ATerm) op)));
 
 	if ( (tree = inner_trees[ATgetInt(op)]) != NULL )
 	{
@@ -1370,6 +1371,7 @@ ATermList RewriterInnermost::rewrite_listelts(ATermList l)
 ATerm RewriterInnermost::rewrite_aux(ATerm Term)
 {
 //gsfprintf(stderr,"rewrite_aux(%T)\n\n",Term);
+//gsfprintf(stderr,"rewrite_aux(%P)\n\n",fromInner(Term));
 	if ( ATisList(Term) )
 	{
 		ATerm head = ATgetFirst((ATermList) Term);
@@ -1382,18 +1384,22 @@ ATerm RewriterInnermost::rewrite_aux(ATerm Term)
 		// if it's a var, see if it needs to be substituted
 		if ( !ATisInt(head) )
 		{
-			assert(ATisAppl(head) && gsIsDataVarId((ATermAppl) head));
-
-			ATerm a = lookupSubstitution((ATermAppl) head);
-			
-			// if a is a list, concatenate the arguments
-			// always set head again, as 'a' might have been changed
-			if ( ATisList(a) )
+			if ( !gsIsOpId(head) ) // this internal rewrite format allows opids
+				               // XXX change to main internal rewrite format!
 			{
-				head = ATgetFirst((ATermList) a);
-				l = ATconcat(ATgetNext((ATermList) a),l);
-			} else {
-				head = a;
+				assert(ATisAppl(head) && gsIsDataVarId((ATermAppl) head));
+
+				ATerm a = lookupSubstitution((ATermAppl) head);
+			
+				// if a is a list, concatenate the arguments
+				// always set head again, as 'a' might have been changed
+				if ( ATisList(a) )
+				{
+					head = ATgetFirst((ATermList) a);
+					l = ATconcat(ATgetNext((ATermList) a),l);
+				} else {
+					head = a;
+				}
 			}
 		}
 		
