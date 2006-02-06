@@ -37,10 +37,9 @@ bool Utils::operator!=( RGB_Color c1, RGB_Color c2 )
   return !( c1 == c2 );
 }
 
-int Utils::round( double f )
+int Utils::roundToInt( double f )
 {
   double intpart;
-  double fracpart = modf( f, &intpart );
-  int result = static_cast< int >(intpart) + ( (fracpart > 0.5) ? 1 : 0 );
-  return result;
+  modf( f + 0.5, &intpart );
+  return static_cast< int > ( intpart );
 }

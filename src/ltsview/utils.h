@@ -62,6 +62,6 @@ namespace Utils
     return ( a < b ) ? a : b;
   }
 
-  int round( double f );
+  int roundToInt( double f );
 }
 #endif
