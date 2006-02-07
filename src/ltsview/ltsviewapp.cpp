@@ -1,3 +1,5 @@
+#define GLUT_DISABLE_ATEXIT_HACK
+
 #include "ltsviewapp.h"
 
 IMPLEMENT_APP( LTSViewApp )

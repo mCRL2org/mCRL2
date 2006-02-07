@@ -12,11 +12,6 @@ WX_OBJECTS	 = ltsviewapp.o mainframe.o glcanvas.o spinctrlfloat.o markstateruled
 AT_OBJECTS	 = ltsviewapp.o action.o fsmparser.o lts.o state.o
 CPP_OBJECTS	 = fileloader.o visualizer.o lts.o state.o transition.o \
 		   cluster.o fsmparser.o utils.o glutils.o
-ifeq ($(HOST_OS),MACOSX)
-GLUT_LDFLAGS     = -framework GLUT -framework OpenGL -lobjc
-else
-GLUT_LDFLAGS     = -lglut
-endif
 
 OBJECTS		 = $(WX_OBJECTS) $(CPP_OBJECTS) ../liblowlevel.o
 TARGETS		 = ltsview
@@ -35,7 +30,7 @@ endif
 CPPFLAGS += $(REVISION)
 
 ltsview : $(OBJECTS)
-	$(CXX) $(GLUT_LDFLAGS) $(LDFLAGS) $(OBJECTS) $(WX_LIBS) -lATerm -o $@
+	$(CXX) $(LDFLAGS) $(OBJECTS) $(GLUT_LDFLAGS) $(WX_LIBS) -lATerm -o $@
 
 $(WX_OBJECTS) : %.o: %.cpp
 	$(CXX) -c $(CPPFLAGS) $(CXXFLAGS) $(WX_CXXFLAGS) $(ATERM_CPPFLAGS) $< -o $@
