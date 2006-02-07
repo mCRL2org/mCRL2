@@ -1880,7 +1880,7 @@ static ATermAppl gstcTraverseVarConsTypeDN(int nFactPars, ATermTable Vars, ATerm
     if(ATgetLength(ParList)==1){
       ATermAppl Type=ATAgetFirst(ParList);
       if(gstcHasUnknown(Type)){
-	Type=gstcTypeMatchA(PosType,Type);
+	Type=gstcTypeMatchA(Type,PosType);
       }
       if(gstcHasUnknown(Type) && gsIsOpId(*DataTerm)){
 	Type=gstcTypeMatchA(Type,ATAgetArgument(*DataTerm,1));
@@ -1938,7 +1938,7 @@ static ATermAppl gstcTraverseVarConsTypeDN(int nFactPars, ATermTable Vars, ATerm
       }
 
       if(ATisEqual(gsMakeOpIdNameEltAt(),ATAgetArgument(*DataTerm,0))){
-	gsDebugMsg("Doing @ matching Type %T, PosType %T\n",Type,PosType);    
+	gsDebugMsg("Doing @ matching Type %T, PosType %T, DataTerm: %T\n",Type,PosType,*DataTerm);    
 	ATermAppl NewType=gstcMatchListOpEltAt(Type);
 	if(!NewType){
 	  gsErrorMsg("the function @ has incompatible argument types %P (while typechecking %P)\n",Type,*DataTerm);
@@ -2615,16 +2615,15 @@ static ATermAppl gstcMatchListOpEltAt(ATermAppl Type){
   ATermList Args=ATLgetArgument(Type,0);
   assert((ATgetLength(Args)==2));
 
-  //assert((gsIsSortNat(ATAgetFirst(Args)));
-  Args=ATgetNext(Args);
-
-  ATermAppl Arg2=ATAgetFirst(Args);
-  if(gsIsSortId(Arg2)) Arg2=gstcUnwindType(Arg2);
-  assert(gsIsSortList(Arg2));
-  Arg2=ATAgetArgument(Arg2,0);
+  ATermAppl Arg1=ATAgetFirst(Args);
+  if(gsIsSortId(Arg1)) Arg1=gstcUnwindType(Arg1);
+  assert(gsIsSortList(Arg1));
+  Arg1=ATAgetArgument(Arg1,0);
   
-  Res=gstcUnifyMinType(Res,Arg2);
+  Res=gstcUnifyMinType(Res,Arg1);
   if(!Res) return NULL;
+
+  //assert((gsIsSortNat(ATAgetFirst(ATgetNext(Args))));
 
   return gsMakeSortArrowProd(ATmakeList2((ATerm)gsMakeSortList(Res),(ATerm)gsMakeSortIdNat()),Res);
 }
