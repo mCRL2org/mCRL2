@@ -8,15 +8,19 @@ namespace Utils
 
   enum RankStyle { Iterative, Cyclic };
 
-  struct RGB_Color    /* The name is not RGBColor because
-                         this leads to a naming conflict with
-                         the built-in name RGBColor on 
-                         MacOsX (Jan Friso Groote, 27-1-2006) */
+  struct RGB_Color
   {
     unsigned char r;
     unsigned char g;
     unsigned char b;
   }; 
+
+  struct HSV_Color
+  {
+    float h;
+    float s;
+    float v;
+  };
 
   struct Point3D
   {
@@ -62,6 +66,8 @@ namespace Utils
     return ( a < b ) ? a : b;
   }
 
+  HSV_Color RGBtoHSV( RGB_Color c );
+  RGB_Color HSVtoRGB( HSV_Color c );
   int roundToInt( double f );
 }
 #endif

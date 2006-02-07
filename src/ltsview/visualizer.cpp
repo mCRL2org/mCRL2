@@ -3,7 +3,7 @@
 VisSettings Visualizer::defaultVisSettings =
 {
   { 190, 190, 190 }, 0.3f, 100, 1.2f, { 255, 255, 255 }, { 235, 235, 235 },
-  { 0, 0, 255 }, false, true, { 255, 0, 0 }, 0.1f, 30, 12, { 255, 255, 255 }, 0, 
+  { 0, 0, 255 }, false, false, { 255, 0, 0 }, 0.1f, 30, 12, { 255, 255, 255 }, 0, 
   { 0, 0, 255 }
 };
 
@@ -119,21 +119,31 @@ void Visualizer::drawLTS()
 	glEnable( GL_COLOR_MATERIAL );
 	glColorMaterial( GL_FRONT_AND_BACK, GL_AMBIENT_AND_DIFFUSE );
 
-	RGB_Color delta_col;
-	//if ( visSettings.longInterpolation )
-	delta_col.r = ( visSettings.interpolateColor2.r - 
-	    visSettings.interpolateColor1.r ) / lts->getNumberOfRanks();
-	delta_col.g = ( visSettings.interpolateColor2.g - 
-	    visSettings.interpolateColor1.g ) / lts->getNumberOfRanks();
-	delta_col.b = ( visSettings.interpolateColor2.b - 
-	    visSettings.interpolateColor1.b ) / lts->getNumberOfRanks();
+	HSV_Color delta_col;
+	RGB_Color rgb1 = visSettings.interpolateColor1;
+	RGB_Color rgb2 = visSettings.interpolateColor2;
+	HSV_Color hsv1 = RGBtoHSV( rgb1 );
+	HSV_Color hsv2 = RGBtoHSV( rgb2 );
+	if ( rgb1.r == rgb1.g && rgb1.g == rgb1.b ) hsv1.h = hsv2.h;
+	if ( rgb2.r == rgb2.g && rgb2.g == rgb2.b ) hsv2.h = hsv1.h;
+	float delta_h1 = hsv2.h - hsv1.h;
+	float delta_h2 = ((delta_h1 < 0.0f) ? 1.0f : -1.0f) * (360.0f - fabs(delta_h1));
+	
+	delta_h1 /= (lts->getNumberOfRanks() - 1);
+	delta_h2 /= (lts->getNumberOfRanks() - 1);
+	
+	if ( visSettings.longInterpolation )
+	  delta_col.h = ( fabs(delta_h1) < fabs(delta_h2) ) ? delta_h2 : delta_h1;
+	else
+	  delta_col.h = ( fabs(delta_h1) < fabs(delta_h2) ) ? delta_h1 : delta_h2;
+	delta_col.s = (hsv2.s - hsv1.s) / (lts->getNumberOfRanks() - 1);
+	delta_col.v = (hsv2.v - hsv1.v) / (lts->getNumberOfRanks() - 1);
 	
 	structHeight = 0.0f;
 	structWidth = 0.0f;
 
-	drawSubtree( lts->getInitialState()->getCluster(),
-	    visSettings.interpolateColor1, delta_col, true, structWidth,
-	    structHeight );
+	drawSubtree( lts->getInitialState()->getCluster(), hsv1, delta_col,
+	    true, structWidth, structHeight );
 
 	glDisable( GL_COLOR_MATERIAL );
       
@@ -170,28 +180,30 @@ void Visualizer::drawLTS()
 }
 
 // draws the subtree with cluster *root (being the root of the tree)
-void Visualizer::drawSubtree( Cluster* root, RGB_Color col, RGB_Color delta_col,
+void Visualizer::drawSubtree( Cluster* root, HSV_Color col, HSV_Color delta_col,
     bool topClosed, float &boundWidth, float &boundHeight )
 {
   if ( !root->hasDescendants() )
   {
-    GLUtils::setColor( col, visSettings.transparency );
+    GLUtils::setColor( HSVtoRGB( col ), visSettings.transparency );
     glutSolidSphere( root->getTopRadius(), visSettings.quality, visSettings.quality );
     boundWidth = root->getTopRadius();
     boundHeight = 2.0f * root->getTopRadius();
   }
   else
   {
-    RGB_Color desccol = 
-      { col.r + delta_col.r, col.g + delta_col.g, col.b + delta_col.b };
+    HSV_Color desccol = 
+      { col.h + delta_col.h, col.s + delta_col.s, col.v + delta_col.v };
+    if ( desccol.h < 0.0f ) desccol.h += 360.0f;
+    else if ( desccol.h > 360.0f ) desccol.h -= 360.0f;
     
     vector< Cluster* > descendants;
     root->getDescendants( descendants );
     
     GLUtils::coloredCylinder( root->getTopRadius(), root->getBaseRadius(),
 	visSettings.clusterHeight, visSettings.quality, visSettings.quality,
-	col, desccol, visSettings.transparency, topClosed,
-	descendants.size() > 1 );
+	HSVtoRGB( col ), HSVtoRGB( desccol ), visSettings.transparency,
+	topClosed, descendants.size() > 1 );
       
     vector< Cluster* >::iterator descit;
     for ( descit = descendants.begin() ; descit != descendants.end() ; ++descit )

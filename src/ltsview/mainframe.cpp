@@ -23,7 +23,8 @@ BEGIN_EVENT_TABLE( MainFrame, wxFrame )
   EVT_TOOL  ( myID_ZOOM, MainFrame::onActivateTool )
   EVT_CHOICE( myID_RANK_STYLE, MainFrame::onChoice )
   EVT_BUTTON( myID_COLOR_BUTTON, MainFrame::onColorButton )
-  EVT_SPINCTRL( myID_SETTINGS_CONTROL, MainFrame::onSettingChanged )
+  EVT_SPINCTRL( myID_SETTINGS_CONTROL, MainFrame::onSpinSettingChanged )
+  EVT_CHECKBOX( myID_SETTINGS_CONTROL, MainFrame::onCommandSettingChanged )
   EVT_BUTTON( wxID_RESET, MainFrame::onResetButton )
   EVT_BUTTON( myID_ADD_RULE, MainFrame::onAddMarkStateRuleButton )
   EVT_BUTTON( myID_REMOVE_RULE, MainFrame::onRemoveMarkStateRuleButton )
@@ -95,47 +96,49 @@ void MainFrame::setupMainArea()
   mainSizer->AddGrowableCol( 0 );
   mainSizer->AddGrowableRow( 0 );
 
-  glCanvas = new GLCanvas( mediator, this, wxID_ANY );
-  glCanvas->SetMinSize( wxSize( 800, 600 ) );
+  glCanvas = new GLCanvas( mediator, this, wxID_ANY, wxDefaultPosition, wxSize( 800, -1 ) );
 
-  wxFlexGridSizer* rightSizer = new wxFlexGridSizer( 2, 1, 0, 0 );
-  rightSizer->AddGrowableRow( 1 );
-  setupRightArea( rightSizer );
+  wxPanel* rightPanel = new wxPanel( this, wxID_ANY, wxDefaultPosition,
+      wxDefaultSize, wxRAISED_BORDER );
+  setupRightPanel( rightPanel );
   
   mainSizer->Add( glCanvas, 1, wxALIGN_CENTER | wxEXPAND | wxALL, 0 );
-  mainSizer->Add( rightSizer, 1, wxALIGN_CENTER | wxEXPAND | wxALL, 0 );
+  mainSizer->Add( rightPanel, 1, wxALIGN_CENTER | wxEXPAND | wxALL, 0 );
   mainSizer->Fit( this );
   SetSizer( mainSizer );
 }
 
-void MainFrame::setupRightArea( wxFlexGridSizer* sizer )
+void MainFrame::setupRightPanel( wxPanel* panel )
 {
+  wxFlexGridSizer* sizer = new wxFlexGridSizer( 2, 1, 0, 0 );
+  sizer->AddGrowableRow( 1 );
+
   int lflags = wxALIGN_LEFT | wxALIGN_CENTER_VERTICAL | wxALL;
   int rflags = wxALIGN_RIGHT | wxALIGN_CENTER_VERTICAL | wxEXPAND | wxALL;
   
   // setup the top part (information box)
   wxFlexGridSizer* topSizer = new wxFlexGridSizer( 4, 2, 0, 0 );
-  numberOfStatesLabel = new wxStaticText( this, wxID_ANY, wxT(""),
+  numberOfStatesLabel = new wxStaticText( panel, wxID_ANY, wxT(""),
       wxDefaultPosition, wxDefaultSize, wxALIGN_RIGHT | wxST_NO_AUTORESIZE );
-  numberOfTransitionsLabel = new wxStaticText( this, wxID_ANY, wxT(""),
+  numberOfTransitionsLabel = new wxStaticText( panel, wxID_ANY, wxT(""),
       wxDefaultPosition, wxDefaultSize, wxALIGN_RIGHT | wxST_NO_AUTORESIZE );
-  numberOfClustersLabel = new wxStaticText( this, wxID_ANY, wxT(""),
+  numberOfClustersLabel = new wxStaticText( panel, wxID_ANY, wxT(""),
       wxDefaultPosition, wxDefaultSize, wxALIGN_RIGHT | wxST_NO_AUTORESIZE );
-  numberOfRanksLabel = new wxStaticText( this, wxID_ANY, wxT(""),
+  numberOfRanksLabel = new wxStaticText( panel, wxID_ANY, wxT(""),
       wxDefaultPosition, wxDefaultSize, wxALIGN_RIGHT | wxST_NO_AUTORESIZE );
   
   topSizer->AddGrowableCol( 1 );
-  topSizer->Add( new wxStaticText( this, wxID_ANY, wxT("Number of states:") ), 0, lflags, 3 );
+  topSizer->Add( new wxStaticText( panel, wxID_ANY, wxT("Number of states:") ), 0, lflags, 3 );
   topSizer->Add( numberOfStatesLabel, 0, rflags, 3 );
-  topSizer->Add( new wxStaticText( this, wxID_ANY, wxT("Number of transitions:") ), 0, lflags, 3 );
+  topSizer->Add( new wxStaticText( panel, wxID_ANY, wxT("Number of transitions:") ), 0, lflags, 3 );
   topSizer->Add( numberOfTransitionsLabel, 0, rflags, 3 );
-  topSizer->Add( new wxStaticText( this, wxID_ANY, wxT("Number of clusters:") ), 0, lflags, 3 );
+  topSizer->Add( new wxStaticText( panel, wxID_ANY, wxT("Number of clusters:") ), 0, lflags, 3 );
   topSizer->Add( numberOfClustersLabel, 0, rflags, 3 );
-  topSizer->Add( new wxStaticText( this, wxID_ANY, wxT("Number of ranks:") ), 0, lflags, 3 );
+  topSizer->Add( new wxStaticText( panel, wxID_ANY, wxT("Number of ranks:") ), 0, lflags, 3 );
   topSizer->Add( numberOfRanksLabel, 0, rflags, 3 );
 
   // setup the bottom part (notebook)
-  wxNotebook* bottomNotebook = new wxNotebook( this, wxID_ANY );
+  wxNotebook* bottomNotebook = new wxNotebook( panel, wxID_ANY );
   wxPanel* settingsPanel = new wxPanel( bottomNotebook, wxID_ANY );
   wxPanel* markPanel = new wxPanel( bottomNotebook, wxID_ANY );
   
@@ -147,6 +150,7 @@ void MainFrame::setupRightArea( wxFlexGridSizer* sizer )
   
   sizer->Add( topSizer, 0, wxEXPAND | wxALL, 5 );
   sizer->Add( bottomNotebook, 0, wxEXPAND | wxALL, 5 );
+  panel->SetSizer( sizer );
 }
 
 void MainFrame::setupSettingsPanel( wxPanel* panel )
@@ -446,12 +450,22 @@ void MainFrame::onColorButton( wxCommandEvent& event )
   {
     coldat = coldlg->GetColourData();
     btn->SetBackgroundColour( coldat.GetColour() );
-    btn->Refresh();
+    btn->ClearBackground();
+    
+    wxEraseEvent eraseEvent;
+    eraseEvent.SetEventObject( btn );
+    this->ProcessEvent( eraseEvent );
+    
     mediator->applySettings();
   }
 }
 
-void MainFrame::onSettingChanged( wxSpinEvent& /*event*/ )
+void MainFrame::onSpinSettingChanged( wxSpinEvent& /*event*/ )
+{
+  mediator->applySettings();
+}
+
+void MainFrame::onCommandSettingChanged( wxCommandEvent& /*event*/ )
 {
   mediator->applySettings();
 }

@@ -11,6 +11,7 @@
 #include <wx/notebook.h>
 #include <wx/spinctrl.h>
 #include <wx/bitmap.h>
+#include <wx/event.h>
 #include "spinctrlfloat.h"
 #include "mediator.h"
 #include "glcanvas.h"
@@ -35,7 +36,8 @@ class MainFrame : public wxFrame
     void	onRemoveMarkStateRuleButton( wxCommandEvent& event );
     void	onResetButton( wxCommandEvent& event );
     void	onResetView( wxCommandEvent& event );
-    void	onSettingChanged( wxSpinEvent& event );
+    void	onCommandSettingChanged( wxCommandEvent& event );
+    void	onSpinSettingChanged( wxSpinEvent& event );
     void	setVisSettings( VisSettings ss );
     void	setNumberInfo( int nstates, int ntransitions, int nclusters, int nranks );
     void	showMessage( string title, string text );
@@ -71,7 +73,7 @@ class MainFrame : public wxFrame
 
     void setupMainArea();
     void setupMenuBar();
-    void setupRightArea( wxFlexGridSizer* sizer );
+    void setupRightPanel( wxPanel* panel );
     void setupMarkPanel( wxPanel* panel );
     void setupSettingsPanel( wxPanel* panel );
     void setupToolBar();

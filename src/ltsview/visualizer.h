@@ -30,7 +30,7 @@ class Visualizer
     float	    structWidth;
     VisSettings	    visSettings;
 
-    void drawSubtree( Cluster* root, RGB_Color col, RGB_Color delta_col, bool
+    void drawSubtree( Cluster* root, HSV_Color col, HSV_Color delta_col, bool
 	topClosed, float &boundWidth, float &boundHeight );
   
   public:

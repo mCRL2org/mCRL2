@@ -7,11 +7,14 @@ wxSpinCtrlFloat::wxSpinCtrlFloat(wxWindow* parent, wxWindowID id, float p_Min, f
   m_Rate(p_Rate) , m_ID(id)
 {
   wxBoxSizer* Sizer = new wxBoxSizer( wxHORIZONTAL );
-  Sizer->Add( m_TextCtrl = new wxTextCtrl(this, 0, wxEmptyString,
-	wxDefaultPosition, wxDefaultSize, wxTE_PROCESS_ENTER ), 1, wxEXPAND, 0
-      );
-  Sizer->Add( m_SpinButton = new wxSpinButton(this, 1, wxDefaultPosition,
-	wxDefaultSize, wxSP_VERTICAL ), 0, wxEXPAND | wxALL, 0 );
+  m_TextCtrl = new wxTextCtrl(this, 0, wxEmptyString, wxDefaultPosition,
+      wxDefaultSize, wxTE_PROCESS_ENTER );
+  m_SpinButton = new wxSpinButton(this, 1, wxDefaultPosition, wxDefaultSize,
+      wxSP_VERTICAL );
+  m_TextCtrl->SetSizeHints( -1, -1, -1, 25 );
+  m_SpinButton->SetSizeHints( -1, -1, -1, 25 );
+  Sizer->Add( m_TextCtrl, 1, wxEXPAND, 0 );
+  Sizer->Add( m_SpinButton , 0, wxEXPAND, 0 );
   
   m_SpinButton->SetRange( roundToInt( p_Min/p_Rate ), roundToInt( p_Max/p_Rate ) );
   SetValue( p_Init );
