@@ -74,6 +74,27 @@ extern "C" ATermList gsRewriteInternals(ATermList Terms)
 	return ATreverse(l);
 }
 
+extern "C" void PrintRewriteStrategy(FILE *stream, RewriteStrategy strat)
+{
+  if (strat == GS_REWR_INNER) {
+    fprintf(stream, "inner");
+  } else if (strat == GS_REWR_INNER2) {
+    fprintf(stream, "inner2");
+  } else if (strat == GS_REWR_INNER3) {
+    fprintf(stream, "inner3");
+  } else if (strat == GS_REWR_INNERC) {
+    fprintf(stream, "innerC");
+  } else if (strat == GS_REWR_INNERC2) {
+    fprintf(stream, "innerC2");
+  } else if (strat == GS_REWR_JITTY) {
+    fprintf(stream, "jitty");
+  } else if (strat == GS_REWR_JITTYC) {
+    fprintf(stream, "jittyc");
+  } else {
+    fprintf(stream, "invalid");
+  }
+}
+
 extern "C" RewriteStrategy RewriteStrategyFromString(const char *s)
 {
 	if ( !strcmp(s,"inner") )

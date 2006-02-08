@@ -6,6 +6,7 @@
 <!ENTITY tconst "<type>const</type>">
 <!ENTITY tvoid "<type>void</type>">
 <!ENTITY tpchar "<type>char*</type>">
+<!ENTITY tpfile "<type>FILE*</type>">
 <!ENTITY taterm "<type>ATerm</type>">
 <!ENTITY trewrstrat "<type>RewriteStrategy</type>">
 <!ENTITY gsRewriteInit "<function>gsRewriteInit</function>">
@@ -18,6 +19,7 @@
 <!ENTITY gsFromRewriteFormat "<function>gsFromRewriteFormat</function>">
 <!ENTITY gsRewriteInternal "<function>gsRewriteInternal</function>">
 <!ENTITY gsRewriteInternals "<function>gsRewriteInternals</function>">
+<!ENTITY PrintRewriteStrategy "<function>PrintRewriteStrategy</function>">
 <!ENTITY RewriteStrategyFromString "<function>RewriteStrategyFromString</function>">
 <!ENTITY parDataEqnSpec "<parameter>DataEqnSpec</parameter>">
 <!ENTITY parStrategy "<parameter>Strategy</parameter>">
@@ -25,6 +27,7 @@
 <!ENTITY parTerm "<parameter>Term</parameter>">
 <!ENTITY parTerms "<parameter>Terms</parameter>">
 <!ENTITY parS "<parameter>s</parameter>">
+<!ENTITY parStream "<parameter>stream</parameter>">
 <!ENTITY stratINNER3 "<constant>GS_REWR_INNER3</constant>">
 <!ENTITY stratINNER3string "<constant>inner3</constant>">
 <!ENTITY stratINNERC "<constant>GS_REWR_INNERC</constant>">
@@ -93,6 +96,11 @@
   <paramdef>&tatermlist; &parTerms;</paramdef>
 </funcprototype>
 <funcprototype>
+  <funcdef>&trewrstrat; &PrintRewriteStrategy;</funcdef>
+  <paramdef>&tpfile; &parStream;</paramdef>
+  <paramdef>&trewrstrat; &parStrategy;</paramdef>
+</funcprototype>
+<funcprototype>
   <funcdef>&trewrstrat; &RewriteStrategyFromString;</funcdef>
   <paramdef>&tconst; &tpchar; &parS;</paramdef>
 </funcprototype>
@@ -120,7 +128,10 @@ Currently, there are three different rewriting strategies available in librewrit
 An alternative to &stratINNER3; is the JITty rewriter &stratJITTY;. This strategy can avoid a lot of unnecessary rewriting in certain cases and can handle some rewrite rules that cause the innermost rewriters to rewrite infinitely.
 </para>
 <para>
-To convert a string representation of a strategy to a &trewrstrat;, one can use &RewriteStrategyFromString;. This is useful for converting command line arguments, specifying a rewrite strategy. The string representations are derived from there &trewrstrat; name by taking the last part and writing it in lower case (e.g. &stratINNER3string; for &stratINNER3;). If the supplied string does not match any of the available strategies, &stratINVALID; is returned. Note that it is not allowed to supply &stratINVALID; to &gsRewriteInit;.
+A strategy &trewrstrat; can be printed to a stream in string representation using &PrintRewriteStrategy;. The string representations are derived from their &trewrstrat; name by taking the last part and writing it in lower case (e.g. &stratINNER3string; for &stratINNER3;).
+</para>
+<para>
+To convert a string representation of a strategy to a &trewrstrat;, one can use &RewriteStrategyFromString;. This is useful for converting command line arguments specifying a rewrite strategy. If the supplied string does not match any of the available strategies, &stratINVALID; is returned. Note that it is not allowed to supply &stratINVALID; to &gsRewriteInit;.
 </para>
 </refsect2>
 

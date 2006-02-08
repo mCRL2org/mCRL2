@@ -8,6 +8,7 @@
 #include <getopt.h>
 #include <limits.h>
 #include <stdio.h>
+#include <stdlib.h>
 #include <aterm2.h>
 #include <string.h>
 #include <cstdio>
@@ -211,8 +212,7 @@ int main(int argc, char *argv[])
   } else {
     //noargc >= 0 && noargc <= 2
     if (noargc > 0) {
-      if (strcmp(argv[optind],"-") != 0)
-        infilename = strdup(argv[optind]);
+      infilename = strdup(argv[optind]);
     }
     if (noargc == 2) {
       outfilename = strdup(argv[optind + 1]);
@@ -241,6 +241,8 @@ int main(int argc, char *argv[])
     linearise_file(infilename, lin_options,
       opt_check_only?phTypeCheck:opt_end_phase, !opt_noalpha);
   if (result == NULL) {
+    free(infilename);
+    free(outfilename);
     return 1;
   }
   if (opt_check_only) {
@@ -250,6 +252,8 @@ int main(int argc, char *argv[])
       fprintf(stdout, "The file '%s'", infilename);
     }
     fprintf(stdout, " contains a well-formed mCRL2 specification.\n");
+    free(infilename);
+    free(outfilename);
     return 0;
   } else {
     //store the result
@@ -262,6 +266,8 @@ int main(int argc, char *argv[])
       FILE *outstream = fopen(outfilename, "wb");
       if (outstream == NULL) {
         gsErrorMsg("cannot open output file '%s'\n", outfilename);
+        free(infilename);
+        free(outfilename);
         return 1;
       }
       gsVerboseMsg("saving result to '%s'...\n", outfilename);
@@ -269,6 +275,8 @@ int main(int argc, char *argv[])
       fclose(outstream);
     }
   }
+  free(infilename);
+  free(outfilename);
   return 0;
 }
 

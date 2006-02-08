@@ -33,6 +33,7 @@ ATermAppl gsFromRewriteFormat(ATerm Term);
 ATerm gsRewriteInternal(ATerm Term);
 ATermList gsRewriteInternals(ATermList Terms);
 
+void PrintRewriteStrategy(FILE *stream, RewriteStrategy strat);
 RewriteStrategy RewriteStrategyFromString(const char *s);
 
 void RWsetVariable(ATerm v, ATerm t);
