@@ -452,10 +452,6 @@ void MainFrame::onColorButton( wxCommandEvent& event )
     btn->SetBackgroundColour( coldat.GetColour() );
     btn->ClearBackground();
     
-    wxEraseEvent eraseEvent;
-    eraseEvent.SetEventObject( btn );
-    this->ProcessEvent( eraseEvent );
-    
     mediator->applySettings();
   }
 }

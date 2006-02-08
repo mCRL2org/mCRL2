@@ -53,7 +53,7 @@ void GLCanvas::initialize()
   glDepthFunc( GL_LEQUAL );
   glShadeModel( GL_SMOOTH );
   
-  GLfloat gray[] = { 0.5f, 0.5f, 0.5f, 1.0f };
+  GLfloat gray[] = { 0.35f, 0.35f, 0.35f, 1.0f };
   GLfloat light_pos[] = { 50.0f, 50.0f, 50.0f, 1.0f };
   glEnable( GL_NORMALIZE );
   glLightfv( GL_LIGHT0, GL_AMBIENT, gray );
@@ -267,6 +267,10 @@ void GLCanvas::onMouseMove( wxMouseEvent& event )
 	
       default : break;
     }
+  }
+  else
+  {
+    event.Skip();
   }
 }
 

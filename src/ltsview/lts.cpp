@@ -239,6 +239,8 @@ void LTS::applyCyclicRanking()
     statesInRank.push_back( nextRank );
     ++currRank;
   }
+  // last element of statesInRank is an empty vector
+  statesInRank.erase( statesInRank.end()-1 );
 }
 
 void LTS::clearRanksAndClusters()

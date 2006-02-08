@@ -162,6 +162,7 @@ void LTSViewApp::setRankStyle( string rss )
       glCanvas->display();
       glCanvas->setDefaultPosition( visualizer->getStructureWidth(),
 	  visualizer->getStructureHeight() );
+      glCanvas->resetView();
       mainFrame->setNumberInfo( lts->getNumberOfStates(),
 	  lts->getNumberOfTransitions(), lts->getNumberOfClusters(),
 	  lts->getNumberOfRanks() );
