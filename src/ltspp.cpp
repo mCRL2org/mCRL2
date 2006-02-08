@@ -50,7 +50,7 @@ int main(int argc, char *argv[])
          exit(EXIT_OK);
          break;
       case CMD_VERSION:
-         doVersion(argv[0]);
+         doVersion();
          exit(EXIT_OK);
       case CMD_CONVERT:
          exit(doConvert(fpOut, traceLevel));
@@ -215,9 +215,9 @@ void doHelp(char *cmd) {
 
 
 
-void doVersion(char *progName) {
+void doVersion() {
 
-   fprintf(stdout, NAME " " VERSION " (revision %i)\n", REVISION);
+   fprintf(stderr, NAME " " VERSION " (revision %i)\n", REVISION);
 
 } /* doVersion */
 

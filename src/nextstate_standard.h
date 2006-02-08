@@ -60,7 +60,7 @@ class NextStateStandard : public NextState
 {
 	friend class NextStateGeneratorStandard;
 	public:
-		NextStateStandard(ATermAppl spec, bool allow_free_vars, int state_format, Enumerator *e, bool clean_up_enumerator, NextStateStrategy strategy = nsStandard);
+		NextStateStandard(ATermAppl spec, bool allow_free_vars, int state_format, Enumerator *e, bool clean_up_enumerator);
 		~NextStateStandard();
 
 		void prioritise(char *action);

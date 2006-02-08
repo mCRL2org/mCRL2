@@ -109,7 +109,7 @@ extern ATermTable *lab_src_tgt, *lab_tgt_src;
         
 int  parseArgs(int argc, char *argv[], int *traceLevel, int *optimal, int *classes);
 void doHelp(char *);
-void doVersion(char *);
+void doVersion();
 int  doReduce(void);
 int  doBranchReduce(void);
 int  doCompare(void);

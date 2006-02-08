@@ -562,12 +562,12 @@ static int WriteTransitions(void) {
    return n_tau_transitions;
    }
    
-static void TestTransitions(void) { 
+/*static void TestTransitions(void) { 
 int label;
 for (label=0;label<nlabel;label++) {
 ATwarning("Test: %d: %t\n",label, ATtableKeys(lab_tgt_src[label]));
 }
-}
+}*/
   
 static ATermList  StableBlockNumbers(void)
 /* returns a list of the block numbers of all stable blocks */

@@ -55,12 +55,12 @@ ATermList Rewriter::rewriteInternalList(ATermList Terms)
 	return ATreverse(l);
 }
 
-bool Rewriter::addRewriteRule(ATermAppl Rule)
+bool Rewriter::addRewriteRule(ATermAppl /*Rule*/)
 {
 	return false;
 }
 
-bool Rewriter::removeRewriteRule(ATermAppl Rule)
+bool Rewriter::removeRewriteRule(ATermAppl /*Rule*/)
 {
 	return false;
 }

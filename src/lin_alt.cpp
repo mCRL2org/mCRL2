@@ -2053,7 +2053,7 @@ static ATermAppl gen_linproc(ATermList sums, ATermList c)
 	return r;
 }
 
-static ATermAppl update_spec(ATermAppl spec, int init)
+static ATermAppl update_spec(ATermAppl spec, int /*init*/)
 {
 	ATermList l,m,n;
 /*	ATermList o;
@@ -2431,10 +2431,10 @@ static ATermAppl make_lpe(ATermAppl Spec, int init_id)
 	return Spec;
 }
 
-static ATermAppl cluster_lpe(ATermAppl spec)
+/*static ATermAppl cluster_lpe(ATermAppl spec)
 {
 	gsWarningMsg("clustering not yet implemented\n");
-	return spec;
+	return spec;*/
 /*	ATermList sums = ATLgetArgument(ATAgetArgument(spec,4),1);
 	ATermList cluster, newsums;
 	ATermAppl sumvars,;
@@ -2448,7 +2448,7 @@ static ATermAppl cluster_lpe(ATermAppl spec)
 	}
 
 	return ATsetArgument(spec,(ATerm) gsMakeLPE(ATLgetArgument(ATAgetArgument(spec,4),0),newsums),4); */
-}
+//}
 
 static ATermAppl get_unique_var(ATermAppl var, ATermTable names, ATermList *substs, ATermList *new_list)
 {
@@ -2719,7 +2719,7 @@ ATermAppl linearise_alt_statespace(ATermAppl Spec, bool lpe)
 	return Spec;
 }
 
-ATermAppl linearise_alt(ATermAppl Spec, t_lin_options lin_options)
+ATermAppl linearise_alt(ATermAppl Spec, t_lin_options /*lin_options*/)
 {
 //	ATermList lin;
 //	ATermList l;

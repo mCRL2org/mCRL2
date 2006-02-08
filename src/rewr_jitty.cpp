@@ -236,7 +236,7 @@ static ATermList create_strategy(ATermList rules)
 						bs[i] = true;
 						vars = ATappend(vars,(ATerm) get_vars(ATgetArgument(pars,i+1)));
 					} else {
-						unsigned int j = -1;
+						int j = -1;
 						bool b = false;
 						for (ATermList o=vars; !ATisEmpty(o); o=ATgetNext(o))
 						{
@@ -569,7 +569,7 @@ ATermAppl RewriterJitty::rewrite_aux(ATermAppl Term)
 		return (ATermAppl) lookupSubstitution(Term);
 	} else {
 		ATerm op = ATgetArgument(Term,0);
-		ATerm head;
+		ATerm head = NULL;
 		ATermList strat;
 		int head_arity = 0;
 		int arity = ATgetArity(ATgetAFun(Term));

@@ -310,7 +310,7 @@ static ATermAppl convert_lpe(ATermAppl spec, ATermList typelist, ATermList *ids)
 	return gsMakeLPE(ATmakeList0(),pars,ATreverse(smds));
 }
 
-static ATermList convert_init(ATermAppl spec, ATermList typelist, ATermList *ids)
+static ATermList convert_init(ATermAppl spec, ATermList typelist, ATermList * /*ids*/)
 {
 	ATermList vars = ATLgetArgument(ATAgetArgument(spec,1),1);
 	ATermList vals = ATLgetArgument(ATAgetArgument(spec,1),0);

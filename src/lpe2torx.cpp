@@ -66,8 +66,8 @@ class torx_data
   public:
     torx_data(unsigned int initial_size)
     {
-      stateactions = ATindexedSetCreate(10000,50);
-      state_indices = ATtableCreate(10000,50);
+      stateactions = ATindexedSetCreate(initial_size,50);
+      state_indices = ATtableCreate(initial_size,50);
       fun_trip = ATmakeAFun("@trip@",2,ATfalse);
       ATprotectAFun(fun_trip);
     }
@@ -168,7 +168,6 @@ int main(int argc, char **argv)
   bool removeunused = true;
   int stateformat = GS_STATE_VECTOR;
   int opt;
-  char *SpecFileName;
   while ( (opt = getopt_long(argc,argv,sopts,lopts,NULL)) != -1 )
   {
     switch ( opt )
@@ -228,6 +227,7 @@ int main(int argc, char **argv)
     return 1;
   }
 
+  char *SpecFileName;
   if ( argc-optind == 1 )
   {
     SpecFileName = argv[optind];
@@ -238,6 +238,7 @@ int main(int argc, char **argv)
       return 1;
     }
   } else {
+    SpecFileName = NULL;
     SpecStream = stdin;
   }
   if ( SpecStream == stdin )

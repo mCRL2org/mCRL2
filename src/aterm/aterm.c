@@ -66,7 +66,7 @@ static void     (*error_handler) (const char *format, va_list args) = NULL;
 static void     (*abort_handler) (const char *format, va_list args) = NULL;
 
 /* We need a buffer for printing and parsing */
-static int      buffer_size = 0;
+static unsigned int      buffer_size = 0;
 static char    *buffer = NULL;
 
 /* Parse error description */
@@ -1216,7 +1216,7 @@ ATwriteToString(ATerm t)
   end = topWriteToString(t, buffer);
   *end++ = '\0';
 
-  assert(end - buffer == size);
+  assert(((unsigned int) (end - buffer)) == size);
 
   return buffer;
 }
@@ -1249,7 +1249,7 @@ unsigned long ATcalcTextSize(ATerm t)
  */
 
 static void
-store_char(int c, int pos)
+store_char(int c, unsigned int pos)
 {
   if (pos >= buffer_size)
     resize_buffer(buffer_size * 2);	/* Double the space */
@@ -1370,7 +1370,7 @@ static ATerm fparse_blob(int *c, FILE *f)
   if (!data) {
     ATerror("out of memory in fparse_blob\n");
   }
-  if (fread(data, 1, len, f) != len) {
+  if (fread(data, 1, len, f) != (unsigned int) len) {
     return NULL;
   }
 
@@ -2886,7 +2886,7 @@ void AT_assertUnmarked(ATerm t)
 {
   ATermAppl appl;
   Symbol sym;
-  int i;
+  unsigned int i;
 
   assert(!IS_MARKED(t->header));
   switch(ATgetType(t)) {
@@ -2921,7 +2921,7 @@ void AT_assertMarked(ATerm t)
 {
   ATermAppl appl;
   Symbol sym;
-  int i;
+  unsigned int i;
 
   assert(IS_MARKED(t->header));
   switch(ATgetType(t)) {
@@ -2960,8 +2960,8 @@ void AT_assertMarked(ATerm t)
 
 unsigned long AT_calcTermDepth(ATerm t)
 {
-  unsigned long depth = 0;
-  int arity, i, maxdepth = 0;
+  unsigned long depth = 0, maxdepth = 0;
+  int arity, i;
   ATermAppl appl;
   ATermList list;
 
@@ -3159,7 +3159,7 @@ ATbool ATdiff(ATerm t1, ATerm t2, ATerm *template, ATerm *diffs)
 
 ATbool AT_isDeepEqual(ATerm t1, ATerm t2)
 {
-  int type;
+  header_type type;
   ATbool result = ATtrue;
 
   if (t1 == NULL && t2 == NULL) {
@@ -3254,7 +3254,7 @@ ATbool AT_isDeepEqual(ATerm t1, ATerm t2)
 
 ATbool AT_isEqual(ATerm t1, ATerm t2)
 {
-  int type;
+  header_type type;
   ATbool result = ATtrue;
 
   if(t1 == t2)
@@ -3342,7 +3342,7 @@ ATbool AT_isEqual(ATerm t1, ATerm t2)
 
 ATbool ATisEqualModuloAnnotations(ATerm t1, ATerm t2)
 {
-  int type;
+  header_type type;
   ATbool result = ATtrue;
 
   if(t1 == t2)

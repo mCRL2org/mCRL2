@@ -126,7 +126,7 @@ static sym_entry *sym_entries = NULL;
 static sym_entry *first_topsym = NULL;
 
 static char *text_buffer = NULL;
-static int   text_buffer_size = 0;
+static unsigned int   text_buffer_size = 0;
 
 static unsigned char bit_buffer = '\0';
 static int  bits_in_buffer = 0; /* how many bits in bit_buffer are used */
@@ -589,12 +589,13 @@ void gather_top_symbols(sym_entry *cur_entry, int cur_arg,
 
 static void build_arg_tables()
 {
-  int cur_sym, cur_arg, cur_trm;
+  int cur_sym, cur_trm;
+  unsigned int cur_arg;
   sym_entry *topsym;
 	
   for(cur_sym=0; cur_sym<nr_unique_symbols; cur_sym++) {
     sym_entry *cur_entry = &sym_entries[cur_sym];
-    int arity = cur_entry->arity;
+    unsigned int arity = cur_entry->arity;
 
     assert(arity == ATgetArity(cur_entry->id));
 		

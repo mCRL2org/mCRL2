@@ -969,7 +969,7 @@ ATfprintf(stderr,"build_tree(  %t  ,  %t  ,  %t  ,  %t  ,  %t  ,  %i  )\n\n",par
 #ifdef _INNERC_STORE_TREES
 ATermAppl RewriterCompilingInnermost::create_tree(ATermList rules, int opid, int arity)
 #else
-static ATermAppl create_tree(ATermList rules, int opid, int arity)
+static ATermAppl create_tree(ATermList rules, int /*opid*/, int arity)
 #endif
 	// Create a match tree for OpId int2term[opid] and update the value of
 	// *max_vars accordingly.
@@ -1414,7 +1414,7 @@ gsfprintf(IT_DEBUG_FILE "X\n");
 	}
 }
 
-void RewriterCompilingInnermost::implement_tree(FILE *f, ATermAppl tree, int arity, int d, int opid)
+void RewriterCompilingInnermost::implement_tree(FILE *f, ATermAppl tree, int arity, int d, int /*opid*/)
 {
 #ifdef IT_DEBUG
 gsfprintf(IT_DEBUG_FILE "implement_tree %P (%i)\n",int2term[opid],opid);
@@ -2049,6 +2049,7 @@ void RewriterCompilingInnermost::CompileRewriteSystem(ATermAppl DataEqnSpec)
       "\n"
       "ATermAppl rewrite(ATermAppl t)\n"
       "{\n"
+//      "  ATfprintf(stderr,\"rewrite: %%t\\n\",t);\n"
          // t is an "APPL" or a var
       "  if ( isAppl(t) )\n"
       "  {\n"

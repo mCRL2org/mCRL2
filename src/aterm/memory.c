@@ -368,7 +368,7 @@ HashNumber AT_hashnumber(ATerm t)
 
 static void hash_info(int stats[MAX_INFO_SIZES][3]) 
 {
-  int i, len;
+  unsigned int i, len;
   static int count[MAX_INFO_SIZES];
 
   /* Initialize statistics */
@@ -589,10 +589,11 @@ void AT_initMemory(int argc, char *argv[])
 
 void AT_cleanupMemory()
 {
-  int i, info[MAX_INFO_SIZES][3];
+  unsigned int i;
+  int info[MAX_INFO_SIZES][3];
 
   if(infoflags & INFO_HASHING) {
-    int max = MAX_INFO_SIZES-1;
+    unsigned int max = MAX_INFO_SIZES-1;
     FILE *f = fopen("hashing.stats", "wb");
 
     if(!f)
@@ -2324,7 +2325,7 @@ ATbool AT_isValidTerm(ATerm term)
     if(cur->size) {
       assert(cur->next_before == cur->next_after);
       offset  = ((char *)term) - ((char *)&cur->data);
-      if (offset >= 0	&& offset < (BLOCK_SIZE * sizeof(header_type))) {
+      if (offset >= 0	&& offset < (int) (BLOCK_SIZE * sizeof(header_type))) {
         inblock = ATtrue;
         break;
       }
@@ -2338,7 +2339,7 @@ ATbool AT_isValidTerm(ATerm term)
       if(cur->size) {
         assert(cur->next_before == cur->next_after);
         offset  = ((char *)term) - ((char *)&cur->data);
-        if (offset >= 0 && offset < (BLOCK_SIZE * sizeof(header_type))) {
+        if (offset >= 0 && offset < (int) (BLOCK_SIZE * sizeof(header_type))) {
           inblock = ATtrue;
           break;
         }
@@ -2483,7 +2484,7 @@ int AT_inAnyFreeList(ATerm t)
 
 void AT_printAllTerms(FILE *file)
 {
-  int i;
+  unsigned int i;
 
   for(i=0; i<table_size; i++) {
     ATerm cur = hashtable[i];
@@ -2526,7 +2527,7 @@ static int compare_afuns(const void *l, const void *r)
 
 void AT_printAllAFunCounts(FILE *file)
 {
-  int i, nr_syms;
+  unsigned int i, nr_syms;
   AFun *afuns;
 
   nr_syms = AT_symbolTableSize();

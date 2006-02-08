@@ -332,9 +332,10 @@ int main(int argc, char **argv)
     Spec = removeUnusedData(Spec);
   }
 
-  FILE *aut;
-  SVCfile svcf, *svc;
-  SVCparameterIndex svcparam;
+  FILE *aut = NULL;
+  SVCfile svcf;
+  SVCfile *svc = &svcf;
+  SVCparameterIndex svcparam = 0;
   if ( argc-optind > 1 )
   {
     if ( outformat == OF_UNKNOWN )
@@ -372,7 +373,6 @@ int main(int argc, char **argv)
         {
           SVCbool b;
 
-          svc = &svcf;
           b = outinfo?SVCfalse:SVCtrue;
           SVCopen(svc,argv[optind+1],SVCwrite,&b); // XXX check result
           SVCsetCreator(svc,NAME);

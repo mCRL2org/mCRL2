@@ -55,7 +55,7 @@ extern int errno;
 
 int  parseArgs(int, char **, FILE **, int *);
 void doHelp(char *);
-void doVersion(char *);
+void doVersion();
 int  doConvert(FILE *, int);
 
 #ifdef __cplusplus

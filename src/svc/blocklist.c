@@ -59,7 +59,7 @@ void BLinsert(BList *blockList, struct HFnode *node){
 }
 
 
-void BLdelete(BList *blockList, BLcursor cursor){
+void BLdelete(BList * blockList, BLcursor cursor){
    tBlock *tmp;
 
    tmp=cursor;

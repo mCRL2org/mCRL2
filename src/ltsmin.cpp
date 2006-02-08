@@ -63,7 +63,7 @@ int main(int argc, char *argv[]) {
          exit(EXIT_OK);
          break;
       case CMD_VERSION:
-         doVersion(argv[0]);
+         doVersion();
          exit(EXIT_OK);
       case CMD_REDUCE:
          exit(doReduce());
@@ -85,7 +85,7 @@ int main(int argc, char *argv[]) {
 
 
 int parseArgs(int argc, char *argv[], int *traceLevel, int *optimal, int
-*classes)
+* /*classes*/)
    {
    int c, ret,/* i, cautious = 0,*/ nInputFiles = 0, branching = 0;
    extern int optind;
@@ -249,9 +249,9 @@ void doHelp(char *cmd) {
 
 
 
-void doVersion(char *progName) {
+void doVersion() {
 
-   fprintf(stdout, NAME " " VERSION " (revision %i)\n", REVISION);
+   fprintf(stderr, NAME " " VERSION " (revision %i)\n", REVISION);
 
 } /* doVersion */
 

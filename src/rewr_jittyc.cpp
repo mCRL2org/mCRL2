@@ -971,7 +971,7 @@ ATfprintf(stderr,"build_tree(  %t  ,  %t  ,  %t  ,  %t  ,  %t  ,  %i  )\n\n",par
 #ifdef _JITTYC_STORE_TREES
 ATermAppl RewriterCompilingJitty::create_tree(ATermList rules, int opid, int arity)
 #else
-static ATermAppl create_tree(ATermList rules, int opid, int arity)
+static ATermAppl create_tree(ATermList rules, int /*opid*/, int /*arity*/)
 #endif
 	// Create a match tree for OpId int2term[opid] and update the value of
 	// *max_vars accordingly.
@@ -1687,7 +1687,7 @@ gsfprintf(IT_DEBUG_FILE "X\n");
 	}
 }
 
-void RewriterCompilingJitty::implement_tree(FILE *f, ATermAppl tree, int arity, int d, int opid, bool *used)
+void RewriterCompilingJitty::implement_tree(FILE *f, ATermAppl tree, int arity, int d, int /*opid*/, bool *used)
 {
 #ifdef IT_DEBUG
 gsfprintf(IT_DEBUG_FILE "implement_tree %P (%i)\n",int2term[opid],opid);
@@ -2376,7 +2376,7 @@ void RewriterCompilingJitty::CompileRewriteSystem(ATermAppl DataEqnSpec)
       "\n"
       "ATermAppl rewrite(ATermAppl t)\n"
       "{\n"
-//      "  ATfprintf(stderr,\"%%t\\n\",t);\n"
+//      "  ATfprintf(stderr,\"rewrite: %%t\\n\",t);\n"
       "  if ( isAppl(t) )\n"
       "  {\n"
       "    ATerm head = ATgetArgument(t,0);\n"

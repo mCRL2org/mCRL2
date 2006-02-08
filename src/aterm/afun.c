@@ -65,10 +65,10 @@ extern char *strdup(const char *s);
 
 static void resize_table()
 {
-  int i;
-  int new_class = table_class+1;
-  int new_size  = AT_TABLE_SIZE(new_class);
-  int new_mask  = AT_TABLE_MASK(new_class);
+  unsigned int i;
+  unsigned int new_class = table_class+1;
+  unsigned int new_size  = AT_TABLE_SIZE(new_class);
+  unsigned int new_mask  = AT_TABLE_MASK(new_class);
 
   at_lookup_table = (SymEntry *)realloc(at_lookup_table, new_size*sizeof(SymEntry));
   at_lookup_table_alias = (ATerm *)at_lookup_table;
@@ -118,7 +118,7 @@ void AT_initSymbol(int argc, char *argv[])
   unsigned long i;
   AFun sym;
 
-  for (i = 1; i < argc; i++) {
+  for (i = 1; i < (unsigned int)argc; i++) {
     if (streq(argv[i], SYMBOL_HASH_OPT)) {
       ATerror("Option %s is depcrecated, use %s instead!\n"
 	      "Note that %s uses 2^<arg> as the actual table size.\n",
@@ -607,7 +607,7 @@ void AT_markProtectedSymbols_young() {
 
 void AT_unmarkAllAFuns()
 {
-  int i;
+  unsigned int i;
 
   for (i=0; i<table_size; i++) {
     if (AT_isValidSymbol((AFun)i)) {

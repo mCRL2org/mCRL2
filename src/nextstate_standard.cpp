@@ -339,7 +339,7 @@ ATerm NextStateStandard::AssignsToRewriteFormat(ATermList assigns, ATermList fre
 	return (ATerm) ATmakeApplArray(info.stateAFun,stateargs);
 }
 
-NextStateStandard::NextStateStandard(ATermAppl spec, bool allow_free_vars, int state_format, Enumerator *e, bool clean_up_enumerator, NextStateStrategy strategy)
+NextStateStandard::NextStateStandard(ATermAppl spec, bool allow_free_vars, int state_format, Enumerator *e, bool clean_up_enumerator)
 {
 	ATermList l,m,n,free_vars;
 

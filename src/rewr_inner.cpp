@@ -331,7 +331,7 @@ static void initialise_build_pars(build_pars *p)
 	ATprotectList(&p->upstack);*/
 }
 
-static void finalise_build_pars(build_pars *p)
+static void finalise_build_pars(build_pars * /*p*/)
 {
 /*	ATunprotectList(&p->Flist);
 	ATunprotectList(&p->Slist);
@@ -726,7 +726,7 @@ static ATermAppl optimise_tree(ATermAppl tree,int *max)
 #ifdef _INNER_STORE_TREES
 ATermAppl RewriterInnermost::create_tree(ATermList rules, int opid, int *max_vars)
 #else
-static ATermAppl create_tree(ATermList rules, int opid, int *max_vars)
+static ATermAppl create_tree(ATermList rules, int /*opid*/, int *max_vars)
 #endif
 	// Create a match tree for OpId int2term[opid] and update the value of
 	// *max_vars accordingly.
