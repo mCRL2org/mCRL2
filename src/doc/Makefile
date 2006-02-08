@@ -4,17 +4,17 @@ TREE_ROOT = ../../
 -include ../../config
 
 MAN_OBJECTS  = mcrl22lpe.1 lpeinfo.1 lpepp.1 \
-               lpedataelm.1 lpeconstelm.1 lpeparelm.1 \
+               lperewr.1 lpedataelm.1 lpeconstelm.1 lpeparelm.1 \
                pnml2mcrl2.1 tbf2lpe.1 \
                librewrite_c.7 librewrite.7
 
 TXT_OBJECTS  = mcrl22lpe.txt lpeinfo.txt lpepp.txt \
-               lpedataelm.txt lpeconstelm.txt lpeparelm.txt \
+               lperewr.txt lpedataelm.txt lpeconstelm.txt lpeparelm.txt \
                pnml2mcrl2.txt tbf2lpe.txt \
                librewrite_c.txt librewrite.txt
 
 HTML_OBJECTS = mcrl22lpe.html lpeinfo.html lpepp.html \
-               lpedataelm.html lpeconstelm.html lpeparelm.html \
+               lperewr.html lpedataelm.html lpeconstelm.html lpeparelm.html \
                pnml2mcrl2.html tbf2lpe.html \
                librewrite_c.html librewrite.html
                
