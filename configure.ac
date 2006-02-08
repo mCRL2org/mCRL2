@@ -70,7 +70,7 @@ fi
 # Set flags
 CPPFLAGS=""
 CFLAGS="-std=c99"
-LDFLAGS="-L. -Lsvc"
+LDFLAGS="-L$PWD/src -L$PWD/src/svc"
 BFLAGS=""
 
 # Check for C99 standard
@@ -183,8 +183,8 @@ if test $with_aterm; then
       ATERM_INCLUDE="$ATERM_ROOT/include"
       ATERM_LIB="$ATERM_ROOT/lib"
     fi
-    CPPFLAGS="-I$ATERM_INCLUDE $CPPFLAGS"
-    LDFLAGS="-L$ATERM_LIB $LDFLAGS"
+    ATERM_CPPFLAGS="-I$ATERM_INCLUDE"
+    ATERM_LDFLAGS="-L$ATERM_LIB"
   fi
   if test $enable_profiling; then
     AC_CHECK_LIB([ATerm-prof], [ATinit], , [AC_MSG_ERROR([cannot find ATerm-prof library])])
@@ -202,12 +202,12 @@ if test $with_aterm; then
 else
   AC_MSG_NOTICE([using local ATerm library])
   ATERM_CPPFLAGS="-I$PWD/src"
-  CPPFLAGS="-I$PWD/src/aterm $CPPFLAGS"
-  LDFLAGS="-L$PWD/src/aterm $LDFLAGS"
+  ATERM_LDFLAGS="-L$PWD/src/aterm"
   ATERM_NAME="ATerm"
   BUILD_ATERM=1
 fi
 AC_SUBST([ATERM_CPPFLAGS],[])
+AC_SUBST([ATERM_LDFLAGS],[])
 AC_SUBST([ATERM_NAME],[])
 AC_SUBST([BUILD_ATERM],[])
 # debug: AC_MSG_RESULT([CPPFLAGS=$CPPFLAGS])
@@ -323,7 +323,6 @@ fi
 if test $WX_CONFIG; then
   USE_WX=1
   WX_CPPFLAGS="$($WX_CONFIG --cppflags)"
-#  CPPFLAGS="$($WX_CONFIG --cppflags) $CPPFLAGS"
   WX_LIBS="$($WX_CONFIG --libs core base)"
 fi
 AC_SUBST([USE_WX],[])
