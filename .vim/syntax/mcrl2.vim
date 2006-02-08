@@ -2,7 +2,7 @@
 " Language:   mCRL2
 " Extension:  mcrl2
 " Maintainer: Aad Mathijssen <A.H.J.Mathijssen@tue.nl>
-" Date:       13-10-2005
+" Date:       06-02-2006
 
 syntax clear
 
