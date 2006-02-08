@@ -90,9 +90,9 @@ int main(int argc, char** argv)
 		po::options_description desc;
 		desc.add_options()
 			("help,h",      "display this help")
-			("quiet,q",     "do not print any unrequested information")
-			("verbose,v",   "display extra information about the data elimination")
 			("version",     "display version information")
+			("quiet,q",     "do not display warning messages")
+			("verbose,v",   "display concise intermediate messages")
 			;
 
 		po::options_description hidden("Hidden options");
@@ -116,9 +116,9 @@ int main(int argc, char** argv)
 		if ( vm.count("help") > 0 )
 		{
 			cerr << "Usage: "<< argv[0] << " [OPTION]... [INFILE [OUTFILE]] \n";
-			cerr << "Remove unused parts of the data specification of the LPE in INFILE, and write" << endl;
-			cerr << "the result to OUTFILE. If OUTFILE is not supplied, stdout is used for output." << endl;
-			cerr << "If INFIlE is also omitted, stdin is used for input." << endl;
+			cerr << "Remove unused parts from the data specification of the LPE in INFILE, and write" << endl;
+			cerr << "the result to OUTFILE. If OUTFILE is not present, stdout is used. If INFILE is" << endl;
+			cerr << "not present, stdin is used." << endl;
 			cerr << endl;
 			cerr << desc;
 			return 0;

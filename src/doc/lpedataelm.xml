@@ -1,0 +1,131 @@
+<?xml version="1.0"?>
+
+<!DOCTYPE refentry PUBLIC "-//OASIS//DTD DocBook XML V4.3//EN" "http://www.oasis-open.org/docbook/xml/4.3/docbookx.dtd"[
+<!ENTITY lpedataelm "<function>lpedataelm</function>">
+<!ENTITY lpepp "<function>lpepp</function>">
+<!ENTITY lpe2lts "<function>lpe2lts</function>">
+<!ENTITY option "<parameter>OPTION</parameter>">
+<!ENTITY infile "<parameter>INFILE</parameter>">
+<!ENTITY outfile "<parameter>OUTFILE</parameter>">
+<!ENTITY format "<parameter>FORMAT</parameter>">
+<!ENTITY default "<parameter>default</parameter>">
+<!ENTITY debug "<parameter>debug</parameter>">
+<!ENTITY internal "<parameter>internal</parameter>">
+<!ENTITY opt_f "<option>-f</option>">
+<!ENTITY opt_h "<option>-h</option>">
+<!ENTITY opt_q "<option>-q</option>">
+<!ENTITY opt_v "<option>-v</option>">
+<!ENTITY opt_d "<option>-d</option>">
+<!ENTITY opt_format "<option>--format</option>">
+<!ENTITY opt_help "<option>--help</option>">
+<!ENTITY opt_version "<option>--version</option>">
+<!ENTITY opt_quiet "<option>--quiet</option>">
+<!ENTITY opt_verbose "<option>--verbose</option>">
+<!ENTITY opt_debug "<option>--debug</option>">
+<!ENTITY stdin "<constant>stdin</constant>">
+<!ENTITY stdout "<constant>stdout</constant>">
+]>
+
+<refentry id="lpedataelm">
+
+<refmeta>
+  <refentrytitle>lpedataelm</refentrytitle>
+  <manvolnum>1</manvolnum>
+</refmeta>
+
+<refnamediv>
+  <refname>lpedataelm</refname>
+  <refpurpose>remove unused parts from the data specification of an LPE</refpurpose>
+</refnamediv>
+
+<refsynopsisdiv>
+  <cmdsynopsis>
+    <command>&lpedataelm;</command>
+    <arg choice="plain" rep="repeat"><arg choice="opt">&option;</arg></arg>
+    <arg choice="opt">&infile;
+    <arg choice="opt">&outfile;</arg>
+    </arg>
+  </cmdsynopsis>
+</refsynopsisdiv>
+
+<refsect1>
+  <title>Description</title>
+  <para>
+    The &lpedataelm; tool removes unused sorts, constructors, mappings and
+    data equations from a linear process equation (LPE). It reads the LPE from
+    &infile; and writes the result to &outfile;. If &outfile; is not present,
+    &stdout; is used. If &infile; is not present, &stdin; is used.
+  </para>
+  <para>
+    Removal of unused data makes the LPE more compact. This has the
+    following advantages:
+    <itemizedlist spacing='compact'>
+    <listitem>
+      <para>The speed of initialisation of the rewriters increases
+      significantly, in particular the compilation time of the compiling
+      rewriters. Note that data elimination is performed automatically when
+      using the tool &lpe2lts;.</para>
+    </listitem>
+    <listitem>
+      <para>When pretty printing the LPE using &lpepp;, the resulting
+      specification is smaller.</para>
+    </listitem>
+    </itemizedlist>
+  </para>
+</refsect1>
+
+<refsect1>
+<title>Options</title>
+<para>
+  <variablelist>
+  <varlistentry>
+    <term>&opt_h;</term>
+    <term>&opt_help;</term>
+    <listitem>
+      <para>
+        display help message and terminate
+      </para>
+    </listitem>
+  </varlistentry>
+
+  <varlistentry>
+    <term>&opt_version;</term>
+    <listitem>
+      <para>
+        display version information and terminate
+      </para>
+    </listitem>
+  </varlistentry>
+
+  <varlistentry>
+    <term>&opt_q;</term>
+    <term>&opt_quiet;</term>
+    <listitem>
+      <para>
+        do not display warning messages
+      </para>
+    </listitem>
+  </varlistentry>
+
+  <varlistentry>
+    <term>&opt_v;</term>
+    <term>&opt_verbose;</term>
+    <listitem>
+      <para>
+        display concise intermediate messages
+      </para>
+    </listitem>
+  </varlistentry>
+  </variablelist>
+</para>
+</refsect1>
+
+<refsect1>
+<title>Author</title>
+<para>
+  Written by Muck van Weerdenburg. Please send all complaints, comments and bug
+  reports to <email>bug@mcrl2.org</email>.
+</para>
+</refsect1>
+
+</refentry>
