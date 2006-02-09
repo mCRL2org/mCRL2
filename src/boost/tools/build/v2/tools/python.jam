@@ -1,0 +1,453 @@
+# Copyright 2004 Vladimir Prus.
+# Distributed under the Boost Software License, Version 1.0. (See
+# accompanying file LICENSE_1_0.txt or copy at
+# http://www.boost.org/LICENSE_1_0.txt)
+
+# Support for Python and the the Boost.Python library.
+#
+# This module defines
+#
+# - a project 'python' with a target 'python' in it, that corresponds
+#   to the python library
+#
+# - a main target rule 'python-extension' which can be used
+#   to build a python extension.
+#
+# Extensions that use Boost.Python must explicitly link to it.
+
+# Known problems: 
+# - the directory where extension is generated is different from V2
+# - the ext + py -> pyd_run_output generator is declared to take 
+#   SHARED_LIB, not PYTHON_EXTENSION. That's because we reuse 
+#   'lib-target-class', which creates SHARED_LIB explicitly.
+
+
+
+
+import type ;
+import testing ;
+import generators ;
+import project ;
+import errors ;
+import targets ;
+import "class" : new ;
+import os ;
+import common ;
+import toolset : flags ;
+
+# Make this module a project
+project.initialize $(__name__) ;
+project python ;
+
+# Initializes the Python toolset.
+# - version -- the version of Python to use. Should be in Major.Minor format,
+#   for example 2.3
+# - 'root' -- the install root for Python
+# - 'includes' -- the include path to Python headers. If empty, will be
+#        guessed from 'root'
+# - 'libraries' -- the path to Python libraries. If empty, will be guessed
+#        from 'root'
+# - 'cygwin-condition' -- if specified, should be a set of properties which
+#   are present when we're building with cygwin gcc. 
+#   This argument is not used yet.
+#
+# Example usage:
+#
+#   using python 2.3 ;  # Use default root
+#   using python 2.3 : /usr/local ; # Root specified, include and lib paths
+#                                   # will be guessed
+#    
+rule init ( version ? : root ? : includes ? : libraries ? : cygwin-condition ? )
+{
+    .configured = true ;
+               
+    if [ os.name ] = NT
+    {
+        init-nt $(version) : $(root) : $(includes) : $(libraries) : $(cygwin-condition) ;
+    }
+    else if [ os.name ] = MACOSX
+    {
+        init-mac $(version) : $(root) : $(includes) : $(libraries) ;
+    } 
+    else if [ modules.peek : UNIX ]
+    {
+        init-unix $(version) : $(root) : $(includes) : $(libraries) ;
+    }
+}
+
+rule init-unix ( version ? : root ? : includes ? : libraries ? )
+{
+    root ?= /usr ;
+    includes ?= $(root)/include/python$(version) ;
+    libraries ?= $(root)/lib/python$(version)/config ;
+    
+    # Find the 'python' binary, which is used for testing.
+    # Look first in $(root)/bin, then in PATH.
+    local interpreter = [ common.get-invocation-command 
+        python : python : : $(root)/bin : path-last ] ;
+    
+    if --debug-configuration in [ modules.peek : ARGV ]
+    {
+        ECHO "notice: Python include path is" $(includes) ;
+        ECHO "notice: Python library path is" $(libraries) ;
+        ECHO "notice: Python interpreter is" $(interpreter) ;        
+    }
+    
+    flags python.capture-output PYTHON : $(interpreter) ;
+    
+    # On Linux, we don't want to link either Boost.Python or
+    # Python extensions to libpython, so that when extensions
+    # loaded in the interpreter, the symbols in the interpreter
+    # are used. If we linked to libpython, we'd get duplicate
+    # symbols. So declare two targets -- one for headers and another
+    # for library.          
+    alias python_for_extensions
+                 : 
+                 :
+                 :
+                 : <include>$(includes) 
+                 ;
+    
+    alias python
+                 : 
+                 :
+                 :
+                 : <include>$(includes) 
+                   <library-path>$(libraries)
+                   <find-shared-library>python$(version)
+                 ;
+    
+    # NOTES:
+    # - V1 had logic to force intel to use gcc's runtime.
+    #   Note sure why that was needed, with icc 8.0 extensions
+    #   built with intel are loaded by python without problems.
+    # - There was 'python-static-multithread' logic. Don't know
+    #   what it affected, so can't test.
+    
+    # TODO: need to figure out when the following code is needed:
+    # for builtin extensions only or in some other cases too.
+
+    
+    #    if [ modules.peek $(OS) ] = OSF
+    #    {
+    #        PYTHON_PROPERTIES += <*><*><linkflags>"-expect_unresolved 'Py*' -expect_unresolved '_Py*'" ;
+    #    }
+    #    else if [ modules.peek $(OS) ] = AIX
+    #    {
+    #        PYTHON_PROPERTIES 
+    #          += <*><*><linkflags>"-Wl,-bI:$(PYTHON_LIB_PATH)/python.exp"
+    #            <*><*><find-library>pthreads ;
+    #    }
+}
+
+rule init-mac ( version : root : includes ? : libraries ? )
+{
+    if ! $(root)
+    {
+        if [ GLOB /System/Library/Frameworks : Python.framework ]
+        {
+            root = /System/Library/Frameworks/Python.framework/Versions/$(version) ;
+        }
+        else
+        {
+            root = /Library/Frameworks/Python.framework/Versions/$(version) ;
+        }
+    }   
+    includes ?= $(PYTHON_ROOT)/include/python$(PYTHON_VERSION) ;
+    # FIXME: not sure what PYTHON_FRAMEWORK variable is
+    PYTHON_FRAMEWORK ?= $(root) ;
+    while $(PYTHON_FRAMEWORK:D=) && $(PYTHON_FRAMEWORK:D=) != Python.framework
+    {
+        PYTHON_FRAMEWORK = $(PYTHON_FRAMEWORK:D) ;
+    }
+    PYTHON_FRAMEWORK = $(PYTHON_FRAMEWORK:D)/Python ;
+
+    alias python
+      : 
+      :
+      : 
+      : <include>$(includes)
+      ;  
+    
+    alias python
+      :
+      : <os>MACOSXX <toolset>darwin
+      :
+      : <framework>$(PYTHON_FRAMEWORK)
+      ;  
+}
+
+.alias-defined = ;
+rule init-nt ( version : root ? : includes ? : libraries ? : cygwin-condition ? )
+{
+#    PYTHON_PROPERTIES =
+#      boost-python-disable-borland
+#      select-nt-python-includes
+#      <runtime-link>dynamic
+#      <sysinclude>@boost
+#      <$(gcc-compilers)><*><define>USE_DL_IMPORT
+#      ;
+
+    if ! $(cygwin-condition)
+    {        
+        root ?= c:/tools/python ;
+        
+        local PATH = [ modules.peek : PATH ] ;
+        local PATH = [ modules.peek : Path ] ;        
+        
+        PYTHON_LIB_PATH ?= $(root)/libs [ GLOB $(root) : PCbuild ] ;
+        
+        PYTHON_INCLUDES ?= $(root)/include [ GLOB $(root) : PC ] ;
+        
+        PYTHON_DLL ?= [ GLOB $(PATH) $(Path) : python$(PYTHON_VERSION_NODOT).dll ] ;
+        PYTHON_DEBUG_DLL ?= [ GLOB $(PATH) $(Path) : python$(PYTHON_VERSION_NODOT)_d.dll ] ;
+        PYTHON_IMPORT_LIB ?= [ GLOB $(PYTHON_LIB_PATH) : libpython$(PYTHON_VERSION_NODOT).* ] ;
+        PYTHON_DEBUG_IMPORT_LIB ?= [ GLOB $(PYTHON_LIB_PATH) : libpython$(PYTHON_VERSION_NODOT).* ] ;        
+        
+        
+        # This is mingw-specific V1 code. I don't yet understand
+        # why mingw must be specially-cased.
+        #local lib = $(PYTHON_IMPORT_LIB) ;
+        #if <define>BOOST_DEBUG_PYTHON in $(properties)
+        #{
+        #    lib = $(PYTHON_DEBUG_IMPORT_LIB) ;
+        #}
+        #lib ?= $(PYTHON_DLL) ;
+        #if <define>BOOST_DEBUG_PYTHON in $(properties)
+        #{
+        #    lib ?= $(PYTHON_DEBUG_DLL) ;
+        #}
+        #properties += <library-file>$(lib) ;
+        #}
+        
+        properties += <library-path>$(PYTHON_LIB_PATH) ;
+            
+        # msvc compilers auto-find the python library
+        # declare two alternatives -- one for msvc and another
+        # for the rest of the world
+        alias python 
+          :
+          : <toolset>msvc 
+          :
+          : <library-path>$(PYTHON_LIB_PATH) 
+            <include>$(PYTHON_INCLUDES)
+          ;
+                       
+        local lib = python$(PYTHON_VERSION_NODOT) ;
+        # TODO: don't support BOOST_DEBUG_PYTHON yet.        
+        #    if <define>BOOST_DEBUG_PYTHON in $(properties)
+        #    {
+        #            lib = python$(PYTHON_VERSION_NODOT)_d ;
+        #    }
+        
+        alias python
+          :
+          :
+          :
+          : <library-path>$(PYTHON_LIB_PATH)    
+            <include>$(PYTHON_INCLUDES)
+            <find-library>$(lib) ;                
+    }
+    else
+    {        
+        root ?= /usr ;  
+        if $(root) = /usr
+        {
+            CYGWIN_PYTHON_DLL_PATH ?= /bin ;
+        }
+        else
+        {
+            CYGWIN_PYTHON_DLL_PATH ?= $(root)/bin ;
+        }
+        CYGWIN_PYTHON_LIB_PATH ?= $(CYGWIN_PYTHON_ROOT)/lib/python$(version)/config ;
+      
+        CYGWIN_PYTHON_DEBUG_VERSION ?= $(version) ;
+        CYGWIN_PYTHON_DEBUG_ROOT ?= /usr/local/pydebug ;
+        CYGWIN_PYTHON_DEBUG_DLL_PATH ?= $(CYGWIN_PYTHON_DEBUG_ROOT)/bin ;
+        CYGWIN_PYTHON_DEBUG_LIB_PATH ?= $(CYGWIN_PYTHON_DEBUG_ROOT)/lib/python$(CYGWIN_PYTHON_DEBUG_VERSION)/config ;        
+        
+        local properties ;
+        # TODO: don't support BOOST_DEBUG_PYTHON yet.                
+        #if <define>BOOST_DEBUG_PYTHON in $(properties)
+        #{
+        #    properties += <library-path>$(CYGWIN_PYTHON_DEBUG_LIB_PATH) <find-library>python$(CYGWIN_PYTHON_DEBUG_VERSION).dll ;
+        #}
+        #else
+        #{
+        properties += <library-path>$(CYGWIN_PYTHON_LIB_PATH) 
+                      <find-library>python$(CYGWIN_PYTHON_VERSION).dll ;
+        
+        properties += <include>$(root)/include/python$(version) ;          
+          
+        #}
+        alias python
+          :
+          : $(cygwin-condition)
+          :
+          : $(properties)
+          ;        
+    }    
+    
+    if ! $(.alias-defined)
+    {
+        .alias-defined = true ;
+        alias python_for_extensions : python ;
+    }    
+}
+
+
+rule configured ( ) 
+{
+     return $(.configured) ;
+}
+        
+type.register PYTHON_EXTENSION : : SHARED_LIB ;
+# We can't give "dll" suffix to PYTHON_EXTENSION, because
+# we would not know what "a.dll" is: python extenstion or
+# ordinary library. Therefore, we specify only suffixes
+# used for generation of targets.
+type.set-generated-target-suffix PYTHON_EXTENSION : : so ;
+type.set-generated-target-suffix PYTHON_EXTENSION : <os>NT : so ;
+type.set-generated-target-suffix PYTHON_EXTENSION : <os>CYGWIN : dll ;
+
+rule python-extension ( name : sources * : requirements * : default-build * : 
+                        usage-requirements * )
+{
+    requirements += <use>/python//python_for_extensions ;
+        
+    # TODO: handle the following V1 code
+    #if $(OS) = MACOSX && $(toolset) = darwin
+    #{
+    #    if <target-type>PYD in $(properties)
+    #    {
+    #        properties += <link-format>bundle ;
+    #    }
+    #    properties += <framework>$(PYTHON_FRAMEWORK) ;
+    #}    
+               
+#        <metrowerks><*><cxxflags>"-inline deferred" 
+#      <cwpro8><*><cxxflags>"-inline deferred"  # added for internal testing purposes
+#        <cxx><*><sysinclude>@boost/boost/compatibility/cpp_c_headers
+#         <define>BOOST_PYTHON_DYNAMIC_LIB
+    
+    
+#    PYTHON_PROPERTIES += 
+#        <sysinclude>@boost
+#          <stlport-iostream>on
+#            select-python-library
+    
+#      boost-python-disable-borland
+#      select-nt-python-includes
+#      <runtime-link>dynamic
+#      <sysinclude>@boost
+#      <$(gcc-compilers)><*><define>USE_DL_IMPORT
+#          <sysinclude>$(PYTHON_INCLUDES)
+            
+    local project = [ project.current ] ;
+
+    
+    targets.main-target-alternative
+      [ new typed-target $(name) : $(project) : PYTHON_EXTENSION
+        : [ targets.main-target-sources $(sources) : $(name) ]
+        : [ targets.main-target-requirements $(requirements) : $(project) ] 
+        : [ targets.main-target-default-build $(default-build) : $(project) ] 
+      ] ;
+}                            
+
+IMPORT python : python-extension : : python-extension ;
+
+# Support for testing
+type.register PY : py ;
+type.register RUN_PYD_OUTPUT ;
+#type.set-generated-target-suffix RUN_PYD : : run ;
+type.register RUN_PYD : : TEST ;
+
+class python-test-generator : generator
+{
+    import set ;
+    
+    rule __init__ ( * : * )
+    {
+        generator.__init__ $(1) : $(2) : $(3) : $(4) : $(5) : $(6) : $(7) : $(8) : $(9) ;
+        self.composing = true ;
+    }
+        
+    rule run ( project name ? : property-set : sources * : multiple ? )
+    {       
+        local python ;
+        for local s in $(sources)
+        {
+            if [ $(s).type ] = PY
+            {
+                python = $(s) ;
+            }
+        }
+        
+        local extensions ;
+        for local s in $(sources)
+        {
+            if [ $(s).type ] = PYTHON_EXTENSION
+            {
+                extensions += $(s) ;
+            }
+        }
+                
+        local libs ;
+        for local s in $(sources)
+        {
+            if [ type.is-derived [ $(s).type ] LIB ] 
+              && ! $(s) in $(extensions)
+            {
+                libs += $(s) ;
+            }
+        }
+        
+        local new-sources ;
+        for local s in $(sources)
+        {
+            if [ type.is-derived [ $(s).type ] CPP ] 
+            {
+                local name = [ utility.basename [ $(s).name ] ] ;
+                if $(name) = [ utility.basename [ $(python).name ] ]
+                {
+                    name = $(name)_ext ;
+                }          
+                local extension = [ generators.construct $(project) $(name) :
+                  PYTHON_EXTENSION : $(property-set) : $(s) $(libs) ] ;
+                # Ignore usage requirements. We're top-level generator and
+                # nobody is going to use us.
+                new-sources += $(extension[2-]) ;
+            }
+        }
+
+            
+        result = [ construct-result $(python) $(extensions) $(new-sources) 
+          : $(project) $(name) : $(property-set) ] ;        
+    }    
+}
+
+generators.register 
+  [ new python-test-generator python.capture-output : : RUN_PYD_OUTPUT ] ;
+
+generators.register-standard testing.expect-success 
+  : RUN_PYD_OUTPUT : RUN_PYD ;
+
+
+rule capture-output ( target : sources * : properties * )
+{
+    PYTHONPATH = [ on $(sources[2]) return $(LOCATE) ] ;
+    testing.capture-output $(target) : $(sources[1]) : $(properties) ;
+    LAUNCHER on $(target) = PYTHONPATH=$(PYTHONPATH) [ on $(target) return $(PYTHON) ] ;
+}
+
+rule bpl-test ( name : sources * : requirements * )
+{        
+    sources ?= $(name).py $(name).cpp ;
+    return [ testing.make-test 
+        run-pyd : $(sources) /boost/python//boost_python
+          : $(requirements) : $(name) ] ;
+}
+
+IMPORT $(__name__) : bpl-test : : bpl-test ;
+  
+  
