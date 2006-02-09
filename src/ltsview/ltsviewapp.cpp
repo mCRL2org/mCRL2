@@ -8,9 +8,9 @@ bool LTSViewApp::OnInit()
 {
   // initialize the ATerm library
   ATerm stackbot;
-  ATinit( 0, NULL, &stackbot );
   int c = 0;
   char* v = "";
+  ATinit( c, &v, &stackbot );
   glutInit( &c, &v );
   
   mainFrame	  = new MainFrame( this );
