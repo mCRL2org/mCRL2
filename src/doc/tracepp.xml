@@ -1,0 +1,166 @@
+<?xml version="1.0"?>
+
+<!DOCTYPE refentry PUBLIC "-//OASIS//DTD DocBook XML V4.3//EN" "http://www.oasis-open.org/docbook/xml/4.3/docbookx.dtd"[
+<!ENTITY tracepp "<function>tracepp</function>">
+<!ENTITY option "<parameter>OPTION</parameter>">
+<!ENTITY infile "<parameter>INFILE</parameter>">
+<!ENTITY outfile "<parameter>OUTFILE</parameter>">
+<!ENTITY format "<parameter>FORMAT</parameter>">
+<!ENTITY default "<parameter>default</parameter>">
+<!ENTITY debug "<parameter>debug</parameter>">
+<!ENTITY internal "<parameter>internal</parameter>">
+<!ENTITY opt_p "<option>-p</option>">
+<!ENTITY opt_m "<option>-m</option>">
+<!ENTITY opt_d "<option>-d</option>">
+<!ENTITY opt_a "<option>-a</option>">
+<!ENTITY opt_h "<option>-h</option>">
+<!ENTITY opt_q "<option>-q</option>">
+<!ENTITY opt_v "<option>-v</option>">
+<!ENTITY opt_plain "<option>--plain</option>">
+<!ENTITY opt_mcrl2 "<option>--mcrl2</option>">
+<!ENTITY opt_dot "<option>--dot</option>">
+<!ENTITY opt_aut "<option>--aut</option>">
+<!ENTITY opt_help "<option>--help</option>">
+<!ENTITY opt_version "<option>--version</option>">
+<!ENTITY opt_quiet "<option>--quiet</option>">
+<!ENTITY opt_verbose "<option>--verbose</option>">
+<!ENTITY opt_debug "<option>--debug</option>">
+<!ENTITY stdin "<constant>stdin</constant>">
+<!ENTITY stdout "<constant>stdout</constant>">
+]>
+
+<refentry id="tracepp">
+
+<refmeta>
+  <refentrytitle>tracepp</refentrytitle>
+  <manvolnum>1</manvolnum>
+</refmeta>
+
+<refnamediv>
+  <refname>tracepp</refname>
+  <refpurpose>convert and pretty print traces</refpurpose>
+</refnamediv>
+
+<refsynopsisdiv>
+  <cmdsynopsis>
+    <command>&tracepp;</command>
+    <arg choice="plain" rep="repeat"><arg choice="opt">&option;</arg></arg>
+    <arg choice="opt">&infile;
+    <arg choice="opt">&outfile;</arg>
+    </arg>
+  </cmdsynopsis>
+</refsynopsisdiv>
+
+<refsect1>
+  <title>Description</title>
+  <para>
+    The &tracepp; tool converts the trace from &infile; to
+    &outfile; in another (possibly human readable) format. If &outfile; is not present,
+    &stdout; is used. If &infile; is not present, &stdin; is used.
+  </para>
+</refsect1>
+
+<refsect1>
+<title>Options</title>
+<para>
+  <variablelist>
+  <varlistentry>
+    <term>&opt_h;</term>
+    <term>&opt_help;</term>
+    <listitem>
+      <para>
+        display help message and terminate
+      </para>
+    </listitem>
+  </varlistentry>
+
+  <varlistentry>
+    <term>&opt_version;</term>
+    <listitem>
+      <para>
+        display version information and terminate
+      </para>
+    </listitem>
+  </varlistentry>
+
+  <varlistentry>
+    <term>&opt_q;</term>
+    <term>&opt_quiet;</term>
+    <listitem>
+      <para>
+        do not display warning messages
+      </para>
+    </listitem>
+  </varlistentry>
+
+  <varlistentry>
+    <term>&opt_v;</term>
+    <term>&opt_verbose;</term>
+    <listitem>
+      <para>
+        display concise intermediate messages
+      </para>
+    </listitem>
+  </varlistentry>
+  </variablelist>
+</para>
+<para>
+The output formats that can be chosen are the following. By default &opt_plain; is
+assumed.
+  <variablelist>
+  <varlistentry>
+    <term>&opt_p;</term>
+    <term>&opt_plain;</term>
+    <listitem>
+      <para> 
+        write trace in plain format (default)
+      </para>
+    </listitem>
+  </varlistentry>
+  <varlistentry>
+    <term>&opt_m;</term>
+    <term>&opt_mcrl2;</term>
+    <listitem>
+      <para> 
+        write trace in mCRL2 trace format
+      </para>
+    </listitem>
+  </varlistentry>
+  <varlistentry>
+    <term>&opt_d;</term>
+    <term>&opt_dot;</term>
+    <listitem>
+      <para> 
+        write trace in dot format
+      </para>
+    </listitem>
+  </varlistentry>
+  <varlistentry>
+    <term>&opt_a;</term>
+    <term>&opt_aut;</term>
+    <listitem>
+      <para> 
+        write trace in aut format
+      </para>
+    </listitem>
+  </varlistentry>
+  </variablelist>
+</para>
+</refsect1>
+
+<refsect1>
+<title>Known Issues</title>
+<para>
+  None so far.
+</para>
+</refsect1>
+
+<refsect1>
+<title>Author</title>
+<para>
+  Written by Muck van Weerdenburg. Please send all complaints, comments and bug
+  reports to <email>bug@mcrl2.org</email>.
+</para>
+</refsect1>
+
+</refentry>
