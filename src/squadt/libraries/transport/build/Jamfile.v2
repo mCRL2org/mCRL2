@@ -4,9 +4,11 @@ project transport
   : requirements
    <include>../../../../boost/
    <include>../
+   <define>BOOST_DATE_TIME_NO_LIB
   : usage-requirements
    <include>../../
-   <linkflags>-lpthread ;
+   <linkflags>-lpthread
+   <define>BOOST_DATE_TIME_NO_LIB ;
 
 lib transport :
             transporter.cpp

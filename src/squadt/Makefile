@@ -46,12 +46,15 @@ TARGETS                        = squadt libmd5.a
 
 BJAM = ../boost/tools/build/jam_src/bin/bjam
 
-all: $(BJAM)
+all: $(BJAM) $(TREE_ROOT)config.jam
 ifeq ($(findstring $(CPPFLAGS),NDEBUG),)
 	 @cd build; ../$(BJAM) --v2 debug
 else
 	 @cd build; ../$(BJAM) --v2 release
 endif
+
+$(TREE_ROOT)config.jam:
+	$(error Please configure the source tree before trying to build!)
 
 $(BJAM):
 	$(MAKE) -C ../boost bjam
@@ -66,14 +69,14 @@ endif
 CPPFLAGS += $(REVISION)
 
 # Include dependencies 
-ifeq ($(findstring $(MAKECMDGOALS),clean distclean),)
-%.o: dependencies
+#ifeq ($(findstring $(MAKECMDGOALS),clean distclean),)
+#%.o: dependencies
 
-dependencies: *.cpp *.h
-	$(CXX) -MM $(CPPFLAGS) $(BOOST_CPPFLAGS) $(LIBXML2_CPPFLAGS) $(WX_CPPFLAGS) $(patsubst %o,%cpp,$(OBJECTS)) > $@
-
--include dependencies
-endif
+#dependencies: *.cpp *.h
+#	$(CXX) -MM $(CPPFLAGS) $(BOOST_CPPFLAGS) $(LIBXML2_CPPFLAGS) $(WX_CPPFLAGS) $(patsubst %o,%cpp,$(OBJECTS)) > $@
+#
+#-include dependencies
+#endif
 
 test: all $(TEST_TARGETS)
 	@tests/messenger/connection_test
@@ -147,6 +150,7 @@ ifeq ($(HOST_OS),MACOSX)
 endif
 
 clean:
-	$(RM) *.o $(TARGETS) $(TEST_TARGETS) utility/*.o utility/relocator core dependencies
+	@cd build; ../$(BJAM) --v2 --clean
+	$(RM) -rf *.o $(TARGETS) $(TEST_TARGETS) utility/*.o utility/relocator core dependencies bin
 
 distclean: clean

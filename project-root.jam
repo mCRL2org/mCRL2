@@ -1,4 +1,8 @@
-path-constant TOP : src ;
+path-constant TOP : . ;
+
+WXWIDGETS_CPPFLAGS = "-I/home/amathijs/wx/lib/wx/include/gtk2-ansi-release-static-2.6 -I/home/amathijs/wx/include/wx-2.6 -DGTK_NO_CHECK_CASTS -D__WXGTK__ -D_FILE_OFFSET_BITS=64 -D_LARGE_FILES -D_LARGEFILE_SOURCE=1 -DNO_GCC_PRAGMA" ;
+WX_CORE_LD_FLAGS    = "-L/home/amathijs/wx/lib -pthread   -L/usr/X11R6/lib  /home/amathijs/wx/lib/libwx_gtk2_core-2.6.a /home/amathijs/wx/lib/libwx_base-2.6.a -Wl,--export-dynamic -pthread -lgtk-x11-2.0 -lgdk-x11-2.0 -latk-1.0 -lgdk_pixbuf-2.0 -lpangoxft-1.0 -lpangox-1.0 -lpango-1.0 -lgobject-2.0 -lgmodule-2.0 -lgthread-2.0 -lglib-2.0 -lXinerama -lXxf86vm -lpng -ljpeg -ltiff -lwxexpat-2.6 -lz -ldl -lm" ;
+WX_NET_LD_FLAGS     = "-L/home/amathijs/wx/lib -pthread   -L/usr/X11R6/lib  /home/amathijs/wx/lib/libwx_base_net-2.6.a /home/amathijs/wx/lib/libwx_base-2.6.a -lwxexpat-2.6 -lz -ldl -lm" ;
 
 use-project /libraries/md5pp           : src/squadt/libraries/md5pp/build ;
 use-project /libraries/transport       : src/squadt/libraries/transport/build ;

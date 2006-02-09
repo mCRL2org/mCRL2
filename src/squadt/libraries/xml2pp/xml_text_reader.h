@@ -41,9 +41,6 @@ namespace xml2pp {
       /** Traverses of the XML document tree */
       void read() throw (int);
 
-      /** Load an XML schema that will be used to validate the document */
-      bool set_schema_for_validation(const char* file_name);
-
       /** Returns the name of the current element */
       inline std::string element_name();
 
@@ -82,19 +79,23 @@ namespace xml2pp {
       throw (new xml2pp::exception);
     }
 
+#ifdef SCHEMA_VALIDATION_ENABLED
     if (schema_name != 0 && xmlTextReaderSchemaValidate(reader, schema_name) < 0) {
       /* Error schema file, abort ... */
       throw (new xml2pp::exception);
     }
+#endif
   }
 
   inline text_reader::text_reader(const std::string& document, const char* schema_name) {
     reader = xmlReaderForMemory(document.c_str(), document.size() + 1, "", 0, 0);
 
+#ifdef SCHEMA_VALIDATION_ENABLED
     if (schema_name != 0 && xmlTextReaderSchemaValidate(reader, schema_name) < 0) {
       /* Error schema file, abort ... */
       throw (new xml2pp::exception);
     }
+#endif
   }
 
   inline text_reader::~text_reader() {

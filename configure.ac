@@ -250,6 +250,7 @@ if test -z $USE_LIBXML2; then
   AC_MSG_NOTICE(libXML2 is required for some tools in the toolset.)
   AC_MSG_NOTICE(it can be obtained from http://www.xmlsoft.org.)
 fi
+AC_SUBST([LIBXML2_CONFIG],[])
 AC_SUBST([LIBXML2_CPPFLAGS],[])
 AC_SUBST([LIBXML2_LDFLAGS],[])
 AC_SUBST([USE_LIBXML2],[])
@@ -363,6 +364,6 @@ AC_MSG_NOTICE()
 AC_MSG_NOTICE(Some tools will not be built if any of these libraries are missing.)
 AC_MSG_NOTICE()
 
-AC_CONFIG_FILES([src/rewr_innerc_aux.h config src/squadt/settings.h])
+AC_CONFIG_FILES([src/rewr_innerc_aux.h config config.jam src/squadt/settings.h])
 AC_OUTPUT
 

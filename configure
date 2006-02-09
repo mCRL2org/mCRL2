@@ -312,7 +312,7 @@ ac_includes_default="\
 # include <unistd.h>
 #endif"
 
-ac_subst_vars='SHELL PATH_SEPARATOR PACKAGE_NAME PACKAGE_TARNAME PACKAGE_VERSION PACKAGE_STRING PACKAGE_BUGREPORT exec_prefix prefix program_transform_name bindir sbindir libexecdir datadir sysconfdir sharedstatedir localstatedir libdir includedir oldincludedir infodir mandir build_alias host_alias target_alias DEFS ECHO_C ECHO_N ECHO_T LIBS build build_cpu build_vendor build_os host host_cpu host_vendor host_os HOST_OS CC CFLAGS LDFLAGS CPPFLAGS ac_ct_CC EXEEXT OBJEXT CPP CXX CXXFLAGS ac_ct_CXX LEX LEXLIB LEX_OUTPUT_ROOT BISON BFLAGS BUILD_EXPERIMENTAL EGREP ATERM_CPPFLAGS ATERM_LDFLAGS ATERM_NAME BUILD_ATERM LIBXML2_CPPFLAGS XML2_CONFIG LIBXML2_LDFLAGS USE_LIBXML2 XMLTO USE_XMLTO BOOST_PREFIX USE_BOOST WX_CONFIG USE_WX WX_CPPFLAGS WX_LIBS LIBOBJS DATADIR LTLIBOBJS'
+ac_subst_vars='SHELL PATH_SEPARATOR PACKAGE_NAME PACKAGE_TARNAME PACKAGE_VERSION PACKAGE_STRING PACKAGE_BUGREPORT exec_prefix prefix program_transform_name bindir sbindir libexecdir datadir sysconfdir sharedstatedir localstatedir libdir includedir oldincludedir infodir mandir build_alias host_alias target_alias DEFS ECHO_C ECHO_N ECHO_T LIBS build build_cpu build_vendor build_os host host_cpu host_vendor host_os HOST_OS CC CFLAGS LDFLAGS CPPFLAGS ac_ct_CC EXEEXT OBJEXT CPP CXX CXXFLAGS ac_ct_CXX LEX LEXLIB LEX_OUTPUT_ROOT BISON BFLAGS BUILD_EXPERIMENTAL EGREP ATERM_CPPFLAGS ATERM_LDFLAGS ATERM_NAME BUILD_ATERM LIBXML2_CPPFLAGS XML2_CONFIG LIBXML2_CONFIG LIBXML2_LDFLAGS USE_LIBXML2 XMLTO USE_XMLTO BOOST_PREFIX USE_BOOST WX_CONFIG USE_WX WX_CPPFLAGS WX_LIBS LIBOBJS DATADIR LTLIBOBJS'
 ac_subst_files=''
 
 # Initialize some variables set by options.
@@ -722,13 +722,13 @@ echo X"$0" |
   	  /^X\(\/\).*/{ s//\1/; q; }
   	  s/.*/./; q'`
   srcdir=$ac_confdir
-  if test ! -r "$srcdir/$ac_unique_file"; then
+  if test ! -r $srcdir/$ac_unique_file; then
     srcdir=..
   fi
 else
   ac_srcdir_defaulted=no
 fi
-if test ! -r "$srcdir/$ac_unique_file"; then
+if test ! -r $srcdir/$ac_unique_file; then
   if test "$ac_srcdir_defaulted" = yes; then
     { echo "$as_me: error: cannot find sources ($ac_unique_file) in $ac_confdir or .." >&2
    { (exit 1); exit 1; }; }
@@ -737,7 +737,7 @@ if test ! -r "$srcdir/$ac_unique_file"; then
    { (exit 1); exit 1; }; }
   fi
 fi
-(cd $srcdir && test -r "./$ac_unique_file") 2>/dev/null ||
+(cd $srcdir && test -r ./$ac_unique_file) 2>/dev/null ||
   { echo "$as_me: error: sources are in $srcdir, but \`cd $srcdir' does not work" >&2
    { (exit 1); exit 1; }; }
 srcdir=`echo "$srcdir" | sed 's%\([^\\/]\)[\\/]*$%\1%'`
@@ -5035,6 +5035,7 @@ fi
 
 
 
+
 # Check for xmlto
 
 # Check whether --with-xmlto or --without-xmlto was given.
@@ -6301,7 +6302,7 @@ echo "$as_me: Some tools will not be built if any of these libraries are missing
 { echo "$as_me:$LINENO: " >&5
 echo "$as_me: " >&6;}
 
-                              ac_config_files="$ac_config_files src/rewr_innerc_aux.h config src/squadt/settings.h"
+                                        ac_config_files="$ac_config_files src/rewr_innerc_aux.h config config.jam src/squadt/settings.h"
 
 cat >confcache <<\_ACEOF
 # This file is a shell script that caches the results of configure
@@ -6855,6 +6856,7 @@ do
   # Handling of arguments.
   "src/rewr_innerc_aux.h" ) CONFIG_FILES="$CONFIG_FILES src/rewr_innerc_aux.h" ;;
   "config" ) CONFIG_FILES="$CONFIG_FILES config" ;;
+  "config.jam" ) CONFIG_FILES="$CONFIG_FILES config.jam" ;;
   "src/squadt/settings.h" ) CONFIG_FILES="$CONFIG_FILES src/squadt/settings.h" ;;
   *) { { echo "$as_me:$LINENO: error: invalid argument: $ac_config_target" >&5
 echo "$as_me: error: invalid argument: $ac_config_target" >&2;}
@@ -6972,6 +6974,7 @@ s,@ATERM_NAME@,$ATERM_NAME,;t t
 s,@BUILD_ATERM@,$BUILD_ATERM,;t t
 s,@LIBXML2_CPPFLAGS@,$LIBXML2_CPPFLAGS,;t t
 s,@XML2_CONFIG@,$XML2_CONFIG,;t t
+s,@LIBXML2_CONFIG@,$LIBXML2_CONFIG,;t t
 s,@LIBXML2_LDFLAGS@,$LIBXML2_LDFLAGS,;t t
 s,@USE_LIBXML2@,$USE_LIBXML2,;t t
 s,@XMLTO@,$XMLTO,;t t

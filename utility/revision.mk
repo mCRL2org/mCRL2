@@ -16,7 +16,7 @@ revision: $(MAXIMUM_REVISION)
 $(MAXIMUM_REVISION):
 	$(MAKE) -C $(dir $(MAXIMUM_REVISION)) maximum_revision
 
-*.o: revision
+*.o *.d *.dpp: revision
 
 # This makes make reload, such that REVISION is initialised properly
 -include revision

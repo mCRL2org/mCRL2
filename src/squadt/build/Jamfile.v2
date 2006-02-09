@@ -9,8 +9,10 @@ project squadt
    <source>/libraries/xml2pp//xml_text_reader
    <source>/boost/filesystem//boost_filesystem ;
 
+include $(TOP)/config.jam ;
+
 alias wxflags : : : :
-   <cxxflags>"`wx-config --cflags`" ;
+   <cxxflags>"`$(WX_CONFIG) --cxxflags`" ;
 
 exe squadt : squadt.cpp
              wxflags
@@ -30,5 +32,5 @@ exe squadt : squadt.cpp
              /libraries/transport//transport
              /libraries/xml2pp//xml_text_reader
              /boost/filesystem//boost_filesystem
-           : <linkflags>"`wx-config --libs core base adv net`" ;
+           : <linkflags>"`$(WX_CONFIG) --libs core base adv net`" ;
 
