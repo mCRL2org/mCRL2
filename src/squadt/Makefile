@@ -150,7 +150,6 @@ ifeq ($(HOST_OS),MACOSX)
 endif
 
 clean:
-	@cd build; ../$(BJAM) --v2 --clean
-	$(RM) -rf *.o $(TARGETS) $(TEST_TARGETS) utility/*.o utility/relocator core dependencies bin
+	$(RM) -rf *.o $(TARGETS) $(TEST_TARGETS) settings.h utility/*.o utility/relocator core dependencies bin
 
 distclean: clean

@@ -57,5 +57,5 @@ install: all
 clean:
 
 distclean:
-	@-$(RM) -rf bin lib stage build_completed tools/build/jam_src/bin tools/build/jam_src/bootstrap
+	@-$(RM) -rf bin bin.v2 lib stage build_completed tools/build/jam_src/bin tools/build/jam_src/bootstrap
 
