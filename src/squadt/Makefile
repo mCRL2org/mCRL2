@@ -11,6 +11,7 @@ ifeq ($(HOST_OS),MINGW)
  CXXFLAGS                      = -O3
 endif
 
+CPPFLAGS=-Ilibraries
 
 ifeq ($(findstring -DNDEBUG,$(CPPFLAGS)),)
  CXXFLAGS                     += -g -Wall -W
@@ -43,7 +44,17 @@ TARGETS                        = squadt libmd5.a
 
 .PHONY: all install clean distclean test strip
 
-all: $(TARGETS)
+BJAM = ../boost/tools/build/jam_src/bin/bjam
+
+all: $(BJAM)
+ifeq ($(findstring $(CPPFLAGS),NDEBUG),)
+	 @cd build; ../$(BJAM) --v2 debug
+else
+	 @cd build; ../$(BJAM) --v2 release
+endif
+
+$(BJAM):
+	$(MAKE) -C ../boost bjam
 
 # Rules for building the maximum_revision tool and to generate a `revision' file
 ifndef SOURCE_DISTRIBUTION

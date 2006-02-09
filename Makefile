@@ -12,7 +12,7 @@ install: all
 
 clean:
 	@${MAKE} -C src $(MAKECMDGOALS)
-	$(RM) -r autom4te.cache config.log *~ core core.*
+	$(RM) -r autom4te.cache config.log *.o *~ core core.*
 
 distclean: clean distribution
 	$(RM) -r config.status config utility/maximum_revision

@@ -1,0 +1,17 @@
+project transport
+  : source-location ../source
+  : build-dir ../../../bin
+  : requirements
+   <include>../../../../boost/
+   <include>../
+  : usage-requirements
+   <include>../../
+   <linkflags>-lpthread ;
+
+lib transport :
+            transporter.cpp
+            transceiver.cpp
+            listener.cpp
+            socket_listener.cpp
+            socket_transceiver.cpp ;
+

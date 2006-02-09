@@ -1,0 +1,8 @@
+project md5pp_test
+  : requirements
+    <include>../../ ;
+
+exe md5_test :
+        md5_test.cpp
+        /libraries/md5pp//md5pp ;
+

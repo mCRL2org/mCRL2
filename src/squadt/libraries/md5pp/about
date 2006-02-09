@@ -1,0 +1,7 @@
+J. van der Wulp, 31-12-2005 
+
+This directory contains a nice clean MD5 implementation in C by Christophe
+Devine. More importantly it contains a custom build C++ wrapper, to make it
+easier to use in combination with C++ streams and STL strings.
+
+

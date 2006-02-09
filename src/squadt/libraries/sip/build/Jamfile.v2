@@ -1,0 +1,32 @@
+project sip
+  : source-location ../source
+  : build-dir ../../../bin
+  : requirements
+   <threading>multi
+   <include>../../../../boost/
+   <include>../../
+  : usage-requirements
+   <include>../../ ;
+
+lib sip_communicator :
+        sip_communicator.cpp
+        /boost/thread//boost_thread
+        /libraries/transport//transport ;
+
+lib sip_common :
+        common.cpp
+        report.cpp
+        exception.cpp
+        sip_communicator
+        /libraries/xml2pp//xml_text_reader ;
+
+lib sipc :
+        sip_controller.cpp
+        layout.cpp
+        sip_common ;
+
+lib sipt :
+        sip_tool.cpp
+        layout.cpp
+        sip_common ;
+

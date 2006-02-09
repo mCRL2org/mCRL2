@@ -1,7 +1,7 @@
 #ifndef MD5PP_H
 #define MD5PP_H
 
-#include "md5.h"
+#include "source/md5.h"
 
 #include <cstdio>
 #include <iostream>
@@ -15,16 +15,16 @@ namespace md5 {
     /* Read digest from a string and convert to compact format */
     void read(const char*);
 
-    /* Whether digest is the zero checksum */
+    /** Whether digest is the zero checksum */
     inline bool is_zero() const;
 
-    /* Fill with zeroes */
+    /** Fill with zeroes */
     inline void zero_out();
 
-    /* Compare two compact digests for equality */
+    /** Compare two compact digests for equality */
     inline bool operator== (const compact_digest& r) const;
 
-    /* Assign to ... */
+    /** Assign to ... */
     inline void operator= (const compact_digest& r);
   };
 
@@ -68,25 +68,34 @@ namespace md5 {
  
     public:
  
+      /** Constructor */
       MD5();
  
+      /** Creates a new compact digest using data from a string */
       static compact_digest MD5_Sum(std::string);
+
+      /** Creates a new compact digest using data from a stream */
       static compact_digest MD5_Sum(std::istream&);
  
+      /** Update checksum with a specified amount of data from string */
       void Update(unsigned char*, unsigned int);
  
+      /** Update checksum with data from string */
       void Update(std::string);
  
-      /* Import from opened istream */
+      /** Update checksum with data from stream */
       void Update(std::istream&);
  
+      /** Complete checksum (Update() is no longer possible) */
       void Finalise();
  
-      /* Empty context */
+      /** Empty context */
       void Clear();
  
+      /** Return the computed MD5 sum */
       const compact_digest & GetDigest() const;
  
+      /** Print the current digest to a stream */
       friend std::ostream& operator<< (std::ostream&, const MD5&);
   };
 

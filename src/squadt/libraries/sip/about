@@ -1,0 +1,9 @@
+J. van der Wulp, 30-02-2006
+
+Libraries that implement the tool and controller side of the Squadt Interaction
+Protocol (SIP). It is built on top of libtransport which in turn is build on
+top of asio (asynchronous input output library proposed for inclusion in
+Boost). In addition it uses some functionality of libXML version 2 (through
+xml2pp).
+
+

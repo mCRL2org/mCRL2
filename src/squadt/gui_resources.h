@@ -3,15 +3,20 @@
 
 #include <wx/wx.h>
 
-extern wxImageList* main_icon_list;
-extern wxImageList* format_icon_list;
-extern wxImageList* format_small_icon_list;
+namespace squadt {
+  namespace GUI {
 
-extern wxIcon* gui_icon;
+    extern wxImageList* main_icon_list;
+    extern wxImageList* format_icon_list;
+    extern wxImageList* format_small_icon_list;
 
-/* Function to load the icons */
-wxImageList* LoadMainIcons();
-wxImageList* LoadFormatIcons();
-wxImageList* LoadSmallFormatIcons();
+    extern wxIcon* gui_icon;
+
+    /* Function to load the icons */
+    wxImageList* LoadMainIcons();
+    wxImageList* LoadFormatIcons();
+    wxImageList* LoadSmallFormatIcons();
+  }
+}
 
 #endif

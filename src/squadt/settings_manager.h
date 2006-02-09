@@ -3,61 +3,65 @@
 
 #include <string>
 
-/*
- * Stores the runtime configuration settings for all components.
- */
-class SettingsManager {
-  private:
+#include "settings.h"
 
-    std::string home_directory;          /* Users home directory */
-    std::string settings_directory;      /* Directory in which project independent settings are stored */
-    std::string tool_catalog_name;       /* The name of the tool catalog file */
-    std::string project_file_name;       /* The base name of a project file */
+namespace squadt {
+  /*
+   * Stores the runtime configuration settings for all components.
+   */
+  class SettingsManager {
+    private:
 
-    static std::string default_profile_directory;
+      std::string home_directory;          /* Users home directory */
+      std::string settings_directory;      /* Directory in which project independent settings are stored */
+      std::string tool_catalog_name;       /* The name of the tool catalog file */
+      std::string project_file_name;       /* The base name of a project file */
 
-  protected:
+      static std::string default_profile_directory;
 
-    /* Determine the default name that is used for the profile directory (depends on host system) */
-    static std::string SettingsManager::GetDefaultProfileDirectory();
+    protected:
 
-  public:
+      /* Determine the default name that is used for the profile directory (depends on host system) */
+      static std::string SettingsManager::GetDefaultProfileDirectory();
 
-    SettingsManager(const char* the_home_directory, const char* profile_directory = default_profile_directory.c_str());
+    public:
 
-    /* The personal directory for the user */
-    void SetHomeDirectory(const std::string);
+      SettingsManager(const char* the_home_directory, const char* profile_directory = default_profile_directory.c_str());
 
-    /* Set the (basename) of the tool catalog file (name may not contain directory separators) */
-    inline void SetToolCatalogName(const std::string name) {
-      tool_catalog_name = name;
-    }
+      /* The personal directory for the user */
+      void SetHomeDirectory(const std::string);
 
-    /* The (base)name of the directory in which settings are stored */
-    void SetSettingsDirectory(const std::string);
+      /* Set the (basename) of the tool catalog file (name may not contain directory separators) */
+      inline void SetToolCatalogName(const std::string name) {
+        tool_catalog_name = name;
+      }
 
-    /* Get the the settings directory */
-    std::string GetSettingsPath() const;
+      /* The (base)name of the directory in which settings are stored */
+      void SetSettingsDirectory(const std::string);
 
-    /* Get the path to the directory containing the image file(s) */
-    std::string GetImagePath() const;
+      /* Get the the settings directory */
+      std::string GetSettingsPath() const;
 
-    /* Get the path to image, in the directory containing the image file(s) */
-    std::string GetImagePath(const std::string image) const;
+      /* Get the path to the directory containing the image file(s) */
+      std::string GetImagePath() const;
 
-    /* Get the path to the directory containing the XML schema file(s) */
-    std::string GetSchemaPath() const;
+      /* Get the path to image, in the directory containing the image file(s) */
+      std::string GetImagePath(const std::string image) const;
 
-    /* Get the path to where the user independent and default configurations are stored */
-    std::string GetConfigurationPath() const;
+      /* Get the path to the directory containing the XML schema file(s) */
+      std::string GetSchemaPath() const;
 
-    /* Get the path to the tool catalog file(s) */
-    std::string GetToolCatalogPath() const;
+      /* Get the path to where the user independent and default configurations are stored */
+      std::string GetConfigurationPath() const;
 
-    /* Get the base name of a project file */
-    std::string GetProjectFileName() const;
+      /* Get the path to the tool catalog file(s) */
+      std::string GetToolCatalogPath() const;
 
-    const std::string GetLogFileName() const;
-};
+      /* Get the base name of a project file */
+      std::string GetProjectFileName() const;
+
+      const std::string GetLogFileName() const;
+  };
+}
 
 #endif

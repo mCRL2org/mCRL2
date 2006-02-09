@@ -1,18 +1,21 @@
 #ifndef UI_CORE_H
 #define UI_CORE_H
 
-class SettingsManager;
-class ToolManager;
-class Logger;
+namespace squadt {
 
-/* Global Settings Manager component */
-extern SettingsManager  settings_manager;
+  class SettingsManager;
+  class ToolManager;
+  class Logger;
 
-/* Global Tool Manager component */
-extern ToolManager      tool_manager;
+  /* Global Settings Manager component */
+  extern SettingsManager  settings_manager;
 
-/* Global log component */
-extern Logger*          logger;
+  /* Global Tool Manager component */
+  extern ToolManager      tool_manager;
+
+  /* Global log component */
+  extern Logger*          logger;
+}
 
 #endif
 

@@ -1,0 +1,11 @@
+project transport
+  : requirements
+   <include>../../../../boost/
+   <include>../../ ;
+
+exe connection_test :
+            connection_test.cpp
+            /libraries/transport//transport
+            /boost/test//boost_unit_test_framework
+           : <linkflags>-lpthread ;
+

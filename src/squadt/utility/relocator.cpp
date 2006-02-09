@@ -2,6 +2,7 @@
 #include <string.h>
 #include <iostream>
 
+#include "../tool.h"
 #include "../tool_manager.h"
 #include "../tool_executor.h"
 #include "../settings_manager.h"

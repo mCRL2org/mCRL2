@@ -1,7 +1,7 @@
 #ifndef LOGGER_H
 #define LOGGER_H
 
-#include <iostream>
+#include <iosfwd>
 #include <list>
 
 #include <wx/wx.h>
@@ -9,44 +9,47 @@
 #include <wx/socket.h>
 #include <wx/textctrl.h>
 
-#define DEFAULT_LOG_PORT 6765
+namespace squadt {
 
-/*
- * Braindead... have to derive from wxTopLevelWindow because event handling does not
- * work properly otherwise
- */
-class Logger : public wxTopLevelWindow {
-  DECLARE_CLASS(Logger)
-  DECLARE_EVENT_TABLE()
+  #define DEFAULT_LOG_PORT 6765
 
-  private:
-    wxSocketServer* listener;
+  /*
+   * Braindead... have to derive from wxTopLevelWindow because event handling does not
+   * work properly otherwise
+   */
+  class Logger : public wxTopLevelWindow {
+    DECLARE_CLASS(Logger)
+    DECLARE_EVENT_TABLE()
 
-    std::list < wxSocketBase* > connections;
+    private:
+      wxSocketServer* listener;
 
-    /* Optional the text control on which to output the log */
-    wxTextCtrl*   log_window;
+      std::list < wxSocketBase* > connections;
 
-    std::ostream& log_stream;
+      /* Optional the text control on which to output the log */
+      wxTextCtrl*   log_window;
 
-  public:
+      std::ostream& log_stream;
 
-    Logger(std::ostream& stream = std::cerr);
-    ~Logger();
+    public:
 
-    /* Set log window */
-    inline void SetLogWindow(wxTextCtrl* window) {
-      log_window = window;
-    }
+      Logger(std::ostream& stream = std::cerr);
+      ~Logger();
 
-    /* Unset log window */
-    inline void UnSetLogWindow() {
-      log_window = NULL;
-    }
+      /* Set log window */
+      inline void SetLogWindow(wxTextCtrl* window) {
+        log_window = window;
+      }
 
-    void OnListenEvent(wxSocketEvent& event);
+      /* Unset log window */
+      inline void UnSetLogWindow() {
+        log_window = NULL;
+      }
 
-    void OnSocketEvent(wxSocketEvent& event);
-};
+      void OnListenEvent(wxSocketEvent& event);
+
+      void OnSocketEvent(wxSocketEvent& event);
+  };
+}
 
 #endif

@@ -5,25 +5,30 @@
 #include <wx/dialog.h>
 #include <wx/dirctrl.h>
 
-class NewSpecificationDialog : public wxDialog {
-  DECLARE_CLASS(NewSpecificationDialog)
-  DECLARE_EVENT_TABLE()
+namespace squadt {
+  namespace GUI {
 
-  public:
-    NewSpecificationDialog();
-    NewSpecificationDialog(wxWindow*, wxWindowID);
-
-    wxString GetName();
-    wxString GetFileName();
-    wxString GetFilePath();
-    wxString GetPath();
-
-  private:
-    wxTextCtrl*       name_field;
-    wxTextCtrl*       select_field;
-    wxGenericDirCtrl* file_field;
-
-    void UpdateSelectField(wxCommandEvent& event);
-};
+    class NewSpecificationDialog : public wxDialog {
+      DECLARE_CLASS(NewSpecificationDialog)
+      DECLARE_EVENT_TABLE()
+ 
+      public:
+        NewSpecificationDialog();
+        NewSpecificationDialog(wxWindow*, wxWindowID);
+  
+        wxString GetName();
+        wxString GetFileName();
+        wxString GetFilePath();
+        wxString GetPath();
+  
+      private:
+        wxTextCtrl*       name_field;
+        wxTextCtrl*       select_field;
+        wxGenericDirCtrl* file_field;
+  
+        void UpdateSelectField(wxCommandEvent& event);
+    };
+  }
+}
 
 #endif

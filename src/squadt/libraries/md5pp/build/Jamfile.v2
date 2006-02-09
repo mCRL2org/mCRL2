@@ -1,0 +1,11 @@
+project md5pp
+  : source-location ../source
+  : requirements
+    <include>../
+  : build-dir ../../../bin
+  : usage-requirements
+    <include>../ ;
+
+lib md5pp :
+        md5.cpp
+        md5pp.cpp ;

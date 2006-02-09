@@ -1,0 +1,14 @@
+project test_sip
+  : requirements
+   <include>../../../../boost/
+   <include>../../ ;
+
+exe communicator_test :
+        communicator_test.cpp
+        /libraries/sip//sip_communicator
+        /boost/test//boost_unit_test_framework ;
+
+exe abstract_interface_test :
+        abstract_interface_test.cpp
+        /libraries/sip//sipt
+        /boost/test//boost_unit_test_framework ;
