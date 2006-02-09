@@ -13,11 +13,39 @@
 <!ENTITY opt_q "<option>-q</option>">
 <!ENTITY opt_v "<option>-v</option>">
 <!ENTITY opt_f "<option>-f</option>">
+<!ENTITY opt_y "<option>-y</option>">
+<!ENTITY opt_u "<option>-u</option>">
+<!ENTITY opt_c "<option>-c</option>">
+<!ENTITY opt_r "<option>-r</option>">
+<!ENTITY opt_l "<option>-l</option>">
+<!ENTITY opt_d "<option>-d</option>">
+<!ENTITY opt_e "<option>-e</option>">
+<!ENTITY opt_D "<option>-D</option>">
+<!ENTITY opt_t "<option>-t</option>">
+<!ENTITY opt_p "<option>-p</option>">
+<!ENTITY opt_m "<option>-m</option>">
+<!ENTITY opt_R "<option>-R</option>">
 <!ENTITY opt_help "<option>--help</option>">
 <!ENTITY opt_version "<option>--version</option>">
 <!ENTITY opt_quiet "<option>--quiet</option>">
 <!ENTITY opt_verbose "<option>--verbose</option>">
 <!ENTITY opt_freevar "<option>--freevar</option>">
+<!ENTITY opt_dummy "<option>--dummy</option>">
+<!ENTITY opt_unused-data "<option>--unused-data</option>">
+<!ENTITY opt_vector "<option>--vector</option>">
+<!ENTITY opt_tree "<option>--tree</option>">
+<!ENTITY opt_max "<option>--max</option>">
+<!ENTITY opt_deadlock "<option>--deadlock</option>">
+<!ENTITY opt_deadlock-detect "<option>--deadlock-detect</option>">
+<!ENTITY opt_deadlock-trace "<option>--deadlock-trace</option>">
+<!ENTITY opt_detect "<option>--detect</option>">
+<!ENTITY opt_trace "<option>--trace</option>">
+<!ENTITY opt_priority "<option>--priority</option>">
+<!ENTITY opt_monitor "<option>--monitor</option>">
+<!ENTITY opt_rewriter "<option>--rewriter</option>">
+<!ENTITY opt_aut "<option>--aut</option>">
+<!ENTITY opt_svc "<option>--svc</option>">
+<!ENTITY opt_no-info "<option>--no-info</option>">
 <!ENTITY stdin "<constant>stdin</constant>">
 <!ENTITY stdout "<constant>stdout</constant>">
 ]>
@@ -107,6 +135,157 @@ Mandatory arguments to long options are mandatory for short options too.
     <listitem>
       <para>
         do not replace free variables in the LPE with dummy values
+      </para>
+    </listitem>
+  </varlistentry>
+
+  <varlistentry>
+    <term>&opt_y;</term>
+    <term>&opt_dummy;</term>
+    <listitem>
+      <para>
+        replace free variables in the LPE with dummy values (default)
+      </para>
+    </listitem>
+  </varlistentry>
+
+  <varlistentry>
+    <term>&opt_u;</term>
+    <term>&opt_unused-data;</term>
+    <listitem>
+      <para>
+        do not remove unused parts of the data specification
+      </para>
+    </listitem>
+  </varlistentry>
+
+  <varlistentry>
+    <term>&opt_c;</term>
+    <term>&opt_vector;</term>
+    <listitem>
+      <para>
+        store state in a vector (fastest, default)
+      </para>
+    </listitem>
+  </varlistentry>
+
+  <varlistentry>
+    <term>&opt_r;</term>
+    <term>&opt_tree;</term>
+    <listitem>
+      <para>
+        store state in a tree (for memory efficiency)
+      </para>
+    </listitem>
+  </varlistentry>
+
+  <varlistentry>
+    <term>&opt_l;</term>
+    <term>&opt_max;=NUM</term>
+    <listitem>
+      <para>
+        explore at most NUM states
+      </para>
+    </listitem>
+  </varlistentry>
+
+  <varlistentry>
+    <term>&opt_d;</term>
+    <term>&opt_deadlock;</term>
+    <term>&opt_deadlock-detect;</term>
+    <listitem>
+      <para>
+        detect deadlocks (i.e. for every deadlock a message is printed)
+      </para>
+    </listitem>
+  </varlistentry>
+
+  <varlistentry>
+    <term>&opt_e;</term>
+    <term>&opt_deadlock-trace;</term>
+    <listitem>
+      <para>
+         write trace to each deadlock state to a file
+      </para>
+    </listitem>
+  </varlistentry>
+
+  <varlistentry>
+    <term>&opt_D;</term>
+    <term>&opt_detect;=NAME</term>
+    <listitem>
+      <para>
+         detect actions from NAME* (i.e. print a message for every occurence)
+      </para>
+    </listitem>
+  </varlistentry>
+
+  <varlistentry>
+    <term>&opt_t;</term>
+    <term>&opt_trace;=NAME</term>
+    <listitem>
+      <para>
+         write trace to each state that is reached with an action from NAME* to a file
+      </para>
+    </listitem>
+  </varlistentry>
+
+  <varlistentry>
+    <term>&opt_p;</term>
+    <term>&opt_priority;=NAME</term>
+    <listitem>
+      <para>
+         give priority to action NAME (i.e. if it is possible to
+         execute an action NAME in some state, than make it the only
+         executable action from that state)
+      </para>
+    </listitem>
+  </varlistentry>
+
+  <varlistentry>
+    <term>&opt_m;</term>
+    <term>&opt_monitor;</term>
+    <listitem>
+      <para>
+         print detailed status of generation
+      </para>
+    </listitem>
+  </varlistentry>
+
+  <varlistentry>
+    <term>&opt_R;</term>
+    <term>&opt_rewriter;=NAME</term>
+    <listitem>
+      <para>
+         use rewriter NAME (default 'inner3')
+      </para>
+    </listitem>
+  </varlistentry>
+
+  <varlistentry>
+    <term>&opt_aut;</term>
+    <listitem>
+      <para>
+         force &outfile; to be in the aut format (implies
+                        &opt_no-info;, see below)  
+      </para>
+    </listitem>
+  </varlistentry>
+
+  <varlistentry>
+    <term>&opt_svc;</term>
+    <listitem>
+      <para>
+         force &outfile; to be in the svc format
+      </para>
+    </listitem>
+  </varlistentry>
+
+   <varlistentry>
+    <term>&opt_no-info;</term>
+    <listitem>
+      <para>
+         do not add state information to &outfile;
       </para>
     </listitem>
   </varlistentry>
