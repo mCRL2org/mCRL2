@@ -14,7 +14,8 @@
 <!ENTITY opt_dummy "<option>--dummy</option>">
 <!ENTITY opt_rewriter "<option>--rewriter</option>">
 <!ENTITY n "<parameter>n</parameter>">
-<!ENTITY min1 "<parameter>-1</parameter>">
+<!ENTITY q "<parameter>q</parameter>">
+<!ENTITY h "<parameter>h</parameter>">
 <!ENTITY ctrl-d "<parameter>Ctrl-D</parameter>">
 ]>
 
@@ -71,7 +72,16 @@
       </varlistentry>
       
       <varlistentry>
-	<term>&min1;</term>
+	<term>&h;</term>
+	<listitem>
+	  <para>
+	    Display a help message explaining the available commands.
+	  </para>
+	</listitem>
+      </varlistentry>
+    
+      <varlistentry>
+	<term>&q;</term>
 	<term>&ctrl-d;</term>
 	<listitem>
 	  <para>
