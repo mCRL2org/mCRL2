@@ -345,6 +345,7 @@ int main(int argc, char **argv)
       s = strrchr(argv[optind+1],'.');
       if ( s == NULL )
       {
+        gsWarningMsg("no extension given for output file; writing state space in AUT format\n",s);
         outformat = OF_AUT;
       } else {
         s++;
@@ -352,6 +353,10 @@ int main(int argc, char **argv)
         {
           outformat = OF_SVC;
         } else {
+          if ( strcmp(s,"aut") )
+          {
+            gsWarningMsg("extension '%s' of output file not recognised; writing state space in AUT format\n",s);
+          }
           outformat = OF_AUT;
         }
       }

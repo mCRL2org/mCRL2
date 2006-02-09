@@ -291,7 +291,19 @@ SVCstateIndex ReadData(void)
    while (SVCgetNextTransition(inFile, &fromState, &label, &toState, &parameter)) 
       {
       ATerm name = label_name[label];
-      if (!name) name = label_name[label] = SVClabel2ATerm(inFile,label);
+      if (!name) {
+          name = SVClabel2ATerm(inFile,label);
+	  name = (ATerm) gsSortMultAct((ATermAppl) name);
+	  for (int i=0; i<nlabel; i++)
+	  {
+             if ( ATisEqual(label_name[i],name) )
+	     {
+                     label = i;
+		     break;
+	     }
+	  }
+          label_name[label] = name;
+      }
       if (classes) {
           ATerm parname = par_name[parameter];
           if (!parname) parname = par_name[parameter] = 

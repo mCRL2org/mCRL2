@@ -73,6 +73,9 @@ private:
   
   //Only used by getDataVarIDs  
   set< data_variable >        p_foundFreeVars;       
+
+  //Only used by detectVar
+  set<data_variable>          sum_vars;
   
   void getDatVarRec(aterm_appl t)
   {
@@ -218,26 +221,35 @@ private:
     }
     return !differs;
   }
- 
-  void detectVar()
+
+  // Remove detected constant parameters if they contain summation variables
+  void detectVar(int n)
   {
-   for(set< int >::iterator i = p_S.begin(); i != p_S.end() ; i++ ){
-     bool b = recDetectVar(p_currentState.at(*i).rhs());
-     if (b) {
-       p_S.erase(i);
+   // every process parameter...
+   for(int i = 0; i != n; i++ ){
+     // ...that is found to be constant (i.e. that is not in the set of
+     // variable parameters)...
+     if ( p_V.find(i) == p_V.end() ) {
+       // ...and contains a summation variable...
+       data_expression t = p_currentState.at(i).rhs();
+       if ( recDetectVar(t, sum_vars) ) {
+         // ...is actually a variable parameter
+         p_V.insert(i);
+       }
      }
    }
   }
 
-  bool recDetectVar(data_expression t)
+  // Return whether or not a summation variable occurs in a data term
+  bool recDetectVar(data_expression t, set<data_variable> &S)
   {
      bool b = false;
-     if(gsIsDataVarId(t)){
+     if( gsIsDataVarId(t) && (S.find(data_variable((ATermAppl) t)) != S.end()) ){
        b = true;
      }
      if ( gsIsDataAppl(t) ) {
        for(aterm_list::iterator i = ((aterm_appl) t).argument_list().begin(); i!= ((aterm_appl) t).argument_list().end();i++) {
-         b = b || recDetectVar((aterm_appl) *i);
+         b = b || recDetectVar((aterm_appl) *i, S);
        }
      }
      return b;
@@ -356,11 +368,11 @@ private:
     {
       cerr << "lpeconstelm:   [ ";
       for(set< int >::iterator i = p_S.begin(); i != (--p_S.end()) ; i++ ){
-	if (!p_nosingleton){
-	  cerr << p_currentState[*i].pp() << ", ";
-	} else {
-	  cerr << p_currentState[*i].pp() << ": " << p_currentState[*i].lhs().type().pp() << ", ";
-	}  
+        if (!p_nosingleton){
+          cerr << p_currentState[*i].pp() << ", ";
+        } else {
+          cerr << p_currentState[*i].pp() << ": " << p_currentState[*i].lhs().type().pp() << ", ";
+        }  
       }
       cerr << p_currentState[*(--p_S.end())].pp() << " ]" << endl;
     }
@@ -382,7 +394,7 @@ public:
   // sorts with singleton constructors are removed from p_S
   // pre:  p_S is calculated && p_initAssignments is set
   // post: p_S contains the indices without the process parameters which have a singleton constructor
-  void removeSingleton()
+  void removeSingleton(int n)
   {
     bool empty = true;
     sort_list rebuild_sort = p_spec.sorts();
@@ -392,11 +404,15 @@ public:
       "lpeconstelm: Constant process parameters which are not substituted and " << endl <<
       "lpeconstelm: removed [--nosingleton]:" << endl;
     }
-    for(set< int >::iterator i = p_S.begin(); i != p_S.end(); i++){
-      if (p_singletonSort.find(p_initAssignments[*i].lhs().type())  != p_singletonSort.end()){
-        p_S.erase(*i);
+    for(int i = 0; i < n; i++)
+    {
+      if ( (p_V.find(i) == p_V.end()) &&
+           (p_singletonSort.find(p_initAssignments[i].lhs().type()) != p_singletonSort.end())
+         )
+      {
+        p_V.insert(i);
         if (p_verbose){
-          cerr << "lpeconstelm:   " << p_initAssignments[*i].lhs().pp() << " : " << p_initAssignments[*i].lhs().type().pp() << endl;
+          cerr << "lpeconstelm:   " << p_initAssignments[i].lhs().pp() << " : " << p_initAssignments[i].lhs().type().pp() << endl;
           empty = false;
         }
       }
@@ -457,7 +473,7 @@ public:
     //Remove process parameters in in summand
     // 
       
-	  summand_list rebuild_summandlist_no_cp;
+          summand_list rebuild_summandlist_no_cp;
     for(summand_list::iterator currentSummand = rebuild_summandlist.begin(); currentSummand != rebuild_summandlist.end(); currentSummand++){
 
       //construct new LPE_summand
@@ -495,7 +511,7 @@ public:
       //            data_assignment_list assignments);    
       tmp = LPE_summand(currentSummand->summation_variables(), rebuild_condition, 
         currentSummand->is_delta(), atermpp::reverse(rebuild_actions) , currentSummand->time(), 
-	      atermpp::reverse(rebuildAssignments));
+              atermpp::reverse(rebuildAssignments));
         rebuild_summandlist_no_cp = push_front(rebuild_summandlist_no_cp, tmp); 
     }
     
@@ -727,8 +743,16 @@ public:
       p_freeVarSet.insert(di->to_expr());
     } 
     
-    int n = p_spec.initial_assignments().size();
+    // Make a set containing all summation variables (for detectVar)
+    summand_list sums = p_spec.lpe().summands();
+    summand_list::iterator sums_b = sums.begin();
+    summand_list::iterator sums_e = sums.end();
+    for (summand_list::iterator i = sums_b; i != sums_e; i++)
+    {
+      sum_vars.insert(i->summation_variables().begin(),i->summation_variables().end());
+    }
 
+    int n = p_spec.initial_assignments().size();
 
     while (foundFake){
       foundFake = false;
@@ -752,7 +776,7 @@ public:
           if ( (p_visitedSummands.find(*currentSummand) != p_visitedSummands.end()) || (conditionTest(currentSummand->condition()))) {
             if(p_verbose){
               //cerr << "  Summand: "<< summandnr++ << endl;
-	      cerr << ".";
+              cerr << ".";
             }
             p_visitedSummands.insert(*currentSummand); 
             //----------          Debug
@@ -765,13 +789,31 @@ public:
             //if (!same) {break;}                                           //Break reduces time to complete; need to find out when to brake
           }
         }
-	if (p_verbose) cerr << endl;
+        if (p_verbose) cerr << endl;
         p_currentState = p_newCurrentState;
       }
 
       //---------------------------------------------------------------
       //---------------------   Body end   ----------------------------
       //---------------------------------------------------------------
+
+      // remove detected constants in case the value contains summation
+      // variables
+      {
+        int n = p_V.size();
+        detectVar(p_lpe.process_parameters().size());
+	int diff = p_V.size()-n;
+        if ( p_verbose )
+        {
+          if ( diff == 1 )
+          {
+            cerr << "lpeconstelm: reset 1 parameter to variable because its value contained summation variables" << endl;
+          } else if ( diff > 1 )
+	  {
+            cerr << "lpeconstelm: reset " << diff << " parameters to variable because their values contained summation variables" << endl;
+          }
+        }
+      }
 
       //---------------------FeeVar aftercheck-------------------------
       //
@@ -804,11 +846,29 @@ public:
         }         
 
       }
-
+      
     }
     
     //---------------------------------------------------------------
 
+    //Singleton sort process parameters
+    //
+    if(p_nosingleton){
+       int n = p_V.size();
+       removeSingleton(p_lpe.process_parameters().size());
+       int diff = p_V.size()-n;
+       if ( p_verbose )
+       {
+         if ( diff > 1 )
+         {
+           cerr << "lpeconstelm: " << diff << " constant parameters are not removed because their sorts contain only one element" << endl;
+         } else if ( diff == 1 )
+         {
+           cerr << "lpeconstelm: 1 constant parameter is not removed because its sort contains only one element" << endl;
+         }
+       }
+    }    
+    
     //---------------------------------------------------------------
     // Construct S    
     //
@@ -818,15 +878,6 @@ public:
       S.insert(j);
     };
     set_difference(S.begin(), S.end(), p_V.begin(), p_V.end(), inserter(p_S, p_S.begin()));
-    
-    // remove detected constants in case the value contains variables
-    detectVar();
-
-    //Singleton sort process parameters
-    //
-    if(p_nosingleton){
-       removeSingleton();
-    }    
     
     if (p_verbose){
       cerr << "lpeconstelm: Number of removed process parameters: "<< p_S.size() << endl ;//printSet(); 
@@ -864,20 +915,20 @@ int main(int ac, char* av[])
         ("no-condition", "all summand conditions are set true (faster)")
         ("no-reachable", "does not remove summands which are not visited")
       ;
-	
+        
     po::options_description hidden("Hidden options");
-	  hidden.add_options()
+          hidden.add_options()
              ("INFILE", po::value< vector<string> >(), "input file")
-	  ;
-	
-	  po::options_description cmdline_options;
-	  cmdline_options.add(desc).add(hidden);
-	
-	  po::options_description visible("Allowed options");
-	  visible.add(desc);
-	
-	  po::positional_options_description p;
-	  p.add("INFILE", -1);
+          ;
+        
+          po::options_description cmdline_options;
+          cmdline_options.add(desc).add(hidden);
+        
+          po::options_description visible("Allowed options");
+          visible.add(desc);
+        
+          po::positional_options_description p;
+          p.add("INFILE", -1);
 
     po::variables_map vm;
     store(po::command_line_parser(ac, av).
@@ -893,48 +944,48 @@ int main(int ac, char* av[])
     }
         
     if (vm.count("version")) {
-	    cerr << obj.getVersion() << " (revision " << REVISION << ")" << endl;
-	    return 0;
-	  }
+            cerr << obj.getVersion() << " (revision " << REVISION << ")" << endl;
+            return 0;
+          }
 
     if (vm.count("verbose")) {
       obj.setVerbose(true);
-	  } else {
-	    obj.setVerbose(false);
-	  }
-	  
-	  if (vm.count("debug")) {
+          } else {
+            obj.setVerbose(false);
+          }
+          
+          if (vm.count("debug")) {
       obj.setDebug(true);
-	  } else {
-	    obj.setDebug(false);
-	  }
+          } else {
+            obj.setDebug(false);
+          }
 
     if (vm.count("no-singleton")) {
       obj.setNoSingleton(true);
-	  } else {
-	    obj.setNoSingleton(false);
-	  }
+          } else {
+            obj.setNoSingleton(false);
+          }
 
     if (vm.count("no-condition")) {
       obj.setAllTrue(true);
-	  } else {
-	    obj.setAllTrue(false);
-	  }
+          } else {
+            obj.setAllTrue(false);
+          }
 
     if (vm.count("no-reachable")) {
       obj.setReachable(false);
-	  } else {
-	    obj.setReachable(true);
-	  }
+          } else {
+            obj.setReachable(true);
+          }
 
     if (vm.count("INFILE")){
       filename = vm["INFILE"].as< vector<string> >();
-	  }
+          }
 
-    //printf("%d",filename.size()); 	  
-	  if (filename.size() == 0){
-	    if (!obj.readStream()){return 1;}
-	  }
+    //printf("%d",filename.size());           
+          if (filename.size() == 0){
+            if (!obj.readStream()){return 1;}
+          }
 
     if (filename.size() > 2){
       cerr << "lpeconstelm: Specify only INPUT and/or OUTPUT file (Too many arguments)."<< endl;

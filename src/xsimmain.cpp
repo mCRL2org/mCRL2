@@ -65,6 +65,8 @@ XSimMain::XSimMain( wxWindow *parent, wxWindowID id, const wxString &title,
     use_dummies = false;
     rewr_strat = GS_REWR_INNER3; // XXX add to constructor?
 
+    base_title = title;
+
     CreateMenu();
     CreateStatus();
     CreateContent();
@@ -343,6 +345,8 @@ void XSimMain::LoadFile(const wxString &filename)
 	    msg.ShowModal();
 	    return;
     }
+
+    SetTitle(base_title+wxT(" - ")+filename);    
 
     ATermList l = ATLgetArgument(ATAgetArgument(Spec,5),1);
     ATermList m = ATmakeList0();

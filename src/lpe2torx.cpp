@@ -52,6 +52,7 @@ class torx_data
     ATermIndexedSet stateactions;
     ATermTable state_indices;
     AFun fun_trip;
+    unsigned int num_indices;
 
     ATerm triple(ATerm one, ATerm two, ATerm three)
     {
@@ -70,6 +71,7 @@ class torx_data
       state_indices = ATtableCreate(initial_size,50);
       fun_trip = ATmakeAFun("@trip@",2,ATfalse);
       ATprotectAFun(fun_trip);
+      num_indices = 0;
     }
 
     ~torx_data()
@@ -85,6 +87,10 @@ class torx_data
       index_pair p;
 
       p.action = ATindexedSetPut(stateactions,triple(from,action,to),&is_new);
+      if ( is_new == ATtrue )
+      {
+        num_indices = num_indices + 1;
+      }
 
       ATerm i;
       if ( (i = ATtableGet(state_indices,to)) == NULL )
@@ -98,9 +104,14 @@ class torx_data
       return p;
     }
 
-    ATerm get_state(int index)
+    ATerm get_state(unsigned int index)
     {
-      return third(ATindexedSetGetElem(stateactions,index));
+      if ( index < num_indices )
+      {
+        return third(ATindexedSetGetElem(stateactions,index));
+      } else {
+        return NULL;
+      }
     }
 };
 
@@ -291,6 +302,11 @@ int main(int argc, char **argv)
     string s;
 
     cin >> s;
+    if ( s.size() != 1 )
+    {
+	    cout << "A_ERROR UnknownCommand: unknown or unimplemented command '" << s << "'" << endl;
+	    continue;
+    }
 
     switch ( s[0] )
     {
@@ -305,6 +321,11 @@ int main(int argc, char **argv)
         
         cin >> index;
         state = td.get_state( index );
+	if ( state == NULL )
+	{
+		cout << "E0 value " << index << " not valid" << endl;
+		break;
+	}
     
         cout << "EB" << endl;
         nsgen = nstate->getNextStates(state,nsgen);
@@ -340,6 +361,7 @@ int main(int argc, char **argv)
         notdone = false;
         break;
       default:
+	cout << "A_ERROR UnknownCommand: unknown or unimplemented command '" << s << "'" << endl;
         break;
     }
   }

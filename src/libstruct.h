@@ -1191,6 +1191,10 @@ ATermList gsGetDataExprArgs(ATermAppl DataExpr);
 //Pre: DataExpr is a data expression
 //Ret: the arguments of the data expression
 
+ATermAppl gsSortMultAct(ATermAppl MultAct);
+//Pre: MultAct is a multiaction
+//Ret: the sorted variant of the argument
+
 #ifdef __cplusplus
 }
 #endif

@@ -1,5 +1,9 @@
 #define NAME "sim"
 
+#include <iostream>
+#include <string>
+#include <cctype>
+
 #include <stdio.h>
 #include <errno.h>
 #include <stdlib.h>
@@ -7,11 +11,14 @@
 #include <getopt.h>
 #include <aterm2.h>
 #include <assert.h>
+
 #include "liblowlevel.h"
 #include "libstruct.h"
 #include "libprint_c.h"
 #include "libnextstate.h"
 #include "librewrite_c.h"
+
+using namespace std;
 
 static void PrintState(ATerm state, NextState *ns)
 {
@@ -32,18 +39,26 @@ static void PrintState(ATerm state, NextState *ns)
 	}
 }
 
+char help_message[] = "During the simulation the following commands are accepted:\n"
+		      "   N - take transition N to the corresponding state (where N is a number)\n"
+		      "   h - print this help message\n"
+		      "   q - quit\n";
+
 void print_help(FILE *f, char *Name)
 {
   fprintf(f,
     "Usage: %s [OPTION]... INFILE\n"
-    "Simulates the LPE in INFILE.\n"
-    "To end simulation, enter '-1' or press CTRL-d.\n"
+    "Simulate the LPE in INFILE via a text-based interface.\n"
     "\n"
-    "Mandatory arguments to long options are mandatory for short options too.\n"
+    "%s"
+    "\n"
+    "The following command line options are available. Mandatory arguments to long\n"
+    "options are mandatory for short options too.\n"
     "  -h, --help            display this help message\n"
     "  -y, --dummy           replace free variables in the LPE with dummy values\n"
     "  -R, --rewriter=NAME   use rewriter NAME (default 'inner3')\n",
-    Name
+    Name,
+    help_message
   );
 }
 
@@ -60,7 +75,7 @@ int main(int argc, char **argv)
 		{ "rewriter",	no_argument,	NULL,	'R' },
 		{ 0, 0, 0, 0 }
 	};
-	int opt, i, r;
+	int opt;
 	RewriteStrategy strat;
 	bool usedummy;
 
@@ -129,14 +144,15 @@ int main(int argc, char **argv)
 	gsprintf(" ]\n\n");
 
 	NextStateGenerator *nsgen = NULL;
-	while ( 1 )
+	bool notdone = true;
+	while ( notdone )
 	{
 		nsgen = nstate->getNextStates(state,nsgen);
 
 		ATermAppl Transition;
 		ATerm NewState;
-		i = 0;
 		states = ATmakeList0();
+		int i = 0;
 		while ( nsgen->next(&Transition,&NewState) )
 		{
 			gsprintf("%i: %P  ->  [ ",i,Transition);
@@ -153,29 +169,39 @@ int main(int argc, char **argv)
 			printf("deadlock\n\n");
 		}
 
-harm:
-		printf("? "); fflush(stdout);
-		r = 0;
-		while ( r == 0 )
+		while ( true )
 		{
-			if ( (r = scanf("%i",&i)) == EOF )
+			string s;
+
+			(cout << "? ").flush();
+			cin >> s;
+			
+			if ( cin.eof() || (s == "q") || (s == "quit") )
 			{
-				r = i = -1;
+				if ( cin.eof() )
+					cout << endl;	
+				notdone = false;
+				break;
+			} else if ( (s == "h") || (s == "help") ) {
+				cout << help_message;
+			} else if ( isdigit(s[0]) ) {
+				unsigned int idx;
+				sscanf(s.c_str(),"%i",&idx);
+				if ( idx < (unsigned int) ATgetLength(states) )
+				{
+					gsprintf("\ntransition: %P\n\n",ATAgetFirst(ATLelementAt(states,idx)));
+					state = ATgetFirst(ATgetNext(ATLelementAt(states,idx)));
+					gsprintf("current state: [ ");
+					PrintState(state,nstate);
+					gsprintf(" ]\n\n");
+					break;
+				} else {
+					cout << "invalid transition index " << idx << " (maximum is " << ATgetLength(states)-1 << ")" << endl;
+				}
 			} else {
-				fgetc(stdin);
+				cout << "unknown command (try 'h' for help)" << endl;
 			}
 		}
-		if ( i < 0 )
-			break;
-		if ( i >= ATgetLength(states) )
-		{
-			goto harm;
-		}
-		gsprintf("\ntransition: %P\n\n",ATAgetFirst(ATLelementAt(states,i)));
-		state = ATgetFirst(ATgetNext(ATLelementAt(states,i)));
-		gsprintf("current state: [ ");
-		PrintState(state,nstate);
-		gsprintf(" ]\n\n");
 	}
 
 	delete nsgen;

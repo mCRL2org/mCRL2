@@ -97,6 +97,7 @@ private:
     
 private:
     // WDR: member variable declarations for XSimMain
+    wxString base_title;
     wxTimer timer;
     ATermList state_vars;
     ATermList state_varnames;
