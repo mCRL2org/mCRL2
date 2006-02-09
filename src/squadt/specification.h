@@ -6,7 +6,7 @@
 #include <iosfwd>
 #include <ctime>
 
-#include "md5/md5pp.h"
+#include <md5pp/md5pp.h>
 
 /*
  * A specification is a container that specifies the dependencies on other
