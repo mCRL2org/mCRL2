@@ -1,0 +1,141 @@
+<?xml version="1.0"?>
+
+<!DOCTYPE refentry PUBLIC "-//OASIS//DTD DocBook XML V4.3//EN" "http://www.oasis-open.org/docbook/xml/4.3/docbookx.dtd"[
+<!ENTITY sim "<function>sim</function>">
+<!ENTITY xsim "<function>xsim</function>">
+<!ENTITY option "<parameter>OPTION</parameter>">
+<!ENTITY infile "<parameter>INFILE</parameter>">
+<!ENTITY name "<parameter>NAME</parameter>">
+<!ENTITY inner3 "<parameter>inner3</parameter>">
+<!ENTITY opt_h "<option>-h</option>">
+<!ENTITY opt_y "<option>-y</option>">
+<!ENTITY opt_R "<option>-R</option>">
+<!ENTITY opt_help "<option>--help</option>">
+<!ENTITY opt_dummy "<option>--dummy</option>">
+<!ENTITY opt_rewriter "<option>--rewriter</option>">
+<!ENTITY n "<parameter>n</parameter>">
+<!ENTITY min1 "<parameter>-1</parameter>">
+<!ENTITY ctrl-d "<parameter>Ctrl-D</parameter>">
+]>
+
+<refentry id="sim">
+
+<refmeta>
+  <refentrytitle>sim</refentrytitle>
+  <manvolnum>1</manvolnum>
+</refmeta>
+
+<refnamediv>
+  <refname>&sim;</refname>
+  <refpurpose>simulate LPEs</refpurpose>
+</refnamediv>
+
+<refsynopsisdiv>
+  <cmdsynopsis>
+    <command>&sim;</command>
+    <arg choice="plain" rep="repeat"><arg choice="opt">&option;</arg></arg>
+    <arg choice="plain">&infile;
+    </arg>
+  </cmdsynopsis>
+</refsynopsisdiv>
+
+<refsect1>
+  <title>Description</title>
+  <para>
+    The &sim; tool simulates the linear process equation (LPE) in &infile; using
+    a command-line interface. 
+  </para>
+  <para>
+    In the first screen, &sim; shows the state vector of the initial state and a
+    list of all possible transitions that can be taken from this state. These
+    transitions are numbered from 0 onwards. For each transition, the state vector
+    of the state that is reached after taking that transition, is shown. When a
+    transition has been taken, &sim; shows the action label of that transition,
+    the state vector of the current state and (again) a list of numbered
+    transitions that can be taken from the current state along with the state
+    vector of the resulting state, respectively.
+  </para>
+  <para>
+    On the &sim; command-line - which starts with a question mark
+    '<function>?</function>' - the following commands can be entered:
+    <variablelist>
+      
+      <varlistentry>
+	<term>&n;</term>
+	<listitem>
+	  <para>
+	    Execute the action with number &n; from the list of actions that are
+	    possible in the current state. 
+	  </para>
+	</listitem>
+      </varlistentry>
+      
+      <varlistentry>
+	<term>&min1;</term>
+	<term>&ctrl-d;</term>
+	<listitem>
+	  <para>
+	    Quit &sim;.
+	  </para>
+	</listitem>
+      </varlistentry>
+    
+    </variablelist>
+  </para>
+</refsect1>
+
+<refsect1>
+<title>Options</title>
+<para>
+  <variablelist>
+
+  <varlistentry>
+    <term>&opt_h;</term>
+    <term>&opt_help;</term>
+    <listitem>
+      <para>
+        Display help message and terminate
+      </para>
+    </listitem>
+  </varlistentry>
+
+  <varlistentry>
+    <term>&opt_y;</term>
+    <term>&opt_dummy;</term>
+    <listitem>
+      <para>
+        Replace free variables in the LPE with dummy values
+      </para>
+    </listitem>
+  </varlistentry>
+
+  <varlistentry>
+    <term>&opt_R;</term>
+    <term>&opt_rewriter;=&name;</term>
+    <listitem>
+      <para>
+	Use rewriter &name;. Default is &inner3;.
+      </para>
+    </listitem>
+  </varlistentry>
+
+  </variablelist>
+</para>
+</refsect1>
+
+<refsect1>
+<title>See also</title>
+<para>
+For a simulator that uses a graphical user interface, see the &xsim; tool. 
+</para>
+</refsect1>
+
+<refsect1>
+<title>Author</title>
+<para>
+  Written by Muck van Weerdenburg. Please send all complaints, comments and bug
+  reports to <email>bug@mcrl2.org</email>.
+</para>
+</refsect1>
+
+</refentry>
