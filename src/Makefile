@@ -430,10 +430,8 @@ Makefile: ../config
 ../config: ../config.in ../configure
 	$(error You must (re)configure your source tree first)
 
-ifeq (,$(findstring $(MAKECMDGOALS),clean distclean))
--include $(foreach s,$(OBJECTS),$(shell if test -f $(basename $s).c; then echo -n $(basename $s).d; fi))
--include $(foreach s,$(OBJECTS),$(shell if test -f $(basename $s).cpp; then echo -n $(basename $s).dpp; fi))
-endif
+-include $(foreach s,$(OBJECTS),$(shell if test -f $(basename $s).c; then echo -n $(basename $s).d; fi)) \
+         $(foreach s,$(OBJECTS),$(shell if test -f $(basename $s).cpp; then echo -n $(basename $s).dpp; fi))
 endif
 
 #Note: to make a shared version of the gsrewr library instead of a static one, do the following:

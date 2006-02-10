@@ -348,7 +348,7 @@ namespace squadt {
     }
 
     void ProjectOverview::ShowAboutWindow(wxCommandEvent &event) {
-      wxDialog*   about = new wxDialog(NULL, wxID_ABOUT, wxT("About Squadt"));
+      wxDialog*   about = new wxDialog(NULL, wxID_ABOUT, wxT("About Squadt"), wxDefaultPosition, wxDefaultSize);
       wxBoxSizer* sizer = new wxBoxSizer(wxVERTICAL);
       wxBoxSizer* ssizer = new wxBoxSizer(wxHORIZONTAL);
       wxBitmap    bitmap;

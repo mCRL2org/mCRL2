@@ -70,6 +70,7 @@ fi
 # Set flags
 CPPFLAGS=""
 CFLAGS="-std=c99"
+CXXFLAGS="-std=c++98"
 LDFLAGS="-L$PWD/src -L$PWD/src/svc"
 BFLAGS=""
 
@@ -89,9 +90,6 @@ AC_RUN_IFELSE(
   AC_MSG_ERROR([C99 standard not supported])
 )
 
-TEMPFLAGS="$CXXFLAGS"
-CXXFLAGS="$TEMPFLAGS -std=c++98"
-
 AC_MSG_CHECKING([for C++ 98 standard])
 AC_LANG_PUSH(C++)
 AC_RUN_IFELSE(
@@ -108,10 +106,24 @@ AC_RUN_IFELSE(
   ],
   [
     AC_MSG_RESULT([no])
-    CXXFLAGS="$TEMPFLAGS"
+    CXXFLAGS=""
   ]
 )
 AC_LANG_POP(C++)
+
+# Check whether optimization must be suppressed
+AC_ARG_ENABLE(
+  [optimisation],
+  AC_HELP_STRING(
+    [--disable-optimisation],
+    [compile without compile-time optimisations]
+  )
+)
+if test $enable_optimisation; then
+ OFLAGS=""
+else
+ OFLAGS="-O2"
+fi
 
 # Check for debug/profiling options
 AC_ARG_ENABLE(
@@ -126,13 +138,13 @@ if test $enable_debug; then
   if test $USE_64_BIT; then
     CPPFLAGS="-DAT_64BIT $CPPFLAGS"
   fi
-  CFLAGS="-g -Wall -O2 -W -pedantic $CFLAGS"
-  CXXFLAGS="-g -Wall -O2 -W $CXXFLAGS"
+  CFLAGS="$CFLAGS -g -Wall $OFLAGS -W -pedantic"
+  CXXFLAGS="$CXXFLAGS -g -Wall $OFLAGS -W"
   BFLAGS="-t $BFLAGS"
 else
   CPPFLAGS="-DNDEBUG $CPPFLAGS"
-  CFLAGS="-O2 -w $CFLAGS"
-  CXXFLAGS="-O2 -w $CXXFLAGS"
+  CFLAGS="$CFLAGS $OFLAGS -w"
+  CXXFLAGS="$CXXFLAGS $OFLAGS -w"
 fi
 AC_SUBST([BFLAGS],[])
 
@@ -364,6 +376,6 @@ AC_MSG_NOTICE()
 AC_MSG_NOTICE(Some tools will not be built if any of these libraries are missing.)
 AC_MSG_NOTICE()
 
-AC_CONFIG_FILES([src/rewr_innerc_aux.h config config.jam src/squadt/settings.h])
+AC_CONFIG_FILES([src/rewr_innerc_aux.h src/squadt/settings.h config config.jam])
 AC_OUTPUT
 

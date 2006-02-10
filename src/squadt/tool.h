@@ -29,7 +29,7 @@ namespace squadt {
      *
      */
     class Tool {
-      friend class ToolManager;
+      friend class squadt::ToolManager;
     
       protected:
         std::string name;               /* A, not necessarily unique, name for the tool */
