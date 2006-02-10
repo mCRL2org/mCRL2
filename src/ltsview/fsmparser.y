@@ -70,11 +70,11 @@ param :
 	      ATmake( "<appl>", $1 ), (ATerm)typeId ) )
 	  }
 	|
-	FANIN cardinality type_def
+	FANIN cardinality type_name type_values
 	|
-	FANOUT cardinality type_def
+	FANOUT cardinality type_name type_values
 	|
-	NODENR cardinality type_def
+	NODENR cardinality type_name type_values
 	;
 
 cardinality :
