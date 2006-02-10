@@ -22,7 +22,7 @@ $(MAXIMUM_REVISION):
 -include $(TREE_ROOT)revision
 
 # This is present for viewCVS generated tarballs that do not include revision
-ifndef $(REVISION)
+ifndef REVISION
 REVISION := -DREVISION=0
 endif
 
