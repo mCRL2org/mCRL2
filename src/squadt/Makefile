@@ -122,7 +122,7 @@ $(OBJECTS) $(TARGETS): Makefile $(CONFIG)
 strip: $(TARGETS)
 	$(STRIP) --strip-unneeded --strip-debug $^
 
-install: all utility/relocator
+install: all #utility/relocator
 	$(INSTALL) -d $(bindir)
 	$(INSTALL) squadt $(bindir)
 	$(INSTALL) -d $(datadir)
@@ -135,7 +135,7 @@ install: all utility/relocator
 	$(INSTALL) -m 0644 schemas/project.xsd $(datadir)/schemas
 	$(GZIP) $(datadir)/schemas/project.xsd
 	$(INSTALL) -m 0644 examples/tool_catalog.xml $(datadir)/configuration
-	utility/relocator $(bindir) $(datadir)/configuration/tool_catalog.xml
+#	utility/relocator $(bindir) $(datadir)/configuration/tool_catalog.xml
 ifeq ($(HOST_OS),MACOSX)
 	/Developer/Tools/Rez -t APPL -o squadt ../sample.r
 	/Developer/Tools/SetFile -a C squadt

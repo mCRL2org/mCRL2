@@ -15,17 +15,17 @@
 # pragma once
 #endif // defined(_MSC_VER) && (_MSC_VER >= 1200)
 
-#include "asio/detail/push_options.hpp"
+#include <boost/asio/detail/push_options.hpp>
 
-#include "asio/detail/push_options.hpp"
+#include <boost/asio/detail/push_options.hpp>
 #include <boost/config.hpp>
-#include "asio/detail/pop_options.hpp"
+#include <boost/asio/detail/pop_options.hpp>
 
 // This class is only supported on Win32 (NT4 and later).
 #if defined(BOOST_WINDOWS)
 #if defined(_WIN32_WINNT) && (_WIN32_WINNT >= 0x0400)
 
-#include "asio/detail/socket_types.hpp"
+#include <boost/asio/detail/socket_types.hpp>
 
 namespace asio {
 namespace detail {
@@ -74,6 +74,6 @@ private:
 #endif // defined(_WIN32_WINNT) && (_WIN32_WINNT >= 0x0400)
 #endif // defined(BOOST_WINDOWS)
 
-#include "asio/detail/pop_options.hpp"
+#include <boost/asio/detail/pop_options.hpp>
 
 #endif // ASIO_DETAIL_WIN_IOCP_OPERATION_HPP

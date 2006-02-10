@@ -12,23 +12,27 @@
 #define PROGRAM_NAME    "relocator"
 #define PROGRAM_VERSION "1.0.0"
 
+using namespace squadt;
+
 SettingsManager settings_manager("", "");
 ToolManager     tool_manager;
 
-class ToolExecutor;
-class Specification;
+namespace squadt {
+  class ToolExecutor;
+  class Specification;
 
-/* Stubs */
-ToolExecutor::ToolExecutor(size_t) {
-}
+  /* Stubs */
+  ToolExecutor::ToolExecutor(size_t) {
+  }
 
-ToolExecutor::~ToolExecutor() {
-}
+  ToolExecutor::~ToolExecutor() {
+  }
 
-void ToolExecutor::Execute(std::string, Specification*) throw (ExecutionException*) {
-}
+  void ToolExecutor::Execute(std::string, Specification*) throw (ExecutionException*) {
+  }
 
-void ToolExecutor::TerminateAll() {
+  void ToolExecutor::TerminateAll() {
+  }
 }
 
 /* Holds filename for the input */

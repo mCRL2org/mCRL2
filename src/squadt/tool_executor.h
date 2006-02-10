@@ -12,7 +12,7 @@ namespace squadt {
   class Process;
   class Specification;
 
-    typedef struct {
+  typedef struct {
     std::string    command;
     Specification* target;
   } ProcessData;

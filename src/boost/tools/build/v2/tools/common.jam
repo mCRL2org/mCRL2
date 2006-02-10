@@ -403,7 +403,7 @@ rule MkDir
 
 actions MkDir1
 {
-    mkdir -p "$(<)"
+    mkdir "$(<)"
 }
 
 actions piecemeal together existing Clean
