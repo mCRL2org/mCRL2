@@ -981,17 +981,17 @@ type of this expression.
 
 \subsection{Priorities and associativity}
 
-The prefix operators together with universal and existential quantification
-have the highest priority, followed by the infix operators, followed by the
-lambda operator, followed by the where clause. Table~\ref{tab:precedence} lists
-the infix operators by decreasing priority. The symbols are shown in plain text
-format and may represent multiple rich text symbols. Operators on the same line
-have the same priority and associativity. Note that the list operations
-\frm{\cons}, \frm{\snoc} and \frm{\concat} are split into three priority levels
-such that expressions with one of these operations as their head symbol are
-allowed if and only if they match the following pattern, where \frm{b, \ldots,
-c}, \frm{d, \ldots, e} and \frm{s, \ldots, t} are expressions with a priority
-level greater than \frm{\concat}:
+The prefix operators have the highest priority, followed by the infix
+operators, followed by the lambda operator together with universal and
+existential quantification, followed by the where clause.
+Table~\ref{tab:precedence} lists the infix operators by decreasing priority.
+The symbols are shown in plain text format and may represent multiple rich text
+symbols. Operators on the same line have the same priority and associativity.
+Note that the list operations \frm{\cons}, \frm{\snoc} and \frm{\concat} are
+split into three priority levels such that expressions with one of these
+operations as their head symbol are allowed if and only if they match the
+following pattern, where \frm{b, \ldots, c}, \frm{d, \ldots, e} and \frm{s,
+\ldots, t} are expressions with a priority level greater than \frm{\concat}:
 \[
 b \cons \dots \cons c \cons s \concat \dots \concat t \snoc d \snoc \dots
 \snoc e
