@@ -6,8 +6,10 @@
 /* Interface classes for both the tool and the controller side of the Squadt Interaction Protocol */
 namespace sip {
 
-  class layout {
-  };
+  namespace layout {
+    class layout {
+    };
+  }
 }
 
 #endif

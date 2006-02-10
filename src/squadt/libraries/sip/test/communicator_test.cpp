@@ -12,6 +12,7 @@ using boost::unit_test::test_suite;
 
 using namespace transport;
 using namespace sip;
+using namespace sip::communicator;
 
 static const std::string empty;
 static const std::string garbage("garbage");

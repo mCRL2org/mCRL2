@@ -13,6 +13,7 @@ using boost::unit_test::test_suite;
 
 using namespace transport;
 using namespace sip;
+using namespace sip::communicator;
 
 /* Single communication */
 void report_to_xml() {

@@ -18,7 +18,7 @@ namespace sip {
     };
   }
 
-  class controller_communicator : public sip_communicator {
+  class controller_communicator : public communicator::sip_communicator {
     private:
       /** Charactarises the current state */
       typedef enum {

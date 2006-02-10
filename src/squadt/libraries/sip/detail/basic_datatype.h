@@ -110,6 +110,8 @@ namespace sip {
       reader.get_attribute(&new_string->minimum_length, "minimum-length");
       reader.get_attribute(&new_string->maximum_length, "maximum-length");
 
+      reader.read();
+
       return (new_string);
     }
 

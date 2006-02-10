@@ -11,7 +11,7 @@
 /* Interface classes for the tool side of the Squadt Interaction Protocol */
 namespace sip {
 
-  class tool_communicator : public sip_communicator {
+  class tool_communicator : public communicator::sip_communicator {
     private:
       /** Charactarises the current state */
       typedef enum {

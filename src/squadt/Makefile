@@ -124,7 +124,7 @@ strip: $(TARGETS)
 
 install: all #utility/relocator
 	$(INSTALL) -d $(bindir)
-	$(INSTALL) squadt $(bindir)
+#	$(INSTALL) squadt $(bindir)
 	$(INSTALL) -d $(datadir)
 	$(INSTALL) -d $(datadir)/images
 	$(INSTALL) -d $(datadir)/schemas

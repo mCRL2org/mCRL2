@@ -126,7 +126,11 @@ namespace sip {
       reader.read();
      
       while (!reader.is_end_element()) {
+        /* The current element must be a datatype specification */
         datatype::basic_datatype::from_xml(reader);
+
+        /* The current element can be a value of the previously read type (value is optional) */
+        reader.is_end_element();
      
         reader.read();
       }
