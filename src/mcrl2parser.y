@@ -72,15 +72,15 @@ ATermAppl gsSpecEltsToSpec(ATermList SpecElts);
 %type <appl> sort_expr_arrow domain_no_arrow_elt sort_expr_struct
 %type <appl> struct_constructor recogniser struct_projection sort_expr_primary
 %type <appl> sort_constant sort_constructor data_expr data_expr_whr whr_decl
-%type <appl> data_expr_lambda data_expr_imp data_expr_and data_expr_eq
+%type <appl> data_expr_quant data_expr_imp data_expr_and data_expr_eq
 %type <appl> data_expr_rel data_expr_cons data_expr_snoc data_expr_concat
-%type <appl> data_expr_add data_expr_div data_expr_mult data_expr_quant_prefix
+%type <appl> data_expr_add data_expr_div data_expr_mult data_expr_prefix
 %type <appl> data_expr_postfix data_expr_primary data_constant data_enumeration
 %type <appl> bag_enum_elt data_comprehension data_var_decl proc_expr
 %type <appl> proc_expr_choice proc_expr_sum proc_expr_merge proc_expr_binit
 %type <appl> proc_expr_cond proc_expr_seq proc_expr_at proc_expr_sync
 %type <appl> proc_expr_primary proc_constant act_proc_ref proc_quant
-%type <appl> mult_act_name ren_expr comm_expr id_tau
+%type <appl> mult_act_name ren_expr comm_expr
 
 %type <list> spec_elts sorts_decls_scs sorts_decl ids_cs domain ops_decls_scs
 %type <list> ops_decl eqn_sect eqn_decls_scs data_vars_decls_scs data_vars_decl
@@ -676,7 +676,7 @@ data_expr:
 
 //where clause
 data_expr_whr:
-  data_expr_lambda
+  data_expr_quant
     {
       $$ = $1;
     }
@@ -710,16 +710,26 @@ whr_decl:
     }
   ;
 
-//lambda abstraction
-data_expr_lambda:
+//quantifications and lambda abstraction
+data_expr_quant:
   data_expr_imp
     {
       $$ = $1;
     }
-  | LAMBDA data_vars_decls_cs DOT data_expr_lambda
+  | LAMBDA data_vars_decls_cs DOT data_expr_quant
     {
       $$ = gsMakeLambda($2, $4);
       gsDebugMsg("parsed lambda abstraction\n  %T\n", $$);
+    }
+  | FORALL data_vars_decls_cs DOT data_expr_quant
+    {
+      $$ = gsMakeForall($2, $4);
+      gsDebugMsg("parsed quantification\n  %T\n", $$);
+    }
+  | EXISTS data_vars_decls_cs DOT data_expr_quant
+    {
+      $$ = gsMakeExists($2, $4);
+      gsDebugMsg("parsed quantification\n  %T\n", $$);
     }
   ;
 
@@ -899,17 +909,17 @@ data_expr_div:
 
 //multiplication and list at
 data_expr_mult:
-  data_expr_quant_prefix
+  data_expr_prefix
     {
       $$ = $1;
     }
-  | data_expr_mult STAR data_expr_quant_prefix
+  | data_expr_mult STAR data_expr_prefix
     {
       $$ = gsMakeDataApplProd(gsMakeDataVarIdOpId($2),
         ATmakeList2((ATerm) $1, (ATerm) $3));
       gsDebugMsg("parsed multiplication or set intersection\n  %T\n", $$);
     }
-  | data_expr_mult DOT data_expr_quant_prefix
+  | data_expr_mult DOT data_expr_prefix
     {
       $$ = gsMakeDataApplProd(gsMakeDataVarIdOpId($2),
         ATmakeList2((ATerm) $1, (ATerm) $3));
@@ -917,33 +927,23 @@ data_expr_mult:
     }
   ;
 
-//universal and existential quantification or prefix data expression
-data_expr_quant_prefix:
+//prefix data expression
+data_expr_prefix:
   data_expr_postfix
     {
       $$ = $1;
     }
-  | FORALL data_vars_decls_cs DOT data_expr_quant_prefix
-    {
-      $$ = gsMakeForall($2, $4);
-      gsDebugMsg("parsed quantification\n  %T\n", $$);
-    }
-  | EXISTS data_vars_decls_cs DOT data_expr_quant_prefix
-    {
-      $$ = gsMakeExists($2, $4);
-      gsDebugMsg("parsed quantification\n  %T\n", $$);
-    }
-  | EXCLAM data_expr_quant_prefix
+  | EXCLAM data_expr_prefix
     {
       $$ = gsMakeDataApplProd(gsMakeDataVarIdOpId($1), ATmakeList1((ATerm) $2));
       gsDebugMsg("parsed prefix data expression\n  %T\n", $$);
     }
-  | MINUS data_expr_quant_prefix
+  | MINUS data_expr_prefix
     {
       $$ = gsMakeDataApplProd(gsMakeDataVarIdOpId($1), ATmakeList1((ATerm) $2));
       gsDebugMsg("parsed prefix data expression\n  %T\n", $$);
     }
-  | HASH data_expr_quant_prefix
+  | HASH data_expr_prefix
     {
       $$ = gsMakeDataApplProd(gsMakeDataVarIdOpId($1), ATmakeList1((ATerm) $2));
       gsDebugMsg("parsed prefix data expression\n  %T\n", $$);
@@ -1163,12 +1163,12 @@ proc_expr_cond:
     {
       $$ = $1;
     }
-  | data_expr_quant_prefix ARROW proc_expr_seq
+  | data_expr_prefix ARROW proc_expr_seq
     {
       $$ = gsMakeCond($1, $3, gsMakeDelta());
       gsDebugMsg("parsed conditional expression\n  %T\n", $$);
     }
-  | data_expr_quant_prefix ARROW proc_expr_seq COMMA proc_expr_seq
+  | data_expr_prefix ARROW proc_expr_seq COMMA proc_expr_seq
     {
       $$ = gsMakeCond($1, $3, $5);
       gsDebugMsg("parsed conditional expression\n  %T\n", $$);
@@ -1195,7 +1195,7 @@ proc_expr_at:
     {
       $$ = $1;
     }
-  | proc_expr_at AT data_expr_quant_prefix
+  | proc_expr_at AT data_expr_prefix
     {
       $$ = gsMakeAtTime($1, $3);
       gsDebugMsg("parsed at time expression\n  %T\n", $$);
@@ -1378,9 +1378,14 @@ comm_expr:
       $$ = gsMakeCommExpr($1, gsMakeNil());
       gsDebugMsg("parsed communication expression\n  %T\n", $$);
     }
-  | mult_act_name ARROW id_tau
+  | mult_act_name ARROW TAU
     {      
-      $$ = gsMakeCommExpr($1, gsIsTau($3)?gsMakeNil():$3);
+      $$ = gsMakeCommExpr($1, gsMakeNil());
+      gsDebugMsg("parsed communication expression\n  %T\n", $$);
+    }
+  | mult_act_name ARROW ID
+    {      
+      $$ = gsMakeCommExpr($1, $3);
       gsDebugMsg("parsed communication expression\n  %T\n", $$);
     }
   ;
@@ -1405,18 +1410,6 @@ ids_bs:
     {
       $$ = ATinsert($1, (ATerm) $3);
       gsDebugMsg("parsed id's\n  %T\n", $$);
-    }
-  ;
-
-//id or tau
-id_tau:
-  ID
-    {
-      $$ = $1;
-    }
-  | TAU
-    {
-      $$ = gsMakeTau();
     }
   ;
 
