@@ -13,6 +13,7 @@
 #include <wx/bitmap.h>
 #include <wx/event.h>
 #include "spinctrlfloat.h"
+#include "colorbutton.h"
 #include "mediator.h"
 #include "glcanvas.h"
 #include "ids.h"
@@ -43,23 +44,23 @@ class MainFrame : public wxFrame
     void	showMessage( string title, string text );
     void	updateProgressDialog( int val, string msg );
   private:
-    wxButton*	      backgroundButton;
-    wxSpinCtrlFloat*    backpointerSpinCtrl;
+    wxColorButton*    backgroundButton;
+    wxSpinCtrlFloat*  backpointerSpinCtrl;
     wxSpinCtrl*	      branchspreadSpinCtrl;
-    wxSpinCtrlFloat*    clusterheightSpinCtrl;
+    wxSpinCtrlFloat*  clusterheightSpinCtrl;
     VisSettings	      defaultSettings;
     wxString	      directory;
-    wxButton*	      downEdgeButton;
+    wxColorButton*    downEdgeButton;
     wxString	      filename;
     GLCanvas*	      glCanvas;
-    wxButton*	      interpolate1Button;
-    wxButton*	      interpolate2Button;
+    wxColorButton*    interpolate1Button;
+    wxColorButton*    interpolate2Button;
     wxCheckBox*	      levelDivCheckBox;
     wxCheckBox*	      longinterpolateCheckBox;
-    wxButton*	      markButton;
+    wxColorButton*    markButton;
     Mediator*	      mediator;
-    wxButton*	      nodeButton;
-    wxSpinCtrlFloat*    nodesizeSpinCtrl;
+    wxColorButton*    nodeButton;
+    wxSpinCtrlFloat*  nodesizeSpinCtrl;
     wxStaticText*     numberOfClustersLabel;
     wxStaticText*     numberOfRanksLabel;
     wxStaticText*     numberOfStatesLabel;
@@ -69,7 +70,7 @@ class MainFrame : public wxFrame
     wxProgressDialog* progDialog;
     wxToolBar*	      toolBar;
     wxSpinCtrl*	      transparencySpinCtrl;
-    wxButton*	      upEdgeButton;
+    wxColorButton*    upEdgeButton;
 
     void setupMainArea();
     void setupMenuBar();

@@ -8,7 +8,8 @@ WX_CXXFLAGS	:= `$(WX_CONFIG) --cxxflags`
 LDFLAGS          = $(ATERM_LDFLAGS)
 
 ICON_OBJECTS	 = mainframe.o glcanvas.o
-WX_OBJECTS	 = ltsviewapp.o mainframe.o glcanvas.o spinctrlfloat.o markstateruledialog.o
+WX_OBJECTS	 = ltsviewapp.o mainframe.o glcanvas.o spinctrlfloat.o \
+		   markstateruledialog.o colorbutton.o
 AT_OBJECTS	 = ltsviewapp.o action.o fsmparser.o lts.o state.o
 CPP_OBJECTS	 = fileloader.o visualizer.o lts.o state.o transition.o \
 		   cluster.o fsmparser.o utils.o glutils.o

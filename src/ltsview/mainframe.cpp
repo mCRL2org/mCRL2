@@ -160,14 +160,10 @@ void MainFrame::setupSettingsPanel( wxPanel* panel )
   wxFlexGridSizer* parsubSizer = new wxFlexGridSizer( 8, 3, 0, 0 );
   parsubSizer->AddGrowableCol( 1 );
   parsubSizer->AddGrowableCol( 2 );
-  parsubSizer->AddGrowableRow( 0 );
-  parsubSizer->AddGrowableRow( 1 );
-  parsubSizer->AddGrowableRow( 2 );
-  parsubSizer->AddGrowableRow( 3 );
-  parsubSizer->AddGrowableRow( 4 );
-  parsubSizer->AddGrowableRow( 5 );
-  parsubSizer->AddGrowableRow( 6 );
-  parsubSizer->AddGrowableRow( 7 );
+  for ( int i = 0 ; i < 8 ; ++i )
+  {
+    parsubSizer->AddGrowableRow( i );
+  }
   parSizer->Add( parsubSizer, 1, wxEXPAND | wxALL, 0 );
   
   int flags = wxALIGN_LEFT | wxALIGN_CENTER_VERTICAL | wxALL; 
@@ -262,14 +258,10 @@ void MainFrame::setupSettingsPanel( wxPanel* panel )
   wxStaticBoxSizer* colSizer = new wxStaticBoxSizer( wxVERTICAL, panel, wxT("Colours") );
   
   wxFlexGridSizer* colsubSizer = new wxFlexGridSizer( 8, 3, 0, 0 );
-  colsubSizer->AddGrowableRow( 0 );
-  colsubSizer->AddGrowableRow( 1 );
-  colsubSizer->AddGrowableRow( 2 );
-  colsubSizer->AddGrowableRow( 3 );
-  colsubSizer->AddGrowableRow( 4 );
-  colsubSizer->AddGrowableRow( 5 );
-  colsubSizer->AddGrowableRow( 6 );
-  colsubSizer->AddGrowableRow( 7 );
+  for ( int i = 0 ; i < 8 ; ++i )
+  {
+    colsubSizer->AddGrowableRow( i );
+  }
   colSizer->Add( colsubSizer, 1, wxEXPAND | wxALL, 0 );
   
   /*transparencySpinCtrl = new wxSpinCtrl( panel, myID_SETTINGS_CONTROL );
@@ -281,45 +273,45 @@ void MainFrame::setupSettingsPanel( wxPanel* panel )
 	wxT("%") ), 0, flags, 0 );*/
 
   wxSize btnSize( 25, 25 );
-  
-  backgroundButton = new wxButton( panel, myID_COLOR_BUTTON );
+
+  backgroundButton = new wxColorButton( panel, this, myID_COLOR_BUTTON );
   backgroundButton->SetSizeHints( btnSize, btnSize );
   colsubSizer->Add( new wxStaticText( panel, wxID_ANY, 
 	wxT("Background:") ), 0, flags, border );
   colsubSizer->Add( backgroundButton, 0, flags, border );
   colsubSizer->AddSpacer( 0 );
 
-  nodeButton = new wxButton( panel, myID_COLOR_BUTTON );
+  nodeButton = new wxColorButton( panel, this, myID_COLOR_BUTTON );
   nodeButton->SetSizeHints( btnSize, btnSize );
   colsubSizer->Add( new wxStaticText( panel, wxID_ANY, 
 	wxT("Node:") ), 0, flags, border );
   colsubSizer->Add( nodeButton, 0, flags, border );
   colsubSizer->AddSpacer( 0 );
 
-  downEdgeButton = new wxButton( panel, myID_COLOR_BUTTON );
+  downEdgeButton = new wxColorButton( panel, this, myID_COLOR_BUTTON );
   downEdgeButton->SetSizeHints( btnSize, btnSize );
   colsubSizer->Add( new wxStaticText( panel, wxID_ANY, 
 	wxT("Edge (down):") ), 0, flags, border );
   colsubSizer->Add( downEdgeButton, 0, flags, border );
   colsubSizer->AddSpacer( 0 );
 
-  upEdgeButton = new wxButton( panel, myID_COLOR_BUTTON );
+  upEdgeButton = new wxColorButton( panel, this, myID_COLOR_BUTTON );
   upEdgeButton->SetSizeHints( btnSize, btnSize );
   colsubSizer->Add( new wxStaticText( panel, wxID_ANY, 
 	wxT("Edge (up):") ), 0, flags, border );
   colsubSizer->Add( upEdgeButton, 0, flags, border );
   colsubSizer->AddSpacer( 0 );
 
-  markButton = new wxButton( panel, myID_COLOR_BUTTON );
+  markButton = new wxColorButton( panel, this, myID_COLOR_BUTTON );
   markButton->SetSizeHints( btnSize, btnSize );
   colsubSizer->Add( new wxStaticText( panel, wxID_ANY, 
 	wxT("Mark:") ), 0, flags, border );
   colsubSizer->Add( markButton, 0, flags, border );
   colsubSizer->AddSpacer( 0 );
 
-  interpolate1Button = new wxButton( panel, myID_COLOR_BUTTON );
+  interpolate1Button = new wxColorButton( panel, this, myID_COLOR_BUTTON );
   interpolate1Button->SetSizeHints( btnSize, btnSize );
-  interpolate2Button = new wxButton( panel, myID_COLOR_BUTTON );
+  interpolate2Button = new wxColorButton( panel, this, myID_COLOR_BUTTON );
   interpolate2Button->SetSizeHints( btnSize, btnSize );
   colsubSizer->Add( new wxStaticText( panel, wxID_ANY, 
 	wxT("Interpolate:") ), 0, flags, border );
@@ -440,20 +432,9 @@ void MainFrame::onResetView( wxCommandEvent& /*event*/ )
   glCanvas->resetView();
 }
 
-void MainFrame::onColorButton( wxCommandEvent& event )
+void MainFrame::onColorButton( wxCommandEvent& /*event*/ )
 {
-  wxButton* btn = (wxButton*)(event.GetEventObject());
-  wxColourData coldat;
-  coldat.SetColour( btn->GetBackgroundColour() );
-  wxColourDialog* coldlg = new wxColourDialog( this, &coldat );
-  if ( coldlg->ShowModal() == wxID_OK )
-  {
-    coldat = coldlg->GetColourData();
-    btn->SetBackgroundColour( coldat.GetColour() );
-    btn->ClearBackground();
-    
-    mediator->applySettings();
-  }
+  mediator->applySettings();
 }
 
 void MainFrame::onSpinSettingChanged( wxSpinEvent& /*event*/ )
@@ -557,7 +538,7 @@ VisSettings MainFrame::getVisSettings() const
 void MainFrame::setVisSettings( VisSettings ss )
 {
   backgroundButton->SetBackgroundColour( wxColour( ss.backgroundColor.r,
-	ss.backgroundColor.g, ss.backgroundColor.b ) );
+  	ss.backgroundColor.g, ss.backgroundColor.b ) );
   nodeButton->SetBackgroundColour( wxColour( ss.stateColor.r,
 	ss.stateColor.g, ss.stateColor.b ) );
   downEdgeButton->SetBackgroundColour( wxColour( ss.downEdgeColor.r,
