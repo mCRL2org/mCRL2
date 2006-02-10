@@ -184,7 +184,8 @@ Mandatory arguments to long options are mandatory for short options too.
     <term>&opt_max;=NUM</term>
     <listitem>
       <para>
-        explore at most NUM states
+        Explore at most NUM states. After exploring of NUM states
+        &lpe2lts; will stop, having generated a partial state space.
       </para>
     </listitem>
   </varlistentry>
@@ -195,7 +196,9 @@ Mandatory arguments to long options are mandatory for short options too.
     <term>&opt_deadlock-detect;</term>
     <listitem>
       <para>
-        detect deadlocks (i.e. for every deadlock a message is printed)
+        Detect deadlocks (i.e. for every deadlock a message is
+        printed). A deadlock is a state from which no transitions are
+        possible. Can be used in combination with &opt_deadlock-trace;
       </para>
     </listitem>
   </varlistentry>
@@ -205,27 +208,39 @@ Mandatory arguments to long options are mandatory for short options too.
     <term>&opt_deadlock-trace;</term>
     <listitem>
       <para>
-         write trace to each deadlock state to a file
+         Write trace to each deadlock state to a file. For each
+         deadlock found during the state-space exploration a unique
+         file with extension .trc (trace) will be created containing
+         one of the shortest traces from the initial state to the
+         deadlock state. In this way all possible traces to a deadlock
+         will be generated during the state-stace explorations. The
+         length of the traces will not decrease during the generation.
+         It is possible that two or more equal traces are generated.
+         The traces can be pretty-printed and converted to other
+         formats using 'tracepp'.
       </para>
     </listitem>
   </varlistentry>
 
   <varlistentry>
     <term>&opt_D;</term>
-    <term>&opt_detect;=NAME</term>
+    <term>&opt_detect;=NAME*</term>
     <listitem>
       <para>
-         detect actions from NAME* (i.e. print a message for every occurence)
+         Detect actions from the list NAME* (i.e. print a message for every occurence).
       </para>
     </listitem>
   </varlistentry>
 
   <varlistentry>
     <term>&opt_t;</term>
-    <term>&opt_trace;=NAME</term>
+    <term>&opt_trace;=NAME*</term>
     <listitem>
       <para>
-         write trace to each state that is reached with an action from NAME* to a file
+         Write trace to each state that is reached with an action from
+         NAME* to a file This option is similar to
+         &opt_deadlock-trace;, but instead of deadlock traces the
+         traces leading to an action from NAME*.
       </para>
     </listitem>
   </varlistentry>
@@ -235,9 +250,9 @@ Mandatory arguments to long options are mandatory for short options too.
     <term>&opt_priority;=NAME</term>
     <listitem>
       <para>
-         give priority to action NAME (i.e. if it is possible to
+         Give priority to action NAME (i.e. if it is possible to
          execute an action NAME in some state, than make it the only
-         executable action from that state)
+         executable action from that state).
       </para>
     </listitem>
   </varlistentry>
@@ -247,17 +262,25 @@ Mandatory arguments to long options are mandatory for short options too.
     <term>&opt_monitor;</term>
     <listitem>
       <para>
-         print detailed status of generation
-      </para>
+         Print detailed status of generation. Once a level (in terms
+         of breadth-first search) is completed, a message stating this
+         is printed. After exploration of every 1000 states the
+         following information is printed: current level, states
+         explored, transitions explored, states seen. A state is
+         explored if all its outgoing transitions have been explored.
+         A state is seen if (at least) one of the transitions leading
+         to it has been explored.
+       </para>
     </listitem>
   </varlistentry>
 
   <varlistentry>
-    <term>&opt_R;</term>
-    <term>&opt_rewriter;=NAME</term>
+    <term>&opt_R;</term> <term>&opt_rewriter;=NAME</term>
     <listitem>
       <para>
-         use rewriter NAME (default 'inner')
+         Use rewriter NAME (default 'inner'). &lpe2lts; makes heavy
+         use of a term rewriting engine to manipulate with the data
+         term of the LPE. The other options are:
       </para>
     </listitem>
   </varlistentry>
@@ -285,7 +308,11 @@ Mandatory arguments to long options are mandatory for short options too.
     <term>&opt_no-info;</term>
     <listitem>
       <para>
-         do not add state information to &outfile;
+         Do not add state information to &outfile; Normally &lpe2lts;
+         adds some information about the state vector to the output
+         .svc file. This can options allows to ommit this
+         information. It is not possible to add the state information
+         to .aut files.
       </para>
     </listitem>
   </varlistentry>
