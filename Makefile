@@ -15,7 +15,7 @@ clean:
 	$(RM) -r autom4te.cache config.log *.o *~ core core.*
 
 distclean: clean distribution
-	$(RM) -r config.status config config.jam utility/maximum_revision
+	$(RM) -r config.status config config.jam revision utility/maximum_revision
 
 # Uses the fact that distribution only exists in an official source distribution
 distribution:

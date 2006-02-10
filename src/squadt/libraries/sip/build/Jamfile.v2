@@ -3,6 +3,7 @@ project sip
   : build-dir ../../../bin
   : requirements
    <threading>multi
+   <inlining>full
    <include>../../../../boost/
    <include>../../
   : usage-requirements

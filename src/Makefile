@@ -241,7 +241,7 @@ endif
 ifndef SOURCE_DISTRIBUTION
 include $(TREE_ROOT)utility/revision.mk
 else
-include revision
+include $(TREE_ROOT)revision
 endif
 
 CPPFLAGS += $(REVISION)
