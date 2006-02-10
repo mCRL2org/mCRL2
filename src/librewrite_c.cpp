@@ -78,14 +78,8 @@ extern "C" void PrintRewriteStrategy(FILE *stream, RewriteStrategy strat)
 {
   if (strat == GS_REWR_INNER) {
     fprintf(stream, "inner");
-  } else if (strat == GS_REWR_INNER2) {
-    fprintf(stream, "inner2");
-  } else if (strat == GS_REWR_INNER3) {
-    fprintf(stream, "inner3");
   } else if (strat == GS_REWR_INNERC) {
     fprintf(stream, "innerC");
-  } else if (strat == GS_REWR_INNERC2) {
-    fprintf(stream, "innerC2");
   } else if (strat == GS_REWR_JITTY) {
     fprintf(stream, "jitty");
   } else if (strat == GS_REWR_JITTYC) {
@@ -100,18 +94,9 @@ extern "C" RewriteStrategy RewriteStrategyFromString(const char *s)
 	if ( !strcmp(s,"inner") )
 	{
 		return GS_REWR_INNER;
-	} else if ( !strcmp(s,"inner2") )
-	{
-		return GS_REWR_INNER2;
-	} else if ( !strcmp(s,"inner3") )
-	{
-		return GS_REWR_INNER3;
 	} else if ( !strcmp(s,"innerc") )
 	{
 		return GS_REWR_INNERC;
-	} else if ( !strcmp(s,"innerc2") )
-	{
-		return GS_REWR_INNERC2;
 	} else if ( !strcmp(s,"jitty") )
 	{
 		return GS_REWR_JITTY;

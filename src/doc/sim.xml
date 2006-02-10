@@ -6,7 +6,7 @@
 <!ENTITY option "<parameter>OPTION</parameter>">
 <!ENTITY infile "<parameter>INFILE</parameter>">
 <!ENTITY name "<parameter>NAME</parameter>">
-<!ENTITY inner3 "<parameter>inner3</parameter>">
+<!ENTITY inner "<parameter>inner</parameter>">
 <!ENTITY opt_h "<option>-h</option>">
 <!ENTITY opt_y "<option>-y</option>">
 <!ENTITY opt_R "<option>-R</option>">
@@ -124,7 +124,7 @@
     <term>&opt_rewriter;=&name;</term>
     <listitem>
       <para>
-	Use rewriter &name;. Default is &inner3;.
+	Use rewriter &name;. Default is &inner;.
       </para>
     </listitem>
   </varlistentry>

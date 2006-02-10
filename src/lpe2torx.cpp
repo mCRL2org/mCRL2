@@ -140,7 +140,6 @@ static void print_help(FILE *f, char *Name)
     "  -u, --unused-data     do not remove unused parts of the data specification\n"
     "  -c, --vector          store state in a vector (fastest, default)\n"
     "  -r, --tree            store state in a tree (for memory efficiency)\n"
-    "  -m, --monitor         print detailed status of generation\n"
     "  -R, --rewriter=NAME   use rewriter NAME (default 'inner')\n",
     Name);
 }
@@ -155,7 +154,7 @@ int main(int argc, char **argv)
   FILE *SpecStream;
   ATerm stackbot;
   ATermAppl Spec;
-  #define sopts "hqvfyucrmR:"
+  #define sopts "hqvfyucrR:"
   struct option lopts[] = {
     { "help",            no_argument,       NULL, 'h' },
     { "version",         no_argument,       NULL, 0   },

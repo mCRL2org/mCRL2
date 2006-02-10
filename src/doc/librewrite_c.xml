@@ -28,8 +28,8 @@
 <!ENTITY parTerms "<parameter>Terms</parameter>">
 <!ENTITY parS "<parameter>s</parameter>">
 <!ENTITY parStream "<parameter>stream</parameter>">
-<!ENTITY stratINNER3 "<constant>GS_REWR_INNER3</constant>">
-<!ENTITY stratINNER3string "<constant>inner3</constant>">
+<!ENTITY stratINNER "<constant>GS_REWR_INNER</constant>">
+<!ENTITY stratINNERstring "<constant>inner</constant>">
 <!ENTITY stratINNERC "<constant>GS_REWR_INNERC</constant>">
 <!ENTITY stratJITTY "<constant>GS_REWR_JITTY</constant>">
 <!ENTITY stratINVALID "<constant>GS_REWR_INVALID</constant>">
@@ -122,13 +122,13 @@ To actually rewrite a data expression, the functions &gsRewriteTerm; and &gsRewr
 <refsect2>
 <title>Strategies</title>
 <para>
-Currently, there are three different rewriting strategies available in librewrite_c. A standard innermost rewriting strategy is available under the name &stratINNER3;. This strategy will fit most non critical rewriting uses, such as simulation, (simple) LPE manipulation and generation of (very) small state spaces. For time critical uses, there is a compiling innermost rewriting strategy &stratINNERC;. With this strategy, a call to &gsRewriteInit; will result in the compilation of an optimised rewriter. This does mean that gcc and the appropriate headers and libraries must be available.
+Currently, there are three different rewriting strategies available in librewrite_c. A standard innermost rewriting strategy is available under the name &stratINNER;. This strategy will fit most non critical rewriting uses, such as simulation, (simple) LPE manipulation and generation of (very) small state spaces. For time critical uses, there is a compiling innermost rewriting strategy &stratINNERC;. With this strategy, a call to &gsRewriteInit; will result in the compilation of an optimised rewriter. This does mean that gcc and the appropriate headers and libraries must be available.
 </para>
 <para>
-An alternative to &stratINNER3; is the JITty rewriter &stratJITTY;. This strategy can avoid a lot of unnecessary rewriting in certain cases and can handle some rewrite rules that cause the innermost rewriters to rewrite infinitely.
+An alternative to &stratINNER; is the JITty rewriter &stratJITTY;. This strategy can avoid a lot of unnecessary rewriting in certain cases and can handle some rewrite rules that cause the innermost rewriters to rewrite infinitely.
 </para>
 <para>
-A strategy &trewrstrat; can be printed to a stream in string representation using &PrintRewriteStrategy;. The string representations are derived from their &trewrstrat; name by taking the last part and writing it in lower case (e.g. &stratINNER3string; for &stratINNER3;).
+A strategy &trewrstrat; can be printed to a stream in string representation using &PrintRewriteStrategy;. The string representations are derived from their &trewrstrat; name by taking the last part and writing it in lower case (e.g. &stratINNERstring; for &stratINNER;).
 </para>
 <para>
 To convert a string representation of a strategy to a &trewrstrat;, one can use &RewriteStrategyFromString;. This is useful for converting command line arguments specifying a rewrite strategy. If the supplied string does not match any of the available strategies, &stratINVALID; is returned. Note that it is not allowed to supply &stratINVALID; to &gsRewriteInit;.

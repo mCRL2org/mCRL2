@@ -1,7 +1,7 @@
 <?xml version="1.0"?>
 
 <!DOCTYPE refentry PUBLIC "-//OASIS//DTD DocBook XML V4.3//EN" "http://www.oasis-open.org/docbook/xml/4.3/docbookx.dtd"[
-<!ENTITY lpe2lts "<function>lpe2lts</function>">
+<!ENTITY lpe2torx "<function>lpe2torx</function>">
 <!ENTITY option "<parameter>OPTION</parameter>">
 <!ENTITY infile "<parameter>INFILE</parameter>">
 <!ENTITY outfile "<parameter>OUTFILE</parameter>">
@@ -17,13 +17,6 @@
 <!ENTITY opt_u "<option>-u</option>">
 <!ENTITY opt_c "<option>-c</option>">
 <!ENTITY opt_r "<option>-r</option>">
-<!ENTITY opt_l "<option>-l</option>">
-<!ENTITY opt_d "<option>-d</option>">
-<!ENTITY opt_e "<option>-e</option>">
-<!ENTITY opt_D "<option>-D</option>">
-<!ENTITY opt_t "<option>-t</option>">
-<!ENTITY opt_p "<option>-p</option>">
-<!ENTITY opt_m "<option>-m</option>">
 <!ENTITY opt_R "<option>-R</option>">
 <!ENTITY opt_help "<option>--help</option>">
 <!ENTITY opt_version "<option>--version</option>">
@@ -34,14 +27,6 @@
 <!ENTITY opt_unused-data "<option>--unused-data</option>">
 <!ENTITY opt_vector "<option>--vector</option>">
 <!ENTITY opt_tree "<option>--tree</option>">
-<!ENTITY opt_max "<option>--max</option>">
-<!ENTITY opt_deadlock "<option>--deadlock</option>">
-<!ENTITY opt_deadlock-detect "<option>--deadlock-detect</option>">
-<!ENTITY opt_deadlock-trace "<option>--deadlock-trace</option>">
-<!ENTITY opt_detect "<option>--detect</option>">
-<!ENTITY opt_trace "<option>--trace</option>">
-<!ENTITY opt_priority "<option>--priority</option>">
-<!ENTITY opt_monitor "<option>--monitor</option>">
 <!ENTITY opt_rewriter "<option>--rewriter</option>">
 <!ENTITY opt_aut "<option>--aut</option>">
 <!ENTITY opt_svc "<option>--svc</option>">
@@ -50,24 +35,23 @@
 <!ENTITY stdout "<constant>stdout</constant>">
 ]>
 
-<refentry id="lpe2lts">
+<refentry id="lpe2torx">
 
 <refmeta>
-  <refentrytitle>lpe2lts</refentrytitle>
+  <refentrytitle>lpe2torx</refentrytitle>
   <manvolnum>1</manvolnum>
 </refmeta>
 
 <refnamediv>
-  <refname>lpe2lts</refname>
-  <refpurpose>generate state space of an LPE</refpurpose>
+  <refname>lpe2torx</refname>
+  <refpurpose>provide TorX explorer interface</refpurpose>
 </refnamediv>
 
 <refsynopsisdiv>
   <cmdsynopsis>
-    <command>&lpe2lts;</command>
+    <command>&lpe2torx;</command>
     <arg choice="plain" rep="repeat"><arg choice="opt">&option;</arg></arg>
     <arg choice="opt">&infile;
-    <arg choice="opt">&outfile;</arg>
     </arg>
   </cmdsynopsis>
 </refsynopsisdiv>
@@ -75,13 +59,10 @@
 <refsect1>
   <title>Description</title>
   <para>
-    The &lpe2lts; tool generates state space of the linear process equation (LPE) in &infile; and
-    saves the result to &outfile;. If &outfile; is not present,
-    the state space is not stored.
-  </para>
-  <para>
-    The format of &outfile; is determined by its extension (unless it is specified
-     by an option). If the extension is unknown, the aut format will be used.
+    The &lpe2torx; tool provides the TorX explorer interface such that TorX can
+    use linear process equations (LPE). The LPE in &infile; is read and can be
+    explored as described in torx_explorer(5). If &infile; is not supplied an
+    LPE is read from &stdin;.
   </para>
 </refsect1>
 
@@ -180,112 +161,11 @@ Mandatory arguments to long options are mandatory for short options too.
   </varlistentry>
 
   <varlistentry>
-    <term>&opt_l;</term>
-    <term>&opt_max;=NUM</term>
-    <listitem>
-      <para>
-        explore at most NUM states
-      </para>
-    </listitem>
-  </varlistentry>
-
-  <varlistentry>
-    <term>&opt_d;</term>
-    <term>&opt_deadlock;</term>
-    <term>&opt_deadlock-detect;</term>
-    <listitem>
-      <para>
-        detect deadlocks (i.e. for every deadlock a message is printed)
-      </para>
-    </listitem>
-  </varlistentry>
-
-  <varlistentry>
-    <term>&opt_e;</term>
-    <term>&opt_deadlock-trace;</term>
-    <listitem>
-      <para>
-         write trace to each deadlock state to a file
-      </para>
-    </listitem>
-  </varlistentry>
-
-  <varlistentry>
-    <term>&opt_D;</term>
-    <term>&opt_detect;=NAME</term>
-    <listitem>
-      <para>
-         detect actions from NAME* (i.e. print a message for every occurence)
-      </para>
-    </listitem>
-  </varlistentry>
-
-  <varlistentry>
-    <term>&opt_t;</term>
-    <term>&opt_trace;=NAME</term>
-    <listitem>
-      <para>
-         write trace to each state that is reached with an action from NAME* to a file
-      </para>
-    </listitem>
-  </varlistentry>
-
-  <varlistentry>
-    <term>&opt_p;</term>
-    <term>&opt_priority;=NAME</term>
-    <listitem>
-      <para>
-         give priority to action NAME (i.e. if it is possible to
-         execute an action NAME in some state, than make it the only
-         executable action from that state)
-      </para>
-    </listitem>
-  </varlistentry>
-
-  <varlistentry>
-    <term>&opt_m;</term>
-    <term>&opt_monitor;</term>
-    <listitem>
-      <para>
-         print detailed status of generation
-      </para>
-    </listitem>
-  </varlistentry>
-
-  <varlistentry>
     <term>&opt_R;</term>
     <term>&opt_rewriter;=NAME</term>
     <listitem>
       <para>
          use rewriter NAME (default 'inner')
-      </para>
-    </listitem>
-  </varlistentry>
-
-  <varlistentry>
-    <term>&opt_aut;</term>
-    <listitem>
-      <para>
-         force &outfile; to be in the aut format (implies
-                        &opt_no-info;, see below)  
-      </para>
-    </listitem>
-  </varlistentry>
-
-  <varlistentry>
-    <term>&opt_svc;</term>
-    <listitem>
-      <para>
-         force &outfile; to be in the svc format
-      </para>
-    </listitem>
-  </varlistentry>
-
-   <varlistentry>
-    <term>&opt_no-info;</term>
-    <listitem>
-      <para>
-         do not add state information to &outfile;
       </para>
     </listitem>
   </varlistentry>

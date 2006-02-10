@@ -154,13 +154,10 @@ Rewriter *createRewriter(ATermAppl DataEqnSpec, RewriteStrategy Strategy)
 	switch ( Strategy )
 	{
 		case GS_REWR_INNER:
-		case GS_REWR_INNER2:
-		case GS_REWR_INNER3:
 			return new RewriterInnermost(DataEqnSpec);
 		case GS_REWR_JITTY:
 			return new RewriterJitty(DataEqnSpec);
 		case GS_REWR_INNERC:
-		case GS_REWR_INNERC2:
 			return new RewriterCompilingInnermost(DataEqnSpec);
 		case GS_REWR_JITTYC:
 			return new RewriterCompilingJitty(DataEqnSpec);
