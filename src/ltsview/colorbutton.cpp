@@ -15,10 +15,11 @@ void wxColorButton::OnMouseDown( wxMouseEvent& /*event*/ )
 {
   wxColourData coldat;
   coldat.SetColour( GetBackgroundColour() );
-  wxColourDialog* coldlg = new wxColourDialog( appFrame, &coldat );
-  if ( coldlg->ShowModal() == wxID_OK )
+  wxColourDialog coldlg( appFrame, &coldat );
+  coldlg.CentreOnParent();
+  if ( coldlg.ShowModal() == wxID_OK )
   {
-    coldat = coldlg->GetColourData();
+    coldat = coldlg.GetColourData();
     SetBackgroundColour( coldat.GetColour() );
     ClearBackground();
     

@@ -175,11 +175,11 @@ void LTSViewApp::showMarkStateRuleDialog()
 {
   if ( lts != NULL )
   {
-    MarkStateRuleDialog* msrDialog = new MarkStateRuleDialog( mainFrame, this,
-	lts->getStateVectorSpec() );
-    if ( msrDialog->ShowModal() == wxOK )
+    MarkStateRuleDialog msrDialog( mainFrame, this, lts->getStateVectorSpec() );
+    msrDialog.CentreOnParent();
+    if ( msrDialog.ShowModal() == wxOK )
     {
+      
     }
-    delete msrDialog;
   }
 }

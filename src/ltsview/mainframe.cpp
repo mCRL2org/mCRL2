@@ -409,6 +409,7 @@ void MainFrame::onOpen( wxCommandEvent& /*event*/ )
 {
   wxString filemask = wxT("FSM files (*.fsm)|*.fsm");
   wxFileDialog dialog( this, wxT("Open LTS"), directory, filename, filemask, wxOPEN );
+  dialog.CentreOnParent();
   if ( dialog.ShowModal() == wxID_OK )
   {
     directory = dialog.GetDirectory();
@@ -570,6 +571,7 @@ void MainFrame::createProgressDialog( const string title, const string text )
       wxString( text.c_str(), wxConvUTF8 ), 100, this, wxPD_APP_MODAL |
       wxPD_AUTO_HIDE | wxPD_ELAPSED_TIME );
   progDialog->SetSize( wxSize( 400, 100 ) );
+  progDialog->CentreOnParent();
 }
 
 void MainFrame::updateProgressDialog( int val, string msg )
