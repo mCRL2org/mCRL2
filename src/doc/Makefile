@@ -10,7 +10,7 @@ MAN_OBJECTS  = mcrl22lpe.1 lpe2lts.1 lpe2torx.1 lpeinfo.1 lpepp.1 \
 
 TXT_OBJECTS  = mcrl22lpe.txt lpe2lts.txt lpe2torx.txt lpeinfo.txt lpepp.txt \
                lperewr.txt lpedataelm.txt lpeconstelm.txt lpeparelm.txt \
-               ltsmin.txt ltspp.txt pnml2mcrl2.txt tbf2lpe.txt sim.txt
+               ltsmin.txt ltspp.txt pnml2mcrl2.txt tbf2lpe.txt sim.txt \
                svc2fsm.txt xsim.txt tracepp.txt librewrite_c.txt librewrite.txt
 
 HTML_OBJECTS = mcrl22lpe.html lpe2lts.html lpe2torx.html lpeinfo.html \
