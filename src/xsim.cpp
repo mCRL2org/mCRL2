@@ -23,13 +23,14 @@
 //------------------------------------------------------------------------------
 
 void print_help() {
-  cout << "Usage: " << PROGRAM_NAME << " [OPTION]... INFILE\n"
-       << "Simulates the LPE in INFILE.\n"
+  cout << "Usage: " << PROGRAM_NAME << " [OPTION]... [INFILE]\n"
+       << "Simulate LPEs in a graphical environment. If INFILE is supplied it will be\n"
+       << "loaded into the simulator.\n"
        << "\n"
        << "Mandatory arguments to long options are mandatory for short options too.\n"
        << "  -h, --help            display this help message\n"
        << "  -y, --dummy           replace free variables in the LPE with dummy values\n"
-       << "  -R, --rewriter=NAME   use rewriter NAME (default 'inner3')\n";
+       << "  -R, --rewriter=NAME   use rewriter NAME (default 'inner')\n";
 }
 
 XSim::XSim()
@@ -46,7 +47,7 @@ bool XSim::OnInit()
     wxCmdLineParser cmdln(argc,argv);
     cmdln.AddSwitch(wxT("h"),wxT("help"),wxT("displays this message"));
     cmdln.AddSwitch(wxT("y"),wxT("dummy"),wxT("replace free variables in the LPE with dummy values"));
-    cmdln.AddOption(wxT("R"),wxT("rewriter"),wxT("use specified rewriter (default 'inner3')"));
+    cmdln.AddOption(wxT("R"),wxT("rewriter"),wxT("use specified rewriter (default 'inner')"));
     cmdln.AddParam(wxT("INFILE"),wxCMD_LINE_VAL_STRING,wxCMD_LINE_PARAM_OPTIONAL);
     cmdln.SetLogo(wxT("Graphical simulator for mCRL2 LPEs."));
 
@@ -61,7 +62,7 @@ bool XSim::OnInit()
 	    return FALSE;
     }
 
-    RewriteStrategy strat = GS_REWR_INNER3;
+    RewriteStrategy strat = GS_REWR_INNER;
 
     if ( cmdln.Found(wxT("y")) )
     {

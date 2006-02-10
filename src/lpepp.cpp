@@ -215,7 +215,7 @@ bool PrintSpecificationFileName(char *SpecFileName, char *OutputFileName,
     PrintPPFormat(stderr, pp_format);
     fprintf(stderr, " format\n");
   }
-  gsRewriteInit(ATAgetArgument(Spec,3),GS_REWR_INNER3);
+  gsRewriteInit(ATAgetArgument(Spec,3),GS_REWR_INNER);
   PrintPart_C(OutputStream, (ATerm) Spec, pp_format);
   gsRewriteFinalise();
   if (SpecStream != stdin) {

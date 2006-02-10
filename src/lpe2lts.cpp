@@ -105,8 +105,8 @@ static void print_help(FILE *f, char *Name)
 {
   fprintf(f,
     "Usage: %s [OPTION]... INFILE [OUTFILE]\n"
-    "Generate state space of the LPE in INFILE and save the result to OUTFILE (in the\n"
-    "aut format). If OUTFILE is not supplied, the state space is not stored.\n"
+    "Generate state space of the LPE in INFILE and save the result to OUTFILE. If\n"
+    "OUTFILE is not supplied, the state space is not stored.\n"
     "\n"
     "The format of OUTFILE is determined by its extension (unless it is specified\n"
     "by an option). If the extension is unknown, the aut format will be used.\n"
@@ -138,7 +138,7 @@ static void print_help(FILE *f, char *Name)
     "                        than make it the only executable action from that\n"
     "                        state)\n"
     "  -m, --monitor         print detailed status of generation\n"
-    "  -R, --rewriter=NAME   use rewriter NAME (default 'inner3')\n"
+    "  -R, --rewriter=NAME   use rewriter NAME (default 'inner')\n"
     "      --aut             force OUTFILE to be in the aut format (implies\n"
     "                        --no-info, see below)\n"
     "      --svc             force OUTFILE to be in the svc format\n"
@@ -186,7 +186,7 @@ int main(int argc, char **argv)
 
   bool quiet = false;
   bool verbose = false;
-  RewriteStrategy strat = GS_REWR_INNER3;
+  RewriteStrategy strat = GS_REWR_INNER;
   bool usedummies = true;
   bool removeunused = true;
   int stateformat = GS_STATE_VECTOR;

@@ -134,7 +134,7 @@
     <term>&opt_rewriter;=&name;</term>
     <listitem>
       <para>
-        rewrite data expressions using rewriter &name; (default 'inner3')
+        rewrite data expressions using rewriter &name; (default 'inner')
       </para>
     </listitem>
   </varlistentry>

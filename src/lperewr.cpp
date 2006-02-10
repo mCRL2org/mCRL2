@@ -28,7 +28,7 @@ int main(int argc, char **argv)
   //declarations for getopt
   bool opt_benchmark = false;
   unsigned long int  opt_bench_times = 0;
-  RewriteStrategy opt_strat = GS_REWR_INNER3;
+  RewriteStrategy opt_strat = GS_REWR_INNER;
   #define SHORT_OPTIONS "hqvb:R:"
   #define VERSION_OPTION CHAR_MAX + 1
   struct option long_options[] = {
@@ -212,7 +212,7 @@ static void print_help(char *Name)
     "  -q, --quiet           do not display warning messages\n"
     "  -v, --verbose         display concise intermediate messages\n"
     "  -b, --benchmark=NUM   rewrite specification NUM times; do not save output\n"
-    "  -R, --rewriter=NAME   use rewriter NAME (default 'inner3')\n",
+    "  -R, --rewriter=NAME   use rewriter NAME (default 'inner')\n",
     Name
   );
 }

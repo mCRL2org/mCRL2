@@ -2624,7 +2624,7 @@ static int main_linearisation(ATermAppl Spec)
 	ATbool init_used;
 	int i, init_id;
 
-	gsRewriteInit(ATAgetArgument(Spec,3),GS_REWR_INNER3);
+	gsRewriteInit(ATAgetArgument(Spec,3),GS_REWR_INNER);
 
 	linTrue = gsMakeDataExprTrue();
 	ATprotectAppl(&linTrue);

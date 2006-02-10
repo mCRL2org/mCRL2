@@ -724,7 +724,7 @@ public:
     p_newVarCounter  = 0;
     
     lpe::LPE p_lpe          = p_spec.lpe();
-    gsRewriteInit(gsMakeDataEqnSpec(aterm_list(p_spec.equations())), GS_REWR_INNER3); 
+    gsRewriteInit(gsMakeDataEqnSpec(aterm_list(p_spec.equations())), GS_REWR_INNER); 
 
     for(data_assignment_list::iterator i = p_spec.initial_assignments().begin(); i != p_spec.initial_assignments().end() ; i++ ){
       p_lookupIndex[i->lhs()] = counter;

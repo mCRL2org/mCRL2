@@ -141,7 +141,7 @@ static void print_help(FILE *f, char *Name)
     "  -c, --vector          store state in a vector (fastest, default)\n"
     "  -r, --tree            store state in a tree (for memory efficiency)\n"
     "  -m, --monitor         print detailed status of generation\n"
-    "  -R, --rewriter=NAME   use rewriter NAME (default 'inner3')\n",
+    "  -R, --rewriter=NAME   use rewriter NAME (default 'inner')\n",
     Name);
 }
 
@@ -174,7 +174,7 @@ int main(int argc, char **argv)
 
   bool quiet = false;
   bool verbose = false;
-  RewriteStrategy strat = GS_REWR_INNER3;
+  RewriteStrategy strat = GS_REWR_INNER;
   bool usedummies = true;
   bool removeunused = true;
   int stateformat = GS_STATE_VECTOR;

@@ -63,7 +63,7 @@ XSimMain::XSimMain( wxWindow *parent, wxWindowID id, const wxString &title,
     timer( this )
 {
     use_dummies = false;
-    rewr_strat = GS_REWR_INNER3; // XXX add to constructor?
+    rewr_strat = GS_REWR_INNER; // XXX add to constructor?
 
     base_title = title;
 

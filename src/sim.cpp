@@ -56,7 +56,7 @@ void print_help(FILE *f, char *Name)
     "options are mandatory for short options too.\n"
     "  -h, --help            display this help message\n"
     "  -y, --dummy           replace free variables in the LPE with dummy values\n"
-    "  -R, --rewriter=NAME   use rewriter NAME (default 'inner3')\n",
+    "  -R, --rewriter=NAME   use rewriter NAME (default 'inner')\n",
     Name,
     help_message
   );
@@ -82,7 +82,7 @@ int main(int argc, char **argv)
 	ATinit(argc,argv,&stackbot);
 
 	usedummy = false;
-	strat = GS_REWR_INNER3;
+	strat = GS_REWR_INNER;
 	while ( (opt = getopt_long(argc,argv,sopts,lopts,NULL)) != -1 )
 	{
 		switch ( opt )

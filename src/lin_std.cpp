@@ -896,7 +896,7 @@ static specificationbasictype *create_spec(ATermAppl t)
   }
   /* Store the equations */
   if (mayrewrite) {
-    gsRewriteInit(gsMakeDataEqnSpec(ATempty),GS_REWR_INNER3);
+    gsRewriteInit(gsMakeDataEqnSpec(ATempty),GS_REWR_INNER);
   }
   spec->eqns = ATempty;
   for(ATermList eqns = ATreverse(ATLgetArgument(ATAgetArgument(t,3),0));

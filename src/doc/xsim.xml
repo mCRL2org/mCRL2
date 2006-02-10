@@ -31,7 +31,7 @@
   <cmdsynopsis>
     <command>&xsim;</command>
     <arg choice="plain" rep="repeat"><arg choice="opt">&option;</arg></arg>
-    <arg choice="plain">&infile;
+    <arg choice="opt">&infile;
     </arg>
   </cmdsynopsis>
 </refsynopsisdiv>
@@ -40,7 +40,8 @@
   <title>Description</title>
   <para>
     The &xsim; tool simulates the linear process equation (LPE) in &infile; using
-    a graphical user interface. This interface consists of two parts. In the top
+    a graphical user interface. If &infile; is not supplied the simulator starts
+    without an LPE. The interface consists of two parts. In the top
     part every transition that is possible from the current state, is listed
     including the changes to the state vector that would result from executing
     that transition. A transition can be executed by double clicking it. In the
@@ -135,8 +136,8 @@ For a simulator that uses a command-line interface, see the &sim; tool.
 <refsect1>
 <title>Author</title>
 <para>
-  Written by Jeroen van der Wulp. Please send all complaints, comments and bug
-  reports to <email>bug@mcrl2.org</email>.
+  Written by Muck van Weerdenburg and Jeroen van der Wulp. Please send all
+  complaints, comments and bug reports to <email>bug@mcrl2.org</email>.
 </para>
 </refsect1>
 

@@ -76,17 +76,17 @@
   <title>Description</title>
   <para>
     The &lpe2lts; generates state space of the linear process equation (LPE) in &infile; and
-    saves the result to &outfile; (in the aut format). If &outfile; is not present,
+    saves the result to &outfile;. If &outfile; is not present,
     the state space is not stored.
+  </para>
+  <para>
+    The format of &outfile; is determined by its extension (unless it is specified
+     by an option). If the extension is unknown, the aut format will be used.
   </para>
 </refsect1>
 
 <refsect1>
 <title>Options</title>
-<para>
-The format of &outfile; is determined by its extension (unless it is specified
-by an option). If the extension is unknown, the aut format will be used.
-</para>
 <para>
 Mandatory arguments to long options are mandatory for short options too.
   <variablelist>
@@ -290,13 +290,6 @@ Mandatory arguments to long options are mandatory for short options too.
     </listitem>
   </varlistentry>
   </variablelist>
-</para>
-</refsect1>
-
-<refsect1>
-<title>Known Issues</title>
-<para>
-   None yet.
 </para>
 </refsect1>
 
