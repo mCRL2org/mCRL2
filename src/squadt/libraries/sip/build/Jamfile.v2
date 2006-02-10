@@ -1,9 +1,8 @@
 project sip
   : source-location ../source
-  : build-dir ../../../bin
+  : build-dir $(BUILD_TOP)
   : requirements
    <threading>multi
-   <inlining>full
    <include>../../../../boost/
    <include>../../
   : usage-requirements

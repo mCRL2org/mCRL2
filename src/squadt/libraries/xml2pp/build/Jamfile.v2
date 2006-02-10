@@ -1,8 +1,8 @@
 project xml_text_reader
   : source-location ../source
+  : build-dir BUILD_TOP
   : requirements
     <include>../
-  : build-dir ../../../bin
   : usage-requirements
     <include>../
     <cxxflags>"`xml2-config --cflags`"

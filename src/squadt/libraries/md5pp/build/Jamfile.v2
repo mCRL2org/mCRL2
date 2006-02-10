@@ -1,8 +1,8 @@
 project md5pp
   : source-location ../source
+  : build-dir $(BUILD_TOP)
   : requirements
     <include>../
-  : build-dir ../../../bin
   : usage-requirements
     <include>../ ;
 

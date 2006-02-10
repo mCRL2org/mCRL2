@@ -1,6 +1,6 @@
 project transport
   : source-location ../source
-  : build-dir ../../../bin
+  : build-dir $(BUILD_TOP)
   : requirements
    <include>../../../../boost/
    <include>../

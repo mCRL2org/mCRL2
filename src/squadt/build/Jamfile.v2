@@ -1,36 +1,33 @@
 project squadt
   : source-location ../
-  : build-dir ../bin
+  : build-dir $(BUILD_TOP)
   : default-build debug
   : requirements
-   <include>../libraries
-   <source>/libraries/md5pp//md5pp
-   <source>/libraries/transport//transport
-   <source>/libraries/xml2pp//xml_text_reader
-   <source>/boost/filesystem//boost_filesystem ;
+   <include>../libraries ;
 
 include $(TOP)/config.jam ;
 
 alias wxflags : : : :
    <cxxflags>"`$(WX_CONFIG) --cxxflags`" ;
 
-exe squadt : squadt.cpp
-             wxflags
-             specification.cpp
-             project_manager.cpp
-             settings_manager.cpp
-             tool_manager.cpp
-             tool_executor.cpp
-             tool.cpp
-             logger.cpp
-             process.cpp
-             gui_new_specification.cpp
-             gui_project_overview.cpp
-             gui_resources.cpp
-             gui_specification_properties.cpp
-             /libraries/md5pp//md5pp
-             /libraries/transport//transport
-             /libraries/xml2pp//xml_text_reader
-             /boost/filesystem//boost_filesystem
-           : <linkflags>"`$(WX_CONFIG) --libs core base adv net`" ;
+exe squadt :
+        squadt.cpp
+        wxflags
+        specification.cpp
+        project_manager.cpp
+        settings_manager.cpp
+        tool_manager.cpp
+        tool_executor.cpp
+        tool.cpp
+        logger.cpp
+        process.cpp
+        gui_new_specification.cpp
+        gui_project_overview.cpp
+        gui_resources.cpp
+        gui_specification_properties.cpp
+        /libraries/md5pp//md5pp
+        /libraries/transport//transport
+        /libraries/xml2pp//xml_text_reader
+        /boost/filesystem//boost_filesystem
+       : <linkflags>"`$(WX_CONFIG) --libs core base adv net`" ;
 
