@@ -80,7 +80,7 @@ ATermAppl gsSpecEltsToSpec(ATermList SpecElts);
 %type <appl> proc_expr_choice proc_expr_sum proc_expr_merge proc_expr_binit
 %type <appl> proc_expr_cond proc_expr_seq proc_expr_at proc_expr_sync
 %type <appl> proc_expr_primary proc_constant act_proc_ref proc_quant
-%type <appl> mult_act_name ren_expr comm_expr
+%type <appl> mult_act_name ren_expr comm_expr id_tau
 
 %type <list> spec_elts sorts_decls_scs sorts_decl ids_cs domain ops_decls_scs
 %type <list> ops_decl eqn_sect eqn_decls_scs data_vars_decls_scs data_vars_decl
@@ -1378,10 +1378,45 @@ comm_expr:
       $$ = gsMakeCommExpr($1, gsMakeNil());
       gsDebugMsg("parsed communication expression\n  %T\n", $$);
     }
-  | mult_act_name ARROW ID
-    {
-      $$ = gsMakeCommExpr($1, $3);
+  | mult_act_name ARROW id_tau
+    {      
+      $$ = gsMakeCommExpr($1, gsIsTau($3)?gsMakeNil():$3);
       gsDebugMsg("parsed communication expression\n  %T\n", $$);
+    }
+  ;
+
+//multi action name
+mult_act_name:
+  ids_bs
+    {
+      $$ = gsMakeMultActName(ATreverse($1));
+      gsDebugMsg("parsed multi action name\n  %T\n", $$);
+    }
+  ;
+
+//one or more id's, separated by bars
+ids_bs:
+  ID
+    {
+      $$ = ATmakeList1((ATerm) $1);
+      gsDebugMsg("parsed id's\n  %T\n", $$);
+    }
+  | ids_bs BAR ID
+    {
+      $$ = ATinsert($1, (ATerm) $3);
+      gsDebugMsg("parsed id's\n  %T\n", $$);
+    }
+  ;
+
+//id or tau
+id_tau:
+  ID
+    {
+      $$ = $1;
+    }
+  | TAU
+    {
+      $$ = gsMakeTau();
     }
   ;
 
@@ -1410,29 +1445,6 @@ mult_act_names_cs:
     {
       $$ = ATinsert($1, (ATerm) $3);
       gsDebugMsg("parsed multi action names\n  %T\n", $$);
-    }
-  ;
-
-//multi action name
-mult_act_name:
-  ids_bs
-    {
-      $$ = gsMakeMultActName(ATreverse($1));
-      gsDebugMsg("parsed multi action name\n  %T\n", $$);
-    }
-  ;
-
-//one or more id's, separated by bars
-ids_bs:
-  ID
-    {
-      $$ = ATmakeList1((ATerm) $1);
-      gsDebugMsg("parsed id's\n  %T\n", $$);
-    }
-  | ids_bs BAR ID
-    {
-      $$ = ATinsert($1, (ATerm) $3);
-      gsDebugMsg("parsed id's\n  %T\n", $$);
     }
   ;
 
