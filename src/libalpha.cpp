@@ -151,6 +151,7 @@ static inline ATermList untypeMA(ATermList MAct){
   if(r) return r;
 
   r=ATinsert(untypeMA(ATgetNext(MAct)),(ATerm)untypeA(ATAgetFirst(MAct)));
+  r=gsaATsortList(r);
   utPut(MAct,r);
   return r;
 }
@@ -967,7 +968,7 @@ static ATermAppl PushHide(ATermList I, ATermAppl a){
 }
 
 static ATermAppl PushAllow(ATermList V, ATermAppl a){
-  //gsWarningMsg("push allow\n");//: V: %T; a:%P\n",V,a);
+  //gsWarningMsg("push allow: V: %T; a:%P\n",V,a);
   V=sort_multiactions_allow(V);
   if ( gsIsDelta(a) || gsIsTau(a) ){
     return a;
@@ -1131,7 +1132,7 @@ static ATermAppl PushAllow(ATermList V, ATermAppl a){
 
     ATermList ulp = untypeMAL(lp);
     ATermList ulq = untypeMAL(lq);
-    
+
     ATermList Vp=merge_list(V,split_allow(V,ulp,ulq));
     ATermList Vq=merge_list(V,split_allow(V,ulq,ulp));
 
@@ -1142,7 +1143,6 @@ static ATermAppl PushAllow(ATermList V, ATermAppl a){
     l=ATLtableGet(alphas,(ATerm) p);
     l2=ATLtableGet(alphas,(ATerm) q);
     assert(l);
-    //gsWarningMsg("a: %T\n\n", q);
     assert(l2);
     l=merge_list(merge_list(l,l2),sync_list(l,l2));
     a=ATsetArgument(ATsetArgument(a,(ATerm)q,1),(ATerm)p,0);
@@ -1430,22 +1430,23 @@ static ATermList gsaGetAlpha(ATermAppl a, unsigned length, ATermList ignore){
   } 
   else if ( gsIsAllow(a) ){
     ATermAppl p = ATAgetArgument(a,1);
-    unsigned max_len = get_max_allowed_length(ATLgetArgument(a,0));
+    ATermList V=sort_multiactions_allow(ATLgetArgument(a,0));
+    unsigned max_len = get_max_allowed_length(V);
     if(length && max_len > length)
       max_len=length;
 
     l=gsaGetAlpha(p,max_len);
-    
-    l=filter_allow_list(l,ATLgetArgument(a,0)); 
+    l=filter_allow_list(l,V); 
     assert(l);
   } 
   else if ( gsIsComm(a) ){
     ATermAppl p = ATAgetArgument(a,1);
+    ATermList C = sort_multiactions_comm(ATLgetArgument(a,0));
     
     l=gsaGetAlpha(p);
     ATtablePut(alphas,(ATerm) p,(ATerm) l); 
     
-    l=filter_comm_list(l,ATLgetArgument(a,0)); 
+    l=filter_comm_list(l,C); 
     assert(l);
   } 
   else if ( gsIsSum(a) || gsIsAtTime(a) || gsIsChoice(a) || gsIsSeq(a) 
@@ -1485,7 +1486,7 @@ static ATermList gsaGetAlpha(ATermAppl a, unsigned length, ATermList ignore){
     ATtablePut(alphas,(ATerm) a,(ATerm) l); 
   }
 
-  //gsVerboseMsg("gsaGetAlpha: a: %P; l:%d\n\n", a, ATgetLength(l));
+  //gsVerboseMsg("gsaGetAlpha: a: %P; l:%d, length: %d\n\n", a, ATgetLength(l), length);
   return l;
 }
 
