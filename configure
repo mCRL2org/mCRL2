@@ -312,7 +312,7 @@ ac_includes_default="\
 # include <unistd.h>
 #endif"
 
-ac_subst_vars='SHELL PATH_SEPARATOR PACKAGE_NAME PACKAGE_TARNAME PACKAGE_VERSION PACKAGE_STRING PACKAGE_BUGREPORT exec_prefix prefix program_transform_name bindir sbindir libexecdir datadir sysconfdir sharedstatedir localstatedir libdir includedir oldincludedir infodir mandir build_alias host_alias target_alias DEFS ECHO_C ECHO_N ECHO_T LIBS build build_cpu build_vendor build_os host host_cpu host_vendor host_os HOST_OS CC CFLAGS LDFLAGS CPPFLAGS ac_ct_CC EXEEXT OBJEXT CPP CXX CXXFLAGS ac_ct_CXX LEX LEXLIB LEX_OUTPUT_ROOT BISON BFLAGS BUILD_EXPERIMENTAL EGREP ATERM_CPPFLAGS ATERM_LDFLAGS ATERM_NAME BUILD_ATERM LIBXML2_CPPFLAGS XML2_CONFIG LIBXML2_CONFIG LIBXML2_LDFLAGS USE_LIBXML2 XMLTO USE_XMLTO BOOST_PREFIX USE_BOOST WX_CONFIG USE_WX WX_CPPFLAGS WX_LIBS LIBOBJS DATADIR LTLIBOBJS'
+ac_subst_vars='SHELL PATH_SEPARATOR PACKAGE_NAME PACKAGE_TARNAME PACKAGE_VERSION PACKAGE_STRING PACKAGE_BUGREPORT exec_prefix prefix program_transform_name bindir sbindir libexecdir datadir sysconfdir sharedstatedir localstatedir libdir includedir oldincludedir infodir mandir build_alias host_alias target_alias DEFS ECHO_C ECHO_N ECHO_T LIBS build build_cpu build_vendor build_os host host_cpu host_vendor host_os BJAM_TOOLSET HOST_OS CC CFLAGS LDFLAGS CPPFLAGS ac_ct_CC EXEEXT OBJEXT CPP CXX CXXFLAGS ac_ct_CXX LEX LEXLIB LEX_OUTPUT_ROOT BISON BFLAGS BUILD_EXPERIMENTAL EGREP ATERM_CPPFLAGS ATERM_LDFLAGS ATERM_NAME BUILD_ATERM LIBXML2_CPPFLAGS XML2_CONFIG LIBXML2_CONFIG LIBXML2_LDFLAGS USE_LIBXML2 XMLTO USE_XMLTO BOOST_PREFIX USE_BOOST WX_CONFIG USE_WX WX_CPPFLAGS WX_LIBS LIBOBJS PREFIX_DIR EXEC_PREFIX_DIR DATA_DIR LIB_DIR BIN_DIR INCLUDE_DIR MAN_DIR LTLIBOBJS'
 ac_subst_files=''
 
 # Initialize some variables set by options.
@@ -1424,6 +1424,9 @@ host_os=`echo $ac_cv_host | sed 's/^\([^-]*\)-\([^-]*\)-\(.*\)$/\3/'`
 
 
 
+# Default toolset to use with Boost.Build
+BJAM_TOOLSET="gcc"
+
 # Setting host OS
 case $host in
   *-*-mingw32*)
@@ -1431,9 +1434,11 @@ case $host in
     ;;
   *-*-cygwin*)
     HOST_OS="CYGWIN"
+    BJAM_TOOLSET="mingw"
     ;;
   *-*-msdos* | *-*-go32* | *-*-windows*)
     HOST_OS="WINDOWS"
+    BJAM_TOOLSET="vc-7_1"
     ;;
   *-*-linux*)
     HOST_OS="LINUX"
@@ -1443,11 +1448,13 @@ case $host in
     ;;
   *-*-darwin*)
     HOST_OS="MACOSX"
+    BJAM_TOOLSET="darwin"
     ;;
   *)
     HOST_OS="UNKNOWN"
     ;;
 esac
+
 
 
 # Default is 32 bits, test is probably very incomplete
@@ -6304,7 +6311,29 @@ else
 echo "$as_me: libXML2       :  MISSING" >&6;}
 fi
 
-eval DATADIR="$datadir"
+#evaluate some location variables for use with bjam
+if test "x$prefix" = xNONE
+then
+  prefix=$ac_default_prefix
+fi
+if test "x$exec_prefix" = xNONE
+then
+  exec_prefix='${prefix}'
+fi
+
+eval "eval PREFIX_DIR=${prefix}"
+
+eval "eval EXEC_PREFIX_DIR=${exec_prefix}"
+
+eval "eval DATA_DIR=${datadir}"
+
+eval "eval BIN_DIR=${bindir}"
+
+eval "eval LIB_DIR=${libdir}"
+
+eval "eval INCLUDE_DIR=${includedir}"
+
+eval "eval MAN_DIR=${mandir}"
 
 
 { echo "$as_me:$LINENO: " >&5
@@ -6314,7 +6343,7 @@ echo "$as_me: Some tools will not be built if any of these libraries are missing
 { echo "$as_me:$LINENO: " >&5
 echo "$as_me: " >&6;}
 
-                                        ac_config_files="$ac_config_files src/rewr_innerc_aux.h src/squadt/settings.h config config.jam"
+                                                            ac_config_files="$ac_config_files src/boost/tools/build/v2/user-config.jam src/squadt/examples/tool_catalog.xml src/rewr_innerc_aux.h src/squadt/settings.h config config.jam"
 
 cat >confcache <<\_ACEOF
 # This file is a shell script that caches the results of configure
@@ -6866,6 +6895,8 @@ for ac_config_target in $ac_config_targets
 do
   case "$ac_config_target" in
   # Handling of arguments.
+  "src/boost/tools/build/v2/user-config.jam" ) CONFIG_FILES="$CONFIG_FILES src/boost/tools/build/v2/user-config.jam" ;;
+  "src/squadt/examples/tool_catalog.xml" ) CONFIG_FILES="$CONFIG_FILES src/squadt/examples/tool_catalog.xml" ;;
   "src/rewr_innerc_aux.h" ) CONFIG_FILES="$CONFIG_FILES src/rewr_innerc_aux.h" ;;
   "src/squadt/settings.h" ) CONFIG_FILES="$CONFIG_FILES src/squadt/settings.h" ;;
   "config" ) CONFIG_FILES="$CONFIG_FILES config" ;;
@@ -6961,6 +6992,7 @@ s,@host@,$host,;t t
 s,@host_cpu@,$host_cpu,;t t
 s,@host_vendor@,$host_vendor,;t t
 s,@host_os@,$host_os,;t t
+s,@BJAM_TOOLSET@,$BJAM_TOOLSET,;t t
 s,@HOST_OS@,$HOST_OS,;t t
 s,@CC@,$CC,;t t
 s,@CFLAGS@,$CFLAGS,;t t
@@ -6998,7 +7030,13 @@ s,@USE_WX@,$USE_WX,;t t
 s,@WX_CPPFLAGS@,$WX_CPPFLAGS,;t t
 s,@WX_LIBS@,$WX_LIBS,;t t
 s,@LIBOBJS@,$LIBOBJS,;t t
-s,@DATADIR@,$DATADIR,;t t
+s,@PREFIX_DIR@,$PREFIX_DIR,;t t
+s,@EXEC_PREFIX_DIR@,$EXEC_PREFIX_DIR,;t t
+s,@DATA_DIR@,$DATA_DIR,;t t
+s,@LIB_DIR@,$LIB_DIR,;t t
+s,@BIN_DIR@,$BIN_DIR,;t t
+s,@INCLUDE_DIR@,$INCLUDE_DIR,;t t
+s,@MAN_DIR@,$MAN_DIR,;t t
 s,@LTLIBOBJS@,$LTLIBOBJS,;t t
 CEOF
 

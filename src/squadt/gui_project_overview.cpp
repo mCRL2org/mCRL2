@@ -347,7 +347,7 @@ namespace squadt {
       SetToolBar(toolbar);
     }
 
-    void ProjectOverview::ShowAboutWindow(wxCommandEvent &event) {
+    void ProjectOverview::ShowAboutWindow(wxCommandEvent& /* event */) {
       wxDialog*   about = new wxDialog(NULL, wxID_ABOUT, wxT("About Squadt"), wxDefaultPosition, wxDefaultSize);
       wxBoxSizer* sizer = new wxBoxSizer(wxVERTICAL);
       wxBoxSizer* ssizer = new wxBoxSizer(wxHORIZONTAL);
@@ -370,7 +370,7 @@ namespace squadt {
     }
 
     /* Handlers for operations of project level */
-    void ProjectOverview::NewProject(wxCommandEvent &event) {
+    void ProjectOverview::NewProject(wxCommandEvent& /* event */) {
       wxDirDialog directory_dialog(this, wxT("Select a project directory"));
 
       if (directory_dialog.ShowModal() == wxID_OK) {

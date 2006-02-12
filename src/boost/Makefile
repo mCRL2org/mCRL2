@@ -17,7 +17,9 @@ TREE_ROOT = ../../
 
 BJAM           = tools/build/jam_src/bin/bjam
 BJAM_BUILD     = ./build.sh
-BJAM_ARGUMENTS = "-sBUILD=release <threading>single <optimization>speed <runtime-link>dynamic"
+BJAM_ARGUMENTS = --v2 variant=release threading=single optimization=speed runtime-link=$(RUNTIME_LINK) \
+		 --prefix=. --layout=system --stagedir=lib stage
+RUNTIME_LINK   = shared
 
 # Build boost build tool
 ifeq ($(HOST_OS),WINDOWS)
@@ -25,26 +27,29 @@ ifeq ($(HOST_OS),WINDOWS)
  BJAM_BUILD   = build.bat
 endif
 ifeq ($(HOST_OS),CYGWIN)
- BJAM_ARGUMENTS = "-sBUILD=release <threading>single <optimization>speed <runtime-link>static"
+ RUNTIME_LINK = static
 endif
 ifeq ($(HOST_OS),MINGW)
- BJAM           = tools/build/jam_src/bin/bjam.exe
- BJAM_BUILD     = start //WAIT mbuild.bat mingw;
- BJAM_ARGUMENTS = "-sTOOLS=mingw" "-sBUILD=release <threading>single <optimization>speed <runtime-link>static"
+ BJAM         = tools/build/jam_src/bin/bjam.exe
+ BJAM_BUILD   = start //WAIT mbuild.bat mingw;
+ RUNTIME_LINK = static
 endif
 
 .PHONY: all bjam install clean distclean
 
-all: bjam build_completed
+all: build_completed
 
-build_completed:
-	$(BJAM) $(BJAM_ARGUMENTS) --prefix=. --layout=system install
+build_completed: $(BJAM)
+	$(BJAM) $(BJAM_ARGUMENTS) --with-program_options
 	touch build_completed
 
 bjam: $(BJAM)
 
-boost_filesystem: bjam
-	$(BJAM) $(BJAM_ARGUMENTS) --prefix=. --layout=system --with-filesystem install
+boost_filesystem: $(BJAM)
+	$(BJAM) $(BJAM_ARGUMENTS) --with-filesystem
+
+boost_program_options: $(BJAM)
+	$(BJAM) $(BJAM_ARGUMENTS) --with-program_options
 
 $(BJAM):
 	cd tools/build/jam_src; \

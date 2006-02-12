@@ -40,13 +40,13 @@ GUI_OBJECTS                    = squadt.o gui_project_overview.o gui_new_specifi
 OBJECTS                        = $(sort $(GUI_OBJECTS) $(PROJECT_MANAGER_OBJECTS) $(TOOL_MANAGER_OBJECTS) $(TOOL_EXECUTOR_OBJECTS))
 
 TEST_TARGETS                   = project_manager_tester tool_manager_tester tests/messenger/connection_test
-TARGETS                        = squadt libmd5.a
+TARGETS                        = squadt
 
 .PHONY: all install clean distclean test strip
 
 BJAM = ../boost/tools/build/jam_src/bin/bjam
 
-all: $(BJAM) $(TREE_ROOT)config.jam
+all: $(BJAM) $(TREE_ROOT)config.jam settings.h
 ifeq ($(findstring $(CPPFLAGS),NDEBUG),)
 	 @cd build; ../$(BJAM) --v2 debug
 else
@@ -78,8 +78,7 @@ CPPFLAGS += $(REVISION)
 #-include dependencies
 #endif
 
-test: all $(TEST_TARGETS)
-	@tests/messenger/connection_test
+test: all
 
 $(LIBXML2_OBJECTS):  CPPFLAGS += $(BOOST_CPPFLAGS) $(WX_CPPFLAGS) $(LIBXML2_CPPFLAGS)
 $(BOOST_OBJECTS):    CPPFLAGS += $(BOOST_CPPFLAGS) $(WX_CPPFLAGS) $(LIBXML2_CPPFLAGS)
@@ -87,32 +86,24 @@ $(WX_OBJECTS):       CPPFLAGS += $(BOOST_CPPFLAGS) $(WX_CPPFLAGS) $(LIBXML2_CPPF
 settings_manager.o:  CPPFLAGS += $(BOOST_CPPFLAGS) $(WX_CPPFLAGS) $(LIBXML2_CPPFLAGS) -DDATA_DIRECTORY=\"$(datadir)\"
 utility/relocator.o: CPPFLAGS += $(BOOST_CPPFLAGS)
 
-# XML schema validation can be triggered by adding to tool_manager project_manager
-#$(PROJECT_MANAGER_OBJECTS): CPPFLAGS += -DPARSER_SCHEMA_VALIDATION
-#$(TOOL_MANAGER_OBJECTS):    CPPFLAGS += -DPARSER_SCHEMA_VALIDATION
-
-libmd5.a: libmd5/md5pp.cpp libmd5/md5pp.h
-	$(CXX) $(CXXFLAGS) -fPIC -c libmd5/md5.c -o libmd5/md5.o
-	$(CXX) $(CXXFLAGS) -fPIC -c libmd5/md5pp.cpp -o libmd5/md5pp.o
-	$(AR) $(ARFLAGS) $@ libmd5/md5pp.o libmd5/md5.o
+md5.o:
+	$(CXX) $(CPPFLAGS) $(CXXFLAGS) -fPIC -c libraries/md5pp/source/md5.cpp -o md5.o
+md5pp.o:
+	$(CXX) $(CPPFLAGS) $(CXXFLAGS) -fPIC -c libraries/md5pp/source/md5pp.cpp -o md5pp.o
+xml_text_reader.o:
+	$(CXX) $(CPPFLAGS) $(CXXFLAGS) -fPIC -c libraries/xml2pp/source/xml_text_reader.cpp -o xml_text_reader.o
 
 tool_manager_tester: tool_manager_tester.cpp $(TOOL_MANAGER_OBJECTS)
-	$(CXX) $(CXXFLAGS) $(CPPFLAGS) $(BOOST_CPPFLAGS) $(TOOL_MANAGER_OBJECTS) $(BOOST_LDFLAGS) $(LDFLAGS) libmd5.a $(BOOST_FILESYSTEM) $(WX_LIBRARIES) -o $@ $<
+	$(CXX) $(CXXFLAGS) $(CPPFLAGS) $(BOOST_CPPFLAGS) $(TOOL_MANAGER_OBJECTS) $(BOOST_LDFLAGS) $(LDFLAGS) md5.o md5pp.o $(BOOST_FILESYSTEM) $(WX_LIBRARIES) -o $@ $<
 
 project_manager_tester: project_manager_tester.cpp $(PROJECT_MANAGER_OBJECTS)
-	$(CXX) $(CXXFLAGS) $(CPPFLAGS) $(BOOST_CPPFLAGS) $(PROJECT_MANAGER_OBJECTS) $(BOOST_LDFLAGS) $(LDFLAGS) libmd5.a $(BOOST_FILESYSTEM) $(WX_LIBRARIES) -o $@ $<
+	$(CXX) $(CXXFLAGS) $(CPPFLAGS) $(BOOST_CPPFLAGS) $(PROJECT_MANAGER_OBJECTS) $(BOOST_LDFLAGS) $(LDFLAGS) md5.o md5pp.o $(BOOST_FILESYSTEM) $(WX_LIBRARIES) -o $@ $<
 
-squadt: $(GUI_OBJECTS) libmd5.a
-	$(CXX) $(CXXFLAGS) $(CPPFLAGS) $(GUI_OBJECTS) $(LDFLAGS) $(WX_LIBRARIES) libmd5.a $(BOOST_LDFLAGS) $(BOOST_FILESYSTEM) -o $@
-
-utility/relocator: utility/relocator.o settings_manager.o $(TOOL_MANAGER_OBJECTS)
-	$(CXX) $(CXXFLAGS) $(CPPFLAGS) $(LDFLAGS) $(subst $(libdir),$(BOOST_PREFIX)/lib,$(BOOST_LDFLAGS)) $^ $(BOOST_FILESYSTEM) -lxml2 -o $@
+squadt: $(GUI_OBJECTS) md5.o md5pp.o settings.h
+	$(CXX) $(CXXFLAGS) $(CPPFLAGS) $(GUI_OBJECTS) $(LDFLAGS) $(WX_LIBRARIES) md5.o md5pp.o $(BOOST_LDFLAGS) $(BOOST_FILESYSTEM) -o $@
 
 %.o: %.cpp
 	$(CXX) -c $(CXXFLAGS) $(CPPFLAGS) $< -o $@
-
-tests/messenger/connection_test: messenger.o tests/messenger/connection_test.cpp
-	$(CXX) $(CXXFLAGS) $(CPPFLAGS) -I../boost/include -I. -lpthread -lboost_unit_test_framework $^ -o $@
 
 messenger.o: messenger.cpp
 	$(CXX) -c $(CXXFLAGS) $(CPPFLAGS) -I../boost/include $< -o $@
@@ -122,7 +113,7 @@ $(OBJECTS) $(TARGETS): Makefile $(CONFIG)
 strip: $(TARGETS)
 	$(STRIP) --strip-unneeded --strip-debug $^
 
-install: all #utility/relocator
+install: all
 	$(INSTALL) -d $(bindir)
 #	$(INSTALL) squadt $(bindir)
 	$(INSTALL) -d $(datadir)
@@ -135,7 +126,7 @@ install: all #utility/relocator
 	$(INSTALL) -m 0644 schemas/project.xsd $(datadir)/schemas
 	$(GZIP) $(datadir)/schemas/project.xsd
 	$(INSTALL) -m 0644 examples/tool_catalog.xml $(datadir)/configuration
-#	utility/relocator $(bindir) $(datadir)/configuration/tool_catalog.xml
+	@cd build; ../$(BJAM) --v2 --install
 ifeq ($(HOST_OS),MACOSX)
 	/Developer/Tools/Rez -t APPL -o squadt ../sample.r
 	/Developer/Tools/SetFile -a C squadt
@@ -150,6 +141,10 @@ ifeq ($(HOST_OS),MACOSX)
 endif
 
 clean:
+#	@cd build; ../$(BJAM) --v2 --clean-all
 	$(RM) -rf *.o $(TARGETS) $(TEST_TARGETS) settings.h utility/*.o utility/relocator core dependencies bin
 
 distclean: clean
+
+settings.h:
+	$(error Please (re)configure your source tree!)

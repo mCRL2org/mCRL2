@@ -1,6 +1,6 @@
 <?xml version="1.0" encoding="utf-8"?>
 <tool-catalog xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:noNamespaceSchemaLocation="tool_catalog.xsd" version="1.0">
- <tool name="lpe2lts" identifier="lpe2lts" location="/tmp/mcrl2/bin/lpe2lts">
+ <tool name="lpe2lts" identifier="lpe2lts" location="@BIN_DIR@/lpe2lts">
   <description>A tool computes the instantiation of an LPE.</description>
   <mode category="Translation">
    <object type="input" name="%.lpe" formalism="LPE" default-format="lpe"/>
@@ -13,34 +13,34 @@
    <object type="input" name="%.lpe" formalism="LPE" default-format="lpe"/>
   </mode>
  </tool>
- <tool name="mcrl22lpe" identifier="mcrl22lpe" location="/tmp/mcrl2/bin/mcrl22lpe">
+ <tool name="mcrl22lpe" identifier="mcrl22lpe" location="@BIN_DIR@mcrl22lpe">
   <mode category="Translation">
    <description>A tool that transforms mCRL2 specification to an LPE.</description>
    <object type="input" name="%.mcrl2" formalism="mCRL2" default-format="mcrl2"/>
    <object type="output" name="%.lpe" formalism="LPE" default-format="lpe"/>
   </mode>
  </tool>
- <tool name="lpeconstelm" identifier="lpeconstelm" location="/tmp/mcrl2/bin/lpeconstelm">
+ <tool name="lpeconstelm" identifier="lpeconstelm" location="@BIN_DIR@/lpeconstelm">
   <mode category="Transformation">
    <description>A tool that transforms an LPE to one where constant process parameters are eliminated.</description>
    <object type="input" formalism="LPE" default-format="lpe"/>
    <object type="output" formalism="LPE" default-format="lpe"/>
   </mode>
  </tool>
- <tool name="lpeparelm" identifier="lpeparelm" location="/tmp/mcrl2/bin/lpeparelm">
+ <tool name="lpeparelm" identifier="lpeparelm" location="@BIN_DIR@/lpeparelm">
   <mode category="Transformation">
    <description>A tool that removes inert parameters from an LPE.</description>
    <object type="input" formalism="LPE" default-format="lpe"/>
    <object type="output" formalism="LPE" default-format="lpe"/>
   </mode>
  </tool>
- <tool name="lpeinfo" identifier="lpeinfo" location="/tmp/mcrl2/bin/lpeinfo">
+ <tool name="lpeinfo" identifier="lpeinfo" location="@BIN_DIR@/lpeinfo">
   <mode category="Analysis">
    <description>A tool that retrieves some basic information aboute an LPE.</description>
    <object type="input" formalism="LPE" default-format="lpe"/>
   </mode>
  </tool>
- <tool name="xsim" identifier="xsim" location="/tmp/mcrl2/bin/xsim">
+ <tool name="xsim" identifier="xsim" location="@BIN_DIR@/xsim">
   <mode category="Analysis">
    <description>Simulates an LPE.</description>
    <object type="input" formalism="LPE" default-format="lpe"/>

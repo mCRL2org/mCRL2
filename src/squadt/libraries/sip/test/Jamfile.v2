@@ -11,4 +11,5 @@ exe communicator_test :
 exe abstract_interface_test :
         abstract_interface_test.cpp
         /libraries/sip//sipt
+        /libraries/sip//sip_common
         /boost/test//boost_unit_test_framework ;

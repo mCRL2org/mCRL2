@@ -14,7 +14,7 @@ namespace sip {
   }
 
   /** Send a layout specification for the display space reserved for this tool */
-  void tool_communicator::send_display_layout(sip::layout) {
+  void tool_communicator::send_display_layout(sip::layout::layout) {
   }
 
   /** Send a layout specification for the display space reserved for this tool */

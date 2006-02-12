@@ -3,6 +3,9 @@ AC_CANONICAL_HOST
 AC_PREFIX_DEFAULT([$HOME])
 AC_CONFIG_SRCDIR([src/liblowlevel.h])
 
+# Default toolset to use with Boost.Build
+BJAM_TOOLSET="gcc"
+
 # Setting host OS
 case $host in
   *-*-mingw32*)
@@ -10,9 +13,11 @@ case $host in
     ;;
   *-*-cygwin*)
     HOST_OS="CYGWIN"
+    BJAM_TOOLSET="mingw"
     ;;
   *-*-msdos* | *-*-go32* | *-*-windows*)
     HOST_OS="WINDOWS"
+    BJAM_TOOLSET="vc-7_1"
     ;;
   *-*-linux*)
     HOST_OS="LINUX"
@@ -22,11 +27,13 @@ case $host in
     ;;
   *-*-darwin*)
     HOST_OS="MACOSX"
+    BJAM_TOOLSET="darwin"
     ;;
   *)
     HOST_OS="UNKNOWN"
     ;;
 esac
+AC_SUBST([BJAM_TOOLSET])
 AC_SUBST([HOST_OS])
 
 # Default is 32 bits, test is probably very incomplete
@@ -369,13 +376,35 @@ else
   AC_MSG_NOTICE(libXML2       :  MISSING)
 fi
 
-eval DATADIR="$datadir"
-AC_SUBST([DATADIR],[])
+#evaluate some location variables for use with bjam
+if test "x$prefix" = xNONE
+then
+  prefix=$ac_default_prefix
+fi
+if test "x$exec_prefix" = xNONE
+then
+  exec_prefix='${prefix}'
+fi
+
+eval "eval PREFIX_DIR=${prefix}"
+AC_SUBST([PREFIX_DIR],[])
+eval "eval EXEC_PREFIX_DIR=${exec_prefix}"
+AC_SUBST([EXEC_PREFIX_DIR],[])
+eval "eval DATA_DIR=${datadir}"
+AC_SUBST([DATA_DIR],[])
+eval "eval BIN_DIR=${bindir}"
+AC_SUBST([LIB_DIR],[])
+eval "eval LIB_DIR=${libdir}"
+AC_SUBST([BIN_DIR],[])
+eval "eval INCLUDE_DIR=${includedir}"
+AC_SUBST([INCLUDE_DIR],[])
+eval "eval MAN_DIR=${mandir}"
+AC_SUBST([MAN_DIR],[])
 
 AC_MSG_NOTICE()
 AC_MSG_NOTICE(Some tools will not be built if any of these libraries are missing.)
 AC_MSG_NOTICE()
 
-AC_CONFIG_FILES([src/rewr_innerc_aux.h src/squadt/settings.h config config.jam])
+AC_CONFIG_FILES([src/boost/tools/build/v2/user-config.jam src/squadt/examples/tool_catalog.xml src/rewr_innerc_aux.h src/squadt/settings.h config config.jam])
 AC_OUTPUT
 

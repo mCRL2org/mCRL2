@@ -29,4 +29,3 @@ lib sipt :
         sip_tool.cpp
         layout.cpp
         sip_common ;
-

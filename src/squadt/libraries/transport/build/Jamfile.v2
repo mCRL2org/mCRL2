@@ -16,4 +16,3 @@ lib transport :
             listener.cpp
             socket_listener.cpp
             socket_transceiver.cpp ;
-

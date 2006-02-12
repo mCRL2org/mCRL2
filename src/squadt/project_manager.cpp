@@ -3,7 +3,7 @@
 
 #include <boost/filesystem/operations.hpp>
 
-#include <xml_text_reader.h>
+#include <xml2pp/xml_text_reader.h>
 
 #include "project_manager.h"
 #include "settings_manager.h"

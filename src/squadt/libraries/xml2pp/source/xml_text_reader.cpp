@@ -1,4 +1,4 @@
-#include "xml_text_reader.h"
+#include <xml2pp/xml_text_reader.h>
 
 namespace xml2pp {
 

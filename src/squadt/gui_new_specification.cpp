@@ -94,7 +94,7 @@ namespace squadt {
       return(file_field->GetFilePath());
     }
 
-    void NewSpecificationDialog::UpdateSelectField(wxCommandEvent& event) {
+    void NewSpecificationDialog::UpdateSelectField(wxCommandEvent& /* event */) {
       wxString filepath = file_field->GetFilePath();
 
       if (filepath == wxT("")) {

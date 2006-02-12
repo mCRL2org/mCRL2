@@ -2,9 +2,9 @@ project md5pp
   : source-location ../source
   : build-dir $(BUILD_TOP)
   : requirements
-    <include>../
+    <include>../../
   : usage-requirements
-    <include>../ ;
+    <include>../../ ;
 
 lib md5pp :
         md5.cpp

@@ -94,25 +94,38 @@ namespace sip {
       throw (new exception(exception::unknown_type_in_configuration));
     }
 
+//    static integer standard_integer;
+//    static integer standard_natural;
+//    static real    standard_real;
+
     /************************************************************************
      * Implementation of string
      ************************************************************************/
+
+    static string standard_string;
+
     inline string::string(size_t minimum, size_t maximum) : minimum_length(minimum), maximum_length(maximum_length) {
     }
 
-    /* Precondition : the current element must be <string> */
+    /** \pre{The current element must be <string>} */
     inline string* string::from_xml(xml2pp::text_reader& reader) {
-      sip::datatype::string* new_string = new string;
+      size_t minimum;
+      size_t maximum;
 
       /* Current element must be <string> */
       assert(reader.is_element("string"));
 
-      reader.get_attribute(&new_string->minimum_length, "minimum-length");
-      reader.get_attribute(&new_string->maximum_length, "maximum-length");
+      reader.get_attribute(&minimum, "minimum-length");
+      reader.get_attribute(&maximum, "maximum-length");
 
       reader.read();
 
-      return (new_string);
+      if (minimum == 0 && maximum == 0) {
+        return (&standard_string);
+      }
+      else {
+        return (new string(minimum, maximum));
+      }
     }
 
     inline void string::set_maximum_length(size_t m) {
@@ -135,11 +148,10 @@ namespace sip {
         output << " maximum-length=\"" << maximum_length << "\"";
       }
 
+      output << "/>";
+
       if (value.empty()) {
-        output << "/>";
-      }
-      else {
-        output << ">" << value << "</string>";
+        output << "<value>" << value << "</value>";
       }
     }
 
@@ -149,12 +161,6 @@ namespace sip {
 
     inline string::~string() {
     }
-
-    /** Some commonly used instances */
-//    static integer standard_integer;
-//    static integer standard_natural;
-//    static real    standard_real;
-    static string standard_string;
   }
 }
 

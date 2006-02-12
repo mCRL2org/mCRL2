@@ -73,6 +73,13 @@ r.to_xml(std::cerr);
 
   d.await_message();
 
+  std::ostringstream copy;
+
+  report::from_xml(d.pop_message().to_string())->to_xml(copy);
+  r.to_xml(temporary);
+
+  BOOST_CHECK(copy.str() == temporary.str());
+
   c.disconnect(d);
 }
 

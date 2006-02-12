@@ -4,12 +4,11 @@ XML2_CONFIG = "@XML2_CONFIG@" ;
 WX_CONFIG   = "@WX_CONFIG@" ;
 
 # Installation related variables
-prefix      = "@prefix@" ;
-exec_prefix = "@exec_prefix@" ;
-bindir      = "@bindir@" ;
-libdir      = "@libdir@" ;
-datadir     = "@datadir@" ;
-includedir  = "@includedir@" ;
-infodir     = "@infodir@" ;
-mandir      = "@mandir@" ;
+PREFIX_DIR      = "@PREFIX_DIR@" ;
+EXEC_PREFIX_DIR = "@EXEC_PREFIX_DIR@" ;
+BIN_DIR         = "@BIN_DIR@" ;
+LIB_DIR         = "@LIB_DIR@" ;
+DATA_DIR        = "@DATA_DIR@" ;
+INCLUDE_DIR     = "@INCLUDE_DIR@" ;
+MAN_DIR         = "@MAN_DIR@" ;
 

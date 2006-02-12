@@ -1,13 +1,12 @@
 project xml_text_reader
   : source-location ../source
-  : build-dir BUILD_TOP
+  : build-dir $(BUILD_TOP)
   : requirements
-    <include>../
+    <include>../../
   : usage-requirements
-    <include>../
+    <include>../../
     <cxxflags>"`xml2-config --cflags`"
     <linkflags>"`xml2-config --libs`" ;
 
 obj xml_text_reader : xml_text_reader.cpp
                     : <cxxflags>"`xml2-config --cflags`" ;
-

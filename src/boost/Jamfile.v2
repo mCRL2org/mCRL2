@@ -75,7 +75,7 @@ layout-$(layout) = true ;
 
 # possible stage only location
 local stage-locate = [ MATCH "^--stagedir=(.*)" : $(ARGV) ] ;
-stage-locate ?= stage ;
+stage-locate ?= lib ;
 
 path-constant BOOST_STAGE_LOCATE : $(stage-locate) ;
 
@@ -98,7 +98,7 @@ rule tag ( name : type ? : property-set )
     {        
         if $(layout) = versioned
         {
-            name = [ stage.add-variant-and-compiler $(name) 
+            name = [ stage.add-variant $(name) 
               : $(type) : $(property-set) ] ;
             
             local version-tag = [ MATCH "^([^.]+)[.]([^.]+)" : $(BOOST_VERSION[1]) ] ;
@@ -121,7 +121,7 @@ rule tag ( name : type ? : property-set )
         }
         else
         {
-            return [ stage.add-variant-and-compiler $(name) 
+            return [ stage.add-variant $(name) 
               : $(type) : $(property-set) ] ;
         }
     }

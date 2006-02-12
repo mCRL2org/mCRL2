@@ -41,7 +41,7 @@ namespace sip {
       void send_accept_configuration();
 
       /** Send a layout specification for the display space reserved for this tool */
-      void send_display_layout(sip::layout);
+      void send_display_layout(sip::layout::layout);
 
       /** Send a layout specification for the display space reserved for this tool */
       void send_display_data();
