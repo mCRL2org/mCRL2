@@ -1,12 +1,11 @@
 .PHONY: all install clean distclean
 
+include config
+
 all: config
 	@${MAKE} -C src $(MAKECMDGOALS)
 
-revision:
-	@${MAKE} -C src revision
-	@${MAKE} -C src/squadt revision
-	@${MAKE} -C src/ltsview revision
+include utility/revision.mk
 
 install: all
 
@@ -15,7 +14,7 @@ clean:
 	$(RM) -r autom4te.cache config.log *.o *~ core core.*
 
 distclean: clean distribution
-	$(RM) -r config.status config config.jam revision utility/maximum_revision
+	$(RM) -r config.status config config.jam revision utility/bin utility/maximum_revision
 
 # Uses the fact that distribution only exists in an official source distribution
 distribution:

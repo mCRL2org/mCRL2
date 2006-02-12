@@ -1,9 +1,3 @@
-ifndef TREE_ROOT
- $(error Please define TREE_ROOT)
-endif
-
-CONFIG             = $(TREE_ROOT)/config
-
 #Redefine default definitions using autoconf
 HOST_OS            = @HOST_OS@
 CC                 = @CC@
@@ -15,6 +9,10 @@ CXXFLAGS           = @CXXFLAGS@
 LDFLAGS            = -Wl,-rpath,$(libdir) -rdynamic @LDFLAGS@
 
 LIBDL              = -ldl
+
+TREE_ROOT          = @abs_top_srcdir@/
+MAXIMUM_REVISION  := $(TREE_ROOT)utility/maximum_revision
+CONFIG            := $(TREE_ROOT)config
 
 BUILD_EXPERIMENTAL = @BUILD_EXPERIMENTAL@
 

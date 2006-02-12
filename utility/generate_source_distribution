@@ -1,4 +1,4 @@
-#!/bin/bash
+#!/bin/sh
 
 # Assumes that the current working directory contains the trunk directory as checked out from the svn repository
 
@@ -33,7 +33,6 @@ svn_update="$(svn update 2>&1 | tail -n 1)"
 # The following works based on assumption that the source tree is configured
 if (! test -e ${archive}.bz2) || ! $(expr "${svn_update}" : "At revision" &> /dev/null ); then
   # Regenerate tarballs for source distribution
-  sh -c 'cd trunk/utility; make maximum_revision' &> /dev/null
   sh -c 'cd trunk; make revision' &> /dev/null
 
   # alternative method of obtaining the last revision that does not require

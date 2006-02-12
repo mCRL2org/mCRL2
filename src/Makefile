@@ -1,11 +1,8 @@
 #All objects that are used
 OBJECTS            =
 
-# Relative path to the root of the source tree
-TREE_ROOT = ../
-
 #Redefine default definitions using autoconf
--include $(TREE_ROOT)config
+-include ../config
 
 # Objects that require wxWidgets CPPFLAGS to compile
 WX_OBJECTS         = xsim.o xsimbase.o xsimmain.o xsimtrace.o xsimtracedll.o

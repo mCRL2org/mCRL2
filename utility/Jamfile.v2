@@ -1,0 +1,10 @@
+project squadt
+  : build-dir bin
+  : default-build release ;
+
+exe maximum_revision :
+           maximum_revision.cpp
+           /boost/filesystem//boost_filesystem
+         : <link>static ;
+
+install install : maximum_revision : : <location>./ ;

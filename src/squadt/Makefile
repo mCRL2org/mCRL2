@@ -1,7 +1,5 @@
 # Relative path to the root of the source tree
-TREE_ROOT = ../../
-
--include $(TREE_ROOT)config
+-include ../../config
 
 CXXFLAGS                       = -std=c++98 -O3# -Winline --param max-inline-insns-single=8000 \
 				 --param large-function-growth=5000 --param inline-unit-growth=5000
@@ -44,20 +42,15 @@ TARGETS                        = squadt
 
 .PHONY: all install clean distclean test strip
 
-BJAM = ../boost/tools/build/jam_src/bin/bjam
-
 all: $(BJAM) $(TREE_ROOT)config.jam settings.h
 ifeq ($(findstring $(CPPFLAGS),NDEBUG),)
-	 @cd build; ../$(BJAM) --v2 debug
+	 @cd build; $(BJAM) --v2 debug
 else
-	 @cd build; ../$(BJAM) --v2 release
+	 @cd build; $(BJAM) --v2 release
 endif
 
 $(TREE_ROOT)config.jam:
 	$(error Please configure the source tree before trying to build!)
-
-$(BJAM):
-	$(MAKE) -C ../boost bjam
 
 # Rules for building the maximum_revision tool and to generate a `revision' file
 ifndef SOURCE_DISTRIBUTION
@@ -115,7 +108,6 @@ strip: $(TARGETS)
 
 install: all
 	$(INSTALL) -d $(bindir)
-#	$(INSTALL) squadt $(bindir)
 	$(INSTALL) -d $(datadir)
 	$(INSTALL) -d $(datadir)/images
 	$(INSTALL) -d $(datadir)/schemas
@@ -126,7 +118,7 @@ install: all
 	$(INSTALL) -m 0644 schemas/project.xsd $(datadir)/schemas
 	$(GZIP) $(datadir)/schemas/project.xsd
 	$(INSTALL) -m 0644 examples/tool_catalog.xml $(datadir)/configuration
-	@cd build; ../$(BJAM) --v2 --install
+	@cd build; $(BJAM) --v2 --install
 ifeq ($(HOST_OS),MACOSX)
 	/Developer/Tools/Rez -t APPL -o squadt ../sample.r
 	/Developer/Tools/SetFile -a C squadt
@@ -141,8 +133,8 @@ ifeq ($(HOST_OS),MACOSX)
 endif
 
 clean:
-#	@cd build; ../$(BJAM) --v2 --clean-all
-	$(RM) -rf *.o $(TARGETS) $(TEST_TARGETS) settings.h utility/*.o utility/relocator core dependencies bin
+#	@cd build; $(BJAM) --v2 --clean-all
+	$(RM) -rf *.o $(TARGETS) $(TEST_TARGETS) settings.h utility/*.o utility/relocator examples/tool_catalog.xml core dependencies bin
 
 distclean: clean
 

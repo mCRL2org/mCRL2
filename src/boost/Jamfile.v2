@@ -112,11 +112,11 @@ rule tag ( name : type ? : property-set )
             # AIX linkers don't accept version suffixes either.
             if [ $(property-set).get <os> ] in NT CYGWIN MACOSX AIX
             {
-                return $(name:B)-$(version-tag)$(name:S) ;
+                return $(name:B)$(name:S) ;
             }
             else
             {
-                return $(name:B)-$(version-tag)$(name:S).$(BOOST_VERSION)  ;
+                return $(name:B)$(name:S).$(BOOST_VERSION)  ;
             }
         }
         else
