@@ -8,7 +8,7 @@ namespace sip {
     /* Await the reply */
     await_message();
 
-    if (current_capabilities = 0) {
+    if (current_capabilities == 0) {
       delete current_capabilities;
     }
 

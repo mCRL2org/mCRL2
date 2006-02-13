@@ -5,6 +5,7 @@
 #include <deque>
 
 #include <sip/detail/common.h>
+#include <sip/detail/controller_capabilities.h>
 #include <sip/detail/report.h>
 #include <sip/detail/sip_communicator.h>
 
@@ -26,16 +27,16 @@ namespace sip {
       status                         current_status;
 
       /** The currently active display layout */
-      sip::layout::layout            current_layout;
+      sip::layout::layout*           current_layout;
 
       /** The last received set of controller capabilities */
-      sip::controller_capabilities   current_capabilities;
+      sip::controller_capabilities*  current_capabilities;
 
     public:
       tool_communicator();
 
       /** Request details about the amount of space that the controller currently has reserved for this tool */
-      void request_reserved_space();
+      void request_capabilities();
 
       /** Request the list of basic input configurations */
       void reply_input_configurations();

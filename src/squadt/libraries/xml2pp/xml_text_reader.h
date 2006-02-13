@@ -45,18 +45,21 @@ namespace xml2pp {
       inline std::string element_name();
 
       /** Get the value of an attribute as ... (second argument remains unchanged if the attribute is not present) */
-      inline bool get_attribute(std::string* string, char* attribute_name);
+      inline bool get_attribute(std::string* string, const char* attribute_name);
+
       /** Get the value of an attribute as ... (second argument remains unchanged if the attribute is not present) */
-      inline bool get_attribute(unsigned int* integer, char* attribute_name);
-      /** Get the value of an attribute as ... (second argument remains unchanged if the attribute is not present) */
-      inline bool get_attribute(unsigned long* integer, char* attribute_name);
-      /** Get the value of an attribute as ... (second argument remains unchanged if the attribute is not present) */
-      inline bool get_attribute(char* attribute_name);
+      template < typename it >
+      inline bool get_attribute(it*, const char*);
+
+      /** Returns whether the attribute is present or not */
+      inline bool get_attribute(const char*);
 
       /** Get the value of an element as ... */
       inline bool get_value(std::string* astring);
-      inline bool get_value(unsigned int* aninteger);
-      inline bool get_value();
+
+      /** Get the value of an element as ... */
+      template < typename it >
+      inline bool get_value(it* aninteger);
 
       /** Whether the current element matches element_name */
       inline bool is_element(char* element_name);
@@ -114,7 +117,7 @@ namespace xml2pp {
   }
 
   /* Get the value of an attribute as ... */
-  inline bool text_reader::get_attribute(std::string* astring, char* attribute_name) {
+  inline bool text_reader::get_attribute(std::string* astring, const char* attribute_name) {
     char* temporary = (char*) xmlTextReaderGetAttribute(reader, TO_XML_STRING(attribute_name));
     bool  return_value = temporary != NULL;
 
@@ -125,33 +128,21 @@ namespace xml2pp {
     return (return_value);
   }
 
-  inline bool text_reader::get_attribute(unsigned int* aninteger, char* attribute_name) {
+  template < typename it >
+  inline bool text_reader::get_attribute(it* aninteger, const char* attribute_name) {
     char* temporary    = (char*) xmlTextReaderGetAttribute(reader, TO_XML_STRING(attribute_name));
     bool  return_value = temporary != NULL;
 
-    *aninteger = (return_value) ? atoi(temporary) : 0;
+    *aninteger = static_cast < it > ((return_value) ? atoi(temporary) : 0);
 
     xmlFree(temporary);
 
     return (return_value);
   }
 
-  inline bool text_reader::get_attribute(unsigned long* aninteger, char* attribute_name) {
+  inline bool text_reader::get_attribute(const char* attribute_name) {
     char* temporary    = (char*) xmlTextReaderGetAttribute(reader, TO_XML_STRING(attribute_name));
     bool  return_value = temporary != NULL;
-
-    *aninteger = (return_value) ? atoi(temporary) : 0;
-
-    xmlFree(temporary);
-
-    return (return_value);
-  }
-
-  inline bool text_reader::get_attribute(char* attribute_name) {
-    char* temporary    = (char*) xmlTextReaderGetAttribute(reader, TO_XML_STRING(attribute_name));
-    bool  return_value = temporary != NULL;
-
-    return_value = (return_value) ? (strcmp(temporary, "true") != strcmp(temporary, "1")) : false;
 
     xmlFree(temporary);
 
@@ -170,22 +161,12 @@ namespace xml2pp {
     return (return_value);
   }
 
-  inline bool text_reader::get_value(unsigned int* aninteger) {
+  template < typename it >
+  inline bool text_reader::get_value(it* aninteger) {
     char* temporary    = (char*) xmlTextReaderValue(reader);
     bool  return_value = temporary != NULL;
 
-    *aninteger = (return_value) ? atoi(temporary) : 0;
-
-    xmlFree(temporary);
-
-    return (return_value);
-  }
-
-  inline bool text_reader::get_value() {
-    char* temporary    = (char*) xmlTextReaderValue(reader);
-    bool  return_value = temporary != NULL;
-
-    return_value = (return_value) ? (strcmp(temporary, "true") != strcmp(temporary, "1")) : false;
+    *aninteger = static_cast < it > ((return_value) ? atoi(temporary) : 0);
 
     xmlFree(temporary);
 

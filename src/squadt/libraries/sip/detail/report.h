@@ -64,7 +64,7 @@ namespace sip {
       void to_xml(std::ostream&) const;
 
       /** Reconstructs a report from XML representation */
-      static report* from_xml(const std::string&);
+      static report* from_xml(xml2pp::text_reader&);
   };
 
   inline report::report() {

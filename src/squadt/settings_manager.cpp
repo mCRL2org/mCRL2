@@ -54,10 +54,10 @@ namespace squadt {
   SettingsManager::SettingsManager(const char* ahome_directory, const char* profile_directory) {
     using namespace boost::filesystem;
 
-    if (strcmp(ahome_directory,"")) {
+    if (ahome_directory != 0) {
       path settings_path(ahome_directory, no_check);
 
-      if (strcmp(profile_directory,"")) {
+      if (profile_directory != 0) {
         settings_path /= default_profile_directory;
       }
 

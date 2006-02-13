@@ -5,6 +5,7 @@ project squadt
 exe maximum_revision :
            maximum_revision.cpp
            /boost/filesystem//boost_filesystem
-         : <link>static ;
+         : <link>static
+           <toolset>darwin:<link>shared ;
 
 install install : maximum_revision : : <location>./ ;

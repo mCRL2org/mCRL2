@@ -59,10 +59,9 @@ namespace sip {
     output << "</report>";
   }
 
-  report* report::from_xml(const std::string& data) {
+  /** \pre{the reader must point at a report element} */
+  report* report::from_xml(xml2pp::text_reader& reader) {
     report* r = new report();
-
-    xml2pp::text_reader reader(data);
 
     reader.read();
 
