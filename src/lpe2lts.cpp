@@ -130,7 +130,7 @@ static void print_help(FILE *f, char *Name)
     "                        printed)\n"
     "  -e, --deadlock-trace  write trace to each deadlock state to a file\n"
     "  -D, --detect=NAME*    detect actions from NAME* (i.e. print a message for\n"
-    "                        every occurence)\n"
+    "                        every occurrence)\n"
     "  -t, --trace=NAME*     write trace to each state that is reached with an\n"
     "                        action from NAME* to a file\n"
     "  -p, --priority=NAME   give priority to action NAME (i.e. if it is\n"

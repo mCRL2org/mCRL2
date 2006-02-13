@@ -160,7 +160,7 @@ linear process equation.</refpurpose>
         <listitem>
           <para>
           &lpeconstelm; will not determine if a condition of a summand is false 
-          or not. All conditions are be threated true if this option is 
+          or not. All conditions are be treated true if this option is 
           used. This option may take less time, however it may find less constant 
           constant process parameters.
           </para>

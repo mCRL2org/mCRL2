@@ -2,6 +2,7 @@
 
 <!DOCTYPE refentry PUBLIC "-//OASIS//DTD DocBook XML V4.3//EN" "http://www.oasis-open.org/docbook/xml/4.3/docbookx.dtd"[
 <!ENTITY lpe2lts "<function>lpe2lts</function>">
+<!ENTITY tracepp "<function>tracepp</function>">
 <!ENTITY option "<parameter>OPTION</parameter>">
 <!ENTITY infile "<parameter>INFILE</parameter>">
 <!ENTITY outfile "<parameter>OUTFILE</parameter>">
@@ -209,15 +210,15 @@ Mandatory arguments to long options are mandatory for short options too.
     <listitem>
       <para>
          Write trace to each deadlock state to a file. For each
-         deadlock found during the state-space exploration a unique
+         deadlock found during the state space exploration a unique
          file with extension .trc (trace) will be created containing
          one of the shortest traces from the initial state to the
-         deadlock state. In this way all possible traces to a deadlock
-         will be generated during the state-stace explorations. The
+         deadlock state. In this way traces to all deadlocks
+         will be generated during the state space exploration. The
          length of the traces will not decrease during the generation.
          It is possible that two or more equal traces are generated.
-         The traces can be pretty-printed and converted to other
-         formats using 'tracepp'.
+         The traces can be pretty printed and converted to other
+         formats using &tracepp;.
       </para>
     </listitem>
   </varlistentry>
@@ -227,7 +228,7 @@ Mandatory arguments to long options are mandatory for short options too.
     <term>&opt_detect;=NAME*</term>
     <listitem>
       <para>
-         Detect actions from the list NAME* (i.e. print a message for every occurence).
+         Detect actions from the list NAME* (i.e. print a message for every occurrence).
       </para>
     </listitem>
   </varlistentry>
@@ -238,9 +239,7 @@ Mandatory arguments to long options are mandatory for short options too.
     <listitem>
       <para>
          Write trace to each state that is reached with an action from
-         NAME* to a file This option is similar to
-         &opt_deadlock-trace;, but instead of deadlock traces the
-         traces leading to an action from NAME*.
+         NAME* to a file (similar to &opt_deadlock-trace;, but for actions).
       </para>
     </listitem>
   </varlistentry>
@@ -280,7 +279,7 @@ Mandatory arguments to long options are mandatory for short options too.
       <para>
          Use rewriter NAME (default 'inner'). &lpe2lts; makes heavy
          use of a term rewriting engine to manipulate with the data
-         term of the LPE. The other options are:
+         term of the LPE.
       </para>
     </listitem>
   </varlistentry>
@@ -310,7 +309,7 @@ Mandatory arguments to long options are mandatory for short options too.
       <para>
          Do not add state information to &outfile; Normally &lpe2lts;
          adds some information about the state vector to the output
-         .svc file. This can options allows to ommit this
+         .svc file. This can options allows to omit this
          information. It is not possible to add the state information
          to .aut files.
       </para>

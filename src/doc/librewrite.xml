@@ -161,7 +161,7 @@ To convert a string representation of a strategy to a &trewrstrat;, one can use 
 <refsect2>
 <title>Implicit variable substitutions</title>
 <para>
-For efficient variable substitutions, a rewriter supplies some special functions. Instead of first substituting values for variables in a term and then rewriting the result, one can also set such a variable &parVar; to an expression &parExpr; with &Rewriter_setsubst;, which does nothing but storing this information, and rewrite the desired term afterwards, with the same effect. With &Rewriter_getsubst; one can retreive the expression a variable has been set to (or the variable itself, if the variable was not set). To clear a set variable &parVar; one can call &Rewriter_clearsubst; (or &Rewriter_clearsubsts; to clear all substitutions).
+For efficient variable substitutions, a rewriter supplies some special functions. Instead of first substituting values for variables in a term and then rewriting the result, one can also set such a variable &parVar; to an expression &parExpr; with &Rewriter_setsubst;, which does nothing but storing this information, and rewrite the desired term afterwards, with the same effect. With &Rewriter_getsubst; one can retrieve the expression a variable has been set to (or the variable itself, if the variable was not set). To clear a set variable &parVar; one can call &Rewriter_clearsubst; (or &Rewriter_clearsubsts; to clear all substitutions).
 </para>
 <para>
 Note that &parExpr; has to be in the internal format of the rewriter.
