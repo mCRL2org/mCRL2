@@ -1,6 +1,8 @@
 #ifndef UTILS_H
 #define UTILS_H
 #include <math.h>
+#include <algorithm>
+using namespace std;
 
 namespace Utils
 {

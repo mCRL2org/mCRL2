@@ -15,10 +15,8 @@
 #include "glcanvas.h"
 #include "visualizer.h"
 #include "markstateruledialog.h"
-#include "utils.h"
 
 using namespace std;
-using namespace Utils;
 
 class LTSViewApp : public wxApp, public Mediator
 {
