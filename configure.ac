@@ -10,10 +10,10 @@ BJAM_TOOLSET="gcc"
 case $host in
   *-*-mingw32*)
     HOST_OS="MINGW"
+    BJAM_TOOLSET="mingw"
     ;;
   *-*-cygwin*)
     HOST_OS="CYGWIN"
-    BJAM_TOOLSET="mingw"
     ;;
   *-*-msdos* | *-*-go32* | *-*-windows*)
     HOST_OS="WINDOWS"

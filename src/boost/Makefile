@@ -17,9 +17,9 @@ TREE_ROOT = ../../
 
 BJAM           = tools/build/jam_src/bin/bjam
 BJAM_BUILD     = ./build.sh
-BJAM_ARGUMENTS = --v2 variant=release threading=single optimization=speed runtime-link=$(RUNTIME_LINK) \
+BJAM_ARGUMENTS = --v2 variant=release threading=single optimization=speed $(LINK_METHOD) \
 		 --prefix=. --layout=system --stagedir=lib stage
-RUNTIME_LINK   = shared
+LINK_METHOD    = runtime-link=shared
 
 # Build boost build tool
 ifeq ($(HOST_OS),WINDOWS)
@@ -27,12 +27,12 @@ ifeq ($(HOST_OS),WINDOWS)
  BJAM_BUILD   = build.bat
 endif
 ifeq ($(HOST_OS),CYGWIN)
- RUNTIME_LINK = static
+ LINK_METHOD  = runtime-link=static link=static
 endif
 ifeq ($(HOST_OS),MINGW)
  BJAM         = tools/build/jam_src/bin/bjam.exe
  BJAM_BUILD   = start //WAIT mbuild.bat mingw;
- RUNTIME_LINK = static
+ LINK_METHOD  = runtime-link=static link=static
 endif
 
 .PHONY: all bjam install clean distclean
