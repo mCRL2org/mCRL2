@@ -1,6 +1,6 @@
 .PHONY: all install clean distclean
 
-include config
+-include config
 
 all: config
 	@${MAKE} -C src $(MAKECMDGOALS)
@@ -21,5 +21,4 @@ distribution:
 	@$(RM) src/revision src/squadt/revision src/ltsview/revision
 
 config:
-	$(error You must configure your source tree first.)
-
+	$(error Please configure the source tree first.)

@@ -21,9 +21,9 @@ TARGETS		 = ltsview
 all : $(TARGETS)
 
 ifndef SOURCE_DISTRIBUTION
-include $(TREE_ROOT)utility/revision.mk
+include ../../utility/revision.mk
 else
-include $(TREE_ROOT)revision
+include ../../revision
 endif
 
 CPPFLAGS += $(REVISION)

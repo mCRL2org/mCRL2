@@ -62,5 +62,5 @@ install: all
 clean:
 
 distclean:
-	@-$(RM) -rf bin bin.v2 lib build_completed tools/build/jam_src/bin tools/build/jam_src/bootstrap tools/build/v2/user-config.jam
+	@-$(RM) -rf bin bin.v2 lib build_completed tools/build/jam_src/bin tools/build/jam_src/bootstrap
 
