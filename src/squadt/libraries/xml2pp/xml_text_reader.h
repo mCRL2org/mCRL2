@@ -88,7 +88,7 @@ namespace xml2pp {
   }
 
   inline text_reader::text_reader(const std::string& document, const char* schema_name) {
-    reader = xmlReaderForMemory(document.c_str(), document.size() + 1, "", 0, 0);
+    reader = xmlReaderForMemory(document.c_str(), document.size(), "", 0, 0);
 
 #ifdef SCHEMA_VALIDATION_ENABLED
     if (schema_name != 0 && xmlTextReaderSchemaValidate(reader, schema_name) < 0) {

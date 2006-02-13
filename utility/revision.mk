@@ -4,7 +4,7 @@
 ifndef TREE_ROOT
  TREE_ROOT                = ./
  MAXIMUM_REVISION         = utility/maximum_revision
- BJAM                     = src/boost/tools/build/jam_src/bin/bjam
+ BJAM                     = src/boost/tools/jam/bin/bjam
  RELATIVE_PATH_CORRECTION = ../
 endif
 

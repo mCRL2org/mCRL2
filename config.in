@@ -41,7 +41,7 @@ WX_LIBS            = $(filter-out -mthreads,@WX_LIBS@)
 WX_CPPFLAGS        = $(filter-out -mthreads,@WX_CPPFLAGS@)
 USE_BOOST          = @USE_BOOST@
 BOOST_PREFIX       = @BOOST_PREFIX@
-BJAM               = @abs_top_srcdir@/src/boost/tools/build/jam_src/bin/bjam
+BJAM               = @abs_top_srcdir@/src/boost/tools/jam/bin/bjam
 USE_GLUT           = @USE_GLUT@
 GLUT_LDFLAGS       = -lglut
 

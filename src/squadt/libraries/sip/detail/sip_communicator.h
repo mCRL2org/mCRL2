@@ -38,6 +38,9 @@ namespace sip {
         /** Pops the first message of the queue */
         inline message pop_message();
  
+        /** Get the first message in the queue */
+        inline message& peek_message();
+ 
         inline size_t number_of_messages();
  
       protected:
@@ -60,11 +63,20 @@ namespace sip {
       send(m.to_xml());
     }
  
-    /* A precondition is that the queue is not empty */
+    /* \pre{the message queue is not empty} */
     inline message sip_communicator::pop_message() {
       message_ptr m = message_queue.front();
  
       message_queue.pop_front();
+ 
+      return (*m);
+    }
+ 
+    /* \pre{the message queue is not empty} */
+    inline message& sip_communicator::peek_message() {
+      message_ptr m = message_queue.front();
+ 
+      message_queue.front();
  
       return (*m);
     }

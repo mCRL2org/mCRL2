@@ -59,7 +59,7 @@ if (! test -e ${archive}.bz2) || ! $(expr "${svn_update}" : "At revision" &> /de
        -or -name 'latex' \
        -or -name 'bin*' \
        -or -wholename '*mcrl2/utility' \
-       -or -wholename '*jam_src/bootstrap' \
+       -or -wholename '*jam/bootstrap' \
        -or -wholename '*boost/stage' \
        -or -wholename '*boost/lib' >> excludes
 

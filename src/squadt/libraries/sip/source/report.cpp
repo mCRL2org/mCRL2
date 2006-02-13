@@ -59,7 +59,7 @@ namespace sip {
     output << "</report>";
   }
 
-  report* from_xml(const std::string& data) {
+  report* report::from_xml(const std::string& data) {
     report* r = new report();
 
     xml2pp::text_reader reader(data);
@@ -75,31 +75,38 @@ namespace sip {
       if (reader.is_element("error")) {
         std::string temporary;
 
-        if (!reader.is_empty_element()) {
-          reader.read();
+        reader.read();
 
+        if (!reader.is_end_element()) {
           reader.get_value(&temporary);
 
           reader.read();
         }
+
+        reader.read();
 
         r->set_error(temporary);
       }
       else if (reader.is_element("comment")) {
         std::string temporary;
 
-        if (!reader.is_empty_element()) {
-          reader.read();
+        reader.read();
 
+        if (!reader.is_end_element()) {
           reader.get_value(&temporary);
 
           reader.read();
         }
 
+        reader.read();
+
         r->set_comment(temporary);
       }
       else if (reader.is_element("output")) {
         /* r.add_output() */
+        reader.read();
+        reader.read();
+        reader.read();
       }
       else if (reader.is_element("configuration")) {
         r->set_configuration(configuration::from_xml(reader));

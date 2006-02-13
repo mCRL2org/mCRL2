@@ -120,6 +120,10 @@ namespace sip {
 
       reader.read();
 
+      if (reader.is_element("string") && reader.is_end_element()) {
+        reader.read();
+      }
+
       if (minimum == 0 && maximum == 0) {
         return (&standard_string);
       }
@@ -150,7 +154,7 @@ namespace sip {
 
       output << "/>";
 
-      if (value.empty()) {
+      if (!value.empty()) {
         output << "<value>" << value << "</value>";
       }
     }

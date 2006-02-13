@@ -15,7 +15,7 @@ TREE_ROOT = ../../
 
 -include $(TREE_ROOT)config
 
-BJAM           = tools/build/jam_src/bin/bjam
+BJAM           = tools/jam/bin/bjam
 BJAM_BUILD     = ./build.sh
 BJAM_ARGUMENTS = --v2 variant=release threading=single optimization=speed $(LINK_METHOD) \
 		 --prefix=. --layout=system --stagedir=lib stage
@@ -23,14 +23,14 @@ LINK_METHOD    = runtime-link=shared
 
 # Build boost build tool
 ifeq ($(HOST_OS),WINDOWS)
- BJAM         = tools/build/jam_src/bin/bjam.exe
+ BJAM         = tools/jam/bin/bjam.exe
  BJAM_BUILD   = build.bat
 endif
 ifeq ($(HOST_OS),CYGWIN)
  LINK_METHOD  = runtime-link=static link=static
 endif
 ifeq ($(HOST_OS),MINGW)
- BJAM         = tools/build/jam_src/bin/bjam.exe
+ BJAM         = tools/jam/bin/bjam.exe
  BJAM_BUILD   = start //WAIT mbuild.bat mingw;
  LINK_METHOD  = runtime-link=static link=static
 endif
@@ -52,8 +52,7 @@ boost_program_options: $(BJAM)
 	$(BJAM) $(BJAM_ARGUMENTS) --with-program_options
 
 $(BJAM):
-	cd tools/build/jam_src; \
-	$(BJAM_BUILD)
+	@cd tools/jam; $(BJAM_BUILD)
 
 install: all
 	$(INSTALL) -d $(libdir)
@@ -62,5 +61,5 @@ install: all
 clean:
 
 distclean:
-	@-$(RM) -rf bin bin.v2 lib build_completed tools/build/jam_src/bin tools/build/jam_src/bootstrap
+	@-$(RM) -rf bin bin.v2 lib build_completed tools/jam/bin tools/jam/bootstrap
 

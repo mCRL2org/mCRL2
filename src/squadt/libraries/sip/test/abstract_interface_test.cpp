@@ -64,7 +64,9 @@ void report_to_xml() {
   r.set_comment("Lookin' good!");
   r.add_output("/etc/passwd", "text/plain");
   r.set_configuration(config);
-r.to_xml(std::cerr);
+
+  /* Serialise r */
+  temporary.str(std::string(""));
   r.to_xml(temporary);
 
   m.set_content(temporary.str());
@@ -75,8 +77,13 @@ r.to_xml(std::cerr);
 
   std::ostringstream copy;
 
-  report::from_xml(d.pop_message().to_string())->to_xml(copy);
+std::cerr << " Reconstruction from XML stream ..." << std::endl;
+std::cerr << "  Message  `" << d.peek_message().to_string() << "'" << std::endl;
+  temporary.str(std::string(""));
   r.to_xml(temporary);
+
+  report::from_xml(d.pop_message().to_string())->to_xml(copy);
+std::cerr << "  Message  `" << copy.str() << "'" << std::endl;
 
   BOOST_CHECK(copy.str() == temporary.str());
 

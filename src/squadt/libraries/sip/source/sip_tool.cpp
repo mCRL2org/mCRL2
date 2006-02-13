@@ -2,7 +2,17 @@
 
 namespace sip {
   /** Request details about the amount of space that the controller currently has reserved for this tool */
-  void tool_communicator::request_reserved_space() {
+  void tool_communicator::request_capabilities() {
+//    send_message();
+
+    /* Await the reply */
+    await_message();
+
+    if (current_capabilities = 0) {
+      delete current_capabilities;
+    }
+
+//    current_capabilities = pop_message();
   }
 
   /** Request the list of basic input configurations */

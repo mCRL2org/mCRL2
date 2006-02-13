@@ -23,10 +23,13 @@ namespace sip {
       } status;
 
       /** The current protocol status */
-      status                 current_status;
+      status                         current_status;
 
       /** The currently active display layout */
-      sip::layout::layout    current_layout;
+      sip::layout::layout            current_layout;
+
+      /** The last received set of controller capabilities */
+      sip::controller_capabilities   current_capabilities;
 
     public:
       tool_communicator();
@@ -56,7 +59,7 @@ namespace sip {
       void send_report(sip::report&);
   };
 
-  inline tool_communicator::tool_communicator() : current_status(status_clean) {
+  inline tool_communicator::tool_communicator() : current_status(status_clean), current_layout(0), current_capabilities(0) {
   }
 }
 
