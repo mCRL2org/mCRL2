@@ -12,8 +12,8 @@
 <!ENTITY opt_v "<option>-d</option>">
 <!ENTITY opt_verbose "<option>--verbose</option>">
 
-<!ENTITY stdin "<option>STDIN</option>">
-<!ENTITY stdout "<option>STDOUT</option>">
+<!ENTITY stdin "<option>stdin</option>">
+<!ENTITY stdout "<option>stdout</option>">
 
 ]>
 
@@ -26,15 +26,14 @@
 
 <refnamediv>
 <refname>lpeparelm</refname>
-<refpurpose> lpeparelm is a filter which removes inert parameters in a 
-linear process equation.</refpurpose>
+<refpurpose>remove unused parameters from a linear process equation.</refpurpose>
 </refnamediv>
 
 <refsynopsisdiv>
   <cmdsynopsis>
     <command>&lpeparelm;</command>
-    <arg choice="plain">[[&opt_h; | &opt_help;] | &opt_version; | [ &opt_v; | &opt_verbose;] | [ &opt_d; | &opt_debug; ] ]</arg>
-    <arg choice="plain">[&infile; [&outfile;]]</arg>
+    <arg choice="plain" rep="repeat"><arg choice="opt">OPTION</arg></arg>
+    <arg choice="opt">&infile; <arg choice="opt">&outfile;</arg></arg>
   </cmdsynopsis>
 </refsynopsisdiv>
 
@@ -42,54 +41,11 @@ linear process equation.</refpurpose>
   <title>Description</title>
   <para>
    This tool removes parameters which have no influence on condition, action 
-   or time arguments of an LPE. Removing these parameters from the LPE can lead
-   to a reduction when generating a state space of an LPE.
+   or time arguments of the LPE specified by &infile;. Removing these parameters
+   from the LPE can lead to a reduction when generating a state space of an LPE.
+   The result is written to &outfile;. If &outfile; is not supplied, &stdout; is
+   used. If &infile; is not supplied, &stdin; is used instead.
   </para>
-</refsect1>
-
-<refsect1>
-  <title>File</title>
-  <para>
-    <variablelist>
-      <varlistentry>
-        <term>no files</term>
-          <listitem>
-            <para> &lpeparelm; read from &stdin;, and writes an LPE to &stdout;.
-            </para>
-          </listitem>
-      </varlistentry>
-      
-      <varlistentry>
-        <term>&infile;</term>
-          <listitem>
-            <para> &lpeparelm; read from file &infile;, and writes an LPE to &stdout;.
-            </para>
-          </listitem>
-      </varlistentry>
-  
-  
-      <varlistentry>
-        <term>&infile; &outfile;</term>
-          <listitem>
-            <para> &lpeparelm; read from file &infile;, and writes an LPE to file &outfile;.
-            </para>
-          </listitem>
-      </varlistentry>
-      
-      <varlistentry>
-        <term> &gt; &outfile;</term>
-          <listitem>
-            <para> &lpeparelm; reads from file &stdin;, and writes an LPE to file &outfile;.
-            </para>
-          </listitem>
-      </varlistentry>
-    </variablelist>
-  </para>
-  
-  <para>
-    Note that &lpeparelm; reads and writes in LPE-format.
-  </para>
-
 </refsect1>
 
 <refsect1>
@@ -118,9 +74,6 @@ linear process equation.</refpurpose>
         <listitem>
           <para>
           Displays short intermediate information during the run of the program.
-          If a &outfile; is given, &lpeparelm; writes the LPE to that
-          given file. If no &outfile; is given it will only display process
-          information.
           </para>
         </listitem>
       </varlistentry>
@@ -131,9 +84,6 @@ linear process equation.</refpurpose>
         <listitem>
           <para>
           Displays detailed intermediate information during the run of the program.
-          If a &outfile; is given, &lpeparelm; writes the LPE to that
-          given file. If no &outfile; is given it will only display process
-          information.
           </para>
         </listitem>
       </varlistentry>

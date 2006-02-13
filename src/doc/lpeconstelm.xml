@@ -15,8 +15,8 @@
 <!ENTITY opt_noreachable "<option>--no-reachable</option>">
 <!ENTITY opt_nocondition "<option>--no-condition</option>">
 
-<!ENTITY stdin "<option>STDIN</option>">
-<!ENTITY stdout "<option>STDOUT</option>">
+<!ENTITY stdin "<option>stdin</option>">
+<!ENTITY stdout "<option>stdout</option>">
 
 ]>
 
@@ -29,84 +29,37 @@
 
 <refnamediv>
 <refname>lpeconstelm</refname>
-<refpurpose> lpeconstelm is a filter which removes constant parameters in a 
-linear process equation.</refpurpose>
+<refpurpose>remove constant parameters from a linear process equation.</refpurpose>
 </refnamediv>
 
 <refsynopsisdiv>
   <cmdsynopsis>
     <command>&lpeconstelm;</command>
-    <arg choice="plain">[[&opt_h; | &opt_help;] | &opt_version; | [&opt_v; | &opt_verbose;] | &opt_nosingleton; | &opt_noreachable; | &opt_nocondition; ]</arg>
-    <arg choice="plain">[&infile; [&outfile;]]</arg>
+    <arg choice="plain" rep="repeat"><arg choice="opt">OPTION</arg></arg>
+    <arg choice="opt">&infile;<arg choice="opt">&outfile;</arg></arg>
   </cmdsynopsis>
 </refsynopsisdiv>
 
 <refsect1>
   <title>Description</title>
   <para>
-  If it can be determined that a parameter an LPE remains constant throughout 
-  any run of the process, all occurrences of that process parameter are replaced
-  by the initial value and process parameter is removed from the list of process
-  parameters.
+  The &lpeconstelm; tool reads and LPE from &infile; and, if it can be
+  determined that certain parameters of this LPE remain constant throughout 
+  any run of the process, all occurrences of these process parameter are
+  replaced by the initial value and the process parameters are removed from the
+  LPE. The result is written to &outfile;. If &outfile; is not supplied,
+  &stdout; is used. If &infile; is not supplied, &stdin; is used instead.
   </para>
   <para>
   If the initial value of a process parameter is a free variable and remains a 
   free variable throughout the run of the process, the process variable is 
-  constant and the process parameter is replaced by the last assigned, 
-  free variable.
+  considered constant.
   </para>
   <para> 
   If the initial value of a process parameter is a free variable and is only 
-  changed ones to a certain value, the process parameter is constant, and the
-  certain value is used for substitution. If the process parameter changes to
-  various values, the process parameter is marked variable.
+  changed once to a certain value, the process parameter is constant and the
+  specific value is used for substitution.
   </para>
-</refsect1>
-
-<refsect1>
-  <title>File</title>
-  <para>
-    <variablelist>
-      <varlistentry>
-        <term>no files</term>
-          <listitem>
-            <para> &lpeconstelm; reads from &stdin;, and writes an LPE to &stdout;.
-            </para>
-          </listitem>
-      </varlistentry>
-      
-      <varlistentry>
-        <term>&infile;</term>
-          <listitem>
-            <para> &lpeconstelm; reads from file &infile;, and writes an LPE to &stdout;.
-            </para>
-          </listitem>
-      </varlistentry>
-  
-  
-      <varlistentry>
-        <term>&infile; &outfile;</term>
-          <listitem>
-            <para> &lpeconstelm; reads from file &infile;, and writes an LPE to file &outfile;.
-            </para>
-          </listitem>
-      </varlistentry>
-      
-      <varlistentry>
-        <term> &gt; &outfile;</term>
-          <listitem>
-            <para> &lpeconstelm; reads from file &stdin;, and writes an LPE to file &outfile;.
-            </para>
-          </listitem>
-      </varlistentry>
-    
-    </variablelist>
-  </para>
-  
-  <para>
-    Note that &lpeconstelm; reads and writes in LPE-format.
-  </para>
-
 </refsect1>
 
 <refsect1>
@@ -135,9 +88,6 @@ linear process equation.</refpurpose>
         <listitem>
           <para>
           Displays short intermediate information during the run of the program.
-          If a &outfile; is given, &lpeconstelm; writes the LPE to that
-          given file. If no &outfile; is given it will only display process
-          information.
           </para>
         </listitem>
       </varlistentry>
@@ -148,9 +98,6 @@ linear process equation.</refpurpose>
         <listitem>
           <para>
           Displays detailed intermediate information during the run of the program.
-          If a &outfile; is given, &lpeconstelm; writes the LPE to that
-          given file. If no &outfile; is given it will only display process
-          information.
           </para>
         </listitem>
       </varlistentry>
@@ -161,7 +108,7 @@ linear process equation.</refpurpose>
           <para>
           &lpeconstelm; will not determine if a condition of a summand is false 
           or not. All conditions are be treated true if this option is 
-          used. This option may take less time, however it may find less constant 
+          used. This option may take less time, however it may find less 
           constant process parameters.
           </para>
         </listitem>
@@ -171,8 +118,8 @@ linear process equation.</refpurpose>
         <term>&opt_noreachable;</term>
         <listitem>
           <para>
-          &lpeconstelm; will not remove the summands which are not visited.
-          By default, summands which are not visited are removed from the LPE.
+          &lpeconstelm; will not remove summands that are not visited.
+          By default, summands that are not visited are removed from the LPE.
           </para>
         </listitem>
       </varlistentry>  
@@ -181,8 +128,8 @@ linear process equation.</refpurpose>
         <term>&opt_nosingleton;</term>
         <listitem>
           <para>
-          &lpeconstelm; will not remove process parameters which have values 
-          from which the sort only contain one element. 
+          &lpeconstelm; will not remove process parameters
+          for which the sort only contain one element. 
           </para>
         </listitem>
       </varlistentry>
