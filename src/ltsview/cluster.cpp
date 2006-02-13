@@ -78,7 +78,7 @@ void Cluster::computeSizeAndDescendantPositions()
   else if ( descendants.size() == 1 )
   {
     baseRadius = (**descendants.begin()).getTopRadius();
-    size = maximum( topRadius, (**descendants.begin()).getSize() );
+    size = max( topRadius, (**descendants.begin()).getSize() );
     (**descendants.begin()).setPosition( -1.0 );
   }
   else // descendants.size() > 1
@@ -128,8 +128,8 @@ void Cluster::computeSizeAndDescendantPositions()
     
     // compute the size of the cluster
     float minRimRadius = (float)( rimSize / sin(PI / (noPosEnd - noPosBegin)) );
-    baseRadius = maximum( centerSize + rimSize + 0.01f, minRimRadius );
-    size = maximum( topRadius, baseRadius );
+    baseRadius = max( centerSize + rimSize + 0.01f, minRimRadius );
+    size = max( topRadius, baseRadius );
 
     // now correct the baseRadius for the case in which a unique largest
     // descendant having descendants exists and all other descendants have no
@@ -143,7 +143,7 @@ void Cluster::computeSizeAndDescendantPositions()
       if ( i == noPosEnd )
       {
 	// none of the clusters on the rim has descendants
-	baseRadius = maximum( largest->getTopRadius() + rimSize + 0.01f,
+	baseRadius = max( largest->getTopRadius() + rimSize + 0.01f,
 	    minRimRadius );
       }
     }

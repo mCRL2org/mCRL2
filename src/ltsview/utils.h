@@ -56,16 +56,6 @@ namespace Utils
   bool operator==( RGB_Color, RGB_Color );
   bool operator!=( RGB_Color, RGB_Color );
   
-  template< class T > const T& maximum( const T& a, const T& b )
-  {
-    return ( a < b ) ? b : a;
-  }
-
-  template< class T > const T& minimum( const T& a, const T& b )
-  {
-    return ( a < b ) ? a : b;
-  }
-
   HSV_Color RGBtoHSV( RGB_Color c );
   RGB_Color HSVtoRGB( HSV_Color c );
   int roundToInt( double f );

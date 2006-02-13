@@ -195,7 +195,7 @@ void Visualizer::drawSubtree( Cluster* root, HSV_Color col, HSV_Color delta_col,
     HSV_Color desccol = 
       { col.h + delta_col.h, col.s + delta_col.s, col.v + delta_col.v };
     if ( desccol.h < 0.0f ) desccol.h += 360.0f;
-    else if ( desccol.h > 360.0f ) desccol.h -= 360.0f;
+    else if ( desccol.h >= 360.0f ) desccol.h -= 360.0f;
     
     vector< Cluster* > descendants;
     root->getDescendants( descendants );
@@ -220,8 +220,8 @@ void Visualizer::drawSubtree( Cluster* root, HSV_Color col, HSV_Color delta_col,
 	
 	drawSubtree( desc, desccol, delta_col, false, descWidth, descHeight );
 	
-	boundWidth = maximum( boundWidth, descWidth );
-	boundHeight = maximum( boundHeight, descHeight );
+	boundWidth = max( boundWidth, descWidth );
+	boundHeight = max( boundHeight, descHeight );
 	
 	glTranslatef( 0.0f, 0.0f, -visSettings.clusterHeight );
       }
@@ -241,9 +241,9 @@ void Visualizer::drawSubtree( Cluster* root, HSV_Color col, HSV_Color delta_col,
 	
 	float sin_a = float( sin( visSettings.outerBranchTilt * PI / 180.0 ) );
 	float cos_a = float( cos( visSettings.outerBranchTilt * PI / 180.0 ) );
-	boundWidth = maximum( boundWidth, rad + descHeight * sin_a + descWidth *
+	boundWidth = max( boundWidth, rad + descHeight * sin_a + descWidth *
 	    cos_a );
-	boundHeight = maximum( boundHeight, descHeight * cos_a + descWidth *
+	boundHeight = max( boundHeight, descHeight * cos_a + descWidth *
 	    sin_a );
 	
 	glRotatef( -visSettings.outerBranchTilt, 0.0f, 1.0f, 0.0f );
@@ -252,7 +252,7 @@ void Visualizer::drawSubtree( Cluster* root, HSV_Color col, HSV_Color delta_col,
 	glTranslatef( 0.0f, 0.0f, -visSettings.clusterHeight );
       }
     }
-    boundWidth = maximum( boundWidth, root->getTopRadius() );
+    boundWidth = max( boundWidth, root->getTopRadius() );
     boundHeight += visSettings.clusterHeight;
   }
 }

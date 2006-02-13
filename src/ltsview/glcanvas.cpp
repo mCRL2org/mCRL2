@@ -10,6 +10,7 @@
 
 BEGIN_EVENT_TABLE( GLCanvas, wxGLCanvas )
     EVT_MOTION( GLCanvas::onMouseMove )
+    EVT_ENTER_WINDOW( GLCanvas::onMouseEnter )
     EVT_LEFT_DOWN( GLCanvas::onMouseDown )
     EVT_LEFT_UP( GLCanvas::onMouseUp )
     EVT_RIGHT_DOWN( GLCanvas::onMouseDown )
@@ -24,7 +25,7 @@ END_EVENT_TABLE()
 
 GLCanvas::GLCanvas( Mediator* owner, wxWindow* parent, wxWindowID id,
     const wxPoint &pos, const wxSize &size )
-        : wxGLCanvas( parent, id, pos, size )
+        : wxGLCanvas( parent, id, pos, size, wxSUNKEN_BORDER )
 {
   mediator = owner;
 }
@@ -46,7 +47,6 @@ void GLCanvas::initialize()
   startPosZ = 0.0f;
   startPosZDefault = 0.0f;
   farClippingPlane = 0.0f;
-  farClippingPlaneDefault = 0.0f;
   
   SetCurrent();
 
@@ -89,8 +89,9 @@ void GLCanvas::setDefaultPosition( float structWidth, float structHeight )
   // structure; structHeight is the height of that cylinder
   float minZ1 = 0.5f * structHeight / float( tan( PI / 6.0 ) ) + structWidth;
   float minZ2 = 0.0f;
-  startPosZDefault = maximum( minZ1, minZ2 );
-  farClippingPlaneDefault = 2.0f * startPosZDefault;
+  startPosZDefault = max( minZ1, minZ2 );
+  farClippingPlane = max( farClippingPlane, 2.0f * startPosZDefault );
+  reshape();
 }
 
 void GLCanvas::resetView()
@@ -101,7 +102,6 @@ void GLCanvas::resetView()
   moveVector.y = 0.0f;
   moveVector.z = 0.0f;
   startPosZ = startPosZDefault;
-  farClippingPlane = farClippingPlaneDefault;
   reshape();
   display();
 }
@@ -113,7 +113,7 @@ void GLCanvas::setActiveTool( int t )
   setMouseCursor();
 }
 
-void GLCanvas::display()
+void GLCanvas::display( bool swapBuffers )
 {
   if ( displayAllowed )
   {
@@ -132,7 +132,7 @@ void GLCanvas::display()
       // draw the structure
       mediator->drawLTS();
       
-      SwapBuffers();
+      if ( swapBuffers ) SwapBuffers();
     glPopMatrix();
   }
 }
@@ -217,6 +217,11 @@ void GLCanvas::setMouseCursor()
   }
 }
 
+void GLCanvas::onMouseEnter( wxMouseEvent& /*event*/ )
+{
+  this->SetFocus();
+}
+
 void GLCanvas::onMouseDown( wxMouseEvent& event )
 {
   determineCurrentTool( event );
@@ -241,6 +246,7 @@ void GLCanvas::onMouseMove( wxMouseEvent& event )
     {
       case myID_ZOOM :
 	moveVector.z += 0.3f * (oldMouseY - (int)(event.GetY()));
+	moveVector.z = min( moveVector.z, startPosZ );
 	oldMouseY = (int)(event.GetY());
 	display();
 	break;
@@ -277,5 +283,6 @@ void GLCanvas::onMouseMove( wxMouseEvent& event )
 void GLCanvas::onMouseWheel( wxMouseEvent& event )
 {
   moveVector.z += 0.02f * event.GetWheelRotation();
+  moveVector.z = min( moveVector.z, startPosZ );
   display();
 }

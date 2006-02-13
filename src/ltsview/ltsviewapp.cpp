@@ -70,7 +70,7 @@ void LTSViewApp::openFile( string fileName )
 
   //lts->printClusterSizesPositions();
   glCanvas->enableDisplay();
-  glCanvas->display();
+  glCanvas->display( false );
   glCanvas->setDefaultPosition( visualizer->getStructureWidth(),
       visualizer->getStructureHeight() );
   glCanvas->resetView();
@@ -159,7 +159,7 @@ void LTSViewApp::setRankStyle( string rss )
 
       //lts->printClusterSizesPositions();
       glCanvas->enableDisplay();
-      glCanvas->display();
+      glCanvas->display( false );
       glCanvas->setDefaultPosition( visualizer->getStructureWidth(),
 	  visualizer->getStructureHeight() );
       glCanvas->resetView();

@@ -40,7 +40,7 @@ void wxSpinCtrlFloat::OnEnter( wxCommandEvent& event )
   float f;
   sscanf( str.c_str(), "%f", &f );
 
-  f = minimum( m_SpinButton->GetMax() * m_Rate, maximum( f, m_SpinButton->GetMin() * m_Rate ) );
+  f = min( m_SpinButton->GetMax() * m_Rate, max( f, m_SpinButton->GetMin() * m_Rate ) );
   SetValue( f );
 
   // Create new event with the user specified event id m_ID

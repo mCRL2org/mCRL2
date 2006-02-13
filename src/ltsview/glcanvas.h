@@ -27,13 +27,14 @@ class GLCanvas: public wxGLCanvas
 	const wxSize &size = wxDefaultSize );
     ~GLCanvas();
 
-    void      display();
+    void      display( bool swapBuffers = true );
     void      enableDisplay();
     void      disableDisplay();
     void      initialize();
     void      onMouseDown( wxMouseEvent& event );
-    void      onMouseUp( wxMouseEvent& event );
+    void      onMouseEnter( wxMouseEvent& event );
     void      onMouseMove( wxMouseEvent& event);
+    void      onMouseUp( wxMouseEvent& event );
     void      onMouseWheel( wxMouseEvent& event );
     void      onPaint( wxPaintEvent& event );
     void      onSize( wxSizeEvent& event );
