@@ -242,32 +242,33 @@ void GLCanvas::onMouseMove( wxMouseEvent& event )
   if ( event.Dragging() )
   {
     // mouse is moving with some button(s) pressed
+    int newMouseX = (int)event.GetX();
+    int newMouseY = (int)event.GetY();
     switch ( currentTool )
     {
       case myID_ZOOM :
-	moveVector.z += 0.3f * (oldMouseY - (int)(event.GetY()));
-	moveVector.z = min( moveVector.z, startPosZ );
-	oldMouseY = (int)(event.GetY());
+	moveVector.z += 0.01f * (startPosZ - moveVector.z) * (oldMouseY - newMouseY);
+	oldMouseY = newMouseY;
 	display();
 	break;
 	
       case myID_PAN :
-	moveVector.x -= 0.03f * (oldMouseX - (int)(event.GetX()));
-	moveVector.y += 0.03f * (oldMouseY - (int)(event.GetY()));
-	oldMouseX = (int)(event.GetX());
-	oldMouseY = (int)(event.GetY());
+	moveVector.x -= 0.0015f * (startPosZ - moveVector.z) * (oldMouseX - newMouseX);
+	moveVector.y += 0.0015f * (startPosZ - moveVector.z) * (oldMouseY - newMouseY);
+	oldMouseX = newMouseX;
+	oldMouseY = newMouseY;
 	display();
 	break;
 	
       case myID_ROTATE :
-	angleX -= 0.5f * (oldMouseX - (int)(event.GetX()));
-	angleY -= 0.5f * (oldMouseY - (int)(event.GetY()));
-	if ( angleX > 360.0f ) angleX -= 360.0f;
-	if ( angleY > 360.0f ) angleY -= 360.0f;
+	angleX -= 0.5f * (oldMouseX - newMouseX);
+	angleY -= 0.5f * (oldMouseY - newMouseY);
+	if ( angleX >= 360.0f ) angleX -= 360.0f;
+	if ( angleY >= 360.0f ) angleY -= 360.0f;
 	if ( angleX < 0.0f ) angleX += 360.0f;
 	if ( angleY < 0.0f ) angleY += 360.0f;
-	oldMouseX = (int)(event.GetX());
-	oldMouseY = (int)(event.GetY());
+	oldMouseX = newMouseX;
+	oldMouseY = newMouseY;
 	display();
 	break;
 	
@@ -282,7 +283,6 @@ void GLCanvas::onMouseMove( wxMouseEvent& event )
 
 void GLCanvas::onMouseWheel( wxMouseEvent& event )
 {
-  moveVector.z += 0.02f * event.GetWheelRotation();
-  moveVector.z = min( moveVector.z, startPosZ );
+  moveVector.z += 0.001f * (startPosZ - moveVector.z) * event.GetWheelRotation();
   display();
 }
