@@ -16,6 +16,7 @@
 BEGIN_EVENT_TABLE( MainFrame, wxFrame )
   EVT_TOOL  ( wxID_OPEN, MainFrame::onOpen )
   EVT_MENU  ( wxID_OPEN, MainFrame::onOpen )
+  EVT_MENU  ( wxID_EXIT, MainFrame::onExit )
   EVT_MENU  ( wxID_RESET, MainFrame::onResetView )
   EVT_TOOL  ( myID_PAN, MainFrame::onActivateTool )
   EVT_TOOL  ( myID_ROTATE, MainFrame::onActivateTool )
@@ -52,12 +53,18 @@ void MainFrame::setupMenuBar()
   wxMenuBar* menuBar = new wxMenuBar;
   wxMenu* fileMenu = new wxMenu;
   wxMenu* viewMenu = new wxMenu;
+  
   fileMenu->Append( wxID_OPEN, wxT("&Open...\tCtrl+O"),
       wxT("Load an LTS from file") );
+  fileMenu->AppendSeparator();
+  fileMenu->Append( wxID_EXIT, wxT("E&xit\tCtrl+X"), wxT("Exit application") );
+    
   viewMenu->Append( wxID_RESET, wxT("&Reset viewpoint"),
       wxT("Set the viewpoint to the default position"));
+  
   menuBar->Append( fileMenu, wxT("&File") );
   menuBar->Append( viewMenu, wxT("&View") );
+  
   SetMenuBar( menuBar );
 }
 
@@ -416,6 +423,11 @@ void MainFrame::onOpen( wxCommandEvent& /*event*/ )
     filename = dialog.GetFilename();
     mediator->openFile( string(dialog.GetPath().fn_str()) );
   }
+}
+
+void MainFrame::onExit( wxCommandEvent& /*event*/ )
+{
+  Destroy();
 }
 
 void MainFrame::onActivateTool( wxCommandEvent& event )

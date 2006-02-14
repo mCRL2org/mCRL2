@@ -6,7 +6,7 @@ IMPLEMENT_APP( LTSViewApp )
 
 bool LTSViewApp::OnInit()
 {
-  // initialize the ATerm library
+  // initialise the ATerm and glut libraries
   ATerm stackbot;
   ATinit( 0, NULL, &stackbot );
   int c = 0;
