@@ -25,10 +25,11 @@
 #define VERSION  "0.1"
 
 #include <getopt.h>
+#include "liblowlevel.h"
 #include "libstruct.h"
 #include "ltsmin.h"
 
-int traceLevel = 0, optimal = 0, classes = 0; 
+int traceLevel = 0, optimal = 0, classes = 0, add_state_parameter = 0; 
 
 #ifndef NO_TIMES_H
 static 	struct tms tms_begin,tms_end;
@@ -84,15 +85,16 @@ int main(int argc, char *argv[]) {
 } /* main */
 
 
+char *inputname = NULL;
 int parseArgs(int argc, char *argv[], int *traceLevel, int *optimal, int
 * /*classes*/)
    {
    int c, ret,/* i, cautious = 0,*/ nInputFiles = 0, branching = 0;
    extern int optind;
 //   char *inFilename=NULL, *outFilename = NULL;
-   SVCbool indexed=SVCtrue;
+   SVCbool indexed=SVCfalse;
    *traceLevel = 0; *optimal = 0;
-   #define ShortOptions      "hqvsb"
+   #define ShortOptions      "hqvsbat:"
    #define VersionOption     0x1
    struct option LongOptions[] = { 
      {"help"      , no_argument,       NULL, 'h'},
@@ -101,6 +103,8 @@ int parseArgs(int argc, char *argv[], int *traceLevel, int *optimal, int
      {"verbose"   , no_argument,       NULL, 'v'},
      {"strong"    , no_argument,       NULL, 's'},
      {"branching" , no_argument,       NULL, 'b'},
+     {"add"       , no_argument,       NULL, 'a'},
+     {"tau"       , required_argument, NULL, 't'},
      {0, 0, 0, 0}
    };
 
@@ -114,15 +118,23 @@ int parseArgs(int argc, char *argv[], int *traceLevel, int *optimal, int
 		 return CMD_VERSION;
          case 'q':
 		 *traceLevel=0;
+		 gsSetQuietMsg();
 		 break;
          case 'v':
 		 *traceLevel=1;
+		 gsSetVerboseMsg();
 		 break;
          case 's':
 		 branching=0;
 		 break;
          case 'b':
 		 branching=1;
+		 break;
+         case 'a':
+		 add_state_parameter = 1;
+		 break;
+         case 't':
+		 add_tau_action(strdup(optarg));
 		 break;
          default:
 		 return ERR_ARGS;
@@ -154,6 +166,7 @@ int parseArgs(int argc, char *argv[], int *traceLevel, int *optimal, int
       }
       ret = branching?CMD_BRANCH_REDUCE:CMD_REDUCE;
 
+      inputname = argv[optind];
       if ( SVCopen(inFile, argv[optind], SVCread, readIndex) )
       {
 	      fprintf(stderr, "%s: %s\n", argv[optind], SVCerror(SVCerrno));
@@ -240,6 +253,11 @@ void doHelp(char *cmd) {
 		   "  -v, --verbose         display concise intermediate messages\n"
                    "  -s, --strong          minimise using strong bisimulation (default)\n"
                    "  -b, --branching       minimise using branching bisimulation\n"
+                   "  -a, --add             do not save the minimised state space but a copy of the\n"
+		   "                        original state space with an extra state parameter\n"
+		   "                        indicating the (branching) bisimulation class a state\n"
+		   "                        belongs to\n"
+                   "  -t, --tau             specify an action that should be considered to be a tau\n"
 //                   "  -c  Cautious mode: don't overwrite existing files\n"
 //                   "  -s  Silent: no logging is printed\n"
 //                   "  -o  Output to `outfile'\n"
@@ -268,7 +286,15 @@ int doReduce(void)
   t_end=times(&tms_end);
   if (traceLevel) printTimes();
 #endif
-  WriteData(initState,WITH_TAULOOPS);
+  if ( add_state_parameter )
+  {
+    SVCbool b;
+    SVCfile inf;
+    SVCopen(&inf, inputname, SVCread, &b);
+    WriteDataAddParam(&inf,initState,WITH_TAULOOPS);
+  } else {
+    WriteData(initState,WITH_TAULOOPS);
+  }
   return 0; 
   }
   
@@ -279,14 +305,22 @@ int doBranchReduce(void)
   t_begin=times(&tms_begin);
 #endif
   SCC();
-  initState = ReturnEquivalenceClasses(initState, DELETE_TAULOOPS);
+//  initState = ReturnEquivalenceClasses(initState, DELETE_TAULOOPS);
   /* ATwarning("Number of states after deletion of tau loops: %d\n", nstate); */
   ReduceBranching();  
 #ifndef NO_TIMES_H
   t_end=times(&tms_end);
   if (traceLevel) printTimes();
 #endif
-  WriteData(initState, DELETE_TAULOOPS);
+  if ( add_state_parameter )
+  {
+    SVCbool b;
+    SVCfile inf;
+    SVCopen(&inf, inputname, SVCread, &b);
+    WriteDataAddParam(&inf,initState,DELETE_TAULOOPS);
+  } else {
+    WriteData(initState, DELETE_TAULOOPS);
+  }
   return 0; 
   } 
    /* doCompare */

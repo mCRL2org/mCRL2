@@ -15,12 +15,16 @@
 <!ENTITY opt_v "<option>-v</option>">
 <!ENTITY opt_s "<option>-s</option>">
 <!ENTITY opt_b "<option>-b</option>">
+<!ENTITY opt_a "<option>-a</option>">
+<!ENTITY opt_t "<option>-t</option>">
 <!ENTITY opt_help "<option>--help</option>">
 <!ENTITY opt_version "<option>--version</option>">
 <!ENTITY opt_quiet "<option>--quiet</option>">
 <!ENTITY opt_verbose "<option>--verbose</option>">
 <!ENTITY opt_strong "<option>--strong</option>">
 <!ENTITY opt_branching "<option>--branching</option>">
+<!ENTITY opt_add "<option>--add</option>">
+<!ENTITY opt_tau "<option>--tau</option>">
 <!ENTITY stdin "<constant>stdin</constant>">
 <!ENTITY stdout "<constant>stdout</constant>">
 ]>
@@ -115,6 +119,28 @@ Mandatory arguments to long options are mandatory for short options too.
     <listitem>
       <para>
         minimise using branching bisimulation
+      </para>
+    </listitem>
+  </varlistentry>
+  
+  <varlistentry>
+    <term>&opt_a;</term>
+    <term>&opt_add;</term>
+    <listitem>
+      <para>
+        do not save the minimised state space but a copy of the original state
+	space with an extra state parameter indicating the (branching)
+	bisimulation class a state belongs to
+      </para>
+    </listitem>
+  </varlistentry>
+  
+  <varlistentry>
+    <term>&opt_t;</term>
+    <term>&opt_tau;</term>
+    <listitem>
+      <para>
+        specify an action that should be considered to be a tau
       </para>
     </listitem>
   </varlistentry>

@@ -118,6 +118,8 @@ SVCstateIndex ReadData(void);
 ATerm Term(Symbol s, int d);
 void ReadCompareData(SVCstateIndex *init1, SVCstateIndex *init2);
 int WriteData(SVCstateIndex initState, int tau_toops);
+int WriteDataAddParam(SVCfile *f, SVCstateIndex initState, int tau_toops);
+void add_tau_action(char *s);
 void GetBlockBoundaries(SVCint b, SVCstateIndex *left, SVCstateIndex *right);
 void Check(void);
 void StartSplitting(void);

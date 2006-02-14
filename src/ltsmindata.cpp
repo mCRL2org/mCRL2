@@ -20,6 +20,7 @@
 
  $Id: bsimdata.c,v 1.1.1.1 2004/09/07 15:06:33 uid523 Exp $ */
 
+#include "libprint_c.h"
 #include "libstruct.h"
 #include "ltsmin.h"
 
@@ -276,20 +277,67 @@ static void UpdateParArray(int state, int parameter) {
           newval = ATinsert(newval, parno);
      par[state] = newval;
 }
-                   
+
+static char **tau_actions = NULL;
+static int num_tau_actions = 0;
+static int size_tau_actions = 0;
+void add_tau_action(char *action)
+{
+	if ( num_tau_actions == size_tau_actions )
+	{
+		size_tau_actions += 8;
+		tau_actions = (char **) realloc(tau_actions,size_tau_actions*sizeof(char *));
+	}
+	tau_actions[num_tau_actions] = action;
+	num_tau_actions++;
+	gsVerboseMsg("marked action '%s' as a tau action\n",action);
+}
+
+bool is_tau_action(char *action)
+{
+	for (int i=0; i<num_tau_actions; i++)
+	{
+		if ( !strcmp(action,tau_actions[i]) )
+		{
+			return true;
+		}
+	}
+	return false;
+}
+
+bool is_tau_mact(ATerm mact)
+{
+	ATermList l = ATLgetArgument((ATermAppl) mact,0);
+	for (; !ATisEmpty(l); l=ATgetNext(l))
+	{
+		ATermAppl actid = ATAgetArgument(ATAgetFirst(l),0);
+		if ( !is_tau_action(ATgetName(ATgetAFun(ATAgetArgument(actid,0)))) )
+		{
+			return false;
+		}
+	}
+	return true;
+}
+
 SVCstateIndex ReadData(void) 
    {
    SVCstateIndex fromState, toState, initState;
    SVClabelIndex label;
    SVCparameterIndex parameter;
-   ATerm term_tau = (ATerm) gsMakeMultAct(ATmakeList0());
+//   ATerm term_tau = (ATerm) gsMakeMultAct(ATmakeList0());
    if (traceLevel>0) Info(inFile); 
    nstate = SVCnumStates(inFile);
-   nlabel = SVCnumLabels(inFile);
+   nlabel = SVCnumLabels(inFile) + 1; // +1 for tau label
    if (classes) npar = SVCnumParameters(inFile);
    AllocData();
+   label_tau = nlabel-1;
+   label_name[label_tau] = (ATerm) gsMakeMultAct(ATmakeList0());
    while (SVCgetNextTransition(inFile, &fromState, &label, &toState, &parameter)) 
       {
+      if ( is_tau_mact(SVClabel2ATerm(inFile,label)) )
+      {
+	      label = label_tau;
+      }
       ATerm name = label_name[label];
       if (!name) {
           name = SVClabel2ATerm(inFile,label);
@@ -309,8 +357,6 @@ SVCstateIndex ReadData(void)
           if (!parname) parname = par_name[parameter] = 
                 SVCparameter2ATerm(inFile,parameter);
       } 
-      if (label_tau < 0 && 
-      ATisEqual(name, term_tau)) label_tau =  label;
       UpdateLabArray(toState, label);
       if (classes) UpdateParArray(fromState, parameter);
       UpdateTable(lab_src_tgt[label], fromState, toState);
@@ -440,7 +486,23 @@ void GetBlockBoundaries(SVCint b, SVCstateIndex *left, SVCstateIndex *right)
      {
      *left = Pi[b].left; *right = Pi[b].right;
      }
-               
+      
+static void print_state(FILE *f,ATerm state)
+{
+	int arity = ATgetArity(ATgetAFun((ATermAppl) state));
+	fprintf(f,"[");
+	for (int i=0; i<arity; i++)
+	{
+		if ( i == 0 )
+		{
+			gsfprintf(f,"%P",ATgetArgument((ATermAppl) state,i));
+		} else {
+			gsfprintf(f,",%P",ATgetArgument((ATermAppl) state,i));
+		}
+	}
+	fprintf(f,"]");
+}
+
 static void TransitionsGoingToBlock(SVCint b, ATermList *newlab) {
    SVCstateIndex left, right, i;
    int newb = ATgetInt((ATermInt) BlockCode(b));
@@ -454,8 +516,8 @@ static void TransitionsGoingToBlock(SVCint b, ATermList *newlab) {
         ATermList labels = lab[s[i]], pars = ATempty; 
         ATerm ss = (ATerm) ATmakeInt(s[i]);
         if (classes) {
-            ATfprintf(stdout, "%t\n", 
-            SVCstate2ATerm(inFile,s[i]));
+            print_state(stdout,SVCstate2ATerm(inFile,s[i]));
+            gsfprintf(stdout, "\n"); 
             }
         for (;!ATisEmpty(labels);labels = ATgetNext(labels)) {
              int label = ATgetInt((ATermInt) ATgetFirst(labels));            
@@ -559,6 +621,8 @@ static int WriteTransitions(void) {
              ATerm action = label_name[label];
              ATermList sources = 
              (ATermList) ATtableGet(lab_tgt_src[label], bname);
+	     if (!ATisEmpty(sources))
+	     {
              SVClabelIndex labelno = SVCnewLabel(outFile, action ,&nnew);
              for (;!ATisEmpty(sources);sources=ATgetNext(sources)) {
                  SVCstateIndex fromState=SVCnewState(outFile, ATgetFirst(sources), 
@@ -569,6 +633,7 @@ static int WriteTransitions(void) {
                  n_transitions++;
                  if (label == label_tau) n_tau_transitions++;
                  }    
+             }
              }
         }
    return n_tau_transitions;
@@ -640,3 +705,76 @@ int WriteData(SVCstateIndex initState, int omit_tauloops)
        }         
     return EXIT_OK;     
     }
+
+
+int state_arity = -1;
+ATerm *state_args;
+AFun state_afun;
+SVCstateIndex get_new_state(SVCfile *in, SVCstateIndex s)
+{
+	ATermAppl state = (ATermAppl) SVCstate2ATerm(in,s);
+
+	if ( state_arity < 0 )
+	{
+		state_arity = ATgetArity(ATgetAFun(state));
+		state_args = (ATerm *) malloc((state_arity+1)*sizeof(ATerm));
+		state_afun = ATmakeAFun(ATgetName(ATgetAFun(state)),state_arity+1,ATfalse);
+	}
+
+	for (int i=0; i<state_arity; i++)
+	{
+		state_args[i] = ATgetArgument(state,i);
+	}
+	state_args[state_arity] = (ATerm) gsMakeDataExprNat_int(blockref[s]);
+
+	state = ATmakeApplArray(state_afun,state_args);
+
+	SVCbool nnew;
+	return SVCnewState(outFile,(ATerm) state, &nnew);
+}
+
+SVClabelIndex get_new_label(SVCfile *in, SVClabelIndex l)
+{
+	SVCbool nnew;
+	return SVCnewLabel(outFile,SVClabel2ATerm(in,l), &nnew);
+}
+
+SVCparameterIndex get_new_param()
+{
+  SVCbool nnew;
+  return SVCnewParameter(outFile, (ATerm)ATmakeList0(), &nnew);
+}
+
+int WriteDataAddParam(SVCfile *in, SVCstateIndex initState, int is_branching)
+{
+//  SVCbool nnew;
+  SVCstateIndex from,to;
+  SVClabelIndex lab;
+  SVCparameterIndex param;
+
+  SVCsetType(outFile, "mCRL2+info");
+  SVCsetCreator(outFile, "ltsmin2");
+
+  SVCstateIndex init = SVCgetInitialState(in);
+  ReturnEquivalenceClasses(initState,is_branching?ATtrue:ATfalse);
+
+  SVCsetInitialState(outFile, get_new_state(in,init)); 
+
+//  fprintf(stderr,"%i: %i\n",init,blockref[init]);
+//  fprintf(stderr,"%i: %i\n",init,ATgetInt((ATermInt) BlockCode(init)));
+  SVCparameterIndex new_param = get_new_param();
+  while ( SVCgetNextTransition(in,&from,&lab,&to,&param) )
+  {
+//  	fprintf(stderr,"%i(%i) - %i -> %i(%i)\n",from,blockref[from],lab,to,blockref[to]);
+//	gsfprintf(stderr,"%i(%i) = ",from,blockref[from]);print_state(stderr,SVCstate2ATerm(in,from));fprintf(stderr,"\n");
+//  	fprintf(stderr,"%i(%i) - %i -> %i(%i)\n",from,ATgetInt((ATermInt) BlockCode(from)),lab,to,ATgetInt((ATermInt) BlockCode(to)));
+  	SVCstateIndex new_from = get_new_state(in,from); 
+  	SVCstateIndex new_to = get_new_state(in,to); 
+	SVClabelIndex new_lab = get_new_label(in,lab);
+	SVCputTransition(outFile,new_from,new_lab,new_to,new_param);
+  }
+
+  SVCclose(outFile);
+
+  return EXIT_OK;
+}

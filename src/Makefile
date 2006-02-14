@@ -151,9 +151,9 @@ $(PNML2MCRL2_OBJECTS) $(patsubst %.o,%.d,$(PNML2MCRL2_OBJECTS)): CPPFLAGS += $(L
 
 #ltsmin definitions
 LTSMIN_NAME        = ltsmin
-LTSMIN_OBJECTS     = ltsmin.o ltsmindata.o ltsminkernel.o libstruct.o liblowlevel.o
+LTSMIN_OBJECTS     = ltsmin.o ltsmindata.o ltsminkernel.o libprint_c.o libstruct.o liblowlevel.o
 OBJECTS           += $(LTSMIN_OBJECTS)
-LTSMIN_LDFLAGS     = -lsvc -l$(ATERM) -lm
+LTSMIN_LDFLAGS     = -lrewrite -lsvc -l$(ATERM) -lm $(LIBDL)
 
 #ltspp definitions
 LTSPP_NAME         = ltspp
@@ -388,7 +388,7 @@ $(PNML2MCRL2_NAME) :
 	@echo cannot make target $@ because the xml2 library cannot be used
 endif
 
-$(LTSMIN_NAME) : $(LTSMIN_OBJECTS) $(ATERM_DEP) $(LIBSVC_DEP)
+$(LTSMIN_NAME) : $(LTSMIN_OBJECTS) $(ATERM_DEP) $(LIBSVC_DEP) $(LIBREWR_NAME)
 	$(CXX) -o $@ $(LTSMIN_OBJECTS) $(LDFLAGS) $(LTSMIN_LDFLAGS)
 
 $(LTSPP_NAME) : $(LTSPP_OBJECTS) $(ATERM_DEP) $(LIBSVC_DEP) $(LIBREWR_NAME)
