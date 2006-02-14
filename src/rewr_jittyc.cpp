@@ -1930,7 +1930,7 @@ void RewriterCompilingJitty::CompileRewriteSystem(ATermAppl DataEqnSpec)
   //
   fprintf(f,  "#include <stdlib.h>\n"
       "#include <string.h>\n"
-      "#include \"aterm2.h\"\n"
+      "#include <aterm/aterm2.h>\n"
       "#include \"assert.h\"\n"
 //      "#include \"libstruct.h\"\n"
 //      "#include \"liblowlevel.h\"\n"
