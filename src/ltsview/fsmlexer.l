@@ -2,12 +2,12 @@
 #include <stdio.h>
 #include <string.h>
 #include "fsmlexer.h"
-#define YY_NO_UNPUT
 
 int lineNo=1, posNo=1;
 extern void fsmerror(const char* s);
 
 %}
+%option nounput
 Quoted	   \"[^\"]*\"
 Id         [a-zA-Z\_][a-zA-Z0-9\_\-\']*
 Number     [0]|([1-9][0-9]*) 
