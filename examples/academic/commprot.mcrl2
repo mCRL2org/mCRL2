@@ -19,6 +19,9 @@
 % A. Belinfante, J. Feenstra, R.G. de Vries, J. Tretmans, N. Goga, L. Feijs, S. Mauw and 
 % L. Heerink. In: G. Csopaki and S. Dibuz and K. Tarnay, editors, Int. Workshop on Testing 
 % of Communicating Systems XII, Kluwer Academic Publishers, pages: 179 - 196, published in 1999.
+%
+% Note: on 13/2/2006 Axel Belinfante detected a flaw in the datatypes by testing the
+% specification in mCRL2 against the one in mCRL.
 
 
 %********************************************************************************************
@@ -161,7 +164,7 @@ eqn ChooseConfig(ap|>r) = ap;
     IsIn(u,[])=false;
     IsIn(u,u'|>xs)= u==u' || IsIn(u,xs);
     Remove(u,[])=[];
-    Remove(u,u'|>xs)= if(u==u',xs,Remove(u,xs));
+    Remove(u,u'|>xs)= if(u==u',xs,u'|>Remove(u,xs));
     
 
 
