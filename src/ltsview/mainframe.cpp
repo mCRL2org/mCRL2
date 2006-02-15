@@ -32,7 +32,7 @@ BEGIN_EVENT_TABLE( MainFrame, wxFrame )
 END_EVENT_TABLE()
 
 MainFrame::MainFrame( Mediator* owner )
-	 : wxFrame(NULL, wxID_ANY, wxT("LTSView"), wxDefaultPosition, wxSize( 1024, 768 ) )
+	 : wxFrame(NULL, wxID_ANY, wxT("LTSView") )
 { 
   mediator = owner;
   directory = wxEmptyString;
@@ -40,13 +40,13 @@ MainFrame::MainFrame( Mediator* owner )
   progDialog = NULL;
 
   SetIcon( wxIcon( main_window ) );
-  CentreOnScreen();
 
   setupMenuBar();
   setupToolBar();
   setupMainArea();
   
   SetSizeHints( GetSize() );
+  CentreOnScreen();
 }
 
 void MainFrame::setupMenuBar()
@@ -113,6 +113,7 @@ void MainFrame::setupMainArea()
   rightPanel->GetSize( &w, &h );
   glCanvas = new GLCanvas( mediator, this );
   glCanvas->SetSizeHints( h, h );
+  glCanvas->SetSize( h, h );
   
   mainSizer->Add( glCanvas, 1, wxALIGN_CENTER | wxEXPAND | wxALL, 0 );
   mainSizer->Add( rightPanel, 1, wxALIGN_CENTER | wxEXPAND | wxALL, 0 );
