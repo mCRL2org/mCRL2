@@ -1,6 +1,6 @@
 %{
 #include "fsmparser.h"
-#include "fsmlexer.c"
+#include "fsmlexer.cpp"
 
 // Global variables
 
@@ -27,17 +27,17 @@ char* intToCString(int i);
 %}
 
 %union {
-  char* str;
+  ATerm aterm;
   int number;
 }
 
 %start fsm_file
 
-%token EOLN SECSEP QUOTE QUOTED LBRACK RBRACK FANIN FANOUT NODENR COMMA
+%token EOLN SECSEP QUOTED LBRACK RBRACK FANIN FANOUT NODENR COMMA
 %token <number> NUMBER
-%token <str> ID
-%token <str> QUOTED
-%type  <str> type_name action
+%token <aterm> ID
+%token <aterm> QUOTED
+%type  <aterm> type_name action
 
 %%
 
@@ -66,8 +66,8 @@ param :
 	ID
 	cardinality type_def
 	  {
-	    stateId = ATinsert( stateId, (ATerm)ATmakeAppl2( const_ATparmid,
-	      ATmake( "<appl>", $1 ), (ATerm)typeId ) )
+	    stateId = ATinsert( stateId, (ATerm)ATmakeAppl2( const_ATparmid, $1,
+	      (ATerm)typeId ) )
 	  }
 	|
 	FANIN cardinality type_name type_values
@@ -91,15 +91,14 @@ type_def :
 	type_values
 	  { 
 	    typeValues = ATreverse( typeValues );
-	    typeId = ATmakeAppl2( const_ATtypeid, ATmake( "<appl>", $1 ),
-	      (ATerm) typeValues );
+	    typeId = ATmakeAppl2( const_ATtypeid, $1, (ATerm) typeValues );
 	    valueTable = ATinsert( valueTable, (ATerm)typeValues )
 	  }
 	;
 
 type_name :
 	/* empty */
-	  { $$ = "unspecified" }
+	  { $$ = ATmake( "<appl>", "unspecified" ) }
 	|
 	ID
 	  { $$ = $1 }
@@ -113,12 +112,7 @@ type_values :
 
 type_value :
 	QUOTED
-	  {
-	    string value = static_cast<string>($1);
-	    value = value.substr( 1, value.length() - 2 );
-	    ATerm valueAT = ATmake( "<appl>", value.c_str() );
-	    typeValues = ATinsert( typeValues, valueAT )
-	  }
+	  { typeValues = ATinsert( typeValues, $1 ) }
 	;
 
 // ----------- Section containing the states ---------
@@ -168,10 +162,9 @@ transition:
 	  {
 	    State* frState = states[$1-1];
 	    State* toState = states[$2-1];
-	    ATerm action = ATmake( "<appl>", $3 );
-	    Transition* t = new Transition( frState, toState, action );
+	    Transition* t = new Transition( frState, toState, $3 );
 	    ATbool b;
-	    ATindexedSetPut( actions, action, &b );
+	    ATindexedSetPut( actions, $3, &b );
 	    fsmparserlts->addTransition( t );
 	    if ( $1 != $2 )
 	    {
@@ -187,13 +180,10 @@ transition:
 
 action :
 	/* empty */
-	  { $$ = "" }
+	  { $$ = ATmake( "<appl>", "" ) }
 	|
 	QUOTED
-	  {
-	    string value = static_cast<string>($1);
-	    $$ = strdup( value.substr( 1, value.length() - 2 ).c_str() )
-	  }
+	  { $$ = $1 }
 	;
 
 %%

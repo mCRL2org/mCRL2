@@ -1,11 +1,15 @@
 %{
 #include <stdio.h>
-#include <string.h>
+#include <string>
+#include "aterm/aterm1.h"
 #include "fsmlexer.h"
+using namespace std;
 
 int lineNo=1, posNo=1;
 extern void fsmerror(const char* s);
-
+void processId();
+void processQuoted();
+void processNumber();
 %}
 %option nounput
 Quoted	   \"[^\"]*\"
@@ -14,19 +18,38 @@ Number     [0]|([1-9][0-9]*)
 
 %%
 
-[ \t]	  posNo += fsmleng;
-\r?\n     lineNo++; posNo=1; fsmlval.str = strdup(fsmtext); return EOLN;
-"---"	  posNo += fsmleng; fsmlval.str = strdup(fsmtext); return SECSEP;
-"\""	  posNo += fsmleng; fsmlval.str = strdup(fsmtext); return QUOTE;
-"("	  posNo += fsmleng; fsmlval.str = strdup(fsmtext); return LBRACK;
-")"	  posNo += fsmleng; fsmlval.str = strdup(fsmtext); return RBRACK;
-","	  posNo += fsmleng; fsmlval.str = strdup(fsmtext); return COMMA;
-fan_in	  posNo += fsmleng; fsmlval.str = strdup(fsmtext); return FANIN;
-fan_out	  posNo += fsmleng; fsmlval.str = strdup(fsmtext); return FANOUT;
-node_nr	  posNo += fsmleng; fsmlval.str = strdup(fsmtext); return NODENR;
-{Id}	  posNo += fsmleng; fsmlval.str = strdup(fsmtext); return ID;
-{Number}  posNo += fsmleng; fsmlval.number = atoi( fsmtext ); return NUMBER;
-{Quoted}  posNo += fsmleng; fsmlval.str = strdup(fsmtext); return QUOTED;
-.         posNo += fsmleng; fsmerror("unknown character");
+[ \t]	  { posNo += fsmleng; }
+\r?\n     { lineNo++; posNo=1; return EOLN; }
+"---"	  { posNo += fsmleng; return SECSEP; }
+"("	  { posNo += fsmleng; return LBRACK; }
+")"	  { posNo += fsmleng; return RBRACK; }
+","	  { posNo += fsmleng; return COMMA; }
+"fan_in"  { posNo += fsmleng; return FANIN; }
+"fan_out" { posNo += fsmleng; return FANOUT; }
+"node_nr" { posNo += fsmleng; return NODENR; }
+{Id}	  { processId(); return ID; }
+{Quoted}  { processQuoted(); return QUOTED; }
+{Number}  { processNumber(); return NUMBER; }
+.         { posNo += fsmleng; fsmerror("unknown character"); }
 
 %%
+
+void processId()
+{
+  posNo += fsmleng;
+  fsmlval.aterm = ATmake( "<appl>", fsmtext ); 
+}
+
+void processQuoted()
+{
+  posNo += fsmleng;
+  string value = static_cast<string>(fsmtext);
+  value = value.substr( 1, value.length() - 2 );
+  fsmlval.aterm = ATmake( "<appl>", value.c_str() );
+}
+
+void processNumber()
+{
+  posNo += fsmleng;
+  fsmlval.number = atoi( fsmtext );
+}

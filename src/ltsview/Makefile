@@ -16,7 +16,7 @@ OBJECTS		 = $(WX_OBJECTS) $(CPP_OBJECTS) ../liblowlevel.o
 TARGETS		 = ltsview
 
 .PHONY: all clean
-.PRECIOUS: fsmparser.cpp fsmlexer.c fsmlexer.h
+.PRECIOUS: fsmparser.cpp fsmlexer.cpp fsmlexer.h
 
 all : $(TARGETS)
 
@@ -39,11 +39,10 @@ $(CPP_OBJECTS) : %.o: %.cpp
 
 %.cpp : %.h
 
-fsmparser.cpp : fsmparser.y fsmlexer.c
+fsmparser.cpp : fsmparser.y fsmlexer.cpp
 	$(BISON) --defines=fsmlexer.h -o fsmparser.cpp -p fsm $<
-	$(CC) -c fsmlexer.c -o fsmlexer.o
 
-fsmlexer.c : fsmlexer.l
+fsmlexer.cpp : fsmlexer.l
 	$(LEX) -o$@ -Pfsm $<
 
 $(ICON_OBJECTS) : icons/*.xpm
@@ -51,7 +50,7 @@ $(ICON_OBJECTS) : icons/*.xpm
 $(OBJECTS) $(TARGETS) : Makefile $(CONFIG)
 
 clean:
-	-rm -f *.o $(TARGETS) fsmparser.cpp fsmlexer.c fsmlexer.h core core.*
+	-rm -f *.o $(TARGETS) fsmparser.cpp fsmlexer.cpp fsmlexer.h core core.*
 
 distclean: clean
 
