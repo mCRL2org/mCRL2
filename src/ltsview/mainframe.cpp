@@ -45,6 +45,8 @@ MainFrame::MainFrame( Mediator* owner )
   setupMenuBar();
   setupToolBar();
   setupMainArea();
+  
+  SetSizeHints( GetSize() );
 }
 
 void MainFrame::setupMenuBar()
@@ -103,11 +105,14 @@ void MainFrame::setupMainArea()
   mainSizer->AddGrowableCol( 0 );
   mainSizer->AddGrowableRow( 0 );
 
-  glCanvas = new GLCanvas( mediator, this, wxID_ANY, wxDefaultPosition, wxSize( 800, -1 ) );
-
   wxPanel* rightPanel = new wxPanel( this, wxID_ANY, wxDefaultPosition,
       wxDefaultSize, wxRAISED_BORDER );
   setupRightPanel( rightPanel );
+
+  int w; int h;
+  rightPanel->GetSize( &w, &h );
+  glCanvas = new GLCanvas( mediator, this );
+  glCanvas->SetSizeHints( h, h );
   
   mainSizer->Add( glCanvas, 1, wxALIGN_CENTER | wxEXPAND | wxALL, 0 );
   mainSizer->Add( rightPanel, 1, wxALIGN_CENTER | wxEXPAND | wxALL, 0 );
@@ -135,13 +140,17 @@ void MainFrame::setupRightPanel( wxPanel* panel )
       wxDefaultPosition, wxDefaultSize, wxALIGN_RIGHT | wxST_NO_AUTORESIZE );
   
   topSizer->AddGrowableCol( 1 );
-  topSizer->Add( new wxStaticText( panel, wxID_ANY, wxT("Number of states:") ), 0, lflags, 3 );
+  topSizer->Add( new wxStaticText( panel, wxID_ANY, wxT("Number of states:") ),
+      0, lflags, 3 );
   topSizer->Add( numberOfStatesLabel, 0, rflags, 3 );
-  topSizer->Add( new wxStaticText( panel, wxID_ANY, wxT("Number of transitions:") ), 0, lflags, 3 );
+  topSizer->Add( new wxStaticText( panel, wxID_ANY,
+	wxT("Number of transitions:") ), 0, lflags, 3 );
   topSizer->Add( numberOfTransitionsLabel, 0, rflags, 3 );
-  topSizer->Add( new wxStaticText( panel, wxID_ANY, wxT("Number of clusters:") ), 0, lflags, 3 );
+  topSizer->Add( new wxStaticText( panel, wxID_ANY, wxT("Number of clusters:")
+	), 0, lflags, 3 );
   topSizer->Add( numberOfClustersLabel, 0, rflags, 3 );
-  topSizer->Add( new wxStaticText( panel, wxID_ANY, wxT("Number of ranks:") ), 0, lflags, 3 );
+  topSizer->Add( new wxStaticText( panel, wxID_ANY, wxT("Number of ranks:") ),
+      0, lflags, 3 );
   topSizer->Add( numberOfRanksLabel, 0, rflags, 3 );
 
   // setup the bottom part (notebook)
@@ -157,6 +166,7 @@ void MainFrame::setupRightPanel( wxPanel* panel )
   
   sizer->Add( topSizer, 0, wxEXPAND | wxALL, 5 );
   sizer->Add( bottomNotebook, 0, wxEXPAND | wxALL, 5 );
+  sizer->Fit( panel );
   panel->SetSizer( sizer );
 }
 
