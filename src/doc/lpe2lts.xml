@@ -10,6 +10,7 @@
 <!ENTITY default "<parameter>default</parameter>">
 <!ENTITY debug "<parameter>debug</parameter>">
 <!ENTITY internal "<parameter>internal</parameter>">
+<!ENTITY name "<parameter>NAME</parameter>">
 <!ENTITY opt_h "<option>-h</option>">
 <!ENTITY opt_q "<option>-q</option>">
 <!ENTITY opt_v "<option>-v</option>">
@@ -76,7 +77,7 @@
 <refsect1>
   <title>Description</title>
   <para>
-    The &lpe2lts; tool generates state space of the linear process equation (LPE) in &infile; and
+    The &lpe2lts; tool generates a state space of the linear process equation (LPE) in &infile; and
     saves the result to &outfile;. If &outfile; is not present,
     the state space is not stored.
   </para>
@@ -89,14 +90,14 @@
 <refsect1>
 <title>Options</title>
 <para>
-Mandatory arguments to long options are mandatory for short options too.
+Mandatory arguments to long options are also mandatory to short options.
   <variablelist>
   <varlistentry>
     <term>&opt_h;</term>
     <term>&opt_help;</term>
     <listitem>
       <para>
-        display help message and terminate
+        Display help message and terminate.
       </para>
     </listitem>
   </varlistentry>
@@ -105,7 +106,7 @@ Mandatory arguments to long options are mandatory for short options too.
     <term>&opt_version;</term>
     <listitem>
       <para>
-        display version information and terminate
+        Display version information and terminate.
       </para>
     </listitem>
   </varlistentry>
@@ -115,7 +116,7 @@ Mandatory arguments to long options are mandatory for short options too.
     <term>&opt_quiet;</term>
     <listitem>
       <para>
-        do not display warning messages
+        Do not display warning messages.
       </para>
     </listitem>
   </varlistentry>
@@ -125,7 +126,7 @@ Mandatory arguments to long options are mandatory for short options too.
     <term>&opt_verbose;</term>
     <listitem>
       <para>
-        display concise intermediate messages
+        Display concise intermediate messages.
       </para>
     </listitem>
   </varlistentry>
@@ -135,7 +136,7 @@ Mandatory arguments to long options are mandatory for short options too.
     <term>&opt_freevar;</term>
     <listitem>
       <para>
-        do not replace free variables in the LPE with dummy values
+        Do not replace free variables in the LPE with dummy values. (See also &opt_dummy;.)
       </para>
     </listitem>
   </varlistentry>
@@ -145,7 +146,13 @@ Mandatory arguments to long options are mandatory for short options too.
     <term>&opt_dummy;</term>
     <listitem>
       <para>
-        replace free variables in the LPE with dummy values (default)
+	Replace free variables in the LPE with dummy values (default). Free
+	variables indicate that the behaviour of the LPE does not depend on the
+	actual value of such a variable. Not replacing these variables can
+	result in states containing free variables. Currently, &lpe2lts;
+	considers each free variable to be different from any other (value or
+	variable) and therefore substituting a default dummy value for such
+	variables can reduce the generated state space.
       </para>
     </listitem>
   </varlistentry>
@@ -155,7 +162,7 @@ Mandatory arguments to long options are mandatory for short options too.
     <term>&opt_unused-data;</term>
     <listitem>
       <para>
-        do not remove unused parts of the data specification
+        Do not remove unused parts of the data specification.
       </para>
     </listitem>
   </varlistentry>
@@ -165,7 +172,7 @@ Mandatory arguments to long options are mandatory for short options too.
     <term>&opt_vector;</term>
     <listitem>
       <para>
-        store state in a vector (fastest, default)
+        Store states in memory in a vector (fastest, default). 
       </para>
     </listitem>
   </varlistentry>
@@ -175,7 +182,7 @@ Mandatory arguments to long options are mandatory for short options too.
     <term>&opt_tree;</term>
     <listitem>
       <para>
-        store state in a tree (for memory efficiency)
+        Store states in memory in a tree (for memory efficiency).
       </para>
     </listitem>
   </varlistentry>
@@ -199,7 +206,7 @@ Mandatory arguments to long options are mandatory for short options too.
       <para>
         Detect deadlocks (i.e. for every deadlock a message is
         printed). A deadlock is a state from which no transitions are
-        possible. Can be used in combination with &opt_deadlock-trace;
+        possible.
       </para>
     </listitem>
   </varlistentry>
@@ -212,45 +219,45 @@ Mandatory arguments to long options are mandatory for short options too.
          Write trace to each deadlock state to a file. For each
          deadlock found during the state space exploration a unique
          file with extension .trc (trace) will be created containing
-         one of the shortest traces from the initial state to the
-         deadlock state. In this way traces to all deadlocks
-         will be generated during the state space exploration. The
-         length of the traces will not decrease during the generation.
-         It is possible that two or more equal traces are generated.
-         The traces can be pretty printed and converted to other
-         formats using &tracepp;.
+         a shortest trace from the initial state to the
+	 deadlock state. The traces can be pretty printed and converted to
+	 other formats using &tracepp;.
       </para>
     </listitem>
   </varlistentry>
 
   <varlistentry>
     <term>&opt_D;</term>
-    <term>&opt_detect;=NAME*</term>
+    <term>&opt_detect;=&name;*</term>
     <listitem>
       <para>
-         Detect actions from the list NAME* (i.e. print a message for every occurrence).
+	 Detect action names from the list &name;*, which is a comma separated
+	 list of action names. A message is printed for every occurrence of one
+	 of these action names. Transitions containing such an occurrence are
+	 those which contain an action with an action name from the list.
       </para>
     </listitem>
   </varlistentry>
 
   <varlistentry>
     <term>&opt_t;</term>
-    <term>&opt_trace;=NAME*</term>
+    <term>&opt_trace;=&name;*</term>
     <listitem>
       <para>
-         Write trace to each state that is reached with an action from
-         NAME* to a file (similar to &opt_deadlock-trace;, but for actions).
+	 Write a shortest trace to each state that is reached with an action
+	 from &name;* to a file (similar to &opt_deadlock-trace;, but for
+	 actions).
       </para>
     </listitem>
   </varlistentry>
 
   <varlistentry>
     <term>&opt_p;</term>
-    <term>&opt_priority;=NAME</term>
+    <term>&opt_priority;=&name;</term>
     <listitem>
       <para>
-         Give priority to action NAME (i.e. if it is possible to
-         execute an action NAME in some state, than make it the only
+         Give priority to action &name; (i.e. if it is possible to
+         execute an action &name; in some state, then make it the only
          executable action from that state).
       </para>
     </listitem>
@@ -274,12 +281,13 @@ Mandatory arguments to long options are mandatory for short options too.
   </varlistentry>
 
   <varlistentry>
-    <term>&opt_R;</term> <term>&opt_rewriter;=NAME</term>
+    <term>&opt_R;</term> <term>&opt_rewriter;=&name;</term>
     <listitem>
       <para>
-         Use rewriter NAME (default 'inner'). &lpe2lts; makes heavy
+         Use rewriter &name; (default 'inner'). &lpe2lts; makes heavy
          use of a term rewriting engine to manipulate with the data
-         term of the LPE.
+	 term of the LPE and therefore the choice of the rewriter can heavily
+	 influence performance.
       </para>
     </listitem>
   </varlistentry>
@@ -288,8 +296,8 @@ Mandatory arguments to long options are mandatory for short options too.
     <term>&opt_aut;</term>
     <listitem>
       <para>
-         force &outfile; to be in the aut format (implies
-                        &opt_no-info;, see below)  
+	 Force &outfile; to be written in the AUT format. This implies the
+	 option &opt_no-info; (see below).
       </para>
     </listitem>
   </varlistentry>
@@ -298,7 +306,7 @@ Mandatory arguments to long options are mandatory for short options too.
     <term>&opt_svc;</term>
     <listitem>
       <para>
-         force &outfile; to be in the svc format
+         Force &outfile; to be written in the SVC format.
       </para>
     </listitem>
   </varlistentry>
@@ -307,11 +315,13 @@ Mandatory arguments to long options are mandatory for short options too.
     <term>&opt_no-info;</term>
     <listitem>
       <para>
-         Do not add state information to &outfile; Normally &lpe2lts;
-         adds some information about the state vector to the output
-         .svc file. This can options allows to omit this
-         information. It is not possible to add the state information
-         to .aut files.
+	 Do not add state information to &outfile;. Without this option
+	 &lpe2lts; adds state vector to the state space. This
+	 option causes this information to be discarded and states are only
+	 indicated by a sequence number. Explicit state information is useful
+	 for visualisation purposes, for instance, but can cause the &outfile;
+	 to grow considerably. Note that this option is implicit when writing
+	 in the AUT format.
       </para>
     </listitem>
   </varlistentry>
