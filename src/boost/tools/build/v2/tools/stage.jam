@@ -393,6 +393,8 @@ class installed-shared-lib-generator : generator
               : [ $(copied).name ] ] ;
             if $(m)
             {
+                result += [ stage.symlink $(m[1]) : $(project)
+                  : $(copied) : $(property-set) ] ;
                 result += [ stage.symlink $(m[1]).$(m[2]) : $(project)
                   : $(copied) : $(property-set) ] ;
                 result += [ stage.symlink $(m[1]).$(m[2]).$(m[3])  : $(project)
