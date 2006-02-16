@@ -1,7 +1,7 @@
 %{
 #include <stdio.h>
 #include <string>
-#include "aterm/aterm1.h"
+#include "aterm/aterm2.h"
 #include "fsmlexer.h"
 using namespace std;
 
@@ -37,16 +37,16 @@ Number     [0]|([1-9][0-9]*)
 void processId()
 {
   posNo += fsmleng;
-  fsmlval.aterm = ATmake( "<appl>", fsmtext ); 
+  fsmlval.aterm = ATmakeAppl0( ATmakeAFun( fsmtext, 0, ATfalse ) ); 
 }
 
 void processQuoted()
 {
   posNo += fsmleng;
-  string value = static_cast<string>(fsmtext);
+  string value = static_cast<string>( fsmtext );
   value = value.substr( 1, value.length() - 2 );
-  fsmlval.aterm = ATmake( "<appl>", value.c_str() );
-}
+  fsmlval.aterm = ATmakeAppl0( ATmakeAFun( value.c_str(), 0, ATfalse ) );
+} 
 
 void processNumber()
 {

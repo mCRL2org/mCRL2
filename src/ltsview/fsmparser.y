@@ -27,7 +27,7 @@ char* intToCString(int i);
 %}
 
 %union {
-  ATerm aterm;
+  ATermAppl aterm;
   int number;
 }
 
@@ -66,8 +66,8 @@ param :
 	ID
 	cardinality type_def
 	  {
-	    stateId = ATinsert( stateId, (ATerm)ATmakeAppl2( const_ATparmid, $1,
-	      (ATerm)typeId ) )
+	    stateId = ATinsert( stateId, (ATerm)ATmakeAppl2( const_ATparmid,
+	      (ATerm)$1, (ATerm)typeId ) )
 	  }
 	|
 	FANIN cardinality type_name type_values
@@ -91,14 +91,14 @@ type_def :
 	type_values
 	  { 
 	    typeValues = ATreverse( typeValues );
-	    typeId = ATmakeAppl2( const_ATtypeid, $1, (ATerm) typeValues );
+	    typeId = ATmakeAppl2( const_ATtypeid, (ATerm)$1, (ATerm) typeValues );
 	    valueTable = ATinsert( valueTable, (ATerm)typeValues )
 	  }
 	;
 
 type_name :
 	/* empty */
-	  { $$ = ATmake( "<appl>", "unspecified" ) }
+	  { $$ = ATmakeAppl0( ATmakeAFun( "unspecified", 0, ATfalse ) ) }
 	|
 	ID
 	  { $$ = $1 }
@@ -112,7 +112,7 @@ type_values :
 
 type_value :
 	QUOTED
-	  { typeValues = ATinsert( typeValues, $1 ) }
+	  { typeValues = ATinsert( typeValues, (ATerm)$1 ) }
 	;
 
 // ----------- Section containing the states ---------
@@ -162,9 +162,9 @@ transition:
 	  {
 	    State* frState = states[$1-1];
 	    State* toState = states[$2-1];
-	    Transition* t = new Transition( frState, toState, $3 );
+	    Transition* t = new Transition( frState, toState, (ATerm)$3 );
 	    ATbool b;
-	    ATindexedSetPut( actions, $3, &b );
+	    ATindexedSetPut( actions, (ATerm)$3, &b );
 	    fsmparserlts->addTransition( t );
 	    if ( $1 != $2 )
 	    {
@@ -180,7 +180,7 @@ transition:
 
 action :
 	/* empty */
-	  { $$ = ATmake( "<appl>", "" ) }
+	  { $$ = ATmakeAppl0( ATmakeAFun( "", 0, ATfalse ) ) }
 	|
 	QUOTED
 	  { $$ = $1 }

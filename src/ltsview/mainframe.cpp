@@ -59,7 +59,7 @@ void MainFrame::setupMenuBar()
   fileMenu->Append( wxID_OPEN, wxT("&Open...\tCtrl+O"),
       wxT("Load an LTS from file") );
   fileMenu->AppendSeparator();
-  fileMenu->Append( wxID_EXIT, wxT("E&xit\tCtrl+X"), wxT("Exit application") );
+  fileMenu->Append( wxID_EXIT, wxT("E&xit\tCtrl+Q"), wxT("Exit application") );
     
   viewMenu->Append( wxID_RESET, wxT("&Reset viewpoint"),
       wxT("Set the viewpoint to the default position"));
