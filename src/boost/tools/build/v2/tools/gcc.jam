@@ -66,6 +66,7 @@ if [ os.name ] = NT
 
 generators.register-c-compiler gcc.compile.c++ : CPP : OBJ : <toolset>gcc ;
 generators.register-c-compiler gcc.compile.c : C : OBJ : <toolset>gcc ;
+generators.register-c-compiler gcc.compile.asm : ASM : OBJ : <toolset>gcc ;
 
 
 # Declare flags and action for compilation
@@ -76,6 +77,10 @@ flags gcc.compile OPTIONS <optimization>space : -Os ;
 flags gcc.compile OPTIONS <inlining>off : -fno-inline ;
 flags gcc.compile OPTIONS <inlining>on : -Wno-inline ;
 flags gcc.compile OPTIONS <inlining>full : -finline-functions -Wno-inline ;
+
+flags gcc.compile OPTIONS <warnings>off : -w ;
+flags gcc.compile OPTIONS <warnings>all : -Wall ;
+flags gcc.compile OPTIONS <warnings-as-errors>on : -Werror ;
 
 flags gcc.compile OPTIONS <debug-symbols>on : -g ;
 flags gcc.compile OPTIONS <profiling>on : -pg ;
@@ -133,7 +138,7 @@ rule compile.c++
 
 actions compile.c++
 {
-    "$(CONFIG_COMMAND)" $(LANG) -Wall -ftemplate-depth-100 $(OPTIONS) -D$(DEFINES) -I"$(INCLUDES)" -c -o "$(<)" "$(>)" 
+    "$(CONFIG_COMMAND)" $(LANG) -ftemplate-depth-100 $(OPTIONS) -D$(DEFINES) -I"$(INCLUDES)" -c -o "$(<)" "$(>)" 
 }
 
 rule compile.c
@@ -150,7 +155,17 @@ rule compile.c
 
 actions compile.c
 {
-    "$(CONFIG_COMMAND)" $(LANG) -Wall $(OPTIONS) -D$(DEFINES) -I"$(INCLUDES)" -c -o "$(<)" "$(>)" 
+    "$(CONFIG_COMMAND)" $(LANG) $(OPTIONS) -D$(DEFINES) -I"$(INCLUDES)" -c -o "$(<)" "$(>)" 
+}
+
+rule compile.asm
+{
+    LANG on $(<) = "-x assembler-with-cpp" ;
+}
+
+actions compile.asm
+{
+    "$(CONFIG_COMMAND)" $(LANG) $(OPTIONS) -D$(DEFINES) -I"$(INCLUDES)" -c -o "$(<)" "$(>)" 
 }
 
 # The class which check that we don't try to use
@@ -297,17 +312,23 @@ actions link bind LIBRARIES
 # in liba.a 
 RM = [ common.rm-command ] ;
 
+if [ os.name ] = NT
+{
+    RM = "if exist \"$(<[1])\" DEL \"$(<[1])\""  ;
+}
+
+
 # Declare action for creating static libraries
-# The 'r' letter means to replace files in the archive
-# The 'u' letter means only outdated files in the archive
-#   should be replaced.
+# The 'r' letter means to add files to the archive with replacement
+# Since we remove archive, we don't care about replacement, but
+# there's no option "add without replacement".
 # The 'c' letter means suppresses warning in case the archive
 #   does not exists yet. That warning is produced only on
 #   some platforms, for whatever reasons.
 actions piecemeal archive 
 {
     $(RM) "$(<)"
-    ar ruc "$(<)" "$(>)"
+    ar rc "$(<)" "$(>)"
 }
 
 

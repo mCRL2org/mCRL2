@@ -44,9 +44,9 @@ TARGETS                        = squadt
 
 all: $(BJAM) $(TREE_ROOT)config.jam settings.h
 ifeq ($(findstring $(CPPFLAGS),NDEBUG),)
-	 @cd build; $(BJAM) --v2 debug
+	 @cd build; $(BJAM) --v2 debug squadt
 else
-	 @cd build; $(BJAM) --v2 release
+	 @cd build; $(BJAM) --v2 release squadt
 endif
 
 $(TREE_ROOT)config.jam:

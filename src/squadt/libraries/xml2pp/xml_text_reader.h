@@ -1,10 +1,12 @@
-#ifndef XML_TEXT_READER_H
-#define XML_TEXT_READER_H
+#ifndef XML2PP_TEXT_READER_H
+#define XML2PP_TEXT_READER_H
 
 #include <iosfwd>
 #include <exception>
 #include <string>
 #include <cstdlib>
+
+#include <xml2pp/detail/exception.h>
 
 namespace xml2pp {
 
@@ -15,28 +17,29 @@ namespace xml2pp {
   /* Macro to convert constant C-type strings to const xmlChar* */
   #define TO_XML_STRING(c_string) reinterpret_cast < const unsigned char* > (c_string)
 
-  class exception : std::exception {
-    /* Errors :
-     *
-     *  - could not open input file
-     *  - error loading XML schema file for validation
-     */
-  };
-
   /* A C++ wrapper around xmlTextReader from libxml2 */
   class text_reader {
     private:
-      xmlTextReaderPtr reader;
+      /** The XML text reader from libxml2 */
+      xmlTextReaderPtr   reader;
+
+      const std::string& _document;
 
     public:
 
       /** Constructor for reading from a file */
       text_reader(const char*, const char* schema_name = 0);
 
-      /** Constructor for reading from an in memory document */
+      /** Constructor for reading an in memory document */
       text_reader(const std::string& document, const char* schema_name = 0);
 
+      /** Constructor for reading part of an in memory document */
+      text_reader(const std::string& document, const size_t prefix_length, const char* schema_name = 0);
+
       ~text_reader();
+
+      /* Set schema for validation purposes throws if the first read() has already occured */
+      inline void set_schema(const char*);
 
       /** Traverses of the XML document tree */
       void read() throw (int);
@@ -74,37 +77,48 @@ namespace xml2pp {
   /****************************************************************************
    * Definitions for inline functions follow
    ****************************************************************************/
-  inline text_reader::text_reader(const char* file_name, const char* schema_name) {
+  inline text_reader::text_reader(const char* file_name, const char* schema_name) : _document(0) {
     reader = xmlNewTextReaderFilename(file_name);
 
     if (reader == 0) {
       /* Error opening file, abort ... */
-      throw (new xml2pp::exception);
+      throw (new xml2pp::exception(exception::unable_to_open_input_file));
     }
 
-#ifdef SCHEMA_VALIDATION_ENABLED
-    if (schema_name != 0 && xmlTextReaderSchemaValidate(reader, schema_name) < 0) {
-      /* Error schema file, abort ... */
-      throw (new xml2pp::exception);
-    }
-#endif
+    set_schema(schema_name);
   }
 
-  inline text_reader::text_reader(const std::string& document, const char* schema_name) {
+  inline text_reader::text_reader(const std::string& document, const char* schema_name) : _document(document) {
     reader = xmlReaderForMemory(document.c_str(), document.size(), "", 0, 0);
 
-#ifdef SCHEMA_VALIDATION_ENABLED
-    if (schema_name != 0 && xmlTextReaderSchemaValidate(reader, schema_name) < 0) {
-      /* Error schema file, abort ... */
-      throw (new xml2pp::exception);
-    }
-#endif
+    set_schema(schema_name);
+  }
+
+  inline text_reader::text_reader(const std::string& document, const size_t prefix_length, const char* schema_name) : _document(document) {
+    reader = xmlReaderForMemory(document.c_str(), prefix_length, "", 0, 0);
+
+    set_schema(schema_name);
   }
 
   inline text_reader::~text_reader() {
     xmlTextReaderClose(reader);
     xmlFreeTextReader(reader);
   }
+
+#ifdef SCHEMA_VALIDATION_ENABLED
+  inline void text_reader::set_schema(const char* schema_name) {
+    if (xmlTextReaderReadState(reader) != XML_TEXTREADER_MODE_INITIAL) {
+      throw (new exception(illegal_operation_after_first_read));
+    }
+    else if (schema_name != 0 && xmlTextReaderSchemaValidate(reader, schema_name) < 0) {
+      /* Error schema file, abort ... */
+      throw (new xml2pp::exception);
+    }
+  }
+#else
+  inline void text_reader::set_schema(const char*) {
+  }
+#endif
 
   /* Returns the name of the current element */
   inline std::string text_reader::element_name() {

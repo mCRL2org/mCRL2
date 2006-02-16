@@ -4,9 +4,13 @@ project xml_text_reader
   : requirements
     <include>../../
   : usage-requirements
-    <include>../../
-    <cxxflags>"`xml2-config --cflags`"
-    <linkflags>"`xml2-config --libs`" ;
+    <include>../../ ;
 
-obj xml_text_reader : xml_text_reader.cpp
-                    : <cxxflags>"`xml2-config --cflags`" ;
+include $(TOP)/config.jam ;
+
+obj xml_text_reader :
+          xml_text_reader.cpp
+        : <cxxflags>"`$(XML2_CONFIG) --cflags`"
+        :
+        : <cxxflags>"`$(XML2_CONFIG) --cflags`"
+          <linkflags>"`$(XML2_CONFIG) --libs`" ;

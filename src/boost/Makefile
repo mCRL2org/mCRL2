@@ -31,7 +31,7 @@ ifeq ($(HOST_OS),CYGWIN)
 endif
 ifeq ($(HOST_OS),MINGW)
  BJAM         = tools/jam/bin/bjam.exe
- BJAM_BUILD   = start //WAIT mbuild.bat mingw;
+ BJAM_BUILD   = start //WAIT build.bat mingw
  LINK_METHOD  = runtime-link=static link=static
 endif
 

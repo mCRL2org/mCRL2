@@ -7,10 +7,9 @@ project squadt
 
 include $(TOP)/config.jam ;
 
-alias wxflags : : : :
-   <cxxflags>"`$(WX_CONFIG) --cxxflags`" ;
+local wx_cppflags = [ SHELL "$(WX_CONFIG) --cxxflags" ] ;
 
-exe squadt : wxflags
+exe squadt :
          squadt.cpp
          specification.cpp
          project_manager.cpp
@@ -28,7 +27,8 @@ exe squadt : wxflags
          /libraries/transport//transport
          /libraries/xml2pp//xml_text_reader
          /boost/filesystem//boost_filesystem
-        : <linkflags>"`$(WX_CONFIG) --libs core base adv net`" ;
+        : <cxxflags>"`$(WX_CONFIG) --cxxflags`"
+          <linkflags>"`$(WX_CONFIG) --libs core base adv net`" ;
 
 install install-squadt : squadt
         : <dll-path>$(LIB_DIR)
@@ -37,4 +37,3 @@ install install-squadt : squadt
 install install-libraries : squadt
         : <install-dependencies>on <install-type>LIB
         : <location>$(LIB_DIR) ;
-

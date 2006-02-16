@@ -20,11 +20,13 @@ import feature ;
 import property-set ;
 import build-request ;
 import errors : error ;
+import virtual-target ;
 import "class" : new ;
 
 import builtin ;
 import make ;
 import os ;
+import option ;
 
 import version ;
 
@@ -46,7 +48,7 @@ if $(test-config)
 {
     module test-config 
     {
-        import project : _using : using ;
+        import toolset : using : using ;
     }
     import test-config ;    
 }
@@ -130,6 +132,10 @@ if --version in [ modules.peek : ARGV ]
     EXIT ;
 }
 
+
+option.process ;
+
+
 # We always load project in "." so that 'use-project' directives has
 # any chance of been seen. Otherwise, we won't be able to refer to
 # subprojects using target ids.
@@ -162,6 +168,11 @@ if $(properties)
     }
     expanded = $(xexpanded) ;    
 }
+else
+{
+    expanded = [ property-set.empty ] ;
+}
+
 
 
 local target-ids = [ $(build-request).get-at 1 ] ;
@@ -169,10 +180,16 @@ local targets
 local clean ;
 
 
+if "--clean-all" in [ modules.peek : ARGV ]
+{
+    cleanall = true ;
+}
+
 if "--clean" in [ modules.peek : ARGV ]
 {
     clean = true ;
 }
+
 
 local bjam-targets ;
 
@@ -225,7 +242,7 @@ for local id in $(target-ids)
     if $(id) = clean
     {
         clean = true ;
-    }
+    }    
     else
     {
         local t ;
@@ -258,25 +275,88 @@ if ! $(targets)
 
 virtual-targets = ;
 
-if $(expanded) 
-{        
-    for local p in $(expanded)
-    {
-        for local t in $(targets)
-        {   
-            local g = [ $(t).generate $(p) ] ;
-            virtual-targets += $(g[2-]) ;
-        }        
-    }
-}
-else
+# Virtual targets obtained when building main targets references on
+# the command line. When running
+#
+#   bjam --clean main_target
+#
+# we want to clean the files that belong only to that main target,
+# so we need to record which targets are produced.
+local results-of-main-targets ;
+
+for local p in $(expanded)
 {
     for local t in $(targets)
-    {        
-        local g = [ $(t).generate [ property-set.empty ] ] ;
+    {   
+        local g = [ $(t).generate $(p) ] ;
+        if ! [ class.is-a $(t) : project-target ]
+        {
+            results-of-main-targets += $(g[2-]) ;
+        }        
         virtual-targets += $(g[2-]) ;
-    }    
+    }        
 }
+
+# The cleaning is tricky. Say, if
+# user says: 
+#
+#    bjam --clean foo
+#
+# where 'foo' is a directory, then we want to clean targets
+# which are in 'foo' or in any children Jamfiles, but not in any
+# unrelated Jamfiles. So, we collect the list of project under which
+# cleaning is allowed.
+#
+
+local projects-to-clean ;
+local targets-to-clean ;
+if $(clean) || $(clean-all)
+{    
+    for local t in $(targets)
+    {
+        if [ class.is-a $(t) : project-target ]
+        {
+            projects-to-clean += [ $(t).project-module ] ;
+        }       
+    }
+    
+    local subvariants ;
+    for local t in $(results-of-main-targets)
+    {
+        # Don't include roots or sources.
+        targets-to-clean += [ virtual-target.traverse $(t) ] ;
+    }
+    targets-to-clean = [ sequence.unique $(targets-to-clean) ] ;        
+}
+
+# Returns 'true' if 'project' is a child of 'current-project',
+# possibly indirect, or is equal to 'project'.
+# Returns 'false' otherwise.
+rule is-child ( project )
+{
+    if ! $(.is-child.$(project))
+    {
+        local r = false ;
+        if $(project) in $(projects-to-clean)
+        {            
+            r = true ;
+        }
+        else 
+        {
+            local parent = [ project.attribute $(project) parent-module ] ;
+            if $(parent) && $(parent) != user-config
+            {
+                r = [ is-child $(parent) ] ;
+            }            
+        }       
+        
+        .is-child.$(project) = $(r) ;
+    }
+    
+    return $(.is-child.$(project)) ;    
+}
+
+
 
 
 actual-targets = ;
@@ -289,12 +369,35 @@ DEPENDS all : $(actual-targets) ;
 
 if $(bjam-targets)
 {
-    UPDATE $(bjam-targets) ;
+    UPDATE $(bjam-targets:G=e) ;        
+}
+else if $(cleanall)
+{    
+    UPDATE clean-all ;
 }
 else if $(clean)
 {
+    local to-clean ;
+    for local t in [ virtual-target.all-targets ]
+    {
+        local p = [ $(t).project ] ;
+        if $(t) in $(targets-to-clean)
+           || [ is-child [ $(p).project-module ] ] = true
+        {
+            to-clean += $(t) ;
+        }        
+    }
+    local to-clean-actual ;
+    for local t in $(to-clean)
+    {
+        to-clean-actual += [ $(t).actualize ] ;
+    }
+    common.Clean clean : $(to-clean-actual) ;
     UPDATE clean ;
+    
+    
 }
+
 else
 {
     UPDATE all ;

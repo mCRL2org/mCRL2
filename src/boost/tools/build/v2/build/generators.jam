@@ -541,28 +541,20 @@ class generator
     {
         # We process each source one-by-one, trying to convert it to
         # a usable type.
-        local failed ;
-        while $(sources) && ! $(failed)
+        for local source in $(sources)
         {
             local _c ;
             local _b ;
             # TODO: need to check for failure on each source.
             convert-to-consumable-types $(project) : $(property-set)
-              : $(sources[1]) : true : _c _b ;
+              : $(source) : true : _c _b ;
             if ! $(_c)
             {
-                generators.dout [ indent ] " failed to convert " $(sources[1]) ;
-                # failed = true ;
+                generators.dout [ indent ] " failed to convert " $(source) ;
             }
             $(consumed-var) += $(_c) ;            
             $(bypassed-var) += $(_b) ;
-            sources = $(sources[2-]) ;
         }           
-        if $(failed)
-        {
-            $(consumed-var) = ;
-            $(bypassed-var) = ;
-        }        
     }
         
     rule consume-directly ( source : consumed-var : missing-types-var )
@@ -606,7 +598,11 @@ rule register ( g )
 {
     .generators += $(g) ;
                    
-    for local t in [ $(g).target-types ] 
+    # A generator can produce several targets of the
+    # same type. We want unique occurence of that generator
+    # in .generators.$(t) in that case, otherwise, it will
+    # be tried twice and we'll get false ambiguity.
+    for local t in [ sequence.unique [ $(g).target-types ] ]
     {            
         .generators.$(t) += $(g) ;
     }    
@@ -999,7 +995,7 @@ local rule find-viable-generators-aux ( target-type : property-set )
     return $(viable-generators) ;
 }
 
-local rule find-viable-generators ( target-type : property-set )
+rule find-viable-generators ( target-type : property-set )
 {
     local key = $(target-type).$(property-set) ;
     local l = $(.fv.$(key)) ;
@@ -1071,6 +1067,7 @@ local rule construct-really (
       " viable generators" ;
     
     local result ;
+    local generators-that-succeeded ;
     for local g in $(viable-generators)
     {
         # This variable will be restored on exit from this scope.
@@ -1081,9 +1078,31 @@ local rule construct-really (
         
         if $(r)
         {
+            generators-that-succeeded += $(g) ;
             if $(result)
             {
-                error "Ambiguity found when searching for best transformation" ;
+                ECHO "Error: ambiguity found when searching for best transformation" ;
+                ECHO "Trying to produce type '$(target-type)' from: " ;
+                for local s in $(sources)
+                {
+                    ECHO " - " [ $(s).str ] ;
+                }
+                ECHO "Generators that succeeded:" ;
+                for local g in $(generators-that-succeeded)
+                {
+                    ECHO " - " [ $(g).id ] ;
+                }
+                ECHO "First generator produced: " ;
+                for local t in $(result[2-])
+                {
+                    ECHO " - " [ $(t).str ] ;
+                }
+                ECHO "Second generator produces: " ;
+                for local t in $(r[2-])
+                {
+                    ECHO " - " [ $(t).str ] ;
+                }
+                EXIT ;
             }
             else
             {

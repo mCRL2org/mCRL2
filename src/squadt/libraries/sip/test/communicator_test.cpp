@@ -163,7 +163,9 @@ void message_wrapper() {
 
   sip_communicator c;
   sip_communicator d;
-  message m(data);
+  message m;
+
+  m.set_content(data);
 
   c.connect(d);
 

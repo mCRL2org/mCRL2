@@ -23,11 +23,7 @@ import sequence ;
 rule using ( toolset-module : * )
 {
     import $(toolset-module) ;
-    if ! $(.$(toolset-module)-init-callled)
-    {        
-        $(toolset-module)-init-callled = true ;
-        $(toolset-module).init $(2) : $(3) : $(4) : $(5) : $(6) : $(7) : $(8) : $(9) ;
-    }    
+    $(toolset-module).init $(2) : $(3) : $(4) : $(5) : $(6) : $(7) : $(8) : $(9) ;
 }
 
 # Expands subfeatures in each property sets.
@@ -70,6 +66,16 @@ rule flags ( rule-or-module   # If contains dot, should be a rule name.
                               # "gcc". Subfeatures, like in "<toolset>gcc-3.2"
                               # are allowed. If left empty, the flag will
                               # always used.
+                              #
+                              # Propery sets may use value-less properties 
+                              # ('<a>'  vs. '<a>value') to match absent 
+                              # properties. This allows to separately match
+                              #
+                              #   <architecture>/<address-model>64
+                              #   <architecture>ia64/<address-model>
+                              #
+                              # Where both features are optional. Without this
+                              # syntax we'd be forced to define "default" value.
 
 
              values * :       # The value to add to variable. If <feature>
@@ -77,16 +83,35 @@ rule flags ( rule-or-module   # If contains dot, should be a rule name.
                               # will be added.
              unchecked ?      # If value 'unchecked' is passed, will not test
                               # that flags are set for the calling module.
+             : hack-hack ?    # For 
+                              #   flags rule OPTIONS <cxx-abi> : -model ansi
+                              # Treak <cxx-abi> as condition
+                              # FIXME: ugly hack.                      
           )
 {
-    local module_ = [ MATCH "([^.]*).*" : $(rule-or-module) ] ;
     local caller = [ CALLER_MODULE ] ;
-    if $(unchecked) != unchecked && $(module_) != $(caller)
+    if ! [ MATCH ".*([.]).*" : $(rule-or-module) ]
+       && [ MATCH "(Jamfile<.*)" : $(caller) ]
     {
-        errors.error "Module $(caller) attempted to set flags for module $(module_)" ;
+        # Unqualified rule name, used inside Jamfile.
+        # (most likely used with 'make' or 'notfile' rules.
+        # This prevents setting flags on entire Jamfile module
+        # (this will be considered as rule), but who cares?
+        # Probably, 'flags' rule should be split into 'flags' and
+        # 'flags-on-module'.
+        rule-or-module = $(caller).$(rule-or-module) ;
+    }
+    else
+    {              
+        local module_ = [ MATCH "([^.]*).*" : $(rule-or-module) ] ;
+        if $(unchecked) != unchecked && $(module_) != $(caller)
+        {
+            errors.error "Module $(caller) attempted to set flags for module $(module_)" ;
+        }
     }
     
-    if $(condition) && ! $(condition:G=)
+    
+    if $(condition) && ! $(condition:G=) && ! $(hack-hack)
     {
         # We have condition in the form '<feature>', that is, without
         # value. That's a previous syntax:
@@ -133,12 +158,41 @@ local rule add-flag ( rule-or-module :
 # 'properties', or an empty list if no such element exists.
 rule find-property-subset ( property-sets * : properties * )
 {
+    # cut property values off
+    local prop-keys = $(properties:G) ;
+
     local result ;
     for local s in $(property-sets)
     {
         if ! $(result)
         {
-            if [ feature.split $(s) ] in $(properties)
+            # Handle value-less properties like '<architecture>' (compare with 
+            # '<architecture>x86').
+
+            local set = [ feature.split $(s) ] ;
+
+            # Find the set of features that
+            # - have no property specified in required property set 
+            # - are omitted in build property set
+            local default-props ;
+            for local i in $(set)
+            {
+                # If $(i) is a value-less property it should match default 
+                # value of an optional property. See the first line in the 
+                # example below:
+                #
+                #  property set     properties     result
+                # <a> <b>foo      <b>foo           match
+                # <a> <b>foo      <a>foo <b>foo    no match
+                # <a>foo <b>foo   <b>foo           no match
+                # <a>foo <b>foo   <a>foo <b>foo    match
+                if ! ( $(i:G=) || ( $(i:G) in $(prop-keys) ) )
+                {
+                    default-props += $(i) ;
+                }
+            }
+
+            if $(set) in $(properties) $(default-props)
             {
                 result = $(s) ;
             }
@@ -211,7 +265,7 @@ rule set-target-variables-aux ( rule-or-module : property-set )
         local variable = $(.$(rule-or-module).variable.$(f)) ;
         local condition = $(.$(rule-or-module).condition.$(f)) ;
         local values = $(.$(rule-or-module).values.$(f)) ;
-
+        
         
         if ! $(condition) ||
           [ find-property-subset $(condition) : $(properties) ]
@@ -258,17 +312,22 @@ rule set-target-variables ( rule-or-module targets + : property-set )
         }
         .stv.$(key) = $(settings) ;
     }
-        
+    
     if $(settings) != none
     {
-        while $(settings)
+        local var-name = ;
+        for local name-or-value in $(settings)
         {
-            # Here, $(settings[1]) is the name of variable to assign
-            # and $(settings[2]) is the value.
-            
-            $(settings[1]) on $(targets) += $(settings[2]) ;
-            settings = $(settings[3-]) ;
-        }    
+            if $(var-name)
+            {
+                $(var-name) on $(targets) += $(name-or-value) ;
+                var-name = ;
+            }
+            else
+            {
+                var-name = $(name-or-value) ;
+            }
+        }
     }
 }
 
@@ -385,4 +444,10 @@ local rule __test__ ( )
     local p = <b>0 <c>1 <d>2 <e>3 <f>4 ;
     assert.result <c>1/<d>2/<e>3 : find-property-subset <c>1/<d>2/<e>3 <a>0/<b>0/<c>1 <d>2/<e>5 <a>9 : $(p) ;
     assert.result : find-property-subset <a>0/<b>0/<c>9/<d>9/<e>5 <a>9 : $(p) ;
+
+    local p-set = <a>/<b> <a>0/<b> <a>/<b>1 <a>0/<b>1 ;
+    assert.result <a>/<b>   : find-property-subset $(p-set) :           ;
+    assert.result <a>0/<b>  : find-property-subset $(p-set) : <a>0      <c>2 ;
+    assert.result <a>/<b>1  : find-property-subset $(p-set) : <b>1      <c>2 ;
+    assert.result <a>0/<b>1 : find-property-subset $(p-set) : <a>0 <b>1 ;
 }

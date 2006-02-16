@@ -83,7 +83,7 @@ std::cerr << "  Message  `" << d.peek_message().to_string() << "'" << std::endl;
   r.to_xml(temporary);
 
   /* New reader */
-  xml2pp::text_reader reader(d.pop_message().to_string());
+  xml2pp::text_reader reader(d.peek_message().to_string());
 
   report::from_xml(reader)->to_xml(copy);
 std::cerr << "  Message  `" << copy.str() << "'" << std::endl;

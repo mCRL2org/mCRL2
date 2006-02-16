@@ -250,7 +250,8 @@ rule copy-file ( project : source : properties )
     local targets ;
     local name = [ $(source).name ] ;
                
-    new-a = [ new action $(source) : common.copy : $(properties) ] ;    
+    new-a = [ 
+      new non-scanning-action $(source) : common.copy : $(properties) ] ;    
     local source-root = [ $(properties).get <install-source-root> ] ;
     if $(source-root) 
     {        
@@ -343,16 +344,47 @@ class installed-shared-lib-generator : generator
     }
     
     rule run ( project name ? : property-set : source : multiple ? )
-    {
-        local copied = [ stage.copy-file $(project) 
-          : $(source) : $(property-set) ] ; 
-        
+    {                        
         if [ $(property-set).get <os> ] = NT
         {
+            local copied = [ stage.copy-file $(project) 
+              : $(source) : $(property-set) ] ; 
+        
+            copied = [ virtual-target.register $(copied) ] ;
+            
             return $(copied) ;
         }
         else 
         {
+            local a = [ $(source).action ] ;            
+            local copied ;
+            if ! $(a)
+            {
+                # Non-derived file, just copy.
+                copied = [ stage.copy-file $(project) 
+                  : $(source) : $(property-set) ] ; 
+            }
+            else
+            {                            
+                local cp = [ $(a).properties ] ;
+                local current-dll-path = [ $(cp).get <dll-path> ] ;
+                local new-dll-path = [ $(property-set).get <dll-path> ] ;
+                                    
+                if $(current-dll-path) != $(new-dll-path)
+                {
+                    # Rpath changed, need to relink.
+                    copied = [ stage.relink-file 
+                        $(project) : $(source) : $(property-set) ] ;
+                }
+                else
+                {                                        
+                    copied = [ stage.copy-file $(project) 
+                      : $(source) : $(property-set) ] ; 
+                }
+            }
+                                
+            copied = [ virtual-target.register $(copied) ] ;
+                                    
             local result = $(copied) ;
             # If the name is in the form NNN.XXX.YYY.ZZZ, where all
             # 'X', 'Y' and 'Z' are numbers, we need to create
@@ -361,8 +393,6 @@ class installed-shared-lib-generator : generator
               : [ $(copied).name ] ] ;
             if $(m)
             {
-                result += [ stage.symlink $(m[1]) : $(project)
-                  : $(copied) : $(property-set) ] ;
                 result += [ stage.symlink $(m[1]).$(m[2]) : $(project)
                   : $(copied) : $(property-set) ] ;
                 result += [ stage.symlink $(m[1]).$(m[2]).$(m[3])  : $(project)

@@ -18,7 +18,7 @@ namespace sip {
     /* Abstract communicator class that divides an incoming data stream in messages */
     class sip_communicator : public transport::transporter {
       public:
- 
+
         typedef boost::shared_ptr < message > message_ptr;
  
         sip_communicator();
@@ -54,8 +54,14 @@ namespace sip {
         /** For barrier synchronisation (used with function await_message) */
         boost::barrier   wait_lock;
  
-        bool             using_buffer;
+        /** Whether a message start tag has been matched after the most recent message end tag */
+        bool             message_open;
+
+        /** Whether there are waiters for wait_lock */
         bool             using_lock;
+
+        /** The number of tag elements (of message::tag) that have been matched at the last delivery */
+        unsigned char    partially_matched;
     };
  
     /* Send a message */

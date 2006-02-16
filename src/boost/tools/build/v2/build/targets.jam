@@ -79,6 +79,7 @@ import virtual-target ;
 import path ;
 import set ;
 import assert ;
+import indirect ;
 
 # Base class for all abstract targets.
 class abstract-target 
@@ -89,7 +90,6 @@ class abstract-target
         : project-target      # the project target to which this one belongs
     )
     {        
-        assert.true class.is-a $(project-target) : project-target ;
         # Note: it might seem that we don't need either name or project at all.
         # However, there are places where we really need it. One example is error
         # messages which should name problematic targets. Another is setting correct
@@ -281,7 +281,8 @@ class project-target : abstract-target
         local self-location = [ get location ] ;
         for local pn in [ get projects-to-build ]
         {
-            local p = [ project.module-name [ path.join $(self-location) $(pn) ] ] ;
+            local p = [ project.module-name 
+                [ path.root $(pn) $(self-location) ] ] ;
             result += [ project.target $(p) ] ;
         }
                         
@@ -364,22 +365,28 @@ class project-target : abstract-target
         }
         else
         {   
-            # Interpret as filename            
-            result = [ new file-reference [ path.make $(id) ] : $(project) ] ;
- 
-            if ! [ $(result).exists ]
-            {
-                # File actually does not exist.
-                # Reset 'target' so that an error is issued.
-                result = ;
-            }            
-            
             # Interpret target-name as name of main target
+            # Need to do this before checking for file. Consider this:
+            #
+            #  exe test : test.cpp ;
+            #  install s : test : <location>. ;
+            #
+            # After first build we'll have target 'test' in Jamfile and file
+            # 'test' on the disk. We need target to override the file.            
+            result = [ main-target $(id) ] ;            
+            
             if ! $(result)
             {
-                result = [ main-target $(id) ] ;
+                result = [ new file-reference [ path.make $(id) ] : $(project) ] ;
+ 
+                if ! [ $(result).exists ]
+                {
+                    # File actually does not exist.
+                    # Reset 'target' so that an error is issued.
+                    result = ;
+                }            
             }
-            
+                                         
             # Interpret id as project-id
             if ! $(result)
             {                
@@ -928,16 +935,33 @@ rule common-properties2 ( build-request requirements )
     local raw = [ $(build-request).raw ] ;
     raw = [ property.refine $(raw) : 
       [ feature.expand [ $(requirements).non-conditional ] ] ] ;
-    
+      
     # We've collected properties that surely must be present in common
     # properties. We now try to figure out what other properties
     # should be added in order to satisfy rules (4)-(6) from the docs.        
     
     local conditionals = [ $(requirements).conditional ] ;
-    local count = $(conditionals) and-once-more ;
+    # The 'count' variable has one element for each conditional feature
+    # and for each occurence of '<indirect-conditional>' feature.
+    # It's used as a loop counter: for each iteration of the loop
+    # before we remove one element and the property set should
+    # stabilize before we've done. It's supposed to #conditionals iterations
+    # should be enough for properties to propagate along conditions in any
+    # direction.
+    local count = $(conditionals) 
+                  [ $(requirements).get <conditional> ]                    
+                  and-once-more ;
     local prev ;
     
     local current = $(raw) ;
+    
+    # It's assumed that ordinary conditional requirements can't add
+    # <indirect-conditional> properties, and that rules refered
+    # by <indirect-conditional> properties can't add new 
+    # <indirect-conditional> properties. So the list of indirect conditionals
+    # does not change.
+    local indirect = [ $(requirements).get <conditional> ] ;
+    indirect = [ MATCH @(.*) : $(indirect) ] ;  
     
     local ok ;
     while $(count) 
@@ -945,6 +969,13 @@ rule common-properties2 ( build-request requirements )
         # Evaluate conditionals in context of current properties
         local e = [ property.evaluate-conditionals-in-context $(conditionals) 
           : $(current) ] ;
+        
+        # Evaluate indirect conditionals.
+        for local i in $(indirect)
+        {
+            e += [ indirect.call $(i) $(current) ] ;
+        }
+                             
         if $(e) = $(prev)
         {                
             # If we got the same result, we've found final properties.
@@ -1010,6 +1041,22 @@ class basic-target : abstract-target
         {
             errors.error "gristed element in sources for" [ full-name ] ;
         }
+    }
+    
+    # Returns the list of abstract-targets which are used as sources.
+    # The extra properties specified for sources are not represented.
+    # The only used of this rule at the moment is the "--dump-test"
+    # feature of the test system.
+    rule sources ( )
+    {
+        if ! $(self.source-targets) {
+            for local s in $(self.sources)
+            {
+                self.source-targets += 
+                  [ targets.resolve-reference $(s) : $(self.project) ] ;
+            }            
+        }    
+        return $(self.source-targets) ;
     }
     
     rule requirements ( )
@@ -1093,7 +1140,7 @@ class basic-target : abstract-target
                 ECHO [ targets.indent ] "Common properties are" [ $(rproperties).raw ] ;
             }
                         
-            if $(rproperties[1]) != "@error"                    
+            if $(rproperties[1]) != "@error" && [ $(rproperties).get <build> ] != no
             {
                 local source-targets ;
                 local properties = [ $(rproperties).non-dependency ] ;
@@ -1109,7 +1156,7 @@ class basic-target : abstract-target
                 if [ modules.peek : .debug-building ] 
                 {
                     ECHO [ targets.indent ] 
-                      "Usage requirements for $(self.name) are $(usage-requirements)" ;
+                      "Usage requirements for $(self.name) are " $(usage-requirements) ;
                 }
 
                 rproperties = [ property-set.create $(properties) 
@@ -1130,17 +1177,34 @@ class basic-target : abstract-target
                 local gur = $(result[1]) ;
                 result = $(result[2-]) ;
 
-                local s = [ create-subvariant $(result) : $(property-set) : $(source-targets)
+                local s = [ create-subvariant 
+                    $(result) :
+                    [ virtual-target.recent-targets ] 
+                      : $(property-set) : $(source-targets)
                   : $(rproperties) : $(usage-requirements) ] ;
+                virtual-target.clear-recent-targets ;
 
                 local ur = [ compute-usage-requirements $(s) ] ;
                 ur = [ $(ur).add $(gur) ] ;
                 $(s).set-usage-requirements $(ur) ;
+                if [ modules.peek : .debug-building ] 
+                {
+                    ECHO [ targets.indent ]
+                      "Usage requirements from $(self.name) are "
+                        [ $(ur).raw ] ;
+                }
+                
+                
                 self.generated.$(property-set) = $(ur) $(result) ;
             } 
             else
             {
                 self.generated.$(property-set) = $(rproperties) ;
+                
+                if $(rproperties[1]) != "@error"
+                {
+                    ECHO "Skipping build of" [ full-name ] "-- <build>no in properties." ;
+                }
             }       
         }                
         else
@@ -1174,26 +1238,49 @@ class basic-target : abstract-target
         local result = [ property-set.create
             [ $(xusage-requirements).non-dependency ] $(extra) ] ;
         
-        result = [ $(result).add 
-          [ $(subvariant).sources-usage-requirements ] ] ;        
+        # Propagate usage requirements we've got from sources, except
+        # for the <pch-header> and <pch-file> features.
+        #
+        # That feature specifies which pch file to use, and should apply
+        # only to direct dependents. Consider:
+        #
+        #   pch pch1 : ...
+        #   lib lib1 : ..... pch1 ;
+        #   pch pch2 : 
+        #   lib lib2 : pch2 lib1 ;
+        #
+        # Here, lib2 should not get <pch-header> property from pch1.
+        #
+        # Essentially, when those two features are in usage requirements,
+        # they are propagated only to direct dependents. We might need
+        # a more general mechanism, but for now, only those two
+        # features are special.
+        local raw = [ $(subvariant).sources-usage-requirements ] ;
+        raw = [ $(raw).raw ] ;
+        raw = [ property.change $(raw) : <pch-header> ] ;      
+        raw = [ property.change $(raw) : <pch-file> ] ;             
+        result = [ $(result).add [ property-set.create $(raw) ] ] ;        
         
         return $(result) ;
     }
     
     # Creates a new subvariant-dg instances for 'targets'
-    local rule create-subvariant ( targets * : build-request : sources * :
+    # - 'root-targets' the virtual targets will be returned to dependents
+    # - 'all-targets' all virtual 
+    #      targets created while building this main target
+    # - 'build-request' is property-set instance with requested build properties
+    local rule create-subvariant ( root-targets * 
+        : all-targets * : build-request : sources * :
         rproperties 
         : usage-requirements )
     {
-        for local e in $(targets)                    
+        for local e in $(root-targets)                    
         {
             $(e).root true ;
         }                    
         
         # Process all vtargets that will be created if this main target
         # is created.
-        local all-targets = 
-          [ sequence.transform virtual-target.traverse : $(targets) ] ; 
         local s = [ new subvariant $(__name__) : $(build-request) : $(sources)
           : $(rproperties) : $(usage-requirements) : $(all-targets) ] ;
         for local v in $(all-targets)          
@@ -1235,14 +1322,27 @@ class typed-target : basic-target
             
     rule construct ( name : source-targets * : property-set )
     {
-        local r = [ generators.construct $(self.project) $(name) : $(self.type) 
+        local r = [ generators.construct $(self.project) $(name:S=) : $(self.type) 
           : [ property-set.create [ $(property-set).raw ] # [ feature.expand
               <main-target-type>$(self.type) ]
           # ]
             : $(source-targets) ] ;
         if ! $(r)
-        {
-            errors.error "unable to construct" [ full-name ] ;
+        {                        
+            ECHO "error: unable to construct " [ full-name ] ;
+            
+            # Are there any top-level generators for this type/property set.
+            if ! [ generators.find-viable-generators 
+                $(self.type) : $(property-set) ]
+            {
+                ECHO "error: no generators were found for type '$(self.type)'" ;
+                ECHO "error: and the requested properties" ;
+                ECHO "error: make sure you've configured the needed tools" ;
+                ECHO "See http://boost.org/boost-build2/doc/html/bbv2/advanced/configuration.html" ;
+            }
+            
+            ECHO "To debug this problem, try the --debug-generators option." ;
+            EXIT ;
         }
         
         return $(r) ;
@@ -1260,13 +1360,8 @@ rule main-target-sources ( sources * : main-target-name )
         if [ class.is-instance $(t) ]
         {
             local name = [ $(t).name ] ;
-            # NOTE: on windows, this won't work if 'main-target-name'
-            # if single letter. But other alternatives are even worse.
-            local new-name = $(main-target-name)..$(name) ;
+            local new-name = $(main-target-name)__$(name) ;
             $(t).rename $(new-name) ;
-            #local p = [ $(t).project ] ;            
-            #local pt = [ project.target $(p) ] ;
-            #$(pt).rename-main-target $(name) : $(new-name) ;
             result += $(new-name) ;
         }
         else

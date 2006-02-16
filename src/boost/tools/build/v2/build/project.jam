@@ -76,7 +76,7 @@ rule load ( jamfile-location )
         # loading the current Jamfile.       
         for local p in [ attribute $(module-name) projects-to-build ]
         {
-            load [ path.join $(jamfile-location) $(p) ] ;
+            load [ path.root $(p) $(jamfile-location) ] ;
         }
 
         local used = [ modules.peek $(module-name) : .used-projects ] ;
@@ -195,7 +195,7 @@ rule module-name ( jamfile-location )
 # declarations.
 #
 JAMFILE = [ modules.peek : JAMFILE ] ;
-JAMFILE ?= [Jj]amfile.v2 [Jj]amfile [Jj]amfile.jam ;
+JAMFILE ?= [Bb]uild.jam [Jj]amfile.v2 [Jj]amfile [Jj]amfile.jam ;
 
 # Find the Jamfile at the given location. This returns the exact names of
 # all the Jamfiles in the given directory. The optional parent-root argument
@@ -238,7 +238,7 @@ local rule find-jamfile (
     #
     if $(jamfile-to-load[2-])
     {
-        local v2-jamfiles = [ MATCH (.*[Jj]amfile\\.v2) : $(jamfile-to-load) ] ;
+        local v2-jamfiles = [ MATCH (.*[Jj]amfile\\.v2)|(.*[Bb]uild\\.jam) : $(jamfile-to-load) ] ;
 
         if $(v2-jamfiles) && ! $(v2-jamfiles[2])
         {
@@ -319,6 +319,9 @@ local rule load-jamfile (
         errors.error "The value of the .current-project variable"
           : "has magically changed after loading a Jamfile."
           : "This means some of the targets might be defined a the wrong project."
+          : "after loading " $(jamfile-module) 
+          : "expected value " $(saved-project)  
+          : "actual value " $(.current-project)
           ;
     }
 
@@ -453,6 +456,7 @@ rule initialize (
     if $(parent-module)
     {        
         inherit-attributes $(module-name) : $(parent-module) ;
+        $(attributes).set parent-module : $(parent-module) : exact ;
     }
     
     if $(jamroot)
@@ -624,7 +628,8 @@ class project-attributes
         }            
         else if $(attribute) = "build-dir"
         {
-            self.build-dir = [ path.root $(specification) $(self.location) ] ;
+            self.build-dir = [ path.root 
+                [ path.make $(specification) ] $(self.location) ] ;
         }        
         else if ! $(attribute) in "id" "default-build" "location" "source-location"
           "parent" "projects-to-build" "project-root"
@@ -714,20 +719,6 @@ rule use ( id : location )
     .current-project = $(saved-project) ;
 }
 
-
-# Initializes an additional toolset-like module.
-# First load 'toolset-module' and then calls its 'init'
-# rule with trailing arguments
-rule _using ( toolset-module : * )
-{
-    import $(toolset-module) ;
-    if ! $(.$(toolset-module)-init-callled)
-    {        
-        $(toolset-module)-init-callled = true ;
-        $(toolset-module).init $(2) : $(3) : $(4) : $(5) : $(6) : $(7) : $(8) : $(9) ;
-    }    
-}
-
 # This module defines rules common to all projects
 module project-rules
 {                
@@ -745,7 +736,7 @@ module project-rules
         local x = [ modules.peek : BOOST_BUILD_PATH ] ;
         local caller = [ modules.binding $(__name__) ] ;
         modules.poke : BOOST_BUILD_PATH : $(caller:D) $(x) ;
-        project._using $(1) : $(2) : $(3) : $(4) : $(5) : $(6) : $(7) : $(8) : $(9) ;
+        toolset.using $(1) : $(2) : $(3) : $(4) : $(5) : $(6) : $(7) : $(8) : $(9) ;
         modules.poke : BOOST_BUILD_PATH : $(x) ;
         
         # The above might have clobbered .current-project
@@ -761,12 +752,12 @@ module project-rules
         modules.import project ;
                 
         local caller = [ CALLER_MODULE ] ;
+        local saved = [ modules.peek project : .current-project ] ;
         module $(caller)
         {
             modules.import $(1) : $(2) : $(3) ;
         }
-        modules.poke project : .current-project 
-          : [ project.target $(__name__) ] ;                        
+        modules.poke project : .current-project : $(saved) ;        
     }
 
         
@@ -886,7 +877,11 @@ module project-rules
     rule explicit ( target-names * )
     {
         import project ;
-        local t = [ project.target $(__name__) ] ;
+        # If 'explicit' is used in a helper rule defined in Jamroot,
+        # and inherited by children, then most of the time 
+        # we want 'explicit' to operate on the Jamfile where
+        # the helper rule is invoked.
+        local t = [ project.current ] ;
         for local n in $(target-names)
         {            
             $(t).mark-target-as-explicit $(n) ;
@@ -899,7 +894,9 @@ module project-rules
         import project ;
         import sequence ;
         
-        local location = [ project.attribute $(__name__) source-location ] ;
+        local current = [ project.current ] ;
+                
+        local location = [ $(current).get source-location ] ;
 
         local result ;
         local paths = [ path.glob $(location) : 

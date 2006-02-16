@@ -11,7 +11,8 @@ project sip
 lib sip_communicator :
         sip_communicator.cpp
         /boost/thread//boost_thread
-        /libraries/transport//transport ;
+        /libraries/transport//transport
+        /libraries/xml2pp//xml_text_reader ;
 
 lib sip_common :
         common.cpp
