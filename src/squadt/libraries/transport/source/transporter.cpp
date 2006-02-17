@@ -1,11 +1,11 @@
 #include <cassert>
 #include <algorithm>
 
-#include <transporter.h>
+#include <transport/transporter.h>
 
-#include <detail/socket_listener.h>
-#include <detail/direct_transceiver.h>
-#include <detail/socket_transceiver.h>
+#include <transport/detail/socket_listener.h>
+#include <transport/detail/direct_transceiver.h>
+#include <transport/detail/socket_transceiver.h>
 
 namespace transport {
   using namespace listener;

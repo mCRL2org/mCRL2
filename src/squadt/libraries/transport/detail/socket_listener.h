@@ -5,7 +5,7 @@
 #include <boost/bind.hpp>
 #include <boost/shared_ptr.hpp>
 
-#include "detail/listener.h"
+#include <transport/detail/listener.h>
 
 namespace transport {
   namespace transceiver {

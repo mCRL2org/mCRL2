@@ -4,10 +4,10 @@
 #include <boost/bind.hpp>
 #include <boost/asio.hpp>
 
-#include <transporter.h>
-#include <detail/transceiver.h>
-#include <detail/socket_listener.h>
-#include <detail/socket_scheduler.h>
+#include <transport/transporter.h>
+#include <transport/detail/transceiver.h>
+#include <transport/detail/socket_listener.h>
+#include <transport/detail/socket_scheduler.h>
 
 namespace transport {
   namespace transceiver {

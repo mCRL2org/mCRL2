@@ -3,6 +3,7 @@
 #include <iostream>
 
 #include <transport/transporter.h>
+#include <transport/detail/socket_transceiver.h>
 
 #include <boost/test/test_tools.hpp>
 #include <boost/test/unit_test.hpp>
@@ -164,6 +165,7 @@ void socket_send_receive() {
 
   initiator.set_string(initiator_data);
   connector.set_string(connector_data);
+
   initiator.send(test_data);
 
   while (connector.get_string().size() < test_data.size()) {
@@ -222,7 +224,7 @@ void mixed_demultiplexing() {
 test_suite* init_unit_test_suite( int argc, char * argv[] ) {
   using namespace boost::unit_test;
 
-  test_suite* test = BOOST_TEST_SUITE( "Proxy Library" );
+  test_suite* test = BOOST_TEST_SUITE( "Transport Library" );
 
   /* Change log parameters */
   unit_test_log_t::instance().set_threshold_level(log_messages);

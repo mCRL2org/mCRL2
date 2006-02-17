@@ -1,7 +1,7 @@
 #ifndef SOCKET_SCHEDULER_H
 #define SOCKET_SCHEDULER_H
 
-#include <detail/socket_transceiver.h>
+#include <transport/detail/socket_transceiver.h>
 
 namespace transport {
   namespace transceiver {

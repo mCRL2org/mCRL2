@@ -3,7 +3,7 @@
 
 #include <sstream>
 
-#include <detail/transceiver.h>
+#include <transport/detail/transceiver.h>
 
 namespace transport {
   namespace transceiver {

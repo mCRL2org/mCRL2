@@ -3,7 +3,7 @@ project transport
   : build-dir $(BUILD_TOP)
   : requirements
    <include>../../../../boost/
-   <include>../
+   <include>../../
    <define>BOOST_DATE_TIME_NO_LIB
   : usage-requirements
    <include>../../

@@ -42,12 +42,9 @@ void empty_message() {
   sip_communicator c;
   sip_communicator d;
 
-  d.add_listener();
-  c.connect();
+  c.connect(d);
 
   c.send(start_message + end_message);
-
-  d.await_message();
 
   c.disconnect(d);
 
