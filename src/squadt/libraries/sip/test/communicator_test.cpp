@@ -158,6 +158,58 @@ void split3_non_empty_message_and_garbage() {
   BOOST_CHECK(d.number_of_messages() == 1 && d.pop_message().to_string() == data + data + data);
 }
 
+/* Two communications fragmented open tag */
+void non_empty_message_and_fragmented_open_tag() {
+  BOOST_MESSAGE("Non-empty fragmented message open tag, two communications: ");
+
+  sip_communicator c;
+  sip_communicator d;
+
+  c.connect(d);
+
+  c.send(start_message.substr(0, start_message.size() >> 1));
+  c.send(start_message.substr(start_message.size() >> 1, start_message.size()) + data + end_message);
+
+  c.disconnect(d);
+
+  BOOST_CHECK(d.number_of_messages() == 1 && d.pop_message().to_string() == data);
+}
+
+/* Two communications and fragmented close tag */
+void non_empty_message_and_fragmented_close_tag() {
+  BOOST_MESSAGE("Non-empty fragmented message close tag, two communications: ");
+
+  sip_communicator c;
+  sip_communicator d;
+
+  c.connect(d);
+
+  c.send(start_message + data + end_message.substr(0, end_message.size() >> 1));
+  c.send(end_message.substr(end_message.size() >> 1, end_message.size()));
+
+  c.disconnect(d);
+
+  BOOST_CHECK(d.number_of_messages() == 1 && d.pop_message().to_string() == data);
+}
+
+/* Three communications fragmented open and close tags */
+void non_empty_message_and_fragmented_tags() {
+  BOOST_MESSAGE("Non-empty fragmented message open and close tags, three communications: ");
+
+  sip_communicator c;
+  sip_communicator d;
+
+  c.connect(d);
+
+  c.send(start_message.substr(0, start_message.size() >> 1));
+  c.send(start_message.substr(start_message.size() >> 1, start_message.size()) + data + end_message.substr(0, end_message.size() >> 1));
+  c.send(end_message.substr(end_message.size() >> 1, end_message.size()));
+
+  c.disconnect(d);
+
+  BOOST_CHECK(d.number_of_messages() == 1 && d.pop_message().to_string() == data);
+}
+
 void message_wrapper() {
   BOOST_MESSAGE("Data wrapping and sending: ");
 
@@ -192,6 +244,9 @@ test_suite* init_unit_test_suite( int argc, char * argv[] ) {
   test->add(BOOST_TEST_CASE(&split3_non_empty_message), 0, 2);
   test->add(BOOST_TEST_CASE(&split3_non_empty_message_fragmented), 0, 2);
   test->add(BOOST_TEST_CASE(&split3_non_empty_message_and_garbage), 0, 2);
+  test->add(BOOST_TEST_CASE(&non_empty_message_and_fragmented_open_tag), 0, 2);
+  test->add(BOOST_TEST_CASE(&non_empty_message_and_fragmented_close_tag), 0, 2);
+  test->add(BOOST_TEST_CASE(&non_empty_message_and_fragmented_tags), 0, 2);
   test->add(BOOST_TEST_CASE(&message_wrapper), 0, 2);
 
   return (test);
