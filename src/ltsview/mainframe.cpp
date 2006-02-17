@@ -119,6 +119,7 @@ void MainFrame::setupMainArea()
   mainSizer->Add( rightPanel, 1, wxALIGN_CENTER | wxEXPAND | wxALL, 0 );
   mainSizer->Fit( this );
   SetSizer( mainSizer );
+  Layout();
 }
 
 void MainFrame::setupRightPanel( wxPanel* panel )
@@ -169,6 +170,7 @@ void MainFrame::setupRightPanel( wxPanel* panel )
   sizer->Add( bottomNotebook, 0, wxEXPAND | wxALL, 5 );
   sizer->Fit( panel );
   panel->SetSizer( sizer );
+  panel->Layout();
 }
 
 void MainFrame::setupSettingsPanel( wxPanel* panel )
@@ -364,7 +366,9 @@ void MainFrame::setupSettingsPanel( wxPanel* panel )
   panelSizer->Add( rankstyleSizer, 0, wxEXPAND | wxALL, border );
   panelSizer->Add( new wxButton( panel, wxID_RESET, wxT("Default settings")
 	), 0, flags, border );
+  panelSizer->Fit( panel );
   panel->SetSizer( panelSizer );
+  panel->Layout();
 }
 
 void MainFrame::setupMarkPanel( wxPanel* panel )
@@ -415,7 +419,9 @@ void MainFrame::setupMarkPanel( wxPanel* panel )
   
   markSizer->Add( markStatesSizer, 0, wxEXPAND | wxALL, border );
   markSizer->Add( markTransitionsSizer, 0, wxEXPAND | wxALL, border );
+  markSizer->Fit( panel );
   panel->SetSizer( markSizer );
+  panel->Layout();
 }
 
 GLCanvas* MainFrame::getGLCanvas() const
