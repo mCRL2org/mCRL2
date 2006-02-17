@@ -3,6 +3,8 @@
 
 #include <ostream>
 
+#include <boost/noncopyable.hpp>
+
 #include <xml2pp/xml_text_reader.h>
 
 namespace sip {
@@ -17,8 +19,9 @@ namespace sip {
    * As well as any information about the controller that might be interesting
    * for a tool developer.
    **/
-  class controller_capabilities {
+  class controller_capabilities : public boost::noncopyable {
     friend class tool_communicator;
+    friend class controller_communicator;
 
     public:
       /** Type for protocol version */
@@ -43,10 +46,10 @@ namespace sip {
       display_dimensions current_dimensions;
 
       /** Constructor */
-      inline controller_capabilities(version);
+      inline controller_capabilities(const version);
 
       /** Set display dimensions */
-      inline void set_display_dimensions(const display_dimensions);
+      inline void set_display_dimensions(const unsigned short x, const unsigned short y, const unsigned short z);
 
       /** Read from XML stream */
       inline static controller_capabilities* from_xml(xml2pp::text_reader& reader);
@@ -63,7 +66,7 @@ namespace sip {
       inline display_dimensions get_display_dimensions() const;
   };
 
-  inline controller_capabilities::controller_capabilities(version v) : protocol_version(v) {
+  inline controller_capabilities::controller_capabilities(const version v) : protocol_version(v) {
     current_dimensions.x = 0;
     current_dimensions.y = 0;
     current_dimensions.z = 0;
@@ -73,8 +76,10 @@ namespace sip {
     return (protocol_version);
   }
 
-  inline void controller_capabilities::set_display_dimensions(const display_dimensions d) {
-    current_dimensions = d;
+  inline void controller_capabilities::set_display_dimensions(const unsigned short x, const unsigned short y, const unsigned short z) {
+    current_dimensions.x = x;
+    current_dimensions.y = y;
+    current_dimensions.z = z;
   }
 
   inline controller_capabilities::display_dimensions controller_capabilities::get_display_dimensions() const {
@@ -83,8 +88,8 @@ namespace sip {
 
   inline void controller_capabilities::to_xml(std::ostream& output) {
     output << "<capabilities>"
-           << "<protocol-version major=\"" << protocol_version.major
-           << "\" minor=\"" << protocol_version.minor << "\"/>"
+           << "<protocol-version major=\"" << (unsigned short) protocol_version.major
+           << "\" minor=\"" << (unsigned short) protocol_version.minor << "\"/>"
            << "<display-dimensions x=\"" << current_dimensions.x
            << "\" y=\"" << current_dimensions.y
            << "\" z=\"" << current_dimensions.z << "\"/>"

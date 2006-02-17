@@ -17,16 +17,15 @@ lib sip_communicator :
 lib sip_common :
         common.cpp
         report.cpp
+        display_layout.cpp
         exception.cpp
         sip_communicator
         /libraries/xml2pp//xml_text_reader ;
 
 lib sipc :
         sip_controller.cpp
-        layout.cpp
         sip_common ;
 
 lib sipt :
         sip_tool.cpp
-        layout.cpp
         sip_common ;

@@ -1,4 +1,5 @@
 #include <sip/sip_tool.h>
+#include <sip/sip_controller.h>
 
 #include <sstream>
 #include <iostream>
@@ -15,8 +16,43 @@ using namespace transport;
 using namespace sip;
 using namespace sip::communicator;
 
+/* Serialisation and deserialisation of a controller capabilities object */
+void controller_capabilities_serialisation() {
+  BOOST_MESSAGE(" Empty controller_capabilities object: ");
+
+  controller_communicator cc;
+  tool_communicator       tc;
+
+  /** Initiative is on the side of the tool */
+  tc.connect(cc);
+
+  tc.request_controller_capabilities();
+
+  tc.disconnect();
+
+  BOOST_MESSAGE(" Filled controller_capabilities object: ");
+
+  /* Example display dimensions */
+  controller_capabilities capabilities();
+
+  cc.set_display_dimensions(50,50,0);
+
+  tc.add_input_configuration("Testing", "aut");
+  tc.add_input_configuration("Testing", "svc");
+
+  tc.connect(cc);
+
+  tc.disconnect();
+}
+
+/* Serialisation and deserialisation of a report object */
+void report_serialisation() {
+  BOOST_MESSAGE(" Empty report object: ");
+  BOOST_MESSAGE(" Filled report object: ");
+}
+
 /* Single communication */
-void report_to_xml() {
+void report_communication() {
   BOOST_MESSAGE("Empty report: ");
 
   std::ostringstream temporary;
@@ -39,7 +75,7 @@ void report_to_xml() {
 
   BOOST_CHECK(d.pop_message().to_string() == std::string("<report></report>"));
 
-  BOOST_MESSAGE("Simple complete report: ");
+  BOOST_MESSAGE("Simple report: ");
 
   /* New tool configuration */
   configuration* config = new configuration;
@@ -101,7 +137,9 @@ test_suite* init_unit_test_suite( int argc, char * argv[] ) {
   /* Change log parameters */
   unit_test_log_t::instance().set_threshold_level(log_messages);
 
-  test->add(BOOST_TEST_CASE(&report_to_xml), 0, 2);
+  test->add(BOOST_TEST_CASE(&controller_capabilities_serialisation), 0, 2);
+  test->add(BOOST_TEST_CASE(&report_serialisation), 0, 2);
+  test->add(BOOST_TEST_CASE(&report_communication), 0, 2);
 
   return (test);
 }

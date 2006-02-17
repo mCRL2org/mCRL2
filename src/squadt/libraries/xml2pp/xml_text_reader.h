@@ -38,7 +38,7 @@ namespace xml2pp {
 
       ~text_reader();
 
-      /* Set schema for validation purposes throws if the first read() has already occured */
+      /* Set schema for validation purposes \attention{throws if the first read() has already occured} */
       inline void set_schema(const char*);
 
       /** Traverses of the XML document tree */

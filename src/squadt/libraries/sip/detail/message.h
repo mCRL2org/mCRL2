@@ -20,19 +20,19 @@ namespace sip {
       public:
         /** Type for message identification */
         enum message_type {
-          request_controller_capabilities,  /// \brief{request the controller a description of its capabilities}
-          reply_controller_capabilities,    /// \brief{send a description of controller capabilities to the tool}
-          request_tool_capabilities,        /// \brief{request a tool a description of its capabilities}
-          reply_tool_capabilities,          /// \brief{send a description of tool capabilities to the controller}
-          send_select_input_configuration,  /// \brief{send the selected input configuration to a tool}
-          signal_start,                     /// \brief{tool can start operation}
-          send_display_layout,              /// \brief{send the controller a layout description for the display}
-          send_display_data,                /// \brief{send the controller a data to be displayed using the current display layout}
-          send_interaction_data,            /// \brief{send a tool data from user interaction via the display associated with this tool}
-          request_termination,              /// \brief{send a tool the signal to end processing and terminate as soon as possible}
-          signal_termination,               /// \brief{send the controller the signal that the tool is about to terminate}
-          send_report,                      /// \brief{send the controller a report of a tools operation}
-          unknown                           /// \brief{type is was specified or unknown (should be derived from content)}
+          request_controller_capabilities    /// \brief{request the controller a description of its capabilities}
+          ,reply_controller_capabilities     /// \brief{send a description of controller capabilities to the tool}
+          ,request_tool_capabilities         /// \brief{request a tool a description of its capabilities}
+          ,reply_tool_capabilities           /// \brief{send a description of tool capabilities to the controller}
+          ,send_select_input_configuration   /// \brief{send the selected input configuration to a tool}
+          ,signal_start                      /// \brief{tool can start operation}
+          ,send_display_layout               /// \brief{send the controller a layout description for the display}
+          ,send_display_data                 /// \brief{send the controller a data to be displayed using the current display layout}
+          ,send_interaction_data             /// \brief{send a tool data from user interaction via the display associated with this tool}
+          ,request_termination               /// \brief{send a tool the signal to end processing and terminate as soon as possible}
+          ,signal_termination                /// \brief{send the controller the signal that the tool is about to terminate}
+          ,send_report                       /// \brief{send the controller a report of a tools operation}
+          ,unknown                           /// \brief{type is was specified or unknown (should be derived from content)}
         };
 
       private:

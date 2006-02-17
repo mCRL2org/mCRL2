@@ -24,16 +24,16 @@ namespace sip {
         sip_communicator();
  
         /** Queues incoming messages */
-        void deliver(std::istream&);
+        virtual void deliver(std::istream&);
  
         /** Queues incoming messages */
-        void deliver(std::string&);
+        virtual void deliver(std::string&);
  
         /* Wait until the next message arrives */
         void await_message();
  
         /** Send a message */
-        inline void send_message(message&);
+        inline void send_message(const message&);
  
         /** Pops the first message of the queue */
         inline message pop_message();
@@ -65,7 +65,7 @@ namespace sip {
     };
  
     /* Send a message */
-    inline void sip_communicator::send_message(message& m) {
+    inline void sip_communicator::send_message(const message& m) {
       send(m.to_xml());
     }
  

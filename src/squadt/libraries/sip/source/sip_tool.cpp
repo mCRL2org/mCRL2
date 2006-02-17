@@ -1,18 +1,28 @@
+#include <boost/ref.hpp>
+
+#include <xml2pp/xml_text_reader.h>
+
 #include <sip/sip_tool.h>
 
 namespace sip {
-  /** Request details about the amount of space that the controller currently has reserved for this tool */
-  void tool_communicator::request_capabilities() {
-//    send_message();
+  using namespace sip::communicator;
 
-    /* Await the reply */
+  /** Request details about the amount of space that the controller currently has reserved for this tool */
+  void tool_communicator::request_controller_capabilities() {
+    send_message(boost::cref(message(message::request_controller_capabilities)));
+
+    /* Await the reply (too crude, message type might not match) */
     await_message();
 
     if (current_capabilities == 0) {
       delete current_capabilities;
     }
 
-//    current_capabilities = pop_message();
+    xml2pp::text_reader reader(pop_message().to_string());
+
+    reader.read();
+
+    current_capabilities = controller_capabilities::from_xml(reader);
   }
 
   /** Request the list of basic input configurations */
@@ -24,7 +34,7 @@ namespace sip {
   }
 
   /** Send a layout specification for the display space reserved for this tool */
-  void tool_communicator::send_display_layout(sip::layout::layout) {
+  void tool_communicator::send_display_layout(sip::layout::display_layout) {
   }
 
   /** Send a layout specification for the display space reserved for this tool */

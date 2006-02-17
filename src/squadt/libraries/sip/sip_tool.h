@@ -3,8 +3,10 @@
 
 #include <string>
 #include <deque>
+#include <set>
 
 #include <sip/detail/common.h>
+#include <sip/detail/message.h>
 #include <sip/detail/controller_capabilities.h>
 #include <sip/detail/report.h>
 #include <sip/detail/sip_communicator.h>
@@ -13,30 +15,35 @@
 namespace sip {
 
   class tool_communicator : public communicator::sip_communicator {
-    private:
+    public:
       /** Charactarises the current state */
       typedef enum {
-        status_clean,
-        status_configured,
-        status_started,
-        status_reported,
-        status_error
+         status_initialising /** \brief{No connection with controller yet} */
+        ,status_clean        /** \brief{Connection with controller: Phase 0} */
+        ,status_configured   /** \brief{Tool has accepted a configuration: Phase 1} */
+        ,status_started      /** \brief{Tool is running: Phase 2} */
+        ,status_reported     /** \brief{Tool is finished and has send a report: Phase 3} */
+        ,status_error        /** \brief{An error occurred} */
       } status;
 
+    private:
       /** The current protocol status */
       status                         current_status;
 
       /** The currently active display layout */
-      sip::layout::layout*           current_layout;
+      sip::layout::display_layout*   current_layout;
 
       /** The last received set of controller capabilities */
       sip::controller_capabilities*  current_capabilities;
+
+      /** A set of available input configurations for this tool */
+      std::set < std::pair < tool_category, storage_format > >       current_input_configurations;
 
     public:
       tool_communicator();
 
       /** Request details about the amount of space that the controller currently has reserved for this tool */
-      void request_capabilities();
+      void request_controller_capabilities();
 
       /** Request the list of basic input configurations */
       void reply_input_configurations();
@@ -45,7 +52,7 @@ namespace sip {
       void send_accept_configuration();
 
       /** Send a layout specification for the display space reserved for this tool */
-      void send_display_layout(sip::layout::layout);
+      void send_display_layout(sip::layout::display_layout);
 
       /** Send a layout specification for the display space reserved for this tool */
       void send_display_data();
@@ -58,9 +65,40 @@ namespace sip {
 
       /** Send a status report to the controller */
       void send_report(sip::report&);
+
+      /** Add an input configuration that will be send when the controller asks for it */
+      inline void add_input_configuration(tool_category, storage_format);
+
+      /** Get the last communicated set of controller capabilities */
+      inline const controller_capabilities& get_controller_capabilities() const;
+
+      /** Returns the current status */
+      inline tool_communicator::status get_status() const;
   };
 
-  inline tool_communicator::tool_communicator() : current_status(status_clean), current_layout(0), current_capabilities(0) {
+  inline tool_communicator::tool_communicator() : current_status(status_initialising), current_layout(0), current_capabilities(0) {
+  }
+
+  /** \pre{status is status_initialising} */
+  inline void tool_communicator::add_input_configuration(tool_category c, storage_format f) {
+    assert(current_status == status_initialising);
+
+    std::pair < tool_category, storage_format > p(c,f);
+
+    current_input_configurations.insert(p);
+  }
+
+  inline tool_communicator::status tool_communicator::get_status() const {
+    return (current_status);
+  }
+
+  /** \pre{status is not status_initialising} */
+  inline const controller_capabilities& tool_communicator::get_controller_capabilities() const {
+    if (current_status == status_initialising) {
+      throw (new exception(exception::message_context_invalid));
+    }
+
+    return (*current_capabilities);
   }
 }
 
