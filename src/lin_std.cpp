@@ -40,6 +40,7 @@ static bool cluster;
 static bool nocluster;
 static bool oldstate;
 static bool binary;
+static bool nosumelm;
 static bool statenames;
 static bool mayrewrite;
 static bool allowFreeDataVariablesInProcesses;
@@ -6711,14 +6712,15 @@ static ATermAppl communicationcomposition(
 //        gsfprintf(stderr,"newnextstate, %P\n",newnextstate);
 //        gsfprintf(stderr,"communicationcondition, %P\n",communicationcondition);
 
-        ApplySumElimination(&newsumvars,
-                            &newcondition,
-                            &newmultiaction,
-                            &newactiontime,
-                            &newnextstate,
-                            communicationcondition,
-                            gsMakeOpIdTrue(),
-                            linGetParameters(ips));
+        if (!nosumelm)
+        { ApplySumElimination(&newsumvars,
+                              &newcondition,
+                              &newmultiaction,
+                              &newactiontime,
+                              &newnextstate,
+                              communicationcondition,
+                              gsMakeOpIdTrue(),
+                              linGetParameters(ips));
 
 //        gsfprintf(stderr,"2newsumvars, %P\n",newsumvars);
 //        gsfprintf(stderr,"2newcondition, %P\n",newcondition);
@@ -6727,7 +6729,8 @@ static ATermAppl communicationcomposition(
 //        gsfprintf(stderr,"2newnextstate, %P\n",newnextstate);
 //        gsfprintf(stderr,"2communicationcondition, %P\n\n",communicationcondition);
 
-        newcondition=RewriteTerm(newcondition);
+          newcondition=RewriteTerm(newcondition); 
+        }
         if (newcondition!=gsMakeDataExprFalse())
         { 
           resultsumlist=ATinsertA(
@@ -7960,6 +7963,7 @@ ATermAppl linearise_std(ATermAppl spec, t_lin_options lin_options)
   nocluster  = (lin_options.no_intermediate_cluster);
   oldstate   = !lin_options.newstate;
   binary     = lin_options.binary;
+  nosumelm   = lin_options.nosumelm;
   statenames = lin_options.statenames;
   mayrewrite = !lin_options.norewrite;
   allowFreeDataVariablesInProcesses = !lin_options.nofreevars;

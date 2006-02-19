@@ -53,6 +53,7 @@ int main(int argc, char *argv[])
   bool opt_norewrite = false;
   bool opt_nofreevars = false;
   bool opt_check_only = false;
+  bool opt_nosumelm = false;
   t_phase opt_end_phase = phNone;
   #define ShortOptions   "0123cnrwbaofep:hqvd"
   #define VersionOption  CHAR_MAX + 1
@@ -76,6 +77,7 @@ int main(int argc, char *argv[])
     { "quiet",       no_argument,       NULL, 'q' },
     { "verbose",     no_argument,       NULL, 'v' },
     { "debug",       no_argument,       NULL, 'd' },
+    { "no-sumelm",   no_argument,       NULL, 'm' },
     { 0, 0, 0, 0 }
   };
   int Option;
@@ -141,6 +143,9 @@ int main(int argc, char *argv[])
         break;
       case 'e': /* check-only */
         opt_check_only = true;
+        break;
+      case 'm': /* no-sumelm */
+        opt_nosumelm = true;
         break;
       case 'p': /* end-phase */
         if (strcmp(optarg, "pa") == 0) {
@@ -235,6 +240,7 @@ int main(int argc, char *argv[])
   lin_options.statenames = opt_statenames;
   lin_options.norewrite = opt_norewrite;
   lin_options.nofreevars = opt_nofreevars;
+  lin_options.nosumelm = opt_nosumelm;
 
   //linearise infilename with options lin_options
   ATermAppl result =
@@ -431,10 +437,11 @@ void PrintHelp(char *Name)
     "                        useful when the rewrite system does not terminate\n"
     "  -f, --no-freevars     instantiate don't care values with arbitrary constants,\n"
     "                        instead of modelling them by free variables\n"
-    "  -e  --check-only      check syntax and static semantics; do not linearise\n"
-    "  -p  --end-phase=PHASE stop linearisation after phase PHASE and output the\n"
+    "  -e, --check-only      check syntax and static semantics; do not linearise\n"
+    "  -p, --end-phase=PHASE stop linearisation after phase PHASE and output the\n"
     "                        result; PHASE can be 'pa' (parse), 'tc' (type check),\n"
     "                        'ar' (alphabet reduction) or 'di' (data implementation)\n"
+    "  -m, --no-sumelm       avoid applying sum elimination in parallel composition\n"
     "  -h, --help            display this help and terminate\n"
     "      --version         display version information and terminate\n"
     "  -q, --quiet           do not display warning messages\n"
