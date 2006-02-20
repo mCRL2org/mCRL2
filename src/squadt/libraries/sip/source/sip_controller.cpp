@@ -12,7 +12,7 @@ namespace sip {
 
     controller_capabilities capabilities(current_version);
 
-    capabilities.set_display_dimensions(50,50,0);
+    capabilities.set_display_dimensions(current_display_dimensions);
     capabilities.to_xml(data);
 
     message m(message::reply_controller_capabilities);

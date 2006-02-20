@@ -105,12 +105,12 @@ ifeq ($(BOOST_PREFIX),boost)
  BOOST_CPPFLAGS  = -I$(BOOST_PREFIX)
 
  ifeq ($(HOST_OS),MINGW)
-  BOOST_FILESYSTEM      = $(BOOST_PREFIX)/lib/libboost_filesystem-s.lib
-  BOOST_PROGRAM_OPTIONS = $(BOOST_PREFIX)/lib/libboost_program_options-s.lib
+  BOOST_FILESYSTEM      = $(BOOST_PREFIX)/lib/boost_filesystem-s.a
+  BOOST_PROGRAM_OPTIONS = $(BOOST_PREFIX)/lib/boost_program_options-s.a
  endif
  ifeq ($(HOST_OS),CYGWIN)
-  BOOST_FILESYSTEM      = $(BOOST_PREFIX)/lib/libboost_filesystem-s.a
-  BOOST_PROGRAM_OPTIONS = $(BOOST_PREFIX)/lib/libboost_program_options-s.a
+  BOOST_FILESYSTEM      = $(BOOST_PREFIX)/lib/boost_filesystem-s.a
+  BOOST_PROGRAM_OPTIONS = $(BOOST_PREFIX)/lib/boost_program_options-s.a
  endif
 else
  BOOST_CPPFLAGS = -I$(BOOST_PREFIX)/include

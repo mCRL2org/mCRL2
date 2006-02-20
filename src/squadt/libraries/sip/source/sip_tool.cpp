@@ -14,13 +14,13 @@ namespace sip {
     /* Await the reply (too crude, message type might not match) */
     await_message();
 
-    if (current_capabilities == 0) {
-      delete current_capabilities;
-    }
-
     xml2pp::text_reader reader(pop_message().to_string());
 
     reader.read();
+
+    if (current_capabilities != 0) {
+      delete current_capabilities;
+    }
 
     current_capabilities = controller_capabilities::from_xml(reader);
   }

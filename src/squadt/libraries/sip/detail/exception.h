@@ -9,11 +9,12 @@ namespace sip {
   class exception : public std::exception {
     public:
       enum exception_type {
-        expected_message_start        /// \brief{the start of a message <message> was expected}
-        ,expected_message_end          /// \brief{the end of a message </message> was expected}
-        ,forbidden_message_content     /// \brief{message contains a sequence that is not allowed}
-        ,message_context_invalid       /// \brief{the message cannot be send in this phase of the protocol}
-        ,unknown_type_in_configuration /// \brief{the type encountered in a configuration specification is unknown}
+        expected_message_start           /// \brief the start of a message <message> was expected 
+        ,expected_message_end            /// \brief the end of a message </message> was expected 
+        ,forbidden_message_content       /// \brief message contains a sequence that is not allowed 
+        ,message_context_invalid         /// \brief the message cannot be send in this phase of the protocol 
+        ,unknown_type_in_configuration   /// \brief the type encountered in a configuration specification is unknown 
+        ,controller_capabilities_unknown /// \brief the controller capabilities are not known yet
       };
 
     private:

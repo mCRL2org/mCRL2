@@ -28,7 +28,7 @@ namespace sip {
         ,status_error        /** \brief{An error occurred} */
       } status;
 
-      static const version current_version;
+      static const version        current_version;
 
       /** The current protocol status */
       status                      current_status;
@@ -64,6 +64,9 @@ namespace sip {
       /** Set the amount of display space that is reserved for this tool */
       void set_display_dimensions(unsigned short x, unsigned short y, unsigned short z);
 
+      /** Get a controller_capabilities object that is send to tools */
+      controller_capabilities get_capabilities();
+
       /** Returns the used protocol version */
       inline controller_communicator::version get_version() const; 
   };
@@ -72,6 +75,9 @@ namespace sip {
   const controller_communicator::version controller_communicator::current_version = {1,0};
 
   inline controller_communicator::controller_communicator() : current_status(status_initialising) {
+    current_display_dimensions.x = 0;
+    current_display_dimensions.y = 0;
+    current_display_dimensions.z = 0;
   }
 
   /** \attension{Works, based on assumption that only one delivery is active for this object at the same time} */
@@ -85,6 +91,14 @@ namespace sip {
     current_display_dimensions.x = x;
     current_display_dimensions.y = y;
     current_display_dimensions.z = z;
+  }
+
+  inline controller_capabilities controller_communicator::get_capabilities() {
+    controller_capabilities c = controller_capabilities(current_version);
+
+    c.set_display_dimensions(current_display_dimensions);
+
+    return (c);
   }
 
   inline controller_communicator::version controller_communicator::get_version() const {

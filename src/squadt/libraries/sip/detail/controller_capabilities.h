@@ -3,8 +3,6 @@
 
 #include <ostream>
 
-#include <boost/noncopyable.hpp>
-
 #include <xml2pp/xml_text_reader.h>
 
 namespace sip {
@@ -19,7 +17,7 @@ namespace sip {
    * As well as any information about the controller that might be interesting
    * for a tool developer.
    **/
-  class controller_capabilities : public boost::noncopyable {
+  class controller_capabilities {
     friend class tool_communicator;
     friend class controller_communicator;
 
@@ -51,11 +49,11 @@ namespace sip {
       /** Set display dimensions */
       inline void set_display_dimensions(const unsigned short x, const unsigned short y, const unsigned short z);
 
+      /** Set display dimensions */
+      inline void set_display_dimensions(const display_dimensions& d);
+
       /** Read from XML stream */
       inline static controller_capabilities* from_xml(xml2pp::text_reader& reader);
-
-      /** Write to XML stream */
-      inline void to_xml(std::ostream&);
 
     public:
 
@@ -64,6 +62,9 @@ namespace sip {
 
       /** Get the dimensions of the part of the display that is reserved for this tool */
       inline display_dimensions get_display_dimensions() const;
+
+      /** Write to XML stream */
+      inline void to_xml(std::ostream&) const;
   };
 
   inline controller_capabilities::controller_capabilities(const version v) : protocol_version(v) {
@@ -76,6 +77,10 @@ namespace sip {
     return (protocol_version);
   }
 
+  inline void controller_capabilities::set_display_dimensions(const display_dimensions& d) {
+    current_dimensions = d;
+  }
+
   inline void controller_capabilities::set_display_dimensions(const unsigned short x, const unsigned short y, const unsigned short z) {
     current_dimensions.x = x;
     current_dimensions.y = y;
@@ -86,7 +91,7 @@ namespace sip {
     return (current_dimensions);
   }
 
-  inline void controller_capabilities::to_xml(std::ostream& output) {
+  inline void controller_capabilities::to_xml(std::ostream& output) const {
     output << "<capabilities>"
            << "<protocol-version major=\"" << (unsigned short) protocol_version.major
            << "\" minor=\"" << (unsigned short) protocol_version.minor << "\"/>"
@@ -117,8 +122,6 @@ namespace sip {
     }
 
     assert (reader.is_element("display-dimensions"));
-
-    reader.read();
 
     reader.get_attribute(&c->current_dimensions.x, "x");
     reader.get_attribute(&c->current_dimensions.y, "y");

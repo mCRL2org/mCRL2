@@ -16,12 +16,15 @@ using namespace transport;
 using namespace sip;
 using namespace sip::communicator;
 
-/* Serialisation and deserialisation of a controller capabilities object */
-void controller_capabilities_serialisation() {
+/* Serialisation, communication and deserialisation of a controller capabilities object */
+void controller_capabilities_exchange() {
   BOOST_MESSAGE(" Empty controller_capabilities object: ");
 
   controller_communicator cc;
   tool_communicator       tc;
+
+  std::ostringstream      check_stream0;
+  std::ostringstream      check_stream1;
 
   /** Initiative is on the side of the tool */
   tc.connect(cc);
@@ -30,12 +33,30 @@ void controller_capabilities_serialisation() {
 
   tc.disconnect();
 
+  cc.get_capabilities().to_xml(check_stream0);
+  tc.get_controller_capabilities().to_xml(check_stream1);
+
+  BOOST_CHECK(check_stream0.str() == check_stream1.str());
+
   BOOST_MESSAGE(" Filled controller_capabilities object: ");
 
   /* Example display dimensions */
   controller_capabilities capabilities();
 
-  cc.set_display_dimensions(50,50,0);
+  cc.set_display_dimensions(75,75,0);
+
+  tc.connect(cc);
+
+  tc.disconnect();
+}
+
+/* Serialisation, communication and deserialisation of an input configuration */
+void input_configuration_exchange() {
+  controller_communicator cc;
+  tool_communicator       tc;
+
+  std::ostringstream      check_stream0;
+  std::ostringstream      check_stream1;
 
   tc.add_input_configuration("Testing", "aut");
   tc.add_input_configuration("Testing", "svc");
@@ -45,14 +66,8 @@ void controller_capabilities_serialisation() {
   tc.disconnect();
 }
 
-/* Serialisation and deserialisation of a report object */
-void report_serialisation() {
-  BOOST_MESSAGE(" Empty report object: ");
-  BOOST_MESSAGE(" Filled report object: ");
-}
-
-/* Single communication */
-void report_communication() {
+/* Serialisation, communication and deserialisation of a report object */
+void report_exchange() {
   BOOST_MESSAGE("Empty report: ");
 
   std::ostringstream temporary;
@@ -137,9 +152,9 @@ test_suite* init_unit_test_suite( int argc, char * argv[] ) {
   /* Change log parameters */
   unit_test_log_t::instance().set_threshold_level(log_messages);
 
-  test->add(BOOST_TEST_CASE(&controller_capabilities_serialisation), 0, 2);
-  test->add(BOOST_TEST_CASE(&report_serialisation), 0, 2);
-  test->add(BOOST_TEST_CASE(&report_communication), 0, 2);
+  test->add(BOOST_TEST_CASE(&controller_capabilities_exchange), 0, 2);
+  test->add(BOOST_TEST_CASE(&input_configuration_exchange), 0, 2);
+  test->add(BOOST_TEST_CASE(&report_exchange), 0, 2);
 
   return (test);
 }

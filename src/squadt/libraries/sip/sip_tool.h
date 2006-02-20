@@ -94,8 +94,8 @@ namespace sip {
 
   /** \pre{status is not status_initialising} */
   inline const controller_capabilities& tool_communicator::get_controller_capabilities() const {
-    if (current_status == status_initialising) {
-      throw (new exception(exception::message_context_invalid));
+    if (current_capabilities == 0) {
+      throw (new exception(exception::controller_capabilities_unknown));
     }
 
     return (*current_capabilities);
