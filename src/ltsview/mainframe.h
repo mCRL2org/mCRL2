@@ -25,23 +25,28 @@ class MainFrame : public wxFrame
 {
   public:
     MainFrame( Mediator* owner );
+    void	addMarkRule( wxString str );
     void	createProgressDialog( const string title, const string text );
     GLCanvas*	getGLCanvas() const;
     VisSettings	getVisSettings() const;
     void	loadTitle();
     void	onActivateTool( wxCommandEvent& event );
-    void	onAddMarkStateRuleButton( wxCommandEvent& event );
-    void	onChoice( wxCommandEvent& event );
+    void	onAddMarkRuleButton( wxCommandEvent& event );
     void	onColorButton( wxCommandEvent& event );
     void	onExit( wxCommandEvent& event );
     void	onOpen( wxCommandEvent& event );
-    void	onRemoveMarkStateRuleButton( wxCommandEvent& event );
+    void	onRankStyle( wxCommandEvent& event );
+    void	onRemoveMarkRuleButton( wxCommandEvent& event );
     void	onResetButton( wxCommandEvent& event );
     void	onResetView( wxCommandEvent& event );
     void	onCommandSettingChanged( wxCommandEvent& event );
+    void	onMarkAnyAll( wxCommandEvent& event );
+    void	onMarkRadio( wxCommandEvent& event );
     void	onSpinSettingChanged( wxSpinEvent& event );
-    void	setVisSettings( VisSettings ss );
+    void	resetMarkRules();
+    void	setMarkedStatesInfo( int number );
     void	setNumberInfo( int nstates, int ntransitions, int nclusters, int nranks );
+    void	setVisSettings( VisSettings ss );
     void	showMessage( string title, string text );
     void	updateProgressDialog( int val, string msg );
   private:
@@ -58,11 +63,18 @@ class MainFrame : public wxFrame
     wxColorButton*    interpolate2Button;
     wxCheckBox*	      levelDivCheckBox;
     wxCheckBox*	      longinterpolateCheckBox;
+    wxChoice*	      markAnyAllChoice;
     wxColorButton*    markButton;
+    wxRadioButton*    markdeadlocksRadio;
+    wxListBox*	      markStatesListBox;
+    wxRadioButton*    markstatesRadio;
+    wxRadioButton*    marktransitionsRadio;
     Mediator*	      mediator;
     wxColorButton*    nodeButton;
     wxSpinCtrlFloat*  nodesizeSpinCtrl;
+    wxRadioButton*    nomarksRadio;
     wxStaticText*     numberOfClustersLabel;
+    wxStaticText*     numberOfMarkedStatesLabel;
     wxStaticText*     numberOfRanksLabel;
     wxStaticText*     numberOfStatesLabel;
     wxStaticText*     numberOfTransitionsLabel;

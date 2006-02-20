@@ -20,18 +20,23 @@ using namespace Utils;
 class Visualizer
 {
   private:
-    static VisSettings defaultVisSettings;
-    GLuint	    displayList;
-    LTS*	    lts;
-    Mediator*	    mediator;
-    RankStyle	    rankStyle;
-    bool	    refreshDisplayList;
-    float	    structHeight;
-    float	    structWidth;
-    VisSettings	    visSettings;
+    static VisSettings	defaultVisSettings;
+    GLuint		displayList;
+    LTS*		lts;
+    MarkStyle		markStyle;
+    Mediator*		mediator;
+    RankStyle		rankStyle;
+    bool		refreshDisplayList;
+    float		structHeight;
+    float		structWidth;
+    VisSettings		visSettings;
 
     void drawSubtree( Cluster* root, HSV_Color col, HSV_Color delta_col, bool
 	topClosed, float &boundWidth, float &boundHeight );
+    void drawSubtreeMarkStates( Cluster* root, bool topClosed, float
+	&boundWidth, float &boundHeight );
+    void drawSubtreeMarkDeadlocks( Cluster* root, bool topClosed, float
+	&boundWidth, float &boundHeight );
   
   public:
     Visualizer( Mediator* owner );
@@ -45,6 +50,7 @@ class Visualizer
     VisSettings getVisSettings() const;
     void	positionClusters();
     void	setLTS( LTS* l );
+    void	setMarkStyle( MarkStyle ms );
     void	setRankStyle( RankStyle rs );
     void	setVisSettings( VisSettings vs );
 };

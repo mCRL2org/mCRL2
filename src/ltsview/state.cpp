@@ -43,6 +43,11 @@ void State::addLoop( Transition* trans )
   loops.push_back( trans );
 }
 
+bool State::isDeadlock() const
+{
+  return ( outTransitions.size() == 0 );
+}
+
 bool State::isMarked() const
 {
   return marked;
@@ -123,4 +128,10 @@ void State::clearHierarchyInfo()
   superiors.clear();
   subordinates.clear();
   comrades.clear();
+}
+
+int State::getValueIndexOfParam( int paramIndex )
+{
+  return ATgetInt( (ATermInt)ATgetArgument( (ATermAppl)ATelementAt( stateVector,
+	  paramIndex ), 1 ) );
 }

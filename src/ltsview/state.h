@@ -40,6 +40,8 @@ class State
     int	      getRank() const;
     void      getSubordinates( set< State* > &ss ) const;
     void      getSuperiors( set< State* > &ss ) const;
+    int	      getValueIndexOfParam( int paramIndex );
+    bool      isDeadlock() const;
     bool      isMarked() const;
     bool      isSelected() const;
     void      mark();

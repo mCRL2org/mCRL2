@@ -30,7 +30,9 @@ class Cluster
   private:
     Cluster*		ancestor;
     float		baseRadius;
+    bool		deadlock;
     vector< Cluster* >	descendants;
+    bool		marked;
     float		position;
     float		size;
     vector< State* >	states;
@@ -50,8 +52,13 @@ class Cluster
     float     getSize() const;
     void      getStates( vector< State* > &ss ) const;
     bool      hasDescendants() const;
+    bool      hasDeadlock() const;
+    bool      isMarked() const;
+    void      mark();
     void      setAncestor( Cluster* c );
+    void      setDeadlock( bool b );
     void      setPosition( float p );
+    void      unmark();
 };
 
 #endif

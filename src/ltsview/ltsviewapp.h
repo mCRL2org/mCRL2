@@ -15,8 +15,10 @@
 #include "glcanvas.h"
 #include "visualizer.h"
 #include "markstateruledialog.h"
+#include "utils.h"
 
 using namespace std;
+using namespace Utils;
 
 class LTSViewApp : public wxApp, public Mediator
 {
@@ -33,13 +35,16 @@ class LTSViewApp : public wxApp, public Mediator
     void applyRanking( RankStyle rs );
 
   public:
+    void	  addMarkRule();
     void	  applyDefaultSettings();
+    void	  applyMarkStyle( MarkStyle ms );
     void	  applySettings();
     void	  drawLTS();
     virtual bool  OnInit();
     void	  openFile( string fileName );
-    void	  setRankStyle( string rss );
-    void	  showMarkStateRuleDialog();
+    void	  removeMarkRules( const vector<int> &mrs );
+    void	  setMatchAnyMarkRule( bool b );
+    void	  setRankStyle( RankStyle rs );
 };
 
 DECLARE_APP( LTSViewApp )

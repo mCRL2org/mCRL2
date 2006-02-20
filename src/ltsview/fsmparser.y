@@ -17,6 +17,7 @@ vector< State* > states;
 
 AFun const_ATtypeid;
 AFun const_ATparmid;
+AFun const_ATvalue;
 AFun const_ATstate;
 AFun const_ATparam;
 
@@ -91,14 +92,14 @@ type_def :
 	type_values
 	  { 
 	    typeValues = ATreverse( typeValues );
-	    typeId = ATmakeAppl2( const_ATtypeid, (ATerm)$1, (ATerm) typeValues );
+	    typeId = ATmakeAppl2( const_ATtypeid, (ATerm)$1, (ATerm)typeValues );
 	    valueTable = ATinsert( valueTable, (ATerm)typeValues )
 	  }
 	;
 
 type_name :
 	/* empty */
-	  { $$ = ATmakeAppl0( ATmakeAFun( "unspecified", 0, ATfalse ) ) }
+	  { $$ = ATmakeAppl0( ATmakeAFun( "", 0, ATfalse ) ) }
 	|
 	ID
 	  { $$ = $1 }
@@ -112,7 +113,8 @@ type_values :
 
 type_value :
 	QUOTED
-	  { typeValues = ATinsert( typeValues, (ATerm)$1 ) }
+	  { typeValues = ATinsert( typeValues, (ATerm)ATmakeAppl2(
+	      const_ATvalue, (ATerm)$1, (ATerm)ATmakeInt( ATgetLength( typeValues ) ) ) ) }
 	;
 
 // ----------- Section containing the states ---------
@@ -219,6 +221,7 @@ void parseFSMfile( string fileName, LTS* const lts )
     
     ATprotectAFun( const_ATtypeid );
     ATprotectAFun( const_ATparmid );
+    ATprotectAFun( const_ATvalue );
     ATprotectAFun( const_ATstate );
     ATprotectAFun( const_ATparam );
     ATprotectList( &stateVector );
@@ -229,6 +232,7 @@ void parseFSMfile( string fileName, LTS* const lts )
     
     const_ATtypeid = ATmakeAFun( "TypeId", 2, ATfalse );
     const_ATparmid = ATmakeAFun( "ParamId", 2, ATfalse );
+    const_ATvalue = ATmakeAFun( "Value", 2, ATfalse );
     const_ATstate = ATmakeAFun( "State", 2, ATfalse );
     const_ATparam = ATmakeAFun( "Param", 2, ATfalse );
     stateVector = ATempty;
@@ -242,6 +246,7 @@ void parseFSMfile( string fileName, LTS* const lts )
     // CLEAN UP
     ATunprotectAFun( const_ATtypeid );
     ATunprotectAFun( const_ATparmid );
+    ATunprotectAFun( const_ATvalue );
     ATunprotectAFun( const_ATstate );
     ATunprotectAFun( const_ATparam );
     ATunprotectList( &stateVector );

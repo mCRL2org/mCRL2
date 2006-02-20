@@ -22,13 +22,15 @@ BEGIN_EVENT_TABLE( MainFrame, wxFrame )
   EVT_TOOL  ( myID_ROTATE, MainFrame::onActivateTool )
   EVT_TOOL  ( myID_SELECT, MainFrame::onActivateTool )
   EVT_TOOL  ( myID_ZOOM, MainFrame::onActivateTool )
-  EVT_CHOICE( myID_RANK_STYLE, MainFrame::onChoice )
+  EVT_CHOICE( myID_RANK_STYLE, MainFrame::onRankStyle )
   EVT_BUTTON( myID_COLOR_BUTTON, MainFrame::onColorButton )
   EVT_SPINCTRL( myID_SETTINGS_CONTROL, MainFrame::onSpinSettingChanged )
   EVT_CHECKBOX( myID_SETTINGS_CONTROL, MainFrame::onCommandSettingChanged )
   EVT_BUTTON( wxID_RESET, MainFrame::onResetButton )
-  EVT_BUTTON( myID_ADD_RULE, MainFrame::onAddMarkStateRuleButton )
-  EVT_BUTTON( myID_REMOVE_RULE, MainFrame::onRemoveMarkStateRuleButton )
+  EVT_RADIOBUTTON( myID_MARK_RADIOBUTTON, MainFrame::onMarkRadio )
+  EVT_CHOICE( myID_MARK_ANYALL, MainFrame::onMarkAnyAll )
+  EVT_BUTTON( myID_ADD_RULE, MainFrame::onAddMarkRuleButton )
+  EVT_BUTTON( myID_REMOVE_RULE, MainFrame::onRemoveMarkRuleButton )
 END_EVENT_TABLE()
 
 MainFrame::MainFrame( Mediator* owner )
@@ -131,14 +133,16 @@ void MainFrame::setupRightPanel( wxPanel* panel )
   int rflags = wxALIGN_RIGHT | wxALIGN_CENTER_VERTICAL | wxEXPAND | wxALL;
   
   // setup the top part (information box)
-  wxFlexGridSizer* topSizer = new wxFlexGridSizer( 4, 2, 0, 0 );
-  numberOfStatesLabel = new wxStaticText( panel, wxID_ANY, wxT(""),
+  wxFlexGridSizer* topSizer = new wxFlexGridSizer( 5, 2, 0, 0 );
+  numberOfStatesLabel = new wxStaticText( panel, wxID_ANY, wxEmptyString,
       wxDefaultPosition, wxDefaultSize, wxALIGN_RIGHT | wxST_NO_AUTORESIZE );
-  numberOfTransitionsLabel = new wxStaticText( panel, wxID_ANY, wxT(""),
+  numberOfTransitionsLabel = new wxStaticText( panel, wxID_ANY, wxEmptyString,
       wxDefaultPosition, wxDefaultSize, wxALIGN_RIGHT | wxST_NO_AUTORESIZE );
-  numberOfClustersLabel = new wxStaticText( panel, wxID_ANY, wxT(""),
+  numberOfClustersLabel = new wxStaticText( panel, wxID_ANY, wxEmptyString,
       wxDefaultPosition, wxDefaultSize, wxALIGN_RIGHT | wxST_NO_AUTORESIZE );
-  numberOfRanksLabel = new wxStaticText( panel, wxID_ANY, wxT(""),
+  numberOfRanksLabel = new wxStaticText( panel, wxID_ANY, wxEmptyString,
+      wxDefaultPosition, wxDefaultSize, wxALIGN_RIGHT | wxST_NO_AUTORESIZE );
+  numberOfMarkedStatesLabel = new wxStaticText( panel, wxID_ANY, wxEmptyString,
       wxDefaultPosition, wxDefaultSize, wxALIGN_RIGHT | wxST_NO_AUTORESIZE );
   
   topSizer->AddGrowableCol( 1 );
@@ -154,6 +158,9 @@ void MainFrame::setupRightPanel( wxPanel* panel )
   topSizer->Add( new wxStaticText( panel, wxID_ANY, wxT("Number of ranks:") ),
       0, lflags, 3 );
   topSizer->Add( numberOfRanksLabel, 0, rflags, 3 );
+  topSizer->Add( new wxStaticText( panel, wxID_ANY,
+	wxT("Number of marked states:") ), 0, rflags, 3 );
+  topSizer->Add( numberOfMarkedStatesLabel, 0, rflags, 3 );
 
   // setup the bottom part (notebook)
   wxNotebook* bottomNotebook = new wxNotebook( panel, wxID_ANY );
@@ -381,29 +388,33 @@ void MainFrame::setupMarkPanel( wxPanel* panel )
   int flags = wxALIGN_LEFT | wxALIGN_CENTER_VERTICAL | wxALL;
   int border = 3;
   
-  wxRadioButton* radiobtn = new wxRadioButton( panel, wxID_ANY, wxT("No marks"),
-      wxDefaultPosition, wxDefaultSize, wxRB_GROUP );
-  radiobtn->SetValue( true );
-  markSizer->Add( radiobtn, 0, flags, border );
-  markSizer->Add( new wxRadioButton( panel, wxID_ANY, wxT("Mark deadlocks") ),
-      0, flags, border );
-  markSizer->Add( new wxRadioButton( panel, wxID_ANY, wxT("Mark states") ),
-      0, flags, border );
-  markSizer->Add( new wxRadioButton( panel, wxID_ANY, wxT("Mark transitions") ),
-      0, flags, border );
+  nomarksRadio = new wxRadioButton( panel, myID_MARK_RADIOBUTTON,
+      wxT("No marks"), wxDefaultPosition, wxDefaultSize, wxRB_GROUP );
+  nomarksRadio->SetValue( true );
+  markdeadlocksRadio = new wxRadioButton( panel, myID_MARK_RADIOBUTTON,
+      wxT("Mark deadlocks"));
+  markstatesRadio = new wxRadioButton( panel, myID_MARK_RADIOBUTTON,
+      wxT("Mark states") );
+  marktransitionsRadio = new wxRadioButton( panel, myID_MARK_RADIOBUTTON,
+      wxT("Mark	transitions") );
+    
+  markSizer->Add( nomarksRadio, 0, flags, border );
+  markSizer->Add( markdeadlocksRadio, 0, flags, border );
+  markSizer->Add( markstatesRadio, 0, flags, border );
+  markSizer->Add( marktransitionsRadio, 0, flags, border );
   
   wxStaticBoxSizer* markStatesSizer = new wxStaticBoxSizer( wxVERTICAL, panel,
       wxT("Mark states") );
-  wxString choices[2] = { wxT("Match all of the following"),
-      wxT("Match any of the following") };
-  wxChoice* anyallChoice = new wxChoice( panel, myID_MARK_ANYALL,
+  wxString choices[2] = { wxT("Match any of the following"),
+      wxT("Match all of the following") };
+  markAnyAllChoice = new wxChoice( panel, myID_MARK_ANYALL,
       wxDefaultPosition, wxDefaultSize, 2, choices );
-  anyallChoice->SetSelection( 0 );
-  markStatesSizer->Add( anyallChoice, 0, flags, border );
+  markAnyAllChoice->SetSelection( 0 );
+  markStatesSizer->Add( markAnyAllChoice, 0, flags, border );
   
-  markStatesSizer->Add( new wxListBox( panel, myID_MARK_RULES,
-	wxDefaultPosition, wxDefaultSize, 0, NULL, wxLB_EXTENDED |
-	wxLB_NEEDED_SB | wxLB_HSCROLL ), 1, flags | wxEXPAND, border );
+  markStatesListBox = new wxListBox( panel, myID_MARK_RULES, wxDefaultPosition,
+      wxDefaultSize, 0, NULL, wxLB_EXTENDED | wxLB_NEEDED_SB | wxLB_HSCROLL );
+  markStatesSizer->Add( markStatesListBox, 1, flags | wxEXPAND, border );
   wxBoxSizer* addremoveSizer = new wxBoxSizer( wxHORIZONTAL );
   addremoveSizer->Add( new wxButton( panel, myID_ADD_RULE, wxT("Add") ), 0,
       flags, border );
@@ -452,9 +463,12 @@ void MainFrame::onActivateTool( wxCommandEvent& event )
   glCanvas->setActiveTool( event.GetId() );
 }
 
-void MainFrame::onChoice( wxCommandEvent& event )
+void MainFrame::onRankStyle( wxCommandEvent& event )
 {
-  mediator->setRankStyle( string(event.GetString().fn_str()) );
+  if ( event.GetSelection() == 0 )
+    mediator->setRankStyle( ITERATIVE );
+  else
+    mediator->setRankStyle( CYCLIC );
 }
 
 void MainFrame::onResetView( wxCommandEvent& /*event*/ )
@@ -482,18 +496,43 @@ void MainFrame::onResetButton( wxCommandEvent& /*event*/ )
   mediator->applyDefaultSettings();
 }
 
-void MainFrame::onAddMarkStateRuleButton( wxCommandEvent& /*event*/ )
+void MainFrame::onMarkRadio( wxCommandEvent& event )
 {
-  mediator->showMarkStateRuleDialog();
+  wxRadioButton* buttonClicked = (wxRadioButton*)event.GetEventObject();
+
+  if ( buttonClicked == nomarksRadio )
+    mediator->applyMarkStyle( NO_MARKS );
+  else if ( buttonClicked == markdeadlocksRadio )
+    mediator->applyMarkStyle( MARK_DEADLOCKS );
+  else if ( buttonClicked == markstatesRadio )
+    mediator->applyMarkStyle( MARK_STATES );
+  else if ( buttonClicked == marktransitionsRadio )
+    mediator->applyMarkStyle( MARK_TRANSITIONS );
 }
 
-void MainFrame::onRemoveMarkStateRuleButton( wxCommandEvent& /*event*/ )
+void MainFrame::onMarkAnyAll( wxCommandEvent& event )
 {
-  wxArrayInt selections;
+  mediator->setMatchAnyMarkRule( event.GetSelection() == 0 );
+}
+
+void MainFrame::onAddMarkRuleButton( wxCommandEvent& /*event*/ )
+{
+  mediator->addMarkRule();
+}
+
+void MainFrame::onRemoveMarkRuleButton( wxCommandEvent& /*event*/ )
+{
+  wxArrayInt sels;
+  vector< int > selsVector;
   wxListBox* markstatesListBox = (wxListBox*) this->FindWindowById( myID_MARK_RULES );
-  markstatesListBox->GetSelections( selections );
-  for ( int i = selections.Count() - 1 ; i >= 0 ; --i )
-    markstatesListBox->Delete( selections[i] );
+  markstatesListBox->GetSelections( sels );
+  for ( int i = sels.Count() - 1 ; i >= 0 ; --i )
+  {
+    markstatesListBox->Delete( sels[i] );
+    selsVector.push_back( sels[i] );
+  }
+  mediator->removeMarkRules( selsVector );
+  markstatesRadio->SetValue( true );
 }
 
 VisSettings MainFrame::getVisSettings() const
@@ -625,7 +664,7 @@ void MainFrame::showMessage( string title, string text )
 
 void MainFrame::loadTitle()
 {
-  if ( filename != wxT("") )
+  if ( filename != wxEmptyString )
     SetTitle( filename + wxT(" - LTSView") );
   else
     SetTitle( wxT( "LTSView" ) );
@@ -637,4 +676,22 @@ void MainFrame::setNumberInfo( int nstates, int ntransitions, int nclusters, int
   numberOfTransitionsLabel->SetLabel( wxString::Format( wxT("%d"), ntransitions ) );
   numberOfClustersLabel->SetLabel( wxString::Format( wxT("%d"), nclusters ) );
   numberOfRanksLabel->SetLabel( wxString::Format( wxT("%d"), nranks ) );
+}
+
+void MainFrame::setMarkedStatesInfo( int number )
+{
+  numberOfMarkedStatesLabel->SetLabel( wxString::Format( wxT("%d"), number ) );
+}
+
+void MainFrame::addMarkRule( wxString str )
+{
+  markStatesListBox->Append( str );
+  markstatesRadio->SetValue( true );
+}
+
+void MainFrame::resetMarkRules()
+{
+  markStatesListBox->Clear();
+  markAnyAllChoice->SetSelection( 0 );
+  nomarksRadio->SetValue( true );
 }

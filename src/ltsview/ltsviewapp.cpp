@@ -65,6 +65,7 @@ void LTSViewApp::openFile( string fileName )
   mainFrame->updateProgressDialog( 80, "Positioning clusters" );
   visualizer->positionClusters();
   mainFrame->updateProgressDialog( 100, "Done" );
+  visualizer->setMarkStyle( NO_MARKS );
 
   //lts->printStructure();
 
@@ -79,6 +80,8 @@ void LTSViewApp::openFile( string fileName )
   mainFrame->setNumberInfo( lts->getNumberOfStates(),
       lts->getNumberOfTransitions(), lts->getNumberOfClusters(),
       lts->getNumberOfRanks() );
+  mainFrame->resetMarkRules();
+  mainFrame->setMarkedStatesInfo( 0 );
   mainFrame->setVisSettings( visualizer->getVisSettings() );
 }
 
@@ -86,10 +89,10 @@ void LTSViewApp::applyRanking( RankStyle rs )
 {
   switch ( rs )
   {
-    case Iterative:
+    case ITERATIVE:
       lts->applyIterativeRanking();
       break;
-    case Cyclic:
+    case CYCLIC:
       lts->applyCyclicRanking();
       break;
     default:
@@ -119,16 +122,8 @@ void LTSViewApp::applySettings()
   }
 }
 
-void LTSViewApp::setRankStyle( string rss )
+void LTSViewApp::setRankStyle( RankStyle rs )
 {
-  RankStyle rs;
-  if ( rss == "Iterative" )
-    rs = Iterative;
-  else if ( rss == "Cyclic" )
-    rs = Cyclic;
-  else
-    return;
-
   if ( visualizer->getRankStyle() != rs )
   {
     visualizer->setRankStyle( rs );
@@ -149,6 +144,7 @@ void LTSViewApp::setRankStyle( string rss )
       ++currentJobNr;
       mainFrame->updateProgressDialog( 50, "Merging superiors" );
       lts->mergeSuperiorClusters();
+      lts->markStates();
       
       ++currentJobNr;
       mainFrame->updateProgressDialog( 75, "Positioning clusters" );
@@ -171,15 +167,58 @@ void LTSViewApp::setRankStyle( string rss )
   }
 }
 
-void LTSViewApp::showMarkStateRuleDialog()
+void LTSViewApp::addMarkRule()
 {
   if ( lts != NULL )
   {
     MarkStateRuleDialog msrDialog( mainFrame, this, lts->getStateVectorSpec() );
     msrDialog.CentreOnParent();
-    if ( msrDialog.ShowModal() == wxOK )
+    if ( msrDialog.ShowModal() == wxID_OK )
     {
-      
+      MarkRule* markrule = msrDialog.getMarkRule();
+      lts->addMarkRule( markrule );
+      mainFrame->addMarkRule( msrDialog.getMarkRuleString() );
+      lts->markStates();
+      applyMarkStyle( MARK_STATES );
     }
   }
+}
+
+void LTSViewApp::removeMarkRules( const vector<int> &mrs )
+{
+  lts->removeMarkRules( mrs );
+  lts->markStates();
+  applyMarkStyle( MARK_STATES );
+}
+
+void LTSViewApp::setMatchAnyMarkRule( bool b )
+{
+  if ( lts != NULL )
+  {
+    if ( lts->getMatchAnyMarkRule() != b )
+    {
+      lts->setMatchAnyMarkRule( b );
+      lts->markStates();
+      applyMarkStyle( MARK_STATES );
+    }
+  }
+}
+
+void LTSViewApp::applyMarkStyle( MarkStyle ms )
+{
+  switch( ms )
+  {
+    case MARK_DEADLOCKS:
+      mainFrame->setMarkedStatesInfo( lts->getNumberOfDeadlocks() );
+      break;
+    case MARK_STATES:
+      mainFrame->setMarkedStatesInfo( lts->getNumberOfMarkedStates() );
+      break;
+    case NO_MARKS:
+    default:
+      mainFrame->setMarkedStatesInfo( 0 );
+      break;
+  }
+  visualizer->setMarkStyle( ms );
+  glCanvas->display();
 }

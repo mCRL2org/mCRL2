@@ -4,6 +4,9 @@ LTS::LTS( Mediator* owner)
 {
   mediator = owner;
   initialState = NULL;
+  matchAny = true;
+  markedStatesCount = 0;
+  deadlockCount = -1;
 }
 
 LTS::~LTS()
@@ -86,6 +89,27 @@ int LTS::getNumberOfClusters() const
   for ( unsigned int i = 0 ; i < clustersInRank.size() ; ++i )
     result += clustersInRank[i].size();
   return result;
+}
+
+int LTS::getNumberOfDeadlocks()
+{
+  if ( deadlockCount == -1 )
+  {
+    // a value of -1 indicates that we have to compute it
+    deadlockCount = 0;
+    for ( vector< State* >::iterator state_it = states.begin() ;
+	  state_it != states.end() ; ++state_it )
+    {
+      if ( (**state_it).isDeadlock() )
+	++deadlockCount;
+    }
+  }
+  return deadlockCount;
+}
+
+int LTS::getNumberOfMarkedStates() const
+{
+  return markedStatesCount;
 }
 
 int LTS::getNumberOfStates() const
@@ -321,6 +345,10 @@ void LTS::mergeSuperiorClusters()
       for ( stateit  = clusstates.begin() ; 
 	    stateit != clusstates.end()   ; ++stateit )
       {
+	// set deadlock information
+	(**clusit).setDeadlock( (**clusit).hasDeadlock() ||
+				(**stateit).isDeadlock() );
+			       
 	// iterate over the superiors of this state
 	set< State* > superiors;
 	(**stateit).getSuperiors( superiors );
@@ -374,6 +402,102 @@ void LTS::mergeSuperiorClusters()
       ancestor->addDescendant( *clusit );
     }
   }
+}
+
+void LTS::addMarkRule( MarkRule* r )
+{
+  markRules.push_back( r );
+}
+
+void LTS::removeMarkRules( const vector<int> &mrs )
+{
+  // it is assumed that mrs is sorted in decreasing order
+  for ( unsigned int i = 0 ; i < mrs.size() ; ++i )
+    markRules.erase( markRules.begin() + mrs[i] );
+}
+
+bool LTS::getMatchAnyMarkRule() const
+{
+  return matchAny;
+}
+
+void LTS::setMatchAnyMarkRule( bool b )
+{
+  matchAny = b;
+}
+
+void LTS::markStates()
+{
+  for ( unsigned int r = 0 ; r < clustersInRank.size() ; ++r )
+  {
+    for ( vector< Cluster* >::iterator clusit = clustersInRank[r].begin() ;
+	clusit != clustersInRank[r].end() ; ++clusit )
+    {
+      (**clusit).unmark();
+    }
+  }
+  
+  if ( matchAny )
+    updateMarksAny();
+  else
+    updateMarksAll();
+}
+
+void LTS::updateMarksAny()
+{
+  markedStatesCount = 0;
+  
+  for ( vector< State* >::iterator stateit = states.begin() ;
+      stateit != states.end() ; ++stateit )
+  {
+    State* state = *stateit;
+    state->unmark();
+    unsigned int i = 0;
+    while ( i < markRules.size() && !state->isMarked() )
+    {
+      MarkRule* markRule = markRules[i];
+      if ( markRule->valueSet[ state->getValueIndexOfParam( markRule->paramIndex
+	    ) ] )
+      {
+	state->mark();
+	state->getCluster()->mark();
+	++markedStatesCount;
+      }
+      ++i;
+    }
+  }
+}
+
+void LTS::updateMarksAll()
+{
+  markedStatesCount = 0;
+  
+  for ( vector< State* >::iterator stateit = states.begin() ;
+      stateit != states.end() ; ++stateit )
+  {
+    State* state = *stateit;
+    state->mark();
+    unsigned int i = 0;
+    while ( i < markRules.size() && state->isMarked() )
+    {
+      MarkRule* markRule = markRules[i];
+      if ( !markRule->valueSet[ state->getValueIndexOfParam( markRule->paramIndex
+	    ) ] )
+      {
+	state->unmark();
+      }
+      ++i;
+    }
+    if ( state->isMarked() ) 
+    {
+      state->getCluster()->mark();
+      ++markedStatesCount;
+    }
+  }
+}
+
+void LTS::markTransitions()
+{
 }
 
 // function for test purposes

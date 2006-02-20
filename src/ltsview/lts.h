@@ -10,12 +10,16 @@
 #include "state.h"
 #include "transition.h"
 #include "cluster.h"
+#include "utils.h"
+
+using namespace Utils;
 
 class LTS
 {
   public:
     LTS( Mediator* owner );
     ~LTS();
+    void	addMarkRule( MarkRule* r );
     void	addState( State* s );
     void	addTransition( Transition* t );
     void	addTransitionLabels( ATermList labels );
@@ -24,20 +28,31 @@ class LTS
     void	clusterComrades();
     void	getClustersAtRank( unsigned int r, vector< Cluster* > &cs ) const;
     State*	getInitialState() const;
+    bool	getMatchAnyMarkRule() const;
     int		getNumberOfClusters() const;
+    int		getNumberOfDeadlocks();
+    int		getNumberOfMarkedStates() const;
     int		getNumberOfRanks() const;
     int		getNumberOfStates() const;
     int		getNumberOfTransitions() const;
     ATermList	getStateVectorSpec();
+    void	markStates();
+    void	markTransitions();
     void	mergeSuperiorClusters();
     void  	printStructure();
     void	printClusterSizesPositions();
+    void	removeMarkRules( const vector<int> &mrs );
     void	setInitialState( State* s );
+    void	setMatchAnyMarkRule( bool b );
     void	setStateVectorSpec( ATermList spec );
 
   private:
     vector< vector< Cluster* > >  clustersInRank;
+    int				  deadlockCount;
     State*			  initialState;
+    int				  markedStatesCount;
+    vector< MarkRule* >		  markRules;
+    bool			  matchAny;
     Mediator*			  mediator;
     vector< State* >		  states;
     vector< vector< State* > >	  statesInRank;
@@ -47,6 +62,8 @@ class LTS
 
     void addComradesToCluster( Cluster* c, State* s );
     void clearRanksAndClusters();
+    void updateMarksAll();
+    void updateMarksAny();
 };
 
 #endif // LTS_H

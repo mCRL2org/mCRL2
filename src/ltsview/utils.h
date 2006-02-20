@@ -1,6 +1,7 @@
 #ifndef UTILS_H
 #define UTILS_H
 #include <math.h>
+#include <vector>
 #include <algorithm>
 using namespace std;
 
@@ -8,7 +9,8 @@ namespace Utils
 {
   const double PI = 3.14159265359;
 
-  enum RankStyle { Iterative, Cyclic };
+  enum RankStyle { ITERATIVE, CYCLIC };
+  enum MarkStyle { NO_MARKS, MARK_DEADLOCKS, MARK_STATES, MARK_TRANSITIONS };
 
   struct RGB_Color
   {
@@ -16,6 +18,8 @@ namespace Utils
     unsigned char g;
     unsigned char b;
   }; 
+
+  const RGB_Color RGB_WHITE = { 255, 255, 255 };
 
   struct HSV_Color
   {
@@ -53,6 +57,12 @@ namespace Utils
     RGB_Color upEdgeColor;
   };
 
+  struct MarkRule
+  {
+    int		    paramIndex;
+    vector< bool >  valueSet;
+  };
+  
   bool operator==( VisSettings, VisSettings );
   bool operator!=( VisSettings, VisSettings );
   bool operator==( RGB_Color, RGB_Color );

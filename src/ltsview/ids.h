@@ -12,7 +12,8 @@ namespace IDs
   const int myID_RANK_STYLE = myID_ROTATE + 1;
   const int myID_COLOR_BUTTON = myID_RANK_STYLE + 1;
   const int myID_SETTINGS_CONTROL = myID_COLOR_BUTTON + 1;
-  const int myID_MARK_ANYALL = myID_SETTINGS_CONTROL + 1;
+  const int myID_MARK_RADIOBUTTON = myID_SETTINGS_CONTROL + 1;
+  const int myID_MARK_ANYALL = myID_MARK_RADIOBUTTON + 1;
   const int myID_MARK_RULES = myID_MARK_ANYALL + 1;
   const int myID_ADD_RULE = myID_MARK_RULES + 1;
   const int myID_REMOVE_RULE = myID_ADD_RULE + 1;

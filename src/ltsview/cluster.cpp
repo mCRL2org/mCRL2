@@ -9,7 +9,11 @@ Cluster::Cluster()
 {
   ancestor = NULL;
   position = 0;
-  size = 0.0;
+  size = 0.0f;
+  baseRadius = 0.0f;
+  topRadius = 0.0f;
+  deadlock = false;
+  marked = false;
 }
 
 Cluster::~Cluster()
@@ -180,4 +184,29 @@ float Cluster::getTopRadius() const
 float Cluster::getBaseRadius() const
 {
   return baseRadius;
+}
+
+bool Cluster::isMarked() const
+{
+  return marked;
+}
+
+void Cluster::mark()
+{
+  marked = true;
+}
+
+void Cluster::unmark()
+{
+  marked = false;
+}
+
+bool Cluster::hasDeadlock() const
+{
+  return deadlock;
+}
+
+void Cluster::setDeadlock( bool b )
+{
+  deadlock = b;
 }
