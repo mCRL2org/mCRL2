@@ -42,7 +42,9 @@ class MainFrame : public wxFrame
     void	onCommandSettingChanged( wxCommandEvent& event );
     void	onMarkAnyAll( wxCommandEvent& event );
     void	onMarkRadio( wxCommandEvent& event );
+    void	onMarkRuleEdit( wxCommandEvent& event );
     void	onSpinSettingChanged( wxSpinEvent& event );
+    void	replaceMarkRule( int index, wxString str );
     void	resetMarkRules();
     void	setMarkedStatesInfo( int number );
     void	setNumberInfo( int nstates, int ntransitions, int nclusters, int nranks );

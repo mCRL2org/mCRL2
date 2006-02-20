@@ -40,9 +40,10 @@ class LTSViewApp : public wxApp, public Mediator
     void	  applyMarkStyle( MarkStyle ms );
     void	  applySettings();
     void	  drawLTS();
+    void	  editMarkRule( const int index );
     virtual bool  OnInit();
     void	  openFile( string fileName );
-    void	  removeMarkRules( const vector<int> &mrs );
+    void	  removeMarkRule( const int index );
     void	  setMatchAnyMarkRule( bool b );
     void	  setRankStyle( RankStyle rs );
 };

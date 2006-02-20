@@ -20,6 +20,7 @@ class MarkStateRuleDialog : public wxDialog
     void      onParameterChoice( wxCommandEvent& event );
     MarkRule* getMarkRule();
     wxString  getMarkRuleString();
+    void      setMarkRule( MarkRule* mr, ATermList svspec );
   private:
     Mediator*			mediator;
     wxChoice*			parameterChoice;

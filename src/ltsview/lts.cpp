@@ -409,11 +409,22 @@ void LTS::addMarkRule( MarkRule* r )
   markRules.push_back( r );
 }
 
-void LTS::removeMarkRules( const vector<int> &mrs )
+void LTS::replaceMarkRule( int index, MarkRule* mr )
 {
-  // it is assumed that mrs is sorted in decreasing order
-  for ( unsigned int i = 0 ; i < mrs.size() ; ++i )
-    markRules.erase( markRules.begin() + mrs[i] );
+  delete markRules[ index ];
+  markRules[ index ] = mr;
+}
+
+void LTS::removeMarkRule( const int index )
+{
+  vector< MarkRule* >::iterator rule_it = markRules.begin() + index;
+  delete *rule_it;
+  markRules.erase( rule_it );
+}
+
+MarkRule* LTS::getMarkRule( const int index ) const
+{
+  return markRules[ index ];
 }
 
 bool LTS::getMatchAnyMarkRule() const

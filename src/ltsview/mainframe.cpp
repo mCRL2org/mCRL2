@@ -29,6 +29,7 @@ BEGIN_EVENT_TABLE( MainFrame, wxFrame )
   EVT_BUTTON( wxID_RESET, MainFrame::onResetButton )
   EVT_RADIOBUTTON( myID_MARK_RADIOBUTTON, MainFrame::onMarkRadio )
   EVT_CHOICE( myID_MARK_ANYALL, MainFrame::onMarkAnyAll )
+  EVT_LISTBOX_DCLICK( myID_MARK_RULES, MainFrame::onMarkRuleEdit )
   EVT_BUTTON( myID_ADD_RULE, MainFrame::onAddMarkRuleButton )
   EVT_BUTTON( myID_REMOVE_RULE, MainFrame::onRemoveMarkRuleButton )
 END_EVENT_TABLE()
@@ -413,7 +414,7 @@ void MainFrame::setupMarkPanel( wxPanel* panel )
   markStatesSizer->Add( markAnyAllChoice, 0, flags, border );
   
   markStatesListBox = new wxListBox( panel, myID_MARK_RULES, wxDefaultPosition,
-      wxDefaultSize, 0, NULL, wxLB_EXTENDED | wxLB_NEEDED_SB | wxLB_HSCROLL );
+      wxDefaultSize, 0, NULL, wxLB_SINGLE | wxLB_NEEDED_SB | wxLB_HSCROLL );
   markStatesSizer->Add( markStatesListBox, 1, flags | wxEXPAND, border );
   wxBoxSizer* addremoveSizer = new wxBoxSizer( wxHORIZONTAL );
   addremoveSizer->Add( new wxButton( panel, myID_ADD_RULE, wxT("Add") ), 0,
@@ -510,6 +511,11 @@ void MainFrame::onMarkRadio( wxCommandEvent& event )
     mediator->applyMarkStyle( MARK_TRANSITIONS );
 }
 
+void MainFrame::onMarkRuleEdit( wxCommandEvent& event )
+{
+  mediator->editMarkRule( event.GetSelection() );
+}
+
 void MainFrame::onMarkAnyAll( wxCommandEvent& event )
 {
   mediator->setMatchAnyMarkRule( event.GetSelection() == 0 );
@@ -522,17 +528,14 @@ void MainFrame::onAddMarkRuleButton( wxCommandEvent& /*event*/ )
 
 void MainFrame::onRemoveMarkRuleButton( wxCommandEvent& /*event*/ )
 {
-  wxArrayInt sels;
-  vector< int > selsVector;
   wxListBox* markstatesListBox = (wxListBox*) this->FindWindowById( myID_MARK_RULES );
-  markstatesListBox->GetSelections( sels );
-  for ( int i = sels.Count() - 1 ; i >= 0 ; --i )
+  int sel_index = markstatesListBox->GetSelection();
+  if ( sel_index != wxNOT_FOUND )
   {
-    markstatesListBox->Delete( sels[i] );
-    selsVector.push_back( sels[i] );
+    markstatesListBox->Delete( sel_index );
+    mediator->removeMarkRule( sel_index );
+    markstatesRadio->SetValue( true );
   }
-  mediator->removeMarkRules( selsVector );
-  markstatesRadio->SetValue( true );
 }
 
 VisSettings MainFrame::getVisSettings() const
@@ -689,6 +692,12 @@ void MainFrame::addMarkRule( wxString str )
   markstatesRadio->SetValue( true );
 }
 
+void MainFrame::replaceMarkRule( int index, wxString str )
+{
+  markStatesListBox->SetString( index, str );
+  markstatesRadio->SetValue( true );
+}
+  
 void MainFrame::resetMarkRules()
 {
   markStatesListBox->Clear();

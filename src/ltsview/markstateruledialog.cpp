@@ -7,8 +7,6 @@ END_EVENT_TABLE()
 MarkStateRuleDialog::MarkStateRuleDialog( wxWindow* parent, Mediator* owner,
     ATermList svspec )
  : wxDialog( parent, wxID_ANY, wxT("Add mark state rule"), wxDefaultPosition )
-
-/*   : wxDialog( parent, wxID_ANY, wxT("Add mark state rule") )  oud  */
 {
   mediator = owner;
 
@@ -98,10 +96,53 @@ void MarkStateRuleDialog::onParameterChoice( wxCommandEvent& event )
   loadValues( event.GetString() );
 }
 
+void MarkStateRuleDialog::setMarkRule( MarkRule* mr, ATermList svspec )
+{
+  ATermAppl paramId = (ATermAppl)ATelementAt( svspec, mr->paramIndex );
+  ATermList values = (ATermList)ATgetArgument( (ATermAppl)ATgetArgument(
+	paramId, 1 ), 1 );
+  wxString paramName = wxString( ATwriteToString( ATgetArgument( paramId, 0 ) ),
+      wxConvLocal);
+  parameterChoice->SetStringSelection( paramName );
+  loadValues( paramName );
+  
+  if ( !mr->isNegated )
+  {
+    relationChoice->SetSelection( 0 );
+    ATermAppl value;
+    while ( !ATisEmpty( values ) )
+    {
+      value = (ATermAppl)ATgetFirst( values );
+      if ( mr->valueSet[ ATgetInt( (ATermInt)ATgetArgument( value, 1 ) ) ] )
+      {
+	valuesListBox->SetStringSelection( wxString( ATwriteToString(
+		ATgetArgument( value, 0 ) ), wxConvLocal ) );
+      }
+      values = ATgetNext( values );
+    }
+  }
+  else
+  {
+    relationChoice->SetSelection( 1 );
+    ATermAppl value;
+    while ( !ATisEmpty( values ) )
+    {
+      value = (ATermAppl)ATgetFirst( values );
+      if ( !mr->valueSet[ ATgetInt( (ATermInt)ATgetArgument( value, 1 ) ) ] )
+      {
+	valuesListBox->SetStringSelection( wxString( ATwriteToString(
+		ATgetArgument( value, 0 ) ), wxConvLocal ) );
+      }
+      values = ATgetNext( values );
+    }
+  }
+}
+
 MarkRule* MarkStateRuleDialog::getMarkRule()
 {
   MarkRule* result = new MarkRule;
   result->paramIndex = parameterIndices[ parameterChoice->GetStringSelection() ];
+  result->isNegated = ( relationChoice->GetSelection() == 1 );
   
   int N = valuesListBox->GetCount();
   wxArrayInt selections;

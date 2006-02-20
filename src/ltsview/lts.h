@@ -29,6 +29,7 @@ class LTS
     void	getClustersAtRank( unsigned int r, vector< Cluster* > &cs ) const;
     State*	getInitialState() const;
     bool	getMatchAnyMarkRule() const;
+    MarkRule*	getMarkRule( const int index ) const;
     int		getNumberOfClusters() const;
     int		getNumberOfDeadlocks();
     int		getNumberOfMarkedStates() const;
@@ -41,7 +42,8 @@ class LTS
     void	mergeSuperiorClusters();
     void  	printStructure();
     void	printClusterSizesPositions();
-    void	removeMarkRules( const vector<int> &mrs );
+    void	removeMarkRule( const int index );
+    void	replaceMarkRule( int index, MarkRule* mr );
     void	setInitialState( State* s );
     void	setMatchAnyMarkRule( bool b );
     void	setStateVectorSpec( ATermList spec );

@@ -60,6 +60,7 @@ namespace Utils
   struct MarkRule
   {
     int		    paramIndex;
+    bool	    isNegated;
     vector< bool >  valueSet;
   };
   

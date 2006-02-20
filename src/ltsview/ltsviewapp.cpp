@@ -184,11 +184,29 @@ void LTSViewApp::addMarkRule()
   }
 }
 
-void LTSViewApp::removeMarkRules( const vector<int> &mrs )
+void LTSViewApp::removeMarkRule( const int index )
 {
-  lts->removeMarkRules( mrs );
+  lts->removeMarkRule( index );
   lts->markStates();
   applyMarkStyle( MARK_STATES );
+}
+
+void LTSViewApp::editMarkRule( const int index )
+{
+  if ( lts != NULL )
+  {
+    MarkStateRuleDialog msrDialog( mainFrame, this, lts->getStateVectorSpec() );
+    msrDialog.setMarkRule( lts->getMarkRule( index ), lts->getStateVectorSpec() );
+    msrDialog.CentreOnParent();
+    if ( msrDialog.ShowModal() == wxID_OK )
+    {
+      MarkRule* markrule = msrDialog.getMarkRule();
+      lts->replaceMarkRule( index, markrule );
+      mainFrame->replaceMarkRule( index, msrDialog.getMarkRuleString() );
+      lts->markStates();
+      applyMarkStyle( MARK_STATES );
+    }
+  }
 }
 
 void LTSViewApp::setMatchAnyMarkRule( bool b )
