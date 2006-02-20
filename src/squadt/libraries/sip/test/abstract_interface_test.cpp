@@ -18,7 +18,7 @@ using namespace sip::communicator;
 
 /* Serialisation, communication and deserialisation of a controller capabilities object */
 void controller_capabilities_exchange() {
-  BOOST_MESSAGE(" Empty controller_capabilities object: ");
+  BOOST_MESSAGE(" Communicating empty controller_capabilities object ... ");
 
   controller_communicator cc;
   tool_communicator       tc;
@@ -30,15 +30,18 @@ void controller_capabilities_exchange() {
   tc.connect(cc);
 
   tc.request_controller_capabilities();
-
-  tc.disconnect();
-
   cc.get_capabilities().to_xml(check_stream0);
   tc.get_controller_capabilities().to_xml(check_stream1);
 
+  tc.disconnect();
+
   BOOST_CHECK(check_stream0.str() == check_stream1.str());
 
-  BOOST_MESSAGE(" Filled controller_capabilities object: ");
+  BOOST_MESSAGE("  done");
+  BOOST_MESSAGE(" Communicating filled controller_capabilities object ... ");
+
+  check_stream0.str("");
+  check_stream1.str("");
 
   /* Example display dimensions */
   controller_capabilities capabilities();
@@ -47,11 +50,21 @@ void controller_capabilities_exchange() {
 
   tc.connect(cc);
 
+  tc.request_controller_capabilities();
+  cc.get_capabilities().to_xml(check_stream0);
+  tc.get_controller_capabilities().to_xml(check_stream1);
+
   tc.disconnect();
+
+  BOOST_CHECK(check_stream0.str() == check_stream1.str());
+
+  BOOST_MESSAGE("  done");
 }
 
 /* Serialisation, communication and deserialisation of an input configuration */
 void input_configuration_exchange() {
+  BOOST_MESSAGE(" Communicating input configuration ... ");
+
   controller_communicator cc;
   tool_communicator       tc;
 
@@ -64,11 +77,12 @@ void input_configuration_exchange() {
   tc.connect(cc);
 
   tc.disconnect();
+  BOOST_MESSAGE("  done");
 }
 
 /* Serialisation, communication and deserialisation of a report object */
 void report_exchange() {
-  BOOST_MESSAGE("Empty report: ");
+  BOOST_MESSAGE(" Communicating empty report ... ");
 
   std::ostringstream temporary;
 
@@ -90,7 +104,8 @@ void report_exchange() {
 
   BOOST_CHECK(d.pop_message().to_string() == std::string("<report></report>"));
 
-  BOOST_MESSAGE("Simple report: ");
+  BOOST_MESSAGE("  done");
+  BOOST_MESSAGE(" Communicating filled report ... ");
 
   /* New tool configuration */
   configuration* config = new configuration;
@@ -142,6 +157,25 @@ std::cerr << "  Message  `" << copy.str() << "'" << std::endl;
   BOOST_CHECK(copy.str() == temporary.str());
 
   c.disconnect(d);
+
+  BOOST_MESSAGE("  done");
+}
+
+void display_layout_exchange() {
+  BOOST_MESSAGE(" Communicating input configuration ... ");
+
+  controller_communicator cc;
+  tool_communicator       tc;
+
+  std::ostringstream      check_stream0;
+  std::ostringstream      check_stream1;
+
+  tc.connect(cc);
+
+//  tc.send_display_layout();
+
+  tc.disconnect();
+  BOOST_MESSAGE("  done");
 }
 
 test_suite* init_unit_test_suite( int argc, char * argv[] ) {
