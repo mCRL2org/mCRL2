@@ -1,43 +1,48 @@
 #ifndef SIP_TOOL_H
 #define SIP_TOOL_H
 
-#include <string>
 #include <deque>
 #include <set>
+#include <string>
+
+#include <boost/mem_fn.hpp>
 
 #include <sip/detail/common.h>
-#include <sip/detail/message.h>
 #include <sip/detail/controller_capabilities.h>
 #include <sip/detail/report.h>
-#include <sip/detail/sip_communicator.h>
+#include <sip/detail/basic_messenger.h>
 
 /* Interface classes for the tool side of the Squadt Interaction Protocol */
 namespace sip {
 
-  class tool_communicator : public communicator::sip_communicator {
+  class tool_communicator : public messenger::basic_messenger {
     public:
       /** Charactarises the current state */
       typedef enum {
-         status_initialising /** \brief{No connection with controller yet} */
-        ,status_clean        /** \brief{Connection with controller: Phase 0} */
-        ,status_configured   /** \brief{Tool has accepted a configuration: Phase 1} */
-        ,status_started      /** \brief{Tool is running: Phase 2} */
-        ,status_reported     /** \brief{Tool is finished and has send a report: Phase 3} */
-        ,status_error        /** \brief{An error occurred} */
+         status_initialising /** \brief No connection with controller yet */
+        ,status_clean        /** \brief Connection with controller: Phase 0 */
+        ,status_configured   /** \brief Tool has accepted a configuration: Phase 1 */
+        ,status_started      /** \brief Tool is running: Phase 2 */
+        ,status_reported     /** \brief Tool is finished and has send a report: Phase 3 */
+        ,status_error        /** \brief An error occurred */
       } status;
 
     private:
+
       /** The current protocol status */
       status                         current_status;
 
       /** The currently active display layout */
-      sip::layout::display_layout*   current_layout;
+      sip::layout::display_layout    current_display_layout;
 
       /** The last received set of controller capabilities */
       sip::controller_capabilities*  current_capabilities;
 
       /** A set of available input configurations for this tool */
       std::set < std::pair < tool_category, storage_format > >       current_input_configurations;
+
+      /** Triggers event handlers for incoming messages */
+      void deliver(std::istream&);
 
     public:
       tool_communicator();
@@ -46,22 +51,19 @@ namespace sip {
       void request_controller_capabilities();
 
       /** Request the list of basic input configurations */
-      void reply_input_configurations();
+      void reply_tool_capabilities();
 
-      /** Send a specification of the current configuration */
+      /** Signal that the current configuration is complete enough for the tool to start processing */
       void send_accept_configuration();
-
-      /** Send a layout specification for the display space reserved for this tool */
-      void send_display_layout(sip::layout::display_layout);
 
       /** Send a layout specification for the display space reserved for this tool */
       void send_display_data();
 
-      /** Send a signal that the tool is about to terminate */
-      void send_termination();
+      /** Send a layout specification for the display space reserved for this tool */
+      void send_display_layout();
 
-      /** Signal an error to the controller */
-      void send_error(std::string);
+      /** Send a signal that the tool is about to terminate */
+      void send_signal_termination();
 
       /** Send a status report to the controller */
       void send_report(sip::report&);
@@ -72,11 +74,16 @@ namespace sip {
       /** Get the last communicated set of controller capabilities */
       inline const controller_capabilities& get_controller_capabilities() const;
 
+      inline layout::display_layout& get_display_layout();
+
       /** Returns the current status */
       inline tool_communicator::status get_status() const;
   };
 
-  inline tool_communicator::tool_communicator() : current_status(status_initialising), current_layout(0), current_capabilities(0) {
+  inline tool_communicator::tool_communicator() : current_status(status_initialising), current_capabilities(0) {
+
+    /* Register event handlers for some message types */
+    set_handler(sip_message::request_controller_capabilities, boost::mem_fn(&tool_communicator::reply_tool_capabilities));
   }
 
   /** \pre{status is status_initialising} */
@@ -99,6 +106,10 @@ namespace sip {
     }
 
     return (*current_capabilities);
+  }
+
+  inline layout::display_layout& tool_communicator::get_display_layout() {
+    return (current_display_layout);
   }
 }
 

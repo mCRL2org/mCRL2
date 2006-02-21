@@ -1,7 +1,11 @@
 #include <sstream>
 
 #include <sip/sip_controller.h>
+#include <sip/detail/message.h>
 #include <sip/detail/common.h>
+
+#include <boost/thread/barrier.hpp>
+#include <boost/bind.hpp>
 
 namespace sip {
   using namespace sip::communicator;
@@ -23,11 +27,21 @@ namespace sip {
   }
 
   /* Request a tool what input configurations it has available */
-  void controller_communicator::request_input_configurations() {
+  void controller_communicator::request_tool_capabilities() {
+    send_message(boost::cref(message(message::request_tool_capabilities)));
   }
 
   /* Send the selected input configuration */
-  void controller_communicator::send_selected_input_configuration() {
+  void controller_communicator::send_configuration() {
+    std::ostringstream data;
+
+    current_configuration.to_xml(data);
+
+    message m(message::reply_controller_capabilities);
+
+    m.set_content(data.str());
+
+    send_message(m);
   }
 
   /* Send data gathered by user interaction */
@@ -36,13 +50,39 @@ namespace sip {
 
   /* Request a tool to terminate */
   void controller_communicator::request_termination() {
+    send_message(boost::cref(message(message::request_termination)));
   }
 
-  void controller_communicator::trigger(message::message_type t) {
-    if (t == message::request_controller_capabilities) {
-      reply_controller_capabilities();
+  /** \attention{Works, based on assumption that only one delivery is active for this object at the same time} */
+  void controller_communicator::deliver(std::istream& s) {
+    communicator::sip_communicator::deliver(s);
 
-      pop_message();
+    sip_communicator::message_queue::iterator m = _message_queue.begin();
+
+    while (m != _message_queue.end()) {
+      switch ((*m)->get_type()) {
+        case message::request_controller_capabilities:
+          reply_controller_capabilities();
+
+          pop_message();
+          break;
+        case message::send_accept_configuration:
+          current_status = status_configured;
+
+          pop_message();
+          break;
+        case message::send_display_layout:
+          pop_message();
+          break;
+        case message::send_display_data:
+          pop_message();
+          break;
+        default:
+          break;
+      }
+
+      ++m;
     }
+
   }
 }

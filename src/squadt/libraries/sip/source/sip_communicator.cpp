@@ -1,17 +1,14 @@
 #include <algorithm>
 #include <sstream>
 
-#include <sip/detail/sip_communicator.h>
+#include <sip/detail/basic_messenger.h>
 #include <sip/detail/exception.h>
 
 namespace sip {
 
   namespace communicator {
 
-    sip_communicator::sip_communicator() : wait_lock(2), message_open(false), using_lock(false), partially_matched(0) {
-    }
- 
-    void sip_communicator::deliver(std::istream& data) {
+    void basic_messenger::deliver(std::istream& data) {
       std::ostringstream s;
  
       s << data.rdbuf() << std::flush;
@@ -27,7 +24,7 @@ namespace sip {
      *
      * \attention{Works under the assumption that message::tag_close.size() < data.size()}
      **/
-    void sip_communicator::deliver(std::string& data) {
+    void basic_messenger::deliver(std::string& data) {
       std::string::const_iterator i = data.begin();
  
       while (i != data.end()) {
@@ -96,22 +93,37 @@ namespace sip {
           }
 
           if (!message_open) {
+            message::type_identifier_t t;
+
             /* End message sequence matched; move message from buffer to queue  */
             std::string new_string;
 
             new_string.swap(buffer);
 
-            message_ptr m(new message(message::extract_type(new_string)));
+            t = message::extract_type(new_string);
+
+            message_ptr m(new message(t));
 
             m->set_content(new_string);
 
-            message_queue.push_back(m);
+            handler_map::iterator h = handlers.find(t);
 
-            /* Unblock waiters, if necessary */
-            if (using_lock) {
-              using_lock = false;
-          
-              wait_lock.wait();
+            if (h != handlers.end()) {
+              /* Service handler */
+              (*h).second(m);
+            }
+            else {
+              /* Put message into queue */
+              message_queue.push_back(m);
+
+              /* Unblock waiters, if necessary */
+              if (waiters.count(t) != 0) {
+                barrier_ptr b = waiters[t];
+                
+                waiters.erase(t);
+
+                b->wait();
+              }
             }
           }
         }
@@ -166,15 +178,18 @@ namespace sip {
       }
     }
  
-    /* Wait until the next message arrives (must not be called from multiple threads) */
-    void sip_communicator::await_message() {
-      assert(!using_lock);
- 
-      if (message_queue.size() == 0) {
-        using_lock = true;
- 
-        wait_lock.wait();
-      }
+    /**
+     * \pre no handler or other waiter for this type is registered
+     * \attention must not be called from multiple threads for the same type
+     **/
+    void basic_messenger::await_message(message::type_identifier_t t) {
+      assert(waiters.count(t) == 0 && handlers.count(t) == 0);
+
+      barrier_ptr b(new boost::barrier(2));
+
+      waiters[t] = b;
+
+      b->wait();
     }
   }
 }

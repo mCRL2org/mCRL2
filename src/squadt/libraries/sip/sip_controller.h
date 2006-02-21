@@ -4,14 +4,15 @@
 #include <string>
 #include <deque>
 
-#include <sip/detail/sip_communicator.h>
+#include <sip/detail/basic_messenger.h>
+#include <sip/detail/configuration.h>
 #include <sip/detail/controller_capabilities.h>
 #include <sip/detail/common.h>
 
 /* Interface classes for the tool side of the Squadt Interaction Protocol */
 namespace sip {
 
-  class controller_communicator : public communicator::sip_communicator {
+  class controller_communicator : public messenger::basic_messenger {
     public:
       typedef controller_capabilities::version            version;
 
@@ -20,12 +21,12 @@ namespace sip {
     private:
       /** Charactarises the current state */
       typedef enum {
-         status_initialising /** \brief{No connection with tool yet} */
-        ,status_clean        /** \brief{Connection with tool: Phase 0} */
-        ,status_configured   /** \brief{Tool has accepted a configuration: Phase 1} */
-        ,status_started      /** \brief{Tool is running: Phase 2} */
-        ,status_reported     /** \brief{Tool is finished and has send a report: Phase 3} */
-        ,status_error        /** \brief{An error occurred} */
+         status_initialising /** \brief No connection with tool yet */
+        ,status_clean        /** \brief Connection with tool: Phase 0 */
+        ,status_configured   /** \brief Tool has accepted a configuration: Phase 1 */
+        ,status_started      /** \brief Tool is running: Phase 2 */
+        ,status_reported     /** \brief Tool is finished and has send a report: Phase 3 */
+        ,status_error        /** \brief An error occurred */
       } status;
 
       static const version        current_version;
@@ -36,12 +37,20 @@ namespace sip {
       /** The currently active display layout */
       sip::layout::display_layout current_layout;
 
+      /** The dimensions of the currently reserved display for the connected tool */
       display_dimensions          current_display_dimensions;
 
-      inline void deliver(std::istream&);
+      /** The current configuration of a tool (may be limited to a main input configuration) */
+      configuration               current_configuration;
+
+      /** Handler function to replace the current display layout with a new one */
+      void (*accept_layout_handler)();
+
+      /** Handler function to map data to the display */
+      void (*accept_data_handler)();
 
       /** Triggers event handlers for incoming messages */
-      void trigger(communicator::message::message_type t);
+      void deliver(std::istream&);
 
     public:
       inline controller_communicator();
@@ -50,13 +59,16 @@ namespace sip {
       void reply_controller_capabilities();
 
       /** Request the list of basic input configurations */
-      void request_input_configurations();
+      void request_tool_capabilities();
 
-      /** Send a specification of the selected configuration */
-      void send_selected_input_configuration();
+      /** Send a specification of a (perhaps partial) configuration */
+      void send_configuration();
 
       /** Send a layout specification for the display space reserved for this tool */
       void send_interaction_data();
+
+      /** Send a layout specification for the display space reserved for this tool */
+      void send_start_signal();
 
       /** Request the tool to terminate itself */
       void request_termination();
@@ -66,6 +78,12 @@ namespace sip {
 
       /** Get a controller_capabilities object that is send to tools */
       controller_capabilities get_capabilities();
+
+      /** Set the current configuration (only effective before status_configured) */
+      void set_configuration(const configuration&);
+
+      /** Get the current (perhaps partial) configuration */
+      configuration get_configuration() const;
 
       /** Returns the used protocol version */
       inline controller_communicator::version get_version() const; 
@@ -80,13 +98,6 @@ namespace sip {
     current_display_dimensions.z = 0;
   }
 
-  /** \attension{Works, based on assumption that only one delivery is active for this object at the same time} */
-  inline void controller_communicator::deliver(std::istream& s) {
-    communicator::sip_communicator::deliver(s);
-
-    trigger(peek_message().get_type());
-  }
-
   inline void controller_communicator::set_display_dimensions(unsigned short x, unsigned short y, unsigned short z) {
     current_display_dimensions.x = x;
     current_display_dimensions.y = y;
@@ -99,6 +110,16 @@ namespace sip {
     c.set_display_dimensions(current_display_dimensions);
 
     return (c);
+  }
+
+  inline void controller_communicator::set_configuration(const configuration& c) {
+    if (status_configured <= current_status) {
+      current_configuration = c;
+    }
+  }
+
+  inline configuration controller_communicator::get_configuration() const {
+    return (current_configuration);
   }
 
   inline controller_communicator::version controller_communicator::get_version() const {

@@ -6,7 +6,8 @@ project sip
    <include>../../../../boost/
    <include>../../
   : usage-requirements
-   <include>../../ ;
+   <include>../../
+   <library>/boost/thread//boost_thread ;
 
 lib sip_communicator :
         sip_communicator.cpp

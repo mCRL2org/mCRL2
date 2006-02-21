@@ -1,10 +1,10 @@
-#include <sip/detail/sip_communicator.h>
-
 #include <iostream>
 
 #include <boost/test/test_tools.hpp>
 #include <boost/test/unit_test.hpp>
 #include <boost/test/unit_test_log.hpp>
+
+#include <sip/detail/basic_messenger.h>
 
 #define BOOST_TEST_SHOW_PROGRESS yes
 
@@ -12,7 +12,7 @@ using boost::unit_test::test_suite;
 
 using namespace transport;
 using namespace sip;
-using namespace sip::communicator;
+using namespace sip::messenger;
 
 static const std::string empty;
 static const std::string garbage("garbage");
@@ -23,24 +23,28 @@ static const std::string end_message("</message>");
 
 /* Single communication */
 void no_message() {
-  BOOST_MESSAGE("No message: ");
+  BOOST_MESSAGE("No message ...");
 
-  sip_communicator c;
-  sip_communicator d;
+  basic_messenger c;
+  basic_messenger d;
 
   c.connect(d);
 
   c.send(empty);
 
   c.disconnect(d);
+
+  BOOST_CHECK(d.number_of_messages() == 0);
+
+  BOOST_MESSAGE(" done");
 }
 
 /* Single communication */
 void empty_message() {
-  BOOST_MESSAGE("Empty message: ");
+  BOOST_MESSAGE("Empty message ...");
 
-  sip_communicator c;
-  sip_communicator d;
+  basic_messenger c;
+  basic_messenger d;
 
   c.connect(d);
 
@@ -49,14 +53,16 @@ void empty_message() {
   c.disconnect(d);
 
   BOOST_CHECK(d.number_of_messages() == 1 && d.pop_message().to_string().empty());
+
+  BOOST_MESSAGE(" done");
 }
 
 /* Single communication */
 void non_empty_message() {
-  BOOST_MESSAGE("Non-empty message: ");
+  BOOST_MESSAGE("Non-empty message ...");
 
-  sip_communicator c;
-  sip_communicator d;
+  basic_messenger c;
+  basic_messenger d;
 
   c.connect(d);
 
@@ -65,14 +71,16 @@ void non_empty_message() {
   c.disconnect(d);
 
   BOOST_CHECK(d.number_of_messages() == 1 && d.pop_message().to_string() == data);
+
+  BOOST_MESSAGE(" done");
 }
 
 /* Two communications */
 void split2_empty_message() {
-  BOOST_MESSAGE("Empty message, two commmunications: ");
+  BOOST_MESSAGE("Empty message, two commmunications ...");
 
-  sip_communicator c;
-  sip_communicator d;
+  basic_messenger c;
+  basic_messenger d;
 
   c.connect(d);
 
@@ -82,14 +90,16 @@ void split2_empty_message() {
   c.disconnect(d);
 
   BOOST_CHECK(d.number_of_messages() == 1 && d.pop_message().to_string().empty());
+
+  BOOST_MESSAGE(" done");
 }
 
 /* Two communications */
 void split2_non_empty_message() {
-  BOOST_MESSAGE("Non-empty message, two communications: ");
+  BOOST_MESSAGE("Non-empty message, two communications ...");
 
-  sip_communicator c;
-  sip_communicator d;
+  basic_messenger c;
+  basic_messenger d;
 
   c.connect(d);
 
@@ -99,14 +109,16 @@ void split2_non_empty_message() {
   c.disconnect(d);
 
   BOOST_CHECK(d.number_of_messages() == 1 && d.pop_message().to_string() == data);
+
+  BOOST_MESSAGE(" done");
 }
 
 /* Three communications */
 void split3_non_empty_message() {
-  BOOST_MESSAGE("Non-empty message, three communications: ");
+  BOOST_MESSAGE("Non-empty message, three communications ...");
 
-  sip_communicator c;
-  sip_communicator d;
+  basic_messenger c;
+  basic_messenger d;
 
   c.connect(d);
 
@@ -117,14 +129,16 @@ void split3_non_empty_message() {
   c.disconnect(d);
 
   BOOST_CHECK(d.number_of_messages() == 1 && d.pop_message().to_string() == data);
+
+  BOOST_MESSAGE(" done");
 }
 
 /* Three communications */
 void split3_non_empty_message_fragmented() {
-  BOOST_MESSAGE("Non-empty fragmented message, three communications: ");
+  BOOST_MESSAGE("Non-empty fragmented message, three communications ...");
 
-  sip_communicator c;
-  sip_communicator d;
+  basic_messenger c;
+  basic_messenger d;
 
   c.connect(d);
 
@@ -135,14 +149,16 @@ void split3_non_empty_message_fragmented() {
   c.disconnect(d);
 
   BOOST_CHECK(d.number_of_messages() == 1 && d.pop_message().to_string() == data + data + data);
+
+  BOOST_MESSAGE(" done");
 }
 
 /* Three communications */
 void split3_non_empty_message_and_garbage() {
-  BOOST_MESSAGE("Non-empty fragmented message, three communications and garbage: ");
+  BOOST_MESSAGE("Non-empty fragmented message, three communications and garbage ...");
 
-  sip_communicator c;
-  sip_communicator d;
+  basic_messenger c;
+  basic_messenger d;
 
   c.connect(d);
 
@@ -153,14 +169,16 @@ void split3_non_empty_message_and_garbage() {
   c.disconnect(d);
 
   BOOST_CHECK(d.number_of_messages() == 1 && d.pop_message().to_string() == data + data + data);
+
+  BOOST_MESSAGE(" done");
 }
 
 /* Two communications fragmented open tag */
 void non_empty_message_and_fragmented_open_tag() {
-  BOOST_MESSAGE("Non-empty fragmented message open tag, two communications: ");
+  BOOST_MESSAGE("Non-empty fragmented message open tag, two communications ...");
 
-  sip_communicator c;
-  sip_communicator d;
+  basic_messenger c;
+  basic_messenger d;
 
   c.connect(d);
 
@@ -170,14 +188,16 @@ void non_empty_message_and_fragmented_open_tag() {
   c.disconnect(d);
 
   BOOST_CHECK(d.number_of_messages() == 1 && d.pop_message().to_string() == data);
+
+  BOOST_MESSAGE(" done");
 }
 
 /* Two communications and fragmented close tag */
 void non_empty_message_and_fragmented_close_tag() {
-  BOOST_MESSAGE("Non-empty fragmented message close tag, two communications: ");
+  BOOST_MESSAGE("Non-empty fragmented message close tag, two communications ...");
 
-  sip_communicator c;
-  sip_communicator d;
+  basic_messenger c;
+  basic_messenger d;
 
   c.connect(d);
 
@@ -187,14 +207,16 @@ void non_empty_message_and_fragmented_close_tag() {
   c.disconnect(d);
 
   BOOST_CHECK(d.number_of_messages() == 1 && d.pop_message().to_string() == data);
+
+  BOOST_MESSAGE(" done");
 }
 
 /* Three communications fragmented open and close tags */
 void non_empty_message_and_fragmented_tags() {
-  BOOST_MESSAGE("Non-empty fragmented message open and close tags, three communications: ");
+  BOOST_MESSAGE("Non-empty fragmented message open and close tags, three communications ...");
 
-  sip_communicator c;
-  sip_communicator d;
+  basic_messenger c;
+  basic_messenger d;
 
   c.connect(d);
 
@@ -205,14 +227,16 @@ void non_empty_message_and_fragmented_tags() {
   c.disconnect(d);
 
   BOOST_CHECK(d.number_of_messages() == 1 && d.pop_message().to_string() == data);
+
+  BOOST_MESSAGE(" done");
 }
 
 void message_wrapper() {
-  BOOST_MESSAGE("Data wrapping and sending: ");
+  BOOST_MESSAGE("Data wrapping and sending ...");
 
-  sip_communicator c;
-  sip_communicator d;
-  message m;
+  basic_messenger c;
+  basic_messenger d;
+  basic_messenger::message m;
 
   m.set_content(data);
 
@@ -223,6 +247,35 @@ void message_wrapper() {
   c.disconnect(d);
 
   BOOST_CHECK(d.number_of_messages() == 1 && d.pop_message().to_string() == data);
+
+  BOOST_MESSAGE(" done");
+}
+
+bool event_triggered = false;
+
+void event_handler(basic_messenger::message_ptr&) {
+  event_triggered = true;
+}
+
+void message_delivery_event_handling() {
+  BOOST_MESSAGE("Data wrapping and sending ...");
+
+  basic_messenger c;
+  basic_messenger d;
+  basic_messenger::message_ptr m(new basic_messenger::message);
+
+  /* Set handler for any message type */
+  d.set_handler(event_handler);
+
+  c.connect(d);
+
+  c.send_message(*m.get());
+
+  c.disconnect(d);
+
+  BOOST_CHECK(event_triggered);
+
+  BOOST_MESSAGE(" done");
 }
 
 test_suite* init_unit_test_suite( int argc, char * argv[] ) {
@@ -245,6 +298,7 @@ test_suite* init_unit_test_suite( int argc, char * argv[] ) {
   test->add(BOOST_TEST_CASE(&non_empty_message_and_fragmented_close_tag), 0, 2);
   test->add(BOOST_TEST_CASE(&non_empty_message_and_fragmented_tags), 0, 2);
   test->add(BOOST_TEST_CASE(&message_wrapper), 0, 2);
+  test->add(BOOST_TEST_CASE(&message_delivery_event_handling), 0, 2);
 
   return (test);
 }

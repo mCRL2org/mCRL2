@@ -13,49 +13,37 @@ namespace sip {
 
   namespace communicator {
 
-    /** Base class for messages */
+    /**
+     * Base class for messages M is a type for message characterisation
+     * 
+     * \attention M should be an enumeration type for message identifiers with
+     *   a value D that is used as the default message type identifier
+     */
+    template < class M, M D = static_cast < M > (0) >
     class message {
       friend class sip_communicator;
 
       public:
         /** Type for message identification */
-        enum message_type {
-          request_controller_capabilities    /// \brief{request the controller a description of its capabilities}
-          ,reply_controller_capabilities     /// \brief{send a description of controller capabilities to the tool}
-          ,request_tool_capabilities         /// \brief{request a tool a description of its capabilities}
-          ,reply_tool_capabilities           /// \brief{send a description of tool capabilities to the controller}
-          ,send_select_input_configuration   /// \brief{send the selected input configuration to a tool}
-          ,signal_start                      /// \brief{tool can start operation}
-          ,send_display_layout               /// \brief{send the controller a layout description for the display}
-          ,send_display_data                 /// \brief{send the controller a data to be displayed using the current display layout}
-          ,send_interaction_data             /// \brief{send a tool data from user interaction via the display associated with this tool}
-          ,request_termination               /// \brief{send a tool the signal to end processing and terminate as soon as possible}
-          ,signal_termination                /// \brief{send the controller the signal that the tool is about to terminate}
-          ,send_report                       /// \brief{send the controller a report of a tools operation}
-          ,unknown                           /// \brief{type is was specified or unknown (should be derived from content)}
-        };
+        typedef M                  type_identifier_t;
 
       private:
 
         /** The message type */
-        message_type               type;
+        type_identifier_t          type;
 
         /** The content of a message */
         std::string                content;
 
-        /** The XML element name used for wrapping the content to XML representation */
-        static const std::string   tag_open;
-        static const std::string   tag_close;
-
         /** Tries to extract the message type, which is the first element */
-        inline static message_type extract_type(std::string& content);
+        inline static type_identifier_t extract_type(std::string& content);
  
       public:
         /** Generates an XML text string for the message */
-        inline message(message_type t = unknown);
+        inline message(type_identifier_t t = D);
 
         /** Returns the message type */
-        inline message_type get_type() const;
+        inline type_identifier_t get_type() const;
  
         /** Generates an XML text string for the message */
         inline std::string to_xml() const;
@@ -76,22 +64,22 @@ namespace sip {
         inline void set_content(const char*);
     };
  
-    const std::string message::tag_open("<message>");
-    const std::string message::tag_close("</message>");
-
-    inline message::message(message_type t) : type(t) {
+    template < class M, M D >
+    inline message< M, D >::message(type_identifier_t t) : type(t) {
     }
 
-    inline message::message_type message::get_type() const {
+    template < class M, M D >
+    inline M message< M, D >::get_type() const {
       return (type);
     }
 
-    inline message::message_type message::extract_type(std::string& content) {
-      const std::string message_type_tag("<message-meta");
+    template < class M, M D >
+    inline M message< M, D >::extract_type(std::string& content) {
+      const std::string message_meta_tag("<message-meta");
 
       std::string::iterator i = content.begin();
 
-      if (std::mismatch(message_type_tag.begin(),message_type_tag.end(),i).first == message_type_tag.end()) {
+      if (std::mismatch(message_meta_tag.begin(),message_meta_tag.end(),i).first == message_meta_tag.end()) {
         size_t identifier = 0;
 
         std::string::iterator e = std::find(content.begin(), content.end(), '>');
@@ -105,17 +93,19 @@ namespace sip {
         /* Remove message meta element */
         content.erase(content.begin(),e);
 
-        return (std::min(static_cast < message::message_type > (identifier), message::unknown));
+        return (std::min(static_cast < M > (identifier), D));
       }
 
-      return (message::unknown);
+      return (D);
     }
  
-    inline void message::set_content(const std::string c) {
+    template < class M, M D >
+    inline void message< M, D >::set_content(const std::string c) {
       content = c;
     }
  
-    inline void message::set_content(std::istream& c) {
+    template < class M, M D >
+    inline void message< M, D >::set_content(std::istream& c) {
       std::ostringstream temporary;
  
       temporary << c.rdbuf();
@@ -123,11 +113,13 @@ namespace sip {
       content = temporary.str();
     }
  
-    inline void message::set_content(const char* c) {
+    template < class M, M D >
+    inline void message< M, D >::set_content(const char* c) {
       content = std::string(c);
     }
  
-    inline std::string message::to_xml() const {
+    template < class M, M D >
+    inline std::string message< M, D >::to_xml() const {
       std::ostringstream output;
       
       to_xml(output);
@@ -135,14 +127,14 @@ namespace sip {
       return (output.str());
     }
  
-    inline void message::to_xml(std::ostream& output) const {
-      output << "<message>"
-             << "<message-meta type=\"" << type << "\"/>"
-             << content
-             << "</message>";
+    template < class M, M D >
+    inline void message< M, D >::to_xml(std::ostream& output) const {
+      output << "<message-meta type=\"" << type << "\"/>"
+             << content;
     }
 
-    inline std::string message::to_string() const {
+    template < class M, M D >
+    inline std::string message< M, D >::to_string() const {
       return (content);
     }
   }
