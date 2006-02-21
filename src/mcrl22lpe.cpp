@@ -55,7 +55,7 @@ int main(int argc, char *argv[])
   bool opt_check_only = false;
   bool opt_nosumelm = false;
   t_phase opt_end_phase = phNone;
-  #define ShortOptions   "0123cnrwbaofep:hqvd"
+  #define ShortOptions   "0123cnrwbaofep:hqvdm"
   #define VersionOption  CHAR_MAX + 1
   struct option LongOptions[] = {
     { "stack",       no_argument,       NULL, '0' },

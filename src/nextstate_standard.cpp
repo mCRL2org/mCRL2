@@ -167,6 +167,26 @@ ATermAppl NextStateStandard::FindDummy(ATermAppl sort, ATermList no_dummy)
 
 	if ( gsIsSortArrow(sort) )
 	{
+		l = ATLgetArgument(ATAgetArgument(current_spec,1),0);
+		for (; !ATisEmpty(l); l=ATgetNext(l))
+		{
+			ATermAppl conssort = ATAgetArgument(ATAgetFirst(l),1);
+			if ( ATisEqual(conssort,sort) )
+			{
+				return ATAgetFirst(l);
+			}
+		}
+
+		l = ATLgetArgument(ATAgetArgument(current_spec,2),0);
+		for (; !ATisEmpty(l); l=ATgetNext(l))
+		{
+			ATermAppl mapsort = ATAgetArgument(ATAgetFirst(l),1);
+			if ( ATisEqual(mapsort,sort) )
+			{
+				return ATAgetFirst(l);
+			}
+		}
+
 		gsErrorMsg("cannot generate dummies for function sorts (%T)\n",sort);
 		exit(1);
 	}

@@ -6417,13 +6417,15 @@ static bool might_communicate(ATermList m,ATermList C)
 
 static ATermList makeMultiActionConditionList(
                    ATermList multiaction,
-                   ATermList communications);
+                   ATermList communications,
+                   ATermList r);
 
 static ATermList phi(ATermList m,
                      ATermList d,
                      ATermList w,
                      ATermList n,
-                     ATermList C)
+                     ATermList C,
+                     ATermList r)
 { /* phi is a function that yields a list of pairs
      indicating how the actions in m|w|n can communicate.
      The pairs contain the resulting multi action and
@@ -6442,7 +6444,7 @@ static ATermList phi(ATermList m,
   { ATermAppl c=can_communicate(m,C); /* returns NULL if no communication
                                          is possible */
     if (c!=NULL)
-    { ATermList T=makeMultiActionConditionList(w,C);
+    { ATermList T=makeMultiActionConditionList(w,C,r);
       return addActionCondition(
                    ((ATAgetArgument(c,0)==gsMakeNil())?NULL:gsMakeAction(c,d)),
                    gsMakeDataExprTrue(),
@@ -6455,14 +6457,35 @@ static ATermList phi(ATermList m,
   /* if n=[a(f)] \oplus o */
   ATermAppl firstaction=ATAgetFirst(n);
   ATermList o=ATgetNext(n);
-  ATermList T=phi(ATappend(m,(ATerm)firstaction),d,w,o,C);
+  ATermList T=phi(ATappend(m,(ATerm)firstaction),d,w,o,C,r);
   return addActionCondition(
                 NULL,
                 pairwiseMatch(d,ATLgetArgument(firstaction,1)),
                 T,
-                phi(m,d,ATappend(w,(ATerm)firstaction),o,C));
+                phi(m,d,ATappend(w,(ATerm)firstaction),o,C,r));
 }
 
+static bool xi(ATermList alpha, ATermList beta, ATermList C)
+{
+  if ( ATisEmpty(beta) )
+  {
+    return can_communicate(alpha,C);
+  } else {
+    ATerm a = ATgetFirst(beta);
+    ATermList l = ATinsert(alpha,a);
+    beta = ATgetNext(beta);
+
+    if ( can_communicate(l,C) )
+    {
+      return true;
+    } else if ( might_communicate(l,C) )
+    {
+      return xi(l,beta,C) || xi(alpha,beta,C);
+    } else {
+      return xi(alpha,beta,C);
+    }
+  }
+}
 
 static ATermAppl makeNegatedConjunction(ATermList S)
 { ATermAppl result=gsMakeDataExprTrue();
@@ -6473,15 +6496,45 @@ static ATermAppl makeNegatedConjunction(ATermList S)
   return result; 
 }
 
+static ATermList psi_prime(ATermList a, ATermList alpha, ATermList C)
+{
+  if ( ATisEmpty(alpha) )
+  {
+    return ATmakeList0();
+  } else {
+    if ( might_communicate(ATinsert(a,ATgetFirst(alpha)),C) && xi(ATinsert(a,ATgetFirst(alpha)),ATgetNext(alpha),C) )
+    {
+                  return ATinsert(
+        psi_prime(a,ATgetNext(alpha),C),
+        (ATerm) gsMakeDataExprAnd(gsMakeDataExprTrue(),pairwiseMatch(ATLgetArgument(ATAgetFirst(a),1),ATLgetArgument(ATAgetFirst(alpha),1)))
+        );
+    } else {
+      return psi_prime(a,ATgetNext(alpha),C);
+    }
+  }
+}
+
+static ATermList psi(ATermList alpha, ATermList C)
+{
+  if ( ATisEmpty(alpha) )
+  {
+    return ATmakeList0();
+  } else {
+    // sort and remove duplicates
+    return ATconcat(psi_prime(ATmakeList1(ATgetFirst(alpha)),ATgetNext(alpha),C),psi(ATgetNext(alpha),C));
+  }
+}
+
 static ATermList makeMultiActionConditionList(
                    ATermList multiaction,
-                   ATermList communications)
-{ /* This is the function gamma(m,C) provided
+                   ATermList communications,
+                   ATermList r = NULL)
+{ /* This is the function gamma(m,C,r) provided
      by Muck van Weerdenburg in Calculation of 
      Communication with open terms [1]. */
   
   if (multiaction==ATempty)
-  { return ATinsertA(ATempty,linMakeTuple(ATempty,gsMakeDataExprTrue()));
+  {  return ATinsertA(ATempty,linMakeTuple(ATempty,(r==NULL)?gsMakeDataExprTrue():makeNegatedConjunction(psi(r,communications))));
   }
 
   ATermAppl firstaction=ATAgetFirst(multiaction);
@@ -6491,13 +6544,13 @@ static ATermList makeMultiActionConditionList(
                   ATLgetArgument(firstaction,1),
                   ATempty,
                   remainingmultiaction,
-                  communications);
+                  communications,
+                  r);
   ATermList T=makeMultiActionConditionList(
                   remainingmultiaction,
-                  communications);
-  ATermAppl b=makeNegatedConjunction(S);
-  S=addActionCondition(firstaction,b,T,S);
-  return S;
+                  communications,
+                  (r==NULL)?ATmakeList1((ATerm) firstaction):ATinsertA(r,firstaction));
+  return addActionCondition(firstaction,gsMakeDataExprTrue(),T,S);
 
 }
 
@@ -6730,6 +6783,8 @@ static ATermAppl communicationcomposition(
 //        gsfprintf(stderr,"2communicationcondition, %P\n\n",communicationcondition);
 
           newcondition=RewriteTerm(newcondition); 
+        } else {
+          newcondition=RewriteTerm(gsMakeDataExprAnd(newcondition,communicationcondition)); 
         }
         if (newcondition!=gsMakeDataExprFalse())
         { 
