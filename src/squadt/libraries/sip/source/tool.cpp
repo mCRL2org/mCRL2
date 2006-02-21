@@ -2,15 +2,16 @@
 
 #include <xml2pp/xml_text_reader.h>
 
-#include <sip/sip_tool.h>
+#include <sip/tool.h>
 #include <sip/detail/message.h>
+#include <sip/detail/basic_messenger.tcc>
 
 namespace sip {
-  using namespace sip::communicator;
+  using namespace sip::messenger;
 
   /* Request details about the amount of space that the controller currently has reserved for this tool */
   void tool_communicator::request_controller_capabilities() {
-    send_message(boost::cref(message(message::request_controller_capabilities)));
+    send_message(boost::cref(sip_message(sip::request_controller_capabilities)));
 
     /* Await the reply (too crude, message type might not match) */
     await_message();

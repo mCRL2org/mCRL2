@@ -12,7 +12,7 @@
 /* Interface classes for the tool side of the Squadt Interaction Protocol */
 namespace sip {
 
-  class controller_communicator : public messenger::basic_messenger {
+  class controller_communicator : public sip_messenger {
     public:
       typedef controller_capabilities::version            version;
 

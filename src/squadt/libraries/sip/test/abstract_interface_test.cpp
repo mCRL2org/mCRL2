@@ -1,5 +1,5 @@
-#include <sip/sip_tool.h>
-#include <sip/sip_controller.h>
+#include <sip/tool.h>
+#include <sip/controller.h>
 
 #include <sstream>
 #include <iostream>
@@ -8,13 +8,15 @@
 #include <boost/test/unit_test.hpp>
 #include <boost/test/unit_test_log.hpp>
 
+#include <sip/detail/basic_messenger.tcc>
+
 #define BOOST_TEST_SHOW_PROGRESS yes
 
 using boost::unit_test::test_suite;
 
 using namespace transport;
 using namespace sip;
-using namespace sip::communicator;
+using namespace sip::messenger;
 
 /* Serialisation, communication and deserialisation of a controller capabilities object */
 void controller_capabilities_exchange() {
@@ -86,10 +88,10 @@ void report_exchange() {
 
   std::ostringstream temporary;
 
-  sip_communicator   c;
-  sip_communicator   d;
-  report             r;
-  message            m;
+  sip_messenger    c;
+  sip_messenger    d;
+  report           r;
+  sip_message      m;
 
   r.to_xml(temporary);
 
@@ -100,7 +102,7 @@ void report_exchange() {
 
   c.send_message(m);
 
-  d.await_message();
+  d.await_message(sip::unknown);
 
   BOOST_CHECK(d.pop_message().to_string() == std::string("<report></report>"));
 
@@ -139,7 +141,7 @@ void report_exchange() {
 
   c.send_message(m);
 
-  d.await_message();
+  d.await_message(sip::unknown);
 
   std::ostringstream copy;
 

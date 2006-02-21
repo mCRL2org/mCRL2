@@ -20,14 +20,19 @@
 
 namespace sip {
 
-  namespace communicator {
-    class basic_messenger;
+  namespace messenger {
+    template < class M > class basic_messenger;
 
-    /* Abstract communicator class that divides an incoming data stream in messages */
+    /**
+     * \brief Abstract communicator class that divides an incoming data stream in messages
+     *
+     * M is the type of a messenger::message or derived type
+     */
+    template < class M >
     class basic_messenger : public transport::transporter {
       public:
 
-        typedef message < sip_message_types, unknown >  message;
+        typedef M                                       message;
 
         /** Convenience type for pointers to messages using a boost shared pointer */
         typedef boost::shared_ptr < message >           message_ptr;
@@ -38,13 +43,13 @@ namespace sip {
       private:
 
         /** Convenience type for pointers to wait locks using a boost scoped pointer */
-        typedef boost::shared_ptr< boost::barrier >                barrier_ptr;
+        typedef boost::shared_ptr< boost::barrier >                     barrier_ptr;
 
         /** Type for the map used to associate a handler to a message type */
-        typedef std::map < message::type_identifier_t, handler_type >   handler_map;
+        typedef std::map < typename M::type_identifier_t, handler_type >   handler_map;
 
         /** Type for the map used to associate a handler to a lock primitive */
-        typedef std::map < message::type_identifier_t, barrier_ptr >    waiter_map;
+        typedef std::map < typename M::type_identifier_t, barrier_ptr >    waiter_map;
 
         /** Handlers based on message types */
         handler_map                handlers;
@@ -79,7 +84,7 @@ namespace sip {
         virtual void deliver(std::string&);
  
         /* Wait until the next message arrives */
-        void await_message(message::type_identifier_t);
+        void await_message(typename M::type_identifier_t);
  
         /** Send a message */
         inline void send_message(const message&);
@@ -93,55 +98,14 @@ namespace sip {
         inline size_t number_of_messages();
  
         /** Set the handler for a type */
-        inline void set_handler(handler_type, const message::type_identifier_t = (message::type_identifier_t) 0);
+        inline void set_handler(handler_type, const typename M::type_identifier_t = static_cast < typename M::type_identifier_t > (0));
 
         /** Unset the handler for a type */
-        inline void unset_handler(const message::type_identifier_t);
+        inline void unset_handler(const typename M::type_identifier_t);
     };
 
-    const std::string basic_messenger::tag_open("<message>");
-
-    const std::string basic_messenger::tag_close("</message>");
-
-    inline basic_messenger::basic_messenger() : message_open(false), partially_matched(0) {
-    }
- 
-    /* Send a message */
-    inline void basic_messenger::send_message(const message& m) {
-      send(m.to_xml());
-    }
- 
-    /* \pre{the message queue is not empty} */
-    inline basic_messenger::message basic_messenger::pop_message() {
-      message_ptr m = message_queue.front();
- 
-      message_queue.pop_front();
- 
-      return (*m);
-    }
- 
-    /* \pre{the message queue is not empty} */
-    inline basic_messenger::message& basic_messenger::peek_message() {
-      message_ptr m = message_queue.front();
- 
-      message_queue.front();
- 
-      return (*m);
-    }
- 
-    inline size_t basic_messenger::number_of_messages() {
-      return (message_queue.size());
-    }
-
-    /** \pre{there is no waiter for this type} */
-    inline void basic_messenger::set_handler(handler_type h, const message::type_identifier_t t) {
-      assert(waiters.count(t) == 0);
-
-      handlers[t] = h;
-    }
-
-    inline void basic_messenger::unset_handler(const message::type_identifier_t t) {
-      handlers.erase(t);
+    template < class M >
+    inline basic_messenger< M >::basic_messenger() : message_open(false), partially_matched(0) {
     }
   }
 }

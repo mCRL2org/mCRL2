@@ -5,7 +5,7 @@ project test_sip
 
 exe communicator_test :
         communicator_test.cpp
-        /libraries/sip//sip_communicator
+        /libraries/sip//messenger
         /boost/test//boost_unit_test_framework ;
 
 exe abstract_interface_test :

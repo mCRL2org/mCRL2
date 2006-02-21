@@ -6,6 +6,7 @@
 #include <sip/detail/report.h>
 #include <sip/detail/controller_capabilities.h>
 #include <sip/detail/display_layout.h>
+#include <sip/detail/basic_messenger.h>
 
 /* Interface classes for both the tool and the controller side of the Squadt Interaction Protocol */
 namespace sip {
@@ -16,10 +17,10 @@ namespace sip {
   /** Storage format for tool input/output configuration specification */
   typedef std::string storage_format;
 
-  /** Type for message identification */
-  enum sip_message_types {
+  /** Type for sip protocol message identification */
+  enum sip_message_identifier_t {
      unknown                           /// \brief type is was specified or unknown (or should be derived from content)
-    ,request_controller_capabilities    /// \brief request the controller a description of its capabilities
+    ,request_controller_capabilities   /// \brief request the controller a description of its capabilities
     ,reply_controller_capabilities     /// \brief send a description of controller capabilities to the tool
     ,request_tool_capabilities         /// \brief request a tool a description of its capabilities
     ,reply_tool_capabilities           /// \brief send a description of tool capabilities to the controller
@@ -34,6 +35,11 @@ namespace sip {
     ,send_report                       /// \brief send the controller a report of a tools operation
   };
 
+  /** A message type for communication of sip protocol messages */
+  typedef messenger::message < sip_message_identifier_t, unknown > sip_message;
+
+  /** A messenger type for communication of sip protocol messages */
+  typedef messenger::basic_messenger < sip_message >               sip_messenger;
 }
 
 #endif

@@ -7,15 +7,15 @@
 
 #include <boost/mem_fn.hpp>
 
+#include <sip/detail/basic_messenger.h>
 #include <sip/detail/common.h>
 #include <sip/detail/controller_capabilities.h>
 #include <sip/detail/report.h>
-#include <sip/detail/basic_messenger.h>
 
 /* Interface classes for the tool side of the Squadt Interaction Protocol */
 namespace sip {
 
-  class tool_communicator : public messenger::basic_messenger {
+  class tool_communicator : public sip_messenger {
     public:
       /** Charactarises the current state */
       typedef enum {
@@ -83,7 +83,7 @@ namespace sip {
   inline tool_communicator::tool_communicator() : current_status(status_initialising), current_capabilities(0) {
 
     /* Register event handlers for some message types */
-    set_handler(sip_message::request_controller_capabilities, boost::mem_fn(&tool_communicator::reply_tool_capabilities));
+    set_handler(boost::mem_fn(&tool_communicator::reply_tool_capabilities), sip::request_tool_capabilities);
   }
 
   /** \pre{status is status_initialising} */

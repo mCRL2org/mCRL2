@@ -1,14 +1,15 @@
 #include <sstream>
 
-#include <sip/sip_controller.h>
+#include <sip/controller.h>
 #include <sip/detail/message.h>
 #include <sip/detail/common.h>
+#include <sip/detail/basic_messenger.tcc>
 
 #include <boost/thread/barrier.hpp>
 #include <boost/bind.hpp>
 
 namespace sip {
-  using namespace sip::communicator;
+  using namespace sip::messenger;
 
   /* Reply details about the amount of reserved display space */
   void controller_communicator::reply_controller_capabilities() {
@@ -57,7 +58,7 @@ namespace sip {
   void controller_communicator::deliver(std::istream& s) {
     communicator::sip_communicator::deliver(s);
 
-    sip_communicator::message_queue::iterator m = _message_queue.begin();
+    basic_messenger::message_queue::iterator m = _message_queue.begin();
 
     while (m != _message_queue.end()) {
       switch ((*m)->get_type()) {

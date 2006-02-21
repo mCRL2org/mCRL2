@@ -9,8 +9,7 @@ project sip
    <include>../../
    <library>/boost/thread//boost_thread ;
 
-lib sip_communicator :
-        sip_communicator.cpp
+lib messenger :
         /boost/thread//boost_thread
         /libraries/transport//transport
         /libraries/xml2pp//xml_text_reader ;
@@ -20,13 +19,13 @@ lib sip_common :
         report.cpp
         display_layout.cpp
         exception.cpp
-        sip_communicator
+        messenger
         /libraries/xml2pp//xml_text_reader ;
 
 lib sipc :
-        sip_controller.cpp
+        controller.cpp
         sip_common ;
 
 lib sipt :
-        sip_tool.cpp
+        tool.cpp
         sip_common ;

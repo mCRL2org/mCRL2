@@ -4,7 +4,7 @@
 #include <boost/test/unit_test.hpp>
 #include <boost/test/unit_test_log.hpp>
 
-#include <sip/detail/basic_messenger.h>
+#include <sip/detail/basic_messenger.tcc>
 
 #define BOOST_TEST_SHOW_PROGRESS yes
 
@@ -21,12 +21,21 @@ static const std::string data("1234567890abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLM
 static const std::string start_message("<message>");
 static const std::string end_message("</message>");
 
+enum message_identifier_t {
+  unknown,
+  good,
+  bad
+};
+
+typedef message < message_identifier_t, ::unknown > message_t;
+typedef basic_messenger < message_t >               messenger_t;
+
 /* Single communication */
 void no_message() {
   BOOST_MESSAGE("No message ...");
 
-  basic_messenger c;
-  basic_messenger d;
+  messenger_t c;
+  messenger_t d;
 
   c.connect(d);
 
@@ -43,8 +52,8 @@ void no_message() {
 void empty_message() {
   BOOST_MESSAGE("Empty message ...");
 
-  basic_messenger c;
-  basic_messenger d;
+  messenger_t c;
+  messenger_t d;
 
   c.connect(d);
 
@@ -61,8 +70,8 @@ void empty_message() {
 void non_empty_message() {
   BOOST_MESSAGE("Non-empty message ...");
 
-  basic_messenger c;
-  basic_messenger d;
+  messenger_t c;
+  messenger_t d;
 
   c.connect(d);
 
@@ -79,8 +88,8 @@ void non_empty_message() {
 void split2_empty_message() {
   BOOST_MESSAGE("Empty message, two commmunications ...");
 
-  basic_messenger c;
-  basic_messenger d;
+  messenger_t c;
+  messenger_t d;
 
   c.connect(d);
 
@@ -98,8 +107,8 @@ void split2_empty_message() {
 void split2_non_empty_message() {
   BOOST_MESSAGE("Non-empty message, two communications ...");
 
-  basic_messenger c;
-  basic_messenger d;
+  messenger_t c;
+  messenger_t d;
 
   c.connect(d);
 
@@ -117,8 +126,8 @@ void split2_non_empty_message() {
 void split3_non_empty_message() {
   BOOST_MESSAGE("Non-empty message, three communications ...");
 
-  basic_messenger c;
-  basic_messenger d;
+  messenger_t c;
+  messenger_t d;
 
   c.connect(d);
 
@@ -137,8 +146,8 @@ void split3_non_empty_message() {
 void split3_non_empty_message_fragmented() {
   BOOST_MESSAGE("Non-empty fragmented message, three communications ...");
 
-  basic_messenger c;
-  basic_messenger d;
+  messenger_t c;
+  messenger_t d;
 
   c.connect(d);
 
@@ -157,8 +166,8 @@ void split3_non_empty_message_fragmented() {
 void split3_non_empty_message_and_garbage() {
   BOOST_MESSAGE("Non-empty fragmented message, three communications and garbage ...");
 
-  basic_messenger c;
-  basic_messenger d;
+  messenger_t c;
+  messenger_t d;
 
   c.connect(d);
 
@@ -177,8 +186,8 @@ void split3_non_empty_message_and_garbage() {
 void non_empty_message_and_fragmented_open_tag() {
   BOOST_MESSAGE("Non-empty fragmented message open tag, two communications ...");
 
-  basic_messenger c;
-  basic_messenger d;
+  messenger_t c;
+  messenger_t d;
 
   c.connect(d);
 
@@ -196,8 +205,8 @@ void non_empty_message_and_fragmented_open_tag() {
 void non_empty_message_and_fragmented_close_tag() {
   BOOST_MESSAGE("Non-empty fragmented message close tag, two communications ...");
 
-  basic_messenger c;
-  basic_messenger d;
+  messenger_t c;
+  messenger_t d;
 
   c.connect(d);
 
@@ -215,8 +224,8 @@ void non_empty_message_and_fragmented_close_tag() {
 void non_empty_message_and_fragmented_tags() {
   BOOST_MESSAGE("Non-empty fragmented message open and close tags, three communications ...");
 
-  basic_messenger c;
-  basic_messenger d;
+  messenger_t c;
+  messenger_t d;
 
   c.connect(d);
 
@@ -234,9 +243,9 @@ void non_empty_message_and_fragmented_tags() {
 void message_wrapper() {
   BOOST_MESSAGE("Data wrapping and sending ...");
 
-  basic_messenger c;
-  basic_messenger d;
-  basic_messenger::message m;
+  messenger_t c;
+  messenger_t d;
+  messenger_t::message m;
 
   m.set_content(data);
 
@@ -253,16 +262,16 @@ void message_wrapper() {
 
 bool event_triggered = false;
 
-void event_handler(basic_messenger::message_ptr&) {
+void event_handler(messenger_t::message_ptr&) {
   event_triggered = true;
 }
 
 void message_delivery_event_handling() {
   BOOST_MESSAGE("Data wrapping and sending ...");
 
-  basic_messenger c;
-  basic_messenger d;
-  basic_messenger::message_ptr m(new basic_messenger::message);
+  messenger_t c;
+  messenger_t d;
+  messenger_t::message_ptr m(new messenger_t::message);
 
   /* Set handler for any message type */
   d.set_handler(event_handler);

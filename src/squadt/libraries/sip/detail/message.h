@@ -11,7 +11,11 @@
 
 namespace sip {
 
-  namespace communicator {
+  namespace messenger {
+
+    template < class M, M D > class message;
+
+    template < class M > class basic_messenger;
 
     /**
      * Base class for messages M is a type for message characterisation
@@ -21,7 +25,7 @@ namespace sip {
      */
     template < class M, M D = static_cast < M > (0) >
     class message {
-      friend class sip_communicator;
+      friend class basic_messenger < message < M, D > >;
 
       public:
         /** Type for message identification */
