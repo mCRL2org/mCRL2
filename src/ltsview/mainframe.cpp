@@ -292,13 +292,13 @@ void MainFrame::setupSettingsPanel( wxPanel* panel )
   }
   colSizer->Add( colsubSizer, 1, wxEXPAND | wxALL, 0 );
   
-  /*transparencySpinCtrl = new wxSpinCtrl( panel, myID_SETTINGS_CONTROL );
-  transparencySpinCtrl->SetSizeHints( wxSize(50,25), wxSize(50,25) );
+  transparencySpinCtrl = new wxSpinCtrl( panel, myID_SETTINGS_CONTROL );
+  transparencySpinCtrl->SetSizeHints( spinctrlSize, spinctrlSize );
   colsubSizer->Add( new wxStaticText( panel, wxID_ANY, 
 	wxT("Transparency:") ), 0, flags, border );
   colsubSizer->Add( transparencySpinCtrl, 0, flags, border );
   colsubSizer->Add( new wxStaticText( panel, wxID_ANY, 
-	wxT("%") ), 0, flags, 0 );*/
+	wxT("%") ), 0, flags, 0 );
 
   wxSize btnSize( 25, 25 );
 
@@ -319,16 +319,16 @@ void MainFrame::setupSettingsPanel( wxPanel* panel )
   downEdgeButton = new wxColorButton( panel, this, myID_COLOR_BUTTON );
   downEdgeButton->SetSizeHints( btnSize, btnSize );
   colsubSizer->Add( new wxStaticText( panel, wxID_ANY, 
-	wxT("Edge (down):") ), 0, flags, border );
+	wxT("Edge (down/up):") ), 0, flags, border );
   colsubSizer->Add( downEdgeButton, 0, flags, border );
-  colsubSizer->AddSpacer( 0 );
+  //colsubSizer->AddSpacer( 0 );
 
   upEdgeButton = new wxColorButton( panel, this, myID_COLOR_BUTTON );
   upEdgeButton->SetSizeHints( btnSize, btnSize );
-  colsubSizer->Add( new wxStaticText( panel, wxID_ANY, 
-	wxT("Edge (up):") ), 0, flags, border );
+  //colsubSizer->Add( new wxStaticText( panel, wxID_ANY, 
+  //	  wxT("Edge (up):") ), 0, flags, border );
   colsubSizer->Add( upEdgeButton, 0, flags, border );
-  colsubSizer->AddSpacer( 0 );
+  //colsubSizer->AddSpacer( 0 );
 
   markButton = new wxColorButton( panel, this, myID_COLOR_BUTTON );
   markButton->SetSizeHints( btnSize, btnSize );
@@ -600,8 +600,8 @@ VisSettings MainFrame::getVisSettings() const
     outerbranchtiltSpinCtrl->GetValue(),
     qualitySpinCtrl->GetValue(),
     stateC,
-    //transparencySpinCtrl->GetValue(),
-    0,
+    transparencySpinCtrl->GetValue(),
+    //0,
     upC
   };
   return result;
@@ -624,7 +624,7 @@ void MainFrame::setVisSettings( VisSettings ss )
   interpolate2Button->SetBackgroundColour( wxColour( ss.interpolateColor2.r,
 	ss.interpolateColor2.g, ss.interpolateColor2.b ) );
   longinterpolateCheckBox->SetValue( ss.longInterpolation );
-  //transparencySpinCtrl->SetValue( ss.transparency );
+  transparencySpinCtrl->SetValue( ss.transparency );
   nodesizeSpinCtrl->SetValue( ss.nodeSize );
   backpointerSpinCtrl->SetValue( ss.backpointerCurve );
   clusterheightSpinCtrl->SetValue( ss.clusterHeight );

@@ -1,6 +1,5 @@
 #ifndef SPINCTRLFLOAT_H
 #define SPINCTRLFLOAT_H
-#include <iostream>
 #include <string>
 #include <wx/wx.h>
 #include <wx/spinbutt.h>

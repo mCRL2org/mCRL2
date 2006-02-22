@@ -130,7 +130,7 @@ void GLCanvas::display( bool swapBuffers )
       glRotatef( angleX, 0.0f, 1.0f, 0.0f );
 
       // draw the structure
-      mediator->drawLTS();
+      mediator->drawLTS( /*angleY > 180.0f*/ );
       
       if ( swapBuffers ) SwapBuffers();
     glPopMatrix();

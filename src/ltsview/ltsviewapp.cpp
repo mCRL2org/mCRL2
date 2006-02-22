@@ -100,9 +100,9 @@ void LTSViewApp::applyRanking( RankStyle rs )
   }
 }
 
-void LTSViewApp::drawLTS()
+void LTSViewApp::drawLTS( /*bool topDown*/ )
 {
-  visualizer->drawLTS();
+  visualizer->drawLTS( /*topDown*/ );
 }
 
 void LTSViewApp::applyDefaultSettings()

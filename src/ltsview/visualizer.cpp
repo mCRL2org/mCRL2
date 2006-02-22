@@ -3,7 +3,7 @@
 VisSettings Visualizer::defaultVisSettings =
 {
   { 120, 120, 120 }, 0.3f, 100, 1.2f, RGB_WHITE, RGB_WHITE,
-  { 0, 0, 255 }, false, false, { 255, 0, 0 }, 0.1f, 30, 12, RGB_WHITE, 0, 
+  { 0, 0, 255 }, false, false, { 255, 0, 0 }, 0.1f, 30, 12, RGB_WHITE, 40, 
   { 0, 0, 255 }
 };
 
@@ -109,7 +109,7 @@ void Visualizer::positionClusters()
   refreshDisplayList = true;
 }
 
-void Visualizer::drawLTS()
+void Visualizer::drawLTS( /*bool topDown*/ )
 {
   if ( lts == NULL ) return;
   if ( refreshDisplayList )
@@ -165,8 +165,8 @@ void Visualizer::drawLTS()
 	    delta_col.s = (hsv2.s - hsv1.s) / (lts->getNumberOfRanks() - 1);
 	    delta_col.v = (hsv2.v - hsv1.v) / (lts->getNumberOfRanks() - 1);
 	    
-	    drawSubtree( lts->getInitialState()->getCluster(), hsv1, delta_col,
-		true, structWidth, structHeight );
+	    drawSubtree( lts->getInitialState()->getCluster(), true,
+		structWidth, structHeight, hsv1, delta_col );
 	    break;
 	}
 
@@ -206,8 +206,8 @@ void Visualizer::drawLTS()
 
 // draws the subtree with cluster *root as the root of the tree
 // applies coloring based on interpolation settings
-void Visualizer::drawSubtree( Cluster* root, HSV_Color col, HSV_Color delta_col,
-    bool topClosed, float &boundWidth, float &boundHeight )
+void Visualizer::drawSubtree( Cluster* root, bool topClosed, float &boundWidth,
+    float &boundHeight, HSV_Color col, HSV_Color delta_col )
 {
   if ( !root->hasDescendants() )
   {
@@ -230,7 +230,7 @@ void Visualizer::drawSubtree( Cluster* root, HSV_Color col, HSV_Color delta_col,
 	visSettings.clusterHeight, visSettings.quality, visSettings.quality,
 	HSVtoRGB( col ), HSVtoRGB( desccol ), visSettings.transparency,
 	topClosed, descendants.size() > 1 );
-      
+
     vector< Cluster* >::iterator descit;
     for ( descit = descendants.begin() ; descit != descendants.end() ; ++descit )
     {
@@ -244,7 +244,7 @@ void Visualizer::drawSubtree( Cluster* root, HSV_Color col, HSV_Color delta_col,
 	float descWidth = 0.0f;
 	float descHeight = 0.0f;
 	
-	drawSubtree( desc, desccol, delta_col, false, descWidth, descHeight );
+	drawSubtree( desc, false, descWidth, descHeight, desccol, delta_col );
 	
 	boundWidth = max( boundWidth, descWidth );
 	boundHeight = max( boundHeight, descHeight );
@@ -263,7 +263,7 @@ void Visualizer::drawSubtree( Cluster* root, HSV_Color col, HSV_Color delta_col,
 	float descWidth = 0.0f;
 	float descHeight = 0.0f;
 	
-	drawSubtree( desc, desccol, delta_col, true, descWidth, descHeight );
+	drawSubtree( desc, true, descWidth, descHeight, desccol, delta_col );
 	
 	float sin_a = float( sin( visSettings.outerBranchTilt * PI / 180.0 ) );
 	float cos_a = float( cos( visSettings.outerBranchTilt * PI / 180.0 ) );
@@ -406,7 +406,6 @@ void Visualizer::drawSubtreeMarkDeadlocks( Cluster* root, bool topClosed, float
 	RGB_WHITE, RGB_WHITE, visSettings.transparency, topClosed,
 	descendants.size() > 1 );
     }
-
       
     vector< Cluster* >::iterator descit;
     for ( descit = descendants.begin() ; descit != descendants.end() ; ++descit )

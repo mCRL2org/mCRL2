@@ -31,8 +31,8 @@ class Visualizer
     float		structWidth;
     VisSettings		visSettings;
 
-    void drawSubtree( Cluster* root, HSV_Color col, HSV_Color delta_col, bool
-	topClosed, float &boundWidth, float &boundHeight );
+    void drawSubtree( Cluster* root, bool topClosed, float &boundWidth, float
+	&boundHeight, HSV_Color col, HSV_Color delta_col );
     void drawSubtreeMarkStates( Cluster* root, bool topClosed, float
 	&boundWidth, float &boundHeight );
     void drawSubtreeMarkDeadlocks( Cluster* root, bool topClosed, float
@@ -42,7 +42,7 @@ class Visualizer
     Visualizer( Mediator* owner );
     ~Visualizer();
     
-    void	drawLTS();
+    void	drawLTS( /*bool topDown*/ );
     float	getStructureHeight() const;
     float	getStructureWidth() const;
     RankStyle	getRankStyle() const;
