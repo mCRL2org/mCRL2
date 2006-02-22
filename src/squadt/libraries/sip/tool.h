@@ -5,7 +5,7 @@
 #include <set>
 #include <string>
 
-#include <boost/mem_fn.hpp>
+#include <boost/bind.hpp>
 
 #include <sip/detail/basic_messenger.h>
 #include <sip/detail/common.h>
@@ -45,7 +45,12 @@ namespace sip {
       void deliver(std::istream&);
 
     public:
+
+      /** Default constructor */
       tool_communicator();
+
+      /** Default destructor */
+      ~tool_communicator();
 
       /** Request details about the amount of space that the controller currently has reserved for this tool */
       void request_controller_capabilities();
@@ -79,12 +84,6 @@ namespace sip {
       /** Returns the current status */
       inline tool_communicator::status get_status() const;
   };
-
-  inline tool_communicator::tool_communicator() : current_status(status_initialising), current_capabilities(0) {
-
-    /* Register event handlers for some message types */
-    set_handler(boost::mem_fn(&tool_communicator::reply_tool_capabilities), sip::request_tool_capabilities);
-  }
 
   /** \pre{status is status_initialising} */
   inline void tool_communicator::add_input_configuration(tool_category c, storage_format f) {

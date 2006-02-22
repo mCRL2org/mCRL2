@@ -3,12 +3,16 @@ project test_sip
    <include>../../../../boost/
    <include>../../ ;
 
-exe communicator_test :
-        communicator_test.cpp
-        /libraries/sip//messenger
+import testing ;
+
+unit-test basic_messenger_test :
+        basic_messenger_test.cpp
+        /libraries/transport//transport
+        /libraries/xml2pp//xml_text_reader
+        /boost/thread//boost_thread
         /boost/test//boost_unit_test_framework ;
 
-exe abstract_interface_test :
+unit-test abstract_interface_test :
         abstract_interface_test.cpp
         /libraries/sip//sipc
         /libraries/sip//sipt

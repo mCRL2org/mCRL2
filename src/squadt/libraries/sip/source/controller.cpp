@@ -11,6 +11,19 @@
 namespace sip {
   using namespace sip::messenger;
 
+  controller_communicator::controller_communicator() : current_status(status_initialising) {
+    current_display_dimensions.x = 0;
+    current_display_dimensions.y = 0;
+    current_display_dimensions.z = 0;
+
+    /* set default delivery event handlers */
+    set_handler(boost::bind(&controller_communicator::reply_controller_capabilities, this), sip::request_tool_capabilities);
+    set_handler(boost::bind(&controller_communicator::set_status, this, status_configured), sip::send_accept_configuration);
+  }
+
+  controller_communicator::~controller_communicator() {
+  }
+
   /* Reply details about the amount of reserved display space */
   void controller_communicator::reply_controller_capabilities() {
     std::ostringstream data;
@@ -20,7 +33,7 @@ namespace sip {
     capabilities.set_display_dimensions(current_display_dimensions);
     capabilities.to_xml(data);
 
-    message m(message::reply_controller_capabilities);
+    message m(sip::reply_controller_capabilities);
 
     m.set_content(data.str());
 
@@ -29,7 +42,7 @@ namespace sip {
 
   /* Request a tool what input configurations it has available */
   void controller_communicator::request_tool_capabilities() {
-    send_message(boost::cref(message(message::request_tool_capabilities)));
+    send_message(boost::cref(message(sip::request_tool_capabilities)));
   }
 
   /* Send the selected input configuration */
@@ -38,7 +51,7 @@ namespace sip {
 
     current_configuration.to_xml(data);
 
-    message m(message::reply_controller_capabilities);
+    message m(sip::reply_controller_capabilities);
 
     m.set_content(data.str());
 
@@ -51,39 +64,6 @@ namespace sip {
 
   /* Request a tool to terminate */
   void controller_communicator::request_termination() {
-    send_message(boost::cref(message(message::request_termination)));
-  }
-
-  /** \attention{Works, based on assumption that only one delivery is active for this object at the same time} */
-  void controller_communicator::deliver(std::istream& s) {
-    communicator::sip_communicator::deliver(s);
-
-    basic_messenger::message_queue::iterator m = _message_queue.begin();
-
-    while (m != _message_queue.end()) {
-      switch ((*m)->get_type()) {
-        case message::request_controller_capabilities:
-          reply_controller_capabilities();
-
-          pop_message();
-          break;
-        case message::send_accept_configuration:
-          current_status = status_configured;
-
-          pop_message();
-          break;
-        case message::send_display_layout:
-          pop_message();
-          break;
-        case message::send_display_data:
-          pop_message();
-          break;
-        default:
-          break;
-      }
-
-      ++m;
-    }
-
+    send_message(boost::cref(message(sip::request_termination)));
   }
 }

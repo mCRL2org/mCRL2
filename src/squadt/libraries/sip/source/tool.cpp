@@ -9,12 +9,21 @@
 namespace sip {
   using namespace sip::messenger;
 
+  tool_communicator::tool_communicator() : current_status(status_initialising), current_capabilities(0) {
+
+    /* Register event handlers for some message types */
+    set_handler(boost::bind(&tool_communicator::reply_tool_capabilities, this), sip::request_tool_capabilities);
+  }
+
+  tool_communicator::~tool_communicator() {
+  }
+
   /* Request details about the amount of space that the controller currently has reserved for this tool */
   void tool_communicator::request_controller_capabilities() {
     send_message(boost::cref(sip_message(sip::request_controller_capabilities)));
 
-    /* Await the reply (too crude, message type might not match) */
-    await_message();
+    /* Await the reply */
+    await_message(sip::reply_controller_capabilities);
 
     xml2pp::text_reader reader(pop_message().to_string());
 
@@ -41,7 +50,7 @@ namespace sip {
 
 //    current_display_layout.to_xml(data);
 
-    message m(message::send_display_layout);
+    message m(sip::send_display_layout);
 
     m.set_content(data.str());
 
@@ -50,7 +59,7 @@ namespace sip {
 
   /* Send a signal that the tool is about to terminate */
   void tool_communicator::send_signal_termination() {
-    send_message(boost::cref(message(message::send_signal_termination)));
+    send_message(boost::cref(message(sip::send_signal_termination)));
   }
 
   /* Send a status report to the controller */

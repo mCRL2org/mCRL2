@@ -267,7 +267,7 @@ void event_handler(messenger_t::message_ptr&) {
 }
 
 void message_delivery_event_handling() {
-  BOOST_MESSAGE("Data wrapping and sending ...");
+  BOOST_MESSAGE("Delivery event handling ...");
 
   messenger_t c;
   messenger_t d;

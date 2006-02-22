@@ -6,26 +6,29 @@ project sip
    <include>../../../../boost/
    <include>../../
   : usage-requirements
-   <include>../../
-   <library>/boost/thread//boost_thread ;
-
-lib messenger :
-        /boost/thread//boost_thread
-        /libraries/transport//transport
-        /libraries/xml2pp//xml_text_reader ;
+   <include>../../ ;
 
 lib sip_common :
         common.cpp
         report.cpp
         display_layout.cpp
         exception.cpp
-        messenger
-        /libraries/xml2pp//xml_text_reader ;
+       :
+       :
+        <library>/libraries/xml2pp//xml_text_reader ;
 
 lib sipc :
         controller.cpp
-        sip_common ;
+        sip_common
+       :
+       :
+        <library>/libraries/transport//transport
+        <library>/boost/thread//boost_thread ;
 
 lib sipt :
         tool.cpp
-        sip_common ;
+        sip_common
+       :
+       :
+        <library>/libraries/transport//transport
+        <library>/boost/thread//boost_thread ;

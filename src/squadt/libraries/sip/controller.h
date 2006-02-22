@@ -44,16 +44,23 @@ namespace sip {
       configuration               current_configuration;
 
       /** Handler function to replace the current display layout with a new one */
-      void (*accept_layout_handler)();
+      sip_messenger::handler_type accept_layout_handler;
 
       /** Handler function to map data to the display */
-      void (*accept_data_handler)();
+      sip_messenger::handler_type accept_data_handler;
 
       /** Triggers event handlers for incoming messages */
       void deliver(std::istream&);
 
+      /** Convenience function for use with event handlers */
+      inline void set_status(status);
+
     public:
-      inline controller_communicator();
+      /** Default constructor */
+      controller_communicator();
+
+      /** Default destructor */
+      ~controller_communicator();
 
       /** Send details about the amount of space that the controller currently has reserved for this tool */
       void reply_controller_capabilities();
@@ -92,12 +99,6 @@ namespace sip {
   /** Protocol version {major,minor} */
   const controller_communicator::version controller_communicator::current_version = {1,0};
 
-  inline controller_communicator::controller_communicator() : current_status(status_initialising) {
-    current_display_dimensions.x = 0;
-    current_display_dimensions.y = 0;
-    current_display_dimensions.z = 0;
-  }
-
   inline void controller_communicator::set_display_dimensions(unsigned short x, unsigned short y, unsigned short z) {
     current_display_dimensions.x = x;
     current_display_dimensions.y = y;
@@ -124,6 +125,10 @@ namespace sip {
 
   inline controller_communicator::version controller_communicator::get_version() const {
     return (current_version);
+  }
+
+  inline void controller_communicator::set_status(status s) {
+    current_status = s;
   }
 }
 

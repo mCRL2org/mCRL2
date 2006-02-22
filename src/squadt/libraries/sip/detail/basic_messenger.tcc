@@ -28,7 +28,7 @@ namespace sip {
     /* Send a message */
     template < class M >
     inline void basic_messenger< M >::send_message(const message& m) {
-      send(m.to_xml());
+      send(tag_open + m.to_xml() + tag_close);
     }
  
     /** \pre{the message queue is not empty} */
