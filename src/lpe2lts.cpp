@@ -349,11 +349,11 @@ int main(int argc, char **argv)
         outformat = OF_SVC;
       } else {
         s++;
-        if ( !strcmp(s,"svc") )
+        if ( !strcmp(s,"aut") )
         {
-          outformat = OF_SVC;
+          outformat = OF_AUT;
         } else {
-          if ( strcmp(s,"aut") )
+          if ( strcmp(s,"svc") )
           {
             gsWarningMsg("extension '%s' of output file not recognised; writing state space in SVC format\n",s);
           }

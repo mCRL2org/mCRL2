@@ -186,66 +186,63 @@ ATermAppl NextStateStandard::FindDummy(ATermAppl sort, ATermList no_dummy)
 				return ATAgetFirst(l);
 			}
 		}
-
-		gsErrorMsg("cannot generate dummies for function sorts (%T)\n",sort);
-		exit(1);
-	}
-
-	l = ATLgetArgument(ATAgetArgument(current_spec,1),0);
-	for (; !ATisEmpty(l); l=ATgetNext(l))
-	{
-		ATermAppl conssort = ATAgetArgument(ATAgetFirst(l),1);
-		if ( ATisEqual(gsGetSortExprResult(conssort),sort) )
+	} else {
+		l = ATLgetArgument(ATAgetArgument(current_spec,1),0);
+		for (; !ATisEmpty(l); l=ATgetNext(l))
 		{
-			ATermList domain = gsGetSortExprDomain(conssort);
-			ATermAppl t = ATAgetFirst(l);
-
-			bool found = true;
-			for (; !ATisEmpty(domain); domain=ATgetNext(domain))
+			ATermAppl conssort = ATAgetArgument(ATAgetFirst(l),1);
+			if ( ATisEqual(gsGetSortExprResult(conssort),sort) )
 			{
-				if ( ATindexOf(no_dummy,ATgetFirst(domain),0) >= 0 )
+				ATermList domain = gsGetSortExprDomain(conssort);
+				ATermAppl t = ATAgetFirst(l);
+	
+				bool found = true;
+				for (; !ATisEmpty(domain); domain=ATgetNext(domain))
 				{
-					found = false;
-					break;
+					if ( ATindexOf(no_dummy,ATgetFirst(domain),0) >= 0 )
+					{
+						found = false;
+						break;
+					}
+					t = gsMakeDataAppl(t,FindDummy(ATAgetFirst(domain),no_dummy));
 				}
-				t = gsMakeDataAppl(t,FindDummy(ATAgetFirst(domain),no_dummy));
+	
+				if ( found )
+				{
+					return t;
+				}
 			}
-
-			if ( found )
+		}
+	
+		l = ATLgetArgument(ATAgetArgument(current_spec,2),0);
+		for (; !ATisEmpty(l); l=ATgetNext(l))
+		{
+			ATermAppl mapsort = ATAgetArgument(ATAgetFirst(l),1);
+			if ( ATisEqual(gsGetSortExprResult(mapsort),sort) )
 			{
-				return t;
+				ATermList domain = gsGetSortExprDomain(mapsort);
+				ATermAppl t = ATAgetFirst(l);
+	
+				bool found = true;
+				for (; !ATisEmpty(domain); domain=ATgetNext(domain))
+				{
+					if ( ATindexOf(no_dummy,ATgetFirst(domain),0) >= 0 )
+					{
+						found = false;
+						break;
+					}
+					t = gsMakeDataAppl(t,FindDummy(ATAgetFirst(domain),no_dummy));
+				}
+	
+				if ( found )
+				{
+					return t;
+				}
 			}
 		}
 	}
 
-	l = ATLgetArgument(ATAgetArgument(current_spec,2),0);
-	for (; !ATisEmpty(l); l=ATgetNext(l))
-	{
-		ATermAppl mapsort = ATAgetArgument(ATAgetFirst(l),1);
-		if ( ATisEqual(gsGetSortExprResult(mapsort),sort) )
-		{
-			ATermList domain = gsGetSortExprDomain(mapsort);
-			ATermAppl t = ATAgetFirst(l);
-
-			bool found = true;
-			for (; !ATisEmpty(domain); domain=ATgetNext(domain))
-			{
-				if ( ATindexOf(no_dummy,ATgetFirst(domain),0) >= 0 )
-				{
-					found = false;
-					break;
-				}
-				t = gsMakeDataAppl(t,FindDummy(ATAgetFirst(domain),no_dummy));
-			}
-
-			if ( found )
-			{
-				return t;
-			}
-		}
-	}
-
-	gsfprintf(stderr,"Could not find dummy of type %T\n",sort);
+	gsErrorMsg("could not find dummy of type %T\n",sort);
 	exit(1);
 }
 
