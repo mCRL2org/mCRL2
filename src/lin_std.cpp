@@ -6496,33 +6496,29 @@ static ATermAppl makeNegatedConjunction(ATermList S)
   return result; 
 }
 
-static ATermList psi_prime(ATermList a, ATermList alpha, ATermList C)
-{
-  if ( ATisEmpty(alpha) )
-  {
-    return ATmakeList0();
-  } else {
-    if ( might_communicate(ATinsert(a,ATgetFirst(alpha)),C) && xi(ATinsert(a,ATgetFirst(alpha)),ATgetNext(alpha),C) )
-    {
-                  return ATinsert(
-        psi_prime(a,ATgetNext(alpha),C),
-        (ATerm) gsMakeDataExprAnd(gsMakeDataExprTrue(),pairwiseMatch(ATLgetArgument(ATAgetFirst(a),1),ATLgetArgument(ATAgetFirst(alpha),1)))
-        );
-    } else {
-      return psi_prime(a,ATgetNext(alpha),C);
-    }
-  }
-}
-
 static ATermList psi(ATermList alpha, ATermList C)
 {
-  if ( ATisEmpty(alpha) )
+  ATermList l = ATmakeList0();
+  while ( !ATisEmpty(alpha) )
   {
-    return ATmakeList0();
-  } else {
-    // sort and remove duplicates
-    return ATconcat(psi_prime(ATmakeList1(ATgetFirst(alpha)),ATgetNext(alpha),C),psi(ATgetNext(alpha),C));
+    ATermList a = ATmakeList1(ATgetFirst(alpha));
+    ATermList beta = ATgetNext(alpha);
+
+    while ( !ATisEmpty(beta) )
+    {
+      if ( might_communicate(ATinsert(a,ATgetFirst(beta)),C) && xi(ATinsert(a,ATgetFirst(beta)),ATgetNext(beta),C) )
+      {
+        // sort and remove duplicates??
+        l = ATinsert(l,
+              (ATerm) gsMakeDataExprAnd(gsMakeDataExprTrue(),pairwiseMatch(ATLgetArgument(ATAgetFirst(a),1),ATLgetArgument(ATAgetFirst(beta),1)))
+            );
+      }
+      beta = ATgetNext(beta);
+    }
+
+    alpha = ATgetNext(alpha);
   }
+  return l;
 }
 
 static ATermList makeMultiActionConditionList(
