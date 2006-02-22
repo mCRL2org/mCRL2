@@ -43,14 +43,16 @@
 <refsect1>
   <title>Description</title>
   <para>
-    The &lpedataelm; tool removes unused sorts, constructors, mappings and
-    data equations from a linear process equation (LPE). It reads the LPE from
-    &infile; and writes the result to &outfile;. If &outfile; is not present,
-    &stdout; is used. If &infile; is not present, &stdin; is used.
+    The &lpedataelm; tool removes unused parts from the data specification from
+    a linear process equation (LPE). It reads the LPE from &infile; and writes
+    the result to &outfile;. If &outfile; is not present, &stdout; is used. If
+    &infile; is not present, &stdin; is used.
   </para>
   <para>
-    Removal of unused data makes the LPE more compact. This has the
-    following advantages:
+    Unused parts are sorts, constructors, mappings and data equations that do
+    not take part in the behavioural description of the LPE.
+    Removal of these parts makes the LPE more compact, which has the following
+    advantages:
     <itemizedlist spacing='compact'>
     <listitem>
       <para>The speed of initialisation of the rewriters increases
