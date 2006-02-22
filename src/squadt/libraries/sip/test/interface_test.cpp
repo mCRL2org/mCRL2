@@ -30,8 +30,9 @@ void controller_capabilities_exchange() {
   /** Initiative is on the side of the tool */
   tc.connect(cc);
 
-  tc.request_controller_capabilities();
   cc.get_capabilities().to_xml(check_stream0);
+
+  tc.request_controller_capabilities();
   tc.get_controller_capabilities().to_xml(check_stream1);
 
   tc.disconnect();
@@ -78,6 +79,8 @@ void input_configuration_exchange() {
   tc.connect(cc);
 
   tc.disconnect();
+
+  BOOST_CHECK(check_stream0.str() == check_stream1.str());
   BOOST_MESSAGE("  done");
 }
 

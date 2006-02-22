@@ -13,6 +13,7 @@ namespace sip {
 
     /* Register event handlers for some message types */
     set_handler(boost::bind(&tool_communicator::reply_tool_capabilities, this), sip::request_tool_capabilities);
+    set_handler(boost::bind(&tool_communicator::accept_interaction_data, this), sip::send_interaction_data);
   }
 
   tool_communicator::~tool_communicator() {
@@ -20,7 +21,9 @@ namespace sip {
 
   /* Request details about the amount of space that the controller currently has reserved for this tool */
   void tool_communicator::request_controller_capabilities() {
-    send_message(boost::cref(sip_message(sip::request_controller_capabilities)));
+    sip_message m(sip::request_controller_capabilities);
+
+    send_message(m);
 
     /* Await the reply */
     await_message(sip::reply_controller_capabilities);
@@ -64,6 +67,9 @@ namespace sip {
 
   /* Send a status report to the controller */
   void tool_communicator::send_report(sip::report&) {
+  }
+
+  void tool_communicator::accept_interaction_data(sip_messenger::message_pts&) {
   }
 }
 

@@ -1,4 +1,5 @@
 #include <algorithm>
+#include <functional>
 #include <sstream>
 
 #include <sip/detail/basic_messenger.h>
@@ -230,6 +231,17 @@ namespace sip {
       }
     }
  
+    template < class M >
+    inline bool basic_messenger< M >::find_message(typename M::type_identifier_t t) {
+      using namespace boost;
+
+      return (message_queue.end() !=
+              std::find_if(message_queue.begin(), message_queue.end(),
+                      bind(std::equal_to<typename M::type_identifier_t>(), t,
+                              bind(&M::get_type,
+                                      bind(&message_ptr::get, _1)))));
+    }
+
     /**
      * \pre no handler or other waiter for this type is registered
      * \attention must not be called from multiple threads for the same type
@@ -238,11 +250,13 @@ namespace sip {
     void basic_messenger< M >::await_message(typename M::type_identifier_t t) {
       assert(waiters.count(t) == 0 && handlers.count(t) == 0);
 
-      barrier_ptr b(new boost::barrier(2));
+      if (!find_message(t)) {
+        barrier_ptr b(new boost::barrier(2));
 
-      waiters[t] = b;
+        waiters[t] = b;
 
-      b->wait();
+        b->wait();
+      }
     }
   }
 }

@@ -9,7 +9,7 @@
 namespace sip {
 
   class tool_communicator : public sip_messenger {
-    public:
+    private:
       /** Charactarises the current state */
       typedef enum {
          status_initialising /** \brief No connection with controller yet */
@@ -19,8 +19,6 @@ namespace sip {
         ,status_reported     /** \brief Tool is finished and has send a report: Phase 3 */
         ,status_error        /** \brief An error occurred */
       } status;
-
-    private:
 
       /** The current protocol status */
       status                         current_status;
@@ -33,6 +31,9 @@ namespace sip {
 
       /** A set of available input configurations for this tool */
       std::set < std::pair < tool_category, storage_format > >       current_input_configurations;
+
+      /** Handler for incoming data resulting from user interaction relayed by the controller */
+      void accept_interaction_data(sip_messenger::message_ptr&);
 
     public:
 
@@ -70,9 +71,6 @@ namespace sip {
       inline const controller_capabilities& get_controller_capabilities() const;
 
       inline layout::display_layout& get_display_layout();
-
-      /** Returns the current status */
-      inline tool_communicator::status get_status() const;
   };
 
   /** \pre{status is status_initialising} */
@@ -82,10 +80,6 @@ namespace sip {
     std::pair < tool_category, storage_format > p(c,f);
 
     current_input_configurations.insert(p);
-  }
-
-  inline tool_communicator::status tool_communicator::get_status() const {
-    return (current_status);
   }
 
   /** \pre{status is not status_initialising} */

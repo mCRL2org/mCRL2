@@ -94,6 +94,9 @@ namespace sip {
  
         /** Get the first message in the queue */
         inline message& peek_message();
+
+        /** Wait until the first message of type t has arrived */
+        inline bool find_message(const typename M::type_identifier_t);
  
         inline size_t number_of_messages();
  

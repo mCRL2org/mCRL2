@@ -97,7 +97,7 @@ namespace sip {
         /* Remove message meta element */
         content.erase(content.begin(),e);
 
-        return (std::min(static_cast < M > (identifier), D));
+        return (std::max(static_cast < M > (identifier), D));
       }
 
       return (D);

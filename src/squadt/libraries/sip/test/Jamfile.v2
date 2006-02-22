@@ -12,8 +12,8 @@ unit-test basic_messenger_test :
         /boost/thread//boost_thread
         /boost/test//boost_unit_test_framework ;
 
-unit-test abstract_interface_test :
-        abstract_interface_test.cpp
+unit-test interface_test :
+        interface_test.cpp
         /libraries/sip//sipc
         /libraries/sip//sipt
         /libraries/sip//sip_common

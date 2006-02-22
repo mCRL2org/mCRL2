@@ -15,8 +15,8 @@ namespace sip {
     current_display_dimensions.y = 0;
     current_display_dimensions.z = 0;
 
-    /* set default delivery event handlers */
-    set_handler(boost::bind(&controller_communicator::reply_controller_capabilities, this), sip::request_tool_capabilities);
+    /* set default handlers for delivery events */
+    set_handler(boost::bind(&controller_communicator::reply_controller_capabilities, this), sip::request_controller_capabilities);
     set_handler(boost::bind(&controller_communicator::set_status, this, status_configured), sip::send_accept_configuration);
     set_handler(boost::bind(&controller_communicator::accept_layout_handler, this, _1), sip::send_display_layout);
     set_handler(boost::bind(&controller_communicator::accept_data_handler, this, _1), sip::send_display_data);
