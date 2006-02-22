@@ -4,6 +4,7 @@
 #include <list>
 
 #include <sip/detail/report.h>
+#include <sip/detail/configuration.h>
 #include <sip/detail/controller_capabilities.h>
 #include <sip/detail/display_layout.h>
 #include <sip/detail/basic_messenger.h>

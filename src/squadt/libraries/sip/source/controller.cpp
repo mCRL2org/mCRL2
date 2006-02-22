@@ -5,7 +5,6 @@
 #include <sip/detail/common.h>
 #include <sip/detail/basic_messenger.tcc>
 
-#include <boost/thread/barrier.hpp>
 #include <boost/bind.hpp>
 
 namespace sip {
@@ -19,6 +18,8 @@ namespace sip {
     /* set default delivery event handlers */
     set_handler(boost::bind(&controller_communicator::reply_controller_capabilities, this), sip::request_tool_capabilities);
     set_handler(boost::bind(&controller_communicator::set_status, this, status_configured), sip::send_accept_configuration);
+    set_handler(boost::bind(&controller_communicator::accept_layout_handler, this, _1), sip::send_display_layout);
+    set_handler(boost::bind(&controller_communicator::accept_data_handler, this, _1), sip::send_display_data);
   }
 
   controller_communicator::~controller_communicator() {
@@ -28,7 +29,7 @@ namespace sip {
   void controller_communicator::reply_controller_capabilities() {
     std::ostringstream data;
 
-    controller_capabilities capabilities(current_version);
+    controller_capabilities capabilities(protocol_version);
 
     capabilities.set_display_dimensions(current_display_dimensions);
     capabilities.to_xml(data);
@@ -65,5 +66,11 @@ namespace sip {
   /* Request a tool to terminate */
   void controller_communicator::request_termination() {
     send_message(boost::cref(message(sip::request_termination)));
+  }
+
+  void controller_communicator::accept_layout_handler (sip_messenger::message_ptr&) {
+  }
+
+  void controller_communicator::accept_data_handler (sip_messenger::message_ptr&) {
   }
 }

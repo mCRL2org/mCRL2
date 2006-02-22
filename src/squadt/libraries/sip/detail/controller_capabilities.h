@@ -4,6 +4,7 @@
 #include <ostream>
 
 #include <xml2pp/xml_text_reader.h>
+#include <sip/detail/capabilities.h>
 
 namespace sip {
 
@@ -22,12 +23,6 @@ namespace sip {
     friend class controller_communicator;
 
     public:
-      /** Type for protocol version */
-      struct version {
-        unsigned char major;
-        unsigned char minor;
-      };
-
       /** Type for display dimensions */
       struct display_dimensions {
         unsigned short x; /* Horizontal */
@@ -38,13 +33,13 @@ namespace sip {
     private:
 
       /** The protocol version */
-      version            protocol_version;
+      version            current_protocol_version;
 
       /** The dimensions of the screen that are currently reserved for this tool */
       display_dimensions current_dimensions;
 
       /** Constructor */
-      inline controller_capabilities(const version);
+      inline controller_capabilities(const version = protocol_version);
 
       /** Set display dimensions */
       inline void set_display_dimensions(const unsigned short x, const unsigned short y, const unsigned short z);
@@ -67,14 +62,14 @@ namespace sip {
       inline void to_xml(std::ostream&) const;
   };
 
-  inline controller_capabilities::controller_capabilities(const version v) : protocol_version(v) {
+  inline controller_capabilities::controller_capabilities(const version v) : current_protocol_version(v) {
     current_dimensions.x = 0;
     current_dimensions.y = 0;
     current_dimensions.z = 0;
   }
 
-  inline controller_capabilities::version controller_capabilities::get_version() const {
-    return (protocol_version);
+  inline version controller_capabilities::get_version() const {
+    return (current_protocol_version);
   }
 
   inline void controller_capabilities::set_display_dimensions(const display_dimensions& d) {
@@ -93,8 +88,8 @@ namespace sip {
 
   inline void controller_capabilities::to_xml(std::ostream& output) const {
     output << "<capabilities>"
-           << "<protocol-version major=\"" << (unsigned short) protocol_version.major
-           << "\" minor=\"" << (unsigned short) protocol_version.minor << "\"/>"
+           << "<protocol-version major=\"" << (unsigned short) current_protocol_version.major
+           << "\" minor=\"" << (unsigned short) current_protocol_version.minor << "\"/>"
            << "<display-dimensions x=\"" << current_dimensions.x
            << "\" y=\"" << current_dimensions.y
            << "\" z=\"" << current_dimensions.z << "\"/>"
@@ -103,8 +98,8 @@ namespace sip {
 
   /** \pre{the reader must point at a capabilities element} */
   inline controller_capabilities* controller_capabilities::from_xml(xml2pp::text_reader& reader) {
-    controller_capabilities*         c;
-    controller_capabilities::version v = {0,0};
+    controller_capabilities* c;
+    version                  v = {0,0};
 
     reader.read();
 

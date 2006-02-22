@@ -1,6 +1,3 @@
-#include <sip/tool.h>
-#include <sip/controller.h>
-
 #include <sstream>
 #include <iostream>
 
@@ -9,6 +6,8 @@
 #include <boost/test/unit_test_log.hpp>
 
 #include <sip/detail/basic_messenger.tcc>
+#include <sip/tool.h>
+#include <sip/controller.h>
 
 #define BOOST_TEST_SHOW_PROGRESS yes
 

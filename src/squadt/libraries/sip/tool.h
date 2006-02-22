@@ -1,16 +1,9 @@
 #ifndef SIP_TOOL_H
 #define SIP_TOOL_H
 
-#include <deque>
 #include <set>
-#include <string>
 
-#include <boost/bind.hpp>
-
-#include <sip/detail/basic_messenger.h>
 #include <sip/detail/common.h>
-#include <sip/detail/controller_capabilities.h>
-#include <sip/detail/report.h>
 
 /* Interface classes for the tool side of the Squadt Interaction Protocol */
 namespace sip {
@@ -40,9 +33,6 @@ namespace sip {
 
       /** A set of available input configurations for this tool */
       std::set < std::pair < tool_category, storage_format > >       current_input_configurations;
-
-      /** Triggers event handlers for incoming messages */
-      void deliver(std::istream&);
 
     public:
 

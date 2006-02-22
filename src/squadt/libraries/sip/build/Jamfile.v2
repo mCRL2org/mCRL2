@@ -20,6 +20,8 @@ lib sip_common :
 lib sipc :
         controller.cpp
         sip_common
+        /libraries/transport//transport
+        /boost/thread//boost_thread
        :
        :
         <library>/libraries/transport//transport
@@ -28,6 +30,8 @@ lib sipc :
 lib sipt :
         tool.cpp
         sip_common
+        /libraries/transport//transport
+        /boost/thread//boost_thread
        :
        :
         <library>/libraries/transport//transport

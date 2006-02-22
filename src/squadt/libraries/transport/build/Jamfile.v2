@@ -7,7 +7,6 @@ project transport
    <define>BOOST_DATE_TIME_NO_LIB
   : usage-requirements
    <include>../../
-   <linkflags>-lpthread
    <define>BOOST_DATE_TIME_NO_LIB ;
 
 lib transport :
@@ -15,4 +14,6 @@ lib transport :
             transceiver.cpp
             listener.cpp
             socket_listener.cpp
-            socket_transceiver.cpp ;
+            socket_transceiver.cpp
+           :
+           : <linkflags>-lpthread ;
