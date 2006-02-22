@@ -187,6 +187,7 @@ void Visualizer::drawLTS( /*bool topDown*/ )
   
   if ( visSettings.transparency > 0 )
   {
+    glDepthMask( GL_FALSE );
     // objects are transparent, so to avoid artifacting...
     glEnable( GL_CULL_FACE );
       // first render the back facing polygons...
@@ -196,6 +197,7 @@ void Visualizer::drawLTS( /*bool topDown*/ )
       glCullFace( GL_BACK );
       glCallList( displayList );
     glDisable( GL_CULL_FACE );
+    glDepthMask( GL_TRUE );
   }
   else
   {
@@ -227,9 +229,9 @@ void Visualizer::drawSubtree( Cluster* root, bool topClosed, float &boundWidth,
     root->getDescendants( descendants );
     
     GLUtils::coloredCylinder( root->getTopRadius(), root->getBaseRadius(),
-	visSettings.clusterHeight, visSettings.quality, visSettings.quality,
-	HSVtoRGB( col ), HSVtoRGB( desccol ), visSettings.transparency,
-	topClosed, descendants.size() > 1 );
+	visSettings.clusterHeight, visSettings.quality, HSVtoRGB( col ),
+	HSVtoRGB( desccol ), visSettings.transparency, topClosed,
+	descendants.size() > 1 );
 
     vector< Cluster* >::iterator descit;
     for ( descit = descendants.begin() ; descit != descendants.end() ; ++descit )
@@ -307,16 +309,15 @@ void Visualizer::drawSubtreeMarkStates( Cluster* root, bool topClosed, float
     if ( root->isMarked() )
     {
       GLUtils::coloredCylinder( root->getTopRadius(), root->getBaseRadius(),
-	visSettings.clusterHeight, visSettings.quality, visSettings.quality,
-	visSettings.markedColor, RGB_WHITE, visSettings.transparency, topClosed,
-	descendants.size() > 1 );
+	visSettings.clusterHeight, visSettings.quality, visSettings.markedColor,
+	RGB_WHITE, visSettings.transparency, topClosed, descendants.size() > 1
+	);
     }
     else
     {
       GLUtils::coloredCylinder( root->getTopRadius(), root->getBaseRadius(),
-	visSettings.clusterHeight, visSettings.quality, visSettings.quality,
-	RGB_WHITE, RGB_WHITE, visSettings.transparency, topClosed,
-	descendants.size() > 1 );
+	visSettings.clusterHeight, visSettings.quality, RGB_WHITE, RGB_WHITE,
+	visSettings.transparency, topClosed, descendants.size() > 1 );
     }
     
     vector< Cluster* >::iterator descit;
@@ -395,16 +396,15 @@ void Visualizer::drawSubtreeMarkDeadlocks( Cluster* root, bool topClosed, float
     if ( root->hasDeadlock() )
     {
       GLUtils::coloredCylinder( root->getTopRadius(), root->getBaseRadius(),
-	visSettings.clusterHeight, visSettings.quality, visSettings.quality,
-	visSettings.markedColor, RGB_WHITE, visSettings.transparency, topClosed,
-	descendants.size() > 1 );
+	visSettings.clusterHeight, visSettings.quality, visSettings.markedColor,
+	RGB_WHITE, visSettings.transparency, topClosed, descendants.size() > 1
+	);
     }
     else
     {
       GLUtils::coloredCylinder( root->getTopRadius(), root->getBaseRadius(),
-	visSettings.clusterHeight, visSettings.quality, visSettings.quality,
-	RGB_WHITE, RGB_WHITE, visSettings.transparency, topClosed,
-	descendants.size() > 1 );
+	visSettings.clusterHeight, visSettings.quality, RGB_WHITE, RGB_WHITE,
+	visSettings.transparency, topClosed, descendants.size() > 1 );
     }
       
     vector< Cluster* >::iterator descit;

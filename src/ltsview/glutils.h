@@ -17,7 +17,7 @@ namespace GLUtils
 {
   void setColor( RGB_Color c, int transp );
   void coloredCylinder( float baserad, float toprad, float height, 
-      int slices, int stacks, RGB_Color basecol, RGB_Color topcol, int transp,
-      bool baseclosed, bool topclosed );
+      int slices, RGB_Color basecol, RGB_Color topcol, int transp, bool
+      baseclosed, bool topclosed );
 }
 #endif
