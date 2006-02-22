@@ -1,16 +1,20 @@
 project xml_text_reader
-  : source-location ../source
-  : build-dir $(BUILD_TOP)
-  : requirements
-    <include>../../
-  : usage-requirements
-    <include>../../ ;
+    : source-location
+       ../source
+    : build-dir
+       $(BUILD_TOP)
+    : requirements
+       <include>../../
+    : usage-requirements
+       <include>../../
+    ;
 
 include $(TOP)/config.jam ;
 
-obj xml_text_reader :
-          xml_text_reader.cpp
-        : <cxxflags>"`$(XML2_CONFIG) --cflags`"
-        :
-        : <cxxflags>"`$(XML2_CONFIG) --cflags`"
-          <linkflags>"`$(XML2_CONFIG) --libs`" ;
+obj xml_text_reader
+    : xml_text_reader.cpp
+    : <cxxflags>"`$(XML2_CONFIG) --cflags`"
+    :
+    : <cxxflags>"`$(XML2_CONFIG) --cflags`"
+      <linkflags>"`$(XML2_CONFIG) --libs`"
+    ;

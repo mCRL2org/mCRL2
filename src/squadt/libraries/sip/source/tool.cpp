@@ -9,11 +9,28 @@
 namespace sip {
   using namespace sip::messenger;
 
+  /**
+   * \attention please use connect() to manually establish a connection with a controller
+   **/
   tool_communicator::tool_communicator() : current_status(status_initialising), current_capabilities(0) {
 
     /* Register event handlers for some message types */
     set_handler(boost::bind(&tool_communicator::reply_tool_capabilities, this), sip::request_tool_capabilities);
-    set_handler(boost::bind(&tool_communicator::accept_interaction_data, this), sip::send_interaction_data);
+    set_handler(boost::bind(&tool_communicator::accept_interaction_data, this, _1), sip::send_interaction_data);
+  }
+
+  /**
+   * The following connection options are recognised and extracted from the command line arguments:
+   *
+   *  - --sip-connect=\<scheme\>, where \<scheme\> is one of
+   *    - socket://\<host\>:\<port\> (for a socket connection)
+   *    - compatible (for standard input/output communication)
+   *
+   * @param argc the number of command line arguments
+   * @param argv a pointer to the list of command line arguments
+   * \attention the specific command line options are removed, so and argc and argv are modified
+   **/
+  tool_communicator::tool_communicator(int& argc, char** argv) : current_status(status_initialising), current_capabilities(0) {
   }
 
   tool_communicator::~tool_communicator() {
@@ -48,7 +65,7 @@ namespace sip {
   }
 
   /* Send a layout specification for the display space reserved for this tool */
-  void tool_communicator::send_display_layout() {
+  void tool_communicator::send_display_layout(layout::display_layout&) {
     std::ostringstream data;
 
 //    current_display_layout.to_xml(data);
@@ -69,7 +86,7 @@ namespace sip {
   void tool_communicator::send_report(sip::report&) {
   }
 
-  void tool_communicator::accept_interaction_data(sip_messenger::message_pts&) {
+  void tool_communicator::accept_interaction_data(sip_messenger::message_ptr&) {
   }
 }
 

@@ -32,6 +32,7 @@ namespace sip {
     class basic_messenger : public transport::transporter {
       public:
 
+        /** Convenience type for messages of type M */
         typedef M                                       message;
 
         /** Convenience type for pointers to messages using a boost shared pointer */
@@ -69,12 +70,15 @@ namespace sip {
         /** The number of tag elements (of message::tag) that have been matched at the last delivery */
         unsigned char              partially_matched;
 
-        /** The XML-like tags used for wrapping the content */
+        /** The XML-like tag used for wrapping the content */
         static const std::string   tag_open;
+
+        /** The XML-like tag used for wrapping the content */
         static const std::string   tag_close;
 
       public:
 
+        /** Default constructor */
         basic_messenger();
  
         /** Queues incoming messages */
@@ -98,6 +102,7 @@ namespace sip {
         /** Wait until the first message of type t has arrived */
         inline bool find_message(const typename M::type_identifier_t);
  
+        /** Returns the number of messages in the queue */
         inline size_t number_of_messages();
  
         /** Set the handler for a type */

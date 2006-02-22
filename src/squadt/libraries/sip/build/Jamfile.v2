@@ -1,38 +1,41 @@
 project sip
-  : source-location ../source
-  : build-dir $(BUILD_TOP)
-  : requirements
-   <threading>multi
-   <include>../../../../boost/
-   <include>../../
-  : usage-requirements
-   <include>../../ ;
+    : source-location
+       ../source
+    : build-dir
+       $(BUILD_TOP)
+    : requirements
+       <threading>multi
+       <include>../../../../boost/
+       <include>../../
+    : usage-requirements
+       <include>../../
+    ;
 
-lib sip_common :
-        common.cpp
-        report.cpp
-        display_layout.cpp
-        exception.cpp
-       :
-       :
-        <library>/libraries/xml2pp//xml_text_reader ;
+alias messenger
+    : # no sources
+    : # no build requirements
+    : # no default build
+    : <library>/libraries/transport//transport
+      <library>/boost/thread//boost_thread
+    ;
 
-lib sipc :
-        controller.cpp
-        sip_common
-        /libraries/transport//transport
-        /boost/thread//boost_thread
-       :
-       :
-        <library>/libraries/transport//transport
-        <library>/boost/thread//boost_thread ;
+lib sip_common
+    : common.cpp
+      report.cpp
+      display_layout.cpp
+      exception.cpp
+    :
+    : <library>/libraries/xml2pp//xml_text_reader
+    ;
 
-lib sipt :
-        tool.cpp
-        sip_common
-        /libraries/transport//transport
-        /boost/thread//boost_thread
-       :
-       :
-        <library>/libraries/transport//transport
-        <library>/boost/thread//boost_thread ;
+lib sipc
+    : controller.cpp
+      sip_common
+      messenger
+    ;
+
+lib sipt
+    : tool.cpp
+      sip_common
+      messenger
+    ;

@@ -21,7 +21,8 @@ namespace sip {
         ,status_error        /** \brief An error occurred */
       } status;
 
-      static const version        current_version;
+      /** The protocol version of the peer, if known otherwise assumed 1.0 */
+      static const version        peer_version;
 
       /** The current protocol status */
       status                      current_status;

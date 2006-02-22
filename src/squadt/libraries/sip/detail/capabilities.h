@@ -4,8 +4,8 @@
 namespace sip {
   /** Type for protocol version */
   struct version {
-    unsigned char major;
-    unsigned char minor;
+    unsigned char major; /// the major number
+    unsigned char minor; /// the minor number
   };
 
   /** Protocol version {major,minor} */

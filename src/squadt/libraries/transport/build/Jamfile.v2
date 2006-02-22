@@ -1,19 +1,23 @@
 project transport
-  : source-location ../source
-  : build-dir $(BUILD_TOP)
-  : requirements
-   <include>../../../../boost/
-   <include>../../
-   <define>BOOST_DATE_TIME_NO_LIB
-  : usage-requirements
-   <include>../../
-   <define>BOOST_DATE_TIME_NO_LIB ;
+    : source-location
+       ../source
+    : build-dir
+       $(BUILD_TOP)
+    : requirements
+       <include>../../../../boost/
+       <include>../../
+       <define>BOOST_DATE_TIME_NO_LIB
+    : usage-requirements
+       <include>../../
+       <define>BOOST_DATE_TIME_NO_LIB
+    ;
 
-lib transport :
-            transporter.cpp
-            transceiver.cpp
-            listener.cpp
-            socket_listener.cpp
-            socket_transceiver.cpp
-           :
-           : <linkflags>-lpthread ;
+lib transport
+    : transporter.cpp
+      transceiver.cpp
+      listener.cpp
+      socket_listener.cpp
+      socket_transceiver.cpp
+    :
+    : <linkflags>-lpthread
+    ;

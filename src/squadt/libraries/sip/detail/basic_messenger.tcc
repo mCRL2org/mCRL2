@@ -32,7 +32,7 @@ namespace sip {
       send(tag_open + m.to_xml() + tag_close);
     }
  
-    /** \pre{the message queue is not empty} */
+    /** \pre the message queue is not empty */
     template < class M >
     inline M basic_messenger< M >::pop_message() {
       message_ptr m = message_queue.front();
@@ -42,7 +42,7 @@ namespace sip {
       return (*m);
     }
  
-    /** \pre{the message queue is not empty} */
+    /** \pre the message queue is not empty  */
     template < class M >
     inline M& basic_messenger< M >::peek_message() {
       message_ptr m = message_queue.front();
@@ -57,7 +57,7 @@ namespace sip {
       return (message_queue.size());
     }
 
-    /** \pre{there is no waiter for this type} */
+    /** \pre there is no waiter for this type */
     template < class M >
     inline void basic_messenger< M >::set_handler(handler_type h, const typename M::type_identifier_t t) {
       assert(waiters.count(t) == 0);
@@ -71,10 +71,10 @@ namespace sip {
     }
  
     /**
-     * \pre{A message is of the form <message>...</message>}
-     * \pre{Both tag_close == tag_open start with == '<' and do not further contain this character}
+     * \pre A message is of the form tag_open...tag_close
+     * \pre Both tag_close == tag_open start with == '<' and do not further contain this character 
      *
-     * \attention{Works under the assumption that tag_close.size() < data.size()}
+     * \attention Works under the assumption that tag_close.size() < data.size()
      **/
     template < class M >
     void basic_messenger< M >::deliver(std::string& data) {

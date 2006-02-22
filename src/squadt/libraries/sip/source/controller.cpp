@@ -68,9 +68,9 @@ namespace sip {
     send_message(boost::cref(message(sip::request_termination)));
   }
 
-  void controller_communicator::accept_layout_handler (sip_messenger::message_ptr&) {
+  void controller_communicator::accept_layout_handler(sip_messenger::message_ptr&) {
   }
 
-  void controller_communicator::accept_data_handler (sip_messenger::message_ptr&) {
+  void controller_communicator::accept_data_handler(sip_messenger::message_ptr&) {
   }
 }

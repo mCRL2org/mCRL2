@@ -27,7 +27,6 @@ using namespace lpe;
 using namespace atermpp;
 
 namespace po = boost::program_options;
-po::variables_map vm;
 
 #define p_version "lpeinfo 0.5"
 
@@ -151,10 +150,10 @@ int main(int ac, char* av[])
         ("version",     "display version information")
     ;
 	
-  	po::options_description hidden("Hidden options");
-  	hidden.add_options()
-      ("INFILE", po::value< string >(), "input file")
-	  ;
+    po::options_description hidden("Hidden options");
+    hidden.add_options()
+        ("INFILE", po::value< string >(), "input file")
+    ;
 	
     po::options_description cmdline_options;
     cmdline_options.add(desc).add(hidden);

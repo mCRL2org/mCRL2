@@ -20,60 +20,58 @@ namespace sip {
         ,status_error        /** \brief An error occurred */
       } status;
 
-      /** The current protocol status */
+      /** \brief The current protocol status */
       status                         current_status;
 
-      /** The currently active display layout */
-      sip::layout::display_layout    current_display_layout;
-
-      /** The last received set of controller capabilities */
+      /** \brief The last received set of controller capabilities */
       sip::controller_capabilities*  current_capabilities;
 
-      /** A set of available input configurations for this tool */
+      /** \brief A set of available input configurations for this tool */
       std::set < std::pair < tool_category, storage_format > >       current_input_configurations;
 
-      /** Handler for incoming data resulting from user interaction relayed by the controller */
+      /** \brief Handler for incoming data resulting from user interaction relayed by the controller */
       void accept_interaction_data(sip_messenger::message_ptr&);
 
     public:
 
-      /** Default constructor */
+      /** \brief Default constructor */
       tool_communicator();
 
-      /** Default destructor */
+      /** \brief Constructor that takes controller connection arguments from the command line */
+      tool_communicator(int&, char**);
+
+      /** \brief Default destructor */
       ~tool_communicator();
 
-      /** Request details about the amount of space that the controller currently has reserved for this tool */
+      /** \brief Request details about the amount of space that the controller currently has reserved for this tool */
       void request_controller_capabilities();
 
-      /** Request the list of basic input configurations */
+      /** \brief Request the list of basic input configurations */
       void reply_tool_capabilities();
 
-      /** Signal that the current configuration is complete enough for the tool to start processing */
+      /** \brief Signal that the current configuration is complete enough for the tool to start processing */
       void send_accept_configuration();
 
-      /** Send a layout specification for the display space reserved for this tool */
+      /** \brief Send a layout specification for the display space reserved for this tool */
       void send_display_data();
 
-      /** Send a layout specification for the display space reserved for this tool */
-      void send_display_layout();
+      /** \brief Send a layout specification for the display space reserved for this tool */
+      void send_display_layout(layout::display_layout&);
 
-      /** Send a signal that the tool is about to terminate */
+      /** \brief Send a signal that the tool is about to terminate */
       void send_signal_termination();
 
-      /** Send a status report to the controller */
+      /** \brief Send a status report to the controller */
       void send_report(sip::report&);
 
-      /** Add an input configuration that will be send when the controller asks for it */
+      /** \brief Add an input configuration that will be send when the controller asks for it */
       inline void add_input_configuration(tool_category, storage_format);
 
-      /** Get the last communicated set of controller capabilities */
+      /** \brief Get the last communicated set of controller capabilities */
       inline const controller_capabilities& get_controller_capabilities() const;
-
-      inline layout::display_layout& get_display_layout();
   };
 
-  /** \pre{status is status_initialising} */
+  /** \pre status is status_initialising */
   inline void tool_communicator::add_input_configuration(tool_category c, storage_format f) {
     assert(current_status == status_initialising);
 
@@ -89,10 +87,6 @@ namespace sip {
     }
 
     return (*current_capabilities);
-  }
-
-  inline layout::display_layout& tool_communicator::get_display_layout() {
-    return (current_display_layout);
   }
 }
 

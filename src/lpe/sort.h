@@ -39,7 +39,7 @@ class sort: public aterm_wrapper
 
     /// Constructs a sort with the given domain and range.
     ///
-    sort(aterm_appl domain, aterm_appl range)
+    sort(aterm_appl /* domain */, aterm_appl /* range */)
     {}
 
     /// Constructs a constant sort from a string. Currently the string s is converted
