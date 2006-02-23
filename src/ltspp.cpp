@@ -113,6 +113,13 @@ int parseArgs(int argc, char *argv[], FILE **fpOut, int *traceLevel){
       return ERR_ARGS;
 
    }
+   if ( (argc-optind == 2) && !strcmp(argv[optind],argv[optind+1]) )
+   {
+      fprintf(stderr,NAME ": input file and output file are not allowed to be the same\n");
+      return ERR_FILE;
+   }
+
+
 
       /* Open the filename given as argument */
 

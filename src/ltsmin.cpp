@@ -164,6 +164,13 @@ int parseArgs(int argc, char *argv[], int *traceLevel, int *optimal, int
           fprintf(stderr,NAME ": incorrect number of arguments (see --help)\n");
 	  return ERR_FILE;
       }
+      if ( !strcmp(argv[optind],argv[optind+1]) )
+      {
+	  fprintf(stderr,NAME ": input file and output file are not allowed to be the same\n");
+	  return ERR_FILE;
+      }
+
+
       ret = branching?CMD_BRANCH_REDUCE:CMD_REDUCE;
 
       inputname = argv[optind];

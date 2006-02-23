@@ -90,11 +90,14 @@ int main(int argc, char **argv)
   if ( opt_verbose )
     gsSetVerboseMsg();
 
+
+
   InStream = stdin;
   char *InFileName = NULL;
   if ( optind < argc && strcmp(argv[optind],"-") )
   {
     InFileName = argv[optind];
+    gsVerboseMsg("reading mCRL LPE from '%s'...\n", InFileName);
     if ( (InStream = fopen(InFileName, "rb")) == NULL )
     {
       gsErrorMsg("cannot open input file '%s' for reading: ",
@@ -102,20 +105,22 @@ int main(int argc, char **argv)
       perror(NULL);
       return 1;
     }
+  } else {
+    gsVerboseMsg("reading mCRL LPE from stdin...\n");
   }
 
-  if ( InStream == stdin )
-    gsVerboseMsg("reading mCRL LPE from stdin...\n");
-  else
-    gsVerboseMsg("reading mCRL LPE from '%s'...\n", InFileName);
   mu_spec = (ATermAppl) ATreadFromFile(InStream);
+
+  if (InStream != stdin) {
+    fclose(InStream);
+  }
+
   if ( mu_spec == NULL )
   {
     if (InStream == stdin) {
       gsErrorMsg("could not read mCRL LPE from stdin\n");
     } else {
       gsErrorMsg("could not read mCRL LPE from '%s'\n", InFileName);
-      fclose(InStream);
     }
     return 1;
   }
@@ -126,39 +131,34 @@ int main(int argc, char **argv)
       gsErrorMsg("stdin does not contain a mCRL LPE\n");
     } else {
       gsErrorMsg("'%s' does not contain a mCRL LPE\n", InFileName);
-      fclose(InStream);
     }
     return false;
   }
   assert(is_mCRL_spec(mu_spec));
 
+
   spec = translate(mu_spec,convert_bools,convert_funcs);
+
 
   OutStream = stdout;
   char *OutFileName = NULL;
   if ( optind+1 < argc )
   {
     OutFileName = argv[optind+1];
+    gsVerboseMsg("writing mCRL2 LPE to '%s'...\n", OutFileName);
     if ( (OutStream = fopen(OutFileName, "wb")) == NULL )
     {
       gsErrorMsg("cannot open output file '%s' for writing: ",
         OutFileName);
       perror(NULL);
-      if (InStream != stdin) {
-        fclose(InStream);
-      }
       return 1;
     }
+  } else {
+    gsVerboseMsg("writing mCRL2 LPE to stdout...\n");
   }
 
-  if ( OutStream == stdout )
-    gsVerboseMsg("writing mCRL2 LPE to stdout...\n");
-  else
-    gsVerboseMsg("writing mCRL2 LPE to '%s'...\n", OutFileName);
   ATwriteToBinaryFile((ATerm) spec,OutStream);
-  if (InStream != stdin) {
-    fclose(InStream);
-  }
+
   if (OutStream != stdout) {
     fclose(OutStream);
   }

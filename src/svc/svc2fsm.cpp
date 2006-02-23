@@ -444,6 +444,12 @@ int main(int argc,char** argv)
     gsSetVerboseMsg();
   }
 
+  if ( (argc-optind == 2) && !strcmp(argv[optind],argv[optind+1]) )
+  {
+    gsErrorMsg("input file and output file are not allowed to be the same\n");
+    return 1;
+  }
+
   SVCbool tmpBool=SVCfalse;
   SVCfile file;
   // 1st argument is svc file
