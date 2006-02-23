@@ -132,7 +132,7 @@ namespace squadt {
             try {
               size_t size = boost::filesystem::file_size(full_path);
 
-              outputs->SetItem(c, 3, wxString::Format(wxT("%u"), size));
+              outputs->SetItem(c, 3, wxString::Format(wxT("%u"), static_cast < unsigned int > (size)));
             }
             catch (...) {
               outputs->SetItem(c, 3, wxT("0"));

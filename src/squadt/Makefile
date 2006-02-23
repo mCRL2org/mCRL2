@@ -107,6 +107,7 @@ strip: $(TARGETS)
 	$(STRIP) --strip-unneeded --strip-debug $^
 
 install: all
+	@cd build; $(BJAM) --v2 --install
 	$(INSTALL) -d $(bindir)
 	$(INSTALL) -d $(datadir)
 	$(INSTALL) -d $(datadir)/images
@@ -118,16 +119,14 @@ install: all
 	$(INSTALL) -m 0644 schemas/project.xsd $(datadir)/schemas
 	$(GZIP) $(datadir)/schemas/project.xsd
 	$(INSTALL) -m 0644 examples/tool_catalog.xml $(datadir)/configuration
-	@cd build; $(BJAM) --v2 --install
 ifeq ($(HOST_OS),MACOSX)
-	/Developer/Tools/Rez -t APPL -o squadt ../sample.r
-	/Developer/Tools/SetFile -a C squadt
+	/Developer/Tools/Rez -t APPL -o $(bindir)/squadt ../sample.r
+	/Developer/Tools/SetFile -a C $(bindir)/squadt
 	mkdir -p ../../squadt.app/Contents
 	mkdir -p ../../squadt.app/Contents/MacOS
 	mkdir -p ../../squadt.app/Contents/Resources
 	cp squadt.plist ../../squadt.app/Contents/Info.plist
 	echo -n "APPL????" > ../../squadt.app/Contents/PkgInfo
-	cp squadt $(bindir)/squadt
 	ln -f $(bindir)/squadt ../../squadt.app/Contents/MacOS/squadt
 	cp -f ../xsim.icns ../../squadt.app/Contents/Resources/squadt.icns
 endif
