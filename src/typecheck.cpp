@@ -1772,7 +1772,7 @@ static ATermAppl gstcTraverseVarConsTypeDN(int nFactPars, ATermTable Vars, ATerm
     ATermAppl Type=ATAtableGet(Vars,(ATerm)Name);
     if(Type){
       if(!gstcTypeMatchA(Type,PosType)){
-	gsErrorMsg("The type %P of variable %P is incompartible with %P (typechecking %P)\n",Name,Type,PosType,*DataTerm); 
+	gsErrorMsg("The type %P of variable %P is incompatible with %P (typechecking %P)\n",Type,Name,PosType,*DataTerm); 
 	return NULL;
       }
       *DataTerm=gsMakeDataVarId(Name,Type);
