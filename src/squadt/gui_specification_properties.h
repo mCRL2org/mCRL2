@@ -25,7 +25,7 @@ namespace squadt {
     
         SpecificationPropertiesDialog(wxWindow*, wxWindowID, wxString, Specification&, std::string);
     
-        void SpecificationPropertiesDialog::UpdateSizes();
+        void UpdateSizes();
     
         void StoreChanges();
     };

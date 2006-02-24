@@ -6,7 +6,7 @@
 #include <xml2pp/xml_text_reader.h>
 
 #include "project_manager.h"
-#include "settings_manager.h"
+#include "settings_manager.tcc"
 #include "specification.h"
 #include "ui_core.h"
 
@@ -48,12 +48,8 @@ namespace squadt {
 
   /* Loads project configuration from XML file, project directory must be set in advance */
   bool ProjectManager::Load() {
-    std::string project_file(project_root);
-#if defined(PARSER_SCHEMA_VALIDATION)
-    xml2pp::text_reader reader(project_file.append("/").append(settings_manager.GetProjectFileName()).c_str(), "schemas/project.xsd");
-#else
-    xml2pp::text_reader reader(project_file.append("/").append(settings_manager.GetProjectFileName()).c_str());
-#endif
+    xml2pp::text_reader reader(settings_manager::path_concatenate(project_root, settings_manager::project_definition_base_name).c_str()
+       XML2PP_SCHEMA(_settings_manager.path_to_schemas(append_schema_suffix(settings_manager::project_definition_base_name)).c_str()));
 
     /* Maps an identifier to a pointer to a specification object */
     std::map < unsigned int, Specification* > identifier_resolution;
@@ -147,12 +143,8 @@ namespace squadt {
    *  - atomicity of writing
    */
   bool ProjectManager::Store() {
-    std::string   project_file(project_root);
-    std::ofstream project_stream;
- 
-    project_file.append("/").append(settings_manager.GetProjectFileName());
- 
-    project_stream.open(project_file.c_str(), std::ios::out | std::ios::trunc);
+    std::ofstream project_stream(settings_manager::path_concatenate(project_root, settings_manager::project_definition_base_name).c_str(),
+                    std::ios::out | std::ios::trunc);
  
     bool return_value = Write(project_stream);
  

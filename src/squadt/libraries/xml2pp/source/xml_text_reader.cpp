@@ -2,13 +2,13 @@
 
 namespace xml2pp {
 
-  void text_reader::read() throw (int) {
+  void text_reader::read() throw () {
     int status = xmlTextReaderRead(reader);
 
     do {
       if (status <= 0) {
         /* Process error, or end of file */
-        throw (status);
+        throw (exception::error_while_parsing_document);
       }
       else {
         /* Skip white space */

@@ -22,7 +22,7 @@ namespace sip {
       exception_type     type;
 
       /** A list of textual descriptions for each type */
-      static const char* descriptions[];
+      static const char* const descriptions[];
 
     public:
 

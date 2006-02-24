@@ -3,12 +3,12 @@
 
 namespace squadt {
 
-  class SettingsManager;
+  class settings_manager;
   class ToolManager;
   class Logger;
 
   /* Global Settings Manager component */
-  extern SettingsManager  settings_manager;
+  extern settings_manager _settings_manager;
 
   /* Global Tool Manager component */
   extern ToolManager      tool_manager;

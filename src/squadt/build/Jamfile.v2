@@ -11,9 +11,10 @@ local wx_cppflags = [ SHELL "$(WX_CONFIG) --cxxflags" ] ;
 
 exe squadt :
          squadt.cpp
+         exception.cpp
          specification.cpp
-         project_manager.cpp
          settings_manager.cpp
+         project_manager.cpp
          tool_manager.cpp
          tool_executor.cpp
          tool.cpp

@@ -6,10 +6,11 @@
 #include "tool.h"
 #include "tool_executor.h"
 #include "tool_manager.h"
-#include "settings_manager.h"
+#include "settings_manager.tcc"
 #include "ui_core.h"
 
 #include <boost/filesystem/operations.hpp>
+#include <boost/filesystem/convenience.hpp>
 
 namespace squadt {
 
@@ -66,12 +67,9 @@ namespace squadt {
     return (true);
   }
 
-  inline bool ToolManager::Read(std::string file_name) {
-#if defined(PARSER_SCHEMA_VALIDATION)
-    xml2pp::text_reader reader(file_name.c_str(), "schemas/tool_catalog.xsd");
-#else
-    xml2pp::text_reader reader(file_name.c_str());
-#endif
+  inline bool ToolManager::Read(const std::string& file_name) {
+    xml2pp::text_reader reader((const char*) file_name.c_str()
+       XML2PP_SCHEMA(_settings_manager.path_to_schemas(append_schema_suffix(settings_manager::tool_catalog_base_name)).c_str()));
  
     bool return_value = true;
  
@@ -102,11 +100,11 @@ namespace squadt {
   }
 
   /* Loads tool configurations from XML file */
-  bool ToolManager::Load() throw (int) {
+  bool ToolManager::Load() throw () {
     using namespace boost::filesystem;
  
-    std::string catalog_file = settings_manager.GetToolCatalogPath();
- 
+    std::string catalog_file = _settings_manager.path_to_user_settings(settings_manager::tool_catalog_base_name);
+
     if (!exists(path(catalog_file, no_check))) {
       path ghost_catalog(catalog_file + ".ghost", no_check);
   
@@ -115,7 +113,7 @@ namespace squadt {
         rename(ghost_catalog, path(catalog_file, no_check));
       }
       else {
-        throw (-1);
+        throw (exception(exception::cannot_load_tool_configuration, catalog_file));
       }
     }
  
@@ -126,25 +124,17 @@ namespace squadt {
   bool ToolManager::Store() const {
     using namespace boost::filesystem;
  
-    std::string   ghost_catalog_file = settings_manager.GetToolCatalogPath();
-    std::ofstream catalog_stream;
+    std::string   catalog_file = _settings_manager.path_to_user_settings(settings_manager::tool_catalog_base_name);
+    std::ofstream catalog_stream(catalog_file.c_str(), std::ios::out | std::ios::trunc);
+    path          old_catalog_path = path(catalog_file + ".ghost");
  
-    ghost_catalog_file.append(".ghost");
- 
-    catalog_stream.open(ghost_catalog_file.c_str(), std::ios::out | std::ios::trunc);
- 
+    rename(path(catalog_file), old_catalog_path);
+
     bool return_value = Write(catalog_stream);
  
     catalog_stream.close();
  
-    /* Replace original with newly generated copy */
-    path original_catalog(settings_manager.GetToolCatalogPath(), no_check);
-    path temporary(settings_manager.GetToolCatalogPath() + ".obsolete", no_check);
-    path ghost_catalog(ghost_catalog_file, no_check);
- 
-    rename(original_catalog, temporary);
-    rename(ghost_catalog, original_catalog);
-    remove(temporary);
+    remove(old_catalog_path);
  
     return (return_value);
   }

@@ -15,17 +15,6 @@ namespace squadt {
   class ToolExecutor;
   class Specification;
 
- /*
-  * Updating the tool catalog proceeds atomically (when it is finished):
-  *
-  * A lock is obtained
-  *
-  *  1. tool_catalog.xml.out is written.
-  *  2. tool_catalog.xml is removed.
-  *  3. tool_catalog.xml.out is moved to tool_catalog.xml
-  *
-  * The lock is released
-  */
   class ToolManager {
     friend class Specification;
  
@@ -39,7 +28,7 @@ namespace squadt {
       bool Write(std::ostream& = std::cout) const;
  
       /* Read configuration from file */
-      bool Read(std::string);
+      bool Read(const std::string&);
  
       bool Execute(unsigned int tool_identifier, std::string arguments, Specification* plan);
  
@@ -53,7 +42,7 @@ namespace squadt {
       bool QueryTools() const;
  
       /** Load tool configuration from the default location */
-      bool Load() throw (int);
+      bool Load() throw ();
  
       /** Store tool configuration to the default location */
       bool Store() const;

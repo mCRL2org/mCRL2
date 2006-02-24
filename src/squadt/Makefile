@@ -21,7 +21,7 @@ LIBXML2_OBJECTS                = xml_text_reader.o project_manager.o tool_manage
 				 project_manager_tester tool_manager_tester
 
 BOOST_OBJECTS                  = gui_project_overview.o tool_manager.o project_manager.o gui_specification_properties.o \
-				 settings_manager.o specification.o
+				 specification.o
 
 ifdef WX_CONFIG
 WX_OBJECTS                     = squadt.o gui_project_overview.o gui_new_specification.o gui_specification_properties.o \
@@ -29,8 +29,8 @@ WX_OBJECTS                     = squadt.o gui_project_overview.o gui_new_specifi
 WX_LIBRARIES                  := $(filter-out -mthreads,$(shell $(WX_CONFIG) --libs core base adv net))
 endif
 
-PROJECT_MANAGER_OBJECTS        = project_manager.o specification.o xml_text_reader.o settings_manager.o
-TOOL_MANAGER_OBJECTS           = tool_manager.o tool.o xml_text_reader.o settings_manager.o
+PROJECT_MANAGER_OBJECTS        = project_manager.o specification.o xml_text_reader.o
+TOOL_MANAGER_OBJECTS           = tool_manager.o tool.o xml_text_reader.o
 TOOL_EXECUTOR_OBJECTS          = tool_executor.o process.o
 GUI_OBJECTS                    = squadt.o gui_project_overview.o gui_new_specification.o gui_specification_properties.o \
 				 $(sort $(TOOL_EXECUTOR_OBJECTS) $(PROJECT_MANAGER_OBJECTS) $(TOOL_MANAGER_OBJECTS)) \
@@ -76,7 +76,6 @@ test: all
 $(LIBXML2_OBJECTS):  CPPFLAGS += $(BOOST_CPPFLAGS) $(WX_CPPFLAGS) $(LIBXML2_CPPFLAGS)
 $(BOOST_OBJECTS):    CPPFLAGS += $(BOOST_CPPFLAGS) $(WX_CPPFLAGS) $(LIBXML2_CPPFLAGS)
 $(WX_OBJECTS):       CPPFLAGS += $(BOOST_CPPFLAGS) $(WX_CPPFLAGS) $(LIBXML2_CPPFLAGS)
-settings_manager.o:  CPPFLAGS += $(BOOST_CPPFLAGS) $(WX_CPPFLAGS) $(LIBXML2_CPPFLAGS) -DDATA_DIRECTORY=\"$(datadir)\"
 utility/relocator.o: CPPFLAGS += $(BOOST_CPPFLAGS)
 
 md5.o:
@@ -118,7 +117,7 @@ install: all
 	$(GZIP) $(datadir)/schemas/tool_catalog.xsd
 	$(INSTALL) -m 0644 schemas/project.xsd $(datadir)/schemas
 	$(GZIP) $(datadir)/schemas/project.xsd
-	$(INSTALL) -m 0644 examples/tool_catalog.xml $(datadir)/configuration
+	$(INSTALL) -m 0644 examples/tool_catalog $(datadir)/configuration
 ifeq ($(HOST_OS),MACOSX)
 	/Developer/Tools/Rez -t APPL -o $(bindir)/squadt ../sample.r
 	/Developer/Tools/SetFile -a C $(bindir)/squadt
@@ -133,7 +132,7 @@ endif
 
 clean:
 #	@cd build; $(BJAM) --v2 --clean-all
-	$(RM) -rf *.o $(TARGETS) $(TEST_TARGETS) settings.h utility/*.o utility/relocator examples/tool_catalog.xml core dependencies bin
+	$(RM) -rf *.o $(TARGETS) $(TEST_TARGETS) settings.h utility/*.o utility/relocator examples/tool_catalog core dependencies bin
 
 distclean: clean
 

@@ -5,8 +5,15 @@
 #include <exception>
 #include <string>
 #include <cstdlib>
+#include <iostream>
 
 #include <xml2pp/detail/exception.h>
+
+#ifdef SCHEMA_VALIDATION_ENABLED
+ #define XML2PP_SCHEMA(x) , x
+#else
+ #define XML2PP_SCHEMA(x)
+#endif
 
 namespace xml2pp {
 
@@ -27,50 +34,51 @@ namespace xml2pp {
 
     public:
 
-      /** Constructor for reading from a file */
+      /** \brief Constructor for reading from a file */
       text_reader(const char*, const char* schema_name = 0);
 
-      /** Constructor for reading an in memory document */
+      /** \brief Constructor for reading an in memory document */
       text_reader(const std::string& document, const char* schema_name = 0);
 
-      /** Constructor for reading part of an in memory document */
+      /** \brief Constructor for reading part of an in memory document */
       text_reader(const std::string& document, const size_t prefix_length, const char* schema_name = 0);
 
+      /** \brief descructor */
       ~text_reader();
 
-      /* Set schema for validation purposes \attention{throws if the first read() has already occured} */
+      /** \brief Set schema for validation purposes */
       inline void set_schema(const char*);
 
-      /** Traverses of the XML document tree */
-      void read() throw (int);
+      /** \brief Traverses of the XML document tree */
+      void read() throw ();
 
-      /** Returns the name of the current element */
+      /** \brief Returns the name of the current element */
       inline std::string element_name();
 
-      /** Get the value of an attribute as ... (second argument remains unchanged if the attribute is not present) */
+      /** \brief Get the value of an attribute as ... (second argument remains unchanged if the attribute is not present) */
       inline bool get_attribute(std::string* string, const char* attribute_name);
 
-      /** Get the value of an attribute as ... (second argument remains unchanged if the attribute is not present) */
+      /** \brief Get the value of an attribute as ... (second argument remains unchanged if the attribute is not present) */
       template < typename it >
       inline bool get_attribute(it*, const char*);
 
-      /** Returns whether the attribute is present or not */
+      /** \brief Returns whether the attribute is present or not */
       inline bool get_attribute(const char*);
 
-      /** Get the value of an element as ... */
+      /** \brief Get the value of an element as ... */
       inline bool get_value(std::string* astring);
 
-      /** Get the value of an element as ... */
+      /** \brief Get the value of an element as ... */
       template < typename it >
       inline bool get_value(it* aninteger);
 
-      /** Whether the current element matches element_name */
+      /** \brief Whether the current element matches element_name */
       inline bool is_element(char* element_name);
 
-      /** Whether the current element is an end of element tag */
+      /** \brief Whether the current element is an end of element tag */
       inline bool is_end_element();
 
-      /** Whether the current element is empty */
+      /** \brief Whether the current element is empty */
       inline bool is_empty_element();
   };
 
@@ -78,11 +86,12 @@ namespace xml2pp {
    * Definitions for inline functions follow
    ****************************************************************************/
   inline text_reader::text_reader(const char* file_name, const char* schema_name) : _document(0) {
+std::cerr << "died on exception\n";
     reader = xmlNewTextReaderFilename(file_name);
 
     if (reader == 0) {
       /* Error opening file, abort ... */
-      throw (new xml2pp::exception(exception::unable_to_open_input_file));
+      throw (xml2pp::exception(exception::unable_to_open_input_file));
     }
 
     set_schema(schema_name);
@@ -106,13 +115,14 @@ namespace xml2pp {
   }
 
 #ifdef SCHEMA_VALIDATION_ENABLED
+  /** \attention throws if the first read() has already occured */
   inline void text_reader::set_schema(const char* schema_name) {
     if (xmlTextReaderReadState(reader) != XML_TEXTREADER_MODE_INITIAL) {
-      throw (new exception(illegal_operation_after_first_read));
+      throw (exception(illegal_operation_after_first_read));
     }
     else if (schema_name != 0 && xmlTextReaderSchemaValidate(reader, schema_name) < 0) {
       /* Error schema file, abort ... */
-      throw (new xml2pp::exception);
+      throw (xml2pp::exception(unable_to_open_schema_file));
     }
   }
 #else

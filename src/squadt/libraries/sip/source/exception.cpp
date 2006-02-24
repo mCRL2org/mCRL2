@@ -2,7 +2,7 @@
 
 namespace sip {
 
-  const char* exception::descriptions[] = {
+  const char* const exception::descriptions[] = {
     "Expected the start of message sequence.",
     "Expected the end of message sequence.",
     "Message contains a forbidden character sequence.",

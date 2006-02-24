@@ -6,6 +6,8 @@
 #
 #   bcp --scan $(find ./ -name '*.cpp' -or -name '*.h' -and -not -name 'boost' | grep --invert-match -e "boost") \
 #      --boost=<path-to-boost-source> ./boost
+#   bcp --scan $(find <path-to-asio-headers> -name '*.cpp' -or -name '*.h' -or -name '*.hpp') \
+#      --boost=<path-to-boost-source> ./boost
 #
 # from the trunk/src directory.
 #

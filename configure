@@ -6343,7 +6343,7 @@ echo "$as_me: Some tools will not be built if any of these libraries are missing
 { echo "$as_me:$LINENO: " >&5
 echo "$as_me: " >&6;}
 
-                                                            ac_config_files="$ac_config_files src/boost/tools/build/v2/user-config.jam src/squadt/examples/tool_catalog.xml src/rewr_innerc_aux.h src/squadt/settings.h config config.jam"
+                                                            ac_config_files="$ac_config_files src/boost/tools/build/v2/user-config.jam src/squadt/examples/tool_catalog src/rewr_innerc_aux.h src/squadt/settings.h config config.jam"
 
 cat >confcache <<\_ACEOF
 # This file is a shell script that caches the results of configure
@@ -6896,7 +6896,7 @@ do
   case "$ac_config_target" in
   # Handling of arguments.
   "src/boost/tools/build/v2/user-config.jam" ) CONFIG_FILES="$CONFIG_FILES src/boost/tools/build/v2/user-config.jam" ;;
-  "src/squadt/examples/tool_catalog.xml" ) CONFIG_FILES="$CONFIG_FILES src/squadt/examples/tool_catalog.xml" ;;
+  "src/squadt/examples/tool_catalog" ) CONFIG_FILES="$CONFIG_FILES src/squadt/examples/tool_catalog" ;;
   "src/rewr_innerc_aux.h" ) CONFIG_FILES="$CONFIG_FILES src/rewr_innerc_aux.h" ;;
   "src/squadt/settings.h" ) CONFIG_FILES="$CONFIG_FILES src/squadt/settings.h" ;;
   "config" ) CONFIG_FILES="$CONFIG_FILES config" ;;

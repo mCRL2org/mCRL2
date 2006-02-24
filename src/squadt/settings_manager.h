@@ -1,66 +1,95 @@
-#ifndef CONFIG_H
-#define CONFIG_H
+#ifndef SETTINGS_MANAGER_H
+#define SETTINGS_MANAGER_H
 
 #include <string>
 
-#include "settings.h"
+#include <boost/noncopyable.hpp>
+#include <boost/filesystem/operations.hpp>
 
 namespace squadt {
-  /*
+
+  class boost::filesystem::path;
+
+  /**
    * Stores the runtime configuration settings for all components.
-   */
-  class SettingsManager {
+   *
+   * \attention call boost::filesystem::path::default_name_check(bf::no_check) before instantiating
+   **/
+  class settings_manager : public boost::noncopyable {
     private:
+      /** Convenience type for paths */
+      typedef boost::filesystem::path path;
 
-      std::string home_directory;          /* Users home directory */
-      std::string settings_directory;      /* Directory in which project independent settings are stored */
-      std::string tool_catalog_name;       /* The name of the tool catalog file */
-      std::string project_file_name;       /* The base name of a project file */
+      /** \brief The home directory of the current user (either xsd or xsd.gz) */
+      const path home_directory;
 
-      static std::string default_profile_directory;
+      /** \brief The absolute path the directory where specific configuration files can be found */
+      const path user_settings_path;
 
-    protected:
+      /** \brief The absolute path to the directory in which system wide configuration files can be found */
+      const path system_settings_path;
 
-      /* Determine the default name that is used for the profile directory (depends on host system) */
-      static std::string SettingsManager::GetDefaultProfileDirectory();
+      /** \brief Helper function for constructors that ensures that the appropriate directories exist */
+      inline void settings_manager::ensure_directories_exist();
 
     public:
 
-      SettingsManager(const char* the_home_directory, const char* profile_directory = default_profile_directory.c_str());
+      /** \brief The suffix of a schema file (either xsd or xsd.gz)*/
+      static const char* schema_suffix;
 
-      /* The personal directory for the user */
-      void SetHomeDirectory(const std::string);
+      /** \brief The base name of a catalog file (as well as the XML schema file for a tool catalog) */
+      static const char* tool_catalog_base_name;
 
-      /* Set the (basename) of the tool catalog file (name may not contain directory separators) */
-      inline void SetToolCatalogName(const std::string name) {
-        tool_catalog_name = name;
-      }
+      /** \brief The base name of a project definition file (as well as the XML schema file for a project definition) */
+      static const char* project_definition_base_name;
 
-      /* The (base)name of the directory in which settings are stored */
-      void SetSettingsDirectory(const std::string);
+      /** \brief The name of the profile directory, for user specific settings (located in a users home directory) */
+      static const char* default_profile_directory;
 
-      /* Get the the settings directory */
-      std::string GetSettingsPath() const;
+    public:
 
-      /* Get the path to the directory containing the image file(s) */
-      std::string GetImagePath() const;
+      /** \brief Constructor */
+      template < typename T1, typename T2 >
+      inline settings_manager(const T1&, const T2&);
 
-      /* Get the path to image, in the directory containing the image file(s) */
-      std::string GetImagePath(const std::string image) const;
+      /** \brief Constructor with default relative path to profile directory */
+      template < typename T >
+      inline settings_manager(const T&);
 
-      /* Get the path to the directory containing the XML schema file(s) */
-      std::string GetSchemaPath() const;
+      /** \brief Get the path to where the user independent and default configurations are stored */
+      template < typename T >
+      inline std::string path_to_user_settings(const T&) const;
 
-      /* Get the path to where the user independent and default configurations are stored */
-      std::string GetConfigurationPath() const;
+      /** \brief Get the path to where the user independent and default configurations are stored */
+      inline std::string path_to_user_settings() const;
 
-      /* Get the path to the tool catalog file(s) */
-      std::string GetToolCatalogPath() const;
+      /** \brief Get the the settings directory */
+      template < typename T >
+      inline std::string path_to_system_settings(const T&) const;
 
-      /* Get the base name of a project file */
-      std::string GetProjectFileName() const;
+      /** \brief Get the the settings directory */
+      inline std::string path_to_system_settings() const;
 
-      const std::string GetLogFileName() const;
+      /** \brief Get the path to image, in the directory containing the image file(s) */
+      template < typename T >
+      inline std::string path_to_images(const T&) const;
+
+      /** \brief Get the path to image, in the directory containing the image file(s) */
+      inline std::string path_to_images() const;
+
+      /** \brief Get the path to the directory containing the XML schema file(s) */
+      template < typename T >
+      inline std::string path_to_schemas(const T&) const;
+
+      /** \brief Get the path to the directory containing the XML schema file(s) */
+      inline std::string path_to_schemas() const;
+
+      /** \brief Have the schema suffix appended to a complete path */
+      static inline std::string& append_schema_suffix(std::string&);
+
+      /** \brief Composes a new path by concatenating two paths */
+      template < typename T1, typename T2 >
+      static inline std::string path_concatenate(const T1, const T2);
   };
 }
 

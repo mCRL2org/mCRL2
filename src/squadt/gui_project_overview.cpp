@@ -8,7 +8,7 @@
 #include "gui_project_overview.h"
 #include "tool.h"
 #include "tool_executor.h"
-#include "settings_manager.h"
+#include "settings_manager.tcc"
 #include "logger.h"
 #include "ui_core.h"
 
@@ -353,7 +353,7 @@ namespace squadt {
       wxBoxSizer* ssizer = new wxBoxSizer(wxHORIZONTAL);
       wxBitmap    bitmap;
 
-      bitmap.LoadFile(wxString(settings_manager.GetImagePath("logo.jpg").c_str(), wxConvLocal), wxBITMAP_TYPE_JPEG);
+      bitmap.LoadFile(wxString(_settings_manager.path_to_images("logo.jpg").c_str(), wxConvLocal), wxBITMAP_TYPE_JPEG);
 
       about->SetSizer(sizer);
 
