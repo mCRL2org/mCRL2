@@ -85,7 +85,8 @@ namespace squadt {
       inline std::string path_to_schemas() const;
 
       /** \brief Have the schema suffix appended to a complete path */
-      static inline std::string& append_schema_suffix(std::string&);
+      template < typename T >
+      static inline std::string append_schema_suffix(const T&);
 
       /** \brief Composes a new path by concatenating two paths */
       template < typename T1, typename T2 >

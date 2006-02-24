@@ -4,7 +4,7 @@
 
 #include <boost/filesystem/operations.hpp>
 
-#include <xml2pp/xml_text_reader.h>
+#include <xml2pp/detail/text_reader.tcc>
 
 #include "specification.h"
 #include "tool.h"

@@ -26,7 +26,7 @@ exe squadt :
          gui_specification_properties.cpp
          /libraries/md5pp//md5pp
          /libraries/transport//transport
-         /libraries/xml2pp//xml_text_reader
+         /libraries/xml2pp//text_reader
          /boost/filesystem//boost_filesystem
         : <cxxflags>"`$(WX_CONFIG) --cxxflags`"
           <linkflags>"`$(WX_CONFIG) --libs core base adv net`" ;

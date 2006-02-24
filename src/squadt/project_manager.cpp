@@ -3,7 +3,7 @@
 
 #include <boost/filesystem/operations.hpp>
 
-#include <xml2pp/xml_text_reader.h>
+#include <xml2pp/detail/text_reader.tcc>
 
 #include "project_manager.h"
 #include "settings_manager.tcc"
@@ -11,6 +11,8 @@
 #include "ui_core.h"
 
 namespace squadt {
+
+  namespace bf = boost::filesystem;
 
   ProjectManager::ProjectManager() {
     free_identifier = 0;
@@ -48,8 +50,18 @@ namespace squadt {
 
   /* Loads project configuration from XML file, project directory must be set in advance */
   bool ProjectManager::Load() {
-    xml2pp::text_reader reader(settings_manager::path_concatenate(project_root, settings_manager::project_definition_base_name).c_str()
-       XML2PP_SCHEMA(_settings_manager.path_to_schemas(append_schema_suffix(settings_manager::project_definition_base_name)).c_str()));
+    xml2pp::text_reader::file_name< std::string > f(settings_manager::path_concatenate(project_root, settings_manager::project_definition_base_name));
+
+    if (!bf::exists(bf::path(f.get()))) {
+      return (false);
+    }
+
+    xml2pp::text_reader reader(f);
+
+    reader.set_schema(xml2pp::text_reader::file_name< std::string >(
+                            _settings_manager.path_to_schemas(
+                                    settings_manager::append_schema_suffix(
+                                            settings_manager::project_definition_base_name)).c_str()));
 
     /* Maps an identifier to a pointer to a specification object */
     std::map < unsigned int, Specification* > identifier_resolution;
@@ -225,10 +237,8 @@ namespace squadt {
     const std::vector < SpecificationOutputType >::const_iterator d = (*i).GetOutputObjects().end();
  
     while (k != d) {
-      using namespace boost::filesystem;
- 
-      if (exists(path((*k).location))) {
-        remove(path((*k).location));
+      if (bf::exists(bf::path((*k).location))) {
+        bf::remove(bf::path((*k).location));
       }
     }
  
@@ -253,10 +263,8 @@ namespace squadt {
         const std::vector < SpecificationOutputType >::const_iterator d = (*i).GetOutputObjects().end();
  
         while (k != d) {
-          using namespace boost::filesystem;
- 
-          if (exists(path((*k).location))) {
-            remove(path((*k).location));
+          if (bf::exists(bf::path((*k).location))) {
+            bf::remove(bf::path((*k).location));
           }
  
           ++k;

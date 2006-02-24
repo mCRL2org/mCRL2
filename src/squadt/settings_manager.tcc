@@ -111,12 +111,19 @@ namespace squadt {
   }
 
   /**
-   * \param[in,out] path a complete path
+   * \param[in] path a complete path
    */
-  inline std::string& settings_manager::append_schema_suffix(std::string& path) {
-    path += schema_suffix;
+  template < >
+  inline std::string settings_manager::append_schema_suffix(const std::string& path) {
+    return(path + schema_suffix);
+  }
 
-    return(path);
+  /**
+   * \param[in] path a complete path
+   */
+  template < typename T >
+  inline std::string settings_manager::append_schema_suffix(const T& path) {
+    return(std::string(path) + schema_suffix);
   }
 
   /**

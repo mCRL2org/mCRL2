@@ -1,7 +1,7 @@
 #include <iostream>
 #include <fstream>
 
-#include <xml2pp/xml_text_reader.h>
+#include <xml2pp/detail/text_reader.tcc>
 
 #include "tool.h"
 #include "tool_executor.h"
@@ -67,9 +67,15 @@ namespace squadt {
     return (true);
   }
 
-  inline bool ToolManager::Read(const std::string& file_name) {
-    xml2pp::text_reader reader(file_name.c_str()
-       XML2PP_SCHEMA(_settings_manager.path_to_schemas(append_schema_suffix(settings_manager::tool_catalog_base_name)).c_str()));
+  inline bool ToolManager::Read(const std::string& name) {
+    xml2pp::text_reader::file_name< std::string > f(name);
+
+    xml2pp::text_reader reader(f);
+
+    reader.set_schema(xml2pp::text_reader::file_name< std::string >(
+                            _settings_manager.path_to_schemas(
+                                    settings_manager::append_schema_suffix(
+                                            settings_manager::tool_catalog_base_name))));
  
     bool return_value = true;
  

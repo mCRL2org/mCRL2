@@ -44,7 +44,7 @@ SUBGROUPING            = YES
 # Build related configuration options
 #---------------------------------------------------------------------------
 EXTRACT_ALL            = NO
-EXTRACT_PRIVATE        = NO
+EXTRACT_PRIVATE        = YES
 EXTRACT_STATIC         = YES
 EXTRACT_LOCAL_CLASSES  = YES
 EXTRACT_LOCAL_METHODS  = NO
@@ -59,7 +59,7 @@ SHOW_INCLUDE_FILES     = YES
 INLINE_INFO            = YES
 SORT_MEMBER_DOCS       = YES
 SORT_BRIEF_DOCS        = NO
-SORT_BY_SCOPE_NAME     = YES
+SORT_BY_SCOPE_NAME     = NO
 GENERATE_TODOLIST      = YES
 GENERATE_TESTLIST      = YES
 GENERATE_BUGLIST       = YES
@@ -123,7 +123,8 @@ FILE_PATTERNS          = *.c \
                          *.PHP3 \
                          *.M \
                          *.MM \
-                         *.PY
+                         *.PY \
+                         *.tcc
 RECURSIVE              = YES
 EXCLUDE                = /home/jwulp/work/mCRL2-holidays/MCRL2/trunk/src/squadt/libraries/xml2pp/test/
 EXCLUDE_SYMLINKS       = NO

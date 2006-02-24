@@ -1,4 +1,4 @@
-project xml_text_reader
+project text_reader
     : source-location
        ../source
     : build-dir
@@ -11,9 +11,9 @@ project xml_text_reader
 
 include $(TOP)/config.jam ;
 
-obj xml_text_reader
-    : xml_text_reader.cpp
-    : <cxxflags>"`$(XML2_CONFIG) --cflags`"
+alias text_reader
+    : # no sources
+    : # no includes
     :
     : <cxxflags>"`$(XML2_CONFIG) --cflags`"
       <linkflags>"`$(XML2_CONFIG) --libs`"

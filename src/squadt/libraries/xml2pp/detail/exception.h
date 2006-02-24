@@ -3,9 +3,11 @@
 
 #include <exception>
 
+#include <boost/format.hpp>
+
 namespace xml2pp {
 
-  class exception : std::exception {
+  class exception : public std::exception {
     /* Errors :
      *
      *  - could not open input file
@@ -17,8 +19,9 @@ namespace xml2pp {
       enum type {
         unable_to_open_input_file          /// \brief Unable to read the specified input file!
        ,unable_to_open_schema_file         /// \brief Unable to read the specified schema file!
+       ,unable_to_initialise_reader        /// \brief The libXML reader could not be initialised!
        ,illegal_operation_after_first_read /// \brief Operation not supported after first read!
-       ,error_while_parsing_document             /// \brief Unexpected end of file, schema error or parse error!
+       ,error_while_parsing_document       /// \brief Unexpected end of file, schema error or parse error!
       };
 
     private:
@@ -30,6 +33,8 @@ namespace xml2pp {
       /** \brief Constructor */
       inline exception(type t);
 
+      inline const char* what() const throw ();
+
       inline ~exception() throw ();
   };
 
@@ -37,6 +42,10 @@ namespace xml2pp {
   }
 
   inline exception::~exception() throw () {
+  }
+
+  inline const char* exception::what() const throw () {
+    return (str(boost::format("Fatal : %u\n") % (unsigned int) _type).c_str());
   }
 }
 
