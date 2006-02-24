@@ -100,10 +100,9 @@ void Visualizer::positionClusters()
 
   // compute the cluster height that results in a picture with a "nice" aspect
   // ratio
-  int ratio = roundToInt( 10.0 * lts->getInitialState()->getCluster()->getSize()
-      / ( lts->getNumberOfRanks() - 1 ) );
-  
-  defaultVisSettings.clusterHeight = 0.4f * ratio ;
+  defaultVisSettings.clusterHeight = 4.0f *
+    lts->getInitialState()->getCluster()->getSize() / ( lts->getNumberOfRanks()
+	- 1 );
   visSettings.clusterHeight = defaultVisSettings.clusterHeight;
   
   refreshDisplayList = true;

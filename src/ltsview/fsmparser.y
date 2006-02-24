@@ -71,11 +71,11 @@ param :
 	      (ATerm)$1, (ATerm)typeId ) )
 	  }
 	|
-	FANIN cardinality type_name type_values
+	FANIN cardinality type_def_ignore
 	|
-	FANOUT cardinality type_name type_values
+	FANOUT cardinality type_def_ignore
 	|
-	NODENR cardinality type_name type_values
+	NODENR cardinality type_def_ignore
 	;
 
 cardinality :
@@ -115,6 +115,25 @@ type_value :
 	QUOTED
 	  { typeValues = ATinsert( typeValues, (ATerm)ATmakeAppl2(
 	      const_ATvalue, (ATerm)$1, (ATerm)ATmakeInt( ATgetLength( typeValues ) ) ) ) }
+	;
+
+type_def_ignore : 
+	type_name_ignore 
+	type_values_ignore
+	;
+
+type_name_ignore :
+	/* empty */
+	| ID
+	;
+
+type_values_ignore :
+	/* empty */
+	| type_values_ignore type_value_ignore
+	;
+
+type_value_ignore :
+	QUOTED
 	;
 
 // ----------- Section containing the states ---------
