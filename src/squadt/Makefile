@@ -132,9 +132,10 @@ endif
 
 clean:
 #	@cd build; $(BJAM) --v2 --clean-all
-	$(RM) -rf *.o $(TARGETS) $(TEST_TARGETS) settings.h utility/*.o utility/relocator examples/tool_catalog core dependencies bin
+	$(RM) -rf *.o $(TARGETS) $(TEST_TARGETS) core dependencies bin
 
 distclean: clean
+	$(RM) settings.h examples/tool_catalog
 
 settings.h:
 	$(error Please (re)configure your source tree!)

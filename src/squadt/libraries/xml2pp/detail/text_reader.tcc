@@ -6,7 +6,7 @@
 namespace xml2pp {
 
   /**
-   * @param n[in] the name of a file
+   * @param[in] n the name of a file
    **/
   template < typename T >
   inline text_reader::file_name< T >::file_name(const T& n) : name(n) {
