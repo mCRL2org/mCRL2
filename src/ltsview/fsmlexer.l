@@ -13,7 +13,7 @@ void processNumber();
 %}
 %option nounput
 Quoted	   \"[^\"]*\"
-Id         [a-zA-Z\_][a-zA-Z0-9\_\-\']*
+Id         [a-zA-Z\_][a-zA-Z0-9\_\-\'@]*
 Number     [0]|([1-9][0-9]*) 
 
 %%
