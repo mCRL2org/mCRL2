@@ -17,7 +17,7 @@ endif
 
 LDFLAGS                        = $(LIBXML2_LDFLAGS)
 
-LIBXML2_OBJECTS                = xml_text_reader.o project_manager.o tool_manager.o tool.o specification.o \
+LIBXML2_OBJECTS                = text_reader.o project_manager.o tool_manager.o tool.o specification.o \
 				 project_manager_tester tool_manager_tester
 
 BOOST_OBJECTS                  = gui_project_overview.o tool_manager.o project_manager.o gui_specification_properties.o \
@@ -29,8 +29,8 @@ WX_OBJECTS                     = squadt.o gui_project_overview.o gui_new_specifi
 WX_LIBRARIES                  := $(filter-out -mthreads,$(shell $(WX_CONFIG) --libs core base adv net))
 endif
 
-PROJECT_MANAGER_OBJECTS        = project_manager.o exception.o settings_manager.o specification.o xml_text_reader.o
-TOOL_MANAGER_OBJECTS           = tool_manager.o exception.o settings_manager.o tool.o xml_text_reader.o
+PROJECT_MANAGER_OBJECTS        = project_manager.o exception.o settings_manager.o specification.o text_reader.o
+TOOL_MANAGER_OBJECTS           = tool_manager.o exception.o settings_manager.o tool.o text_reader.o
 TOOL_EXECUTOR_OBJECTS          = tool_executor.o exception.o process.o
 GUI_OBJECTS                    = squadt.o gui_project_overview.o gui_new_specification.o gui_specification_properties.o \
 				 $(sort $(TOOL_EXECUTOR_OBJECTS) $(PROJECT_MANAGER_OBJECTS) $(TOOL_MANAGER_OBJECTS)) \
@@ -82,8 +82,8 @@ md5.o:
 	$(CXX) $(CPPFLAGS) $(CXXFLAGS) -fPIC -c libraries/md5pp/source/md5.cpp -o md5.o
 md5pp.o:
 	$(CXX) $(CPPFLAGS) $(CXXFLAGS) -fPIC -c libraries/md5pp/source/md5pp.cpp -o md5pp.o
-xml_text_reader.o:
-	$(CXX) $(CPPFLAGS) $(CXXFLAGS) -fPIC -c libraries/xml2pp/source/xml_text_reader.cpp -o xml_text_reader.o
+text_reader.o:
+	$(CXX) $(CPPFLAGS) $(CXXFLAGS) -fPIC -c libraries/xml2pp/source/text_reader.cpp -o text_reader.o
 
 tool_manager_tester: tool_manager_tester.cpp $(TOOL_MANAGER_OBJECTS)
 	$(CXX) $(CXXFLAGS) $(CPPFLAGS) $(BOOST_CPPFLAGS) $(TOOL_MANAGER_OBJECTS) $(BOOST_LDFLAGS) $(LDFLAGS) md5.o md5pp.o $(BOOST_FILESYSTEM) $(WX_LIBRARIES) -o $@ $<

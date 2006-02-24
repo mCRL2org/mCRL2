@@ -8,7 +8,7 @@ import testing ;
 unit-test basic_messenger_test :
         basic_messenger_test.cpp
         /libraries/transport//transport
-        /libraries/xml2pp//xml_text_reader
+        /libraries/xml2pp//text_reader
         /boost/thread//boost_thread
         /boost/test//boost_unit_test_framework ;
 

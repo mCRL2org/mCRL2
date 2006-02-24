@@ -7,7 +7,7 @@
 #include <ostream>
 #include <sstream>
 
-#include <xml2pp/xml_text_reader.h>
+#include <xml2pp/detail/text_reader.tcc>
 
 namespace sip {
 

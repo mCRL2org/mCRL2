@@ -1,6 +1,6 @@
 #include <iostream>
 
-#include <xml2pp/xml_text_reader.h>
+#include <xml2pp/detail/text_reader.tcc>
 
 #include "tool.h"
 

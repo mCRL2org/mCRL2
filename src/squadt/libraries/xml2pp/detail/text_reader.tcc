@@ -1,3 +1,6 @@
+#ifndef XML2PP_TEXT_READER_TCC
+#define XML2PP_TEXT_READER_TCC
+
 #include <xml2pp/text_reader.h>
 
 namespace xml2pp {
@@ -212,4 +215,5 @@ namespace xml2pp {
     while (1);
   }
 }
+#endif
 

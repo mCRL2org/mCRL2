@@ -1,7 +1,7 @@
 #include <algorithm>
 #include <ostream>
 
-#include <xml2pp/xml_text_reader.h>
+#include <xml2pp/text_reader.h>
 
 #include <sip/detail/report.h>
 #include <sip/detail/exception.h>

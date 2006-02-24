@@ -24,7 +24,7 @@ lib sip_common
       report.cpp
       display_layout.cpp
     :
-    : <library>/libraries/xml2pp//xml_text_reader
+    : <library>/libraries/xml2pp//text_reader
     ;
 
 lib sipc

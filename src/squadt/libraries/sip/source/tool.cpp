@@ -1,6 +1,6 @@
 #include <boost/ref.hpp>
 
-#include <xml2pp/xml_text_reader.h>
+#include <xml2pp/text_reader.h>
 
 #include <sip/tool.h>
 #include <sip/detail/message.h>

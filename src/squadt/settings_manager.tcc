@@ -1,3 +1,6 @@
+#ifndef SETTINGS_MANAGER_TCC
+#define SETTINGS_MANAGER_TCC
+
 #include <iostream>
 #include <cstdio>
 
@@ -135,4 +138,5 @@ namespace squadt {
     return ((path(p1) / path(p2)).native_file_string());
   }
 }
+#endif
 
