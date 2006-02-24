@@ -21,7 +21,7 @@ LIBXML2_OBJECTS                = xml_text_reader.o project_manager.o tool_manage
 				 project_manager_tester tool_manager_tester
 
 BOOST_OBJECTS                  = gui_project_overview.o tool_manager.o project_manager.o gui_specification_properties.o \
-				 specification.o
+				 specification.o settings_manager.o
 
 ifdef WX_CONFIG
 WX_OBJECTS                     = squadt.o gui_project_overview.o gui_new_specification.o gui_specification_properties.o \
@@ -29,9 +29,9 @@ WX_OBJECTS                     = squadt.o gui_project_overview.o gui_new_specifi
 WX_LIBRARIES                  := $(filter-out -mthreads,$(shell $(WX_CONFIG) --libs core base adv net))
 endif
 
-PROJECT_MANAGER_OBJECTS        = project_manager.o specification.o xml_text_reader.o
-TOOL_MANAGER_OBJECTS           = tool_manager.o tool.o xml_text_reader.o
-TOOL_EXECUTOR_OBJECTS          = tool_executor.o process.o
+PROJECT_MANAGER_OBJECTS        = project_manager.o exception.o settings_manager.o specification.o xml_text_reader.o
+TOOL_MANAGER_OBJECTS           = tool_manager.o exception.o settings_manager.o tool.o xml_text_reader.o
+TOOL_EXECUTOR_OBJECTS          = tool_executor.o exception.o process.o
 GUI_OBJECTS                    = squadt.o gui_project_overview.o gui_new_specification.o gui_specification_properties.o \
 				 $(sort $(TOOL_EXECUTOR_OBJECTS) $(PROJECT_MANAGER_OBJECTS) $(TOOL_MANAGER_OBJECTS)) \
 				 gui_resources.o logger.o

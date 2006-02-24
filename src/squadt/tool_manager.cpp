@@ -68,7 +68,7 @@ namespace squadt {
   }
 
   inline bool ToolManager::Read(const std::string& file_name) {
-    xml2pp::text_reader reader((const char*) file_name.c_str()
+    xml2pp::text_reader reader(file_name.c_str()
        XML2PP_SCHEMA(_settings_manager.path_to_schemas(append_schema_suffix(settings_manager::tool_catalog_base_name)).c_str()));
  
     bool return_value = true;
