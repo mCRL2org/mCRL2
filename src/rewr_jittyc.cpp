@@ -1141,12 +1141,12 @@ static ATermList create_strategy(ATermList rules, int opid)
 		{
 			if ( ATgetArity(ATgetAFun(ATAelementAt(ATLgetFirst(rules),2))) == arity + 1 )
 			{
-				ATermAppl cond = ATAelementAt(ATLgetFirst(rules),1);
+				ATerm cond = ATelementAt(ATLgetFirst(rules),1);
 				ATermAppl pars = ATAelementAt(ATLgetFirst(rules),2); // arguments of lhs
 				ATermList t = ATmakeList0();
 				ATermList vars = ATmakeList1((ATerm) ATconcat(
 							get_doubles(ATelementAt(ATLgetFirst(rules),3),t),
-							(gsIsNil(cond)?ATmakeList0():get_vars((ATerm) cond))
+							((ATisAppl(cond) && gsIsNil((ATermAppl) cond))?ATmakeList0():get_vars(cond))
 							)); // List of variables occurring in this each argument of the lhs (except the first element which contains variables from the condition and variables which occur more than once in the result)
 
 //gsfprintf(stderr,"rule: %T\n",ATgetFirst(rules));
