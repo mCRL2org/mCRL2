@@ -1,3 +1,54 @@
+% Specification of a system for lifting trucks
+% Based on the original specification in muCRL by Arno Wouters and Pang Jun, 12
+% February 2001
+% Translated to mCRL2 by Bas Ploeger
+%
+% Main modification:
+% 1) The sync message is used to finish the startup phase in old specification,
+%    this is removed.
+% 2) Using move(n,s) to replace move_down(n), move_up(n), move_not(n)
+%
+% This is the final specification used for model checking.
+%
+% In this specification the following problems are solved (or avoided):
+%
+% (1) Station 2 sends startup message before relay between 1 and 2 closed.
+%     Solved by adding a sync action after closing the relay. This models
+%     a delay (before station 2 sends its startup message) which is long
+%     enough to be sure that the relay is closed
+% (2) Errors resulting from more than one setref button pressed in the initial
+%     phase. This made impossible by adding a Setref_monitor process.
+%     This models the situation that the operators conform to the instruction 
+%     in the manual which states that they must assure sure that the system 
+%     is started from one lift only.
+% (3) The problem that releasing a button at the wrong moment may lead to a 
+%     state in which all stations are UP or DOWN but no one is active.
+%     This is solved as follows: after release the station waits until it
+%     is its turn to use the bus before it becomes passive
+% (4) The problem that pressing two up buttons or two down buttons at different
+%     lifts may result in one lift remaining motion less while the others move 
+%     (if one button is released at the wrong moment). This is solved as follows:
+%     after a button being pressed the station waits till it is turn to
+%     use the bus before it becomes active and it becomes active only
+%     if it is sure that there is no other station active (i.e. if the
+%     message it received from the station just before it was a STANDBY message).
+%  
+% The real system measures the height of the lifts and broadcasts these. This is
+% not taken into account in this specification.
+%
+% This specification models two kinds of movements:
+% - movement of all lifts together
+% - movement of a single lift
+% The real system has, in addition, the possibility to move an axis. This
+% is not modelled in this specification.
+%
+% For more information, please refer to the following publication:
+%
+% J.F. Groote, J. Pang and A.G. Wouters. Analysis of a distributed system
+% for lifting trucks. The Journal of Logic and Algebraic Programming
+% 55:21-56, 2003. This article also appeared as Technical report
+% SEN-R0111, CWI, Amsterdam, 2001.
+
 sort  State = struct STANDBY | STOP | STARTUP | UP | DOWN | SYNC;
 
 cons  N: Pos;

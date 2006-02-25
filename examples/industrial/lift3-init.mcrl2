@@ -1,3 +1,28 @@
+% Specification of a system for lifting trucks
+% Based on the original specification in muCRL by Arno Wouters and Pang Jun, 13
+% November 2000
+% Translated to mCRL2 by Bas Ploeger
+%
+% This is the initial specification of the system in which no problems have been
+% solved.
+%
+% The real system measures the height of the lifts and broadcasts these. This is
+% not taken into account in this specification.
+%
+% This specification models:
+% - movement of all lifts together
+% The real system has, in addition, two other possibilities which
+% are not modelled in the present specification
+% - movement of a single lift
+% - movement of an axis
+%
+% For more information, please refer to the following publication:
+%
+% J.F. Groote, J. Pang and A.G. Wouters. Analysis of a distributed system
+% for lifting trucks. The Journal of Logic and Algebraic Programming
+% 55:21-56, 2003. This article also appeared as Technical report
+% SEN-R0111, CWI, Amsterdam, 2001.
+
 sort  State = struct STANDBY | STOP | STARTUP | UP | DOWN | SYNC;
 
 cons  N: Pos;
