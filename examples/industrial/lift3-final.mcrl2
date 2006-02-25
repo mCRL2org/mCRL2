@@ -42,9 +42,11 @@ act   r_stob,s_stob,c_stob: Message # Nat;
       r_btos,s_btos,c_btos: Message # Nat;
       r_open_relay ,s_open_relay ,c_open_relay : Nat;
       r_close_relay,s_close_relay,c_close_relay: Nat;
-      protocol_error: Nat;
-      setref,up,down,released: Nat;
+      s_init,r_init,c_init: Nat;
+      setref,setrefup,setrefdown,up,down,unlockup,unlockdown,released: Nat;
       move: Nat # State;
+      s_sync,r_sync,c_sync;
+      s_stable,r_stable,c_stable;
 
 proc  Bus(R:List(Nat)) =
 	sum msg:Message,a:Nat . 
@@ -57,9 +59,10 @@ proc  Bus(R:List(Nat)) =
 proc  Deliver(m:Message, R:List(Nat), A:List(Nat) ) =
 	sum a:Nat .
 	(
-	  s_btos(m,a).
-	  ( (inl(a,A)) -> 
-	      ( (remove(a,A) == []) -> Bus(R) , Deliver(m,R,remove(a,A)) ) )
+	  ( (inl(a,A)) ->
+	    s_btos(m,a).
+	    ( (remove(a,A) == []) -> Bus(R) , Deliver(m,R,remove(a,A)) )
+	  )
 	  +
 	  r_open_relay(a).Deliver(m,remove(a,R),A)
 	  +
@@ -67,77 +70,102 @@ proc  Deliver(m:Message, R:List(Nat), A:List(Nat) ) =
 	);
 
 proc  Lift0(n:Nat) =
-	setref(n).s_close_relay(n).s_stob(mes(1,STARTUP),n).s_open_relay(n).
+	s_init(n).s_close_relay(n).s_stob(mes(1,STARTUP),n).s_open_relay(n).
+	s_sync.
 	( sum msg:Message . 
 	    r_btos(msg,n).
 	    ( (state(msg) == STARTUP) ->
-		s_stob(mes(1,SYNC),n).s_stob(mes(1,STANDBY),n).Lift2(n,1,address(msg),STANDBY)
-	      , protocol_error(n).Lift2(n,1,1,STOP)
+		s_stable.s_stob(mes(1,STANDBY),n).
+		Lift2(n,1,address(msg),STANDBY,false)
 	    )
 	)
 	+
 	sum msg:Message . 
 	  r_btos(msg,n).
 	  ( (state(msg) == STARTUP) ->
-	      s_close_relay(n).s_stob(mes(S(address(msg)),STARTUP),n).
-	      Lift1(n,S(address(msg)),S(address(msg)))
-	    , protocol_error(n).Lift2(n,1,1,STOP)
+	      s_close_relay(n).
+	      ( (address(msg) == 1) ->
+		  r_sync.s_stob(mes(2,STARTUP),n).
+		  Lift1(n,S(address(msg)),S(address(msg)))
+	      , s_stob(mes(S(address(msg)),STARTUP),n).
+		Lift1(n,S(address(msg)),S(address(msg)))
+	      )
 	  );
 
 proc  Lift1(n:Nat,m:Nat,nos:Nat) =
 	sum msg:Message . 
           r_btos(msg,n).
 	  ( (state(msg) == STARTUP) -> Lift1(n,m,address(msg))
-	  , ( (state(msg) == SYNC) -> Lift2(n,m,nos,STANDBY)
-	    , protocol_error(n).Lift2(n,m,1,STOP) 
+	  , ( (state(msg) == STANDBY) -> 
+		( (address(msg) == P(m)) ->
+		    s_stob(mes(m,STANDBY),n).Lift2(n,m,nos,STANDBY,false)
+		, Lift2(n,m,nos,STANDBY,false)
+		)
 	    )
 	  );
 
-proc  Lift2(n:Nat,m:Nat,nos:Nat,s:State) =
+proc  Lift2(n:Nat,m:Nat,nos:Nat,s:State,c:Bool) =
 	(s == STANDBY) ->
 	  ( 
-	    up(n).Lift3(n,m,nos,UP,nos)
+	    up(n).Lift2(n,m,nos,UP,true)
 	    +
-	    down(n).Lift3(n,m,nos,DOWN,nos)
+	    down(n).Lift2(n,m,nos,DOWN,true)
 	  )
 	+
 	sum msg:Message .
 	  r_btos(msg,n).
-	  ( (state(msg) == SYNC) -> move(n,s).Lift2(n,m,nos,s)
+	  ( (state(msg) == SYNC) -> move(n,s).Lift2(n,m,nos,s,c)
 	  , ( (address(msg) == P(m)) ->
-		s_stob(mes(m,state(msg)),n).Lift2(n,m,nos,state(msg))
-	    , Lift2(n,m,nos,state(msg))
+	      ( c ->
+		( (state(msg) == STANDBY) ->
+		  s_stob(mes(m,s),n).Lift3(n,m,nos,s,nos)
+		, s_stob(mes(m,state(msg)),n).Lift2(n,m,nos,state(msg),false)
+		)
+	      , s_stob(mes(m,state(msg)),n).Lift2(n,m,nos,state(msg),c)
+	      )
+	    , ( c ->
+		Lift2(n,m,nos,s,c)
+	      , Lift2(n,m,nos,state(msg),c)
+	      )
 	    )
 	  );
 	  
 proc  Lift3(n:Nat,m:Nat,nos:Nat,s:State,count:Nat) =
-	released(n).Lift2(n,m,nos,STANDBY)
+	(s != STANDBY ) -> released(n).Lift3(n,m,nos,STANDBY,nos)
 	+
 	sum msg:Message.
 	  r_btos(msg,n).
-	  ( (state(msg) == SYNC) -> move(n,s).Lift3(n,m,nos,s,count)
-	  , ( (address(msg) == P(m)) -> 
-		( (state(msg) == s && count == 2) ->
-		    s_stob(mes(m,SYNC),n).move(n,s).s_stob(mes(m,s),n).
-		    Lift3(n,m,nos,s,nos)
-		, s_stob(mes(m,s),n).Lift3(n,m,nos,s,nos)
-		)
-	    , ( (state(msg) == s) -> Lift3(n,m,nos,s,P(count))
-	      , Lift3(n,m,nos,s,count)
+	  %move(n,s).Lift3(n,m,nos,s,count)
+	  ( (address(msg) == P(m)) -> 
+	    ( (s == STANDBY) ->
+	      s_stob(mes(m,STANDBY),n).Lift2(n,m,nos,STANDBY,false)
+	    , ( (state(msg) == s && count == 2) ->
+		s_stob(mes(m,SYNC),n).move(n,s).s_stob(mes(m,s),n).
+		Lift3(n,m,nos,s,nos)
+	      , s_stob(mes(m,s),n).Lift3(n,m,nos,s,nos)
 	      )
+	    )
+	  , ( (state(msg) == s) -> 
+	      Lift3(n,m,nos,s,P(count))
+	    , Lift3(n,m,nos,s,count)
 	    )
 	  );
 
+proc  Setref_monitor =
+	sum n:Nat . r_init(n).r_stable.Setref_monitor;
+
 init  hide
-      ( { c_stob,c_btos,c_open_relay,c_close_relay },
+      ( { c_stob,c_btos,c_open_relay,c_close_relay,c_sync,c_init,c_stable },
 	allow
-	( { c_stob,c_btos,c_open_relay,c_close_relay,protocol_error,
-	    setref,up,down,released, move },
+	( { c_stob,c_btos,c_open_relay,c_close_relay,c_sync,c_init,c_stable,
+	    setref,setrefup,setrefdown,up,down,unlockup,unlockdown,released,
+	    move },
 	  comm
 	  ( { s_stob|r_stob->c_stob, s_btos|r_btos->c_btos,
 	      s_open_relay|r_open_relay->c_open_relay,
-	      s_close_relay|r_close_relay->c_close_relay },
-	    Bus([]) || Lift0(1) || Lift0(2) || Lift0(3)
+	      s_close_relay|r_close_relay->c_close_relay, s_sync|r_sync->c_sync,
+	      s_init|r_init->c_init, s_stable|r_stable->c_stable },
+	    Bus([]) || Lift0(1) || Lift0(2) || Lift0(3) || Setref_monitor
 	  )
 	)
       );
