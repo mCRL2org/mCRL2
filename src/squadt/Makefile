@@ -9,7 +9,7 @@ ifeq ($(HOST_OS),MINGW)
  CXXFLAGS                      = -O3
 endif
 
-CPPFLAGS=-Ilibraries -I../src/boost
+CPPFLAGS=-Ilibraries -I../boost
 
 ifeq ($(findstring -DNDEBUG,$(CPPFLAGS)),)
  CXXFLAGS                     += -g -Wall -W
@@ -37,7 +37,7 @@ GUI_OBJECTS                    = squadt.o gui_project_overview.o gui_new_specifi
 				 gui_resources.o logger.o
 OBJECTS                        = $(sort $(GUI_OBJECTS) $(PROJECT_MANAGER_OBJECTS) $(TOOL_MANAGER_OBJECTS) $(TOOL_EXECUTOR_OBJECTS))
 
-TEST_TARGETS                   = project_manager_tester tool_manager_tester tests/messenger/connection_test
+TEST_TARGETS                   = project_manager_tester tool_manager_tester
 TARGETS                        = squadt
 
 .PHONY: all install clean distclean test strip
@@ -94,9 +94,6 @@ squadt: $(GUI_OBJECTS) md5.o md5pp.o settings.h
 
 %.o: %.cpp
 	$(CXX) -c $(CXXFLAGS) $(CPPFLAGS) $< -o $@
-
-messenger.o: messenger.cpp
-	$(CXX) -c $(CXXFLAGS) $(CPPFLAGS) -I../boost/include $< -o $@
 
 $(OBJECTS) $(TARGETS): Makefile $(CONFIG)
 
