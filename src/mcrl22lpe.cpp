@@ -54,8 +54,9 @@ int main(int argc, char *argv[])
   bool opt_nofreevars = false;
   bool opt_check_only = false;
   bool opt_nosumelm = false;
+  bool opt_nodeltaelimination = false;
   t_phase opt_end_phase = phNone;
-  #define ShortOptions   "0123cnrwbaofep:hqvdm"
+  #define ShortOptions   "0123cnrwbaofep:hqvdmg"
   #define VersionOption  CHAR_MAX + 1
   struct option LongOptions[] = {
     { "stack",       no_argument,       NULL, '0' },
@@ -70,6 +71,8 @@ int main(int argc, char *argv[])
     { "statenames",  no_argument,       NULL, 'a' },
     { "no-rewrite",  no_argument,       NULL, 'o' },
     { "no-freevars", no_argument,       NULL, 'f' },
+    { "no-sumelm",   no_argument,       NULL, 'm' },
+    { "no-deltaelm", no_argument,       NULL, 'g' },
     { "check-only",  no_argument,       NULL, 'e' },
     { "end-phase",   required_argument, NULL, 'p' },
     { "help",        no_argument,       NULL, 'h' },
@@ -77,7 +80,6 @@ int main(int argc, char *argv[])
     { "quiet",       no_argument,       NULL, 'q' },
     { "verbose",     no_argument,       NULL, 'v' },
     { "debug",       no_argument,       NULL, 'd' },
-    { "no-sumelm",   no_argument,       NULL, 'm' },
     { 0, 0, 0, 0 }
   };
   int Option;
@@ -146,6 +148,9 @@ int main(int argc, char *argv[])
         break;
       case 'm': /* no-sumelm */
         opt_nosumelm = true;
+        break;
+      case 'g': /* no-deltaelm */
+        opt_nodeltaelimination = true;
         break;
       case 'p': /* end-phase */
         if (strcmp(optarg, "pa") == 0) {
@@ -241,6 +246,7 @@ int main(int argc, char *argv[])
   lin_options.norewrite = opt_norewrite;
   lin_options.nofreevars = opt_nofreevars;
   lin_options.nosumelm = opt_nosumelm;
+  lin_options.nodeltaelimination = opt_nodeltaelimination;
 
   //linearise infilename with options lin_options
   ATermAppl result =
@@ -437,11 +443,12 @@ void PrintHelp(char *Name)
     "                        useful when the rewrite system does not terminate\n"
     "  -f, --no-freevars     instantiate don't care values with arbitrary constants,\n"
     "                        instead of modelling them by free variables\n"
+    "  -m, --no-sumelm       avoid applying sum elimination in parallel composition\n"
+    "  -g, --no-deltaelm     avoid removing spurious delta summands\n"
     "  -e, --check-only      check syntax and static semantics; do not linearise\n"
     "  -p, --end-phase=PHASE stop linearisation after phase PHASE and output the\n"
     "                        result; PHASE can be 'pa' (parse), 'tc' (type check),\n"
     "                        'ar' (alphabet reduction) or 'di' (data implementation)\n"
-    "  -m, --no-sumelm       avoid applying sum elimination in parallel composition\n"
     "  -h, --help            display this help and terminate\n"
     "      --version         display version information and terminate\n"
     "  -q, --quiet           do not display warning messages\n"

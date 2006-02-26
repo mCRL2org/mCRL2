@@ -44,6 +44,7 @@ static bool nosumelm;
 static bool statenames;
 static bool mayrewrite;
 static bool allowFreeDataVariablesInProcesses;
+static bool nodeltaelimination;
 
 static void stop(void)
 { /* in debug mode allow a debugger to trace the problem,
@@ -286,6 +287,11 @@ static int gsIsDataExprOr(ATermAppl t)
 static int gsIsDataExprTrue(ATermAppl t)
 {
   return t==gsMakeOpIdTrue();
+}
+
+static int gsIsDataExprFalse(ATermAppl t)
+{
+  return t==gsMakeOpIdFalse();
 }
 
 static int strequal(char *s1,char *s2)
@@ -5825,9 +5831,24 @@ static int gsIsDataExprEquality(ATermAppl t)
 }
 
 
-
 static int implies_condition(ATermAppl c1, ATermAppl c2)
 {
+  if (gsIsDataExprTrue(c2))
+  { return 1;
+  }
+
+  if (gsIsDataExprFalse(c1))
+  { return 1;
+  }
+
+  if (gsIsDataExprTrue(c1))
+  { return 0;
+  }
+
+  if (gsIsDataExprFalse(c2))
+  { return 0;
+  }
+
   if (c1==c2)
   { return 1;
   }
@@ -5864,28 +5885,17 @@ static int implies_condition(ATermAppl c1, ATermAppl c2)
 static ATermList insert_timed_delta_summand(
                     ATermList l, 
                     ATermAppl s)
-{ 
+{ /* The delta summands are put in front.
+     The sequence of summands is maintained as
+     good as possible, to eliminate summands as
+     quickly as possible */ 
   assert(linGetMultiAction(s)==gsMakeDelta());
   ATermList result=ATempty;
 
-  /* first remove superfluous sum operators from s */
-  
   ATermList sumvars=linGetSumVars(s);
   ATermAppl cond=linGetCondition(s);
   ATermAppl multiaction=linGetMultiAction(s);
   ATermAppl actiontime=linGetActionTime(s);
-
-  ATermList newsumvars=ATempty;
-  for( ; sumvars!=ATempty ; sumvars=ATgetNext(sumvars))
-  { ATermAppl sumvar=ATAgetFirst(sumvars);
-    if (occursinterm(sumvar,cond) ||
-        occursinmultiaction(sumvar,multiaction) ||
-        ((actiontime!=gsMakeNil()) && occursinterm(sumvar,actiontime)))
-    { newsumvars=ATinsertA(newsumvars,sumvar);
-    }
-  }
-  
-  sumvars=newsumvars;
 
   for( ; l!=ATempty ; l=ATgetNext(l) )
   { ATermAppl summand=ATAgetFirst(l);
@@ -5893,8 +5903,13 @@ static ATermList insert_timed_delta_summand(
     if ((implies_condition(cond,cond1)) &&
         ((actiontime==linGetActionTime(summand))||
          (linGetActionTime(summand)==gsMakeNil())))
-    { 
-      return ATconcat(l,result);
+    { /* put the summand that was effective in removing
+         this delta summand to the front, such that it
+         is encountered early later on, removing a next
+         delta summand */
+      return ATinsertA(
+               ATconcat(ATreverse(result),ATgetNext(l)),
+               summand);
     }
     if ((linGetMultiAction(summand)==gsMakeDelta()) &&
                 implies_condition(cond1,cond) &&
@@ -5906,7 +5921,7 @@ static ATermList insert_timed_delta_summand(
     { result=ATinsertA(result,summand);
     }
   }
-  result=ATinsertA(result,
+  result=ATinsertA(ATreverse(result),
                    gsMakeLPESummand(
                       sumvars,
                       cond,
@@ -5973,9 +5988,14 @@ static int allow(ATermList allowlist, ATermAppl multiaction)
 static ATermAppl allowcomposition(ATermList allowlist, ATermAppl ips)
 {
   ATermList resultdeltasumlist=ATempty;
+  ATermList resultsimpledeltasumlist=ATempty;
   ATermList resultactionsumlist=ATempty;
   ATermList sourcesumlist=linGetSums(ips);
   allowlist=sortMultiActionLabels(allowlist);
+
+  gsVerboseMsg(
+          "- calculating the allow operator on %d summands\n",
+                          ATgetLength(sourcesumlist));
 
   /* First add the resulting sums in two separate lists
      one for actions, and one for delta's. The delta's 
@@ -5997,8 +6017,30 @@ static ATermAppl allowcomposition(ATermList allowlist, ATermAppl ips)
                     resultactionsumlist,
                     summand); }
     else
-    { 
-      resultdeltasumlist=ATinsertA(
+    { /* first remove free variables from sumvars */
+
+      ATermList newsumvars=ATempty;
+      for( ; sumvars!=ATempty ; sumvars=ATgetNext(sumvars))
+      { ATermAppl sumvar=ATAgetFirst(sumvars);
+        if (occursinterm(sumvar,condition) ||
+           ((actiontime!=gsMakeNil()) && occursinterm(sumvar,actiontime)))
+        { newsumvars=ATinsertA(newsumvars,sumvar);
+        }
+      }
+      sumvars=newsumvars;
+
+      if (gsIsDataExprTrue(condition))
+      { resultsimpledeltasumlist=ATinsertA(
+                    resultsimpledeltasumlist,
+                      gsMakeLPESummand(
+                             sumvars,
+                             condition,
+                             gsMakeDelta(),
+                             actiontime,
+                             nextstate));
+      }
+      else
+      { resultdeltasumlist=ATinsertA(
                     resultdeltasumlist,
                       gsMakeLPESummand(
                              sumvars,
@@ -6006,16 +6048,24 @@ static ATermAppl allowcomposition(ATermList allowlist, ATermAppl ips)
                              gsMakeDelta(),
                              actiontime,
                              nextstate));
+      }
     }
   }
 
   ATermList resultsumlist=resultactionsumlist;
+  resultdeltasumlist=ATconcat(resultsimpledeltasumlist,resultdeltasumlist);
 
-  for ( ; resultdeltasumlist!=ATempty ; 
+  if (nodeltaelimination)
+  { resultsumlist=ATconcat(resultactionsumlist,resultdeltasumlist); 
+  }
+  else
+  { for ( ; resultdeltasumlist!=ATempty ; 
              resultdeltasumlist=ATgetNext(resultdeltasumlist))    
-  { resultsumlist=insert_timed_delta_summand(
+    { 
+      resultsumlist=insert_timed_delta_summand(
                       resultsumlist,
-                      ATAgetFirst(resultdeltasumlist));
+                      ATAgetFirst(resultdeltasumlist)); 
+    } 
   }
   return linMakeInitProcSpec(
              linGetInit(ips),linGetParameters(ips),resultsumlist);
@@ -6092,12 +6142,18 @@ static ATermAppl encapcomposition(ATermList encaplist , ATermAppl ips)
   }
 
   ATermList resultsumlist=resultactionsumlist;
-  for( ; resultdeltasumlist!=ATempty ; 
-         resultdeltasumlist=ATgetNext(resultdeltasumlist))
-  { 
-      resultsumlist=insert_timed_delta_summand(
-                    resultsumlist,
-                    ATAgetFirst(resultdeltasumlist));
+
+  if (nodeltaelimination)
+  { resultsumlist=ATconcat(resultdeltasumlist,resultsumlist);
+  }
+  else
+  {
+    for( ; resultdeltasumlist!=ATempty ; 
+             resultdeltasumlist=ATgetNext(resultdeltasumlist))
+    { resultsumlist=insert_timed_delta_summand(
+                      resultsumlist,
+                      ATAgetFirst(resultdeltasumlist));
+    }
   }
   return linMakeInitProcSpec(
              linGetInit(ips),linGetParameters(ips),resultsumlist);
@@ -6240,28 +6296,6 @@ static ATermList construct_renaming(
 }
 
 /**************** communication operator composition ****************/
-
-/* static ATermList encap(ATermList encaplist, ATermList multiaction)
-{ int actioninset=0;
-  if (gsIsDelta(multiaction))
-  { return delta; }
- 
-  for (ATermList walker=multiaction ;
-            walker!=ATempty ; walker=ATgetNext(walker) )
-  { ATermAppl action=ATAgetFirst(walker);
-    if (isinset(ATAgetArgument(ATAgetArgument(action,0),0),encaplist))
-    { actioninset=1;
-      break;
-    }
-  }
-            
-  / * reverse the actionlist to maintain the ordering * /
-  if (actioninset)
-  { return delta;         
-  }                       
-  return multiaction;
-}
-*/
 
 static ATermList insertActionLabel(
                       ATermAppl action, 
@@ -6692,6 +6726,9 @@ static ATermAppl communicationcomposition(
 
   /* first we sort the multiactions in communications */
 
+  gsVerboseMsg("- calculating the communication operator on %d summands",
+                        ATgetLength(linGetSums(ips)));
+
   ATermList resultingCommunications=ATempty;
   for( ; communications!=ATempty ; communications=ATgetNext(communications))
   { ATermAppl commExpr=ATAgetFirst(communications);
@@ -6796,6 +6833,9 @@ static ATermAppl communicationcomposition(
       }
     }
   }
+  gsVerboseMsg(" resulting in %d summands\n",
+                        ATgetLength(resultsumlist));
+
   return linMakeInitProcSpec(
              linGetInit(ips),linGetParameters(ips),resultsumlist);
 }
@@ -8018,6 +8058,7 @@ ATermAppl linearise_std(ATermAppl spec, t_lin_options lin_options)
   statenames = lin_options.statenames;
   mayrewrite = !lin_options.norewrite;
   allowFreeDataVariablesInProcesses = !lin_options.nofreevars;
+  nodeltaelimination = lin_options.nodeltaelimination;
   //initialise local data structures
   initialize_data();
   specificationbasictype *spec_int = create_spec(spec);

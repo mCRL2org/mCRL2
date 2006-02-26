@@ -18,6 +18,7 @@ typedef struct {
   bool norewrite;
   bool nofreevars;
   bool nosumelm;
+  bool nodeltaelimination;
 } t_lin_options;
 //t_lin_options represents the options of the lineariser
 
