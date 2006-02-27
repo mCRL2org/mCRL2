@@ -48,6 +48,7 @@ po::variables_map vm;
 class ConstelmObj
 {
 private:
+  ATermTable                  safeguard;
   string                      p_inputfile;
   string                      p_outputfile;
   vector< data_assignment >   p_currentState;
@@ -76,7 +77,14 @@ private:
 
   //Only used by detectVar
   set<data_variable>          sum_vars;
-  
+ 
+public:
+  ConstelmObj()
+  {
+	  safeguard = ATtableCreate(10000,50);
+  }
+private:
+
   void getDatVarRec(aterm_appl t)
   {
     if(gsIsDataVarId(t) && (p_freeVarSet.find(data_variable(t).to_expr()) != p_freeVarSet.end())){
@@ -110,7 +118,7 @@ private:
   inline ATermAppl p_substitute(ATermAppl t, vector< data_assignment > &y )
   { 
     for(vector< data_assignment >::iterator i = y.begin() ; i != y.end() ; i++){
-      RWsetVariable(aterm(i->lhs()) , aterm(i->rhs()));
+      RWsetVariable(aterm(i->lhs()) ,gsToRewriteFormat(i->rhs()));
     }
     ATermAppl result = gsRewriteTerm(t);
     for(vector< data_assignment >::iterator i = y.begin() ; i != y.end() ; i++){
@@ -198,6 +206,7 @@ private:
             //            cerr << "\033[0m";
             //----------          Debug
           };
+	  ATtablePut(safeguard,aterm(p_nextState.at(index)),aterm(p_nextState.at(index)));
           p_newCurrentState.at(index) = p_nextState.at(index) ;
           p_currentState.at(index) = p_nextState.at(index);  
         } else {
@@ -210,6 +219,7 @@ private:
                 //                cerr << "\033[0m";
                 //----------          Debug
                 p_newCurrentState.at(index) = newExpression(*i) ;
+	  	ATtablePut(safeguard,aterm(p_newCurrentState.at(index)),aterm(p_newCurrentState.at(index)));
                 p_V.insert(index);
                 p_variableList.insert(p_newCurrentState.at(index).rhs());
                 differs = true;  
@@ -506,23 +516,24 @@ public:
       data_expression rebuild_condition = currentSummand->condition();
       rebuild_condition = data_expression(p_substitute(rebuild_condition, constantPP));
 
+      data_expression rebuild_time = currentSummand->time();
+      if ( currentSummand->has_time() )
+      {
+	      rebuild_time = data_expression(p_substitute(rebuild_time, constantPP));
+      }
+
       //LPE_summand(data_variable_list summation_variables, data_expression condition, 
       //            bool delta, action_list actions, data_expression time, 
       //            data_assignment_list assignments);    
       tmp = LPE_summand(currentSummand->summation_variables(), rebuild_condition, 
-        currentSummand->is_delta(), atermpp::reverse(rebuild_actions) , currentSummand->time(), 
+        currentSummand->is_delta(), atermpp::reverse(rebuild_actions) , rebuild_time, 
               atermpp::reverse(rebuildAssignments));
         rebuild_summandlist_no_cp = push_front(rebuild_summandlist_no_cp, tmp); 
     }
     
-    summand_list rebuild_summandlist2;
-    for(summand_list::iterator i = rebuild_summandlist_no_cp.begin() ; i != rebuild_summandlist_no_cp.end() ; i++){
-      rebuild_summandlist2 = push_front(rebuild_summandlist2, LPE_summand(p_substitute(*i, constantPP ))); 
-    }
-    
      set< data_variable > usedFreeVars;
      set< data_variable > foundVars;
-     for(summand_list::iterator currentSummand = rebuild_summandlist2.begin(); currentSummand != rebuild_summandlist2.end(); currentSummand++){ 
+     for(summand_list::iterator currentSummand = rebuild_summandlist_no_cp.begin(); currentSummand != rebuild_summandlist_no_cp.end(); currentSummand++){ 
        for(data_assignment_list::iterator i = currentSummand->assignments().begin(); i !=  currentSummand->assignments().end() ;i++){
          foundVars = getUsedFreeVars(aterm_appl(i->rhs()));
          for(set< data_variable >::iterator k = foundVars.begin(); k != foundVars.end(); k++){
@@ -539,7 +550,7 @@ public:
     rebuild_lpe = lpe::LPE(
       setToList(usedFreeVars),
       vectorToList(variablePPvar), 
-      rebuild_summandlist2,
+      rebuild_summandlist_no_cp,
       p_lpe.actions()
     );
      
@@ -728,7 +739,10 @@ public:
 
     for(data_assignment_list::iterator i = p_spec.initial_assignments().begin(); i != p_spec.initial_assignments().end() ; i++ ){
       p_lookupIndex[i->lhs()] = counter;
-      p_currentState.push_back(data_assignment(i->lhs(), data_expression(rewrite(i->rhs()))));
+//      p_currentState.push_back(data_assignment(i->lhs(), data_expression(rewrite(i->rhs()))));
+      data_assignment da(i->lhs(),data_expression(rewrite(i->rhs())));
+      ATtablePut(safeguard,aterm(da),aterm(da));
+      p_currentState.push_back(da);
       p_lookupDataVarIndex[counter] = i->lhs();
       counter++;
     }

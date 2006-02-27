@@ -295,13 +295,15 @@ static ATerm toInnerc(ATerm Term)
     }
     else
     {
-      ATerror("%s: Do not deal with application terms correctly\n%T\n\n",NAME,Term);
+      gsfprintf(stderr,"%s: invalid inner format term: %T\n\n",NAME,Term);
+      exit(1);
     }
   }
 
   if ( ATisEmpty((ATermList) Term) )
   {
-    ATerror("%s: invalid inner format term (%T)\n",NAME,Term);
+    gsfprintf(stderr,"%s: invalid inner format term (%T)\n",NAME,Term);
+    exit(1);
   }
 
   ATermList l=ATinsert(ATempty,ATgetFirst((ATermList)Term));
@@ -2211,7 +2213,7 @@ ATermList RewriterCompilingInnermost::rewriteInternalList(ATermList l)
 
 ATermAppl RewriterCompilingInnermost::rewrite(ATermAppl Term)
 {
-  return fromInner((ATerm) so_rewr((ATermAppl) toInnerc(toInner(Term,true))));
+  return fromRewriteFormat((ATerm) so_rewr((ATermAppl) toRewriteFormat(Term)));
 }
 
 ATerm RewriterCompilingInnermost::rewriteInternal(ATerm Term)
