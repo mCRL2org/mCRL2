@@ -22,15 +22,17 @@ namespace sip {
   /**
    * The following connection options are recognised and extracted from the command line arguments:
    *
-   *  - --sip-connect=\<scheme\>, where \<scheme\> is one of
+   *  - --si-connect=\<scheme\>, where \<scheme\> is one of
    *    - socket://\<host\>:\<port\> (for a socket connection)
-   *    - compatible (for standard input/output communication)
+   *    - traditional:// (for standard input/output communication)
    *
    * @param argc the number of command line arguments
    * @param argv a pointer to the list of command line arguments
    * \attention the specific command line options are removed, so and argc and argv are modified
+   * \return whether options were found and whether a connection is being opened with a controller
    **/
-  tool_communicator::tool_communicator(int& argc, char** argv) : current_status(status_initialising), current_capabilities(0) {
+  bool tool_communicator::activate(int& argc, char** argv) {
+    return (true);
   }
 
   tool_communicator::~tool_communicator() {
@@ -45,7 +47,7 @@ namespace sip {
     /* Await the reply */
     await_message(sip::reply_controller_capabilities);
 
-    xml2pp::text_reader reader(pop_message().to_string());
+    xml2pp::text_reader reader(pop_message().to_string().c_str());
 
     reader.read();
 

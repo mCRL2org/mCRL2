@@ -38,7 +38,7 @@ namespace sip {
       tool_communicator();
 
       /** \brief Constructor that takes controller connection arguments from the command line */
-      tool_communicator(int&, char**);
+      bool activate(int&, char**);
 
       /** \brief Default destructor */
       ~tool_communicator();
@@ -83,7 +83,7 @@ namespace sip {
   /** \pre{status is not status_initialising} */
   inline const controller_capabilities& tool_communicator::get_controller_capabilities() const {
     if (current_capabilities == 0) {
-      throw (exception(exception::controller_capabilities_unknown));
+      throw (exception(exception_identifier::controller_capabilities_unknown));
     }
 
     return (*current_capabilities);

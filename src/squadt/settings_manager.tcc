@@ -4,7 +4,7 @@
 #include <iostream>
 #include <cstdio>
 
-#include "exception.tcc"
+#include "exception.h"
 #include "settings.h"
 #include "settings_manager.h"
 
@@ -19,23 +19,22 @@ namespace squadt {
    * \throws boost::filesystem::filesystem_error if \p h, \p t or \p DATA_DIRECTORY are no valid paths
    **/
   template < typename T1, typename T2 >
-  settings_manager::settings_manager(const T1& h, const T2& u) : home_directory(bf::path(h, bf::no_check)),
+  settings_manager::settings_manager(const T1& h, const T2& u) : home_directory(h, bf::no_check),
                 user_settings_path((bf::path(h) / bf::path(u, bf::native))),
-                system_settings_path(bf::path(DATA_DIRECTORY, bf::no_check)) {
+                system_settings_path(DATA_DIRECTORY, bf::no_check) {
 
     ensure_directories_exist();
   }
 
   /**
    * @param h the users home directory
-   * @param u the path relative to the home directory where user specific settings will be stored
    *
    * \throws boost::filesystem::filesystem_error if \p h, \p t or \p DATA_DIRECTORY are no valid paths
    **/
   template < typename T >
-  settings_manager::settings_manager(const T& h) : home_directory(bf::path(h, bf::no_check)),
+  settings_manager::settings_manager(const T& h) : home_directory(h, bf::no_check),
                 user_settings_path((bf::path(h) / bf::path(default_profile_directory, bf::native))),
-                system_settings_path(bf::path(DATA_DIRECTORY)) {
+                system_settings_path(DATA_DIRECTORY, bf::no_check) {
 
     ensure_directories_exist();
   }
@@ -46,7 +45,7 @@ namespace squadt {
       bf::create_directory(user_settings_path);
     }
     else if (!is_directory(user_settings_path)) {
-      throw (exception(exception::cannot_access_user_settings_directory, user_settings_path.native_file_string()));
+      throw (exception(exception_identifier::cannot_access_user_settings_directory, user_settings_path.native_file_string()));
     }
    
     bf::path catalog_path = path_to_user_settings(tool_catalog_base_name);

@@ -2,6 +2,7 @@
 
 namespace sip {
 
+  template < >
   const char* const exception::descriptions[] = {
     "Expected the start of message sequence.",
     "Expected the end of message sequence.",

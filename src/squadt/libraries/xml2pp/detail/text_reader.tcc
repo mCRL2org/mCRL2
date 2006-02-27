@@ -39,7 +39,7 @@ namespace xml2pp {
    **/
   template < typename T >
   inline text_reader::text_reader(const T& d) throw () {
-    reader = xmlReaderForDoc(static_cast < xmlChar* const > (d), "", 0, 0);
+    reader = xmlReaderForDoc(reinterpret_cast < const xmlChar* const > (d), "", 0, 0);
 
     if (reader == 0) {
       throw (exception(exception::unable_to_initialise_reader));

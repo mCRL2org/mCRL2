@@ -119,7 +119,7 @@ namespace squadt {
         rename(ghost_catalog, path(catalog_file, no_check));
       }
       else {
-        throw (exception(exception::cannot_load_tool_configuration, catalog_file));
+        throw (exception(exception_identifier::cannot_load_tool_configuration, catalog_file));
       }
     }
  

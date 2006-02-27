@@ -1,51 +1,25 @@
-#ifndef SIP_EXCEPTION_H
-#define SIP_EXCEPTION_H
+#ifndef SIP_EXCEPTION
+#define SIP_EXCEPTION
 
-#include <exception>
+#include <exception/exception.h>
 
 namespace sip {
 
-  /* Exception class for protocol specific exceptions. */
-  class exception : public std::exception {
-    public:
-      enum exception_type {
-        expected_message_start           /// \brief the start of a message sip_messenger::open_tag was expected 
-        ,expected_message_end            /// \brief the end of a message was expected 
-        ,forbidden_message_content       /// \brief message contains a sequence that is not allowed 
-        ,message_context_invalid         /// \brief the message cannot be send in this phase of the protocol 
-        ,unknown_type_in_configuration   /// \brief the type encountered in a configuration specification is unknown 
-        ,controller_capabilities_unknown /// \brief the controller capabilities are not known yet
-      };
+  namespace exception_identifier {
 
-    private:
-      /** Exception type identifier */
-      exception_type     type;
-
-      /** A list of textual descriptions for each type */
-      static const char* const descriptions[];
-
-    public:
-
-      /** Constructor */
-      inline exception(exception_type t);
-
-      /** A description for the exception */
-      inline const char* what();
-
-      /** Desctructor */
-      inline ~exception() throw ();
-  };
-
-  inline exception::exception(exception_type t) : type(t) {
+    /** Type for exception identification */
+    enum values {
+       expected_message_start          /// \brief the start of a message sip_messenger::open_tag was expected 
+      ,expected_message_end            /// \brief the end of a message was expected 
+      ,forbidden_message_content       /// \brief message contains a sequence that is not allowed 
+      ,message_context_invalid         /// \brief the message cannot be send in this phase of the protocol 
+      ,unknown_type_in_configuration   /// \brief the type encountered in a configuration specification is unknown 
+      ,controller_capabilities_unknown /// \brief the controller capabilities are not known yet
+      ,cli_missing_arguments_separator /// \brief a parse error occurred on a command line argument
+    };
   }
 
-  inline const char* exception::what() {
-    return (descriptions[type]);
-  }
-
-  inline exception::~exception() throw () {
-  }
+  typedef exception::exception < exception_identifier::values > exception;
 }
 
 #endif
-
