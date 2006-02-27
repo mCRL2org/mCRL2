@@ -342,7 +342,7 @@ fi
 if test $WX_CONFIG; then
   USE_WX=1
   WX_CPPFLAGS="$($WX_CONFIG --cppflags)"
-  WX_LDFLAGS="$($WX_CONFIG --libs core base)"
+  WX_LDFLAGS="$($WX_CONFIG --libs core,base,adv,net)"
 fi
 AC_SUBST([USE_WX],[])
 AC_SUBST([WX_CONFIG],[])
