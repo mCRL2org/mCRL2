@@ -15,6 +15,6 @@ alias text_reader
     : # no sources
     : # no includes
     :
-    : <cxxflags>"`$(XML2_CONFIG) --cflags`"
-      <linkflags>"`$(XML2_CONFIG) --libs`"
+    : <cxxflags>"$(IXML2)"
+      <linkflags>"$(LXML2)"
     ;

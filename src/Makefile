@@ -74,7 +74,7 @@ XSIM_OBJECTS       = xsim.o xsimbase.o xsimmain.o xsimtrace.o libtrace.o libprin
 ifdef USE_WX
 OBJECTS           += $(XSIM_OBJECTS)
 endif
-XSIM_LDFLAGS       = -lnextstate -lenum -lrewrite -l$(ATERM) -lm $($LIBDL) $(WX_LIBS)
+XSIM_LDFLAGS       = -lnextstate -lenum -lrewrite -l$(ATERM) -lm $($LIBDL) $(WX_LDFLAGS)
 
 #xsimtrace library definitions
 XSIMTRACE_NAME     = xsimtrace.so

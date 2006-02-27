@@ -7,8 +7,6 @@ project squadt
 
 include $(TOP)/config.jam ;
 
-local wx_cppflags = [ SHELL "$(WX_CONFIG) --cxxflags" ] ;
-
 exe squadt :
          squadt.cpp
          exception.cpp
@@ -25,11 +23,10 @@ exe squadt :
          gui_resources.cpp
          gui_specification_properties.cpp
          /libraries/md5pp//md5pp
-         /libraries/transport//transport
          /libraries/xml2pp//text_reader
          /boost/filesystem//boost_filesystem
-        : <cxxflags>"`$(WX_CONFIG) --cxxflags`"
-          <linkflags>"`$(WX_CONFIG) --libs core base adv net`" ;
+        : <cxxflags>"$(IWX)"
+          <linkflags>"$(LWX_BASE)" ;
 
 install install-squadt : squadt
         : <dll-path>$(LIB_DIR)

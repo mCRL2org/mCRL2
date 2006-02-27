@@ -10,7 +10,6 @@ BJAM_TOOLSET="gcc"
 case $host in
   *-*-mingw32*)
     HOST_OS="MINGW"
-    BJAM_TOOLSET="mingw"
     ;;
   *-*-cygwin*)
     HOST_OS="CYGWIN"
@@ -343,12 +342,12 @@ fi
 if test $WX_CONFIG; then
   USE_WX=1
   WX_CPPFLAGS="$($WX_CONFIG --cppflags)"
-  WX_LIBS="$($WX_CONFIG --libs core base)"
+  WX_LDFLAGS="$($WX_CONFIG --libs core base)"
 fi
 AC_SUBST([USE_WX],[])
 AC_SUBST([WX_CONFIG],[])
 AC_SUBST([WX_CPPFLAGS],[])
-AC_SUBST([WX_LIBS],[])
+AC_SUBST([WX_LDFLAGS],[])
 
 # Checks for header files.
 AC_HEADER_STDC

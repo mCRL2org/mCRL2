@@ -14,7 +14,7 @@
 #include <wx/dynarray.h>
 #include <fstream>
 #include <sstream>
-#include <stdlib.h>
+#include <cstdlib>
 #include <aterm2.h>
 #include "xsimbase.h"
 #include "xsimmain.h"
