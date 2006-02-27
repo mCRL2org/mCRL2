@@ -171,16 +171,19 @@ void LTSViewApp::addMarkRule()
 {
   if ( lts != NULL )
   {
-    MarkStateRuleDialog msrDialog( mainFrame, this, lts->getStateVectorSpec() );
-    msrDialog.CentreOnParent();
-    if ( msrDialog.ShowModal() == wxID_OK )
+    MarkStateRuleDialog* msrDialog = new MarkStateRuleDialog( mainFrame, this,
+	lts->getStateVectorSpec() );
+    msrDialog->CentreOnParent();
+    if ( msrDialog->ShowModal() == wxID_OK )
     {
-      MarkRule* markrule = msrDialog.getMarkRule();
+      MarkRule* markrule = msrDialog->getMarkRule();
       lts->addMarkRule( markrule );
-      mainFrame->addMarkRule( msrDialog.getMarkRuleString() );
+      mainFrame->addMarkRule( msrDialog->getMarkRuleString() );
       lts->markStates();
       applyMarkStyle( MARK_STATES );
     }
+    msrDialog->Close();
+    msrDialog->Destroy();
   }
 }
 
@@ -195,17 +198,20 @@ void LTSViewApp::editMarkRule( const int index )
 {
   if ( lts != NULL )
   {
-    MarkStateRuleDialog msrDialog( mainFrame, this, lts->getStateVectorSpec() );
-    msrDialog.setMarkRule( lts->getMarkRule( index ), lts->getStateVectorSpec() );
-    msrDialog.CentreOnParent();
-    if ( msrDialog.ShowModal() == wxID_OK )
+    MarkStateRuleDialog* msrDialog = new MarkStateRuleDialog( mainFrame, this,
+	lts->getStateVectorSpec() );
+    msrDialog->setMarkRule( lts->getMarkRule( index ), lts->getStateVectorSpec() );
+    msrDialog->CentreOnParent();
+    if ( msrDialog->ShowModal() == wxID_OK )
     {
-      MarkRule* markrule = msrDialog.getMarkRule();
+      MarkRule* markrule = msrDialog->getMarkRule();
       lts->replaceMarkRule( index, markrule );
-      mainFrame->replaceMarkRule( index, msrDialog.getMarkRuleString() );
+      mainFrame->replaceMarkRule( index, msrDialog->getMarkRuleString() );
       lts->markStates();
       applyMarkStyle( MARK_STATES );
     }
+    msrDialog->Close();
+    msrDialog->Destroy();
   }
 }
 

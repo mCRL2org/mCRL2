@@ -444,19 +444,22 @@ GLCanvas* MainFrame::getGLCanvas() const
 void MainFrame::onOpen( wxCommandEvent& /*event*/ )
 {
   wxString filemask = wxT("FSM files (*.fsm)|*.fsm");
-  wxFileDialog dialog( this, wxT("Open LTS"), directory, filename, filemask, wxOPEN );
-  dialog.CentreOnParent();
-  if ( dialog.ShowModal() == wxID_OK )
+  wxFileDialog* dialog = new wxFileDialog( this, wxT("Open LTS"), directory,
+	filename, filemask, wxOPEN );
+  dialog->CentreOnParent();
+  if ( dialog->ShowModal() == wxID_OK )
   {
-    directory = dialog.GetDirectory();
-    filename = dialog.GetFilename();
-    mediator->openFile( string(dialog.GetPath().fn_str()) );
+    directory = dialog->GetDirectory();
+    filename = dialog->GetFilename();
+    mediator->openFile( string(dialog->GetPath().fn_str()) );
   }
+  dialog->Close();
+  dialog->Destroy();
 }
 
 void MainFrame::onExit( wxCommandEvent& /*event*/ )
 {
-  Destroy();
+  Close();
 }
 
 void MainFrame::onActivateTool( wxCommandEvent& event )
@@ -652,7 +655,8 @@ void MainFrame::updateProgressDialog( int val, string msg )
     progDialog->Update( val, wxString( msg.c_str(), wxConvUTF8 ) );
     if ( val == 100 )
     {
-      delete progDialog;
+      progDialog->Close();
+      progDialog->Destroy();
       progDialog = NULL;
     }
   }
@@ -660,9 +664,11 @@ void MainFrame::updateProgressDialog( int val, string msg )
 
 void MainFrame::showMessage( string title, string text )
 {
-  wxMessageDialog msgDialog( this, wxString( text.c_str(), wxConvUTF8 ),
-      wxString( title.c_str(), wxConvUTF8 ), wxOK );
-  msgDialog.ShowModal();
+  wxMessageDialog* msgDialog = new wxMessageDialog( this, wxString(
+	text.c_str(), wxConvUTF8 ), wxString( title.c_str(), wxConvUTF8 ), wxOK );
+  msgDialog->ShowModal();
+  msgDialog->Close();
+  msgDialog->Destroy();
 }
 
 void MainFrame::loadTitle()

@@ -41,7 +41,7 @@ MarkStateRuleDialog::MarkStateRuleDialog( wxWindow* parent, Mediator* owner,
       wxDefaultSize, 2, relChoices );
   relationChoice->SetSelection( 0 );
   valuesListBox = new wxListBox( this, wxID_ANY, wxDefaultPosition,
-      wxDefaultSize, 0, NULL, wxLB_MULTIPLE | wxLB_HSCROLL | wxLB_NEEDED_SB |
+      wxSize(-1, 150), 0, NULL, wxLB_MULTIPLE | wxLB_HSCROLL | wxLB_NEEDED_SB |
       wxLB_SORT );
   
   int flags = wxALIGN_LEFT | wxALIGN_CENTER_VERTICAL | wxALL;
