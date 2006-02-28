@@ -39,7 +39,7 @@ class LTSViewApp : public wxApp, public Mediator
     void	  applyDefaultSettings();
     void	  applyMarkStyle( MarkStyle ms );
     void	  applySettings();
-    void	  drawLTS( /*bool topDown*/ );
+    void	  drawLTS();
     void	  editMarkRule( const int index );
     virtual bool  OnInit();
     void	  openFile( string fileName );

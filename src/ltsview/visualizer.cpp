@@ -9,7 +9,6 @@ VisSettings Visualizer::defaultVisSettings =
 
 Visualizer::Visualizer( Mediator* owner )
 {
-  displayList = glGenLists( 1 );
   lts = NULL;
   structHeight = 0.0f;
   structWidth = 0.0f;
@@ -19,12 +18,11 @@ Visualizer::Visualizer( Mediator* owner )
   visSettings = defaultVisSettings;
   
   rankStyle = ITERATIVE;
-  refreshDisplayList = false;
+  refreshPrimitives = false;
 }
 
 Visualizer::~Visualizer()
 {
-  glDeleteLists( displayList, 1 );
 }
 
 RankStyle Visualizer::getRankStyle() const
@@ -55,19 +53,19 @@ float Visualizer::getStructureWidth() const
 void Visualizer::setMarkStyle( MarkStyle ms )
 {
   markStyle = ms;
-  refreshDisplayList = true;
+  refreshPrimitives = true;
 }
 
 void Visualizer::setRankStyle( RankStyle rs )
 {
   rankStyle = rs;
-  refreshDisplayList = true;
+  refreshPrimitives = true;
 }
 
 void Visualizer::setLTS( LTS* l )
 {
   lts = l;
-  refreshDisplayList = true;
+  refreshPrimitives = true;
 }
 
 void Visualizer::setVisSettings( VisSettings vs )
@@ -75,7 +73,7 @@ void Visualizer::setVisSettings( VisSettings vs )
   if ( visSettings != vs )
   {
     visSettings = vs;
-    refreshDisplayList = true;
+    refreshPrimitives = true;
   }
 }
 
@@ -105,77 +103,99 @@ void Visualizer::positionClusters()
 	- 1 );
   visSettings.clusterHeight = defaultVisSettings.clusterHeight;
   
-  refreshDisplayList = true;
+  refreshPrimitives = true;
 }
 
-void Visualizer::drawLTS( /*bool topDown*/ )
+void Visualizer::drawLTS()
 {
   if ( lts == NULL ) return;
-  if ( refreshDisplayList )
+  if ( refreshPrimitives )
   {
-    glDeleteLists( displayList, 1 );
-    displayList = glGenLists( 1 );
+    // refresh necessary
+    // delete all primitives
+    for ( unsigned int i = 0 ; i < primitives.size() ; ++i )
+    {
+      glDeleteLists( primitives[i]->displayList, 1 );
+      delete primitives[i];
+    }
+    primitives.clear();
     
-    glNewList( displayList, GL_COMPILE );
-      glPushMatrix();
-	glRotatef( 90.0f, 1.0f, 0.0f, 0.0f );
-	glTranslatef( 0.0f, 0.0f, -visSettings.clusterHeight*( lts->getNumberOfRanks()-1 ) / 2.0f );
-      
-	glEnable( GL_COLOR_MATERIAL );
-	glColorMaterial( GL_FRONT_AND_BACK, GL_AMBIENT_AND_DIFFUSE );
+    glPushMatrix();
+      glLoadIdentity();
+      glRotatef( 90.0f, 1.0f, 0.0f, 0.0f );
+      glTranslatef( 0.0f, 0.0f, -visSettings.clusterHeight*(
+	    lts->getNumberOfRanks()-1 ) / 2.0f );
 
-	structHeight = 0.0f;
-	structWidth = 0.0f;
+      structHeight = 0.0f;
+      structWidth = 0.0f;
+      sin_obt = float( sin( visSettings.outerBranchTilt * PI / 180.0 ) );
+      cos_obt = float( cos( visSettings.outerBranchTilt * PI / 180.0 ) );
 
-	switch ( markStyle )
-	{
-	  case MARK_DEADLOCKS:
-	    drawSubtreeMarkDeadlocks( lts->getInitialState()->getCluster(),
-		true, structWidth, structHeight );
-	    break;
-	    
-	  case MARK_STATES:
-	    drawSubtreeMarkStates( lts->getInitialState()->getCluster(), true,
-		structWidth, structHeight );
-	    break;
+      switch ( markStyle )
+      {
+	case MARK_DEADLOCKS:
+	  drawSubtreeMarkDeadlocks( lts->getInitialState()->getCluster(),
+	      true, structWidth, structHeight );
+	  break;
+	  
+	case MARK_STATES:
+	  drawSubtreeMarkStates( lts->getInitialState()->getCluster(), true,
+	      structWidth, structHeight );
+	  break;
 
-	  case NO_MARKS:
-	  default:
-	    // coloring based on interpolation settings, so compute delta_col,
-	    // i.e. the color difference between clusters at consecutive levels in
-	    // the structure.
-	    RGB_Color rgb1 = visSettings.interpolateColor1;
-	    RGB_Color rgb2 = visSettings.interpolateColor2;
-	    HSV_Color hsv1 = RGBtoHSV( rgb1 );
-	    HSV_Color hsv2 = RGBtoHSV( rgb2 );
-	    if ( rgb1.r == rgb1.g && rgb1.g == rgb1.b ) hsv1.h = hsv2.h;
-	    if ( rgb2.r == rgb2.g && rgb2.g == rgb2.b ) hsv2.h = hsv1.h;
-	    float delta_h1 = hsv2.h - hsv1.h;
-	    float delta_h2 = ((delta_h1 < 0.0f) ? 1.0f : -1.0f) * (360.0f - fabs(delta_h1));
-	    
-	    delta_h1 /= (lts->getNumberOfRanks() - 1);
-	    delta_h2 /= (lts->getNumberOfRanks() - 1);
-	    
-	    HSV_Color delta_col;
-	    if ( visSettings.longInterpolation )
-	      delta_col.h = ( fabs(delta_h1) < fabs(delta_h2) ) ? delta_h2 : delta_h1;
-	    else
-	      delta_col.h = ( fabs(delta_h1) < fabs(delta_h2) ) ? delta_h1 : delta_h2;
-	    delta_col.s = (hsv2.s - hsv1.s) / (lts->getNumberOfRanks() - 1);
-	    delta_col.v = (hsv2.v - hsv1.v) / (lts->getNumberOfRanks() - 1);
-	    
-	    drawSubtree( lts->getInitialState()->getCluster(), true,
-		structWidth, structHeight, hsv1, delta_col );
-	    break;
-	}
-
-	glDisable( GL_COLOR_MATERIAL );
-      
-      glPopMatrix();
-    glEndList();
-    
-    refreshDisplayList = false;
+	case NO_MARKS:
+	default:
+	  // coloring based on interpolation settings, so compute delta_col,
+	  // i.e. the color difference between clusters at consecutive levels in
+	  // the structure.
+	  RGB_Color rgb1 = visSettings.interpolateColor1;
+	  RGB_Color rgb2 = visSettings.interpolateColor2;
+	  HSV_Color hsv1 = RGBtoHSV( rgb1 );
+	  HSV_Color hsv2 = RGBtoHSV( rgb2 );
+	  if ( rgb1.r == rgb1.g && rgb1.g == rgb1.b ) hsv1.h = hsv2.h;
+	  if ( rgb2.r == rgb2.g && rgb2.g == rgb2.b ) hsv2.h = hsv1.h;
+	  float delta_h1 = hsv2.h - hsv1.h;
+	  float delta_h2 = ((delta_h1 < 0.0f) ? 1.0f : -1.0f) * (360.0f - fabs(delta_h1));
+	  
+	  delta_h1 /= (lts->getNumberOfRanks() - 1);
+	  delta_h2 /= (lts->getNumberOfRanks() - 1);
+	  
+	  HSV_Color delta_col;
+	  if ( visSettings.longInterpolation )
+	    delta_col.h = ( fabs(delta_h1) < fabs(delta_h2) ) ? delta_h2 : delta_h1;
+	  else
+	    delta_col.h = ( fabs(delta_h1) < fabs(delta_h2) ) ? delta_h1 : delta_h2;
+	  delta_col.s = (hsv2.s - hsv1.s) / (lts->getNumberOfRanks() - 1);
+	  delta_col.v = (hsv2.v - hsv1.v) / (lts->getNumberOfRanks() - 1);
+	  
+	  drawSubtree( lts->getInitialState()->getCluster(), true,
+	      structWidth, structHeight, hsv1, delta_col );
+	  break;
+      }
+    glPopMatrix();
+    refreshPrimitives = false;
   }
+  
+  // get viewpoint world coordinates
+  GLfloat M[16];
+  glGetFloatv( GL_MODELVIEW_MATRIX, M );
+  Point3D viewpoint = { -M[12], -M[13], -M[14] };
+  
+  // compute distance of every primitive to viewpoint
+  for ( unsigned int i = 0 ; i < primitives.size() ; ++i )
+  {
+    Point3D diff = 
+    {
+      primitives[i]->worldCoordinate.x - viewpoint.x,
+      primitives[i]->worldCoordinate.y - viewpoint.y,
+      primitives[i]->worldCoordinate.z - viewpoint.z
+    };
+    primitives[i]->distance = sqrt( diff.x*diff.x + diff.y*diff.y +
+	diff.z*diff.z );
+  }
+
+  // sort primitives based on distance to viewpoint
+  sort( primitives.begin(), primitives.end(), Distance_desc() ); 
   
   // clear the canvas with the background color
   glClearColor( visSettings.backgroundColor.r / 255.0,
@@ -183,26 +203,33 @@ void Visualizer::drawLTS( /*bool topDown*/ )
       visSettings.backgroundColor.b / 255.0, 1.0 );
   glClearDepth( 1.0 );
   glClear( GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT );
+     
+  glEnable( GL_COLOR_MATERIAL );
+  glColorMaterial( GL_FRONT_AND_BACK, GL_AMBIENT_AND_DIFFUSE );
   
-  if ( visSettings.transparency > 0 )
+  /*
+  glDepthMask( GL_FALSE );
+  glEnable( GL_CULL_FACE );
+  glCullFace( GL_FRONT );
+  */
+
+  // draw primitives in sorted order
+  for ( unsigned int i = 0 ; i < primitives.size() ; ++i )
   {
-    glDepthMask( GL_FALSE );
-    // objects are transparent, so to avoid artifacting...
-    glEnable( GL_CULL_FACE );
-      // first render the back facing polygons...
-      glCullFace( GL_FRONT );
-      glCallList( displayList );
-      // and then the front facing polygons
-      glCullFace( GL_BACK );
-      glCallList( displayList );
-    glDisable( GL_CULL_FACE );
-    glDepthMask( GL_TRUE );
+    glCallList( primitives[i]->displayList );
   }
-  else
+  
+  /*
+  glCullFace( GL_BACK );
+  for ( unsigned int i = 0 ; i < primitives.size() ; ++i )
   {
-    // no transparent objects, so render the whole scene in one pass
-    glCallList( displayList );
+    glCallList( primitives[i]->displayList );
   }
+  glDisable( GL_CULL_FACE );
+  glDepthMask( GL_TRUE );
+  */
+  
+  glDisable( GL_COLOR_MATERIAL );
 }
 
 // draws the subtree with cluster *root as the root of the tree
@@ -212,8 +239,24 @@ void Visualizer::drawSubtree( Cluster* root, bool topClosed, float &boundWidth,
 {
   if ( !root->hasDescendants() )
   {
-    GLUtils::setColor( HSVtoRGB( col ), visSettings.transparency );
-    glutSolidSphere( root->getTopRadius(), visSettings.quality, visSettings.quality );
+    GLfloat M[16];
+    glGetFloatv( GL_MODELVIEW_MATRIX, M );
+    GLuint displist = glGenLists( 1 );
+    glNewList( displist, GL_COMPILE );
+      glPushMatrix();
+      glMultMatrixf( M );
+      GLUtils::setColor( HSVtoRGB( col ), visSettings.transparency );
+      glutSolidSphere( root->getTopRadius(), visSettings.quality, visSettings.quality );
+      glPopMatrix();
+    glEndList();
+
+    Primitive* p = new Primitive;
+    p->worldCoordinate.x = M[12];
+    p->worldCoordinate.y = M[13];
+    p->worldCoordinate.z = M[14];
+    p->displayList = displist;
+    primitives.push_back( p );
+
     boundWidth = root->getTopRadius();
     boundHeight = 2.0f * root->getTopRadius();
   }
@@ -227,10 +270,29 @@ void Visualizer::drawSubtree( Cluster* root, bool topClosed, float &boundWidth,
     vector< Cluster* > descendants;
     root->getDescendants( descendants );
     
-    GLUtils::coloredCylinder( root->getTopRadius(), root->getBaseRadius(),
-	visSettings.clusterHeight, visSettings.quality, HSVtoRGB( col ),
-	HSVtoRGB( desccol ), visSettings.transparency, topClosed,
-	descendants.size() > 1 );
+    GLfloat M[16];
+    glGetFloatv( GL_MODELVIEW_MATRIX, M );
+    GLuint displist = glGenLists( 1 );
+    glNewList( displist, GL_COMPILE );
+      glPushMatrix();
+      glMultMatrixf( M );
+      GLUtils::coloredCylinder( root->getTopRadius(), root->getBaseRadius(),
+	  visSettings.clusterHeight, visSettings.quality, HSVtoRGB( col ),
+	  HSVtoRGB( desccol ), visSettings.transparency, topClosed,
+	  ( descendants.size() > 1 ) );
+      glPopMatrix();
+    glEndList();
+
+    Primitive* p = new Primitive;
+    glPushMatrix();
+      glTranslatef( 0.0f, 0.0f, 0.5f * visSettings.clusterHeight );
+      glGetFloatv( GL_MODELVIEW_MATRIX, M );
+    glPopMatrix();
+    p->worldCoordinate.x = M[12];
+    p->worldCoordinate.y = M[13];
+    p->worldCoordinate.z = M[14];
+    p->displayList = displist;
+    primitives.push_back( p );
 
     vector< Cluster* >::iterator descit;
     for ( descit = descendants.begin() ; descit != descendants.end() ; ++descit )
@@ -266,12 +328,10 @@ void Visualizer::drawSubtree( Cluster* root, bool topClosed, float &boundWidth,
 	
 	drawSubtree( desc, true, descWidth, descHeight, desccol, delta_col );
 	
-	float sin_a = float( sin( visSettings.outerBranchTilt * PI / 180.0 ) );
-	float cos_a = float( cos( visSettings.outerBranchTilt * PI / 180.0 ) );
-	boundWidth = max( boundWidth, rad + descHeight * sin_a + descWidth *
-	    cos_a );
-	boundHeight = max( boundHeight, descHeight * cos_a + descWidth *
-	    sin_a );
+	boundWidth = max( boundWidth, rad + descHeight * sin_obt + descWidth *
+	    cos_obt );
+	boundHeight = max( boundHeight, descHeight * cos_obt + descWidth *
+	    sin_obt );
 	
 	glRotatef( -visSettings.outerBranchTilt, 0.0f, 1.0f, 0.0f );
 	glTranslatef( -rad, 0.0f, 0.0f );
@@ -291,12 +351,27 @@ void Visualizer::drawSubtreeMarkStates( Cluster* root, bool topClosed, float
 {
   if ( !root->hasDescendants() )
   {
-    if ( root->isMarked() )
-      GLUtils::setColor( visSettings.markedColor, visSettings.transparency );
-    else
-      GLUtils::setColor( RGB_WHITE, visSettings.transparency );
-    
-    glutSolidSphere( root->getTopRadius(), visSettings.quality, visSettings.quality );
+    GLfloat M[16];
+    glGetFloatv( GL_MODELVIEW_MATRIX, M );
+    GLuint displist = glGenLists( 1 );
+    glNewList( displist, GL_COMPILE );
+      glPushMatrix();
+      glMultMatrixf( M );
+      if ( root->isMarked() )
+	GLUtils::setColor( visSettings.markedColor, visSettings.transparency );
+      else
+	GLUtils::setColor( RGB_WHITE, visSettings.transparency );
+      glutSolidSphere( root->getTopRadius(), visSettings.quality, visSettings.quality );
+      glPopMatrix();
+    glEndList();
+
+    Primitive* p = new Primitive;
+    p->worldCoordinate.x = M[12];
+    p->worldCoordinate.y = M[13];
+    p->worldCoordinate.z = M[14];
+    p->displayList = displist;
+    primitives.push_back( p );
+
     boundWidth = root->getTopRadius();
     boundHeight = 2.0f * root->getTopRadius();
   }
@@ -305,19 +380,38 @@ void Visualizer::drawSubtreeMarkStates( Cluster* root, bool topClosed, float
     vector< Cluster* > descendants;
     root->getDescendants( descendants );
     
-    if ( root->isMarked() )
-    {
-      GLUtils::coloredCylinder( root->getTopRadius(), root->getBaseRadius(),
-	visSettings.clusterHeight, visSettings.quality, visSettings.markedColor,
-	RGB_WHITE, visSettings.transparency, topClosed, descendants.size() > 1
-	);
-    }
-    else
-    {
-      GLUtils::coloredCylinder( root->getTopRadius(), root->getBaseRadius(),
-	visSettings.clusterHeight, visSettings.quality, RGB_WHITE, RGB_WHITE,
-	visSettings.transparency, topClosed, descendants.size() > 1 );
-    }
+    GLfloat M[16];
+    glGetFloatv( GL_MODELVIEW_MATRIX, M );
+    GLuint displist = glGenLists( 1 );
+    glNewList( displist, GL_COMPILE );
+      glPushMatrix();
+      glMultMatrixf( M );
+      if ( root->isMarked() )
+      {
+	GLUtils::coloredCylinder( root->getTopRadius(), root->getBaseRadius(),
+	  visSettings.clusterHeight, visSettings.quality, visSettings.markedColor,
+	  RGB_WHITE, visSettings.transparency, topClosed, descendants.size() > 1
+	  );
+      }
+      else
+      {
+	GLUtils::coloredCylinder( root->getTopRadius(), root->getBaseRadius(),
+	  visSettings.clusterHeight, visSettings.quality, RGB_WHITE, RGB_WHITE,
+	  visSettings.transparency, topClosed, descendants.size() > 1 );
+      }
+      glPopMatrix();
+    glEndList();
+
+    Primitive* p = new Primitive;
+    glPushMatrix();
+      glTranslatef( 0.0f, 0.0f, 0.5f * visSettings.clusterHeight );
+      glGetFloatv( GL_MODELVIEW_MATRIX, M );
+    glPopMatrix();
+    p->worldCoordinate.x = M[12];
+    p->worldCoordinate.y = M[13];
+    p->worldCoordinate.z = M[14];
+    p->displayList = displist;
+    primitives.push_back( p );
     
     vector< Cluster* >::iterator descit;
     for ( descit = descendants.begin() ; descit != descendants.end() ; ++descit )
@@ -353,12 +447,10 @@ void Visualizer::drawSubtreeMarkStates( Cluster* root, bool topClosed, float
 	
 	drawSubtreeMarkStates( desc, true, descWidth, descHeight );
 	
-	float sin_a = float( sin( visSettings.outerBranchTilt * PI / 180.0 ) );
-	float cos_a = float( cos( visSettings.outerBranchTilt * PI / 180.0 ) );
-	boundWidth = max( boundWidth, rad + descHeight * sin_a + descWidth *
-	    cos_a );
-	boundHeight = max( boundHeight, descHeight * cos_a + descWidth *
-	    sin_a );
+	boundWidth = max( boundWidth, rad + descHeight * sin_obt + descWidth *
+	    cos_obt );
+	boundHeight = max( boundHeight, descHeight * cos_obt + descWidth *
+	    sin_obt );
 	
 	glRotatef( -visSettings.outerBranchTilt, 0.0f, 1.0f, 0.0f );
 	glTranslatef( -rad, 0.0f, 0.0f );
@@ -378,12 +470,27 @@ void Visualizer::drawSubtreeMarkDeadlocks( Cluster* root, bool topClosed, float
 {
   if ( !root->hasDescendants() )
   {
-    if ( root->hasDeadlock() )
-      GLUtils::setColor( visSettings.markedColor, visSettings.transparency );
-    else
-      GLUtils::setColor( RGB_WHITE, visSettings.transparency );
-    
-    glutSolidSphere( root->getTopRadius(), visSettings.quality, visSettings.quality );
+    GLfloat M[16];
+    glGetFloatv( GL_MODELVIEW_MATRIX, M );
+    GLuint displist = glGenLists( 1 );
+    glNewList( displist, GL_COMPILE );
+      glPushMatrix();
+      glMultMatrixf( M );
+      if ( root->hasDeadlock() )
+	GLUtils::setColor( visSettings.markedColor, visSettings.transparency );
+      else
+	GLUtils::setColor( RGB_WHITE, visSettings.transparency );
+      glutSolidSphere( root->getTopRadius(), visSettings.quality, visSettings.quality );
+      glPopMatrix();
+    glEndList();
+
+    Primitive* p = new Primitive;
+    p->worldCoordinate.x = M[12];
+    p->worldCoordinate.y = M[13];
+    p->worldCoordinate.z = M[14];
+    p->displayList = displist;
+    primitives.push_back( p );
+
     boundWidth = root->getTopRadius();
     boundHeight = 2.0f * root->getTopRadius();
   }
@@ -392,19 +499,38 @@ void Visualizer::drawSubtreeMarkDeadlocks( Cluster* root, bool topClosed, float
     vector< Cluster* > descendants;
     root->getDescendants( descendants );
     
-    if ( root->hasDeadlock() )
-    {
-      GLUtils::coloredCylinder( root->getTopRadius(), root->getBaseRadius(),
-	visSettings.clusterHeight, visSettings.quality, visSettings.markedColor,
-	RGB_WHITE, visSettings.transparency, topClosed, descendants.size() > 1
-	);
-    }
-    else
-    {
-      GLUtils::coloredCylinder( root->getTopRadius(), root->getBaseRadius(),
-	visSettings.clusterHeight, visSettings.quality, RGB_WHITE, RGB_WHITE,
-	visSettings.transparency, topClosed, descendants.size() > 1 );
-    }
+    GLfloat M[16];
+    glGetFloatv( GL_MODELVIEW_MATRIX, M );
+    GLuint displist = glGenLists( 1 );
+    glNewList( displist, GL_COMPILE );
+      glPushMatrix();
+      glMultMatrixf( M );
+      if ( root->hasDeadlock() )
+      {
+	GLUtils::coloredCylinder( root->getTopRadius(), root->getBaseRadius(),
+	  visSettings.clusterHeight, visSettings.quality, visSettings.markedColor,
+	  RGB_WHITE, visSettings.transparency, topClosed, descendants.size() > 1
+	  );
+      }
+      else
+      {
+	GLUtils::coloredCylinder( root->getTopRadius(), root->getBaseRadius(),
+	  visSettings.clusterHeight, visSettings.quality, RGB_WHITE, RGB_WHITE,
+	  visSettings.transparency, topClosed, descendants.size() > 1 );
+      }
+      glPopMatrix();
+    glEndList();
+
+    Primitive* p = new Primitive;
+    glPushMatrix();
+      glTranslatef( 0.0f, 0.0f, 0.5f * visSettings.clusterHeight );
+      glGetFloatv( GL_MODELVIEW_MATRIX, M );
+    glPopMatrix();
+    p->worldCoordinate.x = M[12];
+    p->worldCoordinate.y = M[13];
+    p->worldCoordinate.z = M[14];
+    p->displayList = displist;
+    primitives.push_back( p );
       
     vector< Cluster* >::iterator descit;
     for ( descit = descendants.begin() ; descit != descendants.end() ; ++descit )
@@ -440,12 +566,10 @@ void Visualizer::drawSubtreeMarkDeadlocks( Cluster* root, bool topClosed, float
 	
 	drawSubtreeMarkDeadlocks( desc, true, descWidth, descHeight );
 	
-	float sin_a = float( sin( visSettings.outerBranchTilt * PI / 180.0 ) );
-	float cos_a = float( cos( visSettings.outerBranchTilt * PI / 180.0 ) );
-	boundWidth = max( boundWidth, rad + descHeight * sin_a + descWidth *
-	    cos_a );
-	boundHeight = max( boundHeight, descHeight * cos_a + descWidth *
-	    sin_a );
+	boundWidth = max( boundWidth, rad + descHeight * sin_obt + descWidth *
+	    cos_obt );
+	boundHeight = max( boundHeight, descHeight * cos_obt + descWidth *
+	    sin_obt );
 	
 	glRotatef( -visSettings.outerBranchTilt, 0.0f, 1.0f, 0.0f );
 	glTranslatef( -rad, 0.0f, 0.0f );

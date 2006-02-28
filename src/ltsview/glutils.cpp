@@ -1,5 +1,10 @@
 #include "glutils.h"
 
+bool GLUtils::Distance_desc::operator()(const Primitive* p1, const Primitive* p2) const
+{
+  return ( p1->distance > p2->distance );
+}
+
 void GLUtils::setColor( RGB_Color c, int transp )
 {
   GLfloat fc[] = { c.r / 255.0f, c.g / 255.0f, c.b / 255.0f, (100-transp) / 100.0f };
@@ -21,14 +26,16 @@ void GLUtils::coloredCylinder( float baserad, float toprad, float height,
   vector< float > nx;
   vector< float > ny;
   
-  for ( int i = 0 ; i <= slices ; ++i )
+  float PI2 = 2.0f * PI;
+  float delta = PI2 / slices;
+  for ( float alf = 0.0f ; alf <= PI2 ; alf += delta )
   {
-    float alf = 2.0 * i * PI / slices;
-    ctab.push_back( cos( alf ) );
-    stab.push_back( sin( alf ) );
-
-    nx.push_back( ctab[i] * nxg );
-    ny.push_back( stab[i] * nxg );
+    float cos_alf = cos(alf);
+    float sin_alf = sin(alf);
+    ctab.push_back( cos_alf );
+    stab.push_back( sin_alf );
+    nx.push_back( cos_alf * nxg );
+    ny.push_back( sin_alf * nxg );
   }
 
   float c1r = basecol.r / 255.0f;
@@ -53,7 +60,7 @@ void GLUtils::coloredCylinder( float baserad, float toprad, float height,
   }
   
   glBegin( GL_QUAD_STRIP );
-  for ( int j = slices ; j >= 0 ; --j )
+  for ( int j = 0 ; j <= slices ; ++j )
   {
     glNormal3f( nx[j], ny[j], nzg );
     glColor4f( c1r, c1g, c1b, alpha );

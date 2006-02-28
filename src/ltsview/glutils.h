@@ -15,6 +15,20 @@ using namespace Utils;
 
 namespace GLUtils
 {
+  struct Primitive
+  {
+    GLuint  displayList;
+    float   distance;
+    Point3D worldCoordinate;
+  };
+
+  // class for primitive comparison based on distance
+  class Distance_desc
+  {
+    public:
+      bool operator()( const Primitive*, const Primitive* ) const;
+  };
+
   void setColor( RGB_Color c, int transp );
   void coloredCylinder( float baserad, float toprad, float height, 
       int slices, RGB_Color basecol, RGB_Color topcol, int transp, bool

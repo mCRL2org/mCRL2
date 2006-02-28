@@ -16,7 +16,7 @@ class Mediator
     virtual void applyDefaultSettings() = 0;
     virtual void applyMarkStyle( MarkStyle ms ) = 0;
     virtual void applySettings() = 0;
-    virtual void drawLTS( /*bool topDown*/ ) = 0;
+    virtual void drawLTS() = 0;
     virtual void editMarkRule( const int index ) = 0;
     virtual void openFile( string fileName ) = 0;
     virtual void removeMarkRule( const int index ) = 0;

@@ -119,7 +119,7 @@ void GLCanvas::display( bool swapBuffers )
   {
     SetCurrent();
     glPushMatrix();
-      glClear( GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT );
+      //glClear( GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT );
       glLoadIdentity(); 
       
       // apply panning and zooming transformations
@@ -130,7 +130,7 @@ void GLCanvas::display( bool swapBuffers )
       glRotatef( angleX, 0.0f, 1.0f, 0.0f );
 
       // draw the structure
-      mediator->drawLTS( /*angleY > 180.0f*/ );
+      mediator->drawLTS();
       
       if ( swapBuffers ) SwapBuffers();
     glPopMatrix();

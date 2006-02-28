@@ -16,20 +16,23 @@
 #include "lts.h"
 
 using namespace Utils;
+using namespace GLUtils;
 
 class Visualizer
 {
   private:
-    static VisSettings	defaultVisSettings;
-    GLuint		displayList;
-    LTS*		lts;
-    MarkStyle		markStyle;
-    Mediator*		mediator;
-    RankStyle		rankStyle;
-    bool		refreshDisplayList;
-    float		structHeight;
-    float		structWidth;
-    VisSettings		visSettings;
+    float		  cos_obt;
+    static VisSettings	  defaultVisSettings;
+    LTS*		  lts;
+    MarkStyle		  markStyle;
+    Mediator*		  mediator;
+    vector< Primitive* >  primitives;
+    RankStyle		  rankStyle;
+    bool		  refreshPrimitives;
+    float		  sin_obt;
+    float		  structHeight;
+    float		  structWidth;
+    VisSettings		  visSettings;
 
     void drawSubtree( Cluster* root, bool topClosed, float &boundWidth, float
 	&boundHeight, HSV_Color col, HSV_Color delta_col );
@@ -42,7 +45,7 @@ class Visualizer
     Visualizer( Mediator* owner );
     ~Visualizer();
     
-    void	drawLTS( /*bool topDown*/ );
+    void	drawLTS();
     float	getStructureHeight() const;
     float	getStructureWidth() const;
     RankStyle	getRankStyle() const;
