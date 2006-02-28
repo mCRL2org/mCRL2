@@ -3,7 +3,7 @@
 
 WX_LIBS		:= `$(WX_CONFIG) --libs core base gl`
 WX_CXXFLAGS	:= `$(WX_CONFIG) --cxxflags`
-LDFLAGS          = $(ATERM_LDFLAGS)
+#LDFLAGS          = $(ATERM_LDFLAGS)
 
 ICON_OBJECTS	 = mainframe.o glcanvas.o
 WX_OBJECTS	 = ltsviewapp.o mainframe.o glcanvas.o spinctrlfloat.o \
