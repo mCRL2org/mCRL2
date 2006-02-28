@@ -6729,6 +6729,7 @@ static ATermAppl communicationcomposition(
   gsVerboseMsg("- calculating the communication operator on %d summands",
                         ATgetLength(linGetSums(ips)));
 
+  ATermList resultingDeltaSummands=ATempty;
   ATermList resultingCommunications=ATempty;
   for( ; communications!=ATempty ; communications=ATgetNext(communications))
   { ATermAppl commExpr=ATAgetFirst(communications);
@@ -6750,8 +6751,8 @@ static ATermAppl communicationcomposition(
     ATermAppl multiaction=linGetMultiAction(summand);
     if (multiaction==gsMakeDelta())
     {
-      resultsumlist=ATinsertA(
-                      resultsumlist,
+      resultingDeltaSummands=ATinsertA(
+                      resultingDeltaSummands,
                       summand);
 
     } 
@@ -6760,6 +6761,37 @@ static ATermAppl communicationcomposition(
       ATermAppl actiontime=linGetActionTime(summand);
       ATermAppl condition=linGetCondition(summand);
       ATermList nextstate=linGetNextState(summand);
+
+      /* Recall a delta summand for every non delta summand.
+       * The reason for this is that with communication, the
+       * conditions for summands can become much more complex. 
+       * Many of the actions in these summands are replaced by
+       * delta's later on. Due to the more complex conditions it
+       * will be hard to remove them. By adding a default delta
+       * with a simple condition, makes this job much easier
+       * later on, and will in general reduce the number of delta
+       * summands in the whole system */
+       
+      /* But first remove free variables from sumvars */
+
+      ATermList newsumvars=ATempty;
+      ATermList runningsumvars=sumvars;
+      for( ; runningsumvars!=ATempty ; runningsumvars=ATgetNext(runningsumvars))
+      { ATermAppl sumvar=ATAgetFirst(runningsumvars);
+        if (occursinterm(sumvar,condition) ||
+           ((actiontime!=gsMakeNil()) && occursinterm(sumvar,actiontime)))
+        { newsumvars=ATinsertA(newsumvars,sumvar);
+        }
+      }
+
+      resultingDeltaSummands=ATinsertA(
+                                resultingDeltaSummands,
+                                gsMakeLPESummand(
+                                        newsumvars,
+                                        condition,
+                                        gsMakeDelta(),
+                                        actiontime, 
+                                        nextstate));
 
         /* the multiactionconditionlist is a list containing
            tuples, with a multiaction and the condition,
@@ -6833,6 +6865,21 @@ static ATermAppl communicationcomposition(
       }
     }
   }
+
+  /* Now the resulting delta summands must be added again */
+
+  if (nodeltaelimination)
+  { resultsumlist=ATconcat(resultsumlist,resultingDeltaSummands);
+  }
+  else
+  { for ( ; resultingDeltaSummands!=ATempty ;
+              resultingDeltaSummands=ATgetNext(resultingDeltaSummands))
+    { resultsumlist=insert_timed_delta_summand(
+                                   resultsumlist,
+                                   ATAgetFirst(resultingDeltaSummands));
+    }
+  }
+  
   gsVerboseMsg(" resulting in %d summands\n",
                         ATgetLength(resultsumlist));
 
