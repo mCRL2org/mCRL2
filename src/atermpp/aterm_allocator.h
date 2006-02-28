@@ -23,6 +23,35 @@
 
 namespace atermpp {
 
+   // general case; works only for T = ATerm, ATermList, ...
+   template <class T>
+   void on_allocate(T* p, std::size_t num)
+   {
+     if (num > 1)
+       ATprotectArray(p, num);
+     else
+       ATprotect(p);
+   }
+
+   template <class T>
+   void on_deallocate(T* p, std::size_t num)
+   {
+     if (num > 1)
+       ATunprotectArray(p);
+     else
+       ATunprotect(p);
+   }
+
+   template <class T>
+   void on_construct(T* p)
+   {
+   }
+
+   template <class T>
+   void on_destroy(T* p)
+   {
+   }
+
    template <class T>
    class aterm_allocator {
      public:
@@ -74,41 +103,43 @@ namespace atermpp {
        pointer allocate (size_type num)
        {
 #ifdef ATERM_DEBUG_ALLOCATOR
-std::cout << "<allocate>" << num << std::endl;
+std::cout << "<allocate> " << num << " elements" << std::endl;
 #endif // ATERM_DEBUG_ALLOCATOR
          // allocate memory with global new
-         pointer result = (pointer)(::operator new(num*sizeof(T)));
-         ATprotectArray(result, num);
-         return result;
+         pointer p = (pointer)(::operator new(num*sizeof(T)));
+         on_allocate(p, num);
+         return p;
        }
 
        // initialize elements of allocated storage p with value value
        void construct (pointer p, const T& value) {
 #ifdef ATERM_DEBUG_ALLOCATOR
-std::cout << "<construct>" << std::endl;
+static int c = 0;
+std::cout << "<construct> " << ++c << std::endl;
 #endif // ATERM_DEBUG_ALLOCATOR
+           on_construct(p);
            // initialize memory with placement new
-           ATprotect(p);
            new((void*)p)T(value);
        }
 
        // destroy elements of initialized storage p
        void destroy (pointer p) {
 #ifdef ATERM_DEBUG_ALLOCATOR
-std::cout << "<destruct>" << std::endl;
+static int d = 0;
+std::cout << "<destroy> " << ++d << std::endl;
 #endif // ATERM_DEBUG_ALLOCATOR
+           on_destroy(p);
            // destroy objects by calling their destructor
-           ATunprotect(p);
            p->~T();
        }
 
        // deallocate storage p of deleted elements
        void deallocate (pointer p, size_type num) {
 #ifdef ATERM_DEBUG_ALLOCATOR
-std::cout << "<deallocate>" << num << std::endl;
+std::cout << "<deallocate> " << num << " elements" << std::endl;
 #endif // ATERM_DEBUG_ALLOCATOR
+           on_deallocate(p, num);
            // deallocate memory with global delete
-           ATunprotectArray(p);
            ::operator delete((void*)p);
        }
    };
