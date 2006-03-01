@@ -9,27 +9,27 @@ namespace transport {
   namespace transceiver {
 
     /* Class that is used internally for direct transmitting/receiving */
-    class DirectTransceiver : public Transceiver {
+    class direct_transceiver : public basic_transceiver {
       friend class transport::transporter;
   
       private:
  
         /** The other side of the connection */
-        DirectTransceiver* peer;
+        direct_transceiver* peer;
 
         /** Deliver data to owner */
         inline void deliver(std::istream& input);
 
         /** Constructor for use by the transporter constructor */
-        inline DirectTransceiver(transporter& o);
+        inline direct_transceiver(transporter& o);
 
         /** Constructor for use by the transporter constructor */
-        inline DirectTransceiver(transporter& o, DirectTransceiver* p);
+        inline direct_transceiver(transporter& o, direct_transceiver* p);
 
       public:
 
         /** Terminate the connection with the peer */
-        inline void disconnect(transporter::ConnectionPtr);
+        inline void disconnect(transporter::connection_ptr);
 
         /** Send a string input stream to the peer */
         inline void send(const std::string& data);
@@ -38,37 +38,37 @@ namespace transport {
         inline void send(std::istream& data);
 
         /** Destructor */
-        inline ~DirectTransceiver();
+        inline ~direct_transceiver();
     };
 
-    inline DirectTransceiver::DirectTransceiver(transporter& o) : Transceiver(o) {
+    inline direct_transceiver::direct_transceiver(transporter& o) : basic_transceiver(o) {
     }
 
     /* Constructor for use by the transporter constructor */
-    inline DirectTransceiver::DirectTransceiver(transporter& o, DirectTransceiver* p) : Transceiver(o), peer(p) {
+    inline direct_transceiver::direct_transceiver(transporter& o, direct_transceiver* p) : basic_transceiver(o), peer(p) {
       p->peer = this;
     }
 
     /* Send a string input stream to the peer */
-    inline void DirectTransceiver::disconnect(transporter::ConnectionPtr) {
+    inline void direct_transceiver::disconnect(transporter::connection_ptr) {
       peer->handle_disconnect(this);
 
       handle_disconnect(peer);
     }
 
     /* Send a string input stream to the peer */
-    inline void DirectTransceiver::send(const std::string& data) {
+    inline void direct_transceiver::send(const std::string& data) {
       std::istringstream input(data);
   
-      Transceiver::deliver(input);
+      basic_transceiver::deliver(input);
     }
   
     /* Send the contents of an input stream to the peer */
-    inline void DirectTransceiver::send(std::istream& data) {
-      Transceiver::deliver(data);
+    inline void direct_transceiver::send(std::istream& data) {
+      basic_transceiver::deliver(data);
     }
 
-    inline DirectTransceiver::~DirectTransceiver() {
+    inline direct_transceiver::~direct_transceiver() {
     }
   }
 }

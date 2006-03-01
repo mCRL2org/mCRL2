@@ -8,8 +8,9 @@
 #include <transport/detail/socket_transceiver.h>
 
 namespace transport {
-  using namespace listener;
+
   using namespace transceiver;
+  using namespace listener;
 
   transporter::transporter() {
   }
@@ -21,20 +22,20 @@ namespace transport {
     connections.clear();
   
     /* Clean up listeners */
-    std::for_each(listeners.begin(),listeners.end(),bind(&Listener::shutdown, bind(&shared_ptr < Listener >::get, _1)));
+    std::for_each(listeners.begin(),listeners.end(),bind(&basic_listener::shutdown, bind(&shared_ptr < basic_listener >::get, _1)));
   }
 
   void transporter::connect(transporter& peer) {
-    ConnectionPtr connection = ConnectionPtr(new DirectTransceiver(*this));
+    connection_ptr connection = connection_ptr(new direct_transceiver(*this));
 
     peer.connections.push_back(connection);
-    connections.push_back(ConnectionPtr(new DirectTransceiver(peer, reinterpret_cast < DirectTransceiver* > (connection.get()))));
+    connections.push_back(connection_ptr(new direct_transceiver(peer, reinterpret_cast < direct_transceiver* > (connection.get()))));
   }
 
   void transporter::connect(const address& address, const long port) {
-    ConnectionPtr new_connection(new SocketTransceiver(*this));
+    connection_ptr new_connection(new socket_transceiver(*this));
 
-    reinterpret_cast < SocketTransceiver* > (new_connection.get())->connect(address, port);
+    reinterpret_cast < socket_transceiver* > (new_connection.get())->connect(address, port);
 
     connections.push_back(new_connection);
   }
@@ -42,7 +43,7 @@ namespace transport {
   void transporter::disconnect(size_t number) {
     assert(number < connections.size());
 
-    ConnectionList::iterator i = connections.begin();
+    connection_list::iterator i = connections.begin();
   
     while (0 < number) {
       assert(i != connections.end());
@@ -56,7 +57,7 @@ namespace transport {
   }
 
   void transporter::disconnect(transporter& m) {
-    ConnectionList::iterator i = connections.begin();
+    connection_list::iterator i = connections.begin();
   
     while (i != connections.end()) {
       if (&(*i)->owner == &m) {
@@ -71,20 +72,20 @@ namespace transport {
     }
   }
 
-  /* May throw ListenerException* */
+  /* May throw listenerException* */
   void transporter::add_listener(const address& address, const long port) {
-    ListenerPtr new_listener(new SocketListener(*this, address, port));
+    listener_ptr new_listener(new socket_listener(*this, address, port));
 
     listeners.push_back(new_listener);
 
-    reinterpret_cast < SocketListener* > (new_listener.get())->activate(new_listener);
+    reinterpret_cast < socket_listener* > (new_listener.get())->activate(new_listener);
   }
 
   /* number < listeners.size() */
   void transporter::remove_listener(size_t number) {
     assert(number < listeners.size());
 
-    ListenerList::iterator i = listeners.begin();
+    listener_list::iterator i = listeners.begin();
 
     while (0 < number) {
       --number;
@@ -100,8 +101,8 @@ namespace transport {
   }
 
   void transporter::send(const std::string& string) {
-    ConnectionList::iterator i = connections.begin();
-    ConnectionList::iterator b = connections.end();
+    connection_list::iterator i = connections.begin();
+    connection_list::iterator b = connections.end();
   
     while (i != b) {
       (*i)->send(string);
@@ -111,8 +112,8 @@ namespace transport {
   }
 
   void transporter::send(std::istream& stream) {
-    ConnectionList::iterator i = connections.begin();
-    ConnectionList::iterator b = connections.end();
+    connection_list::iterator i = connections.begin();
+    connection_list::iterator b = connections.end();
 
     while (i != b) {
       (*i)->send(stream);

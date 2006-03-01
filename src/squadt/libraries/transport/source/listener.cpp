@@ -3,14 +3,14 @@
 namespace transport {
   namespace listener {
 
-    exception::exception(Listener* alistener) : l(alistener) {
+    exception::exception(basic_listener* alistener) : l(alistener) {
     }
 
     transport::exception::exception_type exception::type() {
       return (listener_failure);
     }
 
-    Listener* exception::listener() {
+    basic_listener* exception::originator() {
       return (l);
     }
   }

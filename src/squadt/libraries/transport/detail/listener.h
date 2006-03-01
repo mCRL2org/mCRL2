@@ -7,50 +7,49 @@
 
 namespace transport {
   namespace transceiver {
-    class Transceiver;
+    class transceiver;
   }
 
   namespace listener {
-    using transport::transceiver::Transceiver;
 
     /* Base class for listeners */
-    class Listener {
+    class basic_listener {
       protected:
         transport::transporter& owner;
 
-        inline void associate(boost::shared_ptr < Transceiver >);
+        inline void associate(boost::shared_ptr < transceiver::basic_transceiver >);
 
       public:
 
-        inline Listener(transport::transporter& m);
+        inline basic_listener(transport::transporter& m);
 
         virtual void shutdown() = 0;
 
-        virtual inline ~Listener();
+        virtual inline ~basic_listener();
     };
 
-    inline void Listener::associate(boost::shared_ptr < Transceiver > t) {
+    inline void basic_listener::associate(boost::shared_ptr < transceiver::basic_transceiver > t) {
       owner.connections.push_back(t);
     }
 
-    inline Listener::Listener(transporter& m) : owner(m) {
+    inline basic_listener::basic_listener(transporter& m) : owner(m) {
     }
 
-    inline Listener::~Listener() {
+    inline basic_listener::~basic_listener() {
     }
 
     class exception : transport::exception {
       private:
-        Listener* l;
+        basic_listener* l;
 
       public:
-        exception(Listener*);
+        exception(basic_listener*);
  
         /** Returns the type of the exception */
         exception_type type();
  
         /** Returns the type of the exception */
-        Listener* listener();
+        basic_listener* originator();
     };
   }
 }

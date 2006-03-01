@@ -6,7 +6,7 @@
 namespace transport {
   namespace transceiver {
 
-    class Transceiver {
+    class basic_transceiver {
       friend void transporter::disconnect(transporter&);
 
       protected:
@@ -17,16 +17,16 @@ namespace transport {
         inline void deliver(std::istream& input);
 
         /** Removes this transceiver object from a list of connections */
-        void handle_disconnect(Transceiver*);
+        void handle_disconnect(basic_transceiver*);
 
       public:
 
-        Transceiver(transporter&);
+        inline basic_transceiver(transporter&);
      
-        virtual ~Transceiver();
+        inline virtual ~basic_transceiver();
 
         /** Function that facilitates disconnection (on both sides of a connection) */
-        virtual void disconnect(transporter::ConnectionPtr) = 0;
+        virtual void disconnect(transporter::connection_ptr) = 0;
      
         /** Send a string input stream to the peer */
         virtual void send(const std::string&) = 0;
@@ -35,27 +35,27 @@ namespace transport {
         virtual void send(std::istream&) = 0;
     };
 
-    inline Transceiver::Transceiver(transporter& o) : owner(o) {
+    inline basic_transceiver::basic_transceiver(transporter& o) : owner(o) {
     }
 
-    inline Transceiver::~Transceiver() {
+    inline basic_transceiver::~basic_transceiver() {
     }
 
-    inline void Transceiver::deliver(std::istream& input) {
+    inline void basic_transceiver::deliver(std::istream& input) {
       owner.deliver(input);
     }
 
     class exception : public transport::exception {
       private:
-        Transceiver* t;
+        basic_transceiver* t;
 
       public:
-        exception(Transceiver*);
+        exception(basic_transceiver*);
  
         /** Returns the type of the exception */
         exception_type type();
  
-        Transceiver* transceiver();
+        basic_transceiver* originator();
     };
   }
 }

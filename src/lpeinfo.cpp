@@ -22,6 +22,9 @@
 #include "atermpp/aterm.h"
 #include "lpe/specification.h"
 
+// Squadt protocol interface
+//#include <sip/tool.h>
+
 using namespace std;
 using namespace lpe;
 using namespace atermpp;

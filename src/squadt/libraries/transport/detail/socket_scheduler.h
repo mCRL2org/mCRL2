@@ -6,12 +6,12 @@
 namespace transport {
   namespace transceiver {
 
-    class SocketTransceiver;
+    class socket_transceiver;
 
     /* Wrapper around an asio demuxer */
-    class SocketScheduler {
-      friend class SocketTransceiver;
-      friend class listener::SocketListener;
+    class socket_scheduler {
+      friend class socket_transceiver;
+      friend class listener::socket_listener;
 
       private:
         bool          active;
@@ -23,7 +23,7 @@ namespace transport {
 
       public:
         /** Constructor */
-        inline SocketScheduler();
+        inline socket_scheduler();
 
         /** Run the demuxer */
         inline void run();
@@ -32,36 +32,36 @@ namespace transport {
         inline void stop();
 
         /** Destructor */
-        inline ~SocketScheduler();
+        inline ~socket_scheduler();
     };
 
-    inline SocketScheduler::SocketScheduler() : active(false) {
+    inline socket_scheduler::socket_scheduler() : active(false) {
     }
 
-    inline void SocketScheduler::task() {
+    inline void socket_scheduler::task() {
       demuxer.run();
       demuxer.reset();
 
       active = false;
     }
 
-    inline void SocketScheduler::run() {
+    inline void socket_scheduler::run() {
       if (!active) {
         using namespace boost;
 
         active = true;
 
-        thread = shared_ptr < asio::thread > (new asio::thread(bind(&SocketScheduler::task, this)));
+        thread = shared_ptr < asio::thread > (new asio::thread(bind(&socket_scheduler::task, this)));
       }
     }
 
-    inline void SocketScheduler::stop() {
+    inline void socket_scheduler::stop() {
       if (active) {
         demuxer.interrupt();
       }
     }
 
-    inline SocketScheduler::~SocketScheduler() {
+    inline socket_scheduler::~socket_scheduler() {
       stop();
     }
   }

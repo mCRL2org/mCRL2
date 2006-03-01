@@ -6,21 +6,21 @@
 namespace transport {
   namespace transceiver {
 
-    exception::exception(Transceiver* atransceiver) : t(atransceiver) {
+    exception::exception(basic_transceiver* atransceiver) : t(atransceiver) {
     }
 
     transport::exception::exception_type exception::type() {
       return (transceiver_closed);
     }
 
-    Transceiver* exception::transceiver() {
+    basic_transceiver* exception::originator() {
       return (t);
     }
 
-    void Transceiver::handle_disconnect(Transceiver* t) {
+    void basic_transceiver::handle_disconnect(basic_transceiver* t) {
       /* Remove instance from the list of connections */
-      transporter::ConnectionList::iterator i = owner.connections.begin();
-      transporter::ConnectionList::iterator b = owner.connections.end();
+      transporter::connection_list::iterator i = owner.connections.begin();
+      transporter::connection_list::iterator b = owner.connections.end();
 
       while (i != b) {
         if ((*i).get() == t) {

@@ -9,13 +9,12 @@
 
 namespace transport {
   namespace transceiver {
-    class SocketTransceiver;
+    class socket_transceiver;
   }
 
   namespace listener {
-    using transceiver::SocketTransceiver;
 
-    class SocketListener : public Listener {
+    class socket_listener : public basic_listener {
       private:
         /** The socket listener */
         asio::socket_acceptor    acceptor;
@@ -23,27 +22,27 @@ namespace transport {
         /** For mutual exclusive event handling */
         asio::locking_dispatcher dispatcher;
 
-        void handle_accept(const asio::error&, boost::shared_ptr < SocketTransceiver >, transporter::ListenerPtr);
+        void handle_accept(const asio::error&, boost::shared_ptr < transceiver::socket_transceiver >, transporter::listener_ptr);
 
       public:
 
         /** Constructor */
-        SocketListener(transport::transporter& m, const address& address, const long default_port);
+        socket_listener(transport::transporter& m, const address& address, const long default_port);
 
         /** Activate the listener */
-        void activate(transporter::ListenerPtr);
+        void activate(transporter::listener_ptr);
 
         /** Schedule shutdown of listener */
         void shutdown();
 
         /** Destructor */
-        virtual inline ~SocketListener();
+        virtual inline ~socket_listener();
     };
 
-    inline SocketListener::~SocketListener() {
+    inline socket_listener::~socket_listener() {
     }
 
-    inline void SocketListener::shutdown() {
+    inline void socket_listener::shutdown() {
       acceptor.close();
     }
   }

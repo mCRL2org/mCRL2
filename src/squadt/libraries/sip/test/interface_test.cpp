@@ -1,11 +1,14 @@
 #include <sstream>
 #include <iostream>
+#include <cstdio>
 
 #include <boost/test/test_tools.hpp>
 #include <boost/test/unit_test.hpp>
 #include <boost/test/unit_test_log.hpp>
+#include <boost/test/unit_test_monitor.hpp>
 
 #include <sip/detail/basic_messenger.tcc>
+#include <sip/detail/command_line_interface.h>
 #include <sip/tool.h>
 #include <sip/controller.h>
 
@@ -182,10 +185,44 @@ void display_layout_exchange() {
   BOOST_MESSAGE("  done");
 }
 
-test_suite* init_unit_test_suite( int argc, char * argv[] ) {
+void command_line_interface_helper(int bc, int ac, char* const * const ba, const char* const * const aa, std::string m) {
+  char* copy[bc];
+
+  BOOST_MESSAGE("  " + m + "...");
+
+  for (int i = 0; i < bc; ++i) {
+    copy[i] = ba[i];
+  }
+
+  sip::cli::command_line_argument_extractor t(bc, copy);
+
+  for (int i = 0; i < ac; ++i) {
+    BOOST_CHECK(strcmp(copy[i], aa[i]) == 0);
+  }
+
+  BOOST_MESSAGE("   done");
+}
+
+void command_line_interface() {
+  char* arguments[6] = { "-i", "filename", "--si-connect=socket://localhost:55923", "--a", "filename", "--si-connect=traditional" };
+  char* reference[4] = { "-i", "filename", "--a", "filename" };
+
+  BOOST_MESSAGE(" Command line argument extraction... ");
+
+  command_line_interface_helper(5, 4, arguments, reference, "Trying socket scheme");
+
+  arguments[2] = "--si-connect=traditional";
+
+  command_line_interface_helper(5, 4, arguments, reference, "Trying traditional scheme");
+
+  command_line_interface_helper(6, 4, arguments, reference, "Multiple connect specifications");
+}
+
+test_suite* init_unit_test_suite(int argc, char * argv[]) {
+  using namespace boost;
   using namespace boost::unit_test;
 
-  test_suite* test = BOOST_TEST_SUITE( "SIP Communicator" );
+  test_suite* test = BOOST_TEST_SUITE( "SI protocol implementation" );
 
   /* Change log parameters */
   unit_test_log_t::instance().set_threshold_level(log_messages);
@@ -193,6 +230,7 @@ test_suite* init_unit_test_suite( int argc, char * argv[] ) {
   test->add(BOOST_TEST_CASE(&controller_capabilities_exchange), 0, 2);
   test->add(BOOST_TEST_CASE(&input_configuration_exchange), 0, 2);
   test->add(BOOST_TEST_CASE(&report_exchange), 0, 2);
+  test->add(BOOST_TEST_CASE(&command_line_interface), 0, 2);
 
   return (test);
 }

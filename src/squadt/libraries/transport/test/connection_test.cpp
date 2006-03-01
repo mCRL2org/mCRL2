@@ -147,7 +147,7 @@ void direct_send_receive() {
 
 /* Test whether data can be communicated via a socket connection between a sender and a receiver */
 void socket_send_receive() {
-  class transport::transceiver::SocketTransceiver;
+  class transport::transceiver::socket_transceiver;
 
   std::string        initiator_data;
   std::string        connector_data;

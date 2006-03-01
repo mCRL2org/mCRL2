@@ -5,6 +5,7 @@
 #include <sip/tool.h>
 #include <sip/detail/message.h>
 #include <sip/detail/basic_messenger.tcc>
+#include <sip/detail/command_line_interface.h>
 
 namespace sip {
   using namespace sip::messenger;
@@ -32,6 +33,8 @@ namespace sip {
    * \return whether options were found and whether a connection is being opened with a controller
    **/
   bool tool_communicator::activate(int& argc, char** argv) {
+    cli::command_line_argument_extractor(argc, argv);
+
     return (true);
   }
 

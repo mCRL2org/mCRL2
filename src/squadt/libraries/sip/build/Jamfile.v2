@@ -21,6 +21,7 @@ alias messenger
 
 lib sip_common
     : common.cpp
+      exception.cpp
       report.cpp
       display_layout.cpp
     :

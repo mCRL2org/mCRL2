@@ -5,9 +5,12 @@
 namespace transport {
   namespace listener {
 
+    using namespace transceiver;
+    using namespace listener;
+
     /** Constructor */
-    SocketListener::SocketListener(transporter& m, const address& address, const long port) :
-      Listener(m), acceptor(SocketTransceiver::scheduler.demuxer), dispatcher(SocketTransceiver::scheduler.demuxer) {
+    socket_listener::socket_listener(transporter& m, const address& address, const long port) :
+      basic_listener(m), acceptor(socket_transceiver::scheduler.demuxer), dispatcher(socket_transceiver::scheduler.demuxer) {
       using namespace asio;
       using namespace boost;
 
@@ -19,30 +22,30 @@ namespace transport {
       acceptor.listen();
     }
 
-    void SocketListener::activate(transporter::ListenerPtr l) {
+    void socket_listener::activate(transporter::listener_ptr l) {
       /* Create a new socket transceiver that is not yet connected to the transporter */
-      boost::shared_ptr < SocketTransceiver > t(new SocketTransceiver(owner));
+      boost::shared_ptr < socket_transceiver > t(new socket_transceiver(owner));
 
-      acceptor.async_accept(t->socket, dispatcher.wrap(bind(&SocketListener::handle_accept, this, asio::placeholders::error, t, l)));
+      acceptor.async_accept(t->socket, dispatcher.wrap(bind(&socket_listener::handle_accept, this, asio::placeholders::error, t, l)));
 
       /* Make sure the scheduler is running */
-      SocketTransceiver::scheduler.run();
+      socket_transceiver::scheduler.run();
     }
 
-    void SocketListener::handle_accept(const asio::error& e, boost::shared_ptr < SocketTransceiver > t, transporter::ListenerPtr l) {
+    void socket_listener::handle_accept(const asio::error& e, boost::shared_ptr < socket_transceiver > t, transporter::listener_ptr l) {
       if (!e) {
-        SocketListener::associate(t);
+        socket_listener::associate(t);
 
         t->activate();
 
-        t = boost::shared_ptr < SocketTransceiver > (new SocketTransceiver(owner));
+        t = boost::shared_ptr < socket_transceiver > (new socket_transceiver(owner));
 
         /* Listen for new connections */
-        acceptor.async_accept(t->socket, dispatcher.wrap(bind(&SocketListener::handle_accept, this, asio::placeholders::error, t, l)));
+        acceptor.async_accept(t->socket, dispatcher.wrap(bind(&socket_listener::handle_accept, this, asio::placeholders::error, t, l)));
       }
       else if (e == asio::error::connection_aborted) {
         /* Listen for new connections */
-        acceptor.async_accept(t->socket, dispatcher.wrap(bind(&SocketListener::handle_accept, this, asio::placeholders::error, t, l)));
+        acceptor.async_accept(t->socket, dispatcher.wrap(bind(&socket_listener::handle_accept, this, asio::placeholders::error, t, l)));
       }
       else if (e == asio::error::operation_aborted) {
         return;
@@ -55,7 +58,7 @@ namespace transport {
       }
 
       /* Make sure the scheduler is running */
-      SocketTransceiver::scheduler.run();
+      socket_transceiver::scheduler.run();
     }
   }
 }

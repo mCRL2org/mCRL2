@@ -6,29 +6,29 @@
 namespace transport {
   namespace transceiver {
 
-    unsigned int  SocketTransceiver::input_buffer_size = 2048;
+    unsigned int  socket_transceiver::input_buffer_size = 2048;
 
-    SocketScheduler          SocketTransceiver::scheduler;
+    socket_scheduler          socket_transceiver::scheduler;
 
     /* Constructor */
-    SocketTransceiver::SocketTransceiver(transporter& o) : Transceiver(o), socket(scheduler.demuxer) {
+    socket_transceiver::socket_transceiver(transporter& o) : basic_transceiver(o), socket(scheduler.demuxer) {
       using namespace asio;
 
       buffer = new char[input_buffer_size];
     }
 
     /* Start listening */
-    void SocketTransceiver::activate() {
+    void socket_transceiver::activate() {
       using namespace asio;
       using namespace boost;
 
       socket.set_option(socket_base::keep_alive(true));
       socket.set_option(socket_base::linger(false, 0));
 
-      socket.async_receive(asio::buffer(buffer, input_buffer_size), 0, bind(&SocketTransceiver::handle_receive, this, placeholders::error));
+      socket.async_receive(asio::buffer(buffer, input_buffer_size), 0, bind(&socket_transceiver::handle_receive, this, placeholders::error));
     }
 
-    void SocketTransceiver::connect(const address& address, const long port) {
+    void socket_transceiver::connect(const address& address, const long port) {
       using namespace asio;
 
       /* Build socket connection */
@@ -40,7 +40,7 @@ namespace transport {
       socket.set_option(socket_base::linger(false, 0));
 
       if (!e) {
-        socket.async_receive(asio::buffer(buffer, input_buffer_size), 0, boost::bind(&SocketTransceiver::handle_receive, this, placeholders::error));
+        socket.async_receive(asio::buffer(buffer, input_buffer_size), 0, boost::bind(&socket_transceiver::handle_receive, this, placeholders::error));
 
         /* Make sure the scheduler is running */
         scheduler.run();
@@ -58,7 +58,7 @@ namespace transport {
       }
     }
 
-    void SocketTransceiver::handle_receive(const asio::error& e) {
+    void socket_transceiver::handle_receive(const asio::error& e) {
       using namespace asio;
 
       if (!e) {
@@ -66,9 +66,9 @@ namespace transport {
 
         stream.str(std::string(buffer));
 
-        Transceiver::deliver(stream);
+        basic_transceiver::deliver(stream);
 
-        socket.async_receive(asio::buffer(buffer, input_buffer_size), 0, boost::bind(&SocketTransceiver::handle_receive, this, placeholders::error));
+        socket.async_receive(asio::buffer(buffer, input_buffer_size), 0, boost::bind(&socket_transceiver::handle_receive, this, placeholders::error));
 
         /* Make sure the scheduler is running */
         scheduler.run();
@@ -86,7 +86,7 @@ namespace transport {
       }
     }
 
-    void SocketTransceiver::handle_write(const asio::error& e) {
+    void socket_transceiver::handle_write(const asio::error& e) {
       if (e == asio::error::eof) {
         /* Connection was closed by peer */
         handle_disconnect(this);
@@ -99,15 +99,15 @@ namespace transport {
     }
 
     /* Send via socket */
-    void SocketTransceiver::send(const std::string& data) {
+    void socket_transceiver::send(const std::string& data) {
       using namespace asio;
       using namespace boost;
 
-      asio::async_write(socket, asio::buffer(data.c_str(), data.length() + 1), bind(&SocketTransceiver::handle_write, this, placeholders::error));
+      asio::async_write(socket, asio::buffer(data.c_str(), data.length() + 1), bind(&socket_transceiver::handle_write, this, placeholders::error));
     }
 
     /* Send via socket */
-    void SocketTransceiver::send(std::istream& data) {
+    void socket_transceiver::send(std::istream& data) {
       using namespace asio;
       using namespace boost;
 
@@ -115,11 +115,11 @@ namespace transport {
 
       temporary << data.rdbuf();
 
-      asio::async_write(socket, asio::buffer(temporary.str().c_str(), temporary.str().length() + 1), bind(&SocketTransceiver::handle_write, this, placeholders::error));
+      asio::async_write(socket, asio::buffer(temporary.str().c_str(), temporary.str().length() + 1), bind(&socket_transceiver::handle_write, this, placeholders::error));
     }
 
     /* Destructor */
-    SocketTransceiver::~SocketTransceiver() {
+    socket_transceiver::~socket_transceiver() {
       delete[] buffer;
     }
   }

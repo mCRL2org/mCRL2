@@ -31,33 +31,33 @@
 
 namespace transport {
   namespace listener {
-    class Listener;
+    class basic_listener;
   }
 
   namespace transceiver {
-    class Transceiver;
+    class basic_transceiver;
   }
 
-  using transceiver::Transceiver;
-  using listener::Listener;
+  using transceiver::basic_transceiver;
+  using listener::basic_listener;
 
   class transporter : boost::noncopyable {
-    friend class Transceiver;
-    friend class Listener;
+    friend class basic_transceiver;
+    friend class basic_listener;
 
     public:
-      typedef boost::shared_ptr < Transceiver > ConnectionPtr;
-      typedef std::list < ConnectionPtr >       ConnectionList;
-      typedef boost::shared_ptr < Listener >    ListenerPtr;
-      typedef std::list < ListenerPtr >         ListenerList;
+      typedef boost::shared_ptr < basic_transceiver > connection_ptr;
+      typedef std::list < connection_ptr >            connection_list;
+      typedef boost::shared_ptr < basic_listener >    listener_ptr;
+      typedef std::list < listener_ptr >              listener_list;
 
     private:
 
-      /** Listeners (for socket communication etc) */
-      ListenerList   listeners;
+      /** listeners (for socket communication etc) */
+      listener_list   listeners;
 
       /** The list with connections */
-      ConnectionList connections;
+      connection_list connections;
 
       /** Abstract function for the delivery of streamed data to the client program */
       virtual void deliver(std::istream&) = 0;
@@ -66,7 +66,7 @@ namespace transport {
       virtual void deliver(std::string&) = 0;
 
       /** Creates direct connection to another transporter object */
-      void connect(Transceiver*);
+      void connect(basic_transceiver*);
   
     public:
   

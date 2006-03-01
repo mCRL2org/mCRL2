@@ -13,23 +13,23 @@ namespace transport {
   namespace transceiver {
 
     /* Class that is used internally for direct transmitting/receiving */
-    class SocketTransceiver : public Transceiver {
+    class socket_transceiver : public basic_transceiver {
       friend class transport::transporter;
-      friend class transport::listener::SocketListener;
+      friend class transport::listener::socket_listener;
   
       private:
 
         /** Scheduler for asynchronous socket communication */
-        static SocketScheduler scheduler;
+        static socket_scheduler scheduler;
 
         /** Default port for socket connections */
-        static long            default_port;
+        static long             default_port;
 
-        static unsigned int    input_buffer_size;
-        char*                  buffer;
+        static unsigned int     input_buffer_size;
+        char*                   buffer;
 
         /** The local endpoint of a connection */
-        asio::stream_socket    socket;
+        asio::stream_socket     socket;
  
         /** Send a string input stream to the peer */
         void send(const std::string& data);
@@ -51,20 +51,20 @@ namespace transport {
 
       public:
         /** Constructor that connects to a port on an address */
-        SocketTransceiver(transporter& o);
+        socket_transceiver(transporter& o);
 
         /** Terminate the connection with the peer */
-        void disconnect(transporter::ConnectionPtr);
+        void disconnect(transporter::connection_ptr);
 
         /** Destructor */
-        ~SocketTransceiver();
+        ~socket_transceiver();
     };
 
-    inline void SocketTransceiver::disconnect(transporter::ConnectionPtr) {
+    inline void socket_transceiver::disconnect(transporter::connection_ptr) {
       socket.shutdown(asio::stream_socket::shutdown_both);
       socket.close();
 
-      Transceiver::handle_disconnect(this);
+      basic_transceiver::handle_disconnect(this);
     }
   }
 }
