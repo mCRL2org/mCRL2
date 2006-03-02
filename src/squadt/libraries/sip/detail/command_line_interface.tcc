@@ -88,7 +88,7 @@ namespace sip {
                 std::string& host_name = dynamic_cast < socket_scheme* > (selected_scheme.get())->host_name;
 
                 host_name.reserve(d);
-                host_name.copy(s, d);
+                host_name.assign(s, d);
                 host_name.resize(d);
               }
 
