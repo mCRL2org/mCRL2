@@ -44,9 +44,9 @@ TARGETS                        = squadt
 
 all: $(BJAM) $(TREE_ROOT)config.jam settings.h
 ifeq ($(findstring $(CPPFLAGS),NDEBUG),)
-	 @cd build; $(BJAM) --v2 debug squadt
+	 @cd build; $(BJAM) debug squadt
 else
-	 @cd build; $(BJAM) --v2 release squadt
+	 @cd build; $(BJAM) release squadt
 endif
 
 $(TREE_ROOT)config.jam:
@@ -101,7 +101,7 @@ strip: $(TARGETS)
 	$(STRIP) --strip-unneeded --strip-debug $^
 
 install: all
-	@cd build; $(BJAM) --v2 --install
+	@cd build; $(BJAM) --install
 	$(INSTALL) -d $(bindir)
 	$(INSTALL) -d $(datadir)
 	$(INSTALL) -d $(datadir)/images
@@ -126,7 +126,7 @@ ifeq ($(HOST_OS),MACOSX)
 endif
 
 clean:
-#	@cd build; $(BJAM) --v2 --clean-all
+#	@cd build; $(BJAM) --clean-all
 	$(RM) -rf *.o $(TARGETS) $(TEST_TARGETS) core dependencies bin
 
 distclean: clean

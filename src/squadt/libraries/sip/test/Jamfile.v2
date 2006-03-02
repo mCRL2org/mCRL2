@@ -1,7 +1,7 @@
 project test_sip
-  : requirements
-   <include>../../../../boost/
-   <include>../../ ;
+    : requirements
+       <include>../../../../boost/
+       <include>../../ ;
 
 import testing ;
 

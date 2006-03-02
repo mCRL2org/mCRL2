@@ -1,4 +1,4 @@
-project squadt
+project utilities
   : build-dir bin
   : default-build release ;
 

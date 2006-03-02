@@ -1,11 +1,9 @@
-#include <boost/ref.hpp>
-
 #include <xml2pp/text_reader.h>
 
 #include <sip/tool.h>
 #include <sip/detail/message.h>
 #include <sip/detail/basic_messenger.tcc>
-#include <sip/detail/command_line_interface.h>
+#include <sip/detail/command_line_interface.tcc>
 
 namespace sip {
   using namespace sip::messenger;
@@ -33,7 +31,28 @@ namespace sip {
    * \return whether options were found and whether a connection is being opened with a controller
    **/
   bool tool_communicator::activate(int& argc, char** argv) {
-    cli::command_line_argument_extractor(argc, argv);
+    cli::command_line_argument_extractor e(argc, argv);
+
+    if (e.get_scheme() != 0) {
+      cli::scheme_ptr scheme = e.get_scheme();
+
+      scheme->connect(*this);
+
+      instance_identifier = e.get_identifier();
+
+      /* Identify the tool instance to the controller */
+      sip_message m(sip::send_instance_identifier);
+
+      std::ostringstream s;
+
+      s << instance_identifier;
+
+      m.set_content(s.str());
+
+      send_message(m);
+
+      current_status = status_clean;
+    }
 
     return (true);
   }
@@ -43,7 +62,7 @@ namespace sip {
 
   /* Request details about the amount of space that the controller currently has reserved for this tool */
   void tool_communicator::request_controller_capabilities() {
-    sip_message m(sip::request_controller_capabilities);
+    message m(sip::request_controller_capabilities);
 
     send_message(m);
 
@@ -84,7 +103,9 @@ namespace sip {
 
   /* Send a signal that the tool is about to terminate */
   void tool_communicator::send_signal_termination() {
-    send_message(boost::cref(message(sip::send_signal_termination)));
+    message m(sip::send_signal_termination);
+
+    send_message(m);
   }
 
   /* Send a status report to the controller */

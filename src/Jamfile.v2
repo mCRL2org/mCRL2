@@ -1,0 +1,27 @@
+# This build file has no status and is not portable it serves to (re)build tools with squadt connectivity
+
+project squadt-enabled-tools
+  : source-location ./
+  : build-dir ./bin
+  : default-build debug
+  : requirements
+    <include>src/squadt/libraries
+    <cxxflags>-std=c++98 ;
+
+include $(TOP)/config.jam ;
+
+exe lpeinfo :
+         libprint.o
+         libstruct.o
+         libprint_c.o
+         liblowlevel.o
+         lpeinfo.cpp
+         /libraries/sip//sipt
+         /boost/program_options//boost_program_options
+       : <define>REVISION=$(REVISION_NUMBER)
+         <define>ENABLE_SQUADT_CONNECTIVITY
+         <include>.     # for ATerm/atermpp headers (should be cleaned up)
+         <include>aterm # for ATerm/atermpp headers (should be cleaned up)
+         <linkflags>"-Laterm -lATerm -L. -lrewrite -lm -ldl"
+       ;
+

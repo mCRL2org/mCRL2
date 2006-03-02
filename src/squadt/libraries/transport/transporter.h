@@ -1,16 +1,14 @@
-#ifndef MESSENGER_H
-#define MESSENGER_H
+#ifndef TRANSPORTER_H
+#define TRANSPORTER_H
 
 #include <exception>
 #include <string>
 #include <list>
-#include <cassert>
 #include <istream>
 
-#include <boost/utility.hpp>
+#include <boost/asio/ipv4/address.hpp>
+#include <boost/noncopyable.hpp>
 #include <boost/shared_ptr.hpp>
-
-#include "detail/address.h"
 
 /*
  * Socket/Direct communication abstraction
@@ -25,8 +23,8 @@
  *   - the sender puts the data on a socket, when the data arrives, it is
  *   passed in the very same way to the receiving context.
  *
- *  Currently a single sender can be connected to many receivers that will all
- *  receive everything that is sent (if nothing goes wrong).
+ *  Currently, unless exceptions occur, a single sender can be connected to
+ *  many receivers that will all receive everything that is sent.
  */
 
 namespace transport {
@@ -46,64 +44,77 @@ namespace transport {
     friend class basic_listener;
 
     public:
+      /** Convenience type to hide the shared pointer */
       typedef boost::shared_ptr < basic_transceiver > connection_ptr;
+
+      /** Convenience type to hide the shared pointer */
       typedef std::list < connection_ptr >            connection_list;
+
+      /** Convenience type to hide the shared pointer */
       typedef boost::shared_ptr < basic_listener >    listener_ptr;
+
+      /** Convenience type to hide the shared pointer */
       typedef std::list < listener_ptr >              listener_list;
+
+      /** IP version 4 address verifier (refer to the asio documentation) */
+      typedef asio::ipv4::address                     address;
 
     private:
 
-      /** listeners (for socket communication etc) */
+      /** \brief listeners (for socket communication etc) */
       listener_list   listeners;
 
-      /** The list with connections */
+      /** \brief The list with connections */
       connection_list connections;
 
-      /** Abstract function for the delivery of streamed data to the client program */
+      /** \brief Abstract function for the delivery of streamed data to the client program */
       virtual void deliver(std::istream&) = 0;
 
-      /** Abstract function for the delivery of streamed data to the client program */
+      /** \brief Abstract function for the delivery of streamed data to the client program */
       virtual void deliver(std::string&) = 0;
 
-      /** Creates direct connection to another transporter object */
+      /** \brief Creates direct connection to another transporter object */
       void connect(basic_transceiver*);
   
     public:
   
-      /** Default constructor with no initial connections */
+      /** \brief Default constructor with no initial connections */
       transporter();
  
-      /** Destructor */
+      /** \brief Destructor */
       virtual ~transporter();
   
-      /** Creates direct connection to another transporter object */
+      /** \brief Creates direct connection to another transporter object */
       void connect(transporter&);
 
-      /** Creates socket connection to another transporter object (using a loopback connection by default) */
-      void connect(const address& = address::loopback(), const long port = default_port);
-  
-      /** Disconnect connection number <|number|> */
+      /** \brief Creates socket connection to another transporter object (using a loopback connection by default) */
+      void connect(const address& = address::loopback(), const long port = 0);
+
+      /** \brief Creates socket connection to another transporter object (using a loopback connection by default) */
+      void connect(const std::string& host_name, const long port = 0);
+
+      /** \brief Disconnect connection number <|number|> */
       void disconnect(size_t number = 0);
 
-      /** Disconnect connection number <|number|> */
+      /** \brief Disconnect connection number <|number|> */
       void disconnect(transporter&);
 
-      /** Activate a socket listener (using a loopback connection by default) */
-      void add_listener(const address& = address::loopback(), const long port = default_port);
+      /** \brief Activate a socket listener (using a loopback connection by default) */
+      void add_listener(const address& = address::loopback(), const long port = 0);
 
-      /** Activate a socket listener by its number */
+      /** \brief Activate a socket listener by its number */
       void remove_listener(size_t number = 0);
   
-      /** Communicate a string with all peers */
+      /** \brief Communicate a string with all peers */
       void send(const std::string&);
  
-      /** Communicate data from a stream with all peers */
+      /** \brief Communicate data from a stream with all peers */
       void send(std::istream&);
 
-      /** The number of active listeners */
+      /** \brief The number of active listeners */
       inline size_t number_of_listeners();
 
-      /** The number of active connections */
+      /** \brief The number of active connections */
       inline size_t number_of_connections();
   };
 

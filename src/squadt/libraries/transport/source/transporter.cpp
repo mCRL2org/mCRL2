@@ -40,6 +40,14 @@ namespace transport {
     connections.push_back(new_connection);
   }
 
+  void transporter::connect(const std::string& host_name, const long port) {
+    connection_ptr new_connection(new socket_transceiver(*this));
+
+    reinterpret_cast < socket_transceiver* > (new_connection.get())->connect(host_name, port);
+
+    connections.push_back(new_connection);
+  }
+
   void transporter::disconnect(size_t number) {
     assert(number < connections.size());
 

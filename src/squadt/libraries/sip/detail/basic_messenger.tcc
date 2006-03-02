@@ -155,9 +155,7 @@ namespace sip {
 
             t = M::extract_type(new_string);
 
-            message_ptr m(new message(t));
-
-            m->set_content(new_string);
+            message_ptr m(new message(new_string, t));
 
             typename handler_map::iterator h = handlers.find(t);
 

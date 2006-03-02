@@ -46,6 +46,13 @@ namespace sip {
         /** Generates an XML text string for the message */
         inline message(type_identifier_t t = D);
 
+        /** Copy constructor */
+        inline message(message&);
+
+        /** Generates an XML text string for the message */
+        template < typename T >
+        inline message(T, type_identifier_t t = D);
+
         /** Returns the message type */
         inline type_identifier_t get_type() const;
  
@@ -57,19 +64,36 @@ namespace sip {
  
         /** Returns the content without formatting */
         inline std::string to_string() const;
- 
-        /** Set content via string */
-        inline void set_content(const std::string);
 
-        /** Set content via stream */
-        inline void set_content(std::istream&);
+        /** Generates an XML text string for the message */
+        inline void set_content(const std::string&);
 
-        /** Set content via null-terminated string */
+        /** Generates an XML text string for the message */
         inline void set_content(const char*);
+
+        /** Generates an XML text string for the message */
+        inline void set_content(std::istream&);
     };
  
+    /**
+     * @param t a message type identifier
+     **/
     template < class M, M D >
     inline message< M, D >::message(type_identifier_t t) : type(t) {
+    }
+
+    template < class M, M D >
+    inline message< M, D >::message(message& m) : type(m.type), content(m.content) {
+    }
+
+    /**
+     * @param t a message type identifier
+     * @param c the initial content of the message
+     **/
+    template < class M, M D >
+    template < typename T >
+    inline message< M, D >::message(T c, type_identifier_t t) : type(t) {
+      set_content(c);
     }
 
     template < class M, M D >
@@ -104,25 +128,6 @@ namespace sip {
     }
  
     template < class M, M D >
-    inline void message< M, D >::set_content(const std::string c) {
-      content = c;
-    }
- 
-    template < class M, M D >
-    inline void message< M, D >::set_content(std::istream& c) {
-      std::ostringstream temporary;
- 
-      temporary << c.rdbuf();
- 
-      content = temporary.str();
-    }
- 
-    template < class M, M D >
-    inline void message< M, D >::set_content(const char* c) {
-      content = std::string(c);
-    }
- 
-    template < class M, M D >
     inline std::string message< M, D >::to_xml() const {
       std::ostringstream output;
       
@@ -140,6 +145,37 @@ namespace sip {
     template < class M, M D >
     inline std::string message< M, D >::to_string() const {
       return (content);
+    }
+
+    /**
+     * @param t a message type identifier
+     * @param c the initial content of the message
+     **/
+    template < class M, M D >
+    inline void message< M, D >::set_content(std::istream& c) {
+      std::ostringstream temporary;
+ 
+      temporary << c.rdbuf();
+ 
+      content = temporary.str();
+    }
+
+    /**
+     * @param t a message type identifier
+     * @param c the initial content of the message
+     **/
+    template < class M, M D >
+    inline void message< M, D >::set_content(const std::string& c) {
+      content = c;
+    }
+
+    /**
+     * @param t a message type identifier
+     * @param c the initial content of the message
+     **/
+    template < class M, M D >
+    inline void message< M, D >::set_content(const char* c) {
+      content = c;
     }
   }
 }

@@ -245,9 +245,7 @@ void message_wrapper() {
 
   messenger_t c;
   messenger_t d;
-  messenger_t::message m;
-
-  m.set_content(data);
+  messenger_t::message m(data);
 
   c.connect(d);
 

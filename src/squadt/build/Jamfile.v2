@@ -3,7 +3,8 @@ project squadt
   : build-dir $(BUILD_TOP)
   : default-build debug
   : requirements
-   <include>../libraries ;
+    <include>../libraries
+    <cxxflags>-std=c++98 ;
 
 include $(TOP)/config.jam ;
 

@@ -24,6 +24,7 @@ lib sip_common
       exception.cpp
       report.cpp
       display_layout.cpp
+    : <source>/libraries/xml2pp//text_reader
     :
     : <library>/libraries/xml2pp//text_reader
     ;
@@ -32,10 +33,16 @@ lib sipc
     : controller.cpp
       sip_common
       messenger
+    :
+    :
+    : <library>/libraries/sip//sip_common
     ;
 
 lib sipt
     : tool.cpp
       sip_common
       messenger
+    :
+    :
+    : <library>/libraries/sip//sip_common
     ;

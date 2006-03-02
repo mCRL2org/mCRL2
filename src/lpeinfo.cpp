@@ -23,7 +23,9 @@
 #include "lpe/specification.h"
 
 // Squadt protocol interface
-//#include <sip/tool.h>
+#ifdef ENABLE_SQUADT_CONNECTIVITY
+#include <sip/tool.h>
+#endif
 
 using namespace std;
 using namespace lpe;
@@ -139,6 +141,14 @@ int main(int ac, char* av[])
   ATerm bot;
   ATinit(0,0,&bot);
   gsEnableConstructorFunctions();
+#ifdef ENABLE_SQUADT_CONNECTIVITY
+  sip::tool_communicator tc;
+
+  /* Set tool capabilities */
+
+  /* On purpose we do not catch exceptions */
+  tc.activate(ac,av);
+#endif
    
   InfoObj obj;
   
@@ -217,7 +227,7 @@ int main(int ac, char* av[])
     }
   
   }
-  catch(exception& e){
+  catch(std::exception& e){
     cout << e.what() << "\n";
     return 1;
   }    

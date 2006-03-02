@@ -17,46 +17,56 @@ namespace transport {
       friend class transport::transporter;
       friend class transport::listener::socket_listener;
   
+      public:
+        /** IP version 4 address verifier (refer to the asio documentation) */
+        typedef asio::ipv4::address address;
+
       private:
 
-        /** Scheduler for asynchronous socket communication */
-        static socket_scheduler scheduler;
+        /** \brief Host name resolver */
+        static asio::ipv4::host_resolver resolver;
 
-        /** Default port for socket connections */
-        static long             default_port;
+        /** \brief Scheduler for asynchronous socket communication */
+        static socket_scheduler          scheduler;
 
-        static unsigned int     input_buffer_size;
-        char*                   buffer;
+        /** \brief Default port for socket connections */
+        static long                      default_port;
 
-        /** The local endpoint of a connection */
-        asio::stream_socket     socket;
+        static unsigned int              input_buffer_size;
+        char*                            buffer;
+
+        /** \brief The local endpoint of a connection */
+        asio::stream_socket              socket;
  
-        /** Send a string input stream to the peer */
+        /** \brief Send a string input stream to the peer */
         void send(const std::string& data);
   
-        /** Send the contents of an input stream to the peer */
+        /** \brief Send the contents of an input stream to the peer */
         void send(std::istream& data);
 
-        /** Connect to a peer using an address and a port */
+        /** \brief Connect to a peer using an address and a port */
         void connect(const address& address = address::loopback(), const long port = default_port);
 
-        /** Read from the socket */
+        /** \brief Connect to a peer using an address and a port */
+        void connect(const std::string& host_name, const long port = default_port);
+
+        /** \brief Read from the socket */
         void handle_receive(const asio::error& e);
 
-        /** Process results from a write operation on the socket */
+        /** \brief Process results from a write operation on the socket */
         void handle_write(const asio::error& e);
 
-        /** Start listening for new data */
+        /** \brief Start listening for new data */
         void activate();
 
       public:
-        /** Constructor that connects to a port on an address */
+        /** \brief Constructor that connects to a port on an address */
         socket_transceiver(transporter& o);
 
-        /** Terminate the connection with the peer */
+        /** \brief Terminate the connection with the peer */
         void disconnect(transporter::connection_ptr);
 
-        /** Destructor */
+        /** \brief Destructor */
         ~socket_transceiver();
     };
 

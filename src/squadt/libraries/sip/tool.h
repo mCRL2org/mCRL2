@@ -4,11 +4,16 @@
 #include <set>
 
 #include <sip/detail/common.h>
+#include <sip/detail/schemes.h>
 
 /* Interface classes for the tool side of the Squadt Interaction Protocol */
 namespace sip {
 
+  class tool_communicator;
+
   class tool_communicator : public sip_messenger {
+    friend void scheme::connect(tool_communicator&) const;
+
     private:
       /** Charactarises the current state */
       typedef enum {
@@ -28,6 +33,9 @@ namespace sip {
 
       /** \brief A set of available input configurations for this tool */
       std::set < std::pair < tool_category, storage_format > >       current_input_configurations;
+
+      /** \brief Unique identifier for the running tool, obtained via the command line */
+      long instance_identifier;
 
       /** \brief Handler for incoming data resulting from user interaction relayed by the controller */
       void accept_interaction_data(sip_messenger::message_ptr&);

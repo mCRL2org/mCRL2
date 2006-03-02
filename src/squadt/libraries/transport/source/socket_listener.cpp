@@ -14,7 +14,7 @@ namespace transport {
       using namespace asio;
       using namespace boost;
 
-      ipv4::tcp::endpoint endpoint(port, ipv4::address(address));
+      ipv4::tcp::endpoint endpoint((port == 0) ? socket_transceiver::default_port : port, ipv4::address(address));
 
       acceptor.open(endpoint.protocol());
       acceptor.set_option(socket_acceptor::reuse_address(true));

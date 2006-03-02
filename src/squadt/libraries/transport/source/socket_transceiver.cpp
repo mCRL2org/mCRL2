@@ -6,9 +6,13 @@
 namespace transport {
   namespace transceiver {
 
-    unsigned int  socket_transceiver::input_buffer_size = 2048;
+    unsigned int              socket_transceiver::input_buffer_size = 2048;
 
     socket_scheduler          socket_transceiver::scheduler;
+
+    asio::ipv4::host_resolver socket_transceiver::resolver(scheduler.demuxer);
+
+    long socket_transceiver::default_port = 10946;
 
     /* Constructor */
     socket_transceiver::socket_transceiver(transporter& o) : basic_transceiver(o), socket(scheduler.demuxer) {
@@ -28,12 +32,21 @@ namespace transport {
       socket.async_receive(asio::buffer(buffer, input_buffer_size), 0, bind(&socket_transceiver::handle_receive, this, placeholders::error));
     }
 
+    void socket_transceiver::connect(const std::string& host_name, const long port) {
+      asio::ipv4::host host;
+
+      resolver.get_host_by_name(host, host_name);
+
+      connect(host.address(0), port);
+    }
+
     void socket_transceiver::connect(const address& address, const long port) {
       using namespace asio;
 
-      /* Build socket connection */
-      ipv4::tcp::endpoint endpoint(port, ipv4::address(address));
       error e;
+
+      /* Build socket connection */
+      ipv4::tcp::endpoint endpoint((port == 0) ? default_port : port, address);
 
       socket.connect(endpoint, assign_error(e));
       socket.set_option(socket_base::keep_alive(true));

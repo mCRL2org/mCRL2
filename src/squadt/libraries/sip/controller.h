@@ -36,8 +36,14 @@ namespace sip {
       /** The current configuration of a tool (may be limited to a main input configuration) */
       configuration               current_configuration;
 
+      /** \brief Unique identifier assigned to the peer */
+      long instance_identifier;
+
       /** Convenience function for use with event handlers */
       inline void set_status(status);
+
+      /** Convenience function for use with event handlers */
+      void accept_instance_identifier(message_ptr&);
 
       /** Handler function to replace the current display layout with a new one */
       void accept_layout_handler(sip_messenger::message_ptr&);
@@ -109,6 +115,12 @@ namespace sip {
 
   inline void controller_communicator::set_status(status s) {
     current_status = s;
+  }
+
+  inline void controller_communicator::accept_instance_identifier(message_ptr& m) {
+    instance_identifier = atol(m->to_string().c_str());
+
+    current_status = status_clean;
   }
 }
 

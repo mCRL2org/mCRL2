@@ -4,6 +4,7 @@
 #include <boost/asio.hpp>
 #include <boost/bind.hpp>
 #include <boost/shared_ptr.hpp>
+#include <boost/asio/ipv4/address.hpp>
 
 #include <transport/detail/listener.h>
 
@@ -15,6 +16,10 @@ namespace transport {
   namespace listener {
 
     class socket_listener : public basic_listener {
+      public:
+        /** Convenience type */
+        typedef asio::ipv4::address address;
+
       private:
         /** The socket listener */
         asio::socket_acceptor    acceptor;
@@ -27,7 +32,7 @@ namespace transport {
       public:
 
         /** Constructor */
-        socket_listener(transport::transporter& m, const address& address, const long default_port);
+        socket_listener(transport::transporter& m, const address& address, const long port = 0);
 
         /** Activate the listener */
         void activate(transporter::listener_ptr);

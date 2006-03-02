@@ -1,3 +1,4 @@
+#include <cstdlib>
 #include <sstream>
 
 #include <sip/controller.h>
@@ -11,15 +12,18 @@ namespace sip {
   using namespace sip::messenger;
 
   controller_communicator::controller_communicator() : current_status(status_initialising) {
+    using namespace boost;
+
     current_display_dimensions.x = 0;
     current_display_dimensions.y = 0;
     current_display_dimensions.z = 0;
 
     /* set default handlers for delivery events */
-    set_handler(boost::bind(&controller_communicator::reply_controller_capabilities, this), sip::request_controller_capabilities);
-    set_handler(boost::bind(&controller_communicator::set_status, this, status_configured), sip::send_accept_configuration);
-    set_handler(boost::bind(&controller_communicator::accept_layout_handler, this, _1), sip::send_display_layout);
-    set_handler(boost::bind(&controller_communicator::accept_data_handler, this, _1), sip::send_display_data);
+    set_handler(bind(&controller_communicator::accept_instance_identifier, this, _1), sip::send_instance_identifier);
+    set_handler(bind(&controller_communicator::reply_controller_capabilities, this), sip::request_controller_capabilities);
+    set_handler(bind(&controller_communicator::set_status, this, status_configured), sip::send_accept_configuration);
+    set_handler(bind(&controller_communicator::accept_layout_handler, this, _1), sip::send_display_layout);
+    set_handler(bind(&controller_communicator::accept_data_handler, this, _1), sip::send_display_data);
   }
 
   controller_communicator::~controller_communicator() {
@@ -43,7 +47,9 @@ namespace sip {
 
   /* Request a tool what input configurations it has available */
   void controller_communicator::request_tool_capabilities() {
-    send_message(boost::cref(message(sip::request_tool_capabilities)));
+    message m(sip::request_tool_capabilities);
+
+    send_message(m);
   }
 
   /* Send the selected input configuration */
@@ -65,7 +71,9 @@ namespace sip {
 
   /* Request a tool to terminate */
   void controller_communicator::request_termination() {
-    send_message(boost::cref(message(sip::request_termination)));
+    message m(sip::request_termination);
+
+    send_message(m);
   }
 
   void controller_communicator::accept_layout_handler(sip_messenger::message_ptr&) {

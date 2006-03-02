@@ -22,7 +22,7 @@ $(BJAM):
 
 # Build maximum_revision
 $(MAXIMUM_REVISION): $(BJAM)
-	@cd $(dir $(MAXIMUM_REVISION)); $(RELATIVE_PATH_CORRECTION)$(BJAM) --v2 release
+	@cd $(dir $(MAXIMUM_REVISION)); $(RELATIVE_PATH_CORRECTION)$(BJAM) release
 
 # This makes make reload, such that REVISION is initialised properly
 -include $(TREE_ROOT)revision

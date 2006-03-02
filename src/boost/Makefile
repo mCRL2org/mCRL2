@@ -19,7 +19,7 @@ TREE_ROOT = ../../
 
 BJAM           = tools/jam/bin/bjam
 BJAM_BUILD     = ./build.sh
-BJAM_ARGUMENTS = --v2 variant=release threading=single optimization=speed $(LINK_METHOD) \
+BJAM_ARGUMENTS = variant=release threading=single optimization=speed $(LINK_METHOD) \
 		 --prefix=. --layout=system --stagedir=lib stage
 LINK_METHOD    = runtime-link=shared
 

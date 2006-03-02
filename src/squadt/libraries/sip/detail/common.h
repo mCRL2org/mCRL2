@@ -21,6 +21,7 @@ namespace sip {
   /** Type for sip protocol message identification */
   enum sip_message_identifier_t {
      unknown                           /// \brief type is was specified or unknown (or should be derived from content)
+    ,send_instance_identifier          /// \brief send the unique identifier assigned to a tool instance
     ,request_controller_capabilities   /// \brief request the controller a description of its capabilities
     ,reply_controller_capabilities     /// \brief send a description of controller capabilities to the tool
     ,request_tool_capabilities         /// \brief request a tool a description of its capabilities

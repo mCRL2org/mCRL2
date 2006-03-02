@@ -8,7 +8,7 @@
 #include <boost/test/unit_test_monitor.hpp>
 
 #include <sip/detail/basic_messenger.tcc>
-#include <sip/detail/command_line_interface.h>
+#include <sip/detail/command_line_interface.tcc>
 #include <sip/tool.h>
 #include <sip/controller.h>
 
@@ -204,18 +204,18 @@ void command_line_interface_helper(int bc, int ac, char* const * const ba, const
 }
 
 void command_line_interface() {
-  char* arguments[6] = { "-i", "filename", "--si-connect=socket://localhost:55923", "--a", "filename", "--si-connect=traditional" };
+  char* arguments[7] = { "-i", "filename", "--si-connect=socket://localhost:55923", "--a", "filename", "--si-identifier=1", "--si-connect=traditional" };
   char* reference[4] = { "-i", "filename", "--a", "filename" };
 
   BOOST_MESSAGE(" Command line argument extraction... ");
 
-  command_line_interface_helper(5, 4, arguments, reference, "Trying socket scheme");
+  command_line_interface_helper(6, 4, arguments, reference, "Trying socket scheme");
 
   arguments[2] = "--si-connect=traditional";
 
-  command_line_interface_helper(5, 4, arguments, reference, "Trying traditional scheme");
+  command_line_interface_helper(6, 4, arguments, reference, "Trying traditional scheme");
 
-  command_line_interface_helper(6, 4, arguments, reference, "Multiple connect specifications");
+  command_line_interface_helper(7, 4, arguments, reference, "Multiple connect specifications");
 }
 
 test_suite* init_unit_test_suite(int argc, char * argv[]) {

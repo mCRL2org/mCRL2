@@ -4,6 +4,7 @@ namespace sip {
 
   template < >
   const char* const exception::descriptions[] = {
+    "Functionality not yet implemented!"
     "Expected the start of message sequence.",
     "Expected the end of message sequence.",
     "Message contains a forbidden character sequence.",
@@ -11,7 +12,7 @@ namespace sip {
     "Unknown type encountered in tool configuration.",
     "Controller capabilities have not yet been communicated.",
     "Parse error!",
-    "Parse error: expected `%1%' before `%2%'"
+    "Parse error: expected `%1%' before `%2%'."
   };
 }
 

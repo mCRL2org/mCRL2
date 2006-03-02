@@ -9,7 +9,8 @@ namespace sip {
 
     /** Type for exception identification */
     enum values {
-       expected_message_start          /// \brief the start of a message sip_messenger::open_tag was expected 
+       not_yet_implemented             /// \brief the requested functionality is not, or only partly implemented
+      ,expected_message_start          /// \brief the start of a message sip_messenger::open_tag was expected 
       ,expected_message_end            /// \brief the end of a message was expected 
       ,forbidden_message_content       /// \brief message contains a sequence that is not allowed 
       ,message_context_invalid         /// \brief the message cannot be send in this phase of the protocol 
