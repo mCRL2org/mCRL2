@@ -11,11 +11,12 @@ namespace sip {
 
   class tool_communicator;
 
+  /** \brief The main interface to the protocol implementation (tool-side) */
   class tool_communicator : public sip_messenger {
     friend void scheme::connect(tool_communicator&) const;
 
     private:
-      /** Charactarises the current state */
+      /** Type for keeping protocol phase status */
       typedef enum {
          status_initialising /** \brief No connection with controller yet */
         ,status_clean        /** \brief Connection with controller: Phase 0 */

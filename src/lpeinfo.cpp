@@ -145,9 +145,16 @@ int main(int ac, char* av[])
   sip::tool_communicator tc;
 
   /* Set tool capabilities */
+  sip::tool_capabilities cp;
+
+  /* The tool has only one main input combination it takes an LPE and then behaves as a reporter */
+  cp.add_input_combination("Reporter", "lpe");
 
   /* On purpose we do not catch exceptions */
-  tc.activate(ac,av);
+  if (tc.activate(ac,av)) {
+    /* Wait for configuration */
+    tc.await_message(sip::send_configuration);
+  }
 #endif
    
   InfoObj obj;

@@ -12,19 +12,19 @@
 namespace sip {
 
   namespace datatype {
-    /** Basic datatypes used in the protocol (for validation purposes) */
+    /** \brief Basic datatypes used in the protocol (for validation purposes) */
     class basic_datatype {
       public:
-        /** Reconstruct a type specification from XML stream */
+        /** \brief Reconstruct a type specification from XML stream */
         static basic_datatype* from_xml(xml2pp::text_reader&);
 
-        /** Write from XML stream, using value */
+        /** \brief Write from XML stream, using value */
         virtual void to_xml(std::ostream&, std::string value = "") const = 0;
 
-        /** Establishes whether value is valid for an element of this type */
+        /** \brief Establishes whether value is valid for an element of this type */
         virtual bool validate(std::string& value) const = 0;
 
-        /** Pure virtual destructor */
+        /** \brief Pure virtual destructor */
         virtual ~basic_datatype() = 0;
     };
 
@@ -40,28 +40,29 @@ namespace sip {
 //    class uri : public basic_datatype {
 //    };
 
+    /** \brief Derived datatype for strings */
     class string : public basic_datatype {
       private:
         size_t minimum_length;
         size_t maximum_length;
 
       public:
-        /** Constructor */
+        /** \brief Constructor */
         inline string(size_t minimum = 0, size_t maximum = 0); 
 
-        /** Reconstruct a type from XML stream */
+        /** \brief Reconstruct a type from XML stream */
         inline static string* from_xml(xml2pp::text_reader&);
 
-        /** Set the minimum length of a string of this type */
+        /** \brief Set the minimum length of a string of this type */
         inline void set_minimum_length(size_t);
 
-        /** Set the maximum length of a string of this type */
+        /** \brief Set the maximum length of a string of this type */
         inline void set_maximum_length(size_t);
 
-        /** Write from XML stream, using value */
+        /** \brief Write from XML stream, using value */
         inline void to_xml(std::ostream&, std::string value = "") const;
 
-        /** Establishes whether value is valid for an element of this type */
+        /** \brief Establishes whether value is valid for an element of this type */
         inline bool validate(std::string& value) const;
 
         inline ~string();

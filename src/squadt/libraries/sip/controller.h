@@ -6,12 +6,13 @@
 /* Interface classes for the tool side of the Squadt Interaction Protocol */
 namespace sip {
 
+  /** \brief The main interface to the protocol (controller-side) */
   class controller_communicator : public sip_messenger {
     public:
       typedef controller_capabilities::display_dimensions display_dimensions;
 
     private:
-      /** Charactarises the current state */
+      /** Type for keeping protocol phase status */
       typedef enum {
          status_initialising /** \brief No connection with tool yet */
         ,status_clean        /** \brief Connection with tool: Phase 0 */
@@ -21,71 +22,71 @@ namespace sip {
         ,status_error        /** \brief An error occurred */
       } status;
 
-      /** The protocol version of the peer, if known otherwise assumed 1.0 */
+      /** \brief The protocol version of the peer, if known otherwise assumed 1.0 */
       static const version        peer_version;
 
-      /** The current protocol status */
+      /** \brief The current protocol status */
       status                      current_status;
 
-      /** The currently active display layout */
+      /** \brief The currently active display layout */
       sip::layout::display_layout current_layout;
 
-      /** The dimensions of the currently reserved display for the connected tool */
+      /** \brief The dimensions of the currently reserved display for the connected tool */
       display_dimensions          current_display_dimensions;
 
-      /** The current configuration of a tool (may be limited to a main input configuration) */
+      /** \brief The current configuration of a tool (may be limited to a main input configuration) */
       configuration               current_configuration;
 
       /** \brief Unique identifier assigned to the peer */
       long instance_identifier;
 
-      /** Convenience function for use with event handlers */
+      /** \brief Convenience function for use with event handlers */
       inline void set_status(status);
 
-      /** Convenience function for use with event handlers */
+      /** \brief Convenience function for use with event handlers */
       void accept_instance_identifier(message_ptr&);
 
-      /** Handler function to replace the current display layout with a new one */
+      /** \brief Handler function to replace the current display layout with a new one */
       void accept_layout_handler(sip_messenger::message_ptr&);
 
-      /** Handler function to map data to the display */
+      /** \brief Handler function to map data to the display */
       void accept_data_handler(sip_messenger::message_ptr&);
 
     public:
-      /** Default constructor */
+      /** \brief Default constructor */
       controller_communicator();
 
-      /** Default destructor */
+      /** \brief Default destructor */
       ~controller_communicator();
 
-      /** Send details about the amount of space that the controller currently has reserved for this tool */
+      /** \brief Send details about the amount of space that the controller currently has reserved for this tool */
       void reply_controller_capabilities();
 
-      /** Request the list of basic input configurations */
+      /** \brief Request the list of basic input configurations */
       void request_tool_capabilities();
 
-      /** Send a specification of a (perhaps partial) configuration */
+      /** \brief Send a specification of a (perhaps partial) configuration */
       void send_configuration();
 
-      /** Send a layout specification for the display space reserved for this tool */
+      /** \brief Send a layout specification for the display space reserved for this tool */
       void send_interaction_data();
 
-      /** Send a layout specification for the display space reserved for this tool */
+      /** \brief Send a layout specification for the display space reserved for this tool */
       void send_start_signal();
 
-      /** Request the tool to terminate itself */
+      /** \brief Request the tool to terminate itself */
       void request_termination();
 
-      /** Set the amount of display space that is reserved for this tool */
+      /** \brief Set the amount of display space that is reserved for this tool */
       void set_display_dimensions(unsigned short x, unsigned short y, unsigned short z);
 
-      /** Get a controller_capabilities object that is send to tools */
+      /** \brief Get a controller_capabilities object that is send to tools */
       controller_capabilities get_capabilities();
 
-      /** Set the current configuration (only effective before status_configured) */
+      /** \brief Set the current configuration (only effective before status_configured) */
       void set_configuration(const configuration&);
 
-      /** Get the current (perhaps partial) configuration */
+      /** \brief Get the current (perhaps partial) configuration */
       configuration get_configuration() const;
   };
 

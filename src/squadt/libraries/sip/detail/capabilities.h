@@ -2,7 +2,7 @@
 #define SIP_CAPABILITIES_H
 
 namespace sip {
-  /** Type for protocol version */
+  /** \brief Type for protocol version */
   struct version {
     unsigned char major; /// the major number
     unsigned char minor; /// the minor number

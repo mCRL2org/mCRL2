@@ -10,59 +10,59 @@
 
 namespace sip {
 
-  /** This class models a tool configuration */
+  /** \brief This class models a tool configuration */
   class configuration {
     friend class report;
 
     public:
-      /** Type used to contrain occurences of options within a configuration */
+      /** \brief Type used to contrain occurences of options within a configuration */
       struct option_constraint {
-        unsigned short minimum; /* minimum occurences of this option in a single configuration */
-        unsigned short maximum; /* maximum occurences of this option in a single configuration */
+        unsigned short minimum; /* \brief minimum occurences of this option in a single configuration */
+        unsigned short maximum; /* \brief maximum occurences of this option in a single configuration */
       };
 
-      /** Type for a pointer to an option object */
+      /** \brief Type for a pointer to an option object */
       typedef boost::shared_ptr < option >             option_ptr;
 
-      /** The optional constraint, option is either not present or only present once */
+      /** \brief The optional constraint, option is either not present or only present once */
       const static option_constraint constrain_optional;
   
-      /** The required constraint, option (with possible arguments) must be present */
+      /** \brief The required constraint, option (with possible arguments) must be present */
       const static option_constraint constrain_required;
 
     private:
 
       typedef std::map < option_ptr, option_constraint >  option_list;
 
-      /** The list of configuration options */
+      /** \brief The list of configuration options */
       option_list options;
 
-      /** Whether the configuration can be changed through user interaction */
+      /** \brief Whether the configuration can be changed through user interaction */
       bool interactive;
 
     public:
 
       inline configuration();
 
-      /** Set or reset flag that the tool is interactive (configuration may change through user interaction) */
+      /** \brief Set or reset flag that the tool is interactive (configuration may change through user interaction) */
       inline void set_interactive(bool);
 
-      /** Returns whether the configuration is empty or not */
+      /** \brief Returns whether the configuration is empty or not */
       inline bool is_empty() const;
 
-      /** Add an option to the configuration */
+      /** \brief Add an option to the configuration */
       inline void add_option(const option::identifier);
 
-      /** Add an option from the configuration */
+      /** \brief Add an option from the configuration */
       inline void remove_option(const option::identifier);
 
-      /** Get an option by its id */
+      /** \brief Get an option by its id */
       inline option_ptr get_option(const option::identifier) const;
 
-      /** Generate XML representation */
+      /** \brief Generate XML representation */
       inline void to_xml(std::ostream&) const;
 
-      /** Read a configuration class from XML */
+      /** \brief Read a configuration class from XML */
       static inline configuration* from_xml(xml2pp::text_reader&);
   };
 

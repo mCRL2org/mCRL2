@@ -14,22 +14,24 @@ namespace sip {
     typedef boost::shared_ptr < sip::scheme > scheme_ptr;
 
     /**
+     * \brief Class used for extraction of protocol related command line arguments
+     *
      * This class provides functionality to extract protocol specific arguments
      * from the list of command line arguments that a tool receives.
      **/
     class command_line_argument_extractor : public boost::noncopyable {
       private:
 
-        /** The list of known of options */
+        /** \brief The list of known of options */
         static const char*  known_options[];
 
-        /** The list of known of schemes */
+        /** \brief The list of known of schemes */
         static const char*  known_schemes[];
 
-        /** The number of options in known_options[] */
+        /** \brief The number of options in known_options[] */
         static const size_t known_option_number;
 
-        /** The number of schemes in known_schemes[] */
+        /** \brief The number of schemes in known_schemes[] */
         static const size_t known_scheme_number;
 
         /** \brief The number of the last matched known_option or known_scheme. */
@@ -44,7 +46,7 @@ namespace sip {
         /** \brief the scheme that was last parsed succesfully */
         scheme_ptr   selected_scheme;
 
-        /** A unique number that identifies this instance */
+        /** \brief A unique number that identifies this instance */
         long int identifier;
 
       public:

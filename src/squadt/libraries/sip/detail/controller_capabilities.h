@@ -9,6 +9,8 @@
 namespace sip {
 
   /**
+   * \brief Describes some controller capabilities (e.g. supported protocol version)
+   *
    * Objects of this type contain information about the capabilities of a controller:
    *
    *  - the amount of display space that is reserved for a tool (that makes a request)
@@ -23,7 +25,7 @@ namespace sip {
     friend class controller_communicator;
 
     public:
-      /** Type for display dimensions */
+      /** \brief Type for display dimensions */
       struct display_dimensions {
         unsigned short x; /* Horizontal */
         unsigned short y; /* Vertical */
@@ -32,33 +34,33 @@ namespace sip {
 
     private:
 
-      /** The protocol version */
+      /** \brief The protocol version */
       version            current_protocol_version;
 
-      /** The dimensions of the screen that are currently reserved for this tool */
+      /** \brief The dimensions of the screen that are currently reserved for this tool */
       display_dimensions current_dimensions;
 
-      /** Constructor */
+      /** \brief Constructor */
       inline controller_capabilities(const version = protocol_version);
 
-      /** Set display dimensions */
+      /** \brief Set display dimensions */
       inline void set_display_dimensions(const unsigned short x, const unsigned short y, const unsigned short z);
 
-      /** Set display dimensions */
+      /** \brief Set display dimensions */
       inline void set_display_dimensions(const display_dimensions& d);
 
-      /** Read from XML stream */
+      /** \brief Read from XML stream */
       inline static controller_capabilities* from_xml(xml2pp::text_reader& reader);
 
     public:
 
-      /** Get the protocol version used by the controller */
+      /** \brief Get the protocol version */
       inline version get_version() const;
 
-      /** Get the dimensions of the part of the display that is reserved for this tool */
+      /** \brief Get the dimensions of the part of the display that is reserved for this tool */
       inline display_dimensions get_display_dimensions() const;
 
-      /** Write to XML stream */
+      /** \brief Write to XML stream */
       inline void to_xml(std::ostream&) const;
   };
 

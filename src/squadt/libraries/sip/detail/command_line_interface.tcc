@@ -7,6 +7,7 @@
 #include <sip/detail/exception.h>
 
 #include <sip/detail/command_line_interface.h>
+#include <sip/detail/schemes.tcc>
 
 namespace sip {
 
@@ -82,11 +83,13 @@ namespace sip {
              
               if (t != 0) {
                 /* Take everything between s and t as hostname */
+                const size_t d = t - s;
+
                 std::string& host_name = dynamic_cast < socket_scheme* > (selected_scheme.get())->host_name;
 
-                host_name.resize(t - s);
-
-                memcpy(s, &host_name, t - s);
+                host_name.reserve(d);
+                host_name.copy(s, d);
+                host_name.resize(d);
               }
 
               /* The remaining string should be a port number */

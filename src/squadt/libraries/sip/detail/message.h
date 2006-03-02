@@ -18,7 +18,7 @@ namespace sip {
     template < class M > class basic_messenger;
 
     /**
-     * Base class for messages M is a type for message characterisation
+     * \brief Base class for messages M is a type for message characterisation
      * 
      * \attention M should be an enumeration type for message identifiers with
      *   a value D that is used as the default message type identifier
@@ -28,50 +28,50 @@ namespace sip {
       friend class basic_messenger < message < M, D > >;
 
       public:
-        /** Type for message identification */
+        /** \brief Type for message identification */
         typedef M                  type_identifier_t;
 
       private:
 
-        /** The message type */
+        /** \brief The message type */
         type_identifier_t          type;
 
-        /** The content of a message */
+        /** \brief The content of a message */
         std::string                content;
 
-        /** Tries to extract the message type, which is the first element */
+        /** \brief Tries to extract the message type, which is the first element */
         inline static type_identifier_t extract_type(std::string& content);
  
       public:
-        /** Generates an XML text string for the message */
+        /** \brief Generates an XML text string for the message */
         inline message(type_identifier_t t = D);
 
-        /** Copy constructor */
+        /** \brief Copy constructor */
         inline message(message&);
 
-        /** Generates an XML text string for the message */
+        /** \brief Generates an XML text string for the message */
         template < typename T >
         inline message(T, type_identifier_t t = D);
 
-        /** Returns the message type */
+        /** \brief Returns the message type */
         inline type_identifier_t get_type() const;
  
-        /** Generates an XML text string for the message */
+        /** \brief Generates an XML text string for the message */
         inline std::string to_xml() const;
 
-        /** Generates an XML representation and writes to stream */
+        /** \brief Generates an XML representation and writes to stream */
         inline void to_xml(std::ostream&) const;
  
-        /** Returns the content without formatting */
+        /** \brief Returns the content without formatting */
         inline std::string to_string() const;
 
-        /** Generates an XML text string for the message */
+        /** \brief Generates an XML text string for the message */
         inline void set_content(const std::string&);
 
-        /** Generates an XML text string for the message */
+        /** \brief Generates an XML text string for the message */
         inline void set_content(const char*);
 
-        /** Generates an XML text string for the message */
+        /** \brief Generates an XML text string for the message */
         inline void set_content(std::istream&);
     };
  

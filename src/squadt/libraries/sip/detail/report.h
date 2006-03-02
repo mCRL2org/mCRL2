@@ -15,55 +15,57 @@
 
 namespace sip {
 
-  /** A helper class for the generation of reports */
+  /** \brief Describes a report of tool operation */
   class report {
     public:
-      /** Datatype for a uri */
+      /** \brief Datatype for a uri */
       typedef std::string                                  uri;
 
-      /** Datatype for a storage format (file format) */
+      /** \brief Datatype for a storage format (file format) */
       typedef std::string                                  storage_format;
 
     private:
+      /** \brief Convenience data type to hide the shared pointer wrapping */
       typedef boost::shared_ptr < configuration > configuration_ptr;
 
+      /** \brief Convenience data type */
       typedef std::map  < uri, storage_format >   output_list;
 
-      /** Room for errors (any error here implies unsuccessful termination) */
+      /** \brief Room for errors (any error here implies unsuccessful termination) */
       std::string   error;
 
-      /** Room for comments about anything at all */
+      /** \brief Room for comments about anything at all */
       std::string   comment;
 
-      /** The list of outputs */
+      /** \brief The list of outputs */
       output_list   outputs;
 
-      /** The configuration that can be used to rerun the tool and refresh its outputs */
+      /** \brief The configuration that can be used to rerun the tool and refresh its outputs */
       configuration_ptr _configuration;
 
     public:
-      /** Constructor */
+      /** \brief Constructor */
       inline report();
 
-      /** An error description (implies that tool execution was unsuccessful) */
+      /** \brief An error description (implies that tool execution was unsuccessful) */
       inline void set_error(std::string);
 
-      /** Add an output object */
+      /** \brief Add an output object */
       inline void add_output(const uri URI, const std::string format);
 
-      /** Remove an output object */
+      /** \brief Remove an output object */
       inline void remove_output(const uri URI);
 
-      /** Set the configuration that was used */
+      /** \brief Set the configuration that was used */
       void set_configuration(configuration* o);
 
-      /** Report comment (arbitrary text) */
+      /** \brief Report comment (arbitrary text) */
       inline void set_comment(std::string);
 
-      /** Generates an XML representation for this report */
+      /** \brief Generates an XML representation for this report */
       void to_xml(std::ostream&) const;
 
-      /** Reconstructs a report from XML representation */
+      /** \brief Reconstructs a report from XML representation */
       static report* from_xml(xml2pp::text_reader&);
   };
 

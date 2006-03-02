@@ -33,9 +33,9 @@ namespace sip {
   bool tool_communicator::activate(int& argc, char** argv) {
     cli::command_line_argument_extractor e(argc, argv);
 
-    if (e.get_scheme() != 0) {
-      cli::scheme_ptr scheme = e.get_scheme();
+    cli::scheme_ptr scheme = e.get_scheme();
 
+    if (scheme.get() != 0) {
       scheme->connect(*this);
 
       instance_identifier = e.get_identifier();
@@ -54,7 +54,7 @@ namespace sip {
       current_status = status_clean;
     }
 
-    return (true);
+    return (scheme.get() != 0);
   }
 
   tool_communicator::~tool_communicator() {
