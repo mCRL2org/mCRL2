@@ -52,6 +52,8 @@ namespace squadt {
       /* Load tool configuration from storage */
       ProjectOverview* window = new ProjectOverview(NULL, 1000);
  
+      window->CenterOnScreen();
+
       /* Show a splash */
       wxBitmap        splash_image;
       wxSplashScreen* splash;
