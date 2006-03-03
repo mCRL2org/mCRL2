@@ -53,6 +53,7 @@ source_files="./mcrl2/articles \
               ./mcrl2/test.y \
               ./mcrl2/tests \
               ./mcrl2/specs \
+              ./mcrl2/.vim \
               ./mcrl2/src"
 
 svn_update="$(svn update --non-interactive ${SOURCE_BASE} 2>&1 | tail -n 1)"
@@ -112,6 +113,8 @@ if (! test -e "${archive_name}.bz2"); then
 
   unlink mcrl2
 
+  tar rf ${archive_name} ./mcrl2/utility/revision.mk
+
   # Mark distribution as source distribution
   mkdir mcrl2
 
@@ -124,7 +127,7 @@ if (! test -e "${archive_name}.bz2"); then
            "\n" \
            "\nREVISION := -DREVISION=${revision}" > mcrl2/distribution
 
-  tar rf ${archive_name} ./mcrl2/distribution ./mcrl2/utility/revision.mk
+  tar rf ${archive_name} ./mcrl2/distribution
 
   unlink mcrl2/distribution
   rmdir mcrl2
