@@ -34,10 +34,9 @@ char* intToCString(int i);
 
 %start fsm_file
 
-%token EOLN SECSEP QUOTED LBRACK RBRACK FANIN FANOUT NODENR COMMA
+%token EOLN SECSEP QUOTED LPAR RPAR FANIN FANOUT NODENR COMMA ARROW
 %token <number> NUMBER
-%token <aterm> ID
-%token <aterm> QUOTED
+%token <aterm> ID QUOTED
 %type  <aterm> type_name action
 
 %%
@@ -81,7 +80,7 @@ param :
 cardinality :
 	/* empty */
 	|
-	LBRACK NUMBER RBRACK
+	LPAR NUMBER RPAR
 	;
 	
 type_def : 
@@ -103,6 +102,20 @@ type_name :
 	|
 	ID
 	  { $$ = $1 }
+	|
+	type_name ARROW type_name
+	  {
+	    string result = static_cast<string> ( ATwriteToString( (ATerm)$1 ) )
+	      + "->" + static_cast<string> ( ATwriteToString( (ATerm)$3 ) );
+	    $$ = ATmakeAppl0( ATmakeAFun( result.c_str(), 0, ATfalse ) )
+	  }
+	|
+	LPAR type_name RPAR
+	  {
+	    string result = "(" + static_cast<string> ( ATwriteToString(
+	      (ATerm)$2) ) + ")";
+	    $$ = ATmakeAppl0( ATmakeAFun( result.c_str(), 0, ATfalse ) )
+	  }
 	;
 
 type_values :
@@ -125,6 +138,8 @@ type_def_ignore :
 type_name_ignore :
 	/* empty */
 	| ID
+	| type_name_ignore ARROW type_name_ignore
+	| LPAR type_name_ignore RPAR
 	;
 
 type_values_ignore :

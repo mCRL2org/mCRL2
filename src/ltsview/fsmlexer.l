@@ -13,7 +13,7 @@ void processNumber();
 %}
 %option nounput
 Quoted	   \"[^\"]*\"
-Id         [a-zA-Z\_][a-zA-Z0-9\_\-\'@]*
+Id	   [a-zA-Z_][a-zA-Z0-9_'@]*
 Number     [0]|([1-9][0-9]*) 
 
 %%
@@ -21,8 +21,9 @@ Number     [0]|([1-9][0-9]*)
 [ \t]	  { posNo += fsmleng; }
 \r?\n     { lineNo++; posNo=1; return EOLN; }
 "---"	  { posNo += fsmleng; return SECSEP; }
-"("	  { posNo += fsmleng; return LBRACK; }
-")"	  { posNo += fsmleng; return RBRACK; }
+"("	  { posNo += fsmleng; return LPAR; }
+")"	  { posNo += fsmleng; return RPAR; }
+"->"	  { posNo += fsmleng; return ARROW; }
 ","	  { posNo += fsmleng; return COMMA; }
 "fan_in"  { posNo += fsmleng; return FANIN; }
 "fan_out" { posNo += fsmleng; return FANOUT; }

@@ -1,5 +1,5 @@
 s0(4) Enum4  "e0-4" "e1-4" "e2-4" "e3-4"
-auto-open(2) Bool  "T" "F"
+auto_open(2) Bool  "T" "F"
 a(2) Address  "1" "2"
 m(16) Mes  "mes2(1)" "mes1(1)" "mes1(2)" "mes0(2,dummy,SBY)" "mes0(1,dummy,SBY)" "mes0(2,dummy,SRF)" "mes0(2,dummy,UP)" "mes0(2,dummy,DWN)" "mes0(1,dummy,DWN)" "mes0(1,dummy,UP)" "mes0(1,dummy,SRF)" "mes2(2)" "mes0(2,dummy,UPUL)" "mes0(2,dummy,DNUL)" "mes0(1,dummy,DNUL)" "mes0(1,dummy,UPUL)"
 R(3) Alist  "ema" "set(1,ema)" "set(2,ema)"
