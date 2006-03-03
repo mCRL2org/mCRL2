@@ -53,10 +53,9 @@ source_files="./mcrl2/articles \
               ./mcrl2/test.y \
               ./mcrl2/tests \
               ./mcrl2/specs \
-              ./mcrl2/utility/revision.mk \
               ./mcrl2/src"
 
-svn_update="$(svn update 2>&1 | tail -n 1)"
+svn_update="$(svn update --non-interactive ${SOURCE_BASE} 2>&1 | tail -n 1)"
 
 # Make sure that the maximum revision tool exists
 sh -c "cd ${SOURCE_BASE}; make revision" &> /dev/null
@@ -125,7 +124,7 @@ if (! test -e "${archive_name}.bz2"); then
            "\n" \
            "\nREVISION := -DREVISION=${revision}" > mcrl2/distribution
 
-  tar rf ${archive_name} ./mcrl2/distribution
+  tar rf ${archive_name} ./mcrl2/distribution ./mcrl2/utility/revision.mk
 
   unlink mcrl2/distribution
   rmdir mcrl2
