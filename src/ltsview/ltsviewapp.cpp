@@ -72,8 +72,8 @@ void LTSViewApp::openFile( string fileName )
   //lts->printClusterSizesPositions();
   glCanvas->enableDisplay();
   glCanvas->display( false );
-  glCanvas->setDefaultPosition( visualizer->getStructureWidth(),
-      visualizer->getStructureHeight() );
+  glCanvas->setDefaultPosition( visualizer->getBoundingCylinderWidth(),
+      visualizer->getBoundingCylinderHeight() );
   glCanvas->resetView();
   
   mainFrame->loadTitle();
@@ -100,9 +100,9 @@ void LTSViewApp::applyRanking( RankStyle rs )
   }
 }
 
-void LTSViewApp::drawLTS()
+void LTSViewApp::drawLTS( Point3D viewpoint )
 {
-  visualizer->drawLTS();
+  visualizer->drawLTS( viewpoint );
 }
 
 void LTSViewApp::applyDefaultSettings()
@@ -117,8 +117,8 @@ void LTSViewApp::applySettings()
   if ( lts != NULL )
   {
     glCanvas->display();
-    glCanvas->setDefaultPosition( visualizer->getStructureWidth(),
-	visualizer->getStructureHeight() );
+    glCanvas->setDefaultPosition( visualizer->getBoundingCylinderWidth(),
+	visualizer->getBoundingCylinderHeight() );
   }
 }
 
@@ -156,8 +156,8 @@ void LTSViewApp::setRankStyle( RankStyle rs )
       //lts->printClusterSizesPositions();
       glCanvas->enableDisplay();
       glCanvas->display( false );
-      glCanvas->setDefaultPosition( visualizer->getStructureWidth(),
-	  visualizer->getStructureHeight() );
+      glCanvas->setDefaultPosition( visualizer->getBoundingCylinderWidth(),
+	  visualizer->getBoundingCylinderHeight() );
       glCanvas->resetView();
       mainFrame->setNumberInfo( lts->getNumberOfStates(),
 	  lts->getNumberOfTransitions(), lts->getNumberOfClusters(),
@@ -213,6 +213,16 @@ void LTSViewApp::editMarkRule( const int index )
     msrDialog->Close();
     msrDialog->Destroy();
   }
+}
+
+float LTSViewApp::getHalfStructureHeight() const
+{
+  return visualizer->getHalfStructureHeight();
+}
+
+RGB_Color LTSViewApp::getBackgroundColor() const
+{
+  return visualizer->getBackgroundColor();
 }
 
 void LTSViewApp::setMatchAnyMarkRule( bool b )

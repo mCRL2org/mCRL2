@@ -67,7 +67,14 @@ void GLCanvas::initialize()
   glEnable( GL_DEPTH_TEST );
   glEnable( GL_BLEND );
   
-  glClearColor( 0.4, 0.4, 0.4, 1.0 );
+  glEnable( GL_COLOR_MATERIAL );
+  glColorMaterial( GL_FRONT_AND_BACK, GL_AMBIENT_AND_DIFFUSE );
+
+  glEnable( GL_CULL_FACE );
+  glCullFace( GL_BACK );
+  
+  RGB_Color bgColor = mediator->getBackgroundColor();
+  glClearColor( bgColor.r / 255.0, bgColor.g / 255.0, bgColor.b / 255.0, 1.0 );
   glClearDepth( 1.0 );
   glClear( GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT );
   SwapBuffers();
@@ -119,9 +126,14 @@ void GLCanvas::display( bool swapBuffers )
   {
     SetCurrent();
     glPushMatrix();
-      //glClear( GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT );
       glLoadIdentity(); 
-      
+    
+      // clear the canvas with the background color
+      RGB_Color bgColor = mediator->getBackgroundColor();
+      glClearColor( bgColor.r / 255.0, bgColor.g / 255.0, bgColor.b / 255.0, 1.0
+	  );
+      glClear( GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT );
+     
       // apply panning and zooming transformations
       glTranslatef( moveVector.x, moveVector.y, moveVector.z - startPosZ );
       
@@ -129,8 +141,30 @@ void GLCanvas::display( bool swapBuffers )
       glRotatef( angleY, 1.0f, 0.0f, 0.0f );
       glRotatef( angleX, 0.0f, 1.0f, 0.0f );
 
+      // structure will be drawn around the positive z-axis starting from the
+      // origin, so rotate to make the z-axis point downwards
+      glRotatef( 90.0f, 1.0f, 0.0f, 0.0f );
+
+      // and translate along the z-axis to make the vertical center of the
+      // structure end up in the origin
+      float halfHeight = mediator->getHalfStructureHeight();
+      glTranslatef( 0.0f, 0.0f, -halfHeight );
+      
+      // determine current viewpoint in world coordinates
+      glPushMatrix();
+	glLoadIdentity();
+	glTranslatef( 0.0f, 0.0f, halfHeight );
+	glRotatef( -90.0f , 1.0f, 0.0f, 0.0f );
+	glRotatef( -angleX, 0.0f, 1.0f, 0.0f );
+	glRotatef( -angleY, 1.0f, 0.0f, 0.0f );
+	glTranslatef( -moveVector.x, -moveVector.y, -moveVector.z + startPosZ );
+	GLfloat M[16];
+	glGetFloatv( GL_MODELVIEW_MATRIX, M );
+	Point3D viewpoint = { M[12], M[13], M[14] };
+      glPopMatrix();
+      
       // draw the structure
-      mediator->drawLTS();
+      mediator->drawLTS( viewpoint );
       
       if ( swapBuffers ) SwapBuffers();
     glPopMatrix();

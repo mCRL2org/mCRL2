@@ -63,10 +63,10 @@ void GLUtils::coloredCylinder( float baserad, float toprad, float height,
   for ( int j = 0 ; j <= slices ; ++j )
   {
     glNormal3f( nx[j], ny[j], nzg );
-    glColor4f( c1r, c1g, c1b, alpha );
-    glVertex3f( baserad * ctab[j], baserad * stab[j], 0.0f );
     glColor4f( c2r, c2g, c2b, alpha );
     glVertex3f( toprad * ctab[j], toprad * stab[j], height );
+    glColor4f( c1r, c1g, c1b, alpha );
+    glVertex3f( baserad * ctab[j], baserad * stab[j], 0.0f );
   }
   glEnd();
 

@@ -39,8 +39,10 @@ class LTSViewApp : public wxApp, public Mediator
     void	  applyDefaultSettings();
     void	  applyMarkStyle( MarkStyle ms );
     void	  applySettings();
-    void	  drawLTS();
+    void	  drawLTS( Point3D viewpoint );
     void	  editMarkRule( const int index );
+    RGB_Color	  getBackgroundColor() const;
+    float	  getHalfStructureHeight() const;
     virtual bool  OnInit();
     void	  openFile( string fileName );
     void	  removeMarkRule( const int index );

@@ -21,6 +21,8 @@ using namespace GLUtils;
 class Visualizer
 {
   private:
+    float		  boundingCylH;
+    float		  boundingCylW;
     float		  cos_obt;
     static VisSettings	  defaultVisSettings;
     LTS*		  lts;
@@ -30,8 +32,7 @@ class Visualizer
     RankStyle		  rankStyle;
     bool		  refreshPrimitives;
     float		  sin_obt;
-    float		  structHeight;
-    float		  structWidth;
+    Point3D		  viewpoint;
     VisSettings		  visSettings;
 
     void drawSubtree( Cluster* root, bool topClosed, float &boundWidth, float
@@ -45,9 +46,11 @@ class Visualizer
     Visualizer( Mediator* owner );
     ~Visualizer();
     
-    void	drawLTS();
-    float	getStructureHeight() const;
-    float	getStructureWidth() const;
+    void	drawLTS( Point3D viewpoint );
+    RGB_Color	getBackgroundColor() const;
+    float	getBoundingCylinderHeight() const;
+    float	getBoundingCylinderWidth() const;
+    float	getHalfStructureHeight() const;
     RankStyle	getRankStyle() const;
     VisSettings getDefaultVisSettings() const;
     VisSettings getVisSettings() const;

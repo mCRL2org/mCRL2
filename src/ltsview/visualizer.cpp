@@ -10,8 +10,8 @@ VisSettings Visualizer::defaultVisSettings =
 Visualizer::Visualizer( Mediator* owner )
 {
   lts = NULL;
-  structHeight = 0.0f;
-  structWidth = 0.0f;
+  boundingCylH = 0.0f;
+  boundingCylW = 0.0f;
   mediator = owner;
   
   // set the visualization settings to default values
@@ -40,14 +40,25 @@ VisSettings Visualizer::getVisSettings() const
   return visSettings;
 }
 
-float Visualizer::getStructureHeight() const
+float Visualizer::getHalfStructureHeight() const
 {
-  return structHeight;
+  if ( lts == NULL ) return 0.0f;
+  return visSettings.clusterHeight*( lts->getNumberOfRanks()-1 ) / 2.0f;
 }
 
-float Visualizer::getStructureWidth() const
+float Visualizer::getBoundingCylinderHeight() const
 {
-  return structWidth;
+  return boundingCylH;
+}
+
+float Visualizer::getBoundingCylinderWidth() const
+{
+  return boundingCylW;
+}
+
+RGB_Color Visualizer::getBackgroundColor() const
+{
+  return visSettings.backgroundColor;
 }
 
 void Visualizer::setMarkStyle( MarkStyle ms )
@@ -106,9 +117,10 @@ void Visualizer::positionClusters()
   refreshPrimitives = true;
 }
 
-void Visualizer::drawLTS()
+void Visualizer::drawLTS( Point3D viewpoint )
 {
   if ( lts == NULL ) return;
+  
   if ( refreshPrimitives )
   {
     // refresh necessary
@@ -122,12 +134,8 @@ void Visualizer::drawLTS()
     
     glPushMatrix();
       glLoadIdentity();
-      glRotatef( 90.0f, 1.0f, 0.0f, 0.0f );
-      glTranslatef( 0.0f, 0.0f, -visSettings.clusterHeight*(
-	    lts->getNumberOfRanks()-1 ) / 2.0f );
-
-      structHeight = 0.0f;
-      structWidth = 0.0f;
+      boundingCylH = 0.0f;
+      boundingCylW = 0.0f;
       sin_obt = float( sin( visSettings.outerBranchTilt * PI / 180.0 ) );
       cos_obt = float( cos( visSettings.outerBranchTilt * PI / 180.0 ) );
 
@@ -135,12 +143,12 @@ void Visualizer::drawLTS()
       {
 	case MARK_DEADLOCKS:
 	  drawSubtreeMarkDeadlocks( lts->getInitialState()->getCluster(),
-	      true, structWidth, structHeight );
+	      true, boundingCylW, boundingCylH );
 	  break;
 	  
 	case MARK_STATES:
 	  drawSubtreeMarkStates( lts->getInitialState()->getCluster(), true,
-	      structWidth, structHeight );
+	      boundingCylW, boundingCylH );
 	  break;
 
 	case NO_MARKS:
@@ -169,67 +177,33 @@ void Visualizer::drawLTS()
 	  delta_col.v = (hsv2.v - hsv1.v) / (lts->getNumberOfRanks() - 1);
 	  
 	  drawSubtree( lts->getInitialState()->getCluster(), true,
-	      structWidth, structHeight, hsv1, delta_col );
+	      boundingCylW, boundingCylH, hsv1, delta_col );
 	  break;
       }
     glPopMatrix();
     refreshPrimitives = false;
   }
   
-  // get viewpoint world coordinates
-  GLfloat M[16];
-  glGetFloatv( GL_MODELVIEW_MATRIX, M );
-  Point3D viewpoint = { -M[12], -M[13], -M[14] };
-  
   // compute distance of every primitive to viewpoint
   for ( unsigned int i = 0 ; i < primitives.size() ; ++i )
   {
-    Point3D diff = 
+    Point3D d = 
     {
       primitives[i]->worldCoordinate.x - viewpoint.x,
       primitives[i]->worldCoordinate.y - viewpoint.y,
       primitives[i]->worldCoordinate.z - viewpoint.z
     };
-    primitives[i]->distance = sqrt( diff.x*diff.x + diff.y*diff.y +
-	diff.z*diff.z );
+    primitives[i]->distance = sqrt( d.x*d.x + d.y*d.y + d.z*d.z );
   }
 
-  // sort primitives based on distance to viewpoint
+  // sort primitives descending based on distance to viewpoint
   sort( primitives.begin(), primitives.end(), Distance_desc() ); 
   
-  // clear the canvas with the background color
-  glClearColor( visSettings.backgroundColor.r / 255.0,
-      visSettings.backgroundColor.g / 255.0,
-      visSettings.backgroundColor.b / 255.0, 1.0 );
-  glClearDepth( 1.0 );
-  glClear( GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT );
-     
-  glEnable( GL_COLOR_MATERIAL );
-  glColorMaterial( GL_FRONT_AND_BACK, GL_AMBIENT_AND_DIFFUSE );
-  
-  /*
-  glDepthMask( GL_FALSE );
-  glEnable( GL_CULL_FACE );
-  glCullFace( GL_FRONT );
-  */
-
   // draw primitives in sorted order
   for ( unsigned int i = 0 ; i < primitives.size() ; ++i )
   {
     glCallList( primitives[i]->displayList );
   }
-  
-  /*
-  glCullFace( GL_BACK );
-  for ( unsigned int i = 0 ; i < primitives.size() ; ++i )
-  {
-    glCallList( primitives[i]->displayList );
-  }
-  glDisable( GL_CULL_FACE );
-  glDepthMask( GL_TRUE );
-  */
-  
-  glDisable( GL_COLOR_MATERIAL );
 }
 
 // draws the subtree with cluster *root as the root of the tree
