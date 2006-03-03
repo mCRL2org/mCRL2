@@ -38,6 +38,7 @@ if [[ ! -d ${TARGET_BASE} ]]; then
 fi
 
 source_files="./mcrl2/articles \
+              ./mcrl2/boost-build.jam \
               ./mcrl2/conventions \
               ./mcrl2/COPYING \
               ./mcrl2/INSTALL \
@@ -111,25 +112,36 @@ if (! test -e "${archive_name}.bz2"); then
            --exclude '*.so' \
            --exclude-from excludes ${source_files}
 
-  unlink mcrl2
-
   tar rf ${archive_name} ./mcrl2/utility/revision.mk
+
+  unlink mcrl2
 
   # Mark distribution as source distribution
   mkdir mcrl2
 
-  echo -e  "# This definition is needed to deactivate computation of maximum revision" \
-           "\n# numbers just before builds. This computation would fail since the a source" \
-           "\n# distribution does not contain the svn meta data. The file is included from" \
-           "\n# the make file ./config ." \
-           "\n" \
-           "\nSOURCE_DISTRIBUTION = 1" \
-           "\n" \
+  cp ${SOURCE_BASE}/project-root.jam ./mcrl2/project-root.jam
+
+  echo -e "else {"\
+          "\n  constant REVISION_NUMBER : ${revision} ;"\
+          "\n}" >> ./mcrl2/project-root.jam
+
+  tar rf ${archive_name} ./mcrl2/project-root.jam
+
+  unlink ./mcrl2/project-root.jam
+
+  echo -e  "# This definition is needed to deactivate computation of maximum revision"\
+           "\n# numbers just before builds. This computation would fail since the a source"\
+           "\n# distribution does not contain the svn meta data. The file is included from"\
+           "\n# the make file ./config ."\
+           "\n"\
+           "\nSOURCE_DISTRIBUTION = 1"\
+           "\n"\
            "\nREVISION := -DREVISION=${revision}" > mcrl2/distribution
 
   tar rf ${archive_name} ./mcrl2/distribution
 
   unlink mcrl2/distribution
+
   rmdir mcrl2
 
   bzip2 -f ${archive_name}

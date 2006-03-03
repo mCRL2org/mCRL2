@@ -1,8 +1,9 @@
+import path ;
+
 path-constant TOP : . ;
 
 path-constant BUILD_TOP : src/squadt/bin ;
 
-use-project /utilities                 : utility ;
 use-project /libraries/md5pp           : src/squadt/libraries/md5pp/build ;
 use-project /libraries/transport       : src/squadt/libraries/transport/build ;
 use-project /libraries/sip             : src/squadt/libraries/sip/build ;
@@ -12,4 +13,8 @@ use-project /boost/filesystem          : src/boost/libs/filesystem/build ;
 #use-project /boost/test                : src/boost/libs/test/build ;
 use-project /boost/thread              : src/boost/libs/thread/build ;
 
-constant REVISION_NUMBER : [ SHELL "$(TOP)/utility/maximum_revision" ] ;
+if ! [ path.exists $(TOP)/distribution ] {
+  use-project /utilities : utility ;
+
+  constant REVISION_NUMBER : [ SHELL "$(TOP)/utility/maximum_revision" ] ;
+}

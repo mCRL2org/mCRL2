@@ -1,4 +1,4 @@
-.PHONY: all install clean distclean
+.PHONY: all install clean distclean distribution
 
 -include config
 

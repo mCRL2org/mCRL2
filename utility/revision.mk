@@ -27,10 +27,5 @@ $(MAXIMUM_REVISION): $(BJAM)
 # This makes make reload, such that REVISION is initialised properly
 -include $(TREE_ROOT)revision
 
-# This is present for viewCVS generated tarballs that do not include revision
-ifndef REVISION
-REVISION := -DREVISION=0
-endif
-
 endif
 endif

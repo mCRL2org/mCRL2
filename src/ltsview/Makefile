@@ -22,8 +22,6 @@ all : $(TARGETS)
 
 ifndef SOURCE_DISTRIBUTION
 include ../../utility/revision.mk
-else
-include ../../revision
 endif
 
 CPPFLAGS += $(REVISION)

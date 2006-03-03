@@ -237,8 +237,6 @@ endif
 # Rules for building the maximum_revision tool and to generate a `revision' file
 ifndef SOURCE_DISTRIBUTION
 include ../utility/revision.mk
-else
-include ../revision
 endif
 
 CPPFLAGS += $(REVISION)
