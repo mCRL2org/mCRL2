@@ -45,6 +45,7 @@ source_files="./mcrl2/articles \
               ./mcrl2/configure \
               ./mcrl2/config.guess \
               ./mcrl2/config.sub \
+              ./mcrl2/config.jam.in \
               ./mcrl2/install-sh \
               ./mcrl2/config.in \
               ./mcrl2/Makefile \
@@ -52,6 +53,7 @@ source_files="./mcrl2/articles \
               ./mcrl2/test.y \
               ./mcrl2/tests \
               ./mcrl2/specs \
+              ./mcrl2/utility/revision.mk \
               ./mcrl2/src"
 
 svn_update="$(svn update 2>&1 | tail -n 1)"
