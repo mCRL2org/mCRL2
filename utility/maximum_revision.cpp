@@ -7,27 +7,31 @@
 #include <boost/filesystem/operations.hpp>
 
 #define PROGRAM_NAME    "svn_revision"
-#define PROGRAM_VERSION "1.0.1"
+#define PROGRAM_VERSION "1.0.2"
 
 /* Works under the assumption of valid XML as input */
 
 void usage() {
-  std::cout << "Usage: " << PROGRAM_NAME << " [options]\n";
+  std::cout << "Usage: " << PROGRAM_NAME << " [options] [directory]\n";
   std::cout << std::endl;
   std::cout << "Where options is a combination of:" << std::endl;
   std::cout << std::endl;
   std::cout << "  -h, --help         show this information\n";
   std::cout << "      --version      show program version\n";
   std::cout << std::endl;
-  std::cout << "Prints the maximum svn revision of any file in the current\n";
-  std::cout << "directory or any of its subdirectories.\n";
+  std::cout << "Prints the maximum svn revision of any file in <directory>\n";
+  std::cout << "and otherwise current directory, or any of its subdirectories.\n";
   std::cout << std::endl;
   std::cout << "Report bugs to J.v.d.Wulp@tue.nl.\n";
 
   exit(0);
 }
 
-void processCommandLineOptions (const int argc, char** argv) {
+namespace bf = boost::filesystem;
+
+bf::path target_directory = bf::current_path();
+
+void process_command_line_options (const int argc, char** argv) {
   static struct option long_options[] = {
     {"version"    , 0, NULL, 0},
     {"help"       , 0, NULL, 0},
@@ -59,24 +63,26 @@ void processCommandLineOptions (const int argc, char** argv) {
 
     c = getopt_long(argc, argv, "h", long_options, &i);
   }
-}
 
-using namespace boost::filesystem;
+  if (optind < argc) {
+    target_directory = bf::path(argv[optind]);
+  }
+}
 
 const char*  target = "committed-rev=\"";
 
 /* Returns the maximum found in <|path|> */
-unsigned int ExplorePath(path apath) {
+unsigned int explore_path(bf::path apath) {
   unsigned int return_value = 0;
 
   try {
-    directory_iterator i(apath);
+    bf::directory_iterator i(apath);
 
-    while (i != directory_iterator()) {
-      if (is_directory(*i)) {
+    while (i != bf::directory_iterator()) {
+      if (bf::is_directory(*i)) {
         if ((*i).leaf() == ".svn") {
           try {
-            std::fstream file((*i / path("entries")).string().c_str(), std::ios_base::in);
+            std::fstream file((*i / bf::path("entries")).string().c_str(), std::ios_base::in);
 
             while (file) {
               size_t i = 0;
@@ -115,7 +121,7 @@ unsigned int ExplorePath(path apath) {
           }
         }
         else {
-          unsigned int temporary = ExplorePath(*i);
+          unsigned int temporary = explore_path(*i);
 
           if (return_value < temporary) {
             return_value = temporary;
@@ -137,9 +143,9 @@ unsigned int ExplorePath(path apath) {
  * Validation with respect to the XML schema file is assumed
  *****************************************************************/
 int main(int argc, char **argv) {
-  processCommandLineOptions(argc, argv);
+  process_command_line_options(argc, argv);
 
-  std::cout << ExplorePath(current_path());
+  std::cout << explore_path(target_directory);
 
   return(0);
 }

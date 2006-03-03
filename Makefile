@@ -20,5 +20,9 @@ distclean: clean distribution
 distribution:
 	@$(RM) src/revision src/squadt/revision src/ltsview/revision
 
+ifeq (,$(findstring $(MAKECMDGOALS),clean distclean revision))
+
 config:
 	$(error Please configure the source tree first.)
+
+endif

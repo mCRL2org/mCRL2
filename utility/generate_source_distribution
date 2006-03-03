@@ -56,20 +56,24 @@ source_files="./mcrl2/articles \
 
 svn_update="$(svn update 2>&1 | tail -n 1)"
 
+# Make sure that the maximum revision tool exists
+sh -c "cd ${SOURCE_BASE}; make revision" &> /dev/null
+
+# Alternative method of obtaining the last revision that does not require
+# ${SOURCE_BASE}/utility/maximum_revision (but has a potential for not being accurate)
+# svn log -q -r HEAD https://svn.win.tue.nl/repos/MCRL2/ \
+#  | grep --only-matching -e "^r[[:digit:]]*\ " \
+#  | tr -d "r \n"
+
+# Obtain revision number from checked out source tree
+revision="$(cd ${SOURCE_BASE}; utility/maximum_revision)"
+
+# Determine archive name
+archive_name="${TARGET_BASE}/mcrl2-${revision}.tar"
+
 # The following works based on assumption that the source tree is configured
-if (! test -e ${archive}.bz2) || ! $(expr "${svn_update}" : "At revision" &> /dev/null ); then
-  # Regenerate tarballs for source distribution
-  sh -c 'cd ${SOURCE_BASE}; make revision' &> /dev/null
-
-  # alternative method of obtaining the last revision that does not require
-  # ${SOURCE_BASE}/utility/maximum_revision (but has a potential for not being accurate)
-  # svn log -q -r HEAD https://svn.win.tue.nl/repos/MCRL2/ \
-  #  | grep --only-matching -e "^r[[:digit:]]*\ " \
-  #  | tr -d "r \n"
-
-  revision="$(${SOURCE_BASE}/utility/maximum_revision)"
-  archive_name="${TARGET_BASE}/mcrl2-${revision}.tar"
-
+if (! test -e "${archive_name}.bz2"); then
+  # Generate tarball for source distribution
   ln -sf ${SOURCE_BASE} ./mcrl2
 
   # Find binaries and other files with no extension that should be filtered out
@@ -129,3 +133,5 @@ if (! test -e ${archive}.bz2) || ! $(expr "${svn_update}" : "At revision" &> /de
   unlink excludes
 fi
 
+# Return archive base name
+echo $(basename ${archive_name}.bz2)
