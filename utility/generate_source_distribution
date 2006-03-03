@@ -90,7 +90,7 @@ if (! test -e "${archive_name}.bz2"); then
   find -L ./mcrl2 -type d \
        -name 'html' \
        -or -name 'latex' \
-       -or -name 'bin*' \
+       -or -name 'bin' \
        -or -wholename '*mcrl2/utility' \
        -or -wholename '*jam/bootstrap' \
        -or -wholename '*boost/stage' \
