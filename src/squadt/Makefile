@@ -120,7 +120,7 @@ ifeq ($(HOST_OS),MACOSX)
 	cp squadt.plist ../../squadt.app/Contents/Info.plist
 	echo -n "APPL????" > ../../squadt.app/Contents/PkgInfo
 	ln -f $(bindir)/squadt ../../squadt.app/Contents/MacOS/squadt
-	cp -f ../xsim.icns ../../squadt.app/Contents/Resources/squadt.icns
+	cp -f squadt.icns ../../squadt.app/Contents/Resources/squadt.icns
 endif
 
 clean:
