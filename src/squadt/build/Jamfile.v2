@@ -9,6 +9,7 @@ project squadt
 include $(TOP)/config.jam ;
 
 exe squadt :
+         squadt.cpp
          settings_manager.cpp
          project_manager.cpp
          exception.cpp
@@ -22,7 +23,6 @@ exe squadt :
          gui_project_overview.cpp
          gui_resources.cpp
          gui_specification_properties.cpp
-         squadt.cpp
          /libraries/md5pp//md5pp
          /libraries/xml2pp//text_reader
          /boost/filesystem//boost_filesystem

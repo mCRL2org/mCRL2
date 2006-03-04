@@ -73,7 +73,7 @@ namespace squadt {
     xml2pp::text_reader reader(f);
 
     reader.set_schema(xml2pp::text_reader::file_name< std::string >(
-                            _settings_manager.path_to_schemas(
+                            _settings_manager->path_to_schemas(
                                     settings_manager::append_schema_suffix(
                                             settings_manager::tool_catalog_base_name))));
  
@@ -109,7 +109,7 @@ namespace squadt {
   bool ToolManager::Load() throw () {
     using namespace boost::filesystem;
  
-    std::string catalog_file = _settings_manager.path_to_user_settings(settings_manager::tool_catalog_base_name);
+    std::string catalog_file = _settings_manager->path_to_user_settings(settings_manager::tool_catalog_base_name);
 
     if (!exists(path(catalog_file, no_check))) {
       path ghost_catalog(catalog_file + ".ghost", no_check);
@@ -130,7 +130,7 @@ namespace squadt {
   bool ToolManager::Store() const {
     using namespace boost::filesystem;
  
-    std::string   catalog_file = _settings_manager.path_to_user_settings(settings_manager::tool_catalog_base_name);
+    std::string   catalog_file = _settings_manager->path_to_user_settings(settings_manager::tool_catalog_base_name);
     std::ofstream catalog_stream(catalog_file.c_str(), std::ios::out | std::ios::trunc);
     path          old_catalog_path = path(catalog_file + ".ghost");
  

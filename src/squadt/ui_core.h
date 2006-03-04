@@ -8,7 +8,7 @@ namespace squadt {
   class Logger;
 
   /* Global Settings Manager component */
-  extern settings_manager _settings_manager;
+  extern settings_manager* _settings_manager;
 
   /* Global Tool Manager component */
   extern ToolManager      tool_manager;

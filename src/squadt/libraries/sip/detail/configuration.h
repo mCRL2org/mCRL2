@@ -59,6 +59,12 @@ namespace sip {
       /** \brief Get an option by its id */
       inline option_ptr get_option(const option::identifier) const;
 
+      /** \brief Add an input object to the configuration */
+      inline add_input();
+
+      /** \brief Add an output object to the configuration */
+      inline add_output();
+
       /** \brief Generate XML representation */
       inline void to_xml(std::ostream&) const;
 

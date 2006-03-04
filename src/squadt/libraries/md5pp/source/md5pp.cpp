@@ -5,7 +5,7 @@
 
 namespace md5 {
 
-  compact_digest zero_digest = { 0, 0, 0, 0, 0, 0, 0, 0 };
+  compact_digest zero_digest = { { 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0 } };
 
   void compact_digest::read(const char* string) {
     unsigned char* pointer = (unsigned char*) string;

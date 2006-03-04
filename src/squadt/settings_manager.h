@@ -30,7 +30,7 @@ namespace squadt {
       const path system_settings_path;
 
       /** \brief Helper function for constructors that ensures that the appropriate directories exist */
-      inline void settings_manager::ensure_directories_exist();
+      inline void ensure_directories_exist();
 
     public:
 

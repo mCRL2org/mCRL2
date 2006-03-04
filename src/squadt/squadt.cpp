@@ -1,9 +1,11 @@
+#include <fstream>
+
+#include <boost/scoped_ptr.hpp>
+
 #include <wx/wx.h>
 #include <wx/splash.h>
 #include <wx/filename.h>
 #include <wx/image.h>
-
-#include <fstream>
 
 /* Include definition of the project overview window */
 #include "gui_project_overview.h"
@@ -15,14 +17,14 @@
 namespace squadt {
 
   /* Global Settings Manager component */
-  settings_manager _settings_manager(static_cast < const char* > (wxFileName::GetHomeDir().fn_str()));
+  settings_manager* _settings_manager;
 
   /* Global Tool Manager component */
-  ToolManager      tool_manager;
+  ToolManager       tool_manager;
  
-  std::ofstream    log_stream(_settings_manager.path_to_system_settings("squadt.log").c_str(), std::ios::app);
+  std::ofstream     log_stream;
  
-  Logger*          logger;
+  Logger*           logger;
  
   namespace GUI {
 
@@ -45,7 +47,11 @@ namespace squadt {
     }
  
     bool Squadt::OnInit() {
+      _settings_manager = new settings_manager(wxFileName::GetHomeDir().fn_str());
+
       wxInitAllImageHandlers();
+
+      log_stream.open(_settings_manager->path_to_system_settings("squadt.log").c_str(), std::ios::app);
 
       logger = new Logger((log_stream.good()) ? log_stream : std::cerr);
  
@@ -57,7 +63,7 @@ namespace squadt {
       /* Show a splash */
       wxBitmap        splash_image;
       wxSplashScreen* splash;
-      wxString        logo(_settings_manager.path_to_images("logo.jpg").c_str(), wxConvLocal);
+      wxString        logo(_settings_manager->path_to_images("logo.jpg").c_str(), wxConvLocal);
  
       if (splash_image.LoadFile(logo, wxBITMAP_TYPE_JPEG)) {
         splash = new wxSplashScreen(splash_image, wxSPLASH_CENTRE_ON_PARENT|wxSPLASH_TIMEOUT, 600, window, wxID_ANY);
@@ -79,6 +85,8 @@ namespace squadt {
     }
     
     int Squadt::OnExit() {
+      delete _settings_manager;
+
       return (wxApp::OnExit());
     }
   }
