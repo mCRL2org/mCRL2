@@ -522,6 +522,7 @@ void MainFrame::onMarkRuleEdit( wxCommandEvent& event )
 void MainFrame::onMarkAnyAll( wxCommandEvent& event )
 {
   mediator->setMatchAnyMarkRule( event.GetSelection() == 0 );
+  markstatesRadio->SetValue( true );
 }
 
 void MainFrame::onAddMarkRuleButton( wxCommandEvent& /*event*/ )

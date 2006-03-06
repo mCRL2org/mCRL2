@@ -233,8 +233,8 @@ void LTSViewApp::setMatchAnyMarkRule( bool b )
     {
       lts->setMatchAnyMarkRule( b );
       lts->markStates();
-      applyMarkStyle( MARK_STATES );
     }
+    applyMarkStyle( MARK_STATES );
   }
 }
 
