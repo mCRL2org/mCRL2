@@ -456,7 +456,7 @@ bool EnumeratorSolutionsStandard::next(ATermList *solution)
 				if ( !ATisEqual(new_expr,info.rewr_false) )
 				{
 					fs_push(ATgetNext(ATreverse(uvars)),ATinsert(e.vals,(ATerm) ATmakeAppl2(info.tupAFun,(ATerm) var,(ATerm) term_rf)),new_expr);
-					if ( ATisEmpty(fs_top().vars) || (EliminateVars(&fs_top()), ATisEmpty(fs_top().vars)) )
+					if ( ATisEmpty(fs_top().vars) || (EliminateVars(&fs_top()), ATisEmpty(fs_top().vars) || ATisEqual(fs_top().expr,info.rewr_false)) )
 					{
 						if ( ATisEqual(fs_top().expr,info.rewr_true) )
 						{
@@ -512,7 +512,10 @@ void EnumeratorSolutionsStandard::reset(ATermList Vars, ATerm Expr)
 		EliminateVars(&fs_bottom());
 	}
 	
-	if ( ATisEmpty(fs_bottom().vars) )
+	if ( ATisEqual(fs_bottom().expr,info.rewr_false) )
+	{
+		fs_pop();
+	} else if ( ATisEmpty(fs_bottom().vars) )
 	{
 		if ( ATisEqual(fs_bottom().expr,info.rewr_true) )
 		{
