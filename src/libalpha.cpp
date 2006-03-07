@@ -369,6 +369,16 @@ static unsigned get_max_allowed_length(ATermList V){
   return m;
 }
 
+static unsigned get_max_comm_length(ATermList C){
+  //returns the length of the longest allowed multiaction (min 1).
+  unsigned m = 1;
+  for (; !ATisEmpty(C); C=ATgetNext(C)){
+    unsigned c=ATgetLength(ATLgetArgument(ATAgetArgument(ATAgetFirst(C),0),0));
+    if(c>m) m=c;
+  }
+  return m;
+}
+
 static ATermList optimize_allow_list(ATermList V, ATermList ul){
   //returns the subset of V that is in ul
   ATermList m = ATmakeList0();
@@ -429,6 +439,7 @@ static ATermList split_allow(ATermList V, ATermList ulp, ATermList ulq){
 }
 
 static ATermList sync_list(ATermList l, ATermList m, unsigned length=0){
+  //gsWarningMsg("sync_list: l: %T, m: %T\n\n",l,m);
   ATermList n = ATmakeList0();
   for (; !ATisEmpty(l); l=ATgetNext(l)){
     ATermList ll=ATLgetFirst(l);
@@ -554,6 +565,49 @@ static ATermList apply_rename(ATermList l, ATermList R){
       m = ATinsert(m,(ATerm)a);
   }
   return gsaATsortList(m);
+}
+
+static ATermList apply_unrename(ATermList l, ATermList R){
+  //applies R^{-1} to a multiaction l, returns a list of multiactions.
+
+  ATermList m=ATmakeList1((ATerm)ATmakeList0());
+  if ( ATisEmpty(l) )
+    return m;
+  
+  for (; !ATisEmpty(l); l=ATgetNext(l)){
+    ATermList tR = R;
+    ATermList temp = ATmakeList0();
+    ATermAppl a=ATAgetFirst(l);
+    for (; !ATisEmpty(R); R=ATgetNext(R)){
+      ATermAppl r=ATAgetFirst(R);
+      if(ATisEqual(a,ATAgetArgument(r,1)))
+	temp=ATinsert(temp,(ATerm)ATAgetArgument(r,0));
+    }
+    R = tR;
+    if(ATisEmpty(temp)) 
+      temp=ATinsert(temp,(ATerm)a);
+    m = sync_list(m,ATmakeList1((ATerm)temp));
+  }
+  return m;
+}
+
+static ATermList apply_unrename_allow_list(ATermList V, ATermList R){
+  //applies R^{-1} to a multiaction V, returns a list V1 -- also allow-list.
+
+  ATermList m=ATmakeList0();
+  if ( ATisEmpty(V) )
+    return V;
+  
+  for (; !ATisEmpty(V); V=ATgetNext(V)){
+    ATermList ma=ATLgetArgument(ATAgetFirst(V),0);
+    m=merge_list(m,apply_unrename(ma,R));  //add it to m
+  }
+
+  ATermList r=ATmakeList0();
+  for (; !ATisEmpty(m); m=ATgetNext(m))
+    r=ATinsert(r,(ATerm)gsMakeMultActName(ATLgetFirst(m)));
+  
+  return ATreverse(r);
 }
 
 static ATermList apply_comms(ATermList l, ATermList C, ATermList lhs){
@@ -968,7 +1022,7 @@ static ATermAppl PushHide(ATermList I, ATermAppl a){
 }
 
 static ATermAppl PushAllow(ATermList V, ATermAppl a){
-  //gsWarningMsg("push allow: V: %T; a:%P\n",V,a);
+  //gsWarningMsg("push allow: V: %P; a: %P\n",V,a);
   V=sort_multiactions_allow(V);
   if ( gsIsDelta(a) || gsIsTau(a) ){
     return a;
@@ -1042,12 +1096,8 @@ static ATermAppl PushAllow(ATermList V, ATermAppl a){
     ATermList H=ATLgetArgument(a,0);
     ATermAppl p=ATAgetArgument(a,1);
 
-    ATermList l = ATLtableGet(alphas,(ATerm) p);
-    if(!l) l=gsaGetAlpha(a);
-
     p = PushAllow(V,p);
-
-    l = ATLtableGet(alphas,(ATerm) p);
+    ATermList l = ATLtableGet(alphas,(ATerm) p);
     a = ATsetArgument(a,(ATerm)p,1);
     ATtablePut(alphas,(ATerm) a,(ATerm)filter_block_list(l,H));
     return a;
@@ -1069,11 +1119,16 @@ static ATermAppl PushAllow(ATermList V, ATermAppl a){
     return a;
   } 
   else if ( gsIsRename(a) ){
-    //XXX
-    ATermList l = ATLtableGet(alphas,(ATerm) a);
-    if(!l) l=gsaGetAlpha(a);
-    a = gsMakeAllow(V,a);
-    ATtablePut(alphas,(ATerm) a,(ATerm) filter_allow_list(l,V));
+    ATermList R=ATLgetArgument(a,0);
+    ATermAppl p=ATAgetArgument(a,1);
+
+    ATermList V1 = apply_unrename_allow_list(V,R);
+
+    p = PushAllow(V1,p);
+
+    ATermList l = ATLtableGet(alphas,(ATerm) p);
+    a = ATsetArgument(a,(ATerm)p,1);
+    ATtablePut(alphas,(ATerm) a,(ATerm)filter_rename_list(l,R));
     return a;
   } 
   else if ( gsIsAllow(a) ){
@@ -1359,6 +1414,9 @@ static ATermList gsaGetAlpha(ATermAppl a, unsigned length, ATermList ignore){
   // they have a common type (if !length, then the length is unlimited and ignore is not used)
   // updates the global hash table alphas (in case length==0 and ignore=ATmakeList0() writes the alphabet of a into alphas).
   // XXX ignore parameter not implemented yet
+
+  //gsVerboseMsg("gsaGetAlpha: a: %P; length: %d\n\n", a, length);
+
   ATermList l=NULL; //result
 
   if ( gsIsSync (a)  ){
@@ -1443,7 +1501,7 @@ static ATermList gsaGetAlpha(ATermAppl a, unsigned length, ATermList ignore){
     ATermAppl p = ATAgetArgument(a,1);
     ATermList C = sort_multiactions_comm(ATLgetArgument(a,0));
     
-    l=gsaGetAlpha(p);
+    l=gsaGetAlpha(p,length*get_max_comm_length(C));
     ATtablePut(alphas,(ATerm) p,(ATerm) l); 
     
     l=filter_comm_list(l,C); 
@@ -1486,7 +1544,7 @@ static ATermList gsaGetAlpha(ATermAppl a, unsigned length, ATermList ignore){
     ATtablePut(alphas,(ATerm) a,(ATerm) l); 
   }
 
-  //gsVerboseMsg("gsaGetAlpha: a: %P; l:%d, length: %d\n\n", a, ATgetLength(l), length);
+  //gsVerboseMsg("gsaGetAlpha done: a: %P; l:%d, length: %d\n\n", a, ATgetLength(l), length);
   return l;
 }
 
