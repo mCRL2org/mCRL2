@@ -12,8 +12,8 @@
 #include "libalpha.h"
 
 static ATermAppl gsApplyAlpha(ATermAppl a);
-static ATermList gsaGetAlpha(ATermAppl a, unsigned length=0, ATermList ignore=ATmakeList0());
-static ATermList gsaGetSyncAlpha(ATermAppl a, unsigned length=0, ATermList ignore=ATmakeList0());
+static ATermList gsaGetAlpha(ATermAppl a, unsigned length=0, ATermList allowed=ATmakeList0(), ATermList ignore=ATmakeList0());
+static ATermList gsaGetSyncAlpha(ATermAppl a, unsigned length=0, ATermList allowed=ATmakeList0(), ATermList ignore=ATmakeList0());
 
 static inline ATermAppl INIT_KEY(void){return gsMakeProcVarId(gsString2ATermAppl("init"),ATmakeList0());}
 
@@ -296,11 +296,9 @@ static ATermList merge_list(ATermList l, ATermList m){
 
 static ATermList list_minus(ATermList l, ATermList m){
   ATermList n = ATmakeList0();
-  for (; !ATisEmpty(l); l=ATgetNext(l)){
-    if ( ATindexOf(m,ATgetFirst(l),0) < 0 ){
+  for (; !ATisEmpty(l); l=ATgetNext(l))
+    if ( ATindexOf(m,ATgetFirst(l),0) < 0 )
       n = ATinsert(n,ATgetFirst(l));
-    }
-  }
   return ATreverse(n);
 }
 
@@ -356,6 +354,14 @@ static ATermList filter_allow_list(ATermList l, ATermList V){
     if(ATindexOf(V,(ATerm)gsMakeMultActName(untypeMA(ATLgetFirst(l))),0) >=0)
       m = ATinsert(m,(ATerm)ATLgetFirst(l));
   }
+  return ATreverse(m);
+}
+
+static ATermList get_allow_list(ATermList V){
+  //returns the list of multiactions that are allowed
+  ATermList m = ATmakeList0();
+  for (; !ATisEmpty(V); V=ATgetNext(V))
+    m=ATinsert(m,(ATerm)ATLgetArgument(ATAgetFirst(V),0));
   return ATreverse(m);
 }
 
@@ -438,14 +444,37 @@ static ATermList split_allow(ATermList V, ATermList ulp, ATermList ulq){
   return ATreverse(m);
 }
 
-static ATermList sync_list(ATermList l, ATermList m, unsigned length=0){
+static bool sub_multiaction(ATermList l, ATermList m){
+  // returns true if l is a sub-multiaction of m
+  for (; !ATisEmpty(l); l=ATgetNext(l))
+    if ( ATindexOf(m,ATgetFirst(l),0) < 0 )
+      return false;
+  return true;
+}
+
+static bool sub_multiaction_list(ATermList MAct, ATermList MActL){
+  // true if multiaction MAct is in a submultiaction of a multiaction from MActL (all untyped)
+  for(; !ATisEmpty(MActL); MActL=ATgetNext(MActL))
+    if(sub_multiaction(MAct,ATLgetFirst(MActL))) return true;
+  return false;
+}
+
+static bool disjoint_multiaction(ATermList MAct, ATermList MActL){
+  // true if no part of multiaction MAct is in a submultiaction of a multiaction from MActL (all untyped)
+  for(; !ATisEmpty(MActL); MActL=ATgetNext(MActL))
+    if(!gsaATisDisjoint(MAct,ATLgetFirst(MActL))) return false;
+  return true;
+}
+
+static ATermList sync_list(ATermList l, ATermList m, unsigned length=0, ATermList allowed=ATmakeList0()){
   //gsWarningMsg("sync_list: l: %T, m: %T\n\n",l,m);
   ATermList n = ATmakeList0();
   for (; !ATisEmpty(l); l=ATgetNext(l)){
     ATermList ll=ATLgetFirst(l);
     for (ATermList o=m; !ATisEmpty(o); o=ATgetNext(o)){
       ATermList oo=ATLgetFirst(o);
-      if(!length || unsigned(ATgetLength(ll))+unsigned(ATgetLength(oo))<=length){
+      if((!length || unsigned(ATgetLength(ll))+unsigned(ATgetLength(oo))<=length)&&
+         (ATisEqual(allowed,ATmakeList0()) || (sub_multiaction_list(untypeMA(ll),allowed) && sub_multiaction_list(untypeMA(oo),allowed)))){
 	ATermList ma=sync_mact(ll,oo);
 	if(ATindexOf(n,(ATerm)ma,0)<0)
 	  n = ATinsert(n,(ATerm)ma);
@@ -473,16 +502,6 @@ static inline void sync_list_into_ht(ATermIndexedSet m, ATermList l){
   ATermList l1=ATindexedSetElements(m);
   ATindexedSetReset(m);
   sync_list_ht(m,l1,l);
-}
-
-static bool disjoint_multiaction(ATermList MAct, ATermList MActL){
-  // true if no part of multiaction MAct is in a submultiaction of a multiaction from MActL (all untyped)
-  for (; !ATisEmpty(MActL); MActL=ATgetNext(MActL)){
-    if ( !gsaATisDisjoint(MAct,ATLgetFirst(MActL)) ){
-      return false;
-    }
-  }
-  return true;
 }
 
 static ATermList apply_hide(ATermList I, ATermList MAct){
@@ -1182,8 +1201,8 @@ static ATermAppl PushAllow(ATermList V, ATermAppl a){
     ATermList lq=ATLtableGet(alphas,(ATerm) q);
 
     unsigned max_len=get_max_allowed_length(V);
-    if(!lp) lp=gsaGetAlpha(p,max_len);
-    if(!lq) lq=gsaGetAlpha(q,max_len);
+    if(!lp) lp=gsaGetAlpha(p,max_len,get_allow_list(V));
+    if(!lq) lq=gsaGetAlpha(q,max_len,get_allow_list(V));
 
     ATermList ulp = untypeMAL(lp);
     ATermList ulq = untypeMAL(lq);
@@ -1409,10 +1428,14 @@ static ATermAppl PushComm(ATermList C, ATermAppl a){
   assert(0);
 }
   
-static ATermList gsaGetAlpha(ATermAppl a, unsigned length, ATermList ignore){
+static ATermList gsaGetAlpha(ATermAppl a, unsigned length, ATermList allowed, ATermList ignore){
   // calculate the alphabeth of a up to the length, ignoring the submultiactions from ignore (list of untyped multiactions) IF 
   // they have a common type (if !length, then the length is unlimited and ignore is not used)
   // updates the global hash table alphas (in case length==0 and ignore=ATmakeList0() writes the alphabet of a into alphas).
+  // allowed is a list of multiactions (w/o types) only sub-multiactions of which are allowed 
+  // this may not be strict, e.g. more multiactions can be returned. This is because this parameter
+  // is only needed for the performance purposes. 
+  // 
   // XXX ignore parameter not implemented yet
 
   //gsVerboseMsg("gsaGetAlpha: a: %P; length: %d\n\n", a, length);
@@ -1421,7 +1444,7 @@ static ATermList gsaGetAlpha(ATermAppl a, unsigned length, ATermList ignore){
 
   if ( gsIsSync (a)  ){
     //try to apply a special procedure
-    l = gsaGetSyncAlpha(a,length,ignore);
+    l = gsaGetSyncAlpha(a,length,allowed,ignore);
     if(l){
       if(!length){
 	ATtablePut(alphas,(ATerm) a,(ATerm) l); 
@@ -1445,7 +1468,7 @@ static ATermList gsaGetAlpha(ATermAppl a, unsigned length, ATermList ignore){
       //this should be a mCRL process (pCRL processes always have an entry). 
       //we apply the alphabeth reductions to its body and then we know the alphabet
       //gsWarningMsg("Exploring new mCRL process %T\n\n",pn);
-      l=gsaGetAlpha(ATAtableGet(procs,(ATerm)pn),length,ignore);
+      l=gsaGetAlpha(ATAtableGet(procs,(ATerm)pn),length,allowed,ignore);
       if(!length)
 	ATtablePut(alphas,(ATerm)pn,(ATerm) l);
       else
@@ -1455,7 +1478,7 @@ static ATermList gsaGetAlpha(ATermAppl a, unsigned length, ATermList ignore){
   }
   else if ( gsIsBlock(a) ){
     ATermAppl p = ATAgetArgument(a,1);
-    l=gsaGetAlpha(p,length,ignore);
+    l=gsaGetAlpha(p,length,allowed,ignore);
     if(!length)
       ATtablePut(alphas,(ATerm) p,(ATerm) l); 
     
@@ -1515,14 +1538,14 @@ static ATermList gsaGetAlpha(ATermAppl a, unsigned length, ATermList ignore){
     if(gsIsSum(a) || gsIsAtTime(a) || gsIsBInit(a)) args=1; //second argument of BInit does not matter 
     
     ATermList l2;
-    l = gsaGetAlpha(ATAgetArgument(a,ia1),length);
-    if(args==2) l2 = gsaGetAlpha(ATAgetArgument(a,ia2),length);
+    l = gsaGetAlpha(ATAgetArgument(a,ia1),length,allowed);
+    if(args==2) l2 = gsaGetAlpha(ATAgetArgument(a,ia2),length,allowed);
     
     if(args==2){
       ATermList l1=l;
       l = merge_list(l1,l2);
       if(gsIsSync(a) || gsIsMerge(a) || gsIsLMerge(a))
-	l = merge_list(l,sync_list(l1,l2,length));
+	l = merge_list(l,sync_list(l1,l2,length,allowed));
       //ATermIndexedSet m=ATindexedSetCreate(100,80);
       //gsaATindexedSetPutList(m,l);
       //gsaATindexedSetPutList(m,l2);
@@ -1539,7 +1562,7 @@ static ATermList gsaGetAlpha(ATermAppl a, unsigned length, ATermList ignore){
   }
   
   assert(l);
-  
+    
   if(!length){
     ATtablePut(alphas,(ATerm) a,(ATerm) l); 
   }
@@ -1548,7 +1571,7 @@ static ATermList gsaGetAlpha(ATermAppl a, unsigned length, ATermList ignore){
   return l;
 }
 
-static ATermList gsaGetSyncAlpha(ATermAppl a, unsigned length, ATermList /* ignore */){
+static ATermList gsaGetSyncAlpha(ATermAppl a, unsigned length, ATermList allowed, ATermList /* ignore */){
   // calculate the alphabeth only of it is a single multiaction.
   ATermList l=NULL; //result
 
@@ -1579,7 +1602,7 @@ static ATermList gsaGetSyncAlpha(ATermAppl a, unsigned length, ATermList /* igno
     ATermList l2 = gsaGetSyncAlpha(ATAgetArgument(a,1),length);
     if(!l2) return NULL;
 
-    l=sync_list(l,l2,length);
+    l=sync_list(l,l2,length,allowed);
   }
   else {
     gsWarningMsg("a: %T\n\n", a);
