@@ -4,6 +4,7 @@ project text_reader
     : build-dir
        $(BUILD_TOP)
     : requirements
+       <include>../../../../boost
        <include>../../
     : usage-requirements
        <include>../../
