@@ -131,7 +131,7 @@ else
  OFLAGS="-O2"
 fi
 
-# Check for debug/profiling options
+# Check for debug/profile options
 AC_ARG_ENABLE(
   [debug],
   AC_HELP_STRING(
@@ -155,13 +155,13 @@ fi
 AC_SUBST([BFLAGS],[])
 
 AC_ARG_ENABLE(
-  [profiling],
+  [profile],
   AC_HELP_STRING(
-    [--enable-profiling],
+    [--enable-profile],
     [compile with profiling support]
   )
 )
-if test $enable_profiling; then
+if test $enable_profile; then
   AC_MSG_NOTICE([compiling with profiling support])
   CPPFLAGS="-pg $CPPFLAGS"
   LDFLAGS="-pg $LDFLAGS"
@@ -204,7 +204,7 @@ if test $with_aterm; then
     ATERM_CPPFLAGS="-I$ATERM_INCLUDE"
     ATERM_LDFLAGS="-L$ATERM_LIB"
   fi
-  if test $enable_profiling; then
+  if test $enable_profile; then
     AC_CHECK_LIB([ATerm-prof], [ATinit], , [AC_MSG_ERROR([cannot find ATerm-prof library])])
     ATERM_NAME="ATerm-prof"
   else
