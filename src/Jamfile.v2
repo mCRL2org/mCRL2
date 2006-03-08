@@ -10,8 +10,8 @@ project squadt-enabled-tools
 
 include $(TOP)/config.jam ;
 
-exe lpeinfo :
-         libprint.o
+exe lpeinfo
+       : libprint.o
          libstruct.o
          libprint_c.o
          liblowlevel.o
@@ -20,8 +20,8 @@ exe lpeinfo :
          /boost/program_options//boost_program_options
        : <define>REVISION=$(REVISION_NUMBER)
          <define>ENABLE_SQUADT_CONNECTIVITY
-         <include>.     # for ATerm/atermpp headers (should be cleaned up)
-         <include>aterm # for ATerm/atermpp headers (should be cleaned up)
+         <include>.
+         <include>aterm # for ATerm/atermpp headers (in the future it would be nice to only include .)
          <linkflags>"-Laterm -lATerm -L. -lrewrite -lm -ldl"
        ;
 

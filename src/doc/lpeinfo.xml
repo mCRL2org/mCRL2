@@ -2,19 +2,17 @@
 
 <!DOCTYPE refentry PUBLIC "-//OASIS//DTD DocBook XML V4.2//EN" "http://www.oasis-open.org/docbook/xml/4.2/docbookx.dtd"[
 <!ENTITY lpeinfo "<function>lpeinfo</function>">
+<!ENTITY option "<parameter>OPTION</parameter>">
 <!ENTITY infile "<parameter>INFILE</parameter>">
 <!ENTITY opt_h "<option>-h</option>">
 <!ENTITY opt_help "<option>--help</option>">
 <!ENTITY opt_version "<option>--version</option>">
-<!ENTITY opt_p "<option>-p</option>">
-<!ENTITY opt_pars "<option>--pars</option>">
 <!ENTITY opt_d "<option>-d</option>">
 <!ENTITY opt_debug "<option>--debug</option>">
-<!ENTITY opt_v "<option>-d</option>">
+<!ENTITY opt_v "<option>-v</option>">
 <!ENTITY opt_verbose "<option>--verbose</option>">
-
-<!ENTITY stdin "<option>STDIN</option>">
-<!ENTITY stdout "<option>STDOUT</option>">
+<!ENTITY stdin "<option>stdin</option>">
+<!ENTITY stdout "<option>stdout</option>">
 ]>
 
 <refentry id="lpeinfo">
@@ -32,16 +30,17 @@
 <refsynopsisdiv>
   <cmdsynopsis>
     <command>&lpeinfo;</command>
-    <arg choice="plain">[[&opt_h; | &opt_help;] | &opt_version; | [ &opt_p; | &opt_pars;] | [ &opt_d; | &opt_debug; ] | [ &opt_v; | &opt_verbose; ]]  </arg>
-    <arg choice="plain">[&infile;]</arg>
+    <arg choice="plain" rep="repeat"><arg choice="opt">&option;</arg></arg>
+    <arg choice="opt">&infile;</arg>
   </cmdsynopsis>
 </refsynopsisdiv>
 
 <refsect1>
   <title>Description</title>
   <para>
-    Display basic information about the linear process equation (LPE) in &infile;.
-    By default, the following information is shown:
+    Display basic information about the linear process equation (LPE) in
+    &infile;.  If &infile; is not supplied an LPE is read from &stdin;. By
+    default, the following information about the LPE is shown:
     <itemizedlist>
       <listitem>
         <para>number of summands</para>
@@ -60,46 +59,9 @@
 </refsect1>
 
 <refsect1>
-  <title>File</title>
-  <para>
-    <variablelist>
-      <varlistentry>
-        <term> </term>
-        <term>&gt;</term>
-          <listitem>
-            <para> &lpeinfo; reads from &stdin;, and displays information to &stdout;.
-            </para>
-          </listitem>
-      </varlistentry>
-      
-      <varlistentry>
-        <term>&infile;</term>
-          <listitem>
-            <para> &lpeinfo; reads from file &infile; and displays information to &stdout;.
-            </para>
-          </listitem>
-      </varlistentry>
-    </variablelist>
-  </para>
-  
-  <para>
-    Note that &lpeinfo; reads LPE-format.
-  </para>
-
-</refsect1>
-
-<refsect1>
   <title>Options</title>
   <para>
     <variablelist>
-
-      <varlistentry>
-        <term>&opt_p;</term>
-        <term>&opt_pars;</term>
-          <listitem>
-            <para>display the process parameters of the LPE</para>
-        </listitem>
-      </varlistentry>
 
       <varlistentry>
         <term>&opt_h;</term>

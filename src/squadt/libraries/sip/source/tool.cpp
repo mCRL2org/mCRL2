@@ -86,6 +86,9 @@ namespace sip {
 
   /* Send a specification of the current configuration (it may change during tool execution) */
   void tool_communicator::send_accept_configuration() {
+    message m(sip::send_accept_configuration);
+
+    send_message(m);
   }
 
   /* Send a layout specification for the display space reserved for this tool */

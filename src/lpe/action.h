@@ -47,7 +47,7 @@ class action: public aterm_wrapper
     ///
     std::string name() const
     {
-      return unquote(aterm_appl(ATAgetArgument(m_name,0)).to_string());
+      return unquote(aterm_appl(ATgetArgument(static_cast < ATermAppl > (m_name),0)).to_string());
     }
 
     /// Returns the sequence of arguments.

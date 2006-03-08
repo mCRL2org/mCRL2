@@ -167,15 +167,15 @@ namespace sip {
             else {
               /* Put message into queue */
               message_queue.push_back(m);
+            }
 
-              /* Unblock waiters, if necessary */
-              if (waiters.count(t) != 0) {
-                barrier_ptr b = waiters[t];
-                
-                waiters.erase(t);
+            /* Unblock a possible waiter */
+            if (0 < waiters.count(t)) {
+              barrier_ptr b = waiters[t];
 
-                b->wait();
-              }
+              waiters.erase(t);
+
+              b->wait();
             }
           }
         }
