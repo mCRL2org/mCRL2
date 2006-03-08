@@ -30,7 +30,7 @@ namespace xml2pp {
     reader = xmlReaderForFile(f.get(), "", 0);
 
     if (reader == 0) {
-      throw (exception(exception_identifier::unable_to_open_file, f));
+      throw (exception(exception_identifier::unable_to_open_file, f.get()));
     }
   }
 
@@ -96,7 +96,7 @@ namespace xml2pp {
     }
     else if (xmlTextReaderSchemaValidate(reader, schema_name.get()) < 0) {
       /* Error schema file, abort ... */
-      throw (exception(exception_identifier::unable_to_open_file, f));
+      throw (exception(exception_identifier::unable_to_open_file, f.get()));
     }
   }
 #else
