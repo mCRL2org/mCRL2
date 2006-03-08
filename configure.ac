@@ -46,7 +46,12 @@ esac
 AC_PROG_CPP
 AC_PROG_CC
 AC_PROG_CXX
-AC_PROG_LEX
+
+# Check for flex
+AC_CHECK_PROG([FLEX], [flex], [flex], [])
+if test -z $FLEX; then
+  AC_MSG_ERROR([cannot find flex])
+fi
 
 # Check for compatible bison
 AC_CHECK_PROG([BISON], [bison], [bison], [])

@@ -46,6 +46,7 @@ extensions should be used only for corresponding purpose:
   .svc                  LTS in SVC format
   .aut                  LTS in AUT format
   .trc                  trace for simulation
+  .dot                  GraphViz format
   .mcrl                 mCRL specification
   .tbf                  mCRL LPE
   .pnml                 PNML specification

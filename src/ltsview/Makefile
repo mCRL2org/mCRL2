@@ -41,7 +41,7 @@ fsmparser.cpp : fsmparser.y fsmlexer.cpp
 	$(BISON) --defines=fsmlexer.h -o fsmparser.cpp -p fsm $<
 
 fsmlexer.cpp : fsmlexer.l
-	$(LEX) -o$@ -Pfsm $<
+	$(FLEX) -o$@ -Pfsm $<
 
 $(ICON_OBJECTS) : icons/*.xpm
 

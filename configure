@@ -312,7 +312,7 @@ ac_includes_default="\
 # include <unistd.h>
 #endif"
 
-ac_subst_vars='SHELL PATH_SEPARATOR PACKAGE_NAME PACKAGE_TARNAME PACKAGE_VERSION PACKAGE_STRING PACKAGE_BUGREPORT exec_prefix prefix program_transform_name bindir sbindir libexecdir datadir sysconfdir sharedstatedir localstatedir libdir includedir oldincludedir infodir mandir build_alias host_alias target_alias DEFS ECHO_C ECHO_N ECHO_T LIBS build build_cpu build_vendor build_os host host_cpu host_vendor host_os BJAM_TOOLSET HOST_OS CC CFLAGS LDFLAGS CPPFLAGS ac_ct_CC EXEEXT OBJEXT CPP CXX CXXFLAGS ac_ct_CXX LEX LEXLIB LEX_OUTPUT_ROOT BISON BFLAGS BUILD_EXPERIMENTAL EGREP ATERM_CPPFLAGS ATERM_LDFLAGS ATERM_NAME BUILD_ATERM LIBXML2_CPPFLAGS XML2_CONFIG LIBXML2_CONFIG LIBXML2_LDFLAGS USE_LIBXML2 XMLTO USE_XMLTO BOOST_PREFIX USE_BOOST WX_CONFIG USE_WX WX_CPPFLAGS WX_LDFLAGS LIBOBJS PREFIX_DIR EXEC_PREFIX_DIR DATA_DIR LIB_DIR BIN_DIR INCLUDE_DIR MAN_DIR LTLIBOBJS'
+ac_subst_vars='SHELL PATH_SEPARATOR PACKAGE_NAME PACKAGE_TARNAME PACKAGE_VERSION PACKAGE_STRING PACKAGE_BUGREPORT exec_prefix prefix program_transform_name bindir sbindir libexecdir datadir sysconfdir sharedstatedir localstatedir libdir includedir oldincludedir infodir mandir build_alias host_alias target_alias DEFS ECHO_C ECHO_N ECHO_T LIBS build build_cpu build_vendor build_os host host_cpu host_vendor host_os BJAM_TOOLSET HOST_OS CC CFLAGS LDFLAGS CPPFLAGS ac_ct_CC EXEEXT OBJEXT CPP CXX CXXFLAGS ac_ct_CXX FLEX BISON BFLAGS BUILD_EXPERIMENTAL EGREP ATERM_CPPFLAGS ATERM_LDFLAGS ATERM_NAME BUILD_ATERM LIBXML2_CPPFLAGS XML2_CONFIG LIBXML2_CONFIG LIBXML2_LDFLAGS USE_LIBXML2 XMLTO USE_XMLTO BOOST_PREFIX USE_BOOST WX_CONFIG USE_WX WX_CPPFLAGS WX_LDFLAGS LIBOBJS PREFIX_DIR EXEC_PREFIX_DIR DATA_DIR LIB_DIR BIN_DIR INCLUDE_DIR MAN_DIR LTLIBOBJS'
 ac_subst_files=''
 
 # Initialize some variables set by options.
@@ -3713,17 +3713,16 @@ ac_link='$CC -o conftest$ac_exeext $CFLAGS $CPPFLAGS $LDFLAGS conftest.$ac_ext $
 ac_compiler_gnu=$ac_cv_c_compiler_gnu
 
 
-for ac_prog in flex lex
-do
-  # Extract the first word of "$ac_prog", so it can be a program name with args.
-set dummy $ac_prog; ac_word=$2
+# Check for flex
+# Extract the first word of "flex", so it can be a program name with args.
+set dummy flex; ac_word=$2
 echo "$as_me:$LINENO: checking for $ac_word" >&5
 echo $ECHO_N "checking for $ac_word... $ECHO_C" >&6
-if test "${ac_cv_prog_LEX+set}" = set; then
+if test "${ac_cv_prog_FLEX+set}" = set; then
   echo $ECHO_N "(cached) $ECHO_C" >&6
 else
-  if test -n "$LEX"; then
-  ac_cv_prog_LEX="$LEX" # Let the user override the test.
+  if test -n "$FLEX"; then
+  ac_cv_prog_FLEX="$FLEX" # Let the user override the test.
 else
 as_save_IFS=$IFS; IFS=$PATH_SEPARATOR
 for as_dir in $PATH
@@ -3732,7 +3731,7 @@ do
   test -z "$as_dir" && as_dir=.
   for ac_exec_ext in '' $ac_executable_extensions; do
   if $as_executable_p "$as_dir/$ac_word$ac_exec_ext"; then
-    ac_cv_prog_LEX="$ac_prog"
+    ac_cv_prog_FLEX="flex"
     echo "$as_me:$LINENO: found $as_dir/$ac_word$ac_exec_ext" >&5
     break 2
   fi
@@ -3741,251 +3740,19 @@ done
 
 fi
 fi
-LEX=$ac_cv_prog_LEX
-if test -n "$LEX"; then
-  echo "$as_me:$LINENO: result: $LEX" >&5
-echo "${ECHO_T}$LEX" >&6
+FLEX=$ac_cv_prog_FLEX
+if test -n "$FLEX"; then
+  echo "$as_me:$LINENO: result: $FLEX" >&5
+echo "${ECHO_T}$FLEX" >&6
 else
   echo "$as_me:$LINENO: result: no" >&5
 echo "${ECHO_T}no" >&6
 fi
 
-  test -n "$LEX" && break
-done
-test -n "$LEX" || LEX=":"
-
-if test -z "$LEXLIB"
-then
-  echo "$as_me:$LINENO: checking for yywrap in -lfl" >&5
-echo $ECHO_N "checking for yywrap in -lfl... $ECHO_C" >&6
-if test "${ac_cv_lib_fl_yywrap+set}" = set; then
-  echo $ECHO_N "(cached) $ECHO_C" >&6
-else
-  ac_check_lib_save_LIBS=$LIBS
-LIBS="-lfl  $LIBS"
-cat >conftest.$ac_ext <<_ACEOF
-/* confdefs.h.  */
-_ACEOF
-cat confdefs.h >>conftest.$ac_ext
-cat >>conftest.$ac_ext <<_ACEOF
-/* end confdefs.h.  */
-
-/* Override any gcc2 internal prototype to avoid an error.  */
-#ifdef __cplusplus
-extern "C"
-#endif
-/* We use char because int might match the return type of a gcc2
-   builtin and then its argument prototype would still apply.  */
-char yywrap ();
-int
-main ()
-{
-yywrap ();
-  ;
-  return 0;
-}
-_ACEOF
-rm -f conftest.$ac_objext conftest$ac_exeext
-if { (eval echo "$as_me:$LINENO: \"$ac_link\"") >&5
-  (eval $ac_link) 2>conftest.er1
-  ac_status=$?
-  grep -v '^ *+' conftest.er1 >conftest.err
-  rm -f conftest.er1
-  cat conftest.err >&5
-  echo "$as_me:$LINENO: \$? = $ac_status" >&5
-  (exit $ac_status); } &&
-	 { ac_try='test -z "$ac_c_werror_flag"
-			 || test ! -s conftest.err'
-  { (eval echo "$as_me:$LINENO: \"$ac_try\"") >&5
-  (eval $ac_try) 2>&5
-  ac_status=$?
-  echo "$as_me:$LINENO: \$? = $ac_status" >&5
-  (exit $ac_status); }; } &&
-	 { ac_try='test -s conftest$ac_exeext'
-  { (eval echo "$as_me:$LINENO: \"$ac_try\"") >&5
-  (eval $ac_try) 2>&5
-  ac_status=$?
-  echo "$as_me:$LINENO: \$? = $ac_status" >&5
-  (exit $ac_status); }; }; then
-  ac_cv_lib_fl_yywrap=yes
-else
-  echo "$as_me: failed program was:" >&5
-sed 's/^/| /' conftest.$ac_ext >&5
-
-ac_cv_lib_fl_yywrap=no
-fi
-rm -f conftest.err conftest.$ac_objext \
-      conftest$ac_exeext conftest.$ac_ext
-LIBS=$ac_check_lib_save_LIBS
-fi
-echo "$as_me:$LINENO: result: $ac_cv_lib_fl_yywrap" >&5
-echo "${ECHO_T}$ac_cv_lib_fl_yywrap" >&6
-if test $ac_cv_lib_fl_yywrap = yes; then
-  LEXLIB="-lfl"
-else
-  echo "$as_me:$LINENO: checking for yywrap in -ll" >&5
-echo $ECHO_N "checking for yywrap in -ll... $ECHO_C" >&6
-if test "${ac_cv_lib_l_yywrap+set}" = set; then
-  echo $ECHO_N "(cached) $ECHO_C" >&6
-else
-  ac_check_lib_save_LIBS=$LIBS
-LIBS="-ll  $LIBS"
-cat >conftest.$ac_ext <<_ACEOF
-/* confdefs.h.  */
-_ACEOF
-cat confdefs.h >>conftest.$ac_ext
-cat >>conftest.$ac_ext <<_ACEOF
-/* end confdefs.h.  */
-
-/* Override any gcc2 internal prototype to avoid an error.  */
-#ifdef __cplusplus
-extern "C"
-#endif
-/* We use char because int might match the return type of a gcc2
-   builtin and then its argument prototype would still apply.  */
-char yywrap ();
-int
-main ()
-{
-yywrap ();
-  ;
-  return 0;
-}
-_ACEOF
-rm -f conftest.$ac_objext conftest$ac_exeext
-if { (eval echo "$as_me:$LINENO: \"$ac_link\"") >&5
-  (eval $ac_link) 2>conftest.er1
-  ac_status=$?
-  grep -v '^ *+' conftest.er1 >conftest.err
-  rm -f conftest.er1
-  cat conftest.err >&5
-  echo "$as_me:$LINENO: \$? = $ac_status" >&5
-  (exit $ac_status); } &&
-	 { ac_try='test -z "$ac_c_werror_flag"
-			 || test ! -s conftest.err'
-  { (eval echo "$as_me:$LINENO: \"$ac_try\"") >&5
-  (eval $ac_try) 2>&5
-  ac_status=$?
-  echo "$as_me:$LINENO: \$? = $ac_status" >&5
-  (exit $ac_status); }; } &&
-	 { ac_try='test -s conftest$ac_exeext'
-  { (eval echo "$as_me:$LINENO: \"$ac_try\"") >&5
-  (eval $ac_try) 2>&5
-  ac_status=$?
-  echo "$as_me:$LINENO: \$? = $ac_status" >&5
-  (exit $ac_status); }; }; then
-  ac_cv_lib_l_yywrap=yes
-else
-  echo "$as_me: failed program was:" >&5
-sed 's/^/| /' conftest.$ac_ext >&5
-
-ac_cv_lib_l_yywrap=no
-fi
-rm -f conftest.err conftest.$ac_objext \
-      conftest$ac_exeext conftest.$ac_ext
-LIBS=$ac_check_lib_save_LIBS
-fi
-echo "$as_me:$LINENO: result: $ac_cv_lib_l_yywrap" >&5
-echo "${ECHO_T}$ac_cv_lib_l_yywrap" >&6
-if test $ac_cv_lib_l_yywrap = yes; then
-  LEXLIB="-ll"
-fi
-
-fi
-
-fi
-
-if test "x$LEX" != "x:"; then
-  echo "$as_me:$LINENO: checking lex output file root" >&5
-echo $ECHO_N "checking lex output file root... $ECHO_C" >&6
-if test "${ac_cv_prog_lex_root+set}" = set; then
-  echo $ECHO_N "(cached) $ECHO_C" >&6
-else
-  # The minimal lex program is just a single line: %%.  But some broken lexes
-# (Solaris, I think it was) want two %% lines, so accommodate them.
-cat >conftest.l <<_ACEOF
-%%
-%%
-_ACEOF
-{ (eval echo "$as_me:$LINENO: \"$LEX conftest.l\"") >&5
-  (eval $LEX conftest.l) 2>&5
-  ac_status=$?
-  echo "$as_me:$LINENO: \$? = $ac_status" >&5
-  (exit $ac_status); }
-if test -f lex.yy.c; then
-  ac_cv_prog_lex_root=lex.yy
-elif test -f lexyy.c; then
-  ac_cv_prog_lex_root=lexyy
-else
-  { { echo "$as_me:$LINENO: error: cannot find output from $LEX; giving up" >&5
-echo "$as_me: error: cannot find output from $LEX; giving up" >&2;}
+if test -z $FLEX; then
+  { { echo "$as_me:$LINENO: error: cannot find flex" >&5
+echo "$as_me: error: cannot find flex" >&2;}
    { (exit 1); exit 1; }; }
-fi
-fi
-echo "$as_me:$LINENO: result: $ac_cv_prog_lex_root" >&5
-echo "${ECHO_T}$ac_cv_prog_lex_root" >&6
-rm -f conftest.l
-LEX_OUTPUT_ROOT=$ac_cv_prog_lex_root
-
-echo "$as_me:$LINENO: checking whether yytext is a pointer" >&5
-echo $ECHO_N "checking whether yytext is a pointer... $ECHO_C" >&6
-if test "${ac_cv_prog_lex_yytext_pointer+set}" = set; then
-  echo $ECHO_N "(cached) $ECHO_C" >&6
-else
-  # POSIX says lex can declare yytext either as a pointer or an array; the
-# default is implementation-dependent. Figure out which it is, since
-# not all implementations provide the %pointer and %array declarations.
-ac_cv_prog_lex_yytext_pointer=no
-echo 'extern char *yytext;' >>$LEX_OUTPUT_ROOT.c
-ac_save_LIBS=$LIBS
-LIBS="$LIBS $LEXLIB"
-cat >conftest.$ac_ext <<_ACEOF
-`cat $LEX_OUTPUT_ROOT.c`
-_ACEOF
-rm -f conftest.$ac_objext conftest$ac_exeext
-if { (eval echo "$as_me:$LINENO: \"$ac_link\"") >&5
-  (eval $ac_link) 2>conftest.er1
-  ac_status=$?
-  grep -v '^ *+' conftest.er1 >conftest.err
-  rm -f conftest.er1
-  cat conftest.err >&5
-  echo "$as_me:$LINENO: \$? = $ac_status" >&5
-  (exit $ac_status); } &&
-	 { ac_try='test -z "$ac_c_werror_flag"
-			 || test ! -s conftest.err'
-  { (eval echo "$as_me:$LINENO: \"$ac_try\"") >&5
-  (eval $ac_try) 2>&5
-  ac_status=$?
-  echo "$as_me:$LINENO: \$? = $ac_status" >&5
-  (exit $ac_status); }; } &&
-	 { ac_try='test -s conftest$ac_exeext'
-  { (eval echo "$as_me:$LINENO: \"$ac_try\"") >&5
-  (eval $ac_try) 2>&5
-  ac_status=$?
-  echo "$as_me:$LINENO: \$? = $ac_status" >&5
-  (exit $ac_status); }; }; then
-  ac_cv_prog_lex_yytext_pointer=yes
-else
-  echo "$as_me: failed program was:" >&5
-sed 's/^/| /' conftest.$ac_ext >&5
-
-fi
-rm -f conftest.err conftest.$ac_objext \
-      conftest$ac_exeext conftest.$ac_ext
-LIBS=$ac_save_LIBS
-rm -f "${LEX_OUTPUT_ROOT}.c"
-
-fi
-echo "$as_me:$LINENO: result: $ac_cv_prog_lex_yytext_pointer" >&5
-echo "${ECHO_T}$ac_cv_prog_lex_yytext_pointer" >&6
-if test $ac_cv_prog_lex_yytext_pointer = yes; then
-
-cat >>confdefs.h <<\_ACEOF
-#define YYTEXT_POINTER 1
-_ACEOF
-
-fi
-
 fi
 
 # Check for compatible bison
@@ -4069,6 +3836,7 @@ BFLAGS=""
 # Check for C99 standard
 echo "$as_me:$LINENO: checking for C99 standard" >&5
 echo $ECHO_N "checking for C99 standard... $ECHO_C" >&6
+
 if test "$cross_compiling" = yes; then
   { { echo "$as_me:$LINENO: error: cannot run test program while cross compiling
 See \`config.log' for more details." >&5
@@ -7004,9 +6772,7 @@ s,@CPP@,$CPP,;t t
 s,@CXX@,$CXX,;t t
 s,@CXXFLAGS@,$CXXFLAGS,;t t
 s,@ac_ct_CXX@,$ac_ct_CXX,;t t
-s,@LEX@,$LEX,;t t
-s,@LEXLIB@,$LEXLIB,;t t
-s,@LEX_OUTPUT_ROOT@,$LEX_OUTPUT_ROOT,;t t
+s,@FLEX@,$FLEX,;t t
 s,@BISON@,$BISON,;t t
 s,@BFLAGS@,$BFLAGS,;t t
 s,@BUILD_EXPERIMENTAL@,$BUILD_EXPERIMENTAL,;t t

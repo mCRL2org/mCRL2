@@ -402,7 +402,7 @@ $(LIN_NAME) : $(LIN_OBJECTS) $(ATERM_DEP) $(LIBREWR_NAME)
 	$(BISON) $(BFLAGS) -o $@ $<
 
 %.c : %.l
-	$(LEX) $(LFLAGS) -o$@ $<
+	$(FLEX) $(LFLAGS) -o$@ $<
 
 # *.cpp is needed for generated code (e.g. by bison)
 *.cpp *.o aterm/*.o svc/*.o: Makefile $(CONFIG)

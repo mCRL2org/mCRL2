@@ -8,32 +8,39 @@ The package names given here are used in Debian. Most of the time they are
 called the same on other systems. Only top-level packages are mentioned; lower
 level packages are (usually) automatically installed. Furthermore, the status
 of the packages is mentioned (required, recommended or optional):
-- bison >= 1.875: package bison [required]
-- flex: package flex [required]
 - make >= 3.80 package make [required]
+- flex: package flex [required]
+- bison >= 1.875: package bison [required]
 - wxWidgets >= 2.6: package libwxgtk2.6-dev or libwxgtk2.6-dbg [recommended]
-- xml2 development libraries >= 2.6.22: package libxml2-dev [optional]
+- xml2 development libraries >= 2.6.22: package libxml2-dev [recommended]
 - default icon locations: package gnome-themes, gnome-themes-extras or
   hicolor-icon-theme [optional]
 
 The required packages enable the following tools:
-+ mcrl22lpe:   translate mCRL2 specifications into LPEs
++ mcrl22lpe:   translate an mCRL2 specification into a linear process equation
+               (LPE)
 + lpepp:       pretty print an LPE as an mCRL2 specification
 + lpeinfo:     print basic information of an LPE
-+ sim:         text based simulator
++ sim:         text based simulator for LPEs
 + lperewr:     rewrite data expressions in an LPE
++ lpedataelm:  remove unused parts of the data specification of an LPE
 + lpeconstelm: remove constant process parameters from an LPE
 + lpeparelm:   remove unused process parameters from an LPE
-+ lpe2lts:     generate a state space (LTS) from an LPE
-+ tbf2lpe:     convert mCRL LPEs to mCRL2 LPEs
-+ experimental tools alpha and lin
++ lpe2lts:     generate a labelled transition system (LTS) from an LPE
++ ltspp:       pretty print an LTS      
++ ltsmin:      minimise an LTS using bisimulation reduction
++ tracepp:     pretty print a trace
++ tbf2lpe:     convert an mCRL LPE to an mCRL2 LPE
++ svc2fsm:     convert an LTS in SVC format to FSM format
++ lpe2torx:    provide TorX with an explorer interface using an LPE
 
-The recommended package libwxgtk2.6-dev enables the following tool:
-+ xsim:        graphical simulator
-+ squadt:      systems quality analysis and design tool
-
-The optional package libxml2-dev enables the following tool:
-+ pnml2mcrl2:  convert classic Petri nets in the PNML format to mCRL2
+The recommended packages libwxgtk2.6-dev [1] and libxml2-dev [2] enable the
+following tools:
++ pnml2mcrl2:  convert classic Petri nets in the PNML format to mCRL2 [2]
++ xsim:        graphical simulator for LPEs [1]
++ ltsview:     visualise an LTS in FSM format in 3D using clustering techniques
+               [1]
++ squadt:      systems quality analysis and design tool [1,2]
 
 Any of the default icon location packages ensures that xsim doesn't generate
 warnings on missing icons.
