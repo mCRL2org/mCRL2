@@ -33,7 +33,7 @@
 
 <refnamediv>
   <refname>lpepp</refname>
-  <refpurpose>pretty print LPEs</refpurpose>
+  <refpurpose>pretty print an LPE</refpurpose>
 </refnamediv>
 
 <refsynopsisdiv>
@@ -58,6 +58,7 @@
 <refsect1>
 <title>Options</title>
 <para>
+  Mandatory arguments to long options are mandatory for short options too.
   <variablelist>
   <varlistentry>
     <term>&opt_f;</term>
