@@ -13,7 +13,8 @@ namespace sip {
 
   /** \brief The main interface to the protocol implementation (tool-side) */
   class tool_communicator : public sip_messenger {
-    friend void scheme::connect(tool_communicator&) const;
+    template < typename M >
+    friend void messenger::scheme< M >::connect(basic_messenger< M >*) const;
 
     private:
       /** Type for keeping protocol phase status */
@@ -27,13 +28,13 @@ namespace sip {
       } status;
 
       /** \brief The current protocol status */
-      status                         current_status;
+      status                      current_status;
 
       /** \brief The last received set of controller capabilities */
-      sip::controller_capabilities*  current_capabilities;
+      controller_capabilities_ptr current_controller_capabilities;
 
-      /** \brief A set of available input configurations for this tool */
-      std::set < std::pair < tool_category, storage_format > >       current_input_configurations;
+      /** \brief The object that descibed the capabilities of the current tool */
+      tool_capabilities           current_tool_capabilities;
 
       /** \brief Unique identifier for the running tool, obtained via the command line */
       long instance_identifier;
@@ -73,29 +74,30 @@ namespace sip {
       /** \brief Send a status report to the controller */
       void send_report(sip::report&);
 
-      /** \brief Add an input configuration that will be send when the controller asks for it */
-      inline void add_input_configuration(tool_category, storage_format);
+      /** \brief Get the tool capabilities object that will be sent when a request is received */
+      inline tool_capabilities& get_tool_capabilities();
 
       /** \brief Get the last communicated set of controller capabilities */
-      inline const controller_capabilities& get_controller_capabilities() const;
+      inline const controller_capabilities_ptr get_controller_capabilities() const;
   };
 
-  /** \pre status is status_initialising */
-  inline void tool_communicator::add_input_configuration(tool_category c, storage_format f) {
-    assert(current_status == status_initialising);
-
-    std::pair < tool_category, storage_format > p(c,f);
-
-    current_input_configurations.insert(p);
+  /**
+   * \return a pointer to the tool capabilities object that is sent to the controller on request
+   **/
+  inline tool_capabilities& tool_communicator::get_tool_capabilities() {
+    return (current_tool_capabilities);
   }
 
-  /** \pre{status is not status_initialising} */
-  inline const controller_capabilities& tool_communicator::get_controller_capabilities() const {
-    if (current_capabilities == 0) {
+  /**
+   * \pre status is not status_initialising
+   * \return p which is a pointer to the most recently retrieved controller capabilities object or 0
+   **/
+  inline const controller_capabilities_ptr tool_communicator::get_controller_capabilities() const {
+    if (current_controller_capabilities.get() == 0) {
       throw (exception(exception_identifier::controller_capabilities_unknown));
     }
 
-    return (*current_capabilities);
+    return (current_controller_capabilities);
   }
 }
 

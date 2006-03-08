@@ -2,6 +2,8 @@
 #include <functional>
 #include <sstream>
 
+#include <boost/ref.hpp>
+
 #include <sip/detail/basic_messenger.h>
 #include <sip/detail/exception.h>
 
@@ -34,12 +36,12 @@ namespace sip {
  
     /** \pre the message queue is not empty */
     template < class M >
-    inline M basic_messenger< M >::pop_message() {
+    inline boost::shared_ptr< M > basic_messenger< M >::pop_message() {
       message_ptr m = message_queue.front();
  
       message_queue.pop_front();
  
-      return (*m);
+      return (m);
     }
  
     /** \pre the message queue is not empty  */
@@ -57,7 +59,6 @@ namespace sip {
       return (message_queue.size());
     }
 
-    /** \pre there is no waiter for this type */
     template < class M >
     inline void basic_messenger< M >::set_handler(handler_type h, const typename M::type_identifier_t t) {
       assert(waiters.count(t) == 0);
@@ -229,32 +230,90 @@ namespace sip {
       }
     }
  
+    /**
+     * @param t the type of the message
+     **/
     template < class M >
-    inline bool basic_messenger< M >::find_message(typename M::type_identifier_t t) {
+    inline boost::shared_ptr< M > basic_messenger< M >::find_message(typename M::type_identifier_t t) {
       using namespace boost;
 
-      return (message_queue.end() !=
-              std::find_if(message_queue.begin(), message_queue.end(),
+      typename message_queue_t::iterator i = std::find_if(message_queue.begin(),
+                      message_queue.end(),
                       bind(std::equal_to<typename M::type_identifier_t>(), t,
-                              bind(&M::get_type,
-                                      bind(&message_ptr::get, _1)))));
+                              bind(&M::get_type, bind(&message_ptr::get, _1))));
+
+      return ((i != message_queue.end()) ? *i : message_ptr());
     }
 
     /**
-     * \pre no handler or other waiter for this type is registered
-     * \attention must not be called from multiple threads for the same type
+     * @param p a reference to message_ptr that points to the message that should be removed from the queue
+     * \pre the message must be in the queue
      **/
     template < class M >
-    void basic_messenger< M >::await_message(typename M::type_identifier_t t) {
+    inline void basic_messenger< M >::remove_message(message_ptr& p) {
+      using namespace boost;
+
+      message_queue.erase(std::find_if(message_queue.begin(),
+                      message_queue.end(),
+                      bind(std::equal_to< M* >(),
+                              bind(&message_ptr::get, p),
+                              bind(&message_ptr::get, _1))));
+    }
+
+    /**
+     * @param m reference to the pointer to a message to deliver
+     * @param t reference to the message pointer of the waiter
+     **/
+    template < class M >
+    inline void basic_messenger< M >::deliver_to_waiter(message_ptr& m, message_ptr& t) {
+      t.swap(m);
+    }
+
+    /**
+     * @param t the type of the message
+     * \attention must not be called from multiple threads for the same type (events are not chained)
+     **/
+    template < class M >
+    const boost::shared_ptr< M > basic_messenger< M >::await_message(typename M::type_identifier_t t) {
+      using namespace boost;
+
       assert(waiters.count(t) == 0 && handlers.count(t) == 0);
 
-      if (!find_message(t)) {
+      message_ptr p(find_message(t));
+
+      if (p.get() == 0) {
+        handler_type old_handler = handlers[t];
+        bool         c           = 0 < handlers.count(t);
+
+        // Store handler
+        if (c) {
+          old_handler = handlers[t];
+        }
+
+        set_handler(bind(basic_messenger< M >::deliver_to_waiter, _1, ref(p)), t);
+
         barrier_ptr b(new boost::barrier(2));
 
         waiters[t] = b;
 
         b->wait();
+
+        // Restore handler
+        if (c) {
+          handlers[t] = old_handler;
+
+          // And call
+          old_handler(p);
+        }
+        else {
+          handlers.erase(t);
+        }
       }
+      else {
+        remove_message(p);
+      }
+
+      return (p);
     }
   }
 }

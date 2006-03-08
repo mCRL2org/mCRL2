@@ -144,8 +144,8 @@ int main(int ac, char* av[])
 #ifdef ENABLE_SQUADT_CONNECTIVITY
   sip::tool_communicator tc;
 
-  /* Set tool capabilities */
-  sip::tool_capabilities cp;
+  /* Get tool capabilities in order to modify settings */
+  sip::tool_capabilities& cp = tc.get_tool_capabilities();
 
   /* The tool has only one main input combination it takes an LPE and then behaves as a reporter */
   cp.add_input_combination("Reporter", "lpe");

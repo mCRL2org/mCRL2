@@ -33,10 +33,10 @@ void controller_capabilities_exchange() {
   /** Initiative is on the side of the tool */
   tc.connect(cc);
 
-  cc.get_capabilities().to_xml(check_stream0);
+  cc.get_controller_capabilities().to_xml(check_stream0);
 
   tc.request_controller_capabilities();
-  tc.get_controller_capabilities().to_xml(check_stream1);
+  tc.get_controller_capabilities()->to_xml(check_stream1);
 
   tc.disconnect();
 
@@ -51,13 +51,14 @@ void controller_capabilities_exchange() {
   /* Example display dimensions */
   controller_capabilities capabilities();
 
-  cc.set_display_dimensions(75,75,0);
+  cc.get_controller_capabilities().set_display_dimensions(75,75,0);
 
   tc.connect(cc);
 
   tc.request_controller_capabilities();
-  cc.get_capabilities().to_xml(check_stream0);
-  tc.get_controller_capabilities().to_xml(check_stream1);
+
+  cc.get_controller_capabilities().to_xml(check_stream0);
+  tc.get_controller_capabilities()->to_xml(check_stream1);
 
   tc.disconnect();
 
@@ -67,29 +68,30 @@ void controller_capabilities_exchange() {
 }
 
 /* Serialisation, communication and deserialisation of an input configuration */
-void input_configuration_exchange() {
-  BOOST_MESSAGE(" Communicating input configuration ... ");
+void tool_capabilities_exchange() {
+  BOOST_MESSAGE(" Communicating tool capabilities ... ");
 
   controller_communicator cc;
   tool_communicator       tc;
 
-  std::ostringstream      check_stream0;
-  std::ostringstream      check_stream1;
+  tool_capabilities&      tcp = tc.get_tool_capabilities();
 
-  tc.add_input_configuration("Testing", "aut");
-  tc.add_input_configuration("Testing", "svc");
+  tcp.add_input_combination("text/aut", "Testing");
 
   tc.connect(cc);
 
+  cc.request_tool_capabilities();
+
   tc.disconnect();
 
-  BOOST_CHECK(check_stream0.str() == check_stream1.str());
+  BOOST_CHECK(tcp.to_xml() == cc.get_tool_capabilities()->to_xml());
   BOOST_MESSAGE("  done");
 }
 
 /* Serialisation, communication and deserialisation of a report object */
 void report_exchange() {
-  BOOST_MESSAGE(" Communicating empty report ... ");
+  BOOST_MESSAGE(" Communicating reports ... ");
+  BOOST_MESSAGE("  Empty report ... ");
 
   std::ostringstream temporary;
 
@@ -107,20 +109,22 @@ void report_exchange() {
 
   c.send_message(m);
 
-  d.await_message(sip::unknown);
+  sip_messenger::message_ptr p(d.await_message(sip::unknown));
 
-  BOOST_CHECK(d.pop_message().to_string() == std::string("<report></report>"));
+  BOOST_CHECK(p->to_string() == std::string("<report></report>"));
 
-  BOOST_MESSAGE("  done");
-  BOOST_MESSAGE(" Communicating filled report ... ");
+  BOOST_MESSAGE("   done");
+  BOOST_MESSAGE("  Report with an error, a comment and a configuration ... ");
 
   /* New tool configuration */
-  configuration* config = new configuration;
+  configuration::configuration_ptr config(new configuration);
 
   /* An option for specifying an input file */
-  config->add_option(std::string("Input file 0"));
   config->add_option(std::string("-r"));
   config->add_option(std::string("-s"));
+  config->add_option(std::string("Input file 0"));
+  config->add_input("text/mcrl2", "examples/abp.mcrl2");
+  config->add_output("text/plain", "/etc/passwd");
 
   option::option_ptr t = config->get_option("Input file 0");
 
@@ -135,7 +139,6 @@ void report_exchange() {
 
   r.set_error("Everything okay!");
   r.set_comment("Lookin' good!");
-  r.add_output("/etc/passwd", "text/plain");
   r.set_configuration(config);
 
   /* Serialise r */
@@ -146,30 +149,24 @@ void report_exchange() {
 
   c.send_message(m);
 
-  d.await_message(sip::unknown);
+  p = d.await_message(sip::unknown);
 
   std::ostringstream copy;
 
-std::cerr << " Reconstruction from XML stream ..." << std::endl;
-std::cerr << "  Message  `" << d.peek_message().to_string() << "'" << std::endl;
-  temporary.str(std::string(""));
-  r.to_xml(temporary);
-
   /* New reader */
-  xml2pp::text_reader reader(d.peek_message().to_string());
+  xml2pp::text_reader reader(p->to_string());
 
   report::from_xml(reader)->to_xml(copy);
-std::cerr << "  Message  `" << copy.str() << "'" << std::endl;
 
   BOOST_CHECK(copy.str() == temporary.str());
 
   c.disconnect(d);
 
-  BOOST_MESSAGE("  done");
+  BOOST_MESSAGE("   done");
 }
 
 void display_layout_exchange() {
-  BOOST_MESSAGE(" Communicating input configuration ... ");
+  BOOST_MESSAGE(" Communicating display layout ... ");
 
   controller_communicator cc;
   tool_communicator       tc;
@@ -179,9 +176,8 @@ void display_layout_exchange() {
 
   tc.connect(cc);
 
-//  tc.send_display_layout();
-
   tc.disconnect();
+
   BOOST_MESSAGE("  done");
 }
 
@@ -228,7 +224,7 @@ test_suite* init_unit_test_suite(int argc, char * argv[]) {
   unit_test_log_t::instance().set_threshold_level(log_messages);
 
   test->add(BOOST_TEST_CASE(&controller_capabilities_exchange), 0, 2);
-  test->add(BOOST_TEST_CASE(&input_configuration_exchange), 0, 2);
+  test->add(BOOST_TEST_CASE(&tool_capabilities_exchange), 0, 2);
   test->add(BOOST_TEST_CASE(&report_exchange), 0, 2);
   test->add(BOOST_TEST_CASE(&command_line_interface), 0, 2);
 

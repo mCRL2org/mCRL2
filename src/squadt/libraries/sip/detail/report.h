@@ -17,28 +17,15 @@ namespace sip {
 
   /** \brief Describes a report of tool operation */
   class report {
-    public:
-      /** \brief Datatype for a uri */
-      typedef std::string                                  uri;
-
-      /** \brief Datatype for a storage format (file format) */
-      typedef std::string                                  storage_format;
-
     private:
       /** \brief Convenience data type to hide the shared pointer wrapping */
-      typedef boost::shared_ptr < configuration > configuration_ptr;
-
-      /** \brief Convenience data type */
-      typedef std::map  < uri, storage_format >   output_list;
+      typedef configuration::configuration_ptr configuration_ptr;
 
       /** \brief Room for errors (any error here implies unsuccessful termination) */
-      std::string   error;
+      std::string       error;
 
       /** \brief Room for comments about anything at all */
-      std::string   comment;
-
-      /** \brief The list of outputs */
-      output_list   outputs;
+      std::string       comment;
 
       /** \brief The configuration that can be used to rerun the tool and refresh its outputs */
       configuration_ptr _configuration;
@@ -50,14 +37,8 @@ namespace sip {
       /** \brief An error description (implies that tool execution was unsuccessful) */
       inline void set_error(std::string);
 
-      /** \brief Add an output object */
-      inline void add_output(const uri URI, const std::string format);
-
-      /** \brief Remove an output object */
-      inline void remove_output(const uri URI);
-
       /** \brief Set the configuration that was used */
-      void set_configuration(configuration* o);
+      void set_configuration(configuration_ptr o);
 
       /** \brief Report comment (arbitrary text) */
       inline void set_comment(std::string);
@@ -66,7 +47,7 @@ namespace sip {
       void to_xml(std::ostream&) const;
 
       /** \brief Reconstructs a report from XML representation */
-      static report* from_xml(xml2pp::text_reader&);
+      static report* from_xml(xml2pp::text_reader&) throw ();
   };
 
   inline report::report() {
@@ -76,20 +57,8 @@ namespace sip {
     error = e;
   }
 
-  inline void report::add_output(const std::string u, const std::string f) {
-    assert(outputs.find(u) == outputs.end());
-
-    outputs[u] = f;
-  }
-
-  inline void report::remove_output(const std::string u) {
-    assert(outputs.find(u) != outputs.end());
-
-    outputs.erase(u);
-  }
-
   /** \pre{configuration must have been allocated on the heap} */
-  inline void report::set_configuration(configuration* c) {
+  inline void report::set_configuration(configuration_ptr c) {
     _configuration = configuration_ptr (c);
   }
 

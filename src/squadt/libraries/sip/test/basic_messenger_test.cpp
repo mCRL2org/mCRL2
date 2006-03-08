@@ -61,7 +61,7 @@ void empty_message() {
 
   c.disconnect(d);
 
-  BOOST_CHECK(d.number_of_messages() == 1 && d.pop_message().to_string().empty());
+  BOOST_CHECK(d.number_of_messages() == 1 && d.pop_message()->to_string().empty());
 
   BOOST_MESSAGE(" done");
 }
@@ -79,7 +79,7 @@ void non_empty_message() {
 
   c.disconnect(d);
 
-  BOOST_CHECK(d.number_of_messages() == 1 && d.pop_message().to_string() == data);
+  BOOST_CHECK(d.number_of_messages() == 1 && d.pop_message()->to_string() == data);
 
   BOOST_MESSAGE(" done");
 }
@@ -98,7 +98,7 @@ void split2_empty_message() {
 
   c.disconnect(d);
 
-  BOOST_CHECK(d.number_of_messages() == 1 && d.pop_message().to_string().empty());
+  BOOST_CHECK(d.number_of_messages() == 1 && d.pop_message()->to_string().empty());
 
   BOOST_MESSAGE(" done");
 }
@@ -117,7 +117,7 @@ void split2_non_empty_message() {
 
   c.disconnect(d);
 
-  BOOST_CHECK(d.number_of_messages() == 1 && d.pop_message().to_string() == data);
+  BOOST_CHECK(d.number_of_messages() == 1 && d.pop_message()->to_string() == data);
 
   BOOST_MESSAGE(" done");
 }
@@ -137,7 +137,7 @@ void split3_non_empty_message() {
 
   c.disconnect(d);
 
-  BOOST_CHECK(d.number_of_messages() == 1 && d.pop_message().to_string() == data);
+  BOOST_CHECK(d.number_of_messages() == 1 && d.pop_message()->to_string() == data);
 
   BOOST_MESSAGE(" done");
 }
@@ -157,7 +157,7 @@ void split3_non_empty_message_fragmented() {
 
   c.disconnect(d);
 
-  BOOST_CHECK(d.number_of_messages() == 1 && d.pop_message().to_string() == data + data + data);
+  BOOST_CHECK(d.number_of_messages() == 1 && d.pop_message()->to_string() == data + data + data);
 
   BOOST_MESSAGE(" done");
 }
@@ -177,7 +177,7 @@ void split3_non_empty_message_and_garbage() {
 
   c.disconnect(d);
 
-  BOOST_CHECK(d.number_of_messages() == 1 && d.pop_message().to_string() == data + data + data);
+  BOOST_CHECK(d.number_of_messages() == 1 && d.pop_message()->to_string() == data + data + data);
 
   BOOST_MESSAGE(" done");
 }
@@ -196,7 +196,7 @@ void non_empty_message_and_fragmented_open_tag() {
 
   c.disconnect(d);
 
-  BOOST_CHECK(d.number_of_messages() == 1 && d.pop_message().to_string() == data);
+  BOOST_CHECK(d.number_of_messages() == 1 && d.pop_message()->to_string() == data);
 
   BOOST_MESSAGE(" done");
 }
@@ -215,7 +215,7 @@ void non_empty_message_and_fragmented_close_tag() {
 
   c.disconnect(d);
 
-  BOOST_CHECK(d.number_of_messages() == 1 && d.pop_message().to_string() == data);
+  BOOST_CHECK(d.number_of_messages() == 1 && d.pop_message()->to_string() == data);
 
   BOOST_MESSAGE(" done");
 }
@@ -235,7 +235,7 @@ void non_empty_message_and_fragmented_tags() {
 
   c.disconnect(d);
 
-  BOOST_CHECK(d.number_of_messages() == 1 && d.pop_message().to_string() == data);
+  BOOST_CHECK(d.number_of_messages() == 1 && d.pop_message()->to_string() == data);
 
   BOOST_MESSAGE(" done");
 }
@@ -253,7 +253,7 @@ void message_wrapper() {
 
   c.disconnect(d);
 
-  BOOST_CHECK(d.number_of_messages() == 1 && d.pop_message().to_string() == data);
+  BOOST_CHECK(d.number_of_messages() == 1 && d.pop_message()->to_string() == data);
 
   BOOST_MESSAGE(" done");
 }

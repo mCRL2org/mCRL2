@@ -92,7 +92,7 @@ namespace sip {
       }
 
       /* Unknown type in configuration */
-      throw (sip::exception(exception_identifier::unknown_type_in_configuration));
+      throw (sip::exception(exception_identifier::message_unknown_type, reader.element_name()));
     }
 
 //    static integer standard_integer;
@@ -110,8 +110,8 @@ namespace sip {
 
     /** \pre{The current element must be <string>} */
     inline string* string::from_xml(xml2pp::text_reader& reader) {
-      size_t minimum;
-      size_t maximum;
+      size_t minimum = 0;
+      size_t maximum = 0;
 
       /* Current element must be <string> */
       assert(reader.is_element("string"));

@@ -2,6 +2,7 @@
 #define SIP_CONTROLLER_CAPABILITIES_H
 
 #include <ostream>
+#include <sstream>
 
 #include <xml2pp/text_reader.h>
 #include <sip/detail/capabilities.h>
@@ -32,6 +33,9 @@ namespace sip {
         unsigned short z; /* Unused for the moment (Depth) */
       };
 
+      /** Convenience type to hide boost shared pointer implementation */
+      typedef boost::shared_ptr < controller_capabilities > controller_capabilities_ptr;
+
     private:
 
       /** \brief The protocol version */
@@ -43,22 +47,22 @@ namespace sip {
       /** \brief Constructor */
       inline controller_capabilities(const version = protocol_version);
 
-      /** \brief Set display dimensions */
-      inline void set_display_dimensions(const unsigned short x, const unsigned short y, const unsigned short z);
-
-      /** \brief Set display dimensions */
-      inline void set_display_dimensions(const display_dimensions& d);
-
       /** \brief Read from XML stream */
-      inline static controller_capabilities* from_xml(xml2pp::text_reader& reader);
+      inline static controller_capabilities_ptr from_xml(xml2pp::text_reader& reader) throw ();
 
     public:
 
       /** \brief Get the protocol version */
       inline version get_version() const;
 
+      /** \brief Set display dimensions */
+      inline void set_display_dimensions(const unsigned short x, const unsigned short y, const unsigned short z);
+
       /** \brief Get the dimensions of the part of the display that is reserved for this tool */
       inline display_dimensions get_display_dimensions() const;
+
+      /** \brief Write to XML string */
+      inline std::string to_xml() const;
 
       /** \brief Write to XML stream */
       inline void to_xml(std::ostream&) const;
@@ -72,10 +76,6 @@ namespace sip {
 
   inline version controller_capabilities::get_version() const {
     return (current_protocol_version);
-  }
-
-  inline void controller_capabilities::set_display_dimensions(const display_dimensions& d) {
-    current_dimensions = d;
   }
 
   inline void controller_capabilities::set_display_dimensions(const unsigned short x, const unsigned short y, const unsigned short z) {
@@ -98,9 +98,16 @@ namespace sip {
            << "</capabilities>";
   }
 
-  /** \pre{the reader must point at a capabilities element} */
-  inline controller_capabilities* controller_capabilities::from_xml(xml2pp::text_reader& reader) {
-    controller_capabilities* c;
+  inline std::string controller_capabilities::to_xml() const {
+    std::ostringstream output;
+
+    to_xml(output);
+
+    return (output.str());
+  }
+
+  /** \pre the reader must point at a capabilities element */
+  inline controller_capabilities::controller_capabilities_ptr controller_capabilities::from_xml(xml2pp::text_reader& reader) throw () {
     version                  v = {0,0};
 
     reader.read();
@@ -110,7 +117,7 @@ namespace sip {
     reader.get_attribute(&v.major, "major");
     reader.get_attribute(&v.minor, "minor");
 
-    c = new controller_capabilities(v);
+    controller_capabilities_ptr c(new controller_capabilities(v));
 
     reader.read();
 

@@ -30,7 +30,7 @@ namespace xml2pp {
     reader = xmlReaderForFile(f.get(), "", 0);
 
     if (reader == 0) {
-      throw (exception(exception::unable_to_open_input_file));
+      throw (exception(exception_identifier::unable_to_open_file, f));
     }
   }
 
@@ -42,7 +42,7 @@ namespace xml2pp {
     reader = xmlReaderForDoc(reinterpret_cast < const xmlChar* const > (d), "", 0, 0);
 
     if (reader == 0) {
-      throw (exception(exception::unable_to_initialise_reader));
+      throw (exception(exception_identifier::unable_to_initialise_reader));
     }
   }
 
@@ -54,7 +54,7 @@ namespace xml2pp {
     reader = xmlReaderForMemory(d.c_str(), d.size(), "", 0, 0);
 
     if (reader == 0) {
-      throw (exception(exception::unable_to_initialise_reader));
+      throw (exception(exception_identifier::unable_to_initialise_reader));
     }
   }
 
@@ -66,7 +66,7 @@ namespace xml2pp {
     reader = xmlReaderForDoc(d, "", 0, 0);
 
     if (reader == 0) {
-      throw (exception(exception::unable_to_initialise_reader));
+      throw (exception(exception_identifier::unable_to_initialise_reader));
     }
   }
 
@@ -78,7 +78,7 @@ namespace xml2pp {
     reader = xmlReaderForMemory(d.c_str(), prefix_length, "", 0, 0);
 
     if (reader == 0) {
-      throw (exception(exception::unable_to_initialise_reader));
+      throw (exception(exception_identifier::unable_to_initialise_reader));
     }
   }
 
@@ -96,7 +96,7 @@ namespace xml2pp {
     }
     else if (xmlTextReaderSchemaValidate(reader, schema_name.get()) < 0) {
       /* Error schema file, abort ... */
-      throw (exception(exception::unable_to_open_schema_file));
+      throw (exception(exception_identifier::unable_to_open_file, f));
     }
   }
 #else
@@ -120,7 +120,9 @@ namespace xml2pp {
     char* temporary = (char*) xmlTextReaderGetAttribute(reader, reinterpret_cast < const xmlChar* > (attribute_name));
     bool  return_value = temporary != NULL;
 
-    *astring = (return_value) ? std::string(temporary) : "";
+    if (return_value) {
+      astring->assign(temporary);
+    }
 
     xmlFree(temporary);
 
@@ -132,7 +134,9 @@ namespace xml2pp {
     char* temporary    = (char*) xmlTextReaderGetAttribute(reader, reinterpret_cast < const xmlChar* > (attribute_name));
     bool  return_value = temporary != NULL;
 
-    *aninteger = static_cast < T > ((return_value) ? atoi(temporary) : 0);
+    if (return_value) {
+      *aninteger = static_cast < T > (atoi(temporary));
+    }
 
     xmlFree(temporary);
 
@@ -198,7 +202,7 @@ namespace xml2pp {
     do {
       if (status <= 0) {
         /* Process error, or end of file */
-        throw (exception(exception::error_while_parsing_document));
+        throw (exception(exception_identifier::error_while_parsing_document));
       }
       else {
         /* Skip white space */

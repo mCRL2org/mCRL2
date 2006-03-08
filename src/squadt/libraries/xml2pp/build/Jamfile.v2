@@ -11,8 +11,8 @@ project text_reader
 
 include $(TOP)/config.jam ;
 
-alias text_reader
-    : # no sources
+obj text_reader
+    : exception.cpp
     : # no includes
     :
     : <cxxflags>"$(IXML2)"

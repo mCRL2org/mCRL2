@@ -43,6 +43,15 @@ namespace sip {
 
   /** A messenger type for communication of sip protocol messages */
   typedef messenger::basic_messenger < sip_message >               sip_messenger;
+
+  /** Convenience type, used to hide the shared pointer implementation */
+  typedef boost::shared_ptr < controller_capabilities > controller_capabilities_ptr;
+
+  /** Convenience type, used to hide the shared pointer implementation */
+  typedef boost::shared_ptr < tool_capabilities >       tool_capabilities_ptr;
+
+  /** Convenience type, used to hide the shared pointer implementation */
+  typedef boost::shared_ptr < configuration >           configuration_ptr;
 }
 
 #endif

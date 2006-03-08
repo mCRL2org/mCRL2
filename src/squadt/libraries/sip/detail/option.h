@@ -1,7 +1,7 @@
 #ifndef SIP_OPTION_H
 #define SIP_OPTION_H
 
-#include <list>
+#include <vector>
 #include <string>
 #include <ostream>
 
@@ -9,7 +9,7 @@
 #include <boost/shared_ptr.hpp>
 
 #include <sip/detail/basic_datatype.h>
-#include <sip/detail/configuration.h>
+#include <sip/detail/exception.h>
 
 namespace sip {
 
@@ -28,8 +28,9 @@ namespace sip {
 
       /** \brief Type for argument to value mapping */
       typedef std::pair < datatype::basic_datatype*, std::string > type_value_pair;
+
       /** \brief Container for lists of arguments to lists of value mapping */
-      typedef std::list < type_value_pair >                        type_value_list;
+      typedef std::vector < type_value_pair >                      type_value_list;
 
       /** \brief List of (type, default value) */
       type_value_list arguments;
@@ -46,7 +47,7 @@ namespace sip {
       inline bool takes_arguments() const;
 
       /** \brief Returns the option's identifier */
-      inline const identifier& get_id() const;
+      inline const identifier get_id() const;
 
       /** \brief Append to the type (option takes an additional argument of the specified type) */
       inline void append_type(datatype::basic_datatype&);
@@ -71,7 +72,7 @@ namespace sip {
     return (arguments.size() != 0);
   }
 
-  inline const option::identifier& option::get_id() const {
+  inline const option::identifier option::get_id() const {
     return (id);
   }
 
@@ -104,7 +105,13 @@ namespace sip {
       output << ">";
 
       while (i != b) {
-        (*i).first->to_xml(output, (*i).second);
+        try {
+          (*i).first->to_xml(output, (*i).second);
+        }
+        catch (exception e) {
+          /* Invalid datatype exception; substitute context */
+          e.message() % boost::str(boost::format("option -> argument %u") % (i - arguments.begin()));
+        }
 
         ++i;
       }

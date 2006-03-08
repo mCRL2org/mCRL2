@@ -14,11 +14,8 @@ namespace sip {
   controller_communicator::controller_communicator() : current_status(status_initialising) {
     using namespace boost;
 
-    current_display_dimensions.x = 0;
-    current_display_dimensions.y = 0;
-    current_display_dimensions.z = 0;
-
     /* set default handlers for delivery events */
+    set_handler(bind(&controller_communicator::accept_tool_capabilities, this, _1), sip::reply_tool_capabilities);
     set_handler(bind(&controller_communicator::accept_instance_identifier, this, _1), sip::send_instance_identifier);
     set_handler(bind(&controller_communicator::reply_controller_capabilities, this), sip::request_controller_capabilities);
     set_handler(bind(&controller_communicator::set_status, this, status_configured), sip::send_accept_configuration);
@@ -31,16 +28,7 @@ namespace sip {
 
   /* Reply details about the amount of reserved display space */
   void controller_communicator::reply_controller_capabilities() {
-    std::ostringstream data;
-
-    controller_capabilities capabilities(protocol_version);
-
-    capabilities.set_display_dimensions(current_display_dimensions);
-    capabilities.to_xml(data);
-
-    message m(sip::reply_controller_capabilities);
-
-    m.set_content(data.str());
+    message m(current_controller_capabilities.to_xml(), sip::reply_controller_capabilities);
 
     send_message(m);
   }
@@ -54,13 +42,7 @@ namespace sip {
 
   /* Send the selected input configuration */
   void controller_communicator::send_configuration() {
-    std::ostringstream data;
-
-    current_configuration.to_xml(data);
-
-    message m(sip::reply_controller_capabilities);
-
-    m.set_content(data.str());
+    message m(current_configuration->to_xml(), sip::send_configuration);
 
     send_message(m);
   }
@@ -74,6 +56,14 @@ namespace sip {
     message m(sip::request_termination);
 
     send_message(m);
+  }
+
+  void controller_communicator::accept_tool_capabilities(sip_messenger::message_ptr& m) {
+    xml2pp::text_reader reader(m->to_string().c_str());
+
+    reader.read();
+
+    current_tool_capabilities = tool_capabilities::from_xml(reader);
   }
 
   void controller_communicator::accept_layout_handler(sip_messenger::message_ptr&) {

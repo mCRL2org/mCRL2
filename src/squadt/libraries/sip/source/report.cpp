@@ -17,7 +17,7 @@ namespace sip {
 
       /* Sanity check... */
       if (std::search(error.begin(), error.end(), pattern.begin(), pattern.end()) != error.end()) {
-        throw (sip::exception(exception_identifier::forbidden_message_content));
+        throw (sip::exception(exception_identifier::message_forbidden_content, pattern));
       }
 
       output << "<error>" << error << "</error>";
@@ -29,26 +29,10 @@ namespace sip {
 
       /* Sanity check... */
       if (std::search(comment.begin(), comment.end(), pattern.begin(), pattern.end()) != comment.end()) {
-        throw (sip::exception(exception_identifier::forbidden_message_content));
+        throw (sip::exception(exception_identifier::message_forbidden_content, pattern));
       }
 
       output << "<comment>" << comment << "</comment>";
-    }
-
-    /* Include output specifications */
-    if (0 < outputs.size()) {
-            output_list::const_iterator i = outputs.begin();
-      const output_list::const_iterator b = outputs.end();
-
-      output << "<output>";
-
-      while (i != b) {
-        output << "<object uri=\"" << (*i).first << "\" format=\"" << (*i).second << "\"/>";
-
-        ++i;
-      }
-
-      output << "</output>";
     }
 
     /* Include configuration specification */
@@ -60,7 +44,7 @@ namespace sip {
   }
 
   /** \pre{the reader must point at a report element} */
-  report* report::from_xml(xml2pp::text_reader& reader) {
+  report* report::from_xml(xml2pp::text_reader& reader) throw () {
     report* r = new report();
 
     reader.read();
@@ -100,12 +84,6 @@ namespace sip {
         reader.read();
 
         r->set_comment(temporary);
-      }
-      else if (reader.is_element("output")) {
-        /* r.add_output() */
-        reader.read();
-        reader.read();
-        reader.read();
       }
       else if (reader.is_element("configuration")) {
         r->set_configuration(configuration::from_xml(reader));

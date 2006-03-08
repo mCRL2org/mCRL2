@@ -7,11 +7,13 @@
 #include <sip/detail/exception.h>
 
 #include <sip/detail/command_line_interface.h>
-#include <sip/detail/schemes.tcc>
+#include <sip/detail/schemes.h>
 
 namespace sip {
 
   namespace cli {
+
+    using namespace messenger;
 
     const size_t command_line_argument_extractor::known_option_number = 2;
     const size_t command_line_argument_extractor::known_scheme_number = 2;
@@ -72,31 +74,32 @@ namespace sip {
             throw (exception(exception_identifier::cli_parse_error_expected, "://", s));
           }
 
-          s += 3;
-         
+          char* t = s + 3;
+
           switch (last_matched) {
             case 1: /* Socket scheme (host:port) */
-              selected_scheme = scheme_ptr(new socket_scheme);
+              selected_scheme = scheme_ptr(new socket_scheme< sip_message >);
 
-              /* Search for host port separator */
-              char* t = strchr(s, ':');
+              /* Search for host/port separator */
+              s = strchr(t, ':');
              
               if (t != 0) {
                 /* Take everything between s and t as hostname */
-                const size_t d = t - s;
+                const size_t d = s - t;
 
-                std::string& host_name = dynamic_cast < socket_scheme* > (selected_scheme.get())->host_name;
+                std::string& host_name = dynamic_cast < socket_scheme< sip_message >* > (selected_scheme.get())->host_name;
 
                 host_name.reserve(d);
                 host_name.assign(s, d);
                 host_name.resize(d);
+
+                /* The remaining string should be a port number */
+                dynamic_cast < socket_scheme< sip_message >* > (selected_scheme.get())->port = atol(++t);
               }
 
-              /* The remaining string should be a port number */
-              dynamic_cast < socket_scheme* > (selected_scheme.get())->port = atol(t);
               break;
             default: /* Traditional scheme */
-              selected_scheme = scheme_ptr(new traditional_scheme);
+              selected_scheme = scheme_ptr(new traditional_scheme< sip_message >);
               break;
           }
 
@@ -136,12 +139,12 @@ namespace sip {
             throw (exception(exception_identifier::cli_parse_error_expected, '=', s));
           }
 
-          ++s;
+          char* t = s + 1;
 
           switch (last_matched) {
             case 0: /* Connect option */
               /* Now s should point to a known scheme identifier */
-              char* t = parse_scheme(s);
+              s = parse_scheme(t);
 
               if (s == t) {
                 throw (exception(exception_identifier::cli_parse_error_expected, "valid scheme", s));

@@ -44,13 +44,16 @@ namespace sip {
       private:
 
         /** Convenience type for pointers to wait locks using a boost scoped pointer */
-        typedef boost::shared_ptr< boost::barrier >                     barrier_ptr;
+        typedef boost::shared_ptr< boost::barrier >                        barrier_ptr;
 
         /** Type for the map used to associate a handler to a message type */
         typedef std::map < typename M::type_identifier_t, handler_type >   handler_map;
 
         /** Type for the map used to associate a handler to a lock primitive */
         typedef std::map < typename M::type_identifier_t, barrier_ptr >    waiter_map;
+
+        /** Type for the message queue */
+        typedef std::deque < message_ptr >                                 message_queue_t;
 
         /** Handlers based on message types */
         handler_map                handlers;
@@ -59,7 +62,7 @@ namespace sip {
         waiter_map                 waiters;
  
         /** The current message queue (unhandled messages end up here) */
-        std::deque < message_ptr > message_queue;
+        message_queue_t            message_queue;
 
         /** Buffer that holds content until a message is complete */
         std::string                buffer;
@@ -76,6 +79,9 @@ namespace sip {
         /** The XML-like tag used for wrapping the content */
         static const std::string   tag_close;
 
+        /** Helper function that delivers an incoming message directly to a waiter */
+        static inline void deliver_to_waiter(message_ptr&, message_ptr&);
+
       public:
 
         /** Default constructor */
@@ -88,20 +94,23 @@ namespace sip {
         virtual void deliver(std::string&);
  
         /* Wait until the next message arrives */
-        void await_message(typename M::type_identifier_t);
+        const message_ptr await_message(typename M::type_identifier_t);
  
         /** Send a message */
         inline void send_message(const message&);
  
         /** Pops the first message of the queue */
-        inline message pop_message();
+        inline message_ptr pop_message();
  
         /** Get the first message in the queue */
         inline message& peek_message();
 
         /** Wait until the first message of type t has arrived */
-        inline bool find_message(const typename M::type_identifier_t);
+        inline message_ptr find_message(const typename M::type_identifier_t);
  
+        /** Remove a message from the queue */
+        inline void remove_message(message_ptr& p);
+
         /** Returns the number of messages in the queue */
         inline size_t number_of_messages();
  

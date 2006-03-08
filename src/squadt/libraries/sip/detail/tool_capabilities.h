@@ -3,6 +3,9 @@
 
 #include <set>
 #include <ostream>
+#include <sstream>
+
+#include <boost/shared_ptr.hpp>
 
 #include <xml2pp/text_reader.h>
 #include <sip/detail/capabilities.h>
@@ -37,10 +40,12 @@ namespace sip {
       typedef std::string tool_category;
 
       /** \brief Convenience type definition for an input configuration */
-      typedef std::pair < uri, storage_format >  input_combination;
+      typedef std::pair < uri, storage_format >       input_combination;
 
       /** \brief Convenience type for a list of input configurations */
-      typedef std::set  < input_combination >  input_combination_list;
+      typedef std::set  < input_combination >         input_combination_list;
+
+      typedef boost::shared_ptr < tool_capabilities > tool_capabilities_ptr;
 
     private:
 
@@ -48,10 +53,13 @@ namespace sip {
       version                  current_protocol_version;
 
       /** \brief The available input configurations */
-      input_combination_list current_configurations;
+      input_combination_list   current_configurations;
 
       /** \brief Read from XML stream */
-      inline static tool_capabilities* from_xml(xml2pp::text_reader& reader);
+      inline static tool_capabilities_ptr from_xml(xml2pp::text_reader& reader) throw ();
+
+      /** \brief Whether the configuration can be changed through user interaction */
+      bool interactive;
 
     public:
 
@@ -64,11 +72,17 @@ namespace sip {
       /** \brief Get the protocol version */
       inline version get_version() const;
 
+      /** \brief Set or reset flag that the tool is interactive (configuration may change through user interaction) */
+      inline void set_interactive(bool);
+
+      /** \brief Write to XML string */
+      inline std::string to_xml() const;
+
       /** \brief Write to XML stream */
       inline void to_xml(std::ostream&) const;
   };
 
-  inline tool_capabilities::tool_capabilities(const version v) : current_protocol_version(v) {
+  inline tool_capabilities::tool_capabilities(const version v) : current_protocol_version(v), interactive(false) {
   }
 
   inline void tool_capabilities::add_input_combination(tool_category c, storage_format f) {
@@ -81,12 +95,25 @@ namespace sip {
     return (current_protocol_version);
   }
 
+  inline std::string tool_capabilities::to_xml() const {
+    std::ostringstream output;
+
+    to_xml(output);
+
+    return (output.str());
+  }
+
   inline void tool_capabilities::to_xml(std::ostream& output) const {
     output << "<capabilities>"
            << "<protocol-version major=\"" << (unsigned short) current_protocol_version.major
            << "\" minor=\"" << (unsigned short) current_protocol_version.minor << "\"/>";
+
+    if (interactive) {
+      // Tool is interactive
+      output << "<interactivity level=\"1\"/>";
+    }
     
-    for (input_combination_list::const_iterator i; i != current_configurations.end(); ++i) {
+    for (input_combination_list::const_iterator i = current_configurations.begin(); i != current_configurations.end(); ++i) {
       output << "<input-configuration category=\"" << (*i).first
              << "\" format=\"" << (*i).second << "\"/>";
     }
@@ -94,10 +121,13 @@ namespace sip {
     output << "</capabilities>";
   }
 
-  /** \pre{the reader must point at a capabilities element} */
-  inline tool_capabilities* tool_capabilities::from_xml(xml2pp::text_reader& reader) {
-    tool_capabilities* c;
-    version                  v = {0,0};
+  inline void tool_capabilities::set_interactive(bool b) {
+    interactive = b;
+  }
+
+  /** \pre the reader must point at a capabilities element */
+  inline tool_capabilities::tool_capabilities_ptr tool_capabilities::from_xml(xml2pp::text_reader& reader) throw () {
+    version v = {0,0};
 
     reader.read();
 
@@ -106,13 +136,24 @@ namespace sip {
     reader.get_attribute(&v.major, "major");
     reader.get_attribute(&v.minor, "minor");
 
-    c = new tool_capabilities(v);
+    tool_capabilities_ptr c(new tool_capabilities(v));
 
     reader.read();
 
     /* Skip end element */
     if (reader.is_end_element()) {
       reader.read();
+    }
+
+    if (reader.is_element("interactivity")) {
+      c->interactive = reader.get_attribute("level");
+
+      reader.read();
+
+      /* Skip end element */
+      if (reader.is_end_element()) {
+        reader.read();
+      }
     }
 
     assert (reader.is_element("input-configuration"));
@@ -128,12 +169,10 @@ namespace sip {
       reader.read();
      
       /* Skip end element */
-      if (reader.is_end_element()) {
+      if (reader.is_end_element() && reader.is_element("input-configuration")) {
         reader.read();
       }
     }
-
-    reader.read();
 
     return (c);
   }

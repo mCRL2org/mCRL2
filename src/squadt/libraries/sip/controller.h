@@ -22,26 +22,28 @@ namespace sip {
         ,status_error        /** \brief An error occurred */
       } status;
 
-      /** \brief The protocol version of the peer, if known otherwise assumed 1.0 */
-      static const version        peer_version;
-
       /** \brief The current protocol status */
       status                      current_status;
 
       /** \brief The currently active display layout */
       sip::layout::display_layout current_layout;
 
-      /** \brief The dimensions of the currently reserved display for the connected tool */
-      display_dimensions          current_display_dimensions;
+      /** \brief The capabilities object of the controller as it is send, when requested */
+      controller_capabilities     current_controller_capabilities;
+
+      /** \brief The last received capabilities object of the tool */
+      tool_capabilities_ptr       current_tool_capabilities;
 
       /** \brief The current configuration of a tool (may be limited to a main input configuration) */
-      configuration               current_configuration;
+      configuration_ptr           current_configuration;
 
       /** \brief Unique identifier assigned to the peer */
       long instance_identifier;
 
       /** \brief Convenience function for use with event handlers */
       inline void set_status(status);
+
+      void accept_tool_capabilities(message_ptr&);
 
       /** \brief Convenience function for use with event handlers */
       void accept_instance_identifier(message_ptr&);
@@ -77,40 +79,29 @@ namespace sip {
       /** \brief Request the tool to terminate itself */
       void request_termination();
 
-      /** \brief Set the amount of display space that is reserved for this tool */
-      void set_display_dimensions(unsigned short x, unsigned short y, unsigned short z);
+      /** \brief Get the controller_capabilities object that is send to tools */
+      controller_capabilities& get_controller_capabilities();
 
-      /** \brief Get a controller_capabilities object that is send to tools */
-      controller_capabilities get_capabilities();
+      /** \brief Get the most recently received tool_capabilities object of the connected tool */
+      tool_capabilities_ptr get_tool_capabilities();
 
       /** \brief Set the current configuration (only effective before status_configured) */
       void set_configuration(const configuration&);
 
       /** \brief Get the current (perhaps partial) configuration */
-      configuration get_configuration() const;
+      configuration_ptr get_configuration() const;
   };
 
-  inline void controller_communicator::set_display_dimensions(unsigned short x, unsigned short y, unsigned short z) {
-    current_display_dimensions.x = x;
-    current_display_dimensions.y = y;
-    current_display_dimensions.z = z;
+  inline controller_capabilities& controller_communicator::get_controller_capabilities() {
+    return (current_controller_capabilities);
   }
 
-  inline controller_capabilities controller_communicator::get_capabilities() {
-    controller_capabilities c = controller_capabilities(protocol_version);
-
-    c.set_display_dimensions(current_display_dimensions);
-
-    return (c);
+  inline tool_capabilities_ptr controller_communicator::get_tool_capabilities() {
+    return (current_tool_capabilities);
   }
 
-  inline void controller_communicator::set_configuration(const configuration& c) {
-    if (status_configured <= current_status) {
-      current_configuration = c;
-    }
-  }
-
-  inline configuration controller_communicator::get_configuration() const {
+  /** \attention use get_configuration().swap() to set the configuration */
+  inline configuration_ptr controller_communicator::get_configuration() const {
     return (current_configuration);
   }
 

@@ -23,6 +23,7 @@ lib sip_common
     : common.cpp
       exception.cpp
       report.cpp
+      object.cpp
       display_layout.cpp
     : <source>/libraries/xml2pp//text_reader
     :

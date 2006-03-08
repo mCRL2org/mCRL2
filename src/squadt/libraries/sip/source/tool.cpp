@@ -11,7 +11,8 @@ namespace sip {
   /**
    * \attention please use connect() to manually establish a connection with a controller
    **/
-  tool_communicator::tool_communicator() : current_status(status_initialising), current_capabilities(0) {
+  tool_communicator::tool_communicator() : current_status(status_initialising),
+                                           current_tool_capabilities() {
 
     /* Register event handlers for some message types */
     set_handler(boost::bind(&tool_communicator::reply_tool_capabilities, this), sip::request_tool_capabilities);
@@ -36,7 +37,7 @@ namespace sip {
     cli::scheme_ptr scheme = e.get_scheme();
 
     if (scheme.get() != 0) {
-      scheme->connect(*this);
+      scheme->connect(this);
 
       instance_identifier = e.get_identifier();
 
@@ -67,21 +68,20 @@ namespace sip {
     send_message(m);
 
     /* Await the reply */
-    await_message(sip::reply_controller_capabilities);
+    message_ptr p = await_message(sip::reply_controller_capabilities);
 
-    xml2pp::text_reader reader(pop_message().to_string().c_str());
+    xml2pp::text_reader reader(p->to_string().c_str());
 
     reader.read();
 
-    if (current_capabilities != 0) {
-      delete current_capabilities;
-    }
-
-    current_capabilities = controller_capabilities::from_xml(reader);
+    current_controller_capabilities = controller_capabilities::from_xml(reader);
   }
 
   /* Send a specification of the tools capabilities */
   void tool_communicator::reply_tool_capabilities() {
+    message m(current_tool_capabilities.to_xml(), sip::reply_tool_capabilities);
+
+    send_message(m);
   }
 
   /* Send a specification of the current configuration (it may change during tool execution) */
@@ -90,15 +90,9 @@ namespace sip {
 
   /* Send a layout specification for the display space reserved for this tool */
   void tool_communicator::send_display_layout(layout::display_layout&) {
-    std::ostringstream data;
+//    message m(current_display_layout.to_xml(), sip::send_display_layout);
 
-//    current_display_layout.to_xml(data);
-
-    message m(sip::send_display_layout);
-
-    m.set_content(data.str());
-
-    send_message(m);
+//    send_message(m);
   }
 
   /* Send a signal that the tool is about to terminate */

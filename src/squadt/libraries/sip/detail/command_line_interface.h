@@ -11,7 +11,7 @@ namespace sip {
   namespace cli {
 
     /** \brief Convenience type for hiding boost shared pointers */
-    typedef boost::shared_ptr < sip::scheme > scheme_ptr;
+    typedef boost::shared_ptr < sip::messenger::scheme< sip_message > > scheme_ptr;
 
     /**
      * \brief Class used for extraction of protocol related command line arguments
