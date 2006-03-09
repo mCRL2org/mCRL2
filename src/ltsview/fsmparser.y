@@ -231,22 +231,20 @@ int fsmwrap()
 
 void fsmerror(const char *str)
 {
-  throw "error: " + static_cast<string>(str) + " token \"" +
-  static_cast<string>(fsmtext) + "\" at line " +
-    static_cast<string>(intToCString( lineNo )) + " position " +
-    static_cast<string>(intToCString( posNo ));
+  throw string( "Parse error: " + string(str) + " token \"" + string(fsmtext) +
+    "\" at line " + string(intToCString( lineNo )) + " position " +
+    string(intToCString( posNo )) );
 }
  
 void parseFSMfile( string fileName, LTS* const lts )
 {
-  FILE* infile = fopen(fileName.c_str(),"r");
-  
   // reset the lexer position variables
   lineNo=1;
   posNo=1;
   
+  FILE* infile = fopen(fileName.c_str(),"r");
   if ( infile == NULL )
-    throw "Cannot open file " + fileName + " for reading";
+    throw string( "Cannot open file for reading:\n" + fileName );
   else
   {
     // INITIALISE

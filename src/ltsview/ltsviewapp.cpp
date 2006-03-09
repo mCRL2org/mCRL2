@@ -51,20 +51,21 @@ void LTSViewApp::openFile( string fileName )
 
   mainFrame->createProgressDialog( "Opening file", "Parsing file" );
   mainFrame->updateProgressDialog( 0, "Parsing file" );
+  LTS* newlts = new LTS( this );
   try
   {
-    LTS* newlts = new LTS( this );
     fileLoader->loadFile( fileName, newlts );
-    if ( lts != NULL ) delete lts;
-    lts = newlts;
   }
   catch ( string msg )
   {
+    delete newlts;
     jobNames.clear();
     mainFrame->updateProgressDialog( 100, "Error loading file" );
     mainFrame->showMessage( "Error loading file", msg );
     return;
   }
+  if ( lts != NULL ) delete lts;
+  lts = newlts;
   
   ++currentJobNr;
   mainFrame->updateProgressDialog( 20, "Applying ranking" );

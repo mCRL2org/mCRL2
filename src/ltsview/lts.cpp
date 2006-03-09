@@ -7,18 +7,21 @@ LTS::LTS( Mediator* owner)
   matchAny = true;
   markedStatesCount = 0;
   deadlockCount = -1;
+  stateVectorSpec = NULL;
+  transitionLabels = NULL;
 }
 
 LTS::~LTS()
 {
-  ATunprotectList( &transitionLabels );
-  ATunprotectList( &stateVectorSpec );
+  if ( stateVectorSpec != NULL ) ATunprotectList( &stateVectorSpec );
+  if ( transitionLabels != NULL ) ATunprotectList( &transitionLabels );
   
   for ( unsigned int i = 0 ; i < states.size() ; ++i )
   {
     delete states[i];
   }
   states.clear();
+  statesInRank.clear();
   initialState = NULL;
   
   for ( unsigned int i = 0 ; i < transitions.size() ; ++i )
@@ -26,6 +29,21 @@ LTS::~LTS()
     delete transitions[i];
   }
   transitions.clear();
+
+  for ( unsigned int r = 0 ; r < clustersInRank.size() ; ++r )
+  {
+    for ( unsigned int i = 0 ; i < clustersInRank[r].size() ; ++i )
+    {
+      delete clustersInRank[r][i];
+    }
+  }
+  clustersInRank.clear();
+
+  for ( unsigned int i = 0 ; i < markRules.size() ; ++i )
+  {
+    delete markRules[i];
+  }
+  markRules.clear();
 }
 
 void LTS::setStateVectorSpec( ATermList spec )

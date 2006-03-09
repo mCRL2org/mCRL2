@@ -23,6 +23,12 @@ Visualizer::Visualizer( Mediator* owner )
 
 Visualizer::~Visualizer()
 {
+  for ( unsigned int i = 0 ; i < primitives.size() ; ++i )
+  {
+    glDeleteLists( primitives[i]->displayList, 1 );
+    delete primitives[i];
+  }
+  primitives.clear();
 }
 
 RankStyle Visualizer::getRankStyle() const
