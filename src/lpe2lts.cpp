@@ -397,6 +397,8 @@ int main(int argc, char **argv)
   }
 
   gsVerboseMsg("initialising...\n");
+  ATermAppl term_nil = gsMakeNil();
+  AFun afun_pair = ATmakeAFun("pair",2,ATfalse);
   ATermIndexedSet states = ATindexedSetCreate(10000,50);
   unsigned long num_states = 0;
   unsigned long trans = 0;
@@ -537,7 +539,7 @@ int main(int argc, char **argv)
               SVCbool b;
               SVCputTransition(svc,
                 SVCnewState(svc,(ATerm) ATmakeInt(current_state),&b),
-                SVCnewLabel(svc,(ATerm) Transition,&b),
+                SVCnewLabel(svc,(ATerm) ATmakeAppl2(afun_pair,(ATerm) Transition,(ATerm) term_nil),&b),
                 SVCnewState(svc,(ATerm) ATmakeInt(i),&b),
                 svcparam);
             }

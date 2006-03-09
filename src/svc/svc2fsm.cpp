@@ -366,9 +366,16 @@ static void print_edges(FILE *f, SVCfile file)
     SVCstateIndex source,dest;
     SVCgetNextTransition(&file, &source, &li, &dest, &pi) ;
     if ( is_mcrl2 )
-       gsfprintf(f,"%1d %1d \"%P\"\n",source+1,dest+1,SVClabel2ATerm(&file,li));
-    else
+    {
+       ATerm lab = SVClabel2ATerm(&file,li);
+       if ( !gsIsMultAct((ATermAppl) lab) ) // check for backwards compatibility for untimed svc versions
+       {
+	       lab = ATgetArgument((ATermAppl) lab,0);
+       }
+       gsfprintf(f,"%1d %1d \"%P\"\n",source+1,dest+1,lab);
+    } else {
        gsfprintf(f,"%1d %1d %T\n",source+1,dest+1,SVClabel2ATerm(&file,li));
+    }
     if ((i+1)%100000==0 || i+1==notr)
     {
       if ((i+1)%1000000==0 || i+1==notr) 

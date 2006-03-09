@@ -18,16 +18,18 @@ class Trace
 		unsigned int getLength();
 
 		ATermAppl currentState();
+		ATermAppl currentTime();
 		ATermAppl nextAction();
 
 		void truncate();
 
-		void addAction(ATermAppl action);
+		void addAction(ATermAppl action, ATermAppl time = NULL);
 		bool setState(ATermAppl state);
 		bool canSetState();
 
 		ATermAppl getAction();
 		ATermAppl getState();
+		ATermAppl getTime();
 
 		void load(std::istream &is, TraceFormat tf = tfUnknown);
 		void load(std::string &filename, TraceFormat tf = tfUnknown);
@@ -37,6 +39,7 @@ class Trace
 	private:
 		ATermAppl *states;
 		ATermAppl *actions;
+		ATermAppl *times;
 		unsigned int buf_size;
 		unsigned int len;
 		unsigned int pos;

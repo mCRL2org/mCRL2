@@ -21,13 +21,17 @@
  * The contents of the trace ATermList have the following form.
  *
  *   T   ::=  T'  |  State |> T'  |  State
- *   T'  ::=  Action |> T  |  Action
+ *   T'  ::=  pair(Action,Time) |> T  |  pair(Action,Time)  |  T''
+ *   T'' ::=  Action |> T  |  Action
  *
- * This means that a trace is a sequence of Actions with at most one
- * State between every action and at the beginning and end of the trace.
- * Actions are in the mCRL2 MultAct(<Action>*) format and States are
- * ATermAppls with "STATE" as function symbol and mCRL2 <DataExpr>s as
- * arguments.
+ * This means that a trace is a sequence of Action/Time-pairs with at most one
+ * State between every pair and at the beginning and end of the trace.
+ * Actions are in the mCRL2 MultAct(<Action>*) format, Time is a mCRL2
+ * <DataExpr> of the sort Time and States are ATermAppls with "STATE" as
+ * function symbol and mCRL2 <DataExpr>s as * arguments.
+ *
+ * Note that T'' is only here for backwards compatibility with the previous
+ * untimed version.
  */
 
 #define TRACE_MCRL2_MARKER "mCRL2Trace"
@@ -39,10 +43,31 @@
 
 using namespace std;
 
+AFun trace_pair;
+int trace_pair_set = 0;
+
+static bool isTimedMAct(ATermAppl t)
+{
+	return ATisEqualAFun(ATgetAFun(t),trace_pair);
+}
+
+static ATermAppl makeTimedMAct(ATermAppl act, ATermAppl time)
+{
+	return ATmakeAppl2(trace_pair,(ATerm) act,(ATerm) time);
+}
+
 void Trace::init()
 {
+	if ( trace_pair_set == 0 )
+	{
+		trace_pair = ATmakeAFun("pair",2,ATfalse);
+		ATprotectAFun(trace_pair);
+	}
+	trace_pair_set++;
+
 	states = (ATermAppl *) malloc(INIT_BUF_SIZE*sizeof(ATermAppl));
 	actions = (ATermAppl *) malloc(INIT_BUF_SIZE*sizeof(ATermAppl));
+	times = (ATermAppl *) malloc(INIT_BUF_SIZE*sizeof(ATermAppl));
 	buf_size = INIT_BUF_SIZE;
 	len = 0;
 	pos = 0;
@@ -50,9 +75,13 @@ void Trace::init()
 	{
 		states[i] = NULL;
 		actions[i] = NULL;
+		times[i] = NULL;
 	}
 	ATprotectArray((ATerm *) states,buf_size);
 	ATprotectArray((ATerm *) actions,buf_size);
+	ATprotectArray((ATerm *) times,buf_size);
+
+	// XXX set times[0] to gsMakeTime(0.0)?
 }
 
 Trace::Trace()
@@ -74,10 +103,18 @@ Trace::Trace(string &filename, TraceFormat tf)
 
 Trace::~Trace()
 {
+	ATunprotectArray((ATerm *) times);
 	ATunprotectArray((ATerm *) actions);
 	ATunprotectArray((ATerm *) states);
+	free(times);
 	free(actions);
 	free(states);
+
+	trace_pair_set--;
+	if ( trace_pair_set == 0 )
+	{
+		ATunprotectAFun(trace_pair);
+	}
 }
 
 void Trace::resetPosition()
@@ -108,6 +145,11 @@ ATermAppl Trace::currentState()
 	return states[pos];
 }
 
+ATermAppl Trace::currentTime()
+{
+	return times[pos];
+}
+
 ATermAppl Trace::nextAction()
 {
 	if ( pos < len )
@@ -125,7 +167,7 @@ void Trace::truncate()
 }
 
 
-void Trace::addAction(ATermAppl action)
+void Trace::addAction(ATermAppl action, ATermAppl time)
 {
 	actions[pos] = action;
 	pos++;
@@ -134,20 +176,25 @@ void Trace::addAction(ATermAppl action)
 	{
 		ATunprotectArray((ATerm *) states);
 		ATunprotectArray((ATerm *) actions);
+		ATunprotectArray((ATerm *) times);
 		states = (ATermAppl *) realloc(states,buf_size*2*sizeof(ATermAppl));
 		actions = (ATermAppl *) realloc(actions,buf_size*2*sizeof(ATermAppl));
+		times = (ATermAppl *) realloc(times,buf_size*2*sizeof(ATermAppl));
 		for (unsigned int i=buf_size; i<buf_size*2; i++)
 		{
 			states[i] = NULL;
 			actions[i] = NULL;
+			times[i] = NULL;
 		}
 		buf_size = buf_size * 2;
 		ATprotectArray((ATerm *) states,buf_size);
 		ATprotectArray((ATerm *) actions,buf_size);
+		ATprotectArray((ATerm *) times,buf_size);
 	} else {
 		states[pos] = NULL;
 		actions[pos] = NULL;
 	}
+	times[pos] = time;
 }
 
 bool Trace::setState(ATermAppl state)
@@ -182,6 +229,11 @@ ATermAppl Trace::getAction()
 ATermAppl Trace::getState()
 {
 	return states[pos];
+}
+
+ATermAppl Trace::getTime()
+{
+	return times[pos];
 }
 
 TraceFormat Trace::detectFormat(istream &is)
@@ -240,9 +292,17 @@ void Trace::loadMcrl2(istream &is)
 	{
 		ATermAppl e = (ATermAppl) ATgetFirst(trace);
 
-		if ( gsIsMultAct(e) )
+		if ( gsIsMultAct(e) ) // To be compatible with old untimed version
 		{
 			addAction(e);
+		} else if ( isTimedMAct(e) )
+		{
+			if ( gsIsNil(ATAgetArgument(e,1)) )
+			{
+				addAction(ATAgetArgument(e,0));
+			} else {
+				addAction(ATAgetArgument(e,0),ATAgetArgument(e,1));
+			}
 		} else {
 			setState(e);
 		}
@@ -316,7 +376,7 @@ void Trace::saveMcrl2(ostream &os)
 				gsErrorMsg("saving trace that is not in mCRL2 format to a mCRL2 trace format\n");
 				error_shown = true;
 			}
-			trace = ATinsert(trace,(ATerm) actions[i]);
+			trace = ATinsert(trace,(ATerm) makeTimedMAct(actions[i], (times[i]==NULL)?gsMakeNil():times[i]) );
 		}
 		if ( states[i] != NULL )
 		{

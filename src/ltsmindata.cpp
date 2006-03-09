@@ -305,9 +305,9 @@ bool is_tau_action(char *action)
 	return false;
 }
 
-bool is_tau_mact(ATerm mact)
+bool is_tau_mact(ATermAppl mact)
 {
-	ATermList l = ATLgetArgument((ATermAppl) mact,0);
+	ATermList l = ATLgetArgument(mact,0);
 	for (; !ATisEmpty(l); l=ATgetNext(l))
 	{
 		ATermAppl actid = ATAgetArgument(ATAgetFirst(l),0);
@@ -334,14 +334,18 @@ SVCstateIndex ReadData(void)
    label_name[label_tau] = (ATerm) gsMakeMultAct(ATmakeList0());
    while (SVCgetNextTransition(inFile, &fromState, &label, &toState, &parameter)) 
       {
-      if ( is_tau_mact(SVClabel2ATerm(inFile,label)) )
+      ATermAppl label_term = (ATermAppl) SVClabel2ATerm(inFile,label);
+      if ( !gsIsMultAct(label_term) )
+      {
+	      label_term = (ATermAppl) ATgetArgument((ATermAppl) label_term, 0);
+      }
+      if ( is_tau_mact(label_term) )
       {
 	      label = label_tau;
       }
       ATerm name = label_name[label];
       if (!name) {
-          name = SVClabel2ATerm(inFile,label);
-	  name = (ATerm) gsSortMultAct((ATermAppl) name);
+	  name = (ATerm) gsSortMultAct(label_term);
 	  for (int i=0; i<nlabel; i++)
 	  {
              if ( ATisEqual(label_name[i],name) )
@@ -680,7 +684,7 @@ int WriteData(SVCstateIndex initState, int omit_tauloops)
     SVCstateIndex newState = SVCnewState(outFile, 
     (ATerm) ATmakeInt(ReturnEquivalenceClasses(initState, omit_tauloops?ATtrue:ATfalse)), &nnew);
     SVCsetInitialState(outFile, newState); 
-    SVCsetType(outFile, "mCRL2+info");
+    SVCsetType(outFile, "mCRL2");
     SVCsetCreator(outFile, "ltsmin");
     n_tau_transitions = WriteTransitions();
     if (omit_tauloops == DELETE_TAULOOPS) {

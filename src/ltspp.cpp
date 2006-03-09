@@ -29,6 +29,8 @@
 #include "libprint_c.h"
 #include "ltspp.h"
 
+bool print_state = true;
+
 int main(int argc, char *argv[])
 { FILE *fpOut=NULL;
   int traceLevel;
@@ -38,7 +40,7 @@ int main(int argc, char *argv[])
 
    switch(parseArgs(argc, argv,&fpOut,&traceLevel)) {
       case ERR_ARGS:
-	 fprintf(stderr,NAME ": incorrect number of arguments supplied (see --help)\n");
+         fprintf(stderr,NAME ": incorrect number of arguments supplied (see --help)\n");
     //     doHelp(argv[0]);
          exit(EXIT_ERR_ARGS);
          break;
@@ -68,13 +70,14 @@ int parseArgs(int argc, char *argv[], FILE **fpOut, int *traceLevel){
    extern int optind;
 //   char *inFilename=NULL, *outFilename=NULL;
    SVCbool indexed/*, allocatedFileName = SVCfalse*/;
-   #define ShortOptions      "hqv"
+   #define ShortOptions      "hqvn"
    #define VersionOption     0x1
    struct option LongOptions[] = { 
      {"help"      , no_argument,       NULL, 'h'},
      {"version"   , no_argument,       NULL, VersionOption},
      {"quiet"     , no_argument,       NULL, 'q'},
      {"verbose"   , no_argument,       NULL, 'v'},
+     {"no-state"  , no_argument,       NULL, 'n'},
      {0, 0, 0, 0}
    };
 
@@ -91,6 +94,9 @@ int parseArgs(int argc, char *argv[], FILE **fpOut, int *traceLevel){
 		 break;
 	 case 'v':
 		 *traceLevel=1;
+		 break;
+	 case 'n':
+		 print_state = false;
 		 break;
 	 default:
 		 return ERR_ARGS;
@@ -130,6 +136,14 @@ int parseArgs(int argc, char *argv[], FILE **fpOut, int *traceLevel){
             fprintf(stderr, "%s: %s\n", argv[optind],strerror(errno));
             return ERR_FILE;
 	      
+      }
+      if ( !strcmp(SVCgetType(&inFile),"mCRL2") )
+      {
+            print_state = false;
+      } else if ( strcmp(SVCgetType(&inFile),"mCRL2+info") )
+      {
+	      fprintf(stderr, "error: input file '%s' is not a valid mCRL2 SVC file\n",argv[optind]);
+	      return ERR_FILE;
       }
 /*      } else {
 
@@ -215,6 +229,7 @@ void doHelp(char *cmd) {
     "      --version         display version information and terminate\n"
     "  -q, --quiet           do not display warning messages\n"
     "  -v, --verbose         display concise intermediate messages\n"
+		   "  -n, --no-state        do not save state information\n"
   //                 "-s  Silent: no logging is printed\n");
 //                   "-c  Cautious mode: don't overwrite existing files\n");
 //                   "-o  Output to `outfile'\n");
@@ -287,8 +302,32 @@ int doConvert(FILE *fpOut, int traceLevel) {
   fprintf(fpOut,"nodesep=0.05;\n");
   fprintf(fpOut,"node[width=0.25,height=0.25,label=\"\"];\n");
   fprintf(fpOut,"%d[peripheries=2];\n",SVCgetInitialState(&inFile));
+  int last_state = -1;
   while (SVCgetNextTransition(&inFile, &fromState, &label, &toState, &parameter)) {
+
+      int n = (fromState>toState)?fromState:toState;
+      if ( print_state && (n > last_state) )
+      {
+        for (int i=last_state+1; i<=n; i++)
+        {
+          fprintf(fpOut, "%d[label=\"(",i);
+          ATermList args = ATgetArguments((ATermAppl) SVCstate2ATerm(&inFile,fromState));
+          for (; !ATisEmpty(args); args=ATgetNext(args))
+          {
+            gsfprintf(fpOut, "%P", ATgetFirst(args));
+            if ( !ATisEmpty(ATgetNext(args)) )
+              fprintf(fpOut, ",");
+          }
+          fprintf(fpOut, ")\"];\n");
+        }
+        last_state = n;
+      }
+
       ATermAppl t = (ATermAppl) SVClabel2ATerm(&inFile,label);
+      if ( !gsIsMultAct(t) ) // for backwards compatibility with untimed svc version
+      {
+        t = ATAgetArgument(t,0);
+      }
 /*      AFun s = ATgetAFun(t);
       if (ATisQuoted(s) && ATgetArity(s)==0) 
         ATfprintf(fpOut, "%d->%d[label=%t];\n",fromState, toState, t);
