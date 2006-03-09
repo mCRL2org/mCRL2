@@ -13,7 +13,7 @@
    <object type="input" name="%.lpe" formalism="LPE" default-format="lpe"/>
   </mode>
  </tool>
- <tool name="mcrl22lpe" identifier="mcrl22lpe" location="@BIN_DIR@mcrl22lpe">
+ <tool name="mcrl22lpe" identifier="mcrl22lpe" location="@BIN_DIR@/mcrl22lpe">
   <mode category="Translation">
    <description>A tool that transforms mCRL2 specification to an LPE.</description>
    <object type="input" name="%.mcrl2" formalism="mCRL2" default-format="mcrl2"/>
