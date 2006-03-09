@@ -1,6 +1,8 @@
 #ifndef LTSVIEWAPP_H
 #define LTSVIEWAPP_H
 #include <wx/wx.h>
+#include <wx/cmdline.h>
+#include <wx/filename.h>
 #ifdef __APPLE__
     #include <GLUT/glut.h>
 #else

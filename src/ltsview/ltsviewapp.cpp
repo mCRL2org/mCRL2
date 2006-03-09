@@ -23,6 +23,25 @@ bool LTSViewApp::OnInit()
   mainFrame->Show( true );
   glCanvas->initialize();
 
+  // parse command line and check for specified input file
+  wxCmdLineEntryDesc cmdLineDesc[] = 
+  {
+    { wxCMD_LINE_PARAM, NULL, NULL, wxT("INFILE"), wxCMD_LINE_VAL_STRING,
+      wxCMD_LINE_PARAM_OPTIONAL },
+    { wxCMD_LINE_NONE, NULL, NULL, NULL, wxCMD_LINE_VAL_NONE, 0 }
+  };
+  wxCmdLineParser cmdParser( cmdLineDesc, argc, argv );
+  if ( cmdParser.Parse() == 0 )
+  {
+    if ( cmdParser.GetParamCount() > 0 )
+    {
+      wxFileName fileName( cmdParser.GetParam(0) );
+      fileName.Normalize( wxPATH_NORM_LONG | wxPATH_NORM_DOTS |
+	  wxPATH_NORM_TILDE | wxPATH_NORM_ABSOLUTE );
+      openFile( static_cast< string > ( fileName.GetFullPath().fn_str() ) );
+    }
+  }
+
   return true;
 }
 
@@ -41,8 +60,8 @@ void LTSViewApp::openFile( string fileName )
   }
   catch ( string msg )
   {
-    mainFrame->updateProgressDialog( 100, "Error loading file" );
     jobNames.clear();
+    mainFrame->updateProgressDialog( 100, "Error loading file" );
     mainFrame->showMessage( "Error loading file", msg );
     return;
   }
