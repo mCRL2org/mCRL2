@@ -57,7 +57,7 @@ class RewriterCompilingJitty: public Rewriter
 		void calcTerm(FILE *f, ATerm t, int startarg, ATermList nnfvars, bool rewr = true);
 		void implement_tree_aux(FILE *f, ATermAppl tree, int cur_arg, int parent, int level, int cnt, int d, int arity, bool *used, ATermList nnfvars);
 		void implement_tree(FILE *f, ATermAppl tree, int arity, int d, int opid, bool *used);
-		void implement_strategy(FILE *f, ATermList strat, int arity, int d, int opid);
+		void implement_strategy(FILE *f, ATermList strat, int arity, int d, int opid, unsigned int nf_args);
 		void CompileRewriteSystem(ATermAppl DataEqnSpec);
 
 		ATerm OpId2Int(ATermAppl Term, bool add_opids);
