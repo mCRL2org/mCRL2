@@ -19,12 +19,12 @@ namespace sip {
     private:
       /** Type for keeping protocol phase status */
       typedef enum {
-         status_initialising /** \brief No connection with controller yet */
-        ,status_clean        /** \brief Connection with controller: Phase 0 */
-        ,status_configured   /** \brief Tool has accepted a configuration: Phase 1 */
-        ,status_started      /** \brief Tool is running: Phase 2 */
-        ,status_reported     /** \brief Tool is finished and has send a report: Phase 3 */
-        ,status_error        /** \brief An error occurred */
+        status_initialising, ///< \brief No connection with controller yet
+        status_clean,        ///< \brief Connection with controller: Phase 0
+        status_configured,   ///< \brief Tool has accepted a configuration: Phase 1
+        status_started,      ///< \brief Tool is running: Phase 2
+        status_reported,     ///< \brief Tool is finished and has send a report: Phase 3
+        status_error         ///< \brief An error occurred
       } status;
 
       /** \brief The current protocol status */
@@ -35,6 +35,9 @@ namespace sip {
 
       /** \brief The object that descibed the capabilities of the current tool */
       tool_capabilities           current_tool_capabilities;
+
+      /** \brief This object reflects the current configuration */
+      configuration               current_configuration;
 
       /** \brief Unique identifier for the running tool, obtained via the command line */
       long instance_identifier;
@@ -77,6 +80,9 @@ namespace sip {
       /** \brief Get the tool capabilities object that will be sent when a request is received */
       inline tool_capabilities& get_tool_capabilities();
 
+      /** \brief Get the current tool configuration object be sent when a request is received */
+      inline configuration& get_tool_configuration();
+
       /** \brief Get the last communicated set of controller capabilities */
       inline const controller_capabilities_ptr get_controller_capabilities() const;
   };
@@ -86,6 +92,16 @@ namespace sip {
    **/
   inline tool_capabilities& tool_communicator::get_tool_capabilities() {
     return (current_tool_capabilities);
+  }
+
+  /**
+   * This object can be stored by the controller and subsequently be used to
+   * restore this exact configuration state at the side of the tool.
+   *
+   * \return a reference to the current tool configuration object
+   **/
+  inline configuration& tool_communicator::get_tool_configuration() {
+    return (current_configuration);
   }
 
   /**

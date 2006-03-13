@@ -4,12 +4,12 @@
 namespace sip {
   /** \brief Type for protocol version */
   struct version {
-    unsigned char major; /// the major number
-    unsigned char minor; /// the minor number
+    unsigned char major; ///< the major number
+    unsigned char minor; ///< the minor number
   };
 
-  /** Protocol version {major,minor} */
-  static const version protocol_version = {1,0};
+  /** \brief Protocol version {major,minor} */
+  static const version default_protocol_version = {1,0};
 }
 
 #endif

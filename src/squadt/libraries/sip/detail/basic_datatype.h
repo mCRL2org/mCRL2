@@ -43,7 +43,10 @@ namespace sip {
     /** \brief Derived datatype for strings */
     class string : public basic_datatype {
       private:
+        /** \brief The minimum length a string of this type has */
         size_t minimum_length;
+
+        /** \brief The maximum length a string of this type has */
         size_t maximum_length;
 
       public:
@@ -65,6 +68,7 @@ namespace sip {
         /** \brief Establishes whether value is valid for an element of this type */
         inline bool validate(std::string& value) const;
 
+        /** \brief Destructor */
         inline ~string();
     };
 
@@ -103,12 +107,13 @@ namespace sip {
      * Implementation of string
      ************************************************************************/
 
+    /** Instance of a string (without limitations) */
     static string standard_string;
 
     inline string::string(size_t minimum, size_t maximum) : minimum_length(minimum), maximum_length(maximum_length) {
     }
 
-    /** \pre{The current element must be <string>} */
+    /** \pre The current element must be \<string\>  */
     inline string* string::from_xml(xml2pp::text_reader& reader) {
       size_t minimum = 0;
       size_t maximum = 0;

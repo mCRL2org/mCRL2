@@ -126,7 +126,8 @@ FILE_PATTERNS          = *.c \
                          *.PY \
                          *.tcc
 RECURSIVE              = YES
-EXCLUDE                = /home/jwulp/work/mCRL2-holidays/MCRL2/trunk/src/squadt/libraries/sip/test/
+EXCLUDE                = /home/jwulp/work/mCRL2-holidays/MCRL2/trunk/src/squadt/libraries/sip/test/ \
+                         /home/jwulp/work/mCRL2-holidays/MCRL2/trunk/src/squadt/libraries/sip/source/exception.cpp
 EXCLUDE_SYMLINKS       = NO
 EXCLUDE_PATTERNS       = 
 EXAMPLE_PATH           = 

@@ -99,7 +99,7 @@ strip: $(TARGETS)
 	$(STRIP) --strip-unneeded --strip-debug $^
 
 install: all
-	@cd build; $(BJAM) --install
+	@cd build; $(BJAM) install
 	$(INSTALL) -d $(bindir)
 	$(INSTALL) -d $(datadir)
 	$(INSTALL) -d $(datadir)/images

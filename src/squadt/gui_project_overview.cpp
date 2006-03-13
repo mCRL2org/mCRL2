@@ -353,7 +353,7 @@ namespace squadt {
       wxBoxSizer* ssizer = new wxBoxSizer(wxHORIZONTAL);
       wxBitmap    bitmap;
 
-      bitmap.LoadFile(wxString(_settings_manager->path_to_images("logo.jpg").c_str(), wxConvLocal), wxBITMAP_TYPE_JPEG);
+      bitmap.LoadFile(wxString(global_settings_manager->path_to_images("logo.jpg").c_str(), wxConvLocal), wxBITMAP_TYPE_JPEG);
 
       about->SetSizer(sizer);
 

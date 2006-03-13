@@ -7,14 +7,17 @@ namespace squadt {
   class ToolManager;
   class Logger;
 
+  /* Convenience type */
+  typedef boost::shared_ptr < settings_manager > settings_manager_ptr;
+
   /* Global Settings Manager component */
-  extern settings_manager* _settings_manager;
+  extern settings_manager_ptr global_settings_manager;
 
   /* Global Tool Manager component */
-  extern ToolManager      tool_manager;
+  extern ToolManager          tool_manager;
 
   /* Global log component */
-  extern Logger*          logger;
+  extern Logger*              logger;
 }
 
 #endif

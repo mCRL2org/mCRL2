@@ -28,9 +28,9 @@ namespace sip {
     public:
       /** \brief Type for display dimensions */
       struct display_dimensions {
-        unsigned short x; /* Horizontal */
-        unsigned short y; /* Vertical */
-        unsigned short z; /* Unused for the moment (Depth) */
+        unsigned short x; ///< \brief Horizontal dimension
+        unsigned short y; ///< \brief Vertical dimension
+        unsigned short z; ///< \brief Unused for the moment
       };
 
       /** Convenience type to hide boost shared pointer implementation */
@@ -45,7 +45,7 @@ namespace sip {
       display_dimensions current_dimensions;
 
       /** \brief Constructor */
-      inline controller_capabilities(const version = protocol_version);
+      inline controller_capabilities(const version = default_protocol_version);
 
       /** \brief Read from XML stream */
       inline static controller_capabilities_ptr from_xml(xml2pp::text_reader& reader) throw ();

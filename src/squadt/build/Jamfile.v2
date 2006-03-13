@@ -8,31 +8,39 @@ project squadt
 
 include $(TOP)/config.jam ;
 
-exe squadt :
-         squadt.cpp
-         settings_manager.cpp
-         project_manager.cpp
-         exception.cpp
-         specification.cpp
-         tool_manager.cpp
-         tool_executor.cpp
-         tool.cpp
-         logger.cpp
-         process.cpp
-         gui_new_specification.cpp
-         gui_project_overview.cpp
-         gui_resources.cpp
-         gui_specification_properties.cpp
-         /libraries/md5pp//md5pp
-         /libraries/xml2pp//text_reader
-         /boost/filesystem//boost_filesystem
-        : <cxxflags>"$(IWX)"
-          <linkflags>"$(LWX_BASE)" ;
+exe squadt
+      : squadt.cpp
+        settings_manager.cpp
+        project_manager.cpp
+        exception.cpp
+        specification.cpp
+        tool_manager.cpp
+        tool_executor.cpp
+        tool.cpp
+        logger.cpp
+        process.cpp
+        gui_new_specification.cpp
+        gui_project_overview.cpp
+        gui_resources.cpp
+        gui_specification_properties.cpp
+        /libraries/md5pp//md5pp
+        /libraries/xml2pp//text_reader
+        /boost/filesystem//boost_filesystem
+      : <cxxflags>"$(IWX)"
+        <linkflags>"$(LWX_BASE)" ;
 
-install install-squadt : squadt
-        : <dll-path>$(LIB_DIR)
-          <location>$(BIN_DIR) ;
+alias install
+      : install-squadt
+        install-libraries ;
 
-install install-libraries : squadt
-        : <install-dependencies>on <install-type>LIB
-        : <location>$(LIB_DIR) ;
+install install-squadt
+      : squadt
+      : <dll-path>$(LIB_DIR)
+        <location>$(BIN_DIR) ;
+
+install install-libraries
+      : squadt
+      : <install-dependencies>on <install-type>LIB
+      : <location>$(LIB_DIR) ;
+
+explicit install install-squadt install-libraries ;

@@ -21,9 +21,12 @@ namespace sip {
     public:
       /** \brief Type used to contrain occurences of options within a configuration */
       struct option_constraint {
-        unsigned short minimum; /// \brief minimum occurences of this option in a single configuration
-        unsigned short maximum; /// \brief maximum occurences of this option in a single configuration
+        unsigned short minimum; ///< \brief minimum occurences of this option in a single configuration
+        unsigned short maximum; ///< \brief maximum occurences of this option in a single configuration
       };
+
+      /** \brief Until there is something better this is the type for a tool category */
+      typedef std::string                         tool_category;
 
       /** \brief Type for a pointer to an option object */
       typedef option::option_ptr                  option_ptr;
@@ -54,8 +57,12 @@ namespace sip {
       /** \brief The list of input/output objects */
       object_list objects;
 
+      /** \brief Points to an object that contains describes the main input file and the selected tool_category */
+      std::pair < object_ptr, tool_category > input_combination;
+
     public:
 
+      /** \brief Constructor */
       inline configuration();
 
       /** \brief Returns whether the configuration is empty or not */
@@ -178,6 +185,18 @@ namespace sip {
    **/
   inline void configuration::to_xml(std::ostream& output) const {
     output << "<configuration>";
+
+    /* Add input combination */
+    if (input_combination.first.get() != 0) {
+      output << "<input-combination category=\"" << input_combination.second
+             << "\" format=\"" << input_combination.first->format;
+     
+      if (!input_combination.first->location.empty()) {
+        output << "\" location=\"" << input_combination.first;
+      }
+     
+      output << "\">";
+    }
 
     {
             option_list::const_iterator i = options.begin();
@@ -311,7 +330,7 @@ namespace sip {
 
   /**
    * @param reader is a reference to a libXML 2 text reader instance
-   * /pre the reader points to a <configuration> instance
+   * /pre the reader points to a \<configuration\> instance
    * /post the readers position is just past the configuration block
    **/
   inline configuration::configuration_ptr configuration::from_xml(xml2pp::text_reader& reader) throw () {
@@ -320,6 +339,24 @@ namespace sip {
     assert(reader.is_element("configuration"));
 
     reader.read();
+
+    /* Read input combination */
+    if (reader.is_element("input-combination")) {
+      object::storage_format format;
+      object::uri            location;
+
+      reader.get_attribute(&c->input_combination.second, "category");
+      reader.get_attribute(&format, "format");
+      reader.get_attribute(&location, "location");
+
+      c->input_combination.first = object_ptr(new object (0, format, location));
+
+      reader.read();
+
+      if (reader.is_end_element() && reader.is_element("input-combination")) {
+        reader.read();
+      }
+    }
 
     while (!(reader.is_end_element() && reader.is_element("configuration"))) {
       /* Current element must be <option> */

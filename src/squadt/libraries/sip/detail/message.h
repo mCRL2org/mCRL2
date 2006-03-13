@@ -148,8 +148,7 @@ namespace sip {
     }
 
     /**
-     * @param t a message type identifier
-     * @param c the initial content of the message
+     * @param c contains the initial content of the message
      **/
     template < class M, M D >
     inline void message< M, D >::set_content(std::istream& c) {
@@ -161,7 +160,6 @@ namespace sip {
     }
 
     /**
-     * @param t a message type identifier
      * @param c the initial content of the message
      **/
     template < class M, M D >
@@ -170,7 +168,6 @@ namespace sip {
     }
 
     /**
-     * @param t a message type identifier
      * @param c the initial content of the message
      **/
     template < class M, M D >

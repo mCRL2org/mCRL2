@@ -8,18 +8,15 @@ namespace sip {
 
   /** \brief The main interface to the protocol (controller-side) */
   class controller_communicator : public sip_messenger {
-    public:
-      typedef controller_capabilities::display_dimensions display_dimensions;
-
     private:
       /** Type for keeping protocol phase status */
       typedef enum {
-         status_initialising /** \brief No connection with tool yet */
-        ,status_clean        /** \brief Connection with tool: Phase 0 */
-        ,status_configured   /** \brief Tool has accepted a configuration: Phase 1 */
-        ,status_started      /** \brief Tool is running: Phase 2 */
-        ,status_reported     /** \brief Tool is finished and has send a report: Phase 3 */
-        ,status_error        /** \brief An error occurred */
+        status_initialising, ///< \brief No connection with tool yet
+        status_clean,        ///< \brief Connection with tool: Phase 0
+        status_configured,   ///< \brief Tool has accepted a configuration: Phase 1
+        status_started,      ///< \brief Tool is running: Phase 2
+        status_reported,     ///< \brief Tool is finished and has send a report: Phase 3
+        status_error         ///< \brief An error occurred
       } status;
 
       /** \brief The current protocol status */
@@ -43,10 +40,11 @@ namespace sip {
       /** \brief Convenience function for use with event handlers */
       inline void set_status(status);
 
-      void accept_tool_capabilities(message_ptr&);
+      /** \brief Handler function that sets the identifier for this instance */
+      void accept_instance_identifier(sip_messenger::message_ptr&);
 
-      /** \brief Convenience function for use with event handlers */
-      void accept_instance_identifier(message_ptr&);
+      /** \brief Handler function that replaces the current tool capabilities object with the one from a message */
+      void accept_tool_capabilities(sip_messenger::message_ptr&);
 
       /** \brief Handler function to replace the current display layout with a new one */
       void accept_layout_handler(sip_messenger::message_ptr&);
@@ -109,7 +107,7 @@ namespace sip {
     current_status = s;
   }
 
-  inline void controller_communicator::accept_instance_identifier(message_ptr& m) {
+  inline void controller_communicator::accept_instance_identifier(sip_messenger::message_ptr& m) {
     instance_identifier = atol(m->to_string().c_str());
 
     current_status = status_clean;
