@@ -151,7 +151,8 @@ void Cluster::computeSizeAndDescendantPositions()
 	    minRimRadius );
       }
     }
-
+    
+    /*
     // divide the remaining descendants over the rim of the circle:
     // suppose the list noPosBegin,...,noPosEnd-1 is: [ 0, 1, 2, 3, 4, 5 ]
     // then the clusters are positioned on the rim in the following order
@@ -172,6 +173,48 @@ void Cluster::computeSizeAndDescendantPositions()
 	descendants[noPosit]->setPosition( j*angle );
 	++j;
       }
+    }
+    */
+
+    // Divide the remaining descendants over the rim of the circle. First take
+    // the two largest unpositioned clusters and place them opposite to each
+    // other, then do the same for the two smallest unpositioned clusters. Keep
+    // repeating these steps until all clusters have been positioned. So if the
+    // list of clusters (sorted ascending by size) is [ 0, 1, 2, 3, 4, 5 ] then
+    // the clusters are placed in the following order (starting at angle 0 and
+    // going counter-clockwise): 5, 0, 3, 4, 1, 2
+
+    bool begin = false;
+    int i = 0;
+    int j = ( noPosEnd - noPosBegin ) / 2 + ( noPosEnd - noPosBegin ) % 2;
+    float angle = 360.0 / ( noPosEnd - noPosBegin );
+    while ( noPosBegin != noPosEnd )
+    {
+      if ( begin )
+      {
+	if ( noPosBegin+1 != noPosEnd )
+	{
+	  descendants[noPosBegin++]->setPosition( (i++)*angle );
+	  descendants[noPosBegin++]->setPosition( (j++)*angle );
+	}
+	else
+	{
+	  descendants[noPosBegin++]->setPosition( i*angle );
+	}
+      }
+      else
+      {
+	if( noPosEnd-1 != noPosBegin )
+	{
+	  descendants[--noPosEnd]->setPosition( (i++)*angle );
+	  descendants[--noPosEnd]->setPosition( (j++)*angle );
+	}
+	else
+	{
+	  descendants[--noPosEnd]->setPosition( i*angle );
+	}
+      }
+      begin = !begin;
     }
   }
 }

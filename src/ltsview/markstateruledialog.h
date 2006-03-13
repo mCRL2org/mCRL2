@@ -23,10 +23,10 @@ class MarkStateRuleDialog : public wxDialog
     void      setMarkRule( MarkRule* mr, ATermList svspec );
   private:
     Mediator*			mediator;
-    wxChoice*			parameterChoice;
     map< wxString, int >	parameterIndices;
+    wxListBox*			parameterListBox;
     map< wxString, ATermAppl >	parameterTypes;
-    wxChoice*			relationChoice;
+    wxListBox*			relationListBox;
     map< wxString, int >	valueIndices;
     wxListBox*			valuesListBox;
 

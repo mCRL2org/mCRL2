@@ -1,7 +1,7 @@
 #include "markstateruledialog.h"
 
 BEGIN_EVENT_TABLE( MarkStateRuleDialog, wxDialog )
-  EVT_CHOICE( myID_PARAMETER_CHOICE, MarkStateRuleDialog::onParameterChoice )
+  EVT_LISTBOX( myID_PARAMETER_CHOICE, MarkStateRuleDialog::onParameterChoice )
 END_EVENT_TABLE()
 
 MarkStateRuleDialog::MarkStateRuleDialog( wxWindow* parent, Mediator* owner,
@@ -11,7 +11,8 @@ MarkStateRuleDialog::MarkStateRuleDialog( wxWindow* parent, Mediator* owner,
   mediator = owner;
 
   wxBoxSizer* mainSizer = new wxBoxSizer( wxVERTICAL );
-  wxFlexGridSizer* choicesSizer = new wxFlexGridSizer( 1, 3, 0, 0 );
+
+  wxFlexGridSizer* controlSizer = new wxFlexGridSizer( 2, 3, 0, 0 );
     
   int numberOfParams = ATgetLength( svspec );
   wxArrayString paramChoices;
@@ -34,26 +35,31 @@ MarkStateRuleDialog::MarkStateRuleDialog( wxWindow* parent, Mediator* owner,
   wxString relChoices[2] = { wxT("is an element of"),
     wxT("is not an element of") };
 
-  parameterChoice = new wxChoice( this, myID_PARAMETER_CHOICE,
-      wxDefaultPosition, wxDefaultSize, paramChoices );
-  parameterChoice->SetSelection( 0 );
-  relationChoice = new wxChoice( this, wxID_ANY, wxDefaultPosition,
-      wxDefaultSize, 2, relChoices );
-  relationChoice->SetSelection( 0 );
+  parameterListBox = new wxListBox( this, myID_PARAMETER_CHOICE,
+      wxDefaultPosition, wxSize(150,150), paramChoices, wxLB_SINGLE |
+      wxLB_HSCROLL | wxLB_NEEDED_SB );
+  parameterListBox->SetSelection( 0 );
+  relationListBox = new wxListBox( this, wxID_ANY, wxDefaultPosition,
+      wxSize(150,150), 2, relChoices );
+  relationListBox->SetSelection( 0 );
   valuesListBox = new wxListBox( this, wxID_ANY, wxDefaultPosition,
-      wxSize(-1, 150), 0, NULL, wxLB_MULTIPLE | wxLB_HSCROLL | wxLB_NEEDED_SB |
+      wxSize(150, 150), 0, NULL, wxLB_MULTIPLE | wxLB_HSCROLL | wxLB_NEEDED_SB |
       wxLB_SORT );
   
   int flags = wxALIGN_LEFT | wxALIGN_CENTER_VERTICAL | wxALL;
   int border = 5;
   
-  choicesSizer->Add( new wxStaticText( this, wxID_ANY, wxT("Parameter") ), 0,
+  controlSizer->Add( new wxStaticText( this, wxID_ANY, wxT("Parameter:") ), 0,
       flags, border );
-  choicesSizer->Add( parameterChoice, 0, flags, border );
-  choicesSizer->Add( relationChoice, 0, flags, border );
+  controlSizer->Add( new wxStaticText( this, wxID_ANY, wxT("Relation:") ), 0,
+      flags, border );
+  controlSizer->Add( new wxStaticText( this, wxID_ANY, wxT("Values:") ), 0,
+      flags, border );
+  controlSizer->Add( parameterListBox, 0, flags, border );
+  controlSizer->Add( relationListBox, 0, flags, border );
+  controlSizer->Add( valuesListBox, 0, flags, border );
 
-  mainSizer->Add( choicesSizer, 0, wxEXPAND | wxALL, border );
-  mainSizer->Add( valuesListBox, 1, wxEXPAND | wxALL, border );
+  mainSizer->Add( controlSizer, 0, wxEXPAND | wxALL, border );
   mainSizer->Add( new wxStaticLine( this, wxID_ANY ), 0, wxEXPAND | wxALL,
       border );
   mainSizer->Add( CreateButtonSizer( wxOK | wxCANCEL ), 0, wxEXPAND | wxALL,
@@ -103,12 +109,12 @@ void MarkStateRuleDialog::setMarkRule( MarkRule* mr, ATermList svspec )
 	paramId, 1 ), 1 );
   wxString paramName = wxString( ATwriteToString( ATgetArgument( paramId, 0 ) ),
       wxConvLocal);
-  parameterChoice->SetStringSelection( paramName );
+  parameterListBox->SetStringSelection( paramName );
   loadValues( paramName );
   
   if ( !mr->isNegated )
   {
-    relationChoice->SetSelection( 0 );
+    relationListBox->SetSelection( 0 );
     ATermAppl value;
     while ( !ATisEmpty( values ) )
     {
@@ -123,7 +129,7 @@ void MarkStateRuleDialog::setMarkRule( MarkRule* mr, ATermList svspec )
   }
   else
   {
-    relationChoice->SetSelection( 1 );
+    relationListBox->SetSelection( 1 );
     ATermAppl value;
     while ( !ATisEmpty( values ) )
     {
@@ -141,13 +147,13 @@ void MarkStateRuleDialog::setMarkRule( MarkRule* mr, ATermList svspec )
 MarkRule* MarkStateRuleDialog::getMarkRule()
 {
   MarkRule* result = new MarkRule;
-  result->paramIndex = parameterIndices[ parameterChoice->GetStringSelection() ];
-  result->isNegated = ( relationChoice->GetSelection() == 1 );
+  result->paramIndex = parameterIndices[ parameterListBox->GetStringSelection() ];
+  result->isNegated = ( relationListBox->GetSelection() == 1 );
   
   int N = valuesListBox->GetCount();
   wxArrayInt selections;
   int NS = valuesListBox->GetSelections( selections );
-  if ( relationChoice->GetSelection() == 0 )
+  if ( relationListBox->GetSelection() == 0 )
   {
     result->valueSet.assign( N, false );
     for ( int i = 0 ; i < NS ; ++i )
@@ -170,8 +176,8 @@ MarkRule* MarkStateRuleDialog::getMarkRule()
 
 wxString MarkStateRuleDialog::getMarkRuleString()
 {
-  wxString result = parameterChoice->GetStringSelection();
-  result += ( relationChoice->GetSelection() == 0 ) ? wxT(" in { ") :
+  wxString result = parameterListBox->GetStringSelection();
+  result += ( relationListBox->GetSelection() == 0 ) ? wxT(" in { ") :
     wxT(" not in { ");
   wxArrayInt selections;
   int NS = valuesListBox->GetSelections( selections );

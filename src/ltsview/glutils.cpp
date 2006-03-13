@@ -26,9 +26,9 @@ void GLUtils::coloredCylinder( float baserad, float toprad, float height,
   vector< float > nx;
   vector< float > ny;
   
-  float PI2 = 2.0f * PI;
-  float delta = PI2 / slices;
-  for ( float alf = 0.0f ; alf <= PI2 ; alf += delta )
+  float delta = 2.0f * PI / slices;
+  float alf = 0.0f;
+  for ( int i=0 ; i <= slices ; ++i )
   {
     float cos_alf = cos(alf);
     float sin_alf = sin(alf);
@@ -36,6 +36,7 @@ void GLUtils::coloredCylinder( float baserad, float toprad, float height,
     stab.push_back( sin_alf );
     nx.push_back( cos_alf * nxg );
     ny.push_back( sin_alf * nxg );
+    alf += delta;
   }
 
   float c1r = basecol.r / 255.0f;
