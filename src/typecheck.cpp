@@ -149,6 +149,7 @@ static ATermList gstcGetVarTypes(ATermList VarDecls);
 static ATermAppl gstcTypeMatchA(ATermAppl Type, ATermAppl PosType);
 static ATermList gstcTypeMatchL(ATermList TypeList, ATermList PosTypeList);
 static ATbool gstcHasUnknown(ATermAppl Type);
+static ATbool gstcIsNumericType(ATermAppl Type);
 static ATermAppl gstcExpandNumTypesUp(ATermAppl Type);
 static ATermAppl gstcExpandNumTypesDown(ATermAppl Type);
 static ATermAppl gstcMinType(ATermList TypeList);
@@ -164,6 +165,15 @@ static ATermAppl gstcMatchListOpConcat(ATermAppl Type);
 static ATermAppl gstcMatchListOpEltAt(ATermAppl Type);
 static ATermAppl gstcMatchListOpHead(ATermAppl Type);
 static ATermAppl gstcMatchListOpTail(ATermAppl Type);
+static ATermAppl gstcMatchSetOpSet2Bag(ATermAppl Type);
+static ATermAppl gstcMatchSetBagOpIn(ATermAppl Type);
+static ATermAppl gstcMatchSetBagOpSubEq(ATermAppl Type);
+static ATermAppl gstcMatchSetBagOpUnionDiffIntersect(ATermAppl Type);
+static ATermAppl gstcMatchSetOpSetCompl(ATermAppl Type);
+static ATermAppl gstcMatchBagOpBag2Set(ATermAppl Type);
+static ATermAppl gstcMatchBagOpBagCount(ATermAppl Type);
+// end prototypes
+
 
 static ATermAppl gstcFoldSortRefs(ATermAppl Spec);
 //Pre: Spec is a specification that adheres to the internal syntax after
@@ -1969,6 +1979,79 @@ static ATermAppl gstcTraverseVarConsTypeDN(int nFactPars, ATermTable Vars, ATerm
 	Type=NewType;
       }
 
+      if(ATisEqual(gsMakeOpIdNameSet2Bag(),ATAgetArgument(*DataTerm,0))){
+	gsDebugMsg("Doing Set2Bag matching Type %T, PosType %T\n",Type,PosType);    
+	ATermAppl NewType=gstcMatchSetOpSet2Bag(Type);
+	if(!NewType){
+	  gsErrorMsg("the function Set2Bag has incompatible argument types %P (while typechecking %P)\n",Type,*DataTerm);
+	  return NULL;
+	}
+	Type=NewType;
+      }
+
+      if(ATisEqual(gsMakeOpIdNameSetIn(),ATAgetArgument(*DataTerm,0))){
+	gsDebugMsg("Doing {Set,Bag}In matching Type %T, PosType %T\n",Type,PosType);    
+	ATermAppl NewType=gstcMatchSetBagOpIn(Type);
+	if(!NewType){
+	  gsErrorMsg("the function {Set,Bag}In has incompatible argument types %P (while typechecking %P)\n",Type,*DataTerm);
+	  return NULL;
+	}
+	Type=NewType;
+      }
+
+      if(ATisEqual(gsMakeOpIdNameSubSet(),ATAgetArgument(*DataTerm,0))||
+	 ATisEqual(gsMakeOpIdNameSubSetEq(),ATAgetArgument(*DataTerm,0))){
+	gsDebugMsg("Doing SubSet[Eq] or SubBag[Eq] matching Type %T, PosType %T\n",Type,PosType);    
+	ATermAppl NewType=gstcMatchSetBagOpSubEq(Type);
+	if(!NewType){
+	  gsErrorMsg("the function SubSet[Eq] or SubBag[Eq]  has incompatible argument types %P (while typechecking %P)\n",Type,*DataTerm);
+	  return NULL;
+	}
+	Type=NewType;
+      }
+
+      if(ATisEqual(gsMakeOpIdNameSetUnion(),ATAgetArgument(*DataTerm,0))||
+	 ATisEqual(gsMakeOpIdNameSetDiff(),ATAgetArgument(*DataTerm,0))||
+	 ATisEqual(gsMakeOpIdNameSetIntersect(),ATAgetArgument(*DataTerm,0))){
+	gsDebugMsg("Doing {Set,Bag}{Union,Difference,Intersect} matching Type %T, PosType %T\n",Type,PosType);    
+	ATermAppl NewType=gstcMatchSetBagOpUnionDiffIntersect(Type);
+	if(!NewType){
+	  gsErrorMsg("the function {Set,Bag}{Union,Difference,Intersect} has incompatible argument types %P (while typechecking %P)\n",Type,*DataTerm);
+	  return NULL;
+	}
+	Type=NewType;
+      }
+
+      if(ATisEqual(gsMakeOpIdNameSetCompl(),ATAgetArgument(*DataTerm,0))){
+	gsDebugMsg("Doing SetCompl matching Type %T, PosType %T\n",Type,PosType);    
+	ATermAppl NewType=gstcMatchSetOpSetCompl(Type);
+	if(!NewType){
+	  gsErrorMsg("the function SetCompl has incompatible argument types %P (while typechecking %P)\n",Type,*DataTerm);
+	  return NULL;
+	}
+	Type=NewType;
+      }
+
+      if(ATisEqual(gsMakeOpIdNameBag2Set(),ATAgetArgument(*DataTerm,0))){
+	gsDebugMsg("Doing Bag2Set matching Type %T, PosType %T\n",Type,PosType);    
+	ATermAppl NewType=gstcMatchBagOpBag2Set(Type);
+	if(!NewType){
+	  gsErrorMsg("the function Bag2Set has incompatible argument types %P (while typechecking %P)\n",Type,*DataTerm);
+	  return NULL;
+	}
+	Type=NewType;
+      }
+
+      if(ATisEqual(gsMakeOpIdNameCount(),ATAgetArgument(*DataTerm,0))){
+	gsDebugMsg("Doing BagCount matching Type %T, PosType %T\n",Type,PosType);    
+	ATermAppl NewType=gstcMatchBagOpBagCount(Type);
+	if(!NewType){
+	  gsErrorMsg("the function BagCount has incompatible argument types %P (while typechecking %P)\n",Type,*DataTerm);
+	  return NULL;
+	}
+	Type=NewType;
+      }
+
       *DataTerm=gsMakeOpId(Name,Type);
       assert(Type);
       return Type;
@@ -2365,6 +2448,13 @@ static ATbool gstcHasUnknown(ATermAppl Type){
   return ATtrue;
 }
 
+static ATbool gstcIsNumericType(ATermAppl Type){
+  //returns true if Type is Bool,Pos,Nat,Int or Real
+  //otherwise return fase
+  if(gsIsUnknown(Type)) return ATfalse;
+  return (ATbool)(ATisEqual(gsMakeSortIdBool(),Type)||ATisEqual(gsMakeSortIdPos(),Type)||ATisEqual(gsMakeSortIdNat(),Type)||ATisEqual(gsMakeSortIdInt(),Type)||ATisEqual(gsMakeSortIdReal(),Type));
+}
+
 static ATermAppl gstcExpandNumTypesUp(ATermAppl Type){
   //Expand Pos.. to possible bigger types.
   if(gsIsUnknown(Type)) return Type;
@@ -2668,3 +2758,189 @@ static ATermAppl gstcMatchListOpTail(ATermAppl Type){
 
   return gsMakeSortArrowProd(ATmakeList1((ATerm)gsMakeSortList(Res)),gsMakeSortList(Res));
 }
+
+//Sets
+static ATermAppl gstcMatchSetOpSet2Bag(ATermAppl Type){
+  //tries to sort out the types of Set2Bag (Set(S)->Bag(s))
+  //If some of the parameters are Pos,Nat, or Int do upcasting.
+
+  assert(gsIsSortArrowProd(Type));
+
+  ATermAppl Res=ATAgetArgument(Type,1);
+  if(gsIsSortId(Res)) Res=gstcUnwindType(Res);
+  assert(gsIsSortBag(Res));
+  Res=ATAgetArgument(Res,0);
+ 
+  ATermList Args=ATLgetArgument(Type,0);
+  assert((ATgetLength(Args)==1));
+
+  ATermAppl Arg=ATAgetFirst(Args);
+  if(gsIsSortId(Arg)) Arg=gstcUnwindType(Arg);
+  assert(gsIsSortSet(Arg));
+
+  Arg=gstcUnifyMinType(Arg,Res);
+  if(!Arg) return NULL;
+
+  return gsMakeSortArrowProd(ATmakeList1((ATerm)gsMakeSortSet(Arg)),gsMakeSortBag(Arg));
+}
+
+static ATermAppl gstcMatchSetBagOpIn(ATermAppl Type){
+  //tries to sort out the types of SetIn (SxSet(S)->Bool) or BagIn (SxBag(S)->Bool)
+  //If some of the parameters are Pos,Nat, or Int do upcasting.
+
+  assert(gsIsSortArrowProd(Type));
+  //assert(gsIsBool(ATAgetArgument(Type,1)));
+  ATermList Args=ATLgetArgument(Type,0);
+  assert((ATgetLength(Args)==2));
+
+  ATermAppl Arg1=ATAgetFirst(Args);
+
+  Args=ATgetNext(Args);
+  ATermAppl Arg2=ATAgetFirst(Args);
+  if(gsIsSortId(Arg2)) Arg2=gstcUnwindType(Arg2);
+  assert(gsIsSortSet(Arg2)||gsIsSortBag(Arg2));
+  ATermAppl Arg2s=ATAgetArgument(Arg2,0);
+  
+  ATermAppl Arg=gstcUnifyMinType(Arg1,Arg2s);
+  if(!Arg) return NULL;
+
+  return gsMakeSortArrowProd(ATmakeList2((ATerm)Arg,(ATerm)Arg2),gsMakeSortIdBool());
+}
+
+static ATermAppl gstcMatchSetBagOpSubEq(ATermAppl Type){
+  //tries to sort out the types of SubSet, SubSetEq (Set(S)xSet(S)->Bool)
+  //or SubBag, SubBagEq (Bag(S)xBag(S)->Bool)
+  //If some of the parameters are Pos,Nat, or Int do upcasting.
+
+  assert(gsIsSortArrowProd(Type));
+  //assert(gsIsBool(ATAgetArgument(Type,1)));
+  ATermList Args=ATLgetArgument(Type,0);
+  assert((ATgetLength(Args)==2));
+
+  ATermAppl Arg1=ATAgetFirst(Args);
+  if(gsIsSortId(Arg1)) Arg1=gstcUnwindType(Arg1);
+  if(gstcIsNumericType(Arg1)) return Type;
+  assert(gsIsSortSet(Arg1)||gsIsSortBag(Arg1));
+
+  Args=ATgetNext(Args);
+  ATermAppl Arg2=ATAgetFirst(Args);
+  if(gsIsSortId(Arg2)) Arg2=gstcUnwindType(Arg2);
+  if(gstcIsNumericType(Arg2)) return Type;
+  assert(gsIsSortSet(Arg2)||gsIsSortBag(Arg2));
+  
+  ATermAppl Arg=gstcUnifyMinType(Arg1,Arg2);
+  if(!Arg) return NULL;
+
+  return gsMakeSortArrowProd(ATmakeList2((ATerm)Arg,(ATerm)Arg),gsMakeSortIdBool());
+}
+
+static ATermAppl gstcMatchSetBagOpUnionDiffIntersect(ATermAppl Type){
+  //tries to sort out the types of Set or Bag Union, Diff or Intersect 
+  //operations (Set(S)xSet(S)->Set(S)). It can also be that this operation is 
+  //performed on numbers. In this case we do nothing.
+  //If some of the parameters are Pos,Nat, or Int do upcasting.
+
+  assert(gsIsSortArrowProd(Type));
+  ATermAppl Res=ATAgetArgument(Type,1);
+  if(gsIsSortId(Res)) Res=gstcUnwindType(Res);
+  if(gstcIsNumericType(Res)) return Type;
+  assert(gsIsSortSet(Res)||gsIsSortBag(Res));
+  ATermList Args=ATLgetArgument(Type,0);
+  assert((ATgetLength(Args)==2));
+
+  ATermAppl Arg1=ATAgetFirst(Args);
+  if(gsIsSortId(Arg1)) Arg1=gstcUnwindType(Arg1);
+  if(gstcIsNumericType(Arg1)) return Type;
+  assert(gsIsSortSet(Arg1)||gsIsSortBag(Arg1));
+
+  Args=ATgetNext(Args);
+
+  ATermAppl Arg2=ATAgetFirst(Args);
+  if(gsIsSortId(Arg2)) Arg2=gstcUnwindType(Arg2);
+  if(gstcIsNumericType(Arg2)) return Type;
+  assert(gsIsSortSet(Arg2)||gsIsSortBag(Arg2));
+  
+  Res=gstcUnifyMinType(Res,Arg1);
+  if(!Res) return NULL;
+
+  Res=gstcUnifyMinType(Res,Arg2);
+  if(!Res) return NULL;
+
+  return gsMakeSortArrowProd(ATmakeList2((ATerm)Res,(ATerm)Res),Res);
+}
+
+static ATermAppl gstcMatchSetOpSetCompl(ATermAppl Type){
+  //tries to sort out the types of SetCompl operation (Set(S)->Set(S))
+  //If some of the parameters are Pos,Nat, or Int do upcasting.
+
+  assert(gsIsSortArrowProd(Type));
+  ATermAppl Res=ATAgetArgument(Type,1);
+  if(gsIsSortId(Res)) Res=gstcUnwindType(Res);
+  if(gstcIsNumericType(Res)) return Type;
+  assert(gsIsSortSet(Res));
+  Res=ATAgetArgument(Res,0);
+  ATermList Args=ATLgetArgument(Type,0);
+  assert((ATgetLength(Args)==1));
+
+  ATermAppl Arg=ATAgetFirst(Args);
+  if(gsIsSortId(Arg)) Arg=gstcUnwindType(Arg);
+  if(gstcIsNumericType(Arg)) return Type;
+  assert(gsIsSortSet(Arg));
+  Arg=ATAgetArgument(Arg,0);
+  
+  Res=gstcUnifyMinType(Res,Arg);
+  if(!Res) return NULL;
+
+  return gsMakeSortArrowProd(ATmakeList1((ATerm)gsMakeSortSet(Res)),gsMakeSortSet(Res));
+}
+
+//Bags
+static ATermAppl gstcMatchBagOpBag2Set(ATermAppl Type){
+  //tries to sort out the types of Bag2Set (Bag(S)->Set(S))
+  //If some of the parameters are Pos,Nat, or Int do upcasting.
+
+  assert(gsIsSortArrowProd(Type));
+
+  ATermAppl Res=ATAgetArgument(Type,1);
+  if(gsIsSortId(Res)) Res=gstcUnwindType(Res);
+  assert(gsIsSortSet(Res));
+  Res=ATAgetArgument(Res,0);
+ 
+  ATermList Args=ATLgetArgument(Type,0);
+  assert((ATgetLength(Args)==1));
+
+  ATermAppl Arg=ATAgetFirst(Args);
+  if(gsIsSortId(Arg)) Arg=gstcUnwindType(Arg);
+  assert(gsIsSortBag(Arg));
+
+  Arg=gstcUnifyMinType(Arg,Res);
+  if(!Arg) return NULL;
+
+  return gsMakeSortArrowProd(ATmakeList1((ATerm)gsMakeSortBag(Arg)),gsMakeSortSet(Arg));
+}
+
+static ATermAppl gstcMatchBagOpBagCount(ATermAppl Type){
+  //tries to sort out the types of BagCount (SxBag(S)->Nat)
+  //If some of the parameters are Pos,Nat, or Int do upcasting.
+
+  assert(gsIsSortArrowProd(Type));
+  //assert(gsIsNat(ATAgetArgument(Type,1)));
+  ATermList Args=ATLgetArgument(Type,0);
+  assert((ATgetLength(Args)==2));
+
+  ATermAppl Arg1=ATAgetFirst(Args);
+
+  Args=ATgetNext(Args);
+  ATermAppl Arg2=ATAgetFirst(Args);
+  if(gsIsSortId(Arg2)) Arg2=gstcUnwindType(Arg2);
+  assert(gsIsSortBag(Arg2));
+  Arg2=ATAgetArgument(Arg2,0);
+  
+  ATermAppl Arg=gstcUnifyMinType(Arg1,Arg2);
+  if(!Arg) return NULL;
+
+  return gsMakeSortArrowProd(ATmakeList2((ATerm)Arg,(ATerm)gsMakeSortBag(Arg)),gsMakeSortIdNat());
+}
+
+
+
