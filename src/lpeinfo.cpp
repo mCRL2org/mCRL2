@@ -171,7 +171,7 @@ int main(int ac, char** av)
       std::cerr << error;
     }
 #else
-    std::cerr << error
+    std::cerr << error;
 #endif
 
     return (1);
