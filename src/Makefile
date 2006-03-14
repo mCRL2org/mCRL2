@@ -44,6 +44,12 @@ LIBNEXT_OBJECTS    = libnextstate.o nextstate_standard.o
 OBJECTS           += $(LIBNEXT_OBJECTS)
 LIBNEXT_LDFLAGS    = -l$(ATERM) -lm
 
+#lts library definitions
+LIBLTS_NAME        = liblts.a
+LIBLTS_OBJECTS     = liblts.o
+OBJECTS           += $(LIBLTS_OBJECTS)
+LIBLTS_LDFLAGS     = -l$(ATERM) -lm
+
 #mcrl22lpe definitions
 MCRL22LPE_NAME     = mcrl22lpe
 MCRL22LPE_OBJECTS  = mcrl22lpe.o lin_std.o lin_alt.o mcrl2parser.o mcrl2lexer.o typecheck.o dataimpl.o libprint_c.o libstruct.o liblowlevel.o libalpha.o
@@ -161,6 +167,12 @@ LTSPP_OBJECTS      = ltspp.o libprint_c.o libstruct.o liblowlevel.o
 OBJECTS           += $(LTSPP_OBJECTS)
 LTSPP_LDFLAGS      = -lrewrite -lsvc -l$(ATERM) -lm $(LIBDL)
 
+#ltscp definitions
+LTSCP_NAME         = ltscp
+LTSCP_OBJECTS      = ltscp.o libprint.o libprint_c.o libstruct.o liblowlevel.o
+OBJECTS           += $(LTSCP_OBJECTS)
+LTSCP_LDFLAGS      = -llts -lrewrite -lsvc -l$(ATERM) -lm $(LIBDL)
+
 #alpha definitions
 ALPHA_NAME         = alpha
 ALPHA_OBJECTS      = alpha.o libalpha.o mcrl2parser.o mcrl2lexer.o typecheck.o libprint_c.o libstruct.o liblowlevel.o
@@ -175,7 +187,7 @@ LIN_LDFLAGS        = -lrewrite -l$(ATERM) -lm $(LIBDL)
 
 #Group definitions
 EXPERIMENTALS      = $(LIN_NAME) $(ALPHA_NAME)
-EXE_NAMES          = $(MCRL22LPE_NAME) $(LPEINFO_NAME) $(LPEDATAELM_NAME) $(LPEPARELM_NAME) $(LPECONSTELM_NAME) $(LPEPP_NAME) $(TRACEPP_NAME) $(LPE2LTS_NAME) $(LPE2TORX_NAME) $(SIM_NAME) $(XSIM_NAME) $(TBF2LPE_NAME) $(PNML2MCRL2_NAME) $(LPEREWR_NAME) $(LTSMIN_NAME) $(LTSPP_NAME) $(SVC2FSM_NAME)
+EXE_NAMES          = $(MCRL22LPE_NAME) $(LPEINFO_NAME) $(LPEDATAELM_NAME) $(LPEPARELM_NAME) $(LPECONSTELM_NAME) $(LPEPP_NAME) $(TRACEPP_NAME) $(LPE2LTS_NAME) $(LPE2TORX_NAME) $(SIM_NAME) $(XSIM_NAME) $(TBF2LPE_NAME) $(PNML2MCRL2_NAME) $(LPEREWR_NAME) $(LTSMIN_NAME) $(LTSCP_NAME) $(LTSPP_NAME) $(SVC2FSM_NAME)
 LIB_NAMES          = $(XSIMTRACE_NAME)
 OBJECTS           := $(sort $(OBJECTS))
 
@@ -287,6 +299,9 @@ $(ATERM_NAME): $(ATERM_OBJECTS)
 $(LIBSVC_NAME): $(LIBSVC_OBJECTS)
 	$(AR) $(ARFLAGS) $@ $(LIBSVC_OBJECTS)
 
+$(LIBLTS_NAME): $(LIBLTS_OBJECTS)
+	$(AR) $(ARFLAGS) $@ $(LIBLTS_OBJECTS)
+
 $(LIBREWR_NAME) : $(LIBREWR_OBJECTS)
 	$(AR) $(ARFLAGS) $@ $(LIBREWR_OBJECTS)
 #	$(CC) -shared -o $@ $(LIBREWR_OBJECTS)
@@ -386,10 +401,13 @@ $(PNML2MCRL2_NAME) :
 	@echo cannot make target $@ because the xml2 library cannot be used
 endif
 
-$(LTSMIN_NAME) : $(LTSMIN_OBJECTS) $(ATERM_DEP) $(LIBSVC_DEP) $(LIBREWR_NAME)
+$(LTSMIN_NAME) : $(LTSMIN_OBJECTS) $(ATERM_DEP) $(LIBSVC_NAME) $(LIBREWR_NAME)
 	$(CXX) -o $@ $(LTSMIN_OBJECTS) $(LDFLAGS) $(LTSMIN_LDFLAGS)
 
-$(LTSPP_NAME) : $(LTSPP_OBJECTS) $(ATERM_DEP) $(LIBSVC_DEP) $(LIBREWR_NAME)
+$(LTSCP_NAME) : $(LTSCP_OBJECTS) $(ATERM_DEP) $(LIBSVC_NAME) $(LIBLTS_NAME) $(LIBREWR_NAME)
+	$(CXX) -o $@ $(LTSCP_OBJECTS) $(LDFLAGS) $(LTSCP_LDFLAGS)
+
+$(LTSPP_NAME) : $(LTSPP_OBJECTS) $(ATERM_DEP) $(LIBSVC_NAME) $(LIBREWR_NAME)
 	$(CXX) -o $@ $(LTSPP_OBJECTS) $(LDFLAGS) $(LTSPP_LDFLAGS)
 
 $(ALPHA_NAME) : $(ALPHA_OBJECTS) $(ATERM_DEP) $(LIBREWR_NAME)
