@@ -19,6 +19,7 @@ namespace sip {
     private:
       /** Type for keeping protocol phase status */
       typedef enum {
+        status_inactive,     ///< \brief Inactive
         status_initialising, ///< \brief No connection with controller yet
         status_clean,        ///< \brief Connection with controller: Phase 0
         status_configured,   ///< \brief Tool has accepted a configuration: Phase 1
@@ -85,6 +86,9 @@ namespace sip {
 
       /** \brief Get the last communicated set of controller capabilities */
       inline const controller_capabilities_ptr get_controller_capabilities() const;
+
+      /** \brief Returns whether the current status is equal to status_inactive */
+      inline bool is_active() const;
   };
 
   /**
@@ -114,6 +118,10 @@ namespace sip {
     }
 
     return (current_controller_capabilities);
+  }
+
+  inline bool tool_communicator::is_active() const {
+    return (current_status != status_inactive);
   }
 }
 

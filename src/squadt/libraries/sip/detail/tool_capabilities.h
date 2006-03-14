@@ -66,7 +66,7 @@ namespace sip {
       inline tool_capabilities(const version = default_protocol_version);
 
       /** \brief Add an input configuration */
-      inline void add_input_combination(tool_category, storage_format);
+      inline void add_input_combination(object::identifier, tool_category, storage_format);
 
       /** \brief Get the protocol version */
       inline version get_version() const;
@@ -90,7 +90,7 @@ namespace sip {
   inline tool_capabilities::tool_capabilities(const version v) : protocol_version(v), interactive(false) {
   }
 
-  inline void tool_capabilities::add_input_combination(tool_category c, storage_format f) {
+  inline void tool_capabilities::add_input_combination(object::identifier identifier, tool_category c, storage_format f) {
     input_combination ic(c, f);
 
     input_combinations.insert(ic);

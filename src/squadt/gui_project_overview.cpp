@@ -96,18 +96,13 @@ namespace squadt {
       wxFrame(parent, id, wxT("Squadt - No project"), wxDefaultPosition, wxDefaultSize), project_manager() {
 
       /* Resize and centre frame on display */
-      Centre();
       SetSize(0,0,800,600);
 
       /* Create menubar & toolbar */
       GenerateMenuBar();
 
-    #if defined(ENABLE_TOOLBAR)
-      GenerateToolBar();
-    #endif
-
       /* Upper level window splitter */
-      wxBoxSizer*       mainSizer    = new wxBoxSizer(wxVERTICAL);
+      wxBoxSizer* mainSizer    = new wxBoxSizer(wxVERTICAL);
 
       top_splitter = new wxSplitterWindow(this);
 
@@ -173,8 +168,12 @@ namespace squadt {
       GetSizer()->Detach(top_splitter);
       GetSizer()->Add(new wxPanel(this, wxID_ANY), 1, wxALL|wxEXPAND, 2);
       GetSizer()->RecalcSizes();
+
       top_splitter->Show(false);
+
       Update();
+
+      CentreOnScreen();
     }
 
     ProjectOverview::~ProjectOverview() {

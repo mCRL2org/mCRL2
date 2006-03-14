@@ -71,6 +71,9 @@ namespace sip {
       /** \brief Add an option to the configuration */
       inline void add_option(const option::identifier);
 
+      /** \brief Establishes whether an option exists (by identifier) */
+      inline bool option_exists(const object::identifier);
+
       /** \brief Remove an option from the configuration */
       inline void remove_option(const option::identifier);
 
@@ -78,31 +81,34 @@ namespace sip {
       inline option_ptr get_option(const option::identifier) const;
 
       /** \brief Add an input/output object to the configuration */
-      inline void add_object(object::identifier, object::storage_format, object::type, object::uri = "");
+      inline void add_object(const object::identifier, object::storage_format, object::type, object::uri = "");
+
+      /** \brief Establishes whether an object exists (by identifier) */
+      inline bool object_exists(const object::identifier);
 
       /** \brief Remove an input/output object from the configuration */
-      inline void remove_object(object::identifier);
+      inline void remove_object(const object::identifier);
 
       /** \brief Get an input/output object from the configuration */
-      inline object_ptr get_object(object::identifier);
+      inline object_ptr get_object(const object::identifier);
 
       /** \brief Add an input object to the configuration */
-      inline void add_input(object::identifier, object::storage_format, object::uri = "");
+      inline void add_input(const object::identifier, object::storage_format, object::uri = "");
 
       /** \brief Remove an input object from the configuration */
-      inline void remove_input(object::identifier);
+      inline void remove_input(const object::identifier);
 
       /** \brief Get an input object by its id */
-      inline object_ptr get_input(object::identifier);
+      inline object_ptr get_input(const object::identifier);
 
       /** \brief Add an output object to the configuration */
-      inline void add_output(object::identifier, object::storage_format, object::uri = "");
+      inline void add_output(const object::identifier, object::storage_format, object::uri = "");
 
       /** \brief Remove an output object from the configuration */
-      inline void remove_output(object::identifier);
+      inline void remove_output(const object::identifier);
 
       /** \brief Get an output object by its id */
-      inline object_ptr get_output(object::identifier);
+      inline object_ptr get_output(const object::identifier);
 
       /** \brief Output XML representation to string */
       inline std::string to_xml() const;
@@ -134,6 +140,19 @@ namespace sip {
                                     bind(&option_list::value_type::first, _1))),id)) == options.end());
 
     options[option_ptr(new option(id))] = constrain_optional;
+  }
+
+  /**
+   * @param id an identifier for the option
+   **/
+  inline bool configuration::option_exists(const option::identifier id) {
+    using namespace std;
+    using namespace boost;
+
+    return (find_if(options.begin(), options.end(), bind(equal_to < option::identifier >(),
+                    bind(&option::get_id,
+                            bind(&option_ptr::get,
+                                    bind(&option_list::value_type::first, _1))),id)) != options.end());
   }
 
   /**
@@ -229,7 +248,7 @@ namespace sip {
    * @param l the location for the object (optional)
    * @param t the object type
    **/
-  inline void configuration::add_object(object::identifier id, object::storage_format f, object::type t, object::uri l) {
+  inline void configuration::add_object(const object::identifier id, object::storage_format f, object::type t, object::uri l) {
     using namespace std;
     using namespace boost;
 
@@ -245,7 +264,7 @@ namespace sip {
    * @param f the storage format the object uses
    * @param l the location for the object (optional)
    **/
-  inline void configuration::add_input(object::identifier id, object::storage_format f, object::uri l) {
+  inline void configuration::add_input(const object::identifier id, object::storage_format f, object::uri l) {
     add_object(id, f, object::input, l);
   }
 
@@ -254,7 +273,7 @@ namespace sip {
    * @param f the storage format the object uses
    * @param l the location for the object (optional)
    **/
-  inline void configuration::add_output(object::identifier id, object::storage_format f, object::uri l) {
+  inline void configuration::add_output(const object::identifier id, object::storage_format f, object::uri l) {
     add_object(id, f, object::output, l);
   }
 
@@ -278,7 +297,7 @@ namespace sip {
   /**
    * @param id a unique identifier for the object
    **/
-  inline void configuration::remove_input(object::identifier id) {
+  inline void configuration::remove_input(const object::identifier id) {
     assert(get_object(id)->get_type() == object::input);
 
     remove_object(id);
@@ -287,7 +306,19 @@ namespace sip {
   /**
    * @param id a unique identifier for the object
    **/
-  inline void configuration::remove_output(object::identifier id) {
+  inline bool configuration::object_exists(const object::identifier id) {
+    using namespace std;
+    using namespace boost;
+
+    return (find_if(objects.begin(), objects.end(), bind(equal_to < object::identifier >(),
+                    bind(&object::get_id,
+                            bind(&object_ptr::get,_1)),id)) != objects.end());
+  }
+
+  /**
+   * @param id a unique identifier for the object
+   **/
+  inline void configuration::remove_output(const object::identifier id) {
     assert(get_object(id)->get_type() == object::output);
 
     remove_object(id);
@@ -313,7 +344,7 @@ namespace sip {
   /**
    * @param id a unique identifier for the object
    **/
-  inline object::object_ptr configuration::get_input(object::identifier id) {
+  inline object::object_ptr configuration::get_input(const object::identifier id) {
     assert(get_object(id)->get_type() == object::input);
 
     return (get_object(id));
@@ -322,7 +353,7 @@ namespace sip {
   /**
    * @param id a unique identifier for the object
    **/
-  inline object::object_ptr configuration::get_output(object::identifier id) {
+  inline object::object_ptr configuration::get_output(const object::identifier id) {
     assert(get_object(id)->get_type() == object::output);
 
     return (get_object(id));

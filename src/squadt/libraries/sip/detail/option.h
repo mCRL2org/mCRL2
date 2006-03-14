@@ -18,8 +18,8 @@ namespace sip {
     friend class configuration;
 
     public:
-      /** Datatype for the textual identifier of an option */
-      typedef std::string                   identifier;
+      /** Datatype for the identifier of an option */
+      typedef unsigned int                  identifier;
 
       /** \brief Convenience type to hide the shared pointer wrapping */
       typedef boost::shared_ptr < option >  option_ptr;
@@ -124,7 +124,7 @@ namespace sip {
   }
 
   inline option::option_ptr option::from_xml(xml2pp::text_reader& reader) {
-    std::string id;
+    option::identifier id;
 
     assert(reader.is_element("option"));
 

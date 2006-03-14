@@ -11,7 +11,7 @@ namespace sip {
   /**
    * \attention please use connect() to manually establish a connection with a controller
    **/
-  tool_communicator::tool_communicator() : current_status(status_initialising),
+  tool_communicator::tool_communicator() : current_status(status_inactive),
                                            current_tool_capabilities() {
 
     /* Register event handlers for some message types */
@@ -37,6 +37,8 @@ namespace sip {
     cli::scheme_ptr scheme = e.get_scheme();
 
     if (scheme.get() != 0) {
+      current_status = status_initialising;
+
       scheme->connect(this);
 
       instance_identifier = e.get_identifier();

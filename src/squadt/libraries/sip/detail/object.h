@@ -84,6 +84,9 @@ namespace sip {
       /** \brief Returns the objects type */
       inline const type get_type() const;
 
+      /** \brief Returns the objects uri */
+      inline const uri get_location() const;
+
       /** \brief Write to XML stream */
       inline void to_xml(std::ostream&) const;
   };
@@ -97,6 +100,10 @@ namespace sip {
 
   inline const object::type object::get_type() const {
     return (_type);
+  }
+
+  inline const object::uri object::get_location() const {
+    return (location);
   }
 
   inline void object::to_xml(std::ostream& output) const {
