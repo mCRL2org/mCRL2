@@ -93,12 +93,14 @@ void Cluster::computeSizeAndDescendantPositions()
     // determine whether a unique smallest descendant exists
     Cluster* smallest = descendants[0];
     Cluster* nextSmallest = descendants[1];
-    bool uniqueSmallest = ( nextSmallest->getSize() - smallest->getSize() > 0.1 );
+    bool uniqueSmallest = ( 100.0f * ( nextSmallest->getSize() -
+	  smallest->getSize() ) / smallest->getSize()) > 1.0f;
     
     // determine whether a unique largest descendant exists
     Cluster* largest = descendants[ descendants.size()-1 ];
     Cluster* nextLargest = descendants[ descendants.size()-2 ];
-    bool uniqueLargest = ( largest->getSize() - nextLargest->getSize() > 0.1 );
+    bool uniqueLargest = ( 100.0f * ( nextLargest->getSize() -
+	  largest->getSize() ) / largest->getSize() ) < -1.0f;
 
     // invariant: descendants in range [noPosBegin, noPosEnd) have not been
     // assigned a position yet
