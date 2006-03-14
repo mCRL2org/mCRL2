@@ -152,8 +152,8 @@ lts_type p_lts::detect_type(std::string &filename)
 lts_type p_lts::detect_type(std::istream &is)
 {
   std::streampos pos = is.tellg();
-  char buf[5];
-  std::streamsize r = is.readsome(buf,5);
+  char buf[5]; is.read(buf,5);
+  std::streamsize r = is.gcount();
   is.seekg(pos);
 
   if ( (r == 5) && !strncmp(buf,"des (",5) )
@@ -285,6 +285,7 @@ bool p_lts::read_from_aut(std::istream &is)
   {
     p_add_state();
   }
+  assert(nstate == nstates);
 
   ATermIndexedSet labs = ATindexedSetCreate(100,50);
   while ( !is.eof() )
@@ -293,7 +294,12 @@ bool p_lts::read_from_aut(std::istream &is)
     char s[1024];
 
     is.getline(buf,1024);
+    if ( is.gcount() == 0 )
+    {
+	    break;
+    }
     sscanf(buf,"(%u,\"%[^\"]\",%u)",&from,s,&to);
+
     int label;
     ATerm t = (ATerm) ATmakeAppl(ATmakeAFun(s,0,ATtrue));
     if ( (label =  ATindexedSetGetIndex(labs,t)) < 0 )
@@ -302,8 +308,10 @@ bool p_lts::read_from_aut(std::istream &is)
       label = ATindexedSetPut(labs,t,&b);
       p_add_label(t);
     }
+
     p_add_transition(from,(unsigned int) label,to);
   }
+  assert(ntrans == ntransitions);
 
   this->type = lts_aut;
 
@@ -318,6 +326,7 @@ bool lts::read_from(std::string &filename, lts_type type)
     type = detect_type(filename);
     if ( type == lts_none )
     {
+      gsVerboseMsg("could not determine type of input file '%s'\n",filename.c_str());
       return false;
     }
   }
@@ -348,6 +357,7 @@ bool lts::read_from(std::istream &is, lts_type type)
     type = detect_type(is);
     if ( type == lts_none )
     {
+      gsVerboseMsg("could not determine type of input stream\n");
       return false;
     }
   }

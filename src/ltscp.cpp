@@ -175,18 +175,19 @@ int main(int argc, char **argv)
     gsSetVerboseMsg();
   }
 
-  bool use_stdin = (argc-optind < 1);
-  bool use_stdout = (argc-optind < 2);
+
+  bool use_stdin = (optind >= argc);
+  bool use_stdout = (optind+1 >= argc);
 
   string infile;
   string outfile;
   if ( !use_stdin )
   {
-    infile = argv[argc-optind];
+    infile = argv[optind];
   }
-  if ( !use_stdin )
+  if ( !use_stdout )
   {
-    outfile = argv[argc-optind+1];
+    outfile = argv[optind+1];
     if ( outtype == lts_none )
     {
       gsVerboseMsg("trying to detect output format by extension...\n");
@@ -197,6 +198,9 @@ int main(int argc, char **argv)
       gsVerboseMsg("no output format set or detected; using default (mcrl2)\n");
       outtype = lts_mcrl2;
     }
+  } else {
+      gsVerboseMsg("no output format set; using default (aut)\n");
+      outtype = lts_aut;
   }
 
   lts l;
@@ -233,7 +237,7 @@ int main(int argc, char **argv)
 
   if ( use_stdout)
   {
-    gsVerboseMsg("writing LTS to stdin...\n");
+    gsVerboseMsg("writing LTS to stdout...\n");
     if ( !l.write_to(cout,outtype) )
     {
       gsErrorMsg("cannot write LTS to stdout\n");
