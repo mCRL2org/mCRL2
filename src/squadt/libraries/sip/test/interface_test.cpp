@@ -76,7 +76,7 @@ void tool_capabilities_exchange() {
 
   tool_capabilities&      tcp = tc.get_tool_capabilities();
 
-  tcp.add_input_combination("text/aut", "Testing");
+  tcp.add_input_combination(0, "text/aut", "Testing");
 
   tc.connect(cc);
 
@@ -119,14 +119,20 @@ void report_exchange() {
   /* New tool configuration */
   configuration::configuration_ptr config(new configuration);
 
-  /* An option for specifying an input file */
-  config->add_option(std::string("-r"));
-  config->add_option(std::string("-s"));
-  config->add_option(std::string("Input file 0"));
-  config->add_input("text/mcrl2", "examples/abp.mcrl2");
-  config->add_output("text/plain", "/etc/passwd");
+  const unsigned int r_option    = 0;
+  const unsigned int s_option    = 1;
+  const unsigned int f_option    = 2;
+  const unsigned int input_file  = 3;
+  const unsigned int output_file = 4;
 
-  option::option_ptr t = config->get_option("Input file 0");
+  /* An option for specifying an input file */
+  config->add_option(r_option);
+  config->add_option(s_option);
+  config->add_option(f_option);
+  config->add_input(input_file, "text/mcrl2", "examples/abp.mcrl2");
+  config->add_output(output_file, "text/plain", "/etc/passwd");
+
+  option::option_ptr t = config->get_option(f_option);
 
   /* The option has a URI as argument */
 //  t.append_argument(sip::datatype::uri, std::string("/bin/bash"));

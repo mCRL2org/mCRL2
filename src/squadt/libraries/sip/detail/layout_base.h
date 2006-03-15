@@ -32,11 +32,17 @@ namespace sip {
         /** \brief Abstract destructor */
         virtual ~layout_element() = 0;
 
-        /** \brief This writes the state of the element to */
+        /** \brief Writes the state of the element to stream */
         virtual void state_write() = 0;
 
         /** \brief Read state of the element with a reader */
         virtual void state_read();
+
+        /** \brief Recursively serialises the state of the object to a stream */
+        virtual void element_write() = 0; 
+
+        /** \brief Recursively builds the state of the object */
+        virtual void element_read(); 
     };
 
     /** \brief Abstract base class for layout managers */
