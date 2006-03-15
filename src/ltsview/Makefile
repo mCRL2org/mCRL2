@@ -20,9 +20,7 @@ TARGETS		 = ltsview
 
 all : $(TARGETS)
 
-ifndef SOURCE_DISTRIBUTION
-include ../../utility/revision.mk
-endif
+-include ../../utility/revision.mk
 
 CPPFLAGS += $(REVISION)
 

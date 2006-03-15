@@ -14,6 +14,8 @@
 #include "libprint_c.h"
 #include "librewrite_c.h"
 
+#include "mcrl2_revision.h"
+
 //Functions used by the main program
 static void print_help(char *Name);
 static void print_version(void);

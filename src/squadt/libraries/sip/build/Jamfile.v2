@@ -2,7 +2,7 @@ project sip
     : source-location
        ../source
     : build-dir
-       $(BUILD_TOP)
+       .
     : requirements
        <threading>multi
        <include>../../../../boost/

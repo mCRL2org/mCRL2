@@ -6,7 +6,7 @@
 
 #include <boost/filesystem/operations.hpp>
 
-#define PROGRAM_NAME    "svn_revision"
+#define PROGRAM_NAME    "maximum SVN revision"
 #define PROGRAM_VERSION "1.0.2"
 
 /* Works under the assumption of valid XML as input */
@@ -16,6 +16,7 @@ void usage() {
   std::cout << std::endl;
   std::cout << "Where options is a combination of:" << std::endl;
   std::cout << std::endl;
+  std::cout << "      --cpp-define   output CPP definition\n";
   std::cout << "  -h, --help         show this information\n";
   std::cout << "      --version      show program version\n";
   std::cout << std::endl;
@@ -31,10 +32,18 @@ namespace bf = boost::filesystem;
 
 bf::path target_directory = bf::current_path();
 
+/* Whether the output is a CPP define or not */
+bool        output_cpp_definition = false;
+
+/* The output is a CPP define or not */
+std::string cpp_variable_name     = "REVISION";
+
 void process_command_line_options (const int argc, char** argv) {
   static struct option long_options[] = {
-    {"version"    , 0, NULL, 0},
-    {"help"       , 0, NULL, 0},
+    { "cpp-define" , optional_argument, 0, 0   },
+    { "version"    , no_argument,       0, 0   },
+    { "help"       , no_argument,       0, 'h' },
+    { 0            , 0,                 0, 0   }
   };
 
   int i = 0;
@@ -45,27 +54,32 @@ void process_command_line_options (const int argc, char** argv) {
       case 0:
           switch (i) {
             case 0:
+              output_cpp_definition = true;
+
+              if (optarg != 0) {
+                cpp_variable_name.assign(optarg);
+              }
+
+              break;
+            case 1:
               unsigned int svn_revision;
 
               sscanf("$Revision$", "$%*s %u $", &svn_revision);
 
-              printf("%s %s revision %u copyright (c) 2005\n", PROGRAM_NAME, PROGRAM_VERSION, svn_revision);
+              printf("`%s' %s revision %u copyright (c) 2005\n", PROGRAM_NAME, PROGRAM_VERSION, svn_revision);
               exit(0);
               break;
-            case 1:
-              usage();
           }
         break;
       case 'h':
-      default:
         usage();
     }
 
     c = getopt_long(argc, argv, "h", long_options, &i);
   }
 
-  if (optind < argc) {
-    target_directory = bf::path(argv[optind]);
+  while (optind < argc) {
+    target_directory = bf::path(argv[argc - 1]);
   }
 }
 
@@ -133,7 +147,7 @@ unsigned int explore_path(bf::path apath) {
     }
   }
   catch (...) {
-    std::cerr << "Error: Something went wrong.\n";
+    std::cerr << "Error: Cannot not read directory `" << apath.string() << "'\n";
   }
 
   return (return_value);
@@ -145,7 +159,20 @@ unsigned int explore_path(bf::path apath) {
 int main(int argc, char **argv) {
   process_command_line_options(argc, argv);
 
-  std::cout << explore_path(target_directory);
+  if (!bf::exists(target_directory)) {
+    std::cerr << "Error: Cannot not read directory `" << target_directory.string() << "'\n";
+
+    return (1);
+  }
+
+  unsigned int revision = explore_path(target_directory);
+
+  if (output_cpp_definition) {
+    std::cout << "#define " << cpp_variable_name << " " << revision << std::endl;
+  }
+  else {
+    std::cout << revision;
+  }
 
   return(0);
 }

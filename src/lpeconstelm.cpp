@@ -33,6 +33,8 @@
 #include "libstruct.h"
 #include "liblowlevel.h"
 
+#include "mcrl2_revision.h"
+
 using namespace std;
 using namespace lpe;
 using namespace atermpp;

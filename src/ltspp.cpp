@@ -29,6 +29,8 @@
 #include "libprint_c.h"
 #include "ltspp.h"
 
+#include "mcrl2_revision.h"
+
 bool print_state = true;
 
 int main(int argc, char *argv[])

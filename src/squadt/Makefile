@@ -53,9 +53,7 @@ $(TREE_ROOT)config.jam:
 	$(error Please configure the source tree before trying to build!)
 
 # Rules for building the maximum_revision tool and to generate a `revision' file
-ifndef SOURCE_DISTRIBUTION
-include ../../utility/revision.mk
-endif
+-include ../../utility/revision.mk
 
 CPPFLAGS += $(REVISION)
 

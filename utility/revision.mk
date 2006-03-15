@@ -5,27 +5,21 @@ ifndef TREE_ROOT
  TREE_ROOT                = ./
  MAXIMUM_REVISION         = utility/maximum_revision
  BJAM                     = src/boost/tools/jam/bin/bjam
- RELATIVE_PATH_CORRECTION = ../
 endif
 
-# Add revision number (if not building a source distribution)
-ifndef SOURCE_DISTRIBUTION
-ifeq ($(findstring $(MAKECMDGOALS),clean distclean),)
-$(TREE_ROOT)revision: $(MAXIMUM_REVISION)
-	@cd $(TREE_ROOT); echo "REVISION := -DREVISION=$$(utility/maximum_revision)" > revision
+REVISION_HEADER = $(TREE_ROOT)src/mcrl2_revision.h
 
-*.o: $(TREE_ROOT)revision
+# Add revision number
+ifeq ($(findstring $(MAKECMDGOALS),clean distclean),)
+
+*.o *.d *.dpp: $(REVISION_HEADER)
 
 # Bootstrap bjam
 $(BJAM):
 	$(MAKE) -C $(TREE_ROOT)src/boost bjam
 
 # Build maximum_revision
-$(MAXIMUM_REVISION): $(BJAM)
-	@cd $(dir $(MAXIMUM_REVISION)); $(RELATIVE_PATH_CORRECTION)$(BJAM) release
+$(REVISION_HEADER): $(BJAM)
+	@cd $(TREE_ROOT); $(BJAM)
 
-# This makes make reload, such that REVISION is initialised properly
--include $(TREE_ROOT)revision
-
-endif
 endif

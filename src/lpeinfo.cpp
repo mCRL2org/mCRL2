@@ -12,6 +12,8 @@
 //
 // ======================================================================
 
+#include "mcrl2_revision.h"
+
 //C++
 #include <exception>
 #include <cstdio>

@@ -2,7 +2,7 @@
 
 project squadt-enabled-tools
   : source-location ./
-  : build-dir ./bin
+  : build-dir .
   : default-build debug
   : requirements
     <include>src/squadt/libraries
@@ -18,7 +18,7 @@ exe lpeinfo
          lpeinfo.cpp
          /libraries/sip//sipt
          /boost/program_options//boost_program_options
-       : <define>REVISION=$(REVISION_NUMBER)
+       : <dependency>/root//revision.h
          <define>ENABLE_SQUADT_CONNECTIVITY
          <include>.
          <include>aterm # for ATerm/atermpp headers (in the future it would be nice to only include .)

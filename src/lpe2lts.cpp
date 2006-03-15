@@ -20,6 +20,8 @@
 #include "libtrace.h"
 #include "libdataelm.h"
 
+#include "mcrl2_revision.h"
+
 using namespace std;
 
 #define OF_UNKNOWN  0

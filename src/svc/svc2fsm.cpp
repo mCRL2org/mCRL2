@@ -11,6 +11,8 @@
 #include "libprint_c.h"
 #include "libprint.h"
 
+#include "mcrl2_revision.h"
+
 #define NAME "svc2fsm"
 #define VERSION "0.1m2"
 

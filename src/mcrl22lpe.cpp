@@ -23,6 +23,8 @@
 #include "libalpha.h"
 #include "dataimpl.h"
 
+#include "mcrl2_revision.h"
+
 //Type definitions
 
 typedef enum { phNone, phParse, phTypeCheck, phAlphaRed, phDataImpl } t_phase;

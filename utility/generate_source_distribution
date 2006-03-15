@@ -129,19 +129,6 @@ if (! test -e "${archive_name}.bz2"); then
 
   unlink ./mcrl2/project-root.jam
 
-  echo -e  "# This definition is needed to deactivate computation of maximum revision"\
-           "\n# numbers just before builds. This computation would fail since the a source"\
-           "\n# distribution does not contain the svn meta data. The file is included from"\
-           "\n# the make file ./config ."\
-           "\n"\
-           "\nSOURCE_DISTRIBUTION = 1"\
-           "\n"\
-           "\nREVISION := -DREVISION=${revision}" > mcrl2/distribution
-
-  tar rf ${archive_name} ./mcrl2/distribution
-
-  unlink mcrl2/distribution
-
   rmdir mcrl2
 
   bzip2 -f ${archive_name}

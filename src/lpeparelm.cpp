@@ -23,6 +23,8 @@
 #include "atermpp/aterm.h"
 #include "lpe/lpe_error.h"
 
+#include "mcrl2_revision.h"
+
 using namespace std;
 using namespace lpe;
 using namespace atermpp;

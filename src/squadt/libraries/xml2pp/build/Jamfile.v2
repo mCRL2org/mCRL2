@@ -2,7 +2,7 @@ project text_reader
     : source-location
        ../source
     : build-dir
-       $(BUILD_TOP)
+       .
     : requirements
        <include>../../../../boost
        <include>../../

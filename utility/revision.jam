@@ -1,0 +1,22 @@
+
+exe maximum_revision
+       : utility/maximum_revision.cpp
+       : <library>/boost/filesystem//boost_filesystem
+         <optimization>speed
+         <threading>single
+         <link>static
+         <variant>release
+         <toolset>darwin:<link>shared 
+       ;
+
+make revision.h
+       : maximum_revision
+       : run_maximum_revision
+       ;
+
+actions quietly run_maximum_revision {
+  echo "#ifndef SVN_REVISION_H" > $(REVISION)
+  echo "#define SVN_REVISION_H" >> $(REVISION)
+  $(>) --cpp-define >> $(REVISION)
+  echo "#endif" >> $(REVISION)
+}
