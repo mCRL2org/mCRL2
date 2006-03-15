@@ -8,6 +8,8 @@
 
 #include <md5pp/md5pp.h>
 
+#include "executor.h"
+
 /*
  * A specification is a container that specifies the dependencies on other
  * specifications and what tool is used to generate a set of new `output objects'.
@@ -74,9 +76,10 @@ namespace squadt {
    * configuration from some input objects. The result is one or more output
    * objects that represent this specification on storage.
    */
-  class Specification {
+  class Specification : public process_change_listener {
     friend class ProjectManager;
     friend class ToolManager;
+    friend class executor;
  
     private:
  
@@ -120,10 +123,16 @@ namespace squadt {
       bool Commit();
  
       void SetStatus(SpecificationStatus);
+
+      /** Handler that is called when an associated process changes state */
+      inline void report_change(process::status);
  
     public:
  
       Specification(bool, SpecificationVisualiser* avisualiser = &dummy_visualiser);
+
+      /** \brief destructor */
+      inline ~Specification();
  
       /** Generate the specification (instantiation on storage) */
       bool Generate() throw (void*);
@@ -190,6 +199,9 @@ namespace squadt {
       /** Pretty prints the fields of the specification */
       void Print(std::ostream& stream = std::cerr) const;
   };
+
+  inline Specification::~Specification() {
+  }
 
   inline void Specification::SetVisualiser(SpecificationVisualiser* avisualiser) {
     visualiser = avisualiser;
@@ -302,6 +314,23 @@ namespace squadt {
 
   inline const SpecificationStatus Specification::GetStatus() const {
     return(status);
+  }
+
+  inline void Specification::report_change(process::status s) {
+    switch (s) {
+      case process::stopped:
+        status = not_up_to_date;
+        break;
+      case process::running:
+        status = being_computed;
+        break;
+      case process::completed:
+        status = up_to_date;
+        break;
+      case process::aborted:
+        status = non_existent;
+        break;
+    }
   }
 }
 

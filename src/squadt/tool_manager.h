@@ -7,12 +7,13 @@
 #include <list>
 
 #include "tool.h"
+#include "executor.h"
 
 namespace squadt {
 
   using namespace tool;
 
-  class ToolExecutor;
+  class executor;
   class Specification;
 
   class ToolManager {
@@ -20,7 +21,7 @@ namespace squadt {
  
     private:
  
-      static ToolExecutor tool_executor;
+      static executor tool_executor;
  
       std::list < Tool* > tools;            /* List of known tools */
  
@@ -30,8 +31,8 @@ namespace squadt {
       /* Read configuration from file */
       bool Read(const std::string&);
  
-      bool Execute(unsigned int tool_identifier, std::string arguments, Specification* plan);
- 
+      void Execute(unsigned int tool_identifier, std::string arguments, Specification* p = 0) const;
+
     public:
  
       /* Constructor; with the directory it should use as data directory */

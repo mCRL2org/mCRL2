@@ -16,9 +16,7 @@ exe squadt
         exception.cpp
         specification.cpp
         tool_manager.cpp
-        tool_executor.cpp
         tool.cpp
-        process.cpp
         gui_new_specification.cpp
         gui_project_overview.cpp
         gui_resources.cpp

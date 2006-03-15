@@ -10,6 +10,7 @@ namespace squadt {
     enum values {
       cannot_access_user_settings_directory /// \brief the directory where user settings must be stored is not accessible
      ,cannot_load_tool_configuration        /// \brief the file that contains the information about known tools cannot be read
+     ,program_execution_failed              /// \brief program execution failed
     };
   }
 

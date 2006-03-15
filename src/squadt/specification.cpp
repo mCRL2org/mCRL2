@@ -8,7 +8,7 @@
 
 #include "specification.h"
 #include "tool.h"
-#include "tool_executor.h"
+#include "executor.h"
 #include "tool_manager.h"
 #include "ui_core.h"
 
@@ -237,16 +237,7 @@ namespace squadt {
       }
  
       /* Run tool via the tool executor with command using the tool_identifier to lookup the name of a tool */
-      if (tool_manager.Execute(tool_identifier, final_configuration, this)) {
-        /* Set status, for the convenience of the user */
-        status = being_computed;
-  
-        visualiser->VisualiseStatusChange(status);
-      }
-      else {
-        /* Signal error */
-        throw (this);
-      }
+      tool_manager.Execute(tool_identifier, final_configuration, this);
  
       return (true);
     }

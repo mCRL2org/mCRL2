@@ -1,21 +1,23 @@
 #include <iostream>
 #include <fstream>
 
+#include <boost/bind.hpp>
+#include <boost/filesystem/operations.hpp>
+#include <boost/filesystem/convenience.hpp>
+
 #include <xml2pp/detail/text_reader.tcc>
 
 #include "tool.h"
-#include "tool_executor.h"
+#include "executor.h"
+#include "specification.h"
 #include "tool_manager.h"
 #include "settings_manager.tcc"
 #include "ui_core.h"
 
-#include <boost/filesystem/operations.hpp>
-#include <boost/filesystem/convenience.hpp>
-
 namespace squadt {
 
   /* A tool executor per instance, will be replaced in the future */
-  ToolExecutor ToolManager::tool_executor;
+  executor ToolManager::tool_executor;
 
   ToolManager::ToolManager() {
   }
@@ -145,27 +147,17 @@ namespace squadt {
     return (return_value);
   }
 
-  bool ToolManager::Execute(unsigned int tool_identifier, std::string arguments, Specification* plan) {
+  void ToolManager::Execute(unsigned int tool_identifier, std::string arguments, Specification* p) const {
     using namespace boost::filesystem;
  
-    try {
-      std::string command = path(tool_manager.GetTool(tool_identifier)->GetLocation(), no_check).string();
+    std::string command = path(tool_manager.GetTool(tool_identifier)->GetLocation(), no_check).string();
  
-      tool_executor.Execute(command.append(" ").append(arguments).c_str(), plan);
-    }
-    catch (ExecutionError* exception) {
-      return (false);
-    }
-    catch (ExecutionDelayed* exception) {
-      return (true);
-    }
- 
-    return (true);
+    tool_executor.execute(command.append(" ").append(arguments), p);
   }
 
   /* Have the tool executor terminate all running tools */
   void ToolManager::TerminateAll() {
-    tool_executor.TerminateAll();
+    tool_executor.terminate();
   }
 }
 

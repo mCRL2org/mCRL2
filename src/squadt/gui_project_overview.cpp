@@ -7,7 +7,7 @@
 
 #include "gui_project_overview.h"
 #include "tool.h"
-#include "tool_executor.h"
+#include "executor.h"
 #include "settings_manager.tcc"
 #include "ui_core.h"
 
