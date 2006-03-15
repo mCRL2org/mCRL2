@@ -5,6 +5,8 @@
 #include "libprint_c.h"
 #include "liblts.h"
 
+#include "mcrl2_revision.h"
+
 #define NAME "ltscp"
 #define VERSION "0.1"
 
