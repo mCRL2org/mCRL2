@@ -6,7 +6,7 @@
 #include <string.h>
 #include <getopt.h>
 #include "aterm2.h"
-#include "svc.h"
+#include "svc/svc.h"
 #include "libstruct.h"
 #include "libprint_c.h"
 #include "libprint.h"

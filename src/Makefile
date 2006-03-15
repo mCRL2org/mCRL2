@@ -22,7 +22,7 @@ OBJECTS           += $(LIBSVC_OBJECTS)
 
 #svc2fsm definitions
 SVC2FSM_NAME       = svc2fsm
-SVC2FSM_OBJECTS    = svc/svc2fsm.o libprint_c.o libprint.o libstruct.o liblowlevel.o
+SVC2FSM_OBJECTS    = svc2fsm.o libprint_c.o libprint.o libstruct.o liblowlevel.o
 OBJECTS           += $(SVC2FSM_OBJECTS)
 SVC2FSM_LDFLAGS    = -lrewrite -lsvc -l$(ATERM) -lm $(LIBDL)
 
