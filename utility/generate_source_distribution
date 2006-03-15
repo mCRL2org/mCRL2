@@ -28,7 +28,7 @@ TARGET_BASE="$2"
 if [[ ! -d ${SOURCE_BASE} ]]; then
   echo "Error:";
   echo "";
-  echo " This script should be run from a directory containing";
+  echo " The first argument should be a directory containing";
   echo " the trunk directory of a checked out svn repository.";
   echo "";
   exit 0;
