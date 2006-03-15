@@ -5,7 +5,7 @@
 #include <cstdio>
 
 #include "exception.h"
-#include "settings.h"
+#include "setup.h"
 #include "settings_manager.h"
 
 namespace squadt {

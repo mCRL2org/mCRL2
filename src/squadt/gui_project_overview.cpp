@@ -9,7 +9,6 @@
 #include "tool.h"
 #include "tool_executor.h"
 #include "settings_manager.tcc"
-#include "logger.h"
 #include "ui_core.h"
 
 #include <wx/textctrl.h>
@@ -956,8 +955,6 @@ namespace squadt {
 
     void ProjectOverview::CleanUp() {
       tool_manager.TerminateAll();
-
-      logger->~Logger();
     }
   }
 }

@@ -14,7 +14,7 @@ clean:
 	$(RM) -r autom4te.cache config.log *.o *~ core core.*
 
 distclean: clean distribution
-	$(RM) -r config.status config config.jam src/mcrl2_revision.h utility/bin utility/maximum_revision
+	$(RM) -r config.status config config.jam src/setup.h src/mcrl2_revision.h utility/bin utility/maximum_revision
 
 ifeq (,$(findstring $(MAKECMDGOALS),clean distclean revision))
 

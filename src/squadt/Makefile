@@ -42,7 +42,7 @@ TARGETS                        = squadt
 
 .PHONY: all install clean distclean test strip
 
-all: $(BJAM) $(TREE_ROOT)config.jam settings.h
+all: $(BJAM) $(TREE_ROOT)config.jam
 ifeq ($(findstring $(CPPFLAGS),NDEBUG),)
 	 @cd build; $(BJAM) debug squadt
 else
@@ -85,7 +85,7 @@ tool_manager_tester: tool_manager_tester.cpp $(TOOL_MANAGER_OBJECTS)
 project_manager_tester: project_manager_tester.cpp $(PROJECT_MANAGER_OBJECTS)
 	$(CXX) $(CXXFLAGS) $(CPPFLAGS) $(BOOST_CPPFLAGS) $(PROJECT_MANAGER_OBJECTS) $(BOOST_LDFLAGS) $(LDFLAGS) md5.o md5pp.o $(BOOST_FILESYSTEM) $(WX_LIBRARIES) -o $@ $<
 
-squadt: $(GUI_OBJECTS) md5.o md5pp.o settings.h
+squadt: $(GUI_OBJECTS) md5.o md5pp.o
 	$(CXX) $(CXXFLAGS) $(CPPFLAGS) $(GUI_OBJECTS) $(LDFLAGS) $(WX_LIBRARIES) md5.o md5pp.o $(BOOST_LDFLAGS) $(BOOST_FILESYSTEM) -o $@
 
 %.o: %.cpp
@@ -122,11 +122,11 @@ ifeq ($(HOST_OS),MACOSX)
 endif
 
 clean:
-#	@cd build; $(BJAM) --clean-all
+	@cd build; $(BJAM) --clean-all
 	$(RM) -rf *.o $(TARGETS) $(TEST_TARGETS) core dependencies bin
 
 distclean: clean
-	$(RM) settings.h examples/tool_catalog
+	$(RM) examples/tool_catalog
 
-settings.h:
+../settings.h:
 	$(error Please (re)configure your source tree!)

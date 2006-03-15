@@ -722,13 +722,13 @@ echo X"$0" |
   	  /^X\(\/\).*/{ s//\1/; q; }
   	  s/.*/./; q'`
   srcdir=$ac_confdir
-  if test ! -r $srcdir/$ac_unique_file; then
+  if test ! -r "$srcdir/$ac_unique_file"; then
     srcdir=..
   fi
 else
   ac_srcdir_defaulted=no
 fi
-if test ! -r $srcdir/$ac_unique_file; then
+if test ! -r "$srcdir/$ac_unique_file"; then
   if test "$ac_srcdir_defaulted" = yes; then
     { echo "$as_me: error: cannot find sources ($ac_unique_file) in $ac_confdir or .." >&2
    { (exit 1); exit 1; }; }
@@ -737,7 +737,7 @@ if test ! -r $srcdir/$ac_unique_file; then
    { (exit 1); exit 1; }; }
   fi
 fi
-(cd $srcdir && test -r ./$ac_unique_file) 2>/dev/null ||
+(cd $srcdir && test -r "./$ac_unique_file") 2>/dev/null ||
   { echo "$as_me: error: sources are in $srcdir, but \`cd $srcdir' does not work" >&2
    { (exit 1); exit 1; }; }
 srcdir=`echo "$srcdir" | sed 's%\([^\\/]\)[\\/]*$%\1%'`
@@ -6110,7 +6110,7 @@ echo "$as_me: Some tools will not be built if any of these libraries are missing
 { echo "$as_me:$LINENO: " >&5
 echo "$as_me: " >&6;}
 
-                                                            ac_config_files="$ac_config_files src/boost/tools/build/v2/user-config.jam src/squadt/examples/tool_catalog src/rewr_innerc_aux.h src/squadt/settings.h config config.jam"
+                                                            ac_config_files="$ac_config_files src/boost/tools/build/v2/user-config.jam src/squadt/examples/tool_catalog src/rewr_innerc_aux.h src/setup.h config config.jam"
 
 cat >confcache <<\_ACEOF
 # This file is a shell script that caches the results of configure
@@ -6665,7 +6665,7 @@ do
   "src/boost/tools/build/v2/user-config.jam" ) CONFIG_FILES="$CONFIG_FILES src/boost/tools/build/v2/user-config.jam" ;;
   "src/squadt/examples/tool_catalog" ) CONFIG_FILES="$CONFIG_FILES src/squadt/examples/tool_catalog" ;;
   "src/rewr_innerc_aux.h" ) CONFIG_FILES="$CONFIG_FILES src/rewr_innerc_aux.h" ;;
-  "src/squadt/settings.h" ) CONFIG_FILES="$CONFIG_FILES src/squadt/settings.h" ;;
+  "src/setup.h" ) CONFIG_FILES="$CONFIG_FILES src/setup.h" ;;
   "config" ) CONFIG_FILES="$CONFIG_FILES config" ;;
   "config.jam" ) CONFIG_FILES="$CONFIG_FILES config.jam" ;;
   *) { { echo "$as_me:$LINENO: error: invalid argument: $ac_config_target" >&5

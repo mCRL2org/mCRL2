@@ -12,7 +12,6 @@
 
 #include "tool_manager.h"
 #include "settings_manager.tcc"
-#include "logger.h"
 #include "ui_core.h"
 
 namespace squadt {
@@ -24,8 +23,6 @@ namespace squadt {
   ToolManager          tool_manager;
  
   std::ofstream        log_stream;
- 
-  Logger*              logger;
  
 }
 
@@ -50,8 +47,6 @@ bool Squadt::OnInit() {
 
   log_stream.open(global_settings_manager->path_to_system_settings("squadt.log").c_str(), std::ios::app);
 
-  logger = new Logger((log_stream.good()) ? log_stream : std::cerr);
-
   /* Load tool configuration from storage */
   ProjectOverview* window = new ProjectOverview(NULL, 1000);
 
@@ -70,11 +65,6 @@ bool Squadt::OnInit() {
   tool_manager.Load();
 
   window->GenerateToolContextMenus();
-
-  /* Connect log display to logger */
-  if (window->GetLogDisplay()) {
-    logger->SetLogWindow(window->GetLogDisplay());
-  }
 
   return (true);
 }
