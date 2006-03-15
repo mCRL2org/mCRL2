@@ -5,10 +5,9 @@
 #include "libprint_c.h"
 #include "liblts.h"
 
-#include "mcrl2_revision.h"
-
 #define NAME "ltscp"
 #define VERSION "0.1"
+#include "mcrl2_revision.h"
 
 using namespace std;
 using namespace mcrl2::lts;
@@ -66,13 +65,13 @@ static void print_help(FILE *f, char *Name)
 {
   fprintf(f,
     "Usage: %s [OPTION]... [INFILE [OUTFILE]]\n"
-    "Copy the labeled transition system (LTS) in INFILE to OUTFILE, converting\n"
-    "between formats if necessary (and possible). Ifi OUTFILE is not supplied, the\n"
+    "Copy the labelled transition system (LTS) in INFILE to OUTFILE, converting\n"
+    "between formats if necessary (and possible). If OUTFILE is not supplied, the\n"
     "LTS is saved to stdout. If INFILE is not supplied, stdin is used instead.\n"
     "\n"
-    "The format of INFILE and OUTFILE is determined by its extension or its contents.\n"
+    "The format of INFILE and OUTFILE is determined by its contents or extension.\n"
     "Options --in and --out can be used to force the format for INFILE and OUTFILE,\n"
-    "respectively."
+    "respectively.\n"
     "\n"
     "Mandatory arguments to long options are mandatory for short options too.\n"
     "  -h, --help            display this help message\n"
