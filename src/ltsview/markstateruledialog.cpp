@@ -153,6 +153,7 @@ MarkRule* MarkStateRuleDialog::getMarkRule()
 
   MarkRule* result = new MarkRule;
   result->paramIndex = parameterIndices[ parameterListBox->GetString( parIndex ) ];
+  result->isActivated = true;
   result->isNegated = ( relationListBox->GetSelection() == 1 );
   result->valueSet.assign( valuesListBox->GetCount(), true );
 

@@ -223,6 +223,7 @@ void LTSViewApp::editMarkRule( const int index )
   {
     MarkStateRuleDialog* msrDialog = new MarkStateRuleDialog( mainFrame, this,
 	lts->getStateVectorSpec() );
+    bool oldActivated = lts->getMarkRule( index )->isActivated;
     msrDialog->setMarkRule( lts->getMarkRule( index ), lts->getStateVectorSpec() );
     msrDialog->CentreOnParent();
     if ( msrDialog->ShowModal() == wxID_OK )
@@ -230,6 +231,7 @@ void LTSViewApp::editMarkRule( const int index )
       MarkRule* markrule = msrDialog->getMarkRule();
       if ( markrule != NULL )
       {
+	markrule->isActivated = oldActivated;
 	lts->replaceMarkRule( index, markrule );
 	mainFrame->replaceMarkRule( index, msrDialog->getMarkRuleString() );
 	lts->markStates();
