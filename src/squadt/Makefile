@@ -122,8 +122,10 @@ ifeq ($(HOST_OS),MACOSX)
 endif
 
 clean:
-	@cd build; $(BJAM) --clean-all
-	$(RM) -rf *.o $(TARGETS) $(TEST_TARGETS) core dependencies bin
+	@if test -e $(BJAM); then \
+	  cd build; $(BJAM) --clean-all; \
+	fi
+	$(RM) -rf *.o $(TARGETS) $(TEST_TARGETS) core dependencies
 
 distclean: clean
 	$(RM) examples/tool_catalog
