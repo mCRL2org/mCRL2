@@ -3556,7 +3556,7 @@ static stacklisttype *new_stack(
 
       /* construct the sort of the push operator */
       walker=ATreverse(stack->opns->sorts);
-      for (tempsorts=stack->opns->stacksort; 
+      for (tempsorts=gsMakeSortArrow(stack->opns->stacksort,stack->opns->stacksort); 
            walker!=ATempty ; walker=ATgetNext(walker))
       { tempsorts=gsMakeSortArrow(ATAgetFirst(walker),tempsorts);
       }
