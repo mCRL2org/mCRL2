@@ -133,6 +133,10 @@ AC_RUN_IFELSE(
 )
 AC_LANG_POP(C++)
 
+# Add standard compatibility check flags for runtime compilation
+R_CFLAGS="$R_CFLAGS $CFLAGS"
+R_CXXFLAGS="$R_CXXFLAGS $CXXFLAGS"
+
 # Check whether optimization must be suppressed
 AC_ARG_ENABLE(
   [optimisation],
@@ -394,6 +398,7 @@ fi
 
 includedir="$includedir/mcrl2"
 datadir="$datadir/mcrl2"
+libdir="$libdir/mcrl2"
 
 eval "eval PREFIX_DIR=${prefix}"
 AC_SUBST([PREFIX_DIR],[])
@@ -420,11 +425,11 @@ AC_SUBST([R_LDFLAGS],[$R_LDFLAGS])
 AC_SUBST([R_SLDFLAGS],[$R_SLDFLAGS])
 
 if test $BUILD_ATERM; then
-  AC_SUBST([IATERM_CPPFLAGS],[-I$INCLUDE_DIR/aterm])
-  AC_SUBST([IATERM_LDFLAGS],[-L$INCLUDE_DIR/aterm])
+  AC_SUBST([IATERM_CPPFLAGS],["-I$INCLUDE_DIR/aterm"])
+  AC_SUBST([IATERM_LDFLAGS],["-L$INCLUDE_DIR/aterm -lATerm"])
 else
-  AC_SUBST([IATERM_CPPFLAGS],[$ATERM_CPPFLAGS])
-  AC_SUBST([IATERM_LDFLAGS],[$ATERM_LDFLAGS])
+  AC_SUBST([IATERM_CPPFLAGS],["$ATERM_CPPFLAGS"])
+  AC_SUBST([IATERM_LDFLAGS],["$ATERM_LDFLAGS -lATerm"])
 fi
 
 AC_MSG_NOTICE()

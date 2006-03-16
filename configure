@@ -3979,6 +3979,10 @@ ac_link='$CC -o conftest$ac_exeext $CFLAGS $CPPFLAGS $LDFLAGS conftest.$ac_ext $
 ac_compiler_gnu=$ac_cv_c_compiler_gnu
 
 
+# Add standard compatibility check flags for runtime compilation
+R_CFLAGS="$R_CFLAGS $CFLAGS"
+R_CXXFLAGS="$R_CXXFLAGS $CXXFLAGS"
+
 # Check whether optimization must be suppressed
 # Check whether --enable-optimisation or --disable-optimisation was given.
 if test "${enable_optimisation+set}" = set; then
@@ -6092,6 +6096,7 @@ fi
 
 includedir="$includedir/mcrl2"
 datadir="$datadir/mcrl2"
+libdir="$libdir/mcrl2"
 
 eval "eval PREFIX_DIR=${prefix}"
 
@@ -6122,14 +6127,14 @@ R_SLDFLAGS=$R_SLDFLAGS
 
 
 if test $BUILD_ATERM; then
-  IATERM_CPPFLAGS=-I$INCLUDE_DIR/aterm
+  IATERM_CPPFLAGS="-I$INCLUDE_DIR/aterm"
 
-  IATERM_LDFLAGS=-L$INCLUDE_DIR/aterm
+  IATERM_LDFLAGS="-L$INCLUDE_DIR/aterm -lATerm"
 
 else
-  IATERM_CPPFLAGS=$ATERM_CPPFLAGS
+  IATERM_CPPFLAGS="$ATERM_CPPFLAGS"
 
-  IATERM_LDFLAGS=$ATERM_LDFLAGS
+  IATERM_LDFLAGS="$ATERM_LDFLAGS -lATerm"
 
 fi
 

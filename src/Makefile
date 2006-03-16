@@ -201,6 +201,9 @@ OBJECTS           := $(sort $(OBJECTS))
 
 all: $(EXE_NAMES) $(LIB_NAMES) $(BUILD_EXPERIMENTAL)
 
+# Rules for building the maximum_revision tool and to generate a revision file
+-include ../utility/revision.mk
+
 experimental: $(EXPERIMENTALS)
 
 # Build bjam and local boost 
@@ -254,11 +257,6 @@ else
 boost:
 endif
 
-# Rules for building the maximum_revision tool and to generate a `revision' file
--include ../utility/revision.mk
-
-CPPFLAGS += $(REVISION)
-
 install: all
 	$(INSTALL) -d $(bindir)
 	@for f in $(EXE_NAMES); do\
@@ -293,9 +291,9 @@ endif
 
 aterm_install:
 	install -d $(includedir)/aterm
-	install aterm/*.h $(includedir)/aterm
+	install -m 444 aterm/*.h $(includedir)/aterm
 	install -d $(libdir)/aterm
-	install aterm/libATerm.a $(libdir)/aterm
+	install -m 444 aterm/libATerm.a $(libdir)/aterm
 
 clean:
 	$(RM) $(EXE_NAMES) $(EXPERIMENTALS) $(LIB_NAMES) *.o *.a *.d* *.dpp* lpe/*.o lpe/*.dpp aterm/*.o aterm/*.a aterm/*.d svc/*.o svc/*.a svc/*.d svc/*.dpp mcrl2lexer.c mcrl2parser.c mcrl2parser.h mcrl2parser.output lpeinfo lpeparelm lpeconstelm autom4te.cache *~ core core.* utility/maximum_revision
