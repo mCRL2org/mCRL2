@@ -75,16 +75,8 @@ void RewriterCompilingInnermost::clearSubstitutions()
 #include "setup.h"
 #include "rewr_innerc.h"
 
-
-#ifndef INNERC_CFLAGS
-#define INNERC_CFLAGS  ""
-#endif
-#ifndef INNERC_CPPFLAGS
-#define INNERC_CPPFLAGS  ""
-#endif
-#ifndef INNERC_LDFLAGS
-#define INNERC_LDFLAGS  ""
-#endif
+#define INNERC_COMPILE_COMMAND (CC " -c " CFLAGS " " SCFLAGS " " CPPFLAGS " " ATERM_CPPFLAGS " %s.c")
+#define INNERC_LINK_COMMAND (CC " " LDFLAGS " " SLDFLAGS " -o %s.so %s.o")
 
 #define ATXgetArgument(x,y) ((unsigned int) (intptr_t) ATgetArgument(x,y))
 
@@ -1560,7 +1552,7 @@ void RewriterCompilingInnermost::CompileRewriteSystem(ATermAppl DataEqnSpec)
 
   s = (char *) malloc(20);
   sprintf(s,"innerc_%i",getpid());
-  t = (char *) malloc(100+strlen(INNERC_LDFLAGS)+strlen(INNERC_CFLAGS)+strlen(INNERC_CPPFLAGS));
+  t = (char *) malloc(100+strlen(INNERC_COMPILE_COMMAND)+strlen(INNERC_LINK_COMMAND));
 
   sprintf(t,"%s.c",s);
   file_c = strdup(t);
@@ -1581,7 +1573,7 @@ void RewriterCompilingInnermost::CompileRewriteSystem(ATermAppl DataEqnSpec)
   //
   fprintf(f,  "#include <stdlib.h>\n"
       "#include <string.h>\n"
-      "#include <aterm/aterm2.h>\n"
+      "#include <aterm2.h>\n"
       "#include \"assert.h\"\n"
 //      "#include \"libstruct.h\"\n"
 //      "#include \"liblowlevel.h\"\n"
@@ -2138,31 +2130,17 @@ void RewriterCompilingInnermost::CompileRewriteSystem(ATermAppl DataEqnSpec)
 
   fclose(f);
   fprintf(stderr,"Compiling rewriter...");fflush(stderr);
-#ifdef __APPLE__
-// for this to work use: "setenv MACOSX_DEPLOYMENT_TARGET 10.3" to
-// set the environment variable setenv MACOSX_DEPLOYMENT_TARGET to 10.3
-  sprintf(t,"gcc -c %s %s %s.c",INNERC_CPPFLAGS,INNERC_CFLAGS,s);
-#ifndef NDEBUG
-  gsfprintf(stderr,"\n%s\n",t);
-#endif
+  sprintf(t,INNERC_COMPILE_COMMAND,s);
   system(t);
-  sprintf(t,"gcc -bundle -undefined dynamic_lookup -o %s.so %s.o",s,s);
-#ifndef NDEBUG
-  gsfprintf(stderr,"%s\n",t);
-#endif
+  sprintf(t,INNERC_LINK_COMMAND,s,s);
   system(t);
-#else
-  sprintf(t,"gcc -c %s %s -Wno-unused -O3 -rdynamic %s.c",INNERC_CPPFLAGS,INNERC_CFLAGS,s);
-  system(t);
-  sprintf(t,"gcc %s -shared -o %s.so %s.o",INNERC_LDFLAGS,s,s);
-  system(t);
-#endif
   fprintf(stderr,"done.\n");
 
   sprintf(t,"./%s.so",s);
   if ( (h = dlopen(t,RTLD_NOW)) == NULL )
   {
     fprintf(stderr,"error opening dll\n%s\n",dlerror());
+    exit(1);
   }
   so_rewr_init = (void (*)()) dlsym(h,"rewrite_init");
   so_rewr = (ATermAppl (*)(ATermAppl)) dlsym(h,"rewrite");
