@@ -37,6 +37,7 @@ class LTSViewApp : public wxApp, public Mediator
     void applyRanking( RankStyle rs );
 
   public:
+    void	  activateMarkRule( const int index, const bool activate );
     void	  addMarkRule();
     void	  applyDefaultSettings();
     void	  applyMarkStyle( MarkStyle ms );

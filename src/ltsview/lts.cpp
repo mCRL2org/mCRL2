@@ -427,6 +427,11 @@ void LTS::addMarkRule( MarkRule* r )
   markRules.push_back( r );
 }
 
+void LTS::activateMarkRule( const int index, const bool activate )
+{
+  markRules[ index ]->isActivated = activate;
+}
+
 void LTS::replaceMarkRule( int index, MarkRule* mr )
 {
   delete markRules[ index ];
@@ -475,6 +480,12 @@ void LTS::markStates()
 void LTS::updateMarksAny()
 {
   markedStatesCount = 0;
+  vector< MarkRule* > activeMarkRules;
+  for ( vector< MarkRule* >::iterator mr_it = markRules.begin() ; mr_it !=
+      markRules.end() ; ++mr_it )
+  {
+    if ( (**mr_it).isActivated ) activeMarkRules.push_back( *mr_it );
+  }
   
   for ( vector< State* >::iterator stateit = states.begin() ;
       stateit != states.end() ; ++stateit )
@@ -482,9 +493,9 @@ void LTS::updateMarksAny()
     State* state = *stateit;
     state->unmark();
     unsigned int i = 0;
-    while ( i < markRules.size() && !state->isMarked() )
+    while ( i < activeMarkRules.size() && !state->isMarked() )
     {
-      MarkRule* markRule = markRules[i];
+      MarkRule* markRule = activeMarkRules[i];
       if ( markRule->valueSet[ state->getValueIndexOfParam( markRule->paramIndex
 	    ) ] )
       {
@@ -500,6 +511,12 @@ void LTS::updateMarksAny()
 void LTS::updateMarksAll()
 {
   markedStatesCount = 0;
+  vector< MarkRule* > activeMarkRules;
+  for ( vector< MarkRule* >::iterator mr_it = markRules.begin() ; mr_it !=
+      markRules.end() ; ++mr_it )
+  {
+    if ( (**mr_it).isActivated ) activeMarkRules.push_back( *mr_it );
+  }
   
   for ( vector< State* >::iterator stateit = states.begin() ;
       stateit != states.end() ; ++stateit )
@@ -507,9 +524,9 @@ void LTS::updateMarksAll()
     State* state = *stateit;
     state->mark();
     unsigned int i = 0;
-    while ( i < markRules.size() && state->isMarked() )
+    while ( i < activeMarkRules.size() && state->isMarked() )
     {
-      MarkRule* markRule = markRules[i];
+      MarkRule* markRule = activeMarkRules[i];
       if ( !markRule->valueSet[ state->getValueIndexOfParam( markRule->paramIndex
 	    ) ] )
       {

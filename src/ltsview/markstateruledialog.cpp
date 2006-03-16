@@ -42,8 +42,8 @@ MarkStateRuleDialog::MarkStateRuleDialog( wxWindow* parent, Mediator* owner,
   relationListBox = new wxListBox( this, wxID_ANY, wxDefaultPosition,
       wxSize(150,150), 2, relChoices );
   relationListBox->SetSelection( 0 );
-  valuesListBox = new wxListBox( this, wxID_ANY, wxDefaultPosition,
-      wxSize(150, 150), 0, NULL, wxLB_MULTIPLE | wxLB_HSCROLL | wxLB_NEEDED_SB |
+  valuesListBox = new wxCheckListBox( this, wxID_ANY, wxDefaultPosition,
+      wxSize(150, 150), 0, NULL, wxLB_SINGLE | wxLB_HSCROLL | wxLB_NEEDED_SB |
       wxLB_SORT );
   
   int flags = wxALIGN_LEFT | wxALIGN_CENTER_VERTICAL | wxALL;
@@ -121,8 +121,9 @@ void MarkStateRuleDialog::setMarkRule( MarkRule* mr, ATermList svspec )
       value = (ATermAppl)ATgetFirst( values );
       if ( mr->valueSet[ ATgetInt( (ATermInt)ATgetArgument( value, 1 ) ) ] )
       {
-	valuesListBox->SetStringSelection( wxString( ATwriteToString(
-		ATgetArgument( value, 0 ) ), wxConvLocal ) );
+	valuesListBox->Check( valuesListBox->FindString( wxString(
+		ATwriteToString( ATgetArgument( value, 0 ) ), wxConvLocal )),
+	    true );
       }
       values = ATgetNext( values );
     }
@@ -136,8 +137,9 @@ void MarkStateRuleDialog::setMarkRule( MarkRule* mr, ATermList svspec )
       value = (ATermAppl)ATgetFirst( values );
       if ( !mr->valueSet[ ATgetInt( (ATermInt)ATgetArgument( value, 1 ) ) ] )
       {
-	valuesListBox->SetStringSelection( wxString( ATwriteToString(
-		ATgetArgument( value, 0 ) ), wxConvLocal ) );
+	valuesListBox->Check( valuesListBox->FindString( wxString(
+		ATwriteToString( ATgetArgument( value, 0 ) ), wxConvLocal )),
+	    true );
       }
       values = ATgetNext( values );
     }
@@ -146,29 +148,28 @@ void MarkStateRuleDialog::setMarkRule( MarkRule* mr, ATermList svspec )
 
 MarkRule* MarkStateRuleDialog::getMarkRule()
 {
+  int parIndex = parameterListBox->GetSelection();
+  if ( parIndex == wxNOT_FOUND ) return NULL;
+
   MarkRule* result = new MarkRule;
-  result->paramIndex = parameterIndices[ parameterListBox->GetStringSelection() ];
+  result->paramIndex = parameterIndices[ parameterListBox->GetString( parIndex ) ];
   result->isNegated = ( relationListBox->GetSelection() == 1 );
-  
-  int N = valuesListBox->GetCount();
-  wxArrayInt selections;
-  int NS = valuesListBox->GetSelections( selections );
+  result->valueSet.assign( valuesListBox->GetCount(), true );
+
   if ( relationListBox->GetSelection() == 0 )
   {
-    result->valueSet.assign( N, false );
-    for ( int i = 0 ; i < NS ; ++i )
+    for ( int i = 0 ; i < valuesListBox->GetCount() ; ++i )
     {
-      result->valueSet[ valueIndices[ valuesListBox->GetString( selections[i] )
-	] ] = true;
+      result->valueSet[ valueIndices[ valuesListBox->GetString( i ) ] ] =
+	valuesListBox->IsChecked( i );
     }
   }
   else
   {
-    result->valueSet.assign( N, true );
-    for ( int i = 0 ; i < NS ; ++i )
+    for ( int i = 0 ; i < valuesListBox->GetCount() ; ++i )
     {
-      result->valueSet[ valueIndices[ valuesListBox->GetString( selections[i] )
-	] ] = false;
+      result->valueSet[ valueIndices[ valuesListBox->GetString( i ) ] ] =
+	!valuesListBox->IsChecked( i );
     }
   }  
   return result;
@@ -176,17 +177,22 @@ MarkRule* MarkStateRuleDialog::getMarkRule()
 
 wxString MarkStateRuleDialog::getMarkRuleString()
 {
-  wxString result = parameterListBox->GetStringSelection();
+  int parIndex = parameterListBox->GetSelection();
+  if ( parIndex == wxNOT_FOUND ) return wxEmptyString;
+  
+  wxString result = parameterListBox->GetString( parIndex );
   result += ( relationListBox->GetSelection() == 0 ) ? wxT(" in { ") :
     wxT(" not in { ");
-  wxArrayInt selections;
-  int NS = valuesListBox->GetSelections( selections );
-  for ( int i = 0 ; i < NS-1 ; ++i )
+  bool isfirst = true;
+  for ( int i = 0 ; i < valuesListBox->GetCount() ; ++i )
   {
-    result += valuesListBox->GetString( selections[i] );
-    result += wxT(", ");
+    if ( valuesListBox->IsChecked( i ) )
+    {
+      if ( !isfirst ) result += wxT(", ");
+      result += valuesListBox->GetString( i );
+      isfirst = false;
+    }
   }
-  result += valuesListBox->GetString( selections[NS-1] );
   result += wxT(" }");
   return result;
 }

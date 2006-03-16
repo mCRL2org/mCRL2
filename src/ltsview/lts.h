@@ -19,6 +19,7 @@ class LTS
   public:
     LTS( Mediator* owner );
     ~LTS();
+    void	activateMarkRule( const int index, const bool activate );
     void	addMarkRule( MarkRule* r );
     void	addState( State* s );
     void	addTransition( Transition* t );

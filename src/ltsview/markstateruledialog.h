@@ -3,6 +3,7 @@
 #include <map>
 #include <vector>
 #include <wx/wx.h>
+#include <wx/checklst.h>
 #include <wx/statline.h>
 #include "mediator.h"
 #include "ids.h"
@@ -28,7 +29,7 @@ class MarkStateRuleDialog : public wxDialog
     map< wxString, ATermAppl >	parameterTypes;
     wxListBox*			relationListBox;
     map< wxString, int >	valueIndices;
-    wxListBox*			valuesListBox;
+    wxCheckListBox*		valuesListBox;
 
     void loadValues( wxString paramName );
 

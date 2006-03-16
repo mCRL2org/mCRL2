@@ -12,6 +12,7 @@ class Mediator
 {
   public:
     virtual ~Mediator() {}
+    virtual void      activateMarkRule( const int index, const bool activate ) = 0;
     virtual void      addMarkRule() = 0;
     virtual void      applyDefaultSettings() = 0;
     virtual void      applyMarkStyle( MarkStyle ms ) = 0;

@@ -197,10 +197,13 @@ void LTSViewApp::addMarkRule()
     if ( msrDialog->ShowModal() == wxID_OK )
     {
       MarkRule* markrule = msrDialog->getMarkRule();
-      lts->addMarkRule( markrule );
-      mainFrame->addMarkRule( msrDialog->getMarkRuleString() );
-      lts->markStates();
-      applyMarkStyle( MARK_STATES );
+      if ( markrule != NULL )
+      {
+	lts->addMarkRule( markrule );
+	mainFrame->addMarkRule( msrDialog->getMarkRuleString() );
+	lts->markStates();
+	applyMarkStyle( MARK_STATES );
+      }
     }
     msrDialog->Close();
     msrDialog->Destroy();
@@ -225,13 +228,26 @@ void LTSViewApp::editMarkRule( const int index )
     if ( msrDialog->ShowModal() == wxID_OK )
     {
       MarkRule* markrule = msrDialog->getMarkRule();
-      lts->replaceMarkRule( index, markrule );
-      mainFrame->replaceMarkRule( index, msrDialog->getMarkRuleString() );
-      lts->markStates();
-      applyMarkStyle( MARK_STATES );
+      if ( markrule != NULL )
+      {
+	lts->replaceMarkRule( index, markrule );
+	mainFrame->replaceMarkRule( index, msrDialog->getMarkRuleString() );
+	lts->markStates();
+	applyMarkStyle( MARK_STATES );
+      }
     }
     msrDialog->Close();
     msrDialog->Destroy();
+  }
+}
+
+void LTSViewApp::activateMarkRule( const int index, const bool activate )
+{
+  if ( lts != NULL )
+  {
+    lts->activateMarkRule( index, activate );
+    lts->markStates();
+    applyMarkStyle( MARK_STATES );
   }
 }
 

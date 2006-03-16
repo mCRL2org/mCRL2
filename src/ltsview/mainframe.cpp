@@ -30,6 +30,7 @@ BEGIN_EVENT_TABLE( MainFrame, wxFrame )
   EVT_RADIOBUTTON( myID_MARK_RADIOBUTTON, MainFrame::onMarkRadio )
   EVT_CHOICE( myID_MARK_ANYALL, MainFrame::onMarkAnyAll )
   EVT_LISTBOX_DCLICK( myID_MARK_RULES, MainFrame::onMarkRuleEdit )
+  EVT_CHECKLISTBOX( myID_MARK_RULES, MainFrame::onMarkRuleActivate )
   EVT_BUTTON( myID_ADD_RULE, MainFrame::onAddMarkRuleButton )
   EVT_BUTTON( myID_REMOVE_RULE, MainFrame::onRemoveMarkRuleButton )
 END_EVENT_TABLE()
@@ -413,7 +414,7 @@ void MainFrame::setupMarkPanel( wxPanel* panel )
   markAnyAllChoice->SetSelection( 0 );
   markStatesSizer->Add( markAnyAllChoice, 0, flags, border );
   
-  markStatesListBox = new wxListBox( panel, myID_MARK_RULES, wxDefaultPosition,
+  markStatesListBox = new wxCheckListBox( panel, myID_MARK_RULES, wxDefaultPosition,
       wxDefaultSize, 0, NULL, wxLB_SINGLE | wxLB_NEEDED_SB | wxLB_HSCROLL );
   markStatesSizer->Add( markStatesListBox, 1, flags | wxEXPAND, border );
   wxBoxSizer* addremoveSizer = new wxBoxSizer( wxHORIZONTAL );
@@ -514,6 +515,12 @@ void MainFrame::onMarkRadio( wxCommandEvent& event )
     mediator->applyMarkStyle( MARK_TRANSITIONS );
 }
 
+void MainFrame::onMarkRuleActivate( wxCommandEvent& event )
+{
+  int i = event.GetInt();
+  mediator->activateMarkRule( i, markStatesListBox->IsChecked( i ) );
+}
+
 void MainFrame::onMarkRuleEdit( wxCommandEvent& event )
 {
   mediator->editMarkRule( event.GetSelection() );
@@ -532,11 +539,10 @@ void MainFrame::onAddMarkRuleButton( wxCommandEvent& /*event*/ )
 
 void MainFrame::onRemoveMarkRuleButton( wxCommandEvent& /*event*/ )
 {
-  wxListBox* markstatesListBox = (wxListBox*) this->FindWindowById( myID_MARK_RULES );
-  int sel_index = markstatesListBox->GetSelection();
+  int sel_index = markStatesListBox->GetSelection();
   if ( sel_index != wxNOT_FOUND )
   {
-    markstatesListBox->Delete( sel_index );
+    markStatesListBox->Delete( sel_index );
     mediator->removeMarkRule( sel_index );
     markstatesRadio->SetValue( true );
   }
@@ -696,12 +702,15 @@ void MainFrame::setMarkedStatesInfo( int number )
 void MainFrame::addMarkRule( wxString str )
 {
   markStatesListBox->Append( str );
+  markStatesListBox->Check( markStatesListBox->GetCount()-1, true );
   markstatesRadio->SetValue( true );
 }
 
 void MainFrame::replaceMarkRule( int index, wxString str )
 {
+  bool isChecked = markStatesListBox->IsChecked( index );
   markStatesListBox->SetString( index, str );
+  markStatesListBox->Check( index, isChecked );
   markstatesRadio->SetValue( true );
 }
   

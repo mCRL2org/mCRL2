@@ -12,6 +12,7 @@
 #include <wx/spinctrl.h>
 #include <wx/bitmap.h>
 #include <wx/event.h>
+#include <wx/checklst.h>
 #include "spinctrlfloat.h"
 #include "colorbutton.h"
 #include "mediator.h"
@@ -42,6 +43,7 @@ class MainFrame : public wxFrame
     void	onCommandSettingChanged( wxCommandEvent& event );
     void	onMarkAnyAll( wxCommandEvent& event );
     void	onMarkRadio( wxCommandEvent& event );
+    void	onMarkRuleActivate( wxCommandEvent& event );
     void	onMarkRuleEdit( wxCommandEvent& event );
     void	onSpinSettingChanged( wxSpinEvent& event );
     void	replaceMarkRule( int index, wxString str );
@@ -68,7 +70,7 @@ class MainFrame : public wxFrame
     wxChoice*	      markAnyAllChoice;
     wxColorButton*    markButton;
     wxRadioButton*    markdeadlocksRadio;
-    wxListBox*	      markStatesListBox;
+    wxCheckListBox*   markStatesListBox;
     wxRadioButton*    markstatesRadio;
     wxRadioButton*    marktransitionsRadio;
     Mediator*	      mediator;
