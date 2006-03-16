@@ -8,6 +8,8 @@ all: config
 include utility/revision.mk
 
 install: all
+	install -d $(datadir)
+	cp -r examples $(datadir)
 
 clean:
 	@${MAKE} -C src $(MAKECMDGOALS)

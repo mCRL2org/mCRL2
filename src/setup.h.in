@@ -4,6 +4,7 @@
 #define DATA_DIRECTORY "@DATA_DIR@"
 
 #define CC             "@CC@"
+#define CXX            "@CXX@"
 #define CFLAGS         "@R_CFLAGS@"
 #define CXXFLAGS       "@R_CXXFLAGS@"
 #define CPPFLAGS       "@R_CPPFLAGS@"
