@@ -72,7 +72,7 @@ void RewriterCompilingJitty::clearSubstitutions()
 #include "liblowlevel.h"
 #include "libstruct.h"
 #include "libprint_c.h"
-#include "rewr_innerc_aux.h"
+#include "setup.h"
 #include "rewr_jittyc.h"
 
 #ifndef INNERC_CFLAGS

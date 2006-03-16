@@ -7,6 +7,10 @@ OBJECTS            =
 # Objects that require wxWidgets CPPFLAGS to compile
 WX_OBJECTS         = xsim.o xsimbase.o xsimmain.o xsimtrace.o xsimtracedll.o
 
+# All programs depend on the ATerm library
+CPPFLAGS += $(ATERM_CPPFLAGS) 
+LDFLAGS  += $(ATERM_LDFLAGS) 
+
 #ATerm definitions
 ATERM_NAME         = aterm/libATerm.a
 ATERM_OBJECTS      = aterm/afun.o aterm/aterm.o aterm/bafio.o aterm/byteio.o aterm/gc.o aterm/hash.o aterm/list.o aterm/make.o aterm/md5c.o aterm/memory.o aterm/tafio.o aterm/version.o
@@ -223,6 +227,10 @@ endif
 endif
 endif
 
+ifdef BUILD_ATERM
+install: aterm_install
+endif
+
 clean distclean: squadt boost_relay ltsview documentation
 
 # For building documentation
@@ -282,6 +290,12 @@ ifeq ($(HOST_OS),MACOSX)
 	cp -f xsim.icns ../xsim.app/Contents/Resources/xsim.icns
 endif
 endif
+
+aterm_install:
+	install -d $(includedir)/aterm
+	install aterm/*.h $(includedir)/aterm
+	install -d $(libdir)/aterm
+	install aterm/libATerm.a $(libdir)/aterm
 
 clean:
 	$(RM) $(EXE_NAMES) $(EXPERIMENTALS) $(LIB_NAMES) *.o *.a *.d* *.dpp* lpe/*.o lpe/*.dpp aterm/*.o aterm/*.a aterm/*.d svc/*.o svc/*.a svc/*.d svc/*.dpp mcrl2lexer.c mcrl2parser.c mcrl2parser.h mcrl2parser.output lpeinfo lpeparelm lpeconstelm autom4te.cache *~ core core.* utility/maximum_revision
@@ -425,13 +439,13 @@ $(LIN_NAME) : $(LIN_OBJECTS) $(ATERM_DEP) $(LIBREWR_NAME)
 
 %.d : %.c
 	@echo generating dependencies for $<
-	@$(CC) -MT '$*.o' -MM $(CPPFLAGS) $< > $@.$$$$; \
+	@$(CC) -MT '$*.o' -MM $(CPPFLAGS) $(ATERM_CPPFLAGS) $< > $@.$$$$; \
 	sed 's,\($*\)\.o[ :]*,\1.o $@ : ,g' < $@.$$$$ > $@; \
 	$(RM) $@.$$$$
 
 %.dpp : %.cpp
 	@echo generating dependencies for $<
-	@$(CXX) -MT '$*.o' -MM $(CPPFLAGS) $< > $@.$$$$; \
+	@$(CXX) -MT '$*.o' -MM $(CPPFLAGS) $(ATERM_CPPFLAGS) $< > $@.$$$$; \
 	sed 's,\($*\)\.o[ :]*,\1.o $@ : ,g' < $@.$$$$ > $@; \
 	$(RM) $@.$$$$
 

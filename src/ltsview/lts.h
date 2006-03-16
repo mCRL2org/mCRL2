@@ -4,7 +4,7 @@
 #include <iostream>
 #include <vector>
 #include <map>
-#include "aterm/aterm2.h"
+#include "aterm2.h"
 #include "liblowlevel.h"
 #include "mediator.h"
 #include "state.h"

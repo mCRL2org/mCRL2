@@ -6,6 +6,15 @@ AC_CONFIG_SRCDIR([src/liblowlevel.h])
 # Default toolset to use with Boost.Build
 BJAM_TOOLSET="gcc"
 
+# Flags for runtime compilation and linking
+R_CFLAGS="-Wno-unused -O3 -rdynamic"
+R_SCFLAGS="-fPIC"
+R_CXXFLAGS="-Wno-unused -O3 -rdynamic"
+R_SCXXFLAGS="-fPIC"
+R_CPPFLAGS=""
+R_LDFLAGS=""
+R_SLDFLAGS="-shared"
+
 # Setting host OS
 case $host in
   *-*-mingw32*)
@@ -26,6 +35,8 @@ case $host in
     ;;
   *-*-darwin*)
     HOST_OS="MACOSX"
+    R_LDFLAGS="-bundle -undefined dynamic_lookup"
+    R_SLDFLAGS=""
     BJAM_TOOLSET="darwin"
     ;;
   *)
@@ -82,7 +93,7 @@ fi
 CPPFLAGS=""
 CFLAGS="-std=c99"
 CXXFLAGS="-std=c++98"
-LDFLAGS="-L$PWD/src -L$PWD/src/svc"
+LDFLAGS=""
 BFLAGS=""
 
 # Check for C99 standard
@@ -197,17 +208,10 @@ AC_ARG_WITH(
 )
 if test $with_aterm; then
   ATERM_ROOT=$(echo $with_aterm, | cut -d, -f1)
-  ATERM_SUFFIX=$(echo $with_aterm, | cut -d, -f2)
+  ATERM_SUFFIX=/$(echo $with_aterm, | cut -d, -f2 -s)
   if test $ATERM_ROOT; then
-    if test $ATERM_SUFFIX; then
-      ATERM_INCLUDE="$ATERM_ROOT/include/$ATERM_SUFFIX"
-      ATERM_LIB="$ATERM_ROOT/lib/$ATERM_SUFFIX"
-    else
-      ATERM_INCLUDE="$ATERM_ROOT/include"
-      ATERM_LIB="$ATERM_ROOT/lib"
-    fi
-    ATERM_CPPFLAGS="-I$ATERM_INCLUDE"
-    ATERM_LDFLAGS="-L$ATERM_LIB"
+    ATERM_CPPFLAGS="-I$ATERM_ROOT/include$ATERM_SUFFIX"
+    ATERM_LDFLAGS="-L$ATERM_LIB$ATERM_SUFFIX"
   fi
   if test $enable_profile; then
     AC_CHECK_LIB([ATerm-prof], [ATinit], , [AC_MSG_ERROR([cannot find ATerm-prof library])])
@@ -224,7 +228,7 @@ if test $with_aterm; then
   AC_CHECK_HEADERS([aterm2.h], , [AC_MSG_ERROR([cannot find ATerm headers])])
 else
   AC_MSG_NOTICE([using local ATerm library])
-  ATERM_CPPFLAGS="-I$PWD/src"
+  ATERM_CPPFLAGS="-I$PWD/src/aterm"
   ATERM_LDFLAGS="-L$PWD/src/aterm"
   ATERM_NAME="ATerm"
   BUILD_ATERM=1
@@ -233,8 +237,6 @@ AC_SUBST([ATERM_CPPFLAGS],[])
 AC_SUBST([ATERM_LDFLAGS],[])
 AC_SUBST([ATERM_NAME],[])
 AC_SUBST([BUILD_ATERM],[])
-# debug: AC_MSG_RESULT([CPPFLAGS=$CPPFLAGS])
-# debug: AC_MSG_RESULT([LDFLAGS=$LDFLAGS])
 
 # Check for xml2 library and header files
 AC_ARG_WITH(
@@ -390,6 +392,9 @@ then
   exec_prefix='${prefix}'
 fi
 
+includedir="$includedir/mcrl2"
+datadir="$datadir/mcrl2"
+
 eval "eval PREFIX_DIR=${prefix}"
 AC_SUBST([PREFIX_DIR],[])
 eval "eval EXEC_PREFIX_DIR=${exec_prefix}"
@@ -405,10 +410,27 @@ AC_SUBST([INCLUDE_DIR],[])
 eval "eval MAN_DIR=${mandir}"
 AC_SUBST([MAN_DIR],[])
 
+# Runtime compilation flags
+AC_SUBST([R_CFLAGS],[])
+AC_SUBST([R_SCFLAGS],["$R_SCFLAGS $R_CFLAGS"])
+AC_SUBST([R_CXXFLAGS],[])
+AC_SUBST([R_SCXXFLAGS],["$R_SCXXFLAGS $R_CXXFLAGS"])
+AC_SUBST([R_CPPFLAGS],[])
+AC_SUBST([R_LDFLAGS],[$R_LDFLAGS])
+AC_SUBST([R_SLDFLAGS],[$R_SLDFLAGS])
+
+if test $BUILD_ATERM; then
+  AC_SUBST([IATERM_CPPFLAGS],[-I$INCLUDE_DIR/aterm])
+  AC_SUBST([IATERM_LDFLAGS],[-L$INCLUDE_DIR/aterm])
+else
+  AC_SUBST([IATERM_CPPFLAGS],[$ATERM_CPPFLAGS])
+  AC_SUBST([IATERM_LDFLAGS],[$ATERM_LDFLAGS])
+fi
+
 AC_MSG_NOTICE()
 AC_MSG_NOTICE(Some tools will not be built if any of these libraries are missing.)
 AC_MSG_NOTICE()
 
-AC_CONFIG_FILES([src/boost/tools/build/v2/user-config.jam src/squadt/examples/tool_catalog src/rewr_innerc_aux.h src/setup.h config config.jam])
+AC_CONFIG_FILES([src/boost/tools/build/v2/user-config.jam src/squadt/examples/tool_catalog src/setup.h config config.jam])
 AC_OUTPUT
 

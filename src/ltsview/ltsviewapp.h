@@ -10,7 +10,7 @@
 #endif
 #include <string>
 #include <iostream>
-#include "aterm/aterm1.h"
+#include "aterm1.h"
 #include "mediator.h"
 #include "mainframe.h"
 #include "fileloader.h"

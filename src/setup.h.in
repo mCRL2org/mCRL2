@@ -3,4 +3,15 @@
 
 #define DATA_DIRECTORY "@DATA_DIR@"
 
+#define CC             "@CC@"
+#define CFLAGS         "@R_CFLAGS@"
+#define CXXFLAGS       "@R_CXXFLAGS@"
+#define CPPFLAGS       "@R_CPPFLAGS@"
+#define LDFLAGS        "@R_LDFLAGS@"
+#define SCFLAGS        "@R_SCFLAGS@"        // Shared object compilation
+#define SCXXFLAGS      "@R_SCXXFLAGS@"      // Shared object compilation
+#define SLDFLAGS       "@R_SLDFLAGS@"       // Linking to shared library
+#define ATERM_CPPFLAGS "@IATERM_CPPFLAGS@"  // Preprocessor options for the ATerm library
+#define ATERM_LDFLAGS  "@IATERM_LDFLAGS@"   // Linker options for the ATerm library
+
 #endif

@@ -72,7 +72,7 @@ void RewriterCompilingInnermost::clearSubstitutions()
 #include "liblowlevel.h"
 #include "libstruct.h"
 #include "libprint_c.h"
-#include "rewr_innerc_aux.h"
+#include "setup.h"
 #include "rewr_innerc.h"
 
 
