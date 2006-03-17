@@ -36,7 +36,7 @@
  </tool>
  <tool name="lpeinfo" identifier="lpeinfo" location="@BIN_DIR@/lpeinfo">
   <mode category="Analysis">
-   <description>A tool that retrieves some basic information aboute an LPE.</description>
+   <description>A tool that retrieves some basic information about an LPE.</description>
    <object type="input" formalism="LPE" default-format="lpe"/>
   </mode>
  </tool>

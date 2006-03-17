@@ -7,50 +7,24 @@
 
 #include <xml2pp/detail/text_reader.tcc>
 
-#include "tool.h"
-#include "executor.h"
-#include "specification.h"
 #include "tool_manager.h"
 #include "settings_manager.tcc"
 #include "ui_core.h"
 
+#include "setup.h"
+
 namespace squadt {
 
-  /* A tool executor per instance, will be replaced in the future */
-  executor ToolManager::tool_executor;
-
-  ToolManager::ToolManager() {
+  tool_manager::tool_manager() {
   }
 
-  ToolManager::~ToolManager() {
-    const std::list < Tool* >::const_iterator b = tools.end();
-          std::list < Tool* >::const_iterator i = tools.begin();
- 
-    while (i != b) {
-      delete *i;
- 
-      ++i;
-    }
+  tool_manager::~tool_manager() {
+    terminate();
   }
 
-  /* Write project information to stream */
-  void ToolManager::Print(std::ostream& stream) const {
-    const std::list < Tool* >::const_iterator b = tools.end();
-          std::list < Tool* >::const_iterator i = tools.begin();
-          unsigned int                       n = 0;
- 
-    while (i != b) {
-      stream << "Configured as tool <" << n++ << "> :" << std::endl << std::endl;
- 
-      (*i)->Print(stream);
- 
-      ++i;
-    }
-  }
-
-  inline bool ToolManager::Write(std::ostream& stream) const {
-    const std::list < Tool* >::const_iterator b = tools.end();
-          std::list < Tool* >::const_iterator i = tools.begin();
+  void tool_manager::write(std::ostream& stream) const {
+    const tool_list::const_iterator b = tools.end();
+          tool_list::const_iterator i = tools.begin();
  
     /* Write header */
     stream << "<?xml version=\"1.0\" encoding=\"utf-8\"?>\n"
@@ -58,19 +32,28 @@ namespace squadt {
            << " xsi:noNamespaceSchemaLocation=\"tool_catalog.xsd\" version=\"1.0\">\n";
  
     while (i != b) {
-      (*i)->Write(stream);
+      (*i)->write(stream);
  
       ++i;
     }
  
     /* Write footer */
     stream << "</tool-catalog>\n";
- 
-    return (true);
   }
 
-  inline bool ToolManager::Read(const std::string& name) {
-    xml2pp::text_reader::file_name< std::string > f(name);
+  tool_manager::ptr tool_manager::read() {
+    return (read(global_settings_manager->path_to_user_settings(settings_manager::tool_catalog_base_name)));
+  }
+
+  /**
+   * @param n the name of the file to read from
+   **/
+  tool_manager::ptr tool_manager::read(const std::string& n) {
+    xml2pp::text_reader::file_name< std::string > f(n);
+
+    if (!bf::exists(bf::path(f.get()))) {
+      throw (exception(exception_identifier::failed_loading_object, "squadt tool catalog", f.get()));
+    }
 
     xml2pp::text_reader reader(f);
 
@@ -78,86 +61,42 @@ namespace squadt {
                             global_settings_manager->path_to_schemas(
                                     settings_manager::append_schema_suffix(
                                             settings_manager::tool_catalog_base_name))));
+    return (read(reader));
+  }
+
+  /**
+   * @param r an XML text reader to use to read data from
+   **/
+  tool_manager::ptr tool_manager::read(xml2pp::text_reader& r) {
+
+    tool_manager::ptr new_tool_manager(new tool_manager());
  
-    bool return_value = true;
- 
-    try {
-      /* Read root element (tool-catalog) */
-      reader.read();
-      reader.read();
+    /* Read root element (tool-catalog) */
+    r.read();
+    r.read();
   
-      while (!reader.is_end_element()) {
-        Tool* new_tool = new Tool();
- 
-        new_tool->Read(reader);
- 
-        /* Add a new tool to the list of tools */
-        tools.push_back(new_tool);
-      }
-    }
-    catch(int status) {
-      /* Process error, or end of file */
-      if (status != 0) {
-        std::cerr << "Fatal: Parse error(s) or unknown exception with parsing tool_catalog.xsd.\n";
- 
-        return_value = false;
-      }
+    while (!r.is_end_element()) {
+      /* Add a new tool to the list of tools */
+      new_tool_manager->tools.push_back(tool::read(r));
     }
  
-    return (return_value);
+    return (new_tool_manager);
   }
 
-  /* Loads tool configurations from XML file */
-  bool ToolManager::Load() throw () {
+  /**
+   * @param t the tool that is to be run
+   * @param p the processor that should be passed the feedback of execution
+   **/
+  void tool_manager::run(tool& t, processor* p) const {
     using namespace boost::filesystem;
  
-    std::string catalog_file = global_settings_manager->path_to_user_settings(settings_manager::tool_catalog_base_name);
-
-    if (!exists(path(catalog_file, no_check))) {
-      path ghost_catalog(catalog_file + ".ghost", no_check);
-  
-      if (exists(ghost_catalog)) {
-        /* Recover */
-        rename(ghost_catalog, path(catalog_file, no_check));
-      }
-      else {
-        throw (exception(exception_identifier::cannot_load_tool_configuration, catalog_file));
-      }
-    }
+    std::string command = t.get_location();
  
-    return (Read(catalog_file));
+    /* TODO contact executor to execute */
   }
 
-  /* TODO ensure atomicity */
-  bool ToolManager::Store() const {
-    using namespace boost::filesystem;
- 
-    std::string   catalog_file = global_settings_manager->path_to_user_settings(settings_manager::tool_catalog_base_name);
-    std::ofstream catalog_stream(catalog_file.c_str(), std::ios::out | std::ios::trunc);
-    path          old_catalog_path = path(catalog_file + ".ghost");
- 
-    rename(path(catalog_file), old_catalog_path);
-
-    bool return_value = Write(catalog_stream);
- 
-    catalog_stream.close();
- 
-    remove(old_catalog_path);
- 
-    return (return_value);
-  }
-
-  void ToolManager::Execute(unsigned int tool_identifier, std::string arguments, Specification* p) const {
-    using namespace boost::filesystem;
- 
-    std::string command = path(tool_manager.GetTool(tool_identifier)->GetLocation(), no_check).string();
- 
-    tool_executor.execute(command.append(" ").append(arguments), p);
-  }
-
-  /* Have the tool executor terminate all running tools */
-  void ToolManager::TerminateAll() {
-    tool_executor.terminate();
+  void tool_manager::terminate() {
+    /* TODO signal executor to terminate the processes related to this tool manager */
   }
 }
 

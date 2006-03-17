@@ -55,8 +55,6 @@ $(TREE_ROOT)config.jam:
 # Rules for building the maximum_revision tool and to generate a `revision' file
 -include ../../utility/revision.mk
 
-CPPFLAGS += $(REVISION)
-
 # Include dependencies 
 #ifeq ($(findstring $(MAKECMDGOALS),clean distclean),)
 #%.o: dependencies
@@ -99,7 +97,6 @@ strip: $(TARGETS)
 install: all
 	@cd build; $(BJAM) install
 	$(INSTALL) -d $(bindir)
-	$(INSTALL) -d $(datadir)
 	$(INSTALL) -d $(datadir)/images
 	$(INSTALL) -d $(datadir)/schemas
 	$(INSTALL) -d $(datadir)/configuration

@@ -1,91 +1,142 @@
 #ifndef TOOL_MANAGER_H_
 #define TOOL_MANAGER_H_
 
+#include <algorithm>
+#include <functional>
 #include <iosfwd>
 #include <ostream>
 #include <string>
 #include <list>
 
+#include <boost/bind.hpp>
+#include <boost/noncopyable.hpp>
+
 #include "tool.h"
+#include "processor.h"
 #include "executor.h"
 
 namespace squadt {
 
-  using namespace tool;
+  /**
+   * \brief Basic component that provides information about a set of tools
+   *
+   * The tool manager is a special purpose database that is used to keep track
+   * of a set of tools across system runs. To this end it can store and
+   * retrieve tool information to/from persistent storage. Additionally the
+   * tool manager provides functionality to help run, and once running, to
+   * terminate tools.
+   **/
+  class tool_manager : public boost::noncopyable {
+    friend class processor;
+ 
+    public:
+ 
+      /** \brief Convenience type alias for hiding shared pointer implementation */
+      typedef boost::shared_ptr < tool_manager > ptr;
 
-  class executor;
-  class Specification;
-
-  class ToolManager {
-    friend class Specification;
+      /** \brief Convenience type alias the list of tools */
+      typedef std::list < tool::ptr >            tool_list;
  
     private:
  
-      static executor tool_executor;
- 
-      std::list < Tool* > tools;            /* List of known tools */
- 
-      /* Write configuration to stream */
-      bool Write(std::ostream& = std::cout) const;
- 
-      /* Read configuration from file */
-      bool Read(const std::string&);
- 
-      void Execute(unsigned int tool_identifier, std::string arguments, Specification* p = 0) const;
+      /** \brief Type for output print format variants */
+      enum output_variant {
+        plain_text,          ///< Output is formatted plain text
+        squadt_tool_catalog  ///< Output is squadt XML tool catalog format
+      };
+
+      /** \brief List of known tools */
+      tool_list                tools;
 
     public:
  
-      /* Constructor; with the directory it should use as data directory */
-      ToolManager();
+      /** \brief Constructor */
+      tool_manager();
  
-      ~ToolManager();
+      /** \brief Destructor */
+      ~tool_manager();
  
-      bool QueryTools() const;
+      /** \brief Write configuration to stream */
+      void write(std::ostream& = std::cout) const;
  
-      /** Load tool configuration from the default location */
-      bool Load() throw ();
+      /** \brief Read configuration from the default location */
+      static tool_manager::ptr read();
+
+      /** \brief Read configuration from file */
+      static tool_manager::ptr read(const std::string&);
+
+      /** \brief Read configuration with an XML text reader */
+      static tool_manager::ptr read(xml2pp::text_reader&);
  
-      /** Store tool configuration to the default location */
-      bool Store() const;
+      /** \brief Establishes whether the named tool is among the known tools or not */
+      inline bool exists(const std::string&) const;
+
+      /** \brief Returns a tool by its name */
+      inline tool& find(const std::string&) const;
+
+      /** \brief Start a tool */
+      void run(tool&, processor* = 0) const;
+
+      /** \brief Add a new tool to the catalog */
+      inline bool add(const std::string&, const std::string&);
  
-      /** Print tool configuration information to stream */
-      void Print(std::ostream& stream = std::cerr) const;
+      /** \brief Get the list of known tools */
+      inline const tool_list& get_tools();
  
-      /** Add a new tool to the catalog */
-      bool AddTool(std::string name);
+      /** \brief Get the number of known tools */
+      inline const unsigned int number_of_tools() const;
  
-      /** Remove a tool from the catalog */
-      bool RemoveTool(std::string name);
- 
-      /** Get the list of known tools */
-      const std::list < Tool* >& GetTools() const;
- 
-      /** Get tool number i (where i < tools.size() ) */
-      const Tool* GetTool(unsigned int index) const;
- 
-      /** Get the number of known tools */
-      const unsigned int GetNumberOfTools() const;
- 
-      /** Have the tool executor terminate all running tools */
-      void TerminateAll();
+      /** \brief Have the tool executor terminate all running tools */
+      void terminate();
   };
 
-  inline const std::list < Tool* >& ToolManager::GetTools() const {
+  inline const std::list < tool::ptr >& tool_manager::get_tools() {
     return (tools);
   }
 
-  inline const Tool* ToolManager::GetTool(unsigned int index) const {
-    std::list < Tool* >::const_iterator i = tools.begin();
-
-    while (0 < index--) {
-      ++i;
-    }
-
-    return (*i);
+  inline const unsigned int tool_manager::number_of_tools() const {
+    return (tools.size());
   }
 
-  inline const unsigned int ToolManager::GetNumberOfTools() const {
-    return (tools.size());
+  /**
+   * @param n the name of the tool
+   *
+   * \pre a tool with this name must be among the known tools
+   **/
+  inline tool& tool_manager::find(const std::string& n) const {
+    using namespace boost;
+
+    return (*(*std::find_if(tools.begin(), tools.end(), 
+               bind(std::equal_to< std::string >(), n, 
+                       bind(&tool::get_name,
+                               bind(&tool::ptr::get, _1))))).get());
+  }
+
+  /**
+   * @param n the name of the tool
+   **/
+  inline bool tool_manager::exists(const std::string& n) const {
+    using namespace boost;
+
+    return (tools.end() != std::find_if(tools.begin(), tools.end(), 
+               bind(std::equal_to< std::string >(), n, 
+                       bind(&tool::get_name,
+                               bind(&tool::ptr::get, _1)))));
+  }
+
+  /**
+   * @param n the name of the tool
+   *
+   * \return whether the tool was added or not
+   **/
+  inline bool tool_manager::add(const std::string& n, const std::string& l) {
+    bool b = exists(n);
+
+    if (!b) {
+      tools.push_back(tool::ptr(new tool(n, l)));
+    }
+
+    return (b);
   }
 }
 

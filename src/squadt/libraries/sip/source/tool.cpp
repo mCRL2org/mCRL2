@@ -76,26 +76,26 @@ namespace sip {
 
     reader.read();
 
-    current_controller_capabilities = controller_capabilities::from_xml(reader);
+    current_controller_capabilities = controller_capabilities::read(reader);
   }
 
   /* Send a specification of the tools capabilities */
   void tool_communicator::reply_tool_capabilities() {
-    message m(current_tool_capabilities.to_xml(), sip::reply_tool_capabilities);
+    message m(current_tool_capabilities.write(), sip::reply_tool_capabilities);
 
     send_message(m);
   }
 
   /* Send a specification of the current configuration (it may change during tool execution) */
   void tool_communicator::send_accept_configuration() {
-    message m(current_configuration.to_xml(), sip::send_accept_configuration);
+    message m(current_configuration.write(), sip::send_accept_configuration);
 
     send_message(m);
   }
 
   /* Send a layout specification for the display space reserved for this tool */
   void tool_communicator::send_display_layout(layout::display_layout&) {
-//    message m(current_display_layout.to_xml(), sip::send_display_layout);
+//    message m(current_display_layout.write(), sip::send_display_layout);
 
 //    send_message(m);
   }

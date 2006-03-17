@@ -9,6 +9,7 @@
 
 #include <xml2pp/text_reader.h>
 #include <sip/detail/object.h>
+#include <sip/detail/configuration.h>
 #include <sip/detail/capabilities.h>
 
 namespace sip {
@@ -44,7 +45,7 @@ namespace sip {
       typedef std::set  < input_combination >              input_combination_list;
 
       /** \brief Convenience type that hides the shared pointer implementation */
-      typedef boost::shared_ptr < tool_capabilities >      tool_capabilities_ptr;
+      typedef boost::shared_ptr < tool_capabilities >      ptr;
 
     private:
 
@@ -58,7 +59,7 @@ namespace sip {
       bool                     interactive;
 
       /** \brief Read from XML stream */
-      inline static tool_capabilities_ptr from_xml(xml2pp::text_reader& reader) throw ();
+      inline static tool_capabilities::ptr read(xml2pp::text_reader& reader) throw ();
 
     public:
 
@@ -75,10 +76,10 @@ namespace sip {
       inline void set_interactive(bool);
 
       /** \brief Write to XML string */
-      inline std::string to_xml() const;
+      inline std::string write() const;
 
       /** \brief Write to XML stream */
-      inline void to_xml(std::ostream&) const;
+      inline void write(std::ostream&) const;
 
       /** \brief Returns a reference to input_combinations.begin() */
       inline input_combination_list::iterator begin_input_combinations();
@@ -100,10 +101,10 @@ namespace sip {
     return (protocol_version);
   }
 
-  inline std::string tool_capabilities::to_xml() const {
+  inline std::string tool_capabilities::write() const {
     std::ostringstream output;
 
-    to_xml(output);
+    write(output);
 
     return (output.str());
   }
@@ -118,7 +119,7 @@ namespace sip {
     return (input_combinations.end());
   }
 
-  inline void tool_capabilities::to_xml(std::ostream& output) const {
+  inline void tool_capabilities::write(std::ostream& output) const {
     output << "<capabilities>"
            << "<protocol-version major=\"" << (unsigned short) protocol_version.major
            << "\" minor=\"" << (unsigned short) protocol_version.minor << "\"/>";
@@ -141,52 +142,40 @@ namespace sip {
   }
 
   /** \pre the reader must point at a capabilities element */
-  inline tool_capabilities::tool_capabilities_ptr tool_capabilities::from_xml(xml2pp::text_reader& reader) throw () {
+  inline tool_capabilities::tool_capabilities::ptr tool_capabilities::read(xml2pp::text_reader& r) throw () {
     version v = {0,0};
 
-    reader.read();
+    r.read();
 
-    assert (reader.is_element("protocol-version"));
+    assert (r.is_element("protocol-version"));
     
-    reader.get_attribute(&v.major, "major");
-    reader.get_attribute(&v.minor, "minor");
+    r.get_attribute(&v.major, "major");
+    r.get_attribute(&v.minor, "minor");
 
-    tool_capabilities_ptr c(new tool_capabilities(v));
+    tool_capabilities::ptr c(new tool_capabilities(v));
 
-    reader.read();
+    r.read();
+    r.skip_end_element("protocol-version");
 
-    /* Skip end element */
-    if (reader.is_end_element()) {
-      reader.read();
+    if (r.is_element("interactivity")) {
+      c->interactive = r.get_attribute("level");
+
+      r.read();
+      r.skip_end_element("interactivity");
     }
 
-    if (reader.is_element("interactivity")) {
-      c->interactive = reader.get_attribute("level");
+    assert (r.is_element("input-configuration"));
 
-      reader.read();
-
-      /* Skip end element */
-      if (reader.is_end_element()) {
-        reader.read();
-      }
-    }
-
-    assert (reader.is_element("input-configuration"));
-
-    while (reader.is_element("input-configuration")) {
+    while (r.is_element("input-configuration")) {
       input_combination ic;
 
-      reader.get_attribute(&ic.first, "category");
-      reader.get_attribute(&ic.second, "format");
+      r.get_attribute(&ic.first, "category");
+      r.get_attribute(&ic.second, "format");
 
       c->input_combinations.insert(ic);
 
-      reader.read();
-     
-      /* Skip end element */
-      if (reader.is_end_element() && reader.is_element("input-configuration")) {
-        reader.read();
-      }
+      r.read();
+      r.skip_end_element("input-configuration");
     }
 
     return (c);

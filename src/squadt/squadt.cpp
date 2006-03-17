@@ -17,13 +17,10 @@
 namespace squadt {
 
   /* Global Settings Manager component */
-  settings_manager_ptr global_settings_manager;
+  settings_manager::ptr global_settings_manager;
 
   /* Global Tool Manager component */
-  ToolManager          tool_manager;
- 
-  std::ofstream        log_stream;
- 
+  tool_manager::ptr     global_tool_manager;
 }
 
 /* Squadt class declaration */
@@ -41,30 +38,28 @@ bool Squadt::OnInit() {
   using namespace squadt;
   using namespace squadt::GUI;
 
-  global_settings_manager = settings_manager_ptr(new settings_manager(wxFileName::GetHomeDir().fn_str()));
+  global_settings_manager = settings_manager::ptr(new settings_manager(wxFileName::GetHomeDir().fn_str()));
 
   wxInitAllImageHandlers();
 
-  log_stream.open(global_settings_manager->path_to_system_settings("squadt.log").c_str(), std::ios::app);
-
   /* Load tool configuration from storage */
-  ProjectOverview* window = new ProjectOverview(NULL, 1000);
+//  ProjectOverview* window = new ProjectOverview(NULL, 1000);
 
   /* Show a splash */
-  wxBitmap        splash_image;
-  wxSplashScreen* splash;
+//  wxBitmap        splash_image;
+//  wxSplashScreen* splash;
   wxString        logo(global_settings_manager->path_to_images("logo.jpg").c_str(), wxConvLocal);
 
-  if (splash_image.LoadFile(logo, wxBITMAP_TYPE_JPEG)) {
-    splash = new wxSplashScreen(splash_image, wxSPLASH_CENTRE_ON_PARENT|wxSPLASH_TIMEOUT, 600, window, wxID_ANY);
-  }
+//  if (splash_image.LoadFile(logo, wxBITMAP_TYPE_JPEG)) {
+//    splash = new wxSplashScreen(splash_image, wxSPLASH_CENTRE_ON_PARENT|wxSPLASH_TIMEOUT, 600, window, wxID_ANY);
+//  }
 
   /* Make sure the main window is visible */
-  window->Show(true);
+//  window->Show(true);
 
-  tool_manager.Load();
+  global_tool_manager = tool_manager::read();
 
-  window->GenerateToolContextMenus();
+//  window->GenerateToolContextMenus();
 
   return (true);
 }

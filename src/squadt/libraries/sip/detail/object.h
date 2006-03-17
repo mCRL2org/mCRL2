@@ -49,7 +49,7 @@ namespace sip {
       typedef std::string                   storage_format;
 
       /** \brief convenience type to hide the shared pointer implementation */
-      typedef boost::shared_ptr < object >  object_ptr;
+      typedef boost::shared_ptr < object >  ptr;
 
       /** Datatype for the textual identifier of an option/object */
       typedef option::identifier            identifier;
@@ -72,7 +72,7 @@ namespace sip {
       const static char*   type_strings[];
 
       /** \brief Read from XML stream */
-      inline static object_ptr from_xml(xml2pp::text_reader& reader) throw ();
+      inline static object::ptr read(xml2pp::text_reader& reader) throw ();
 
       /** \brief Constructor */
       inline object(identifier, const storage_format, const uri = "", const type = input);
@@ -88,7 +88,7 @@ namespace sip {
       inline const uri get_location() const;
 
       /** \brief Write to XML stream */
-      inline void to_xml(std::ostream&) const;
+      inline void write(std::ostream&) const;
   };
 
   inline object::object(identifier i, const storage_format f, const uri l, const type t) : format(f), location(l), _type(t), id(i) {
@@ -106,7 +106,7 @@ namespace sip {
     return (location);
   }
 
-  inline void object::to_xml(std::ostream& output) const {
+  inline void object::write(std::ostream& output) const {
     output << "<object id=\"" << id
            << "\" type=\"" << type_strings[_type]
            << "\" storage-format=\"" << format << "\"";
@@ -119,18 +119,18 @@ namespace sip {
   }
 
   /** \pre the reader must point at an object element} */
-  inline object::object_ptr object::from_xml(xml2pp::text_reader& reader) throw () {
+  inline object::ptr object::read(xml2pp::text_reader& r) throw () {
     option::identifier id;
 
-    assert (reader.is_element("object"));
+    assert (r.is_element("object"));
     
-    if (!reader.get_attribute(&id, "id")) {
+    if (!r.get_attribute(&id, "id")) {
       throw (exception(exception_identifier::message_missing_required_attribute, "id", "object"));
     }
 
     std::string new_type;
 
-    if (!reader.get_attribute(&new_type, "type")) {
+    if (!r.get_attribute(&new_type, "type")) {
       throw (exception(exception_identifier::message_missing_required_attribute, "type", "object"));
     }
 
@@ -146,22 +146,18 @@ namespace sip {
 
     std::string new_format;
 
-    if (!reader.get_attribute(&new_format, "storage-format")) {
+    if (!r.get_attribute(&new_format, "storage-format")) {
       throw (exception(exception_identifier::message_missing_required_attribute, "storage-format", "object"));
     }
 
     std::string new_location;
 
-    reader.get_attribute(&new_location, "location");
+    r.get_attribute(&new_location, "location");
 
-    reader.read();
+    r.read();
+    r.skip_end_element("object");
 
-    /* Skip end element */
-    if (reader.is_end_element() && reader.is_element("object")) {
-      reader.read();
-    }
-
-    return (object_ptr(new object(id, new_format, new_location, static_cast < object::type > (i))));
+    return (object::ptr(new object(id, new_format, new_location, static_cast < object::type > (i))));
   }
 }
 

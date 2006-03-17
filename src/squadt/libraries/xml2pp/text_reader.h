@@ -59,7 +59,7 @@ namespace xml2pp {
       inline void set_schema(const file_name< T >&) throw ();
 
       /** \brief Traverses of the XML document tree */
-      inline void read() throw ();
+      inline void read(unsigned int = 0) throw ();
 
       /** \brief Returns the name of the current element */
       inline std::string element_name();
@@ -75,17 +75,20 @@ namespace xml2pp {
       inline bool get_attribute(const char*);
 
       /** \brief Get the value of an element as ... */
-      inline bool get_value(std::string* astring);
+      inline bool get_value(std::string*);
 
       /** \brief Get the value of an element as ... */
       template < typename T >
-      inline bool get_value(T* aninteger);
+      inline bool get_value(T*);
 
       /** \brief Whether the current element matches element_name */
-      inline bool is_element(char* element_name);
+      inline bool is_element(const char*);
 
       /** \brief Whether the current element is an end of element tag */
       inline bool is_end_element();
+
+      /** \brief Skips to the next position if the current element is an end of element tag */
+      inline bool skip_end_element(const char*);
 
       /** \brief Whether the current element is empty */
       inline bool is_empty_element();

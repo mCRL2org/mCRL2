@@ -18,17 +18,14 @@ namespace sip {
   /** \brief Describes a report of tool operation */
   class report {
     private:
-      /** \brief Convenience data type to hide the shared pointer wrapping */
-      typedef configuration::configuration_ptr configuration_ptr;
-
       /** \brief Room for errors (any error here implies unsuccessful termination) */
-      std::string       error;
+      std::string        error;
 
       /** \brief Room for comments about anything at all */
-      std::string       comment;
+      std::string        comment;
 
       /** \brief The configuration that can be used to rerun the tool and refresh its outputs */
-      configuration_ptr _configuration;
+      configuration::ptr _configuration;
 
     public:
       /** \brief Constructor */
@@ -38,16 +35,16 @@ namespace sip {
       inline void set_error(std::string);
 
       /** \brief Set the configuration that was used */
-      void set_configuration(configuration_ptr o);
+      void set_configuration(configuration::ptr o);
 
       /** \brief Report comment (arbitrary text) */
       inline void set_comment(std::string);
 
       /** \brief Generates an XML representation for this report */
-      void to_xml(std::ostream&) const;
+      void write(std::ostream&) const;
 
       /** \brief Reconstructs a report from XML representation */
-      static report* from_xml(xml2pp::text_reader&) throw ();
+      static report* read(xml2pp::text_reader&) throw ();
   };
 
   inline report::report() {
@@ -58,8 +55,8 @@ namespace sip {
   }
 
   /** \pre{configuration must have been allocated on the heap} */
-  inline void report::set_configuration(configuration_ptr c) {
-    _configuration = configuration_ptr (c);
+  inline void report::set_configuration(configuration::ptr c) {
+    _configuration = configuration::ptr (c);
   }
 
   inline void report::set_comment(std::string c) {

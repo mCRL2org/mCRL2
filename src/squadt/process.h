@@ -19,7 +19,7 @@ namespace squadt {
   class process;
   
   /**
-   * Wrapper around a wxProcess object
+   * \brief Represents a system process with a status reporting facility
    **/
   class process : public wxProcess {
     public:
@@ -71,7 +71,7 @@ namespace squadt {
    * @param h the function to call when the process terminates
    * @param f the flags for process behaviour (see wxWidgets documentation)
    **/
-  inline process::process(handler h, int f) : wxProcess(f), current_status(stopped), call_back() {
+  inline process::process(handler h, int f) : wxProcess(f), current_status(stopped), call_back(h) {
   }
 
   inline process::~process() {

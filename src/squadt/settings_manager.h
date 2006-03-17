@@ -11,11 +11,17 @@ namespace squadt {
   class boost::filesystem::path;
 
   /**
+   * \brief Central storage component for paths to common resources
+   *
    * Stores the runtime configuration settings for all components.
    *
    * \attention call boost::filesystem::path::default_name_check(bf::no_check) before instantiating
    **/
   class settings_manager : public boost::noncopyable {
+    public:
+      /** Convenience type to hide shared pointer implementation */
+      typedef boost::shared_ptr < settings_manager > ptr;
+
     private:
       /** Convenience type for paths */
       typedef boost::filesystem::path path;

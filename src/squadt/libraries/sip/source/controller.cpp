@@ -28,7 +28,7 @@ namespace sip {
 
   /* Reply details about the amount of reserved display space */
   void controller_communicator::reply_controller_capabilities() {
-    message m(current_controller_capabilities.to_xml(), sip::reply_controller_capabilities);
+    message m(current_controller_capabilities.write(), sip::reply_controller_capabilities);
 
     send_message(m);
   }
@@ -42,7 +42,7 @@ namespace sip {
 
   /* Send the selected input configuration */
   void controller_communicator::send_configuration() {
-    message m(current_configuration->to_xml(), sip::send_configuration);
+    message m(current_configuration->write(), sip::send_configuration);
 
     send_message(m);
   }
@@ -63,7 +63,7 @@ namespace sip {
 
     reader.read();
 
-    current_tool_capabilities = tool_capabilities::from_xml(reader);
+    current_tool_capabilities = tool_capabilities::read(reader);
   }
 
   void controller_communicator::accept_layout_handler(sip_messenger::message_ptr&) {

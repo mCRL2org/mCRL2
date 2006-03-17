@@ -33,10 +33,10 @@ void controller_capabilities_exchange() {
   /** Initiative is on the side of the tool */
   tc.connect(cc);
 
-  cc.get_controller_capabilities().to_xml(check_stream0);
+  cc.get_controller_capabilities().write(check_stream0);
 
   tc.request_controller_capabilities();
-  tc.get_controller_capabilities()->to_xml(check_stream1);
+  tc.get_controller_capabilities()->write(check_stream1);
 
   tc.disconnect();
 
@@ -57,8 +57,8 @@ void controller_capabilities_exchange() {
 
   tc.request_controller_capabilities();
 
-  cc.get_controller_capabilities().to_xml(check_stream0);
-  tc.get_controller_capabilities()->to_xml(check_stream1);
+  cc.get_controller_capabilities().write(check_stream0);
+  tc.get_controller_capabilities()->write(check_stream1);
 
   tc.disconnect();
 
@@ -84,7 +84,7 @@ void tool_capabilities_exchange() {
 
   tc.disconnect();
 
-  BOOST_CHECK(tcp.to_xml() == cc.get_tool_capabilities()->to_xml());
+  BOOST_CHECK(tcp.write() == cc.get_tool_capabilities()->write());
   BOOST_MESSAGE("  done");
 }
 
@@ -100,7 +100,7 @@ void report_exchange() {
   report           r;
   sip_message      m;
 
-  r.to_xml(temporary);
+  r.write(temporary);
 
   m.set_content(temporary.str());
 
@@ -117,7 +117,7 @@ void report_exchange() {
   BOOST_MESSAGE("  Report with an error, a comment and a configuration ... ");
 
   /* New tool configuration */
-  configuration::configuration_ptr config(new configuration);
+  configuration::ptr config(new configuration);
 
   const unsigned int r_option    = 0;
   const unsigned int s_option    = 1;
@@ -132,7 +132,7 @@ void report_exchange() {
   config->add_input(input_file, "text/mcrl2", "examples/abp.mcrl2");
   config->add_output(output_file, "text/plain", "/etc/passwd");
 
-  option::option_ptr t = config->get_option(f_option);
+  option::ptr t = config->get_option(f_option);
 
   /* The option has a URI as argument */
 //  t.append_argument(sip::datatype::uri, std::string("/bin/bash"));
@@ -149,7 +149,7 @@ void report_exchange() {
 
   /* Serialise r */
   temporary.str(std::string(""));
-  r.to_xml(temporary);
+  r.write(temporary);
 
   m.set_content(temporary.str());
 
@@ -162,7 +162,7 @@ void report_exchange() {
   /* New reader */
   xml2pp::text_reader reader(p->to_string());
 
-  report::from_xml(reader)->to_xml(copy);
+  report::read(reader)->write(copy);
 
   BOOST_CHECK(copy.str() == temporary.str());
 

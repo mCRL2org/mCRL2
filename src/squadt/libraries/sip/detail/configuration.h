@@ -28,14 +28,8 @@ namespace sip {
       /** \brief Until there is something better this is the type for a tool category */
       typedef std::string                         tool_category;
 
-      /** \brief Type for a pointer to an option object */
-      typedef option::option_ptr                  option_ptr;
-
-      /** \brief Type for a pointer to an object object */
-      typedef object::object_ptr                  object_ptr;
-
       /** \brief Type to hide for a pointer to an option object */
-      typedef boost::shared_ptr < configuration > configuration_ptr;
+      typedef boost::shared_ptr < configuration > ptr;
 
       /** \brief The optional constraint, option is either not present or only present once */
       const static option_constraint              constrain_optional;
@@ -46,10 +40,10 @@ namespace sip {
     private:
 
       /** Convenience type for container for options */
-      typedef std::map < option_ptr, option_constraint >  option_list;
+      typedef std::map < option::ptr, option_constraint >  option_list;
 
       /** Convenience type for container for objects */
-      typedef std::list < object_ptr >                    object_list;
+      typedef std::list < object::ptr >                    object_list;
 
       /** \brief The list of configuration options */
       option_list options;
@@ -58,7 +52,7 @@ namespace sip {
       object_list objects;
 
       /** \brief Points to an object that contains describes the main input file and the selected tool_category */
-      std::pair < object_ptr, tool_category > input_combination;
+      std::pair < object::ptr, tool_category > input_combination;
 
     public:
 
@@ -78,7 +72,7 @@ namespace sip {
       inline void remove_option(const option::identifier);
 
       /** \brief Get an option by its id */
-      inline option_ptr get_option(const option::identifier) const;
+      inline option::ptr get_option(const option::identifier) const;
 
       /** \brief Add an input/output object to the configuration */
       inline void add_object(const object::identifier, object::storage_format, object::type, object::uri = "");
@@ -90,7 +84,7 @@ namespace sip {
       inline void remove_object(const object::identifier);
 
       /** \brief Get an input/output object from the configuration */
-      inline object_ptr get_object(const object::identifier);
+      inline object::ptr get_object(const object::identifier);
 
       /** \brief Add an input object to the configuration */
       inline void add_input(const object::identifier, object::storage_format, object::uri = "");
@@ -99,7 +93,7 @@ namespace sip {
       inline void remove_input(const object::identifier);
 
       /** \brief Get an input object by its id */
-      inline object_ptr get_input(const object::identifier);
+      inline object::ptr get_input(const object::identifier);
 
       /** \brief Add an output object to the configuration */
       inline void add_output(const object::identifier, object::storage_format, object::uri = "");
@@ -108,16 +102,16 @@ namespace sip {
       inline void remove_output(const object::identifier);
 
       /** \brief Get an output object by its id */
-      inline object_ptr get_output(const object::identifier);
+      inline object::ptr get_output(const object::identifier);
 
       /** \brief Output XML representation to string */
-      inline std::string to_xml() const;
+      inline std::string write() const;
 
       /** \brief Output XML representation to stream */
-      inline void to_xml(std::ostream&) const;
+      inline void write(std::ostream&) const;
 
       /** \brief Read a configuration class from XML */
-      static inline configuration_ptr from_xml(xml2pp::text_reader&) throw ();
+      static inline configuration::ptr read(xml2pp::text_reader&) throw ();
   };
 
   inline configuration::configuration() {
@@ -136,10 +130,10 @@ namespace sip {
 
     assert(find_if(options.begin(), options.end(), bind(equal_to < option::identifier >(),
                     bind(&option::get_id,
-                            bind(&option_ptr::get,
+                            bind(&option::ptr::get,
                                     bind(&option_list::value_type::first, _1))),id)) == options.end());
 
-    options[option_ptr(new option(id))] = constrain_optional;
+    options[option::ptr(new option(id))] = constrain_optional;
   }
 
   /**
@@ -151,7 +145,7 @@ namespace sip {
 
     return (find_if(options.begin(), options.end(), bind(equal_to < option::identifier >(),
                     bind(&option::get_id,
-                            bind(&option_ptr::get,
+                            bind(&option::ptr::get,
                                     bind(&option_list::value_type::first, _1))),id)) != options.end());
   }
 
@@ -165,7 +159,7 @@ namespace sip {
     option_list::iterator i = find_if(options.begin(), options.end(),
                     bind(equal_to < option::identifier >(),
                             bind(&option::get_id,
-                                    bind(&option_ptr::get,
+                                    bind(&option::ptr::get,
                                             bind(&option_list::value_type::first, _1))), id));
 
     assert(i != options.end());
@@ -176,14 +170,14 @@ namespace sip {
   /**
    * @param id an identifier for the option
    **/
-  inline option::option_ptr configuration::get_option(const option::identifier id) const {
+  inline option::ptr configuration::get_option(const option::identifier id) const {
     using namespace std;
     using namespace boost;
 
     option_list::const_iterator i = find_if(options.begin(), options.end(),
                     bind(equal_to < option::identifier >(),
                             bind(&option::get_id,
-                                    bind(&option_ptr::get,
+                                    bind(&option::ptr::get,
                                             bind(&option_list::value_type::first, _1))), id));
 
     assert(i != options.end());
@@ -191,10 +185,10 @@ namespace sip {
     return ((*i).first);
   }
 
-  inline std::string configuration::to_xml() const {
+  inline std::string configuration::write() const {
     std::ostringstream output;
 
-    to_xml(output);
+    write(output);
 
     return (output.str());
   }
@@ -202,7 +196,7 @@ namespace sip {
   /**
    * @param output the stream to which the output is written
    **/
-  inline void configuration::to_xml(std::ostream& output) const {
+  inline void configuration::write(std::ostream& output) const {
     output << "<configuration>";
 
     /* Add input combination */
@@ -222,7 +216,7 @@ namespace sip {
       const option_list::const_iterator b = options.end();
      
       while (i != b) {
-        (*i).first->to_xml(output);
+        (*i).first->write(output);
      
         ++i;
       }
@@ -233,7 +227,7 @@ namespace sip {
       const object_list::const_iterator b = objects.end();
      
       while (i != b) {
-        (*i)->to_xml(output);
+        (*i)->write(output);
      
         ++i;
       }
@@ -254,9 +248,9 @@ namespace sip {
 
     assert(find_if(objects.begin(), objects.end(), bind(equal_to < object::identifier >(),
                     bind(&object::get_id,
-                            bind(&object_ptr::get,_1)),id)) == objects.end());
+                            bind(&object::ptr::get,_1)),id)) == objects.end());
 
-    objects.push_back(object_ptr(new object(id, f, l, t)));
+    objects.push_back(object::ptr(new object(id, f, l, t)));
   }
 
   /**
@@ -287,7 +281,7 @@ namespace sip {
     object_list::iterator i = find_if(objects.begin(), objects.end(),
                     bind(equal_to < object::identifier >(),
                             bind(&object::get_id,
-                                    bind(&object_ptr::get,_1)), id));
+                                    bind(&object::ptr::get,_1)), id));
 
     assert(i != objects.end());
 
@@ -312,7 +306,7 @@ namespace sip {
 
     return (find_if(objects.begin(), objects.end(), bind(equal_to < object::identifier >(),
                     bind(&object::get_id,
-                            bind(&object_ptr::get,_1)),id)) != objects.end());
+                            bind(&object::ptr::get,_1)),id)) != objects.end());
   }
 
   /**
@@ -327,14 +321,14 @@ namespace sip {
   /**
    * @param id an identifier for the object
    **/
-  inline object::object_ptr configuration::get_object(const object::identifier id) {
+  inline object::ptr configuration::get_object(const object::identifier id) {
     using namespace std;
     using namespace boost;
 
     object_list::iterator i = find_if(objects.begin(), objects.end(),
                     bind(equal_to < object::identifier >(),
                             bind(&object::get_id,
-                                    bind(&object_ptr::get,_1)), id));
+                                    bind(&object::ptr::get,_1)), id));
 
     assert(i != objects.end());
 
@@ -344,7 +338,7 @@ namespace sip {
   /**
    * @param id a unique identifier for the object
    **/
-  inline object::object_ptr configuration::get_input(const object::identifier id) {
+  inline object::ptr configuration::get_input(const object::identifier id) {
     assert(get_object(id)->get_type() == object::input);
 
     return (get_object(id));
@@ -353,7 +347,7 @@ namespace sip {
   /**
    * @param id a unique identifier for the object
    **/
-  inline object::object_ptr configuration::get_output(const object::identifier id) {
+  inline object::ptr configuration::get_output(const object::identifier id) {
     assert(get_object(id)->get_type() == object::output);
 
     return (get_object(id));
@@ -364,8 +358,8 @@ namespace sip {
    * /pre the reader points to a \<configuration\> instance
    * /post the readers position is just past the configuration block
    **/
-  inline configuration::configuration_ptr configuration::from_xml(xml2pp::text_reader& reader) throw () {
-    configuration_ptr c(new configuration);
+  inline configuration::ptr configuration::read(xml2pp::text_reader& reader) throw () {
+    configuration::ptr c(new configuration);
 
     assert(reader.is_element("configuration"));
 
@@ -380,7 +374,7 @@ namespace sip {
       reader.get_attribute(&format, "format");
       reader.get_attribute(&location, "location");
 
-      c->input_combination.first = object_ptr(new object (0, format, location));
+      c->input_combination.first = object::ptr(new object (0, format, location));
 
       reader.read();
 
@@ -392,10 +386,10 @@ namespace sip {
     while (!(reader.is_end_element() && reader.is_element("configuration"))) {
       /* Current element must be <option> */
       if (reader.is_element("option")) {
-        c->options[option::from_xml(reader)] = constrain_optional;
+        c->options[option::read(reader)] = constrain_optional;
       }
       else if (reader.is_element("object")) {
-        c->objects.push_back(object::from_xml(reader));
+        c->objects.push_back(object::read(reader));
       }
     }
 

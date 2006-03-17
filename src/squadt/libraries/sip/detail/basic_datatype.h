@@ -16,10 +16,10 @@ namespace sip {
     class basic_datatype {
       public:
         /** \brief Reconstruct a type specification from XML stream */
-        static basic_datatype* from_xml(xml2pp::text_reader&);
+        static basic_datatype* read(xml2pp::text_reader&);
 
         /** \brief Write from XML stream, using value */
-        virtual void to_xml(std::ostream&, std::string value = "") const = 0;
+        virtual void write(std::ostream&, std::string value = "") const = 0;
 
         /** \brief Establishes whether value is valid for an element of this type */
         virtual bool validate(std::string& value) const = 0;
@@ -54,7 +54,7 @@ namespace sip {
         inline string(size_t minimum = 0, size_t maximum = 0); 
 
         /** \brief Reconstruct a type from XML stream */
-        inline static string* from_xml(xml2pp::text_reader&);
+        inline static string* read(xml2pp::text_reader&);
 
         /** \brief Set the minimum length of a string of this type */
         inline void set_minimum_length(size_t);
@@ -63,7 +63,7 @@ namespace sip {
         inline void set_maximum_length(size_t);
 
         /** \brief Write from XML stream, using value */
-        inline void to_xml(std::ostream&, std::string value = "") const;
+        inline void write(std::ostream&, std::string value = "") const;
 
         /** \brief Establishes whether value is valid for an element of this type */
         inline bool validate(std::string& value) const;
@@ -78,25 +78,25 @@ namespace sip {
     inline basic_datatype::~basic_datatype() {
     }
 
-    inline basic_datatype* basic_datatype::from_xml(xml2pp::text_reader& reader) {
-      if (reader.is_element("enumeration")) {
-//        return (enumeration::from_xml(reader));
+    inline basic_datatype* basic_datatype::read(xml2pp::text_reader& r) {
+      if (r.is_element("enumeration")) {
+//        return (enumeration::read(r));
       }
-      else if (reader.is_element("integer")) {
-//        return (integer::from_xml(reader));
+      else if (r.is_element("integer")) {
+//        return (integer::read(r));
       }
-      else if (reader.is_element("real")) {
-//        return (real::from_xml(reader));
+      else if (r.is_element("real")) {
+//        return (real::read(r));
       }
-      else if (reader.is_element("uri")) {
-//        return (uri::from_xml(reader));
+      else if (r.is_element("uri")) {
+//        return (uri::read(r));
       }
-      else if (reader.is_element("string")) {
-        return (string::from_xml(reader));
+      else if (r.is_element("string")) {
+        return (string::read(r));
       }
 
       /* Unknown type in configuration */
-      throw (sip::exception(exception_identifier::message_unknown_type, reader.element_name()));
+      throw (sip::exception(exception_identifier::message_unknown_type, r.element_name()));
     }
 
 //    static integer standard_integer;
@@ -114,21 +114,18 @@ namespace sip {
     }
 
     /** \pre The current element must be \<string\>  */
-    inline string* string::from_xml(xml2pp::text_reader& reader) {
+    inline string* string::read(xml2pp::text_reader& r) {
       size_t minimum = 0;
       size_t maximum = 0;
 
       /* Current element must be <string> */
-      assert(reader.is_element("string"));
+      assert(r.is_element("string"));
 
-      reader.get_attribute(&minimum, "minimum-length");
-      reader.get_attribute(&maximum, "maximum-length");
+      r.get_attribute(&minimum, "minimum-length");
+      r.get_attribute(&maximum, "maximum-length");
 
-      reader.read();
-
-      if (reader.is_element("string") && reader.is_end_element()) {
-        reader.read();
-      }
+      r.read();
+      r.skip_end_element("string");
 
       if (minimum == 0 && maximum == 0) {
         return (&standard_string);
@@ -146,7 +143,7 @@ namespace sip {
       minimum_length = m;
     }
 
-    inline void string::to_xml(std::ostream& output, std::string value) const {
+    inline void string::write(std::ostream& output, std::string value) const {
       assert(validate(value));
 
       output << "<string";

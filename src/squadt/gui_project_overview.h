@@ -39,7 +39,7 @@ namespace squadt {
         static std::map < std::pair < std::string, std::string >, wxMenu* > context_menus;
     
         /* The project manager */
-        ProjectManager project_manager;
+        project_manager::ptr current_project_manager;
     
         /* Convenience functions */
         inline void GenerateMenuBar();
@@ -82,22 +82,21 @@ namespace squadt {
         void CleanUp();
     
         /* To connect Specification objects to elements in the tree view */
-        class SpecificationData : public wxTreeItemData, public SpecificationVisualiser {
+        class SpecificationData : public wxTreeItemData {
           private:
             wxTreeCtrl& tree_view;
     
           public:
-            Specification& specification;
+            processor& _processor;
          
-            /* Visually updates the status of the specification */
-            void VisualiseStatusChange(SpecificationStatus status) {
+            /* Visually updates the status of the _processor */
+            void VisualiseStatusChange(processor::output_status status) {
               wxTreeItemId item = GetId();
     
               tree_view.SetItemImage(item, (tree_view.GetItemImage(item) >> 2) + status);
             }
          
-            SpecificationData(wxTreeCtrl& atree_view, Specification& aspecification) : tree_view(atree_view), specification(aspecification) {
-              aspecification.SetVisualiser(this);
+            SpecificationData(wxTreeCtrl& atree_view, processor& s) : tree_view(atree_view), _processor(s) {
             }
         };
     

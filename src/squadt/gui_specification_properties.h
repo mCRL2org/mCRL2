@@ -14,7 +14,7 @@ namespace squadt {
       DECLARE_EVENT_TABLE()
     
       private:
-        Specification& specification;
+        processor&     current_processor;
         std::string    project_root;
         wxListCtrl*    inputs;
         wxListCtrl*    outputs;
@@ -23,7 +23,7 @@ namespace squadt {
     
       public:
     
-        SpecificationPropertiesDialog(wxWindow*, wxWindowID, wxString, Specification&, std::string);
+        SpecificationPropertiesDialog(wxWindow*, wxWindowID, wxString, processor&, std::string);
     
         void UpdateSizes();
     

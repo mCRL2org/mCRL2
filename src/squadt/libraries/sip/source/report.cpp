@@ -8,7 +8,7 @@
 
 namespace sip {
 
-  void report::to_xml(std::ostream& output) const {
+  void report::write(std::ostream& output) const {
     output << "<report>";
 
     /* Include error */
@@ -37,59 +37,59 @@ namespace sip {
 
     /* Include configuration specification */
     if (_configuration != 0 && !_configuration->is_empty()) {
-      _configuration->to_xml(output);
+      _configuration->write(output);
     }
 
     output << "</report>";
   }
 
-  /** \pre{the reader must point at a report element} */
-  report* report::from_xml(xml2pp::text_reader& reader) throw () {
-    report* r = new report();
+  /** \pre the reader must point at a report element */
+  report* report::read(xml2pp::text_reader& r) throw () {
+    report* l = new report();
 
-    reader.read();
+    r.read();
 
-    assert(reader.is_element("report"));
+    assert(r.is_element("report"));
 
-    reader.read();
+    r.read();
 
     /* Next element is one of : error, comment, output or configuration (or the end tag of report) */
-    while (!reader.is_end_element()) {
-      if (reader.is_element("error")) {
+    while (!r.is_end_element()) {
+      if (r.is_element("error")) {
         std::string temporary;
 
-        reader.read();
+        r.read();
 
-        if (!reader.is_end_element()) {
-          reader.get_value(&temporary);
+        if (!r.is_end_element()) {
+          r.get_value(&temporary);
 
-          reader.read();
+          r.read();
         }
 
-        reader.read();
+        r.read();
 
-        r->set_error(temporary);
+        l->set_error(temporary);
       }
-      else if (reader.is_element("comment")) {
+      else if (r.is_element("comment")) {
         std::string temporary;
 
-        reader.read();
+        r.read();
 
-        if (!reader.is_end_element()) {
-          reader.get_value(&temporary);
+        if (!r.is_end_element()) {
+          r.get_value(&temporary);
 
-          reader.read();
+          r.read();
         }
 
-        reader.read();
+        r.read();
 
-        r->set_comment(temporary);
+        l->set_comment(temporary);
       }
-      else if (reader.is_element("configuration")) {
-        r->set_configuration(configuration::from_xml(reader));
+      else if (r.is_element("configuration")) {
+        l->set_configuration(configuration::read(r));
       }
     }
 
-    return (r);
+    return (l);
   }
 }

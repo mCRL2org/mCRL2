@@ -3,84 +3,115 @@
 
 #include <list>
 
-#include "specification.h"
+#include <boost/noncopyable.hpp>
 
-class ToolManager;
+#include "processor.h"
 
 namespace squadt {
 
-  static Specification primary_specification(true);
-  static Specification generated_specification(false);
-
-  /*
-   * A project is a collection of specifications objects along with meta
-   * information about those specifications and how specifications that are not
-   * initially in the project can be obtained by applying tools to specifications
-   * that are in the project.
+  /**
+   * \brief Basic component that stores and retrieves information about projects
    *
-   */
-  class ProjectManager {
+   * A project is a collection of processors, that describe how to make output
+   * from input objects. The output of one processor can be served as input to
+   * another processor which creates potentially complex dependencies among
+   * processors. The project manager stores this information and facilitates
+   * the running the tools behind the processors to obtain a consistent set of
+   * outputs.
+   *
+   * \attention Processors may not depend on themselves.
+   **/
+  class project_manager : public boost::noncopyable {
+    public:
+
+      /** \brief Convenience type for hiding shared pointer implementation */
+      typedef boost::shared_ptr < project_manager >  ptr;
+
+      /** \brief Convenience type alias */
+      typedef std::list < processor::ptr >           processor_list;
+
     private:
+
+      /** \brief The location of the project directory */
+      std::string                  directory;
+
+      /** \brief A description of the project */
+      std::string                  description;
  
-      std::list < Specification > specifications;
- 
-      /* Keeps the smallest natural number that has not yet been assigned as identifier */
-      unsigned int free_identifier;
- 
-      std::string  project_root;
-      std::string  project_description;
- 
-      /* Writes project configuration in XML format to stream */
-      bool Write(std::ostream& stream = std::cout);
+      /**
+       * \brief The list of processors for this project
+       *
+       * \invariant A processor p that a processor q depends on occurs before q.
+       **/
+      std::list < processor::ptr > processors;
  
     public:
  
-      ProjectManager();
+      /* \brief Constructor */
+      inline project_manager(const std::string&, const std::string&);
  
-      /* Set a project directory */
-      void SetProjectDirectory(std::string directory);
+      /* \brief Get a reference to the list of processors in this project */
+      inline const processor_list& get_processors();
+
+      /** \brief Get the description */
+      inline const std::string& get_description();
  
-      /* Get project directory */
-      std::string GetProjectDirectory();
+      /* \brief Read project information from project_directory */
+      static project_manager::ptr read(const std::string&);
  
-      /* Set project description */
-      void SetDescription(std::string description);
+      /** \brief Read configuration with an XML text reader */
+      static project_manager::ptr read(xml2pp::text_reader&) throw ();
  
-      /* Get project description */
-      const std::string GetDescription();
+      /** \brief Writes project configuration to the project file */
+      void write() const;
+
+      /** \brief Writes project configuration to stream */
+      void write(std::ostream& = std::cout) const;
  
-      /* Get a pointer to the list of specifications in this project */
-      const std::list < Specification >* GetSpecifications();
+      /* \brief Add a new processor to the project */
+      inline processor::ptr add(tool&, processor::visualisation_handler = processor::dummy_visualiser);
+
+      /** \brief Remove a processor and all processors that depend one one of its outputs */
+      inline void remove(processor*);
  
-      /* Close project, writing out changes if necessary */
-      bool Close();
- 
-      /* Read project information from project_directory */
-      bool Load();
- 
-      /* Write project information to storage */
-      bool Store();
- 
-      /* Write project information to stream */
-      void Print(std::ostream& stream = std::cerr);
- 
-      /* Add a new specification to the project */
-      Specification& Add(Specification& specification = generated_specification) throw (Specification&);
- 
-      /* Remove a specification from the project */
-      bool Remove(const Specification* specification);
- 
-      /* Specifications are required to be present in the list */
-      bool Remove(const std::vector < Specification* >& some_specifications);
- 
-      /* Remove instance from a specification from storage */
-      bool Flush(Specification* specification);
- 
-      /* Update information about a specification that is already in the project */
-      bool Update(Specification* specification);
- 
-      /* Make all specifications in the project up to date */
-      bool UpdateAll();
+      /* \brief Make all specifications in the project up to date */
+      void update();
   };
+
+  /**
+   * @param l a path to the root of the project directory
+   * @param d a description for the project
+   **/
+  inline project_manager::project_manager(const std::string& l, const std::string& d)
+          : directory(l), description(d) {
+  }
+
+  inline const std::string& project_manager::get_description() {
+    return (description);
+  }
+
+  inline const project_manager::processor_list& project_manager::get_processors() {
+    return (processors);
+  }
+
+  inline processor::ptr project_manager::add(tool& t, processor::visualisation_handler h) {
+    return (processor::ptr(new processor(t, h)));
+  }
+
+  /**
+   * @param p pointer to the processor that is to be removed
+   **/
+  inline void project_manager::remove(processor* p) {
+    processor_list::iterator i = processors.begin();
+
+    while (i != processors.end()) {
+      if ((*i).get() == p || !((*i)->consistent_inputs())) {
+        i = processors.erase(i);
+      }
+      else {
+        ++i;
+      }
+    }
+  }
 }
 #endif

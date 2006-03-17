@@ -22,21 +22,21 @@ namespace sip {
     const char*  command_line_argument_extractor::known_schemes[known_scheme_number] = { "traditional", "socket" };
 
     /**
-     * \returns The arguments for a selected scheme (e.g. hostname and port for the socket scheme), or 0
+     * \return The arguments for a selected scheme (e.g. hostname and port for the socket scheme), or 0
      **/
     inline scheme_ptr command_line_argument_extractor::get_scheme() const {
       return (selected_scheme);
     }
 
     /**
-     * \returns The identifier extracted from one of the command line arguments, or the default identifier
+     * \return The identifier extracted from one of the command line arguments, or the default identifier
      **/
     inline long command_line_argument_extractor::get_identifier() const {
       return (identifier);
     }
 
     /**
-     * \returns A pointer within argv to the point upto which the option was matched.
+     * \return A pointer within argv to the point upto which the option was matched.
      **/
     inline char* command_line_argument_extractor::parse_option(char* const option) {
       unsigned int i = 0;
@@ -57,7 +57,7 @@ namespace sip {
     }
 
     /**
-     * \returns A pointer within argv to the point upto which the option was matched.
+     * \return A pointer within argv to the point upto which the option was matched.
      **/
     inline char* command_line_argument_extractor::parse_scheme(char* const option) throw () {
       unsigned int i = 0;

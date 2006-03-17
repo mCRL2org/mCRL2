@@ -34,7 +34,7 @@ namespace sip {
       };
 
       /** Convenience type to hide boost shared pointer implementation */
-      typedef boost::shared_ptr < controller_capabilities > controller_capabilities_ptr;
+      typedef boost::shared_ptr < controller_capabilities > ptr;
 
     private:
 
@@ -48,7 +48,7 @@ namespace sip {
       inline controller_capabilities(const version = default_protocol_version);
 
       /** \brief Read from XML stream */
-      inline static controller_capabilities_ptr from_xml(xml2pp::text_reader& reader) throw ();
+      inline static controller_capabilities::ptr read(xml2pp::text_reader& reader) throw ();
 
     public:
 
@@ -62,10 +62,10 @@ namespace sip {
       inline display_dimensions get_display_dimensions() const;
 
       /** \brief Write to XML string */
-      inline std::string to_xml() const;
+      inline std::string write() const;
 
       /** \brief Write to XML stream */
-      inline void to_xml(std::ostream&) const;
+      inline void write(std::ostream&) const;
   };
 
   inline controller_capabilities::controller_capabilities(const version v) : current_protocol_version(v) {
@@ -88,7 +88,7 @@ namespace sip {
     return (current_dimensions);
   }
 
-  inline void controller_capabilities::to_xml(std::ostream& output) const {
+  inline void controller_capabilities::write(std::ostream& output) const {
     output << "<capabilities>"
            << "<protocol-version major=\"" << (unsigned short) current_protocol_version.major
            << "\" minor=\"" << (unsigned short) current_protocol_version.minor << "\"/>"
@@ -98,40 +98,37 @@ namespace sip {
            << "</capabilities>";
   }
 
-  inline std::string controller_capabilities::to_xml() const {
+  inline std::string controller_capabilities::write() const {
     std::ostringstream output;
 
-    to_xml(output);
+    write(output);
 
     return (output.str());
   }
 
   /** \pre the reader must point at a capabilities element */
-  inline controller_capabilities::controller_capabilities_ptr controller_capabilities::from_xml(xml2pp::text_reader& reader) throw () {
+  inline controller_capabilities::controller_capabilities::ptr controller_capabilities::read(xml2pp::text_reader& r) throw () {
     version                  v = {0,0};
 
-    reader.read();
+    r.read();
 
-    assert (reader.is_element("protocol-version"));
+    assert (r.is_element("protocol-version"));
     
-    reader.get_attribute(&v.major, "major");
-    reader.get_attribute(&v.minor, "minor");
+    r.get_attribute(&v.major, "major");
+    r.get_attribute(&v.minor, "minor");
 
-    controller_capabilities_ptr c(new controller_capabilities(v));
+    controller_capabilities::ptr c(new controller_capabilities(v));
 
-    reader.read();
+    r.read();
+    r.skip_end_element("protocol-version");
 
-    if (reader.is_end_element()) {
-      reader.read();
-    }
+    assert (r.is_element("display-dimensions"));
 
-    assert (reader.is_element("display-dimensions"));
+    r.get_attribute(&c->current_dimensions.x, "x");
+    r.get_attribute(&c->current_dimensions.y, "y");
+    r.get_attribute(&c->current_dimensions.z, "z");
 
-    reader.get_attribute(&c->current_dimensions.x, "x");
-    reader.get_attribute(&c->current_dimensions.y, "y");
-    reader.get_attribute(&c->current_dimensions.z, "z");
-
-    reader.read();
+    r.read();
 
     return (c);
   }

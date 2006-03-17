@@ -25,8 +25,8 @@ namespace squadt {
     BEGIN_EVENT_TABLE(SpecificationPropertiesDialog, wxDialog)
     END_EVENT_TABLE()
 
-    SpecificationPropertiesDialog::SpecificationPropertiesDialog(wxWindow* parent, wxWindowID id, wxString title, Specification& aspecification, std::string aproject_root) :
-      wxDialog(parent, id, title, wxDefaultPosition, wxSize(450,450), wxCAPTION|wxSTAY_ON_TOP), specification(aspecification) {
+    SpecificationPropertiesDialog::SpecificationPropertiesDialog(wxWindow* parent, wxWindowID id, wxString title, processor& p, std::string aproject_root) :
+      wxDialog(parent, id, title, wxDefaultPosition, wxSize(450,450), wxCAPTION|wxSTAY_ON_TOP), current_processor(p) {
 
       /* Create controls */
       wxBoxSizer* sizer      = new wxBoxSizer(wxVERTICAL);

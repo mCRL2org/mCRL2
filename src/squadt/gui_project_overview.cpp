@@ -92,7 +92,7 @@ namespace squadt {
     std::map < std::pair < std::string, std::string >, wxMenu* > ProjectOverview::context_menus;
 
     ProjectOverview::ProjectOverview(wxWindow* parent, wxWindowID id) :
-      wxFrame(parent, id, wxT("Squadt - No project"), wxDefaultPosition, wxDefaultSize), project_manager() {
+      wxFrame(parent, id, wxT("Squadt - No project"), wxDefaultPosition, wxDefaultSize) {
 
       /* Resize and centre frame on display */
       SetSize(0,0,800,600);
@@ -378,12 +378,8 @@ namespace squadt {
         specifications->DeleteChildren(specifications->GetRootItem());
 
         /* Close current project */
-        project_manager.Close();
-
-        project_directory = directory_dialog.GetPath();
-
-        /* Communicate project directory with project manager */
-        project_manager.SetProjectDirectory(std::string(project_directory.fn_str()));
+        current_project_manager.reset();
+        current_project_manager = project_manager::ptr(new project_manager(directory_dialog.GetPath().fn_str()));
 
         /* Project name is derived from project directory name (TODO check whether portable)*/
         SetTitle(project_directory.AfterLast('/').Prepend(wxT("Squadt - ")));
@@ -391,7 +387,7 @@ namespace squadt {
         chdir(project_directory.fn_str());
 
         /* Store default configuration */
-        project_manager.Store();
+        current_project_manager->write();
 
         GetSizer()->Remove(0);
         GetSizer()->Add(top_splitter, 1, wxALL|wxEXPAND, 2);
@@ -418,8 +414,8 @@ namespace squadt {
       top_splitter->Show(false);
       Update();
 
-      project_manager.Store();
-      project_manager.Close();
+      current_project_manager->write();
+      current_project_manager.reset();
 
       specifications->DeleteChildren(specifications->GetRootItem());
 
@@ -435,37 +431,33 @@ namespace squadt {
         wxString project_directory = directory_dialog.GetPath();
 
         /* Clean up an open project and clear specification view */
-        project_manager.Store();
-        project_manager.Close();
+        current_project_manager->write();
+        current_project_manager.reset();
 
         specifications->DeleteChildren(specifications->GetRootItem());
 
         /* Communicate project directory with project manager */
-        project_manager.SetProjectDirectory(std::string(project_directory.fn_str()));
+        current_project_manager = project_manager::read(std::string(project_directory.fn_str()));
 
         chdir(project_directory.fn_str());
-
-        /* Load specification into project manager */
-        project_manager.Load();
 
         /* Set window title (TODO check whether portable)*/
         SetTitle(project_directory.AfterLast('/').Prepend(wxT("Squadt - ")));
 
-        std::list < Specification >::const_iterator b = project_manager.GetSpecifications()->end();
-        std::list < Specification >::const_iterator i = project_manager.GetSpecifications()->begin();
-        std::map  < Specification*, wxTreeItemId > to_tree_id;
+        project_manager::processor_list::iterator b = current_project_manager->get_processors().end();
+        std::map  < processor*, wxTreeItemId >    to_tree_id;
 
         /* Connect a graphic representation to each specification */
-        while (i != b) {
-                Specification&     specification      = const_cast < Specification& > (*i);
-                SpecificationData* specification_data = new SpecificationData(*specifications, specification);
+        for (project_manager::processor_list::iterator i = current_project_manager->get_processors().begin(); i != b; ++i) {
+                processor&         p                  = const_cast < processor& > (*i);
+                SpecificationData* specification_data = new SpecificationData(*processor, specification);
           const wxTreeItemId       root               = specifications->GetRootItem();
                 wxTreeItemId       new_item;
-          const wxString           name(specification.GetName().c_str(), wxConvLocal);
+          const wxString           name(p.GetName().c_str(), wxConvLocal);
 
-          if (specification.GetNumberOfInputObjects() == 0) {
+          if (p.number_of_input_objects() == 0) {
             /* Specification is provided (not generated) */
-            new_item = specifications->AppendItem(root, name, specification.GetStatus(), -1, specification_data);
+            new_item = specifications->AppendItem(root, name, p.get_status(), -1, specification_data);
           }
           else {
             const wxTreeItemId parent = to_tree_id[specification.GetInputObjects().front().derived_from.pointer];
@@ -497,7 +489,7 @@ namespace squadt {
     }
 
     void ProjectOverview::StoreProject(wxCommandEvent& /* event */) {
-      project_manager.Store();
+      current_project_manager.Store();
     }
 
     /* Build all specifications that are not up to date */
@@ -550,7 +542,7 @@ namespace squadt {
           boost::filesystem::path file_name(std::string(dialog->GetFilePath().fn_str()));
 
           if (file_name.string() != "") {
-            boost::filesystem::path target_name(project_manager.GetProjectDirectory());
+            boost::filesystem::path target_name(current_project_manager.GetProjectDirectory());
             bool                    valid = true;
 
             target_name /= std::string(file_name.leaf());
@@ -560,7 +552,7 @@ namespace squadt {
               wxMessageDialog message_dialog(this, wxT("A file with this name is already in the project, do you want to add it under a different name?"), wxT("Warning ..."), wxYES_NO|wxICON_QUESTION);
 
               if (message_dialog.ShowModal() == wxID_YES) {
-                wxFileDialog new_file_name_dialog(this, wxT("Select a new file name"), wxString(project_manager.GetProjectDirectory().c_str(), wxConvLocal), wxString(file_name.leaf().c_str(), wxConvLocal), wxT("*.*"), wxSAVE|wxOVERWRITE_PROMPT);
+                wxFileDialog new_file_name_dialog(this, wxT("Select a new file name"), wxString(current_project_manager.GetProjectDirectory().c_str(), wxConvLocal), wxString(file_name.leaf().c_str(), wxConvLocal), wxT("*.*"), wxSAVE|wxOVERWRITE_PROMPT);
 
                 if (new_file_name_dialog.ShowModal() == wxID_OK) {
 
@@ -571,7 +563,7 @@ namespace squadt {
                     valid = false;
                   }
                   else {
-                    target_name = std::string(project_manager.GetProjectDirectory());
+                    target_name = std::string(current_project_manager.GetProjectDirectory());
 
                     try {
                       target_name /= boost::filesystem::path(std::string(new_file_name_dialog.GetPath().fn_str()));
@@ -587,7 +579,7 @@ namespace squadt {
                     error_dialog.ShowModal();
                   }
                   else {
-                    target_name = boost::filesystem::path(std::string(project_manager.GetProjectDirectory())) / std::string(target_name.leaf());
+                    target_name = boost::filesystem::path(std::string(current_project_manager.GetProjectDirectory())) / std::string(target_name.leaf());
 
                     if (file_name != target_name) {
                       boost::filesystem::remove(target_name);
@@ -639,7 +631,7 @@ namespace squadt {
                 /* TODO */
               }
 
-              SpecificationData* specification_data = new SpecificationData(*specifications, project_manager.Add(new_specification));
+              SpecificationData* specification_data = new SpecificationData(*specifications, current_project_manager.Add(new_specification));
 
               specifications->SetItemData(new_item, specification_data);
             }
@@ -722,7 +714,7 @@ namespace squadt {
       new_specification.SetName(name);
 
       /* Add new item to (local) project manager and tree-control */
-      Specification& added_specification = project_manager.Add(new_specification);
+      Specification& added_specification = current_project_manager.Add(new_specification);
 
       new_item = specifications->PrependItem(selected, wxString(name.c_str(), wxConvLocal), 0, -1, new SpecificationData(*specifications, added_specification));
 
@@ -742,7 +734,7 @@ namespace squadt {
       /* TODO only takes the last output object */
       wxString filename = wxString(((SpecificationData*) specifications->GetItemData(specifications->GetSelection()))->specification.GetOutputObjects().back().location.c_str(), wxConvLocal);
 
-      filename.Prepend(wxT("/")).Prepend(wxString(project_manager.GetProjectDirectory().c_str(), wxConvLocal));
+      filename.Prepend(wxT("/")).Prepend(wxString(current_project_manager.GetProjectDirectory().c_str(), wxConvLocal));
 
       /* Test with gVim as editor */
       editor->Open(filename.Prepend(wxT("gvim ")));
@@ -782,7 +774,7 @@ namespace squadt {
       Specification&                 specification = ((SpecificationData*) specifications->GetItemData(specifications->GetSelection()))->specification;
       wxString                       name          = wxString(specification.GetName().c_str(), wxConvLocal);
       wxString                       title         = wxString(wxT("Properties of `")).Append(name).Append(wxT("'"));
-      SpecificationPropertiesDialog* dialog        = new SpecificationPropertiesDialog(this, wxID_ANY, title, specification, project_manager.GetProjectDirectory());
+      SpecificationPropertiesDialog* dialog        = new SpecificationPropertiesDialog(this, wxID_ANY, title, specification, current_project_manager.GetProjectDirectory());
 
       /* TODO set proper icon when a format can be resolved to an icon */
       dialog->SetIcon(main_icon_list->GetIcon(0));
@@ -833,7 +825,7 @@ namespace squadt {
         sdepricated.clear();
 
         /* Delete from project manager */
-        project_manager.Remove(vdepricated);
+        current_project_manager.Remove(vdepricated);
 
         specifications->DeleteChildren(selected);
         specifications->Delete(selected);

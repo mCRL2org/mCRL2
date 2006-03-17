@@ -16,7 +16,7 @@
 namespace squadt {
   class process;
 
-  /** Classes that inherit from this class */
+  /** \brief Base class for process change listeners */
   class process_change_listener {
     friend class executor;
 
@@ -33,7 +33,7 @@ namespace squadt {
   inline process_change_listener::~process_change_listener() {
   }
 
-  /** Execution of programs as processes */
+  /** \brief Basic process execution component */
   class executor {
     private:
       /** \brief Type for storing a command and a pointer to a state listener  */

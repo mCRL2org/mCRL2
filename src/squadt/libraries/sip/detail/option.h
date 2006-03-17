@@ -22,7 +22,7 @@ namespace sip {
       typedef unsigned int                  identifier;
 
       /** \brief Convenience type to hide the shared pointer wrapping */
-      typedef boost::shared_ptr < option >  option_ptr;
+      typedef boost::shared_ptr < option >  ptr;
 
     private:
 
@@ -59,10 +59,10 @@ namespace sip {
       inline void bind_argument(const size_t n, std::string);
 
       /** \brief Generate XML representation */
-      inline void to_xml(std::ostream&) const;
+      inline void write(std::ostream&) const;
 
       /** \brief Generate XML representation */
-      inline static option_ptr from_xml(xml2pp::text_reader&);
+      inline static option::ptr read(xml2pp::text_reader&);
   };
 
   inline option::option(identifier i) : id(i) {
@@ -95,7 +95,7 @@ namespace sip {
     (*i).second = s;
   }
 
-  inline void option::to_xml(std::ostream& output) const {
+  inline void option::write(std::ostream& output) const {
     output << "<option id=\"" << id << "\"";
 
     if (takes_arguments()) {
@@ -106,7 +106,7 @@ namespace sip {
 
       while (i != b) {
         try {
-          (*i).first->to_xml(output, (*i).second);
+          (*i).first->write(output, (*i).second);
         }
         catch (exception e) {
           /* Invalid datatype exception; substitute context */
@@ -123,46 +123,47 @@ namespace sip {
     }
   }
 
-  inline option::option_ptr option::from_xml(xml2pp::text_reader& reader) {
+  inline option::ptr option::read(xml2pp::text_reader& r) {
     option::identifier id;
 
-    assert(reader.is_element("option"));
+    assert(r.is_element("option"));
 
-    reader.get_attribute(&id, "id");
+    r.get_attribute(&id, "id");
 
-    option_ptr o(new option(id));
+    option::ptr o(new option(id));
 
-    if (!reader.is_empty_element()) {
-      reader.read();
+    if (!r.is_empty_element()) {
+      r.read();
 
-      while (!reader.is_end_element()) {
+      while (!r.is_end_element()) {
         using namespace sip::datatype;
      
         /* The current element must be a datatype specification */
         type_value_pair new_argument;
      
         /* Set the type */
-        new_argument.first = basic_datatype::from_xml(reader);
+        new_argument.first = basic_datatype::read(r);
 
         /* The current element can be a value of the previously read type (element is optional) */
-        if (reader.is_element("value")) {
-          reader.read();
-          if (!reader.is_end_element()) {
+        if (r.is_element("value")) {
+          r.read();
+
+          if (!r.is_end_element()) {
             /* Read value */
-            reader.get_value(&new_argument.second);
+            r.get_value(&new_argument.second);
      
-            reader.read();
+            r.read();
           }
      
           /* Skip end tag */
-          reader.read();
+          r.read();
         }
      
         o->arguments.push_back(new_argument);
       }
     }
 
-    reader.read();
+    r.read();
 
     return (o);
   }

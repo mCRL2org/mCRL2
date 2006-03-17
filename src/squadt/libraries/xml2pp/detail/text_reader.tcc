@@ -177,9 +177,9 @@ namespace xml2pp {
   }
 
   /* Whether the current element matches element_name */
-  inline bool text_reader::is_element(char* element_name) {
+  inline bool text_reader::is_element(const char* e) {
     xmlChar* temporary    = xmlTextReaderName(reader);
-    bool     return_value = xmlStrEqual(temporary, reinterpret_cast < const xmlChar* > (element_name)) != 0;
+    bool     return_value = xmlStrEqual(temporary, reinterpret_cast < const xmlChar* > (e)) != 0;
 
     xmlFree(temporary);
 
@@ -191,12 +191,30 @@ namespace xml2pp {
     return (xmlTextReaderNodeType(reader) == XML_READER_TYPE_END_ELEMENT);
   }
 
+  /**
+   * @param e the end element that has to be matched
+   *
+   * \return whether the position was changed
+   **/
+  inline bool text_reader::skip_end_element(const char* e) {
+    if (xmlTextReaderNodeType(reader) == XML_READER_TYPE_END_ELEMENT && is_element(e)) {
+      read();
+
+      return (true);
+    }
+
+    return (false);
+  }
+
   /* Whether the current element is empty */
   inline bool text_reader::is_empty_element() {
     return (xmlTextReaderIsEmptyElement(reader));
   }
 
-  inline void text_reader::read() throw () {
+  /**
+   * @param n the number times to skip a succesful read
+   **/
+  inline void text_reader::read(unsigned int n) throw () {
     int status = xmlTextReaderRead(reader);
 
     do {
@@ -207,10 +225,13 @@ namespace xml2pp {
       else {
         /* Skip white space */
         if (xmlTextReaderNodeType(reader) == XML_READER_TYPE_SIGNIFICANT_WHITESPACE) {
-          /* Text is no profile, skip */
           status = xmlTextReaderRead(reader);
 
           continue;
+        }
+
+        if (n != 0) {
+          --n;
         }
       }
 

@@ -11,18 +11,17 @@ include $(TOP)/config.jam ;
 
 exe squadt
       : squadt.cpp
-        settings_manager.cpp
-        project_manager.cpp
         exception.cpp
-        specification.cpp
+        settings_manager.cpp
         tool_manager.cpp
-        tool.cpp
+        project_manager.cpp
+        processor.cpp
         gui_new_specification.cpp
-        gui_project_overview.cpp
+#        gui_project_overview.cpp
         gui_resources.cpp
-        gui_specification_properties.cpp
+#        gui_specification_properties.cpp
         /libraries/md5pp//md5pp
-        /libraries/xml2pp//text_reader
+        /libraries/sip//sip_common
         /boost/filesystem//boost_filesystem
       : <cxxflags>"$(IWX)"
         <linkflags>"$(LWX_BASE)" ;
