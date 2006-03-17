@@ -1,3 +1,4 @@
+path-constant REVISION : $(TOP)/src/mcrl2_revision.h ;
 
 exe maximum_revision
        : utility/maximum_revision.cpp

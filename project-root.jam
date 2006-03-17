@@ -3,7 +3,6 @@ import path ;
 project mcrl2_toolset ;
 
 path-constant TOP       : . ;
-path-constant REVISION  : ./src/mcrl2_revision.h ;
 path-constant BUILD_TOP : ./bin ;
 
 use-project /root                      : . ;
@@ -15,6 +14,6 @@ use-project /boost/program_options     : src/boost/libs/program_options/build ;
 use-project /boost/filesystem          : src/boost/libs/filesystem/build ;
 use-project /boost/thread              : src/boost/libs/thread/build ;
 
-if [ path.exists utility/revision.jam ] {
-  include utility/revision.jam ; 
+if [ path.exists $(TOP)/utility/revision.jam ] {
+  include $(TOP)/utility/revision.jam ; 
 }
