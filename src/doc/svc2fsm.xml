@@ -33,7 +33,7 @@
 
 <refnamediv>
   <refname>svc2fsm</refname>
-  <refpurpose>convert SVC files to FSM format</refpurpose>
+  <refpurpose>convert SVC files to FSM format (DEPRECATED)</refpurpose>
 </refnamediv>
 
 <refsynopsisdiv>

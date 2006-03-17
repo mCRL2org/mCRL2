@@ -12,6 +12,9 @@ namespace lts
 
   enum lts_type { lts_none, lts_mcrl2, lts_aut, lts_mcrl, lts_svc };
 
+  bool is_timed_pair(ATermAppl t);
+  ATermAppl make_timed_pair(ATermAppl action, ATermAppl time = NULL);
+
   #include "liblts_private.h"
 
   class lts;

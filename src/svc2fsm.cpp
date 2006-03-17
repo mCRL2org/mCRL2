@@ -392,6 +392,8 @@ static void print_edges(FILE *f, SVCfile file)
 
 int main(int argc,char** argv) 
 {
+  fprintf(stderr,"warning: this tool is deprecated; use ltscp instead\n");
+
   ATerm bottom;
   ATinit(argc, argv, &bottom);
 

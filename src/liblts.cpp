@@ -18,9 +18,30 @@ namespace lts
 {
 
 AFun timed_pair;
-unsigned int timed_pair_set = 0;
-
-#define isTimedPair(x) (ATisEqualAFun(ATgetAFun(x),timed_pair))
+bool timed_pair_not_set = true;
+static void set_timed_pair()
+{
+  if ( timed_pair_not_set )
+  {
+    timed_pair = ATmakeAFun("pair",2,ATfalse);
+    ATprotectAFun(timed_pair);
+    timed_pair_not_set = false;
+  }
+}
+bool is_timed_pair(ATermAppl t)
+{
+  set_timed_pair();
+  return ATisEqualAFun(ATgetAFun(t),timed_pair);
+}
+ATermAppl make_timed_pair(ATermAppl action, ATermAppl time)
+{
+  set_timed_pair();
+  if ( time == NULL)
+  {
+    time = gsMakeNil();
+  }
+  return ATmakeAppl2(timed_pair,(ATerm) action,(ATerm) time);
+}
 
 lts::lts()
 {
@@ -55,23 +76,10 @@ lts::~lts()
   free(labels);
   free(label_values);
   free(transitions);
-
-  timed_pair--;
-  if ( timed_pair_set == 0 )
-  {
-    ATunprotectAFun(timed_pair);
-  }
 }
 
 void p_lts::init()
 {
-  if ( timed_pair_set == 0 )
-  {
-    timed_pair = ATmakeAFun("pair",2,ATfalse);
-    ATprotectAFun(timed_pair);
-  }
-  timed_pair_set++;
-
   states_size = 0;
   nstates = 0;
   states = NULL;
@@ -426,7 +434,7 @@ bool p_lts::write_to_svc(std::string &filename, lts_type type)
     }
     for (unsigned int i=0; i<nlabels; i++)
     {
-      if ( !ATisAppl(label_values[i]) || !(gsIsMultAct((ATermAppl) label_values[i]) || isTimedPair((ATermAppl) label_values[i]) ) )
+      if ( !ATisAppl(label_values[i]) || !(gsIsMultAct((ATermAppl) label_values[i]) || is_timed_pair((ATermAppl) label_values[i]) ) )
       {
         gsVerboseMsg("cannot save LTS in mCRL2 format; label values are incompatible\n");
         return false;
@@ -519,7 +527,7 @@ bool p_lts::write_to_aut(std::ostream &os)
         os << "\"";
         PrintPart_CXX(os,label,ppDefault);
         os << "\"";
-      } else if ( ATisAppl(label) && isTimedPair((ATermAppl) label) )
+      } else if ( ATisAppl(label) && is_timed_pair((ATermAppl) label) )
       {
         os << "\"";
         PrintPart_CXX(os,ATgetArgument((ATermAppl) label,0),ppDefault);

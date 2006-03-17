@@ -1,9 +1,11 @@
 #include <string>
 #include <getopt.h>
+#include "aterm2.h"
 #include "liblowlevel.h"
 #include "libstruct.h"
 #include "libprint_c.h"
 #include "liblts.h"
+#include "liblts_fsm.h"
 
 #define NAME "ltscp"
 #define VERSION "0.1"
@@ -11,6 +13,34 @@
 
 using namespace std;
 using namespace mcrl2::lts;
+
+enum alt_lts_type { alt_lts_none, alt_lts_fsm };
+
+static ATerm get_lpe(string &filename)
+{
+  if ( filename == "" )
+  {
+    return NULL;
+  }
+
+  FILE* file = fopen(filename.c_str(),"rb");
+  if ( file == NULL )
+  {
+    gsErrorMsg("unable to open LPE-file '%s'\n",filename.c_str());
+    return NULL;
+  }
+  
+  ATerm t = ATreadFromFile(file);
+  fclose(file);
+  
+  if ( (t == NULL) || (ATgetType(t) != AT_APPL) || !(gsIsSpecV1((ATermAppl) t) || !strcmp(ATgetName(ATgetAFun((ATermAppl) t)),"spec2gen")) )
+  {
+    gsErrorMsg("invalid LPE-file '%s'\n",filename.c_str());
+    return NULL;
+  }
+
+  return t;
+}
 
 static lts_type get_extension(string s)
 {
@@ -34,6 +64,24 @@ static lts_type get_extension(string s)
   return lts_none;
 }
 
+static alt_lts_type get_alt_extension(string s)
+{
+  string::size_type pos = s.find_last_of('.');
+  
+  if ( pos != string::npos )
+  {
+    string ext = s.substr(pos+1);
+
+    if ( ext == "fsm" )
+    {
+      gsVerboseMsg("detected FSM extension\n");
+      return alt_lts_fsm;
+    }
+  }
+
+  return alt_lts_none;
+}
+
 static lts_type get_format(char *s)
 {
   if ( !strcmp(s,"aut") )
@@ -50,6 +98,16 @@ static lts_type get_format(char *s)
   return lts_none;
 }
 
+static alt_lts_type get_alt_format(char *s)
+{
+  if ( !strcmp(s,"fsm") )
+  {
+    return alt_lts_fsm;
+  }
+
+  return alt_lts_none;
+}
+
 static void print_formats(FILE *f)
 {
   fprintf(f,
@@ -58,6 +116,7 @@ static void print_formats(FILE *f)
     "  aut       the aldebaran format (.aut)\n"
     "  mcrl      the mCRL SVC format (.svc)\n"
     "  mcrl2     the mCRL2 SVC format (.svc, default)\n"
+    "  fsm       the FSM format (.fsm, only output)\n"
     );
 }
 
@@ -80,7 +139,10 @@ static void print_help(FILE *f, char *Name)
     "  -v, --verbose         display concise intermediate messages\n"
     "  -i, --in=FORMAT       consider INFILE to be in the FORMAT format\n"
     "  -o, --out=FORMAT      save LTS in OUTFILE in the FORMAT format\n"
-    "  -f, --formats         list accepted formats\n",
+    "  -f, --formats         list accepted formats\n"
+    "  -l, --lpe=FILE        supply LPE file from which the input file was generated\n"
+    "                        (needed to store the correct parameter names of states\n"
+    "                        when saving as FSM file)\n",
     Name);
 }
 
@@ -96,7 +158,7 @@ int main(int argc, char **argv)
   gsEnableConstructorFunctions();
 
 
-  #define ShortOptions      "hqvi:o:f"
+  #define ShortOptions      "hqvi:o:fl:"
   #define VersionOption     0x1
   struct option LongOptions[] = { 
     {"help"      , no_argument,         NULL, 'h'},
@@ -106,6 +168,7 @@ int main(int argc, char **argv)
     {"in"        , required_argument,   NULL, 'i'},
     {"out"       , required_argument,   NULL, 'o'},
     {"formats"   , no_argument,         NULL, 'f'},
+    {"lpe"       , required_argument,   NULL, 'l'},
     {0, 0, 0, 0}
   };
 
@@ -114,6 +177,9 @@ int main(int argc, char **argv)
   lts_type intype = lts_none;
   lts_type outtype = lts_none;
   int opt;
+  string lpefile;
+  bool use_alt_outtype = false;
+  alt_lts_type alt_outtype = alt_lts_none;
   while ( (opt = getopt_long(argc, argv, ShortOptions, LongOptions, NULL)) != -1 )
   {
     switch ( opt )
@@ -143,20 +209,33 @@ int main(int argc, char **argv)
         }
         break;
       case 'o':
-        if ( outtype != lts_none )
+        if ( (outtype != lts_none) || use_alt_outtype )
         {
           fprintf(stderr,"warning: output format has already been specified; extra option ignored\n");
         } else {
           outtype = get_format(optarg);
           if ( outtype == lts_none )
           {
-            fprintf(stderr,"warning: format '%s' is not recognised; option ignored\n",optarg);
+            alt_outtype = get_alt_format(optarg);
+            if ( alt_outtype == alt_lts_none )
+            {
+              fprintf(stderr,"warning: format '%s' is not recognised; option ignored\n",optarg);
+            } else {
+              use_alt_outtype = true;
+            }
           }
         }
         break;
       case 'f':
         print_formats(stderr);
         return 0;
+      case 'l':
+        if ( lpefile != "" )
+        {
+          fprintf(stderr,"warning: LPE file has already been specified; extra option ignored\n");
+        }
+        lpefile = optarg;
+        break;
       default:
         break;
     }
@@ -189,19 +268,39 @@ int main(int argc, char **argv)
   if ( !use_stdout )
   {
     outfile = argv[optind+1];
-    if ( outtype == lts_none )
+    if ( (outtype == lts_none) && !use_alt_outtype )
     {
-      gsVerboseMsg("trying to detect output format by extension...\n");
-      outtype = get_extension(outfile);
-    }
-    if ( outtype == lts_none )
-    {
-      gsVerboseMsg("no output format set or detected; using default (mcrl2)\n");
-      outtype = lts_mcrl2;
+      if ( lpefile != "" )
+      {
+        gsVerboseMsg("no output format set; using fsm because --lpe was used\n");
+        alt_outtype = alt_lts_fsm;
+        use_alt_outtype = true;
+      } else {
+        gsVerboseMsg("trying to detect output format by extension...\n");
+        outtype = get_extension(outfile);
+        if ( outtype == lts_none )
+        {
+          alt_outtype = get_alt_extension(outfile);
+          if ( alt_outtype == alt_lts_none )
+          {
+            gsVerboseMsg("no output format set or detected; using default (mcrl2)\n");
+            outtype = lts_mcrl2;
+          } else {
+            use_alt_outtype = true;
+          }
+        }
+      }
     }
   } else {
-      gsVerboseMsg("no output format set; using default (aut)\n");
-      outtype = lts_aut;
+      if ( lpefile != "" )
+      {
+        gsVerboseMsg("no output format set; using fsm because --lpe was used\n");
+        alt_outtype = alt_lts_fsm;
+        use_alt_outtype = true;
+      } else {
+        gsVerboseMsg("no output format set; using default (aut)\n");
+        outtype = lts_aut;
+      }
   }
 
   lts l;
@@ -236,20 +335,56 @@ int main(int argc, char **argv)
     }
   }
 
-  if ( use_stdout)
+  if ( use_stdout )
   {
     gsVerboseMsg("writing LTS to stdout...\n");
-    if ( !l.write_to(cout,outtype) )
+    if ( use_alt_outtype )
     {
-      gsErrorMsg("cannot write LTS to stdout\n");
-      return 1;
+      switch ( alt_outtype )
+      {
+        case alt_lts_fsm:
+          if ( !write_lts_to_fsm(l,cout,get_lpe(lpefile)) )
+          {
+            gsErrorMsg("cannot write LTS to stdout\n");
+            return 1;
+          }
+          break;
+        default:
+          assert(0);
+          gsErrorMsg("do not know how to handle output format\n");
+          return 1;
+      }
+    } else {
+      if ( !l.write_to(cout,outtype) )
+      {
+        gsErrorMsg("cannot write LTS to stdout\n");
+        return 1;
+      }
     }
   } else {
     gsVerboseMsg("writing LTS to '%s'...\n",outfile.c_str());
-    if ( !l.write_to(outfile,outtype) )
+    if ( use_alt_outtype )
     {
-      gsErrorMsg("cannot write LTS to file '%s'\n",outfile.c_str());
-      return 1;
+      switch ( alt_outtype )
+      {
+        case alt_lts_fsm:
+          if ( !write_lts_to_fsm(l,outfile,get_lpe(lpefile)) )
+          {
+            gsErrorMsg("cannot write LTS to file '%s'\n",outfile.c_str());
+            return 1;
+          }
+          break;
+        default:
+          assert(0);
+          gsErrorMsg("do not know how to handle output format\n");
+          return 1;
+      }
+    } else {
+      if ( !l.write_to(outfile,outtype) )
+      {
+        gsErrorMsg("cannot write LTS to file '%s'\n",outfile.c_str());
+        return 1;
+      }
     }
   }
 

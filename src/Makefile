@@ -48,12 +48,6 @@ LIBNEXT_OBJECTS    = libnextstate.o nextstate_standard.o
 OBJECTS           += $(LIBNEXT_OBJECTS)
 LIBNEXT_LDFLAGS    = -l$(ATERM) -lm
 
-#lts library definitions
-LIBLTS_NAME        = liblts.a
-LIBLTS_OBJECTS     = liblts.o
-OBJECTS           += $(LIBLTS_OBJECTS)
-LIBLTS_LDFLAGS     = -l$(ATERM) -lm
-
 #mcrl22lpe definitions
 MCRL22LPE_NAME     = mcrl22lpe
 MCRL22LPE_OBJECTS  = mcrl22lpe.o lin_std.o lin_alt.o mcrl2parser.o mcrl2lexer.o typecheck.o dataimpl.o libprint_c.o libstruct.o liblowlevel.o libalpha.o
@@ -101,6 +95,18 @@ else
 endif
 
 ifdef USE_BOOST
+ #lts library definitions
+ LIBLTS_NAME        = liblts.a
+ LIBLTS_OBJECTS     = liblts.o liblts_fsm.o
+ OBJECTS           += $(LIBLTS_OBJECTS)
+ LIBLTS_LDFLAGS     = -l$(ATERM) -lm
+
+ #ltscp definitions
+ LTSCP_NAME         = ltscp
+ LTSCP_OBJECTS      = ltscp.o libprint.o libprint_c.o libstruct.o liblowlevel.o
+ OBJECTS           += $(LTSCP_OBJECTS)
+ LTSCP_LDFLAGS      = -llts -lrewrite -lsvc -l$(ATERM) -lm $(LIBDL)
+
  #lpeinfo definitions
  LPEINFO_NAME        = lpeinfo
  LPEINFO_OBJECTS     = libprint.o libstruct.o libprint_c.o liblowlevel.o lpeinfo.o
@@ -170,12 +176,6 @@ LTSPP_NAME         = ltspp
 LTSPP_OBJECTS      = ltspp.o libprint_c.o libstruct.o liblowlevel.o
 OBJECTS           += $(LTSPP_OBJECTS)
 LTSPP_LDFLAGS      = -lrewrite -lsvc -l$(ATERM) -lm $(LIBDL)
-
-#ltscp definitions
-LTSCP_NAME         = ltscp
-LTSCP_OBJECTS      = ltscp.o libprint.o libprint_c.o libstruct.o liblowlevel.o
-OBJECTS           += $(LTSCP_OBJECTS)
-LTSCP_LDFLAGS      = -llts -lrewrite -lsvc -l$(ATERM) -lm $(LIBDL)
 
 #alpha definitions
 ALPHA_NAME         = alpha
@@ -309,9 +309,6 @@ $(ATERM_NAME): $(ATERM_OBJECTS)
 $(LIBSVC_NAME): $(LIBSVC_OBJECTS)
 	$(AR) $(ARFLAGS) $@ $(LIBSVC_OBJECTS)
 
-$(LIBLTS_NAME): $(LIBLTS_OBJECTS)
-	$(AR) $(ARFLAGS) $@ $(LIBLTS_OBJECTS)
-
 $(LIBREWR_NAME) : $(LIBREWR_OBJECTS)
 	$(AR) $(ARFLAGS) $@ $(LIBREWR_OBJECTS)
 #	$(CC) -shared -o $@ $(LIBREWR_OBJECTS)
@@ -357,8 +354,14 @@ svc/%: CPPFLAGS += -I. -Iaterm
 
 # Targets that depend on any of the boost libraries
 ifdef USE_BOOST
-lpe% libdataelm.%: CPPFLAGS += $(BOOST_CPPFLAGS) -I. -Iaterm
-lpe% libdataelm.%: CXXFLAGS += -ftemplate-depth-256
+lpe% libdataelm.% liblts_fsm.% ltscp.%: CPPFLAGS += $(BOOST_CPPFLAGS) -I. -Iaterm
+lpe% libdataelm.% liblts_fsm.% ltscp.%: CXXFLAGS += -ftemplate-depth-256
+
+$(LIBLTS_NAME): $(LIBLTS_OBJECTS)
+	$(AR) $(ARFLAGS) $@ $(LIBLTS_OBJECTS)
+
+$(LTSCP_NAME) : $(LTSCP_OBJECTS) $(ATERM_DEP) $(LIBSVC_NAME) $(LIBLTS_NAME) $(LIBREWR_NAME)
+	$(CXX) $(CXXFLAGS) -o $@ $(CPPFLAGS) $(LTSCP_OBJECTS) $(BOOST_LDFALGS) $(LDFLAGS) $(LTSCP_LDFLAGS)
 
 $(LPEINFO_NAME) : $(LPEINFO_OBJECTS) $(ATERM_DEP) $(LIBREWR_NAME) $(BUILD_BOOST)
 	$(CXX) $(CXXFLAGS) -o $@ $(CPPFLAGS) $(LPEINFO_OBJECTS) $(BOOST_LDFLAGS) $(BOOST_PROGRAM_OPTIONS) $(LDFLAGS) $(LPEINFO_LDFLAGS)
@@ -378,6 +381,10 @@ $(LPE2LTS_NAME) : $(LPE2LTS_OBJECTS) $(ATERM_DEP) $(LIBSVC_NAME) $(LIBREWR_NAME)
 $(LPE2TORX_NAME) : $(LPE2TORX_OBJECTS) $(ATERM_DEP) $(LIBREWR_NAME) $(LIBENUM_NAME) $(LIBNEXT_NAME)
 	$(CXX) -o $@ $(LPE2TORX_OBJECTS) $(LDFLAGS) $(LPE2TORX_LDFLAGS)
 else
+$(LIBLTS_NAME) :
+	@echo "Missing Boost libraries so skipping build of liblts."
+$(LTSCP_NAME) :
+	@echo "Missing Boost libraries so skipping build of ltscp."
 $(LPEINFO_NAME) :
 	@echo "Missing Boost libraries so skipping build of lpeinfo."
 $(LPECONSTELM_NAME) :
@@ -413,9 +420,6 @@ endif
 
 $(LTSMIN_NAME) : $(LTSMIN_OBJECTS) $(ATERM_DEP) $(LIBSVC_NAME) $(LIBREWR_NAME)
 	$(CXX) -o $@ $(LTSMIN_OBJECTS) $(LDFLAGS) $(LTSMIN_LDFLAGS)
-
-$(LTSCP_NAME) : $(LTSCP_OBJECTS) $(ATERM_DEP) $(LIBSVC_NAME) $(LIBLTS_NAME) $(LIBREWR_NAME)
-	$(CXX) -o $@ $(LTSCP_OBJECTS) $(LDFLAGS) $(LTSCP_LDFLAGS)
 
 $(LTSPP_NAME) : $(LTSPP_OBJECTS) $(ATERM_DEP) $(LIBSVC_NAME) $(LIBREWR_NAME)
 	$(CXX) -o $@ $(LTSPP_OBJECTS) $(LDFLAGS) $(LTSPP_LDFLAGS)

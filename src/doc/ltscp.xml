@@ -7,6 +7,7 @@
 <!ENTITY infile "<parameter>INFILE</parameter>">
 <!ENTITY outfile "<parameter>OUTFILE</parameter>">
 <!ENTITY format "<parameter>FORMAT</parameter>">
+<!ENTITY file "<parameter>FILE</parameter>">
 <!ENTITY default "<parameter>default</parameter>">
 <!ENTITY debug "<parameter>debug</parameter>">
 <!ENTITY internal "<parameter>internal</parameter>">
@@ -16,6 +17,7 @@
 <!ENTITY opt_i "<option>-i</option>">
 <!ENTITY opt_o "<option>-o</option>">
 <!ENTITY opt_f "<option>-f</option>">
+<!ENTITY opt_l "<option>-l</option>">
 <!ENTITY opt_help "<option>--help</option>">
 <!ENTITY opt_version "<option>--version</option>">
 <!ENTITY opt_quiet "<option>--quiet</option>">
@@ -23,6 +25,7 @@
 <!ENTITY opt_in "<option>--in</option>">
 <!ENTITY opt_out "<option>--out</option>">
 <!ENTITY opt_formats "<option>--formats</option>">
+<!ENTITY opt_lpe "<option>--lpe</option>">
 <!ENTITY stdin "<constant>stdin</constant>">
 <!ENTITY stdout "<constant>stdout</constant>">
 ]>
@@ -63,6 +66,13 @@
     extension.  Options &opt_in; and &opt_out; can be used to force the format
     for &infile; and &outfile;, respectively. A list of supported formats can
     be requested by using the option &opt_formats;
+  </para>
+  
+  <para>
+    Note that tools that use the FSM format may depend on state information and
+    parameter names. The former requires that the state information is in the
+    input LTS file and the latter that the &opt_l; option is used (see the
+    options sections below).
   </para>
 </refsect1>
 
@@ -135,6 +145,19 @@
     <listitem>
       <para>
        list accepted formats
+      </para>
+    </listitem>
+  </varlistentry>
+
+  <varlistentry>
+    <term>&opt_l;</term>
+    <term>&opt_lpe;=&file;</term>
+    <listitem>
+      <para>
+	When saving as an FSM file, name the state parameters according to the
+	names in the LPE in &file;.  This should be the LPE from which the
+	input LTS file was generated. If this option is not used, state
+	parameters are assigned an arbitrary name by &ltscp;.
       </para>
     </listitem>
   </varlistentry>
