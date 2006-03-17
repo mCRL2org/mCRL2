@@ -67,7 +67,7 @@ ifeq ($(HOST_OS),CYGWIN)
  GLUT_LDFLAGS      = -lopengl32 -lglu32 -lglut32
 endif
 ifeq ($(HOST_OS),MACOSX)
- LDFLAGS           = @LDFLAGS@
+ LDFLAGS           = -L. -Lsvc @LDFLAGS@
  GLUT_LDFLAGS      = -framework OpenGL -framework GLUT
 
  # Environment variable for Mac
