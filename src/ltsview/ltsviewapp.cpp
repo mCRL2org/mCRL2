@@ -166,8 +166,7 @@ void LTSViewApp::setRankStyle( RankStyle rs )
       ++currentJobNr;
       mainFrame->updateProgressDialog( 50, "Merging superiors" );
       lts->mergeSuperiorClusters();
-      lts->markStates();
-      lts->markTransitions();
+      lts->markClusters();
       
       ++currentJobNr;
       mainFrame->updateProgressDialog( 75, "Positioning clusters" );
@@ -204,7 +203,6 @@ void LTSViewApp::addMarkRule()
       {
 	lts->addMarkRule( markrule );
 	mainFrame->addMarkRule( msrDialog->getMarkRuleString() );
-	lts->markStates();
 	applyMarkStyle( MARK_STATES );
       }
     }
@@ -216,7 +214,6 @@ void LTSViewApp::addMarkRule()
 void LTSViewApp::removeMarkRule( const int index )
 {
   lts->removeMarkRule( index );
-  lts->markStates();
   applyMarkStyle( MARK_STATES );
 }
 
@@ -237,7 +234,6 @@ void LTSViewApp::editMarkRule( const int index )
 	markrule->isActivated = oldActivated;
 	lts->replaceMarkRule( index, markrule );
 	mainFrame->replaceMarkRule( index, msrDialog->getMarkRuleString() );
-	lts->markStates();
 	applyMarkStyle( MARK_STATES );
       }
     }
@@ -251,7 +247,6 @@ void LTSViewApp::activateMarkRule( const int index, const bool activate )
   if ( lts != NULL )
   {
     lts->activateMarkRule( index, activate );
-    lts->markStates();
     applyMarkStyle( MARK_STATES );
   }
 }
@@ -270,11 +265,7 @@ void LTSViewApp::setMatchAnyMarkRule( bool b )
 {
   if ( lts != NULL )
   {
-    if ( lts->getMatchAnyMarkRule() != b )
-    {
-      lts->setMatchAnyMarkRule( b );
-      lts->markStates();
-    }
+    lts->setMatchAnyMarkRule( b );
     applyMarkStyle( MARK_STATES );
   }
 }

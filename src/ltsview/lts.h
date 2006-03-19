@@ -20,7 +20,7 @@ class LTS
     LTS( Mediator* owner );
     ~LTS();
     void	activateMarkRule( const int index, const bool activate );
-    void	addMarkRule( MarkRule* r );
+    void	addMarkRule( MarkRule* r, int index=-1 );
     void	addState( State* s );
     void	addTransition( Transition* t );
     void	applyIterativeRanking();
@@ -40,8 +40,7 @@ class LTS
     int		getNumberOfTransitions() const;
     ATermList	getStateVectorSpec();
     void	markAction( string label );
-    void	markStates();
-    void	markTransitions();
+    void	markClusters();
     void	mergeSuperiorClusters();
     void  	printStructure();
     void	printClusterSizesPositions();
@@ -58,18 +57,20 @@ class LTS
     vector< vector< Cluster* > >  clustersInRank;
     int				  deadlockCount;
     State*			  initialState;
-    int				  markedStatesCount;
-    int				  markedTransitionsCount;
+    vector< State* >		  markedStates;
+    vector< Transition* >	  markedTransitions;
     vector< MarkRule* >		  markRules;
     bool			  matchAny;
     Mediator*			  mediator;
-    vector< State* >		  states;
     vector< vector< State* > >	  statesInRank;
     ATermList			  stateVectorSpec;
-    vector< Transition* >	  transitions;
+    vector< State* >		  unmarkedStates;
+    vector< Transition* >	  unmarkedTransitions;
 
     void addComradesToCluster( Cluster* c, State* s );
     void clearRanksAndClusters();
+    void processAddedMarkRule( MarkRule* r );
+    void processRemovedMarkRule( MarkRule* r );
     void updateMarksAll();
     void updateMarksAny();
 };

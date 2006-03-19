@@ -32,7 +32,7 @@ class Cluster
     float		baseRadius;
     bool		deadlock;
     vector< Cluster* >	descendants;
-    bool		markedState;
+    int			markedState;
     int			markedTransition;
     float		position;
     float		size;

@@ -13,7 +13,7 @@ Cluster::Cluster()
   baseRadius = 0.0f;
   topRadius = 0.0f;
   deadlock = false;
-  markedState = false;
+  markedState = 0;
   markedTransition = 0;
 }
 
@@ -234,7 +234,7 @@ float Cluster::getBaseRadius() const
 
 bool Cluster::hasMarkedState() const
 {
-  return markedState;
+  return ( markedState > 0 );
 }
 
 bool Cluster::hasMarkedTransition() const
@@ -244,12 +244,12 @@ bool Cluster::hasMarkedTransition() const
 
 void Cluster::markState()
 {
-  markedState = true;
+  ++markedState;
 }
 
 void Cluster::unmarkState()
 {
-  markedState = false;
+  --markedState;
 }
 
 void Cluster::markTransition()
