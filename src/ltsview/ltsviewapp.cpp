@@ -284,6 +284,7 @@ void LTSViewApp::unmarkAction( string label )
 
 void LTSViewApp::applyMarkStyle( MarkStyle ms )
 {
+  if ( lts == NULL ) return;
   switch( ms )
   {
     case MARK_DEADLOCKS:
