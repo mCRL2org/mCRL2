@@ -9,6 +9,7 @@ Transition::Transition(State* bs, State* es, ATerm lbl )
   label = lbl;
   ATprotect( &label );
   backpointer = false;
+  marked = false;
 }
 
 Transition::~Transition()
@@ -24,6 +25,11 @@ State* Transition::getBeginState() const
 State* Transition::getEndState() const
 {
   return endState;
+}
+
+ATerm Transition::getLabel() const
+{
+  return label;
 }
 
 bool Transition::isBackpointer() const

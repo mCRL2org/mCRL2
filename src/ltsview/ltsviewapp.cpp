@@ -101,7 +101,9 @@ void LTSViewApp::openFile( string fileName )
       lts->getNumberOfTransitions(), lts->getNumberOfClusters(),
       lts->getNumberOfRanks() );
   mainFrame->resetMarkRules();
+  mainFrame->setActionLabels( lts->getActionLabels() );
   mainFrame->setMarkedStatesInfo( 0 );
+  mainFrame->setMarkedTransitionsInfo( 0 );
   mainFrame->setVisSettings( visualizer->getVisSettings() );
 }
 
@@ -165,6 +167,7 @@ void LTSViewApp::setRankStyle( RankStyle rs )
       mainFrame->updateProgressDialog( 50, "Merging superiors" );
       lts->mergeSuperiorClusters();
       lts->markStates();
+      lts->markTransitions();
       
       ++currentJobNr;
       mainFrame->updateProgressDialog( 75, "Positioning clusters" );
@@ -276,19 +279,38 @@ void LTSViewApp::setMatchAnyMarkRule( bool b )
   }
 }
 
+void LTSViewApp::markAction( string label )
+{
+  lts->markAction( label );
+  applyMarkStyle( MARK_TRANSITIONS );
+}
+
+void LTSViewApp::unmarkAction( string label )
+{
+  lts->unmarkAction( label );
+  applyMarkStyle( MARK_TRANSITIONS );
+}
+
 void LTSViewApp::applyMarkStyle( MarkStyle ms )
 {
   switch( ms )
   {
     case MARK_DEADLOCKS:
       mainFrame->setMarkedStatesInfo( lts->getNumberOfDeadlocks() );
+      mainFrame->setMarkedTransitionsInfo( 0 );
       break;
     case MARK_STATES:
       mainFrame->setMarkedStatesInfo( lts->getNumberOfMarkedStates() );
+      mainFrame->setMarkedTransitionsInfo( 0 );
+      break;
+    case MARK_TRANSITIONS:
+      mainFrame->setMarkedStatesInfo( 0 );
+      mainFrame->setMarkedTransitionsInfo( lts->getNumberOfMarkedTransitions() );
       break;
     case NO_MARKS:
     default:
       mainFrame->setMarkedStatesInfo( 0 );
+      mainFrame->setMarkedTransitionsInfo( 0 );
       break;
   }
   visualizer->setMarkStyle( ms );

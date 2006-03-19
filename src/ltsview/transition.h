@@ -17,6 +17,7 @@ class Transition
     ~Transition();
     State*  getBeginState() const;
     State*  getEndState() const;
+    ATerm   getLabel() const;
     bool    isBackpointer() const;
     bool    isMarked() const;
     void    mark();

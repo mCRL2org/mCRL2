@@ -23,10 +23,10 @@ class LTS
     void	addMarkRule( MarkRule* r );
     void	addState( State* s );
     void	addTransition( Transition* t );
-    void	addTransitionLabels( ATermList labels );
     void	applyIterativeRanking();
     void	applyCyclicRanking();
     void	clusterComrades();
+    ATermList	getActionLabels() const;
     void	getClustersAtRank( unsigned int r, vector< Cluster* > &cs ) const;
     State*	getInitialState() const;
     bool	getMatchAnyMarkRule() const;
@@ -34,10 +34,12 @@ class LTS
     int		getNumberOfClusters() const;
     int		getNumberOfDeadlocks();
     int		getNumberOfMarkedStates() const;
+    int		getNumberOfMarkedTransitions() const;
     int		getNumberOfRanks() const;
     int		getNumberOfStates() const;
     int		getNumberOfTransitions() const;
     ATermList	getStateVectorSpec();
+    void	markAction( string label );
     void	markStates();
     void	markTransitions();
     void	mergeSuperiorClusters();
@@ -45,15 +47,19 @@ class LTS
     void	printClusterSizesPositions();
     void	removeMarkRule( const int index );
     void	replaceMarkRule( int index, MarkRule* mr );
+    void	setActionLabels( ATermList labels );
     void	setInitialState( State* s );
     void	setMatchAnyMarkRule( bool b );
     void	setStateVectorSpec( ATermList spec );
+    void	unmarkAction( string label );
 
   private:
+    ATermList			  actionLabels;
     vector< vector< Cluster* > >  clustersInRank;
     int				  deadlockCount;
     State*			  initialState;
     int				  markedStatesCount;
+    int				  markedTransitionsCount;
     vector< MarkRule* >		  markRules;
     bool			  matchAny;
     Mediator*			  mediator;
@@ -61,7 +67,6 @@ class LTS
     vector< vector< State* > >	  statesInRank;
     ATermList			  stateVectorSpec;
     vector< Transition* >	  transitions;
-    ATermList			  transitionLabels;
 
     void addComradesToCluster( Cluster* c, State* s );
     void clearRanksAndClusters();

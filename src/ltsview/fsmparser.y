@@ -51,7 +51,7 @@ fsm_file :
 	SECSEP EOLN
 	states
 	SECSEP EOLN transitions
-	  { fsmparserlts->addTransitionLabels( ATindexedSetElements( actions ) ) }
+	  { fsmparserlts->setActionLabels( ATindexedSetElements( actions ) ) }
 	;
 
 // --------- Section containing the state vector ----------

@@ -46,11 +46,13 @@ class LTSViewApp : public wxApp, public Mediator
     void	  editMarkRule( const int index );
     RGB_Color	  getBackgroundColor() const;
     float	  getHalfStructureHeight() const;
+    void	  markAction( string label );
     virtual bool  OnInit();
     void	  openFile( string fileName );
     void	  removeMarkRule( const int index );
     void	  setMatchAnyMarkRule( bool b );
     void	  setRankStyle( RankStyle rs );
+    void	  unmarkAction( string label );
 };
 
 DECLARE_APP( LTSViewApp )

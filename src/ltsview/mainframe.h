@@ -13,6 +13,7 @@
 #include <wx/bitmap.h>
 #include <wx/event.h>
 #include <wx/checklst.h>
+#include "aterm/aterm2.h"
 #include "spinctrlfloat.h"
 #include "colorbutton.h"
 #include "mediator.h"
@@ -45,10 +46,13 @@ class MainFrame : public wxFrame
     void	onMarkRadio( wxCommandEvent& event );
     void	onMarkRuleActivate( wxCommandEvent& event );
     void	onMarkRuleEdit( wxCommandEvent& event );
+    void	onMarkTransition( wxCommandEvent& event );
     void	onSpinSettingChanged( wxSpinEvent& event );
     void	replaceMarkRule( int index, wxString str );
     void	resetMarkRules();
+    void	setActionLabels( ATermList labels );
     void	setMarkedStatesInfo( int number );
+    void	setMarkedTransitionsInfo( int number );
     void	setNumberInfo( int nstates, int ntransitions, int nclusters, int nranks );
     void	setVisSettings( VisSettings ss );
     void	showMessage( string title, string text );
@@ -56,29 +60,30 @@ class MainFrame : public wxFrame
   private:
     wxColorButton*    backgroundButton;
     wxSpinCtrlFloat*  backpointerSpinCtrl;
-    wxSpinCtrl*	      branchspreadSpinCtrl;
-    wxSpinCtrlFloat*  clusterheightSpinCtrl;
-    VisSettings	      defaultSettings;
+//    wxSpinCtrl*	      branchspreadSpinCtrl;
+//    wxSpinCtrlFloat*  clusterheightSpinCtrl;
     wxString	      directory;
     wxColorButton*    downEdgeButton;
     wxString	      filename;
     GLCanvas*	      glCanvas;
     wxColorButton*    interpolate1Button;
     wxColorButton*    interpolate2Button;
-    wxCheckBox*	      levelDivCheckBox;
+//    wxCheckBox*	      levelDivCheckBox;
     wxCheckBox*	      longinterpolateCheckBox;
     wxChoice*	      markAnyAllChoice;
     wxColorButton*    markButton;
-    wxRadioButton*    markdeadlocksRadio;
+    wxRadioButton*    markDeadlocksRadio;
     wxCheckListBox*   markStatesListBox;
-    wxRadioButton*    markstatesRadio;
-    wxRadioButton*    marktransitionsRadio;
+    wxRadioButton*    markStatesRadio;
+    wxCheckListBox*   markTransitionsListBox;
+    wxRadioButton*    markTransitionsRadio;
     Mediator*	      mediator;
     wxColorButton*    nodeButton;
     wxSpinCtrlFloat*  nodesizeSpinCtrl;
     wxRadioButton*    nomarksRadio;
     wxStaticText*     numberOfClustersLabel;
     wxStaticText*     numberOfMarkedStatesLabel;
+    wxStaticText*     numberOfMarkedTransitionsLabel;
     wxStaticText*     numberOfRanksLabel;
     wxStaticText*     numberOfStatesLabel;
     wxStaticText*     numberOfTransitionsLabel;

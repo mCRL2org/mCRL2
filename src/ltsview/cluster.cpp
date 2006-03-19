@@ -13,7 +13,8 @@ Cluster::Cluster()
   baseRadius = 0.0f;
   topRadius = 0.0f;
   deadlock = false;
-  marked = false;
+  markedState = false;
+  markedTransition = 0;
 }
 
 Cluster::~Cluster()
@@ -231,19 +232,34 @@ float Cluster::getBaseRadius() const
   return baseRadius;
 }
 
-bool Cluster::isMarked() const
+bool Cluster::hasMarkedState() const
 {
-  return marked;
+  return markedState;
 }
 
-void Cluster::mark()
+bool Cluster::hasMarkedTransition() const
 {
-  marked = true;
+  return ( markedTransition > 0 );
 }
 
-void Cluster::unmark()
+void Cluster::markState()
 {
-  marked = false;
+  markedState = true;
+}
+
+void Cluster::unmarkState()
+{
+  markedState = false;
+}
+
+void Cluster::markTransition()
+{
+  ++markedTransition;
+}
+
+void Cluster::unmarkTransition()
+{
+  --markedTransition;
 }
 
 bool Cluster::hasDeadlock() const

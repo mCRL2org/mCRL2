@@ -32,7 +32,8 @@ class Cluster
     float		baseRadius;
     bool		deadlock;
     vector< Cluster* >	descendants;
-    bool		marked;
+    bool		markedState;
+    int			markedTransition;
     float		position;
     float		size;
     vector< State* >	states;
@@ -53,12 +54,15 @@ class Cluster
     void      getStates( vector< State* > &ss ) const;
     bool      hasDescendants() const;
     bool      hasDeadlock() const;
-    bool      isMarked() const;
-    void      mark();
+    bool      hasMarkedState() const;
+    bool      hasMarkedTransition() const;
+    void      markState();
+    void      markTransition();
     void      setAncestor( Cluster* c );
     void      setDeadlock( bool b );
     void      setPosition( float p );
-    void      unmark();
+    void      unmarkState();
+    void      unmarkTransition();
 };
 
 #endif

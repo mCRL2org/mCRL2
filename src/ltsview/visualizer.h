@@ -23,6 +23,7 @@ class Visualizer
   private:
     float		  boundingCylH;
     float		  boundingCylW;
+    float		  clusterHeight;
     float		  cos_obt;
     static VisSettings	  defaultVisSettings;
     LTS*		  lts;
@@ -37,9 +38,11 @@ class Visualizer
 
     void drawSubtree( Cluster* root, bool topClosed, float &boundWidth, float
 	&boundHeight, HSV_Color col, HSV_Color delta_col );
+    void drawSubtreeMarkDeadlocks( Cluster* root, bool topClosed, float
+	&boundWidth, float &boundHeight );
     void drawSubtreeMarkStates( Cluster* root, bool topClosed, float
 	&boundWidth, float &boundHeight );
-    void drawSubtreeMarkDeadlocks( Cluster* root, bool topClosed, float
+    void drawSubtreeMarkTransitions( Cluster* root, bool topClosed, float
 	&boundWidth, float &boundHeight );
   
   public:

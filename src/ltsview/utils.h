@@ -41,12 +41,12 @@ namespace Utils
     float     backpointerCurve;
 //    int	      branchRotation;
 //    int	      branchScale;
-    int	      branchSpread;
-    float     clusterHeight;
+//    int	      branchSpread;
+//    float     clusterHeight;
     RGB_Color downEdgeColor;
     RGB_Color interpolateColor1;
     RGB_Color interpolateColor2;
-    bool      levelDividers;
+//    bool      levelDividers;
     bool      longInterpolation;
     RGB_Color markedColor;
     float     nodeSize;

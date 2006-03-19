@@ -21,10 +21,12 @@ class Mediator
     virtual void      editMarkRule( const int index ) = 0;
     virtual RGB_Color getBackgroundColor() const = 0;
     virtual float     getHalfStructureHeight() const = 0;
+    virtual void      markAction( string label ) = 0;
     virtual void      openFile( string fileName ) = 0;
     virtual void      removeMarkRule( const int index ) = 0;
     virtual void      setMatchAnyMarkRule( bool b ) = 0;
     virtual void      setRankStyle( RankStyle rs ) = 0;
+    virtual void      unmarkAction( string label ) = 0;
 };
 
 #endif

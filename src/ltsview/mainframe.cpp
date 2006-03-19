@@ -31,6 +31,7 @@ BEGIN_EVENT_TABLE( MainFrame, wxFrame )
   EVT_CHOICE( myID_MARK_ANYALL, MainFrame::onMarkAnyAll )
   EVT_LISTBOX_DCLICK( myID_MARK_RULES, MainFrame::onMarkRuleEdit )
   EVT_CHECKLISTBOX( myID_MARK_RULES, MainFrame::onMarkRuleActivate )
+  EVT_CHECKLISTBOX( myID_MARK_TRANSITIONS, MainFrame::onMarkTransition )
   EVT_BUTTON( myID_ADD_RULE, MainFrame::onAddMarkRuleButton )
   EVT_BUTTON( myID_REMOVE_RULE, MainFrame::onRemoveMarkRuleButton )
 END_EVENT_TABLE()
@@ -135,7 +136,7 @@ void MainFrame::setupRightPanel( wxPanel* panel )
   int rflags = wxALIGN_RIGHT | wxALIGN_CENTER_VERTICAL | wxEXPAND | wxALL;
   
   // setup the top part (information box)
-  wxFlexGridSizer* topSizer = new wxFlexGridSizer( 5, 2, 0, 0 );
+  wxFlexGridSizer* topSizer = new wxFlexGridSizer( 6, 2, 0, 0 );
   numberOfStatesLabel = new wxStaticText( panel, wxID_ANY, wxEmptyString,
       wxDefaultPosition, wxDefaultSize, wxALIGN_RIGHT | wxST_NO_AUTORESIZE );
   numberOfTransitionsLabel = new wxStaticText( panel, wxID_ANY, wxEmptyString,
@@ -145,6 +146,8 @@ void MainFrame::setupRightPanel( wxPanel* panel )
   numberOfRanksLabel = new wxStaticText( panel, wxID_ANY, wxEmptyString,
       wxDefaultPosition, wxDefaultSize, wxALIGN_RIGHT | wxST_NO_AUTORESIZE );
   numberOfMarkedStatesLabel = new wxStaticText( panel, wxID_ANY, wxEmptyString,
+      wxDefaultPosition, wxDefaultSize, wxALIGN_RIGHT | wxST_NO_AUTORESIZE );
+  numberOfMarkedTransitionsLabel = new wxStaticText( panel, wxID_ANY, wxEmptyString,
       wxDefaultPosition, wxDefaultSize, wxALIGN_RIGHT | wxST_NO_AUTORESIZE );
   
   topSizer->AddGrowableCol( 1 );
@@ -163,6 +166,9 @@ void MainFrame::setupRightPanel( wxPanel* panel )
   topSizer->Add( new wxStaticText( panel, wxID_ANY,
 	wxT("Number of marked states:") ), 0, rflags, 3 );
   topSizer->Add( numberOfMarkedStatesLabel, 0, rflags, 3 );
+  topSizer->Add( new wxStaticText( panel, wxID_ANY,
+	wxT("Number of marked transitions:") ), 0, rflags, 3 );
+  topSizer->Add( numberOfMarkedTransitionsLabel, 0, rflags, 3 );
 
   // setup the bottom part (notebook)
   wxNotebook* bottomNotebook = new wxNotebook( panel, wxID_ANY );
@@ -186,16 +192,16 @@ void MainFrame::setupSettingsPanel( wxPanel* panel )
 {
   wxStaticBoxSizer* parSizer = new wxStaticBoxSizer( wxVERTICAL, panel, wxT("Parameters") );
 
-  wxFlexGridSizer* parsubSizer = new wxFlexGridSizer( 8, 3, 0, 0 );
-  parsubSizer->AddGrowableCol( 1 );
-  parsubSizer->AddGrowableCol( 2 );
-  for ( int i = 0 ; i < 8 ; ++i )
+  wxFlexGridSizer* parsubSizer = new wxFlexGridSizer( 5, 2, 0, 0 );
+  parsubSizer->AddGrowableCol( 0 );
+  for ( int i = 0 ; i < 5 ; ++i )
   {
     parsubSizer->AddGrowableRow( i );
   }
   parSizer->Add( parsubSizer, 1, wxEXPAND | wxALL, 0 );
   
-  int flags = wxALIGN_LEFT | wxALIGN_CENTER_VERTICAL | wxALL; 
+  int lflags = wxALIGN_LEFT | wxALIGN_CENTER_VERTICAL | wxALL; 
+  int rflags = wxALIGN_RIGHT | wxALIGN_CENTER_VERTICAL | wxALL; 
   int border = 3;
 
   wxSize spinctrlSize( 50, -1 );
@@ -204,34 +210,32 @@ void MainFrame::setupSettingsPanel( wxPanel* panel )
       0.0f, 100.0f, 0.1f, 0.0f, wxDefaultPosition, spinctrlSize );
   nodesizeSpinCtrl->SetSizeHints( spinctrlSize, spinctrlSize );
   parsubSizer->Add( new wxStaticText( panel, wxID_ANY, 
-	wxT("Node size:") ), 0, flags, border );
-  parsubSizer->Add( nodesizeSpinCtrl, 0, flags, border );
-  parsubSizer->AddSpacer( 0 );
+	wxT("Node size:") ), 0, lflags, border );
+  parsubSizer->Add( nodesizeSpinCtrl, 0, rflags, border );
   
   backpointerSpinCtrl = new wxSpinCtrlFloat( panel, myID_SETTINGS_CONTROL,
       0.0f, 100.0f, 0.1f, 0.0f, wxDefaultPosition, spinctrlSize  );
   backpointerSpinCtrl->SetSizeHints( spinctrlSize, spinctrlSize );
   parsubSizer->Add( new wxStaticText( panel, wxID_ANY, 
-	wxT("Backpointer curve:") ), 0, flags, border );
-  parsubSizer->Add( backpointerSpinCtrl, 0, flags, border );
-  parsubSizer->AddSpacer( 0 );
+	wxT("Backpointer curve:") ), 0, lflags, border );
+  parsubSizer->Add( backpointerSpinCtrl, 0, rflags, border );
   
-  clusterheightSpinCtrl = new wxSpinCtrlFloat( panel, myID_SETTINGS_CONTROL,
+  /*clusterheightSpinCtrl = new wxSpinCtrlFloat( panel, myID_SETTINGS_CONTROL,
       0.0f, 1000.0f, 0.1f, 0.0f, wxDefaultPosition, spinctrlSize  );
   clusterheightSpinCtrl->SetSizeHints( spinctrlSize, spinctrlSize );
   parsubSizer->Add( new wxStaticText( panel, wxID_ANY, 
 	wxT("Cluster height:") ), 0, flags, border );
   parsubSizer->Add( clusterheightSpinCtrl, 0, flags, border );
   parsubSizer->AddSpacer( 0 );
-  /*
+  */
+  /*branchscaleSpinCtrl = new wxSpinCtrl( panel, myID_SETTINGS_CONTROL );
   parsubSizer->Add( new wxStaticText( panel, wxID_ANY, 
 	wxT("Branch scale:") ), 0, flags, border );
-  branchscaleSpinCtrl = new wxSpinCtrl( panel, myID_SETTINGS_CONTROL );
   parsubSizer->Add( branchscaleSpinCtrl, 0, flags, border );
   parsubSizer->Add( new wxStaticText( panel, wxID_ANY, 
 	wxT("%") ), 0, flags, 0 );
   */
-  branchspreadSpinCtrl = new wxSpinCtrl( panel, myID_SETTINGS_CONTROL );
+  /*branchspreadSpinCtrl = new wxSpinCtrl( panel, myID_SETTINGS_CONTROL );
   branchspreadSpinCtrl->SetMinSize( spinctrlSize );
   branchspreadSpinCtrl->SetMaxSize( spinctrlSize );
   parsubSizer->Add( new wxStaticText( panel, wxID_ANY, 
@@ -239,6 +243,7 @@ void MainFrame::setupSettingsPanel( wxPanel* panel )
   parsubSizer->Add( branchspreadSpinCtrl, 0, flags, border );
   parsubSizer->Add( new wxStaticText( panel, wxID_ANY, 
 	wxT("%") ), 0, flags, 0 );
+  */
   /*
   parsubSizer->Add( new wxStaticText( panel, wxID_ANY, 
 	wxT("Branch rotation:") ), 0, flags, border );
@@ -254,10 +259,8 @@ void MainFrame::setupSettingsPanel( wxPanel* panel )
   outerbranchtiltSpinCtrl->SetMinSize( spinctrlSize );
   outerbranchtiltSpinCtrl->SetMaxSize( spinctrlSize );
   parsubSizer->Add( new wxStaticText( panel, wxID_ANY, 
-	wxT("Outer branch tilt:") ), 0, flags, border );
-  parsubSizer->Add( outerbranchtiltSpinCtrl, 0, flags, border );
-  parsubSizer->Add( new wxStaticText( panel, wxID_ANY, 
-	wxString("\xc2\xb0", wxConvUTF8) ), 0, flags, 0 );
+	wxT("Outer branch tilt:") ), 0, lflags, border );
+  parsubSizer->Add( outerbranchtiltSpinCtrl, 0, rflags, border );
   
   qualitySpinCtrl = new wxSpinCtrl( panel, myID_SETTINGS_CONTROL, wxEmptyString,
       wxDefaultPosition );
@@ -265,9 +268,8 @@ void MainFrame::setupSettingsPanel( wxPanel* panel )
   qualitySpinCtrl->SetMinSize( spinctrlSize );
   qualitySpinCtrl->SetMaxSize( spinctrlSize );
   parsubSizer->Add( new wxStaticText( panel, wxID_ANY, 
-	wxT("Rendering quality:") ), 0, flags, border );
-  parsubSizer->Add( qualitySpinCtrl, 0, flags, border );
-  parsubSizer->AddSpacer( 0 );
+	wxT("Rendering quality:") ), 0, lflags, border );
+  parsubSizer->Add( qualitySpinCtrl, 0, rflags, border );
   /*
   qualitySlider = new wxSlider( panel, myID_SETTINGS_CONTROL, 4, 4, 100,
       wxDefaultPosition, wxSize( 100, -1 ), wxSL_HORIZONTAL | wxSL_LABELS |
@@ -278,15 +280,16 @@ void MainFrame::setupSettingsPanel( wxPanel* panel )
   parsubSizer->AddSpacer( 0 );
   */
   
-  levelDivCheckBox = new wxCheckBox( panel, myID_SETTINGS_CONTROL,
+  /*levelDivCheckBox = new wxCheckBox( panel, myID_SETTINGS_CONTROL,
 	wxT("Show level dividers") );
   parsubSizer->Add( levelDivCheckBox, 0, flags, border );
-  
+  */
   // Setup the Colors panel
   
   wxStaticBoxSizer* colSizer = new wxStaticBoxSizer( wxVERTICAL, panel, wxT("Colours") );
   
-  wxFlexGridSizer* colsubSizer = new wxFlexGridSizer( 8, 3, 0, 0 );
+  wxFlexGridSizer* colsubSizer = new wxFlexGridSizer( 8, 4, 0, 0 );
+  colsubSizer->AddGrowableCol( 0 );
   for ( int i = 0 ; i < 8 ; ++i )
   {
     colsubSizer->AddGrowableRow( i );
@@ -296,46 +299,50 @@ void MainFrame::setupSettingsPanel( wxPanel* panel )
   transparencySpinCtrl = new wxSpinCtrl( panel, myID_SETTINGS_CONTROL );
   transparencySpinCtrl->SetSizeHints( spinctrlSize, spinctrlSize );
   colsubSizer->Add( new wxStaticText( panel, wxID_ANY, 
-	wxT("Transparency:") ), 0, flags, border );
-  colsubSizer->Add( transparencySpinCtrl, 0, flags, border );
+	wxT("Transparency:") ), 0, lflags, border );
+  colsubSizer->AddSpacer( 0 );
+  colsubSizer->Add( transparencySpinCtrl, 0, rflags, border );
   colsubSizer->Add( new wxStaticText( panel, wxID_ANY, 
-	wxT("%") ), 0, flags, 0 );
+	wxT("%") ), 0, lflags, 0 );
 
   wxSize btnSize( 25, 25 );
 
   backgroundButton = new wxColorButton( panel, this, myID_COLOR_BUTTON );
   backgroundButton->SetSizeHints( btnSize, btnSize );
   colsubSizer->Add( new wxStaticText( panel, wxID_ANY, 
-	wxT("Background:") ), 0, flags, border );
-  colsubSizer->Add( backgroundButton, 0, flags, border );
+	wxT("Background:") ), 0, lflags, border );
+  colsubSizer->AddSpacer( 0 );
+  colsubSizer->Add( backgroundButton, 0, rflags, border );
   colsubSizer->AddSpacer( 0 );
 
   nodeButton = new wxColorButton( panel, this, myID_COLOR_BUTTON );
   nodeButton->SetSizeHints( btnSize, btnSize );
   colsubSizer->Add( new wxStaticText( panel, wxID_ANY, 
-	wxT("Node:") ), 0, flags, border );
-  colsubSizer->Add( nodeButton, 0, flags, border );
+	wxT("Node:") ), 0, lflags, border );
+  colsubSizer->AddSpacer( 0 );
+  colsubSizer->Add( nodeButton, 0, rflags, border );
   colsubSizer->AddSpacer( 0 );
 
   downEdgeButton = new wxColorButton( panel, this, myID_COLOR_BUTTON );
   downEdgeButton->SetSizeHints( btnSize, btnSize );
   colsubSizer->Add( new wxStaticText( panel, wxID_ANY, 
-	wxT("Edge (down/up):") ), 0, flags, border );
-  colsubSizer->Add( downEdgeButton, 0, flags, border );
+	wxT("Edge (down/up):") ), 0, lflags, border );
+  colsubSizer->Add( downEdgeButton, 0, rflags, border );
   //colsubSizer->AddSpacer( 0 );
 
   upEdgeButton = new wxColorButton( panel, this, myID_COLOR_BUTTON );
   upEdgeButton->SetSizeHints( btnSize, btnSize );
   //colsubSizer->Add( new wxStaticText( panel, wxID_ANY, 
   //	  wxT("Edge (up):") ), 0, flags, border );
-  colsubSizer->Add( upEdgeButton, 0, flags, border );
-  //colsubSizer->AddSpacer( 0 );
+  colsubSizer->Add( upEdgeButton, 0, rflags, border );
+  colsubSizer->AddSpacer( 0 );
 
   markButton = new wxColorButton( panel, this, myID_COLOR_BUTTON );
   markButton->SetSizeHints( btnSize, btnSize );
   colsubSizer->Add( new wxStaticText( panel, wxID_ANY, 
-	wxT("Mark:") ), 0, flags, border );
-  colsubSizer->Add( markButton, 0, flags, border );
+	wxT("Mark:") ), 0, lflags, border );
+  colsubSizer->AddSpacer( 0 );
+  colsubSizer->Add( markButton, 0, rflags, border );
   colsubSizer->AddSpacer( 0 );
 
   interpolate1Button = new wxColorButton( panel, this, myID_COLOR_BUTTON );
@@ -343,13 +350,14 @@ void MainFrame::setupSettingsPanel( wxPanel* panel )
   interpolate2Button = new wxColorButton( panel, this, myID_COLOR_BUTTON );
   interpolate2Button->SetSizeHints( btnSize, btnSize );
   colsubSizer->Add( new wxStaticText( panel, wxID_ANY, 
-	wxT("Interpolate:") ), 0, flags, border );
-  colsubSizer->Add( interpolate1Button, 0, flags, border );
-  colsubSizer->Add( interpolate2Button, 0, flags, border );
+	wxT("Interpolate:") ), 0, lflags, border );
+  colsubSizer->Add( interpolate1Button, 0, rflags, border );
+  colsubSizer->Add( interpolate2Button, 0, rflags, border );
+  colsubSizer->AddSpacer( 0 );
   
   longinterpolateCheckBox = new wxCheckBox( panel, myID_SETTINGS_CONTROL,
       wxT("Long interpolation") );
-  colsubSizer->Add( longinterpolateCheckBox, 0, flags, border );
+  colsubSizer->Add( longinterpolateCheckBox, 0, lflags, border );
 
   wxFlexGridSizer* panelSizer = new wxFlexGridSizer( 4, 1, 0, 0 );
   panelSizer->AddGrowableCol( 0 );
@@ -365,16 +373,16 @@ void MainFrame::setupSettingsPanel( wxPanel* panel )
   rankstyleSizer->AddGrowableCol( 1 );
   //rankstyleSizer->AddGrowableRow( 0 );
   rankstyleSizer->Add( new wxStaticText( panel, wxID_ANY, wxT("Rank style:") ),
-      1, flags, border );
+      1, lflags, border );
   wxString choices[2] = { wxT("Iterative"), wxT("Cyclic") };
   wxChoice* rankstyleChoice = new wxChoice( panel, myID_RANK_STYLE,
       wxDefaultPosition, wxDefaultSize, 2, choices );
   rankstyleChoice->SetSelection( 0 );
-  rankstyleSizer->Add( rankstyleChoice, 1, flags, border );
+  rankstyleSizer->Add( rankstyleChoice, 1, lflags, border );
   
   panelSizer->Add( rankstyleSizer, 0, wxEXPAND | wxALL, border );
   panelSizer->Add( new wxButton( panel, wxID_RESET, wxT("Default settings")
-	), 0, flags, border );
+	), 0, lflags, border );
   panelSizer->Fit( panel );
   panel->SetSizer( panelSizer );
   panel->Layout();
@@ -393,17 +401,17 @@ void MainFrame::setupMarkPanel( wxPanel* panel )
   nomarksRadio = new wxRadioButton( panel, myID_MARK_RADIOBUTTON,
       wxT("No marks"), wxDefaultPosition, wxDefaultSize, wxRB_GROUP );
   nomarksRadio->SetValue( true );
-  markdeadlocksRadio = new wxRadioButton( panel, myID_MARK_RADIOBUTTON,
+  markDeadlocksRadio = new wxRadioButton( panel, myID_MARK_RADIOBUTTON,
       wxT("Mark deadlocks"));
-  markstatesRadio = new wxRadioButton( panel, myID_MARK_RADIOBUTTON,
+  markStatesRadio = new wxRadioButton( panel, myID_MARK_RADIOBUTTON,
       wxT("Mark states") );
-  marktransitionsRadio = new wxRadioButton( panel, myID_MARK_RADIOBUTTON,
+  markTransitionsRadio = new wxRadioButton( panel, myID_MARK_RADIOBUTTON,
       wxT("Mark	transitions") );
     
   markSizer->Add( nomarksRadio, 0, flags, border );
-  markSizer->Add( markdeadlocksRadio, 0, flags, border );
-  markSizer->Add( markstatesRadio, 0, flags, border );
-  markSizer->Add( marktransitionsRadio, 0, flags, border );
+  markSizer->Add( markDeadlocksRadio, 0, flags, border );
+  markSizer->Add( markStatesRadio, 0, flags, border );
+  markSizer->Add( markTransitionsRadio, 0, flags, border );
   
   wxStaticBoxSizer* markStatesSizer = new wxStaticBoxSizer( wxVERTICAL, panel,
       wxT("Mark states") );
@@ -426,9 +434,10 @@ void MainFrame::setupMarkPanel( wxPanel* panel )
   
   wxStaticBoxSizer* markTransitionsSizer = new wxStaticBoxSizer( wxVERTICAL,
       panel, wxT("Mark transitions") );
-  markTransitionsSizer->Add( new wxCheckListBox( panel, myID_MARK_TRANSITIONS,
-	wxDefaultPosition, wxDefaultSize, 0, NULL, wxLB_SINGLE | wxLB_SORT |
-	wxLB_NEEDED_SB | wxLB_HSCROLL ), 1, flags | wxEXPAND, border );
+  markTransitionsListBox = new wxCheckListBox( panel, myID_MARK_TRANSITIONS,
+      wxDefaultPosition, wxDefaultSize, 0, NULL, wxLB_SINGLE | wxLB_SORT |
+      wxLB_NEEDED_SB | wxLB_HSCROLL );
+  markTransitionsSizer->Add( markTransitionsListBox, 1, flags | wxEXPAND, border );
   
   markSizer->Add( markStatesSizer, 0, wxEXPAND | wxALL, border );
   markSizer->Add( markTransitionsSizer, 0, wxEXPAND | wxALL, border );
@@ -507,11 +516,11 @@ void MainFrame::onMarkRadio( wxCommandEvent& event )
 
   if ( buttonClicked == nomarksRadio )
     mediator->applyMarkStyle( NO_MARKS );
-  else if ( buttonClicked == markdeadlocksRadio )
+  else if ( buttonClicked == markDeadlocksRadio )
     mediator->applyMarkStyle( MARK_DEADLOCKS );
-  else if ( buttonClicked == markstatesRadio )
+  else if ( buttonClicked == markStatesRadio )
     mediator->applyMarkStyle( MARK_STATES );
-  else if ( buttonClicked == marktransitionsRadio )
+  else if ( buttonClicked == markTransitionsRadio )
     mediator->applyMarkStyle( MARK_TRANSITIONS );
 }
 
@@ -519,6 +528,7 @@ void MainFrame::onMarkRuleActivate( wxCommandEvent& event )
 {
   int i = event.GetInt();
   mediator->activateMarkRule( i, markStatesListBox->IsChecked( i ) );
+  markStatesRadio->SetValue( true );
 }
 
 void MainFrame::onMarkRuleEdit( wxCommandEvent& event )
@@ -529,7 +539,7 @@ void MainFrame::onMarkRuleEdit( wxCommandEvent& event )
 void MainFrame::onMarkAnyAll( wxCommandEvent& event )
 {
   mediator->setMatchAnyMarkRule( event.GetSelection() == 0 );
-  markstatesRadio->SetValue( true );
+  markStatesRadio->SetValue( true );
 }
 
 void MainFrame::onAddMarkRuleButton( wxCommandEvent& /*event*/ )
@@ -544,8 +554,20 @@ void MainFrame::onRemoveMarkRuleButton( wxCommandEvent& /*event*/ )
   {
     markStatesListBox->Delete( sel_index );
     mediator->removeMarkRule( sel_index );
-    markstatesRadio->SetValue( true );
+    markStatesRadio->SetValue( true );
   }
+}
+
+void MainFrame::onMarkTransition( wxCommandEvent& event )
+{
+  int i = event.GetInt();
+  if ( markTransitionsListBox->IsChecked( i ) )
+    mediator->markAction( string( markTransitionsListBox->GetString( i
+	    ).fn_str() ) );
+  else
+    mediator->unmarkAction( string( markTransitionsListBox->GetString( i
+	    ).fn_str() ) );
+  markTransitionsRadio->SetValue( true );
 }
 
 VisSettings MainFrame::getVisSettings() const
@@ -598,12 +620,12 @@ VisSettings MainFrame::getVisSettings() const
     backpointerSpinCtrl->GetValue(),
 //    branchrotationSpinCtrl->GetValue(),
 //    branchscaleSpinCtrl->GetValue(),
-    branchspreadSpinCtrl->GetValue(),
-    clusterheightSpinCtrl->GetValue(),
+//    branchspreadSpinCtrl->GetValue(),
+//    clusterheightSpinCtrl->GetValue(),
     downC,
     intC1,
     intC2,
-    levelDivCheckBox->GetValue(),
+//    levelDivCheckBox->GetValue(),
     longinterpolateCheckBox->GetValue(),
     markC,
     nodesizeSpinCtrl->GetValue(),
@@ -637,11 +659,11 @@ void MainFrame::setVisSettings( VisSettings ss )
   transparencySpinCtrl->SetValue( ss.transparency );
   nodesizeSpinCtrl->SetValue( ss.nodeSize );
   backpointerSpinCtrl->SetValue( ss.backpointerCurve );
-  clusterheightSpinCtrl->SetValue( ss.clusterHeight );
-  branchspreadSpinCtrl->SetValue( ss.branchSpread );
+//  clusterheightSpinCtrl->SetValue( ss.clusterHeight );
+//  branchspreadSpinCtrl->SetValue( ss.branchSpread );
   outerbranchtiltSpinCtrl->SetValue( ss.outerBranchTilt );
   qualitySpinCtrl->SetValue( ss.quality );
-  levelDivCheckBox->SetValue( ss.levelDividers );
+//  levelDivCheckBox->SetValue( ss.levelDividers );
   //branchscaleSpinCtrl->SetValue( ss.branchScale );
   //branchrotationSpinCtrl->SetValue( ss.branchRotation );
 }
@@ -699,11 +721,16 @@ void MainFrame::setMarkedStatesInfo( int number )
   numberOfMarkedStatesLabel->SetLabel( wxString::Format( wxT("%d"), number ) );
 }
 
+void MainFrame::setMarkedTransitionsInfo( int number )
+{
+  numberOfMarkedTransitionsLabel->SetLabel( wxString::Format( wxT("%d"), number ) );
+}
+
 void MainFrame::addMarkRule( wxString str )
 {
   markStatesListBox->Append( str );
   markStatesListBox->Check( markStatesListBox->GetCount()-1, true );
-  markstatesRadio->SetValue( true );
+  markStatesRadio->SetValue( true );
 }
 
 void MainFrame::replaceMarkRule( int index, wxString str )
@@ -711,7 +738,7 @@ void MainFrame::replaceMarkRule( int index, wxString str )
   bool isChecked = markStatesListBox->IsChecked( index );
   markStatesListBox->SetString( index, str );
   markStatesListBox->Check( index, isChecked );
-  markstatesRadio->SetValue( true );
+  markStatesRadio->SetValue( true );
 }
   
 void MainFrame::resetMarkRules()
@@ -719,4 +746,19 @@ void MainFrame::resetMarkRules()
   markStatesListBox->Clear();
   markAnyAllChoice->SetSelection( 0 );
   nomarksRadio->SetValue( true );
+}
+
+void MainFrame::setActionLabels( ATermList labels )
+{
+  wxArrayString strLabels;
+  strLabels.Alloc( ATgetLength( labels ) );
+  ATerm atLabel;
+  ATermList atLabels = labels;
+  while ( !ATisEmpty( atLabels ) )
+  {
+    atLabel = ATgetFirst( atLabels );
+    strLabels.Add( wxString( ATwriteToString( atLabel ), wxConvLocal ) );
+    atLabels = ATgetNext( atLabels );
+  }
+  markTransitionsListBox->Set( strLabels );
 }
