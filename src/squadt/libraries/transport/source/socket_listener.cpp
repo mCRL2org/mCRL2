@@ -22,7 +22,7 @@ namespace transport {
       acceptor.listen();
     }
 
-    void socket_listener::activate(transporter::listener_ptr l) {
+    void socket_listener::activate(basic_listener::ptr l) {
       /* Create a new socket transceiver that is not yet connected to the transporter */
       boost::shared_ptr < socket_transceiver > t(new socket_transceiver(owner));
 
@@ -32,7 +32,7 @@ namespace transport {
       socket_transceiver::scheduler.run();
     }
 
-    void socket_listener::handle_accept(const asio::error& e, boost::shared_ptr < socket_transceiver > t, transporter::listener_ptr l) {
+    void socket_listener::handle_accept(const asio::error& e, transceiver::socket_transceiver::ptr t, basic_listener::ptr l) {
       if (!e) {
         socket_listener::associate(t);
 
@@ -52,9 +52,7 @@ namespace transport {
       }
       else {
         /* Some other error occurred, abort... */
-        std::cerr << "Error : " << e << std::endl;
-
-        throw (new listener::exception(this));
+        throw (exception(exception_identifier::listener_failure));
       }
 
       /* Make sure the scheduler is running */

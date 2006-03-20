@@ -118,6 +118,7 @@ namespace sip {
      *  - --si-connect=\<scheme\>, where \<scheme\> is one of
      *    - socket://\<host\>:\<port\> (for a socket connection)
      *    - traditional:// (for standard input/output communication)
+     *  - --si-identifier=\<positive natural number\>
      *
      * @param argc the number of command line arguments
      * @param argv a pointer to the list of command line arguments

@@ -7,24 +7,33 @@
 
 namespace transport {
   namespace transceiver {
-    class transceiver;
+    class basic_transceiver;
   }
 
   namespace listener {
 
     /* Base class for listeners */
     class basic_listener {
+      public:
+        /** \brief Convenience type alias to hide the shared pointer implementation */
+        typedef boost::shared_ptr < basic_listener > ptr;
+
       protected:
+        /** \brief The communicator that will take over the accepted connections */
         transport::transporter& owner;
 
+        /** \brief Associates the owner with the connection */
         inline void associate(boost::shared_ptr < transceiver::basic_transceiver >);
 
       public:
 
+        /** \brief Constructor */
         inline basic_listener(transport::transporter& m);
 
+        /** \brief Shutdown the listener */
         virtual void shutdown() = 0;
 
+        /** \brief Destructor */
         virtual inline ~basic_listener();
     };
 
@@ -37,20 +46,6 @@ namespace transport {
 
     inline basic_listener::~basic_listener() {
     }
-
-    class exception : transport::exception {
-      private:
-        basic_listener* l;
-
-      public:
-        exception(basic_listener*);
- 
-        /** Returns the type of the exception */
-        exception_type type();
- 
-        /** Returns the type of the exception */
-        basic_listener* originator();
-    };
   }
 }
 

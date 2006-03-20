@@ -204,6 +204,10 @@ namespace squadt {
     return (outputs);
   }
 
+  inline void processor::process() throw () {
+    /* TODO */
+  }
+
   /**
    * \return whether the status was adjusted or not
    **/

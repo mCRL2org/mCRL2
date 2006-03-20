@@ -64,9 +64,7 @@ namespace transport {
         }
         else if (e != asio::error::operation_aborted) {
           /* The safe default error handling */
-          std::cerr << "Error : " << e << std::endl;
-
-          throw (new exception(this));
+          throw (exception(exception_identifier::transceiver_failure));
         }
       }
     }
@@ -92,9 +90,7 @@ namespace transport {
           handle_disconnect(this);
         }
         else if (e != asio::error::operation_aborted) {
-          std::cerr << "Error : " << e << std::endl;
-
-          throw (new exception(this));
+          throw (exception(exception_identifier::transceiver_failure));
         }
       }
     }
@@ -105,9 +101,7 @@ namespace transport {
         handle_disconnect(this);
       }
       else if (e != asio::error::success && e != asio::error::operation_aborted) {
-        std::cerr << "Error : " << e << std::endl;
-
-        throw (new exception(this));
+        throw (exception(exception_identifier::transceiver_failure));
       }
     }
 

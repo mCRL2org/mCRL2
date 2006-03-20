@@ -7,12 +7,9 @@
 #include <boost/asio/ipv4/address.hpp>
 
 #include <transport/detail/listener.h>
+#include <transport/detail/socket_transceiver.h>
 
 namespace transport {
-  namespace transceiver {
-    class socket_transceiver;
-  }
-
   namespace listener {
 
     class socket_listener : public basic_listener {
@@ -21,26 +18,27 @@ namespace transport {
         typedef asio::ipv4::address address;
 
       private:
-        /** The socket listener */
+        /** \brief The socket listener */
         asio::socket_acceptor    acceptor;
 
-        /** For mutual exclusive event handling */
+        /** \brief For mutual exclusive event handling */
         asio::locking_dispatcher dispatcher;
 
-        void handle_accept(const asio::error&, boost::shared_ptr < transceiver::socket_transceiver >, transporter::listener_ptr);
+        /** \brief Handler for incoming socket connections */
+        void handle_accept(const asio::error&, transceiver::socket_transceiver::ptr, basic_listener::ptr);
 
       public:
 
-        /** Constructor */
+        /** \brief Constructor */
         socket_listener(transport::transporter& m, const address& address, const long port = 0);
 
-        /** Activate the listener */
-        void activate(transporter::listener_ptr);
+        /** \brief Activate the listener */
+        void activate(basic_listener::ptr);
 
-        /** Schedule shutdown of listener */
+        /** \brief Schedule shutdown of listener */
         void shutdown();
 
-        /** Destructor */
+        /** \brief Destructor */
         virtual inline ~socket_listener();
     };
 

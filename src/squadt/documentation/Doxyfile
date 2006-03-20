@@ -82,7 +82,8 @@ WARN_LOGFILE           =
 #---------------------------------------------------------------------------
 # configuration options related to the input files
 #---------------------------------------------------------------------------
-INPUT                  = /home/jwulp/work/mCRL2-holidays/MCRL2/trunk/src/squadt
+INPUT                  = /home/jwulp/work/mCRL2-holidays/MCRL2/trunk/src/squadt \
+                         /home/jwulp/work/mCRL2-holidays/MCRL2/trunk/src/squadt/libraries/exception/
 FILE_PATTERNS          = *.c \
                          *.cc \
                          *.cxx \
@@ -126,9 +127,12 @@ FILE_PATTERNS          = *.c \
                          *.PY \
                          *.tcc
 RECURSIVE              = YES
-EXCLUDE                = /home/jwulp/work/mCRL2-holidays/MCRL2/trunk/src/squadt/libraries/ \
-                         /home/jwulp/work/mCRL2-holidays/MCRL2/trunk/src/squadt/bindings/ \
-                         /home/jwulp/work/mCRL2-holidays/MCRL2/trunk/src/squadt/gui_resources.cpp
+EXCLUDE                = /home/jwulp/work/mCRL2-holidays/MCRL2/trunk/src/squadt/bindings/ \
+                         /home/jwulp/work/mCRL2-holidays/MCRL2/trunk/src/squadt/gui_resources.cpp \
+                         /home/jwulp/work/mCRL2-holidays/MCRL2/trunk/src/squadt/libraries/md5pp/ \
+                         /home/jwulp/work/mCRL2-holidays/MCRL2/trunk/src/squadt/libraries/sip/ \
+                         /home/jwulp/work/mCRL2-holidays/MCRL2/trunk/src/squadt/libraries/transport/ \
+                         /home/jwulp/work/mCRL2-holidays/MCRL2/trunk/src/squadt/libraries/xml2pp/
 EXCLUDE_SYMLINKS       = NO
 EXCLUDE_PATTERNS       = 
 EXAMPLE_PATH           = 

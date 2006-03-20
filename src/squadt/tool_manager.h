@@ -3,13 +3,15 @@
 
 #include <algorithm>
 #include <functional>
+#include <list>
 #include <iosfwd>
+#include <map>
 #include <ostream>
 #include <string>
-#include <list>
 
 #include <boost/bind.hpp>
-#include <boost/noncopyable.hpp>
+
+#include <sip/controller.h>
 
 #include "tool.h"
 #include "processor.h"
@@ -25,18 +27,33 @@ namespace squadt {
    * retrieve tool information to/from persistent storage. Additionally the
    * tool manager provides functionality to help run, and once running, to
    * terminate tools.
+   *
+   * The tool manager sets the appropriate command line options and handles the
+   * initial connection with the tool. A tool (instance) receives a unique
+   * identifier, which is communicated as a command line argument (e.g. via
+   * `--si-identifier=4' for the identifier 4). As a first act of a new
+   * connection the tool communicates the identifier. Effectively it identifies
+   * itself to the tool manager. The tool manager then passes through the
+   * connection to the processor that requested the tool to be started in the
+   * first place.
    **/
-  class tool_manager : public boost::noncopyable {
+  class tool_manager : public sip::controller::communicator {
     friend class processor;
  
     public:
  
       /** \brief Convenience type alias for hiding shared pointer implementation */
-      typedef boost::shared_ptr < tool_manager > ptr;
+      typedef boost::shared_ptr < tool_manager >               ptr;
 
       /** \brief Convenience type alias the list of tools */
-      typedef std::list < tool::ptr >            tool_list;
+      typedef std::list < tool::ptr >                          tool_list;
  
+      /** \brief Numeric type for instance identification */
+      typedef unsigned long int                                instance_identifier;
+
+      /** \brief Maps an instance identifier to its associated process */
+      typedef std::map < instance_identifier, processor::ptr > instance_list;
+
     private:
  
       /** \brief Type for output print format variants */
@@ -48,13 +65,24 @@ namespace squadt {
       /** \brief List of known tools */
       tool_list                tools;
 
+      /** \brief List of running tools and pointers to their associate processes */
+      instance_list            instances;
+
+      /** \brief Used to obtain unused instance identifiers */
+      instance_identifier      free_identifier;
+
+    private:
+
+      /** \brief Start a tool */
+      void execute(tool&, processor* = 0) const;
+
     public:
  
       /** \brief Constructor */
-      tool_manager();
+      inline tool_manager();
  
       /** \brief Destructor */
-      ~tool_manager();
+      inline ~tool_manager();
  
       /** \brief Write configuration to stream */
       void write(std::ostream& = std::cout) const;
@@ -74,9 +102,6 @@ namespace squadt {
       /** \brief Returns a tool by its name */
       inline tool& find(const std::string&) const;
 
-      /** \brief Start a tool */
-      void run(tool&, processor* = 0) const;
-
       /** \brief Add a new tool to the catalog */
       inline bool add(const std::string&, const std::string&);
  
@@ -89,6 +114,15 @@ namespace squadt {
       /** \brief Have the tool executor terminate all running tools */
       void terminate();
   };
+
+  inline tool_manager::tool_manager() {
+    /* Listen for incoming socket connections on the default port */
+    add_listener();
+  }
+
+  inline tool_manager::~tool_manager() {
+    terminate();
+  }
 
   inline const std::list < tool::ptr >& tool_manager::get_tools() {
     return (tools);

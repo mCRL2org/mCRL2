@@ -4,7 +4,7 @@ namespace squadt {
 
   namespace bf = boost::filesystem;
 
-  /* Deactivate default path validation for boost::filesystem */
+  /** \brief Deactivates default path validation for boost::filesystem */
   bool deactivate_path_validation() {
     bool b = boost::filesystem::path::default_name_check_writable();
 
@@ -15,6 +15,7 @@ namespace squadt {
     return (b);
   }
 
+  /** \brief Triggers deactivation of default path validation during static initialisation */
   bool path_validation_active = deactivate_path_validation();
 
   const char* settings_manager::default_profile_directory    = ((bf::native(".squadt")) ? ".squadt" : "squadt");

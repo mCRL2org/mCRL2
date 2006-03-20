@@ -14,8 +14,7 @@ project transport
 
 lib transport
     : transporter.cpp
-      transceiver.cpp
-      listener.cpp
+      exception.cpp
       socket_listener.cpp
       socket_transceiver.cpp
     :

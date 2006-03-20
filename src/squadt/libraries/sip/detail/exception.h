@@ -4,7 +4,6 @@
 #include <exception/exception.h>
 
 namespace sip {
-
   namespace exception_identifier {
 
     /** \brief Type for exception identification */

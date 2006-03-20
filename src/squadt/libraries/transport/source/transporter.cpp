@@ -25,38 +25,52 @@ namespace transport {
     std::for_each(listeners.begin(),listeners.end(),bind(&basic_listener::shutdown, bind(&shared_ptr < basic_listener >::get, _1)));
   }
 
-  void transporter::connect(transporter& peer) {
+  /**
+   * @param p the peer to connect to
+   **/
+  void transporter::connect(transporter& p) {
     connection_ptr connection = connection_ptr(new direct_transceiver(*this));
 
-    peer.connections.push_back(connection);
-    connections.push_back(connection_ptr(new direct_transceiver(peer, reinterpret_cast < direct_transceiver* > (connection.get()))));
+    p.connections.push_back(connection);
+    connections.push_back(connection_ptr(new direct_transceiver(p, reinterpret_cast < direct_transceiver* > (connection.get()))));
   }
 
-  void transporter::connect(const address& address, const long port) {
-    connection_ptr new_connection(new socket_transceiver(*this));
+  /**
+   * @param a an address
+   * @param p a port
+   **/
+  void transporter::connect(const address& a, const long p) {
+    connection_ptr c(new socket_transceiver(*this));
 
-    reinterpret_cast < socket_transceiver* > (new_connection.get())->connect(address, port);
+    reinterpret_cast < socket_transceiver* > (c.get())->connect(a, p);
 
-    connections.push_back(new_connection);
+    connections.push_back(c);
   }
 
-  void transporter::connect(const std::string& host_name, const long port) {
-    connection_ptr new_connection(new socket_transceiver(*this));
+  /**
+   * @param h a hostname address
+   * @param p a port
+   **/
+  void transporter::connect(const std::string& h, const long p) {
+    connection_ptr c(new socket_transceiver(*this));
 
-    reinterpret_cast < socket_transceiver* > (new_connection.get())->connect(host_name, port);
+    reinterpret_cast < socket_transceiver* > (c.get())->connect(h, p);
 
-    connections.push_back(new_connection);
+    connections.push_back(c);
   }
 
-  void transporter::disconnect(size_t number) {
-    assert(number < connections.size());
+  /**
+   * @param n the number of the connection that is to be closed
+   **/
+  void transporter::disconnect(size_t n) {
+    assert(n < connections.size());
 
     connection_list::iterator i = connections.begin();
   
-    while (0 < number) {
+    while (0 < n) {
       assert(i != connections.end());
 
-      --number;
+      --n;
 
       ++i;
     }
@@ -64,6 +78,9 @@ namespace transport {
     (*i)->disconnect(*i);
   }
 
+  /**
+   * @param m the directly connected peer
+   **/
   void transporter::disconnect(transporter& m) {
     connection_list::iterator i = connections.begin();
   
@@ -80,23 +97,28 @@ namespace transport {
     }
   }
 
-  /* May throw listenerException* */
-  void transporter::add_listener(const address& address, const long port) {
-    listener_ptr new_listener(new socket_listener(*this, address, port));
+  /**
+   * @param a an address
+   * @param p a port
+   **/
+  void transporter::add_listener(const address& a, const long p) {
+    listener_ptr new_listener(new socket_listener(*this, a, p));
 
     listeners.push_back(new_listener);
 
     reinterpret_cast < socket_listener* > (new_listener.get())->activate(new_listener);
   }
 
-  /* number < listeners.size() */
-  void transporter::remove_listener(size_t number) {
-    assert(number < listeners.size());
+  /**
+   * @param the number of the listener that is to be removed
+   **/
+  void transporter::remove_listener(size_t n) {
+    assert(n < listeners.size());
 
     listener_list::iterator i = listeners.begin();
 
-    while (0 < number) {
-      --number;
+    while (0 < n) {
+      --n;
 
       ++i;
     }
@@ -108,23 +130,29 @@ namespace transport {
     }
   }
 
-  void transporter::send(const std::string& string) {
+  /**
+   * @param d the data to be sent
+   **/
+  void transporter::send(const std::string& d) {
     connection_list::iterator i = connections.begin();
     connection_list::iterator b = connections.end();
   
     while (i != b) {
-      (*i)->send(string);
+      (*i)->send(d);
 
       ++i;
     }
   }
 
-  void transporter::send(std::istream& stream) {
+  /**
+   * @param s stream that contains the data to be sent
+   **/
+  void transporter::send(std::istream& s) {
     connection_list::iterator i = connections.begin();
     connection_list::iterator b = connections.end();
 
     while (i != b) {
-      (*i)->send(stream);
+      (*i)->send(s);
   
       ++i;
     }

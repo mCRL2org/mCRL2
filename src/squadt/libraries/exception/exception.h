@@ -12,6 +12,9 @@ namespace exception {
   class exception : public std::exception {
 
     private:
+      /** The exception type */
+      T                        type;
+
       /** \brief The optional argument for an error description */
       boost::format            _message;
 
@@ -45,7 +48,7 @@ namespace exception {
    * @param[in] t the type identifier of the exception
    **/
   template < typename T >
-  inline exception< T >::exception(const T t) : _message(descriptions[t]) {
+  inline exception< T >::exception(const T t) : type(t), _message(descriptions[t]) {
   }
 
   /**
@@ -54,8 +57,8 @@ namespace exception {
    **/
   template < typename T >
   template < typename T1 >
-  inline exception< T >::exception(const T t, T1 a1) : _message(descriptions[t]) {
-    _message % a1;
+  inline exception< T >::exception(const T t, T1 a) : type(t), _message(descriptions[t]) {
+    _message % a;
   }
 
   /**
@@ -65,7 +68,7 @@ namespace exception {
    **/
   template < typename T >
   template < typename T1, typename T2 >
-  inline exception< T >::exception(const T t, T1 a1, T2 a2) : _message(descriptions[t]) {
+  inline exception< T >::exception(const T t, T1 a1, T2 a2) : type(t), _message(descriptions[t]) {
     _message % a1 % a2;
   }
 

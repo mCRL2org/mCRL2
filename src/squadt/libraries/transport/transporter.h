@@ -10,6 +10,8 @@
 #include <boost/noncopyable.hpp>
 #include <boost/shared_ptr.hpp>
 
+#include <transport/detail/exception.h>
+
 /*
  * Socket/Direct communication abstraction
  *
@@ -125,16 +127,6 @@ namespace transport {
   inline size_t transporter::number_of_connections() {
     return (connections.size());
   }
-
-  class exception : public std::exception {
-    public:
-      typedef enum {
-        listener_failure,
-        transceiver_closed
-      } exception_type;
-
-      virtual exception_type type() = 0;
-  };
 }
 
 #endif

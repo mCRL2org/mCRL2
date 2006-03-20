@@ -15,6 +15,7 @@ namespace squadt {
     };
   }
 
+  /** \brief A basic type for exceptions derived from that provided by the standard library */
   typedef exception::exception < exception_identifier::values > exception;
 }
 

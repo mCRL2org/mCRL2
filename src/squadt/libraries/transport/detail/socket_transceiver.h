@@ -6,7 +6,6 @@
 
 #include <transport/transporter.h>
 #include <transport/detail/transceiver.h>
-#include <transport/detail/socket_listener.h>
 #include <transport/detail/socket_scheduler.h>
 
 namespace transport {
@@ -18,8 +17,11 @@ namespace transport {
       friend class transport::listener::socket_listener;
   
       public:
-        /** IP version 4 address verifier (refer to the asio documentation) */
+        /** \brief IP version 4 address verifier (refer to the asio documentation) */
         typedef asio::ipv4::address address;
+
+        /** \brief Convenience type to hide the boost shared pointer implementation */
+        typedef boost::shared_ptr < socket_transceiver > ptr;
 
       private:
 
@@ -32,7 +34,10 @@ namespace transport {
         /** \brief Default port for socket connections */
         static long                      default_port;
 
+        /** \brief Size of the input buffer */
         static unsigned int              input_buffer_size;
+
+        /** \brief The input buffer */
         char*                            buffer;
 
         /** \brief The local endpoint of a connection */

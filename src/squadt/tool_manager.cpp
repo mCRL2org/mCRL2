@@ -15,13 +15,6 @@
 
 namespace squadt {
 
-  tool_manager::tool_manager() {
-  }
-
-  tool_manager::~tool_manager() {
-    terminate();
-  }
-
   void tool_manager::write(std::ostream& stream) const {
     const tool_list::const_iterator b = tools.end();
           tool_list::const_iterator i = tools.begin();
@@ -88,7 +81,7 @@ namespace squadt {
    * @param t the tool that is to be run
    * @param p the processor that should be passed the feedback of execution
    **/
-  void tool_manager::run(tool& t, processor* p) const {
+  void tool_manager::execute(tool& t, processor* p) const {
     using namespace boost::filesystem;
  
     std::string command = t.get_location();

@@ -4,9 +4,11 @@
 #include <transport/detail/socket_transceiver.h>
 
 namespace transport {
-  namespace transceiver {
+  namespace listener {
+    class socket_listener;
+  }
 
-    class socket_transceiver;
+  namespace transceiver {
 
     /* Wrapper around an asio demuxer */
     class socket_scheduler {

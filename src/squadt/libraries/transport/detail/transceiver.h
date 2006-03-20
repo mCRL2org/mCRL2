@@ -6,6 +6,9 @@
 namespace transport {
   namespace transceiver {
 
+    /**
+     * \brief Base class for transceivers
+     **/
     class basic_transceiver {
       friend void transporter::disconnect(transporter&);
 
@@ -17,13 +20,15 @@ namespace transport {
         inline void deliver(std::istream& input);
 
         /** Removes this transceiver object from a list of connections */
-        void handle_disconnect(basic_transceiver*);
+        inline void handle_disconnect(basic_transceiver*);
 
       public:
 
+        /** \brief Constructor */
         inline basic_transceiver(transporter&);
      
-        inline virtual ~basic_transceiver();
+        /** \brief Destructor */
+        virtual inline ~basic_transceiver();
 
         /** Function that facilitates disconnection (on both sides of a connection) */
         virtual void disconnect(transporter::connection_ptr) = 0;
@@ -45,18 +50,21 @@ namespace transport {
       owner.deliver(input);
     }
 
-    class exception : public transport::exception {
-      private:
-        basic_transceiver* t;
+    inline void basic_transceiver::handle_disconnect(basic_transceiver* t) {
+      /* Remove instance from the list of connections */
+      transporter::connection_list::iterator i = owner.connections.begin();
+      transporter::connection_list::iterator b = owner.connections.end();
 
-      public:
-        exception(basic_transceiver*);
- 
-        /** Returns the type of the exception */
-        exception_type type();
- 
-        basic_transceiver* originator();
-    };
+      while (i != b) {
+        if ((*i).get() == t) {
+          owner.connections.erase(i);
+
+          break;
+        }
+
+        ++i;
+      }
+    }
   }
 }
 
