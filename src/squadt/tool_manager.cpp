@@ -2,10 +2,13 @@
 #include <fstream>
 
 #include <boost/bind.hpp>
+#include <boost/format.hpp>
 #include <boost/filesystem/operations.hpp>
 #include <boost/filesystem/convenience.hpp>
+#include <boost/ref.hpp>
 
 #include <xml2pp/detail/text_reader.tcc>
+#include <sip/detail/basic_messenger.tcc>
 
 #include "tool_manager.h"
 #include "settings_manager.tcc"
@@ -14,6 +17,18 @@
 #include "setup.h"
 
 namespace squadt {
+
+  const char* default_argument_pattern = "%s --si-connect=socket://%s:%s --si-identifier=%s";
+
+  const long tool_manager::default_tcp_port = 10946;
+
+  tool_manager::tool_manager() : free_identifier(0) {
+    /* Listen for incoming socket connections on the loopback interface with the default port */
+    add_listener();
+
+    /* Set handler for incoming instance identification messages */
+    set_handler(boost::bind(&tool_manager::handle_relay_connection, this, _1), sip::send_instance_identifier);
+  }
 
   void tool_manager::write(std::ostream& stream) const {
     const tool_list::const_iterator b = tools.end();
@@ -82,11 +97,54 @@ namespace squadt {
    * @param p the processor that should be passed the feedback of execution
    **/
   void tool_manager::execute(tool& t, processor* p) const {
-    using namespace boost::filesystem;
- 
     std::string command = t.get_location();
  
     /* TODO contact executor to execute */
+  }
+
+  void tool_manager::query_capabilities() throw () {
+    using namespace boost;
+
+    std::for_each(tools.begin(), tools.end(),
+                    bind(&tool_manager::query_capabilities, this, 
+                                    bind(&tool::ptr::operator*, _1)));
+  }
+
+  /**
+   * @param t the tool that is to be run
+   * @param p the processor that should be passed the feedback of execution
+   **/
+  void tool_manager::query_capabilities(tool& t) throw () {
+    boost::filesystem::path p(t.get_location());
+ 
+    /* Sanity check: establish tool existence */
+    if (!boost::filesystem::exists(p)) {
+      throw (exception(exception_identifier::requested_tool_unavailable));
+    }
+
+    boost::format command(default_argument_pattern);
+
+    command % p.native_file_string();
+    command % get_local_host().name() % default_tcp_port;
+    command % free_identifier++;
+
+    local_executor.execute(boost::str(command), 0);
+
+    /* TODO special processor?!? */
+  }
+
+  /**
+   * @param m the message that was just delivered
+   **/
+  void tool_manager::handle_relay_connection(sip::message_ptr& m) {
+    instance_identifier id = atol(m->to_string().c_str());
+
+    if (instances.find(id) == instances.end()) {
+      throw (exception(exception_identifier::unexpected_instance_identifier));
+    }
+
+//    instances[id].accept_instance_identifier(m);
+    /* TODO finish?!? */
   }
 
   void tool_manager::terminate() {

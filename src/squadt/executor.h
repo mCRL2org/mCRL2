@@ -35,10 +35,14 @@ namespace squadt {
  
     /** \brief Basic process execution component */
     class executor {
+
       private:
+
         /** \brief Type for storing a command and a pointer to a state listener  */
         typedef std::pair < std::string, process_change_listener* > delayed_command;
  
+      private:
+
         /** \brief The maximum number of processes that is allowed to run concurrently */
         unsigned int maximum_concurrent_processes;
  
@@ -47,6 +51,8 @@ namespace squadt {
  
         /** \brief Data of processes that will be started */
         std::deque < delayed_command > delayed_commands;
+
+      private:
     
         /** \brief Actually start a new process (run a command) */
         inline void start_process(const std::string&, process_change_listener* s);

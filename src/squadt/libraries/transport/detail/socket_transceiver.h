@@ -20,6 +20,9 @@ namespace transport {
         /** \brief IP version 4 address verifier (refer to the asio documentation) */
         typedef asio::ipv4::address address;
 
+        /** \brief IP version 4 host class (refer to the asio documentation) */
+        typedef asio::ipv4::host    host;
+
         /** \brief Convenience type to hide the boost shared pointer implementation */
         typedef boost::shared_ptr < socket_transceiver > ptr;
 
@@ -43,6 +46,8 @@ namespace transport {
         /** \brief The local endpoint of a connection */
         asio::stream_socket              socket;
  
+      private:
+
         /** \brief Send a string input stream to the peer */
         void send(const std::string& data);
   
@@ -55,6 +60,9 @@ namespace transport {
         /** \brief Connect to a peer using an address and a port */
         void connect(const std::string& host_name, const long port = default_port);
 
+        /** \brief Returns an object with the local hosts name and addresses */
+        static host get_local_host();
+
         /** \brief Read from the socket */
         void handle_receive(const asio::error& e);
 
@@ -65,6 +73,7 @@ namespace transport {
         void activate();
 
       public:
+
         /** \brief Constructor that connects to a port on an address */
         socket_transceiver(transporter& o);
 

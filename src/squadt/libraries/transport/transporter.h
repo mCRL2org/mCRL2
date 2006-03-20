@@ -7,6 +7,7 @@
 #include <istream>
 
 #include <boost/asio/ipv4/address.hpp>
+#include <boost/asio/ipv4/host.hpp>
 #include <boost/noncopyable.hpp>
 #include <boost/shared_ptr.hpp>
 
@@ -61,6 +62,9 @@ namespace transport {
       /** IP version 4 address verifier (refer to the asio documentation) */
       typedef asio::ipv4::address                     address;
 
+      /** IP version 4 address verifier (refer to the asio documentation) */
+      typedef asio::ipv4::host                        host;
+
     private:
 
       /** \brief listeners (for socket communication etc) */
@@ -77,11 +81,11 @@ namespace transport {
 
       /** \brief Creates direct connection to another transporter object */
       void connect(basic_transceiver*);
-  
+
     public:
   
       /** \brief Default constructor with no initial connections */
-      transporter();
+      inline transporter();
  
       /** \brief Destructor */
       virtual ~transporter();
@@ -118,8 +122,14 @@ namespace transport {
 
       /** \brief The number of active connections */
       inline size_t number_of_connections();
+
+      /** \brief Returns an object with the local hosts name and addresses */
+      static host get_local_host();
   };
 
+  inline transporter::transporter() {
+  }
+ 
   inline size_t transporter::number_of_listeners() {
     return (listeners.size());
   }

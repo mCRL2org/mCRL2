@@ -14,7 +14,9 @@ namespace transport {
 
     long socket_transceiver::default_port = 10946;
 
-    /* Constructor */
+    /**
+     * @param o a transporter to deliver data to
+     **/
     socket_transceiver::socket_transceiver(transporter& o) : basic_transceiver(o), socket(scheduler.demuxer) {
       using namespace asio;
 
@@ -32,21 +34,33 @@ namespace transport {
       socket.async_receive(asio::buffer(buffer, input_buffer_size), 0, bind(&socket_transceiver::handle_receive, this, placeholders::error));
     }
 
-    void socket_transceiver::connect(const std::string& host_name, const long port) {
+    /**
+     * @param h the host name to use
+     * @param p the port to use
+     **/
+    void socket_transceiver::connect(const std::string& h, const long p) {
       asio::ipv4::host host;
 
-      resolver.get_host_by_name(host, host_name);
+      resolver.get_host_by_name(host, h);
 
-      connect(host.address(0), port);
+      connect(host.address(0), p);
     }
 
-    void socket_transceiver::connect(const address& address, const long port) {
+    socket_transceiver::host socket_transceiver::get_local_host() {
+      asio::ipv4::host h;
+
+      resolver.get_local_host(h);
+
+      return (h);
+    }
+
+    void socket_transceiver::connect(const address& a, const long p) {
       using namespace asio;
 
       error e;
 
       /* Build socket connection */
-      ipv4::tcp::endpoint endpoint((port == 0) ? default_port : port, address);
+      ipv4::tcp::endpoint endpoint((p == 0) ? default_port : p, a);
 
       socket.connect(endpoint, assign_error(e));
       socket.set_option(socket_base::keep_alive(true));
@@ -69,6 +83,9 @@ namespace transport {
       }
     }
 
+    /**
+     * @param e reference to an asio error object
+     **/
     void socket_transceiver::handle_receive(const asio::error& e) {
       using namespace asio;
 
@@ -95,6 +112,9 @@ namespace transport {
       }
     }
 
+    /**
+     * @param e reference to an asio error object
+     **/
     void socket_transceiver::handle_write(const asio::error& e) {
       if (e == asio::error::eof) {
         /* Connection was closed by peer */
@@ -105,27 +125,30 @@ namespace transport {
       }
     }
 
-    /* Send via socket */
-    void socket_transceiver::send(const std::string& data) {
+    /**
+     * @param d the data that is to be sent
+     **/
+    void socket_transceiver::send(const std::string& d) {
       using namespace asio;
       using namespace boost;
 
-      asio::async_write(socket, asio::buffer(data.c_str(), data.length() + 1), bind(&socket_transceiver::handle_write, this, placeholders::error));
+      asio::async_write(socket, asio::buffer(d.c_str(), d.length() + 1), bind(&socket_transceiver::handle_write, this, placeholders::error));
     }
 
-    /* Send via socket */
-    void socket_transceiver::send(std::istream& data) {
+    /**
+     * @param d the stream that contains the data that is to be sent
+     **/
+    void socket_transceiver::send(std::istream& d) {
       using namespace asio;
       using namespace boost;
 
       std::ostringstream temporary;
 
-      temporary << data.rdbuf();
+      temporary << d.rdbuf();
 
       asio::async_write(socket, asio::buffer(temporary.str().c_str(), temporary.str().length() + 1), bind(&socket_transceiver::handle_write, this, placeholders::error));
     }
 
-    /* Destructor */
     socket_transceiver::~socket_transceiver() {
       delete[] buffer;
     }

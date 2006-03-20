@@ -49,7 +49,7 @@ namespace squadt {
       typedef std::list < tool::ptr >                          tool_list;
  
       /** \brief Numeric type for instance identification */
-      typedef unsigned long int                                instance_identifier;
+      typedef long int                                         instance_identifier;
 
       /** \brief Maps an instance identifier to its associated process */
       typedef std::map < instance_identifier, processor::ptr > instance_list;
@@ -71,15 +71,30 @@ namespace squadt {
       /** \brief Used to obtain unused instance identifiers */
       instance_identifier      free_identifier;
 
+      /** \brief Local executor for executing tools on the current machine */
+      execution::executor      local_executor;
+
+      /** \brief The default TCP port for a tool manager */
+      static const long        default_tcp_port;
+
     private:
 
       /** \brief Start a tool */
       void execute(tool&, processor* = 0) const;
 
+      /** \brief Get the tool_capabilities object for all known tools */
+      void query_capabilities() throw ();
+
+      /** \brief Get the tool_capabilities object for a tool */
+      void query_capabilities(tool&) throw ();
+
+      /** \brief This is the event handler for incoming identification messages */
+      void handle_relay_connection(sip::message_ptr&);
+
     public:
  
       /** \brief Constructor */
-      inline tool_manager();
+      tool_manager();
  
       /** \brief Destructor */
       inline ~tool_manager();
@@ -114,11 +129,6 @@ namespace squadt {
       /** \brief Have the tool executor terminate all running tools */
       void terminate();
   };
-
-  inline tool_manager::tool_manager() {
-    /* Listen for incoming socket connections on the default port */
-    add_listener();
-  }
 
   inline tool_manager::~tool_manager() {
     terminate();

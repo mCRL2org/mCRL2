@@ -22,10 +22,10 @@ namespace squadt {
     private:
 
       /** \brief A name for the tool */
-      std::string                 name;
+      std::string                  name;
 
       /** \brief The location where the tool can be found */
-      std::string                 location;
+      std::string                  location;
 
       /** \brief Stores the tool capabilities object obtained through protocol implementation */
       sip::tool::capabilities::ptr capabilities;

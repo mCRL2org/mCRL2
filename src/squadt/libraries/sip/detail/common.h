@@ -3,18 +3,20 @@
 
 #include <list>
 
+#include <boost/bind.hpp>
+
 #include <sip/detail/basic_messenger.h>
 
 /* Interface classes for both the tool and the controller side of the Squadt Interaction Protocol */
 namespace sip {
 
-  /** Category name that describes a tools function */
+  /** \brief Category name that describes a tools function */
   typedef std::string tool_category;
 
-  /** Storage format for tool input/output configuration specification */
+  /** \brief Storage format for tool input/output configuration specification */
   typedef std::string storage_format;
 
-  /** Type for sip protocol message identification */
+  /** \brief Type for sip protocol message identification */
   enum message_identifier_t {
      unknown                           /// \brief type is was specified or unknown (or should be derived from content)
     ,send_instance_identifier          /// \brief send the unique identifier assigned to a tool instance
@@ -33,10 +35,13 @@ namespace sip {
     ,send_report                       /// \brief send the controller a report of a tools operation
   };
 
-  /** A message type for communication of sip protocol messages */
+  /** \brief A message type for communication of sip protocol messages */
   typedef messaging::message < message_identifier_t, unknown > message;
 
-  /** A messenger type for communication of sip protocol messages */
+  /** \brief A convenience type to share the boost shared pointer implementation */
+  typedef boost::shared_ptr < message >                        message_ptr;
+
+  /** \brief A messenger type for communication of sip protocol messages */
   typedef messaging::basic_messenger < sip::message >          messenger;
 
   /** \brief Type for protocol version */

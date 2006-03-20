@@ -12,9 +12,6 @@ namespace transport {
   using namespace transceiver;
   using namespace listener;
 
-  transporter::transporter() {
-  }
- 
   transporter::~transporter() {
     using namespace boost;
 
@@ -156,6 +153,10 @@ namespace transport {
   
       ++i;
     }
+  }
+
+  transporter::host transporter::get_local_host() {
+    return (socket_transceiver::get_local_host());
   }
 }
 
