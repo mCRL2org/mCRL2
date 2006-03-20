@@ -17,15 +17,16 @@
 using boost::unit_test::test_suite;
 
 using namespace transport;
-using namespace sip;
-using namespace sip::messenger;
+using namespace sip::messaging;
+
+namespace cli = sip::command_line_interface;
 
 /* Serialisation, communication and deserialisation of a controller capabilities object */
 void controller_capabilities_exchange() {
   BOOST_MESSAGE(" Communicating empty controller_capabilities object ... ");
 
-  controller_communicator cc;
-  tool_communicator       tc;
+  sip::controller::communicator cc;
+  sip::tool::communicator       tc;
 
   std::ostringstream      check_stream0;
   std::ostringstream      check_stream1;
@@ -49,7 +50,7 @@ void controller_capabilities_exchange() {
   check_stream1.str("");
 
   /* Example display dimensions */
-  controller_capabilities capabilities();
+  sip::controller::capabilities capabilities();
 
   cc.get_controller_capabilities().set_display_dimensions(75,75,0);
 
@@ -71,10 +72,10 @@ void controller_capabilities_exchange() {
 void tool_capabilities_exchange() {
   BOOST_MESSAGE(" Communicating tool capabilities ... ");
 
-  controller_communicator cc;
-  tool_communicator       tc;
+  sip::controller::communicator cc;
+  sip::tool::communicator       tc;
 
-  tool_capabilities&      tcp = tc.get_tool_capabilities();
+  sip::tool::capabilities&      tcp = tc.get_tool_capabilities();
 
   tcp.add_input_combination(0, "text/aut", "Testing");
 
@@ -95,10 +96,10 @@ void report_exchange() {
 
   std::ostringstream temporary;
 
-  sip_messenger    c;
-  sip_messenger    d;
-  report           r;
-  sip_message      m;
+  sip::messenger c;
+  sip::messenger d;
+  sip::report    r;
+  sip::message   m;
 
   r.write(temporary);
 
@@ -109,7 +110,7 @@ void report_exchange() {
 
   c.send_message(m);
 
-  sip_messenger::message_ptr p(d.await_message(sip::unknown));
+  sip::messenger::message_ptr p(d.await_message(sip::unknown));
 
   BOOST_CHECK(p->to_string() == std::string("<report></report>"));
 
@@ -117,7 +118,7 @@ void report_exchange() {
   BOOST_MESSAGE("  Report with an error, a comment and a configuration ... ");
 
   /* New tool configuration */
-  configuration::ptr config(new configuration);
+  sip::configuration::ptr config(new sip::configuration);
 
   const unsigned int r_option    = 0;
   const unsigned int s_option    = 1;
@@ -132,7 +133,7 @@ void report_exchange() {
   config->add_input(input_file, "text/mcrl2", "examples/abp.mcrl2");
   config->add_output(output_file, "text/plain", "/etc/passwd");
 
-  option::ptr t = config->get_option(f_option);
+  sip::option::ptr t = config->get_option(f_option);
 
   /* The option has a URI as argument */
 //  t.append_argument(sip::datatype::uri, std::string("/bin/bash"));
@@ -162,7 +163,7 @@ void report_exchange() {
   /* New reader */
   xml2pp::text_reader reader(p->to_string());
 
-  report::read(reader)->write(copy);
+  sip::report::read(reader)->write(copy);
 
   BOOST_CHECK(copy.str() == temporary.str());
 
@@ -174,8 +175,8 @@ void report_exchange() {
 void display_layout_exchange() {
   BOOST_MESSAGE(" Communicating display layout ... ");
 
-  controller_communicator cc;
-  tool_communicator       tc;
+  sip::controller::communicator cc;
+  sip::tool::communicator       tc;
 
   std::ostringstream      check_stream0;
   std::ostringstream      check_stream1;
@@ -196,7 +197,7 @@ void command_line_interface_helper(int bc, int ac, char* const * const ba, const
     copy[i] = ba[i];
   }
 
-  sip::cli::command_line_argument_extractor t(bc, copy);
+  cli::argument_extractor t(bc, copy);
 
   for (int i = 0; i < ac; ++i) {
     BOOST_CHECK(strcmp(copy[i], aa[i]) == 0);

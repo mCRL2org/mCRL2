@@ -10,8 +10,7 @@
 #include <xml2pp/detail/text_reader.tcc>
 
 namespace sip {
-
-  namespace messenger {
+  namespace messaging {
 
     template < class M, M D > class message;
 

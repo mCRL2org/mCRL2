@@ -6,11 +6,11 @@
 
 namespace sip {
 
-  namespace cli {
-    class command_line_argument_extractor;
+  namespace command_line_interface {
+    class argument_extractor;
   }
 
-  namespace messenger {
+  namespace messaging {
 
     /** \brief Abstract base class for container types for parsed information about schemes */
     template < typename M >
@@ -25,7 +25,7 @@ namespace sip {
     /** \brief Derived class for the traditional scheme */
     template < typename M >
     class traditional_scheme : public scheme< M > {
-      friend class cli::command_line_argument_extractor;
+      friend class command_line_interface::argument_extractor;
  
       public:
         inline traditional_scheme();
@@ -37,7 +37,7 @@ namespace sip {
     /** \brief Derived class for the socket scheme */
     template < typename M >
     class socket_scheme : public scheme< M > {
-      friend class cli::command_line_argument_extractor;
+      friend class command_line_interface::argument_extractor;
  
       private:
         /** \brief IPv4 address of endpoint */

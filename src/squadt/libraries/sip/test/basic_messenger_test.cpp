@@ -12,7 +12,6 @@ using boost::unit_test::test_suite;
 
 using namespace transport;
 using namespace sip;
-using namespace sip::messenger;
 
 static const std::string empty;
 static const std::string garbage("garbage");
@@ -21,14 +20,14 @@ static const std::string data("1234567890abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLM
 static const std::string start_message("<message>");
 static const std::string end_message("</message>");
 
-enum message_identifier_t {
+enum test_message_identifier_t {
   unknown,
   good,
   bad
 };
 
-typedef message < message_identifier_t, ::unknown > message_t;
-typedef basic_messenger < message_t >               messenger_t;
+typedef sip::messaging::message < test_message_identifier_t, ::unknown > message_t;
+typedef sip::messaging::basic_messenger < message_t >                    messenger_t;
 
 /* Single communication */
 void no_message() {

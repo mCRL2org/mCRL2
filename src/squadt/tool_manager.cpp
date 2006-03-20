@@ -61,6 +61,7 @@ namespace squadt {
                             global_settings_manager->path_to_schemas(
                                     settings_manager::append_schema_suffix(
                                             settings_manager::tool_catalog_base_name))));
+
     return (read(reader));
   }
 

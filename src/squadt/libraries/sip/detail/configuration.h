@@ -66,7 +66,7 @@ namespace sip {
       inline void add_option(const option::identifier);
 
       /** \brief Establishes whether an option exists (by identifier) */
-      inline bool option_exists(const object::identifier);
+      inline bool option_exists(const option::identifier);
 
       /** \brief Remove an option from the configuration */
       inline void remove_option(const option::identifier);
@@ -118,7 +118,7 @@ namespace sip {
    * \brief Operator for writing to stream
    *
    * @param s stream to write to
-   * @param p the configuration object to write out
+   * @param c the configuration object to write out
    **/
   inline std::ostream& operator << (std::ostream& s, const configuration& c) {
     c.write(s);

@@ -8,8 +8,7 @@
 #include <sip/detail/exception.h>
 
 namespace sip {
-
-  namespace messenger {
+  namespace messaging {
 
     template < class M >
     const std::string basic_messenger< M >::tag_open("<message>");

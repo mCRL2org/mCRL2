@@ -20,7 +20,7 @@ namespace sip {
   typedef std::string storage_format;
 
   /** Type for sip protocol message identification */
-  enum sip_message_identifier_t {
+  enum message_identifier_t {
      unknown                           /// \brief type is was specified or unknown (or should be derived from content)
     ,send_instance_identifier          /// \brief send the unique identifier assigned to a tool instance
     ,request_controller_capabilities   /// \brief request the controller a description of its capabilities
@@ -39,19 +39,10 @@ namespace sip {
   };
 
   /** A message type for communication of sip protocol messages */
-  typedef messenger::message < sip_message_identifier_t, unknown > sip_message;
+  typedef messaging::message < message_identifier_t, unknown > message;
 
   /** A messenger type for communication of sip protocol messages */
-  typedef messenger::basic_messenger < sip_message >               sip_messenger;
-
-  /** Convenience type, used to hide the shared pointer implementation */
-  typedef boost::shared_ptr < controller_capabilities > controller_capabilities_ptr;
-
-  /** Convenience type, used to hide the shared pointer implementation */
-  typedef boost::shared_ptr < tool_capabilities >       tool_capabilities_ptr;
-
-  /** Convenience type, used to hide the shared pointer implementation */
-  typedef boost::shared_ptr < configuration >           configuration_ptr;
+  typedef messaging::basic_messenger < sip::message >          messenger;
 }
 
 #endif

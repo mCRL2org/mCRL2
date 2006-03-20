@@ -8,10 +8,10 @@
 
 namespace sip {
 
-  namespace cli {
+  namespace command_line_interface {
 
     /** \brief Convenience type for hiding boost shared pointers */
-    typedef boost::shared_ptr < sip::messenger::scheme< sip_message > > scheme_ptr;
+    typedef boost::shared_ptr < sip::messaging::scheme< sip::message > > scheme_ptr;
 
     /**
      * \brief Class used for extraction of protocol related command line arguments
@@ -19,7 +19,7 @@ namespace sip {
      * This class provides functionality to extract protocol specific arguments
      * from the list of command line arguments that a tool receives.
      **/
-    class command_line_argument_extractor : public boost::noncopyable {
+    class argument_extractor : public boost::noncopyable {
       private:
 
         /** \brief The list of known of options */
@@ -35,7 +35,15 @@ namespace sip {
         static const size_t known_scheme_number;
 
         /** \brief The number of the last matched known_option or known_scheme. */
-        size_t last_matched;
+        size_t              last_matched;
+
+        /** \brief the scheme that was last parsed succesfully */
+        scheme_ptr         selected_scheme;
+
+        /** \brief A unique number that identifies this instance */
+        long int            identifier;
+
+      private:
 
         /** \brief Parses a minimum prefix of argument to search for a known option */
         inline char* parse_option(char* const);
@@ -43,16 +51,10 @@ namespace sip {
         /** \brief Parses a minimum prefix of argument to search for a known scheme */
         inline char* parse_scheme(char* const) throw ();
 
-        /** \brief the scheme that was last parsed succesfully */
-        scheme_ptr   selected_scheme;
-
-        /** \brief A unique number that identifies this instance */
-        long int identifier;
-
       public:
 
         /** \brief Constructor that performs extraction */
-        inline command_line_argument_extractor(int&, char** const) throw ();
+        inline argument_extractor(int&, char** const) throw ();
 
         /** \brief Removes protocol specific options and adjusts the argument count */
         inline void process(int&, char** const) throw ();
@@ -65,7 +67,7 @@ namespace sip {
     };
 
     /** Constructor */
-    inline command_line_argument_extractor::command_line_argument_extractor(int& argc, char** const argv) throw () : identifier(-1) {
+    inline argument_extractor::argument_extractor(int& argc, char** const argv) throw () : identifier(-1) {
       process(argc, argv);
     }
   }

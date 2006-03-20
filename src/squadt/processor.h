@@ -136,10 +136,10 @@ namespace squadt {
       void write(std::ostream& stream = std::cout) const;
 
       /** \brief Get input objects */
-      inline input_list& get_inputs();
+      inline const input_list& get_inputs() const;
  
       /** \brief Get output objects */
-      inline output_list& get_outputs();
+      inline const output_list& get_outputs() const;
  
       /** \brief Pretty prints the fields of the specification */
       void print(std::ostream& stream = std::cerr) const;
@@ -154,7 +154,7 @@ namespace squadt {
       inline void check_output_status();
 
       /** \brief Removes the outputs of this processor from storage */
-      inline void flush_outputs();
+      void flush_outputs();
  
       /** Recursively set the status of specification and */
       inline const output_status get_output_status() const;
@@ -196,13 +196,11 @@ namespace squadt {
     return (program);
   }
 
-  inline processor::input_list& processor::get_inputs() {
-    /* Potentially violates consistency */
+  inline const processor::input_list& processor::get_inputs() const {
     return (inputs);
   }
 
-  inline processor::output_list& processor::get_outputs() {
-    /* Potentially violates consistency */
+  inline const processor::output_list& processor::get_outputs() const {
     return (outputs);
   }
 
@@ -234,12 +232,6 @@ namespace squadt {
     }
 
     return (true);
-  }
-
-  inline void processor::flush_outputs() {
-    set_output_status(non_existent);
-
-    /* TODO remove all output objects from storage */
   }
 
   inline const processor::output_status processor::get_output_status() const {

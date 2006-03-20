@@ -28,12 +28,12 @@ namespace squadt {
       std::string                 location;
 
       /** \brief Stores the tool capabilities object obtained through protocol implementation */
-      sip::tool_capabilities::ptr capabilities;
+      sip::tool::capabilities::ptr capabilities;
 
     private:
 
       /** Constructor */
-      inline tool(std::string, std::string, sip::tool_capabilities::ptr);
+      inline tool(std::string, std::string, sip::tool::capabilities::ptr);
 
     public:
 
@@ -47,7 +47,7 @@ namespace squadt {
       inline static tool::ptr read(xml2pp::text_reader&) throw ();
 
       /** \brief Get the location to for this tool */
-      inline const sip::tool_capabilities& get_capabilities() const;
+      inline const sip::tool::capabilities& get_capabilities() const;
 
       /** \brief Get the location to for this tool */
       inline std::string& get_location();
@@ -66,9 +66,9 @@ namespace squadt {
   /**
    * @param l a full path to the executable
    * @param n a name for the tool
-   * @param c a tool_capabilities object for the tool
+   * @param c a tool::capabilities object for the tool
    **/
-  inline tool::tool(std::string n, std::string l, sip::tool_capabilities::ptr c) : name(n), location(l), capabilities(c) {
+  inline tool::tool(std::string n, std::string l, sip::tool::capabilities::ptr c) : name(n), location(l), capabilities(c) {
   }
 
   /**
@@ -101,7 +101,7 @@ namespace squadt {
 
     r.read();
 
-    sip::tool_capabilities::ptr c = sip::tool_capabilities::read(r);
+    sip::tool::capabilities::ptr c = sip::tool::capabilities::read(r);
 
     r.skip_end_element("tool");
 
@@ -113,7 +113,7 @@ namespace squadt {
     }
   }
 
-  inline const sip::tool_capabilities& tool::get_capabilities() const {
+  inline const sip::tool::capabilities& tool::get_capabilities() const {
     return (*capabilities);
   }
 

@@ -1,6 +1,8 @@
 #include "processor.h"
 #include "exception.h"
 
+#include <boost/filesystem/operations.hpp>
+
 #include <xml2pp/detail/text_reader.tcc>
 
 #include "ui_core.h"
@@ -115,6 +117,21 @@ namespace squadt {
     }
 
     return (c);
+  }
+
+  void processor::flush_outputs() {
+    using namespace boost::filesystem;
+
+    set_output_status(non_existent);
+
+    /* Make sure any output objects are removed from storage */
+    for (output_list::const_iterator i = outputs.begin(); i != outputs.end(); ++i) {
+      path p((*i)->location);
+
+      if (exists(p)) {
+        remove(p);
+      }
+    }
   }
 }
 

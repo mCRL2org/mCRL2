@@ -11,34 +11,34 @@
 
 namespace sip {
 
-  namespace cli {
+  namespace command_line_interface {
 
-    using namespace messenger;
+    using namespace messaging;
 
-    const size_t command_line_argument_extractor::known_option_number = 2;
-    const size_t command_line_argument_extractor::known_scheme_number = 2;
+    const size_t argument_extractor::known_option_number = 2;
+    const size_t argument_extractor::known_scheme_number = 2;
 
-    const char*  command_line_argument_extractor::known_options[known_option_number] = { "--si-connect", "--si-identifier" };
-    const char*  command_line_argument_extractor::known_schemes[known_scheme_number] = { "traditional", "socket" };
+    const char*  argument_extractor::known_options[known_option_number] = { "--si-connect", "--si-identifier" };
+    const char*  argument_extractor::known_schemes[known_scheme_number] = { "traditional", "socket" };
 
     /**
      * \return The arguments for a selected scheme (e.g. hostname and port for the socket scheme), or 0
      **/
-    inline scheme_ptr command_line_argument_extractor::get_scheme() const {
+    inline scheme_ptr argument_extractor::get_scheme() const {
       return (selected_scheme);
     }
 
     /**
      * \return The identifier extracted from one of the command line arguments, or the default identifier
      **/
-    inline long command_line_argument_extractor::get_identifier() const {
+    inline long argument_extractor::get_identifier() const {
       return (identifier);
     }
 
     /**
      * \return A pointer within argv to the point upto which the option was matched.
      **/
-    inline char* command_line_argument_extractor::parse_option(char* const option) {
+    inline char* argument_extractor::parse_option(char* const option) {
       unsigned int i = 0;
 
       while (i < known_option_number) {
@@ -59,7 +59,7 @@ namespace sip {
     /**
      * \return A pointer within argv to the point upto which the option was matched.
      **/
-    inline char* command_line_argument_extractor::parse_scheme(char* const option) throw () {
+    inline char* argument_extractor::parse_scheme(char* const option) throw () {
       unsigned int i = 0;
 
       while (i < known_scheme_number) {
@@ -78,7 +78,7 @@ namespace sip {
 
           switch (last_matched) {
             case 1: /* Socket scheme (host:port) */
-              selected_scheme = scheme_ptr(new socket_scheme< sip_message >);
+              selected_scheme = scheme_ptr(new socket_scheme< sip::message >);
 
               /* Search for host/port separator */
               s = strchr(t, ':');
@@ -87,19 +87,19 @@ namespace sip {
                 /* Take everything between s and t as hostname */
                 const size_t d = s - t;
 
-                std::string& host_name = dynamic_cast < socket_scheme< sip_message >* > (selected_scheme.get())->host_name;
+                std::string& host_name = dynamic_cast < socket_scheme< sip::message >* > (selected_scheme.get())->host_name;
 
                 host_name.reserve(d);
                 host_name.assign(s, d);
                 host_name.resize(d);
 
                 /* The remaining string should be a port number */
-                dynamic_cast < socket_scheme< sip_message >* > (selected_scheme.get())->port = atol(++t);
+                dynamic_cast < socket_scheme< sip::message >* > (selected_scheme.get())->port = atol(++t);
               }
 
               break;
             default: /* Traditional scheme */
-              selected_scheme = scheme_ptr(new traditional_scheme< sip_message >);
+              selected_scheme = scheme_ptr(new traditional_scheme< sip::message >);
               break;
           }
 
@@ -124,7 +124,7 @@ namespace sip {
      * \attention the specific command line options are removed, so and argc and argv are modified
      * \return whether options were found and whether a connection is being opened with a controller
      **/
-    inline void command_line_argument_extractor::process(int& argc, char** const argv) throw () {
+    inline void argument_extractor::process(int& argc, char** const argv) throw () {
       size_t i = 0;
       size_t j = 0;
 

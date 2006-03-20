@@ -13,6 +13,14 @@
 
 namespace sip {
 
+  namespace controller {
+    class communicator;
+  }
+
+  namespace tool {
+    class communicator;
+  }
+
   /**
    * \brief Describes some tool capabilities (e.g. supported protocol version)
    *
@@ -26,8 +34,8 @@ namespace sip {
    * for a tool developer.
    **/
   class object {
-    friend class tool_communicator;
-    friend class controller_communicator;
+    friend class tool::communicator;
+    friend class controller::communicator;
     friend class configuration;
 
     public:
@@ -70,6 +78,8 @@ namespace sip {
 
       /** \brief String representations for types, used for XML encoding */
       const static char*   type_strings[];
+
+    private:
 
       /** \brief Read from XML stream */
       inline static object::ptr read(xml2pp::text_reader& reader) throw ();

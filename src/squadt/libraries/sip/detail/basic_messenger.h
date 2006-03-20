@@ -20,7 +20,7 @@
 
 namespace sip {
 
-  namespace messenger {
+  namespace messaging {
     template < class M > class basic_messenger;
 
     /**
