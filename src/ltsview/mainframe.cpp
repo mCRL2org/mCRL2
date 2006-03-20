@@ -760,5 +760,6 @@ void MainFrame::setActionLabels( ATermList labels )
     strLabels.Add( wxString( ATwriteToString( atLabel ), wxConvLocal ) );
     atLabels = ATgetNext( atLabels );
   }
+  strLabels.Sort();
   markTransitionsListBox->Set( strLabels );
 }

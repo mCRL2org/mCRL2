@@ -35,15 +35,17 @@ MarkStateRuleDialog::MarkStateRuleDialog( wxWindow* parent, Mediator* owner,
   wxString relChoices[2] = { wxT("is an element of"),
     wxT("is not an element of") };
 
+  wxSize lbSize( 200, 200 );
+
   parameterListBox = new wxListBox( this, myID_PARAMETER_CHOICE,
-      wxDefaultPosition, wxSize(150,150), paramChoices, wxLB_SINGLE |
+      wxDefaultPosition, lbSize, paramChoices, wxLB_SINGLE |
       wxLB_HSCROLL | wxLB_NEEDED_SB );
   parameterListBox->SetSelection( 0 );
   relationListBox = new wxListBox( this, wxID_ANY, wxDefaultPosition,
-      wxSize(150,150), 2, relChoices );
+      lbSize, 2, relChoices );
   relationListBox->SetSelection( 0 );
   valuesListBox = new wxCheckListBox( this, wxID_ANY, wxDefaultPosition,
-      wxSize(150, 150), 0, NULL, wxLB_SINGLE | wxLB_HSCROLL | wxLB_NEEDED_SB |
+      lbSize, 0, NULL, wxLB_SINGLE | wxLB_HSCROLL | wxLB_NEEDED_SB |
       wxLB_SORT );
   
   int flags = wxALIGN_LEFT | wxALIGN_CENTER_VERTICAL | wxALL;
@@ -93,6 +95,7 @@ void MarkStateRuleDialog::loadValues( wxString paramName )
       valueIndices[ valuestr ] = ATgetInt( (ATermInt)ATgetArgument( value, 1 ) );
       valueList = ATgetNext( valueList );
     }
+    values.Sort();
     valuesListBox->Set( values );
   }
 }
