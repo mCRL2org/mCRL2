@@ -150,7 +150,7 @@ inline int recv(socket_type s, bufs* b, size_t count, int flags)
     for (size_t i = 0; i < count; ++i)
     {
       recv_bufs[i].iov_len = b[i].size;
-      recv_bufs[i].iov_base = b[i].data;
+      recv_bufs[i].iov_base = static_cast < caddr_t > (b[i].data);
     }
 
     // Receive some data.
@@ -296,7 +296,7 @@ inline int send(socket_type s, const bufs* b, size_t count, int flags)
     for (size_t i = 0; i < count; ++i)
     {
       send_bufs[i].iov_len = b[i].size;
-      send_bufs[i].iov_base = b[i].data;
+      send_bufs[i].iov_base = static_cast < caddr_t > (b[i].data);
     }
 
     // Send the data.

@@ -20,6 +20,10 @@
 
 #if defined(__MACH__) && defined(__APPLE__)
 
+#ifndef EV_OOBAND
+#define EV_OOBAND EV_FLAG1
+#endif
+
 // Define this to indicate that epoll is supported on the target platform.
 #define ASIO_HAS_KQUEUE_REACTOR 1
 

@@ -153,7 +153,7 @@ namespace sip {
         return (c);
       }
  
-      return (capabilities::ptr());
+      return capabilities::ptr();
     }
   }
 }

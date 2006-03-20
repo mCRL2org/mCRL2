@@ -15,6 +15,8 @@
 namespace sip {
   namespace tool {
 
+    class capabilities;
+
     /**
      * \brief Describes some tool capabilities (e.g. supported protocol version)
      *
@@ -46,7 +48,7 @@ namespace sip {
         typedef std::set  < input_combination >              input_combination_list;
  
         /** \brief Convenience type that hides the shared pointer implementation */
-        typedef boost::shared_ptr < capabilities >      ptr;
+        typedef boost::shared_ptr < capabilities >           ptr;
  
       private:
  
@@ -186,7 +188,7 @@ namespace sip {
         return (c);
       }
  
-      return (tool::capabilities::ptr());
+      return capabilities::ptr();
     }
   }
 }
