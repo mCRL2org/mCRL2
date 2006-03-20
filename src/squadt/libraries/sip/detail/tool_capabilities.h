@@ -10,7 +10,7 @@
 #include <xml2pp/text_reader.h>
 #include <sip/detail/object.h>
 #include <sip/detail/configuration.h>
-#include <sip/detail/capabilities.h>
+#include <sip/detail/common.h>
 
 namespace sip {
   namespace tool {

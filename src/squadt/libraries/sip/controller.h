@@ -2,6 +2,9 @@
 #define SIP_CONTROLLER_H
 
 #include <sip/detail/common.h>
+#include <sip/detail/controller_capabilities.h>
+#include <sip/detail/tool_capabilities.h>
+#include <sip/detail/display_layout.h>
 
 /* Interface classes for the tool side of the Squadt Interaction Protocol */
 namespace sip {

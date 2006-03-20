@@ -4,7 +4,11 @@
 #include <set>
 
 #include <sip/detail/common.h>
+#include <sip/detail/tool_capabilities.h>
+#include <sip/detail/controller_capabilities.h>
+#include <sip/detail/display_layout.h>
 #include <sip/detail/schemes.h>
+#include <sip/detail/report.h>
 
 /* Interface classes for the tool side of the Squadt Interaction Protocol */
 namespace sip {

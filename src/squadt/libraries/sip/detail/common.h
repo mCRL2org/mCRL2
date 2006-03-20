@@ -3,11 +3,6 @@
 
 #include <list>
 
-#include <sip/detail/report.h>
-#include <sip/detail/configuration.h>
-#include <sip/detail/controller_capabilities.h>
-#include <sip/detail/tool_capabilities.h>
-#include <sip/detail/display_layout.h>
 #include <sip/detail/basic_messenger.h>
 
 /* Interface classes for both the tool and the controller side of the Squadt Interaction Protocol */
@@ -43,6 +38,15 @@ namespace sip {
 
   /** A messenger type for communication of sip protocol messages */
   typedef messaging::basic_messenger < sip::message >          messenger;
+
+  /** \brief Type for protocol version */
+  struct version {
+    unsigned char major; ///< the major number
+    unsigned char minor; ///< the minor number
+  };
+
+  /** \brief Protocol version {major,minor} */
+  static const version default_protocol_version = {1,0};
 }
 
 #endif

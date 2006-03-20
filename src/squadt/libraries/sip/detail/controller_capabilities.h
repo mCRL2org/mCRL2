@@ -5,10 +5,16 @@
 #include <sstream>
 
 #include <xml2pp/text_reader.h>
-#include <sip/detail/capabilities.h>
+#include <sip/detail/common.h>
 
 namespace sip {
+  namespace tool {
+    class communicator;
+  }
+
   namespace controller {
+
+    class communicator;
 
     /**
      * \brief Describes some controller capabilities (e.g. supported protocol version)
