@@ -406,7 +406,7 @@ void MainFrame::setupMarkPanel( wxPanel* panel )
   markStatesRadio = new wxRadioButton( panel, myID_MARK_RADIOBUTTON,
       wxT("Mark states") );
   markTransitionsRadio = new wxRadioButton( panel, myID_MARK_RADIOBUTTON,
-      wxT("Mark	transitions") );
+      wxT("Mark transitions") );
     
   markSizer->Add( nomarksRadio, 0, flags, border );
   markSizer->Add( markDeadlocksRadio, 0, flags, border );
