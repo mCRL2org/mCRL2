@@ -20,8 +20,6 @@
 
 namespace squadt {
 
-  class processor;
-
   /**
    * \brief A processor represents a tool configuration.
    *
@@ -33,7 +31,7 @@ namespace squadt {
    * input of other processors.
    *
    **/
-  class processor : public process_change_listener {
+  class processor : public execution::process_change_listener {
     friend class project_manager;
     friend class tool_manager;
     friend class executor;
@@ -97,6 +95,8 @@ namespace squadt {
       /** \brief Visualisation function for state changes */
       visualisation_handler               visualise;
  
+    private:
+
       /** \brief The default visualisation function that does nothing */
       static void dummy_visualiser(output_status);
 
@@ -104,7 +104,7 @@ namespace squadt {
       inline void set_output_status(const processor::output_status);
 
       /** \brief Handler function that is called when an associated process changes state */
-      inline void report_change(process::status);
+      inline void report_change(execution::process::status);
 
     public:
  
@@ -254,7 +254,9 @@ namespace squadt {
     }
   }
 
-  inline void processor::report_change(process::status s) {
+  inline void processor::report_change(execution::process::status s) {
+    using namespace execution;
+
     switch (s) {
       case process::stopped:
         set_output_status(not_up_to_date);

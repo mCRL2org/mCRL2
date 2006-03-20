@@ -4,7 +4,6 @@
 #include <exception/exception.h>
 
 namespace squadt {
-
   namespace exception_identifier {
 
     enum values {

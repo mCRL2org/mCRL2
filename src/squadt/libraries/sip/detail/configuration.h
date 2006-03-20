@@ -114,6 +114,18 @@ namespace sip {
       static inline configuration::ptr read(xml2pp::text_reader&) throw ();
   };
 
+  /**
+   * \brief Operator for writing to stream
+   *
+   * @param s stream to write to
+   * @param p the configuration object to write out
+   **/
+  inline std::ostream& operator << (std::ostream& s, const configuration& c) {
+    c.write(s);
+
+    return (s);
+  }
+
   inline configuration::configuration() {
   }
 

@@ -68,6 +68,18 @@ namespace sip {
       inline void write(std::ostream&) const;
   };
 
+  /**
+   * \brief Operator for writing to stream
+   *
+   * @param s stream to write to
+   * @param p the controller_capabilities object to write out
+   **/
+  inline std::ostream& operator << (std::ostream& s, const controller_capabilities& c) {
+    c.write(s);
+
+    return (s);
+  }
+
   inline controller_capabilities::controller_capabilities(const version v) : current_protocol_version(v) {
     current_dimensions.x = 0;
     current_dimensions.y = 0;
@@ -106,31 +118,35 @@ namespace sip {
     return (output.str());
   }
 
-  /** \pre the reader must point at a capabilities element */
+  /** \attention if the reader does not point at a capabilities element nothing is read */
   inline controller_capabilities::controller_capabilities::ptr controller_capabilities::read(xml2pp::text_reader& r) throw () {
-    version                  v = {0,0};
+    if (r.is_element("capabilities")) {
+      version v = {0,0};
 
-    r.read();
+      r.read();
 
-    assert (r.is_element("protocol-version"));
-    
-    r.get_attribute(&v.major, "major");
-    r.get_attribute(&v.minor, "minor");
+      assert (r.is_element("protocol-version"));
 
-    controller_capabilities::ptr c(new controller_capabilities(v));
+      r.get_attribute(&v.major, "major");
+      r.get_attribute(&v.minor, "minor");
 
-    r.read();
-    r.skip_end_element("protocol-version");
+      controller_capabilities::ptr c(new controller_capabilities(v));
 
-    assert (r.is_element("display-dimensions"));
+      r.read();
+      r.skip_end_element("protocol-version");
 
-    r.get_attribute(&c->current_dimensions.x, "x");
-    r.get_attribute(&c->current_dimensions.y, "y");
-    r.get_attribute(&c->current_dimensions.z, "z");
+      assert (r.is_element("display-dimensions"));
 
-    r.read();
+      r.get_attribute(&c->current_dimensions.x, "x");
+      r.get_attribute(&c->current_dimensions.y, "y");
+      r.get_attribute(&c->current_dimensions.z, "z");
 
-    return (c);
+      r.read();
+
+      return (c);
+    }
+
+    return (controller_capabilities::ptr());
   }
 }
 

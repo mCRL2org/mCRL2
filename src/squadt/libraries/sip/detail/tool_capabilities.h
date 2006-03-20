@@ -58,9 +58,6 @@ namespace sip {
       /** \brief Whether the configuration can be changed through user interaction, after the start signal */
       bool                     interactive;
 
-      /** \brief Read from XML stream */
-      inline static tool_capabilities::ptr read(xml2pp::text_reader& reader) throw ();
-
     public:
 
       /** \brief Constructor */
@@ -75,18 +72,30 @@ namespace sip {
       /** \brief Set or reset flag that the tool is interactive (configuration may change through user interaction) */
       inline void set_interactive(bool);
 
+      /** \brief Read from XML stream */
+      inline static tool_capabilities::ptr read(xml2pp::text_reader& reader) throw ();
+
       /** \brief Write to XML string */
       inline std::string write() const;
 
       /** \brief Write to XML stream */
       inline void write(std::ostream&) const;
 
-      /** \brief Returns a reference to input_combinations.begin() */
-      inline input_combination_list::iterator begin_input_combinations();
-
-      /** \brief Returns a reference to input_combinations.end() */
-      inline input_combination_list::iterator end_input_combinations();
+      /** \brief Returns a reference to the list of input combinations */
+      inline const input_combination_list& get_input_combinations() const;
   };
+
+  /**
+   * \brief Operator for writing to stream
+   *
+   * @param s stream to write to
+   * @param p the tool_capabilities object to write out
+   **/
+  inline std::ostream& operator << (std::ostream& s, const tool_capabilities& t) {
+    t.write(s);
+
+    return (s);
+  }
 
   inline tool_capabilities::tool_capabilities(const version v) : protocol_version(v), interactive(false) {
   }
@@ -109,14 +118,8 @@ namespace sip {
     return (output.str());
   }
 
-  /** \brief Returns a reference to input_combinations.begin() */
-  inline tool_capabilities::input_combination_list::iterator tool_capabilities::begin_input_combinations() {
-    return (input_combinations.begin());
-  }
-
-  /** \brief Returns a reference to input_combinations.end() */
-  inline tool_capabilities::input_combination_list::iterator tool_capabilities::end_input_combinations() {
-    return (input_combinations.end());
+  inline const tool_capabilities::input_combination_list& tool_capabilities::get_input_combinations() const {
+    return (input_combinations);
   }
 
   inline void tool_capabilities::write(std::ostream& output) const {
@@ -141,44 +144,48 @@ namespace sip {
     interactive = b;
   }
 
-  /** \pre the reader must point at a capabilities element */
+  /** \attention if the reader does not point at a capabilities element nothing is read */
   inline tool_capabilities::tool_capabilities::ptr tool_capabilities::read(xml2pp::text_reader& r) throw () {
-    version v = {0,0};
-
-    r.read();
-
-    assert (r.is_element("protocol-version"));
-    
-    r.get_attribute(&v.major, "major");
-    r.get_attribute(&v.minor, "minor");
-
-    tool_capabilities::ptr c(new tool_capabilities(v));
-
-    r.read();
-    r.skip_end_element("protocol-version");
-
-    if (r.is_element("interactivity")) {
-      c->interactive = r.get_attribute("level");
+    if (r.is_element("capabilities")) {
+      version v = {0,0};
 
       r.read();
-      r.skip_end_element("interactivity");
-    }
 
-    assert (r.is_element("input-configuration"));
+      assert (r.is_element("protocol-version"));
 
-    while (r.is_element("input-configuration")) {
-      input_combination ic;
+      r.get_attribute(&v.major, "major");
+      r.get_attribute(&v.minor, "minor");
 
-      r.get_attribute(&ic.first, "category");
-      r.get_attribute(&ic.second, "format");
-
-      c->input_combinations.insert(ic);
+      tool_capabilities::ptr c(new tool_capabilities(v));
 
       r.read();
-      r.skip_end_element("input-configuration");
+      r.skip_end_element("protocol-version");
+
+      if (r.is_element("interactivity")) {
+        c->interactive = r.get_attribute("level");
+
+        r.read();
+        r.skip_end_element("interactivity");
+      }
+
+      assert (r.is_element("input-configuration"));
+
+      while (r.is_element("input-configuration")) {
+        input_combination ic;
+
+        r.get_attribute(&ic.first, "category");
+        r.get_attribute(&ic.second, "format");
+
+        c->input_combinations.insert(ic);
+
+        r.read();
+        r.skip_end_element("input-configuration");
+      }
+
+      return (c);
     }
 
-    return (c);
+    return (tool_capabilities::ptr());
   }
 }
 

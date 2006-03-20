@@ -47,6 +47,18 @@ namespace sip {
       static report* read(xml2pp::text_reader&) throw ();
   };
 
+  /**
+   * \brief Operator for writing to stream
+   *
+   * @param s stream to write to
+   * @param p the report object to write out
+   **/
+  inline std::ostream& operator << (std::ostream& s, const report& r) {
+    r.write(s);
+
+    return (s);
+  }
+
   inline report::report() {
   }
 

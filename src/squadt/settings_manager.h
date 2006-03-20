@@ -19,10 +19,12 @@ namespace squadt {
    **/
   class settings_manager : public boost::noncopyable {
     public:
+
       /** Convenience type to hide shared pointer implementation */
       typedef boost::shared_ptr < settings_manager > ptr;
 
     private:
+
       /** Convenience type for paths */
       typedef boost::filesystem::path path;
 
@@ -34,6 +36,8 @@ namespace squadt {
 
       /** \brief The absolute path to the directory in which system wide configuration files can be found */
       const path system_settings_path;
+
+    private:
 
       /** \brief Helper function for constructors that ensures that the appropriate directories exist */
       inline void ensure_directories_exist();

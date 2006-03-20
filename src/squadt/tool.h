@@ -22,10 +22,18 @@ namespace squadt {
     private:
 
       /** \brief A name for the tool */
-      std::string name;
+      std::string                 name;
 
       /** \brief The location where the tool can be found */
-      std::string location;
+      std::string                 location;
+
+      /** \brief Stores the tool capabilities object obtained through protocol implementation */
+      sip::tool_capabilities::ptr capabilities;
+
+    private:
+
+      /** Constructor */
+      inline tool(std::string, std::string, sip::tool_capabilities::ptr);
 
     public:
 
@@ -37,6 +45,9 @@ namespace squadt {
 
       /** \brief Read configuration from file */
       inline static tool::ptr read(xml2pp::text_reader&) throw ();
+
+      /** \brief Get the location to for this tool */
+      inline const sip::tool_capabilities& get_capabilities() const;
 
       /** \brief Get the location to for this tool */
       inline std::string& get_location();
@@ -53,11 +64,26 @@ namespace squadt {
   }
 
   /**
+   * @param l a full path to the executable
+   * @param n a name for the tool
+   * @param c a tool_capabilities object for the tool
+   **/
+  inline tool::tool(std::string n, std::string l, sip::tool_capabilities::ptr c) : name(n), location(l), capabilities(c) {
+  }
+
+  /**
    * @param s the stream to write to
    **/
   inline void tool::write(std::ostream& s) const {
     s << "<tool name=\"" << name
-      << "\" location=\"" << location << "\"/>";
+      << "\" location=\"" << location << "\"";
+
+    if (capabilities.get() != 0) {
+      s << capabilities << "</tool>";
+    }
+    else {
+      s << "/>";
+    }
   }
 
   /**
@@ -74,9 +100,21 @@ namespace squadt {
     }
 
     r.read();
+
+    sip::tool_capabilities::ptr c = sip::tool_capabilities::read(r);
+
     r.skip_end_element("tool");
 
-    return (tool::ptr(new tool(name, location)));
+    if (c.get() == 0) {
+      return (tool::ptr(new tool(name, location)));
+    }
+    else {
+      return (tool::ptr(new tool(name, location, c)));
+    }
+  }
+
+  inline const sip::tool_capabilities& tool::get_capabilities() const {
+    return (*capabilities);
   }
 
   inline std::string& tool::get_location() {
