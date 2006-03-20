@@ -61,7 +61,8 @@ class State
     vector< Transition* > outTransitions;
     int			  rank;
     bool		  selected;
-    ATermList		  stateVector;
+    vector< ATerm >	  stateVector;
+    ATermList		  stateVectorAT;
     set< State* >	  subordinates;
     set< State* >	  superiors;
 };

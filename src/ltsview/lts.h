@@ -42,8 +42,8 @@ class LTS
     void	markAction( string label );
     void	markClusters();
     void	mergeSuperiorClusters();
-    void  	printStructure();
-    void	printClusterSizesPositions();
+//    void  	printStructure();
+//    void	printClusterSizesPositions();
     void	removeMarkRule( const int index );
     void	replaceMarkRule( int index, MarkRule* mr );
     void	setActionLabels( ATermList labels );
@@ -57,15 +57,17 @@ class LTS
     vector< vector< Cluster* > >  clustersInRank;
     int				  deadlockCount;
     State*			  initialState;
+    vector< ATerm >		  markedActionLabels;
     vector< State* >		  markedStates;
-    vector< Transition* >	  markedTransitions;
+    int				  markedTransitionCount;
     vector< MarkRule* >		  markRules;
     bool			  matchAny;
     Mediator*			  mediator;
     vector< vector< State* > >	  statesInRank;
     ATermList			  stateVectorSpec;
+    int				  transitionCount;
+    map< ATerm, vector< Transition* > >	  transitions;
     vector< State* >		  unmarkedStates;
-    vector< Transition* >	  unmarkedTransitions;
 
     void addComradesToCluster( Cluster* c, State* s );
     void clearRanksAndClusters();

@@ -6,6 +6,8 @@ LTS::LTS( Mediator* owner)
   initialState = NULL;
   matchAny = true;
   deadlockCount = -1;
+  transitionCount = 0;
+  markedTransitionCount = 0;
   stateVectorSpec = NULL;
   actionLabels = NULL;
 }
@@ -28,17 +30,14 @@ LTS::~LTS()
   statesInRank.clear();
   initialState = NULL;
   
-  for ( unsigned int i = 0 ; i < unmarkedTransitions.size() ; ++i )
+  markedActionLabels.clear();
+  for ( map< ATerm, vector< Transition* > >::iterator v_it = transitions.begin() ;
+	v_it != transitions.end() ; ++v_it )
   {
-    delete unmarkedTransitions[i];
+    for ( unsigned int i = 0 ; i < v_it->second.size() ; ++i )
+      delete v_it->second[i];
   }
-  unmarkedTransitions.clear();
-
-  for ( unsigned int i = 0 ; i < markedTransitions.size() ; ++i )
-  {
-    delete markedTransitions[i];
-  }
-  markedTransitions.clear();
+  transitions.clear();
 
   for ( unsigned int r = 0 ; r < clustersInRank.size() ; ++r )
   {
@@ -86,7 +85,8 @@ void LTS::addState( State* s )
 
 void LTS::addTransition( Transition* t )
 {
-  unmarkedTransitions.push_back( t );
+  transitions[t->getLabel()].push_back( t );
+  ++transitionCount;
 }
 
 void LTS::setActionLabels( ATermList labels )
@@ -153,7 +153,7 @@ int LTS::getNumberOfMarkedStates() const
 
 int LTS::getNumberOfMarkedTransitions() const
 {
-  return markedTransitions.size();
+  return markedTransitionCount;
 }
 
 int LTS::getNumberOfStates() const
@@ -163,7 +163,7 @@ int LTS::getNumberOfStates() const
 
 int LTS::getNumberOfTransitions() const
 {
-  return ( unmarkedTransitions.size() + markedTransitions.size() );
+  return transitionCount;
 }
 
 void LTS::applyIterativeRanking()
@@ -728,6 +728,7 @@ void LTS::setMatchAnyMarkRule( bool b )
 void LTS::markClusters()
 {
   // recompute the markings of clusters (after applying a different rank style)
+  // process marked states
   State* s;
   for ( vector< State* >::iterator s_it = markedStates.begin() ;
       s_it != markedStates.end() ; ++s_it )
@@ -738,64 +739,58 @@ void LTS::markClusters()
       s->getCluster()->markState();
     }
   }
-  Transition* t;
-  for ( vector< Transition* >::iterator t_it = markedTransitions.begin() ;
-      t_it != markedTransitions.end() ; ++t_it )
+
+  // process marked transitions
+  for ( vector< ATerm >::iterator at_it = markedActionLabels.begin() ;
+	at_it != markedActionLabels.end() ; ++at_it )
   {
-    t = *t_it;
-    if ( t->isMarked() )
+    vector< Transition* > tobeMarked = transitions[*at_it];
+    for ( vector< Transition* >::iterator t_it = tobeMarked.begin() ;
+	  t_it != tobeMarked.end() ; ++t_it )
     {
-      t->getBeginState()->getCluster()->markTransition();
+      (**t_it).getBeginState()->getCluster()->markTransition();
     }
   }
 }
 
 void LTS::markAction( string label )
 {
-  ATermAppl atLabel = ATmakeAppl0( ATmakeAFun( label.c_str(), 0, ATfalse ) );
+  ATerm atLabel = (ATerm)ATmakeAppl0( ATmakeAFun( label.c_str(), 0, ATfalse ) );
+  
+  markedActionLabels.push_back( atLabel );
+  
   Transition* t;
-  vector< Transition* > newunmarked;
-  for ( vector< Transition* >::iterator t_it = unmarkedTransitions.begin() ;
-      t_it != unmarkedTransitions.end() ; ++t_it )
+  vector< Transition* > tobeMarked = transitions[atLabel];
+  for ( vector< Transition* >::iterator t_it = tobeMarked.begin() ;
+      t_it != tobeMarked.end() ; ++t_it )
   {
     t = *t_it;
-    if ( ATisEqual( t->getLabel(), (ATerm)atLabel ) )
-    {
-      t->mark();
-      t->getBeginState()->getCluster()->markTransition();
-      markedTransitions.push_back( t );
-    }
-    else
-    {
-      newunmarked.push_back( t );
-    }
+    t->mark();
+    t->getBeginState()->getCluster()->markTransition();
   }
-  unmarkedTransitions.swap( newunmarked );
+  markedTransitionCount += tobeMarked.size();
 }
 
 void LTS::unmarkAction( string label )
 {
-  ATermAppl atLabel = ATmakeAppl0( ATmakeAFun( label.c_str(), 0, ATfalse ) );
+  ATerm atLabel = (ATerm)ATmakeAppl0( ATmakeAFun( label.c_str(), 0, ATfalse ) );
+  
+  markedActionLabels.erase( find( markedActionLabels.begin(),
+	markedActionLabels.end(), atLabel ) );
+  
   Transition* t;
-  vector< Transition* > newmarked;
-  for ( vector< Transition* >::iterator t_it = markedTransitions.begin() ;
-      t_it != markedTransitions.end() ; ++t_it )
+  vector< Transition* > tobeUnmarked = transitions[atLabel];
+  for ( vector< Transition* >::iterator t_it = tobeUnmarked.begin() ;
+      t_it != tobeUnmarked.end() ; ++t_it )
   {
     t = *t_it;
-    if ( ATisEqual( t->getLabel(), (ATerm)atLabel ) )
-    {
-      t->unmark();
-      t->getBeginState()->getCluster()->unmarkTransition();
-      unmarkedTransitions.push_back( t );
-    }
-    else
-    {
-      newmarked.push_back( t );
-    }
+    t->unmark();
+    t->getBeginState()->getCluster()->unmarkTransition();
   }
-  markedTransitions.swap( newmarked );
+  markedTransitionCount -= tobeUnmarked.size();
 }
 
+/*
 // function for test purposes
 void LTS::printStructure()
 {
@@ -897,3 +892,4 @@ void LTS::printClusterSizesPositions()
     cout << endl;
   }
 }
+*/

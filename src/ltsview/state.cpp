@@ -2,15 +2,20 @@
 
 State::State( ATermList sv )
 {
-  stateVector = sv;
+  stateVectorAT = sv;
   ATprotectList( &stateVector );
+  while ( !ATisEmpty( sv ) )
+  {
+    stateVector.push_back( ATgetFirst( sv ) );
+    sv = ATgetNext( sv );
+  }
   cluster = NULL;
   rank = 0;
 }
 
 State::~State()
 {
-  ATunprotectList( &stateVector );
+  ATunprotectList( &stateVectorAT );
 }
 
 void State::addSuperior( State* s )
@@ -132,6 +137,5 @@ void State::clearHierarchyInfo()
 
 int State::getValueIndexOfParam( int paramIndex )
 {
-  return ATgetInt( (ATermInt)ATgetArgument( (ATermAppl)ATelementAt( stateVector,
-	  paramIndex ), 1 ) );
+  return ATgetInt((ATermInt)ATgetArgument((ATermAppl)stateVector[paramIndex],1));
 }
