@@ -13,8 +13,8 @@ namespace squadt {
   namespace bf = boost::filesystem;
 
   /**
-   * @param h the users home directory
-   * @param u the path relative to the home directory where user specific settings will be stored
+   * @param[in] h the users home directory
+   * @param[in] u the path relative to the home directory where user specific settings will be stored
    *
    * \throws boost::filesystem::filesystem_error if \p h, \p t or \p DATA_DIRECTORY are no valid paths
    **/
@@ -27,7 +27,7 @@ namespace squadt {
   }
 
   /**
-   * @param h the users home directory
+   * @param[in] h the users home directory
    *
    * \throws boost::filesystem::filesystem_error if \p h, \p t or \p DATA_DIRECTORY are no valid paths
    **/
@@ -57,7 +57,7 @@ namespace squadt {
   }
 
   /**
-   * \param[in] node a complete path relative to the path to the user settings path
+   * @param[in] node a complete path relative to the path to the user settings path
    *
    * \throws boost::filesystem::filesystem_error if node is not a valid name for a file
    **/
@@ -71,13 +71,13 @@ namespace squadt {
   }
 
   /**
-   * \param[in] node a complete path relative to the path to the system settings path
+   * @param[in] n a complete path relative to the path to the system settings path
    *
    * \throws boost::filesystem::filesystem_error if node is not a valid name for a file
    **/
   template < typename T >
-  inline std::string settings_manager::path_to_system_settings(const T& node) const {
-    return ((system_settings_path / path(node)).native_file_string());
+  inline std::string settings_manager::path_to_system_settings(const T& n) const {
+    return ((system_settings_path / path(n)).native_file_string());
   }
 
   inline std::string settings_manager::path_to_system_settings() const {
@@ -85,13 +85,13 @@ namespace squadt {
   }
 
   /**
-   * \param[in] node a complete path, relative to the path to the images
+   * @param[in] n a complete path, relative to the path to the images
    *
    * \throws boost::filesystem::filesystem_error if node is not a valid name for a file
    **/
   template < typename T >
-  inline std::string settings_manager::path_to_images(const T& node) const {
-    return ((system_settings_path / path("images") / path(node)).native_file_string());
+  inline std::string settings_manager::path_to_images(const T& n) const {
+    return ((system_settings_path / path("images") / path(n)).native_file_string());
   }
 
   inline std::string settings_manager::path_to_images() const {
@@ -99,13 +99,13 @@ namespace squadt {
   }
 
   /**
-   * \param[in] node a complete path, relative to the path to the schemas
+   * @param[in] n a complete path, relative to the path to the schemas
    *
    * \throws boost::filesystem::filesystem_error if node is not a valid name for a file
    **/
   template < typename T >
-  inline std::string settings_manager::path_to_schemas(const T& node) const {
-    return ((system_settings_path / path("schemas") / path(node)).native_file_string());
+  inline std::string settings_manager::path_to_schemas(const T& n) const {
+    return ((system_settings_path / path("schemas") / path(n)).native_file_string());
   }
 
   inline std::string settings_manager::path_to_schemas() const {
@@ -113,24 +113,24 @@ namespace squadt {
   }
 
   /**
-   * \param[in] path a complete path
+   * @param[in] p a complete path
    */
   template < >
-  inline std::string settings_manager::append_schema_suffix(const std::string& path) {
-    return(path + schema_suffix);
+  inline std::string settings_manager::append_schema_suffix(const std::string& p) {
+    return(p + schema_suffix);
   }
 
   /**
-   * \param[in] path a complete path
+   * @param[in] p a complete path
    */
   template < typename T >
-  inline std::string settings_manager::append_schema_suffix(const T& path) {
-    return(std::string(path) + schema_suffix);
+  inline std::string settings_manager::append_schema_suffix(const T& p) {
+    return(std::string(p) + schema_suffix);
   }
 
   /**
-   * \param[in] p1 an incomplete path
-   * \param[in] p2 a relative path component
+   * @param[in] p1 an incomplete path
+   * @param[in] p2 a relative path component
    **/
   template < typename T1, typename T2 >
   inline std::string settings_manager::path_concatenate(const T1 p1, const T2 p2) {

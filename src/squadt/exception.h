@@ -6,6 +6,7 @@
 namespace squadt {
   namespace exception_identifier {
 
+    /** \brief Type for exception identification */
     enum values {
       cannot_access_user_settings_directory,    ///< \brief the directory where user settings must be stored is not accessible
       failed_loading_object,                    ///< \brief failed to load information

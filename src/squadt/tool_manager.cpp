@@ -18,6 +18,7 @@
 
 namespace squadt {
 
+  /** \brief Scheme for easy command generation */
   const char* default_argument_pattern = "%s --si-connect=socket://%s:%s --si-identifier=%s";
 
   const long tool_manager::default_tcp_port = 10946;
@@ -112,7 +113,6 @@ namespace squadt {
 
   /**
    * @param t the tool that is to be run
-   * @param p the processor that should be passed the feedback of execution
    **/
   void tool_manager::query_capabilities(tool& t) throw () {
     boost::filesystem::path p(t.get_location());

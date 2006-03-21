@@ -77,10 +77,10 @@ namespace squadt {
         /** \brief Remove a process from the list */
         inline void remove(process*);
     
-        /* \brief Terminate a specific process */
+        /** \brief Terminate a specific process */
         inline void terminate(process*);
     
-        /* \brief Terminate all processes */
+        /** \brief Terminate all processes */
         inline void terminate();
     };
  

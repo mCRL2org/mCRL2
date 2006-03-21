@@ -41,14 +41,15 @@ namespace squadt {
       private:
     
         /** \brief The system's proces identifier for this process */
-        long int identifier;
+        long int    identifier;
     
         /** \brief The status of this process */
-        status current_status;
+        status      current_status;
  
+        /** \brief The function that is called when the status changes */
         handler     call_back;
  
-        /** Overwritten on terminate function */
+        /** \brief Overridden on terminate function */
         inline void OnTerminate(int pid, int status);
     
       public:
@@ -65,6 +66,7 @@ namespace squadt {
         /** \brief Terminates the process */
         inline void kill();
  
+        /** \brief Destructor */
         inline ~process();
     };
  

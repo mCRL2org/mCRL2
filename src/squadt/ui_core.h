@@ -6,10 +6,10 @@
 
 namespace squadt {
 
-  /* Global Settings Manager component */
+  /** \brief Global Settings Manager component */
   extern settings_manager::ptr global_settings_manager;
 
-  /* Global Tool Manager component */
+  /** \brief Global Tool Manager component */
   extern tool_manager::ptr     global_tool_manager;
 }
 

@@ -47,16 +47,16 @@ namespace squadt {
  
     public:
  
-      /* \brief Constructor */
+      /** \brief Constructor */
       inline project_manager(const std::string&, const std::string&);
  
-      /* \brief Get a reference to the list of processors in this project */
+      /** \brief Get a reference to the list of processors in this project */
       inline const processor_list& get_processors();
 
       /** \brief Get the description */
       inline const std::string& get_description();
  
-      /* \brief Read project information from project_directory */
+      /** \brief Read project information from project_directory */
       static project_manager::ptr read(const std::string&);
  
       /** \brief Read configuration with an XML text reader */
@@ -68,13 +68,13 @@ namespace squadt {
       /** \brief Writes project configuration to stream */
       void write(std::ostream& = std::cout) const;
  
-      /* \brief Add a new processor to the project */
+      /** \brief Add a new processor to the project */
       inline processor::ptr add(tool&, processor::visualisation_handler = processor::dummy_visualiser);
 
       /** \brief Remove a processor and all processors that depend one one of its outputs */
       inline void remove(processor*);
  
-      /* \brief Make all specifications in the project up to date */
+      /** \brief Make all specifications in the project up to date */
       void update();
   };
 

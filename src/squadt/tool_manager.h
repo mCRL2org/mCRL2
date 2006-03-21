@@ -170,6 +170,7 @@ namespace squadt {
 
   /**
    * @param n the name of the tool
+   * @param l the location of the tool
    *
    * \return whether the tool was added or not
    **/
