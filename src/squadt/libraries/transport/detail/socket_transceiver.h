@@ -5,7 +5,7 @@
 #include <boost/asio.hpp>
 
 #include <transport/transporter.h>
-#include <transport/detail/transceiver.h>
+#include <transport/detail/transceiver.tcc>
 #include <transport/detail/socket_scheduler.h>
 
 namespace transport {
@@ -18,10 +18,10 @@ namespace transport {
   
       public:
         /** \brief IP version 4 address verifier (refer to the asio documentation) */
-        typedef asio::ipv4::address address;
+        typedef asio::ipv4::address                      address;
 
         /** \brief IP version 4 host class (refer to the asio documentation) */
-        typedef asio::ipv4::host    host;
+        typedef asio::ipv4::host                         host;
 
         /** \brief Convenience type to hide the boost shared pointer implementation */
         typedef boost::shared_ptr < socket_transceiver > ptr;
@@ -36,6 +36,8 @@ namespace transport {
 
         /** \brief Default port for socket connections */
         static long                      default_port;
+
+      private:
 
         /** \brief Size of the input buffer */
         static unsigned int              input_buffer_size;
@@ -75,16 +77,16 @@ namespace transport {
       public:
 
         /** \brief Constructor that connects to a port on an address */
-        socket_transceiver(transporter& o);
+        socket_transceiver(transporter* o);
 
         /** \brief Terminate the connection with the peer */
-        void disconnect(transporter::connection_ptr);
+        void disconnect(basic_transceiver::ptr);
 
         /** \brief Destructor */
         ~socket_transceiver();
     };
 
-    inline void socket_transceiver::disconnect(transporter::connection_ptr) {
+    inline void socket_transceiver::disconnect(basic_transceiver::ptr) {
       socket.shutdown(asio::stream_socket::shutdown_both);
       socket.close();
 

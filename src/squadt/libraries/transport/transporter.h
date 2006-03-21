@@ -9,9 +9,10 @@
 #include <boost/asio/ipv4/address.hpp>
 #include <boost/asio/ipv4/host.hpp>
 #include <boost/noncopyable.hpp>
-#include <boost/shared_ptr.hpp>
 
 #include <transport/detail/exception.h>
+#include <transport/detail/transceiver.h>
+#include <transport/detail/listener.h>
 
 /*
  * Socket/Direct communication abstraction
@@ -31,13 +32,6 @@
  */
 
 namespace transport {
-  namespace listener {
-    class basic_listener;
-  }
-
-  namespace transceiver {
-    class basic_transceiver;
-  }
 
   using transceiver::basic_transceiver;
   using listener::basic_listener;
@@ -47,17 +41,12 @@ namespace transport {
     friend class basic_listener;
 
     public:
-      /** Convenience type to hide the shared pointer */
-      typedef boost::shared_ptr < basic_transceiver > connection_ptr;
 
       /** Convenience type to hide the shared pointer */
-      typedef std::list < connection_ptr >            connection_list;
+      typedef std::list < basic_transceiver::ptr >    connection_list;
 
       /** Convenience type to hide the shared pointer */
-      typedef boost::shared_ptr < basic_listener >    listener_ptr;
-
-      /** Convenience type to hide the shared pointer */
-      typedef std::list < listener_ptr >              listener_list;
+      typedef std::list < basic_listener::ptr >       listener_list;
 
       /** IP version 4 address verifier (refer to the asio documentation) */
       typedef asio::ipv4::address                     address;
@@ -73,14 +62,22 @@ namespace transport {
       /** \brief The list with connections */
       connection_list connections;
 
-      /** \brief Abstract function for the delivery of streamed data to the client program */
-      virtual void deliver(std::istream&) = 0;
+    private:
 
       /** \brief Abstract function for the delivery of streamed data to the client program */
-      virtual void deliver(std::string&) = 0;
+      virtual void deliver(std::istream&, basic_transceiver*) = 0;
+
+      /** \brief Abstract function for the delivery of streamed data to the client program */
+      virtual void deliver(std::string&, basic_transceiver*) = 0;
 
       /** \brief Creates direct connection to another transporter object */
       void connect(basic_transceiver*);
+
+      /** \brief Associate a connection with this transporter */
+      void associate(const basic_transceiver::ptr&);
+
+      /** \brief Disassociate a connection from this transporter */
+      basic_transceiver::ptr disassociate(const basic_transceiver*);
 
     public:
   
@@ -102,8 +99,11 @@ namespace transport {
       /** \brief Disconnect connection number <|number|> */
       void disconnect(size_t number = 0);
 
-      /** \brief Disconnect connection number <|number|> */
+      /** \brief Disconnect from directly connected peer */
       void disconnect(transporter&);
+
+      /** \brief Pass a connection through to another transporter */
+      inline void relay_connection(transporter*, basic_transceiver*);
 
       /** \brief Activate a socket listener (using a loopback connection by default) */
       void add_listener(const address& = address::loopback(), const long port = 0);
@@ -112,30 +112,60 @@ namespace transport {
       void remove_listener(size_t number = 0);
   
       /** \brief Communicate a string with all peers */
-      void send(const std::string&);
+      inline void send(const std::string&);
  
       /** \brief Communicate data from a stream with all peers */
-      void send(std::istream&);
+      inline void send(std::istream&);
 
       /** \brief The number of active listeners */
-      inline size_t number_of_listeners();
-
-      /** \brief The number of active connections */
-      inline size_t number_of_connections();
+      inline size_t number_of_listeners() const;
 
       /** \brief Returns an object with the local hosts name and addresses */
       static host get_local_host();
+
+      /** \brief The number of active connections */
+      inline size_t number_of_connections() const;
   };
 
   inline transporter::transporter() {
   }
  
-  inline size_t transporter::number_of_listeners() {
+  inline size_t transporter::number_of_listeners() const {
     return (listeners.size());
   }
 
-  inline size_t transporter::number_of_connections() {
+  inline size_t transporter::number_of_connections() const {
     return (connections.size());
+  }
+
+  /**
+   * @param d the data to be sent
+   **/
+  inline void transporter::send(const std::string& d) {
+    for (connection_list::const_iterator i = connections.begin(); i != connections.end(); ++i) {
+      (*i)->send(d);
+    }
+  }
+
+  /**
+   * @param s stream that contains the data to be sent
+   **/
+  inline void transporter::send(std::istream& s) {
+    for (connection_list::const_iterator i = connections.begin(); i != connections.end(); ++i) {
+      (*i)->send(s);
+    }
+  }
+
+  /**
+   * @param[in,out] t the transporter to relay the connection to
+   * @param[in] c the transceiver that represents the local end point of the connection
+   **/
+  inline void transporter::relay_connection(transporter* t, basic_transceiver* c) {
+    assert(t != 0);
+
+    t->associate(c->owner->disassociate(c));
+
+    c->owner = t;
   }
 }
 

@@ -13,6 +13,7 @@
 
 #include <md5pp/md5pp.h>
 #include <xml2pp/text_reader.h>
+#include <sip/controller.h>
 #include <sip/detail/configuration.h>
 
 #include "tool.h"
@@ -31,7 +32,7 @@ namespace squadt {
    * input of other processors.
    *
    **/
-  class processor : public execution::process_change_listener {
+  class processor : public execution::process_change_listener, public sip::controller::communicator {
     friend class project_manager;
     friend class tool_manager;
     friend class executor;

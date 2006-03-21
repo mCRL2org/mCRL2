@@ -35,7 +35,7 @@ namespace xml2pp {
   }
 
   /**
-   * @param d[in] the document that is to be parsed
+   * @param[in] d the document that is to be parsed
    **/
   template < typename T >
   inline text_reader::text_reader(const T& d) throw () {
@@ -47,7 +47,7 @@ namespace xml2pp {
   }
 
   /**
-   * @param d[in] the document that is to be parsed
+   * @param[in] d the document that is to be parsed
    **/
   template < >
   inline text_reader::text_reader(const std::string& d) throw () {
@@ -59,10 +59,11 @@ namespace xml2pp {
   }
 
   /**
-   * @param d[in] the document that is to be parsed
+   * @param[in] d the document that is to be parsed
+   * @param[in] l the length of a prefix of d that is to be taken as the document
    **/
   template < typename T >
-  inline text_reader::text_reader(const T& d, const size_t prefix_length) throw () {
+  inline text_reader::text_reader(const T& d, const size_t l) throw () {
     reader = xmlReaderForDoc(d, "", 0, 0);
 
     if (reader == 0) {
@@ -71,11 +72,12 @@ namespace xml2pp {
   }
 
   /**
-   * @param d[in] the document that is to be parsed
+   * @param[in] d the document that is to be parsed
+   * @param[in] l the length of a prefix of d that is to be taken as the document
    **/
   template < >
-  inline text_reader::text_reader(const std::string& d, const size_t prefix_length) throw () {
-    reader = xmlReaderForMemory(d.c_str(), prefix_length, "", 0, 0);
+  inline text_reader::text_reader(const std::string& d, const size_t l) throw () {
+    reader = xmlReaderForMemory(d.c_str(), l, "", 0, 0);
 
     if (reader == 0) {
       throw (exception(exception_identifier::unable_to_initialise_reader));
@@ -115,13 +117,18 @@ namespace xml2pp {
     return (name);
   }
 
-  /* Get the value of an attribute as ... */
-  inline bool text_reader::get_attribute(std::string* astring, const char* attribute_name) {
-    char* temporary = (char*) xmlTextReaderGetAttribute(reader, reinterpret_cast < const xmlChar* > (attribute_name));
+  /**
+   * @param[out] d the variable that should hold the result 
+   * @param[in] n the name of the attribute which value to get
+   *
+   * \return whether the attribute was present
+   **/
+  inline bool text_reader::get_attribute(std::string* d, const char* n) {
+    char* temporary = (char*) xmlTextReaderGetAttribute(reader, reinterpret_cast < const xmlChar* > (n));
     bool  return_value = temporary != NULL;
 
     if (return_value) {
-      astring->assign(temporary);
+      d->assign(temporary);
     }
 
     xmlFree(temporary);
@@ -129,13 +136,19 @@ namespace xml2pp {
     return (return_value);
   }
 
+  /**
+   * @param[out] d the variable that should hold the result 
+   * @param[in] n the name of the attribute which value to get
+   *
+   * \return whether the attribute was present
+   **/
   template < typename T >
-  inline bool text_reader::get_attribute(T* aninteger, const char* attribute_name) {
-    char* temporary    = (char*) xmlTextReaderGetAttribute(reader, reinterpret_cast < const xmlChar* > (attribute_name));
+  inline bool text_reader::get_attribute(T* d, const char* n) {
+    char* temporary    = (char*) xmlTextReaderGetAttribute(reader, reinterpret_cast < const xmlChar* > (n));
     bool  return_value = temporary != NULL;
 
     if (return_value) {
-      *aninteger = static_cast < T > (atoi(temporary));
+      *d= static_cast < T > (atoi(temporary));
     }
 
     xmlFree(temporary);
@@ -143,8 +156,13 @@ namespace xml2pp {
     return (return_value);
   }
 
-  inline bool text_reader::get_attribute(const char* attribute_name) {
-    char* temporary    = (char*) xmlTextReaderGetAttribute(reader, reinterpret_cast < const xmlChar* > (attribute_name));
+  /**
+   * @param[in] n the name of the attribute which value to get
+   *
+   * \return the value as a boolean
+   **/
+  inline bool text_reader::get_attribute(const char* n) {
+    char* temporary    = (char*) xmlTextReaderGetAttribute(reader, reinterpret_cast < const xmlChar* > (n));
     bool  return_value = temporary != NULL;
 
     xmlFree(temporary);
@@ -152,31 +170,44 @@ namespace xml2pp {
     return (return_value);
   }
 
-  /* Get the value of an attribute as ... */
-  inline bool text_reader::get_value(std::string* astring) {
+  /**
+   * @param[out] d the variable that should hold the result 
+   *
+   * \return whether the node is empty
+   **/
+  inline bool text_reader::get_value(std::string* d) {
     char* temporary    = (char*) xmlTextReaderValue(reader);
     bool  return_value = temporary != NULL;
 
-    *astring = (return_value) ? std::string(temporary) : "";
+    *d = (return_value) ? std::string(temporary) : "";
 
     xmlFree(temporary);
 
     return (return_value);
   }
 
+  /**
+   * @param[out] d the variable that should hold the result 
+   *
+   * \return whether the node is empty
+   **/
   template < typename T >
-  inline bool text_reader::get_value(T* aninteger) {
+  inline bool text_reader::get_value(T* d) {
     char* temporary    = (char*) xmlTextReaderValue(reader);
     bool  return_value = temporary != NULL;
 
-    *aninteger = static_cast < T > ((return_value) ? atoi(temporary) : 0);
+    *d = static_cast < T > ((return_value) ? atoi(temporary) : 0);
 
     xmlFree(temporary);
 
     return (return_value);
   }
 
-  /* Whether the current element matches element_name */
+  /**
+   * @param[out] e the name of an element
+   *
+   * \return whether the name of the current element matches e
+   **/
   inline bool text_reader::is_element(const char* e) {
     xmlChar* temporary    = xmlTextReaderName(reader);
     bool     return_value = xmlStrEqual(temporary, reinterpret_cast < const xmlChar* > (e)) != 0;
@@ -212,7 +243,7 @@ namespace xml2pp {
   }
 
   /**
-   * @param n the number times to skip a succesful read
+   * @param[in] n the number times to skip a succesful read
    **/
   inline void text_reader::read(unsigned int n) throw () {
     int status = xmlTextReaderRead(reader);

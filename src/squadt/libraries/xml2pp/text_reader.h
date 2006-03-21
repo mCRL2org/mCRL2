@@ -17,25 +17,25 @@ namespace xml2pp {
     #include <libxml/xmlreader.h>
   }
 
-  /* A C++ wrapper around xmlTextReader from libxml2 */
+  /** \brief A C++ wrapper around xmlTextReader from libxml2 */
   class text_reader : public boost::noncopyable {
     private:
-      /** The XML text reader from libxml2 */
+      /** \brief The XML text reader from libxml2 */
       xmlTextReaderPtr   reader;
 
     public:
 
-      /** Wrapper class to allow distinction between input strings and file names */
+      /** \brief Wrapper class to allow distinction between input strings and file names */
       template < typename T >
       class file_name {
-        /** The name of the file */
+        /** \brief The name of the file */
         const T& name;
 
         public:
           /** \brief Constructor */
           inline file_name(const T& n);
 
-          /** Returns a C string that represents the file name */
+          /** \brief Returns a C string that represents the file name */
           inline const char* get() const;
       };
 

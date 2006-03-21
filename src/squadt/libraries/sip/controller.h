@@ -14,14 +14,14 @@ namespace sip {
     class communicator : public sip::messenger {
       private:
         /** Type for keeping protocol phase status */
-        typedef enum {
+        enum status {
           status_initialising, ///< \brief No connection with tool yet
           status_clean,        ///< \brief Connection with tool: Phase 0
           status_configured,   ///< \brief Tool has accepted a configuration: Phase 1
           status_started,      ///< \brief Tool is running: Phase 2
           status_reported,     ///< \brief Tool is finished and has send a report: Phase 3
           status_error         ///< \brief An error occurred
-        } status;
+        };
  
         /** \brief The current protocol status */
         status                      current_status;
@@ -39,8 +39,10 @@ namespace sip {
         configuration::ptr          current_configuration;
  
         /** \brief Unique identifier assigned to the peer */
-        long instance_identifier;
+        long                        instance_identifier;
  
+      private:
+
         /** \brief Convenience function for use with event handlers */
         inline void set_status(status);
  
@@ -57,6 +59,7 @@ namespace sip {
         void accept_data_handler(messenger::message_ptr&);
  
       public:
+
         /** \brief Default constructor */
         communicator();
  

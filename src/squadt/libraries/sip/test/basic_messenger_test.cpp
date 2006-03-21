@@ -259,7 +259,7 @@ void message_wrapper() {
 
 bool event_triggered = false;
 
-void event_handler(messenger_t::message_ptr&) {
+void event_handler(messenger_t::message_ptr&, basic_transceiver*) {
   event_triggered = true;
 }
 

@@ -36,8 +36,8 @@ namespace md5 {
   compact_digest MD5::MD5_Sum(std::string data) {
     MD5 sum;
 
-    sum.Update(data);
-    sum.Finalise();
+    sum.update(data);
+    sum.finalise();
 
     return (sum.digest);
   }
@@ -45,8 +45,8 @@ namespace md5 {
   compact_digest MD5::MD5_Sum(std::istream& stream) {
     MD5 sum;
 
-    sum.Update(stream);
-    sum.Finalise();
+    sum.update(stream);
+    sum.finalise();
 
     return (sum.digest);
   }

@@ -6,7 +6,7 @@
 #include <boost/shared_ptr.hpp>
 #include <boost/asio/ipv4/address.hpp>
 
-#include <transport/detail/listener.h>
+#include <transport/detail/listener.tcc>
 #include <transport/detail/socket_transceiver.h>
 
 namespace transport {

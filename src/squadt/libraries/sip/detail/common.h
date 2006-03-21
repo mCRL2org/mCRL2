@@ -52,6 +52,9 @@ namespace sip {
 
   /** \brief Protocol version {major,minor} */
   static const version default_protocol_version = {1,0};
+
+  /** \brief Convenience type for connection end points (primarily used by delivery handler functions) */
+  typedef transport::transceiver::basic_transceiver* end_point;
 }
 
 #endif

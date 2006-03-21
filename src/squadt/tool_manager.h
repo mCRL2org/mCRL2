@@ -89,7 +89,7 @@ namespace squadt {
       void query_capabilities(tool&) throw ();
 
       /** \brief This is the event handler for incoming identification messages */
-      void handle_relay_connection(sip::message_ptr&);
+      void handle_relay_connection(sip::message_ptr&, sip::end_point);
 
     public:
  

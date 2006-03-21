@@ -17,7 +17,7 @@ namespace transport {
     /**
      * @param o a transporter to deliver data to
      **/
-    socket_transceiver::socket_transceiver(transporter& o) : basic_transceiver(o), socket(scheduler.demuxer) {
+    socket_transceiver::socket_transceiver(transporter* o) : basic_transceiver(o), socket(scheduler.demuxer) {
       using namespace asio;
 
       buffer = new char[input_buffer_size];

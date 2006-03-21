@@ -28,7 +28,7 @@ namespace squadt {
     add_listener();
 
     /* Set handler for incoming instance identification messages */
-    set_handler(boost::bind(&tool_manager::handle_relay_connection, this, _1), sip::send_instance_identifier);
+    set_handler(boost::bind(&tool_manager::handle_relay_connection, this, _1, _2), sip::send_instance_identifier);
   }
 
   void tool_manager::write(std::ostream& stream) const {
@@ -130,21 +130,20 @@ namespace squadt {
 
     local_executor.execute(boost::str(command), 0);
 
-    /* TODO special processor?!? */
+    /* TODO special processor for waiting? */
   }
 
   /**
    * @param m the message that was just delivered
    **/
-  void tool_manager::handle_relay_connection(sip::message_ptr& m) {
+  void tool_manager::handle_relay_connection(sip::message_ptr& m, sip::end_point o) {
     instance_identifier id = atol(m->to_string().c_str());
 
     if (instances.find(id) == instances.end()) {
       throw (exception(exception_identifier::unexpected_instance_identifier));
     }
 
-//    instances[id].accept_instance_identifier(m);
-    /* TODO finish?!? */
+    relay_connection(instances[id].get(), o);
   }
 
   void tool_manager::terminate() {

@@ -1,8 +1,10 @@
-#include <cassert>
 #include <algorithm>
+#include <functional>
 
-#include <transport/transporter.h>
+#include <boost/bind.hpp>
+#include <boost/ref.hpp>
 
+#include <transport/detail/transceiver.tcc>
 #include <transport/detail/socket_listener.h>
 #include <transport/detail/direct_transceiver.h>
 #include <transport/detail/socket_transceiver.h>
@@ -26,10 +28,10 @@ namespace transport {
    * @param p the peer to connect to
    **/
   void transporter::connect(transporter& p) {
-    connection_ptr connection = connection_ptr(new direct_transceiver(*this));
+    basic_transceiver::ptr t(new direct_transceiver(this));
 
-    p.connections.push_back(connection);
-    connections.push_back(connection_ptr(new direct_transceiver(p, reinterpret_cast < direct_transceiver* > (connection.get()))));
+    p.connections.push_back(t);
+    connections.push_back(basic_transceiver::ptr(new direct_transceiver(&p, reinterpret_cast < direct_transceiver* > (t.get()))));
   }
 
   /**
@@ -37,7 +39,7 @@ namespace transport {
    * @param p a port
    **/
   void transporter::connect(const address& a, const long p) {
-    connection_ptr c(new socket_transceiver(*this));
+    basic_transceiver::ptr c(new socket_transceiver(this));
 
     reinterpret_cast < socket_transceiver* > (c.get())->connect(a, p);
 
@@ -49,11 +51,47 @@ namespace transport {
    * @param p a port
    **/
   void transporter::connect(const std::string& h, const long p) {
-    connection_ptr c(new socket_transceiver(*this));
+    basic_transceiver::ptr c(new socket_transceiver(this));
 
     reinterpret_cast < socket_transceiver* > (c.get())->connect(h, p);
 
     connections.push_back(c);
+  }
+
+  /**
+   * @param t the connection to associate with this transporter
+   **/
+  void transporter::associate(const basic_transceiver::ptr& t) {
+    const basic_transceiver* p = t.get();
+
+    connection_list::iterator i = std::find_if(connections.begin(), connections.end(),
+                      boost::bind(std::equal_to< const basic_transceiver* >(), p,
+                              boost::bind(&basic_transceiver::ptr::get, _1)));
+
+    if (i == connections.end()) {
+      connections.push_back(t);
+    }
+  }
+
+  /**
+   * @param t the transceiver that identifies the connection to be severed
+   *
+   * \return a shared pointer to the transceiver that is removed
+   **/
+  basic_transceiver::ptr transporter::disassociate(const basic_transceiver* t) {
+    basic_transceiver::ptr p;
+
+    connection_list::iterator i = std::find_if(connections.begin(), connections.end(),
+                      boost::bind(std::equal_to< const basic_transceiver* >(), t,
+                              boost::bind(&basic_transceiver::ptr::get, _1)));
+
+    if (i != connections.end()) {
+      p = *i;
+
+      connections.erase(i);
+    }
+
+    return (p);
   }
 
   /**
@@ -79,15 +117,14 @@ namespace transport {
    * @param m the directly connected peer
    **/
   void transporter::disconnect(transporter& m) {
-    connection_list::iterator i = connections.begin();
-  
-    while (i != connections.end()) {
-      if (&(*i)->owner == &m) {
-        break;
-      }
+    using namespace boost;
 
-      ++i;
-    }
+    const transporter* p = &m;
+
+    connection_list::iterator i = std::find_if(connections.begin(), connections.end(),
+                      bind(std::equal_to< const transporter* >(), p,
+                                      bind(&basic_transceiver::get_owner,
+                                                      bind(&basic_transceiver::ptr::get, _1))));
 
     if (i != connections.end()) {
       (*i)->disconnect(*i);
@@ -99,7 +136,7 @@ namespace transport {
    * @param p a port
    **/
   void transporter::add_listener(const address& a, const long p) {
-    listener_ptr new_listener(new socket_listener(*this, a, p));
+    basic_listener::ptr new_listener(new socket_listener(*this, a, p));
 
     listeners.push_back(new_listener);
 
@@ -107,7 +144,7 @@ namespace transport {
   }
 
   /**
-   * @param the number of the listener that is to be removed
+   * @param n the number of the listener that is to be removed
    **/
   void transporter::remove_listener(size_t n) {
     assert(n < listeners.size());
@@ -124,34 +161,6 @@ namespace transport {
       (*i)->shutdown();
 
       listeners.erase(i);
-    }
-  }
-
-  /**
-   * @param d the data to be sent
-   **/
-  void transporter::send(const std::string& d) {
-    connection_list::iterator i = connections.begin();
-    connection_list::iterator b = connections.end();
-  
-    while (i != b) {
-      (*i)->send(d);
-
-      ++i;
-    }
-  }
-
-  /**
-   * @param s stream that contains the data to be sent
-   **/
-  void transporter::send(std::istream& s) {
-    connection_list::iterator i = connections.begin();
-    connection_list::iterator b = connections.end();
-
-    while (i != b) {
-      (*i)->send(s);
-  
-      ++i;
     }
   }
 

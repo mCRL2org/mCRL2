@@ -16,18 +16,24 @@ namespace sip {
     template < class M >
     const std::string basic_messenger< M >::tag_close("</message>");
 
+    /**
+     * @param d a stream that contains the data to be delived
+     * @param o a pointer to the transceiver on which the data was received
+     **/
     template < class M >
-    void basic_messenger< M >::deliver(std::istream& data) {
+    void basic_messenger< M >::deliver(std::istream& d, basic_transceiver* o) {
       std::ostringstream s;
  
-      s << data.rdbuf() << std::flush;
+      s << d.rdbuf() << std::flush;
  
       std::string content = s.str();
  
-      deliver(content);
+      deliver(content, o);
     }
 
-    /* Send a message */
+    /**
+     * @param m the message that is to be sent
+     **/
     template < class M >
     inline void basic_messenger< M >::send_message(const message& m) {
       send(tag_open + m.to_xml() + tag_close);
@@ -58,6 +64,10 @@ namespace sip {
       return (message_queue.size());
     }
 
+    /**
+     * @param h the handler function that is to be executed
+     * @param t the message type on which delivery h is to be executed
+     **/
     template < class M >
     inline void basic_messenger< M >::set_handler(handler_type h, const typename M::type_identifier_t t) {
       assert(waiters.count(t) == 0);
@@ -65,19 +75,25 @@ namespace sip {
       handlers[t] = h;
     }
 
+    /**
+     * @param t the message type for which to clear the event handler
+     **/
     template < class M >
     inline void basic_messenger< M >::unset_handler(const typename M::type_identifier_t t) {
       handlers.erase(t);
     }
  
     /**
+     * @param d a stream that contains the data to be delived
+     * @param o a pointer to the transceiver on which the data was received
+     *
      * \pre A message is of the form tag_open...tag_close
      * \pre Both tag_close == tag_open start with == '<' and do not further contain this character 
      *
      * \attention Works under the assumption that tag_close.size() < data.size()
      **/
     template < class M >
-    void basic_messenger< M >::deliver(std::string& data) {
+    void basic_messenger< M >::deliver(std::string& data, basic_transceiver* o) {
       std::string::const_iterator i = data.begin();
  
       while (i != data.end()) {
@@ -161,7 +177,7 @@ namespace sip {
 
             if (h != handlers.end()) {
               /* Service handler */
-              (*h).second(m);
+              (*h).second(m, o);
             }
             else {
               /* Put message into queue */
@@ -261,11 +277,26 @@ namespace sip {
 
     /**
      * @param m reference to the pointer to a message to deliver
+     * @param o the transceiver that delivered the message
      * @param t reference to the message pointer of the waiter
      **/
     template < class M >
-    inline void basic_messenger< M >::deliver_to_waiter(message_ptr& m, message_ptr& t) {
+    inline void basic_messenger< M >::deliver_to_waiter(message_ptr& m, basic_transceiver* o, message_ptr& t) {
       t.swap(m);
+    }
+
+    /**
+     * @param m reference to the pointer to a message to deliver
+     * @param o the transceiver that delivered the message
+     * @param t reference to the message pointer of the waiter
+     * @param h the old handler to call
+     **/
+    template < class M >
+    inline void basic_messenger< M >::deliver_to_waiter(message_ptr& m, basic_transceiver* o, message_ptr& t, handler_type h) {
+      t = m;
+
+      /** Chain call */
+      h(m,o);
     }
 
     /**
@@ -286,10 +317,11 @@ namespace sip {
 
         // Store handler
         if (c) {
-          old_handler = handlers[t];
+          set_handler(bind(basic_messenger< M >::deliver_to_waiter, _1, _2, ref(p), handlers[t]), t);
         }
-
-        set_handler(bind(basic_messenger< M >::deliver_to_waiter, _1, ref(p)), t);
+        else {
+          set_handler(bind(basic_messenger< M >::deliver_to_waiter, _1, _2, ref(p)), t);
+        }
 
         barrier_ptr b(new boost::barrier(2));
 
@@ -300,9 +332,6 @@ namespace sip {
         // Restore handler
         if (c) {
           handlers[t] = old_handler;
-
-          // And call
-          old_handler(p);
         }
         else {
           handlers.erase(t);

@@ -15,21 +15,21 @@ using boost::unit_test::test_suite;
 
 using namespace transport;
 
-class StreamMessenger : public transporter {
+class stream_messenger : public transporter {
   private:
 
   public:
 
     std::ostringstream output;
 
-    StreamMessenger() : transporter() {
+    stream_messenger() : transporter() {
     }
 
-    void deliver(std::istream& input) {
+    void deliver(std::istream& input, transceiver::basic_transceiver*) {
       output << input.rdbuf();
     }
 
-    void deliver(std::string& input) {
+    void deliver(std::string& input, transceiver::basic_transceiver*) {
       output.str(input);
     }
 
@@ -48,8 +48,8 @@ static const std::string test_data("1234567890abcdefghijklmnopqrstuvwxyzABCDEFGH
 void direct_connection_test() {
   BOOST_MESSAGE("Testing direct connection: ");
 
-  StreamMessenger    initiator;
-  StreamMessenger    connector;
+  stream_messenger    initiator;
+  stream_messenger    connector;
 
   BOOST_MESSAGE("  Connecting peer...");
   connector.connect(initiator);
@@ -70,8 +70,8 @@ void direct_connection_test() {
 void socket_connection_test() {
   BOOST_MESSAGE("Testing socket connection: ");
 
-  StreamMessenger    initiator;
-  StreamMessenger    connector;
+  stream_messenger    initiator;
+  stream_messenger    connector;
 
   BOOST_MESSAGE("  Activating listener...");
   connector.add_listener();
@@ -112,8 +112,8 @@ void direct_send_receive() {
   std::string        initiator_data;
   std::string        connector_data;
 
-  StreamMessenger    initiator;
-  StreamMessenger    connector;
+  stream_messenger    initiator;
+  stream_messenger    connector;
 
   connector.connect(initiator);
 
@@ -152,8 +152,8 @@ void socket_send_receive() {
   std::string        initiator_data;
   std::string        connector_data;
 
-  StreamMessenger    initiator;
-  StreamMessenger    connector;
+  stream_messenger    initiator;
+  stream_messenger    connector;
 
   connector.add_listener();
   initiator.connect();

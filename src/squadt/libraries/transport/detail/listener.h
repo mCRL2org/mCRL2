@@ -3,9 +3,9 @@
 
 #include <boost/shared_ptr.hpp>
 
-#include <transport/transporter.h>
-
 namespace transport {
+  class transporter;
+
   namespace transceiver {
     class basic_transceiver;
   }
@@ -36,16 +36,6 @@ namespace transport {
         /** \brief Destructor */
         virtual inline ~basic_listener();
     };
-
-    inline void basic_listener::associate(boost::shared_ptr < transceiver::basic_transceiver > t) {
-      owner.connections.push_back(t);
-    }
-
-    inline basic_listener::basic_listener(transporter& m) : owner(m) {
-    }
-
-    inline basic_listener::~basic_listener() {
-    }
   }
 }
 

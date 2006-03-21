@@ -16,6 +16,7 @@ namespace xml2pp {
     };
   }
 
+  /** \brief The common exception type */
   typedef exception::exception < exception_identifier::values > exception;
 }
 

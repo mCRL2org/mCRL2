@@ -23,6 +23,8 @@ namespace sip {
   namespace messaging {
     template < class M > class basic_messenger;
 
+    using transport::transceiver::basic_transceiver;
+
     /**
      * \brief Abstract communicator class that divides an incoming data stream in messages
      *
@@ -33,13 +35,13 @@ namespace sip {
       public:
 
         /** Convenience type for messages of type M */
-        typedef M                                       message;
+        typedef M                                                           message;
 
         /** Convenience type for pointers to messages using a boost shared pointer */
-        typedef boost::shared_ptr < message >           message_ptr;
+        typedef boost::shared_ptr < message >                               message_ptr;
 
         /** Convenience type for handlers */
-        typedef boost::function1 < void, message_ptr& > handler_type;
+        typedef boost::function2 < void, message_ptr&, basic_transceiver* > handler_type;
  
       private:
 
@@ -54,6 +56,14 @@ namespace sip {
 
         /** Type for the message queue */
         typedef std::deque < message_ptr >                                 message_queue_t;
+
+        /** The XML-like tag used for wrapping the content */
+        static const std::string   tag_open;
+
+        /** The XML-like tag used for wrapping the content */
+        static const std::string   tag_close;
+
+      private:
 
         /** Handlers based on message types */
         handler_map                handlers;
@@ -73,14 +83,13 @@ namespace sip {
         /** The number of tag elements (of message::tag) that have been matched at the last delivery */
         unsigned char              partially_matched;
 
-        /** The XML-like tag used for wrapping the content */
-        static const std::string   tag_open;
-
-        /** The XML-like tag used for wrapping the content */
-        static const std::string   tag_close;
+      private:
 
         /** Helper function that delivers an incoming message directly to a waiter */
-        static inline void deliver_to_waiter(message_ptr&, message_ptr&);
+        static inline void deliver_to_waiter(message_ptr&, basic_transceiver*, message_ptr&);
+
+        /** Helper function that delivers an incoming message directly to a waiter */
+        static inline void deliver_to_waiter(message_ptr&, basic_transceiver*, message_ptr&, handler_type);
 
       public:
 
@@ -88,10 +97,10 @@ namespace sip {
         basic_messenger();
  
         /** Queues incoming messages */
-        virtual void deliver(std::istream&);
+        virtual void deliver(std::istream&, basic_transceiver*);
  
         /** Queues incoming messages */
-        virtual void deliver(std::string&);
+        virtual void deliver(std::string&, basic_transceiver*);
  
         /* Wait until the next message arrives */
         const message_ptr await_message(typename M::type_identifier_t);

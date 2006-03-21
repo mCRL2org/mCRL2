@@ -9,33 +9,34 @@
 namespace md5 {
 
   union compact_digest {
-    uint8_t  bytes[16];
-    uint32_t dwords[4];
+    uint8_t  bytes[16]; ///< Subsequent bytes of a digest
+    uint32_t dwords[4]; ///< Subsequent quad-bytes of a digest
 
-    /* Read digest from a string and convert to compact format */
+    /** \brief Read digest from a string and convert to compact format */
     void read(const char*);
 
-    /** Whether digest is the zero checksum */
+    /** \brief Whether digest is the zero checksum */
     inline bool is_zero() const;
 
-    /** Fill with zeroes */
+    /** \brief Fill with zeroes */
     inline void zero_out();
 
-    /** Compare two compact digests for equality */
+    /** \brief Compare two compact digests for equality */
     inline bool operator== (const compact_digest& r) const;
 
-    /** Assign to ... */
+    /** \brief Assign to ... */
     inline void operator= (const compact_digest& r);
   };
 
+  /** \brief The digest containing only zeroes, used for initialisation */
   extern compact_digest zero_digest;
 
-  /* Whether digest is the zero checksum */
+  /** \brief Whether digest is the zero checksum */
   inline bool compact_digest::is_zero() const {
     return (dwords[0] == 0 && dwords[1] == 0 && dwords[2] == 0 && dwords[3] == 0);
   }
 
-  /* Set to the zero checksum */
+  /** \brief Set to the zero checksum */
   inline void compact_digest::zero_out() {
     dwords[0] = 0;
     dwords[1] = 0;
@@ -43,12 +44,12 @@ namespace md5 {
     dwords[3] = 0;
   }
 
-  /* Compare to MD5 checksums in compact format */
+  /** \brief Compare to MD5 checksums in compact format */
   inline bool compact_digest::operator== (const compact_digest& r) const {
     return (dwords[0] == r.dwords[0] && dwords[1] == r.dwords[1] && dwords[2] == r.dwords[2] && dwords[3] == r.dwords[3]);
   }
 
-  /* Assign MD5 checksums in compact format */
+  /* \brief Assign MD5 checksums in compact format */
   inline void compact_digest::operator= (const compact_digest& r) {
     dwords[0] = r.dwords[0];
     dwords[1] = r.dwords[1];
@@ -56,87 +57,107 @@ namespace md5 {
     dwords[3] = r.dwords[3];
   }
 
+  /** \brief Print the current digest to a stream */
   std::ostream& operator<< (std::ostream&, const compact_digest&);
 
+  /**
+   * Basic C++ wrapper around an MD5 context
+   **/
   class MD5 {
     private:
-      bool finalised;
+      /** \brief Whether the digest was finalised */
+      bool           finalised;
  
+      /** \brief The MD5 context, until finalised */
       md5_context    context;
  
+      /** \brief Holds a digest after finalisation */
       compact_digest digest;
  
     public:
  
-      /** Constructor */
+      /** \brief Constructor */
       MD5();
  
-      /** Creates a new compact digest using data from a string */
+      /** \brief Creates a new compact digest using data from a string */
       static compact_digest MD5_Sum(std::string);
 
-      /** Creates a new compact digest using data from a stream */
+      /** \brief Creates a new compact digest using data from a stream */
       static compact_digest MD5_Sum(std::istream&);
  
-      /** Update checksum with a specified amount of data from string */
-      void Update(unsigned char*, unsigned int);
+      /** \brief Update checksum with a specified amount of data from string */
+      void update(unsigned char*, unsigned int);
  
-      /** Update checksum with data from string */
-      void Update(std::string);
+      /** \brief Update checksum with data from string */
+      void update(const std::string&);
  
-      /** Update checksum with data from stream */
-      void Update(std::istream&);
+      /** \brief Update checksum with data from stream */
+      void update(std::istream&);
  
-      /** Complete checksum (Update() is no longer possible) */
-      void Finalise();
+      /** \brief Complete checksum (update() is no longer possible) */
+      void finalise();
  
-      /** Empty context */
-      void Clear();
+      /** \brief Empty context */
+      void clear();
  
-      /** Return the computed MD5 sum */
-      const compact_digest & GetDigest() const;
+      /** \brief Return the computed MD5 sum */
+      const compact_digest & get_digest() const;
  
-      /** Print the current digest to a stream */
+      /** \brief Print the current digest to a stream */
       friend std::ostream& operator<< (std::ostream&, const MD5&);
   };
 
-  inline void MD5::Update(unsigned char* content, unsigned int length) {
-    md5_update(&context, content, length);
+  /**
+   * @param[in] d a string with data
+   * @param[in] l length of the previx of d that will be read as data
+   **/
+  inline void MD5::update(unsigned char* d, unsigned int l) {
+    md5_update(&context, d, l);
   }
 
-  inline void MD5::Update(std::string data) {
-    Update((unsigned char*) data.c_str(), data.size());
+  /**
+   * @param[in] d a string with data
+   **/
+  inline void MD5::update(const std::string& d) {
+    update((unsigned char*) d.c_str(), d.size());
   }
 
-  inline void MD5::Update(std::istream& stream) {
+  /**
+   * @param[in] s a stream from which to read data
+   **/
+  inline void MD5::update(std::istream& s) {
     unsigned char buffer[1000];
 
-    while (stream.good()) {
-      stream.get(reinterpret_cast < char* > (buffer), 1000);
+    while (s.good()) {
+      s.get(reinterpret_cast < char* > (buffer), 1000);
 
-      Update(buffer, stream.gcount());
+      update(buffer, s.gcount());
     }
   }
 
-  inline void MD5::Finalise() {
+  inline void MD5::finalise() {
     md5_finish(&context, digest.bytes);
 
     finalised = true;
   }
 
-  inline std::ostream& operator<< (std::ostream& stream, const MD5& context) {
-    if (context.finalised) {
-      stream << context.digest;
+  /**
+   * @param[in] s a stream from which to read data
+   * @param[in] c an MD5 context
+   **/
+  inline std::ostream& operator<< (std::ostream& s, const MD5& c) {
+    if (c.finalised) {
+      s << c.digest;
     }
 
-    return (stream);
+    return (s);
   }
 
-  inline void MD5::Clear() {
+  inline void MD5::clear() {
     finalised = false;
 
     md5_starts(&context);
   }
-
 }
 
 #endif
