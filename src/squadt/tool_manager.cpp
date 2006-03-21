@@ -29,6 +29,7 @@ namespace squadt {
 
     /* Set handler for incoming instance identification messages */
     set_handler(boost::bind(&tool_manager::handle_relay_connection, this, _1, _2), sip::send_instance_identifier);
+    set_handler(bind(&tool_manager::handle_store_tool_capabilities, this, _1), sip::reply_tool_capabilities);
   }
 
   void tool_manager::write(std::ostream& stream) const {
@@ -133,6 +134,10 @@ namespace squadt {
     /* TODO special processor for waiting? */
   }
 
+  void tool_manager::terminate() {
+    /* TODO signal executor to terminate the processes related to this tool manager */
+  }
+
   /**
    * @param m the message that was just delivered
    **/
@@ -144,10 +149,20 @@ namespace squadt {
     }
 
     relay_connection(instances[id].get(), o);
+
+    instances[id]->set_status(status_clean);
   }
 
-  void tool_manager::terminate() {
-    /* TODO signal executor to terminate the processes related to this tool manager */
+  /**
+   * @param m the message that was just delivered
+   **/
+  void tool_manager::handle_store_tool_capabilities(sip::message_ptr& m) {
+    xml2pp::text_reader reader(m->to_string().c_str());
+ 
+    reader.read();
+ 
+    /* TODO find correct tool to store this object */
+    //= tool::capabilities::read(reader);
   }
 }
 

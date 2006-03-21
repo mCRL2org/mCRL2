@@ -19,8 +19,8 @@ namespace squadt {
     s << "<processor tool-name=\"" << program.get_name() << "\">";
 
     /* The last received configuration from the tool */
-    if (configuration.get() != 0) {
-      configuration->write(s);
+    if (current_configuration.get() != 0) {
+      current_configuration->write(s);
     }
 
     /* The inputs */
@@ -66,7 +66,7 @@ namespace squadt {
 
     processor::ptr c(new processor(t));
 
-    c->configuration = sip::configuration::read(r);
+    c->current_configuration = sip::configuration::read(r);
 
     /* Read inputs */
     while (r.is_element("input")) {

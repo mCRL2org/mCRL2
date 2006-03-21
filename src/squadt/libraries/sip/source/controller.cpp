@@ -12,13 +12,13 @@ namespace sip {
   namespace controller {
 
     using namespace sip::messaging;
+
+    controller::capabilities communicator::current_controller_capabilities;
  
     communicator::communicator() : current_status(status_initialising) {
       using namespace boost;
  
       /* set default handlers for delivery events */
-      set_handler(bind(&communicator::accept_tool_capabilities, this, _1), sip::reply_tool_capabilities);
-      set_handler(bind(&communicator::accept_instance_identifier, this, _1), sip::send_instance_identifier);
       set_handler(bind(&communicator::reply_controller_capabilities, this), sip::request_controller_capabilities);
       set_handler(bind(&communicator::set_status, this, status_configured), sip::send_accept_configuration);
       set_handler(bind(&communicator::accept_layout_handler, this, _1), sip::send_display_layout);
@@ -58,14 +58,6 @@ namespace sip {
       message m(sip::request_termination);
  
       send_message(m);
-    }
- 
-    void communicator::accept_tool_capabilities(messenger::message_ptr& m) {
-      xml2pp::text_reader reader(m->to_string().c_str());
- 
-      reader.read();
- 
-      current_tool_capabilities = tool::capabilities::read(reader);
     }
  
     void communicator::accept_layout_handler(messenger::message_ptr&) {

@@ -91,6 +91,9 @@ namespace squadt {
       /** \brief This is the event handler for incoming identification messages */
       void handle_relay_connection(sip::message_ptr&, sip::end_point);
 
+      /** \brief Handler function that inserts a tool capabilities object into a tool object */
+      void handle_store_tool_capabilities(sip::message_ptr&);
+
     public:
  
       /** \brief Constructor */

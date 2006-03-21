@@ -14,7 +14,6 @@
 #include <md5pp/md5pp.h>
 #include <xml2pp/text_reader.h>
 #include <sip/controller.h>
-#include <sip/detail/configuration.h>
 
 #include "tool.h"
 #include "executor.h"
@@ -81,9 +80,6 @@ namespace squadt {
       /** \brief Identifies the tool that is required to run the command */
       tool&                               program;
 
-      /** \brief A tool configuration that can be send to configure a tool */
-      sip::configuration::ptr             configuration;
- 
       /** \brief The information about inputs of this processor */
       input_list                          inputs;
 
@@ -190,7 +186,7 @@ namespace squadt {
   }
 
   inline sip::configuration::ptr processor::get_configuration() {
-    return (configuration);
+    return (current_configuration);
   }
 
   inline const tool& processor::get_tool() {

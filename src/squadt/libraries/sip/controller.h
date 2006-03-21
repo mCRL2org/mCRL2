@@ -12,7 +12,7 @@ namespace sip {
 
     /** \brief The main interface to the protocol (controller-side) */
     class communicator : public sip::messenger {
-      private:
+      protected:
         /** Type for keeping protocol phase status */
         enum status {
           status_initialising, ///< \brief No connection with tool yet
@@ -29,28 +29,20 @@ namespace sip {
         /** \brief The currently active display layout */
         sip::layout::display_layout current_layout;
  
-        /** \brief The capabilities object of the controller as it is send, when requested */
-        controller::capabilities    current_controller_capabilities;
- 
-        /** \brief The last received capabilities object of the tool */
-        tool::capabilities::ptr     current_tool_capabilities;
- 
         /** \brief The current configuration of a tool (may be limited to a main input configuration) */
         configuration::ptr          current_configuration;
  
-        /** \brief Unique identifier assigned to the peer */
-        long                        instance_identifier;
- 
-      private:
+      protected:
 
-        /** \brief Convenience function for use with event handlers */
+        /** \brief The capabilities object of the controller as it is send, when requested */
+        static controller::capabilities current_controller_capabilities;
+
+      protected:
+
+        /** \brief convenience function for use with event handlers */
         inline void set_status(status);
- 
-        /** \brief Handler function that sets the identifier for this instance */
-        void accept_instance_identifier(messenger::message_ptr&);
- 
-        /** \brief Handler function that replaces the current tool capabilities object with the one from a message */
-        void accept_tool_capabilities(messenger::message_ptr&);
+
+      private:
  
         /** \brief Handler function to replace the current display layout with a new one */
         void accept_layout_handler(messenger::message_ptr&);
@@ -85,10 +77,7 @@ namespace sip {
         void request_termination();
  
         /** \brief Get the controller_capabilities object that is send to tools */
-        controller::capabilities& get_controller_capabilities();
- 
-        /** \brief Get the most recently received tool_capabilities object of the connected tool */
-        tool::capabilities::ptr get_tool_capabilities();
+        const controller::capabilities& get_controller_capabilities();
  
         /** \brief Set the current configuration (only effective before status_configured) */
         void set_configuration(const configuration&);
@@ -97,12 +86,8 @@ namespace sip {
         configuration::ptr get_configuration() const;
     };
  
-    inline controller::capabilities& communicator::get_controller_capabilities() {
+    inline const controller::capabilities& communicator::get_controller_capabilities() {
       return (current_controller_capabilities);
-    }
- 
-    inline tool::capabilities::ptr communicator::get_tool_capabilities() {
-      return (current_tool_capabilities);
     }
  
     /** \attention use get_configuration().swap() to set the configuration */
@@ -112,12 +97,6 @@ namespace sip {
  
     inline void communicator::set_status(status s) {
       current_status = s;
-    }
- 
-    inline void communicator::accept_instance_identifier(messenger::message_ptr& m) {
-      instance_identifier = atol(m->to_string().c_str());
- 
-      current_status = status_clean;
     }
   }
 }
