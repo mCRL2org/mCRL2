@@ -439,13 +439,13 @@ $(LIN_NAME) : $(LIN_OBJECTS) $(ATERM_DEP) $(LIBREWR_NAME)
 # *.cpp is needed for generated code (e.g. by bison)
 *.cpp *.o aterm/*.o svc/*.o: Makefile $(CONFIG)
 
-%.d : %.c
+%.d : %.c $(REVISION_HEADER)
 	@echo generating dependencies for $<
 	@$(CC) -MT '$*.o' -MM $(CPPFLAGS) $(ATERM_CPPFLAGS) $< > $@.$$$$; \
 	sed 's,\($*\)\.o[ :]*,\1.o $@ : ,g' < $@.$$$$ > $@; \
 	$(RM) $@.$$$$
 
-%.dpp : %.cpp
+%.dpp : %.cpp $(REVISION_HEADER)
 	@echo generating dependencies for $<
 	@$(CXX) -MT '$*.o' -MM $(CPPFLAGS) $(ATERM_CPPFLAGS) $< > $@.$$$$; \
 	sed 's,\($*\)\.o[ :]*,\1.o $@ : ,g' < $@.$$$$ > $@; \
