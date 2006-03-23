@@ -79,9 +79,9 @@ ATermAppl gsSpecEltsToSpec(ATermList SpecElts);
 %type <appl> bag_enum_elt data_comprehension data_var_decl proc_expr
 %type <appl> proc_expr_choice proc_expr_sum proc_expr_merge proc_expr_merge_rhs
 %type <appl> proc_expr_binit proc_expr_binit_rhs proc_expr_cond
-%type <appl> proc_expr_cond_rhs proc_expr_seq proc_expr_seq_rhs proc_expr_at
-%type <appl> proc_expr_sync proc_expr_sync_rhs proc_expr_primary proc_constant
-%type <appl> act_proc_ref proc_quant
+%type <appl> proc_expr_cond_la proc_expr_cond_nla proc_expr_seq
+%type <appl> proc_expr_seq_rhs proc_expr_at proc_expr_sync proc_expr_sync_rhs
+%type <appl> proc_expr_primary proc_constant act_proc_ref proc_quant
 %type <appl> mult_act_name ren_expr comm_expr
 
 %type <list> spec_elts sorts_decls_scs sorts_decl ids_cs domain ops_decls_scs
@@ -1191,25 +1191,38 @@ proc_expr_cond:
     {
       $$ = $1;
     }
-  | data_expr_prefix ARROW proc_expr_cond_rhs
+  | data_expr_prefix ARROW proc_expr_cond_la
     {
       $$ = gsMakeCond($1, $3, gsMakeDelta());
       gsDebugMsg("parsed conditional expression\n  %T\n", $$);
     }
-  | data_expr_prefix ARROW proc_expr_cond_rhs COMMA proc_expr_cond_rhs
+  | data_expr_prefix ARROW proc_expr_cond_nla COMMA proc_expr_cond_la
     {
       $$ = gsMakeCond($1, $3, $5);
       gsDebugMsg("parsed conditional expression\n  %T\n", $$);
     }
   ;
 
-//right argument of conditional
-proc_expr_cond_rhs:
+//last argument of conditional
+proc_expr_cond_la:
+  proc_expr_cond
+    {
+      $$ = $1;
+    }
+  | SUM data_vars_decls_cs DOT proc_expr_cond_la
+    {
+      $$ = gsMakeSum($2, $4);
+      gsDebugMsg("parsed summation\n  %T\n", $$);
+    }
+  ;
+
+//non-last argument of conditional
+proc_expr_cond_nla:
   proc_expr_seq
     {
       $$ = $1;
     }
-  | SUM data_vars_decls_cs DOT proc_expr_cond_rhs
+  | SUM data_vars_decls_cs DOT proc_expr_cond_nla
     {
       $$ = gsMakeSum($2, $4);
       gsDebugMsg("parsed summation\n  %T\n", $$);
