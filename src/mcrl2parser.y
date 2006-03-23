@@ -72,10 +72,11 @@ ATermAppl gsSpecEltsToSpec(ATermList SpecElts);
 %type <appl> sort_expr_arrow domain_no_arrow_elt sort_expr_struct
 %type <appl> struct_constructor recogniser struct_projection sort_expr_primary
 %type <appl> sort_constant sort_constructor data_expr data_expr_whr whr_decl
-%type <appl> data_expr_quant data_expr_imp data_expr_and data_expr_eq
-%type <appl> data_expr_rel data_expr_cons data_expr_snoc data_expr_concat
-%type <appl> data_expr_add data_expr_div data_expr_mult data_expr_prefix
-%type <appl> data_expr_postfix data_expr_primary data_constant data_enumeration
+%type <appl> data_expr_quant data_expr_imp data_expr_imp_rhs data_expr_and
+%type <appl> data_expr_and_rhs data_expr_eq data_expr_eq_rhs data_expr_rel
+%type <appl> data_expr_cons data_expr_snoc data_expr_concat data_expr_add
+%type <appl> data_expr_div data_expr_mult data_expr_prefix data_expr_postfix
+%type <appl> data_expr_primary data_constant data_enumeration
 %type <appl> bag_enum_elt data_comprehension data_var_decl proc_expr
 %type <appl> proc_expr_choice proc_expr_sum proc_expr_merge proc_expr_merge_rhs
 %type <appl> proc_expr_binit proc_expr_binit_rhs proc_expr_cond
@@ -737,13 +738,13 @@ data_expr_quant:
     }
   ;
 
-//implication
+//implication (right associative)
 data_expr_imp:
   data_expr_and
     {
       $$ = $1;
     }
-  | data_expr_and IMP data_expr_imp
+  | data_expr_and IMP data_expr_imp_rhs
     {
       $$ = gsMakeDataApplProd(gsMakeDataVarIdOpId($2),
         ATmakeList2((ATerm) $1, (ATerm) $3));
@@ -751,19 +752,37 @@ data_expr_imp:
     }
   ;
 
-//conjunction and disjunction
+//right argument of implication
+data_expr_imp_rhs:
+  data_expr_imp
+    {
+      $$ = $1;
+    }
+  | FORALL data_vars_decls_cs DOT data_expr_imp_rhs
+    {
+      $$ = gsMakeForall($2, $4);
+      gsDebugMsg("parsed quantification\n  %T\n", $$);
+    }
+  | EXISTS data_vars_decls_cs DOT data_expr_imp_rhs
+    {
+      $$ = gsMakeExists($2, $4);
+      gsDebugMsg("parsed quantification\n  %T\n", $$);
+    }
+  ;
+
+//conjunction and disjunction (right associative)
 data_expr_and:
   data_expr_eq
     {
       $$ = $1;
     }
-  | data_expr_and AND data_expr_eq
+  | data_expr_eq AND data_expr_and_rhs
     {
       $$ = gsMakeDataApplProd(gsMakeDataVarIdOpId($2),
         ATmakeList2((ATerm) $1, (ATerm) $3));
       gsDebugMsg("parsed conjunction\n  %T\n", $$);
     }
-  | data_expr_and BARS data_expr_eq
+  | data_expr_eq BARS data_expr_and_rhs
     {
       $$ = gsMakeDataApplProd(gsMakeDataVarIdOpId($2),
         ATmakeList2((ATerm) $1, (ATerm) $3));
@@ -771,23 +790,59 @@ data_expr_and:
     }
   ;
 
-//equality
+//right argument of conjunction and disjunction
+data_expr_and_rhs:
+  data_expr_and
+    {
+      $$ = $1;
+    }
+  | FORALL data_vars_decls_cs DOT data_expr_and_rhs
+    {
+      $$ = gsMakeForall($2, $4);
+      gsDebugMsg("parsed quantification\n  %T\n", $$);
+    }
+  | EXISTS data_vars_decls_cs DOT data_expr_and_rhs
+    {
+      $$ = gsMakeExists($2, $4);
+      gsDebugMsg("parsed quantification\n  %T\n", $$);
+    }
+  ;
+
+//equality (right associative)
 data_expr_eq:
   data_expr_rel
     {
       $$ = $1;
     }
-  | data_expr_eq EQ data_expr_rel
+  | data_expr_rel EQ data_expr_eq_rhs
     {
       $$ = gsMakeDataApplProd(gsMakeDataVarIdOpId($2),
         ATmakeList2((ATerm) $1, (ATerm) $3));
       gsDebugMsg("parsed equality expression\n  %T\n", $$);
     }
-  | data_expr_eq NEQ data_expr_rel
+  | data_expr_rel NEQ data_expr_eq_rhs
     {
       $$ = gsMakeDataApplProd(gsMakeDataVarIdOpId($2),
         ATmakeList2((ATerm) $1, (ATerm) $3));
       gsDebugMsg("parsed equality expression\n  %T\n", $$);
+    }
+  ;
+
+//right argument of equality 
+data_expr_eq_rhs:
+  data_expr_eq
+    {
+      $$ = $1;
+    }
+  | FORALL data_vars_decls_cs DOT data_expr_eq_rhs
+    {
+      $$ = gsMakeForall($2, $4);
+      gsDebugMsg("parsed quantification\n  %T\n", $$);
+    }
+  | EXISTS data_vars_decls_cs DOT data_expr_eq_rhs
+    {
+      $$ = gsMakeExists($2, $4);
+      gsDebugMsg("parsed quantification\n  %T\n", $$);
     }
   ;
 
@@ -829,7 +884,7 @@ data_expr_rel:
     }
   ;
 
-//cons
+//cons (right associative)
 data_expr_cons:
   data_expr_snoc
     {
@@ -843,7 +898,7 @@ data_expr_cons:
     }
   ;
 
-//snoc
+//snoc (left associative)
 data_expr_snoc:
   data_expr_concat
     {
@@ -857,7 +912,7 @@ data_expr_snoc:
     }
   ; 
 
-//concatenation
+//concatenation (left associative)
 data_expr_concat:
   data_expr_add
     {
@@ -871,7 +926,7 @@ data_expr_concat:
     }
   ;
 
-//addition and subtraction
+//addition and subtraction (left associative)
 data_expr_add:
   data_expr_div
     {
@@ -891,7 +946,7 @@ data_expr_add:
     }
   ;
 
-//division
+//division (left associative)
 data_expr_div:
   data_expr_mult
     {
@@ -911,7 +966,7 @@ data_expr_div:
     }
   ;
 
-//multiplication and list at
+//multiplication and list at (left associative)
 data_expr_mult:
   data_expr_prefix
     {
