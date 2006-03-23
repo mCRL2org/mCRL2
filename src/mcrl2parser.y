@@ -75,17 +75,18 @@ ATermAppl gsSpecEltsToSpec(ATermList SpecElts);
 %type <appl> data_expr_quant data_expr_imp data_expr_imp_rhs data_expr_and
 %type <appl> data_expr_and_rhs data_expr_eq data_expr_eq_rhs data_expr_rel
 %type <appl> data_expr_cons data_expr_snoc data_expr_concat data_expr_add
-%type <appl> data_expr_div data_expr_mult data_expr_prefix data_expr_postfix
-%type <appl> data_expr_primary data_constant data_enumeration
-%type <appl> bag_enum_elt data_comprehension data_var_decl proc_expr
-%type <appl> proc_expr_choice proc_expr_sum proc_expr_merge proc_expr_merge_rhs
-%type <appl> proc_expr_binit proc_expr_binit_rhs proc_expr_cond
-%type <appl> proc_expr_cond_la proc_expr_seq proc_expr_seq_wo_cond
-%type <appl> proc_expr_seq_rhs proc_expr_seq_rhs_wo_cond proc_expr_at
-%type <appl> proc_expr_at_wo_cond proc_expr_sync proc_expr_sync_wo_cond
-%type <appl> proc_expr_sync_rhs proc_expr_sync_rhs_wo_cond
-%type <appl> proc_expr_primary proc_constant act_proc_ref proc_quant
-%type <appl> mult_act_name ren_expr comm_expr
+%type <appl> data_expr_div data_expr_mult data_expr_prefix
+%type <appl> data_expr_quant_prefix data_expr_postfix data_expr_primary
+%type <appl> data_constant data_enumeration bag_enum_elt data_comprehension
+%type <appl> data_var_decl
+%type <appl> proc_expr proc_expr_choice proc_expr_sum proc_expr_merge
+%type <appl> proc_expr_merge_rhs proc_expr_binit proc_expr_binit_rhs
+%type <appl> proc_expr_cond proc_expr_cond_la proc_expr_seq
+%type <appl> proc_expr_seq_wo_cond proc_expr_seq_rhs proc_expr_seq_rhs_wo_cond
+%type <appl> proc_expr_at proc_expr_at_wo_cond proc_expr_sync
+%type <appl> proc_expr_sync_wo_cond proc_expr_sync_rhs
+%type <appl> proc_expr_sync_rhs_wo_cond proc_expr_primary proc_constant
+%type <appl> act_proc_ref proc_quant mult_act_name ren_expr comm_expr
 
 %type <list> spec_elts sorts_decls_scs sorts_decl ids_cs domain ops_decls_scs
 %type <list> ops_decl eqn_sect eqn_decls_scs data_vars_decls_scs data_vars_decl
@@ -992,7 +993,7 @@ data_expr_prefix:
     {
       $$ = $1;
     }
-  | EXCLAM data_expr_prefix
+  | EXCLAM data_expr_quant_prefix
     {
       $$ = gsMakeDataApplProd(gsMakeDataVarIdOpId($1), ATmakeList1((ATerm) $2));
       gsDebugMsg("parsed prefix data expression\n  %T\n", $$);
@@ -1006,6 +1007,24 @@ data_expr_prefix:
     {
       $$ = gsMakeDataApplProd(gsMakeDataVarIdOpId($1), ATmakeList1((ATerm) $2));
       gsDebugMsg("parsed prefix data expression\n  %T\n", $$);
+    }
+  ;
+
+//quantifier or prefix data expression
+data_expr_quant_prefix:
+  data_expr_prefix
+    {
+      $$ = $1;
+    }
+  | FORALL data_vars_decls_cs DOT data_expr_quant_prefix
+    {
+      $$ = gsMakeForall($2, $4);
+      gsDebugMsg("parsed quantification\n  %T\n", $$);
+    }
+  | EXISTS data_vars_decls_cs DOT data_expr_quant_prefix
+    {
+      $$ = gsMakeExists($2, $4);
+      gsDebugMsg("parsed quantification\n  %T\n", $$);
     }
   ;
 
