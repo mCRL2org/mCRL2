@@ -1,12 +1,12 @@
 <?xml version="1.0"?>
 
 <!DOCTYPE refentry PUBLIC "-//OASIS//DTD DocBook XML V4.3//EN" "http://www.oasis-open.org/docbook/xml/4.3/docbookx.dtd"[
-<!ENTITY ltspp "<function>ltspp</function>">
-<!ENTITY lpe2lts "<function>lpe2lts</function>">
+<!ENTITY ltsinfo "<function>ltsinfo</function>">
 <!ENTITY option "<parameter>OPTION</parameter>">
 <!ENTITY infile "<parameter>INFILE</parameter>">
 <!ENTITY outfile "<parameter>OUTFILE</parameter>">
 <!ENTITY format "<parameter>FORMAT</parameter>">
+<!ENTITY file "<parameter>FILE</parameter>">
 <!ENTITY default "<parameter>default</parameter>">
 <!ENTITY debug "<parameter>debug</parameter>">
 <!ENTITY internal "<parameter>internal</parameter>">
@@ -25,34 +25,31 @@
 <!ENTITY stdout "<constant>stdout</constant>">
 ]>
 
-<refentry id="ltspp">
+<refentry id="ltsinfo">
 
 <refmeta>
-  <refentrytitle>ltspp</refentrytitle>
+  <refentrytitle>ltsinfo</refentrytitle>
   <manvolnum>1</manvolnum>
 </refmeta>
 
 <refnamediv>
-  <refname>ltspp</refname>
-  <refpurpose>pretty print an LTS</refpurpose>
+  <refname>ltsinfo</refname>
+  <refpurpose>copy an LTS</refpurpose>
 </refnamediv>
 
 <refsynopsisdiv>
   <cmdsynopsis>
-    <command>&ltspp;</command>
+    <command>&ltsinfo;</command>
     <arg choice="plain" rep="repeat"><arg choice="opt">&option;</arg></arg>
-    <arg choice="opt">&infile;
-      <arg choice="opt">&outfile;</arg>
-    </arg>
+    <arg choice="opt">&infile;</arg>
   </cmdsynopsis>
 </refsynopsisdiv>
 
 <refsect1>
   <title>Description</title>
   <para>
-    The &ltspp; tool prints the labelled transition system (LTS)  &infile; to
-    &outfile; in the DOT format. If &outfile; is not supplied, &stdout; is
-    used. If &infile; is not present, stdin is used.
+    The ltsinfo tool prints information about the labelled transition system
+    (LTS) in &infile;.  If &infile; is not supplied, stdin is used instead.
   </para>
 
   <para>

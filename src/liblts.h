@@ -4,13 +4,18 @@
 #include <string>
 #include <iostream>
 #include <aterm/aterm2.h>
+#include "setup.h"
 
 namespace mcrl2
 {
 namespace lts
 {
 
-  enum lts_type { lts_none, lts_mcrl2, lts_aut, lts_mcrl, lts_svc };
+  enum lts_type { lts_none, lts_mcrl2, lts_aut, lts_mcrl, lts_svc
+#ifdef MCRL2_BCG
+                , lts_bcg
+#endif
+                };
 
   bool is_timed_pair(ATermAppl t);
   ATermAppl make_timed_pair(ATermAppl action, ATermAppl time = NULL);

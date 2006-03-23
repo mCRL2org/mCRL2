@@ -6,6 +6,11 @@
 #include "libprint_c.h"
 #include "liblts.h"
 #include "liblts_fsm.h"
+#include "setup.h"
+
+#ifdef MCRL2_BCG
+#include "bcg_user.h"
+#endif
 
 #define NAME "ltscp"
 #define VERSION "0.1"
@@ -42,7 +47,7 @@ static ATerm get_lpe(string &filename)
   return t;
 }
 
-static lts_type get_extension(string s)
+static lts_type get_extension(string &s)
 {
   string::size_type pos = s.find_last_of('.');
   
@@ -58,13 +63,19 @@ static lts_type get_extension(string s)
     {
       gsVerboseMsg("detected SVC extension; assuming mCRL2 format\n");
       return lts_mcrl2;
+#ifdef MCRL2_BCG
+    } else if ( ext == "bcg" )
+    {
+      gsVerboseMsg("detected BCG extension\n");
+      return lts_bcg;
+#endif
     }
   }
 
   return lts_none;
 }
 
-static alt_lts_type get_alt_extension(string s)
+static alt_lts_type get_alt_extension(string &s)
 {
   string::size_type pos = s.find_last_of('.');
   
@@ -93,6 +104,11 @@ static lts_type get_format(char *s)
   } else if ( !strcmp(s,"mcrl2") )
   {
     return lts_mcrl2;
+#ifdef MCRL2_BCG
+  } else if ( !strcmp(s,"bcg") )
+  {
+    return lts_bcg;
+#endif
   }
 
   return lts_none;
@@ -117,6 +133,9 @@ static void print_formats(FILE *f)
     "  mcrl      the mCRL SVC format (.svc)\n"
     "  mcrl2     the mCRL2 SVC format (.svc, default)\n"
     "  fsm       the FSM format (.fsm, only output)\n"
+#ifdef MCRL2_BCG
+    "  bcg       the BCG format\n"
+#endif
     );
 }
 
@@ -157,6 +176,9 @@ int main(int argc, char **argv)
   ATinit(argc,argv,&bot);
   gsEnableConstructorFunctions();
 
+#ifdef MCRL2_BCG
+  BCG_INIT();
+#endif
 
   #define ShortOptions      "hqvi:o:fl:"
   #define VersionOption     0x1

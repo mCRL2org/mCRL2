@@ -73,12 +73,16 @@ static bool occurs_in(ATermAppl name, ATermList ma)
   return false;
 }
 
-static void save_trace(string &filename, ATerm state, ATermTable backpointers, NextState *nstate)
+static void save_trace(string &filename, ATerm state, ATermTable backpointers, NextState *nstate, ATerm extra_state = NULL, ATermAppl extra_transition = NULL)
 {
   ATerm s = state;
   ATerm ns;
   ATermList tr = ATmakeList0();
   
+  if ( extra_state != NULL )
+  {
+	  tr = ATinsert(tr,(ATerm) ATmakeList2((ATerm) extra_transition,extra_state));
+  }
   while ( (ns = ATtableGet(backpointers, s)) != NULL )
   {
     tr = ATinsert(tr, (ATerm) ATmakeList2(ATgetFirst(ATgetNext((ATermList) ns)),s));
@@ -486,42 +490,42 @@ int main(int argc, char **argv)
         }
       }
 
-      for (int i=0; i<num_trace_actions; i++)
-      {
-        if ( occurs_in(trace_actions[i],ATLgetArgument(Transition,0)) )
-        {
-          if ( trace_action )
-          {
-            if ( basefilename == NULL )
-            {
-              basefilename = strdup(SpecFileName);
-              char *s = strrchr(basefilename,'.');
-              if ( s != NULL )
-              {
-                *s = '\0';
-              }
-            }
-            stringstream ss;
-            ss << basefilename << "_act_" << tracecnt << "_" << ATgetName(ATgetAFun(trace_actions[i])) << ".trc";
-            string sss(ss.str());
-            save_trace(sss,state,backpointers,nstate);
-    
-            if ( detect_action || gsVerbose )
-            {
-              gsfprintf(stderr,"detect: action '%P' found and saved to '%s_act_%lu_%P.trc'.\n",trace_actions[i],basefilename,tracecnt,trace_actions[i]);
-              fflush(stderr);
-            }
-            tracecnt++;
-          } else //if ( detect_action )
-          {
-            gsfprintf(stderr,"detect: action '%P' found.\n",trace_actions[i]);
-            fflush(stderr);
-          }
-        }
-      }
-
       if ( i < num_states )
       {
+        for (int j=0; j<num_trace_actions; j++)
+        {
+          if ( occurs_in(trace_actions[j],ATLgetArgument(Transition,0)) )
+          {
+            if ( trace_action )
+            {
+              if ( basefilename == NULL )
+              {
+                basefilename = strdup(SpecFileName);
+                char *s = strrchr(basefilename,'.');
+                if ( s != NULL )
+                {
+                  *s = '\0';
+                }
+              }
+              stringstream ss;
+              ss << basefilename << "_act_" << tracecnt << "_" << ATgetName(ATgetAFun(trace_actions[j])) << ".trc";
+              string sss(ss.str());
+              save_trace(sss,state,backpointers,nstate,NewState,Transition);
+      
+              if ( detect_action || gsVerbose )
+              {
+                gsfprintf(stderr,"detect: action '%P' found and saved to '%s_act_%lu_%P.trc'.\n",trace_actions[j],basefilename,tracecnt,trace_actions[j]);
+                fflush(stderr);
+              }
+              tracecnt++;
+            } else //if ( detect_action )
+            {
+              gsfprintf(stderr,"detect: action '%P' found.\n",trace_actions[j]);
+              fflush(stderr);
+            }
+          }
+        }
+
         switch ( outformat )
         {
           case OF_AUT:

@@ -63,10 +63,16 @@
                                     unsigned int label,
                                     unsigned int to);
 
-      bool read_from_svc(std::string &filename, lts_type type);
       bool read_from_aut(std::string &filename);
       bool read_from_aut(std::istream &is);
-      bool write_to_svc(std::string &filename, lts_type type);
       bool write_to_aut(std::string &filename);
       bool write_to_aut(std::ostream &os);
+
+      bool read_from_svc(std::string &filename, lts_type type);
+      bool write_to_svc(std::string &filename, lts_type type);
+
+#ifdef MCRL2_BCG
+      bool read_from_bcg(std::string &filename);
+      bool write_to_bcg(std::string &filename);
+#endif
   };
