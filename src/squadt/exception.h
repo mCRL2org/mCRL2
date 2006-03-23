@@ -13,7 +13,8 @@ namespace squadt {
       required_attributes_missing,              ///< \brief input from file failed due to errors in input
       requested_tool_unavailable,               ///< \brief requested tool is not available
       program_execution_failed,                 ///< \brief program execution failed
-      unexpected_instance_identifier            ///< \brief a connection was accepted of which the peer provided an unexpected instance identifier
+      unexpected_instance_identifier,           ///< \brief a connection was accepted of which the peer provided an unexpected instance identifier
+      missing_object_descriptor                 ///< \brief processor dependency graph has dangling edges
     };
   }
 

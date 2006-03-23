@@ -1,15 +1,114 @@
-#include "processor.h"
-#include "exception.h"
-
 #include <boost/filesystem/operations.hpp>
 
 #include <xml2pp/detail/text_reader.tcc>
 
-#include "ui_core.h"
+#include "processor.tcc"
+#include "exception.h"
+#include "core.h"
 
 namespace squadt {
 
   void processor::dummy_visualiser(output_status) {
+  }
+
+  /**
+   * Currently it is only checked whether a status of up_to_date is still
+   * correct with respect to the state of the inputs and ouputs on physical
+   * storage. If the processor is in any other state the function will return
+   * false without doing checks.
+   *
+   * Other checks simply do not look useful at this point given the way a
+   * processor is used.
+   *
+   * \return whether the status was adjusted or not
+   *
+   * @param[in] d whether to check recursively or not
+   **/
+  inline bool processor::check_status(const bool r) {
+    using namespace boost::filesystem;
+
+    if (current_output_status == up_to_date) {
+      output_status new_status = current_output_status;
+     
+      time_t maximum_input_timestamp  = 0;
+      time_t minimum_output_timestamp = 0;
+     
+      /* Check whether outputs all exist and find the minimum timestamp of the inputs */
+      for (output_list::const_iterator i; i != outputs.end(); ++i) {
+        path l((*i)->location);
+     
+        if (exists(l)) {
+          /* Output exists, get timestamp */ 
+          minimum_output_timestamp = std::min(minimum_output_timestamp, last_write_time(l));
+        }
+        else {
+          /* Output does not exist; consequently the output is not up-to-date */
+          new_status = not_up_to_date;
+
+          break;
+        }
+      }
+     
+      /* Find the maximum timestamp of the inputs */
+      for (input_list::const_iterator i; i != inputs.end(); ++i) {
+        object_descriptor::sptr d = (*i).lock();
+     
+        if (d.get() == 0) {
+          throw (exception(exception_identifier::missing_object_descriptor));
+        }
+     
+        path l(d->location);
+     
+        if (exists(l)) {
+          /* Input exists, get timestamp */ 
+          time_t stamp = last_write_time(l);
+     
+          maximum_input_timestamp = std::max(maximum_input_timestamp, stamp);
+     
+          if (d->timestamp < stamp) {
+            /* Compare checksums and update recorded checksum */
+            md5pp::compact_digest old = d->checksum;
+     
+            d->timestamp = stamp;
+            d->checksum  = md5pp::MD5::MD5_sum(l);
+     
+            if (old != d->checksum) {
+              new_status = not_up_to_date;
+     
+              break;
+            }
+          }
+        }
+      }
+     
+      if (minimum_output_timestamp <= maximum_input_timestamp) {
+        new_status = not_up_to_date;
+      }
+      else if (r && current_output_status <= new_status) {
+        /* Status can still be okay, check recursively */
+        for (input_list::const_iterator i; i != inputs.end(); ++i) {
+          object_descriptor::sptr d = (*i).lock();
+     
+          if (d.get() == 0) {
+            throw (exception(exception_identifier::missing_object_descriptor));
+          }
+     
+          if (d->generator->check_status(true)) {
+            new_status = not_up_to_date;
+     
+            break;
+          }
+        }
+      }
+     
+      if (new_status < current_output_status) {
+        current_output_status = new_status;
+     
+        return (true);
+      }
+    }
+
+    return (false);
   }
 
   /**

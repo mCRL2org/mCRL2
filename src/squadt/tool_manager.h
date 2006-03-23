@@ -14,8 +14,8 @@
 #include <sip/controller.h>
 
 #include "tool.h"
+#include "task.h"
 #include "processor.h"
-#include "executor.h"
 
 namespace squadt {
 
@@ -36,6 +36,12 @@ namespace squadt {
    * itself to the tool manager. The tool manager then passes through the
    * connection to the processor that requested the tool to be started in the
    * first place.
+   *
+   * Design choices:
+   *  - a task is the unit of work it denotes the execution of a single command
+   *  - the tool_manager and executor are separated such the that tool manager
+   *    act as a proxy, and in the future do load balancing for a number
+   *    executors that may run on different machines
    **/
   class tool_manager : public sip::controller::communicator {
     friend class processor;
@@ -43,16 +49,21 @@ namespace squadt {
     public:
  
       /** \brief Convenience type alias for hiding shared pointer implementation */
-      typedef boost::shared_ptr < tool_manager >               ptr;
+      typedef boost::shared_ptr < tool_manager >                     ptr;
 
       /** \brief Convenience type alias the list of tools */
-      typedef std::list < tool::ptr >                          tool_list;
+      typedef std::list < tool::ptr >                                tool_list;
+ 
+    private:
  
       /** \brief Numeric type for instance identification */
-      typedef long int                                         instance_identifier;
+      typedef long int                                               instance_identifier;
 
-      /** \brief Maps an instance identifier to its associated process */
-      typedef std::map < instance_identifier, processor::ptr > instance_list;
+      /** \brief Maps an instance identifier to its associated task */
+      typedef std::map < instance_identifier, execution::task* >     instance_list;
+
+      /** \brief Maps a task to its associated process */
+      typedef std::list < execution::task* >                         validated_instance_list;
 
     private:
  
@@ -62,25 +73,30 @@ namespace squadt {
         squadt_tool_catalog  ///< Output is squadt XML tool catalog format
       };
 
-      /** \brief List of known tools */
-      tool_list                tools;
-
-      /** \brief List of running tools and pointers to their associate processes */
-      instance_list            instances;
-
-      /** \brief Used to obtain unused instance identifiers */
-      instance_identifier      free_identifier;
-
-      /** \brief Local executor for executing tools on the current machine */
-      execution::executor      local_executor;
-
       /** \brief The default TCP port for a tool manager */
       static const long        default_tcp_port;
 
     private:
+ 
+      /** \brief List of known tools */
+      tool_list                   tools;
+
+      /** \brief Assigns a unique instance identifier to a task */
+      instance_list               instances;
+
+      /** \brief Maps an instance identifier to its associated processor */
+      validated_instance_list     validated_instances;
+
+      /** \brief Local executor for executing tools on the current machine */
+      execution::executor         local_executor;
+
+      /** \brief Used to obtain unused instance identifiers */
+      mutable instance_identifier free_identifier;
+
+    private:
 
       /** \brief Start a tool */
-      void execute(tool&, processor* = 0) const;
+      void execute(tool&, execution::task* = 0);
 
       /** \brief Get the tool_capabilities object for all known tools */
       void query_capabilities() throw ();
@@ -90,9 +106,6 @@ namespace squadt {
 
       /** \brief This is the event handler for incoming identification messages */
       void handle_relay_connection(sip::message_ptr&, sip::end_point);
-
-      /** \brief Handler function that inserts a tool capabilities object into a tool object */
-      void handle_store_tool_capabilities(sip::message_ptr&);
 
     public:
  

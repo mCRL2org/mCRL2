@@ -11,8 +11,10 @@
 #include <sip/detail/basic_messenger.tcc>
 
 #include "tool_manager.h"
+#include "processor.tcc"
+#include "extractor.h"
 #include "settings_manager.tcc"
-#include "ui_core.h"
+#include "core.h"
 
 #include "setup.h"
 
@@ -29,7 +31,6 @@ namespace squadt {
 
     /* Set handler for incoming instance identification messages */
     set_handler(boost::bind(&tool_manager::handle_relay_connection, this, _1, _2), sip::send_instance_identifier);
-    set_handler(bind(&tool_manager::handle_store_tool_capabilities, this, _1), sip::reply_tool_capabilities);
   }
 
   void tool_manager::write(std::ostream& stream) const {
@@ -98,10 +99,18 @@ namespace squadt {
    * @param t the tool that is to be run
    * @param p the processor that should be passed the feedback of execution
    **/
-  void tool_manager::execute(tool& t, processor* p) const {
-    std::string command = t.get_location();
- 
-    /* TODO contact executor to execute */
+  void tool_manager::execute(tool& t, execution::task* p) {
+    instance_identifier id = free_identifier++;
+
+    boost::format command(default_argument_pattern);
+
+    command % t.get_location();
+    command % get_local_host().name() % default_tcp_port;
+    command % id;
+
+    local_executor.execute(boost::str(command), p);
+
+    instances[id] = p;
   }
 
   void tool_manager::query_capabilities() throw () {
@@ -114,28 +123,46 @@ namespace squadt {
 
   /**
    * @param t the tool that is to be run
+   *
+   * \attention This function blocks.
    **/
   void tool_manager::query_capabilities(tool& t) throw () {
-    boost::filesystem::path p(t.get_location());
- 
     /* Sanity check: establish tool existence */
-    if (!boost::filesystem::exists(p)) {
+    if (!boost::filesystem::exists(boost::filesystem::path(t.get_location()))) {
       throw (exception(exception_identifier::requested_tool_unavailable));
     }
 
+    instance_identifier id = free_identifier++;
+
     boost::format command(default_argument_pattern);
 
-    command % p.native_file_string();
-    command % get_local_host().name() % default_tcp_port;
-    command % free_identifier++;
+    command % t.get_location()
+            % get_local_host().name() % default_tcp_port
+            % id;
 
     local_executor.execute(boost::str(command), 0);
 
-    /* TODO special processor for waiting? */
+    /* Create extractor object, that will retrieve the data from the running tool process */
+    boost::scoped_ptr < extractor > e(new extractor(t));
+
+    instances[id] = e.get();
+
+    /* Wait until the process has been identified */
+    if (e->get_process(true)) {
+      /* Wait until the extractor has gathered all information */
+      e->await_completion();
+    }
+    else {
+      throw (exception(exception_identifier::program_execution_failed, t.get_name()));
+    }
+
+    local_executor.terminate(e->get_process());
   }
 
   void tool_manager::terminate() {
-    /* TODO signal executor to terminate the processes related to this tool manager */
+    /* Request the local tool executor to terminate the running processes known to this tool manager */
+    std::for_each(validated_instances.begin(), validated_instances.end(),
+                    boost::bind(&execution::executor::terminate, local_executor));
   }
 
   /**
@@ -148,21 +175,13 @@ namespace squadt {
       throw (exception(exception_identifier::unexpected_instance_identifier));
     }
 
-    relay_connection(instances[id].get(), o);
+    execution::task* p = instances[id];
 
-    instances[id]->set_status(status_clean);
-  }
+    relay_connection(p, o);
 
-  /**
-   * @param m the message that was just delivered
-   **/
-  void tool_manager::handle_store_tool_capabilities(sip::message_ptr& m) {
-    xml2pp::text_reader reader(m->to_string().c_str());
- 
-    reader.read();
- 
-    /* TODO find correct tool to store this object */
-    //= tool::capabilities::read(reader);
+    p->set_status(status_clean);
+
+    instances.erase(id);
   }
 }
 

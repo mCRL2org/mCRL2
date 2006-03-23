@@ -1,9 +1,10 @@
 #include <iomanip> 
 #include <cstdio>
+#include <fstream>
 
 #include <md5pp/md5pp.h>
 
-namespace md5 {
+namespace md5pp {
 
   compact_digest zero_digest = { { 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0 } };
 
@@ -33,20 +34,46 @@ namespace md5 {
     md5_starts(&context);
   }
 
-  compact_digest MD5::MD5_Sum(std::string data) {
+  /**
+   * @param[in] s a string that contains the data
+   **/
+  compact_digest MD5::MD5_sum(const std::string s) {
     MD5 sum;
 
-    sum.update(data);
+    sum.update(s);
     sum.finalise();
 
     return (sum.digest);
   }
 
-  compact_digest MD5::MD5_Sum(std::istream& stream) {
+  /**
+   * @param[in] s a stream that contains the data
+   **/
+  compact_digest MD5::MD5_sum(std::istream& s) {
     MD5 sum;
 
-    sum.update(stream);
+    sum.update(s);
     sum.finalise();
+
+    return (sum.digest);
+  }
+
+  /**
+   * @param[in] p a path to the file that contains the data
+   **/
+  compact_digest MD5::MD5_sum(const boost::filesystem::path& p) {
+    MD5 sum;
+
+    std::ifstream s;
+            
+    s.open(p.string().c_str());
+
+    assert (s.good());
+
+    sum.update(s);
+    sum.finalise();
+
+    s.close();
 
     return (sum.digest);
   }
@@ -58,6 +85,5 @@ namespace md5 {
 
     return (stream);
   }
-
 }
 

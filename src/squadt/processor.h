@@ -1,5 +1,5 @@
-#ifndef SPECIFICATION_H
-#define SPECIFICATION_H
+#ifndef PROCESSOR_H
+#define PROCESSOR_H
 
 #include <algorithm>
 #include <string>
@@ -13,10 +13,12 @@
 
 #include <md5pp/md5pp.h>
 #include <xml2pp/text_reader.h>
-#include <sip/controller.h>
 
-#include "tool.h"
 #include "executor.h"
+#include "tool_manager.h"
+#include "tool.h"
+#include "task.h"
+#include "core.h"
 
 namespace squadt {
 
@@ -31,7 +33,7 @@ namespace squadt {
    * input of other processors.
    *
    **/
-  class processor : public execution::process_change_listener, public sip::controller::communicator {
+  class processor : public execution::task {
     friend class project_manager;
     friend class tool_manager;
     friend class executor;
@@ -47,11 +49,11 @@ namespace squadt {
 
       /** \brief Type to hold information about output objects */
       struct object_descriptor {
-        processor*          generator;      ///< The process responsible for generating this object
-        std::string         storage_format; ///< The used storage format
-        std::string         location;       ///< The location of the object
-        md5::compact_digest checksum;       ///< The digest for the completed object
-        std::time_t         timestamp;      ///< A timestamp of a time just before the last checksum
+        processor*            generator;      ///< The process responsible for generating this object
+        std::string           storage_format; ///< The used storage format
+        std::string           location;       ///< The location of the object
+        md5pp::compact_digest checksum;       ///< The digest for the completed object
+        std::time_t           timestamp;      ///< The last time the file was modified just before the last checksum was computed
 
         /** \brief Convenience type for hiding shared pointer implementation */
         typedef boost::shared_ptr < object_descriptor >  sptr;
@@ -112,7 +114,7 @@ namespace squadt {
       inline processor(tool& t, visualisation_handler);
 
       /** \brief Check the inputs with respect to the outputs and adjust status accordingly */
-      inline bool check_status();
+      bool check_status(bool);
 
       /** \brief Validate whether the inputs to this process are not dangling pointers */
       inline bool consistent_inputs() const;
@@ -159,112 +161,6 @@ namespace squadt {
       /** \brief Destructor */
       inline ~processor();
   };
-
-  /**
-   * \brief Operator for writing to stream
-   *
-   * @param s stream to write to
-   * @param p the processor to write out
-   **/
-  inline std::ostream& operator << (std::ostream& s, const processor& p) {
-    p.write(s);
-
-    return (s);
-  }
-
-  inline processor::processor(tool& t) : program(t), visualise(dummy_visualiser) {
-  }
-
-  /**
-   * @param t the tool that is used for processing
-   * @param h the function that is called when the status of the output changes
-   **/
-  inline processor::processor(tool& t, visualisation_handler h) : program(t), visualise(h) {
-  }
-
-  inline processor::~processor() {
-  }
-
-  inline sip::configuration::ptr processor::get_configuration() {
-    return (current_configuration);
-  }
-
-  inline const tool& processor::get_tool() {
-    return (program);
-  }
-
-  inline const processor::input_list& processor::get_inputs() const {
-    return (inputs);
-  }
-
-  inline const processor::output_list& processor::get_outputs() const {
-    return (outputs);
-  }
-
-  inline void processor::process() throw () {
-    /* TODO */
-  }
-
-  /**
-   * \return whether the status was adjusted or not
-   **/
-  inline bool processor::check_status() {
-    /* TODO */
-    return (true);
-  }
-
-  inline const unsigned int processor::number_of_inputs() const {
-    return (inputs.size());
-  }
-
-  inline const unsigned int processor::number_of_outputs() const {
-    return (outputs.size());
-  }
-
-  inline bool processor::consistent_inputs() const {
-    input_list::const_iterator i = inputs.begin();
-
-    while (i != inputs.end()) {
-      if ((*i).lock().get() == 0) {
-        return false;
-      }
-
-      ++i;
-    }
-
-    return (true);
-  }
-
-  inline const processor::output_status processor::get_output_status() const {
-    return(current_output_status);
-  }
-
-  inline void processor::set_output_status(const processor::output_status s) {
-    if (current_output_status != s) {
-      current_output_status = s;
- 
-      visualise(current_output_status);
-    }
-  }
-
-  inline void processor::report_change(execution::process::status s) {
-    using namespace execution;
-
-    switch (s) {
-      case process::stopped:
-        set_output_status(not_up_to_date);
-        break;
-      case process::running:
-        set_output_status(being_computed);
-        break;
-      case process::completed:
-        set_output_status(up_to_date);
-        break;
-      case process::aborted:
-        set_output_status(non_existent);
-        break;
-    }
-  }
 }
 
 #endif

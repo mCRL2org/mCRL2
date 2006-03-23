@@ -1,12 +1,14 @@
 #ifndef MD5PP_H
 #define MD5PP_H
 
-#include "source/md5.h"
-
 #include <cstdio>
-#include <iostream>
+#include <iosfwd>
 
-namespace md5 {
+#include <boost/filesystem/path.hpp>
+
+#include <md5pp/detail/md5.h>
+
+namespace md5pp {
 
   union compact_digest {
     uint8_t  bytes[16]; ///< Subsequent bytes of a digest
@@ -23,6 +25,9 @@ namespace md5 {
 
     /** \brief Compare two compact digests for equality */
     inline bool operator== (const compact_digest& r) const;
+
+    /** \brief Compare two compact digests for equality */
+    inline bool operator!= (const compact_digest& r) const;
 
     /** \brief Assign to ... */
     inline void operator= (const compact_digest& r);
@@ -47,6 +52,11 @@ namespace md5 {
   /** \brief Compare to MD5 checksums in compact format */
   inline bool compact_digest::operator== (const compact_digest& r) const {
     return (dwords[0] == r.dwords[0] && dwords[1] == r.dwords[1] && dwords[2] == r.dwords[2] && dwords[3] == r.dwords[3]);
+  }
+
+  /** \brief Compare to MD5 checksums in compact format */
+  inline bool compact_digest::operator!= (const compact_digest& r) const {
+    return (dwords[0] != r.dwords[0] || dwords[1] != r.dwords[1] || dwords[2] != r.dwords[2] || dwords[3] != r.dwords[3]);
   }
 
   /* \brief Assign MD5 checksums in compact format */
@@ -80,10 +90,13 @@ namespace md5 {
       MD5();
  
       /** \brief Creates a new compact digest using data from a string */
-      static compact_digest MD5_Sum(std::string);
+      static compact_digest MD5_sum(const std::string);
 
       /** \brief Creates a new compact digest using data from a stream */
-      static compact_digest MD5_Sum(std::istream&);
+      static compact_digest MD5_sum(std::istream&);
+
+      /** \brief Creaset a new compact digest using data from a file */
+      static compact_digest MD5_sum(const boost::filesystem::path&);
  
       /** \brief Update checksum with a specified amount of data from string */
       void update(unsigned char*, unsigned int);

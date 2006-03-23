@@ -9,37 +9,31 @@
 #include <list>
 
 #include <boost/bind.hpp>
+#include <boost/weak_ptr.hpp>
 #include <boost/shared_ptr.hpp>
 
 #include "process.h"
+#include "process_listener.h"
 
 namespace squadt {
   namespace execution {
 
-    /** \brief Base class for process change listeners */
-    class process_change_listener {
-      friend class executor;
- 
-      private:
-        /** Called when the state changes of the associated executor */
-        virtual void report_change(process::status) = 0;
- 
-      public:
- 
-        /** Abstract destructor */
-        virtual ~process_change_listener() = 0;
-    };
- 
-    inline process_change_listener::~process_change_listener() {
-    }
- 
-    /** \brief Basic process execution component */
+    /**
+     * \brief Basic process execution component
+     *
+     * Design choices:
+     *  - only a predetermined fixed number of processes can is run concurrently,
+     *    which means that sometimes execution is delayed
+     *  - the execute method is non-blocking; consequently nothing can be
+     *    concluded about the execution of the command except through a
+     *    process_listener object
+     **/
     class executor {
 
       private:
 
         /** \brief Type for storing a command and a pointer to a state listener  */
-        typedef std::pair < std::string, process_change_listener* > delayed_command;
+        typedef std::pair < const std::string, process_listener* > delayed_command;
  
       private:
 
@@ -47,7 +41,7 @@ namespace squadt {
         unsigned int maximum_concurrent_processes;
  
         /** \brief List of active processes */
-        std::list < process::ptr > processes;
+        std::list < process::ptr >     processes;
  
         /** \brief Data of processes that will be started */
         std::deque < delayed_command > delayed_commands;
@@ -55,14 +49,17 @@ namespace squadt {
       private:
     
         /** \brief Actually start a new process (run a command) */
-        inline void start_process(const std::string&, process_change_listener* s);
+        inline void start_process(const std::string&, process_listener* s);
     
         /** \brief Start processing commands if the queue contains any waiters */
         inline void start_delayed();
  
         /** \brief handler that is invoked when a process is terminated */
-        inline void handle_process_termination(process_change_listener* s, process* p);
+        inline void handle_process_termination(process_listener* s, process* p);
   
+        /** \brief Remove a process from the list */
+        inline void remove(process*);
+    
       public:
     
         /** \brief Constructor */
@@ -72,10 +69,7 @@ namespace squadt {
         inline ~executor();
     
         /** \brief Execute a tool */
-        inline void execute(const std::string&, process_change_listener*);
-    
-        /** \brief Remove a process from the list */
-        inline void remove(process*);
+        inline void execute(const std::string&, process_listener*);
     
         /** \brief Terminate a specific process */
         inline void terminate(process*);
@@ -97,9 +91,11 @@ namespace squadt {
                                       boost::bind(&process::ptr::get, _1))));
     }
  
-    inline void executor::start_process(const std::string& command, process_change_listener* s) {
+    inline void executor::start_process(const std::string& command, process_listener* s) {
       process::ptr p = process::execute(boost::bind(&executor::handle_process_termination, this, s, _1), command);
     
+      s->set_process(p);
+
       if (p.get() != 0) {
         processes.push_back(p);
  
@@ -122,7 +118,7 @@ namespace squadt {
     /* Start processing commands if the queue contains any waiters */
     inline void executor::start_delayed() {
       if (0 < delayed_commands.size()) {
-        std::pair < std::string, process_change_listener* > p = delayed_commands.front();
+        std::pair < std::string, process_listener* > p = delayed_commands.front();
  
         delayed_commands.pop_front();
  
@@ -134,7 +130,7 @@ namespace squadt {
       remove(p);
     }
  
-    void executor::handle_process_termination(process_change_listener* l, process* p) {
+    void executor::handle_process_termination(process_listener* l, process* p) {
       remove(p);
  
       // start process for delayed command
@@ -149,13 +145,13 @@ namespace squadt {
      * @param c the command that is to be executed
      * @param l a pointer to a listener for process state changes
      **/
-    void executor::execute(const std::string& c, process_change_listener* l) {
+    void executor::execute(const std::string& c, process_listener* l) {
       if (processes.size() < maximum_concurrent_processes) {
         start_process(c, l);
       }
       else {
         /* queue command for later execution */
-        delayed_commands.push_back(std::pair < std::string, process_change_listener* >(c, l));
+        delayed_commands.push_back(std::pair < const std::string, process_listener* >(c, l));
       }
     }
   }

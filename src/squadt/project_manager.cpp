@@ -10,8 +10,8 @@
 
 #include "project_manager.h"
 #include "settings_manager.tcc"
-#include "processor.h"
-#include "ui_core.h"
+#include "processor.tcc"
+#include "core.h"
 
 namespace squadt {
 

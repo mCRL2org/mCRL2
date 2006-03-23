@@ -39,7 +39,7 @@ namespace sip {
       identifier id;
 
       /** \brief Constructor (only accessible from class configuration) */
-      inline option(identifier);
+      inline option(const identifier);
 
     public:
 
@@ -65,7 +65,7 @@ namespace sip {
       inline static option::ptr read(xml2pp::text_reader&);
   };
 
-  inline option::option(identifier i) : id(i) {
+  inline option::option(const identifier i) : id(i) {
   }
 
   inline bool option::takes_arguments() const {
@@ -128,44 +128,47 @@ namespace sip {
 
     assert(r.is_element("option"));
 
-    r.get_attribute(&id, "id");
+    if (!r.get_attribute(&id, "id")) {
+      throw (exception(exception_identifier::message_missing_required_attribute, "id", "option"));
+    }
+    else {
+      option::ptr o(new option(id));
 
-    option::ptr o(new option(id));
-
-    if (!r.is_empty_element()) {
-      r.read();
-
-      while (!r.is_end_element()) {
-        using namespace sip::datatype;
+      if (!r.is_empty_element()) {
+        r.read();
      
-        /* The current element must be a datatype specification */
-        type_value_pair new_argument;
+        while (!r.is_end_element()) {
+          using namespace sip::datatype;
+       
+          /* The current element must be a datatype specification */
+          type_value_pair new_argument;
+       
+          /* Set the type */
+          new_argument.first = basic_datatype::read(r);
      
-        /* Set the type */
-        new_argument.first = basic_datatype::read(r);
-
-        /* The current element can be a value of the previously read type (element is optional) */
-        if (r.is_element("value")) {
-          r.read();
-
-          if (!r.is_end_element()) {
-            /* Read value */
-            r.get_value(&new_argument.second);
+          /* The current element can be a value of the previously read type (element is optional) */
+          if (r.is_element("value")) {
+            r.read();
      
+            if (!r.is_end_element()) {
+              /* Read value */
+              r.get_value(&new_argument.second);
+       
+              r.read();
+            }
+       
+            /* Skip end tag */
             r.read();
           }
-     
-          /* Skip end tag */
-          r.read();
+       
+          o->arguments.push_back(new_argument);
         }
-     
-        o->arguments.push_back(new_argument);
       }
+
+      r.read();
+
+      return (o);
     }
-
-    r.read();
-
-    return (o);
   }
 }
 

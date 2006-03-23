@@ -5,7 +5,7 @@
 
 #include <boost/noncopyable.hpp>
 
-#include "processor.h"
+#include "processor.tcc"
 
 namespace squadt {
 

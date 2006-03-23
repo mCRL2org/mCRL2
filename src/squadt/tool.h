@@ -10,10 +10,14 @@
 
 namespace squadt {
 
+  class extractor;
+
   /**
    * \brief Container for information about a single tool
    **/
   class tool {
+    friend class extractor;
+
     public:
 
       /** \brief Convenience type for hiding shared pointer implementation */
@@ -22,13 +26,13 @@ namespace squadt {
     private:
 
       /** \brief A name for the tool */
-      std::string                  name;
+      std::string                         name;
 
       /** \brief The location where the tool can be found */
-      std::string                  location;
+      std::string                         location;
 
       /** \brief Stores the tool capabilities object obtained through protocol implementation */
-      sip::tool::capabilities::ptr capabilities;
+      sip::tool::capabilities::ptr        capabilities;
 
     private:
 

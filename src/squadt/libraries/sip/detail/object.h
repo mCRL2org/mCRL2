@@ -82,10 +82,10 @@ namespace sip {
     private:
 
       /** \brief Read from XML stream */
-      inline static object::ptr read(xml2pp::text_reader& reader) throw ();
+      inline static object::ptr read(xml2pp::text_reader& reader);
 
       /** \brief Constructor */
-      inline object(identifier, const storage_format, const uri = "", const type = input);
+      inline object(const identifier, const storage_format, const uri = "", const type = input);
 
     public:
       /** \brief Returns the objects identifier */
@@ -101,7 +101,7 @@ namespace sip {
       inline void write(std::ostream&) const;
   };
 
-  inline object::object(identifier i, const storage_format f, const uri l, const type t) : format(f), location(l), _type(t), id(i) {
+  inline object::object(const identifier i, const storage_format f, const uri l, const type t) : format(f), location(l), _type(t), id(i) {
   }
 
   inline const object::identifier object::get_id() const {
@@ -129,45 +129,46 @@ namespace sip {
   }
 
   /** \pre the reader must point at an object element} */
-  inline object::ptr object::read(xml2pp::text_reader& r) throw () {
-    option::identifier id;
+  inline object::ptr object::read(xml2pp::text_reader& r) {
+    object::identifier id;
 
-    assert (r.is_element("object"));
+    assert(r.is_element("object"));
     
     if (!r.get_attribute(&id, "id")) {
       throw (exception(exception_identifier::message_missing_required_attribute, "id", "object"));
     }
+    else {
+      std::string new_type;
 
-    std::string new_type;
-
-    if (!r.get_attribute(&new_type, "type")) {
-      throw (exception(exception_identifier::message_missing_required_attribute, "type", "object"));
+      if (!r.get_attribute(&new_type, "type")) {
+        throw (exception(exception_identifier::message_missing_required_attribute, "type", "object"));
+      }
+     
+      size_t i = 0;
+     
+      while (type_strings[i] != 0 && strcmp(new_type.c_str(), type_strings[i]) != 0) {
+        ++i;
+      }
+     
+      if (type_strings[i] == 0) {
+        throw (exception(exception_identifier::message_unknown_type, new_type, "object"));
+      }
+     
+      std::string new_format;
+     
+      if (!r.get_attribute(&new_format, "storage-format")) {
+        throw (exception(exception_identifier::message_missing_required_attribute, "storage-format", "object"));
+      }
+     
+      std::string new_location;
+     
+      r.get_attribute(&new_location, "location");
+     
+      r.read();
+      r.skip_end_element("object");
+     
+      return (object::ptr(new object(id, new_format, new_location, static_cast < object::type > (i))));
     }
-
-    size_t i = 0;
-
-    while (type_strings[i] != 0 && strcmp(new_type.c_str(), type_strings[i]) != 0) {
-      ++i;
-    }
-
-    if (type_strings[i] == 0) {
-      throw (exception(exception_identifier::message_unknown_type, new_type, "object"));
-    }
-
-    std::string new_format;
-
-    if (!r.get_attribute(&new_format, "storage-format")) {
-      throw (exception(exception_identifier::message_missing_required_attribute, "storage-format", "object"));
-    }
-
-    std::string new_location;
-
-    r.get_attribute(&new_location, "location");
-
-    r.read();
-    r.skip_end_element("object");
-
-    return (object::ptr(new object(id, new_format, new_location, static_cast < object::type > (i))));
   }
 }
 

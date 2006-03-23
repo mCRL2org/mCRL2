@@ -2,6 +2,10 @@
 
 #include <boost/shared_ptr.hpp>
 
+#include "tool_manager.h"
+#include "settings_manager.tcc"
+#include "core.h"
+
 #include <wx/wx.h>
 #include <wx/splash.h>
 #include <wx/filename.h>
@@ -10,17 +14,13 @@
 /* Include definition of the project overview window */
 #include "gui_project_overview.h"
 
-#include "tool_manager.h"
-#include "settings_manager.tcc"
-#include "ui_core.h"
-
 namespace squadt {
 
   /* Global Settings Manager component */
-  settings_manager::ptr global_settings_manager;
+  boost::shared_ptr < settings_manager > global_settings_manager;
 
   /* Global Tool Manager component */
-  tool_manager::ptr     global_tool_manager;
+  boost::shared_ptr < tool_manager >     global_tool_manager;
 }
 
 /* Squadt class declaration */

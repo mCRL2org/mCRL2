@@ -1,24 +1,17 @@
 #ifndef PROCESS_H
 #define PROCESS_H
 
-#include <cassert>
-
 #include <boost/function.hpp>
 #include <boost/ref.hpp>
 
 #include <wx/wx.h>
 #include <wx/process.h>
-#include <wx/textctrl.h>
-#include <wx/socket.h>
-#include <wx/sckstrm.h>
 
 #include "exception.h"
 
 namespace squadt {
   namespace execution {
 
-    class process;
-    
     /**
      * \brief Represents a system process with a status reporting facility
      **/
