@@ -77,9 +77,11 @@ ATermAppl gsSpecEltsToSpec(ATermList SpecElts);
 %type <appl> data_expr_add data_expr_div data_expr_mult data_expr_prefix
 %type <appl> data_expr_postfix data_expr_primary data_constant data_enumeration
 %type <appl> bag_enum_elt data_comprehension data_var_decl proc_expr
-%type <appl> proc_expr_choice proc_expr_sum proc_expr_merge proc_expr_binit
-%type <appl> proc_expr_cond proc_expr_seq proc_expr_at proc_expr_sync
-%type <appl> proc_expr_primary proc_constant act_proc_ref proc_quant
+%type <appl> proc_expr_choice proc_expr_sum proc_expr_merge proc_expr_merge_rhs
+%type <appl> proc_expr_binit proc_expr_binit_rhs proc_expr_cond
+%type <appl> proc_expr_cond_rhs proc_expr_seq proc_expr_seq_rhs proc_expr_at
+%type <appl> proc_expr_sync proc_expr_sync_rhs proc_expr_primary proc_constant
+%type <appl> act_proc_ref proc_quant
 %type <appl> mult_act_name ren_expr comm_expr
 
 %type <list> spec_elts sorts_decls_scs sorts_decl ids_cs domain ops_decls_scs
@@ -1100,7 +1102,7 @@ proc_expr:
     }
   ;
 
-//choice (associative)
+//choice (right associative)
 proc_expr_choice:
   proc_expr_sum
     {
@@ -1126,21 +1128,34 @@ proc_expr_sum:
     }
   ;
 
-//merge (associative) and left merge (left associative)
+//merge and left merge (right associative)
 proc_expr_merge:
   proc_expr_binit
     {
       $$ = $1;
     }
-  | proc_expr_binit BARS proc_expr_merge
+  | proc_expr_binit BARS proc_expr_merge_rhs
     {
       $$ = gsMakeMerge($1, $3);
       gsDebugMsg("parsed merge expression\n  %T\n", $$);
     }
-  | proc_expr_binit LMERGE proc_expr_merge
+  | proc_expr_binit LMERGE proc_expr_merge_rhs
     {
       $$ = gsMakeLMerge($1, $3);
       gsDebugMsg("parsed left merge expression\n  %T\n", $$);
+    }
+  ;
+
+//right argument of merge
+proc_expr_merge_rhs:
+  proc_expr_merge
+    {
+      $$ = $1;
+    }
+  | SUM data_vars_decls_cs DOT proc_expr_merge_rhs
+    {
+      $$ = gsMakeSum($2, $4);
+      gsDebugMsg("parsed summation\n  %T\n", $$);
     }
   ;
 
@@ -1150,10 +1165,23 @@ proc_expr_binit:
     {
       $$ = $1;
     }
-  | proc_expr_cond BINIT proc_expr_binit
+  | proc_expr_binit BINIT proc_expr_binit_rhs
     {
       $$ = gsMakeBInit($1, $3);
       gsDebugMsg("parsed bounded initialisation expression\n  %T\n", $$);
+    }
+  ;
+
+//right argument of bounded initialisation
+proc_expr_binit_rhs:
+  proc_expr_cond
+    {
+      $$ = $1;
+    }
+  | SUM data_vars_decls_cs DOT proc_expr_binit_rhs
+    {
+      $$ = gsMakeSum($2, $4);
+      gsDebugMsg("parsed summation\n  %T\n", $$);
     }
   ;
 
@@ -1163,29 +1191,54 @@ proc_expr_cond:
     {
       $$ = $1;
     }
-  | data_expr_prefix ARROW proc_expr_seq
+  | data_expr_prefix ARROW proc_expr_cond_rhs
     {
       $$ = gsMakeCond($1, $3, gsMakeDelta());
       gsDebugMsg("parsed conditional expression\n  %T\n", $$);
     }
-  | data_expr_prefix ARROW proc_expr_seq COMMA proc_expr_seq
+  | data_expr_prefix ARROW proc_expr_cond_rhs COMMA proc_expr_cond_rhs
     {
       $$ = gsMakeCond($1, $3, $5);
       gsDebugMsg("parsed conditional expression\n  %T\n", $$);
     }
   ;
 
+//right argument of conditional
+proc_expr_cond_rhs:
+  proc_expr_seq
+    {
+      $$ = $1;
+    }
+  | SUM data_vars_decls_cs DOT proc_expr_cond_rhs
+    {
+      $$ = gsMakeSum($2, $4);
+      gsDebugMsg("parsed summation\n  %T\n", $$);
+    }
+  ;
 
-//sequential (associative)
+//sequential (right associative)
 proc_expr_seq:
   proc_expr_at
     {
       $$ = $1;
     }
-  | proc_expr_at DOT proc_expr_seq
+  | proc_expr_at DOT proc_expr_seq_rhs
     {
       $$ = gsMakeSeq($1, $3);
       gsDebugMsg("parsed sequential expression\n  %T\n", $$);
+    }
+  ;
+
+//right argument of sequential
+proc_expr_seq_rhs:
+  proc_expr_seq
+    {
+      $$ = $1;
+    }
+  | SUM data_vars_decls_cs DOT proc_expr_seq_rhs
+    {
+      $$ = gsMakeSum($2, $4);
+      gsDebugMsg("parsed summation\n  %T\n", $$);
     }
   ;
 
@@ -1202,16 +1255,29 @@ proc_expr_at:
     }
   ;
 
-//synchronisation (associative)
+//synchronisation (right associative)
 proc_expr_sync:
   proc_expr_primary
     {
       $$ = $1;
     }
-  | proc_expr_primary BAR proc_expr_sync
+  | proc_expr_primary BAR proc_expr_sync_rhs
     {
       $$ = gsMakeSync($1, $3);
       gsDebugMsg("parsed sync expression\n  %T\n", $$);
+    }
+  ;
+
+//right argument of synchronisation
+proc_expr_sync_rhs:
+  proc_expr_sync
+    {
+      $$ = $1;
+    }
+  | SUM data_vars_decls_cs DOT proc_expr_sync_rhs
+    {
+      $$ = gsMakeSum($2, $4);
+      gsDebugMsg("parsed summation\n  %T\n", $$);
     }
   ;
 
