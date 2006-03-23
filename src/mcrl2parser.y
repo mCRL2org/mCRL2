@@ -79,8 +79,10 @@ ATermAppl gsSpecEltsToSpec(ATermList SpecElts);
 %type <appl> bag_enum_elt data_comprehension data_var_decl proc_expr
 %type <appl> proc_expr_choice proc_expr_sum proc_expr_merge proc_expr_merge_rhs
 %type <appl> proc_expr_binit proc_expr_binit_rhs proc_expr_cond
-%type <appl> proc_expr_cond_la proc_expr_cond_nla proc_expr_seq
-%type <appl> proc_expr_seq_rhs proc_expr_at proc_expr_sync proc_expr_sync_rhs
+%type <appl> proc_expr_cond_la proc_expr_seq proc_expr_seq_wo_cond
+%type <appl> proc_expr_seq_rhs proc_expr_seq_rhs_wo_cond proc_expr_at
+%type <appl> proc_expr_at_wo_cond proc_expr_sync proc_expr_sync_wo_cond
+%type <appl> proc_expr_sync_rhs proc_expr_sync_rhs_wo_cond
 %type <appl> proc_expr_primary proc_constant act_proc_ref proc_quant
 %type <appl> mult_act_name ren_expr comm_expr
 
@@ -1196,7 +1198,7 @@ proc_expr_cond:
       $$ = gsMakeCond($1, $3, gsMakeDelta());
       gsDebugMsg("parsed conditional expression\n  %T\n", $$);
     }
-  | data_expr_prefix ARROW proc_expr_cond_nla COMMA proc_expr_cond_la
+  | data_expr_prefix ARROW proc_expr_seq_rhs_wo_cond COMMA proc_expr_cond_la
     {
       $$ = gsMakeCond($1, $3, $5);
       gsDebugMsg("parsed conditional expression\n  %T\n", $$);
@@ -1216,20 +1218,7 @@ proc_expr_cond_la:
     }
   ;
 
-//non-last argument of conditional
-proc_expr_cond_nla:
-  proc_expr_seq
-    {
-      $$ = $1;
-    }
-  | SUM data_vars_decls_cs DOT proc_expr_cond_nla
-    {
-      $$ = gsMakeSum($2, $4);
-      gsDebugMsg("parsed summation\n  %T\n", $$);
-    }
-  ;
-
-//sequential (right associative)
+//sequential composition (right associative)
 proc_expr_seq:
   proc_expr_at
     {
@@ -1242,13 +1231,49 @@ proc_expr_seq:
     }
   ;
 
-//right argument of sequential
+//sequential composition not mentioning conditional
+proc_expr_seq_wo_cond:
+  proc_expr_at_wo_cond
+    {
+      $$ = $1;
+    }
+  | proc_expr_at DOT proc_expr_seq_rhs_wo_cond
+    {
+      $$ = gsMakeSeq($1, $3);
+      gsDebugMsg("parsed sequential expression\n  %T\n", $$);
+    }
+  ;
+
+//right argument of sequential composition
 proc_expr_seq_rhs:
   proc_expr_seq
     {
       $$ = $1;
     }
   | SUM data_vars_decls_cs DOT proc_expr_seq_rhs
+    {
+      $$ = gsMakeSum($2, $4);
+      gsDebugMsg("parsed summation\n  %T\n", $$);
+    }
+  | data_expr_prefix ARROW proc_expr_seq_rhs
+    {
+      $$ = gsMakeCond($1, $3, gsMakeDelta());
+      gsDebugMsg("parsed conditional expression\n  %T\n", $$);
+    }
+  | data_expr_prefix ARROW proc_expr_seq_rhs_wo_cond COMMA proc_expr_seq_rhs
+    {
+      $$ = gsMakeCond($1, $3, $5);
+      gsDebugMsg("parsed conditional expression\n  %T\n", $$);
+    }
+  ;
+
+//right argument of sequential composition not mentioning conditional
+proc_expr_seq_rhs_wo_cond:
+  proc_expr_seq_wo_cond
+    {
+      $$ = $1;
+    }
+  | SUM data_vars_decls_cs DOT proc_expr_seq_rhs_wo_cond
     {
       $$ = gsMakeSum($2, $4);
       gsDebugMsg("parsed summation\n  %T\n", $$);
@@ -1268,6 +1293,19 @@ proc_expr_at:
     }
   ;
 
+//timed expression not mentioning conditional
+proc_expr_at_wo_cond:
+  proc_expr_sync_wo_cond
+    {
+      $$ = $1;
+    }
+  | proc_expr_at_wo_cond AT data_expr_prefix
+    {
+      $$ = gsMakeAtTime($1, $3);
+      gsDebugMsg("parsed at time expression\n  %T\n", $$);
+    }
+  ;
+
 //synchronisation (right associative)
 proc_expr_sync:
   proc_expr_primary
@@ -1281,6 +1319,19 @@ proc_expr_sync:
     }
   ;
 
+//synchronisation (right associative)
+proc_expr_sync_wo_cond:
+  proc_expr_primary
+    {
+      $$ = $1;
+    }
+  | proc_expr_primary BAR proc_expr_sync_rhs_wo_cond
+    {
+      $$ = gsMakeSync($1, $3);
+      gsDebugMsg("parsed sync expression\n  %T\n", $$);
+    }
+  ;
+
 //right argument of synchronisation
 proc_expr_sync_rhs:
   proc_expr_sync
@@ -1288,6 +1339,29 @@ proc_expr_sync_rhs:
       $$ = $1;
     }
   | SUM data_vars_decls_cs DOT proc_expr_sync_rhs
+    {
+      $$ = gsMakeSum($2, $4);
+      gsDebugMsg("parsed summation\n  %T\n", $$);
+    }
+  | data_expr_prefix ARROW proc_expr_sync_rhs
+    {
+      $$ = gsMakeCond($1, $3, gsMakeDelta());
+      gsDebugMsg("parsed conditional expression\n  %T\n", $$);
+    }
+  | data_expr_prefix ARROW proc_expr_sync_rhs_wo_cond COMMA proc_expr_sync_rhs
+    {
+      $$ = gsMakeCond($1, $3, $5);
+      gsDebugMsg("parsed conditional expression\n  %T\n", $$);
+    }
+  ;
+
+//right argument of synchronisation
+proc_expr_sync_rhs_wo_cond:
+  proc_expr_sync_wo_cond
+    {
+      $$ = $1;
+    }
+  | SUM data_vars_decls_cs DOT proc_expr_sync_rhs_wo_cond
     {
       $$ = gsMakeSum($2, $4);
       gsDebugMsg("parsed summation\n  %T\n", $$);
