@@ -4,9 +4,10 @@ project md5pp
     : build-dir
        .
     : requirements
-       <include>../../
+       <include>../..
+       <include>../../../../boost
     : usage-requirements
-       <include>../../
+       <include>../..
     ;
 
 lib md5pp

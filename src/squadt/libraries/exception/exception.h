@@ -59,7 +59,7 @@ namespace exception {
   template < typename T1 >
   inline exception< T >::exception(const T t, T1 a) : type(t), _message(descriptions[t]) {
     _message % a;
-  }
+ }
 
   /**
    * @param[in] t the type identifier of the exception

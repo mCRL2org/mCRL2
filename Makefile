@@ -8,17 +8,17 @@ all: config
 include utility/revision.mk
 
 install: all
-	install -d $(datadir)/academic
-	cp examples/academic/*.mcrl2 $(datadir)/academic
-	install -d $(datadir)/industrial
-	cp examples/industrial/*.mcrl2 $(datadir)/industrial
-	install -d $(datadir)/industrial/garage
-	cp examples/industrial/garage/*.mcrl2 $(datadir)/industrial/garage
-	install -d $(datadir)/generated
-	cp examples/generated/*.mcrl2 $(datadir)/generated
-	cp examples/generated/*.pnml $(datadir)/generated
-	install -d $(datadir)/visualisation
-	cp examples/visualisation/*.fsm $(datadir)/visualisation
+	install -d $(datadir)/examples/academic
+	cp examples/academic/*.mcrl2 $(datadir)/examples/academic
+	install -d $(datadir)/examples/industrial
+	cp examples/industrial/*.mcrl2 $(datadir)/examples/industrial
+	install -d $(datadir)/examples/industrial/garage
+	cp examples/industrial/garage/*.mcrl2 $(datadir)/examples/industrial/garage
+	install -d $(datadir)/examples/generated
+	cp examples/generated/*.mcrl2 $(datadir)/examples/generated
+	cp examples/generated/*.pnml $(datadir)/examples/generated
+	install -d $(datadir)/examples/visualisation
+	cp examples/visualisation/*.fsm $(datadir)/examples/visualisation
 
 clean:
 	@${MAKE} -C src $(MAKECMDGOALS)
