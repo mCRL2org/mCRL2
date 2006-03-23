@@ -102,10 +102,10 @@ int main(int ac, char** av)
   gsEnableConstructorFunctions();
 
 #ifdef ENABLE_SQUADT_CONNECTIVITY
-  sip::tool_communicator tc;
+  sip::tool::communicator tc;
 
   /* Get tool capabilities in order to modify settings */
-  sip::tool_capabilities& cp = tc.get_tool_capabilities();
+  sip::tool::capabilities& cp = tc.get_tool_capabilities();
 
   /* The tool has only one main input combination it takes an LPE and then behaves as a reporter */
   cp.add_input_combination(LPD_FOR_INPUT, "Reporter", "lpe");
@@ -150,7 +150,7 @@ int main(int ac, char** av)
   if (lpe_specification.load(file_name)) {
     lpe::LPE lpe = lpe_specification.lpe();
     
-    cout << "Output read from " << ((file_name == "-") ? "standard input" : file_name) << endl << endl;
+    cout << "Input read from " << ((file_name == "-") ? "standard input" : file_name) << endl << endl;
 
     cout << "Number of summands          : " << lpe.summands().size() << endl;
     cout << "Number of free variables    : " << lpe_specification.initial_free_variables().size() + lpe.free_variables().size() << endl;
