@@ -19,10 +19,10 @@
 
 //Global precondition: the ATerm library has been initialised
 
-//external declarations
-extern ATermAppl gsTree;                 /* declared in mcrl2lexer.l */
-extern void mcrl2yyerror(const char *s); /* declared in mcrl2lexer.l */
-extern int mcrl2yylex(void);             /* declared in mcrl2lexer.c */
+//external declarations from mcrl2lexer.l
+void mcrl2yyerror(const char *s);
+int mcrl2yylex(void);
+extern ATermAppl SpecTree;
 
 #ifdef _MSC_VER
 #define yyfalse 0
@@ -105,7 +105,7 @@ spec:
     {
       $$ = gsSpecEltsToSpec(ATreverse($1));
       gsDebugMsg("parsed specification\n  %T\n", $$);
-      gsTree = $$;
+      SpecTree = $$;
     }
   ;
 

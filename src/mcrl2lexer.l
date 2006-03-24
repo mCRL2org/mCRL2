@@ -7,26 +7,24 @@
 
 //Global precondition: the ATerm library has been initialised
 
-//global declarations
-ATermAppl gsTree = NULL;         /* the parse tree */
-mcrl2yyFlexLexer *lexer = NULL;
-
 //external declarations
-int mcrl2yyparse(void);  /* declared in mcrl2parser.cpp */
-extern YYSTYPE mcrl2yylval;         /* declared in mcrl2parser.cpp */
+int mcrl2yyparse(void);          /* declared in mcrl2parser.cpp */
+extern YYSTYPE mcrl2yylval;      /* declared in mcrl2parser.cpp */
 #ifndef _MSC_VER
 extern int fileno(FILE *stream); /* declared in stdio.h (forgotten by lex) */
 #endif
 
+//global declarations, used by mcrl2parser.cpp
+int  mcrl2yylex(void);           /* lexer function */
+void mcrl2yyerror(const char *s);/* error function */
+ATermAppl SpecTree = NULL;       /* the parse tree */
+
 //local declarations
 int LineNr = 1;                  /* line number in source file */
 int ColNr  = 1;                  /* column number in source file */
-void gsProcessString(void);      /* default action to be taken when a string is
-                                    scanned */
-void mcrl2yyerror(const char *s);/* display error message (needed by yacc) */
-extern "C" int mcrl2yywrap(void);/* action taken after an EOF (needed by yacc) */
+mcrl2yyFlexLexer *lexer = NULL;  /* lexer object */
 
-#define gsProcessString() ColNr += YYLeng(); mcrl2yylval.appl = gsString2ATermAppl(YYText());
+#define ProcessString() ColNr += YYLeng(); mcrl2yylval.appl = gsString2ATermAppl(YYText());
 
 %}
 Id         [a-zA-Z\_][a-zA-Z0-9\_']*
@@ -34,6 +32,7 @@ Number     "0"|([1-9][0-9]*)
 
 %option c++
 %option nounput
+%option noyywrap
 
 %%
 
@@ -43,82 +42,82 @@ Number     "0"|([1-9][0-9]*)
 
 "%".*      { ColNr += YYLeng(); /* comment */ }
 
-"||_"      { gsProcessString(); return LMERGE; }
-"->"       { gsProcessString(); return ARROW; }
-"<="       { gsProcessString(); return LTE; }
-">="       { gsProcessString(); return GTE; }
-"|>"       { gsProcessString(); return CONS; }
-"<|"       { gsProcessString(); return SNOC; }
-"++"       { gsProcessString(); return CONCAT; }
-"=="       { gsProcessString(); return EQ; }
-"!="       { gsProcessString(); return NEQ; }
-"&&"       { gsProcessString(); return AND; }
-"||"       { gsProcessString(); return BARS; }
-"=>"       { gsProcessString(); return IMP; }
-"<<"       { gsProcessString(); return BINIT; }
-"<>"       { gsProcessString(); return ELSE; }
-"*"        { gsProcessString(); return STAR; }
-"+"        { gsProcessString(); return PLUS; }
-"-"        { gsProcessString(); return MINUS; }
-"="        { gsProcessString(); return EQUALS; }
-"."        { gsProcessString(); return DOT; }
-","        { gsProcessString(); return COMMA; }
-":"        { gsProcessString(); return COLON; }
-";"        { gsProcessString(); return SEMICOLON; }
-"?"        { gsProcessString(); return QMARK; }
-"!"        { gsProcessString(); return EXCLAM; }
-"@"        { gsProcessString(); return AT; }
-"#"        { gsProcessString(); return HASH; }
-"|"        { gsProcessString(); return BAR; }
-"("        { gsProcessString(); return LPAR; }
-")"        { gsProcessString(); return RPAR; }
-"[]"       { gsProcessString(); return PBRACK; }
-"["        { gsProcessString(); return LBRACK; }
-"]"        { gsProcessString(); return RBRACK; }
-"<"        { gsProcessString(); return LANG; }
-">"        { gsProcessString(); return RANG; }
-"{}"       { gsProcessString(); return PBRACE; }
-"{"        { gsProcessString(); return LBRACE; }
-"}"        { gsProcessString(); return RBRACE; }
+"||_"      { ProcessString(); return LMERGE; }
+"->"       { ProcessString(); return ARROW; }
+"<="       { ProcessString(); return LTE; }
+">="       { ProcessString(); return GTE; }
+"|>"       { ProcessString(); return CONS; }
+"<|"       { ProcessString(); return SNOC; }
+"++"       { ProcessString(); return CONCAT; }
+"=="       { ProcessString(); return EQ; }
+"!="       { ProcessString(); return NEQ; }
+"&&"       { ProcessString(); return AND; }
+"||"       { ProcessString(); return BARS; }
+"=>"       { ProcessString(); return IMP; }
+"<<"       { ProcessString(); return BINIT; }
+"<>"       { ProcessString(); return ELSE; }
+"*"        { ProcessString(); return STAR; }
+"+"        { ProcessString(); return PLUS; }
+"-"        { ProcessString(); return MINUS; }
+"="        { ProcessString(); return EQUALS; }
+"."        { ProcessString(); return DOT; }
+","        { ProcessString(); return COMMA; }
+":"        { ProcessString(); return COLON; }
+";"        { ProcessString(); return SEMICOLON; }
+"?"        { ProcessString(); return QMARK; }
+"!"        { ProcessString(); return EXCLAM; }
+"@"        { ProcessString(); return AT; }
+"#"        { ProcessString(); return HASH; }
+"|"        { ProcessString(); return BAR; }
+"("        { ProcessString(); return LPAR; }
+")"        { ProcessString(); return RPAR; }
+"[]"       { ProcessString(); return PBRACK; }
+"["        { ProcessString(); return LBRACK; }
+"]"        { ProcessString(); return RBRACK; }
+"<"        { ProcessString(); return LANG; }
+">"        { ProcessString(); return RANG; }
+"{}"       { ProcessString(); return PBRACE; }
+"{"        { ProcessString(); return LBRACE; }
+"}"        { ProcessString(); return RBRACE; }
 
-sort       { gsProcessString(); return KWSORT; }
-cons       { gsProcessString(); return KWCONS; }
-map        { gsProcessString(); return KWMAP; }
-var        { gsProcessString(); return KWVAR; }
-eqn        { gsProcessString(); return KWEQN; }
-act        { gsProcessString(); return KWACT; }
-proc       { gsProcessString(); return KWPROC; }
-init       { gsProcessString(); return KWINIT; }
-struct     { gsProcessString(); return KWSTRUCT; }
-Bool       { gsProcessString(); return BOOL; }
-Pos        { gsProcessString(); return POS; }
-Nat        { gsProcessString(); return NAT; }
-Int        { gsProcessString(); return INT; }
-List       { gsProcessString(); return LIST; }
-Set        { gsProcessString(); return SET; }
-Bag        { gsProcessString(); return BAG; }
-true       { gsProcessString(); return TRUE; }
-false      { gsProcessString(); return FALSE; }
-whr        { gsProcessString(); return WHR; }
-end        { gsProcessString(); return END; }
-lambda     { gsProcessString(); return LAMBDA; }
-forall     { gsProcessString(); return FORALL; }
-exists     { gsProcessString(); return EXISTS; }
-div        { gsProcessString(); return DIV; }
-mod        { gsProcessString(); return MOD; }
-in         { gsProcessString(); return IN; }
-delta      { gsProcessString(); return DELTA; }
-tau        { gsProcessString(); return TAU; }
-sum        { gsProcessString(); return SUM; }
-block      { gsProcessString(); return BLOCK; }
-allow      { gsProcessString(); return ALLOW; }
-hide       { gsProcessString(); return HIDE; }
-rename     { gsProcessString(); return RENAME; }
-comm       { gsProcessString(); return COMM; }
+sort       { ProcessString(); return KWSORT; }
+cons       { ProcessString(); return KWCONS; }
+map        { ProcessString(); return KWMAP; }
+var        { ProcessString(); return KWVAR; }
+eqn        { ProcessString(); return KWEQN; }
+act        { ProcessString(); return KWACT; }
+proc       { ProcessString(); return KWPROC; }
+init       { ProcessString(); return KWINIT; }
+struct     { ProcessString(); return KWSTRUCT; }
+Bool       { ProcessString(); return BOOL; }
+Pos        { ProcessString(); return POS; }
+Nat        { ProcessString(); return NAT; }
+Int        { ProcessString(); return INT; }
+List       { ProcessString(); return LIST; }
+Set        { ProcessString(); return SET; }
+Bag        { ProcessString(); return BAG; }
+true       { ProcessString(); return TRUE; }
+false      { ProcessString(); return FALSE; }
+whr        { ProcessString(); return WHR; }
+end        { ProcessString(); return END; }
+lambda     { ProcessString(); return LAMBDA; }
+forall     { ProcessString(); return FORALL; }
+exists     { ProcessString(); return EXISTS; }
+div        { ProcessString(); return DIV; }
+mod        { ProcessString(); return MOD; }
+in         { ProcessString(); return IN; }
+delta      { ProcessString(); return DELTA; }
+tau        { ProcessString(); return TAU; }
+sum        { ProcessString(); return SUM; }
+block      { ProcessString(); return BLOCK; }
+allow      { ProcessString(); return ALLOW; }
+hide       { ProcessString(); return HIDE; }
+rename     { ProcessString(); return RENAME; }
+comm       { ProcessString(); return COMM; }
 
-{Id}       { gsProcessString(); return ID; }
+{Id}       { ProcessString(); return ID; }
 
-{Number}   { gsProcessString(); return NUMBER; }
+{Number}   { ProcessString(); return NUMBER; }
 
 .          { 
              ColNr += YYLeng(); mcrl2yyerror("unknown character");
@@ -143,27 +142,21 @@ void mcrl2yyerror(const char *s) {
   ); 
 }
 
-int mcrl2yywrap(void) {
-  return 1;
-}
-
 ATermAppl mcrl2Parse(std::istream &FormStream) {
   ATermAppl Result = NULL;
-  gsTree = NULL;
-  ATprotectAppl(&gsTree);
+  SpecTree = NULL;
+  ATprotectAppl(&SpecTree);
   LineNr = 1;
   ColNr = 1;
   lexer = new mcrl2yyFlexLexer(&FormStream);
-  //mcrl2yyrestart(FormStream);
   if (mcrl2yyparse() != 0) {
     Result = NULL;
   } else {
-    //gsTree contains the parsed formula
-    Result = gsTree;
-    gsTree = NULL;
+    //SpecTree contains the parsed specification
+    Result = SpecTree;
+    SpecTree = NULL;
   }
-
-  ATunprotectAppl(&gsTree);
+  ATunprotectAppl(&SpecTree);
   delete lexer;
   return Result;
 }
