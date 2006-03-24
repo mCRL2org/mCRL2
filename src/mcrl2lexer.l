@@ -9,6 +9,7 @@
 
 //global declarations
 ATermAppl gsTree = NULL;         /* the parse tree */
+mcrl2yyFlexLexer *lexer = NULL;
 
 //external declarations
 int mcrl2yyparse(void);  /* declared in mcrl2parser.cpp */
@@ -25,19 +26,22 @@ void gsProcessString(void);      /* default action to be taken when a string is
 void mcrl2yyerror(const char *s);/* display error message (needed by yacc) */
 extern "C" int mcrl2yywrap(void);/* action taken after an EOF (needed by yacc) */
 
+#define gsProcessString() ColNr += YYLeng(); mcrl2yylval.appl = gsString2ATermAppl(YYText());
+
 %}
 Id         [a-zA-Z\_][a-zA-Z0-9\_']*
 Number     "0"|([1-9][0-9]*) 
 
+%option c++
 %option nounput
 
 %%
 
-[ \t]      { ColNr += mcrl2yyleng; /* whitespace */ }
+[ \t]      { ColNr += YYLeng(); /* whitespace */ }
 
 \r?\n      { LineNr++; ColNr = 1; /* newline */ }
 
-"%".*      { ColNr += mcrl2yyleng; /* comment */ }
+"%".*      { ColNr += YYLeng(); /* comment */ }
 
 "||_"      { gsProcessString(); return LMERGE; }
 "->"       { gsProcessString(); return ARROW; }
@@ -117,26 +121,25 @@ comm       { gsProcessString(); return COMM; }
 {Number}   { gsProcessString(); return NUMBER; }
 
 .          { 
-             ColNr += mcrl2yyleng; mcrl2yyerror("unknown character");
+             ColNr += YYLeng(); mcrl2yyerror("unknown character");
              /* remaining characters */
 	   }
 
 %%
 
-void gsProcessString(void) {
-  ColNr += mcrl2yyleng;
-  mcrl2yylval.appl = gsString2ATermAppl(mcrl2yytext);
+int mcrl2yylex(void) {
+  return lexer->yylex();
 }
 
 void mcrl2yyerror(const char *s) {
-  int oldColNr = ColNr - mcrl2yyleng;
+  int oldColNr = ColNr - lexer->YYLeng();
   if (oldColNr < 0) {
     oldColNr = 0;
   }
   fprintf(
     stderr,
     "token '%s' at position %d, %d caused the following error: %s\n", 
-    mcrl2yytext, LineNr, oldColNr, s
+    lexer->YYText(), LineNr, oldColNr, s
   ); 
 }
 
@@ -144,13 +147,14 @@ int mcrl2yywrap(void) {
   return 1;
 }
 
-ATermAppl mcrl2Parse(FILE *FormStream) {
+ATermAppl mcrl2Parse(std::istream &FormStream) {
   ATermAppl Result = NULL;
   gsTree = NULL;
   ATprotectAppl(&gsTree);
   LineNr = 1;
   ColNr = 1;
-  mcrl2yyrestart(FormStream);
+  lexer = new mcrl2yyFlexLexer(&FormStream);
+  //mcrl2yyrestart(FormStream);
   if (mcrl2yyparse() != 0) {
     Result = NULL;
   } else {
@@ -160,5 +164,6 @@ ATermAppl mcrl2Parse(FILE *FormStream) {
   }
 
   ATunprotectAppl(&gsTree);
+  delete lexer;
   return Result;
 }

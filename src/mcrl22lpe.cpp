@@ -12,6 +12,8 @@
 #include <aterm2.h>
 #include <string.h>
 #include <cstdio>
+#include <string>
+#include <fstream>
 #include "lin_types.h"
 #include "lin_std.h"
 #include "lin_alt.h"
@@ -25,13 +27,15 @@
 
 #include "mcrl2_revision.h"
 
+using namespace std;
+
 //Type definitions
 
 typedef enum { phNone, phParse, phTypeCheck, phAlphaRed, phDataImpl } t_phase;
 //t_phase represents the phases at which the program should be able to stop
 
 //Functions used by the main program
-static ATermAppl linearise_file(char *infilename, t_lin_options lin_options,
+static ATermAppl linearise_file(string &infilename, t_lin_options lin_options,
   t_phase end_phase, bool alpha);
 static void AltIllegalOptWarning(char opt);
 static void PrintMoreInfo(char *Name);
@@ -213,21 +217,21 @@ int main(int argc, char *argv[])
     if (opt_nofreevars)              AltIllegalOptWarning('f');
   }
   //check for wrong number of arguments
-  char *infilename   = NULL;
-  char *outfilename = NULL;
+  string infilename;
+  string outfilename;
   int noargc; //non-option argument count
   noargc = argc - optind;
   if (noargc > 2) {
     fprintf(stderr, "%s: too many arguments\n", NAME);
-   	PrintMoreInfo(argv[0]);
-   	return 1;
+    PrintMoreInfo(argv[0]);
+    return 1;
   } else {
     //noargc >= 0 && noargc <= 2
     if (noargc > 0) {
-      infilename = strdup(argv[optind]);
+      infilename = argv[optind];
     }
     if (noargc == 2) {
-      outfilename = strdup(argv[optind + 1]);
+      outfilename = argv[optind + 1];
     }
   }
 
@@ -255,70 +259,56 @@ int main(int argc, char *argv[])
     linearise_file(infilename, lin_options,
       opt_check_only?phTypeCheck:opt_end_phase, !opt_noalpha);
   if (result == NULL) {
-    free(infilename);
-    free(outfilename);
     return 1;
   }
   if (opt_check_only) {
-    if (infilename == NULL) {
+    if (infilename == "") {
       fprintf(stdout, "stdin");
     } else {
-      fprintf(stdout, "The file '%s'", infilename);
+      fprintf(stdout, "The file '%s'", infilename.c_str());
     }
     fprintf(stdout, " contains a well-formed mCRL2 specification.\n");
-    free(infilename);
-    free(outfilename);
     return 0;
   } else {
     //store the result
-    if (outfilename == NULL) {
+    if (outfilename == "") {
       gsVerboseMsg("saving result to stdout...\n");
       ATwriteToBinaryFile((ATerm) result, stdout);
       fprintf(stdout, "\n");
     } else { //outfilename != NULL
       //open output filename
-      FILE *outstream = fopen(outfilename, "wb");
+      FILE *outstream = fopen(outfilename.c_str(), "wb");
       if (outstream == NULL) {
-        gsErrorMsg("cannot open output file '%s'\n", outfilename);
-        free(infilename);
-        free(outfilename);
+        gsErrorMsg("cannot open output file '%s'\n", outfilename.c_str());
         return 1;
       }
-      gsVerboseMsg("saving result to '%s'...\n", outfilename);
+      gsVerboseMsg("saving result to '%s'...\n", outfilename.c_str());
       ATwriteToBinaryFile((ATerm) result, outstream);
       fclose(outstream);
     }
   }
-  free(infilename);
-  free(outfilename);
   return 0;
 }
 
-ATermAppl linearise_file(char *infilename, t_lin_options lin_options,
+ATermAppl linearise_file(string &infilename, t_lin_options lin_options,
   t_phase end_phase, bool alpha)
 {
-  //open input filename
-  FILE *instream;
-  if (infilename == NULL) {
-    instream = stdin;
+  ATermAppl result = NULL;
+  //parse specification
+  if (infilename == "") {
+    //parse specification from stdin
+    gsVerboseMsg("parsing input from stdin...\n");
+    result = mcrl2Parse(cin);
   } else {
-    instream = fopen(infilename, "rb");
-    if (instream == NULL) {
-      gsErrorMsg("cannot open input file '%s'\n", infilename);
+    //parse specification from infilename
+    ifstream instream(infilename.c_str(), ifstream::in|ifstream::binary);
+    if (!instream.is_open()) {
+      gsErrorMsg("cannot open input file '%s'\n", infilename.c_str());
       return NULL;
     }
-  }
-  assert(instream != NULL);
-  //parse specification from instream
-  gsVerboseMsg("parsing input ");
-  if (infilename == NULL) {
-    gsVerboseMsg("from stdin...\n");
-  } else {
-    gsVerboseMsg("file '%s'...\n", infilename);
-  }
-  ATermAppl result = mcrl2Parse(instream);
-  if (infilename != NULL) {
-    fclose(instream);
+    gsVerboseMsg("parsing input file '%s'...\n", infilename.c_str());
+    result = mcrl2Parse(instream);
+    instream.close();
   }
   if (result == NULL) 
   {
