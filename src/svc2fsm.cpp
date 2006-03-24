@@ -147,7 +147,7 @@ static void print_states(FILE *f, SVCfile file, int* in, int* out) {
       if ( j < num_names )
          fprintf(f,"%s(%d) %s ",names[j],a[j], types[j]);
       else
-         fprintf(f,"unknown%1d(%d) %s ",j,a[j], "unknown");
+         fprintf(f,"unknown%1d(%d) %s ",(int) j,a[j], "unknown");
       if ( is_mcrl2 )
       {
         for(k=0;k<a[j];k++) 
@@ -207,14 +207,14 @@ static void print_states(FILE *f, SVCfile file, int* in, int* out) {
          ATerm vj=ATgetFirst(state[i]);  // state variable j
          ATbool newValue;                // set to true if value did not exist in set
          // get index in set
-         long value=(short)ATindexedSetPut(set[j],vj,&newValue);
-         fprintf(f,"%d ",value);
+         short value = ATindexedSetPut(set[j],vj,&newValue);
+         fprintf(f,"%hd ",value);
          // take next element of list
          state[i]=ATgetNext(state[i]);
       }
       if (in !=NULL) fprintf(f,"%d ",in[i] );
       if (out!=NULL) fprintf(f,"%d ",out[i]);
-      fprintf(f,"%d\n",i+1);
+      fprintf(f,"%ld\n",i+1);
     }
     ATunprotectArray((ATerm *) state);
     free(state);free(a);free(set);
