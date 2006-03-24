@@ -74,7 +74,7 @@ act   r_stob,s_stob,c_stob: Message # Nat;
 proc  Bus(R:List(Nat)) =
 	sum msg:Message,a:Nat . 
 	  r_stob(msg,a). 
-	  ( (Addresses(R,a) == []) -> Bus(R) , Deliver(msg,R,Addresses(R,a)) )
+	  ( (Addresses(R,a) == []) -> Bus(R) <> Deliver(msg,R,Addresses(R,a)) )
 	+
 	sum a:Nat .
 	  ( r_open_relay(a).Bus(remove(a,R)) + r_close_relay(a).Bus(a |> R) );
@@ -84,7 +84,7 @@ proc  Deliver(m:Message, R:List(Nat), A:List(Nat) ) =
 	(
 	  s_btos(m,a).
 	  ( (inl(a,A)) -> 
-	      ( (remove(a,A) == []) -> Bus(R) , Deliver(m,R,remove(a,A)) ) )
+	      ( (remove(a,A) == []) -> Bus(R) <> Deliver(m,R,remove(a,A)) ) )
 	  +
 	  r_open_relay(a).Deliver(m,remove(a,R),A)
 	  +
@@ -97,7 +97,7 @@ proc  Lift0(n:Nat) =
 	    r_btos(msg,n).
 	    ( (state(msg) == STARTUP) ->
 		s_stob(mes(1,SYNC),n).s_stob(mes(1,STANDBY),n).Lift2(n,1,address(msg),STANDBY)
-	      , protocol_error(n).Lift2(n,1,1,STOP)
+	      <> protocol_error(n).Lift2(n,1,1,STOP)
 	    )
 	)
 	+
@@ -106,15 +106,15 @@ proc  Lift0(n:Nat) =
 	  ( (state(msg) == STARTUP) ->
 	      s_close_relay(n).s_stob(mes(S(address(msg)),STARTUP),n).
 	      Lift1(n,S(address(msg)),S(address(msg)))
-	    , protocol_error(n).Lift2(n,1,1,STOP)
+	    <> protocol_error(n).Lift2(n,1,1,STOP)
 	  );
 
 proc  Lift1(n:Nat,m:Nat,nos:Nat) =
 	sum msg:Message . 
           r_btos(msg,n).
 	  ( (state(msg) == STARTUP) -> Lift1(n,m,address(msg))
-	  , ( (state(msg) == SYNC) -> Lift2(n,m,nos,STANDBY)
-	    , protocol_error(n).Lift2(n,m,1,STOP) 
+	  <> ( (state(msg) == SYNC) -> Lift2(n,m,nos,STANDBY)
+	    <> protocol_error(n).Lift2(n,m,1,STOP) 
 	    )
 	  );
 
@@ -129,9 +129,9 @@ proc  Lift2(n:Nat,m:Nat,nos:Nat,s:State) =
 	sum msg:Message .
 	  r_btos(msg,n).
 	  ( (state(msg) == SYNC) -> move(n,s).Lift2(n,m,nos,s)
-	  , ( (address(msg) == P(m)) ->
+	  <> ( (address(msg) == P(m)) ->
 		s_stob(mes(m,state(msg)),n).Lift2(n,m,nos,state(msg))
-	    , Lift2(n,m,nos,state(msg))
+	    <> Lift2(n,m,nos,state(msg))
 	    )
 	  );
 	  
@@ -141,14 +141,14 @@ proc  Lift3(n:Nat,m:Nat,nos:Nat,s:State,count:Nat) =
 	sum msg:Message.
 	  r_btos(msg,n).
 	  ( (state(msg) == SYNC) -> move(n,s).Lift3(n,m,nos,s,count)
-	  , ( (address(msg) == P(m)) -> 
+	  <> ( (address(msg) == P(m)) -> 
 		( (state(msg) == s && count == 2) ->
 		    s_stob(mes(m,SYNC),n).move(n,s).s_stob(mes(m,s),n).
 		    Lift3(n,m,nos,s,nos)
-		, s_stob(mes(m,s),n).Lift3(n,m,nos,s,nos)
+		<> s_stob(mes(m,s),n).Lift3(n,m,nos,s,nos)
 		)
-	    , ( (state(msg) == s) -> Lift3(n,m,nos,s,P(count))
-	      , Lift3(n,m,nos,s,count)
+	    <> ( (state(msg) == s) -> Lift3(n,m,nos,s,P(count))
+	      <> Lift3(n,m,nos,s,count)
 	      )
 	    )
 	  );

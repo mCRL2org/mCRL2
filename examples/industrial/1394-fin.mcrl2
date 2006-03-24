@@ -125,11 +125,11 @@ proc Link0(n:Nat,id:Nat,buffer:SIG_TUPLE)=
                      Link0(n,id,quadruple(dhead,
                                  sig(dest),
                                  sig(h,crc(h)),
-                                 sig(d,crc(d))))),
+                                 sig(d,crc(d))))) <>
               sPAreq(id,fair).Link1(n,id,buffer) +
         sum p:SIGNAL.
            rPDind(id,p).
-              (is_start(p) -> Link4(n,id,buffer) , Link0(n,id,buffer));
+              (is_start(p) -> Link4(n,id,buffer) <> Link0(n,id,buffer));
 
      Link1(n:Nat,id:Nat,p:SIG_TUPLE)=
         rPAcon(id,won).Link2req(n,id,p) +
@@ -144,32 +144,32 @@ proc Link0(n:Nat,id:Nat,buffer:SIG_TUPLE)=
         rPCind(id).sPDreq(id,fourth(p)).
         rPCind(id).sPDreq(id,End).
         ( (getdest(second(p))==n) ->
-            LDcon(id,broadsent).Link0(n,id,void),
+            LDcon(id,broadsent).Link0(n,id,void) <>
             Link3(n,id,void));
 
      Link3(n:Nat,id:Nat,buffer:SIG_TUPLE)=
         sum p:SIGNAL.
            rPDind(id,p).
-           ( is_prefix(p) -> Link3(n,id,buffer),
-           ( is_start(p) ->  Link3RA(n,id,buffer),
-           ( is_sagap(p) ->  LDcon(id,ackmiss).Link0(n,id,buffer),
+           ( is_prefix(p) -> Link3(n,id,buffer) <>
+           ( is_start(p) ->  Link3RA(n,id,buffer) <>
+           ( is_sagap(p) ->  LDcon(id,ackmiss).Link0(n,id,buffer) <>
                              LDcon(id,ackmiss).LinkWSA(n,id,buffer,n)
            )));
 
      Link3RA(n:Nat,id:Nat,buffer:SIG_TUPLE)=
         sum a:SIGNAL.
            rPDind(id,a).
-           ( is_sagap(a) ->  LDcon(id,ackmiss).Link0(n,id,buffer),
-             ( is_physig(a) -> LDcon(id,ackmiss).LinkWSA(n,id,buffer,n),
+           ( is_sagap(a) ->  LDcon(id,ackmiss).Link0(n,id,buffer) <>
+             ( is_physig(a) -> LDcon(id,ackmiss).LinkWSA(n,id,buffer,n) <>
                                Link3RE(n,id,buffer,a)));
 
      Link3RE(n:Nat,id:Nat,buffer:SIG_TUPLE,a:SIGNAL)=
         sum e:SIGNAL.
            rPDind(id,e).
            ((valid_ack(a) && is_terminator(e)) ->
-                   LDcon(id,ackrec(getack(a))).LinkWSA(n,id,buffer,n),
+                   LDcon(id,ackrec(getack(a))).LinkWSA(n,id,buffer,n) <>
              ( is_sagap(e) ->
-                   LDcon(id,ackmiss).Link0(n,id,buffer),
+                   LDcon(id,ackmiss).Link0(n,id,buffer) <>
                    LDcon(id,ackmiss).LinkWSA(n,id,buffer,n)
            ) );
 
@@ -178,29 +178,29 @@ proc Link0(n:Nat,id:Nat,buffer:SIG_TUPLE)=
            rPDind(id,dh).
            ( is_physig(dh) ->
              ( is_sagap(dh) ->
-                Link0(n,id,buffer),
-                LinkWSA(n,id,buffer,n)),
+                Link0(n,id,buffer) <>
+                LinkWSA(n,id,buffer,n)) <>
              Link4DH(n,id,buffer));
 
      Link4DH(n:Nat,id:Nat,buffer:SIG_TUPLE)=
         sum dest:SIGNAL.rPDind(id,dest).
            ( is_dest(dest) ->
              ( (getdest(dest)==id) ->
-                  sPAreq(id,immediate).Link4RH(n,id,buffer,id),
+                  sPAreq(id,immediate).Link4RH(n,id,buffer,id) <>
                   ( (getdest(dest)==n) ->
-                      Link4RH(n,id,buffer,n),
+                      Link4RH(n,id,buffer,n) <>
                       LinkWSA(n,id,buffer,n)
                   )
-             ),
+             ) <>
              ( is_sagap(dest) ->
-                  Link0(n,id,buffer),
+                  Link0(n,id,buffer) <>
                   LinkWSA(n,id,buffer,n)
            ) );
 
      Link4RH(n:Nat,id:Nat,buffer:SIG_TUPLE,dest:Nat)=
         sum h:SIGNAL.rPDind(id,h).
            ( valid_hpart(h) ->
-                Link4RD(n,id,buffer,dest,h),
+                Link4RD(n,id,buffer,dest,h) <>
                 LinkWSA(n,id,buffer,dest)
            );
 
@@ -208,7 +208,7 @@ proc Link0(n:Nat,id:Nat,buffer:SIG_TUPLE)=
         sum d:SIGNAL.
            rPDind(id,d).
              ( is_data(d) ->
-                  Link4RE(n,id,buffer,dest,h,d),
+                  Link4RE(n,id,buffer,dest,h,d) <>
                   LinkWSA(n,id,buffer,dest)
              );
 
@@ -217,20 +217,21 @@ proc Link0(n:Nat,id:Nat,buffer:SIG_TUPLE)=
            rPDind(id,e).
              ( is_terminator(e) ->
                   ( (dest==id) ->
-                       Link4DRec(n,id,buffer,h,d),
+                       Link4DRec(n,id,buffer,h,d) <>
                        Link4BRec(n,id,buffer,h,d)
-                  ),
+                  ) <>
                   LinkWSA(n,id,buffer,dest)
              );
 
      Link4DRec(n:Nat,id:Nat,buffer:SIG_TUPLE,h:SIGNAL,d:SIGNAL)=
         (getcrc(d)==check) ->
-           LDind(id,good(gethead(h),getdata(d))).rPAcon(id,won).Link5(n,id,buffer),
+           LDind(id,good(gethead(h),getdata(d))).rPAcon(id,won).Link5(n,id,buffer)
+	   <>
            LDind(id,dcrc_err(gethead(h))).rPAcon(id,won).Link5(n,id,buffer);
 
      Link4BRec(n:Nat,id:Nat,buffer:SIG_TUPLE,h:SIGNAL,d:SIGNAL)=
         (getcrc(d)==check) ->
-           LDind(id,broadrec(gethead(h),getdata(d))).Link0(n,id,buffer),
+           LDind(id,broadrec(gethead(h),getdata(d))).Link0(n,id,buffer) <>
            Link0(n,id,buffer);
 
      Link5(n,id:Nat,buffer:SIG_TUPLE)=
@@ -240,7 +241,7 @@ proc Link0(n:Nat,id:Nat,buffer:SIG_TUPLE)=
      Link6(n:Nat,id:Nat,buffer:SIG_TUPLE,p:SIGNAL,b:BOC)=
         rPCind(id).sPDreq(id,Start).rPCind(id).sPDreq(id,p).rPCind(id).
            ( (b==release) ->
-                sPDreq(id,End).Link0(n,id,buffer),
+                sPDreq(id,End).Link0(n,id,buffer) <>
                 sPDreq(id,Prefix).Link7(n,id,buffer)
            );
  
@@ -259,7 +260,7 @@ proc Link0(n:Nat,id:Nat,buffer:SIG_TUPLE)=
         rPCind(id).sPDreq(id,fourth(p)).
         rPCind(id).sPDreq(id,End).
         ( (getdest(second(p))==n) ->
-             LDcon(id,broadsent).Link0(n,id,buffer),
+             LDcon(id,broadsent).Link0(n,id,buffer) <>
              Link3(n,id,buffer)
         );
 
@@ -267,7 +268,7 @@ proc Link0(n:Nat,id:Nat,buffer:SIG_TUPLE)=
      LinkWSA(n:Nat,id:Nat,buffer:SIG_TUPLE,dest:Nat)=
         sum p:SIGNAL.rPDind(id,p).
            ( is_sagap(p) ->
-                Link0(n,id,buffer),
+                Link0(n,id,buffer) <>
                 LinkWSA(n,id,buffer,dest) 
            ) +
         (dest==id) -> rPAcon(id,won).rPCind(id).sPDreq(id,End).Link0(n,id,buffer);
@@ -322,16 +323,16 @@ proc BusIdle(n:Nat,t:BoolTABLE)=
 
      DecideIdle(n:Nat,t:BoolTABLE,id:Nat,astat:PAR)=
         (!get(id,t)) ->
-          sPAcon(id,won).BusBusy(n,invert(id,t),inita(n),inita(n),id),
+          sPAcon(id,won).BusBusy(n,invert(id,t),inita(n),inita(n),id) <>
           sPAcon(id,lost).BusIdle(n,t);
 
      BusBusy(n:Nat,t,next,destfault:BoolTABLE,busy:Nat)=
         (busy<n) -> 
            ( sPCind(busy).
                 (sum p:SIGNAL.rPDreq(busy,p).Distribute(n,t,next,destfault,busy,p,0))
-           ),
+           ) <>
            ( zero(next) ->
-                SubactionGap(n,t,0),
+                SubactionGap(n,t,0) <>
                   Resolve(n,t,next,0)
            ) +
        sum j:Nat.(j<=n) -> rPAreq(j,fair).sPAcon(j,lost).BusBusy(n,t,next,destfault,busy) +
@@ -340,24 +341,25 @@ proc BusIdle(n:Nat,t:BoolTABLE)=
 
      SubactionGap(n:Nat,t:BoolTABLE,i:Nat)=
         (i==n) ->
-           BusIdle(n,t),
+           BusIdle(n,t) <>
            sPDind(i,subactgap).SubactionGap(n,t,i+1);
 
      Resolve(n:Nat,t,next:BoolTABLE,i:Nat)=
         (i<n) ->
         (get(i,next) ->
-            sPAcon(i,won).sPCind(i).Resolve(n,t,next,i+1),
+            sPAcon(i,won).sPCind(i).Resolve(n,t,next,i+1) <>
             internal.Resolve(n,t,next,i+1) 
-        ),
+        ) <>
         Resolve2(n,t,next);
 
      Resolve2(n:Nat,t:BoolTABLE,next:BoolTABLE)=
         more(next) ->
-           (sum j:Nat.(j<=n) -> rPDreq(j,End).(get(j,next) -> Resolve2(n,t,invert(j,next)))),
+           (sum j:Nat.(j<=n) -> rPDreq(j,End).(get(j,next) ->
+	   Resolve2(n,t,invert(j,next)))) <>
            (sum j:Nat,p:SIGNAL.(j<=n) ->
               rPDreq(j,p).
                  (is_end(p) ->
-                     SubactionGap(n,t,0),
+                     SubactionGap(n,t,0) <>
                      Distribute(n,t,inita(n),inita(n),j,p,0)
            )     );
 
@@ -385,13 +387,13 @@ proc BusIdle(n:Nat,t:BoolTABLE)=
             (!get(i,next)) ->
                rPAreq(i,immediate).
                   Distribute(n,t,invert(i,next),destfault,busy,p,i)
-         ),
+         ) <>
          %% i==busy
          internal.Distribute(n,t,next,destfault,busy,p,i+1)
-       ),
+       ) <>
        %% i>=n
        ( is_end(p) ->
-            BusBusy(n,t,next,destfault,n),
+            BusBusy(n,t,next,destfault,n) <>
             BusBusy(n,t,next,destfault,busy)
        );
 

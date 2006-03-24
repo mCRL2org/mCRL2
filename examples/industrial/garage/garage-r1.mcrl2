@@ -1011,7 +1011,7 @@ proc
   +     
     (ps == ps_ack_deny) ->
       (allowed(i, gs_sl) ->
-        (snd_ack_req(safety, logical, i) . SL(ps_req, gs_sl, i, r)),
+        (snd_ack_req(safety, logical, i) . SL(ps_req, gs_sl, i, r)) <>
         (snd_deny_req(safety, logical, i). SL(ps_idle, gs_sl, i, r)))
   +
     (ps == ps_req) ->

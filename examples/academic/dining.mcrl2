@@ -18,7 +18,7 @@ proc
   KForkPhil(k:Pos) =
        % ForkPhil(1) || ... || ForkPhil(k);
        % or 
-       % (k>1) -> (ForkPhil(k)||KForkPhil(max(k-1,1))),ForkPhil(k);
+       % (k>1) -> (ForkPhil(k)||KForkPhil(max(k-1,1))) <> ForkPhil(k);
        ForkPhil(1) || ForkPhil(2);
 
 init allow( { lock, free, eat },
