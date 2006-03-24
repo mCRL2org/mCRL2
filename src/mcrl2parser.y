@@ -48,6 +48,9 @@ ATermAppl gsSpecEltsToSpec(ATermList SpecElts);
 //generate a GLR parser
 %glr-parser
 
+//set name prefix
+%name-prefix="mcrl2yy"
+
 //start token
 %start spec
 

@@ -31,8 +31,9 @@ Id         [a-zA-Z\_][a-zA-Z0-9\_']*
 Number     "0"|([1-9][0-9]*) 
 
 %option c++
-%option nounput
 %option noyywrap
+%option prefix="mcrl2yy"
+%option nounput
 
 %%
 
