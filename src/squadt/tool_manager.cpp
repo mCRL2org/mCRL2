@@ -141,10 +141,10 @@ namespace squadt {
             % get_local_host().name() % default_tcp_port
             % id;
 
-    local_executor.execute(boost::str(command), 0);
-
     /* Create extractor object, that will retrieve the data from the running tool process */
     boost::scoped_ptr < extractor > e(new extractor(t));
+
+    local_executor.execute(boost::str(command), e.get());
 
     instances[id] = e.get();
 

@@ -87,7 +87,7 @@ namespace squadt {
      * @param h the function to call when the process terminates
      **/
     inline process::ptr process::execute(handler h, const std::string& c) throw () {
-      ptr p(new process(h, wxPROCESS_REDIRECT));
+      ptr p(new process(h));
     
       p->identifier = wxExecute(boost::cref(wxString(c.c_str(), wxConvLocal)), wxEXEC_ASYNC, p.get());
     
@@ -105,7 +105,7 @@ namespace squadt {
     
     inline void process::OnTerminate(int /* pid */, int /* status */) {
       current_status = completed;
- 
+
       /* Clean up */
       call_back(this);
     }

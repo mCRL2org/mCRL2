@@ -47,7 +47,10 @@ bool Squadt::OnInit() {
 
   new splash(&logo);
 
-//  global_tool_manager->query_tools();
+  wxYield();
+
+  global_tool_manager->query_tools();
+
   /* Load tool configuration from storage */
 //  ProjectOverview* window = new ProjectOverview(NULL, 1000);
 

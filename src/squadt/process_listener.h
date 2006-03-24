@@ -71,11 +71,13 @@ namespace squadt {
     inline void process_listener::await_process() const {
       boost::mutex::scoped_lock l(register_lock);
 
-      if (associated_process.lock().get() == 0 && !register_condition.get()) {
-        register_condition = boost::shared_ptr < boost::condition > (new boost::condition());
-      }
+      if (associated_process.lock().get() == 0) {
+        if (!register_condition.get()) {
+          register_condition = boost::shared_ptr < boost::condition > (new boost::condition());
+        }
 
-      register_condition->wait(l);
+        register_condition->wait(l);
+      }
     }
 
     /**
