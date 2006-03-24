@@ -5,9 +5,9 @@
 #include "tool_manager.h"
 #include "settings_manager.tcc"
 #include "core.h"
+#include "gui_splash.h"
 
 #include <wx/wx.h>
-#include <wx/splash.h>
 #include <wx/filename.h>
 #include <wx/image.h>
 
@@ -39,16 +39,21 @@ bool Squadt::OnInit() {
   using namespace squadt::GUI;
 
   global_settings_manager = settings_manager::ptr(new settings_manager(wxFileName::GetHomeDir().fn_str()));
+  global_tool_manager     = tool_manager::read();
 
   wxInitAllImageHandlers();
 
+  wxImage logo(wxString(global_settings_manager->path_to_images("logo.jpg").c_str(), wxConvLocal));
+
+  new splash(&logo);
+
+//  global_tool_manager->query_tools();
   /* Load tool configuration from storage */
 //  ProjectOverview* window = new ProjectOverview(NULL, 1000);
 
   /* Show a splash */
 //  wxBitmap        splash_image;
 //  wxSplashScreen* splash;
-  wxString        logo(global_settings_manager->path_to_images("logo.jpg").c_str(), wxConvLocal);
 
 //  if (splash_image.LoadFile(logo, wxBITMAP_TYPE_JPEG)) {
 //    splash = new wxSplashScreen(splash_image, wxSPLASH_CENTRE_ON_PARENT|wxSPLASH_TIMEOUT, 600, window, wxID_ANY);
@@ -56,8 +61,6 @@ bool Squadt::OnInit() {
 
   /* Make sure the main window is visible */
 //  window->Show(true);
-
-  global_tool_manager = tool_manager::read();
 
 //  window->GenerateToolContextMenus();
 

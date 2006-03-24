@@ -8,6 +8,7 @@ namespace squadt {
     wxImageList* format_icon_list;
     wxImageList* format_small_icon_list;
 
+    /* Icon for use by Squadt */
     wxIcon* gui_icon;
 
     /* Images */
@@ -23,10 +24,10 @@ namespace squadt {
     #include "pixmaps/stock_cancel.xpm"
     #include "pixmaps/stock_new_small.xpm"
 
-    #include "pixmaps/elephant.xpm"
+    #include "pixmaps/logo_icon.xpm"
 
     /* General of GUI Icons */
-    wxImageList* LoadMainIcons() {
+    wxImageList* load_main_icons() {
       wxImageList* list = new wxImageList(24, 24, false, 7);
 
       list->Add(wxIcon(stock_new_xpm));
@@ -37,13 +38,13 @@ namespace squadt {
       list->Add(wxIcon(stock_ok_xpm));
       list->Add(wxIcon(stock_cancel_xpm));
 
-      gui_icon = new wxIcon(elephant_xpm);
+      gui_icon = new wxIcon(logo_icon_xpm);
 
       return(list);
     }
 
     /* General of icons for file formats */
-    wxImageList* LoadFormatIcons() {
+    wxImageList* load_format_icons() {
       wxImageList* list = new wxImageList(24, 24, false, 4);
 
       list->Add(wxIcon(stock_new_green_xpm));
@@ -55,7 +56,7 @@ namespace squadt {
     }
 
     /* General of icons for file formats */
-    wxImageList* LoadSmallFormatIcons() {
+    wxImageList* load_small_format_icons() {
       wxImageList* list = new wxImageList(16, 16, false, 1);
 
       list->Add(wxIcon(stock_new_small_xpm));

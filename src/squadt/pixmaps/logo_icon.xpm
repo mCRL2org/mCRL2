@@ -1,5 +1,5 @@
 /* XPM */
-static char * elephant_xpm[] = {
+static char * logo_icon_xpm[] = {
 "116 116 10913 3",
 "   	c None",
 ".  	c #A07349",

@@ -12,6 +12,7 @@
 
 #include "tool_manager.h"
 #include "processor.tcc"
+#include "process_listener.h"
 #include "extractor.h"
 #include "settings_manager.tcc"
 #include "core.h"
@@ -91,7 +92,7 @@ namespace squadt {
       /* Add a new tool to the list of tools */
       new_tool_manager->tools.push_back(tool::read(r));
     }
- 
+
     return (new_tool_manager);
   }
 
@@ -113,11 +114,11 @@ namespace squadt {
     instances[id] = p;
   }
 
-  void tool_manager::query_capabilities() throw () {
+  void tool_manager::query_tools() throw () {
     using namespace boost;
 
     std::for_each(tools.begin(), tools.end(),
-                    bind(&tool_manager::query_capabilities, this, 
+                    bind(&tool_manager::query_tool, this, 
                                     bind(&tool::ptr::operator*, _1)));
   }
 
@@ -126,9 +127,9 @@ namespace squadt {
    *
    * \attention This function blocks.
    **/
-  void tool_manager::query_capabilities(tool& t) throw () {
+  void tool_manager::query_tool(tool& t) throw () {
     /* Sanity check: establish tool existence */
-    if (!boost::filesystem::exists(boost::filesystem::path(t.get_location()))) {
+    if (t.get_location().empty() || !boost::filesystem::exists(boost::filesystem::path(t.get_location()))) {
       throw (exception(exception_identifier::requested_tool_unavailable));
     }
 

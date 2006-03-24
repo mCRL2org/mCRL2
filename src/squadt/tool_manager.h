@@ -98,12 +98,6 @@ namespace squadt {
       /** \brief Start a tool */
       void execute(tool&, execution::task* = 0);
 
-      /** \brief Get the tool_capabilities object for all known tools */
-      void query_capabilities() throw ();
-
-      /** \brief Get the tool_capabilities object for a tool */
-      void query_capabilities(tool&) throw ();
-
       /** \brief This is the event handler for incoming identification messages */
       void handle_relay_connection(sip::message_ptr&, sip::end_point);
 
@@ -136,6 +130,12 @@ namespace squadt {
       /** \brief Add a new tool to the catalog */
       inline bool add(const std::string&, const std::string&);
  
+      /** \brief Get the tool_capabilities object for all known tools */
+      void query_tools() throw ();
+
+      /** \brief Get the tool_capabilities object for a tool */
+      void query_tool(tool&) throw ();
+
       /** \brief Get the list of known tools */
       inline const tool_list& get_tools();
  

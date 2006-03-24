@@ -99,7 +99,7 @@ namespace squadt {
     std::string name;
     std::string location;
 
-    if (!(r.get_attribute(&name, "name") && r.get_attribute(&name, "location"))) {
+    if (!(r.get_attribute(&name, "name") && r.get_attribute(&location, "location"))) {
       throw (exception(exception_identifier::required_attributes_missing, "tool"));
     }
 

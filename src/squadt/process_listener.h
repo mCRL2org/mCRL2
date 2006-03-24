@@ -18,13 +18,13 @@ namespace squadt {
       protected:
 
         /** \brief A pointer to the process associated to this listener or 0 */
-        boost::weak_ptr < execution::process >  associated_process;
+        boost::weak_ptr < execution::process >          associated_process;
 
         /** \brief Semaphore to guarantee mutual exclusion (for use with register_condition) */
-        boost::mutex                            register_lock;
+        mutable boost::mutex                            register_lock;
 
         /** \brief Monitor for waiting until process has registered */
-        boost::shared_ptr < boost::condition >  register_condition;
+        mutable boost::shared_ptr < boost::condition >  register_condition;
 
       private:
 
@@ -40,10 +40,10 @@ namespace squadt {
         virtual ~process_listener() = 0;
 
         /** \brief Gets a pointer to the associated process */
-        inline process* get_process(const bool = false);
+        inline process* get_process(const bool = false) const;
 
         /** \brief Blocks untill the process has registered */
-        inline void await_process();
+        inline void await_process() const;
     };
  
     inline process_listener::~process_listener() {
@@ -68,7 +68,7 @@ namespace squadt {
       }
     }
 
-    inline void process_listener::await_process() {
+    inline void process_listener::await_process() const {
       boost::mutex::scoped_lock l(register_lock);
 
       if (associated_process.lock().get() == 0 && !register_condition.get()) {
@@ -83,7 +83,7 @@ namespace squadt {
      *
      * \return A pointer to the associated process, or 0 on program failure
      **/
-    inline process* process_listener::get_process(const bool b) {
+    inline process* process_listener::get_process(const bool b) const {
       if (b) {
         await_process();
       }
