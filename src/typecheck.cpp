@@ -599,7 +599,7 @@ void gstcDataInit(void){
   gstcAddSystemFunctionProd(gsMakeOpIdNameSet2Bag(),
 			    gstcMakeSortArrowProd1(gsMakeSortSet(gsMakeUnknown()),gsMakeSortBag(gsMakeUnknown())));
   gstcAddSystemConstant(gsMakeOpIdNameEmptySet(),gsMakeSortSet(gsMakeUnknown()));
-  gstcAddSystemFunctionProd(gsMakeOpIdNameSetIn(),
+  gstcAddSystemFunctionProd(gsMakeOpIdNameEltIn(),
 			    gstcMakeSortArrowProd2(gsMakeUnknown(),gsMakeSortSet(gsMakeUnknown()),gsMakeSortExprBool()));
   gstcAddSystemFunctionProd(gsMakeOpIdNameSubSetEq(),
 			    gstcMakeSortArrowProd2(gsMakeSortSet(gsMakeUnknown()),gsMakeSortSet(gsMakeUnknown()),gsMakeSortExprBool()));
@@ -619,7 +619,7 @@ void gstcDataInit(void){
   gstcAddSystemFunctionProd(gsMakeOpIdNameBag2Set(),
 			    gstcMakeSortArrowProd1(gsMakeSortBag(gsMakeUnknown()),gsMakeSortSet(gsMakeUnknown())));
   gstcAddSystemConstant(gsMakeOpIdNameEmptyBag(),gsMakeSortBag(gsMakeUnknown()));
-  gstcAddSystemFunctionProd(gsMakeOpIdNameBagIn(),
+  gstcAddSystemFunctionProd(gsMakeOpIdNameEltIn(),
 			    gstcMakeSortArrowProd2(gsMakeUnknown(),gsMakeSortBag(gsMakeUnknown()),gsMakeSortExprBool()));
   gstcAddSystemFunctionProd(gsMakeOpIdNameCount(),
 			    gstcMakeSortArrowProd2(gsMakeUnknown(),gsMakeSortBag(gsMakeUnknown()),gsMakeSortExprNat()));
@@ -1989,7 +1989,7 @@ static ATermAppl gstcTraverseVarConsTypeDN(int nFactPars, ATermTable Vars, ATerm
 	Type=NewType;
       }
 
-      if(ATisEqual(gsMakeOpIdNameSetIn(),ATAgetArgument(*DataTerm,0))){
+      if(ATisEqual(gsMakeOpIdNameEltIn(),ATAgetArgument(*DataTerm,0))){
 	gsDebugMsg("Doing {Set,Bag}In matching Type %T, PosType %T\n",Type,PosType);    
 	ATermAppl NewType=gstcMatchSetBagOpIn(Type);
 	if(!NewType){
@@ -2785,7 +2785,7 @@ static ATermAppl gstcMatchSetOpSet2Bag(ATermAppl Type){
 }
 
 static ATermAppl gstcMatchSetBagOpIn(ATermAppl Type){
-  //tries to sort out the types of SetIn (SxSet(S)->Bool) or BagIn (SxBag(S)->Bool)
+  //tries to sort out the type of EltIn (SxSet(S)->Bool or SxBag(S)->Bool)
   //If some of the parameters are Pos,Nat, or Int do upcasting.
 
   assert(gsIsSortArrowProd(Type));

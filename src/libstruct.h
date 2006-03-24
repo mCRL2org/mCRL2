@@ -247,9 +247,9 @@ ATermAppl gsMakeOpIdNameHead();
 ATermAppl gsMakeOpIdNameTail();
 ATermAppl gsMakeOpIdNameRHead();
 ATermAppl gsMakeOpIdNameRTail();
+ATermAppl gsMakeOpIdNameEltIn();
 ATermAppl gsMakeOpIdNameSetComp();
 ATermAppl gsMakeOpIdNameEmptySet();
-ATermAppl gsMakeOpIdNameSetIn();
 ATermAppl gsMakeOpIdNameSubSetEq();
 ATermAppl gsMakeOpIdNameSubSet();
 ATermAppl gsMakeOpIdNameSetUnion();
@@ -260,7 +260,6 @@ ATermAppl gsMakeOpIdNameBagComp();
 ATermAppl gsMakeOpIdNameBag2Set();
 ATermAppl gsMakeOpIdNameSet2Bag();
 ATermAppl gsMakeOpIdNameEmptyBag();
-ATermAppl gsMakeOpIdNameBagIn();
 ATermAppl gsMakeOpIdNameCount();
 ATermAppl gsMakeOpIdNameSubBagEq();
 ATermAppl gsMakeOpIdNameSubBag();
@@ -605,6 +604,11 @@ ATermAppl gsMakeOpIdRTail(ATermAppl SortExpr);
 //Ret: Operation identifier for 'right tail', which has sort S -> S, where S
 //     stands for SortExpr
 
+ATermAppl gsMakeOpIdEltIn(ATermAppl SortExprLHS, ATermAppl SortExprRHS);
+//Pre: SortExprLHS and SortExprRHS are sort expressions
+//Ret: Operation identifier for 'element test', which has sort
+//     S -> T -> Bool, where S and T stand for SortExprLHS and SortExprRHS
+
 ATermAppl gsMakeOpIdSetComp(ATermAppl SortExprDom, ATermAppl SortExprResult);
 //Pre: SortExprDom and SortExprResult are sort expressions
 //Ret: Operation identifier for set comprehension of sort (S -> Bool) -> T,
@@ -613,11 +617,6 @@ ATermAppl gsMakeOpIdSetComp(ATermAppl SortExprDom, ATermAppl SortExprResult);
 ATermAppl gsMakeOpIdEmptySet(ATermAppl SortExpr);
 //Pre: SortExpr is a sort expression
 //Ret: Operation identifier for the empty set of sort SortExpr
-
-ATermAppl gsMakeOpIdSetIn(ATermAppl SortExprLHS, ATermAppl SortExprRHS);
-//Pre: SortExprLHS and SortExprRHS are sort expressions
-//Ret: Operation identifier for 'set element test', which has sort
-//     S -> T -> Bool, where S and T stand for SortExprLHS and SortExprRHS
 
 ATermAppl gsMakeOpIdSubSetEq(ATermAppl SortExpr);
 //Pre: SortExpr is a sort expression
@@ -657,11 +656,6 @@ ATermAppl gsMakeOpIdBagComp(ATermAppl SortExprDom, ATermAppl SortExprResult);
 ATermAppl gsMakeOpIdEmptyBag(ATermAppl SortExpr);
 //Pre: SortExpr is a sort expression
 //Ret: Operation identifier for the empty bag of sort SortExpr
-
-ATermAppl gsMakeOpIdBagIn(ATermAppl SortExprLHS, ATermAppl SortExprRHS);
-//Pre: SortExprLHS and SortExprRHS are sort expressions
-//Ret: Operation identifier for 'bag element test', which has sort
-//     S -> T -> Bool, where S and T stand for SortExprLHS and SortExprRHS
 
 ATermAppl gsMakeOpIdCount(ATermAppl SortExprLHS, ATermAppl SortExprRHS);
 //Pre: SortExpr is a sort expression
@@ -1006,6 +1000,11 @@ ATermAppl gsMakeDataExprRTail(ATermAppl DataExpr);
 //Pre: DataExpr is a data expression
 //Ret: Data expression for the right tail of DataExpr
 
+ATermAppl gsMakeDataExprEltIn(ATermAppl DataExprLHS, ATermAppl DataExprRHS);
+//Pre: DataExprLHS and DataExprRHS are data expressions
+//Ret: Data expression for element test "e in e'", where e = DataExprLHS and
+//     e' = DataExprRHS
+
 ATermAppl gsMakeDataExprSetComp(ATermAppl DataExpr, ATermAppl SortExpr);
 //Pre: DataExpr is a data expression of sort S -> Bool
 //     SortExprResult is a sort expression
@@ -1014,11 +1013,6 @@ ATermAppl gsMakeDataExprSetComp(ATermAppl DataExpr, ATermAppl SortExpr);
 ATermAppl gsMakeDataExprEmptySet(ATermAppl SortExpr);
 //Pre: SortExpr is a sort expression
 //Ret: Data expression for the empty set of sort SortExpr
-
-ATermAppl gsMakeDataExprSetIn(ATermAppl DataExprLHS, ATermAppl DataExprRHS);
-//Pre: DataExprLHS and DataExprRHS are data expressions
-//Ret: Data expression for set element test "e in e'", where e = DataExprLHS and
-//     e' = DataExprRHS
 
 ATermAppl gsMakeDataExprSubSetEq(ATermAppl DataExprLHS, ATermAppl DataExprRHS);
 //Pre: DataExprLHS and DataExprRHS are data expressions of the same sort
@@ -1058,11 +1052,6 @@ ATermAppl gsMakeDataExprEmptyBag(ATermAppl SortExpr);
 ATermAppl gsMakeDataExprCount(ATermAppl DataExprLHS, ATermAppl DataExprRHS);
 //Pre: DataExprLHS and DataExprRHS are data expressions
 //Ret: Data expression for the count of element DataExprLHS in bag DataExprRHS
-
-ATermAppl gsMakeDataExprBagIn(ATermAppl DataExprLHS, ATermAppl DataExprRHS);
-//Pre: DataExprLHS and DataExprRHS are data expressions
-//Ret: Data expression for bag element test "e in e'", where e = DataExprLHS
-//     and e' = DataExprRHS
 
 ATermAppl gsMakeDataExprSubBagEq(ATermAppl DataExprLHS, ATermAppl DataExprRHS);
 //Pre: DataExprLHS and DataExprRHS are data expressions of the same sort

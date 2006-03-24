@@ -1378,8 +1378,7 @@ bool gsIsOpIdInfix(ATermAppl Term)
      (OpIdName == gsMakeOpIdNameLTE())          ||
      (OpIdName == gsMakeOpIdNameGT())           ||
      (OpIdName == gsMakeOpIdNameGTE())          ||
-     (OpIdName == gsMakeOpIdNameSetIn())        ||
-     (OpIdName == gsMakeOpIdNameBagIn())        ||
+     (OpIdName == gsMakeOpIdNameEltIn())        ||
      (OpIdName == gsMakeOpIdNameSubSetEq())     ||
      (OpIdName == gsMakeOpIdNameSubSet())       ||
      (OpIdName == gsMakeOpIdNameSubBagEq())     ||
@@ -1412,7 +1411,7 @@ int gsPrecOpIdInfix(ATermAppl OpIdName)
   } else if (
       (OpIdName == gsMakeOpIdNameLT()) || (OpIdName == gsMakeOpIdNameLTE()) ||
       (OpIdName == gsMakeOpIdNameGT()) || (OpIdName == gsMakeOpIdNameGTE()) ||
-      (OpIdName == gsMakeOpIdNameSetIn()) || (OpIdName == gsMakeOpIdNameBagIn()) ||
+      (OpIdName == gsMakeOpIdNameEltIn()) ||
       (OpIdName == gsMakeOpIdNameSubSetEq()) || (OpIdName == gsMakeOpIdNameSubSet()) ||
       (OpIdName == gsMakeOpIdNameSubBagEq()) || (OpIdName == gsMakeOpIdNameSubBag())
       ) {
@@ -1454,7 +1453,7 @@ int gsPrecOpIdInfixLeft(ATermAppl OpIdName)
   } else if (
       (OpIdName == gsMakeOpIdNameLT()) || (OpIdName == gsMakeOpIdNameLTE()) ||
       (OpIdName == gsMakeOpIdNameGT()) || (OpIdName == gsMakeOpIdNameGTE()) ||
-      (OpIdName == gsMakeOpIdNameSetIn()) || (OpIdName == gsMakeOpIdNameBagIn()) ||
+      (OpIdName == gsMakeOpIdNameEltIn()) ||
       (OpIdName == gsMakeOpIdNameSubSetEq()) || (OpIdName == gsMakeOpIdNameSubSet()) ||
       (OpIdName == gsMakeOpIdNameSubBagEq()) || (OpIdName == gsMakeOpIdNameSubBag())
       ) {
@@ -1496,7 +1495,7 @@ int gsPrecOpIdInfixRight(ATermAppl OpIdName)
   } else if (
       (OpIdName == gsMakeOpIdNameLT()) || (OpIdName == gsMakeOpIdNameLTE()) ||
       (OpIdName == gsMakeOpIdNameGT()) || (OpIdName == gsMakeOpIdNameGTE()) ||
-      (OpIdName == gsMakeOpIdNameSetIn()) || (OpIdName == gsMakeOpIdNameBagIn()) ||
+      (OpIdName == gsMakeOpIdNameEltIn()) ||
       (OpIdName == gsMakeOpIdNameSubSetEq()) || (OpIdName == gsMakeOpIdNameSubSet()) ||
       (OpIdName == gsMakeOpIdNameSubBagEq()) || (OpIdName == gsMakeOpIdNameSubBag())
       ) {
