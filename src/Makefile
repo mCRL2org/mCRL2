@@ -116,8 +116,8 @@ ifdef USE_BOOST
  #ltsinfo definitions
  LTSINFO_NAME       = ltsinfo
  LTSINFO_OBJECTS    = ltsinfo.o libprint.o libprint_c.o libstruct.o liblowlevel.o
+ OBJECTS           += $(LTSINFO_OBJECTS)
  LTSINFO_LDFLAGS    = -llts -lrewrite -lsvc -l$(ATERM) -lm $(LIBDL)
- OBJECTS           += $(LTSCP_OBJECTS)
 
  #lpeinfo definitions
  LPEINFO_NAME        = lpeinfo

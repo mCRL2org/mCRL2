@@ -17,6 +17,8 @@
 #define ATisAppl(x) (ATgetType(x) == AT_APPL)
 #define ATisList(x) (ATgetType(x) == AT_LIST)
 
+using namespace std;
+
 namespace mcrl2
 {
 namespace lts
@@ -53,13 +55,13 @@ lts::lts()
   init();
 }
 
-lts::lts(std::string &filename, lts_type type)
+lts::lts(string &filename, lts_type type)
 {
   init();
   read_from(filename,type);
 }
 
-lts::lts(std::istream &is, lts_type type)
+lts::lts(istream &is, lts_type type)
 {
   init();
   read_from(is,type);
@@ -115,9 +117,9 @@ void p_lts::clear()
   init();
 }
 
-lts_type p_lts::detect_type(std::string &filename)
+lts_type p_lts::detect_type(string &filename)
 {
-  std::ifstream is(filename.c_str(),std::ifstream::in|std::ifstream::binary);
+  ifstream is(filename.c_str(),ifstream::in|ifstream::binary);
   if ( !is.is_open() )
   {
     gsVerboseMsg("cannot open file '%s' for reading\n",filename.c_str());
@@ -128,63 +130,203 @@ lts_type p_lts::detect_type(std::string &filename)
 
   is.close();
 
-  if ( t == lts_none )
-  {
-    SVCfile f;
-    SVCbool b;
-
-    char *s = strdup(filename.c_str());
-    if ( SVCopen(&f,s,SVCread,&b) )
-    {
-      gsVerboseMsg("cannot detect file type of '%s'\n",filename.c_str());
-      return lts_none;
-    }
-    free(s);
-
-    std::string svc_type = SVCgetType(&f);
-    
-    if ( svc_type == "generic" )
-    {
-      gsVerboseMsg("detected mCRL input file\n");
-      t = lts_mcrl;
-    } else if ( (svc_type == "mCRL2") || (svc_type == "mCRL2+info") )
-    {
-      gsVerboseMsg("detected mCRL2 input file\n");
-      t = lts_mcrl2;
-    } else {
-      gsVerboseMsg("detected SVC input file\n");
-      t = lts_svc;
-    }
-
-    SVCclose(&f);
-  }
-
   return t;
 }
 
-lts_type p_lts::detect_type(std::istream &is)
+lts_type p_lts::detect_type(istream &is)
 {
-  if ( is == std::cin ) // XXX better test to see if is is seekable?
+  if ( is == cin ) // XXX better test to see if is is seekable?
   {
     gsVerboseMsg("type detection does not work on stdin\n");
     return lts_none;
   }
 
-  std::streampos pos = is.tellg();
-  char buf[5]; is.read(buf,5);
-  std::streamsize r = is.gcount();
-  is.seekg(pos);
+  streampos init_pos = is.tellg();
+  char buf[32]; is.read(buf,32);
+  if ( is.eof() ) is.clear();
+  streamsize r = is.gcount();
+  is.seekg(init_pos);
 
-  if ( (r == 5) && !strncmp(buf,"des (",5) )
+  // detect lts_aut
+  if ( (r >= 5) && !strncmp(buf,"des (",5) )
   {
     gsVerboseMsg("detected AUT input file\n");
     return lts_aut;
   }
+  
+  // detect lts_svc, lts_mcrl and lts_mcrl2
+  if ( r >= 18 )
+  {
+    unsigned int pos = 0;
+    unsigned char byte_val;
+    unsigned int int_flag,size,val;
+#define _GET_SVC_BIT() ((((unsigned char *) (buf))[(pos)/8] >> (7-((pos++)%8))) & 1)
+#define _GET_SVC_BIT2() ((((unsigned char *) (buf2))[(pos)/8] >> (7-((pos++)%8))) & 1)
+#define _GET_SVC_CHAR() { byte_val = 0; for (int _i=0; _i<7; _i++) { byte_val = byte_val*2 + _GET_SVC_BIT2(); } }
+#define _GET_SVC_BYTE() { byte_val = 0; for (int _i=0; _i<8; _i++) { byte_val = byte_val*2 + _GET_SVC_BIT(); } }
+#define _GET_SVC_INT() { int_flag = _GET_SVC_BIT(); size = _GET_SVC_BIT(); size = size*2+_GET_SVC_BIT(); val = 0; for (unsigned int _i=0; _i<=size; _i++) { _GET_SVC_BYTE(); val = val*256 + byte_val; } }
+    _GET_SVC_BIT(); // indexed flag
+    _GET_SVC_INT(); // header pos
+    if ( int_flag == 0 )
+    {
+      unsigned int header_pos = val;
+      _GET_SVC_INT(); // body pos
+      if ( int_flag == 0 )
+      {
+        _GET_SVC_INT(); // trailer pos
+        if ( int_flag == 0 )
+        {
+          _GET_SVC_INT(); // version pos
+          if ( (val >= (pos+7)/8) && (header_pos >= (pos+7)/8) )
+          {
+            is.seekg(init_pos+((streampos) val));
+	    if ( is.fail() )
+            {
+              is.seekg(init_pos);
+            } else {
+              char buf2[56];
+              bool valid = false;
+              bool notdone = true;
+              while ( notdone )
+              {
+                is.read(buf2,56);
+                if ( is.eof() ) is.clear();
+
+                pos = 0;
+                r = is.gcount();
+                if ( r == 0 )
+                {
+                  break;
+                }
+                for (int i=0; i*7<r*8; i++)
+                {
+                  _GET_SVC_CHAR();
+                  if ( byte_val == 0 )
+                  {
+                    notdone = false;
+                    valid = true;
+                    break;
+                  } else if ( (byte_val < ' ') || (byte_val > '~') )
+                  {
+                    notdone = false;
+                    break;
+                  }
+                }
+              }
+              if ( valid )
+              {
+                is.seekg(init_pos+((streampos) header_pos));
+                if ( is.fail() )
+                {
+                  is.seekg(init_pos);
+                } else {
+                  string s;
+                  unsigned int str_cnt = 0;
+                  valid = false;
+                  notdone = true;
+                  while ( notdone )
+                  {
+                    is.read(buf2,56);
+                    if ( is.eof() ) is.clear();
+
+                    pos = 0;
+                    r = is.gcount();
+                    if ( r == 0 )
+                    {
+                      break;
+                    }
+                    for (int i=0; i*7<r*8; i++)
+                    {
+                      _GET_SVC_CHAR();
+                      if ( byte_val == 0 )
+                      {
+                        str_cnt++;
+                        if ( str_cnt == 4 )
+                        {
+                          valid = true;
+                          notdone = false;
+                          break;
+                        } else {
+                          s = "";
+                        }
+                      } else if ( (byte_val < ' ') || (byte_val > '~') )
+                      {
+                        notdone = false;
+                        break;
+                      } else {
+                        s += (char) byte_val;
+                      }
+                    }
+                  }
+                  is.seekg(init_pos);
+                  if ( valid )
+                  {
+                    if ( s == "generic" )
+                    {
+                      gsVerboseMsg("detected mCRL input file\n");
+                      return lts_mcrl;
+                    } else if ( (s == "mCRL2") || (s == "mCRL2+info") )
+                    {
+                      gsVerboseMsg("detected mCRL2 input file\n");
+                      return lts_mcrl2;
+                    } else {
+                      gsVerboseMsg("detected SVC input file\n");
+                      return lts_svc;
+                    }
+                  }
+                }
+              }
+            }
+          }
+        }
+      }
+    }
+  }
+
+#ifdef MCRL2_BCG
+  // detect lts_bcg
+  if ( r >= 2 )
+  {
+    if ( (buf[0] == 0x01) && (buf[1] == 0x00) )
+    {
+      const unsigned int offsets[] = { 0x3, 0xb, 0x13, 0x1b, 0x23, 0x2b, 0x33, 0x3b, 0x43, 0x4b };
+      const unsigned int num_offsets = 10;
+
+      is.seekg(0,istream::end);
+      streampos size = is.tellg();
+
+      bool valid = true;
+      for (unsigned int i=0; i<num_offsets; i++)
+      {
+        if ( offsets[i] >= size )
+        {
+          valid = false;
+          break;
+        }
+        
+        unsigned int pointer = 0; is.read((char *) &pointer,4);
+        if ( pointer >= size )
+        {
+          valid = false;
+          break;
+        }
+      }
+
+      is.seekg(init_pos);
+
+      if ( valid )
+      {
+        gsVerboseMsg("detected BCG input file\n");
+        return lts_bcg;
+      }
+    }
+  }
+#endif
 
   return lts_none;
 }
 
-bool p_lts::read_from_svc(std::string &filename, lts_type type)
+bool p_lts::read_from_svc(string &filename, lts_type type)
 {
   SVCfile f;
   SVCbool b;
@@ -198,7 +340,7 @@ bool p_lts::read_from_svc(std::string &filename, lts_type type)
 
   creator = SVCgetCreator(&f);
   
-  std::string svc_type = SVCgetType(&f);
+  string svc_type = SVCgetType(&f);
   if ( type == lts_mcrl )
   {
     if ( svc_type != "generic" )
@@ -275,9 +417,9 @@ bool p_lts::read_from_svc(std::string &filename, lts_type type)
   return true;
 }
 
-bool p_lts::read_from_aut(std::string &filename)
+bool p_lts::read_from_aut(string &filename)
 {
-  std::ifstream is(filename.c_str());
+  ifstream is(filename.c_str());
 
   if ( !is.is_open() )
   {
@@ -292,7 +434,7 @@ bool p_lts::read_from_aut(std::string &filename)
   return r;
 }
 
-bool p_lts::read_from_aut(std::istream &is)
+bool p_lts::read_from_aut(istream &is)
 {
   unsigned int ntrans,nstate;
   char buf[1024];
@@ -338,10 +480,10 @@ bool p_lts::read_from_aut(std::istream &is)
 }
 
 #ifdef MCRL2_BCG
-bool p_lts::read_from_bcg(std::string &filename)
+bool p_lts::read_from_bcg(string &filename)
 {
-  std::string::size_type pos = filename.rfind('.');
-  if ( (pos == std::string::npos) || (filename.substr(pos+1) != "bcg") )
+  string::size_type pos = filename.rfind('.');
+  if ( (pos == string::npos) || (filename.substr(pos+1) != "bcg") )
   {
     gsVerboseMsg("cannot open BCG file without '.bcg' extension\n");
     return false;
@@ -388,12 +530,13 @@ bool p_lts::read_from_bcg(std::string &filename)
   BCG_OT_END_ITERATE;
 
   creator = "";
+  type = lts_bcg;
 
   return true;
 }
 #endif
 
-bool lts::read_from(std::string &filename, lts_type type)
+bool lts::read_from(string &filename, lts_type type)
 {
   clear();
   if ( type == lts_none )
@@ -428,7 +571,7 @@ bool lts::read_from(std::string &filename, lts_type type)
   }
 }
 
-bool lts::read_from(std::istream &is, lts_type type)
+bool lts::read_from(istream &is, lts_type type)
 {
   clear();
   if ( type == lts_none )
@@ -462,7 +605,7 @@ bool lts::read_from(std::istream &is, lts_type type)
   }
 }
 
-bool p_lts::write_to_svc(std::string &filename, lts_type type)
+bool p_lts::write_to_svc(string &filename, lts_type type)
 {
   if ( type == lts_mcrl )
   {
@@ -571,9 +714,9 @@ bool p_lts::write_to_svc(std::string &filename, lts_type type)
   return true;
 }
 
-bool p_lts::write_to_aut(std::string &filename)
+bool p_lts::write_to_aut(string &filename)
 {
-  std::ofstream os(filename.c_str());
+  ofstream os(filename.c_str());
 
   if ( !os.is_open() )
   {
@@ -588,9 +731,9 @@ bool p_lts::write_to_aut(std::string &filename)
   return true;
 }
 
-bool p_lts::write_to_aut(std::ostream &os)
+bool p_lts::write_to_aut(ostream &os)
 {
-  os << "des (" << init_state << "," << ntransitions << "," << nstates << ")" << std::endl;
+  os << "des (" << init_state << "," << ntransitions << "," << nstates << ")" << endl;
 
   for (unsigned int i=0; i<ntransitions; i++)
   {
@@ -614,14 +757,14 @@ bool p_lts::write_to_aut(std::ostream &os)
     } else {
       os << transitions[i].label;
     }
-    os << "," << transitions[i].to << ")" << std::endl;
+    os << "," << transitions[i].to << ")" << endl;
   }
 
   return true;
 }
 
 #ifdef MCRL2_BCG
-bool p_lts::write_to_bcg(std::string &filename)
+bool p_lts::write_to_bcg(string &filename)
 {
   BCG_IO_WRITE_BCG_SURVIVE(BCG_TRUE);
   char *s = strdup(filename.c_str());
@@ -647,7 +790,7 @@ bool p_lts::write_to_bcg(std::string &filename)
   unsigned int buf_size = 0;
   for (unsigned int i=0; i<ntransitions; i++)
   {
-    std::string label_str;
+    string label_str;
     if ( label_info )
     {
       ATerm label = label_values[transitions[i].label];
@@ -686,7 +829,7 @@ bool p_lts::write_to_bcg(std::string &filename)
 }
 #endif
 
-bool lts::write_to(std::string &filename, lts_type type)
+bool lts::write_to(string &filename, lts_type type)
 {
   switch ( type )
   {
@@ -710,7 +853,7 @@ bool lts::write_to(std::string &filename, lts_type type)
   }
 }
 
-bool lts::write_to(std::ostream &os, lts_type type)
+bool lts::write_to(ostream &os, lts_type type)
 {
   switch ( type )
   {
@@ -942,12 +1085,12 @@ bool lts::has_creator()
   return !creator.empty();
 }
 
-std::string lts::get_creator()
+string lts::get_creator()
 {
   return creator;
 }
 
-void lts::set_creator(std::string creator)
+void lts::set_creator(string creator)
 {
   this->creator = creator;
 }
