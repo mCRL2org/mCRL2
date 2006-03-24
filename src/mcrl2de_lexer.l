@@ -1,30 +1,30 @@
 %{
 #include <string.h>
-#include "mcrl2lexer.h"
-#include "mcrl2parser.hpp"
+#include "mcrl2de_lexer.h"
+#include "mcrl2de_parser.hpp"
 #include "libstruct.h"
 #include "liblowlevel.h"
 
 //Global precondition: the ATerm library has been initialised
 
 //external declarations
-int mcrl2yyparse(void);          /* declared in mcrl2parser.cpp */
-extern YYSTYPE mcrl2yylval;      /* declared in mcrl2parser.cpp */
+int mcrl2deyyparse(void);          /* declared in mcrl2deparser.cpp */
+extern YYSTYPE mcrl2deyylval;      /* declared in mcrl2deparser.cpp */
 #ifndef _MSC_VER
-extern int fileno(FILE *stream); /* declared in stdio.h (forgotten by flex) */
+extern int fileno(FILE *stream);   /* declared in stdio.h (forgotten by flex) */
 #endif
 
 //global declarations, used by mcrl2parser.cpp
-int  mcrl2yylex(void);           /* lexer function */
-void mcrl2yyerror(const char *s);/* error function */
-ATermAppl SpecTree = NULL;       /* the parse tree */
+int  mcrl2deyylex(void);           /* lexer function */
+void mcrl2deyyerror(const char *s);/* error function */
+ATermAppl DETree = NULL;           /* the parse tree */
 
 //local declarations
 int LineNr = 1;                  /* line number in source file */
 int ColNr  = 1;                  /* column number in source file */
-mcrl2yyFlexLexer *lexer = NULL;  /* lexer object */
+mcrl2deyyFlexLexer *lexer = NULL;  /* lexer object */
 
-#define ProcessString() ColNr += YYLeng(); mcrl2yylval.appl = gsString2ATermAppl(YYText());
+#define ProcessString() ColNr += YYLeng(); mcrl2deyylval.appl = gsString2ATermAppl(YYText());
 
 %}
 Id         [a-zA-Z\_][a-zA-Z0-9\_']*
@@ -32,7 +32,7 @@ Number     "0"|([1-9][0-9]*)
 
 %option c++
 %option noyywrap
-%option prefix="mcrl2yy"
+%option prefix="mcrl2deyy"
 %option nounput
 
 %%
@@ -121,17 +121,17 @@ comm       { ProcessString(); return COMM; }
 {Number}   { ProcessString(); return NUMBER; }
 
 .          { 
-             ColNr += YYLeng(); mcrl2yyerror("unknown character");
+             ColNr += YYLeng(); mcrl2deyyerror("unknown character");
              /* remaining characters */
 	   }
 
 %%
 
-int mcrl2yylex(void) {
+int mcrl2deyylex(void) {
   return lexer->yylex();
 }
 
-void mcrl2yyerror(const char *s) {
+void mcrl2deyyerror(const char *s) {
   int oldColNr = ColNr - lexer->YYLeng();
   if (oldColNr < 0) {
     oldColNr = 0;
@@ -143,21 +143,21 @@ void mcrl2yyerror(const char *s) {
   ); 
 }
 
-ATermAppl mcrl2Parse(std::istream &SpecStream) {
+ATermAppl mcrl2deParse(std::istream &DEStream) {
   ATermAppl Result = NULL;
-  SpecTree = NULL;
-  ATprotectAppl(&SpecTree);
+  DETree = NULL;
+  ATprotectAppl(&DETree);
   LineNr = 1;
   ColNr = 1;
-  lexer = new mcrl2yyFlexLexer(&SpecStream);
-  if (mcrl2yyparse() != 0) {
+  lexer = new mcrl2deyyFlexLexer(&DEStream);
+  if (mcrl2deyyparse() != 0) {
     Result = NULL;
   } else {
-    //SpecTree contains the parsed specification
-    Result = SpecTree;
-    SpecTree = NULL;
+    //DETree contains the parsed data expression
+    Result = DETree;
+    DETree = NULL;
   }
-  ATunprotectAppl(&SpecTree);
+  ATunprotectAppl(&DETree);
   delete lexer;
   return Result;
 }

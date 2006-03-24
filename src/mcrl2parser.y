@@ -455,7 +455,7 @@ proc_decl:
     }
   ;
 
-//one or more declarations of one or more operation variables, separated by
+//one or more declarations of one or more data variables, separated by
 //comma's
 data_vars_decls_cs:
   data_vars_decl

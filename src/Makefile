@@ -203,7 +203,7 @@ OBJECTS           := $(sort $(OBJECTS))
 
 #Make rules
 .PHONY: all install clean distclean boost boost_relay documentation squadt ltsview experimental
-.PRECIOUS: mcrl2parser.cpp mcrl2lexer.cpp
+.PRECIOUS: mcrl2parser.cpp mcrl2lexer.cpp mcrl2de_parser.cpp mcrl2de_lexer.cpp
 
 all: $(EXE_NAMES) $(LIB_NAMES) $(BUILD_EXPERIMENTAL)
 
@@ -302,11 +302,13 @@ aterm_install:
 	install -m 444 aterm/libATerm.a $(libdir)/aterm
 
 clean:
-	$(RM) $(EXE_NAMES) $(EXPERIMENTALS) $(LIB_NAMES) *.o *.a *.d* *.dpp* lpe/*.o lpe/*.dpp aterm/*.o aterm/*.a aterm/*.d svc/*.o svc/*.a svc/*.d svc/*.dpp mcrl2lexer.cpp mcrl2parser.cpp mcrl2parser.hpp mcrl2parser.output autom4te.cache *~ core core.* utility/maximum_revision
+	$(RM) $(EXE_NAMES) $(EXPERIMENTALS) $(LIB_NAMES) *.o *.a *.d* *.dpp* lpe/*.o lpe/*.dpp aterm/*.o aterm/*.a aterm/*.d svc/*.o svc/*.a svc/*.d svc/*.dpp mcrl2lexer.cpp mcrl2parser.cpp mcrl2parser.hpp mcrl2parser.output mcrl2de_lexer.cpp mcrl2de_parser.cpp mcrl2de_parser.hpp mcrl2de_parser.output autom4te.cache *~ core core.* utility/maximum_revision
 
 distclean: clean
 
 mcrl2lexer.o: mcrl2parser.cpp
+
+mcrl2de_lexer.o: mcrl2de_parser.cpp
 
 $(ATERM_NAME): $(ATERM_OBJECTS)
 	$(AR) $(ARFLAGS) $@ $(ATERM_OBJECTS)
