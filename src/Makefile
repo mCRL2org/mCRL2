@@ -203,7 +203,7 @@ OBJECTS           := $(sort $(OBJECTS))
 
 #Make rules
 .PHONY: all install clean distclean boost boost_relay documentation squadt ltsview experimental
-.PRECIOUS: mcrl2parser.c mcrl2lexer.c
+.PRECIOUS: mcrl2parser.cpp mcrl2lexer.cpp
 
 all: $(EXE_NAMES) $(LIB_NAMES) $(BUILD_EXPERIMENTAL)
 
@@ -302,12 +302,11 @@ aterm_install:
 	install -m 444 aterm/libATerm.a $(libdir)/aterm
 
 clean:
-	$(RM) $(EXE_NAMES) $(EXPERIMENTALS) $(LIB_NAMES) *.o *.a *.d* *.dpp* lpe/*.o lpe/*.dpp aterm/*.o aterm/*.a aterm/*.d svc/*.o svc/*.a svc/*.d svc/*.dpp mcrl2lexer.c mcrl2parser.c mcrl2parser.h mcrl2parser.output autom4te.cache *~ core core.* utility/maximum_revision
+	$(RM) $(EXE_NAMES) $(EXPERIMENTALS) $(LIB_NAMES) *.o *.a *.d* *.dpp* lpe/*.o lpe/*.dpp aterm/*.o aterm/*.a aterm/*.d svc/*.o svc/*.a svc/*.d svc/*.dpp mcrl2lexer.cpp mcrl2parser.cpp mcrl2parser.hpp mcrl2parser.output autom4te.cache *~ core core.* utility/maximum_revision
 
 distclean: clean
-	$(RM) -r rewr_innerc_aux.h
 
-mcrl2lexer.o: mcrl2parser.c
+mcrl2lexer.o: mcrl2parser.cpp
 
 $(ATERM_NAME): $(ATERM_OBJECTS)
 	$(AR) $(ARFLAGS) $@ $(ATERM_OBJECTS)
@@ -443,13 +442,13 @@ $(ALPHA_NAME) : $(ALPHA_OBJECTS) $(ATERM_DEP) $(LIBREWR_NAME)
 $(LIN_NAME) : $(LIN_OBJECTS) $(ATERM_DEP) $(LIBREWR_NAME)
 	$(CXX) -o $@ $(LIN_OBJECTS) $(LDFLAGS) $(LIN_LDFLAGS)
 
-%.c : %.y
+%.cpp : %.y
 	$(BISON) $(BFLAGS) -o $@ $<
 
-%.c : %.l
+%.cpp : %.l
 	$(FLEX) $(LFLAGS) -o$@ $<
 
-# *.cpp is needed for generated code (e.g. by bison)
+# *.cpp is needed for generated code (by flex and bison)
 *.cpp *.o aterm/*.o svc/*.o: Makefile $(CONFIG)
 
 %.d : %.c $(REVISION_HEADER)

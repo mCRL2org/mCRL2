@@ -1,7 +1,7 @@
 %{
 #include <string.h>
 #include "mcrl2lexer.h"
-#include "mcrl2parser.h"
+#include "mcrl2parser.hpp"
 #include "libstruct.h"
 #include "liblowlevel.h"
 
@@ -11,8 +11,8 @@
 ATermAppl gsTree = NULL;         /* the parse tree */
 
 //external declarations
-int mcrl2yyparse(void);             /* declared in mcrl2parser.c */
-extern YYSTYPE mcrl2yylval;         /* declared in mcrl2parser.c */
+int mcrl2yyparse(void);  /* declared in mcrl2parser.cpp */
+extern YYSTYPE mcrl2yylval;         /* declared in mcrl2parser.cpp */
 #ifndef _MSC_VER
 extern int fileno(FILE *stream); /* declared in stdio.h (forgotten by lex) */
 #endif
@@ -23,7 +23,7 @@ int ColNr  = 1;                  /* column number in source file */
 void gsProcessString(void);      /* default action to be taken when a string is
                                     scanned */
 void mcrl2yyerror(const char *s);/* display error message (needed by yacc) */
-int mcrl2yywrap(void);           /* action taken after an EOF (needed by yacc) */
+extern "C" int mcrl2yywrap(void);/* action taken after an EOF (needed by yacc) */
 
 %}
 Id         [a-zA-Z\_][a-zA-Z0-9\_']*
