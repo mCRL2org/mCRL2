@@ -52,6 +52,7 @@ Number     "0"|([1-9][0-9]*)
 "||"       { gsProcessString(); return BARS; }
 "=>"       { gsProcessString(); return IMP; }
 "<<"       { gsProcessString(); return BINIT; }
+"<>"       { gsProcessString(); return ELSE; }
 "*"        { gsProcessString(); return STAR; }
 "+"        { gsProcessString(); return PLUS; }
 "-"        { gsProcessString(); return MINUS; }

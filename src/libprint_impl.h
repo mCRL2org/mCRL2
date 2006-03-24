@@ -890,7 +890,7 @@ void PRINT_FUNC(PrintPart_Appl)(PRINT_OUTTYPE OutStream,
       pp_format, ShowSorts, 5);
     ATermAppl PartElse = ATAgetArgument(Part, 2);
     if (!gsIsDelta(PartElse)) {
-      PRINT_FUNC(fprints)(OutStream, ", ");
+      PRINT_FUNC(fprints)(OutStream, " <> ");
       PRINT_FUNC(PrintPart_Appl)(OutStream, PartElse,
         pp_format, ShowSorts, 5);
     }

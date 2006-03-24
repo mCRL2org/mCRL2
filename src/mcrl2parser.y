@@ -55,6 +55,7 @@ ATermAppl gsSpecEltsToSpec(ATermList SpecElts);
 //---------
 
 %token <appl> LMERGE ARROW LTE GTE CONS SNOC CONCAT EQ NEQ AND BARS IMP BINIT
+%token <appl> ELSE
 %token <appl> STAR PLUS MINUS EQUALS DOT COMMA COLON SEMICOLON QMARK EXCLAM AT
 %token <appl> HASH BAR
 %token <appl> LPAR RPAR PBRACK LBRACK RBRACK LANG RANG PBRACE LBRACE RBRACE
@@ -1272,7 +1273,7 @@ proc_expr_cond:
       $$ = gsMakeCond($1, $3, gsMakeDelta());
       gsDebugMsg("parsed conditional expression\n  %T\n", $$);
     }
-  | data_expr_prefix ARROW proc_expr_seq_rhs_wo_cond COMMA proc_expr_cond_la
+  | data_expr_prefix ARROW proc_expr_seq_rhs_wo_cond ELSE proc_expr_cond_la
     {
       $$ = gsMakeCond($1, $3, $5);
       gsDebugMsg("parsed conditional expression\n  %T\n", $$);
@@ -1334,7 +1335,7 @@ proc_expr_seq_rhs:
       $$ = gsMakeCond($1, $3, gsMakeDelta());
       gsDebugMsg("parsed conditional expression\n  %T\n", $$);
     }
-  | data_expr_prefix ARROW proc_expr_seq_rhs_wo_cond COMMA proc_expr_seq_rhs
+  | data_expr_prefix ARROW proc_expr_seq_rhs_wo_cond ELSE proc_expr_seq_rhs
     {
       $$ = gsMakeCond($1, $3, $5);
       gsDebugMsg("parsed conditional expression\n  %T\n", $$);
@@ -1422,7 +1423,7 @@ proc_expr_sync_rhs:
       $$ = gsMakeCond($1, $3, gsMakeDelta());
       gsDebugMsg("parsed conditional expression\n  %T\n", $$);
     }
-  | data_expr_prefix ARROW proc_expr_sync_rhs_wo_cond COMMA proc_expr_sync_rhs
+  | data_expr_prefix ARROW proc_expr_sync_rhs_wo_cond ELSE proc_expr_sync_rhs
     {
       $$ = gsMakeCond($1, $3, $5);
       gsDebugMsg("parsed conditional expression\n  %T\n", $$);
