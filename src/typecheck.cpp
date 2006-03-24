@@ -166,7 +166,7 @@ static ATermAppl gstcMatchListOpEltAt(ATermAppl Type);
 static ATermAppl gstcMatchListOpHead(ATermAppl Type);
 static ATermAppl gstcMatchListOpTail(ATermAppl Type);
 static ATermAppl gstcMatchSetOpSet2Bag(ATermAppl Type);
-static ATermAppl gstcMatchSetBagOpIn(ATermAppl Type);
+static ATermAppl gstcMatchListSetBagOpIn(ATermAppl Type);
 static ATermAppl gstcMatchSetBagOpSubEq(ATermAppl Type);
 static ATermAppl gstcMatchSetBagOpUnionDiffIntersect(ATermAppl Type);
 static ATermAppl gstcMatchSetOpSetCompl(ATermAppl Type);
@@ -576,7 +576,8 @@ void gstcDataInit(void){
 			    gstcMakeSortArrowProd2(gsMakeSortIdReal(),gsMakeSortIdNat(),gsMakeSortIdReal()));
 //Lists
   gstcAddSystemConstant(gsMakeOpIdNameEmptyList(),gsMakeSortList(gsMakeUnknown()));
-  gstcAddSystemFunctionProd(gsMakeOpIdNameListSize(),
+  gstcAddSystemFunctionProd(gsMakeOpIdNameEltIn(),
+			    gstcMakeSortArrowProd2(gsMakeUnknown(),gsMakeSortList(gsMakeUnknown()),gsMakeSortExprBool()));  gstcAddSystemFunctionProd(gsMakeOpIdNameListSize(),
 			    gstcMakeSortArrowProd1(gsMakeSortList(gsMakeUnknown()),gsMakeSortExprNat()));
   gstcAddSystemFunctionProd(gsMakeOpIdNameCons(),
 			    gstcMakeSortArrowProd2(gsMakeUnknown(),gsMakeSortList(gsMakeUnknown()),gsMakeSortList(gsMakeUnknown())));
@@ -1990,10 +1991,10 @@ static ATermAppl gstcTraverseVarConsTypeDN(int nFactPars, ATermTable Vars, ATerm
       }
 
       if(ATisEqual(gsMakeOpIdNameEltIn(),ATAgetArgument(*DataTerm,0))){
-	gsDebugMsg("Doing {Set,Bag}In matching Type %T, PosType %T\n",Type,PosType);    
-	ATermAppl NewType=gstcMatchSetBagOpIn(Type);
+	gsDebugMsg("Doing {List,Set,Bag}In matching Type %T, PosType %T\n",Type,PosType);    
+	ATermAppl NewType=gstcMatchListSetBagOpIn(Type);
 	if(!NewType){
-	  gsErrorMsg("the function {Set,Bag}In has incompatible argument types %P (while typechecking %P)\n",Type,*DataTerm);
+	  gsErrorMsg("the function {List,Set,Bag}In has incompatible argument types %P (while typechecking %P)\n",Type,*DataTerm);
 	  return NULL;
 	}
 	Type=NewType;
@@ -2785,8 +2786,8 @@ static ATermAppl gstcMatchSetOpSet2Bag(ATermAppl Type){
   return gsMakeSortArrowProd(ATmakeList1((ATerm)gsMakeSortSet(Arg)),gsMakeSortBag(Arg));
 }
 
-static ATermAppl gstcMatchSetBagOpIn(ATermAppl Type){
-  //tries to sort out the type of EltIn (SxSet(S)->Bool or SxBag(S)->Bool)
+static ATermAppl gstcMatchListSetBagOpIn(ATermAppl Type){
+  //tries to sort out the type of EltIn (SxList(S)->Bool or SxSet(S)->Bool or SxBag(S)->Bool)
   //If some of the parameters are Pos,Nat, or Int do upcasting.
 
   assert(gsIsSortArrowProd(Type));
@@ -2799,7 +2800,7 @@ static ATermAppl gstcMatchSetBagOpIn(ATermAppl Type){
   Args=ATgetNext(Args);
   ATermAppl Arg2=ATAgetFirst(Args);
   if(gsIsSortId(Arg2)) Arg2=gstcUnwindType(Arg2);
-  assert(gsIsSortSet(Arg2)||gsIsSortBag(Arg2));
+  assert(gsIsSortList(Arg2)||gsIsSortSet(Arg2)||gsIsSortBag(Arg2));
   ATermAppl Arg2s=ATAgetArgument(Arg2,0);
   
   ATermAppl Arg=gstcUnifyMinType(Arg1,Arg2s);
