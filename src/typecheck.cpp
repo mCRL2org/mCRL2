@@ -2777,6 +2777,7 @@ static ATermAppl gstcMatchSetOpSet2Bag(ATermAppl Type){
   ATermAppl Arg=ATAgetFirst(Args);
   if(gsIsSortId(Arg)) Arg=gstcUnwindType(Arg);
   assert(gsIsSortSet(Arg));
+  Arg=ATAgetArgument(Arg,0);
 
   Arg=gstcUnifyMinType(Arg,Res);
   if(!Arg) return NULL;
