@@ -10,7 +10,7 @@
 #include "liblowlevel.h"
 #include "libprint_types.h"
 #include "libprint_c.h"
-#include "mcrl2lexer.h"
+#include "libparse.h"
 #include "typecheck.h"
 #include "dataimpl.h"
 #include "lin_alt.h"
@@ -127,7 +127,7 @@ int main(int argc, char **argv)
                 }
                 //parse specification
                 gsVerboseMsg("parsing input file '%s'...\n", argv[optind]);
-                Spec = mcrl2Parse(SpecStream);
+                Spec = parse_specification(SpecStream);
 		SpecStream.close();
                 if (Spec == NULL) {
                   gsErrorMsg("parsing failed\n");

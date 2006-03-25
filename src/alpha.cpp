@@ -14,7 +14,7 @@
 #include "libstruct.h"
 #include "libprint_types.h"
 #include "libprint_c.h"
-#include "mcrl2lexer.h"
+#include "libparse.h"
 #include "typecheck.h"
 #include "libalpha.h"
 
@@ -52,7 +52,7 @@ int main(int argc, char **argv)
 {
         FILE *OutStream;
 	ATerm stackbot;
-	ATermAppl Spec;
+	ATermAppl Spec = NULL;
         #define sopts      "aw:hqvd"
         #define VersionOption     CHAR_MAX + 1
 	struct option lopts[] = {
@@ -136,10 +136,10 @@ int main(int argc, char **argv)
 				fprintf(stderr,"error: cannot open input file '%s'\n",argv[optind]);
 				return 1;
 			}
-			Spec = mcrl2Parse(is);
+			Spec = parse_specification(is);
 			is.close();
 		} else {
-			Spec = mcrl2Parse(cin);
+			Spec = parse_specification(cin);
 		}
 		Spec = gsTypeCheck(Spec);
 	}

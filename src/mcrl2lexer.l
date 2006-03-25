@@ -5,6 +5,8 @@
 #include "libstruct.h"
 #include "liblowlevel.h"
 
+using namespace std;
+
 //Global precondition: the ATerm library has been initialised
 
 //external declarations
@@ -23,6 +25,8 @@ ATermAppl SpecTree = NULL;       /* the parse tree */
 int LineNr = 1;                  /* line number in source file */
 int ColNr  = 1;                  /* column number in source file */
 mcrl2yyFlexLexer *lexer = NULL;  /* lexer object */
+vector<istream*> *lexer_streams = NULL;/* input streams */
+int cur_index = -1;               /* current index in lexer_streams */
 
 #define ProcessString() ColNr += YYLeng(); mcrl2yylval.appl = gsString2ATermAppl(YYText());
 
@@ -31,7 +35,6 @@ Id         [a-zA-Z\_][a-zA-Z0-9\_']*
 Number     "0"|([1-9][0-9]*) 
 
 %option c++
-%option noyywrap
 %option prefix="mcrl2yy"
 %option nounput
 
@@ -143,13 +146,35 @@ void mcrl2yyerror(const char *s) {
   ); 
 }
 
-ATermAppl mcrl2Parse(std::istream &SpecStream) {
+int mcrl2yywrap(void) {
+  if (lexer_streams == NULL) {
+    return 1;
+  }
+  //SpecStreams != NULL
+  if (!(cur_index >= 0 && cur_index < (int) lexer_streams->size())) {
+    return 1;
+  }
+  //0 <= cur_index < lexer_streams->size()
+  LineNr = 1;
+  ColNr = 1;
+  cur_index++;
+  lexer->switch_streams((*lexer_streams)[cur_index], NULL);
+  return 0;
+}
+
+ATermAppl parse_streams(vector<istream*> &streams) {
   ATermAppl Result = NULL;
+  if (streams.size() == 0) {
+    return Result;
+  }
+  //streams.size() > 0
   SpecTree = NULL;
   ATprotectAppl(&SpecTree);
   LineNr = 1;
   ColNr = 1;
-  lexer = new mcrl2yyFlexLexer(&SpecStream);
+  cur_index = 0;
+  lexer_streams = &streams;
+  lexer = new mcrl2yyFlexLexer(streams[0]);
   if (mcrl2yyparse() != 0) {
     Result = NULL;
   } else {

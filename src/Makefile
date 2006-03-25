@@ -50,7 +50,7 @@ LIBNEXT_LDFLAGS    = -l$(ATERM) -lm
 
 #mcrl22lpe definitions
 MCRL22LPE_NAME     = mcrl22lpe
-MCRL22LPE_OBJECTS  = mcrl22lpe.o lin_std.o lin_alt.o mcrl2parser.o mcrl2lexer.o typecheck.o dataimpl.o libprint_c.o libstruct.o liblowlevel.o libalpha.o
+MCRL22LPE_OBJECTS  = mcrl22lpe.o lin_std.o lin_alt.o libparse.o mcrl2parser.o mcrl2lexer.o typecheck.o dataimpl.o libprint_c.o libstruct.o liblowlevel.o libalpha.o
 OBJECTS           += $(MCRL22LPE_OBJECTS)
 MCRL22LPE_LDFLAGS  = -lrewrite -l$(ATERM) -lm $(LIBDL)
 
@@ -185,13 +185,13 @@ LTSMIN_LDFLAGS     = -lrewrite -lsvc -l$(ATERM) -lm $(LIBDL)
 
 #alpha definitions
 ALPHA_NAME         = alpha
-ALPHA_OBJECTS      = alpha.o libalpha.o mcrl2parser.o mcrl2lexer.o typecheck.o libprint_c.o libstruct.o liblowlevel.o
+ALPHA_OBJECTS      = alpha.o libalpha.o mcrl2parser.o libparse.o mcrl2lexer.o typecheck.o libprint_c.o libstruct.o liblowlevel.o
 OBJECTS           += $(ALPHA_OBJECTS)
 ALPHA_LDFLAGS      = -lrewrite -l$(ATERM) -lm $(LIBDL)
 
 #lin definitions
 LIN_NAME           = lin
-LIN_OBJECTS        = lin.o lin_alt.o mcrl2parser.o mcrl2lexer.o typecheck.o dataimpl.o libprint_c.o libstruct.o liblowlevel.o
+LIN_OBJECTS        = lin.o lin_alt.o mcrl2parser.o libparse.o mcrl2lexer.o typecheck.o dataimpl.o libprint_c.o libstruct.o liblowlevel.o
 OBJECTS           += $(LIN_OBJECTS)
 LIN_LDFLAGS        = -lrewrite -l$(ATERM) -lm $(LIBDL)
 
@@ -203,7 +203,7 @@ OBJECTS           := $(sort $(OBJECTS))
 
 #Make rules
 .PHONY: all install clean distclean boost boost_relay documentation squadt ltsview experimental
-.PRECIOUS: mcrl2parser.cpp mcrl2lexer.cpp mcrl2de_parser.cpp mcrl2de_lexer.cpp
+.PRECIOUS: mcrl2parser.cpp mcrl2lexer.cpp
 
 all: $(EXE_NAMES) $(LIB_NAMES) $(BUILD_EXPERIMENTAL)
 
@@ -307,8 +307,6 @@ clean:
 distclean: clean
 
 mcrl2lexer.o: mcrl2parser.cpp
-
-mcrl2de_lexer.o: mcrl2de_parser.cpp
 
 $(ATERM_NAME): $(ATERM_OBJECTS)
 	$(AR) $(ARFLAGS) $@ $(ATERM_OBJECTS)

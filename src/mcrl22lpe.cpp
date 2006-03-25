@@ -20,7 +20,7 @@
 #include "liblowlevel.h"
 #include "libstruct.h"
 #include "libprint_c.h"
-#include "mcrl2lexer.h"
+#include "libparse.h"
 #include "typecheck.h"
 #include "libalpha.h"
 #include "dataimpl.h"
@@ -298,7 +298,7 @@ ATermAppl linearise_file(string &infilename, t_lin_options lin_options,
   if (infilename == "") {
     //parse specification from stdin
     gsVerboseMsg("parsing input from stdin...\n");
-    result = mcrl2Parse(cin);
+    result = parse_specification(cin);
   } else {
     //parse specification from infilename
     ifstream instream(infilename.c_str(), ifstream::in|ifstream::binary);
@@ -307,7 +307,7 @@ ATermAppl linearise_file(string &infilename, t_lin_options lin_options,
       return NULL;
     }
     gsVerboseMsg("parsing input file '%s'...\n", infilename.c_str());
-    result = mcrl2Parse(instream);
+    result = parse_specification(instream);
     instream.close();
   }
   if (result == NULL) 
