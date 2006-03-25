@@ -5,6 +5,7 @@
 #include <string.h>
 #include <getopt.h>
 #include <aterm2.h>
+#include <fstream>
 #include "libstruct.h"
 #include "liblowlevel.h"
 #include "libprint_types.h"
@@ -13,6 +14,8 @@
 #include "typecheck.h"
 #include "dataimpl.h"
 #include "lin_alt.h"
+
+using namespace std;
 
 void print_help(FILE *f, char *Name)
 {
@@ -38,9 +41,7 @@ void print_help(FILE *f, char *Name)
 
 int main(int argc, char **argv)
 {
-	FILE *SpecStream,*OutFile;
 	ATerm stackbot;
-	ATermAppl Spec;
 	#define sopts "cl2rsah"
 	#define HelpOption 1
 	struct option lopts[] = {
@@ -105,20 +106,29 @@ int main(int argc, char **argv)
 		return 0;
 	}
 
-	if ( (SpecStream = fopen(argv[optind],"rb")) == NULL )
-	{
-		perror(NAME);
-		return 1;
-	}
+	ATermAppl Spec = NULL;
 	gsEnableConstructorFunctions();
 	if ( read_aterm )
 	{
+	        FILE *SpecStream = fopen(argv[optind],"rb");
+        	if ( SpecStream == NULL )
+	        {
+		        perror(NAME);
+        		return 1;
+	        }
 		Spec = (ATermAppl) ATreadFromFile(SpecStream);
+                fclose(SpecStream);
 	} else {
+                //open input file
+                ifstream SpecStream(argv[optind], ifstream::in|ifstream::binary);
+                if (!SpecStream.is_open()) {
+                  gsErrorMsg("cannot open input file '%s'\n", argv[optind]);
+                  return 1;
+                }
                 //parse specification
-                gsVerboseMsg("parsing...\n");
+                gsVerboseMsg("parsing input file '%s'...\n", argv[optind]);
                 Spec = mcrl2Parse(SpecStream);
-		fclose(SpecStream);
+		SpecStream.close();
                 if (Spec == NULL) {
                   gsErrorMsg("parsing failed\n");
                   return 1;
@@ -138,7 +148,7 @@ int main(int argc, char **argv)
                   return 1;
                 }
 	}
-
+        FILE *OutFile;
 	if ( argc-optind > 1 )
 	{
 		if ( !strcmp("-",argv[optind+1]) )
