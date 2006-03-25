@@ -52,11 +52,12 @@ ATermAppl gsSpecEltsToSpec(ATermList SpecElts);
 %name-prefix="mcrl2yy"
 
 //start token
-%start spec
+%start start
 
 //terminals
 //---------
 
+%token <appl> TAG_SPEC TAG_DATA_EXPR
 %token <appl> LMERGE ARROW LTE GTE CONS SNOC CONCAT EQ NEQ AND BARS IMP BINIT
 %token <appl> ELSE
 %token <appl> STAR PLUS MINUS EQUALS DOT COMMA COLON SEMICOLON QMARK EXCLAM AT
@@ -71,6 +72,7 @@ ATermAppl gsSpecEltsToSpec(ATermList SpecElts);
 //non-terminals
 //-------------
 
+%type <appl> start
 %type <appl> spec spec_elt sort_spec cons_spec map_spec eqn_spec
 %type <appl> eqn_decl act_spec proc_spec proc_decl initialisation sort_expr
 %type <appl> sort_expr_arrow domain_no_arrow_elt sort_expr_struct
@@ -102,13 +104,26 @@ ATermAppl gsSpecEltsToSpec(ATermList SpecElts);
 
 %%
 
+//start
+start:
+  TAG_SPEC spec
+    {
+      $$ = $2;
+      SpecTree = $$;
+    }
+  | TAG_DATA_EXPR data_expr
+    {
+      $$ = $2;
+      SpecTree = $$;
+    }
+  ;
+
 //specification
 spec:
   spec_elts
     {
       $$ = gsSpecEltsToSpec(ATreverse($1));
       gsDebugMsg("parsed specification\n  %T\n", $$);
-      SpecTree = $$;
     }
   ;
 

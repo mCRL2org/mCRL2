@@ -46,6 +46,9 @@ Number     "0"|([1-9][0-9]*)
 
 "%".*      { ColNr += YYLeng(); /* comment */ }
 
+"@spec"    { ProcessString(); return TAG_SPEC; }
+"@data_expr" { ProcessString(); return TAG_DATA_EXPR; }
+
 "||_"      { ProcessString(); return LMERGE; }
 "->"       { ProcessString(); return ARROW; }
 "<="       { ProcessString(); return LTE; }
@@ -151,10 +154,10 @@ int mcrl2yywrap(void) {
     return 1;
   }
   //SpecStreams != NULL
-  if (!(cur_index >= 0 && cur_index < (int) lexer_streams->size())) {
+  if (!(cur_index >= 0 && cur_index < (int) lexer_streams->size()-1)) {
     return 1;
   }
-  //0 <= cur_index < lexer_streams->size()
+  //0 <= cur_index < lexer_streams->size()-1
   LineNr = 1;
   ColNr = 1;
   cur_index++;
