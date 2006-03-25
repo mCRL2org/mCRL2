@@ -2,6 +2,8 @@
 #define LVERSION  "0.1"
 #define AUTHOR    "Yaroslav S. Usenko and Muck van Weerdenburg"
 
+#include <iostream>
+#include <fstream>
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
@@ -15,6 +17,8 @@
 #include "mcrl2lexer.h"
 #include "typecheck.h"
 #include "libalpha.h"
+
+using namespace std;
 
 void PrintUsage(FILE *f, char *Name)
 {
@@ -46,7 +50,6 @@ void PrintVersion(FILE *Stream) {
 
 int main(int argc, char **argv)
 {
-	FILE *SpecStream;
         FILE *OutStream;
 	ATerm stackbot;
 	ATermAppl Spec;
@@ -65,6 +68,7 @@ int main(int argc, char **argv)
 	int opt,read_aterm,write_aterm;
 
 	ATinit(argc,argv,&stackbot);
+	gsEnableConstructorFunctions();
 
 	read_aterm = 0;
 	write_aterm = 0;
@@ -98,16 +102,6 @@ int main(int argc, char **argv)
 	      }
 	  }
 
-	SpecStream = stdin;
-	if ( optind < argc && strcmp(argv[optind],"-") )
-	{
-		if ( (SpecStream = fopen(argv[optind],"rb")) == NULL )
-		{
-			perror(NAME);
-			return 1;
-		}
-	}
-
 	OutStream = stdout;
 	if ( optind+1 < argc )
 	{
@@ -120,13 +114,34 @@ int main(int argc, char **argv)
 
 	if ( read_aterm )
 	{
-		gsEnableConstructorFunctions();
+		FILE *SpecStream = stdin;
+		if ( optind < argc && strcmp(argv[optind],"-") )
+		{
+			if ( (SpecStream = fopen(argv[optind],"rb")) == NULL )
+			{
+				perror(NAME);
+				return 1;
+			}
+		}
+
 		Spec = (ATermAppl) ATreadFromFile(SpecStream);
-	} else {
-		gsEnableConstructorFunctions();
-		Spec = mcrl2Parse(SpecStream);
-		Spec = gsTypeCheck(Spec);
+
 		fclose(SpecStream);
+	} else {
+		if ( optind < argc && strcmp(argv[optind],"-") )
+		{
+			ifstream is(argv[optind]);
+			if ( !is.is_open() )
+			{
+				fprintf(stderr,"error: cannot open input file '%s'\n",argv[optind]);
+				return 1;
+			}
+			Spec = mcrl2Parse(is);
+			is.close();
+		} else {
+			Spec = mcrl2Parse(cin);
+		}
+		Spec = gsTypeCheck(Spec);
 	}
 	if ( Spec == NULL )
 	{
