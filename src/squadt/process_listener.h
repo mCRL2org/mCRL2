@@ -13,6 +13,7 @@ namespace squadt {
 
     /** \brief Base class for process change listeners */
     class process_listener {
+      friend class process;
       friend class executor;
  
       protected:
@@ -29,7 +30,7 @@ namespace squadt {
       private:
 
         /** \brief Called when the state changes of the associated executor */
-        virtual void report_change(process::status) = 0;
+        virtual void report_change(process::status);
 
         /** \brief Associates a process with this listener */
         inline void set_process(const process::ptr& p);
@@ -37,7 +38,7 @@ namespace squadt {
       public:
  
         /** \brief Abstract destructor */
-        virtual ~process_listener() = 0;
+        virtual ~process_listener();
 
         /** \brief Gets a pointer to the associated process */
         inline process* get_process(const bool = false) const;
@@ -47,6 +48,9 @@ namespace squadt {
     };
  
     inline process_listener::~process_listener() {
+    }
+
+    inline void process_listener::report_change(process::status) {
     }
 
     /**

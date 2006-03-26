@@ -131,10 +131,13 @@ namespace squadt {
       inline bool add(const std::string&, const std::string&);
  
       /** \brief Get the tool_capabilities object for all known tools */
-      void query_tools() throw ();
+      void query_tools();
+
+      /** \brief Get the tool_capabilities object for all known tools */
+      void query_tools(boost::function < void (const std::string&) >);
 
       /** \brief Get the tool_capabilities object for a tool */
-      void query_tool(tool&) throw ();
+      bool query_tool(tool&);
 
       /** \brief Get the list of known tools */
       inline const tool_list& get_tools();

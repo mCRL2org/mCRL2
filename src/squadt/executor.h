@@ -17,6 +17,8 @@
 namespace squadt {
   namespace execution {
 
+    class command;
+
     /**
      * \brief Basic process execution component
      *
@@ -31,9 +33,9 @@ namespace squadt {
 
       private:
 
-        /** \brief Type for storing a command and a pointer to a state listener  */
-        typedef std::pair < const std::string, process_listener* > delayed_command;
- 
+        /** Convenient short-hand type */
+        typedef std::pair < command, process_listener* > command_pair;
+
       private:
 
         /** \brief The maximum number of processes that is allowed to run concurrently */
@@ -43,18 +45,18 @@ namespace squadt {
         std::list < process::ptr >     processes;
  
         /** \brief Data of processes that will be started */
-        std::deque < delayed_command > delayed_commands;
+        std::deque < command_pair >    delayed_commands;
 
       private:
     
         /** \brief Start a new process */
-        inline void start_process(const std::string&);
+        inline void start_process(const command&);
     
         /** \brief Start a new process with a listener */
-        inline void start_process(const std::string&, process_listener&);
+        inline void start_process(const command&, process_listener&);
 
         /** \brief Start a new process with a listener if s is not 0 */
-        inline void start_process(const std::string&, process_listener* s);
+        inline void start_process(const command&, process_listener* s);
     
         /** \brief handler that is invoked when a process is terminated */
         inline void handle_process_termination(process* p);
@@ -77,7 +79,7 @@ namespace squadt {
         inline ~executor();
     
         /** \brief Execute a tool */
-        inline void execute(const std::string&, process_listener* = 0);
+        inline void execute(const command&, process_listener* = 0);
     
         /** \brief Terminate a specific process */
         inline void terminate(process*);
@@ -97,51 +99,50 @@ namespace squadt {
      * @param[in] p the process to remove
      **/
     inline void executor::remove(process* p) {
-      processes.erase(std::find_if(processes.begin(), processes.end(),
-                              boost::bind(std::equal_to < process * >(), p,
-                                      boost::bind(&process::ptr::get, _1))));
-    }
- 
-    /**
-     * @param[in] c the command to execute
-     **/
-    inline void executor::start_process(const std::string& c) {
-      process::ptr p = process::execute(boost::bind(&executor::handle_process_termination, this, _1), c);
-    
-      if (p.get() != 0) {
-        processes.push_back(p);
-      }
-    }
- 
-    /**
-     * @param[in] c the command to execute
-     * @param[in] s reference to a process listener
-     **/
-    inline void executor::start_process(const std::string& c, process_listener& s) {
-      process::ptr p = process::execute(boost::bind(&executor::handle_process_termination, this, _1, &s), c);
-    
-      s.set_process(p);
+      std::list < process::ptr >::iterator i = std::find_if(processes.begin(), processes.end(),
+                              boost::bind(std::equal_to < process* >(), p,
+                                      boost::bind(&process::ptr::get, _1)));
 
-      if (p.get() != 0) {
-        processes.push_back(p);
- 
-        s.report_change(process::running);
-      }
-      else {
-        s.report_change(process::aborted);
+      if (i != processes.end()) {
+        processes.erase(i);
       }
     }
  
     /**
      * @param[in] c the command to execute
-     * @param[in] s a pointer to a process listener or 0
      **/
-    inline void executor::start_process(const std::string& c, process_listener* s) {
-      if (s == 0) {
+    inline void executor::start_process(const command& c) {
+      process::ptr p(new process(boost::bind(&executor::handle_process_termination, this, _1)));
+      
+      processes.push_back(p);
+
+      p->execute(c);
+    }
+ 
+    /**
+     * @param[in] c the command to execute
+     * @param[in] l reference to a process listener
+     **/
+    inline void executor::start_process(const command& c, process_listener& l) {
+      process::ptr p(new process(boost::bind(&executor::handle_process_termination, this, _1, &l), l));
+
+      l.set_process(p);
+
+      processes.push_back(p);
+
+      p->execute(c);
+    }
+ 
+    /**
+     * @param[in] c the command to execute
+     * @param[in] l a pointer to a process listener or 0
+     **/
+    inline void executor::start_process(const command& c, process_listener* l) {
+      if (l == 0) {
         start_process(c);
       }
       else {
-        start_process(c, *s);
+        start_process(c, *l);
       }
     }
 
@@ -152,17 +153,17 @@ namespace squadt {
     
       delayed_commands.clear();
     
-      std::for_each(processes.begin(), processes.end(), boost::bind(&process::kill, _1));
+      std::for_each(processes.begin(), processes.end(), boost::bind(&process::terminate, _1));
     }
  
     /* Start processing commands if the queue contains any waiters */
     inline void executor::start_delayed() {
       if (0 < delayed_commands.size()) {
-        std::pair < std::string, process_listener* > p = delayed_commands.front();
+        command_pair c = delayed_commands.front();
  
         delayed_commands.pop_front();
  
-        start_process(p.first, p.second);
+        start_process(c.first, c.second);
       }
     }
     
@@ -187,21 +188,19 @@ namespace squadt {
       remove(p);
  
       start_delayed();
- 
-      l->report_change(p->get_status());
     }
  
     /**
      * @param c the command that is to be executed
      * @param l a pointer to a listener for process state changes
      **/
-    void executor::execute(const std::string& c, process_listener* l) {
+    void executor::execute(const command& c, process_listener* l) {
       if (processes.size() < maximum_concurrent_processes) {
         start_process(c, l);
       }
       else {
         /* queue command for later execution */
-        delayed_commands.push_back(std::pair < const std::string, process_listener* >(c, l));
+        delayed_commands.push_back(command_pair(c, l));
       }
     }
   }

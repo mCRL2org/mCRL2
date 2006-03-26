@@ -10,6 +10,7 @@
 #include <xml2pp/detail/text_reader.tcc>
 #include <sip/detail/basic_messenger.tcc>
 
+#include "executor.h"
 #include "tool_manager.h"
 #include "processor.tcc"
 #include "process_listener.h"
@@ -22,7 +23,8 @@
 namespace squadt {
 
   /** \brief Scheme for easy command generation */
-  const char* default_argument_pattern = "%s --si-connect=socket://%s:%s --si-identifier=%s";
+  const char* socket_connect_pattern = "--si-connect=socket://%s:%s";
+  const char* identifier_pattern     = "--si-identifier=%s";
 
   const long tool_manager::default_tcp_port = 10946;
 
@@ -103,18 +105,19 @@ namespace squadt {
   void tool_manager::execute(tool& t, execution::task* p) {
     instance_identifier id = free_identifier++;
 
-    boost::format command(default_argument_pattern);
+    execution::command c(t.get_location());
 
-    command % t.get_location();
-    command % get_local_host().name() % default_tcp_port;
-    command % id;
+    c.append_argument(boost::str(boost::format(socket_connect_pattern)
+                            % get_local_host().name() % default_tcp_port));
+    c.append_argument(boost::str(boost::format(identifier_pattern)
+                            % id));
 
-    local_executor.execute(boost::str(command), p);
+    local_executor.execute(c, p);
 
     instances[id] = p;
   }
 
-  void tool_manager::query_tools() throw () {
+  void tool_manager::query_tools() {
     using namespace boost;
 
     std::for_each(tools.begin(), tools.end(),
@@ -123,41 +126,45 @@ namespace squadt {
   }
 
   /**
+   * @param h a function that is called with the name of a tool before it is queried
+   **/
+  void tool_manager::query_tools(boost::function < void (const std::string&) > h) {
+    using namespace boost;
+
+    for (tool_list::const_iterator i = tools.begin(); i != tools.end(); ++i) {
+      h((*i)->get_name());
+
+      query_tool(**i);
+    }
+  }
+
+  /**
    * @param t the tool that is to be run
    *
    * \attention This function blocks.
    **/
-  void tool_manager::query_tool(tool& t) throw () {
+  bool tool_manager::query_tool(tool& t) {
     /* Sanity check: establish tool existence */
     if (t.get_location().empty() || !boost::filesystem::exists(boost::filesystem::path(t.get_location()))) {
       throw (exception(exception_identifier::requested_tool_unavailable));
     }
 
-    instance_identifier id = free_identifier++;
-
-    boost::format command(default_argument_pattern);
-
-    command % t.get_location()
-            % get_local_host().name() % default_tcp_port
-            % id;
-
     /* Create extractor object, that will retrieve the data from the running tool process */
     boost::scoped_ptr < extractor > e(new extractor(t));
 
-    local_executor.execute(boost::str(command), e.get());
-
-    instances[id] = e.get();
+    execute(t, e.get());
 
     /* Wait until the process has been identified */
     if (e->get_process(true)) {
       /* Wait until the extractor has gathered all information */
       e->await_completion();
-    }
-    else {
-      throw (exception(exception_identifier::program_execution_failed, t.get_name()));
+
+      local_executor.terminate(e->get_process());
+
+      return (true);
     }
 
-    local_executor.terminate(e->get_process());
+    return (false);
   }
 
   void tool_manager::terminate() {

@@ -1,21 +1,23 @@
 #ifndef PROCESS_H
 #define PROCESS_H
 
-#include <boost/function.hpp>
-#include <boost/ref.hpp>
+#include <cstdio>
 
-#include <wx/wx.h>
-#include <wx/process.h>
+#include <boost/thread/thread.hpp>
+#include <boost/function.hpp>
 
 #include "exception.h"
+#include "command.h"
 
 namespace squadt {
   namespace execution {
 
+    class process_listener;
+
     /**
      * \brief Represents a system process with a status reporting facility
      **/
-    class process : public wxProcess {
+    class process {
       public:
          /** \brief state of the process */
          enum status {
@@ -30,34 +32,53 @@ namespace squadt {
  
          /** \brief Convenience type for handlers */
          typedef boost::function < void (process*) >  handler;
+
+      private:
+
+         /** \brief The default listener for changes in status */
+         static process_listener default_listener;
  
       private:
-    
+
         /** \brief The system's proces identifier for this process */
-        long int    identifier;
-    
+        long int                            identifier;
+
         /** \brief The status of this process */
-        status      current_status;
- 
+        mutable status                      current_status;
+
         /** \brief The function that is called when the status changes */
-        handler     call_back;
- 
-        /** \brief Overridden on terminate function */
-        inline void OnTerminate(int pid, int status);
+        handler                             signal_termination;
     
+        /** \brief A reference to a listener for changes status changes */
+        process_listener&                   listener;
+
+        /** \brief Thread in which actual execution and waiting is performed */
+        boost::shared_ptr < boost::thread > execution_thread;
+
+      private:
+
+        /** \brief This method does the actual execution and waiting */
+        void operator() (const command&);
+
       public:
     
         /** \brief Constructor */
-        inline process(handler, int flags = wxPROCESS_DEFAULT);
+        inline process(handler);
+    
+        /** \brief Constructor with listener */
+        inline process(handler, process_listener&);
     
         /** \brief Start the process by executing a command */
-        static ptr execute(handler, const std::string&) throw ();
+        void execute(const command&);
      
         /** \brief Returns the process status */
         inline status get_status() const;
  
         /** \brief Terminates the process */
-        inline void kill();
+        void terminate();
+ 
+        /** \brief Wait for the process to terminate */
+        void wait() const;
  
         /** \brief Destructor */
         inline ~process();
@@ -65,49 +86,25 @@ namespace squadt {
  
     /**
      * @param h the function to call when the process terminates
-     * @param f the flags for process behaviour (see wxWidgets documentation)
      **/
-    inline process::process(handler h, int f) : wxProcess(f), current_status(stopped), call_back(h) {
+    inline process::process(handler h) : current_status(stopped), signal_termination(h), listener(default_listener) {
+    }
+ 
+    /**
+     * @param h the function to call when the process terminates
+     * @param l a reference to a listener for process status change events
+     **/
+    inline process::process(handler h, process_listener& l) : current_status(stopped), signal_termination(h), listener(l) {
     }
  
     inline process::~process() {
-      Kill(identifier, wxSIGTERM);
+      if (identifier) {
+        terminate();
+      }
     }
  
     inline process::status process::get_status() const {
       return (current_status);
-    }
- 
-    inline void process::kill() {
-      Kill(identifier, wxSIGTERM);
-    }
- 
-    /**
-     * @param c the command to execute
-     * @param h the function to call when the process terminates
-     **/
-    inline process::ptr process::execute(handler h, const std::string& c) throw () {
-      ptr p(new process(h));
-    
-      p->identifier = wxExecute(boost::cref(wxString(c.c_str(), wxConvLocal)), wxEXEC_ASYNC, p.get());
-    
-      if (p->identifier < 0) {
-        p->current_status = aborted;
- 
-        throw (new exception(exception_identifier::program_execution_failed, c));
-      }
-      else {
-        p->current_status = running;
-      }
-    
-      return (p);
-    }
-    
-    inline void process::OnTerminate(int /* pid */, int /* status */) {
-      current_status = completed;
-
-      /* Clean up */
-      call_back(this);
     }
   }
 }

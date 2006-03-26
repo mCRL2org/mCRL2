@@ -3,12 +3,15 @@
 
 #include <wx/wx.h>
 #include <wx/bitmap.h>
+#include <wx/colour.h>
 #include <wx/frame.h>
+#include <wx/font.h>
 #include <wx/gauge.h>
 #include <wx/sizer.h>
 #include <wx/dcclient.h>
 #include <wx/image.h>
 #include <wx/panel.h>
+#include <wx/utils.h>
 
 namespace squadt {
   namespace GUI {
@@ -38,16 +41,34 @@ namespace squadt {
      * progess.
      **/
     class splash : public wxFrame {
+      friend class squadt::GUI::picture; 
+
       private:
-        wxGauge* progress_indicator;
-        wxPanel* display;
+
+        wxPanel*      display;
+
+        wxGauge*      progress_indicator;
+
+        unsigned char number_of_categories;
+
+        unsigned char current_category;
+
+        std::string   category;
+        std::string   operation;
+        std::string   operand;
 
       public:
-        /** Constructor */
-        inline splash(wxImage*);
+        /** \brief Constructor */
+        inline splash(wxImage*, unsigned char);
 
-        /** Update progress indicator */
-        inline void update(unsigned int);
+        /** \brief Sets the category */
+        inline void set_category(const std::string&, unsigned int = 0);
+
+        /** \brief Update progress indicator */
+        inline void set_operation(const std::string&, const std::string&);
+
+        /** \brief Finishes up and hides the splash window */
+        inline void set_done();
     };
  
     /**
@@ -61,14 +82,31 @@ namespace squadt {
     inline void picture::OnPaint(wxPaintEvent& WXUNUSED(event)) {
       wxPaintDC dc(this);
 
+      splash& s = *(dynamic_cast < splash* > (GetParent()));
+
       dc.DrawBitmap(image, 0, 0, false);
+      dc.SetTextForeground(*wxBLACK);
+      dc.SetBackgroundMode(wxTRANSPARENT);
+      dc.SetFont(wxFont(14, wxFONTFAMILY_DECORATIVE, wxFONTSTYLE_NORMAL, wxFONTWEIGHT_NORMAL));
+      dc.DrawText(wxString(s.category.c_str(), wxConvLocal), 380, 30);
+      dc.SetFont(wxFont(10, wxFONTFAMILY_DECORATIVE, wxFONTSTYLE_NORMAL, wxFONTWEIGHT_NORMAL));
+
+      if (!s.operation.empty()) {
+        wxString o = wxString(s.operation.c_str(), wxConvLocal);
+
+        o.Append(wxT(": ")).Append(wxString(s.operand.c_str(), wxConvLocal));
+
+        dc.DrawText(o, 395, 70);
+      }
     }
 
     /**
      * @param[in] i the image to display
+     * @param[in] n the number of categories
      **/
-    inline splash::splash(wxImage* i) :
-            wxFrame(0, wxID_ANY, wxT(""), wxDefaultPosition, wxDefaultSize, wxNO_BORDER|wxSTAY_ON_TOP|wxFRAME_NO_TASKBAR) {
+    inline splash::splash(wxImage* i, unsigned char n) :
+            wxFrame(0, wxID_ANY, wxT(""), wxDefaultPosition, wxDefaultSize, wxNO_BORDER|wxSTAY_ON_TOP|wxFRAME_NO_TASKBAR),
+            number_of_categories(n), current_category(0) {
 
       wxBoxSizer*      s = new wxBoxSizer(wxVERTICAL);
       progress_indicator = new wxGauge(this, wxID_ANY, 6);
@@ -89,10 +127,47 @@ namespace squadt {
     }
 
     /**
-     * @param p the value by which to increase the progress indicator
+     * @param c a string that represents the category
+     * @param m the maximum number of operations in this category (0 < m)
      **/
-    inline void splash::update(unsigned int p) {
-      progress_indicator->SetValue(progress_indicator->GetValue() + p);
+    inline void splash::set_category(const std::string& c, unsigned int m) {
+      progress_indicator->SetRange(number_of_categories * (m + 1));
+      progress_indicator->SetValue((current_category++ * progress_indicator->GetRange()) / number_of_categories);
+
+      category = c;
+
+      display->Update();
+    }
+
+    /**
+     * @param o a string that represents an operation description
+     * @param s a string that represents the operand
+     **/
+    inline void splash::set_operation(const std::string& o, const std::string& s) {
+
+      progress_indicator->SetValue(progress_indicator->GetValue() + 1);
+
+      operation = o;
+      operand   = s;
+
+      display->Refresh();
+    }
+
+    inline void splash::set_done() {
+      category.clear();
+      operation.clear();
+      operand.clear();
+
+      progress_indicator->SetValue(progress_indicator->GetRange());
+
+      display->Update();
+
+      wxYield();
+      wxSleep(2);
+
+      Show(false);
+
+      Destroy();
     }
   }
 }
