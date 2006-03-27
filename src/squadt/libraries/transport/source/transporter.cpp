@@ -30,7 +30,10 @@ namespace transport {
   void transporter::connect(transporter& p) {
     basic_transceiver::ptr t(new direct_transceiver(this));
 
+    boost::recursive_mutex::scoped_lock pl(p.lock);
     p.connections.push_back(t);
+
+    boost::recursive_mutex::scoped_lock l(lock);
     connections.push_back(basic_transceiver::ptr(new direct_transceiver(&p, reinterpret_cast < direct_transceiver* > (t.get()))));
   }
 
@@ -40,6 +43,8 @@ namespace transport {
    **/
   void transporter::connect(const address& a, const long p) {
     basic_transceiver::ptr c(new socket_transceiver(this));
+
+    boost::recursive_mutex::scoped_lock l(lock);
 
     reinterpret_cast < socket_transceiver* > (c.get())->connect(a, p);
 
@@ -53,6 +58,8 @@ namespace transport {
   void transporter::connect(const std::string& h, const long p) {
     basic_transceiver::ptr c(new socket_transceiver(this));
 
+    boost::recursive_mutex::scoped_lock l(lock);
+
     reinterpret_cast < socket_transceiver* > (c.get())->connect(h, p);
 
     connections.push_back(c);
@@ -62,6 +69,8 @@ namespace transport {
    * @param t the connection to associate with this transporter
    **/
   void transporter::associate(const basic_transceiver::ptr& t) {
+    boost::recursive_mutex::scoped_lock l(lock);
+
     const basic_transceiver* p = t.get();
 
     connection_list::iterator i = std::find_if(connections.begin(), connections.end(),
@@ -70,6 +79,8 @@ namespace transport {
 
     if (i == connections.end()) {
       connections.push_back(t);
+
+      t->owner = this;
     }
   }
 
@@ -78,7 +89,9 @@ namespace transport {
    *
    * \return a shared pointer to the transceiver that is removed
    **/
-  basic_transceiver::ptr transporter::disassociate(const basic_transceiver* t) {
+  basic_transceiver::ptr transporter::disassociate(basic_transceiver* t) {
+    boost::recursive_mutex::scoped_lock l(lock);
+
     basic_transceiver::ptr p;
 
     connection_list::iterator i = std::find_if(connections.begin(), connections.end(),
@@ -89,6 +102,8 @@ namespace transport {
       p = *i;
 
       connections.erase(i);
+
+      t->owner = 0;
     }
 
     return (p);
@@ -99,6 +114,8 @@ namespace transport {
    **/
   void transporter::disconnect(size_t n) {
     assert(n < connections.size());
+
+    boost::recursive_mutex::scoped_lock l(lock);
 
     connection_list::iterator i = connections.begin();
   
@@ -118,6 +135,8 @@ namespace transport {
    **/
   void transporter::disconnect(transporter& m) {
     using namespace boost;
+
+    boost::recursive_mutex::scoped_lock l(lock);
 
     const transporter* p = &m;
 

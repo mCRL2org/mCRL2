@@ -114,9 +114,9 @@ namespace squadt {
     c.append_argument(boost::str(boost::format(identifier_pattern)
                             % id));
 
-    local_executor.execute(c, p);
-
     instances[id] = p;
+
+    local_executor.execute(c, p);
   }
 
   void tool_manager::query_tools() {
@@ -152,13 +152,16 @@ namespace squadt {
     }
 
     /* Create extractor object, that will retrieve the data from the running tool process */
-    boost::scoped_ptr < extractor > e(new extractor(t));
+    boost::shared_ptr < extractor > e(new extractor(t));
 
     execute(t, e.get());
 
     /* Wait until the process has been identified */
     if (e->get_process(true)) {
-      /* Wait until the extractor has gathered all information */
+      /* Start extracting */
+      e->start();
+
+      /* Wait for extraction process to complete */
       e->await_completion();
 
       local_executor.terminate(e->get_process());
@@ -190,7 +193,8 @@ namespace squadt {
 
     relay_connection(p, o);
 
-    p->set_status(status_clean);
+    /* Signal the listener that a connection has been established */
+    p->signal_connection(o);
 
     instances.erase(id);
   }

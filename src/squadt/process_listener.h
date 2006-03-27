@@ -63,12 +63,9 @@ namespace squadt {
 
       associated_process = p;
 
-      if (register_condition.get()) {
+      if (register_condition.get() != 0) {
         /* Wake up waiting threads */
         register_condition->notify_all();
-
-        /* Make sure that register_condition is freed */
-        register_condition.reset();
       }
     }
 

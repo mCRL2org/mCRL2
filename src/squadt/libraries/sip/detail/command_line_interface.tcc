@@ -154,7 +154,7 @@ namespace sip {
               }
               break;
             case 1: /* Identifier option */
-              identifier = atol(s);
+              identifier = atol(t);
               break;
             default: /* Unknown option */
               break;

@@ -35,7 +35,7 @@ namespace transport {
         inline void deliver(std::istream& input);
 
         /** \brief Removes this transceiver object from a list of connections */
-        inline void handle_disconnect(const basic_transceiver*);
+        inline void handle_disconnect(basic_transceiver*);
 
       public:
 

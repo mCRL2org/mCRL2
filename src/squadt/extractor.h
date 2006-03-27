@@ -33,25 +33,32 @@ namespace squadt {
       /** \brief Checks the process status and removes */
       inline void report_change(const execution::process::status);
 
-      /** \brief Unblocks waiters and requests a tool to prepare termination */
-      inline void finish();
-
     public:
 
       /** \brief Constructor */
       inline extractor(tool&);
 
-      /** \brief Function that blocks until all needed data is gathered from a tool */
-      inline void await_completion();
+      /** \brief Starts the extraction */
+      inline void start();
   };
 
   /**
    * @param[in] t reference to the tool object to use for storage
    **/
-  inline extractor::extractor(tool& t) {
+  inline extractor::extractor(tool& t) : task() {
     set_handler(bind(&extractor::handle_store_tool_capabilities, this, _1, t), sip::reply_tool_capabilities);
+  }
 
-    request_tool_capabilities();
+  /**
+   * \pre associated_process.get() is not 0
+   **/
+  inline void extractor::start() {
+    /* Await connection */
+    await_connection();
+
+    if (connected) {
+      request_tool_capabilities();
+    }
   }
 
   /**
@@ -60,20 +67,12 @@ namespace squadt {
    **/
   inline void extractor::handle_store_tool_capabilities(sip::message_ptr& m, tool& t) {
     xml2pp::text_reader reader(m->to_string().c_str());
- 
+
     reader.read();
  
     t.capabilities = sip::tool::capabilities::read(reader);
-  }
 
-  inline void extractor::finish() {
-    /* Let the tool know that it should prepare for termination */
-    request_termination();
-
-    boost::mutex::scoped_lock l(register_lock);
-
-    /* Signal completion to waiters */
-    register_condition->notify_all();
+    finish();
   }
 
   /**
@@ -84,24 +83,13 @@ namespace squadt {
       /* Unblock any remaining waiters */
       boost::mutex::scoped_lock l(register_lock);
 
-      /* Signal completion to waiters */
-      register_condition->notify_all();
+      done = true;
+
+      if (register_condition.get() != 0) {
+        /* Signal completion to waiters */
+        register_condition->notify_all();
+      }
     }
-  }
-
-  /**
-   * \pre associated_process.lock().get() must be unequal 0
-   **/
-  inline void extractor::await_completion() {
-    boost::mutex::scoped_lock l(register_lock);
-
-    assert (associated_process.get() != 0);
-
-    if (!register_condition.get()) {
-      register_condition = boost::shared_ptr < boost::condition > (new boost::condition());
-    }
-
-    register_condition->wait(l);
   }
 }
 

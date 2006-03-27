@@ -9,6 +9,7 @@
 #include <boost/asio/ipv4/address.hpp>
 #include <boost/asio/ipv4/host.hpp>
 #include <boost/noncopyable.hpp>
+#include <boost/thread/recursive_mutex.hpp>
 
 #include <transport/detail/exception.h>
 #include <transport/detail/transceiver.h>
@@ -56,11 +57,14 @@ namespace transport {
 
     private:
 
-      /** \brief listeners (for socket communication etc) */
-      listener_list   listeners;
+      /** \brief To obtain mutual exclusion for operations on the list of connections */
+      mutable boost::recursive_mutex lock;
+
+      /** \brief Listeners (for socket communication etc) */
+      listener_list                  listeners;
 
       /** \brief The list with connections */
-      connection_list connections;
+      connection_list                connections;
 
     private:
 
@@ -70,14 +74,11 @@ namespace transport {
       /** \brief Abstract function for the delivery of streamed data to the client program */
       virtual void deliver(std::string&, basic_transceiver*) = 0;
 
-      /** \brief Creates direct connection to another transporter object */
-      void connect(basic_transceiver*);
-
       /** \brief Associate a connection with this transporter */
       void associate(const basic_transceiver::ptr&);
 
       /** \brief Disassociate a connection from this transporter */
-      basic_transceiver::ptr disassociate(const basic_transceiver*);
+      basic_transceiver::ptr disassociate(basic_transceiver*);
 
     public:
   
@@ -142,6 +143,8 @@ namespace transport {
    * @param d the data to be sent
    **/
   inline void transporter::send(const std::string& d) {
+    boost::recursive_mutex::scoped_lock l(lock);
+
     for (connection_list::const_iterator i = connections.begin(); i != connections.end(); ++i) {
       (*i)->send(d);
     }
@@ -151,6 +154,8 @@ namespace transport {
    * @param s stream that contains the data to be sent
    **/
   inline void transporter::send(std::istream& s) {
+    boost::recursive_mutex::scoped_lock l(lock);
+
     for (connection_list::const_iterator i = connections.begin(); i != connections.end(); ++i) {
       (*i)->send(s);
     }
@@ -163,9 +168,10 @@ namespace transport {
   inline void transporter::relay_connection(transporter* t, basic_transceiver* c) {
     assert(t != 0);
 
-    t->associate(c->owner->disassociate(c));
+    boost::recursive_mutex::scoped_lock l(lock);
+    boost::recursive_mutex::scoped_lock tl(t->lock);
 
-    c->owner = t;
+    t->associate(c->owner->disassociate(c));
   }
 }
 

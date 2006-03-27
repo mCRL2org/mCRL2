@@ -167,6 +167,9 @@ namespace squadt {
       }
     }
     
+    /**
+     * @param[in] p a pointer to the process that should be terminated
+     **/
     inline void executor::terminate(process::wptr p) {
       process::ptr t(p.lock());
 

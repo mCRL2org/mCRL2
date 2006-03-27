@@ -17,7 +17,7 @@ namespace transport {
       owner->deliver(input, this);
     }
 
-    inline void basic_transceiver::handle_disconnect(const basic_transceiver* t) {
+    inline void basic_transceiver::handle_disconnect(basic_transceiver* t) {
       /* Remove instance from the list of connections */
       owner->disassociate(t);
     }
