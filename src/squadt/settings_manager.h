@@ -100,7 +100,7 @@ namespace squadt {
 
       /** \brief Composes a new path by concatenating two paths */
       template < typename T1, typename T2 >
-      static inline std::string path_concatenate(const T1, const T2);
+      static inline std::string path_concatenate(const T1 p1, const T2 p2);
   };
 }
 

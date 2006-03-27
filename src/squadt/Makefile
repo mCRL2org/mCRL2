@@ -15,32 +15,19 @@ ifeq ($(findstring -DNDEBUG,$(CPPFLAGS)),)
  CXXFLAGS                     += -g -Wall -W
 endif
 
-LDFLAGS                        = $(LIBXML2_LDFLAGS)
-
-LIBXML2_OBJECTS                = project_manager.o tool_manager.o tool.o specification.o \
-				 project_manager_tester tool_manager_tester
-
-BOOST_OBJECTS                  = gui_project_overview.o tool_manager.o project_manager.o gui_specification_properties.o \
-				 specification.o settings_manager.o
-
 ifdef WX_CONFIG
-WX_OBJECTS                     = squadt.o gui_project_overview.o gui_new_specification.o gui_specification_properties.o \
-				 gui_resources.o tool_executor.o logger.o process.o
-WX_LIBRARIES                  := $(filter-out -mthreads,$(shell $(WX_CONFIG) --libs core base adv net))
+WX_OBJECTS                     = squadt.o gui_project_overview.o gui_new_specification.o gui_resources.o
 endif
 
-PROJECT_MANAGER_OBJECTS        = project_manager.o exception.o settings_manager.o specification.o
+PROJECT_MANAGER_OBJECTS        = project_manager.o exception.o settings_manager.o processor.o
 TOOL_MANAGER_OBJECTS           = tool_manager.o exception.o settings_manager.o tool.o
-TOOL_EXECUTOR_OBJECTS          = tool_executor.o exception.o process.o
-GUI_OBJECTS                    = squadt.o gui_project_overview.o gui_new_specification.o gui_specification_properties.o \
+TOOL_EXECUTOR_OBJECTS          = executor.o exception.o process.o
+GUI_OBJECTS                    = squadt.o gui_project_overview.o gui_new_specification.o gui_resources.o
 				 $(sort $(TOOL_EXECUTOR_OBJECTS) $(PROJECT_MANAGER_OBJECTS) $(TOOL_MANAGER_OBJECTS)) \
-				 gui_resources.o logger.o
 OBJECTS                        = $(sort $(GUI_OBJECTS) $(PROJECT_MANAGER_OBJECTS) $(TOOL_MANAGER_OBJECTS) $(TOOL_EXECUTOR_OBJECTS))
-
-TEST_TARGETS                   = project_manager_tester tool_manager_tester
 TARGETS                        = squadt
 
-.PHONY: all install clean distclean test strip
+.PHONY: all install clean distclean strip
 
 all: $(BJAM) $(TREE_ROOT)config.jam
 ifeq ($(findstring $(CPPFLAGS),NDEBUG),)
@@ -49,47 +36,26 @@ else
 	 @cd build; $(BJAM) release squadt
 endif
 
-$(TREE_ROOT)config.jam:
-	$(error Please configure the source tree before trying to build!)
+ifeq ($(findstring $(MAKECMDGOALS),clean distclean),)
+../../config.jam ../../config ../setup.h:
+	$(error Please (re)configure your source tree!)
+endif
 
 # Rules for building the maximum_revision tool and to generate a `revision' file
 -include ../../utility/revision.mk
 
-# Include dependencies 
-#ifeq ($(findstring $(MAKECMDGOALS),clean distclean),)
-#%.o: dependencies
-
-#dependencies: *.cpp *.h
-#	$(CXX) -MM $(CPPFLAGS) $(BOOST_CPPFLAGS) $(LIBXML2_CPPFLAGS) $(WX_CPPFLAGS) $(patsubst %o,%cpp,$(OBJECTS)) > $@
-#
-#-include dependencies
-#endif
-
-test: all
-
-$(LIBXML2_OBJECTS):  CPPFLAGS += $(BOOST_CPPFLAGS) $(WX_CPPFLAGS) $(LIBXML2_CPPFLAGS)
-$(BOOST_OBJECTS):    CPPFLAGS += $(BOOST_CPPFLAGS) $(WX_CPPFLAGS) $(LIBXML2_CPPFLAGS)
-$(WX_OBJECTS):       CPPFLAGS += $(BOOST_CPPFLAGS) $(WX_CPPFLAGS) $(LIBXML2_CPPFLAGS)
-utility/relocator.o: CPPFLAGS += $(BOOST_CPPFLAGS)
-
-md5.o:
-	$(CXX) $(CPPFLAGS) $(CXXFLAGS) -fPIC -c libraries/md5pp/source/md5.cpp -o md5.o
-md5pp.o:
-	$(CXX) $(CPPFLAGS) $(CXXFLAGS) -fPIC -c libraries/md5pp/source/md5pp.cpp -o md5pp.o
-
-tool_manager_tester: tool_manager_tester.cpp $(TOOL_MANAGER_OBJECTS)
-	$(CXX) $(CXXFLAGS) $(CPPFLAGS) $(BOOST_CPPFLAGS) $(TOOL_MANAGER_OBJECTS) $(BOOST_LDFLAGS) $(LDFLAGS) md5.o md5pp.o $(BOOST_FILESYSTEM) $(WX_LIBRARIES) -o $@ $<
-
-project_manager_tester: project_manager_tester.cpp $(PROJECT_MANAGER_OBJECTS)
-	$(CXX) $(CXXFLAGS) $(CPPFLAGS) $(BOOST_CPPFLAGS) $(PROJECT_MANAGER_OBJECTS) $(BOOST_LDFLAGS) $(LDFLAGS) md5.o md5pp.o $(BOOST_FILESYSTEM) $(WX_LIBRARIES) -o $@ $<
+$(WX_OBJECTS): CPPFLAGS += $(BOOST_CPPFLAGS) $(WX_CPPFLAGS) $(LIBXML2_CPPFLAGS)
 
 squadt: $(GUI_OBJECTS) md5.o md5pp.o
-	$(CXX) $(CXXFLAGS) $(CPPFLAGS) $(GUI_OBJECTS) $(LDFLAGS) $(WX_LIBRARIES) md5.o md5pp.o $(BOOST_LDFLAGS) $(BOOST_FILESYSTEM) -o $@
+	$(CXX) $(CXXFLAGS) $(CPPFLAGS) $(GUI_OBJECTS) $(LIBXML2_CPPFLAGS) $(WX_LDFLAGS) md5.o md5pp.o $(BOOST_LDFLAGS) $(BOOST_FILESYSTEM) -o $@
+
+md5.o md5pp.o:
+	$(CXX) $(CPPFLAGS) $(CXXFLAGS) -fPIC -c libraries/md5pp/source/$(patsubst %.o,%.cpp,$@) -o $@
 
 %.o: %.cpp
-	$(CXX) -c $(CXXFLAGS) $(CPPFLAGS) $< -o $@
+	$(CXX) -c $(CXXFLAGS) $(CPPFLAGS) -I.. $(BOOST_CPPFLAGS) $(LIBXML2_CPPFLAGS) $< -o $@
 
-$(OBJECTS) $(TARGETS): Makefile $(CONFIG)
+%.o: Makefile ../../config
 
 strip: $(TARGETS)
 	$(STRIP) --strip-unneeded --strip-debug $^
@@ -122,10 +88,7 @@ clean:
 	@if test -e $(BJAM); then \
 	  cd build; $(BJAM) --clean-all; \
 	fi
-	$(RM) -rf *.o $(TARGETS) $(TEST_TARGETS) core dependencies
+	$(RM) -rf *.o $(TARGETS) core dependencies
 
 distclean: clean
 	$(RM) examples/tool_catalog
-
-../settings.h:
-	$(error Please (re)configure your source tree!)

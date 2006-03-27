@@ -128,13 +128,13 @@ FILE_PATTERNS          = *.c \
                          *.tcc
 RECURSIVE              = YES
 EXCLUDE                = /home/jwulp/work/mCRL2-holidays/MCRL2/trunk/src/squadt/bindings/ \
-                         /home/jwulp/work/mCRL2-holidays/MCRL2/trunk/src/squadt/gui_resources.cpp \
                          /home/jwulp/work/mCRL2-holidays/MCRL2/trunk/src/squadt/libraries/md5pp/ \
                          /home/jwulp/work/mCRL2-holidays/MCRL2/trunk/src/squadt/libraries/sip/ \
                          /home/jwulp/work/mCRL2-holidays/MCRL2/trunk/src/squadt/libraries/transport/ \
-                         /home/jwulp/work/mCRL2-holidays/MCRL2/trunk/src/squadt/libraries/xml2pp/
+                         /home/jwulp/work/mCRL2-holidays/MCRL2/trunk/src/squadt/libraries/xml2pp/ \
+                         /home/jwulp/work/mCRL2-holidays/MCRL2/trunk/src/squadt/squadt.cpp
 EXCLUDE_SYMLINKS       = NO
-EXCLUDE_PATTERNS       = 
+EXCLUDE_PATTERNS       = gui_*
 EXAMPLE_PATH           = 
 EXAMPLE_PATTERNS       = *
 EXAMPLE_RECURSIVE      = NO

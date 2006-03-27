@@ -22,8 +22,10 @@
 
 namespace squadt {
 
-  /** \brief Scheme for easy command generation */
+  /** \brief Socket connection option scheme for easy command generation */
   const char* socket_connect_pattern = "--si-connect=socket://%s:%s";
+
+  /** \brief Identifier option scheme for easy command generation */
   const char* identifier_pattern     = "--si-identifier=%s";
 
   const long tool_manager::default_tcp_port = 10946;
@@ -175,6 +177,7 @@ namespace squadt {
 
   /**
    * @param m the message that was just delivered
+   * @param o the local end point through which the message was received
    **/
   void tool_manager::handle_relay_connection(sip::message_ptr& m, sip::end_point o) {
     instance_identifier id = atol(m->to_string().c_str());

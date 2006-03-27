@@ -9,7 +9,7 @@
 #include "tool.h"
 #include "executor.h"
 #include "settings_manager.tcc"
-#include "ui_core.h"
+#include "core.h"
 
 #include <wx/textctrl.h>
 #include <wx/process.h>
@@ -28,7 +28,6 @@
 
 #include "gui_resources.h"
 #include "gui_new_specification.h"
-#include "gui_specification_properties.h"
 
 namespace squadt {
   namespace GUI {

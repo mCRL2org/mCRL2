@@ -22,7 +22,7 @@ namespace squadt {
    *
    * \return whether the status was adjusted or not
    *
-   * @param[in] d whether to check recursively or not
+   * @param[in] r whether to check recursively or not
    **/
   inline bool processor::check_status(const bool r) {
     using namespace boost::filesystem;

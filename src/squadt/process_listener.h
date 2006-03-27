@@ -41,7 +41,7 @@ namespace squadt {
         virtual ~process_listener();
 
         /** \brief Gets a pointer to the associated process */
-        inline process* get_process(const bool = false) const;
+        inline process* get_process(const bool b = false) const;
 
         /** \brief Blocks untill the process has registered */
         inline void await_process() const;
