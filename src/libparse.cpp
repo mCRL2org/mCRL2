@@ -8,24 +8,28 @@ using namespace std;
 
 //Global precondition: the ATerm library has been initialised
 
+ATermAppl parse_tagged_stream(const string &tag, istream &stream);
+/*Pre: stream is opened for reading
+  Post:the content of tag followed by stream is parsed
+  Ret: the parsed content, if everything went ok
+       NULL, otherwise
+*/ 
+
 ATermAppl parse_specification(istream &spec_stream) {
-  vector<istream*> *streams = new vector<istream*>();
-  istringstream *start = new istringstream("@spec");
-  streams->push_back(start);
-  streams->push_back(&spec_stream);
-  ATermAppl result = parse_streams(*streams);
-  delete start;
-  delete streams;
-  return result;
+  return parse_tagged_stream("spec", spec_stream);
 }
 
-ATermAppl parse_data_expression(std::istream &de_stream) {
+ATermAppl parse_data_expression(istream &de_stream) {
+  return parse_tagged_stream("data_expr", de_stream);
+}
+
+ATermAppl parse_tagged_stream(const string &tag, istream &stream) {
   vector<istream*> *streams = new vector<istream*>();
-  istringstream *start = new istringstream("@data_expr");
-  streams->push_back(start);
-  streams->push_back(&de_stream);
+  istringstream *tag_stream = new istringstream(tag);
+  streams->push_back(tag_stream);
+  streams->push_back(&stream);
   ATermAppl result = parse_streams(*streams);
-  delete start;
+  delete tag_stream;
   delete streams;
   return result;
 }

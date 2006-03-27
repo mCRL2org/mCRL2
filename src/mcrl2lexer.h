@@ -1,4 +1,4 @@
-#include <iostream>
+#include <istream>
 #include <vector>
 #include <aterm2.h>
 

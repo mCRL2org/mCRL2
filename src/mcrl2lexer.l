@@ -1,11 +1,9 @@
 %{
-#include <string.h>
+#include <cstring>
 #include "mcrl2lexer.h"
 #include "mcrl2parser.hpp"
 #include "libstruct.h"
 #include "liblowlevel.h"
-
-using namespace std;
 
 //Global precondition: the ATerm library has been initialised
 
@@ -25,7 +23,7 @@ ATermAppl SpecTree = NULL;       /* the parse tree */
 int LineNr = 1;                  /* line number in source file */
 int ColNr  = 1;                  /* column number in source file */
 mcrl2yyFlexLexer *lexer = NULL;  /* lexer object */
-vector<istream*> *lexer_streams = NULL;/* input streams */
+std::vector<std::istream*> *lexer_streams = NULL;/* input streams */
 int cur_index = -1;               /* current index in lexer_streams */
 
 #define ProcessString() ColNr += YYLeng(); mcrl2yylval.appl = gsString2ATermAppl(YYText());
@@ -46,8 +44,8 @@ Number     "0"|([1-9][0-9]*)
 
 "%".*      { ColNr += YYLeng(); /* comment */ }
 
-"@spec"    { ProcessString(); return TAG_SPEC; }
-"@data_expr" { ProcessString(); return TAG_DATA_EXPR; }
+"spec" { ProcessString(); return TAG_SPEC; }
+"data_expr" { ProcessString(); return TAG_DATA_EXPR; }
 
 "||_"      { ProcessString(); return LMERGE; }
 "->"       { ProcessString(); return ARROW; }
@@ -165,7 +163,7 @@ int mcrl2yywrap(void) {
   return 0;
 }
 
-ATermAppl parse_streams(vector<istream*> &streams) {
+ATermAppl parse_streams(std::vector<std::istream*> &streams) {
   ATermAppl Result = NULL;
   if (streams.size() == 0) {
     return Result;
