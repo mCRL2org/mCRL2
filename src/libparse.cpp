@@ -19,8 +19,16 @@ ATermAppl parse_specification(istream &spec_stream) {
   return parse_tagged_stream("spec", spec_stream);
 }
 
+ATermAppl parse_sort_expression(istream &se_stream) {
+  return parse_tagged_stream("sort_expr", se_stream);
+}
+
 ATermAppl parse_data_expression(istream &de_stream) {
   return parse_tagged_stream("data_expr", de_stream);
+}
+
+ATermAppl parse_proc_expression(istream &pe_stream) {
+  return parse_tagged_stream("proc_expr", pe_stream);
 }
 
 ATermAppl parse_tagged_stream(const string &tag, istream &stream) {

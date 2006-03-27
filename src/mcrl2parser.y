@@ -57,7 +57,7 @@ ATermAppl gsSpecEltsToSpec(ATermList SpecElts);
 //terminals
 //---------
 
-%token <appl> TAG_SPEC TAG_DATA_EXPR
+%token <appl> TAG_SPEC TAG_SORT_EXPR TAG_DATA_EXPR TAG_PROC_EXPR
 %token <appl> LMERGE ARROW LTE GTE CONS SNOC CONCAT EQ NEQ AND BARS IMP BINIT
 %token <appl> ELSE
 %token <appl> STAR PLUS MINUS EQUALS DOT COMMA COLON SEMICOLON QMARK EXCLAM AT
@@ -111,7 +111,17 @@ start:
       $$ = $2;
       SpecTree = $$;
     }
+  | TAG_SORT_EXPR sort_expr
+    {
+      $$ = $2;
+      SpecTree = $$;
+    }
   | TAG_DATA_EXPR data_expr
+    {
+      $$ = $2;
+      SpecTree = $$;
+    }
+  | TAG_PROC_EXPR proc_expr
     {
       $$ = $2;
       SpecTree = $$;

@@ -52,7 +52,9 @@ Number     "0"|([1-9][0-9]*)
 "%".*      { ColNr += YYLeng(); /* comment */ }
 
 "spec" { ProcessString(); return TAG_SPEC; }
+"sort_expr" { ProcessString(); return TAG_SORT_EXPR; }
 "data_expr" { ProcessString(); return TAG_DATA_EXPR; }
+"proc_expr" { ProcessString(); return TAG_PROC_EXPR; }
 
 "||_"      { ProcessString(); return LMERGE; }
 "->"       { ProcessString(); return ARROW; }

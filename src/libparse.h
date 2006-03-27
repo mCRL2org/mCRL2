@@ -11,9 +11,24 @@ ATermAppl parse_specification(std::istream &spec_stream);
        NULL, otherwise
 */ 
 
+ATermAppl parse_sort_expression(std::istream &se_stream);
+/*Pre: se_stream is an input stream from which can be read       
+  Post:the content of se_stream is parsed as an mCRL2 sort expression
+  Ret: the parsed sort expression, if everything went ok
+       NULL, otherwise
+*/ 
+
 ATermAppl parse_data_expression(std::istream &de_stream);
 /*Pre: de_stream is an input stream from which can be read       
   Post:the content of de_stream is parsed as an mCRL2 data expression
   Ret: the parsed data expression, if everything went ok
        NULL, otherwise
 */ 
+
+ATermAppl parse_proc_expression(std::istream &pe_stream);
+/*Pre: pe_stream is an input stream from which can be read       
+  Post:the content of pe_stream is parsed as an mCRL2 process expression
+  Ret: the parsed proc expression, if everything went ok
+       NULL, otherwise
+*/ 
+
