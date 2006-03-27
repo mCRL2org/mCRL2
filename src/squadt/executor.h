@@ -82,7 +82,7 @@ namespace squadt {
         inline void execute(const command&, process_listener* = 0);
     
         /** \brief Terminate a specific process */
-        inline void terminate(process*);
+        inline void terminate(process::wptr);
     
         /** \brief Terminate all processes */
         inline void terminate();
@@ -167,8 +167,12 @@ namespace squadt {
       }
     }
     
-    inline void executor::terminate(process* p) {
-      remove(p);
+    inline void executor::terminate(process::wptr p) {
+      process::ptr t(p.lock());
+
+      if (t.get() != 0) {
+        t->terminate();
+      }
     }
  
     /**

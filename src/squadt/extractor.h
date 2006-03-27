@@ -95,7 +95,7 @@ namespace squadt {
   inline void extractor::await_completion() {
     boost::mutex::scoped_lock l(register_lock);
 
-    assert (associated_process.lock().get() != 0);
+    assert (associated_process.get() != 0);
 
     if (!register_condition.get()) {
       register_condition = boost::shared_ptr < boost::condition > (new boost::condition());

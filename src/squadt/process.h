@@ -29,7 +29,10 @@ namespace squadt {
  
          /** \brief Convenience type to hide shared pointer implementation */
          typedef boost::shared_ptr < process >        ptr;
- 
+
+         /** \brief Convenience type to hide weak pointer implementation */
+         typedef boost::weak_ptr < process >          wptr;
+
          /** \brief Convenience type for handlers */
          typedef boost::function < void (process*) >  handler;
 

@@ -136,7 +136,7 @@ namespace squadt {
 
       category = c;
 
-      display->Update();
+      display->Refresh();
     }
 
     /**

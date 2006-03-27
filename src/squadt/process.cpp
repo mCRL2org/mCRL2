@@ -43,14 +43,12 @@ namespace squadt {
 
         waitpid(identifier, &exit_code, 0);
 
-        signal_termination(this);
-
-        identifier = 0;
-
         current_status = (WIFEXITED(exit_code)) ? completed : aborted;
 
         /* Inform listener */
         listener.report_change(current_status);
+
+        signal_termination(this);
       }
     }
 
@@ -64,8 +62,6 @@ namespace squadt {
 
     void process::wait() const {
       int exit_code;
-
-      assert(0 < identifier);
 
       waitpid(identifier, &exit_code, 0);
     }
