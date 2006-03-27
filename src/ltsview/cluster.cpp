@@ -14,16 +14,27 @@ Cluster::Cluster()
   topRadius = 0.0f;
   deadlock = false;
   markedState = 0;
-  markedTransition = 0;
+  markedTransitionCount = 0;
 }
 
 Cluster::~Cluster()
 {
+  actionLabelCounts.clear();
+  descendants.clear();
+  states.clear();
 }
 
 void Cluster::addState( State* s )
 {
   states.push_back( s );
+}
+
+void Cluster::addActionLabel( ATerm l )
+{
+  if ( actionLabelCounts.find( l ) == actionLabelCounts.end() )
+    actionLabelCounts[l] = 1;
+  else
+    ++actionLabelCounts[l];
 }
 
 void Cluster::setAncestor( Cluster* c )
@@ -239,7 +250,7 @@ bool Cluster::hasMarkedState() const
 
 bool Cluster::hasMarkedTransition() const
 {
-  return ( markedTransition > 0 );
+  return ( markedTransitionCount > 0 );
 }
 
 void Cluster::markState()
@@ -252,14 +263,18 @@ void Cluster::unmarkState()
   --markedState;
 }
 
-void Cluster::markTransition()
+int Cluster::markActionLabel( ATerm l )
 {
-  ++markedTransition;
+  if ( actionLabelCounts.find( l ) != actionLabelCounts.end() )
+    markedTransitionCount += actionLabelCounts[l];
+  return markedTransitionCount;
 }
 
-void Cluster::unmarkTransition()
+int Cluster::unmarkActionLabel( ATerm l )
 {
-  --markedTransition;
+  if ( actionLabelCounts.find( l ) != actionLabelCounts.end() )
+    markedTransitionCount -= actionLabelCounts[l];
+  return markedTransitionCount;
 }
 
 bool Cluster::hasDeadlock() const

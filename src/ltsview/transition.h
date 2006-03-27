@@ -20,16 +20,15 @@ class Transition
     ATerm   getLabel() const;
     bool    isBackpointer() const;
     bool    isMarked() const;
-    void    mark();
-    void    setBackpointer(bool b);
-    void    unmark();
+    void    setBackpointer( bool b );
+    void    setMarkedPointer( bool* bp );
       
   private:
     bool    backpointer;
     State*  beginState;
     State*  endState;
     ATerm   label;
-    bool    marked;
+    bool*   marked;
 };
 
 #endif

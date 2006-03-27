@@ -6,16 +6,13 @@ LTS::LTS( Mediator* owner)
   initialState = NULL;
   matchAny = true;
   deadlockCount = -1;
-  transitionCount = 0;
   markedTransitionCount = 0;
   stateVectorSpec = NULL;
-  actionLabels = NULL;
 }
 
 LTS::~LTS()
 {
   if ( stateVectorSpec != NULL ) ATunprotectList( &stateVectorSpec );
-  if ( actionLabels != NULL ) ATunprotectList( &actionLabels );
   
   for ( unsigned int i = 0 ; i < unmarkedStates.size() ; ++i )
   {
@@ -30,12 +27,17 @@ LTS::~LTS()
   statesInRank.clear();
   initialState = NULL;
   
-  markedActionLabels.clear();
-  for ( map< ATerm, vector< Transition* > >::iterator v_it = transitions.begin() ;
-	v_it != transitions.end() ; ++v_it )
+  for ( map< ATerm, bool* >::iterator it = actionLabelMarkings.begin() ;
+	it != actionLabelMarkings.end() ; ++it )
   {
-    for ( unsigned int i = 0 ; i < v_it->second.size() ; ++i )
-      delete v_it->second[i];
+    delete it->second;
+  }
+  actionLabelMarkings.clear();
+  
+  for ( vector< Transition* >::iterator t_it = transitions.begin() ;
+	t_it != transitions.end() ; ++t_it )
+  {
+    delete *t_it;
   }
   transitions.clear();
 
@@ -71,13 +73,6 @@ void LTS::setInitialState( State* s )
   initialState = s;
 }
 
-/*
-void LTS::addDataType( DataType* dt )
-{
-  dataTypes.push_back( dt );
-}
-*/
-
 void LTS::addState( State* s )
 {
   unmarkedStates.push_back( s );
@@ -85,19 +80,27 @@ void LTS::addState( State* s )
 
 void LTS::addTransition( Transition* t )
 {
-  transitions[t->getLabel()].push_back( t );
-  ++transitionCount;
+  transitions.push_back( t );
+  ATerm lab = t->getLabel();
+  if ( actionLabelMarkings.find( lab ) == actionLabelMarkings.end() )
+  {
+    bool* b = new bool( false );
+    actionLabelMarkings[lab] = b;
+    t->setMarkedPointer( b );
+  }
+  else
+  {
+    t->setMarkedPointer( actionLabelMarkings[lab] );
+  }
 }
 
-void LTS::setActionLabels( ATermList labels )
+void LTS::getActionLabels( vector< ATerm > &ls ) const
 {
-  actionLabels = labels;
-  ATprotectList( &actionLabels );
-}
-
-ATermList LTS::getActionLabels() const
-{
-  return actionLabels;
+  for ( map< ATerm, bool* >::const_iterator it = actionLabelMarkings.begin() ;
+	it != actionLabelMarkings.end() ; ++it )
+  {
+    ls.push_back( it->first );
+  }
 }
 
 void LTS::getClustersAtRank( unsigned int r, vector< Cluster* > &cs ) const
@@ -163,7 +166,7 @@ int LTS::getNumberOfStates() const
 
 int LTS::getNumberOfTransitions() const
 {
-  return transitionCount;
+  return transitions.size();
 }
 
 void LTS::applyIterativeRanking()
@@ -454,6 +457,13 @@ void LTS::mergeSuperiorClusters()
   }
 }
 
+void LTS::computeClusterLabelInfo()
+{
+  for ( vector< Transition* >::iterator t_it = transitions.begin() ;
+	t_it != transitions.end() ; ++t_it )
+    (**t_it).getBeginState()->getCluster()->addActionLabel( (**t_it).getLabel() );
+}
+
 void LTS::addMarkRule( MarkRule* r, int index )
 {
   if ( index == -1 ) 
@@ -740,7 +750,7 @@ void LTS::markClusters()
     }
   }
 
-  // process marked transitions
+  /* process marked transitions
   for ( vector< ATerm >::iterator at_it = markedActionLabels.begin() ;
 	at_it != markedActionLabels.end() ; ++at_it )
   {
@@ -751,43 +761,37 @@ void LTS::markClusters()
       (**t_it).getBeginState()->getCluster()->markTransition();
     }
   }
+  */
 }
 
 void LTS::markAction( string label )
 {
   ATerm atLabel = (ATerm)ATmakeAppl0( ATmakeAFun( label.c_str(), 0, ATfalse ) );
-  
-  markedActionLabels.push_back( atLabel );
-  
-  Transition* t;
-  vector< Transition* > tobeMarked = transitions[atLabel];
-  for ( vector< Transition* >::iterator t_it = tobeMarked.begin() ;
-      t_it != tobeMarked.end() ; ++t_it )
+  *( actionLabelMarkings[atLabel] ) = true;
+
+  markedTransitionCount = 0;
+  for ( vector< vector< Cluster* > >::iterator cs_it = clustersInRank.begin() ;
+	cs_it != clustersInRank.end() ; ++cs_it )
   {
-    t = *t_it;
-    t->mark();
-    t->getBeginState()->getCluster()->markTransition();
+    for ( vector< Cluster* >::iterator c_it = cs_it->begin() ;
+	  c_it != cs_it->end() ; ++c_it )
+      markedTransitionCount += (**c_it).markActionLabel( atLabel );
   }
-  markedTransitionCount += tobeMarked.size();
 }
 
 void LTS::unmarkAction( string label )
 {
   ATerm atLabel = (ATerm)ATmakeAppl0( ATmakeAFun( label.c_str(), 0, ATfalse ) );
-  
-  markedActionLabels.erase( find( markedActionLabels.begin(),
-	markedActionLabels.end(), atLabel ) );
-  
-  Transition* t;
-  vector< Transition* > tobeUnmarked = transitions[atLabel];
-  for ( vector< Transition* >::iterator t_it = tobeUnmarked.begin() ;
-      t_it != tobeUnmarked.end() ; ++t_it )
+  *( actionLabelMarkings[atLabel] ) = false;
+
+  markedTransitionCount = 0;
+  for ( vector< vector< Cluster* > >::iterator cs_it = clustersInRank.begin() ;
+	cs_it != clustersInRank.end() ; ++cs_it )
   {
-    t = *t_it;
-    t->unmark();
-    t->getBeginState()->getCluster()->unmarkTransition();
+    for ( vector< Cluster* >::iterator c_it = cs_it->begin() ;
+	  c_it != cs_it->end() ; ++c_it )
+      markedTransitionCount += (**c_it).unmarkActionLabel( atLabel );
   }
-  markedTransitionCount -= tobeUnmarked.size();
 }
 
 /*

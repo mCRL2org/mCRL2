@@ -748,17 +748,14 @@ void MainFrame::resetMarkRules()
   nomarksRadio->SetValue( true );
 }
 
-void MainFrame::setActionLabels( ATermList labels )
+void MainFrame::setActionLabels( vector< ATerm > &labels )
 {
   wxArrayString strLabels;
-  strLabels.Alloc( ATgetLength( labels ) );
-  ATerm atLabel;
-  ATermList atLabels = labels;
-  while ( !ATisEmpty( atLabels ) )
+  strLabels.Alloc( labels.size() );
+  for ( vector< ATerm >::iterator it = labels.begin() ; it != labels.end() ;
+	++it )
   {
-    atLabel = ATgetFirst( atLabels );
-    strLabels.Add( wxString( ATwriteToString( atLabel ), wxConvLocal ) );
-    atLabels = ATgetNext( atLabels );
+    strLabels.Add( wxString( ATwriteToString( *it ), wxConvLocal ) );
   }
   strLabels.Sort();
   markTransitionsListBox->Set( strLabels );

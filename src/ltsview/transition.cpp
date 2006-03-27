@@ -9,7 +9,7 @@ Transition::Transition(State* bs, State* es, ATerm lbl )
   label = lbl;
   ATprotect( &label );
   backpointer = false;
-  marked = false;
+  marked = NULL;
 }
 
 Transition::~Transition()
@@ -44,15 +44,10 @@ void Transition::setBackpointer( bool b )
 
 bool Transition::isMarked() const
 {
-  return marked;
+  return *marked;
 }
 
-void Transition::mark()
+void Transition::setMarkedPointer( bool* bp )
 {
-  marked = true;
-}
-
-void Transition::unmark()
-{
-  marked = false;
+  marked = bp;
 }

@@ -50,7 +50,7 @@ class MainFrame : public wxFrame
     void	onSpinSettingChanged( wxSpinEvent& event );
     void	replaceMarkRule( int index, wxString str );
     void	resetMarkRules();
-    void	setActionLabels( ATermList labels );
+    void	setActionLabels( vector< ATerm > &labels );
     void	setMarkedStatesInfo( int number );
     void	setMarkedTransitionsInfo( int number );
     void	setNumberInfo( int nstates, int ntransitions, int nclusters, int nranks );

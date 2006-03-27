@@ -26,7 +26,8 @@ class LTS
     void	applyIterativeRanking();
     void	applyCyclicRanking();
     void	clusterComrades();
-    ATermList	getActionLabels() const;
+    void	computeClusterLabelInfo();
+    void	getActionLabels( vector< ATerm> &ls ) const;
     void	getClustersAtRank( unsigned int r, vector< Cluster* > &cs ) const;
     State*	getInitialState() const;
     bool	getMatchAnyMarkRule() const;
@@ -53,11 +54,10 @@ class LTS
     void	unmarkAction( string label );
 
   private:
-    ATermList			  actionLabels;
+    map< ATerm, bool* >		  actionLabelMarkings;
     vector< vector< Cluster* > >  clustersInRank;
     int				  deadlockCount;
     State*			  initialState;
-    vector< ATerm >		  markedActionLabels;
     vector< State* >		  markedStates;
     int				  markedTransitionCount;
     vector< MarkRule* >		  markRules;
@@ -65,8 +65,7 @@ class LTS
     Mediator*			  mediator;
     vector< vector< State* > >	  statesInRank;
     ATermList			  stateVectorSpec;
-    int				  transitionCount;
-    map< ATerm, vector< Transition* > >	  transitions;
+    vector< Transition* >	  transitions;
     vector< State* >		  unmarkedStates;
 
     void addComradesToCluster( Cluster* c, State* s );

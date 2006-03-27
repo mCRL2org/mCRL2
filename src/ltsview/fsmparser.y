@@ -12,7 +12,6 @@ ATermList stateId;
 ATermList typeValues;
 ATermAppl typeId;
 
-ATermIndexedSet actions;
 vector< State* > states;
 
 AFun const_ATtypeid;
@@ -51,7 +50,6 @@ fsm_file :
 	SECSEP EOLN
 	states
 	SECSEP EOLN transitions
-	  { fsmparserlts->setActionLabels( ATindexedSetElements( actions ) ) }
 	;
 
 // --------- Section containing the state vector ----------
@@ -199,8 +197,6 @@ transition:
 	    State* frState = states[$1-1];
 	    State* toState = states[$2-1];
 	    Transition* t = new Transition( frState, toState, (ATerm)$3 );
-	    ATbool b;
-	    ATindexedSetPut( actions, (ATerm)$3, &b );
 	    fsmparserlts->addTransition( t );
 	    if ( $1 != $2 )
 	    {
@@ -270,7 +266,6 @@ void parseFSMfile( string fileName, LTS* const lts )
     stateVector = ATempty;
     stateId = ATempty;
     valueTable = ATempty;
-    actions = ATindexedSetCreate( 100, 50 );
 
     // PARSE
     fsmparse();
@@ -287,7 +282,6 @@ void parseFSMfile( string fileName, LTS* const lts )
     ATunprotectList( &typeValues );
     ATunprotectAppl( &typeId );
     
-    ATindexedSetDestroy( actions );
     states.clear();
     fsmparserlts = NULL;
   }

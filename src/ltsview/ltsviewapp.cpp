@@ -78,6 +78,7 @@ void LTSViewApp::openFile( string fileName )
   ++currentJobNr;
   mainFrame->updateProgressDialog( 60, "Merging superiors" );
   lts->mergeSuperiorClusters();
+  lts->computeClusterLabelInfo();
   
   visualizer->setLTS( lts );
   
@@ -101,7 +102,11 @@ void LTSViewApp::openFile( string fileName )
       lts->getNumberOfTransitions(), lts->getNumberOfClusters(),
       lts->getNumberOfRanks() );
   mainFrame->resetMarkRules();
-  mainFrame->setActionLabels( lts->getActionLabels() );
+  
+  vector< ATerm > ls;
+  lts->getActionLabels( ls );
+  mainFrame->setActionLabels( ls );
+
   mainFrame->setMarkedStatesInfo( 0 );
   mainFrame->setMarkedTransitionsInfo( 0 );
   mainFrame->setVisSettings( visualizer->getVisSettings() );
@@ -166,6 +171,7 @@ void LTSViewApp::setRankStyle( RankStyle rs )
       ++currentJobNr;
       mainFrame->updateProgressDialog( 50, "Merging superiors" );
       lts->mergeSuperiorClusters();
+      lts->computeClusterLabelInfo();
       lts->markClusters();
       
       ++currentJobNr;

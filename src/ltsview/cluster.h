@@ -1,9 +1,11 @@
 #ifndef CLUSTER_H
 #define CLUSTER_H
 #include <vector>
+#include <map>
 #include <algorithm>
 #include <math.h>
 #include "utils.h"
+#include "aterm/aterm1.h"
 
 #ifndef STATE_H
   #include "state.h"
@@ -28,12 +30,13 @@ class Cluster
 {
   
   private:
+    map< ATerm, int >	actionLabelCounts;
     Cluster*		ancestor;
     float		baseRadius;
     bool		deadlock;
     vector< Cluster* >	descendants;
     int			markedState;
-    int			markedTransition;
+    int			markedTransitionCount;
     float		position;
     float		size;
     vector< State* >	states;
@@ -44,6 +47,7 @@ class Cluster
     ~Cluster();
     void      addDescendant( Cluster* c );
     void      addState( State* s );
+    void      addActionLabel( ATerm l );
     void      computeSizeAndDescendantPositions();
     Cluster*  getAncestor() const;
     float     getBaseRadius() const;
@@ -57,12 +61,12 @@ class Cluster
     bool      hasMarkedState() const;
     bool      hasMarkedTransition() const;
     void      markState();
-    void      markTransition();
+    int	      markActionLabel( ATerm l );
     void      setAncestor( Cluster* c );
     void      setDeadlock( bool b );
     void      setPosition( float p );
     void      unmarkState();
-    void      unmarkTransition();
+    int       unmarkActionLabel( ATerm l );
 };
 
 #endif
