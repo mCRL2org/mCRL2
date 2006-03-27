@@ -7,6 +7,13 @@
 
 //Global precondition: the ATerm library has been initialised
 
+//needed for newer versions of flex (>= 2.5.31)
+#ifndef yywrap
+#define yywrap mcrl2yywrap
+#endif
+extern "C" int mcrl2yywrap(void);
+//C linkage is needed for compatibility with older versions of flex (2.5.4)
+
 //external declarations
 int mcrl2yyparse(void);          /* declared in mcrl2parser.cpp */
 extern YYSTYPE mcrl2yylval;      /* declared in mcrl2parser.cpp */
