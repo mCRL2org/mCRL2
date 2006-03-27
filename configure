@@ -722,13 +722,13 @@ echo X"$0" |
   	  /^X\(\/\).*/{ s//\1/; q; }
   	  s/.*/./; q'`
   srcdir=$ac_confdir
-  if test ! -r "$srcdir/$ac_unique_file"; then
+  if test ! -r $srcdir/$ac_unique_file; then
     srcdir=..
   fi
 else
   ac_srcdir_defaulted=no
 fi
-if test ! -r "$srcdir/$ac_unique_file"; then
+if test ! -r $srcdir/$ac_unique_file; then
   if test "$ac_srcdir_defaulted" = yes; then
     { echo "$as_me: error: cannot find sources ($ac_unique_file) in $ac_confdir or .." >&2
    { (exit 1); exit 1; }; }
@@ -737,7 +737,7 @@ if test ! -r "$srcdir/$ac_unique_file"; then
    { (exit 1); exit 1; }; }
   fi
 fi
-(cd $srcdir && test -r "./$ac_unique_file") 2>/dev/null ||
+(cd $srcdir && test -r ./$ac_unique_file) 2>/dev/null ||
   { echo "$as_me: error: sources are in $srcdir, but \`cd $srcdir' does not work" >&2
    { (exit 1); exit 1; }; }
 srcdir=`echo "$srcdir" | sed 's%\([^\\/]\)[\\/]*$%\1%'`
@@ -3724,7 +3724,7 @@ ac_link='$CC -o conftest$ac_exeext $CFLAGS $CPPFLAGS $LDFLAGS conftest.$ac_ext $
 ac_compiler_gnu=$ac_cv_c_compiler_gnu
 
 
-# Check for flex
+# Check for compatible flex
 # Extract the first word of "flex", so it can be a program name with args.
 set dummy flex; ac_word=$2
 echo "$as_me:$LINENO: checking for $ac_word" >&5
@@ -3764,6 +3764,35 @@ if test -z $FLEX; then
   { { echo "$as_me:$LINENO: error: cannot find flex" >&5
 echo "$as_me: error: cannot find flex" >&2;}
    { (exit 1); exit 1; }; }
+fi
+echo "$as_me:$LINENO: checking whether flex option c++ is available" >&5
+echo $ECHO_N "checking whether flex option c++ is available... $ECHO_C" >&6
+if $FLEX -I -o/dev/null test.l &> /dev/null; then
+  echo "$as_me:$LINENO: result: yes" >&5
+echo "${ECHO_T}yes" >&6;
+else
+  echo "$as_me:$LINENO: result: no" >&5
+echo "${ECHO_T}no" >&6
+  { { echo "$as_me:$LINENO: error: flex option c++ not available; please upgrade to a newer version" >&5
+echo "$as_me: error: flex option c++ not available; please upgrade to a newer version" >&2;}
+   { (exit 1); exit 1; }; };
+fi
+echo "$as_me:$LINENO: checking whether flex C++ scanner can be used" >&5
+echo $ECHO_N "checking whether flex C++ scanner can be used... $ECHO_C" >&6
+$FLEX -I -otest.cpp test.l
+if $CXX -c test.cpp -o /dev/null &> /dev/null; then
+  flex_usable="yes"
+fi
+rm -f test.cpp
+if test $flex_usable; then
+  echo "$as_me:$LINENO: result: yes" >&5
+echo "${ECHO_T}yes" >&6;
+else
+  echo "$as_me:$LINENO: result: no" >&5
+echo "${ECHO_T}no" >&6
+  { { echo "$as_me:$LINENO: error: flex C++ scanner cannot be used with the $CXX compiler; please upgrade to a newer version" >&5
+echo "$as_me: error: flex C++ scanner cannot be used with the $CXX compiler; please upgrade to a newer version" >&2;}
+   { (exit 1); exit 1; }; };
 fi
 
 # Check for compatible bison
@@ -3815,25 +3844,25 @@ echo "${ECHO_T}yes" >&6;
 else
   echo "$as_me:$LINENO: result: no" >&5
 echo "${ECHO_T}no" >&6
-  { { echo "$as_me:$LINENO: error: bison option %glr-parser not available" >&5
-echo "$as_me: error: bison option %glr-parser not available" >&2;}
+  { { echo "$as_me:$LINENO: error: bison option %glr-parser not available; please upgrade to bison 1.875a or later" >&5
+echo "$as_me: error: bison option %glr-parser not available; please upgrade to bison 1.875a or later" >&2;}
    { (exit 1); exit 1; }; };
 fi
 echo "$as_me:$LINENO: checking whether bison GLR parser can be used" >&5
 echo $ECHO_N "checking whether bison GLR parser can be used... $ECHO_C" >&6
-$BISON test.y -o test.c
-if $CC -c test.c -o /dev/null &> /dev/null; then
+$BISON test.y -o test.cpp
+if $CXX -c test.cpp -o /dev/null &> /dev/null; then
   glr_usable="yes"
 fi
-rm -f test.c
+rm -f test.cpp
 if test $glr_usable; then
   echo "$as_me:$LINENO: result: yes" >&5
 echo "${ECHO_T}yes" >&6;
 else
   echo "$as_me:$LINENO: result: no" >&5
 echo "${ECHO_T}no" >&6
-  { { echo "$as_me:$LINENO: error: bison GLR parser cannot be used with the $CC compiler; please upgrade to bison 1.875a or later" >&5
-echo "$as_me: error: bison GLR parser cannot be used with the $CC compiler; please upgrade to bison 1.875a or later" >&2;}
+  { { echo "$as_me:$LINENO: error: bison GLR parser cannot be used with the $CXX compiler; please upgrade to bison 1.875a or later" >&5
+echo "$as_me: error: bison GLR parser cannot be used with the $CXX compiler; please upgrade to bison 1.875a or later" >&2;}
    { (exit 1); exit 1; }; };
 fi
 

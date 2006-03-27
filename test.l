@@ -1,33 +1,17 @@
 %{
 //needed for newer versions of flex (>= 2.5.31)
 #ifndef yywrap
-#define yywrap mcrl2yywrap
+#define yywrap testyywrap
 #endif
-extern "C" int mcrl2yywrap(void);
+extern "C" int testyywrap(void);
 //C linkage is needed for compatibility with older versions of flex (2.5.4)
 
-//global declarations, used by mcrl2parser.cpp
-int  mcrl2yylex(void);           /* lexer function */
-void mcrl2yyerror(const char *s);/* error function */
-
+int  testyylex(void);
+void testyyerror(const char *s);
 %}
-
 %option c++
-%option prefix="mcrl2yy"
-%option nounput
-
+%option prefix="testyy"
 %%
-
-
 %%
-
-//int mcrl2yylex(void) {
-//}
-//.          { mcrl2yyerror("unknown character"); }
-
-void mcrl2yyerror(const char *) {
-}
-
-int mcrl2yywrap(void) {
-    return 1;
-}
+void testyyerror(const char *) { }
+int testyywrap(void) { return 1; }
