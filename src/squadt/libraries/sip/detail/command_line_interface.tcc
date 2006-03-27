@@ -57,6 +57,8 @@ namespace sip {
     }
 
     /**
+     * @param[in] option a pointer to where a scheme description starts
+     *
      * \return A pointer within argv to the point upto which the option was matched.
      **/
     inline char* argument_extractor::parse_scheme(char* const option) throw () {
@@ -90,7 +92,7 @@ namespace sip {
                 std::string& host_name = dynamic_cast < socket_scheme< sip::message >* > (selected_scheme.get())->host_name;
 
                 host_name.reserve(d);
-                host_name.assign(s, d);
+                host_name.assign(t, d);
                 host_name.resize(d);
 
                 /* The remaining string should be a port number */
