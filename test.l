@@ -6,6 +6,11 @@
 extern "C" int testyywrap(void);
 //C linkage is needed for compatibility with older versions of flex (2.5.4)
 
+//fix for the broken cygwin versions of flex
+#ifdef __CYGWIN__
+#include <iostream>
+#endif
+
 int  testyylex(void);
 void testyyerror(const char *s);
 %}
