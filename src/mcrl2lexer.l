@@ -5,19 +5,17 @@
 #include "libstruct.h"
 #include "liblowlevel.h"
 
-//Global precondition: the ATerm library has been initialised
-
-//needed for newer versions of flex (>= 2.5.31)
-#ifndef yywrap
-#define yywrap mcrl2yywrap
-#endif
-extern "C" int mcrl2yywrap(void);
-//C linkage is needed for compatibility with older versions of flex (2.5.4)
-
 //fix for the broken cygwin versions of flex
 #ifdef __CYGWIN__
 #include <iostream>
 #endif
+
+//fix for newer versions of flex (>= 2.5.31)
+#ifndef yywrap
+#define yywrap mcrl2yywrap
+#endif
+
+//Global precondition: the ATerm library has been initialised
 
 //external declarations
 int mcrl2yyparse(void);          /* declared in mcrl2parser.cpp */
@@ -29,31 +27,32 @@ extern int fileno(FILE *stream); /* declared in stdio.h (forgotten by flex) */
 //global declarations, used by mcrl2parser.cpp
 int  mcrl2yylex(void);           /* lexer function */
 void mcrl2yyerror(const char *s);/* error function */
+extern "C" int mcrl2yywrap(void);/* wrap function */
+//Note: C linkage is needed for older versions of flex (2.5.4)
 ATermAppl spec_tree = NULL;      /* the parse tree */
 
 //local declarations
 class mcrl2_lexer : public mcrl2yyFlexLexer {
 public:
-  mcrl2_lexer(void);
-  //~mcrl2_lexer(void);
-  int yylex(void);
-  void yyerror(const char *s);
-  int yywrap(void);
+  mcrl2_lexer(void);             /* constructor */
+  int yylex(void);               /* the generated lexer function */
+  void yyerror(const char *s);   /* error function */
+  int yywrap(void);              /* wrap function */
   ATermAppl parse_streams(std::vector<std::istream*> &streams);
 protected:
-  int line_nr;                   /* line number in source file */
-  int col_nr;                    /* column number in source file */
-  std::vector<std::istream*> *lexer_streams;/* input streams */
-  int cur_index;                 /* current index in lexer_streams */
+  std::vector<std::istream*> *cur_streams;/* current input streams */
+  int cur_index;                 /* current index in current streams */
+  int line_nr;                   /* line number in cur_streams[cur_index] */
+  int col_nr;                    /* column number in cu_streams[cur_index] */
   void process_string(void);     /* update position, provide token to parser */
 };
-
-mcrl2_lexer *lexer = NULL;       /* lexer object, used by parse_streams */
 
 //implement yylex in mcrl2_lexer instead of mcrl2yyFlexLexer
 //(this gets rid of global variables but is ugly in its own right)
 #define YY_DECL int mcrl2_lexer::yylex()
 int mcrl2yyFlexLexer::yylex(void) { return 1; }
+
+mcrl2_lexer *lexer = NULL;       /* lexer object, used by parse_streams */
 
 %}
 Id         [a-zA-Z\_][a-zA-Z0-9\_']*
@@ -190,7 +189,7 @@ int mcrl2yywrap(void) {
 mcrl2_lexer::mcrl2_lexer(void) : mcrl2yyFlexLexer(NULL, NULL) {
   line_nr = 1;
   col_nr = 1;
-  lexer_streams = NULL;
+  cur_streams = NULL;
   cur_index = -1;
 }
 
@@ -207,18 +206,18 @@ void mcrl2_lexer::yyerror(const char *s) {
 }
 
 int mcrl2_lexer::yywrap(void) {
-  if (lexer_streams == NULL) {
+  if (cur_streams == NULL) {
     return 1;
   }
   //SpecStreams != NULL
-  if (!(cur_index >= 0 && cur_index < (int) lexer_streams->size()-1)) {
+  if (!(cur_index >= 0 && cur_index < (int) cur_streams->size()-1)) {
     return 1;
   }
-  //0 <= cur_index < lexer_streams->size()-1
+  //0 <= cur_index < cur_streams->size()-1
   line_nr = 1;
   col_nr = 1;
   cur_index++;
-  switch_streams((*lexer_streams)[cur_index], NULL);
+  switch_streams((*cur_streams)[cur_index], NULL);
   return 0;
 }
 
@@ -238,8 +237,8 @@ ATermAppl mcrl2_lexer::parse_streams(std::vector<std::istream*> &streams) {
   line_nr = 1;
   col_nr = 1;
   cur_index = 0;
-  lexer_streams = &streams;
-  switch_streams((*lexer_streams)[0], NULL);
+  cur_streams = &streams;
+  switch_streams((*cur_streams)[0], NULL);
   if (mcrl2yyparse() != 0) {
     result = NULL;
   } else {
