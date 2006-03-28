@@ -133,6 +133,161 @@ lts_type p_lts::detect_type(string &filename)
   return t;
 }
 
+typedef struct {
+  unsigned int flag;
+  unsigned int size;
+  unsigned int value;
+} svc_int;
+
+class svc_buffer
+{
+  private:
+    unsigned char buffer[56];
+    unsigned int buffer_size;
+    unsigned int pos;
+    unsigned int count;
+    istream *input;
+    bool valid;
+
+  public:
+    svc_buffer(istream *is)
+    {
+      input = is;
+      buffer_size = 0;
+      pos = 0;
+      count = 0;
+      valid = true;
+    }
+
+    svc_buffer(unsigned char *buf, unsigned int size)
+    {
+      input = NULL;
+      set_buffer(buf,size);
+    }
+
+    void set_input(istream *is)
+    {
+      input = is;
+    }
+
+    void set_buffer(unsigned char *buf, unsigned int size)
+    {
+      if ( size > 56 )
+      {
+        size = 56;
+      }
+      memcpy(buffer,buf,size);
+      buffer_size = size;
+      pos = 0;
+      count = 0;
+      valid = true;
+    }
+
+    void reset_buffer()
+    {
+      buffer_size = 0;
+      pos = 0;
+      count = 0;
+      valid = true;
+    }
+
+    unsigned int get_count()
+    {
+      return count;
+    }
+
+    bool is_valid()
+    {
+      return valid;
+    }
+
+    unsigned int get_bit()
+    {
+      if ( pos/8 == buffer_size )
+      {
+        input->read((char *) buffer,56);
+        if ( input->eof() )
+        {
+          input->clear();
+        }
+        buffer_size = input->gcount();
+        pos = 0;
+      }
+      if ( pos/8 == buffer_size )
+      {
+        valid = false;
+        return 0;
+      } else {
+        unsigned int r = ( buffer[pos/8] >> (7 - (pos%8)) ) & 1;
+        pos++;
+        count++;
+        return r;
+      }
+    }
+
+    unsigned char get_byte()
+    {
+      unsigned char r = 0;
+      for (unsigned int i=0; i<8; i++)
+      {
+        r = r*2 + get_bit();
+      }
+      return r;
+    }
+
+    char get_char()
+    {
+      char r = 0;
+      for (unsigned int i=0; i<7; i++)
+      {
+        r = r*2 + get_bit();
+      }
+      return r;
+    }
+
+    svc_int get_int()
+    {
+      svc_int r;
+      r.flag = get_bit();
+      r.size = get_bit();
+      r.size = r.size*2 + get_bit();
+      r.value = 0;
+      for (unsigned int i=0; i<=r.size; i++)
+      {
+        r.value = r.value*256 + get_byte();
+      }
+      return r;
+    }
+
+    string get_string()
+    {
+      string s;
+      bool is_valid = false;
+      while ( true )
+      {
+        char c = get_char();
+        if ( c == 0 )
+        {
+          is_valid = true;
+          break;
+        } else if ( (c < ' ') || (c > '~') )
+        {
+          break;
+        } else {
+          s += c;
+        }
+      }
+      if ( valid && is_valid )
+      {
+        cout << s << endl;
+        return s;
+      } else {
+        valid = false;
+        return "";
+      }
+    }
+};
+
 lts_type p_lts::detect_type(istream &is)
 {
   if ( is == cin ) // XXX better test to see if is is seekable?
@@ -157,109 +312,48 @@ lts_type p_lts::detect_type(istream &is)
   // detect lts_svc, lts_mcrl and lts_mcrl2
   if ( r >= 18 )
   {
-    unsigned int pos = 0;
-    unsigned char byte_val;
-    unsigned int int_flag,size,val;
-#define _GET_SVC_BIT() ((((unsigned char *) (buf))[(pos)/8] >> (7-((pos++)%8))) & 1)
-#define _GET_SVC_BIT2() ((((unsigned char *) (buf2))[(pos)/8] >> (7-((pos++)%8))) & 1)
-#define _GET_SVC_CHAR() { byte_val = 0; for (int _i=0; _i<7; _i++) { byte_val = byte_val*2 + _GET_SVC_BIT2(); } }
-#define _GET_SVC_BYTE() { byte_val = 0; for (int _i=0; _i<8; _i++) { byte_val = byte_val*2 + _GET_SVC_BIT(); } }
-#define _GET_SVC_INT() { int_flag = _GET_SVC_BIT(); size = _GET_SVC_BIT(); size = size*2+_GET_SVC_BIT(); val = 0; for (unsigned int _i=0; _i<=size; _i++) { _GET_SVC_BYTE(); val = val*256 + byte_val; } }
-    _GET_SVC_BIT(); // indexed flag
-    _GET_SVC_INT(); // header pos
-    if ( int_flag == 0 )
+    svc_buffer sbuf((unsigned char *) buf,r);
+    sbuf.get_bit(); // indexed flag
+    svc_int header_pos = sbuf.get_int(); // header pos
+    if ( header_pos.flag == 0 )
     {
-      unsigned int header_pos = val;
-      _GET_SVC_INT(); // body pos
-      if ( int_flag == 0 )
+      if ( sbuf.get_int().flag == 0 ) // body pos
       {
-        _GET_SVC_INT(); // trailer pos
-        if ( int_flag == 0 )
+        if ( sbuf.get_int().flag == 0 ) // trailer pos
         {
-          _GET_SVC_INT(); // version pos
-          if ( (val >= (pos+7)/8) && (header_pos >= (pos+7)/8) )
+          svc_int version_pos = sbuf.get_int(); // version pos
+          if ( (version_pos.flag == 0) &&
+               (version_pos.value >= (sbuf.get_count()+7)/8) &&
+               (header_pos.value >= (sbuf.get_count()+7)/8) )
           {
-            is.seekg(init_pos+((streampos) val));
-	    if ( is.fail() )
+            is.seekg(init_pos+((streampos) version_pos.value));
+            if ( is.fail() )
             {
               is.seekg(init_pos);
             } else {
-              char buf2[56];
-              bool valid = false;
-              bool notdone = true;
-              while ( notdone )
+              sbuf.reset_buffer();
+              sbuf.set_input(&is);
+              sbuf.get_string();
+              if ( sbuf.is_valid() )
               {
-                is.read(buf2,56);
-                if ( is.eof() ) is.clear();
-
-                pos = 0;
-                r = is.gcount();
-                if ( r == 0 )
-                {
-                  break;
-                }
-                for (int i=0; i*7<r*8; i++)
-                {
-                  _GET_SVC_CHAR();
-                  if ( byte_val == 0 )
-                  {
-                    notdone = false;
-                    valid = true;
-                    break;
-                  } else if ( (byte_val < ' ') || (byte_val > '~') )
-                  {
-                    notdone = false;
-                    break;
-                  }
-                }
-              }
-              if ( valid )
-              {
-                is.seekg(init_pos+((streampos) header_pos));
+                is.seekg(init_pos+((streampos) header_pos.value));
                 if ( is.fail() )
                 {
                   is.seekg(init_pos);
                 } else {
+                  sbuf.reset_buffer();
                   string s;
-                  unsigned int str_cnt = 0;
-                  valid = false;
-                  notdone = true;
-                  while ( notdone )
+                  for (unsigned int i=0; i<4; i++)
                   {
-                    is.read(buf2,56);
-                    if ( is.eof() ) is.clear();
-
-                    pos = 0;
-                    r = is.gcount();
-                    if ( r == 0 )
+                    s = sbuf.get_string();
+                    if ( !sbuf.is_valid() )
                     {
                       break;
                     }
-                    for (int i=0; i*7<r*8; i++)
-                    {
-                      _GET_SVC_CHAR();
-                      if ( byte_val == 0 )
-                      {
-                        str_cnt++;
-                        if ( str_cnt == 4 )
-                        {
-                          valid = true;
-                          notdone = false;
-                          break;
-                        } else {
-                          s = "";
-                        }
-                      } else if ( (byte_val < ' ') || (byte_val > '~') )
-                      {
-                        notdone = false;
-                        break;
-                      } else {
-                        s += (char) byte_val;
-                      }
-                    }
                   }
+
                   is.seekg(init_pos);
-                  if ( valid )
+                  if ( sbuf.is_valid() )
                   {
                     if ( s == "generic" )
                     {

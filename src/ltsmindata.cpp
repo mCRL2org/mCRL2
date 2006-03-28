@@ -514,7 +514,7 @@ static void TransitionsGoingToBlock(SVCint b, ATermList *newlab) {
    ATermList newlabels = ATempty;
    GetBlockBoundaries(b, &left, &right);
    if (classes) fprintf(stdout,
-   "--------------------------- block %d --------------------------\n", b);
+   "--------------------------- block %d --------------------------\n", (int) b);
    /* ATwarning("TransitionGoingTo b = %d newb = %d\n",b, newb); */
    for (i = left; i < right;i++) {
         ATermList labels = lab[s[i]], pars = ATempty; 

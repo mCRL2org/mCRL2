@@ -485,7 +485,7 @@ static ATbool CompareKernel(SVCstateIndex init1,SVCstateIndex init2,
 int Compare(SVCstateIndex init1, SVCstateIndex init2)
      {
      int cnt = 0, nBlocks = 0, last_nBlocks = 0;
-     ATbool different;
+     ATbool different = ATtrue;
      StartSplitting();
      do {
        nBlocks = NumberOfPartitions();
