@@ -110,8 +110,8 @@ Int        { ProcessString(); return INT; }
 List       { ProcessString(); return LIST; }
 Set        { ProcessString(); return SET; }
 Bag        { ProcessString(); return BAG; }
-true       { ProcessString(); return TRUE; }
-false      { ProcessString(); return FALSE; }
+true       { ProcessString(); return CTRUE; }
+false      { ProcessString(); return CFALSE; }
 whr        { ProcessString(); return WHR; }
 end        { ProcessString(); return END; }
 lambda     { ProcessString(); return LAMBDA; }
