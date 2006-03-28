@@ -35,6 +35,9 @@ namespace squadt {
         /** \brief Signals that a new connection has been established */
         inline void signal_connection(sip::end_point&);
 
+        /** \brief Checks the process status and removes */
+        inline void report_change(const execution::process::status);
+
       public:
  
         /** \brief Convenience type for hiding shared pointer implementation */
@@ -72,13 +75,15 @@ namespace squadt {
     inline void task::await_connection() {
       boost::mutex::scoped_lock l(register_lock);
  
-      while (!connected && !done) {
-        /* Other side has not connected and the process has not been registered as terminated */
-        if (!register_condition.get()) {
+      if (!connected) {
+        if (register_condition.get() == 0) {
           register_condition = boost::shared_ptr < boost::condition > (new boost::condition());
         }
- 
-        register_condition->wait(l);
+
+        while (!connected && !done) {
+          /* Other side has not connected and the process has not been registered as terminated */
+          register_condition->wait(l);
+        }
       }
     }
 
@@ -90,14 +95,14 @@ namespace squadt {
     inline void task::await_completion() {
       boost::mutex::scoped_lock l(register_lock);
  
-      assert (associated_process.get() != 0);
- 
-      while (!done) {
+      if (!done) {
         if (register_condition.get() == 0) {
           register_condition = boost::shared_ptr < boost::condition > (new boost::condition());
         }
-       
-        register_condition->wait(l);
+
+        while (!done && associated_process.get() != 0) {
+          register_condition->wait(l);
+        }
       }
     }
 
@@ -114,6 +119,24 @@ namespace squadt {
    
       /* Signal completion to waiters */
       register_condition->notify_all();
+    }
+
+    
+    /**
+     * @param[in] s the current status of the process
+     **/
+    inline void task::report_change(const execution::process::status s) {
+      if (s == execution::process::completed || s == execution::process::aborted) {
+        /* Unblock any remaining waiters */
+        boost::mutex::scoped_lock l(register_lock);
+ 
+        done = true;
+ 
+        if (register_condition.get() != 0) {
+          /* Signal completion to waiters */
+          register_condition->notify_all();
+        }
+      }
     }
   }
 }

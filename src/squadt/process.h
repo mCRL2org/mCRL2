@@ -5,6 +5,7 @@
 
 #include <boost/thread/thread.hpp>
 #include <boost/function.hpp>
+#include <boost/weak_ptr.hpp>
 
 #include "exception.h"
 #include "command.h"
@@ -18,6 +19,8 @@ namespace squadt {
      * \brief Represents a system process with a status reporting facility
      **/
     class process {
+      friend class executor;
+
       public:
          /** \brief state of the process */
          enum status {
@@ -27,36 +30,39 @@ namespace squadt {
            aborted    ///< was aborted
          };
  
-         /** \brief Convenience type to hide shared pointer implementation */
-         typedef boost::shared_ptr < process >        ptr;
+         /** \brief Convenience type for weak pointer implementation */
+         typedef boost::weak_ptr < process >            wptr;
 
-         /** \brief Convenience type to hide weak pointer implementation */
-         typedef boost::weak_ptr < process >          wptr;
+         /** \brief Convenience type to hide shared pointer implementation */
+         typedef boost::shared_ptr < process >          ptr;
+
+         /** \brief Convenience type to hide shared pointer implementation */
+         typedef boost::shared_ptr < process_listener > listener_ptr;
 
          /** \brief Convenience type for handlers */
-         typedef boost::function < void (process*) >  handler;
+         typedef boost::function < void (process*) >    handler;
 
       private:
 
-         /** \brief The default listener for changes in status */
-         static process_listener default_listener;
+        /** \brief The default listener for changes in status */
+        static boost::shared_ptr < process_listener >   default_listener;
  
       private:
 
         /** \brief The system's proces identifier for this process */
-        long int                            identifier;
+        long int                             identifier;
 
         /** \brief The status of this process */
-        mutable status                      current_status;
+        mutable status                       current_status;
 
         /** \brief The function that is called when the status changes */
-        handler                             signal_termination;
+        handler                              signal_termination;
     
-        /** \brief A reference to a listener for changes status changes */
-        process_listener&                   listener;
+        /** \brief A reference to a listener to report changes in state */
+        boost::weak_ptr < process_listener > listener;
 
         /** \brief Thread in which actual execution and waiting is performed */
-        boost::shared_ptr < boost::thread > execution_thread;
+        boost::shared_ptr < boost::thread >  execution_thread;
 
       private:
 
@@ -69,7 +75,7 @@ namespace squadt {
         inline process(handler);
     
         /** \brief Constructor with listener */
-        inline process(handler, process_listener&);
+        inline process(handler, process::listener_ptr&);
     
         /** \brief Start the process by executing a command */
         void execute(const command&);
@@ -97,7 +103,7 @@ namespace squadt {
      * @param h the function to call when the process terminates
      * @param l a reference to a listener for process status change events
      **/
-    inline process::process(handler h, process_listener& l) : current_status(stopped), signal_termination(h), listener(l) {
+    inline process::process(handler h, process::listener_ptr& l) : current_status(stopped), signal_termination(h), listener(l) {
     }
  
     inline process::~process() {

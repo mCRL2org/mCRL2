@@ -22,6 +22,7 @@ namespace sip {
       friend void messaging::scheme< M >::connect(basic_messenger< M >*) const;
  
       private:
+
         /** Type for keeping protocol phase status */
         typedef enum {
           status_inactive,     ///< \brief Inactive
@@ -46,8 +47,10 @@ namespace sip {
         configuration                 current_configuration;
  
         /** \brief Unique identifier for the running tool, obtained via the command line */
-        long instance_identifier;
+        long                          instance_identifier;
  
+      private:
+
         /** \brief Handler for incoming data resulting from user interaction relayed by the controller */
         void accept_interaction_data(sip::messenger::message_ptr&);
  

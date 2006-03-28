@@ -30,9 +30,6 @@ namespace squadt {
       /** \brief handler that accomplishes the actual task */
       inline void handle_store_tool_capabilities(sip::message_ptr& m, tool& t);
 
-      /** \brief Checks the process status and removes */
-      inline void report_change(const execution::process::status);
-
     public:
 
       /** \brief Constructor */
@@ -73,23 +70,6 @@ namespace squadt {
     t.capabilities = sip::tool::capabilities::read(reader);
 
     finish();
-  }
-
-  /**
-   * @param[in] s the current status of the process
-   **/
-  inline void extractor::report_change(const execution::process::status s) {
-    if (s == execution::process::completed || s == execution::process::aborted) {
-      /* Unblock any remaining waiters */
-      boost::mutex::scoped_lock l(register_lock);
-
-      done = true;
-
-      if (register_condition.get() != 0) {
-        /* Signal completion to waiters */
-        register_condition->notify_all();
-      }
-    }
   }
 }
 

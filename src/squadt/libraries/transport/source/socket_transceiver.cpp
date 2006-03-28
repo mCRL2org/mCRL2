@@ -63,6 +63,8 @@ namespace transport {
       ipv4::tcp::endpoint endpoint((p == 0) ? default_port : p, a);
 
       socket.connect(endpoint, assign_error(e));
+
+      /* Set socket options */
       socket.set_option(socket_base::keep_alive(true));
       socket.set_option(socket_base::linger(false, 0));
 

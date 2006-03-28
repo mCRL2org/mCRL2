@@ -34,7 +34,7 @@ namespace squadt {
       private:
 
         /** Convenient short-hand type */
-        typedef std::pair < command, process_listener* > command_pair;
+        typedef std::pair < command, process::listener_ptr > command_pair;
 
       private:
 
@@ -53,16 +53,13 @@ namespace squadt {
         inline void start_process(const command&);
     
         /** \brief Start a new process with a listener */
-        inline void start_process(const command&, process_listener&);
+        inline void start_process(const command&, process::listener_ptr&);
 
-        /** \brief Start a new process with a listener if s is not 0 */
-        inline void start_process(const command&, process_listener* s);
-    
         /** \brief handler that is invoked when a process is terminated */
         inline void handle_process_termination(process* p);
   
         /** \brief handler that is invoked when a process is terminated */
-        inline void handle_process_termination(process* p, process_listener* s);
+        inline void handle_process_termination(process* p, process::listener_ptr& s);
   
         /** \brief Start processing commands if the queue contains any waiters */
         inline void start_delayed();
@@ -79,20 +76,22 @@ namespace squadt {
         inline ~executor();
     
         /** \brief Execute a tool */
-        inline void execute(const command&, process_listener* = 0);
+        template < typename T >
+        inline void execute(const command&, T = process::default_listener);
     
         /** \brief Terminate a specific process */
-        inline void terminate(process::wptr);
+        template < typename T >
+        inline void terminate(T);
     
         /** \brief Terminate all processes */
-        inline void terminate();
+        inline void terminate_all();
     };
  
     inline executor::executor(unsigned int m) : maximum_concurrent_processes(m) {
     }
     
     inline executor::~executor() {
-      terminate();
+      terminate_all();
     }
  
     /**
@@ -123,33 +122,22 @@ namespace squadt {
      * @param[in] c the command to execute
      * @param[in] l reference to a process listener
      **/
-    inline void executor::start_process(const command& c, process_listener& l) {
-      process::ptr p(new process(boost::bind(&executor::handle_process_termination, this, _1, &l), l));
+    inline void executor::start_process(const command& c, process::listener_ptr& l) {
+      process::ptr p(new process(boost::bind(&executor::handle_process_termination, this, _1, l), l));
 
-      l.set_process(p);
+      if (l.get() != 0) {
+        l->set_process(p);
+      }
 
       processes.push_back(p);
 
       p->execute(c);
     }
- 
-    /**
-     * @param[in] c the command to execute
-     * @param[in] l a pointer to a process listener or 0
-     **/
-    inline void executor::start_process(const command& c, process_listener* l) {
-      if (l == 0) {
-        start_process(c);
-      }
-      else {
-        start_process(c, *l);
-      }
-    }
 
     /**
      * The queue with commands for to be started processes is also cleared by this function.
      **/
-    inline void executor::terminate() {
+    inline void executor::terminate_all() {
     
       delayed_commands.clear();
     
@@ -168,14 +156,11 @@ namespace squadt {
     }
     
     /**
-     * @param[in] p a pointer to the process that should be terminated
+     * @param[in] p a weak pointer (or reference to) to the process that should be terminated
      **/
-    inline void executor::terminate(process::wptr p) {
-      process::ptr t(p.lock());
-
-      if (t.get() != 0) {
-        t->terminate();
-      }
+    template < typename T >
+    inline void executor::terminate(T p) {
+      p->terminate();
     }
  
     /**
@@ -191,7 +176,7 @@ namespace squadt {
      * @param p a pointer to a process object
      * @param l a pointer to a listener for process state changes
      **/
-    void executor::handle_process_termination(process* p, process_listener* l) {
+    void executor::handle_process_termination(process* p, process::listener_ptr& l) {
       remove(p);
  
       start_delayed();
@@ -199,9 +184,10 @@ namespace squadt {
  
     /**
      * @param c the command that is to be executed
-     * @param l a pointer to a listener for process state changes
+     * @param l a shared pointer a listener (or reference to) for process state changes
      **/
-    void executor::execute(const command& c, process_listener* l) {
+    template < typename T >
+    void executor::execute(const command& c, T l) {
       if (processes.size() < maximum_concurrent_processes) {
         start_process(c, l);
       }

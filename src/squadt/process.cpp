@@ -15,7 +15,7 @@
 namespace squadt {
   namespace execution {
 
-    process_listener process::default_listener;
+    boost::shared_ptr < process_listener > process::default_listener;
 
     void process::terminate() {
       kill(identifier, SIGKILL);
@@ -36,7 +36,7 @@ namespace squadt {
       current_status = (identifier < 0) ? aborted : running;
 
       /* Inform listener */
-      listener.report_change(current_status);
+      listener.lock()->report_change(current_status);
 
       if (0 < identifier) {
         int exit_code;
@@ -46,7 +46,7 @@ namespace squadt {
         current_status = (WIFEXITED(exit_code)) ? completed : aborted;
 
         /* Inform listener */
-        listener.report_change(current_status);
+        listener.lock()->report_change(current_status);
 
         signal_termination(this);
       }

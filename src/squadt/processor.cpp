@@ -1,6 +1,7 @@
 #include <boost/filesystem/operations.hpp>
 
 #include <xml2pp/detail/text_reader.tcc>
+#include <sip/controller.h>
 
 #include "processor.tcc"
 #include "exception.h"
@@ -8,7 +9,7 @@
 
 namespace squadt {
 
-  void processor::dummy_visualiser(output_status) {
+  void processor::reporter::dummy(output_status) {
   }
 
   /**
@@ -118,8 +119,10 @@ namespace squadt {
     s << "<processor tool-name=\"" << program.get_name() << "\">";
 
     /* The last received configuration from the tool */
-    if (current_configuration.get() != 0) {
-      current_configuration->write(s);
+    sip::configuration::ptr c = task_monitor->get_configuration();
+
+    if (c.get() != 0) {
+      c->write(s);
     }
 
     /* The inputs */
@@ -165,7 +168,7 @@ namespace squadt {
 
     processor::ptr c(new processor(t));
 
-    c->current_configuration = sip::configuration::read(r);
+    c->task_monitor->set_configuration(sip::configuration::read(r));
 
     /* Read inputs */
     while (r.is_element("input")) {

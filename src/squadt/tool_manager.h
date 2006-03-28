@@ -60,10 +60,10 @@ namespace squadt {
       typedef long int                                               instance_identifier;
 
       /** \brief Maps an instance identifier to its associated task */
-      typedef std::map < instance_identifier, execution::task* >     instance_list;
+      typedef std::map < instance_identifier, execution::task::ptr > instance_list;
 
       /** \brief Maps a task to its associated process */
-      typedef std::list < execution::task* >                         validated_instance_list;
+      typedef std::list < execution::task::ptr >                     validated_instance_list;
 
     private:
  
@@ -96,7 +96,8 @@ namespace squadt {
     private:
 
       /** \brief Start a tool */
-      void execute(tool&, execution::task* = 0);
+      template < typename T >
+      void execute(tool&, T);
 
       /** \brief This is the event handler for incoming identification messages */
       void handle_relay_connection(sip::message_ptr&, sip::end_point);

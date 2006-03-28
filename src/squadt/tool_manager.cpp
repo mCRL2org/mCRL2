@@ -104,7 +104,8 @@ namespace squadt {
    * @param t the tool that is to be run
    * @param p the processor that should be passed the feedback of execution
    **/
-  void tool_manager::execute(tool& t, execution::task* p) {
+  template < typename T >
+  void tool_manager::execute(tool& t, T p) {
     instance_identifier id = free_identifier++;
 
     execution::command c(t.get_location());
@@ -116,7 +117,7 @@ namespace squadt {
 
     instances[id] = p;
 
-    local_executor.execute(c, p);
+    local_executor.execute(c, boost::dynamic_pointer_cast < execution::process_listener, execution::task > (p));
   }
 
   void tool_manager::query_tools() {
@@ -154,10 +155,10 @@ namespace squadt {
     /* Create extractor object, that will retrieve the data from the running tool process */
     boost::shared_ptr < extractor > e(new extractor(t));
 
-    execute(t, e.get());
+    execute(t, boost::dynamic_pointer_cast < execution::task, extractor > (e));
 
     /* Wait until the process has been identified */
-    if (e->get_process(true)) {
+    if (e->get_process(true).get() != 0) {
       /* Start extracting */
       e->start();
 
@@ -173,9 +174,12 @@ namespace squadt {
   }
 
   void tool_manager::terminate() {
+    using namespace execution;
+
     /* Request the local tool executor to terminate the running processes known to this tool manager */
-    std::for_each(validated_instances.begin(), validated_instances.end(),
-                    boost::bind(&execution::executor::terminate, local_executor));
+    for (validated_instance_list::const_iterator i = validated_instances.begin(); i != validated_instances.end(); ++i) {
+      local_executor.terminate((*i)->get_process());
+    }
   }
 
   /**
@@ -189,9 +193,9 @@ namespace squadt {
       throw (exception(exception_identifier::unexpected_instance_identifier));
     }
 
-    execution::task* p = instances[id];
+    execution::task::ptr p = instances[id];
 
-    relay_connection(p, o);
+    relay_connection(p.get(), o);
 
     /* Signal the listener that a connection has been established */
     p->signal_connection(o);

@@ -69,7 +69,7 @@ namespace squadt {
       void write(std::ostream& = std::cout) const;
  
       /** \brief Add a new processor to the project */
-      inline processor::ptr add(tool&, processor::visualisation_handler = processor::dummy_visualiser);
+      inline processor::ptr add(tool&, processor::reporter::callback_handler = processor::reporter::dummy);
 
       /** \brief Remove a processor and all processors that depend one one of its outputs */
       inline void remove(processor*);
@@ -94,7 +94,7 @@ namespace squadt {
     return (processors);
   }
 
-  inline processor::ptr project_manager::add(tool& t, processor::visualisation_handler h) {
+  inline processor::ptr project_manager::add(tool& t, processor::reporter::callback_handler h) {
     return (processor::ptr(new processor(t, h)));
   }
 

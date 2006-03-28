@@ -8,6 +8,36 @@
 namespace squadt {
 
   /**
+   * @param[in] o the processor that owns of this object
+   * @param[in] h the function or functor that is called/invoked when the process status changes
+   **/
+  processor::reporter::reporter(processor& o, callback_handler h) : owner(o), visualise(h) {
+  }
+
+  /**
+   * @param[in] s the new status
+   **/
+  inline void processor::reporter::report_change(execution::process::status s) {
+    using namespace execution;
+
+    switch (s) {
+      case process::stopped:
+        owner.set_output_status(not_up_to_date);
+        break;
+      case process::running:
+        owner.set_output_status(being_computed);
+        break;
+      case process::completed:
+        owner.set_output_status(up_to_date);
+        break;
+      case process::aborted:
+        owner.set_output_status(non_existent);
+        break;
+    }
+  }
+
+
+  /**
    * \brief Operator for writing to stream
    *
    * @param s stream to write to
@@ -19,21 +49,21 @@ namespace squadt {
     return (s);
   }
 
-  inline processor::processor(tool& t) : program(t), visualise(dummy_visualiser) {
+  /**
+   * @param t the tool that is used for processing
+   **/
+  inline processor::processor(tool& t) : program(t), task_monitor(new reporter(*this, reporter::dummy)) {
   }
 
   /**
    * @param t the tool that is used for processing
    * @param h the function that is called when the status of the output changes
    **/
-  inline processor::processor(tool& t, visualisation_handler h) : program(t), visualise(h) {
+  inline processor::processor(tool& t, reporter::callback_handler h) : program(t),
+                                                                         task_monitor(new reporter(*this, h)) {
   }
 
   inline processor::~processor() {
-  }
-
-  inline sip::configuration::ptr processor::get_configuration() {
-    return (current_configuration);
   }
 
   inline const tool& processor::get_tool() {
@@ -51,8 +81,8 @@ namespace squadt {
   /**
    * \attention This function is non-blocking
    **/
-  inline void processor::process() throw () {
-    global_tool_manager->execute(program, this);
+  inline void processor::process() {
+    global_tool_manager->execute(program, boost::dynamic_pointer_cast < execution::task, reporter >(task_monitor));
   }
 
   inline const unsigned int processor::number_of_inputs() const {
@@ -85,26 +115,7 @@ namespace squadt {
     if (current_output_status != s) {
       current_output_status = s;
  
-      visualise(current_output_status);
-    }
-  }
-
-  inline void processor::report_change(execution::process::status s) {
-    using namespace execution;
-
-    switch (s) {
-      case process::stopped:
-        set_output_status(not_up_to_date);
-        break;
-      case process::running:
-        set_output_status(being_computed);
-        break;
-      case process::completed:
-        set_output_status(up_to_date);
-        break;
-      case process::aborted:
-        set_output_status(non_existent);
-        break;
+      task_monitor->visualise(current_output_status);
     }
   }
 }

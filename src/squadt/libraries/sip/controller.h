@@ -12,6 +12,7 @@ namespace sip {
 
     /** \brief The main interface to the protocol (controller-side) */
     class communicator : public sip::messenger {
+
       protected:
         /** Type for keeping protocol phase status */
         enum status {
@@ -79,15 +80,24 @@ namespace sip {
         /** \brief Get the controller_capabilities object that is send to tools */
         const controller::capabilities& get_controller_capabilities();
  
-        /** \brief Set the current configuration (only effective before status_configured) */
-        void set_configuration(const configuration&);
- 
+        /** \brief Set the current (perhaps partial) configuration */
+        template < typename T >
+        void set_configuration(T);
+
         /** \brief Get the current (perhaps partial) configuration */
         configuration::ptr get_configuration() const;
     };
  
     inline const controller::capabilities& communicator::get_controller_capabilities() {
       return (current_controller_capabilities);
+    }
+ 
+    /**
+     * @param[in] c the current configuration
+     **/
+    template < typename T >
+    inline void communicator::set_configuration(T c) {
+      current_configuration = c;
     }
  
     /** \attention use get_configuration().swap() to set the configuration */

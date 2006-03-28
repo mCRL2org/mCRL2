@@ -33,12 +33,13 @@ namespace squadt {
    * input of other processors.
    *
    **/
-  class processor : public execution::task {
+  class processor {
     friend class project_manager;
     friend class tool_manager;
     friend class executor;
  
     public:
+
       /** \brief Type that is used to keep the status of the output of a processor */
       enum output_status {
         non_existent,         /* outputs do not exist */
@@ -62,9 +63,47 @@ namespace squadt {
         typedef boost::weak_ptr < object_descriptor >    wptr;
       };
 
-      /** \brief Type for functions that can be used for visualising a state change */
-      typedef boost::function < void (processor::output_status) > visualisation_handler;
+      /**
+       * \brief Basic reporter for task progress
+       *
+       * The process(es) that are spawned for this task are monitored via the
+       * process_listener interface.
+       **/
+      class reporter : public execution::task {
+          friend class processor;
 
+        public:
+
+          /** \brief Type for functions that is used to communicate state changes */
+          typedef boost::function < void (processor::output_status) > callback_handler;
+
+          /** \brief Convenience type for hiding shared pointer implementation */
+          typedef boost::shared_ptr < reporter >                      ptr;
+
+        private:
+  
+          /** \brief The processor that owns this object */
+          processor& owner;
+
+        private:
+  
+          /** \brief Visualisation function for state changes */
+          callback_handler visualise;
+  
+        private:
+  
+          /** \brief Handler function that is called when an associated process changes state */
+          inline void report_change(execution::process::status);
+  
+        public:
+  
+          /** \brief Constructor with a callback handler for actual visualisation */
+          inline reporter(processor&, callback_handler);
+
+          /** \brief The default visualisation function that does nothing */
+          static void dummy(output_status);
+      };
+ 
       /** \brief Convenience type for hiding shared pointer implementation */
       typedef boost::shared_ptr < processor >                     ptr;
 
@@ -88,30 +127,24 @@ namespace squadt {
       /** \brief The information about outputs of this processor */
       output_list                         outputs;
  
-      /** \brief the current status of the outputs of the processor */
+      /** \brief The current status of the outputs of the processor */
       output_status                       current_output_status;
- 
-      /** \brief Visualisation function for state changes */
-      visualisation_handler               visualise;
+
+      /** \brief The current task that is running or about to run */
+      reporter::ptr                       task_monitor;
  
     private:
-
-      /** \brief The default visualisation function that does nothing */
-      static void dummy_visualiser(output_status);
 
       /** \brief Manually sets the output status */
       inline void set_output_status(const processor::output_status);
 
-      /** \brief Handler function that is called when an associated process changes state */
-      inline void report_change(execution::process::status);
-
     public:
  
-      /** \brief Constructor without visualisation handler */
+      /** \brief Basic constructor */
       inline processor(tool& t);
 
       /** \brief Constructor with visualisation handler */
-      inline processor(tool& t, visualisation_handler);
+      inline processor(tool& t, reporter::callback_handler);
 
       /** \brief Check the inputs with respect to the outputs and adjust status accordingly */
       bool check_status(bool);
@@ -120,11 +153,8 @@ namespace squadt {
       inline bool consistent_inputs() const;
 
       /** \brief Start processing: generate outputs from inputs */
-      void process() throw ();
+      void process();
  
-      /** \brief Get a pointer to the configuration object that was last received by from the tool */
-      inline sip::configuration::ptr get_configuration();
-
       /** \brief Get the object for the tool associated with this processor */
       inline const tool& get_tool();
 

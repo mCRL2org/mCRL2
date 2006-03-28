@@ -7,7 +7,7 @@
 #include <boost/thread/condition.hpp>
 
 #include "process.h"
-
+#include <iostream>
 namespace squadt {
   namespace execution {
 
