@@ -22,7 +22,7 @@
 //external declarations from mcrl2lexer.l
 void mcrl2yyerror(const char *s);
 int mcrl2yylex(void);
-extern ATermAppl SpecTree;
+extern ATermAppl spec_tree;
 
 #ifdef _MSC_VER
 #define yyfalse 0
@@ -109,22 +109,22 @@ start:
   TAG_SPEC spec
     {
       $$ = $2;
-      SpecTree = $$;
+      spec_tree = $$;
     }
   | TAG_SORT_EXPR sort_expr
     {
       $$ = $2;
-      SpecTree = $$;
+      spec_tree = $$;
     }
   | TAG_DATA_EXPR data_expr
     {
       $$ = $2;
-      SpecTree = $$;
+      spec_tree = $$;
     }
   | TAG_PROC_EXPR proc_expr
     {
       $$ = $2;
-      SpecTree = $$;
+      spec_tree = $$;
     }
   ;
 
