@@ -1,6 +1,8 @@
 #ifndef SOCKET_SCHEDULER_H
 #define SOCKET_SCHEDULER_H
 
+#include <boost/thread/mutex.hpp>
+
 #include <transport/detail/socket_transceiver.h>
 
 namespace transport {
@@ -10,30 +12,43 @@ namespace transport {
 
   namespace transceiver {
 
-    /* Wrapper around an asio demuxer */
+    /**
+     * \brief Basic wrapper around an asio demuxer
+     *
+     * The demuxer is the scheduler it responds to incoming events and
+     * dispatches tasks (through handler functions) accordingly.
+     **/
     class socket_scheduler {
       friend class socket_transceiver;
       friend class listener::socket_listener;
 
       private:
-        bool          active;
-        asio::demuxer demuxer;
+        /** \brief The current state of the scheduler */
+        bool                               active;
 
+        /** \brief The demuxer */
+        asio::demuxer                      demuxer;
+
+        /** \brief This lock is used to ensure that switching between states active or shutdown is atomic */
+        boost::mutex                       run_lock;
+
+        /** \brief The thread in which the scheduling takes place */
         boost::shared_ptr < asio::thread > thread;
 
+        /** \brief Runs until no more tasks are registered, then resets */
         void task();
 
       public:
-        /** Constructor */
+        /** \brief Constructor */
         inline socket_scheduler();
 
-        /** Run the demuxer */
+        /** \brief Run the demuxer */
         inline void run();
 
-        /** Stop the demuxer */
+        /** \brief Stop the demuxer */
         inline void stop();
 
-        /** Destructor */
+        /** \brief Destructor */
         inline ~socket_scheduler();
     };
 
@@ -42,12 +57,17 @@ namespace transport {
 
     inline void socket_scheduler::task() {
       demuxer.run();
+
+      boost::mutex::scoped_lock l(run_lock);
+
       demuxer.reset();
 
       active = false;
     }
 
     inline void socket_scheduler::run() {
+      boost::mutex::scoped_lock l(run_lock);
+
       if (!active) {
         using namespace boost;
 
@@ -58,8 +78,12 @@ namespace transport {
     }
 
     inline void socket_scheduler::stop() {
+      boost::mutex::scoped_lock l(run_lock);
+
       if (active) {
         demuxer.interrupt();
+
+        active = false;
       }
     }
 
