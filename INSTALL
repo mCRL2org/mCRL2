@@ -8,9 +8,9 @@ The package names given here are used in Debian. Most of the time they are
 called the same on other systems. Only top-level packages are mentioned; lower
 level packages are (usually) automatically installed. Furthermore, the status
 of the packages is mentioned (required, recommended or optional):
-- make >= 3.80 package make [required]
-- flex: package flex [required]
-- bison >= 1.875: package bison [required]
+- make >= 3.80: package make [required]
+- flex >= 2.5.4a-12: package flex [required]
+- bison >= 2.0: package bison [required]
 - wxWidgets >= 2.6: package libwxgtk2.6-dev or libwxgtk2.6-dbg [recommended]
 - xml2 development libraries >= 2.6.22: package libxml2-dev [recommended]
 - default icon locations: package gnome-themes, gnome-themes-extras or

@@ -68,7 +68,7 @@ if $FLEX -I -o/dev/null test.l &> /dev/null; then
   AC_MSG_RESULT([yes]);
 else
   AC_MSG_RESULT([no])
-  AC_MSG_ERROR([flex option c++ not available; please upgrade to a newer version]);
+  AC_MSG_ERROR([flex option c++ not available; please upgrade to flex 2.5.4a-12 or later]);
 fi
 AC_MSG_CHECKING([whether flex C++ scanner can be used])
 $FLEX -I -otest.cpp test.l
@@ -80,7 +80,7 @@ if test $flex_usable; then
   AC_MSG_RESULT([yes]);
 else
   AC_MSG_RESULT([no])
-  AC_MSG_ERROR([flex C++ scanner cannot be used with the $CXX compiler; please upgrade to a newer version]);
+  AC_MSG_ERROR([flex C++ scanner cannot be used with the $CXX compiler; please upgrade to flex 2.5.4a-12 or later]);
 fi
 
 # Check for compatible bison
@@ -93,7 +93,7 @@ if $BISON test.y -o/dev/null &> /dev/null; then
   AC_MSG_RESULT([yes]);
 else
   AC_MSG_RESULT([no])
-  AC_MSG_ERROR([bison option %glr-parser not available; please upgrade to bison 1.875a or later]);
+  AC_MSG_ERROR([bison option %glr-parser not available; please upgrade to bison 2.0 or later]);
 fi
 AC_MSG_CHECKING([whether bison GLR parser can be used])
 $BISON test.y -o test.cpp
@@ -105,7 +105,7 @@ if test $glr_usable; then
   AC_MSG_RESULT([yes]);
 else
   AC_MSG_RESULT([no])
-  AC_MSG_ERROR([bison GLR parser cannot be used with the $CXX compiler; please upgrade to bison 1.875a or later]);
+  AC_MSG_ERROR([bison GLR parser cannot be used with the $CXX compiler; please upgrade to bison 2.0 or later]);
 fi
 
 # Set flags

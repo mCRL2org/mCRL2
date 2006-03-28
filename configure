@@ -3773,8 +3773,8 @@ echo "${ECHO_T}yes" >&6;
 else
   echo "$as_me:$LINENO: result: no" >&5
 echo "${ECHO_T}no" >&6
-  { { echo "$as_me:$LINENO: error: flex option c++ not available; please upgrade to a newer version" >&5
-echo "$as_me: error: flex option c++ not available; please upgrade to a newer version" >&2;}
+  { { echo "$as_me:$LINENO: error: flex option c++ not available; please upgrade to flex 2.5.4a-12 or later" >&5
+echo "$as_me: error: flex option c++ not available; please upgrade to flex 2.5.4a-12 or later" >&2;}
    { (exit 1); exit 1; }; };
 fi
 echo "$as_me:$LINENO: checking whether flex C++ scanner can be used" >&5
@@ -3790,8 +3790,8 @@ echo "${ECHO_T}yes" >&6;
 else
   echo "$as_me:$LINENO: result: no" >&5
 echo "${ECHO_T}no" >&6
-  { { echo "$as_me:$LINENO: error: flex C++ scanner cannot be used with the $CXX compiler; please upgrade to a newer version" >&5
-echo "$as_me: error: flex C++ scanner cannot be used with the $CXX compiler; please upgrade to a newer version" >&2;}
+  { { echo "$as_me:$LINENO: error: flex C++ scanner cannot be used with the $CXX compiler; please upgrade to flex 2.5.4a-12 or later" >&5
+echo "$as_me: error: flex C++ scanner cannot be used with the $CXX compiler; please upgrade to flex 2.5.4a-12 or later" >&2;}
    { (exit 1); exit 1; }; };
 fi
 
@@ -3844,8 +3844,8 @@ echo "${ECHO_T}yes" >&6;
 else
   echo "$as_me:$LINENO: result: no" >&5
 echo "${ECHO_T}no" >&6
-  { { echo "$as_me:$LINENO: error: bison option %glr-parser not available; please upgrade to bison 1.875a or later" >&5
-echo "$as_me: error: bison option %glr-parser not available; please upgrade to bison 1.875a or later" >&2;}
+  { { echo "$as_me:$LINENO: error: bison option %glr-parser not available; please upgrade to bison 2.0 or later" >&5
+echo "$as_me: error: bison option %glr-parser not available; please upgrade to bison 2.0 or later" >&2;}
    { (exit 1); exit 1; }; };
 fi
 echo "$as_me:$LINENO: checking whether bison GLR parser can be used" >&5
@@ -3861,8 +3861,8 @@ echo "${ECHO_T}yes" >&6;
 else
   echo "$as_me:$LINENO: result: no" >&5
 echo "${ECHO_T}no" >&6
-  { { echo "$as_me:$LINENO: error: bison GLR parser cannot be used with the $CXX compiler; please upgrade to bison 1.875a or later" >&5
-echo "$as_me: error: bison GLR parser cannot be used with the $CXX compiler; please upgrade to bison 1.875a or later" >&2;}
+  { { echo "$as_me:$LINENO: error: bison GLR parser cannot be used with the $CXX compiler; please upgrade to bison 2.0 or later" >&5
+echo "$as_me: error: bison GLR parser cannot be used with the $CXX compiler; please upgrade to bison 2.0 or later" >&2;}
    { (exit 1); exit 1; }; };
 fi
 
