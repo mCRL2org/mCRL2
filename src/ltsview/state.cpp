@@ -3,7 +3,7 @@
 State::State( ATermList sv )
 {
   stateVectorAT = sv;
-  ATprotectList( &stateVector );
+  ATprotectList( &stateVectorAT );
   while ( !ATisEmpty( sv ) )
   {
     stateVector.push_back( ATgetFirst( sv ) );
