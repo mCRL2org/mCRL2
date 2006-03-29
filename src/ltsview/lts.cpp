@@ -509,7 +509,10 @@ void LTS::addMarkRule( MarkRule* r, int index )
     markRules.push_back( r );
   else
     markRules.insert( markRules.begin() + index, r );
-  processAddedMarkRule( r );
+  if ( r->isActivated )
+  {
+    processAddedMarkRule( r );
+  }
 }
 
 void LTS::processAddedMarkRule( MarkRule* r )

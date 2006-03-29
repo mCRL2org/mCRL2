@@ -12,6 +12,7 @@ State::State( ATermList sv )
   cluster = NULL;
   rank = 0;
   position = -1.0f;
+  marked = false;
 }
 
 State::~State()

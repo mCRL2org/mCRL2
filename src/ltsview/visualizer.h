@@ -42,6 +42,8 @@ class Visualizer
     void computeSubtreeBounds( Cluster* root, float &boundWidth, float
 	&boundHeight );
     void drawStates( Cluster* root );
+    void drawStatesMarkStates( Cluster* root );
+    void drawStatesMarkDeadlocks( Cluster* root );
     void drawSubtree( Cluster* root, bool topClosed, HSV_Color col, HSV_Color
 	delta_col );
     void drawSubtreeMarkDeadlocks( Cluster* root, bool topClosed );

@@ -65,8 +65,6 @@ namespace Utils
     vector< bool >  valueSet;
   };
   
-  bool operator==( VisSettings, VisSettings );
-  bool operator!=( VisSettings, VisSettings );
   bool operator==( RGB_Color, RGB_Color );
   bool operator!=( RGB_Color, RGB_Color );
   

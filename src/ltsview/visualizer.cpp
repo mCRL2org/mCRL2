@@ -159,8 +159,19 @@ void Visualizer::drawLTS( Point3D viewpoint )
     glDeleteLists( statesDisplayList, 1 );
     statesDisplayList = glGenLists( 1 );
     glNewList( statesDisplayList, GL_COMPILE );
-      GLUtils::setColor( visSettings.stateColor, 0 );
-      drawStates( lts->getInitialState()->getCluster() );
+      switch ( markStyle )
+      {
+	case MARK_STATES:
+	  drawStatesMarkStates( lts->getInitialState()->getCluster() );
+	  break;
+	case MARK_DEADLOCKS:
+	  drawStatesMarkDeadlocks( lts->getInitialState()->getCluster() );
+	  break;
+	default:
+	  GLUtils::setColor( visSettings.stateColor, 0 );
+	  drawStates( lts->getInitialState()->getCluster() );
+	  break;
+      }
     glEndList();
     refreshStates = false;
   }
@@ -732,5 +743,110 @@ void Visualizer::drawStates( Cluster* root )
       glTranslatef( 0.0f, 0.0f, -clusterHeight );
     }
   }
-  
+}
+
+void Visualizer::drawStatesMarkStates( Cluster* root )
+{
+  vector< State* > c_ss;
+  root->getStates( c_ss );
+  for ( vector< State* >::iterator s_it = c_ss.begin() ; s_it != c_ss.end() ;
+	++s_it )
+  {
+    if ( (**s_it).isMarked() )
+      GLUtils::setColor( visSettings.markedColor, 0 );
+    else
+      GLUtils::setColor( RGB_WHITE, 0 );
+
+    if ( (**s_it).getPosition() < -0.9f )
+      glutSolidSphere( visSettings.nodeSize, 4, 4 );
+    else
+    {
+      glRotatef( -(**s_it).getPosition(), 0.0f, 0.0f, 1.0f );
+      glTranslatef( root->getTopRadius(), 0.0f, 0.0f );
+      glutSolidSphere( visSettings.nodeSize, 4, 4 );
+      glTranslatef( -root->getTopRadius(), 0.0f, 0.0f );
+      glRotatef( (**s_it).getPosition(), 0.0f, 0.0f, 1.0f );
+    }
+  }
+
+  vector< Cluster* > descs;
+  root->getDescendants( descs );
+  for ( vector< Cluster* >::iterator descit = descs.begin() ;
+	descit != descs.end() ; ++descit )
+  {
+    if ( (**descit).getPosition() < -0.9f )
+    {
+      // descendant is centered
+      glTranslatef( 0.0f, 0.0f, clusterHeight );
+      drawStatesMarkStates( *descit );
+      glTranslatef( 0.0f, 0.0f, -clusterHeight );
+    }
+    else
+    {
+      glTranslatef( 0.0f, 0.0f, clusterHeight );
+      glRotatef( -(**descit).getPosition(), 0.0f, 0.0f, 1.0f );
+      glTranslatef( root->getBaseRadius(), 0.0f, 0.0f );
+      glRotatef( visSettings.outerBranchTilt, 0.0f, 1.0f, 0.0f );
+
+      drawStatesMarkStates( *descit );
+      
+      glRotatef( -visSettings.outerBranchTilt, 0.0f, 1.0f, 0.0f );
+      glTranslatef( -root->getBaseRadius(), 0.0f, 0.0f );
+      glRotatef( (**descit).getPosition(), 0.0f, 0.0f, 1.0f );
+      glTranslatef( 0.0f, 0.0f, -clusterHeight );
+    }
+  }
+}
+
+void Visualizer::drawStatesMarkDeadlocks( Cluster* root )
+{
+  vector< State* > c_ss;
+  root->getStates( c_ss );
+  for ( vector< State* >::iterator s_it = c_ss.begin() ; s_it != c_ss.end() ;
+	++s_it )
+  {
+    if ( (**s_it).isDeadlock() )
+      GLUtils::setColor( visSettings.markedColor, 0 );
+    else
+      GLUtils::setColor( RGB_WHITE, 0 );
+
+    if ( (**s_it).getPosition() < -0.9f )
+      glutSolidSphere( visSettings.nodeSize, 4, 4 );
+    else
+    {
+      glRotatef( -(**s_it).getPosition(), 0.0f, 0.0f, 1.0f );
+      glTranslatef( root->getTopRadius(), 0.0f, 0.0f );
+      glutSolidSphere( visSettings.nodeSize, 4, 4 );
+      glTranslatef( -root->getTopRadius(), 0.0f, 0.0f );
+      glRotatef( (**s_it).getPosition(), 0.0f, 0.0f, 1.0f );
+    }
+  }
+
+  vector< Cluster* > descs;
+  root->getDescendants( descs );
+  for ( vector< Cluster* >::iterator descit = descs.begin() ;
+	descit != descs.end() ; ++descit )
+  {
+    if ( (**descit).getPosition() < -0.9f )
+    {
+      // descendant is centered
+      glTranslatef( 0.0f, 0.0f, clusterHeight );
+      drawStatesMarkDeadlocks( *descit );
+      glTranslatef( 0.0f, 0.0f, -clusterHeight );
+    }
+    else
+    {
+      glTranslatef( 0.0f, 0.0f, clusterHeight );
+      glRotatef( -(**descit).getPosition(), 0.0f, 0.0f, 1.0f );
+      glTranslatef( root->getBaseRadius(), 0.0f, 0.0f );
+      glRotatef( visSettings.outerBranchTilt, 0.0f, 1.0f, 0.0f );
+
+      drawStatesMarkDeadlocks( *descit );
+      
+      glRotatef( -visSettings.outerBranchTilt, 0.0f, 1.0f, 0.0f );
+      glTranslatef( -root->getBaseRadius(), 0.0f, 0.0f );
+      glRotatef( (**descit).getPosition(), 0.0f, 0.0f, 1.0f );
+      glTranslatef( 0.0f, 0.0f, -clusterHeight );
+    }
+  }
 }
