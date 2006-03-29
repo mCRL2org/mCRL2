@@ -28,7 +28,7 @@ namespace squadt {
     private:
 
       /** \brief handler that accomplishes the actual task */
-      inline void handle_store_tool_capabilities(sip::message_ptr& m, tool& t);
+      inline void handle_store_tool_capabilities(const sip::message_ptr& m, tool& t);
 
     public:
 
@@ -62,7 +62,7 @@ namespace squadt {
    * @param[in] m the message that was just delivered
    * @param[in,out] t the tool object in which to store the result
    **/
-  inline void extractor::handle_store_tool_capabilities(sip::message_ptr& m, tool& t) {
+  inline void extractor::handle_store_tool_capabilities(const sip::message_ptr& m, tool& t) {
     xml2pp::text_reader reader(m->to_string().c_str());
 
     reader.read();

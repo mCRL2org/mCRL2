@@ -60,10 +60,10 @@ namespace sip {
       send_message(m);
     }
  
-    void communicator::accept_layout_handler(messenger::message_ptr&) {
+    void communicator::accept_layout_handler(const messenger::message_ptr&) {
     }
  
-    void communicator::accept_data_handler(messenger::message_ptr&) {
+    void communicator::accept_data_handler(const messenger::message_ptr&) {
     }
   }
 }

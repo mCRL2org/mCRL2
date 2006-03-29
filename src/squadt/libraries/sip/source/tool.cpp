@@ -112,7 +112,7 @@ namespace sip {
     void communicator::send_report(sip::report&) {
     }
  
-    void communicator::accept_interaction_data(sip::messenger::message_ptr&) {
+    void communicator::accept_interaction_data(const sip::messenger::message_ptr&) {
     }
   }
 }

@@ -46,10 +46,10 @@ namespace sip {
       private:
  
         /** \brief Handler function to replace the current display layout with a new one */
-        void accept_layout_handler(messenger::message_ptr&);
+        void accept_layout_handler(const messenger::message_ptr&);
  
         /** \brief Handler function to map data to the display */
-        void accept_data_handler(messenger::message_ptr&);
+        void accept_data_handler(const messenger::message_ptr&);
  
       public:
 

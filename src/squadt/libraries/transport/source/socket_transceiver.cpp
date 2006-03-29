@@ -1,9 +1,9 @@
 #include <iostream>
 #include <sstream>
 
-#include <boost/bind/protect.hpp>
-
 #include <transport/detail/socket_transceiver.h>
+
+#include <boost/ref.hpp>
 
 namespace transport {
   namespace transceiver {
@@ -25,10 +25,8 @@ namespace transport {
         socket.set_option(socket_base::keep_alive(true));
         socket.set_option(socket_base::linger(false, 0));
 
-        socket.async_receive(asio::buffer(buffer, input_buffer_size), 0,
-                          boost::bind(&socket_transceiver::activate_handler, w, 
-                                  boost::protect(boost::bind(&socket_transceiver::handle_receive, this, _1, _2)),
-                                        placeholders::error));
+        socket.async_receive(asio::buffer(buffer, input_buffer_size), 0, 
+                        boost::bind(&socket_transceiver::handle_receive, this, w, _1));
       }
     }
 
@@ -58,9 +56,7 @@ namespace transport {
 
         if (!e) {
           socket.async_receive(asio::buffer(buffer, input_buffer_size), 0,
-                          boost::bind(&socket_transceiver::activate_handler, w, 
-                                  boost::protect(boost::bind(&socket_transceiver::handle_receive, this, _1, _2)),
-                                        placeholders::error));
+                          boost::bind(&socket_transceiver::handle_receive, this, w, _1));
 
           /* Make sure the scheduler is running */
           scheduler.run();
@@ -85,20 +81,20 @@ namespace transport {
     void socket_transceiver::connect(const std::string& h, const long p, socket_transceiver::ptr w) {
       if (w.get() != 0) {
         asio::ipv4::host host;
-       
+
         resolver.get_host_by_name(host, h);
-       
-        connect(host.address(0), p);
+
+        connect(host.address(0), p, w);
       }
     }
 
     void socket_transceiver::disconnect(basic_transceiver::ptr, socket_transceiver::ptr w) {
       if (w.get() != 0) {
         boost::mutex::scoped_lock l(operation_lock);
-       
+
         socket.shutdown(asio::stream_socket::shutdown_both);
         socket.close();
-       
+
         basic_transceiver::handle_disconnect(this);
       }
     }
@@ -112,45 +108,34 @@ namespace transport {
     }
 
     /**
-     * @param o shared pointer to the object on which the handler will operate
-     * @param h the handler function
      * @param e reference to an asio error object
      **/
-    void socket_transceiver::activate_handler(socket_transceiver::wptr o, handler_t h, const asio::error& e) {
-      socket_transceiver::ptr s = o.lock();
-
-      if (!o.expired()) {
-        boost::mutex::scoped_lock l(s->operation_lock);
-
-        h(e, o);
-      }
-    }
-
-    /**
-     * @param e reference to an asio error object
-     **/
-    void socket_transceiver::handle_receive(const asio::error& e, socket_transceiver::wptr& w) {
+    void socket_transceiver::handle_receive(socket_transceiver::wptr w, const asio::error& e) {
       /* Object still exists, so do the receiving and delivery */
       using namespace asio;
 
-      if (!e) {
-        basic_transceiver::deliver(boost::cref(std::string(buffer)));
+      socket_transceiver::ptr s = w.lock();
 
-        socket.async_receive(asio::buffer(buffer, input_buffer_size), 0,
-                        boost::bind(&socket_transceiver::activate_handler, w, 
-                                boost::protect(boost::bind(&socket_transceiver::handle_receive, this, _1, _2)),
-                                        placeholders::error));
+      if (!w.expired()) {
+        boost::mutex::scoped_lock l(s->operation_lock);
 
-        /* Make sure the scheduler is running */
-        scheduler.run();
-      }
-      else {
-        if (e == asio::error::eof) {
-          /* The safe default error handling */
-          handle_disconnect(this);
+        if (!e) {
+          basic_transceiver::deliver(boost::cref(std::string(buffer)));
+       
+          socket.async_receive(asio::buffer(buffer, input_buffer_size), 0,
+                                  boost::bind(&socket_transceiver::handle_receive, this, w, _1));
+       
+          /* Make sure the scheduler is running */
+          scheduler.run();
         }
-        else if (e != asio::error::operation_aborted) {
-          throw (exception(exception_identifier::transceiver_failure));
+        else {
+          if (e == asio::error::eof) {
+            /* The safe default error handling */
+            handle_disconnect(this);
+          }
+          else if (e != asio::error::operation_aborted) {
+            throw (exception(exception_identifier::transceiver_failure));
+          }
         }
       }
     }
@@ -158,14 +143,18 @@ namespace transport {
     /**
      * @param e reference to an asio error object
      **/
-    void socket_transceiver::handle_write(const asio::error& e, socket_transceiver::wptr& w) {
-      /* Object still exists, so continue processing the write operation */
-      if (e == asio::error::eof) {
-        /* Connection was closed by peer */
-        handle_disconnect(this);
-      }
-      else if (e != asio::error::success && e != asio::error::operation_aborted) {
-        throw (exception(exception_identifier::transceiver_failure));
+    void socket_transceiver::handle_write(socket_transceiver::wptr w, const asio::error& e) {
+      socket_transceiver::ptr s = w.lock();
+
+      if (!w.expired()) {
+        /* Object still exists, so continue processing the write operation */
+        if (e == asio::error::eof) {
+          /* Connection was closed by peer */
+          handle_disconnect(this);
+        }
+        else if (e != asio::error::success && e != asio::error::operation_aborted) {
+          throw (exception(exception_identifier::transceiver_failure));
+        }
       }
     }
 
@@ -174,15 +163,10 @@ namespace transport {
      **/
     void socket_transceiver::send(const std::string& d, socket_transceiver::ptr w) {
       if (w.get() != 0) {
-        using namespace asio;
-        using namespace boost;
-       
         boost::mutex::scoped_lock l(operation_lock);
-       
+
         asio::async_write(socket, asio::buffer(d.c_str(), d.length() + 1), 
-                        boost::bind(&socket_transceiver::activate_handler, w, 
-                                boost::protect(boost::bind(&socket_transceiver::handle_write, this, _1, _2)),
-                                        placeholders::error));
+                      boost::bind(&socket_transceiver::handle_write, this, w, _1));
       }
     }
 
@@ -190,19 +174,16 @@ namespace transport {
      * @param d the stream that contains the data that is to be sent
      **/
     void socket_transceiver::send(std::istream& d, socket_transceiver::ptr w) {
-      using namespace asio;
-      using namespace boost;
-
-      boost::mutex::scoped_lock l(operation_lock);
-
       std::ostringstream s;
 
-      s << d.rdbuf();
+      if (w.get() != 0) {
+        boost::mutex::scoped_lock l(operation_lock);
 
-      asio::async_write(socket, asio::buffer(s.str().c_str(), s.str().length() + 1),
-                      boost::bind(&socket_transceiver::activate_handler, w, 
-                              boost::protect(boost::bind(&socket_transceiver::handle_write, this, _1, _2)),
-                                      placeholders::error));
+        s << d.rdbuf();
+
+        asio::async_write(socket, asio::buffer(s.str().c_str(), s.str().length() + 1), 
+                      boost::bind(&socket_transceiver::handle_write, this, w, _1));
+      }
     }
   }
 }

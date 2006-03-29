@@ -100,7 +100,7 @@ namespace squadt {
       void execute(tool&, T);
 
       /** \brief This is the event handler for incoming identification messages */
-      void handle_relay_connection(sip::message_ptr&, sip::end_point);
+      void handle_relay_connection(const sip::message_ptr&, const sip::end_point);
 
     public:
  

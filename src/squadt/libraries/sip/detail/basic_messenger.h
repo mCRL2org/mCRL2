@@ -8,12 +8,11 @@
 #include <boost/bind.hpp>
 #include <boost/function.hpp>
 #include <boost/shared_ptr.hpp>
-#include <boost/thread/barrier.hpp>
+#include <boost/weak_ptr.hpp>
+#include <boost/thread/mutex.hpp>
+#include <boost/thread/condition.hpp>
 
 #include <transport/transporter.h>
-
-/* Braindead macro defined in one of the system headers included by transport.h */
-#undef barrier
 
 #include <sip/detail/message.h>
 #include <sip/detail/common.h>
@@ -34,99 +33,114 @@ namespace sip {
     class basic_messenger : public transport::transporter {
       public:
 
-        /** Convenience type for messages of type M */
-        typedef M                                                           message;
+        /** \brief Convenience type for messages of type M */
+        typedef M                                                                       message;
 
-        /** Convenience type for pointers to messages using a boost shared pointer */
-        typedef boost::shared_ptr < message >                               message_ptr;
+        /** \brief Convenience type for pointers to messages using a boost shared pointer */
+        typedef boost::shared_ptr < message >                                           message_ptr;
 
-        /** Convenience type for handlers */
-        typedef boost::function2 < void, message_ptr&, basic_transceiver* > handler_type;
+        /** \brief Convenience type for shared pointers */
+        typedef boost::weak_ptr < basic_messenger < M > >                               wptr;
+
+        /** \brief Convenience type for handlers */
+        typedef boost::function2 < void, const message_ptr&, const basic_transceiver* > handler_type;
  
       private:
 
-        /** Convenience type for pointers to wait locks using a boost scoped pointer */
-        typedef boost::shared_ptr< boost::barrier >                        barrier_ptr;
+        /** \brief Monitor synchronisation construct */
+        struct monitor {
+          boost::condition condition;
+          boost::mutex     mutex;
 
-        /** Type for the map used to associate a handler to a message type */
-        typedef std::map < typename M::type_identifier_t, handler_type >   handler_map;
+          /** \brief Convenience type for shared pointers */
+          typedef boost::shared_ptr < monitor > ptr;
+        };
 
-        /** Type for the map used to associate a handler to a lock primitive */
-        typedef std::map < typename M::type_identifier_t, barrier_ptr >    waiter_map;
+        /** \brief Type for the map used to associate a handler to a message type */
+        typedef std::map < typename M::type_identifier_t, handler_type >            handler_map;
 
-        /** Type for the message queue */
-        typedef std::deque < message_ptr >                                 message_queue_t;
+        /** \brief Type for the map used to associate a handler to a lock primitive */
+        typedef std::map < typename M::type_identifier_t, typename monitor::ptr >   waiter_map;
 
-        /** The XML-like tag used for wrapping the content */
+        /** \brief Type for the message queue */
+        typedef std::deque < message_ptr >                                          message_queue_t;
+
+        /** \brief The XML-like tag used for wrapping the content */
         static const std::string   tag_open;
 
-        /** The XML-like tag used for wrapping the content */
+        /** \brief The XML-like tag used for wrapping the content */
         static const std::string   tag_close;
 
       private:
 
-        /** Handlers based on message types */
+        /** \brief Handlers based on message types */
         handler_map                handlers;
  
-        /** For barrier synchronisation (used with function await_message) */
+        /** \brief For blocking until delivery (used with function await_message) */
         waiter_map                 waiters;
  
-        /** The current message queue (unhandled messages end up here) */
+        /** \brief Used to ensure any element t (in M::type_identifier_t) in waiters is assigned to at most once */
+        boost::mutex               waiter_lock;
+
+        /** \brief The current message queue (unhandled messages end up here) */
         message_queue_t            message_queue;
 
-        /** Buffer that holds content until a message is complete */
+        /** \brief Buffer that holds content until a message is complete */
         std::string                buffer;
  
-        /** Whether a message start tag has been matched after the most recent message end tag */
+        /** \brief Whether a message start tag has been matched after the most recent message end tag */
         bool                       message_open;
 
-        /** The number of tag elements (of message::tag) that have been matched at the last delivery */
+        /** \brief The number of tag elements (of message::tag) that have been matched at the last delivery */
         unsigned char              partially_matched;
 
       private:
 
-        /** Helper function that delivers an incoming message directly to a waiter */
-        static inline void deliver_to_waiter(message_ptr&, basic_transceiver*, message_ptr&);
+        /** \brief Helper function that services the handlers */
+        static inline void   service_handlers(basic_messenger< M >::wptr, const message_ptr&, const basic_transceiver*, handler_type);
 
-        /** Helper function that delivers an incoming message directly to a waiter */
-        static inline void deliver_to_waiter(message_ptr&, basic_transceiver*, message_ptr&, handler_type);
+        /** \brief Helper function that delivers an incoming message directly to a waiter */
+        static inline void   deliver_to_waiter(const message_ptr&, const basic_transceiver*, message_ptr&);
+
+        /** \brief Helper function that delivers an incoming message directly to a waiter */
+        static inline void   deliver_to_waiter(const message_ptr&, const basic_transceiver*, message_ptr&, handler_type);
 
       public:
 
-        /** Default constructor */
+        /** \brief Default constructor */
         basic_messenger();
  
-        /** Queues incoming messages */
+        /** \brief Queues incoming messages */
         virtual void deliver(std::istream&, basic_transceiver*);
  
-        /** Queues incoming messages */
+        /** \brief Queues incoming messages */
         virtual void deliver(const std::string&, basic_transceiver*);
  
-        /* Wait until the next message arrives */
+        /* \brief Wait until the next message arrives */
         const message_ptr await_message(typename M::type_identifier_t);
  
-        /** Send a message */
+        /** \brief Send a message */
         inline void send_message(const message&);
  
-        /** Pops the first message of the queue */
+        /** \brief Pops the first message of the queue */
         inline message_ptr pop_message();
  
-        /** Get the first message in the queue */
+        /** \brief Get the first message in the queue */
         inline message& peek_message();
 
-        /** Wait until the first message of type t has arrived */
+        /** \brief Wait until the first message of type t has arrived */
         inline message_ptr find_message(const typename M::type_identifier_t);
  
-        /** Remove a message from the queue */
+        /** \brief Remove a message from the queue */
         inline void remove_message(message_ptr& p);
 
-        /** Returns the number of messages in the queue */
+        /** \brief Returns the number of messages in the queue */
         inline size_t number_of_messages();
  
-        /** Set the handler for a type */
+        /** \brief Set the handler for a type */
         inline void set_handler(handler_type, const typename M::type_identifier_t = static_cast < typename M::type_identifier_t > (0));
 
-        /** Unset the handler for a type */
+        /** \brief Unset the handler for a type */
         inline void unset_handler(const typename M::type_identifier_t);
     };
 

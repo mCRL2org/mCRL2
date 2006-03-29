@@ -55,7 +55,7 @@ namespace squadt {
       private:
  
         /** \brief Signals that a new connection has been established */
-        inline void signal_connection(sip::end_point&);
+        inline void signal_connection(const sip::end_point&);
 
         /** \brief Checks the process status and removes */
         virtual inline void signal_change(const execution::process::status);
@@ -142,7 +142,7 @@ namespace squadt {
     /**
      * @param p a pointer to the local end_point of the new connection
      **/
-    inline void task_monitor::signal_connection(sip::end_point&) {
+    inline void task_monitor::signal_connection(const sip::end_point&) {
       boost::mutex::scoped_lock l(register_lock);
  
       connected = true;

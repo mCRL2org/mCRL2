@@ -160,7 +160,7 @@ namespace squadt {
 
       progress_indicator->SetValue(progress_indicator->GetRange());
 
-      display->Update();
+      display->Refresh();
 
       wxYield();
       wxSleep(2);

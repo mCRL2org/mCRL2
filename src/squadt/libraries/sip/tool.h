@@ -52,7 +52,7 @@ namespace sip {
       private:
 
         /** \brief Handler for incoming data resulting from user interaction relayed by the controller */
-        void accept_interaction_data(sip::messenger::message_ptr&);
+        void accept_interaction_data(const sip::messenger::message_ptr&);
  
       public:
  

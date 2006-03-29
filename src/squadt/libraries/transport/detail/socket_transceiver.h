@@ -32,9 +32,6 @@ namespace transport {
         /** \brief Convenience type to hide the boost shared pointer implementation */
         typedef boost::weak_ptr < socket_transceiver >   wptr;
 
-        /** \brief Function type for common handlers */
-        typedef boost::function < void (const asio::error&, socket_transceiver::wptr&) > handler_t;
-
       private:
 
         /** \brief Host name resolver */
@@ -86,14 +83,11 @@ namespace transport {
         /** \brief Start listening for new data */
         void activate(ptr);
 
-        /** \brief Helper function that runs handler functions only if the object stil exists */
-        static void activate_handler(boost::weak_ptr < socket_transceiver >, handler_t, const asio::error&);
-
         /** \brief Read from the socket */
-        void handle_receive(const asio::error&, wptr&);
+        void handle_receive(wptr, const asio::error&);
 
         /** \brief Process results from a write operation on the socket */
-        void handle_write(const asio::error&, wptr&);
+        void handle_write(wptr, const asio::error&);
 
       public:
 
@@ -146,14 +140,14 @@ namespace transport {
     /**
      * \attention Wrapper for the similar looking private function
      **/
-    inline void socket_transceiver::connect(const std::string& a, const long p) {
+    inline void socket_transceiver::connect(const address& a, const long p) {
       connect(a, p, this_ptr.lock());
     }
 
     /**
      * \attention Wrapper for the similar looking private function
      **/
-    inline void socket_transceiver::connect(const address& a, const long p) {
+    inline void socket_transceiver::connect(const std::string& a, const long p) {
       connect(a, p, this_ptr.lock());
     }
 

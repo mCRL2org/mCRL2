@@ -31,7 +31,7 @@ namespace transport {
      **/
     void socket_listener::activate(basic_listener::ptr l) {
       /* Create a new socket transceiver that is not yet connected to the transporter */
-      boost::shared_ptr < socket_transceiver > t(new socket_transceiver(&owner));
+      socket_transceiver::ptr t = socket_transceiver::create(&owner);
 
       acceptor.async_accept(t->socket, dispatcher.wrap(bind(&socket_listener::handle_accept, this, asio::placeholders::error, t, l)));
 
@@ -50,7 +50,7 @@ namespace transport {
 
         t->activate();
 
-        t = boost::shared_ptr < socket_transceiver > (new socket_transceiver(&owner));
+        t = socket_transceiver::create(&owner);
 
         /* Listen for new connections */
         acceptor.async_accept(t->socket, dispatcher.wrap(bind(&socket_listener::handle_accept, this, asio::placeholders::error, t, l)));

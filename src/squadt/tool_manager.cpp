@@ -191,7 +191,7 @@ namespace squadt {
    * @param m the message that was just delivered
    * @param o the local end point through which the message was received
    **/
-  void tool_manager::handle_relay_connection(sip::message_ptr& m, sip::end_point o) {
+  void tool_manager::handle_relay_connection(const sip::message_ptr& m, const sip::end_point o) {
     instance_identifier id = atol(m->to_string().c_str());
 
     if (instances.find(id) == instances.end()) {
@@ -200,7 +200,7 @@ namespace squadt {
 
     execution::task_monitor::ptr p = instances[id];
 
-    relay_connection(p.get(), o);
+    relay_connection(p.get(), const_cast < transport::transceiver::basic_transceiver* > (o));
 
     /* Signal the listener that a connection has been established */
     p->signal_connection(o);

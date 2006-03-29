@@ -186,11 +186,9 @@ namespace sip {
 
             /* Unblock a possible waiter */
             if (0 < waiters.count(t)) {
-              barrier_ptr b = waiters[t];
+              boost::mutex::scoped_lock l(waiters[t]->mutex);
 
-              waiters.erase(t);
-
-              b->wait();
+              waiters[t]->condition.notify_all();
             }
           }
         }
@@ -276,13 +274,31 @@ namespace sip {
     }
 
     /**
+     * \attention Meant to be called from a separate thread
+     *
+     * @param w a weak pointer to the messenger
+     * @param m reference to the pointer to a message to deliver
+     * @param o the transceiver that delivered the message
+     * @param h the handler to call
+     **/
+    template < class M >
+    inline void basic_messenger< M >::service_handlers(basic_messenger< M >::wptr w,
+                    const message_ptr& m, const basic_transceiver* o, handler_type h) {
+      typename basic_messenger< M >::wptr t(w.lock());
+
+      if (!w.expired()) {
+        h(m, o);
+      }
+    }
+
+    /**
      * @param m reference to the pointer to a message to deliver
      * @param o the transceiver that delivered the message
      * @param t reference to the message pointer of the waiter
      **/
     template < class M >
-    inline void basic_messenger< M >::deliver_to_waiter(message_ptr& m, basic_transceiver* o, message_ptr& t) {
-      t.swap(m);
+    inline void basic_messenger< M >::deliver_to_waiter(const message_ptr& m, const basic_transceiver* o, message_ptr& t) {
+      t = m;
     }
 
     /**
@@ -292,15 +308,16 @@ namespace sip {
      * @param h the old handler to call
      **/
     template < class M >
-    inline void basic_messenger< M >::deliver_to_waiter(message_ptr& m, basic_transceiver* o, message_ptr& t, handler_type h) {
+    inline void basic_messenger< M >::deliver_to_waiter(const message_ptr& m, const basic_transceiver* o, message_ptr& t, handler_type h) {
       t = m;
 
       /** Chain call */
-      h(m,o);
+      h(m, o);
     }
 
     /**
      * @param t the type of the message
+     *
      * \attention must not be called from multiple threads for the same type (events are not chained)
      **/
     template < class M >
@@ -312,28 +329,40 @@ namespace sip {
       message_ptr p(find_message(t));
 
       if (p.get() == 0) {
-        handler_type old_handler = handlers[t];
-        bool         c           = 0 < handlers.count(t);
+        boost::mutex::scoped_lock w(waiter_lock);
 
-        // Store handler
-        if (c) {
+        handler_type              chained_handler;
+        bool                      stored = 0 < handlers.count(t);
+
+        if (stored) {
+          chained_handler = handlers[t];
+
           set_handler(bind(basic_messenger< M >::deliver_to_waiter, _1, _2, ref(p), handlers[t]), t);
         }
         else {
           set_handler(bind(basic_messenger< M >::deliver_to_waiter, _1, _2, ref(p)), t);
         }
+        
+        if (waiters.count(t) == 0) {
+          typename monitor::ptr m(new monitor);
+        
+          waiters[t] = m;
+        }
 
-        barrier_ptr b(new boost::barrier(2));
+        w.unlock();
 
-        waiters[t] = b;
+        boost::mutex::scoped_lock l(waiters[t]->mutex);
 
-        b->wait();
+        waiters[t]->condition.wait(l);
 
-        // Restore handler
-        if (c) {
-          handlers[t] = old_handler;
+        w.lock();
+
+        if (stored) {
+          // Restore handler
+          handlers[t] = chained_handler;
         }
         else {
+          // Remove the added handler
           handlers.erase(t);
         }
       }
