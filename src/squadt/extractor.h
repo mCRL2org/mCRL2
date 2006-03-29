@@ -5,7 +5,7 @@
 
 #include <sip/detail/basic_messenger.h>
 
-#include "task.h"
+#include "task_monitor.h"
 #include "tool.h"
 
 namespace squadt {
@@ -18,7 +18,7 @@ namespace squadt {
    * Extracts the tool information that is important for operation of the tool
    * manager.
    **/
-  class extractor : public execution::task {
+  class extractor : public execution::task_monitor {
 
     public:
 
@@ -42,7 +42,7 @@ namespace squadt {
   /**
    * @param[in] t reference to the tool object to use for storage
    **/
-  inline extractor::extractor(tool& t) : task() {
+  inline extractor::extractor(tool& t) : task_monitor() {
     set_handler(bind(&extractor::handle_store_tool_capabilities, this, _1, t), sip::reply_tool_capabilities);
   }
 

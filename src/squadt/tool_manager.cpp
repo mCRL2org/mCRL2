@@ -13,7 +13,7 @@
 #include "executor.h"
 #include "tool_manager.h"
 #include "processor.tcc"
-#include "process_listener.h"
+#include "task_monitor.h"
 #include "extractor.h"
 #include "settings_manager.tcc"
 #include "core.h"
@@ -117,7 +117,7 @@ namespace squadt {
 
     instances[id] = p;
 
-    local_executor.execute(c, boost::dynamic_pointer_cast < execution::process_listener, execution::task > (p));
+    local_executor.execute(c, p);
   }
 
   void tool_manager::query_tools() {
@@ -155,17 +155,22 @@ namespace squadt {
     /* Create extractor object, that will retrieve the data from the running tool process */
     boost::shared_ptr < extractor > e(new extractor(t));
 
-    execute(t, boost::dynamic_pointer_cast < execution::task, extractor > (e));
+    execute(t, boost::dynamic_pointer_cast < execution::task_monitor, extractor > (e));
+
+    execution::process::ptr p(e->get_process(true));
 
     /* Wait until the process has been identified */
-    if (e->get_process(true).get() != 0) {
+    if (p.get() != 0) {
       /* Start extracting */
       e->start();
 
       /* Wait for extraction process to complete */
       e->await_completion();
 
-      local_executor.terminate(e->get_process());
+      /* Disconnect any connection to the process */
+      e->disconnect(p.get());
+
+      local_executor.terminate(p);
 
       return (true);
     }
@@ -193,7 +198,7 @@ namespace squadt {
       throw (exception(exception_identifier::unexpected_instance_identifier));
     }
 
-    execution::task::ptr p = instances[id];
+    execution::task_monitor::ptr p = instances[id];
 
     relay_connection(p.get(), o);
 

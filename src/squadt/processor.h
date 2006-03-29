@@ -17,7 +17,7 @@
 #include "executor.h"
 #include "tool_manager.h"
 #include "tool.h"
-#include "task.h"
+#include "task_monitor.h"
 #include "core.h"
 
 namespace squadt {
@@ -67,9 +67,9 @@ namespace squadt {
        * \brief Basic reporter for task progress
        *
        * The process(es) that are spawned for this task are monitored via the
-       * process_listener interface.
+       * task_monitor interface.
        **/
-      class reporter : public execution::task {
+      class reporter : public execution::task_monitor {
           friend class processor;
 
         public:
@@ -131,7 +131,7 @@ namespace squadt {
       output_status                       current_output_status;
 
       /** \brief The current task that is running or about to run */
-      reporter::ptr                       task_monitor;
+      reporter::ptr                       monitor;
  
     private:
 

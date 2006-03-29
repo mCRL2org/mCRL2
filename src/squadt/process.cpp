@@ -6,18 +6,27 @@
 #include <unistd.h>
 #include <sys/wait.h>
 
+#undef barrier
+
 #include <boost/bind.hpp>
 #include <boost/thread/thread.hpp>
 
-#include "process_listener.h"
+#include "task_monitor.h"
 #include "command.h"
 
 namespace squadt {
   namespace execution {
 
-    boost::shared_ptr < process_listener > process::default_listener;
+    boost::shared_ptr < task_monitor > process::default_monitor;
 
     void process::terminate() {
+      /* Inform monitor */
+      boost::shared_ptr < task_monitor > l = monitor.lock();
+      
+      if (l.get() != 0) {
+        l->disconnect(this);
+      }
+
       kill(identifier, SIGKILL);
     }
  
@@ -35,8 +44,12 @@ namespace squadt {
 
       current_status = (identifier < 0) ? aborted : running;
 
-      /* Inform listener */
-      listener.lock()->report_change(current_status);
+      /* Inform monitor */
+      boost::shared_ptr < task_monitor > l = monitor.lock();
+
+      if (l.get() != 0) {
+        l->signal_change(current_status);
+      }
 
       if (0 < identifier) {
         int exit_code;
@@ -45,8 +58,10 @@ namespace squadt {
 
         current_status = (WIFEXITED(exit_code)) ? completed : aborted;
 
-        /* Inform listener */
-        listener.lock()->report_change(current_status);
+        /* Inform monitor */
+        if (l.get() != 0) {
+          l->signal_change(current_status);
+        }
 
         signal_termination(this);
       }

@@ -13,7 +13,7 @@
 namespace squadt {
   namespace execution {
 
-    class process_listener;
+    class task_monitor;
 
     /**
      * \brief Represents a system process with a status reporting facility
@@ -37,7 +37,7 @@ namespace squadt {
          typedef boost::shared_ptr < process >          ptr;
 
          /** \brief Convenience type to hide shared pointer implementation */
-         typedef boost::shared_ptr < process_listener > listener_ptr;
+         typedef boost::shared_ptr < task_monitor >     task_monitor_ptr;
 
          /** \brief Convenience type for handlers */
          typedef boost::function < void (process*) >    handler;
@@ -45,7 +45,7 @@ namespace squadt {
       private:
 
         /** \brief The default listener for changes in status */
-        static boost::shared_ptr < process_listener >   default_listener;
+        static boost::shared_ptr < task_monitor >       default_monitor;
  
       private:
 
@@ -58,8 +58,8 @@ namespace squadt {
         /** \brief The function that is called when the status changes */
         handler                              signal_termination;
     
-        /** \brief A reference to a listener to report changes in state */
-        boost::weak_ptr < process_listener > listener;
+        /** \brief A reference to a monitor for this process */
+        boost::weak_ptr < task_monitor >     monitor;
 
         /** \brief Thread in which actual execution and waiting is performed */
         boost::shared_ptr < boost::thread >  execution_thread;
@@ -75,7 +75,7 @@ namespace squadt {
         inline process(handler);
     
         /** \brief Constructor with listener */
-        inline process(handler, process::listener_ptr&);
+        inline process(handler, task_monitor_ptr&);
     
         /** \brief Start the process by executing a command */
         void execute(const command&);
@@ -96,17 +96,18 @@ namespace squadt {
     /**
      * @param h the function to call when the process terminates
      **/
-    inline process::process(handler h) : current_status(stopped), signal_termination(h), listener(default_listener) {
+    inline process::process(handler h) : current_status(stopped), signal_termination(h), monitor(default_monitor) {
     }
  
     /**
      * @param h the function to call when the process terminates
      * @param l a reference to a listener for process status change events
      **/
-    inline process::process(handler h, process::listener_ptr& l) : current_status(stopped), signal_termination(h), listener(l) {
+    inline process::process(handler h, task_monitor_ptr& l) : current_status(stopped), signal_termination(h), monitor(l) {
     }
  
     inline process::~process() {
+      /* Inform listener */
       if (identifier) {
         terminate();
       }

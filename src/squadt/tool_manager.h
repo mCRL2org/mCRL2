@@ -14,7 +14,7 @@
 #include <sip/controller.h>
 
 #include "tool.h"
-#include "task.h"
+#include "task_monitor.h"
 #include "processor.h"
 
 namespace squadt {
@@ -49,21 +49,21 @@ namespace squadt {
     public:
  
       /** \brief Convenience type alias for hiding shared pointer implementation */
-      typedef boost::shared_ptr < tool_manager >                     ptr;
+      typedef boost::shared_ptr < tool_manager >                             ptr;
 
       /** \brief Convenience type alias the list of tools */
-      typedef std::list < tool::ptr >                                tool_list;
+      typedef std::list < tool::ptr >                                        tool_list;
  
     private:
  
       /** \brief Numeric type for instance identification */
-      typedef long int                                               instance_identifier;
+      typedef long int                                                       instance_identifier;
 
       /** \brief Maps an instance identifier to its associated task */
-      typedef std::map < instance_identifier, execution::task::ptr > instance_list;
+      typedef std::map < instance_identifier, execution::task_monitor::ptr > instance_list;
 
       /** \brief Maps a task to its associated process */
-      typedef std::list < execution::task::ptr >                     validated_instance_list;
+      typedef std::list < execution::task_monitor::ptr >                     validated_instance_list;
 
     private:
  

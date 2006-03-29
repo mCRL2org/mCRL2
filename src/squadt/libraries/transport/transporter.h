@@ -97,8 +97,11 @@ namespace transport {
       /** \brief Creates socket connection to another transporter object (using a loopback connection by default) */
       void connect(const std::string& host_name, const long port = 0);
 
+      /** \brief Disconnect all */
+      void disconnect();
+
       /** \brief Disconnect connection number <|number|> */
-      void disconnect(size_t number = 0);
+      void disconnect(size_t number);
 
       /** \brief Disconnect from directly connected peer */
       void disconnect(transporter&);

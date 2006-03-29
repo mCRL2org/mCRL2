@@ -109,6 +109,14 @@ namespace transport {
     return (p);
   }
 
+  void transporter::disconnect() {
+    boost::recursive_mutex::scoped_lock l(lock);
+
+    for (connection_list::const_iterator i = connections.begin(); i != connections.end(); ++i) {
+      (*i)->disconnect(*i);
+    }
+  }
+
   /**
    * @param n the number of the connection that is to be closed
    **/

@@ -3,6 +3,7 @@
 #include <xml2pp/detail/text_reader.tcc>
 #include <sip/controller.h>
 
+#include "task_monitor.h"
 #include "processor.tcc"
 #include "exception.h"
 #include "core.h"
@@ -119,7 +120,7 @@ namespace squadt {
     s << "<processor tool-name=\"" << program.get_name() << "\">";
 
     /* The last received configuration from the tool */
-    sip::configuration::ptr c = task_monitor->get_configuration();
+    sip::configuration::ptr c = monitor->get_configuration();
 
     if (c.get() != 0) {
       c->write(s);
@@ -168,7 +169,7 @@ namespace squadt {
 
     processor::ptr c(new processor(t));
 
-    c->task_monitor->set_configuration(sip::configuration::read(r));
+    c->monitor->set_configuration(sip::configuration::read(r));
 
     /* Read inputs */
     while (r.is_element("input")) {

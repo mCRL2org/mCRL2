@@ -3,6 +3,7 @@
 
 #include <algorithm>
 
+#include "task_monitor.h"
 #include "processor.h"
 
 namespace squadt {
@@ -52,7 +53,7 @@ namespace squadt {
   /**
    * @param t the tool that is used for processing
    **/
-  inline processor::processor(tool& t) : program(t), task_monitor(new reporter(*this, reporter::dummy)) {
+  inline processor::processor(tool& t) : program(t), monitor(new reporter(*this, reporter::dummy)) {
   }
 
   /**
@@ -60,7 +61,7 @@ namespace squadt {
    * @param h the function that is called when the status of the output changes
    **/
   inline processor::processor(tool& t, reporter::callback_handler h) : program(t),
-                                                                         task_monitor(new reporter(*this, h)) {
+                                                                         monitor(new reporter(*this, h)) {
   }
 
   inline processor::~processor() {
@@ -82,7 +83,7 @@ namespace squadt {
    * \attention This function is non-blocking
    **/
   inline void processor::process() {
-    global_tool_manager->execute(program, boost::dynamic_pointer_cast < execution::task, reporter >(task_monitor));
+    global_tool_manager->execute(program, boost::dynamic_pointer_cast < execution::task_monitor, reporter > (monitor));
   }
 
   inline const unsigned int processor::number_of_inputs() const {
@@ -115,7 +116,7 @@ namespace squadt {
     if (current_output_status != s) {
       current_output_status = s;
  
-      task_monitor->visualise(current_output_status);
+      monitor->visualise(current_output_status);
     }
   }
 }

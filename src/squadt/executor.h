@@ -12,7 +12,7 @@
 #include <boost/weak_ptr.hpp>
 #include <boost/shared_ptr.hpp>
 
-#include "process_listener.h"
+#include "task_monitor.h"
 
 namespace squadt {
   namespace execution {
@@ -27,14 +27,14 @@ namespace squadt {
      *    which means that sometimes execution is delayed
      *  - the execute method is non-blocking; consequently nothing can be
      *    concluded about the execution of the command except through a
-     *    process_listener object
+     *    task_monitor object
      **/
     class executor {
 
       private:
 
         /** Convenient short-hand type */
-        typedef std::pair < command, process::listener_ptr > command_pair;
+        typedef std::pair < command, task_monitor::ptr > command_pair;
 
       private:
 
@@ -53,13 +53,13 @@ namespace squadt {
         inline void start_process(const command&);
     
         /** \brief Start a new process with a listener */
-        inline void start_process(const command&, process::listener_ptr&);
+        inline void start_process(const command&, task_monitor::ptr&);
 
         /** \brief handler that is invoked when a process is terminated */
         inline void handle_process_termination(process* p);
   
         /** \brief handler that is invoked when a process is terminated */
-        inline void handle_process_termination(process* p, process::listener_ptr& s);
+        inline void handle_process_termination(process* p, task_monitor::ptr& s);
   
         /** \brief Start processing commands if the queue contains any waiters */
         inline void start_delayed();
@@ -77,7 +77,7 @@ namespace squadt {
     
         /** \brief Execute a tool */
         template < typename T >
-        inline void execute(const command&, T = process::default_listener);
+        inline void execute(const command&, T = process::default_monitor);
     
         /** \brief Terminate a specific process */
         template < typename T >
@@ -122,7 +122,7 @@ namespace squadt {
      * @param[in] c the command to execute
      * @param[in] l reference to a process listener
      **/
-    inline void executor::start_process(const command& c, process::listener_ptr& l) {
+    inline void executor::start_process(const command& c, task_monitor::ptr& l) {
       process::ptr p(new process(boost::bind(&executor::handle_process_termination, this, _1, l), l));
 
       if (l.get() != 0) {
@@ -176,7 +176,7 @@ namespace squadt {
      * @param p a pointer to a process object
      * @param l a pointer to a listener for process state changes
      **/
-    void executor::handle_process_termination(process* p, process::listener_ptr& l) {
+    void executor::handle_process_termination(process* p, task_monitor::ptr& l) {
       remove(p);
  
       start_delayed();
