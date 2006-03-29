@@ -9,6 +9,7 @@ project transport
        <define>BOOST_DATE_TIME_NO_LIB
     : usage-requirements
        <include>../../
+       <library>/boost/thread//boost_thread
        <define>BOOST_DATE_TIME_NO_LIB
     ;
 
