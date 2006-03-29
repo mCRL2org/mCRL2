@@ -100,7 +100,7 @@ namespace sip {
         virtual void deliver(std::istream&, basic_transceiver*);
  
         /** Queues incoming messages */
-        virtual void deliver(std::string&, basic_transceiver*);
+        virtual void deliver(const std::string&, basic_transceiver*);
  
         /* Wait until the next message arrives */
         const message_ptr await_message(typename M::type_identifier_t);

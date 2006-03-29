@@ -10,13 +10,29 @@ namespace transport {
       return (owner);
     }
 
+    /**
+     * @param o a pointer to the owner
+     **/
     inline basic_transceiver::basic_transceiver(transporter* o) : owner(o) {
     }
 
-    inline void basic_transceiver::deliver(std::istream& input) {
-      owner->deliver(input, this);
+    /**
+     * @param d an string that represents the data to be delivered
+     **/
+    inline void basic_transceiver::deliver(const std::string& d) {
+      owner->deliver(d, this);
     }
 
+    /**
+     * @param d an input stream with the data that is to be delivered
+     **/
+    inline void basic_transceiver::deliver(std::istream& d) {
+      owner->deliver(d, this);
+    }
+
+    /**
+     * @param o a pointer to the owner
+     **/
     inline void basic_transceiver::handle_disconnect(basic_transceiver* t) {
       /* Remove instance from the list of connections */
       owner->disassociate(t);

@@ -42,7 +42,7 @@ namespace transport {
    * @param p a port
    **/
   void transporter::connect(const address& a, const long p) {
-    basic_transceiver::ptr c(new socket_transceiver(this));
+    basic_transceiver::ptr c = socket_transceiver::create(this);
 
     boost::recursive_mutex::scoped_lock l(lock);
 
@@ -56,7 +56,7 @@ namespace transport {
    * @param p a port
    **/
   void transporter::connect(const std::string& h, const long p) {
-    basic_transceiver::ptr c(new socket_transceiver(this));
+    basic_transceiver::ptr c = socket_transceiver::create(this);
 
     boost::recursive_mutex::scoped_lock l(lock);
 

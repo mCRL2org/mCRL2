@@ -84,7 +84,7 @@ namespace sip {
     }
  
     /**
-     * @param d a stream that contains the data to be delived
+     * @param data a stream that contains the data to be delived
      * @param o a pointer to the transceiver on which the data was received
      *
      * \pre A message is of the form tag_open...tag_close
@@ -93,7 +93,7 @@ namespace sip {
      * \attention Works under the assumption that tag_close.size() < data.size()
      **/
     template < class M >
-    void basic_messenger< M >::deliver(std::string& data, basic_transceiver* o) {
+    void basic_messenger< M >::deliver(const std::string& data, basic_transceiver* o) {
       std::string::const_iterator i = data.begin();
  
       while (i != data.end()) {

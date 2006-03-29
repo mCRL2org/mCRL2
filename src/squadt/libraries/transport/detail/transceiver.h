@@ -2,8 +2,10 @@
 #define TRANSCEIVER_H
 
 #include <boost/shared_ptr.hpp>
+#include <boost/noncopyable.hpp>
 
 namespace transport {
+
   class transporter;
 
   namespace transceiver {
@@ -11,7 +13,7 @@ namespace transport {
     /**
      * \brief Base class for transceivers
      **/
-    class basic_transceiver {
+    class basic_transceiver : private boost::noncopyable {
       friend class transport::transporter;
 
       public:
@@ -32,7 +34,10 @@ namespace transport {
       protected:
 
         /** \brief Deliver the data from the input stream to the owner */
-        inline void deliver(std::istream& input);
+        inline void deliver(std::istream&);
+
+        /** \brief Deliver the data from the input stream to the owner */
+        inline void deliver(const std::string&);
 
         /** \brief Removes this transceiver object from a list of connections */
         inline void handle_disconnect(basic_transceiver*);
