@@ -18,6 +18,7 @@ BEGIN_EVENT_TABLE( MainFrame, wxFrame )
   EVT_MENU  ( wxID_OPEN, MainFrame::onOpen )
   EVT_MENU  ( wxID_EXIT, MainFrame::onExit )
   EVT_MENU  ( wxID_RESET, MainFrame::onResetView )
+  EVT_MENU  ( myID_DISPLAY_STATES, MainFrame::onDisplayStates )
   EVT_TOOL  ( myID_PAN, MainFrame::onActivateTool )
   EVT_TOOL  ( myID_ROTATE, MainFrame::onActivateTool )
   EVT_TOOL  ( myID_SELECT, MainFrame::onActivateTool )
@@ -68,6 +69,9 @@ void MainFrame::setupMenuBar()
     
   viewMenu->Append( wxID_RESET, wxT("&Reset viewpoint"),
       wxT("Set the viewpoint to the default position"));
+  viewMenu->AppendSeparator();
+  viewMenu->AppendCheckItem( myID_DISPLAY_STATES, wxT("Display &states"),
+      wxT("Show/hide individual states") );
   
   menuBar->Append( fileMenu, wxT("&File") );
   menuBar->Append( viewMenu, wxT("&View") );
@@ -207,14 +211,14 @@ void MainFrame::setupSettingsPanel( wxPanel* panel )
   wxSize spinctrlSize( 50, -1 );
 
   nodesizeSpinCtrl = new wxSpinCtrlFloat( panel, myID_SETTINGS_CONTROL,
-      0.0f, 100.0f, 0.1f, 0.0f, wxDefaultPosition, spinctrlSize );
+      0.0f, 1000.0f, 0.1f, 0.0f, wxDefaultPosition, spinctrlSize );
   nodesizeSpinCtrl->SetSizeHints( spinctrlSize, spinctrlSize );
   parsubSizer->Add( new wxStaticText( panel, wxID_ANY, 
 	wxT("Node size:") ), 0, lflags, border );
   parsubSizer->Add( nodesizeSpinCtrl, 0, rflags, border );
   
   backpointerSpinCtrl = new wxSpinCtrlFloat( panel, myID_SETTINGS_CONTROL,
-      0.0f, 100.0f, 0.1f, 0.0f, wxDefaultPosition, spinctrlSize  );
+      0.0f, 1000.0f, 0.1f, 0.0f, wxDefaultPosition, spinctrlSize  );
   backpointerSpinCtrl->SetSizeHints( spinctrlSize, spinctrlSize );
   parsubSizer->Add( new wxStaticText( panel, wxID_ANY, 
 	wxT("Backpointer curve:") ), 0, lflags, border );
@@ -488,6 +492,11 @@ void MainFrame::onRankStyle( wxCommandEvent& event )
 void MainFrame::onResetView( wxCommandEvent& /*event*/ )
 {
   glCanvas->resetView();
+}
+
+void MainFrame::onDisplayStates( wxCommandEvent& /*event*/ )
+{
+  mediator->toggleDisplayStates();
 }
 
 void MainFrame::onColorButton( wxCommandEvent& /*event*/ )

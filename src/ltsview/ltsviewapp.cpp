@@ -68,23 +68,30 @@ void LTSViewApp::openFile( string fileName )
   lts = newlts;
   
   ++currentJobNr;
-  mainFrame->updateProgressDialog( 20, "Applying ranking" );
+  mainFrame->updateProgressDialog( 14, "Applying ranking" );
   applyRanking( visualizer->getRankStyle() );
   
   ++currentJobNr;
-  mainFrame->updateProgressDialog( 40, "Clustering comrades" );
+  mainFrame->updateProgressDialog( 28, "Clustering comrades" );
   lts->clusterComrades();
   
   ++currentJobNr;
-  mainFrame->updateProgressDialog( 60, "Merging superiors" );
+  mainFrame->updateProgressDialog( 42, "Merging superiors" );
   lts->mergeSuperiorClusters();
+
+  mainFrame->updateProgressDialog( 57, "Setting mark info" );
   lts->computeClusterLabelInfo();
   
-  visualizer->setLTS( lts );
-  
   ++currentJobNr;
-  mainFrame->updateProgressDialog( 80, "Positioning clusters" );
-  visualizer->positionClusters();
+  mainFrame->updateProgressDialog( 71, "Positioning clusters" );
+  lts->positionClusters();
+
+  visualizer->setLTS( lts );
+  visualizer->computeClusterHeight();
+  
+  mainFrame->updateProgressDialog( 85, "Positioning states" );
+  lts->positionStates();
+  
   mainFrame->updateProgressDialog( 100, "Done" );
   visualizer->setMarkStyle( NO_MARKS );
 
@@ -92,7 +99,7 @@ void LTSViewApp::openFile( string fileName )
 
   //lts->printClusterSizesPositions();
   glCanvas->enableDisplay();
-  glCanvas->display( false );
+  visualizer->computeBoundsInfo();
   glCanvas->setDefaultPosition( visualizer->getBoundingCylinderWidth(),
       visualizer->getBoundingCylinderHeight() );
   glCanvas->resetView();
@@ -140,9 +147,10 @@ void LTSViewApp::applyDefaultSettings()
 
 void LTSViewApp::applySettings()
 {
-  visualizer->setVisSettings( mainFrame->getVisSettings() );
+  bool refreshBoundCyl = visualizer->setVisSettings( mainFrame->getVisSettings() );
   if ( lts != NULL )
   {
+    if ( refreshBoundCyl ) visualizer->computeBoundsInfo();
     glCanvas->display();
     glCanvas->setDefaultPosition( visualizer->getBoundingCylinderWidth(),
 	visualizer->getBoundingCylinderHeight() );
@@ -165,25 +173,31 @@ void LTSViewApp::setRankStyle( RankStyle rs )
       applyRanking( rs );
       
       ++currentJobNr;
-      mainFrame->updateProgressDialog( 25, "Clustering comrades" );
+      mainFrame->updateProgressDialog( 17, "Clustering comrades" );
       lts->clusterComrades();
       
       ++currentJobNr;
-      mainFrame->updateProgressDialog( 50, "Merging superiors" );
+      mainFrame->updateProgressDialog( 33, "Merging superiors" );
       lts->mergeSuperiorClusters();
+
+      mainFrame->updateProgressDialog( 50, "Setting mark info" );
       lts->computeClusterLabelInfo();
       lts->markClusters();
       
       ++currentJobNr;
-      mainFrame->updateProgressDialog( 75, "Positioning clusters" );
-      visualizer->positionClusters();
+      mainFrame->updateProgressDialog( 67, "Positioning clusters" );
+      lts->positionClusters();
+      visualizer->computeClusterHeight();
+
+      mainFrame->updateProgressDialog( 84, "Positioning states" );
+      lts->positionStates();
       mainFrame->updateProgressDialog( 100, "Done" );
 
       //lts->printStructure();
 
       //lts->printClusterSizesPositions();
       glCanvas->enableDisplay();
-      glCanvas->display( false );
+      visualizer->computeBoundsInfo();
       glCanvas->setDefaultPosition( visualizer->getBoundingCylinderWidth(),
 	  visualizer->getBoundingCylinderHeight() );
       glCanvas->resetView();
@@ -312,5 +326,11 @@ void LTSViewApp::applyMarkStyle( MarkStyle ms )
       break;
   }
   visualizer->setMarkStyle( ms );
+  glCanvas->display();
+}
+
+void LTSViewApp::toggleDisplayStates()
+{
+  visualizer->toggleDisplayStates();
   glCanvas->display();
 }

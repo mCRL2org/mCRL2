@@ -68,7 +68,7 @@ void GLCanvas::initialize()
   glEnable( GL_BLEND );
   
   glEnable( GL_COLOR_MATERIAL );
-  glColorMaterial( GL_FRONT_AND_BACK, GL_AMBIENT_AND_DIFFUSE );
+  glColorMaterial( GL_FRONT, GL_AMBIENT_AND_DIFFUSE );
 
   glEnable( GL_CULL_FACE );
   glCullFace( GL_BACK );
@@ -120,7 +120,7 @@ void GLCanvas::setActiveTool( int t )
   setMouseCursor();
 }
 
-void GLCanvas::display( bool swapBuffers )
+void GLCanvas::display()
 {
   if ( displayAllowed )
   {
@@ -166,7 +166,7 @@ void GLCanvas::display( bool swapBuffers )
       // draw the structure
       mediator->drawLTS( viewpoint );
       
-      if ( swapBuffers ) SwapBuffers();
+      SwapBuffers();
     glPopMatrix();
   }
 }

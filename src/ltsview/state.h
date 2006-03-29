@@ -37,6 +37,7 @@ class State
     void      getComrades( set< State* > &ss ) const;
     void      getInTransitions( vector< Transition* > &ts ) const;
     void      getOutTransitions( vector< Transition* > &ts ) const;
+    float     getPosition() const;
     int	      getRank() const;
     void      getSubordinates( set< State* > &ss ) const;
     void      getSuperiors( set< State* > &ss ) const;
@@ -47,6 +48,7 @@ class State
     void      mark();
     void      select();
     void      setCluster( Cluster* c );
+    void      setPosition( float p );
     void      setRank( int r );
     void      unmark();
 
@@ -59,6 +61,7 @@ class State
     bool		  marked;
     float		  probability;
     vector< Transition* > outTransitions;
+    float		  position;
     int			  rank;
     bool		  selected;
     vector< ATerm >	  stateVector;

@@ -103,12 +103,6 @@ void LTS::getActionLabels( vector< ATerm > &ls ) const
   }
 }
 
-void LTS::getClustersAtRank( unsigned int r, vector< Cluster* > &cs ) const
-{
-  if ( r < clustersInRank.size() )
-    cs = clustersInRank[ r ];
-}
-
 State* LTS::getInitialState() const
 {
   return initialState;
@@ -462,6 +456,51 @@ void LTS::computeClusterLabelInfo()
   for ( vector< Transition* >::iterator t_it = transitions.begin() ;
 	t_it != transitions.end() ; ++t_it )
     (**t_it).getBeginState()->getCluster()->addActionLabel( (**t_it).getLabel() );
+}
+
+void LTS::positionClusters()
+{
+  // iterate over the ranks in reverse order (bottom-up)
+  for ( vector< vector< Cluster* > >::reverse_iterator r_it = clustersInRank.rbegin()
+	; r_it != clustersInRank.rend() ; ++r_it )
+  {
+    // iterate over the clusters in this rank
+    for ( vector< Cluster* >::iterator c_it = r_it->begin() ;
+	  c_it != r_it->end() ; ++c_it )
+    {
+      // compute the size of this cluster and the positions of its descendants
+      (**c_it).computeSizeAndDescendantPositions();
+    }
+  }
+  // position the initial state's cluster
+  initialState->getCluster()->setPosition( -1 );
+}
+
+void LTS::positionStates()
+{
+  for ( vector< vector< Cluster* > >::iterator r_it = clustersInRank.begin() ;
+	r_it != clustersInRank.end() ; ++r_it )
+  {
+    for ( vector< Cluster* >::iterator c_it = r_it->begin() ;
+	  c_it != r_it->end() ; ++c_it )
+    {
+      vector< State* > c_ss;
+      (**c_it).getStates( c_ss );
+      if ( c_ss.size() == 1 )
+	c_ss[0]->setPosition( -1.0f );
+      else
+      {
+	float pos = 0.0f;
+	float delta = 360.0f / float(c_ss.size());
+	for ( vector< State* >::iterator s_it = c_ss.begin() ;
+	      s_it != c_ss.end() ; ++s_it )
+	{
+	  (**s_it).setPosition( pos );
+	  pos += delta;
+	}
+      }
+    }
+  }
 }
 
 void LTS::addMarkRule( MarkRule* r, int index )

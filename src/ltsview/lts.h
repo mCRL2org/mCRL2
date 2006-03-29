@@ -28,7 +28,6 @@ class LTS
     void	clusterComrades();
     void	computeClusterLabelInfo();
     void	getActionLabels( vector< ATerm> &ls ) const;
-    void	getClustersAtRank( unsigned int r, vector< Cluster* > &cs ) const;
     State*	getInitialState() const;
     bool	getMatchAnyMarkRule() const;
     MarkRule*	getMarkRule( const int index ) const;
@@ -43,6 +42,8 @@ class LTS
     void	markAction( string label );
     void	markClusters();
     void	mergeSuperiorClusters();
+    void	positionClusters();
+    void	positionStates();
 //    void  	printStructure();
 //    void	printClusterSizesPositions();
     void	removeMarkRule( const int index );

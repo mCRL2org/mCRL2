@@ -37,7 +37,7 @@ namespace Utils
 
   struct VisSettings
   {
-    RGB_Color  backgroundColor;
+    RGB_Color backgroundColor;
     float     backpointerCurve;
 //    int	      branchRotation;
 //    int	      branchScale;

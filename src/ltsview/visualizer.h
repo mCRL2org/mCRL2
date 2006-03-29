@@ -26,29 +26,34 @@ class Visualizer
     float		  clusterHeight;
     float		  cos_obt;
     static VisSettings	  defaultVisSettings;
+    bool		  displayStates;
     LTS*		  lts;
     MarkStyle		  markStyle;
     Mediator*		  mediator;
     vector< Primitive* >  primitives;
     RankStyle		  rankStyle;
     bool		  refreshPrimitives;
+    bool		  refreshStates;
     float		  sin_obt;
+    GLuint		  statesDisplayList;
     Point3D		  viewpoint;
     VisSettings		  visSettings;
 
-    void drawSubtree( Cluster* root, bool topClosed, float &boundWidth, float
-	&boundHeight, HSV_Color col, HSV_Color delta_col );
-    void drawSubtreeMarkDeadlocks( Cluster* root, bool topClosed, float
-	&boundWidth, float &boundHeight );
-    void drawSubtreeMarkStates( Cluster* root, bool topClosed, float
-	&boundWidth, float &boundHeight );
-    void drawSubtreeMarkTransitions( Cluster* root, bool topClosed, float
-	&boundWidth, float &boundHeight );
+    void computeSubtreeBounds( Cluster* root, float &boundWidth, float
+	&boundHeight );
+    void drawStates( Cluster* root );
+    void drawSubtree( Cluster* root, bool topClosed, HSV_Color col, HSV_Color
+	delta_col );
+    void drawSubtreeMarkDeadlocks( Cluster* root, bool topClosed );
+    void drawSubtreeMarkStates( Cluster* root, bool topClosed );
+    void drawSubtreeMarkTransitions( Cluster* root, bool topClosed );
   
   public:
     Visualizer( Mediator* owner );
     ~Visualizer();
     
+    void	computeBoundsInfo();
+    void	computeClusterHeight();
     void	drawLTS( Point3D viewpoint );
     RGB_Color	getBackgroundColor() const;
     float	getBoundingCylinderHeight() const;
@@ -57,10 +62,10 @@ class Visualizer
     RankStyle	getRankStyle() const;
     VisSettings getDefaultVisSettings() const;
     VisSettings getVisSettings() const;
-    void	positionClusters();
     void	setLTS( LTS* l );
     void	setMarkStyle( MarkStyle ms );
     void	setRankStyle( RankStyle rs );
-    void	setVisSettings( VisSettings vs );
+    bool	setVisSettings( VisSettings vs );
+    void	toggleDisplayStates();
 };
 #endif

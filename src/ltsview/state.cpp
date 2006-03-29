@@ -11,6 +11,7 @@ State::State( ATermList sv )
   }
   cluster = NULL;
   rank = 0;
+  position = -1.0f;
 }
 
 State::~State()
@@ -91,6 +92,16 @@ int State::getRank() const
 void State::setRank( int r )
 {
   rank = r;
+}
+
+float State::getPosition() const
+{
+  return position;
+}
+
+void State::setPosition( float p )
+{
+  position = p;
 }
 
 Cluster* State::getCluster() const

@@ -35,6 +35,7 @@ class MainFrame : public wxFrame
     void	onActivateTool( wxCommandEvent& event );
     void	onAddMarkRuleButton( wxCommandEvent& event );
     void	onColorButton( wxCommandEvent& event );
+    void	onDisplayStates( wxCommandEvent& event );
     void	onExit( wxCommandEvent& event );
     void	onOpen( wxCommandEvent& event );
     void	onRankStyle( wxCommandEvent& event );

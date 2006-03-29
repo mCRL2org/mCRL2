@@ -27,7 +27,7 @@ class GLCanvas: public wxGLCanvas
 	const wxSize &size = wxDefaultSize );
     ~GLCanvas();
 
-    void      display( bool swapBuffers = true );
+    void      display();
     void      enableDisplay();
     void      disableDisplay();
     void      initialize();
