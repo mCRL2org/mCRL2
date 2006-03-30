@@ -1,0 +1,334 @@
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.0 Transitional//EN">
+<HTML>
+<HEAD>
+	<META HTTP-EQUIV="CONTENT-TYPE" CONTENT="text/html; charset=windows-1252">
+	<TITLE>mCRL2 Library Requirements and Guidelines</TITLE>
+	<META NAME="GENERATOR" CONTENT="OpenOffice.org 2.0  (Win32)">
+	<META NAME="CREATED" CONTENT="20051215;17392083">
+	<META NAME="CHANGEDBY" CONTENT="Wieger Wesselink">
+	<META NAME="CHANGED" CONTENT="20060330;15143436">
+	<STYLE>
+	<!--
+		TD P { color: #000000 }
+		H1 { color: #000000 }
+		P { color: #000000 }
+		PRE { color: #000000 }
+		PRE.c15 { margin-left: 2cm }
+		P.c12 { font-weight: bold }
+		BLOCKQUOTE { color: #000000 }
+		BLOCKQUOTE.c11 { font-weight: bold }
+		P.c10 { margin-bottom: 0cm; color: #ff0000 }
+		P.c6 { margin-bottom: 0cm }
+		P.c5 { color: #ff0000 }
+		H3 { color: #000000 }
+		H3.c4 { text-align: left }
+		P.c3 { text-align: left }
+		H2 { color: #000000 }
+		H2.c2 { text-align: left }
+		H1.c1 { text-align: left }
+		H4 { color: #000000 }
+	-->
+	</STYLE>
+</HEAD>
+<BODY LANG="en-US" TEXT="#000000" BGCOLOR="#ffffff" DIR="LTR">
+<H1 CLASS="c1">mCRL2 Library Requirements and Guidelines (proposal)</H1>
+<P STYLE="margin-bottom: 0cm">This is still work in progress. Some to
+do items are printed in <FONT COLOR="#ff0000">red</FONT>, while some
+choices we made are printed in <FONT COLOR="#008000">green</FONT>.</P>
+<H2 CLASS="c2"><A NAME="Introduction"></A>Introduction</H2>
+<P CLASS="c3">This page describes requirements and guidelines for the
+mCRL2 tool set. We want to encourage other people to contribute to
+the toolset. Therefore it is important to have a repository that is
+well structured, and a high degree of consistency in naming things as
+source files, and interface functions. This allows people not
+familiar with the repository to find their way quickly.</P>
+<H3 CLASS="c4"><A NAME="License"></A>License requirements</H3>
+<P CLASS="c5">We need to make a mCRL2 Software License (Jan Friso).</P>
+<P>Possible requirements are:</P>
+<UL>
+	<LI><P CLASS="c6" STYLE="margin-bottom: 0.5cm">Must be simple to
+	read and understand.</P>
+	<LI><P CLASS="c6" STYLE="margin-bottom: 0.5cm">Must grant permission
+	without fee to copy, use and modify the software for any use
+	(commercial and non-commercial).</P>
+	<LI><P CLASS="c6" STYLE="margin-bottom: 0.5cm">Must require that the
+	license appear on all copies of the software source code.</P>
+	<LI><P CLASS="c6" STYLE="margin-bottom: 0.5cm">Must not require that
+	the license appear with executables or other binary uses of the
+	library.</P>
+	<LI><P CLASS="c6" STYLE="margin-bottom: 0.5cm">Must not require that
+	the source code be available for execution or other binary uses of
+	the library.</P>
+	<LI><P>May restrict the use of the name and description of the
+	library to the standard version found on the mCRL2 web site.</P>
+</UL>
+<P>Some examples are:</P>
+<P><A HREF="http://www.gnu.org/copyleft/gpl.html">GNU General Public
+License</A></P>
+<P><A HREF="http://www.gnu.org/copyleft/lesser.html">GNU Lesser
+General Public License</A></P>
+<P><A HREF="http://www.boost.org/LICENSE_1_0.txt">Boost Software
+License</A></P>
+<H3 CLASS="c4"><A NAME="Portability"></A>Portability requirements</H3>
+<UL>
+	<LI><P CLASS="c3">A library's interface must be portable and not
+	restricted to a particular compiler or operating system.</P>
+	<LI><P CLASS="c3">A library's implementation must if possible be
+	portable and not restricted to a particular compiler or operating
+	system.</P>
+	<LI><P CLASS="c3"><FONT COLOR="#008000">mCRL2 contributors must
+	ensure their libraries work with g++ and Visual C++. </FONT>
+	</P>
+</UL>
+<P CLASS="c3">Sometimes it is necessary to write different
+implementations for different platforms. For the sake of consistency
+we need a configuration file that contains macro's for compiler
+workarounds and for distinguishing between compilers and platforms. A
+possible solution is to use the <A HREF="http://www.boost.org/libs/config/config.htm">Boost
+configuration</A> for that.</P>
+<H2 CLASS="c2"><A NAME="Guidelines"></A>Guidelines</H2>
+<H3><A NAME="Design_and_Programming"></A>Design and Programming</H3>
+<UL>
+	<LI><P>Aim for ISO Standard C++. That means making effective use of
+	the standard features of the language, and avoiding non-standard
+	compiler extensions. It also means using the C++ Standard Library
+	where applicable.</P>
+</UL>
+<UL>
+	<LI><P>Headers should be good neighbours. We need something similar
+	to the <A HREF="http://www.boost.org/more/header.htm">Boost header
+	policy</A>.</P>
+</UL>
+<UL>
+	<LI><P><FONT COLOR="#008000">Use the naming conventions of the C++
+	Standard Library.</FONT></P>
+</UL>
+<UL>
+	<LI><P CLASS="c6" STYLE="margin-bottom: 0.5cm">Names (except as
+	noted below) should be all lowercase, with words separated by
+	underscores.</P>
+	<LI><P CLASS="c6" STYLE="margin-bottom: 0.5cm">Template parameter
+	names begin with an uppercase letter.</P>
+	<LI><P>Macro names all uppercase and begin with MCRL2_.</P>
+</UL>
+<UL>
+	<LI><P><FONT COLOR="#008000">Choose meaningful names - explicit is
+	better than implicit, and readability counts. There is a strong
+	preference for clear and descriptive names, even if lengthy.</FONT></P>
+</UL>
+<UL>
+	<LI><P><FONT COLOR="#008000">Use exceptions to report errors where
+	appropriate, and write code that is safe in the face of exceptions.</FONT></P>
+</UL>
+<UL>
+	<LI><P>Provide sample programs or confidence tests so potential
+	users can see how to use your library.</P>
+</UL>
+<UL>
+	<LI><P>Provide a regression test program or programs.</P>
+</UL>
+<H3>Testing</H3>
+<P CLASS="c5">We need to choose a test framework.</P>
+<P CLASS="c6" STYLE="margin-bottom: 0.5cm">There are several test
+frameworks available. For mCRL2 we need to choose one that is simple
+to use and that supports multiple platforms. A very specific
+requirement is that we need an automatic way of testing tools instead
+of code. [I have only experience with the <A HREF="http://www.boost.org/libs/test/doc/index.html">Boost
+Test Library</A> (Wieger)].</P>
+<H3><A NAME="Directory_structure"></A>Directory Structure and
+Filenames</H3>
+<UL>
+	<LI><P CLASS="c6" STYLE="margin-bottom: 0.5cm">File and directory
+	names must contain only <B>lowercase</B> ASCII letters , numbers,
+	underscores, and a period. Leading character must be alphabetic.
+	Maximum length 31. Only a single period is permitted. These
+	requirements ensure file and directory names are relatively
+	portable.</P>
+</UL>
+<P CLASS="c6" STYLE="margin-bottom: 0.5cm"><BR><BR>
+</P>
+<P CLASS="c10" STYLE="margin-bottom: 0.5cm">The following conventions
+are used in Boost, and we might consider to do the same for mCRL2.</P>
+<UL>
+	<LI><P CLASS="c6" STYLE="margin-bottom: 0.5cm">All libraries/tools
+	have at their highest level a primary directory named after the
+	particular library. The primary directory may have sub-directories.</P>
+	<LI><P>For very simple tools or libraries, that have an
+	implementation in just a couple of source files, all files
+	(excluding header files) may be placed directly in the primary
+	directory (for that library).</P>
+</UL>
+<P>A primary directory may contain the following sub-directories. If
+a sub-directory `examples' exists, then all examples that belong to
+this library/tool should be in this directory.</P>
+<BLOCKQUOTE CLASS="c11">mCRL2 standard sub-directory names 
+</BLOCKQUOTE>
+<DL>
+	<DD>
+	<TABLE BORDER=1 CELLPADDING=5 CELLSPACING=2>
+		<TR>
+			<TD>
+				<P CLASS="c12">Sub-directory</P>
+			</TD>
+			<TD>
+				<P CLASS="c12">Contents</P>
+			</TD>
+			<TD>
+				<P CLASS="c12">Required</P>
+			</TD>
+		</TR>
+		<TR>
+			<TD>
+				<P><CODE>build</CODE></P>
+			</TD>
+			<TD>
+				<P>Library build files such as a Jamfile.</P>
+			</TD>
+			<TD>
+				<P>If any build files.</P>
+			</TD>
+		</TR>
+		<TR>
+			<TD>
+				<P><CODE>doc</CODE></P>
+			</TD>
+			<TD>
+				<P>Documentation (HTML) files.</P>
+			</TD>
+			<TD>
+				<P>If several doc files.</P>
+			</TD>
+		</TR>
+		<TR>
+			<TD>
+				<P><CODE>example</CODE></P>
+			</TD>
+			<TD>
+				<P>Sample program files.</P>
+			</TD>
+			<TD>
+				<P>If several sample files.</P>
+			</TD>
+		</TR>
+		<TR>
+			<TD>
+				<P><CODE>src</CODE></P>
+			</TD>
+			<TD>
+				<P>Source files which must be compiled to build the library. 
+				</P>
+			</TD>
+			<TD>
+				<P>If any source files.</P>
+			</TD>
+		</TR>
+		<TR>
+			<TD>
+				<P><CODE>test</CODE></P>
+			</TD>
+			<TD>
+				<P>Regression or other test programs or scripts.</P>
+			</TD>
+			<TD>
+				<P>If several test files.</P>
+			</TD>
+		</TR>
+	</TABLE>
+</DL>
+<H4><A NAME="Naming-_consistency"></A>Naming consistency</H4>
+<P>In C++ libraries it is common practice to separate source and
+header files, and to put header files in one common directory (called
+mcrl or mcrl2?), and possibly in subdirectories of it.</P>
+<P CLASS="c5">The following conventions are again taken from Boost
+(slightly adapted), and we might consider reusing them.</P>
+<P>Header files are stored separately from source files. The main
+header directory is chosen to be trunk/mcrl2 (trunk refers to the
+repository) will be used to store all headers under. A header that
+includes the common functionality of a library may be stored directly
+under trunk/mcrl2, otherwise the header is stored in a sub-directory
+of the header directory named after the library it is a part of.</P>
+<P>The library is given a name that describes the contents of the
+library. Cryptic abbreviations are strongly discouraged. Following
+the practice of the C++ Standard Library, names are usually singular
+rather than plural. For example, a library dealing with file systems
+might chose the name &quot;filesystem&quot;, but not &quot;filesystems&quot;,
+&quot;fs&quot; or &quot;nicecode&quot;. Examples closer to the
+current mCRL2 toolset repository:</P>
+<UL>
+	<LI><P CLASS="c6" STYLE="margin-bottom: 0.5cm">The library's primary
+	directory (in parent <I>trunk/libs</I>) is given that same name. For
+	example, <I>trunk/libs/prover</I>.</P>
+</UL>
+<UL>
+	<LI><P STYLE="margin-bottom: 0cm">The tool's primary directory (in
+	parent <I>trunk/tools</I>) is given that same name. For example,
+	<I>trunk/tools/prover</I>. 
+	</P>
+	<LI><P CLASS="c6" STYLE="margin-bottom: 0.5cm">The library's primary
+	header directory (in parent <I>trunk/mcrl2</I>) is given that same
+	name. For example, <I>trunk/mcrl2/prover.h</I>.</P>
+</UL>
+<UL>
+	<LI><P>A more specific header sub_prover.h that is not required for
+	regular use of the library may be put here:
+	trunk/mcrl2/sub_prover.h.</P>
+</UL>
+<UL>
+	<LI><P>The library's primary namespace (in parent <I>::mcrl2</I>) is
+	given that same name, except when there's a component with that name
+	(e.g., <I>mcrl2::tuple</I>), in which case the namespace name is
+	pluralized.</P>
+</UL>
+<H3><A NAME="Documentation"></A>Documentation</H3>
+<P>We need to choose an intermediate format for documentation. We
+might want to choose <A HREF="http://docbook.sourceforge.net/">DocBook</A>
+as the default documentation format, but this needs to be discussed.
+People can choose to write directly in DocBook, or use a tool like
+<A HREF="http://boost-consulting.com/boost/tools/quickbook/doc/html/index.html">Quickbook</A>
+to avoid having to write in XML directly.</P>
+<H4>Library documentation</H4>
+<P>Appropriate topics for documentation often include:</P>
+<UL>
+	<LI><P CLASS="c6" STYLE="margin-bottom: 0.5cm">General introduction
+	to the library.</P>
+	<LI><P CLASS="c6" STYLE="margin-bottom: 0.5cm">Description of each
+	class.</P>
+	<LI><P CLASS="c6" STYLE="margin-bottom: 0.5cm">Relationship between
+	classes.</P>
+	<LI><P CLASS="c6" STYLE="margin-bottom: 0.5cm">For each function, as
+	applicable, description, requirements (preconditions), effects,
+	post-conditions, returns, and throws.</P>
+	<LI><P CLASS="c6" STYLE="margin-bottom: 0.5cm">Discussion of error
+	detection and recovery strategy.</P>
+	<LI><P CLASS="c6" STYLE="margin-bottom: 0.5cm">How to use including
+	description of typical uses.</P>
+	<LI><P CLASS="c6" STYLE="margin-bottom: 0.5cm">How to compile and
+	link.</P>
+	<LI><P CLASS="c6" STYLE="margin-bottom: 0.5cm">How to test.</P>
+	<LI><P CLASS="c6" STYLE="margin-bottom: 0.5cm">Version or revision
+	history.</P>
+	<LI><P CLASS="c6" STYLE="margin-bottom: 0.5cm">Rationale for design
+	decisions.</P>
+	<LI><P>Acknowledgements.</P>
+</UL>
+<H4>Source code documentation</H4>
+<P><FONT COLOR="#008000">Library source code must be documented using
+</FONT><A HREF="http://www.doxygen.org/"><FONT COLOR="#008000">Doxygen</FONT></A><FONT COLOR="#008000">.</FONT>
+This is simply a matter of adding comments to the code that look like
+this:</P>
+<PRE CLASS="c15">/// Returns the value of the aterm_int.
+///
+int value() const;</PRE><P>
+This forces people to put descriptive comments with each method.
+Because this documentation is generated directly from the comments
+present in the source code it is likely more up to date than any
+manually crafted and maintained documentation.</P>
+<H4>Tool documentation</H4>
+<P><FONT COLOR="#008000">For tools documentation must be provided
+both in HTML and in man format.</FONT></P>
+<HR>
+<H3>Revised<!--webbot bot="Timestamp" s-type="EDITED" s-format="%d %B, %Y" startspan -->
+30 March, 2006<!--webbot bot="Timestamp" endspan i-checksum="39359" -->
+</H3>
+</BODY>
+</HTML>
