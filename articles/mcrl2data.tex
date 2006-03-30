@@ -657,8 +657,8 @@ generated for user defined sorts.
 \begin{tabular}{|l@{\qquad}L@{\qquad}l|}
 \hline
 Operator                   & \textit{Rich}          & \verb+Plain+\\\hline
-equality                   & \_ == \_               & \verb+_ == _+\\
-inequality                 & \_ \not = \_           & \verb+_ != _+\\
+equality                   & \_ \approx \_          & \verb+_ == _+\\
+inequality                 & \_ \not\approx \_      & \verb+_ != _+\\
 conditional                & \faaa{if}{\_}{\_}{\_}  & \verb+if(_,_,_)+\\
 \hline
 \end{tabular}\bigskip
@@ -721,6 +721,7 @@ sort.
 \hline
 Operator                       & \textit{Rich}          & \verb+Plain+\\\hline
 construction                   & \lst{\_\,,\ldots,\_}   & \verb+[_,...,_]+\\
+element test                   & \_ \in \_              & \verb+_ in _+\\
 length                         & \# \_                  & \verb+#_+\\
 cons                           & \_ \cons \_            & \verb+_ |> _+\\
 snoc                           & \_ \snoc \_            & \verb+_ <| _+\\
@@ -959,7 +960,7 @@ Data terms occur in relation to processes in the following ways:
 \begin{tdefinitions}{-}
 \item action parameters
 \item arguments of a process reference
-\item left argument of conditional process terms (\frm{b \To p,q})
+\item left argument of conditional process terms (\frm{b \To p \diamond q})
 \item right argument of a timed process term (\frm{p @ t})
 \end{tdefinitions}
 
@@ -971,8 +972,8 @@ parenthesized.
 \subsection{Type inference}
 
 Data expressions involving numbers, sets, bags or lists may be ambiguous. E.g.\
-namely \frm{1} can be parsed as a term of sort \frm{\srtpos}, \frm{\srtnat} or
-\frm{\srtint}, and \frm{\set{}} can be parsed as a term of an arbitrary set or
+namely \frm{1} can be parsed as a term of sort \frm{\srtpos}, \frm{\srtnat},
+\frm{\srtint} or \frm{\srtreal}, and \frm{\set{}} can be parsed as a term of an arbitrary set or
 bag sort. For overloaded operations, we have similar problems.
 
 These problems are solved by a type inference system: if the type of an
@@ -1008,8 +1009,8 @@ operators                                           & associativity\\\hline
 \verb+<|+                                           & left\\
 \verb-++-                                           & left\\
 \verb+<+, \verb+>+, \verb+<=+, \verb+>=+, \verb+in+ & none\\
-\verb+==+, \verb+!=+                                & left\\
-\verb+&&+, \verb+||+                                & left\\
+\verb+==+, \verb+!=+                                & right\\
+\verb+&&+, \verb+||+                                & right\\
 \verb+=>+                                           & right\\\hline
 \end{tabular}
 \caption{Precedence of infix operators}

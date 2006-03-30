@@ -466,7 +466,7 @@ void PRINT_FUNC(PrintPart_Appl)(PRINT_OUTTYPE OutStream,
     //print condition
     ATermAppl Cond = ATAgetArgument(Part, 1);
     if (!gsIsNil(Cond)) {
-      PRINT_FUNC(PrintPart_Appl)(OutStream, Cond, pp_format, ShowSorts, 12);
+      PRINT_FUNC(PrintPart_Appl)(OutStream, Cond, pp_format, ShowSorts, 11);
       PRINT_FUNC(fprints)(OutStream, " ->\n         ");
     }
     //print multiaction
@@ -478,7 +478,7 @@ void PRINT_FUNC(PrintPart_Appl)(PRINT_OUTTYPE OutStream,
     //print time
     if (IsTimed) {
       PRINT_FUNC(fprints)(OutStream, " @ ");
-      PRINT_FUNC(PrintPart_Appl)(OutStream, Time, pp_format, ShowSorts, 12);
+      PRINT_FUNC(PrintPart_Appl)(OutStream, Time, pp_format, ShowSorts, 11);
     }
     //print process reference
     if (!gsIsDelta(MultAct)) {
@@ -646,7 +646,7 @@ void PRINT_FUNC(PrintPart_Appl)(PRINT_OUTTYPE OutStream,
         PRINT_FUNC(fprints)(OutStream, " }");
       } else if (gsIsOpIdQuant(Head) && ArgsLength == 1) {
         //quantification
-        if (PrecLevel > 12) PRINT_FUNC(fprints)(OutStream, "(");
+        if (PrecLevel > 1) PRINT_FUNC(fprints)(OutStream, "(");
         PRINT_FUNC(PrintPart_Appl)(OutStream, Head,
           pp_format, ShowSorts, PrecLevel);
         PRINT_FUNC(fprints)(OutStream, " ");
@@ -661,17 +661,17 @@ void PRINT_FUNC(PrintPart_Appl)(PRINT_OUTTYPE OutStream,
         if (gsRewriteIsInitialised()) {
           Body = gsRewriteTerm(Body);
         }
-        PRINT_FUNC(PrintPart_Appl)(OutStream, Body, pp_format, ShowSorts, 12);
-        if (PrecLevel > 12) PRINT_FUNC(fprints)(OutStream, ")");
+        PRINT_FUNC(PrintPart_Appl)(OutStream, Body, pp_format, ShowSorts, 1);
+        if (PrecLevel > 1) PRINT_FUNC(fprints)(OutStream, ")");
       } else if (gsIsOpIdPrefix(Head) && ArgsLength == 1) {
         //print prefix expression
         PRINT_FUNC(dbg_prints)("printing prefix expression\n");
-        if (PrecLevel > 12) PRINT_FUNC(fprints)(OutStream, "(");
+        if (PrecLevel > 11) PRINT_FUNC(fprints)(OutStream, "(");
         PRINT_FUNC(PrintPart_Appl)(OutStream, Head,
           pp_format, ShowSorts, PrecLevel);
         PRINT_FUNC(PrintPart_Appl)(OutStream, ATAelementAt(Args, 0),
-          pp_format, ShowSorts, 12);
-        if (PrecLevel > 12) PRINT_FUNC(fprints)(OutStream, ")");
+          pp_format, ShowSorts, 11);
+        if (PrecLevel > 11) PRINT_FUNC(fprints)(OutStream, ")");
       } else if (gsIsOpIdInfix(Head) && ArgsLength == 2) {
         //print infix expression
         PRINT_FUNC(dbg_prints)("printing infix expression\n");
@@ -707,7 +707,7 @@ void PRINT_FUNC(PrintPart_Appl)(PRINT_OUTTYPE OutStream,
         PRINT_FUNC(dbg_prints)("printing negation\n");
         PRINT_FUNC(fprints)(OutStream, "-");
         PRINT_FUNC(PrintPart_Appl)(OutStream, ATAelementAt(Args, 0),
-          pp_format, ShowSorts, 12);
+          pp_format, ShowSorts, 11);
       } else if (gsIsDataVarIdOpId(Part)) {
         //print untyped data variable or operation identifier
         PRINT_FUNC(dbg_prints)("printing untyped data variable or operation identifier\n");
@@ -726,14 +726,14 @@ void PRINT_FUNC(PrintPart_Appl)(PRINT_OUTTYPE OutStream,
       } else {
         //print data application
         PRINT_FUNC(dbg_prints)("printing data application\n");
-        if (PrecLevel > 13) PRINT_FUNC(fprints)(OutStream, "(");
+        if (PrecLevel > 11) PRINT_FUNC(fprints)(OutStream, "(");
         PRINT_FUNC(PrintPart_Appl)(OutStream, Head,
-          pp_format, ShowSorts, 13);
+          pp_format, ShowSorts, 11);
         PRINT_FUNC(fprints)(OutStream, "(");
         PRINT_FUNC(PrintPart_List)(OutStream, Args,
           pp_format, ShowSorts, 0, NULL, ", ");
         PRINT_FUNC(fprints)(OutStream, ")");
-        if (PrecLevel > 13) PRINT_FUNC(fprints)(OutStream, ")");
+        if (PrecLevel > 11) PRINT_FUNC(fprints)(OutStream, ")");
       }
     }
   } else if (gsIsNumber(Part)) {
@@ -765,22 +765,11 @@ void PRINT_FUNC(PrintPart_Appl)(PRINT_OUTTYPE OutStream,
     PRINT_FUNC(PrintPart_Appl)(OutStream, ATAgetArgument(Part, 1),
       pp_format, ShowSorts, 0);
     PRINT_FUNC(fprints)(OutStream, " }");
-  } else if (gsIsForall(Part) || gsIsExists(Part)) {
-    //print universal/existential quantification
-    PRINT_FUNC(dbg_prints)("printing universal/existential quantification\n");
-    if (PrecLevel > 12) PRINT_FUNC(fprints)(OutStream, "(");
-    PRINT_FUNC(fprints)(OutStream, (gsIsForall(Part))?"forall ":"exists ");
-    PRINT_FUNC(PrintDecls)(OutStream, ATLgetArgument(Part, 0),
-      pp_format, NULL, ", ");
-    PRINT_FUNC(fprints)(OutStream, ". ");
-    PRINT_FUNC(PrintPart_Appl)(OutStream, ATAgetArgument(Part, 1),
-      pp_format, ShowSorts, 12);
-    if (PrecLevel > 12) PRINT_FUNC(fprints)(OutStream, ")");
-  } else if (gsIsLambda(Part)) {
-    //print lambda abstraction
-    PRINT_FUNC(dbg_prints)("printing lambda abstraction\n");
+  } else if (gsIsLambda(Part) || gsIsForall(Part) || gsIsExists(Part)) {
+    //print lambda abstraction or universal/existential quantification
+    PRINT_FUNC(dbg_prints)("printing lambda abstraction or universal/existential quantification\n");
     if (PrecLevel > 1) PRINT_FUNC(fprints)(OutStream, "(");
-    PRINT_FUNC(fprints)(OutStream, "lambda ");
+    PRINT_FUNC(fprints)(OutStream, (gsIsLambda(Part)?"lambda ":(gsIsForall(Part))?"forall ":"exists "));
     PRINT_FUNC(PrintDecls)(OutStream, ATLgetArgument(Part, 0),
       pp_format, NULL, ", ");
     PRINT_FUNC(fprints)(OutStream, ". ");
@@ -884,7 +873,7 @@ void PRINT_FUNC(PrintPart_Appl)(PRINT_OUTTYPE OutStream,
     PRINT_FUNC(dbg_prints)("printing conditional\n");
     if (PrecLevel > 4) PRINT_FUNC(fprints)(OutStream, "(");
     PRINT_FUNC(PrintPart_Appl)(OutStream, ATAgetArgument(Part, 0),
-      pp_format, ShowSorts, 12);
+      pp_format, ShowSorts, 11);
     PRINT_FUNC(fprints)(OutStream, " -> ");
     PRINT_FUNC(PrintPart_Appl)(OutStream, ATAgetArgument(Part, 1),
       pp_format, ShowSorts, 5);
@@ -913,7 +902,7 @@ void PRINT_FUNC(PrintPart_Appl)(PRINT_OUTTYPE OutStream,
       pp_format, ShowSorts, 6);
     PRINT_FUNC(fprints)(OutStream, " @ ");
     PRINT_FUNC(PrintPart_Appl)(OutStream, ATAgetArgument(Part, 1),
-      pp_format, ShowSorts, 12);
+      pp_format, ShowSorts, 11);
     if (PrecLevel > 6) PRINT_FUNC(fprints)(OutStream, ")");
   } else if (gsIsSync(Part)) {
     //print sync
