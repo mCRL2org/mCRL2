@@ -1436,9 +1436,9 @@ int gsPrecOpIdInfixLeft(ATermAppl OpIdName)
   if (OpIdName == gsMakeOpIdNameImp()) {
     return 3;
   } else if ((OpIdName == gsMakeOpIdNameAnd()) || (OpIdName == gsMakeOpIdNameOr())) {
-    return 3;
-  } else if ((OpIdName == gsMakeOpIdNameEq()) || (OpIdName == gsMakeOpIdNameNeq())) {
     return 4;
+  } else if ((OpIdName == gsMakeOpIdNameEq()) || (OpIdName == gsMakeOpIdNameNeq())) {
+    return 5;
   } else if (
       (OpIdName == gsMakeOpIdNameLT()) || (OpIdName == gsMakeOpIdNameLTE()) ||
       (OpIdName == gsMakeOpIdNameGT()) || (OpIdName == gsMakeOpIdNameGTE()) ||
@@ -1478,9 +1478,9 @@ int gsPrecOpIdInfixRight(ATermAppl OpIdName)
   if (OpIdName == gsMakeOpIdNameImp()) {
     return 2;
   } else if ((OpIdName == gsMakeOpIdNameAnd()) || (OpIdName == gsMakeOpIdNameOr())) {
-    return 4;
+    return 3;
   } else if ((OpIdName == gsMakeOpIdNameEq()) || (OpIdName == gsMakeOpIdNameNeq())) {
-    return 5;
+    return 4;
   } else if (
       (OpIdName == gsMakeOpIdNameLT()) || (OpIdName == gsMakeOpIdNameLTE()) ||
       (OpIdName == gsMakeOpIdNameGT()) || (OpIdName == gsMakeOpIdNameGTE()) ||
