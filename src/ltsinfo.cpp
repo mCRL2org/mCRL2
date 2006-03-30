@@ -93,12 +93,15 @@ static void print_formats(FILE *f)
   fprintf(f,
     "The following formats are accepted by " NAME ":\n"
     "\n"
-    "  aut       the aldebaran format (.aut)\n"
+    "  format  ext.  description                       remarks\n"
+    "  -----------------------------------------------------------\n"
+    "  aut     .aut  Aldebaran format (CADP)\n"
 #ifdef MCRL2_BCG
-    "  bcg       the BCG format (.bcg)\n"
+    "  bcg     .bcg  Binary Coded Graph format (CADP)\n"
 #endif
-    "  mcrl      the mCRL SVC format (.svc)\n"
-    "  mcrl2     the mCRL2 SVC format (.svc, default)\n"
+    "  mcrl    .svc  mCRL SVC format\n"
+    "  mcrl2   .svc  mCRL2 SVC format                  default\n"
+    "\n"
     );
 }
 
@@ -107,18 +110,18 @@ static void print_help(FILE *f, char *Name)
   fprintf(f,
     "Usage: %s [OPTION]... [INFILE]\n"
     "Print information about the labelled transition system (LTS) in INFILE. If\n"
-    "INFILE is not supplied, stdin is used instead.\n"
+    "INFILE is not supplied, stdin is used.\n"
     "\n"
-    "The format of INFILE is determined by its contents or extension. The option --in\n"
-    "can be used to force the format for INFILE.\n"
+    "The format of INFILE is determined by its contents. The option --in can be used\n"
+    "to force the format for INFILE.\n"
     "\n"
     "Mandatory arguments to long options are mandatory for short options too.\n"
-    "  -h, --help            display this help message\n"
-    "      --version         display version information\n"
+    "  -h, --help            display this help message and terminate\n"
+    "      --version         display version information and terminate\n"
     "  -q, --quiet           do not display warning messages\n"
     "  -v, --verbose         display concise intermediate messages\n"
-    "  -i, --in=FORMAT       consider INFILE to be in the FORMAT format\n"
-    "  -f, --formats         list accepted formats\n",
+    "  -f, --formats         list accepted formats\n"
+    "  -i, --in=FORMAT       use FORMAT as the input format\n",
     Name);
 }
 

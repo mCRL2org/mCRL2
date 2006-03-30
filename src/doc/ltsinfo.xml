@@ -7,9 +7,6 @@
 <!ENTITY outfile "<parameter>OUTFILE</parameter>">
 <!ENTITY format "<parameter>FORMAT</parameter>">
 <!ENTITY file "<parameter>FILE</parameter>">
-<!ENTITY default "<parameter>default</parameter>">
-<!ENTITY debug "<parameter>debug</parameter>">
-<!ENTITY internal "<parameter>internal</parameter>">
 <!ENTITY opt_h "<option>-h</option>">
 <!ENTITY opt_q "<option>-q</option>">
 <!ENTITY opt_v "<option>-v</option>">
@@ -34,7 +31,7 @@
 
 <refnamediv>
   <refname>ltsinfo</refname>
-  <refpurpose>copy an LTS</refpurpose>
+  <refpurpose>display information about an LTS</refpurpose>
 </refnamediv>
 
 <refsynopsisdiv>
@@ -49,19 +46,20 @@
   <title>Description</title>
   <para>
     The ltsinfo tool prints information about the labelled transition system
-    (LTS) in &infile;.  If &infile; is not supplied, stdin is used instead.
+    (LTS) in &infile;.  If &infile; is not supplied, &stdin; is used.
   </para>
 
   <para>
-    The format of &infile; is determined by its contents or extension.  The
+    The format of &infile; is determined by its contents.  The
     option &opt_in; can be used to force the format for &infile;. A list of
-    supported formats can be requested by using the option &opt_formats;
+    supported formats can be requested by using the option &opt_formats;.
   </para>
 </refsect1>
 
 <refsect1>
 <title>Options</title>
 <para>
+  Mandatory arguments to long options are mandatory for short options too.
   <variablelist>
   <varlistentry>
     <term>&opt_h;</term>
@@ -103,16 +101,6 @@
   </varlistentry>
 
   <varlistentry>
-    <term>&opt_i;</term>
-    <term>&opt_in;=&format;</term>
-    <listitem>
-      <para>
-       consider &infile; to be in the &format; format
-      </para>
-    </listitem>
-  </varlistentry>
-
-  <varlistentry>
     <term>&opt_f;</term>
     <term>&opt_formats;</term>
     <listitem>
@@ -121,6 +109,15 @@
       </para>
     </listitem>
   </varlistentry>
+
+  <varlistentry>
+    <term>&opt_i;</term>
+    <term>&opt_in;=&format;</term>
+    <listitem>
+      <para>use &format; format as the input format</para>
+    </listitem>
+  </varlistentry>
+
   </variablelist>
 </para>
 </refsect1>

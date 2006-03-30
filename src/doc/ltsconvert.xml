@@ -2,15 +2,11 @@
 
 <!DOCTYPE refentry PUBLIC "-//OASIS//DTD DocBook XML V4.3//EN" "http://www.oasis-open.org/docbook/xml/4.3/docbookx.dtd"[
 <!ENTITY ltsconvert "<function>ltsconvert</function>">
-<!ENTITY lpe2lts "<function>lpe2lts</function>">
 <!ENTITY option "<parameter>OPTION</parameter>">
 <!ENTITY infile "<parameter>INFILE</parameter>">
 <!ENTITY outfile "<parameter>OUTFILE</parameter>">
 <!ENTITY format "<parameter>FORMAT</parameter>">
 <!ENTITY file "<parameter>FILE</parameter>">
-<!ENTITY default "<parameter>default</parameter>">
-<!ENTITY debug "<parameter>debug</parameter>">
-<!ENTITY internal "<parameter>internal</parameter>">
 <!ENTITY opt_h "<option>-h</option>">
 <!ENTITY opt_q "<option>-q</option>">
 <!ENTITY opt_v "<option>-v</option>">
@@ -18,6 +14,7 @@
 <!ENTITY opt_o "<option>-o</option>">
 <!ENTITY opt_f "<option>-f</option>">
 <!ENTITY opt_l "<option>-l</option>">
+<!ENTITY opt_n "<option>-n</option>">
 <!ENTITY opt_help "<option>--help</option>">
 <!ENTITY opt_version "<option>--version</option>">
 <!ENTITY opt_quiet "<option>--quiet</option>">
@@ -26,8 +23,11 @@
 <!ENTITY opt_out "<option>--out</option>">
 <!ENTITY opt_formats "<option>--formats</option>">
 <!ENTITY opt_lpe "<option>--lpe</option>">
+<!ENTITY opt_no_state "<option>--no-state</option>">
 <!ENTITY stdin "<constant>stdin</constant>">
 <!ENTITY stdout "<constant>stdout</constant>">
+<!ENTITY fsm "<constant>fsm</constant>">
+<!ENTITY dot "<constant>dot</constant>">
 ]>
 
 <refentry id="ltsconvert">
@@ -56,22 +56,21 @@
   <title>Description</title>
   <para>
     The ltsconvert tool converts the labelled transition system (LTS) in
-    &infile; to &outfile;, changing the format if necessary (and possible). If
-    &outfile; is not supplied, the LTS is saved to stdout. If &infile; is not
-    supplied, stdin is used instead.
+    &infile; to &outfile; in the requested format. If &outfile; is not
+    supplied, &stdout; is used. If &infile; is not supplied, &stdin; is used.
   </para>
 
   <para>
-    The format of &infile; and &outfile; is determined by its contents or
-    extension.  Options &opt_in; and &opt_out; can be used to force the format
-    for &infile; and &outfile;, respectively. A list of supported formats can
-    be requested by using the option &opt_formats;
+    The output format is determined by the extension of &outfile;, whereas the
+    input format is determined by the content of &infile;. Options &opt_in;
+    and &opt_out; can be used to force the input and output formats.  A list of
+    supported formats can be requested by using the option &opt_formats;.
   </para>
   
   <para>
-    Note that tools that use the FSM format may depend on state information and
+    Note that tools that use the &fsm; format may depend on state information and
     parameter names. The former requires that the state information is in the
-    input LTS file and the latter that the &opt_l; option is used (see the
+    input LTS file and the latter that the &opt_lpe; option is used (see the
     options sections below).
   </para>
 </refsect1>
@@ -79,6 +78,7 @@
 <refsect1>
 <title>Options</title>
 <para>
+  Mandatory arguments to long options are mandatory for short options too.
   <variablelist>
   <varlistentry>
     <term>&opt_h;</term>
@@ -120,26 +120,6 @@
   </varlistentry>
 
   <varlistentry>
-    <term>&opt_i;</term>
-    <term>&opt_in;=&format;</term>
-    <listitem>
-      <para>
-       consider &infile; to be in the &format; format
-      </para>
-    </listitem>
-  </varlistentry>
-
-  <varlistentry>
-    <term>&opt_o;</term>
-    <term>&opt_out;=&format;</term>
-    <listitem>
-      <para>
-       save LTS in &outfile; in the &format; format
-      </para>
-    </listitem>
-  </varlistentry>
-
-  <varlistentry>
     <term>&opt_f;</term>
     <term>&opt_formats;</term>
     <listitem>
@@ -150,14 +130,37 @@
   </varlistentry>
 
   <varlistentry>
+    <term>&opt_i;</term>
+    <term>&opt_in;=&format;</term>
+    <listitem>
+      <para>use &format; format as the input format</para>
+    </listitem>
+  </varlistentry>
+
+  <varlistentry>
+    <term>&opt_o;</term>
+    <term>&opt_out;=&format;</term>
+    <listitem>
+      <para>use &format; format as the output format</para>
+    </listitem>
+  </varlistentry>
+
+  <varlistentry>
     <term>&opt_l;</term>
     <term>&opt_lpe;=&file;</term>
     <listitem>
-      <para>
-	When saving as an FSM file, name the state parameters according to the
-	names in the LPE in &file;.  This should be the LPE from which the
-	input LTS file was generated. If this option is not used, state
-	parameters are assigned an arbitrary name by &ltsconvert;.
+      <para>use &file; as the LPE from which the input LTS was
+        generated; this is needed to store the correct parameter
+        names of states when saving in &fsm; format
+      </para>
+    </listitem>
+  </varlistentry>
+
+  <varlistentry>
+    <term>&opt_n;</term>
+    <term>&opt_no_state;</term>
+    <listitem>
+      <para>leave out state information when saving in &dot; format
       </para>
     </listitem>
   </varlistentry>

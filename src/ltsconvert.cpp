@@ -148,14 +148,17 @@ static void print_formats(FILE *f)
   fprintf(f,
     "The following formats are accepted by " NAME ":\n"
     "\n"
-    "  aut       the aldebaran format (.aut)\n"
+    "  format  ext.  description                       remarks\n"
+    "  -----------------------------------------------------------\n"
+    "  aut     .aut  Aldebaran format (CADP)\n"
 #ifdef MCRL2_BCG
-    "  bcg       the BCG format\n"
+    "  bcg     .bcg  Binary Coded Graph format (CADP)\n"
 #endif
-    "  dot       the DOT format (.dot, only output)\n"
-    "  fsm       the FSM format (.fsm, only output)\n"
-    "  mcrl      the mCRL SVC format (.svc)\n"
-    "  mcrl2     the mCRL2 SVC format (.svc, default)\n"
+    "  dot     .dot  GraphViz format                   output only\n"
+    "  fsm     .fsm  Finite State Machine format       output only\n"
+    "  mcrl    .svc  mCRL SVC format\n"
+    "  mcrl2   .svc  mCRL2 SVC format                  default\n"
+    "\n"
     );
 }
 
@@ -163,26 +166,26 @@ static void print_help(FILE *f, char *Name)
 {
   fprintf(f,
     "Usage: %s [OPTION]... [INFILE [OUTFILE]]\n"
-    "Copy the labelled transition system (LTS) in INFILE to OUTFILE, converting\n"
-    "between formats if necessary (and possible). If OUTFILE is not supplied, the\n"
-    "LTS is saved to stdout. If INFILE is not supplied, stdin is used instead.\n"
+    "Convert the labelled transition system (LTS) from INFILE to OUTFILE in the\n"
+    "requested format. If OUTFILE is not supplied, stdout is used. If INFILE is not\n"
+    "supplied, stdin is used.\n"
     "\n"
-    "The format of INFILE and OUTFILE is determined by its contents or extension.\n"
-    "Options --in and --out can be used to force the format for INFILE and OUTFILE,\n"
-    "respectively.\n"
+    "The output format is determined by the extension of OUTFILE, whereas the input\n"
+    "format is determined by the content of INFILE. Options --in and --out can be\n"
+    "used to force the input and output formats.\n"
     "\n"
     "Mandatory arguments to long options are mandatory for short options too.\n"
-    "  -h, --help            display this help message\n"
-    "      --version         display version information\n"
+    "  -h, --help            display this help message and terminate\n"
+    "      --version         display version information and terminate\n"
     "  -q, --quiet           do not display warning messages\n"
     "  -v, --verbose         display concise intermediate messages\n"
-    "  -i, --in=FORMAT       consider INFILE to be in the FORMAT format\n"
-    "  -o, --out=FORMAT      save LTS in OUTFILE in the FORMAT format\n"
     "  -f, --formats         list accepted formats\n"
-    "  -l, --lpe=FILE        supply LPE file from which the input file was generated\n"
-    "                        (needed to store the correct parameter names of states\n"
-    "                        when saving as FSM file)\n"
-    "  -n, --no-state        do not save state information in DOT files\n",
+    "  -i, --in=FORMAT       use FORMAT as the input format\n"
+    "  -o, --out=FORMAT      use FORMAT as the output format\n"
+    "  -l, --lpe=FILE        use FILE as the LPE from which the input LTS was\n"
+    "                        generated; this is needed to store the correct parameter\n"
+    "                        names of states when saving in fsm format\n"
+    "  -n, --no-state        leave out state information when saving in dot format\n",
     Name);
 }
 
