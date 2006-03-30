@@ -2,7 +2,7 @@
 // socket_ops.hpp
 // ~~~~~~~~~~~~~~
 //
-// Copyright (c) 2003-2005 Christopher M. Kohlhoff (chris at kohlhoff dot com)
+// Copyright (c) 2003-2006 Christopher M. Kohlhoff (chris at kohlhoff dot com)
 //
 // Distributed under the Boost Software License, Version 1.0. (See accompanying
 // file LICENSE_1_0.txt or copy at http://www.boost.org/LICENSE_1_0.txt)
@@ -19,9 +19,9 @@
 
 #include <boost/asio/detail/push_options.hpp>
 #include <boost/config.hpp>
+#include <cstdlib>
 #include <cstring>
 #include <cerrno>
-#include <vector>
 #include <boost/detail/workaround.hpp>
 #include <boost/asio/detail/pop_options.hpp>
 
@@ -62,7 +62,24 @@ inline socket_type accept(socket_type s, socket_addr_type* addr,
     socket_addr_len_type* addrlen)
 {
   set_error(0);
+#if defined(__MACH__) && defined(__APPLE__)
+  socket_type new_s = error_wrapper(::accept(s, addr, addrlen));
+  if (new_s == invalid_socket)
+    return new_s;
+
+  int optval = 1;
+  int result = error_wrapper(::setsockopt(new_s,
+        SOL_SOCKET, SO_NOSIGPIPE, &optval, sizeof(optval)));
+  if (result != 0)
+  {
+    ::close(new_s);
+    return invalid_socket;
+  }
+
+  return new_s;
+#else
   return error_wrapper(::accept(s, addr, addrlen));
+#endif
 }
 
 inline int bind(socket_type s, const socket_addr_type* addr,
@@ -101,287 +118,144 @@ inline int listen(socket_type s, int backlog)
   return error_wrapper(::listen(s, backlog));
 }
 
-struct bufs
+#if defined(BOOST_WINDOWS)
+typedef WSABUF buf;
+#else // defined(BOOST_WINDOWS)
+typedef iovec buf;
+#endif // defined(BOOST_WINDOWS)
+
+inline void init_buf(buf& b, void* data, size_t size)
 {
-  void* data;
-  size_t size;
-};
+#if defined(BOOST_WINDOWS)
+  b.buf = static_cast<char*>(data);
+  b.len = static_cast<u_long>(size);
+#else // defined(BOOST_WINDOWS)
+  b.iov_base = data;
+  b.iov_len = size;
+#endif // defined(BOOST_WINDOWS)
+}
 
-enum { max_bufs = 16 };
+inline void init_buf(buf& b, const void* data, size_t size)
+{
+#if defined(BOOST_WINDOWS)
+  b.buf = static_cast<char*>(const_cast<void*>(data));
+  b.len = static_cast<u_long>(size);
+#else // defined(BOOST_WINDOWS)
+  b.iov_base = const_cast<void*>(data);
+  b.iov_len = size;
+#endif // defined(BOOST_WINDOWS)
+}
 
-inline int recv(socket_type s, bufs* b, size_t count, int flags)
+inline int recv(socket_type s, buf* bufs, size_t count, int flags)
 {
   set_error(0);
 #if defined(BOOST_WINDOWS)
-  // Copy buffers into WSABUF array.
-  WSABUF recv_bufs[max_bufs];
-  if (count > max_bufs)
-    count = max_bufs;
-  for (size_t i = 0; i < count; ++i)
-  {
-    recv_bufs[i].len = static_cast<u_long>(b[i].size);
-    recv_bufs[i].buf = static_cast<char*>(b[i].data);
-  }
-
   // Receive some data.
   DWORD recv_buf_count = static_cast<DWORD>(count);
   DWORD bytes_transferred = 0;
   DWORD recv_flags = flags;
-  int result = error_wrapper(::WSARecv(s, recv_bufs,
+  int result = error_wrapper(::WSARecv(s, bufs,
         recv_buf_count, &bytes_transferred, &recv_flags, 0, 0));
   if (result != 0)
     return -1;
   return bytes_transferred;
 #else // defined(BOOST_WINDOWS)
-  if (count == 1)
-  {
-    // We only have to receive into a single buffer, so use normal recv call.
-    return error_wrapper(::recv(s, b[0].data, b[0].size, flags));
-  }
-  else if (flags == 0)
-  {
-    // No flags have been specified so we can perform this receive operation
-    // using a vectored-read function, i.e. readv.
-
-    // Copy buffers into iovec array.
-    iovec recv_bufs[max_bufs];
-    if (count > max_bufs)
-      count = max_bufs;
-    for (size_t i = 0; i < count; ++i)
-    {
-      recv_bufs[i].iov_len = b[i].size;
-      recv_bufs[i].iov_base = static_cast < caddr_t > (b[i].data);
-    }
-
-    // Receive some data.
-    return error_wrapper(::readv(s, recv_bufs, count));
-  }
-  else
-  {
-    // Socket flags have been supplied so receive into a temporary buffer and
-    // then copy the data to the caller-supplied buffers.
-
-    // Create a buffer of the appropriate size.
-    size_t buf_size = 0;
-    for (size_t i = 0; i < count; ++i)
-      buf_size += b[i].size;
-    std::vector<char> buffer(buf_size);
-
-    // Receive some data.
-    int result = error_wrapper(::recv(s, &buffer[0], buf_size, flags));
-    if (result <= 0)
-      return result;
-
-    // Copy to caller-supplied buffers.
-    using namespace std; // For memcpy.
-    size_t bytes_avail = result;
-    size_t bytes_copied = 0;
-    for (size_t i = 0; i < count && bytes_avail > 0; ++i)
-    {
-      size_t size = (b[i].size < bytes_avail) ? b[i].size : bytes_avail;
-      memcpy(b[i].data, &buffer[bytes_copied], size);
-      bytes_copied += size;
-      bytes_avail -= size;
-    }
-
-    return result;
-  }
+  msghdr msg;
+  msg.msg_name = 0;
+  msg.msg_namelen = 0;
+  msg.msg_iov = bufs;
+  msg.msg_iovlen = count;
+  msg.msg_control = 0;
+  msg.msg_controllen = 0;
+  msg.msg_flags = 0;
+  return error_wrapper(::recvmsg(s, &msg, flags));
 #endif // defined(BOOST_WINDOWS)
 }
 
-inline int recvfrom(socket_type s, bufs* b, size_t count, int flags,
+inline int recvfrom(socket_type s, buf* bufs, size_t count, int flags,
     socket_addr_type* addr, socket_addr_len_type* addrlen)
 {
   set_error(0);
 #if defined(BOOST_WINDOWS)
-  // Copy buffers into WSABUF array.
-  WSABUF recv_bufs[max_bufs];
-  if (count > max_bufs)
-    count = max_bufs;
-  for (size_t i = 0; i < count; ++i)
-  {
-    recv_bufs[i].len = static_cast<u_long>(b[i].size);
-    recv_bufs[i].buf = static_cast<char*>(b[i].data);
-  }
-
   // Receive some data.
   DWORD recv_buf_count = static_cast<DWORD>(count);
   DWORD bytes_transferred = 0;
   DWORD recv_flags = flags;
-  int result = error_wrapper(::WSARecvFrom(s, recv_bufs, recv_buf_count,
+  int result = error_wrapper(::WSARecvFrom(s, bufs, recv_buf_count,
         &bytes_transferred, &recv_flags, addr, addrlen, 0, 0));
   if (result != 0)
     return -1;
   return bytes_transferred;
 #else // defined(BOOST_WINDOWS)
-  if (count == 1)
-  {
-    // We only have to receive into a single buffer, so use normal recvfrom
-    // call.
-    return error_wrapper(::recvfrom(s,
-          b[0].data, b[0].size, flags, addr, addrlen));
-  }
-  else
-  {
-    // We have to receive into multiple buffers, so receive into a temporary
-    // buffer and then copy the data to the caller-supplied buffers.
-
-    // Create a buffer of the appropriate size.
-    size_t buf_size = 0;
-    for (size_t i = 0; i < count; ++i)
-      buf_size += b[i].size;
-    std::vector<char> buffer(buf_size);
-
-    // Receive some data.
-    int result = error_wrapper(::recvfrom(s,
-          &buffer[0], buf_size, flags, addr, addrlen));
-    if (result <= 0)
-      return result;
-
-    // Copy to caller-supplied buffers.
-    using namespace std; // For memcpy.
-    size_t bytes_avail = result;
-    size_t bytes_copied = 0;
-    for (size_t i = 0; i < count && bytes_avail > 0; ++i)
-    {
-      size_t size = (b[i].size < bytes_avail) ? b[i].size : bytes_avail;
-      memcpy(b[i].data, &buffer[bytes_copied], size);
-      bytes_copied += size;
-      bytes_avail -= size;
-    }
-
-    return result;
-  }
+  msghdr msg;
+  msg.msg_name = addr;
+  msg.msg_namelen = *addrlen;
+  msg.msg_iov = bufs;
+  msg.msg_iovlen = count;
+  msg.msg_control = 0;
+  msg.msg_controllen = 0;
+  msg.msg_flags = 0;
+  int result = error_wrapper(::recvmsg(s, &msg, flags));
+  *addrlen = msg.msg_namelen;
+  return result;
 #endif // defined(BOOST_WINDOWS)
 }
 
-inline int send(socket_type s, const bufs* b, size_t count, int flags)
+inline int send(socket_type s, const buf* bufs, size_t count, int flags)
 {
   set_error(0);
 #if defined(BOOST_WINDOWS)
-  // Copy buffers into WSABUF array.
-  WSABUF send_bufs[max_bufs];
-  if (count > max_bufs)
-    count = max_bufs;
-  for (size_t i = 0; i < count; ++i)
-  {
-    send_bufs[i].len = static_cast<u_long>(b[i].size);
-    send_bufs[i].buf = static_cast<char*>(b[i].data);
-  }
-
   // Send the data.
   DWORD send_buf_count = static_cast<DWORD>(count);
   DWORD bytes_transferred = 0;
   DWORD send_flags = flags;
-  int result = error_wrapper(::WSASend(s, send_bufs,
+  int result = error_wrapper(::WSASend(s, const_cast<buf*>(bufs),
         send_buf_count, &bytes_transferred, send_flags, 0, 0));
   if (result != 0)
     return -1;
   return bytes_transferred;
 #else // defined(BOOST_WINDOWS)
-  if (count == 1)
-  {
-    // We only have to send a single buffer, so use normal send call.
-    return error_wrapper(::send(s, b[0].data, b[0].size, flags));
-  }
-  else if (flags == 0)
-  {
-    // No flags have been specified so we can perform this send operation using
-    // a vectored-write function, i.e. writev.
-
-    // Copy buffers into iovec array.
-    iovec send_bufs[max_bufs];
-    if (count > max_bufs)
-      count = max_bufs;
-    for (size_t i = 0; i < count; ++i)
-    {
-      send_bufs[i].iov_len = b[i].size;
-      send_bufs[i].iov_base = static_cast < caddr_t > (b[i].data);
-    }
-
-    // Send the data.
-    return error_wrapper(::writev(s, send_bufs, count));
-  }
-  else
-  {
-    // Socket flags have been supplied so copy the caller-supplied buffers into
-    // a temporary buffer for sending.
-
-    // Create a buffer of the appropriate size.
-    size_t buf_size = 0;
-    for (size_t i = 0; i < count; ++i)
-      buf_size += b[i].size;
-    std::vector<char> buffer(buf_size);
-
-    // Copy data from caller-supplied buffers.
-    using namespace std; // For memcpy.
-    size_t bytes_copied = 0;
-    for (size_t i = 0; i < count; ++i)
-    {
-      memcpy(&buffer[bytes_copied], b[i].data, b[i].size);
-      bytes_copied += b[i].size;
-    }
-
-    // Receive some data.
-    return error_wrapper(::send(s, &buffer[0], buf_size, flags));
-  }
+  msghdr msg;
+  msg.msg_name = 0;
+  msg.msg_namelen = 0;
+  msg.msg_iov = const_cast<buf*>(bufs);
+  msg.msg_iovlen = count;
+  msg.msg_control = 0;
+  msg.msg_controllen = 0;
+  msg.msg_flags = 0;
+#if defined(__linux__)
+  flags |= MSG_NOSIGNAL;
+#endif // defined(__linux__)
+  return error_wrapper(::sendmsg(s, &msg, flags));
 #endif // defined(BOOST_WINDOWS)
 }
 
-inline int sendto(socket_type s, const bufs* b, size_t count, int flags,
+inline int sendto(socket_type s, const buf* bufs, size_t count, int flags,
     const socket_addr_type* addr, socket_addr_len_type addrlen)
 {
   set_error(0);
 #if defined(BOOST_WINDOWS)
-  // Copy buffers into WSABUF array.
-  WSABUF send_bufs[max_bufs];
-  if (count > max_bufs)
-    count = max_bufs;
-  for (size_t i = 0; i < count; ++i)
-  {
-    send_bufs[i].len = static_cast<u_long>(b[i].size);
-    send_bufs[i].buf = static_cast<char*>(b[i].data);
-  }
-
   // Send the data.
   DWORD send_buf_count = static_cast<DWORD>(count);
   DWORD bytes_transferred = 0;
-  int result = ::WSASendTo(s, send_bufs, send_buf_count,
+  int result = ::WSASendTo(s, const_cast<buf*>(bufs), send_buf_count,
       &bytes_transferred, flags, addr, addrlen, 0, 0);
   if (result != 0)
     return -1;
   return bytes_transferred;
 #else // defined(BOOST_WINDOWS)
-  if (count == 1)
-  {
-    // We only have to send a single buffer, so use normal sendto call.
-    return error_wrapper(::sendto(s,
-          b[0].data, b[0].size, flags, addr, addrlen));
-  }
-  else
-  {
-    // Socket flags have been supplied so copy the caller-supplied buffers into
-    // a temporary buffer for sending.
-
-    // Create a buffer of the appropriate size.
-    size_t buf_size = 0;
-    for (size_t i = 0; i < count; ++i)
-      buf_size += b[i].size;
-    std::vector<char> buffer(buf_size);
-
-    // Copy data from caller-supplied buffers.
-    using namespace std; // For memcpy.
-    size_t bytes_copied = 0;
-    for (size_t i = 0; i < count; ++i)
-    {
-      memcpy(&buffer[bytes_copied], b[i].data, b[i].size);
-      bytes_copied += b[i].size;
-    }
-
-    // Receive some data.
-    return error_wrapper(::sendto(s,
-          &buffer[0], buf_size, flags, addr, addrlen));
-  }
+  msghdr msg;
+  msg.msg_name = const_cast<socket_addr_type*>(addr);
+  msg.msg_namelen = addrlen;
+  msg.msg_iov = const_cast<buf*>(bufs);
+  msg.msg_iovlen = count;
+  msg.msg_control = 0;
+  msg.msg_controllen = 0;
+  msg.msg_flags = 0;
+#if defined(__linux__)
+  flags |= MSG_NOSIGNAL;
+#endif // defined(__linux__)
+  return error_wrapper(::sendmsg(s, &msg, flags));
 #endif // defined(BOOST_WINDOWS)
 }
 
@@ -391,9 +265,24 @@ inline socket_type socket(int af, int type, int protocol)
 #if defined(BOOST_WINDOWS)
   return error_wrapper(::WSASocket(af, type, protocol, 0, 0,
         WSA_FLAG_OVERLAPPED));
-#else // defined(BOOST_WINDOWS)
+#elif defined(__MACH__) && defined(__APPLE__)
+  socket_type s = error_wrapper(::socket(af, type, protocol));
+  if (s == invalid_socket)
+    return s;
+
+  int optval = 1;
+  int result = error_wrapper(::setsockopt(s,
+        SOL_SOCKET, SO_NOSIGPIPE, &optval, sizeof(optval)));
+  if (result != 0)
+  {
+    ::close(s);
+    return invalid_socket;
+  }
+
+  return s;
+#else
   return error_wrapper(::socket(af, type, protocol));
-#endif // defined(BOOST_WINDOWS)
+#endif
 }
 
 inline int setsockopt(socket_type s, int level, int optname,
@@ -469,74 +358,170 @@ inline int select(int nfds, fd_set* readfds, fd_set* writefds,
   return error_wrapper(::select(nfds, readfds, writefds, exceptfds, timeout));
 }
 
-inline const char* inet_ntop(int af, const void* src, char* dest,
-    size_t length)
+inline int poll_read(socket_type s)
+{
+#if defined(BOOST_WINDOWS)
+  FD_SET fds;
+  FD_ZERO(&fds);
+  FD_SET(s, &fds);
+  set_error(0);
+  return error_wrapper(::select(s, &fds, 0, 0, 0));
+#else // defined(BOOST_WINDOWS)
+  pollfd fds;
+  fds.fd = s;
+  fds.events = POLLIN;
+  fds.revents = 0;
+  set_error(0);
+  return error_wrapper(::poll(&fds, 1, -1));
+#endif // defined(BOOST_WINDOWS)
+}
+
+inline int poll_write(socket_type s)
+{
+#if defined(BOOST_WINDOWS)
+  FD_SET fds;
+  FD_ZERO(&fds);
+  FD_SET(s, &fds);
+  set_error(0);
+  return error_wrapper(::select(s, 0, &fds, 0, 0));
+#else // defined(BOOST_WINDOWS)
+  pollfd fds;
+  fds.fd = s;
+  fds.events = POLLOUT;
+  fds.revents = 0;
+  set_error(0);
+  return error_wrapper(::poll(&fds, 1, -1));
+#endif // defined(BOOST_WINDOWS)
+}
+
+inline const char* inet_ntop(int af, const void* src, char* dest, size_t length,
+    unsigned long scope_id = 0)
 {
   set_error(0);
 #if defined(BOOST_WINDOWS)
-  using namespace std; // For strncat.
+  using namespace std; // For memcpy.
 
-  if (af != AF_INET)
+  if (af != AF_INET && af != AF_INET6)
   {
     set_error(asio::error::address_family_not_supported);
     return 0;
   }
 
-  char* addr_str = error_wrapper(
-      ::inet_ntoa(*static_cast<const in_addr*>(src)));
-  if (addr_str)
+  sockaddr_storage address;
+  DWORD address_length;
+  if (af == AF_INET)
   {
-    *dest = '\0';
-#if BOOST_WORKAROUND(BOOST_MSVC, >= 1400)
-    strncat_s(dest, length, addr_str, length);
-#else
-    strncat(dest, addr_str, length);
-#endif
-    return dest;
+    address_length = sizeof(sockaddr_in);
+    sockaddr_in* ipv4_address = reinterpret_cast<sockaddr_in*>(&address);
+    ipv4_address->sin_family = AF_INET;
+    ipv4_address->sin_port = 0;
+    memcpy(&ipv4_address->sin_addr, src, sizeof(in_addr));
+  }
+  else // AF_INET6
+  {
+    address_length = sizeof(sockaddr_in6);
+    sockaddr_in6* ipv6_address = reinterpret_cast<sockaddr_in6*>(&address);
+    ipv6_address->sin6_family = AF_INET6;
+    ipv6_address->sin6_port = 0;
+    ipv6_address->sin6_flowinfo = 0;
+    ipv6_address->sin6_scope_id = scope_id;
+    memcpy(&ipv6_address->sin6_addr, src, sizeof(in6_addr));
   }
 
+  DWORD string_length = length;
+  int result = error_wrapper(::WSAAddressToStringA(
+        reinterpret_cast<sockaddr*>(&address),
+        address_length, 0, dest, &string_length));
+
   // Windows may not set an error code on failure.
-  if (get_error() == 0)
+  if (result == socket_error_retval && get_error() == 0)
     set_error(asio::error::invalid_argument);
 
-  return 0;
-
+  return result == socket_error_retval ? 0 : dest;
 #else // defined(BOOST_WINDOWS)
   const char* result = error_wrapper(::inet_ntop(af, src, dest, length));
   if (result == 0 && get_error() == 0)
     set_error(asio::error::invalid_argument);
+  if (result != 0 && af == AF_INET6 && scope_id != 0)
+  {
+    using namespace std; // For strcat and sprintf.
+    char if_name[IF_NAMESIZE + 1] = "%";
+    const in6_addr* ipv6_address = static_cast<const in6_addr*>(src);
+    bool is_link_local = IN6_IS_ADDR_LINKLOCAL(ipv6_address);
+    if (!is_link_local || if_indextoname(scope_id, if_name + 1) == 0)
+      sprintf(if_name + 1, "%lu", scope_id);
+    strcat(dest, if_name);
+  }
   return result;
 #endif // defined(BOOST_WINDOWS)
 }
 
-inline int inet_pton(int af, const char* src, void* dest)
+inline int inet_pton(int af, const char* src, void* dest,
+    unsigned long* scope_id = 0)
 {
   set_error(0);
 #if defined(BOOST_WINDOWS)
-  using namespace std; // For strcmp.
+  using namespace std; // For memcpy and strcmp.
 
-  if (af != AF_INET)
+  if (af != AF_INET && af != AF_INET6)
   {
     set_error(asio::error::address_family_not_supported);
     return -1;
   }
 
-  u_long_type addr = error_wrapper(::inet_addr(src));
-  if (addr != INADDR_NONE || strcmp(src, "255.255.255.255") == 0)
+  sockaddr_storage address;
+  int address_length = sizeof(sockaddr_storage);
+  int result = error_wrapper(::WSAStringToAddressA(
+        const_cast<char*>(src), af, 0,
+        reinterpret_cast<sockaddr*>(&address),
+        &address_length));
+
+  if (af == AF_INET)
   {
-    static_cast<in_addr*>(dest)->s_addr = addr;
-    return 1;
+    if (result != socket_error_retval)
+    {
+      sockaddr_in* ipv4_address = reinterpret_cast<sockaddr_in*>(&address);
+      memcpy(dest, &ipv4_address->sin_addr, sizeof(in_addr));
+    }
+    else if (strcmp(src, "255.255.255.255") == 0)
+    {
+      static_cast<in_addr*>(dest)->s_addr = INADDR_NONE;
+    }
+  }
+  else // AF_INET6
+  {
+    if (result != socket_error_retval)
+    {
+      sockaddr_in6* ipv6_address = reinterpret_cast<sockaddr_in6*>(&address);
+      memcpy(dest, &ipv6_address->sin6_addr, sizeof(in6_addr));
+      if (scope_id)
+        *scope_id = ipv6_address->sin6_scope_id;
+    }
   }
 
   // Windows may not set an error code on failure.
-  if (get_error() == 0)
+  if (result == socket_error_retval && get_error() == 0)
     set_error(asio::error::invalid_argument);
 
-  return 0;
+  return result == socket_error_retval ? -1 : 1;
 #else // defined(BOOST_WINDOWS)
   int result = error_wrapper(::inet_pton(af, src, dest));
   if (result <= 0 && get_error() == 0)
     set_error(asio::error::invalid_argument);
+  if (result > 0 && af == AF_INET6 && scope_id)
+  {
+    using namespace std; // For strchr and atoi.
+    *scope_id = 0;
+    if (const char* if_name = strchr(src, '%'))
+    {
+      in6_addr* ipv6_address = static_cast<in6_addr*>(dest);
+      bool is_link_local = IN6_IS_ADDR_LINKLOCAL(ipv6_address);
+      if (is_link_local)
+        *scope_id = if_nametoindex(if_name + 1);
+      if (*scope_id == 0)
+        *scope_id = atoi(if_name + 1);
+    }
+  }
   return result;
 #endif // defined(BOOST_WINDOWS)
 }

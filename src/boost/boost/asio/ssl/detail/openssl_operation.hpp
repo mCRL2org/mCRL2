@@ -15,17 +15,17 @@
 # pragma once
 #endif // defined(_MSC_VER) && (_MSC_VER >= 1200)
 
-#include "asio/detail/push_options.hpp"
+#include <boost/asio/detail/push_options.hpp>
 
-#include "asio/detail/push_options.hpp"
+#include <boost/asio/detail/push_options.hpp>
 #include <boost/function.hpp>
 #include <boost/bind.hpp>
-#include "asio/detail/pop_options.hpp"
+#include <boost/asio/detail/pop_options.hpp>
 
-#include "asio/buffer.hpp"
-#include "asio/placeholders.hpp"
-#include "asio/write.hpp"
-#include "asio/ssl/detail/openssl_types.hpp"
+#include <boost/asio/buffer.hpp>
+#include <boost/asio/placeholders.hpp>
+#include <boost/asio/write.hpp>
+#include <boost/asio/ssl/detail/openssl_types.hpp>
 
 namespace asio {
 namespace ssl {
@@ -365,7 +365,7 @@ private:
 
   int do_sync_read()
   {
-    size_t len = socket_.asio::read_some
+    size_t len = socket_.read_some
       ( 
         asio::buffer(recv_buf_.get_unused_start(),
           recv_buf_.get_unused_len())
@@ -398,6 +398,6 @@ private:
 } // namespace ssl
 } // namespace asio
 
-#include "asio/detail/pop_options.hpp"
+#include <boost/asio/detail/pop_options.hpp>
 
 #endif // ASIO_SSL_DETAIL_OPENSSL_OPERATION_HPP

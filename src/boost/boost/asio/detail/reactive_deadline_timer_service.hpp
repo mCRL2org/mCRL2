@@ -2,7 +2,7 @@
 // reactive_deadline_timer_service.hpp
 // ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 //
-// Copyright (c) 2003-2005 Christopher M. Kohlhoff (chris at kohlhoff dot com)
+// Copyright (c) 2003-2006 Christopher M. Kohlhoff (chris at kohlhoff dot com)
 //
 // Distributed under the Boost Software License, Version 1.0. (See accompanying
 // file LICENSE_1_0.txt or copy at http://www.boost.org/LICENSE_1_0.txt)
@@ -33,23 +33,21 @@
 namespace asio {
 namespace detail {
 
-template <typename Demuxer, typename Time_Traits, typename Reactor>
+template <typename IO_Service, typename Time_Traits, typename Reactor>
 class reactive_deadline_timer_service
 {
 public:
-  // Implementation structure for a timer.
-  struct timer_impl
+  // The implementation type of the timer. This type is dependent on the
+  // underlying implementation of the timer service.
+  struct implementation_type
     : private noncopyable
   {
     boost::posix_time::ptime expiry;
+    bool might_have_pending_waits;
   };
 
-  // The native type of the timer. This type is dependent on the underlying
-  // implementation of the timer service.
-  typedef timer_impl* impl_type;
-
-  // The demuxer type for this service.
-  typedef Demuxer demuxer_type;
+  // The io_service type associated with this service.
+  typedef IO_Service io_service_type;
 
   // The time type.
   typedef typename Time_Traits::time_type time_type;
@@ -58,79 +56,77 @@ public:
   typedef typename Time_Traits::duration_type duration_type;
 
   // Constructor.
-  reactive_deadline_timer_service(demuxer_type& d)
-    : demuxer_(d),
-      reactor_(d.get_service(service_factory<Reactor>()))
+  reactive_deadline_timer_service(io_service_type& io_service)
+    : io_service_(io_service),
+      reactor_(io_service.get_service(service_factory<Reactor>()))
   {
   }
 
-  // Get the demuxer associated with the service.
-  demuxer_type& demuxer()
+  // Get the io_service associated with the service.
+  io_service_type& io_service()
   {
-    return demuxer_;
+    return io_service_;
   }
 
-  // Return a null timer implementation.
-  static impl_type null()
+  // Construct a new timer implementation.
+  void construct(implementation_type& impl)
   {
-    return 0;
-  }
-
-  // Create a new timer implementation.
-  void create(impl_type& impl)
-  {
-    impl = new timer_impl;
+    impl.expiry = boost::posix_time::ptime();
+    impl.might_have_pending_waits = false;
   }
 
   // Destroy a timer implementation.
-  void destroy(impl_type& impl)
+  void destroy(implementation_type& impl)
   {
-    if (impl != null())
-    {
-      reactor_.cancel_timer(impl);
-      delete impl;
-      impl = null();
-    }
+    cancel(impl);
+  }
+
+  // Cancel any asynchronous wait operations associated with the timer.
+  std::size_t cancel(implementation_type& impl)
+  {
+    if (!impl.might_have_pending_waits)
+      return 0;
+    std::size_t count = reactor_.cancel_timer(&impl);
+    impl.might_have_pending_waits = false;
+    return count;
   }
 
   // Get the expiry time for the timer as an absolute time.
-  time_type expires_at(const impl_type& impl) const
+  time_type expires_at(const implementation_type& impl) const
   {
-    return Time_Traits::from_utc(impl->expiry);
+    return Time_Traits::from_utc(impl.expiry);
   }
 
   // Set the expiry time for the timer as an absolute time.
-  void expires_at(impl_type& impl, const time_type& expiry_time)
+  std::size_t expires_at(implementation_type& impl,
+      const time_type& expiry_time)
   {
-    impl->expiry = Time_Traits::to_utc(expiry_time);
+    std::size_t count = cancel(impl);
+    impl.expiry = Time_Traits::to_utc(expiry_time);
+    return count;
   }
 
   // Get the expiry time for the timer relative to now.
-  duration_type expires_from_now(const impl_type& impl) const
+  duration_type expires_from_now(const implementation_type& impl) const
   {
     return Time_Traits::subtract(expires_at(impl), Time_Traits::now());
   }
 
   // Set the expiry time for the timer relative to now.
-  void expires_from_now(impl_type& impl, const duration_type& expiry_time)
+  std::size_t expires_from_now(implementation_type& impl,
+      const duration_type& expiry_time)
   {
-    expires_at(impl, Time_Traits::add(Time_Traits::now(), expiry_time));
-  }
-
-  // Cancel any asynchronous wait operations associated with the timer.
-  std::size_t cancel(impl_type& impl)
-  {
-    return reactor_.cancel_timer(impl);
+    return expires_at(impl, Time_Traits::add(Time_Traits::now(), expiry_time));
   }
 
   // Perform a blocking wait on the timer.
-  void wait(impl_type& impl)
+  void wait(implementation_type& impl)
   {
     boost::posix_time::ptime now
       = boost::posix_time::microsec_clock::universal_time();
-    while (now < impl->expiry)
+    while (now < impl.expiry)
     {
-      boost::posix_time::time_duration timeout = impl->expiry - now;
+      boost::posix_time::time_duration timeout = impl.expiry - now;
       ::timeval tv;
       tv.tv_sec = timeout.total_seconds();
       tv.tv_usec = timeout.total_microseconds() % 1000000;
@@ -143,10 +139,9 @@ public:
   class wait_handler
   {
   public:
-    wait_handler(impl_type& impl, Demuxer& demuxer, Handler handler)
-      : impl_(impl),
-        demuxer_(demuxer),
-        work_(demuxer),
+    wait_handler(IO_Service& io_service, Handler handler)
+      : io_service_(io_service),
+        work_(io_service),
         handler_(handler)
     {
     }
@@ -154,27 +149,27 @@ public:
     void operator()(int result)
     {
       asio::error e(result);
-      demuxer_.post(detail::bind_handler(handler_, e));
+      io_service_.post(detail::bind_handler(handler_, e));
     }
 
   private:
-    impl_type& impl_;
-    Demuxer& demuxer_;
-    typename Demuxer::work work_;
+    IO_Service& io_service_;
+    typename IO_Service::work work_;
     Handler handler_;
   };
 
   // Start an asynchronous wait on the timer.
   template <typename Handler>
-  void async_wait(impl_type& impl, Handler handler)
+  void async_wait(implementation_type& impl, Handler handler)
   {
-    reactor_.schedule_timer(impl->expiry,
-        wait_handler<Handler>(impl, demuxer_, handler), impl);
+    impl.might_have_pending_waits = true;
+    reactor_.schedule_timer(impl.expiry,
+        wait_handler<Handler>(io_service_, handler), &impl);
   }
 
 private:
-  // The demuxer used for dispatching handlers.
-  Demuxer& demuxer_;
+  // The io_service used for dispatching handlers.
+  IO_Service& io_service_;
 
   // The selector that performs event demultiplexing for the provider.
   Reactor& reactor_;

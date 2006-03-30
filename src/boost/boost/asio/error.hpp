@@ -2,7 +2,7 @@
 // error.hpp
 // ~~~~~~~~~
 //
-// Copyright (c) 2003-2005 Christopher M. Kohlhoff (chris at kohlhoff dot com)
+// Copyright (c) 2003-2006 Christopher M. Kohlhoff (chris at kohlhoff dot com)
 //
 // Distributed under the Boost Software License, Version 1.0. (See accompanying
 // file LICENSE_1_0.txt or copy at http://www.boost.org/LICENSE_1_0.txt)
@@ -280,7 +280,10 @@ public:
     return code_;
   }
 
-  struct unspecified_bool_type_t;
+  struct unspecified_bool_type_t
+  {
+  };
+
   typedef unspecified_bool_type_t* unspecified_bool_type;
 
   /// Operator returns non-null if there is a non-success error code.

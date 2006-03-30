@@ -16,18 +16,17 @@
 # pragma once
 #endif // defined(_MSC_VER) && (_MSC_VER >= 1200)
 
-#include "asio/detail/push_options.hpp"
+#include <boost/asio/detail/push_options.hpp>
 
-#include "asio/detail/push_options.hpp"
+#include <boost/asio/detail/push_options.hpp>
 #include <memory>
 #include <string>
 #include <boost/noncopyable.hpp>
-#include "asio/detail/pop_options.hpp"
+#include <boost/asio/detail/pop_options.hpp>
 
-#include "asio/basic_demuxer.hpp"
-#include "asio/demuxer_service.hpp"
-#include "asio/ssl/context_base.hpp"
-#include "asio/ssl/detail/openssl_context_service.hpp"
+#include <boost/asio/basic_io_service.hpp>
+#include <boost/asio/ssl/context_base.hpp>
+#include <boost/asio/ssl/detail/openssl_context_service.hpp>
 
 namespace asio {
 namespace ssl {
@@ -38,12 +37,12 @@ class context_service
   : private boost::noncopyable
 {
 public:
-  /// The demuxer type for this service.
-  typedef basic_demuxer<demuxer_service<Allocator> > demuxer_type;
+  /// The io_service type for this service.
+  typedef basic_io_service<Allocator> io_service_type;
 
 private:
   // The type of the platform-specific implementation.
-  typedef detail::openssl_context_service<demuxer_type> service_impl_type;
+  typedef detail::openssl_context_service<io_service_type> service_impl_type;
 
 public:
   /// The type of the context.
@@ -54,15 +53,16 @@ public:
 #endif
 
   /// Constructor.
-  explicit context_service(demuxer_type& demuxer)
-    : service_impl_(demuxer.get_service(service_factory<service_impl_type>()))
+  explicit context_service(io_service_type& io_service)
+    : service_impl_(io_service.get_service(
+          service_factory<service_impl_type>()))
   {
   }
 
-  /// Get the demuxer associated with the service.
-  demuxer_type& demuxer()
+  /// Get the io_service associated with the service.
+  io_service_type& io_service()
   {
-    return service_impl_.demuxer();
+    return service_impl_.io_service();
   }
 
   /// Return a null context implementation.
@@ -165,6 +165,6 @@ private:
 } // namespace ssl
 } // namespace asio
 
-#include "asio/detail/pop_options.hpp"
+#include <boost/asio/detail/pop_options.hpp>
 
 #endif // ASIO_SSL_CONTEXT_SERVICE_HPP

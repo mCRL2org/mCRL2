@@ -13,9 +13,9 @@ namespace transport {
   namespace transceiver {
 
     /**
-     * \brief Basic wrapper around an asio demuxer
+     * \brief Basic wrapper around an asio io_service
      *
-     * The demuxer is the scheduler it responds to incoming events and
+     * The io_service is the scheduler it responds to incoming events and
      * dispatches tasks (through handler functions) accordingly.
      **/
     class socket_scheduler {
@@ -26,8 +26,8 @@ namespace transport {
         /** \brief The current state of the scheduler */
         bool                               active;
 
-        /** \brief The demuxer */
-        asio::demuxer                      demuxer;
+        /** \brief The io_service */
+        asio::io_service                   io_service;
 
         /** \brief This lock is used to ensure that switching between states active or shutdown is atomic */
         boost::mutex                       run_lock;
@@ -42,10 +42,10 @@ namespace transport {
         /** \brief Constructor */
         inline socket_scheduler();
 
-        /** \brief Run the demuxer */
+        /** \brief Run the io_service */
         inline void run();
 
-        /** \brief Stop the demuxer */
+        /** \brief Stop the io_service */
         inline void stop();
 
         /** \brief Destructor */
@@ -56,11 +56,11 @@ namespace transport {
     }
 
     inline void socket_scheduler::task() {
-      demuxer.run();
+      io_service.run();
 
       boost::mutex::scoped_lock l(run_lock);
 
-      demuxer.reset();
+      io_service.reset();
 
       active = false;
     }
@@ -81,7 +81,7 @@ namespace transport {
       boost::mutex::scoped_lock l(run_lock);
 
       if (active) {
-        demuxer.interrupt();
+        io_service.interrupt();
 
         active = false;
       }

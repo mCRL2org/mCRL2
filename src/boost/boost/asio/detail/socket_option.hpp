@@ -2,7 +2,7 @@
 // socket_option.hpp
 // ~~~~~~~~~~~~~~~~~
 //
-// Copyright (c) 2003-2005 Christopher M. Kohlhoff (chris at kohlhoff dot com)
+// Copyright (c) 2003-2006 Christopher M. Kohlhoff (chris at kohlhoff dot com)
 //
 // Distributed under the Boost Software License, Version 1.0. (See accompanying
 // file LICENSE_1_0.txt or copy at http://www.boost.org/LICENSE_1_0.txt)
@@ -152,6 +152,69 @@ public:
 
 private:
   int value_;
+};
+
+// Helper template for implementing unsigned integer options.
+template <int Level, int Name>
+class unsigned_integer
+{
+public:
+  // Default constructor.
+  unsigned_integer()
+    : value_(0)
+  {
+  }
+
+  // Construct with a specific option value.
+  unsigned_integer(unsigned int value)
+    : value_(value)
+  {
+  }
+
+  // Get the level of the socket option.
+  int level() const
+  {
+    return Level;
+  }
+
+  // Get the name of the socket option.
+  int name() const
+  {
+    return Name;
+  }
+
+  // Set the value of the int option.
+  void set(unsigned int value)
+  {
+    value_ = value;
+  }
+
+  // Get the current value of the int option.
+  unsigned int get() const
+  {
+    return value_;
+  }
+
+  // Get the address of the int data.
+  unsigned int* data()
+  {
+    return &value_;
+  }
+
+  // Get the address of the int data.
+  const unsigned int* data() const
+  {
+    return &value_;
+  }
+
+  // Get the size of the int data.
+  std::size_t size() const
+  {
+    return sizeof(value_);
+  }
+
+private:
+  unsigned int value_;
 };
 
 // Helper template for implementing linger options.

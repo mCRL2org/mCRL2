@@ -2,7 +2,7 @@
 // thread.hpp
 // ~~~~~~~~~~
 //
-// Copyright (c) 2003-2005 Christopher M. Kohlhoff (chris at kohlhoff dot com)
+// Copyright (c) 2003-2006 Christopher M. Kohlhoff (chris at kohlhoff dot com)
 //
 // Distributed under the Boost Software License, Version 1.0. (See accompanying
 // file LICENSE_1_0.txt or copy at http://www.boost.org/LICENSE_1_0.txt)
@@ -22,13 +22,11 @@
 #include <boost/asio/detail/pop_options.hpp>
 
 #if !defined(BOOST_HAS_THREADS)
-# error Thread support is required!
-#endif
-
-#if defined(BOOST_WINDOWS)
-# include <boost/asio/detail/win_thread.hpp>
+#include <boost/asio/detail/null_thread.hpp>
+#elif defined(BOOST_WINDOWS)
+#include <boost/asio/detail/win_thread.hpp>
 #elif defined(BOOST_HAS_PTHREADS)
-# include <boost/asio/detail/posix_thread.hpp>
+#include <boost/asio/detail/posix_thread.hpp>
 #else
 # error Only Windows and POSIX are supported!
 #endif
@@ -36,7 +34,9 @@
 namespace asio {
 namespace detail {
 
-#if defined(BOOST_WINDOWS)
+#if !defined(BOOST_HAS_THREADS)
+typedef null_thread thread;
+#elif defined(BOOST_WINDOWS)
 typedef win_thread thread;
 #elif defined(BOOST_HAS_PTHREADS)
 typedef posix_thread thread;

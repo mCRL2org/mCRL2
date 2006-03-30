@@ -52,7 +52,7 @@ namespace transport {
         char*                            buffer;
 
         /** \brief The local endpoint of a connection */
-        asio::stream_socket              socket;
+        asio::ipv4::tcp::socket          socket;
  
         /** \brief Used to make operations: read, write and disconnect mutually exclusive */
         boost::mutex                     operation_lock;
@@ -122,7 +122,7 @@ namespace transport {
     /**
      * @param o a transporter to deliver data to
      **/
-    inline socket_transceiver::socket_transceiver(transporter* o) : basic_transceiver(o), socket(scheduler.demuxer) {
+    inline socket_transceiver::socket_transceiver(transporter* o) : basic_transceiver(o), socket(scheduler.io_service) {
       buffer = new char[input_buffer_size];
     }
 

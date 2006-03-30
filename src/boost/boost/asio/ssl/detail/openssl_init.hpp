@@ -16,15 +16,15 @@
 # pragma once
 #endif // defined(_MSC_VER) && (_MSC_VER >= 1200)
 
-#include "asio/detail/push_options.hpp"
+#include <boost/asio/detail/push_options.hpp>
 
-#include "asio/detail/push_options.hpp"
+#include <boost/asio/detail/push_options.hpp>
 #include <vector>
 #include <boost/shared_ptr.hpp>
-#include "asio/detail/pop_options.hpp"
+#include <boost/asio/detail/pop_options.hpp>
 
-#include "asio/detail/mutex.hpp"
-#include "asio/ssl/detail/openssl_types.hpp"
+#include <boost/asio/detail/mutex.hpp>
+#include <boost/asio/ssl/detail/openssl_types.hpp>
 
 namespace asio {
 namespace ssl {
@@ -117,6 +117,6 @@ openssl_init<Do_Init> openssl_init<Do_Init>::instance_;
 } // namespace ssl
 } // namespace asio
 
-#include "asio/detail/pop_options.hpp"
+#include <boost/asio/detail/pop_options.hpp>
 
 #endif // ASIO_SSL_DETAIL_OPENSSL_INIT_HPP

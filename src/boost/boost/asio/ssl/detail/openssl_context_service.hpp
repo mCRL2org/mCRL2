@@ -16,22 +16,22 @@
 # pragma once
 #endif // defined(_MSC_VER) && (_MSC_VER >= 1200)
 
-#include "asio/detail/push_options.hpp"
+#include <boost/asio/detail/push_options.hpp>
 
-#include "asio/detail/push_options.hpp"
+#include <boost/asio/detail/push_options.hpp>
 #include <string>
-#include "asio/detail/pop_options.hpp"
+#include <boost/asio/detail/pop_options.hpp>
 
-#include "asio/error.hpp"
-#include "asio/ssl/context_base.hpp"
-#include "asio/ssl/detail/openssl_init.hpp"
-#include "asio/ssl/detail/openssl_types.hpp"
+#include <boost/asio/error.hpp>
+#include <boost/asio/ssl/context_base.hpp>
+#include <boost/asio/ssl/detail/openssl_init.hpp>
+#include <boost/asio/ssl/detail/openssl_types.hpp>
 
 namespace asio {
 namespace ssl {
 namespace detail {
 
-template <typename Demuxer>
+template <typename IO_Service>
 class openssl_context_service
 {
 public:
@@ -39,18 +39,18 @@ public:
   typedef ::SSL_CTX* impl_type;
 
   // Constructor.
-  openssl_context_service(Demuxer& d)
-    : demuxer_(d)
+  openssl_context_service(IO_Service& io_service)
+    : io_service_(io_service)
   {
   }
 
-  // The demuxer type for this service.
-  typedef Demuxer demuxer_type;
+  // The io_service type for this service.
+  typedef IO_Service io_service_type;
 
-  // Get the demuxer associated with the service.
-  demuxer_type& demuxer()
+  // Get the io_service associated with the service.
+  io_service_type& io_service()
   {
-    return demuxer_;
+    return io_service_;
   }
 
   // Return a null context implementation.
@@ -291,8 +291,8 @@ public:
   }
 
 private:
-  // The demuxer that owns the service.
-  Demuxer& demuxer_;
+  // The io_service that owns the service.
+  IO_Service& io_service_;
 
   // Ensure openssl is initialised.
   openssl_init<> init_;
@@ -302,6 +302,6 @@ private:
 } // namespace ssl
 } // namespace asio
 
-#include "asio/detail/pop_options.hpp"
+#include <boost/asio/detail/pop_options.hpp>
 
 #endif // ASIO_SSL_DETAIL_OPENSSL_CONTEXT_SERVICE_HPP

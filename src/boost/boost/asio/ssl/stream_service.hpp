@@ -16,20 +16,19 @@
 # pragma once
 #endif // defined(_MSC_VER) && (_MSC_VER >= 1200)
 
-#include "asio/detail/push_options.hpp"
+#include <boost/asio/detail/push_options.hpp>
 
-#include "asio/detail/push_options.hpp"
+#include <boost/asio/detail/push_options.hpp>
 #include <cstddef>
 #include <memory>
 #include <boost/config.hpp>
 #include <boost/noncopyable.hpp>
-#include "asio/detail/pop_options.hpp"
+#include <boost/asio/detail/pop_options.hpp>
 
-#include "asio/basic_demuxer.hpp"
-#include "asio/demuxer_service.hpp"
-#include "asio/ssl/basic_context.hpp"
-#include "asio/ssl/stream_base.hpp"
-#include "asio/ssl/detail/openssl_stream_service.hpp"
+#include <boost/asio/basic_io_service.hpp>
+#include <boost/asio/ssl/basic_context.hpp>
+#include <boost/asio/ssl/stream_base.hpp>
+#include <boost/asio/ssl/detail/openssl_stream_service.hpp>
 
 namespace asio {
 namespace ssl {
@@ -40,8 +39,8 @@ class stream_service
   : private boost::noncopyable
 {
 public:
-  /// The demuxer type.
-  typedef basic_demuxer<demuxer_service<Allocator> > demuxer_type;
+  /// The io_service type.
+  typedef basic_io_service<Allocator> io_service_type;
 
 private:
   // The type of the platform-specific implementation.
@@ -55,16 +54,17 @@ public:
   typedef typename service_impl_type::impl_type impl_type;
 #endif
 
-  /// Construct a new stream service for the specified demuxer.
-  explicit stream_service(demuxer_type& demuxer)
-    : service_impl_(demuxer.get_service(service_factory<service_impl_type>()))
+  /// Construct a new stream service for the specified io_service.
+  explicit stream_service(io_service_type& io_service)
+    : service_impl_(io_service.get_service(
+          service_factory<service_impl_type>()))
   {
   }
 
-  /// Get the demuxer associated with the service.
-  demuxer_type& demuxer()
+  /// Get the io_service associated with the service.
+  io_service_type& io_service()
   {
-    return service_impl_.demuxer();
+    return service_impl_.io_service();
   }
 
   /// Return a null stream implementation.
@@ -175,6 +175,6 @@ private:
 } // namespace ssl
 } // namespace asio
 
-#include "asio/detail/pop_options.hpp"
+#include <boost/asio/detail/pop_options.hpp>
 
 #endif // ASIO_SSL_STREAM_SERVICE_HPP

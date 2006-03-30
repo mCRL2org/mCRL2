@@ -16,16 +16,16 @@
 # pragma once
 #endif // defined(_MSC_VER) && (_MSC_VER >= 1200)
 
-#include "asio/detail/push_options.hpp"
+#include <boost/asio/detail/push_options.hpp>
 
-#include "asio/detail/push_options.hpp"
+#include <boost/asio/detail/push_options.hpp>
 #include <string>
 #include <boost/noncopyable.hpp>
-#include "asio/detail/pop_options.hpp"
+#include <boost/asio/detail/pop_options.hpp>
 
-#include "asio/error_handler.hpp"
-#include "asio/service_factory.hpp"
-#include "asio/ssl/context_base.hpp"
+#include <boost/asio/error_handler.hpp>
+#include <boost/asio/service_factory.hpp>
+#include <boost/asio/ssl/context_base.hpp>
 
 namespace asio {
 namespace ssl {
@@ -43,12 +43,12 @@ public:
   /// The native implementation type of the locking dispatcher.
   typedef typename service_type::impl_type impl_type;
 
-  /// The demuxer type for this context.
-  typedef typename service_type::demuxer_type demuxer_type;
+  /// The io_service type for this context.
+  typedef typename service_type::io_service_type io_service_type;
 
   /// Constructor.
-  basic_context(demuxer_type& d, method m)
-    : service_(d.get_service(service_factory<Service>())),
+  basic_context(io_service_type& io_service, method m)
+    : service_(io_service.get_service(service_factory<Service>())),
       impl_(service_.null())
   {
     service_.create(impl_, m);
@@ -417,6 +417,6 @@ private:
 } // namespace ssl
 } // namespace asio
 
-#include "asio/detail/pop_options.hpp"
+#include <boost/asio/detail/pop_options.hpp>
 
 #endif // ASIO_SSL_BASIC_CONTEXT_HPP

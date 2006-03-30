@@ -2,7 +2,7 @@
 // wrapped_handler.hpp
 // ~~~~~~~~~~~~~~~~~~~
 //
-// Copyright (c) 2003-2005 Christopher M. Kohlhoff (chris at kohlhoff dot com)
+// Copyright (c) 2003-2006 Christopher M. Kohlhoff (chris at kohlhoff dot com)
 //
 // Distributed under the Boost Software License, Version 1.0. (See accompanying
 // file LICENSE_1_0.txt or copy at http://www.boost.org/LICENSE_1_0.txt)
@@ -17,7 +17,25 @@
 
 #include <boost/asio/detail/push_options.hpp>
 
+#include <boost/asio/handler_alloc_hook.hpp>
 #include <boost/asio/detail/bind_handler.hpp>
+
+namespace asio {
+namespace detail {
+
+template <typename Dispatcher, typename Handler>
+class wrapped_handler;
+
+} // namespace detail
+} // namespace asio
+
+namespace asio {
+
+template <typename Dispatcher, typename Handler>
+class handler_alloc_hook<
+  asio::detail::wrapped_handler<Dispatcher, Handler> >;
+
+} // namespace asio
 
 namespace asio {
 namespace detail {
@@ -113,10 +131,36 @@ public:
 private:
   Dispatcher& dispatcher_;
   Handler handler_;
+  friend class asio::handler_alloc_hook<
+    wrapped_handler<Dispatcher, Handler> >;
 };
 
 } // namespace detail
 } // namespace asio
+
+template <typename Dispatcher, typename Handler>
+class asio::handler_alloc_hook<
+  asio::detail::wrapped_handler<Dispatcher, Handler> >
+{
+public:
+  typedef asio::detail::wrapped_handler<Dispatcher, Handler> handler_type;
+
+  template <typename Allocator>
+  static typename Allocator::pointer allocate(handler_type& handler,
+      Allocator& allocator, typename Allocator::size_type count)
+  {
+    return asio::handler_alloc_hook<Handler>::allocate(
+        handler.handler_, allocator, count);
+  }
+
+  template <typename Allocator>
+  static void deallocate(handler_type& handler, Allocator& allocator,
+      typename Allocator::pointer pointer, typename Allocator::size_type count)
+  {
+    return asio::handler_alloc_hook<Handler>::deallocate(
+        handler.handler_, allocator, pointer, count);
+  }
+};
 
 #include <boost/asio/detail/pop_options.hpp>
 

@@ -1,0 +1,39 @@
+#!/bin/bash
+
+if [[ $# != 2 ]]; then
+  echo "Please specify the directory to the asio include tree"
+  exit
+fi
+
+# Should be run from the boost/boost directory
+asio_cvs_root="${1}"
+boost_include="${2}"
+
+echo "Using :"
+echo "  ASIO CVS root : ${1}"
+echo "  BOOST include : ${2}"
+echo ""
+
+conversion_script="/tmp/asio_to_boost"
+
+echo "#!/bin/bash" > ${conversion_script}
+echo "" >> ${conversion_script}
+echo "echo \"   \${1} -> \${2}\"" >> ${conversion_script}
+echo "" >> ${conversion_script}
+echo sed "'s/\#[ ]*include \"\(asio[^\"]*\)\"/\#include <boost\/\1>/' \${1} > \${2}/\$(basename \${1})" >> ${conversion_script}
+
+chmod +x ${conversion_script}
+
+${conversion_script} ${asio_cvs_root}/asio.hpp ${boost_include}
+
+for i in $(find ${asio_cvs_root} -mindepth 1 -type d -not -iname 'CVS'); do
+  directory=$(expr "${i}" : "${asio_cvs_root}/\(.*\)$")
+
+  echo "${boost_include}/${directory}"
+
+  mkdir -p "${boost_include}/${directory}"
+
+  find ${i} -maxdepth 1 -name '*.?pp' -exec ${conversion_script} '{}' "${boost_include}/${directory}" \;
+done
+
+unlink ${conversion_script}

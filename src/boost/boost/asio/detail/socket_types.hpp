@@ -2,7 +2,7 @@
 // socket_types.hpp
 // ~~~~~~~~~~~~~~~~
 //
-// Copyright (c) 2003-2005 Christopher M. Kohlhoff (chris at kohlhoff dot com)
+// Copyright (c) 2003-2006 Christopher M. Kohlhoff (chris at kohlhoff dot com)
 //
 // Distributed under the Boost Software License, Version 1.0. (See accompanying
 // file LICENSE_1_0.txt or copy at http://www.boost.org/LICENSE_1_0.txt)
@@ -35,10 +35,18 @@
 # endif // !defined(_WIN32_WINNT) && !defined(_WIN32_WINDOWS)
 # if defined(__BORLANDC__) && !defined(_WSPIAPI_H_)
 #  include <stdlib.h> // Needed for __errno
+#  if defined(__WIN32__) && !defined(WIN32)
+#   define WIN32 // Needed for correct types in winsock2.h
+#  endif // defined(__WIN32__) && !defined(WIN32)
 #  define _WSPIAPI_H_
 #  define ASIO_WSPIAPI_H_DEFINED
 # endif // defined(__BORLANDC__) && !defined(_WSPIAPI_H_)
 # define FD_SETSIZE 1024
+# if !defined(ASIO_NO_WIN32_LEAN_AND_MEAN)
+#  if !defined(WIN32_LEAN_AND_MEAN)
+#   define WIN32_LEAN_AND_MEAN
+#  endif // !defined(WIN32_LEAN_AND_MEAN)
+# endif // !defined(ASIO_NO_WIN32_LEAN_AND_MEAN)
 # include <winsock2.h>
 # include <ws2tcpip.h>
 # include <mswsock.h>
@@ -52,6 +60,7 @@
 # endif // defined(_MSC_VER) || defined(__BORLANDC__)
 #else
 # include <sys/ioctl.h>
+# include <sys/poll.h>
 # include <sys/types.h>
 # include <sys/select.h>
 # include <sys/socket.h>
@@ -60,6 +69,7 @@
 # include <netinet/tcp.h>
 # include <arpa/inet.h>
 # include <netdb.h>
+# include <net/if.h>
 # if defined(__sun)
 #  include <sys/filio.h>
 # endif
@@ -73,9 +83,12 @@ namespace detail {
 typedef SOCKET socket_type;
 const SOCKET invalid_socket = INVALID_SOCKET;
 const int socket_error_retval = SOCKET_ERROR;
-const int max_addr_str_len = 256;
+const int max_addr_v4_str_len = 256;
+const int max_addr_v6_str_len = 256;
 typedef sockaddr socket_addr_type;
 typedef sockaddr_in inet_addr_v4_type;
+typedef sockaddr_in6 inet_addr_v6_type;
+typedef sockaddr_storage inet_addr_storage_type;
 typedef int socket_addr_len_type;
 typedef unsigned long ioctl_arg_type;
 typedef u_long u_long_type;
@@ -90,9 +103,12 @@ const int message_do_not_route = MSG_DONTROUTE;
 typedef int socket_type;
 const int invalid_socket = -1;
 const int socket_error_retval = -1;
-const int max_addr_str_len = INET_ADDRSTRLEN;
+const int max_addr_v4_str_len = INET_ADDRSTRLEN;
+const int max_addr_v6_str_len = INET6_ADDRSTRLEN + 1 + IF_NAMESIZE;
 typedef sockaddr socket_addr_type;
 typedef sockaddr_in inet_addr_v4_type;
+typedef sockaddr_in6 inet_addr_v6_type;
+typedef sockaddr_storage inet_addr_storage_type;
 typedef socklen_t socket_addr_len_type;
 typedef int ioctl_arg_type;
 typedef uint32_t u_long_type;

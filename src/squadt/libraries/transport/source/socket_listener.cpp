@@ -14,14 +14,14 @@ namespace transport {
      * @param p the port to listen on
      **/
     socket_listener::socket_listener(transporter& m, const address& a, const long p) :
-      basic_listener(m), acceptor(socket_transceiver::scheduler.demuxer), dispatcher(socket_transceiver::scheduler.demuxer) {
+      basic_listener(m), acceptor(socket_transceiver::scheduler.io_service), dispatcher(socket_transceiver::scheduler.io_service) {
       using namespace asio;
       using namespace boost;
 
       ipv4::tcp::endpoint endpoint((p == 0) ? socket_transceiver::default_port : p, ipv4::address(a));
 
       acceptor.open(endpoint.protocol());
-      acceptor.set_option(socket_acceptor::reuse_address(true));
+      acceptor.set_option(socket_base::reuse_address(true));
       acceptor.bind(endpoint);
       acceptor.listen();
     }

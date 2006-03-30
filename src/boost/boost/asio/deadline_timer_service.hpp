@@ -2,7 +2,7 @@
 // deadline_timer_service.hpp
 // ~~~~~~~~~~~~~~~~~~~~~~~~~~
 //
-// Copyright (c) 2003-2005 Christopher M. Kohlhoff (chris at kohlhoff dot com)
+// Copyright (c) 2003-2006 Christopher M. Kohlhoff (chris at kohlhoff dot com)
 //
 // Distributed under the Boost Software License, Version 1.0. (See accompanying
 // file LICENSE_1_0.txt or copy at http://www.boost.org/LICENSE_1_0.txt)
@@ -26,15 +26,13 @@
 #include <boost/date_time/posix_time/posix_time_types.hpp>
 #include <boost/asio/detail/pop_options.hpp>
 
-#include <boost/asio/basic_demuxer.hpp>
-#include <boost/asio/demuxer_service.hpp>
+#include <boost/asio/basic_io_service.hpp>
 #include <boost/asio/time_traits.hpp>
 #include <boost/asio/detail/epoll_reactor.hpp>
 #include <boost/asio/detail/kqueue_reactor.hpp>
 #include <boost/asio/detail/noncopyable.hpp>
 #include <boost/asio/detail/select_reactor.hpp>
 #include <boost/asio/detail/reactive_deadline_timer_service.hpp>
-#include <boost/asio/detail/win_iocp_demuxer_service.hpp>
 
 namespace asio {
 
@@ -46,8 +44,8 @@ class deadline_timer_service
   : private noncopyable
 {
 public:
-  /// The demuxer type.
-  typedef basic_demuxer<demuxer_service<Allocator> > demuxer_type;
+  /// The io_service type.
+  typedef basic_io_service<Allocator> io_service_type;
 
   /// The time traits type.
   typedef Time_Traits traits_type;
@@ -60,97 +58,94 @@ public:
 
 private:
   // The type of the platform-specific implementation.
-#if defined(ASIO_HAS_IOCP_DEMUXER)
-  typedef detail::reactive_deadline_timer_service<demuxer_type,
-    traits_type, detail::select_reactor<true> > service_impl_type;
-#elif defined(ASIO_HAS_EPOLL_REACTOR)
-  typedef detail::reactive_deadline_timer_service<demuxer_type,
-    traits_type, detail::epoll_reactor<false> > service_impl_type;
-#elif defined(ASIO_HAS_KQUEUE_REACTOR)
-  typedef detail::reactive_deadline_timer_service<demuxer_type,
-    traits_type, detail::kqueue_reactor<false> > service_impl_type;
+#if defined(ASIO_HAS_IOCP)
+  typedef detail::reactive_deadline_timer_service<io_service_type,
+    traits_type, detail::select_reactor<true, Allocator> > service_impl_type;
+#elif defined(ASIO_HAS_EPOLL)
+  typedef detail::reactive_deadline_timer_service<io_service_type,
+    traits_type, detail::epoll_reactor<false, Allocator> > service_impl_type;
+#elif defined(ASIO_HAS_KQUEUE)
+  typedef detail::reactive_deadline_timer_service<io_service_type,
+    traits_type, detail::kqueue_reactor<false, Allocator> > service_impl_type;
 #else
-  typedef detail::reactive_deadline_timer_service<demuxer_type,
-    traits_type, detail::select_reactor<false> > service_impl_type;
+  typedef detail::reactive_deadline_timer_service<io_service_type,
+    traits_type, detail::select_reactor<false, Allocator> > service_impl_type;
 #endif
 
 public:
   /// The native type of the deadline timer.
 #if defined(GENERATING_DOCUMENTATION)
-  typedef implementation_defined impl_type;
+  typedef implementation_defined implementation_type;
 #else
-  typedef typename service_impl_type::impl_type impl_type;
+  typedef typename service_impl_type::implementation_type implementation_type;
 #endif
 
-  /// Construct a new timer service for the specified demuxer.
-  explicit deadline_timer_service(demuxer_type& demuxer)
-    : service_impl_(demuxer.get_service(service_factory<service_impl_type>()))
+  /// Construct a new timer service for the specified io_service.
+  explicit deadline_timer_service(io_service_type& io_service)
+    : service_impl_(io_service.get_service(
+          service_factory<service_impl_type>()))
   {
   }
 
-  /// Get the demuxer associated with the service.
-  demuxer_type& demuxer()
+  /// Get the io_service associated with the service.
+  io_service_type& io_service()
   {
-    return service_impl_.demuxer();
+    return service_impl_.io_service();
   }
 
-  /// Return a null timer implementation.
-  impl_type null() const
+  /// Construct a new timer implementation.
+  void construct(implementation_type& impl)
   {
-    return service_impl_.null();
-  }
-
-  /// Create a new timer implementation.
-  void create(impl_type& impl)
-  {
-    service_impl_.create(impl);
+    service_impl_.construct(impl);
   }
 
   /// Destroy a timer implementation.
-  void destroy(impl_type& impl)
+  void destroy(implementation_type& impl)
   {
     service_impl_.destroy(impl);
   }
 
+  /// Cancel any asynchronous wait operations associated with the timer.
+  std::size_t cancel(implementation_type& impl)
+  {
+    return service_impl_.cancel(impl);
+  }
+
   /// Get the expiry time for the timer as an absolute time.
-  time_type expires_at(const impl_type& impl) const
+  time_type expires_at(const implementation_type& impl) const
   {
     return service_impl_.expires_at(impl);
   }
 
   /// Set the expiry time for the timer as an absolute time.
-  void expires_at(impl_type& impl, const time_type& expiry_time)
+  std::size_t expires_at(implementation_type& impl,
+      const time_type& expiry_time)
   {
-    service_impl_.expires_at(impl, expiry_time);
+    return service_impl_.expires_at(impl, expiry_time);
   }
 
   /// Get the expiry time for the timer relative to now.
-  duration_type expires_from_now(const impl_type& impl) const
+  duration_type expires_from_now(const implementation_type& impl) const
   {
     return service_impl_.expires_from_now(impl);
   }
 
   /// Set the expiry time for the timer relative to now.
-  void expires_from_now(impl_type& impl, const duration_type& expiry_time)
+  std::size_t expires_from_now(implementation_type& impl,
+      const duration_type& expiry_time)
   {
-    service_impl_.expires_from_now(impl, expiry_time);
-  }
-
-  /// Cancel any asynchronous wait operations associated with the timer.
-  std::size_t cancel(impl_type& impl)
-  {
-    return service_impl_.cancel(impl);
+    return service_impl_.expires_from_now(impl, expiry_time);
   }
 
   // Perform a blocking wait on the timer.
-  void wait(impl_type& impl)
+  void wait(implementation_type& impl)
   {
     service_impl_.wait(impl);
   }
 
   // Start an asynchronous wait on the timer.
   template <typename Handler>
-  void async_wait(impl_type& impl, Handler handler)
+  void async_wait(implementation_type& impl, Handler handler)
   {
     service_impl_.async_wait(impl, handler);
   }

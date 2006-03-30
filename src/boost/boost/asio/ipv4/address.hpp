@@ -2,7 +2,7 @@
 // address.hpp
 // ~~~~~~~~~~~
 //
-// Copyright (c) 2003-2005 Christopher M. Kohlhoff (chris at kohlhoff dot com)
+// Copyright (c) 2003-2006 Christopher M. Kohlhoff (chris at kohlhoff dot com)
 //
 // Distributed under the Boost Software License, Version 1.0. (See accompanying
 // file LICENSE_1_0.txt or copy at http://www.boost.org/LICENSE_1_0.txt)
@@ -19,10 +19,12 @@
 
 #include <boost/asio/detail/push_options.hpp>
 #include <string>
+#include <boost/array.hpp>
 #include <boost/throw_exception.hpp>
 #include <boost/asio/detail/pop_options.hpp>
 
 #include <boost/asio/error.hpp>
+#include <boost/asio/error_handler.hpp>
 #include <boost/asio/detail/socket_ops.hpp>
 #include <boost/asio/detail/socket_types.hpp>
 
@@ -41,10 +43,20 @@ namespace ipv4 {
 class address
 {
 public:
+  /// The type used to represent an address as an array of bytes.
+  typedef boost::array<unsigned char, 4> bytes_type;
+
   /// Default constructor.
   address()
   {
     addr_.s_addr = 0;
+  }
+
+  /// Construct an address from raw bytes.
+  address(const bytes_type& bytes)
+  {
+    using namespace std; // For memcpy.
+    memcpy(&addr_.s_addr, bytes.elems, 4);
   }
 
   /// Construct an address from a unsigned long in host byte order.
@@ -64,6 +76,17 @@ public:
   }
 
   /// Construct an address using an IP address string in dotted decimal form.
+  template <typename Error_Handler>
+  address(const char* host, Error_Handler error_handler)
+  {
+    if (asio::detail::socket_ops::inet_pton(AF_INET, host, &addr_) <= 0)
+    {
+      asio::error e(asio::detail::socket_ops::get_error());
+      error_handler(e);
+    }
+  }
+
+  /// Construct an address using an IP address string in dotted decimal form.
   address(const std::string& host)
   {
     if (asio::detail::socket_ops::inet_pton(
@@ -71,6 +94,18 @@ public:
     {
       asio::error e(asio::detail::socket_ops::get_error());
       boost::throw_exception(e);
+    }
+  }
+
+  /// Construct an address using an IP address string in dotted decimal form.
+  template <typename Error_Handler>
+  address(const std::string& host, Error_Handler error_handler)
+  {
+    if (asio::detail::socket_ops::inet_pton(
+          AF_INET, host.c_str(), &addr_) <= 0)
+    {
+      asio::error e(asio::detail::socket_ops::get_error());
+      error_handler(e);
     }
   }
 
@@ -110,6 +145,15 @@ public:
     return *this;
   }
 
+  /// Get the address in bytes.
+  bytes_type to_bytes() const
+  {
+    using namespace std; // For memcpy.
+    bytes_type bytes;
+    memcpy(bytes.elems, &addr_.s_addr, 4);
+    return bytes;
+  }
+
   /// Get the address as an unsigned long in host byte order
   unsigned long to_ulong() const
   {
@@ -119,14 +163,22 @@ public:
   /// Get the address as a string in dotted decimal format.
   std::string to_string() const
   {
-    char addr_str[asio::detail::max_addr_str_len];
+    return to_string(asio::throw_error());
+  }
+
+  /// Get the address as a string in dotted decimal format.
+  template <typename Error_Handler>
+  std::string to_string(Error_Handler error_handler) const
+  {
+    char addr_str[asio::detail::max_addr_v4_str_len];
     const char* addr =
       asio::detail::socket_ops::inet_ntop(AF_INET, &addr_, addr_str,
-          asio::detail::max_addr_str_len);
+          asio::detail::max_addr_v4_str_len);
     if (addr == 0)
     {
       asio::error e(asio::detail::socket_ops::get_error());
-      boost::throw_exception(e);
+      error_handler(e);
+      return std::string();
     }
     return addr;
   }

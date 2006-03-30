@@ -12,7 +12,7 @@ namespace transport {
 
     socket_scheduler          socket_transceiver::scheduler;
 
-    asio::ipv4::host_resolver socket_transceiver::resolver(scheduler.demuxer);
+    asio::ipv4::host_resolver socket_transceiver::resolver(scheduler.io_service);
 
     long socket_transceiver::default_port = 10946;
 
@@ -82,7 +82,7 @@ namespace transport {
       if (w.get() != 0) {
         asio::ipv4::host host;
 
-        resolver.get_host_by_name(host, h);
+        resolver.by_name(host, h);
 
         connect(host.address(0), p, w);
       }
@@ -92,7 +92,7 @@ namespace transport {
       if (w.get() != 0) {
         boost::mutex::scoped_lock l(operation_lock);
 
-        socket.shutdown(asio::stream_socket::shutdown_both);
+        socket.shutdown(asio::ipv4::tcp::socket::shutdown_both);
         socket.close();
 
         basic_transceiver::handle_disconnect(this);
@@ -102,7 +102,7 @@ namespace transport {
     socket_transceiver::host socket_transceiver::get_local_host() {
       asio::ipv4::host h;
 
-      resolver.get_local_host(h);
+      resolver.local(h);
 
       return (h);
     }

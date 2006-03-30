@@ -14,15 +14,19 @@ namespace transport {
 
     class socket_listener : public basic_listener {
       public:
+
         /** Convenience type */
         typedef asio::ipv4::address address;
 
       private:
+
         /** \brief The socket listener */
-        asio::socket_acceptor    acceptor;
+        asio::ipv4::tcp::acceptor   acceptor;
 
         /** \brief For mutual exclusive event handling */
-        asio::locking_dispatcher dispatcher;
+        asio::locking_dispatcher    dispatcher;
+
+      private:
 
         /** \brief Handler for incoming socket connections */
         void handle_accept(const asio::error&, transceiver::socket_transceiver::ptr, basic_listener::ptr);

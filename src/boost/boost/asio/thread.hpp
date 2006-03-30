@@ -2,7 +2,7 @@
 // thread.hpp
 // ~~~~~~~~~~
 //
-// Copyright (c) 2003-2005 Christopher M. Kohlhoff (chris at kohlhoff dot com)
+// Copyright (c) 2003-2006 Christopher M. Kohlhoff (chris at kohlhoff dot com)
 //
 // Distributed under the Boost Software License, Version 1.0. (See accompanying
 // file LICENSE_1_0.txt or copy at http://www.boost.org/LICENSE_1_0.txt)
@@ -34,13 +34,13 @@ namespace asio {
  * @e Shared @e objects: Unsafe.
  *
  * @par Example:
- * A typical use of asio::thread would be to launch a thread to run a demuxer's
- * event processing loop:
+ * A typical use of asio::thread would be to launch a thread to run an
+ * io_service's event processing loop:
  *
  * @par
- * @code asio::demuxer d;
+ * @code asio::io_service io_service;
  * // ...
- * asio::thread t(boost::bind(&asio::demuxer::run, &d));
+ * asio::thread t(boost::bind(&asio::io_service::run, &io_service));
  * // ...
  * t.join(); @endcode
  */

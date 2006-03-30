@@ -2,7 +2,7 @@
 // locking_dispatcher.hpp
 // ~~~~~~~~~~~~~~~~~~~~~~
 //
-// Copyright (c) 2003-2005 Christopher M. Kohlhoff (chris at kohlhoff dot com)
+// Copyright (c) 2003-2006 Christopher M. Kohlhoff (chris at kohlhoff dot com)
 //
 // Distributed under the Boost Software License, Version 1.0. (See accompanying
 // file LICENSE_1_0.txt or copy at http://www.boost.org/LICENSE_1_0.txt)
@@ -18,13 +18,12 @@
 #include <boost/asio/detail/push_options.hpp>
 
 #include <boost/asio/basic_locking_dispatcher.hpp>
-#include <boost/asio/locking_dispatcher_service.hpp>
+#include <boost/asio/io_service.hpp>
 
 namespace asio {
 
 /// Typedef for the typical usage of locking_dispatcher.
-typedef basic_locking_dispatcher<locking_dispatcher_service<> >
-  locking_dispatcher;
+typedef basic_locking_dispatcher<io_service> locking_dispatcher;
 
 } // namespace asio
 

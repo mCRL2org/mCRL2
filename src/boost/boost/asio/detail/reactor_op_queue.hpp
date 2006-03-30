@@ -2,7 +2,7 @@
 // reactor_op_queue.hpp
 // ~~~~~~~~~~~~~~~~~~~~
 //
-// Copyright (c) 2003-2005 Christopher M. Kohlhoff (chris at kohlhoff dot com)
+// Copyright (c) 2003-2006 Christopher M. Kohlhoff (chris at kohlhoff dot com)
 //
 // Distributed under the Boost Software License, Version 1.0. (See accompanying
 // file LICENSE_1_0.txt or copy at http://www.boost.org/LICENSE_1_0.txt)
@@ -36,7 +36,8 @@ public:
   // Constructor.
   reactor_op_queue()
     : operations_(),
-      cancelled_operations_(0)
+      cancelled_operations_(0),
+      cleanup_operations_(0)
   {
   }
 
@@ -104,18 +105,32 @@ public:
     typename operation_map::iterator i = operations_.find(descriptor);
     if (i != operations_.end())
     {
-      op_base* next_op = i->second->next_;
-      i->second->next_ = 0;
-      i->second->invoke(result);
-      if (next_op)
+      op_base* this_op = i->second;
+      i->second = this_op->next_;
+      this_op->next_ = cleanup_operations_;
+      cleanup_operations_ = this_op;
+      bool done = this_op->invoke(result);
+      if (done)
       {
-        i->second = next_op;
-        return true;
+        // Operation has finished.
+        if (i->second)
+        {
+          return true;
+        }
+        else
+        {
+          operations_.erase(i);
+          return false;
+        }
       }
       else
       {
-        operations_.erase(i);
-        return false;
+        // Operation wants to be called again. Leave it at the front of the
+        // queue for this descriptor, and remove from the cleanup list.
+        cleanup_operations_ = this_op->next_;
+        this_op->next_ = i->second;
+        i->second = this_op;
+        return true;
       }
     }
     return false;
@@ -127,14 +142,23 @@ public:
     typename operation_map::iterator i = operations_.find(descriptor);
     if (i != operations_.end())
     {
-      op_base* op = i->second;
-      operations_.erase(i);
-      while (op)
+      while (i->second)
       {
-        op_base* next_op = op->next_;
-        op->next_ = 0;
-        op->invoke(result);
-        op = next_op;
+        op_base* this_op = i->second;
+        i->second = this_op->next_;
+        this_op->next_ = cleanup_operations_;
+        cleanup_operations_ = this_op;
+        bool done = i->second->invoke(result);
+        if (!done)
+        {
+          // Operation has not finished yet, so leave at front of queue, and
+          // remove from the cleanup list.
+          cleanup_operations_ = this_op->next_;
+          this_op->next_ = i->second;
+          i->second = this_op;
+          return;
+        }
+        operations_.erase(i);
       }
     }
   }
@@ -160,16 +184,27 @@ public:
     typename operation_map::iterator i = operations_.begin();
     while (i != operations_.end())
     {
-      typename operation_map::iterator op = i++;
-      if (descriptors.is_set(op->first))
+      typename operation_map::iterator op_iter = i++;
+      if (descriptors.is_set(op_iter->first))
       {
-        op_base* next_op = op->second->next_;
-        op->second->next_ = 0;
-        op->second->invoke(result);
-        if (next_op)
-          op->second = next_op;
+        op_base* this_op = op_iter->second;
+        op_iter->second = this_op->next_;
+        this_op->next_ = cleanup_operations_;
+        cleanup_operations_ = this_op;
+        bool done = this_op->invoke(result);
+        if (done)
+        {
+          if (!op_iter->second)
+            operations_.erase(op_iter);
+        }
         else
-          operations_.erase(op);
+        {
+          // Operation has not finished yet, so leave at front of queue, and
+          // remove from the cleanup list.
+          cleanup_operations_ = this_op->next_;
+          this_op->next_ = op_iter->second;
+          op_iter->second = this_op;
+        }
       }
     }
   }
@@ -179,10 +214,23 @@ public:
   {
     while (cancelled_operations_)
     {
-      op_base* next_op = cancelled_operations_->next_;
-      cancelled_operations_->next_ = 0;
-      cancelled_operations_->invoke(asio::error::operation_aborted);
-      cancelled_operations_ = next_op;
+      op_base* this_op = cancelled_operations_;
+      cancelled_operations_ = this_op->next_;
+      this_op->next_ = cleanup_operations_;
+      cleanup_operations_ = this_op;
+      this_op->invoke(asio::error::operation_aborted);
+    }
+  }
+
+  // Destroy operations that are waiting to be cleaned up.
+  void cleanup_operations()
+  {
+    while (cleanup_operations_)
+    {
+      op_base* next_op = cleanup_operations_->next_;
+      cleanup_operations_->next_ = 0;
+      cleanup_operations_->destroy();
+      cleanup_operations_ = next_op;
     }
   }
 
@@ -199,17 +247,26 @@ private:
     }
 
     // Perform the operation.
-    void invoke(int result)
+    bool invoke(int result)
     {
-      func_(this, result);
+      return invoke_func_(this, result);
+    }
+
+    // Destroy the operation.
+    void destroy()
+    {
+      return destroy_func_(this);
     }
 
   protected:
-    typedef void (*func_type)(op_base*, int);
+    typedef bool (*invoke_func_type)(op_base*, int);
+    typedef void (*destroy_func_type)(op_base*);
 
     // Construct an operation for the given descriptor.
-    op_base(func_type func, Descriptor descriptor)
-      : func_(func),
+    op_base(invoke_func_type invoke_func,
+        destroy_func_type destroy_func, Descriptor descriptor)
+      : invoke_func_(invoke_func),
+        destroy_func_(destroy_func),
         descriptor_(descriptor),
         next_(0)
     {
@@ -224,7 +281,10 @@ private:
     friend class reactor_op_queue<Descriptor>;
 
     // The function to be called to dispatch the handler.
-    func_type func_;
+    invoke_func_type invoke_func_;
+
+    // The function to be called to delete the handler.
+    destroy_func_type destroy_func_;
 
     // The descriptor associated with the operation.
     Descriptor descriptor_;
@@ -241,16 +301,22 @@ private:
   public:
     // Constructor.
     op(Descriptor descriptor, Handler handler)
-      : op_base(&op<Handler>::invoke_handler, descriptor),
+      : op_base(&op<Handler>::invoke_handler,
+          &op<Handler>::destroy_handler, descriptor),
         handler_(handler)
     {
     }
 
     // Invoke the handler.
-    static void invoke_handler(op_base* base, int result)
+    static bool invoke_handler(op_base* base, int result)
     {
-      std::auto_ptr<op<Handler> > o(static_cast<op<Handler>*>(base));
-      o->handler_(result);
+      return static_cast<op<Handler>*>(base)->handler_(result);
+    }
+
+    // Delete the handler.
+    static void destroy_handler(op_base* base)
+    {
+      delete static_cast<op<Handler>*>(base);
     }
 
   private:
@@ -265,6 +331,9 @@ private:
 
   // The list of operations that have been cancelled.
   op_base* cancelled_operations_;
+
+  // The list of operations to be destroyed.
+  op_base* cleanup_operations_;
 };
 
 } // namespace detail

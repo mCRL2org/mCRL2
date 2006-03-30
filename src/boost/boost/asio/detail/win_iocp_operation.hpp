@@ -2,7 +2,7 @@
 // win_iocp_operation.hpp
 // ~~~~~~~~~~~~~~~~~~~~~~
 //
-// Copyright (c) 2003-2005 Christopher M. Kohlhoff (chris at kohlhoff dot com)
+// Copyright (c) 2003-2006 Christopher M. Kohlhoff (chris at kohlhoff dot com)
 //
 // Distributed under the Boost Software License, Version 1.0. (See accompanying
 // file LICENSE_1_0.txt or copy at http://www.boost.org/LICENSE_1_0.txt)
@@ -30,18 +30,18 @@
 namespace asio {
 namespace detail {
 
-class win_iocp_demuxer_service;
-
 // Base class for all IOCP operations. A function pointer is used instead of
 // virtual functions to avoid the associated overhead.
 //
 // This class inherits from OVERLAPPED so that we can downcast to get back to
 // the win_iocp_operation pointer from the LPOVERLAPPED out parameter of
 // GetQueuedCompletionStatus.
+template <typename Allocator>
 struct win_iocp_operation
   : public OVERLAPPED
 {
-  typedef void (*func_type)(win_iocp_operation*, DWORD, size_t);
+  typedef void (*func_type)(win_iocp_operation<Allocator>*,
+      DWORD, size_t, const Allocator&);
 
   win_iocp_operation(func_type func)
     : func_(func)
@@ -53,9 +53,10 @@ struct win_iocp_operation
     hEvent = 0;
   }
 
-  void do_completion(DWORD last_error, size_t bytes_transferred)
+  void do_completion(DWORD last_error, size_t bytes_transferred,
+      const Allocator& allocator)
   {
-    func_(this, last_error, bytes_transferred);
+    func_(this, last_error, bytes_transferred, allocator);
   }
 
 protected:

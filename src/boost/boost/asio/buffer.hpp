@@ -2,7 +2,7 @@
 // buffer.hpp
 // ~~~~~~~~~~
 //
-// Copyright (c) 2003-2005 Christopher M. Kohlhoff (chris at kohlhoff dot com)
+// Copyright (c) 2003-2006 Christopher M. Kohlhoff (chris at kohlhoff dot com)
 //
 // Distributed under the Boost Software License, Version 1.0. (See accompanying
 // file LICENSE_1_0.txt or copy at http://www.boost.org/LICENSE_1_0.txt)
@@ -39,8 +39,8 @@ std::size_t buffer_size_helper(const const_buffer&);
 
 /// Holds a buffer that can be modified.
 /**
- * The const_buffer class provides a safe representation of a buffer that can be
- * modified. It does not own the underlying data, and so is cheap to copy or
+ * The mutable_buffer class provides a safe representation of a buffer that can
+ * be modified. It does not own the underlying data, and so is cheap to copy or
  * assign.
  */
 class mutable_buffer
@@ -514,8 +514,8 @@ inline const_buffer_container_1 buffer(boost::array<const Pod_Type, N>& data,
  * @note The buffer is invalidated by any vector operation that would also
  * invalidate iterators.
  */
-template <typename Pod_Type>
-inline mutable_buffer_container_1 buffer(std::vector<Pod_Type>& data)
+template <typename Pod_Type, typename Allocator>
+inline mutable_buffer_container_1 buffer(std::vector<Pod_Type, Allocator>& data)
 {
   return mutable_buffer_container_1(
       mutable_buffer(&data[0], data.size() * sizeof(Pod_Type)));
@@ -526,8 +526,8 @@ inline mutable_buffer_container_1 buffer(std::vector<Pod_Type>& data)
  * @note The buffer is invalidated by any vector operation that would also
  * invalidate iterators.
  */
-template <typename Pod_Type>
-inline mutable_buffer_container_1 buffer(std::vector<Pod_Type>& data,
+template <typename Pod_Type, typename Allocator>
+inline mutable_buffer_container_1 buffer(std::vector<Pod_Type, Allocator>& data,
     std::size_t max_size_in_bytes)
 {
   return mutable_buffer_container_1(
@@ -541,8 +541,9 @@ inline mutable_buffer_container_1 buffer(std::vector<Pod_Type>& data,
  * @note The buffer is invalidated by any vector operation that would also
  * invalidate iterators.
  */
-template <typename Pod_Type>
-inline const_buffer_container_1 buffer(const std::vector<Pod_Type>& data)
+template <typename Pod_Type, typename Allocator>
+inline const_buffer_container_1 buffer(
+    const std::vector<Pod_Type, Allocator>& data)
 {
   return const_buffer_container_1(
       const_buffer(&data[0], data.size() * sizeof(Pod_Type)));
@@ -553,36 +554,9 @@ inline const_buffer_container_1 buffer(const std::vector<Pod_Type>& data)
  * @note The buffer is invalidated by any vector operation that would also
  * invalidate iterators.
  */
-template <typename Pod_Type>
-inline const_buffer_container_1 buffer(const std::vector<Pod_Type>& data,
-    std::size_t max_size_in_bytes)
-{
-  return const_buffer_container_1(
-      const_buffer(&data[0],
-        data.size() * sizeof(Pod_Type) < max_size_in_bytes
-        ? data.size() * sizeof(Pod_Type) : max_size_in_bytes));
-}
-
-/// Create a new non-modifiable buffer that represents the given POD vector.
-/**
- * @note The buffer is invalidated by any vector operation that would also
- * invalidate iterators.
- */
-template <typename Pod_Type>
-inline const_buffer_container_1 buffer(std::vector<const Pod_Type>& data)
-{
-  return const_buffer_container_1(
-      const_buffer(&data[0], data.size() * sizeof(Pod_Type)));
-}
-
-/// Create a new non-modifiable buffer that represents the given POD vector.
-/**
- * @note The buffer is invalidated by any vector operation that would also
- * invalidate iterators.
- */
-template <typename Pod_Type>
-inline const_buffer_container_1 buffer(std::vector<const Pod_Type>& data,
-    std::size_t max_size_in_bytes)
+template <typename Pod_Type, typename Allocator>
+inline const_buffer_container_1 buffer(
+    const std::vector<Pod_Type, Allocator>& data, std::size_t max_size_in_bytes)
 {
   return const_buffer_container_1(
       const_buffer(&data[0],

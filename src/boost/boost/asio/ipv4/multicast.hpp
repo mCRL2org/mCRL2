@@ -2,7 +2,7 @@
 // multicast.hpp
 // ~~~~~~~~~~~~~
 //
-// Copyright (c) 2003-2005 Christopher M. Kohlhoff (chris at kohlhoff dot com)
+// Copyright (c) 2003-2006 Christopher M. Kohlhoff (chris at kohlhoff dot com)
 //
 // Distributed under the Boost Software License, Version 1.0. (See accompanying
 // file LICENSE_1_0.txt or copy at http://www.boost.org/LICENSE_1_0.txt)
@@ -36,10 +36,10 @@ namespace multicast {
  * @par Examples:
  * Setting the option to join a multicast group:
  * @code
- * asio::datagram_socket socket(demuxer); 
+ * asio::datagram_socket socket(io_service); 
  * ...
  * asio::ipv4::address multicast_address("225.0.0.1");
- * asio::ipv4::multicast::add_membership option(multicast_address);
+ * asio::ipv4::multicast::join_group option(multicast_address);
  * socket.set_option(option);
  * @endcode
  *
@@ -47,10 +47,10 @@ namespace multicast {
  * Setting the option to join a multicast group on the specified local
  * interface.
  * @code
- * asio::datagram_socket socket(demuxer); 
+ * asio::datagram_socket socket(io_service); 
  * asio::ipv4::address multicast_address("225.0.0.1");
  * asio::ipv4::address local_interface("1.2.3.4");
- * asio::ipv4::multicast::add_membership option(
+ * asio::ipv4::multicast::join_group option(
  *     multicast_address, local_interface);
  * socket.set_option(option);
  * ...
@@ -60,10 +60,10 @@ namespace multicast {
  * Socket_Option, IPv4_MReq_Socket_Option.
  */
 #if defined(GENERATING_DOCUMENTATION)
-typedef implementation_defined add_membership;
+typedef implementation_defined join_group;
 #else
 typedef asio::ipv4::detail::socket_option::multicast_request<
-  IPPROTO_IP, IP_ADD_MEMBERSHIP> add_membership;
+  IPPROTO_IP, IP_ADD_MEMBERSHIP> join_group;
 #endif
 
 /// Socket option to leave a multicast group on a specified interface.
@@ -73,10 +73,10 @@ typedef asio::ipv4::detail::socket_option::multicast_request<
  * @par Examples:
  * Setting the option to leave a multicast group:
  * @code
- * asio::datagram_socket socket(demuxer); 
+ * asio::datagram_socket socket(io_service); 
  * ...
  * asio::ipv4::address multicast_address("225.0.0.1");
- * asio::ipv4::multicast::drop_membership option(multicast_address);
+ * asio::ipv4::multicast::leave_group option(multicast_address);
  * socket.set_option(option);
  * @endcode
  *
@@ -84,10 +84,10 @@ typedef asio::ipv4::detail::socket_option::multicast_request<
  * Setting the option to leave a multicast group on the specified local
  * interface.
  * @code
- * asio::datagram_socket socket(demuxer); 
+ * asio::datagram_socket socket(io_service); 
  * asio::ipv4::address multicast_address("225.0.0.1");
  * asio::ipv4::address local_interface("1.2.3.4");
- * asio::ipv4::multicast::drop_membership option(
+ * asio::ipv4::multicast::leave_group option(
  *     multicast_address, local_interface);
  * socket.set_option(option);
  * ...
@@ -97,10 +97,10 @@ typedef asio::ipv4::detail::socket_option::multicast_request<
  * Socket_Option, IPv4_MReq_Socket_Option.
  */
 #if defined(GENERATING_DOCUMENTATION)
-typedef implementation_defined drop_membership;
+typedef implementation_defined leave_group;
 #else
 typedef asio::ipv4::detail::socket_option::multicast_request<
-  IPPROTO_IP, IP_DROP_MEMBERSHIP> drop_membership;
+  IPPROTO_IP, IP_DROP_MEMBERSHIP> leave_group;
 #endif
 
 /// Socket option for local interface to use for outgoing multicast packets.
@@ -110,7 +110,7 @@ typedef asio::ipv4::detail::socket_option::multicast_request<
  * @par Examples:
  * Setting the option:
  * @code
- * asio::datagram_socket socket(demuxer); 
+ * asio::datagram_socket socket(io_service); 
  * ...
  * asio::ipv4::address local_interface("1.2.3.4");
  * asio::ipv4::multicast::outbound_interface option(local_interface);
@@ -120,7 +120,7 @@ typedef asio::ipv4::detail::socket_option::multicast_request<
  * @par
  * Getting the current option value:
  * @code
- * asio::datagram_socket socket(demuxer); 
+ * asio::datagram_socket socket(io_service); 
  * ...
  * asio::ipv4::multicast::outbound_interface option;
  * socket.get_option(option);
@@ -144,18 +144,18 @@ typedef asio::ipv4::detail::socket_option::address<
  * @par Examples:
  * Setting the option:
  * @code
- * asio::datagram_socket socket(demuxer); 
+ * asio::datagram_socket socket(io_service); 
  * ...
- * asio::ipv4::multicast::time_to_live option(4);
+ * asio::ipv4::multicast::hops option(4);
  * socket.set_option(option);
  * @endcode
  *
  * @par
  * Getting the current option value:
  * @code
- * asio::datagram_socket socket(demuxer); 
+ * asio::datagram_socket socket(io_service); 
  * ...
- * asio::ipv4::multicast::time_to_live option;
+ * asio::ipv4::multicast::hops option;
  * socket.get_option(option);
  * int ttl = option.get();
  * @endcode
@@ -164,10 +164,10 @@ typedef asio::ipv4::detail::socket_option::address<
  * Socket_Option, Integer_Socket_Option.
  */
 #if defined(GENERATING_DOCUMENTATION)
-typedef implementation_defined time_to_live;
+typedef implementation_defined hops;
 #else
 typedef asio::detail::socket_option::integer<
-  IPPROTO_IP, IP_MULTICAST_TTL> time_to_live;
+  IPPROTO_IP, IP_MULTICAST_TTL> hops;
 #endif
 
 /// Socket option determining whether outgoing multicast packets will be
@@ -178,7 +178,7 @@ typedef asio::detail::socket_option::integer<
  * @par Examples:
  * Setting the option:
  * @code
- * asio::datagram_socket socket(demuxer); 
+ * asio::datagram_socket socket(io_service); 
  * ...
  * asio::ipv4::multicast::enable_loopback option(true);
  * socket.set_option(option);
@@ -187,7 +187,7 @@ typedef asio::detail::socket_option::integer<
  * @par
  * Getting the current option value:
  * @code
- * asio::datagram_socket socket(demuxer); 
+ * asio::datagram_socket socket(io_service); 
  * ...
  * asio::ipv4::multicast::enable_loopback option;
  * socket.get_option(option);

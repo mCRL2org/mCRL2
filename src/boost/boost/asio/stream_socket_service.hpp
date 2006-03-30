@@ -2,7 +2,7 @@
 // stream_socket_service.hpp
 // ~~~~~~~~~~~~~~~~~~~~~~~~~
 //
-// Copyright (c) 2003-2005 Christopher M. Kohlhoff (chris at kohlhoff dot com)
+// Copyright (c) 2003-2006 Christopher M. Kohlhoff (chris at kohlhoff dot com)
 //
 // Distributed under the Boost Software License, Version 1.0. (See accompanying
 // file LICENSE_1_0.txt or copy at http://www.boost.org/LICENSE_1_0.txt)
@@ -19,12 +19,10 @@
 
 #include <boost/asio/detail/push_options.hpp>
 #include <cstddef>
-#include <memory>
 #include <boost/config.hpp>
 #include <boost/asio/detail/pop_options.hpp>
 
-#include <boost/asio/basic_demuxer.hpp>
-#include <boost/asio/demuxer_service.hpp>
+#include <boost/asio/basic_io_service.hpp>
 #include <boost/asio/detail/epoll_reactor.hpp>
 #include <boost/asio/detail/kqueue_reactor.hpp>
 #include <boost/asio/detail/noncopyable.hpp>
@@ -35,58 +33,78 @@
 namespace asio {
 
 /// Default service implementation for a stream socket.
-template <typename Allocator = std::allocator<void> >
+template <typename Protocol, typename Allocator>
 class stream_socket_service
   : private noncopyable
 {
 public:
-  /// The demuxer type.
-  typedef basic_demuxer<demuxer_service<Allocator> > demuxer_type;
+  /// The io_service type.
+  typedef basic_io_service<Allocator> io_service_type;
+
+  /// The protocol type.
+  typedef Protocol protocol_type;
+
+  /// The endpoint type.
+  typedef typename Protocol::endpoint endpoint_type;
 
 private:
   // The type of the platform-specific implementation.
-#if defined(ASIO_HAS_IOCP_DEMUXER)
+#if defined(ASIO_HAS_IOCP)
   typedef detail::win_iocp_socket_service<Allocator> service_impl_type;
-#elif defined(ASIO_HAS_EPOLL_REACTOR)
-  typedef detail::reactive_socket_service<
-    demuxer_type, detail::epoll_reactor<false> > service_impl_type;
-#elif defined(ASIO_HAS_KQUEUE_REACTOR)
-  typedef detail::reactive_socket_service<
-    demuxer_type, detail::kqueue_reactor<false> > service_impl_type;
+#elif defined(ASIO_HAS_EPOLL)
+  typedef detail::reactive_socket_service<io_service_type,
+      detail::epoll_reactor<false, Allocator> > service_impl_type;
+#elif defined(ASIO_HAS_KQUEUE)
+  typedef detail::reactive_socket_service<io_service_type,
+      detail::kqueue_reactor<false, Allocator> > service_impl_type;
 #else
-  typedef detail::reactive_socket_service<
-    demuxer_type, detail::select_reactor<false> > service_impl_type;
+  typedef detail::reactive_socket_service<io_service_type,
+      detail::select_reactor<false, Allocator> > service_impl_type;
 #endif
 
 public:
-  /// The type of a stream socket.
+  /// The type of a stream socket implementation.
 #if defined(GENERATING_DOCUMENTATION)
-  typedef implementation_defined impl_type;
+  typedef implementation_defined implementation_type;
 #else
-  typedef typename service_impl_type::impl_type impl_type;
+  typedef typename service_impl_type::implementation_type implementation_type;
 #endif
 
-  /// Construct a new stream socket service for the specified demuxer.
-  explicit stream_socket_service(demuxer_type& demuxer)
-    : service_impl_(demuxer.get_service(service_factory<service_impl_type>()))
+  /// The native socket type.
+#if defined(GENERATING_DOCUMENTATION)
+  typedef implementation_defined native_type;
+#else
+  typedef typename service_impl_type::native_type native_type;
+#endif
+
+  /// Construct a new stream socket service for the specified io_service.
+  explicit stream_socket_service(io_service_type& io_service)
+    : service_impl_(io_service.get_service(
+          service_factory<service_impl_type>()))
   {
   }
 
-  /// Get the demuxer associated with the service.
-  demuxer_type& demuxer()
+  /// Get the io_service associated with the service.
+  io_service_type& io_service()
   {
-    return service_impl_.demuxer();
+    return service_impl_.io_service();
   }
 
-  /// Return a null stream socket implementation.
-  impl_type null() const
+  /// Construct a new stream socket implementation.
+  void construct(implementation_type& impl)
   {
-    return service_impl_.null();
+    service_impl_.construct(impl);
   }
 
-  /// Open a new stream socket implementation.
-  template <typename Protocol, typename Error_Handler>
-  void open(impl_type& impl, const Protocol& protocol,
+  /// Destroy a stream socket implementation.
+  void destroy(implementation_type& impl)
+  {
+    service_impl_.destroy(impl);
+  }
+
+  /// Open a stream socket.
+  template <typename Error_Handler>
+  void open(implementation_type& impl, const protocol_type& protocol,
       Error_Handler error_handler)
   {
     if (protocol.type() == SOCK_STREAM)
@@ -95,46 +113,54 @@ public:
       error_handler(asio::error(asio::error::invalid_argument));
   }
 
-  /// Assign a new stream socket implementation.
-  void assign(impl_type& impl, impl_type new_impl)
+  /// Open a stream socket from an existing native socket.
+  template <typename Error_Handler>
+  void open(implementation_type& impl, const native_type& native_socket,
+      Error_Handler error_handler)
   {
-    service_impl_.assign(impl, new_impl);
+    service_impl_.open(impl, native_socket, error_handler);
   }
 
   /// Close a stream socket implementation.
   template <typename Error_Handler>
-  void close(impl_type& impl, Error_Handler error_handler)
+  void close(implementation_type& impl, Error_Handler error_handler)
   {
     service_impl_.close(impl, error_handler);
   }
 
+  /// Get the native socket implementation.
+  native_type native(implementation_type& impl)
+  {
+    return service_impl_.native(impl);
+  }
+
   /// Bind the stream socket to the specified local endpoint.
-  template <typename Endpoint, typename Error_Handler>
-  void bind(impl_type& impl, const Endpoint& endpoint,
+  template <typename Error_Handler>
+  void bind(implementation_type& impl, const endpoint_type& endpoint,
       Error_Handler error_handler)
   {
     service_impl_.bind(impl, endpoint, error_handler);
   }
 
   /// Connect the stream socket to the specified endpoint.
-  template <typename Endpoint, typename Error_Handler>
-  void connect(impl_type& impl, const Endpoint& peer_endpoint,
+  template <typename Error_Handler>
+  void connect(implementation_type& impl, const endpoint_type& peer_endpoint,
       Error_Handler error_handler)
   {
     service_impl_.connect(impl, peer_endpoint, error_handler);
   }
 
   /// Start an asynchronous connect.
-  template <typename Endpoint, typename Handler>
-  void async_connect(impl_type& impl, const Endpoint& peer_endpoint,
-      Handler handler)
+  template <typename Handler>
+  void async_connect(implementation_type& impl,
+      const endpoint_type& peer_endpoint, Handler handler)
   {
     service_impl_.async_connect(impl, peer_endpoint, handler);
   }
 
   /// Set a socket option.
   template <typename Option, typename Error_Handler>
-  void set_option(impl_type& impl, const Option& option,
+  void set_option(implementation_type& impl, const Option& option,
       Error_Handler error_handler)
   {
     service_impl_.set_option(impl, option, error_handler);
@@ -142,7 +168,7 @@ public:
 
   /// Get a socket option.
   template <typename Option, typename Error_Handler>
-  void get_option(const impl_type& impl, Option& option,
+  void get_option(const implementation_type& impl, Option& option,
       Error_Handler error_handler) const
   {
     service_impl_.get_option(impl, option, error_handler);
@@ -150,31 +176,35 @@ public:
 
   /// Perform an IO control command on the socket.
   template <typename IO_Control_Command, typename Error_Handler>
-  void io_control(impl_type& impl, IO_Control_Command& command,
+  void io_control(implementation_type& impl, IO_Control_Command& command,
       Error_Handler error_handler)
   {
     service_impl_.io_control(impl, command, error_handler);
   }
 
   /// Get the local endpoint.
-  template <typename Endpoint, typename Error_Handler>
-  void get_local_endpoint(const impl_type& impl, Endpoint& endpoint,
+  template <typename Error_Handler>
+  endpoint_type local_endpoint(const implementation_type& impl,
       Error_Handler error_handler) const
   {
+    endpoint_type endpoint;
     service_impl_.get_local_endpoint(impl, endpoint, error_handler);
+    return endpoint;
   }
 
   /// Get the remote endpoint.
-  template <typename Endpoint, typename Error_Handler>
-  void get_remote_endpoint(const impl_type& impl, Endpoint& endpoint,
+  template <typename Error_Handler>
+  endpoint_type remote_endpoint(const implementation_type& impl,
       Error_Handler error_handler) const
   {
+    endpoint_type endpoint;
     service_impl_.get_remote_endpoint(impl, endpoint, error_handler);
+    return endpoint;
   }
 
   /// Disable sends or receives on the socket.
   template <typename Error_Handler>
-  void shutdown(impl_type& impl, socket_base::shutdown_type what,
+  void shutdown(implementation_type& impl, socket_base::shutdown_type what,
       Error_Handler error_handler)
   {
     service_impl_.shutdown(impl, what, error_handler);
@@ -182,7 +212,7 @@ public:
 
   /// Send the given data to the peer.
   template <typename Const_Buffers, typename Error_Handler>
-  std::size_t send(impl_type& impl, const Const_Buffers& buffers,
+  std::size_t send(implementation_type& impl, const Const_Buffers& buffers,
       socket_base::message_flags flags, Error_Handler error_handler)
   {
     return service_impl_.send(impl, buffers, flags, error_handler);
@@ -190,7 +220,7 @@ public:
 
   /// Start an asynchronous send.
   template <typename Const_Buffers, typename Handler>
-  void async_send(impl_type& impl, const Const_Buffers& buffers,
+  void async_send(implementation_type& impl, const Const_Buffers& buffers,
       socket_base::message_flags flags, Handler handler)
   {
     service_impl_.async_send(impl, buffers, flags, handler);
@@ -198,7 +228,7 @@ public:
 
   /// Receive some data from the peer.
   template <typename Mutable_Buffers, typename Error_Handler>
-  std::size_t receive(impl_type& impl, const Mutable_Buffers& buffers,
+  std::size_t receive(implementation_type& impl, const Mutable_Buffers& buffers,
       socket_base::message_flags flags, Error_Handler error_handler)
   {
     return service_impl_.receive(impl, buffers, flags, error_handler);
@@ -206,7 +236,7 @@ public:
 
   /// Start an asynchronous receive.
   template <typename Mutable_Buffers, typename Handler>
-  void async_receive(impl_type& impl, const Mutable_Buffers& buffers,
+  void async_receive(implementation_type& impl, const Mutable_Buffers& buffers,
       socket_base::message_flags flags, Handler handler)
   {
     service_impl_.async_receive(impl, buffers, flags, handler);
