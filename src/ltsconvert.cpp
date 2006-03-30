@@ -6,20 +6,21 @@
 #include "libprint_c.h"
 #include "liblts.h"
 #include "liblts_fsm.h"
+#include "liblts_dot.h"
 #include "setup.h"
 
 #ifdef MCRL2_BCG
 #include "bcg_user.h"
 #endif
 
-#define NAME "ltscp"
+#define NAME "ltsconvert"
 #define VERSION "0.1"
 #include "mcrl2_revision.h"
 
 using namespace std;
 using namespace mcrl2::lts;
 
-enum alt_lts_type { alt_lts_none, alt_lts_fsm };
+enum alt_lts_type { alt_lts_none, alt_lts_fsm, alt_lts_dot };
 
 static ATerm get_lpe(string &filename)
 {
@@ -45,6 +46,18 @@ static ATerm get_lpe(string &filename)
   }
 
   return t;
+}
+
+static string get_base(string &s)
+{
+  string::size_type pos = s.find_last_of('.');
+  
+  if ( pos == string::npos )
+  {
+    return s;
+  } else {
+    return s.substr(0,pos);
+  }
 }
 
 static lts_type get_extension(string &s)
@@ -87,6 +100,9 @@ static alt_lts_type get_alt_extension(string &s)
     {
       gsVerboseMsg("detected FSM extension\n");
       return alt_lts_fsm;
+    } else if ( ext == "dot" )
+    {
+      return alt_lts_dot;
     }
   }
 
@@ -119,6 +135,9 @@ static alt_lts_type get_alt_format(char *s)
   if ( !strcmp(s,"fsm") )
   {
     return alt_lts_fsm;
+  } else if ( !strcmp(s,"dot") )
+  {
+    return alt_lts_dot;
   }
 
   return alt_lts_none;
@@ -130,12 +149,13 @@ static void print_formats(FILE *f)
     "The following formats are accepted by " NAME ":\n"
     "\n"
     "  aut       the aldebaran format (.aut)\n"
-    "  mcrl      the mCRL SVC format (.svc)\n"
-    "  mcrl2     the mCRL2 SVC format (.svc, default)\n"
-    "  fsm       the FSM format (.fsm, only output)\n"
 #ifdef MCRL2_BCG
     "  bcg       the BCG format\n"
 #endif
+    "  dot       the DOT format (.dot, only output)\n"
+    "  fsm       the FSM format (.fsm, only output)\n"
+    "  mcrl      the mCRL SVC format (.svc)\n"
+    "  mcrl2     the mCRL2 SVC format (.svc, default)\n"
     );
 }
 
@@ -161,7 +181,8 @@ static void print_help(FILE *f, char *Name)
     "  -f, --formats         list accepted formats\n"
     "  -l, --lpe=FILE        supply LPE file from which the input file was generated\n"
     "                        (needed to store the correct parameter names of states\n"
-    "                        when saving as FSM file)\n",
+    "                        when saving as FSM file)\n"
+    "  -n, --no-state        do not save state information in DOT files\n",
     Name);
 }
 
@@ -180,7 +201,7 @@ int main(int argc, char **argv)
   BCG_INIT();
 #endif
 
-  #define ShortOptions      "hqvi:o:fl:"
+  #define ShortOptions      "hqvi:o:fl:n"
   #define VersionOption     0x1
   struct option LongOptions[] = { 
     {"help"      , no_argument,         NULL, 'h'},
@@ -191,6 +212,7 @@ int main(int argc, char **argv)
     {"out"       , required_argument,   NULL, 'o'},
     {"formats"   , no_argument,         NULL, 'f'},
     {"lpe"       , required_argument,   NULL, 'l'},
+    {"no-state"  , no_argument,         NULL, 'n'},
     {0, 0, 0, 0}
   };
 
@@ -202,6 +224,7 @@ int main(int argc, char **argv)
   string lpefile;
   bool use_alt_outtype = false;
   alt_lts_type alt_outtype = alt_lts_none;
+  bool print_dot_state = true;
   while ( (opt = getopt_long(argc, argv, ShortOptions, LongOptions, NULL)) != -1 )
   {
     switch ( opt )
@@ -257,6 +280,9 @@ int main(int argc, char **argv)
           fprintf(stderr,"warning: LPE file has already been specified; extra option ignored\n");
         }
         lpefile = optarg;
+        break;
+      case 'n':
+        print_dot_state = false;
         break;
       default:
         break;
@@ -371,6 +397,16 @@ int main(int argc, char **argv)
             return 1;
           }
           break;
+        case alt_lts_dot:
+          {
+            string str_stdout = "stdout";
+            if ( !write_lts_to_dot(l,cout,str_stdout,print_dot_state) )
+            {
+              gsErrorMsg("cannot write LTS to stdout\n");
+              return 1;
+            }
+            break;
+          }
         default:
           assert(0);
           gsErrorMsg("do not know how to handle output format\n");
@@ -396,6 +432,16 @@ int main(int argc, char **argv)
             return 1;
           }
           break;
+        case alt_lts_dot:
+          {
+            string str_base = get_base(outfile);
+            if ( !write_lts_to_dot(l,outfile,str_base,print_dot_state) )
+            {
+              gsErrorMsg("cannot write LTS to file '%s'\n",outfile.c_str());
+              return 1;
+            }
+            break;
+          }
         default:
           assert(0);
           gsErrorMsg("do not know how to handle output format\n");

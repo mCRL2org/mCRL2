@@ -94,11 +94,11 @@ static void print_formats(FILE *f)
     "The following formats are accepted by " NAME ":\n"
     "\n"
     "  aut       the aldebaran format (.aut)\n"
-    "  mcrl      the mCRL SVC format (.svc)\n"
-    "  mcrl2     the mCRL2 SVC format (.svc, default)\n"
 #ifdef MCRL2_BCG
     "  bcg       the BCG format (.bcg)\n"
 #endif
+    "  mcrl      the mCRL SVC format (.svc)\n"
+    "  mcrl2     the mCRL2 SVC format (.svc, default)\n"
     );
 }
 

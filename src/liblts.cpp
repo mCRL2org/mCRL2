@@ -279,7 +279,6 @@ class svc_buffer
       }
       if ( valid && is_valid )
       {
-        cout << s << endl;
         return s;
       } else {
         valid = false;

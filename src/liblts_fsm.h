@@ -13,8 +13,8 @@ namespace mcrl2
 namespace lts
 {
 
-bool write_lts_to_fsm(lts &l, std::string filename, ATerm lpe = NULL);
-bool write_lts_to_fsm(lts &l, std::string filename, lpe::LPE &lpe);
+bool write_lts_to_fsm(lts &l, std::string &filename, ATerm lpe = NULL);
+bool write_lts_to_fsm(lts &l, std::string &filename, lpe::LPE &lpe);
 bool write_lts_to_fsm(lts &l, std::ostream &os, ATerm lpe = NULL);
 bool write_lts_to_fsm(lts &l, std::ostream &os, lpe::LPE &lpe);
 

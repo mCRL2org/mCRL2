@@ -1,7 +1,7 @@
 <?xml version="1.0"?>
 
 <!DOCTYPE refentry PUBLIC "-//OASIS//DTD DocBook XML V4.3//EN" "http://www.oasis-open.org/docbook/xml/4.3/docbookx.dtd"[
-<!ENTITY ltscp "<function>ltscp</function>">
+<!ENTITY ltsconvert "<function>ltsconvert</function>">
 <!ENTITY lpe2lts "<function>lpe2lts</function>">
 <!ENTITY option "<parameter>OPTION</parameter>">
 <!ENTITY infile "<parameter>INFILE</parameter>">
@@ -30,21 +30,21 @@
 <!ENTITY stdout "<constant>stdout</constant>">
 ]>
 
-<refentry id="ltscp">
+<refentry id="ltsconvert">
 
 <refmeta>
-  <refentrytitle>ltscp</refentrytitle>
+  <refentrytitle>ltsconvert</refentrytitle>
   <manvolnum>1</manvolnum>
 </refmeta>
 
 <refnamediv>
-  <refname>ltscp</refname>
-  <refpurpose>copy an LTS</refpurpose>
+  <refname>ltsconvert</refname>
+  <refpurpose>convert an LTS</refpurpose>
 </refnamediv>
 
 <refsynopsisdiv>
   <cmdsynopsis>
-    <command>&ltscp;</command>
+    <command>&ltsconvert;</command>
     <arg choice="plain" rep="repeat"><arg choice="opt">&option;</arg></arg>
     <arg choice="opt">&infile;
       <arg choice="opt">&outfile;</arg>
@@ -55,8 +55,8 @@
 <refsect1>
   <title>Description</title>
   <para>
-    The ltscp tool copies the labelled transition system (LTS) in &infile; to
-    &outfile;, converting between formats if necessary (and possible). If
+    The ltsconvert tool converts the labelled transition system (LTS) in
+    &infile; to &outfile;, changing the format if necessary (and possible). If
     &outfile; is not supplied, the LTS is saved to stdout. If &infile; is not
     supplied, stdin is used instead.
   </para>
@@ -157,7 +157,7 @@
 	When saving as an FSM file, name the state parameters according to the
 	names in the LPE in &file;.  This should be the LPE from which the
 	input LTS file was generated. If this option is not used, state
-	parameters are assigned an arbitrary name by &ltscp;.
+	parameters are assigned an arbitrary name by &ltsconvert;.
       </para>
     </listitem>
   </varlistentry>
