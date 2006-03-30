@@ -67,6 +67,9 @@ void GLCanvas::initialize()
   glEnable( GL_DEPTH_TEST );
   glEnable( GL_BLEND );
   
+  GLfloat light_gray[] = { 0.2f, 0.2f, 0.2f };
+  glMaterialfv( GL_FRONT, GL_SPECULAR, light_gray );
+  glMaterialf( GL_FRONT, GL_SHININESS, 8.0f );
   glEnable( GL_COLOR_MATERIAL );
   glColorMaterial( GL_FRONT, GL_AMBIENT_AND_DIFFUSE );
 
