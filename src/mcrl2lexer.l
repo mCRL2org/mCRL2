@@ -8,6 +8,9 @@
 //fix for the broken cygwin versions of flex
 #ifdef __CYGWIN__
 #include <iostream>
+using std::cerr;
+using std::cin;
+using std::cout;
 #endif
 
 //fix for newer versions of flex (>= 2.5.31)
