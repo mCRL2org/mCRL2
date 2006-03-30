@@ -44,7 +44,7 @@
 
 <refnamediv>
   <refname>lpe2torx</refname>
-  <refpurpose>provide TorX explorer interface</refpurpose>
+  <refpurpose>provide TorX explorer interface to an LPE</refpurpose>
 </refnamediv>
 
 <refsynopsisdiv>
@@ -59,17 +59,19 @@
 <refsect1>
   <title>Description</title>
   <para>
-    The &lpe2torx; tool provides the TorX explorer interface such that TorX can
-    use linear process equations (LPE). The LPE in &infile; is read and can be
-    explored as described in torx_explorer(5). If &infile; is not supplied an
-    LPE is read from &stdin;.
+    The &lpe2torx; tool provides a TorX explorer interface to the linear
+    process equation (LPE) in &infile;. If &infile; is not supplied, &stdin; is
+    used.
+  </para>
+  <para>    
+    The LPE can be explored using TorX as described in torx_explorer(5).
   </para>
 </refsect1>
 
 <refsect1>
 <title>Options</title>
 <para>
-Mandatory arguments to long options are mandatory for short options too.
+  Mandatory arguments to long options are mandatory for short options too.
   <variablelist>
   <varlistentry>
     <term>&opt_h;</term>
