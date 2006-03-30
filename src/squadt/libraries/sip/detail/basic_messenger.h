@@ -66,10 +66,10 @@ namespace sip {
         typedef std::deque < message_ptr >                                          message_queue_t;
 
         /** \brief The XML-like tag used for wrapping the content */
-        static const std::string   tag_open;
+        static const std::string                                                    tag_open;
 
         /** \brief The XML-like tag used for wrapping the content */
-        static const std::string   tag_close;
+        static const std::string                                                    tag_close;
 
       private:
 
@@ -97,7 +97,7 @@ namespace sip {
       private:
 
         /** \brief Helper function that services the handlers */
-        static inline void   service_handlers(basic_messenger< M >::wptr, const message_ptr&, const basic_transceiver*, handler_type);
+        static inline void   service_handlers(const message_ptr&, const basic_transceiver*, handler_type);
 
         /** \brief Helper function that delivers an incoming message directly to a waiter */
         static inline void   deliver_to_waiter(const message_ptr&, const basic_transceiver*, message_ptr&);
@@ -142,6 +142,9 @@ namespace sip {
 
         /** \brief Unset the handler for a type */
         inline void unset_handler(const typename M::type_identifier_t);
+
+        /** \brief Destructor */
+        ~basic_messenger();
     };
 
     template < class M >

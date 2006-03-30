@@ -3,6 +3,7 @@
 #include <sstream>
 
 #include <boost/ref.hpp>
+#include <boost/thread/thread.hpp>
 
 #include <sip/detail/basic_messenger.h>
 #include <sip/detail/exception.h>
@@ -15,6 +16,20 @@ namespace sip {
 
     template < class M >
     const std::string basic_messenger< M >::tag_close("</message>");
+
+    template < class M >
+    basic_messenger< M >::~basic_messenger() {
+      boost::mutex::scoped_lock w(waiter_lock);
+
+      // Unblock all waiters
+      const message_ptr m(new message());
+
+      for (typename waiter_map::const_iterator i = waiters.begin(); i != waiters.end(); ++i) {
+        boost::mutex::scoped_lock l((*i).second->mutex);
+
+        (*i).second->condition.notify_all();
+      }
+    }
 
     /**
      * @param d a stream that contains the data to be delived
@@ -173,11 +188,15 @@ namespace sip {
 
             message_ptr m(new message(new_string, t));
 
+            boost::mutex::scoped_lock w(waiter_lock);
+
             typename handler_map::iterator h = handlers.find(t);
 
             if (h != handlers.end()) {
               /* Service handler */
-              (*h).second(m, o);
+              boost::thread(boost::bind(&basic_messenger< M >::service_handlers, m, o, (*h).second));
+
+              boost::thread::yield();
             }
             else {
               /* Put message into queue */
@@ -245,6 +264,8 @@ namespace sip {
  
     /**
      * @param t the type of the message
+     *
+     * \pre waiter_lock must be in state locked
      **/
     template < class M >
     inline boost::shared_ptr< M > basic_messenger< M >::find_message(typename M::type_identifier_t t) {
@@ -282,13 +303,8 @@ namespace sip {
      * @param h the handler to call
      **/
     template < class M >
-    inline void basic_messenger< M >::service_handlers(basic_messenger< M >::wptr w,
-                    const message_ptr& m, const basic_transceiver* o, handler_type h) {
-      typename basic_messenger< M >::wptr t(w.lock());
-
-      if (!w.expired()) {
-        h(m, o);
-      }
+    inline void basic_messenger< M >::service_handlers(const message_ptr& m, const basic_transceiver* o, handler_type h) {
+      h(m, o);
     }
 
     /**
@@ -324,13 +340,11 @@ namespace sip {
     const boost::shared_ptr< M > basic_messenger< M >::await_message(typename M::type_identifier_t t) {
       using namespace boost;
 
-      assert(waiters.count(t) == 0 && handlers.count(t) == 0);
+      boost::mutex::scoped_lock w(waiter_lock);
 
       message_ptr p(find_message(t));
 
       if (p.get() == 0) {
-        boost::mutex::scoped_lock w(waiter_lock);
-
         handler_type              chained_handler;
         bool                      stored = 0 < handlers.count(t);
 
