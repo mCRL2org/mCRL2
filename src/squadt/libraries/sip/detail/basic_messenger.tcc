@@ -3,6 +3,7 @@
 #include <sstream>
 
 #include <boost/ref.hpp>
+#include <boost/bind.hpp>
 #include <boost/thread/thread.hpp>
 
 #include <sip/detail/basic_messenger.h>
@@ -195,8 +196,6 @@ namespace sip {
             if (h != handlers.end()) {
               /* Service handler */
               boost::thread(boost::bind(&basic_messenger< M >::service_handlers, m, o, (*h).second));
-
-              boost::thread::yield();
             }
             else {
               /* Put message into queue */

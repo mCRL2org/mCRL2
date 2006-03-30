@@ -130,7 +130,7 @@ inline void init_buf(buf& b, void* data, size_t size)
   b.buf = static_cast<char*>(data);
   b.len = static_cast<u_long>(size);
 #else // defined(BOOST_WINDOWS)
-  b.iov_base = data;
+  b.iov_base = static_cast < caddr_t > (data);
   b.iov_len = size;
 #endif // defined(BOOST_WINDOWS)
 }
@@ -141,7 +141,7 @@ inline void init_buf(buf& b, const void* data, size_t size)
   b.buf = static_cast<char*>(const_cast<void*>(data));
   b.len = static_cast<u_long>(size);
 #else // defined(BOOST_WINDOWS)
-  b.iov_base = const_cast<void*>(data);
+  b.iov_base = reinterpret_cast < caddr_t >(const_cast < void* > (data));
   b.iov_len = size;
 #endif // defined(BOOST_WINDOWS)
 }
@@ -188,7 +188,7 @@ inline int recvfrom(socket_type s, buf* bufs, size_t count, int flags,
   return bytes_transferred;
 #else // defined(BOOST_WINDOWS)
   msghdr msg;
-  msg.msg_name = addr;
+  msg.msg_name = reinterpret_cast < char* > (addr);
   msg.msg_namelen = *addrlen;
   msg.msg_iov = bufs;
   msg.msg_iovlen = count;
@@ -245,7 +245,7 @@ inline int sendto(socket_type s, const buf* bufs, size_t count, int flags,
   return bytes_transferred;
 #else // defined(BOOST_WINDOWS)
   msghdr msg;
-  msg.msg_name = const_cast<socket_addr_type*>(addr);
+  msg.msg_name = const_cast < char* > (reinterpret_cast < const char* > (addr));
   msg.msg_namelen = addrlen;
   msg.msg_iov = const_cast<buf*>(bufs);
   msg.msg_iovlen = count;
