@@ -52,6 +52,7 @@ source_files="./mcrl2/articles \
               ./mcrl2/Makefile \
               ./mcrl2/examples \
               ./mcrl2/test.y \
+              ./mcrl2/test.l \
               ./mcrl2/tests \
               ./mcrl2/specs \
               ./mcrl2/.vim \
