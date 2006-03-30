@@ -55,14 +55,14 @@ endif
 ifeq ($(HOST_OS),MINGW)
  CPPFLAGS         += -DNO_DYNLOAD -DNO_TIMES_H
  CXXFLAGS         := $(filter-out -std=c++98,$(CXXFLAGS))
- LDFLAGS           = -Wl,-rpath,$(libdir) @LDFLAGS@
+ LDFLAGS           = -Wl,-rpath,$(libdir) -L. -Lsvc @LDFLAGS@
  LIBDL             =
  GLUT_LDFLAGS      = -lopengl32 -lglu32 -lglut32
 endif
 ifeq ($(HOST_OS),CYGWIN)
  CPPFLAGS         += -DNO_DYNLOAD
  CXXFLAGS         := $(filter-out -std=c++98,$(CXXFLAGS))
- LDFLAGS           = -Wl,-rpath,$(libdir) @LDFLAGS@
+ LDFLAGS           = -Wl,-rpath,$(libdir) -L. -Lsvc @LDFLAGS@
  LIBDL             =
  GLUT_LDFLAGS      = -lopengl32 -lglu32 -lglut32
 endif
@@ -104,8 +104,8 @@ ifeq ($(BOOST_PREFIX),boost)
   BOOST_PROGRAM_OPTIONS = $(BOOST_PREFIX)/lib/boost_program_options-s.a
  endif
  ifeq ($(HOST_OS),CYGWIN)
-  BOOST_FILESYSTEM      = $(BOOST_PREFIX)/lib/libboost_filesystem-s.a
-  BOOST_PROGRAM_OPTIONS = $(BOOST_PREFIX)/lib/libboost_program_options-s.a
+  BOOST_FILESYSTEM      = $(BOOST_PREFIX)/lib/boost_filesystem-s.a
+  BOOST_PROGRAM_OPTIONS = $(BOOST_PREFIX)/lib/boost_program_options-s.a
  endif
 else
  BOOST_CPPFLAGS = -I$(BOOST_PREFIX)/include
