@@ -114,7 +114,7 @@ namespace transport {
   void transporter::disconnect() {
     boost::recursive_mutex::scoped_lock l(lock);
 
-    for (connection_list::const_iterator i = connections.begin(); i != connections.end(); ++i) {
+    for (connection_list::const_iterator i = connections.begin(); i != connections.end(); i = connections.begin()) {
       (*i)->disconnect(*i);
     }
   }
