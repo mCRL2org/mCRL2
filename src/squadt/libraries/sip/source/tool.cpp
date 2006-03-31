@@ -52,7 +52,7 @@ namespace sip {
         s << instance_identifier;
  
         m.set_content(s.str());
- 
+
         send_message(m);
  
         current_status = status_clean;

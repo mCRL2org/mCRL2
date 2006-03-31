@@ -17,6 +17,8 @@ namespace transport {
   transporter::~transporter() {
     using namespace boost;
 
+    boost::recursive_mutex::scoped_lock l(lock);
+
     /* Disconnect all peers */
     connections.clear();
   
