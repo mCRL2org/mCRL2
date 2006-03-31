@@ -139,9 +139,6 @@ namespace squadt {
       }
     }
 
-    /**
-     * @param p a pointer to the local end_point of the new connection
-     **/
     inline void task_monitor::signal_connection(const sip::end_point&) {
       boost::mutex::scoped_lock l(register_lock);
  

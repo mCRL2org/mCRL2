@@ -3,6 +3,7 @@
 
 #include <list>
 
+#include <boost/filesystem/path.hpp>
 #include <boost/noncopyable.hpp>
 
 #include "processor.tcc"
@@ -33,7 +34,7 @@ namespace squadt {
     private:
 
       /** \brief The location of the project directory */
-      std::string                  directory;
+      boost::filesystem::path      directory;
 
       /** \brief A description of the project */
       std::string                  description;
@@ -45,16 +46,30 @@ namespace squadt {
        **/
       std::list < processor::ptr > processors;
  
+    private:
+
+      /** \brief Constructor */
+      inline project_manager(const boost::filesystem::path&);
+ 
+      /** \brief Constructor for use by read() */
+      inline project_manager();
+
     public:
  
-      /** \brief Constructor */
-      inline project_manager(const std::string&, const std::string&);
- 
+      /** \brief Factory */
+      inline static project_manager::ptr create(const boost::filesystem::path& l);
+
+      /** \brief Get the name of the project */
+      inline std::string get_name() const;
+
+      /** \brief Get the path to the project directory */
+      inline std::string get_project_directory() const;
+
       /** \brief Get a reference to the list of processors in this project */
-      inline const processor_list& get_processors();
+      inline const processor_list& get_processors() const;
 
       /** \brief Get the description */
-      inline const std::string& get_description();
+      inline const std::string& get_description() const;
  
       /** \brief Read project information from project_directory */
       static project_manager::ptr read(const std::string&);
@@ -80,17 +95,29 @@ namespace squadt {
 
   /**
    * @param l a path to the root of the project directory
-   * @param d a description for the project
    **/
-  inline project_manager::project_manager(const std::string& l, const std::string& d)
-          : directory(l), description(d) {
+  inline project_manager::project_manager(const boost::filesystem::path& l) : directory(l) {
   }
 
-  inline const std::string& project_manager::get_description() {
-    return (description);
+  inline project_manager::project_manager() {
   }
 
-  inline const project_manager::processor_list& project_manager::get_processors() {
+  /**
+   * @param l a path to the root of the project directory
+   **/
+  inline project_manager::ptr project_manager::create(const boost::filesystem::path& l) {
+    return project_manager::ptr(new project_manager(l));
+  }
+
+  inline std::string project_manager::get_name() const {
+    return (directory.leaf());
+  }
+
+  inline std::string project_manager::get_project_directory() const {
+    return (directory.native_directory_string());
+  }
+
+  inline const project_manager::processor_list& project_manager::get_processors() const {
     return (processors);
   }
 

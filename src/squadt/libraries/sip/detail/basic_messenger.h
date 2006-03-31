@@ -49,8 +49,8 @@ namespace sip {
 
         /** \brief Monitor synchronisation construct */
         struct monitor {
-          boost::condition condition;
-          boost::mutex     mutex;
+          boost::condition condition; ///< a boost::condition synchronisation primitive
+          boost::mutex     mutex;     ///< a boost::mutex synchronisation primitive
 
           /** \brief Convenience type for shared pointers */
           typedef boost::shared_ptr < monitor > ptr;

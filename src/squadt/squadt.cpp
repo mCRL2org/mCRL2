@@ -6,15 +6,14 @@
 #include "tool_manager.h"
 #include "settings_manager.tcc"
 #include "core.h"
+
 #include "gui_splash.h"
+#include "gui_main.h"
 
 #include <wx/wx.h>
 #include <wx/filename.h>
 #include <wx/image.h>
 #include <wx/thread.h>
-
-/* Include definition of the project overview window */
-#include "gui_project_overview.h"
 
 namespace squadt {
 
@@ -27,22 +26,22 @@ namespace squadt {
 
 using namespace squadt::GUI;
 
-class Initialisation : public wxThread {
+class initialisation : public wxThread {
   private:
     splash* splash_window;
 
   public:
-    Initialisation(splash*);
+    initialisation(splash*);
 
     void* Entry();
 };
 
-Initialisation::Initialisation(splash* s) : wxThread(wxTHREAD_JOINABLE), splash_window(s) {
+initialisation::initialisation(splash* s) : wxThread(wxTHREAD_JOINABLE), splash_window(s) {
   Create();
   Run();
 }
 
-void* Initialisation::Entry() {
+void* initialisation::Entry() {
   squadt::global_tool_manager->query_tools(
                   boost::bind(&splash::set_operation, splash_window, std::string("processing"), _1));
 
@@ -79,23 +78,20 @@ bool Squadt::OnInit() {
   splash_window->set_category("Querying tools", global_tool_manager->number_of_tools());
 
   /* Perform initialisation */
-  Initialisation ti(splash_window);
+  initialisation ti(splash_window);
 
   /* Cannot just wait because the splash would not be updated */
   while (ti.IsAlive()) {
     wxYield();
   }
 
-//  window->GenerateToolContextMenus();
+  splash_window->set_category("Initialising components");
 
-  splash_window->set_category("Generating menus");
+  /* Initialise main application window */
+  new squadt::GUI::main();
 
-  /* Load tool configuration from storage */
-//  ProjectOverview* window = new ProjectOverview(NULL, 1000);
+  /* Disable splash */
   splash_window->set_done();
-
-  /* Make sure the main window is visible */
-//  window->Show(true);
 
   return (true);
 }

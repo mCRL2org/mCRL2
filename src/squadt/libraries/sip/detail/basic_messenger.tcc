@@ -296,7 +296,6 @@ namespace sip {
     /**
      * \attention Meant to be called from a separate thread
      *
-     * @param w a weak pointer to the messenger
      * @param m reference to the pointer to a message to deliver
      * @param o the transceiver that delivered the message
      * @param h the handler to call

@@ -17,6 +17,8 @@ exe squadt
         project_manager.cpp
         processor.cpp
         process.cpp
+        gui_main.cpp
+        gui_project.cpp
         gui_new_specification.cpp
 #        gui_project_overview.cpp
         gui_resources.cpp

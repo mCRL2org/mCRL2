@@ -69,7 +69,7 @@ namespace squadt {
   project_manager::ptr project_manager::read(xml2pp::text_reader& r) throw () {
     processor::id_conversion_map m;
 
-    project_manager::ptr p(new project_manager("",""));
+    project_manager::ptr p(new project_manager());
 
     /* Advance to project element */
     r.read();

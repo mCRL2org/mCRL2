@@ -50,13 +50,13 @@ namespace squadt {
       /** \brief Read configuration from file */
       inline static tool::ptr read(xml2pp::text_reader&) throw ();
 
-      /** \brief Get the location to for this tool */
+      /** \brief Get the last received capabilities object for this tool */
       inline const sip::tool::capabilities& get_capabilities() const;
 
       /** \brief Get the location to for this tool */
       inline std::string& get_location();
 
-      /** \brief Get the location to for this tool */
+      /** \brief Get the name of this tool */
       inline std::string& get_name();
   };
 
