@@ -393,6 +393,7 @@ int main(int argc, char **argv)
             SVCsetType(svc, "mCRL2");
           svcparam = SVCnewParameter(svc,(ATerm) ATmakeList0(),&b);
         }
+        break;
       default:
         gsVerboseMsg("not saving state space.\n");
         break;
