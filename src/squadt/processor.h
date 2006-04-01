@@ -159,8 +159,8 @@ namespace squadt {
       inline const tool& get_tool();
 
       /** \brief Read from XML using a libXML2 reader */
-      static processor::ptr read(id_conversion_map&, xml2pp::text_reader& reader) throw ();
- 
+      static processor::ptr read(id_conversion_map&, xml2pp::text_reader&) throw ();
+
       /** \brief Write as XML to stream */
       void write(std::ostream& stream = std::cout) const;
 

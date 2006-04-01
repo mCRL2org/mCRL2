@@ -10,5 +10,9 @@ namespace squadt {
      **/
     project::project(boost::filesystem::path& l) : manager(project_manager::create(l)) {
     }
+
+    wxString project::get_name() const {
+      return (wxString(manager->get_name().c_str(), wxConvLocal));
+    }
   }
 }

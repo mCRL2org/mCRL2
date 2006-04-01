@@ -90,7 +90,7 @@ namespace squadt {
       project* new_project = new project(project_directory);
 
       /* Adjust title */
-      SetTitle(default_title + wxT(" - ") /* + project name */);
+      SetTitle(default_title + wxT(" - ") + new_project->get_name());
 
       /* Enable controls */
       wxMenuBar& menu_bar = *GetMenuBar();
@@ -109,7 +109,7 @@ namespace squadt {
       project* new_project = new project(project_directory);
 
       /* Adjust title */
-      SetTitle(default_title + wxT(" - ") /* + project name */);
+      SetTitle(default_title + wxT(" - ") + new_project->get_name());
 
       /* Enable controls */
       wxMenuBar& menu_bar = *GetMenuBar();

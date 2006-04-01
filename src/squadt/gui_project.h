@@ -6,6 +6,7 @@
 
 #include <wx/wx.h>
 #include <wx/panel.h>
+#include <wx/string.h>
 
 namespace squadt {
 
@@ -30,6 +31,9 @@ namespace squadt {
 
         /** \brief Constructor */
         project(boost::filesystem::path&);
+
+        /** \brief Returns the name of the project */
+        wxString get_name() const;
     };
   }
 }

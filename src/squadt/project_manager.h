@@ -4,6 +4,8 @@
 #include <list>
 
 #include <boost/filesystem/path.hpp>
+#include <boost/filesystem/convenience.hpp>
+#include <boost/filesystem/operations.hpp>
 #include <boost/noncopyable.hpp>
 
 #include "processor.tcc"
@@ -48,16 +50,22 @@ namespace squadt {
  
     private:
 
-      /** \brief Constructor */
-      inline project_manager(const boost::filesystem::path&);
- 
       /** \brief Constructor for use by read() */
       inline project_manager();
 
+      /** \brief Constructor */
+      inline project_manager(const boost::filesystem::path&);
+ 
+      /** \brief Read project information from project_directory */
+      void read();
+ 
+      /** \brief Read configuration with an XML text reader */
+      void read(xml2pp::text_reader&);
+ 
     public:
  
       /** \brief Factory */
-      inline static project_manager::ptr create(const boost::filesystem::path& l);
+      inline static project_manager::ptr create(const boost::filesystem::path&);
 
       /** \brief Get the name of the project */
       inline std::string get_name() const;
@@ -70,18 +78,15 @@ namespace squadt {
 
       /** \brief Get the description */
       inline const std::string& get_description() const;
- 
+
       /** \brief Read project information from project_directory */
       static project_manager::ptr read(const std::string&);
- 
-      /** \brief Read configuration with an XML text reader */
-      static project_manager::ptr read(xml2pp::text_reader&) throw ();
  
       /** \brief Writes project configuration to the project file */
       void write() const;
 
       /** \brief Writes project configuration to stream */
-      void write(std::ostream& = std::cout) const;
+      void write(std::ostream&) const;
  
       /** \brief Add a new processor to the project */
       inline processor::ptr add(tool&, processor::reporter::callback_handler = processor::reporter::dummy);
@@ -93,13 +98,33 @@ namespace squadt {
       void update();
   };
 
-  /**
-   * @param l a path to the root of the project directory
-   **/
-  inline project_manager::project_manager(const boost::filesystem::path& l) : directory(l) {
+  inline project_manager::project_manager() {
   }
 
-  inline project_manager::project_manager() {
+  /**
+   * @param l a path to the root of the project directory
+   *
+   * \pre l should be a path to a directory
+   * 
+   * If the directory does not exist then it is created and an initial project
+   * description file is written to it.
+   **/
+  inline project_manager::project_manager(const boost::filesystem::path& l) : directory(l) {
+    using namespace boost;
+
+    assert(!l.empty());
+
+    if (filesystem::exists(l)) {
+      assert(filesystem::is_directory(l));
+
+      read();
+    }
+    else {
+      filesystem::create_directories(l);
+
+      /* Create initial project description file */
+      write();
+    }
   }
 
   /**
@@ -121,6 +146,10 @@ namespace squadt {
     return (processors);
   }
 
+  /**
+   * @param t a reference to a tool object
+   * @param h the handler that can be used to report back state changes
+   **/
   inline processor::ptr project_manager::add(tool& t, processor::reporter::callback_handler h) {
     return (processor::ptr(new processor(t, h)));
   }

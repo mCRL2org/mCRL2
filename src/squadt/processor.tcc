@@ -37,7 +37,6 @@ namespace squadt {
     }
   }
 
-
   /**
    * \brief Operator for writing to stream
    *

@@ -76,7 +76,7 @@ namespace squadt {
         main();
     };
 
-    inline main::main() : wxFrame(0, wxID_ANY, wxT("desk-SQuADT"), wxDefaultPosition, wxDefaultSize) {
+    inline main::main() : wxFrame(0, wxID_ANY, default_title, wxDefaultPosition, wxDefaultSize) {
       build();
 
       /* Reposition the window */

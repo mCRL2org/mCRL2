@@ -27,7 +27,7 @@ namespace squadt {
   }
 
   /**
-   * @param s the stream the output is written to
+   * @param[out] s the stream the output is written to
    **/
   void project_manager::write(std::ostream& s) const {
     /* Write header */
@@ -45,11 +45,32 @@ namespace squadt {
     s << "</project>\n";
   }
 
+  /**
+   * \pre directory/<|settings_manager::project_definition_base_name|> must exist
+   **/
+  void project_manager::read() {
+    xml2pp::text_reader::file_name< std::string > f(settings_manager::path_concatenate(directory, settings_manager::project_definition_base_name));
+
+    assert(bf::exists(f.get()) && !bf::is_directory(f.get()));
+
+    xml2pp::text_reader reader(f);
+
+    reader.set_schema(xml2pp::text_reader::file_name< std::string >(
+                            global_settings_manager->path_to_schemas(
+                                    settings_manager::append_schema_suffix(
+                                            settings_manager::project_definition_base_name)).c_str()));
+
+    read(reader);
+  }
+
+  /**
+   * @param[in] l a path to a project file
+   **/
   project_manager::ptr project_manager::read(const std::string& l) {
     xml2pp::text_reader::file_name< std::string > f(settings_manager::path_concatenate(l, settings_manager::project_definition_base_name));
 
     if (!bf::exists(bf::path(f.get()))) {
-      throw (exception(exception_identifier::failed_loading_object, "squadt project", f.get()));
+      throw (exception(exception_identifier::failed_loading_object, "SQuADT project", f.get()));
     }
 
     xml2pp::text_reader reader(f);
@@ -59,17 +80,20 @@ namespace squadt {
                                     settings_manager::append_schema_suffix(
                                             settings_manager::project_definition_base_name)).c_str()));
 
-    project_manager::ptr p = read(reader);
+    project_manager::ptr p(new project_manager());
+
+    p->read(reader);
 
     p->directory = l;
 
     return (p);
   }
 
-  project_manager::ptr project_manager::read(xml2pp::text_reader& r) throw () {
+  /**
+   * @param[in] r an xml2pp text reader that has been constructed with a project file
+   **/
+  void project_manager::read(xml2pp::text_reader& r) {
     processor::id_conversion_map m;
-
-    project_manager::ptr p(new project_manager());
 
     /* Advance to project element */
     r.read();
@@ -77,19 +101,21 @@ namespace squadt {
     if (r.is_element("description") && !r.is_empty_element()) {
       r.read();
 
-      r.get_value(&p->description);
+      r.get_value(&description);
 
       r.read(2);
     }
+
+    processor::id_conversion_map c;
 
     /* Read processors */
     while (r.is_element("processor")) {
       r.read();
 
+      processors.push_back(processor::read(c, r));
+
       r.skip_end_element("processor");
     }
-
-    return (p);
   }
 
   void project_manager::update() {
