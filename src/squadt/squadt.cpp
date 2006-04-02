@@ -87,11 +87,11 @@ bool Squadt::OnInit() {
 
   splash_window->set_category("Initialising components");
 
-  /* Initialise main application window */
-  new squadt::GUI::main();
-
   /* Disable splash */
   splash_window->set_done();
+
+  /* Initialise main application window */
+  new squadt::GUI::main();
 
   return (true);
 }

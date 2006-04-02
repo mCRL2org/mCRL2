@@ -1,5 +1,6 @@
 #include "gui_main.h"
 #include "gui_project.h"
+#include "gui_dialog_project.h"
 #include "tool_manager.h"
 #include "core.h"
 
@@ -85,41 +86,49 @@ namespace squadt {
     }
 
     void main::project_new() {
-      boost::filesystem::path project_directory;
+      dialog::new_project dialog(this);
 
-      project* new_project = new project(project_directory);
+      if (dialog.ShowModal()) {
+        boost::filesystem::path project_directory;
 
-      /* Adjust title */
-      SetTitle(default_title + wxT(" - ") + new_project->get_name());
+        project* new_project = new project(project_directory);
 
-      /* Enable controls */
-      wxMenuBar& menu_bar = *GetMenuBar();
+        /* Adjust title */
+        SetTitle(default_title + wxT(" - ") + new_project->get_name());
 
-      menu_bar.Enable(wxID_NEW, false);
-      menu_bar.Enable(wxID_OPEN, false);
-      menu_bar.Enable(wxID_CLOSE, true);
-      menu_bar.Enable(cmID_START_ANALYSIS, true);
-      menu_bar.Enable(cmID_RESTART_ANALYSIS, true);
-      menu_bar.Enable(cmID_STOP_ANALYSIS, true);
+        /* Enable controls */
+        wxMenuBar& menu_bar = *GetMenuBar();
+
+        menu_bar.Enable(wxID_NEW, false);
+        menu_bar.Enable(wxID_OPEN, false);
+        menu_bar.Enable(wxID_CLOSE, true);
+        menu_bar.Enable(cmID_START_ANALYSIS, true);
+        menu_bar.Enable(cmID_RESTART_ANALYSIS, true);
+        menu_bar.Enable(cmID_STOP_ANALYSIS, true);
+      }
     }
 
     void main::project_open() {
-      boost::filesystem::path project_directory;
+      dialog::open_project dialog(this);
 
-      project* new_project = new project(project_directory);
+      if (dialog.ShowModal()) {
+        boost::filesystem::path project_directory;
 
-      /* Adjust title */
-      SetTitle(default_title + wxT(" - ") + new_project->get_name());
+        project* new_project = new project(project_directory);
 
-      /* Enable controls */
-      wxMenuBar& menu_bar = *GetMenuBar();
+        /* Adjust title */
+        SetTitle(default_title + wxT(" - ") + new_project->get_name());
 
-      menu_bar.Enable(wxID_NEW, false);
-      menu_bar.Enable(wxID_OPEN, false);
-      menu_bar.Enable(wxID_CLOSE, true);
-      menu_bar.Enable(cmID_START_ANALYSIS, true);
-      menu_bar.Enable(cmID_RESTART_ANALYSIS, true);
-      menu_bar.Enable(cmID_STOP_ANALYSIS, true);
+        /* Enable controls */
+        wxMenuBar& menu_bar = *GetMenuBar();
+
+        menu_bar.Enable(wxID_NEW, false);
+        menu_bar.Enable(wxID_OPEN, false);
+        menu_bar.Enable(wxID_CLOSE, true);
+        menu_bar.Enable(cmID_START_ANALYSIS, true);
+        menu_bar.Enable(cmID_RESTART_ANALYSIS, true);
+        menu_bar.Enable(cmID_STOP_ANALYSIS, true);
+      }
     }
 
     /**

@@ -163,7 +163,7 @@ namespace squadt {
       display->Refresh();
 
       wxYield();
-      wxSleep(2);
+      wxSleep(1);
 
       Show(false);
 

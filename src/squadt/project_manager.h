@@ -138,6 +138,10 @@ namespace squadt {
     return (directory.leaf());
   }
 
+  inline const std::string& project_manager::get_description() const {
+    return (description);
+  }
+
   inline std::string project_manager::get_project_directory() const {
     return (directory.native_directory_string());
   }

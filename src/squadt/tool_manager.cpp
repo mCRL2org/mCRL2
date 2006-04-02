@@ -149,7 +149,7 @@ namespace squadt {
   bool tool_manager::query_tool(tool& t) {
     /* Sanity check: establish tool existence */
     if (t.get_location().empty() || !boost::filesystem::exists(boost::filesystem::path(t.get_location()))) {
-      throw (exception(exception_identifier::requested_tool_unavailable));
+      throw (exception(exception_identifier::requested_tool_unavailable, t.get_name()));
     }
 
     /* Create extractor object, that will retrieve the data from the running tool process */
