@@ -24,5 +24,5 @@ namespace squadt {
 
   const char* settings_manager::tool_catalog_base_name       = "tool_catalog";
 
-  const char* settings_manager::project_definition_base_name = "project";
+  const char* settings_manager::project_definition_base_name = "project.xml";
 }

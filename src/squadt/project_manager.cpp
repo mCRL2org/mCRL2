@@ -53,14 +53,19 @@ namespace squadt {
 
     assert(bf::exists(f.get()) && !bf::is_directory(f.get()));
 
-    xml2pp::text_reader reader(f);
+    try {
+      xml2pp::text_reader reader(f);
 
-    reader.set_schema(xml2pp::text_reader::file_name< std::string >(
+      reader.set_schema(xml2pp::text_reader::file_name< std::string >(
                             global_settings_manager->path_to_schemas(
                                     settings_manager::append_schema_suffix(
                                             settings_manager::project_definition_base_name)).c_str()));
 
-    read(reader);
+      read(reader);
+    }
+    catch (...) {
+      throw;
+    }
   }
 
   /**
@@ -73,18 +78,23 @@ namespace squadt {
       throw (exception(exception_identifier::failed_loading_object, "SQuADT project", f.get()));
     }
 
-    xml2pp::text_reader reader(f);
-
-    reader.set_schema(xml2pp::text_reader::file_name< std::string >(
-                            global_settings_manager->path_to_schemas(
-                                    settings_manager::append_schema_suffix(
-                                            settings_manager::project_definition_base_name)).c_str()));
-
     project_manager::ptr p(new project_manager());
 
-    p->read(reader);
+    try {
+      xml2pp::text_reader reader(f);
 
-    p->directory = l;
+      reader.set_schema(xml2pp::text_reader::file_name< std::string >(
+                              global_settings_manager->path_to_schemas(
+                                      settings_manager::append_schema_suffix(
+                                              settings_manager::project_definition_base_name)).c_str()));
+     
+      p->read(reader);
+
+      p->directory = l;
+    }
+    catch (...) {
+      throw;
+    }
 
     return (p);
   }
