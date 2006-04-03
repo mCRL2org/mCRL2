@@ -30,7 +30,7 @@ namespace squadt {
       public:
 
         /** \brief Constructor */
-        project(boost::filesystem::path&);
+        project(const boost::filesystem::path&);
 
         /** \brief Returns the name of the project */
         wxString get_name() const;

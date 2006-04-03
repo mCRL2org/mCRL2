@@ -213,8 +213,13 @@ namespace squadt {
             EndModal(2);
             break;
           default: /* wxID_OK */
-            if (wxMessageDialog(0, wxT("The directory already exists; any files it contains will be imported into the project."),
+            if (wxFileName::DirExists(directory_selector->GetPath())) {
+              if (wxMessageDialog(0, wxT("The directory already exists; any files it contains will be imported into the project."),
                                     wxT("Warning"), wxOK|wxCANCEL).ShowModal() == wxID_OK) {
+                EndModal(1);
+              }
+            }
+            else {
               EndModal(1);
             }
             break;
@@ -251,18 +256,18 @@ namespace squadt {
       }
 
       /** \brief Gets the name of the project */
-      wxString new_project::get_name() const {
-        return (wxFileName(directory_selector->GetPath()).GetFullName());
+      std::string new_project::get_name() const {
+        return (static_cast < const char* > (wxFileName(directory_selector->GetPath()).GetFullName().fn_str()));
       }
 
       /** \brief Gets the directory reserved from project files */
-      wxString new_project::get_location() const {
-        return (directory_selector->GetPath());
+      std::string new_project::get_location() const {
+        return (static_cast < const char* > (directory_selector->GetPath().fn_str()));
       }
 
       /** \brief Gets the name of the project */
-      wxString new_project::get_description() const {
-        return (description->GetValue());
+      std::string new_project::get_description() const {
+        return (static_cast < const char* > (description->GetValue().fn_str()));
       }
 
       new_project::~new_project() {
@@ -376,18 +381,18 @@ namespace squadt {
       }
 
       /** \brief Gets the name of the project */
-      wxString open_project::get_name() const {
-        return (wxFileName(directory_selector->GetPath()).GetFullName());
+      std::string open_project::get_name() const {
+        return (static_cast < const char* > (wxFileName(directory_selector->GetPath()).GetFullName().fn_str()));
       }
 
       /** \brief Gets the directory reserved from project files */
-      wxString open_project::get_location() const {
-        return (directory_selector->GetPath());
+      std::string open_project::get_location() const {
+        return (static_cast < const char* > (directory_selector->GetPath().fn_str()));
       }
 
       /** \brief Gets the name of the project */
-      wxString open_project::get_description() const {
-        return (description->GetLabel());
+      std::string open_project::get_description() const {
+        return (static_cast < const char* > (description->GetLabel().fn_str()));
       }
 
       open_project::~open_project() {

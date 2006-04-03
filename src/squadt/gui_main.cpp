@@ -4,6 +4,8 @@
 #include "tool_manager.h"
 #include "core.h"
 
+#include <boost/ref.hpp>
+
 #include <wx/menu.h>
 #include <wx/notebook.h>
 
@@ -86,48 +88,27 @@ namespace squadt {
     }
 
     void main::project_new() {
+      using namespace boost::filesystem;
+
       dialog::new_project dialog(this);
 
       if (dialog.ShowModal()) {
-        boost::filesystem::path project_directory;
-
-        project* new_project = new project(project_directory);
-
-        /* Adjust title */
-        SetTitle(default_title + wxT(" - ") + new_project->get_name());
-
-        /* Enable controls */
-        wxMenuBar& menu_bar = *GetMenuBar();
-
-        menu_bar.Enable(wxID_NEW, false);
-        menu_bar.Enable(wxID_OPEN, false);
-        menu_bar.Enable(wxID_CLOSE, true);
-        menu_bar.Enable(cmID_START_ANALYSIS, true);
-        menu_bar.Enable(cmID_RESTART_ANALYSIS, true);
-        menu_bar.Enable(cmID_STOP_ANALYSIS, true);
+        /* Create the new project */
+        project* p = new GUI::project(boost::cref(path(dialog.get_location())));
+         
+        enable_project_level_functionality(p);
       }
     }
 
     void main::project_open() {
+      using namespace boost::filesystem;
+
       dialog::open_project dialog(this);
 
       if (dialog.ShowModal()) {
-        boost::filesystem::path project_directory;
+        project* p = new GUI::project(boost::cref(path(dialog.get_location())));
 
-        project* new_project = new project(project_directory);
-
-        /* Adjust title */
-        SetTitle(default_title + wxT(" - ") + new_project->get_name());
-
-        /* Enable controls */
-        wxMenuBar& menu_bar = *GetMenuBar();
-
-        menu_bar.Enable(wxID_NEW, false);
-        menu_bar.Enable(wxID_OPEN, false);
-        menu_bar.Enable(wxID_CLOSE, true);
-        menu_bar.Enable(cmID_START_ANALYSIS, true);
-        menu_bar.Enable(cmID_RESTART_ANALYSIS, true);
-        menu_bar.Enable(cmID_STOP_ANALYSIS, true);
+        enable_project_level_functionality(p);
       }
     }
 
@@ -136,6 +117,29 @@ namespace squadt {
      * it exists and otherwise disables the project close menu option.
      **/
     void main::project_close() {
+      disable_project_level_functionality();
+    }
+
+    /**
+     * @param p a pointer to the project object for which this is requested
+     **/
+    void main::enable_project_level_functionality(project* p) {
+
+      /* Adjust title */
+      SetTitle(default_title + wxT(" - ") + p->get_name());
+
+      /* Disable or enable controls, if appropriate */
+      wxMenuBar& menu_bar = *GetMenuBar();
+
+      menu_bar.Enable(wxID_NEW, false);
+      menu_bar.Enable(wxID_OPEN, false);
+      menu_bar.Enable(wxID_CLOSE, true);
+      menu_bar.Enable(cmID_START_ANALYSIS, true);
+      menu_bar.Enable(cmID_RESTART_ANALYSIS, true);
+      menu_bar.Enable(cmID_STOP_ANALYSIS, true);
+    }
+
+    void main::disable_project_level_functionality() {
 
       /* Adjust title */
       SetTitle(default_title);

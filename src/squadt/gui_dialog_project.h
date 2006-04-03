@@ -53,13 +53,13 @@ namespace squadt {
           inline project(wxWindow*, wxString);
 
           /** \brief Gets the name of the project */
-          virtual wxString get_name() const = 0;
+          virtual std::string get_name() const = 0;
 
           /** \brief Gets the name of the project */
-          virtual wxString get_location() const = 0;
+          virtual std::string get_location() const = 0;
 
           /** \brief Gets the name of the project */
-          virtual wxString get_description() const = 0;
+          virtual std::string get_description() const = 0;
 
           /** \brief Destructor */
           virtual ~project() = 0;
@@ -121,13 +121,13 @@ namespace squadt {
           new_project(wxWindow*);
 
           /** \brief Gets the name of the project */
-          wxString get_name() const;
+          std::string get_name() const;
 
           /** \brief Gets the name of the project */
-          wxString get_location() const;
+          std::string get_location() const;
 
           /** \brief Gets the name of the project */
-          wxString get_description() const;
+          std::string get_description() const;
 
           /** \brief Destructor */
           ~new_project();
@@ -170,13 +170,13 @@ namespace squadt {
           open_project(wxWindow*);
 
           /** \brief Gets the name of the project */
-          wxString get_name() const;
+          std::string get_name() const;
 
           /** \brief Gets the name of the project */
-          wxString get_location() const;
+          std::string get_location() const;
 
           /** \brief Gets the name of the project */
-          wxString get_description() const;
+          std::string get_description() const;
 
           /** \brief Destructor */
           ~open_project();

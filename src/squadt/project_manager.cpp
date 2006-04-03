@@ -17,6 +17,42 @@ namespace squadt {
 
   namespace bf = boost::filesystem;
 
+  /**
+   * @param l a path to the root of the project store
+   *
+   * \pre l should be a path to a directory
+   * 
+   * If the directory does not exist then it is created and an initial project
+   * description file is written to it. If the directory exists but there is no
+   * project description file in it, then such a file is created and all files
+   * in the directory are imported into the project.
+   **/
+  project_manager::project_manager(const boost::filesystem::path& l) : directory(l) {
+    using namespace boost;
+
+    assert(!l.empty());
+
+    if (filesystem::exists(l)) {
+      assert(filesystem::is_directory(l));
+
+      if (!filesystem::exists(l / filesystem::path(settings_manager::project_definition_base_name))) {
+        /* Create initial project description file */
+        write();
+
+        /* Import files TODO */
+      }
+      else {
+        read();
+      }
+    }
+    else {
+      filesystem::create_directories(l);
+
+      /* Create initial project description file */
+      write();
+    }
+  }
+
   void project_manager::write() const {
     std::ofstream project_stream(settings_manager::path_concatenate(directory,
              settings_manager::project_definition_base_name).c_str(), std::ios::out | std::ios::trunc);

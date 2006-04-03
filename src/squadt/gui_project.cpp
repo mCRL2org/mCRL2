@@ -8,7 +8,7 @@ namespace squadt {
     /**
      * @param l is the path
      **/
-    project::project(boost::filesystem::path& l) : manager(project_manager::create(l)) {
+    project::project(const boost::filesystem::path& l) : manager(project_manager::create(l)) {
     }
 
     wxString project::get_name() const {

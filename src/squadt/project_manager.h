@@ -35,7 +35,7 @@ namespace squadt {
 
     private:
 
-      /** \brief The location of the project directory */
+      /** \brief The location of the project store */
       boost::filesystem::path      directory;
 
       /** \brief A description of the project */
@@ -54,8 +54,8 @@ namespace squadt {
       inline project_manager();
 
       /** \brief Constructor */
-      inline project_manager(const boost::filesystem::path&);
- 
+      project_manager(const boost::filesystem::path&);
+
       /** \brief Read project information from project_directory */
       void read();
  
@@ -70,7 +70,7 @@ namespace squadt {
       /** \brief Get the name of the project */
       inline std::string get_name() const;
 
-      /** \brief Get the path to the project directory */
+      /** \brief Get the path to the project store */
       inline std::string get_project_directory() const;
 
       /** \brief Get a reference to the list of processors in this project */
@@ -102,33 +102,7 @@ namespace squadt {
   }
 
   /**
-   * @param l a path to the root of the project directory
-   *
-   * \pre l should be a path to a directory
-   * 
-   * If the directory does not exist then it is created and an initial project
-   * description file is written to it.
-   **/
-  inline project_manager::project_manager(const boost::filesystem::path& l) : directory(l) {
-    using namespace boost;
-
-    assert(!l.empty());
-
-    if (filesystem::exists(l)) {
-      assert(filesystem::is_directory(l));
-
-      read();
-    }
-    else {
-      filesystem::create_directories(l);
-
-      /* Create initial project description file */
-      write();
-    }
-  }
-
-  /**
-   * @param l a path to the root of the project directory
+   * @param l a path to the root of the project store
    **/
   inline project_manager::ptr project_manager::create(const boost::filesystem::path& l) {
     return project_manager::ptr(new project_manager(l));

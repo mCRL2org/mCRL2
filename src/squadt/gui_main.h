@@ -61,6 +61,12 @@ namespace squadt {
         /** \brief Shows a project open dialog and switches the active view to the new project */
         void project_close();
 
+        /** \brief Helper function for setting widget properties to enable access to project level functionality */
+        void enable_project_level_functionality(project*);
+
+        /** \brief Helper function for setting widget properties to disable access to project level functionality */
+        void disable_project_level_functionality();
+
         /** \brief Creates, shows and eventually removes the about window */
         void about();
 
