@@ -554,8 +554,8 @@ int main(int argc, char **argv)
           default:
             break;
         }
+        trans++;
       }
-      trans++;
       if ( prioritised_action )
       {
               break;
