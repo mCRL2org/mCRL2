@@ -5,6 +5,7 @@
 #include <wx/dialog.h>
 #include <wx/button.h>
 #include <wx/sizer.h>
+#include <wx/dirctrl.h>
 
 namespace squadt {
   namespace GUI {

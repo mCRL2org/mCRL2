@@ -6,7 +6,6 @@
 #include <wx/filename.h>
 #include <wx/sizer.h>
 #include <wx/statline.h>
-#include <wx/dirctrl.h>
 #include <wx/msgdlg.h>
 #include <wx/textctrl.h>
 

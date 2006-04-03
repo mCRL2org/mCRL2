@@ -195,7 +195,7 @@ namespace sip {
 
             if (h != handlers.end()) {
               /* Service handler */
-              boost::thread(boost::bind(&basic_messenger< M >::service_handlers, m, o, (*h).second));
+              boost::thread t(boost::bind(&basic_messenger< M >::service_handlers, m, o, (*h).second));
             }
             else {
               /* Put message into queue */

@@ -99,7 +99,7 @@ private:
   
   // Returns a vector in which each element is a AtermsAppl (DataVarID)  
   //
-  set< data_variable > inline getUsedFreeVars(aterm_appl input)
+  inline set< data_variable > getUsedFreeVars(aterm_appl input)
   {
     p_foundFreeVars.clear();
     getDatVarRec(input);
@@ -359,7 +359,7 @@ private:
     cerr << endl;
   }
 
-  void inline printVar()
+  inline void printVar()
   {
     cerr << "lpeconstelm: Variable indices : {";
     set< int >::iterator i = p_V.begin();
@@ -374,7 +374,7 @@ private:
     cerr << "}" << endl;
   }
 
-  void inline printState()
+  inline void printState()
   {
     if ( p_S.size() > 0 )
     {
@@ -390,7 +390,7 @@ private:
     }
   }
   
-  void inline printCurrentState()
+  inline void printCurrentState()
   {
     for(vector< data_assignment >::iterator i = p_currentState.begin(); i != p_currentState.end() ; i++ ){
       cerr << "[" << i->pp() << "]";
@@ -439,7 +439,7 @@ public:
   // and removing the constant process parameters from the list of process. 
   // Constant parameters (stored in p_S)
   //
-  void inline output()
+  inline void output()
   {
     lpe::LPE p_lpe = p_spec.lpe();
     summand_list rebuild_summandlist;
@@ -607,14 +607,14 @@ public:
   
   // Set output file
   //
-  void inline setSaveFile(string x)
+  inline void setSaveFile(string x)
   {
     p_outputfile = x;
   }
 
   // Print the set of constant process parameters
   //  
-  void inline printSet()
+  inline void printSet()
   {
     cerr << "lpeconstelm: Constant indices: { ";
     set< int >::iterator i = p_S.begin();
@@ -632,7 +632,7 @@ public:
   // Loads an LPE from file
   // returns true if succeeds
   //  
-  bool inline loadFile(string filename)
+  inline bool loadFile(string filename)
   {
     p_filenamein = filename;
     if (!p_spec.load(p_filenamein))
@@ -650,7 +650,7 @@ public:
   // Reads an LPE from stdin
   // returns true if succeeds
   //  
-  bool inline readStream()
+  inline bool readStream()
   {
     ATermAppl z = (ATermAppl) ATreadFromFile(stdin);
     if (z == NULL){
@@ -677,7 +677,7 @@ public:
   // Sets verbose option
   // Note: Has to be set
   //
-  void inline setVerbose(bool b)
+  inline void setVerbose(bool b)
   {
     p_verbose = b;
   }
@@ -685,7 +685,7 @@ public:
   // Sets debug option
   // Note: Has to be set
   //
-  void inline setDebug(bool b)
+  inline void setDebug(bool b)
   {
     p_debug = b;
   }
@@ -693,7 +693,7 @@ public:
   // Sets no singleton option
   // Note: Has to be set
   //  
-  void inline setNoSingleton(bool b)
+  inline void setNoSingleton(bool b)
   {
     p_nosingleton = b;
   }
@@ -701,7 +701,7 @@ public:
   // Sets all conditions to true
   // Note: Has to be set
   //  
-  void inline setAllTrue(bool b)
+  inline void setAllTrue(bool b)
   {
     p_alltrue = b;
   }
@@ -709,7 +709,7 @@ public:
   // Sets the option if not inspected summands have to removed 
   // Note: Has to be set
   //  
-  void inline setReachable(bool b)
+  inline void setReachable(bool b)
   {
     p_reachable = b;
   }
@@ -903,7 +903,7 @@ public:
   
   // Gets the version of the tool
   //    
-  string inline getVersion()
+  inline string getVersion()
   {
     return p_version;
   }

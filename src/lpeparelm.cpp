@@ -69,7 +69,7 @@ private:
   
   // Returns a vector in which each element is a AtermsAppl (DataVarID)  
   //
-  set< data_variable > inline getDataVarIDs(aterm_appl input)
+  inline set< data_variable > getDataVarIDs(aterm_appl input)
   {
     p_foundVariables.clear();
     getDatVarRec(input);
@@ -109,7 +109,7 @@ public:
   // Sets verbose option
   // Note: Has to be set
   //
-  void inline setVerbose(bool b)
+  inline void setVerbose(bool b)
   {
     p_verbose = b;
   }
@@ -117,14 +117,14 @@ public:
   // Sets verbose option
   // Note: Has to be set
   //  
-  void inline setDebug(bool b)
+  inline void setDebug(bool b)
   {
     p_debug = b;
   }
 
   // Set output file
   //  
-  void inline setSaveFile(string x)
+  inline void setSaveFile(string x)
   {
     p_outputfile = x;
   }
@@ -132,7 +132,7 @@ public:
   // Loads an LPE from file
   // returns true if succeeds
   //  
-  bool inline loadFile(string filename)
+  inline bool loadFile(string filename)
   {
     p_inputfile = filename;
     if (!p_spec.load(p_inputfile)){
@@ -145,7 +145,7 @@ public:
   // Reads an LPE from stdin
   // returns true if succeeds
   //  
-  bool inline readStream()
+  inline bool readStream()
   {
     ATermAppl z = (ATermAppl) ATreadFromFile(stdin);
     if (z == NULL){
@@ -294,7 +294,7 @@ public:
     //}
   }
   
-  void inline output()
+  inline void output()
   {
     LPE lpe = p_spec.lpe();
     summand_list rebuild_summandlist;
@@ -404,7 +404,7 @@ public:
     } 
   }
     
-  string inline getVersion()
+  inline string getVersion()
   {
     return p_version;
   }
