@@ -213,7 +213,7 @@ namespace squadt {
             EndModal(2);
             break;
           default: /* wxID_OK */
-            if (wxFileName::DirExists(directory_selector->GetPath())) {
+            if (wxFileName(directory_selector->GetPath(), name->GetValue()).DirExists()) {
               if (wxMessageDialog(0, wxT("The directory already exists; any files it contains will be imported into the project."),
                                     wxT("Warning"), wxOK|wxCANCEL).ShowModal() == wxID_OK) {
                 EndModal(1);
@@ -334,7 +334,9 @@ namespace squadt {
             break;
           default: /* wxID_OK */
             if (!selection_is_valid) {
-              wxMessageDialog(0, wxT("Could not read project description; project file corrupt or inaccessible?"), wxT("Error"), wxOK).ShowModal();
+              wxMessageDialog(0, wxT("Could not read project description; project file corrupt or inaccessible?"),
+                              wxT("Error"), wxOK).ShowModal();
+
               button_accept->Enable(false);
             }
             else {
