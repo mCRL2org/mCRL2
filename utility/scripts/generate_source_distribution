@@ -37,26 +37,26 @@ if [[ ! -d ${TARGET_BASE} ]]; then
   echo "Error: <target-directory> must exist and be a directory!";
 fi
 
-source_files="./mcrl2/articles \
-              ./mcrl2/boost-build.jam \
-              ./mcrl2/conventions \
-              ./mcrl2/COPYING \
-              ./mcrl2/INSTALL \
-              ./mcrl2/README \
-              ./mcrl2/configure \
-              ./mcrl2/config.guess \
-              ./mcrl2/config.sub \
-              ./mcrl2/config.jam.in \
-              ./mcrl2/install-sh \
-              ./mcrl2/config.in \
-              ./mcrl2/Makefile \
-              ./mcrl2/examples \
-              ./mcrl2/test.y \
-              ./mcrl2/test.l \
-              ./mcrl2/tests \
-              ./mcrl2/specs \
-              ./mcrl2/.vim \
-              ./mcrl2/src"
+source_files="mcrl2/articles \
+              mcrl2/boost-build.jam \
+              mcrl2/conventions \
+              mcrl2/COPYING \
+              mcrl2/INSTALL \
+              mcrl2/README \
+              mcrl2/configure \
+              mcrl2/config.guess \
+              mcrl2/config.sub \
+              mcrl2/config.jam.in \
+              mcrl2/install-sh \
+              mcrl2/config.in \
+              mcrl2/Makefile \
+              mcrl2/examples \
+              mcrl2/test.y \
+              mcrl2/test.l \
+              mcrl2/tests \
+              mcrl2/specs \
+              mcrl2/.vim \
+              mcrl2/src"
 
 svn_update="$(svn update --non-interactive ${SOURCE_BASE} 2>&1 | tail -n 1)"
 
@@ -78,17 +78,17 @@ archive_name="${TARGET_BASE}/mcrl2-${revision}.tar"
 # The following works based on assumption that the source tree is configured
 if (! test -e "${archive_name}.bz2"); then
   # Generate tarball for source distribution
-  ln -sf ${SOURCE_BASE} ./mcrl2
+  ln -sf ${SOURCE_BASE} mcrl2
 
   # Find binaries and other files with no extension that should be filtered out
-  find -L ./mcrl2 -mindepth 2 -type f \
+  find -L mcrl2 -mindepth 2 -type f \
        -not -name '*.*' \
        -not -name 'Makefile' \
-       -not -name '*revision' \
+       -not -name '*revision.h' \
        -not -wholename '*boost*' > excludes
 
   # Find directories to filter out
-  find -L ./mcrl2 -type d \
+  find -L mcrl2 -type d \
        -name 'html' \
        -or -name 'latex' \
        -or -name 'bin' \
@@ -113,22 +113,22 @@ if (! test -e "${archive_name}.bz2"); then
            --exclude '*.so' \
            --exclude-from excludes ${source_files}
 
-  tar rf ${archive_name} ./mcrl2/utility/revision.mk
+  tar rf ${archive_name} mcrl2/utility/revision.mk
 
   unlink mcrl2
 
   # Mark distribution as source distribution
   mkdir mcrl2
 
-  cp ${SOURCE_BASE}/project-root.jam ./mcrl2/project-root.jam
+  cp ${SOURCE_BASE}/project-root.jam mcrl2/project-root.jam
 
   echo -e "else {"\
           "\n  constant REVISION_NUMBER : ${revision} ;"\
-          "\n}" >> ./mcrl2/project-root.jam
+          "\n}" >> mcrl2/project-root.jam
 
-  tar rf ${archive_name} ./mcrl2/project-root.jam
+  tar rf ${archive_name} mcrl2/project-root.jam
 
-  unlink ./mcrl2/project-root.jam
+  unlink mcrl2/project-root.jam
 
   rmdir mcrl2
 
