@@ -23,7 +23,7 @@ using std::cout;
 //external declarations
 int mcrl2yyparse(void);          /* declared in mcrl2parser.cpp */
 extern YYSTYPE mcrl2yylval;      /* declared in mcrl2parser.cpp */
-#ifndef _MSC_VER
+#if !defined(_MSC_VER) && !defined(__MINGW32__)
 extern int fileno(FILE *stream); /* declared in stdio.h (forgotten by flex) */
 #endif
 
