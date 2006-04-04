@@ -28,20 +28,24 @@ exe squadt
         /libraries/sip//sipc
         /boost/filesystem//boost_filesystem
       : <cxxflags>"$(IWX)"
-        <linkflags>"$(LWX_BASE)" ;
+        <linkflags>"$(LWX_BASE)"
+      ;
 
 alias install
-      : install-squadt
-        install-libraries ;
+      : install-libraries
+        install-binaries
+      ;
 
-install install-squadt
+install install-binaries
       : squadt
       : <dll-path>$(LIB_DIR)
-        <location>$(BIN_DIR) ;
+        <location>$(BIN_DIR)
+      ;
 
 install install-libraries
       : squadt
       : <install-dependencies>on <install-type>LIB
-      : <location>$(LIB_DIR) ;
+      : <location>$(LIB_DIR)
+      ;
 
-explicit install install-squadt install-libraries ;
+explicit install install-binaries install-libraries ;

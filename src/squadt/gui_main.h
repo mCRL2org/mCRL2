@@ -24,7 +24,10 @@ namespace squadt {
       private:
 
         /** \brief The default title for the main window */
-        static wxString default_title;
+        static wxString       default_title;
+
+        /** \brief The currently opened project, or 0 */
+        squadt::GUI::project* project_view;
 
       private:
 
@@ -61,11 +64,11 @@ namespace squadt {
         /** \brief Shows a project open dialog and switches the active view to the new project */
         void project_close();
 
-        /** \brief Helper function for setting widget properties to enable access to project level functionality */
-        void enable_project_level_functionality(project*);
+        /** \brief Adds a project view and sets widget properties to enable access to project level functionality */
+        void add_project_view(project*);
 
-        /** \brief Helper function for setting widget properties to disable access to project level functionality */
-        void disable_project_level_functionality();
+        /** \brief Removes a project view and sets widget properties to disable access to project level functionality */
+        void remove_project_view(project*);
 
         /** \brief Creates, shows and eventually removes the about window */
         void about();
@@ -82,7 +85,7 @@ namespace squadt {
         main();
     };
 
-    inline main::main() : wxFrame(0, wxID_ANY, default_title, wxDefaultPosition, wxDefaultSize) {
+    inline main::main() : wxFrame(0, wxID_ANY, default_title, wxDefaultPosition, wxDefaultSize), project_view(0) {
       build();
 
       /* Reposition the window */

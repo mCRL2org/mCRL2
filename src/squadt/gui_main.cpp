@@ -96,7 +96,7 @@ namespace squadt {
         /* Create the new project */
         project* p = new GUI::project(boost::cref(path(dialog.get_location())));
          
-        enable_project_level_functionality(p);
+        add_project_view(p);
       }
     }
 
@@ -108,7 +108,7 @@ namespace squadt {
       if (dialog.ShowModal()) {
         project* p = new GUI::project(boost::cref(path(dialog.get_location())));
 
-        enable_project_level_functionality(p);
+        add_project_view(p);
       }
     }
 
@@ -117,13 +117,15 @@ namespace squadt {
      * it exists and otherwise disables the project close menu option.
      **/
     void main::project_close() {
-      disable_project_level_functionality();
+      remove_project_view(project_view);
     }
 
     /**
      * @param p a pointer to the project object for which this is requested
      **/
-    void main::enable_project_level_functionality(project* p) {
+    void main::add_project_view(project* p) {
+
+      /* Only one project view supported at this time ... */
 
       /* Adjust title */
       SetTitle(default_title + wxT(" - ") + p->get_name());
@@ -139,7 +141,10 @@ namespace squadt {
       menu_bar.Enable(cmID_STOP_ANALYSIS, true);
     }
 
-    void main::disable_project_level_functionality() {
+    /**
+     * @param p a pointer to the project object for which this is requested
+     **/
+    void main::remove_project_view(project* p) {
 
       /* Adjust title */
       SetTitle(default_title);
