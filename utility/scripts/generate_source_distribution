@@ -113,7 +113,8 @@ if (! test -e "${archive_name}.bz2"); then
            --exclude '*.so' \
            --exclude-from excludes ${source_files}
 
-  tar rf ${archive_name} mcrl2/utility/revision.mk
+  # Exceptions
+  tar rf ${archive_name} src/squadt/core.h mcrl2/utility/revision.mk
 
   unlink mcrl2
 
