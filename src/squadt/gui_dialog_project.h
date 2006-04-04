@@ -1,6 +1,8 @@
 #ifndef GUI_DIALOG_PROJECT
 #define GUI_DIALOG_PROJECT
 
+#include <string>
+
 #include <wx/wx.h>
 #include <wx/dialog.h>
 #include <wx/button.h>
