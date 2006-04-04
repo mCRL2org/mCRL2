@@ -12,6 +12,8 @@ REVISION_HEADER = $(TREE_ROOT)src/mcrl2_revision.h
 # Add revision number
 ifeq ($(findstring $(MAKECMDGOALS),clean distclean),)
 
+revision: $(REVISION_HEADER)
+
 *.d *.dpp: $(REVISION_HEADER)
 
 # Bootstrap bjam
