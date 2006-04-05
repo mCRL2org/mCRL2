@@ -30,7 +30,7 @@ namespace squadt {
 
   const long tool_manager::default_tcp_port = 10946;
 
-  tool_manager::tool_manager() : free_identifier(0) {
+  tool_manager::tool_manager() : sip::controller::communicator(), free_identifier(0) {
     /* Listen for incoming socket connections on the loopback interface with the default port */
     add_listener();
 

@@ -22,7 +22,16 @@ namespace transport {
 
       acceptor.open(endpoint.protocol());
       acceptor.set_option(socket_base::reuse_address(true));
-      acceptor.bind(endpoint);
+
+      try {
+            acceptor.bind(endpoint);
+      }
+      catch (asio::error e) {
+        std::cerr << " socket layer : " << e << " (" << endpoint.address().to_string() << ":" << endpoint.port() << ")" << std::endl;
+
+        throw;
+      }
+
       acceptor.listen();
     }
 
