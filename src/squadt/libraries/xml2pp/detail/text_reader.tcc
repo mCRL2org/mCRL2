@@ -28,7 +28,7 @@ namespace xml2pp {
   template < typename T >
   inline text_reader::text_reader(const file_name< T >& f) throw () {
     reader = xmlReaderForFile(f.get(), "", 0);
-std::cerr << "TODEBUG(" << f.get() << ")" << std::endl;
+
     if (reader == 0) {
       throw (exception(exception_identifier::unable_to_open_file, f.get()));
     }
@@ -253,20 +253,18 @@ std::cerr << "TODEBUG(" << f.get() << ")" << std::endl;
         /* Process error, or end of file */
         throw (exception(exception_identifier::error_while_parsing_document));
       }
-      else {
-        /* Skip white space */
-        if (xmlTextReaderNodeType(reader) == XML_READER_TYPE_SIGNIFICANT_WHITESPACE) {
-          status = xmlTextReaderRead(reader);
-
-          continue;
-        }
-
-        if (n != 0) {
-          --n;
-        }
+      else if (xmlTextReaderNodeType(reader) == XML_READER_TYPE_SIGNIFICANT_WHITESPACE) {
+        /* Skip whitespace */
+        status = xmlTextReaderRead(reader);
       }
+      else if (1 < n) {
+        status = xmlTextReaderRead(reader);
 
-      break;
+        --n;
+      }
+      else {
+        break;
+      }
     }
     while (1);
   }

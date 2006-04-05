@@ -72,7 +72,7 @@ namespace squadt {
       << " xsi:noNamespaceSchemaLocation=\"project.xsd\" version=\"1.0\">\n";
 
     if (!description.empty()) {
-      s << "<description>" << description << "</desription>";
+      s << "<description>" << description << "</description>";
     }
  
     std::for_each(processors.begin(), processors.end(),
@@ -139,10 +139,8 @@ namespace squadt {
    * @param[in] r an xml2pp text reader that has been constructed with a project file
    **/
   void project_manager::read(xml2pp::text_reader& r) {
-    processor::id_conversion_map m;
-
-    /* Advance to project element */
-    r.read();
+    /* Advance beyond project element */
+    r.read(2);
 
     if (r.is_element("description") && !r.is_empty_element()) {
       r.read();

@@ -58,7 +58,7 @@ namespace xml2pp {
       template < typename T >
       inline void set_schema(const file_name< T >&) throw ();
 
-      /** \brief Traverses of the XML document tree */
+      /** \brief Advances to the next element in the XML document tree */
       inline void read(unsigned int = 0) throw ();
 
       /** \brief Returns the name of the current element */

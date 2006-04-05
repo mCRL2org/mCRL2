@@ -69,7 +69,6 @@ namespace squadt {
        **/
       wxString project::get_project_description(wxString p) {
         std::string f(p.fn_str());
-std::cerr << "TODEBUG(" << f.c_str() << ")\n";
 
         project_manager::ptr m = project_manager::read(f);
 
