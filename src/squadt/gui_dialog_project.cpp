@@ -55,7 +55,7 @@ namespace squadt {
       }
 
       /**
-       * @param[in] p should be a valid path that identifies a directory
+       * @param[in] p should be a valid path that identifies a project store
        **/
       bool project::is_project_directory(wxString p) {
         wxString f(settings_manager::path_concatenate(std::string(p.fn_str()),
@@ -65,10 +65,15 @@ namespace squadt {
       }
 
       /**
-       * @param[in] p should be a valid path that identifies a directory
+       * @param[in] p should be a valid path that identifies a project store
        **/
       wxString project::get_project_description(wxString p) {
-        return (wxString(project_manager::read(std::string(p.fn_str()))->get_description().c_str(), wxConvLocal));
+        std::string f(p.fn_str());
+std::cerr << "TODEBUG(" << f.c_str() << ")\n";
+
+        project_manager::ptr m = project_manager::read(f);
+
+        return (wxString(m->get_description().c_str(), wxConvLocal));
       }
 
       project::~project() {
@@ -156,13 +161,13 @@ namespace squadt {
         screen1->Add(already_project_directory);
         screen1->Add(open_project_instead);
          
-        /* Hide everything in screen1 */
-        screen1->Show(false);
-
         /* Add sizers to the main sizer */
         s->AddSpacer(10);
         s->Add(screen0, 0, wxEXPAND|wxLEFT|wxRIGHT, 20);
         s->Add(screen1, 0, wxEXPAND|wxLEFT|wxRIGHT, 20);
+
+        /* Hide everything in screen1 */
+        s->Show(screen1, false, true);
 
         main_panel->SetSizer(s);
 
@@ -257,12 +262,12 @@ namespace squadt {
 
       /** \brief Gets the name of the project */
       std::string new_project::get_name() const {
-        return (static_cast < const char* > (wxFileName(directory_selector->GetPath()).GetFullName().fn_str()));
+        return (static_cast < const char* > (name->GetValue().fn_str()));
       }
 
       /** \brief Gets the directory reserved from project files */
       std::string new_project::get_location() const {
-        return (static_cast < const char* > (directory_selector->GetPath().fn_str()));
+        return (static_cast < const char* > (wxFileName(directory_selector->GetPath(), name->GetValue()).GetFullPath().fn_str()));
       }
 
       /** \brief Gets the name of the project */
@@ -355,10 +360,10 @@ namespace squadt {
 
         if (dialog::project::is_project_directory(directory_selector->GetPath())) {
 
+          selection_is_valid = true;
+
           try {
             wxString label = dialog::project::get_project_description(directory_selector->GetPath());
-
-            selection_is_valid = true;
 
             description->SetLabel(label);
 
@@ -366,35 +371,36 @@ namespace squadt {
             s->Show(project_description, true);
           }
           catch (...) {
-            s->Show(not_store, true);
-
             /* Project description could not be extracted */
-            selection_is_valid = false;
+            s->Show(not_store, false);
           }
-
-          button_accept->Enable(selection_is_valid);
         }
         else {
           s->Show(not_store, true);
           s->Show(project_description, false);
+
+          selection_is_valid = false;
         }
+
+        button_accept->Enable(selection_is_valid);
 
         Layout();
       }
 
       /** \brief Gets the name of the project */
       std::string open_project::get_name() const {
-        return (static_cast < const char* > (wxFileName(directory_selector->GetPath()).GetFullName().fn_str()));
+        return (std::string(wxFileName(directory_selector->GetPath()).GetFullName().fn_str()));
       }
 
       /** \brief Gets the directory reserved from project files */
       std::string open_project::get_location() const {
-        return (static_cast < const char* > (directory_selector->GetPath().fn_str()));
+std::cerr << "path(" << directory_selector->GetPath().fn_str() << ")\n";
+        return (std::string(directory_selector->GetPath().fn_str()));
       }
 
       /** \brief Gets the name of the project */
       std::string open_project::get_description() const {
-        return (static_cast < const char* > (description->GetLabel().fn_str()));
+        return (std::string(description->GetLabel().fn_str()));
       }
 
       open_project::~open_project() {

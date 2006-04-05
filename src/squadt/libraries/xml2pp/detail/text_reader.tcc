@@ -28,7 +28,7 @@ namespace xml2pp {
   template < typename T >
   inline text_reader::text_reader(const file_name< T >& f) throw () {
     reader = xmlReaderForFile(f.get(), "", 0);
-
+std::cerr << "TODEBUG(" << f.get() << ")" << std::endl;
     if (reader == 0) {
       throw (exception(exception_identifier::unable_to_open_file, f.get()));
     }

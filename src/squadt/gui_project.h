@@ -7,6 +7,7 @@
 #include <wx/wx.h>
 #include <wx/panel.h>
 #include <wx/string.h>
+#include <wx/splitter.h>
 
 namespace squadt {
 
@@ -19,7 +20,7 @@ namespace squadt {
     /**
      * \brief Represents the main view of a project
      **/
-    class project : wxPanel {
+    class project : wxSplitterWindow {
       friend class squadt::GUI::main;
 
       private:
@@ -27,10 +28,18 @@ namespace squadt {
         /** \brief The location (incomplete path) to project directory the project name is the basename */
         boost::shared_ptr < project_manager > manager;
 
+      private:
+
+        /** \brief Initially places the widgets */
+        void build();
+
       public:
 
         /** \brief Constructor */
-        project(const boost::filesystem::path&);
+        project(wxWindow* p, const boost::filesystem::path&);
+
+        /** \brief Constructor, with project description */
+        project(wxWindow* p, const boost::filesystem::path&, const std::string&);
 
         /** \brief Returns the name of the project */
         wxString get_name() const;

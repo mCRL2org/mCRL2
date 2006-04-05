@@ -77,6 +77,9 @@ namespace squadt {
       inline const processor_list& get_processors() const;
 
       /** \brief Get the description */
+      inline void set_description(const std::string&);
+
+      /** \brief Get the description */
       inline const std::string& get_description() const;
 
       /** \brief Read project information from project_directory */
@@ -110,6 +113,13 @@ namespace squadt {
 
   inline std::string project_manager::get_name() const {
     return (directory.leaf());
+  }
+
+  /**
+   * @param d a description for this project
+   **/
+  inline void project_manager::set_description(const std::string& d) {
+    description = d;
   }
 
   inline const std::string& project_manager::get_description() const {

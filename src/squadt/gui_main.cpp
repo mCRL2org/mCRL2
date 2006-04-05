@@ -94,8 +94,8 @@ namespace squadt {
 
       if (dialog.ShowModal()) {
         /* Create the new project */
-        project* p = new GUI::project(boost::cref(path(dialog.get_location())));
-         
+        project* p = new GUI::project(this, boost::cref(path(dialog.get_location())), dialog.get_description());
+
         add_project_view(p);
       }
     }
@@ -106,7 +106,7 @@ namespace squadt {
       dialog::open_project dialog(this);
 
       if (dialog.ShowModal()) {
-        project* p = new GUI::project(boost::cref(path(dialog.get_location())));
+        project* p = new GUI::project(this, boost::cref(path(dialog.get_location())));
 
         add_project_view(p);
       }
@@ -126,6 +126,9 @@ namespace squadt {
     void main::add_project_view(project* p) {
 
       /* Only one project view supported at this time ... */
+      assert(project_view == 0);
+
+      project_view = p;
 
       /* Adjust title */
       SetTitle(default_title + wxT(" - ") + p->get_name());
@@ -143,8 +146,16 @@ namespace squadt {
 
     /**
      * @param p a pointer to the project object for which this is requested
+     *
+     * \pre project_view is not 0
      **/
     void main::remove_project_view(project* p) {
+
+      assert(project_view != 0);
+
+      project_view->Destroy();
+
+      project_view = 0;
 
       /* Adjust title */
       SetTitle(default_title);
