@@ -71,13 +71,19 @@ namespace sip {
       send_message(m);
  
       /* Await the reply */
-      message_ptr p = await_message(sip::reply_controller_capabilities);
+      do {
+        message_ptr p = await_message(sip::reply_controller_capabilities);
  
-      xml2pp::text_reader reader(p->to_string().c_str());
- 
-      reader.read();
- 
-      current_controller_capabilities = controller::capabilities::read(reader);
+        if (p.get() != 0) {
+          xml2pp::text_reader reader(p->to_string().c_str());
+       
+          reader.read();
+       
+          current_controller_capabilities = controller::capabilities::read(reader);
+
+          break;
+        }
+      } while (1);
     }
  
     /* Send a specification of the tools capabilities */

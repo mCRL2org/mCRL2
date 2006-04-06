@@ -21,7 +21,7 @@ namespace transport {
         /** \brief Convenience type to hide the shared pointer */
         typedef boost::shared_ptr < basic_transceiver > ptr;
 
-      private:
+      protected:
 
         /** \brief The local owner on this side of the connection */
         transporter* owner;

@@ -6,8 +6,8 @@ project test_transport
 
 import testing ;
 
-unit-test connection_test :
-        connection_test.cpp
+unit-test connection_test
+      : connection_test.cpp
         /libraries/transport//transport
         /boost/test//boost_unit_test_framework
       ;

@@ -139,6 +139,8 @@ namespace transport {
   }
 
   inline size_t transporter::number_of_connections() const {
+    boost::recursive_mutex::scoped_lock l(lock);
+
     return (connections.size());
   }
 

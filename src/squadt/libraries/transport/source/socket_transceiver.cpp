@@ -92,7 +92,6 @@ namespace transport {
       if (w.get() != 0) {
         boost::mutex::scoped_lock l(operation_lock);
 
-        socket.shutdown(asio::ipv4::tcp::socket::shutdown_both);
         socket.close();
 
         basic_transceiver::handle_disconnect(this);

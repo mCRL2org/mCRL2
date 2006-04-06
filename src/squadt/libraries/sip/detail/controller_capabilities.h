@@ -68,6 +68,9 @@ namespace sip {
         /** \brief Get the dimensions of the part of the display that is reserved for this tool */
         inline display_dimensions get_display_dimensions() const;
  
+        /** \brief Read from XML string */
+        inline static capabilities::ptr read(const std::string&);
+
         /** \brief Write to XML string */
         inline std::string write() const;
  
@@ -125,7 +128,22 @@ namespace sip {
       return (output.str());
     }
  
-    /** \attention if the reader does not point at a capabilities element nothing is read */
+    /**
+     * @param s the string to read from
+     **/
+    inline capabilities::ptr capabilities::read(const std::string& s) {
+      xml2pp::text_reader r(s);
+
+      r.read();
+
+      return (read(r));
+    }
+
+    /**
+     * @param r the XML text reader to read from
+     *
+     * \attention if the reader does not point at a capabilities element nothing is read
+     **/
     inline capabilities::ptr capabilities::read(xml2pp::text_reader& r) throw () {
       if (r.is_element("capabilities")) {
         version v = {0,0};

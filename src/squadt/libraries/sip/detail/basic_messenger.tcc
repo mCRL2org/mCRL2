@@ -86,8 +86,6 @@ namespace sip {
      **/
     template < class M >
     inline void basic_messenger< M >::set_handler(handler_type h, const typename M::type_identifier_t t) {
-      assert(waiters.count(t) == 0);
-
       handlers[t] = h;
     }
 
@@ -195,18 +193,11 @@ namespace sip {
 
             if (h != handlers.end()) {
               /* Service handler */
-              boost::thread t(boost::bind(&basic_messenger< M >::service_handlers, m, o, (*h).second));
+              boost::thread thread(boost::bind(&basic_messenger< M >::service_handlers, this, m, o, (*h).second));
             }
             else {
               /* Put message into queue */
               message_queue.push_back(m);
-            }
-
-            /* Unblock a possible waiter */
-            if (0 < waiters.count(t)) {
-              boost::mutex::scoped_lock l(waiters[t]->mutex);
-
-              waiters[t]->condition.notify_all();
             }
           }
         }
@@ -303,6 +294,17 @@ namespace sip {
     template < class M >
     inline void basic_messenger< M >::service_handlers(const message_ptr& m, const basic_transceiver* o, handler_type h) {
       h(m, o);
+
+      boost::mutex::scoped_lock w(waiter_lock);
+
+      typename M::type_identifier_t id = m->get_type();
+
+      /* Unblock all possible waiter */
+      if (0 < waiters.count(id)) {
+        boost::mutex::scoped_lock l(waiters[id]->mutex);
+
+        waiters[id]->condition.notify_all();
+      }
     }
 
     /**

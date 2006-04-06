@@ -17,6 +17,7 @@ using namespace transport;
 
 class stream_messenger : public transporter {
   private:
+    mutable boost::mutex tlock;
 
   public:
 
@@ -26,18 +27,26 @@ class stream_messenger : public transporter {
     }
 
     void deliver(std::istream& input, transceiver::basic_transceiver*) {
+      boost::mutex::scoped_lock l(tlock);
+
       output << input.rdbuf();
     }
 
-    void deliver(std::string& input, transceiver::basic_transceiver*) {
+    void deliver(const std::string& input, transceiver::basic_transceiver*) {
+      boost::mutex::scoped_lock l(tlock);
+
       output.str(input);
     }
 
     inline const std::string get_string() {
+      boost::mutex::scoped_lock l(tlock);
+
       return (output.str());
     }
 
     inline void set_string(std::string& string) {
+      boost::mutex::scoped_lock l(tlock);
+
       return (output.str(string));
     }
 };

@@ -50,9 +50,7 @@ void controller_capabilities_exchange() {
   check_stream1.str("");
 
   /* Example display dimensions */
-  sip::controller::capabilities capabilities();
-
-  cc.get_controller_capabilities().set_display_dimensions(75,75,0);
+  const_cast < sip::controller::capabilities& > (cc.get_controller_capabilities()).set_display_dimensions(75,75,0);
 
   tc.connect(cc);
 
@@ -83,9 +81,13 @@ void tool_capabilities_exchange() {
 
   cc.request_tool_capabilities();
 
-  tc.disconnect();
+  sip::messenger::message_ptr m = cc.await_message(sip::reply_tool_capabilities);
 
-  BOOST_CHECK(tcp.write() == cc.get_tool_capabilities()->write());
+  cc.disconnect();
+
+  sip::tool::capabilities::ptr cp = sip::tool::capabilities::read(m->to_string());
+
+  BOOST_CHECK(tcp.write() == cp->write());
   BOOST_MESSAGE("  done");
 }
 

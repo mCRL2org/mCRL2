@@ -60,7 +60,7 @@ namespace sip {
  
         /** \brief Whether the configuration can be changed through user interaction, after the start signal */
         bool                     interactive;
- 
+
       public:
  
         /** \brief Constructor */
@@ -74,6 +74,8 @@ namespace sip {
  
         /** \brief Set or reset flag that the tool is interactive (configuration may change through user interaction) */
         inline void set_interactive(bool);
+ 
+        inline static capabilities::ptr read(const std::string&);
  
         /** \brief Read from XML stream */
         inline static capabilities::ptr read(xml2pp::text_reader& reader) throw ();
@@ -147,7 +149,22 @@ namespace sip {
       interactive = b;
     }
  
-    /** \attention if the reader does not point at a capabilities element nothing is read */
+    /**
+     * @param s the string to read from
+     **/
+    inline capabilities::ptr capabilities::read(const std::string& s) {
+      xml2pp::text_reader r(s);
+
+      r.read();
+
+      return (read(r));
+    }
+
+    /**
+     * @param r the XML text reader to read from
+     *
+     * \attention if the reader does not point at a capabilities element nothing is read
+     **/
     inline capabilities::ptr capabilities::read(xml2pp::text_reader& r) throw () {
       if (r.is_element("capabilities")) {
         version v = {0,0};

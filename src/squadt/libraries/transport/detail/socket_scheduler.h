@@ -2,6 +2,7 @@
 #define SOCKET_SCHEDULER_H
 
 #include <boost/thread/mutex.hpp>
+#include <boost/thread/thread.hpp>
 
 #include <transport/detail/socket_transceiver.h>
 
@@ -24,16 +25,16 @@ namespace transport {
 
       private:
         /** \brief The current state of the scheduler */
-        bool                               active;
+        bool                                active;
 
         /** \brief The io_service */
-        asio::io_service                   io_service;
+        asio::io_service                    io_service;
 
         /** \brief This lock is used to ensure that switching between states active or shutdown is atomic */
-        boost::mutex                       run_lock;
+        boost::mutex                        run_lock;
 
         /** \brief The thread in which the scheduling takes place */
-        boost::shared_ptr < asio::thread > thread;
+        boost::shared_ptr < boost::thread > thread;
 
         /** \brief Runs until no more tasks are registered, then resets */
         void task();
@@ -66,14 +67,14 @@ namespace transport {
     }
 
     inline void socket_scheduler::run() {
-      boost::mutex::scoped_lock l(run_lock);
+      using namespace boost;
+
+      mutex::scoped_lock l(run_lock);
 
       if (!active) {
-        using namespace boost;
-
         active = true;
 
-        thread = shared_ptr < asio::thread > (new asio::thread(bind(&socket_scheduler::task, this)));
+        thread = shared_ptr < boost::thread > (new boost::thread(bind(&socket_scheduler::task, this)));
       }
     }
 

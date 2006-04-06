@@ -54,10 +54,19 @@ namespace transport {
       p->peer = this;
     }
 
-    inline void direct_transceiver::disconnect(basic_transceiver::ptr) {
+    /**
+     * @param p a shared pointer to this object
+     **/
+    inline void direct_transceiver::disconnect(basic_transceiver::ptr p) {
+      transporter* o = owner;
+
       peer->handle_disconnect(this);
 
+      owner = o;
+
       handle_disconnect(peer);
+
+      owner = 0;
     }
 
     /**
