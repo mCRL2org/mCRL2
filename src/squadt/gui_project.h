@@ -8,6 +8,7 @@
 #include <wx/panel.h>
 #include <wx/string.h>
 #include <wx/splitter.h>
+#include <wx/treectrl.h>
 
 namespace squadt {
 
@@ -25,6 +26,12 @@ namespace squadt {
 
       private:
 
+        /** \brief The view on processors and their interdependencies */
+        wxTreeCtrl*                           processor_view;
+
+        /** \brief The view on progress report regions for tools */
+        wxPanel*                              process_display_view;
+
         /** \brief The location (incomplete path) to project directory the project name is the basename */
         boost::shared_ptr < project_manager > manager;
 
@@ -32,6 +39,9 @@ namespace squadt {
 
         /** \brief Initially places the widgets */
         void build();
+
+        /** \brief Event handler for when a context menu is requested for a tree item */
+        void on_tree_item_activate(wxTreeEvent&);
 
       public:
 

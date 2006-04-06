@@ -393,7 +393,6 @@ namespace squadt {
 
       /** \brief Gets the directory reserved from project files */
       std::string open_project::get_location() const {
-std::cerr << "path(" << directory_selector->GetPath().fn_str() << ")\n";
         return (std::string(directory_selector->GetPath().fn_str()));
       }
 

@@ -29,7 +29,7 @@ namespace xml2pp {
       template < typename T >
       class file_name {
         /** \brief The name of the file */
-        const T& name;
+        const T name;
 
         public:
           /** \brief Constructor */

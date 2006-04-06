@@ -1,5 +1,6 @@
 #include "gui_main.h"
 #include "gui_project.h"
+#include "gui_resources.h"
 #include "gui_dialog_project.h"
 #include "tool_manager.h"
 #include "core.h"
@@ -31,10 +32,23 @@ namespace squadt {
       Connect(wxID_EXIT, wxEVT_COMMAND_MENU_SELECTED, wxCommandEventHandler(main::on_menu_quit));
       Connect(wxEVT_CLOSE_WINDOW, wxCloseEventHandler(main::on_window_close));
 
+      /* Load main icons */
+      main_icon_list = load_main_icons();
+
+      SetIcon(*gui_icon);
+
+      /* Load default icons for file formats */
+      format_icon_list = load_format_icons();
+
+      /* Load default small icons for file formats */
+      format_small_icon_list = load_small_format_icons();
+
       /* Generate and attach the menu bar */
       set_menu_bar();
 
       CreateStatusBar();
+
+      SetSizer(new wxBoxSizer(wxVERTICAL));
 
       SetSize(wxSize(800, 600));
     }
@@ -48,6 +62,7 @@ namespace squadt {
 
       for (tool_manager::tool_list::const_iterator i = tools.begin(); i != tools.end(); ++i) {
         sip::tool::capabilities c = (*i)->get_capabilities();
+        /* TODO */
       }
     }
 
@@ -130,6 +145,8 @@ namespace squadt {
 
       project_view = p;
 
+      GetSizer()->Add(project_view, 1, wxEXPAND);
+
       /* Adjust title */
       SetTitle(default_title + wxT(" - ") + p->get_name());
 
@@ -153,8 +170,12 @@ namespace squadt {
 
       assert(project_view != 0);
 
-      project_view->Destroy();
+      GetSizer()->Detach(project_view);
+      GetSizer()->RecalcSizes();
 
+      Layout();
+
+      project_view->Destroy();
       project_view = 0;
 
       /* Adjust title */
