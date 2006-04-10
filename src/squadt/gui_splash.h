@@ -57,6 +57,9 @@ namespace squadt {
         std::string   operation;
         std::string   operand;
 
+        /** \brief Flag that indicates whether progress was made since last update */
+        bool          changed;
+
       public:
         /** \brief Constructor */
         inline splash(wxImage*, unsigned char);
@@ -69,6 +72,9 @@ namespace squadt {
 
         /** \brief Finishes up and hides the splash window */
         inline void set_done();
+
+        /** \brief Calls the wxWidgets Update() method, if required */
+        inline void update();
     };
  
     /**
@@ -106,7 +112,7 @@ namespace squadt {
      **/
     inline splash::splash(wxImage* i, unsigned char n) :
             wxFrame(0, wxID_ANY, wxT(""), wxDefaultPosition, wxDefaultSize, wxNO_BORDER|wxSTAY_ON_TOP|wxFRAME_NO_TASKBAR),
-            number_of_categories(n), current_category(0) {
+            number_of_categories(n), current_category(0), changed(false) {
 
       wxBoxSizer*      s = new wxBoxSizer(wxVERTICAL);
       progress_indicator = new wxGauge(this, wxID_ANY, 6);
@@ -136,7 +142,7 @@ namespace squadt {
 
       category = c;
 
-      display->Refresh();
+      changed = true;
     }
 
     /**
@@ -150,7 +156,15 @@ namespace squadt {
       operation = o;
       operand   = s;
 
-      display->Refresh();
+      changed = true;
+    }
+
+    inline void splash::update() {
+      if (changed) {
+        changed = false;
+
+        display->Update();
+      }
     }
 
     inline void splash::set_done() {
@@ -160,7 +174,7 @@ namespace squadt {
 
       progress_indicator->SetValue(progress_indicator->GetRange());
 
-      display->Refresh();
+      display->Update();
 
       wxYield();
       wxSleep(1);

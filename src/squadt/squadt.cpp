@@ -82,6 +82,8 @@ bool Squadt::OnInit() {
 
   /* Cannot just wait because the splash would not be updated */
   while (ti.IsAlive()) {
+    splash_window->update();
+
     wxYield();
   }
 
