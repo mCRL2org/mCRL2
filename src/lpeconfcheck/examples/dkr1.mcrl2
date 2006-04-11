@@ -1,0 +1,97 @@
+% This file contains a specification of the Dolev, Klawe and Rodeh leader election
+% protocol in a ring as described in TCS:
+% L.-AA. Fredlund, J.F. Groote and H. Korver.
+% Formal Verification of a Leader Election
+% Protocol in Process Algebra.
+% Theoretical Computer Science, 177:459-486, 1997.
+%
+%
+% This specification is basically a translation of the mCRL specification found as
+% an example in the mCRL distribution called DKRleader1.mcrl. A crucial difference
+% between the two specifications is the addition of the equations
+% "rtail(d |> q) = if(q == [], [], d |> rtail(q))" and
+% "rhead(d |> q) = if(q == [], d, rhead(q))".
+% Without these equations, the prover is unable to prove a number of confluence
+% conditions.
+%
+%
+% To compare confcheck (the tool for mCRL) and lpeconfcheck (the tool for mCRL2),
+% the following two rewrite rules must be added to the specification in
+% DKRleader1.mcrl:
+% "toe(in(d,q))=if(eq(q,q0),d,toe(q))" and
+% "untoe(in(d,q))=if(eq(q,q0),q0,in(d,untoe(q)))".
+%
+%
+% confcheck and lpeconfcheck can then be compared by executing the following
+% commands:
+%
+% mcrl22lpe -f -n dkr1.mcrl2 dkr1.lpe
+% lperewr dkr1.lpe | lpeconstelm > dkr1.temp.lpe
+% time lpeconfcheck dkr1.temp.lpe dkr1.final.lpe
+% mcrl -regular -tbf -nocluster DKRleader1.mcrl
+% rewr DKRleader1.tbf | constelm > DKRleader1.temp.tbf
+% time confcheck DKRleader1.temp.tbf > DKRleader1.c.tbf
+
+map
+  submod: Nat # Nat -> Nat;
+
+var
+  n, m: Nat;
+
+eqn
+  submod(0, n) = Int2Nat(n - 1);
+  n > 0 -> submod(n, m) = Int2Nat(n - 1);
+
+var
+  d: Nat;
+  q: List(Nat);
+
+eqn
+  rtail(d |> q) = if(q == [], [], d |> rtail(q));
+  rhead(d |> q) = if(q == [], d, rhead(q));
+
+act
+  rq, rp, sp, sq, c: Nat # Nat;
+  leader;
+
+proc
+  Active(i: Nat, d: Nat, n: Nat) =
+    sq(i, d) .
+      (sum e: Nat. rq(submod(i, n), e) .
+        ((d == e) ->
+          leader . Dead(i, n)
+        <>
+          sq(i, e) . (sum f: Nat. rq(submod(i, n), f) .
+            ((e > max(d, f)) ->
+              Active(i, e, n)
+            <>
+              Relay(i, n)
+            )
+          )
+        )
+      );
+
+  Relay(i: Nat, n: Nat) =
+    sum d: Nat. rq(submod(i, n), d) . sq(i, d) . Relay(i, n);
+
+  Dead(i: Nat, n: Nat) =
+    delta;
+
+  Q(i: Nat, q: List(Nat)) =
+    sum d: Nat. rp(i, d) . Q(i, d |> q) +
+    (q != []) -> sp(i, rhead(q)) . Q(i, rtail(q));
+
+  Spec =
+    hide({c},
+      allow({c, leader},
+        comm({rp|sq -> c, rq|sp -> c},
+          Active(0,3,4) || Q(0,[]) ||
+          Active(1,1,4) || Q(1,[]) ||
+          Active(2,0,4) || Q(2,[]) ||
+          Active(3,2,4) || Q(3,[])
+        )
+      )
+    );
+
+init
+  Spec;

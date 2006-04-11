@@ -1,0 +1,27 @@
+% This specification serves as an example of the use of
+% lpeformcheck. The file "formulas" contains a list of
+% formulas in internal mCRL2 format. These formulas can
+% be checked using the data specification of this 
+% specification as context. 
+%
+%
+% The following commands illustrate the use of
+% lpeformcheck:
+%
+% mcrl22lpe formulas.mcrl2 formulas.lpe
+% lpeformcheck -l formulas.lpe -f formulas
+
+map
+  f: Bool -> Bool;
+  g: Bool -> Bool;
+
+eqn
+  f(true) = true;
+  g(true) = false;
+  g(false) = true;
+
+act
+  a: Int;
+
+init
+  delta;
