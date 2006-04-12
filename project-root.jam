@@ -3,12 +3,12 @@ import modules ;
 
 path-constant TOP       : . ;
 path-constant BUILD_TOP : ./bin ;
+path-constant BOOST     : ./boost ;
 
 project mcrl2_toolset
        : build-dir $(BUILD_TOP)
        : requirements
           <cxxflags>-std=c++98
-          <link>static
        ;
 
 # The known sub projects

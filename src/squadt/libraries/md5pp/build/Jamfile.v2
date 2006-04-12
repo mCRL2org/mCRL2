@@ -5,7 +5,7 @@ project md5pp
        .
     : requirements
        <include>../..
-       <include>../../../../boost
+       <include>$(BOOST)
     : usage-requirements
        <include>../..
     ;

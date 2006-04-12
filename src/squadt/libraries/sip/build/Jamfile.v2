@@ -5,7 +5,7 @@ project sip
        .
     : requirements
        <threading>multi
-       <include>../../../../boost/
+       <include>$(BOOST)
        <include>../../
     : usage-requirements
        <include>../../

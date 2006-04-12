@@ -4,7 +4,7 @@ project transport
     : build-dir
        .
     : requirements
-       <include>../../../../boost/
+       <include>$(BOOST)
        <include>../../
        <define>BOOST_DATE_TIME_NO_LIB
     : usage-requirements

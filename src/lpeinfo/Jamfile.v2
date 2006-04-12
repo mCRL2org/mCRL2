@@ -3,7 +3,10 @@ import option ;
 import package ;
 
 project lpeinfo
-       : source-location ..
+       : source-location .
+       : requirements
+          <include>BOOST
+          <link>static
        : build-dir $(BUILD_TOP)
        ;
 
