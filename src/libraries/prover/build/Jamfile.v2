@@ -1,0 +1,31 @@
+project prover
+       : source-location ../source
+       : build-dir $(BUILD_TOP)
+       : default-build debug
+       : requirements
+          <include>..
+       : usage-requirements
+          <include>..
+       ;
+
+lib prover
+       : prover.cpp
+         bddprover.cpp
+         confluencechecker.cpp
+         formulachecker.cpp
+         invariantchecker.cpp
+         invarianteliminator.cpp
+       : <use>/libraries/aterm//aterm
+         <use>/temporary//lowlevel
+         <use>/temporary//print
+         <use>/temporary//rewrite
+         <use>/temporary//struct
+         <use>/libraries/auxiliary//auxiliary
+       :
+       : <library>/libraries/aterm//aterm
+         <library>/libraries/auxiliary//auxiliary
+         <library>/temporary//lowlevel
+         <library>/temporary//print
+         <library>/temporary//rewrite
+         <library>/temporary//struct
+       ;

@@ -1,0 +1,20 @@
+project lpeinvcheck
+  : source-location .
+  : build-dir $(BUILD_TOP)
+  : default-build debug
+  ;
+
+exe lpeinvcheck
+       : lpeinvcheck.cpp
+         /libraries/prover//prover
+       : <dependency>/root//revision.h
+         <include>.
+       ;
+
+explicit install ;
+
+install install
+       : lpeinvcheck
+       : <dll-path>$(LIB_DIR)
+         <location>$(BIN_DIR)
+       ;

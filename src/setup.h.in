@@ -1,18 +1,26 @@
 #ifndef SETTINGS_H
 #define SETTINGS_H
 
+// Locations
 #define DATA_DIRECTORY "@DATA_DIR@"
 
+// Build options
 #define CC             "@CC@"
 #define CXX            "@CXX@"
 #define CFLAGS         "@R_CFLAGS@"
 #define CXXFLAGS       "@R_CXXFLAGS@"
 #define CPPFLAGS       "@R_CPPFLAGS@"
 #define LDFLAGS        "@R_LDFLAGS@"
-#define SCFLAGS        "@R_SCFLAGS@"        // Shared object compilation
-#define SCXXFLAGS      "@R_SCXXFLAGS@"      // Shared object compilation
-#define SLDFLAGS       "@R_SLDFLAGS@"       // Linking to shared library
-#define ATERM_CPPFLAGS "@IATERM_CPPFLAGS@"  // Preprocessor options for the ATerm library
+
+// Shared object compilation
+#define SCFLAGS        "@R_SCFLAGS@"
+#define SCXXFLAGS      "@R_SCXXFLAGS@"
+
+// Linking to shared library
+#define SLDFLAGS       "@R_SLDFLAGS@"
+
+// Preprocessor and linker options for the ATerm library
+#define ATERM_CPPFLAGS "@IATERM_CPPFLAGS@"
 #define ATERM_LDFLAGS  "@IATERM_LDFLAGS@"   // Linker options for the ATerm library
 
 #endif

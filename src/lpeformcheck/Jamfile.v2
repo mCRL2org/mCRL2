@@ -1,0 +1,21 @@
+project lpeformcheck
+  : source-location .
+  : build-dir $(BUILD_TOP)
+  : default-build debug
+  ;
+
+exe lpeformcheck
+       : lpeformcheck.cpp
+         /libraries/prover//prover
+         /libraries/aterm//aterm
+       : <dependency>/root//revision.h
+         <include>.
+       ;
+
+explicit install ;
+
+install install
+       : lpeformcheck
+       : <dll-path>$(LIB_DIR)
+         <location>$(BIN_DIR)
+       ;

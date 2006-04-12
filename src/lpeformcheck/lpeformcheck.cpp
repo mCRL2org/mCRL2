@@ -7,6 +7,7 @@
 #include "libprint_c.h"
 #include "liblowlevel.h"
 #include "libstruct.h"
+#include "mcrl2_revision.h"
 #include <string>
 
 // Class LPE_Form_Check ---------------------------------------------------------------------------

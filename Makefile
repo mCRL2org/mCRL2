@@ -2,12 +2,14 @@
 
 -include config
 
-all: config
+all: config $(BJAM)
+	@$(BJAM)
 	@${MAKE} -C src $(MAKECMDGOALS)
 
 include utility/revision.mk
 
 install: all
+	@$(BJAM) --install
 	install -d $(datadir)/examples/academic
 	cp examples/academic/*.mcrl2 $(datadir)/examples/academic
 	install -d $(datadir)/examples/industrial
@@ -21,11 +23,16 @@ install: all
 	cp examples/visualisation/*.fsm $(datadir)/examples/visualisation
 
 clean:
-	@${MAKE} -C src $(MAKECMDGOALS)
-	$(RM) -r autom4te.cache config.log *.o *~ core core.*
+	@$(BJAM) --clean
+	@${MAKE} -C src clean
+	@$(RM) -r autom4te.cache config.log *.o *~ core core.*
 
-distclean: clean distribution
-	$(RM) -r bin config.status config config.jam src/setup.h src/mcrl2_revision.h
+distclean: distribution
+	@$(BJAM) --clean-all
+	@${MAKE} -C src distclean
+	@$(RM) -r autom4te.cache config.log *.o *~ core core.* \
+	         bin config.status config config.jam src/setup.h \
+		 src/mcrl2_revision.h
 
 ifeq (,$(findstring $(MAKECMDGOALS),clean distclean revision))
 

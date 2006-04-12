@@ -2,8 +2,8 @@ path-constant REVISION : $(TOP)/src/mcrl2_revision.h ;
 
 exe maximum_revision
        : utility/maximum_revision.cpp
-       : <library>/boost/filesystem//boost_filesystem
-         <optimization>speed
+         /boost/filesystem//boost_filesystem
+       : <optimization>speed
          <threading>single
          <link>static
          <variant>release

@@ -1,19 +1,48 @@
 import path ;
-
-project mcrl2_toolset ;
+import modules ;
 
 path-constant TOP       : . ;
 path-constant BUILD_TOP : ./bin ;
 
+project mcrl2_toolset
+       : build-dir $(BUILD_TOP)
+       : requirements
+          <cxxflags>-std=c++98
+          <link>static
+       ;
+
+# The known sub projects
 use-project /root                      : . ;
+use-project /libraries/temporary       : src/libraries/temporary/build ;
+use-project /libraries/auxiliary       : src/libraries/auxiliary/build ;
+use-project /libraries/prover          : src/libraries/prover/build ;
+use-project /libraries/aterm           : src/aterm/build ;
 use-project /libraries/md5pp           : src/squadt/libraries/md5pp/build ;
 use-project /libraries/transport       : src/squadt/libraries/transport/build ;
 use-project /libraries/sip             : src/squadt/libraries/sip/build ;
 use-project /libraries/xml2pp          : src/squadt/libraries/xml2pp/build ;
-use-project /boost/program_options     : src/boost/libs/program_options/build ;
-use-project /boost/filesystem          : src/boost/libs/filesystem/build ;
-use-project /boost/thread              : src/boost/libs/thread/build ;
+use-project /boost/program_options     : boost/libs/program_options/build ;
+use-project /boost/filesystem          : boost/libs/filesystem/build ;
+use-project /boost/thread              : boost/libs/thread/build ;
 
+tools = [ MATCH src/(.*)/.* : [ glob src/*/Jamfile.v2 ] ] ;
+
+for tool in $(tools) {
+  # Make tool project known under a nice name
+  use-project /tools/$(tool) : src/$(tool) ;
+
+  # Build by default
+  build-project src/$(tool) ;
+}
+
+# Install when requested
+if install in [ MATCH "^--(install)" : [ modules.peek : ARGV ] ] {
+  alias install-tools
+       : /tools/$(tools)//install
+       ;
+}
+
+# The SVN revision nummer with which tools will be tagged
 if [ path.exists $(TOP)/utility/revision.jam ] {
   include $(TOP)/utility/revision.jam ; 
 }

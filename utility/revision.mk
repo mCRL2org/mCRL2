@@ -4,7 +4,7 @@
 ifndef TREE_ROOT
  TREE_ROOT                = ./
  MAXIMUM_REVISION         = utility/maximum_revision
- BJAM                     = src/boost/tools/jam/bin/bjam
+ BJAM                     = boost/tools/jam/bin/bjam
 endif
 
 REVISION_HEADER = $(TREE_ROOT)src/mcrl2_revision.h
@@ -18,7 +18,7 @@ revision: $(REVISION_HEADER)
 
 # Bootstrap bjam
 $(BJAM):
-	$(MAKE) -C $(TREE_ROOT)src/boost bjam
+	$(MAKE) -C $(TREE_ROOT)/boost bjam
 
 # Build maximum_revision
 $(REVISION_HEADER): $(BJAM)

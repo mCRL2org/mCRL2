@@ -1,0 +1,21 @@
+project lpeinvelm
+  : source-location .
+  : build-dir $(BUILD_TOP)
+  : default-build debug
+  ;
+
+exe lpeinvelm
+       : lpeinvelm.cpp
+         /libraries/prover//prover
+         /libraries/aterm//aterm
+       : <dependency>/root//revision.h
+         <include>.
+       ;
+
+explicit install ;
+
+install install
+       : lpeinvelm
+       : <dll-path>$(LIB_DIR)
+         <location>$(BIN_DIR)
+       ;

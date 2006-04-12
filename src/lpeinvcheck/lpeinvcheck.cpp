@@ -6,6 +6,7 @@
 #include "invariantchecker.h"
 #include "libprint_c.h"
 #include "libstruct.h"
+#include "mcrl2_revision.h"
 #include <string>
 
 // Class LPE_Inv_Check --------------------------------------------------------------------------

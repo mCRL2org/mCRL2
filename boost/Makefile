@@ -13,7 +13,7 @@
 #
 # Then create boost/include and move the boost/boost directory to /boost/include/boost.
 
-TREE_ROOT = ../../
+TREE_ROOT = ../
 
 -include $(TREE_ROOT)config
 

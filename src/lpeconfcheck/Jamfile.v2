@@ -1,0 +1,21 @@
+project lpeconfcheck
+  : source-location .
+  : build-dir $(BUILD_TOP)
+  : default-build debug
+  ;
+
+exe lpeconfcheck
+       : lpeconfcheck.cpp
+         /libraries/prover//prover
+         /libraries/aterm//aterm
+       : <dependency>/root//revision.h
+         <include>.
+       ;
+
+explicit install ;
+
+install install
+       : lpeconfcheck
+       : <dll-path>$(LIB_DIR)
+         <location>$(BIN_DIR)
+       ;

@@ -113,12 +113,6 @@ ifdef USE_BOOST
  OBJECTS           += $(LTSINFO_OBJECTS)
  LTSINFO_LDFLAGS    = -llts -lrewrite -lsvc -l$(ATERM) -lm $(LIBDL)
 
- #lpeinfo definitions
- LPEINFO_NAME        = lpeinfo
- LPEINFO_OBJECTS     = libprint.o libstruct.o libprint_c.o liblowlevel.o lpeinfo.o
- OBJECTS            += $(LPEINFO_OBJECTS)
- LPEINFO_LDFLAGS     = -lrewrite -l$(ATERM) -lm $(LIBDL)
-
  #lpconstelm definitions
  LPECONSTELM_NAME    = lpeconstelm
  LPECONSTELM_OBJECTS = libprint.o libstruct.o libprint_c.o liblowlevel.o lpeconstelm.o
@@ -191,7 +185,7 @@ LIN_LDFLAGS        = -lrewrite -l$(ATERM) -lm $(LIBDL)
 
 #Group definitions
 EXPERIMENTALS      = $(LIN_NAME) $(ALPHA_NAME)
-EXE_NAMES          = $(MCRL22LPE_NAME) $(LPEINFO_NAME) $(LPEDATAELM_NAME) $(LPEPARELM_NAME) $(LPECONSTELM_NAME) $(LPEPP_NAME) $(TRACEPP_NAME) $(LPE2LTS_NAME) $(LPE2TORX_NAME) $(SIM_NAME) $(XSIM_NAME) $(TBF2LPE_NAME) $(PNML2MCRL2_NAME) $(LPEREWR_NAME) $(LTSMIN_NAME) $(LTSCONVERT_NAME) $(LTSINFO_NAME) $(SVC2FSM_NAME)
+EXE_NAMES          = $(MCRL22LPE_NAME) $(LPEDATAELM_NAME) $(LPEPARELM_NAME) $(LPECONSTELM_NAME) $(LPEPP_NAME) $(TRACEPP_NAME) $(LPE2LTS_NAME) $(LPE2TORX_NAME) $(SIM_NAME) $(XSIM_NAME) $(TBF2LPE_NAME) $(PNML2MCRL2_NAME) $(LPEREWR_NAME) $(LTSMIN_NAME) $(LTSCONVERT_NAME) $(LTSINFO_NAME) $(SVC2FSM_NAME)
 LIB_NAMES          = $(XSIMTRACE_NAME)
 OBJECTS           := $(sort $(OBJECTS))
 
@@ -212,7 +206,7 @@ all : boost
 distclean install: boost_relay
 
 boost/build_completed:
-	@$(MAKE) -C boost
+	@$(MAKE) -C ../boost
 endif
 
 # Build/clean/install documentation
@@ -241,7 +235,7 @@ documentation: $(CONFIG)
 	@$(MAKE) -C doc $(MAKECMDGOALS)
 
 boost_relay:
-	@$(MAKE) -C boost $(MAKECMDGOALS)
+	@$(MAKE) -C ../boost $(MAKECMDGOALS)
 
 ltsview: $(CONFIG) 
 	@$(MAKE) -C ltsview $(MAKECMDGOALS)
@@ -365,9 +359,6 @@ $(LTSCONVERT_NAME) : $(LTSCONVERT_OBJECTS) $(ATERM_DEP) $(LIBSVC_NAME) $(LIBLTS_
 $(LTSINFO_NAME) : $(LTSINFO_OBJECTS) $(ATERM_DEP) $(LIBSVC_NAME) $(LIBLTS_NAME) $(LIBREWR_NAME)
 	$(CXX) -o $@ $(LTSINFO_OBJECTS) $(BOOST_LDFLAGS) $(LDFLAGS) $(LTSINFO_LDFLAGS)
 
-$(LPEINFO_NAME) : $(LPEINFO_OBJECTS) $(ATERM_DEP) $(LIBREWR_NAME) $(BUILD_BOOST)
-	$(CXX) -o $@ $(LPEINFO_OBJECTS) $(BOOST_LDFLAGS) $(BOOST_PROGRAM_OPTIONS) $(LDFLAGS) $(LPEINFO_LDFLAGS)
-
 $(LPECONSTELM_NAME) : $(LPECONSTELM_OBJECTS) $(ATERM_DEP) $(LIBREWR_NAME) $(BUILD_BOOST)
 	$(CXX) -o $@ $(LPECONSTELM_OBJECTS) $(BOOST_LDFLAGS) $(BOOST_PROGRAM_OPTIONS) $(LDFLAGS) $(LPECONSTELM_LDFLAGS)
 
@@ -389,8 +380,6 @@ $(LTSCONVERT_NAME) :
 	@echo "Missing Boost libraries so skipping build of ltsconvert."
 $(LTSINFO_NAME) :
 	@echo "Missing Boost libraries so skipping build of ltsinfo."
-$(LPEINFO_NAME) :
-	@echo "Missing Boost libraries so skipping build of lpeinfo."
 $(LPECONSTELM_NAME) :
 	@echo "Missing Boost libraries so skipping build of lpeconstelm."
 $(LPEPARELM_NAME) :
