@@ -22,13 +22,11 @@ install: all
 	install -d $(datadir)/examples/visualisation
 	cp examples/visualisation/*.fsm $(datadir)/examples/visualisation
 
-clean:
-	@$(BJAM) --clean
+clean: bjam_clean
 	@${MAKE} -C src clean
 	@$(RM) -r autom4te.cache config.log *.o *~ core core.*
 
-distclean: distribution
-	@$(BJAM) --clean-all
+distclean: bjam_cleanall
 	@${MAKE} -C src distclean
 	@$(RM) -r autom4te.cache config.log *.o *~ core core.* \
 	         bin config.status config config.jam src/setup.h \
@@ -38,5 +36,17 @@ ifeq (,$(findstring $(MAKECMDGOALS),clean distclean revision))
 
 config:
 	$(error Please configure the source tree first.)
-
 endif
+
+ifneq ($(wildcard $(BJAM)),)
+bjam_clean:
+	@if test
+	@$(BJAM) --clean
+
+bjam_cleanall:
+	@$(BJAM) --clean-all
+else
+bjam_clean:
+bjam_cleanall:
+endif
+
