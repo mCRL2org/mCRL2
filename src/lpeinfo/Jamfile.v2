@@ -1,0 +1,32 @@
+# This build file has no status and is not portable it serves to (re)build tools with squadt connectivity
+import option ;
+import package ;
+
+project lpeinfo
+       : source-location ..
+       : build-dir $(BUILD_TOP)
+       ;
+
+exe lpeinfo
+       : lpeinfo.cpp
+         /libraries/temporary//print
+         /libraries/temporary//struct
+         /libraries/temporary//lowlevel
+         /libraries/temporary//rewrite
+         /libraries/aterm//aterm
+         /libraries/sip//sipt
+         /boost/program_options//boost_program_options
+       : <dependency>/root//revision.h
+         <define>ENABLE_SQUADT_CONNECTIVITY
+         <include>.
+       ;
+
+include $(TOP)/config.jam ;
+
+explicit install ;
+
+install install
+       : lpeinfo
+       : <dll-path>$(LIB_DIR)
+         <location>$(BIN_DIR)
+       ;

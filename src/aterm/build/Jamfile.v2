@@ -1,0 +1,25 @@
+project aterm
+       : source-location ..
+       : build-dir $(BUILD_TOP)
+       : default-build debug
+       : requirements
+          <cflags>-std=c99
+       : usage-requirements
+          <include>..
+       ;
+
+lib aterm
+       : afun.c
+         aterm.c
+         bafio.c
+         byteio.c
+         gc.c
+         hash.c
+         list.c
+         make.c
+         md5c.c
+         memory.c
+         tafio.c
+         version.c
+#       : <link>static
+       ;

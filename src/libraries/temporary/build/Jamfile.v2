@@ -1,0 +1,50 @@
+# This build file has no status and is not portable it serves to (re)build tools with squadt connectivity
+
+project temporary
+       : source-location ../../..
+       : build-dir $(BUILD_TOP)
+       : default-build debug
+       : requirements
+          <include>../../../src/squadt/libraries
+       : usage-requirements
+          <include>../../..
+       ;
+
+include $(TOP)/config.jam ;
+
+# The following lines are to make this build stand-alone
+lib print
+       : libprint.cpp
+         libprint_c.cpp
+       : <dependency>/libraries/aterm//aterm
+         <dependency>/libraries/temporary//rewrite
+       :
+       : <library>/libraries/temporary//rewrite
+         <library>/libraries/aterm//aterm
+       ;
+obj struct
+       : libstruct.cpp
+       : <dependency>/libraries/aterm//aterm
+       :
+       : <library>/libraries/aterm//aterm
+       ;
+obj lowlevel
+       : liblowlevel.cpp
+       : <dependency>/libraries/aterm//aterm
+       :
+       : <library>/libraries/aterm//aterm
+       ;
+
+lib rewrite
+       : librewrite_c.cpp
+         librewrite.cpp
+         rewr_inner.cpp
+         rewr_jitty.cpp
+         rewr_innerc.cpp
+         rewr_jittyc.cpp
+       : <source>/libraries/aterm//aterm
+       :
+       : <library>/libraries/aterm//aterm 
+         <linkflags>"-lm -ldl"
+       ;
+
