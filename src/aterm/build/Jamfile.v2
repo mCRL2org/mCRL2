@@ -21,5 +21,7 @@ lib aterm
          memory.c
          tafio.c
          version.c
-#       : <link>static
+       : <address-model>64:<define>AT_64BIT
+       :
+       : <address-model>64:<define>AT_64BIT
        ;

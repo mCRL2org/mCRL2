@@ -30,11 +30,7 @@ TARGETS                        = squadt
 .PHONY: all install clean distclean strip
 
 all: $(BJAM) $(TREE_ROOT)config.jam
-ifeq ($(findstring $(CPPFLAGS),NDEBUG),)
-	 @cd build; $(BJAM) debug squadt
-else
-	 @cd build; $(BJAM) release squadt
-endif
+	 @cd build; $(BOOST_BUILD) debug squadt
 
 ifeq ($(findstring $(MAKECMDGOALS),clean distclean),)
 ../../config.jam ../../config ../setup.h:

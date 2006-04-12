@@ -49,9 +49,17 @@ AC_SUBST([HOST_OS])
 # Default is 32 bits, test is probably very incomplete
 case $host in
   *64*-*-*)
-    USE_64_BIT=1
+    ADDRESS_WIDTH=64
+    ;;
+  *32*-*-*)
+    ADDRESS_WIDTH=32
+    ;;
+  *)
+    ADDRESS_WIDTH=16
     ;;
 esac
+
+AC_SUBST([ADDRESS_WIDTH],[])
 
 # Checks for programs.
 AC_PROG_CPP
@@ -180,18 +188,18 @@ AC_ARG_ENABLE(
 )
 if test $enable_debug; then
   AC_MSG_NOTICE([compiling with debugging information])
-  if test $USE_64_BIT; then
-    CPPFLAGS="-DAT_64BIT $CPPFLAGS"
-  fi
   CFLAGS="$CFLAGS -g -Wall $OFLAGS -W -pedantic"
   CXXFLAGS="$CXXFLAGS -g -Wall $OFLAGS -W"
   BFLAGS="-t $BFLAGS"
+  BUILD_VARIANT="debug"
 else
   CPPFLAGS="-DNDEBUG $CPPFLAGS"
   CFLAGS="$CFLAGS $OFLAGS -w"
   CXXFLAGS="$CXXFLAGS $OFLAGS -w"
+  BUILD_VARIANT="release"
 fi
 AC_SUBST([BFLAGS],[])
+AC_SUBST([BUILD_VARIANT],[])
 
 AC_ARG_ENABLE(
   [profile],
@@ -255,6 +263,10 @@ else
   ATERM_LDFLAGS="-L$PWD/src/aterm"
   ATERM_NAME="ATerm"
   BUILD_ATERM=1
+
+  if test "$ADDRESS_WIDTH" = "64"; then
+    ATERM_CPPFLAGS="-DAT_64BIT $ATERM_CPPFLAGS"
+  fi
 fi
 AC_SUBST([ATERM_CPPFLAGS],[])
 AC_SUBST([ATERM_LDFLAGS],[])

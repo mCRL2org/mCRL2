@@ -312,7 +312,7 @@ ac_includes_default="\
 # include <unistd.h>
 #endif"
 
-ac_subst_vars='SHELL PATH_SEPARATOR PACKAGE_NAME PACKAGE_TARNAME PACKAGE_VERSION PACKAGE_STRING PACKAGE_BUGREPORT exec_prefix prefix program_transform_name bindir sbindir libexecdir datadir sysconfdir sharedstatedir localstatedir libdir includedir oldincludedir infodir mandir build_alias host_alias target_alias DEFS ECHO_C ECHO_N ECHO_T LIBS build build_cpu build_vendor build_os host host_cpu host_vendor host_os BJAM_TOOLSET HOST_OS CC CFLAGS LDFLAGS CPPFLAGS ac_ct_CC EXEEXT OBJEXT CPP CXX CXXFLAGS ac_ct_CXX FLEX BISON BFLAGS BUILD_EXPERIMENTAL EGREP ATERM_CPPFLAGS ATERM_LDFLAGS ATERM_NAME BUILD_ATERM LIBXML2_CPPFLAGS XML2_CONFIG LIBXML2_CONFIG LIBXML2_LDFLAGS USE_LIBXML2 XMLTO USE_XMLTO BOOST_PREFIX USE_BOOST WX_CONFIG USE_WX WX_CPPFLAGS WX_LDFLAGS LIBOBJS PREFIX_DIR EXEC_PREFIX_DIR DATA_DIR LIB_DIR BIN_DIR INCLUDE_DIR MAN_DIR R_CFLAGS R_SCFLAGS R_CXXFLAGS R_SCXXFLAGS R_CPPFLAGS R_LDFLAGS R_SLDFLAGS IATERM_CPPFLAGS IATERM_LDFLAGS LTLIBOBJS'
+ac_subst_vars='SHELL PATH_SEPARATOR PACKAGE_NAME PACKAGE_TARNAME PACKAGE_VERSION PACKAGE_STRING PACKAGE_BUGREPORT exec_prefix prefix program_transform_name bindir sbindir libexecdir datadir sysconfdir sharedstatedir localstatedir libdir includedir oldincludedir infodir mandir build_alias host_alias target_alias DEFS ECHO_C ECHO_N ECHO_T LIBS build build_cpu build_vendor build_os host host_cpu host_vendor host_os BJAM_TOOLSET HOST_OS ADDRESS_WIDTH CC CFLAGS LDFLAGS CPPFLAGS ac_ct_CC EXEEXT OBJEXT CPP CXX CXXFLAGS ac_ct_CXX FLEX BISON BFLAGS BUILD_VARIANT BUILD_EXPERIMENTAL EGREP ATERM_CPPFLAGS ATERM_LDFLAGS ATERM_NAME BUILD_ATERM LIBXML2_CPPFLAGS XML2_CONFIG LIBXML2_CONFIG LIBXML2_LDFLAGS USE_LIBXML2 XMLTO USE_XMLTO BOOST_PREFIX USE_BOOST WX_CONFIG USE_WX WX_CPPFLAGS WX_LDFLAGS LIBOBJS PREFIX_DIR EXEC_PREFIX_DIR DATA_DIR LIB_DIR BIN_DIR INCLUDE_DIR MAN_DIR R_CFLAGS R_SCFLAGS R_CXXFLAGS R_SCXXFLAGS R_CPPFLAGS R_LDFLAGS R_SLDFLAGS IATERM_CPPFLAGS IATERM_LDFLAGS LTLIBOBJS'
 ac_subst_files=''
 
 # Initialize some variables set by options.
@@ -1470,9 +1470,17 @@ esac
 # Default is 32 bits, test is probably very incomplete
 case $host in
   *64*-*-*)
-    USE_64_BIT=1
+    ADDRESS_WIDTH=64
+    ;;
+  *32*-*-*)
+    ADDRESS_WIDTH=32
+    ;;
+  *)
+    ADDRESS_WIDTH=16
     ;;
 esac
+
+
 
 # Checks for programs.
 ac_ext=c
@@ -4033,17 +4041,17 @@ fi;
 if test $enable_debug; then
   { echo "$as_me:$LINENO: compiling with debugging information" >&5
 echo "$as_me: compiling with debugging information" >&6;}
-  if test $USE_64_BIT; then
-    CPPFLAGS="-DAT_64BIT $CPPFLAGS"
-  fi
   CFLAGS="$CFLAGS -g -Wall $OFLAGS -W -pedantic"
   CXXFLAGS="$CXXFLAGS -g -Wall $OFLAGS -W"
   BFLAGS="-t $BFLAGS"
+  BUILD_VARIANT="debug"
 else
   CPPFLAGS="-DNDEBUG $CPPFLAGS"
   CFLAGS="$CFLAGS $OFLAGS -w"
   CXXFLAGS="$CXXFLAGS $OFLAGS -w"
+  BUILD_VARIANT="release"
 fi
+
 
 
 # Check whether --enable-profile or --disable-profile was given.
@@ -4741,6 +4749,10 @@ echo "$as_me: using local ATerm library" >&6;}
   ATERM_LDFLAGS="-L$PWD/src/aterm"
   ATERM_NAME="ATerm"
   BUILD_ATERM=1
+
+  if test "$ADDRESS_WIDTH" = "64"; then
+    ATERM_CPPFLAGS="-DAT_64BIT $ATERM_CPPFLAGS"
+  fi
 fi
 
 
@@ -6825,6 +6837,7 @@ s,@host_vendor@,$host_vendor,;t t
 s,@host_os@,$host_os,;t t
 s,@BJAM_TOOLSET@,$BJAM_TOOLSET,;t t
 s,@HOST_OS@,$HOST_OS,;t t
+s,@ADDRESS_WIDTH@,$ADDRESS_WIDTH,;t t
 s,@CC@,$CC,;t t
 s,@CFLAGS@,$CFLAGS,;t t
 s,@LDFLAGS@,$LDFLAGS,;t t
@@ -6839,6 +6852,7 @@ s,@ac_ct_CXX@,$ac_ct_CXX,;t t
 s,@FLEX@,$FLEX,;t t
 s,@BISON@,$BISON,;t t
 s,@BFLAGS@,$BFLAGS,;t t
+s,@BUILD_VARIANT@,$BUILD_VARIANT,;t t
 s,@BUILD_EXPERIMENTAL@,$BUILD_EXPERIMENTAL,;t t
 s,@EGREP@,$EGREP,;t t
 s,@ATERM_CPPFLAGS@,$ATERM_CPPFLAGS,;t t

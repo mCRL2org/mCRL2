@@ -3,13 +3,13 @@
 -include config
 
 all: config $(BJAM)
-	@$(BJAM)
+	@$(BOOST_BUILD)
 	@${MAKE} -C src $(MAKECMDGOALS)
 
 include utility/revision.mk
 
 install: all
-	@$(BJAM) --install
+	@$(BOOST_BUILD) --install
 	install -d $(datadir)/examples/academic
 	cp examples/academic/*.mcrl2 $(datadir)/examples/academic
 	install -d $(datadir)/examples/industrial
@@ -40,7 +40,6 @@ endif
 
 ifneq ($(wildcard $(BJAM)),)
 bjam_clean:
-	@if test
 	@$(BJAM) --clean
 
 bjam_cleanall:
