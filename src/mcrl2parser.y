@@ -64,9 +64,10 @@ ATermAppl gsSpecEltsToSpec(ATermList SpecElts);
 %token <appl> HASH BAR
 %token <appl> LPAR RPAR PBRACK LBRACK RBRACK LANG RANG PBRACE LBRACE RBRACE
 %token <appl> KWSORT KWCONS KWMAP KWVAR KWEQN KWACT KWPROC KWINIT KWSTRUCT
-%token <appl> BOOL POS NAT INT LIST SET BAG
-%token <appl> CTRUE CFALSE WHR END LAMBDA FORALL EXISTS DIV MOD IN
+%token <appl> BOOL POS NAT INT REAL LIST SET BAG
+%token <appl> CTRUE CFALSE DIV MOD IN LAMBDA FORALL EXISTS WHR END 
 %token <appl> DELTA TAU SUM BLOCK ALLOW HIDE RENAME COMM
+%token <appl> MU NU DELAY NIL
 %token <appl> ID NUMBER
 
 //non-terminals
@@ -679,6 +680,10 @@ sort_constant:
       $$ = gsMakeSortId($1);
     }
   | INT
+    {
+      $$ = gsMakeSortId($1);
+    }
+  | REAL
     {
       $$ = gsMakeSortId($1);
     }

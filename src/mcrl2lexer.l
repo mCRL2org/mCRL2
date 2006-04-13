@@ -124,24 +124,28 @@ eqn        { process_string(); return KWEQN; }
 act        { process_string(); return KWACT; }
 proc       { process_string(); return KWPROC; }
 init       { process_string(); return KWINIT; }
+
 struct     { process_string(); return KWSTRUCT; }
 Bool       { process_string(); return BOOL; }
 Pos        { process_string(); return POS; }
 Nat        { process_string(); return NAT; }
 Int        { process_string(); return INT; }
+Real       { process_string(); return REAL; }
 List       { process_string(); return LIST; }
 Set        { process_string(); return SET; }
 Bag        { process_string(); return BAG; }
+
 true       { process_string(); return CTRUE; }
 false      { process_string(); return CFALSE; }
-whr        { process_string(); return WHR; }
-end        { process_string(); return END; }
-lambda     { process_string(); return LAMBDA; }
-forall     { process_string(); return FORALL; }
-exists     { process_string(); return EXISTS; }
 div        { process_string(); return DIV; }
 mod        { process_string(); return MOD; }
 in         { process_string(); return IN; }
+lambda     { process_string(); return LAMBDA; }
+forall     { process_string(); return FORALL; }
+exists     { process_string(); return EXISTS; }
+whr        { process_string(); return WHR; }
+end        { process_string(); return END; }
+
 delta      { process_string(); return DELTA; }
 tau        { process_string(); return TAU; }
 sum        { process_string(); return SUM; }
@@ -150,6 +154,11 @@ allow      { process_string(); return ALLOW; }
 hide       { process_string(); return HIDE; }
 rename     { process_string(); return RENAME; }
 comm       { process_string(); return COMM; }
+
+mu         { process_string(); return MU; }
+nu         { process_string(); return NU; }
+delay      { process_string(); return DELAY; }
+nil        { process_string(); return NIL; }
 
 {Id}       { process_string(); return ID; }
 
