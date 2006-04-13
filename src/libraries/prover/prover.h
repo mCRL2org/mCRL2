@@ -9,6 +9,7 @@
 #include "manipulator.h"
 #include "info.h"
 #include "utilities.h"
+#include "time.h"
 
 class Prover {
   protected:
@@ -20,6 +21,7 @@ class Prover {
     Answer f_tautology;
     Answer f_contradiction;
     int f_time_limit;
+    time_t f_deadline;
   public:
     Prover(
       ATermAppl a_equations,

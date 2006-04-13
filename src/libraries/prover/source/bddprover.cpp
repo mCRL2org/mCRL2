@@ -9,6 +9,7 @@
 #include "liblowlevel.h"
 #include "libprint_c.h"
 #include "libstruct.h"
+#include "time.h"
 
 // Class BDD_Prover -------------------------------------------------------------------------------
   // Class BDD_Prover - Functions declared private ------------------------------------------------
@@ -16,6 +17,7 @@
     void BDD_Prover::build_bdd() {
       f_formula_to_bdd = ATtableCreate(60000, 25);
       f_smallest = ATtableCreate(2000, 50);
+      f_deadline = time(0) + f_time_limit;
 
       ATerm v_previous_1 = 0;
       ATerm v_previous_2 = 0;
@@ -43,6 +45,11 @@
     // --------------------------------------------------------------------------------------------
 
     ATerm BDD_Prover::bdd_down(ATerm a_formula, int a_indent) {
+      if (f_time_limit != 0 && (f_deadline - time(0)) < 0) {
+        gsDebugMsg("The time limit has passed.\n");
+        return a_formula;
+      }
+
       if (f_info->is_true(a_formula)) {
         return a_formula;
       }

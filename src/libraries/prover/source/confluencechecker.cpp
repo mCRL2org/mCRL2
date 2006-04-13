@@ -216,6 +216,13 @@
           continue;
         }
 
+        if (f_disjointness_checker.disjoint(v_summand_number, a_summand_number)) {
+          gsfprintf(stderr, ":");
+          f_commutes[(f_number_of_summands * a_summand_number) + v_summand_number] = 1;
+          v_summand_number++;
+          continue;
+        }
+
         v_multi_actions_or_delta = ATAgetArgument(v_summand, 2);
         if (!gsIsDelta(v_multi_actions_or_delta)) {
           v_condition_2 = ATAgetArgument(v_summand, 1);
@@ -278,6 +285,7 @@
     Confluence_Checker::Confluence_Checker(
       RewriteStrategy a_rewrite_strategy, int a_time_limit, ATermAppl a_lpe, bool a_no_marking, bool a_check_all, bool a_counter_example
     ):
+      f_disjointness_checker(ATAgetArgument(a_lpe, 5)),
       f_bdd_prover(ATAgetArgument(a_lpe, 3), a_rewrite_strategy, a_time_limit)
     {
       f_lpe = a_lpe;
@@ -325,7 +333,7 @@
           if (!gsIsDelta(v_multi_actions_or_delta)) {
             v_multi_actions = ATLgetArgument(v_multi_actions_or_delta, 0);
             if (ATisEmpty(v_multi_actions)) {
-              gsfprintf(stderr, "tau summand %d: ", v_summand_number);
+              gsfprintf(stderr, "tau summand %2d: ", v_summand_number);
               v_marked_summand = check_confluence_and_mark_summand(a_invariant, v_summand, v_summand_number, v_is_marked);
               gsfprintf(stderr, "\n");
             }
@@ -342,6 +350,7 @@
       if (v_is_marked) {
         v_lpe = add_ctau_action(v_lpe);
       }
+      free(f_commutes);
 
       return v_lpe;
     }

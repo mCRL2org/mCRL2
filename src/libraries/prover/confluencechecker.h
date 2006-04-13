@@ -7,9 +7,11 @@
 #include "aterm2.h"
 #include "librewrite.h"
 #include "bddprover.h"
+#include "disjointnesschecker.h"
 
 class Confluence_Checker {
   private:
+    Disjointness_Checker f_disjointness_checker;
     BDD_Prover f_bdd_prover;
     ATermAppl f_lpe;
     bool f_no_marking;
