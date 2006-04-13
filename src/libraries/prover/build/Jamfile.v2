@@ -12,6 +12,7 @@ lib prover
        : prover.cpp
          bddprover.cpp
          confluencechecker.cpp
+         disjointnesschecker.cpp
          formulachecker.cpp
          invariantchecker.cpp
          invarianteliminator.cpp
