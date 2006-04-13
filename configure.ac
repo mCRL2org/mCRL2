@@ -54,8 +54,11 @@ case $host in
   *32*-*-*)
     ADDRESS_WIDTH=32
     ;;
-  *)
+  *16*-*-*)
     ADDRESS_WIDTH=16
+    ;;
+  *)
+    ADDRESS_WIDTH=32
     ;;
 esac
 

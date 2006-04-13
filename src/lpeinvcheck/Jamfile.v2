@@ -13,6 +13,8 @@ exe lpeinvcheck
          <include>.
        ;
 
+include $(TOP)/config.jam ;
+
 explicit install ;
 
 install install

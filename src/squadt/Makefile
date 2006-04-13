@@ -57,7 +57,7 @@ strip: $(TARGETS)
 	$(STRIP) --strip-unneeded --strip-debug $^
 
 install: all
-	@cd build; $(BJAM) install
+	@cd build; $(BOOST_BUILD) install
 	$(INSTALL) -d $(bindir)
 	$(INSTALL) -d $(datadir)/images
 	$(INSTALL) -d $(datadir)/schemas
@@ -81,9 +81,6 @@ ifeq ($(HOST_OS),MACOSX)
 endif
 
 clean:
-	@if test -e $(BJAM); then \
-	  cd build; $(BJAM) --clean-all; \
-	fi
 	$(RM) -rf *.o $(TARGETS) core dependencies
 
 distclean: clean
