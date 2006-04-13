@@ -81,7 +81,7 @@ static void save_trace(string &filename, ATerm state, ATermTable backpointers, N
   
   if ( extra_state != NULL )
   {
-	  tr = ATinsert(tr,(ATerm) ATmakeList2((ATerm) extra_transition,extra_state));
+    tr = ATinsert(tr,(ATerm) ATmakeList2((ATerm) extra_transition,extra_state));
   }
   while ( (ns = ATtableGet(backpointers, s)) != NULL )
   {
@@ -143,6 +143,8 @@ static void print_help(FILE *f, char *Name)
     "                        possible to execute an action NAME in some state,\n"
     "                        than make it the only executable action from that\n"
     "                        state)\n"
+    "  -n, --max-traces=NUM  save no more than NUM trace files when using the\n"
+    "                        options -e/--deadlock-trace or -t/--trace\n"
     "  -m, --monitor         print detailed status of generation\n"
     "  -R, --rewriter=NAME   use rewriter NAME (default 'inner')\n"
     "      --aut             force OUTFILE to be in the aut format (implies\n"
@@ -162,7 +164,7 @@ int main(int argc, char **argv)
   FILE *SpecStream;
   ATerm stackbot;
   ATermAppl Spec;
-  #define sopts "hqvfyucrl:deD:t:mp:R:"
+  #define sopts "hqvfyucrl:deD:t:n:mp:R:"
   struct option lopts[] = {
     { "help",            no_argument,       NULL, 'h' },
     { "version",         no_argument,       NULL, 0   },
@@ -179,6 +181,7 @@ int main(int argc, char **argv)
     { "deadlock-trace",  no_argument,       NULL, 'e' },
     { "detect",          required_argument, NULL, 'D' },
     { "trace",           required_argument, NULL, 't' },
+    { "max-traces",      required_argument, NULL, 'n' },
     { "monitor",         no_argument,       NULL, 'm' },
     { "priority",        required_argument, NULL, 'p' },
     { "rewriter",        required_argument, NULL, 'R' },
@@ -205,6 +208,7 @@ int main(int argc, char **argv)
   bool trace_action = false;
   int num_trace_actions = 0;
   ATermAppl *trace_actions = NULL;
+  unsigned long max_traces = ULONG_MAX;
   bool monitor = false;
   bool detect_deadlock = false;
   bool detect_action = false;
@@ -244,6 +248,9 @@ int main(int argc, char **argv)
         if ( (optarg[0] >= '0') && (optarg[0] <= '9') )
         {
           max_states = strtoul(optarg,NULL,0);
+        } else {
+          gsErrorMsg("invalid argument to -l/--max\n",optarg);
+          return 1;
         }
         break;
       case 'd':
@@ -261,6 +268,15 @@ int main(int argc, char **argv)
         trace = true;
         trace_action = true;
         trace_actions = parse_action_list(optarg,&num_trace_actions);
+        break;
+      case 'n':
+        if ( (optarg[0] >= '0') && (optarg[0] <= '9') )
+        {
+          max_traces = strtoul(optarg,NULL,0);
+        } else {
+          gsErrorMsg("invalid argument to -n/--max-traces\n",optarg);
+          return 1;
+        }
         break;
       case 'm':
         monitor = true;
@@ -499,26 +515,29 @@ int main(int argc, char **argv)
           {
             if ( trace_action )
             {
-              if ( basefilename == NULL )
+              if ( tracecnt < max_traces )
               {
-                basefilename = strdup(SpecFileName);
-                char *s = strrchr(basefilename,'.');
-                if ( s != NULL )
+                if ( basefilename == NULL )
                 {
-                  *s = '\0';
+                  basefilename = strdup(SpecFileName);
+                  char *s = strrchr(basefilename,'.');
+                  if ( s != NULL )
+                  {
+                    *s = '\0';
+                  }
                 }
+                stringstream ss;
+                ss << basefilename << "_act_" << tracecnt << "_" << ATgetName(ATgetAFun(trace_actions[j])) << ".trc";
+                string sss(ss.str());
+                save_trace(sss,state,backpointers,nstate,NewState,Transition);
+
+                if ( detect_action || gsVerbose )
+                {
+                  gsfprintf(stderr,"detect: action '%P' found and saved to '%s_act_%lu_%P.trc'.\n",trace_actions[j],basefilename,tracecnt,trace_actions[j]);
+                  fflush(stderr);
+                }
+                tracecnt++;
               }
-              stringstream ss;
-              ss << basefilename << "_act_" << tracecnt << "_" << ATgetName(ATgetAFun(trace_actions[j])) << ".trc";
-              string sss(ss.str());
-              save_trace(sss,state,backpointers,nstate,NewState,Transition);
-      
-              if ( detect_action || gsVerbose )
-              {
-                gsfprintf(stderr,"detect: action '%P' found and saved to '%s_act_%lu_%P.trc'.\n",trace_actions[j],basefilename,tracecnt,trace_actions[j]);
-                fflush(stderr);
-              }
-              tracecnt++;
             } else //if ( detect_action )
             {
               gsfprintf(stderr,"detect: action '%P' found.\n",trace_actions[j]);
@@ -571,26 +590,29 @@ int main(int argc, char **argv)
     {
       if ( trace_deadlock )
       {
-        if ( basefilename == NULL )
+        if ( tracecnt < max_traces )
         {
-          basefilename = strdup(SpecFileName);
-          char *s = strrchr(basefilename,'.');
-          if ( s != NULL )
+          if ( basefilename == NULL )
           {
-            *s = '\0';
+            basefilename = strdup(SpecFileName);
+            char *s = strrchr(basefilename,'.');
+            if ( s != NULL )
+            {
+              *s = '\0';
+            }
           }
-        }
-        stringstream ss;
-        ss << basefilename << "_dlk_" << tracecnt << ".trc";
-        string sss(ss.str());
-        save_trace(sss,state,backpointers,nstate);
+          stringstream ss;
+          ss << basefilename << "_dlk_" << tracecnt << ".trc";
+          string sss(ss.str());
+          save_trace(sss,state,backpointers,nstate);
 
-        if ( detect_deadlock || gsVerbose )
-        {
-          fprintf(stderr,"deadlock-detect: deadlock found and saved to '%s_dlk_%lu.trc'.\n",basefilename,tracecnt);
-          fflush(stderr);
+          if ( detect_deadlock || gsVerbose )
+          {
+            fprintf(stderr,"deadlock-detect: deadlock found and saved to '%s_dlk_%lu.trc'.\n",basefilename,tracecnt);
+            fflush(stderr);
+          }
+          tracecnt++;
         }
-        tracecnt++;
       } else if ( detect_deadlock ) {
         fprintf(stderr,"deadlock-detect: deadlock found.\n");
         fflush(stderr);

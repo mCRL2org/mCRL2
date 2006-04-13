@@ -24,6 +24,7 @@
 <!ENTITY opt_e "<option>-e</option>">
 <!ENTITY opt_D "<option>-D</option>">
 <!ENTITY opt_t "<option>-t</option>">
+<!ENTITY opt_n "<option>-n</option>">
 <!ENTITY opt_p "<option>-p</option>">
 <!ENTITY opt_m "<option>-m</option>">
 <!ENTITY opt_R "<option>-R</option>">
@@ -42,6 +43,7 @@
 <!ENTITY opt_deadlock-trace "<option>--deadlock-trace</option>">
 <!ENTITY opt_detect "<option>--detect</option>">
 <!ENTITY opt_trace "<option>--trace</option>">
+<!ENTITY opt_max-traces "<option>--max-traces</option>">
 <!ENTITY opt_priority "<option>--priority</option>">
 <!ENTITY opt_monitor "<option>--monitor</option>">
 <!ENTITY opt_rewriter "<option>--rewriter</option>">
@@ -146,13 +148,13 @@ Mandatory arguments to long options are also mandatory to short options.
     <term>&opt_dummy;</term>
     <listitem>
       <para>
-	Replace free variables in the LPE with dummy values (default). Free
-	variables indicate that the behaviour of the LPE does not depend on the
-	actual value of such a variable. Not replacing these variables can
-	result in states containing free variables. Currently, &lpe2lts;
-	considers each free variable to be different from any other (value or
-	variable) and therefore substituting a default dummy value for such
-	variables can reduce the generated state space.
+        Replace free variables in the LPE with dummy values (default). Free
+        variables indicate that the behaviour of the LPE does not depend on the
+        actual value of such a variable. Not replacing these variables can
+        result in states containing free variables. Currently, &lpe2lts;
+        considers each free variable to be different from any other (value or
+        variable) and therefore substituting a default dummy value for such
+        variables can reduce the generated state space.
       </para>
     </listitem>
   </varlistentry>
@@ -216,12 +218,11 @@ Mandatory arguments to long options are also mandatory to short options.
     <term>&opt_deadlock-trace;</term>
     <listitem>
       <para>
-         Write trace to each deadlock state to a file. For each
-         deadlock found during the state space exploration a unique
-         file with extension .trc (trace) will be created containing
-         a shortest trace from the initial state to the
-	 deadlock state. The traces can be pretty printed and converted to
-	 other formats using &tracepp;.
+         Write trace to each deadlock state to a file. For each deadlock found
+         during the state space exploration a unique file with extension .trc
+         (trace) will be created containing a shortest trace from the initial
+         state to the deadlock state. The traces can be pretty printed and
+         converted to other formats using &tracepp;.
       </para>
     </listitem>
   </varlistentry>
@@ -231,10 +232,10 @@ Mandatory arguments to long options are also mandatory to short options.
     <term>&opt_detect;=&name;*</term>
     <listitem>
       <para>
-	 Detect action names from the list &name;*, which is a comma separated
-	 list of action names. A message is printed for every occurrence of one
-	 of these action names. Transitions containing such an occurrence are
-	 those which contain an action with an action name from the list.
+        Detect action names from the list &name;*, which is a comma separated
+        list of action names. A message is printed for every occurrence of one
+        of these action names. Transitions containing such an occurrence are
+        those which contain an action with an action name from the list.
       </para>
     </listitem>
   </varlistentry>
@@ -244,9 +245,20 @@ Mandatory arguments to long options are also mandatory to short options.
     <term>&opt_trace;=&name;*</term>
     <listitem>
       <para>
-	 Write a shortest trace to each state that is reached with an action
-	 from &name;* to a file (similar to &opt_deadlock-trace;, but for
-	 actions).
+        Write a shortest trace to each state that is reached with an action
+        from &name;* to a file (similar to &opt_deadlock-trace;, but for
+        actions).
+      </para>
+    </listitem>
+  </varlistentry>
+
+  <varlistentry>
+    <term>&opt_n;</term>
+    <term>&opt_max-traces;=NUM</term>
+    <listitem>
+      <para>
+	Save no more than NUM trace files when using the options
+	&opt_e;/&opt_deadlock-trace; or &opt_t;/&opt_trace;.
       </para>
     </listitem>
   </varlistentry>
@@ -262,7 +274,7 @@ Mandatory arguments to long options are also mandatory to short options.
       </para>
     </listitem>
   </varlistentry>
-
+  
   <varlistentry>
     <term>&opt_m;</term>
     <term>&opt_monitor;</term>
@@ -284,10 +296,10 @@ Mandatory arguments to long options are also mandatory to short options.
     <term>&opt_R;</term> <term>&opt_rewriter;=&name;</term>
     <listitem>
       <para>
-         Use rewriter &name; (default 'inner'). &lpe2lts; makes heavy
-         use of a term rewriting engine to manipulate with the data
-	 term of the LPE and therefore the choice of the rewriter can heavily
-	 influence performance.
+         Use rewriter &name; (default 'inner'). &lpe2lts; makes heavy use of a
+         term rewriting engine to manipulate with the data term of the LPE and
+         therefore the choice of the rewriter can heavily influence
+         performance.
       </para>
     </listitem>
   </varlistentry>
@@ -296,8 +308,8 @@ Mandatory arguments to long options are also mandatory to short options.
     <term>&opt_aut;</term>
     <listitem>
       <para>
-	 Force &outfile; to be written in the AUT format. This implies the
-	 option &opt_no-info; (see below).
+        Force &outfile; to be written in the AUT format. This implies the
+        option &opt_no-info; (see below).
       </para>
     </listitem>
   </varlistentry>
@@ -315,13 +327,13 @@ Mandatory arguments to long options are also mandatory to short options.
     <term>&opt_no-info;</term>
     <listitem>
       <para>
-	 Do not add state information to &outfile;. Without this option
-	 &lpe2lts; adds state vector to the state space. This
-	 option causes this information to be discarded and states are only
-	 indicated by a sequence number. Explicit state information is useful
-	 for visualisation purposes, for instance, but can cause the &outfile;
-	 to grow considerably. Note that this option is implicit when writing
-	 in the AUT format.
+        Do not add state information to &outfile;. Without this option
+        &lpe2lts; adds state vector to the state space. This option causes this
+        information to be discarded and states are only indicated by a sequence
+        number. Explicit state information is useful for visualisation
+        purposes, for instance, but can cause the &outfile; to grow
+        considerably. Note that this option is implicit when writing in the AUT
+        format.
       </para>
     </listitem>
   </varlistentry>
