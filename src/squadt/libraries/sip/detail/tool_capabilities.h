@@ -41,8 +41,11 @@ namespace sip {
         /** \brief Until there is something better this is the type for a tool category */
         typedef configuration::tool_category                 tool_category;
  
-        /** \brief Convenience type definition for an input configuration */
-        typedef std::pair < tool_category, storage_format >  input_combination;
+        /** \brief Description for a tool's main input object */
+        struct input_combination {
+          tool_category   category;
+          storage_format  format;
+        };
  
         /** \brief Convenience type for a list of input configurations */
         typedef std::set  < input_combination >              input_combination_list;
@@ -101,12 +104,17 @@ namespace sip {
  
       return (s);
     }
+
+    /** \brief Smaller, performs simple lexicographic comparison (included for use with standard data structures) */
+    inline bool operator < (const capabilities::input_combination& a, const capabilities::input_combination& b) {
+      return (a.format < b.format || ((a.format == b.format) && a.category < b.category));
+    }
  
     inline capabilities::capabilities(const version v) : protocol_version(v), interactive(false) {
     }
  
     inline void capabilities::add_input_combination(object::identifier identifier, tool_category c, storage_format f) {
-      input_combination ic(c, f);
+      input_combination ic = {c, f};
  
       input_combinations.insert(ic);
     }
@@ -138,8 +146,8 @@ namespace sip {
       }
       
       for (input_combination_list::const_iterator i = input_combinations.begin(); i != input_combinations.end(); ++i) {
-        output << "<input-configuration category=\"" << (*i).first
-               << "\" format=\"" << (*i).second << "\"/>";
+        output << "<input-configuration category=\"" << (*i).category
+               << "\" format=\"" << (*i).format << "\"/>";
       }
  
       output << "</capabilities>";
@@ -193,8 +201,8 @@ namespace sip {
         while (r.is_element("input-configuration")) {
           input_combination ic;
  
-          r.get_attribute(&ic.first, "category");
-          r.get_attribute(&ic.second, "format");
+          r.get_attribute(&ic.category, "category");
+          r.get_attribute(&ic.format, "format");
  
           c->input_combinations.insert(ic);
  

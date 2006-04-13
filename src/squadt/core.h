@@ -12,6 +12,12 @@ namespace squadt {
 
   /** \brief Global Tool Manager component */
   extern boost::shared_ptr < tool_manager >     global_tool_manager;
+
+  /** \brief Convenience type alias */
+  typedef sip::tool::capabilities::storage_format storage_format;
+
+  /** \brief Convenience type alias */
+  typedef sip::tool::capabilities::tool_category  tool_category;
 }
 
 #endif

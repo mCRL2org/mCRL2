@@ -1,10 +1,14 @@
 #ifndef SQUADT_MAIN_H
 #define SQUADT_MAIN_H
 
+#include <map>
+
 #include <wx/wx.h>
+#include <wx/menu.h>
 #include <wx/frame.h>
 
-class wxMenu;
+#include "tool.h"
+#include "core.h"
 
 namespace squadt {
   namespace GUI {
@@ -23,11 +27,22 @@ namespace squadt {
 
       private:
 
+        /** \brief Maps a tool category to a number of tool objects that can accept input in that */
+        typedef std::multimap < tool_category, tool::ptr >       tools_by_category;
+
+        /** \brief Maps a storage format to a number of tool categories */
+        typedef std::map < storage_format, tools_by_category >   categories_by_format;
+
+      private:
+
         /** \brief The default title for the main window */
         static wxString       default_title;
 
         /** \brief The currently opened project, or 0 */
         squadt::GUI::project* project_view;
+
+        /** \brief Maps a format to a map that maps a category to a set of tools for that format and category */
+        categories_by_format  categories_for_format;
 
       private:
 
@@ -35,7 +50,7 @@ namespace squadt {
         void build();
 
         /** \brief Helper function that gathers the tool information that is used to on-the-fly build context menus */
-        void build_tool_cache();
+        void build_tool_index();
 
         /** \brief Shows a project creation dialog and switches the active view to the new project */
         inline void on_menu_new(wxCommandEvent& /* event */);
@@ -86,7 +101,11 @@ namespace squadt {
     };
 
     inline main::main() : wxFrame(0, wxID_ANY, default_title, wxDefaultPosition, wxDefaultSize), project_view(0) {
+      /* Add widgets */
       build();
+
+      /* Build the index (on the tool database) that is used to populate the context menus */
+      build_tool_index();
 
       /* Reposition the window */
       CentreOnScreen();

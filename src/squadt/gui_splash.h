@@ -150,7 +150,6 @@ namespace squadt {
      * @param s a string that represents the operand
      **/
     inline void splash::set_operation(const std::string& o, const std::string& s) {
-
       progress_indicator->SetValue(progress_indicator->GetValue() + 1);
 
       operation = o;

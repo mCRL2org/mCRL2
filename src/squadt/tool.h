@@ -17,6 +17,7 @@ namespace squadt {
    **/
   class tool {
     friend class extractor;
+    friend class tool_manager;
 
     public:
 
@@ -34,15 +35,15 @@ namespace squadt {
       /** \brief Stores the tool capabilities object obtained through protocol implementation */
       sip::tool::capabilities::ptr        capabilities;
 
+      /** \brief The default capabilities descriptor; one that is empty */
+      static const sip::tool::capabilities::ptr no_capabilities;
+
     private:
 
-      /** Constructor */
-      inline tool(std::string, std::string, sip::tool::capabilities::ptr);
+      /** \brief Constructor */
+      inline tool(std::string, std::string, sip::tool::capabilities::ptr = tool::no_capabilities);
 
     public:
-
-      /** Constructor */
-      inline tool(std::string, std::string);
 
       /** \brief Write configuration to stream */
       void write(std::ostream& = std::cout) const;
@@ -51,7 +52,7 @@ namespace squadt {
       inline static tool::ptr read(xml2pp::text_reader&) throw ();
 
       /** \brief Get the last received capabilities object for this tool */
-      inline const sip::tool::capabilities& get_capabilities() const;
+      inline const sip::tool::capabilities::ptr get_capabilities() const;
 
       /** \brief Get the location to for this tool */
       inline std::string& get_location();
@@ -59,13 +60,6 @@ namespace squadt {
       /** \brief Get the name of this tool */
       inline std::string& get_name();
   };
-
-  /**
-   * @param l a full path to the executable
-   * @param n a name for the tool
-   **/
-  inline tool::tool(std::string n, std::string l) : name(n), location(l) {
-  }
 
   /**
    * @param l a full path to the executable
@@ -117,8 +111,8 @@ namespace squadt {
     }
   }
 
-  inline const sip::tool::capabilities& tool::get_capabilities() const {
-    return (*capabilities);
+  inline const sip::tool::capabilities::ptr tool::get_capabilities() const {
+    return (capabilities);
   }
 
   inline std::string& tool::get_location() {

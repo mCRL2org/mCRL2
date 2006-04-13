@@ -51,7 +51,7 @@ namespace squadt {
       /** \brief Type to hold information about output objects */
       struct object_descriptor {
         processor*            generator;      ///< The process responsible for generating this object
-        std::string           storage_format; ///< The used storage format
+        storage_format        format;         ///< The used storage format
         std::string           location;       ///< The location of the object
         md5pp::compact_digest checksum;       ///< The digest for the completed object
         std::time_t           timestamp;      ///< The last time the file was modified just before the last checksum was computed

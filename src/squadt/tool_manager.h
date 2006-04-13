@@ -14,6 +14,7 @@
 #include <sip/controller.h>
 
 #include "tool.h"
+#include "core.h"
 #include "task_monitor.h"
 #include "processor.h"
 
@@ -54,6 +55,9 @@ namespace squadt {
       /** \brief Convenience type alias the list of tools */
       typedef std::list < tool::ptr >                                        tool_list;
  
+      /** \brief Convenience type alias the list of tools, indexed by main input format */
+      typedef std::multimap < storage_format, tool::ptr >                    tool_map;
+
     private:
  
       /** \brief Numeric type for instance identification */
@@ -74,7 +78,7 @@ namespace squadt {
       };
 
       /** \brief The default TCP port for a tool manager */
-      static const long        default_tcp_port;
+      static const long                         default_tcp_port;
 
     private:
  
@@ -154,7 +158,7 @@ namespace squadt {
     terminate();
   }
 
-  inline const std::list < tool::ptr >& tool_manager::get_tools() {
+  inline const tool_manager::tool_list& tool_manager::get_tools() {
     return (tools);
   }
 

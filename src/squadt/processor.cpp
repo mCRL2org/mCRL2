@@ -134,7 +134,7 @@ namespace squadt {
     /* The outputs */
     for (output_list::const_iterator i = outputs.begin(); i != outputs.end(); ++i) {
       s << "<output id=\"" << reinterpret_cast < unsigned long > ((*i).get())
-        << "\" format=\"" << (*i)->storage_format
+        << "\" format=\"" << (*i)->format
         << "\" location=\"" << (*i)->location
         << "\" digest=\"" << (*i)->checksum
         << "\" timestamp\"" << (*i)->timestamp << "\"/>";
@@ -204,7 +204,7 @@ namespace squadt {
 
       object_descriptor* n = m[id].get();
 
-      if (!(b && r.get_attribute(&n->storage_format, "format")
+      if (!(b && r.get_attribute(&n->format, "format")
               && r.get_attribute(&n->location, "location")
               && r.get_attribute(&temporary, "digest")
               && r.get_attribute(&n->timestamp, "timestamp"))) {
