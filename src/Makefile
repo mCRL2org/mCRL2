@@ -205,7 +205,7 @@ ifdef BUILD_BOOST
 all : boost
 distclean install: boost_relay
 
-boost/build_completed:
+../boost/build_completed:
 	@$(MAKE) -C ../boost
 endif
 
