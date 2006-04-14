@@ -91,7 +91,7 @@ BOOST_PROGRAM_OPTIONS = -lboost_program_options
 BOOST_LDFLAGS         =
 
 ifeq ($(BOOST_PREFIX),boost)
- BUILD_BOOST       = boost/build_completed
+ BUILD_BOOST = ../boost/build_completed
 
  ifeq ($(HOST_OS),LINUX)
   BOOST_LDFLAGS = -Wl,-rpath=$(libdir)
