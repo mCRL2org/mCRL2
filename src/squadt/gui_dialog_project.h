@@ -13,7 +13,7 @@ namespace squadt {
   namespace GUI {
     namespace dialog {
 
-      /** Base class for project settings */
+      /** \brief Base class for project level dialogs */
       class project : public wxDialog {
 
         protected:
@@ -59,9 +59,6 @@ namespace squadt {
 
           /** \brief Gets the name of the project */
           virtual std::string get_location() const = 0;
-
-          /** \brief Gets the name of the project */
-          virtual std::string get_description() const = 0;
 
           /** \brief Destructor */
           virtual ~project() = 0;
@@ -182,6 +179,46 @@ namespace squadt {
 
           /** \brief Destructor */
           ~open_project();
+      };
+
+      /** \brief Creates a dialog window to gather information about an existing project */
+      class add_to_project : public project {
+
+        private:
+
+          /** \brief Control to select a project store */
+          wxGenericDirCtrl* file_selector;
+
+          /** \brief Text field that contains the name of the new project */
+          wxTextCtrl*       name;
+
+          /** \brief Path to the project store */
+          wxString          project_store;
+
+        private:
+
+          /** \brief Helper function that places the widgets */
+          void build();
+
+          /** \brief Handler for the event that one of the buttons is clicked */
+          void on_button_clicked(wxCommandEvent&);
+
+          /** \brief Handler for the event that a directory is selected */
+          void on_selection_changed(wxTreeEvent&);
+
+        public:
+
+          /** \brief Constructor */
+          add_to_project(wxWindow*, wxString);
+
+          /** \brief Gets the name of the project */
+          std::string get_name() const;
+
+          /** \brief Gets the name of the project */
+          std::string get_location() const;
+
+          /** \brief Destructor */
+          ~add_to_project();
       };
     }
   }

@@ -52,22 +52,25 @@ namespace squadt {
   /**
    * @param t the tool that is used for processing
    **/
-  inline processor::processor(tool& t) : program(t), monitor(new reporter(*this, reporter::dummy)) {
+  inline processor::processor() : monitor(new reporter(*this, reporter::dummy)) {
   }
 
   /**
    * @param t the tool that is used for processing
    * @param h the function that is called when the status of the output changes
    **/
-  inline processor::processor(tool& t, reporter::callback_handler h) : program(t),
-                                                                         monitor(new reporter(*this, h)) {
+  inline processor::processor(reporter::callback_handler h) : monitor(new reporter(*this, h)) {
   }
 
   inline processor::~processor() {
   }
 
-  inline const tool& processor::get_tool() {
-    return (program);
+  inline void processor::set_tool(tool::ptr& t) {
+    tool_descriptor = t;
+  }
+
+  inline const tool::ptr processor::get_tool() {
+    return (tool_descriptor);
   }
 
   inline const processor::input_list& processor::get_inputs() const {
@@ -82,7 +85,7 @@ namespace squadt {
    * \attention This function is non-blocking
    **/
   inline void processor::process() {
-    global_tool_manager->execute(program, boost::dynamic_pointer_cast < execution::task_monitor, reporter > (monitor));
+    global_tool_manager->execute(*tool_descriptor, boost::dynamic_pointer_cast < execution::task_monitor, reporter > (monitor));
   }
 
   inline const unsigned int processor::number_of_inputs() const {

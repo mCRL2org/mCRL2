@@ -117,7 +117,7 @@ namespace squadt {
    * @param s the stream to write to
    **/
   void processor::write(std::ostream& s) const {
-    s << "<processor tool-name=\"" << program.get_name() << "\">";
+    s << "<processor tool-name=\"" << tool_descriptor->get_name() << "\">";
 
     /* The last received configuration from the tool */
     sip::configuration::ptr c = monitor->get_configuration();
@@ -165,10 +165,9 @@ namespace squadt {
     }
 
     /* Get tool object for tool name */
-    tool& t = global_tool_manager->find(temporary);
+    processor::ptr c(new processor());
 
-    processor::ptr c(new processor(t));
-
+    c->tool_descriptor = global_tool_manager->find(temporary);
     c->monitor->set_configuration(sip::configuration::read(r));
 
     /* Read inputs */

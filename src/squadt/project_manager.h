@@ -92,7 +92,7 @@ namespace squadt {
       void write(std::ostream&) const;
  
       /** \brief Add a new processor to the project */
-      inline processor::ptr add(tool&, processor::reporter::callback_handler = processor::reporter::dummy);
+      inline processor::ptr add(processor::reporter::callback_handler = processor::reporter::dummy);
 
       /** \brief Remove a processor and all processors that depend one one of its outputs */
       inline void remove(processor*);
@@ -135,11 +135,10 @@ namespace squadt {
   }
 
   /**
-   * @param t a reference to a tool object
    * @param h the handler that can be used to report back state changes
    **/
-  inline processor::ptr project_manager::add(tool& t, processor::reporter::callback_handler h) {
-    return (processor::ptr(new processor(t, h)));
+  inline processor::ptr project_manager::add(processor::reporter::callback_handler h) {
+    return (processor::ptr(new processor(h)));
   }
 
   /**

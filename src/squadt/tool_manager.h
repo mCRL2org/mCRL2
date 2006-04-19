@@ -130,7 +130,7 @@ namespace squadt {
       inline bool exists(const std::string&) const;
 
       /** \brief Returns a tool by its name */
-      inline tool& find(const std::string&) const;
+      inline tool::ptr find(const std::string&) const;
 
       /** \brief Add a new tool to the catalog */
       inline bool add(const std::string&, const std::string&);
@@ -171,13 +171,13 @@ namespace squadt {
    *
    * \pre a tool with this name must be among the known tools
    **/
-  inline tool& tool_manager::find(const std::string& n) const {
+  inline tool::ptr tool_manager::find(const std::string& n) const {
     using namespace boost;
 
-    return (*(*std::find_if(tools.begin(), tools.end(), 
+    return (*std::find_if(tools.begin(), tools.end(), 
                bind(std::equal_to< std::string >(), n, 
                        bind(&tool::get_name,
-                               bind(&tool::ptr::get, _1))))).get());
+                               bind(&tool::ptr::get, _1)))));
   }
 
   /**

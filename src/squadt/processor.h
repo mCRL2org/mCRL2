@@ -80,7 +80,7 @@ namespace squadt {
           /** \brief Convenience type for hiding shared pointer implementation */
           typedef boost::shared_ptr < reporter >                      ptr;
 
-        private:
+        protected:
   
           /** \brief The processor that owns this object */
           processor& owner;
@@ -107,6 +107,12 @@ namespace squadt {
       /** \brief Convenience type for hiding shared pointer implementation */
       typedef boost::shared_ptr < processor >                     ptr;
 
+      /** \brief Convenience type for hiding shared pointer implementation */
+      typedef boost::shared_ptr < processor >                     sptr;
+
+      /** \brief Convenience type for hiding shared pointer implementation */
+      typedef boost::weak_ptr < processor >                       wptr;
+
       /** \brief Convenience type for hiding the implementation of a list with input information */
       typedef std::vector < object_descriptor::wptr >             input_list;
 
@@ -119,7 +125,7 @@ namespace squadt {
     private:
  
       /** \brief Identifies the tool that is required to run the command */
-      tool&                               program;
+      tool::ptr                           tool_descriptor;
 
       /** \brief The information about inputs of this processor */
       input_list                          inputs;
@@ -141,10 +147,10 @@ namespace squadt {
     public:
  
       /** \brief Basic constructor */
-      inline processor(tool& t);
+      inline processor();
 
       /** \brief Constructor with visualisation handler */
-      inline processor(tool& t, reporter::callback_handler);
+      inline processor(reporter::callback_handler);
 
       /** \brief Check the inputs with respect to the outputs and adjust status accordingly */
       bool check_status(bool);
@@ -156,7 +162,10 @@ namespace squadt {
       void process();
  
       /** \brief Get the object for the tool associated with this processor */
-      inline const tool& get_tool();
+      inline void set_tool(tool::ptr&);
+
+      /** \brief Get the object for the tool associated with this processor */
+      inline const tool::ptr get_tool();
 
       /** \brief Read from XML using a libXML2 reader */
       static processor::ptr read(id_conversion_map&, xml2pp::text_reader&) throw ();
@@ -185,7 +194,7 @@ namespace squadt {
       /** \brief Removes the outputs of this processor from storage */
       void flush_outputs();
  
-      /** Recursively set the status of specification and */
+      /** \brief Recursively set the status of specification and */
       inline const output_status get_output_status() const;
 
       /** \brief Destructor */

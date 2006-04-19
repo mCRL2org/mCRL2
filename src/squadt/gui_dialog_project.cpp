@@ -223,6 +223,14 @@ namespace squadt {
                 EndModal(1);
               }
             }
+            else if (wxFileName(directory_selector->GetPath(), name->GetValue()).FileExists()) {
+              wxString message = wxT("Unable to create project store, a file `");
+
+              message.Append(name->GetValue());
+              message.Append(wxT("' already exists in the selected directory."));
+
+              wxMessageDialog(0, message,wxT("Error"), wxOK).ShowModal();
+            }
             else {
               EndModal(1);
             }
@@ -402,6 +410,100 @@ namespace squadt {
       }
 
       open_project::~open_project() {
+      }
+
+      /**
+       * @param p the parent window
+       * @param s path of the project store
+       **/
+      add_to_project::add_to_project(wxWindow* p, wxString s) : dialog::project(p, wxT("Select the file to add...")),
+                                                                project_store(s) {
+        build();
+
+        Connect(wxEVT_COMMAND_TREE_SEL_CHANGED, wxTreeEventHandler(dialog::add_to_project::on_selection_changed));
+      }
+
+      void add_to_project::build() {
+        wxBoxSizer*       s = new wxBoxSizer(wxVERTICAL);
+        wxBoxSizer*       t = new wxBoxSizer(wxHORIZONTAL);
+        wxTreeEvent       e;
+
+        name = new wxTextCtrl(main_panel, wxID_ANY, wxT(""));
+
+        t->Add(new wxStaticText(main_panel, wxID_ANY, wxT("Add as :")));
+        t->AddSpacer(5);
+        t->Add(name, 1, wxEXPAND);
+
+        file_selector = new wxGenericDirCtrl(main_panel, wxID_ANY, default_directory,
+                        wxDefaultPosition, wxDefaultSize, wxDIRCTRL_3D_INTERNAL|wxSUNKEN_BORDER);
+
+        s->AddSpacer(10);
+        s->Add(file_selector, 1, wxEXPAND|wxLEFT|wxRIGHT, 20);
+        s->AddSpacer(10);
+        s->Add(t, 0, wxEXPAND|wxLEFT|wxRIGHT, 20);
+        s->AddSpacer(10);
+
+        main_panel->SetSizer(s);
+
+        Layout();
+
+        /* Trigger event to set the buttons right */
+        on_selection_changed(e);
+      }
+
+      /**
+       * @param[in] e the event object passed by wxWidgets
+       **/
+      void add_to_project::on_button_clicked(wxCommandEvent& e) {
+        switch (e.GetId()) {
+          case wxID_CANCEL:
+            EndModal(0);
+            break;
+          default: /* wxID_OK */
+            if (wxFileName(project_store, name->GetValue()).DirExists() || wxFileName(project_store, name->GetValue()).DirExists()) {
+              wxMessageDialog(0, wxT("A file with this name is already part of the project!"), wxT("Error"), wxOK).ShowModal();
+
+              button_accept->Enable(false);
+            }
+            else {
+              EndModal(1);
+            }
+            break;
+        }
+      }
+
+      void add_to_project::on_selection_changed(wxTreeEvent&) {
+        bool b = wxFileName::FileExists(file_selector->GetPath());
+
+        if (b) {
+          name->SetValue(wxFileName(file_selector->GetPath()).GetFullName());
+
+          wxFileName n(project_store, name->GetValue());
+
+          b = !(n.DirExists() || n.FileExists());
+
+          if (!b) {
+            wxMessageDialog(0, wxT("A file with this name is already part of the project!"), wxT("Error"), wxOK).ShowModal();
+          }
+        }
+        else {
+          name->SetValue(wxT(""));
+        }
+
+        button_accept->Enable(b);
+      }
+
+      /** \brief Gets the name under which to add the file to the project */
+      std::string add_to_project::get_name() const {
+        return (std::string(wxFileName(file_selector->GetPath()).GetFullName().fn_str()));
+      }
+
+      /** \brief Gets the selected file that is to be added the the project */
+      std::string add_to_project::get_location() const {
+        return (std::string(file_selector->GetPath().fn_str()));
+      }
+
+      add_to_project::~add_to_project() {
       }
     }
   }

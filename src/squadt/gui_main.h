@@ -7,13 +7,12 @@
 #include <wx/menu.h>
 #include <wx/frame.h>
 
+#include "gui_project.h"
 #include "tool.h"
 #include "core.h"
 
 namespace squadt {
   namespace GUI {
-
-    class project;
 
     /**
      * \brief The main window that contains the project views are placed
@@ -24,6 +23,7 @@ namespace squadt {
      * can be added with little effort.
      **/
     class main : public wxFrame {
+      friend void squadt::GUI::project::spawn_context_menu(processor* p);
 
       private:
 

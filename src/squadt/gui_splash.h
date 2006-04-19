@@ -16,6 +16,9 @@
 namespace squadt {
   namespace GUI {
 
+    /**
+     * \brief Basic control for loading a bitmap picture
+     **/
     class picture : public wxPanel {
       private:
         DECLARE_EVENT_TABLE()
@@ -37,6 +40,8 @@ namespace squadt {
     END_EVENT_TABLE()
 
     /**
+     * \brief Basic splash screen that shows initialisation progress
+     *
      * Displays a splash screen with a progess bar that shows initialisation
      * progess.
      **/

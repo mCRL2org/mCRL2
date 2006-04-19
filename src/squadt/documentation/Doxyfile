@@ -134,7 +134,7 @@ EXCLUDE                = /home/jwulp/work/mCRL2-holidays/MCRL2/trunk/src/squadt/
                          /home/jwulp/work/mCRL2-holidays/MCRL2/trunk/src/squadt/libraries/xml2pp/ \
                          /home/jwulp/work/mCRL2-holidays/MCRL2/trunk/src/squadt/squadt.cpp
 EXCLUDE_SYMLINKS       = NO
-EXCLUDE_PATTERNS       = gui_*
+EXCLUDE_PATTERNS       = gui_resources*
 EXAMPLE_PATH           = 
 EXAMPLE_PATTERNS       = *
 EXAMPLE_RECURSIVE      = NO
