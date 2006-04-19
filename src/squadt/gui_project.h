@@ -71,6 +71,9 @@ namespace squadt {
         /** \brief Event handler for when a context menu is requested for a tree item */
         void on_tree_item_activate(wxTreeEvent&);
 
+        /** \brief Event handler for when an item of a context menu is selected */
+        void on_context_menu_select(wxCommandEvent&);
+
         /** \brief Creates a context menu for the selected processor */
         void spawn_context_menu(processor*);
 

@@ -1,31 +1,18 @@
-#ifndef GUI_DIALOG_PROJECT
-#define GUI_DIALOG_PROJECT
+#ifndef GUI_DIALOG_PROJECT_H
+#define GUI_DIALOG_PROJECT_H
 
 #include <string>
 
-#include <wx/wx.h>
-#include <wx/dialog.h>
-#include <wx/button.h>
-#include <wx/sizer.h>
-#include <wx/dirctrl.h>
+#include "gui_dialog_base.h"
 
 namespace squadt {
   namespace GUI {
     namespace dialog {
 
       /** \brief Base class for project level dialogs */
-      class project : public wxDialog {
+      class project : public dialog::basic {
 
         protected:
-
-          /** The panel that holds the custom controls for this dialog */
-          wxPanel*        main_panel;
-
-          /** \brief Button that, when pressed, accepts the current settings */
-          wxButton*       button_accept;
-
-          /** \brief Button that, when pressed, cancels and closes the window */
-          wxButton*       button_cancel;
 
           /** \brief The directory from which the directory selectors start */
           static wxString default_directory;
@@ -38,27 +25,13 @@ namespace squadt {
           /** \brief Determines wether a directory is recognised as a project store */
           static wxString get_project_description(wxString);
 
-        private:
-
-          /** \brief Helper function that places the widgets */
-          void build();
-
-          /** \brief Handler for when one of the buttons is clicked */
-          void on_button_clicked(wxCommandEvent&);
-
-          /** \brief Handler for the window close event */
-          void on_window_close(wxCloseEvent&);
-
         public:
 
           /** \brief Constructor */
-          inline project(wxWindow*, wxString);
+          project(wxWindow*, wxString);
 
           /** \brief Gets the name of the project */
           virtual std::string get_name() const = 0;
-
-          /** \brief Gets the name of the project */
-          virtual std::string get_location() const = 0;
 
           /** \brief Destructor */
           virtual ~project() = 0;
@@ -206,6 +179,9 @@ namespace squadt {
           /** \brief Handler for the event that a directory is selected */
           void on_selection_changed(wxTreeEvent&);
 
+          /** \brief Handler for the event that the name changes */
+          void on_name_updated(wxCommandEvent&);
+
         public:
 
           /** \brief Constructor */
@@ -215,7 +191,10 @@ namespace squadt {
           std::string get_name() const;
 
           /** \brief Gets the name of the project */
-          std::string get_location() const;
+          std::string get_source() const;
+
+          /** \brief Gets the name of the project */
+          std::string get_destination() const;
 
           /** \brief Destructor */
           ~add_to_project();

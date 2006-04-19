@@ -19,39 +19,7 @@ namespace squadt {
        * @param p the parent window
        * @param t the title for the window
        **/
-      project::project(wxWindow* p, wxString t) : wxDialog(p, wxID_ANY, t, wxDefaultPosition, wxSize(450, 350)) {
-        build();
-
-        Connect(wxEVT_CLOSE_WINDOW, wxCloseEventHandler(dialog::project::on_window_close));
-        Connect(wxEVT_COMMAND_BUTTON_CLICKED, wxCommandEventHandler(dialog::project::on_button_clicked));
-      }
-
-      /**
-       * @param[in] e the event object passed by wxWidgets
-       **/
-      void project::on_button_clicked(wxCommandEvent& e) {
-        EndModal((e.GetId() == wxID_CANCEL) ? 0 : 1);
-      }
-
-      void project::on_window_close(wxCloseEvent&) {
-        EndModal(0);
-      }
-
-      void project::build() {
-        wxBoxSizer* s  = new wxBoxSizer(wxVERTICAL);
-        wxBoxSizer* ss = new wxBoxSizer(wxHORIZONTAL);
-
-        main_panel    = new wxPanel(this, wxID_ANY);
-        button_accept = new wxButton(this, wxID_OK);
-        button_cancel = new wxButton(this, wxID_CANCEL);
-
-        ss->Add(button_accept, 0, wxRIGHT, 5);
-        ss->Add(button_cancel, 0, wxLEFT|wxRIGHT, 5);
-        s->Add(main_panel, 1, wxEXPAND|wxALL, 4);
-        s->Add(new wxStaticLine(this, wxID_ANY), 0, wxEXPAND|wxALL, 2);
-        s->Add(ss, 0, wxALIGN_RIGHT|wxALL, 5);
-
-        SetSizer(s);
+      project::project(wxWindow* p, wxString t) : dialog::basic(p, t, wxSize(450, 350)) {
       }
 
       /**
@@ -421,6 +389,7 @@ namespace squadt {
         build();
 
         Connect(wxEVT_COMMAND_TREE_SEL_CHANGED, wxTreeEventHandler(dialog::add_to_project::on_selection_changed));
+        Connect(wxEVT_COMMAND_TEXT_UPDATED, wxTextEventHandler(dialog::add_to_project::on_name_updated));
       }
 
       void add_to_project::build() {
@@ -472,35 +441,39 @@ namespace squadt {
         }
       }
 
-      void add_to_project::on_selection_changed(wxTreeEvent&) {
-        bool b = wxFileName::FileExists(file_selector->GetPath());
+      void add_to_project::on_name_updated(wxCommandEvent&) {
+        button_accept->Enable(false);
 
-        if (b) {
-          name->SetValue(wxFileName(file_selector->GetPath()).GetFullName());
-
+        if (!name->GetValue().IsEmpty()) {
           wxFileName n(project_store, name->GetValue());
-
-          b = !(n.DirExists() || n.FileExists());
-
-          if (!b) {
+         
+          if (n.DirExists() || n.FileExists()) {
             wxMessageDialog(0, wxT("A file with this name is already part of the project!"), wxT("Error"), wxOK).ShowModal();
           }
+          else {
+            button_accept->Enable(true);
+          }
         }
-        else {
-          name->SetValue(wxT(""));
-        }
+      }
 
-        button_accept->Enable(b);
+      void add_to_project::on_selection_changed(wxTreeEvent&) {
+        name->SetValue(wxFileName::FileExists(file_selector->GetPath()) ?
+                wxFileName(file_selector->GetPath()).GetFullName() : wxT(""));
       }
 
       /** \brief Gets the name under which to add the file to the project */
       std::string add_to_project::get_name() const {
-        return (std::string(wxFileName(file_selector->GetPath()).GetFullName().fn_str()));
+        return (std::string(name->GetValue().fn_str()));
       }
 
       /** \brief Gets the selected file that is to be added the the project */
-      std::string add_to_project::get_location() const {
+      std::string add_to_project::get_source() const {
         return (std::string(file_selector->GetPath().fn_str()));
+      }
+
+      /** \brief Gets the selected file that is to be added the the project */
+      std::string add_to_project::get_destination() const {
+        return (std::string(wxFileName(project_store, name->GetValue()).GetFullPath().fn_str()));
       }
 
       add_to_project::~add_to_project() {
