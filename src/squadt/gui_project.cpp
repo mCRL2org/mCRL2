@@ -1,4 +1,5 @@
 #include <boost/bind.hpp>
+#include <boost/filesystem/convenience.hpp>
 
 #include "gui_main.h"
 #include "gui_project.h"
@@ -23,7 +24,7 @@ namespace squadt {
      * @param[in,out] p a shared pointer to the processor for which process is monitored and reported
      * @param[in] t the tool used by the processor
      **/
-    project::node_data::node_data(project& p) : processor(boost::bind(&node_data::change_state, this, _1)), parent(p) {
+    project::node_data::node_data(project& p) : parent(p) {
     }
 
     /**
@@ -79,7 +80,7 @@ namespace squadt {
      **/
     void project::on_tree_item_activate(wxTreeEvent& e) {
       if (processor_view->GetRootItem() != e.GetItem()) {
-        spawn_context_menu(reinterpret_cast < node_data* > (processor_view->GetItemData(e.GetItem())));
+        spawn_context_menu(reinterpret_cast < node_data* > (processor_view->GetItemData(e.GetItem()))->get_processor());
       }
       else {
         dialog::add_to_project dialog(this, wxString(manager->get_project_directory().c_str(), wxConvLocal));
@@ -90,14 +91,31 @@ namespace squadt {
           /* Add to the new project */
           wxTreeItemId i = processor_view->AppendItem(e.GetItem(), wxString(dialog.get_name().c_str(), wxConvLocal), 3);
 
-          processor_view->EnsureVisible(i);
-
-          /* TODO actually add to project and attach processor to the new item
-            reinterpret_cast < wxTreeItemData* > (new node_data(*this))
-           */
-
           /* File does not exist in project directory */
-          copy_file(path(dialog.get_source()), path(dialog.get_destination()));
+          path destination_path = path(dialog.get_destination());
+
+          copy_file(path(dialog.get_source()), destination_path);
+
+          node_data* monitor = new node_data(*this);
+
+          /* Add the processor to the project */
+          monitor->set_processor(manager->add(boost::bind(&node_data::update_state, monitor, _1)));
+
+          processor_view->SetItemData(i, reinterpret_cast < wxTreeItemData* > (monitor));
+
+          storage_format f = storage_format_unknown;
+
+          /* TODO more intelligent file format check */
+          if (!extension(destination_path).empty()) {
+            f = extension(destination_path);
+
+            f.erase(f.begin());
+          }
+
+          /* Add the input to the processor, as main input */
+          monitor->get_processor()->append_output(f, destination_path.string());
+
+          processor_view->EnsureVisible(i);
         }
       }
     }
@@ -132,12 +150,24 @@ namespace squadt {
           break;
         case cmID_CLEAN:
           break;
-        case cmID_DERIVE:
+        case cmID_DERIVE: {
+          }
           break;
         case cmID_DETAILS: {
-            dialog::processor_details dialog(this, wxT("View and update details"), wxString(manager->get_project_directory().c_str(), wxConvLocal));
+            dialog::processor_details dialog(this, wxString(manager->get_project_directory().c_str(), wxConvLocal));
+
+            if (processor_view->GetItemParent(processor_view->GetSelection()) == processor_view->GetRootItem()) {
+              processor const* p = reinterpret_cast < node_data* > (processor_view->GetItemData(processor_view->GetSelection()))->get_processor();
+
+              /* Add the main input (must exist) */
+              dialog.set_name(processor_view->GetItemText(processor_view->GetSelection()));
+
+              /* Add the main input (must exist) */
+              dialog.populate_tool_list(p->get_outputs().front()->format);
+            }
 
             if (dialog.ShowModal()) {
+              /* Process changes */
             }
           }
           break;

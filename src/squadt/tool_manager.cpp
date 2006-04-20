@@ -139,7 +139,7 @@ namespace squadt {
     for (tool_list::const_iterator i = tools.begin(); i != tools.end(); ++i) {
       h((*i)->get_name());
 
-      query_tool(**i);
+      query_tool(*(*i));
     }
   }
 

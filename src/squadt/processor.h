@@ -80,15 +80,15 @@ namespace squadt {
           /** \brief Convenience type for hiding shared pointer implementation */
           typedef boost::shared_ptr < reporter >                      ptr;
 
-        protected:
-  
+        public:
+
           /** \brief The processor that owns this object */
           processor& owner;
 
         private:
   
           /** \brief Visualisation function for state changes */
-          callback_handler visualise;
+          callback_handler callback;
   
         private:
   
@@ -97,10 +97,10 @@ namespace squadt {
   
         public:
   
-          /** \brief Constructor with a callback handler for actual visualisation */
+          /** \brief Constructor with a callback handler */
           inline reporter(processor&, callback_handler);
 
-          /** \brief The default visualisation function that does nothing */
+          /** \brief The default callback function that does nothing */
           static void dummy(output_status);
       };
  
@@ -149,7 +149,7 @@ namespace squadt {
       /** \brief Basic constructor */
       inline processor();
 
-      /** \brief Constructor with visualisation handler */
+      /** \brief Constructor with callback handler */
       inline processor(reporter::callback_handler);
 
       /** \brief Check the inputs with respect to the outputs and adjust status accordingly */
@@ -176,8 +176,17 @@ namespace squadt {
       /** \brief Get input objects */
       inline const input_list& get_inputs() const;
  
+      /** \brief Add an input object */
+      inline void append_input(object_descriptor::wptr&);
+ 
       /** \brief Get output objects */
       inline const output_list& get_outputs() const;
+ 
+      /** \brief Add an output object */
+      inline void append_output(object_descriptor::sptr&);
+
+      /** \brief Add an output object */
+      inline void append_output(const storage_format&, const std::string&);
  
       /** \brief Pretty prints the fields of the specification */
       void print(std::ostream& stream = std::cerr) const;

@@ -8,6 +8,7 @@
 #include <wx/frame.h>
 
 #include "gui_project.h"
+#include "gui_miscellaneous.h"
 #include "tool.h"
 #include "core.h"
 
@@ -25,32 +26,19 @@ namespace squadt {
     class main : public wxFrame {
       friend void squadt::GUI::project::spawn_context_menu(processor* p);
 
-      private:
-
-        /** \brief Maps a tool category to a number of tool objects that can accept input in that */
-        typedef std::multimap < tool_category, tool::ptr >       tools_by_category;
-
-        /** \brief Maps a storage format to a number of tool categories */
-        typedef std::map < storage_format, tools_by_category >   categories_by_format;
 
       private:
 
         /** \brief The default title for the main window */
-        static wxString       default_title;
+        static wxString                                   default_title;
 
         /** \brief The currently opened project, or 0 */
-        squadt::GUI::project* project_view;
-
-        /** \brief Maps a format to a map that maps a category to a set of tools for that format and category */
-        categories_by_format  categories_for_format;
+        squadt::GUI::project*                             project_view;
 
       private:
 
         /** \brief Helper function that creates widgets and adds them to the window */
         void build();
-
-        /** \brief Helper function that gathers the tool information that is used to on-the-fly build context menus */
-        void build_tool_index();
 
         /** \brief Shows a project creation dialog and switches the active view to the new project */
         inline void on_menu_new(wxCommandEvent& /* event */);
@@ -96,6 +84,11 @@ namespace squadt {
 
       public:
 
+        /** \brief Tool selection helper that indexes the tools known by the global tool manager */
+        static miscellaneous::tool_selection_helper::sptr tool_registry;
+
+      public:
+
         /** \brief Constructor */
         main();
     };
@@ -105,7 +98,9 @@ namespace squadt {
       build();
 
       /* Build the index (on the tool database) that is used to populate the context menus */
-      build_tool_index();
+      if (tool_registry.get() == 0) {
+        tool_registry = miscellaneous::tool_selection_helper::sptr(new miscellaneous::tool_selection_helper());
+      }
 
       /* Reposition the window */
       CentreOnScreen();

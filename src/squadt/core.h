@@ -18,6 +18,10 @@ namespace squadt {
 
   /** \brief Convenience type alias */
   typedef sip::tool::capabilities::tool_category  tool_category;
+
+
+  /** \brief Special storage format constant for when the type is unknown */
+  static const storage_format storage_format_unknown = "";
 }
 
 #endif

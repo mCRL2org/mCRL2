@@ -12,7 +12,7 @@ namespace squadt {
    * @param[in] o the processor that owns of this object
    * @param[in] h the function or functor that is called/invoked when the process status changes
    **/
-  processor::reporter::reporter(processor& o, callback_handler h) : owner(o), visualise(h) {
+  processor::reporter::reporter(processor& o, callback_handler h) : owner(o), callback(h) {
   }
 
   /**
@@ -77,8 +77,37 @@ namespace squadt {
     return (inputs);
   }
 
+  /**
+   * @param p weak pointer to an object descriptor
+   **/
+  inline void processor::append_input(object_descriptor::wptr& p) {
+    inputs.push_back(p);
+  }
+
   inline const processor::output_list& processor::get_outputs() const {
     return (outputs);
+  }
+
+  /**
+   * @param p shared pointer to an object descriptor
+   **/
+  inline void processor::append_output(object_descriptor::sptr& p) {
+    p->generator = this;
+
+    outputs.push_back(p);
+  }
+
+  /**
+   * @param f the storage format that l uses
+   * @param l a URI (local path) to where the file is stored
+   **/
+  inline void processor::append_output(const storage_format& f, const std::string& l) {
+    object_descriptor::sptr p = object_descriptor::sptr(new object_descriptor);
+
+    p->format    = f;
+    p->location  = l;
+
+    append_output(p);
   }
 
   /**
@@ -118,7 +147,7 @@ namespace squadt {
     if (current_output_status != s) {
       current_output_status = s;
  
-      monitor->visualise(current_output_status);
+      monitor->callback(current_output_status);
     }
   }
 }

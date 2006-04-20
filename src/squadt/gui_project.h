@@ -35,21 +35,35 @@ namespace squadt {
          * changes of the processor. These state changes will be visualised
          * through this object.
          **/
-        class node_data : public processor, public wxTreeItemData {
+        class node_data : public wxTreeItemData {
+          friend class project;
+
           private:
 
             /** \brief The associated project */
             project&       parent;
 
+            /** \brief The associated processor */
+            processor::ptr target;
+
           private:
 
-            /* \brief Updates the GUI to reflect the change in state */
-            inline void change_state(processor::output_status);
+            /** \brief Updates the GUI to reflect the change in state */
+            inline void update_state(processor::output_status);
 
           public:
 
-            /* \brief Constructor */
-            node_data(project&);
+            /** \brief Constructor */
+            inline node_data(project&);
+
+            /** \brief Sets the associated processor */
+            inline void set_processor(processor::ptr);
+
+            /** \brief Gets the associated processor */
+            inline processor* get_processor() const;
+
+            /** \brief Gets the associated project window */
+            inline project const* get_project() const;
         };
 
       private:
@@ -92,7 +106,22 @@ namespace squadt {
     /**
      * @param[in] o the state of the output objects for this processor
      **/
-    inline void project::node_data::change_state(processor::output_status o) {
+    inline void project::node_data::update_state(processor::output_status o) {
+    }
+
+    inline project const* project::node_data::get_project() const {
+      return (&parent);
+    }
+
+    /**
+     * @param p pointer to the process that should be associated with this
+     **/
+    inline void project::node_data::set_processor(processor::ptr p) {
+      target = p;
+    }
+
+    inline processor* project::node_data::get_processor() const {
+      return (target.get());
     }
   }
 }

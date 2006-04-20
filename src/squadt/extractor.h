@@ -1,6 +1,7 @@
 #ifndef EXTRACTOR_H
 #define EXTRACTOR_H
 
+#include <boost/ref.hpp>
 #include <boost/shared_ptr.hpp>
 
 #include <sip/detail/basic_messenger.h>
@@ -43,7 +44,7 @@ namespace squadt {
    * @param[in] t reference to the tool object to use for storage
    **/
   inline extractor::extractor(tool& t) : task_monitor() {
-    set_handler(bind(&extractor::handle_store_tool_capabilities, this, _1, t), sip::reply_tool_capabilities);
+    set_handler(bind(&extractor::handle_store_tool_capabilities, this, _1, boost::ref(t)), sip::reply_tool_capabilities);
   }
 
   /**

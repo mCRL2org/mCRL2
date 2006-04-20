@@ -343,7 +343,7 @@ namespace squadt {
             description->SetLabel(label);
 
             s->Show(not_store, false);
-            s->Show(project_description, true);
+            s->Show(project_description, !label.IsEmpty());
           }
           catch (...) {
             /* Project description could not be extracted */

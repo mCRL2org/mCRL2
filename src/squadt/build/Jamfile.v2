@@ -23,6 +23,7 @@ exe squadt
         gui_dialog_base.cpp
         gui_dialog_project.cpp
         gui_dialog_processor.cpp
+        gui_miscellaneous.cpp
 #        gui_new_specification.cpp
 #        gui_project_overview.cpp
 #        gui_specification_properties.cpp

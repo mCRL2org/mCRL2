@@ -1,3 +1,4 @@
+#include "gui_main.h"
 #include "gui_dialog_processor.h"
 
 namespace squadt {
@@ -8,8 +9,8 @@ namespace squadt {
        * @param p a pointer to the parent window
        * @param t the title for the dialog window 
        **/
-      processor_details::processor_details(wxWindow* p, wxString t, wxString s) :
-                                                dialog::processor(p, t), project_store(s) {
+      processor_details::processor_details(wxWindow* p, wxString s) :
+                                                dialog::processor(p, wxT("View and change details")), project_store(s) {
         build();
       }
 
@@ -47,6 +48,8 @@ namespace squadt {
         tool_selector = new wxTreeCtrl(main_panel, wxID_ANY, wxDefaultPosition, wxDefaultSize,
                                         wxTR_HIDE_ROOT|wxTR_HAS_BUTTONS|wxTR_SINGLE|wxSUNKEN_BORDER);
 
+        tool_selector->AddRoot(wxEmptyString);
+
         s->AddSpacer(20);
         s->Add(tool_selector, 3, wxEXPAND|wxTOP|wxBOTTOM, 10);
         s->AddSpacer(10);
@@ -58,6 +61,37 @@ namespace squadt {
         Layout();
 
         /* Trigger event to set the buttons right */
+      }
+
+      void processor_details::populate_tool_list(storage_format f) {
+        using namespace squadt::miscellaneous;
+
+        tool_selector->DeleteChildren(tool_selector->GetRootItem());
+
+        main::tool_registry->by_format(f, boost::bind(&processor_details::add_to_tool_list, this, _1));
+      }
+
+      void processor_details::add_to_tool_list(const miscellaneous::tool_selection_helper::tools_by_category::value_type& p) {
+        wxString     current_category_name = wxString(p.first.c_str(), wxConvLocal);
+
+        wxTreeItemId root = tool_selector->GetRootItem();
+
+        /* Use of GetLastChild() because ItemHasChildren can return true when there are no children */
+        if (tool_selector->GetLastChild(root).IsOk()) {
+          wxTreeItemId last_category = tool_selector->GetLastChild(root);
+         
+          if (tool_selector->GetItemText(last_category) != current_category_name) {
+            /* Add category */
+            last_category = tool_selector->AppendItem(root, current_category_name);
+          }
+         
+          tool_selector->AppendItem(last_category, wxString(p.second->get_name().c_str(), wxConvLocal));
+        }
+        else {
+          wxTreeItemId last_category = tool_selector->AppendItem(root, current_category_name);
+
+          tool_selector->AppendItem(last_category, wxString(p.second->get_name().c_str(), wxConvLocal));
+        }
       }
     }
   }
