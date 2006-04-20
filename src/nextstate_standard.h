@@ -21,12 +21,13 @@ typedef struct {
 	AFun pairAFun;
 	int statelen;
 	AFun stateAFun;
+	unsigned int *current_id;
 } ns_info;
 
 class NextStateGeneratorStandard : public NextStateGenerator
 {
 	public:
-		NextStateGeneratorStandard(ATerm State, ns_info &Info);
+		NextStateGeneratorStandard(ATerm State, ns_info &Info, unsigned int identifier);
 		~NextStateGeneratorStandard();
 
 		bool next(ATermAppl *Transition, ATerm *State, bool *prioritised = NULL);
@@ -37,6 +38,7 @@ class NextStateGeneratorStandard : public NextStateGenerator
 
 	private:
 		ns_info info;
+		unsigned int id;
 
 		bool error;
 
@@ -49,6 +51,8 @@ class NextStateGeneratorStandard : public NextStateGenerator
 		ATerm *stateargs;
 
 		EnumeratorSolutions *sols;
+
+		void set_substitutions();
 
 		void SetTreeStateVars(ATerm tree, ATermList *vars);
 		ATermAppl rewrActionArgs(ATermAppl act);
@@ -76,6 +80,8 @@ class NextStateStandard : public NextState
 
 	private:
 		ns_info info;
+		unsigned int next_id;
+		unsigned int current_id;
 
 		bool clean_up_enum_obj;
 		bool usedummies;

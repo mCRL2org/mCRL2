@@ -61,47 +61,6 @@ static ATermAppl *parse_action_list(char *s, int *len)
   return r;
 }
 
-static bool occurs_in(ATermAppl name, ATermList ma)
-{
-  for (; !ATisEmpty(ma); ma=ATgetNext(ma))
-  {
-    if ( ATisEqual(name,ATgetArgument(ATAgetArgument(ATAgetFirst(ma),0),0)) )
-    {
-      return true;
-    }
-  }
-  return false;
-}
-
-static void save_trace(string &filename, ATerm state, ATermTable backpointers, NextState *nstate, ATerm extra_state = NULL, ATermAppl extra_transition = NULL)
-{
-  ATerm s = state;
-  ATerm ns;
-  ATermList tr = ATmakeList0();
-  
-  if ( extra_state != NULL )
-  {
-    tr = ATinsert(tr,(ATerm) ATmakeList2((ATerm) extra_transition,extra_state));
-  }
-  while ( (ns = ATtableGet(backpointers, s)) != NULL )
-  {
-    tr = ATinsert(tr, (ATerm) ATmakeList2(ATgetFirst(ATgetNext((ATermList) ns)),s));
-    s = ATgetFirst((ATermList) ns);
-  }
-  
-  Trace trace;
-  trace.setState(nstate->makeStateVector(s));
-  for (; !ATisEmpty(tr); tr=ATgetNext(tr))
-  {
-    ATermList e = (ATermList) ATgetFirst(tr);
-    trace.addAction((ATermAppl) ATgetFirst(e));
-    e = ATgetNext(e);
-    trace.setState(nstate->makeStateVector(ATgetFirst(e)));
-  }
-
-  trace.save(filename);
-}
-
 static void print_help_suggestion(FILE *f, char *Name)
 {
   fprintf(f,"Try '%s --help' for more information.\n",Name);
@@ -159,6 +118,501 @@ static void print_version(FILE *f)
   fprintf(f,NAME " " VERSION " (revision %i)\n", REVISION);
 }
 
+
+////////////////////////////////////////////////////////////////////////////////
+//                        Global variable definitions                         //
+////////////////////////////////////////////////////////////////////////////////
+
+static bool quiet = false;
+static bool verbose = false;
+static RewriteStrategy strat = GS_REWR_INNER;
+static bool usedummies = true;
+static bool removeunused = true;
+static int stateformat = GS_STATE_VECTOR;
+static int outformat = OF_UNKNOWN;
+static bool outinfo = true;
+static unsigned long max_states = ULONG_MAX;
+static char *priority_action = NULL;
+static bool trace = false;
+static bool trace_deadlock = false;
+static bool trace_action = false;
+static int num_trace_actions = 0;
+static ATermAppl *trace_actions = NULL;
+static unsigned long max_traces = ULONG_MAX;
+static bool monitor = false;
+static bool detect_deadlock = false;
+static bool detect_action = false;
+
+static NextState *nstate;
+  
+static ATermAppl term_nil;
+static AFun afun_pair;
+static ATermIndexedSet states;
+static unsigned long num_states;
+static unsigned long trans;
+static unsigned long level;
+
+static ATermTable backpointers;
+
+static unsigned long tracecnt;
+
+static char *basefilename = NULL;
+
+////////////////////////////////////////////////////////////////////////////////
+//                               LTS functions                                //
+////////////////////////////////////////////////////////////////////////////////
+
+FILE *aut = NULL;
+SVCfile svcf;
+SVCfile *svc = &svcf;
+SVCparameterIndex svcparam = 0;
+
+static void open_lts(char *filename)
+{
+  switch ( outformat )
+  {
+    case OF_AUT:
+      gsVerboseMsg("writing state space in AUT format to '%s'.\n",filename);
+      outinfo = false;
+      if ( (aut = fopen(filename,"wb")) == NULL )
+      {
+        gsErrorMsg("cannot open '%s' for writing\n",filename);
+        exit(1);
+      }
+      break;
+    case OF_SVC:
+      gsVerboseMsg("writing state space in SVC format to '%s'.\n",filename);
+      {
+        SVCbool b;
+
+        b = outinfo?SVCfalse:SVCtrue;
+        SVCopen(svc,filename,SVCwrite,&b); // XXX check result
+        SVCsetCreator(svc,NAME);
+        if (outinfo)
+          SVCsetType(svc, "mCRL2+info");
+        else
+          SVCsetType(svc, "mCRL2");
+        svcparam = SVCnewParameter(svc,(ATerm) ATmakeList0(),&b);
+      }
+      break;
+    default:
+      gsVerboseMsg("not saving state space.\n");
+      break;
+  }
+}
+
+static void save_initial_state(ATerm state)
+{
+  switch ( outformat )
+  {
+    case OF_AUT:
+      fprintf(aut,"des (0,0,0)                   \n");
+      break;
+    case OF_SVC:
+      {
+        SVCbool b;
+        if ( outinfo )
+        {
+          SVCsetInitialState(svc,SVCnewState(svc,(ATerm) nstate->makeStateVector(state),&b));
+        } else {
+          SVCsetInitialState(svc,SVCnewState(svc,(ATerm) ATmakeInt(0),&b));
+        }
+      }
+      break;
+    default:
+      break;
+  }
+}
+
+static void save_transition(unsigned long from, ATermAppl action, unsigned long to)
+{
+  switch ( outformat )
+  {
+    case OF_AUT:
+      gsfprintf(aut,"(%lu,\"%P\",%lu)\n",from,action,to);
+      fflush(aut);
+      break;
+    case OF_SVC:
+      if ( outinfo )
+      {
+        SVCbool b;
+        SVCputTransition(svc,
+          SVCnewState(svc,(ATerm) nstate->makeStateVector(ATindexedSetGetElem(states,from)),&b),
+          SVCnewLabel(svc,(ATerm) ATmakeAppl2(afun_pair,(ATerm) action,(ATerm) term_nil),&b),
+          SVCnewState(svc,(ATerm) nstate->makeStateVector(ATindexedSetGetElem(states,to)),&b),
+          svcparam);
+      } else {
+        SVCbool b;
+        SVCputTransition(svc,
+          SVCnewState(svc,(ATerm) ATmakeInt(from),&b),
+          SVCnewLabel(svc,(ATerm) ATmakeAppl2(afun_pair,(ATerm) action,(ATerm) term_nil),&b),
+          SVCnewState(svc,(ATerm) ATmakeInt(to),&b),
+          svcparam);
+      }
+      break;
+    default:
+      break;
+  }
+}
+
+static void close_lts()
+{
+  switch ( outformat )
+  {
+    case OF_AUT:
+      rewind(aut);
+      fprintf(aut,"des (0,%lu,%lu)",trans,num_states);
+      fclose(aut);
+      break;
+    case OF_SVC:
+      SVCclose(svc);
+      break;
+    default:
+      break;
+  }
+}
+
+
+////////////////////////////////////////////////////////////////////////////////
+//                              Trace functions                               //
+////////////////////////////////////////////////////////////////////////////////
+
+static bool occurs_in(ATermAppl name, ATermList ma)
+{
+  for (; !ATisEmpty(ma); ma=ATgetNext(ma))
+  {
+    if ( ATisEqual(name,ATgetArgument(ATAgetArgument(ATAgetFirst(ma),0),0)) )
+    {
+      return true;
+    }
+  }
+  return false;
+}
+
+static void save_trace(string &filename, ATerm state, ATermTable backpointers, NextState *nstate, ATerm extra_state = NULL, ATermAppl extra_transition = NULL)
+{
+  ATerm s = state;
+  ATerm ns;
+  ATermList tr = ATmakeList0();
+  
+  if ( extra_state != NULL )
+  {
+    tr = ATinsert(tr,(ATerm) ATmakeList2((ATerm) extra_transition,extra_state));
+  }
+  while ( (ns = ATtableGet(backpointers, s)) != NULL )
+  {
+    tr = ATinsert(tr, (ATerm) ATmakeList2(ATgetFirst(ATgetNext((ATermList) ns)),s));
+    s = ATgetFirst((ATermList) ns);
+  }
+  
+  Trace trace;
+  trace.setState(nstate->makeStateVector(s));
+  for (; !ATisEmpty(tr); tr=ATgetNext(tr))
+  {
+    ATermList e = (ATermList) ATgetFirst(tr);
+    trace.addAction((ATermAppl) ATgetFirst(e));
+    e = ATgetNext(e);
+    trace.setState(nstate->makeStateVector(ATgetFirst(e)));
+  }
+  
+  trace.save(filename);
+}
+
+static void check_action_trace(ATerm OldState, ATermAppl Transition, ATerm NewState)
+{
+  for (int j=0; j<num_trace_actions; j++)
+  {
+    if ( occurs_in(trace_actions[j],ATLgetArgument(Transition,0)) )
+    {
+      if ( trace_action )
+      {
+        if ( tracecnt < max_traces )
+        {
+          if ( basefilename == NULL )
+          {
+          }
+          stringstream ss;
+          ss << basefilename << "_act_" << tracecnt << "_" << ATgetName(ATgetAFun(trace_actions[j])) << ".trc";
+          string sss(ss.str());
+          save_trace(sss,OldState,backpointers,nstate,NewState,Transition);
+
+          if ( detect_action || gsVerbose )
+          {
+            gsfprintf(stderr,"detect: action '%P' found and saved to '%s_act_%lu_%P.trc'.\n",trace_actions[j],basefilename,tracecnt,trace_actions[j]);
+            fflush(stderr);
+          }
+          tracecnt++;
+        }
+      } else //if ( detect_action )
+      {
+        gsfprintf(stderr,"detect: action '%P' found.\n",trace_actions[j]);
+        fflush(stderr);
+      }
+    }
+  }
+}
+
+static void check_deadlock_trace(ATerm state)
+{
+  if ( trace_deadlock )
+  {
+    if ( tracecnt < max_traces )
+    {
+      stringstream ss;
+      ss << basefilename << "_dlk_" << tracecnt << ".trc";
+      string sss(ss.str());
+      save_trace(sss,state,backpointers,nstate);
+
+      if ( detect_deadlock || gsVerbose )
+      {
+        fprintf(stderr,"deadlock-detect: deadlock found and saved to '%s_dlk_%lu.trc'.\n",basefilename,tracecnt);
+        fflush(stderr);
+      }
+      tracecnt++;
+    }
+  } else if ( detect_deadlock ) {
+    fprintf(stderr,"deadlock-detect: deadlock found.\n");
+    fflush(stderr);
+  }
+}
+
+
+////////////////////////////////////////////////////////////////////////////////
+//                         Main exploration functions                         //
+////////////////////////////////////////////////////////////////////////////////
+
+// Confluence reduction based on S.C.C. Blom, Partial tau-confluence for
+// Efficient State Space Generation, Technical Report SEN-R0123, CWI,
+// Amsterdam, 2001
+
+static ATermTable representation = NULL;
+
+static ATerm get_repr(ATerm state)
+{
+  if ( representation == NULL )
+  {
+    return state;
+  }
+
+  ATerm t = ATtableGet(representation,state);
+  if ( t != NULL )
+  {
+    return t;
+  }
+
+  ATerm v = state;
+  ATermIndexedSet visited = ATindexedSetCreate(1000,50);
+  int num_visited = 0;
+  ATermTable number = ATtableCreate(1000,50);
+  ATermTable low = ATtableCreate(1000,50);
+  ATermTable next = ATtableCreate(1000,50);
+  ATermTable back = ATtableCreate(1000,50);
+  int count;
+  NextStateGenerator *nsgen = NULL;
+
+  ATtablePut(number,v,(ATerm) ATmakeInt(0));
+  count = 0;
+  bool notdone = true;
+  while ( notdone )
+  {
+    if ( ATgetInt((ATermInt) ATtableGet(number,v)) == 0 )
+    {
+      count++;
+      ATtablePut(number,v,(ATerm) ATmakeInt(count));
+      ATtablePut(low,v,(ATerm) ATmakeInt(count));
+      ATermList nextl = ATmakeList0();
+      nsgen = nstate->getNextStates(v,nsgen);
+      ATermAppl Transition;
+      ATerm NewState;
+      bool prioritised_action;
+      while ( nsgen->next(&Transition,&NewState,&prioritised_action) && prioritised_action )
+      {
+        ATbool b;
+        ATindexedSetPut(visited,NewState,&b);
+        if ( b == ATtrue )
+        {
+          num_visited++;
+        }
+        ATerm t = ATtableGet(representation,NewState);
+        if ( t != NULL )
+        {
+          v = t;
+          notdone = false;
+          break;
+        }
+        nextl = ATinsert(nextl,NewState);
+        ATtablePut(number,NewState,(ATerm) ATmakeInt(0));
+      }
+      if ( !notdone )
+      {
+        break;
+      }
+      ATtablePut(next,v,(ATerm) nextl);
+    }
+    ATermList nextl = (ATermList) ATtableGet(next,v);
+    if ( ATisEmpty(nextl) )
+    {
+      if ( ATisEqual(ATtableGet(number,v),ATtableGet(low,v)) )
+      {
+        break;
+      }
+      ATerm backv = ATtableGet(back,v);
+      int a = ATgetInt((ATermInt) ATtableGet(low,backv));
+      int b = ATgetInt((ATermInt) ATtableGet(low,v));
+      if ( a < b )
+      {
+        ATtablePut(low,backv,(ATerm) ATmakeInt(a));
+      } else {
+        ATtablePut(low,backv,(ATerm) ATmakeInt(b));
+      }
+      v = backv;
+    } else {
+      ATerm u = ATgetFirst(nextl);
+      ATtablePut(next,v,(ATerm) ATgetNext(nextl));
+      int nu = ATgetInt((ATermInt) ATtableGet(number,u));
+      if ( nu == 0 )
+      {
+        ATtablePut(back,u,v);
+        v = u;
+      } else {
+        if ( nu < ATgetInt((ATermInt) ATtableGet(number,v)) )
+        {
+          int lv = ATgetInt((ATermInt) ATtableGet(low,v));
+          if ( nu < lv )
+          {
+            ATtablePut(low,v,(ATerm) ATmakeInt(nu));
+          }
+        }
+      }
+    }
+  }
+  for (int i=0; i<num_visited; i++)
+  {
+    ATtablePut(representation,ATindexedSetGetElem(visited,i),v);
+  }
+
+  ATtableDestroy(back);
+  ATtableDestroy(next);
+  ATtableDestroy(low);
+  ATtableDestroy(number);
+  ATindexedSetDestroy(visited);
+
+  return v;
+}
+
+
+static bool generate_lts()
+{
+  ATerm state = get_repr(nstate->getInitialState());
+  save_initial_state(state);
+
+  ATbool new_state;
+  unsigned long current_state = ATindexedSetPut(states,state,&new_state);
+  num_states++;
+
+  bool err = false;
+  if ( max_states != 0 )
+  {
+    unsigned long nextlevelat = 1;
+    unsigned long prevtrans = 0;
+    unsigned long prevcurrent = 0;
+    tracecnt = 0;
+    gsVerboseMsg("generating state space...\n");
+
+    NextStateGenerator *nsgen = NULL;
+    while ( current_state < num_states )
+    {
+      state = ATindexedSetGetElem(states,current_state);
+      bool deadlockstate = true;
+
+      nsgen = nstate->getNextStates(state,nsgen);
+      ATermAppl Transition;
+      ATerm NewState;
+      while ( nsgen->next(&Transition,&NewState) )
+      {
+        ATbool new_state;
+        unsigned long i;
+
+        NewState = get_repr(NewState);
+        i = ATindexedSetPut(states, NewState, &new_state);
+
+        if ( new_state )
+        {
+          if ( num_states < max_states )
+          {
+                  num_states++;
+                  if ( trace )
+                  {
+                          ATtablePut(backpointers, NewState, (ATerm) ATmakeList2(state,(ATerm) Transition));
+                  }
+          }
+        }
+
+        if ( i < num_states )
+        {
+          deadlockstate = false; // XXX is this ok here, or should it be outside the if?
+
+          check_action_trace(state,Transition,NewState);
+
+          save_transition(current_state,Transition,i);
+          trans++;
+        }
+      }
+      
+      if ( nsgen->errorOccurred() )
+      {
+        err = true;
+        break;
+      }
+      if ( deadlockstate )
+      {
+        check_deadlock_trace(state);
+      }
+
+      current_state++;
+      if ( (monitor || gsVerbose) && ((current_state%1000) == 0) )
+      {
+        fprintf(stderr,
+          "monitor: currently at level %lu with %lu state%s and %lu transition%s explored and %lu state%s seen.\n",
+          level,
+          current_state,
+          (current_state==1)?"":"s",
+          trans,
+          (trans==1)?"":"s",
+          num_states,
+          (num_states==1)?"":"s"
+        );
+      }
+      if ( current_state == nextlevelat )
+      {
+        if ( monitor )
+        {
+          fprintf(stderr,
+            "monitor: level %lu done. (%lu state%s, %lu transition%s)\n",
+            level,current_state-prevcurrent,
+            ((current_state-prevcurrent)==1)?"":"s",
+            trans-prevtrans,
+            ((trans-prevtrans)==1)?"":"s"
+          );
+          fflush(stderr);
+        }
+        level++;
+        nextlevelat = num_states;
+        prevcurrent = current_state;
+        prevtrans = trans;
+      }
+    }
+    delete nsgen;
+  }
+  
+  return err;
+}
+
+
+////////////////////////////////////////////////////////////////////////////////
+//                               main function                                //
+////////////////////////////////////////////////////////////////////////////////
+
 int main(int argc, char **argv)
 {
   FILE *SpecStream;
@@ -193,25 +647,6 @@ int main(int argc, char **argv)
 
   ATinit(argc,argv,&stackbot);
 
-  bool quiet = false;
-  bool verbose = false;
-  RewriteStrategy strat = GS_REWR_INNER;
-  bool usedummies = true;
-  bool removeunused = true;
-  int stateformat = GS_STATE_VECTOR;
-  int outformat = OF_UNKNOWN;
-  bool outinfo = true;
-  unsigned long max_states = ULONG_MAX;
-  char *priority_action = NULL;
-  bool trace = false;
-  bool trace_deadlock = false;
-  bool trace_action = false;
-  int num_trace_actions = 0;
-  ATermAppl *trace_actions = NULL;
-  unsigned long max_traces = ULONG_MAX;
-  bool monitor = false;
-  bool detect_deadlock = false;
-  bool detect_action = false;
   int opt;
   while ( (opt = getopt_long(argc,argv,sopts,lopts,NULL)) != -1 )
   {
@@ -326,7 +761,7 @@ int main(int argc, char **argv)
     print_help_suggestion(stderr,argv[0]);
     return 1;
   }
-        char *SpecFileName = argv[optind];
+  char *SpecFileName = argv[optind];
   if ( (SpecStream = fopen(SpecFileName, "rb")) == NULL )
   {
     gsErrorMsg("could not open input file '%s' for reading: ", SpecFileName);
@@ -354,10 +789,6 @@ int main(int argc, char **argv)
     Spec = removeUnusedData(Spec);
   }
 
-  FILE *aut = NULL;
-  SVCfile svcf;
-  SVCfile *svc = &svcf;
-  SVCparameterIndex svcparam = 0;
   if ( argc-optind > 1 )
   {
     if ( outformat == OF_UNKNOWN )
@@ -384,308 +815,53 @@ int main(int argc, char **argv)
       }
     }
 
-    switch ( outformat )
-    {
-      case OF_AUT:
-        gsVerboseMsg("writing state space in AUT format to '%s'.\n",argv[optind+1]);
-        outinfo = false;
-        if ( (aut = fopen(argv[optind+1],"wb")) == NULL )
-        {
-          gsErrorMsg("cannot open '%s' for writing\n",argv[optind+1]);
-          return 1;
-        }
-        break;
-      case OF_SVC:
-        gsVerboseMsg("writing state space in SVC format to '%s'.\n",argv[optind+1]);
-        {
-          SVCbool b;
-
-          b = outinfo?SVCfalse:SVCtrue;
-          SVCopen(svc,argv[optind+1],SVCwrite,&b); // XXX check result
-          SVCsetCreator(svc,NAME);
-          if (outinfo)
-            SVCsetType(svc, "mCRL2+info");
-          else
-            SVCsetType(svc, "mCRL2");
-          svcparam = SVCnewParameter(svc,(ATerm) ATmakeList0(),&b);
-        }
-        break;
-      default:
-        gsVerboseMsg("not saving state space.\n");
-        break;
-    }
+    open_lts(argv[optind+1]);
   } else {
     outformat = OF_UNKNOWN;
     gsVerboseMsg("not saving state space.\n");
   }
 
   gsVerboseMsg("initialising...\n");
-  ATermAppl term_nil = gsMakeNil();
-  AFun afun_pair = ATmakeAFun("pair",2,ATfalse);
-  ATermIndexedSet states = ATindexedSetCreate(10000,50);
-  unsigned long num_states = 0;
-  unsigned long trans = 0;
-  unsigned long level = 1;
-  ATermTable backpointers;
+  
+  basefilename = strdup(SpecFileName);
+  char *s = strrchr(basefilename,'.');
+  if ( s != NULL )
+  {
+    *s = '\0';
+  }
+
+  term_nil = gsMakeNil();
+  ATprotectAppl(&term_nil);
+  afun_pair = ATmakeAFun("pair",2,ATfalse);
+  ATprotectAFun(afun_pair);
+  states = ATindexedSetCreate(10000,50);
+  
   if ( trace )
   {
     backpointers = ATtableCreate(10000,50);
   } else {
     backpointers = NULL;
   }
-
-  NextState *nstate = createNextState(Spec,!usedummies,stateformat,createEnumerator(Spec,createRewriter(ATAgetArgument(Spec,3),strat),true),true);
+  
+  nstate = createNextState(Spec,!usedummies,stateformat,createEnumerator(Spec,createRewriter(ATAgetArgument(Spec,3),strat),true),true);
+  
   if ( priority_action != NULL )
   {
-          gsVerboseMsg("prioritising action '%s'...\n",priority_action);
-          nstate->prioritise(priority_action);
+    gsVerboseMsg("prioritising action '%s'...\n",priority_action);
+    nstate->prioritise(priority_action);
+    representation = ATtableCreate(10000,50);
   }
 
-  ATerm state = nstate->getInitialState();
-  switch ( outformat )
-  {
-    case OF_AUT:
-      fprintf(aut,"des (0,0,0)                   \n");
-      break;
-    case OF_SVC:
-      {
-        SVCbool b;
-        if ( outinfo )
-        {
-          SVCsetInitialState(svc,SVCnewState(svc,(ATerm) nstate->makeStateVector(state),&b));
-        } else {
-          SVCsetInitialState(svc,SVCnewState(svc,(ATerm) ATmakeInt(0),&b));
-        }
-      }
-      break;
-    default:
-      break;
-  }
+  num_states = 0;
+  trans = 0;
+  level = 1;
 
-  ATbool new_state;
-  unsigned long current_state = ATindexedSetPut(states,state,&new_state);
-  num_states++;
+  bool err = generate_lts();
 
-  bool err = false;
-  if ( max_states != 0 )
-  {
-  unsigned long nextlevelat = 1;
-  unsigned long prevtrans = 0;
-  unsigned long prevcurrent = 0;
-  unsigned long tracecnt = 0;
-  char *basefilename = NULL;
-  gsVerboseMsg("generating state space...\n");
-
-  NextStateGenerator *nsgen = NULL;
-  while ( current_state < num_states )
-  {
-    state = ATindexedSetGetElem(states,current_state);
-    bool deadlockstate = true;
-
-    nsgen = nstate->getNextStates(state,nsgen);
-    ATermAppl Transition;
-    ATerm NewState;
-    bool prioritised_action;
-    while ( nsgen->next(&Transition,&NewState,&prioritised_action) )
-    {
-      ATbool new_state;
-      unsigned long i;
-
-      deadlockstate = false;
-
-      i = ATindexedSetPut(states, NewState, &new_state);
-
-      if ( new_state )
-      {
-        if ( num_states < max_states )
-        {
-                num_states++;
-                if ( trace )
-                {
-                        ATtablePut(backpointers, NewState, (ATerm) ATmakeList2(state,(ATerm) Transition));
-                }
-        }
-      }
-
-      if ( i < num_states )
-      {
-        for (int j=0; j<num_trace_actions; j++)
-        {
-          if ( occurs_in(trace_actions[j],ATLgetArgument(Transition,0)) )
-          {
-            if ( trace_action )
-            {
-              if ( tracecnt < max_traces )
-              {
-                if ( basefilename == NULL )
-                {
-                  basefilename = strdup(SpecFileName);
-                  char *s = strrchr(basefilename,'.');
-                  if ( s != NULL )
-                  {
-                    *s = '\0';
-                  }
-                }
-                stringstream ss;
-                ss << basefilename << "_act_" << tracecnt << "_" << ATgetName(ATgetAFun(trace_actions[j])) << ".trc";
-                string sss(ss.str());
-                save_trace(sss,state,backpointers,nstate,NewState,Transition);
-
-                if ( detect_action || gsVerbose )
-                {
-                  gsfprintf(stderr,"detect: action '%P' found and saved to '%s_act_%lu_%P.trc'.\n",trace_actions[j],basefilename,tracecnt,trace_actions[j]);
-                  fflush(stderr);
-                }
-                tracecnt++;
-              }
-            } else //if ( detect_action )
-            {
-              gsfprintf(stderr,"detect: action '%P' found.\n",trace_actions[j]);
-              fflush(stderr);
-            }
-          }
-        }
-
-        switch ( outformat )
-        {
-          case OF_AUT:
-            gsfprintf(aut,"(%lu,\"%P\",%lu)\n",current_state,Transition,i);
-            fflush(aut);
-            break;
-          case OF_SVC:
-            if ( outinfo )
-            {
-              SVCbool b;
-              SVCputTransition(svc,
-                SVCnewState(svc,(ATerm) nstate->makeStateVector(ATindexedSetGetElem(states,current_state)),&b),
-                SVCnewLabel(svc,(ATerm) Transition,&b),
-                SVCnewState(svc,(ATerm) nstate->makeStateVector(ATindexedSetGetElem(states,i)),&b),
-                svcparam);
-            } else {
-              SVCbool b;
-              SVCputTransition(svc,
-                SVCnewState(svc,(ATerm) ATmakeInt(current_state),&b),
-                SVCnewLabel(svc,(ATerm) ATmakeAppl2(afun_pair,(ATerm) Transition,(ATerm) term_nil),&b),
-                SVCnewState(svc,(ATerm) ATmakeInt(i),&b),
-                svcparam);
-            }
-            break;
-          default:
-            break;
-        }
-        trans++;
-      }
-      if ( prioritised_action )
-      {
-              break;
-      }
-    }
-    
-    if ( nsgen->errorOccurred() )
-    {
-      err = true;
-      break;
-    }
-    if ( deadlockstate )
-    {
-      if ( trace_deadlock )
-      {
-        if ( tracecnt < max_traces )
-        {
-          if ( basefilename == NULL )
-          {
-            basefilename = strdup(SpecFileName);
-            char *s = strrchr(basefilename,'.');
-            if ( s != NULL )
-            {
-              *s = '\0';
-            }
-          }
-          stringstream ss;
-          ss << basefilename << "_dlk_" << tracecnt << ".trc";
-          string sss(ss.str());
-          save_trace(sss,state,backpointers,nstate);
-
-          if ( detect_deadlock || gsVerbose )
-          {
-            fprintf(stderr,"deadlock-detect: deadlock found and saved to '%s_dlk_%lu.trc'.\n",basefilename,tracecnt);
-            fflush(stderr);
-          }
-          tracecnt++;
-        }
-      } else if ( detect_deadlock ) {
-        fprintf(stderr,"deadlock-detect: deadlock found.\n");
-        fflush(stderr);
-      }
-    }
-
-    current_state++;
-    if ( (monitor || gsVerbose) && ((current_state%1000) == 0) )
-    {
-      fprintf(stderr,
-        "monitor: currently at level %lu with %lu state%s and %lu transition%s explored and %lu state%s seen.\n",
-        level,
-        current_state,
-        (current_state==1)?"":"s",
-        trans,
-        (trans==1)?"":"s",
-        num_states,
-        (num_states==1)?"":"s"
-      );
-    }
-    if ( current_state == nextlevelat )
-    {
-      if ( monitor )
-      {
-        fprintf(stderr,
-          "monitor: level %lu done. (%lu state%s, %lu transition%s)\n",
-          level,current_state-prevcurrent,
-          ((current_state-prevcurrent)==1)?"":"s",
-          trans-prevtrans,
-          ((trans-prevtrans)==1)?"":"s"
-        );
-        fflush(stderr);
-      }
-      level++;
-      nextlevelat = num_states;
-      prevcurrent = current_state;
-      prevtrans = trans;
-    }
-/*    if ( current_state == nextlevelat )
-    {
-      if ( monitor )
-      {
-        fprintf(stderr,
-          "monitor: Level %lu done. Currently %lu states visited and %lu states and %lu transitions explored.\n",
-          level,
-          num_states,
-          current_state,
-          trans
-        );
-        fflush(stderr);
-      }
-      level++;
-      nextlevelat = num_states;
-    }*/
-  }
-  delete nsgen;
   delete nstate;
   free(basefilename);
-  }
 
-  switch ( outformat )
-  {
-    case OF_AUT:
-      rewind(aut);
-      fprintf(aut,"des (0,%lu,%lu)",trans,num_states);
-      fclose(aut);
-      break;
-    case OF_SVC:
-      SVCclose(svc);
-      break;
-    default:
-      break;
-  }
+  close_lts();
 
   if ( !err && (monitor || gsVerbose))
   {

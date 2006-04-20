@@ -360,6 +360,9 @@ NextStateStandard::NextStateStandard(ATermAppl spec, bool allow_free_vars, int s
 {
 	ATermList l,m,n,free_vars;
 
+	next_id = 0;
+	info.current_id = &current_id;
+
 	info.parent = this;
 
 	info.enum_obj = e;
@@ -550,7 +553,7 @@ NextStateGenerator *NextStateStandard::getNextStates(ATerm state, NextStateGener
 {
 	if ( old == NULL )
 	{
-		return new NextStateGeneratorStandard(state,info);
+		return new NextStateGeneratorStandard(state,info,next_id++);
 	} else {
 		((NextStateGeneratorStandard *) old)->reset(state);
 		return old;
@@ -631,9 +634,10 @@ void NextStateGeneratorStandard::SetTreeStateVars(ATerm tree, ATermList *vars)
 	}
 }
 
-NextStateGeneratorStandard::NextStateGeneratorStandard(ATerm State, ns_info &Info)
+NextStateGeneratorStandard::NextStateGeneratorStandard(ATerm State, ns_info &Info, unsigned int identifier)
 {
 	info = Info;
+	id = identifier;
 
 	cur_state = NULL;
 	cur_act = NULL;
@@ -666,17 +670,15 @@ NextStateGeneratorStandard::~NextStateGeneratorStandard()
 	ATunprotect(&cur_state);
 }
 
-void NextStateGeneratorStandard::reset(ATerm State)
+void NextStateGeneratorStandard::set_substitutions()
 {
-	error = false;
-
 	ATermList l = info.procvars;
 	switch ( info.stateformat )
 	{
 		case GS_STATE_VECTOR:
 			for (int i=0; !ATisEmpty(l); l=ATgetNext(l),i++)
 			{
-				ATerm a = ATgetArgument((ATermAppl) State,i);
+				ATerm a = ATgetArgument((ATermAppl) cur_state,i);
 
 				if ( !ATisEqual(a,info.nil) )
 				{
@@ -685,11 +687,20 @@ void NextStateGeneratorStandard::reset(ATerm State)
 			}
 			break;
 		case GS_STATE_TREE:
-			SetTreeStateVars(State,&l);
+			SetTreeStateVars(cur_state,&l);
 			break;
 	}
 
+	*info.current_id = id;
+}
+
+void NextStateGeneratorStandard::reset(ATerm State)
+{
+	error = false;
+
 	cur_state = State;
+
+	set_substitutions();
 
 	if ( info.num_summands == 0 )
 	{
@@ -713,6 +724,11 @@ bool NextStateGeneratorStandard::next(ATermAppl *Transition, ATerm *State, bool 
 		{
 			cur_act = ATgetArgument(info.summands[sum_idx],2);
 			cur_nextstate = ATgetArgument(info.summands[sum_idx],3);
+
+			if ( *info.current_id != id )
+			{
+				set_substitutions();
+			}
 
 			sols = info.enum_obj->findSolutions(ATLgetArgument(info.summands[sum_idx],0),ATgetArgument(info.summands[sum_idx],1),sols);
 		
