@@ -48,7 +48,7 @@
         "  -f, --formulas=FORMULAS         Use the list of formulas in internal mCRL2\n"
         "                                  format as found in FORMULAS as input.\n"
         "  -l, --lpe=LPE                   Use the mCRL2 LPE as found in LPE as input.\n"
-        "  -c, --counter-example           Give a valuation for which the current\n
+        "  -c, --counter-example           Give a valuation for which the current\n"
         "                                  formula does not hold, in case the current\n"
         "                                  formulas is neither a contradiction nor a\n"
         "                                  tautology.\n"
