@@ -60,7 +60,7 @@ namespace squadt {
             inline void set_processor(processor::ptr);
 
             /** \brief Gets the associated processor */
-            inline processor* get_processor() const;
+            inline processor::ptr& get_processor();
 
             /** \brief Gets the associated project window */
             inline project const* get_project() const;
@@ -120,8 +120,8 @@ namespace squadt {
       target = p;
     }
 
-    inline processor* project::node_data::get_processor() const {
-      return (target.get());
+    inline processor::ptr& project::node_data::get_processor() {
+      return (target);
     }
   }
 }

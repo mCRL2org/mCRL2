@@ -50,7 +50,7 @@ namespace squadt {
         private:
         
           /** \brief Helper function that places the widgets */
-          void build();
+          void build(wxString&);
 
           /** \brief Helper function for filling the tool list with tools */
           void populate_tool_list(storage_format);
@@ -58,10 +58,16 @@ namespace squadt {
           /** \brief Helper function that actually adds a tool to the list of tools */
           void add_to_tool_list(const miscellaneous::tool_selection_helper::tools_by_category::value_type&);
 
+          /** \brief Event handler for when something is selected in the tool_selector control */
+          void on_tool_selector_item_selected(wxTreeEvent& e);
+
+          /** \brief Event handler for when something is about to be selected in the tool_selector control */
+          void on_tool_selector_item_select(wxTreeEvent& e);
+
         public:
 
           /** \brief Constructor */
-          processor_details(wxWindow*, wxString);
+          processor_details(wxWindow*, wxString, wxString);
 
           /** \brief Constructor sets the name field */
           inline void set_name(wxString);

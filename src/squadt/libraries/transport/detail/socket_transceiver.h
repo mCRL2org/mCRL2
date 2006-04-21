@@ -107,7 +107,7 @@ namespace transport {
         inline void connect(const std::string&, const long = default_port);
 
         /** \brief Wrapper for connect() that ensures establishes that the object is not freed yet */
-        inline void connect(const address& = address::loopback(), const long = default_port);
+        inline void connect(const address& = address::any(), const long = default_port);
 
         /** \brief Terminate the connection with the peer */
         inline void disconnect(basic_transceiver::ptr);

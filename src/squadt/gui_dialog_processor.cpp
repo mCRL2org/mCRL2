@@ -8,18 +8,25 @@ namespace squadt {
       /**
        * @param p a pointer to the parent window
        * @param t the title for the dialog window 
+       * @param n the value for the name field
        **/
-      processor_details::processor_details(wxWindow* p, wxString s) :
+      processor_details::processor_details(wxWindow* p, wxString s, wxString n) :
                                                 dialog::processor(p, wxT("View and change details")), project_store(s) {
-        build();
+        build(n);
+
+        Connect(wxEVT_COMMAND_TREE_ITEM_ACTIVATED, wxTreeEventHandler(processor_details::on_tool_selector_item_selected), 0, this);
+        Connect(wxEVT_COMMAND_TREE_SEL_CHANGING, wxTreeEventHandler(processor_details::on_tool_selector_item_select), 0, this);
       }
 
-      void processor_details::build() {
+      /**
+       * @param n reference to the name
+       **/
+      void processor_details::build(wxString& n) {
         wxBoxSizer*       s = new wxBoxSizer(wxHORIZONTAL);
         wxBoxSizer*       t = new wxBoxSizer(wxVERTICAL);
         wxBoxSizer*       u = new wxBoxSizer(wxHORIZONTAL);
 
-        name = new wxTextCtrl(main_panel, wxID_ANY, wxT(""));
+        name = new wxTextCtrl(main_panel, wxID_ANY, n);
 
         u->Add(new wxStaticText(main_panel, wxID_ANY, wxT("Name :")));
         u->AddSpacer(5);
@@ -59,8 +66,20 @@ namespace squadt {
         main_panel->SetSizer(s);
 
         Layout();
+      }
 
-        /* Trigger event to set the buttons right */
+      void processor_details::on_tool_selector_item_selected(wxTreeEvent& e) {
+        if (tool_selector->GetItemParent(e.GetItem()) == tool_selector->GetRootItem()) {
+          tool_selector->Toggle(e.GetItem());
+
+          tool_selector->UnselectItem(e.GetItem());
+        }
+      }
+
+      void processor_details::on_tool_selector_item_select(wxTreeEvent& e) {
+        if (tool_selector->GetItemParent(e.GetItem()) == tool_selector->GetRootItem()) {
+          e.Veto();
+        }
       }
 
       void processor_details::populate_tool_list(storage_format f) {

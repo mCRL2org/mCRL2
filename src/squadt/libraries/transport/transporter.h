@@ -109,8 +109,8 @@ namespace transport {
       /** \brief Pass a connection through to another transporter */
       inline void relay_connection(transporter*, basic_transceiver*);
 
-      /** \brief Activate a socket listener (using a loopback connection by default) */
-      void add_listener(const address& = address::loopback(), const long port = 0);
+      /** \brief Activate a socket listener */
+      void add_listener(const address& = address::any(), const long port = 0);
 
       /** \brief Activate a socket listener by its number */
       void remove_listener(size_t number = 0);

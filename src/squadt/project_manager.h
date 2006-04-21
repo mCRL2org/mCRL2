@@ -92,7 +92,7 @@ namespace squadt {
       void write(std::ostream&) const;
  
       /** \brief Add a new processor to the project */
-      inline processor::ptr add(processor::reporter::callback_handler = processor::reporter::dummy);
+      inline void add(processor::ptr&);
 
       /** \brief Remove a processor and all processors that depend one one of its outputs */
       inline void remove(processor*);
@@ -137,18 +137,22 @@ namespace squadt {
   /**
    * @param h the handler that can be used to report back state changes
    **/
-  inline processor::ptr project_manager::add(processor::reporter::callback_handler h) {
-    return (processor::ptr(new processor(h)));
+  inline void project_manager::add(processor::ptr& p) {
+    processors.push_back(p);
   }
 
   /**
    * @param p pointer to the processor that is to be removed
+   *
+   * \attention all processors with inconsistent inputs are also removed
    **/
   inline void project_manager::remove(processor* p) {
     processor_list::iterator i = processors.begin();
 
     while (i != processors.end()) {
       if ((*i).get() == p || !((*i)->consistent_inputs())) {
+        (*i)->flush_outputs();
+
         i = processors.erase(i);
       }
       else {

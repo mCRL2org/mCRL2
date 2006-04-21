@@ -24,7 +24,8 @@ namespace squadt {
      * @param[in,out] p a shared pointer to the processor for which process is monitored and reported
      * @param[in] t the tool used by the processor
      **/
-    project::node_data::node_data(project& p) : parent(p) {
+    project::node_data::node_data(project& p) : parent(p),
+                    target(new processor(boost::bind(&node_data::update_state, this, _1))) {
     }
 
     /**
@@ -72,7 +73,7 @@ namespace squadt {
       processor_view->Connect(wxEVT_COMMAND_TREE_ITEM_MENU, wxTreeEventHandler(project::on_tree_item_activate), 0, this);
       processor_view->Connect(wxEVT_COMMAND_TREE_ITEM_ACTIVATED, wxTreeEventHandler(project::on_tree_item_activate), 0, this);
 
-      Connect(wxEVT_COMMAND_MENU_SELECTED, wxCommandEventHandler(project::on_context_menu_select), 0, this);
+      Connect(wxEVT_COMMAND_MENU_SELECTED, wxCommandEventHandler(project::on_context_menu_select));
     }
 
     /**
@@ -80,7 +81,7 @@ namespace squadt {
      **/
     void project::on_tree_item_activate(wxTreeEvent& e) {
       if (processor_view->GetRootItem() != e.GetItem()) {
-        spawn_context_menu(reinterpret_cast < node_data* > (processor_view->GetItemData(e.GetItem()))->get_processor());
+        spawn_context_menu(reinterpret_cast < node_data* > (processor_view->GetItemData(e.GetItem()))->get_processor().get());
       }
       else {
         dialog::add_to_project dialog(this, wxString(manager->get_project_directory().c_str(), wxConvLocal));
@@ -99,7 +100,7 @@ namespace squadt {
           node_data* monitor = new node_data(*this);
 
           /* Add the processor to the project */
-          monitor->set_processor(manager->add(boost::bind(&node_data::update_state, monitor, _1)));
+          manager->add(monitor->get_processor());
 
           processor_view->SetItemData(i, reinterpret_cast < wxTreeItemData* > (monitor));
 
@@ -141,27 +142,30 @@ namespace squadt {
      * @param e a reference to a menu event object
      **/
     void project::on_context_menu_select(wxCommandEvent& e) {
+      wxTreeItemId    s = processor_view->GetSelection();
+      processor::ptr& p = reinterpret_cast < node_data* > (processor_view->GetItemData(s))->get_processor();
+
       switch (e.GetId()) {
         case cmID_REMOVE:
-          processor_view->Delete(processor_view->GetSelection());
+          manager->remove(p.get());
 
+          processor_view->Delete(s);
           break;
         case cmID_REBUILD:
+          p->flush_outputs();
+
+          p->process();
           break;
         case cmID_CLEAN:
+          p->flush_outputs();
           break;
         case cmID_DERIVE: {
           }
           break;
         case cmID_DETAILS: {
-            dialog::processor_details dialog(this, wxString(manager->get_project_directory().c_str(), wxConvLocal));
+            dialog::processor_details dialog(this, wxString(manager->get_project_directory().c_str(), wxConvLocal), processor_view->GetItemText(s));
 
-            if (processor_view->GetItemParent(processor_view->GetSelection()) == processor_view->GetRootItem()) {
-              processor const* p = reinterpret_cast < node_data* > (processor_view->GetItemData(processor_view->GetSelection()))->get_processor();
-
-              /* Add the main input (must exist) */
-              dialog.set_name(processor_view->GetItemText(processor_view->GetSelection()));
-
+            if (processor_view->GetItemParent(s) == processor_view->GetRootItem()) {
               /* Add the main input (must exist) */
               dialog.populate_tool_list(p->get_outputs().front()->format);
             }
