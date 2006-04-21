@@ -457,8 +457,14 @@ namespace squadt {
       }
 
       void add_to_project::on_selection_changed(wxTreeEvent&) {
-        name->SetValue(wxFileName::FileExists(file_selector->GetPath()) ?
-                wxFileName(file_selector->GetPath()).GetFullName() : wxT(""));
+        if (wxFileName::FileExists(file_selector->GetPath())) {
+          name->SetValue(wxFileName(file_selector->GetPath()).GetFullName());
+        }
+        else {
+          name->SetValue(wxEmptyString);
+
+          button_accept->Enable(false);
+        }
       }
 
       /** \brief Gets the name under which to add the file to the project */

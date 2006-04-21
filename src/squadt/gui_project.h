@@ -11,6 +11,7 @@
 #include <wx/treectrl.h>
 
 #include "processor.h"
+#include "gui_miscellaneous.h"
 
 namespace squadt {
 
@@ -77,6 +78,9 @@ namespace squadt {
         /** \brief The location (incomplete path) to project directory the project name is the basename */
         boost::shared_ptr < project_manager > manager;
 
+        /** \brief The list of temporary processors that exist for tool configuration purposes */
+        std::vector < processor::ptr >        temporary_processors;
+
       private:
 
         /** \brief Initially places the widgets */
@@ -89,7 +93,10 @@ namespace squadt {
         void on_context_menu_select(wxCommandEvent&);
 
         /** \brief Creates a context menu for the selected processor */
-        void spawn_context_menu(processor*);
+        void spawn_context_menu(storage_format&);
+
+        /** \brief Helper function to add tools by category to a context menu */
+        void add_to_context_menu(const miscellaneous::tool_selection_helper::tools_by_category::value_type&, wxMenu*, int*);
 
       public:
 

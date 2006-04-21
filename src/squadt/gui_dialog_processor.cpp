@@ -6,13 +6,13 @@ namespace squadt {
     namespace dialog {
 
       /**
-       * @param p a pointer to the parent window
+       * @param o a pointer to the parent window
        * @param t the title for the dialog window 
        * @param n the value for the name field
        **/
-      processor_details::processor_details(wxWindow* p, wxString s, wxString n) :
-                                                dialog::processor(p, wxT("View and change details")), project_store(s) {
-        build(n);
+      processor_details::processor_details(wxWindow* o, wxString s, squadt::processor* p) :
+                                                dialog::processor(o, wxT("View and change details")), project_store(s), target_processor(p) {
+        build();
 
         Connect(wxEVT_COMMAND_TREE_ITEM_ACTIVATED, wxTreeEventHandler(processor_details::on_tool_selector_item_selected), 0, this);
         Connect(wxEVT_COMMAND_TREE_SEL_CHANGING, wxTreeEventHandler(processor_details::on_tool_selector_item_select), 0, this);
@@ -21,12 +21,12 @@ namespace squadt {
       /**
        * @param n reference to the name
        **/
-      void processor_details::build(wxString& n) {
+      void processor_details::build() {
         wxBoxSizer*       s = new wxBoxSizer(wxHORIZONTAL);
         wxBoxSizer*       t = new wxBoxSizer(wxVERTICAL);
         wxBoxSizer*       u = new wxBoxSizer(wxHORIZONTAL);
 
-        name = new wxTextCtrl(main_panel, wxID_ANY, n);
+        name = new wxTextCtrl(main_panel, wxID_ANY, wxT(""));
 
         u->Add(new wxStaticText(main_panel, wxID_ANY, wxT("Name :")));
         u->AddSpacer(5);

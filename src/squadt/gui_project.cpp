@@ -14,8 +14,8 @@
 #define cmID_REMOVE     (wxID_HIGHEST + 1)
 #define cmID_REBUILD    (wxID_HIGHEST + 2)
 #define cmID_CLEAN      (wxID_HIGHEST + 3)
-#define cmID_DERIVE     (wxID_HIGHEST + 4)
-#define cmID_DETAILS    (wxID_HIGHEST + 5)
+#define cmID_DETAILS    (wxID_HIGHEST + 4)
+#define cmID_TOOLS      (wxID_HIGHEST + 5)
 
 namespace squadt {
   namespace GUI {
@@ -81,7 +81,10 @@ namespace squadt {
      **/
     void project::on_tree_item_activate(wxTreeEvent& e) {
       if (processor_view->GetRootItem() != e.GetItem()) {
-        spawn_context_menu(reinterpret_cast < node_data* > (processor_view->GetItemData(e.GetItem()))->get_processor().get());
+        processor::ptr p = reinterpret_cast < node_data* > (processor_view->GetItemData(e.GetItem()))->get_processor();
+
+        /* TODO Do something for processors for which this is not possible */
+        spawn_context_menu(p->get_outputs().front()->format);
       }
       else {
         dialog::add_to_project dialog(this, wxString(manager->get_project_directory().c_str(), wxConvLocal));
@@ -122,16 +125,21 @@ namespace squadt {
     }
 
     /**
-     * @param p a pointer to a processor object
+     * @param f a storage format for which to add tools to the menu
      **/
-    void project::spawn_context_menu(processor* p) {
+    void project::spawn_context_menu(storage_format& f) {
       wxMenu  context_menu;
 
       context_menu.Append(cmID_REMOVE, wxT("Remove"));
       context_menu.Append(cmID_REBUILD, wxT("Rebuild"));
       context_menu.Append(cmID_CLEAN, wxT("Clean"));
       context_menu.AppendSeparator();
-      context_menu.Append(cmID_DERIVE, wxT("Derive ..."));
+
+      /* wxWidgets identifier for menu items */
+      int identifier = cmID_TOOLS;
+
+      main::tool_registry->by_format(f, boost::bind(&project::add_to_context_menu, this, _1, &context_menu, &identifier));
+
       context_menu.AppendSeparator();
       context_menu.Append(cmID_DETAILS, wxT("Details"));
 
@@ -139,15 +147,37 @@ namespace squadt {
     }
 
     /**
+     * @param p the main tool_selection_helper object that indexes the global tool manager
+     * @param c a reference to the context menu to which to add
+     * @param id a reference to the next free identifier
+     **/
+    void project::add_to_context_menu(const miscellaneous::tool_selection_helper::tools_by_category::value_type& p, wxMenu* c, int* id) {
+      wxString    category_name = wxString(p.first.c_str(), wxConvLocal);
+      int         item_id       = c->FindItem(category_name); 
+      wxMenu*     target_menu;
+
+      if (item_id == wxNOT_FOUND) {
+        target_menu = new wxMenu();
+
+        c->Append(*id++, category_name, target_menu);
+      }
+      else {
+        target_menu = c->FindItem(item_id)->GetMenu();
+      }
+
+      target_menu->Append(*id++, wxString(p.second->get_name().c_str(), wxConvLocal));
+    }
+
+    /**
      * @param e a reference to a menu event object
      **/
     void project::on_context_menu_select(wxCommandEvent& e) {
-      wxTreeItemId    s = processor_view->GetSelection();
-      processor::ptr& p = reinterpret_cast < node_data* > (processor_view->GetItemData(s))->get_processor();
+      wxTreeItemId s = processor_view->GetSelection();
+      processor*   p = reinterpret_cast < node_data* > (processor_view->GetItemData(s))->get_processor().get();
 
       switch (e.GetId()) {
         case cmID_REMOVE:
-          manager->remove(p.get());
+          manager->remove(p);
 
           processor_view->Delete(s);
           break;
@@ -159,13 +189,14 @@ namespace squadt {
         case cmID_CLEAN:
           p->flush_outputs();
           break;
-        case cmID_DERIVE: {
-          }
-          break;
         case cmID_DETAILS: {
-            dialog::processor_details dialog(this, wxString(manager->get_project_directory().c_str(), wxConvLocal), processor_view->GetItemText(s));
+            dialog::processor_details dialog(this, wxString(manager->get_project_directory().c_str(), wxConvLocal), p);
 
             if (processor_view->GetItemParent(s) == processor_view->GetRootItem()) {
+              dialog.set_name(processor_view->GetItemText(s));
+              dialog.show_tool_selector(false);
+              dialog.show_input_objects(false);
+
               /* Add the main input (must exist) */
               dialog.populate_tool_list(p->get_outputs().front()->format);
             }
@@ -173,6 +204,22 @@ namespace squadt {
             if (dialog.ShowModal()) {
               /* Process changes */
             }
+          }
+          break;
+        default: {
+            /* Assume that a tool was selected */
+            wxMenu*     menu          = reinterpret_cast < wxMenu* > (e.GetEventObject());
+            wxMenuItem* menu_item     = menu->FindItem(e.GetId());
+//            wxMenu*     category_menu = menu_item->GetMenu();
+
+            /* Create a temporary processor */
+            processor::ptr tp = processor::ptr(new processor());
+
+            temporary_processors.push_back(tp);
+
+            global_tool_manager->find(std::string(menu_item->GetLabel().fn_str()));
+
+//            tp->configure();
           }
           break;
       }

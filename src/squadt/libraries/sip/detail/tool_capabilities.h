@@ -4,8 +4,10 @@
 #include <set>
 #include <ostream>
 #include <sstream>
+#include <utility>
 
 #include <boost/shared_ptr.hpp>
+#include <boost/bind.hpp>
 
 #include <xml2pp/text_reader.h>
 #include <sip/detail/object.h>
@@ -43,8 +45,11 @@ namespace sip {
  
         /** \brief Description for a tool's main input object */
         struct input_combination {
-          tool_category   category;
-          storage_format  format;
+          tool_category      category;   ///< tool category
+          storage_format     format;     ///< storage format of the main input
+          object::identifier identifier; ///< identifier for the main input object
+
+          inline static bool equal(const input_combination&, const input_combination&);
         };
  
         /** \brief Convenience type for a list of input configurations */
@@ -91,8 +96,15 @@ namespace sip {
  
         /** \brief Returns a reference to the list of input combinations */
         inline const input_combination_list& get_input_combinations() const;
+
+        /** \brief Find a specific input combination of this tool, if it exists */
+        inline const input_combination* find_input_combination(const storage_format&, const tool_category&) const;
     };
  
+    inline bool capabilities::input_combination::equal(const input_combination& p, const input_combination& q) {
+      return (p.format == q.format && p.category == q.category);
+    }
+
     /**
      * \brief Operator for writing to stream
      *
@@ -113,8 +125,8 @@ namespace sip {
     inline capabilities::capabilities(const version v) : protocol_version(v), interactive(false) {
     }
  
-    inline void capabilities::add_input_combination(object::identifier identifier, tool_category c, storage_format f) {
-      input_combination ic = {c, f};
+    inline void capabilities::add_input_combination(object::identifier id, tool_category c, storage_format f) {
+      input_combination ic = {c, f, id};
  
       input_combinations.insert(ic);
     }
@@ -147,7 +159,8 @@ namespace sip {
       
       for (input_combination_list::const_iterator i = input_combinations.begin(); i != input_combinations.end(); ++i) {
         output << "<input-configuration category=\"" << (*i).category
-               << "\" format=\"" << (*i).format << "\"/>";
+               << "\" format=\"" << (*i).format
+               << "\" identifier=\"" << (*i).identifier << "\"/>";
       }
  
       output << "</capabilities>";
@@ -203,6 +216,7 @@ namespace sip {
  
           r.get_attribute(&ic.category, "category");
           r.get_attribute(&ic.format, "format");
+          r.get_attribute(&ic.identifier, "identifier");
  
           c->input_combinations.insert(ic);
  
@@ -214,6 +228,26 @@ namespace sip {
       }
  
       return capabilities::ptr();
+    }
+
+    /**
+     * @param f the storage format
+     * @param t the category in which the tool operates
+     **/
+    inline const capabilities::input_combination*
+              capabilities::find_input_combination(const storage_format& f, const tool_category& t) const {
+ 
+      input_combination p = {f, t, 0};
+
+      input_combination_list::const_iterator i = std::find_if(input_combinations.begin(),
+                      input_combinations.end(), boost::bind(&input_combination::equal, _1, p));
+
+      if (i == input_combinations.end()) {
+        return (0);
+      }
+      else {
+        return (&(*i));
+      }
     }
   }
 }

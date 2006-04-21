@@ -49,14 +49,10 @@ namespace squadt {
     return (s);
   }
 
-  /**
-   * @param t the tool that is used for processing
-   **/
   inline processor::processor() : monitor(new reporter(*this, reporter::dummy)) {
   }
 
   /**
-   * @param t the tool that is used for processing
    * @param h the function that is called when the status of the output changes
    **/
   inline processor::processor(reporter::callback_handler h) : monitor(new reporter(*this, h)) {
@@ -66,6 +62,10 @@ namespace squadt {
   }
 
   inline void processor::set_tool(tool::ptr& t) {
+    tool_descriptor = t;
+  }
+
+  inline void processor::set_tool(tool::ptr t) {
     tool_descriptor = t;
   }
 
@@ -113,8 +113,23 @@ namespace squadt {
   /**
    * \attention This function is non-blocking
    **/
+  inline void processor::configure(sip::tool::capabilities::input_combination* ic) {
+    selected_input_combination = ic;
+
+    sip::configuration::ptr c(new sip::configuration);
+
+    monitor->set_configuration(c);
+
+    global_tool_manager->execute(*tool_descriptor, boost::dynamic_pointer_cast < execution::task_monitor, reporter > (monitor), true);
+  }
+
+  /**
+   * \attention This function is non-blocking
+   *
+   * \pre the configure member must have been called
+   **/
   inline void processor::process() {
-    global_tool_manager->execute(*tool_descriptor, boost::dynamic_pointer_cast < execution::task_monitor, reporter > (monitor));
+    global_tool_manager->execute(*tool_descriptor, boost::dynamic_pointer_cast < execution::task_monitor, reporter > (monitor), false);
   }
 
   inline const unsigned int processor::number_of_inputs() const {

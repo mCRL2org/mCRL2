@@ -101,7 +101,7 @@ namespace squadt {
 
       /** \brief Start a tool */
       template < typename T >
-      void execute(tool&, T);
+      void execute(tool&, T, bool);
 
       /** \brief This is the event handler for incoming identification messages */
       void handle_relay_connection(const sip::message_ptr&, const sip::end_point);

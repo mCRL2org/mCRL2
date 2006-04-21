@@ -77,7 +77,7 @@ namespace squadt {
     
         /** \brief Execute a tool */
         template < typename T >
-        inline void execute(const command&, T = process::default_monitor);
+        inline void execute(const command&, T = process::default_monitor, bool = false);
     
         /** \brief Terminate a specific process */
         template < typename T >
@@ -187,8 +187,8 @@ namespace squadt {
      * @param l a shared pointer a listener (or reference to) for process state changes
      **/
     template < typename T >
-    void executor::execute(const command& c, T l) {
-      if (processes.size() < maximum_concurrent_processes) {
+    void executor::execute(const command& c, T l, bool b) {
+      if (b || processes.size() < maximum_concurrent_processes) {
         start_process(c, l);
       }
       else {

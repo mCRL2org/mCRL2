@@ -125,19 +125,22 @@ namespace squadt {
     private:
  
       /** \brief Identifies the tool that is required to run the command */
-      tool::ptr                           tool_descriptor;
+      tool::ptr                                   tool_descriptor;
 
       /** \brief The information about inputs of this processor */
-      input_list                          inputs;
+      input_list                                  inputs;
 
       /** \brief The information about outputs of this processor */
-      output_list                         outputs;
+      output_list                                 outputs;
  
       /** \brief The current status of the outputs of the processor */
-      output_status                       current_output_status;
+      output_status                               current_output_status;
 
       /** \brief The current task that is running or about to run */
-      reporter::ptr                       monitor;
+      reporter::ptr                               monitor;
+
+      /** \brief The selected input combination of the tool */
+      sip::tool::capabilities::input_combination* selected_input_combination;
  
     private:
 
@@ -158,11 +161,17 @@ namespace squadt {
       /** \brief Validate whether the inputs to this process are not dangling pointers */
       inline bool consistent_inputs() const;
 
+      /** \brief Start tool configuration */
+      void configure(sip::tool::capabilities::input_combination*);
+ 
       /** \brief Start processing: generate outputs from inputs */
       void process();
  
       /** \brief Get the object for the tool associated with this processor */
       inline void set_tool(tool::ptr&);
+
+      /** \brief Get the object for the tool associated with this processor */
+      inline void set_tool(tool::ptr);
 
       /** \brief Get the object for the tool associated with this processor */
       inline const tool::ptr get_tool();

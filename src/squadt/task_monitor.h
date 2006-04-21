@@ -144,7 +144,9 @@ namespace squadt {
  
       connected = true;
  
-      register_condition->notify_all();
+      if (register_condition.get() != 0) {
+        register_condition->notify_all();
+      }
     }
  
     /**

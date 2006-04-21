@@ -105,9 +105,10 @@ namespace squadt {
   /**
    * @param t the tool that is to be run
    * @param p the processor that should be passed the feedback of execution
+   * @param b whether or not to circumvent the executor restriction mechanism
    **/
   template < typename T >
-  void tool_manager::execute(tool& t, T p) {
+  void tool_manager::execute(tool& t, T p, bool b) {
     instance_identifier id = free_identifier++;
 
     execution::command c(t.get_location());
@@ -119,7 +120,7 @@ namespace squadt {
 
     instances[id] = p;
 
-    local_executor.execute(c, p);
+    local_executor.execute(c, p, b);
   }
 
   void tool_manager::query_tools() {
@@ -157,7 +158,7 @@ namespace squadt {
     /* Create extractor object, that will retrieve the data from the running tool process */
     boost::shared_ptr < extractor > e(new extractor(t));
 
-    execute(t, boost::dynamic_pointer_cast < execution::task_monitor, extractor > (e));
+    execute(t, boost::dynamic_pointer_cast < execution::task_monitor, extractor > (e), false);
 
     execution::process::ptr p(e->get_process(true));
 
