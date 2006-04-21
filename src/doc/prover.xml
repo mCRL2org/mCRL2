@@ -1,0 +1,132 @@
+<?xml version="1.0"?>
+
+<!DOCTYPE refentry PUBLIC "-//OASIS//DTD DocBook XML V4.2//EN" "http://www.oasis-open.org/docbook/xml/4.2/docbookx.dtd"[
+<!ENTITY class_prover "<classname>Prover</classname>">
+
+<!ENTITY type_virtual "<type>virtual</type>">
+<!ENTITY type_abstract "<type>abstract</type>">
+<!ENTITY type_const "<type>const</type>">
+<!ENTITY type_void "<type>void</type>">
+<!ENTITY type_bool "<type>bool</type>">
+<!ENTITY type_pchar "<type>char*</type>">
+<!ENTITY type_int "<type>int</type>">
+<!ENTITY type_atermappl "<type>ATermAppl</type>">
+<!ENTITY type_rewrite_strategy "<type>RewriteStrategy</type>">
+
+<!ENTITY prover_constructor "<function>Prover::Prover</function>">
+<!ENTITY prover_destructor "<function>Prover::~Prover</function>">
+<!ENTITY prover_set_formula "<function>Prover::set_formula</function>">
+<!ENTITY prover_set_time_limit "<function>Prover::set_time_limit</function>">
+<!ENTITY prover_is_tautology "<function>Prover::is_tautology</function>">
+<!ENTITY prover_is_contradiction "<function>Prover::is_contradiction</function>">
+<!ENTITY prover_get_witness "<function>Prover::get_witness</function>">
+<!ENTITY prover_get_counter_example "<function>Prover::get_counter_example</function>">
+
+<!ENTITY par_equations "<parameter>a_equations</parameter>">
+<!ENTITY par_strategy "<parameter>a_strategy</parameter>">
+<!ENTITY par_time_limit "<parameter>a_time_limit</parameter>">
+<!ENTITY par_formula "<parameter>a_formula</parameter>">
+<!ENTITY par_seconds "<parameter>a_seconds</parameter>">
+
+<!ENTITY strat_jitty "<constant>GS_REWR_JITTY</constant>">
+
+<!ENTITY answer_yes "<constant>answer_yes</constant>">
+<!ENTITY answer_no "<constant>answer_no</constant>">
+<!ENTITY answer_undefined "<constant>answer_undefined</constant>">
+]>
+
+<refentry id="prover">
+
+<refmeta>
+<refentrytitle>prover</refentrytitle>
+<manvolnum>7</manvolnum>
+</refmeta>
+
+<refnamediv>
+<refname>prover</refname>
+<refpurpose>a base class for mCRL2 provers that handle propositional formulas</refpurpose>
+</refnamediv>
+
+<refsynopsisdiv>
+<funcsynopsis>
+<funcprototype>
+  <funcdef>&prover_constructor;</funcdef>
+  <paramdef>&type_atermappl; &par_equations;, &type_rewrite_strategy; &par_strategy; = &strat_jitty;, &type_int; &par_time_limit; = 0</paramdef>
+</funcprototype>
+<funcprototype>
+  <funcdef>&type_virtual; &prover_destructor;</funcdef>
+  <paramdef>&type_void;</paramdef>
+</funcprototype>
+<funcprototype>
+  <funcdef>&type_void; &prover_set_formula;</funcdef>
+  <paramdef>&type_atermappl; &par_formula;</paramdef>
+</funcprototype>
+<funcprototype>
+  <funcdef>&type_void; &prover_set_time_limit;</funcdef>
+  <paramdef>&type_int; &par_seconds;</paramdef>
+</funcprototype>
+<funcprototype>
+  <funcdef>&type_virtual; &type_abstract; &type_bool; &prover_is_tautology;</funcdef>
+  <paramdef>&type_void;</paramdef>
+</funcprototype>
+<funcprototype>
+  <funcdef>&type_virtual; &type_abstract; &type_bool; &prover_is_contradiction;</funcdef>
+  <paramdef>&type_void;</paramdef>
+</funcprototype>
+<funcprototype>
+  <funcdef>&type_virtual; &type_abstract; &type_atermappl; &prover_get_witness;</funcdef>
+  <paramdef>&type_void;</paramdef>
+</funcprototype>
+<funcprototype>
+  <funcdef>&type_virtual; &type_abstract; &type_atermappl; &prover_get_counter_example;</funcdef>
+  <paramdef>&type_void;</paramdef>
+</funcprototype>
+</funcsynopsis>
+</refsynopsisdiv>
+
+<refsect1>
+<title>Description</title>
+<para>
+  The &class_prover; class is a base class for provers. Provers take propositional formulas as input and can indicate if these formulas are
+  tautologies or contradictions. Since provers are not necessarily complete, it is sometimes impossible to determine if a formula is a
+  tautology or a contradiction. If this is the case, the prover will indicate this fact. A prover uses a rewriter to rewrite parts of the
+  formulas it manipulates. The constructor &prover_constructor; initializes the prover's rewriter with the equations &par_equations; and
+  the rewrite strategy &par_strategy;. To limit the amount of time spent on proving a single formula, a time limit can be set. This time limit
+  can be set initially by the constructor &prover_constructor; and can be changed afterwards using the function &prover_set_time_limit;. Once
+  a prover is created, the formula to be proven can be set using the function &prover_set_formula;. The functions &prover_is_tautology; and
+  &prover_is_contradiction; can then indicate whether or not this formula is a tautology or a contradiction. These functions will return
+  &answer_yes;, &answer_no; or &answer_undefined;. If a formula is neither a tautology nor a contradiction according to the prover, a so called
+  witness and counter example can be returned by the functions &prover_get_witness; and &prover_get_counter_example;. A witness is a valuation
+  for which the formula holds, a counter example is a valuation for which it does not hold.
+</para>
+</refsect1>
+
+<refsect1>
+<title>Preconditions</title>
+<para>
+The following precondition has to be satisfied for &prover_is_tautology;, &prover_is_contradiction;,
+&prover_get_counter_example; and &prover_get_witness;:
+<itemizedlist>
+  <listitem>
+    <para>the function &prover_set_formula; has been called</para>
+  </listitem>
+</itemizedlist>
+</para>
+<para>
+  The following precondition has to be satisfied for &prover_set_formula;:
+  <itemizedlist>
+    <listitem>
+      <para>&par_formula; is an &type_atermappl; representing a propositional formula</para>
+    </listitem>
+  </itemizedlist>
+</para>
+</refsect1>
+
+<refsect1>
+<title>Author</title>
+<para>
+  Written by Luc Engelen. Please send all complaints, comments and bug reports to <email>bug@mcrl2.org</email>.
+</para>
+</refsect1>
+
+</refentry>

@@ -1,0 +1,94 @@
+<?xml version="1.0"?>
+
+<!DOCTYPE refentry PUBLIC "-//OASIS//DTD DocBook XML V4.2//EN" "http://www.oasis-open.org/docbook/xml/4.2/docbookx.dtd"[
+<!ENTITY class_disjointness_checker "<classname>Disjointness_Checker</classname>">
+
+<!ENTITY type_virtual "<type>virtual</type>">
+<!ENTITY type_void "<type>void</type>">
+<!ENTITY type_bool "<type>bool</type>">
+<!ENTITY type_int "<type>int</type>">
+<!ENTITY type_aterm "<type>ATerm</type>">
+<!ENTITY type_aterm_appl "<type>ATermAppl</type>">
+
+<!ENTITY disjointness_checker_constructor "<function>Disjointness_Checker::Disjointness_Checker</function>">
+<!ENTITY disjointness_checker_destructor "<function>Disjointness_Checker::~Disjointness_Checker</function>">
+<!ENTITY disjointness_checker_disjoint "<function>Disjointness_Checker::disjoint</function>">
+
+<!ENTITY par_process_equations "<parameter>a_process_equations</parameter>">
+<!ENTITY par_summand_number_1 "<parameter>a_summand_number_1</parameter>">
+<!ENTITY par_summand_number_2 "<parameter>a_summand_number_2</parameter>">
+]>
+
+<refentry id="disjointnesschecker">
+
+<refmeta>
+<refentrytitle>disjointnesschecker</refentrytitle>
+<manvolnum>7</manvolnum>
+</refmeta>
+
+<refnamediv>
+<refname>disjointnesschecker</refname>
+<refpurpose>a class that can indicate whether two summands of an mCRL2 LPE are syntactically disjoint</refpurpose>
+</refnamediv>
+
+<refsynopsisdiv>
+<funcsynopsis>
+<funcprototype>
+  <funcdef>&disjointness_checker_constructor;</funcdef>
+  <paramdef>&type_aterm_appl; &par_process_equations;</paramdef>
+</funcprototype>
+<funcprototype>
+  <funcdef>&type_virtual; &disjointness_checker_destructor;</funcdef>
+  <paramdef>&type_void;</paramdef>
+</funcprototype>
+<funcprototype>
+  <funcdef>&type_bool; &disjointness_checker_disjoint;</funcdef>
+  <paramdef>&type_int; &par_summand_number_1;, &type_int; &par_summand_number_2;</paramdef>
+</funcprototype>
+</funcsynopsis>
+</refsynopsisdiv>
+
+<refsect1>
+<title>Description</title>
+<para>
+  Two summands are syntactically disjoint if the following conditions hold:
+  <itemizedlist spacing='compact'>
+    <listitem>
+      <para>
+        The set of variables used by one summand is disjoint from the set
+        of variables changed by the other summand and vice versa.
+      </para>
+    </listitem>
+    <listitem>
+      <para>
+        The set of variables changed by one summand is disjoint from the set
+        of variables changed by the other summand.
+      </para>
+    </listitem>
+  </itemizedlist>
+  An instance of the class &class_disjointness_checker; is created using the constructor &disjointness_checker_constructor;. The parameter
+  &par_process_equations; is used to determine the set of used variables and the set of changed variables for all summands. The function
+  &disjointness_checker_disjoint; indicates whether two summands are syntactically disjoint.
+</para>
+</refsect1>
+
+<refsect1>
+<title>Preconditions</title>
+<para>
+The following precondition has to be satisfied for &disjointness_checker_constructor;:
+<itemizedlist>
+  <listitem>
+    <para>the parameter &par_process_equations; is a specification of process equations in mCRL2 format</para>
+  </listitem>
+</itemizedlist>
+</para>
+</refsect1>
+
+<refsect1>
+<title>Author</title>
+<para>
+  Written by Luc Engelen. Please send all complaints, comments and bug reports to <email>bug@mcrl2.org</email>.
+</para>
+</refsect1>
+
+</refentry>

@@ -35,8 +35,8 @@
     void LPE_Inv_Check::print_help() {
       fprintf(stderr,
         "Usage: %s [OPTION]... [--invariant=INVARIANT] [--lpe=LPE]\n"
-        "This tool checks whether the formula in INVARIANT is an invariant of the mCRL2\n"
-        "LPE as found in LPE.\n"
+        "This tool checks whether the formula in internal mCRL2 format as found in\n"
+        "INVARIANT is an invariant of the mCRL2 LPE as found in LPE.\n"
         "At least one of the arguments --invariant=INVARIANT or --lpe=LPE is required.\n"
         "If only one is given, stdin is used as the other input.\n"
         "\n"
@@ -48,7 +48,8 @@
         "                                  the invariant is found, but report all\n"
         "                                  violations instead.\n"
         "  -c, --counter-example           Give a valuation for which the invariant is\n"
-        "                                  violated.\n"
+        "                                  violated, in case the invariant is neither\n"
+        "                                  a contradiction nor a tautology.\n"
         "  -h, --help                      Display this help and terminate.\n"
         "      --version                   Display version information and terminate.\n"
         "  -q, --quiet                     Do not display warning messages.\n"

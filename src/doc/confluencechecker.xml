@@ -1,0 +1,182 @@
+<?xml version="1.0"?>
+
+<!DOCTYPE refentry PUBLIC "-//OASIS//DTD DocBook XML V4.2//EN" "http://www.oasis-open.org/docbook/xml/4.2/docbookx.dtd"[
+<!ENTITY class_bdd_prover "<classname>BDD_Prover</classname>">
+<!ENTITY class_confluence_checker "<classname>Confluence_Checker</classname>">
+<!ENTITY class_disjointness_checker "<classname>Disjointness_Checker</classname>">
+
+<!ENTITY type_virtual "<type>virtual</type>">
+<!ENTITY type_void "<type>void</type>">
+<!ENTITY type_bool "<type>bool</type>">
+<!ENTITY type_int "<type>int</type>">
+<!ENTITY type_aterm "<type>ATerm</type>">
+<!ENTITY type_aterm_appl "<type>ATermAppl</type>">
+<!ENTITY type_rewrite_strategy "<type>RewriteStrategy</type>">
+
+<!ENTITY confluence_checker_constructor "<function>Confluence_Checker::Confluence_Checker</function>">
+<!ENTITY confluence_checker_destructor "<function>Confluence_Checker::~Confluence_Checker</function>">
+<!ENTITY confluence_checker_check_confluence_and_mark "<function>Confluence_Checker::check_confluence_and_mark</function>">
+
+<!ENTITY par_rewrite_strategy "<parameter>a_rewrite_strategy</parameter>">
+<!ENTITY par_time_limit "<parameter>a_time_limit</parameter>">
+<!ENTITY par_lpe "<parameter>a_lpe</parameter>">
+<!ENTITY par_no_marking "<parameter>a_no_marking</parameter>">
+<!ENTITY par_check_all "<parameter>a_check_all</parameter>">
+<!ENTITY par_counter_example "<parameter>a_counter_example</parameter>">
+<!ENTITY par_invariant "<parameter>a_inariant</parameter>">
+<!ENTITY par_summand_number "<parameter>a_summand_number</parameter>">
+
+<!ENTITY strat_jitty "<constant>GS_REWR_JITTY</constant>">
+
+<!ENTITY stderr "<constant>stderr</constant>">
+]>
+
+<refentry id="confluencechecker">
+
+<refmeta>
+<refentrytitle>confluencechecker</refentrytitle>
+<manvolnum>7</manvolnum>
+</refmeta>
+
+<refnamediv>
+<refname>confluencechecker</refname>
+<refpurpose>a class that can check which summands of an mCRL2 LPE are confluent</refpurpose>
+</refnamediv>
+
+<refsynopsisdiv>
+<funcsynopsis>
+<funcprototype>
+  <funcdef>&confluence_checker_constructor;</funcdef>
+  <paramdef>
+    &type_rewrite_strategy; &par_rewrite_strategy; = &strat_jitty;,
+    &type_int; &par_time_limit; = 0,
+    &type_aterm_appl; &par_lpe;,
+    &type_bool; &par_no_marking;,
+    &type_bool; &par_check_all;,
+    &type_bool; &par_counter_example;
+  </paramdef>
+</funcprototype>
+<funcprototype>
+  <funcdef>&confluence_checker_destructor;</funcdef>
+  <paramdef>&type_void;</paramdef>
+</funcprototype>
+<funcprototype>
+  <funcdef>&confluence_checker_check_confluence_and_mark;</funcdef>
+  <paramdef>&type_aterm_appl; &par_invariant;, &type_int; &par_summand_number;</paramdef>
+</funcprototype>
+</funcsynopsis>
+</refsynopsisdiv>
+
+<refsect1>
+<title>Description</title>
+<para>
+  Given an LPE,
+  <literallayout>
+    P(d: D) = ...
+            + sum ei: Ei. ci(d, ei) -> ai(fi(d, ei)) . P(gi(d, ei))
+            + ...
+            + sum ej: Ej. cj(d, ej) -> tau . P(gj(d, ej))
+            + ...;
+  </literallayout>
+  tau-summand j is confluent with summand i if the following condition holds
+  for all d: D, for all ei: Ei and for all ej: Ej:
+  <literallayout>
+    (inv(d) /\ ci(d, ei) /\ cj(d, ej))
+    =>
+    (ci(gj(d, ej), ei) /\ cj(gi(d, ei), ej) /\ fi(d, ei) == fi(gj(d, ej), ei) /\ gi(gj(d, ej), ei) == gj(gi(d, ei), ej))
+  </literallayout>
+  where inv() is the invariant specified using the parameter &par_invariant; of the function &confluence_checker_check_confluence_and_mark;.
+  In case ai is also a tau-action, the formula above can be weakened to the following:
+  <literallayout>
+    (inv(d) /\ ci(d, ei) /\ cj(d, ej))
+    =>
+    (gi(d, ei) == gj(d, ej) \/ (ci(gj(d, ej), ei) /\ cj(gi(d, ei), ej) /\ gi(gj(d, ej), ei) == gj(gi(d, ei), ej)))
+  </literallayout>
+</para>
+
+<para>
+  The class &class_confluence_checker; can determine whether two summands are confluent
+  in three ways and will indicate which of the methods was used while proving confluence.
+  The three ways of determining confluence are as follows:
+  <itemizedlist spacing='compact'>
+    <listitem>
+      <para>
+        The most time consuming way of checking the confluence of two summands is
+        generating the confluence condition and then checking if this condition is a
+        tautology using a prover for propositional formulas. If two summands are
+        proven confluent using the prover, the class &class_confluence_checker;
+        indicates this by printing a plus sign ('+').
+      </para>
+    </listitem>
+    <listitem>
+      <para>
+        Another way of checking the confluence of two summands is determining whether
+        the two summands are syntactically disjoint. Two summands are syntactically
+        disjoint if the following holds:
+        <itemizedlist spacing='compact'>
+          <listitem>
+            <para>
+              The set of variables used by one summand is disjoint from the set
+              of variables changed by the other summand and vice versa.
+            </para>
+          </listitem>
+          <listitem>
+            <para>
+              The set of variables changed by one summand is disjoint from the set
+              of variables changed by the other summand.
+            </para>
+          </listitem>
+        </itemizedlist>
+        If two summands are confluent because of syntactic disjointness, the class
+        &class_confluence_checker; indicates this by printing a colon (':').
+      </para>
+    </listitem>
+    <listitem>
+      <para>
+        If summand number 1 has been proven confluent with summand number 2, summand
+        number 2 is obviously confluent with summand number 1. This method of checking
+        confluence is called checking confluence by symmetry. If two summands are
+        confluent by symmetry, the class &class_confluence_checker; indicates this by
+        printing a dot ('.').
+      </para>
+    </listitem>
+  </itemizedlist>
+</para>
+
+<para>
+  The class &class_confluence_checker; uses an instance of the class &class_bdd_prover; and an instance of the class &class_disjointness_checker;
+  to determine which tau-summands of an mCRL2 LPE are confluent. Confluent tau's will be marked as ctau. The constructor
+  &confluence_checker_constructor; initializes the BDD based prover with the parameters &par_rewrite_strategy; and &par_time_limit;, and the data
+  specification of the LPE passed as parameter &par_lpe;.
+  The function &confluence_checker_check_confluence_and_mark; returns an LPE with all confluent tau's marked as ctau, unless the parameter
+  &par_no_marking; was set. In case the parameter &par_no_marking; was set, the confluent tau's will not be marked, only the results of the
+  confluence checking will be displayed. If the parameter &par_counter_example; is set, a so called counter example is printed to &stderr; each
+  time the prover
+  indicates that two summands are not confluent. A counter example is a valuation for which the confluence condition to be proven does not hold.
+  When checking if a tau-summand is confluent, a confluence condition as described above will be created for each of the summands. If the parameter
+  &par_check_all; is set, all of these confluence conditions will be checked. If the parameter is not set, the checking will stop as soon as one
+  condition is encountered that is not a tautology.
+</para>
+
+</refsect1>
+
+<refsect1>
+<title>Preconditions</title>
+<para>
+  The following precondition has to be satisfied for &confluence_checker_check_confluence_and_mark;:
+  <itemizedlist>
+    <listitem>
+      <para>&par_invariant; is an &type_aterm_appl; representing a propositional formula</para>
+    </listitem>
+  </itemizedlist>
+</para>
+</refsect1>
+
+<refsect1>
+<title>Author</title>
+<para>
+  Written by Luc Engelen. Please send all complaints, comments and bug reports to <email>bug@mcrl2.org</email>.
+</para>
+</refsect1>
+
+</refentry>

@@ -1,0 +1,297 @@
+<?xml version="1.0"?>
+
+<!DOCTYPE refentry PUBLIC "-//OASIS//DTD DocBook XML V4.3//EN" "http://www.oasis-open.org/docbook/xml/4.3/docbookx.dtd"[
+<!ENTITY lpeinvelm "<function>lpeinvelm</function>">
+<!ENTITY lpeparelm "<function>lpeparelm</function>">
+<!ENTITY lpeconstelm "<function>lpeconstelm</function>">
+<!ENTITY option "<parameter>OPTION</parameter>">
+<!ENTITY invariant "<parameter>INVARIANT</parameter>">
+<!ENTITY lpe "<parameter>LPE</parameter>">
+<!ENTITY output "<parameter>OUTPUT</parameter>">
+<!ENTITY number "<parameter>NUMBER</parameter>">
+<!ENTITY strategy "<parameter>STRATEGY</parameter>">
+<!ENTITY seconds "<parameter>SECONDS</parameter>">
+<!ENTITY opt_i "<option>-i</option>">
+<!ENTITY opt_l "<option>-l</option>">
+<!ENTITY opt_o "<option>-o</option>">
+<!ENTITY opt_s "<option>-s</option>">
+<!ENTITY opt_n "<option>-n</option>">
+<!ENTITY opt_a "<option>-a</option>">
+<!ENTITY opt_h "<option>-h</option>">
+<!ENTITY opt_q "<option>-q</option>">
+<!ENTITY opt_v "<option>-v</option>">
+<!ENTITY opt_d "<option>-d</option>">
+<!ENTITY opt_r "<option>-r</option>">
+<!ENTITY opt_t "<option>-t</option>">
+<!ENTITY opt_invariant "<option>--invariant</option>">
+<!ENTITY opt_lpe "<option>--lpe</option>">
+<!ENTITY opt_output "<option>--output</option>">
+<!ENTITY opt_summand "<option>--summand</option>">
+<!ENTITY opt_no_check "<option>--no-check</option>">
+<!ENTITY opt_simplify_all "<option>--simplify-all</option>">
+<!ENTITY opt_help "<option>--help</option>">
+<!ENTITY opt_version "<option>--version</option>">
+<!ENTITY opt_quiet "<option>--quiet</option>">
+<!ENTITY opt_verbose "<option>--verbose</option>">
+<!ENTITY opt_debug "<option>--debug</option>">
+<!ENTITY opt_rewrite_strategy "<option>--rewrite-strategy</option>">
+<!ENTITY opt_time_limit "<option>--time-limit</option>">
+<!ENTITY strat_inner_string "<constant>inner</constant>">
+<!ENTITY strat_innerc_string "<constant>innerc</constant>">
+<!ENTITY strat_jitty_string "<constant>jitty</constant>">
+<!ENTITY strat_jittyc_string "<constant>jittyc</constant>">
+<!ENTITY stdin "<constant>stdin</constant>">
+<!ENTITY stdout "<constant>stdout</constant>">
+]>
+
+<refentry id="lpeinvelm">
+
+<refmeta>
+  <refentrytitle>lpeinvelm</refentrytitle>
+  <manvolnum>1</manvolnum>
+</refmeta>
+
+<refnamediv>
+  <refname>lpeinvelm</refname>
+  <refpurpose>use an invariant to simplify or eleminate summands of an LPE</refpurpose>
+</refnamediv>
+
+<refsynopsisdiv>
+  <cmdsynopsis>
+    <command>&lpeinvelm;</command>
+    <arg choice="plain" rep="repeat"><arg choice="opt">&option;</arg></arg>
+    <arg choice="opt">&opt_invariant;=&invariant;</arg>
+    <arg choice="opt">&opt_lpe;=&lpe;</arg>
+    <arg choice="opt">&opt_output;=&output;</arg>
+  </cmdsynopsis>
+</refsynopsisdiv>
+
+<refsect1>
+  <title>Description</title>
+  <para>
+    The &lpeinvelm; tool uses the invariant as found in &invariant; to eliminate unreachable
+    summands of the mCRL2 LPE as found in &lpe;. It can also be used to simplify the summands
+    of the given LPE. The resulting LPE is written to the file named &output;.
+  </para>
+
+  <para>
+    At least one of the arguments &opt_invariant;=&invariant; or &opt_lpe;=&lpe; is required.
+    If only one is given, &stdin; is used as the other input.
+  </para>
+
+  <para>
+    If &opt_output;=&output; is not used, the resulting LPE is written to &stdout;.
+  </para>
+
+  <para>
+    Given an LPE,
+    <literallayout>
+      P(d: D) = ...
+              + sum ei: Ei. ci(d, ei) -> ai(fi(d, ei)) . P(gi(d, ei))
+              + ...;
+    </literallayout>
+    the tool &lpeinvelm; will generate a formula of the form
+    <literallayout>
+      inv(d) /\ ci(d, ei)
+    </literallayout>
+    for each of the summands or for the chosen summand only, where inv() is the invariant passed using the option &opt_invariant;. It will then
+    use a prover for propositional formulas to see if the formula is a contradiction. If the formula is a contradiction for some summand,
+    this summand will be eliminated from the LPE.
+  </para>
+
+  <para>
+    Without using the option &opt_no_check;, &lpeinvelm; will first check if the given formula
+    is an invariant of the LPE. If this is not the case, no elimination or simplification will
+    be done. Because of the limitations of the prover used to check the invariant, the
+    invariant may hold even though the prover is unable to determine this fact. In cases where
+    a formula is an invariant of the LPE, but the prover is unable to determine this, the option
+    &opt_no_check; can be used to eliminate or simplify summands anyway.
+  </para>
+
+  <para>
+    The option &opt_verbose; gives insight into what the prover is doing and can be used to see
+    if rewrite rules have to be added to the specification, in order to enable the prover to
+    determine the invariance of a formula.
+  </para>
+
+  <para>
+    The option &opt_simplify_all; will replace the conditions of all summands by the equivalent
+    BDD of the condition in conjunction with the invariant passed using the option &opt_invariant;.
+    This may enable other tools, like for instance &lpeconstelm; or &lpeparelm;, to simplify
+    the LPE even further.
+  </para>
+</refsect1>
+
+<refsect1>
+<title>Options</title>
+<para>
+  Mandatory arguments to long options are mandatory for short options too.
+  <variablelist>
+  <varlistentry>
+    <term>&opt_i;</term>
+    <term>&opt_invariant;=&invariant;</term>
+    <listitem>
+      <para>
+        Use the formula in internal mCRL2 format as
+        found in &invariant; as invariant
+      </para>
+    </listitem>
+  </varlistentry>
+
+  <varlistentry>
+    <term>&opt_l;</term>
+    <term>&opt_lpe;=&lpe;</term>
+    <listitem>
+      <para>
+        Use the mCRL2 LPE as found in &lpe; as input
+      </para>
+    </listitem>
+  </varlistentry>
+
+  <varlistentry>
+    <term>&opt_o;</term>
+    <term>&opt_output;=&output;</term>
+    <listitem>
+      <para>
+        write the resulting LPE to the file named &output;
+      </para>
+    </listitem>
+  </varlistentry>
+
+  <varlistentry>
+    <term>&opt_s;</term>
+    <term>&opt_summand;=&number;</term>
+    <listitem>
+      <para>
+        Eliminate or simplify the summand with number &number; only
+      </para>
+    </listitem>
+  </varlistentry>
+
+  <varlistentry>
+    <term>&opt_n;</term>
+    <term>&opt_no_check;</term>
+    <listitem>
+      <para>
+        Do not check if the invariant holds before eliminating unreachable summands
+      </para>
+    </listitem>
+  </varlistentry>
+
+  <varlistentry>
+    <term>&opt_a;</term>
+    <term>&opt_simplify_all;</term>
+    <listitem>
+      <para>
+        Simplify the conditions of all summands, instead of just eliminating the summands
+        whose conditions are contradictions
+      </para>
+    </listitem>
+  </varlistentry>
+
+  <varlistentry>
+    <term>&opt_h;</term>
+    <term>&opt_help;</term>
+    <listitem>
+      <para>
+        display help message and terminate
+      </para>
+    </listitem>
+  </varlistentry>
+
+  <varlistentry>
+    <term>&opt_version;</term>
+    <listitem>
+      <para>
+        display version information and terminate
+      </para>
+    </listitem>
+  </varlistentry>
+
+  <varlistentry>
+    <term>&opt_q;</term>
+    <term>&opt_quiet;</term>
+    <listitem>
+      <para>
+        do not display warning messages
+      </para>
+    </listitem>
+  </varlistentry>
+
+  <varlistentry>
+    <term>&opt_v;</term>
+    <term>&opt_verbose;</term>
+    <listitem>
+      <para>
+        display concise intermediate messages
+      </para>
+    </listitem>
+  </varlistentry>
+
+  <varlistentry>
+    <term>&opt_d;</term>
+    <term>&opt_debug;</term>
+    <listitem>
+      <para>
+        Display detailed intermediate messages
+      </para>
+    </listitem>
+  </varlistentry>
+
+  <varlistentry>
+    <term>&opt_r;</term>
+    <term>&opt_rewrite_strategy;=&strategy;</term>
+    <listitem>
+      <para>
+        Use the specified &strategy; as rewrite
+        strategy:
+        <itemizedlist spacing='compact'>
+          <listitem>
+            <para>
+              &strat_inner_string; for the innermost rewrite strategy
+            </para>
+          </listitem>
+          <listitem>
+            <para>
+              &strat_innerc_string; for the compiled innermost rewrite strategy
+            </para>
+          </listitem>
+          <listitem>
+            <para>
+              &strat_jitty_string; for the jitty rewrite strategy
+            </para>
+          </listitem>
+          <listitem>
+            <para>
+              &strat_jittyc_string; for the compiled jitty rewrite strategy
+            </para>
+          </listitem>
+        </itemizedlist>
+      </para>
+    </listitem>
+  </varlistentry>
+
+  <varlistentry>
+    <term>&opt_t;</term>
+    <term>&opt_time_limit;=&seconds;</term>
+    <listitem>
+      <para>
+        Spend at most the specified number of &seconds; on proving
+        a single formula
+      </para>
+    </listitem>
+  </varlistentry>
+
+  </variablelist>
+</para>
+</refsect1>
+
+<refsect1>
+<title>Author</title>
+<para>
+  Written by Luc Engelen. Please send all complaints, comments and bug
+  reports to <email>bug@mcrl2.org</email>.
+</para>
+</refsect1>
+
+</refentry>

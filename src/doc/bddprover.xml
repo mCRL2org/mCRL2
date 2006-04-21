@@ -1,0 +1,117 @@
+<?xml version="1.0"?>
+
+<!DOCTYPE refentry PUBLIC "-//OASIS//DTD DocBook XML V4.2//EN" "http://www.oasis-open.org/docbook/xml/4.2/docbookx.dtd"[
+<!ENTITY class_prover "<classname>Prover</classname>">
+<!ENTITY class_bdd_prover "<classname>BDD_Prover</classname>">
+
+<!ENTITY type_virtual "<type>virtual</type>">
+<!ENTITY type_abstract "<type>abstract</type>">
+<!ENTITY type_const "<type>const</type>">
+<!ENTITY type_void "<type>void</type>">
+<!ENTITY type_bool "<type>bool</type>">
+<!ENTITY type_pchar "<type>char*</type>">
+<!ENTITY type_int "<type>int</type>">
+<!ENTITY type_atermappl "<type>ATermAppl</type>">
+<!ENTITY type_rewrite_strategy "<type>RewriteStrategy</type>">
+
+<!ENTITY prover_set_formula "<function>Prover::set_formula</function>">
+
+<!ENTITY bdd_prover_constructor "<function>BDD_Prover::BDD_Prover</function>">
+<!ENTITY bdd_prover_destructor "<function>BDD_Prover::~BDD_Prover</function>">
+<!ENTITY bdd_prover_is_tautology "<function>BDD_Prover::is_tautology</function>">
+<!ENTITY bdd_prover_is_contradiction "<function>BDD_Prover::is_contradiction</function>">
+<!ENTITY bdd_prover_get_bdd "<function>BDD_Prover::get_bdd</function>">
+<!ENTITY bdd_prover_get_witness "<function>BDD_Prover::get_witness</function>">
+<!ENTITY bdd_prover_get_counter_example "<function>BDD_Prover::get_counter_example</function>">
+
+<!ENTITY par_equations "<parameter>a_equations</parameter>">
+<!ENTITY par_rewrite_strategy "<parameter>a_rewrite_strategy</parameter>">
+<!ENTITY par_time_limit "<parameter>a_time_limit</parameter>">
+<!ENTITY par_reverse "<parameter>a_reverse</parameter>">
+<!ENTITY par_full "<parameter>a_full</parameter>">
+
+<!ENTITY strat_jitty "<constant>GS_REWR_JITTY</constant>">
+
+<!ENTITY const_true "<constant>true</constant>">
+]>
+
+<refentry id="bddprover">
+
+<refmeta>
+<refentrytitle>bddprover</refentrytitle>
+<manvolnum>7</manvolnum>
+</refmeta>
+
+<refnamediv>
+<refname>bddprover</refname>
+<refpurpose>a class of mCRL2 provers that use BDD's to prove propositional formulas</refpurpose>
+</refnamediv>
+
+<refsynopsisdiv>
+<funcsynopsis>
+<funcprototype>
+  <funcdef>&bdd_prover_constructor;</funcdef>
+  <paramdef>
+    &type_atermappl; &par_equations;,
+    &type_rewrite_strategy; &par_rewrite_strategy; = &strat_jitty;,
+    &type_int; &par_time_limit; = 0,
+    &type_bool; &par_reverse; = &const_true;,
+    &type_bool; &par_full; = &const_true;
+  </paramdef>
+</funcprototype>
+<funcprototype>
+  <funcdef>&type_virtual; &bdd_prover_destructor;</funcdef>
+  <paramdef>&type_void;</paramdef>
+</funcprototype>
+<funcprototype>
+  <funcdef>&type_virtual; &type_bool; &bdd_prover_is_tautology;</funcdef>
+  <paramdef>&type_void;</paramdef>
+</funcprototype>
+<funcprototype>
+  <funcdef>&type_virtual; &type_bool; &bdd_prover_is_contradiction;</funcdef>
+  <paramdef>&type_void;</paramdef>
+</funcprototype>
+<funcprototype>
+  <funcdef>&type_virtual; &type_atermappl; &bdd_prover_get_bdd;</funcdef>
+  <paramdef>&type_void;</paramdef>
+</funcprototype>
+<funcprototype>
+  <funcdef>&type_virtual; &type_atermappl; &bdd_prover_get_witness;</funcdef>
+  <paramdef>&type_void;</paramdef>
+</funcprototype>
+<funcprototype>
+  <funcdef>&type_virtual; &type_atermappl; &bdd_prover_get_counter_example;</funcdef>
+  <paramdef>&type_void;</paramdef>
+</funcprototype>
+</funcsynopsis>
+</refsynopsisdiv>
+
+<refsect1>
+<title>Description</title>
+<para>
+  The class &class_bdd_prover; implements the abstract functions of its base class &class_prover;. An entity of the class &class_bdd_prover; uses
+  binary decision diagrams to determine if a given formula is a tautology or a contradiction. The resulting BDD can be retreived using the function
+  &bdd_prover_get_bdd;.
+</para>
+</refsect1>
+
+<refsect1>
+<title>Preconditions</title>
+<para>
+The following precondition has to be satisfied for &bdd_prover_get_bdd;:
+<itemizedlist>
+  <listitem>
+    <para>the function &prover_set_formula; has been called</para>
+  </listitem>
+</itemizedlist>
+</para>
+</refsect1>
+
+<refsect1>
+<title>Author</title>
+<para>
+  Written by Luc Engelen. Please send all complaints, comments and bug reports to <email>bug@mcrl2.org</email>.
+</para>
+</refsect1>
+
+</refentry>

@@ -1,0 +1,122 @@
+<?xml version="1.0"?>
+
+<!DOCTYPE refentry PUBLIC "-//OASIS//DTD DocBook XML V4.2//EN" "http://www.oasis-open.org/docbook/xml/4.2/docbookx.dtd"[
+<!ENTITY class_bdd_prover "<classname>BDD_Prover</classname>">
+<!ENTITY class_invariant_checker "<classname>Invariant_Checker</classname>">
+
+<!ENTITY type_virtual "<type>virtual</type>">
+<!ENTITY type_void "<type>void</type>">
+<!ENTITY type_bool "<type>bool</type>">
+<!ENTITY type_int "<type>int</type>">
+<!ENTITY type_aterm "<type>ATerm</type>">
+<!ENTITY type_aterm_appl "<type>ATermAppl</type>">
+<!ENTITY type_rewrite_strategy "<type>RewriteStrategy</type>">
+
+<!ENTITY invariant_checker_constructor "<function>Invariant_Checker::Invariant_Checker</function>">
+<!ENTITY invariant_checker_destructor "<function>Invariant_Checker::~Invariant_Checker</function>">
+<!ENTITY invariant_checker_check_invariant "<function>Invariant_Checker::check_invariant</function>">
+
+<!ENTITY par_rewrite_strategy "<parameter>a_rewrite_strategy</parameter>">
+<!ENTITY par_time_limit "<parameter>a_time_limit</parameter>">
+<!ENTITY par_lpe "<parameter>a_lpe</parameter>">
+<!ENTITY par_counter_example "<parameter>a_counter_example</parameter>">
+<!ENTITY par_all "<parameter>a_all</parameter>">
+<!ENTITY par_invariant "<parameter>a_invariant</parameter>">
+
+<!ENTITY strat_jitty "<constant>GS_REWR_JITTY</constant>">
+<!ENTITY stderr "<constant>stderr</constant>">
+]>
+
+<refentry id="invariantchecker">
+
+<refmeta>
+<refentrytitle>invariantchecker</refentrytitle>
+<manvolnum>7</manvolnum>
+</refmeta>
+
+<refnamediv>
+<refname>invariantchecker</refname>
+<refpurpose>a class that can check if a formula is an invariant of an mCRL2 LPE</refpurpose>
+</refnamediv>
+
+<refsynopsisdiv>
+<funcsynopsis>
+<funcprototype>
+  <funcdef>&invariant_checker_constructor;</funcdef>
+  <paramdef>
+    &type_rewrite_strategy; &par_rewrite_strategy;,
+    &type_int; &par_time_limit;,
+    &type_aterm_appl; &par_lpe;,
+    &type_bool; &par_counter_example;,
+    &type_bool; &par_all;
+  </paramdef>
+</funcprototype>
+<funcprototype>
+  <funcdef>&invariant_checker_destructor;</funcdef>
+  <paramdef>&type_void;</paramdef>
+</funcprototype>
+<funcprototype>
+  <funcdef>&type_aterm_appl; &invariant_checker_check_invariant;</funcdef>
+  <paramdef>
+    &type_aterm_appl; &par_invariant;
+  </paramdef>
+</funcprototype>
+</funcsynopsis>
+</refsynopsisdiv>
+
+<refsect1>
+<title>Description</title>
+<para>
+  The class &class_invariant_checker; uses an instance of the class &class_bdd_prover; to check whether a formula is a valid invariant of an mCRL2
+  LPE. The constructor &invariant_checker_constructor; initializes the BDD based prover with the parameters &par_rewrite_strategy; and
+  &par_time_limit;, and with the data specification of the LPE passed as parameter &par_lpe;. If the parameter &par_counter_example; is set, a so
+  called counter example will be printed to &stderr; when a summand is encountered that violates the invariant. A counter example is a valuation
+  for which the formula to be proven does not
+  hold. If the parameter &par_all; is set, the invariant checker will not stop as soon as a violation of the invariant is found, but will report all
+  violations instead. The function &invariant_checker_check_invariant; indicates whether the invariant passed as parameter &par_invariant; is an
+  invariant of the given LPE.
+</para>
+<para>
+  Given an LPE,
+  <literallayout>
+    P(d: D) = ...
+            + sum ei: Ei. ci(d, ei) -> ai(fi(d, ei)) . P(gi(d, ei))
+            + ...;
+  </literallayout>
+  an instance of the class &class_invariant_checker; will generate a formula of the form
+  <literallayout>
+    inv(d) /\ ci(d, ei) => inv(gi(d, ei))
+  </literallayout>
+  for each of the summands, where inv() is the formula passed as parameter &par_invariant;. If the invariant holds for the initial state and all
+  the generated formulas are tautologies according to the prover, the formula passed as parameter &par_invariant; is an invariant.
+</para>
+</refsect1>
+
+<refsect1>
+<title>Preconditions</title>
+<para>
+  The following precondition has to be satisfied for &invariant_checker_constructor;:
+  <itemizedlist>
+    <listitem>
+      <para>the parameter &par_lpe; is a valid mCRL2 LPE</para>
+    </listitem>
+  </itemizedlist>
+</para>
+<para>
+  The following precondition has to be satisfied for &invariant_checker_check_invariant;:
+  <itemizedlist>
+    <listitem>
+      <para>the parameter &par_invariant; is a valid formula in internal mCRL2 format</para>
+    </listitem>
+  </itemizedlist>
+</para>
+</refsect1>
+
+<refsect1>
+<title>Author</title>
+<para>
+  Written by Luc Engelen. Please send all complaints, comments and bug reports to <email>bug@mcrl2.org</email>.
+</para>
+</refsect1>
+
+</refentry>

@@ -1,0 +1,235 @@
+<?xml version="1.0"?>
+
+<!DOCTYPE refentry PUBLIC "-//OASIS//DTD DocBook XML V4.3//EN" "http://www.oasis-open.org/docbook/xml/4.3/docbookx.dtd"[
+<!ENTITY lpeinvcheck "<function>lpeinvcheck</function>">
+<!ENTITY option "<parameter>OPTION</parameter>">
+<!ENTITY invariant "<parameter>INVARIANT</parameter>">
+<!ENTITY lpe "<parameter>LPE</parameter>">
+<!ENTITY strategy "<parameter>STRATEGY</parameter>">
+<!ENTITY seconds "<parameter>SECONDS</parameter>">
+<!ENTITY opt_i "<option>-i</option>">
+<!ENTITY opt_l "<option>-l</option>">
+<!ENTITY opt_a "<option>-a</option>">
+<!ENTITY opt_c "<option>-c</option>">
+<!ENTITY opt_h "<option>-h</option>">
+<!ENTITY opt_q "<option>-q</option>">
+<!ENTITY opt_v "<option>-v</option>">
+<!ENTITY opt_d "<option>-d</option>">
+<!ENTITY opt_r "<option>-r</option>">
+<!ENTITY opt_t "<option>-t</option>">
+<!ENTITY opt_invariant "<option>--invariant</option>">
+<!ENTITY opt_lpe "<option>--lpe</option>">
+<!ENTITY opt_all "<option>--all</option>">
+<!ENTITY opt_counter_example "<option>--counter-example</option>">
+<!ENTITY opt_help "<option>--help</option>">
+<!ENTITY opt_version "<option>--version</option>">
+<!ENTITY opt_quiet "<option>--quiet</option>">
+<!ENTITY opt_verbose "<option>--verbose</option>">
+<!ENTITY opt_debug "<option>--debug</option>">
+<!ENTITY opt_rewrite_strategy "<option>--rewrite-strategy</option>">
+<!ENTITY opt_time_limit "<option>--time-limit</option>">
+<!ENTITY strat_inner_string "<constant>inner</constant>">
+<!ENTITY strat_innerc_string "<constant>innerc</constant>">
+<!ENTITY strat_jitty_string "<constant>jitty</constant>">
+<!ENTITY strat_jittyc_string "<constant>jittyc</constant>">
+<!ENTITY stdin "<constant>stdin</constant>">
+]>
+
+<refentry id="lpeinvcheck">
+
+<refmeta>
+  <refentrytitle>lpeinvcheck</refentrytitle>
+  <manvolnum>1</manvolnum>
+</refmeta>
+
+<refnamediv>
+  <refname>lpeinvcheck</refname>
+  <refpurpose>check whether a formula is an invariant of an LPE</refpurpose>
+</refnamediv>
+
+<refsynopsisdiv>
+  <cmdsynopsis>
+    <command>&lpeinvcheck;</command>
+    <arg choice="plain" rep="repeat"><arg choice="opt">&option;</arg></arg>
+    <arg choice="opt">&opt_invariant;=&invariant;</arg>
+    <arg choice="opt">&opt_lpe;=&lpe;</arg>
+  </cmdsynopsis>
+</refsynopsisdiv>
+
+<refsect1>
+  <title>Description</title>
+  <para>
+    The &lpeinvcheck; tool checks whether the formula in internal mCRL2 format as
+    found in &invariant; is an invariant of the mCRL2 LPE as found in &lpe;.
+  </para>
+
+  <para>
+    At least one of the arguments &opt_invariant; or &opt_lpe; is required. If only
+    one is given, &stdin; is used as the other input.
+  </para>
+
+  <para>
+    Because of limitations of the prover used to check the invariance of a formula,
+    &lpeinvcheck; may indicate that a formula is not an invariant even though it is.
+    The option &opt_verbose; gives insight into what the prover is doing and can be
+    used to see if the formula has to be extended or rewrite rules have to be added
+    to the specification, in order to enable the prover to determine that a certain
+    formula is indeed a tautology or a contradiction.
+  </para>
+</refsect1>
+
+<refsect1>
+<title>Options</title>
+<para>
+  Mandatory arguments to long options are mandatory for short options too.
+  <variablelist>
+  <varlistentry>
+    <term>&opt_i;</term>
+    <term>&opt_invariant;=&invariant;</term>
+    <listitem>
+      <para>
+        Use the formula in internal mCRL2 format as found in &invariant; as invariant
+      </para>
+    </listitem>
+  </varlistentry>
+
+  <varlistentry>
+    <term>&opt_l;</term>
+    <term>&opt_lpe;=&lpe;</term>
+    <listitem>
+      <para>
+        Use the mCRL2 LPE as found in &lpe; as input
+      </para>
+    </listitem>
+  </varlistentry>
+
+  <varlistentry>
+    <term>&opt_a;</term>
+    <term>&opt_all;</term>
+    <listitem>
+      <para>
+        Do not terminate as soon as a violation of
+        the invariant is found, but report all
+        violations instead
+      </para>
+    </listitem>
+  </varlistentry>
+
+  <varlistentry>
+    <term>&opt_c;</term>
+    <term>&opt_counter_example;</term>
+    <listitem>
+      <para>
+        Give a valuation for which the invariant
+        is violated, in case the invariant is neither
+        a contradiction nor a tautology
+      </para>
+    </listitem>
+  </varlistentry>
+
+  <varlistentry>
+    <term>&opt_h;</term>
+    <term>&opt_help;</term>
+    <listitem>
+      <para>
+        Display help message and terminate
+      </para>
+    </listitem>
+  </varlistentry>
+
+  <varlistentry>
+    <term>&opt_version;</term>
+    <listitem>
+      <para>
+        Display version information and terminate
+      </para>
+    </listitem>
+  </varlistentry>
+
+  <varlistentry>
+    <term>&opt_q;</term>
+    <term>&opt_quiet;</term>
+    <listitem>
+      <para>
+        Do not display warning messages
+      </para>
+    </listitem>
+  </varlistentry>
+
+  <varlistentry>
+    <term>&opt_v;</term>
+    <term>&opt_verbose;</term>
+    <listitem>
+      <para>
+        Display concise intermediate messages
+      </para>
+    </listitem>
+  </varlistentry>
+
+  <varlistentry>
+    <term>&opt_d;</term>
+    <term>&opt_debug;</term>
+    <listitem>
+      <para>
+        Display detailed intermediate messages
+      </para>
+    </listitem>
+  </varlistentry>
+
+  <varlistentry>
+    <term>&opt_r;</term>
+    <term>&opt_rewrite_strategy;=&strategy;</term>
+    <listitem>
+      <para>
+        Use the specified &strategy; as rewrite
+        strategy:
+        <itemizedlist spacing='compact'>
+          <listitem>
+            <para>
+              &strat_inner_string; for the innermost rewrite strategy
+            </para>
+          </listitem>
+          <listitem>
+            <para>
+              &strat_innerc_string; for the compiled innermost rewrite strategy
+            </para>
+          </listitem>
+          <listitem>
+            <para>
+              &strat_jitty_string; for the jitty rewrite strategy
+            </para>
+          </listitem>
+          <listitem>
+            <para>
+              &strat_jittyc_string; for the compiled jitty rewrite strategy
+            </para>
+          </listitem>
+        </itemizedlist>
+      </para>
+    </listitem>
+  </varlistentry>
+
+  <varlistentry>
+    <term>&opt_t;</term>
+    <term>&opt_time_limit;=&seconds;</term>
+    <listitem>
+      <para>
+        Spend at most the specified number of &seconds; on proving
+        a single formula
+      </para>
+    </listitem>
+  </varlistentry>
+
+  </variablelist>
+</para>
+</refsect1>
+
+<refsect1>
+<title>Author</title>
+<para>
+  Written by Luc Engelen. Please send all complaints, comments and bug
+  reports to <email>bug@mcrl2.org</email>.
+</para>
+</refsect1>
+
+</refentry>

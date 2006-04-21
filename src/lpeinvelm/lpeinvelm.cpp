@@ -44,9 +44,10 @@
     void LPE_Inv_Elm::print_help() {
       fprintf(stderr,
         "Usage: %s [OPTION]... [--invariant=INVARIANT] [--lpe=LPE] [--output=OUTPUT]\n"
-        "This tool uses the invariant as found in INVARIANT to eliminate unreachable\n"
-        "summands of the mCRL2 LPE as found in LPE. The resulting LPE is written to the\n"
-        "file named OUTPUT.\n"
+        "This tool uses the invariant in internal mCRL2 format as found in INVARIANT to\n"
+        "eliminate unreachable summands of the mCRL2 LPE as found in LPE. It can also\n"
+        "be used to simplify the conditions of the summands of the given LPE. The\n"
+        "resulting LPE is written to the file named OUTPUT.\n"
         "At least one of the arguments --invariant=INVARIANT or --lpe=LPE is required.\n"
         "If only one is given, stdin is used as the other input.\n"
         "If --ouput=OUTPUT is not used, the resulting LPE is written to stdout.\n"

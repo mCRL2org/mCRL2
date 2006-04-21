@@ -1,0 +1,121 @@
+<?xml version="1.0"?>
+
+<!DOCTYPE refentry PUBLIC "-//OASIS//DTD DocBook XML V4.2//EN" "http://www.oasis-open.org/docbook/xml/4.2/docbookx.dtd"[
+<!ENTITY class_bdd_prover "<classname>BDD_Prover</classname>">
+<!ENTITY class_invariant_eliminator "<classname>Invariant_Eliminator</classname>">
+
+<!ENTITY type_virtual "<type>virtual</type>">
+<!ENTITY type_void "<type>void</type>">
+<!ENTITY type_bool "<type>bool</type>">
+<!ENTITY type_int "<type>int</type>">
+<!ENTITY type_aterm "<type>ATerm</type>">
+<!ENTITY type_aterm_appl "<type>ATermAppl</type>">
+<!ENTITY type_rewrite_strategy "<type>RewriteStrategy</type>">
+
+<!ENTITY invariant_eliminator_constructor "<function>Invariant_Eliminator::Invariant_Eliminator</function>">
+<!ENTITY invariant_eliminator_destructor "<function>Invariant_Eliminator::~Invariant_Eliminator</function>">
+<!ENTITY invariant_eliminator_simplify "<function>Invariant_Eliminator::simplify</function>">
+
+<!ENTITY par_rewrite_strategy "<parameter>a_rewrite_strategy</parameter>">
+<!ENTITY par_time_limit "<parameter>a_time_limit</parameter>">
+<!ENTITY par_lpe "<parameter>a_lpe</parameter>">
+<!ENTITY par_simplify_all "<parameter>a_simplify_all</parameter>">
+<!ENTITY par_invariant "<parameter>a_invariant</parameter>">
+<!ENTITY par_summand_number "<parameter>a_summand_number</parameter>">
+
+<!ENTITY strat_jitty "<constant>GS_REWR_JITTY</constant>">
+]>
+
+<refentry id="prover">
+
+<refmeta>
+<refentrytitle>invarianteliminator</refentrytitle>
+<manvolnum>7</manvolnum>
+</refmeta>
+
+<refnamediv>
+<refname>invarianteliminator</refname>
+<refpurpose>a class that can eliminate or simplify summands of an mCRL2 LPE using an invariant</refpurpose>
+</refnamediv>
+
+<refsynopsisdiv>
+<funcsynopsis>
+<funcprototype>
+  <funcdef>&invariant_eliminator_constructor;</funcdef>
+  <paramdef>
+    &type_rewrite_strategy; &par_rewrite_strategy;,
+    &type_int; &par_time_limit;,
+    &type_aterm_appl; &par_lpe;,
+    &type_bool; &par_simplify_all;
+  </paramdef>
+</funcprototype>
+<funcprototype>
+  <funcdef>&invariant_eliminator_destructor;</funcdef>
+  <paramdef>&type_void;</paramdef>
+</funcprototype>
+<funcprototype>
+  <funcdef>&type_aterm_appl; &invariant_eliminator_simplify;</funcdef>
+  <paramdef>
+    &type_aterm_appl; &par_invariant;,
+    &type_int; &par_summand_number;
+  </paramdef>
+</funcprototype>
+</funcsynopsis>
+</refsynopsisdiv>
+
+<refsect1>
+<title>Description</title>
+<para>
+  The class &class_invariant_eliminator; uses an instance of the class &class_bdd_prover; to simplify or eliminate summands of an mCRL2 LPE. The
+  constructor &invariant_eliminator_constructor; initializes the BDD based prover with the parameters &par_rewrite_strategy; and &par_time_limit;,
+  and with the data specification of the LPE passed as parameter &par_lpe;. If parameter &par_simplify_all; is set, the conditions of all summands
+  of the LPE are simplified when calling function &invariant_eliminator_simplify;. If the parameter &par_simplify_all; is not set, only the
+  summands whose condition in conjunction with the invariant prove to be a contradiction are eliminated. The function &invariant_eliminator_simplify;
+  returns the LPE after simplification or elimination using the invariant passed as parameter &par_invariant;. If &par_summand_number; differs from 0,
+  only the summand with the number passed as parameter &par_summand_number; will be eliminated or simplified.
+</para>
+<para>
+  Given an LPE,
+  <literallayout>
+    P(d: D) = ...
+            + sum ei: Ei. ci(d, ei) -> ai(fi(d, ei)) . P(gi(d, ei))
+            + ...;
+  </literallayout>
+  an instance of the class &class_invariant_eliminator; will generate a formula of the form
+  <literallayout>
+    inv(d) /\ ci(d, ei)
+  </literallayout>
+  for each of the summands or for the chosen summand only, where inv() is the invariant passed as parameter &par_invariant;. If such a formula is a
+  contradiction according to the prover, the corresponding summand will be eliminated. If the parameter &par_simplify_all; is set, the condition of
+  each summand is replaced by the BDD obtained from the prover after proving that summand's formula.
+</para>
+</refsect1>
+
+<refsect1>
+<title>Preconditions</title>
+<para>
+  The following precondition has to be satisfied for &invariant_eliminator_constructor;:
+  <itemizedlist>
+    <listitem>
+      <para>the parameter &par_lpe; is a valid mCRL2 LPE</para>
+    </listitem>
+  </itemizedlist>
+</para>
+<para>
+The following precondition has to be satisfied for &invariant_eliminator_simplify;:
+<itemizedlist>
+  <listitem>
+    <para>the parameter &par_invariant; is a valid formula in internal mCRL2 format</para>
+  </listitem>
+</itemizedlist>
+</para>
+</refsect1>
+
+<refsect1>
+<title>Author</title>
+<para>
+  Written by Luc Engelen. Please send all complaints, comments and bug reports to <email>bug@mcrl2.org</email>.
+</para>
+</refsect1>
+
+</refentry>
