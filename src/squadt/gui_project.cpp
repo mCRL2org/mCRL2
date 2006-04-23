@@ -145,10 +145,15 @@ namespace squadt {
 
     /* Helper class for associating a tool input combination with a menu item */
     class cmMenuItem : public wxMenuItem {
+
       public:
+
+        const tool::ptr                the_tool;
+
         const tool::input_combination* input_combination;
 
-        cmMenuItem(wxMenu* m, int id, const wxString& t, const tool::input_combination* ic) : wxMenuItem(m, wxID_ANY, t), input_combination(ic) {
+        cmMenuItem(wxMenu* m, int id, const wxString& t, const tool::ptr& tp, const tool::input_combination* ic) :
+                                        wxMenuItem(m, wxID_ANY, t), the_tool(tp), input_combination(ic) {
         }
     };
 
@@ -174,6 +179,7 @@ namespace squadt {
 
       cmMenuItem* new_menu_item = new cmMenuItem(target_menu, *id++, 
                                 wxString(p.second->get_name().c_str(), wxConvLocal),
+                                p.second,
                                 p.second->find_input_combination(f, p.first));
 
       target_menu->Append(new_menu_item);
@@ -224,7 +230,7 @@ namespace squadt {
             cmMenuItem* menu_item = reinterpret_cast < cmMenuItem* > (menu->FindItem(e.GetId()));
 
             /* Create a temporary processor */
-            processor::ptr tp = processor::ptr(new processor());
+            processor::ptr tp = processor::ptr(new processor(menu_item->the_tool));
 
             temporary_processors.push_back(tp);
 

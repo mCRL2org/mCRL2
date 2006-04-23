@@ -237,7 +237,7 @@ namespace sip {
     inline capabilities::input_combination const*
               capabilities::find_input_combination(const storage_format& f, const tool_category& t) const {
  
-      input_combination p = {f, t, 0};
+      input_combination p = {t, f, 0};
 
       input_combination_list::const_iterator i = std::find_if(input_combinations.begin(),
                       input_combinations.end(), boost::bind(&input_combination::equal, _1, p));

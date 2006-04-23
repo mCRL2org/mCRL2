@@ -40,8 +40,8 @@ namespace squadt {
   /**
    * \brief Operator for writing to stream
    *
-   * @param s stream to write to
-   * @param p the processor to write out
+   * @param[in] s stream to write to
+   * @param[out] p the processor to write out
    **/
   inline std::ostream& operator << (std::ostream& s, const processor& p) {
     p.write(s);
@@ -49,22 +49,33 @@ namespace squadt {
     return (s);
   }
 
-  inline processor::processor() : monitor(new reporter(*this, reporter::dummy)) {
+  /**
+   * @param[in] h the function that is called when the status of the output changes
+   **/
+  inline processor::processor(reporter::callback_handler h) : monitor(new reporter(*this, h)) {
   }
 
   /**
-   * @param h the function that is called when the status of the output changes
+   * @param[in] h the function that is called when the status of the output changes
+   * @param[in] t the tool descriptor of the tool that is to be used to produce the output from the input
    **/
-  inline processor::processor(reporter::callback_handler h) : monitor(new reporter(*this, h)) {
+  inline processor::processor(tool::ptr t, reporter::callback_handler h) :
+                tool_descriptor(t), monitor(new reporter(*this, reporter::dummy)) {
   }
 
   inline processor::~processor() {
   }
 
+  /**
+   * @param[in] t the tool descriptor of the tool that is to be used to produce the output from the input
+   **/
   inline void processor::set_tool(tool::ptr& t) {
     tool_descriptor = t;
   }
 
+  /**
+   * @param[in] t the tool descriptor of the tool that is to be used to produce the output from the input
+   **/
   inline void processor::set_tool(tool::ptr t) {
     tool_descriptor = t;
   }

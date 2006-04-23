@@ -98,13 +98,13 @@ namespace squadt {
           /** \brief Handler function that is called when an associated process changes state */
           inline void report_change(execution::process::status);
   
+          /** \brief The default callback function that does nothing */
+          static void dummy(output_status);
+
         public:
   
           /** \brief Constructor with a callback handler */
-          inline reporter(processor&, callback_handler);
-
-          /** \brief The default callback function that does nothing */
-          static void dummy(output_status);
+          inline reporter(processor&, callback_handler = dummy);
       };
  
       /** \brief Convenience type for hiding shared pointer implementation */
@@ -159,10 +159,10 @@ namespace squadt {
     public:
  
       /** \brief Basic constructor */
-      inline processor();
+      inline processor(reporter::callback_handler = reporter::dummy);
 
       /** \brief Constructor with callback handler */
-      inline processor(reporter::callback_handler);
+      inline processor(tool::ptr, reporter::callback_handler = reporter::dummy);
 
       /** \brief Check the inputs with respect to the outputs and adjust status accordingly */
       bool check_status(bool);
