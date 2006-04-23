@@ -42,10 +42,10 @@ namespace squadt {
           private:
 
             /** \brief The associated project */
-            project&       parent;
+            project&   parent;
 
-            /** \brief The associated processor */
-            processor::ptr target;
+            /** \brief The associated output object */
+            processor::object_descriptor* target;
 
           private:
 
@@ -57,14 +57,11 @@ namespace squadt {
             /** \brief Constructor */
             inline node_data(project&);
 
+            /** \brief Constructor */
+            inline node_data(project&, processor::object_descriptor*);
+
             /** \brief Sets the associated processor */
-            inline void set_processor(processor::ptr);
-
-            /** \brief Gets the associated processor */
-            inline processor::ptr& get_processor();
-
-            /** \brief Gets the associated project window */
-            inline project const* get_project() const;
+            inline void associate(processor::object_descriptor*);
         };
 
       private:
@@ -96,7 +93,7 @@ namespace squadt {
         void spawn_context_menu(storage_format&);
 
         /** \brief Helper function to add tools by category to a context menu */
-        void add_to_context_menu(const miscellaneous::tool_selection_helper::tools_by_category::value_type&, wxMenu*, int*);
+        void add_to_context_menu(const storage_format&, const miscellaneous::tool_selection_helper::tools_by_category::value_type&, wxMenu*, int*);
 
       public:
 
@@ -106,9 +103,25 @@ namespace squadt {
         /** \brief Constructor, with project description */
         project(wxWindow* p, const boost::filesystem::path&, const std::string&);
 
+        /** \brief Descructor */
+        ~project();
+
         /** \brief Returns the name of the project */
         wxString get_name() const;
     };
+
+    /**
+     * @param[in,out] p a shared pointer to the processor for which process is monitored and reported
+     **/
+    inline project::node_data::node_data(project& p) : parent(p) {
+    }
+
+    /**
+     * @param[in,out] p a shared pointer to the processor for which process is monitored and reported
+     * @param[in] t the processor that is to be associated 
+     **/
+    inline project::node_data::node_data(project& p, processor::object_descriptor* t) : parent(p), target(t) {
+    }
 
     /**
      * @param[in] o the state of the output objects for this processor
@@ -116,19 +129,11 @@ namespace squadt {
     inline void project::node_data::update_state(processor::output_status o) {
     }
 
-    inline project const* project::node_data::get_project() const {
-      return (&parent);
-    }
-
     /**
      * @param p pointer to the process that should be associated with this
      **/
-    inline void project::node_data::set_processor(processor::ptr p) {
+    inline void project::node_data::associate(processor::object_descriptor* p) {
       target = p;
-    }
-
-    inline processor::ptr& project::node_data::get_processor() {
-      return (target);
     }
   }
 }

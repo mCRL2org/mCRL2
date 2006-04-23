@@ -17,6 +17,8 @@ namespace squadt {
 
   namespace bf = boost::filesystem;
 
+  const std::string project_manager::maintain_old_name("");
+
   /**
    * @param l a path to the root of the project store
    *
@@ -36,10 +38,10 @@ namespace squadt {
       assert(filesystem::is_directory(l));
 
       if (!filesystem::exists(l / filesystem::path(settings_manager::project_definition_base_name))) {
+        import_directory(l);
+
         /* Create initial project description file */
         write();
-
-        /* Import files TODO */
       }
       else {
         read();
@@ -63,6 +65,28 @@ namespace squadt {
   }
 
   /**
+   * @param l the directory that is to be imported
+   **/
+  void project_manager::import_directory(const boost::filesystem::path& l) {
+    assert(bf::exists(l) && bf::is_directory(l));
+
+    bf::directory_iterator end;
+    bf::directory_iterator i(l);
+
+    while (i != end) {
+      if (is_directory(*i) && !symbolic_link_exists(*i)) {
+        /* Recursively import */
+        import_directory(*i);
+      }
+      else {
+        import_file(*i);
+      }
+
+      ++i;
+    }
+  }
+
+  /**
    * @param[out] s the stream the output is written to
    **/
   void project_manager::write(std::ostream& s) const {
@@ -72,7 +96,7 @@ namespace squadt {
       << " xsi:noNamespaceSchemaLocation=\"project.xsd\" version=\"1.0\">\n";
 
     if (!description.empty()) {
-      s << "<description>" << description << "</description>";
+      s << "<description>" << description << "</description>\n";
     }
  
     std::for_each(processors.begin(), processors.end(),
@@ -154,11 +178,7 @@ namespace squadt {
 
     /* Read processors */
     while (r.is_element("processor")) {
-      r.read();
-
       processors.push_back(processor::read(c, r));
-
-      r.skip_end_element("processor");
     }
   }
 

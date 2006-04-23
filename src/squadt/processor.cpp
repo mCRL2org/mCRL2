@@ -117,7 +117,13 @@ namespace squadt {
    * @param s the stream to write to
    **/
   void processor::write(std::ostream& s) const {
-    s << "<processor tool-name=\"" << tool_descriptor->get_name() << "\">";
+    s << "<processor";
+
+    if (tool_descriptor.get() != 0) {
+      s << " tool-name=\"" << tool_descriptor->get_name() << "\"";
+    }
+
+    s << ">\n";
 
     /* The last received configuration from the tool */
     sip::configuration::ptr c = monitor->get_configuration();
@@ -128,16 +134,16 @@ namespace squadt {
 
     /* The inputs */
     for (input_list::const_iterator i = inputs.begin(); i != inputs.end(); ++i) {
-      s << "<input id=\"" << reinterpret_cast < unsigned long > ((*i).lock().get()) << "\"/>";
+      s << "<input id=\"" << std::dec << reinterpret_cast < unsigned long > ((*i).lock().get()) << "\"/>";
     }
 
     /* The outputs */
     for (output_list::const_iterator i = outputs.begin(); i != outputs.end(); ++i) {
-      s << "<output id=\"" << reinterpret_cast < unsigned long > ((*i).get())
+      s << "<output id=\"" << std::dec << reinterpret_cast < unsigned long > ((*i).get())
         << "\" format=\"" << (*i)->format
         << "\" location=\"" << (*i)->location
         << "\" digest=\"" << (*i)->checksum
-        << "\" timestamp\"" << (*i)->timestamp << "\"/>";
+        << "\" timestamp=\"" << std::dec << (*i)->timestamp << "\"/>";
     }
 
     s << "</processor>";
@@ -151,24 +157,23 @@ namespace squadt {
    * \attention the same map m must be used to read back all processor instances that were written with write()
    **/
   processor::ptr processor::read(id_conversion_map& m, xml2pp::text_reader& r) throw () {
-    std::string temporary;
-    
-    if (!r.get_attribute(&temporary, "tool-name")) {
-      throw (exception(exception_identifier::required_attributes_missing, "processor"));
+    processor::ptr c(new processor());
+    std::string    temporary;
+
+    if (r.get_attribute(&temporary, "tool-name")) {
+      c->tool_descriptor = global_tool_manager->find(temporary);
+
+      /* Check tool existence */
+      if (!global_tool_manager->exists(temporary)) {
+        throw (exception(exception_identifier::requested_tool_unavailable, temporary));
+      }
     }
 
     r.read();
 
-    /* Check tool existence */
-    if (!global_tool_manager->exists(temporary)) {
-      throw (exception(exception_identifier::requested_tool_unavailable, temporary));
+    if (r.is_element("configuration")) {
+      c->monitor->set_configuration(sip::configuration::read(r));
     }
-
-    /* Get tool object for tool name */
-    processor::ptr c(new processor());
-
-    c->tool_descriptor = global_tool_manager->find(temporary);
-    c->monitor->set_configuration(sip::configuration::read(r));
 
     /* Read inputs */
     while (r.is_element("input")) {
@@ -185,7 +190,7 @@ namespace squadt {
 
       r.read();
 
-      r.skip_end_element("output");
+      r.skip_end_element("input");
     }
 
     /* Read outputs */

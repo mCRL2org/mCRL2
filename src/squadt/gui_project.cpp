@@ -1,5 +1,6 @@
 #include <boost/bind.hpp>
-#include <boost/filesystem/convenience.hpp>
+#include <boost/ref.hpp>
+#include <boost/filesystem/path.hpp>
 
 #include "gui_main.h"
 #include "gui_project.h"
@@ -20,12 +21,8 @@
 namespace squadt {
   namespace GUI {
 
-    /**
-     * @param[in,out] p a shared pointer to the processor for which process is monitored and reported
-     * @param[in] t the tool used by the processor
-     **/
-    project::node_data::node_data(project& p) : parent(p),
-                    target(new processor(boost::bind(&node_data::update_state, this, _1))) {
+    project::~project() {
+      manager->write();
     }
 
     /**
@@ -38,6 +35,27 @@ namespace squadt {
      **/
     project::project(wxWindow* p, const boost::filesystem::path& l) : wxSplitterWindow(p, wxID_ANY), manager(project_manager::create(l)) {
       build();
+
+      /* Update view */
+      project_manager::processor_iterator i = manager->get_processor_iterator();
+
+      while (i.valid()) {
+        processor::output_object_iterator j = (*i)->get_outputs_iterator();
+
+        while (j.valid()) {
+          wxTreeItemId item = processor_view->AppendItem(processor_view->GetRootItem(),
+                                                wxString(boost::filesystem::path((*j)->location).leaf().c_str(), wxConvLocal), 3);
+
+          processor_view->SetItemData(item, new node_data(*this, *j));
+
+//        This is disabled to avoid bug in wxGTK (but would be desirable to do)
+//          processor_view->EnsureVisible(item);
+
+          ++j;
+        }
+
+        ++i;
+      }
     }
 
     /**
@@ -81,44 +99,21 @@ namespace squadt {
      **/
     void project::on_tree_item_activate(wxTreeEvent& e) {
       if (processor_view->GetRootItem() != e.GetItem()) {
-        processor::ptr p = reinterpret_cast < node_data* > (processor_view->GetItemData(e.GetItem()))->get_processor();
-
-        /* TODO Do something for processors for which this is not possible */
-        spawn_context_menu(p->get_outputs().front()->format);
+        spawn_context_menu(reinterpret_cast < node_data* > (processor_view->GetItemData(e.GetItem()))->target->format);
       }
       else {
         dialog::add_to_project dialog(this, wxString(manager->get_project_directory().c_str(), wxConvLocal));
 
         if (dialog.ShowModal()) {
-          using namespace boost::filesystem;
-
           /* Add to the new project */
           wxTreeItemId i = processor_view->AppendItem(e.GetItem(), wxString(dialog.get_name().c_str(), wxConvLocal), 3);
 
           /* File does not exist in project directory */
-          path destination_path = path(dialog.get_destination());
+          processor* p = manager->import_file(
+                                boost::filesystem::path(dialog.get_source()), 
+                                boost::filesystem::path(dialog.get_destination()).leaf()).get();
 
-          copy_file(path(dialog.get_source()), destination_path);
-
-          node_data* monitor = new node_data(*this);
-
-          /* Add the processor to the project */
-          manager->add(monitor->get_processor());
-
-          processor_view->SetItemData(i, reinterpret_cast < wxTreeItemData* > (monitor));
-
-          storage_format f = storage_format_unknown;
-
-          /* TODO more intelligent file format check */
-          if (!extension(destination_path).empty()) {
-            f = extension(destination_path);
-
-            f.erase(f.begin());
-          }
-
-          /* Add the input to the processor, as main input */
-          monitor->get_processor()->append_output(f, destination_path.string());
-
+          processor_view->SetItemData(i, new node_data(*this, *(p->get_outputs_iterator())));
           processor_view->EnsureVisible(i);
         }
       }
@@ -128,6 +123,8 @@ namespace squadt {
      * @param f a storage format for which to add tools to the menu
      **/
     void project::spawn_context_menu(storage_format& f) {
+      using namespace boost;
+
       wxMenu  context_menu;
 
       context_menu.Append(cmID_REMOVE, wxT("Remove"));
@@ -138,7 +135,7 @@ namespace squadt {
       /* wxWidgets identifier for menu items */
       int identifier = cmID_TOOLS;
 
-      main::tool_registry->by_format(f, boost::bind(&project::add_to_context_menu, this, _1, &context_menu, &identifier));
+      main::tool_registry->by_format(f, bind(&project::add_to_context_menu, this, cref(f), _1, &context_menu, &identifier));
 
       context_menu.AppendSeparator();
       context_menu.Append(cmID_DETAILS, wxT("Details"));
@@ -146,12 +143,22 @@ namespace squadt {
       PopupMenu(&context_menu);
     }
 
+    /* Helper class for associating a tool input combination with a menu item */
+    class cmMenuItem : public wxMenuItem {
+      public:
+        const tool::input_combination* input_combination;
+
+        cmMenuItem(wxMenu* m, int id, const wxString& t, const tool::input_combination* ic) : wxMenuItem(m, wxID_ANY, t), input_combination(ic) {
+        }
+    };
+
     /**
-     * @param p the main tool_selection_helper object that indexes the global tool manager
-     * @param c a reference to the context menu to which to add
-     * @param id a reference to the next free identifier
+     * @param[in] f 
+     * @param[in] p the main tool_selection_helper object that indexes the global tool manager
+     * @param[in] c a reference to the context menu to which to add
+     * @param[in,out] id a reference to the next free identifier
      **/
-    void project::add_to_context_menu(const miscellaneous::tool_selection_helper::tools_by_category::value_type& p, wxMenu* c, int* id) {
+    void project::add_to_context_menu(const storage_format& f, const miscellaneous::tool_selection_helper::tools_by_category::value_type& p, wxMenu* c, int* id) {
       wxString    category_name = wxString(p.first.c_str(), wxConvLocal);
       int         item_id       = c->FindItem(category_name); 
       wxMenu*     target_menu;
@@ -165,15 +172,20 @@ namespace squadt {
         target_menu = c->FindItem(item_id)->GetMenu();
       }
 
-      target_menu->Append(*id++, wxString(p.second->get_name().c_str(), wxConvLocal));
+      cmMenuItem* new_menu_item = new cmMenuItem(target_menu, *id++, 
+                                wxString(p.second->get_name().c_str(), wxConvLocal),
+                                p.second->find_input_combination(f, p.first));
+
+      target_menu->Append(new_menu_item);
     }
 
     /**
      * @param e a reference to a menu event object
      **/
     void project::on_context_menu_select(wxCommandEvent& e) {
-      wxTreeItemId s = processor_view->GetSelection();
-      processor*   p = reinterpret_cast < node_data* > (processor_view->GetItemData(s))->get_processor().get();
+      wxTreeItemId                  s = processor_view->GetSelection();
+      processor::object_descriptor* t = reinterpret_cast < node_data* > (processor_view->GetItemData(s))->target;
+      processor*                    p = t->generator;
 
       switch (e.GetId()) {
         case cmID_REMOVE:
@@ -198,19 +210,18 @@ namespace squadt {
               dialog.show_input_objects(false);
 
               /* Add the main input (must exist) */
-              dialog.populate_tool_list(p->get_outputs().front()->format);
+              dialog.populate_tool_list(t->format);
             }
 
             if (dialog.ShowModal()) {
-              /* Process changes */
+              /* TODO Process changes */
             }
           }
           break;
         default: {
             /* Assume that a tool was selected */
-            wxMenu*     menu          = reinterpret_cast < wxMenu* > (e.GetEventObject());
-            wxMenuItem* menu_item     = menu->FindItem(e.GetId());
-//            wxMenu*     category_menu = menu_item->GetMenu();
+            wxMenu*     menu      = reinterpret_cast < wxMenu* > (e.GetEventObject());
+            cmMenuItem* menu_item = reinterpret_cast < cmMenuItem* > (menu->FindItem(e.GetId()));
 
             /* Create a temporary processor */
             processor::ptr tp = processor::ptr(new processor());
@@ -219,7 +230,7 @@ namespace squadt {
 
             global_tool_manager->find(std::string(menu_item->GetLabel().fn_str()));
 
-//            tp->configure();
+            tp->configure(menu_item->input_combination, boost::filesystem::path(t->location));
           }
           break;
       }

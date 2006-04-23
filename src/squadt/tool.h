@@ -7,6 +7,7 @@
 #include <sip/detail/tool_capabilities.h>
 
 #include "exception.h"
+#include "core.h"
 
 namespace squadt {
 
@@ -22,7 +23,10 @@ namespace squadt {
     public:
 
       /** \brief Convenience type for hiding shared pointer implementation */
-      typedef boost::shared_ptr < tool >  ptr;
+      typedef boost::shared_ptr < tool >                 ptr;
+
+      /** \brief Convenience type alias */
+      typedef sip::tool::capabilities::input_combination input_combination;
 
     private:
 
@@ -59,6 +63,9 @@ namespace squadt {
 
       /** \brief Get the name of this tool */
       inline std::string& get_name();
+
+      /** \brief Find a specific input combination of this tool, if it exists */
+      inline input_combination const* find_input_combination(const storage_format&, const tool_category&) const;
   };
 
   /**
@@ -121,6 +128,14 @@ namespace squadt {
 
   inline std::string& tool::get_name() {
     return (name);
+  }
+
+  /**
+   * @param f the storage format
+   * @param t the category in which the tool operates
+   **/
+  inline tool::input_combination const* tool::find_input_combination(const storage_format& f, const tool_category& t) const {
+    return (capabilities->find_input_combination(f, t));
   }
 }
 

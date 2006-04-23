@@ -1,5 +1,6 @@
 #include "gui_miscellaneous.h"
 
+#include "tool.h"
 #include "tool_manager.h"
 
 namespace squadt {

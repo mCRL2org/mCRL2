@@ -98,7 +98,7 @@ namespace sip {
         inline const input_combination_list& get_input_combinations() const;
 
         /** \brief Find a specific input combination of this tool, if it exists */
-        inline const input_combination* find_input_combination(const storage_format&, const tool_category&) const;
+        inline input_combination const* find_input_combination(const storage_format&, const tool_category&) const;
     };
  
     inline bool capabilities::input_combination::equal(const input_combination& p, const input_combination& q) {
@@ -234,7 +234,7 @@ namespace sip {
      * @param f the storage format
      * @param t the category in which the tool operates
      **/
-    inline const capabilities::input_combination*
+    inline capabilities::input_combination const*
               capabilities::find_input_combination(const storage_format& f, const tool_category& t) const {
  
       input_combination p = {f, t, 0};

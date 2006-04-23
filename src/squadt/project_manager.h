@@ -8,9 +8,12 @@
 #include <boost/filesystem/operations.hpp>
 #include <boost/noncopyable.hpp>
 
+#include "iterators.h"
 #include "processor.tcc"
 
 namespace squadt {
+
+  using squadt::detail::constant_indirect_iterator;
 
   /**
    * \brief Basic component that stores and retrieves information about projects
@@ -25,13 +28,20 @@ namespace squadt {
    * \attention Processors may not depend on themselves.
    **/
   class project_manager : public boost::noncopyable {
+
     public:
 
       /** \brief Convenience type for hiding shared pointer implementation */
-      typedef boost::shared_ptr < project_manager >  ptr;
+      typedef boost::shared_ptr < project_manager >                    ptr;
 
       /** \brief Convenience type alias */
-      typedef std::list < processor::ptr >           processor_list;
+      typedef std::list < processor::ptr >                             processor_list;
+
+      /** \brief Iterator type for the processor list */
+      typedef constant_indirect_iterator < processor_list, processor > processor_iterator;
+
+      /** \brief Constant that is used to specify to keep the existing file name (see import_file method) */
+      static const std::string                                         maintain_old_name;
 
     private:
 
@@ -61,7 +71,7 @@ namespace squadt {
  
       /** \brief Read configuration with an XML text reader */
       void read(xml2pp::text_reader&);
- 
+
     public:
  
       /** \brief Factory */
@@ -73,8 +83,14 @@ namespace squadt {
       /** \brief Get the path to the project store */
       inline std::string get_project_directory() const;
 
+      /** \brief Recursively add all files in a directory to the project */
+      void import_directory(const boost::filesystem::path&);
+ 
+      /** \brief Add a file to the project under a new name */
+      inline processor::ptr import_file(const boost::filesystem::path&, const std::string& = maintain_old_name);
+
       /** \brief Get a reference to the list of processors in this project */
-      inline const processor_list& get_processors() const;
+      inline processor_iterator get_processor_iterator() const;
 
       /** \brief Get the description */
       inline void set_description(const std::string&);
@@ -130,8 +146,8 @@ namespace squadt {
     return (directory.native_directory_string());
   }
 
-  inline const project_manager::processor_list& project_manager::get_processors() const {
-    return (processors);
+  inline project_manager::processor_iterator project_manager::get_processor_iterator() const {
+    return (processor_iterator(processors));
   }
 
   /**
@@ -139,6 +155,43 @@ namespace squadt {
    **/
   inline void project_manager::add(processor::ptr& p) {
     processors.push_back(p);
+  }
+
+  /**
+   * @param s path that identifies the file that is to be imported
+   * @param d new name for the file in the project
+   *
+   * Note that:
+   *  - when d is empty, the original filename will be maintained
+   *  - when the file is already in the project directory it is not copied
+   **/
+  inline processor::ptr project_manager::import_file(const boost::filesystem::path& s, const std::string& d) {
+    using namespace boost::filesystem;
+
+    assert(exists(s) && !is_directory(s) && native(d));
+
+    path       destination_path = directory / path(d.empty() ? s.leaf() : d);
+    processor::ptr p(new processor);
+
+    if (s != destination_path) {
+      copy_file(s, destination_path);
+    }
+
+    /* Add the file to the project */
+    storage_format f = storage_format_unknown;
+
+    /* TODO more intelligent file format check */
+    if (!extension(s).empty()) {
+      f = extension(s);
+
+      f.erase(f.begin());
+    }
+
+    p->append_output(f, s.string());
+
+    processors.push_back(p);
+
+    return (p);
   }
 
   /**

@@ -14,6 +14,7 @@
 #include <md5pp/md5pp.h>
 #include <xml2pp/text_reader.h>
 
+#include "iterators.h"
 #include "executor.h"
 #include "tool_manager.h"
 #include "tool.h"
@@ -21,6 +22,8 @@
 #include "core.h"
 
 namespace squadt {
+
+  using detail::constant_indirect_iterator;
 
   /**
    * \brief A processor represents a tool configuration.
@@ -105,42 +108,48 @@ namespace squadt {
       };
  
       /** \brief Convenience type for hiding shared pointer implementation */
-      typedef boost::shared_ptr < processor >                     ptr;
+      typedef boost::shared_ptr < processor >                               ptr;
 
       /** \brief Convenience type for hiding shared pointer implementation */
-      typedef boost::shared_ptr < processor >                     sptr;
+      typedef boost::shared_ptr < processor >                               sptr;
 
       /** \brief Convenience type for hiding shared pointer implementation */
-      typedef boost::weak_ptr < processor >                       wptr;
+      typedef boost::weak_ptr < processor >                                 wptr;
 
       /** \brief Convenience type for hiding the implementation of a list with input information */
-      typedef std::vector < object_descriptor::wptr >             input_list;
+      typedef std::vector < object_descriptor::wptr >                       input_list;
 
       /** \brief Convenience type for hiding the implementation of a list with output information */
-      typedef std::vector < object_descriptor::sptr >             output_list;
+      typedef std::vector < object_descriptor::sptr >                       output_list;
+
+      /** \brief Type for iterating the input objects */
+      typedef constant_indirect_iterator < input_list, object_descriptor >  input_object_iterator;
+
+      /** \brief Type for iterating the output objects */
+      typedef constant_indirect_iterator < output_list, object_descriptor > output_object_iterator;
 
       /** \brief Helper type for read() members */
-      typedef std::map < unsigned long, object_descriptor::sptr > id_conversion_map;
+      typedef std::map < unsigned long, object_descriptor::sptr >           id_conversion_map;
 
     private:
  
       /** \brief Identifies the tool that is required to run the command */
-      tool::ptr                                   tool_descriptor;
+      tool::ptr                tool_descriptor;
 
       /** \brief The information about inputs of this processor */
-      input_list                                  inputs;
+      input_list               inputs;
 
       /** \brief The information about outputs of this processor */
-      output_list                                 outputs;
+      output_list              outputs;
  
       /** \brief The current status of the outputs of the processor */
-      output_status                               current_output_status;
+      output_status            current_output_status;
 
       /** \brief The current task that is running or about to run */
-      reporter::ptr                               monitor;
+      reporter::ptr            monitor;
 
       /** \brief The selected input combination of the tool */
-      sip::tool::capabilities::input_combination* selected_input_combination;
+      tool::input_combination* selected_input_combination;
  
     private:
 
@@ -162,7 +171,7 @@ namespace squadt {
       inline bool consistent_inputs() const;
 
       /** \brief Start tool configuration */
-      void configure(sip::tool::capabilities::input_combination*);
+      void configure(const tool::input_combination*, const boost::filesystem::path&);
  
       /** \brief Start processing: generate outputs from inputs */
       void process();
@@ -183,13 +192,13 @@ namespace squadt {
       void write(std::ostream& stream = std::cout) const;
 
       /** \brief Get input objects */
-      inline const input_list& get_inputs() const;
+      inline input_object_iterator get_inputs_iterator() const;
  
       /** \brief Add an input object */
       inline void append_input(object_descriptor::wptr&);
  
       /** \brief Get output objects */
-      inline const output_list& get_outputs() const;
+      inline output_object_iterator get_outputs_iterator() const;
  
       /** \brief Add an output object */
       inline void append_output(object_descriptor::sptr&);

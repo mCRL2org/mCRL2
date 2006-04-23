@@ -73,8 +73,8 @@ namespace squadt {
     return (tool_descriptor);
   }
 
-  inline const processor::input_list& processor::get_inputs() const {
-    return (inputs);
+  inline processor::input_object_iterator processor::get_inputs_iterator() const {
+    return (input_object_iterator(inputs));
   }
 
   /**
@@ -84,8 +84,8 @@ namespace squadt {
     inputs.push_back(p);
   }
 
-  inline const processor::output_list& processor::get_outputs() const {
-    return (outputs);
+  inline processor::output_object_iterator processor::get_outputs_iterator() const {
+    return (output_object_iterator(outputs));
   }
 
   /**
@@ -111,12 +111,16 @@ namespace squadt {
   }
 
   /**
+   * @param[in] ic the input combination that is to be used
+   * @param[in] l the file that serves as main input
    * \attention This function is non-blocking
    **/
-  inline void processor::configure(sip::tool::capabilities::input_combination* ic) {
-    selected_input_combination = ic;
+  inline void processor::configure(const tool::input_combination* ic, const boost::filesystem::path& l) {
+    selected_input_combination = const_cast < tool::input_combination* > (ic);
 
     sip::configuration::ptr c(new sip::configuration);
+
+    c->add_input(ic->identifier, ic->format, l.string());
 
     monitor->set_configuration(c);
 
