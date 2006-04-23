@@ -94,6 +94,9 @@ namespace sip {
  
         /** \brief Get the last communicated set of controller capabilities */
         inline const controller::capabilities::ptr get_controller_capabilities() const;
+
+        /** \brief Waits until a configuration is delivered and returns a pointer to it */
+        const configuration::ptr await_configuration();
  
         /** \brief Returns whether the current status is equal to status_inactive */
         inline bool is_active() const;

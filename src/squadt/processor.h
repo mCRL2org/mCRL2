@@ -101,6 +101,12 @@ namespace squadt {
           /** \brief The default callback function that does nothing */
           static void dummy(output_status);
 
+          /** \brief Helper function for communication with a tool, starts a new thread with pilot() */
+          inline void start_pilot(bool = true);
+
+          /** \brief Helper function for communication with a tool */
+          inline void pilot(bool = true);
+
         public:
   
           /** \brief Constructor with a callback handler */

@@ -333,8 +333,6 @@ namespace sip {
 
     /**
      * @param t the type of the message
-     *
-     * \attention must not be called from multiple threads for the same type (events are not chained)
      **/
     template < class M >
     const boost::shared_ptr< M > basic_messenger< M >::await_message(typename M::type_identifier_t t) {

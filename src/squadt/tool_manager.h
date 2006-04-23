@@ -78,7 +78,7 @@ namespace squadt {
       };
 
       /** \brief The default TCP port for a tool manager */
-      static const long                         default_tcp_port;
+      static const long   default_tcp_port;
 
     private:
  

@@ -8,6 +8,7 @@
 #include <boost/thread/condition.hpp>
 
 #include <sip/controller.h>
+#include <sip/detail/basic_messenger.tcc>
 
 #include "process.h"
 
@@ -77,8 +78,14 @@ namespace squadt {
         /** \brief Waits until a connection has been established with the running process */
         inline void await_connection();
 
-        /** \brief Blocks until all private member done is true */
+        /** \brief Blocks until private member done is true */
         inline void await_completion();
+
+        /** \brief Whether there still exists a connection with the tool */
+        inline bool is_connected() const;
+
+        /** \brief Whether the tool is still busy performing its task */
+        inline bool is_busy() const;
 
         /** \brief Disconnects from a running process (or make sure not connection exists) */
         inline void disconnect(execution::process*);
@@ -168,7 +175,7 @@ namespace squadt {
     }
 
     /**
-     * Waits until extraction is complete or the process has terminated
+     * Waits until done is set or the process has terminated
      *
      * \pre associated_process.lock().get() must be unequal 0
      **/
@@ -184,6 +191,14 @@ namespace squadt {
           register_condition->wait(l);
         }
       }
+    }
+
+    inline bool task_monitor::is_connected() const {
+      return (connected);
+    }
+
+    inline bool task_monitor::is_busy() const {
+      return (!done);
     }
 
     /**

@@ -111,7 +111,10 @@ namespace sip {
       inline void write(std::ostream&) const;
 
       /** \brief Read a configuration class from XML */
-      static inline configuration::ptr read(xml2pp::text_reader&) throw ();
+      inline static configuration::ptr read(const std::string&);
+
+      /** \brief Read a configuration class from XML */
+      inline static configuration::ptr read(xml2pp::text_reader&) throw ();
   };
 
   /**
@@ -363,6 +366,17 @@ namespace sip {
     assert(get_object(id)->get_type() == object::output);
 
     return (get_object(id));
+  }
+
+  /**
+   * @param s the string containing an XML specification of the configuration
+   **/
+  inline configuration::ptr configuration::read(const std::string& s) {
+    xml2pp::text_reader reader(s.c_str());
+
+    reader.read();
+
+    return (read(reader));
   }
 
   /**

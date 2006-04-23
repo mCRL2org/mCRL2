@@ -56,6 +56,9 @@ namespace squadt {
 
         ++i;
       }
+
+      /* Make sure the root is expanded, here because EnsureVisible() could not be used */
+      processor_view->Expand(processor_view->GetRootItem());
     }
 
     /**

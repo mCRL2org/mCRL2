@@ -3,6 +3,8 @@
 
 #include <algorithm>
 
+#include <boost/thread/thread.hpp>
+
 #include "task_monitor.h"
 #include "processor.h"
 
@@ -34,6 +36,34 @@ namespace squadt {
       case process::aborted:
         owner.set_output_status(non_existent);
         break;
+    }
+  }
+
+  /**
+   * @param b whether or not to send the start signal after the configuration is accepted
+   **/
+  inline void processor::reporter::start_pilot(bool b) {
+    boost::thread thread(boost::bind(&processor::reporter::pilot, this, b));
+  }
+
+  /**
+   * @param b whether or not to send the start signal after the configuration is accepted
+   **/
+  inline void processor::reporter::pilot(bool b) {
+    /* Wait until the tool has connected and identified itself */
+    await_connection();
+
+    if (connected) {
+      send_configuration();
+     
+      /* Wait until configuration is accepted, or the tool has terminated */
+      if (await_message(sip::send_accept_configuration).get() != 0 && b) {
+        send_start_signal();
+      }
+      else {
+        /* End tool execution */
+        finish();
+      }
     }
   }
 
@@ -136,6 +166,8 @@ namespace squadt {
     monitor->set_configuration(c);
 
     global_tool_manager->execute(*tool_descriptor, boost::dynamic_pointer_cast < execution::task_monitor, reporter > (monitor), true);
+
+    monitor->start_pilot();
   }
 
   /**
@@ -145,6 +177,8 @@ namespace squadt {
    **/
   inline void processor::process() {
     global_tool_manager->execute(*tool_descriptor, boost::dynamic_pointer_cast < execution::task_monitor, reporter > (monitor), false);
+
+    monitor->start_pilot();
   }
 
   inline const unsigned int processor::number_of_inputs() const {

@@ -120,6 +120,12 @@ namespace sip {
  
     void communicator::accept_interaction_data(const sip::messenger::message_ptr&) {
     }
+
+    const configuration::ptr communicator::await_configuration() {
+      const sip::messenger::message_ptr m = await_message(sip::send_configuration);
+
+      return (sip::configuration::read(m->to_string()));
+    }
   }
 }
 

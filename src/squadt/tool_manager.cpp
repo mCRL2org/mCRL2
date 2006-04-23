@@ -8,7 +8,6 @@
 #include <boost/ref.hpp>
 
 #include <xml2pp/detail/text_reader.tcc>
-#include <sip/detail/basic_messenger.tcc>
 
 #include "executor.h"
 #include "tool_manager.h"

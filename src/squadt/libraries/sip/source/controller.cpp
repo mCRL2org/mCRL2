@@ -60,6 +60,12 @@ namespace sip {
       send_message(m);
     }
  
+    void communicator::send_start_signal() {
+      message m(sip::send_signal_start);
+ 
+      send_message(m);
+    }
+ 
     void communicator::accept_layout_handler(const messenger::message_ptr&) {
     }
  

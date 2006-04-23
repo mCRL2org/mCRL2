@@ -115,20 +115,24 @@ int main(int ac, char** av)
     bool valid = false;
 
     /* Static configuration cycle */
-    while (valid == false) {
-      valid = true;
-
+    while (!valid) {
       /* Wait for configuration data to be send (either a previous configuration, or only an input combination) */
-      tc.await_message(sip::send_configuration);
+      sip::configuration::ptr configuration = tc.await_configuration();
 
       /* Validate configuration specification, should contain a file name of an LPD that is to be read as input */
-      sip::configuration& configuration = tc.get_tool_configuration();
-
-      valid &= configuration.object_exists(LPD_FOR_INPUT);
+      valid  = configuration.get() != 0;
+      valid &= configuration->object_exists(LPD_FOR_INPUT);
 
       if (valid) {
         /* An object with the correct id exists, assume the URI is relative (i.e. a file name in the local file system) */
-        file_name = configuration.get_object(LPD_FOR_INPUT)->get_location();
+        file_name = configuration->get_object(LPD_FOR_INPUT)->get_location();
+      }
+      else {
+        sip::report report;
+
+        report.set_error("Invalid input combination!");
+
+        tc.send_report(report);
       }
     }
 
