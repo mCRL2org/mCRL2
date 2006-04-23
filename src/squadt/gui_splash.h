@@ -62,6 +62,9 @@ namespace squadt {
         std::string   operation;
         std::string   operand;
 
+        /** \brief Amount to set the progress bar to during the next update */
+        int           new_amount;
+
         /** \brief Flag that indicates whether progress was made since last update */
         bool          changed;
 
@@ -117,7 +120,7 @@ namespace squadt {
      **/
     inline splash::splash(wxImage* i, unsigned char n) :
             wxFrame(0, wxID_ANY, wxT(""), wxDefaultPosition, wxDefaultSize, wxNO_BORDER|wxSTAY_ON_TOP|wxFRAME_NO_TASKBAR),
-            number_of_categories(n), current_category(0), changed(false) {
+            number_of_categories(n), current_category(0), new_amount(0), changed(false) {
 
       wxBoxSizer*      s = new wxBoxSizer(wxVERTICAL);
       progress_indicator = new wxGauge(this, wxID_ANY, 6);
@@ -155,7 +158,7 @@ namespace squadt {
      * @param s a string that represents the operand
      **/
     inline void splash::set_operation(const std::string& o, const std::string& s) {
-      progress_indicator->SetValue(progress_indicator->GetValue() + 1);
+      ++new_amount;
 
       operation = o;
       operand   = s;
@@ -163,9 +166,17 @@ namespace squadt {
       changed = true;
     }
 
+    /**
+     * This function should be called periodically to update the progress bar.
+     * It should be called from the main thread. The reason for its existence
+     * is so that set_operation() can be called from any other thread
+     * (which could otherwise result in mysterious blocking behaviour).
+     **/
     inline void splash::update() {
       if (changed) {
         changed = false;
+
+        progress_indicator->SetValue(new_amount);
 
         display->Update();
       }
