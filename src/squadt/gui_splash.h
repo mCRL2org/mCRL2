@@ -15,29 +15,25 @@
 
 namespace squadt {
   namespace GUI {
+    namespace detail {
 
-    /**
-     * \brief Basic control for loading a bitmap picture
-     **/
-    class picture : public wxPanel {
-      private:
-        DECLARE_EVENT_TABLE()
-
-        /** \brief a reference to the image to be displayed */
-        wxBitmap image;
-
-      private:
-        /** \brief Method that paints the image */
-        inline void OnPaint(wxPaintEvent& WXUNUSED(event));
-
-      public:
-
-        picture(wxWindow*, wxImage*);
-    };
-
-    BEGIN_EVENT_TABLE(picture, wxPanel)
-     EVT_PAINT(picture::OnPaint)
-    END_EVENT_TABLE()
+      /**
+       * \brief Basic control for loading a bitmap picture
+       **/
+      class picture : public wxPanel {
+        private:
+          /** \brief a reference to the image to be displayed */
+          wxBitmap image;
+     
+        private:
+          /** \brief Method that paints the image */
+          inline void on_paint(wxPaintEvent& WXUNUSED(event));
+     
+        public:
+     
+          picture(wxWindow*, wxImage*);
+      };
+    }
 
     /**
      * \brief Basic splash screen that shows initialisation progress
@@ -46,7 +42,7 @@ namespace squadt {
      * progess.
      **/
     class splash : public wxFrame {
-      friend class squadt::GUI::picture; 
+      friend class squadt::GUI::detail::picture; 
 
       private:
 
@@ -94,32 +90,37 @@ namespace squadt {
         inline void update();
     };
  
-    /**
-     * @param p a pointer to a wxWindow that will serve as parent
-     * @param i a reference to the image to be displayed
-     **/
-    inline picture::picture(wxWindow* p, wxImage* i) :
-              wxPanel(p, wxID_ANY, wxDefaultPosition, wxSize(i->GetWidth(),i->GetHeight()), wxRAISED_BORDER), image(i) {
-    }
+    namespace detail {
 
-    inline void picture::OnPaint(wxPaintEvent& WXUNUSED(event)) {
-      wxPaintDC dc(this);
+      /**
+       * @param p a pointer to a wxWindow that will serve as parent
+       * @param i a reference to the image to be displayed
+       **/
+      inline picture::picture(wxWindow* p, wxImage* i) :
+                wxPanel(p, wxID_ANY, wxDefaultPosition, wxSize(i->GetWidth(),i->GetHeight()), wxRAISED_BORDER), image(i) {
 
-      splash& s = *(dynamic_cast < splash* > (GetParent()));
+        Connect(wxEVT_PAINT, wxPaintEventHandler(picture::on_paint));
+      }
 
-      dc.DrawBitmap(image, 0, 0, false);
-      dc.SetTextForeground(*wxBLACK);
-      dc.SetBackgroundMode(wxTRANSPARENT);
-      dc.SetFont(wxFont(14, wxFONTFAMILY_DECORATIVE, wxFONTSTYLE_NORMAL, wxFONTWEIGHT_NORMAL));
-      dc.DrawText(wxString(s.category.c_str(), wxConvLocal), 380, 30);
-      dc.SetFont(wxFont(10, wxFONTFAMILY_DECORATIVE, wxFONTSTYLE_NORMAL, wxFONTWEIGHT_NORMAL));
-
-      if (!s.operation.empty()) {
-        wxString o = wxString(s.operation.c_str(), wxConvLocal);
-
-        o.Append(wxT(": ")).Append(wxString(s.operand.c_str(), wxConvLocal));
-
-        dc.DrawText(o, 395, 70);
+      inline void picture::on_paint(wxPaintEvent& WXUNUSED(event)) {
+        wxPaintDC dc(this);
+     
+        splash& s = *(dynamic_cast < splash* > (GetParent()));
+     
+        dc.DrawBitmap(image, 0, 0, false);
+        dc.SetTextForeground(*wxBLACK);
+        dc.SetBackgroundMode(wxTRANSPARENT);
+        dc.SetFont(wxFont(14, wxFONTFAMILY_DECORATIVE, wxFONTSTYLE_NORMAL, wxFONTWEIGHT_NORMAL));
+        dc.DrawText(wxString(s.category.c_str(), wxConvLocal), 380, 30);
+        dc.SetFont(wxFont(10, wxFONTFAMILY_DECORATIVE, wxFONTSTYLE_NORMAL, wxFONTWEIGHT_NORMAL));
+     
+        if (!s.operation.empty()) {
+          wxString o = wxString(s.operation.c_str(), wxConvLocal);
+     
+          o.Append(wxT(": ")).Append(wxString(s.operand.c_str(), wxConvLocal));
+     
+          dc.DrawText(o, 395, 70);
+        }
       }
     }
 
@@ -133,7 +134,7 @@ namespace squadt {
 
       wxBoxSizer*      s = new wxBoxSizer(wxVERTICAL);
       progress_indicator = new wxGauge(this, wxID_ANY, 6);
-      display            = new picture(this, i);
+      display            = new detail::picture(this, i);
 
       s->Add(display, 0, wxALL|wxEXPAND, 0);
       s->Add(progress_indicator, 0, wxALL|wxEXPAND, 0);

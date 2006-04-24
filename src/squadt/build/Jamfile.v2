@@ -21,6 +21,7 @@ exe squadt
         gui_project.cpp
         gui_resources.cpp
         gui_dialog_base.cpp
+        gui_tool_display.cpp
         gui_dialog_project.cpp
         gui_dialog_processor.cpp
         gui_miscellaneous.cpp

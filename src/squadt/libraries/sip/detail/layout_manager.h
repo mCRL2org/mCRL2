@@ -39,7 +39,7 @@ namespace sip {
     template < >
     class box< vertical > : public layout_manager {
       public:
-        /** \brief The directional alignment of layout elements with respect to the containing element */
+        /** \brief The directional alignment of layout elements perpendicular to the orientation of the box */
         enum alignment {
           left   = 0, ///< element is put as much to the left as possible
           center = 1, ///< element is centered
@@ -67,7 +67,7 @@ namespace sip {
     template < >
     class box< horizontal > : public layout_manager {
       public:
-        /** The vertical alignment of layout elements with respect to the containing element */
+        /** \brief The directional alignment of layout elements perpendicular to the orientation of the box */
         enum alignment {
           top    = 0, ///< element is put as much to the top as possible
           center = 1, ///< element is centered

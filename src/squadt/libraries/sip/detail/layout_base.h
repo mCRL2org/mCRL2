@@ -6,6 +6,8 @@
 namespace sip {
   namespace layout {
 
+    class mediator;
+
     /** \brief Type for element visibility */
     enum visibility {
       visible,       ///< the element is visible
@@ -24,7 +26,8 @@ namespace sip {
     /** \brief Abstract base class for layout elements */
     class layout_element {
       private:
-        /** The margins for this default {0,0,0,0} */
+
+        /** \brief The margins for this default {0,0,0,0} */
         margins margin;
 
       public:
@@ -43,6 +46,9 @@ namespace sip {
 
         /** \brief Recursively builds the state of the object */
         virtual void element_read(); 
+
+        /** \brief Set the callback function that is used to instantiate a layout element */
+        virtual void instantiate(layout::mediator*);
     };
 
     /** \brief Abstract base class for layout managers */

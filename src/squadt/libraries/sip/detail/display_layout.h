@@ -3,7 +3,7 @@
 
 #include "sip/detail/basic_datatype.h"
 #include "sip/detail/layout_base.h"
-#include "sip/detail/layout_box.h"
+#include "sip/detail/layout_manager.h"
 #include "sip/detail/layout_widgets.h"
 
 namespace sip {
