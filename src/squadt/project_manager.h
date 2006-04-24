@@ -151,7 +151,7 @@ namespace squadt {
   }
 
   /**
-   * @param h the handler that can be used to report back state changes
+   * @param p a reference to the processor to add
    **/
   inline void project_manager::add(processor::ptr& p) {
     processors.push_back(p);

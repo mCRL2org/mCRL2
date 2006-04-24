@@ -51,7 +51,7 @@ namespace squadt {
         inline void rebuild_index();
 
         /** \brief A pair of iterators (begin,end) for iterating the set of tools that operate on a given format */
-        void by_format(const storage_format, const category_tool_action) const;
+        void by_format(const storage_format f, const category_tool_action a) const;
     };
 
     inline tool_selection_helper::tool_selection_helper() {

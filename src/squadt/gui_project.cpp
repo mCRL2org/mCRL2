@@ -28,12 +28,18 @@ namespace squadt {
     /**
      * @param p the parent window
      * @param l is the path
+     * @param d is a description for this project
      *
      * Creates a project_manager object that is either:
      *  - read from l, if l is a project store
      *  - the default project_manager, and l is the new project store
      **/
-    project::project(wxWindow* p, const boost::filesystem::path& l) : wxSplitterWindow(p, wxID_ANY), manager(project_manager::create(l)) {
+    project::project(wxWindow* p, const boost::filesystem::path& l, const std::string& d) : wxSplitterWindow(p, wxID_ANY), manager(project_manager::create(l)) {
+      if (!d.empty()) {
+        manager->set_description(d);
+        manager->write();
+      }
+
       build();
 
       /* Update view */
@@ -59,24 +65,6 @@ namespace squadt {
 
       /* Make sure the root is expanded, here because EnsureVisible() could not be used */
       processor_view->Expand(processor_view->GetRootItem());
-    }
-
-    /**
-     * @param p the parent window
-     * @param l is the path
-     * @param d is a description for this project
-     *
-     * Creates a project_manager object that is either:
-     *  - read from l, if l is a project store
-     *  - the default project_manager, and l is the new project store
-     **/
-    project::project(wxWindow* p, const boost::filesystem::path& l, const std::string& d) : wxSplitterWindow(p, wxID_ANY), manager(project_manager::create(l)) {
-      if (!d.empty()) {
-        manager->set_description(d);
-        manager->write();
-      }
-
-      build();
     }
 
     void project::build() {

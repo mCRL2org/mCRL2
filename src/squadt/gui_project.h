@@ -97,11 +97,8 @@ namespace squadt {
 
       public:
 
-        /** \brief Constructor */
-        project(wxWindow* p, const boost::filesystem::path&);
-
         /** \brief Constructor, with project description */
-        project(wxWindow* p, const boost::filesystem::path&, const std::string&);
+        project(wxWindow* p, const boost::filesystem::path&, const std::string& = "");
 
         /** \brief Descructor */
         ~project();

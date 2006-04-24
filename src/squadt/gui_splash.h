@@ -23,7 +23,7 @@ namespace squadt {
       private:
         DECLARE_EVENT_TABLE()
 
-        /* \brief a reference to the image to be displayed */
+        /** \brief a reference to the image to be displayed */
         wxBitmap image;
 
       private:
@@ -50,16 +50,25 @@ namespace squadt {
 
       private:
 
+        /** \brief The area where the picture is displayed */
         wxPanel*      display;
 
+        /** \brief The progress indicator */
         wxGauge*      progress_indicator;
 
+        /** \brief The number of subsequent categories, for progress */
         unsigned char number_of_categories;
 
+        /** \brief The current */
         unsigned char current_category;
 
+        /** \brief Description of a category */
         std::string   category;
+
+        /** \brief Description of an operation that takes place within a category */
         std::string   operation;
+
+        /** \brief Target of an operation */
         std::string   operand;
 
         /** \brief Amount to set the progress bar to during the next update */

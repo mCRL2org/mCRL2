@@ -143,10 +143,10 @@ namespace squadt {
         << "\" format=\"" << (*i)->format
         << "\" location=\"" << (*i)->location
         << "\" digest=\"" << (*i)->checksum
-        << "\" timestamp=\"" << std::dec << (*i)->timestamp << "\"/>";
+        << "\" timestamp=\"" << std::dec << (*i)->timestamp << "\"/>\n";
     }
 
-    s << "</processor>";
+    s << "</processor>\n";
   }
 
   /**
@@ -222,6 +222,8 @@ namespace squadt {
 
       r.skip_end_element("output");
     }
+
+    r.skip_end_element("processor");
 
     return (c);
   }

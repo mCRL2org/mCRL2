@@ -147,6 +147,8 @@ namespace squadt {
 
     p->format    = f;
     p->location  = l;
+    p->timestamp = time(0);
+    p->checksum.zero_out();
 
     append_output(p);
   }

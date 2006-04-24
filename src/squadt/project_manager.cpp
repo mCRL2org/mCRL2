@@ -55,15 +55,6 @@ namespace squadt {
     }
   }
 
-  void project_manager::write() const {
-    std::ofstream project_stream(settings_manager::path_concatenate(directory,
-             settings_manager::project_definition_base_name).c_str(), std::ios::out | std::ios::trunc);
- 
-    write(project_stream);
- 
-    project_stream.close();
-  }
-
   /**
    * @param l the directory that is to be imported
    **/
@@ -84,6 +75,15 @@ namespace squadt {
 
       ++i;
     }
+  }
+
+  void project_manager::write() const {
+    std::ofstream project_stream(settings_manager::path_concatenate(directory,
+             settings_manager::project_definition_base_name).c_str(), std::ios::out | std::ios::trunc);
+ 
+    write(project_stream);
+ 
+    project_stream.close();
   }
 
   /**

@@ -185,6 +185,7 @@ namespace squadt {
     /**
      * @param c the command that is to be executed
      * @param l a shared pointer a listener (or reference to) for process state changes
+     * @param b whether or not to circumvent the number of running processes limit
      **/
     template < typename T >
     void executor::execute(const command& c, T l, bool b) {

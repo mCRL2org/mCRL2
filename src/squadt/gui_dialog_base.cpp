@@ -10,8 +10,8 @@ namespace squadt {
 
       /**
        * @param p the parent window
-       * @param s the dimensions as (width, height) in pixels of the window
        * @param t the title of the window
+       * @param d the dimensions as (width, height) in pixels of the window
        **/
       basic::basic(wxWindow* p, wxString& t, wxSize d) : wxDialog(p, wxID_ANY, t, wxDefaultPosition, d) {
         build();

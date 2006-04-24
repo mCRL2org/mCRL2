@@ -7,8 +7,8 @@ namespace squadt {
 
       /**
        * @param o a pointer to the parent window
-       * @param t the title for the dialog window 
-       * @param n the value for the name field
+       * @param s path to the project store
+       * @param p the processor of which to display data
        **/
       processor_details::processor_details(wxWindow* o, wxString s, squadt::processor* p) :
                                                 dialog::processor(o, wxT("View and change details")), project_store(s), target_processor(p) {
@@ -18,9 +18,6 @@ namespace squadt {
         Connect(wxEVT_COMMAND_TREE_SEL_CHANGING, wxTreeEventHandler(processor_details::on_tool_selector_item_select), 0, this);
       }
 
-      /**
-       * @param n reference to the name
-       **/
       void processor_details::build() {
         wxBoxSizer*       s = new wxBoxSizer(wxHORIZONTAL);
         wxBoxSizer*       t = new wxBoxSizer(wxVERTICAL);
