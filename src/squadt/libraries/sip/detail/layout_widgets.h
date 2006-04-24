@@ -48,8 +48,6 @@ namespace sip {
      *    - p is connected to r and
      *    - r is connected to q
      **/
-    class radio_button;
-
     class radio_button : public layout_element {
       private:
         /** The caption */

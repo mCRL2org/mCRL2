@@ -9,7 +9,7 @@
 namespace sip {
   namespace layout {
 
-    /** The variants for the box, a basic layout manager */
+    /** \brief The variants for the box, a basic layout manager */
     enum box_variant {
       vertical,    ///< to lay out elements above one another
       horizontal   ///< to lay out elements beside one another
@@ -31,10 +31,15 @@ namespace sip {
     box< T >::box() {
     }
 
+    /**
+     * \brief Vertical box layout manager
+     *
+     * Elements are laid out vertically
+     **/
     template < >
     class box< vertical > : public layout_manager {
       public:
-        /** The horizontal alignment of layout elements with respect to the containing element */
+        /** \brief The directional alignment of layout elements with respect to the containing element */
         enum alignment {
           left   = 0, ///< element is put as much to the left as possible
           center = 1, ///< element is centered
@@ -54,6 +59,11 @@ namespace sip {
       children.push_back(std::pair < layout_element_ptr, alignment >(e, a));
     }
 
+    /**
+     * \brief Horizontal box layout manager
+     *
+     * Elements are laid out horizontally
+     **/
     template < >
     class box< horizontal > : public layout_manager {
       public:

@@ -54,7 +54,7 @@ namespace squadt {
 
           processor_view->SetItemData(item, new node_data(*this, *j));
 
-//        This is disabled to avoid bug in wxGTK (but would be desirable to do)
+          /* This is disabled to avoid bug in wxGTK (but would be desirable to do) */
 //          processor_view->EnsureVisible(item);
 
           ++j;

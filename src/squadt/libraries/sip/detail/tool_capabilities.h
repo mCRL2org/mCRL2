@@ -49,6 +49,7 @@ namespace sip {
           storage_format     format;     ///< storage format of the main input
           object::identifier identifier; ///< identifier for the main input object
 
+          /** \brief Compares two input combinations for equality */
           inline static bool equal(const input_combination&, const input_combination&);
         };
  
