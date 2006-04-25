@@ -1,40 +1,86 @@
 #ifndef LAYOUT_MEDIATOR_H
 #define LAYOUT_MEDIATOR_H
 
-#include <sip/detail/layout_manager.h>
+#include <memory>
+
+#include <boost/function.hpp>
 
 namespace sip {
   namespace layout {
 
+    class manager;
+    class constraints;
+
     /** \brief Abstract base class for interaction with a layout element */
     class mediator {
-      private:
+      friend class sip::layout::manager;
+
+      public:
+
+        /** \brief Wrapper for data that needs to be passed between build and attach members */
+        class wrapper {
+        };
+
+        /** \brief Convenience type for use of auto pointers */
+        typedef std::auto_ptr < mediator >                                                  aptr;
+
+        /** \brief Convenience type for use of auto pointers */
+        typedef std::auto_ptr < wrapper >                                                   wrapper_aptr;
+
+        /** \brief Type for layout manager build functions */
+        typedef std::auto_ptr < std::pair < aptr, wrapper_aptr > >                          connector_pair;
+
+        /** \brief Function type for wrapping the attach methods */
+        typedef boost::function < void (wrapper_aptr const&, layout::constraints const*) >  attach_function;
+
+      protected:
+
+        /** \brief A function object provided by the layout manager that is used to attach elements */
+        attach_function attach;
+
+        /** \brief Data used by derived classes to build a GUI */
+        wrapper_aptr    data;
+
+      public:
+
+        /** \brief Constructor */
+        inline mediator(wrapper_aptr d);
+
+        inline wrapper_aptr get_data();
 
         /** \brief Instantiates a vertically aligned box layout manager */
-        virtual void build_vertical_box(box< vertical >::alignment&);
+        virtual aptr build_vertical_box() = 0;
 
         /** \brief Instantiates a horizonally aligned box layout manager */
-        virtual void build_horizontal_box(box< horizontal >::alignment&);
+        virtual aptr build_horizontal_box() = 0;
 
         /** \brief Instantiates a label (static text) */
-        virtual void build_label(std::string&);
+        virtual wrapper_aptr build_label(std::string const&) = 0;
 
         /** \brief Instantiates a label */
-        virtual void build_button(std::string&);
+        virtual wrapper_aptr build_button(std::string const&) = 0;
 
         /** \brief Instantiates a single radio button */
-        virtual void build_radio_button(std::string&);
+        virtual wrapper_aptr build_radio_button(std::string const&) = 0;
 
         /** \brief Instantiates a progress bar */
-        virtual void build_progress_bar(unsigned int, unsigned int, unsigned int);
+        virtual wrapper_aptr build_progress_bar(unsigned int const&, unsigned int const&, unsigned int const&) = 0;
 
         /** \brief Instantiates a single line text input control */
-        virtual void build_text_field(std::string&);
+        virtual wrapper_aptr build_text_field(std::string const&) = 0;
 
+        /** \brief Destructor */
         virtual ~mediator() = 0;
     };
 
+    inline mediator::mediator(wrapper_aptr d) : data(d) {
+    }
+
     inline mediator::~mediator() {
+    }
+
+    inline mediator::wrapper_aptr mediator::get_data() {
+      return (data);
     }
   }
 }

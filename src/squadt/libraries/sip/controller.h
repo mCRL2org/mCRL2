@@ -4,7 +4,7 @@
 #include <sip/detail/common.h>
 #include <sip/detail/controller_capabilities.h>
 #include <sip/detail/tool_capabilities.h>
-#include <sip/detail/display_layout.h>
+#include <sip/detail/layout_tool_display.h>
 
 /* Interface classes for the tool side of the Squadt Interaction Protocol */
 namespace sip {
@@ -27,8 +27,8 @@ namespace sip {
         /** \brief The current protocol status */
         status                      current_status;
  
-        /** \brief The currently active display layout */
-        sip::layout::display_layout current_layout;
+        /** \brief The currently active tool display layout, or 0 */
+        sip::layout::tool_display   current_layout;
  
         /** \brief The current configuration of a tool (may be limited to a main input configuration) */
         configuration::ptr          current_configuration;

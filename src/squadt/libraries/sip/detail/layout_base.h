@@ -3,37 +3,22 @@
 
 #include <boost/shared_ptr.hpp>
 
+#include <sip/detail/layout_mediator.h>
+
 namespace sip {
   namespace layout {
 
-    class mediator;
-
-    /** \brief Type for element visibility */
-    enum visibility {
-      visible,       ///< the element is visible
-      hidden,        ///< the element is not visible but still has effect on the layout
-      none           ///< the element is invisible and has no effect on the layout
-    };
-
-    /** \brief Type for the margins that should be observed around the element */
-    struct margins {
-      unsigned short top;    ///< top margin in pixels
-      unsigned short right;  ///< right margin in pixels
-      unsigned short bottom; ///< bottom margin in pixels
-      unsigned short left;   ///< left margin in pixels
-    };
-
     /** \brief Abstract base class for layout elements */
-    class layout_element {
-      private:
+    class element {
+      public:
 
-        /** \brief The margins for this default {0,0,0,0} */
-        margins margin;
+        /** \brief Convenience type for hiding shared pointer implementation */
+        typedef boost::shared_ptr < element > sptr;
 
       public:
 
         /** \brief Abstract destructor */
-        virtual ~layout_element() = 0;
+        virtual ~element() = 0;
 
         /** \brief Writes the state of the element to stream */
         virtual void state_write() = 0;
@@ -48,20 +33,8 @@ namespace sip {
         virtual void element_read(); 
 
         /** \brief Set the callback function that is used to instantiate a layout element */
-        virtual void instantiate(layout::mediator*);
+        virtual mediator::wrapper_aptr instantiate(layout::mediator*);
     };
-
-    /** \brief Abstract base class for layout managers */
-    class layout_manager : public layout_element {
-      public:
-        virtual ~layout_manager() = 0;
-    };
-
-    /** Convenience type for hiding shared pointer implementation */
-    typedef boost::shared_ptr < layout_element > layout_element_ptr;
-
-    /** Convenience type for hiding shared pointer implementation */
-    typedef boost::shared_ptr < layout_manager > layout_manager_ptr;
   }
 }
 #endif
