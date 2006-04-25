@@ -6,7 +6,7 @@
 #include <sip/detail/common.h>
 #include <sip/detail/tool_capabilities.h>
 #include <sip/detail/controller_capabilities.h>
-#include <sip/detail/display_layout.h>
+#include <sip/detail/layout_tool_display.h>
 #include <sip/detail/schemes.h>
 #include <sip/detail/report.h>
 
@@ -78,7 +78,7 @@ namespace sip {
         void send_display_data();
  
         /** \brief Send a layout specification for the display space reserved for this tool */
-        void send_display_layout(layout::display_layout&);
+        void send_display_layout(layout::tool_display&);
  
         /** \brief Send a signal that the tool is about to terminate */
         void send_signal_termination();

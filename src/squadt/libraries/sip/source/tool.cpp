@@ -101,7 +101,7 @@ namespace sip {
     }
  
     /* Send a layout specification for the display space reserved for this tool */
-    void communicator::send_display_layout(layout::display_layout&) {
+    void communicator::send_display_layout(layout::tool_display&) {
 ////    message m(current_display_layout.write(), sip::send_display_layout);
  
 ////    send_message(m);
