@@ -1,6 +1,8 @@
 #ifndef LAYOUT_WIDGETS_H
 #define LAYOUT_WIDGETS_H
 
+#include <iostream>
+
 #include <sip/detail/layout_mediator.h>
 
 namespace sip {
@@ -24,6 +26,9 @@ namespace sip {
      
           /** \brief Instantiate a layout element, through a mediator */
           inline layout::mediator::wrapper_aptr instantiate(layout::mediator*);
+
+          /** \brief Write out the layout structure in XML format */
+          inline void write_structure(std::ostream&);
       };
      
       /**
@@ -31,7 +36,14 @@ namespace sip {
        **/
       inline label::label(std::string c) : text(c) {
       }
-     
+
+      /**
+       * @param[out] o the stream to which to write the result
+       **/
+      inline void label::write_structure(std::ostream& o) {
+        o << "<label id=\"" << id << "\" text=\"" << text << "\"/>";
+      }
+
       /**
        * @param m the mediator object to use
        **/
@@ -52,6 +64,9 @@ namespace sip {
      
           /** \brief Instantiate a layout element, through a mediator */
           inline layout::mediator::wrapper_aptr instantiate(layout::mediator*);
+
+          /** \brief Write out the layout structure in XML format */
+          inline void write_structure(std::ostream&);
       };
      
       /**
@@ -60,6 +75,13 @@ namespace sip {
       inline button::button(std::string c) : label(c) {
       }
      
+      /**
+       * @param[out] o the stream to which to write the result
+       **/
+      inline void button::write_structure(std::ostream& o) {
+        o << "<button id=\"" << id << "\" label=\"" << label << "\"/>";
+      }
+
       /**
        * @param m the mediator object to use
        **/
@@ -96,6 +118,9 @@ namespace sip {
      
           /** \brief Instantiate a layout element, through a mediator */
           inline layout::mediator::wrapper_aptr instantiate(layout::mediator*);
+
+          /** \brief Write out the layout structure in XML format */
+          inline void write_structure(std::ostream&);
       };
      
       /**
@@ -105,6 +130,14 @@ namespace sip {
       inline radio_button::radio_button(std::string c, radio_button* r) : label(c), connection(r) {
       }
      
+      /**
+       * @param[out] o the stream to which to write the result
+       **/
+      inline void radio_button::write_structure(std::ostream& o) {
+        o << "<radio-button id=\"" << id << "\" next=\""
+          << connection->id << "\" label=\"" << label << "\"/>";
+      }
+
       /**
        * @param m the mediator object to use
        **/
@@ -132,6 +165,9 @@ namespace sip {
      
           /** \brief Instantiate a layout element, through a mediator */
           inline layout::mediator::wrapper_aptr instantiate(layout::mediator*);
+
+          /** \brief Write out the layout structure in XML format */
+          inline void write_structure(std::ostream&);
       };
      
       /**
@@ -143,6 +179,15 @@ namespace sip {
               : minimum(min), maximum(max), current(c) {
       }
      
+      /**
+       * @param[out] o the stream to which to write the result
+       **/
+      inline void progress_bar::write_structure(std::ostream& o) {
+        o << "<progress-bar id=\"" << id << "\" minimum=\""
+          << minimum << "\" maximum=\"" << maximum
+          << " current=\"" << current <<  "\"/>";
+      }
+
       /**
        * @param m the mediator object to use
        **/
@@ -172,6 +217,9 @@ namespace sip {
      
           /** \brief Instantiate a layout element, through a mediator */
           inline layout::mediator::wrapper_aptr instantiate(layout::mediator*);
+
+          /** \brief Write out the layout structure in XML format */
+          inline void write_structure(std::ostream&);
       };
      
       /**
@@ -181,6 +229,17 @@ namespace sip {
       inline text_field::text_field(const std::string& s, basic_datatype* t) : text(s), type(t) {
       }
      
+      /**
+       * @param[out] o the stream to which to write the result
+       **/
+      inline void text_field::write_structure(std::ostream& o) {
+        o << "<text-field id=\"" << id << "\" text=\"" << text << "\">";
+
+        type->write(o);
+
+        o << "<text-field/>";
+      }
+
       /**
        * @param m the mediator object to use
        **/

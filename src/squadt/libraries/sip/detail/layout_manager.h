@@ -112,6 +112,9 @@ namespace sip {
 
         /** \brief Instantiate a layout element, through a mediator */
         inline mediator::wrapper_aptr instantiate(layout::mediator*);
+
+        /** \brief Write out the layout structure in XML format */
+        inline void write_structure(std::ostream&);
     };
 
     /**
@@ -157,6 +160,9 @@ namespace sip {
 
         /** \brief Instantiate a layout element, through a mediator */
         inline mediator::wrapper_aptr instantiate(layout::mediator*);
+
+        /** \brief Write out the layout structure in XML format */
+        inline void write_structure(std::ostream&);
     };
 
     /**
@@ -182,6 +188,33 @@ namespace sip {
 
     inline void box< horizontal >::add(element::sptr& e, alignment& a, margins& m, visibility& v) {
       children.push_back(children_list::value_type(e, constraints(a, m, v)));
+    }
+
+    /**
+     * @param[out] o the stream to which to write the result
+     **/
+    inline void box< vertical >::write_structure(std::ostream& o) {
+      o << "<box-layout-manager id=\"" << id << "\" type=\"vertical\">";
+
+      for (children_list::const_iterator i = children.begin(); i != children.end(); ++i) {
+        (*i).first->write_structure(o);
+      }
+
+      o << "<box-layout-manager/>";
+    }
+
+    /**
+     * @param[out] o the stream to which to write the result
+     **/
+    inline void box< horizontal >::write_structure(std::ostream& o) {
+      o << "<box-layout-manager id=\"" << id << "\" type=\"horizontal\">";
+
+      for (children_list::const_iterator i = children.begin(); i != children.end(); ++i) {
+        (*i).first->write_structure(o);
+      }
+
+
+      o << "<box-layout-manager/>";
     }
 
     /**
