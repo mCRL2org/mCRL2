@@ -36,6 +36,14 @@ namespace sip {
         /** \brief Convenience type for hiding shared pointer implementation */
         typedef boost::shared_ptr < manager > sptr;
 
+      public:
+
+        /** \brief The default margins between elements */
+        static margins    default_margins;
+
+        /** \brief The default visibility of elements */
+        static visibility default_visibility;
+
       protected:
 
         /** \brief Attaches a layout element to a manager, using layout constraints */
@@ -45,6 +53,9 @@ namespace sip {
 
         /* \brief Destructor */
         virtual ~manager() = 0;
+
+        /* \brief Instantiates a layout element and returns a shared pointer */
+        virtual sptr create_sptr() const = 0;
     };
 
     /** \brief The variants for the box, a basic layout manager */
@@ -95,10 +106,13 @@ namespace sip {
             inline constraints(alignment&, margins&, visibility&);
         };
 
+        /** \brief Default alignment */
+        static alignment   default_alignment;
+
       private:
 
         /** \brief The type of the list with the element managed by this manager */
-        typedef std::vector < std::pair < element::sptr, constraints > > children_list;
+        typedef std::vector < std::pair < element*, constraints > > children_list;
 
       private:
 
@@ -107,14 +121,21 @@ namespace sip {
 
       public:
 
+        /* \brief Instantiates a layout manager and returns a shared pointer */
+        inline manager::sptr create_sptr() const;
+
         /** Adds a new element to the box */
-        inline void add(element::sptr&, alignment& a, margins& m, visibility& v);
+        inline void add(element*, alignment& = default_alignment,
+                                  margins& = manager::default_margins,
+                                  visibility& = manager::default_visibility);
 
         /** \brief Instantiate a layout element, through a mediator */
         inline mediator::wrapper_aptr instantiate(layout::mediator*);
 
         /** \brief Write out the layout structure in XML format */
         inline void write_structure(std::ostream&);
+
+        inline ~box();
     };
 
     /**
@@ -143,10 +164,13 @@ namespace sip {
             inline constraints(alignment&, margins&, visibility&);
         };
 
+        /** \brief Default alignment */
+        static alignment   default_alignment;
+
       private:
 
         /** \brief The type of the list with the element managed by this manager */
-        typedef std::vector < std::pair < element::sptr, constraints > > children_list;
+        typedef std::vector < std::pair < element*, constraints > > children_list;
 
       private:
 
@@ -155,14 +179,21 @@ namespace sip {
 
       public:
 
+        /* \brief Instantiates a layout manager and returns a shared pointer */
+        inline manager::sptr create_sptr() const;
+
         /** Adds a new element to the box */
-        inline void add(element::sptr&, alignment& a, margins& m, visibility& v);
+        inline void add(element*, alignment& = default_alignment,
+                                  margins& = default_margins,
+                                  visibility& = default_visibility);
 
         /** \brief Instantiate a layout element, through a mediator */
         inline mediator::wrapper_aptr instantiate(layout::mediator*);
 
         /** \brief Write out the layout structure in XML format */
         inline void write_structure(std::ostream&);
+
+        inline ~box();
     };
 
     /**
@@ -182,11 +213,19 @@ namespace sip {
                                                 align(a), margin(m), visible(v) {
     }
 
-    inline void box< vertical >::add(element::sptr& e, alignment& a, margins& m, visibility& v) {
+    inline manager::sptr box< vertical >::create_sptr() const {
+      return (manager::sptr(new box< vertical >::box()));
+    }
+
+    inline manager::sptr box< horizontal >::create_sptr() const {
+      return (manager::sptr(new box< horizontal >::box()));
+    }
+
+    inline void box< vertical >::add(element* e, alignment& a, margins& m, visibility& v) {
       children.push_back(children_list::value_type(e, constraints(a, m, v)));
     }
 
-    inline void box< horizontal >::add(element::sptr& e, alignment& a, margins& m, visibility& v) {
+    inline void box< horizontal >::add(element* e, alignment& a, margins& m, visibility& v) {
       children.push_back(children_list::value_type(e, constraints(a, m, v)));
     }
 
@@ -245,6 +284,18 @@ namespace sip {
       }
 
       return (n->get_data());
+    }
+
+    inline box< vertical >::~box() {
+      for (children_list::const_iterator i = children.begin(); i != children.end(); ++i) {
+        delete (*i).first;
+      }
+    }
+
+    inline box< horizontal >::~box() {
+      for (children_list::const_iterator i = children.begin(); i != children.end(); ++i) {
+        delete (*i).first;
+      }
     }
   }
 }

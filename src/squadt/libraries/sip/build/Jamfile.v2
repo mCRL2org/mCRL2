@@ -24,6 +24,7 @@ lib sip_common
       exception.cpp
       report.cpp
       object.cpp
+      layout.cpp
     : <source>/libraries/xml2pp//text_reader
     ;
 

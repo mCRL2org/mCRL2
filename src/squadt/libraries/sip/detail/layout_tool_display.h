@@ -20,10 +20,17 @@ namespace sip {
 
         /** \brief Get the layout manager that contains all widgits for this display */
         inline const layout::manager::sptr get_top_manager() const;
+
+        /** \brief Set the layout manager that contains all widgits for this display */
+        inline void set_top_manager(layout::manager::sptr&);
     };
 
     inline const layout::manager::sptr tool_display::get_top_manager() const {
       return (top_manager);
+    }
+
+    inline void tool_display::set_top_manager(layout::manager::sptr& m) {
+      top_manager = m;
     }
   }
 }

@@ -5,8 +5,6 @@
 #include "tool_manager.h"
 #include "core.h"
 
-#include <boost/ref.hpp>
-
 #include <wx/menu.h>
 
 /* Some custum identifiers for use with event handlers */
@@ -97,7 +95,7 @@ namespace squadt {
 
       if (dialog.ShowModal()) {
         /* Create the new project */
-        project* p = new GUI::project(this, boost::cref(path(dialog.get_location())), dialog.get_description());
+        project* p = new GUI::project(this, path(dialog.get_location()), dialog.get_description());
 
         add_project_view(p);
       }
@@ -109,7 +107,7 @@ namespace squadt {
       dialog::open_project dialog(this);
 
       if (dialog.ShowModal()) {
-        project* p = new GUI::project(this, boost::cref(path(dialog.get_location())));
+        project* p = new GUI::project(this, path(dialog.get_location()));
 
         add_project_view(p);
       }
