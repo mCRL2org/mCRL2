@@ -51,11 +51,11 @@ namespace sip {
 
       public:
 
+        /** Adds a new element to the box */
+        virtual void add(element*) = 0;
+
         /* \brief Destructor */
         virtual ~manager() = 0;
-
-        /* \brief Instantiates a layout element and returns a shared pointer */
-        virtual sptr create_sptr() const = 0;
     };
 
     /** \brief The variants for the box, a basic layout manager */
@@ -87,6 +87,8 @@ namespace sip {
      **/
     template < >
     class box< vertical > : public manager {
+      friend class sip::layout::element;
+
       public:
 
         /** \brief The directional alignment of layout elements perpendicular to the orientation of the box */
@@ -103,11 +105,14 @@ namespace sip {
             visibility  visible; ///< whether the element affects layout and is visible
 
             /** \brief Constructor */
-            inline constraints(alignment&, margins&, visibility&);
+            inline constraints(alignment const&, margins const&, visibility const&);
         };
 
         /** \brief Default alignment */
         static alignment   default_alignment;
+
+        /** \brief Default constraints */
+        static constraints default_constraints;
 
       private:
 
@@ -119,15 +124,26 @@ namespace sip {
         /** \brief The layout elements directly contained in this box */
         children_list children;
 
+      private:
+
+        /** \brief Read back a layout structure in XML format */
+        inline static element* read_structure(xml2pp::text_reader& r);
+
       public:
 
         /* \brief Instantiates a layout manager and returns a shared pointer */
-        inline manager::sptr create_sptr() const;
+        inline static manager::sptr create_sptr();
 
         /** Adds a new element to the box */
-        inline void add(element*, alignment& = default_alignment,
-                                  margins& = manager::default_margins,
-                                  visibility& = manager::default_visibility);
+        inline void add(element*);
+
+        /** Adds a new element to the box */
+        inline void add(element*, constraints const&);
+
+        /** Adds a new element to the box */
+        inline void add(element*, alignment const& default_alignment,
+                                  margins const& = manager::default_margins,
+                                  visibility const& = manager::default_visibility);
 
         /** \brief Instantiate a layout element, through a mediator */
         inline mediator::wrapper_aptr instantiate(layout::mediator*);
@@ -145,6 +161,8 @@ namespace sip {
      **/
     template < >
     class box< horizontal > : public manager {
+      friend class sip::layout::element;
+
       public:
 
         /** \brief The directional alignment of layout elements perpendicular to the orientation of the box */
@@ -161,11 +179,14 @@ namespace sip {
             visibility  visible; ///< whether the element affects layout and is visible
 
             /** \brief Constructor */
-            inline constraints(alignment&, margins&, visibility&);
+            inline constraints(alignment const&, margins const&, visibility const&);
         };
 
         /** \brief Default alignment */
         static alignment   default_alignment;
+
+        /** \brief Default constraints */
+        static constraints default_constraints;
 
       private:
 
@@ -177,15 +198,26 @@ namespace sip {
         /** \brief The layout elements directly contained in this box */
         children_list children;
 
+      private:
+
+        /** \brief Read back a layout structure in XML format */
+        inline static element* read_structure(xml2pp::text_reader& r);
+
       public:
 
         /* \brief Instantiates a layout manager and returns a shared pointer */
-        inline manager::sptr create_sptr() const;
+        inline static manager::sptr create_sptr();
 
         /** Adds a new element to the box */
-        inline void add(element*, alignment& = default_alignment,
-                                  margins& = default_margins,
-                                  visibility& = default_visibility);
+        inline void add(element*);
+
+        /** Adds a new element to the box */
+        inline void add(element*, constraints const&);
+
+        /** Adds a new element to the box */
+        inline void add(element*, alignment const&,
+                                  margins const& = default_margins,
+                                  visibility const& = default_visibility);
 
         /** \brief Instantiate a layout element, through a mediator */
         inline mediator::wrapper_aptr instantiate(layout::mediator*);
@@ -205,32 +237,78 @@ namespace sip {
       m->attach(d, c);
     }
 
-    box< vertical >::constraints::constraints(alignment& a, margins& m, visibility& v) :
+    inline manager::~manager() {
+    }
+
+    box< vertical >::constraints::constraints(alignment const& a, margins const& m, visibility const& v) :
                                                 align(a), margin(m), visible(v) {
     }
 
-    box< horizontal >::constraints::constraints(alignment& a, margins& m, visibility& v) :
+    box< horizontal >::constraints::constraints(alignment const& a, margins const& m, visibility const& v) :
                                                 align(a), margin(m), visible(v) {
     }
 
-    inline manager::sptr box< vertical >::create_sptr() const {
+    inline manager::sptr box< vertical >::create_sptr() {
       return (manager::sptr(new box< vertical >::box()));
     }
 
-    inline manager::sptr box< horizontal >::create_sptr() const {
+    inline manager::sptr box< horizontal >::create_sptr() {
       return (manager::sptr(new box< horizontal >::box()));
     }
 
-    inline void box< vertical >::add(element* e, alignment& a, margins& m, visibility& v) {
+    /**
+     * @param[in] e a pointer to a layout element
+     **/
+    inline void box< vertical >::add(element* e) {
+      children.push_back(children_list::value_type(e, default_constraints));
+    }
+
+    /**
+     * @param[in] e a pointer to a layout element
+     **/
+    inline void box< horizontal >::add(element* e) {
+      children.push_back(children_list::value_type(e, default_constraints));
+    }
+
+    /**
+     * @param[in] e a pointer to a layout element
+     * @param[in] c the layout constraints to observe
+     **/
+    inline void box< vertical >::add(element* e, constraints const& c) {
+      children.push_back(children_list::value_type(e, c));
+    }
+
+    /**
+     * @param[in] e a pointer to a layout element
+     * @param[in] c the layout constraints to observe
+     **/
+    inline void box< horizontal >::add(element* e, constraints const& c) {
+      children.push_back(children_list::value_type(e, c));
+    }
+
+    /**
+     * @param[in] e a pointer to a layout element
+     * @param[in] a how the element should be aligned relative to the box
+     * @param[in] m the margins of the element relative to other elements that occupy the box
+     * @param[in] v whether the element is visible and has an effect on other elements that occupy the box
+     **/
+    inline void box< vertical >::add(element* e, alignment const& a, margins const& m, visibility const& v) {
       children.push_back(children_list::value_type(e, constraints(a, m, v)));
     }
 
-    inline void box< horizontal >::add(element* e, alignment& a, margins& m, visibility& v) {
+    /**
+     * @param[in] e a pointer to a layout element
+     * @param[in] a how the element should be aligned relative to the box
+     * @param[in] m the margins of the element relative to other elements that occupy the box
+     * @param[in] v whether the element is visible and has an effect on other elements that occupy the box
+     **/
+    inline void box< horizontal >::add(element* e, alignment const& a, margins const& m, visibility const& v) {
       children.push_back(children_list::value_type(e, constraints(a, m, v)));
     }
 
     /**
      * @param[out] o the stream to which to write the result
+     * \todo alignment, margins and visibility
      **/
     inline void box< vertical >::write_structure(std::ostream& o) {
       o << "<box-layout-manager id=\"" << id << "\" type=\"vertical\">";
@@ -244,6 +322,7 @@ namespace sip {
 
     /**
      * @param[out] o the stream to which to write the result
+     * \todo alignment, margins and visibility
      **/
     inline void box< horizontal >::write_structure(std::ostream& o) {
       o << "<box-layout-manager id=\"" << id << "\" type=\"horizontal\">";
@@ -252,8 +331,53 @@ namespace sip {
         (*i).first->write_structure(o);
       }
 
-
       o << "<box-layout-manager/>";
+    }
+
+    /**
+     * @param[in] o the xml2pp text reader from which to read
+     *
+     * \pre reader should point to a box-layout-manager element (of type horizontal)
+     * \post reader points to after the associated end tag of the box
+     * \todo alignment, margins and visibility
+     **/
+    inline element* box< vertical >::read_structure(xml2pp::text_reader& r) {
+      box< vertical >* new_box = new box();
+
+      r.read();
+
+      if (!r.is_empty_element()) {
+        while (!r.is_end_element()) {
+          new_box->children.push_back(children_list::value_type(element::read_structure(r), default_constraints));
+        }
+      }
+
+      r.read();
+
+      return (new_box);
+    }
+
+    /**
+     * @param[in] o the xml2pp text reader from which to read
+     *
+     * \pre reader should point to a box-layout-manager element (of type horizontal)
+     * \post reader points to after the associated end tag of the box
+     * \todo alignment, margins and visibility
+     **/
+    inline element* box< horizontal >::read_structure(xml2pp::text_reader& r) {
+      box< horizontal >* new_box = new box();
+
+      r.read();
+
+      if (!r.is_empty_element()) {
+        while (!r.is_end_element()) {
+          new_box->children.push_back(children_list::value_type(element::read_structure(r), default_constraints));
+        }
+      }
+
+      r.read();
+
+      return (new_box);
     }
 
     /**

@@ -3,6 +3,7 @@
 
 #include <iostream>
 
+#include <sip/detail/layout_base.h>
 #include <sip/detail/layout_mediator.h>
 
 namespace sip {
@@ -13,11 +14,17 @@ namespace sip {
      
       /** \brief A basic text label widget */
       class label : public layout::element {
+        friend class layout::element;
      
         private:
      
           /** \brief The text to be displayed */
           std::string text;
+
+        private:
+     
+          /** \brief Write out the layout structure in XML format */
+          static element* read_structure(xml2pp::text_reader&);
      
         public:
      
@@ -45,6 +52,22 @@ namespace sip {
       }
 
       /**
+       * @param[in] o the xml2pp text reader from which to read
+       *
+       * \pre reader should point to a button element
+       * \post reader points to after the associated end tag of the box
+       **/
+      inline element* label::read_structure(xml2pp::text_reader& r) {
+        std::string   t;
+
+        r.get_attribute(&t, "text");
+
+        r.read();
+
+        return (new label(t));
+      }
+
+      /**
        * @param m the mediator object to use
        **/
       inline layout::mediator::wrapper_aptr label::instantiate(layout::mediator* m) {
@@ -53,9 +76,16 @@ namespace sip {
      
       /** \brief A basic button widget */
       class button : public layout::element {
+        friend class layout::element;
+     
         private:
           /** The caption */
           std::string label;
+     
+        private:
+     
+          /** \brief Write out the layout structure in XML format */
+          static element* read_structure(xml2pp::text_reader&);
      
         public:
      
@@ -83,6 +113,22 @@ namespace sip {
       }
 
       /**
+       * @param[in] o the xml2pp text reader from which to read
+       *
+       * \pre reader should point to a button element
+       * \post reader points to after the associated end tag of the box
+       **/
+      inline element* button::read_structure(xml2pp::text_reader& r) {
+        std::string   l;
+
+        r.get_attribute(&l, "label");
+
+        r.read();
+
+        return (new button(l));
+      }
+
+      /**
        * @param m the mediator object to use
        **/
       inline layout::mediator::wrapper_aptr button::instantiate(layout::mediator* m) {
@@ -101,12 +147,19 @@ namespace sip {
        *    - r is connected to q
        **/
       class radio_button : public layout::element {
+        friend class layout::element;
+     
         private:
           /** The caption */
           std::string          label;
      
           /** The connection reference */
           const radio_button*  connection;
+     
+        private:
+     
+          /** \brief Write out the layout structure in XML format */
+          static element* read_structure(xml2pp::text_reader&);
      
         public:
      
@@ -125,6 +178,12 @@ namespace sip {
      
       /**
        * @param[in] c the label for the button
+       **/
+      inline radio_button::radio_button(std::string c) : label(c) {
+      }
+     
+      /**
+       * @param[in] c the label for the button
        * @param[in] r pointer to a connected radio button
        **/
       inline radio_button::radio_button(std::string c, radio_button* r) : label(c), connection(r) {
@@ -139,6 +198,23 @@ namespace sip {
       }
 
       /**
+       * @param[in] o the xml2pp text reader from which to read
+       *
+       * \pre reader should point to a radio-button element
+       * \post reader points to after the associated end tag of the box
+       * \todo connect to associated radio buttons
+       **/
+      inline element* radio_button::read_structure(xml2pp::text_reader& r) {
+        std::string   t;
+
+        r.get_attribute(&t, "text");
+
+        r.read();
+
+        return (new radio_button(t));
+      }
+
+      /**
        * @param m the mediator object to use
        **/
       inline layout::mediator::wrapper_aptr radio_button::instantiate(layout::mediator* m) {
@@ -147,8 +223,10 @@ namespace sip {
      
       /** \brief A basic button widget */
       class progress_bar : public layout::element {
+        friend class layout::element;
      
         private:
+
           /** The minimum value */
           unsigned int minimum;
      
@@ -157,6 +235,11 @@ namespace sip {
      
           /** The current value */
           unsigned int current;
+     
+        private:
+     
+          /** \brief Write out the layout structure in XML format */
+          static element* read_structure(xml2pp::text_reader&);
      
         public:
      
@@ -189,6 +272,24 @@ namespace sip {
       }
 
       /**
+       * @param[in] o the xml2pp text reader from which to read
+       *
+       * \pre reader should point to a progress-bar element
+       * \post reader points to after the associated end tag of the box
+       **/
+      inline element* progress_bar::read_structure(xml2pp::text_reader& r) {
+        unsigned int min, max, c;
+
+        r.get_attribute(&min, "minimum");
+        r.get_attribute(&max, "maximum");
+        r.get_attribute(&c, "current");
+
+        r.read();
+
+        return (new progress_bar(min, max, c));
+      }
+
+      /**
        * @param m the mediator object to use
        **/
       inline layout::mediator::wrapper_aptr progress_bar::instantiate(layout::mediator* m) {
@@ -202,6 +303,8 @@ namespace sip {
        * purposes. By default any string is accepted.
        **/
       class text_field : public layout::element {
+        friend class layout::element;
+     
         private:
      
           /** \brief The text to be displayed initialy */
@@ -209,6 +312,11 @@ namespace sip {
      
           /** Type for validation purposes */
           basic_datatype* type;
+     
+        private:
+     
+          /** \brief Write out the layout structure in XML format */
+          static element* read_structure(xml2pp::text_reader&);
      
         public:
      
@@ -238,6 +346,22 @@ namespace sip {
         type->write(o);
 
         o << "<text-field/>";
+      }
+
+      /**
+       * @param[in] o the xml2pp text reader from which to read
+       *
+       * \pre reader should point to a text-field element
+       * \post reader points to after the associated end tag of the box
+       **/
+      inline element* text_field::read_structure(xml2pp::text_reader& r) {
+        std::string t;
+
+        r.get_attribute(&t, "text");
+
+        r.read(1);
+
+        return (new text_field(t));
       }
 
       /**

@@ -156,40 +156,42 @@ int main(int ac, char** av)
     
     if (tc.is_active()) {
       using namespace sip;
+      using namespace sip::layout;
+      using namespace sip::layout::elements;
 
       layout::tool_display display;
 
       /* Create and add the top layout manager */
       layout::manager::sptr layout_manager = layout::box < horizontal >::box::create_sptr();
 
-      display->set_top_manager(layout_manager);
+      display.set_top_manager(layout_manager);
 
       /* Add labels */
-      layout_manager.add(new layout::label("input read from: " + file_name));
+      layout_manager->add(new label("input read from: " + file_name));
 
       /* First column */
-      layout::box < vertical >* left = layout::box < horizontal >::box();
+      layout::manager* left = new layout::box < vertical >::box();
 
-      left.add(new layout::label("Input read from              :"));
-      left.add(new layout::label("Number of summands           :"));
-      left.add(new layout::label("Number of free variables     :"));
-      left.add(new layout::label("Number of process parameters :"));
-      left.add(new layout::label("Number of actions            :"));
+      left->add(new label("Input read from              :"));
+      left->add(new label("Number of summands           :"));
+      left->add(new label("Number of free variables     :"));
+      left->add(new label("Number of process parameters :"));
+      left->add(new label("Number of actions            :"));
 
       /* Second column */
-      layout::box < vertical >* right = layout::box < horizontal >::box();
+      layout::manager* right = new layout::box < vertical >::box();
 
       boost::format c("%u");
 
-      right.add(new layout::label(filename));
-      right.add(new layout::label(boost::str(c % lpe.summands().size())));
-      right.add(new layout::label(boost::str(c % lpe_specification.initial_free_variables().size() + lpe.free_variables().size())));
-      right.add(new layout::label(boost::str(c % lpe.process_parameters().size())));
-      right.add(new layout::label(boost::str(c % lpe.actions().size())));
+      right->add(new label(file_name));
+      right->add(new label(boost::str(c % lpe.summands().size())));
+      right->add(new label(boost::str(c % (lpe_specification.initial_free_variables().size() + lpe.free_variables().size()))));
+      right->add(new label(boost::str(c % lpe.process_parameters().size())));
+      right->add(new label(boost::str(c % lpe.actions().size())));
 
       /* Attach columns*/
-      layout_manager.add(left);
-      layout_manager.add(right);
+      layout_manager->add(left);
+      layout_manager->add(right);
     }
     else {
       cout << "Input read from " << ((file_name == "-") ? "standard input" : file_name) << endl << endl;

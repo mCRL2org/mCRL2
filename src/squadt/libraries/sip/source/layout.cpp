@@ -1,4 +1,6 @@
 #include <sip/detail/layout_manager.h>
+#include <sip/detail/layout_elements.h>
+#include <sip/detail/object.h>
 
 #include <xml2pp/text_reader.h>
 
@@ -10,22 +12,59 @@ namespace sip {
     visibility manager::default_visibility = visible;
 
     box< vertical >::alignment     box< vertical >::default_alignment = box< vertical >::center;
-
     box< horizontal >::alignment   box< horizontal >::default_alignment = box< horizontal >::center;
 
-    inline void element::read_structure(std::string& input) {
-      xml2pp::text_reader reader(input);
+    box< vertical >::constraints   box< vertical >::default_constraints(box< vertical >::default_alignment,
+                                        manager::default_margins, manager::default_visibility);
+
+    box< horizontal >::constraints box< horizontal >::default_constraints(box< horizontal >::default_alignment,
+                                        manager::default_margins, manager::default_visibility);
+
+    element* element::read_structure(std::string& input) {
+      xml2pp::text_reader r(input);
 
       r.read();
 
-      std::string();
+      return (read_structure(r));
+    }
 
-      if () {
-      label
-      button
-      radio_button
-      progress_bar
-      text_field
+    element* element::read_structure(xml2pp::text_reader& r) {
+      using namespace sip::layout::elements;
+
+      element* new_element;
+
+      std::string        name = r.element_name();
+      object::identifier id;
+
+      r.get_attribute(&id, "id");
+
+      if (name == "label") {
+        new_element = label::read_structure(r);
+      }
+      else if (name == "button") {
+        new_element = button::read_structure(r);
+      }
+      else if (name == "radio-button") {
+        new_element = radio_button::read_structure(r);
+      }
+      else if (name == "progress-bar") {
+        new_element = progress_bar::read_structure(r);
+      }
+      else if (name == "text-field") {
+        new_element = text_field::read_structure(r);
+      }
+      else if (name == "box-layout-manager") {
+        std::string type;
+
+        r.get_attribute(&type, "type");
+
+        new_element = (type == "vertical") ? box< vertical >::read_structure(r) :
+                                             box< horizontal >::read_structure(r);
+      }
+
+      new_element->id = id;
+
+      return (new_element);
     }
   }
 }

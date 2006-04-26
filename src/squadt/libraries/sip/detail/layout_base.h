@@ -5,8 +5,10 @@
 
 #include <boost/shared_ptr.hpp>
 
+#include <xml2pp/text_reader.h>
+
 #include <sip/detail/layout_mediator.h>
-#include <sip/detail/option.h>
+#include <sip/detail/object.h>
 
 namespace sip {
   namespace layout {
@@ -15,8 +17,9 @@ namespace sip {
     class element {
 
       protected:
+
         /** \brief Unique identifier for an object */
-        sip::option::identifier  id;
+        sip::object::identifier  id;
 
       public:
 
@@ -28,21 +31,41 @@ namespace sip {
         /** \brief Abstract destructor */
         virtual ~element() = 0;
 
+        /** \brief Set the elements id */
+        inline void set_id(sip::object::identifier);
+
+        /** \brief Set the elements id */
+        inline void set_id(sip::object::identifier&);
+
         /** \brief Writes the state of the element to stream */
-//        virtual void write_state(std::ostream&) = 0;
+// TODO   virtual void write_state(std::ostream&) = 0;
 
         /** \brief Read state of the element with a reader */
-//        virtual void read_state();
+// TODO   virtual void read_state();
 
         /** \brief Recursively serialises the state of the object to a stream */
         virtual void write_structure(std::ostream&) = 0; 
 
         /** \brief Recursively builds the state of the object */
-//        virtual void read_structure(); 
+        static element* read_structure(std::string&); 
+
+        /** \brief Recursively builds the state of the object */
+        static element* read_structure(xml2pp::text_reader&); 
 
         /** \brief Set the callback function that is used to instantiate a layout element */
-        virtual mediator::wrapper_aptr instantiate(layout::mediator*);
+        virtual mediator::wrapper_aptr instantiate(layout::mediator*) = 0;
     };
+
+    inline element::~element() {
+    }
+
+    inline void element::set_id(sip::object::identifier& i) {
+      id = i;
+    }
+
+    inline void element::set_id(sip::object::identifier i) {
+      id = i;
+    }
   }
 }
 

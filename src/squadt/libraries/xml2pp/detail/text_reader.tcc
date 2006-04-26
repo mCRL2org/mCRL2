@@ -148,7 +148,7 @@ namespace xml2pp {
     bool  return_value = temporary != NULL;
 
     if (return_value) {
-      *d= static_cast < T > (atoi(temporary));
+      *d= static_cast < T > (atol(temporary));
     }
 
     xmlFree(temporary);
