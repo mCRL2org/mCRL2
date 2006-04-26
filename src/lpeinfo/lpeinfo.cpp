@@ -192,6 +192,8 @@ int main(int ac, char** av)
       /* Attach columns*/
       layout_manager->add(left);
       layout_manager->add(right);
+
+      tc.send_display_layout(display);
     }
     else {
       cout << "Input read from " << ((file_name == "-") ? "standard input" : file_name) << endl << endl;
