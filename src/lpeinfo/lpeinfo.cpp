@@ -154,12 +154,51 @@ int main(int ac, char** av)
   if (lpe_specification.load(file_name)) {
     lpe::LPE lpe = lpe_specification.lpe();
     
-    cout << "Input read from " << ((file_name == "-") ? "standard input" : file_name) << endl << endl;
+    if (tc.is_active()) {
+      using namespace sip;
 
-    cout << "Number of summands          : " << lpe.summands().size() << endl;
-    cout << "Number of free variables    : " << lpe_specification.initial_free_variables().size() + lpe.free_variables().size() << endl;
-    cout << "Number of process parameters: " << lpe.process_parameters().size() << endl; 
-    cout << "Number of actions           : " << lpe.actions().size() << endl;
+      layout::tool_display display;
+
+      /* Create and add the top layout manager */
+      layout::manager::sptr layout_manager = layout::box < horizontal >::box::create_sptr();
+
+      display->set_top_manager(layout_manager);
+
+      /* Add labels */
+      layout_manager.add(new layout::label("input read from: " + file_name));
+
+      /* First column */
+      layout::box < vertical >* left = layout::box < horizontal >::box();
+
+      left.add(new layout::label("Input read from              :"));
+      left.add(new layout::label("Number of summands           :"));
+      left.add(new layout::label("Number of free variables     :"));
+      left.add(new layout::label("Number of process parameters :"));
+      left.add(new layout::label("Number of actions            :"));
+
+      /* Second column */
+      layout::box < vertical >* right = layout::box < horizontal >::box();
+
+      boost::format c("%u");
+
+      right.add(new layout::label(filename));
+      right.add(new layout::label(boost::str(c % lpe.summands().size())));
+      right.add(new layout::label(boost::str(c % lpe_specification.initial_free_variables().size() + lpe.free_variables().size())));
+      right.add(new layout::label(boost::str(c % lpe.process_parameters().size())));
+      right.add(new layout::label(boost::str(c % lpe.actions().size())));
+
+      /* Attach columns*/
+      layout_manager.add(left);
+      layout_manager.add(right);
+    }
+    else {
+      cout << "Input read from " << ((file_name == "-") ? "standard input" : file_name) << endl << endl;
+     
+      cout << "Number of summands          : " << lpe.summands().size() << endl;
+      cout << "Number of free variables    : " << lpe_specification.initial_free_variables().size() + lpe.free_variables().size() << endl;
+      cout << "Number of process parameters: " << lpe.process_parameters().size() << endl; 
+      cout << "Number of actions           : " << lpe.actions().size() << endl;
+    }
   }
   else {
     std::string error("Error: unable to load LPE from `" + file_name + "'\n");
