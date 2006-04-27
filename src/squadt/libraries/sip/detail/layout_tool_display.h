@@ -21,15 +21,15 @@ namespace sip {
       private:
 
         /** \brief the layout manager that contains all widgits for this display */
-        layout::manager::sptr top_manager;
+        layout::manager::aptr top_manager;
 
       public:
 
         /** \brief Get the layout manager that contains all widgits for this display */
-        inline const layout::manager::sptr get_top_manager() const;
+        inline layout::manager const* get_top_manager() const;
 
         /** \brief Set the layout manager that contains all widgits for this display */
-        inline void set_top_manager(layout::manager::sptr);
+        inline void set_top_manager(layout::manager::aptr);
 
         /** \brief Write out the layout structure in XML format */
         std::string write() const;
@@ -41,11 +41,11 @@ namespace sip {
         static tool_display::sptr read(xml2pp::text_reader&);
     };
 
-    inline const layout::manager::sptr tool_display::get_top_manager() const {
-      return (top_manager);
+    inline layout::manager const* tool_display::get_top_manager() const {
+      return (top_manager.get());
     }
 
-    inline void tool_display::set_top_manager(layout::manager::sptr m) {
+    inline void tool_display::set_top_manager(layout::manager::aptr m) {
       top_manager = m;
     }
     
@@ -53,7 +53,7 @@ namespace sip {
       std::ostringstream output;
  
       write(output);
- 
+
       return (output.str());
     }
 
@@ -81,11 +81,9 @@ namespace sip {
 
       r.read();
 
-      if (!r.is_element("display-layout")) {
-        display->set_top_manager(layout::manager::sptr(layout::manager::read_structure(r)));
+      if (!r.is_end_element("display-layout")) {
+        display->set_top_manager(layout::manager::static_read_structure(r));
       }
-
-      r.read();
 
       return (display);
     }

@@ -22,16 +22,16 @@ namespace sip {
         };
 
         /** \brief Convenience type for use of auto pointers */
-        typedef std::auto_ptr < mediator >                                                  aptr;
+        typedef std::auto_ptr < mediator >                                           aptr;
 
         /** \brief Convenience type for use of auto pointers */
-        typedef std::auto_ptr < wrapper >                                                   wrapper_aptr;
+        typedef std::auto_ptr < wrapper >                                            wrapper_aptr;
 
         /** \brief Type for layout manager build functions */
-        typedef std::auto_ptr < std::pair < aptr, wrapper_aptr > >                          connector_pair;
+        typedef std::auto_ptr < std::pair < aptr, wrapper_aptr > >                   connector_pair;
 
         /** \brief Function type for wrapping the attach methods */
-        typedef boost::function < void (wrapper_aptr const&, layout::constraints const*) >  attach_function;
+        typedef boost::function < void (wrapper_aptr, layout::constraints const*) >  attach_function;
 
       protected:
 
@@ -46,7 +46,11 @@ namespace sip {
         /** \brief Constructor */
         inline mediator(wrapper_aptr d);
 
+        /** \brief Get the associated data */
         inline wrapper_aptr get_data();
+
+        /** \brief Set the attach function */
+        inline void set_attach(attach_function);
 
         /** \brief Instantiates a vertically aligned box layout manager */
         virtual aptr build_vertical_box() = 0;
@@ -81,6 +85,13 @@ namespace sip {
 
     inline mediator::wrapper_aptr mediator::get_data() {
       return (data);
+    }
+
+    /**
+     * @param[in] h the function to set
+     **/
+    inline void mediator::set_attach(attach_function h) {
+      attach = h;
     }
   }
 }

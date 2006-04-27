@@ -19,6 +19,9 @@ namespace squadt {
 
     using ::sip::layout::mediator;
 
+    using namespace sip;
+    using namespace sip::layout;
+
     /** \brief Provides the means of */
     class tool_display_mediator : public sip::layout::mediator {
       
@@ -49,10 +52,10 @@ namespace squadt {
       private:
 
         /** \brief Helper function for layout managers to attach widgets */
-        void attach(mediator::wrapper_aptr, sip::layout::box < sip::layout::vertical >::constraints&);
+        void attach_to_vertical_box(mediator::wrapper_aptr, sip::layout::constraints const*);
 
         /** \brief Helper function for layout managers to attach widgets */
-        void attach(mediator::wrapper_aptr, sip::layout::box < sip::layout::horizontal >::constraints&);
+        void attach_to_horizontal_box(mediator::wrapper_aptr, sip::layout::constraints const*);
 
       public:
 
@@ -111,17 +114,19 @@ namespace squadt {
      * @param p pointer to the data that represent the window to be attached
      * @param c layout constraints
      **/
-    void tool_display_mediator::attach(mediator::wrapper_aptr d, sip::layout::box < sip::layout::vertical >::constraints& c) {
+    void tool_display_mediator::attach_to_vertical_box(mediator::wrapper_aptr d, sip::layout::constraints const* c) {
       wxWindow* target = reinterpret_cast < wxWindow* > (d.get());
       int       flags  = wxLEFT|wxRIGHT;
 
+      layout::box_vertical::constraints const& cr = *(static_cast < layout::box_vertical::constraints const* > (c));
+
       using sip::layout::box;
 
-      switch (c.align) {
-        case sip::layout::box < sip::layout::vertical >::left:
+      switch (cr.align) {
+        case layout::box < vertical >::left:
           flags |= wxALIGN_LEFT;
           break;
-        case sip::layout::box < sip::layout::vertical >::right:
+        case layout::box < vertical >::right:
           flags |= wxALIGN_RIGHT;
           break;
         default: /* center */
@@ -131,17 +136,17 @@ namespace squadt {
 
       wxSizer* sizer = static_cast < tool_display_mediator::wrapper* > (data.get())->get_sizer();
 
-      if (0 < c.margin.top) {
-        sizer->AddSpacer(c.margin.bottom);
+      if (0 < cr.margin.top) {
+        sizer->AddSpacer(cr.margin.bottom);
       }
 
-      sizer->Add(target, 0, flags, (c.margin.left + c.margin.right) >> 1);
+      sizer->Add(target, 0, flags, (cr.margin.left + cr.margin.right) >> 1);
 
-      if (0 < c.margin.bottom) {
-        sizer->AddSpacer(c.margin.bottom);
+      if (0 < cr.margin.bottom) {
+        sizer->AddSpacer(cr.margin.bottom);
       }
 
-      if (c.visible == sip::layout::hidden) {
+      if (cr.visible == sip::layout::hidden) {
         sizer->Show(target, false);
       }
     }
@@ -150,11 +155,13 @@ namespace squadt {
      * @param p pointer to the data that represent the window to be attached
      * @param c layout constraints
      **/
-    void tool_display_mediator::attach(wrapper_aptr d, sip::layout::box < sip::layout::horizontal >::constraints& c) {
+    void tool_display_mediator::attach_to_horizontal_box(wrapper_aptr d, sip::layout::constraints const* c) {
       wxWindow* target = reinterpret_cast < wxWindow* > (d.get());
       int       flags  = wxTOP|wxBOTTOM;
 
-      switch (c.align) {
+      sip::layout::box < horizontal >::constraints const& cr = *(static_cast < sip::layout::box < horizontal >::constraints const* > (c));
+
+      switch (cr.align) {
         case sip::layout::box < sip::layout::horizontal >::top:
           flags |= wxALIGN_TOP;
           break;
@@ -168,17 +175,17 @@ namespace squadt {
 
       wxSizer* sizer = static_cast < tool_display_mediator::wrapper* > (data.get())->get_sizer();
 
-      if (0 < c.margin.left) {
-        sizer->AddSpacer(c.margin.left);
+      if (0 < cr.margin.left) {
+        sizer->AddSpacer(cr.margin.left);
       }
 
-      sizer->Add(target, 0, flags, (c.margin.top + c.margin.bottom) >> 1);
+      sizer->Add(target, 0, flags, (cr.margin.top + cr.margin.bottom) >> 1);
 
-      if (0 < c.margin.right) {
-        sizer->AddSpacer(c.margin.right);
+      if (0 < cr.margin.right) {
+        sizer->AddSpacer(cr.margin.right);
       }
 
-      if (c.visible == sip::layout::hidden) {
+      if (cr.visible == sip::layout::hidden) {
         sizer->Show(target, false);
       }
     }
@@ -191,6 +198,9 @@ namespace squadt {
 
       sip::layout::mediator::aptr m(new tool_display_mediator(current_window, wrapper_aptr(new wrapper(t))));
 
+      m->set_attach(boost::bind(&tool_display_mediator::attach_to_vertical_box,
+                                                static_cast < tool_display_mediator* > (m.get()), _1, _2));
+
       return (m);
     }
     
@@ -201,6 +211,9 @@ namespace squadt {
       wxSizer* t = new wxBoxSizer(wxHORIZONTAL);
 
       sip::layout::mediator::aptr m(new tool_display_mediator(current_window, wrapper_aptr (new wrapper(t))));
+
+      m->set_attach(boost::bind(&tool_display_mediator::attach_to_horizontal_box,
+                                                static_cast < tool_display_mediator* > (m.get()), _1, _2));
 
       return (m);
     }
@@ -262,9 +275,6 @@ namespace squadt {
     tool_display_mediator::~tool_display_mediator() {
     }
 
-    /**
-     * @param[in] d reference to the object that contains the display layout specification
-     **/
     void tool_display::instantiate() {
       wxSizer* root = GetSizer();
 
@@ -284,7 +294,7 @@ namespace squadt {
     /** \brief Set a new layout description */
     void tool_display::set_layout(sip::layout::tool_display::sptr l) {
       current_layout = l;
-
+current_layout->write(std::cerr);
       context->gui_builder.schedule_update(this);
     }
   }

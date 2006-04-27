@@ -45,6 +45,7 @@ namespace squadt {
 
     /**
      * @param[in] p the parent window
+     * @param[in] v the project that owns tool display
      **/
     inline tool_display::tool_display(wxWindow* p, GUI::project* c) :
                                 wxPanel(p, wxID_ANY, wxDefaultPosition, wxDefaultSize, wxRAISED_BORDER),

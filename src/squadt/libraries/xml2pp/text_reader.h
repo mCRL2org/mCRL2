@@ -87,6 +87,9 @@ namespace xml2pp {
       /** \brief Whether the current element is an end of element tag */
       inline bool is_end_element();
 
+      /** \brief Whether the current element is an end of element tag */
+      inline bool is_end_element(const char*);
+
       /** \brief Skips to the next position if the current element is an end of element tag */
       inline bool skip_end_element(const char*);
 

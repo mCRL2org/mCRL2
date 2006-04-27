@@ -217,9 +217,17 @@ namespace xml2pp {
     return (return_value);
   }
 
-  /* Whether the current element is an end of element tag */
   inline bool text_reader::is_end_element() {
     return (xmlTextReaderNodeType(reader) == XML_READER_TYPE_END_ELEMENT);
+  }
+
+  /**
+   * @param e the end element that has to be matched
+   *
+   * \return whether the position was changed
+   **/
+  inline bool text_reader::is_end_element(const char* e) {
+    return (is_element(e) && xmlTextReaderNodeType(reader) == XML_READER_TYPE_END_ELEMENT);
   }
 
   /**

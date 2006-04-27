@@ -2,8 +2,7 @@
 #define LAYOUT_BASE_H
 
 #include <iosfwd>
-
-#include <boost/shared_ptr.hpp>
+#include <memory>
 
 #include <xml2pp/text_reader.h>
 
@@ -23,13 +22,18 @@ namespace sip {
 
       public:
 
-        /** \brief Convenience type for hiding shared pointer implementation */
-        typedef boost::shared_ptr < element > sptr;
+        /** \brief Convenience type for hiding auto pointer implementation */
+        typedef std::auto_ptr < element > aptr;
+
+      protected:
+
+        /** \brief Resets private members to defaults */
+        inline void clear();
 
       public:
 
-        /** \brief Abstract destructor */
-        virtual ~element() = 0;
+        /** \brief Constructor */
+        element();
 
         /** \brief Set the elements id */
         inline void set_id(sip::object::identifier);
@@ -46,17 +50,33 @@ namespace sip {
         /** \brief Recursively serialises the state of the object to a stream */
         virtual void write_structure(std::ostream&) = 0; 
 
-        /** \brief Recursively builds the state of the object */
-        static element* read_structure(std::string&); 
+        /** \brief Reads element specific data */
+        virtual void read(xml2pp::text_reader&); 
 
         /** \brief Recursively builds the state of the object */
-        static element* read_structure(xml2pp::text_reader&); 
+        static element::aptr static_read_structure(std::string&); 
+
+        /** \brief Recursively builds the state of the object */
+        static element::aptr static_read_structure(xml2pp::text_reader&); 
+
+        /** \brief Recursively builds the state of the object */
+        virtual void read_structure(xml2pp::text_reader&) = 0; 
 
         /** \brief Set the callback function that is used to instantiate a layout element */
-        virtual mediator::wrapper_aptr instantiate(layout::mediator*) = 0;
+        virtual mediator::wrapper_aptr instantiate(layout::mediator*) const = 0;
+
+        /** \brief Abstract destructor */
+        virtual ~element() = 0;
     };
 
+    inline element::element() : id(0) {
+    }
+
     inline element::~element() {
+    }
+
+    inline void element::clear() {
+      id = 0;
     }
 
     inline void element::set_id(sip::object::identifier& i) {
@@ -65,6 +85,10 @@ namespace sip {
 
     inline void element::set_id(sip::object::identifier i) {
       id = i;
+    }
+
+    inline void element::read(xml2pp::text_reader& r) {
+      r.get_attribute(&id, "id");
     }
   }
 }

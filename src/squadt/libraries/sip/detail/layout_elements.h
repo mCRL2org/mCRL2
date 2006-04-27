@@ -23,8 +23,11 @@ namespace sip {
 
         private:
      
+          /** Default constructor */
+          inline label();
+
           /** \brief Write out the layout structure in XML format */
-          static element* read_structure(xml2pp::text_reader&);
+          void read_structure(xml2pp::text_reader&);
      
         public:
      
@@ -32,12 +35,15 @@ namespace sip {
           inline label(std::string);
      
           /** \brief Instantiate a layout element, through a mediator */
-          inline layout::mediator::wrapper_aptr instantiate(layout::mediator*);
+          inline layout::mediator::wrapper_aptr instantiate(layout::mediator*) const;
 
           /** \brief Write out the layout structure in XML format */
           inline void write_structure(std::ostream&);
       };
      
+      inline label::label() {
+      }
+
       /**
        * @param[in] c the text of the label
        **/
@@ -57,20 +63,16 @@ namespace sip {
        * \pre reader should point to a button element
        * \post reader points to after the associated end tag of the box
        **/
-      inline element* label::read_structure(xml2pp::text_reader& r) {
-        std::string   t;
-
-        r.get_attribute(&t, "text");
+      inline void label::read_structure(xml2pp::text_reader& r) {
+        r.get_attribute(&text, "text");
 
         r.read();
-
-        return (new label(t));
       }
 
       /**
        * @param m the mediator object to use
        **/
-      inline layout::mediator::wrapper_aptr label::instantiate(layout::mediator* m) {
+      inline layout::mediator::wrapper_aptr label::instantiate(layout::mediator* m) const {
         return (m->build_label(text));
       }
      
@@ -84,8 +86,11 @@ namespace sip {
      
         private:
      
+          /** Default constructor */
+          inline button();
+
           /** \brief Write out the layout structure in XML format */
-          static element* read_structure(xml2pp::text_reader&);
+          void read_structure(xml2pp::text_reader&);
      
         public:
      
@@ -93,12 +98,15 @@ namespace sip {
           inline button(std::string);
      
           /** \brief Instantiate a layout element, through a mediator */
-          inline layout::mediator::wrapper_aptr instantiate(layout::mediator*);
+          inline layout::mediator::wrapper_aptr instantiate(layout::mediator*) const;
 
           /** \brief Write out the layout structure in XML format */
           inline void write_structure(std::ostream&);
       };
      
+      inline button::button() {
+      }
+
       /**
        * @param[in] c the label for the button
        **/
@@ -118,20 +126,16 @@ namespace sip {
        * \pre reader should point to a button element
        * \post reader points to after the associated end tag of the box
        **/
-      inline element* button::read_structure(xml2pp::text_reader& r) {
-        std::string   l;
-
-        r.get_attribute(&l, "label");
+      inline void button::read_structure(xml2pp::text_reader& r) {
+        r.get_attribute(&label, "label");
 
         r.read();
-
-        return (new button(l));
       }
 
       /**
        * @param m the mediator object to use
        **/
-      inline layout::mediator::wrapper_aptr button::instantiate(layout::mediator* m) {
+      inline layout::mediator::wrapper_aptr button::instantiate(layout::mediator* m) const {
         return (m->build_button(label));
       }
      
@@ -158,8 +162,11 @@ namespace sip {
      
         private:
      
+          /** Default constructor */
+          inline radio_button();
+
           /** \brief Write out the layout structure in XML format */
-          static element* read_structure(xml2pp::text_reader&);
+          void read_structure(xml2pp::text_reader&);
      
         public:
      
@@ -170,12 +177,15 @@ namespace sip {
           inline radio_button(std::string, radio_button*);
      
           /** \brief Instantiate a layout element, through a mediator */
-          inline layout::mediator::wrapper_aptr instantiate(layout::mediator*);
+          inline layout::mediator::wrapper_aptr instantiate(layout::mediator*) const;
 
           /** \brief Write out the layout structure in XML format */
           inline void write_structure(std::ostream&);
       };
      
+      inline radio_button::radio_button() {
+      }
+
       /**
        * @param[in] c the label for the button
        **/
@@ -204,20 +214,16 @@ namespace sip {
        * \post reader points to after the associated end tag of the box
        * \todo connect to associated radio buttons
        **/
-      inline element* radio_button::read_structure(xml2pp::text_reader& r) {
-        std::string   t;
-
-        r.get_attribute(&t, "text");
+      inline void radio_button::read_structure(xml2pp::text_reader& r) {
+        r.get_attribute(&label, "text");
 
         r.read();
-
-        return (new radio_button(t));
       }
 
       /**
        * @param m the mediator object to use
        **/
-      inline layout::mediator::wrapper_aptr radio_button::instantiate(layout::mediator* m) {
+      inline layout::mediator::wrapper_aptr radio_button::instantiate(layout::mediator* m) const {
         return (m->build_radio_button(label));
       }
      
@@ -238,8 +244,11 @@ namespace sip {
      
         private:
      
+          /** Default constructor */
+          inline progress_bar();
+
           /** \brief Write out the layout structure in XML format */
-          static element* read_structure(xml2pp::text_reader&);
+          void read_structure(xml2pp::text_reader&);
      
         public:
      
@@ -247,12 +256,15 @@ namespace sip {
           inline progress_bar(const unsigned int, const unsigned int, const unsigned int);
      
           /** \brief Instantiate a layout element, through a mediator */
-          inline layout::mediator::wrapper_aptr instantiate(layout::mediator*);
+          inline layout::mediator::wrapper_aptr instantiate(layout::mediator*) const;
 
           /** \brief Write out the layout structure in XML format */
           inline void write_structure(std::ostream&);
       };
      
+      inline progress_bar::progress_bar() {
+      }
+
       /**
        * @param[in] min the minimum position
        * @param[in] max the maximum position
@@ -277,22 +289,18 @@ namespace sip {
        * \pre reader should point to a progress-bar element
        * \post reader points to after the associated end tag of the box
        **/
-      inline element* progress_bar::read_structure(xml2pp::text_reader& r) {
-        unsigned int min, max, c;
-
-        r.get_attribute(&min, "minimum");
-        r.get_attribute(&max, "maximum");
-        r.get_attribute(&c, "current");
+      inline void progress_bar::read_structure(xml2pp::text_reader& r) {
+        r.get_attribute(&minimum, "minimum");
+        r.get_attribute(&maximum, "maximum");
+        r.get_attribute(&current, "current");
 
         r.read();
-
-        return (new progress_bar(min, max, c));
       }
 
       /**
        * @param m the mediator object to use
        **/
-      inline layout::mediator::wrapper_aptr progress_bar::instantiate(layout::mediator* m) {
+      inline layout::mediator::wrapper_aptr progress_bar::instantiate(layout::mediator* m) const {
         return (m->build_progress_bar(minimum, maximum, current));
       }
      
@@ -315,8 +323,11 @@ namespace sip {
      
         private:
      
+          /** Default constructor */
+          inline text_field();
+
           /** \brief Write out the layout structure in XML format */
-          static element* read_structure(xml2pp::text_reader&);
+          void read_structure(xml2pp::text_reader&);
      
         public:
      
@@ -324,12 +335,15 @@ namespace sip {
           inline text_field(const std::string& i, basic_datatype* = &standard_string);
      
           /** \brief Instantiate a layout element, through a mediator */
-          inline layout::mediator::wrapper_aptr instantiate(layout::mediator*);
+          inline layout::mediator::wrapper_aptr instantiate(layout::mediator*) const;
 
           /** \brief Write out the layout structure in XML format */
           inline void write_structure(std::ostream&);
       };
      
+      inline text_field::text_field() {
+      }
+
       /**
        * @param[in] s the initial content of the text control
        * @param[in] t the a type description object for validation purposes
@@ -354,20 +368,16 @@ namespace sip {
        * \pre reader should point to a text-field element
        * \post reader points to after the associated end tag of the box
        **/
-      inline element* text_field::read_structure(xml2pp::text_reader& r) {
-        std::string t;
-
-        r.get_attribute(&t, "text");
+      inline void text_field::read_structure(xml2pp::text_reader& r) {
+        r.get_attribute(&text, "text");
 
         r.read(1);
-
-        return (new text_field(t));
       }
 
       /**
        * @param m the mediator object to use
        **/
-      inline layout::mediator::wrapper_aptr text_field::instantiate(layout::mediator* m) {
+      inline layout::mediator::wrapper_aptr text_field::instantiate(layout::mediator* m) const {
         return (m->build_text_field(text));
       }
     }

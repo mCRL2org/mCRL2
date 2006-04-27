@@ -3,6 +3,7 @@
 
 #include <utility>
 #include <vector>
+#include <memory>
 
 #include <sip/detail/layout_base.h>
 #include <sip/detail/layout_mediator.h>
@@ -31,10 +32,12 @@ namespace sip {
 
     /** \brief Abstract base class for layout managers */
     class manager : public element {
+      friend class sip::layout::element;
+
       public:
 
-        /** \brief Convenience type for hiding shared pointer implementation */
-        typedef boost::shared_ptr < manager > sptr;
+        /** \brief Convenience type for hiding auto pointer implementation */
+        typedef std::auto_ptr < manager > aptr;
 
       public:
 
@@ -47,15 +50,15 @@ namespace sip {
       protected:
 
         /** \brief Attaches a layout element to a manager, using layout constraints */
-        inline void attach(layout::mediator*, mediator::wrapper_aptr, constraints const*);
+        inline void attach(layout::mediator*, mediator::wrapper_aptr, constraints const*) const;
 
       public:
 
+        /** \brief Recursively builds the state of the object */
+        static aptr static_read_structure(xml2pp::text_reader&); 
+
         /** Adds a new element to the box */
         virtual void add(element*) = 0;
-
-        /** \brief Recursively builds the state of the object */
-        static manager::sptr read_structure(xml2pp::text_reader&); 
 
         /* \brief Destructor */
         virtual ~manager() = 0;
@@ -77,11 +80,20 @@ namespace sip {
       public:
         /** Constructor */
         inline box();
+
+        /* \brief Instantiates a layout manager and returns a shared pointer */
+        inline static manager::aptr create_aptr();
     };
 
     template < box_variant T >
     inline box< T >::box() {
     }
+
+    /** \brief Convenience type for vertically oriented box layout manager */
+    typedef box < sip::layout::vertical >   box_vertical;
+
+    /** \brief Convenience type for horizontally oriented box layout manager */
+    typedef box < sip::layout::horizontal > box_horizontal;
 
     /**
      * \brief Vertical box layout manager
@@ -131,12 +143,15 @@ namespace sip {
       private:
 
         /** \brief Read back a layout structure in XML format */
-        inline static element* read_structure(xml2pp::text_reader& r);
+        inline void read_structure(xml2pp::text_reader& r);
+
+        /** \brief Resets private members to defaults */
+        inline void clear();
 
       public:
 
         /* \brief Instantiates a layout manager and returns a shared pointer */
-        inline static manager::sptr create_sptr();
+        inline static manager::aptr create_aptr();
 
         /** Adds a new element to the box */
         inline void add(element*);
@@ -150,7 +165,7 @@ namespace sip {
                                   visibility const& = manager::default_visibility);
 
         /** \brief Instantiate a layout element, through a mediator */
-        inline mediator::wrapper_aptr instantiate(layout::mediator*);
+        inline mediator::wrapper_aptr instantiate(layout::mediator*) const;
 
         /** \brief Write out the layout structure in XML format */
         inline void write_structure(std::ostream&);
@@ -206,12 +221,12 @@ namespace sip {
       private:
 
         /** \brief Read back a layout structure in XML format */
-        inline static element* read_structure(xml2pp::text_reader& r);
+        inline void read_structure(xml2pp::text_reader& r);
+
+        /** \brief Resets private members to defaults */
+        inline void clear();
 
       public:
-
-        /* \brief Instantiates a layout manager and returns a shared pointer */
-        inline static manager::sptr create_sptr();
 
         /** Adds a new element to the box */
         inline void add(element*);
@@ -225,7 +240,7 @@ namespace sip {
                                   visibility const& = default_visibility);
 
         /** \brief Instantiate a layout element, through a mediator */
-        inline mediator::wrapper_aptr instantiate(layout::mediator*);
+        inline mediator::wrapper_aptr instantiate(layout::mediator*) const;
 
         /** \brief Write out the layout structure in XML format */
         inline void write_structure(std::ostream&);
@@ -238,7 +253,7 @@ namespace sip {
      * @param d the data needed
      * @param c the layout constraints
      **/
-    inline void manager::attach(layout::mediator* m, mediator::wrapper_aptr d, constraints const* c) {
+    inline void manager::attach(layout::mediator* m, mediator::wrapper_aptr d, constraints const* c) const {
       m->attach(d, c);
     }
 
@@ -253,12 +268,21 @@ namespace sip {
                                                 align(a), margin(m), visible(v) {
     }
 
-    inline manager::sptr box< vertical >::create_sptr() {
-      return (manager::sptr(new box< vertical >::box()));
+    template < box_variant T > 
+    inline manager::aptr box< T >::create_aptr() {
+      return (manager::aptr(new typename box< T >::box()));
     }
 
-    inline manager::sptr box< horizontal >::create_sptr() {
-      return (manager::sptr(new box< horizontal >::box()));
+    inline void box< vertical >::clear() {
+      element::clear();
+
+      children.clear();
+    }
+
+    inline void box< horizontal >::clear() {
+      element::clear();
+
+      children.clear();
     }
 
     /**
@@ -322,7 +346,7 @@ namespace sip {
         (*i).first->write_structure(o);
       }
 
-      o << "<box-layout-manager/>";
+      o << "</box-layout-manager>";
     }
 
     /**
@@ -336,7 +360,7 @@ namespace sip {
         (*i).first->write_structure(o);
       }
 
-      o << "<box-layout-manager/>";
+      o << "</box-layout-manager>";
     }
 
     /**
@@ -346,20 +370,18 @@ namespace sip {
      * \post reader points to after the associated end tag of the box
      * \todo alignment, margins and visibility
      **/
-    inline element* box< vertical >::read_structure(xml2pp::text_reader& r) {
-      box< vertical >* new_box = new box();
-
-      r.read();
+    inline void box< vertical >::read_structure(xml2pp::text_reader& r) {
+      clear();
 
       if (!r.is_empty_element()) {
-        while (!r.is_end_element()) {
-          new_box->children.push_back(children_list::value_type(element::read_structure(r), default_constraints));
+        r.read();
+
+        while (!r.is_end_element("box-layout-manager")) {
+          children.push_back(children_list::value_type(element::static_read_structure(r).release(), default_constraints));
         }
       }
 
       r.read();
-
-      return (new_box);
     }
 
     /**
@@ -369,26 +391,24 @@ namespace sip {
      * \post reader points to after the associated end tag of the box
      * \todo alignment, margins and visibility
      **/
-    inline element* box< horizontal >::read_structure(xml2pp::text_reader& r) {
-      box< horizontal >* new_box = new box();
-
-      r.read();
+    inline void box< horizontal >::read_structure(xml2pp::text_reader& r) {
+      clear();
 
       if (!r.is_empty_element()) {
-        while (!r.is_end_element()) {
-          new_box->children.push_back(children_list::value_type(element::read_structure(r), default_constraints));
+        r.read();
+
+        while (!r.is_end_element("box-layout-manager")) {
+          children.push_back(children_list::value_type(element::static_read_structure(r).release(), default_constraints));
         }
       }
 
       r.read();
-
-      return (new_box);
     }
 
     /**
      * @param m the mediator object to use
      **/
-    inline layout::mediator::wrapper_aptr box< vertical >::instantiate(layout::mediator* m) {
+    inline layout::mediator::wrapper_aptr box< vertical >::instantiate(layout::mediator* m) const {
       layout::mediator::aptr n = m->build_vertical_box();
 
       m = n.get();
@@ -403,7 +423,7 @@ namespace sip {
     /**
      * @param m the mediator object to use
      **/
-    inline layout::mediator::wrapper_aptr box< horizontal >::instantiate(layout::mediator* m) {
+    inline layout::mediator::wrapper_aptr box< horizontal >::instantiate(layout::mediator* m) const {
       layout::mediator::aptr n = m->build_horizontal_box();
 
       m = n.get();
