@@ -34,7 +34,8 @@ namespace squadt {
 
         t->instantiate();
 
-        t->Show();
+        t->Show(true);
+        t->GetSizer()->Layout();
       }
     }
     
@@ -119,7 +120,9 @@ namespace squadt {
 
       GUI::tool_display* display = new GUI::tool_display(process_display_view, this);
 
-      s->Add(display, 0, wxEXPAND);
+      s->Add(display, 0, wxEXPAND|wxALL, 2);
+
+      s->Layout();
 
       return (display);
     }

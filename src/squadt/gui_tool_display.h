@@ -49,7 +49,6 @@ namespace squadt {
     inline tool_display::tool_display(wxWindow* p, GUI::project* c) :
                                 wxPanel(p, wxID_ANY, wxDefaultPosition, wxDefaultSize, wxRAISED_BORDER),
                                 context(c) {
-      Show(false);
     }
 
     inline void tool_display::remove() {
