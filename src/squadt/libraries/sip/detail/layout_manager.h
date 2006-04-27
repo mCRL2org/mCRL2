@@ -54,6 +54,9 @@ namespace sip {
         /** Adds a new element to the box */
         virtual void add(element*) = 0;
 
+        /** \brief Recursively builds the state of the object */
+        static manager::sptr read_structure(xml2pp::text_reader&); 
+
         /* \brief Destructor */
         virtual ~manager() = 0;
     };
@@ -87,6 +90,7 @@ namespace sip {
      **/
     template < >
     class box< vertical > : public manager {
+      friend class sip::layout::manager;
       friend class sip::layout::element;
 
       public:
@@ -161,6 +165,7 @@ namespace sip {
      **/
     template < >
     class box< horizontal > : public manager {
+      friend class sip::layout::manager;
       friend class sip::layout::element;
 
       public:

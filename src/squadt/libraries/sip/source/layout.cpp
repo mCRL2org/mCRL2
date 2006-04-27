@@ -66,6 +66,28 @@ namespace sip {
 
       return (new_element);
     }
+
+    manager::sptr manager::read_structure(xml2pp::text_reader& r) {
+      if (r.is_element("box-layout-manager")) {
+        manager* new_manager;
+
+        std::string type;
+
+        r.get_attribute(&type, "type");
+
+        if (type == "vertical") {
+          new_manager = static_cast < manager* > (box< vertical >::read_structure(r));
+        }
+        else {
+          new_manager = static_cast < manager* > (box< horizontal >::read_structure(r));
+        }
+
+        return (manager::sptr(new_manager));
+      }
+      else {
+        return (manager::sptr());
+      }
+    }
   }
 }
 

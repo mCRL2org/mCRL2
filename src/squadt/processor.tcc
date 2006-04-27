@@ -14,7 +14,27 @@ namespace squadt {
    * @param[in] o the processor that owns of this object
    * @param[in] h the function or functor that is called/invoked when the process status changes
    **/
-  processor::reporter::reporter(processor& o, callback_handler h) : owner(o), callback(h) {
+  processor::reporter::reporter(processor& o) : owner(o) {
+    on_status_change = status_change_dummy;
+    on_layout_change = layout_change_dummy;
+
+    /* Set the handler for incoming layout messages */
+    activate_layout_handler(on_layout_change);
+  }
+
+  /**
+   * @param[in] h the function or functor that is invoked at layout change
+   **/
+  inline void processor::reporter::set_layout_handler(layout_callback_function h) {
+    /* Set the handler for incoming layout messages */
+    activate_layout_handler(h);
+  }
+
+  /**
+   * @param[in] h the function or functor that is invoked at status change
+   **/
+  inline void processor::reporter::set_status_handler(status_callback_function h) {
+    on_status_change = h;
   }
 
   /**
@@ -82,15 +102,15 @@ namespace squadt {
   /**
    * @param[in] h the function that is called when the status of the output changes
    **/
-  inline processor::processor(reporter::callback_handler h) : monitor(new reporter(*this, h)) {
+  inline processor::processor() : monitor(new reporter(*this)) {
   }
 
   /**
    * @param[in] h the function that is called when the status of the output changes
    * @param[in] t the tool descriptor of the tool that is to be used to produce the output from the input
    **/
-  inline processor::processor(tool::ptr t, reporter::callback_handler h) :
-                tool_descriptor(t), monitor(new reporter(*this, reporter::dummy)) {
+  inline processor::processor(tool::ptr t) :
+                tool_descriptor(t), monitor(new reporter(*this)) {
   }
 
   inline processor::~processor() {
@@ -112,6 +132,10 @@ namespace squadt {
 
   inline const tool::ptr processor::get_tool() {
     return (tool_descriptor);
+  }
+
+  inline const processor::reporter::ptr processor::get_monitor() {
+    return (monitor);
   }
 
   inline processor::input_object_iterator processor::get_inputs_iterator() const {
@@ -213,7 +237,7 @@ namespace squadt {
     if (current_output_status != s) {
       current_output_status = s;
  
-      monitor->callback(current_output_status);
+      monitor->on_status_change(current_output_status);
     }
   }
 }

@@ -9,26 +9,47 @@
 namespace squadt {
   namespace GUI {
 
+    class project;
+
     /**
      * @brief Display window associated with a tool
      **/
     class tool_display : wxPanel {
+      friend class GUI::project;
+      friend class GUI::project::builder;
+
+      private:
+
+        /** \brief The GUI project view to which this display `belongs' */
+        GUI::project*                   context;
+
+        /** \brief Abstract description of the layout of this panel */
+        sip::layout::tool_display::sptr current_layout;
+
+      private:
+
+        /** \brief Builds the specified layout within this window */
+        void instantiate();
+
       public:
 
         /** \brief Constructor */
-        inline tool_display(wxWindow*);
+        inline tool_display(wxWindow*, project*);
 
         /** \brief Removes itself from the parent window */
         inline void remove();
 
-        /** \brief Builds the specified layout within this window */
-        void instantiate(sip::layout::tool_display&);
+        /** \brief Set a new layout description */
+        void set_layout(sip::layout::tool_display::sptr);
     };
 
     /**
      * @param[in] p the parent window
      **/
-    inline tool_display::tool_display(wxWindow* p) : wxPanel(p, wxID_ANY, wxDefaultPosition, wxDefaultSize, wxRAISED_BORDER) {
+    inline tool_display::tool_display(wxWindow* p, GUI::project* c) :
+                                wxPanel(p, wxID_ANY, wxDefaultPosition, wxDefaultSize, wxRAISED_BORDER),
+                                context(c) {
+      Show(false);
     }
 
     inline void tool_display::remove() {

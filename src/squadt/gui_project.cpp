@@ -7,6 +7,7 @@
 #include "gui_resources.h"
 #include "project_manager.h"
 #include "gui_dialog_base.h"
+#include "gui_tool_display.h"
 #include "gui_dialog_project.h"
 #include "gui_dialog_processor.h"
 
@@ -21,7 +22,30 @@
 namespace squadt {
   namespace GUI {
 
+    project::builder::builder() {
+      Connect(wxEVT_IDLE, wxIdleEventHandler(builder::process));
+    }
+    
+    void project::builder::process(wxIdleEvent&) {
+      while (0 < tool_displays.size()) {
+        tool_display* t = tool_displays.front();
+
+        tool_displays.pop_front();
+
+        t->instantiate();
+
+        t->Show();
+      }
+    }
+    
+    void project::builder::schedule_update(tool_display* t) {
+      tool_displays.push_back(t);
+    }
+        
     project::~project() {
+      /* Remove the event handler for the builder */
+      PopEventHandler();
+
       manager->write();
     }
 
@@ -71,6 +95,8 @@ namespace squadt {
       processor_view       = new wxTreeCtrl(this, wxID_ANY, wxDefaultPosition, wxDefaultSize, wxTR_HAS_BUTTONS|wxTR_SINGLE|wxSUNKEN_BORDER);
       process_display_view = new wxPanel(this, wxID_ANY);
 
+      process_display_view->SetSizer(new wxBoxSizer(wxVERTICAL));
+
       processor_view->SetImageList(format_icon_list);
       processor_view->AddRoot(wxT("Store"));
 
@@ -83,8 +109,21 @@ namespace squadt {
       processor_view->Connect(wxEVT_COMMAND_TREE_ITEM_ACTIVATED, wxTreeEventHandler(project::on_tree_item_activate), 0, this);
 
       Connect(wxEVT_COMMAND_MENU_SELECTED, wxCommandEventHandler(project::on_context_menu_select));
+
+      /** Make sure gui_builder receives idle events */
+      PushEventHandler(&gui_builder);
     }
 
+    GUI::tool_display* project::add_tool_display() {
+      wxSizer* s = process_display_view->GetSizer();
+
+      GUI::tool_display* display = new GUI::tool_display(process_display_view, this);
+
+      s->Add(display, 0, wxEXPAND);
+
+      return (display);
+    }
+            
     /**
      * @param e a reference to a tree event object
      **/
@@ -226,6 +265,11 @@ namespace squadt {
             temporary_processors.push_back(tp);
 
             global_tool_manager->find(std::string(menu_item->GetLabel().fn_str()));
+
+            /* Attach tool display */
+            GUI::tool_display* display = add_tool_display();
+
+            tp->get_monitor()->set_layout_handler(boost::bind(&GUI::tool_display::set_layout, display, _1));
 
             tp->configure(menu_item->input_combination, boost::filesystem::path(t->location));
           }

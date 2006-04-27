@@ -10,7 +10,10 @@
 
 namespace squadt {
 
-  void processor::reporter::dummy(output_status) {
+  void processor::reporter::status_change_dummy(output_status) {
+  }
+
+  void processor::reporter::layout_change_dummy(sip::layout::tool_display::sptr) {
   }
 
   /**

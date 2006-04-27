@@ -1,6 +1,10 @@
+#include <deque>
+
+#include "gui_project.h"
 #include "gui_tool_display.h"
 
 #include <wx/button.h>
+#include <wx/event.h>
 #include <wx/gauge.h>
 #include <wx/radiobut.h>
 #include <wx/sizer.h>
@@ -261,7 +265,7 @@ namespace squadt {
     /**
      * @param[in] d reference to the object that contains the display layout specification
      **/
-    void tool_display::instantiate(sip::layout::tool_display& d) {
+    void tool_display::instantiate() {
       wxSizer* root = GetSizer();
 
       if (root != 0) {
@@ -272,9 +276,16 @@ namespace squadt {
 
       tool_display_mediator m(this, mediator::wrapper_aptr(new tool_display_mediator::wrapper(root)));
       
-      d.get_top_manager()->instantiate(&m);
+      current_layout->get_top_manager()->instantiate(&m);
 
       SetSizer(root);
+    }
+
+    /** \brief Set a new layout description */
+    void tool_display::set_layout(sip::layout::tool_display::sptr l) {
+      current_layout = l;
+
+      context->gui_builder.schedule_update(this);
     }
   }
 }

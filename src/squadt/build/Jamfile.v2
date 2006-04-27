@@ -1,6 +1,6 @@
 project squadt
   : source-location ../
-  : build-dir .
+  : build-dir $(BUILD_TOP)
   : default-build debug
   : requirements
     <include>../../

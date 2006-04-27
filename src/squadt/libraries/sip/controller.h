@@ -27,9 +27,6 @@ namespace sip {
         /** \brief The current protocol status */
         status                      current_status;
  
-        /** \brief The currently active tool display layout, or 0 */
-        sip::layout::tool_display   current_layout;
- 
         /** \brief The current configuration of a tool (may be limited to a main input configuration) */
         configuration::ptr          current_configuration;
  
@@ -43,10 +40,15 @@ namespace sip {
         /** \brief convenience function for use with event handlers */
         inline void set_status(status);
 
+      public:
+
+        /** \brief Function type that for communicating display layouts */
+        typedef boost::function < void (sip::layout::tool_display::sptr) > layout_accept_function;
+
       private:
  
         /** \brief Handler function to replace the current display layout with a new one */
-        void accept_layout_handler(const messenger::message_ptr&);
+        void accept_layout_handler(const messenger::message_ptr&, layout_accept_function);
  
         /** \brief Handler function to map data to the display */
         void accept_data_handler(const messenger::message_ptr&);
@@ -86,6 +88,9 @@ namespace sip {
 
         /** \brief Get the current (perhaps partial) configuration */
         configuration::ptr get_configuration() const;
+
+        /** \brief Sets a handler for layout messages using a handler function */
+        void activate_layout_handler(layout_accept_function);
     };
  
     inline const controller::capabilities& communicator::get_controller_capabilities() {

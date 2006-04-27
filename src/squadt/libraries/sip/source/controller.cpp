@@ -1,12 +1,12 @@
 #include <cstdlib>
 #include <sstream>
 
+#include <boost/bind.hpp>
+
 #include <sip/controller.h>
 #include <sip/detail/message.h>
 #include <sip/detail/common.h>
 #include <sip/detail/basic_messenger.tcc>
-
-#include <boost/bind.hpp>
 
 namespace sip {
   namespace controller {
@@ -21,8 +21,6 @@ namespace sip {
       /* set default handlers for delivery events */
       set_handler(bind(&communicator::reply_controller_capabilities, this), sip::request_controller_capabilities);
       set_handler(bind(&communicator::set_status, this, status_configured), sip::send_accept_configuration);
-      set_handler(bind(&communicator::accept_layout_handler, this, _1), sip::send_display_layout);
-      set_handler(bind(&communicator::accept_data_handler, this, _1), sip::send_display_data);
     }
  
     communicator::~communicator() {
@@ -66,7 +64,22 @@ namespace sip {
       send_message(m);
     }
  
-    void communicator::accept_layout_handler(const messenger::message_ptr&) {
+
+    /** \brief Sets a handler for layout messages using a handler function */
+    void communicator::activate_layout_handler(layout_accept_function h) {
+      set_handler(boost::bind(&communicator::accept_layout_handler, this, _1, h), sip::send_display_layout);
+    }
+
+    /**
+     * @param m pointer to the message
+     * @param h
+     **/
+    void communicator::accept_layout_handler(const messenger::message_ptr& m, layout_accept_function h) {
+      xml2pp::text_reader reader(m->to_string().c_str());
+
+      reader.read();
+
+      h(layout::tool_display::read(reader));
     }
  
     void communicator::accept_data_handler(const messenger::message_ptr&) {

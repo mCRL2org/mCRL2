@@ -101,10 +101,10 @@ namespace sip {
     }
  
     /* Send a layout specification for the display space reserved for this tool */
-    void communicator::send_display_layout(layout::tool_display&) {
-////    message m(current_display_layout.write(), sip::send_display_layout);
+    void communicator::send_display_layout(layout::tool_display& d) {
+      message m(d.write(), sip::send_display_layout);
  
-////    send_message(m);
+      send_message(m);
     }
  
     /* Send a signal that the tool is about to terminate */
@@ -116,6 +116,7 @@ namespace sip {
  
     /* Send a status report to the controller */
     void communicator::send_report(sip::report&) {
+      /* TODO */
     }
  
     void communicator::accept_interaction_data(const sip::messenger::message_ptr&) {

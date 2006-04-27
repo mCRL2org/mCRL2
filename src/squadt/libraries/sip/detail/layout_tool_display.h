@@ -1,6 +1,8 @@
 #ifndef LAYOUT_TOOL_DISPLAY
 #define LAYOUT_TOOL_DISPLAY
 
+#include <iosfwd>
+
 #include "sip/detail/basic_datatype.h"
 #include "sip/detail/layout_base.h"
 #include "sip/detail/layout_manager.h"
@@ -11,6 +13,11 @@ namespace sip {
 
     /** \brief Basic container class for controller-side layout definitions */
     class tool_display {
+      public:
+
+        /** \brief Convenience type alias to hide the shared pointer implementation */
+        typedef boost::shared_ptr < tool_display > sptr;
+
       private:
 
         /** \brief the layout manager that contains all widgits for this display */
@@ -22,15 +29,65 @@ namespace sip {
         inline const layout::manager::sptr get_top_manager() const;
 
         /** \brief Set the layout manager that contains all widgits for this display */
-        inline void set_top_manager(layout::manager::sptr&);
+        inline void set_top_manager(layout::manager::sptr);
+
+        /** \brief Write out the layout structure in XML format */
+        std::string write() const;
+
+        /** \brief Write out the layout structure in XML format */
+        void write(std::ostream&) const;
+
+        /** \brief Write out the layout structure in XML format */
+        static tool_display::sptr read(xml2pp::text_reader&);
     };
 
     inline const layout::manager::sptr tool_display::get_top_manager() const {
       return (top_manager);
     }
 
-    inline void tool_display::set_top_manager(layout::manager::sptr& m) {
+    inline void tool_display::set_top_manager(layout::manager::sptr m) {
       top_manager = m;
+    }
+    
+    inline std::string tool_display::write() const {
+      std::ostringstream output;
+ 
+      write(output);
+ 
+      return (output.str());
+    }
+
+    /**
+     * @param[out] o the stream to which to write the result
+     **/
+    inline void tool_display::write(std::ostream& o) const {
+      o << "<display-layout>";
+
+      if (top_manager.get() != 0) {
+        top_manager->write_structure(o);
+      }
+
+      o << "</display-layout>";
+    }
+
+    /**
+     * @param[in] o the xml2pp text reader from which to read
+     *
+     * \pre reader should point to a display-layout element
+     * \post reader points to after the associated end tag of the box
+     **/
+    inline tool_display::sptr tool_display::read(xml2pp::text_reader& r) {
+      tool_display::sptr display(new tool_display());
+
+      r.read();
+
+      if (!r.is_element("display-layout")) {
+        display->set_top_manager(layout::manager::sptr(layout::manager::read_structure(r)));
+      }
+
+      r.read();
+
+      return (display);
     }
   }
 }

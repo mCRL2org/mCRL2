@@ -78,10 +78,13 @@ namespace squadt {
         public:
 
           /** \brief Type for functions that is used to communicate state changes */
-          typedef boost::function < void (processor::output_status) > callback_handler;
+          typedef boost::function < void (processor::output_status) >        status_callback_function;
+
+          /** \brief Type for functions that is used to communicate state changes */
+          typedef boost::function < void (sip::layout::tool_display::sptr) > layout_callback_function;
 
           /** \brief Convenience type for hiding shared pointer implementation */
-          typedef boost::shared_ptr < reporter >                      ptr;
+          typedef boost::shared_ptr < reporter >                             ptr;
 
         public:
 
@@ -90,8 +93,11 @@ namespace squadt {
 
         private:
   
+          /** \brief Visualisation function for layout changes */
+          layout_callback_function on_layout_change;
+  
           /** \brief Visualisation function for state changes */
-          callback_handler callback;
+          status_callback_function on_status_change;
   
         private:
   
@@ -99,7 +105,10 @@ namespace squadt {
           inline void report_change(execution::process::status);
   
           /** \brief The default callback function that does nothing */
-          static void dummy(output_status);
+          static void status_change_dummy(output_status);
+
+          /** \brief The default callback function that does nothing */
+          static void layout_change_dummy(sip::layout::tool_display::sptr);
 
           /** \brief Helper function for communication with a tool, starts a new thread with pilot() */
           inline void start_pilot(bool = true);
@@ -110,7 +119,13 @@ namespace squadt {
         public:
   
           /** \brief Constructor with a callback handler */
-          inline reporter(processor&, callback_handler = dummy);
+          inline reporter(processor&);
+
+          /** \brief Constructor with a callback handler */
+          inline void set_status_handler(status_callback_function);
+
+          /** \brief Constructor with a callback handler */
+          inline void set_layout_handler(layout_callback_function);
       };
  
       /** \brief Convenience type for hiding shared pointer implementation */
@@ -165,10 +180,10 @@ namespace squadt {
     public:
  
       /** \brief Basic constructor */
-      inline processor(reporter::callback_handler = reporter::dummy);
+      inline processor();
 
       /** \brief Constructor with callback handler */
-      inline processor(tool::ptr, reporter::callback_handler = reporter::dummy);
+      inline processor(tool::ptr);
 
       /** \brief Check the inputs with respect to the outputs and adjust status accordingly */
       bool check_status(bool);
@@ -190,6 +205,9 @@ namespace squadt {
 
       /** \brief Get the object for the tool associated with this processor */
       inline const tool::ptr get_tool();
+
+      /** \brief Get the object for the tool associated with this processor */
+      inline const reporter::ptr get_monitor();
 
       /** \brief Read from XML using a libXML2 reader */
       static processor::ptr read(id_conversion_map&, xml2pp::text_reader&) throw ();

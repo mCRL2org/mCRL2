@@ -20,12 +20,14 @@ namespace squadt {
   namespace GUI {
 
     class main;
+    class tool_display;
 
     /**
      * \brief Represents the main view of a project
      **/
     class project : wxSplitterWindow {
       friend class squadt::GUI::main;
+      friend class squadt::GUI::tool_display;
 
       private:
 
@@ -64,6 +66,29 @@ namespace squadt {
             inline void associate(processor::object_descriptor*);
         };
 
+        /** \brief Performs GUI updates in idle time on behalf of other threads */
+        class builder: public wxEvtHandler {
+          friend class GUI::tool_display;
+       
+          private:
+       
+            /** \brief The list of tool displays that need to be updated */
+            std::deque < tool_display* >  tool_displays;
+       
+          private:
+       
+            /** \brief The event handler that does the actual updating */
+            void process(wxIdleEvent&);
+       
+          public:
+       
+            /** \brief Constructor */
+            builder();
+       
+            /** \brief Schedule a tool display for update */
+            void schedule_update(tool_display*);
+        };
+       
       private:
 
         /** \brief The view on processors and their interdependencies */
@@ -77,6 +102,9 @@ namespace squadt {
 
         /** \brief The list of temporary processors that exist for tool configuration purposes */
         std::vector < processor::ptr >        temporary_processors;
+
+        /** \brief Instantiation of a builder for this project */
+        builder                               gui_builder;
 
       private:
 
@@ -94,6 +122,9 @@ namespace squadt {
 
         /** \brief Helper function to add tools by category to a context menu */
         void add_to_context_menu(const storage_format&, const miscellaneous::tool_selection_helper::tools_by_category::value_type&, wxMenu*, int*);
+
+        /** \brief Add a new tool display to the process_display_view */
+        GUI::tool_display* add_tool_display();
 
       public:
 
