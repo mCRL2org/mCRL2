@@ -71,7 +71,7 @@ namespace sip {
     }
 
     /**
-     * @param[in] o the xml2pp text reader from which to read
+     * @param[in] r the xml2pp text reader from which to read
      *
      * \pre reader should point to a display-layout element
      * \post reader points to after the associated end tag of the box

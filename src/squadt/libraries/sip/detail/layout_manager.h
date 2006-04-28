@@ -60,7 +60,7 @@ namespace sip {
         /** Adds a new element to the box */
         virtual void add(element*) = 0;
 
-        /* \brief Destructor */
+        /** \brief Destructor */
         virtual ~manager() = 0;
     };
 
@@ -80,9 +80,6 @@ namespace sip {
       public:
         /** Constructor */
         inline box();
-
-        /* \brief Instantiates a layout manager and returns a shared pointer */
-        inline static manager::aptr create_aptr();
     };
 
     template < box_variant T >
@@ -142,6 +139,9 @@ namespace sip {
 
       private:
 
+        /** \brief Instantiates a layout manager and returns a shared pointer */
+        inline static manager::aptr create();
+
         /** \brief Read back a layout structure in XML format */
         inline void read_structure(xml2pp::text_reader& r);
 
@@ -149,9 +149,6 @@ namespace sip {
         inline void clear();
 
       public:
-
-        /* \brief Instantiates a layout manager and returns a shared pointer */
-        inline static manager::aptr create_aptr();
 
         /** Adds a new element to the box */
         inline void add(element*);
@@ -170,6 +167,7 @@ namespace sip {
         /** \brief Write out the layout structure in XML format */
         inline void write_structure(std::ostream&);
 
+        /** \brief Destructor */
         inline ~box();
     };
 
@@ -228,6 +226,9 @@ namespace sip {
 
       public:
 
+        /** \brief Instantiates a layout manager and returns a shared pointer */
+        inline static manager::aptr create();
+
         /** Adds a new element to the box */
         inline void add(element*);
 
@@ -245,6 +246,7 @@ namespace sip {
         /** \brief Write out the layout structure in XML format */
         inline void write_structure(std::ostream&);
 
+        /** \brief Destructor */
         inline ~box();
     };
 
@@ -268,9 +270,12 @@ namespace sip {
                                                 align(a), margin(m), visible(v) {
     }
 
-    template < box_variant T > 
-    inline manager::aptr box< T >::create_aptr() {
-      return (manager::aptr(new typename box< T >::box()));
+    inline manager::aptr box< vertical >::create() {
+      return (manager::aptr(new box< vertical >::box()));
+    }
+
+    inline manager::aptr box< horizontal >::create() {
+      return (manager::aptr(new box< horizontal >::box()));
     }
 
     inline void box< vertical >::clear() {
@@ -364,7 +369,7 @@ namespace sip {
     }
 
     /**
-     * @param[in] o the xml2pp text reader from which to read
+     * @param[in] r the xml2pp text reader from which to read
      *
      * \pre reader should point to a box-layout-manager element (of type horizontal)
      * \post reader points to after the associated end tag of the box
@@ -385,7 +390,7 @@ namespace sip {
     }
 
     /**
-     * @param[in] o the xml2pp text reader from which to read
+     * @param[in] r the xml2pp text reader from which to read
      *
      * \pre reader should point to a box-layout-manager element (of type horizontal)
      * \post reader points to after the associated end tag of the box

@@ -139,7 +139,7 @@ namespace squadt {
       if (0 < cr.margin.top) {
         sizer->AddSpacer(cr.margin.bottom);
       }
-
+std::cerr << "sizer " << sizer << std::endl;
       sizer->Add(target, 0, flags, (cr.margin.left + cr.margin.right) >> 1);
 
       if (0 < cr.margin.bottom) {

@@ -58,7 +58,7 @@ namespace sip {
       }
 
       /**
-       * @param[in] o the xml2pp text reader from which to read
+       * @param[in] r the xml2pp text reader from which to read
        *
        * \pre reader should point to a button element
        * \post reader points to after the associated end tag of the box
@@ -121,7 +121,7 @@ namespace sip {
       }
 
       /**
-       * @param[in] o the xml2pp text reader from which to read
+       * @param[in] r the xml2pp text reader from which to read
        *
        * \pre reader should point to a button element
        * \post reader points to after the associated end tag of the box
@@ -208,7 +208,7 @@ namespace sip {
       }
 
       /**
-       * @param[in] o the xml2pp text reader from which to read
+       * @param[in] r the xml2pp text reader from which to read
        *
        * \pre reader should point to a radio-button element
        * \post reader points to after the associated end tag of the box
@@ -284,7 +284,7 @@ namespace sip {
       }
 
       /**
-       * @param[in] o the xml2pp text reader from which to read
+       * @param[in] r the xml2pp text reader from which to read
        *
        * \pre reader should point to a progress-bar element
        * \post reader points to after the associated end tag of the box
@@ -363,7 +363,7 @@ namespace sip {
       }
 
       /**
-       * @param[in] o the xml2pp text reader from which to read
+       * @param[in] r the xml2pp text reader from which to read
        *
        * \pre reader should point to a text-field element
        * \post reader points to after the associated end tag of the box
