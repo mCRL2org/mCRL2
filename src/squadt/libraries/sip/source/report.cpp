@@ -17,7 +17,7 @@ namespace sip {
 
       /* Sanity check... */
       if (std::search(error.begin(), error.end(), pattern.begin(), pattern.end()) != error.end()) {
-        throw (sip::exception(exception_identifier::message_forbidden_content, pattern));
+        throw (new sip::exception(exception_identifier::message_forbidden_content, pattern));
       }
 
       output << "<error>" << error << "</error>";
@@ -29,7 +29,7 @@ namespace sip {
 
       /* Sanity check... */
       if (std::search(comment.begin(), comment.end(), pattern.begin(), pattern.end()) != comment.end()) {
-        throw (sip::exception(exception_identifier::message_forbidden_content, pattern));
+        throw (new sip::exception(exception_identifier::message_forbidden_content, pattern));
       }
 
       output << "<comment>" << comment << "</comment>";

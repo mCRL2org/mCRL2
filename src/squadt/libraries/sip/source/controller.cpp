@@ -79,7 +79,6 @@ namespace sip {
 
       reader.read();
 
-std::cerr << "Read(" << m->to_string().c_str() << ")\n" << std::endl;
       h(layout::tool_display::read(reader));
     }
  

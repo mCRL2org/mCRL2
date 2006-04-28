@@ -51,13 +51,15 @@ namespace sip {
       else if (name == "text-field") {
         new_element = element::aptr(new text_field());
       }
+
+      if (new_element.get() != 0) {
+        /* Read abstract element specific data */
+        new_element->read(r);
+        new_element->read_structure(r);
+      }
       else { /* Assume layout manager */
         new_element = manager::static_read_structure(r);
       }
-
-      /* Read abstract element specific data */
-      new_element->read(r);
-      new_element->read_structure(r);
 
       return (new_element);
     }
@@ -78,6 +80,9 @@ namespace sip {
         else {
           new_element = manager::aptr(new box_horizontal::box());
         }
+      }
+      else {
+        throw (new sip::exception(exception_identifier::unknown_layout_element, name));
       }
 
       /* Read abstract element specific data */

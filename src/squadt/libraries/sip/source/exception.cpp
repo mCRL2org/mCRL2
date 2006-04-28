@@ -13,7 +13,8 @@ namespace sip {
     "Unknown type encountered for `%1%' in context `%2%'.",
     "Controller capabilities have not yet been communicated.",
     "Parse error!",
-    "Parse error: expected `%1%' before `%2%'."
+    "Parse error: expected `%1%' before `%2%'.",
+    "Encountered an unknown layout element: `%1%'"
   };
 }
 

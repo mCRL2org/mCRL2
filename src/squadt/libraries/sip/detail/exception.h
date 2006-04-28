@@ -17,7 +17,8 @@ namespace sip {
       message_unknown_type,               ///< \brief the type encountered in a configuration specification is unknown 
       controller_capabilities_unknown,    ///< \brief the controller capabilities are not known yet
       cli_parse_error,                    ///< \brief a parse error occurred on a command line argument
-      cli_parse_error_expected            ///< \brief a parse error occurred on a command line argument (message with expected clause)
+      cli_parse_error_expected,           ///< \brief a parse error occurred on a command line argument (message with expected clause)
+      unknown_layout_element              ///< \brief a layout description contained an unknown layout element
     };
   }
 

@@ -27,21 +27,35 @@ namespace squadt {
       
       public:
 
+        /** \brief Wrapper around a wxWindow derived class */
         class wrapper : public sip::layout::mediator::wrapper {
-
           private:
+
+            /** \brief A wxWindow or wxSizer derived object stored in the */
             wxObject* target;
+
+            /** \brief Whether that what is wrapped is a window */
+            bool is_window;
 
           public:
 
-            /** \brief Constructor */
-            inline wrapper(wxObject*);
+            /** \brief Constructor for wrapping a window */
+            inline wrapper(wxWindow*);
 
-            /** \brief Get target cast to a sizer pointer */
-            inline wxSizer* get_sizer() const;
+            /** \brief Constructor for wrapping a sizer */
+            inline wrapper(wxSizer*);
 
             /** \brief Get target cast to a window pointer */
             inline wxWindow* get_window() const;
+
+            /** \brief Get target cast to a window pointer */
+            inline wxSizer*  get_sizer() const;
+
+            /** \brief Whether a window is wrapped */
+            inline bool wraps_window() const;
+
+            /** \brief Whether a sizer is wrapped */
+            inline bool wraps_sizer() const;
         };
 
       private:
@@ -97,17 +111,29 @@ namespace squadt {
     /**
      * @param w the window or sizer to which to attach elements
      **/
-    inline tool_display_mediator::wrapper::wrapper(wxObject* w) : target(w) {
+    inline tool_display_mediator::wrapper::wrapper(wxWindow* w) : target(w), is_window(true) {
     }
 
-    /** \brief Get target cast to a sizer pointer */
-    inline wxSizer* tool_display_mediator::wrapper::get_sizer() const {
+    /**
+     * @param w the window or sizer to which to attach elements
+     **/
+    inline tool_display_mediator::wrapper::wrapper(wxSizer* s) : target(s), is_window(false) {
+    }
+
+    inline wxWindow* tool_display_mediator::wrapper::get_window() const {
+      return (static_cast < wxWindow* > (target));
+    }
+
+    inline wxSizer*  tool_display_mediator::wrapper::get_sizer() const {
       return (static_cast < wxSizer* > (target));
     }
 
-    /** \brief Get target cast to a window pointer */
-    inline wxWindow* tool_display_mediator::wrapper::get_window() const {
-      return (static_cast < wxWindow* > (target));
+    inline bool tool_display_mediator::wrapper::wraps_window() const {
+      return (is_window);
+    }
+
+    inline bool tool_display_mediator::wrapper::wraps_sizer() const {
+      return (!is_window);
     }
 
     /**
@@ -115,8 +141,8 @@ namespace squadt {
      * @param c layout constraints
      **/
     void tool_display_mediator::attach_to_vertical_box(mediator::wrapper_aptr d, sip::layout::constraints const* c) {
-      wxWindow* target = reinterpret_cast < wxWindow* > (d.get());
-      int       flags  = wxLEFT|wxRIGHT;
+      wrapper* sd     = static_cast < wrapper* > (d.get());
+      int      flags  = wxLEFT|wxRIGHT;
 
       layout::box_vertical::constraints const& cr = *(static_cast < layout::box_vertical::constraints const* > (c));
 
@@ -134,20 +160,27 @@ namespace squadt {
           break;
       }
 
-      wxSizer* sizer = static_cast < tool_display_mediator::wrapper* > (data.get())->get_sizer();
+      wxSizer* sizer = static_cast < wrapper* > (data.get())->get_sizer();
 
       if (0 < cr.margin.top) {
         sizer->AddSpacer(cr.margin.bottom);
       }
-std::cerr << "sizer " << sizer << std::endl;
-      sizer->Add(target, 0, flags, (cr.margin.left + cr.margin.right) >> 1);
+
+      wxSizerItem* new_sizer_item;
+
+      if (sd->wraps_window()) {
+        new_sizer_item = sizer->Add(sd->get_window(), 0, flags, (cr.margin.left + cr.margin.right) >> 1);
+      }
+      else {
+        new_sizer_item = sizer->Add(sd->get_sizer(), 0, flags, (cr.margin.left + cr.margin.right) >> 1);
+      }
 
       if (0 < cr.margin.bottom) {
         sizer->AddSpacer(cr.margin.bottom);
       }
 
       if (cr.visible == sip::layout::hidden) {
-        sizer->Show(target, false);
+        new_sizer_item->Show(false);
       }
     }
 
@@ -156,10 +189,10 @@ std::cerr << "sizer " << sizer << std::endl;
      * @param c layout constraints
      **/
     void tool_display_mediator::attach_to_horizontal_box(wrapper_aptr d, sip::layout::constraints const* c) {
-      wxWindow* target = reinterpret_cast < wxWindow* > (d.get());
-      int       flags  = wxTOP|wxBOTTOM;
+      wrapper* sd     = static_cast < wrapper* > (d.get());
+      int      flags  = wxTOP|wxBOTTOM;
 
-      sip::layout::box < horizontal >::constraints const& cr = *(static_cast < sip::layout::box < horizontal >::constraints const* > (c));
+      sip::layout::box < horizontal >::constraints const& cr = *(static_cast < layout::box_horizontal::constraints const* > (c));
 
       switch (cr.align) {
         case sip::layout::box < sip::layout::horizontal >::top:
@@ -173,20 +206,27 @@ std::cerr << "sizer " << sizer << std::endl;
           break;
       }
 
-      wxSizer* sizer = static_cast < tool_display_mediator::wrapper* > (data.get())->get_sizer();
+      wxSizer* sizer = static_cast < wrapper* > (data.get())->get_sizer();
 
       if (0 < cr.margin.left) {
         sizer->AddSpacer(cr.margin.left);
       }
 
-      sizer->Add(target, 0, flags, (cr.margin.top + cr.margin.bottom) >> 1);
+      wxSizerItem* new_sizer_item;
+
+      if (sd->wraps_window()) {
+        new_sizer_item = sizer->Add(sd->get_window(), 0, flags, (cr.margin.top + cr.margin.bottom) >> 1);
+      }
+      else {
+        new_sizer_item = sizer->Add(sd->get_sizer(), 0, flags, (cr.margin.top + cr.margin.bottom) >> 1);
+      }
 
       if (0 < cr.margin.right) {
         sizer->AddSpacer(cr.margin.right);
       }
 
       if (cr.visible == sip::layout::hidden) {
-        sizer->Show(target, false);
+        new_sizer_item->Show(false);
       }
     }
 
@@ -294,7 +334,7 @@ std::cerr << "sizer " << sizer << std::endl;
     /** \brief Set a new layout description */
     void tool_display::set_layout(sip::layout::tool_display::sptr l) {
       current_layout = l;
-current_layout->write(std::cerr);
+
       context->gui_builder.schedule_update(this);
     }
   }
