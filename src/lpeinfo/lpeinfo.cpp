@@ -162,12 +162,9 @@ int main(int ac, char** av)
       layout::tool_display display;
 
       /* Create and add the top layout manager */
-      layout::manager::sptr layout_manager = layout::box < horizontal >::box::create_sptr();
+      layout::manager::aptr layout_manager = layout::box < horizontal >::box::create();
 
       display.set_top_manager(layout_manager);
-
-      /* Add labels */
-      layout_manager->add(new label("input read from: " + file_name));
 
       /* First column */
       layout::manager* left = new layout::box < vertical >::box();
