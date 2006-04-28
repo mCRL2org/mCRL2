@@ -78,7 +78,7 @@ private:
   set< data_variable >        p_foundFreeVars;       
 
   //Only used by detectVar
-  set<data_variable>          sum_vars;
+  set< data_expression >      sum_vars;
  
 public:
   ConstelmObj()
@@ -198,19 +198,22 @@ private:
     bool differs = false;
     for(vector< data_assignment>::iterator i= p_currentState.begin(); i != p_currentState.end() ;i++){
       int index = p_lookupIndex[i->lhs()]; 
+      cerr << p_currentState.at(index).pp() << " vs. " << p_nextState.at(index).pp();
       if (p_V.find(index) == p_V.end()) { 
         if (inFreeVarList(i->rhs())) { 
-          if (p_variableList.find(p_nextState.at(index).rhs()) != p_variableList.end()){
-            p_V.insert(p_lookupIndex[i->lhs()]); 
+          if (!inFreeVarList( p_nextState.at(index).rhs() )){
+	    ATtablePut(safeguard,aterm(p_nextState.at(index)),aterm(p_nextState.at(index)));
+            p_newCurrentState.at(index) = p_nextState.at(index) ;
+            p_currentState.at(index) = p_nextState.at(index);  
+            if (p_variableList.find(p_nextState.at(index).rhs()) != p_variableList.end()){
+              p_V.insert(p_lookupIndex[i->lhs()]); 
             //----------          Debug
             //            cerr << "\033[34m OLD:    "<< i->pp() << endl;
             //            cerr << "\033[32m NEW:    "<< p_nextState.at(index).pp() << endl;
             //            cerr << "\033[0m";
             //----------          Debug
-          };
-	  ATtablePut(safeguard,aterm(p_nextState.at(index)),aterm(p_nextState.at(index)));
-          p_newCurrentState.at(index) = p_nextState.at(index) ;
-          p_currentState.at(index) = p_nextState.at(index);  
+            }
+	  }
         } else {
           if (!inFreeVarList( p_nextState.at(index).rhs() )){
              if (!compare(i->rhs(), p_nextState.at(index).rhs())){
@@ -221,6 +224,7 @@ private:
                 //                cerr << "\033[0m";
                 //----------          Debug
                 p_newCurrentState.at(index) = newExpression(*i) ;
+		p_currentState.at(index) = p_currentState.at(index);
 	  	ATtablePut(safeguard,aterm(p_newCurrentState.at(index)),aterm(p_newCurrentState.at(index)));
                 p_V.insert(index);
                 p_variableList.insert(p_newCurrentState.at(index).rhs());
@@ -230,6 +234,7 @@ private:
          }
 
       } 
+      cerr << " -> " << p_newCurrentState.at(index).pp() << endl;
     }
     return !differs;
   }
@@ -244,7 +249,7 @@ private:
      if ( p_V.find(i) == p_V.end() ) {
        // ...and contains a summation variable...
        data_expression t = p_currentState.at(i).rhs();
-       if ( recDetectVar(t, sum_vars) ) {
+       if ( recDetectVar(t, sum_vars) || recDetectVar(t, p_variableList) ) {
          // ...is actually a variable parameter
          p_V.insert(i);
        }
@@ -253,10 +258,10 @@ private:
   }
 
   // Return whether or not a summation variable occurs in a data term
-  bool recDetectVar(data_expression t, set<data_variable> &S)
+  bool recDetectVar(data_expression t, set<data_expression> &S)
   {
      bool b = false;
-     if( gsIsDataVarId(t) && (S.find(data_variable((ATermAppl) t)) != S.end()) ){
+     if( gsIsDataVarId(t) && (S.find(t) != S.end()) ){
        b = true;
      }
      if ( gsIsDataAppl(t) ) {
@@ -466,15 +471,10 @@ public:
     for(set< int >::iterator i = p_S.begin(); i != p_S.end(); i++){
       constantPP.push_back(p_currentState.at(*i));
     }
-    
-    vector< data_assignment > variablePP;
-    for(set< int >::iterator i = p_V.begin(); i != p_V.end(); i++){
-      variablePP.push_back(p_currentState.at(*i));
-    }
-    
+
     vector< data_variable > variablePPvar;
     for(set< int >::iterator i = p_V.begin(); i != p_V.end(); i++){
-      variablePPvar.push_back(p_currentState.at(*i).lhs());
+      variablePPvar.push_back(p_initAssignments.at(*i).lhs());
     }
 
     vector< data_expression > variablePPexpr;
@@ -765,7 +765,11 @@ public:
     summand_list::iterator sums_e = sums.end();
     for (summand_list::iterator i = sums_b; i != sums_e; i++)
     {
-      sum_vars.insert(i->summation_variables().begin(),i->summation_variables().end());
+//      sum_vars.insert(i->summation_variables().begin(),i->summation_variables().end());
+      for (data_variable_list::iterator j = i->summation_variables().begin(); j != i->summation_variables().end(); j++)
+      {
+        sum_vars.insert(data_expression(*j));
+      }
     }
 
     int n = p_spec.initial_assignments().size();
@@ -814,7 +818,7 @@ public:
       //---------------------------------------------------------------
 
       // remove detected constants in case the value contains summation
-      // variables
+      // variables or non constant parameter variables
       {
         int n = p_V.size();
         detectVar(p_lpe.process_parameters().size());
