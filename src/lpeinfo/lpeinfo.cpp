@@ -20,6 +20,7 @@
 
 //Boost
 #include <boost/program_options.hpp>
+#include <boost/filesystem/convenience.hpp>
 
 //mCRL2
 #include <atermpp/aterm.h>
@@ -164,31 +165,33 @@ int main(int ac, char** av)
       /* Create and add the top layout manager */
       layout::manager::aptr layout_manager = layout::box < horizontal >::box::create();
 
-      display.set_top_manager(layout_manager);
-
       /* First column */
-      layout::manager* left = new layout::box < vertical >::box();
+      layout::box_vertical* left_column = new layout::box_vertical::box();
 
-      left->add(new label("Input read from              :"));
-      left->add(new label("Number of summands           :"));
-      left->add(new label("Number of free variables     :"));
-      left->add(new label("Number of process parameters :"));
-      left->add(new label("Number of actions            :"));
+      layout::box_vertical::alignment a = box_vertical::left;
+
+      left_column->add(new label("Input read from :"), a);
+      left_column->add(new label("Summands (#)          :"), a);
+      left_column->add(new label("Free variables (#)    :"), a);
+      left_column->add(new label("Process parameters (#):"), a);
+      left_column->add(new label("Actions (#)           :"), a);
 
       /* Second column */
-      layout::manager* right = new layout::box < vertical >::box();
+      layout::box_vertical* right_column = new layout::box_vertical::box();
 
       boost::format c("%u");
 
-      right->add(new label(file_name));
-      right->add(new label(boost::str(c % lpe.summands().size())));
-      right->add(new label(boost::str(c % (lpe_specification.initial_free_variables().size() + lpe.free_variables().size()))));
-      right->add(new label(boost::str(c % lpe.process_parameters().size())));
-      right->add(new label(boost::str(c % lpe.actions().size())));
+      right_column->add(new label(boost::filesystem::path(file_name).leaf()), a);
+      right_column->add(new label(boost::str(c % lpe.summands().size())), a);
+      right_column->add(new label(boost::str(c % (lpe_specification.initial_free_variables().size() + lpe.free_variables().size()))), a);
+      right_column->add(new label(boost::str(c % lpe.process_parameters().size())), a);
+      right_column->add(new label(boost::str(c % lpe.actions().size())), a);
 
       /* Attach columns*/
-      layout_manager->add(left);
-      layout_manager->add(right);
+      layout_manager->add(left_column);
+      layout_manager->add(right_column);
+
+      display.set_top_manager(layout_manager);
 
       tc.send_display_layout(display);
     }

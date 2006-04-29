@@ -18,6 +18,7 @@ exe lpeinfo
          /libraries/aterm//aterm
          /libraries/sip//sipt
          /boost/program_options//boost_program_options
+         /boost/filesystem//boost_filesystem
        : <dependency>/root//revision.h
          <define>ENABLE_SQUADT_CONNECTIVITY
          <include>.
