@@ -5,9 +5,9 @@
 #include <boost/filesystem/path.hpp>
 
 #include <wx/wx.h>
-#include <wx/panel.h>
 #include <wx/string.h>
 #include <wx/splitter.h>
+#include <wx/scrolwin.h>
 #include <wx/treectrl.h>
 
 #include "processor.h"
@@ -95,7 +95,7 @@ namespace squadt {
         wxTreeCtrl*                           processor_view;
 
         /** \brief The view on progress report regions for tools */
-        wxPanel*                              process_display_view;
+        wxScrolledWindow*                     process_display_view;
 
         /** \brief The location (incomplete path) to project directory the project name is the basename */
         boost::shared_ptr < project_manager > manager;

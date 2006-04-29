@@ -350,6 +350,7 @@ namespace squadt {
         Show(true);
 
         GetParent()->Layout();
+        GetParent()->FitInside();
       }
       catch (...) {
         /* Consider every exception a failure to correctly read the layout, and bail */

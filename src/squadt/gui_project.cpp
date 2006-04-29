@@ -93,17 +93,19 @@ namespace squadt {
     }
 
     void project::build() {
-      processor_view       = new wxTreeCtrl(this, wxID_ANY, wxDefaultPosition, wxDefaultSize, wxVSCROLL|wxTR_HAS_BUTTONS|wxTR_SINGLE|wxSUNKEN_BORDER);
-      process_display_view = new wxPanel(this, wxID_ANY, wxDefaultPosition, wxDefaultSize, wxVSCROLL|wxTAB_TRAVERSAL);
-
-      process_display_view->SetSizer(new wxBoxSizer(wxVERTICAL));
-
-      processor_view->SetImageList(format_icon_list);
-      processor_view->AddRoot(wxT("Store"));
+      process_display_view = new wxScrolledWindow(this, wxID_ANY, wxDefaultPosition, wxDefaultSize, wxVSCROLL|wxTAB_TRAVERSAL);
+      processor_view       = new wxTreeCtrl(this, wxID_ANY, wxDefaultPosition, wxDefaultSize,
+                                                        wxTR_HAS_BUTTONS|wxTR_SINGLE|wxSUNKEN_BORDER);
 
       SetMinimumPaneSize(GetParent()->GetSize().GetWidth() / 2);
 
       SplitVertically(processor_view, process_display_view);
+
+      process_display_view->SetSizer(new wxBoxSizer(wxVERTICAL));
+      process_display_view->SetScrollRate(10, 10);
+
+      processor_view->SetImageList(format_icon_list);
+      processor_view->AddRoot(wxT("Store"));
 
       /* Connect event handlers */
       processor_view->Connect(wxEVT_COMMAND_TREE_ITEM_MENU, wxTreeEventHandler(project::on_tree_item_activate), 0, this);
