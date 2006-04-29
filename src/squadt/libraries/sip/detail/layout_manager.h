@@ -54,11 +54,14 @@ namespace sip {
 
       public:
 
+        /** \brief Adds a new element to the box */
+        virtual void add(element*) = 0;
+
         /** \brief Recursively builds the state of the object */
         static aptr static_read_structure(xml2pp::text_reader&); 
 
-        /** Adds a new element to the box */
-        virtual void add(element*) = 0;
+        /** \brief Instantiate a layout element, through a mediator */
+        virtual mediator::wrapper_aptr instantiate(layout::mediator*) const = 0;
 
         /** \brief Destructor */
         virtual ~manager() = 0;
@@ -139,9 +142,6 @@ namespace sip {
 
       private:
 
-        /** \brief Instantiates a layout manager and returns a shared pointer */
-        inline static manager::aptr create();
-
         /** \brief Read back a layout structure in XML format */
         inline void read_structure(xml2pp::text_reader& r);
 
@@ -150,6 +150,12 @@ namespace sip {
 
       public:
 
+        /** \brief Constructor */
+        inline box();
+
+        /** \brief Instantiates a layout manager and returns a shared pointer */
+        inline static manager::aptr create();
+
         /** Adds a new element to the box */
         inline void add(element*);
 
@@ -157,7 +163,7 @@ namespace sip {
         inline void add(element*, constraints const&);
 
         /** Adds a new element to the box */
-        inline void add(element*, alignment const& default_alignment,
+        inline void add(element*, alignment const&,
                                   margins const& = manager::default_margins,
                                   visibility const& = manager::default_visibility);
 
@@ -226,6 +232,9 @@ namespace sip {
 
       public:
 
+        /** \brief Constructor */
+        inline box();
+
         /** \brief Instantiates a layout manager and returns a shared pointer */
         inline static manager::aptr create();
 
@@ -270,6 +279,12 @@ namespace sip {
                                                 align(a), margin(m), visible(v) {
     }
 
+    inline box< vertical >::box() {
+    }
+
+    inline box< horizontal >::box() {
+    }
+
     inline manager::aptr box< vertical >::create() {
       return (manager::aptr(new box< vertical >::box()));
     }
@@ -301,7 +316,8 @@ namespace sip {
      * @param[in] e a pointer to a layout element
      **/
     inline void box< horizontal >::add(element* e) {
-      children.push_back(children_list::value_type(e, default_constraints));
+      children_list::value_type c(e, default_constraints);
+      children.push_back(c);
     }
 
     /**

@@ -93,15 +93,15 @@ namespace squadt {
     }
 
     void project::build() {
-      processor_view       = new wxTreeCtrl(this, wxID_ANY, wxDefaultPosition, wxDefaultSize, wxTR_HAS_BUTTONS|wxTR_SINGLE|wxSUNKEN_BORDER);
-      process_display_view = new wxPanel(this, wxID_ANY);
+      processor_view       = new wxTreeCtrl(this, wxID_ANY, wxDefaultPosition, wxDefaultSize, wxVSCROLL|wxTR_HAS_BUTTONS|wxTR_SINGLE|wxSUNKEN_BORDER);
+      process_display_view = new wxPanel(this, wxID_ANY, wxDefaultPosition, wxDefaultSize, wxVSCROLL|wxTAB_TRAVERSAL);
 
       process_display_view->SetSizer(new wxBoxSizer(wxVERTICAL));
 
       processor_view->SetImageList(format_icon_list);
       processor_view->AddRoot(wxT("Store"));
 
-      SetMinimumPaneSize(150);
+      SetMinimumPaneSize(GetParent()->GetSize().GetWidth() / 2);
 
       SplitVertically(processor_view, process_display_view);
 
@@ -120,7 +120,7 @@ namespace squadt {
 
       GUI::tool_display* display = new GUI::tool_display(process_display_view, this);
 
-      s->Add(display, 0, wxEXPAND|wxALL, 2);
+      s->Insert(0, display, 0, wxEXPAND|wxALL, 2);
 
       s->Layout();
 

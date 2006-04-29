@@ -26,10 +26,16 @@ namespace squadt {
         /** \brief Abstract description of the layout of this panel */
         sip::layout::tool_display::sptr current_layout;
 
+        /** \brief Sizer that contains the content part */
+        wxSizer*                        content;
+
       private:
 
         /** \brief Builds the specified layout within this window */
         void instantiate();
+
+        /** \brief Intialises widgets */
+        void build();
 
       public:
 
@@ -37,7 +43,7 @@ namespace squadt {
         inline tool_display(wxWindow*, project*);
 
         /** \brief Removes itself from the parent window */
-        inline void remove();
+        void remove();
 
         /** \brief Set a new layout description */
         void set_layout(sip::layout::tool_display::sptr);
@@ -49,16 +55,11 @@ namespace squadt {
      **/
     inline tool_display::tool_display(wxWindow* p, GUI::project* c) :
                                 wxPanel(p, wxID_ANY, wxDefaultPosition, wxDefaultSize, wxRAISED_BORDER),
-                                context(c) {
-    }
+                                context(c), content(0) {
 
-    inline void tool_display::remove() {
-      wxSizer* s = GetParent()->GetSizer();
-      
-      s->Detach(this);
-      s->Layout();
+      build();
 
-      Destroy();
+      Show(false);
     }
   }
 }

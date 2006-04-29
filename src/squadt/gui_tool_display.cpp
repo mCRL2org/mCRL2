@@ -260,7 +260,6 @@ namespace squadt {
     
     /**
      * @param[in] s the text of the label
-     * @param[in] a the function that is used to attach the element
      **/
     mediator::wrapper_aptr tool_display_mediator::build_label(std::string const& s) {
       wxStaticText* t = new wxStaticText(current_window, wxID_ANY, wxString(s.c_str(), wxConvLocal));
@@ -270,7 +269,6 @@ namespace squadt {
     
     /**
      * @param[in] s the text of the label
-     * @param[in] a the function that is used to attach the element
      **/
     mediator::wrapper_aptr tool_display_mediator::build_button(std::string const& s) {
       wxButton* t = new wxButton(current_window, wxID_ANY, wxString(s.c_str(), wxConvLocal));
@@ -280,7 +278,6 @@ namespace squadt {
     
     /**
      * @param[in] s the text of the label
-     * @param[in] a the function that is used to attach the element
      **/
     mediator::wrapper_aptr tool_display_mediator::build_radio_button(std::string const& s) {
       wxRadioButton* t = new wxRadioButton(current_window, wxID_ANY, wxString(s.c_str(), wxConvLocal));
@@ -292,7 +289,6 @@ namespace squadt {
      * @param[in] min the minimum value (if supported)
      * @param[in] max the maximum value (if supported)
      * @param[in] max the current value
-     * @param[in] a the function that is used to attach the element
      **/
     mediator::wrapper_aptr tool_display_mediator::build_progress_bar(unsigned int const& min, unsigned int const& max, unsigned int const& c) {
       wxGauge* t = new wxGauge(current_window, wxID_ANY, max - min);
@@ -304,7 +300,6 @@ namespace squadt {
     
     /**
      * @param[in] s the text of the label
-     * @param[in] a the function that is used to attach the element
      **/
     mediator::wrapper_aptr tool_display_mediator::build_text_field(std::string const& s) {
       wxTextCtrl* t = new wxTextCtrl(current_window, wxID_ANY, wxString(s.c_str(), wxConvLocal));
@@ -315,20 +310,51 @@ namespace squadt {
     tool_display_mediator::~tool_display_mediator() {
     }
 
-    void tool_display::instantiate() {
-      wxSizer* root = GetSizer();
+    void tool_display::build() {
+      wxSizer* root(new wxBoxSizer(wxVERTICAL));
 
-      if (root != 0) {
-        delete root;
-      }
-
-      root = new wxBoxSizer(wxVERTICAL);
-
-      tool_display_mediator m(this, mediator::wrapper_aptr(new tool_display_mediator::wrapper(root)));
-      
-      current_layout->get_top_manager()->instantiate(&m);
+      /* Set minimum dimensions */
+      root->SetMinSize(GetClientSize().GetWidth(), 50);
 
       SetSizer(root);
+    }
+
+    void tool_display::remove() {
+      wxSizer* s = GetParent()->GetSizer();
+      
+      s->Detach(this);
+      s->Layout();
+
+      Destroy();
+    }
+
+    void tool_display::instantiate() {
+      if (content != 0) {
+        GetSizer()->Detach(content);
+
+        delete content;
+      }
+
+      std::auto_ptr < wxSizer > root(new wxBoxSizer(wxVERTICAL));
+
+      tool_display_mediator m(this, mediator::wrapper_aptr(new tool_display_mediator::wrapper(root.get())));
+      
+      try {
+        content = static_cast < tool_display_mediator::wrapper* >
+                                                        (current_layout->instantiate(&m).get())->get_sizer();
+        GetSizer()->Add(content, 1, wxALL, 2);
+
+        content->RecalcSizes();
+        content->Layout();
+
+        Show(true);
+
+        GetParent()->Layout();
+      }
+      catch (...) {
+        /* Consider every exception a failure to correctly read the layout, and bail */
+        remove();
+      }
     }
 
     /** \brief Set a new layout description */

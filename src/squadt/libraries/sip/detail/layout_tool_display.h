@@ -39,6 +39,8 @@ namespace sip {
 
         /** \brief Write out the layout structure in XML format */
         static tool_display::sptr read(xml2pp::text_reader&);
+
+        inline mediator::wrapper_aptr instantiate(mediator* m) const;
     };
 
     inline layout::manager const* tool_display::get_top_manager() const {
@@ -86,6 +88,10 @@ namespace sip {
       }
 
       return (display);
+    }
+
+    inline mediator::wrapper_aptr tool_display::instantiate(mediator* m) const {
+      return (top_manager->instantiate(m));
     }
   }
 }
