@@ -144,15 +144,15 @@ namespace squadt {
       wrapper* sd     = static_cast < wrapper* > (d.get());
       int      flags  = wxLEFT|wxRIGHT;
 
-      layout::box_vertical::constraints const& cr = *(static_cast < layout::box_vertical::constraints const* > (c));
+      layout::constraints const& cr = *(static_cast < layout::constraints const* > (c));
 
       using sip::layout::box;
 
-      switch (cr.align) {
-        case layout::box < vertical >::left:
+      switch (cr.align_vertical) {
+        case layout::left:
           flags |= wxALIGN_LEFT;
           break;
-        case layout::box < vertical >::right:
+        case layout::right:
           flags |= wxALIGN_RIGHT;
           break;
         default: /* center */
@@ -192,13 +192,13 @@ namespace squadt {
       wrapper* sd     = static_cast < wrapper* > (d.get());
       int      flags  = wxTOP|wxBOTTOM;
 
-      sip::layout::box < horizontal >::constraints const& cr = *(static_cast < layout::box_horizontal::constraints const* > (c));
+      sip::layout::constraints const& cr = *(static_cast < layout::constraints const* > (c));
 
-      switch (cr.align) {
-        case sip::layout::box < sip::layout::horizontal >::top:
+      switch (cr.align_horizontal) {
+        case sip::layout::top:
           flags |= wxALIGN_TOP;
           break;
-        case sip::layout::box < sip::layout::horizontal >::bottom:
+        case sip::layout::bottom:
           flags |= wxALIGN_BOTTOM;
           break;
         default: /* center */

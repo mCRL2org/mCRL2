@@ -1,7 +1,7 @@
 #ifndef LAYOUT_BASE_H
 #define LAYOUT_BASE_H
 
-#include <iosfwd>
+#include <iostream>
 #include <memory>
 
 #include <xml2pp/text_reader.h>
@@ -26,6 +26,9 @@ namespace sip {
         typedef std::auto_ptr < element > aptr;
 
       protected:
+
+        /** \brief writes the element level attributes to stream */
+        inline void write_attributes(std::ostream&);
 
         /** \brief Resets private members to defaults */
         inline void clear();
@@ -77,6 +80,15 @@ namespace sip {
 
     inline void element::clear() {
       id = 0;
+    }
+
+    /**
+     * @param[in] o the stream to write to
+     **/
+    inline void element::write_attributes(std::ostream& o) {
+      if (id != 0) {
+        o << " id=\"" << id << "\"";
+      }
     }
 
     inline void element::set_id(sip::object::identifier& i) {

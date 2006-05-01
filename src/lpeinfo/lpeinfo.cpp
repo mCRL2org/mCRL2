@@ -163,12 +163,12 @@ int main(int ac, char** av)
       layout::tool_display display;
 
       /* Create and add the top layout manager */
-      layout::manager::aptr layout_manager = layout::box < horizontal >::box::create();
+      layout::manager::aptr layout_manager = layout::horizontal_box::create();
 
       /* First column */
-      layout::box_vertical* left_column = new layout::box_vertical::box();
+      layout::vertical_box* left_column = new layout::vertical_box();
 
-      layout::box_vertical::alignment a = box_vertical::left;
+      layout::vertical_box::alignment a = layout::left;
 
       left_column->add(new label("Input read from :"), a);
       left_column->add(new label("Summands (#)          :"), a);
@@ -177,7 +177,7 @@ int main(int ac, char** av)
       left_column->add(new label("Actions (#)           :"), a);
 
       /* Second column */
-      layout::box_vertical* right_column = new layout::box_vertical::box();
+      layout::vertical_box* right_column = new layout::vertical_box();
 
       boost::format c("%u");
 

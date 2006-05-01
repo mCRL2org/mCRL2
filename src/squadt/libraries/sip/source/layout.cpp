@@ -7,18 +7,11 @@
 namespace sip {
   namespace layout {
 
-    margins    manager::default_margins = {0,0,0,0};
+    margins       manager::default_margins = {0,0,0,0};
 
-    visibility manager::default_visibility = visible;
+    visibility    manager::default_visibility = visible;
 
-    box< vertical >::alignment     box< vertical >::default_alignment = box< vertical >::center;
-    box< horizontal >::alignment   box< horizontal >::default_alignment = box< horizontal >::center;
-
-    box< vertical >::constraints   box< vertical >::default_constraints(box< vertical >::default_alignment,
-                                        manager::default_margins, manager::default_visibility);
-
-    box< horizontal >::constraints box< horizontal >::default_constraints(box< horizontal >::default_alignment,
-                                        manager::default_margins, manager::default_visibility);
+    constraints   manager::default_constraints(center, middle, manager::default_margins, manager::default_visibility);
 
     element::aptr element::static_read_structure(std::string& input) {
       xml2pp::text_reader r(input);
@@ -75,10 +68,10 @@ namespace sip {
         r.get_attribute(&type, "type");
 
         if (type == "vertical") {
-          new_element = manager::aptr(new box_vertical::box());
+          new_element = manager::aptr(new vertical_box());
         }
         else {
-          new_element = manager::aptr(new box_horizontal::box());
+          new_element = manager::aptr(new horizontal_box());
         }
       }
       else {
