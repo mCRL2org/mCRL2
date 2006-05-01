@@ -171,6 +171,20 @@ namespace xml2pp {
   }
 
   /**
+   * @param[in] n the name of the attribute which value to get
+   *
+   * \attention the result is undefined if no attribute with that name is found
+   **/
+  inline std::string text_reader::get_attribute_string_value(const char* n) const {
+    char* temporary          = (char*) xmlTextReaderGetAttribute(reader, reinterpret_cast < const xmlChar* > (n));
+    std::string return_value(temporary);
+
+    xmlFree(temporary);
+
+    return (return_value);
+  }
+
+  /**
    * @param[out] d the variable that should hold the result 
    *
    * \return whether the node is empty

@@ -3,6 +3,7 @@
 
 #include <utility>
 #include <vector>
+#include <map>
 #include <memory>
 
 #include <sip/detail/layout_base.h>
@@ -17,6 +18,15 @@ namespace sip {
       unsigned short right;  ///< right margin in pixels
       unsigned short bottom; ///< bottom margin in pixels
       unsigned short left;   ///< left margin in pixels
+
+      /** \brief Constructor */
+      inline margins(const unsigned short = 0, const unsigned short = 0, const unsigned short = 0, const unsigned short = 0);
+
+      /** \brief Compares for equality */
+      inline bool operator==(margins const&) const;
+
+      /** \brief Compares for inequality */
+      inline bool operator!=(margins const&) const;
     };
 
     /** \brief Type for element visibility */
@@ -28,25 +38,25 @@ namespace sip {
 
     /** \brief The directional alignment of layout elements perpendicular to the orientation of the box */
     enum vertical_alignment {
-      left,       ///< element is put as much to the left as possible
-      center,     ///< element is centered
-      right       ///< element is put as much to the right as possible
+      top = 0,    ///< element is put as much to the top as possible
+      middle = 1, ///< element is centered
+      bottom = 2  ///< element is put as much to the bottom as possible
     };
 
     /** \brief The directional alignment of layout elements perpendicular to the orientation of the box */
     enum horizontal_alignment {
-      top,        ///< element is put as much to the top as possible
-      middle,     ///< element is centered
-      bottom      ///< element is put as much to the bottom as possible
+      left = 3,   ///< element is put as much to the left as possible
+      center = 4, ///< element is centered
+      right = 5   ///< element is put as much to the right as possible
     };
 
     /** \brief Base class for layout constraint containers */
     class constraints {
       public:
-        horizontal_alignment align_horizontal; ///< how the element is aligned horizontally
-        vertical_alignment   align_vertical;   ///< how the element is aligned vertically
-        margins              margin;           ///< the margins that should be observed around the element
-        visibility           visible;          ///< whether the element affects layout and is visible
+        horizontal_alignment alignment_horizontal; ///< how the element is aligned horizontally
+        vertical_alignment   alignment_vertical;   ///< how the element is aligned vertically
+        margins              margin;               ///< the margins that should be observed around the element
+        visibility           visible;              ///< whether the element affects layout and is visible
        
         /** \brief Constructor */
         inline constraints(vertical_alignment const&, horizontal_alignment const&, margins const&, visibility const&);
@@ -56,6 +66,18 @@ namespace sip {
        
         /** \brief Constructor, for when vertical alignment does not matter */
         inline constraints(horizontal_alignment const&, margins const&, visibility const&);
+
+        /** \brief Write out the layout constraint in XML format */
+        void write(std::ostream&) const;
+
+        /** \brief Read back a layout constraint, in XML format */
+        void read(xml2pp::text_reader&);
+
+        /** \brief Compares for equality */
+        inline bool operator==(constraints const&) const;
+
+        /** \brief Compares for inequality */
+        inline bool operator!=(constraints const&) const;
     };
 
     /** \brief Abstract base class for layout managers */
@@ -70,13 +92,13 @@ namespace sip {
       public:
 
         /** \brief The default margins between elements */
-        static margins     default_margins;
+        static const margins     default_margins;
 
         /** \brief The default visibility of elements */
-        static visibility  default_visibility;
+        static const visibility  default_visibility;
 
         /** \brief Default constraints */
-        static constraints default_constraints;
+        static const constraints default_constraints;
 
       protected:
 
@@ -87,6 +109,13 @@ namespace sip {
 
         /** \brief Adds a new element to the box */
         virtual void add(element*) = 0;
+
+        /** Adds a new element to the box */
+        virtual void add(element*, margins const& = manager::default_margins,
+                                  visibility const& = manager::default_visibility) = 0;
+
+        /** Adds a new element to the box */
+        virtual void add(element*, visibility const& = manager::default_visibility) = 0;
 
         /** \brief Recursively builds the state of the object */
         static aptr static_read_structure(xml2pp::text_reader&); 
@@ -124,7 +153,7 @@ namespace sip {
       private:
 
         /** \brief Read back a layout structure in XML format */
-        inline void read_structure(xml2pp::text_reader& r);
+        void read_structure(xml2pp::text_reader& r);
 
       public:
 
@@ -136,6 +165,13 @@ namespace sip {
 
         /** Adds a new element to the box */
         inline void add(element*, constraints const&);
+
+        /** Adds a new element to the box */
+        inline void add(element*, margins const& = manager::default_margins,
+                                  visibility const& = manager::default_visibility);
+
+        /** Adds a new element to the box */
+        inline void add(element*, visibility const& = manager::default_visibility);
 
         /** \brief Instantiate a layout element, through a mediator */
         virtual mediator::wrapper_aptr instantiate(layout::mediator*) const = 0;
@@ -155,12 +191,12 @@ namespace sip {
 
       public:
 
-        typedef vertical_alignment alignment;
+        typedef horizontal_alignment alignment;
 
       public:
 
         /** \brief Default alignment */
-        static alignment   default_alignment;
+        static const alignment   default_alignment;
 
       public:
 
@@ -176,7 +212,7 @@ namespace sip {
                                   visibility const& = manager::default_visibility);
 
         /** \brief Write out the layout structure in XML format */
-        inline void write_structure(std::ostream&);
+        void write_structure(std::ostream&);
 
         /** \brief Instantiate a layout element, through a mediator */
         inline mediator::wrapper_aptr instantiate(layout::mediator*) const;
@@ -193,12 +229,12 @@ namespace sip {
 
       public:
 
-        typedef horizontal_alignment alignment;
+        typedef vertical_alignment alignment;
 
       public:
 
         /** \brief Default alignment */
-        static alignment   default_alignment;
+        static const alignment   default_alignment;
 
       public:
 
@@ -214,7 +250,7 @@ namespace sip {
                                   visibility const& = manager::default_visibility);
 
         /** \brief Write out the layout structure in XML format */
-        inline void write_structure(std::ostream&);
+        void write_structure(std::ostream&);
 
         /** \brief Instantiate a layout element, through a mediator */
         inline mediator::wrapper_aptr instantiate(layout::mediator*) const;
@@ -232,16 +268,54 @@ namespace sip {
     inline manager::~manager() {
     }
 
-    constraints::constraints(vertical_alignment const& av, horizontal_alignment const& ah, margins const& m, visibility const& v) :
-                                                align_horizontal(ah), align_vertical(av), margin(m), visible(v) {
+    inline constraints::constraints(vertical_alignment const& av, horizontal_alignment const& ah, margins const& m, visibility const& v) :
+                                                alignment_horizontal(ah), alignment_vertical(av), margin(m), visible(v) {
     }
 
-    constraints::constraints(vertical_alignment const& av, margins const& m, visibility const& v) :
-                                                align_horizontal(middle), align_vertical(av), margin(m), visible(v) {
+    inline constraints::constraints(vertical_alignment const& av, margins const& m, visibility const& v) :
+                                                alignment_horizontal(center), alignment_vertical(av), margin(m), visible(v) {
     }
 
-    constraints::constraints(horizontal_alignment const& ah, margins const& m, visibility const& v) :
-                                                align_horizontal(ah), align_vertical(center), margin(m), visible(v) {
+    inline constraints::constraints(horizontal_alignment const& ah, margins const& m, visibility const& v) :
+                                                alignment_horizontal(ah), alignment_vertical(middle), margin(m), visible(v) {
+    }
+
+    /**
+     * @param[in] t the top margin
+     * @param[in] r the right margin
+     * @param[in] b the bottom margin
+     * @param[in] l the left margin
+     **/
+    inline margins::margins(const unsigned short t, const unsigned short r, const unsigned short b, const unsigned short l) :
+                                                                top(t), right(r), bottom(b), left(l) {
+    }
+
+    /**
+     * @param[in] c the constraints object to compare against
+     **/
+    inline bool margins::operator==(margins const& m) const {
+      return (top == m.top && left == m.left && bottom == m.bottom && right == m.right);
+    }
+
+    /**
+     * @param[in] c the constraints object to compare against
+     **/
+    inline bool margins::operator!=(margins const& m) const {
+      return (top != m.top || left != m.left || bottom != m.bottom || right != m.right);
+    }
+
+    /**
+     * @param[in] c the constraints object to compare against
+     **/
+    inline bool constraints::operator==(constraints const& c) const {
+      return (alignment_horizontal == c.alignment_horizontal && alignment_vertical == c.alignment_vertical && margin == c.margin && visible == c.visible);
+    }
+
+    /**
+     * @param[in] c the constraints object to compare against
+     **/
+    inline bool constraints::operator!=(constraints const& c) const {
+      return (alignment_horizontal != c.alignment_horizontal || alignment_vertical != c.alignment_vertical || margin != c.margin || visible != c.visible);
     }
 
     inline box::box() {
@@ -289,7 +363,7 @@ namespace sip {
      * @param[in] v whether the element is visible and has an effect on other elements that occupy the box
      **/
     inline void vertical_box::add(element* e, alignment const& a, margins const& m, visibility const& v) {
-      children.push_back(children_list::value_type(e, constraints(a, m, v)));
+      children.push_back(children_list::value_type(e, constraints(middle, a, m, v)));
     }
 
     /**
@@ -299,60 +373,24 @@ namespace sip {
      * @param[in] v whether the element is visible and has an effect on other elements that occupy the box
      **/
     inline void horizontal_box::add(element* e, alignment const& a, margins const& m, visibility const& v) {
-      children.push_back(children_list::value_type(e, constraints(a, m, v)));
+      children.push_back(children_list::value_type(e, constraints(a, center, m, v)));
     }
 
     /**
-     * @param[out] o the stream to which to write the result
-     * \todo alignment, margins and visibility
+     * @param[in] e a pointer to a layout element
+     * @param[in] m the margins of the element relative to other elements that occupy the box
+     * @param[in] v whether the element is visible and has an effect on other elements that occupy the box
      **/
-    inline void vertical_box::write_structure(std::ostream& o) {
-      o << "<box-layout-manager type=\"vertical\"";
-
-      element::write_attributes(o);
-
-      for (children_list::const_iterator i = children.begin(); i != children.end(); ++i) {
-        (*i).first->write_structure(o);
-      }
-
-      o << "</box-layout-manager>";
+    inline void box::add(element* e, margins const& m, visibility const& v) {
+      children.push_back(children_list::value_type(e, constraints(middle, center, m, v)));
     }
 
     /**
-     * @param[out] o the stream to which to write the result
-     * \todo alignment, margins and visibility
+     * @param[in] e a pointer to a layout element
+     * @param[in] v whether the element is visible and has an effect on other elements that occupy the box
      **/
-    inline void horizontal_box::write_structure(std::ostream& o) {
-      o << "<box-layout-manager type=\"horizontal\"";
-      
-      element::write_attributes(o);
-
-      for (children_list::const_iterator i = children.begin(); i != children.end(); ++i) {
-        (*i).first->write_structure(o);
-      }
-
-      o << "</box-layout-manager>";
-    }
-
-    /**
-     * @param[in] r the xml2pp text reader from which to read
-     *
-     * \pre reader should point to a box-layout-manager element (of type horizontal)
-     * \post reader points to after the associated end tag of the box
-     * \todo alignment, margins and visibility
-     **/
-    inline void box::read_structure(xml2pp::text_reader& r) {
-      clear();
-
-      if (!r.is_empty_element()) {
-        r.read();
-
-        while (!r.is_end_element("box-layout-manager")) {
-          children.push_back(children_list::value_type(element::static_read_structure(r).release(), default_constraints));
-        }
-      }
-
-      r.read();
+    inline void box::add(element* e, visibility const& v) {
+      children.push_back(children_list::value_type(e, constraints(middle, center, manager::default_margins, v)));
     }
 
     /**

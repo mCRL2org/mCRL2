@@ -74,6 +74,9 @@ namespace xml2pp {
       /** \brief Returns whether the attribute is present or not */
       inline bool get_attribute(const char*);
 
+      /** \brief Returns the value of a named attribute attribute as a string */
+      inline std::string get_attribute_string_value(const char*) const;
+
       /** \brief Get the value of an element as ... */
       inline bool get_value(std::string*);
 

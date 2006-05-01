@@ -148,7 +148,7 @@ namespace squadt {
 
       using sip::layout::box;
 
-      switch (cr.align_vertical) {
+      switch (cr.alignment_horizontal) {
         case layout::left:
           flags |= wxALIGN_LEFT;
           break;
@@ -194,7 +194,7 @@ namespace squadt {
 
       sip::layout::constraints const& cr = *(static_cast < layout::constraints const* > (c));
 
-      switch (cr.align_horizontal) {
+      switch (cr.alignment_vertical) {
         case sip::layout::top:
           flags |= wxALIGN_TOP;
           break;
@@ -342,7 +342,7 @@ namespace squadt {
       try {
         content = static_cast < tool_display_mediator::wrapper* >
                                                         (current_layout->instantiate(&m).get())->get_sizer();
-        GetSizer()->Add(content, 1, wxALL, 2);
+        GetSizer()->Add(content, 1, wxALL|wxALIGN_CENTER, 2);
 
         content->RecalcSizes();
         content->Layout();

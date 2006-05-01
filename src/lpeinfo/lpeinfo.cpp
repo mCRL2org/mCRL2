@@ -170,11 +170,11 @@ int main(int ac, char** av)
 
       layout::vertical_box::alignment a = layout::left;
 
-      left_column->add(new label("Input read from :"), a);
-      left_column->add(new label("Summands (#)          :"), a);
-      left_column->add(new label("Free variables (#)    :"), a);
+      left_column->add(new label("Input read from:"), a);
+      left_column->add(new label("Summands (#):"), a);
+      left_column->add(new label("Free variables (#):"), a);
       left_column->add(new label("Process parameters (#):"), a);
-      left_column->add(new label("Actions (#)           :"), a);
+      left_column->add(new label("Actions (#):"), a);
 
       /* Second column */
       layout::vertical_box* right_column = new layout::vertical_box();
@@ -188,8 +188,8 @@ int main(int ac, char** av)
       right_column->add(new label(boost::str(c % lpe.actions().size())), a);
 
       /* Attach columns*/
-      layout_manager->add(left_column);
-      layout_manager->add(right_column);
+      layout_manager->add(left_column, margins(0,5,0,5));
+      layout_manager->add(right_column, margins(0,5,0,20));
 
       display.set_top_manager(layout_manager);
 
