@@ -53,19 +53,6 @@ static void stop(void)
   exit(-1);
 }
 
-
-/* This file describes a C implementation of the abstract datatype
-   describing abstract data types with both functions and constructors
-   in Dams and Groote, A specification of an instantiator, for use in
-   the context with the Toolbus.
-   
-   For every function described in Dams and Groote, a function of type
-   `ATerm ' is generated. Type `ATerm ' is the type of terms that can be
-   handled by the toolbus, and is described in Klint, A Guide to
-   Toolbus Programming.  We use in particular functions ATmake,
-   ATmatch, TBread, TBwrite, gsfprintf, TBsprintf 
- */
-   
 /* PREAMBLE */
 
 typedef struct specificationbasictype {
@@ -4679,7 +4666,7 @@ static void define_equations_for_case_function(
   ATermList xxxterm=ATempty;
   ATermList w=NULL;
 
-  v1=getfreshvariable("x",e->sortId);
+  v1=getfreshvariable("x",sortname);
   for(j=0; (j<e->size); j++)
   { v=getfreshvariable("y",sortname);
     vars=ATinsertA(vars,v); 
@@ -4723,7 +4710,7 @@ static void create_case_function_on_enumeratedtype(
   int j=0;
   
   /* first find out whether the function exists already, in which
-       case nothing need to be done */
+     case nothing needs to be done */
 
   for(ATermList w=e->functions; w!=ATempty; w=ATgetNext(w))
   {
@@ -6052,6 +6039,7 @@ static ATermAppl allowcomposition(ATermList allowlist, ATermAppl ips)
     }
   }
 
+  gsfprintf(stderr,"Short delta's %d\n",ATgetLength(resultsimpledeltasumlist));
   ATermList resultsumlist=resultactionsumlist;
   resultdeltasumlist=ATconcat(resultsimpledeltasumlist,resultdeltasumlist);
 
