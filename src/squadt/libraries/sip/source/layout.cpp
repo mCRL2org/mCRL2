@@ -225,11 +225,11 @@ namespace sip {
       if (!r.is_empty_element()) {
         r.read();
 
-        if (r.is_element("layout-constraints")) {
-          current_constraints.read(r);
-        }
-
         while (!r.is_end_element("box-layout-manager")) {
+          if (r.is_element("layout-constraints")) {
+            current_constraints.read(r);
+          }
+
           children.push_back(children_list::value_type(element::static_read_structure(r).release(), current_constraints));
         }
       }

@@ -24,7 +24,7 @@ namespace squadt {
      * can be added with little effort.
      **/
     class main : public wxFrame {
-      friend void squadt::GUI::project::spawn_context_menu(storage_format&);
+      friend void squadt::GUI::project::spawn_context_menu(processor::object_descriptor const&);
 
       private:
 
@@ -100,6 +100,9 @@ namespace squadt {
       if (tool_registry.get() == 0) {
         tool_registry = miscellaneous::tool_selection_helper::sptr(new miscellaneous::tool_selection_helper());
       }
+
+      /* Default size is the minimum size */
+      SetMinSize(wxDefaultSize);
 
       /* Reposition the window */
       CentreOnScreen();

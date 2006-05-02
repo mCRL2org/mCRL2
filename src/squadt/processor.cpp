@@ -137,7 +137,7 @@ namespace squadt {
 
     /* The inputs */
     for (input_list::const_iterator i = inputs.begin(); i != inputs.end(); ++i) {
-      s << "<input id=\"" << std::dec << reinterpret_cast < unsigned long > ((*i).lock().get()) << "\"/>";
+      s << "<input id=\"" << std::dec << reinterpret_cast < unsigned long > ((*i).lock().get()) << "\"/>\n";
     }
 
     /* The outputs */
@@ -219,6 +219,7 @@ namespace squadt {
         throw (exception(exception_identifier::required_attributes_missing, "processor->output"));
       }
 
+      n->generator = c.get();
       n->checksum.read(temporary.c_str());
 
       r.read();

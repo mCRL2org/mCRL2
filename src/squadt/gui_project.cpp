@@ -1,3 +1,5 @@
+#include <stack>
+
 #include <boost/bind.hpp>
 #include <boost/ref.hpp>
 #include <boost/filesystem/path.hpp>
@@ -60,6 +62,7 @@ namespace squadt {
      *  - the default project_manager, and l is the new project store
      **/
     project::project(wxWindow* p, const boost::filesystem::path& l, const std::string& d) : wxSplitterWindow(p, wxID_ANY), manager(project_manager::create(l)) {
+
       if (!d.empty()) {
         manager->set_description(d);
         manager->write();
@@ -67,25 +70,49 @@ namespace squadt {
 
       build();
 
-      /* Update view */
-      project_manager::processor_iterator i = manager->get_processor_iterator();
+      wxTreeItemId root_item_id = processor_view->GetRootItem();
 
-      while (i.valid()) {
-        processor::output_object_iterator j = (*i)->get_outputs_iterator();
+      /* Update view: First add files that are not generated from other files in the project */
+      for (project_manager::processor_iterator i = manager->get_processor_iterator(); i.valid(); ++i) {
+        if ((*i)->number_of_inputs() == 0) {
+          for (processor::output_object_iterator j = (*i)->get_outputs_iterator(); j.valid(); ++j) {
+            wxTreeItemId item = processor_view->AppendItem(root_item_id,
+                        wxString(boost::filesystem::path((*j)->location).leaf().c_str(), wxConvLocal), 3);
 
-        while (j.valid()) {
-          wxTreeItemId item = processor_view->AppendItem(processor_view->GetRootItem(),
-                                                wxString(boost::filesystem::path((*j)->location).leaf().c_str(), wxConvLocal), 3);
+            processor_view->SetItemData(item, new node_data(*this, *j));
 
-          processor_view->SetItemData(item, new node_data(*this, *j));
-
-          /* This is disabled to avoid bug in wxGTK (but would be desirable to do) */
-//          processor_view->EnsureVisible(item);
-
-          ++j;
+            /* This is disabled to avoid bug in wxGTK */
+//            processor_view->EnsureVisible(item);
+          }
         }
+      }
 
-        ++i;
+      std::stack < wxTreeItemId > id_stack;
+
+      id_stack.push(root_item_id);
+
+      while (!id_stack.empty()) {
+        wxTreeItemIdValue cookie;             // For wxTreeCtrl traversal
+        wxTreeItemId      c = id_stack.top(); // The current node
+
+        id_stack.pop();
+
+        for (wxTreeItemId i = processor_view->GetFirstChild(c, cookie);
+                                  i.IsOk(); i = processor_view->GetNextChild(c, cookie)) {
+
+          processor* t = static_cast < node_data* > (processor_view->GetItemData(i))->target->generator;
+
+            for (processor::output_object_iterator j = t->get_outputs_iterator(); j.valid(); ++j) {
+
+              wxTreeItemId item = processor_view->AppendItem(i,
+                          wxString(boost::filesystem::path((*j)->location).leaf().c_str(), wxConvLocal), 0);
+          
+              processor_view->SetItemData(item, new node_data(*this, *j));
+          
+              /* This is disabled to avoid bug in wxGTK */
+//              processor_view->EnsureVisible(item);
+            }
+        }
       }
 
       /* Make sure the root is expanded, here because EnsureVisible() could not be used */
@@ -134,7 +161,7 @@ namespace squadt {
      **/
     void project::on_tree_item_activate(wxTreeEvent& e) {
       if (processor_view->GetRootItem() != e.GetItem()) {
-        spawn_context_menu(reinterpret_cast < node_data* > (processor_view->GetItemData(e.GetItem()))->target->format);
+        spawn_context_menu(*(static_cast < node_data* > (processor_view->GetItemData(e.GetItem()))->target));
       }
       else {
         dialog::add_to_project dialog(this, wxString(manager->get_project_directory().c_str(), wxConvLocal));
@@ -157,22 +184,31 @@ namespace squadt {
     /**
      * @param f a storage format for which to add tools to the menu
      **/
-    void project::spawn_context_menu(storage_format& f) {
+    void project::spawn_context_menu(processor::object_descriptor const& t) {
       using namespace boost;
+
+      bool generated = (0 < t.generator->number_of_inputs());
 
       wxMenu  context_menu;
 
       context_menu.Append(cmID_REMOVE, wxT("Remove"));
-      context_menu.Append(cmID_REBUILD, wxT("Rebuild"));
-      context_menu.Append(cmID_CLEAN, wxT("Clean"));
+
+      if (generated) {
+        context_menu.Append(cmID_REBUILD, wxT("Rebuild"));
+        context_menu.Append(cmID_CLEAN, wxT("Clean"));
+      }
+
       context_menu.AppendSeparator();
 
       /* wxWidgets identifier for menu items */
       int identifier = cmID_TOOLS;
 
-      main::tool_registry->by_format(f, bind(&project::add_to_context_menu, this, cref(f), _1, &context_menu, &identifier));
+      main::tool_registry->by_format(t.format, bind(&project::add_to_context_menu, this, cref(t.format), _1, &context_menu, &identifier));
 
-      context_menu.AppendSeparator();
+      if (context_menu.FindItemByPosition(2 + generated * 2) != 0) {
+        context_menu.AppendSeparator();
+      }
+
       context_menu.Append(cmID_DETAILS, wxT("Details"));
 
       PopupMenu(&context_menu);

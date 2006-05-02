@@ -118,7 +118,7 @@ namespace squadt {
         void on_context_menu_select(wxCommandEvent&);
 
         /** \brief Creates a context menu for the selected processor */
-        void spawn_context_menu(storage_format&);
+        void spawn_context_menu(processor::object_descriptor const&);
 
         /** \brief Helper function to add tools by category to a context menu */
         void add_to_context_menu(const storage_format&, const miscellaneous::tool_selection_helper::tools_by_category::value_type&, wxMenu*, int*);
