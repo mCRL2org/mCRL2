@@ -20,7 +20,7 @@ namespace transport {
     boost::recursive_mutex::scoped_lock l(lock);
 
     /* Disconnect all peers */
-    connections.clear();
+    disconnect();
   
     /* Clean up listeners */
     std::for_each(listeners.begin(),listeners.end(),bind(&basic_listener::shutdown, bind(&shared_ptr < basic_listener >::get, _1)));
