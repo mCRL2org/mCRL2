@@ -13,7 +13,7 @@ lib lts
          liblts_fsm.cpp
          liblts_dot.cpp
          liblts_red.cpp
-       : <use>/libraries/aterm//aterm
+       : <use>/libraries/aterm//atermpp
          <use>/libraries/svc//svc
        :
        : <library>/libraries/aterm//aterm

@@ -26,3 +26,11 @@ lib aterm
        :
        : <address-model>64:<define>AT_64BIT
        ;
+
+alias atermpp
+       :
+       :
+       :
+       : <include>$(BOOST)
+         <library>aterm
+       ;

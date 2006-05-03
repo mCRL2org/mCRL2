@@ -4,7 +4,7 @@ import package ;
 project lpeinfo
        : source-location .
        : requirements
-          <include>BOOST
+          <include>$(BOOST)
           <link>static
        : build-dir $(BUILD_TOP)
        ;

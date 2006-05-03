@@ -21,7 +21,6 @@ exe ltsgraph
          /libraries/temporary//lowlevel
          /libraries/temporary//rewrite
          /libraries/lts//lts
-         /libraries/aterm//aterm
        : <dependency>/root//revision.h
          <include>.
          <cxxflags>"$(IWX)"
