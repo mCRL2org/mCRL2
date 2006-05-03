@@ -1,6 +1,11 @@
 #ifndef ITERATORS_H
 #define ITERATORS_H
 
+#include <memory>
+
+#include <boost/shared_ptr.hpp>
+#include <boost/weak_ptr.hpp>
+
 namespace squadt {
   namespace detail {
 
@@ -26,6 +31,20 @@ namespace squadt {
 
         /** \brief The past-end-of-sequence value */
         typename T::const_iterator end;
+
+      private:
+
+        /** \brief Helper function for boost shared pointers */
+        inline static S* get_pointer(const boost::shared_ptr < S >&);
+
+        /** \brief Helper function for boost weak pointers */
+        inline static S* get_pointer(const boost::weak_ptr < S >&);
+
+        /** \brief Helper function for standard library auto pointers */
+        inline static S* get_pointer(const std::auto_ptr < S >&);
+
+        /** \brief Helper function for ordinary pointers */
+        inline static S* get_pointer(const S*);
 
       public:
 
@@ -61,7 +80,27 @@ namespace squadt {
  
     template < typename T, typename S >
     inline S* constant_indirect_iterator< T, S >::operator*() const {
-      return ((*iterator).get());
+      return (get_pointer(*iterator));
+    }
+
+    template < typename T, typename S >
+    inline S* constant_indirect_iterator< T, S >::get_pointer(const S* i) {
+      return (i);
+    }
+
+    template < typename T, typename S >
+    inline S* constant_indirect_iterator< T, S >::get_pointer(const boost::shared_ptr < S >& i) {
+      return (i.get());
+    }
+
+    template < typename T, typename S >
+    inline S* constant_indirect_iterator< T, S >::get_pointer(const boost::weak_ptr < S >& i) {
+      return (i.lock().get());
+    }
+
+    template < typename T, typename S >
+    inline S* constant_indirect_iterator< T, S >::get_pointer(const std::auto_ptr < S >& i) {
+      return (i.get());
     }
   }
 }

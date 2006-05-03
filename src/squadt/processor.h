@@ -143,14 +143,14 @@ namespace squadt {
       /** \brief Convenience type for hiding the implementation of a list with output information */
       typedef std::vector < object_descriptor::sptr >                       output_list;
 
+      /** \brief Helper type for read() members */
+      typedef std::map < unsigned long, object_descriptor::sptr >           id_conversion_map;
+
       /** \brief Type for iterating the input objects */
       typedef constant_indirect_iterator < input_list, object_descriptor >  input_object_iterator;
 
       /** \brief Type for iterating the output objects */
       typedef constant_indirect_iterator < output_list, object_descriptor > output_object_iterator;
-
-      /** \brief Helper type for read() members */
-      typedef std::map < unsigned long, object_descriptor::sptr >           id_conversion_map;
 
     private:
  

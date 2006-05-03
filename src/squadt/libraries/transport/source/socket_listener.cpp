@@ -27,6 +27,7 @@ namespace transport {
             acceptor.bind(endpoint);
       }
       catch (asio::error e) {
+        /* This should probably be logged somewhere someday */
         std::cerr << " socket layer : " << e << " (" << endpoint.address().to_string() << ":" << endpoint.port() << ")" << std::endl;
 
         throw;

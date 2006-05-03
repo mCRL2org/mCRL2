@@ -188,7 +188,7 @@ namespace squadt {
 
         progress_indicator->SetValue(new_amount);
 
-        display->Update();
+        display->Refresh();
       }
     }
 

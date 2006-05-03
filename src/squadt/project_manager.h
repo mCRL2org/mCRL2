@@ -1,7 +1,7 @@
 #ifndef PROJECT_MANAGER_H_
 #define PROJECT_MANAGER_H_
 
-#include <list>
+#include <vector>
 
 #include <boost/filesystem/path.hpp>
 #include <boost/filesystem/convenience.hpp>
@@ -35,7 +35,7 @@ namespace squadt {
       typedef boost::shared_ptr < project_manager >                    ptr;
 
       /** \brief Convenience type alias */
-      typedef std::list < processor::ptr >                             processor_list;
+      typedef std::vector < processor::ptr >                           processor_list;
 
       /** \brief Iterator type for the processor list */
       typedef constant_indirect_iterator < processor_list, processor > processor_iterator;
@@ -51,12 +51,8 @@ namespace squadt {
       /** \brief A description of the project */
       std::string                  description;
  
-      /**
-       * \brief The list of processors for this project
-       *
-       * \invariant A processor p that a processor q depends on occurs before q.
-       **/
-      std::list < processor::ptr > processors;
+      /** \brief The list of processors for this project */
+      processor_list               processors;
  
     private:
 
@@ -65,6 +61,9 @@ namespace squadt {
 
       /** \brief Constructor */
       project_manager(const boost::filesystem::path&);
+
+      /** \brief Sorts the processor list */
+      void sort_processors();
 
       /** \brief Read project information from project_directory */
       void read();

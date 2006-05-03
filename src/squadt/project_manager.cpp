@@ -1,6 +1,7 @@
 #include <algorithm>
 #include <fstream>
 #include <map>
+#include <algorithm>
 
 #include <boost/bind.hpp>
 #include <boost/ref.hpp>
@@ -180,6 +181,85 @@ namespace squadt {
     while (r.is_element("processor")) {
       processors.push_back(processor::read(c, r));
     }
+
+    sort_processors();
+  }
+
+  /**
+   * Sort processors such that for all i < j:
+   *
+   *   f(processors[i]) < f(processors[j]), or
+   *
+   *   f(processors[i]) = f(processors[j]) implies
+   *
+   *     not exists l < k : processor[l] -> processors[j] and processor[l].number_of_inputs() = 0 and
+   *                        processor[k] -> processors[i] and processor[k].number_of_inputs() = 0
+   *
+   *  where:
+   *
+   *    - processor[k] -> processor[i] is a dependency of processor i on k
+   *
+   *    - function f is defined as:
+   *      - f(p) = 0, if p.number_of_inputs() == 0
+   *      - f(p) = 1 + f(max i : f(p.inputs[i].generator))
+   **/
+  void project_manager::sort_processors() {
+    unsigned short number = 0; /* The number of */
+
+    std::map < processor*, unsigned short > weights;
+
+    /* Compute weights */
+    processor_list::const_iterator j = processors.begin(); /* Lower bound */
+
+    for (processor_list::const_iterator i = j; i != processors.end(); ++i) {
+      if ((*i)->number_of_inputs() == 0) {
+        weights[(*i).get()] = ++number;
+      }
+    }
+
+    while (j != processors.end()) {
+      for (processor_list::const_iterator i = j; i != processors.end(); ++i) {
+        if (weights.find((*i).get()) != weights.end()) {
+          if (i == j) {
+            ++j;
+          }
+        }
+        else {
+          processor::input_object_iterator k              = (*i)->get_inputs_iterator();
+          unsigned int                     maximum_weight = 0;
+
+          while (k.valid()) {
+            processor* target = (*k)->generator;
+
+            if (target != 0) {
+              if (weights.find(target) == weights.end()) {
+                break;
+              }
+              else {
+                unsigned int current_weight = weights[target];
+             
+                if (maximum_weight < current_weight) {
+                  maximum_weight = current_weight;
+                }
+              }
+            }
+
+            ++k;
+          }
+
+          if (!k.valid()) {
+            weights[(*i).get()] = 1 + maximum_weight;
+          }
+        }
+      }
+    }
+
+    /* Do the actual sorting */
+    std::stable_sort(processors.begin(), processors.end(), boost::bind(std::less< unsigned short >(), 
+                        boost::bind(&std::map < processor*, unsigned short >::operator[], weights,
+                                boost::bind(&processor::ptr::get, _1)),
+                        boost::bind(&std::map < processor*, unsigned short >::operator[], weights,
+                                boost::bind(&processor::ptr::get, _2))));
   }
 
   void project_manager::update() {

@@ -133,6 +133,8 @@ namespace squadt {
 
       GetSizer()->Add(project_view, 1, wxEXPAND);
 
+      p->load_views();
+
       /* Adjust title */
       SetTitle(default_title + wxT(" - ") + p->get_name());
 

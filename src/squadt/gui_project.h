@@ -92,7 +92,7 @@ namespace squadt {
       private:
 
         /** \brief The view on processors and their interdependencies */
-        wxTreeCtrl*                           processor_view;
+        wxTreeCtrl*                           file_view;
 
         /** \brief The view on progress report regions for tools */
         wxScrolledWindow*                     process_display_view;
@@ -110,6 +110,9 @@ namespace squadt {
 
         /** \brief Initially places the widgets */
         void build();
+
+        /** \brief Loads the contents of the views (currently only file view) */
+        void load_views();
 
         /** \brief Event handler for when a context menu is requested for a tree item */
         void on_tree_item_activate(wxTreeEvent&);
