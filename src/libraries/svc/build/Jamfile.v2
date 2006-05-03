@@ -1,0 +1,23 @@
+project svc
+       : source-location ../../../svc
+       : build-dir $(BUILD_TOP)
+       : default-build debug
+       : requirements
+          <cflags>-std=c99
+          <include>../../../svc
+       : usage-requirements
+          <include>../../../svc
+       ;
+
+lib svc
+       : blocklist.c
+         code.c
+         compress.c
+         hashtable.c
+         huffman.c
+         lz.c
+         ptable.c
+         svc1.c
+         svc2.c
+       : <use>/libraries/aterm//aterm
+       ;
