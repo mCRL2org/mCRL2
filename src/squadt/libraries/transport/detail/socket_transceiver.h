@@ -60,6 +60,15 @@ namespace transport {
         /** \brief Used to make sure that an object is not deleted when its methods are still executing */
         socket_transceiver::wptr         this_ptr;
 
+        /** \brief Used to make it possible to wait for send operations to complete */
+        boost::mutex                     send_lock;
+
+        /** \brief Used to make it possible to wait for send operations to complete */
+        boost::condition                 send_monitor;
+
+        /** \brief The amount of send operations that are currently in progress */
+        unsigned int                     send_count;
+
       private:
 
         /** \brief Constructor that connects to a port on an address */
@@ -122,7 +131,7 @@ namespace transport {
     /**
      * @param o a transporter to deliver data to
      **/
-    inline socket_transceiver::socket_transceiver(transporter* o) : basic_transceiver(o), socket(scheduler.io_service) {
+    inline socket_transceiver::socket_transceiver(transporter* o) : basic_transceiver(o), socket(scheduler.io_service), send_count(0) {
       buffer = new char[input_buffer_size];
     }
 
@@ -180,6 +189,13 @@ namespace transport {
     }
 
     inline socket_transceiver::~socket_transceiver() {
+      boost::mutex::scoped_lock s(send_lock);
+
+      /* Wait until send operations complete */
+      if (0 < send_count) {
+        send_monitor.wait(s);
+      }
+
       delete[] buffer;
     }
   }

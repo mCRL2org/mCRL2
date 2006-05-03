@@ -89,6 +89,13 @@ namespace transport {
     }
 
     void socket_transceiver::disconnect(basic_transceiver::ptr, socket_transceiver::ptr w) {
+      boost::mutex::scoped_lock s(send_lock);
+
+      /* Wait until send operations complete */
+      if (0 < send_count) {
+        send_monitor.wait(s);
+      }
+
       if (w.get() != 0) {
         boost::mutex::scoped_lock l(operation_lock);
 
@@ -146,6 +153,12 @@ namespace transport {
       socket_transceiver::ptr s = w.lock();
 
       if (!w.expired()) {
+        boost::mutex::scoped_lock k(send_lock);
+
+        if (--send_count == 0) {
+          send_monitor.notify_all();
+        }
+
         /* Object still exists, so continue processing the write operation */
         if (e == asio::error::eof) {
           /* Connection was closed by peer */
@@ -162,6 +175,10 @@ namespace transport {
      **/
     void socket_transceiver::send(const std::string& d, socket_transceiver::ptr w) {
       if (w.get() != 0) {
+        boost::mutex::scoped_lock k(send_lock);
+
+        ++send_count;
+
         boost::mutex::scoped_lock l(operation_lock);
 
         asio::async_write(socket, asio::buffer(d.c_str(), d.length() + 1), 
@@ -173,9 +190,13 @@ namespace transport {
      * @param d the stream that contains the data that is to be sent
      **/
     void socket_transceiver::send(std::istream& d, socket_transceiver::ptr w) {
-      std::ostringstream s;
-
       if (w.get() != 0) {
+        boost::mutex::scoped_lock k(send_lock);
+
+        ++send_count;
+
+        std::ostringstream s;
+
         boost::mutex::scoped_lock l(operation_lock);
 
         s << d.rdbuf();
