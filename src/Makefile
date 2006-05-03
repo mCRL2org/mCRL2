@@ -97,7 +97,7 @@ endif
 ifdef USE_BOOST
  #lts library definitions
  LIBLTS_NAME        = liblts.a
- LIBLTS_OBJECTS     = liblts.o liblts_fsm.o liblts_dot.o
+ LIBLTS_OBJECTS     = liblts.o liblts_fsm.o liblts_dot.o liblts_red.o
  OBJECTS           += $(LIBLTS_OBJECTS)
  LIBLTS_LDFLAGS     = -l$(ATERM) -lm
 
@@ -347,8 +347,8 @@ svc/%: CPPFLAGS += -I. -Iaterm
 
 # Targets that depend on any of the boost libraries
 ifdef USE_BOOST
-lpe% libdataelm.% liblts_fsm.% ltsconvert.% ltsinfo.%: CPPFLAGS += $(BOOST_CPPFLAGS) -I. -Iaterm
-lpe% libdataelm.% liblts_fsm.% ltsconvert.% ltsinfo.%: CXXFLAGS += -ftemplate-depth-256
+lpe% libdataelm.% liblts% ltsconvert.% ltsinfo.%: CPPFLAGS += $(BOOST_CPPFLAGS) -I. -Iaterm
+lpe% libdataelm.% liblts% ltsconvert.% ltsinfo.%: CXXFLAGS += -ftemplate-depth-256
 
 $(LIBLTS_NAME): $(LIBLTS_OBJECTS)
 	$(AR) $(ARFLAGS) $@ $(LIBLTS_OBJECTS)

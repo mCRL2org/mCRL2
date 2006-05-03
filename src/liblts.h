@@ -2,6 +2,8 @@
 #define __LIBLTS_H
 
 #include <string>
+#include <vector>
+#include <atermpp/aterm_allocator.h>
 #include <iostream>
 #include <aterm/aterm2.h>
 #include "setup.h"
@@ -16,6 +18,7 @@ namespace lts
                 , lts_bcg
 #endif
                 };
+  enum lts_reduction { lts_red_none, lts_red_trace, lts_red_strong, lts_red_obs_trace, lts_red_branch };
 
   bool is_timed_pair(ATermAppl t);
   ATermAppl make_timed_pair(ATermAppl action, ATermAppl time = NULL);
@@ -81,13 +84,14 @@ namespace lts
       void set_initial_state(unsigned int state);
       
       unsigned int add_state(ATerm value = NULL);
-      unsigned int add_label(ATerm value = NULL);
+      unsigned int add_label(ATerm value = NULL, bool is_tau = false);
+      unsigned int add_label(bool is_tau);
       unsigned int add_transition(unsigned int from,
                                   unsigned int label,
                                   unsigned int to);
 
       void set_state(unsigned int state, ATerm value);
-      void set_label(unsigned int label, ATerm value);
+      void set_label(unsigned int label, ATerm value, bool is_tau = false);
 
       ATerm state_value(unsigned int state);
       ATerm label_value(unsigned int label);
@@ -99,6 +103,9 @@ namespace lts
       label_iterator get_labels();
       transition_iterator get_transitions();
 
+      bool is_tau(unsigned int label);
+      void set_tau(unsigned int label, bool is_tau = true);
+
       bool has_creator();
       std::string get_creator();
       void set_creator(std::string creator);
@@ -107,6 +114,8 @@ namespace lts
 
       bool has_state_info();
       bool has_label_info();
+
+      bool reduce(lts_reduction red);
 
       friend class state_iterator;
       friend class label_iterator;

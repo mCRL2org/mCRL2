@@ -265,6 +265,7 @@ static ATermList get_lpe_params(ATerm lpe)
       {
         params = ATinsert(params,(ATerm) ATmakeList2(ATgetFirst(pars),(ATerm) gsGetSort(ATAgetFirst(pars))));
       }
+      params = ATreverse(params);
     } else if ( ATisAppl(lpe) && !strcmp(ATgetName(ATgetAFun((ATermAppl) lpe)),"spec2gen") )
     {
       ATermList pars = ATLgetArgument(ATAgetArgument((ATermAppl) lpe,1),1);
@@ -272,6 +273,7 @@ static ATermList get_lpe_params(ATerm lpe)
       {
         params = ATinsert(params,(ATerm) ATmakeList2(ATgetArgument(ATAgetFirst(pars),0),ATgetArgument(ATAgetFirst(pars),1)));
       }
+      params = ATreverse(params);
     } else {
       return false;
     }

@@ -47,6 +47,7 @@
       unsigned int *states;
       ATerm *state_values;
       unsigned int *labels;
+      bool *taus;
       ATerm *label_values;
       transition *transitions;
       unsigned int init_state;
@@ -58,7 +59,7 @@
       void clear();
 
       unsigned int p_add_state(ATerm value = NULL);
-      unsigned int p_add_label(ATerm value = NULL);
+      unsigned int p_add_label(ATerm value = NULL, bool is_tau = false);
       unsigned int p_add_transition(unsigned int from,
                                     unsigned int label,
                                     unsigned int to);

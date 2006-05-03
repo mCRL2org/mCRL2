@@ -204,7 +204,7 @@ int main(int argc, char **argv)
   BCG_INIT();
 #endif
 
-  #define ShortOptions      "hqvi:o:fl:n"
+  #define ShortOptions      "hqvi:o:fl:nsbtu"
   #define VersionOption     0x1
   struct option LongOptions[] = { 
     {"help"      , no_argument,         NULL, 'h'},
@@ -216,6 +216,10 @@ int main(int argc, char **argv)
     {"formats"   , no_argument,         NULL, 'f'},
     {"lpe"       , required_argument,   NULL, 'l'},
     {"no-state"  , no_argument,         NULL, 'n'},
+    {"strong"    , no_argument,         NULL, 's'},
+    {"branching" , no_argument,         NULL, 'b'},
+    {"trace"     , no_argument,         NULL, 't'},
+    {"obs-trace" , no_argument,         NULL, 'u'},
     {0, 0, 0, 0}
   };
 
@@ -228,6 +232,7 @@ int main(int argc, char **argv)
   bool use_alt_outtype = false;
   alt_lts_type alt_outtype = alt_lts_none;
   bool print_dot_state = true;
+  lts_reduction reduction = lts_red_none;
   while ( (opt = getopt_long(argc, argv, ShortOptions, LongOptions, NULL)) != -1 )
   {
     switch ( opt )
@@ -287,6 +292,18 @@ int main(int argc, char **argv)
       case 'n':
         print_dot_state = false;
         break;
+      case 's':
+	reduction = lts_red_strong;
+	break;
+      case 'b':
+	reduction = lts_red_branch;
+	break;
+      case 't':
+	reduction = lts_red_trace;
+	break;
+      case 'u':
+	reduction = lts_red_obs_trace;
+	break;
       default:
         break;
     }
@@ -338,6 +355,10 @@ int main(int argc, char **argv)
             outtype = lts_mcrl2;
           } else {
             use_alt_outtype = true;
+            if ( alt_outtype == alt_lts_fsm )
+            {
+              gsWarningMsg("parameter names are unknown (use -l/--lpe option)\n");
+            }
           }
         }
       }
@@ -384,6 +405,12 @@ int main(int argc, char **argv)
         return 1;
       }
     }
+  }
+
+  if ( reduction != lts_red_none )
+  {
+    gsVerboseMsg("reducing LTS...\n");
+    l.reduce(reduction);
   }
 
   if ( use_stdout )

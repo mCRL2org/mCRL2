@@ -80,6 +80,7 @@ lts::~lts()
 
   free(states);
   free(state_values);
+  free(taus);
   free(labels);
   free(label_values);
   free(transitions);
@@ -95,6 +96,7 @@ void p_lts::init()
   labels_size = 0;
   nlabels = 0;
   labels = NULL;
+  taus = NULL;
   label_values = NULL;
 
   transitions_size = 0;
@@ -110,6 +112,7 @@ void p_lts::clear()
 {
   free(states);
   free(state_values);
+  free(taus);
   free(labels);
   free(label_values);
   free(transitions);
@@ -457,14 +460,14 @@ bool p_lts::read_from_svc(string &filename, lts_type type)
       return false;
     }
   } else {
-    if ( type == lts_mcrl )
+    if ( svc_type == "generic" )
     {
-      gsVerboseMsg("SVC file '%s' is not in the mCRL format\n",filename.c_str());
+      gsVerboseMsg("SVC file '%s' is in the mCRL format\n",filename.c_str());
       free(fn);
       return false;
-    } else if ( type == lts_mcrl2 )
+    } else if ( (svc_type == "mCRL2") || (svc_type == "mCRL2+info") )
     {
-      gsVerboseMsg("SVC file '%s' is not in the mCRL2 format\n",filename.c_str());
+      gsVerboseMsg("SVC file '%s' is in the mCRL2 format\n",filename.c_str());
       free(fn);
       return false;
     }
@@ -495,7 +498,21 @@ bool p_lts::read_from_svc(string &filename, lts_type type)
 
     for (unsigned int i=nlabels; i<=((unsigned int) label); i++)
     {
-      p_add_label(SVClabel2ATerm(&f,(SVClabelIndex) i));
+      if ( type == lts_mcrl )
+      {
+        ATermAppl lab = (ATermAppl) SVClabel2ATerm(&f,(SVClabelIndex) i);
+        p_add_label((ATerm) lab,!strcmp(ATgetName(ATgetAFun(lab)),"tau"));
+      } else if ( type == lts_mcrl2 )
+      {
+        ATermAppl lab = (ATermAppl) SVClabel2ATerm(&f,(SVClabelIndex) i);
+        if ( !gsIsMultAct(lab) )
+        {
+          lab = ATAgetArgument(lab,0);
+        }
+        p_add_label((ATerm) lab,(ATisEmpty(ATLgetArgument(lab,0))==ATtrue)?true:false);
+      } else {
+        p_add_label(SVClabel2ATerm(&f,(SVClabelIndex) i));
+      }
     }
 
     p_add_transition((unsigned int) from,
@@ -560,7 +577,7 @@ bool p_lts::read_from_aut(istream &is)
     {
       ATbool b;
       label = ATindexedSetPut(labs,t,&b);
-      p_add_label(t);
+      p_add_label(t,!strcmp(s,"tau"));
     }
 
     p_add_transition(from,(unsigned int) label,to);
@@ -612,7 +629,7 @@ bool p_lts::read_from_bcg(string &filename)
   n = BCG_OT_NB_LABELS(bcg_graph);
   for (unsigned int i=0; i<n; i++)
   {
-    p_add_label((ATerm) ATmakeAppl0(ATmakeAFun(BCG_OT_LABEL_STRING(bcg_graph,i),0,ATtrue)));
+    p_add_label((ATerm) ATmakeAppl0(ATmakeAFun(BCG_OT_LABEL_STRING(bcg_graph,i),0,ATtrue)),!strcmp(BCG_OT_LABEL_STRING(bcg_graph,i),"i"));
   }
 
   unsigned int from,label,to;
@@ -1042,12 +1059,17 @@ unsigned int p_lts::p_add_state(ATerm value)
   return nstates++;
 }
 
-unsigned int lts::add_label(ATerm value)
+unsigned int lts::add_label(bool is_tau)
 {
-  return p_add_label(value);
+  return p_add_label(NULL, is_tau);
 }
 
-unsigned int p_lts::p_add_label(ATerm value)
+unsigned int lts::add_label(ATerm value, bool is_tau)
+{
+  return p_add_label(value, is_tau);
+}
+
+unsigned int p_lts::p_add_label(ATerm value, bool is_tau)
 {
   if ( nlabels == labels_size )
   {
@@ -1061,6 +1083,7 @@ unsigned int p_lts::p_add_label(ATerm value)
     assert(label_info == (value != NULL));
 
     labels = (unsigned int *) realloc(labels,new_labels_size*sizeof(unsigned int));
+    taus = (bool *) realloc(taus,new_labels_size*sizeof(bool));
     if ( label_info )
     {
       if ( label_values != NULL )
@@ -1078,6 +1101,7 @@ unsigned int p_lts::p_add_label(ATerm value)
   }
 
   labels[nlabels] = nlabels;
+  taus[nlabels] = is_tau;
   if ( label_info )
   {
     label_values[nlabels] = value;
@@ -1122,10 +1146,11 @@ void lts::set_state(unsigned int state, ATerm value)
   state_values[state] = value;
 }
 
-void lts::set_label(unsigned int label, ATerm value)
+void lts::set_label(unsigned int label, ATerm value, bool is_tau)
 {
   assert(label_info && (value != NULL));
   label_values[label] = value;
+  taus[label] = is_tau;
 }
 
 ATerm lts::state_value(unsigned int state)
@@ -1171,6 +1196,18 @@ label_iterator lts::get_labels()
 transition_iterator lts::get_transitions()
 {
   return transition_iterator(this);
+}
+
+bool lts::is_tau(unsigned int label)
+{
+  assert(label < nlabels);
+  return taus[label];
+}
+
+void lts::set_tau(unsigned int label, bool is_tau)
+{
+  assert(label < nlabels);
+  taus[label] = is_tau;
 }
 
 bool lts::has_creator()
