@@ -9,7 +9,7 @@ project lpeinvcheck
 exe lpeinvcheck
        : lpeinvcheck.cpp
          /libraries/prover//prover
-       : <dependency>/root//revision.h
+       : <source>/root//mcrl2_revision
          <include>.
        ;
 

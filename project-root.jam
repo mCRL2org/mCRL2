@@ -1,9 +1,10 @@
 import path ;
 import modules ;
 
-path-constant TOP       : . ;
-path-constant BUILD_TOP : ./bin ;
-path-constant BOOST     : ./boost ;
+path-constant TOP             : . ;
+path-constant BUILD_TOP       : ./bin ;
+path-constant BOOST           : ./boost ;
+path-constant REVISION_HEADER : ./src/mcrl2_revision.h ;
 
 project mcrl2_toolset
        : build-dir $(BUILD_TOP)
@@ -28,7 +29,7 @@ for library in $(libraries) {
   use-project /libraries/$(library) : src/libraries/$(library)/build ;
 }
 
-tools = [ MATCH src/(.*)/.* : [ glob src/*/Jamfile.v2 ] ] ;
+tools = [ MATCH src/(.*)/.* : [ glob src/*/Jamfile.v2 src/*/build/Jamfile.v2 ] ] ;
 
 for tool in $(tools) {
   # Make tool project known under a nice name
@@ -48,4 +49,13 @@ if install in [ MATCH "^--(install)" : [ modules.peek : ARGV ] ] {
 # The SVN revision number with which tools will be tagged
 if [ path.exists $(TOP)/utility/revision.jam ] {
   include $(TOP)/utility/revision.jam ; 
+
+  make $(REVISION_HEADER)
+       : maximum_revision
+       : run_maximum_revision
+       ;
 }
+
+alias mcrl2_revision
+       : $(REVISION_HEADER)
+       ;

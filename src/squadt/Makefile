@@ -56,8 +56,7 @@ md5.o md5pp.o:
 strip: $(TARGETS)
 	$(STRIP) --strip-unneeded --strip-debug $^
 
-install: all
-	@cd build; $(BOOST_BUILD) install
+install:
 	$(INSTALL) -d $(bindir)
 	$(INSTALL) -d $(datadir)/images
 	$(INSTALL) -d $(datadir)/schemas

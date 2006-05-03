@@ -21,7 +21,7 @@ exe ltsgraph
          /libraries/temporary//lowlevel
          /libraries/temporary//rewrite
          /libraries/lts//lts
-       : <dependency>/root//revision.h
+       : <source>/root//mcrl2_revision
          <include>.
          <cxxflags>"$(IWX)"
          <linkflags>"$(LWX_BASE)"

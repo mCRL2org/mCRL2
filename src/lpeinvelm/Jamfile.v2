@@ -10,7 +10,7 @@ exe lpeinvelm
        : lpeinvelm.cpp
          /libraries/prover//prover
          /libraries/aterm//aterm
-       : <dependency>/root//revision.h
+       : <source>/root//mcrl2_revision
          <include>.
        ;
 

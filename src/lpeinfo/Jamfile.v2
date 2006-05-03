@@ -19,7 +19,7 @@ exe lpeinfo
          /libraries/sip//sipt
          /boost/program_options//boost_program_options
          /boost/filesystem//boost_filesystem
-       : <dependency>/root//revision.h
+       : <source>/root//mcrl2_revision
          <define>ENABLE_SQUADT_CONNECTIVITY
          <include>.
        ;
