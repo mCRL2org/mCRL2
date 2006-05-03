@@ -1,4 +1,4 @@
-#include "GraphFrame.h" 
+#include "graph_frame.h" 
 
 BEGIN_EVENT_TABLE(GraphFrame, wxFrame)
     EVT_PAINT(GraphFrame::OnPaint)
@@ -149,7 +149,6 @@ void GraphFrame::Init(wxString LTSfile) {
         wxPoint * pe2;
     
         //AT_writeToStringBuffer should return a string at most 99 char
-        int i;
         while (ti.more()) {
             char buffer[100];
 			for (int i=0;i<100;i++)

@@ -1,0 +1,37 @@
+import option ;
+import package ;
+
+include $(TOP)/config.jam ;
+
+project ltsgraph
+       : source-location .
+       : requirements
+          <link>static
+       : build-dir $(BUILD_TOP)
+       ;
+
+exe ltsgraph
+       : ltsgraph.cpp
+         graph_frame.cpp
+         label.cpp
+         node.cpp
+         edge.cpp
+         /libraries/temporary//print
+         /libraries/temporary//struct
+         /libraries/temporary//lowlevel
+         /libraries/temporary//rewrite
+         /libraries/lts//lts
+         /libraries/aterm//aterm
+       : <dependency>/root//revision.h
+         <include>.
+         <cxxflags>"$(IWX)"
+         <linkflags>"$(LWX_BASE)"
+       ;
+
+explicit install ;
+
+install install
+       : lpeinfo
+       : <dll-path>$(LIB_DIR)
+         <location>$(BIN_DIR)
+       ;

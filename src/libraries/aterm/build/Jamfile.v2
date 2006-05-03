@@ -1,11 +1,12 @@
 project aterm
-       : source-location ..
+       : source-location ../../../aterm
        : build-dir $(BUILD_TOP)
        : default-build debug
        : requirements
           <cflags>-std=c99
+          <include>../../../aterm
        : usage-requirements
-          <include>..
+          <include>../../../aterm
        ;
 
 lib aterm

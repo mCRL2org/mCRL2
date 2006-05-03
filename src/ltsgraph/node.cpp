@@ -3,7 +3,7 @@
 #define POS_LBL_X 3
 #define POS_LBL_Y 5
 
-Node::Node(int _num, wxPoint _pos, wxString _Slbl) : num(_num), pos(_pos) {
+Node::Node(int _num, wxPoint _pos, wxString _Slbl) : pos(_pos), num(_num) {
     //cout << "NODE no: " << num << " pos.x " << pos.x << " pos.y " << pos.y << endl;
     wxPoint * posLbl = new wxPoint( pos.x-POS_LBL_X, pos.y-POS_LBL_Y );
     lbl = new Label(_Slbl, *posLbl);

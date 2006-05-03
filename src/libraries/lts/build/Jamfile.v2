@@ -1,0 +1,21 @@
+project lts
+       : source-location ../../..
+       : build-dir $(BUILD_TOP)
+       : default-build debug
+       : requirements
+          <include>../../..
+       : usage-requirements
+          <include>../../..
+       ;
+
+lib lts
+       : liblts.cpp
+         liblts_fsm.cpp
+         liblts_dot.cpp
+         liblts_red.cpp
+       : <use>/libraries/aterm//aterm
+         <use>/libraries/svc//svc
+       :
+       : <library>/libraries/aterm//aterm
+         <library>/libraries/svc//svc
+       ;

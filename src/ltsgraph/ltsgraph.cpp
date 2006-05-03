@@ -1,4 +1,4 @@
-#include "GraphFrame.h"
+#include "graph_frame.h"
 
 void print_help() {
   cout << "Usage: ltsgraph [INFILE]\n"
@@ -14,7 +14,7 @@ void print_help() {
 class GraphApp : public wxApp
 {
 public:
-bool GraphApp::OnInit() {
+bool OnInit() {
 
     wxCmdLineParser cmdln(argc,argv);
     cmdln.AddSwitch(wxT("h"),wxT("help"),wxT("displays this message"));

@@ -13,10 +13,6 @@ project mcrl2_toolset
 
 # The known sub projects
 use-project /root                      : . ;
-use-project /libraries/temporary       : src/libraries/temporary/build ;
-use-project /libraries/auxiliary       : src/libraries/auxiliary/build ;
-use-project /libraries/prover          : src/libraries/prover/build ;
-use-project /libraries/aterm           : src/aterm/build ;
 use-project /libraries/md5pp           : src/squadt/libraries/md5pp/build ;
 use-project /libraries/transport       : src/squadt/libraries/transport/build ;
 use-project /libraries/sip             : src/squadt/libraries/sip/build ;
@@ -24,6 +20,13 @@ use-project /libraries/xml2pp          : src/squadt/libraries/xml2pp/build ;
 use-project /boost/program_options     : boost/libs/program_options/build ;
 use-project /boost/filesystem          : boost/libs/filesystem/build ;
 use-project /boost/thread              : boost/libs/thread/build ;
+
+libraries = [ MATCH src/libraries/(.*)/build/.* : [ glob src/libraries/*/build/Jamfile.v2 ] ] ;
+
+for library in $(libraries) {
+  # Make tool project known under a nice name
+  use-project /libraries/$(library) : src/libraries/$(library)/build ;
+}
 
 tools = [ MATCH src/(.*)/.* : [ glob src/*/Jamfile.v2 ] ] ;
 
@@ -42,7 +45,7 @@ if install in [ MATCH "^--(install)" : [ modules.peek : ARGV ] ] {
        ;
 }
 
-# The SVN revision nummer with which tools will be tagged
+# The SVN revision number with which tools will be tagged
 if [ path.exists $(TOP)/utility/revision.jam ] {
   include $(TOP)/utility/revision.jam ; 
 }
