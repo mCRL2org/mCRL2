@@ -30,7 +30,7 @@ exe ltsgraph
 explicit install ;
 
 install install
-       : lpeinfo
+       : ltsgraph
        : <dll-path>$(LIB_DIR)
          <location>$(BIN_DIR)
        ;
