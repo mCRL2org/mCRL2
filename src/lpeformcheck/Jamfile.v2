@@ -1,7 +1,5 @@
 project lpeformcheck
   : source-location .
-  : requirements
-     <link>static
   : build-dir $(BUILD_TOP)
   : default-build debug
   ;

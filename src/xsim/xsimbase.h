@@ -41,14 +41,12 @@
 #include <aterm2.h>
 #include "libnextstate.h"
 
-using namespace std;
-
 class SimulatorInterface;
 class SimulatorViewInterface;
 class SimulatorViewDLLInterface;
 class XSimViewsDLL;
 
-typedef list<SimulatorViewInterface *> viewlist;
+typedef std::list<SimulatorViewInterface *> viewlist;
 typedef viewlist::iterator viewlistiterator;
 
 class SimulatorInterface
@@ -281,8 +279,8 @@ public:
 	/* Reset the simulator corresponding to View (i.e. make it NULL) */
 
 private:
-	list<SimulatorInterface *> sims;
-	list<SimulatorViewDLLInterface *> views;
+	std::list<SimulatorInterface *> sims;
+	std::list<SimulatorViewDLLInterface *> views;
 };
 
 #endif

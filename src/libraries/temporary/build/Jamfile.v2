@@ -13,6 +13,29 @@ project temporary
 include $(TOP)/config.jam ;
 
 # The following lines are to make this build stand-alone
+lib trace
+       : libtrace.cpp
+       : <dependency>/libraries/aterm//aterm
+       :
+       : <library>/libraries/aterm//aterm
+       ;
+
+lib enum
+       : libenum.cpp
+         enum_standard.cpp
+       : <dependency>/libraries/aterm//aterm
+       :
+       : <library>/libraries/aterm//aterm
+       ;
+
+lib nextstate
+       : libnextstate.cpp
+         nextstate_standard.cpp
+       : <dependency>/libraries/aterm//aterm
+       :
+       : <library>/libraries/aterm//aterm
+       ;
+
 lib print
        : libprint.cpp
          libprint_c.cpp
@@ -22,12 +45,14 @@ lib print
        : <library>/libraries/temporary//rewrite
          <library>/libraries/aterm//aterm
        ;
+
 obj struct
        : libstruct.cpp
        : <dependency>/libraries/aterm//aterm
        :
        : <library>/libraries/aterm//aterm
        ;
+
 obj lowlevel
        : liblowlevel.cpp
        : <dependency>/libraries/aterm//aterm
@@ -42,9 +67,11 @@ lib rewrite
          rewr_jitty.cpp
          rewr_innerc.cpp
          rewr_jittyc.cpp
-       : <source>/libraries/aterm//aterm
+       : <dependency>/libraries/aterm//aterm
        :
        : <library>/libraries/aterm//aterm 
+         <os>NT:<linkflags>"-lm"
+         <os>CYGWIN:<linkflags>"-lm"
          <linkflags>"-lm -ldl"
        ;
 

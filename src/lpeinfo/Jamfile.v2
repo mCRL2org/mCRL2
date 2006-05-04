@@ -1,11 +1,7 @@
-import option ;
-import package ;
-
 project lpeinfo
        : source-location .
        : requirements
           <include>$(BOOST)
-          <link>static
        : build-dir $(BUILD_TOP)
        ;
 
@@ -17,19 +13,31 @@ exe lpeinfo
          /libraries/temporary//rewrite
          /libraries/aterm//aterm
          /libraries/sip//sipt
-         /boost/program_options//boost_program_options
-         /boost/filesystem//boost_filesystem
-       : <source>/root//mcrl2_revision
+       : <source>/boost/program_options//boost_program_options
+         <source>/boost/filesystem//boost_filesystem
+         <source>/root//mcrl2_revision
          <define>ENABLE_SQUADT_CONNECTIVITY
          <include>.
        ;
 
 include $(TOP)/config.jam ;
 
-explicit install ;
+explicit install install-libraries ;
 
-install install
+alias install
+       : install-libraries
+         install-binaries
+       ;
+
+install install-binaries
        : lpeinfo
        : <dll-path>$(LIB_DIR)
          <location>$(BIN_DIR)
        ;
+
+install install-libraries
+      : lpeinfo
+      : <install-dependencies>on <install-type>LIB
+      : <location>$(LIB_DIR)
+      ;
+

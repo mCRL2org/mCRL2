@@ -1,6 +1,17 @@
 #All objects that are used
 OBJECTS            =
 
+# Creates an application bundle on Mac OS
+define create_mac_app
+	/Developer/Tools/Rez -t APPL -o $^ sample.r
+	/Developer/Tools/SetFile -a C $^
+	install -d $@/Contents/MacOS
+	install Info.plist $@/Contents/Info.plist
+	install -d $@/Contents/Resources
+	install xsim.icns $@/Contents/Resources/xsim.icns
+	ln -f $(bindir)/$^ $@/Contents/MacOS/xsim
+endef
+
 #Redefine default definitions using autoconf
 -include ../config
 
@@ -185,8 +196,8 @@ LIN_LDFLAGS        = -lrewrite -l$(ATERM) -lm $(LIBDL)
 
 #Group definitions
 EXPERIMENTALS      = $(LIN_NAME) $(ALPHA_NAME)
-EXE_NAMES          = $(MCRL22LPE_NAME) $(LPEDATAELM_NAME) $(LPEPARELM_NAME) $(LPECONSTELM_NAME) $(LPEPP_NAME) $(TRACEPP_NAME) $(LPE2LTS_NAME) $(LPE2TORX_NAME) $(SIM_NAME) $(XSIM_NAME) $(TBF2LPE_NAME) $(PNML2MCRL2_NAME) $(LPEREWR_NAME) $(LTSMIN_NAME) $(LTSCONVERT_NAME) $(LTSINFO_NAME) $(SVC2FSM_NAME)
-LIB_NAMES          = $(XSIMTRACE_NAME)
+EXE_NAMES          = $(MCRL22LPE_NAME) $(LPEDATAELM_NAME) $(LPEPARELM_NAME) $(LPECONSTELM_NAME) $(LPEPP_NAME) $(TRACEPP_NAME) $(LPE2LTS_NAME) $(LPE2TORX_NAME) $(SIM_NAME) $(TBF2LPE_NAME) $(PNML2MCRL2_NAME) $(LPEREWR_NAME) $(LTSMIN_NAME) $(LTSCONVERT_NAME) $(LTSINFO_NAME) $(SVC2FSM_NAME)
+LIB_NAMES          =
 OBJECTS           := $(sort $(OBJECTS))
 
 #Make rules
@@ -251,6 +262,12 @@ else
 boost:
 endif
 
+ifdef USE_WX
+ifeq ($(HOST_OS),MACOSX)
+install: ../xsim.app ../ltsgraph.app ../ltsview.app ../squadt.app
+endif
+endif
+
 install: all
 	$(INSTALL) -d $(bindir)
 	@for f in $(EXE_NAMES); do\
@@ -268,20 +285,6 @@ install: all
 	    $$c;\
 	  fi;\
 	done
-ifdef USE_WX
-ifeq ($(HOST_OS),MACOSX)
-	/Developer/Tools/Rez -t APPL -o xsim sample.r
-	/Developer/Tools/SetFile -a C xsim   
-	mkdir -p ../xsim.app/Contents
-	mkdir -p ../xsim.app/Contents/MacOS
-	mkdir -p ../xsim.app/Contents/Resources
-	cp xsim.plist ../xsim.app/Contents/Info.plist
-	echo -n "APPL????" > ../xsim.app/Contents/PkgInfo
-	cp xsim $(bindir)/xsim
-	ln -f $(bindir)/xsim ../xsim.app/Contents/MacOS/xsim
-	cp -f xsim.icns ../xsim.app/Contents/Resources/xsim.icns
-endif
-endif
 
 aterm_install:
 	install -d $(includedir)/aterm

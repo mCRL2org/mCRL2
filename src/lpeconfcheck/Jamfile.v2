@@ -1,8 +1,6 @@
 project lpeconfcheck
   : source-location .
   : build-dir $(BUILD_TOP)
-  : requirements
-     <link>static
   : default-build debug
   ;
 

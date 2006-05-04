@@ -59,3 +59,9 @@ if [ path.exists $(TOP)/utility/revision.jam ] {
 alias mcrl2_revision
        : $(REVISION_HEADER)
        ;
+
+if ! [ path.exists $(TOP)/config.jam ] {
+  ECHO "Please configure your source tree!" ;
+
+  exit ;
+}

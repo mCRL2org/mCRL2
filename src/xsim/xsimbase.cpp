@@ -9,6 +9,8 @@
 #include <list>
 #include "xsimbase.h"
 
+using namespace std;
+
 SimulatorViewDLLInterface::~SimulatorViewDLLInterface()
 {
 	if ( xsimdll != NULL )

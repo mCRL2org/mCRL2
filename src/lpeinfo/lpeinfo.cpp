@@ -32,15 +32,15 @@
 #include <sip/tool.h>
 #endif
 
-/* Macros for identifiers of options and objects */
-#define LPD_FOR_INPUT 0
-
 using namespace std;
 using namespace atermpp;
 
 namespace po = boost::program_options;
 
 #define VERSION "0.5"
+
+/* Constants for identifiers of options and objects */
+const unsigned int lpd_file_for_input = 0;
 
 /* Verbosity switch */
 bool        verbose = false;
@@ -109,7 +109,7 @@ int main(int ac, char** av)
   sip::tool::capabilities& cp = tc.get_tool_capabilities();
 
   /* The tool has only one main input combination it takes an LPE and then behaves as a reporter */
-  cp.add_input_combination(LPD_FOR_INPUT, "Reporter", "lpe");
+  cp.add_input_combination(lpd_file_for_input, "Reporter", "lpe");
 
   /* On purpose we do not catch exceptions */
   if (tc.activate(ac,av)) {
@@ -122,11 +122,11 @@ int main(int ac, char** av)
 
       /* Validate configuration specification, should contain a file name of an LPD that is to be read as input */
       valid  = configuration.get() != 0;
-      valid &= configuration->object_exists(LPD_FOR_INPUT);
+      valid &= configuration->object_exists(lpd_file_for_input);
 
       if (valid) {
         /* An object with the correct id exists, assume the URI is relative (i.e. a file name in the local file system) */
-        file_name = configuration->get_object(LPD_FOR_INPUT)->get_location();
+        file_name = configuration->get_object(lpd_file_for_input)->get_location();
       }
       else {
         sip::report report;

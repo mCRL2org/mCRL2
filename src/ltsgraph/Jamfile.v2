@@ -1,12 +1,7 @@
-import option ;
-import package ;
-
 include $(TOP)/config.jam ;
 
 project ltsgraph
        : source-location .
-       : requirements
-          <link>static
        : build-dir $(BUILD_TOP)
        ;
 

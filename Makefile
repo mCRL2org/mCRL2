@@ -22,12 +22,14 @@ install: all
 	install -d $(datadir)/examples/visualisation
 	cp examples/visualisation/*.fsm $(datadir)/examples/visualisation
 
-clean: bjam_clean
+clean:
 	@${MAKE} -C src clean
+	@$(RM) -rf bin
 	@$(RM) -r autom4te.cache config.log *.o *~ core core.*
 
-distclean: bjam_cleanall
+distclean:
 	@${MAKE} -C src distclean
+	@${MAKE} -C boost distclean
 	@$(RM) -r autom4te.cache config.log *.o *~ core core.* \
 	         bin config.status config config.jam src/setup.h \
 		 src/mcrl2_revision.h
@@ -37,15 +39,3 @@ ifeq (,$(findstring $(MAKECMDGOALS),clean distclean revision))
 config:
 	$(error Please configure the source tree first.)
 endif
-
-ifneq ($(wildcard $(BJAM)),)
-bjam_clean:
-	@$(BJAM) --clean
-
-bjam_cleanall:
-	@$(BJAM) --clean-all
-else
-bjam_clean:
-bjam_cleanall:
-endif
-
