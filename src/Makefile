@@ -423,11 +423,11 @@ $(ALPHA_NAME) : $(ALPHA_OBJECTS) $(ATERM_DEP) $(LIBREWR_NAME)
 $(LIN_NAME) : $(LIN_OBJECTS) $(ATERM_DEP) $(LIBREWR_NAME)
 	$(CXX) -o $@ $(LIN_OBJECTS) $(LDFLAGS) $(LIN_LDFLAGS)
 
-%.cpp : %.y
+mcrl2parser.cpp: %.cpp : %.y
 	$(BISON) $(BFLAGS) -o $@ $<
 
-%.cpp : %.l
-	$(FLEX) $(LFLAGS) -o$@ $<
+mcrl2lexer.cpp: %.cpp : %.l
+	$(FLEX) $(LFLAGS) -o $@ $<
 
 # *.cpp is needed for generated code (by flex and bison)
 *.cpp *.o aterm/*.o svc/*.o: Makefile $(CONFIG)

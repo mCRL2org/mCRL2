@@ -24,6 +24,7 @@ lib aterm
          version.c
        : <link>static
          <address-model>64:<define>AT_64BIT
+         <cflags>-fPIC
        :
        : <address-model>64:<define>AT_64BIT
        ;
