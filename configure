@@ -4065,6 +4065,7 @@ fi;
 if test $enable_profile; then
   { echo "$as_me:$LINENO: compiling with profiling support" >&5
 echo "$as_me: compiling with profiling support" >&6;}
+  BUILD_VARIANT="profile"
   CPPFLAGS="-pg $CPPFLAGS"
   LDFLAGS="-pg $LDFLAGS"
 fi

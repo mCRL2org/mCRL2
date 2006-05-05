@@ -213,6 +213,7 @@ AC_ARG_ENABLE(
 )
 if test $enable_profile; then
   AC_MSG_NOTICE([compiling with profiling support])
+  BUILD_VARIANT="profile"
   CPPFLAGS="-pg $CPPFLAGS"
   LDFLAGS="-pg $LDFLAGS"
 fi
