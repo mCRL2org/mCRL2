@@ -19,5 +19,7 @@ lib transport
       socket_listener.cpp
       socket_transceiver.cpp
     : <library>/boost/thread//boost_thread
-    : <linkflags>-lpthread
+      <threading>multi
+    :
+    : <threading>multi
     ;

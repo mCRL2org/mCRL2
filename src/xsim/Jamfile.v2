@@ -1,22 +1,34 @@
-include $(TOP)/config.jam ;
-
-project ltsgraph
+project xsim
        : source-location .
+       : requirements
+          <include>$(BOOST)
        : build-dir $(BUILD_TOP)
        ;
 
-exe ltsgraph
-       : ltsgraph.cpp
-         graph_frame.cpp
-         label.cpp
-         node.cpp
-         edge.cpp
+include $(TOP)/config.jam ;
+
+lib xsimtrace
+       : xsimtracedll.cpp
+       : <dependency>/libraries/temporary//nextstate
+         <cxxflags>"$(IWX)"
+       ;
+
+exe xsim
+       : xsim.cpp
+         xsimbase.cpp
+         xsimmain.cpp
+         xsimtrace.cpp
+         /libraries/temporary//trace
+         /libraries/temporary//enum
+         /libraries/temporary//nextstate
          /libraries/temporary//print
          /libraries/temporary//struct
          /libraries/temporary//lowlevel
          /libraries/temporary//rewrite
-         /libraries/lts//lts
+         /libraries/aterm//aterm
+         /libraries/sip//sipt
        : <source>/root//mcrl2_revision
+         <define>ENABLE_SQUADT_CONNECTIVITY
          <include>.
          <cxxflags>"$(IWX)"
          <linkflags>"$(LWX_BASE)"
@@ -30,13 +42,14 @@ alias install
        ;
 
 install install-libraries
-       : ltsgraph
+       : xsim
        : <install-dependencies>on <install-type>LIB
        : <location>$(LIB_DIR)
        ;
 
 install install-binaries
-       : ltsgraph
+       : xsim 
        : <dll-path>$(LIB_DIR)
          <location>$(BIN_DIR)
        ;
+
