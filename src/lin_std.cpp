@@ -6039,7 +6039,6 @@ static ATermAppl allowcomposition(ATermList allowlist, ATermAppl ips)
     }
   }
 
-  gsfprintf(stderr,"Short delta's %d\n",ATgetLength(resultsimpledeltasumlist));
   ATermList resultsumlist=resultactionsumlist;
   resultdeltasumlist=ATconcat(resultsimpledeltasumlist,resultdeltasumlist);
 
