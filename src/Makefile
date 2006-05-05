@@ -427,7 +427,7 @@ mcrl2parser.cpp: %.cpp : %.y
 	$(BISON) $(BFLAGS) -o $@ $<
 
 mcrl2lexer.cpp: %.cpp : %.l
-	$(FLEX) $(LFLAGS) -o $@ $<
+	$(FLEX) $(LFLAGS) -o$@ $<
 
 # *.cpp is needed for generated code (by flex and bison)
 *.cpp *.o aterm/*.o svc/*.o: Makefile $(CONFIG)
