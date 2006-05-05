@@ -305,10 +305,32 @@ lts_type p_lts::detect_type(istream &is)
   is.seekg(init_pos);
 
   // detect lts_aut
-  if ( (r >= 5) && !strncmp(buf,"des (",5) )
+  if ( r >= 3 )
   {
-    gsVerboseMsg("detected AUT input file\n");
-    return lts_aut;
+    // we assume that "des" is completely in buf in case this is a aut file
+    int i = 0;
+    // skip any spaces or tabs
+    while ( (i < r) && ((buf[i] == ' ') || (buf[i] == '\t')) )
+    {
+      i++;
+    }
+    // at least need to start with des
+    if ( (i+3 <= r) && !memcmp(buf+i,"des",3) )
+    {
+      i = i + 3;
+      // skip any spaces or tabs
+      while ( (i < r) && ((buf[i] == ' ') || (buf[i] == '\t')) )
+      {
+        i++;
+      }
+      // if we are not at the end of the buffer, then we expect a opening
+      // parenthesis
+      if ( (i >= r) || (buf[i] == '(') ) 
+      {
+        gsVerboseMsg("detected AUT input file\n");
+        return lts_aut;
+      }
+    }
   }
   
   // detect lts_svc, lts_mcrl and lts_mcrl2
@@ -550,7 +572,7 @@ bool p_lts::read_from_aut(istream &is)
   char buf[1024];
   
   is.getline(buf,1024);
-  sscanf(buf,"des (%u,%u,%u)",&init_state,&ntrans,&nstate);
+  sscanf(buf," des (%u,%u,%u)",&init_state,&ntrans,&nstate);
 
   for (unsigned int i=0; i<nstate; i++)
   {
