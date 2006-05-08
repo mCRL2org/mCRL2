@@ -12,6 +12,8 @@
 //
 // ======================================================================
 
+#include "mcrl2_revision.h"
+
 //C++
 #include <iostream>
 #include <vector>
@@ -33,19 +35,21 @@
 #include "libstruct.h"
 #include "liblowlevel.h"
 
-#include "mcrl2_revision.h"
+// Squadt protocol interface
+#ifdef ENABLE_SQUADT_CONNECTIVITY
+#include <sip/tool.h>
+#endif
 
 using namespace std;
 using namespace lpe;
 using namespace atermpp;
 
 namespace po = boost::program_options;
-po::variables_map vm;
 
-//Constanten
-//Private:
-  #define p_version "lpeconstelm 0.5.2";
-//Public:
+/* Name of the file to read input from (or standard input: "-") */
+std::vector < std::string > file_names;
+
+#define VERSION "0.5.2"
 
 class ConstelmObj
 {
@@ -81,14 +85,12 @@ private:
   set< data_expression >      sum_vars;
  
 public:
-  ConstelmObj()
-  {
-	  safeguard = ATtableCreate(10000,50);
+  ConstelmObj() {
+    safeguard = ATtableCreate(10000,50);
   }
 private:
 
-  void getDatVarRec(aterm_appl t)
-  {
+  void getDatVarRec(aterm_appl t) {
     if(gsIsDataVarId(t) && (p_freeVarSet.find(data_variable(t).to_expr()) != p_freeVarSet.end())){
       p_foundFreeVars.insert(t);
     };
@@ -99,8 +101,7 @@ private:
   
   // Returns a vector in which each element is a AtermsAppl (DataVarID)  
   //
-  inline set< data_variable > getUsedFreeVars(aterm_appl input)
-  {
+  inline set< data_variable > getUsedFreeVars(aterm_appl input) {
     p_foundFreeVars.clear();
     getDatVarRec(input);
     return p_foundFreeVars;
@@ -110,15 +111,13 @@ private:
   //
   // pre : input is an AtermAppl
   // post: result is an ATermAppl in normal form
-  inline ATermAppl rewrite(ATermAppl t)
-  { 
+  inline ATermAppl rewrite(ATermAppl t) { 
     return gsRewriteTerm(t);
   }
 
   // Subsitutes a vectorlist of data assignements to a ATermAppl 
   //
-  inline ATermAppl p_substitute(ATermAppl t, vector< data_assignment > &y )
-  { 
+  inline ATermAppl p_substitute(ATermAppl t, vector< data_assignment > &y ) { 
     for(vector< data_assignment >::iterator i = y.begin() ; i != y.end() ; i++){
       RWsetVariable(aterm(i->lhs()) ,gsToRewriteFormat(i->rhs()));
     }
@@ -132,8 +131,7 @@ private:
   // calculates a nextstate given the current 
   // stores the next state information in p_nextState 
   // 
-  inline void calculateNextState(data_assignment_list assignments)
-  {
+  inline void calculateNextState(data_assignment_list assignments) {
     for(vector< data_assignment >::iterator i = p_currentState.begin(); i != p_currentState.end(); i++ ){
       int index = p_lookupIndex[i->lhs()];
       if (p_V.find(index) == p_V.end()){
@@ -147,14 +145,13 @@ private:
         p_nextState.at(index) = data_assignment(i->lhs(), p_substitute(tmp, p_currentState));
       } else {
         p_nextState.at(index) = *i;
-      }    
+      }
     }
-  }  
+  }
   
   // returns whether a expression occurs in the list of free variables
   //  
-  inline bool inFreeVarList(data_expression dexpr)
-  {
+  inline bool inFreeVarList(data_expression dexpr) {
     return (p_freeVarSet.find(dexpr) != p_freeVarSet.end());
   }
 
@@ -162,8 +159,7 @@ private:
   // these date_expressions are used to model that a process parameter has a 
   // value which is not constant
   //
-  inline data_assignment newExpression(data_assignment ass)
-  {
+  inline data_assignment newExpression(data_assignment ass) {
     char buffer [99];
     sprintf(buffer, "%s^%d", ass.lhs().name().c_str(), p_newVarCounter++);
     data_variable w(buffer, ass.lhs().type() );
@@ -173,15 +169,13 @@ private:
   
   // returns whether two data_expressions are equal
   //
-  inline bool compare(data_expression x, data_expression y)
-  {
+  inline bool compare(data_expression x, data_expression y) {
     return (x==y);
   }
   
   // returns whether the given data_expression is false
   //  
-  inline bool conditionTest(data_expression x)
-  {
+  inline bool conditionTest(data_expression x) {
     if (p_alltrue){return true;};
     //----------          Debug  
     //    cerr << "\033[33m " << x.pp() << endl;
@@ -193,8 +187,7 @@ private:
 
   // returns whether the currentState and NextState differ
   //
-  inline bool cmpCurrToNext()
-  {
+  inline bool cmpCurrToNext() {
     bool differs = false;
     for(vector< data_assignment>::iterator i= p_currentState.begin(); i != p_currentState.end() ;i++){
       int index = p_lookupIndex[i->lhs()]; 
@@ -240,8 +233,7 @@ private:
   }
 
   // Remove detected constant parameters if they contain summation variables
-  void detectVar(int n)
-  {
+  void detectVar(int n) {
    // every process parameter...
    for(int i = 0; i != n; i++ ){
      // ...that is found to be constant (i.e. that is not in the set of
@@ -258,8 +250,7 @@ private:
   }
 
   // Return whether or not a summation variable occurs in a data term
-  bool recDetectVar(data_expression t, set<data_expression> &S)
-  {
+  bool recDetectVar(data_expression t, set<data_expression> &S) {
      bool b = false;
      if( gsIsDataVarId(t) && (S.find(t) != S.end()) ){
        b = true;
@@ -272,13 +263,10 @@ private:
      return b;
   }
 
-
   // template for changing a vector into a list
   //
   template <typename Term>
-  inline
-  term_list<Term> vectorToList(vector<Term> y)
-  { 
+  inline term_list<Term> vectorToList(vector<Term> y) { 
     term_list<Term> result;
     for(typename vector<Term>::iterator i = y.begin(); i != y.end() ; i++)
       { 
@@ -290,9 +278,7 @@ private:
   // template for changing a set into a list
   //  
   template <typename Term>
-  inline
-  term_list<Term> setToList(set<Term> y)
-  { 
+  inline term_list<Term> setToList(set<Term> y) { 
     term_list<Term> result;
     for(typename set<Term>::iterator i = y.begin(); i != y.end() ; i++)
       { 
@@ -303,8 +289,7 @@ private:
   
   // Find all sorts which have a singleton domain
   //
-  void findSingleton()
-  {
+  void findSingleton() {
 
     map< lpe::sort, int >     p_countSort;
     //set< lpe::sort > result;
@@ -355,8 +340,7 @@ private:
   //---------------------------------------------------------------
   //---------------------   Debug begin  --------------------------
   //---------------------------------------------------------------
-  inline void printNextState()
-  {
+  inline void printNextState() {
     for(vector< data_assignment >::iterator i = p_nextState.begin(); i != p_nextState.end() ; i++ ){
       cerr << "[" << i->pp() << "]";
     
@@ -364,8 +348,7 @@ private:
     cerr << endl;
   }
 
-  inline void printVar()
-  {
+  inline void printVar() {
     cerr << "lpeconstelm: Variable indices : {";
     set< int >::iterator i = p_V.begin();
     int j = 0;
@@ -379,8 +362,7 @@ private:
     cerr << "}" << endl;
   }
 
-  inline void printState()
-  {
+  inline void printState() {
     if ( p_S.size() > 0 )
     {
       cerr << "lpeconstelm:   [ ";
@@ -395,8 +377,7 @@ private:
     }
   }
   
-  inline void printCurrentState()
-  {
+  inline void printCurrentState() {
     for(vector< data_assignment >::iterator i = p_currentState.begin(); i != p_currentState.end() ; i++ ){
       cerr << "[" << i->pp() << "]";
     
@@ -439,13 +420,12 @@ public:
     }
   }
 
-  // Writes an LPE to a file or sdtout
+  // Writes an LPD to a file or sdtout
   // Substituting occurences of constant parameters with their constant value
   // and removing the constant process parameters from the list of process. 
   // Constant parameters (stored in p_S)
   //
-  inline void output()
-  {
+  inline void output() {
     lpe::LPE p_lpe = p_spec.lpe();
     summand_list rebuild_summandlist;
 
@@ -458,8 +438,8 @@ public:
     }
 
     if (p_verbose) {
-      cerr << "lpeconstelm: Number of summands of old LPE: " << p_lpe.summands().size() << endl;
-      cerr << "lpeconstelm: Number of summands of new LPE: " <<  rebuild_summandlist.size() << endl;
+      cerr << "lpeconstelm: Number of summands of old LPD: " << p_lpe.summands().size() << endl;
+      cerr << "lpeconstelm: Number of summands of new LPD: " <<  rebuild_summandlist.size() << endl;
     }
 
     set< data_variable > constantVar;
@@ -488,7 +468,7 @@ public:
           summand_list rebuild_summandlist_no_cp;
     for(summand_list::iterator currentSummand = rebuild_summandlist.begin(); currentSummand != rebuild_summandlist.end(); currentSummand++){
 
-      //construct new LPE_summand
+      //construct new LPD_summand
       //
       LPE_summand tmp;
 
@@ -524,7 +504,7 @@ public:
 	      rebuild_time = data_expression(p_substitute(rebuild_time, constantPP));
       }
 
-      //LPE_summand(data_variable_list summation_variables, data_expression condition, 
+      //LPD_summand(data_variable_list summation_variables, data_expression condition, 
       //            bool delta, action_list actions, data_expression time, 
       //            data_assignment_list assignments);    
       tmp = LPE_summand(currentSummand->summation_variables(), rebuild_condition, 
@@ -607,15 +587,13 @@ public:
   
   // Set output file
   //
-  inline void setSaveFile(string x)
-  {
+  inline void setSaveFile(string x) {
     p_outputfile = x;
   }
 
   // Print the set of constant process parameters
   //  
-  inline void printSet()
-  {
+  inline void printSet() {
     cerr << "lpeconstelm: Constant indices: { ";
     set< int >::iterator i = p_S.begin();
     int j = 0;
@@ -629,36 +607,34 @@ public:
     cerr << "}"<< endl;
   }
   
-  // Loads an LPE from file
+  // Loads an LPD from file
   // returns true if succeeds
   //  
-  inline bool loadFile(string filename)
-  {
+  inline bool loadFile(string filename) {
     p_filenamein = filename;
     if (!p_spec.load(p_filenamein))
     {
       cerr << "lpeconstelm: error: could not read input file '" << filename << "'" << endl;
       return false;
     } 
-    //LPE x = p_spec.lpe(); 
+    //LPD x = p_spec.lpe(); 
     //cerr << x.pp() << endl;
     //p_spec.save("/scratch/dump.lpe");
     //assert(false);
     return true;
   }
   
-  // Reads an LPE from stdin
+  // Reads an LPD from stdin
   // returns true if succeeds
   //  
-  inline bool readStream()
-  {
+  inline bool readStream() {
     ATermAppl z = (ATermAppl) ATreadFromFile(stdin);
     if (z == NULL){
-      cerr << "lpeconstelm: Could not read LPE from stdin"<< endl;
+      cerr << "lpeconstelm: Could not read LPD from stdin"<< endl;
       return false;
     };
     if (!gsIsSpecV1(z)){
-      cerr << "lpeconstelm: Stdin does not contain an LPE" << endl;
+      cerr << "lpeconstelm: Stdin does not contain an LPD" << endl;
       return false;
     }
     p_spec = specification(z);
@@ -668,8 +644,7 @@ public:
 
   // Writes file to stdout
   //
-  void writeStream(specification newSpec)
-  {
+  void writeStream(specification newSpec) {
     assert(gsIsSpecV1((ATermAppl) newSpec));
     ATwriteToBinaryFile(aterm(newSpec) , stdout);
   }
@@ -677,54 +652,47 @@ public:
   // Sets verbose option
   // Note: Has to be set
   //
-  inline void setVerbose(bool b)
-  {
+  inline void setVerbose(bool b) {
     p_verbose = b;
   }
   
   // Sets debug option
   // Note: Has to be set
   //
-  inline void setDebug(bool b)
-  {
+  inline void setDebug(bool b) {
     p_debug = b;
   }
   
   // Sets no singleton option
   // Note: Has to be set
   //  
-  inline void setNoSingleton(bool b)
-  {
+  inline void setNoSingleton(bool b) {
     p_nosingleton = b;
   }
 
   // Sets all conditions to true
   // Note: Has to be set
   //  
-  inline void setAllTrue(bool b)
-  {
+  inline void setAllTrue(bool b) {
     p_alltrue = b;
   }
   
   // Sets the option if not inspected summands have to removed 
   // Note: Has to be set
   //  
-  inline void setReachable(bool b)
-  {
+  inline void setReachable(bool b) {
     p_reachable = b;
   }
   
   // Prints the data_variable which are constant
   //  
-  void printSetVar()
-  {
+  void printSetVar() {
     printState();
   }  
   
   // The constelm filter
   //
-  void filter()
-  {
+  void filter() {
 
     //---------------------------------------------------------------
     //---------------------   Init begin   --------------------------
@@ -907,133 +875,233 @@ public:
   
   // Gets the version of the tool
   //    
-  inline string getVersion()
-  {
-    return p_version;
+  inline string getVersion() {
+    return (VERSION);
   }
 };
 
-int main(int ac, char* av[])
-  {
+ConstelmObj parse_command_line(int ac, char** av) {
+  ConstelmObj constelm;
 
-    ATerm bot;
-    ATinit(0,0,&bot);
-    gsEnableConstructorFunctions();
-  
-    vector< string > filename;
-   
-    ConstelmObj obj;
+  po::options_description description;
 
-    try {
-      po::options_description desc;
-      desc.add_options()
-        ("help,h",      "display this help")
-        ("verbose,v",   "turn on the display of short intermediate messages")
-        ("debug,d",    "turn on the display of detailed intermediate messages")
-        ("version",     "display version information")
-        ("no-singleton", "do not remove sorts consisting of a single element")
-        ("no-condition", "all summand conditions are set true (faster)")
-        ("no-reachable", "does not remove summands which are not visited")
-      ;
+  description.add_options()
+    ("no-singleton", "do not remove sorts consisting of a single element")
+    ("no-condition", "all summand conditions are set true (faster)")
+    ("no-reachable", "does not remove summands which are not visited")
+    ("verbose,v",    "turn on the display of short intermediate messages")
+    ("debug,d",      "turn on the display of detailed intermediate messages")
+    ("version",      "display version information")
+    ("help,h",       "display this help")
+  ;
         
-    po::options_description hidden("Hidden options");
-          hidden.add_options()
-             ("INFILE", po::value< vector<string> >(), "input file")
-          ;
-        
-          po::options_description cmdline_options;
-          cmdline_options.add(desc).add(hidden);
-        
-          po::options_description visible("Allowed options");
-          visible.add(desc);
-        
-          po::positional_options_description p;
-          p.add("INFILE", -1);
+  po::options_description hidden("Hidden options");
 
-    po::variables_map vm;
-    store(po::command_line_parser(ac, av).
+  hidden.add_options()
+     ("INFILE", po::value< string >(), "input file")
+  ;
+        
+  po::options_description cmdline_options;
+  cmdline_options.add(description).add(hidden);
+        
+  po::options_description visible("Allowed options");
+  visible.add(description);
+        
+  po::positional_options_description p;
+  p.add("file_names", -1);
+
+  po::variables_map vm;
+  po::store(po::command_line_parser(ac, av).
     options(cmdline_options).positional(p).run(), vm);
+  po::notify(vm);
      
-    if (vm.count("help")) {
-      cerr << "Usage: "<< av[0] << " [OPTION]... [INFILE [OUTFILE]] \n";
-      cerr << "Remove constant process parameters from the LPE in INFILE, and write the result" << endl;
-      cerr << "to stdout." << endl;
-      cerr << endl;
-      cerr << desc;
-      return 0;
-    }
+  if (vm.count("help")) {
+    std::cerr << "Usage: "<< av[0] << " [OPTION]... [INFILE [OUTFILE]] \n"
+              << "Removes constant process parameters from the LPD read from standard output or INFILE." << std::endl
+              << "By default the result is written to standard output, and otherwise to OUTFILE." << endl
+              << endl
+              << description;
+
+    exit (0);
+  }
         
-    if (vm.count("version")) {
-            cerr << obj.getVersion() << " (revision " << REVISION << ")" << endl;
-            return 0;
-          }
+  if (vm.count("version")) {
+    std::cerr << VERSION << " (revision " << REVISION << ")" << endl;
 
-    if (vm.count("verbose")) {
-      obj.setVerbose(true);
-          } else {
-            obj.setVerbose(false);
-          }
-          
-          if (vm.count("debug")) {
-      obj.setDebug(true);
-          } else {
-            obj.setDebug(false);
-          }
+    exit (0);
+  }
 
-    if (vm.count("no-singleton")) {
-      obj.setNoSingleton(true);
-          } else {
-            obj.setNoSingleton(false);
-          }
+  constelm.setVerbose(0 < vm.count("verbose"));
+  constelm.setDebug(0 < vm.count("debug"));
+  constelm.setNoSingleton(0 < vm.count("no-singleton"));
+  constelm.setAllTrue(0 < vm.count("no-condition"));
+  constelm.setReachable(0 < vm.count("no-reachable"));
 
-    if (vm.count("no-condition")) {
-      obj.setAllTrue(true);
-          } else {
-            obj.setAllTrue(false);
-          }
+  if (vm.count("file_names")){
+    file_names = vm["file_names"].as< std::vector< std::string > >();
+  }
 
-    if (vm.count("no-reachable")) {
-      obj.setReachable(false);
-          } else {
-            obj.setReachable(true);
-          }
-
-    if (vm.count("INFILE")){
-      filename = vm["INFILE"].as< vector<string> >();
-          }
-
-    //printf("%d",filename.size());           
-          if (filename.size() == 0){
-            if (!obj.readStream()){return 1;}
-          }
-
-    if (filename.size() > 2){
-      cerr << "lpeconstelm: Specify only INPUT and/or OUTPUT file (Too many arguments)."<< endl;
-      return 1;
+  if (file_names.size() == 0){
+    /* Read from standard input */
+    if (!constelm.readStream()) {
+      exit (1);
     }
-    
-    if(filename.size() >= 1){
-      if (filename[0] == ">"){
-        if (!obj.readStream()){return 1;}
-      }
-      else{
-        if(!obj.loadFile(filename[0])){return 1;};
-      }
-    } ; 
-    if(filename.size() == 2){
-      obj.setSaveFile(filename[1]);
+  }
+  else if (2 < file_names.size()) {
+    cerr << "lpeconstelm: Specify only INPUT and/or OUTPUT file (Too many arguments)."<< endl;
+
+    exit (0);
+  }
+  else {
+    if(!constelm.loadFile(file_names[0])) {
+      exit (1);
+    }
+
+    if(file_names.size() == 2){
+      constelm.setSaveFile(file_names[1]);
     };
-     
-    obj.filter();
-    obj.output(); 
-    
-    gsRewriteFinalise();
+  }
 
+  return (constelm);
+}
+
+#ifdef ENABLE_SQUADT_CONNECTIVITY
+/* Communicate the basic configuration display */
+void set_basic_configuration_display(sip::tool::communicator& tc) {
+  using namespace sip;
+  using namespace sip::layout;
+  using namespace sip::layout::elements;
+
+  layout::tool_display::sptr display(new layout::tool_display);
+
+  /* Create and add the top layout manager */
+  layout::manager::aptr layout_manager = layout::horizontal_box::create();
+
+  /* First column */
+  layout::vertical_box* column = new layout::vertical_box();
+
+  column->add(new checkbox("remove single element sorts", true), layout::left);
+  column->add(new checkbox("remove summands that are not visited", true), layout::left);
+  column->add(new checkbox("take summand conditions into account", true), layout::left);
+
+  /* Attach columns*/
+  layout_manager->add(column, margins(0,5,0,5));
+
+  display->set_top_manager(layout_manager);
+
+  tc.send_display_layout(display);
+}
+#endif
+
+int main(int ac, char** av) {
+  ATerm       bottom;
+  ConstelmObj constelm;
+
+  ATinit(ac,av,&bottom);
+  
+  gsEnableConstructorFunctions();
+
+#ifdef ENABLE_SQUADT_CONNECTIVITY
+  sip::tool::communicator tc;
+
+  /* Constants for identifiers of options and objects */
+  const unsigned int lpd_file_for_input  = 0;
+  const unsigned int lpd_file_for_output = 1;
+
+  /* Get tool capabilities in order to modify settings */
+  sip::tool::capabilities& cp = tc.get_tool_capabilities();
+
+  /* The tool has only one main input combination it takes an LPE and then behaves as a reporter */
+  cp.add_input_combination(lpd_file_for_input, "Transformation", "lpe");
+
+  /* On purpose we do not catch exceptions */
+  if (tc.activate(ac,av)) {
+    bool valid = false;
+
+    std::string input_file_name;
+    std::string output_file_name;
+
+    /* Static configuration cycle (phase 1: obtain input combination) */
+    while (!valid) {
+      /* Wait for configuration data to be send (either a previous configuration, or only an input combination) */
+      sip::configuration::ptr configuration = tc.await_configuration();
+
+      /* Validate configuration specification, should contain a file name of an LPD that is to be read as input */
+      valid  = configuration.get() != 0;
+      valid &= configuration->object_exists(lpd_file_for_input);
+
+      if (valid) {
+        std::string input_file_name  = configuration->get_object(lpd_file_for_input)->get_location();
+
+        /* An object with the correct id exists, assume the URI is relative (i.e. a file name in the local file system) */
+        constelm.loadFile(input_file_name);
+      }
+      else {
+        sip::report report;
+
+        report.set_error("Invalid input combination!");
+
+        tc.send_report(report);
+      }
     }
-    catch(exception& e){
-      cerr << "lpeconstelm: " << e.what() << "\n";
-      return 1;
-    }    
+
+    valid = false;
+
+    /* Draw a configuration layout in the tool display */
+    set_basic_configuration_display(tc);
+
+    /* Static configuration cycle (phase 2: gather user input) */
+    while (!valid) {
+      /* Wait for configuration data to be send (either a previous configuration, or only an input combination) */
+      sip::configuration::ptr configuration = tc.await_configuration();
+
+      /* Validate configuration specification, should contain a file name of an LPD that is to be read as input */
+      valid  = configuration.get() != 0;
+      valid &= configuration->object_exists(lpd_file_for_input);
+      valid &= configuration->object_exists(lpd_file_for_output);
+
+      if (valid) {
+        std::string output_file_name = configuration->get_object(lpd_file_for_output)->get_location();
+
+        if (input_file_name == output_file_name) {
+          sip::report report;
+
+          report.set_error("Input file is the same as the output file!");
+
+          tc.send_report(report);
+        }
+
+        /* An object with the correct id exists, assume the URI is relative (i.e. a file name in the local file system) */
+        constelm.setSaveFile(output_file_name);
+
+        tc.set_configuration(configuration);
+      }
+      else {
+        sip::report report;
+
+        report.set_error("Invalid input combination!");
+
+        tc.send_report(report);
+      }
+    }
+
+    /* Send the controller the signal that we're ready to rumble (no further configuration necessary) */
+    tc.send_accept_configuration();
+
+    /* Wait for start message */
+    tc.await_message(sip::send_signal_start);
+  }
+  else {
+    constelm = parse_command_line(ac,av);
+  }
+#else
+  constelm = parse_command_line(ac,av);
+#endif
+     
+  constelm.filter();
+  constelm.output(); 
     
-    return 0;
+  gsRewriteFinalise();
+
+  return 0;
 }

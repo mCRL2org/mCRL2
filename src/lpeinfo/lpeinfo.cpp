@@ -39,9 +39,6 @@ namespace po = boost::program_options;
 
 #define VERSION "0.5"
 
-/* Constants for identifiers of options and objects */
-const unsigned int lpd_file_for_input = 0;
-
 /* Verbosity switch */
 bool        verbose = false;
 
@@ -96,8 +93,7 @@ void parse_command_line(int ac, char** av) {
   file_name = (0 < vm.count("INFILE")) ? vm["INFILE"].as< string >() : "-";
 }
         
-int main(int ac, char** av)
-{
+int main(int ac, char** av) {
   ATerm bot;
   ATinit(0,0,&bot);
   gsEnableConstructorFunctions();
@@ -105,11 +101,14 @@ int main(int ac, char** av)
 #ifdef ENABLE_SQUADT_CONNECTIVITY
   sip::tool::communicator tc;
 
+  /* Constants for identifiers of options and objects */
+  const unsigned int lpd_file_for_input = 0;
+
   /* Get tool capabilities in order to modify settings */
   sip::tool::capabilities& cp = tc.get_tool_capabilities();
 
   /* The tool has only one main input combination it takes an LPE and then behaves as a reporter */
-  cp.add_input_combination(lpd_file_for_input, "Reporter", "lpe");
+  cp.add_input_combination(lpd_file_for_input, "Reporting", "lpe");
 
   /* On purpose we do not catch exceptions */
   if (tc.activate(ac,av)) {
@@ -127,6 +126,8 @@ int main(int ac, char** av)
       if (valid) {
         /* An object with the correct id exists, assume the URI is relative (i.e. a file name in the local file system) */
         file_name = configuration->get_object(lpd_file_for_input)->get_location();
+
+        tc.set_configuration(configuration);
       }
       else {
         sip::report report;
@@ -155,6 +156,7 @@ int main(int ac, char** av)
   if (lpe_specification.load(file_name)) {
     lpe::LPE lpe = lpe_specification.lpe();
     
+#ifdef ENABLE_SQUADT_CONNECTIVITY
     if (tc.is_active()) {
       using namespace sip;
       using namespace sip::layout;
@@ -196,13 +198,16 @@ int main(int ac, char** av)
       tc.send_display_layout(display);
     }
     else {
+#endif
       cout << "Input read from " << ((file_name == "-") ? "standard input" : file_name) << endl << endl;
      
       cout << "Number of summands          : " << lpe.summands().size() << endl;
       cout << "Number of free variables    : " << lpe_specification.initial_free_variables().size() + lpe.free_variables().size() << endl;
       cout << "Number of process parameters: " << lpe.process_parameters().size() << endl; 
       cout << "Number of actions           : " << lpe.actions().size() << endl;
+#ifdef ENABLE_SQUADT_CONNECTIVITY
     }
+#endif
   }
   else {
     std::string error("Error: unable to load LPE from `" + file_name + "'\n");

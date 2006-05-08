@@ -23,7 +23,7 @@ namespace sip {
 
         private:
      
-          /** Default constructor */
+          /** \brief Default constructor */
           inline label();
 
           /** \brief Write out the layout structure in XML format */
@@ -81,12 +81,12 @@ namespace sip {
         friend class layout::element;
      
         private:
-          /** The caption */
+          /** \brief The caption */
           std::string label;
      
         private:
      
-          /** Default constructor */
+          /** \brief Default constructor */
           inline button();
 
           /** \brief Write out the layout structure in XML format */
@@ -154,15 +154,15 @@ namespace sip {
         friend class layout::element;
      
         private:
-          /** The caption */
+          /** \brief The caption */
           std::string          label;
      
-          /** The connection reference */
+          /** \brief The connection reference */
           const radio_button*  connection;
      
         private:
      
-          /** Default constructor */
+          /** \brief Default constructor */
           inline radio_button();
 
           /** \brief Write out the layout structure in XML format */
@@ -215,7 +215,7 @@ namespace sip {
        * \todo connect to associated radio buttons
        **/
       inline void radio_button::read_structure(xml2pp::text_reader& r) {
-        r.get_attribute(&label, "text");
+        r.get_attribute(&label, "label");
 
         r.read();
       }
@@ -227,24 +227,98 @@ namespace sip {
         return (m->build_radio_button(label));
       }
      
+      /**
+       * \brief A checkbox widget
+       **/
+      class checkbox : public layout::element {
+        friend class layout::element;
+     
+        private:
+
+          /** \brief The caption */
+          std::string          label;
+
+          /** \brief The status of the checkbox */
+          bool                 status;
+     
+        private:
+     
+          /** \brief Default constructor */
+          inline checkbox();
+
+          /** \brief Write out the layout structure in XML format */
+          void read_structure(xml2pp::text_reader&);
+     
+        public:
+     
+          /** \brief Alternative constructor for a checkbox */
+          inline checkbox(std::string, bool);
+     
+          /** \brief Instantiate a layout element, through a mediator */
+          inline layout::mediator::wrapper_aptr instantiate(layout::mediator*) const;
+
+          /** \brief Write out the layout structure in XML format */
+          inline void write_structure(std::ostream&);
+      };
+     
+      inline checkbox::checkbox() {
+      }
+
+      /**
+       * @param[in] c the label for the button
+       * @param[in] s the status of the checkbox
+       **/
+      inline checkbox::checkbox(std::string c, bool s) : label(c), status(s) {
+      }
+     
+      /**
+       * @param[out] o the stream to which to write the result
+       **/
+      inline void checkbox::write_structure(std::ostream& o) {
+        o << "<checkbox id=\"" << id << "\""
+          << " label=\"" << label << "\" status=\"" << status << "\"/>";
+      }
+
+      /**
+       * @param[in] r the xml2pp text reader from which to read
+       *
+       * \pre reader should point to a radio-button element
+       * \post reader points to after the associated end tag of the box
+       * \todo connect to associated radio buttons
+       **/
+      inline void checkbox::read_structure(xml2pp::text_reader& r) {
+        r.get_attribute(&label, "label");
+
+        status = r.get_attribute("status");
+
+        r.read();
+      }
+
+      /**
+       * @param m the mediator object to use
+       **/
+      inline layout::mediator::wrapper_aptr checkbox::instantiate(layout::mediator* m) const {
+        return (m->build_checkbox(label, status));
+      }
+
       /** \brief A basic button widget */
       class progress_bar : public layout::element {
         friend class layout::element;
      
         private:
 
-          /** The minimum value */
+          /** \brief The minimum value */
           unsigned int minimum;
      
-          /** The maximum value */
+          /** \brief The maximum value */
           unsigned int maximum;
      
-          /** The current value */
+          /** \brief The current value */
           unsigned int current;
      
         private:
      
-          /** Default constructor */
+          /** \brief Default constructor */
           inline progress_bar();
 
           /** \brief Write out the layout structure in XML format */
@@ -318,12 +392,12 @@ namespace sip {
           /** \brief The text to be displayed initialy */
           std::string text;
      
-          /** Type for validation purposes */
+          /** \brief Type for validation purposes */
           basic_datatype* type;
      
         private:
      
-          /** Default constructor */
+          /** \brief Default constructor */
           inline text_field();
 
           /** \brief Write out the layout structure in XML format */
@@ -331,7 +405,7 @@ namespace sip {
      
         public:
      
-          /** Constructor */
+          /** \brief Constructor */
           inline text_field(const std::string& i, basic_datatype* = &standard_string);
      
           /** \brief Instantiate a layout element, through a mediator */

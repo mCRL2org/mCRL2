@@ -44,7 +44,7 @@ namespace sip {
         tool::capabilities            current_tool_capabilities;
  
         /** \brief This object reflects the current configuration */
-        configuration                 current_configuration;
+        configuration::ptr            current_configuration;
  
         /** \brief Unique identifier for the running tool, obtained via the command line */
         long                          instance_identifier;
@@ -73,12 +73,18 @@ namespace sip {
  
         /** \brief Signal that the current configuration is complete enough for the tool to start processing */
         void send_accept_configuration();
+
+        /** \brief Signal that the current configuration is complete enough for the tool to start processing */
+        void send_accept_configuration(const sip::configuration&);
  
         /** \brief Send a layout specification for the display space reserved for this tool */
         void send_display_data();
  
         /** \brief Send a layout specification for the display space reserved for this tool */
         void send_display_layout(layout::tool_display&);
+ 
+        /** \brief Send a layout specification for the display space reserved for this tool */
+        void send_display_layout(layout::tool_display::sptr);
  
         /** \brief Send a signal that the tool is about to terminate */
         void send_signal_termination();
@@ -90,7 +96,10 @@ namespace sip {
         inline tool::capabilities& get_tool_capabilities();
  
         /** \brief Get the current tool configuration object be sent when a request is received */
-        inline configuration& get_tool_configuration();
+        inline configuration& get_configuration();
+ 
+        /** \brief Set the current tool configuration object */
+        inline void set_configuration(configuration::ptr);
  
         /** \brief Get the last communicated set of controller capabilities */
         inline const controller::capabilities::ptr get_controller_capabilities() const;
@@ -115,8 +124,12 @@ namespace sip {
      *
      * \return a reference to the current tool configuration object
      **/
-    inline configuration& communicator::get_tool_configuration() {
-      return (current_configuration);
+    inline configuration& communicator::get_configuration() {
+      return (*current_configuration);
+    }
+ 
+    inline void communicator::set_configuration(configuration::ptr c) {
+      current_configuration = c;
     }
  
     /**

@@ -4,6 +4,7 @@
 #include "gui_tool_display.h"
 
 #include <wx/button.h>
+#include <wx/checkbox.h>
 #include <wx/event.h>
 #include <wx/gauge.h>
 #include <wx/radiobut.h>
@@ -91,6 +92,9 @@ namespace squadt {
         /** \brief Instantiates a single radio button */
         inline mediator::wrapper_aptr build_radio_button(std::string const&);
       
+        /** \brief Instantiates a single radio button */
+        inline mediator::wrapper_aptr build_checkbox(std::string const&, const bool);
+
         /** \brief Instantiates a progress bar */
         inline mediator::wrapper_aptr build_progress_bar(unsigned int const&, unsigned int const&, unsigned int const&);
       
@@ -281,6 +285,18 @@ namespace squadt {
      **/
     mediator::wrapper_aptr tool_display_mediator::build_radio_button(std::string const& s) {
       wxRadioButton* t = new wxRadioButton(current_window, wxID_ANY, wxString(s.c_str(), wxConvLocal));
+
+      return (mediator::wrapper_aptr(new wrapper(t)));
+    }
+
+    /**
+     * @param[in] s the text of the label
+     * @param[in] s the status of the checkbox
+     **/
+    mediator::wrapper_aptr tool_display_mediator::build_checkbox(std::string const& s, const bool b) {
+      wxCheckBox* t = new wxCheckBox(current_window, wxID_ANY, wxString(s.c_str(), wxConvLocal));
+
+      t->SetValue(b);
 
       return (mediator::wrapper_aptr(new wrapper(t)));
     }

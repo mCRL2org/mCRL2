@@ -95,7 +95,16 @@ namespace sip {
  
     /* Send a specification of the current configuration (it may change during tool execution) */
     void communicator::send_accept_configuration() {
-      message m(current_configuration.write(), sip::send_accept_configuration);
+      message m(current_configuration->write(), sip::send_accept_configuration);
+ 
+      send_message(m);
+    }
+ 
+    /**
+     * @param[in] c the configuration object that specifies the accepted configuration
+     **/
+    void communicator::send_accept_configuration(const sip::configuration& c) {
+      message m(c.write(), sip::send_accept_configuration);
  
       send_message(m);
     }
@@ -103,6 +112,13 @@ namespace sip {
     /* Send a layout specification for the display space reserved for this tool */
     void communicator::send_display_layout(layout::tool_display& d) {
       message m(d.write(), sip::send_display_layout);
+ 
+      send_message(m);
+    }
+ 
+    /* Send a layout specification for the display space reserved for this tool */
+    void communicator::send_display_layout(layout::tool_display::sptr d) {
+      message m(d->write(), sip::send_display_layout);
  
       send_message(m);
     }

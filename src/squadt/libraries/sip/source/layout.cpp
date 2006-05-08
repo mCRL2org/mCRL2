@@ -83,6 +83,9 @@ namespace sip {
       else if (name == "radio-button") {
         new_element = element::aptr(new radio_button());
       }
+      else if (name == "checkbox") {
+        new_element = element::aptr(new checkbox());
+      }
       else if (name == "progress-bar") {
         new_element = element::aptr(new progress_bar());
       }

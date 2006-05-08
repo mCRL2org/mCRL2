@@ -67,6 +67,9 @@ namespace sip {
         /** \brief Instantiates a single radio button */
         virtual wrapper_aptr build_radio_button(std::string const&) = 0;
 
+        /** \brief Instantiates a single radio button */
+        virtual wrapper_aptr build_checkbox(std::string const&, const bool status) = 0;
+
         /** \brief Instantiates a progress bar */
         virtual wrapper_aptr build_progress_bar(unsigned int const&, unsigned int const&, unsigned int const&) = 0;
 
