@@ -7,7 +7,6 @@ project lpeinvelm
 exe lpeinvelm
        : lpeinvelm.cpp
          /libraries/prover//prover
-         /libraries/aterm//aterm
        : <source>/root//mcrl2_revision
          <include>.
        ;

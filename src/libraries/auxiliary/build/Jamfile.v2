@@ -16,13 +16,7 @@ lib auxiliary
        : info.cpp
          manipulator.cpp
          utilities.cpp
-       : <use>/libraries/aterm//aterm
-         <use>/temporary//lowlevel
-         <use>/temporary//print
-         <use>/temporary//struct
+       : <dependency>/libraries/temporary//print
        :
-       : <library>/libraries/aterm//aterm
-         <library>/temporary//lowlevel
-         <library>/temporary//print
-         <library>/temporary//struct
+       : <dependency>/libraries/temporary//print
        ;

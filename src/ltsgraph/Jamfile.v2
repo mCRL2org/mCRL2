@@ -11,9 +11,9 @@ exe ltsgraph
          label.cpp
          node.cpp
          edge.cpp
-         /libraries/temporary//print
-         /libraries/lts//lts
-       : <source>/root//mcrl2_revision
+       : <source>/libraries/temporary//print
+         <source>/libraries/lts//lts
+         <source>/root//mcrl2_revision
          <include>.
          <cxxflags>"$(IWX)"
          <linkflags>"$(LWX_BASE)"

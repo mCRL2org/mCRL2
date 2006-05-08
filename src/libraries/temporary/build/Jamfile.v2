@@ -38,26 +38,14 @@ lib nextstate
          <library>/libraries/temporary//enum
        ;
 
-lib print
-       : libprint.cpp
-         libprint_c.cpp
-       : <dependency>/libraries/temporary//lowlevel
-         <dependency>/libraries/temporary//rewrite
-         <dependency>/libraries/temporary//struct
-       :
-       : <library>/libraries/temporary//lowlevel
-         <library>/libraries/temporary//rewrite
-         <library>/libraries/temporary//struct
-       ;
-
-obj struct
+lib struct
        : libstruct.cpp
        : <dependency>/libraries/aterm//aterm
        :
        : <library>/libraries/aterm//aterm
        ;
 
-obj lowlevel
+lib lowlevel
        : liblowlevel.cpp
        : <dependency>/libraries/aterm//aterm
        :
@@ -77,5 +65,17 @@ lib rewrite
          <os>NT:<linkflags>"-lm"
          <os>CYGWIN:<linkflags>"-lm"
          <linkflags>"-lm -ldl"
+       ;
+
+lib print
+       : libprint.cpp
+         libprint_c.cpp
+       : <dependency>/libraries/temporary//lowlevel
+         <dependency>/libraries/temporary//rewrite
+         <dependency>/libraries/temporary//struct
+       :
+       : <library>/libraries/temporary//lowlevel
+         <library>/libraries/temporary//rewrite
+         <library>/libraries/temporary//struct
        ;
 

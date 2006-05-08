@@ -13,9 +13,8 @@ lib lts
          liblts_fsm.cpp
          liblts_dot.cpp
          liblts_red.cpp
-       : <use>/libraries/aterm//atermpp
-         <use>/libraries/svc//svc
+       : <dependency>/libraries/svc//svc
+         <dependency>/libraries/aterm//atermpp
        :
-       : <library>/libraries/aterm//aterm
-         <library>/libraries/svc//svc
+       : <library>/libraries/svc//svc
        ;

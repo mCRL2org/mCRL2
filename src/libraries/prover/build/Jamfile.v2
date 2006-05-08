@@ -16,14 +16,7 @@ lib prover
          formulachecker.cpp
          invariantchecker.cpp
          invarianteliminator.cpp
-       : <use>/temporary//lowlevel
-         <use>/temporary//print
-         <use>/temporary//struct
-         <use>/libraries/auxiliary//auxiliary
+       : <dependency>/libraries/auxiliary//auxiliary
        :
-       : <library>/libraries/aterm//aterm
-         <library>/libraries/auxiliary//auxiliary
-         <library>/temporary//lowlevel
-         <library>/temporary//print
-         <library>/temporary//struct
+       : <dependency>/libraries/auxiliary//auxiliary
        ;
