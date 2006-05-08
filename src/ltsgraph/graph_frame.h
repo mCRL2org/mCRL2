@@ -33,6 +33,7 @@ public:
 	void Init(wxString LTSfile);
 	void OnPaint(wxPaintEvent& evt);
 	void OnOpen(wxCommandEvent& event);
+	void OptimizeDrawing();
 	void OnResize(wxSizeEvent& event);
 	int  FindNode(wxPoint);
 	void PressLeft(wxMouseEvent& event);

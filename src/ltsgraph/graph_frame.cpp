@@ -77,6 +77,7 @@ void GraphFrame::OnResize(wxSizeEvent& event) {
 }
 
 
+
 void GraphFrame::OnOpen( wxCommandEvent& /* event */ ) {
 
     wxFileDialog dialog( this, wxT("Select a LTS file..."), wxT(""), wxT(""), wxT("*.aut |*.aut|*.svc|*.svc|All files|*"));
@@ -103,6 +104,8 @@ void GraphFrame::OnPaint(wxPaintEvent& evt) {
     for (size_t n = 0; n < vectNode.size(); n++) {
         vectNode[n]->OnPaint(&myDC);
     }
+	
+	OptimizeDrawing();
 
 }
 

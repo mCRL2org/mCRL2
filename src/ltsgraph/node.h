@@ -18,9 +18,9 @@ using namespace std;
 class Node
 {
 public:
-    Node(int _num, wxPoint _pos, wxString _Slbl);
+    Node(unsigned int _num, wxPoint _pos, wxString _Slbl);
     void OnPaint(wxPaintDC * ptrDC);
-    int Get_num();
+    unsigned int Get_num();
     wxCoord GetX(); 
     wxCoord GetY();
 	void SetXY(wxCoord, wxCoord);
@@ -32,7 +32,7 @@ private:
 	bool locked;
     wxPoint pos;
     Label * lbl;
-    int num;
+    unsigned int num;
     
 
 };

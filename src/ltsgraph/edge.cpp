@@ -11,7 +11,7 @@ const double triangle_height = 8.0;
 
 const wxColour color = "BLACK";
 
-Edge::Edge(int _numN1, int _numN2, wxPoint _pos1, wxPoint _pos2, wxString _Slbl) 
+Edge::Edge(unsigned int _numN1, unsigned int _numN2, wxPoint _pos1, wxPoint _pos2, wxString _Slbl) 
 	: numN1(_numN1), numN2(_numN2), pos1(_pos1), pos2(_pos2) {
 
     wxPoint * posLbl = new wxPoint( pos1.x + ((pos2.x-pos1.x)/2)-10 , pos1.y + ((pos2.y-pos1.y)/2)-10 );
@@ -85,11 +85,11 @@ void Edge::OnPaint(wxPaintDC * ptrDC) {
  
 }
 
-int Edge::Get_numN1() {
+unsigned int Edge::Get_numN1() {
 	return numN1;
 }
 
-int Edge::Get_numN2() {
+unsigned int Edge::Get_numN2() {
 	return numN2;
 }
 
@@ -112,6 +112,22 @@ void Edge::Set_pos2(wxCoord _x, wxCoord _y) {
 	}
 	else
 		wxBell();
+}
+
+int Edge::GetXpos1() {
+	return pos1.x;
+}
+
+int Edge::GetYpos1() {
+	return pos1.y;
+}
+
+int Edge::GetXpos2() {
+	return pos2.x;
+}
+
+int Edge::GetYpos2() {
+	return pos2.y;
 }
 
 void Edge::Lock1() {

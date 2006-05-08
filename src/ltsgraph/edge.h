@@ -14,12 +14,16 @@ class Edge
 {
 public:
     Edge();
-    Edge(int _numN1, int _numN2, wxPoint _pos1, wxPoint _pos2, wxString _Slbl);
+    Edge(unsigned int _numN1, unsigned int _numN2, wxPoint _pos1, wxPoint _pos2, wxString _Slbl);
     void OnPaint(wxPaintDC * ptrDC);
-	int Get_numN1();
-	int Get_numN2();
+	unsigned int Get_numN1();
+	unsigned int Get_numN2();
 	void Set_pos1(wxCoord _x, wxCoord _y);
 	void Set_pos2(wxCoord _x, wxCoord _y);
+	int GetXpos1();
+	int GetYpos1();
+	int GetXpos2();
+	int GetYpos2();
 	void Lock1();
 	void Unlock1();
 	void Lock2();
@@ -28,8 +32,8 @@ public:
 private:
 	bool locked1;
 	bool locked2;
-	int numN1;
-	int numN2;
+	unsigned int numN1;
+	unsigned int numN2;
     wxPoint pos1;
     wxPoint pos2;
     Label * lbl;
