@@ -33,15 +33,15 @@
 <!ENTITY stderr "<constant>stderr</constant>">
 ]>
 
-<refentry id="confluencechecker">
+<refentry id="confluence_checker">
 
 <refmeta>
-<refentrytitle>confluencechecker</refentrytitle>
+<refentrytitle>confluence_checker</refentrytitle>
 <manvolnum>7</manvolnum>
 </refmeta>
 
 <refnamediv>
-<refname>confluencechecker</refname>
+<refname>confluence_checker</refname>
 <refpurpose>a class that can check which summands of an mCRL2 LPE are confluent</refpurpose>
 </refnamediv>
 

@@ -35,15 +35,15 @@
 <!ENTITY const_true "<constant>true</constant>">
 ]>
 
-<refentry id="bddprover">
+<refentry id="bdd_prover">
 
 <refmeta>
-<refentrytitle>bddprover</refentrytitle>
+<refentrytitle>bdd_prover</refentrytitle>
 <manvolnum>7</manvolnum>
 </refmeta>
 
 <refnamediv>
-<refname>bddprover</refname>
+<refname>bdd_prover</refname>
 <refpurpose>a class of mCRL2 provers that use BDD's to prove propositional formulas</refpurpose>
 </refnamediv>
 

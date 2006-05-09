@@ -27,15 +27,15 @@
 <!ENTITY stderr "<constant>stderr</constant>">
 ]>
 
-<refentry id="invariantchecker">
+<refentry id="invariant_checker">
 
 <refmeta>
-<refentrytitle>invariantchecker</refentrytitle>
+<refentrytitle>invariant_checker</refentrytitle>
 <manvolnum>7</manvolnum>
 </refmeta>
 
 <refnamediv>
-<refname>invariantchecker</refname>
+<refname>invariant_checker</refname>
 <refpurpose>a class that can check if a formula is an invariant of an mCRL2 LPE</refpurpose>
 </refnamediv>
 

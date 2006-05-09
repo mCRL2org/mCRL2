@@ -26,15 +26,15 @@
 <!ENTITY strat_jitty "<constant>GS_REWR_JITTY</constant>">
 ]>
 
-<refentry id="prover">
+<refentry id="invariant_eliminator">
 
 <refmeta>
-<refentrytitle>invarianteliminator</refentrytitle>
+<refentrytitle>invariant_eliminator</refentrytitle>
 <manvolnum>7</manvolnum>
 </refmeta>
 
 <refnamediv>
-<refname>invarianteliminator</refname>
+<refname>invariant_eliminator</refname>
 <refpurpose>a class that can eliminate or simplify summands of an mCRL2 LPE using an invariant</refpurpose>
 </refnamediv>
 

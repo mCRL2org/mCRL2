@@ -19,15 +19,15 @@
 <!ENTITY par_summand_number_2 "<parameter>a_summand_number_2</parameter>">
 ]>
 
-<refentry id="disjointnesschecker">
+<refentry id="disjointness_checker">
 
 <refmeta>
-<refentrytitle>disjointnesschecker</refentrytitle>
+<refentrytitle>disjointness_checker</refentrytitle>
 <manvolnum>7</manvolnum>
 </refmeta>
 
 <refnamediv>
-<refname>disjointnesschecker</refname>
+<refname>disjointness_checker</refname>
 <refpurpose>a class that can indicate whether two summands of an mCRL2 LPE are syntactically disjoint</refpurpose>
 </refnamediv>
 

@@ -29,15 +29,15 @@
 <!ENTITY stderr "<constant>stderr</constant>">
 ]>
 
-<refentry id="formulachecker">
+<refentry id="formula_checker">
 
 <refmeta>
-<refentrytitle>formulachecker</refentrytitle>
+<refentrytitle>formula_checker</refentrytitle>
 <manvolnum>7</manvolnum>
 </refmeta>
 
 <refnamediv>
-<refname>formulachecker</refname>
+<refname>formula_checker</refname>
 <refpurpose>a class that can check propositional formulas</refpurpose>
 </refnamediv>
 
