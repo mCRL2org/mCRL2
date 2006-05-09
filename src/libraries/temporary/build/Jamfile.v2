@@ -28,6 +28,13 @@ lib enum
        : <library>/libraries/aterm//aterm
        ;
 
+lib dataelm
+       : libdataelm.cpp
+       : <dependency>/libraries/lpe//lpe
+       :
+       : <dependency>/libraries/lpe//lpe
+       ;
+
 lib nextstate
        : libnextstate.cpp
          nextstate_standard.cpp

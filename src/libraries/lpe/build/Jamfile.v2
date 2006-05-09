@@ -1,0 +1,11 @@
+project lpe
+       : build-dir $(BUILD_TOP)
+       ;
+
+alias lpe
+       :
+       : <source>/libraries/aterm//atermpp
+       :
+       : <include>$(BOOST)
+         <include>../../..
+       ;

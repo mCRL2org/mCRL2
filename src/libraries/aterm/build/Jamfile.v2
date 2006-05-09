@@ -36,5 +36,6 @@ alias atermpp
        :
        :
        : <include>$(BOOST)
+         <include>../../..
          <library>aterm
        ;

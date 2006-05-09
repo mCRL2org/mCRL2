@@ -1,32 +1,22 @@
-project xsim
+project lpe2lts
        : source-location .
        : requirements
           <include>$(BOOST)
        : build-dir $(BUILD_TOP)
        ;
 
-include $(TOP)/config.jam ;
-
-lib xsimtrace
-       : xsimtracedll.cpp
-       : <dependency>/libraries/temporary//nextstate
-         <cxxflags>"$(IWX)"
-       ;
-
-exe xsim
-       : xsim.cpp
-         xsimbase.cpp
-         xsimmain.cpp
-         xsimtrace.cpp
-         /libraries/temporary//trace
+exe lpe2lts
+       : lpe2lts.cpp
+         /libraries/temporary//dataelm
          /libraries/temporary//nextstate
          /libraries/temporary//print
+         /libraries/temporary//trace
+         /libraries/lts//lts
          /libraries/sip//sipt
        : <source>/root//mcrl2_revision
-         <define>ENABLE_SQUADT_CONNECTIVITY
-         <cxxflags>"$(IWX)"
-         <linkflags>"$(LWX_BASE)"
        ;
+
+include $(TOP)/config.jam ;
 
 explicit install install-libraries install-binaries ;
 
@@ -36,13 +26,13 @@ alias install
        ;
 
 install install-libraries
-       : xsim
+       : lpe2lts
        : <install-dependencies>on <install-type>LIB
        : <location>$(LIB_DIR)
        ;
 
 install install-binaries
-       : xsim 
+       : lpe2lts
        : <dll-path>$(LIB_DIR)
          <location>$(BIN_DIR)
        ;
