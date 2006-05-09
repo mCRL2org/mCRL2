@@ -7,6 +7,7 @@
 <!ENTITY outfile "<parameter>OUTFILE</parameter>">
 <!ENTITY invariant "<parameter>INVARIANT</parameter>">
 <!ENTITY number "<parameter>NUMBER</parameter>">
+<!ENTITY prefix "<parameter>PREFIX</parameter>">
 <!ENTITY strategy "<parameter>STRATEGY</parameter>">
 <!ENTITY seconds "<parameter>SECONDS</parameter>">
 <!ENTITY opt_i "<option>-i</option>">
@@ -15,6 +16,7 @@
 <!ENTITY opt_m "<option>-m</option>">
 <!ENTITY opt_a "<option>-a</option>">
 <!ENTITY opt_c "<option>-c</option>">
+<!ENTITY opt_p "<option>-p</option>">
 <!ENTITY opt_h "<option>-h</option>">
 <!ENTITY opt_q "<option>-q</option>">
 <!ENTITY opt_v "<option>-v</option>">
@@ -27,6 +29,7 @@
 <!ENTITY opt_no_marking "<option>--no_marking</option>">
 <!ENTITY opt_check_all "<option>--check_all</option>">
 <!ENTITY opt_counter_example "<option>--counter-example</option>">
+<!ENTITY opt_print_dot "<option>--print-dot</option>">
 <!ENTITY opt_help "<option>--help</option>">
 <!ENTITY opt_version "<option>--version</option>">
 <!ENTITY opt_quiet "<option>--quiet</option>">
@@ -227,11 +230,24 @@
         Give a valuation for which the confluence
         condition does not hold, in case the
         encountered condition is neither a
-        contradiction nor a tautolgy.
+        contradiction nor a tautolgy
       </para>
     </listitem>
   </varlistentry>
 
+  <varlistentry>
+    <term>&opt_p;</term>
+    <term>&opt_print_dot;</term>
+    <listitem>
+      <para>
+        Save a .dot file of the resulting BDD in
+        case two summands cannot be proven
+        confluent. PREFIX will be used as prefix
+        of the output files
+      </para>
+    </listitem>
+  </varlistentry>
+  
   <varlistentry>
     <term>&opt_h;</term>
     <term>&opt_help;</term>

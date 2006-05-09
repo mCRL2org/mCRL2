@@ -2,8 +2,8 @@
 #define  VERSION   "0.0.1"
 #define  AUTHOR    "Luc Engelen"
 
-#include "confluencechecker.h"
-#include "invariantchecker.h"
+#include "confluence_checker.h"
+#include "invariant_checker.h"
 #include "getopt.h"
 #include "libprint_c.h"
 #include "libstruct.h"
@@ -23,6 +23,7 @@
       bool f_no_marking;
       bool f_check_all;
       bool f_counter_example;
+      char* f_dot_file_name;
       RewriteStrategy f_strategy;
       int f_time_limit;
       ATermAppl f_lpe;
@@ -66,6 +67,10 @@
         "                                  condition does not hold, in case the\n"
         "                                  encountered condition is neither a\n"
         "                                  contradiction nor a tautolgy.\n"
+        "  -p, --print-dot=PREFIX          Save a .dot file of the resulting BDD in\n"
+        "                                  case two summands cannot be proven\n"
+        "                                  confluent. PREFIX will be used as prefix\n"
+        "                                  of the output files.\n"
         "  -h, --help                      Display this help and terminate.\n"
         "      --version                   Display version information and terminate.\n"
         "  -q, --quiet                     Do not display warning messages.\n"
@@ -109,6 +114,7 @@
       f_no_marking = false;
       f_check_all = false;
       f_counter_example = false;
+      f_dot_file_name = 0;
       f_strategy = GS_REWR_JITTY;
       f_time_limit = 0;
     }
@@ -122,7 +128,7 @@
     // --------------------------------------------------------------------------------------------
 
     void LPE_Conf_Check::get_options(int a_argc, char* a_argv[]) {
-      char* v_short_options = "i:s:nmachqvdr:t:";
+      char* v_short_options = "i:s:nmacp:hqvdr:t:";
 
       f_tool_command = a_argv[0];
 
@@ -133,6 +139,7 @@
         {"no-marking",       no_argument,       0, 'm'},
         {"check-all",        no_argument,       0, 'a'},
         {"counter-example",  no_argument,       0, 'c'},
+        {"print-dot",        required_argument, 0, 'p'},
         {"help",             no_argument,       0, 'h'},
         {"version",          no_argument,       0, 0x1},
         {"quiet",            no_argument,       0, 'q'},
@@ -169,6 +176,9 @@
             break;
           case 'c':
             f_counter_example = true;
+            break;
+          case 'p':
+            f_dot_file_name = strdup(optarg);
             break;
           case 'h':
             print_help();
@@ -263,8 +273,11 @@
     // --------------------------------------------------------------------------------------------
 
     void LPE_Conf_Check::check_confluence_and_mark() {
-      Confluence_Checker v_confluence_checker(f_strategy, f_time_limit, f_lpe, f_no_marking, f_check_all, f_counter_example);
+      Confluence_Checker v_confluence_checker(f_strategy, f_time_limit, f_lpe, f_no_marking, f_check_all, f_counter_example, f_dot_file_name);
 
+      if (f_invariant == 0) {
+        f_invariant = gsMakeOpIdTrue();
+      }
       f_lpe = v_confluence_checker.check_confluence_and_mark(f_invariant, f_summand_number);
     }
 

@@ -3,7 +3,7 @@
 #define  AUTHOR    "Luc Engelen"
 
 #include "getopt.h"
-#include "invariantchecker.h"
+#include "invariant_checker.h"
 #include "libprint_c.h"
 #include "libstruct.h"
 #include "mcrl2_revision.h"

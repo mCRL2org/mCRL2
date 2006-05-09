@@ -35,8 +35,32 @@
       f_full = a_full;
     }
 
-// Class ATerm_Info -------------------------------------------------------------------------------
-  // Class ATerm_Info - Functions declared private ------------------------------------------------
+
+    // --------------------------------------------------------------------------------------------
+
+    Compare_Result ATerm_Info::compare_guard(ATerm a_guard1, ATerm a_guard2) {
+      return lexico(
+               lexico(
+                 compare_guard_structure(a_guard1, a_guard2),
+                 compare_guard_equation(a_guard1, a_guard2)
+               ),
+               compare_address(a_guard1, a_guard2)
+             );
+    }
+
+    // --------------------------------------------------------------------------------------------
+
+    Compare_Result ATerm_Info::compare_term(ATerm a_term1, ATerm a_term2) {
+      return lexico(
+               lexico(
+                 compare_term_occurs(a_term1, a_term2),
+                 compare_term_type(a_term1, a_term2)
+               ),
+               compare_address(a_term1, a_term2)
+             );
+    }
+
+  // Class ATerm_Info - Functions declared protected ----------------------------------------------
 
     int ATerm_Info::get_guard_structure(ATerm a_guard) {
       if (is_variable(a_guard)) {
@@ -88,18 +112,6 @@
 
     // --------------------------------------------------------------------------------------------
 
-    Compare_Result ATerm_Info::compare_guard(ATerm a_guard1, ATerm a_guard2) {
-      return lexico(
-               lexico(
-                 compare_guard_structure(a_guard1, a_guard2),
-                 compare_guard_equation(a_guard1, a_guard2)
-               ),
-               compare_address(a_guard1, a_guard2)
-             );
-    }
-
-    // --------------------------------------------------------------------------------------------
-
     Compare_Result ATerm_Info::compare_term_type(ATerm a_term1, ATerm a_term2) {
       if (is_variable(a_term1) && !is_variable(a_term2)) {
         return compare_result_bigger;
@@ -120,18 +132,6 @@
         return compare_result_bigger;
       }
       return compare_result_equal;
-    }
-
-    // --------------------------------------------------------------------------------------------
-
-    Compare_Result ATerm_Info::compare_term(ATerm a_term1, ATerm a_term2) {
-      return lexico(
-               lexico(
-                 compare_term_occurs(a_term1, a_term2),
-                 compare_term_type(a_term1, a_term2)
-               ),
-               compare_address(a_term1, a_term2)
-             );
     }
 
 // Class AI_Jitty ---------------------------------------------------------------------------------

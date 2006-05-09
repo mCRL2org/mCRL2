@@ -2,8 +2,8 @@
 #define  VERSION   "0.0.1"
 #define  AUTHOR    "Luc Engelen"
 
-#include "invarianteliminator.h"
-#include "invariantchecker.h"
+#include "invariant_eliminator.h"
+#include "invariant_checker.h"
 #include "getopt.h"
 #include "libprint_c.h"
 #include "liblowlevel.h"
