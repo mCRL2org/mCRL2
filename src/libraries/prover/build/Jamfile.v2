@@ -10,12 +10,12 @@ project prover
 
 lib prover
        : prover.cpp
-         bddprover.cpp
-         confluencechecker.cpp
-         disjointnesschecker.cpp
-         formulachecker.cpp
-         invariantchecker.cpp
-         invarianteliminator.cpp
+         bdd_prover.cpp
+         confluence_checker.cpp
+         disjointness_checker.cpp
+         formula_checker.cpp
+         invariant_checker.cpp
+         invariant_eliminator.cpp
        : <dependency>/libraries/auxiliary//auxiliary
        :
        : <library>/libraries/auxiliary//auxiliary

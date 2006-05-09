@@ -105,7 +105,7 @@ void GraphFrame::OnPaint(wxPaintEvent& evt) {
         vectNode[n]->OnPaint(&myDC);
     }
 	
-	OptimizeDrawing();
+//	OptimizeDrawing();
 
 }
 

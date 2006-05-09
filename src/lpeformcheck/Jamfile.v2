@@ -13,10 +13,22 @@ exe lpeformcheck
 
 include $(TOP)/config.jam ;
 
-explicit install ;
+explicit install install-libraries install-binaries ;
 
-install install
+alias install
+       : install-libraries
+         install-binaries
+       ;
+
+install install-binaries
        : lpeformcheck
        : <dll-path>$(LIB_DIR)
          <location>$(BIN_DIR)
        ;
+
+install install-libraries
+      : lpeformcheck
+      : <install-dependencies>on <install-type>LIB
+      : <location>$(LIB_DIR)
+      ;
+

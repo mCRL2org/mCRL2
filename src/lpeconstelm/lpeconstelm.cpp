@@ -983,6 +983,7 @@ void set_basic_configuration_display(sip::tool::communicator& tc) {
   column->add(new checkbox("remove single element sorts", true), layout::left);
   column->add(new checkbox("remove summands that are not visited", true), layout::left);
   column->add(new checkbox("take summand conditions into account", true), layout::left);
+  column->add(new button("OK"), layout::right);
 
   /* Attach columns*/
   layout_manager->add(column, margins(0,5,0,5));

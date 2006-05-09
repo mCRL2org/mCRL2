@@ -22,7 +22,7 @@ lib aterm
          memory.c
          tafio.c
          version.c
-       : <link>static
+       : <link>shared
          <address-model>64:<define>AT_64BIT
          <cflags>-fPIC
          <toolset>darwin:<cflags>"-fPIC -fno-common"
