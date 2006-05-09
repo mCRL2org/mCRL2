@@ -66,7 +66,7 @@ namespace sip {
         virtual void read_structure(xml2pp::text_reader&) = 0; 
 
         /** \brief Set the callback function that is used to instantiate a layout element */
-        virtual mediator::wrapper_aptr instantiate(layout::mediator*) const = 0;
+        virtual mediator::wrapper_aptr instantiate(layout::mediator*) = 0;
 
         /** \brief Abstract destructor */
         virtual ~element() = 0;

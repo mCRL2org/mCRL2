@@ -9,6 +9,7 @@ namespace sip {
   namespace layout {
 
     class manager;
+    class element;
     class constraints;
 
     /** \brief Abstract base class for interaction with a layout element */
@@ -59,22 +60,22 @@ namespace sip {
         virtual aptr build_horizontal_box() = 0;
 
         /** \brief Instantiates a label (static text) */
-        virtual wrapper_aptr build_label(std::string const&) = 0;
+        virtual wrapper_aptr build_label(layout::element*, std::string const&) = 0;
 
         /** \brief Instantiates a label */
-        virtual wrapper_aptr build_button(std::string const&) = 0;
+        virtual wrapper_aptr build_button(layout::element*, std::string const&) = 0;
 
         /** \brief Instantiates a single radio button */
-        virtual wrapper_aptr build_radio_button(std::string const&) = 0;
+        virtual wrapper_aptr build_radio_button(layout::element*, std::string const&) = 0;
 
         /** \brief Instantiates a single radio button */
-        virtual wrapper_aptr build_checkbox(std::string const&, const bool status) = 0;
+        virtual wrapper_aptr build_checkbox(layout::element*, std::string const&, const bool status) = 0;
 
         /** \brief Instantiates a progress bar */
-        virtual wrapper_aptr build_progress_bar(unsigned int const&, unsigned int const&, unsigned int const&) = 0;
+        virtual wrapper_aptr build_progress_bar(layout::element*, unsigned int const&, unsigned int const&, unsigned int const&) = 0;
 
         /** \brief Instantiates a single line text input control */
-        virtual wrapper_aptr build_text_field(std::string const&) = 0;
+        virtual wrapper_aptr build_text_field(layout::element*, std::string const&) = 0;
 
         /** \brief Destructor */
         virtual ~mediator() = 0;

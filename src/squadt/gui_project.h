@@ -2,6 +2,7 @@
 #define SQUADT_PROJECT_H
 
 #include <boost/shared_ptr.hpp>
+#include <boost/function.hpp>
 #include <boost/filesystem/path.hpp>
 
 #include <wx/wx.h>
@@ -73,7 +74,7 @@ namespace squadt {
           private:
        
             /** \brief The list of tool displays that need to be updated */
-            std::deque < tool_display* >  tool_displays;
+            std::deque < boost::function < void () > > tasks;
        
           private:
        
@@ -86,7 +87,7 @@ namespace squadt {
             builder();
        
             /** \brief Schedule a tool display for update */
-            void schedule_update(tool_display*);
+            void schedule_update(boost::function < void () >);
         };
        
       private:
@@ -127,7 +128,7 @@ namespace squadt {
         void add_to_context_menu(const storage_format&, const miscellaneous::tool_selection_helper::tools_by_category::value_type&, wxMenu*, int*);
 
         /** \brief Add a new tool display to the process_display_view */
-        GUI::tool_display* add_tool_display();
+        GUI::tool_display* add_tool_display(processor::reporter::sptr);
 
       public:
 

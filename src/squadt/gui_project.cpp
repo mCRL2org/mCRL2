@@ -1,4 +1,5 @@
 #include <stack>
+#include <utility>
 
 #include <boost/bind.hpp>
 #include <boost/ref.hpp>
@@ -29,20 +30,18 @@ namespace squadt {
     }
     
     void project::builder::process(wxIdleEvent&) {
-      while (0 < tool_displays.size()) {
-        tool_display* t = tool_displays.front();
+      while (0 < tasks.size()) {
+        boost::function < void () > task = tasks.front();
 
-        tool_displays.pop_front();
+        tasks.pop_front();
 
-        t->instantiate();
-
-        t->Show(true);
-        t->GetSizer()->Layout();
+        /* Execute task */
+        task();
       }
     }
     
-    void project::builder::schedule_update(tool_display* t) {
-      tool_displays.push_back(t);
+    void project::builder::schedule_update(boost::function < void () > l) {
+      tasks.push_back(l);
     }
         
     project::~project() {
@@ -152,10 +151,13 @@ namespace squadt {
       PushEventHandler(&gui_builder);
     }
 
-    GUI::tool_display* project::add_tool_display() {
+    /**
+     * @param[in] p the processor::reporter that is connected to the associated tool process
+     **/
+    GUI::tool_display* project::add_tool_display(processor::reporter::sptr p) {
       wxSizer* s = process_display_view->GetSizer();
 
-      GUI::tool_display* display = new GUI::tool_display(process_display_view, this);
+      GUI::tool_display* display = new GUI::tool_display(process_display_view, this, p);
 
       s->Insert(0, display, 0, wxEXPAND|wxALL, 2);
 
@@ -316,7 +318,7 @@ namespace squadt {
             global_tool_manager->find(std::string(menu_item->GetLabel().fn_str()));
 
             /* Attach tool display */
-            GUI::tool_display* display = add_tool_display();
+            GUI::tool_display* display = add_tool_display(tp->get_monitor());
 
             tp->get_monitor()->set_layout_handler(boost::bind(&GUI::tool_display::set_layout, display, _1));
 

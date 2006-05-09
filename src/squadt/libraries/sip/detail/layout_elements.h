@@ -35,7 +35,7 @@ namespace sip {
           inline label(std::string);
      
           /** \brief Instantiate a layout element, through a mediator */
-          inline layout::mediator::wrapper_aptr instantiate(layout::mediator*) const;
+          inline layout::mediator::wrapper_aptr instantiate(layout::mediator*);
 
           /** \brief Write out the layout structure in XML format */
           inline void write_structure(std::ostream&);
@@ -72,8 +72,8 @@ namespace sip {
       /**
        * @param m the mediator object to use
        **/
-      inline layout::mediator::wrapper_aptr label::instantiate(layout::mediator* m) const {
-        return (m->build_label(text));
+      inline layout::mediator::wrapper_aptr label::instantiate(layout::mediator* m) {
+        return (m->build_label(this, text));
       }
      
       /** \brief A basic button widget */
@@ -98,7 +98,7 @@ namespace sip {
           inline button(std::string);
      
           /** \brief Instantiate a layout element, through a mediator */
-          inline layout::mediator::wrapper_aptr instantiate(layout::mediator*) const;
+          inline layout::mediator::wrapper_aptr instantiate(layout::mediator*);
 
           /** \brief Write out the layout structure in XML format */
           inline void write_structure(std::ostream&);
@@ -135,8 +135,8 @@ namespace sip {
       /**
        * @param m the mediator object to use
        **/
-      inline layout::mediator::wrapper_aptr button::instantiate(layout::mediator* m) const {
-        return (m->build_button(label));
+      inline layout::mediator::wrapper_aptr button::instantiate(layout::mediator* m) {
+        return (m->build_button(this, label));
       }
      
       /**
@@ -177,7 +177,7 @@ namespace sip {
           inline radio_button(std::string, radio_button*);
      
           /** \brief Instantiate a layout element, through a mediator */
-          inline layout::mediator::wrapper_aptr instantiate(layout::mediator*) const;
+          inline layout::mediator::wrapper_aptr instantiate(layout::mediator*);
 
           /** \brief Write out the layout structure in XML format */
           inline void write_structure(std::ostream&);
@@ -223,8 +223,8 @@ namespace sip {
       /**
        * @param m the mediator object to use
        **/
-      inline layout::mediator::wrapper_aptr radio_button::instantiate(layout::mediator* m) const {
-        return (m->build_radio_button(label));
+      inline layout::mediator::wrapper_aptr radio_button::instantiate(layout::mediator* m) {
+        return (m->build_radio_button(this, label));
       }
      
       /**
@@ -255,7 +255,7 @@ namespace sip {
           inline checkbox(std::string, bool);
      
           /** \brief Instantiate a layout element, through a mediator */
-          inline layout::mediator::wrapper_aptr instantiate(layout::mediator*) const;
+          inline layout::mediator::wrapper_aptr instantiate(layout::mediator*);
 
           /** \brief Write out the layout structure in XML format */
           inline void write_structure(std::ostream&);
@@ -297,8 +297,8 @@ namespace sip {
       /**
        * @param m the mediator object to use
        **/
-      inline layout::mediator::wrapper_aptr checkbox::instantiate(layout::mediator* m) const {
-        return (m->build_checkbox(label, status));
+      inline layout::mediator::wrapper_aptr checkbox::instantiate(layout::mediator* m){
+        return (m->build_checkbox(this, label, status));
       }
 
       /** \brief A basic button widget */
@@ -330,7 +330,7 @@ namespace sip {
           inline progress_bar(const unsigned int, const unsigned int, const unsigned int);
      
           /** \brief Instantiate a layout element, through a mediator */
-          inline layout::mediator::wrapper_aptr instantiate(layout::mediator*) const;
+          inline layout::mediator::wrapper_aptr instantiate(layout::mediator*);
 
           /** \brief Write out the layout structure in XML format */
           inline void write_structure(std::ostream&);
@@ -374,8 +374,8 @@ namespace sip {
       /**
        * @param m the mediator object to use
        **/
-      inline layout::mediator::wrapper_aptr progress_bar::instantiate(layout::mediator* m) const {
-        return (m->build_progress_bar(minimum, maximum, current));
+      inline layout::mediator::wrapper_aptr progress_bar::instantiate(layout::mediator* m) {
+        return (m->build_progress_bar(this, minimum, maximum, current));
       }
      
       /**
@@ -409,7 +409,7 @@ namespace sip {
           inline text_field(const std::string& i, basic_datatype* = &standard_string);
      
           /** \brief Instantiate a layout element, through a mediator */
-          inline layout::mediator::wrapper_aptr instantiate(layout::mediator*) const;
+          inline layout::mediator::wrapper_aptr instantiate(layout::mediator*);
 
           /** \brief Write out the layout structure in XML format */
           inline void write_structure(std::ostream&);
@@ -451,8 +451,8 @@ namespace sip {
       /**
        * @param m the mediator object to use
        **/
-      inline layout::mediator::wrapper_aptr text_field::instantiate(layout::mediator* m) const {
-        return (m->build_text_field(text));
+      inline layout::mediator::wrapper_aptr text_field::instantiate(layout::mediator* m) {
+        return (m->build_text_field(this, text));
       }
     }
   }

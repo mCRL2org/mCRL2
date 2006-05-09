@@ -134,7 +134,7 @@ namespace squadt {
     return (tool_descriptor);
   }
 
-  inline const processor::reporter::ptr processor::get_monitor() {
+  inline const processor::reporter::sptr processor::get_monitor() {
     return (monitor);
   }
 

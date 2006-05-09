@@ -121,7 +121,7 @@ namespace sip {
         static aptr static_read_structure(xml2pp::text_reader&); 
 
         /** \brief Instantiate a layout element, through a mediator */
-        virtual mediator::wrapper_aptr instantiate(layout::mediator*) const = 0;
+        virtual mediator::wrapper_aptr instantiate(layout::mediator*) = 0;
 
         /** \brief Destructor */
         virtual ~manager() = 0;
@@ -174,7 +174,7 @@ namespace sip {
         inline void add(element*, visibility const& = manager::default_visibility);
 
         /** \brief Instantiate a layout element, through a mediator */
-        virtual mediator::wrapper_aptr instantiate(layout::mediator*) const = 0;
+        virtual mediator::wrapper_aptr instantiate(layout::mediator*) = 0;
 
         /** \brief Destructor */
         virtual ~box() = 0;
@@ -215,7 +215,7 @@ namespace sip {
         void write_structure(std::ostream&);
 
         /** \brief Instantiate a layout element, through a mediator */
-        inline mediator::wrapper_aptr instantiate(layout::mediator*) const;
+        inline mediator::wrapper_aptr instantiate(layout::mediator*);
     };
 
     /**
@@ -253,7 +253,7 @@ namespace sip {
         void write_structure(std::ostream&);
 
         /** \brief Instantiate a layout element, through a mediator */
-        inline mediator::wrapper_aptr instantiate(layout::mediator*) const;
+        inline mediator::wrapper_aptr instantiate(layout::mediator*);
     };
 
     /**
@@ -409,14 +409,14 @@ namespace sip {
     /**
      * @param m the mediator object to use
      **/
-    inline layout::mediator::wrapper_aptr vertical_box::instantiate(layout::mediator* m) const {
+    inline layout::mediator::wrapper_aptr vertical_box::instantiate(layout::mediator* m) {
       return (box::instantiate(m->build_vertical_box()));
     }
 
     /**
      * @param m the mediator object to use
      **/
-    inline layout::mediator::wrapper_aptr horizontal_box::instantiate(layout::mediator* m) const {
+    inline layout::mediator::wrapper_aptr horizontal_box::instantiate(layout::mediator* m) {
       return (box::instantiate(m->build_horizontal_box()));
     }
 
