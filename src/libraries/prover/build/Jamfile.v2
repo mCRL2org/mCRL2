@@ -18,5 +18,5 @@ lib prover
          invarianteliminator.cpp
        : <dependency>/libraries/auxiliary//auxiliary
        :
-       : <dependency>/libraries/auxiliary//auxiliary
+       : <library>/libraries/auxiliary//auxiliary
        ;

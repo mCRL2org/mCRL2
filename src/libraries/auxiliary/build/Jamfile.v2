@@ -18,5 +18,5 @@ lib auxiliary
          utilities.cpp
        : <dependency>/libraries/temporary//print
        :
-       : <dependency>/libraries/temporary//print
+       : <library>/libraries/temporary//print
        ;
