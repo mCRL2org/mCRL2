@@ -16,7 +16,10 @@
 <!ENTITY opt_o "<option>-o</option>">
 <!ENTITY opt_s "<option>-s</option>">
 <!ENTITY opt_n "<option>-n</option>">
+<!ENTITY opt_e "<option>-e</option>">
 <!ENTITY opt_a "<option>-a</option>">
+<!ENTITY opt_y "<option>-y</option>">
+<!ENTITY opt_c "<option>-c</option>">
 <!ENTITY opt_h "<option>-h</option>">
 <!ENTITY opt_q "<option>-q</option>">
 <!ENTITY opt_v "<option>-v</option>">
@@ -28,7 +31,10 @@
 <!ENTITY opt_output "<option>--output</option>">
 <!ENTITY opt_summand "<option>--summand</option>">
 <!ENTITY opt_no_check "<option>--no-check</option>">
+<!ENTITY opt_no_elimination "<option>--no-elimination</option>">
 <!ENTITY opt_simplify_all "<option>--simplify-all</option>">
+<!ENTITY opt_all_violations "<option>--all-violations</option>">
+<!ENTITY opt_counter_example "<option>--counter-example</option>">
 <!ENTITY opt_help "<option>--help</option>">
 <!ENTITY opt_version "<option>--version</option>">
 <!ENTITY opt_quiet "<option>--quiet</option>">
@@ -69,9 +75,11 @@
 <refsect1>
   <title>Description</title>
   <para>
-    The &lpeinvelm; tool uses the invariant as found in &invariant; to eliminate unreachable
-    summands of the mCRL2 LPE as found in &lpe;. It can also be used to simplify the summands
-    of the given LPE. The resulting LPE is written to the file named &output;.
+    The &lpeinvelm; tool checks whether the invariant in internal mCRL2 format as found in
+    &invariant; holds for the mCRL2 LPE as found in &lpe;. If the invariant holds, it will
+    eliminate all summand of the LPE that are proven to be unreachable using the invariant.
+    It can also be used to simplify the conditions of the summands of the given LPE.
+    The resulting LPE is written to the file named &output;.
   </para>
 
   <para>
@@ -90,13 +98,21 @@
               + sum ei: Ei. ci(d, ei) -> ai(fi(d, ei)) . P(gi(d, ei))
               + ...;
     </literallayout>
-    the tool &lpeinvelm; will generate a formula of the form
+    a formula of the form
+    <literallayout>
+      inv(d) /\ ci(d, ei) => inv(gi(d, ei))
+    </literallayout>
+    is generated for each of the summands, where inv() is the formula passed using the option &opt_invariant;. This formula is an invariant of the
+    LPE if it holds in the initial state and all the generated formulas are tautologies.
+  </para>
+  <para>
+    The invariant is used to eliminate summands as follows. A formula of the form
     <literallayout>
       inv(d) /\ ci(d, ei)
     </literallayout>
-    for each of the summands or for the chosen summand only, where inv() is the invariant passed using the option &opt_invariant;. It will then
-    use a prover for propositional formulas to see if the formula is a contradiction. If the formula is a contradiction for some summand,
-    this summand will be eliminated from the LPE.
+    is generated for each of the summands or for the summand indicated using the option &opt_summand; only. The tool uses a prover for
+    propositional formulas to see if the generated formula is a contradiction. If the formula is a contradiction for some summand, this summand
+    will be eliminated from the LPE.
   </para>
 
   <para>
@@ -153,7 +169,7 @@
     <term>&opt_output;=&output;</term>
     <listitem>
       <para>
-        write the resulting LPE to the file named &output;
+        Write the resulting LPE to the file named &output;
       </para>
     </listitem>
   </varlistentry>
@@ -179,12 +195,44 @@
   </varlistentry>
 
   <varlistentry>
+    <term>&opt_e;</term>
+    <term>&opt_no_elimination;</term>
+    <listitem>
+      <para>
+        Do not eliminate or simplify summands
+      </para>
+    </listitem>
+  </varlistentry>
+
+  <varlistentry>
     <term>&opt_a;</term>
     <term>&opt_simplify_all;</term>
     <listitem>
       <para>
         Simplify the conditions of all summands, instead of just eliminating the summands
-        whose conditions are contradictions
+        whose conditions in conjunction with the invariant are contradictions
+      </para>
+    </listitem>
+  </varlistentry>
+
+  <varlistentry>
+    <term>&opt_y;</term>
+    <term>&opt_all_violations;</term>
+    <listitem>
+      <para>
+        Do not terminate as soon as a violation of the invariant is found, but report
+        all violations instead
+      </para>
+    </listitem>
+  </varlistentry>
+
+  <varlistentry>
+    <term>&opt_c;</term>
+    <term>&opt_counter_example;</term>
+    <listitem>
+      <para>
+        Display a valuation indicating why the invariant is violated, for all
+        found violations of the invariant
       </para>
     </listitem>
   </varlistentry>

@@ -21,7 +21,10 @@
       char* f_output_file_name;
       int f_summand_number;
       bool f_no_check;
+      bool f_no_elimination;
       bool f_simplify_all;
+      bool f_all_violations;
+      bool f_counter_example;
       RewriteStrategy f_strategy;
       int f_time_limit;
       ATermAppl f_lpe;
@@ -44,10 +47,11 @@
     void LPE_Inv_Elm::print_help() {
       fprintf(stderr,
         "Usage: %s [OPTION]... [--invariant=INVARIANT] [--lpe=LPE] [--output=OUTPUT]\n"
-        "This tool uses the invariant in internal mCRL2 format as found in INVARIANT to\n"
-        "eliminate unreachable summands of the mCRL2 LPE as found in LPE. It can also\n"
-        "be used to simplify the conditions of the summands of the given LPE. The\n"
-        "resulting LPE is written to the file named OUTPUT.\n"
+        "This tool checks whether the invariant in internal mCRL2 format as found in\n"
+        "INVARIANT holds for the mCRL2 LPE as found in LPE. If the invariant holds, it\n"
+        "will eliminate all summands of the LPE that are proven to be unreachable using\n"
+        "the invariant. It can also be used to simplify the conditions of the summands\n"
+        "of the given LPE. The resulting LPE is written to the file named OUTPUT.\n"
         "At least one of the arguments --invariant=INVARIANT or --lpe=LPE is required.\n"
         "If only one is given, stdin is used as the other input.\n"
         "If --ouput=OUTPUT is not used, the resulting LPE is written to stdout.\n"
@@ -56,15 +60,23 @@
         "  -i, --invariant=INVARIANT       Use the formula in internal mCRL2 format as\n"
         "                                  found in INVARIANT as invariant.\n"
         "  -l, --lpe=LPE                   Use the mCRL2 LPE as found in LPE as input.\n"
-        "  -o, --output=OUPUT              write the resulting LPE to the file named\n"
+        "  -o, --output=OUPUT              Write the resulting LPE to the file named\n"
         "                                  OUTPUT.\n"
         "  -s, --summand=NUMBER            Eliminate or simplify the summand with number\n"
         "                                  NUMBER only.\n"
         "  -n, --no-check                  Do not check if the invariant holds before\n"
         "                                  eliminating unreachable summands.\n"
+        "  -e, --no-elimination            Do not eliminate or simplify summands.\n"
         "  -a, --simplify-all              Simplify the conditions of all summands,\n"
         "                                  instead of just eliminating the summands\n"
-        "                                  whose conditions are contradictions.\n"
+        "                                  whose conditions in conjunction with the\n"
+        "                                  invariant are contradictions.\n"
+        "  -y, --all-violations            Do not terminate as soon as a violation of\n"
+        "                                  the invariant is found, but report all\n"
+        "                                  violations instead.\n"
+        "  -c, --counter-example           Display a valuation indicating why the\n"
+        "                                  invariant is violated, for all found\n"
+        "                                  violations of the invariant.\n"
         "  -h, --help                      Display this help and terminate.\n"
         "      --version                   Display version information and terminate.\n"
         "  -q, --quiet                     Do not display warning messages.\n"
@@ -105,7 +117,10 @@
       f_output_file_name = 0;
       f_summand_number = 0;
       f_no_check = false;
+      f_no_elimination = false;
       f_simplify_all = false;
+      f_all_violations = false;
+      f_counter_example = false;
       f_strategy = GS_REWR_JITTY;
       f_time_limit = 0;
 
@@ -120,7 +135,7 @@
     // --------------------------------------------------------------------------------------------
 
     void LPE_Inv_Elm::get_options(int a_argc, char* a_argv[]) {
-      char* v_short_options = "i:l:o:s:nahqvdr:t:";
+      char* v_short_options = "i:l:o:s:neaychqvdr:t:";
 
       f_tool_command = a_argv[0];
 
@@ -130,7 +145,10 @@
         {"output",           required_argument, 0, 'o'},
         {"summand",          required_argument, 0, 's'},
         {"no-check",         no_argument,       0, 'n'},
+        {"no-elimination",   no_argument,       0, 'e'},
         {"simplify-all",     no_argument,       0, 'a'},
+        {"all-violation",    no_argument,       0, 'y'},
+        {"counter-example",  no_argument,       0, 'c'},
         {"help",             no_argument,       0, 'h'},
         {"version",          no_argument,       0, 0x1},
         {"quiet",            no_argument,       0, 'q'},
@@ -165,8 +183,17 @@
           case 'n':
             f_no_check = true;
             break;
+          case 'e':
+            f_no_elimination = true;
+            break;
           case 'a':
             f_simplify_all = true;
+            break;
+          case 'y':
+            f_all_violations = true;
+            break;
+          case 'c':
+            f_counter_example = true;
             break;
           case 'h':
             print_help();
@@ -245,7 +272,7 @@
 
     bool LPE_Inv_Elm::check_invariant() {
       if (!f_no_check) {
-        Invariant_Checker v_invariant_checker(f_strategy, f_time_limit, f_lpe, false, false);
+        Invariant_Checker v_invariant_checker(f_strategy, f_time_limit, f_lpe, f_counter_example, f_all_violations);
 
         return v_invariant_checker.check_invariant(f_invariant);
       } else {
@@ -257,15 +284,19 @@
     // --------------------------------------------------------------------------------------------
 
     void LPE_Inv_Elm::simplify() {
-      Invariant_Eliminator v_invariant_eliminator(f_strategy, f_time_limit, f_lpe, f_simplify_all);
+      if (!f_no_elimination) {
+        Invariant_Eliminator v_invariant_eliminator(f_strategy, f_time_limit, f_lpe, f_simplify_all);
 
-      f_lpe = v_invariant_eliminator.simplify(f_invariant, f_summand_number);
+        f_lpe = v_invariant_eliminator.simplify(f_invariant, f_summand_number);
+      }
     }
 
     // --------------------------------------------------------------------------------------------
 
     void LPE_Inv_Elm::write_result() {
-      write_ATerm_to_file(f_output_file_name, f_lpe, "resulting LPE");
+      if (!f_no_elimination) {
+        write_ATerm_to_file(f_output_file_name, f_lpe, "resulting LPE");
+      }
     }
 
 // Main function ----------------------------------------------------------------------------------

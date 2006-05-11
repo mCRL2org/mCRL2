@@ -72,9 +72,9 @@
   &par_time_limit;, and with the data specification of the LPE passed as parameter &par_lpe;. If the parameter &par_counter_example; is set, a so
   called counter example will be printed to &stderr; when a summand is encountered that violates the invariant. A counter example is a valuation
   for which the formula to be proven does not
-  hold. If the parameter &par_all; is set, the invariant checker will not stop as soon as a violation of the invariant is found, but will report all
-  violations instead. The function &invariant_checker_check_invariant; indicates whether the invariant passed as parameter &par_invariant; is an
-  invariant of the given LPE.
+  hold. If the parameter &par_all; is set, the invariant checker will not stop as soon as a violation of the invariant is found, but will report
+  all violations instead. The function &invariant_checker_check_invariant; indicates whether the invariant passed as parameter &par_invariant; is
+  an invariant of the given LPE.
 </para>
 <para>
   Given an LPE,
@@ -87,8 +87,8 @@
   <literallayout>
     inv(d) /\ ci(d, ei) => inv(gi(d, ei))
   </literallayout>
-  for each of the summands, where inv() is the formula passed as parameter &par_invariant;. If the invariant holds for the initial state and all
-  the generated formulas are tautologies according to the prover, the formula passed as parameter &par_invariant; is an invariant.
+  for each of the summands, where inv() is the formula passed as parameter &par_invariant;. If this formula passed as parameter
+  &par_invariant; holds for the initial state and all the generated formulas are tautologies according to the prover, it is an invariant.
 </para>
 </refsect1>
 

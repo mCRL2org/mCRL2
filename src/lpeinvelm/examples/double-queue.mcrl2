@@ -1,12 +1,12 @@
-% This specification serves as an example of the use of lpeinvcheck and
-% lpeinvelm. It specifies a component called Q that has two process
-% parameters, q1 and q2 of type Queue. q1 == q2 holds as an invariant
-% for this specification.
+% This specification serves as an example of the use of lpeinvelm. It
+% specifies a component called Q that has two process parameters, q1
+% and q2 of type Queue. q1 == q2 holds as an invariant for this
+% specification.
 %
 %
-% lpeinvelm and lpeinvcheck take invariants in internal mCRL2 format as
-% input. The representation of q1 == q2 in internal mCRL2 format is as
-% follows:
+% lpeinvelm takes an invariant in internal mCRL2 format as input. The
+% representation of q1 == q2 in internal mCRL2 format is as follows:
+%
 % DataAppl(
 %   DataAppl(
 %     OpId("==",SortArrow(SortId("Queue"),SortArrow(SortId("Queue"),SortId("Bool")))),
@@ -16,14 +16,8 @@
 % )
 % 
 %
-% After storing this invariant in a file called "inv", it can be checked
-% using the following commands:
-%
-% mcrl22lpe double-queue.mcrl2 double-queue.lpe
-% lpeinvcheck -i inv -l double-queue.lpe
-%
-%
-% The invariant can be used to simplify an lpe as follows:
+% After storing this invariant in a file called "inv", it can be used to
+% simplify an lpe as follows:
 %
 % mcrl22lpe -n double-queue.mcrl2 double-queue.lpe
 % lpeinvelm -i inv -l double-queue.lpe -o double-queue-elm.lpe
