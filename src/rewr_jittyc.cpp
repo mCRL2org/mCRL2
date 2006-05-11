@@ -1149,7 +1149,7 @@ static ATermList create_strategy(ATermList rules, int opid)
 		ATermList m = ATmakeList0();
 		DECL_A(args,int,arity);
 		DECL_A(bs,bool,arity);
-//printf("arity = %i\n",arity);
+//fprintf(stderr,"arity = %i\n",arity);
 
 		// Maintain dependency count (i.e. the number of rules that depend on a given argument)
 		for (unsigned int i = 0; i < arity; i++)
@@ -1172,8 +1172,8 @@ static ATermList create_strategy(ATermList rules, int opid)
 
 //gsfprintf(stderr,"rule: %T\n",ATgetFirst(rules));
 //gsfprintf(stderr,"rule: %T\n",ATAelementAt(ATLgetFirst(rules),2));
-//gsfprintf(stderr,"rule: "); PrintPart_C(stderr,fromInner(ATAelementAt(ATgetFirst(rules),2))); gsfprintf(stderr,"\n");
-//gsprintf("pars: %T\n",pars);
+//gsfprintf(stderr,"rule: %P\n",fromRewriteFormat(ATelementAt(ATLgetFirst(rules),2)));
+//gsfprintf(stderr,"pars: %T\n",pars);
 
 				// Indices of arguments that need to be rewritten
 				for (unsigned int i = 0; i < arity; i++)
@@ -1188,6 +1188,19 @@ static ATermList create_strategy(ATermList rules, int opid)
 					{
 						// Argument is not a variable, so it needs to be rewritten
 						bs[i] = true;
+						ATermList evars = get_vars(ATgetArgument(pars,i+1));
+						for (; !ATisEmpty(evars); evars=ATgetNext(evars))
+						{
+						int j=0;
+						for (ATermList o=ATgetNext(vars); !ATisEmpty(o); o=ATgetNext(o))
+						{
+							if ( ATindexOf(ATLgetFirst(o),ATgetFirst(evars),0) >= 0 )
+							{
+									bs[j] = true;
+							}
+							j++;
+						}
+						}
 					} else {
 						// Argument is a variable; check whether it occurred before
 						int j = -1;
@@ -1246,7 +1259,7 @@ static ATermList create_strategy(ATermList rules, int opid)
 			{
 				if ( ATisEmpty(ATLgetFirst(ATLgetFirst(m))) )
 				{
-//gsprintf("add: %T\n",ATgetFirst(ATgetNext(ATLgetFirst(m))));
+//gsfprintf(stderr,"add: %T\n",ATgetFirst(ATgetNext(ATLgetFirst(m))));
 					m3 = ATinsert(m3, ATgetFirst(ATgetNext(ATLgetFirst(m))));
 					//strat = ATinsert(strat, ATgetFirst(ATgetNext(ATLgetFirst(m))));
 				} else {

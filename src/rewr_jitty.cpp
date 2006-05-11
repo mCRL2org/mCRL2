@@ -234,6 +234,19 @@ static ATermList create_strategy(ATermList rules)
 					if ( !gsIsDataVarId(ATAgetArgument(pars,i+1)) )
 					{
 						bs[i] = true;
+						ATermList evars = get_vars(ATgetArgument(pars,i+1));
+						for (; !ATisEmpty(evars); evars=ATgetNext(evars))
+						{
+						int j=0;
+						for (ATermList o=ATgetNext(vars); !ATisEmpty(o); o=ATgetNext(o))
+						{
+							if ( ATindexOf(ATLgetFirst(o),ATgetFirst(evars),0) >= 0 )
+							{
+									bs[j] = true;
+							}
+							j++;
+						}
+						}
 						vars = ATappend(vars,(ATerm) get_vars(ATgetArgument(pars,i+1)));
 					} else {
 						int j = -1;
