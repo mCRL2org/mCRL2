@@ -85,7 +85,7 @@ namespace sip {
      * @param t the message type on which delivery h is to be executed
      **/
     template < class M >
-    inline void basic_messenger< M >::set_handler(handler_type h, const typename M::type_identifier_t t) {
+    inline void basic_messenger< M >::add_handler(const typename M::type_identifier_t t, handler_type h) {
       handlers[t] = h;
     }
 
@@ -93,8 +93,21 @@ namespace sip {
      * @param t the message type for which to clear the event handler
      **/
     template < class M >
-    inline void basic_messenger< M >::unset_handler(const typename M::type_identifier_t t) {
+    inline void basic_messenger< M >::clear_handlers(const typename M::type_identifier_t t) {
       handlers.erase(t);
+    }
+ 
+    /**
+     * @param t the message type for which to clear the event handler
+     * @param h the handler to remove
+     **/
+    template < class M >
+    inline void basic_messenger< M >::remove_handler(const typename M::type_identifier_t t, handler_type h) {
+      typename handler_map::const_iterator i = std::find_if(handlers.begin(), handlers.end(), boost::bind(&boost::function_equal, h, _1));
+
+      if (i != handlers.end()) {
+        handlers.erase(i);
+      }
     }
  
     /**
@@ -349,10 +362,10 @@ namespace sip {
         if (stored) {
           chained_handler = handlers[t];
 
-          set_handler(bind(basic_messenger< M >::deliver_to_waiter, _1, _2, ref(p), handlers[t]), t);
+          add_handler(t, bind(basic_messenger< M >::deliver_to_waiter, _1, _2, ref(p), handlers[t]));
         }
         else {
-          set_handler(bind(basic_messenger< M >::deliver_to_waiter, _1, _2, ref(p)), t);
+          add_handler(t, bind(basic_messenger< M >::deliver_to_waiter, _1, _2, ref(p)));
         }
         
         if (waiters.count(t) == 0) {

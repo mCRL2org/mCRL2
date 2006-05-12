@@ -12,6 +12,11 @@ namespace exception {
   class exception : public std::exception {
 
     private:
+
+      /** The exception type */
+      typedef T                type_identifiers;
+
+    private:
       /** The exception type */
       T                        type;
 
@@ -33,6 +38,9 @@ namespace exception {
       /** \brief Constructor for messages with two arguments. */
       template < typename T1, typename T2 >
       inline exception(T t, T1, T2);
+
+      /** \brief Get the type of the exception */
+      inline T get_type() const;
 
       /** \brief Returns */
       inline boost::format& message();
@@ -70,6 +78,11 @@ namespace exception {
   template < typename T1, typename T2 >
   inline exception< T >::exception(const T t, T1 a1, T2 a2) : type(t), _message(descriptions[t]) {
     _message % a1 % a2;
+  }
+
+  template < typename T >
+  inline T exception< T >::get_type() const {
+    return (type); 
   }
 
   template < typename T >

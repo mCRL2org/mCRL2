@@ -29,7 +29,6 @@ namespace sip {
     ,send_signal_start                 /// \brief tool can start operation
     ,send_display_layout               /// \brief send the controller a layout description for the display
     ,send_display_data                 /// \brief send the controller a data to be displayed using the current display layout
-    ,send_interaction_data             /// \brief send a tool data from user interaction via the display associated with this tool
     ,request_termination               /// \brief send a tool the signal to end processing and terminate as soon as possible
     ,send_signal_termination           /// \brief send the controller the signal that the tool is about to terminate
     ,send_report                       /// \brief send the controller a report of a tools operation

@@ -16,7 +16,10 @@ namespace sip {
       public:
 
         /** \brief Convenience type alias to hide the shared pointer implementation */
-        typedef boost::shared_ptr < tool_display > sptr;
+        typedef boost::shared_ptr < tool_display >          sptr;
+
+        /** \brief Convenience type for passing and returning a sequence of layout elements */
+        typedef std::vector < sip::layout::element const* > constant_elements;
 
       private:
 
@@ -37,10 +40,14 @@ namespace sip {
         /** \brief Write out the layout structure in XML format */
         void write(std::ostream&) const;
 
-        /** \brief Write out the layout structure in XML format */
+        /** \brief Read the layout structure from an xml2pp text reader */
         static tool_display::sptr read(xml2pp::text_reader&);
 
-        inline mediator::wrapper_aptr instantiate(mediator* m) const;
+        /** \brief Creates a (G)UI for this tool_display */
+        mediator::wrapper_aptr instantiate(mediator* m) const;
+
+        /** \brief Update (part of) the layout structure based on data read from an xml2pp text reader */
+        constant_elements update(xml2pp::text_reader&);
     };
 
     inline layout::manager const* tool_display::get_top_manager() const {
@@ -88,10 +95,6 @@ namespace sip {
       }
 
       return (display);
-    }
-
-    inline mediator::wrapper_aptr tool_display::instantiate(mediator* m) const {
-      return (top_manager->instantiate(m));
     }
   }
 }

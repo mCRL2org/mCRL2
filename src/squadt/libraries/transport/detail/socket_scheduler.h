@@ -30,9 +30,6 @@ namespace transport {
         /** \brief The io_service */
         asio::io_service                    io_service;
 
-        /** \brief This lock is used to ensure that switching between states active or shutdown is atomic */
-        boost::mutex                        run_lock;
-
         /** \brief The thread in which the scheduling takes place */
         boost::shared_ptr < boost::thread > thread;
 
@@ -58,9 +55,6 @@ namespace transport {
 
     inline void socket_scheduler::task() {
       io_service.run();
-
-      boost::mutex::scoped_lock l(run_lock);
-
       io_service.reset();
 
       active = false;
@@ -68,8 +62,6 @@ namespace transport {
 
     inline void socket_scheduler::run() {
       using namespace boost;
-
-      mutex::scoped_lock l(run_lock);
 
       if (!active) {
         active = true;
@@ -79,12 +71,10 @@ namespace transport {
     }
 
     inline void socket_scheduler::stop() {
-      boost::mutex::scoped_lock l(run_lock);
-
       if (active) {
         io_service.interrupt();
 
-        active = false;
+        thread->join();
       }
     }
 

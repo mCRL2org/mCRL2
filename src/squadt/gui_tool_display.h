@@ -23,15 +23,21 @@ namespace squadt {
 
       /** \brief Handles state events of widgets */
       class state_change_handler : public wxEvtHandler {
+        friend class tool_display;
         friend class detail::tool_display_mediator;
 
         private:
      
+          /** \brief Associates a sip layout element with a wxWidgets control */
+          typedef std::map < wxObject*, sip::layout::element const* > element_for_window_map;
+     
+        private:
+     
           /** \brief Associated processor */
-          processor::reporter::sptr                     owner;
+          processor::reporter::sptr  monitor;
 
           /** \brief Associates a sip layout element with a wxWidgets control */
-          std::map < wxObject*, sip::layout::element* > element_for_window;
+          element_for_window_map     element_for_window;
      
         private:
      
@@ -56,7 +62,13 @@ namespace squadt {
           inline void clear();
 
           /** \brief Associate a sip layout element pointer with a wxWindow pointer */
-          inline void associate(wxObject*, sip::layout::element*);
+          inline void associate(wxObject*, sip::layout::element const*);
+
+          /** \brief Update the (G)UI state for a specific element */
+          void update(sip::layout::mediator* m, sip::layout::element const*);
+
+          /** \brief Gets the monitor for the associated process */
+          processor::reporter::sptr& get_monitor();
       };
     }
 
@@ -89,46 +101,42 @@ namespace squadt {
         /** \brief Intialises widgets */
         void build();
 
+        /** \brief Update the (G)UI state for a list of elements */
+        void update(std::vector < sip::layout::element const* >);
+
+        /** \brief Set a new layout description */
+        void schedule_layout_change(sip::layout::tool_display::sptr);
+
+        /** \brief Set a new layout description */
+        void schedule_layout_update(std::vector < sip::layout::element const* > const&);
+
       public:
 
         /** \brief Constructor */
-        inline tool_display(wxWindow*, project*, processor::reporter::sptr& s);
+        tool_display(wxWindow*, project*, processor::reporter::sptr& s);
 
         /** \brief Removes itself from the parent window */
         void remove();
-
-        /** \brief Set a new layout description */
-        void set_layout(sip::layout::tool_display::sptr);
     };
-
-    /**
-     * @param[in] p the parent window
-     * @param[in] v the project that owns tool display
-     * @param[in] s the processor associated with this display
-     **/
-    inline tool_display::tool_display(wxWindow* p, GUI::project* c, processor::reporter::sptr& s) :
-                                wxPanel(p, wxID_ANY, wxDefaultPosition, wxDefaultSize, wxRAISED_BORDER),
-                                context(c), event_handler(s), content(0) {
-
-      build();
-
-      Show(false);
-    }
 
     namespace detail {
 
       /**
        * @param[in] s the processor associated with this display
        **/
-      inline state_change_handler::state_change_handler(processor::reporter::sptr& s) : owner(s) {
+      inline state_change_handler::state_change_handler(processor::reporter::sptr& s) : monitor(s) {
       }
 
       inline void state_change_handler::state_change_handler::clear() {
         element_for_window.clear();
       }
 
-      inline void state_change_handler::state_change_handler::associate(wxObject* o, sip::layout::element* e) {
+      inline void state_change_handler::state_change_handler::associate(wxObject* o, sip::layout::element const* e) {
         element_for_window[o] = e;
+      }
+
+      inline processor::reporter::sptr& state_change_handler::get_monitor() {
+        return (monitor);
       }
     }
   }

@@ -11,9 +11,15 @@
 namespace squadt {
 
   void processor::reporter::status_change_dummy(output_status) {
+    std::cerr << "No custom status change event handler connected!" << std::endl;
   }
 
-  void processor::reporter::layout_change_dummy(sip::layout::tool_display::sptr) {
+  void processor::reporter::display_layout_change_dummy(sip::layout::tool_display::sptr) {
+    std::cerr << "No custom display change event handler connected!" << std::endl;
+  }
+
+  void processor::reporter::display_data_change_dummy(sip::layout::tool_display::constant_elements const&) {
+    std::cerr << "No custom display state change event handler connected!" << std::endl;
   }
 
   /**

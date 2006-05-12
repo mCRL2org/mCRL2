@@ -16,8 +16,8 @@ namespace sip {
                                              current_tool_capabilities() {
  
       /* Register event handlers for some message types */
-      set_handler(boost::bind(&communicator::reply_tool_capabilities, this), sip::request_tool_capabilities);
-      set_handler(boost::bind(&communicator::accept_interaction_data, this, _1), sip::send_interaction_data);
+      add_handler(sip::request_tool_capabilities, boost::bind(&communicator::reply_tool_capabilities, this));
+      add_handler(sip::send_display_data, boost::bind(&communicator::accept_interaction_data, this, _1));
     }
  
     /**

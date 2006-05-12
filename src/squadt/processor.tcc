@@ -16,18 +16,30 @@ namespace squadt {
    **/
   processor::reporter::reporter(processor& o) : owner(o) {
     on_status_change = status_change_dummy;
-    on_layout_change = layout_change_dummy;
+    on_layout_change = display_layout_change_dummy;
+    on_state_change  = display_data_change_dummy;
 
     /* Set the handler for incoming layout messages */
-    activate_layout_handler(on_layout_change);
+    activate_display_layout_handler(on_layout_change);
+
+    /* Set the handler for incoming layout messages */
+    activate_display_data_handler(sip::layout::tool_display::sptr(), on_state_change);
   }
 
   /**
    * @param[in] h the function or functor that is invoked at layout change
    **/
-  inline void processor::reporter::set_layout_handler(layout_callback_function h) {
+  inline void processor::reporter::set_display_layout_handler(display_layout_callback_function h) {
     /* Set the handler for incoming layout messages */
-    activate_layout_handler(h);
+    activate_display_layout_handler(h);
+  }
+
+  /**
+   * @param[in] h the function or functor that is invoked at layout change
+   **/
+  inline void processor::reporter::set_display_data_handler(sip::layout::tool_display::sptr d, display_data_callback_function h) {
+    /* Set the handler for incoming layout messages */
+    activate_display_data_handler(d, h);
   }
 
   /**

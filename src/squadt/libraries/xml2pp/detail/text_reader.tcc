@@ -30,7 +30,7 @@ namespace xml2pp {
     reader = xmlReaderForFile(f.get(), "", 0);
 
     if (reader == 0) {
-      throw (exception(exception_identifier::unable_to_open_file, f.get()));
+      throw (exception::exception(exception::unable_to_open_file, f.get()));
     }
   }
 
@@ -42,7 +42,7 @@ namespace xml2pp {
     reader = xmlReaderForDoc(reinterpret_cast < const xmlChar* const > (d), "", 0, 0);
 
     if (reader == 0) {
-      throw (exception(exception_identifier::unable_to_initialise_reader));
+      throw (exception::exception(exception::unable_to_initialise_reader));
     }
   }
 
@@ -54,7 +54,7 @@ namespace xml2pp {
     reader = xmlReaderForMemory(d.c_str(), d.size(), "", 0, 0);
 
     if (reader == 0) {
-      throw (exception(exception_identifier::unable_to_initialise_reader));
+      throw (exception::exception(exception::unable_to_initialise_reader));
     }
   }
 
@@ -67,7 +67,7 @@ namespace xml2pp {
     reader = xmlReaderForDoc(d, "", 0, 0);
 
     if (reader == 0) {
-      throw (exception(exception_identifier::unable_to_initialise_reader));
+      throw (exception::exception(exception::unable_to_initialise_reader));
     }
   }
 
@@ -80,7 +80,7 @@ namespace xml2pp {
     reader = xmlReaderForMemory(d.c_str(), l, "", 0, 0);
 
     if (reader == 0) {
-      throw (exception(exception_identifier::unable_to_initialise_reader));
+      throw (exception::exception(exception::unable_to_initialise_reader));
     }
   }
 
@@ -98,7 +98,7 @@ namespace xml2pp {
     }
     else if (xmlTextReaderSchemaValidate(reader, schema_name.get()) < 0) {
       /* Error schema file, abort ... */
-      throw (exception(exception_identifier::unable_to_open_file, f.get()));
+      throw (exception::exception(exception::unable_to_open_file, f.get()));
     }
   }
 #else
@@ -273,7 +273,7 @@ namespace xml2pp {
     do {
       if (status <= 0) {
         /* Process error, or end of file */
-        throw (exception(exception_identifier::error_while_parsing_document));
+        throw (exception::exception((status < 0) ? exception::error_while_parsing_document : exception::end_of_stream));
       }
       else if (xmlTextReaderNodeType(reader) == XML_READER_TYPE_SIGNIFICANT_WHITESPACE) {
         /* Skip whitespace */

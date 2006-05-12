@@ -318,10 +318,9 @@ namespace squadt {
             global_tool_manager->find(std::string(menu_item->GetLabel().fn_str()));
 
             /* Attach tool display */
-            GUI::tool_display* display = add_tool_display(tp->get_monitor());
+            add_tool_display(tp->get_monitor());
 
-            tp->get_monitor()->set_layout_handler(boost::bind(&GUI::tool_display::set_layout, display, _1));
-
+            /* Start tool configuration phase */
             tp->configure(menu_item->input_combination, boost::filesystem::path(t->location));
           }
           break;

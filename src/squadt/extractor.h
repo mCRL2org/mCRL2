@@ -44,7 +44,7 @@ namespace squadt {
    * @param[in] t reference to the tool object to use for storage
    **/
   inline extractor::extractor(tool& t) : task_monitor() {
-    set_handler(bind(&extractor::handle_store_tool_capabilities, this, _1, boost::ref(t)), sip::reply_tool_capabilities);
+    add_handler(sip::reply_tool_capabilities, bind(&extractor::handle_store_tool_capabilities, this, _1, boost::ref(t)));
   }
 
   /**

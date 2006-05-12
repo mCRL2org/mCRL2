@@ -77,14 +77,17 @@ namespace squadt {
 
         public:
 
-          /** \brief Type for functions that is used to communicate state changes */
-          typedef boost::function < void (processor::output_status) >        status_callback_function;
+          /** \brief Type for functions that is used to handle incoming process state changes */
+          typedef boost::function < void (processor::output_status) >                            status_callback_function;
 
-          /** \brief Type for functions that is used to communicate state changes */
-          typedef boost::function < void (sip::layout::tool_display::sptr) > layout_callback_function;
+          /** \brief Type for functions that is used to handle incoming layout state changes */
+          typedef boost::function < void (sip::layout::tool_display::sptr) >                     display_layout_callback_function;
+
+          /** \brief Type for functions that is used to handle incoming (G)UI state changes */
+          typedef boost::function < void (sip::layout::tool_display::constant_elements const&) > display_data_callback_function;
 
           /** \brief Convenience type for hiding shared pointer implementation */
-          typedef boost::shared_ptr < reporter >                             sptr;
+          typedef boost::shared_ptr < reporter >                                                 sptr;
 
         public:
 
@@ -93,11 +96,14 @@ namespace squadt {
 
         private:
   
-          /** \brief Visualisation function for layout changes */
-          layout_callback_function on_layout_change;
+          /** \brief Actualisation function for layout changes */
+          display_layout_callback_function on_layout_change;
   
-          /** \brief Visualisation function for state changes */
-          status_callback_function on_status_change;
+          /** \brief Actualisation function for user interface state changes */
+          display_data_callback_function   on_state_change;
+  
+          /** \brief Actualisation function for process state changes */
+          status_callback_function         on_status_change;
   
         private:
   
@@ -108,7 +114,10 @@ namespace squadt {
           static void status_change_dummy(output_status);
 
           /** \brief The default callback function that does nothing */
-          static void layout_change_dummy(sip::layout::tool_display::sptr);
+          static void display_layout_change_dummy(sip::layout::tool_display::sptr);
+
+          /** \brief The default callback function that does nothing */
+          static void display_data_change_dummy(sip::layout::tool_display::constant_elements const&);
 
           /** \brief Helper function for communication with a tool, starts a new thread with pilot() */
           inline void start_pilot(bool = true);
@@ -125,7 +134,10 @@ namespace squadt {
           inline void set_status_handler(status_callback_function);
 
           /** \brief Constructor with a callback handler */
-          inline void set_layout_handler(layout_callback_function);
+          inline void set_display_layout_handler(display_layout_callback_function);
+
+          /** \brief Constructor with a callback handler */
+          inline void set_display_data_handler(sip::layout::tool_display::sptr, display_data_callback_function);
       };
  
       /** \brief Convenience type for hiding shared pointer implementation */

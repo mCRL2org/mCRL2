@@ -5,6 +5,7 @@
 
 #include <sip/detail/layout_base.h>
 #include <sip/detail/layout_mediator.h>
+#include <sip/detail/common.h>
 
 namespace sip {
   namespace layout {
@@ -37,8 +38,11 @@ namespace sip {
           /** \brief Instantiate a layout element, through a mediator */
           inline layout::mediator::wrapper_aptr instantiate(layout::mediator*);
 
+          /** \brief Synchronise with instantiation that is part of a (G)UI */
+          inline void update(layout::mediator*, layout::mediator::wrapper*) const;
+
           /** \brief Write out the layout structure in XML format */
-          inline void write_structure(std::ostream&);
+          inline void write_structure(std::ostream&) const;
       };
      
       inline label::label() {
@@ -53,7 +57,7 @@ namespace sip {
       /**
        * @param[out] o the stream to which to write the result
        **/
-      inline void label::write_structure(std::ostream& o) {
+      inline void label::write_structure(std::ostream& o) const {
         o << "<label id=\"" << id << "\" text=\"" << text << "\"/>";
       }
 
@@ -70,10 +74,18 @@ namespace sip {
       }
 
       /**
-       * @param m the mediator object to use
+       * @param[in] m the mediator object to use
        **/
       inline layout::mediator::wrapper_aptr label::instantiate(layout::mediator* m) {
         return (m->build_label(this, text));
+      }
+     
+      /**
+       * @param[in] m the mediator object to use
+       * @param[in] t pointer to the associated (G)UI object
+       **/
+      inline void label::update(layout::mediator* m, layout::mediator::wrapper* t) const {
+        m->update_label(t, text);
       }
      
       /** \brief A basic button widget */
@@ -100,8 +112,11 @@ namespace sip {
           /** \brief Instantiate a layout element, through a mediator */
           inline layout::mediator::wrapper_aptr instantiate(layout::mediator*);
 
+          /** \brief Synchronise with instantiation that is part of a (G)UI */
+          inline void update(layout::mediator*, layout::mediator::wrapper*) const;
+
           /** \brief Write out the layout structure in XML format */
-          inline void write_structure(std::ostream&);
+          inline void write_structure(std::ostream&) const;
       };
      
       inline button::button() {
@@ -116,7 +131,7 @@ namespace sip {
       /**
        * @param[out] o the stream to which to write the result
        **/
-      inline void button::write_structure(std::ostream& o) {
+      inline void button::write_structure(std::ostream& o) const {
         o << "<button id=\"" << id << "\" label=\"" << label << "\"/>";
       }
 
@@ -133,12 +148,20 @@ namespace sip {
       }
 
       /**
-       * @param m the mediator object to use
+       * @param[in] m the mediator object to use
        **/
       inline layout::mediator::wrapper_aptr button::instantiate(layout::mediator* m) {
         return (m->build_button(this, label));
       }
      
+      /**
+       * @param[in] m the mediator object to use
+       * @param[in] t pointer to the associated (G)UI object
+       **/
+      inline void button::update(layout::mediator* m, layout::mediator::wrapper* t) const {
+        m->update_button(t, label);
+      }
+
       /**
        * \brief A basic radio button widget
        *
@@ -158,7 +181,10 @@ namespace sip {
           std::string          label;
      
           /** \brief The connection reference */
-          const radio_button*  connection;
+          radio_button* const connection;
+
+          /** \brief Whether the radio button is selected or not */
+          bool                 selected;
      
         private:
      
@@ -170,41 +196,56 @@ namespace sip {
      
         public:
      
-          /** \brief Constructor for a button */
-          inline radio_button(std::string);
-     
           /** \brief Alternative constructor for a button */
-          inline radio_button(std::string, radio_button*);
+          inline radio_button(std::string, radio_button* = 0, bool = false);
+
+          /** \brief Whether the button is selected or not */
+          inline void set_selected(bool, bool = true);
      
           /** \brief Instantiate a layout element, through a mediator */
           inline layout::mediator::wrapper_aptr instantiate(layout::mediator*);
 
+          /** \brief Synchronise with instantiation that is part of a (G)UI */
+          inline void update(layout::mediator*, layout::mediator::wrapper*) const;
+
           /** \brief Write out the layout structure in XML format */
-          inline void write_structure(std::ostream&);
+          inline void write_structure(std::ostream&) const;
       };
      
-      inline radio_button::radio_button() {
+      inline radio_button::radio_button() : connection(0) {
       }
 
       /**
        * @param[in] c the label for the button
+       * @param[in] r pointer to a connected radio button
+       * @param[in] s whether the button is selected or not
        **/
-      inline radio_button::radio_button(std::string c) : label(c) {
+      inline radio_button::radio_button(std::string c, radio_button* r, bool s) : label(c), connection(r), selected(s) {
       }
      
       /**
-       * @param[in] c the label for the button
-       * @param[in] r pointer to a connected radio button
+       * @param[in] s the label for the button
+       * @param[in] b whether or not to unselect connected radio buttons
        **/
-      inline radio_button::radio_button(std::string c, radio_button* r) : label(c), connection(r) {
+      inline void radio_button::set_selected(bool s, bool b) {
+        radio_button* temporary = connection;
+
+        while (connection != 0 && connection != this) {
+          temporary->set_selected(false, false);
+
+          temporary = temporary->connection;
+        }
+
+        selected = true;
       }
      
       /**
        * @param[out] o the stream to which to write the result
        **/
-      inline void radio_button::write_structure(std::ostream& o) {
+      inline void radio_button::write_structure(std::ostream& o) const {
         o << "<radio-button id=\"" << id << "\" next=\""
-          << connection->id << "\" label=\"" << label << "\"/>";
+          << connection->id << "\" label=\"" << label
+          << "\" selected=\"" << selected << "\"/>";
       }
 
       /**
@@ -221,12 +262,20 @@ namespace sip {
       }
 
       /**
-       * @param m the mediator object to use
+       * @param[in] m the mediator object to use
        **/
       inline layout::mediator::wrapper_aptr radio_button::instantiate(layout::mediator* m) {
-        return (m->build_radio_button(this, label));
+        return (m->build_radio_button(this, label, selected));
       }
      
+      /**
+       * @param[in] m the mediator object to use
+       * @param[in] t pointer to the associated (G)UI object
+       **/
+      inline void radio_button::update(layout::mediator* m, layout::mediator::wrapper* t) const {
+        m->update_radio_button(t, label, selected);
+      }
+
       /**
        * \brief A checkbox widget
        **/
@@ -254,11 +303,17 @@ namespace sip {
           /** \brief Alternative constructor for a checkbox */
           inline checkbox(std::string, bool);
      
+          /** \brief Set the status */
+          inline void set_status(bool);
+     
           /** \brief Instantiate a layout element, through a mediator */
           inline layout::mediator::wrapper_aptr instantiate(layout::mediator*);
 
+          /** \brief Synchronise with instantiation that is part of a (G)UI */
+          inline void update(layout::mediator*, layout::mediator::wrapper*) const;
+
           /** \brief Write out the layout structure in XML format */
-          inline void write_structure(std::ostream&);
+          inline void write_structure(std::ostream&) const;
       };
      
       inline checkbox::checkbox() {
@@ -270,11 +325,18 @@ namespace sip {
        **/
       inline checkbox::checkbox(std::string c, bool s) : label(c), status(s) {
       }
+
+      /**
+       * @param[in] s the new status
+       **/
+      inline void checkbox::set_status(bool b) {
+        status = b;
+      }
      
       /**
        * @param[out] o the stream to which to write the result
        **/
-      inline void checkbox::write_structure(std::ostream& o) {
+      inline void checkbox::write_structure(std::ostream& o) const {
         o << "<checkbox id=\"" << id << "\""
           << " label=\"" << label << "\" status=\"" << status << "\"/>";
       }
@@ -295,10 +357,18 @@ namespace sip {
       }
 
       /**
-       * @param m the mediator object to use
+       * @param[in] m the mediator object to use
        **/
       inline layout::mediator::wrapper_aptr checkbox::instantiate(layout::mediator* m){
         return (m->build_checkbox(this, label, status));
+      }
+
+      /**
+       * @param[in] m the mediator object to use
+       * @param[in] t pointer to the associated (G)UI object
+       **/
+      inline void checkbox::update(layout::mediator* m, layout::mediator::wrapper* t) const {
+        m->update_checkbox(t, label, status);
       }
 
       /** \brief A basic button widget */
@@ -332,8 +402,11 @@ namespace sip {
           /** \brief Instantiate a layout element, through a mediator */
           inline layout::mediator::wrapper_aptr instantiate(layout::mediator*);
 
+          /** \brief Synchronise with instantiation that is part of a (G)UI */
+          inline void update(layout::mediator*, layout::mediator::wrapper*) const;
+
           /** \brief Write out the layout structure in XML format */
-          inline void write_structure(std::ostream&);
+          inline void write_structure(std::ostream&) const;
       };
      
       inline progress_bar::progress_bar() {
@@ -351,7 +424,7 @@ namespace sip {
       /**
        * @param[out] o the stream to which to write the result
        **/
-      inline void progress_bar::write_structure(std::ostream& o) {
+      inline void progress_bar::write_structure(std::ostream& o) const {
         o << "<progress-bar id=\"" << id << "\" minimum=\""
           << minimum << "\" maximum=\"" << maximum
           << " current=\"" << current <<  "\"/>";
@@ -372,12 +445,20 @@ namespace sip {
       }
 
       /**
-       * @param m the mediator object to use
+       * @param[in] m the mediator object to use
        **/
       inline layout::mediator::wrapper_aptr progress_bar::instantiate(layout::mediator* m) {
         return (m->build_progress_bar(this, minimum, maximum, current));
       }
      
+      /**
+       * @param[in] m the mediator object to use
+       * @param[in] t pointer to the associated (G)UI object
+       **/
+      inline void progress_bar::update(layout::mediator* m, layout::mediator::wrapper* t) const {
+        m->update_progress_bar(t, minimum, maximum, current);
+      }
+
       /**
        * \brief A text input field
        *
@@ -407,12 +488,18 @@ namespace sip {
      
           /** \brief Constructor */
           inline text_field(const std::string& i, basic_datatype* = &standard_string);
+
+          /** \brief Set the text */
+          inline void set_text(std::string);
      
           /** \brief Instantiate a layout element, through a mediator */
           inline layout::mediator::wrapper_aptr instantiate(layout::mediator*);
 
+          /** \brief Synchronise with instantiation that is part of a (G)UI */
+          inline void update(layout::mediator*, layout::mediator::wrapper*) const;
+
           /** \brief Write out the layout structure in XML format */
-          inline void write_structure(std::ostream&);
+          inline void write_structure(std::ostream&) const;
       };
      
       inline text_field::text_field() {
@@ -426,9 +513,16 @@ namespace sip {
       }
      
       /**
+       * @param[in] s the new text
+       **/
+      inline void text_field::set_text(std::string s) {
+        text = s;
+      }
+
+      /**
        * @param[out] o the stream to which to write the result
        **/
-      inline void text_field::write_structure(std::ostream& o) {
+      inline void text_field::write_structure(std::ostream& o) const {
         o << "<text-field id=\"" << id << "\" text=\"" << text << "\">";
 
         type->write(o);
@@ -449,10 +543,18 @@ namespace sip {
       }
 
       /**
-       * @param m the mediator object to use
+       * @param[in] m the mediator object to use
        **/
       inline layout::mediator::wrapper_aptr text_field::instantiate(layout::mediator* m) {
         return (m->build_text_field(this, text));
+      }
+
+      /**
+       * @param[in] m the mediator object to use
+       * @param[in] t pointer to the associated (G)UI object
+       **/
+      inline void text_field::update(layout::mediator* m, layout::mediator::wrapper* t) const {
+        m->update_text_field(t, text);
       }
     }
   }

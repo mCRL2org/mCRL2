@@ -77,8 +77,9 @@ namespace sip {
         /** \brief Signal that the current configuration is complete enough for the tool to start processing */
         void send_accept_configuration(const sip::configuration&);
  
-        /** \brief Send a layout specification for the display space reserved for this tool */
-        void send_display_data();
+        /** \brief Send data to update the state of the last communicated display layout */
+        template < typename E >
+        void send_display_data(E const*);
  
         /** \brief Send a layout specification for the display space reserved for this tool */
         void send_display_layout(layout::tool_display&);
@@ -146,6 +147,16 @@ namespace sip {
  
     inline bool communicator::is_active() const {
       return (current_status != status_inactive);
+    }
+
+    /**
+     * @param[in] a sip layout element of which the data is to be sent
+     **/
+    template < typename E >
+    void communicator::send_display_data(E const* e) {
+      message m(e->read_state());
+
+      send_message(m);
     }
   }
 }

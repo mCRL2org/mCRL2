@@ -191,6 +191,7 @@ namespace sip {
 
       public:
 
+        /** \brief Element positioning is subject only to horizontal alignment */
         typedef horizontal_alignment alignment;
 
       public:
@@ -212,7 +213,7 @@ namespace sip {
                                   visibility const& = manager::default_visibility);
 
         /** \brief Write out the layout structure in XML format */
-        void write_structure(std::ostream&);
+        void write_structure(std::ostream&) const;
 
         /** \brief Instantiate a layout element, through a mediator */
         inline mediator::wrapper_aptr instantiate(layout::mediator*);
@@ -229,6 +230,7 @@ namespace sip {
 
       public:
 
+        /** \brief Element positioning is subject only to vertical alignment */
         typedef vertical_alignment alignment;
 
       public:
@@ -250,7 +252,7 @@ namespace sip {
                                   visibility const& = manager::default_visibility);
 
         /** \brief Write out the layout structure in XML format */
-        void write_structure(std::ostream&);
+        void write_structure(std::ostream&) const;
 
         /** \brief Instantiate a layout element, through a mediator */
         inline mediator::wrapper_aptr instantiate(layout::mediator*);
@@ -291,14 +293,14 @@ namespace sip {
     }
 
     /**
-     * @param[in] c the constraints object to compare against
+     * @param[in] m the margins to compare agains
      **/
     inline bool margins::operator==(margins const& m) const {
       return (top == m.top && left == m.left && bottom == m.bottom && right == m.right);
     }
 
     /**
-     * @param[in] c the constraints object to compare against
+     * @param[in] m the margins to compare agains
      **/
     inline bool margins::operator!=(margins const& m) const {
       return (top != m.top || left != m.left || bottom != m.bottom || right != m.right);
@@ -403,7 +405,7 @@ namespace sip {
         attach(n, (*i).first->instantiate(n), dynamic_cast < const layout::constraints* > (&(*i).second));
       }
 
-      return (n->get_data());
+      return (n->extract_data());
     }
 
     /**

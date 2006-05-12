@@ -1,5 +1,6 @@
 #include <sip/detail/layout_manager.h>
 #include <sip/detail/layout_elements.h>
+#include <sip/detail/layout_tool_display.h>
 #include <sip/detail/object.h>
 
 #include <xml2pp/text_reader.h>
@@ -167,7 +168,7 @@ namespace sip {
     /**
      * @param[out] o the stream to which to write the result
      **/
-    void vertical_box::write_structure(std::ostream& o) {
+    void vertical_box::write_structure(std::ostream& o) const {
       constraints const* current_constraints = &manager::default_constraints;
 
       o << "<box-layout-manager type=\"vertical\"";
@@ -192,7 +193,7 @@ namespace sip {
     /**
      * @param[out] o the stream to which to write the result
      **/
-    void horizontal_box::write_structure(std::ostream& o) {
+    void horizontal_box::write_structure(std::ostream& o) const {
       constraints const* current_constraints = &manager::default_constraints;
 
       o << "<box-layout-manager type=\"horizontal\"";
@@ -238,6 +239,39 @@ namespace sip {
       }
 
       r.read();
+    }
+
+    /**
+     * @param[in] m a mediator to synchronise an element with the associated element in a (G)UI
+     **/
+    mediator::wrapper_aptr tool_display::instantiate(mediator* m) const {
+      return (top_manager->instantiate(m));
+    }
+
+    /**
+     * @param[in] r an xml2pp text reader that should point to state descriptions
+     * @param[in] m a mediator to synchronise an element with the associated element in a (G)UI
+     *
+     * \return vector of pointers to elements that have been updated
+     **/
+    tool_display::constant_elements tool_display::update(xml2pp::text_reader& r) {
+      /* TODO
+       *
+       * read_structure may invoke event
+       *   - controller side 
+       *      * event schedules a (G)UI update
+       *   - tool side 
+       *      * event depends on the user
+       **/
+      try {
+        while (1) {
+        }
+      }
+      catch (xml2pp::exception::exception* e) {
+        if (e->get_type() != xml2pp::exception::end_of_stream) { 
+          throw;
+        }
+      }
     }
   }
 }

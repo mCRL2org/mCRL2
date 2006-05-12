@@ -7,6 +7,7 @@
 
 #include <boost/bind.hpp>
 #include <boost/function.hpp>
+#include <boost/function_equal.hpp>
 #include <boost/shared_ptr.hpp>
 #include <boost/weak_ptr.hpp>
 #include <boost/thread/mutex.hpp>
@@ -138,10 +139,13 @@ namespace sip {
         inline size_t number_of_messages();
  
         /** \brief Set the handler for a type */
-        inline void set_handler(handler_type, const typename M::type_identifier_t = static_cast < typename M::type_identifier_t > (0));
+        inline void add_handler(const typename M::type_identifier_t, handler_type);
 
-        /** \brief Unset the handler for a type */
-        inline void unset_handler(const typename M::type_identifier_t);
+        /** \brief Clears the handlers for a message type */
+        inline void clear_handlers(const typename M::type_identifier_t);
+
+        /** \brief Remove a specific handlers for a message type */
+        inline void remove_handler(const typename M::type_identifier_t, handler_type);
 
         /** \brief Destructor */
         ~basic_messenger();

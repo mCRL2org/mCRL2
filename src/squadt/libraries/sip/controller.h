@@ -1,6 +1,8 @@
 #ifndef SIP_CONTROLLER_H
 #define SIP_CONTROLLER_H
 
+#include <vector>
+
 #include <sip/detail/common.h>
 #include <sip/detail/controller_capabilities.h>
 #include <sip/detail/tool_capabilities.h>
@@ -35,23 +37,32 @@ namespace sip {
         /** \brief The capabilities object of the controller as it is send, when requested */
         static controller::capabilities current_controller_capabilities;
 
+      public:
+
+        /** \brief Function type that for communicating display layouts */
+        typedef boost::function < void (sip::layout::tool_display::sptr) >                     display_layout_handler_function;
+
+        /** \brief Function type that for communicating display layouts */
+        typedef boost::function < void (sip::layout::tool_display::constant_elements const&) > display_data_handler_function;
+
       protected:
 
         /** \brief convenience function for use with event handlers */
         inline void set_status(status);
 
-      public:
-
-        /** \brief Function type that for communicating display layouts */
-        typedef boost::function < void (sip::layout::tool_display::sptr) > layout_accept_function;
-
       private:
  
         /** \brief Handler function to replace the current display layout with a new one */
-        void accept_layout_handler(const messenger::message_ptr&, layout_accept_function);
+        void display_layout_handler(const messenger::message_ptr&, display_layout_handler_function);
  
-        /** \brief Handler function to map data to the display */
-        void accept_data_handler(const messenger::message_ptr&);
+        /** \brief Handler function to replace the current display layout with a new one */
+        void display_data_handler(const messenger::message_ptr&, sip::layout::tool_display::sptr, display_data_handler_function);
+
+        /** \brief The current handler for layout change events */
+        display_layout_handler_function current_layout_handler;
+
+        /** \brief The current handler for layout state change events */
+        display_data_handler_function   current_data_handler;
  
       public:
 
@@ -70,10 +81,11 @@ namespace sip {
         /** \brief Send a specification of a (perhaps partial) configuration */
         void send_configuration();
  
-        /** \brief Send a layout specification for the display space reserved for this tool */
-        void send_interaction_data();
+        /** \brief Send data to update the state of the last communicated display layout */
+        template < typename E >
+        void send_display_data(E const*);
  
-        /** \brief Send a layout specification for the display space reserved for this tool */
+        /** \brief Sends a message to a tool that it may start processing */
         void send_start_signal();
  
         /** \brief Request the tool to terminate itself */
@@ -90,7 +102,10 @@ namespace sip {
         configuration::ptr get_configuration() const;
 
         /** \brief Sets a handler for layout messages using a handler function */
-        void activate_layout_handler(layout_accept_function);
+        void activate_display_layout_handler(display_layout_handler_function);
+
+        /** \brief Sets a handler for layout messages using a handler function */
+        void activate_display_data_handler(sip::layout::tool_display::sptr, display_data_handler_function);
     };
  
     inline const controller::capabilities& communicator::get_controller_capabilities() {
@@ -112,6 +127,16 @@ namespace sip {
  
     inline void communicator::set_status(status s) {
       current_status = s;
+    }
+
+    /**
+     * @param[in] a sip layout element of which the data is to be sent
+     **/
+    template < typename E >
+    void communicator::send_display_data(E const* e) {
+      message m(e->read_state(), sip::send_display_data);
+
+      send_message(m);
     }
   }
 }
