@@ -689,7 +689,7 @@ course.
 \section{Language}
 \label{sec:language}
 
-This section describes the mCRL2 language. Roughly, the language consists of a
+This section describes the mCRL2 language. Roughly, the language consists of
 a process algebra part and data specification part. These parts are explained
 in Sections \ref{ssec:process algebra} and \ref{ssec:data}, respectively.
 
@@ -729,7 +729,7 @@ The most basic expressions are as follows:
 behaviour.
 
 \item \deffont{Alternative composition}, written as $p \alt q$. This
-expression non-deterministically \emph{chooses} to execute either $p$ or $q$.
+represents a \emph{non-deterministic choice} between $p$ and $q$.
 
 \item \deffont{Sequential composition}, written $p \seq q$. This expression
 first executes $p$ and then $q$ (assuming $p$ terminates).
@@ -902,8 +902,9 @@ processes are not {\it bisimilar}.
 
 Other equivalences can also be used. With \deffont{trace equivalence}, for
 instance, two processes are equal when the sets of traces that the processes
-can execute are equal. In this case $a\seq(b\alt c)$ and $a \seq b\alt a \seq
-c$, which are not bisimilar, would be equivalent as for both we have that
+can execute are equal.\footnote{We will not define the set of traces of a
+process formally.} In this case $a\seq(b\alt c)$ and $a \seq b\alt a \seq c$,
+which are not bisimilar, would be equivalent as for both we have that
 $\{\epsilon,a,a\seq b,a\seq c\}$, with $\epsilon$ the empty trace, is the set
 of traces.
 
@@ -1547,16 +1548,16 @@ $c(\false, 6)$ are valid actions.
 For some operators this parameterisation involves small changes in the
 semantics:
 \begin{itemize}
-\item restriction $\allow{V}(p)$, blocking $\block{H}(p)$ and hiding
+\item Restriction $\allow{V}(p)$, blocking $\block{H}(p)$ and hiding
 $\hide{I}(p)$
 \emph{disregard} the data parameters of the multiactions in $p$ when
 determining if an (multi)action should be blocked or hidden. For example, 
 $\allow{\set{b \mid c}}(a(0) \alt b(\true,5) \sync c) = b(\true,5) \sync c$ and
 $\block{\set{b}}(a(0) \alt b(\true,5) \sync c) = a(0)$.
-\item renaming $\ren{R}(p)$ also disregards the data parameters, but when a
+\item Renaming $\ren{R}(p)$ also disregards the data parameters, but when a
 renaming is applied the data parameters are \emph{retained}. For example,
 $\ren{\set{a \to b}}(a(0) \alt a) = b(0) \alt b$.
-\item communication $\comm{C}(p)$ has become more \emph{strict}: for each
+\item Communication $\comm{C}(p)$ has become \emph{stricter}: for each
 communication $a_0 \sync \cdots \sync a_n \to c$, $n \geq 1$, multiactions
 $a_0(\ldots) \sync \cdots \sync a_n(\ldots)$ in $p$ are only replaced by
 $c(\ldots)$ when the data parameters of all $a_i$ are equal (both the number
@@ -1745,7 +1746,7 @@ where $I$ a finite index set, $c_i$ a condition, $f_i$ the parameter of action
 $a_i$ occurring at time $t_i$ and $g_i$ the next state.\footnote{The general
 form of an LPE also contains terminating summands and multiactions. We do not
 include these here because they only add complexity and provide no essential
-insight to the concept.} Note that the first summand is a \emph{meta-level}
+insight in the concept.} Note that the first summand is a \emph{meta-level}
 operation: $\sum_{i\in I}p_i$ is a shorthand for $p_1 \alt \cdots \alt p_n$,
 where $n$ is the size of $I$.
 \end{definition}
@@ -2139,6 +2140,7 @@ PhD thesis, Eindhoven, 2003.
 
 \end{thebibliography}
 
+\newpage
 \appendix
 
 \section{Formal syntax}

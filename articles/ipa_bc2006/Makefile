@@ -2,7 +2,7 @@
 all     : 
 
 clean   :
-	rm -f *.tbf *.aut *.svc *.fsm *.bcg *.dlk *.dot *.dvi *.log *.aux *.toc *.out *.blg *.bbl *.ps *.o evaluator *~ core core.*
+	rm -f *.tbf *.aut *.svc *.fsm *.bcg *.dlk *.dot *.dvi *.log *.aux *.toc *.out *.blg *.bbl *.ps *.pdf *.o evaluator *~ core core.*
 
 #mCRL rules
 %.tbf   : %.mcrl
@@ -44,4 +44,4 @@ clean   :
 	ps2pdf14 -sPAPERSIZE=a4 $^
 
 %.pdf   : %.tex
-	pdflatex $^
+	texi2dvi -p $^
