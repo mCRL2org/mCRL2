@@ -1,0 +1,103 @@
+
+map  MaximumWafers: Nat;
+eqn  MaximumWafers = 6;
+
+sort WaferState = struct fresh?is_fresh | measured?is_measured | exposed?is_exposed;
+
+sort Wafer = struct wafer(status : WaferState);
+map  DummyWafer:                   Wafer;
+     IsFresh,IsMeasured,IsExposed: Wafer -> Bool;
+     IsDummy:                      Wafer -> Bool;
+     MakeMeasured,MakeExposed:     Wafer -> Wafer;
+var  s : WaferState;
+eqn  IsFresh(wafer(s))       = is_fresh(s);
+     IsFresh(DummyWafer)     = false;
+     IsMeasured(wafer(s))    = is_measured(s);
+     IsMeasured(DummyWafer)  = false;
+     IsExposed(wafer(s))     = is_exposed(s);
+     IsExposed(DummyWafer)   = false;
+     IsDummy(wafer(s))       = false;
+     IsDummy(DummyWafer)     = true;
+     MakeMeasured(wafer(s))  = wafer(measured);
+     MakeExposed(wafer(s))   = wafer(exposed);
+
+sort WaferList = List (Wafer);
+map  InitWaferList: Nat -> WaferList;
+var  n : Nat;
+eqn  InitWaferList(0)     = []; 
+0 < n -> InitWaferList(n) = wafer(fresh) |> InitWaferList(max(n - 1,0)); 
+
+sort LockID  = struct L0 | L1 | L2 | L3;
+
+sort RobotID = struct R0 | R1;
+
+act  ALLE_HENS_AAN_DEK;
+     Measure,Expose,Swap;
+     Rotate : RobotID;
+
+     T2L,L2T: Wafer#LockID;
+     L2R,R2L: Wafer#LockID#RobotID;
+     R2C,C2R: Wafer#RobotID;
+
+     T2L_T,L2T_T,T2L_L,L2T_L: Wafer#LockID;
+     L2R_L,R2L_L,L2R_R,R2L_R: Wafer#LockID#RobotID;
+     R2C_R,C2R_R,R2C_C,C2R_C: Wafer#RobotID;
+
+proc
+     % Tray process
+     T(wl:WaferList,n:Nat) =
+      (sum l:LockID.
+        (wl != []) -> T2L_T(head(wl),l) . T(tail(wl),n)) +
+      (n == 0) -> ALLE_HENS_AAN_DEK.T(wl,n)
+               <> (sum w:Wafer, l:LockID . L2T_T(w,l).T(wl,max(n - 1,0)));
+
+     % Lock process
+     L(id:LockID,w:Wafer)=
+      (!IsDummy(w)) -> (IsExposed(w) -> L2T_L(w, id) +
+                        IsFresh(w) -> L2R_L(w,id,if(id == L0 || id == L1,R0,R1))
+                       ).L(id,DummyWafer)
+                    <> (sum x:Wafer.(T2L_L(x,id) +
+                        R2L_L(x,id,if(id == L0 || id == L1,R0,R1))).L(id,x));
+
+     % Robot process
+     R(id:RobotID,wA:Wafer,wB:Wafer) =
+       (sum w:Wafer, lid:LockID.
+         (IsDummy(wA)) -> L2R_R(w,lid,id).R(id,w,wB)) +
+       (sum lid:LockID.
+         (IsExposed(wA)) -> R2L_R(wA,lid,id).R(id,DummyWafer,wB)) +
+       ((IsDummy(wA) != IsDummy(wB)) ||
+         (IsFresh(wA) && IsExposed(wB))) -> Rotate(id).R(id,wB,wA) +
+       (IsFresh(wB)) -> R2C_R(wB,id).R(id,wA,DummyWafer) +
+       (sum w:Wafer.(IsDummy(wB)) -> C2R_R(w,id).R(id,wA,w));
+
+     % Wafer stages
+     C(w0:Wafer,w1:Wafer) =
+       (IsFresh(w0)) -> Measure.C(MakeMeasured(w0),w1) +
+       (IsMeasured(w1)) -> Expose.C(w0,MakeExposed(w1)) +
+       ((IsDummy(w1) && IsMeasured(w0)) ||
+        (!(IsExposed(w0) || IsFresh(w0)) && IsExposed(w1))) -> Swap.C(w1,w0) +
+       (sum rid:RobotID.
+         (IsExposed(w0)) -> C2R_C(w0,rid).C(DummyWafer,w1)) +
+       (sum w:Wafer, rid:RobotID.
+         (IsDummy(w0)) -> R2C_C(w,rid).C(w,w1));
+
+init
+
+hide({Measure,Expose,Swap,Rotate},
+  allow({T2L,L2T,L2R,R2L,R2C,C2R,Measure,Expose,Rotate,Swap,ALLE_HENS_AAN_DEK},
+    comm({T2L_T|T2L_L -> T2L, L2T_T|L2T_L -> L2T,
+          L2R_L|L2R_R -> L2R, R2L_L|R2L_R -> R2L,
+          R2C_R|R2C_C -> R2C, C2R_R|C2R_C -> C2R
+         },
+      T(InitWaferList(MaximumWafers),MaximumWafers) ||
+      L(L0,DummyWafer) ||
+      L(L1,DummyWafer) ||
+      L(L2,DummyWafer) ||
+      L(L3,DummyWafer) ||
+      R(R0,DummyWafer,DummyWafer) ||
+      R(R1,DummyWafer,DummyWafer) ||
+      C(DummyWafer,DummyWafer)
+    )
+  )
+);
+
