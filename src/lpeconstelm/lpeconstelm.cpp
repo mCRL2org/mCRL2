@@ -1036,6 +1036,8 @@ int main(int ac, char** av) {
 
         /* An object with the correct id exists, assume the URI is relative (i.e. a file name in the local file system) */
         constelm.loadFile(input_file_name);
+
+        tc.set_configuration(configuration);
       }
       else {
         sip::report report;
@@ -1046,23 +1048,25 @@ int main(int ac, char** av) {
       }
     }
 
-    valid = false;
-
     /* Draw a configuration layout in the tool display */
     set_basic_configuration_display(tc);
+
+    valid = false;
 
     /* Static configuration cycle (phase 2: gather user input) */
     while (!valid) {
       /* Wait for configuration data to be send (either a previous configuration, or only an input combination) */
-      sip::configuration::ptr configuration = tc.await_configuration();
+      sip::message_ptr data = tc.await_message(sip::send_display_data);
+
+      sip::configuration& configuration = tc.get_configuration();
 
       /* Validate configuration specification, should contain a file name of an LPD that is to be read as input */
-      valid  = configuration.get() != 0;
-      valid &= configuration->object_exists(lpd_file_for_input);
-      valid &= configuration->object_exists(lpd_file_for_output);
+      valid  = true;
+      valid &= configuration.object_exists(lpd_file_for_input);
+      valid &= configuration.object_exists(lpd_file_for_output);
 
       if (valid) {
-        std::string output_file_name = configuration->get_object(lpd_file_for_output)->get_location();
+        std::string output_file_name = configuration.get_object(lpd_file_for_output)->get_location();
 
         if (input_file_name == output_file_name) {
           sip::report report;
@@ -1074,8 +1078,6 @@ int main(int ac, char** av) {
 
         /* An object with the correct id exists, assume the URI is relative (i.e. a file name in the local file system) */
         constelm.setSaveFile(output_file_name);
-
-        tc.set_configuration(configuration);
       }
       else {
         sip::report report;
