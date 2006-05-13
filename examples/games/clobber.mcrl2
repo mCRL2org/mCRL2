@@ -1,8 +1,8 @@
 % This specification describes the game `Clobber', which is a two
 % player board game. There is a board of 8 by 8 (although below
 % we describe a board of 4 by 4, as otherwise the state space is
-% prohibitively big). One player has white pieces  (0) and the other has
-% black pieces (X). Initially, the board is set up as:
+% prohibitively big). One player has white pieces  (0) and the 
+% other has black pieces (X). Initially, the board is set up as:
 % 
 %      0 X 0 X 0 X 0 X
 %      X 0 X 0 X 0 X 0
@@ -15,9 +15,10 @@
 % 
 % Black makes the first move and players alternatingly make a move. A 
 % player makes a turn by moving a piece
-% of its own color horizontally or vertically to a position with a piece
-% of the opposite color and it removes that piece. This is the only move
-% that is allowed. The first player that cannot do a move looses the game.
+% of its own color horizontally or vertically to a position with a 
+% piece of the opposite color and it removes that piece. This is 
+% the only move that is allowed. The first player that cannot do a 
+% move looses the game.
 %
 % Thanks go to Mark Winands for explaining the game.
 %
@@ -27,7 +28,7 @@ sort Position = struct Black | White | Empty;
 sort Direction = struct Up | Right | Down | Left;
 map N,M:Pos;
 eqn N=4;
-    M=3;
+    M=4;
 
 sort Row=List(Position);
      Board=List(Row);
@@ -37,6 +38,7 @@ map  At:Pos#Pos#Board->Position;
      Put:Position#Pos#Pos#Board->Board;
      Put:Position#Pos#Pos#Direction#Board->Board;
      Put:Position#Pos#Row->Row;
+     CanMove:Pos#Pos#Position#Position#Board->Bool;
 
 var b:Board;
     r:Row;
@@ -50,10 +52,12 @@ eqn At(x,y,Up,b)=At(x,y+1,b);
            At(1,y,Left,b)=Empty;
     At(x,y,[])=Empty;
     x==1 -> At(x,y,r|>b)=At(y,r);
-    x>1 -> At(x,y,r|>b)=At(Int2Pos(x-1),y,b);
+    x>N -> At(x,y,b)=Empty;
+    1<x && x<=N -> At(x,y,r|>b)=At(Int2Pos(x-1),y,b);
     At(y,[])=Empty;
     y==1 -> At(y,p|>r)=p;
-    y>1 -> At(y,p|>r)=At(Int2Pos(y-1),r);
+    y>M -> At(y,p|>r)=Empty;
+    1<y && y<=M -> At(y,p|>r)=At(Int2Pos(y-1),r);
     Put(p,x,y,Up,b)=Put(p,x,y+1,b);
     Put(p,x,y,Right,b)=Put(p,x+1,y,b);
     y>1 -> Put(p,x,y,Down,b)=Put(p,x,Int2Pos(y-1),b);
@@ -63,7 +67,28 @@ eqn At(x,y,Up,b)=At(x,y+1,b);
     y==1 -> Put(p,y,p'|>r)=p|>r;
     y>1 -> Put(p,y,p'|>r)=p'|>Put(p,Int2Pos(y-1),r);
 
+    x==N && y==M ->
+      CanMove(x,y,p,p',b)=
+         At(x,y,b)==p && 
+            ( At(x,y,Down,b)==p' || At(x,y,Left,b)==p');
+
+    x==N && y<M ->
+      CanMove(x,y,p,p',b)=
+         (At(x,y,b)==p && 
+            (At(x,y,Up,b)==p' || 
+             At(x,y,Down,b)==p' || At(x,y,Left,b)==p')) ||
+          CanMove(1,y+1,p,p',b);
+
+    x<N ->
+      CanMove(x,y,p,p',b)=
+         (At(x,y,b)==p && 
+            (At(x,y,Up,b)==p' || At(x,y,Right,b)==p' ||
+             At(x,y,Down,b)==p' || At(x,y,Left,b)==p')) ||
+          CanMove(x+1,y,p,p',b);
+
+
 act WhiteMove,BlackMove:Pos#Pos#Direction;
+    WhiteWins,BlackWins;
 
 proc Clobber(b:Board,WhiteMoves:Bool)=
        sum x,y:Pos, dir:Direction.
@@ -79,9 +104,14 @@ proc Clobber(b:Board,WhiteMoves:Bool)=
                      At(x,y,b)==Black && 
                      At(x,y,dir,b)==White)->
            BlackMove(x,y,dir).
-             Clobber(Put(Black,x,y,dir,Put(Empty,x,y,b)),true);
+             Clobber(Put(Black,x,y,dir,Put(Empty,x,y,b)),true)+
+       (WhiteMoves && !CanMove(1,1,White,Black,b)) ->
+             BlackWins.Clobber(b,WhiteMoves)+
+       (!WhiteMoves && !CanMove(1,1,Black,White,b)) ->
+             WhiteWins.Clobber(b,WhiteMoves);
 
-init Clobber([[Black,White,Black],
-              [White,Black,White],
-              [Black,White,Black],
-              [White,Black,White]],false);
+
+init Clobber([[Black,White,Black,White],
+              [White,Black,White,Black],
+              [Black,White,Black,White],
+              [White,Black,White,Black]],false);
