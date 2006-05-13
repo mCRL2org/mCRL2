@@ -24,62 +24,64 @@
 % Reijkjavik, May 9, 2006, Jan Friso Groote
 
 sort Position = struct Black | White | Empty;
-     Direction = struct Up | Right | Down | Left;
-
-map N:Pos;
+sort Direction = struct Up | Right | Down | Left;
+map N,M:Pos;
 eqn N=4;
+    M=3;
 
 sort Row=List(Position);
      Board=List(Row);
-map  At:Board#Pos#Pos->Position;
-     At:Board#Pos#Pos#Direction->Position;
-     At:Row#Pos->Position;
-     Put:Position#Board#Pos#Pos->Board;
-     Put:Position#Board#Pos#Pos#Direction->Board;
-     Put:Position#Row#Pos->Row;
+map  At:Pos#Pos#Board->Position;
+     At:Pos#Pos#Direction#Board->Position;
+     At:Pos#Row->Position;
+     Put:Position#Pos#Pos#Board->Board;
+     Put:Position#Pos#Pos#Direction#Board->Board;
+     Put:Position#Pos#Row->Row;
 
 var b:Board;
     r:Row;
     p,p':Position;
     x,y:Pos;
-eqn At(b,x,y,Up)=At(b,x,y+1);
-    At(b,x,y,Right)=At(b,x+1,y);
-    y>1 -> At(b,x,y,Down)=At(b,x,Int2Pos(y-1));
-           At(b,x,1,Down)=Empty;
-    x>1 -> At(b,x,y,Left)=At(b,Int2Pos(x-1),y);
-           At(b,1,y,Left)=Empty;
-    At([],x,y)=Empty;
-    At(r|>b,1,y)=At(r,y);
-    x>1 -> At(r|>b,x,y)=At(b,Int2Pos(x-1),y);
-    At([],y)=Empty;
-    At(p|>r,1)=p;
-    y>1 -> At(p|>r,y)=At(r,Int2Pos(y-1));
-    Put(p,b,x,y,Up)=Put(p,b,x,y+1);
-    Put(p,b,x,y,Right)=Put(p,b,x+1,y);
-    y>1 -> Put(p,b,x,y,Down)=Put(p,b,x,Int2Pos(y-1));
-    x>1 -> Put(p,b,x,y,Left)=Put(p,b,Int2Pos(x-1),y);
-    Put(p,r|>b,1,y)=Put(p,r,y)|>b;
-    x>1 -> Put(p,r|>b,x,y)=r|>Put(p,b,Int2Pos(x-1),y);
-    Put(p,p'|>r,1)=p|>r;
-    y>1 -> Put(p,p'|>r,y)=p'|>Put(p,r,Int2Pos(y-1));
+eqn At(x,y,Up,b)=At(x,y+1,b);
+    At(x,y,Right,b)=At(x+1,y,b);
+    y>1 -> At(x,y,Down,b)=At(x,Int2Pos(y-1),b);
+           At(x,1,Down,b)=Empty;
+    x>1 -> At(x,y,Left,b)=At(Int2Pos(x-1),y,b);
+           At(1,y,Left,b)=Empty;
+    At(x,y,[])=Empty;
+    x==1 -> At(x,y,r|>b)=At(y,r);
+    x>1 -> At(x,y,r|>b)=At(Int2Pos(x-1),y,b);
+    At(y,[])=Empty;
+    y==1 -> At(y,p|>r)=p;
+    y>1 -> At(y,p|>r)=At(Int2Pos(y-1),r);
+    Put(p,x,y,Up,b)=Put(p,x,y+1,b);
+    Put(p,x,y,Right,b)=Put(p,x+1,y,b);
+    y>1 -> Put(p,x,y,Down,b)=Put(p,x,Int2Pos(y-1),b);
+    x>1 -> Put(p,x,y,Left,b)=Put(p,Int2Pos(x-1),y,b);
+    x==1 -> Put(p,x,y,r|>b)=Put(p,y,r)|>b;
+    x>1 -> Put(p,x,y,r|>b)=r|>Put(p,Int2Pos(x-1),y,b);
+    y==1 -> Put(p,y,p'|>r)=p|>r;
+    y>1 -> Put(p,y,p'|>r)=p'|>Put(p,Int2Pos(y-1),r);
 
 act WhiteMove,BlackMove:Pos#Pos#Direction;
 
 proc Clobber(b:Board,WhiteMoves:Bool)=
        sum x,y:Pos, dir:Direction.
                     (WhiteMoves && 
-                     x<=N && y<=N &&
-                     At(b,x,y)==White && 
-                     At(b,x,y,dir)==Black)->
-           WhiteMove(x,y,dir).Clobber(Put(White,Put(Empty,b,x,y),x,y,dir),false)+
+                     x<=N && y<=M &&
+                     At(x,y,b)==White && 
+                     At(x,y,dir,b)==Black)->
+           WhiteMove(x,y,dir).
+             Clobber(Put(White,x,y,dir,Put(Empty,x,y,b)),false)+
        sum x,y:Pos, dir:Direction.
                     (!WhiteMoves && 
-                     x<=N && y<= N &&
-                     At(b,x,y)==Black && 
-                     At(b,x,y,dir)==White)->
-           BlackMove(x,y,dir).Clobber(Put(Black,Put(Empty,b,x,y),x,y,dir),true);
+                     x<=N && y<= M &&
+                     At(x,y,b)==Black && 
+                     At(x,y,dir,b)==White)->
+           BlackMove(x,y,dir).
+             Clobber(Put(Black,x,y,dir,Put(Empty,x,y,b)),true);
 
-init Clobber([[Black,White,Black,White],
-              [White,Black,White,Black],
-              [Black,White,Black,White],
-              [White,Black,White,Black]],false);
+init Clobber([[Black,White,Black],
+              [White,Black,White],
+              [Black,White,Black],
+              [White,Black,White]],false);
