@@ -481,14 +481,15 @@ namespace squadt {
       }
 
       void state_change_handler::button_clicked(wxCommandEvent& e) {
-        layout::elements::button* b = static_cast < layout::elements::button const* > (element_for_window[e.GetEventObject()]);
+        layout::elements::button const* b = static_cast < layout::elements::button const* > (element_for_window[e.GetEventObject()]);
 
         monitor->send_display_data(b);
       }
      
       void state_change_handler::radio_button_selected(wxCommandEvent& e) {
         wxRadioButton*                  wxr = static_cast < wxRadioButton* > (e.GetEventObject());
-        layout::elements::radio_button* r   = static_cast < layout::elements::radio_button const* > (element_for_window[e.GetEventObject()]);
+        layout::elements::radio_button* r   = const_cast < layout::elements::radio_button* >
+                        (static_cast < layout::elements::radio_button const* > (element_for_window[e.GetEventObject()]));
 
         r->set_selected(wxr->GetValue());
 
@@ -497,7 +498,8 @@ namespace squadt {
      
       void state_change_handler::checkbox_clicked(wxCommandEvent& e) {
         wxCheckBox*                 wxc = static_cast < wxCheckBox* > (e.GetEventObject());
-        layout::elements::checkbox* c   = static_cast < layout::elements::checkbox const* > (element_for_window[wxc]);
+        layout::elements::checkbox* c   = const_cast < layout::elements::checkbox* >
+                        (static_cast < layout::elements::checkbox const* > (element_for_window[wxc]));
 
         c->set_status(wxc->GetValue());
 
@@ -506,7 +508,8 @@ namespace squadt {
      
       void state_change_handler::text_field_changed(wxCommandEvent& e) {
         wxTextCtrl*                   wxt = static_cast < wxTextCtrl* > (e.GetEventObject());
-        layout::elements::text_field* t   = static_cast < layout::elements::text_field const* > (element_for_window[wxt]);
+        layout::elements::text_field* t   = const_cast < layout::elements::text_field* >
+                        (static_cast < layout::elements::text_field const* > (element_for_window[wxt]));
 
         t->set_text(std::string(wxt->GetValue().fn_str()));
 
