@@ -47,25 +47,25 @@ var b:Board;
 eqn At(x,y,Up,b)=At(x,y+1,b);
     At(x,y,Right,b)=At(x+1,y,b);
     y>1 -> At(x,y,Down,b)=At(x,Int2Pos(y-1),b);
-           At(x,1,Down,b)=Empty;
+    y==1 -> At(x,y,Down,b)=Empty;
     x>1 -> At(x,y,Left,b)=At(Int2Pos(x-1),y,b);
-           At(1,y,Left,b)=Empty;
+    x==1 -> At(x,y,Left,b)=Empty;
     At(x,y,[])=Empty;
-    x==1 -> At(x,y,r|>b)=At(y,r);
-    x>N -> At(x,y,b)=Empty;
-    1<x && x<=N -> At(x,y,r|>b)=At(Int2Pos(x-1),y,b);
-    At(y,[])=Empty;
-    y==1 -> At(y,p|>r)=p;
-    y>M -> At(y,p|>r)=Empty;
-    1<y && y<=M -> At(y,p|>r)=At(Int2Pos(y-1),r);
+    y==1 -> At(x,y,r|>b)=At(x,r);
+    y>M -> At(x,y,b)=Empty;
+    1<y && y<=M -> At(x,y,r|>b)=At(x,Int2Pos(y-1),b);
+    At(x,[])=Empty;
+    x==1 -> At(x,p|>r)=p;
+    x>N -> At(x,p|>r)=Empty;
+    1<x && x<=N -> At(x,p|>r)=At(Int2Pos(x-1),r);
     Put(p,x,y,Up,b)=Put(p,x,y+1,b);
     Put(p,x,y,Right,b)=Put(p,x+1,y,b);
     y>1 -> Put(p,x,y,Down,b)=Put(p,x,Int2Pos(y-1),b);
     x>1 -> Put(p,x,y,Left,b)=Put(p,Int2Pos(x-1),y,b);
-    x==1 -> Put(p,x,y,r|>b)=Put(p,y,r)|>b;
-    x>1 -> Put(p,x,y,r|>b)=r|>Put(p,Int2Pos(x-1),y,b);
-    y==1 -> Put(p,y,p'|>r)=p|>r;
-    y>1 -> Put(p,y,p'|>r)=p'|>Put(p,Int2Pos(y-1),r);
+    y==1 -> Put(p,x,y,r|>b)=Put(p,x,r)|>b;
+    y>1 -> Put(p,x,y,r|>b)=r|>Put(p,x,Int2Pos(y-1),b);
+    x==1 -> Put(p,x,p'|>r)=p|>r;
+    x>1 -> Put(p,x,p'|>r)=p'|>Put(p,Int2Pos(x-1),r);
 
     x==N && y==M ->
       CanMove(x,y,p,p',b)=

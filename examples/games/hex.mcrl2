@@ -43,15 +43,15 @@ var b:Board;
 eqn At(x,y,[])=Empty;
     x==0 -> At(x,y,r|>b)=Empty;
     y==0 -> At(x,y,r|>b)=Empty;
-    x==1 -> At(x,y,r|>b)=At(y,r);
-    x>1 -> At(x,y,r|>b)=At(Int2Pos(x-1),y,b);
-    At(y,[])=Empty;
-    y==1 -> At(y,p|>r)=p;
-    y>1 -> At(y,p|>r)=At(Int2Pos(y-1),r);
-    x==1 -> Put(p,x,y,r|>b)=Put(p,y,r)|>b;
-    x>1 -> Put(p,x,y,r|>b)=r|>Put(p,Int2Pos(x-1),y,b);
-    y==1 -> Put(p,y,p'|>r)=p|>r;
-    y>1 -> Put(p,y,p'|>r)=p'|>Put(p,Int2Pos(y-1),r);
+    y==1 -> At(x,y,r|>b)=At(x,r);
+    y>1 -> At(x,y,r|>b)=At(x,Int2Pos(y-1),b);
+    At(x,[])=Empty;
+    x==1 -> At(x,p|>r)=p;
+    x>1 -> At(x,p|>r)=At(Int2Pos(x-1),r);
+    y==1 -> Put(p,x,y,r|>b)=Put(p,x,r)|>b;
+    y>1 -> Put(p,x,y,r|>b)=r|>Put(p,x,Int2Pos(y-1),b);
+    x==1 -> Put(p,x,p'|>r)=p|>r;
+    x>1 -> Put(p,x,p'|>r)=p'|>Put(p,Int2Pos(x-1),r);
 
     Wins(Red,b)=CheckRedInLeftMostColumn(1,b);
     y<M -> CheckRedInLeftMostColumn(y,b)=
@@ -95,7 +95,7 @@ proc Hex(b:Board,RedMoves:Bool)=
             y<=M &&
             At(x,y,b)==Empty &&
             !Wins(Red,b))
-           -> BlueMove(x,y).Hex(Put(Blue,x,y,b),false)+
+           -> BlueMove(x,y).Hex(Put(Blue,x,y,b),true)+
        Wins(Red,b) -> RedWins.Hex(b,RedMoves)+
        Wins(Blue,b) -> BlueWins.Hex(b,RedMoves);
 

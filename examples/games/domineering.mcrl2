@@ -27,15 +27,15 @@ var b:Board;
     p,p':Position;
     x,y:Pos;
 eqn At(x,y,[])=Empty;
-    x==1 -> At(x,y,r|>b)=At(y,r);
-    x>1 -> At(x,y,r|>b)=At(Int2Pos(x-1),y,b);
+    y==1 -> At(x,y,r|>b)=At(x,r);
+    y>1 -> At(x,y,r|>b)=At(x,Int2Pos(y-1),b);
     At(y,[])=Empty;
-    y==1 -> At(y,p|>r)=p;
-    y>1 -> At(y,p|>r)=At(Int2Pos(y-1),r);
-    x==1 -> Put(p,x,y,r|>b)=Put(p,y,r)|>b;
-    x>1 -> Put(p,x,y,r|>b)=r|>Put(p,Int2Pos(x-1),y,b);
-    y==1 -> Put(p,y,p'|>r)=p|>r;
-    y>1 -> Put(p,y,p'|>r)=p'|>Put(p,Int2Pos(y-1),r);
+    x==1 -> At(x,p|>r)=p;
+    x>1 -> At(x,p|>r)=At(Int2Pos(x-1),r);
+    y==1 -> Put(p,x,y,r|>b)=Put(p,x,r)|>b;
+    y>1 -> Put(p,x,y,r|>b)=r|>Put(p,x,Int2Pos(y-1),b);
+    x==1 -> Put(p,x,p'|>r)=p|>r;
+    x>1 -> Put(p,x,p'|>r)=p'|>Put(p,Int2Pos(x-1),r);
 
     y==M -> NoVerticalSpot(x,y,b)=true;
     x<N && y<M -> NoVerticalSpot(x,y,b)=
