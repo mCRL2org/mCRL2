@@ -570,18 +570,18 @@ public:
     );
     
     assert(gsIsSpecV1((ATermAppl) rebuild_spec));
-    
+
     //cerr << p_lpe.pp() << endl;
-    
-    if (p_outputfile.size() == 0){
+    if (p_outputfile.empty()){
       //if(!p_verbose){
       //  assert(!p_verbose);
         writeStream(rebuild_spec);
       //};
-    } else {
-      if(!rebuild_spec.save(p_outputfile)){
+    }
+    else {
+      if(!rebuild_spec.save(p_outputfile)) {
          cerr << "lpeconstelm: Unsuccessfully written outputfile: " << p_outputfile << endl;
-      };
+      }
     } 
   }
   
@@ -898,7 +898,7 @@ ConstelmObj parse_command_line(int ac, char** av) {
   po::options_description hidden("Hidden options");
 
   hidden.add_options()
-     ("INFILE", po::value< string >(), "input file")
+     ("file_names", po::value< vector<string> >(), "input/output files")
   ;
         
   po::options_description cmdline_options;
@@ -911,8 +911,7 @@ ConstelmObj parse_command_line(int ac, char** av) {
   p.add("file_names", -1);
 
   po::variables_map vm;
-  po::store(po::command_line_parser(ac, av).
-    options(cmdline_options).positional(p).run(), vm);
+  po::store(po::command_line_parser(ac, av).options(cmdline_options).positional(p).run(), vm);
   po::notify(vm);
      
   if (vm.count("help")) {
@@ -948,18 +947,18 @@ ConstelmObj parse_command_line(int ac, char** av) {
     }
   }
   else if (2 < file_names.size()) {
-    cerr << "lpeconstelm: Specify only INPUT and/or OUTPUT file (Too many arguments)."<< endl;
+    cerr << "lpeconstelm: Specify only INPUT and/or OUTPUT file (too many arguments)."<< endl;
 
     exit (0);
   }
   else {
-    if(!constelm.loadFile(file_names[0])) {
+    if (!constelm.loadFile(file_names[0])) {
       exit (1);
     }
 
-    if(file_names.size() == 2){
+    if (file_names.size() == 2) {
       constelm.setSaveFile(file_names[1]);
-    };
+    }
   }
 
   return (constelm);
@@ -1100,10 +1099,10 @@ int main(int ac, char** av) {
 #else
   constelm = parse_command_line(ac,av);
 #endif
-     
+
   constelm.filter();
   constelm.output(); 
-    
+
   gsRewriteFinalise();
 
   return 0;
