@@ -33,11 +33,10 @@ bool OnInit() {
 	GraphFrame *frame;
 	
 	frame = new GraphFrame(wxT("ltsgraph"), wxPoint(150, 150), wxSize(INITIAL_WIN_WIDTH, INITIAL_WIN_HEIGHT));
+	frame->Show(TRUE);
     if ( cmdln.GetParamCount() > 0 ) 
 		frame->Init(cmdln.GetParam(0));
-	frame->Show(TRUE);
 
-	gsEnableConstructorFunctions();
 
     return TRUE;
 }
@@ -56,7 +55,7 @@ extern "C" int WINAPI WinMain(HINSTANCE hInstance,
         ATerm bot;
 
         ATinit(NULL,NULL,&bot); // XXX args?
-
+		gsEnableConstructorFunctions();
         return wxEntry(hInstance, hPrevInstance, lpCmdLine, nCmdShow);    
     }
 #else
@@ -65,7 +64,7 @@ int main(int argc, char **argv)
 	ATerm bot;
 
 	ATinit(argc,argv,&bot);
-
+	gsEnableConstructorFunctions();	
 	return wxEntry(argc, argv);
 }
 #endif
