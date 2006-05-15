@@ -191,7 +191,6 @@ private:
     bool differs = false;
     for(vector< data_assignment>::iterator i= p_currentState.begin(); i != p_currentState.end() ;i++){
       int index = p_lookupIndex[i->lhs()]; 
-      cerr << p_currentState.at(index).pp() << " vs. " << p_nextState.at(index).pp();
       if (p_V.find(index) == p_V.end()) { 
         if (inFreeVarList(i->rhs())) { 
           if (!inFreeVarList( p_nextState.at(index).rhs() )){
@@ -227,7 +226,6 @@ private:
          }
 
       } 
-      cerr << " -> " << p_newCurrentState.at(index).pp() << endl;
     }
     return !differs;
   }
