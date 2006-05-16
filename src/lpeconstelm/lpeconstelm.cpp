@@ -88,6 +88,9 @@ public:
   ConstelmObj() {
     safeguard = ATtableCreate(10000,50);
   }
+  ~ConstelmObj() {
+    ATtableDestroy(safeguard);
+  }
 private:
 
   void getDatVarRec(aterm_appl t) {
@@ -878,9 +881,7 @@ public:
   }
 };
 
-ConstelmObj parse_command_line(int ac, char** av) {
-  ConstelmObj constelm;
-
+void parse_command_line(int ac, char** av, ConstelmObj &constelm) {
   po::options_description description;
 
   description.add_options()
@@ -932,7 +933,7 @@ ConstelmObj parse_command_line(int ac, char** av) {
   constelm.setDebug(0 < vm.count("debug"));
   constelm.setNoSingleton(0 < vm.count("no-singleton"));
   constelm.setAllTrue(0 < vm.count("no-condition"));
-  constelm.setReachable(0 < vm.count("no-reachable"));
+  constelm.setReachable(0 == vm.count("no-reachable"));
 
   if (vm.count("file_names")){
     file_names = vm["file_names"].as< std::vector< std::string > >();
@@ -958,8 +959,6 @@ ConstelmObj parse_command_line(int ac, char** av) {
       constelm.setSaveFile(file_names[1]);
     }
   }
-
-  return (constelm);
 }
 
 #ifdef ENABLE_SQUADT_CONNECTIVITY
@@ -1092,10 +1091,10 @@ int main(int ac, char** av) {
     tc.await_message(sip::send_signal_start);
   }
   else {
-    constelm = parse_command_line(ac,av);
+    parse_command_line(ac,av,constelm);
   }
 #else
-  constelm = parse_command_line(ac,av);
+  parse_command_line(ac,av,constelm);
 #endif
 
   constelm.filter();
