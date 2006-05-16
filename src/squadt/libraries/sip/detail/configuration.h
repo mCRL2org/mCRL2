@@ -374,8 +374,6 @@ namespace sip {
   inline configuration::ptr configuration::read(const std::string& s) {
     xml2pp::text_reader reader(s.c_str());
 
-    reader.read();
-
     return (read(reader));
   }
 

@@ -56,7 +56,8 @@ namespace sip {
         /** \brief Recursively serialises the state of the object to a stream */
         virtual void write_structure(std::ostream&) const = 0; 
 
-        inline std::string read_state() const;
+        /** \brief Gets a complete structure specification for a layout element */
+        inline std::string get_state() const;
 
         /** \brief Reads element specific data */
         virtual void read(xml2pp::text_reader&); 
@@ -75,6 +76,12 @@ namespace sip {
 
         /** \brief Synchronise with instantiation that is part of a (G)UI */
         virtual void update(layout::mediator*, mediator::wrapper*) const;
+
+        /** \brief Awaits the next change event */
+        inline void await_change() const;
+
+        /** \brief Recursively traverses layout structure to find an element by its id */
+        virtual element* find(element::identifier);
 
         /** \brief Abstract destructor */
         virtual ~element() = 0;
@@ -99,6 +106,9 @@ namespace sip {
       }
     }
 
+    /**
+     * @param[in] i the identifier of the wanted element
+     **/
     inline void element::set_id(element::identifier i) {
       id = i;
     }
@@ -107,16 +117,26 @@ namespace sip {
       return(id);
     }
 
+    /**
+     * @param[in] r the xml2pp text reader to read from
+     **/
     inline void element::read(xml2pp::text_reader& r) {
       r.get_attribute(&id, "id");
     }
 
-    inline std::string element::read_state() const {
+    inline std::string element::get_state() const {
       std::ostringstream s;
     
       write_structure(s);
     
       return (s.str());
+    }
+
+    /**
+     * @param[in] i the identifier of the wanted element
+     **/
+    inline element* element::find(element::identifier i) {
+      return ((i == id) ? this : 0);
     }
 
     /**

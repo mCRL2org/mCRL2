@@ -40,6 +40,9 @@ namespace sip {
       /** \brief Report comment (arbitrary text) */
       inline void set_comment(std::string);
 
+      /** \brief Output XML representation to string */
+      inline std::string write() const;
+
       /** \brief Generates an XML representation for this report */
       void write(std::ostream&) const;
 
@@ -64,6 +67,14 @@ namespace sip {
 
   inline void report::set_error(std::string e) {
     error = e;
+  }
+
+  inline std::string report::write() const {
+    std::ostringstream output;
+
+    write(output);
+
+    return (output.str());
   }
 
   /** \pre{configuration must have been allocated on the heap} */

@@ -20,6 +20,19 @@ namespace sip {
     /** \brief Maps visibility to a string */
     static const char* visibility_to_text[3] = {"visible","hidden","none"};
 
+    /**
+     * @param[in] id the identifier of the wanted element
+     **/
+    element* box::find(layout::element::identifier identifier) {
+      element* r = (identifier == id) ? this : 0;
+
+      for (children_list::const_iterator i = children.begin(); i != children.end() && r == 0; ++i) {
+        r = (*i).first->find(identifier);
+      }
+
+      return (r);
+    }
+
     /** \brief Finds a member of the visibility domain for a string */
     visibility text_to_visibility(std::string const& s) {
       if (s == "visible") {
@@ -61,8 +74,6 @@ namespace sip {
 
     element::aptr element::static_read_structure(std::string& input) {
       xml2pp::text_reader r(input);
-
-      r.read();
 
       /* Read structure data */
       return (static_read_structure(r));
@@ -250,28 +261,53 @@ namespace sip {
 
     /**
      * @param[in] r an xml2pp text reader that should point to state descriptions
-     * @param[in] m a mediator to synchronise an element with the associated element in a (G)UI
+     *
+     * Looks up an element by its id and calls the read_structure on this
+     * member to read its new state from the text reader.
      *
      * \return vector of pointers to elements that have been updated
      **/
     tool_display::constant_elements tool_display::update(xml2pp::text_reader& r) {
+      tool_display::constant_elements changed_elements;
+
       /* TODO
        *
        * read_structure may invoke event
        *   - controller side 
        *      * event schedules a (G)UI update
        *   - tool side 
-       *      * event depends on the user
+       *      * event handling is provided on the tool developer
        **/
       try {
-        while (1) {
+        while (r.valid()) {
+          sip::layout::element::identifier id;
+
+          r.get_attribute(&id, "id");
+
+          /* Find the element that is to be changed */
+          element* t = top_manager->find(id);
+
+          if (t != 0) {
+            t->read_structure(r);
+
+            changed_elements.push_back(t);
+          }
+          else {
+            std::string name = r.element_name();
+
+            while (r.valid() && !r.is_end_element(name.c_str())) {
+              r.read();
+            }
+
+            r.read();
+          }
         }
       }
       catch (xml2pp::exception::exception* e) {
-        if (e->get_type() != xml2pp::exception::end_of_stream) { 
-          throw;
-        }
+        std::cerr << e->what();
       }
+
+      return (changed_elements);
     }
   }
 }

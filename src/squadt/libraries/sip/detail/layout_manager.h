@@ -176,6 +176,9 @@ namespace sip {
         /** \brief Instantiate a layout element, through a mediator */
         virtual mediator::wrapper_aptr instantiate(layout::mediator*) = 0;
 
+        /** \brief Recursively traverses layout structure to find an element by its id */
+        element* find(element::identifier);
+
         /** \brief Destructor */
         virtual ~box() = 0;
     };

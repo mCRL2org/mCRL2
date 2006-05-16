@@ -962,6 +962,10 @@ void parse_command_line(int ac, char** av, ConstelmObj &constelm) {
 }
 
 #ifdef ENABLE_SQUADT_CONNECTIVITY
+/* Constants for identifiers of options and objects */
+const unsigned int lpd_file_for_input  = 0;
+const unsigned int lpd_file_for_output = 1;
+
 /* Communicate the basic configuration display */
 void set_basic_configuration_display(sip::tool::communicator& tc) {
   using namespace sip;
@@ -988,6 +992,40 @@ void set_basic_configuration_display(sip::tool::communicator& tc) {
 
   tc.send_display_layout(display);
 }
+
+/* Validates a configuration for use with lpeconstelm, and establishes completeness */
+bool validate_configuration(sip::tool::communicator& tc, sip::configuration& c) {
+  bool valid  = true;
+
+  /* Should contain a file name of an LPD that is to be read as input */
+  valid &= c.object_exists(lpd_file_for_input);
+  valid &= c.object_exists(lpd_file_for_output);
+
+  if (valid) {
+    std::string input_file_name  = c.get_object(lpd_file_for_input)->get_location();
+    std::string output_file_name = c.get_object(lpd_file_for_output)->get_location();
+
+    valid = input_file_name == output_file_name;
+
+    if (!valid) {
+      sip::report report;
+
+      report.set_error("Input file is the same as the output file!");
+
+      tc.send_report(report);
+    }
+  }
+
+  return (valid);
+}
+
+void process_configuration(ConstelmObj& constelm, sip::configuration& c) {
+  std::string input_file_name  = c.get_object(lpd_file_for_input)->get_location();
+  std::string output_file_name = c.get_object(lpd_file_for_output)->get_location();
+
+  /* An object with the correct id exists, assume the URI is relative (i.e. a file name in the local file system) */
+  constelm.setSaveFile(output_file_name);
+}
 #endif
 
 int main(int ac, char** av) {
@@ -1000,10 +1038,6 @@ int main(int ac, char** av) {
 
 #ifdef ENABLE_SQUADT_CONNECTIVITY
   sip::tool::communicator tc;
-
-  /* Constants for identifiers of options and objects */
-  const unsigned int lpd_file_for_input  = 0;
-  const unsigned int lpd_file_for_output = 1;
 
   /* Get tool capabilities in order to modify settings */
   sip::tool::capabilities& cp = tc.get_tool_capabilities();
@@ -1028,7 +1062,7 @@ int main(int ac, char** av) {
       valid &= configuration->object_exists(lpd_file_for_input);
 
       if (valid) {
-        std::string input_file_name  = configuration->get_object(lpd_file_for_input)->get_location();
+        std::string input_file_name = configuration->get_object(lpd_file_for_input)->get_location();
 
         /* An object with the correct id exists, assume the URI is relative (i.e. a file name in the local file system) */
         constelm.loadFile(input_file_name);
@@ -1047,41 +1081,12 @@ int main(int ac, char** av) {
     /* Draw a configuration layout in the tool display */
     set_basic_configuration_display(tc);
 
-    valid = false;
-
     /* Static configuration cycle (phase 2: gather user input) */
-    while (!valid) {
+    while (!validate_configuration(tc, tc.get_configuration())) {
       /* Wait for configuration data to be send (either a previous configuration, or only an input combination) */
       sip::message_ptr data = tc.await_message(sip::send_display_data);
 
-      sip::configuration& configuration = tc.get_configuration();
-
-      /* Validate configuration specification, should contain a file name of an LPD that is to be read as input */
-      valid  = true;
-      valid &= configuration.object_exists(lpd_file_for_input);
-      valid &= configuration.object_exists(lpd_file_for_output);
-
-      if (valid) {
-        std::string output_file_name = configuration.get_object(lpd_file_for_output)->get_location();
-
-        if (input_file_name == output_file_name) {
-          sip::report report;
-
-          report.set_error("Input file is the same as the output file!");
-
-          tc.send_report(report);
-        }
-
-        /* An object with the correct id exists, assume the URI is relative (i.e. a file name in the local file system) */
-        constelm.setSaveFile(output_file_name);
-      }
-      else {
-        sip::report report;
-
-        report.set_error("Invalid input combination!");
-
-        tc.send_report(report);
-      }
+      std::cerr << "lpeconstelm: Data(" << data->to_string() << ")" << std::endl;
     }
 
     /* Send the controller the signal that we're ready to rumble (no further configuration necessary) */

@@ -52,7 +52,7 @@ namespace sip {
       private:
 
         /** \brief Handler for incoming data resulting from user interaction relayed by the controller */
-        void accept_interaction_data(const sip::messenger::message_ptr&);
+        void accept_interaction_data(const sip::messenger::message_ptr&, layout::tool_display::sptr);
  
       public:
  
@@ -80,9 +80,6 @@ namespace sip {
         /** \brief Send data to update the state of the last communicated display layout */
         template < typename E >
         void send_display_data(E const*);
- 
-        /** \brief Send a layout specification for the display space reserved for this tool */
-        void send_display_layout(layout::tool_display&);
  
         /** \brief Send a layout specification for the display space reserved for this tool */
         void send_display_layout(layout::tool_display::sptr);
@@ -150,7 +147,7 @@ namespace sip {
     }
 
     /**
-     * @param[in] a sip layout element of which the data is to be sent
+     * @param[in] e pointer to a sip layout element of which the data is to be sent
      **/
     template < typename E >
     void communicator::send_display_data(E const* e) {

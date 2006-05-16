@@ -17,7 +17,6 @@ namespace sip {
  
       /* Register event handlers for some message types */
       add_handler(sip::request_tool_capabilities, boost::bind(&communicator::reply_tool_capabilities, this));
-      add_handler(sip::send_display_data, boost::bind(&communicator::accept_interaction_data, this, _1));
     }
  
     /**
@@ -77,8 +76,6 @@ namespace sip {
         if (p.get() != 0) {
           xml2pp::text_reader reader(p->to_string().c_str());
        
-          reader.read();
-       
           current_controller_capabilities = controller::capabilities::read(reader);
 
           break;
@@ -109,18 +106,22 @@ namespace sip {
       send_message(m);
     }
  
-    /* Send a layout specification for the display space reserved for this tool */
-    void communicator::send_display_layout(layout::tool_display& d) {
-      message m(d.write(), sip::send_display_layout);
- 
-      send_message(m);
-    }
- 
-    /* Send a layout specification for the display space reserved for this tool */
+    /**
+     * Send a layout specification for the display space reserved for this
+     * tool. Also sets up an event handler to update the tool display with
+     * data from change events, once those are are received.
+     *
+     * The last communicated display layout is stored internally and is updated
+     * accordingly when data is received.
+     **/
     void communicator::send_display_layout(layout::tool_display::sptr d) {
       message m(d->write(), sip::send_display_layout);
  
       send_message(m);
+
+      clear_handlers(sip::send_display_data);
+
+      add_handler(sip::send_display_data, boost::bind(&communicator::accept_interaction_data, this, _1, d));
     }
  
     /* Send a signal that the tool is about to terminate */
@@ -131,11 +132,20 @@ namespace sip {
     }
  
     /* Send a status report to the controller */
-    void communicator::send_report(sip::report&) {
-      /* TODO */
+    void communicator::send_report(sip::report& r) {
+      message m(r.write(), sip::send_report);
+ 
+      send_message(m);
     }
  
-    void communicator::accept_interaction_data(const sip::messenger::message_ptr&) {
+    /**
+     * @param[in] m shared pointer to the message
+     * @param[out] d tool display on which to execute changes
+     **/
+    void communicator::accept_interaction_data(const sip::messenger::message_ptr& m, layout::tool_display::sptr d) {
+      xml2pp::text_reader reader(m->to_string().c_str());
+
+      d->update(reader);
     }
 
     const configuration::ptr communicator::await_configuration() {

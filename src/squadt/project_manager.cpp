@@ -165,7 +165,7 @@ namespace squadt {
    **/
   void project_manager::read(xml2pp::text_reader& r) {
     /* Advance beyond project element */
-    r.read(2);
+    r.read(1);
 
     if (r.is_element("description") && !r.is_empty_element()) {
       r.read();

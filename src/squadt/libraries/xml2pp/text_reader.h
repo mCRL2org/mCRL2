@@ -23,6 +23,9 @@ namespace xml2pp {
       /** \brief The XML text reader from libxml2 */
       xmlTextReaderPtr   reader;
 
+      /** \brief Whether the end-of-stream was reached */
+      bool               past_end_of_stream;
+
     public:
 
       /** \brief Wrapper class to allow distinction between input strings and file names */
@@ -98,6 +101,9 @@ namespace xml2pp {
 
       /** \brief Whether the current element is empty */
       inline bool is_empty_element();
+
+      /** \brief Whether the reader currently points to a valid element */
+      inline bool valid();
   };
 }
 

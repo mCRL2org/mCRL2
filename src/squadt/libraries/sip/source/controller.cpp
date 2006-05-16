@@ -61,7 +61,6 @@ namespace sip {
     }
 
     /**
-     * @param m pointer to the message
      * @param h the function that is called when a new layout for the display has been received
      **/
     void communicator::activate_display_layout_handler(display_layout_handler_function h) {
@@ -74,7 +73,7 @@ namespace sip {
     }
 
     /**
-     * @param m pointer to the message
+     * @param d pointer to a tool display
      * @param h the function that is called when a new layout for the display has been received
      *
      * \pre d.get() != 0
@@ -95,8 +94,6 @@ namespace sip {
     void communicator::display_layout_handler(const messenger::message_ptr& m, display_layout_handler_function h) {
       xml2pp::text_reader reader(m->to_string().c_str());
 
-      reader.read();
-
       sip::layout::tool_display::sptr d = layout::tool_display::read(reader);
 
       h(d);
@@ -109,8 +106,6 @@ namespace sip {
      **/
     void communicator::display_data_handler(const messenger::message_ptr& m, sip::layout::tool_display::sptr d, display_data_handler_function h) {
       xml2pp::text_reader reader(m->to_string().c_str());
-
-      reader.read();
 
       h(d->update(reader));
     }

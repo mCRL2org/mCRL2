@@ -130,11 +130,11 @@ namespace sip {
     }
 
     /**
-     * @param[in] a sip layout element of which the data is to be sent
+     * @param[in] e a sip layout element of which the data is to be sent
      **/
     template < typename E >
     void communicator::send_display_data(E const* e) {
-      message m(e->read_state(), sip::send_display_data);
+      message m(e->get_state(), sip::send_display_data);
 
       send_message(m);
     }

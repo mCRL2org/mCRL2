@@ -113,8 +113,6 @@ namespace sip {
 
         xml2pp::text_reader reader(content, (++e - i));
 
-        reader.read();
-
         reader.get_attribute(&identifier, "type");
 
         /* Remove message meta element */

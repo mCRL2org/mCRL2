@@ -104,18 +104,19 @@ namespace squadt {
       throw (exception(exception_identifier::required_attributes_missing, "tool"));
     }
 
-    r.read();
+    if (!r.is_end_element()) {
+      r.read();
 
-    sip::tool::capabilities::ptr c = sip::tool::capabilities::read(r);
+      sip::tool::capabilities::ptr c = sip::tool::capabilities::read(r);
+      
+      if (c.get() != 0) {
+        return (tool::ptr(new tool(name, location, c)));
+      }
+    }
 
     r.skip_end_element("tool");
-
-    if (c.get() == 0) {
-      return (tool::ptr(new tool(name, location)));
-    }
-    else {
-      return (tool::ptr(new tool(name, location, c)));
-    }
+      
+    return (tool::ptr(new tool(name, location)));
   }
 
   inline const sip::tool::capabilities::ptr tool::get_capabilities() const {

@@ -32,6 +32,12 @@ namespace xml2pp {
     if (reader == 0) {
       throw (exception::exception(exception::unable_to_open_file, f.get()));
     }
+    else {
+      /* Point to first element */
+      past_end_of_stream = false;
+
+      read();
+    }
   }
 
   /**
@@ -44,6 +50,12 @@ namespace xml2pp {
     if (reader == 0) {
       throw (exception::exception(exception::unable_to_initialise_reader));
     }
+    else {
+      /* Point to first element */
+      past_end_of_stream = false;
+
+      read();
+    }
   }
 
   /**
@@ -55,6 +67,12 @@ namespace xml2pp {
 
     if (reader == 0) {
       throw (exception::exception(exception::unable_to_initialise_reader));
+    }
+    else {
+      /* Point to first element */
+      past_end_of_stream = false;
+
+      read();
     }
   }
 
@@ -69,6 +87,12 @@ namespace xml2pp {
     if (reader == 0) {
       throw (exception::exception(exception::unable_to_initialise_reader));
     }
+    else {
+      /* Point to first element */
+      past_end_of_stream = false;
+
+      read();
+    }
   }
 
   /**
@@ -81,6 +105,12 @@ namespace xml2pp {
 
     if (reader == 0) {
       throw (exception::exception(exception::unable_to_initialise_reader));
+    }
+    else {
+      /* Point to first element */
+      past_end_of_stream = false;
+
+      read();
     }
   }
 
@@ -273,7 +303,14 @@ namespace xml2pp {
     do {
       if (status <= 0) {
         /* Process error, or end of file */
-        throw (exception::exception((status < 0) ? exception::error_while_parsing_document : exception::end_of_stream));
+        if (status < 0) {
+          throw (exception::exception(exception::error_while_parsing_document));
+        }
+        else {
+          past_end_of_stream = true;
+
+          break;
+        }
       }
       else if (xmlTextReaderNodeType(reader) == XML_READER_TYPE_SIGNIFICANT_WHITESPACE) {
         /* Skip whitespace */
@@ -289,6 +326,10 @@ namespace xml2pp {
       }
     }
     while (1);
+  }
+
+  inline bool text_reader::valid() {
+    return (!past_end_of_stream);
   }
 }
 #endif

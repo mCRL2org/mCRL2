@@ -91,9 +91,8 @@ namespace squadt {
  
     /* Read root element (tool-catalog) */
     r.read();
-    r.read();
-  
-    while (!r.is_end_element()) {
+
+    while (!r.is_end_element("tool-catalog")) {
       /* Add a new tool to the list of tools */
       new_tool_manager->tools.push_back(tool::read(r));
     }

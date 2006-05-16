@@ -327,7 +327,7 @@ namespace sip {
       }
 
       /**
-       * @param[in] s the new status
+       * @param[in] b the new status
        **/
       inline void checkbox::set_status(bool b) {
         status = b;

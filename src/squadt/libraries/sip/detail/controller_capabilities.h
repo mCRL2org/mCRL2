@@ -134,8 +134,6 @@ namespace sip {
     inline capabilities::ptr capabilities::read(const std::string& s) {
       xml2pp::text_reader r(s);
 
-      r.read();
-
       return (read(r));
     }
 

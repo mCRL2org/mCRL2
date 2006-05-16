@@ -66,8 +66,6 @@ namespace squadt {
   inline void extractor::handle_store_tool_capabilities(const sip::message_ptr& m, tool& t) {
     xml2pp::text_reader reader(m->to_string().c_str());
 
-    reader.read();
- 
     t.capabilities = sip::tool::capabilities::read(reader);
 
     finish();
