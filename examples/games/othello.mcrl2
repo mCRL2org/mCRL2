@@ -1,0 +1,215 @@
+% This specification describes the game `Othello', which is a two
+% player board game. There is a board of N by M 
+% One player has white pieces (W) and the 
+% other has red pieces (R). Initially, the board is set up as:
+% 
+%      . . . . . . . .
+%      . . . . . . . .
+%      . . . . . . . .
+%      . . . R W . . .
+%      . . . W R . . .
+%      . . . . . . . .
+%      . . . . . . . .
+%      . . . . . . . .
+% 
+% Red makes the first move and the players alternatingly put a piece on
+% the board, unless a player cannot put a piece on the board, 
+% in which case he must skip his turn. 
+% A move is made by putting a piece on the board such that at least
+% one piece of the opponent is enclosed with two opposite colors.
+% Subsequently all pieces that are enclosed will change color.
+%
+% The game ends when the board is full, or when both players cannot
+% do a move anymore. The player with the largest number of pieces
+% on the board wins. If both players have the same number of pieces
+% it is a draw.
+%
+% Thanks go to Mark Winands for suggesting the game.
+%
+% Reijkjavik, May 16, 2006, Jan Friso Groote
+
+sort Position = struct Red | White | Empty;
+map N,M:Pos;
+eqn N=4;
+    M=4;
+
+sort Row=List(Position);
+     Board=List(Row);
+map  At:Nat#Nat#Board->Position;
+     At:Nat#Row->Position;
+     Put:Position#Nat#Nat#Board->Board;
+     Put:Position#Nat#Row->Row;
+     Enclosing:Position#Nat#Nat#Board->Bool;
+     Count:Position#Nat#Nat#Board->Nat;
+     CanMove:Position#Board->Bool;
+     CanMove:Position#Nat#Nat#Board->Bool;
+     PutPiece,PutPiece1,PutPiece2,PutPiece3,PutPiece4,
+        PutPiece5,PutPiece6,PutPiece7,PutPiece8:Position#Nat#Nat#Board->Board;
+     Opposite:Position->Position;
+     Swap:Position#Nat#Nat#Int#Int#Board->Board;
+     Search:Position#Nat#Nat#Int#Int#Bool#Board->Bool;
+     
+
+var b:Board;
+    r:Row;
+    p,p':Position;
+    x,y:Nat;
+    dx,dy:Int;
+    othercolorseen:Bool;
+eqn Opposite(Red)=White;
+    Opposite(White)=Red;
+
+    At(x,y,[])=Empty;
+    x==0 || y==0 -> At(x,y,b)=Empty;
+    y==1 -> At(x,y,r|>b)=At(x,r);
+    y>M -> At(x,y,b)=Empty;
+    1<y && y<=M -> At(x,y,r|>b)=At(x,Int2Nat(y-1),b);
+    At(x,[])=Empty;
+    x==0 -> At(x,r)=Empty;
+    x==1 -> At(x,p|>r)=p;
+    x>N -> At(x,p|>r)=Empty;
+    1<x && x<=N -> At(x,p|>r)=At(Int2Nat(x-1),r);
+
+    y==1 -> Put(p,x,y,r|>b)=Put(p,x,r)|>b;
+    y>1 -> Put(p,x,y,r|>b)=r|>Put(p,x,Int2Pos(y-1),b);
+    x==1 -> Put(p,x,p'|>r)=p|>r;
+    x>1 -> Put(p,x,p'|>r)=p'|>Put(p,Int2Pos(x-1),r);
+
+    
+    x==N && y==M ->
+      Count(p,x,y,b)=if(At(x,y,b)==p,1,0);
+
+    x==N && y<M ->
+      Count(p,x,y,b)=if(At(x,y,b)==p,1,0)+Count(p,1,y+1,b);
+
+    x<N ->
+      Count(p,x,y,b)=if(At(x,y,b)==p,1,0)+Count(p,x+1,y,b);
+
+    Enclosing(p,x,y,b)=
+       Search(p,x,y,1,0,false,b)||
+       Search(p,x,y,1,-1,false,b)||
+       Search(p,x,y,0,-1,false,b)||
+       Search(p,x,y,-1,-1,false,b)||
+       Search(p,x,y,-1,0,false,b)||
+       Search(p,x,y,-1,1,false,b)||
+       Search(p,x,y,0,1,false,b)||
+       Search(p,x,y,1,1,false,b);
+
+
+    At(Int2Nat(x+dx),Int2Nat(y+dy),b)==Opposite(p) ->
+       Search(p,x,y,dx,dy,othercolorseen,b)=
+                 Search(p,Int2Nat(x+dx),Int2Nat(y+dy),dx,dy,true,b);
+
+    At(Int2Nat(x+dx),Int2Nat(y+dy),b)==p -> 
+       Search(p,x,y,dx,dy,othercolorseen,b)=othercolorseen;
+
+    At(Int2Nat(x+dx),Int2Nat(y+dy),b)==Empty  ->
+       Search(p,x,y,dx,dy,othercolorseen,b)=false;
+
+    At(x,y,b)==Empty -> Swap(p,x,y,dx,dy,b)=b;
+    At(x,y,b)==p -> Swap(p,x,y,dx,dy,b)=b;
+    At(x,y,b)==Opposite(p) -> 
+        Swap(p,x,y,dx,dy,b)=
+          Put(p,x,y,Swap(p,Int2Nat(x+dx),Int2Nat(y+dy),dx,dy,b));
+
+    PutPiece(p,x,y,b)=
+       Put(p,x,y,PutPiece1(p,x,y,b));
+
+    Search(p,x,y,1,0,false,b) ->
+          PutPiece1(p,x,y,b)=Swap(p,x+1,y,1,0,PutPiece2(p,x,y,b));
+
+    !Search(p,x,y,1,0,false,b) ->
+          PutPiece1(p,x,y,b)=PutPiece2(p,x,y,b);
+
+    Search(p,x,y,1,-1,false,b) ->
+          PutPiece2(p,x,y,b)=Swap(p,x+1,Int2Nat(y-1),1,-1,PutPiece3(p,x,y,b));
+
+    !Search(p,x,y,1,-1,false,b) ->
+          PutPiece2(p,x,y,b)=PutPiece3(p,x,y,b);
+
+    Search(p,x,y,0,-1,false,b) ->
+          PutPiece3(p,x,y,b)=Swap(p,x,Int2Nat(y-1),0,-1,PutPiece4(p,x,y,b));
+
+    !Search(p,x,y,0,-1,false,b) ->
+          PutPiece3(p,x,y,b)=PutPiece4(p,x,y,b);
+
+    Search(p,x,y,-1,-1,false,b) ->
+          PutPiece4(p,x,y,b)=
+             Swap(p,Int2Nat(x-1),Int2Nat(y-1),-1,-1,PutPiece5(p,x,y,b));
+
+    !Search(p,x,y,-1,-1,false,b) ->
+          PutPiece4(p,x,y,b)=PutPiece5(p,x,y,b);
+
+    Search(p,x,y,-1,0,false,b) ->
+          PutPiece5(p,x,y,b)=
+             Swap(p,Int2Nat(x-1),y,-1,0,PutPiece6(p,x,y,b));
+
+    !Search(p,x,y,-1,0,false,b) ->
+          PutPiece5(p,x,y,b)=PutPiece6(p,x,y,b);
+
+    Search(p,x,y,-1,1,false,b) ->
+          PutPiece6(p,x,y,b)=Swap(p,Int2Nat(x-1),y+1,-1,1,PutPiece7(p,x,y,b));
+
+    !Search(p,x,y,-1,1,false,b) ->
+          PutPiece6(p,x,y,b)=PutPiece7(p,x,y,b);
+
+    Search(p,x,y,0,1,false,b) ->
+          PutPiece7(p,x,y,b)=Swap(p,x,y+1,0,1,PutPiece8(p,x,y,b));
+
+    !Search(p,x,y,0,1,false,b) ->
+          PutPiece7(p,x,y,b)=PutPiece8(p,x,y,b);
+
+    Search(p,x,y,1,1,false,b) ->
+          PutPiece8(p,x,y,b)=Swap(p,x+1,y+1,1,1,b);
+
+    !Search(p,x,y,1,1,false,b) ->
+          PutPiece8(p,x,y,b)=b;
+
+
+    CanMove(p,b)=CanMove(p,1,1,b);
+
+    x==N && y==M ->
+      CanMove(p,x,y,b)=At(x,y,b)==Empty && Enclosing(p,x,y,b);
+
+    x==N && y<M ->
+      CanMove(p,x,y,b)=
+         (At(x,y,b)==Empty && Enclosing(p,x,y,b)) || CanMove(p,1,y+1,b);
+
+    x<N ->
+      CanMove(p,x,y,b)=
+         (At(x,y,b)==Empty && Enclosing(p,x,y,b)) || CanMove(p,x+1,y,b);
+
+
+act WhiteMove,RedMove:Pos#Pos;
+    WhiteWins,RedWins,Draw;
+
+proc Othello(b:Board,WhiteMoves:Bool)=
+       sum x,y:Pos. ((WhiteMoves ||
+                       (!WhiteMoves && !CanMove(Red,b))) &&
+                     x<=N && y<=M &&
+                     At(x,y,b)==Empty &&
+                     Enclosing(White,x,y,b))->
+           WhiteMove(x,y).
+             Othello(PutPiece(White,x,y,b),false)+
+       sum x,y:Pos. ((!WhiteMoves || 
+                       (WhiteMoves && !CanMove(White,b))) &&
+                     x<=N && y<=M &&
+                     At(x,y,b)==Empty &&
+                     Enclosing(Red,x,y,b))->
+           RedMove(x,y).
+             Othello(PutPiece(Red,x,y,b),true)+
+       (!CanMove(Red,b) && !CanMove(White,b) && 
+                     Count(Red,1,1,b)>Count(White,1,1,b)) ->
+           RedWins.Othello(b,WhiteMoves)+
+       (!CanMove(Red,b) && !CanMove(White,b) && 
+                     Count(Red,1,1,b)<Count(White,1,1,b)) ->
+           WhiteWins.Othello(b,WhiteMoves)+
+       (!CanMove(Red,b) && !CanMove(White,b) && 
+                     Count(Red,1,1,b)==Count(White,1,1,b)) ->
+           Draw.Othello(b,WhiteMoves);
+
+
+init Othello([[Empty,Empty,Empty,Empty],
+              [Empty, Red ,White,Empty],
+              [Empty,White, Red ,Empty],
+              [Empty,Empty,Empty,Empty]],false);
