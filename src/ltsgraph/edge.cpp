@@ -11,12 +11,11 @@ const double triangle_height = 8.0;
 
 const wxColour color = "BLACK";
 
-Edge::Edge(unsigned int _numN1, unsigned int _numN2, wxPoint _pos1, wxPoint _pos2, wxString _Slbl) 
-	: numN1(_numN1), numN2(_numN2), pos1(_pos1), pos2(_pos2) {
+Edge::Edge(unsigned int _numN1, unsigned int _numN2, double _pos1X, double _pos1Y, double _pos2X, double _pos2Y, wxString _Slbl) 
+	: numN1(_numN1), numN2(_numN2), pos1X(_pos1X), pos1Y(_pos1Y), pos2X(_pos2X), pos2Y(_pos2Y) {
 
-    wxPoint * posLbl = new wxPoint( pos1.x + ((pos2.x-pos1.x)/2)-10 , pos1.y + ((pos2.y-pos1.y)/2)-10 );
-    lbl = new Label(_Slbl, *posLbl);
-    //cout << "EDGE pos1.x " << pos1.x << " pos1.y " << pos1.y << " pos2.x " << pos2.x << " pos2.y " << pos2.y << endl;
+    lbl = new Label (_Slbl, pos1X + ((pos2X-pos1X)/2)-10, (int) round(pos1Y) + ((int) round((pos2Y-pos1Y)/2))-10 );
+
 }
 
 
@@ -25,14 +24,14 @@ void Edge::OnPaint(wxPaintDC * ptrDC) {
 
     //Calculate triangle coord
     //angle expressed in radians
-    double alpha = atan( (( double )(pos2.y-pos1.y)) / (( double ) (pos2.x-pos1.x)) );
+    double alpha = atan( (( double )(pos2Y-pos1Y)) / (( double ) (pos2X-pos1X)) );
 
-    wxCoord newX =  pos2.x + (pos2.x-pos1.x>0?
+    wxCoord newX = (int) round(( pos2X + (pos2X-pos1X>0?
                              -(int) round(10 * cos(alpha)):
-                              (int) round(10 * cos(alpha)));
-    wxCoord newY =  pos2.y - (pos2.x-pos1.x>=0?
+                              (int) round(10 * cos(alpha))) ));
+    wxCoord newY =  (int) round(( pos2Y - (pos2X-pos1X>=0?
                               (int) round(10 * sin(alpha)):
-                             -(int) round(10 * sin(alpha)));
+                             -(int) round(10 * sin(alpha))) ));
     
     
     //Calculate triangle points coord
@@ -50,7 +49,7 @@ void Edge::OnPaint(wxPaintDC * ptrDC) {
     double lenX3 = cos(gamma_p3) * sqrtCalc; 
     
     //coord correcting depend on position 
-    if (pos2.x < pos1.x) {
+    if (pos2X < pos1X) {
         lenY1 = -lenY1;
     }
     else {
@@ -78,7 +77,7 @@ void Edge::OnPaint(wxPaintDC * ptrDC) {
     //Edge body (line)
     wxPen myPen(color,ARROW_WIDTH,wxSOLID);
     ptrDC->SetPen(myPen);
-    ptrDC->DrawLine(pos1.x,pos1.y,pos2.x,pos2.y);
+    ptrDC->DrawLine((wxCoord)pos1X,(wxCoord)pos1Y,(wxCoord)pos2X,(wxCoord)pos2Y);
 
     //Label
     lbl->OnPaint(ptrDC);
@@ -93,41 +92,41 @@ unsigned int Edge::Get_numN2() {
 	return numN2;
 }
 
-void Edge::Set_pos1(wxCoord _x, wxCoord _y){
+void Edge::Set_pos1(double _x, double _y){
 	if (!locked1) {
-		pos1.x = _x;
-		pos1.y = _y;
-		lbl->SetXY(pos1.x + ((pos2.x-pos1.x)/2)-10 , pos1.y + ((pos2.y-pos1.y)/2)-10);
+		pos1X = _x;
+		pos1Y = _y;
+		lbl->SetXY(pos1X + ((pos2X-pos1X)/2)-10 , pos1Y + ((pos2Y-pos1Y)/2)-10);
 	}
 	else 
 		wxBell();
 }
 
-void Edge::Set_pos2(wxCoord _x, wxCoord _y) {
+void Edge::Set_pos2(double _x, double _y) {
 	if (!locked2) {
-		pos2.x = _x;
-		pos2.y = _y;
+		pos2X = _x;
+		pos2Y = _y;
 		//Change position of label
-		lbl->SetXY(pos1.x + ((pos2.x-pos1.x)/2)-10 , pos1.y + ((pos2.y-pos1.y)/2)-10);
+		lbl->SetXY(pos1X + ((pos2X-pos1X)/2)-10 , pos1Y + ((pos2Y-pos1Y)/2)-10);
 	}
 	else
 		wxBell();
 }
 
-int Edge::GetXpos1() {
-	return pos1.x;
+double Edge::GetXpos1() {
+	return pos1X;
 }
 
-int Edge::GetYpos1() {
-	return pos1.y;
+double Edge::GetYpos1() {
+	return pos1Y;
 }
 
-int Edge::GetXpos2() {
-	return pos2.x;
+double Edge::GetXpos2() {
+	return pos2X;
 }
 
-int Edge::GetYpos2() {
-	return pos2.y;
+double Edge::GetYpos2() {
+	return pos2Y;
 }
 
 void Edge::Lock1() {

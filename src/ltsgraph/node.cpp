@@ -1,12 +1,11 @@
 #include "node.h"
 
-#define POS_LBL_X 3
-#define POS_LBL_Y 5
+const double POS_LBL_X = 3.0;
+const double POS_LBL_Y = 5.0;
 
-Node::Node(unsigned int _num, wxPoint _pos, wxString _Slbl) : pos(_pos), num(_num) {
-    //cout << "NODE no: " << num << " pos.x " << pos.x << " pos.y " << pos.y << endl;
-    wxPoint * posLbl = new wxPoint( pos.x-POS_LBL_X, pos.y-POS_LBL_Y );
-    lbl = new Label(_Slbl, *posLbl);
+Node::Node(unsigned int _num, double _posX, double _posY, wxString _Slbl) : posX(_posX), posY(_posY), num(_num) {
+
+    lbl = new Label(_Slbl, posX-POS_LBL_X, posY-POS_LBL_Y);
 	locked = false;
 }
 
@@ -22,7 +21,7 @@ void Node::OnPaint(wxPaintDC * ptrDC) {
     //Circle
     wxBrush myBrush(color,wxSOLID );
     ptrDC->SetBrush(myBrush);
-    ptrDC->DrawCircle(pos.x,pos.y,CIRCLE_RADIUS);
+    ptrDC->DrawCircle((wxCoord)posX,(wxCoord)posY,CIRCLE_RADIUS);
 
     //Label
     lbl->OnPaint(ptrDC);
@@ -33,12 +32,12 @@ unsigned int Node::Get_num() {
     return num;
 }
 
-wxCoord Node::GetX() {
-    return pos.x;
+double Node::GetX() {
+    return posX;
 }
 
-wxCoord Node::GetY() {
-    return pos.y;
+double Node::GetY() {
+    return posY;
 }
 
 bool Node::IsLocked(){
@@ -53,12 +52,12 @@ void Node::Unlock() {
 	locked = false;
 }
 
-void Node::SetXY(wxCoord _x, wxCoord _y) {
+void Node::SetXY(double _x, double _y) {
 	if (!locked) {
-		pos.x = _x;
-		pos.y = _y;
+		posX = _x;
+		posY = _y;
 		//Change position of label
-		lbl->SetXY(pos.x-POS_LBL_X, pos.y-POS_LBL_Y);
+		lbl->SetXY(posX-POS_LBL_X, posY-POS_LBL_Y);
 	}
 	else 
 		wxBell();

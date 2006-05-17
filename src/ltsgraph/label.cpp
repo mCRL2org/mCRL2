@@ -3,7 +3,7 @@
 
 #define FONT_SIZE 9
 
-Label::Label(wxString _name, wxPoint _pos) : name(_name), pos(_pos) {}
+Label::Label(wxString _name, double _posX, double _posY) : name(_name), posX(_posX), posY(_posY) {}
 
 
 void Label::OnPaint(wxPaintDC * ptrDC) {
@@ -11,13 +11,13 @@ void Label::OnPaint(wxPaintDC * ptrDC) {
 
     wxFont MyFont(FONT_SIZE, wxSWISS , wxNORMAL, wxNORMAL, false, wxT("Arial"));
     ptrDC->SetFont(MyFont);
-    ptrDC->DrawRotatedText(name,pos.x,pos.y,0);
+    ptrDC->DrawRotatedText(name,(int) round(posX),(int) round(posY),0);
  
 }
 
-void Label::SetXY(wxCoord _x, wxCoord _y) {
-	pos.x = _x;
-	pos.y = _y;
+void Label::SetXY(double _posX, double _posY) {
+	posX = _posX;
+	posY = _posY;
 }
 
 

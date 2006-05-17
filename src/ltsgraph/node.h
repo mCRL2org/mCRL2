@@ -18,19 +18,20 @@ using namespace std;
 class Node
 {
 public:
-    Node(unsigned int _num, wxPoint _pos, wxString _Slbl);
+    Node(unsigned int _num, double _posX, double _posY, wxString _Slbl);
     void OnPaint(wxPaintDC * ptrDC);
     unsigned int Get_num();
-    wxCoord GetX(); 
-    wxCoord GetY();
-	void SetXY(wxCoord, wxCoord);
+    double GetX(); 
+    double GetY();
+	void SetXY(double, double);
 	bool IsLocked();
 	void Lock();
 	void Unlock();
 
 private:
 	bool locked;
-    wxPoint pos;
+    double posX;
+	double posY;
     Label * lbl;
     unsigned int num;
     

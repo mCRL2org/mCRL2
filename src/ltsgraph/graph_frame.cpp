@@ -10,6 +10,7 @@ BEGIN_EVENT_TABLE(GraphFrame, wxFrame)
 	EVT_LEFT_UP(GraphFrame::ReleaseLeft)
 	EVT_RIGHT_UP(GraphFrame::PressRight)
 	EVT_MENU(wxID_OPEN, GraphFrame::OnOpen)
+	EVT_MENU(wxID_EXIT, GraphFrame::OnQuit)
 	EVT_MENU(ID_SET_EDGE_STIF, GraphFrame::OnSetEdgeStiffness)
 	EVT_MENU(ID_SET_NODE_STRE, GraphFrame::OnSetNodeStrenght)
 	EVT_MENU(ID_SET_NATU_LENG, GraphFrame::OnSetNaturalLength)
@@ -18,8 +19,8 @@ BEGIN_EVENT_TABLE(GraphFrame, wxFrame)
 END_EVENT_TABLE()
 
 
-int GenRandom(const int &max) {
-    return static_cast <int> (rand()%max+CIRCLE_RADIUS); 
+double GenRandom(const int &max) {
+    return static_cast <double> (rand()%max+CIRCLE_RADIUS); 
 }
 
 GraphFrame::GraphFrame(const wxString& title, const wxPoint& pos, const wxSize& size, long style) 
@@ -47,6 +48,7 @@ void GraphFrame::CreateMenu() {
 	//file
 	file = new wxMenu;
     openItem = file->Append( wxID_OPEN, wxT("&Open...	CTRL-o"), wxT("") );
+	quitItem = file->Append( wxID_EXIT, wxT("&Quit	CTRL-q"), wxT("") );
 	menu->Append( file, wxT("&File") );
 
 	//draw
@@ -73,8 +75,8 @@ void GraphFrame::OnResize(wxSizeEvent& event) {
 	double diff_x = (double) sz2.GetWidth() / (double) sz.GetWidth();
 	double diff_y = (double) sz2.GetHeight() / (double) sz.GetHeight();
 
-	wxCoord x;
-	wxCoord y;
+	double x;
+	double y;
     for (size_t m = 0; m < vectNode.size(); m++) {
         vectNode[m]->SetXY((int)(vectNode[m]->GetX() * diff_x), (int)(vectNode[m]->GetY() * diff_y));
 
@@ -110,6 +112,11 @@ void GraphFrame::OnOpen( wxCommandEvent& /* event */ ) {
 		Refresh();
 		Update();
     }
+}
+
+void GraphFrame::OnQuit( wxCommandEvent& /* event */ )
+{
+     Close( TRUE );
 }
 
 void GraphFrame::OnSetEdgeStiffness( wxCommandEvent& /* event */ ) {
@@ -152,6 +159,7 @@ void GraphFrame::OnPaint(wxPaintEvent& /* event */) {
     for (size_t n = 0; n < vectNode.size(); n++) {
         vectNode[n]->OnPaint(&myDC);
     }
+
 }
 
 
@@ -162,7 +170,6 @@ void GraphFrame::OnOptimize( wxCommandEvent& /* event */ ) {
 		}
 
 }
-
 
 //init vectNode & vectEdge
 void GraphFrame::Init(wxString LTSfile) {
@@ -182,7 +189,6 @@ void GraphFrame::Init(wxString LTSfile) {
         //initialize vectNode
 
         state_iterator si = mylts.get_states();
-        wxPoint * p;
         
         wxString tmp;
 		int randX = sz.GetWidth()  - 2*CIRCLE_RADIUS;
@@ -191,10 +197,8 @@ void GraphFrame::Init(wxString LTSfile) {
         while (si.more()) {
             tmp.sprintf(wxT("%d"), *si);
             wxString * Slbl_Node = new wxString(tmp);
-            p = new wxPoint(GenRandom(randX),GenRandom(randY));
-            vectNode.push_back(new Node(*si, *p, *Slbl_Node));
+            vectNode.push_back(new Node(*si, GenRandom(randX), GenRandom(randY), *Slbl_Node));
             ++ si;
-            delete p;
             delete Slbl_Node;
         }   
     
@@ -213,11 +217,7 @@ void GraphFrame::Init(wxString LTSfile) {
                 if (vectNode[n]->Get_num() == ti.from()) {
                     for (size_t m = 0; m < vectNode.size(); m++) {
                         if (vectNode[m]->Get_num() == ti.to()) {
-                            pe1 = new wxPoint(vectNode[n]->GetX(), vectNode[n]->GetY());
-                            pe2 = new wxPoint(vectNode[m]->GetX(), vectNode[m]->GetY());
-                            vectEdge.push_back(new Edge(ti.from(),ti.to(),*pe1, *pe2, *Slbl_Edge));
-                            delete pe1;
-                            delete pe2; 
+                            vectEdge.push_back(new Edge(ti.from(),ti.to(),vectNode[n]->GetX(), vectNode[n]->GetY(), vectNode[m]->GetX(), vectNode[m]->GetY(), *Slbl_Edge));
                         }
                     }
                 }
@@ -236,6 +236,147 @@ void GraphFrame::Init(wxString LTSfile) {
 	}
 }
 
+////////////// VERSION WITH LOGARITHMIC APPROACH  ///////////////////////////////////
+
+// static double old_precX = 0.0;
+// static double old_precY = 0.0;
+// 
+// bool GraphFrame::OptimizeDrawing(double precision) {
+// 
+// 	double x1, y1, x2, y2 = 0.0;
+// 	double x2Minx1, y2Miny1 = 0.0;	
+// 	double x2Minx1DivDist, y2Miny1DivDist = 0.0;
+// 
+// 	double distance, forceX, forceNodeX, forceY, forceNodeY, force = 0.0;
+// 
+// 	double arrayForceX[vectNode.size()][vectNode.size()];
+// 	double arrayForceY[vectNode.size()][vectNode.size()];
+// 	double arraySumForceX[vectNode.size()];
+// 	double arraySumForceY[vectNode.size()];
+// 
+// 	bool end = false;
+// 
+// 	
+// 	//Calculate forces
+// 	for (size_t i = 0; i<vectNode.size(); i++) {
+// 		double X = 0;
+// 		double Y = 0;
+// 		x1 = vectNode[i]->GetX();
+// 		y1 = vectNode[i]->GetY();
+// 
+// 		for (size_t j = 0; j<vectNode.size(); j++) {
+// 			if (i != j) {
+// 				x2 = vectNode[j]->GetX();
+// 				y2 = vectNode[j]->GetY();
+// 
+// 				x2Minx1 = x2 - x1;
+// 				y2Miny1 = y2 - y1;
+// 				distance = sqrt( (x2Minx1*x2Minx1) + (y2Miny1*y2Miny1) );//Euclidean distance
+// 
+// 				double forceEdgeX = 0;
+// 				double forceEdgeY = 0;
+// 				double forceNodeX = 0;
+// 				double forceNodeY = 0;
+// 
+// 				if (distance != NaturalLength && distance > 0) {
+// 
+// 					for (size_t n = 0; n < vectEdge.size(); n++) {
+// 						if (vectEdge[n]->Get_numN1() == vectNode[i]->Get_num() && vectEdge[n]->Get_numN2() == vectNode[j]->Get_num()) {
+// 							forceEdgeX += ( EdgeStiffness * log(distance / NaturalLength) );
+// 							forceEdgeY += ( EdgeStiffness * log(distance / NaturalLength) );
+// 						}
+// 					}
+// 				}
+// 
+// 
+// 				if (distance > 0) { // to avoid division per 0
+// 					forceNodeX = ( NodeStrenght / ( distance*distance ) );
+// 					forceNodeY = ( NodeStrenght / ( distance*distance ) );
+// 				}
+// 				X += forceEdgeX;
+// 				Y += forceEdgeY;
+// 				forceX = 0.1*(forceEdgeX + forceNodeX);
+// 				forceY = 0.1*(forceEdgeY + forceNodeY);
+// 
+// 				arrayForceX[i][j] = forceX;
+// 				arrayForceY[i][j] = forceY;
+// 
+// 			}
+// 		}
+// 	}
+// 
+// 	for (size_t i = 0; i<vectNode.size(); i++) {
+// 		arraySumForceX[i] = 0.0;
+// 		arraySumForceY[i] = 0.0;
+// 	}
+// 
+// 	//Sum forces for each nodes
+// 	for (size_t i = 0; i<vectNode.size(); i++) {
+// 		for (size_t j = 0; j<vectNode.size(); j++) {
+// 			arraySumForceX[i] += arrayForceX[i][j];
+// 			arraySumForceY[i] += arrayForceY[i][j];
+// 		}
+// 	}
+// 
+// 	//Replace the nodes & edges according to their new position
+// 	for (size_t i = 0; i<vectNode.size(); i++) {
+// 		double newX = 0;
+// 		double newY = 0;
+// 		newX = vectNode[i]->GetX() + arraySumForceX[i];
+// 		newY = vectNode[i]->GetY() + arraySumForceY[i];
+// 		
+// 		//Check whether positions are outside of the window
+// 		if (newX > sz.GetWidth())
+// 			newX = sz.GetWidth() - CIRCLE_RADIUS;
+// 		if (newX < CIRCLE_RADIUS)
+// 			newX = 0 + CIRCLE_RADIUS;
+// 		if (newY > sz.GetHeight())
+// 			newY = sz.GetHeight() - CIRCLE_RADIUS;
+// 		if (newY < CIRCLE_RADIUS)
+// 			newY = 0 + CIRCLE_RADIUS;
+// 
+// 		vectNode[i]->SetXY( newX , newY );
+// 		
+// 		for (size_t n = 0; n < vectEdge.size(); n++) {
+// 			if (vectEdge[n]->Get_numN1() == vectNode[i]->Get_num()) {
+// 				vectEdge[n]->Set_pos1(vectNode[i]->GetX(),vectNode[i]->GetY());
+// 			}
+// 			if (vectEdge[n]->Get_numN2() == vectNode[i]->Get_num()) {
+// 				vectEdge[n]->Set_pos2(vectNode[i]->GetX(),vectNode[i]->GetY());
+// 			}
+// 		}
+// 	}
+// 
+// 	//Calculate the precision of the drawing
+// 	double precX = 0.0;
+// 	double precY = 0.0;
+// 
+// 	for (size_t i = 0; i<vectNode.size(); i++) { 
+// 		precX += arraySumForceX[i];
+// 		precY += arraySumForceY[i];
+// 	}
+// 
+// 	double precX2 = 0.0;
+// 	double precY2 = 0.0;
+// 	for (size_t i = 0; i<vectNode.size(); i++) { 
+// 		precX2 += floor(fabs(arraySumForceX[i]));
+// 		precY2 += floor(fabs(arraySumForceY[i]));
+// 	}
+// 
+// 	if ((old_precX == precX && old_precY == precY) || (precX == precision && precY == precision ) /*|| (isnan(precX) || isnan(precY) )*/)
+// 		end = true;
+// 
+// 	old_precX = precX;
+// 	old_precY = precY;
+// 
+// 	Refresh();
+// 	Update();
+// 
+// 	return end;
+// 
+// }
+
+
 static double old_precX = 0.0;
 static double old_precY = 0.0;
 
@@ -245,7 +386,7 @@ bool GraphFrame::OptimizeDrawing(double precision) {
 	double x2Minx1, y2Miny1 = 0.0;	
 	double x2Minx1DivDist, y2Miny1DivDist = 0.0;
 
-	double distance, forceX, forceY, force = 0.0;
+	double distance, forceX, forceNodeX, forceY, forceNodeY, force = 0.0;
 
 	double arrayForceX[vectNode.size()][vectNode.size()];
 	double arrayForceY[vectNode.size()][vectNode.size()];
@@ -287,9 +428,7 @@ bool GraphFrame::OptimizeDrawing(double precision) {
 						}
 					}
 				}
-				else {
-					cout << "equal ! " << endl;
-				}
+
 
 				if (distance > 0) { // to avoid division per 0
 					forceNodeX = ( NodeStrenght / ( distance*distance ) ) * x2Minx1DivDist;
@@ -322,9 +461,10 @@ bool GraphFrame::OptimizeDrawing(double precision) {
 
 	//Replace the nodes & edges according to their new position
 	for (size_t i = 0; i<vectNode.size(); i++) {
-		wxCoord newX, newY = 0;
-		newX = vectNode[i]->GetX() + (wxCoord)arraySumForceX[i];
-		newY = vectNode[i]->GetY() + (wxCoord)arraySumForceY[i];
+		double newX = 0;
+		double newY = 0;
+		newX = vectNode[i]->GetX() + arraySumForceX[i];
+		newY = vectNode[i]->GetY() + arraySumForceY[i];
 		
 		//Check whether positions are outside of the window
 		if (newX > sz.GetWidth())

@@ -39,6 +39,7 @@ public:
 	void Init(wxString LTSfile);
 	void OnPaint(wxPaintEvent& evt);
 	void OnOpen(wxCommandEvent& event);
+	void OnQuit(wxCommandEvent& event);
 	void OnSetEdgeStiffness( wxCommandEvent &event );
 	void OnSetNodeStrenght( wxCommandEvent &event );
 	void OnSetNaturalLength( wxCommandEvent &event );
@@ -55,7 +56,7 @@ public:
 
 private:
 	wxSize sz;
-//replace later by calcul
+//replace later by calcul depending of the number of nodes/edges ? 
 	double EdgeStiffness;   //stiffness of the edge
 	double NodeStrenght;   //Strenght of the electrical repulsion
 	double NaturalLength;
@@ -68,6 +69,7 @@ private:
 	wxMenu *draw;
 	wxMenu *options;
     wxMenuItem *openItem;
+	wxMenuItem *quitItem;
 	wxMenuItem *optimizegraph;
 	wxMenuItem *setEdgeStiffnessItem;
 	wxMenuItem *setNodeStrenghtItem;

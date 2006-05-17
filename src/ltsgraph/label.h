@@ -15,13 +15,14 @@ class Label
 {
 public:
     Label();
-    Label(wxString _name, wxPoint _pos);
+    Label(wxString _name, double _x, double _y);
     void OnPaint(wxPaintDC * ptrDC); 
-	void SetXY(wxCoord _x, wxCoord _y);
+	void SetXY(double _x, double _y);
 
 private:
     wxString name;
-    wxPoint pos;
+    double posX;
+	double posY;
 
 };
 
