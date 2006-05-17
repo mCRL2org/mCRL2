@@ -245,7 +245,7 @@ bool GraphFrame::OptimizeDrawing(double precision) {
 	double x2Minx1, y2Miny1 = 0.0;	
 	double x2Minx1DivDist, y2Miny1DivDist = 0.0;
 
-	double distance, forceX, forceNodeX, forceY, forceNodeY, force = 0.0;
+	double distance, forceX, forceY, force = 0.0;
 
 	double arrayForceX[vectNode.size()][vectNode.size()];
 	double arrayForceY[vectNode.size()][vectNode.size()];
@@ -273,6 +273,8 @@ bool GraphFrame::OptimizeDrawing(double precision) {
 
 				double forceEdgeX = 0;
 				double forceEdgeY = 0;
+				double forceNodeX = 0;
+				double forceNodeY = 0;
 
 				if (distance != NaturalLength && distance > 0) {
 					x2Minx1DivDist = x2Minx1 / distance;
