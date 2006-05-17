@@ -4,7 +4,7 @@
 #include <exception/exception.h>
 
 namespace sip {
-  namespace exception_identifier {
+  namespace exception {
 
     /** \brief Type for exception identification */
     enum values {
@@ -20,10 +20,10 @@ namespace sip {
       cli_parse_error_expected,           ///< \brief a parse error occurred on a command line argument (message with expected clause)
       unknown_layout_element              ///< \brief a layout description contained an unknown layout element
     };
-  }
 
-  /** \brief The common exception type */
-  typedef exception::exception < exception_identifier::values > exception;
+    /** \brief The common exception type */
+    typedef ::exception::exception < values > exception;
+  }
 }
 
 #endif

@@ -9,6 +9,8 @@
 namespace sip {
 
   void report::write(std::ostream& output) const {
+    using sip::exception::exception;
+
     output << "<report>";
 
     /* Include error */
@@ -17,7 +19,7 @@ namespace sip {
 
       /* Sanity check... */
       if (std::search(error.begin(), error.end(), pattern.begin(), pattern.end()) != error.end()) {
-        throw (new sip::exception(exception_identifier::message_forbidden_content, pattern));
+        throw (new exception(sip::exception::message_forbidden_content, pattern));
       }
 
       output << "<error>" << error << "</error>";
@@ -29,7 +31,7 @@ namespace sip {
 
       /* Sanity check... */
       if (std::search(comment.begin(), comment.end(), pattern.begin(), pattern.end()) != comment.end()) {
-        throw (new sip::exception(exception_identifier::message_forbidden_content, pattern));
+        throw (new exception(sip::exception::message_forbidden_content, pattern));
       }
 
       output << "<comment>" << comment << "</comment>";

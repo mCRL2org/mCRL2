@@ -25,6 +25,7 @@ lib sip_common
       report.cpp
       object.cpp
       layout.cpp
+      layout_elements.cpp
     : <source>/libraries/xml2pp//text_reader
     ;
 

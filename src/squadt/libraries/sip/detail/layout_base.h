@@ -15,6 +15,8 @@
 namespace sip {
   namespace layout {
 
+    class basic_event_handler;
+
     /** \brief Abstract base class for layout elements */
     class element {
 
@@ -27,12 +29,20 @@ namespace sip {
         typedef boost::function < void () > event_handler;
 
         /** \brief Convenience type for hiding auto pointer implementation */
-        typedef std::auto_ptr < element > aptr;
+        typedef std::auto_ptr < element >   aptr;
+
+      private:
+
+        /** brief The global event handler for all element objects, unless they adopt another one */
+        static basic_event_handler  global_event_handler;
 
       protected:
 
-        /** \brief Unique identifier for an object */
+        /** \brief Unique identifier for an element object */
         identifier id;
+
+        /** brief The current event handler for this object */
+        basic_event_handler*        current_event_handler;
 
       protected:
 
@@ -78,7 +88,10 @@ namespace sip {
         virtual void update(layout::mediator*, mediator::wrapper*) const;
 
         /** \brief Awaits the next change event */
-        inline void await_change() const;
+        void await_change() const;
+
+        /** \brief Set the event handler object that will dispatch the events for this object */
+        void set_event_handler(basic_event_handler* e);
 
         /** \brief Recursively traverses layout structure to find an element by its id */
         virtual element* find(element::identifier);
@@ -87,7 +100,7 @@ namespace sip {
         virtual ~element() = 0;
     };
 
-    inline element::element() : id(reinterpret_cast < element::identifier > (this)) {
+    inline element::element() : id(reinterpret_cast < element::identifier > (this)), current_event_handler(&global_event_handler) {
     }
 
     inline element::~element() {

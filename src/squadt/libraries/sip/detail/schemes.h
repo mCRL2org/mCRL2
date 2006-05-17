@@ -67,7 +67,7 @@ namespace sip {
     template < typename M >
     inline void traditional_scheme< M >::connect(basic_messenger< M >* t) const {
       /** Not yet implemented */
-      throw (exception(exception_identifier::not_yet_implemented));
+      throw (sip::exception::exception(sip::exception::not_yet_implemented));
     }
  
     /** \brief Constructor */

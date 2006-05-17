@@ -96,6 +96,8 @@ namespace sip {
   }
 
   inline void option::write(std::ostream& output) const {
+    using sip::exception::exception;
+
     output << "<option id=\"" << id << "\"";
 
     if (takes_arguments()) {
@@ -124,12 +126,14 @@ namespace sip {
   }
 
   inline option::ptr option::read(xml2pp::text_reader& r) {
+    using sip::exception::exception;
+
     option::identifier id;
 
     assert(r.is_element("option"));
 
     if (!r.get_attribute(&id, "id")) {
-      throw (exception(exception_identifier::message_missing_required_attribute, "id", "option"));
+      throw (exception(sip::exception::message_missing_required_attribute, "id", "option"));
     }
     else {
       option::ptr o(new option(id));

@@ -96,7 +96,7 @@ namespace sip {
       }
 
       /* Unknown type in configuration */
-      throw (sip::exception(exception_identifier::message_unknown_type, r.element_name()));
+      throw (sip::exception::exception(exception::message_unknown_type, r.element_name()));
     }
 
 //    static integer standard_integer;

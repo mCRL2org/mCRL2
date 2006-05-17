@@ -42,7 +42,7 @@ namespace sip {
           inline void update(layout::mediator*, layout::mediator::wrapper*) const;
 
           /** \brief Write out the layout structure in XML format */
-          inline void write_structure(std::ostream&) const;
+          void write_structure(std::ostream&) const;
       };
      
       inline label::label() {
@@ -52,25 +52,6 @@ namespace sip {
        * @param[in] c the text of the label
        **/
       inline label::label(std::string c) : text(c) {
-      }
-
-      /**
-       * @param[out] o the stream to which to write the result
-       **/
-      inline void label::write_structure(std::ostream& o) const {
-        o << "<label id=\"" << id << "\" text=\"" << text << "\"/>";
-      }
-
-      /**
-       * @param[in] r the xml2pp text reader from which to read
-       *
-       * \pre reader should point to a button element
-       * \post reader points to after the associated end tag of the box
-       **/
-      inline void label::read_structure(xml2pp::text_reader& r) {
-        r.get_attribute(&text, "text");
-
-        r.read();
       }
 
       /**
@@ -116,7 +97,7 @@ namespace sip {
           inline void update(layout::mediator*, layout::mediator::wrapper*) const;
 
           /** \brief Write out the layout structure in XML format */
-          inline void write_structure(std::ostream&) const;
+          void write_structure(std::ostream&) const;
       };
      
       inline button::button() {
@@ -128,25 +109,6 @@ namespace sip {
       inline button::button(std::string c) : label(c) {
       }
      
-      /**
-       * @param[out] o the stream to which to write the result
-       **/
-      inline void button::write_structure(std::ostream& o) const {
-        o << "<button id=\"" << id << "\" label=\"" << label << "\"/>";
-      }
-
-      /**
-       * @param[in] r the xml2pp text reader from which to read
-       *
-       * \pre reader should point to a button element
-       * \post reader points to after the associated end tag of the box
-       **/
-      inline void button::read_structure(xml2pp::text_reader& r) {
-        r.get_attribute(&label, "label");
-
-        r.read();
-      }
-
       /**
        * @param[in] m the mediator object to use
        **/
@@ -209,7 +171,7 @@ namespace sip {
           inline void update(layout::mediator*, layout::mediator::wrapper*) const;
 
           /** \brief Write out the layout structure in XML format */
-          inline void write_structure(std::ostream&) const;
+          void write_structure(std::ostream&) const;
       };
      
       inline radio_button::radio_button() : connection(0) {
@@ -239,27 +201,6 @@ namespace sip {
         selected = true;
       }
      
-      /**
-       * @param[out] o the stream to which to write the result
-       **/
-      inline void radio_button::write_structure(std::ostream& o) const {
-        o << "<radio-button id=\"" << id << "\" next=\""
-          << connection->id << "\" label=\"" << label
-          << "\" selected=\"" << selected << "\"/>";
-      }
-
-      /**
-       * @param[in] r the xml2pp text reader from which to read
-       *
-       * \pre reader should point to a radio-button element
-       * \post reader points to after the associated end tag of the box
-       * \todo connect to associated radio buttons
-       **/
-      inline void radio_button::read_structure(xml2pp::text_reader& r) {
-        r.get_attribute(&label, "label");
-
-        r.read();
-      }
 
       /**
        * @param[in] m the mediator object to use
@@ -313,7 +254,7 @@ namespace sip {
           inline void update(layout::mediator*, layout::mediator::wrapper*) const;
 
           /** \brief Write out the layout structure in XML format */
-          inline void write_structure(std::ostream&) const;
+          void write_structure(std::ostream&) const;
       };
      
       inline checkbox::checkbox() {
@@ -333,29 +274,6 @@ namespace sip {
         status = b;
       }
      
-      /**
-       * @param[out] o the stream to which to write the result
-       **/
-      inline void checkbox::write_structure(std::ostream& o) const {
-        o << "<checkbox id=\"" << id << "\""
-          << " label=\"" << label << "\" status=\"" << status << "\"/>";
-      }
-
-      /**
-       * @param[in] r the xml2pp text reader from which to read
-       *
-       * \pre reader should point to a radio-button element
-       * \post reader points to after the associated end tag of the box
-       * \todo connect to associated radio buttons
-       **/
-      inline void checkbox::read_structure(xml2pp::text_reader& r) {
-        r.get_attribute(&label, "label");
-
-        status = r.get_attribute("status");
-
-        r.read();
-      }
-
       /**
        * @param[in] m the mediator object to use
        **/
@@ -406,7 +324,7 @@ namespace sip {
           inline void update(layout::mediator*, layout::mediator::wrapper*) const;
 
           /** \brief Write out the layout structure in XML format */
-          inline void write_structure(std::ostream&) const;
+          void write_structure(std::ostream&) const;
       };
      
       inline progress_bar::progress_bar() {
@@ -421,29 +339,6 @@ namespace sip {
               : minimum(min), maximum(max), current(c) {
       }
      
-      /**
-       * @param[out] o the stream to which to write the result
-       **/
-      inline void progress_bar::write_structure(std::ostream& o) const {
-        o << "<progress-bar id=\"" << id << "\" minimum=\""
-          << minimum << "\" maximum=\"" << maximum
-          << " current=\"" << current <<  "\"/>";
-      }
-
-      /**
-       * @param[in] r the xml2pp text reader from which to read
-       *
-       * \pre reader should point to a progress-bar element
-       * \post reader points to after the associated end tag of the box
-       **/
-      inline void progress_bar::read_structure(xml2pp::text_reader& r) {
-        r.get_attribute(&minimum, "minimum");
-        r.get_attribute(&maximum, "maximum");
-        r.get_attribute(&current, "current");
-
-        r.read();
-      }
-
       /**
        * @param[in] m the mediator object to use
        **/
@@ -499,7 +394,7 @@ namespace sip {
           inline void update(layout::mediator*, layout::mediator::wrapper*) const;
 
           /** \brief Write out the layout structure in XML format */
-          inline void write_structure(std::ostream&) const;
+          void write_structure(std::ostream&) const;
       };
      
       inline text_field::text_field() {
@@ -517,29 +412,6 @@ namespace sip {
        **/
       inline void text_field::set_text(std::string s) {
         text = s;
-      }
-
-      /**
-       * @param[out] o the stream to which to write the result
-       **/
-      inline void text_field::write_structure(std::ostream& o) const {
-        o << "<text-field id=\"" << id << "\" text=\"" << text << "\">";
-
-        type->write(o);
-
-        o << "<text-field/>";
-      }
-
-      /**
-       * @param[in] r the xml2pp text reader from which to read
-       *
-       * \pre reader should point to a text-field element
-       * \post reader points to after the associated end tag of the box
-       **/
-      inline void text_field::read_structure(xml2pp::text_reader& r) {
-        r.get_attribute(&text, "text");
-
-        r.read(1);
       }
 
       /**

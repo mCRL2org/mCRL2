@@ -1,3 +1,5 @@
+#include <utility>
+
 #include <sip/detail/layout_manager.h>
 #include <sip/detail/layout_elements.h>
 #include <sip/detail/layout_tool_display.h>
@@ -5,8 +7,12 @@
 
 #include <xml2pp/text_reader.h>
 
+#include <sip/detail/event_handlers.h>
+
 namespace sip {
   namespace layout {
+
+    basic_event_handler element::global_event_handler;
 
     const margins       manager::default_margins;
 
@@ -19,6 +25,22 @@ namespace sip {
 
     /** \brief Maps visibility to a string */
     static const char* visibility_to_text[3] = {"visible","hidden","none"};
+
+    /**
+     * Blocks until the next change event or when the object is destroyed
+     *
+     * \return Whether there was a change, otherwise the object was destroyed
+     **/
+    void element::await_change() const {
+      current_event_handler->await_change(this);
+    }
+
+    /**
+     * @param[in] e event handler object that will dispatch events for this object
+     **/
+    void element::set_event_handler(basic_event_handler* e) {
+      current_event_handler->transfer(*e, this);
+    }
 
     /**
      * @param[in] id the identifier of the wanted element
@@ -118,6 +140,8 @@ namespace sip {
     }
 
     manager::aptr manager::static_read_structure(xml2pp::text_reader& r) {
+      using sip::exception::exception;
+
       std::string name(r.element_name());
 
       layout::manager::aptr new_element;
@@ -135,7 +159,7 @@ namespace sip {
         }
       }
       else {
-        throw (new sip::exception(exception_identifier::unknown_layout_element, name));
+        throw (new exception(sip::exception::unknown_layout_element, name));
       }
 
       /* Read abstract element specific data */

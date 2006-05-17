@@ -983,12 +983,23 @@ void set_basic_configuration_display(sip::tool::communicator& tc) {
   column->add(new checkbox("remove single element sorts", true), layout::left);
   column->add(new checkbox("remove summands that are not visited", true), layout::left);
   column->add(new checkbox("take summand conditions into account", true), layout::left);
-  column->add(new button("OK"), layout::right);
+
+  button* okay_button = new button("OK");
+
+  column->add(okay_button, layout::right);
 
   /* Attach columns*/
   layout_manager->add(column, margins(0,5,0,5));
 
   display->set_top_manager(layout_manager);
+
+  tc.send_display_layout(display);
+
+  /* Wait until the ok button was pressed */
+  okay_button->await_change();
+
+  /* Clean the display */
+  display->set_top_manager(layout::horizontal_box::create());
 
   tc.send_display_layout(display);
 }
