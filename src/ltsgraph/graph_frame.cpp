@@ -158,7 +158,7 @@ void GraphFrame::OnPaint(wxPaintEvent& /* event */) {
 void GraphFrame::OnOptimize( wxCommandEvent& /* event */ ) {
 
 		while (!OptimizeDrawing(0.0)) {
-			wxYield(); // to allow user to interrupt optimizing
+			wxTheApp->Yield(true); // to allow user to interrupt optimizing
 		}
 
 }
