@@ -162,7 +162,7 @@ int main(int ac, char** av) {
       using namespace sip::layout;
       using namespace sip::layout::elements;
 
-      layout::tool_display display;
+      layout::tool_display::sptr display(new layout::tool_display);
 
       /* Create and add the top layout manager */
       layout::manager::aptr layout_manager = layout::horizontal_box::create();
@@ -193,7 +193,7 @@ int main(int ac, char** av) {
       layout_manager->add(left_column, margins(0,5,0,5));
       layout_manager->add(right_column, margins(0,5,0,20));
 
-      display.set_top_manager(layout_manager);
+      display->set_top_manager(layout_manager);
 
       tc.send_display_layout(display);
     }
