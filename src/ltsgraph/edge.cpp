@@ -11,25 +11,24 @@ const double triangle_height = 8.0;
 
 const wxColour color = "BLACK";
 
-Edge::Edge(unsigned int _numN1, unsigned int _numN2, double _pos1X, double _pos1Y, double _pos2X, double _pos2Y, wxString _Slbl) 
-	: numN1(_numN1), numN2(_numN2), pos1X(_pos1X), pos1Y(_pos1Y), pos2X(_pos2X), pos2Y(_pos2Y) {
-
-    lbl = new Label (_Slbl, pos1X + ((pos2X-pos1X)/2)-10, (int) round(pos1Y) + ((int) round((pos2Y-pos1Y)/2))-10 );
-
+Edge::Edge(Node* _N1, Node* _N2, wxString _lbl) : lbl(_lbl) 
+{ N1=_N1;
+  N2=_N2;
 }
 
 
-void Edge::OnPaint(wxPaintDC * ptrDC) {
 
-
+void Edge::OnPaint(wxPaintDC * ptrDC) 
+{
     //Calculate triangle coord
     //angle expressed in radians
-    double alpha = atan( (( double )(pos2Y-pos1Y)) / (( double ) (pos2X-pos1X)) );
+    double alpha = atan( (( double )(GetYpos2()-GetYpos1())) / 
+                (( double ) (GetXpos2()-GetXpos1())) );
 
-    wxCoord newX = (int) round(( pos2X + (pos2X-pos1X>0?
+    wxCoord newX = (int) round((GetXpos2() + (GetXpos2()-GetXpos1()>0?
                              -(int) round(10 * cos(alpha)):
                               (int) round(10 * cos(alpha))) ));
-    wxCoord newY =  (int) round(( pos2Y - (pos2X-pos1X>=0?
+    wxCoord newY =  (int) round(( GetYpos2() - (GetXpos2()-GetXpos1()>=0?
                               (int) round(10 * sin(alpha)):
                              -(int) round(10 * sin(alpha))) ));
     
@@ -49,7 +48,7 @@ void Edge::OnPaint(wxPaintDC * ptrDC) {
     double lenX3 = cos(gamma_p3) * sqrtCalc; 
     
     //coord correcting depend on position 
-    if (pos2X < pos1X) {
+    if (GetXpos2() < GetXpos1()) {
         lenY1 = -lenY1;
     }
     else {
@@ -77,73 +76,62 @@ void Edge::OnPaint(wxPaintDC * ptrDC) {
     //Edge body (line)
     wxPen myPen(color,ARROW_WIDTH,wxSOLID);
     ptrDC->SetPen(myPen);
-    ptrDC->DrawLine((wxCoord)pos1X,(wxCoord)pos1Y,(wxCoord)pos2X,(wxCoord)pos2Y);
+    ptrDC->DrawLine((wxCoord)GetXpos1(),(wxCoord)GetYpos1(),(wxCoord)GetXpos2(),(wxCoord)GetYpos2());
 
     //Label
-    lbl->OnPaint(ptrDC);
- 
+
+    wxFont MyFont(FONT_SIZE, wxSWISS , wxNORMAL, wxNORMAL, false, wxT("Arial"));
+    ptrDC->SetFont(MyFont);
+
+    double x1=N1->GetX();
+    double y1=N1->GetY();
+    double x2=N2->GetX();
+    double y2=N2->GetY();
+    double posX=(x1+x2)/2+POS_EDGE_LBL_X;
+    double posY=(y1+y2)/2+POS_EDGE_LBL_Y;
+    ptrDC->DrawRotatedText(lbl,(int) round(posX),(int) round(posY),0);
 }
 
-unsigned int Edge::Get_numN1() {
-	return numN1;
+Node* Edge::Get_N1() 
+{
+  return N1;
 }
 
-unsigned int Edge::Get_numN2() {
-	return numN2;
-}
-
-void Edge::Set_pos1(double _x, double _y){
-	if (!locked1) {
-		pos1X = _x;
-		pos1Y = _y;
-		lbl->SetXY(pos1X + ((pos2X-pos1X)/2)-10 , pos1Y + ((pos2Y-pos1Y)/2)-10);
-	}
-	else 
-		wxBell();
-}
-
-void Edge::Set_pos2(double _x, double _y) {
-	if (!locked2) {
-		pos2X = _x;
-		pos2Y = _y;
-		//Change position of label
-		lbl->SetXY(pos1X + ((pos2X-pos1X)/2)-10 , pos1Y + ((pos2Y-pos1Y)/2)-10);
-	}
-	else
-		wxBell();
+Node* Edge::Get_N2() {
+  return N2;
 }
 
 double Edge::GetXpos1() {
-	return pos1X;
+  return N1->GetX();
 }
 
 double Edge::GetYpos1() {
-	return pos1Y;
+  return N1->GetY();
 }
 
 double Edge::GetXpos2() {
-	return pos2X;
+  return N2->GetX();
 }
 
 double Edge::GetYpos2() {
-	return pos2Y;
+  return N2->GetY();
 }
 
-void Edge::Lock1() {
-	locked1 = true;
-}
+// void Edge::Lock1() {
+//   locked1 = true;
+// }
 
-void Edge::Unlock1() {
-	locked1 = false;
-}
+// void Edge::Unlock1() {
+//   locked1 = false;
+// }
 
-void Edge::Lock2() {
-	locked2 = true;
-}
+// void Edge::Lock2() {
+//   locked2 = true;
+// }
 
-void Edge::Unlock2() {
-	locked2 = false;
-}
+// void Edge::Unlock2() {
+//   locked2 = false;
+// }
 
 
 

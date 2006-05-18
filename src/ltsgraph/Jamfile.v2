@@ -8,7 +8,6 @@ project ltsgraph
 exe ltsgraph
        : ltsgraph.cpp
          graph_frame.cpp
-         label.cpp
          node.cpp
          edge.cpp
        : <source>/libraries/temporary//print
