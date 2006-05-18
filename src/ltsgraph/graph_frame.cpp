@@ -37,7 +37,8 @@ GraphFrame::GraphFrame(const wxString& title, const wxPoint& pos, const wxSize& 
 
   EdgeStiffness = 1.0; 
   NodeStrength = 1000; 
-  NaturalLength = 50.0;
+  // value below is reset later when the number of nodes is known.
+  NaturalLength = 20;
 
   CreateMenu();
 
@@ -149,7 +150,7 @@ void GraphFrame::OnPaint(wxPaintEvent& /* event */) {
 
 void GraphFrame::OnOptimize( wxCommandEvent& /* event */ ) {
 
-    while (!OptimizeDrawing(0.01)) {
+    while (!OptimizeDrawing(0.0)) {
       wxTheApp->Yield(true); // to allow user to interrupt optimizing
     }
 
@@ -164,13 +165,6 @@ void GraphFrame::Init(wxString LTSfile) {
   lts mylts;
     if (mylts.read_from(st_LTSfile)) 
     {
-    
-      //Information
-      cerr << "Initial state : " << mylts.initial_state() << endl;
-      cerr << "Num states : " << mylts.num_states() << endl;
-      cerr << "Num transitions : " << mylts.num_transitions() << endl;
-      cerr << "Num labels : " << mylts.num_labels() << endl;
-  
       //initialize vectNode
 
       state_iterator si = mylts.get_states();
@@ -187,6 +181,7 @@ void GraphFrame::Init(wxString LTSfile) {
         ++ si;
         delete Slbl_Node;
       }   
+      NaturalLength = (400 / vectNode.size())+8;
     
     
       //initialize vectEdge
@@ -358,6 +353,11 @@ bool GraphFrame::OptimizeDrawing(double precision)
   double arraySumForceX[vectNode.size()];
   double arraySumForceY[vectNode.size()];
 
+  wxSize sz2 = GetClientSize();
+  double WindowWidth = (double)sz.GetWidth();
+  double WindowHeight = (double)sz.GetHeight();
+
+
   // Reset the forces to 0, to begin with.
   for (size_t i = 0; i<vectNode.size(); i++) {
     arraySumForceX[i]=0.0;
@@ -365,15 +365,16 @@ bool GraphFrame::OptimizeDrawing(double precision)
   }
   
   //Calculate forces
-  for (size_t i = 0; i<vectNode.size(); i++) {
-    double x1 = vectNode[i]->GetX();
+  for (size_t i = 0; i<vectNode.size(); i++) 
+  { double x1 = vectNode[i]->GetX();
     double y1 = vectNode[i]->GetY();
 
     // First calculate the repulsing force for node i with respect to
     // the other nodes, and cumulate it in <arraySumForceX[i],arraySumForceY[i];
-    for (size_t j = 0; j<vectNode.size(); j++) {
-      if (i != j) {
-        double x2 = vectNode[j]->GetX();
+    for (size_t j = 0; j<vectNode.size(); j++) 
+    {
+      if (i != j) 
+      { double x2 = vectNode[j]->GetX();
         double y2 = vectNode[j]->GetY();
         double x2Minx1 = x1 - x2;
         double y2Miny1 = y1 - y2;
@@ -444,7 +445,7 @@ bool GraphFrame::OptimizeDrawing(double precision)
           // below the force is divided by the number of edges, as
           // otherwise the cumulative force can become excessively
           // big for transition systems with many vectors.
-//          double s = (EdgeStiffness * (distance - NaturalLength)) / distance;
+          // double s = (EdgeStiffness * (distance - NaturalLength)) / distance;
           double s = (EdgeStiffness * log(distance / NaturalLength)) / distance;
 
           arraySumForceX[i] += s * x2Minx1;
@@ -452,6 +453,11 @@ bool GraphFrame::OptimizeDrawing(double precision)
         }
       }
     }
+    // Finally add a tiny center petal force to center the whole
+    // graph on the screen
+    
+    arraySumForceX[i]+=(WindowWidth-2*x1) / (1 * WindowWidth); 
+    arraySumForceY[i]+=(WindowHeight-2*y1) /(1 * WindowHeight); 
   }
 
   //Replace the nodes & edges according to their new position

@@ -22,42 +22,39 @@ void Edge::OnPaint(wxPaintDC * ptrDC)
 {
     //Calculate triangle coord
     //angle expressed in radians
-    double alpha = atan( (( double )(GetYpos2()-GetYpos1())) / 
-                (( double ) (GetXpos2()-GetXpos1())) );
+    double alpha = atan((GetYpos2()-GetYpos1()) / (GetXpos2()-GetXpos1()));
 
     wxCoord newX = (int) round((GetXpos2() + (GetXpos2()-GetXpos1()>0?
-                             -(int) round(10 * cos(alpha)):
-                              (int) round(10 * cos(alpha))) ));
+                             -CIRCLE_RADIUS * cos(alpha):
+                              CIRCLE_RADIUS * cos(alpha)) ));
     wxCoord newY =  (int) round(( GetYpos2() - (GetXpos2()-GetXpos1()>=0?
-                              (int) round(10 * sin(alpha)):
-                             -(int) round(10 * sin(alpha))) ));
+                              CIRCLE_RADIUS * sin(alpha):
+                             -CIRCLE_RADIUS * sin(alpha))));
     
     
     //Calculate triangle points coord
     //angles expressed in radians
-    double beta = atan( triangle_base/(triangle_height*2) );
+    double beta = atan(triangle_base/(triangle_height*2));
     
-    double sqrtCalc = sqrt( (triangle_height*triangle_height) + (triangle_base*triangle_base)/4 );
+    double ArrowSideLength = sqrt( (triangle_height*triangle_height) + 
+                    (triangle_base*triangle_base)/4 );
     
-    double gamma_p1 = 1/2 * PI - alpha - beta;
-    double lenX1 = cos(gamma_p1) * sqrtCalc;
-    double lenY1 = sin(gamma_p1) * sqrtCalc;
+    double gamma_p1 = alpha - beta;
+    double lenX1 = cos(gamma_p1) * ArrowSideLength;
+    double lenY1 = sin(gamma_p1) * ArrowSideLength;
     
-    double gamma_p3 = alpha - beta;
-    double lenY3 = sin(gamma_p3) * sqrtCalc;
-    double lenX3 = cos(gamma_p3) * sqrtCalc; 
+    double gamma_p3 = alpha + beta;
+    double lenX3 = cos(gamma_p3) * ArrowSideLength; 
+    double lenY3 = sin(gamma_p3) * ArrowSideLength;
     
-    //coord correcting depend on position 
-    if (GetXpos2() < GetXpos1()) {
-        lenY1 = -lenY1;
+    // coord correcting depend on position 
+    if (GetXpos2() > GetXpos1()) 
+    {
+      lenX1 = -lenX1;
+      lenY1 = -lenY1;
+      lenX3 = -lenX3;
+      lenY3 = -lenY3;
     }
-    else {
-        double lenTMP = lenY1;
-        lenY1 = lenY3;
-        lenY3 = lenTMP;
-        lenX1 = -lenX1;
-        lenX3 = -lenX3;
-   }
    
     //Edge head (polygone)
     wxPoint * p1 = new wxPoint((int) round(lenX1), (int) round(lenY1));
