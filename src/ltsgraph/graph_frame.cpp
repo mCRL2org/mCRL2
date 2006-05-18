@@ -35,9 +35,9 @@ GraphFrame::GraphFrame(const wxString& title, const wxPoint& pos, const wxSize& 
     #endif
   sz = GetClientSize();
 
-  EdgeStiffness = 0.1; 
-  NodeStrength = 10000; 
-  NaturalLength = 250.0;
+  EdgeStiffness = 1.0; 
+  NodeStrength = 1000000; 
+  NaturalLength = 50.0;
 
   CreateMenu();
 
@@ -472,12 +472,12 @@ bool GraphFrame::OptimizeDrawing(double precision)
     newY = vectNode[i]->GetY() + arraySumForceY[i];
     
     //Check whether positions are outside of the window
-    if (newX > sz.GetWidth())
-        newX = sz.GetWidth() - CIRCLE_RADIUS;
+    if (newX + CIRCLE_RADIUS  > sz.GetWidth())
+        newX = sz.GetWidth() - CIRCLE_RADIUS ;
     if (newX < CIRCLE_RADIUS)
-        newX = 0 + CIRCLE_RADIUS;
-    if (newY > sz.GetHeight())
-        newY = sz.GetHeight() - CIRCLE_RADIUS;
+        newX = 0 + CIRCLE_RADIUS ;
+    if (newY + CIRCLE_RADIUS > sz.GetHeight())
+        newY = sz.GetHeight() - CIRCLE_RADIUS ;
     if (newY < CIRCLE_RADIUS)
         newY = 0 + CIRCLE_RADIUS;
 
