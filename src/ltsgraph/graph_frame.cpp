@@ -36,7 +36,7 @@ GraphFrame::GraphFrame(const wxString& title, const wxPoint& pos, const wxSize& 
   sz = GetClientSize();
 
   EdgeStiffness = 0.1; 
-  NodeStrength = 0.1; 
+  NodeStrength = 10000; 
   NaturalLength = 250.0;
 
   CreateMenu();
@@ -381,8 +381,8 @@ bool GraphFrame::OptimizeDrawing(double precision)
       {
         double x2 = vectNode[j]->GetX();
         double y2 = vectNode[j]->GetY();
-        double x2Minx1 = x2 - x1;
-        double y2Miny1 = y2 - y1;
+        double x2Minx1 = x1 - x2;
+        double y2Miny1 = y1 - y2;
         
         //Euclidean distance
         double distance = sqrt( (x2Minx1*x2Minx1) + (y2Miny1*y2Miny1) );
@@ -408,12 +408,12 @@ bool GraphFrame::OptimizeDrawing(double precision)
           // 1 as a repulsing force.
 
           if (i>j)
-          { arraySumForceX[i] += 10.0;
-            arraySumForceY[i] += 10.0;
+          { arraySumForceX[i] += CIRCLE_RADIUS / 2;
+            arraySumForceY[i] += CIRCLE_RADIUS / 2;
           }
           else
-          { arraySumForceX[i] += -10.0;
-            arraySumForceY[i] += -10.0;
+          { arraySumForceX[i] += -CIRCLE_RADIUS / 2;
+            arraySumForceY[i] += -CIRCLE_RADIUS / 2;
           }
         }
       }
@@ -421,36 +421,43 @@ bool GraphFrame::OptimizeDrawing(double precision)
 
     // Subsequently calculate the attracting forces of the edges.
     for (size_t n = 0; n < vectEdge.size(); n++) 
-    { double x2=0.0,y2=0.0;
+    { 
+      bool calculate=false;
+      double x2=0.0,y2=0.0;
       if (vectEdge[n]->Get_N1() == vectNode[i] &&
           vectEdge[n]->Get_N1()!=vectEdge[n]->Get_N2())
       { // x2 = vectEdge[n]->GetXpos2();
         // y2 = vectEdge[n]->GetYpos2();
         x2 = (vectEdge[n]->Get_N2())->GetX();
         y2 = (vectEdge[n]->Get_N2())->GetY();
+        calculate=true;
       }
-        
+      else
       if (vectEdge[n]->Get_N2() == vectNode[i] &&
           vectEdge[n]->Get_N1()!=vectEdge[n]->Get_N2())
       { // x2 = vectEdge[n]->GetXpos1();
         // y2 = vectEdge[n]->GetYpos1();
         x2 = (vectEdge[n]->Get_N1())->GetX();
         y2 = (vectEdge[n]->Get_N1())->GetY();
+        calculate=true;
       }
         
-      double x2Minx1 = x2 - x1;
-      double y2Miny1 = y2 - y1;
-      double distance = sqrt( (x2Minx1*x2Minx1) + (y2Miny1*y2Miny1) );
-
-      if (distance>0.1)
-      { 
-        // below the force is divided by the number of edges, as
-        // otherwise the cumulative force can become excessively
-        // big for transition systems with many vectors.
-        arraySumForceX[i] += EdgeStiffness*(distance-NaturalLength) *
-                             x2Minx1 / (distance*vectEdge.size());
-        arraySumForceY[i] += EdgeStiffness*(distance-NaturalLength) * 
-                                   y2Miny1 / (distance*vectEdge.size());
+      if (calculate)
+      {
+        double x2Minx1 = x2 - x1;
+        double y2Miny1 = y2 - y1;
+        double distance = sqrt( (x2Minx1*x2Minx1) + (y2Miny1*y2Miny1) );
+  
+        if (distance>0.1)
+        { 
+          // below the force is divided by the number of edges, as
+          // otherwise the cumulative force can become excessively
+          // big for transition systems with many vectors.
+          arraySumForceX[i] += EdgeStiffness*(distance-NaturalLength) *
+                               x2Minx1 / (distance*vectEdge.size());
+          arraySumForceY[i] += EdgeStiffness*(distance-NaturalLength) * 
+                                     y2Miny1 / (distance*vectEdge.size());
+        }
       }
     }
   }
@@ -459,8 +466,8 @@ bool GraphFrame::OptimizeDrawing(double precision)
   for (size_t i = 0; i<vectNode.size(); i++) 
   { double newX = 0;
     double newY = 0;
-    cerr << "force on node " << i << " is (" << arraySumForceX[i]
-         << "," << arraySumForceY[i] << ")\n";
+    // cerr << "force on node " << i << " is (" << arraySumForceX[i]
+    //     << "," << arraySumForceY[i] << ")\n";
     newX = vectNode[i]->GetX() + arraySumForceX[i];
     newY = vectNode[i]->GetY() + arraySumForceY[i];
     
