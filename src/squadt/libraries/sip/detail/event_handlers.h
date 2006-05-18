@@ -128,7 +128,7 @@ namespace sip {
      * @param[in] id a pointer that serves as an identifier for the originator of the event
      **/
     inline void basic_event_handler::process(const void* id) {
-      boost::thread(boost::bind(&basic_event_handler::execute_handlers, this, id));
+      boost::thread t(boost::bind(&basic_event_handler::execute_handlers, this, id));
     }
 
     /**
