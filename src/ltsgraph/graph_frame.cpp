@@ -36,7 +36,7 @@ GraphFrame::GraphFrame(const wxString& title, const wxPoint& pos, const wxSize& 
   sz = GetClientSize();
 
   EdgeStiffness = 1.0; 
-  NodeStrength = 1000000; 
+  NodeStrength = 1000; 
   NaturalLength = 50.0;
 
   CreateMenu();
@@ -82,7 +82,6 @@ void GraphFrame::OnResize(wxSizeEvent& event)
   }
 
   Refresh();
-  Update();
 
   sz = sz2;
 }
@@ -96,7 +95,6 @@ void GraphFrame::OnOpen( wxCommandEvent& /* event */ ) {
     vectNode.clear();
     Init(dialog.GetPath());
     Refresh();
-    Update();
     }
 }
 
@@ -214,7 +212,6 @@ void GraphFrame::Init(wxString LTSfile) {
       }
 
       Refresh();
-      Update();
     }
     else 
     {
@@ -349,7 +346,6 @@ void GraphFrame::Init(wxString LTSfile) {
 //   old_precY = precY;
 // 
 //   Refresh();
-//   Update();
 // 
 //   return end;
 // 
@@ -363,22 +359,20 @@ bool GraphFrame::OptimizeDrawing(double precision)
   double arraySumForceY[vectNode.size()];
 
   // Reset the forces to 0, to begin with.
-  for (size_t i = 0; i<vectNode.size(); i++) 
-  { arraySumForceX[i]=0.0;
+  for (size_t i = 0; i<vectNode.size(); i++) {
+    arraySumForceX[i]=0.0;
     arraySumForceY[i]=0.0;
   }
   
   //Calculate forces
-  for (size_t i = 0; i<vectNode.size(); i++) 
-  {
+  for (size_t i = 0; i<vectNode.size(); i++) {
     double x1 = vectNode[i]->GetX();
     double y1 = vectNode[i]->GetY();
 
     // First calculate the repulsing force for node i with respect to
     // the other nodes, and cumulate it in <arraySumForceX[i],arraySumForceY[i];
-    for (size_t j = 0; j<vectNode.size(); j++) 
-    { if (i != j) 
-      {
+    for (size_t j = 0; j<vectNode.size(); j++) {
+      if (i != j) {
         double x2 = vectNode[j]->GetX();
         double y2 = vectNode[j]->GetY();
         double x2Minx1 = x1 - x2;
@@ -388,18 +382,15 @@ bool GraphFrame::OptimizeDrawing(double precision)
         double distance = sqrt( (x2Minx1*x2Minx1) + (y2Miny1*y2Miny1) );
 
         // cerr << "Distance1 " << distance << "\n";
-        if (distance > 0.1) 
+        if (distance > 1) 
         {
           // below the force is divided by the vectNode.size()^2 to
           // compensate for the fact that for all nodes a force
           // is summed. Otherwise the forces would be extremely big.
+          double s = NodeStrength / (distance * distance * distance);
           
-          arraySumForceX[i] += (NodeStrength * x2Minx1) / 
-                                     (distance * distance * distance *
-                                      vectNode.size() * vectNode.size());
-          arraySumForceY[i] += (NodeStrength * y2Miny1) /
-                                     (distance * distance * distance *
-                                      vectNode.size() * vectNode.size());
+          arraySumForceX[i] += s * x2Minx1;
+          arraySumForceY[i] += s * y2Miny1;
         }
         else 
         { // If the nodes are on top of each other, they must have
@@ -453,10 +444,11 @@ bool GraphFrame::OptimizeDrawing(double precision)
           // below the force is divided by the number of edges, as
           // otherwise the cumulative force can become excessively
           // big for transition systems with many vectors.
-          arraySumForceX[i] += EdgeStiffness*(distance-NaturalLength) *
-                               x2Minx1 / (distance*vectEdge.size());
-          arraySumForceY[i] += EdgeStiffness*(distance-NaturalLength) * 
-                                     y2Miny1 / (distance*vectEdge.size());
+//          double s = (EdgeStiffness * (distance - NaturalLength)) / distance;
+          double s = (EdgeStiffness * log(distance / NaturalLength)) / distance;
+
+          arraySumForceX[i] += s * x2Minx1;
+          arraySumForceY[i] += s * y2Miny1;
         }
       }
     }
@@ -497,7 +489,6 @@ bool GraphFrame::OptimizeDrawing(double precision)
   achieved_precision=achieved_precision / vectNode.size();
 
   Refresh();
-  Update();
 
   return achieved_precision<precision;
 
@@ -535,7 +526,6 @@ void GraphFrame::Drag(wxMouseEvent& event) {
         
         //Redraw
         Refresh();
-        Update();
       }
     }
   }
@@ -562,7 +552,6 @@ void GraphFrame::PressRight(wxMouseEvent& event) {
     { vectNode[numFix]->Lock();
     }
     Refresh();
-    Update();
   }
 
 }
