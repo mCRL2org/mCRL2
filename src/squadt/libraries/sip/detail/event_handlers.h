@@ -5,7 +5,6 @@
 #include <utility>
 
 #include <boost/bind.hpp>
-#include <boost/bind/apply.hpp>
 #include <boost/function.hpp>
 #include <boost/shared_ptr.hpp>
 #include <boost/thread/thread.hpp>
