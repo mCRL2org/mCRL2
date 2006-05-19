@@ -121,9 +121,19 @@ namespace sip {
 
       clear_handlers(sip::send_display_data);
 
-      add_handler(sip::send_display_data, boost::bind(&communicator::accept_interaction_data, this, _1, d));
+      add_handler(sip::send_display_data, boost::bind(&communicator::accept_display_data, this, _1, d));
     }
- 
+
+    void communicator::clear_display() {
+      layout::tool_display display;
+
+      clear_handlers(sip::send_display_data);
+
+      message m(display.write(), sip::send_display_layout);
+
+      send_message(m);
+    }
+
     /* Send a signal that the tool is about to terminate */
     void communicator::send_signal_termination() {
       message m(sip::send_signal_termination);
@@ -132,17 +142,28 @@ namespace sip {
     }
  
     /* Send a status report to the controller */
-    void communicator::send_report(sip::report& r) {
+    void communicator::send_report(sip::report const& r) {
       message m(r.write(), sip::send_report);
  
       send_message(m);
+    }
+
+    /**
+     * @param[in] e a description of the error
+     **/
+    void communicator::send_error_report(std::string const& e) {
+      sip::report report;
+
+      report.set_error(e);
+
+      send_report(report);
     }
  
     /**
      * @param[in] m shared pointer to the message
      * @param[out] d tool display on which to execute changes
      **/
-    void communicator::accept_interaction_data(const sip::messenger::message_ptr& m, layout::tool_display::sptr d) {
+    void communicator::accept_display_data(const sip::messenger::message_ptr& m, layout::tool_display::sptr d) {
       xml2pp::text_reader reader(m->to_string().c_str());
 
       d->update(reader);

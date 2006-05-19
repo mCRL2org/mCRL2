@@ -51,9 +51,9 @@ namespace sip {
  
       private:
 
-        /** \brief Handler for incoming data resulting from user interaction relayed by the controller */
-        void accept_interaction_data(const sip::messenger::message_ptr&, layout::tool_display::sptr);
- 
+        /** \brief Handler for incoming data resulting from user interaction with the display relayed by the controller */
+        void accept_display_data(const sip::messenger::message_ptr&, layout::tool_display::sptr);
+
       public:
  
         /** \brief Default constructor */
@@ -84,11 +84,17 @@ namespace sip {
         /** \brief Send a layout specification for the display space reserved for this tool */
         void send_display_layout(layout::tool_display::sptr);
  
+        /** \brief Sends the empty layout specification for the display space */
+        void clear_display();
+ 
         /** \brief Send a signal that the tool is about to terminate */
         void send_signal_termination();
  
         /** \brief Send a status report to the controller */
-        void send_report(sip::report&);
+        void send_report(sip::report const&);
+
+        /** \brief Sends an error report to the controller */
+        void send_error_report(std::string const&);
  
         /** \brief Get the tool capabilities object that will be sent when a request is received */
         inline tool::capabilities& get_tool_capabilities();

@@ -966,8 +966,8 @@ void parse_command_line(int ac, char** av, ConstelmObj &constelm) {
 const unsigned int lpd_file_for_input  = 0;
 const unsigned int lpd_file_for_output = 1;
 
-/* Communicate the basic configuration display */
-void set_basic_configuration_display(sip::tool::communicator& tc) {
+/* Communicate the basic configuration display, and wait until the ok button was pressed */
+sip::layout::tool_display::sptr set_basic_configuration_display(sip::tool::communicator& tc) {
   using namespace sip;
   using namespace sip::layout;
   using namespace sip::layout::elements;
@@ -998,14 +998,19 @@ void set_basic_configuration_display(sip::tool::communicator& tc) {
   /* Wait until the ok button was pressed */
   okay_button->await_change();
 
-  /* Clean the display */
-  display->set_top_manager(layout::horizontal_box::create());
-
-  tc.send_display_layout(display);
+  return (display);
 }
 
-/* Validates a configuration for use with lpeconstelm, and establishes completeness */
-bool validate_configuration(sip::tool::communicator& tc, sip::configuration& c) {
+/* Extracts the configuration from the currently set display layout */
+void extract_configuration(sip::layout::tool_display& d, sip::configuration& c) {
+  std::string input_file_name  = c.get_object(lpd_file_for_input)->get_location();
+
+  /* Add output file to the configuration */
+  c.add_output(lpd_file_for_output, "lpe", input_file_name + ".lpe");
+}
+
+/* Checks whether the configuration is complete and valid */
+bool validate_configuration(sip::configuration& c) {
   bool valid  = true;
 
   /* Should contain a file name of an LPD that is to be read as input */
@@ -1016,25 +1021,27 @@ bool validate_configuration(sip::tool::communicator& tc, sip::configuration& c) 
     std::string input_file_name  = c.get_object(lpd_file_for_input)->get_location();
     std::string output_file_name = c.get_object(lpd_file_for_output)->get_location();
 
-    valid = input_file_name == output_file_name;
-
-    if (!valid) {
-      sip::report report;
-
-      report.set_error("Input file is the same as the output file!");
-
-      tc.send_report(report);
-    }
+    valid = input_file_name != output_file_name;
   }
 
   return (valid);
 }
 
-void process_configuration(ConstelmObj& constelm, sip::configuration& c) {
+/*
+ * Realises the configuration
+ *
+ * Precondition: the configuration is valid
+ **/
+void realise_configuration(sip::tool::communicator& tc, ConstelmObj& constelm, sip::configuration& c) {
   std::string input_file_name  = c.get_object(lpd_file_for_input)->get_location();
   std::string output_file_name = c.get_object(lpd_file_for_output)->get_location();
 
-  /* An object with the correct id exists, assume the URI is relative (i.e. a file name in the local file system) */
+  if (!constelm.loadFile(input_file_name)) {
+    tc.send_error_report("Error reading input!");
+
+    exit(1);
+  }
+
   constelm.setSaveFile(output_file_name);
 }
 #endif
@@ -1081,24 +1088,31 @@ int main(int ac, char** av) {
         tc.set_configuration(configuration);
       }
       else {
-        sip::report report;
+        tc.send_error_report("Invalid input combination!");
 
-        report.set_error("Invalid input combination!");
-
-        tc.send_report(report);
+        exit(1);
       }
     }
 
     /* Draw a configuration layout in the tool display */
-    set_basic_configuration_display(tc);
+    sip::layout::tool_display::sptr display = set_basic_configuration_display(tc);
 
+    /* Clean the display */
+    tc.clear_display();
+
+    /* Extract configuration from the current state of the display and use it to update the configuration of tc */
+    extract_configuration(*display, tc.get_configuration());
+    
     /* Static configuration cycle (phase 2: gather user input) */
-    while (!validate_configuration(tc, tc.get_configuration())) {
+    if (!validate_configuration(tc.get_configuration())) {
       /* Wait for configuration data to be send (either a previous configuration, or only an input combination) */
-      sip::message_ptr data = tc.await_message(sip::send_display_data);
+      tc.send_error_report("Fatal error: the configuration is invalid");
 
-      std::cerr << "lpeconstelm: Data(" << data->to_string() << ")" << std::endl;
+      exit(1);
     }
+
+    /* Realise the */
+    realise_configuration(tc, constelm, tc.get_configuration());
 
     /* Send the controller the signal that we're ready to rumble (no further configuration necessary) */
     tc.send_accept_configuration();

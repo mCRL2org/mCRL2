@@ -32,6 +32,10 @@ namespace squadt {
      
           /**
            * \brief Wrapper around a wxWindow derived class
+           *
+           * Avoids memory leaks by deleting the pointed to window or sizer,
+           * unless it was explicitly released with one of the `release_'
+           * methods.
            **/
           class wrapper : public sip::layout::mediator::wrapper {
             private:
@@ -41,6 +45,9 @@ namespace squadt {
      
               /** \brief Whether that what is wrapped is a window */
               bool is_window;
+
+              /** \brief Whether to clean up should the wrapper be destroyed */
+              mutable bool clean_up;
      
             public:
      
@@ -56,11 +63,20 @@ namespace squadt {
               /** \brief Get target cast to a window pointer */
               inline wxSizer*  get_sizer() const;
      
+              /** \brief Get target cast to a window pointer */
+              inline wxWindow* release_window() const;
+     
+              /** \brief Get target cast to a window pointer */
+              inline wxSizer*  release_sizer() const;
+     
               /** \brief Whether a window is wrapped */
               inline bool wraps_window() const;
      
               /** \brief Whether a sizer is wrapped */
               inline bool wraps_sizer() const;
+
+              /** \brief Constructor for wrapping a window */
+              inline ~wrapper();
           };
 
         private:
@@ -153,13 +169,13 @@ namespace squadt {
       /**
        * @param w the window or sizer to which to attach elements
        **/
-      inline tool_display_mediator::wrapper::wrapper(wxWindow* w) : target(w), is_window(true) {
+      inline tool_display_mediator::wrapper::wrapper(wxWindow* w) : target(w), is_window(true), clean_up(true) {
       }
      
       /**
        * @param w the window or sizer to which to attach elements
        **/
-      inline tool_display_mediator::wrapper::wrapper(wxSizer* s) : target(s), is_window(false) {
+      inline tool_display_mediator::wrapper::wrapper(wxSizer* s) : target(s), is_window(false), clean_up(true) {
       }
      
       inline wxWindow* tool_display_mediator::wrapper::get_window() const {
@@ -170,12 +186,37 @@ namespace squadt {
         return (static_cast < wxSizer* > (target));
       }
      
+      inline wxWindow* tool_display_mediator::wrapper::release_window() const {
+        clean_up = false;
+
+        return (static_cast < wxWindow* > (target));
+      }
+     
+      inline wxSizer*  tool_display_mediator::wrapper::release_sizer() const {
+        clean_up = false;
+
+        return (static_cast < wxSizer* > (target));
+      }
+     
       inline bool tool_display_mediator::wrapper::wraps_window() const {
         return (is_window);
       }
      
       inline bool tool_display_mediator::wrapper::wraps_sizer() const {
         return (!is_window);
+      }
+     
+      inline tool_display_mediator::wrapper::~wrapper() {
+        if (clean_up) {
+          if (is_window) {
+            static_cast < wxWindow* > (target)->Destroy();
+          }
+          else {
+            static_cast < wxSizer* > (target)->Clear();
+         
+            delete target;
+          }
+        }
       }
      
       /**
@@ -211,10 +252,10 @@ namespace squadt {
         wxSizerItem* new_sizer_item;
      
         if (sd->wraps_window()) {
-          new_sizer_item = sizer->Add(sd->get_window(), 0, flags, (cr.margin.left + cr.margin.right) >> 1);
+          new_sizer_item = sizer->Add(sd->release_window(), 0, flags, (cr.margin.left + cr.margin.right) >> 1);
         }
         else {
-          new_sizer_item = sizer->Add(sd->get_sizer(), 0, flags, (cr.margin.left + cr.margin.right) >> 1);
+          new_sizer_item = sizer->Add(sd->release_sizer(), 0, flags, (cr.margin.left + cr.margin.right) >> 1);
         }
      
         if (0 < cr.margin.bottom) {
@@ -257,10 +298,10 @@ namespace squadt {
         wxSizerItem* new_sizer_item;
      
         if (sd->wraps_window()) {
-          new_sizer_item = sizer->Add(sd->get_window(), 0, flags, (cr.margin.top + cr.margin.bottom) >> 1);
+          new_sizer_item = sizer->Add(sd->release_window(), 0, flags, (cr.margin.top + cr.margin.bottom) >> 1);
         }
         else {
-          new_sizer_item = sizer->Add(sd->get_sizer(), 0, flags, (cr.margin.top + cr.margin.bottom) >> 1);
+          new_sizer_item = sizer->Add(sd->release_sizer(), 0, flags, (cr.margin.top + cr.margin.bottom) >> 1);
         }
      
         if (0 < cr.margin.right) {
@@ -318,7 +359,7 @@ namespace squadt {
        * @param[in] s the text of the label
        **/
       void tool_display_mediator::update_label(mediator::wrapper* w, std::string const& s) {
-        wxStaticText* t = static_cast < wxStaticText* > (static_cast < wrapper* > (w)->get_window());
+        wxStaticText* t = static_cast < wxStaticText* > (static_cast < wrapper* > (w)->release_window());
 
         t->SetLabel(wxString(s.c_str(), wxConvLocal));
       }
@@ -354,7 +395,7 @@ namespace squadt {
        * @param[in] s the text of the label
        **/
       void tool_display_mediator::update_button(mediator::wrapper* w, std::string const& s) {
-        wxButton* t = static_cast < wxButton* > (static_cast < wrapper* > (w)->get_window());
+        wxButton* t = static_cast < wxButton* > (static_cast < wrapper* > (w)->release_window());
 
         t->SetLabel(wxString(s.c_str(), wxConvLocal));
       }
@@ -384,7 +425,7 @@ namespace squadt {
        * @param[in] b whether the button is selected or not
        **/
       void tool_display_mediator::update_radio_button(mediator::wrapper* w, std::string const& s, bool b) {
-        wxRadioButton* t = static_cast < wxRadioButton* > (static_cast < wrapper* > (w)->get_window());
+        wxRadioButton* t = static_cast < wxRadioButton* > (static_cast < wrapper* > (w)->release_window());
 
         t->SetLabel(wxString(s.c_str(), wxConvLocal));
         t->SetValue(b);
@@ -415,7 +456,7 @@ namespace squadt {
        * @param[in] b whether the button is selected or not
        **/
       void tool_display_mediator::update_checkbox(mediator::wrapper* w, std::string const& s, bool b) {
-        wxCheckBox* t = static_cast < wxCheckBox* > (static_cast < wrapper* > (w)->get_window());
+        wxCheckBox* t = static_cast < wxCheckBox* > (static_cast < wrapper* > (w)->release_window());
 
         t->SetLabel(wxString(s.c_str(), wxConvLocal));
         t->SetValue(b);
@@ -445,7 +486,7 @@ namespace squadt {
        * @param[in] max the current value
        **/
       void tool_display_mediator::update_progress_bar(mediator::wrapper* w, unsigned int const& min, unsigned int const& max, unsigned int const& c) {
-        wxGauge* t = static_cast < wxGauge* > (static_cast < wrapper* > (w)->get_window());
+        wxGauge* t = static_cast < wxGauge* > (static_cast < wrapper* > (w)->release_window());
 
         t->SetRange(max - min);
         t->SetValue(c);
@@ -472,7 +513,7 @@ namespace squadt {
        * @param[in] s the text of the label
        **/
       void tool_display_mediator::update_text_field(mediator::wrapper* w, std::string const& s) {
-        wxStaticText* t = static_cast < wxStaticText* > (static_cast < wrapper* > (w)->get_window());
+        wxStaticText* t = static_cast < wxStaticText* > (static_cast < wrapper* > (w)->release_window());
 
         t->SetLabel(wxString(s.c_str(), wxConvLocal));
       }
@@ -592,17 +633,21 @@ namespace squadt {
       tool_display_mediator m(this, mediator::wrapper_aptr(new tool_display_mediator::wrapper(root.get())), &event_handler);
       
       try {
-        content = static_cast < tool_display_mediator::wrapper* >
-                                                        (current_layout->instantiate(&m).get())->get_sizer();
-        GetSizer()->Add(content, 1, wxALL|wxALIGN_CENTER, 2);
+        mediator::wrapper_aptr new_layout(current_layout->instantiate(&m));
+                                
+        if (new_layout.get() != 0) {
+          content = static_cast < tool_display_mediator::wrapper* > (new_layout.get())->release_sizer();
 
-        content->RecalcSizes();
-        content->Layout();
+          GetSizer()->Add(content, 1, wxALL|wxALIGN_CENTER, 2);
 
-        Show(true);
+          content->RecalcSizes();
+          content->Layout();
 
-        GetParent()->Layout();
-        GetParent()->FitInside();
+          Show(true);
+
+          GetParent()->Layout();
+          GetParent()->FitInside();
+        }
       }
       catch (...) {
         /* Consider every exception a failure to correctly read the layout, and bail */

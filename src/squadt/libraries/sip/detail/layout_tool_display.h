@@ -26,7 +26,16 @@ namespace sip {
         /** \brief the layout manager that contains all widgits for this display */
         layout::manager::aptr top_manager;
 
+        /** \brief Whether or not the tool display is visible to the user */
+        bool visible;
+
       public:
+
+        /** \brief Constructor */
+        inline tool_display();
+
+        /** \brief Whether or not the tool display is shown */
+        inline void show(bool);
 
         /** \brief Get the layout manager that contains all widgits for this display */
         inline layout::manager const* get_top_manager() const;
@@ -50,12 +59,22 @@ namespace sip {
         constant_elements update(xml2pp::text_reader&);
     };
 
+    inline tool_display::tool_display() : visible(true) {
+    }
+
     inline layout::manager const* tool_display::get_top_manager() const {
       return (top_manager.get());
     }
 
     inline void tool_display::set_top_manager(layout::manager::aptr m) {
       top_manager = m;
+    }
+
+    /**
+     * @param[in] s Whether or not the tool display must be visible
+     **/
+    inline void tool_display::show(bool s) {
+      visible = s;
     }
     
     inline std::string tool_display::write() const {
@@ -64,37 +83,6 @@ namespace sip {
       write(output);
 
       return (output.str());
-    }
-
-    /**
-     * @param[out] o the stream to which to write the result
-     **/
-    inline void tool_display::write(std::ostream& o) const {
-      o << "<display-layout>";
-
-      if (top_manager.get() != 0) {
-        top_manager->write_structure(o);
-      }
-
-      o << "</display-layout>";
-    }
-
-    /**
-     * @param[in] r the xml2pp text reader from which to read
-     *
-     * \pre reader should point to a display-layout element
-     * \post reader points to after the associated end tag of the box
-     **/
-    inline tool_display::sptr tool_display::read(xml2pp::text_reader& r) {
-      tool_display::sptr display(new tool_display());
-
-      r.read();
-
-      if (!r.is_end_element("display-layout")) {
-        display->set_top_manager(layout::manager::static_read_structure(r));
-      }
-
-      return (display);
     }
   }
 }

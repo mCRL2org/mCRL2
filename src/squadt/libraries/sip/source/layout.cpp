@@ -277,10 +277,47 @@ namespace sip {
     }
 
     /**
+     * @param[out] o the stream to which to write the result
+     **/
+    void tool_display::write(std::ostream& o) const {
+      o << "<display-layout visible=\"" << visible << "\">";
+
+      if (top_manager.get() != 0) {
+        top_manager->write_structure(o);
+      }
+
+      o << "</display-layout>";
+    }
+
+    /**
+     * @param[in] r the xml2pp text reader from which to read
+     *
+     * \pre reader should point to a display-layout element
+     * \post reader points to after the associated end tag of the box
+     **/
+    tool_display::sptr tool_display::read(xml2pp::text_reader& r) {
+      tool_display::sptr display(new tool_display());
+
+      display->visible = r.get_attribute("visible");
+
+      r.read();
+
+      if (!r.is_end_element("display-layout")) {
+        display->set_top_manager(layout::manager::static_read_structure(r));
+      }
+
+      return (display);
+    }
+
+    /**
      * @param[in] m a mediator to synchronise an element with the associated element in a (G)UI
      **/
     mediator::wrapper_aptr tool_display::instantiate(mediator* m) const {
-      return (top_manager->instantiate(m));
+      if (top_manager.get() != 0) {
+        return (top_manager->instantiate(m));
+      }
+
+      return (mediator::wrapper_aptr());
     }
 
     /**
