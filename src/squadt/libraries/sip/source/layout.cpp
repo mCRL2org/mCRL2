@@ -43,7 +43,7 @@ namespace sip {
     }
 
     /**
-     * @param[in] id the identifier of the wanted element
+     * @param[in] identifier the identifier of the wanted element
      **/
     element* box::find(layout::element::identifier identifier) {
       element* r = (identifier == id) ? this : 0;

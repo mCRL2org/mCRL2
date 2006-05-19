@@ -67,12 +67,12 @@ namespace squadt {
       };
 
       /**
-       * \brief Basic reporter for task progress
+       * \brief Basic monitor for task progress
        *
        * The process(es) that are spawned for this task are monitored via the
        * task_monitor interface.
        **/
-      class reporter : public execution::task_monitor {
+      class monitor : public execution::task_monitor {
         friend class processor;
 
         public:
@@ -87,7 +87,7 @@ namespace squadt {
           typedef boost::function < void (sip::layout::tool_display::constant_elements const&) > display_data_callback_function;
 
           /** \brief Convenience type for hiding shared pointer implementation */
-          typedef boost::shared_ptr < reporter >                                                 sptr;
+          typedef boost::shared_ptr < monitor >                                                 sptr;
 
         public:
 
@@ -128,7 +128,7 @@ namespace squadt {
         public:
   
           /** \brief Constructor with a callback handler */
-          inline reporter(processor&);
+          inline monitor(processor&);
 
           /** \brief Constructor with a callback handler */
           inline void set_status_handler(status_callback_function);
@@ -179,7 +179,7 @@ namespace squadt {
       output_status            current_output_status;
 
       /** \brief The current task that is running or about to run */
-      reporter::sptr           monitor;
+      monitor::sptr            current_monitor;
 
       /** \brief The selected input combination of the tool */
       tool::input_combination* selected_input_combination;
@@ -219,7 +219,7 @@ namespace squadt {
       inline const tool::ptr get_tool();
 
       /** \brief Get the object for the tool associated with this processor */
-      inline const reporter::sptr get_monitor();
+      inline const monitor::sptr get_monitor();
 
       /** \brief Read from XML using a libXML2 reader */
       static processor::ptr read(id_conversion_map&, xml2pp::text_reader&) throw ();

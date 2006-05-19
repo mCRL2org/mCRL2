@@ -154,9 +154,9 @@ namespace squadt {
     }
 
     /**
-     * @param[in] p the processor::reporter that is connected to the associated tool process
+     * @param[in] p the processor::monitor that is connected to the associated tool process
      **/
-    GUI::tool_display* project::add_tool_display(processor::reporter::sptr p) {
+    GUI::tool_display* project::add_tool_display(processor::monitor::sptr p) {
       wxSizer* s = process_display_view->GetSizer();
 
       GUI::tool_display* display = new GUI::tool_display(process_display_view, this, p);
@@ -194,7 +194,7 @@ namespace squadt {
     }
 
     /**
-     * @param f a storage format for which to add tools to the menu
+     * @param t a storage format for which to add tools to the menu
      **/
     void project::spawn_context_menu(processor::object_descriptor const& t) {
       using namespace boost;

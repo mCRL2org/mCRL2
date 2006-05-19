@@ -10,15 +10,15 @@
 
 namespace squadt {
 
-  void processor::reporter::status_change_dummy(output_status) {
+  void processor::monitor::status_change_dummy(output_status) {
     std::cerr << "No custom status change event handler connected!" << std::endl;
   }
 
-  void processor::reporter::display_layout_change_dummy(sip::layout::tool_display::sptr) {
+  void processor::monitor::display_layout_change_dummy(sip::layout::tool_display::sptr) {
     std::cerr << "No custom display change event handler connected!" << std::endl;
   }
 
-  void processor::reporter::display_data_change_dummy(sip::layout::tool_display::constant_elements const&) {
+  void processor::monitor::display_data_change_dummy(sip::layout::tool_display::constant_elements const&) {
     std::cerr << "No custom display state change event handler connected!" << std::endl;
   }
 
@@ -135,7 +135,7 @@ namespace squadt {
     s << ">\n";
 
     /* The last received configuration from the tool */
-    sip::configuration::ptr c = monitor->get_configuration();
+    sip::configuration::ptr c = current_monitor->get_configuration();
 
     if (c.get() != 0) {
       c->write(s);
@@ -181,7 +181,7 @@ namespace squadt {
     r.read();
 
     if (r.is_element("configuration")) {
-      c->monitor->set_configuration(sip::configuration::read(r));
+      c->current_monitor->set_configuration(sip::configuration::read(r));
     }
 
     /* Read inputs */

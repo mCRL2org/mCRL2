@@ -34,7 +34,7 @@ namespace squadt {
         private:
      
           /** \brief Associated processor */
-          processor::reporter::sptr  monitor;
+          processor::monitor::sptr  monitor;
 
           /** \brief Associates a sip layout element with a wxWidgets control */
           element_for_window_map     element_for_window;
@@ -56,7 +56,7 @@ namespace squadt {
         public:
 
           /** \brief Constructor */
-          state_change_handler(processor::reporter::sptr&);
+          state_change_handler(processor::monitor::sptr&);
 
           /** \brief Clears the element_for_window map */
           inline void clear();
@@ -68,7 +68,7 @@ namespace squadt {
           void update(sip::layout::mediator* m, sip::layout::element const*);
 
           /** \brief Gets the monitor for the associated process */
-          processor::reporter::sptr& get_monitor();
+          processor::monitor::sptr& get_monitor();
       };
     }
 
@@ -113,7 +113,7 @@ namespace squadt {
       public:
 
         /** \brief Constructor */
-        tool_display(wxWindow*, project*, processor::reporter::sptr& s);
+        tool_display(wxWindow*, project*, processor::monitor::sptr& s);
 
         /** \brief Removes itself from the parent window */
         void remove();
@@ -124,7 +124,7 @@ namespace squadt {
       /**
        * @param[in] s the processor associated with this display
        **/
-      inline state_change_handler::state_change_handler(processor::reporter::sptr& s) : monitor(s) {
+      inline state_change_handler::state_change_handler(processor::monitor::sptr& s) : monitor(s) {
       }
 
       inline void state_change_handler::state_change_handler::clear() {
@@ -135,7 +135,7 @@ namespace squadt {
         element_for_window[o] = e;
       }
 
-      inline processor::reporter::sptr& state_change_handler::get_monitor() {
+      inline processor::monitor::sptr& state_change_handler::get_monitor() {
         return (monitor);
       }
     }

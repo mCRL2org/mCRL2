@@ -534,10 +534,10 @@ namespace squadt {
 
     /**
      * @param[in] p the parent window
-     * @param[in] v the project that owns tool display
+     * @param[in] c the project that owns tool display
      * @param[in] s the processor associated with this display
      **/
-    tool_display::tool_display(wxWindow* p, GUI::project* c, processor::reporter::sptr& s) :
+    tool_display::tool_display(wxWindow* p, GUI::project* c, processor::monitor::sptr& s) :
                                 wxPanel(p, wxID_ANY, wxDefaultPosition, wxDefaultSize, wxRAISED_BORDER),
                                 context(c), event_handler(s), content(0) {
 
@@ -576,6 +576,8 @@ namespace squadt {
       if (content != 0) {
         /* Delete controls */
         content->Clear(true);
+
+        GetSizer()->Detach(content);
 
         delete content;
       }

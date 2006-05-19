@@ -12,9 +12,8 @@ namespace squadt {
 
   /**
    * @param[in] o the processor that owns of this object
-   * @param[in] h the function or functor that is called/invoked when the process status changes
    **/
-  processor::reporter::reporter(processor& o) : owner(o) {
+  processor::monitor::monitor(processor& o) : owner(o) {
     on_status_change = status_change_dummy;
     on_layout_change = display_layout_change_dummy;
     on_state_change  = display_data_change_dummy;
@@ -29,15 +28,16 @@ namespace squadt {
   /**
    * @param[in] h the function or functor that is invoked at layout change
    **/
-  inline void processor::reporter::set_display_layout_handler(display_layout_callback_function h) {
+  inline void processor::monitor::set_display_layout_handler(display_layout_callback_function h) {
     /* Set the handler for incoming layout messages */
     activate_display_layout_handler(h);
   }
 
   /**
+   * @param[in] d the tool display associated with this monitor
    * @param[in] h the function or functor that is invoked at layout change
    **/
-  inline void processor::reporter::set_display_data_handler(sip::layout::tool_display::sptr d, display_data_callback_function h) {
+  inline void processor::monitor::set_display_data_handler(sip::layout::tool_display::sptr d, display_data_callback_function h) {
     /* Set the handler for incoming layout messages */
     activate_display_data_handler(d, h);
   }
@@ -45,14 +45,14 @@ namespace squadt {
   /**
    * @param[in] h the function or functor that is invoked at status change
    **/
-  inline void processor::reporter::set_status_handler(status_callback_function h) {
+  inline void processor::monitor::set_status_handler(status_callback_function h) {
     on_status_change = h;
   }
 
   /**
    * @param[in] s the new status
    **/
-  inline void processor::reporter::report_change(execution::process::status s) {
+  inline void processor::monitor::report_change(execution::process::status s) {
     using namespace execution;
 
     switch (s) {
@@ -74,14 +74,14 @@ namespace squadt {
   /**
    * @param b whether or not to send the start signal after the configuration is accepted
    **/
-  inline void processor::reporter::start_pilot(bool b) {
-    boost::thread thread(boost::bind(&processor::reporter::pilot, this, b));
+  inline void processor::monitor::start_pilot(bool b) {
+    boost::thread thread(boost::bind(&processor::monitor::pilot, this, b));
   }
 
   /**
    * @param b whether or not to send the start signal after the configuration is accepted
    **/
-  inline void processor::reporter::pilot(bool b) {
+  inline void processor::monitor::pilot(bool b) {
     /* Wait until the tool has connected and identified itself */
     await_connection();
 
@@ -111,18 +111,14 @@ namespace squadt {
     return (s);
   }
 
-  /**
-   * @param[in] h the function that is called when the status of the output changes
-   **/
-  inline processor::processor() : monitor(new reporter(*this)) {
+  inline processor::processor() : current_monitor(new monitor(*this)) {
   }
 
   /**
-   * @param[in] h the function that is called when the status of the output changes
    * @param[in] t the tool descriptor of the tool that is to be used to produce the output from the input
    **/
   inline processor::processor(tool::ptr t) :
-                tool_descriptor(t), monitor(new reporter(*this)) {
+                tool_descriptor(t), current_monitor(new monitor(*this)) {
   }
 
   inline processor::~processor() {
@@ -146,8 +142,8 @@ namespace squadt {
     return (tool_descriptor);
   }
 
-  inline const processor::reporter::sptr processor::get_monitor() {
-    return (monitor);
+  inline const processor::monitor::sptr processor::get_monitor() {
+    return (current_monitor);
   }
 
   inline processor::input_object_iterator processor::get_inputs_iterator() const {
@@ -201,11 +197,11 @@ namespace squadt {
 
     c->add_input(ic->identifier, ic->format, l.string());
 
-    monitor->set_configuration(c);
+    current_monitor->set_configuration(c);
 
-    global_tool_manager->execute(*tool_descriptor, boost::dynamic_pointer_cast < execution::task_monitor, reporter > (monitor), true);
+    global_tool_manager->execute(*tool_descriptor, boost::dynamic_pointer_cast < execution::task_monitor, monitor > (current_monitor), true);
 
-    monitor->start_pilot();
+    current_monitor->start_pilot();
   }
 
   /**
@@ -214,9 +210,9 @@ namespace squadt {
    * \pre the configure member must have been called
    **/
   inline void processor::process() {
-    global_tool_manager->execute(*tool_descriptor, boost::dynamic_pointer_cast < execution::task_monitor, reporter > (monitor), false);
+    global_tool_manager->execute(*tool_descriptor, boost::dynamic_pointer_cast < execution::task_monitor, monitor > (current_monitor), false);
 
-    monitor->start_pilot();
+    current_monitor->start_pilot();
   }
 
   inline const unsigned int processor::number_of_inputs() const {
@@ -249,7 +245,7 @@ namespace squadt {
     if (current_output_status != s) {
       current_output_status = s;
  
-      monitor->on_status_change(current_output_status);
+      current_monitor->on_status_change(current_output_status);
     }
   }
 }

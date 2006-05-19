@@ -132,7 +132,7 @@ namespace squadt {
         void add_to_context_menu(const storage_format&, const miscellaneous::tool_selection_helper::tools_by_category::value_type&, wxMenu*, int*);
 
         /** \brief Add a new tool display to the process_display_view */
-        GUI::tool_display* add_tool_display(processor::reporter::sptr);
+        GUI::tool_display* add_tool_display(processor::monitor::sptr);
 
       public:
 
