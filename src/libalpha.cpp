@@ -1286,37 +1286,32 @@ static ATermAppl PushComm(ATermList C, ATermAppl a){
     return a;
   } 
   else if ( gsIsBlock(a) ){
-    //XXX
+    a = gsApplyAlpha(a);
     ATermList l = ATLtableGet(alphas,(ATerm) a);
-    if(!l) l=gsaGetAlpha(a);
     a = gsMakeComm(C,a);
     ATtablePut(alphas,(ATerm) a,(ATerm) filter_comm_list(l,C));
     return a;
   } else if ( gsIsHide(a) ){
-    //XXX
+    a = gsApplyAlpha(a);
     ATermList l = ATLtableGet(alphas,(ATerm) a);
-    if(!l) l=gsaGetAlpha(a);
     a = gsMakeComm(C,a);
     ATtablePut(alphas,(ATerm) a,(ATerm) filter_comm_list(l,C));
     return a;
   } else if ( gsIsRename(a) ){
-    //XXX
+    a = gsApplyAlpha(a);
     ATermList l = ATLtableGet(alphas,(ATerm) a);
-    if(!l) l=gsaGetAlpha(a);
     a = gsMakeComm(C,a);
     ATtablePut(alphas,(ATerm) a,(ATerm) filter_comm_list(l,C));
     return a;
   } else if ( gsIsComm(a) ){
-    //XXX
+    a = gsApplyAlpha(a);
     ATermList l = ATLtableGet(alphas,(ATerm) a);
-    if(!l) l=gsaGetAlpha(a);
     a = gsMakeComm(C,a);
     ATtablePut(alphas,(ATerm) a,(ATerm) filter_comm_list(l,C));
     return a;
   } else if ( gsIsAllow(a) ){
-    //XXX
+    a = gsApplyAlpha(a);
     ATermList l = ATLtableGet(alphas,(ATerm) a);
-    if(!l) l=gsaGetAlpha(a);
     a = gsMakeComm(C,a);
     ATtablePut(alphas,(ATerm) a,(ATerm) filter_comm_list(l,C));
     return a;
