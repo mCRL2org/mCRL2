@@ -1041,7 +1041,7 @@ static ATermAppl PushHide(ATermList I, ATermAppl a){
 }
 
 static ATermAppl PushAllow(ATermList V, ATermAppl a){
-  //gsWarningMsg("push allow: V: %P; a: %P\n",V,a);
+  //gsWarningMsg("push allow: V: %P; a: %P\n\n",V,a);
   V=sort_multiactions_allow(V);
   if ( gsIsDelta(a) || gsIsTau(a) ){
     return a;
@@ -1066,8 +1066,10 @@ static ATermAppl PushAllow(ATermList V, ATermAppl a){
     {
       ATermList ll=l;
       l = filter_allow_list(ll,V);
-      if(ATisEqual(l,ll)) 
-	return a; //everything from alpha(a) is allowed by V -- no need in allow
+      if(ATisEqual(l,ll)){         //everything from alpha(a) is allowed by V -- no need in allow
+        ATtablePut(alphas,(ATerm) a,(ATerm) l); // not to forget: put the list in the table!!!
+	return a; 
+      }
     }
     
     ATermList ul=untypeMAL(l);
