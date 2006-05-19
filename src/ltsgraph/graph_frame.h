@@ -27,9 +27,10 @@ using namespace std;
 using namespace mcrl2::lts;
 
 const int ID_OPTIMIZE      = 10000;
-const int ID_SET_EDGE_STIF = 10001;
-const int ID_SET_NODE_STRE = 10002;
-const int ID_SET_NATU_LENG = 10003;
+const int ID_STOP_OPTIMIZE = 10001;
+const int ID_SET_EDGE_STIF = 10002;
+const int ID_SET_NODE_STRE = 10003;
+const int ID_SET_NATU_LENG = 10004;
 
 class GraphFrame : public wxFrame
 {
@@ -43,6 +44,7 @@ public:
   void OnSetNodeStrength( wxCommandEvent &event );
   void OnSetNaturalLength( wxCommandEvent &event );
   void OnOptimize( wxCommandEvent &event );
+  void OnStopOptimize( wxCommandEvent &event );
   void OnResize(wxSizeEvent& event);
   bool OptimizeDrawing(double precision);
   int  FindNode(wxPoint);
@@ -55,7 +57,8 @@ public:
 
 private:
   wxSize sz;
-//replace later by calcul depending of the number of nodes/edges ? 
+  bool StopOpti;
+  
   double EdgeStiffness;   //stiffness of the edge
   double NodeStrength;   //Strength of the electrical repulsion
   double NaturalLength;
@@ -66,7 +69,8 @@ private:
   wxMenu *options;
   wxMenuItem *openItem;
   wxMenuItem *quitItem;
-  wxMenuItem *optimizegraph;
+  wxMenuItem *optimizeGraph;
+  wxMenuItem *stopOptimize;
   wxMenuItem *setEdgeStiffnessItem;
   wxMenuItem *setNodeStrengthItem;
   wxMenuItem *setNaturalLengthItem;

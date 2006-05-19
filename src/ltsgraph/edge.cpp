@@ -114,21 +114,5 @@ double Edge::GetYpos2() {
   return N2->GetY();
 }
 
-// void Edge::Lock1() {
-//   locked1 = true;
-// }
-
-// void Edge::Unlock1() {
-//   locked1 = false;
-// }
-
-// void Edge::Lock2() {
-//   locked2 = true;
-// }
-
-// void Edge::Unlock2() {
-//   locked2 = false;
-// }
-
 
 

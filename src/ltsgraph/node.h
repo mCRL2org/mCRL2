@@ -10,7 +10,7 @@
 #include <string>
 
 #define POS_NODE_LBL_X 3.0
-#define POS_NODE_LBL_Y 0.0
+#define POS_NODE_LBL_Y 5.0
 #define FONT_SIZE 9
 #define CIRCLE_RADIUS 10
 

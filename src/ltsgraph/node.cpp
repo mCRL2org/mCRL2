@@ -25,8 +25,17 @@ void Node::OnPaint(wxPaintDC * ptrDC)
     wxFont MyFont(FONT_SIZE, wxSWISS , wxNORMAL, wxNORMAL, false, wxT("Arial"));
     ptrDC->SetFont(MyFont);
 
-    double x=posX+POS_NODE_LBL_X;
-    double y=posY+POS_NODE_LBL_Y;
+		double x= posX-POS_NODE_LBL_X;;
+		//Adjust label x position according to the length
+		switch (lbl.Length()) {
+			case 1:  x = posX-POS_NODE_LBL_X;  break;
+			case 2:  x = posX-POS_NODE_LBL_X-3;break;
+			case 3:  x = posX-POS_NODE_LBL_X-6;break;
+			default: x = posX-POS_NODE_LBL_X;  break;
+		}
+
+    double y=posY-POS_NODE_LBL_Y;
+
     ptrDC->DrawRotatedText(lbl,(int) round(x),(int) round(y),0.0);
 }
 
@@ -58,9 +67,6 @@ void Node::SetXY(double _x, double _y) {
   if (!locked) {
     posX = _x;
     posY = _y;
-    // Change position of label; Not necessary, ought to
-    // be automatic.
-    // lbl->SetXY(posX-POS_LBL_X, posY-POS_LBL_Y);
   }
   else 
     wxBell();
