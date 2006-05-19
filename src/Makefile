@@ -24,7 +24,7 @@ LDFLAGS  += $(ATERM_LDFLAGS)
 
 #ATerm definitions
 ATERM_NAME         = aterm/libATerm.a
-ATERM_OBJECTS      = aterm/afun.o aterm/aterm.o aterm/bafio.o aterm/byteio.o aterm/gc.o aterm/hash.o aterm/list.o aterm/make.o aterm/md5c.o aterm/memory.o aterm/tafio.o aterm/version.o
+ATERM_OBJECTS      = aterm/afun.o aterm/aterm.o aterm/bafio.o aterm/byteio.o aterm/gc.o aterm/hash.o aterm/list.o aterm/make.o aterm/md5c.o aterm/memory.o aterm/tafio.o aterm/version.o aterm/atermpp.o
 ifdef BUILD_ATERM
 OBJECTS           += $(ATERM_OBJECTS)
 ATERM_DEP          = $(ATERM_NAME)

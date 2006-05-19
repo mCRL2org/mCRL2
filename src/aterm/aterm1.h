@@ -32,6 +32,8 @@ typedef struct _ATerm
 	struct _ATerm *next;
 } *ATerm;
 
+typedef void (*ATermProtFunc)();
+
 /** The following functions implement the operations of
   * the 'standard' ATerm interface, and should appear
   * in some form in every implementation of the ATerm
@@ -100,6 +102,10 @@ void ATprotect(ATerm *atp);
 void ATunprotect(ATerm *atp);
 void ATprotectArray(ATerm *start, int size);
 void ATunprotectArray(ATerm *start);
+void ATaddProtectFunction(ATermProtFunc f);
+void ATremoveProtectFunction(ATermProtFunc f);
+void ATmarkTerm(ATerm *atp);
+void ATmarkArray(ATerm *start, int size);
 
 /* Convenience macro's to circumvent gcc's (correct) warning:
  *   "dereferencing type-punned pointer will break strict-aliasing rules"
