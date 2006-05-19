@@ -574,7 +574,8 @@ namespace squadt {
       using namespace detail;
 
       if (content != 0) {
-        GetSizer()->Detach(content);
+        /* Delete controls */
+        content->Clear(true);
 
         delete content;
       }

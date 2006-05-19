@@ -10,6 +10,7 @@
 #include <wx/splitter.h>
 #include <wx/scrolwin.h>
 #include <wx/treectrl.h>
+#include <wx/timer.h>
 
 #include "processor.h"
 #include "gui_miscellaneous.h"
@@ -75,11 +76,14 @@ namespace squadt {
        
             /** \brief The list of tool displays that need to be updated */
             std::deque < boost::function < void () > > tasks;
+
+            /** \brief Timer for GUI update cycle for tool displays */
+            wxTimer                                    timer;
        
           private:
        
             /** \brief The event handler that does the actual updating */
-            void process(wxIdleEvent&);
+            void process(wxTimerEvent&);
        
           public:
        

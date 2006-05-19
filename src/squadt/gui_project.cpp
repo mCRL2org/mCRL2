@@ -25,11 +25,13 @@
 namespace squadt {
   namespace GUI {
 
-    project::builder::builder() {
-      Connect(wxEVT_IDLE, wxIdleEventHandler(builder::process));
+    project::builder::builder() : timer(this, wxID_ANY) {
+      Connect(wxEVT_TIMER, wxTimerEventHandler(builder::process));
+
+      timer.Start(50);
     }
     
-    void project::builder::process(wxIdleEvent&) {
+    void project::builder::process(wxTimerEvent&) {
       while (0 < tasks.size()) {
         boost::function < void () > task = tasks.front();
 

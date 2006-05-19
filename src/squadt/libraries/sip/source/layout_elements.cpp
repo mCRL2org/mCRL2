@@ -124,7 +124,7 @@ namespace sip {
       /**
        * @param[out] o the stream to which to write the result
        **/
-      inline void text_field::write_structure(std::ostream& o) const {
+      void text_field::write_structure(std::ostream& o) const {
         o << "<text-field id=\"" << id << "\" text=\"" << text << "\">";
 
         type->write(o);
@@ -138,7 +138,7 @@ namespace sip {
        * \pre reader should point to a text-field element
        * \post reader points to after the associated end tag of the box
        **/
-      inline void text_field::read_structure(xml2pp::text_reader& r) {
+      void text_field::read_structure(xml2pp::text_reader& r) {
         r.get_attribute(&text, "text");
 
         r.read(1);

@@ -200,8 +200,6 @@ namespace sip {
 
             message_ptr m(new message(new_string, t));
 
-            boost::mutex::scoped_lock w(waiter_lock);
-
             typename handler_map::iterator h = handlers.find(t);
 
             if (h != handlers.end()) {
@@ -306,9 +304,9 @@ namespace sip {
      **/
     template < class M >
     inline void basic_messenger< M >::service_handlers(const message_ptr& m, const basic_transceiver* o, handler_type h) {
-      h(m, o);
-
       boost::mutex::scoped_lock w(waiter_lock);
+
+      h(m, o);
 
       typename M::type_identifier_t id = m->get_type();
 
