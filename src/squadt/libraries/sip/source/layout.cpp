@@ -317,7 +317,7 @@ namespace sip {
         return (top_manager->instantiate(m));
       }
 
-      return (mediator::wrapper_aptr());
+      return mediator::wrapper_aptr();
     }
 
     /**
