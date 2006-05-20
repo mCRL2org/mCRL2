@@ -2,17 +2,10 @@
 
 #include "ltsviewapp.h"
 
-IMPLEMENT_APP( LTSViewApp )
+IMPLEMENT_APP_NO_MAIN( LTSViewApp )
 
 bool LTSViewApp::OnInit()
 {
-  // initialise the ATerm and glut libraries
-  ATerm stackbot;
-  ATinit( 0, NULL, &stackbot );
-  int c = 0;
-  char* v = "";
-  glutInit( &c, &v );
-  
   mainFrame	  = new MainFrame( this );
   fileLoader	  = new FileLoader( this );
   visualizer	  = new Visualizer( this );
@@ -44,6 +37,35 @@ bool LTSViewApp::OnInit()
 
   return true;
 }
+
+#ifdef __WINDOWS__
+extern "C" int WINAPI WinMain(HINSTANCE hInstance,                    
+                                  HINSTANCE hPrevInstance,                
+                                  wxCmdLineArgType lpCmdLine,             
+                                  int nCmdShow) {                                                                     
+  ATerm stackbot;
+  int   c = 0;
+  char* v = "";
+
+  // initialise the ATerm and glut libraries
+  ATinit(NULL,NULL,&stackbot); // XXX args?
+
+  glutInit(&c, &v);
+
+  return wxEntry(hInstance, hPrevInstance, lpCmdLine, nCmdShow);    
+}
+#else
+int main(int argc, char **argv) {
+  ATerm stackbot;
+
+  // initialise the ATerm and glut libraries
+  ATinit(argc,argv,&stackbot);
+
+  glutInit(&argc, argv);
+
+  return wxEntry(argc, argv);
+}
+#endif
 
 void LTSViewApp::openFile( string fileName )
 {
