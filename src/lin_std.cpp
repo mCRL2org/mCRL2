@@ -180,7 +180,7 @@ static void newobject(int n)
 
   if (n>=maxobject)
   { int newsize=(n>=2*maxobject?
-                  (n<1024?1024:(n+1)):2*maxobject);
+                  (n<4096?4096:(n+1)):2*maxobject);
     if (maxobject==0)
     { objectdata=(objectdatatype *)malloc(newsize*sizeof(objectdatatype));
     }
@@ -350,7 +350,8 @@ static long addObject(ATermAppl o, ATbool *isnew)
 }
 
 static long objectIndex(ATermAppl o)
-{ long result=ATindexedSetGetIndex(objectIndexTable,(ATerm)o);
+{ // gsfprintf(stderr,"ObjectIndex %T\n",o);
+  long result=ATindexedSetGetIndex(objectIndexTable,(ATerm)o);
   assert(result>=0); /* object index must always return the index
                         of an existing object, because at the
                         places where objectIndex is used, no
@@ -602,7 +603,7 @@ static long addMultiAction(ATermAppl multiAction, ATbool *isnew)
   
   
   if (*isnew)
-  { 
+  { // fprintf(stderr,"New multiaction\n");
     newobject(n);
     objectdata[n].parameters=getparameters(multiAction);
     objectdata[n].objectname=(ATermAppl)actionnames;
@@ -2183,6 +2184,7 @@ static ATermAppl bodytovarheadGNF(
 { /* it is assumed that we only receive processes with
      operators alt, seq, sum, cond, name, delta, tau, sync, AtTime in it */
 
+  // gsfprintf(stderr,"INPUT bodytovarheadGNF: %T\n\n",body);
 
   ATermAppl newproc=NULL;
 
@@ -2201,13 +2203,15 @@ static ATermAppl bodytovarheadGNF(
   if (gsIsSum(body)) 
   { 
     if (sum>=s)
-    { ATermList renamevars=ATempty;
+    { // gsfprintf(stderr,"SUM %P\n",body);
+      ATermList renamevars=ATempty;
       ATermList sumvars=ATLgetArgument(body,0);
       ATermAppl body1=ATAgetArgument(body,1);
       ATermList renameterms=ATempty;
       alphaconvert(&sumvars,&renamevars,&renameterms,freevars,ATempty);
       body1=substitute_pCRLproc(renameterms,renamevars,body1);
       body1=bodytovarheadGNF(body1,sum,ATconcat(sumvars,freevars),first);
+      // gsfprintf(stderr,"SUM RESULT %T\n",body1);
       return gsMakeSum(sumvars,body1);
     }
     body=bodytovarheadGNF(body,alt,freevars,first);
@@ -2256,7 +2260,10 @@ static ATermAppl bodytovarheadGNF(
     ATermAppl body2=ATAgetArgument(body,1);
 
     if (seq>=s)
-    { body1=bodytovarheadGNF(body1,name,freevars,v);
+    { 
+      // gsfprintf(stderr,"First INPUT value seq. comp bodytovarheadGNF\n%T\n\n",body1);
+      body1=bodytovarheadGNF(body1,name,freevars,v);
+      // gsfprintf(stderr,"First return value seq. comp bodytovarheadGNF\n%T\n\n",body1);
       body2=bodytovarheadGNF(body2,seq,freevars,later);
       return gsMakeSeq(body1,body2);
     } 
@@ -2266,10 +2273,13 @@ static ATermAppl bodytovarheadGNF(
   }
 
   if (gsIsAction(body))
-  { ATbool isnew=ATfalse;
+  { 
+    ATbool isnew=ATfalse;
     ATermAppl ma=gsMakeMultAct(ATinsertA(ATempty,body)); 
+    // gsfprintf(stderr,"Action bodytovarheadGNF %P\n%T\n",body,ma);
     if ((s==multiaction)||(v==first))
-    { return ma;
+    { // gsfprintf(stderr,"Return multiaciont\n");
+      return ma;
     }
     
     long n=addMultiAction(ma,&isnew); 
@@ -2284,6 +2294,7 @@ static ATermAppl bodytovarheadGNF(
                                   objectdata[n].processbody,
                                   GNF,1);
     }
+    // gsfprintf(stderr,"Make process: %d\n%P\n\n",n,gsMakeProcess(objectdata[n].targetsort,getarguments(ma)));
     return gsMakeProcess(objectdata[n].targetsort,getarguments(ma)); 
   }  
 
@@ -2389,11 +2400,25 @@ static void procstovarheadGNF(ATermList procs)
   for( ; (procs!=ATempty) ; procs=ATgetNext(procs))
   { ATermAppl proc=ATAgetFirst(procs);
     long n=objectIndex(proc);
-    objectdata[n].processbody=bodytovarheadGNF(
+    // gsfprintf(stderr,"procstovarheadGNF: %d  %P\n\n",n,proc);
+    
+    // The intermediate variable result is needed here 
+    // because otherwise it appears that the g++ compiler
+    // will not always do the assignment for whatever reason.
+    // This might be due to a problem with the compiler, but
+    // can also be due to other residual errors in the code.
+    // Jan Friso Groote 20/5/2006
+    
+    ATermAppl result=
+      bodytovarheadGNF(
                 objectdata[n].processbody,
                 alt, 
                 objectdata[n].parameters,
                 first);
+    // gsfprintf(stderr,"Result: %P\n\n",result);
+    objectdata[n].processbody=result;
+    // gsfprintf(stderr,"procstovarheadGNFbodyresult %d %d   %T\n\n",n,maxobject,
+    //                      objectdata[n].processbody);
   }
 }
 
@@ -2959,7 +2984,8 @@ static ATermAppl procstorealGNFbody(
   }
   
   if (gsIsAction(body))
-  { gsErrorMsg("Expect only multiactions at this point\n");
+  { //gsfprintf(stderr,"procstorealGNF %P\n\n",body);
+    gsErrorMsg("Expect only multiactions at this point\n");
     stop();
   }
  
@@ -3052,9 +3078,12 @@ static void procstorealGNFrec(
 { long n=objectIndex(procIdDecl);
   ATermAppl t=NULL;
 
+  // gsfprintf(stderr,"HIER procstorealGNFrec %d  %P\n",n,procIdDecl);
 
   if (objectdata[n].processstatus==pCRL)
-  { objectdata[n].processstatus=GNFbusy;
+  { // gsfprintf(stderr,"HIER pCRL\n");
+    objectdata[n].processstatus=GNFbusy;
+    // gsfprintf(stderr,"processbody: %T\n\n",objectdata[n].processbody);
     t=procstorealGNFbody(objectdata[n].processbody,first,
               todo,regular,pCRL,objectdata[n].parameters);
     if (objectdata[n].processstatus!=GNFbusy)
@@ -3068,7 +3097,8 @@ static void procstorealGNFrec(
   }
 
   if (objectdata[n].processstatus==mCRL)
-  { objectdata[n].processstatus=mCRLbusy;
+  { // gsfprintf(stderr,"HIER pCRL\n");
+    objectdata[n].processstatus=mCRLbusy;
     t=procstorealGNFbody(objectdata[n].processbody,first,todo,
              regular,mCRL,objectdata[n].parameters);
     /* if t is not equal to NULL,
@@ -3087,7 +3117,8 @@ static void procstorealGNFrec(
       (objectdata[n].processstatus==GNF)||
       (objectdata[n].processstatus==mCRLdone)||
       (objectdata[n].processstatus==multiAction))
-  { return;
+  { // gsfprintf(stderr,"HIER elders\n");
+    return;
   }
 
   if (objectdata[n].processstatus==mCRLbusy)
@@ -3102,11 +3133,13 @@ static void procstorealGNFrec(
 static void procstorealGNF(ATermAppl procsIdDecl, int regular)
 { ATermList todo=ATempty;
 
+  // gsfprintf(stderr,"procstorealGNF Start %P\n\n",procsIdDecl);
   todo=ATinsertA(todo,procsIdDecl);
   for(; (todo!=ATempty) ; )
     { 
       procsIdDecl=ATAgetFirst(todo);
       todo=ATgetNext(todo);
+      // gsfprintf(stderr,"procstorealGNF Todo %P\n\n",procsIdDecl);
       procstorealGNFrec(procsIdDecl,first,&todo,regular);
     }
 }
@@ -7693,7 +7726,8 @@ static int canterminatebody(
   }
 
   if (gsIsProcess(t))
-  { if (allowrecursion)
+  { // gsfprintf(stderr,"CanTerminateBody %T\n\n",t);
+    if (allowrecursion)
     { return (canterminate_rec(ATAgetArgument(t,0),stable,visited));
     }
     return objectdata[objectIndex(ATAgetArgument(t,0))].canterminate;
@@ -8052,6 +8086,7 @@ static ATermAppl transform(
   init=splitmCRLandpCRLprocsAndAddTerminatedAction(init);
   pcrlprocesslist=collectPcrlProcesses(init);
 
+  // gsfprintf(stderr,"pcrlprocesslist %P\n",pcrlprocesslist);
   if (pcrlprocesslist==ATempty) 
   { gsErrorMsg("There are no pCRL processes to be linearized\n"); 
     stop();
