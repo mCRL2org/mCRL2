@@ -180,7 +180,7 @@ static void newobject(int n)
 
   if (n>=maxobject)
   { int newsize=(n>=2*maxobject?
-                  (n<4096?4096:(n+1)):2*maxobject);
+                  (n<1024?1024:(n+1)):2*maxobject);
     if (maxobject==0)
     { objectdata=(objectdatatype *)malloc(newsize*sizeof(objectdatatype));
     }
@@ -350,7 +350,7 @@ static long addObject(ATermAppl o, ATbool *isnew)
 }
 
 static long objectIndex(ATermAppl o)
-{ // gsfprintf(stderr,"ObjectIndex %T\n",o);
+{ 
   long result=ATindexedSetGetIndex(objectIndexTable,(ATerm)o);
   assert(result>=0); /* object index must always return the index
                         of an existing object, because at the
@@ -603,27 +603,21 @@ static long addMultiAction(ATermAppl multiAction, ATbool *isnew)
   
   
   if (*isnew)
-  { // fprintf(stderr,"New multiaction\n");
+  { 
     newobject(n);
     objectdata[n].parameters=getparameters(multiAction);
     objectdata[n].objectname=(ATermAppl)actionnames;
     objectdata[n].object=multiact;
-    objectdata[n].processbody=
-                     makemultiaction(actionnames,
-                                     objectdata[n].parameters);
+    // must separate assignment below as 
+    // objectdata may change as a side effect of make 
+    // multiaction.
+    ATermAppl tempvar=makemultiaction(actionnames,
+                                  objectdata[n].parameters);
+    objectdata[n].processbody=tempvar;
   }
   return n;
 }
 
-/* static int existsvariable(ATermAppl var)
-/ * Delivers -1 if the variable does not exists. 
-   Otherwise a number>=0 is returned,
-   indicating the index of the variable * /
-{ long n=existsObjectIndex(var);
-  if (n<0) return -1;
-  if (objectdata[n].object==variable) return n;
-  return -1;
-} */
 
 static void insertvariable(ATermAppl var, ATbool mustbenew)
 { 
@@ -1852,9 +1846,6 @@ static ATermList substitute_assignmentlist(
 
   */
 
-  /* gsfprintf(stderr,"terms %P\nvars%P\nassignments%P\nparameters%P\n\n",
-                      terms,vars,assignments,parameters); */
-
   assert(replacelhs==0 || replacelhs==1);
   assert(replacerhs==0 || replacerhs==1);
 
@@ -2184,8 +2175,6 @@ static ATermAppl bodytovarheadGNF(
 { /* it is assumed that we only receive processes with
      operators alt, seq, sum, cond, name, delta, tau, sync, AtTime in it */
 
-  // gsfprintf(stderr,"INPUT bodytovarheadGNF: %T\n\n",body);
-
   ATermAppl newproc=NULL;
 
   if (gsIsChoice(body)) 
@@ -2203,7 +2192,7 @@ static ATermAppl bodytovarheadGNF(
   if (gsIsSum(body)) 
   { 
     if (sum>=s)
-    { // gsfprintf(stderr,"SUM %P\n",body);
+    { 
       ATermList renamevars=ATempty;
       ATermList sumvars=ATLgetArgument(body,0);
       ATermAppl body1=ATAgetArgument(body,1);
@@ -2211,7 +2200,6 @@ static ATermAppl bodytovarheadGNF(
       alphaconvert(&sumvars,&renamevars,&renameterms,freevars,ATempty);
       body1=substitute_pCRLproc(renameterms,renamevars,body1);
       body1=bodytovarheadGNF(body1,sum,ATconcat(sumvars,freevars),first);
-      // gsfprintf(stderr,"SUM RESULT %T\n",body1);
       return gsMakeSum(sumvars,body1);
     }
     body=bodytovarheadGNF(body,alt,freevars,first);
@@ -2261,9 +2249,7 @@ static ATermAppl bodytovarheadGNF(
 
     if (seq>=s)
     { 
-      // gsfprintf(stderr,"First INPUT value seq. comp bodytovarheadGNF\n%T\n\n",body1);
       body1=bodytovarheadGNF(body1,name,freevars,v);
-      // gsfprintf(stderr,"First return value seq. comp bodytovarheadGNF\n%T\n\n",body1);
       body2=bodytovarheadGNF(body2,seq,freevars,later);
       return gsMakeSeq(body1,body2);
     } 
@@ -2276,9 +2262,8 @@ static ATermAppl bodytovarheadGNF(
   { 
     ATbool isnew=ATfalse;
     ATermAppl ma=gsMakeMultAct(ATinsertA(ATempty,body)); 
-    // gsfprintf(stderr,"Action bodytovarheadGNF %P\n%T\n",body,ma);
     if ((s==multiaction)||(v==first))
-    { // gsfprintf(stderr,"Return multiaciont\n");
+    { 
       return ma;
     }
     
@@ -2288,13 +2273,15 @@ static ATermAppl bodytovarheadGNF(
     if (objectdata[n].targetsort==NULL)
     { /* this action does not yet have a corresponding process, which
          must be constructed. The resulting process is stored in 
-         the variable targetsort in objectdata. */
-      objectdata[n].targetsort=newprocess(
-                                  objectdata[n].parameters,
-                                  objectdata[n].processbody,
-                                  GNF,1);
+         the variable targetsort in objectdata. Tempvar below is
+         needed as objectdata may be realloced as a side effect
+         of newprocess */
+      ATermAppl tempvar=newprocess(
+                             objectdata[n].parameters,
+                             objectdata[n].processbody,
+                             GNF,1);
+      objectdata[n].targetsort=tempvar;
     }
-    // gsfprintf(stderr,"Make process: %d\n%P\n\n",n,gsMakeProcess(objectdata[n].targetsort,getarguments(ma)));
     return gsMakeProcess(objectdata[n].targetsort,getarguments(ma)); 
   }  
 
@@ -2309,11 +2296,13 @@ static ATermAppl bodytovarheadGNF(
     if (objectdata[n].targetsort==NULL)
     { /* this action does not yet have a corresponding process, which
          must be constructed. The resulting process is stored in 
-         the variable targetsort in objectdata. */
-      objectdata[n].targetsort=newprocess(
-                                  objectdata[n].parameters,
-                                  objectdata[n].processbody,
-                                  GNF,1);
+         the variable targetsort in objectdata. Tempvar below is needed
+         as objectdata may be realloced as a side effect of newprocess. */
+      ATermAppl tempvar= newprocess(
+                             objectdata[n].parameters,
+                             objectdata[n].processbody,
+                             GNF,1);
+      objectdata[n].targetsort=tempvar;
     }
     return gsMakeProcess(objectdata[n].targetsort,getarguments(body));
   } 
@@ -2337,11 +2326,13 @@ static ATermAppl bodytovarheadGNF(
     if (objectdata[n].targetsort==NULL)
     { /* this action does not yet have a corresponding process, which
          must be constructed. The resulting process is stored in 
-         the variable targetsort in objectdata. */
-      objectdata[n].targetsort=newprocess(
-                                  objectdata[n].parameters,
-                                  objectdata[n].processbody,
-                                  GNF,1);
+         the variable targetsort in objectdata. Tempvar below is needed
+         as objectdata may be realloced as a side effect of newprocess */
+      ATermAppl tempvar=newprocess(
+                             objectdata[n].parameters,
+                             objectdata[n].processbody,
+                             GNF,1);
+      objectdata[n].targetsort=tempvar;
     }
     return gsMakeProcess(objectdata[n].targetsort,getarguments(ma));
  
@@ -2400,14 +2391,10 @@ static void procstovarheadGNF(ATermList procs)
   for( ; (procs!=ATempty) ; procs=ATgetNext(procs))
   { ATermAppl proc=ATAgetFirst(procs);
     long n=objectIndex(proc);
-    // gsfprintf(stderr,"procstovarheadGNF: %d  %P\n\n",n,proc);
     
     // The intermediate variable result is needed here 
-    // because otherwise it appears that the g++ compiler
-    // will not always do the assignment for whatever reason.
-    // This might be due to a problem with the compiler, but
-    // can also be due to other residual errors in the code.
-    // Jan Friso Groote 20/5/2006
+    // because objectdata can be realloced as a side 
+    // effect of bodytovarheadGNF.
     
     ATermAppl result=
       bodytovarheadGNF(
@@ -2415,10 +2402,7 @@ static void procstovarheadGNF(ATermList procs)
                 alt, 
                 objectdata[n].parameters,
                 first);
-    // gsfprintf(stderr,"Result: %P\n\n",result);
     objectdata[n].processbody=result;
-    // gsfprintf(stderr,"procstovarheadGNFbodyresult %d %d   %T\n\n",n,maxobject,
-    //                      objectdata[n].processbody);
   }
 }
 
@@ -2984,7 +2968,7 @@ static ATermAppl procstorealGNFbody(
   }
   
   if (gsIsAction(body))
-  { //gsfprintf(stderr,"procstorealGNF %P\n\n",body);
+  { 
     gsErrorMsg("Expect only multiactions at this point\n");
     stop();
   }
@@ -3078,12 +3062,9 @@ static void procstorealGNFrec(
 { long n=objectIndex(procIdDecl);
   ATermAppl t=NULL;
 
-  // gsfprintf(stderr,"HIER procstorealGNFrec %d  %P\n",n,procIdDecl);
-
   if (objectdata[n].processstatus==pCRL)
-  { // gsfprintf(stderr,"HIER pCRL\n");
+  { 
     objectdata[n].processstatus=GNFbusy;
-    // gsfprintf(stderr,"processbody: %T\n\n",objectdata[n].processbody);
     t=procstorealGNFbody(objectdata[n].processbody,first,
               todo,regular,pCRL,objectdata[n].parameters);
     if (objectdata[n].processstatus!=GNFbusy)
@@ -3097,7 +3078,7 @@ static void procstorealGNFrec(
   }
 
   if (objectdata[n].processstatus==mCRL)
-  { // gsfprintf(stderr,"HIER pCRL\n");
+  { 
     objectdata[n].processstatus=mCRLbusy;
     t=procstorealGNFbody(objectdata[n].processbody,first,todo,
              regular,mCRL,objectdata[n].parameters);
@@ -3117,7 +3098,7 @@ static void procstorealGNFrec(
       (objectdata[n].processstatus==GNF)||
       (objectdata[n].processstatus==mCRLdone)||
       (objectdata[n].processstatus==multiAction))
-  { // gsfprintf(stderr,"HIER elders\n");
+  { 
     return;
   }
 
@@ -3133,13 +3114,11 @@ static void procstorealGNFrec(
 static void procstorealGNF(ATermAppl procsIdDecl, int regular)
 { ATermList todo=ATempty;
 
-  // gsfprintf(stderr,"procstorealGNF Start %P\n\n",procsIdDecl);
   todo=ATinsertA(todo,procsIdDecl);
   for(; (todo!=ATempty) ; )
     { 
       procsIdDecl=ATAgetFirst(todo);
       todo=ATgetNext(todo);
-      // gsfprintf(stderr,"procstorealGNF Todo %P\n\n",procsIdDecl);
       procstorealGNFrec(procsIdDecl,first,&todo,regular);
     }
 }
@@ -3237,14 +3216,17 @@ static int alreadypresent(ATermAppl *var,ATermList vl, long n)
     ATermAppl var2=getfreshvariable(
                       ATgetName(ATgetAFun(ATAgetArgument(*var,0))),
                       ATAgetArgument(*var,1));
-    objectdata[n].parameters=
-               substitute_datalist(ATinsertA(ATempty,var2),
-                                   ATinsertA(ATempty,*var),
-                                   objectdata[n].parameters);
-    objectdata[n].processbody=
-               substitute_pCRLproc(ATinsertA(ATempty,var2),  
+    // templist is needed as objectdata may be realloced
+    // during the substitution. Same applies to tempvar
+    // below.
+    ATermList templist=substitute_datalist(ATinsertA(ATempty,var2),
+                                           ATinsertA(ATempty,*var),
+                                           objectdata[n].parameters);
+    objectdata[n].parameters=templist;
+    ATermAppl tempvar=substitute_pCRLproc(ATinsertA(ATempty,var2),  
                                    ATinsertA(ATempty,*var),
                                    objectdata[n].processbody);
+    objectdata[n].processbody=tempvar;
     *var=var2;
     return 0;
   }
@@ -6843,13 +6825,6 @@ static ATermAppl communicationcomposition(
         ATermList newnextstate=nextstate;
 
 
-//        gsfprintf(stderr,"newsumvars, %P\n",newsumvars);
-//        gsfprintf(stderr,"newcondition, %P\n",newcondition);
-//        gsfprintf(stderr,"newmultiaction, %P\n",newmultiaction);
-//        gsfprintf(stderr,"newactiontime, %P\n",newactiontime);
-//        gsfprintf(stderr,"newnextstate, %P\n",newnextstate);
-//        gsfprintf(stderr,"communicationcondition, %P\n",communicationcondition);
-
         if (!nosumelm)
         { ApplySumElimination(&newsumvars,
                               &newcondition,
@@ -6859,13 +6834,6 @@ static ATermAppl communicationcomposition(
                               communicationcondition,
                               gsMakeOpIdTrue(),
                               linGetParameters(ips));
-
-//        gsfprintf(stderr,"2newsumvars, %P\n",newsumvars);
-//        gsfprintf(stderr,"2newcondition, %P\n",newcondition);
-//        gsfprintf(stderr,"2newmultiaction, %P\n",newmultiaction);
-//        gsfprintf(stderr,"2newactiontime, %P\n",newactiontime);
-//        gsfprintf(stderr,"2newnextstate, %P\n",newnextstate);
-//        gsfprintf(stderr,"2communicationcondition, %P\n\n",communicationcondition);
 
           newcondition=RewriteTerm(newcondition); 
         } else {
@@ -7683,9 +7651,12 @@ static void alphaconversion(ATermAppl procId, ATermList parameters)
   if ((objectdata[n].processstatus==GNF)||
       (objectdata[n].processstatus==multiAction))
    { objectdata[n].processstatus=GNFalpha;
-     objectdata[n].processbody=
-       alphaconversionterm(objectdata[n].processbody,
-            parameters,ATempty,ATempty);
+     // tempvar below is needed as objectdata may be realloced
+     // during a call to alphaconversionterm.
+       ATermAppl tempvar=alphaconversionterm(
+                           objectdata[n].processbody,
+                           parameters,ATempty,ATempty);
+       objectdata[n].processbody=tempvar;
    }
   else
   if (objectdata[n].processstatus==mCRLdone)
@@ -7726,7 +7697,7 @@ static int canterminatebody(
   }
 
   if (gsIsProcess(t))
-  { // gsfprintf(stderr,"CanTerminateBody %T\n\n",t);
+  { 
     if (allowrecursion)
     { return (canterminate_rec(ATAgetArgument(t,0),stable,visited));
     }
@@ -8086,7 +8057,6 @@ static ATermAppl transform(
   init=splitmCRLandpCRLprocsAndAddTerminatedAction(init);
   pcrlprocesslist=collectPcrlProcesses(init);
 
-  // gsfprintf(stderr,"pcrlprocesslist %P\n",pcrlprocesslist);
   if (pcrlprocesslist==ATempty) 
   { gsErrorMsg("There are no pCRL processes to be linearized\n"); 
     stop();
