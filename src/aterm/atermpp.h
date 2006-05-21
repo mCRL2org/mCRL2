@@ -4,6 +4,7 @@ class IProtectedATerm
 {
   public:
     virtual void ATprotectTerms() = 0;
+    virtual ~IProtectedATerm();
 };
 
 void ATprotectProtectedATerm(IProtectedATerm *i);

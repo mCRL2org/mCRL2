@@ -616,8 +616,7 @@ static bool generate_lts()
 int main(int argc, char **argv)
 {
   FILE *SpecStream;
-  ATerm stackbot;
-  ATermAppl Spec;
+  ATerm Spec;
   #define sopts "hqvfyucrl:deD:t:n:mp:R:"
   struct option lopts[] = {
     { "help",            no_argument,       NULL, 'h' },
@@ -645,7 +644,7 @@ int main(int argc, char **argv)
     { 0, 0, 0, 0 }
   };
 
-  ATinit(argc,argv,&stackbot);
+  ATinit(argc,argv,&Spec);
 
   int opt;
   while ( (opt = getopt_long(argc,argv,sopts,lopts,NULL)) != -1 )
@@ -769,7 +768,7 @@ int main(int argc, char **argv)
     return 1;
   }
   gsVerboseMsg("reading LPE from '%s'\n", SpecFileName);
-  Spec = (ATermAppl) ATreadFromFile(SpecStream);
+  Spec = ATreadFromFile(SpecStream);
   if ( Spec == NULL )
   {
     gsErrorMsg("could not read LPE from '%s'\n", SpecFileName);
@@ -777,16 +776,15 @@ int main(int argc, char **argv)
   }
   assert(Spec != NULL);
   gsEnableConstructorFunctions();
-  if (!gsIsSpecV1(Spec)) {
+  if (!gsIsSpecV1((ATermAppl) Spec)) {
     gsErrorMsg("'%s' does not contain an LPE\n", SpecFileName);
     return 1;
   }
-  assert(gsIsSpecV1(Spec));
 
   if ( removeunused )
   {
     gsVerboseMsg("removing unused parts of the data specification.\n");
-    Spec = removeUnusedData(Spec);
+    Spec = (ATerm) removeUnusedData((ATermAppl) Spec);
   }
 
   if ( argc-optind > 1 )
@@ -843,7 +841,7 @@ int main(int argc, char **argv)
     backpointers = NULL;
   }
   
-  nstate = createNextState(Spec,!usedummies,stateformat,createEnumerator(Spec,createRewriter(ATAgetArgument(Spec,3),strat),true),true);
+  nstate = createNextState((ATermAppl) Spec,!usedummies,stateformat,createEnumerator((ATermAppl) Spec,createRewriter(ATAgetArgument((ATermAppl) Spec,3),strat),true),true);
   
   if ( priority_action != NULL )
   {

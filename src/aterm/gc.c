@@ -308,7 +308,7 @@ VOIDCDECL mark_phase()
 
 
   start = MIN(stackTop, stackBot);
-  stop  = MAX(stackTop, stackBot);
+  stop  = MAX(stackTop, stackBot)+1;
 
   stack_size = stop-start;
 
@@ -419,7 +419,7 @@ VOIDCDECL mark_phase_young()
 
   stackTop = stack_top();
   start = MIN(stackTop, stackBot);
-  stop  = MAX(stackTop, stackBot);
+  stop  = MAX(stackTop, stackBot)+1;
 
   stack_size = stop-start;
 

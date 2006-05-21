@@ -1,6 +1,10 @@
 #include <malloc.h>
 #include "atermpp.h"
 
+IProtectedATerm::~IProtectedATerm()
+{
+}
+
 IProtectedATerm **p_aterms = NULL;
 int p_aterms_size = 0;
 int p_aterms_count = 0;
