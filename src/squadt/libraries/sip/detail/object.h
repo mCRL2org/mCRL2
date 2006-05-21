@@ -57,7 +57,7 @@ namespace sip {
       typedef std::string                   storage_format;
 
       /** \brief convenience type to hide the shared pointer implementation */
-      typedef boost::shared_ptr < object >  ptr;
+      typedef boost::shared_ptr < object >  sptr;
 
       /** Datatype for the textual identifier of an option/object */
       typedef option::identifier            identifier;
@@ -82,7 +82,7 @@ namespace sip {
     private:
 
       /** \brief Read from XML stream */
-      inline static object::ptr read(xml2pp::text_reader& reader);
+      inline static object::sptr read(xml2pp::text_reader& reader);
 
       /** \brief Constructor */
       inline object(const identifier, const storage_format, const uri = "", const type = input);
@@ -129,7 +129,7 @@ namespace sip {
   }
 
   /** \pre the reader must point at an object element} */
-  inline object::ptr object::read(xml2pp::text_reader& r) {
+  inline object::sptr object::read(xml2pp::text_reader& r) {
     using sip::exception::exception;
 
     object::identifier id;
@@ -169,7 +169,7 @@ namespace sip {
       r.read();
       r.skip_end_element("object");
      
-      return (object::ptr(new object(id, new_format, new_location, static_cast < object::type > (i))));
+      return (object::sptr(new object(id, new_format, new_location, static_cast < object::type > (i))));
     }
   }
 }

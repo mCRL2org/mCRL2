@@ -8,12 +8,13 @@
 #include <boost/filesystem/operations.hpp>
 #include <boost/noncopyable.hpp>
 
-#include "iterators.h"
+#include <iterator_wrapper/indirect_iterator.h>
+
 #include "processor.tcc"
 
 namespace squadt {
 
-  using squadt::detail::constant_indirect_iterator;
+  using iterator_wrapper::constant_indirect_iterator;
 
   /**
    * \brief Basic component that stores and retrieves information about projects

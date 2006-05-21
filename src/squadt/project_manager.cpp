@@ -225,7 +225,7 @@ namespace squadt {
           }
         }
         else {
-          processor::input_object_iterator k              = (*i)->get_inputs_iterator();
+          processor::input_object_iterator k              = (*i)->get_input_iterator();
           unsigned int                     maximum_weight = 0;
 
           while (k.valid()) {

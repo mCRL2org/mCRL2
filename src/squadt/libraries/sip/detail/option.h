@@ -22,7 +22,7 @@ namespace sip {
       typedef unsigned int                  identifier;
 
       /** \brief Convenience type to hide the shared pointer wrapping */
-      typedef boost::shared_ptr < option >  ptr;
+      typedef boost::shared_ptr < option >  sptr;
 
     private:
 
@@ -62,7 +62,7 @@ namespace sip {
       inline void write(std::ostream&) const;
 
       /** \brief Generate XML representation */
-      inline static option::ptr read(xml2pp::text_reader&);
+      inline static option::sptr read(xml2pp::text_reader&);
   };
 
   inline option::option(const identifier i) : id(i) {
@@ -125,7 +125,7 @@ namespace sip {
     }
   }
 
-  inline option::ptr option::read(xml2pp::text_reader& r) {
+  inline option::sptr option::read(xml2pp::text_reader& r) {
     using sip::exception::exception;
 
     option::identifier id;
@@ -136,7 +136,7 @@ namespace sip {
       throw (exception(sip::exception::message_missing_required_attribute, "id", "option"));
     }
     else {
-      option::ptr o(new option(id));
+      option::sptr o(new option(id));
 
       if (!r.is_empty_element()) {
         r.read();

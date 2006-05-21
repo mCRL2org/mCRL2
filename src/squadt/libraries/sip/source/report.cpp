@@ -38,8 +38,8 @@ namespace sip {
     }
 
     /* Include configuration specification */
-    if (_configuration != 0 && !_configuration->is_empty()) {
-      _configuration->write(output);
+    if (final_configuration != 0 && !final_configuration->is_empty()) {
+      final_configuration->write(output);
     }
 
     output << "</report>";

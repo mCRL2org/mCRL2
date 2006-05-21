@@ -14,7 +14,7 @@
 #include <md5pp/md5pp.h>
 #include <xml2pp/text_reader.h>
 
-#include "iterators.h"
+#include <iterator_wrapper/indirect_iterator.h>
 #include "executor.h"
 #include "tool_manager.h"
 #include "tool.h"
@@ -23,7 +23,7 @@
 
 namespace squadt {
 
-  using detail::constant_indirect_iterator;
+  using iterator_wrapper::constant_indirect_iterator;
 
   /**
    * \brief A processor represents a tool configuration.
@@ -228,13 +228,13 @@ namespace squadt {
       void write(std::ostream& stream = std::cout) const;
 
       /** \brief Get input objects */
-      inline input_object_iterator get_inputs_iterator() const;
+      inline input_object_iterator get_input_iterator() const;
  
       /** \brief Add an input object */
       inline void append_input(object_descriptor::wptr&);
  
       /** \brief Get output objects */
-      inline output_object_iterator get_outputs_iterator() const;
+      inline output_object_iterator get_output_iterator() const;
  
       /** \brief Add an output object */
       inline void append_output(object_descriptor::sptr&);

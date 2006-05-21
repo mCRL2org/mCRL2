@@ -146,7 +146,7 @@ namespace squadt {
     return (current_monitor);
   }
 
-  inline processor::input_object_iterator processor::get_inputs_iterator() const {
+  inline processor::input_object_iterator processor::get_input_iterator() const {
     return (input_object_iterator(inputs));
   }
 
@@ -157,7 +157,7 @@ namespace squadt {
     inputs.push_back(p);
   }
 
-  inline processor::output_object_iterator processor::get_outputs_iterator() const {
+  inline processor::output_object_iterator processor::get_output_iterator() const {
     return (output_object_iterator(outputs));
   }
 
@@ -193,7 +193,7 @@ namespace squadt {
   inline void processor::configure(const tool::input_combination* ic, const boost::filesystem::path& l) {
     selected_input_combination = const_cast < tool::input_combination* > (ic);
 
-    sip::configuration::ptr c(new sip::configuration);
+    sip::configuration::sptr c(new sip::configuration);
 
     c->add_input(ic->identifier, ic->format, l.string());
 

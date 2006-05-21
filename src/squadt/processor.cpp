@@ -135,7 +135,7 @@ namespace squadt {
     s << ">\n";
 
     /* The last received configuration from the tool */
-    sip::configuration::ptr c = current_monitor->get_configuration();
+    sip::configuration::sptr c = current_monitor->get_configuration();
 
     if (c.get() != 0) {
       c->write(s);

@@ -19,13 +19,13 @@ namespace sip {
   class report {
     private:
       /** \brief Room for errors (any error here implies unsuccessful termination) */
-      std::string        error;
+      std::string         error;
 
       /** \brief Room for comments about anything at all */
-      std::string        comment;
+      std::string         comment;
 
       /** \brief The configuration that can be used to rerun the tool and refresh its outputs */
-      configuration::ptr _configuration;
+      configuration::sptr final_configuration;
 
     public:
       /** \brief Constructor */
@@ -35,7 +35,7 @@ namespace sip {
       inline void set_error(std::string);
 
       /** \brief Set the configuration that was used */
-      void set_configuration(configuration::ptr o);
+      void set_configuration(configuration::sptr o);
 
       /** \brief Report comment (arbitrary text) */
       inline void set_comment(std::string);
@@ -78,8 +78,8 @@ namespace sip {
   }
 
   /** \pre{configuration must have been allocated on the heap} */
-  inline void report::set_configuration(configuration::ptr c) {
-    _configuration = configuration::ptr (c);
+  inline void report::set_configuration(configuration::sptr c) {
+    final_configuration = configuration::sptr (c);
   }
 
   inline void report::set_comment(std::string c) {

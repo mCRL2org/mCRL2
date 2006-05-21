@@ -30,7 +30,7 @@ namespace sip {
         status                      current_status;
  
         /** \brief The current configuration of a tool (may be limited to a main input configuration) */
-        configuration::ptr          current_configuration;
+        configuration::sptr         current_configuration;
  
       protected:
 
@@ -99,7 +99,7 @@ namespace sip {
         void set_configuration(T);
 
         /** \brief Get the current (perhaps partial) configuration */
-        configuration::ptr get_configuration() const;
+        configuration::sptr get_configuration() const;
 
         /** \brief Sets a handler for layout messages using a handler function */
         void activate_display_layout_handler(display_layout_handler_function);
@@ -121,7 +121,7 @@ namespace sip {
     }
  
     /** \attention use get_configuration().swap() to set the configuration */
-    inline configuration::ptr communicator::get_configuration() const {
+    inline configuration::sptr communicator::get_configuration() const {
       return (current_configuration);
     }
  
