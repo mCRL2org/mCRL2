@@ -117,7 +117,7 @@ int main(int ac, char** av) {
     /* Static configuration cycle */
     while (!valid) {
       /* Wait for configuration data to be send (either a previous configuration, or only an input combination) */
-      sip::configuration::ptr configuration = tc.await_configuration();
+      sip::configuration::sptr configuration = tc.await_configuration();
 
       /* Validate configuration specification, should contain a file name of an LPD that is to be read as input */
       valid  = configuration.get() != 0;

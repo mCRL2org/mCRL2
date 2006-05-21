@@ -169,7 +169,7 @@ namespace sip {
       d->update(reader);
     }
 
-    const configuration::ptr communicator::await_configuration() {
+    const configuration::sptr communicator::await_configuration() {
       const sip::messenger::message_ptr m = await_message(sip::send_configuration);
 
       return (sip::configuration::read(m->to_string()));

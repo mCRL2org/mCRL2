@@ -44,7 +44,7 @@ namespace sip {
         tool::capabilities            current_tool_capabilities;
  
         /** \brief This object reflects the current configuration */
-        configuration::ptr            current_configuration;
+        configuration::sptr           current_configuration;
  
         /** \brief Unique identifier for the running tool, obtained via the command line */
         long                          instance_identifier;
@@ -103,13 +103,13 @@ namespace sip {
         inline configuration& get_configuration();
  
         /** \brief Set the current tool configuration object */
-        inline void set_configuration(configuration::ptr);
+        inline void set_configuration(configuration::sptr);
  
         /** \brief Get the last communicated set of controller capabilities */
         inline const controller::capabilities::ptr get_controller_capabilities() const;
 
         /** \brief Waits until a configuration is delivered and returns a pointer to it */
-        const configuration::ptr await_configuration();
+        const configuration::sptr await_configuration();
  
         /** \brief Returns whether the current status is equal to status_inactive */
         inline bool is_active() const;
@@ -132,7 +132,7 @@ namespace sip {
       return (*current_configuration);
     }
  
-    inline void communicator::set_configuration(configuration::ptr c) {
+    inline void communicator::set_configuration(configuration::sptr c) {
       current_configuration = c;
     }
  
