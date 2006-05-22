@@ -1,3 +1,5 @@
+#include <stack>
+
 #include "gui_main.h"
 #include "gui_dialog_processor.h"
 
@@ -11,7 +13,8 @@ namespace squadt {
        * @param p the processor of which to display data
        **/
       processor_details::processor_details(wxWindow* o, wxString s, squadt::processor* p) :
-                                                dialog::processor(o, wxT("View and change details")), project_store(s), target_processor(p) {
+                                                dialog::processor(o, wxT("View and change details")),
+                                                project_store(s), target_processor(p), tools_selectable(true) {
         build();
 
         Connect(wxEVT_COMMAND_TREE_ITEM_ACTIVATED, wxTreeEventHandler(processor_details::on_tool_selector_item_selected), 0, this);
@@ -74,8 +77,37 @@ namespace squadt {
       }
 
       void processor_details::on_tool_selector_item_select(wxTreeEvent& e) {
-        if (tool_selector->GetItemParent(e.GetItem()) == tool_selector->GetRootItem()) {
+        if (tool_selector->GetItemParent(e.GetItem()) == tool_selector->GetRootItem() || !tools_selectable) {
           e.Veto();
+        }
+      }
+
+      void processor_details::select_tool(std::string const& name) {
+        std::stack < wxTreeItemId > id_stack;
+
+        id_stack.push(tool_selector->GetRootItem());
+
+        /* Recursively search the tree to find the node to select (if only there where a search method) */
+        while (!id_stack.empty()) {
+          wxTreeItemIdValue cookie;             // For wxTreeCtrl traversal
+          wxTreeItemId      c = id_stack.top(); // The current node
+
+          id_stack.pop();
+
+          for (wxTreeItemId j = tool_selector->GetFirstChild(c, cookie);
+                                    j.IsOk(); j = tool_selector->GetNextChild(c, cookie)) {
+
+            if (tool_selector->GetItemText(j) == wxString(name.c_str(), wxConvLocal)) {
+              tool_selector->SelectItem(j);
+              tool_selector->EnsureVisible(j);
+
+              break;
+            }
+
+            if (tool_selector->ItemHasChildren(j)) {
+              id_stack.push(j);
+            }
+          }
         }
       }
 
@@ -89,7 +121,6 @@ namespace squadt {
 
       void processor_details::add_to_tool_list(const miscellaneous::tool_selection_helper::tools_by_category::value_type& p) {
         wxString     current_category_name = wxString(p.first.c_str(), wxConvLocal);
-
         wxTreeItemId root = tool_selector->GetRootItem();
 
         /* Use of GetLastChild() because ItemHasChildren can return true when there are no children */

@@ -40,14 +40,14 @@ namespace sip {
 
     public:
       /**
-       * Type to indicate what the object is used for.
+       * \brief Type to indicate what the object is used for.
        *
        * This is useful for instance to a controller that can make sure that
        * input objects exists before giving the tool the start signal.
        **/
       enum type {
-        input           /// \brief object is used as input
-       ,output          /// \brief object is used as output
+        input,          ///< \brief object is used as input
+        output          ///< \brief object is used as output
       };
 
       /** \brief Until there is something better this is the type for a URI */
@@ -59,7 +59,7 @@ namespace sip {
       /** \brief convenience type to hide the shared pointer implementation */
       typedef boost::shared_ptr < object >  sptr;
 
-      /** Datatype for the textual identifier of an option/object */
+      /** \brief Datatype for the textual identifier of an option/object */
       typedef option::identifier            identifier;
 
     private:
@@ -94,6 +94,9 @@ namespace sip {
       /** \brief Returns the objects type */
       inline const type get_type() const;
 
+      /** \brief Returns the objects storage format */
+      inline const storage_format get_format() const;
+
       /** \brief Returns the objects uri */
       inline const uri get_location() const;
 
@@ -110,6 +113,10 @@ namespace sip {
 
   inline const object::type object::get_type() const {
     return (_type);
+  }
+
+  inline const object::storage_format object::get_format() const {
+    return (format);
   }
 
   inline const object::uri object::get_location() const {

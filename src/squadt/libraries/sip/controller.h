@@ -64,6 +64,9 @@ namespace sip {
         /** \brief The current handler for layout state change events */
         display_data_handler_function   current_data_handler;
  
+        /** \brief Event handler for storing configurations */
+        void store_configuration(const messenger::message_ptr& m);
+
       public:
 
         /** \brief Default constructor */

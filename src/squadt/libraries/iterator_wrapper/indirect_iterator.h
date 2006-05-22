@@ -160,14 +160,16 @@ namespace iterator_wrapper {
   }
  
   /**
-   * @param c the container with the elements over which to iterate
+   * @param begin the iterator from which to start
+   * @param end the iterator with which to end
    **/
   template < typename T, typename S, typename I >
   inline constant_indirect_iterator< T, S, I >::constant_indirect_iterator(I& begin, I& end) : iterator(begin), end(end) {
   }
  
   /**
-   * @param c the container with the elements over which to iterate
+   * @param begin the iterator from which to start
+   * @param end the iterator with which to end
    **/
   template < typename T, typename S, typename I >
   inline indirect_iterator< T, S, I >::indirect_iterator(I& begin, I& end) : iterator(begin), end(end) {

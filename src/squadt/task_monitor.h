@@ -1,10 +1,12 @@
 #ifndef TASK_MONITOR_H
 #define TASK_MONITOR_H
 
+#include <map>
 
 #include <boost/weak_ptr.hpp>
 #include <boost/shared_ptr.hpp>
 #include <boost/thread/mutex.hpp>
+#include <boost/thread/thread.hpp>
 #include <boost/thread/condition.hpp>
 
 #include <sip/controller.h>
@@ -55,15 +57,40 @@ namespace squadt {
 
       private:
  
+        /** \brief Type for event distinction */
+        enum event_type {
+          connection, ///< A new connection has been established
+          completion  ///< A tool completed its operation
+        };
+       
+        /** The type for a map that contains the event handlers */
+        typedef std::multimap < const event_type, boost::function < bool () > >  handler_map;
+       
+      private:
+ 
+        /** \brief The event handler that have been registered */
+        handler_map handlers;
+
+      private:
+ 
         /** \brief Signals that a new connection has been established */
         inline void signal_connection(const sip::end_point&);
 
         /** \brief Checks the process status and removes */
-        virtual inline void signal_change(const execution::process::status);
+        inline void signal_change(const execution::process::status);
+
+        /** \brief Executes a handler a specified number of times and then */
+        inline static bool countdown_handler_wrapper(boost::shared_ptr < unsigned int >, boost::function < void () >);
+
+        /** \brief Executes a handler until it is manually removed */
+        inline static bool perpetual_handler_wrapper(boost::function < void () >);
 
         /** \brief Associates a process with this listener */
         inline void set_process(const process::ptr& p);
  
+        /** \brief Execute event handlers */
+        void service_handlers(event_type e);
+
       public:
 
         /** \brief Constructor */
@@ -80,6 +107,18 @@ namespace squadt {
 
         /** \brief Blocks until private member done is true */
         inline void await_completion();
+
+        /** \brief Executes a handler function once the tool has connected */
+        inline void on_connection(boost::function < void () >);
+
+        /** \brief Executes a handler function once the tool has connected */
+        inline void once_on_connection(boost::function < void () >);
+
+        /** \brief Executes a handler function once the tool has connected */
+        inline void on_completion(boost::function < void () >);
+
+        /** \brief Executes a handler function once on tool completion */
+        inline void once_on_completion(boost::function < void () >);
 
         /** \brief Whether there still exists a connection with the tool */
         inline bool is_connected() const;
@@ -134,6 +173,7 @@ namespace squadt {
 
       return (associated_process);
     }
+
     inline void task_monitor::await_process() const {
       boost::mutex::scoped_lock l(register_lock);
 
@@ -146,6 +186,24 @@ namespace squadt {
       }
     }
 
+    /**
+     * @param[in] h the function object that is executed once a connection is established
+     **/
+    inline void task_monitor::on_connection(boost::function < void () > h) {
+      handlers.insert(std::make_pair(connection, boost::bind(&task_monitor::perpetual_handler_wrapper, h)));
+    }
+
+    /**
+     * @param[in] h the function object that is executed once a connection is established
+     **/
+    inline void task_monitor::once_on_connection(boost::function < void () > h) {
+      boost::shared_ptr < unsigned int > n(new unsigned int);
+
+      *n = 1;
+
+      handlers.insert(std::make_pair(connection, boost::bind(&task_monitor::countdown_handler_wrapper, n, h)));
+    }
+
     inline void task_monitor::signal_connection(const sip::end_point&) {
       boost::mutex::scoped_lock l(register_lock);
  
@@ -153,6 +211,9 @@ namespace squadt {
  
       if (register_condition.get() != 0) {
         register_condition->notify_all();
+
+        /* Service connection handlers */
+        boost::thread s(boost::bind(&task_monitor::service_handlers, this, connection));
       }
     }
  
@@ -172,6 +233,61 @@ namespace squadt {
           register_condition->wait(l);
         }
       }
+    }
+
+    /**
+     * @param the event type of which to execute the handler
+     **/
+    inline void task_monitor::service_handlers(const event_type e) {
+      std::pair < handler_map::iterator, handler_map::iterator > p = handlers.equal_range(e);
+
+      handler_map::iterator i = p.first;
+
+      while (p.first != p.second) {
+        if ((*(p.first)).second()) {
+          handlers.erase(p.first);
+        }
+
+        ++(p.first);
+      }
+    }
+
+    /**
+     * @param[in] the amount of times that the handler is executed
+     * @param[in] h the function object that is executed once a connection is established
+     **/
+    inline bool task_monitor::countdown_handler_wrapper(boost::shared_ptr < unsigned int > n, boost::function < void () > h) {
+      h();
+
+      return (--*n == 0); 
+    }
+
+    /**
+     * @param[in] the amount of times that the handler is executed
+     * @param[in] h the function object that is executed once a connection is established
+     **/
+    inline bool task_monitor::perpetual_handler_wrapper(boost::function < void () > h) {
+      h();
+
+      return (false); 
+    }
+
+    /**
+     * @param[in] h the function object that is executed once a connection is established
+     **/
+    inline void task_monitor::on_completion(boost::function < void () > h) {
+      handlers.insert(std::make_pair(completion, boost::bind(&task_monitor::perpetual_handler_wrapper, h)));
+    }
+
+    /**
+     * @param[in] h the function object that is executed once a connection is established
+     **/
+    inline void task_monitor::once_on_completion(boost::function < void () > h) {
+      boost::shared_ptr < unsigned int > n(new unsigned int);
+
+      *n = 1;
+
+      handlers.insert(std::make_pair(completion, boost::bind(&task_monitor::countdown_handler_wrapper, n, h)));
     }
 
     /**
@@ -230,6 +346,9 @@ namespace squadt {
         if (register_condition.get() != 0) {
           /* Signal completion to waiters */
           register_condition->notify_all();
+
+          /* Service completion handlers */
+          boost::thread s(boost::bind(&task_monitor::service_handlers, this, completion));
         }
       }
     }

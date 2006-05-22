@@ -165,9 +165,9 @@ namespace squadt {
    * \pre must point to a processor element
    * \attention the same map m must be used to read back all processor instances that were written with write()
    **/
-  processor::ptr processor::read(id_conversion_map& m, xml2pp::text_reader& r) throw () {
-    processor::ptr c(new processor());
-    std::string    temporary;
+  processor::sptr processor::read(id_conversion_map& m, xml2pp::text_reader& r) throw () {
+    processor::sptr c(new processor());
+    std::string     temporary;
 
     if (r.get_attribute(&temporary, "tool-name")) {
       c->tool_descriptor = global_tool_manager->find(temporary);

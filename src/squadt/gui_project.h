@@ -97,16 +97,13 @@ namespace squadt {
       private:
 
         /** \brief The view on processors and their interdependencies */
-        wxTreeCtrl*                           file_view;
+        wxTreeCtrl*                           object_view;
 
         /** \brief The view on progress report regions for tools */
         wxScrolledWindow*                     process_display_view;
 
         /** \brief The location (incomplete path) to project directory the project name is the basename */
         boost::shared_ptr < project_manager > manager;
-
-        /** \brief The list of temporary processors that exist for tool configuration purposes */
-        std::vector < processor::ptr >        temporary_processors;
 
         /** \brief Instantiation of a builder for this project */
         builder                               gui_builder;
@@ -130,6 +127,9 @@ namespace squadt {
 
         /** \brief Helper function to add tools by category to a context menu */
         void add_to_context_menu(const storage_format&, const miscellaneous::tool_selection_helper::tools_by_category::value_type&, wxMenu*, int*);
+
+        /** \brief Add new processor outputs to the object view */
+        void process_configuration(wxTreeItemId, processor::sptr);
 
         /** \brief Add a new tool display to the process_display_view */
         GUI::tool_display* add_tool_display(processor::monitor::sptr);

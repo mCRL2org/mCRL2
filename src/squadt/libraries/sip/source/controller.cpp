@@ -15,14 +15,23 @@ namespace sip {
 
     controller::capabilities communicator::current_controller_capabilities;
  
+    /**
+     * @param[in] m a reference to the message
+     **/
+    void communicator::store_configuration(const messenger::message_ptr& m) {
+      current_configuration = sip::configuration::read(m->to_string());
+
+      set_status(status_configured);
+    }
+ 
     communicator::communicator() : current_status(status_initialising) {
       using namespace boost;
  
       /* set default handlers for delivery events */
       add_handler(sip::request_controller_capabilities, bind(&communicator::reply_controller_capabilities, this));
-      add_handler(sip::send_accept_configuration, bind(&communicator::set_status, this, status_configured));
+      add_handler(sip::send_accept_configuration, bind(&communicator::store_configuration, this, _1));
     }
- 
+
     communicator::~communicator() {
     }
  

@@ -189,6 +189,12 @@ namespace squadt {
       /** \brief Manually sets the output status */
       inline void set_output_status(const processor::output_status);
 
+      /** \brief Extracts useful information from a configuration object */
+      inline void process_configuration();
+
+      /** \brief Extracts useful information from a configuration object */
+      inline void process_configuration(sip::configuration::sptr const& c);
+
     public:
  
       /** \brief Basic constructor */
@@ -203,8 +209,14 @@ namespace squadt {
       /** \brief Validate whether the inputs to this process are not dangling pointers */
       inline bool consistent_inputs() const;
 
+      /** \brief Start tool configuration, with callback on completion */
+      void configure(const tool::input_combination*, const boost::filesystem::path&, boost::function < void () >);
+
       /** \brief Start tool configuration */
       void configure(const tool::input_combination*, const boost::filesystem::path&);
+ 
+      /** \brief Start processing: generate outputs from inputs */
+      void process(boost::function < void () >);
  
       /** \brief Start processing: generate outputs from inputs */
       void process();
@@ -222,7 +234,7 @@ namespace squadt {
       inline const monitor::sptr get_monitor();
 
       /** \brief Read from XML using a libXML2 reader */
-      static processor::ptr read(id_conversion_map&, xml2pp::text_reader&) throw ();
+      static processor::sptr read(id_conversion_map&, xml2pp::text_reader&) throw ();
 
       /** \brief Write as XML to stream */
       void write(std::ostream& stream = std::cout) const;
@@ -233,6 +245,9 @@ namespace squadt {
       /** \brief Add an input object */
       inline void append_input(object_descriptor::wptr&);
  
+      /** \brief Find an object descriptor for a given pointer to an object */
+      inline const object_descriptor::sptr find_output(object_descriptor*);
+ 
       /** \brief Get output objects */
       inline output_object_iterator get_output_iterator() const;
  
@@ -242,6 +257,9 @@ namespace squadt {
       /** \brief Add an output object */
       inline void append_output(const storage_format&, const std::string&);
  
+      /** \brief Add an output object */
+      inline void append_output(sip::object const&);
+
       /** \brief Pretty prints the fields of the specification */
       void print(std::ostream& stream = std::cerr) const;
  

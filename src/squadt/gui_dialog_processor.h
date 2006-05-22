@@ -50,6 +50,9 @@ namespace squadt {
           /** \brief The processor for which to display information */
           squadt::processor*  target_processor;
 
+          /** \brief Whether tools are selectable or not */
+          bool                tools_selectable;
+
         private:
         
           /** \brief Helper function that places the widgets */
@@ -67,10 +70,16 @@ namespace squadt {
           /** \brief Event handler for when something is about to be selected in the tool_selector control */
           void on_tool_selector_item_select(wxTreeEvent& e);
 
+          /** \brief Select a tool by its name */
+          void select_tool(std::string const&);
+
         public:
 
           /** \brief Constructor */
           processor_details(wxWindow*, wxString, squadt::processor*);
+
+          /** \brief Whether tools in the tool list are selectable */
+          inline void allow_tool_selection(bool b);
 
           /** \brief Show or hide the tool selector */
           inline void show_tool_selector(bool b);
@@ -93,6 +102,13 @@ namespace squadt {
       }
 
       inline processor::~processor() {
+      }
+
+      /**
+       * @param b whether the tool list should allow selection
+       **/
+      inline void processor_details::allow_tool_selection(bool b) {
+        tools_selectable = b;
       }
 
       /**

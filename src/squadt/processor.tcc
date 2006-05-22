@@ -2,7 +2,9 @@
 #define PROCESSOR_TCC
 
 #include <algorithm>
+#include <functional>
 
+#include <boost/bind.hpp>
 #include <boost/thread/thread.hpp>
 
 #include "task_monitor.h"
@@ -157,6 +159,20 @@ namespace squadt {
     inputs.push_back(p);
   }
 
+  inline const processor::object_descriptor::sptr processor::find_output(object_descriptor* o) {
+    object_descriptor::sptr s;
+
+    output_list::const_iterator i = std::find_if(outputs.begin(), outputs.end(),
+                boost::bind(std::equal_to < object_descriptor* >(), o, 
+                               boost::bind(&object_descriptor::sptr::get, _1)));
+                               
+    if (i == outputs.end()) {
+      s = *i;
+    }
+
+    return (s);
+  }
+
   inline processor::output_object_iterator processor::get_output_iterator() const {
     return (output_object_iterator(outputs));
   }
@@ -167,7 +183,13 @@ namespace squadt {
   inline void processor::append_output(object_descriptor::sptr& p) {
     p->generator = this;
 
-    outputs.push_back(p);
+    if (std::find_if(outputs.begin(), outputs.end(),
+                boost::bind(std::equal_to < std::string >(), p->location,
+                        boost::bind(&object_descriptor::location,
+                               boost::bind(&object_descriptor::sptr::get, _1)))) == outputs.end()) {
+
+      outputs.push_back(p);
+    }
   }
 
   /**
@@ -186,8 +208,52 @@ namespace squadt {
   }
 
   /**
+   * @param o a sip::object object that describes an output object
+   **/
+  inline void processor::append_output(sip::object const& o) {
+    object_descriptor::sptr p = object_descriptor::sptr(new object_descriptor);
+
+    p->format    = o.get_format();
+    p->location  = o.get_location();
+    p->timestamp = time(0);
+    p->checksum.zero_out();
+
+    append_output(p);
+  }
+
+  inline void processor::process_configuration() {
+    process_configuration(current_monitor->get_configuration());
+  }
+
+  /**
+   * @param c a reference to a configuration object
+   **/
+  inline void processor::process_configuration(sip::configuration::sptr const& c) {
+    /* Extract information about output objects from the configuration */
+    for (sip::configuration::object_iterator i = current_monitor->get_configuration()->get_object_iterator(); i.valid(); ++i) {
+      if ((*i)->get_type() == sip::object::output) {
+        append_output(*(*i));
+      }
+    }
+  }
+
+  /**
    * @param[in] ic the input combination that is to be used
    * @param[in] l the file that serves as main input
+   * @param[in] h a function object that is invoked when configuration has completed
+   *
+   * \attention This function is non-blocking
+   **/
+  inline void processor::configure(const tool::input_combination* ic, const boost::filesystem::path& l, boost::function < void ()> h) {
+    configure(ic, l);
+
+    current_monitor->once_on_completion(h);
+  }
+
+  /**
+   * @param[in] ic the input combination that is to be used
+   * @param[in] l the file that serves as main input
+   *
    * \attention This function is non-blocking
    **/
   inline void processor::configure(const tool::input_combination* ic, const boost::filesystem::path& l) {
@@ -201,7 +267,14 @@ namespace squadt {
 
     global_tool_manager->execute(*tool_descriptor, boost::dynamic_pointer_cast < execution::task_monitor, monitor > (current_monitor), true);
 
+    current_monitor->once_on_completion(boost::bind(&processor::process_configuration, this));
     current_monitor->start_pilot();
+  }
+
+  inline void processor::process(boost::function < void () > h) {
+    process();
+
+    current_monitor->once_on_completion(h);
   }
 
   /**
@@ -212,6 +285,7 @@ namespace squadt {
   inline void processor::process() {
     global_tool_manager->execute(*tool_descriptor, boost::dynamic_pointer_cast < execution::task_monitor, monitor > (current_monitor), false);
 
+    current_monitor->once_on_completion(boost::bind(&processor::process_configuration, this));
     current_monitor->start_pilot();
   }
 

@@ -67,6 +67,9 @@ namespace squadt {
     return ((user_settings_path / path(node)).native_file_string());
   }
 
+  /**
+   * @param[in] node a complete path relative to the path to the user settings path
+   **/
   template < >
   inline std::string settings_manager::path_to_user_settings(const path& node) const {
     return ((user_settings_path / node).native_file_string());
@@ -86,6 +89,9 @@ namespace squadt {
     return ((system_settings_path / path(n)).native_file_string());
   }
 
+  /**
+   * @param[in] n a complete path relative to the path to the system settings path
+   **/
   template < >
   inline std::string settings_manager::path_to_system_settings(const path& n) const {
     return ((system_settings_path / n).native_file_string());
@@ -105,6 +111,9 @@ namespace squadt {
     return ((system_settings_path / path("images") / path(n)).native_file_string());
   }
 
+  /**
+   * @param[in] n a complete path, relative to the path to the images
+   **/
   template < >
   inline std::string settings_manager::path_to_images(const path& n) const {
     return ((system_settings_path / path("images") / n).native_file_string());
@@ -124,6 +133,9 @@ namespace squadt {
     return ((system_settings_path / path("schemas") / path(n)).native_file_string());
   }
 
+  /**
+   * @param[in] n a complete path, relative to the path to the schemas
+   **/
   template < >
   inline std::string settings_manager::path_to_schemas(const path& n) const {
     return ((system_settings_path / path("schemas") / n).native_file_string());

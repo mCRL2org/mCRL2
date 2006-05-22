@@ -45,7 +45,7 @@ namespace sip {
     public:
 
       /** \brief Type for iterating the object list */
-      typedef iterator_wrapper::indirect_iterator < object_list, const object > object_iterator;
+      typedef iterator_wrapper::constant_indirect_iterator < object_list, object > object_iterator;
 
     public:
 
