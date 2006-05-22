@@ -85,7 +85,7 @@ float Cluster::getPosition() const
 void Cluster::computeSizeAndDescendantPositions()
 // pre: size of every descendant is known (and assumed to be correct)
 {
-  topRadius = states.size() / (2 * PI);
+  topRadius = sqrt( states.size() / PI );
   if ( descendants.size() == 0 )
   {
     baseRadius = topRadius;
