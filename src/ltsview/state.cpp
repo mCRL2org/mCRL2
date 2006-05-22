@@ -52,7 +52,7 @@ void State::addLoop( Transition* trans )
 
 bool State::isDeadlock() const
 {
-  return ( outTransitions.size() == 0 );
+  return ( outTransitions.size() + loops.size() == 0 );
 }
 
 bool State::isMarked() const
