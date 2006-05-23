@@ -70,6 +70,24 @@ namespace squadt {
           /** \brief Gets the monitor for the associated process */
           processor::monitor::sptr& get_monitor();
       };
+
+      /**
+       * @param[in] s the processor associated with this display
+       **/
+      inline state_change_handler::state_change_handler(processor::monitor::sptr& s) : monitor(s) {
+      }
+
+      inline void state_change_handler::clear() {
+        element_for_window.clear();
+      }
+
+      inline void state_change_handler::associate(wxObject* o, sip::layout::element const* e) {
+        element_for_window[o] = e;
+      }
+
+      inline processor::monitor::sptr& state_change_handler::get_monitor() {
+        return (monitor);
+      }
     }
 
     /**
@@ -118,27 +136,6 @@ namespace squadt {
         /** \brief Removes itself from the parent window */
         void remove();
     };
-
-    namespace detail {
-
-      /**
-       * @param[in] s the processor associated with this display
-       **/
-      inline state_change_handler::state_change_handler(processor::monitor::sptr& s) : monitor(s) {
-      }
-
-      inline void state_change_handler::state_change_handler::clear() {
-        element_for_window.clear();
-      }
-
-      inline void state_change_handler::state_change_handler::associate(wxObject* o, sip::layout::element const* e) {
-        element_for_window[o] = e;
-      }
-
-      inline processor::monitor::sptr& state_change_handler::get_monitor() {
-        return (monitor);
-      }
-    }
   }
 }
 

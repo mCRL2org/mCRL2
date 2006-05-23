@@ -62,7 +62,8 @@ namespace squadt {
      *  - read from l, if l is a project store
      *  - the default project_manager, and l is the new project store
      **/
-    project::project(wxWindow* p, const boost::filesystem::path& l, const std::string& d) : wxSplitterWindow(p, wxID_ANY), manager(project_manager::create(l)) {
+    project::project(wxWindow* p, const boost::filesystem::path& l, const std::string& d) :
+                                wxSplitterWindow(p, wxID_ANY), manager(project_manager::create(l)) {
 
       if (!d.empty()) {
         manager->set_description(d);
@@ -217,7 +218,7 @@ namespace squadt {
       /* wxWidgets identifier for menu items */
       int identifier = cmID_TOOLS;
 
-      main::tool_registry->by_format(t.format, bind(&project::add_to_context_menu, this, cref(t.format), _1, &context_menu, &identifier));
+      main::tool_registry->by_format(t.format, bind(&project::add_to_context_menu, this, t.format, _1, &context_menu, &identifier));
 
       context_menu.AppendSeparator();
 
@@ -245,12 +246,12 @@ namespace squadt {
     };
 
     /**
-     * @param[in] f 
+     * @param[in] f the storage format of the selected output
      * @param[in] p the main tool_selection_helper object that indexes the global tool manager
      * @param[in] c a reference to the context menu to which to add
      * @param[in,out] id a reference to the next free identifier
      **/
-    void project::add_to_context_menu(const storage_format& f, const miscellaneous::tool_selection_helper::tools_by_category::value_type& p, wxMenu* c, int* id) {
+    void project::add_to_context_menu(const storage_format f, const miscellaneous::tool_selection_helper::tools_by_category::value_type& p, wxMenu* c, int* id) {
       wxString    category_name = wxString(p.first.c_str(), wxConvLocal);
       int         item_id       = c->FindItem(category_name); 
       wxMenu*     target_menu;
@@ -307,7 +308,10 @@ namespace squadt {
               /* Add the main input (must exist) */
               dialog.populate_tool_list(t->format);
 
-              dialog.select_tool(p->get_tool()->get_name());
+              if (p->get_tool().get() != 0) {
+                dialog.select_tool(p->get_tool()->get_name());
+              }
+
               dialog.allow_tool_selection(false);
             }
 
@@ -325,9 +329,7 @@ namespace squadt {
             processor::sptr tp(new processor(menu_item->the_tool));
 
             /* Attach the new processor by relating it to p */
-            processor::object_descriptor::wptr ow(p->find_output(t));
-
-            tp->append_input(ow);
+            tp->append_input(p->find_output(t));
 
             global_tool_manager->find(std::string(menu_item->GetLabel().fn_str()));
 
@@ -350,14 +352,16 @@ namespace squadt {
         for (processor::output_object_iterator j = tp->get_output_iterator(); j.valid(); ++j) {
           wxTreeItemId item = object_view->AppendItem(s,
                     wxString(boost::filesystem::path((*j)->location).leaf().c_str(), wxConvLocal), 3);
-      
+
           object_view->SetItemData(item, new node_data(*this, *j));
-      
+
           object_view->EnsureVisible(item);
         }
 
-        /* Add the processor to the project */
-        manager->add(tp);
+        if (0 < tp->number_of_outputs()) {
+          /* Add the processor to the project */
+          manager->add(tp);
+        }
       }
     }
 

@@ -436,6 +436,8 @@ namespace sip {
       }
     }
 
+    reader.skip_end_element("configuration");
+
     return (c);
   }
 }

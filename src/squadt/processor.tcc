@@ -159,6 +159,13 @@ namespace squadt {
     inputs.push_back(p);
   }
 
+  /**
+   * @param p weak pointer to an object descriptor
+   **/
+  inline void processor::append_input(object_descriptor::wptr p) {
+    inputs.push_back(p);
+  }
+
   inline const processor::object_descriptor::sptr processor::find_output(object_descriptor* o) {
     object_descriptor::sptr s;
 
@@ -166,7 +173,7 @@ namespace squadt {
                 boost::bind(std::equal_to < object_descriptor* >(), o, 
                                boost::bind(&object_descriptor::sptr::get, _1)));
                                
-    if (i == outputs.end()) {
+    if (i != outputs.end()) {
       s = *i;
     }
 
@@ -244,7 +251,7 @@ namespace squadt {
    *
    * \attention This function is non-blocking
    **/
-  inline void processor::configure(const tool::input_combination* ic, const boost::filesystem::path& l, boost::function < void ()> h) {
+  inline void processor::configure(const tool::input_combination* ic, const boost::filesystem::path& l, boost::function < void() > h) {
     configure(ic, l);
 
     current_monitor->once_on_completion(h);

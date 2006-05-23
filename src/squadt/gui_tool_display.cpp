@@ -271,7 +271,7 @@ namespace squadt {
        * @param p pointer to the data that represent the window to be attached
        * @param c layout constraints
        **/
-      void tool_display_mediator::attach_to_horizontal_box(wrapper_aptr d, sip::layout::constraints const* c) {
+      void tool_display_mediator::attach_to_horizontal_box(mediator::wrapper_aptr d, sip::layout::constraints const* c) {
         wrapper* sd     = static_cast < wrapper* > (d.get());
         int      flags  = wxTOP|wxBOTTOM;
      

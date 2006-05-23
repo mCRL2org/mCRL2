@@ -244,6 +244,9 @@ namespace squadt {
  
       /** \brief Add an input object */
       inline void append_input(object_descriptor::wptr&);
+
+      /** \brief Add an input object */
+      inline void append_input(object_descriptor::wptr);
  
       /** \brief Find an object descriptor for a given pointer to an object */
       inline const object_descriptor::sptr find_output(object_descriptor*);

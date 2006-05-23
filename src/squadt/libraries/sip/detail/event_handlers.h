@@ -128,7 +128,15 @@ namespace sip {
      * @param[in] id a pointer that serves as an identifier for the originator of the event
      **/
     inline void basic_event_handler::process(const void* id) {
-      boost::thread t(boost::bind(&basic_event_handler::execute_handlers, this, id));
+      if (0 < handlers.count(id)) {
+        boost::thread t(boost::bind(&basic_event_handler::execute_handlers, this, id));
+      }
+   
+      if (0 < waiters.size()) {
+        boost::mutex::scoped_lock l(lock);
+
+        wake(id);
+      }
     }
 
     /**
@@ -140,8 +148,6 @@ namespace sip {
       std::pair < handler_map::const_iterator, handler_map::const_iterator > p = handlers.equal_range(id);
    
       std::for_each(p.first, p.second, boost::bind(&handler_map::value_type::second, _1));
-   
-      wake(id);
     }
    
     /**
@@ -153,7 +159,7 @@ namespace sip {
       std::pair < handler_map::iterator, handler_map::iterator > p = handlers.equal_range(id);
    
       handlers.erase(p.first, p.second);
-   
+
       wake(id);
     }
    
@@ -185,7 +191,7 @@ namespace sip {
    
     inline basic_event_handler::~basic_event_handler() {
       boost::mutex::scoped_lock l(lock);
-   
+
       wake();
     }
   }

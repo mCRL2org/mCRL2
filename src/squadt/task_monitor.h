@@ -213,7 +213,9 @@ namespace squadt {
         register_condition->notify_all();
 
         /* Service connection handlers */
-        boost::thread s(boost::bind(&task_monitor::service_handlers, this, connection));
+        if (0 < handlers.count(connection)) {
+          boost::thread s(boost::bind(&task_monitor::service_handlers, this, connection));
+        }
       }
     }
  
@@ -236,7 +238,7 @@ namespace squadt {
     }
 
     /**
-     * @param the event type of which to execute the handler
+     * @param e the event type of which to execute the handler
      **/
     inline void task_monitor::service_handlers(const event_type e) {
       std::pair < handler_map::iterator, handler_map::iterator > p = handlers.equal_range(e);
@@ -253,7 +255,7 @@ namespace squadt {
     }
 
     /**
-     * @param[in] the amount of times that the handler is executed
+     * @param[in] n the amount of times that the handler is executed
      * @param[in] h the function object that is executed once a connection is established
      **/
     inline bool task_monitor::countdown_handler_wrapper(boost::shared_ptr < unsigned int > n, boost::function < void () > h) {
@@ -263,7 +265,6 @@ namespace squadt {
     }
 
     /**
-     * @param[in] the amount of times that the handler is executed
      * @param[in] h the function object that is executed once a connection is established
      **/
     inline bool task_monitor::perpetual_handler_wrapper(boost::function < void () > h) {
@@ -347,8 +348,10 @@ namespace squadt {
           /* Signal completion to waiters */
           register_condition->notify_all();
 
-          /* Service completion handlers */
-          boost::thread s(boost::bind(&task_monitor::service_handlers, this, completion));
+          /* Service connection handlers */
+          if (0 < handlers.count(completion)) {
+            boost::thread s(boost::bind(&task_monitor::service_handlers, this, completion));
+          }
         }
       }
     }

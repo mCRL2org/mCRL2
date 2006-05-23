@@ -126,7 +126,7 @@ namespace squadt {
         void spawn_context_menu(processor::object_descriptor const&);
 
         /** \brief Helper function to add tools by category to a context menu */
-        void add_to_context_menu(const storage_format&, const miscellaneous::tool_selection_helper::tools_by_category::value_type&, wxMenu*, int*);
+        void add_to_context_menu(const storage_format f, const miscellaneous::tool_selection_helper::tools_by_category::value_type&, wxMenu*, int*);
 
         /** \brief Add new processor outputs to the object view */
         void process_configuration(wxTreeItemId, processor::sptr);
