@@ -1,11 +1,22 @@
+#include <cmath>
+#include <ctime>
 #include <stack>
+
+#include <boost/format.hpp>
+#include <boost/filesystem/path.hpp>
+#include <boost/filesystem/operations.hpp>
 
 #include "gui_main.h"
 #include "gui_dialog_processor.h"
+#include "processor.tcc"
 
 namespace squadt {
   namespace GUI {
     namespace dialog {
+
+      const char* prefixes_for_binary_multiples[7] = { "", "Ki", "Mi", "Gi", "Ti", "Pi", "Ei" };
+
+      boost::format time_format("%s %sB");
 
       /**
        * @param o a pointer to the parent window
@@ -22,6 +33,8 @@ namespace squadt {
       }
 
       void processor_details::build() {
+        using namespace boost::filesystem;
+
         wxBoxSizer*       s = new wxBoxSizer(wxHORIZONTAL);
         wxBoxSizer*       t = new wxBoxSizer(wxVERTICAL);
         wxBoxSizer*       u = new wxBoxSizer(wxHORIZONTAL);
@@ -35,15 +48,74 @@ namespace squadt {
         wxNotebook* notebook = new wxNotebook(main_panel, wxID_ANY, wxDefaultPosition, wxDefaultSize, wxNB_TOP);
 
         input_objects = new wxListCtrl(notebook, wxID_ANY, wxDefaultPosition, wxDefaultSize,
-                        wxLC_REPORT|wxLC_SMALL_ICON|wxLC_ALIGN_LEFT|wxLC_SINGLE_SEL|wxLC_VRULES);
+                        wxLC_REPORT|wxLC_ALIGN_LEFT|wxLC_SINGLE_SEL|wxLC_VRULES|wxLC_HRULES);
         input_objects->InsertColumn(0, wxT("Name"));
-        input_objects->InsertColumn(1, wxT("Size"));
+        input_objects->InsertColumn(1, wxT("Size"), wxLIST_FORMAT_RIGHT);
         input_objects->InsertColumn(2, wxT("Date"));
+
+        long row = 0;
+
+        for (squadt::processor::input_object_iterator i = target_processor->get_input_iterator(); i.valid(); ++i) {
+          if (*i != 0) {
+            path p((*i)->location);
+
+            input_objects->InsertItem(row, wxString(p.leaf().c_str(), wxConvLocal));
+
+            if (exists(p)) {
+              unsigned long size       = file_size(p);
+              time_t        write_time = last_write_time(p);
+              unsigned char magnitude  = static_cast < unsigned char > (floor(log(size) / log(1024)));
+
+              size = (unsigned long) (size / pow(1024, magnitude));
+
+              input_objects->SetItem(row, 1, wxString(str((time_format % size %
+                         prefixes_for_binary_multiples[magnitude])).c_str(), wxConvLocal));
+
+              input_objects->SetItem(row, 2, wxString(ctime(&write_time), wxConvLocal));
+            }
+
+            ++row;
+          }
+        }
+
+        input_objects->SetColumnWidth(0, wxLIST_AUTOSIZE);
+        input_objects->SetColumnWidth(1, wxLIST_AUTOSIZE);
+        input_objects->SetColumnWidth(2, wxLIST_AUTOSIZE);
+
         output_objects = new wxListCtrl(notebook, wxID_ANY, wxDefaultPosition, wxDefaultSize,
-                        wxLC_REPORT|wxLC_SMALL_ICON|wxLC_ALIGN_LEFT|wxLC_SINGLE_SEL|wxLC_VRULES);
+                        wxLC_REPORT|wxLC_ALIGN_LEFT|wxLC_SINGLE_SEL|wxLC_VRULES|wxLC_HRULES);
         output_objects->InsertColumn(0, wxT("Name"));
-        output_objects->InsertColumn(1, wxT("Size"));
+        output_objects->InsertColumn(1, wxT("Size"), wxLIST_FORMAT_RIGHT);
         output_objects->InsertColumn(2, wxT("Date"));
+
+        row = 0;
+
+        for (squadt::processor::output_object_iterator i = target_processor->get_output_iterator(); i.valid(); ++i) {
+          if (*i != 0) {
+            path p((*i)->location);
+
+            output_objects->InsertItem(row, wxString(p.leaf().c_str(), wxConvLocal));
+
+            if (exists(p)) {
+              unsigned long size       = file_size(p);
+              time_t        write_time = last_write_time(p);
+              unsigned char magnitude  = static_cast < unsigned char > (floor(log(size) / log(1024)));
+
+              size = (unsigned long) (size / pow(1024, magnitude));
+
+              output_objects->SetItem(row, 1, wxString(str((time_format % size %
+                        prefixes_for_binary_multiples[magnitude])).c_str(), wxConvLocal));
+
+              output_objects->SetItem(row, 2, wxString(ctime(&write_time), wxConvLocal));
+            }
+
+            ++row;
+          }
+        }
+
+        output_objects->SetColumnWidth(0, wxLIST_AUTOSIZE);
+        output_objects->SetColumnWidth(1, wxLIST_AUTOSIZE);
+        output_objects->SetColumnWidth(2, wxLIST_AUTOSIZE);
 
         notebook->AddPage(input_objects, wxT("Input"));
         notebook->AddPage(output_objects, wxT("Output"));

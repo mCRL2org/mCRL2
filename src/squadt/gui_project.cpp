@@ -316,7 +316,7 @@ namespace squadt {
             }
 
             if (dialog.ShowModal()) {
-              /* TODO Process changes */
+              object_view->SetItemText(s, dialog.get_name());
             }
           }
           break;

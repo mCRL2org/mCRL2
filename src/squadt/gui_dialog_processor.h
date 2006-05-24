@@ -90,8 +90,11 @@ namespace squadt {
           /** \brief Show or hide the list of output objects */
           inline void show_output_objects(bool b);
 
-          /** \brief Constructor sets the name field */
+          /** \brief Sets the value of the name field */
           inline void set_name(wxString);
+
+          /** \brief Gets the value of the name field */
+          inline wxString get_name();
       };
 
       /**
@@ -137,6 +140,13 @@ namespace squadt {
        **/
       inline void processor_details::set_name(wxString n) {
         name->SetValue(n);
+      }
+
+      /**
+       * @param n the new name
+       **/
+      inline wxString processor_details::get_name() {
+        return (name->GetValue());
       }
     }
   }
