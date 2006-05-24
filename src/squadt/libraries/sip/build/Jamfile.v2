@@ -26,7 +26,8 @@ lib sip_common
       object.cpp
       layout.cpp
       layout_elements.cpp
-    : <source>/libraries/xml2pp//text_reader
+    : <library>/libraries/xml2pp//text_reader
+      <library>/boost/thread//boost_thread
     : # no default build
     : <library>/boost/thread//boost_thread
     ;
