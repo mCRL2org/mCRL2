@@ -605,7 +605,10 @@ static long addMultiAction(ATermAppl multiAction, ATbool *isnew)
   if (*isnew)
   { 
     newobject(n);
-    objectdata[n].parameters=getparameters(multiAction);
+    // tempvar is needed as objectdata can change during a call
+    // of getparameters.
+    ATermList templist=getparameters(multiAction);
+    objectdata[n].parameters=templist;
     objectdata[n].objectname=(ATermAppl)actionnames;
     objectdata[n].object=multiact;
     // must separate assignment below as 
