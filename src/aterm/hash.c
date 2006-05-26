@@ -256,39 +256,44 @@ static long hashPut(ATermTable s, ATerm key, long n)
 
 static void hashResizeSet(ATermIndexedSet s)
 {
-  long i,oldsize;
+  long i,newsizeMinus1;
   ATerm t;
+  long *newhashtable;
 
-  oldsize = s->sizeMinus1;
-  s->sizeMinus1 = calculateNewSize(s->sizeMinus1,
+  newsizeMinus1 = calculateNewSize(s->sizeMinus1,
 				   s->nr_deletions, s->nr_entries);
 
-  s->hashtable = (long *)realloc(s->hashtable, 
-				 sizeof(long) * (1+s->sizeMinus1));
-  s->max_entries = ((s->sizeMinus1/100)*s->max_load);
-  if (s->hashtable==NULL) { 
+  newhashtable = (long *)realloc(s->hashtable, 
+  				 sizeof(long) * (newsizeMinus1+1));
+  
+  if (newhashtable!=NULL) 
+  { /* the hashtable has properly been resized */
+    s->hashtable = newhashtable;
+    s->sizeMinus1=newsizeMinus1;
+    s->max_entries = ((s->sizeMinus1/100)*s->max_load);
 #ifndef NDEBUG
-    fprintf(stderr,"No memory to increase the size of the hash table\n");
+    if(!silent) 
+    { 
+      fprintf(stderr,"Hashtable of indexed set has \
+                            been resized to %ld with %ld entries.\n",
+	      s->sizeMinus1+1,s->nr_entries);
+    }
 #endif
-    s->sizeMinus1 = oldsize;
-    if(s->nr_entries-s->nr_deletions+2>=s->sizeMinus1) {
-      ATerror("hashResizeSet: Hashtable is full\n");
+  }
+  else
+  { /* resizing the hashtable failed and s->hashtable still
+       points to the old hashtable. We keep this old hashtable */
+#ifndef NDEBUG
+    fprintf(stderr,"No memory to increase the size of the indexed set hash table\n");
+#endif
+    if(s->nr_entries-s->nr_deletions+2>=s->sizeMinus1) 
+    {
+      ATerror("hashResizeSet: Hashtable of indexed set is full\n");
     }
 
     /* I do not know whether the bound below is very optimal,
        but we are anyhow in a precarious situation now */
     s->max_entries = (s->nr_entries-s->nr_deletions+s->sizeMinus1)/2;
-    s->hashtable = (long *)malloc(sizeof(long) * (1+oldsize));
-    if (s->hashtable == NULL) {
-      ATerror("hashResizeSet: No memory to re-claim hashtable\n");
-    }
-  }  else {
-#ifndef NDEBUG
-    if(!silent) { 
-      fprintf(stderr,"Hashtable has been resized to %ld with %ld entries.\n",
-	      s->sizeMinus1+1,s->nr_entries);
-    }
-#endif
   }
 
   /* reset the hashtable. */
