@@ -10,6 +10,7 @@ project mcrl2_toolset
        : build-dir $(BUILD_TOP)
        : requirements
           <cxxflags>-std=c++98
+          <define>_FILE_OFFSET_BITS=64
        ;
 
 # The known sub projects
