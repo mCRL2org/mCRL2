@@ -68,7 +68,7 @@ namespace iterator_wrapper {
       constant_indirect_iterator(I& begin, I&end);
 
       /** \brief Whether the iterator has moved past the end of the sequence */
-      inline bool valid();
+      inline bool valid() const;
 
       /** \brief Advances to the next element */
       inline void operator++();
@@ -136,7 +136,7 @@ namespace iterator_wrapper {
       indirect_iterator(I& begin, I&end);
 
       /** \brief Whether the iterator has moved past the end of the sequence */
-      inline bool valid();
+      inline bool valid() const;
 
       /** \brief Advances to the next element */
       inline void operator++();
@@ -160,28 +160,28 @@ namespace iterator_wrapper {
   }
  
   /**
-   * @param begin the iterator from which to start
-   * @param end the iterator with which to end
+   * @param b the iterator from which to start
+   * @param e the iterator with which to end
    **/
   template < typename T, typename S, typename I >
-  inline constant_indirect_iterator< T, S, I >::constant_indirect_iterator(I& begin, I& end) : iterator(begin), end(end) {
+  inline constant_indirect_iterator< T, S, I >::constant_indirect_iterator(I& b, I& e) : iterator(b), end(e) {
   }
  
   /**
-   * @param begin the iterator from which to start
-   * @param end the iterator with which to end
+   * @param b the iterator from which to start
+   * @param e the iterator with which to end
    **/
   template < typename T, typename S, typename I >
-  inline indirect_iterator< T, S, I >::indirect_iterator(I& begin, I& end) : iterator(begin), end(end) {
+  inline indirect_iterator< T, S, I >::indirect_iterator(I& b, I& e) : iterator(b), end(e) {
   }
  
   template < typename T, typename S, typename I >
-  inline bool constant_indirect_iterator< T, S, I >::valid() {
+  inline bool constant_indirect_iterator< T, S, I >::valid() const {
     return (iterator != end);
   }
  
   template < typename T, typename S, typename I >
-  inline bool indirect_iterator< T, S, I >::valid() {
+  inline bool indirect_iterator< T, S, I >::valid() const {
     return (iterator != end);
   }
  

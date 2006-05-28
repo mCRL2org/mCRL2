@@ -101,7 +101,7 @@ namespace squadt {
     std::string location;
 
     if (!(r.get_attribute(&name, "name") && r.get_attribute(&location, "location"))) {
-      throw (exception(exception_identifier::required_attributes_missing, "tool"));
+      throw (exception::exception(exception::required_attributes_missing, "tool"));
     }
 
     if (!r.is_end_element()) {

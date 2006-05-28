@@ -1,6 +1,8 @@
 #ifndef XML2PP_TEXT_READER_TCC
 #define XML2PP_TEXT_READER_TCC
 
+#include <cstring>
+
 #include <xml2pp/text_reader.h>
 
 namespace xml2pp {
@@ -193,7 +195,7 @@ namespace xml2pp {
    **/
   inline bool text_reader::get_attribute(const char* n) {
     char* temporary    = (char*) xmlTextReaderGetAttribute(reader, reinterpret_cast < const xmlChar* > (n));
-    bool  return_value = temporary != NULL;
+    bool  return_value = temporary != NULL && strcmp(temporary, "0") != 0;
 
     xmlFree(temporary);
 

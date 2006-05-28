@@ -1,18 +1,18 @@
-project lpeconstelm
+project lpedataelm
        : source-location .
        : requirements
           <include>$(BOOST)
        : build-dir $(BUILD_TOP)
        ;
 
-exe lpeconstelm
-       : lpeconstelm.cpp
+exe lpedataelm
+       : lpedataelm.cpp
+         /libraries/temporary//dataelm
+         /libraries/temporary//lowlevel
          /libraries/temporary//print
-         /libraries/sip//sipt
+         /libraries/temporary//struct
        : <source>/boost/program_options//boost_program_options
-         <source>/boost/filesystem//boost_filesystem
          <source>/root//mcrl2_revision
-         <define>ENABLE_SQUADT_CONNECTIVITY
          <include>.
        ;
 
@@ -26,13 +26,13 @@ alias install
        ;
 
 install install-libraries
-       : lpeconstelm
+       : lpedataelm
        : <install-dependencies>on <install-type>LIB <location>$(LIB_DIR)
        : release
        ;
 
 stage install-binaries
-       : lpeconstelm 
+       : lpedataelm 
        : <install-type>EXE
          <dll-path>$(LIB_DIR)
          <location>$(BIN_DIR)

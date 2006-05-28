@@ -29,11 +29,11 @@ double GenRandom(const int &max) {
 GraphFrame::GraphFrame(const wxString& title, const wxPoint& pos, const wxSize& size, long style) 
   : wxFrame(NULL, -1, title, pos, size, style) {
 
-    SetBackgroundColour(wxSystemSettings::GetColour(wxSYS_COLOUR_BTNFACE));
+  SetBackgroundColour(wxSystemSettings::GetColour(wxSYS_COLOUR_BTNFACE));
  
-    #ifdef MCRL2_BCG
-        BCG_INIT();
-    #endif
+  #ifdef MCRL2_BCG
+  BCG_INIT();
+  #endif
 
   sz = GetClientSize();
   StopOpti = false;
@@ -49,7 +49,7 @@ GraphFrame::GraphFrame(const wxString& title, const wxPoint& pos, const wxSize& 
 
 void GraphFrame::CreateMenu() {
 
-    menu = new wxMenuBar;
+  menu = new wxMenuBar;
     
   //file
   file = new wxMenu;
@@ -236,7 +236,30 @@ bool GraphFrame::OptimizeDrawing(double precision)
     arraySumForceX[i]=0.0;
     arraySumForceY[i]=0.0;
   }
+//  double mx = sz.GetWidth()  >> 1;
+//  double my = sz.GetHeight() >> 1;
+
+  /* The sum of the absolute forces */
+  double absolute_sum = 0;
   
+  // Simulate an attractive force toward the center of the viewport
+//  for (size_t i = 0; i<vectNode.size(); i++) {
+//    double dx = mx - vectNode[i]->GetX();
+//    double dy = my - vectNode[i]->GetY();
+
+    /* Scaling factor */
+//    double s = sqrt(dx * dx + dy * dy);
+
+//    if (0.1 < s) {
+//      s = NodeStrength / (s * s * s);
+     
+//      arraySumForceX[i] = dx * s;
+//      arraySumForceY[i] = dy * s;
+
+//      absolute_sum += arraySumForceX[i] + arraySumForceY[i];
+//    }
+//  }
+
   //Calculate forces
   for (size_t i = 0; i<vectNode.size(); i++) 
   { double x1 = vectNode[i]->GetX();
@@ -264,6 +287,8 @@ bool GraphFrame::OptimizeDrawing(double precision)
           
           arraySumForceX[i] += s * x2Minx1;
           arraySumForceY[i] += s * y2Miny1;
+
+          absolute_sum += s * (x2Minx1 + y2Miny1);
         }
         else 
         { // If the nodes are on top of each other, they must have

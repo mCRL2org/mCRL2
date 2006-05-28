@@ -966,8 +966,12 @@ void parse_command_line(int ac, char** av, ConstelmObj &constelm) {
 const unsigned int lpd_file_for_input  = 0;
 const unsigned int lpd_file_for_output = 1;
 
+const unsigned int option_remove_single_element_sorts = 0;
+const unsigned int option_remove_unvisited_summands   = 1;
+const unsigned int option_ignore_summand_conditions   = 2;
+
 /* Communicate the basic configuration display, and wait until the ok button was pressed */
-sip::layout::tool_display::sptr set_basic_configuration_display(sip::tool::communicator& tc) {
+void set_basic_configuration_display(sip::tool::communicator& tc) {
   using namespace sip;
   using namespace sip::layout;
   using namespace sip::layout::elements;
@@ -980,9 +984,13 @@ sip::layout::tool_display::sptr set_basic_configuration_display(sip::tool::commu
   /* First column */
   layout::vertical_box* column = new layout::vertical_box();
 
-  column->add(new checkbox("remove single element sorts", true), layout::left);
-  column->add(new checkbox("remove summands that are not visited", true), layout::left);
-  column->add(new checkbox("take summand conditions into account", true), layout::left);
+  checkbox* remove_single_element_sorts = new checkbox("remove single element sorts", true);
+  checkbox* remove_unvisited_summands   = new checkbox("remove summands that are not visited", true);
+  checkbox* ignore_summand_conditions   = new checkbox("take summand conditions into account", true);
+
+  column->add(remove_single_element_sorts, layout::left);
+  column->add(remove_unvisited_summands, layout::left);
+  column->add(ignore_summand_conditions, layout::left);
 
   button* okay_button = new button("OK");
 
@@ -998,15 +1006,21 @@ sip::layout::tool_display::sptr set_basic_configuration_display(sip::tool::commu
   /* Wait until the ok button was pressed */
   okay_button->await_change();
 
-  return (display);
-}
+  /* Update the current configuration */
+  sip::configuration& c = tc.get_configuration();
 
-/* Extracts the configuration from the currently set display layout */
-void extract_configuration(sip::layout::tool_display& d, sip::configuration& c) {
   std::string input_file_name  = c.get_object(lpd_file_for_input)->get_location();
 
   /* Add output file to the configuration */
   c.add_output(lpd_file_for_output, "lpe", input_file_name + ".lpe");
+
+  /* Values for the options */
+  c.add_option(option_remove_single_element_sorts).
+        append_argument(sip::datatype::standard_boolean, remove_single_element_sorts->get_status());
+  c.add_option(option_remove_unvisited_summands).
+        append_argument(sip::datatype::standard_boolean, remove_unvisited_summands->get_status());
+  c.add_option(option_ignore_summand_conditions).
+        append_argument(sip::datatype::standard_boolean, ignore_summand_conditions->get_status());
 }
 
 /* Checks whether the configuration is complete and valid */
@@ -1028,7 +1042,7 @@ bool validate_configuration(sip::configuration& c) {
 }
 
 /*
- * Realises the configuration
+ * Configures the tool with the information contained in a configuration object.
  *
  * Precondition: the configuration is valid
  **/
@@ -1043,6 +1057,33 @@ void realise_configuration(sip::tool::communicator& tc, ConstelmObj& constelm, s
   }
 
   constelm.setSaveFile(output_file_name);
+
+  /* Set with options from the current configuration object */
+  sip::option::sptr o = c.get_option(option_remove_single_element_sorts);
+
+  if (o.get() != 0) {
+    sip::option::argument_iterator i = o->get_value_iterator();
+ 
+    constelm.setNoSingleton(boost::any_cast < bool > (*i));
+  }
+
+  o = c.get_option(option_remove_unvisited_summands);
+
+  if (o.get() != 0) {
+    sip::option::argument_iterator i = o->get_value_iterator();
+ 
+    constelm.setAllTrue(!boost::any_cast < bool > (*i));
+  }
+
+  o = c.get_option(option_ignore_summand_conditions);
+
+  if (o.get() != 0) {
+    sip::option::argument_iterator i = o->get_value_iterator();
+ 
+    constelm.setAllTrue(boost::any_cast < bool > (*i));
+  }
+
+  constelm.setVerbose(true);
 }
 #endif
 
@@ -1094,21 +1135,22 @@ int main(int ac, char** av) {
       }
     }
 
-    /* Draw a configuration layout in the tool display */
-    sip::layout::tool_display::sptr display = set_basic_configuration_display(tc);
-
-    /* Clean the display */
-    tc.clear_display();
-
-    /* Extract configuration from the current state of the display and use it to update the configuration of tc */
-    extract_configuration(*display, tc.get_configuration());
-    
-    /* Static configuration cycle (phase 2: gather user input) */
     if (!validate_configuration(tc.get_configuration())) {
-      /* Wait for configuration data to be send (either a previous configuration, or only an input combination) */
-      tc.send_error_report("Fatal error: the configuration is invalid");
+      /* Configuration is incomplete or incorrect; prompt the user */
 
-      exit(1);
+      /* Draw a configuration layout in the tool display */
+      set_basic_configuration_display(tc);
+     
+      /* Clean the display */
+      tc.clear_display();
+     
+      /* Static configuration cycle (phase 2: gather user input) */
+      if (!validate_configuration(tc.get_configuration())) {
+        /* Wait for configuration data to be send (either a previous configuration, or only an input combination) */
+        tc.send_error_report("Fatal error: the configuration is invalid");
+     
+        exit(1);
+      }
     }
 
     /* Realise the */

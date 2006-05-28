@@ -4,7 +4,7 @@
 #include <exception/exception.h>
 
 namespace squadt {
-  namespace exception_identifier {
+  namespace exception {
 
     /** \brief Type for exception identification */
     enum values {
@@ -16,10 +16,10 @@ namespace squadt {
       unexpected_instance_identifier,           ///< \brief a connection was accepted of which the peer provided an unexpected instance identifier
       missing_object_descriptor                 ///< \brief processor dependency graph has dangling edges
     };
-  }
 
-  /** \brief A basic type for exceptions derived from that provided by the standard library */
-  typedef exception::exception < exception_identifier::values > exception;
+    /** \brief A basic type for exceptions derived from that provided by the standard library */
+    typedef ::exception::exception < values > exception;
+  }
 }
 
 #endif

@@ -69,7 +69,7 @@ namespace squadt {
     xml2pp::text_reader::file_name< std::string > f(n);
 
     if (!bf::exists(bf::path(f.get()))) {
-      throw (exception(exception_identifier::failed_loading_object, "squadt tool catalog", f.get()));
+      throw (exception::exception(exception::failed_loading_object, "squadt tool catalog", f.get()));
     }
 
     xml2pp::text_reader reader(f);
@@ -135,10 +135,23 @@ namespace squadt {
   void tool_manager::query_tools(boost::function < void (const std::string&) > h) {
     using namespace boost;
 
+    tool_list failed_tools;
+
     for (tool_list::const_iterator i = tools.begin(); i != tools.end(); ++i) {
       h((*i)->get_name());
 
-      query_tool(*(*i));
+      if (!query_tool(*(*i))) {
+        failed_tools.push_back(*i);
+      }
+    }
+
+    /* Retry initialisation of failed tools */
+    for (tool_list::const_iterator i = failed_tools.begin(); i != failed_tools.end(); ++i) {
+      h((*i)->get_name());
+
+      if (!query_tool(*(*i))) {
+        /* TODO log failure */
+      }
     }
   }
 
@@ -150,7 +163,7 @@ namespace squadt {
   bool tool_manager::query_tool(tool& t) {
     /* Sanity check: establish tool existence */
     if (t.get_location().empty() || !boost::filesystem::exists(boost::filesystem::path(t.get_location()))) {
-      throw (exception(exception_identifier::requested_tool_unavailable, t.get_name()));
+      return (false);
     }
 
     /* Create extractor object, that will retrieve the data from the running tool process */
@@ -196,7 +209,7 @@ namespace squadt {
     instance_identifier id = atol(m->to_string().c_str());
 
     if (instances.find(id) == instances.end()) {
-      throw (exception(exception_identifier::unexpected_instance_identifier));
+      throw (exception::exception(exception::unexpected_instance_identifier));
     }
 
     execution::task_monitor::ptr p = instances[id];

@@ -5,6 +5,7 @@
 #include <string>
 #include <ostream>
 
+#include <boost/any.hpp>
 #include <boost/utility.hpp>
 #include <boost/shared_ptr.hpp>
 
@@ -17,26 +18,57 @@ namespace sip {
   class option {
     friend class configuration;
 
+    private:
+
+      /** \brief Type for argument to value mapping */
+      typedef std::pair < datatype::basic_datatype::sptr, std::string > type_value_pair;
+
+      /** \brief Container for lists of arguments to lists of value mapping */
+      typedef std::vector < type_value_pair >                           type_value_list;
+
     public:
+
       /** Datatype for the identifier of an option */
       typedef unsigned int                  identifier;
 
       /** \brief Convenience type to hide the shared pointer wrapping */
       typedef boost::shared_ptr < option >  sptr;
 
+      /** \brief Iterator over the argument values */
+      class argument_iterator {
+
+        private:
+
+          /** \brief the start of the sequence */
+                type_value_list::const_iterator iterator;
+
+          /** \brief the end of the sequence */
+          const type_value_list::const_iterator end;
+
+        public:
+
+          /** \brief Constructor */
+          inline argument_iterator(type_value_list::const_iterator, type_value_list::const_iterator);
+
+          /** \brief Whether the iterator has moved past the end of the sequence */
+          inline bool valid() const;
+
+          /** \brief Advances to the next element */
+          inline void operator++();
+
+          /** \brief Returs a functor that, when invoked, returns a value */
+          inline boost::any operator*() const;
+      };
+
     private:
-
-      /** \brief Type for argument to value mapping */
-      typedef std::pair < datatype::basic_datatype*, std::string > type_value_pair;
-
-      /** \brief Container for lists of arguments to lists of value mapping */
-      typedef std::vector < type_value_pair >                      type_value_list;
 
       /** \brief List of (type, default value) */
       type_value_list arguments;
 
       /** \brief Must uniquely identify the option in a configuration */
       identifier id;
+
+    private:
 
       /** \brief Constructor (only accessible from class configuration) */
       inline option(const identifier);
@@ -49,11 +81,18 @@ namespace sip {
       /** \brief Returns the option's identifier */
       inline const identifier get_id() const;
 
+      /** \brief Gets an iterator that in order of appearance returns the values for each argument */
+      inline argument_iterator get_value_iterator() const;
+
       /** \brief Append to the type (option takes an additional argument of the specified type) */
-      inline void append_type(datatype::basic_datatype&);
+      inline void append_type(datatype::basic_datatype::sptr);
+
+      /** \brief Append to the type (option takes an additional argument of the specified type) */
+      inline void append_type(datatype::basic_datatype::sptr&);
 
       /** \brief Append type and instance ... */
-      inline void append_argument(datatype::basic_datatype&, std::string);
+      template < typename T >
+      inline void append_argument(datatype::basic_datatype::sptr, T);
 
       /** \brief Assigns a value to the n-th argument of the option */
       inline void bind_argument(const size_t n, std::string);
@@ -64,6 +103,28 @@ namespace sip {
       /** \brief Generate XML representation */
       inline static option::sptr read(xml2pp::text_reader&);
   };
+
+  /**
+   * @param b the iterator from which to start
+   * @param e the iterator with which to end
+   **/
+  inline option::argument_iterator::argument_iterator
+          (type_value_list::const_iterator b, type_value_list::const_iterator e) : iterator(b), end(e) {
+  }
+
+  inline bool option::argument_iterator::valid() const {
+    return (iterator != end);
+  }
+
+  inline void option::argument_iterator::operator++() {
+    ++iterator;
+  }
+
+  inline boost::any option::argument_iterator::operator*() const {
+    sip::datatype::basic_datatype* p = (*iterator).first.get();
+
+    return (p->evaluate((*iterator).second));
+  }
 
   inline option::option(const identifier i) : id(i) {
   }
@@ -76,12 +137,26 @@ namespace sip {
     return (id);
   }
 
-  inline void option::append_type(datatype::basic_datatype& t) {
-    arguments.push_back(type_value_pair(&t, ""));
+  inline option::argument_iterator option::get_value_iterator() const {
+    return (argument_iterator(arguments.begin(), arguments.end()));
   }
 
-  inline void option::append_argument(datatype::basic_datatype& t, std::string d) {
-    arguments.push_back(type_value_pair(&t, d));
+  inline void option::append_type(datatype::basic_datatype::sptr& t) {
+    arguments.push_back(std::make_pair(t, ""));
+  }
+
+  inline void option::append_type(datatype::basic_datatype::sptr t) {
+    arguments.push_back(std::make_pair(t, ""));
+  }
+
+  template < typename T >
+  inline void option::append_argument(datatype::basic_datatype::sptr t, T d) {
+    arguments.push_back(std::make_pair(t, t.get()->convert(d)));
+  }
+
+  template < >
+  inline void option::append_argument(datatype::basic_datatype::sptr t, std::string d) {
+    arguments.push_back(std::make_pair(t, d));
   }
 
   inline void option::bind_argument(const size_t n, std::string s) {
@@ -145,27 +220,7 @@ namespace sip {
           using namespace sip::datatype;
        
           /* The current element must be a datatype specification */
-          type_value_pair new_argument;
-       
-          /* Set the type */
-          new_argument.first = basic_datatype::read(r);
-     
-          /* The current element can be a value of the previously read type (element is optional) */
-          if (r.is_element("value")) {
-            r.read();
-     
-            if (!r.is_end_element()) {
-              /* Read value */
-              r.get_value(&new_argument.second);
-       
-              r.read();
-            }
-       
-            /* Skip end tag */
-            r.read();
-          }
-       
-          o->arguments.push_back(new_argument);
+          o->arguments.push_back(basic_datatype::read(r));
         }
       }
 

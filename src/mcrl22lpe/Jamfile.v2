@@ -1,0 +1,48 @@
+import bison ;
+import lex ;
+
+project mcrl22lpe
+       : source-location ..
+       : requirements
+          <include>$(BOOST)
+       : build-dir $(BUILD_TOP)
+       ;
+
+exe mcrl22lpe
+       : mcrl22lpe/mcrl2parser.yy
+         mcrl22lpe/mcrl2lexer.ll
+         mcrl22lpe/mcrl22lpe.cpp
+         lin_std.cpp
+         lin_alt.cpp
+         libparse.cpp
+         typecheck.cpp
+         dataimpl.cpp
+         libalpha.cpp
+         /libraries/temporary//struct
+         /libraries/temporary//lowlevel
+         /libraries/temporary//print
+         /libraries/temporary//rewrite
+       : <source>/root//mcrl2_revision
+       ;
+
+include $(TOP)/config.jam ;
+
+explicit install install-libraries install-binaries ;
+
+alias install
+       : install-libraries
+         install-binaries
+       ;
+
+install install-libraries
+       : mcrl22lpe
+       : <install-dependencies>on <install-type>LIB
+       : <location>$(LIB_DIR)
+       ;
+
+install install-binaries
+       : mcrl22lpe
+       : <dll-path>$(LIB_DIR)
+         <location>$(BIN_DIR)
+       ;
+

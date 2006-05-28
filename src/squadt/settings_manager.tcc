@@ -46,7 +46,7 @@ namespace squadt {
       bf::create_directory(user_settings_path);
     }
     else if (!is_directory(user_settings_path)) {
-      throw (exception(exception_identifier::cannot_access_user_settings_directory, user_settings_path.native_file_string()));
+      throw (exception::exception(exception::cannot_access_user_settings_directory, user_settings_path.native_file_string()));
     }
    
     bf::path catalog_path = path_to_user_settings(tool_catalog_base_name);

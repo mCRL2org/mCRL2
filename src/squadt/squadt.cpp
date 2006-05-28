@@ -3,6 +3,7 @@
 #include <boost/bind.hpp>
 #include <boost/shared_ptr.hpp>
 
+#include "exception.h"
 #include "tool_manager.h"
 #include "settings_manager.tcc"
 #include "core.h"
@@ -42,8 +43,13 @@ initialisation::initialisation(splash* s) : wxThread(wxTHREAD_JOINABLE), splash_
 }
 
 void* initialisation::Entry() {
-  squadt::global_tool_manager->query_tools(
-                  boost::bind(&splash::set_operation, splash_window, std::string("processing"), _1));
+  try {
+    squadt::global_tool_manager->query_tools(
+                    boost::bind(&splash::set_operation, splash_window, std::string("processing"), _1));
+  }
+  catch (squadt::exception::exception e) {
+    std::cerr << e.what() << std::endl;
+  }
 
   return (0);
 }

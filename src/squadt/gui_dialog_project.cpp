@@ -360,6 +360,9 @@ namespace squadt {
         button_accept->Enable(selection_is_valid);
 
         Layout();
+
+        /* Circumvent refresh bug on wxGTK by explicitly using refresh */
+        directory_selector->Refresh();
       }
 
       /** \brief Gets the name of the project */

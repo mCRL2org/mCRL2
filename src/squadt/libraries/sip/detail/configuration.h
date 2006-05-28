@@ -75,7 +75,7 @@ namespace sip {
       inline bool is_empty() const;
 
       /** \brief Add an option to the configuration */
-      inline void add_option(const option::identifier);
+      inline option& add_option(const option::identifier, bool = true);
 
       /** \brief Establishes whether an option exists (by identifier) */
       inline bool option_exists(const option::identifier);
@@ -153,17 +153,22 @@ namespace sip {
 
   /**
    * @param id an identifier for the option
+   * @param r whether or not to replace an existing option with the same id
    **/
-  inline void configuration::add_option(const option::identifier id) {
+  inline option& configuration::add_option(const option::identifier id, bool r) {
     using namespace std;
     using namespace boost;
 
-    assert(find_if(options.begin(), options.end(), bind(equal_to < option::identifier >(),
+    assert(r || find_if(options.begin(), options.end(), bind(equal_to < option::identifier >(),
                     bind(&option::get_id,
                             bind(&option::sptr::get,
                                     bind(&option_list::value_type::first, _1))),id)) == options.end());
 
-    options[option::sptr(new option(id))] = constrain_optional;
+    option::sptr o(new option(id));
+
+    options[o] = constrain_optional;
+
+    return (*o);
   }
 
   /**

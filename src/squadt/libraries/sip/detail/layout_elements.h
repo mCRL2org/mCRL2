@@ -143,7 +143,7 @@ namespace sip {
           std::string          label;
      
           /** \brief The connection reference */
-          radio_button* const connection;
+          radio_button* const  connection;
 
           /** \brief Whether the radio button is selected or not */
           bool                 selected;
@@ -163,6 +163,9 @@ namespace sip {
 
           /** \brief Whether the button is selected or not */
           inline void set_selected(bool, bool = true);
+
+          /** \brief Whether the radion button is selected or not */
+          inline bool is_selected() const;
      
           /** \brief Instantiate a layout element, through a mediator */
           inline layout::mediator::wrapper_aptr instantiate(layout::mediator*);
@@ -201,6 +204,9 @@ namespace sip {
         selected = true;
       }
      
+      inline bool radio_button::is_selected() const {
+        return (selected);
+      }
 
       /**
        * @param[in] m the mediator object to use
@@ -246,6 +252,9 @@ namespace sip {
      
           /** \brief Set the status */
           inline void set_status(bool);
+
+          /** \brief Gets the status */
+          inline bool get_status() const;
      
           /** \brief Instantiate a layout element, through a mediator */
           inline layout::mediator::wrapper_aptr instantiate(layout::mediator*);
@@ -272,6 +281,10 @@ namespace sip {
        **/
       inline void checkbox::set_status(bool b) {
         status = b;
+      }
+
+      inline bool checkbox::get_status() const {
+        return (status);
       }
      
       /**
@@ -316,6 +329,9 @@ namespace sip {
      
           /** \brief Constructor for a button */
           inline progress_bar(const unsigned int, const unsigned int, const unsigned int);
+
+          /** \brief Gets the current value of the progess bar */
+          inline unsigned int get_value() const;
      
           /** \brief Instantiate a layout element, through a mediator */
           inline layout::mediator::wrapper_aptr instantiate(layout::mediator*);
@@ -337,6 +353,10 @@ namespace sip {
        **/
       inline progress_bar::progress_bar(const unsigned int min, const unsigned int max, const unsigned int c)
               : minimum(min), maximum(max), current(c) {
+      }
+
+      inline unsigned int progress_bar::get_value() const {
+        return (current);
       }
      
       /**
@@ -369,7 +389,7 @@ namespace sip {
           std::string text;
      
           /** \brief Type for validation purposes */
-          basic_datatype* type;
+          basic_datatype::sptr type;
      
         private:
      
@@ -382,10 +402,16 @@ namespace sip {
         public:
      
           /** \brief Constructor */
-          inline text_field(const std::string& i, basic_datatype* = &standard_string);
+          inline text_field(const std::string& i, basic_datatype::sptr);
+
+          /** \brief Constructor */
+          inline text_field(const std::string& i, basic_datatype::sptr& = standard_string);
 
           /** \brief Set the text */
           inline void set_text(std::string);
+     
+          /** \brief Get the text */
+          inline std::string get_text() const;
      
           /** \brief Instantiate a layout element, through a mediator */
           inline layout::mediator::wrapper_aptr instantiate(layout::mediator*);
@@ -404,7 +430,14 @@ namespace sip {
        * @param[in] s the initial content of the text control
        * @param[in] t the a type description object for validation purposes
        **/
-      inline text_field::text_field(const std::string& s, basic_datatype* t) : text(s), type(t) {
+      inline text_field::text_field(const std::string& s, basic_datatype::sptr& t) : text(s), type(t) {
+      }
+     
+      /**
+       * @param[in] s the initial content of the text control
+       * @param[in] t the a type description object for validation purposes
+       **/
+      inline text_field::text_field(const std::string& s, basic_datatype::sptr t) : text(s), type(t) {
       }
      
       /**
@@ -412,6 +445,10 @@ namespace sip {
        **/
       inline void text_field::set_text(std::string s) {
         text = s;
+      }
+
+      inline std::string text_field::get_text() const {
+        return (text);
       }
 
       /**

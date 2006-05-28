@@ -65,7 +65,7 @@ namespace squadt {
         object_descriptor::sptr d = (*i).lock();
      
         if (d.get() == 0) {
-          throw (exception(exception_identifier::missing_object_descriptor));
+          throw (exception::exception(exception::missing_object_descriptor));
         }
      
         path l(d->location);
@@ -101,7 +101,7 @@ namespace squadt {
           object_descriptor::sptr d = (*i).lock();
      
           if (d.get() == 0) {
-            throw (exception(exception_identifier::missing_object_descriptor));
+            throw (exception::exception(exception::missing_object_descriptor));
           }
      
           if (d->generator->check_status(true)) {
@@ -174,7 +174,7 @@ namespace squadt {
 
       /* Check tool existence */
       if (!global_tool_manager->exists(temporary)) {
-        throw (exception(exception_identifier::requested_tool_unavailable, temporary));
+        throw (exception::exception(exception::requested_tool_unavailable, temporary));
       }
     }
 
@@ -189,7 +189,7 @@ namespace squadt {
       unsigned long id;
 
       if (!r.get_attribute(&id, "id")) {
-        throw (exception(exception_identifier::required_attributes_missing, "processor->input"));
+        throw (exception::exception(exception::required_attributes_missing, "processor->input"));
       }
       else {
         assert(m.find(id) != m.end());
@@ -222,7 +222,7 @@ namespace squadt {
               && r.get_attribute(&temporary, "digest")
               && r.get_attribute(&n->timestamp, "timestamp"))) {
 
-        throw (exception(exception_identifier::required_attributes_missing, "processor->output"));
+        throw (exception::exception(exception::required_attributes_missing, "processor->output"));
       }
 
       n->generator = c.get();

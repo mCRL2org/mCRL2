@@ -136,7 +136,7 @@ namespace squadt {
     xml2pp::text_reader::file_name< std::string > f(settings_manager::path_concatenate(l, settings_manager::project_definition_base_name));
 
     if (!bf::exists(bf::path(f.get()))) {
-      throw (exception(exception_identifier::failed_loading_object, "SQuADT project", f.get()));
+      throw (exception::exception(exception::failed_loading_object, "SQuADT project", f.get()));
     }
 
     project_manager::ptr p(new project_manager());
