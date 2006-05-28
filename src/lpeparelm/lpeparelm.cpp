@@ -19,11 +19,16 @@
 #include <boost/program_options.hpp>
 
 //mCRL2
-#include "lpe/specification.h"
+#include "mcrl2_revision.h"
+
 #include "atermpp/aterm.h"
+#include "lpe/specification.h"
 #include "lpe/lpe_error.h"
 
-#include "mcrl2_revision.h"
+// Squadt protocol interface
+#ifdef ENABLE_SQUADT_CONNECTIVITY
+#include <sip/tool.h>
+#endif
 
 using namespace std;
 using namespace lpe;
@@ -33,17 +38,9 @@ using atermpp::aterm;
 using atermpp::aterm_appl;
 using atermpp::aterm_list;
 
-namespace po = boost::program_options;
-po::variables_map vm;
+const char* version = "0.5.1";
 
-
-//Constanten
-//Private:
-  #define p_version "lpeparelm 0.5";
-//Public:
-
-class ParElmObj
-{
+class ParElmObj {
 private:
   string                      p_inputfile;
   string                      p_outputfile;
@@ -406,105 +403,170 @@ public:
     
   inline string getVersion()
   {
-    return p_version;
+    return (version);
   }
 };
 
-int main(int ac, char* av[])
-  {
-    ATerm bot;
-    ATinit(0,0,&bot);
-    gsEnableConstructorFunctions();
-  
-    vector< string > filename;
-   
-    ParElmObj obj;
+void parse_command_line(int ac, char** av, ParElmObj& parelm) {
+  namespace po = boost::program_options;
 
-    try {
-      po::options_description desc;
-      desc.add_options()
-        ("help,h",      "display this help")
-        ("verbose,v",   "turn on the display of short intermediate messages")
-        ("debug,d",    "turn on the display of detailed intermediate messages")
-        ("version",     "display version information")
-      ;
-	
-    po::options_description hidden("Hidden options");
-	  hidden.add_options()
-             ("INFILE", po::value< vector<string> >(), "input file")
-	  ;
-	
-	  po::options_description cmdline_options;
-	  cmdline_options.add(desc).add(hidden);
-	
-	  po::options_description visible("Allowed options");
-	  visible.add(desc);
-	
-	  po::positional_options_description p;
-	  p.add("INFILE", -1);
+  po::options_description description;
 
-    po::variables_map vm;
-    store(po::command_line_parser(ac, av).
-    options(cmdline_options).positional(p).run(), vm);
-     
-    if (vm.count("help")) {
-       cerr << "Usage: "<< av[0] << " [OPTION]... [INFILE [OUTFILE]] \n";
-       cerr << "Remove unused parameters from the LPE in INFILE, and write the result" << endl;
-       cerr << "to stdout." << endl;
-       cerr << endl;
-       cerr << desc;
-      return 0;
-    }
+  /* Name of the file to read input from (or standard input: "-") */
+  std::vector < std::string > file_names;
+
+  description.add_options()
+    ("verbose,v", "turn on the display of short intermediate messages")
+    ("debug,d",   "turn on the display of detailed intermediate messages")
+    ("version",   "display version information")
+    ("help,h",    "display this help")
+  ;
         
-    if (vm.count("version")) {
-	    cerr << obj.getVersion() << " (revision " << REVISION << ")" << endl;
-	    return 0;
-	  }
+  po::options_description hidden("Hidden options");
 
-    if (vm.count("verbose")) {
-      obj.setVerbose(true);
-	  } else {
-	    obj.setVerbose(false);
-	  }
-	  
-	  if (vm.count("debug")) {
-      obj.setDebug(true);
-	  } else {
-	    obj.setDebug(false);
-	  }
+  hidden.add_options()
+     ("file_names", po::value< vector<string> >(), "input/output files")
+  ;
+        
+  po::options_description cmdline_options;
+  cmdline_options.add(description).add(hidden);
+        
+  po::options_description visible("Allowed options");
+  visible.add(description);
+        
+  po::positional_options_description p;
+  p.add("file_names", -1);
 
-    if (vm.count("INFILE")){
-      filename = vm["INFILE"].as< vector<string> >();
-	  }
-	  
-	  if (filename.size() == 0){
-	    if (!obj.readStream()){return 1;}
-	  }
+  po::variables_map vm;
+  po::store(po::command_line_parser(ac, av).options(cmdline_options).positional(p).run(), vm);
+  po::notify(vm);
+     
+  if (vm.count("help")) {
+    std::cerr << "Usage: "<< av[0] << " [OPTION]... [INFILE [OUTFILE]] \n"
+              << "Removes unused parameters from the LPD read from standard input or INFILE." << std::endl
+              << "By default the result is written to standard output, and otherwise to OUTFILE." << std::endl
+              << std::endl << description;
 
-    if (filename.size() > 2){
-      cerr << "lpeparelm: Specify only INPUT and/or OUTPUT file (Too many arguments)."<< endl;
-      return 1;
-    }
-             
-    if(filename.size() >= 1){
-      if (filename[0] == ">"){
-        if (!obj.readStream()){return 1;}
-      }
-      else{
-        if(!obj.loadFile(filename[0])){return 1;};
-      }
-    } ; 
-    if(filename.size() == 2){
-      obj.setSaveFile(filename[1]);
-    };
-
-    obj.filter();
-    obj.output(); 
-
+    exit (0);
   }
-  catch(exception& e){
-      cerr << "lpeparelm: " << e.what() << "\n";
-      return 1;
-  }    
-  return 0;
+        
+  if (vm.count("version")) {
+    std::cerr << version << " (revision " << REVISION << ")" << endl;
+
+    exit (0);
+  }
+
+  parelm.setVerbose(vm.count("verbose"));
+  parelm.setDebug(vm.count("debug"));
+
+  if (file_names.size() == 0){
+    /* Read from standard input */
+    if (!parelm.readStream()) {
+      exit (1);
+    }
+  }
+  else if (2 < file_names.size()) {
+    cerr << "lpeparelm: Specify only INPUT and/or OUTPUT file (too many arguments)."<< endl;
+
+    exit (0);
+  }
+  else {
+    if (!parelm.loadFile(file_names[0])) {
+      exit (1);
+    }
+
+    if (file_names.size() == 2) {
+      parelm.setSaveFile(file_names[1]);
+    }
+  }
+}
+
+#ifdef ENABLE_SQUADT_CONNECTIVITY
+/* Constants for identifiers of options and objects */
+const unsigned int lpd_file_for_input  = 0;
+const unsigned int lpd_file_for_output = 1;
+
+void realise_configuration(sip::tool::communicator& tc, ParElmObj& constelm, sip::configuration& c) {
+  std::string input_file_name  = c.get_object(lpd_file_for_input)->get_location();
+  std::string output_file_name = c.get_object(lpd_file_for_output)->get_location();
+
+  if (!constelm.loadFile(input_file_name)) {
+    tc.send_error_report("Error reading input!");
+
+    exit(1);
+  }
+
+  constelm.setSaveFile(output_file_name);
+
+  constelm.setVerbose(true);
+}
+#endif
+
+int main(int ac, char** av) {
+  ATerm     bottom;
+  ParElmObj parelm;
+
+  ATinit(ac,av,&bottom);
+
+  gsEnableConstructorFunctions();
+  
+#ifdef ENABLE_SQUADT_CONNECTIVITY
+  sip::tool::communicator tc;
+
+  /* Get tool capabilities in order to modify settings */
+  sip::tool::capabilities& cp = tc.get_tool_capabilities();
+
+  /* The tool has only one main input combination it takes an LPE and then behaves as a reporter */
+  cp.add_input_combination(lpd_file_for_input, "Transformation", "lpe");
+
+  /* On purpose we do not catch exceptions */
+  if (tc.activate(ac,av)) {
+    bool valid = false;
+
+    /* Static configuration cycle (phase 1: obtain input combination) */
+    while (!valid) {
+      /* Wait for configuration data to be send (either a previous configuration, or only an input combination) */
+      sip::configuration::sptr configuration = tc.await_configuration();
+
+      /* Validate configuration specification, should contain a file name of an LPD that is to be read as input */
+      valid  = configuration.get() != 0;
+      valid &= configuration->object_exists(lpd_file_for_input);
+
+      if (valid) {
+        std::string input_file_name = configuration->get_object(lpd_file_for_input)->get_location();
+
+        /* Add output file to the configuration */
+        configuration->add_output(lpd_file_for_output, "lpe", input_file_name + ".lpe");
+
+        /* An object with the correct id exists, assume the URI is relative (i.e. a file name in the local file system) */
+        tc.set_configuration(configuration);
+      }
+      else {
+        tc.send_error_report("Invalid input combination!");
+
+        exit(1);
+      }
+    }
+
+    realise_configuration(tc, parelm, tc.get_configuration());
+
+    /* Send the controller the signal that we're ready to rumble (no further configuration necessary) */
+    tc.send_accept_configuration();
+
+    /* Wait for start message */
+    tc.await_message(sip::send_signal_start);
+  }
+  else {
+    parse_command_line(ac,av,parelm);
+  }
+#else
+  parse_command_line(ac,av,parelm);
+#endif
+
+  parelm.filter();
+  parelm.output(); 
+
+  gsRewriteFinalise();
+
+  return (0);
 }

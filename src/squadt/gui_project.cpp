@@ -262,7 +262,8 @@ namespace squadt {
         c->Append(*id++, category_name, target_menu);
       }
       else {
-        target_menu = c->FindItem(item_id)->GetMenu();
+        /* According to the documentation the following does what c->FindItem(item_id)->GetSubMenu() should have done */
+        target_menu = c->GetMenuItems().GetLast()->GetData()->GetSubMenu();
       }
 
       cmMenuItem* new_menu_item = new cmMenuItem(target_menu, *id++, 

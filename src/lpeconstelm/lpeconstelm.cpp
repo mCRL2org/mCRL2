@@ -12,8 +12,6 @@
 //
 // ======================================================================
 
-#include "mcrl2_revision.h"
-
 //C++
 #include <iostream>
 #include <vector>
@@ -28,6 +26,8 @@
 #include <boost/program_options.hpp>
 
 //mCRL2
+#include "mcrl2_revision.h"
+
 #include "atermpp/aterm.h"
 #include "lpe/specification.h"
 
@@ -44,12 +44,7 @@ using namespace std;
 using namespace lpe;
 using namespace atermpp;
 
-namespace po = boost::program_options;
-
-/* Name of the file to read input from (or standard input: "-") */
-std::vector < std::string > file_names;
-
-#define VERSION "0.5.2"
+const char* version = "0.5.2";
 
 class ConstelmObj
 {
@@ -877,12 +872,17 @@ public:
   // Gets the version of the tool
   //    
   inline string getVersion() {
-    return (VERSION);
+    return (version);
   }
 };
 
-void parse_command_line(int ac, char** av, ConstelmObj &constelm) {
+void parse_command_line(int ac, char** av, ConstelmObj& constelm) {
+  namespace po = boost::program_options;
+
   po::options_description description;
+
+  /* Name of the file to read input from (or standard input: "-") */
+  std::vector < std::string > file_names;
 
   description.add_options()
     ("no-singleton", "do not remove sorts consisting of a single element")
@@ -915,16 +915,15 @@ void parse_command_line(int ac, char** av, ConstelmObj &constelm) {
      
   if (vm.count("help")) {
     std::cerr << "Usage: "<< av[0] << " [OPTION]... [INFILE [OUTFILE]] \n"
-              << "Removes constant process parameters from the LPD read from standard output or INFILE." << std::endl
-              << "By default the result is written to standard output, and otherwise to OUTFILE." << endl
-              << endl
-              << description;
+              << "Removes constant process parameters from the LPD read from standard input or INFILE." << std::endl
+              << "By default the result is written to standard output, and otherwise to OUTFILE." << std::endl
+              << std::endl << description;
 
     exit (0);
   }
         
   if (vm.count("version")) {
-    std::cerr << VERSION << " (revision " << REVISION << ")" << endl;
+    std::cerr << version << " (revision " << REVISION << ")" << endl;
 
     exit (0);
   }
@@ -1121,11 +1120,6 @@ int main(int ac, char** av) {
       valid &= configuration->object_exists(lpd_file_for_input);
 
       if (valid) {
-        std::string input_file_name = configuration->get_object(lpd_file_for_input)->get_location();
-
-        /* An object with the correct id exists, assume the URI is relative (i.e. a file name in the local file system) */
-        constelm.loadFile(input_file_name);
-
         tc.set_configuration(configuration);
       }
       else {
@@ -1153,7 +1147,6 @@ int main(int ac, char** av) {
       }
     }
 
-    /* Realise the */
     realise_configuration(tc, constelm, tc.get_configuration());
 
     /* Send the controller the signal that we're ready to rumble (no further configuration necessary) */
