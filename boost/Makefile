@@ -42,7 +42,6 @@ endif
 all: build_completed
 
 build_completed: $(BJAM)
-	$(BJAM) $(BJAM_ARGUMENTS) --with-program_options
 	touch build_completed
 
 bjam: $(BJAM)
@@ -57,8 +56,6 @@ $(BJAM):
 	@cd tools/jam; $(BJAM_BUILD)
 
 install: all
-	$(INSTALL) -d $(libdir)
-	$(INSTALL) lib/* $(libdir)
 
 clean:
 

@@ -196,7 +196,7 @@ LIN_LDFLAGS        = -lrewrite -l$(ATERM) -lm $(LIBDL)
 
 #Group definitions
 EXPERIMENTALS      = $(LIN_NAME) $(ALPHA_NAME)
-EXE_NAMES          = $(LPEPP_NAME) $(TRACEPP_NAME) $(LPE2TORX_NAME) $(SIM_NAME) $(TBF2LPE_NAME) $(PNML2MCRL2_NAME) $(LPEREWR_NAME) $(LTSMIN_NAME) $(SVC2FSM_NAME)
+EXE_NAMES          = $(LPEPP_NAME) $(TRACEPP_NAME) $(LPE2TORX_NAME) $(SIM_NAME) $(TBF2LPE_NAME) $(PNML2MCRL2_NAME) $(LPEREWR_NAME)
 LIB_NAMES          =
 OBJECTS           := $(sort $(OBJECTS))
 
@@ -242,17 +242,17 @@ clean distclean: squadt boost_relay ltsview documentation
 
 # For building documentation
 documentation: $(CONFIG)
-	@$(MAKE) -C doc $(MAKECMDGOALS)
+	@$(MAKE) -C doc $(filter all clean distclean install,$(MAKECMDGOALS))
 
 boost_relay:
-	@$(MAKE) -C ../boost $(MAKECMDGOALS)
+	@$(MAKE) -C ../boost $(filter all clean distclean install,$(MAKECMDGOALS))
 
 ltsview: $(CONFIG) 
-	@$(MAKE) -C ltsview $(MAKECMDGOALS)
+	@$(MAKE) -C ltsview $(filter all clean distclean install,$(MAKECMDGOALS))
 
 # For building squadt
 squadt: boost $(CONFIG)
-	@$(MAKE) -C squadt $(MAKECMDGOALS)
+	@$(MAKE) -C squadt $(filter all clean distclean install,$(MAKECMDGOALS))
 
 # For building bjam and boost libraries
 ifeq (,$(findstring $(MAKECMDGOALS),clean distclean revision))
