@@ -196,7 +196,7 @@ LIN_LDFLAGS        = -lrewrite -l$(ATERM) -lm $(LIBDL)
 
 #Group definitions
 EXPERIMENTALS      = $(LIN_NAME) $(ALPHA_NAME)
-EXE_NAMES          = $(LPEPP_NAME) $(TRACEPP_NAME) $(LPE2TORX_NAME) $(SIM_NAME) $(TBF2LPE_NAME) $(PNML2MCRL2_NAME) $(LPEREWR_NAME) $(LTSMIN_NAME) $(LTSCONVERT_NAME) $(LTSINFO_NAME) $(SVC2FSM_NAME)
+EXE_NAMES          = $(LPEPP_NAME) $(TRACEPP_NAME) $(LPE2TORX_NAME) $(SIM_NAME) $(TBF2LPE_NAME) $(PNML2MCRL2_NAME) $(LPEREWR_NAME) $(LTSMIN_NAME) $(SVC2FSM_NAME)
 LIB_NAMES          =
 OBJECTS           := $(sort $(OBJECTS))
 
@@ -217,7 +217,6 @@ all : boost
 distclean install: boost_relay
 
 ../boost/build_completed:
-	@$(MAKE) -C ../boost
 endif
 
 # Build/clean/install documentation
