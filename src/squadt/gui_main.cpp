@@ -63,7 +63,7 @@ namespace squadt {
       project_menu->Append(wxID_OPEN, wxT("&Open...\tCTRL-o"));
       project_menu->Append(wxID_CLOSE, wxT("&Close\tCTRL-F4"))->Enable(false);
       project_menu->AppendSeparator();
-      project_menu->Append(wxID_ADD, wxT("&Add file...\tCTRL-f"));
+      project_menu->Append(wxID_ADD, wxT("&Add file...\tCTRL-f"))->Enable(false);
       project_menu->AppendSeparator();
       project_menu->Append(wxID_EXIT, wxT("&Quit"));
       menu->Append(project_menu, wxT("&Project"));

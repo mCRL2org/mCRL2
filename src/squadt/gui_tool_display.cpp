@@ -25,6 +25,9 @@ namespace squadt {
       using namespace sip;
       using namespace sip::layout;
 
+      #define cmID_MINIMISE  (wxID_HIGHEST + 1)
+      #define cmID_CLOSE     (wxID_HIGHEST + 2)
+
       /** \brief Translates a sip layout to a functional wxWidgets layout */
       class tool_display_mediator : public sip::layout::mediator {
         
@@ -596,7 +599,49 @@ namespace squadt {
       /* Set minimum dimensions */
       root->SetMinSize(GetClientSize().GetWidth(), 50);
 
+      wxWindow* titlepanel(new wxPanel(this, wxID_ANY, wxDefaultPosition, wxDefaultSize, wxRAISED_BORDER));
+
+      control_bar = new wxBoxSizer(wxHORIZONTAL);
+      control_bar->AddSpacer(4);
+      control_bar->Add(new wxStaticText(titlepanel, wxID_ANY, wxT("")), 0, wxTOP|wxBOTTOM|wxLEFT, 2);
+      control_bar->AddStretchSpacer(1);
+      control_bar->Add(new wxButton(titlepanel, cmID_MINIMISE, wxT("-"), wxDefaultPosition, wxDefaultSize, wxBU_EXACTFIT), 0, wxALIGN_RIGHT);
+      control_bar->Add(new wxButton(titlepanel, cmID_CLOSE, wxT("x"), wxDefaultPosition, wxDefaultSize, wxBU_EXACTFIT), 0, wxALIGN_RIGHT);
+
+      titlepanel->SetSizer(control_bar);
+      root->Add(titlepanel, 0, wxEXPAND);
+
       SetSizer(root);
+
+      Connect(cmID_MINIMISE, cmID_CLOSE, wxEVT_COMMAND_BUTTON_CLICKED, wxCommandEventHandler(tool_display::on_panel_button_clicked));
+    }
+
+    void tool_display::set_title(wxString s) {
+      control_bar->GetItem(1)->GetWindow()->SetLabel(s);
+    }
+
+    void tool_display::on_panel_button_clicked(wxCommandEvent& e) {
+      if (e.GetId() == cmID_MINIMISE) {
+        if (content != 0) {
+          wxSizer* root = GetSizer();
+
+          if (content->IsShown()) {
+            root->SetMinSize(GetClientSize().GetWidth(), root->GetItem((size_t) 0)->GetSize().GetHeight());
+
+            content->Show(false);
+          }
+          else {
+            root->SetMinSize(GetClientSize().GetWidth(), 50);
+
+            content->Show(true);
+          }
+
+          GetParent()->Layout();
+        }
+      }
+      else {
+        remove();
+      }
     }
 
     void tool_display::remove() {
@@ -647,6 +692,9 @@ namespace squadt {
 
           GetParent()->Layout();
           GetParent()->FitInside();
+        }
+        else {
+          content = 0;
         }
       }
       catch (...) {

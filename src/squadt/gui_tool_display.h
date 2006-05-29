@@ -111,6 +111,9 @@ namespace squadt {
         /** \brief Sizer that contains the content part */
         wxSizer*                        content;
 
+        /** \brief Sizer of the tool display control buttons */
+        wxSizer*                        control_bar;
+
       private:
 
         /** \brief Builds the specified layout within this window */
@@ -128,10 +131,16 @@ namespace squadt {
         /** \brief Set a new layout description */
         void schedule_layout_update(std::vector < sip::layout::element const* > const&);
 
+        /** \brief Handler for panel control button events */
+        void on_panel_button_clicked(wxCommandEvent&);
+
       public:
 
         /** \brief Constructor */
         tool_display(wxWindow*, project*, processor::monitor::sptr& s);
+
+        /** \brief Sets the title of the display window */
+        void set_title(wxString);
 
         /** \brief Removes itself from the parent window */
         void remove();

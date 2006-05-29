@@ -138,6 +138,7 @@ namespace squadt {
       object_view          = new wxTreeCtrl(this, wxID_ANY, wxDefaultPosition, wxDefaultSize,
                                                         wxTR_LINES_AT_ROOT|wxTR_HIDE_ROOT|wxTR_HAS_BUTTONS|wxTR_SINGLE|wxSUNKEN_BORDER);
 
+      SetMinimumPaneSize(1);
       SplitVertically(object_view, process_display_view);
 
       process_display_view->SetSizer(new wxBoxSizer(wxVERTICAL));
@@ -337,7 +338,10 @@ namespace squadt {
             global_tool_manager->find(std::string(menu_item->GetLabel().fn_str()));
 
             /* Attach tool display */
-            add_tool_display(tp->get_monitor());
+            GUI::tool_display* display = add_tool_display(tp->get_monitor());
+
+            display->set_title(wxString(std::string(menu_item->the_tool->get_name() + " : " +
+                                boost::filesystem::path(t->location).leaf()).c_str(), wxConvLocal));
 
             /* Start tool configuration phase */
             tp->configure(menu_item->input_combination, boost::filesystem::path(t->location), boost::bind(&project::process_configuration, this, s, tp));
