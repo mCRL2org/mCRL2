@@ -113,6 +113,9 @@ namespace squadt {
         /** \brief Initially places the widgets */
         void build();
 
+        /** \brief Add a file to the project */
+        void add();
+
         /** \brief Loads the contents of the views (currently only file view) */
         void load_views();
 

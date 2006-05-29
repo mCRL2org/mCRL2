@@ -26,6 +26,7 @@ namespace squadt {
       /* Connect event handlers */
       Connect(wxID_NEW, wxEVT_COMMAND_MENU_SELECTED, wxCommandEventHandler(main::on_menu_new));
       Connect(wxID_OPEN, wxEVT_COMMAND_MENU_SELECTED, wxCommandEventHandler(main::on_menu_open));
+      Connect(wxID_ADD, wxEVT_COMMAND_MENU_SELECTED, wxCommandEventHandler(main::on_menu_add_file));
       Connect(wxID_CLOSE, wxEVT_COMMAND_MENU_SELECTED, wxCommandEventHandler(main::on_menu_close));
       Connect(wxID_ABOUT, wxEVT_COMMAND_MENU_SELECTED, wxCommandEventHandler(main::on_menu_about));
       Connect(wxID_EXIT, wxEVT_COMMAND_MENU_SELECTED, wxCommandEventHandler(main::on_menu_quit));
@@ -56,14 +57,16 @@ namespace squadt {
       wxMenuBar* menu = new wxMenuBar();
 
       /* File menu */
-      wxMenu* file_menu = new wxMenu();
+      wxMenu* project_menu = new wxMenu();
 
-      file_menu->Append(wxID_NEW, wxT("&New...\tCTRL-n"));
-      file_menu->Append(wxID_OPEN, wxT("&Open...\tCTRL-o"));
-      file_menu->Append(wxID_CLOSE, wxT("&Close\tCTRL-F4"))->Enable(false);
-      file_menu->AppendSeparator();
-      file_menu->Append(wxID_EXIT, wxT("&Quit"));
-      menu->Append(file_menu, wxT("&File"));
+      project_menu->Append(wxID_NEW, wxT("&New...\tCTRL-n"));
+      project_menu->Append(wxID_OPEN, wxT("&Open...\tCTRL-o"));
+      project_menu->Append(wxID_CLOSE, wxT("&Close\tCTRL-F4"))->Enable(false);
+      project_menu->AppendSeparator();
+      project_menu->Append(wxID_ADD, wxT("&Add file...\tCTRL-f"));
+      project_menu->AppendSeparator();
+      project_menu->Append(wxID_EXIT, wxT("&Quit"));
+      menu->Append(project_menu, wxT("&Project"));
 
       wxMenu* edit_menu  = new wxMenu();
 
@@ -83,6 +86,7 @@ namespace squadt {
       help_menu->Append(wxID_HELP, wxT("&User Manual"));
       help_menu->AppendSeparator();
       help_menu->Append(wxID_ABOUT, wxT("&About"));
+
       menu->Append(help_menu, wxT("&Help"));
 
       SetMenuBar(menu);
@@ -111,6 +115,10 @@ namespace squadt {
 
         add_project_view(p);
       }
+    }
+
+    void main::project_add_file() {
+      project_view->add();
     }
 
     /**
@@ -143,6 +151,7 @@ namespace squadt {
 
       menu_bar.Enable(wxID_NEW, false);
       menu_bar.Enable(wxID_OPEN, false);
+      menu_bar.Enable(wxID_ADD, true);
       menu_bar.Enable(wxID_CLOSE, true);
       menu_bar.Enable(cmID_START_ANALYSIS, true);
       menu_bar.Enable(cmID_RESTART_ANALYSIS, true);
@@ -175,6 +184,7 @@ namespace squadt {
       menu_bar.Enable(wxID_NEW, true);
       menu_bar.Enable(wxID_OPEN, true);
       menu_bar.Enable(wxID_CLOSE, false);
+      menu_bar.Enable(wxID_ADD, false);
       menu_bar.Enable(cmID_START_ANALYSIS, false);
       menu_bar.Enable(cmID_RESTART_ANALYSIS, false);
       menu_bar.Enable(cmID_STOP_ANALYSIS, false);

@@ -6,7 +6,7 @@ all: config $(BJAM)
 	@$(BOOST_BUILD)
 	@${MAKE} -C src $(MAKECMDGOALS)
 
-include utility/revision.mk
+-include utility/revision.mk
 
 install: all
 	@$(BOOST_BUILD) --install
@@ -30,7 +30,7 @@ clean:
 distclean:
 	@${MAKE} -C src distclean
 	@${MAKE} -C boost distclean
-	@$(RM) -r autom4te.cache config.log *.o *~ core core.* \
+	@$(RM) -r autom4te.cache config.log *.o *.app *~ core core.* \
 	         bin config.status config config.jam src/setup.h \
 		 src/mcrl2_revision.h
 

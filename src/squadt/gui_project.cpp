@@ -135,10 +135,8 @@ namespace squadt {
 
     void project::build() {
       process_display_view = new wxScrolledWindow(this, wxID_ANY, wxDefaultPosition, wxDefaultSize, wxVSCROLL|wxTAB_TRAVERSAL);
-      object_view            = new wxTreeCtrl(this, wxID_ANY, wxDefaultPosition, wxDefaultSize,
-                                                        wxTR_HAS_BUTTONS|wxTR_SINGLE|wxSUNKEN_BORDER);
-
-      SetMinimumPaneSize(GetParent()->GetSize().GetWidth() / 2);
+      object_view          = new wxTreeCtrl(this, wxID_ANY, wxDefaultPosition, wxDefaultSize,
+                                                        wxTR_LINES_AT_ROOT|wxTR_HIDE_ROOT|wxTR_HAS_BUTTONS|wxTR_SINGLE|wxSUNKEN_BORDER);
 
       SplitVertically(object_view, process_display_view);
 
@@ -181,20 +179,24 @@ namespace squadt {
         spawn_context_menu(*(static_cast < node_data* > (object_view->GetItemData(e.GetItem()))->target));
       }
       else {
-        dialog::add_to_project dialog(this, wxString(manager->get_project_directory().c_str(), wxConvLocal));
+        project::add();
+      }
+    }
 
-        if (dialog.ShowModal()) {
-          /* Add to the new project */
-          wxTreeItemId i = object_view->AppendItem(e.GetItem(), wxString(dialog.get_name().c_str(), wxConvLocal), 3);
+    void project::add() {
+      dialog::add_to_project dialog(this, wxString(manager->get_project_directory().c_str(), wxConvLocal));
 
-          /* File does not exist in project directory */
-          processor* p = manager->import_file(
-                                boost::filesystem::path(dialog.get_source()), 
-                                boost::filesystem::path(dialog.get_destination()).leaf()).get();
+      if (dialog.ShowModal()) {
+        /* Add to the new project */
+        wxTreeItemId i = object_view->AppendItem(object_view->GetRootItem(), wxString(dialog.get_name().c_str(), wxConvLocal), 3);
 
-          object_view->SetItemData(i, new node_data(*this, *(p->get_output_iterator())));
-          object_view->EnsureVisible(i);
-        }
+        /* File does not exist in project directory */
+        processor* p = manager->import_file(
+                              boost::filesystem::path(dialog.get_source()), 
+                              boost::filesystem::path(dialog.get_destination()).leaf()).get();
+
+        object_view->SetItemData(i, new node_data(*this, *(p->get_output_iterator())));
+        object_view->EnsureVisible(i);
       }
     }
 

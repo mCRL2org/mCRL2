@@ -218,6 +218,18 @@ if test $enable_profile; then
   LDFLAGS="-pg $LDFLAGS"
 fi
 
+# Check for debug/profile options
+AC_ARG_WITH(
+  [static],
+  AC_HELP_STRING(
+    [--enable-static],
+    [produce and link to static libraries]
+  )
+)
+if test $enable_static; then
+  BUILD_VARIANT="${BUILD_VARIANT} link=static"
+fi
+
 # Check whether dymbol table stripping from binaries is requested
 AC_ARG_ENABLE(
   [experimental],

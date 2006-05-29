@@ -48,6 +48,9 @@ namespace squadt {
         /** \brief Closes the active project view */
         inline void on_menu_close(wxCommandEvent& /* event */);
 
+        /** \brief Closes the active project view */
+        inline void on_menu_add_file(wxCommandEvent& /* event */);
+
         /** \brief Creates, shows and eventually removes the about window */
         inline void on_menu_about(wxCommandEvent&);
 
@@ -65,6 +68,9 @@ namespace squadt {
 
         /** \brief Shows a project open dialog and switches the active view to the new project */
         void project_close();
+
+        /** \brief Add a file to the project */
+        void project_add_file();
 
         /** \brief Adds a project view and sets widget properties to enable access to project level functionality */
         void add_project_view(project*);
@@ -117,6 +123,10 @@ namespace squadt {
 
     inline void main::on_menu_open(wxCommandEvent&) {
       project_open();
+    }
+
+    inline void main::on_menu_add_file(wxCommandEvent&) {
+      project_add_file();
     }
 
     inline void main::on_menu_close(wxCommandEvent&) {

@@ -869,6 +869,8 @@ Optional Features:
 Optional Packages:
   --with-PACKAGE[=ARG]    use PACKAGE [ARG=yes]
   --without-PACKAGE       do not use PACKAGE (same as --with-PACKAGE=no)
+  --enable-static         produce and link to static libraries
+
   --with-aterm=dir[,suf]
                           use ATerm headers from dir/include[/suf] and
                           the ATerm library from dir/lib[/suf]
@@ -4068,6 +4070,17 @@ echo "$as_me: compiling with profiling support" >&6;}
   BUILD_VARIANT="profile"
   CPPFLAGS="-pg $CPPFLAGS"
   LDFLAGS="-pg $LDFLAGS"
+fi
+
+# Check for debug/profile options
+
+# Check whether --with-static or --without-static was given.
+if test "${with_static+set}" = set; then
+  withval="$with_static"
+
+fi;
+if test $enable_static; then
+  BUILD_VARIANT="${BUILD_VARIANT} link=static"
 fi
 
 # Check whether dymbol table stripping from binaries is requested
