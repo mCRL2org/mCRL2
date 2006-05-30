@@ -400,12 +400,14 @@ fi
 if test $WX_CONFIG; then
   USE_WX=1
   WX_CPPFLAGS="$($WX_CONFIG --cppflags)"
-  WX_LDFLAGS="$($WX_CONFIG --libs core,base,adv,net)"
+  WX_BASE_LDFLAGS="$($WX_CONFIG --libs core,base)"
+  WX_GL_LDFLAGS="$($WX_CONFIG --libs core,base,gl)"
 fi
 AC_SUBST([USE_WX],[])
 AC_SUBST([WX_CONFIG],[])
 AC_SUBST([WX_CPPFLAGS],[])
-AC_SUBST([WX_LDFLAGS],[])
+AC_SUBST([WX_BASE_LDFLAGS],[])
+AC_SUBST([WX_GL_LDFLAGS],[])
 
 # Checks for header files.
 AC_HEADER_STDC

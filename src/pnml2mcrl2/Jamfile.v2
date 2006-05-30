@@ -1,0 +1,40 @@
+project pnml2mcrl2
+       : source-location .
+       : requirements
+          <include>$(BOOST)
+       : build-dir $(BUILD_TOP)
+       ;
+
+include $(TOP)/config.jam ;
+
+exe pnml2mcrl2
+       : pnml2mcrl2.cpp
+         /libraries/temporary//print
+         /libraries/mcrl2//mcrl2
+       : <source>/root//mcrl2_revision
+         <include>.
+         <cxxflags>"$(XML2_CPPFLAGS)"
+         <linkflags>"$(XML2_LDFLAGS)"
+       ;
+
+explicit install install-libraries install-binaries ;
+
+alias install
+       : install-libraries
+         install-binaries
+       ;
+
+install install-libraries
+       : pnml2mcrl2
+       : <install-dependencies>on <install-type>LIB <location>$(LIB_DIR)
+       : release
+       ;
+
+stage install-binaries
+       : pnml2mcrl2
+       : <install-type>EXE
+         <dll-path>$(LIB_DIR)
+         <location>$(BIN_DIR)
+       : release
+       ;
+

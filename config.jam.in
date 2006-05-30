@@ -1,9 +1,10 @@
 
 # Library specific variables
-IXML2      = "@LIBXML2_CPPFLAGS@" ;
-LXML2      = "@LIBXML2_LDFLAGS@" ;
-IWX        = "@WX_CPPFLAGS@" ;
-LWX_BASE   = "@WX_LDFLAGS@" ;
+XML2_CPPFLAGS   = "@LIBXML2_CPPFLAGS@" ;
+XML2_LDFLAGS    = "@LIBXML2_LDFLAGS@" ;
+WX_CPPFLAGS     = "@WX_CPPFLAGS@" ;
+WX_BASE_LDFLAGS = "@WX_BASE_LDFLAGS@" ;
+WX_GL_LDFLAGS   = "@WX_GL_LDFLAGS@" ;
 
 # Installation related variables
 PREFIX_DIR      = "@PREFIX_DIR@" ;

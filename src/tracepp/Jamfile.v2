@@ -1,0 +1,38 @@
+project tracepp
+       : source-location .
+       : requirements
+          <include>$(BOOST)
+       : build-dir $(BUILD_TOP)
+       ;
+
+exe tracepp
+       : tracepp.cpp
+         /libraries/temporary//print
+         /libraries/temporary//trace
+       : <source>/root//mcrl2_revision
+         <include>.
+       ;
+
+include $(TOP)/config.jam ;
+
+explicit install install-libraries install-binaries ;
+
+alias install
+       : install-libraries
+         install-binaries
+       ;
+
+install install-libraries
+       : tracepp 
+       : <install-dependencies>on <install-type>LIB <location>$(LIB_DIR)
+       : release
+       ;
+
+stage install-binaries
+       : tracepp 
+       : <install-type>EXE
+         <dll-path>$(LIB_DIR)
+         <location>$(BIN_DIR)
+       : release
+       ;
+

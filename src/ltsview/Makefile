@@ -23,6 +23,7 @@ all : $(TARGETS)
 -include ../../utility/revision.mk
 
 ltsview : $(OBJECTS)
+	$(MAKE) -C .. aterm/libATerm.a
 	$(CXX) $(LDFLAGS) $(OBJECTS) $(GLUT_LDFLAGS) $(ATERM_LDFLAGS) $(WX_LIBS) -lATerm -o $@
 
 $(WX_OBJECTS) : %.o: %.cpp
@@ -33,10 +34,10 @@ $(CPP_OBJECTS) : %.o: %.cpp
 
 %.cpp : %.h
 
-fsmparser.cpp : fsmparser.y fsmlexer.cpp
+fsmparser.cpp : fsmparser.yy fsmlexer.cpp
 	$(BISON) --defines=fsmlexer.h -o fsmparser.cpp -p fsm $<
 
-fsmlexer.cpp : fsmlexer.l
+fsmlexer.cpp : fsmlexer.ll
 	$(FLEX) -o$@ -Pfsm $<
 
 $(ICON_OBJECTS) : icons/*.xpm

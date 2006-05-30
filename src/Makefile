@@ -195,8 +195,8 @@ OBJECTS           += $(LIN_OBJECTS)
 LIN_LDFLAGS        = -lrewrite -l$(ATERM) -lm $(LIBDL)
 
 #Group definitions
-EXPERIMENTALS      = $(LIN_NAME) $(ALPHA_NAME)
-EXE_NAMES          = $(LPEPP_NAME) $(TRACEPP_NAME) $(LPE2TORX_NAME) $(SIM_NAME) $(TBF2LPE_NAME) $(PNML2MCRL2_NAME) $(LPEREWR_NAME)
+EXPERIMENTALS      =
+EXE_NAMES          =
 LIB_NAMES          =
 OBJECTS           := $(sort $(OBJECTS))
 
@@ -227,7 +227,7 @@ endif
 # Build/clean/install libxml2 dependent targets
 ifdef BUILD_EXPERIMENTAL
 ifdef USE_WX
-all install: ltsview
+install: ltsview
 ifdef USE_LIBXML2
 install: squadt
 endif

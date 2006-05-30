@@ -16,6 +16,6 @@ obj text_reader
     : exception.cpp
     : # no includes
     :
-    : <cxxflags>"$(IXML2)"
-      <linkflags>"$(LXML2)"
+    : <cxxflags>"$(XML2_CPPFLAGS)"
+      <linkflags>"$(XML2_LDFLAGS)"
     ;

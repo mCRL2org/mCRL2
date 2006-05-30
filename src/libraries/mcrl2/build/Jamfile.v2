@@ -1,0 +1,36 @@
+import bison ;
+import lex ;
+
+project mcrl2
+       : source-location ../source
+       : build-dir $(BUILD_TOP)
+       : default-build debug
+       : requirements
+          <include>..
+       : usage-requirements
+          <include>..
+       ;
+
+lib mcrl2
+       : mcrl2parser.yy
+         mcrl2lexer.ll
+         libparse.cpp
+         typecheck.cpp
+         dataimpl.cpp
+       : <dependency>/libraries/aterm//aterm
+         <dependency>/libraries/temporary//print
+         <dependency>/libraries/temporary//rewrite
+       :
+       : <library>/libraries/aterm//aterm
+         <library>/libraries/temporary//print
+         <library>/libraries/temporary//rewrite
+       ;
+
+lib alpha
+       : libalpha.cpp
+       : <dependency>/libraries/aterm//aterm
+         <dependency>/libraries/temporary//print
+       :
+       : <library>/libraries/aterm//aterm
+         <library>/libraries/temporary//print
+       ;

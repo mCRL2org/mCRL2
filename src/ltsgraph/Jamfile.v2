@@ -1,9 +1,9 @@
-include $(TOP)/config.jam ;
-
 project ltsgraph
        : source-location .
        : build-dir $(BUILD_TOP)
        ;
+
+include $(TOP)/config.jam ;
 
 exe ltsgraph
        : ltsgraph.cpp
@@ -14,8 +14,8 @@ exe ltsgraph
          <source>/libraries/lts//lts
          <source>/root//mcrl2_revision
          <include>.
-         <cxxflags>"$(IWX)"
-         <linkflags>"$(LWX_BASE)"
+         <cxxflags>"$(WX_CPPFLAGS)"
+         <linkflags>"$(WX_BASE_LDFLAGS)"
        ;
 
 explicit install install-libraries install-binaries ;
