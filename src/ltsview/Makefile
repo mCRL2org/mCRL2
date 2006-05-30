@@ -35,7 +35,7 @@ $(CPP_OBJECTS) : %.o: %.cpp
 %.cpp : %.h
 
 fsmparser.cpp : fsmparser.yy fsmlexer.cpp
-	$(BISON) --defines=fsmlexer.h -o fsmparser.cpp -p fsm $<
+	$(BISON) --defines=fsmparser.hpp -o fsmparser.cpp -p fsm $<
 
 fsmlexer.cpp : fsmlexer.ll
 	$(FLEX) -o$@ -Pfsm $<

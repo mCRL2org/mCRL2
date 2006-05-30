@@ -2,7 +2,7 @@
 #include <stdio.h>
 #include <string>
 #include "aterm/aterm2.h"
-#include "fsmlexer.h"
+#include "fsmparser.hpp"
 using namespace std;
 
 int lineNo=1, posNo=1;
