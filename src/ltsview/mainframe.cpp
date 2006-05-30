@@ -455,6 +455,12 @@ GLCanvas* MainFrame::getGLCanvas() const
   return glCanvas;
 }
 
+void MainFrame::setFileInfo( wxFileName fn )
+{
+  directory = fn.GetPath();
+  filename  = fn.GetFullName();
+}
+
 void MainFrame::onOpen( wxCommandEvent& /*event*/ )
 {
   wxString filemask = wxT("FSM files (*.fsm)|*.fsm");
@@ -464,7 +470,7 @@ void MainFrame::onOpen( wxCommandEvent& /*event*/ )
   if ( dialog->ShowModal() == wxID_OK )
   {
     directory = dialog->GetDirectory();
-    filename = dialog->GetFilename();
+    filename  = dialog->GetFilename();
     mediator->openFile( string(dialog->GetPath().fn_str()) );
   }
   dialog->Close();

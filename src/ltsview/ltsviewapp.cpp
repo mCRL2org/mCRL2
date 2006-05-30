@@ -31,6 +31,7 @@ bool LTSViewApp::OnInit()
       wxFileName fileName( cmdParser.GetParam(0) );
       fileName.Normalize( wxPATH_NORM_LONG | wxPATH_NORM_DOTS |
 	  wxPATH_NORM_TILDE | wxPATH_NORM_ABSOLUTE );
+      mainFrame->setFileInfo( fileName );
       openFile( static_cast< string > ( fileName.GetFullPath().fn_str() ) );
     }
   }

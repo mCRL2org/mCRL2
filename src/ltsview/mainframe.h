@@ -13,6 +13,7 @@
 #include <wx/bitmap.h>
 #include <wx/event.h>
 #include <wx/checklst.h>
+#include <wx/filename.h>
 #include "aterm/aterm2.h"
 #include "spinctrlfloat.h"
 #include "colorbutton.h"
@@ -52,6 +53,7 @@ class MainFrame : public wxFrame
     void	replaceMarkRule( int index, wxString str );
     void	resetMarkRules();
     void	setActionLabels( vector< ATerm > &labels );
+    void	setFileInfo( wxFileName fn );
     void	setMarkedStatesInfo( int number );
     void	setMarkedTransitionsInfo( int number );
     void	setNumberInfo( int nstates, int ntransitions, int nclusters, int nranks );
