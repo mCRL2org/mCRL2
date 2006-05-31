@@ -173,7 +173,7 @@ void Visualizer::drawLTS( Point3D viewpoint )
 	  drawStatesMarkDeadlocks( lts->getInitialState()->getCluster() );
 	  break;
 	default:
-	  setColor( visSettings.stateColor, 0 );
+	  setColor( visSettings.stateColor, 1.0f );
 	  drawStates( lts->getInitialState()->getCluster() );
 	  break;
       }
@@ -753,9 +753,9 @@ void Visualizer::drawStatesMarkStates( Cluster* root )
 	++s_it )
   {
     if ( (**s_it).isMarked() )
-      setColor( visSettings.markedColor, 0 );
+      setColor( visSettings.markedColor, 1.0f );
     else
-      setColor( RGB_WHITE, 0 );
+      setColor( RGB_WHITE, 1.0f );
 
     if ( (**s_it).getPosition() < -0.9f )
       glutSolidSphere( visSettings.nodeSize, 4, 4 );
@@ -806,9 +806,9 @@ void Visualizer::drawStatesMarkDeadlocks( Cluster* root )
 	++s_it )
   {
     if ( (**s_it).isDeadlock() )
-      setColor( visSettings.markedColor, 0 );
+      setColor( visSettings.markedColor, 1.0f );
     else
-      setColor( RGB_WHITE, 0 );
+      setColor( RGB_WHITE, 1.0f );
 
     if ( (**s_it).getPosition() < -0.9f )
       glutSolidSphere( visSettings.nodeSize, 4, 4 );
