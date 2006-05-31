@@ -5,7 +5,7 @@ exe maximum_revision
          <threading>single
          <link>static
          <variant>release
-         <toolset>darwin:<link>shared 
+         <toolset>darwin:<variant>debug
        ;
 
 actions quietly run_maximum_revision {

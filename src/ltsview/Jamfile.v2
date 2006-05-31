@@ -55,7 +55,6 @@ exe ltsview
         visualizer.cpp
         cluster.cpp
         utils.cpp
-        glutils.cpp
         fsm
         spinctrlfloat
         GLUT
