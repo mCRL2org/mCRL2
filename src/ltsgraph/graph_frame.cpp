@@ -209,14 +209,19 @@ void GraphFrame::OnOpen( wxCommandEvent& /* event */ ) {
 }
 
 void GraphFrame::OnQuit( wxCommandEvent& /* event */ ) {
-	StopOpti = true;
   Close( TRUE );
 }
 
 void GraphFrame::OnClose(wxCloseEvent& /*event*/) {
-	StopOpti = true;
-	while(!StopOpti);
-  Close( TRUE );
+  StopOpti = true;
+
+  while(!StopOpti) {
+    wxTheApp->Yield(true); // to allow user to interrupt optimizing
+  }
+
+  static_cast < wxSplitterWindow* > (leftPanel->GetParent())->Unsplit(leftPanel);
+  delete leftPanel;
+  Destroy();
 }
 
 void GraphFrame::OnOptimize( wxCommandEvent& /* event */ ) {
@@ -611,7 +616,6 @@ void ViewPort::OnPaint(wxPaintEvent& /* event */) {
 
 //Resizing Graph
 void ViewPort::OnResize(wxSizeEvent& event) {
-
   wxSize sz2 = GetClientSize();
 
 	GF->Resize(sz2); 

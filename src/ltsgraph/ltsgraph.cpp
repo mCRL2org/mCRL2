@@ -40,8 +40,11 @@ bool OnInit() {
 
     return TRUE;
 }
-};
 
+int OnExit() {
+  return (wxApp::OnExit());
+}
+};
 
 IMPLEMENT_APP_NO_MAIN(GraphApp)
 IMPLEMENT_WX_THEME_SUPPORT
