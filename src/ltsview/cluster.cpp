@@ -104,8 +104,8 @@ void Cluster::computeSizeAndDescendantPositions()
   {
     baseRadius = topRadius;
     size = topRadius;
-    //volume = PI * topRadius * topRadius;
-    volume = 0.0f;
+    volume = 4 * PI/3 * topRadius * topRadius * topRadius;
+    //volume = 0.0f;
   }
   else if ( descendants.size() == 1 )
   {
