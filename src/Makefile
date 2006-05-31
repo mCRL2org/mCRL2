@@ -227,7 +227,7 @@ endif
 # Build/clean/install libxml2 dependent targets
 ifdef BUILD_EXPERIMENTAL
 ifdef USE_WX
-install: ltsview
+#install: ltsview
 ifdef USE_LIBXML2
 install: squadt
 endif
