@@ -20,22 +20,29 @@ using namespace std;
 class Node
 {
 public:
-  Node(unsigned int _num, double _posX, double _posY, wxString _lbl);
+  Node(unsigned int _num, double _posX, double _posY, wxString _lbl, bool _initState);
   void OnPaint(wxPaintDC * ptrDC);
   unsigned int Get_num();
   double GetX(); 
   double GetY();
   void SetXY(double, double);
+	void forceSetXY(double, double);//set the x and y even if node is locked
   bool IsLocked();
   void Lock();
   void Unlock();
+	void ShowLabels();
+	void HideLabels();
+	void SetRadius(int);
 
 private:
+	int radius;
   bool locked;
+	bool labelsVisible;
   double posX;
   double posY;
   wxString lbl;
   unsigned int num;
+	bool initState;
     
 
 };

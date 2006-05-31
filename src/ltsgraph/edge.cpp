@@ -12,8 +12,10 @@ const double triangle_height = 8.0;
 const wxColour color = "BLACK";
 
 Edge::Edge(Node* _N1, Node* _N2, wxString _lbl) : lbl(_lbl) 
-{ N1=_N1;
+{ 
+	N1=_N1;
   N2=_N2;
+	lbl.Replace(wxT("\""), wxT(""), true);
 }
 
 
@@ -76,17 +78,18 @@ void Edge::OnPaint(wxPaintDC * ptrDC)
     ptrDC->DrawLine((wxCoord)GetXpos1(),(wxCoord)GetYpos1(),(wxCoord)GetXpos2(),(wxCoord)GetYpos2());
 
     //Label
-
-    wxFont MyFont(FONT_SIZE, wxSWISS , wxNORMAL, wxNORMAL, false, wxT("Arial"));
-    ptrDC->SetFont(MyFont);
-
-    double x1=N1->GetX();
-    double y1=N1->GetY();
-    double x2=N2->GetX();
-    double y2=N2->GetY();
-    double posX=(x1+x2)/2+POS_EDGE_LBL_X;
-    double posY=(y1+y2)/2+POS_EDGE_LBL_Y;
-    ptrDC->DrawRotatedText(lbl,(int) round(posX),(int) round(posY),0);
+		if (labelsVisible) {
+			wxFont MyFont(FONT_SIZE, wxSWISS , wxNORMAL, wxNORMAL, false, wxT("Arial"));
+			ptrDC->SetFont(MyFont);
+	
+			double x1=N1->GetX();
+			double y1=N1->GetY();
+			double x2=N2->GetX();
+			double y2=N2->GetY();
+			double posX=(x1+x2)/2+POS_EDGE_LBL_X;
+			double posY=(y1+y2)/2+POS_EDGE_LBL_Y;
+			ptrDC->DrawRotatedText(lbl,(int) round(posX),(int) round(posY),0);
+		}
 }
 
 Node* Edge::Get_N1() 
@@ -114,5 +117,11 @@ double Edge::GetYpos2() {
   return N2->GetY();
 }
 
+void Edge::ShowLabels() {
+		labelsVisible = true;
+} 
 
+void Edge::HideLabels() {
+		labelsVisible = false;
+} 
 

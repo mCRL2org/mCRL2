@@ -30,12 +30,17 @@ public:
   double GetXpos2();
   double GetYpos2();
 
+	void ShowLabels();
+	void HideLabels();
+
 private:
 
   Node* N1; 
   Node* N2; // Start and end nodes.
 
   wxString lbl;
+
+	bool labelsVisible;
     
 
 };
