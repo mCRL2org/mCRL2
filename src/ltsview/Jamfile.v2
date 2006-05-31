@@ -13,10 +13,15 @@ include $(TOP)/config.jam ;
 lib glut : : <name>glut ;
 lib GL : : <name>GL ;
 
+cpp fsmlexer.cpp
+      : fsmlexer.ll
+      : <flex.prefix>"fsm"
+      ;
+
 lib fsm
       : fsmparser.yy
       : <bison.prefix>"fsm"
-        <flex.prefix>"fsm"
+        <implicit-dependency>fsmlexer.cpp
         <dependency>/libraries/aterm//aterm
       ;
 
