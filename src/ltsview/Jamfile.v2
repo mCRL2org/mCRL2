@@ -10,18 +10,16 @@ import bison : bison ;
 
 include $(TOP)/config.jam ;
 
-lib GLUT
+alias GLUT
       :
-      : <toolset>darwin:<linkflags>"-framework GLUT"
-        <os>windows:<name>glut32
-        <name>glut
+      : <os>NT:<name>"glut32"
+        <os>LINUX:<name>"glut"
       ;
 
-lib GL
+alias OpenGL
       :
-      : <toolset>darwin:<linkflags>"-framework OpenGL"
-        <os>windows:<name>opengl32
-        <name>GL
+      : <os>NT:<name>"opengl32"
+        <os>LINUX:<name>"GL"
       ;
 
 cpp fsmlexer.cpp
@@ -56,14 +54,16 @@ exe ltsview
         cluster.cpp
         utils.cpp
         fsm
-        spinctrlfloat
+        OpenGL
         GLUT
-        GL
+        spinctrlfloat
         /libraries/temporary//lowlevel
         /libraries/aterm//aterm
       : <implicit-dependency>fsm
         <cxxflags>"$(WX_CPPFLAGS)"
         <linkflags>"$(WX_GL_LDFLAGS)"
+        <toolset>darwin:<framework>"OpenGL"
+        <toolset>darwin:<framework>"GLUT"
       ;
 
 alias install
