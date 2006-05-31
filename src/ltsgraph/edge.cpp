@@ -20,7 +20,7 @@ Edge::Edge(Node* _N1, Node* _N2, wxString _lbl) : lbl(_lbl)
 
 
 
-void Edge::OnPaint(wxPaintDC * ptrDC) 
+void Edge::OnPaint(wxDC * ptrDC) 
 {
     //Calculate triangle coord
     //angle expressed in radians
@@ -91,6 +91,7 @@ void Edge::OnPaint(wxPaintDC * ptrDC)
 			ptrDC->DrawRotatedText(lbl,(int) round(posX),(int) round(posY),0);
 		}
 }
+
 
 Node* Edge::Get_N1() 
 {

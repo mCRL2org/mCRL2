@@ -2,6 +2,7 @@
 
 BEGIN_EVENT_TABLE(GraphFrame, wxFrame)
   EVT_MENU(wxID_OPEN, GraphFrame::OnOpen)
+	EVT_MENU(ID_EXPORT_PS, GraphFrame::ExportPostScript)
   EVT_MENU(wxID_EXIT, GraphFrame::OnQuit)
   EVT_MENU(ID_OPTIMIZE, GraphFrame::OnOptimize)
   EVT_MENU(ID_STOP_OPTIMIZE, GraphFrame::OnStopOptimize)
@@ -168,8 +169,9 @@ void GraphFrame::CreateMenu() {
     
   //file
   file = new wxMenu;
-  openItem = file->Append( wxID_OPEN, wxT("&Open...\tCTRL-o"), wxT("") );
-  quitItem = file->Append( wxID_EXIT, wxT("&Quit\tCTRL-q"), wxT("") );
+  openItem     = file->Append( wxID_OPEN, wxT("&Open...\tCTRL-o"), wxT("") );
+	exportPsItem = file->Append( ID_EXPORT_PS, wxT("Export to &PostScript\tCTRL-p"), wxT("") );
+  quitItem     = file->Append( wxID_EXIT, wxT("&Quit\tCTRL-q"), wxT("") );
   menu->Append( file, wxT("&File") );
 
   //draw
@@ -525,6 +527,38 @@ void GraphFrame::Draw(wxPaintDC * myDC) {
     for (size_t n = 0; n < vectNode.size(); n++) {
         vectNode[n]->OnPaint(myDC);
     }
+}
+
+void GraphFrame::ExportPostScript( wxCommandEvent& /* event */ ) {
+
+		wxPrintData pd;
+		pd.SetFilename(_("test.ps"));
+    pd.SetPrintMode(wxPRINT_MODE_FILE);
+    wxPostScriptDC myDC(pd);
+		myDC.StartDoc(wxT("pri*nting..."));
+		//pd.SetFontMetricPath(wxT("afm/"));
+		
+
+		
+	
+		//wxPostScriptDC * myDC = new wxPostScriptDC();
+
+// 		wxPostScriptDC * myDC = new wxPostScriptDC(wxT("./test.ps"), true, this);
+
+		//fix a bug (the size status text disappeared)
+ 		wxSize size = wxSize(leftPanel->Get_Width(), leftPanel->Get_Height());
+ 		FillStatusBar(GetInfoWinSize(size),0);
+
+    //Call Edge and Node OnPaint() method (Edge 1st)
+    for (size_t n = 0; n < vectEdge.size(); n++) {
+        vectEdge[n]->OnPaint(&myDC);
+    }
+      
+    for (size_t n = 0; n < vectNode.size(); n++) {
+        vectNode[n]->OnPaint(&myDC);
+    }
+
+		myDC.EndDoc();
 }
 
 void GraphFrame::Resize(wxSize sz2) {

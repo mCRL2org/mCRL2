@@ -6,7 +6,7 @@ Node::Node(unsigned int _num, double _posX, double _posY, wxString _lbl, bool _i
   locked = false;
 }
 
-void Node::OnPaint(wxPaintDC * ptrDC) 
+void Node::OnPaint(wxDC * ptrDC) 
 {
   wxColour color;
   if (!locked)

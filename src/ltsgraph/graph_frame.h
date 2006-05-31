@@ -7,6 +7,8 @@
 #include <wx/utils.h>
 #include <wx/msgdlg.h>
 #include <wx/gdicmn.h>
+#include <wx/dcps.h>
+//#include <wx/cmndata.h>
 //layout
 #include <wx/splitter.h>
 #include <wx/panel.h>
@@ -24,8 +26,7 @@
 #include "liblts.h"
 #include "libstruct.h"
 
-#include "./../../../tmp/MCRL2/trunk/src/ltsview/spinctrlfloat.h"
-//#include "./../ltsview/spinctrlfloat.h"
+#include "./../ltsview/spinctrlfloat.h"
 
 #include "node.h"
 #include "edge.h"
@@ -37,11 +38,12 @@
 using namespace std;
 using namespace mcrl2::lts;
 
-const int ID_OPTIMIZE      = 10000;
-const int ID_STOP_OPTIMIZE = 10001;
-const int ID_CHECK_NODE    = 10002;
-const int ID_CHECK_EDGE    = 10003;
-const int ID_BUTTON_OPTI   = 10004;
+const int ID_OPTIMIZE      = wxID_HIGHEST + 0;
+const int ID_STOP_OPTIMIZE = wxID_HIGHEST + 1;
+const int ID_CHECK_NODE    = wxID_HIGHEST + 2;
+const int ID_CHECK_EDGE    = wxID_HIGHEST + 3;
+const int ID_BUTTON_OPTI   = wxID_HIGHEST + 4;
+const int ID_EXPORT_PS     = wxID_HIGHEST + 5;
 
 
 
@@ -54,6 +56,7 @@ public:
 	void BuildLayout();
   void Init(wxString LTSfile);
 	void Draw(wxPaintDC * myDC);
+	void ExportPostScript(wxCommandEvent& event);
 	void Resize(wxSize);
 	void ReplaceAfterDrag(wxPoint);
 	void FixNode(int num);
@@ -88,6 +91,7 @@ private:
   wxMenu * file;
   wxMenu * draw;
   wxMenuItem * openItem;
+  wxMenuItem * exportPsItem;
   wxMenuItem * quitItem;
   wxMenuItem * optimizeGraph;
   wxMenuItem * stopOptimize;

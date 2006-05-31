@@ -7,6 +7,7 @@
 
 #include "wx/wxprec.h"
 #include "wx/dataobj.h"
+#include <wx/dcps.h>
 #include <string>
 
 #define POS_NODE_LBL_X 3.0
@@ -21,7 +22,7 @@ class Node
 {
 public:
   Node(unsigned int _num, double _posX, double _posY, wxString _lbl, bool _initState);
-  void OnPaint(wxPaintDC * ptrDC);
+  void OnPaint(wxDC * ptrDC);
   unsigned int Get_num();
   double GetX(); 
   double GetY();

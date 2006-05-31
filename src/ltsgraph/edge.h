@@ -6,6 +6,7 @@
 #endif
 
 #include "wx/wxprec.h"
+#include <wx/dcps.h>
 #include "node.h"
 #include <string>
 
@@ -21,7 +22,7 @@ public:
   Edge();
   Edge(Node* _N1, Node* _N2, wxString _Slbl);
 
-  void OnPaint(wxPaintDC * ptrDC);
+  void OnPaint(wxDC * ptrDC);
   Node* Get_N1();
   Node* Get_N2();
 
