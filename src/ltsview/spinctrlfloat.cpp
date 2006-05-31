@@ -1,4 +1,12 @@
 #include "spinctrlfloat.h"
+#include <cmath>
+
+int roundToInt( double f )
+{
+  double intpart;
+  modf( f + 0.5, &intpart );
+  return static_cast< int > ( intpart );
+}
 
 wxSpinCtrlFloat::wxSpinCtrlFloat(wxWindow* parent, wxWindowID id, float p_Min, float
     p_Max, float p_Rate, float p_Init, const wxPoint& pos, const wxSize&

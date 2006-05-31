@@ -10,8 +10,19 @@ import bison : bison ;
 
 include $(TOP)/config.jam ;
 
-lib glut : : <name>glut ;
-lib GL : : <name>GL ;
+lib GLUT
+      :
+      : <toolset>darwin:<linkflags>"-framework GLUT"
+        <os>windows:<name>glut32
+        <name>glut
+      ;
+
+lib GL
+      :
+      : <toolset>darwin:<linkflags>"-framework OpenGL"
+        <os>windows:<name>opengl32
+        <name>GL
+      ;
 
 cpp fsmlexer.cpp
       : fsmlexer.ll
@@ -25,11 +36,16 @@ lib fsm
         <dependency>/libraries/aterm//aterm
       ;
 
+# This file does not belong here anymore, it is shared with ltsgraph
+obj spinctrlfloat
+      : spinctrlfloat.cpp
+      : <cxxflags>"$(WX_CPPFLAGS)"
+      ;
+
 exe ltsview
       : ltsviewapp.cpp
         mainframe.cpp
         glcanvas.cpp
-        spinctrlfloat.cpp # This file does not belong here anymore, it is shared with ltsgraph
         markstateruledialog.cpp
         colorbutton.cpp
         lts.cpp
@@ -41,7 +57,8 @@ exe ltsview
         utils.cpp
         glutils.cpp
         fsm
-        glut
+        spinctrlfloat
+        GLUT
         GL
         /libraries/temporary//lowlevel
         /libraries/aterm//aterm

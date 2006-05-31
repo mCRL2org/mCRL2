@@ -3,9 +3,8 @@
 #include <string>
 #include <wx/wx.h>
 #include <wx/spinbutt.h>
-#include "utils.h"
+
 using namespace std;
-using namespace Utils;
 
 class wxSpinCtrlFloat : public wxPanel
 {
