@@ -10,7 +10,7 @@ exe ltsgraph
          graph_frame.cpp
          node.cpp
          edge.cpp
-         /tools/ltsview//spinctrlfloat
+         /libraries/wx_extension//wx_extension
        : <source>/libraries/temporary//print
          <source>/libraries/lts//lts
          <source>/root//mcrl2_revision

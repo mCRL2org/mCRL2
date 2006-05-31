@@ -1,0 +1,29 @@
+project wx_extension
+       : source-location ../source
+       : build-dir $(BUILD_TOP)
+       : requirements
+          <include>..
+       : usage-requirements
+          <include>..
+       ;
+
+include $(TOP)/config.jam ;
+
+obj spinctrlfloat.o
+      : spinctrlfloat.cpp
+      : <cxxflags>"$(WX_CPPFLAGS)"
+      ;
+
+obj colorbutton.o
+      : colorbutton.cpp
+      : <cxxflags>"$(WX_CPPFLAGS)"
+      ;
+
+lib wx_extension
+       : colorbutton.o
+         spinctrlfloat.o
+       : <cxxflags>"$(WX_CPPFLAGS)"
+       :
+       : <cxxflags>"$(WX_CPPFLAGS)"
+       ;
+

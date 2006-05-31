@@ -7,20 +7,24 @@ project ltsview
 
 import lex : lex ;
 import bison : bison ;
+import os : name ;
 
 include $(TOP)/config.jam ;
 
-alias GLUT
-      :
-      : <os>NT:<name>"glut32"
-        <os>LINUX:<name>"glut"
-      ;
-
-alias OpenGL
-      :
-      : <os>NT:<name>"opengl32"
-        <os>LINUX:<name>"GL"
-      ;
+switch [ os.name ] {
+  case "NT" :
+    lib OpenGL : : <name>"opengl32" ;
+    lib GLU : : <name>"glu32" ;
+    lib GLUT : : <name>"glut32" ;
+  case "MACOSX" :
+    alias OpenGL : : : : <framework>"OpenGL" ;
+    alias GLUT : : : : <framework>"GLUT" ;
+    alias GLU ;
+  case * :
+    lib OpenGL : : <name>"GL" ;
+    lib GLU : : <name>"GLU" ;
+    lib GLUT : : <name>"glut" ;
+}
 
 cpp fsmlexer.cpp
       : fsmlexer.ll
@@ -34,18 +38,11 @@ lib fsm
         <dependency>/libraries/aterm//aterm
       ;
 
-# This file does not belong here anymore, it is shared with ltsgraph
-obj spinctrlfloat
-      : spinctrlfloat.cpp
-      : <cxxflags>"$(WX_CPPFLAGS)"
-      ;
-
 exe ltsview
       : ltsviewapp.cpp
         mainframe.cpp
         glcanvas.cpp
         markstateruledialog.cpp
-        colorbutton.cpp
         lts.cpp
         state.cpp
         transition.cpp
@@ -56,14 +53,12 @@ exe ltsview
         fsm
         OpenGL
         GLUT
-        spinctrlfloat
+        /libraries/wx_extension//wx_extension
         /libraries/temporary//lowlevel
         /libraries/aterm//aterm
       : <implicit-dependency>fsm
         <cxxflags>"$(WX_CPPFLAGS)"
         <linkflags>"$(WX_GL_LDFLAGS)"
-        <toolset>darwin:<framework>"OpenGL"
-        <toolset>darwin:<framework>"GLUT"
       ;
 
 alias install
