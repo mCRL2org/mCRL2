@@ -69,7 +69,7 @@ void State::unmark()
 {
   marked = false;
 }
-
+/*
 bool State::isSelected() const
 {
   return selected;
@@ -84,7 +84,7 @@ void State::deselect()
 {
   selected = false;
 }
-
+*/
 int State::getRank() const
 {
   return rank;

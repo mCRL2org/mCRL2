@@ -37,6 +37,7 @@ namespace Utils
 
   struct VisSettings
   {
+    float     alpha;
     RGB_Color backgroundColor;
     float     backpointerCurve;
 //    int	      branchRotation;
@@ -53,7 +54,6 @@ namespace Utils
     int	      outerBranchTilt;
     int	      quality;
     RGB_Color stateColor;
-    int	      transparency;
     RGB_Color upEdgeColor;
   };
 

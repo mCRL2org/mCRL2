@@ -631,6 +631,7 @@ VisSettings MainFrame::getVisSettings() const
   };
   VisSettings result =
   {
+    (100-transparencySpinCtrl->GetValue()) / 100.0f,
     bgC,
     backpointerSpinCtrl->GetValue(),
 //    branchrotationSpinCtrl->GetValue(),
@@ -647,7 +648,6 @@ VisSettings MainFrame::getVisSettings() const
     outerbranchtiltSpinCtrl->GetValue(),
     qualitySpinCtrl->GetValue(),
     stateC,
-    transparencySpinCtrl->GetValue(),
     //0,
     upC
   };
@@ -671,7 +671,7 @@ void MainFrame::setVisSettings( VisSettings ss )
   interpolate2Button->SetBackgroundColour( wxColour( ss.interpolateColor2.r,
 	ss.interpolateColor2.g, ss.interpolateColor2.b ) );
   longinterpolateCheckBox->SetValue( ss.longInterpolation );
-  transparencySpinCtrl->SetValue( ss.transparency );
+  transparencySpinCtrl->SetValue( 100 - (int)(ss.alpha * 100) );
   nodesizeSpinCtrl->SetValue( ss.nodeSize );
   backpointerSpinCtrl->SetValue( ss.backpointerCurve );
 //  clusterheightSpinCtrl->SetValue( ss.clusterHeight );

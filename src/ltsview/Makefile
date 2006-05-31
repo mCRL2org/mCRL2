@@ -10,7 +10,7 @@ WX_OBJECTS	 = ltsviewapp.o mainframe.o glcanvas.o spinctrlfloat.o \
 		   markstateruledialog.o colorbutton.o
 AT_OBJECTS	 = ltsviewapp.o action.o fsmparser.o lts.o state.o
 CPP_OBJECTS	 = fileloader.o visualizer.o lts.o state.o transition.o \
-		   cluster.o fsmparser.o utils.o glutils.o ../liblowlevel.o
+		   cluster.o fsmparser.o utils.o ../liblowlevel.o
 
 OBJECTS		 = $(WX_OBJECTS) $(CPP_OBJECTS)
 TARGETS		 = ltsview

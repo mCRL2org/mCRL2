@@ -1,9 +1,14 @@
 #include "visualizer.h"
 
+bool Distance_desc::operator()(const Primitive* p1, const Primitive* p2) const
+{
+  return ( p1->distance > p2->distance );
+}
+
 VisSettings Visualizer::defaultVisSettings =
 {
-  { 120, 120, 120 }, 0.3f, /*100, 1.2f,*/ RGB_WHITE, RGB_WHITE,
-  { 0, 0, 255 }, /*false,*/ false, { 255, 0, 0 }, 0.1f, 30, 12, RGB_WHITE, 40, 
+  0.6f, { 120, 120, 120 }, 0.3f, /*100, 1.2f,*/ RGB_WHITE, RGB_WHITE,
+  { 0, 0, 255 }, /*false,*/ false, { 255, 0, 0 }, 0.1f, 30, 12, RGB_WHITE,
   { 0, 0, 255 }
 };
 
@@ -113,7 +118,7 @@ bool Visualizer::setVisSettings( VisSettings vs )
   }
   
   if ( oldSettings.quality != vs.quality ||
-       oldSettings.transparency != vs.transparency )
+       fabs( oldSettings.alpha - vs.alpha ) > 0.01f )
   {
     refreshPrimitives = true;
   }
@@ -168,7 +173,7 @@ void Visualizer::drawLTS( Point3D viewpoint )
 	  drawStatesMarkDeadlocks( lts->getInitialState()->getCluster() );
 	  break;
 	default:
-	  GLUtils::setColor( visSettings.stateColor, 0 );
+	  setColor( visSettings.stateColor, 0 );
 	  drawStates( lts->getInitialState()->getCluster() );
 	  break;
       }
@@ -336,7 +341,7 @@ void Visualizer::drawSubtree( Cluster* root, bool topClosed, HSV_Color col,
     glNewList( displist, GL_COMPILE );
       glPushMatrix();
       glMultMatrixf( M );
-      GLUtils::setColor( HSVtoRGB( col ), visSettings.transparency );
+      setColor( HSVtoRGB( col ), visSettings.alpha );
       glutSolidSphere( root->getTopRadius(), visSettings.quality, visSettings.quality );
       glPopMatrix();
     glEndList();
@@ -364,10 +369,8 @@ void Visualizer::drawSubtree( Cluster* root, bool topClosed, HSV_Color col,
     glNewList( displist, GL_COMPILE );
       glPushMatrix();
       glMultMatrixf( M );
-      GLUtils::coloredCylinder( root->getTopRadius(), root->getBaseRadius(),
-	  clusterHeight, visSettings.quality, HSVtoRGB( col ), HSVtoRGB( desccol
-	    ), visSettings.transparency, topClosed, ( descendants.size() > 1 )
-	  );
+      drawColoredCylinder( root->getTopRadius(), root->getBaseRadius(),
+	  HSVtoRGB(col), HSVtoRGB(desccol), topClosed, descendants.size() > 1 );
       glPopMatrix();
     glEndList();
 
@@ -389,9 +392,10 @@ void Visualizer::drawSubtree( Cluster* root, bool topClosed, HSV_Color col,
       
       if ( desc->getPosition() < -0.9f )
       {
-	// descendant is centered
 	glTranslatef( 0.0f, 0.0f, clusterHeight );
+	
 	drawSubtree( desc, false, desccol, delta_col );
+	
 	glTranslatef( 0.0f, 0.0f, -clusterHeight );
       }
       else
@@ -425,9 +429,9 @@ void Visualizer::drawSubtreeMarkStates( Cluster* root, bool topClosed )
       glPushMatrix();
       glMultMatrixf( M );
       if ( root->hasMarkedState() )
-	GLUtils::setColor( visSettings.markedColor, visSettings.transparency );
+	setColor( visSettings.markedColor, visSettings.alpha );
       else
-	GLUtils::setColor( RGB_WHITE, visSettings.transparency );
+	setColor( RGB_WHITE, visSettings.alpha );
       glutSolidSphere( root->getTopRadius(), visSettings.quality, visSettings.quality );
       glPopMatrix();
     glEndList();
@@ -452,16 +456,14 @@ void Visualizer::drawSubtreeMarkStates( Cluster* root, bool topClosed )
       glMultMatrixf( M );
       if ( root->hasMarkedState() )
       {
-	GLUtils::coloredCylinder( root->getTopRadius(), root->getBaseRadius(),
-	  clusterHeight, visSettings.quality, visSettings.markedColor,
-	  RGB_WHITE, visSettings.transparency, topClosed, descendants.size() >
-	  1);
+	drawColoredCylinder( root->getTopRadius(), root->getBaseRadius(),
+	    visSettings.markedColor, RGB_WHITE, topClosed, descendants.size() >
+	    1 );
       }
       else
       {
-	GLUtils::coloredCylinder( root->getTopRadius(), root->getBaseRadius(),
-	  clusterHeight, visSettings.quality, RGB_WHITE, RGB_WHITE,
-	  visSettings.transparency, topClosed, descendants.size() > 1 );
+	drawColoredCylinder( root->getTopRadius(), root->getBaseRadius(),
+	    RGB_WHITE, RGB_WHITE, topClosed, descendants.size() > 1 );
       }
       glPopMatrix();
     glEndList();
@@ -484,9 +486,10 @@ void Visualizer::drawSubtreeMarkStates( Cluster* root, bool topClosed )
       
       if ( desc->getPosition() < -0.9f )
       {
-	// descendant is centered
 	glTranslatef( 0.0f, 0.0f, clusterHeight );
+	
 	drawSubtreeMarkStates( desc, false );
+	
 	glTranslatef( 0.0f, 0.0f, -clusterHeight );
       }
       else
@@ -520,9 +523,9 @@ void Visualizer::drawSubtreeMarkDeadlocks( Cluster* root, bool topClosed )
       glPushMatrix();
       glMultMatrixf( M );
       if ( root->hasDeadlock() )
-	GLUtils::setColor( visSettings.markedColor, visSettings.transparency );
+	setColor( visSettings.markedColor, visSettings.alpha );
       else
-	GLUtils::setColor( RGB_WHITE, visSettings.transparency );
+	setColor( RGB_WHITE, visSettings.alpha );
       glutSolidSphere( root->getTopRadius(), visSettings.quality, visSettings.quality );
       glPopMatrix();
     glEndList();
@@ -547,16 +550,14 @@ void Visualizer::drawSubtreeMarkDeadlocks( Cluster* root, bool topClosed )
       glMultMatrixf( M );
       if ( root->hasDeadlock() )
       {
-	GLUtils::coloredCylinder( root->getTopRadius(), root->getBaseRadius(),
-	  clusterHeight, visSettings.quality, visSettings.markedColor,
-	  RGB_WHITE, visSettings.transparency, topClosed, descendants.size() > 1
-	  );
+	drawColoredCylinder( root->getTopRadius(), root->getBaseRadius(),
+	    visSettings.markedColor, RGB_WHITE, topClosed, descendants.size() >
+	    1 );
       }
       else
       {
-	GLUtils::coloredCylinder( root->getTopRadius(), root->getBaseRadius(),
-	  clusterHeight, visSettings.quality, RGB_WHITE, RGB_WHITE,
-	  visSettings.transparency, topClosed, descendants.size() > 1 );
+	drawColoredCylinder( root->getTopRadius(), root->getBaseRadius(),
+	    RGB_WHITE, RGB_WHITE, topClosed, descendants.size() > 1 );
       }
       glPopMatrix();
     glEndList();
@@ -579,9 +580,10 @@ void Visualizer::drawSubtreeMarkDeadlocks( Cluster* root, bool topClosed )
       
       if ( desc->getPosition() < -0.9f )
       {
-	// descendant is centered
 	glTranslatef( 0.0f, 0.0f, clusterHeight );
+
 	drawSubtreeMarkDeadlocks( desc, false );
+
 	glTranslatef( 0.0f, 0.0f, -clusterHeight );
       }
       else
@@ -615,9 +617,9 @@ void Visualizer::drawSubtreeMarkTransitions( Cluster* root, bool topClosed )
       glPushMatrix();
       glMultMatrixf( M );
       if ( root->hasMarkedTransition() )
-	GLUtils::setColor( visSettings.markedColor, visSettings.transparency );
+	setColor( visSettings.markedColor, visSettings.alpha );
       else
-	GLUtils::setColor( RGB_WHITE, visSettings.transparency );
+	setColor( RGB_WHITE, visSettings.alpha );
       glutSolidSphere( root->getTopRadius(), visSettings.quality, visSettings.quality );
       glPopMatrix();
     glEndList();
@@ -642,16 +644,14 @@ void Visualizer::drawSubtreeMarkTransitions( Cluster* root, bool topClosed )
       glMultMatrixf( M );
       if ( root->hasMarkedTransition() )
       {
-	GLUtils::coloredCylinder( root->getTopRadius(), root->getBaseRadius(),
-	  clusterHeight, visSettings.quality, visSettings.markedColor,
-	  RGB_WHITE, visSettings.transparency, topClosed, descendants.size() > 1
-	  );
+	drawColoredCylinder( root->getTopRadius(), root->getBaseRadius(),
+	    visSettings.markedColor, RGB_WHITE, topClosed, descendants.size() >
+	    1);
       }
       else
       {
-	GLUtils::coloredCylinder( root->getTopRadius(), root->getBaseRadius(),
-	  clusterHeight, visSettings.quality, RGB_WHITE, RGB_WHITE,
-	  visSettings.transparency, topClosed, descendants.size() > 1 );
+	drawColoredCylinder( root->getTopRadius(), root->getBaseRadius(),
+	    RGB_WHITE, RGB_WHITE, topClosed, descendants.size() > 1 );
       }
       glPopMatrix();
     glEndList();
@@ -753,9 +753,9 @@ void Visualizer::drawStatesMarkStates( Cluster* root )
 	++s_it )
   {
     if ( (**s_it).isMarked() )
-      GLUtils::setColor( visSettings.markedColor, 0 );
+      setColor( visSettings.markedColor, 0 );
     else
-      GLUtils::setColor( RGB_WHITE, 0 );
+      setColor( RGB_WHITE, 0 );
 
     if ( (**s_it).getPosition() < -0.9f )
       glutSolidSphere( visSettings.nodeSize, 4, 4 );
@@ -806,9 +806,9 @@ void Visualizer::drawStatesMarkDeadlocks( Cluster* root )
 	++s_it )
   {
     if ( (**s_it).isDeadlock() )
-      GLUtils::setColor( visSettings.markedColor, 0 );
+      setColor( visSettings.markedColor, 0 );
     else
-      GLUtils::setColor( RGB_WHITE, 0 );
+      setColor( RGB_WHITE, 0 );
 
     if ( (**s_it).getPosition() < -0.9f )
       glutSolidSphere( visSettings.nodeSize, 4, 4 );
@@ -829,9 +829,10 @@ void Visualizer::drawStatesMarkDeadlocks( Cluster* root )
   {
     if ( (**descit).getPosition() < -0.9f )
     {
-      // descendant is centered
       glTranslatef( 0.0f, 0.0f, clusterHeight );
+      
       drawStatesMarkDeadlocks( *descit );
+      
       glTranslatef( 0.0f, 0.0f, -clusterHeight );
     }
     else
@@ -848,5 +849,87 @@ void Visualizer::drawStatesMarkDeadlocks( Cluster* root )
       glRotatef( (**descit).getPosition(), 0.0f, 0.0f, 1.0f );
       glTranslatef( 0.0f, 0.0f, -clusterHeight );
     }
+  }
+}
+
+void Visualizer::setColor( RGB_Color c, float alpha )
+{
+  GLfloat fc[] = { c.r / 255.0f, c.g / 255.0f, c.b / 255.0f, alpha };
+  glColor4fv( fc );
+}
+
+// draws a cylinder around z-axis with given base radius, top radius, height,
+// color at base, color at top, closed base if baseclosed and closed top if
+// topclosed
+void Visualizer::drawColoredCylinder( float baserad, float toprad, RGB_Color
+    basecol, RGB_Color topcol, bool baseclosed, bool topclosed )
+{
+  int slices = visSettings.quality;
+  float nxg = clusterHeight;
+  float nzg = baserad - toprad;
+  float r = sqrt( nxg*nxg + nzg*nzg );
+  nxg = nxg / r;
+  nzg = nzg / r;
+
+  vector< float > ctab;
+  vector< float > stab;
+  vector< float > nx;
+  vector< float > ny;
+  
+  float delta = 2.0f * PI / slices;
+  float alf = 0.0f;
+  for ( int i=0 ; i <= slices ; ++i )
+  {
+    float cos_alf = cos(alf);
+    float sin_alf = sin(alf);
+    ctab.push_back( cos_alf );
+    stab.push_back( sin_alf );
+    nx.push_back( cos_alf * nxg );
+    ny.push_back( sin_alf * nxg );
+    alf += delta;
+  }
+
+  float c1r = basecol.r / 255.0f;
+  float c1g = basecol.g / 255.0f;
+  float c1b = basecol.b / 255.0f;
+  float c2r = topcol.r / 255.0f;
+  float c2g = topcol.g / 255.0f;
+  float c2b = topcol.b / 255.0f;
+
+  if ( baseclosed )
+  {
+    glBegin( GL_TRIANGLE_FAN );
+    glNormal3f( 0.0, 0.0, -1.0 );
+    glColor4f( c1r, c1g, c1b, visSettings.alpha );
+    glVertex3f( 0.0, 0.0, 0.0 );
+    for ( int j = slices ; j >= 0 ; --j )
+    {
+      glVertex3f( baserad * ctab[j], baserad * stab[j], 0.0f );
+    }
+    glEnd();
+  }
+  
+  glBegin( GL_QUAD_STRIP );
+  for ( int j = 0 ; j <= slices ; ++j )
+  {
+    glNormal3f( nx[j], ny[j], nzg );
+    glColor4f( c2r, c2g, c2b, visSettings.alpha );
+    glVertex3f( toprad * ctab[j], toprad * stab[j], clusterHeight );
+    glColor4f( c1r, c1g, c1b, visSettings.alpha );
+    glVertex3f( baserad * ctab[j], baserad * stab[j], 0.0f );
+  }
+  glEnd();
+
+  if ( topclosed )
+  {
+    glBegin( GL_TRIANGLE_FAN );
+    glNormal3f( 0.0, 0.0, 1.0 );
+    glColor4f( c2r, c2g, c2b, visSettings.alpha );
+    glVertex3f( 0.0, 0.0, clusterHeight );
+    for ( int j = 0 ; j <= slices ; ++j )
+    {
+      glVertex3f( toprad * ctab[j], toprad * stab[j], clusterHeight );
+    }
+    glEnd();
   }
 }

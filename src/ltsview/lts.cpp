@@ -473,7 +473,7 @@ void LTS::positionClusters()
     }
   }
   // position the initial state's cluster
-  initialState->getCluster()->setPosition( -1 );
+  initialState->getCluster()->setPosition( -1.0f );
 }
 
 void LTS::positionStates()

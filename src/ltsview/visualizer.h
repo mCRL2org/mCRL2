@@ -1,6 +1,8 @@
 #ifndef VISUALIZER_H
 #define VISUALIZER_H
 
+#include <vector>
+#include <math.h>
 #include "mediator.h"
 #ifdef __APPLE__
     #include <OpenGL/gl.h>
@@ -12,11 +14,24 @@
     #include <GL/glut.h>
 #endif
 #include "utils.h"
-#include "glutils.h"
 #include "lts.h"
 
+using namespace std;
 using namespace Utils;
-using namespace GLUtils;
+
+struct Primitive
+{
+  GLuint  displayList;
+  float   distance;
+  Point3D worldCoordinate;
+};
+
+// class for primitive comparison based on distance
+class Distance_desc
+{
+  public:
+    bool operator()( const Primitive*, const Primitive* ) const;
+};
 
 class Visualizer
 {
@@ -41,6 +56,8 @@ class Visualizer
 
     void computeSubtreeBounds( Cluster* root, float &boundWidth, float
 	&boundHeight );
+    void drawColoredCylinder( float baserad, float toprad, RGB_Color basecol,
+	RGB_Color topcol, bool baseclosed, bool topclosed );
     void drawStates( Cluster* root );
     void drawStatesMarkStates( Cluster* root );
     void drawStatesMarkDeadlocks( Cluster* root );
@@ -49,6 +66,7 @@ class Visualizer
     void drawSubtreeMarkDeadlocks( Cluster* root, bool topClosed );
     void drawSubtreeMarkStates( Cluster* root, bool topClosed );
     void drawSubtreeMarkTransitions( Cluster* root, bool topClosed );
+    void setColor( RGB_Color c, float alpha );
   
   public:
     Visualizer( Mediator* owner );

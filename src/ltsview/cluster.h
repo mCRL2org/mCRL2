@@ -19,8 +19,8 @@ using namespace std;
 // forward declaration
 class Cluster;
 
-// class for cluster comparison based on cluster sizes
-class Comp_ClusterSize
+// class for cluster comparison based on cluster volumes
+class Comp_ClusterVolume
 {
   public:
     bool operator()( const Cluster*, const Cluster* ) const;
@@ -41,7 +41,8 @@ class Cluster
     float		size;
     vector< State* >	states;
     float		topRadius;
-  
+    float		volume; 
+
   public:
     Cluster();
     ~Cluster();
@@ -56,6 +57,7 @@ class Cluster
     float     getTopRadius() const;
     float     getSize() const;
     void      getStates( vector< State* > &ss ) const;
+    float     getVolume() const;
     bool      hasDescendants() const;
     bool      hasDeadlock() const;
     bool      hasMarkedState() const;

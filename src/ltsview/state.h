@@ -32,7 +32,7 @@ class State
     void      addSubordinate( State* s );
     void      addSuperior( State* s );
     void      clearHierarchyInfo();
-    void      deselect();
+    //void      deselect();
     Cluster*  getCluster() const;
     void      getComrades( set< State* > &ss ) const;
     void      getInTransitions( vector< Transition* > &ts ) const;
@@ -44,9 +44,9 @@ class State
     int	      getValueIndexOfParam( int paramIndex );
     bool      isDeadlock() const;
     bool      isMarked() const;
-    bool      isSelected() const;
+    //bool      isSelected() const;
     void      mark();
-    void      select();
+    //void      select();
     void      setCluster( Cluster* c );
     void      setPosition( float p );
     void      setRank( int r );
@@ -55,15 +55,15 @@ class State
   private:
     Cluster*		  cluster;
     set< State* >	  comrades;
-    float		  currentProbability;
+    //float		  currentProbability;
     vector< Transition* > inTransitions;
     vector< Transition* > loops;
     bool		  marked;
-    float		  probability;
+    //float		  probability;
     vector< Transition* > outTransitions;
     float		  position;
     int			  rank;
-    bool		  selected;
+    //bool		  selected;
     vector< ATerm >	  stateVector;
     ATermList		  stateVectorAT;
     set< State* >	  subordinates;
