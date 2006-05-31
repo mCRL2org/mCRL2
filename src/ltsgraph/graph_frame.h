@@ -24,8 +24,8 @@
 #include "liblts.h"
 #include "libstruct.h"
 
-//#include "./../../../tmp/MCRL22/MCRL2/trunk/src/ltsview/spinctrlfloat.h"
-#include "./../ltsview/spinctrlfloat.h"
+#include "./../../../tmp/MCRL2/trunk/src/ltsview/spinctrlfloat.h"
+//#include "./../ltsview/spinctrlfloat.h"
 
 #include "node.h"
 #include "edge.h"
@@ -43,7 +43,7 @@ const int ID_CHECK_NODE    = 10002;
 const int ID_CHECK_EDGE    = 10003;
 const int ID_BUTTON_OPTI   = 10004;
 
-static int CircleRadius;
+
 
 class ViewPort;
 

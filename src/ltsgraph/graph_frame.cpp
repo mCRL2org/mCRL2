@@ -22,6 +22,7 @@ END_EVENT_TABLE()
 
 static vector<Node*> vectNode;
 static vector<Edge*> vectEdge;
+static int CircleRadius;
 
 double GenRandom(const int &max) {
     return static_cast <double> (rand()%max+CircleRadius);
@@ -132,11 +133,9 @@ void GraphFrame::BuildLayout() {
 // setup the bottom part (others settings box)
 	wxStaticBoxSizer* othersSettingsSizer = new wxStaticBoxSizer( wxVERTICAL, rightPanel, wxT("Others settings") );
 
-	const wxValidator * valCkNodeLab = new wxValidator();
-	ckNodeLabels = new wxCheckBox(rightPanel, ID_CHECK_NODE, wxT("Display state's labels"), wxDefaultPosition, wxDefaultSize, wxCHK_2STATE, *valCkNodeLab);
+	ckNodeLabels = new wxCheckBox(rightPanel, ID_CHECK_NODE, wxT("Display state's labels"), wxDefaultPosition, wxDefaultSize, wxCHK_2STATE);
 	ckNodeLabels->SetValue(true);
-	const wxValidator * valCkEdgeLab = new wxValidator();
-	ckEdgeLabels = new wxCheckBox(rightPanel, ID_CHECK_EDGE, wxT("Display transition's labels"), wxDefaultPosition, wxDefaultSize, wxCHK_2STATE, *valCkEdgeLab);
+	ckEdgeLabels = new wxCheckBox(rightPanel, ID_CHECK_EDGE, wxT("Display transition's labels"), wxDefaultPosition, wxDefaultSize, wxCHK_2STATE);
 	ckEdgeLabels->SetValue(true);
 
 	othersSettingsSizer->Add(ckNodeLabels, 0, lflags, 4 );
@@ -152,7 +151,6 @@ void GraphFrame::BuildLayout() {
 
 	rightSizer->AddSpacer(20);
 
-	const wxValidator * valBtnOpti = new wxValidator();
 	btnOptiStop = new wxButton(rightPanel, ID_BUTTON_OPTI, wxT("Optimize"), wxDefaultPosition, wxDefaultSize);
 	btnOptiStop->Enable(false);
 
