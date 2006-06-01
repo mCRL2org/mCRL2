@@ -26,7 +26,7 @@
 #include "liblts.h"
 #include "libstruct.h"
 
-#include "./../ltsview/spinctrlfloat.h"
+#include "spinctrlfloat.h"
 
 #include "node.h"
 #include "edge.h"
