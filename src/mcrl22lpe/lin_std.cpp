@@ -1182,13 +1182,13 @@ static processstatustype determine_process_statusterm(
 
   if (gsIsChoice(body))
   { if (status==multiAction) 
-    { gsErrorMsg("Choice operator occurs in a multi-action\n");
+    { gsErrorMsg("Choice operator occurs in a multi-action in %P.\n", body);
       stop();
     }
     s1=determine_process_statusterm(ATAgetArgument(body,0),pCRL);
     s2=determine_process_statusterm(ATAgetArgument(body,1),pCRL);
     if ((s1==mCRL)||(s2==mCRL))
-    { gsErrorMsg("mCRL operators occur within the scope of a choice operator\n");
+    { gsErrorMsg("mCRL operators occur within the scope of a choice operator in %P.\n",body);
       stop();
     }
     return pCRL;
@@ -1196,13 +1196,13 @@ static processstatustype determine_process_statusterm(
 
   if (gsIsSeq(body))
   { if (status==multiAction) 
-    { gsErrorMsg("Sequential operator occurs in a multi-action\n");
+    { gsErrorMsg("Sequential operator occurs in a multi-action in %P.\n",body);
       stop();
     }
     s1=determine_process_statusterm(ATAgetArgument(body,0),pCRL);
     s2=determine_process_statusterm(ATAgetArgument(body,1),pCRL);
     if ((s1==mCRL)||(s2==mCRL))
-    { gsErrorMsg("mCRL operators occur within the scope of a sequential operator\n");
+    { gsErrorMsg("mCRL operators occur within the scope of a sequential operator in %P.\n",body);
       stop();
     }
     return pCRL;
@@ -1210,7 +1210,7 @@ static processstatustype determine_process_statusterm(
 
   if (gsIsMerge(body))
   { if (status!=mCRL)
-    { gsErrorMsg("The parallel operator occurs in the scope of pCRL operators\n");
+    { gsErrorMsg("The parallel operator occurs in the scope of pCRL operators in %P.\n",body);
       stop();
     }
     s1=determine_process_statusterm(ATAgetArgument(body,0),mCRL);
@@ -1219,19 +1219,19 @@ static processstatustype determine_process_statusterm(
   }
 
   if (gsIsLMerge(body))
-  { gsErrorMsg("Cannot linearize because the specification contains a leftmerge\n");
+  { gsErrorMsg("Cannot linearize because the specification contains a leftmerge.\n");
     stop();
   }
 
   if (gsIsCond(body))  
   { if (status==multiAction) 
-    { gsErrorMsg("If-then(-else) occurs in a multi-action\n");
+    { gsErrorMsg("If-then(-else) occurs in a multi-action in %P.\n",body);
       stop();
     }
     s1=determine_process_statusterm(ATAgetArgument(body,1),pCRL);
     s2=determine_process_statusterm(ATAgetArgument(body,2),pCRL);
     if ((s1==mCRL)||(s2==mCRL))
-    { gsErrorMsg("mCRL operators occur in the scope of the if-then-else operator\n");
+    { gsErrorMsg("mCRL operators occur in the scope of the if-then-else operator in %P.\n",body);
       stop();
     }
     return pCRL;
@@ -1242,12 +1242,12 @@ static processstatustype determine_process_statusterm(
        that this variable name will be reused later on */
     insertvariables(ATLgetArgument(body,0),ATfalse);
     if (status==multiAction)
-    { gsErrorMsg("Sum operator occurs within a multi-action\n");
+    { gsErrorMsg("Sum operator occurs within a multi-action in %P.\n",body);
       stop();
     }
     s1=determine_process_statusterm(ATAgetArgument(body,1),pCRL);
     if (s1==mCRL)
-    { gsErrorMsg("mCRL operators occur in the scope of the sum operator\n");
+    { gsErrorMsg("mCRL operators occur in the scope of the sum operator in %P.\n",body);
       stop();
     }
     return pCRL;
@@ -1255,7 +1255,7 @@ static processstatustype determine_process_statusterm(
 
   if (gsIsComm(body))
   { if (status!=mCRL)
-    { gsErrorMsg("The communication operator occurs in the scope of pCRL operators\n");
+    { gsErrorMsg("The communication operator occurs in the scope of pCRL operators in %P.\n",body);
       stop();
     }
     s2=determine_process_statusterm(ATAgetArgument(body,1),mCRL);
@@ -1263,19 +1263,19 @@ static processstatustype determine_process_statusterm(
   }
 
   if (gsIsBInit(body))
-  { gsErrorMsg("Cannot linearize a specification with the bounded initialization operator\n");
+  { gsErrorMsg("Cannot linearize a specification with the bounded initialization operator.\n");
     stop();
   }
 
   if (gsIsAtTime(body)) 
   { timeIsBeingUsed = true;
     if (status==multiAction)
-    { gsErrorMsg("A time operator occurs in a multi-action\n");
+    { gsErrorMsg("A time operator occurs in a multi-action in %P.\n",body);
       stop();
     }
     s1=determine_process_statusterm(ATAgetArgument(body,0),pCRL);
     if ((s1==mCRL)||(s2==mCRL))
-    { gsErrorMsg("A mCRL operator occurs in the scope of a time operator\n");
+    { gsErrorMsg("A mCRL operator occurs in the scope of a time operator in %P.\n",body);
       stop();
     }
     return pCRL;
@@ -1286,14 +1286,16 @@ static processstatustype determine_process_statusterm(
     s1=determine_process_statusterm(ATAgetArgument(body,0),pCRL);
     s2=determine_process_statusterm(ATAgetArgument(body,1),pCRL);
     if ((s1!=multiAction)||(s2!=multiAction))
-    { gsErrorMsg("Other objects than multi-actions occur in the scope of a synch operator\n");
+    { 
+      gsErrorMsg("Other objects than multi-actions occur in the scope of a synch operator in %P.\n",body);
       stop();
     }
     return multiAction;
   }
 
   if (gsIsAction(body))
-  { return multiAction;
+  { 
+    return multiAction;
   }
 
   if (gsIsProcess(body))
@@ -1311,7 +1313,7 @@ static processstatustype determine_process_statusterm(
 
   if (gsIsHide(body))
   { if (status!=mCRL) 
-    { gsErrorMsg("A hide operator occurs in the scope of pCRL operators\n");
+    { gsErrorMsg("A hide operator occurs in the scope of pCRL operators in %P.\n",body);
       stop();
     }
     s1=determine_process_statusterm(ATAgetArgument(body,1),mCRL);
@@ -1320,7 +1322,7 @@ static processstatustype determine_process_statusterm(
 
   if (gsIsRename(body))
   { if (status!=mCRL) 
-    { gsErrorMsg("A rename operator occurs in the scope of pCRL operators\n");
+    { gsErrorMsg("A rename operator occurs in the scope of pCRL operators in %P.\n",body);
       stop();
     }
     s1=determine_process_statusterm(ATAgetArgument(body,1),mCRL);
@@ -1329,7 +1331,7 @@ static processstatustype determine_process_statusterm(
 
   if (gsIsAllow(body))
   { if (status!=mCRL) 
-    { gsErrorMsg("An allow operator occurs in the scope of pCRL operators\n");
+    { gsErrorMsg("An allow operator occurs in the scope of pCRL operators in %P.\n",body);
       stop();
     }
     s1=determine_process_statusterm(ATAgetArgument(body,1),mCRL);
@@ -1338,14 +1340,14 @@ static processstatustype determine_process_statusterm(
 
   if (gsIsBlock(body))
   { if (status!=mCRL) 
-    { gsErrorMsg("A block operator occurs in the scope of pCRL operators\n");
+    { gsErrorMsg("A block operator occurs in the scope of pCRL operators in %P.\n",body);
       stop();
     }
     s1=determine_process_statusterm(ATAgetArgument(body,1),mCRL);
     return mCRL;
   }
 
-  gsErrorMsg("Process has unexpected format (2) %T\n",body);
+  gsErrorMsg("Process has unexpected format (2) %P\n",body);
   stop();
   return error;
 } 
