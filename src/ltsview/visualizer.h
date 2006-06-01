@@ -58,6 +58,7 @@ class Visualizer
 	&boundHeight );
     void drawColoredCylinder( float baserad, float toprad, RGB_Color basecol,
 	RGB_Color topcol, bool baseclosed, bool topclosed );
+    void drawHemisphere( float rad, RGB_Color col );
     void drawStates( Cluster* root );
     void drawStatesMarkStates( Cluster* root );
     void drawStatesMarkDeadlocks( Cluster* root );

@@ -933,3 +933,87 @@ void Visualizer::drawColoredCylinder( float baserad, float toprad, RGB_Color
     glEnd();
   }
 }
+
+void Visualizer::drawHemisphere( float r, RGB_Color col )
+{
+  int n = visSettings.quality;
+  int i,j;
+  
+  // rotate around the z-axis first to ensure that one vertex of the base of the
+  // hemisphere is always at angle 0 (i.e. in point (r,0,0)). This way, the
+  // hemisphere will always fit nicely onto other objects in the scene (like
+  // cylinders) no matter what the value of n is.
+  float rot = 0.0f;
+  while ( rot <= 90.0f ) rot += 360.0f / (float)n;
+  rot -= 360.0f / (float)n;
+  glRotatef( 90 - rot, 0.0f, 0.0f, 1.0f );
+
+  // precompute the cosines and sines that are needed during drawing and put
+  // them in vectors (this is done for efficiency).
+  vector< float > cos_theta1;
+  vector< float > sin_theta1;
+  for ( j = 0 ; j <= n / 2 ; j++ )
+  {
+    float theta1 = j * 2.0f * PI / n - 0.5f * PI;
+    cos_theta1.push_back( cos( theta1 ) );
+    sin_theta1.push_back( sin( theta1 ) );
+  }
+  
+  vector< float > cos_theta2;
+  vector< float > sin_theta2;
+  for ( i = 0 ; i <= n ; i++ )
+  {
+    cos_theta2.push_back( cos( i * PI / n ) );
+    sin_theta2.push_back( sin( i * PI / n ) );
+  }
+   
+  float ex,ey,ez,px,py,pz;
+  glColor4f( col.r / 255.0f, col.g / 255.0f, col.b / 255.0f, visSettings.alpha );
+
+  for ( j = 0 ; j < n / 2 ; j++ )
+  {
+    glBegin(GL_QUAD_STRIP);
+    for ( i = 0 ; i <= n ; i++ )
+    {
+      ex = cos_theta1[j] * cos_theta2[i];
+      ey = sin_theta1[j];
+      ez = cos_theta1[j] * sin_theta2[i];
+      px = r * ex;
+      py = r * ey;
+      pz = r * ez;
+
+      glNormal3f( ex, ey, ez );
+      glVertex3f( px, py, pz );
+
+      ex = cos_theta1[j+1] * cos_theta2[i];
+      ey = sin_theta1[j+1];
+      ez = cos_theta1[j+1] * sin_theta2[i];
+      px = r * ex;
+      py = r * ey;
+      pz = r * ez;
+
+      glNormal3f( ex, ey, ez );
+      glVertex3f( px, py, pz );
+    }
+    glEnd();
+  }
+  
+  // if n is odd, then we have to draw yet another strip, namely the one between
+  if ( n % 2 == 1 )
+  {
+    j = n / 2;
+    glBegin(GL_POLYGON );
+    for ( i = n ; i >= 0 ; i-- )
+    {
+      ex = cos_theta1[j] * cos_theta2[i];
+      ey = sin_theta1[j];
+      ez = cos_theta1[j] * sin_theta2[i];
+      px = r * ex;
+      py = r * ey;
+      pz = r * ez;
+      glNormal3f( ex, ey, ez );
+      glVertex3f( px, py, pz );
+    }
+    glEnd();
+  }
+}
