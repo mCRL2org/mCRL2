@@ -4,11 +4,8 @@
 
 all: config $(BJAM)
 	@$(BOOST_BUILD)
-	@${MAKE} -C src $(MAKECMDGOALS)
 
--include utility/revision.mk
-
-install: all
+install: $(BJAM)
 	@$(BOOST_BUILD) --install
 	install -d $(datadir)/examples/academic
 	cp examples/academic/*.mcrl2 $(datadir)/examples/academic
@@ -33,6 +30,9 @@ distclean:
 	@$(RM) -r autom4te.cache config.log *.o *.app *~ core core.* \
 	         bin config.status config config.jam src/setup.h \
 		 src/mcrl2_revision.h
+
+$(BJAM):
+	$(MAKE) -C boost bjam
 
 ifeq (,$(findstring $(MAKECMDGOALS),clean distclean revision))
 

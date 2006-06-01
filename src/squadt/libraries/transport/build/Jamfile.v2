@@ -5,10 +5,10 @@ project transport
        .
     : requirements
        <include>$(BOOST)
-       <include>../../
+       <include>../..
        <define>BOOST_DATE_TIME_NO_LIB
     : usage-requirements
-       <include>../../
+       <include>../..
        <library>/boost/thread//boost_thread
        <define>BOOST_DATE_TIME_NO_LIB
     ;

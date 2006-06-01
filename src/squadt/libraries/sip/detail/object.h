@@ -139,7 +139,7 @@ namespace sip {
   inline object::sptr object::read(xml2pp::text_reader& r) {
     using sip::exception::exception;
 
-    object::identifier id;
+    object::identifier id = 0;
 
     assert(r.is_element("object"));
     

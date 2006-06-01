@@ -204,10 +204,11 @@ OBJECTS           := $(sort $(OBJECTS))
 .PHONY: all install clean distclean boost boost_relay documentation squadt ltsview experimental
 .PRECIOUS: mcrl2parser.cpp mcrl2lexer.cpp
 
-all: $(EXE_NAMES) $(LIB_NAMES) $(BUILD_EXPERIMENTAL)
+#all: $(EXE_NAMES) $(LIB_NAMES) $(BUILD_EXPERIMENTAL)
+all:
 
 # Rules for building the maximum_revision tool and to generate a revision file
--include ../utility/revision.mk
+#-include ../utility/revision.mk
 
 experimental: $(EXPERIMENTALS)
 
@@ -449,8 +450,8 @@ Makefile: ../config
 ../config: ../config.in ../configure
 	$(error You must (re)configure your source tree first)
 
--include $(foreach s,$(OBJECTS),$(shell if test -f $(basename $s).c; then echo -n $(basename $s).d; fi)) \
-         $(foreach s,$(OBJECTS),$(shell if test -f $(basename $s).cpp; then echo -n $(basename $s).dpp; fi))
+#-include $(foreach s,$(OBJECTS),$(shell if test -f $(basename $s).c; then echo -n $(basename $s).d; fi)) \
+#         $(foreach s,$(OBJECTS),$(shell if test -f $(basename $s).cpp; then echo -n $(basename $s).dpp; fi))
 endif
 
 #Note: to make a shared version of the gsrewr library instead of a static one, do the following:

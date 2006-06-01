@@ -203,7 +203,7 @@ namespace sip {
   inline option::sptr option::read(xml2pp::text_reader& r) {
     using sip::exception::exception;
 
-    option::identifier id;
+    option::identifier id = 0;
 
     assert(r.is_element("option"));
 
