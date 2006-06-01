@@ -957,6 +957,7 @@ static ATermAppl PushBlock(ATermList H, ATermAppl a){
   }
 
   assert(0);
+  return NULL; 
 }
 
 static ATermAppl PushHide(ATermList I, ATermAppl a){
@@ -1038,6 +1039,7 @@ static ATermAppl PushHide(ATermList I, ATermAppl a){
     return a;
   }
   assert(0);
+  return NULL; //to suppress warnings  
 }
 
 static ATermAppl PushAllow(ATermList V, ATermAppl a){
@@ -1160,7 +1162,7 @@ static ATermAppl PushAllow(ATermList V, ATermAppl a){
     C=sort_multiactions_comm(C);
     
     ATermAppl p=ATAgetArgument(a,1);
-    ATermList V1;
+    ATermList V1=NULL;  //initializet to avoid warnings
     ATermList l = ATLtableGet(alphas,(ATerm) p);
     if(!l){
       // check if C has renamings to tau:
@@ -1264,6 +1266,7 @@ static ATermAppl PushAllow(ATermList V, ATermAppl a){
     return a;
   }
   assert(0);
+  return NULL; //to suppress warnings  
 }
 
 static ATermAppl PushComm(ATermList C, ATermAppl a){
@@ -1423,6 +1426,7 @@ static ATermAppl PushComm(ATermList C, ATermAppl a){
     return a;
   }
   assert(0);
+  return NULL; //to suppress warnings  
 }
   
 static ATermList gsaGetAlpha(ATermAppl a, unsigned length, ATermList allowed, ATermList ignore){
@@ -1741,6 +1745,7 @@ ATermList gsaGetDeps(ATermAppl a){
     return r;
   }
   assert(0);
+  return NULL; //to suppress warnings  
 }
 
 ATermAppl gsaGetProp(ATermAppl a, ATermAppl context){
@@ -1783,6 +1788,7 @@ ATermAppl gsaGetProp(ATermAppl a, ATermAppl context){
     return r;
   }
   assert(0);
+  return NULL; //to suppress warnings  
 }
 
 ATermAppl gsaSubstNP(ATermTable subs_npCRL, ATermTable consts, ATermAppl a){
@@ -1852,7 +1858,8 @@ ATermAppl gsaSubstNP(ATermTable subs_npCRL, ATermTable consts, ATermAppl a){
     if(args==2) a=ATsetArgument(a,(ATerm)q,ia2);
     return a;
   }
-  assert(0);  
+  assert(0);
+  return NULL; //to suppress warnings  
 }
 
 ATermAppl gsaGenNInst(ATermAppl number, ATermAppl P){
