@@ -1,9 +1,8 @@
 project squadt
-  : source-location ../
-  : build-dir $(BUILD_TOP)
-  : default-build debug
+  : source-location ..
+  : build-dir $(BUILD_TOP) 
   : requirements
-    <include>../../
+    <include>../..
     <include>../libraries
     <cxxflags>-std=c++98 ;
 
@@ -32,21 +31,5 @@ exe squadt
         <linkflags>"$(WX_BASE_LDFLAGS)"
       ;
 
-alias install
-      : install-libraries
-        install-binaries
-      ;
+install_with_libraries squadt ;
 
-install install-binaries
-      : squadt
-      : <dll-path>$(LIB_DIR)
-        <location>$(BIN_DIR)
-      ;
-
-install install-libraries
-      : squadt
-      : <install-dependencies>on <install-type>LIB
-      : <location>$(LIB_DIR)
-      ;
-
-explicit install install-binaries install-libraries ;

@@ -27,30 +27,6 @@ use-project /boost/program_options     : boost/libs/program_options/build ;
 use-project /boost/filesystem          : boost/libs/filesystem/build ;
 use-project /boost/thread              : boost/libs/thread/build ;
 
-libraries = [ MATCH src/libraries/(.*)/build/.* : [ glob src/libraries/*/build/Jamfile.v2 ] ] ;
-
-for library in $(libraries) {
-  # Make tool project known under a nice name
-  use-project /libraries/$(library) : src/libraries/$(library)/build ;
-}
-
-tools = [ MATCH src/(.*)/.* : [ glob src/*/Jamfile.v2 src/*/build/Jamfile.v2 ] ] ;
-
-for tool in $(tools) {
-  # Make tool project known under a nice name
-  use-project /tools/$(tool) : src/$(tool) ;
-
-  # Build by default
-  build-project src/$(tool) ;
-}
-
-# Install when requested
-if install in [ MATCH "^--(install)" : [ modules.peek : ARGV ] ] {
-  alias install-tools
-       : /tools/$(tools)//install
-       ;
-}
-
 # The SVN revision number with which tools will be tagged
 if [ path.exists $(TOP)/utility/revision.jam ] {
   include $(TOP)/utility/revision.jam ; 
@@ -70,3 +46,55 @@ if ! [ path.exists $(TOP)/config.jam ] {
 
   exit ;
 }
+
+tools = [ MATCH src/(.*)/.* : [ glob src/*/Jamfile.v2 src/*/build/Jamfile.v2 ] ] ;
+
+# Register tool projects
+for tool in $(tools) {
+  # Make tool project known under a nice name
+  use-project /tools/$(tool) : src/$(tool) ;
+
+  # Build by default
+  build-project src/$(tool) ;
+}
+
+libraries = [ MATCH src/libraries/(.*)/build/.* : [ glob src/libraries/*/build/Jamfile.v2 ] ] ;
+
+# Register library projects
+for library in $(libraries) {
+  # Make tool project known under a nice name
+  use-project /libraries/$(library) : src/libraries/$(library)/build ;
+}
+
+include config.jam ;
+
+# Custom rule to install a tool executable with the libraries it depends on
+rule install_with_libraries ( tool ) {
+
+  alias install
+        : install-libraries
+          install-binaries
+        ;
+
+  install install-binaries
+        : $(tool)
+        : <dll-path>$(LIB_DIR)
+          <location>$(BIN_DIR)
+        ;
+
+  install install-libraries
+        : $(tool)
+        : <install-dependencies>on <install-type>SHARED_LIB
+        : <location>$(LIB_DIR)
+        ;
+
+  explicit install install-binaries install-libraries ;
+}
+
+# Install when requested
+if install in [ MATCH "^--(install)" : [ modules.peek : ARGV ] ] {
+  alias install-tools
+       : /tools/$(tools)//install
+       ;
+}
+
