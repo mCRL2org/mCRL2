@@ -46,7 +46,7 @@ class NextStateGeneratorStandard : public NextStateGenerator
 
 		ATerm cur_state;
 		ATerm cur_act;
-		ATerm cur_nextstate;
+		ATermList cur_nextstate;
 
 		ATerm *stateargs;
 
@@ -56,7 +56,7 @@ class NextStateGeneratorStandard : public NextStateGenerator
 
 		void SetTreeStateVars(ATerm tree, ATermList *vars);
 		ATermAppl rewrActionArgs(ATermAppl act);
-		ATerm makeNewState(ATerm old, ATerm assigns);
+		ATerm makeNewState(ATerm old, ATermList assigns);
 		ATermList ListFromFormat(ATermList l);
 };
 
@@ -102,7 +102,7 @@ class NextStateStandard : public NextState
 		ATermList ListToFormat(ATermList l,ATermList free_vars);
 		ATermList ListFromFormat(ATermList l);
 		ATermAppl ActionToRewriteFormat(ATermAppl act, ATermList free_vars);
-		ATerm AssignsToRewriteFormat(ATermList assigns, ATermList free_vars);
+		ATermList AssignsToRewriteFormat(ATermList assigns, ATermList free_vars);
 };
 
 #endif

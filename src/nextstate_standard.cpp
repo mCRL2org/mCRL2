@@ -323,16 +323,8 @@ ATermAppl NextStateStandard::ActionToRewriteFormat(ATermAppl act, ATermList free
 	return gsMakeMultAct(m);
 }
 
-ATerm NextStateStandard::AssignsToRewriteFormat(ATermList assigns, ATermList free_vars)
+ATermList NextStateStandard::AssignsToRewriteFormat(ATermList assigns, ATermList free_vars)
 {
-/*	ATermList l = ATmakeList0();
-	for (; !ATisEmpty(assigns); assigns=ATgetNext(assigns))
-	{
-		ATermAppl a = ATAgetFirst(assigns);
-		l = ATinsert(l,(ATerm) ATmakeAppl2(ATgetAFun(a),rewr_obj->toRewriteFormat(ATAgetArgument(a,0)),rewr_obj->toRewriteFormat(ATAgetArgument(a,1))));
-	}
-	return ATreverse(l); */
-
 	int i = 0;
 	for (ATermList l=pars; !ATisEmpty(l); l=ATgetNext(l),i++)
 	{
@@ -353,7 +345,14 @@ ATerm NextStateStandard::AssignsToRewriteFormat(ATermList assigns, ATermList fre
 		}
 	}
 
-	return (ATerm) ATmakeApplArray(info.stateAFun,stateargs);
+	ATermList r = ATmakeList0();
+	i=info.statelen;
+	while ( i != 0 )
+	{
+		i--;
+		r = ATinsert(r,stateargs[i]);
+	}
+	return r;
 }
 
 NextStateStandard::NextStateStandard(ATermAppl spec, bool allow_free_vars, int state_format, Enumerator *e, bool clean_up_enumerator)
@@ -389,8 +388,11 @@ NextStateStandard::NextStateStandard(ATermAppl spec, bool allow_free_vars, int s
 	ATprotectList(&pars);
 
 	info.statelen = ATgetLength(pars);
-	info.stateAFun = ATmakeAFun("STATE",info.statelen,ATfalse);
-	ATprotectAFun(info.stateAFun);
+	if ( info.stateformat == GS_STATE_VECTOR )
+	{
+		info.stateAFun = ATmakeAFun("STATE",info.statelen,ATfalse);
+		ATprotectAFun(info.stateAFun);
+	}
 
 	info.procvars = ATLgetArgument(ATAgetArgument(current_spec,5),1);
 	ATprotectList(&info.procvars);
@@ -568,14 +570,15 @@ Rewriter *NextStateStandard::getRewriter()
 
 
 
-ATerm NextStateGeneratorStandard::makeNewState(ATerm old, ATerm assigns)
+ATerm NextStateGeneratorStandard::makeNewState(ATerm old, ATermList assigns)
 {
 	ATermList l;
 
 	l = info.procvars;
 	for (int i=0; i<info.statelen; i++)
 	{
-		ATerm a = ATgetArgument((ATermAppl) assigns,i);
+		ATerm a = ATgetFirst(assigns);
+		assigns = ATgetNext(assigns);
 		if ( ATisEqual(a,info.nil) )
 		{
 			switch ( info.stateformat )
@@ -644,7 +647,7 @@ NextStateGeneratorStandard::NextStateGeneratorStandard(ATerm State, ns_info &Inf
 	cur_nextstate = NULL;
 	ATprotect(&cur_state);
 	ATprotect(&cur_act);
-	ATprotect(&cur_nextstate);
+	ATprotectList(&cur_nextstate);
 
 	stateargs = (ATerm *) malloc(info.statelen*sizeof(ATerm));
 	for (int i=0; i<info.statelen; i++)
@@ -665,7 +668,7 @@ NextStateGeneratorStandard::~NextStateGeneratorStandard()
 	ATunprotectArray(stateargs);
 	free(stateargs);
 
-	ATunprotect(&cur_nextstate);
+	ATunprotectList(&cur_nextstate);
 	ATunprotect(&cur_act);
 	ATunprotect(&cur_state);
 }
@@ -707,7 +710,7 @@ void NextStateGeneratorStandard::reset(ATerm State)
 		sols = info.enum_obj->findSolutions(ATmakeList0(),info.rewr_obj->toRewriteFormat(gsMakeDataExprFalse()),sols);
 	} else {
 		cur_act = ATgetArgument(info.summands[0],2);
-		cur_nextstate = ATgetArgument(info.summands[0],3);
+		cur_nextstate = (ATermList) ATgetArgument(info.summands[0],3);
 		sols = info.enum_obj->findSolutions(ATLgetArgument(info.summands[0],0),ATgetArgument(info.summands[0],1),sols);
 	}
 	sum_idx = 1;
@@ -723,7 +726,7 @@ bool NextStateGeneratorStandard::next(ATermAppl *Transition, ATerm *State, bool 
 		if ( !error )
 		{
 			cur_act = ATgetArgument(info.summands[sum_idx],2);
-			cur_nextstate = ATgetArgument(info.summands[sum_idx],3);
+			cur_nextstate = (ATermList) ATgetArgument(info.summands[sum_idx],3);
 
 			if ( *info.current_id != id )
 			{
