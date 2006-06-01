@@ -22,7 +22,7 @@
 #include <string>
 #include <iostream>
 #include <cassert>
-#include "aterm/aterm2.h"
+#include "aterm2.h"
 #include "atermpp/aterm_conversion.h"
 
 namespace atermpp

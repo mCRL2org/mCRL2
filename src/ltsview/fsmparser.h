@@ -3,7 +3,7 @@
 #include <string>
 #include <vector>
 #include <stdexcept>
-#include "aterm/aterm2.h"
+#include "aterm2.h"
 #include "lts.h"
 #include "state.h"
 #include "transition.h"

@@ -21,7 +21,7 @@
    $Id: huffman.c,v 1.1.1.1 2004/09/07 15:06:33 uid523 Exp $ */
 
 #include <limits.h>
-#include "huffman.h"
+#include <huffman.h>
 
 static ATerm ESCAPE_SEQUENCE;
 static ATerm NO_ATERM;

@@ -1,8 +1,8 @@
 project ltsconvert
        : source-location .
+       : build-dir $(BUILD_TOP)
        : requirements
           <include>$(BOOST)
-       : build-dir $(BUILD_TOP)
        ;
 
 exe ltsconvert

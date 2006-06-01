@@ -3,9 +3,8 @@
 project temporary
        : source-location ../../..
        : build-dir $(BUILD_TOP)
-       : default-build debug
        : requirements
-          <include>../../../src/squadt/libraries
+          <include>../../..
        : usage-requirements
           <include>../../..
        ;

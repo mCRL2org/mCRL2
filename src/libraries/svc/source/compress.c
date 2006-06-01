@@ -21,7 +21,7 @@
    $Id: compress.c,v 1.1.1.1 2004/09/07 15:06:33 uid523 Exp $ */
 
 #include <limits.h>
-#include "compress.h"
+#include <compress.h>
 
 static char buffer[102400];
 static void calcDelta(CompressedStream *, long *);

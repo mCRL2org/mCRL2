@@ -235,7 +235,7 @@ endif
 endif
 
 ifdef BUILD_ATERM
-install: aterm_install
+#install: aterm_install
 endif
 
 clean distclean: squadt boost_relay ltsview documentation
@@ -285,11 +285,11 @@ install: all
 	  fi;\
 	done
 
-aterm_install:
-	install -d $(includedir)/aterm
-	install -m 444 aterm/*.h $(includedir)/aterm
-	install -d $(libdir)/aterm
-	install -m 444 aterm/libATerm.a $(libdir)/aterm
+#aterm_install: aterm/libATerm.a
+#	install -d $(includedir)/aterm
+#	install -m 444 aterm/*.h $(includedir)/aterm
+#	install -d $(libdir)/aterm
+#	install -m 444 aterm/libATerm.a $(libdir)/aterm
 
 clean:
 	$(RM) $(EXE_NAMES) $(EXPERIMENTALS) $(LIB_NAMES) *.o *.a *.d* *.dpp* lpe/*.o lpe/*.dpp aterm/*.o aterm/*.a aterm/*.d svc/*.o svc/*.a svc/*.d svc/*.dpp mcrl2lexer.cpp mcrl2parser.cpp mcrl2parser.hpp mcrl2parser.output mcrl2de_lexer.cpp mcrl2de_parser.cpp mcrl2de_parser.hpp mcrl2de_parser.output autom4te.cache *~ core core.* utility/maximum_revision mcrl2lexer.c mcrl2parser.c mcrl2parser.h
@@ -431,17 +431,17 @@ mcrl2lexer.cpp: %.cpp : %.l
 # *.cpp is needed for generated code (by flex and bison)
 *.cpp *.o aterm/*.o svc/*.o: Makefile $(CONFIG)
 
-%.d : %.c $(REVISION_HEADER)
-	@echo generating dependencies for $<
-	@$(CC) -MT '$*.o' -MM $(CPPFLAGS) $(ATERM_CPPFLAGS) $< > $@.$$$$; \
-	sed 's,\($*\)\.o[ :]*,\1.o $@ : ,g' < $@.$$$$ > $@; \
-	$(RM) $@.$$$$
+#%.d : %.c $(REVISION_HEADER)
+#	@echo generating dependencies for $<
+#	@$(CC) -MT '$*.o' -MM $(CPPFLAGS) $(ATERM_CPPFLAGS) $< > $@.$$$$; \
+#	sed 's,\($*\)\.o[ :]*,\1.o $@ : ,g' < $@.$$$$ > $@; \
+#	$(RM) $@.$$$$
 
-%.dpp : %.cpp $(REVISION_HEADER)
-	@echo generating dependencies for $<
-	@$(CXX) -MT '$*.o' -MM $(CPPFLAGS) $(ATERM_CPPFLAGS) $< > $@.$$$$; \
-	sed 's,\($*\)\.o[ :]*,\1.o $@ : ,g' < $@.$$$$ > $@; \
-	$(RM) $@.$$$$
+#%.dpp : %.cpp $(REVISION_HEADER)
+#	@echo generating dependencies for $<
+#	@$(CXX) -MT '$*.o' -MM $(CPPFLAGS) $(ATERM_CPPFLAGS) $< > $@.$$$$; \
+#	sed 's,\($*\)\.o[ :]*,\1.o $@ : ,g' < $@.$$$$ > $@; \
+#	$(RM) $@.$$$$
 
 ifeq (,$(findstring $(MAKECMDGOALS),clean distclean revision))
 Makefile: ../config

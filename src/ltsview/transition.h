@@ -1,7 +1,7 @@
 #ifndef TRANSITION_H
 #define TRANSITION_H
 
-#include "aterm/aterm1.h"
+#include "aterm1.h"
 
 #ifndef STATE_H
   #include "state.h"

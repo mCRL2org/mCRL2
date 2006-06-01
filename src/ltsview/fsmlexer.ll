@@ -1,7 +1,7 @@
 %{
 #include <stdio.h>
 #include <string>
-#include "aterm/aterm2.h"
+#include "aterm2.h"
 #include "fsmparser.hpp"
 using namespace std;
 

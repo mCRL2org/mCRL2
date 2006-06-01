@@ -1,5 +1,7 @@
 project lpe
        : build-dir $(BUILD_TOP)
+       : usage-requirements
+         <include>../include
        ;
 
 alias lpe
@@ -7,5 +9,5 @@ alias lpe
        : <source>/libraries/aterm//atermpp
        :
        : <include>$(BOOST)
-         <include>../../..
+         <include>../include
        ;

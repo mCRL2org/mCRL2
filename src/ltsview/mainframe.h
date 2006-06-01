@@ -14,7 +14,7 @@
 #include <wx/event.h>
 #include <wx/checklst.h>
 #include <wx/filename.h>
-#include "aterm/aterm2.h"
+#include "aterm2.h"
 #include "spinctrlfloat.h"
 #include "colorbutton.h"
 #include "mediator.h"

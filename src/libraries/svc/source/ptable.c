@@ -20,7 +20,7 @@
 
    $Id: ptable.c,v 1.1.1.1 2004/09/07 15:06:33 uid523 Exp $ */
 
-#include "ptable.h"
+#include <ptable.h>
 #include <stdio.h>
 
 

@@ -5,7 +5,7 @@
 #include <vector>
 #include <atermpp/aterm_allocator.h>
 #include <iostream>
-#include <aterm/aterm2.h>
+#include <aterm2.h>
 #include "setup.h"
 
 namespace mcrl2

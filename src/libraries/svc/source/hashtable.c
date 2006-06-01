@@ -37,7 +37,7 @@
    Changes per 1/5/00 by Izak van Langevelde:
    - use the new ATerm lib with indexed sets*/ 
 
-#include "hashtable.h"
+#include <hashtable.h>
 
 
 

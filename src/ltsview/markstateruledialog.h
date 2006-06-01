@@ -7,7 +7,7 @@
 #include <wx/statline.h>
 #include "mediator.h"
 #include "ids.h"
-#include "aterm/aterm2.h"
+#include "aterm2.h"
 #include "utils.h"
 
 using namespace IDs;

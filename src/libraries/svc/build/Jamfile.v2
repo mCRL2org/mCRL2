@@ -1,12 +1,11 @@
 project svc
-       : source-location ../../../svc
+       : source-location ../source
        : build-dir $(BUILD_TOP)
-       : default-build debug
        : requirements
           <cflags>-std=c99
-          <include>../../../svc
+          <include>../include/svc
        : usage-requirements
-          <include>../../../svc
+          <include>../include
        ;
 
 lib svc

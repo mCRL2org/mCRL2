@@ -22,8 +22,8 @@
 
 #include <string.h>
 #include <time.h>
-#include "svcerrno.h"
-#include "svc.h"
+#include <svcerrno.h>
+#include <svc.h>
 
 #if !(defined __USE_SVID || defined __USE_BSD || defined __USE_XOPEN_EXTENDED || defined __APPLE__ || defined _MSC_VER)
 extern char *strdup(const char *s);

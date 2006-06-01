@@ -3,7 +3,7 @@
 
 #include <vector>
 #include <set>
-#include "aterm/aterm2.h"
+#include "aterm2.h"
 #include "liblowlevel.h"
 
 #ifndef TRANSITION_H

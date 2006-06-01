@@ -10,7 +10,7 @@ include $(TOP)/config.jam ;
 exe pnml2mcrl2
        : pnml2mcrl2.cpp
          /libraries/temporary//print
-         /libraries/mcrl2//mcrl2
+         /libraries/parser//parser
        : <source>/root//mcrl2_revision
          <include>.
          <cxxflags>"$(XML2_CPPFLAGS)"

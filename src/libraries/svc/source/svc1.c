@@ -23,8 +23,8 @@
 #include <stdlib.h>
 #include <string.h>
 #include <errno.h>
-#include "svcerrno.h"
-#include "svc1.h"
+#include <svcerrno.h>
+#include <svc1.h>
 
 #if !(defined __USE_SVID || defined __USE_BSD || defined __USE_XOPEN_EXTENDED || defined __APPLE__ || defined _MSC_VER)
 extern char *strdup(const char *s);

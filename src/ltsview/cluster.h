@@ -5,7 +5,7 @@
 #include <algorithm>
 #include <math.h>
 #include "utils.h"
-#include "aterm/aterm1.h"
+#include "aterm1.h"
 
 #ifndef STATE_H
   #include "state.h"

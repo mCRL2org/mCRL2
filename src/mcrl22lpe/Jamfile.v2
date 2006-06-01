@@ -8,8 +8,8 @@ exe mcrl22lpe
        : mcrl22lpe.cpp
          lin_std.cpp
          lin_alt.cpp
-         /libraries/mcrl2//mcrl2
-         /libraries/mcrl2//alpha
+         /libraries/parser//parser
+         /libraries/parser//alpha
          /libraries/temporary//print
          /libraries/temporary//rewrite
        : <source>/root//mcrl2_revision
@@ -18,8 +18,8 @@ exe mcrl22lpe
 exe lin
        : lin.cpp
          lin_alt.cpp
-         /libraries/mcrl2//mcrl2
-         /libraries/mcrl2//alpha
+         /libraries/parser//parser
+         /libraries/parser//alpha
          /libraries/temporary//print
          /libraries/temporary//rewrite
        : <source>/root//mcrl2_revision
@@ -27,8 +27,8 @@ exe lin
 
 exe alpha
        : alpha.cpp
-         /libraries/mcrl2//mcrl2
-         /libraries/mcrl2//alpha
+         /libraries/parser//parser
+         /libraries/parser//alpha
          /libraries/temporary//print
          /libraries/temporary//rewrite
        : <source>/root//mcrl2_revision

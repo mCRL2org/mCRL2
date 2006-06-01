@@ -1,17 +1,17 @@
 import bison ;
 import lex ;
 
-project mcrl2
+project parser
        : source-location ../source
        : build-dir $(BUILD_TOP)
        : default-build debug
        : requirements
-          <include>..
+          <include>../include
        : usage-requirements
-          <include>..
+          <include>../include
        ;
 
-lib mcrl2
+lib parser
        : mcrl2parser.yy
          mcrl2lexer.ll
          libparse.cpp

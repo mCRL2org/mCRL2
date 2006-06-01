@@ -1,5 +1,6 @@
 import path ;
 import modules ;
+import feature : feature ;
 
 path-constant TOP             : . ;
 path-constant BUILD_TOP       : ./bin ;
@@ -12,6 +13,9 @@ project mcrl2_toolset
           <cxxflags>-std=c++98
           <define>_FILE_OFFSET_BITS=64
        ;
+
+# Feature to mark tools as experimental
+feature experimental : no yes : optional dependency ;
 
 # The known sub projects
 use-project /root                      : . ;
