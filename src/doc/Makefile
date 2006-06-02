@@ -31,11 +31,11 @@ HTML_OBJECTS = mcrl22lpe.html lpe2lts.html lpe2torx.html lpeinfo.html \
 
 
 # For now build only man objects
-OBJECTS         = $(MAN_OBJECTS)
+OBJECTS             = $(MAN_OBJECTS)
 MAN_OBJECT_SUFFIXES = $(patsubst .%,%, $(sort $(suffix $(MAN_OBJECTS))))
 MAN_INSTALL_TARGETS = $(patsubst %,%.install,$(MAN_OBJECT_SUFFIXES))
 
-.PHONY: all clean distclean install
+.PHONY: all clean distclean install xmlto_available
 
 all: $(OBJECTS)
 
@@ -44,7 +44,9 @@ clean:
 
 distclean: clean
 
-install: all $(MAN_INSTALL_TARGETS)
+xmlto_available: $(MAN_INSTALL_TARGETS)
+
+install: all $(USE_XMLTO)
 
 documentation: all
 

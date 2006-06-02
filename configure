@@ -4967,7 +4967,7 @@ fi
 
 fi
 if test $XMLTO; then
-  USE_XMLTO=1
+  USE_XMLTO=xmlto_available
 else
   { echo "$as_me:$LINENO: documentation cannot be build because xmlto was not found." >&5
 echo "$as_me: documentation cannot be build because xmlto was not found." >&6;}

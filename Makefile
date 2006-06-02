@@ -6,8 +6,8 @@ all: config $(BJAM)
 	@$(BOOST_BUILD)
 
 install: $(BJAM)
-	@$(MAKE) -C src/doc install
 	@$(BOOST_BUILD) --install
+	@$(MAKE) -C src/doc install
 
 clean:
 	@${MAKE} -C src clean
@@ -23,6 +23,9 @@ distclean:
 
 $(BJAM):
 	$(MAKE) -C boost bjam
+
+revision: $(BJAM)
+	@$(BOOST_BUILD) mcrl2_revision
 
 ifeq (,$(findstring $(MAKECMDGOALS),clean distclean revision))
 

@@ -38,6 +38,7 @@ if [[ ! -d ${TARGET_BASE} ]]; then
 fi
 
 source_files="mcrl2/articles \
+              mcrl2/boost \
               mcrl2/boost-build.jam \
               mcrl2/conventions \
               mcrl2/COPYING \
@@ -104,8 +105,6 @@ if (! test -e "${archive_name}.bz2"); then
            --exclude '*.ps' \
            --exclude '*.log' \
            --exclude '*.pdf' \
-           --exclude 'core*' \
-           --exclude 'vgcore*' \
            --exclude '*.d' \
            --exclude '*.dpp' \
            --exclude '*.o' \
