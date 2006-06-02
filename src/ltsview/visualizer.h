@@ -56,8 +56,8 @@ class Visualizer
 
     void computeSubtreeBounds( Cluster* root, float &boundWidth, float
 	&boundHeight );
-    void drawColoredCylinder( float baserad, float toprad, RGB_Color basecol,
-	RGB_Color topcol, bool baseclosed, bool topclosed );
+    void drawCylinder( float baserad, float toprad, RGB_Color basecol, RGB_Color
+	topcol, bool baseclosed, bool topclosed );
     void drawHemisphere( float rad, RGB_Color col );
     void drawStates( Cluster* root );
     void drawStatesMarkStates( Cluster* root );
@@ -67,6 +67,8 @@ class Visualizer
     void drawSubtreeMarkDeadlocks( Cluster* root, bool topClosed );
     void drawSubtreeMarkStates( Cluster* root, bool topClosed );
     void drawSubtreeMarkTransitions( Cluster* root, bool topClosed );
+    void drawTube( float baserad, float toprad, RGB_Color basecol, RGB_Color
+	topcol, Point3D b1, Point3D b2, Point3D b3 );
     void setColor( RGB_Color c, float alpha );
   
   public:

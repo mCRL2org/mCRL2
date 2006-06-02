@@ -343,6 +343,11 @@ void Visualizer::drawSubtree( Cluster* root, bool topClosed, HSV_Color col,
       glMultMatrixf( M );
       setColor( HSVtoRGB( col ), visSettings.alpha );
       glutSolidSphere( root->getTopRadius(), visSettings.quality, visSettings.quality );
+      /*Point3D b1 = { 0,0,1 };
+      Point3D b2 = { 2,0,1 };
+      Point3D b3 = { 2,0,2 };
+      drawTube( root->getTopRadius(), root->getTopRadius(), HSVtoRGB( col ),
+	  HSVtoRGB( col ), b1, b2, b3 )*/;
       glPopMatrix();
     glEndList();
 
@@ -369,7 +374,7 @@ void Visualizer::drawSubtree( Cluster* root, bool topClosed, HSV_Color col,
     glNewList( displist, GL_COMPILE );
       glPushMatrix();
       glMultMatrixf( M );
-      drawColoredCylinder( root->getTopRadius(), root->getBaseRadius(),
+      drawCylinder( root->getTopRadius(), root->getBaseRadius(),
 	  HSVtoRGB(col), HSVtoRGB(desccol), topClosed, descendants.size() > 1 );
       glPopMatrix();
     glEndList();
@@ -456,13 +461,13 @@ void Visualizer::drawSubtreeMarkStates( Cluster* root, bool topClosed )
       glMultMatrixf( M );
       if ( root->hasMarkedState() )
       {
-	drawColoredCylinder( root->getTopRadius(), root->getBaseRadius(),
+	drawCylinder( root->getTopRadius(), root->getBaseRadius(),
 	    visSettings.markedColor, RGB_WHITE, topClosed, descendants.size() >
 	    1 );
       }
       else
       {
-	drawColoredCylinder( root->getTopRadius(), root->getBaseRadius(),
+	drawCylinder( root->getTopRadius(), root->getBaseRadius(),
 	    RGB_WHITE, RGB_WHITE, topClosed, descendants.size() > 1 );
       }
       glPopMatrix();
@@ -550,13 +555,13 @@ void Visualizer::drawSubtreeMarkDeadlocks( Cluster* root, bool topClosed )
       glMultMatrixf( M );
       if ( root->hasDeadlock() )
       {
-	drawColoredCylinder( root->getTopRadius(), root->getBaseRadius(),
+	drawCylinder( root->getTopRadius(), root->getBaseRadius(),
 	    visSettings.markedColor, RGB_WHITE, topClosed, descendants.size() >
 	    1 );
       }
       else
       {
-	drawColoredCylinder( root->getTopRadius(), root->getBaseRadius(),
+	drawCylinder( root->getTopRadius(), root->getBaseRadius(),
 	    RGB_WHITE, RGB_WHITE, topClosed, descendants.size() > 1 );
       }
       glPopMatrix();
@@ -644,13 +649,13 @@ void Visualizer::drawSubtreeMarkTransitions( Cluster* root, bool topClosed )
       glMultMatrixf( M );
       if ( root->hasMarkedTransition() )
       {
-	drawColoredCylinder( root->getTopRadius(), root->getBaseRadius(),
+	drawCylinder( root->getTopRadius(), root->getBaseRadius(),
 	    visSettings.markedColor, RGB_WHITE, topClosed, descendants.size() >
 	    1);
       }
       else
       {
-	drawColoredCylinder( root->getTopRadius(), root->getBaseRadius(),
+	drawCylinder( root->getTopRadius(), root->getBaseRadius(),
 	    RGB_WHITE, RGB_WHITE, topClosed, descendants.size() > 1 );
       }
       glPopMatrix();
@@ -861,8 +866,8 @@ void Visualizer::setColor( RGB_Color c, float alpha )
 // draws a cylinder around z-axis with given base radius, top radius, height,
 // color at base, color at top, closed base if baseclosed and closed top if
 // topclosed
-void Visualizer::drawColoredCylinder( float baserad, float toprad, RGB_Color
-    basecol, RGB_Color topcol, bool baseclosed, bool topclosed )
+void Visualizer::drawCylinder( float baserad, float toprad, RGB_Color basecol,
+      RGB_Color topcol, bool baseclosed, bool topclosed )
 {
   int slices = visSettings.quality;
   float nxg = clusterHeight;
@@ -940,16 +945,17 @@ void Visualizer::drawHemisphere( float r, RGB_Color col )
   int i,j;
   
   // rotate around the z-axis first to ensure that one vertex of the base of the
-  // hemisphere is always at angle 0 (i.e. in point (r,0,0)). This way, the
-  // hemisphere will always fit nicely onto other objects in the scene (like
-  // cylinders) no matter what the value of n is.
+  // hemisphere is always at angle 0 in the (x,y)-plane (i.e. in point (r,0,0)).
+  // This way, the hemisphere will always fit nicely onto other objects in the
+  // scene (like cylinders) no matter what the value of n is.
   float rot = 0.0f;
   while ( rot <= 90.0f ) rot += 360.0f / (float)n;
   rot -= 360.0f / (float)n;
   glRotatef( 90 - rot, 0.0f, 0.0f, 1.0f );
 
   // precompute the cosines and sines that are needed during drawing and put
-  // them in vectors (this is done for efficiency).
+  // them in vectors (this is done for efficiency: every (co)sine used is
+  // now computed exactly once).
   vector< float > cos_theta1;
   vector< float > sin_theta1;
   for ( j = 0 ; j <= n / 2 ; j++ )
@@ -970,6 +976,8 @@ void Visualizer::drawHemisphere( float r, RGB_Color col )
   float ex,ey,ez,px,py,pz;
   glColor4f( col.r / 255.0f, col.g / 255.0f, col.b / 255.0f, visSettings.alpha );
 
+  // draw the hemisphere by drawing rings that stand upright on top of the
+  // (x,y)-plane
   for ( j = 0 ; j < n / 2 ; j++ )
   {
     glBegin(GL_QUAD_STRIP);
@@ -998,7 +1006,8 @@ void Visualizer::drawHemisphere( float r, RGB_Color col )
     glEnd();
   }
   
-  // if n is odd, then we have to draw yet another strip, namely the one between
+  // if n is odd, then we have to draw one more polygon, namely the one that is
+  // enclosed by the outermost circle of the last ring and the (x,y)-plane
   if ( n % 2 == 1 )
   {
     j = n / 2;
@@ -1016,4 +1025,152 @@ void Visualizer::drawHemisphere( float r, RGB_Color col )
     }
     glEnd();
   }
+}
+
+// draws a tube around the first half of a cubic Bezier curve of which begin
+// point b0 is in the origin. The coordinates of the other points are given as
+// parameters, as are the base radius, top radius, base color and top color.
+// Coordinates of b1, b2 and b3 are assumed to be relative to the current origin
+// (not world coordinates).
+void Visualizer::drawTube( float baserad, float toprad, RGB_Color basecol,
+      RGB_Color topcol, Point3D b1, Point3D b2, Point3D b3 )
+{
+  int N = visSettings.quality / 2 + visSettings.quality % 2;
+
+  vector< Point3D > curve;
+  vector< Point3D > curve_der;
+  float d_t = 0.5f / N;
+  float t  = 0.0f;
+  float it = 1.0f;
+  
+  for ( int i = 0 ; i <= N ; i++ )
+  {
+    float fac1 = 3*t*it*it;
+    float fac2 = 3*t*t*it;
+    float fac3 = t*t*t;
+    
+    Point3D bt =
+      { fac1*b1.x + fac2*b2.x + fac3*b3.x,
+	fac1*b1.y + fac2*b2.y + fac3*b3.y,
+	fac1*b1.z + fac2*b2.z + fac3*b3.z };
+    curve.push_back( bt );
+    t  += d_t;
+    it -= d_t;
+  }
+
+  t  = 0.0f;
+  it = 1.0f;
+  for ( int i = 0 ; i <= N ; i++ )
+  {
+    float fac1 = 3*it*it;
+    float fac2 = 6*t*it;
+    float fac3 = 3*t*t;
+    
+    // compute the derivative of the Bezier curve in t
+    Point3D bt_der =
+      { fac1*b1.x + fac2*(b2.x-b1.x) + fac3*(b3.x-b2.x),
+        fac1*b1.y + fac2*(b2.y-b1.y) + fac3*(b3.y-b2.y),
+        fac1*b1.z + fac2*(b2.z-b1.z) + fac3*(b3.z-b2.z) };
+    
+    // normalise the vector
+    float length = sqrt( bt_der.x*bt_der.x + bt_der.y*bt_der.y +
+	bt_der.z*bt_der.z );
+    bt_der.x = bt_der.x / length;
+    bt_der.y = bt_der.y / length;
+    bt_der.z = bt_der.z / length;
+	       
+    curve_der.push_back( bt_der );
+    t  += d_t;
+    it -= d_t;
+  }
+
+  vector< float > ctab;
+  vector< float > stab;
+  float delta_ang = 2.0f * PI / visSettings.quality;
+  float ang = 0.0f;
+  for ( int j = 0 ; j <= visSettings.quality ; j++ )
+  {
+    ctab.push_back( cos( ang ) );
+    stab.push_back( sin( ang ) );
+    ang += delta_ang;
+  }
+    
+  for ( int i = 0 ; i < N ; i++ )
+  {
+    // rotate so that z-axis points in direction of curve, i.e.: rotate around
+    // the vector perpendicular to the plane spanned by the z-axis (0,0,1) and
+    // the direction vector curve_der[i]. This perpendicular vector is computed
+    // by taking the cross product of the two vectors. The angle over which we
+    // rotate is the angle between the two vectors, which (as both vectors are
+    // normalised) equals the arccos of the dot product of both vectors.
+    float rot_ang1 = acos( curve_der[i].z ) * 180.0f / PI;
+    float rot_ang2 = acos( curve_der[i+1].z ) * 180.0f / PI;
+    
+    vector< Point3D > normals1;
+    vector< Point3D > normals2;
+    vector< Point3D > vertices1;
+    vector< Point3D > vertices2;
+    GLfloat M[16];
+    
+    for ( int j = 0 ; j <= visSettings.quality ; j++ )
+    {
+      glPushMatrix();
+      glLoadIdentity();
+      glRotatef( rot_ang2, -curve_der[i+1].y, curve_der[i+1].x, 0.0f );
+      glTranslatef( ctab[j], stab[j], 0.0f );
+      glGetFloatv( GL_MODELVIEW_MATRIX, M );
+      Point3D p1 = { M[12], M[13], M[14] };
+      normals2.push_back( p1 );
+      glPopMatrix();
+      
+      glPushMatrix();
+      glLoadIdentity();
+      glTranslatef( curve[i+1].x, curve[i+1].y, curve[i+1].z );
+      glRotatef( rot_ang2, -curve_der[i+1].y, curve_der[i+1].x, 0.0f );
+      glTranslatef( baserad*ctab[j], baserad*stab[j], 0.0f );
+      glGetFloatv( GL_MODELVIEW_MATRIX, M );
+      Point3D p2 = { M[12], M[13], M[14] };
+      vertices2.push_back( p2 );
+      glPopMatrix();
+      
+      glPushMatrix();
+      glLoadIdentity();
+      glRotatef( rot_ang1, -curve_der[i].y, curve_der[i].x, 0.0f );
+      glTranslatef( ctab[j], stab[j], 0.0f );
+      glGetFloatv( GL_MODELVIEW_MATRIX, M );
+      Point3D p3 = { M[12], M[13], M[14] };
+      normals1.push_back( p3 );
+      glPopMatrix();
+      
+      glPushMatrix();
+      glLoadIdentity();
+      glTranslatef( curve[i].x, curve[i].y, curve[i].z );
+      glRotatef( rot_ang1, -curve_der[i].y, curve_der[i].x, 0.0f );
+      glTranslatef( baserad*ctab[j], baserad*stab[j], 0.0f );
+      glGetFloatv( GL_MODELVIEW_MATRIX, M );
+      Point3D p4 = { M[12], M[13], M[14] };
+      cerr << M[12] << "," << M[13] << "," << M[14] << endl;
+      vertices1.push_back( p4 );
+      glPopMatrix();
+    }
+    
+    glColor4f( 0,0,0,1 );
+    glBegin( GL_LINE_STRIP );
+    for ( int j = 0 ; j <= visSettings.quality ; j++ )
+    {
+      glNormal3f( normals2[j].x, normals2[j].y, normals2[j].z );
+      glVertex3f( vertices2[j].x, vertices2[j].y, vertices2[j].z );
+      glNormal3f( normals1[j].x, normals1[j].y, normals1[j].z );
+      glVertex3f( vertices1[j].x, vertices1[j].y, vertices1[j].z );
+    }
+    glEnd();
+  }
+  
+  glColor4f( 0,0,0,1 );
+  glBegin( GL_LINE_STRIP );
+  for ( int i = 0 ; i < N ; i++ )
+  {
+    glVertex3f( curve[i].x, curve[i].y, curve[i].z );
+  }
+  glEnd();
 }
