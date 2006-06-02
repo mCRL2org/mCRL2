@@ -37,7 +37,7 @@ MAN_INSTALL_TARGETS = $(patsubst %,%.install,$(MAN_OBJECT_SUFFIXES))
 
 .PHONY: all clean distclean install xmlto_available
 
-all: $(OBJECTS)
+all:
 
 clean:
 	$(RM) $(OBJECTS)
