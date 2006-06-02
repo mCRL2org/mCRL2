@@ -6,8 +6,6 @@ project squadt
     <include>../libraries
     <cxxflags>-std=c++98 ;
 
-include $(TOP)/config.jam ;
-
 exe squadt
       : squadt.cpp
         exception.cpp
@@ -27,8 +25,7 @@ exe squadt
         /libraries/md5pp//md5pp
         /libraries/sip//sipc
         /boost/filesystem//boost_filesystem
-      : <cxxflags>"$(WX_CPPFLAGS)"
-        <linkflags>"$(WX_BASE_LDFLAGS)"
+      : <wx>basic
       ;
 
 install_with_libraries squadt ;

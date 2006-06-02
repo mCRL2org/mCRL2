@@ -17,26 +17,4 @@ exe ltsconvert
          <include>.
        ;
 
-include $(TOP)/config.jam ;
-
-explicit install install-libraries install-binaries ;
-
-alias install
-       : install-libraries
-         install-binaries
-       ;
-
-install install-libraries
-       : ltsconvert
-       : <install-dependencies>on <install-type>LIB <location>$(LIB_DIR)
-       : release
-       ;
-
-stage install-binaries
-       : ltsconvert 
-       : <install-type>EXE
-         <dll-path>$(LIB_DIR)
-         <location>$(BIN_DIR)
-       : release
-       ;
-
+install_with_libraries ltsconvert ;

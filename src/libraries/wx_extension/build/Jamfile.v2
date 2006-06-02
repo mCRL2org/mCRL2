@@ -22,7 +22,7 @@ obj colorbutton.o
 lib wx_extension
        : colorbutton.o
          spinctrlfloat.o
-       : <cxxflags>"$(WX_CPPFLAGS)"
+       : <toolset>darwin:<linkflags>"-undefined dynamic_lookup"
        :
        : <cxxflags>"$(WX_CPPFLAGS)"
        ;

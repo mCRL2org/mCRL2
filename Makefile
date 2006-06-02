@@ -6,18 +6,8 @@ all: config $(BJAM)
 	@$(BOOST_BUILD)
 
 install: $(BJAM)
+	@$(MAKE) -C src/doc install
 	@$(BOOST_BUILD) --install
-	install -d $(datadir)/examples/academic
-	cp examples/academic/*.mcrl2 $(datadir)/examples/academic
-	install -d $(datadir)/examples/industrial
-	cp examples/industrial/*.mcrl2 $(datadir)/examples/industrial
-	install -d $(datadir)/examples/industrial/garage
-	cp examples/industrial/garage/*.mcrl2 $(datadir)/examples/industrial/garage
-	install -d $(datadir)/examples/generated
-	cp examples/generated/*.mcrl2 $(datadir)/examples/generated
-	cp examples/generated/*.pnml $(datadir)/examples/generated
-	install -d $(datadir)/examples/visualisation
-	cp examples/visualisation/*.fsm $(datadir)/examples/visualisation
 
 clean:
 	@${MAKE} -C src clean

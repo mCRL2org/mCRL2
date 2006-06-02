@@ -23,6 +23,7 @@ exe lin
          /libraries/temporary//print
          /libraries/temporary//rewrite
        : <source>/root//mcrl2_revision
+         <tool_type>experimental
        ;
 
 exe alpha
@@ -32,26 +33,7 @@ exe alpha
          /libraries/temporary//print
          /libraries/temporary//rewrite
        : <source>/root//mcrl2_revision
+         <tool_type>experimental
        ;
 
-include $(TOP)/config.jam ;
-
-explicit lin install install-libraries install-binaries ;
-
-alias install
-       : install-libraries
-         install-binaries
-       ;
-
-install install-libraries
-       : mcrl22lpe
-       : <install-dependencies>on <install-type>LIB
-       : <location>$(LIB_DIR)
-       ;
-
-install install-binaries
-       : mcrl22lpe
-       : <dll-path>$(LIB_DIR)
-         <location>$(BIN_DIR)
-       ;
-
+install_with_libraries mcrl22lpe lin alpha ;

@@ -1,6 +1,7 @@
 import path ;
 import modules ;
 import feature : feature ;
+import os : name ;
 
 path-constant TOP             : . ;
 path-constant BUILD_TOP       : ./bin ;
@@ -13,9 +14,6 @@ project mcrl2_toolset
           <cxxflags>-std=c++98
           <define>_FILE_OFFSET_BITS=64
        ;
-
-# Feature to mark tools as experimental
-feature experimental : no yes : optional dependency ;
 
 # The known sub projects
 use-project /root                      : . ;
@@ -66,14 +64,69 @@ for library in $(libraries) {
   use-project /libraries/$(library) : src/libraries/$(library)/build ;
 }
 
-include config.jam ;
+include $(TOP)/config.jam ;
+
+# Feature to mark tools as experimental
+feature tool_type : basic experimental : optional incidental ;
+
+feature squadt_support : disable enable : composite optional incidental ;
+
+feature.compose <squadt_support>enable
+      : <define>ENABLE_SQUADT_CONNECTIVITY
+        <library>/libraries/sip//sipt
+      ;
+
+# Feature for linking to the xml2 library
+feature xml2 : none interface library : composite incidental link-incompatible ;
+
+feature.compose <xml2>interface
+      : <cxxflags>"$(XML2_CPPFLAGS)"
+      ;
+feature.compose <xml2>library
+      : <linkflags>"$(XML2_LDFLAGS)"
+        <cxxflags>"$(XML2_CPPFLAGS)"
+      ;
+
+# Feature for linking to wx widget libraries
+feature wx : none interface basic gl : composite incidental link-incompatible ;
+
+feature.compose <wx>interface
+      : <cxxflags>"$(WX_CPPFLAGS)"
+      ;
+feature.compose <wx>basic
+      : <linkflags>"$(WX_BASE_LDFLAGS)"
+        <cxxflags>"$(WX_CPPFLAGS)"
+      ;
+feature.compose <wx>gl
+      : <linkflags>"$(WX_GL_LDFLAGS)"
+        <cxxflags>"$(WX_CPPFLAGS)"
+      ;
+
+# OpenGL, GLU and GLUT libraries names
+rule import_libraries {
+  switch [ os.name ] {
+    case "NT" :
+      lib OpenGL : : <name>"opengl32" ;
+      lib GLU    : : <name>"glu32" ;
+      lib GLUT   : : <name>"glut32" ;
+    case "MACOSX" :
+      alias OpenGL : : : : <framework>"OpenGL" ;
+      alias GLUT   : : : : <framework>"GLUT" ;
+      alias GLU ;
+    case * :
+      lib OpenGL : : <name>"GL" ;
+      lib GLU    : : <name>"GLU" ;
+      lib GLUT   : : <name>"glut" ;
+  }
+}
 
 # Custom rule to install a tool executable with the libraries it depends on
-rule install_with_libraries ( tool ) {
+rule install_with_libraries ( tool * : property * ) {
 
   alias install
         : install-libraries
           install-binaries
+        : $(property)
         ;
 
   install install-binaries
@@ -96,5 +149,13 @@ if install in [ MATCH "^--(install)" : [ modules.peek : ARGV ] ] {
   alias install-tools
        : /tools/$(tools)//install
        ;
-}
 
+  extensions = mcrl2 pnml fsm ;
+
+  # Install examples
+  install examples
+       : [ glob ./examples/*.$(extensions) ./examples/*/*.$(extensions) ./examples/*/*/*.$(extensions) ]
+       : <location>$(DATA_DIR)
+         <install-source-root>.
+       ;
+}

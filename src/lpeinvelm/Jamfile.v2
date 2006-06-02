@@ -1,7 +1,6 @@
 project lpeinvelm
   : source-location .
   : build-dir $(BUILD_TOP)
-  : default-build debug
   ;
 
 exe lpeinvelm
@@ -11,23 +10,4 @@ exe lpeinvelm
          <include>.
        ;
 
-include $(TOP)/config.jam ;
-
-explicit install install-libraries install-binaries ;
-
-alias install
-       : install-libraries
-         install-binaries
-       ;
-
-install install-binaries
-       : lpeinvelm
-       : <dll-path>$(LIB_DIR)
-         <location>$(BIN_DIR)
-       ;
-
-install install-libraries
-      : lpeinvelm
-      : <install-dependencies>on <install-type>LIB
-      : <location>$(LIB_DIR)
-      ;
+install_with_libraries lpeinvelm ;

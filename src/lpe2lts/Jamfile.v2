@@ -1,8 +1,8 @@
 project lpe2lts
        : source-location .
+       : build-dir $(BUILD_TOP)
        : requirements
           <include>$(BOOST)
-       : build-dir $(BUILD_TOP)
        ;
 
 exe lpe2lts
@@ -16,24 +16,4 @@ exe lpe2lts
        : <source>/root//mcrl2_revision
        ;
 
-include $(TOP)/config.jam ;
-
-explicit install install-libraries install-binaries ;
-
-alias install
-       : install-libraries
-         install-binaries
-       ;
-
-install install-libraries
-       : lpe2lts
-       : <install-dependencies>on <install-type>LIB
-       : <location>$(LIB_DIR)
-       ;
-
-install install-binaries
-       : lpe2lts
-       : <dll-path>$(LIB_DIR)
-         <location>$(BIN_DIR)
-       ;
-
+install_with_libraries lpe2lts ;

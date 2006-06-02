@@ -1,13 +1,11 @@
 project text_reader
-    : source-location
-       ../source
-    : build-dir
-       .
+    : source-location ../source
+    : build-dir $(BUILD_TOP)
     : requirements
        <include>$(BOOST)
-       <include>../../
+       <include>../..
     : usage-requirements
-       <include>../../
+       <include>../..
     ;
 
 include $(TOP)/config.jam ;

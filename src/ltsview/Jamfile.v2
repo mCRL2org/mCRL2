@@ -2,29 +2,10 @@ project ltsview
   : build-dir $(BUILD_TOP)
   : requirements
     <include>.
-    <include>..
   ;
 
 import lex : lex ;
 import bison : bison ;
-import os : name ;
-
-include $(TOP)/config.jam ;
-
-switch [ os.name ] {
-  case "NT" :
-    lib OpenGL : : <name>"opengl32" ;
-    lib GLU : : <name>"glu32" ;
-    lib GLUT : : <name>"glut32" ;
-  case "MACOSX" :
-    alias OpenGL : : : : <framework>"OpenGL" ;
-    alias GLUT : : : : <framework>"GLUT" ;
-    alias GLU ;
-  case * :
-    lib OpenGL : : <name>"GL" ;
-    lib GLU : : <name>"GLU" ;
-    lib GLUT : : <name>"glut" ;
-}
 
 cpp fsmlexer.cpp
       : fsmlexer.ll
@@ -35,8 +16,11 @@ lib fsm
       : fsmparser.yy
       : <bison.prefix>"fsm"
         <implicit-dependency>fsmlexer.cpp
+        <dependency>/libraries/temporary//lowlevel
         <dependency>/libraries/aterm//aterm
       ;
+
+import_libraries ;
 
 exe ltsview
       : ltsviewapp.cpp
@@ -46,9 +30,9 @@ exe ltsview
         lts.cpp
         state.cpp
         transition.cpp
+        cluster.cpp
         fileloader.cpp
         visualizer.cpp
-        cluster.cpp
         utils.cpp
         fsm
         OpenGL
@@ -57,25 +41,8 @@ exe ltsview
         /libraries/temporary//lowlevel
         /libraries/aterm//aterm
       : <implicit-dependency>fsm
-        <cxxflags>"$(WX_CPPFLAGS)"
-        <linkflags>"$(WX_GL_LDFLAGS)"
+        <wx>gl
       ;
 
-alias install
-      : install-libraries
-        install-binaries
-      ;
+install_with_libraries ltsview ;
 
-install install-binaries
-      : ltsview
-      : <dll-path>$(LIB_DIR)
-        <location>$(BIN_DIR)
-      ;
-
-install install-libraries
-      : ltsview
-      : <install-dependencies>on <install-type>LIB
-      : <location>$(LIB_DIR)
-      ;
-
-explicit install install-binaries install-libraries ;

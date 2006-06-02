@@ -1,8 +1,8 @@
 project tbf2lpe
        : source-location .
+       : build-dir $(BUILD_TOP)
        : requirements
           <include>$(BOOST)
-       : build-dir $(BUILD_TOP)
        ;
 
 exe tbf2lpe
@@ -14,26 +14,4 @@ exe tbf2lpe
          <include>.
        ;
 
-include $(TOP)/config.jam ;
-
-explicit install install-libraries install-binaries ;
-
-alias install
-       : install-libraries
-         install-binaries
-       ;
-
-install install-libraries
-       : tbf2lpe 
-       : <install-dependencies>on <install-type>LIB <location>$(LIB_DIR)
-       : release
-       ;
-
-stage install-binaries
-       : tbf2lpe 
-       : <install-type>EXE
-         <dll-path>$(LIB_DIR)
-         <location>$(BIN_DIR)
-       : release
-       ;
-
+install_with_libraries tbf2lpe ;

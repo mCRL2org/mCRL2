@@ -3,8 +3,6 @@ project ltsgraph
        : build-dir $(BUILD_TOP)
        ;
 
-include $(TOP)/config.jam ;
-
 exe ltsgraph
        : ltsgraph.cpp
          graph_frame.cpp
@@ -15,25 +13,8 @@ exe ltsgraph
          <source>/libraries/lts//lts
          <source>/root//mcrl2_revision
          <include>.
-         <cxxflags>"$(WX_CPPFLAGS)"
-         <linkflags>"$(WX_BASE_LDFLAGS)"
+         <wx>basic
        ;
 
-explicit install install-libraries install-binaries ;
+install_with_libraries ltsgraph ;
 
-alias install
-       : install-libraries
-         install-binaries
-       ;
-
-install install-libraries
-       : ltsgraph
-       : <install-dependencies>on <install-type>LIB
-       : <location>$(LIB_DIR)
-       ;
-
-install install-binaries
-       : ltsgraph
-       : <dll-path>$(LIB_DIR)
-         <location>$(BIN_DIR)
-       ;

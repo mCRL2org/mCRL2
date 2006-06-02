@@ -13,30 +13,9 @@ exe lpeconstelm
        : <source>/boost/program_options//boost_program_options
          <source>/boost/filesystem//boost_filesystem
          <source>/root//mcrl2_revision
-         <define>ENABLE_SQUADT_CONNECTIVITY
+         <squadt_support>enable
          <include>.
        ;
 
-include $(TOP)/config.jam ;
-
-explicit install install-libraries install-binaries ;
-
-alias install
-       : install-libraries
-         install-binaries
-       ;
-
-install install-libraries
-       : lpeconstelm
-       : <install-dependencies>on <install-type>LIB <location>$(LIB_DIR)
-       : release
-       ;
-
-stage install-binaries
-       : lpeconstelm 
-       : <install-type>EXE
-         <dll-path>$(LIB_DIR)
-         <location>$(BIN_DIR)
-       : release
-       ;
+install_with_libraries lpeconstelm ;
 

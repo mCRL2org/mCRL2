@@ -5,12 +5,10 @@ project xsim
        : build-dir $(BUILD_TOP)
        ;
 
-include $(TOP)/config.jam ;
-
 lib xsimtrace
        : xsimtracedll.cpp
        : <dependency>/libraries/temporary//nextstate
-         <cxxflags>"$(WX_CPPFLAGS)"
+         <wx>interface
        ;
 
 exe xsim
@@ -21,11 +19,9 @@ exe xsim
          /libraries/temporary//trace
          /libraries/temporary//nextstate
          /libraries/temporary//print
-         /libraries/sip//sipt
        : <source>/root//mcrl2_revision
-         <define>ENABLE_SQUADT_CONNECTIVITY
-         <cxxflags>"$(WX_CPPFLAGS)"
-         <linkflags>"$(WX_BASE_LDFLAGS)"
+         <squadt_support>enable
+         <wx>basic
        ;
 
 exe sim
@@ -35,22 +31,5 @@ exe sim
        : <source>/root//mcrl2_revision
        ;
 
-explicit install install-libraries install-binaries ;
-
-alias install
-       : install-libraries
-         install-binaries
-       ;
-
-install install-libraries
-       : xsim
-       : <install-dependencies>on <install-type>LIB
-       : <location>$(LIB_DIR)
-       ;
-
-install install-binaries
-       : xsim 
-       : <dll-path>$(LIB_DIR)
-         <location>$(BIN_DIR)
-       ;
+install_with_libraries xsim sim ;
 
