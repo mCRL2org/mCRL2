@@ -42,7 +42,7 @@
       return lexico(
                lexico(
                  compare_guard_structure(a_guard1, a_guard2),
-                 compare_guard_equation(a_guard1, a_guard2)
+                 compare_guard_equality(a_guard1, a_guard2)
                ),
                compare_address(a_guard1, a_guard2)
              );
@@ -66,7 +66,7 @@
       if (is_variable(a_guard)) {
         return 0;
       }
-      if (is_equation(a_guard)) {
+      if (is_equality(a_guard)) {
         ATerm v_term1, v_term2;
 
         v_term1 = get_argument(a_guard, 0);
@@ -93,8 +93,8 @@
 
     // --------------------------------------------------------------------------------------------
 
-    Compare_Result ATerm_Info::compare_guard_equation(ATerm a_guard1, ATerm a_guard2) {
-      if (f_full && is_equation(a_guard1) && is_equation(a_guard2)) {
+    Compare_Result ATerm_Info::compare_guard_equality(ATerm a_guard1, ATerm a_guard2) {
+      if (f_full && is_equality(a_guard1) && is_equality(a_guard2)) {
         ATerm v_g1a0, v_g1a1, v_g2a0, v_g2a1;
 
         v_g1a0 = get_argument(a_guard1, 0);
@@ -257,7 +257,7 @@
 
     // --------------------------------------------------------------------------------------------
 
-    bool AI_Jitty::is_equation(ATerm a_term) {
+    bool AI_Jitty::is_equality(ATerm a_term) {
       if (get_number_of_arguments(a_term) == 2) {
         ATerm v_term;
 
@@ -382,7 +382,7 @@
 
     // --------------------------------------------------------------------------------------------
 
-    bool AI_Inner::is_equation(ATerm a_term) {
+    bool AI_Inner::is_equality(ATerm a_term) {
       if (get_number_of_arguments(a_term) == 2) {
         ATerm v_term;
 

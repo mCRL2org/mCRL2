@@ -18,6 +18,8 @@ class Invariant_Eliminator {
     Invariant_Eliminator(
       RewriteStrategy a_rewrite_strategy,
       int a_time_limit,
+      bool a_path_eliminator,
+      SMT_Solver_Type a_solver_type,
       ATermAppl a_lpe,
       bool a_simplify_all
     );

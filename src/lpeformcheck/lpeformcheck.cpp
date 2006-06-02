@@ -8,6 +8,7 @@
 #include "liblowlevel.h"
 #include "libstruct.h"
 #include "mcrl2_revision.h"
+#include "bdd_path_eliminator.h"
 #include <string>
 
 // Class LPE_Form_Check ---------------------------------------------------------------------------
@@ -21,6 +22,8 @@
       bool f_witness;
       RewriteStrategy f_strategy;
       int f_time_limit;
+      bool f_path_eliminator;
+      SMT_Solver_Type f_solver_type;
       void print_help();
       void print_more_info();
       void print_version();
@@ -70,7 +73,12 @@
         "                                  - 'jittyc' for the compiled jitty rewrite\n"
         "                                    strategy.\n"
         "  -t, --time-limit=SECONDS        Spend at most the specified number of\n"
-        "                                  SECONDS on proving a single formula.\n",
+        "                                  SECONDS on proving a single formula.\n"
+        "  -z --smt-solver=SOLVER          Use the specified SOLVER to remove\n"
+        "                                  inconsistent paths from BDDs:\n"
+        "                                  - 'ario' for the SMT solver Ario\n"
+        "                                  - 'cvc-lite' for the SMT solver CVC Lite.\n"
+        "                                  By default, no path elimination is applied.\n",
         f_tool_command
       );
     }
@@ -97,7 +105,8 @@
       f_witness = false;
       f_strategy = GS_REWR_JITTY;
       f_time_limit = 0;
-
+      f_path_eliminator = false;
+      f_solver_type = solver_type_ario;
     }
 
     // --------------------------------------------------------------------------------------------
@@ -109,7 +118,7 @@
     // --------------------------------------------------------------------------------------------
 
     void LPE_Form_Check::get_options(int a_argc, char* a_argv[]) {
-      char* v_short_options = "f:l:cwhqvdr:t:";
+      char* v_short_options = "f:l:cwhqvdr:t:z:";
 
       struct option v_long_options[] = {
         {"formulas",         required_argument, 0, 'f'},
@@ -123,6 +132,7 @@
         {"debug",            no_argument,       0, 'd'},
         {"rewrite-strategy", required_argument, 0, 'r'},
         {"time-limit",       required_argument, 0, 't'},
+        {"smt-solver",       required_argument, 0, 'z'},
         {0, 0, 0, 0}
       };
 
@@ -178,6 +188,18 @@
               f_time_limit = 0;
             }
             break;
+          case 'z':
+            if (strcmp(optarg, "ario") == 0) {
+              f_path_eliminator = true;
+              f_solver_type = solver_type_ario;
+            } else if (strcmp(optarg, "cvc-lite") == 0) {
+              f_path_eliminator = true;
+              f_solver_type = solver_type_cvc_lite;
+            } else {
+              gsErrorMsg("option -z has illegal argument '%s'\n", optarg);
+              exit(1);
+            }
+            break;
           default:
             print_more_info();
             exit(1);
@@ -210,7 +232,7 @@
         exit(1);
       } else {
         ATermAppl v_data_equations = ATAgetArgument(v_lpe, 3);
-        Formula_Checker v_formula_checker(f_strategy, f_time_limit, v_data_equations, f_counter_example, f_witness);
+        Formula_Checker v_formula_checker(f_strategy, f_time_limit, f_path_eliminator, f_solver_type, v_data_equations, f_counter_example, f_witness);
 
         v_formula_checker.check_formulas(v_formulas);
       }

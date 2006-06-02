@@ -8,6 +8,7 @@
 #include "librewrite.h"
 #include "bdd_prover.h"
 #include "disjointness_checker.h"
+#include "bdd2dot.h"
 
 class Confluence_Checker {
   private:
@@ -26,6 +27,8 @@ class Confluence_Checker {
     Confluence_Checker(
       RewriteStrategy a_rewrite_strategy,
       int a_time_limit,
+      bool a_path_eliminator,
+      SMT_Solver_Type a_solver_type,
       ATermAppl a_lpe,
       bool a_no_marking,
       bool a_check_all,

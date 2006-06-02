@@ -33,10 +33,10 @@
         return f_true;
       }
 
-      bool v_is_equation;
+      bool v_is_equality;
 
-      v_is_equation = f_info->is_equation(a_guard);
-      if (v_is_equation && ATgetArgument(a_guard, 2) == a_formula) {
+      v_is_equality = f_info->is_equality(a_guard);
+      if (v_is_equality && ATgetArgument(a_guard, 2) == a_formula) {
         return ATgetArgument(a_guard, 1);
       }
       if (f_info->is_variable(a_formula)) {
@@ -180,7 +180,7 @@
       delete[] v_parts;
       v_parts = 0;
 
-      if (f_info->is_equation(v_result)) {
+      if (f_info->is_equality(v_result)) {
         ATerm v_term1;
         ATerm v_term2;
 
@@ -226,10 +226,10 @@
         return f_true;
       }
 
-      bool v_is_equation;
+      bool v_is_equality;
 
-      v_is_equation = f_info->is_equation(a_guard);
-      if (v_is_equation && ATelementAt((ATermList) a_guard, 2) == a_formula) {
+      v_is_equality = f_info->is_equality(a_guard);
+      if (v_is_equality && ATelementAt((ATermList) a_guard, 2) == a_formula) {
         return ATelementAt((ATermList) a_guard, 1);
       }
       if (f_info->is_variable(a_formula)) {
@@ -382,7 +382,7 @@
         delete[] v_parts;
         v_parts = 0;
 
-        if (f_info->is_equation(v_result)) {
+        if (f_info->is_equality(v_result)) {
           ATerm v_term1;
           ATerm v_term2;
 

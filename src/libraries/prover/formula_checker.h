@@ -17,6 +17,8 @@ class Formula_Checker {
     Formula_Checker(
       RewriteStrategy a_rewrite_strategy,
       int a_time_limit,
+      bool a_path_eliminator,
+      SMT_Solver_Type a_solver_type,
       ATermAppl a_data_equations,
       bool a_counter_example,
       bool a_witness

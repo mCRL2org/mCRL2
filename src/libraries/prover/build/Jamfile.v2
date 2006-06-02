@@ -11,12 +11,20 @@ project prover
 lib prover
        : prover.cpp
          bdd_prover.cpp
+         bdd_simplifier.cpp
+         bdd_path_eliminator.cpp
+         smt_solver.cpp
+         smt_lib_solver.cpp
+         smt_solver_ario.cpp
+         smt_solver_cvc_lite.cpp
          confluence_checker.cpp
          disjointness_checker.cpp
          formula_checker.cpp
          invariant_checker.cpp
          invariant_eliminator.cpp
        : <dependency>/libraries/auxiliary//auxiliary
+         <dependency>/libraries/pstream//pstream
        :
        : <library>/libraries/auxiliary//auxiliary
+         <library>/libraries/pstream//pstream
        ;

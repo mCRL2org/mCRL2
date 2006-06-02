@@ -298,11 +298,11 @@
   // Class Confluence_Checker - Functions declared public -----------------------------------------
 
     Confluence_Checker::Confluence_Checker(
-      RewriteStrategy a_rewrite_strategy, int a_time_limit, ATermAppl a_lpe, bool a_no_marking, bool a_check_all, bool a_counter_example,
-      char* a_dot_file_name
+      RewriteStrategy a_rewrite_strategy, int a_time_limit, bool a_path_eliminator, SMT_Solver_Type a_solver_type, ATermAppl a_lpe,
+      bool a_no_marking, bool a_check_all, bool a_counter_example, char* a_dot_file_name
     ):
       f_disjointness_checker(ATAgetArgument(a_lpe, 5)),
-      f_bdd_prover(ATAgetArgument(a_lpe, 3), a_rewrite_strategy, a_time_limit)
+      f_bdd_prover(ATAgetArgument(a_lpe, 3), a_rewrite_strategy, a_time_limit, a_path_eliminator, a_solver_type)
     {
       if (has_ctau_action(a_lpe)) {
         gsErrorMsg("An action named \'ctau\' already exists.\n");

@@ -22,21 +22,21 @@
       ATerm v_previous_1 = 0;
       ATerm v_previous_2 = 0;
 
-      f_bdd = f_rewriter->toRewriteFormat(f_formula);
-      f_bdd = f_rewriter->rewriteInternal(f_bdd);
-      f_bdd = f_manipulator->orient(f_bdd);
+      f_internal_bdd = f_rewriter->toRewriteFormat(f_formula);
+      f_internal_bdd = f_rewriter->rewriteInternal(f_internal_bdd);
+      f_internal_bdd = f_manipulator->orient(f_internal_bdd);
 
-      gsVerboseMsg("Formula rewritten and oriented: %P\n", f_rewriter->fromRewriteFormat(f_bdd));
+      gsVerboseMsg("Formula rewritten and oriented: %P\n", f_rewriter->fromRewriteFormat(f_internal_bdd));
 
-      while (v_previous_1 != f_bdd && v_previous_2 != f_bdd) {
+      while (v_previous_1 != f_internal_bdd && v_previous_2 != f_internal_bdd) {
         v_previous_2 = v_previous_1;
-        v_previous_1 = f_bdd;
-        f_bdd = bdd_down(f_bdd, 2);
+        v_previous_1 = f_internal_bdd;
+        f_internal_bdd = bdd_down(f_internal_bdd, 2);
         gsVerboseMsg("End of iteration.\n");
-        gsVerboseMsg("Intermediate BDD: %P\n", f_rewriter->fromRewriteFormat(f_bdd));
+        gsVerboseMsg("Intermediate BDD: %P\n", f_rewriter->fromRewriteFormat(f_internal_bdd));
       }
 
-      gsVerboseMsg("Resulting BDD: %P\n", f_rewriter->fromRewriteFormat(f_bdd));
+      gsVerboseMsg("Resulting BDD: %P\n", f_rewriter->fromRewriteFormat(f_internal_bdd));
 
       ATtableDestroy(f_formula_to_bdd);
       ATtableDestroy(f_smallest);
@@ -148,10 +148,12 @@
     void BDD_Prover::update_answers() {
       if (!f_processed) {
         build_bdd();
-        if (f_info->is_true(f_bdd)) {
+        f_bdd = f_rewriter->fromRewriteFormat(f_internal_bdd);
+        f_bdd = f_bdd_simplifier->simplify(f_bdd);
+        if (f_bdd_info.is_true(f_bdd)) {
           f_tautology = answer_yes;
           f_contradiction = answer_no;
-        } else if (f_info->is_false(f_bdd)) {
+        } else if (f_bdd_info.is_false(f_bdd)) {
           f_tautology = answer_no;
           f_contradiction = answer_yes;
         } else {
@@ -164,29 +166,27 @@
 
     // --------------------------------------------------------------------------------------------
 
-    ATermAppl BDD_Prover::aux_get_branch(ATerm a_bdd, bool a_polarity) {
+    ATermAppl BDD_Prover::get_branch(ATermAppl a_bdd, bool a_polarity) {
       ATermAppl v_result;
 
-      if (f_info->is_if_then_else_bool(a_bdd)) {
-        ATerm v_guard = f_info->get_argument(a_bdd, 0);
-        ATerm v_true_bdd = f_info->get_argument(a_bdd, 1);
-        ATerm v_false_bdd = f_info->get_argument(a_bdd, 2);
-        ATermAppl v_branch = aux_get_branch(v_true_bdd, a_polarity);
+      if (f_bdd_info.is_if_then_else(a_bdd)) {
+        ATermAppl v_guard = f_bdd_info.get_guard(a_bdd);
+        ATermAppl v_true_branch = f_bdd_info.get_true_branch(a_bdd);
+        ATermAppl v_false_branch = f_bdd_info.get_false_branch(a_bdd);
+        ATermAppl v_branch = get_branch(v_true_branch, a_polarity);
         if (v_branch == 0) {
-          v_branch = aux_get_branch(v_false_bdd, a_polarity);
+          v_branch = get_branch(v_false_branch, a_polarity);
           if (v_branch == 0) {
             v_result = 0;
           } else {
-            ATermAppl v_term = f_rewriter->fromRewriteFormat(v_guard);
-            v_term = gsMakeDataExprNot(v_term);
+            ATermAppl v_term = gsMakeDataExprNot(v_guard);
             v_result = gsMakeDataExprAnd(v_branch, v_term);
           }
         } else {
-          ATermAppl v_term = f_rewriter->fromRewriteFormat(v_guard);
-          v_result = gsMakeDataExprAnd(v_branch, v_term);
+          v_result = gsMakeDataExprAnd(v_branch, v_guard);
         }
       } else {
-        if ((f_info->is_true(a_bdd) && a_polarity) || (f_info->is_false(a_bdd) && !a_polarity)) {
+        if ((f_bdd_info.is_true(a_bdd) && a_polarity) || (f_bdd_info.is_false(a_bdd) && !a_polarity)) {
           v_result = gsMakeOpIdTrue();
         } else {
           v_result = 0;
@@ -198,7 +198,8 @@
   // Class BDD_Prover - Functions declared public -------------------------------------------------
 
     BDD_Prover::BDD_Prover(
-      ATermAppl a_equations, RewriteStrategy a_rewrite_strategy, int a_time_limit, bool a_reverse, bool a_full
+      ATermAppl a_equations, RewriteStrategy a_rewrite_strategy, int a_time_limit, bool a_path_eliminator,
+      SMT_Solver_Type a_solver_type, bool a_reverse, bool a_full
     ):
       Prover(a_equations, a_rewrite_strategy, a_time_limit)
     {
@@ -213,12 +214,18 @@
         bool_to_char_string(f_reverse),
         bool_to_char_string(f_full)
       );
+      if (a_path_eliminator) {
+        f_bdd_simplifier = new BDD_Path_Eliminator(a_solver_type);
+      } else {
+        f_bdd_simplifier = new BDD_Simplifier();
+      }
     }
 
     // --------------------------------------------------------------------------------------------
 
     BDD_Prover::~BDD_Prover() {
-      // Nothing to free.
+      delete f_bdd_simplifier;
+      f_bdd_simplifier = 0;
     }
 
     // --------------------------------------------------------------------------------------------
@@ -239,7 +246,7 @@
 
     ATermAppl BDD_Prover::get_bdd() {
       update_answers();
-      return f_rewriter->fromRewriteFormat(f_bdd);
+      return f_bdd;
     }
 
     // --------------------------------------------------------------------------------------------
@@ -247,9 +254,10 @@
     ATermAppl BDD_Prover::get_witness() {
       ATermAppl v_result;
 
+      update_answers();
       if (!(is_contradiction() == answer_yes) && !(is_tautology() == answer_yes)) {
         gsDebugMsg("The formula appears to be satisfiable.\n");
-        v_result = aux_get_branch(f_bdd, true);
+        v_result = get_branch(f_bdd, true);
       } else {
         gsDebugMsg("The formula is a contradiction or a tautology.\n");
         v_result = 0;
@@ -262,9 +270,10 @@
     ATermAppl BDD_Prover::get_counter_example() {
       ATermAppl v_result;
 
+      update_answers();
       if (!(is_contradiction() == answer_yes) && !(is_tautology() == answer_yes)) {
         gsDebugMsg("The formula appears to be satisfiable.\n");
-        v_result = aux_get_branch(f_bdd, false);
+        v_result = get_branch(f_bdd, false);
       } else {
         gsDebugMsg("The formula is a contradiction or a tautology.\n");
         v_result = 0;

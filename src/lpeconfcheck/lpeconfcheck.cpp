@@ -26,6 +26,8 @@
       char* f_dot_file_name;
       RewriteStrategy f_strategy;
       int f_time_limit;
+      bool f_path_eliminator;
+      SMT_Solver_Type f_solver_type;
       ATermAppl f_lpe;
       ATermAppl f_invariant;
       void print_help();
@@ -85,7 +87,12 @@
         "                                  - 'jittyc' for the compiled jitty rewrite\n"
         "                                    strategy.\n"
         "  -t, --time-limit=SECONDS        Spend at most the specified number of\n"
-        "                                  SECONDS on proving a single formula.\n",
+        "                                  SECONDS on proving a single formula.\n"
+        "  -z --smt-solver=SOLVER          Use the specified SOLVER to remove\n"
+        "                                  inconsistent paths from BDDs:\n"
+        "                                  - 'ario' for the SMT solver Ario\n"
+        "                                  - 'cvc-lite' for the SMT solver CVC Lite.\n"
+        "                                  By default, no path elimination is applied.\n",
         f_tool_command
       );
     }
@@ -117,6 +124,8 @@
       f_dot_file_name = 0;
       f_strategy = GS_REWR_JITTY;
       f_time_limit = 0;
+      f_path_eliminator = false;
+      f_solver_type = solver_type_ario;
     }
 
     // --------------------------------------------------------------------------------------------
@@ -128,7 +137,7 @@
     // --------------------------------------------------------------------------------------------
 
     void LPE_Conf_Check::get_options(int a_argc, char* a_argv[]) {
-      char* v_short_options = "i:s:nmacp:hqvdr:t:";
+      char* v_short_options = "i:s:nmacp:hqvdr:t:z:";
 
       f_tool_command = a_argv[0];
 
@@ -147,6 +156,7 @@
         {"debug",            no_argument,       0, 'd'},
         {"rewrite-strategy", required_argument, 0, 'r'},
         {"time-limit",       required_argument, 0, 't'},
+        {"smt-solver",       required_argument, 0, 'z'},
         {0, 0, 0, 0}
       };
 
@@ -162,7 +172,7 @@
               gsErrorMsg("The summand number must be greater than or equal to 1.\n");
               exit(1);
             } else {
-              gsVerboseMsg("Eliminating or simplifying summand number %d.\n", f_summand_number);
+              gsVerboseMsg("Checking confluence of summand number %d.\n", f_summand_number);
             }
             break;
           case 'n':
@@ -216,6 +226,18 @@
               exit(0);
             }
             break;
+          case 'z':
+            if (strcmp(optarg, "ario") == 0) {
+              f_path_eliminator = true;
+              f_solver_type = solver_type_ario;
+            } else if (strcmp(optarg, "cvc-lite") == 0) {
+              f_path_eliminator = true;
+              f_solver_type = solver_type_cvc_lite;
+            } else {
+              gsErrorMsg("option -z has illegal argument '%s'\n", optarg);
+              exit(1);
+            }
+            break;
           default:
             print_more_info();
             exit(1);
@@ -259,7 +281,7 @@
 
     bool LPE_Conf_Check::check_invariant() {
       if (!f_no_check && f_invariant_file_name != 0) {
-        Invariant_Checker v_invariant_checker(f_strategy, f_time_limit, f_lpe, false, false);
+        Invariant_Checker v_invariant_checker(f_strategy, f_time_limit, f_path_eliminator, f_solver_type, f_lpe, false, false);
 
         return v_invariant_checker.check_invariant(f_invariant);
       } else {
@@ -273,7 +295,9 @@
     // --------------------------------------------------------------------------------------------
 
     void LPE_Conf_Check::check_confluence_and_mark() {
-      Confluence_Checker v_confluence_checker(f_strategy, f_time_limit, f_lpe, f_no_marking, f_check_all, f_counter_example, f_dot_file_name);
+      Confluence_Checker v_confluence_checker(
+        f_strategy, f_time_limit, f_path_eliminator, f_solver_type, f_lpe, f_no_marking, f_check_all, f_counter_example, f_dot_file_name
+      );
 
       if (f_invariant == 0) {
         f_invariant = gsMakeOpIdTrue();

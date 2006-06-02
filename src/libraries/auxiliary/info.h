@@ -18,7 +18,7 @@ class ATerm_Info {
     bool f_reverse;
     int get_guard_structure(ATerm a_guard);
     Compare_Result compare_guard_structure(ATerm a_guard1, ATerm a_guard2);
-    Compare_Result compare_guard_equation(ATerm a_guard1, ATerm a_guard2);
+    Compare_Result compare_guard_equality(ATerm a_guard1, ATerm a_guard2);
     Compare_Result compare_term_type(ATerm a_term1, ATerm a_term2);
     Compare_Result compare_term_occurs(ATerm a_term1, ATerm a_term2);
   public:
@@ -35,7 +35,7 @@ class ATerm_Info {
     virtual bool is_false(ATerm a_term) = 0;
     virtual bool is_if_then_else_bool(ATerm a_term) = 0;
     virtual bool is_variable(ATerm a_term) = 0;
-    virtual bool is_equation(ATerm a_term) = 0;
+    virtual bool is_equality(ATerm a_term) = 0;
 };
 
 class AI_Jitty: public ATerm_Info {
@@ -49,7 +49,7 @@ class AI_Jitty: public ATerm_Info {
     virtual bool is_false(ATerm a_term);
     virtual bool is_if_then_else_bool(ATerm a_term);
     virtual bool is_variable(ATerm a_term);
-    virtual bool is_equation(ATerm a_term);
+    virtual bool is_equality(ATerm a_term);
 };
 
 class AI_Inner: public ATerm_Info {
@@ -63,7 +63,7 @@ class AI_Inner: public ATerm_Info {
     virtual bool is_false(ATerm a_term);
     virtual bool is_if_then_else_bool(ATerm a_term);
     virtual bool is_variable(ATerm a_term);
-    virtual bool is_equation(ATerm a_term);
+    virtual bool is_equality(ATerm a_term);
 };
 
 #endif

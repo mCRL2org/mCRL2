@@ -1,0 +1,16 @@
+project pstream
+       : source-location ../source
+       : build-dir $(BUILD_TOP)
+       : default-build debug
+       : requirements
+          <include>..
+       : usage-requirements
+          <include>..
+       ;
+
+alias pstream
+       :
+       :
+       :
+       : <include>..
+       ;

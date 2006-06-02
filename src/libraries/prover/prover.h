@@ -11,6 +11,12 @@
 #include "utilities.h"
 #include "time.h"
 
+enum Answer {
+  answer_yes,
+  answer_no,
+  answer_undefined
+};
+
 class Prover {
   protected:
     ATermAppl f_formula;

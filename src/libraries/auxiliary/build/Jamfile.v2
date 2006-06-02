@@ -15,7 +15,12 @@ project auxiliary
 lib auxiliary
        : info.cpp
          manipulator.cpp
+         bdd_info.cpp
+         bdd_manipulator.cpp
+         bdd2dot.cpp
          utilities.cpp
+         expression_info.cpp
+         sort_info.cpp
        : <dependency>/libraries/temporary//print
        :
        : <library>/libraries/temporary//print

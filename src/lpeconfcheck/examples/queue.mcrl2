@@ -49,8 +49,8 @@ var
   a, b, c: Int;
 
 eqn
-  rhead(d |> q) = if(q != [], rhead(q), d);
-  rtail(d |> q) = if(q != [], d |> rtail(q), []);
+%  rhead(d |> q) = if(q != [], rhead(q), d);
+%  rtail(d |> q) = if(q != [], d |> rtail(q), []);
   if(true, d1, d2) = d1;
   if(false, d1, d2) = d2;
 

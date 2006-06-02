@@ -99,9 +99,10 @@
   // Class Invariant_Checker - Functions declared public --------------------------------------------
 
     Invariant_Checker::Invariant_Checker(
-      RewriteStrategy a_rewrite_strategy, int a_time_limit, ATermAppl a_lpe, bool a_counter_example, bool a_all
+      RewriteStrategy a_rewrite_strategy, int a_time_limit, bool a_path_eliminator, SMT_Solver_Type a_solver_type, ATermAppl a_lpe,
+      bool a_counter_example, bool a_all
     ):
-      f_bdd_prover(ATAgetArgument(a_lpe, 3), a_rewrite_strategy, a_time_limit)
+      f_bdd_prover(ATAgetArgument(a_lpe, 3), a_rewrite_strategy, a_time_limit, a_path_eliminator, a_solver_type)
     {
       f_init = ATAgetArgument(a_lpe, 6);
       f_summands = ATLgetArgument(ATAgetArgument(a_lpe, 5), 2);

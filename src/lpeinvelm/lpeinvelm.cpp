@@ -9,6 +9,7 @@
 #include "liblowlevel.h"
 #include "libstruct.h"
 #include "mcrl2_revision.h"
+#include "bdd_path_eliminator.h"
 #include <string>
 
 // Class LPE_Inv_Elm --------------------------------------------------------------------------
@@ -25,6 +26,8 @@
       bool f_simplify_all;
       bool f_all_violations;
       bool f_counter_example;
+      bool f_path_eliminator;
+      SMT_Solver_Type f_solver_type;
       RewriteStrategy f_strategy;
       int f_time_limit;
       ATermAppl f_lpe;
@@ -90,8 +93,14 @@
         "                                  - 'jitty' for the jitty rewrite strategy\n"
         "                                  - 'jittyc' for the compiled jitty rewrite\n"
         "                                    strategy.\n"
+        "                                  The default strategy is the 'jitty' strategy.\n"
         "  -t, --time-limit=SECONDS        Spend at most the specified number of\n"
-        "                                  SECONDS on proving a single formula.\n",
+        "                                  SECONDS on proving a single formula.\n"
+        "  -z --smt-solver=SOLVER          Use the specified SOLVER to remove\n"
+        "                                  inconsistent paths from BDDs:\n"
+        "                                  - 'ario' for the SMT solver Ario\n"
+        "                                  - 'cvc-lite' for the SMT solver CVC Lite.\n"
+        "                                  By default, no path elimination is applied.\n",
         f_tool_command
       );
     }
@@ -123,7 +132,8 @@
       f_counter_example = false;
       f_strategy = GS_REWR_JITTY;
       f_time_limit = 0;
-
+      f_path_eliminator = false;
+      f_solver_type = solver_type_ario;
     }
 
     // --------------------------------------------------------------------------------------------
@@ -135,7 +145,7 @@
     // --------------------------------------------------------------------------------------------
 
     void LPE_Inv_Elm::get_options(int a_argc, char* a_argv[]) {
-      char* v_short_options = "i:l:o:s:neaychqvdr:t:";
+      char* v_short_options = "i:l:o:s:neaychqvdr:t:z:";
 
       f_tool_command = a_argv[0];
 
@@ -156,6 +166,7 @@
         {"debug",            no_argument,       0, 'd'},
         {"rewrite-strategy", required_argument, 0, 'r'},
         {"time-limit",       required_argument, 0, 't'},
+        {"smt-solver",       required_argument, 0, 'z'},
         {0, 0, 0, 0}
       };
 
@@ -231,6 +242,18 @@
               exit(0);
             }
             break;
+          case 'z':
+            if (strcmp(optarg, "ario") == 0) {
+              f_path_eliminator = true;
+              f_solver_type = solver_type_ario;
+            } else if (strcmp(optarg, "cvc-lite") == 0) {
+              f_path_eliminator = true;
+              f_solver_type = solver_type_cvc_lite;
+            } else {
+              gsErrorMsg("option -z has illegal argument '%s'\n", optarg);
+              exit(1);
+            }
+            break;
           default:
             print_more_info();
             exit(1);
@@ -272,7 +295,7 @@
 
     bool LPE_Inv_Elm::check_invariant() {
       if (!f_no_check) {
-        Invariant_Checker v_invariant_checker(f_strategy, f_time_limit, f_lpe, f_counter_example, f_all_violations);
+        Invariant_Checker v_invariant_checker(f_strategy, f_time_limit, f_path_eliminator, f_solver_type, f_lpe, f_counter_example, f_all_violations);
 
         return v_invariant_checker.check_invariant(f_invariant);
       } else {
@@ -285,7 +308,7 @@
 
     void LPE_Inv_Elm::simplify() {
       if (!f_no_elimination) {
-        Invariant_Eliminator v_invariant_eliminator(f_strategy, f_time_limit, f_lpe, f_simplify_all);
+        Invariant_Eliminator v_invariant_eliminator(f_strategy, f_time_limit, f_path_eliminator, f_solver_type, f_lpe, f_simplify_all);
 
         f_lpe = v_invariant_eliminator.simplify(f_invariant, f_summand_number);
       }
