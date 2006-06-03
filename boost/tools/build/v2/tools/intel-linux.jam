@@ -18,14 +18,21 @@ feature.extend-subfeature toolset intel : platform : linux ;
 
 toolset.inherit-generators intel-linux 
      <toolset>intel <toolset-intel:platform>linux : gcc ;
-generators.override builtin.lib-generator : intel-linux.prebuilt ;     
+generators.override intel-linux.prebuilt : builtin.lib-generator ;
 generators.override intel-linux.prebuilt : builtin.prebuilt ;
 generators.override intel-linux.searched-lib-generator : searched-lib-generator ;
 
 toolset.inherit-rules intel-linux : gcc ;
 toolset.inherit-flags intel-linux : gcc 
-        : <inlining>off <inlining>on <inlining>full <optimization>space ;
-               
+        : <inlining>off <inlining>on <inlining>full <optimization>space 
+          <warnings>off <warnings>all <warnings>on
+        ;
+        
+if [ MATCH (--debug-configuration) : [ modules.peek : ARGV ] ]
+{
+    .debug-configuration = true ;
+}
+                       
 # Initializes the intel-linux toolset
 #   version in mandatory
 #   name (default icc) is used to invoke the specified intellinux complier
@@ -41,7 +48,24 @@ rule init ( version ? :  command * : options * )
     common.handle-options intel-linux : $(condition) : $(command) : $(options) ;
 
     gcc.init-link-flags intel-linux gnu $(condition) ;
-
+    
+    local root = [ feature.get-values <root> : $(options) ] ;
+    local bin ;
+    if $(command) || $(root)
+    {
+        bin ?= [ common.get-absolute-tool-path $(command[-1]) ] ;
+        root ?= $(bin:D) ;
+    
+        if $(root)
+        {
+            local lib_path = $(root)/lib ;
+            if $(.debug-configuration)
+            {
+                ECHO notice: using intel libraries :: $(condition) :: $(lib_path) ;
+            }
+            flags intel-linux.link RUN_PATH $(condition) : $(lib_path) ;
+        }   
+    }
 }
 
 SPACE = " " ;
@@ -50,6 +74,11 @@ flags intel-linux.compile OPTIONS <inlining>off : "-Ob0" ;
 flags intel-linux.compile OPTIONS <inlining>on : "-Ob1" ;
 flags intel-linux.compile OPTIONS <inlining>full : "-Ob2" ;
 flags intel-linux.compile OPTIONS <optimization>space : "-O1" ; # no specific space optimization flag in icc
+
+flags intel-linux.compile OPTIONS <warnings>off : -w0 ;
+flags intel-linux.compile OPTIONS <warnings>on : -w1 ;
+flags intel-linux.compile OPTIONS <warnings>all : -w2 ;
+
 actions compile.c++
 {
     "$(CONFIG_COMMAND)" -c -xc++ $(OPTIONS) -D$(DEFINES) -I"$(INCLUDES)" -c -o "$(<)" "$(>)"

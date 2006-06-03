@@ -239,8 +239,6 @@ ifdef BUILD_ATERM
 #install: aterm_install
 endif
 
-clean distclean: boost_relay
-
 # For building documentation
 documentation: $(CONFIG)
 	@$(MAKE) -C doc $(filter all clean distclean install,$(MAKECMDGOALS))

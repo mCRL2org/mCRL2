@@ -1,4 +1,7 @@
 
+# Build specific settings
+ADDRESS_MODEL   = "@ADDRESS_MODEL@" ;
+
 # Library specific variables
 XML2_CPPFLAGS   = "@LIBXML2_CPPFLAGS@" ;
 XML2_LDFLAGS    = "@LIBXML2_LDFLAGS@" ;

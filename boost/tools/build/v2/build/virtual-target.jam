@@ -469,16 +469,12 @@ rule add-prefix-and-suffix ( specified-name : type ? : property-set )
     local suffix = [ type.generated-target-suffix $(type) : $(property-set) ] ;
     suffix = .$(suffix) ;
     
-    local prefix ;
-    
-    if [ type.is-derived $(type) LIB ] && [ os.on-unix ] 
-       && ! [ MATCH ^(lib) : $(specified-name) ]
-       # This becomes hacky! Need to introduce more general mechanism  
-       && ! [ type.is-derived $(type) PYTHON_EXTENSION ] 
+    local prefix = [ type.generated-target-prefix $(type) : $(property-set) ] ;
+      
+    if  [ MATCH ^($(prefix)) : $(specified-name) ]
     {
-        prefix = "lib" ;
+        prefix = ;
     }
-    
     return $(prefix:E="")$(specified-name)$(suffix:E="") ;
 }
 
@@ -926,6 +922,22 @@ rule clear-recent-targets ( )
 rule all-targets ( )
 {
     return $(.all-targets) ;
+}
+
+# Returns all targets from 'targets' with types
+# equal to 'type' or derived from it.
+rule select-by-type ( type : targets * )
+{
+    local result ;
+    for local t in $(targets)
+    {
+        if [ type.is-subtype [ $(t).type ] $(type) ]
+        {
+            result += $(t) ;
+        }         
+    }
+    
+    return $(result) ;    
 }
 
 

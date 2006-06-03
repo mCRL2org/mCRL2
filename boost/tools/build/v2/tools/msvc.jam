@@ -193,17 +193,11 @@ local rule configure-really (
         # Register a new configuration 
         $(.versions).register $(version) ;
 
-        # Set new options if any
-        if $(options)
-        {
-            $(.versions).set $(version) : options : $(options) ;
-        }
+        # Add user-supplied to auto-detected options
+        options = [ $(.versions).get $(version) : options ] $(options) ;
 
         # Mark the configuration as 'used'.
         $(.versions).use $(version) ;
-
-        # Get auto-detected or user-supplied options 
-        options = [ $(.versions).get $(version) : options ] ;
 
         # Generate condition and save it
         local condition = [ common.check-init-parameters msvc : 
@@ -399,7 +393,12 @@ local rule configure-version-specific ( version : condition )
     {
         flags msvc.compile CFLAGS $(condition) : /Zc:forScope /Zc:wchar_t ;
         flags msvc.compile.c++ C++FLAGS $(condition) : /wd4675 ;
-        flags msvc.compile CFLAGS $(condition)/<warnings>all : /Wp64 ; # 64-bit compatibility warning
+        # disable the function is deprecated warning
+        # Some version of msvc have a bug, that cause deprecation
+        # warning to be emitted even with /W0
+        flags msvc.compile CFLAGS $(condition)/<warnings>off : /wd4996 ; 
+        # 64-bit compatibility warning
+        flags msvc.compile CFLAGS $(condition)/<warnings>all : /Wp64 ; 
     }
     
     #
@@ -419,6 +418,10 @@ local rule configure-version-specific ( version : condition )
         flags msvc.compile CFLAGS $(condition)/$(cpu-arch-i386)/<instruction-set>$(cpu-type-g5) : /G5 ;
         flags msvc.compile CFLAGS $(condition)/$(cpu-arch-i386)/<instruction-set>$(cpu-type-g6) : /G6 ;
         flags msvc.compile CFLAGS $(condition)/$(cpu-arch-i386)/<instruction-set>$(cpu-type-g7) : /G7 ;
+        
+        # Improve floating-point accuracy. Otherwise, some of C++ Boost's
+        # "math" tests will fail.
+        flags msvc.compile CFLAGS $(condition) : /Op ;
     }
 }
 
@@ -468,13 +471,13 @@ rule default-paths ( version ? )
     
     if $(version)
     {
-        default-path += [ default-path $(version) ] ;
+        possible-paths += [ default-path $(version) ] ;
     }
     else
     {
         for local i in $(.known-versions)
         {
-            default-path += [ default-path $(i) ] ;
+            possible-paths += [ default-path $(i) ] ;
         }
     }
 
@@ -496,7 +499,7 @@ generators.register-c-compiler msvc.compile.c : C : OBJ : <toolset>msvc ;
 
 # Using 'register-c-compiler' adds the build directory to INCLUDES
 generators.register-c-compiler msvc.compile.rc : RC : OBJ(%_res) : <toolset>msvc ;
-generators.override msvc.compile.rc : rc.resource-compile ;
+generators.override msvc.compile.rc : rc.compile.resource ;
 generators.register-standard msvc.compile.asm : ASM : OBJ : <toolset>msvc ;
 
 generators.register-c-compiler msvc.compile.idl : IDL : MSTYPELIB H C(%_i) C(%_proxy) C(%_dlldata) : <toolset>msvc ;
@@ -548,8 +551,8 @@ flags msvc.compile CFLAGS <runtime-debugging>on/<runtime-link>static/<threading>
 flags msvc.compile CFLAGS <runtime-debugging>off/<runtime-link>static/<threading>multi : /MT ;
 flags msvc.compile CFLAGS <runtime-debugging>on/<runtime-link>static/<threading>multi : /MTd ;
 
-flags msvc.compile USER_CFLAGS <cflags> : ;
-flags msvc.compile.c++ USER_CFLAGS <cxxflags> : ;
+flags msvc.compile.c OPTIONS <cflags> : ;
+flags msvc.compile.c++ OPTIONS <cxxflags> : ;
 
 flags msvc.compile PDB_CFLAG <debug-symbols>on/<debug-store>database : /Fd ;  # not used yet
 
@@ -582,17 +585,17 @@ rule compile.pch ( targets + : sources * : properties * )
 # The actions differ only by explicit selection of input language
 actions compile.c bind PCH_HEADER PCH_FILE
 {
-    $(.CC) /Zm800 -nologo -TC -U$(UNDEFS) $(CFLAGS) $(USER_CFLAGS) @"@($(<[1]:W).rsp:E=$(nl)"$(>)" $(nl)-D$(DEFINES) $(nl)"-I$(INCLUDES)")" -c -Fo"$(<[1]:W)" -Yu"$(PCH_HEADER:D=)" -Fp"$(PCH_FILE:W)"
+    $(.CC) /Zm800 -nologo -TC -U$(UNDEFS) $(CFLAGS) $(OPTIONS) @"@($(<[1]:W).rsp:E=$(nl)"$(>)" $(nl)-D$(DEFINES) $(nl)"-I$(INCLUDES)")" -c -Fo"$(<[1]:W)" -Yu"$(PCH_HEADER:D=)" -Fp"$(PCH_FILE:W)"
 }
 
 actions compile.c++ bind PCH_HEADER PCH_FILE
 {
-    $(.CC) /Zm800 -nologo -TP -U$(UNDEFS) $(CFLAGS) $(C++FLAGS) $(USER_CFLAGS) @"@($(<[1]:W).rsp:E=$(nl)"$(>)" $(nl)-D$(DEFINES) $(nl)"-I$(INCLUDES)")" -c -Fo"$(<[1]:W)" -Yu"$(PCH_HEADER:D=)" -Fp"$(PCH_FILE:W)"
+    $(.CC) /Zm800 -nologo -TP -U$(UNDEFS) $(CFLAGS) $(C++FLAGS) $(OPTIONS) @"@($(<[1]:W).rsp:E=$(nl)"$(>)" $(nl)-D$(DEFINES) $(nl)"-I$(INCLUDES)")" -c -Fo"$(<[1]:W)" -Yu"$(PCH_HEADER:D=)" -Fp"$(PCH_FILE:W)"
 }
 
 actions compile.pch bind PCH_SOURCE
 {
-    $(.CC) /Zm800 -nologo -TP -U$(UNDEFS) $(CFLAGS) $(C++FLAGS) $(USER_CFLAGS) @"@($(<[1]:W).rsp:E=$(nl)"$(PCH_SOURCE:W)" $(nl)-D$(DEFINES) $(nl)"-I$(INCLUDES)")" -c -Fo"$(<[1]:W)" /Yc"$(>[1]:D=)" -Fp"$(<[2]:W)"
+    $(.CC) /Zm800 -nologo -TP -U$(UNDEFS) $(CFLAGS) $(C++FLAGS) $(OPTIONS) @"@($(<[1]:W).rsp:E=$(nl)"$(PCH_SOURCE:W)" $(nl)-D$(DEFINES) $(nl)"-I$(INCLUDES)")" -c -Fo"$(<[1]:W)" /Yc"$(>[1]:D=)" -Fp"$(<[2]:W)"
 }
 
 
@@ -642,9 +645,7 @@ flags msvc LINKFLAGS <user-interface>wince : /subsystem:windowsce ;
 flags msvc LINKFLAGS <user-interface>native : /subsystem:native ;
 flags msvc LINKFLAGS <user-interface>auto : /subsystem:posix ;
 
-flags msvc LINKFLAGS <main-target-type>LIB/<link>shared : /DLL ;
-
-flags msvc.link USER_LINKFLAGS <linkflags> ;
+flags msvc.link OPTIONS <linkflags> ;
 flags msvc.link LINKPATH <library-path> ;
 
 
@@ -652,6 +653,8 @@ flags msvc.link FINDLIBS_ST <find-static-library> ;
 flags msvc.link FINDLIBS_SA <find-shared-library> ;
 flags msvc.link LIBRARY_OPTION <toolset>msvc : "" : unchecked ;
 flags msvc.link LIBRARIES_MENTIONED_BY_FILE : <library-file> ;
+
+flags msvc.archive AROPTIONS <archiveflags> ;
 
 
 rule link.dll ( targets + : sources * : properties * )
@@ -670,7 +673,7 @@ if [ os.name ] in NT
     actions archive
     {  
         if exist "$(<[1])" DEL "$(<[1])"  
-        $(.LD) /lib /NOLOGO /out:"$(<[1])" @"@($(<[1]:W).rsp:E=$(nl)"$(>)" $(nl)$(LIBRARIES_MENTIONED_BY_FILE) $(nl)"$(LIBRARY_OPTION)$(FINDLIBS_ST:S=.lib)" $(nl)"$(LIBRARY_OPTION)$(FINDLIBS_SA:S=.lib)")"
+        $(.LD) /lib /NOLOGO $(AROPTIONS) /out:"$(<[1])" @"@($(<[1]:W).rsp:E=$(nl)"$(>)" $(nl)$(LIBRARIES_MENTIONED_BY_FILE) $(nl)"$(LIBRARY_OPTION)$(FINDLIBS_ST:S=.lib)" $(nl)"$(LIBRARY_OPTION)$(FINDLIBS_SA:S=.lib)")"
     }
 }
 else
@@ -678,7 +681,7 @@ else
     actions archive
     {  
         $(RM) "$(<[1])"
-        $(.LD) /lib /NOLOGO /out:"$(<[1])" @"@($(<[1]:W).rsp:E=$(nl)"$(>)" $(nl)$(LIBRARIES_MENTIONED_BY_FILE) $(nl)"$(LIBRARY_OPTION)$(FINDLIBS_ST:S=.lib)" $(nl)"$(LIBRARY_OPTION)$(FINDLIBS_SA:S=.lib)")"
+        $(.LD) /lib /NOLOGO $(AROPTIONS) /out:"$(<[1])" @"@($(<[1]:W).rsp:E=$(nl)"$(>)" $(nl)$(LIBRARIES_MENTIONED_BY_FILE) $(nl)"$(LIBRARY_OPTION)$(FINDLIBS_ST:S=.lib)" $(nl)"$(LIBRARY_OPTION)$(FINDLIBS_SA:S=.lib)")"
     }
 }
         
@@ -698,7 +701,7 @@ if [ os.name ] in NT
 {
     actions link bind DEF_FILE
     {
-        $(.LD) /NOLOGO $(LINKFLAGS) /out:"$(<[1]:W)" /INCREMENTAL:NO /LIBPATH:"$(LINKPATH:W)" $(USER_LINKFLAGS) @"@($(<[1]:W).rsp:E=$(nl)"$(>)" $(nl)$(LIBRARIES_MENTIONED_BY_FILE) $(nl)$(LIBRARIES) $(nl)"$(LIBRARY_OPTION)$(FINDLIBS_ST:S=.lib)" $(nl)"$(LIBRARY_OPTION)$(FINDLIBS_SA:S=.lib)")"
+        $(.LD) /NOLOGO $(LINKFLAGS) /out:"$(<[1]:W)" /INCREMENTAL:NO /LIBPATH:"$(LINKPATH:W)" $(OPTIONS) @"@($(<[1]:W).rsp:E=$(nl)"$(>)" $(nl)$(LIBRARIES_MENTIONED_BY_FILE) $(nl)$(LIBRARIES) $(nl)"$(LIBRARY_OPTION)$(FINDLIBS_ST:S=.lib)" $(nl)"$(LIBRARY_OPTION)$(FINDLIBS_SA:S=.lib)")"
         if exist "$(<[1]).manifest" (
             mt -nologo -manifest "$(<[1]).manifest" "-outputresource:$(<[1]);1"
         )
@@ -706,7 +709,7 @@ if [ os.name ] in NT
 
     actions link.dll bind DEF_FILE
     {
-        $(.LD) /NOLOGO $(LINKFLAGS) /out:"$(<[1]:W)" /INCREMENTAL:NO /IMPLIB:"$(<[2]:W)" /LIBPATH:"$(LINKPATH:W)" /def:$(DEF_FILE) $(USER_LINKFLAGS) @"@($(<[1]:W).rsp:E=$(nl)"$(>)" $(nl)$(LIBRARIES_MENTIONED_BY_FILE) $(nl)$(LIBRARIES) $(nl)"$(LIBRARY_OPTION)$(FINDLIBS_ST:S=.lib)" $(nl)"$(LIBRARY_OPTION)$(FINDLIBS_SA:S=.lib)")"
+        $(.LD) /NOLOGO /DLL $(LINKFLAGS) /out:"$(<[1]:W)" /INCREMENTAL:NO /IMPLIB:"$(<[2]:W)" /LIBPATH:"$(LINKPATH:W)" /def:$(DEF_FILE) $(OPTIONS) @"@($(<[1]:W).rsp:E=$(nl)"$(>)" $(nl)$(LIBRARIES_MENTIONED_BY_FILE) $(nl)$(LIBRARIES) $(nl)"$(LIBRARY_OPTION)$(FINDLIBS_ST:S=.lib)" $(nl)"$(LIBRARY_OPTION)$(FINDLIBS_SA:S=.lib)")"
         if exist "$(<[1]).manifest" (
             mt -nologo -manifest "$(<[1]).manifest" "-outputresource:$(<[1]);2"
         )
@@ -716,7 +719,7 @@ else
 {
     actions link bind DEF_FILE
     {
-        $(.LD) /NOLOGO $(LINKFLAGS) /out:"$(<[1]:W)" /INCREMENTAL:NO /LIBPATH:"$(LINKPATH:W)" $(USER_LINKFLAGS) @"@($(<[1]:W).rsp:E=$(nl)"$(>)" $(nl)$(LIBRARIES_MENTIONED_BY_FILE) $(nl)$(LIBRARIES) $(nl)"$(LIBRARY_OPTION)$(FINDLIBS_ST:S=.lib)" $(nl)"$(LIBRARY_OPTION)$(FINDLIBS_SA:S=.lib)")"
+        $(.LD) /NOLOGO $(LINKFLAGS) /out:"$(<[1]:W)" /INCREMENTAL:NO /LIBPATH:"$(LINKPATH:W)" $(OPTIONS) @"@($(<[1]:W).rsp:E=$(nl)"$(>)" $(nl)$(LIBRARIES_MENTIONED_BY_FILE) $(nl)$(LIBRARIES) $(nl)"$(LIBRARY_OPTION)$(FINDLIBS_ST:S=.lib)" $(nl)"$(LIBRARY_OPTION)$(FINDLIBS_SA:S=.lib)")"
         if test -e "$(<[1]).manifest"; then
             $(.MT) -nologo -manifest "$(<[1]:W).manifest" "-outputresource:$(<[1]:W);1"
         fi
@@ -724,7 +727,7 @@ else
 
     actions link.dll bind DEF_FILE
     {
-        $(.LD) /NOLOGO $(LINKFLAGS) /out:"$(<[1]:W)" /INCREMENTAL:NO /IMPLIB:"$(<[2]:W)" /LIBPATH:"$(LINKPATH:W)" /def:$(DEF_FILE) $(USER_LINKFLAGS) @"@($(<[1]:W).rsp:E=$(nl)"$(>)" $(nl)$(LIBRARIES_MENTIONED_BY_FILE) $(nl)$(LIBRARIES) $(nl)"$(LIBRARY_OPTION)$(FINDLIBS_ST:S=.lib)" $(nl)"$(LIBRARY_OPTION)$(FINDLIBS_SA:S=.lib)")"
+        $(.LD) /NOLOGO /DLL $(LINKFLAGS) /out:"$(<[1]:W)" /INCREMENTAL:NO /IMPLIB:"$(<[2]:W)" /LIBPATH:"$(LINKPATH:W)" /def:$(DEF_FILE) $(OPTIONS) @"@($(<[1]:W).rsp:E=$(nl)"$(>)" $(nl)$(LIBRARIES_MENTIONED_BY_FILE) $(nl)$(LIBRARIES) $(nl)"$(LIBRARY_OPTION)$(FINDLIBS_ST:S=.lib)" $(nl)"$(LIBRARY_OPTION)$(FINDLIBS_SA:S=.lib)")"
         if test -e "$(<[1]).manifest"; then
             $(.MT) -nologo -manifest "$(<[1]:W).manifest" "-outputresource:$(<[1]:W);2"
         fi

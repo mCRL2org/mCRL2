@@ -49,20 +49,20 @@ AC_SUBST([HOST_OS])
 # Default is 32 bits, test is probably very incomplete
 case $host in
   *64*-*-*)
-    ADDRESS_WIDTH=64
+    ADDRESS_MODEL=64
     ;;
   *32*-*-*)
-    ADDRESS_WIDTH=32
+    ADDRESS_MODEL=32
     ;;
   *16*-*-*)
-    ADDRESS_WIDTH=16
+    ADDRESS_MODEL=16
     ;;
   *)
-    ADDRESS_WIDTH=32
+    ADDRESS_MODEL=32
     ;;
 esac
 
-AC_SUBST([ADDRESS_WIDTH],[])
+AC_SUBST([ADDRESS_MODEL],[])
 
 # Checks for programs.
 AC_PROG_CPP
@@ -280,7 +280,7 @@ else
   ATERM_NAME="ATerm"
   BUILD_ATERM=1
 
-  if test "$ADDRESS_WIDTH" = "64"; then
+  if test "$ADDRESS_MODEL" = "64"; then
     ATERM_CPPFLAGS="-DAT_64BIT $ATERM_CPPFLAGS"
   fi
 fi

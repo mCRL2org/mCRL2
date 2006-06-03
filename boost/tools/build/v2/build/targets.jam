@@ -281,9 +281,7 @@ class project-target : abstract-target
         local self-location = [ get location ] ;
         for local pn in [ get projects-to-build ]
         {
-            local p = [ project.module-name 
-                [ path.root $(pn) $(self-location) ] ] ;
-            result += [ project.target $(p) ] ;
+            result += [ find $(pn) ] ;
         }
                         
         return $(result) ;
@@ -584,7 +582,7 @@ class main-target : abstract-target
 
     # Returns the best viable alternative for this property-set
     # See the documentation for selection rules.
-    local rule select-alternatives ( property-set )
+    local rule select-alternatives ( property-set debug ? )
     {
         # When selecting alternatives we have to consider defaults,
         # for example:
@@ -607,7 +605,7 @@ class main-target : abstract-target
             while $(worklist) && ! $(bad)
             {
                 local v = $(worklist[1]) ; 
-                local properties = [ $(v).match $(property-set) ] ;
+                local properties = [ $(v).match $(property-set) $(debug) ] ;              
                            
                 if $(properties) != no-match
                 {                                    
@@ -752,11 +750,8 @@ class main-target : abstract-target
         local best-alternatives = [ select-alternatives $(property-set) ] ;
         if ! $(best-alternatives)
         {
-            errors.error
-                "failed to build" [ full-name ]
-                "with properties" [ $(property-set).raw ]
-                  "because no best-matching alternative could be found"
-                  ; 
+            ECHO "error: No best alternative for" [ full-name ] ;
+            select-alternatives $(property-set) debug ;
             return [ property-set.empty ] ;
         }
         else
@@ -796,9 +791,10 @@ class file-reference : abstract-target
     
     rule generate ( properties )
     {
-         return [ property-set.empty ] 
-                [ virtual-target.from-file $(self.name)
-                                         : [ location ]
+        location ;
+        return [ property-set.empty ] 
+               [ virtual-target.from-file $(self.name)
+                                         : $(self.file-location)
                                          : $(self.project) ] ;        
     }    
 
@@ -808,7 +804,7 @@ class file-reference : abstract-target
         location ;
         return $(self.file-path) ;
     }
-
+           
     # Returns the location of target. Needed by 'testing.jam'
     rule location ( )
     {
@@ -931,7 +927,8 @@ rule common-properties2 ( build-request requirements )
     # Apply non-conditional requirements. 
     # There's a slight bug here: it's possible that conditional
     # requirement change a value set by non-conditional requirements. This
-    # should be error, but we don't detect it yet.
+    # should be error, but we don't detect it yet.   
+    
     local raw = [ $(build-request).raw ] ;
     raw = [ property.refine $(raw) : 
       [ feature.expand [ $(requirements).non-conditional ] ] ] ;
@@ -1071,7 +1068,7 @@ class basic-target : abstract-target
     
     # Returns the alternative condition for this alternative, if
     # the condition is satisfied by 'property-set'.
-    rule match ( property-set )
+    rule match ( property-set debug ? )
     {    
         # The condition is composed of all base non-conditional properties.
         # It's not clear if we should expand 'self.requirements' or not.
@@ -1084,12 +1081,25 @@ class basic-target : abstract-target
         local bcondition = [ $(self.requirements).base ] ;
         local ccondition = [ $(self.requirements).conditional ] ;
         local condition = [ set.difference $(bcondition) : $(ccondition) ] ;
+        if $(debug)
+        {
+            ECHO "    next alternative: required properties:" $(condition:E=(empty)) ;
+        }                
+        
         if $(condition) in [ $(property-set).raw ] 
         {
-            return $(condition) ;            
+            if $(debug)
+            {
+                ECHO "        matched" ;
+            }            
+            return $(condition) ;                        
         }
         else
         {
+            if $(debug)
+            {
+                ECHO "        not matched" ;
+            }            
             return no-match ;
         }        
     }

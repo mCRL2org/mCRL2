@@ -50,6 +50,7 @@ feature asynch-exceptions : off on : propagated ;
 feature extern-c-nothrow : off on : propagated ;
 feature debug-symbols : on off : propagated ;
 feature define : : free ;
+feature undef : : free ;
 feature "include" : : free path ; #order-sensitive ;
 feature cflags : : free ;
 feature cxxflags : : free ;
@@ -81,8 +82,8 @@ feature dependency : : free dependency incidental ;
 feature implicit-dependency : : free dependency incidental ;
 
 feature warnings :
-    all        # enable all warnings issued by the tool
-    on         # enable default warning level for the tool
+    on         # enable default/"reasonable" warning level for the tool
+    all        # enable all possible warnings issued by the tool
     off        # disable all warnings issued by the tool
   : incidental propagated ;
 
@@ -551,7 +552,7 @@ class prebuilt-lib-generator : generator
 generators.register 
   [ new prebuilt-lib-generator builtin.prebuilt : : LIB : <file> ] ;
 
-generators.override builtin.lib-generator : builtin.prebuilt ;
+generators.override builtin.prebuilt : builtin.lib-generator ;
 
     
 class compile-action : action 

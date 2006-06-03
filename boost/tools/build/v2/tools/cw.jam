@@ -45,6 +45,7 @@ rule init ( version ? : command * : options * )
     
     common.handle-options cw : $(condition) : $(command) : $(options) ;
 
+    local root = [ feature.get-values <root> : $(options) ] ;    
     if $(command)
     {
         command = [ common.get-absolute-tool-path $(command[-1]) ] ;
@@ -56,7 +57,11 @@ rule init ( version ? : command * : options * )
    # map the batch file in setup so it can be executed
 
     other-tools = $(tool-root:D) ;
-    root = $(other-tools:D) ;
+    root ?= $(other-tools:D) ;
+    
+    flags cw.link RUN_PATH $(condition) : 
+        "$(root)\\Win32-x86 Support\\Libraries\\Runtime"
+        "$(root)\\Win32-x86 Support\\Libraries\\Runtime\\Libs\\MSL_All-DLLs" ;      
     
     setup = "set \"CWFOLDER="$(root)"\" && call \""$(setup)"\" > nul " ;
 
@@ -78,6 +83,22 @@ rule init ( version ? : command * : options * )
    flags cw.compile .CC $(condition) : $(prefix)$(compiler) ;
    flags cw.link .LD $(condition) : $(prefix)$(linker) ;
    flags cw.archive .LD $(condition) : $(prefix)$(linker) ;
+
+    if [ MATCH ^([89]\\.) : $(version) ]   
+    {
+        if [ os.name ] = NT
+        {
+        # The runtime libraries
+        flags cw.compile CFLAGS <runtime-link>static/<threading>single/<runtime-debugging>off : -runtime ss ;
+        flags cw.compile CFLAGS <runtime-link>static/<threading>single/<runtime-debugging>on : -runtime ssd ;
+        
+        flags cw.compile CFLAGS <runtime-link>static/<threading>multi/<runtime-debugging>off : -runtime sm ;
+        flags cw.compile CFLAGS <runtime-link>static/<threading>multi/<runtime-debugging>on : -runtime smd ;
+        
+        flags cw.compile CFLAGS <runtime-link>shared/<runtime-debugging>off : -runtime dm ;
+        flags cw.compile CFLAGS <runtime-link>shared/<runtime-debugging>on : -runtime dmd ;
+        }        
+    }    
 }
 
 rule default-paths ( version ? ) # FIXME
@@ -99,6 +120,9 @@ rule default-paths ( version ? ) # FIXME
 
    return $(possible-paths) ;
 }
+
+
+
 
 ## declare generators
 
@@ -134,6 +158,9 @@ flags cw.compile CFLAGS <inlining>off : -inline off ;
 flags cw.compile CFLAGS <inlining>on : -inline on ;
 flags cw.compile CFLAGS <inlining>full : -inline all ;
 flags cw.compile CFLAGS <exception-handling>off : -Cpp_exceptions off ;
+
+
+flags cw.compile CFLAGS <rtti>on : -RTTI on ;
 flags cw.compile CFLAGS <rtti>off : -RTTI off ;
 
 flags cw.compile CFLAGS <warnings>on : -w on ;
@@ -211,6 +238,6 @@ actions link bind DEF_FILE
 
 actions link.dll bind DEF_FILE
 {
-   $(.LD) -o "$(<[1]:W)" -implib "$(<[2]:W)" -L"$(LINKPATH)" $(LINKFLAGS) -f "$(DEF_FILE)" $(USER_LINKFLAGS) @"@($(<[1]:W).rsp:E=$(nl)"$(>)" $(nl)$(LIBRARIES_MENTIONED_BY_FILE) $(nl)"$(LIBRARY_OPTION)$(FINDLIBS_ST:S=.lib)" $(nl)"$(LIBRARY_OPTION)$(FINDLIBS_SA:S=.lib)")"
+   $(.LD) -o "$(<[1]:W)" -implib "$(<[2]:W)" -L"$(LINKPATH)" $(LINKFLAGS) -f"$(DEF_FILE)" $(USER_LINKFLAGS) @"@($(<[1]:W).rsp:E=$(nl)"$(>)" $(nl)$(LIBRARIES_MENTIONED_BY_FILE) $(nl)"$(LIBRARY_OPTION)$(FINDLIBS_ST:S=.lib)" $(nl)"$(LIBRARY_OPTION)$(FINDLIBS_SA:S=.lib)")"
 }
 

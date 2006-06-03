@@ -73,6 +73,11 @@ class install-target-class : basic-target
             # add them.
             local l = [ $(build-property-set).get <dll-path> ] ;
             ps-raw += $(l:G=<dll-path>) ;
+            
+            # Also copy <linkflags> feature from current build
+            # set, to be used for relinking.
+            local l = [ $(build-property-set).get <linkflags> ] ;
+            ps-raw += $(l:G=<linkflags>) ;            
         }
         
         # Remove the <tag> feature on original targets.
@@ -110,11 +115,20 @@ class install-target-class : basic-target
     
         
     rule construct ( name : source-targets * : property-set )
-    {        
+    {                
         source-targets = [ 
           targets-to-stage $(source-targets) : $(property-set) ] ;
         
         property-set = [ update-location $(property-set) ] ;          
+        
+        local ename = [ $(property-set).get <name> ] ;              
+                
+        if $(ename) && $(source-targets[2])
+        {
+            errors.error 
+              "When <name> property is used in 'install', only one source is allowed" ;
+        }
+        
                                        
         local result ;
         for local i in $(source-targets)
@@ -129,13 +143,20 @@ class install-target-class : basic-target
             local t = [ $(i).type ] ;            
             if $(t) && [ type.registered INSTALLED_$(t) ]
             {
-                local targets = [ generators.construct $(self.project) $(name) : 
-                  INSTALLED_$(t) : $(new-properties) : $(i) : * ] ;
-                staged-targets += $(targets[2-]) ;                                
+                if $(ename)
+                {
+                    error.error "In 'install': <name> property specified with target that requires relinking" ;
+                }
+                else
+                {
+                    local targets = [ generators.construct $(self.project) $(name) : 
+                      INSTALLED_$(t) : $(new-properties) : $(i) : * ] ;
+                    staged-targets += $(targets[2-]) ;                                
+                }                                                
             }
             else             
             {                
-                staged-targets = [ stage.copy-file $(self.project) 
+                staged-targets = [ stage.copy-file $(self.project) $(ename)
                   : $(i) : $(new-properties) ] ;
             }
             
@@ -159,7 +180,7 @@ class install-target-class : basic-target
     rule targets-to-stage ( source-targets * : property-set )
     {   
         local result ;
-        
+               
         # Traverse the dependencies, if needed.
         if [ $(property-set).get <install-dependencies> ] = "on"
         {
@@ -187,12 +208,14 @@ class install-target-class : basic-target
                     {
                         result += $(r) ;                        
                     }   
-                }                
+                }                                
             }
-            else
+            else if ! $(included-types)
             {
+                # Don't install typeless target if there's
+                # explicit list of allowed types.
                 result += $(r) ;
-            }
+            }                
         }
                 
         return $(result) ;
@@ -245,11 +268,11 @@ class install-target-class : basic-target
 # Creates a copy of target 'source'. The 'properties' object should
 # have a <location> property which specifies where the target must
 # be placed.
-rule copy-file ( project : source : properties )
+rule copy-file ( project name ? : source : properties )
 {   
     local targets ;
-    local name = [ $(source).name ] ;
-               
+    name ?= [ $(source).name ] ;
+
     new-a = [ 
       new non-scanning-action $(source) : common.copy : $(properties) ] ;    
     local source-root = [ $(properties).get <install-source-root> ] ;
@@ -393,8 +416,6 @@ class installed-shared-lib-generator : generator
               : [ $(copied).name ] ] ;
             if $(m)
             {
-                result += [ stage.symlink $(m[1]) : $(project)
-                  : $(copied) : $(property-set) ] ;
                 result += [ stage.symlink $(m[1]).$(m[2]) : $(project)
                   : $(copied) : $(property-set) ] ;
                 result += [ stage.symlink $(m[1]).$(m[2]).$(m[3])  : $(project)
@@ -422,12 +443,7 @@ rule install ( name : sources * : requirements * : default-build * )
     {
         requirements += <hardcode-dll-paths>false ;
     }        
-    
-    if <name> in $(requirements:G)
-    {
-        errors.user-error 
-          "The <name> property is not allowed for the 'install' rule" ;
-    }
+        
     if <tag> in $(requirements:G)
     {
         errors.user-error 
@@ -468,7 +484,7 @@ rule rename ( name : type ? : property-set : unversioned ? )
         
         local runtime-tag = ;
         if <runtime-link>static in $(properties) { runtime-tag += s ; }
-        if <runtime-build>debug in $(properties) { runtime-tag += g ; }
+        if <runtime-debugging>on in $(properties) { runtime-tag += g ; }
         
         if <variant>debug-python in $(properties) { runtime-tag += y ; }
         if <variant>debug in $(properties) { runtime-tag += d ; }
