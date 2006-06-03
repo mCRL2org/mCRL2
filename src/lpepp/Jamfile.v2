@@ -7,8 +7,8 @@ project lpepp
 
 exe lpepp
        : lpepp.cpp
-         /libraries/temporary//print
-       : <source>/root//mcrl2_revision
+       : <library>/libraries/temporary//print
+         <source>/root//mcrl2_revision
          <include>.
        ;
 

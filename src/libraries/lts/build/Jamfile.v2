@@ -1,7 +1,6 @@
 project lts
        : source-location ../source
        : build-dir $(BUILD_TOP)
-       : default-build debug
        : requirements
           <include>../include
        : usage-requirements
