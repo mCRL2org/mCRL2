@@ -239,7 +239,7 @@ ifdef BUILD_ATERM
 #install: aterm_install
 endif
 
-clean distclean: squadt boost_relay ltsview documentation
+clean distclean: boost_relay
 
 # For building documentation
 documentation: $(CONFIG)

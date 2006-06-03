@@ -11,12 +11,13 @@ install: $(BJAM)
 
 clean:
 	@${MAKE} -C src clean
+	@$(MAKE) -C src/doc clean
 	@$(RM) -rf bin
 	@$(RM) -r autom4te.cache config.log *.o *~ core core.*
 
 distclean:
 	@${MAKE} -C src distclean
-	@${MAKE} -C boost distclean
+	@$(MAKE) -C src/doc distclean
 	@$(RM) -r autom4te.cache config.log *.o *.app *~ core core.* \
 	         bin config.status config config.jam src/setup.h \
 		 src/mcrl2_revision.h
