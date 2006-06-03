@@ -33,7 +33,7 @@ char* intToCString(int i);
 
 %start fsm_file
 
-%token EOLN SECSEP QUOTED LPAR RPAR FANIN FANOUT NODENR COMMA ARROW
+%token EOLN SECSEP LPAR RPAR FANIN FANOUT NODENR COMMA ARROW
 %token <number> NUMBER
 %token <aterm> ID QUOTED
 %type  <aterm> type_name action
