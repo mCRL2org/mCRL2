@@ -10,9 +10,13 @@ project text_reader
 
 include $(TOP)/config.jam ;
 
-obj text_reader
+obj text_reader.o
     : exception.cpp
-    : # no includes
+    ;
+
+alias text_reader
+    : text_reader.o
+    :
     :
     : <cxxflags>"$(XML2_CPPFLAGS)"
       <linkflags>"$(XML2_LDFLAGS)"
