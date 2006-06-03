@@ -3,6 +3,7 @@
 
 // Locations
 #define DATA_DIRECTORY "@DATA_DIR@"
+#define TOOL_DIRECTORY "@BIN_DIR@"
 
 // Build options
 #define CC             "@CC@"

@@ -73,12 +73,15 @@ namespace squadt {
       /** \brief Get the path to where the user independent and default configurations are stored */
       inline std::string path_to_user_settings() const;
 
-      /** \brief Get the the settings directory */
+      /** \brief Get the settings directory */
       template < typename T >
       inline std::string path_to_system_settings(const T&) const;
 
-      /** \brief Get the the settings directory */
+      /** \brief Get the settings directory */
       inline std::string path_to_system_settings() const;
+
+      /** \brief Get the path where the default executable binaries are installed */
+      inline std::string path_to_default_binaries() const;
 
       /** \brief Get the path to image, in the directory containing the image file(s) */
       template < typename T >

@@ -23,7 +23,7 @@ namespace squadt {
     public:
 
       /** \brief Convenience type for hiding shared pointer implementation */
-      typedef boost::shared_ptr < tool >                 ptr;
+      typedef boost::shared_ptr < tool >                 sptr;
 
       /** \brief Convenience type alias */
       typedef sip::tool::capabilities::input_combination input_combination;
@@ -53,7 +53,7 @@ namespace squadt {
       void write(std::ostream& = std::cout) const;
 
       /** \brief Read configuration from file */
-      inline static tool::ptr read(xml2pp::text_reader&) throw ();
+      inline static tool::sptr read(xml2pp::text_reader&) throw ();
 
       /** \brief Get the last received capabilities object for this tool */
       inline const sip::tool::capabilities::ptr get_capabilities() const;
@@ -65,7 +65,7 @@ namespace squadt {
       inline std::string& get_name();
 
       /** \brief Find a specific input combination of this tool, if it exists */
-      inline input_combination const* find_input_combination(const storage_format&, const tool_category&) const;
+      inline input_combination const* find_input_combination(const tool_category&, const storage_format&) const;
   };
 
   /**
@@ -96,7 +96,7 @@ namespace squadt {
    *
    * @param r the XML text reader to read the data from
    **/
-  inline tool::ptr tool::read(xml2pp::text_reader& r) throw () {
+  inline tool::sptr tool::read(xml2pp::text_reader& r) throw () {
     std::string name;
     std::string location;
 
@@ -110,13 +110,13 @@ namespace squadt {
       sip::tool::capabilities::ptr c = sip::tool::capabilities::read(r);
       
       if (c.get() != 0) {
-        return (tool::ptr(new tool(name, location, c)));
+        return (tool::sptr(new tool(name, location, c)));
       }
     }
 
     r.skip_end_element("tool");
       
-    return (tool::ptr(new tool(name, location)));
+    return (tool::sptr(new tool(name, location)));
   }
 
   inline const sip::tool::capabilities::ptr tool::get_capabilities() const {
@@ -135,7 +135,7 @@ namespace squadt {
    * @param f the storage format
    * @param t the category in which the tool operates
    **/
-  inline tool::input_combination const* tool::find_input_combination(const storage_format& f, const tool_category& t) const {
+  inline tool::input_combination const* tool::find_input_combination(const tool_category& t, const storage_format& f) const {
     return (capabilities->find_input_combination(f, t));
   }
 }

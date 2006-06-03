@@ -485,6 +485,6 @@ AC_MSG_NOTICE()
 AC_MSG_NOTICE(Some tools will not be built if any of these libraries are missing.)
 AC_MSG_NOTICE()
 
-AC_CONFIG_FILES([boost/tools/build/v2/user-config.jam src/squadt/examples/tool_catalog src/setup.h config config.jam])
+AC_CONFIG_FILES([boost/tools/build/v2/user-config.jam src/setup.h config config.jam])
 AC_OUTPUT
 

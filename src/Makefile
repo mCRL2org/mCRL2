@@ -226,14 +226,14 @@ all install: documentation
 endif
 
 # Build/clean/install libxml2 dependent targets
-ifdef BUILD_EXPERIMENTAL
-ifdef USE_WX
+#ifdef BUILD_EXPERIMENTAL
+#ifdef USE_WX
 #install: ltsview
-ifdef USE_LIBXML2
-install: squadt
-endif
-endif
-endif
+#ifdef USE_LIBXML2
+#install: squadt
+#endif
+#endif
+#endif
 
 ifdef BUILD_ATERM
 #install: aterm_install

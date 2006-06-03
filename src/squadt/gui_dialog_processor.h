@@ -10,6 +10,8 @@
 #include <wx/listctrl.h>
 #include <wx/notebook.h>
 
+#include <sip/tool.h>
+
 #include "gui_dialog_base.h"
 
 namespace squadt {
@@ -33,25 +35,25 @@ namespace squadt {
         private:
 
           /** \brief Path to the project store where input/output objects are stored */
-          wxString            project_store;
+          wxString                project_store;
 
           /** \brief Tree control for tool selection */
-          wxTreeCtrl*         tool_selector;
+          wxTreeCtrl*             tool_selector;
 
           /** \brief Text field that contains a name */
-          wxTextCtrl*         name;
+          wxTextCtrl*             name;
 
           /** \brief The list of input objects */
-          wxListCtrl*         input_objects;
+          wxListCtrl*             input_objects;
 
           /** \brief The list of output objects */
-          wxListCtrl*         output_objects;
+          wxListCtrl*             output_objects;
 
           /** \brief The processor for which to display information */
-          squadt::processor*  target_processor;
+          squadt::processor::sptr target_processor;
 
           /** \brief Whether tools are selectable or not */
-          bool                tools_selectable;
+          bool                    tools_selectable;
 
         private:
         
@@ -71,12 +73,12 @@ namespace squadt {
           void on_tool_selector_item_select(wxTreeEvent& e);
 
           /** \brief Select a tool by its name */
-          void select_tool(std::string const&);
+          void select_tool(sip::tool::capabilities::input_combination const*, std::string const&);
 
         public:
 
           /** \brief Constructor */
-          processor_details(wxWindow*, wxString, squadt::processor*);
+          processor_details(wxWindow*, wxString, squadt::processor::sptr);
 
           /** \brief Whether tools in the tool list are selectable */
           inline void allow_tool_selection(bool b);

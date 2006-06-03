@@ -26,7 +26,7 @@ namespace squadt {
         typedef boost::shared_ptr < tool_selection_helper >                     sptr;
 
         /** \brief Maps a tool category to a number of tool objects that can accept input in that */
-        typedef std::multimap < tool_category, tool::ptr >                      tools_by_category;
+        typedef std::multimap < tool_category, tool::sptr >                     tools_by_category;
 
         /** \brief Maps a storage format to a number of tool categories */
         typedef std::map < storage_format, tools_by_category >                  categories_by_format;

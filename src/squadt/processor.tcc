@@ -27,6 +27,25 @@ namespace squadt {
     activate_display_data_handler(sip::layout::tool_display::sptr(), on_state_change);
   }
 
+  inline processor::sptr processor::create() {
+    processor::sptr n(new processor());
+
+    n->this_object = processor::wptr(n);
+
+    return (n);
+  }
+
+  /**
+   * @param[in] t the tool to use
+   **/
+  inline processor::sptr processor::create(tool::sptr t) {
+    processor::sptr n(new processor(t));
+
+    n->this_object = processor::wptr(n);
+
+    return (n);
+  }
+
   /**
    * @param[in] h the function or functor that is invoked at layout change
    **/
@@ -119,7 +138,7 @@ namespace squadt {
   /**
    * @param[in] t the tool descriptor of the tool that is to be used to produce the output from the input
    **/
-  inline processor::processor(tool::ptr t) :
+  inline processor::processor(tool::sptr t) :
                 tool_descriptor(t), current_monitor(new monitor(*this)) {
   }
 
@@ -129,18 +148,29 @@ namespace squadt {
   /**
    * @param[in] t the tool descriptor of the tool that is to be used to produce the output from the input
    **/
-  inline void processor::set_tool(tool::ptr& t) {
+  inline void processor::set_tool(tool::sptr& t) {
     tool_descriptor = t;
   }
 
   /**
    * @param[in] t the tool descriptor of the tool that is to be used to produce the output from the input
    **/
-  inline void processor::set_tool(tool::ptr t) {
+  inline void processor::set_tool(tool::sptr t) {
     tool_descriptor = t;
   }
 
-  inline const tool::ptr processor::get_tool() {
+  /**
+   * @param[in] i the input combination to set
+   **/
+  inline void processor::set_input_combination(tool::input_combination* i) {
+    selected_input_combination = i;
+  }
+
+  inline tool::input_combination const* processor::get_input_combination() const {
+    return(selected_input_combination);
+  }
+
+  inline const tool::sptr processor::get_tool() {
     return (tool_descriptor);
   }
 
@@ -188,7 +218,7 @@ namespace squadt {
    * @param p shared pointer to an object descriptor
    **/
   inline void processor::append_output(object_descriptor::sptr& p) {
-    p->generator = this;
+    p->generator = this_object;
 
     if (std::find_if(outputs.begin(), outputs.end(),
                 boost::bind(std::equal_to < std::string >(), p->location,
@@ -239,6 +269,7 @@ namespace squadt {
     /* Extract information about output objects from the configuration */
     for (sip::configuration::object_iterator i = current_monitor->get_configuration()->get_object_iterator(); i.valid(); ++i) {
       if ((*i)->get_type() == sip::object::output) {
+        /* TODO check and replace existing outputs */
         append_output(*(*i));
       }
     }
@@ -272,6 +303,39 @@ namespace squadt {
 
     current_monitor->set_configuration(c);
 
+    configure();
+  }
+
+  /**
+   * \attention This function is non-blocking
+   **/
+  inline void processor::reconfigure(boost::function < void() > h) {
+    current_monitor->once_on_completion(h);
+
+    reconfigure();
+  }
+
+  /**
+   * \pre The existing configuration must contain the input object matching the selected input combination
+   *
+   * \attention This function is non-blocking
+   **/
+  inline void processor::reconfigure() {
+    sip::configuration::sptr c(new sip::configuration);
+
+    c->add_object(current_monitor->get_configuration()->get_object(selected_input_combination->identifier));
+
+    current_monitor->set_configuration(c);
+
+    configure();
+  }
+
+  /**
+   * \pre The existing configuration must contain the input object matching the selected input combination
+   *
+   * \attention This function is non-blocking
+   **/
+  inline void processor::configure() {
     global_tool_manager->execute(*tool_descriptor, boost::dynamic_pointer_cast < execution::task_monitor, monitor > (current_monitor), true);
 
     current_monitor->once_on_completion(boost::bind(&processor::process_configuration, this));

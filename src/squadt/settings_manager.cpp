@@ -20,7 +20,7 @@ namespace squadt {
 
   const char* settings_manager::default_profile_directory    = ((bf::native(".squadt")) ? ".squadt" : "squadt");
 
-  const char* settings_manager::schema_suffix                = ".xsd.gz";
+  const char* settings_manager::schema_suffix                = ".xsd";
 
   const char* settings_manager::tool_catalog_base_name       = "tool_catalog";
 

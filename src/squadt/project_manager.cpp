@@ -229,14 +229,14 @@ namespace squadt {
           unsigned int                     maximum_weight = 0;
 
           while (k.valid()) {
-            processor* target = (*k)->generator;
+            processor::sptr target((*k)->generator);
 
-            if (target != 0) {
-              if (weights.find(target) == weights.end()) {
+            if (target.get() != 0) {
+              if (weights.find(target.get()) == weights.end()) {
                 break;
               }
               else {
-                unsigned int current_weight = weights[target];
+                unsigned int current_weight = weights[target.get()];
              
                 if (maximum_weight < current_weight) {
                   maximum_weight = current_weight;

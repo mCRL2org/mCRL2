@@ -53,10 +53,10 @@ namespace squadt {
       typedef boost::shared_ptr < tool_manager >                             ptr;
 
       /** \brief Convenience type alias the list of tools */
-      typedef std::list < tool::ptr >                                        tool_list;
+      typedef std::list < tool::sptr >                                        tool_list;
  
       /** \brief Convenience type alias the list of tools, indexed by main input format */
-      typedef std::multimap < storage_format, tool::ptr >                    tool_map;
+      typedef std::multimap < storage_format, tool::sptr >                    tool_map;
 
     private:
  
@@ -79,6 +79,9 @@ namespace squadt {
 
       /** \brief The default TCP port for a tool manager */
       static const long   default_tcp_port;
+
+      /** \brief Set of tool names that are assumed to be available */
+      static char const*  default_tools[];
 
     private:
  
@@ -130,7 +133,7 @@ namespace squadt {
       inline bool exists(const std::string&) const;
 
       /** \brief Returns a tool by its name */
-      inline tool::ptr find(const std::string&) const;
+      inline tool::sptr find(const std::string&) const;
 
       /** \brief Add a new tool to the catalog */
       inline bool add(const std::string&, const std::string&);
@@ -171,13 +174,13 @@ namespace squadt {
    *
    * \pre a tool with this name must be among the known tools
    **/
-  inline tool::ptr tool_manager::find(const std::string& n) const {
+  inline tool::sptr tool_manager::find(const std::string& n) const {
     using namespace boost;
 
     return (*std::find_if(tools.begin(), tools.end(), 
                bind(std::equal_to< std::string >(), n, 
                        bind(&tool::get_name,
-                               bind(&tool::ptr::get, _1)))));
+                               bind(&tool::sptr::get, _1)))));
   }
 
   /**
@@ -189,7 +192,7 @@ namespace squadt {
     return (tools.end() != std::find_if(tools.begin(), tools.end(), 
                bind(std::equal_to< std::string >(), n, 
                        bind(&tool::get_name,
-                               bind(&tool::ptr::get, _1)))));
+                               bind(&tool::sptr::get, _1)))));
   }
 
   /**
@@ -202,7 +205,7 @@ namespace squadt {
     bool b = exists(n);
 
     if (!b) {
-      tools.push_back(tool::ptr(new tool(n, l)));
+      tools.push_back(tool::sptr(new tool(n, l)));
     }
 
     return (b);

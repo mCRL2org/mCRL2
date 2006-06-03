@@ -21,6 +21,8 @@
 
 namespace squadt {
 
+  namespace bf = boost::filesystem;
+
   /** \brief Socket connection option scheme for easy command generation */
   const char* socket_connect_pattern = "--si-connect=socket://%s:%s";
 
@@ -30,6 +32,8 @@ namespace squadt {
   const long tool_manager::default_tcp_port = 10946;
 
   const sip::tool::capabilities::ptr tool::no_capabilities(new sip::tool::capabilities());
+
+  char const* tool_manager::default_tools[] = {"lpeconstelm", "lpeinfo", "lpeparelm", "lpe2lts", "mcrl22lpe", "xsim", 0};
 
   tool_manager::tool_manager() : sip::controller::communicator(), free_identifier(0) {
     /* Listen for incoming socket connections on the loopback interface with the default port */
@@ -59,7 +63,29 @@ namespace squadt {
   }
 
   tool_manager::ptr tool_manager::read() {
-    return (read(global_settings_manager->path_to_user_settings(settings_manager::tool_catalog_base_name)));
+    boost::filesystem::path p(global_settings_manager->path_to_user_settings(settings_manager::tool_catalog_base_name));
+
+    if (!boost::filesystem::exists(p)) {
+      /* Write the default configuration */;
+      boost::format f(" <tool name=\"%s\" location=\"%s\"/>\n");
+
+      std::ofstream o(p.native_file_string().c_str());
+
+      o << "<?xml version=\"1.0\" encoding=\"utf-8\"?>\n"
+        << "<tool-catalog xmlns:xsi=\"http://www.w3.org/2001/XMLSchema-instance\" xsi:noNamespaceSchemaLocation=\"tool_catalog.xsd\" version=\"1.0\">\n";
+
+      bf::path default_path(global_settings_manager->path_to_default_binaries());
+
+      for (char const** tool = default_tools; *tool != 0; ++tool) {
+        o << (f % *tool % (default_path / bf::path(*tool)).native_file_string());
+      }
+
+      o << "</tool-catalog>\n";
+
+      o.close();
+    }
+
+    return (read(p.native_file_string()));
   }
 
   /**
@@ -126,7 +152,7 @@ namespace squadt {
 
     std::for_each(tools.begin(), tools.end(),
                     bind(&tool_manager::query_tool, this, 
-                                    bind(&tool::ptr::operator*, _1)));
+                                    bind(&tool::sptr::operator*, _1)));
   }
 
   /**

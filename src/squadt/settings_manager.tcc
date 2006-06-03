@@ -48,13 +48,6 @@ namespace squadt {
     else if (!is_directory(user_settings_path)) {
       throw (exception::exception(exception::cannot_access_user_settings_directory, user_settings_path.native_file_string()));
     }
-   
-    bf::path catalog_path = path_to_user_settings(tool_catalog_base_name);
-
-    if (!bf::exists(catalog_path)) {
-      /* Copy default settings */
-      bf::copy_file(system_settings_path / bf::path("configuration") / bf::path(tool_catalog_base_name), catalog_path);
-    }
   }
 
   /**
@@ -99,6 +92,13 @@ namespace squadt {
 
   inline std::string settings_manager::path_to_system_settings() const {
     return (system_settings_path.native_file_string());
+  }
+
+  /**
+   * @param[in] n a complete path relative to the path to the system settings path
+   **/
+  inline std::string settings_manager::path_to_default_binaries() const {
+    return (TOOL_DIRECTORY);
   }
 
   /**

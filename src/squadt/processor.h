@@ -10,6 +10,7 @@
 #include <boost/function.hpp>
 #include <boost/shared_ptr.hpp>
 #include <boost/weak_ptr.hpp>
+#include <boost/noncopyable.hpp>
 
 #include <md5pp/md5pp.h>
 #include <xml2pp/text_reader.h>
@@ -36,12 +37,21 @@ namespace squadt {
    * input of other processors.
    *
    **/
-  class processor {
+  class processor : boost::noncopyable {
     friend class project_manager;
     friend class tool_manager;
     friend class executor;
  
     public:
+
+      /** \brief Convenience type for hiding shared pointer implementation */
+      typedef boost::shared_ptr < processor >                               ptr;
+
+      /** \brief Convenience type for hiding shared pointer implementation */
+      typedef boost::shared_ptr < processor >                               sptr;
+
+      /** \brief Convenience type for hiding shared pointer implementation */
+      typedef boost::weak_ptr < processor >                                 wptr;
 
       /** \brief Type that is used to keep the status of the output of a processor */
       enum output_status {
@@ -53,7 +63,7 @@ namespace squadt {
 
       /** \brief Type to hold information about output objects */
       struct object_descriptor {
-        processor*            generator;      ///< The process responsible for generating this object
+        processor::wptr       generator;      ///< The process responsible for generating this object
         storage_format        format;         ///< The used storage format
         std::string           location;       ///< The location of the object
         md5pp::compact_digest checksum;       ///< The digest for the completed object
@@ -140,15 +150,6 @@ namespace squadt {
           inline void set_display_data_handler(sip::layout::tool_display::sptr, display_data_callback_function);
       };
  
-      /** \brief Convenience type for hiding shared pointer implementation */
-      typedef boost::shared_ptr < processor >                               ptr;
-
-      /** \brief Convenience type for hiding shared pointer implementation */
-      typedef boost::shared_ptr < processor >                               sptr;
-
-      /** \brief Convenience type for hiding shared pointer implementation */
-      typedef boost::weak_ptr < processor >                                 wptr;
-
       /** \brief Convenience type for hiding the implementation of a list with input information */
       typedef std::vector < object_descriptor::wptr >                       input_list;
 
@@ -165,26 +166,35 @@ namespace squadt {
       typedef constant_indirect_iterator < output_list, object_descriptor > output_object_iterator;
 
     private:
+
+      /** \brief Weak pointer to this object for passing */
+      wptr                           this_object;
  
       /** \brief Identifies the tool that is required to run the command */
-      tool::ptr                tool_descriptor;
+      tool::sptr                     tool_descriptor;
 
       /** \brief The information about inputs of this processor */
-      input_list               inputs;
+      input_list                     inputs;
 
       /** \brief The information about outputs of this processor */
-      output_list              outputs;
+      output_list                    outputs;
  
       /** \brief The current status of the outputs of the processor */
-      output_status            current_output_status;
+      output_status                  current_output_status;
 
       /** \brief The current task that is running or about to run */
-      monitor::sptr            current_monitor;
+      monitor::sptr                  current_monitor;
 
       /** \brief The selected input combination of the tool */
-      tool::input_combination* selected_input_combination;
+      tool::input_combination const* selected_input_combination;
  
     private:
+
+      /** \brief Basic constructor */
+      inline processor();
+
+      /** \brief Constructor with callback handler */
+      inline processor(tool::sptr);
 
       /** \brief Manually sets the output status */
       inline void set_output_status(const processor::output_status);
@@ -196,13 +206,13 @@ namespace squadt {
       inline void process_configuration(sip::configuration::sptr const& c);
 
     public:
+
+      /** \brief Factory method for creating instances of this object */
+      inline static processor::sptr create();
  
-      /** \brief Basic constructor */
-      inline processor();
-
-      /** \brief Constructor with callback handler */
-      inline processor(tool::ptr);
-
+      /** \brief Factory method for creating instances of this object */
+      inline static processor::sptr create(tool::sptr);
+ 
       /** \brief Check the inputs with respect to the outputs and adjust status accordingly */
       bool check_status(bool);
 
@@ -215,6 +225,15 @@ namespace squadt {
       /** \brief Start tool configuration */
       void configure(const tool::input_combination*, const boost::filesystem::path&);
  
+      /** \brief Start tool configuration */
+      void configure();
+ 
+      /** \brief Start tool (re)configuration */
+      void reconfigure(boost::function < void () >);
+ 
+      /** \brief Start tool reconfiguration */
+      void reconfigure();
+ 
       /** \brief Start processing: generate outputs from inputs */
       void process(boost::function < void () >);
  
@@ -222,13 +241,19 @@ namespace squadt {
       void process();
  
       /** \brief Get the object for the tool associated with this processor */
-      inline void set_tool(tool::ptr&);
+      inline void set_tool(tool::sptr&);
+
+      /** \brief Sets the object for the tool associated with this processor */
+      inline void set_tool(tool::sptr);
 
       /** \brief Get the object for the tool associated with this processor */
-      inline void set_tool(tool::ptr);
+      inline const tool::sptr get_tool();
 
-      /** \brief Get the object for the tool associated with this processor */
-      inline const tool::ptr get_tool();
+      /** \brief Get the input combination if one is already selected */
+      inline void set_input_combination(tool::input_combination*);
+
+      /** \brief Get the input combination if one is already selected */
+      inline tool::input_combination const* get_input_combination() const;
 
       /** \brief Get the object for the tool associated with this processor */
       inline const monitor::sptr get_monitor();

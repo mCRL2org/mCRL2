@@ -103,8 +103,10 @@ namespace squadt {
           if (d.get() == 0) {
             throw (exception::exception(exception::missing_object_descriptor));
           }
+
+          processor::sptr p(d->generator);
      
-          if (d->generator->check_status(true)) {
+          if (p.get() != 0 && p->check_status(true)) {
             new_status = not_up_to_date;
      
             break;
@@ -130,6 +132,11 @@ namespace squadt {
 
     if (tool_descriptor.get() != 0) {
       s << " tool-name=\"" << tool_descriptor->get_name() << "\"";
+
+      if (selected_input_combination != 0) {
+        s << " format=\"" << selected_input_combination->format << "\"";
+        s << " category=\"" << selected_input_combination->category << "\"";
+      }
     }
 
     s << ">\n";
@@ -166,7 +173,7 @@ namespace squadt {
    * \attention the same map m must be used to read back all processor instances that were written with write()
    **/
   processor::sptr processor::read(id_conversion_map& m, xml2pp::text_reader& r) throw () {
-    processor::sptr c(new processor());
+    processor::sptr c = create();
     std::string     temporary;
 
     if (r.get_attribute(&temporary, "tool-name")) {
@@ -175,6 +182,13 @@ namespace squadt {
       /* Check tool existence */
       if (!global_tool_manager->exists(temporary)) {
         throw (exception::exception(exception::requested_tool_unavailable, temporary));
+      }
+
+      storage_format format;
+      tool_category  category;
+
+      if (r.get_attribute(&category, "category") && r.get_attribute(&format, "format")) {
+        c->selected_input_combination = c->tool_descriptor->find_input_combination(category, format);
       }
     }
 
@@ -225,7 +239,7 @@ namespace squadt {
         throw (exception::exception(exception::required_attributes_missing, "processor->output"));
       }
 
-      n->generator = c.get();
+      n->generator = c;
       n->checksum.read(temporary.c_str());
 
       r.read();

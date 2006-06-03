@@ -23,7 +23,7 @@ namespace squadt {
        * @param s path to the project store
        * @param p the processor of which to display data
        **/
-      processor_details::processor_details(wxWindow* o, wxString s, squadt::processor* p) :
+      processor_details::processor_details(wxWindow* o, wxString s, squadt::processor::sptr p) :
                                                 dialog::processor(o, wxT("View and change details")),
                                                 project_store(s), target_processor(p), tools_selectable(true) {
         build();
@@ -154,7 +154,9 @@ namespace squadt {
         }
       }
 
-      void processor_details::select_tool(std::string const& name) {
+      void processor_details::select_tool(sip::tool::capabilities::input_combination const* combination, std::string const& name) {
+        wxString category(combination->category.c_str(), wxConvLocal);
+
         std::stack < wxTreeItemId > id_stack;
 
         id_stack.push(tool_selector->GetRootItem());
@@ -169,9 +171,21 @@ namespace squadt {
           for (wxTreeItemId j = tool_selector->GetFirstChild(c, cookie);
                                     j.IsOk(); j = tool_selector->GetNextChild(c, cookie)) {
 
-            if (tool_selector->GetItemText(j) == wxString(name.c_str(), wxConvLocal)) {
-              tool_selector->SelectItem(j);
-              tool_selector->EnsureVisible(j);
+            if (tool_selector->GetItemText(j) == category) {
+              wxTreeItemIdValue cookie1; // For wxTreeCtrl traversal
+
+              /* Found category */
+              for (wxTreeItemId k = tool_selector->GetFirstChild(j, cookie1);
+                                    k.IsOk(); k = tool_selector->GetNextChild(j, cookie1)) {
+
+                if (tool_selector->GetItemText(k) == wxString(name.c_str(), wxConvLocal)) {
+                  /* Found tool */
+                  tool_selector->SelectItem(k);
+                  tool_selector->EnsureVisible(k);
+
+                  break;
+                }
+              }
 
               break;
             }

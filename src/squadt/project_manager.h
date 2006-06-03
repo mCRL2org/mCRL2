@@ -170,8 +170,8 @@ namespace squadt {
 
     assert(exists(s) && !is_directory(s) && native(d));
 
-    path       destination_path = directory / path(d.empty() ? s.leaf() : d);
-    processor::ptr p(new processor);
+    path           destination_path = directory / path(d.empty() ? s.leaf() : d);
+    processor::ptr p = processor::create();
 
     if (s != destination_path) {
       copy_file(s, destination_path);

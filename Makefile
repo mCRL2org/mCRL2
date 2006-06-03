@@ -22,7 +22,7 @@ distclean:
 		 src/mcrl2_revision.h
 
 $(BJAM):
-	$(MAKE) -C boost bjam
+	@$(MAKE) -C boost bjam
 
 revision: $(BJAM)
 	@$(BOOST_BUILD) mcrl2_revision

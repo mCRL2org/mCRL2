@@ -30,3 +30,6 @@ exe squadt
 
 install_with_libraries squadt ;
 
+install_data images : [ glob pixmaps/logo.jpg ] : images ;
+install_data schemas : [ glob schemas/*.xsd ] : schemas ;
+

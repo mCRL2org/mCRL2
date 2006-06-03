@@ -1,6 +1,8 @@
 project ltsgraph
        : source-location .
        : build-dir $(BUILD_TOP)
+       : requirements
+          <include>$(BOOST)
        ;
 
 exe ltsgraph

@@ -89,6 +89,9 @@ namespace sip {
       /** \brief Add an input/output object to the configuration */
       inline void add_object(const object::identifier, object::storage_format, object::type, object::uri = "");
 
+      /** \brief Add an input/output object to the configuration */
+      inline void add_object(object::sptr);
+
       /** \brief Establishes whether an object exists (by identifier) */
       inline bool object_exists(const object::identifier);
 
@@ -290,6 +293,20 @@ namespace sip {
                             bind(&object::sptr::get,_1)),id)) == objects.end());
 
     objects.push_back(object::sptr(new object(id, f, l, t)));
+  }
+
+  /**
+   * @param o a pointer to an existing object
+   **/
+  inline void configuration::add_object(object::sptr o) {
+    using namespace std;
+    using namespace boost;
+
+    assert(find_if(objects.begin(), objects.end(), bind(equal_to < object::identifier >(),
+                    bind(&object::get_id,
+                            bind(&object::sptr::get,_1)),o->get_id())) == objects.end());
+
+    objects.push_back(o);
   }
 
   /**

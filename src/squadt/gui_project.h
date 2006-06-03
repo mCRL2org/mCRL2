@@ -134,8 +134,11 @@ namespace squadt {
         /** \brief Add new processor outputs to the object view */
         void process_configuration(wxTreeItemId, processor::sptr);
 
+        /** \brief Add new processor outputs to the object view */
+        void process_reconfiguration(wxTreeItemId, processor::sptr);
+
         /** \brief Add a new tool display to the process_display_view */
-        GUI::tool_display* add_tool_display(processor::monitor::sptr);
+        GUI::tool_display* add_tool_display(processor::monitor::sptr, wxString);
 
       public:
 
