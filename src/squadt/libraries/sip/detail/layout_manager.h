@@ -111,11 +111,11 @@ namespace sip {
         virtual void add(element*) = 0;
 
         /** Adds a new element to the box */
-        virtual void add(element*, margins const& = manager::default_margins,
+        virtual void add(element*, margins const&,
                                   visibility const& = manager::default_visibility) = 0;
 
         /** Adds a new element to the box */
-        virtual void add(element*, visibility const& = manager::default_visibility) = 0;
+        virtual void add(element*, visibility const&) = 0;
 
         /** \brief Recursively builds the state of the object */
         static aptr static_read_structure(xml2pp::text_reader&); 
@@ -167,11 +167,11 @@ namespace sip {
         inline void add(element*, constraints const&);
 
         /** Adds a new element to the box */
-        inline void add(element*, margins const& = manager::default_margins,
+        inline void add(element*, margins const&,
                                   visibility const& = manager::default_visibility);
 
         /** Adds a new element to the box */
-        inline void add(element*, visibility const& = manager::default_visibility);
+        inline void add(element*, visibility const&);
 
         /** \brief Instantiate a layout element, through a mediator */
         virtual mediator::wrapper_aptr instantiate(layout::mediator*) = 0;

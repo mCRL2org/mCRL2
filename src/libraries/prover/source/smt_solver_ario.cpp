@@ -6,6 +6,7 @@
 #include "libprint_c.h"
 #include <iostream>
 
+using namespace std;
 using namespace redi;
 
 // Class SMT_Solver_Ario --------------------------------------------------------------------------

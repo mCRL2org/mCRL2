@@ -347,7 +347,7 @@ fi
 if test $XMLTO; then
   USE_XMLTO=xmlto_available
 else
-  AC_MSG_NOTICE(documentation cannot be build because xmlto was not found.)
+  AC_MSG_NOTICE(documentation cannot be built because xmlto was not found.)
   AC_MSG_NOTICE(xmlto can be obtained from http://cyberelk.net/tim/xmlto/.)
 fi
 AC_SUBST([USE_XMLTO],[])

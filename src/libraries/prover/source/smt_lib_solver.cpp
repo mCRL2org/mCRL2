@@ -6,6 +6,8 @@
 #include "libstruct.h"
 #include "utilities.h"
 
+using namespace std;
+
 // Class SMT_LIB_Solver ---------------------------------------------------------------------------
   // Class SMT_LIB_Solver - Functions declared private --------------------------------------------
 

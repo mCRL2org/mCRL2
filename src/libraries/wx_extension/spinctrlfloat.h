@@ -4,8 +4,6 @@
 #include <wx/wx.h>
 #include <wx/spinbutt.h>
 
-using namespace std;
-
 class wxSpinCtrlFloat : public wxPanel
 {
   public:

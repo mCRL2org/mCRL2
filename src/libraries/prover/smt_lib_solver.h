@@ -10,8 +10,6 @@
 #include "sort_info.h"
 #include <string>
 
-using namespace std;
-
 class SMT_LIB_Solver: public SMT_Solver {
   private:
     ATermIndexedSet f_variables;
@@ -47,13 +45,13 @@ class SMT_LIB_Solver: public SMT_Solver {
   protected:
     Expression_Info f_expression_info;
     Sort_Info f_sort_info;
-    string f_benchmark;
-    string f_extrasorts;
-    string f_operators_extrafuns;
-    string f_variables_extrafuns;
-    string f_formula;
-    string f_operators_notes;
-    string f_sorts_notes;
+    std::string f_benchmark;
+    std::string f_extrasorts;
+    std::string f_operators_extrafuns;
+    std::string f_variables_extrafuns;
+    std::string f_formula;
+    std::string f_operators_notes;
+    std::string f_sorts_notes;
     void translate(ATermList a_formula);
   public:
     SMT_LIB_Solver();

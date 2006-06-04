@@ -21,6 +21,7 @@ project
        : requirements
           <cxxflags>-std=c++98
           <define>_FILE_OFFSET_BITS=64
+          <toolset>darwin:<linkflags>"-undefined dynamic_lookup"
        : default-build
           <address-model>$(ADDRESS_MODEL)
           <variant>$(BUILD_VARIANT)
@@ -110,16 +111,16 @@ rule import_libraries {
   switch [ os.name ] {
     case "NT" :
       lib OpenGL : : <name>"opengl32" ;
-      lib GLU    : : <name>"glu32" ;
-      lib GLUT   : : <name>"glut32" ;
+      lib GLU    : OpenGL : <name>"glu32" ;
+      lib GLUT   : OpenGL : <name>"glut32" ;
     case "MACOSX" :
       alias OpenGL : : : : <framework>"OpenGL" ;
-      alias GLUT   : : : : <framework>"GLUT" ;
-      alias GLU    : : : : OpenGL ;
+      alias GLUT   : OpenGL : : : <framework>"GLUT" ;
+      alias GLU    : OpenGL : : : ;
     case * :
       lib OpenGL : : <name>"GL" ;
-      lib GLU    : : <name>"GLU" ;
-      lib GLUT   : : <name>"glut" ;
+      lib GLU    : OpenGL : <name>"GLU" ;
+      lib GLUT   : OpenGL : <name>"glut" ;
   }
 
   lib z  : : <name>"z" ;

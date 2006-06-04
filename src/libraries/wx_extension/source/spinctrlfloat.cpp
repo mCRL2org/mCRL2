@@ -1,6 +1,8 @@
 #include "spinctrlfloat.h"
 #include <cmath>
 
+using namespace std;
+
 int roundToInt( double f )
 {
   double intpart;

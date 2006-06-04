@@ -13,6 +13,7 @@ exe mcrl22lpe
          /libraries/temporary//print
          /libraries/temporary//rewrite
        : <source>/root//mcrl2_revision
+         <squadt_support>enable
        ;
 
 exe lin

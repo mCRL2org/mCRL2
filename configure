@@ -4969,8 +4969,8 @@ fi
 if test $XMLTO; then
   USE_XMLTO=xmlto_available
 else
-  { echo "$as_me:$LINENO: documentation cannot be build because xmlto was not found." >&5
-echo "$as_me: documentation cannot be build because xmlto was not found." >&6;}
+  { echo "$as_me:$LINENO: documentation cannot be built because xmlto was not found." >&5
+echo "$as_me: documentation cannot be built because xmlto was not found." >&6;}
   { echo "$as_me:$LINENO: xmlto can be obtained from http://cyberelk.net/tim/xmlto/." >&5
 echo "$as_me: xmlto can be obtained from http://cyberelk.net/tim/xmlto/." >&6;}
 fi
