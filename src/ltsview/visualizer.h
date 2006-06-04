@@ -69,6 +69,8 @@ class Visualizer
     void drawSubtreeMarkTransitions( Cluster* root, bool topClosed );
     void drawTube( float baserad, float toprad, RGB_Color basecol, RGB_Color
 	topcol, Point3D b1, Point3D b2, Point3D b3 );
+    void myRotatef( float theta, float ax, float ay, float az, float M[] );
+    void myTranslatef( float tx, float ty, float tz, float M[] );
     void setColor( RGB_Color c, float alpha );
   
   public:

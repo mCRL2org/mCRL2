@@ -347,7 +347,8 @@ void Visualizer::drawSubtree( Cluster* root, bool topClosed, HSV_Color col,
       Point3D b2 = { 2,0,1 };
       Point3D b3 = { 2,0,2 };
       drawTube( root->getTopRadius(), root->getTopRadius(), HSVtoRGB( col ),
-	  HSVtoRGB( col ), b1, b2, b3 )*/;
+	  HSVtoRGB( col ), b1, b2, b3 );
+      */
       glPopMatrix();
     glEndList();
 
@@ -859,8 +860,7 @@ void Visualizer::drawStatesMarkDeadlocks( Cluster* root )
 
 void Visualizer::setColor( RGB_Color c, float alpha )
 {
-  GLfloat fc[] = { c.r / 255.0f, c.g / 255.0f, c.b / 255.0f, alpha };
-  glColor4fv( fc );
+  glColor4f( c.r / 255.0f, c.g / 255.0f, c.b / 255.0f, alpha );
 }
 
 // draws a cylinder around z-axis with given base radius, top radius, height,
@@ -1035,14 +1035,19 @@ void Visualizer::drawHemisphere( float r, RGB_Color col )
 void Visualizer::drawTube( float baserad, float toprad, RGB_Color basecol,
       RGB_Color topcol, Point3D b1, Point3D b2, Point3D b3 )
 {
-  int N = visSettings.quality / 2 + visSettings.quality % 2;
+  // N is the number of tube stacks that we have to draw
+  // as we draw only half a tube, N is the quality setting divided by 2
+  // if this setting is odd, we deliberately  miss a segment to make sure that a
+  // segment ends precisely halfway through the curve
+  int N = visSettings.quality / 2;
 
-  vector< Point3D > curve;
-  vector< Point3D > curve_der;
+  vector< Point3D > curve;	// stores the curve's vertex coordinates
+  vector< Point3D > curve_der;	// stores the derivatives in those vertices
+  
+  // compute the vertex coordinates of the curve
   float d_t = 0.5f / N;
   float t  = 0.0f;
   float it = 1.0f;
-  
   for ( int i = 0 ; i <= N ; i++ )
   {
     float fac1 = 3*t*it*it;
@@ -1058,6 +1063,7 @@ void Visualizer::drawTube( float baserad, float toprad, RGB_Color basecol,
     it -= d_t;
   }
 
+  // compute the derivative of the curve in each of the vertices
   t  = 0.0f;
   it = 1.0f;
   for ( int i = 0 ; i <= N ; i++ )
@@ -1066,24 +1072,27 @@ void Visualizer::drawTube( float baserad, float toprad, RGB_Color basecol,
     float fac2 = 6*t*it;
     float fac3 = 3*t*t;
     
-    // compute the derivative of the Bezier curve in t
     Point3D bt_der =
       { fac1*b1.x + fac2*(b2.x-b1.x) + fac3*(b3.x-b2.x),
         fac1*b1.y + fac2*(b2.y-b1.y) + fac3*(b3.y-b2.y),
         fac1*b1.z + fac2*(b2.z-b1.z) + fac3*(b3.z-b2.z) };
     
     // normalise the vector
-    float length = sqrt( bt_der.x*bt_der.x + bt_der.y*bt_der.y +
+    float len = sqrt( bt_der.x*bt_der.x + bt_der.y*bt_der.y +
 	bt_der.z*bt_der.z );
-    bt_der.x = bt_der.x / length;
-    bt_der.y = bt_der.y / length;
-    bt_der.z = bt_der.z / length;
+    if ( len != 0 )
+    {
+      bt_der.x = bt_der.x / len;
+      bt_der.y = bt_der.y / len;
+      bt_der.z = bt_der.z / len;
+    }
 	       
     curve_der.push_back( bt_der );
     t  += d_t;
     it -= d_t;
   }
 
+  // precompute sine and cosine functions
   vector< float > ctab;
   vector< float > stab;
   float delta_ang = 2.0f * PI / visSettings.quality;
@@ -1094,83 +1103,99 @@ void Visualizer::drawTube( float baserad, float toprad, RGB_Color basecol,
     stab.push_back( sin( ang ) );
     ang += delta_ang;
   }
-    
+  
+  float M[16];
+  float rot_ang1;
+  float rot_ang2;
+
+  // draw the rings
   for ( int i = 0 ; i < N ; i++ )
   {
-    // rotate so that z-axis points in direction of curve, i.e.: rotate around
-    // the vector perpendicular to the plane spanned by the z-axis (0,0,1) and
-    // the direction vector curve_der[i]. This perpendicular vector is computed
-    // by taking the cross product of the two vectors. The angle over which we
-    // rotate is the angle between the two vectors, which (as both vectors are
-    // normalised) equals the arccos of the dot product of both vectors.
-    float rot_ang1 = acos( curve_der[i].z ) * 180.0f / PI;
-    float rot_ang2 = acos( curve_der[i+1].z ) * 180.0f / PI;
+    // compute the angle over which we have to rotate to align the z-axis with
+    // vertex i's direction vector (i.e. derivative) (note that we use the fact
+    // that the derivative vector is normalised)
+    rot_ang1 = acos( curve_der[i].z );
+    rot_ang2 = acos( curve_der[i+1].z );
     
-    vector< Point3D > normals1;
-    vector< Point3D > normals2;
-    vector< Point3D > vertices1;
-    vector< Point3D > vertices2;
-    GLfloat M[16];
-    
+    glBegin( GL_QUAD_STRIP );
     for ( int j = 0 ; j <= visSettings.quality ; j++ )
     {
-      glPushMatrix();
-      glLoadIdentity();
-      glRotatef( rot_ang2, -curve_der[i+1].y, curve_der[i+1].x, 0.0f );
-      glTranslatef( ctab[j], stab[j], 0.0f );
-      glGetFloatv( GL_MODELVIEW_MATRIX, M );
-      Point3D p1 = { M[12], M[13], M[14] };
-      normals2.push_back( p1 );
-      glPopMatrix();
+      // compute the normal vector for vertex (i+1,j)
+      for ( int k = 0 ; k < 16 ; k++ ) M[k] = (k % 5 == 0) ? 1 : 0;
+      myRotatef( rot_ang2, -curve_der[i+1].y, curve_der[i+1].x, 0.0f, M );
+      myTranslatef( ctab[j], stab[j], 0.0f, M );
+      glNormal3f( M[3], M[7], M[11] );
+
+      // compute the coordinates of vertex (i+1,j)
+      for ( int k = 0 ; k < 16 ; k++ ) M[k] = (k % 5 == 0) ? 1 : 0;
+      myTranslatef( curve[i+1].x, curve[i+1].y, curve[i+1].z, M );
+      myRotatef( rot_ang2, -curve_der[i+1].y, curve_der[i+1].x, 0.0f, M );
+      myTranslatef( baserad*ctab[j], baserad*stab[j], 0.0f, M );
+      glVertex3f( M[3], M[7], M[11] );
       
-      glPushMatrix();
-      glLoadIdentity();
-      glTranslatef( curve[i+1].x, curve[i+1].y, curve[i+1].z );
-      glRotatef( rot_ang2, -curve_der[i+1].y, curve_der[i+1].x, 0.0f );
-      glTranslatef( baserad*ctab[j], baserad*stab[j], 0.0f );
-      glGetFloatv( GL_MODELVIEW_MATRIX, M );
-      Point3D p2 = { M[12], M[13], M[14] };
-      vertices2.push_back( p2 );
-      glPopMatrix();
+      // compute the normal vector for vertex (i,j)
+      for ( int k = 0 ; k < 16 ; k++ ) M[k] = (k % 5 == 0) ? 1 : 0;
+      myRotatef( rot_ang1, -curve_der[i].y, curve_der[i].x, 0.0f, M );
+      myTranslatef( ctab[j], stab[j], 0.0f, M );
+      glNormal3f( M[3], M[7], M[11] );
       
-      glPushMatrix();
-      glLoadIdentity();
-      glRotatef( rot_ang1, -curve_der[i].y, curve_der[i].x, 0.0f );
-      glTranslatef( ctab[j], stab[j], 0.0f );
-      glGetFloatv( GL_MODELVIEW_MATRIX, M );
-      Point3D p3 = { M[12], M[13], M[14] };
-      normals1.push_back( p3 );
-      glPopMatrix();
-      
-      glPushMatrix();
-      glLoadIdentity();
-      glTranslatef( curve[i].x, curve[i].y, curve[i].z );
-      glRotatef( rot_ang1, -curve_der[i].y, curve_der[i].x, 0.0f );
-      glTranslatef( baserad*ctab[j], baserad*stab[j], 0.0f );
-      glGetFloatv( GL_MODELVIEW_MATRIX, M );
-      Point3D p4 = { M[12], M[13], M[14] };
-      cerr << M[12] << "," << M[13] << "," << M[14] << endl;
-      vertices1.push_back( p4 );
-      glPopMatrix();
-    }
-    
-    glColor4f( 0,0,0,1 );
-    glBegin( GL_LINE_STRIP );
-    for ( int j = 0 ; j <= visSettings.quality ; j++ )
-    {
-      glNormal3f( normals2[j].x, normals2[j].y, normals2[j].z );
-      glVertex3f( vertices2[j].x, vertices2[j].y, vertices2[j].z );
-      glNormal3f( normals1[j].x, normals1[j].y, normals1[j].z );
-      glVertex3f( vertices1[j].x, vertices1[j].y, vertices1[j].z );
+      // compute the coordinates of vertex (i,j)
+      for ( int k = 0 ; k < 16 ; k++ ) M[k] = (k % 5 == 0) ? 1 : 0;
+      myTranslatef( curve[i].x, curve[i].y, curve[i].z, M );
+      myRotatef( rot_ang1, -curve_der[i].y, curve_der[i].x, 0.0f, M );
+      myTranslatef( baserad*ctab[j], baserad*stab[j], 0.0f, M );
+      glVertex3f( M[3], M[7], M[11] );
     }
     glEnd();
   }
-  
-  glColor4f( 0,0,0,1 );
-  glBegin( GL_LINE_STRIP );
-  for ( int i = 0 ; i < N ; i++ )
+}
+
+// multiplies the rotation matrix with M and stores the result in M
+// theta is the angle in radians(!) over which we rotate, [ax,ay,az] is the
+// vector around which we rotate.
+void Visualizer::myRotatef( float theta, float ax, float ay, float az, float M[] )
+{
+  float len = sqrt( ax*ax + ay*ay + az*az );
+  float x = ax;
+  float y = ay;
+  float z = az;
+  if ( len != 0 )
   {
-    glVertex3f( curve[i].x, curve[i].y, curve[i].z );
+    x /= len;
+    y /= len;
+    z /= len;
   }
-  glEnd();
+
+  float c = cos( theta );
+  float s = sin( theta );
+
+  // compute the rotation matrix for this angle and vector
+  // note that R is actually a 4x4 matrix; the fourth column and fourth row are
+  // as in the identity matrix: [0,0,0,1]
+  float R[9] = { x*x*(1-c)+c,   x*y*(1-c)-z*s, x*z*(1-c)+y*s,
+		 y*x*(1-c)+z*s, y*y*(1-c)+c,   y*z*(1-c)-x*s,
+		 x*z*(1-c)-y*s, y*z*(1-c)+x*s, z*z*(1-c)+c };
+  
+  M[0] = M[0]*R[0] + M[1]*R[3] + M[2]*R[6];
+  M[1] = M[0]*R[1] + M[1]*R[4] + M[2]*R[7];
+  M[2] = M[0]*R[2] + M[1]*R[5] + M[2]*R[8];
+  M[4] = M[4]*R[0] + M[5]*R[3] + M[6]*R[6];
+  M[5] = M[4]*R[1] + M[5]*R[4] + M[6]*R[7];
+  M[6] = M[4]*R[2] + M[5]*R[5] + M[6]*R[8];
+  M[8] = M[8]*R[0] + M[9]*R[3] + M[10]*R[6];
+  M[9] = M[8]*R[1] + M[9]*R[4] + M[10]*R[7];
+  M[10] = M[8]*R[2] + M[9]*R[5] + M[10]*R[8];
+  M[12] = M[12]*R[0] + M[13]*R[3] + M[14]*R[6];
+  M[13] = M[12]*R[1] + M[13]*R[4] + M[14]*R[7];
+  M[14] = M[12]*R[2] + M[13]*R[5] + M[14]*R[8];
+}
+
+// multiplies the translation matrix with matrix M and stores the result in M
+// [tx,ty,tz] is the vector over which we translate
+void Visualizer::myTranslatef( float tx, float ty, float tz, float M[] )
+{
+  M[3] = M[0]*tx + M[1]*ty + M[2]*tz + M[3];
+  M[7] = M[4]*tx + M[5]*ty + M[6]*tz + M[7];
+  M[11] = M[8]*tx + M[9]*ty + M[10]*tz + M[11];
+  M[15] = M[12]*tx + M[13]*ty + M[14]*tz + M[15];
 }
