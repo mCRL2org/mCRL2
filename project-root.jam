@@ -115,12 +115,27 @@ rule import_libraries {
     case "MACOSX" :
       alias OpenGL : : : : <framework>"OpenGL" ;
       alias GLUT   : : : : <framework>"GLUT" ;
-      alias GLU ;
+      alias GLU    : : : : OpenGL ;
     case * :
       lib OpenGL : : <name>"GL" ;
       lib GLU    : : <name>"GLU" ;
       lib GLUT   : : <name>"glut" ;
   }
+
+  lib z  : : <name>"z" ;
+
+  lib m  : : <name>"m" ;
+
+  lib dl : : <name>"dl" ;
+
+  lib xml2
+        :
+        : <name>"xml2"
+        :
+        : <cxxflags>"$(XML2_CPPFLAGS)"
+          <library>z
+          <library>m
+        ;
 }
 
 # Install when requested

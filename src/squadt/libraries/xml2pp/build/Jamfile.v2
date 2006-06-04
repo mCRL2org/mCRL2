@@ -8,7 +8,7 @@ project text_reader
        <include>../..
     ;
 
-include $(TOP)/config.jam ;
+import_libraries ;
 
 obj text_reader.o
     : exception.cpp
@@ -18,6 +18,6 @@ alias text_reader
     : text_reader.o
     :
     :
-    : <cxxflags>"$(XML2_CPPFLAGS)"
-      <linkflags>"$(XML2_LDFLAGS)"
+    :
+      <library>xml2
     ;

@@ -214,9 +214,6 @@ experimental: $(EXPERIMENTALS)
 
 # Build bjam and local boost 
 ifdef BUILD_BOOST
-all : boost
-distclean install: boost_relay
-
 ../boost/build_completed:
 endif
 
