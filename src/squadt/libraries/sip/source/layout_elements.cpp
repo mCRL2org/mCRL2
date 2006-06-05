@@ -51,9 +51,16 @@ namespace sip {
        * @param[out] o the stream to which to write the result
        **/
       void radio_button::write_structure(std::ostream& o) const {
-        o << "<radio-button id=\"" << id << "\" next=\""
-          << connection->id << "\" label=\"" << label
-          << "\" selected=\"" << selected << "\"/>";
+        o << "<radio-button id=\"" << id << "\" label=\"" << label;
+
+        if (connection != 0) {
+          o << "\" next=\"" << connection->id;
+        }
+        if (selected) {
+          o << "\" selected=\"" << selected;
+        }
+
+        o << "\"/>";
       }
 
       /**
@@ -65,6 +72,7 @@ namespace sip {
        **/
       void radio_button::read_structure(xml2pp::text_reader& r) {
         r.get_attribute(&label, "label");
+        r.get_attribute(&selected, "selected");
 
         r.read();
 
@@ -141,7 +149,7 @@ namespace sip {
       void text_field::read_structure(xml2pp::text_reader& r) {
         r.get_attribute(&text, "text");
 
-        r.read(1);
+        r.read(2);
 
         current_event_handler->process(this);
       }

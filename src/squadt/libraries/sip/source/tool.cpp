@@ -116,7 +116,7 @@ namespace sip {
      **/
     void communicator::send_display_layout(layout::tool_display::sptr d) {
       message m(d->write(), sip::send_display_layout);
- 
+
       send_message(m);
 
       clear_handlers(sip::send_display_data);

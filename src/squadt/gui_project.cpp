@@ -202,6 +202,8 @@ namespace squadt {
 
         object_view->SetItemData(i, new node_data(*this, *(p->get_output_iterator())));
         object_view->EnsureVisible(i);
+
+        manager->write();
       }
     }
 

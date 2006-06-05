@@ -9,7 +9,6 @@ project transport
        <define>BOOST_DATE_TIME_NO_LIB
     : usage-requirements
        <include>../..
-       <library>/boost/thread//boost_thread
        <define>BOOST_DATE_TIME_NO_LIB
     ;
 
@@ -18,8 +17,9 @@ lib transport
       exception.cpp
       socket_listener.cpp
       socket_transceiver.cpp
-    : <library>/boost/thread//boost_thread
+    : <dependency>/boost/thread//boost_thread
       <threading>multi
     :
     : <threading>multi
+      <library>/boost/thread//boost_thread
     ;
