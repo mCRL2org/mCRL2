@@ -398,7 +398,7 @@ namespace sip {
 
           /** \brief Write out the layout structure in XML format */
           void read_structure(xml2pp::text_reader&);
-     
+
         public:
      
           /** \brief Constructor */
@@ -424,6 +424,7 @@ namespace sip {
       };
      
       inline text_field::text_field() {
+        type = standard_string;
       }
 
       /**
