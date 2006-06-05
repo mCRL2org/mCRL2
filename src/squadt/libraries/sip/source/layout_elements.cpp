@@ -129,7 +129,7 @@ namespace sip {
 
         type->write(o);
 
-        o << "<text-field/>";
+        o << "</text-field>";
       }
 
       /**
