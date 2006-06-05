@@ -3,8 +3,6 @@
 
 #include <transport/detail/socket_transceiver.h>
 
-#include <boost/ref.hpp>
-
 namespace transport {
   namespace transceiver {
 
@@ -126,8 +124,10 @@ namespace transport {
         boost::mutex::scoped_lock l(s->operation_lock);
 
         if (!e) {
-          basic_transceiver::deliver(boost::cref(std::string(buffer)));
-       
+          std::string data(buffer);
+
+          basic_transceiver::deliver(data);
+
           socket.async_receive(asio::buffer(buffer, input_buffer_size), 0,
                                   boost::bind(&socket_transceiver::handle_receive, this, w, _1));
        
