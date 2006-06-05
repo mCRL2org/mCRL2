@@ -12,7 +12,6 @@ exe lpe2lts
          /libraries/temporary//print
          /libraries/temporary//trace
          /libraries/lts//lts
-         /libraries/sip//sipt
        : <source>/root//mcrl2_revision
          <squadt_support>enable
        ;

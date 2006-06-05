@@ -1,8 +1,8 @@
 #All objects that are used
 OBJECTS            =
 
-# Creates an application bundle on Mac OS
-define create_mac_app
+# Creates an application bundle on Mac OS X
+%.app: src/%
 	/Developer/Tools/Rez -t APPL -o $^ sample.r
 	/Developer/Tools/SetFile -a C $^
 	install -d $@/Contents/MacOS
@@ -10,7 +10,6 @@ define create_mac_app
 	install -d $@/Contents/Resources
 	install xsim.icns $@/Contents/Resources/xsim.icns
 	ln -f $(bindir)/$^ $@/Contents/MacOS/xsim
-endef
 
 #Redefine default definitions using autoconf
 -include ../config

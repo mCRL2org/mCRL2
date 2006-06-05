@@ -57,9 +57,6 @@ tools = [ MATCH src/(.*)/.* : [ glob src/*/Jamfile.v2 src/*/build/Jamfile.v2 ] ]
 for tool in $(tools) {
   # Make tool project known under a nice name
   use-project /tools/$(tool) : src/$(tool) ;
-
-  # Build by default
-  build-project src/$(tool) ;
 }
 
 libraries = [ MATCH src/libraries/(.*)/build/.* : [ glob src/libraries/*/build/Jamfile.v2 ] ] ;
@@ -68,6 +65,74 @@ libraries = [ MATCH src/libraries/(.*)/build/.* : [ glob src/libraries/*/build/J
 for library in $(libraries) {
   # Make tool project known under a nice name
   use-project /libraries/$(library) : src/libraries/$(library)/build ;
+}
+
+# Install when requested
+if ! install in [ MATCH "^--(install)" "^(install)" : [ modules.peek : ARGV ] ] {
+
+  # Build by default
+  for tool in $(tools) {
+    build-project src/$(tool) ;
+  }
+
+  # Dummy rule
+  rule install_with_libraries ( tool * : property * ) {
+  }
+
+  # Dummy rule
+  rule install_data ( name : files * : directories ? ) {
+  }
+}
+else {
+
+  # Custom rule to install a tool executable with the libraries it depends on
+  rule install_with_libraries ( tools * : properties * ) {
+
+    alias install
+          : install-libraries
+            install-binaries
+          : $(properties)
+          ;
+
+    stage install-binaries
+          : $(tools)
+          : <install-dependencies>on
+            <install-type>EXE
+            <dll-path>$(LIB_DIR)
+            <location>$(BIN_DIR)
+          ;
+
+    stage install-libraries
+          : $(tools)
+          : <install-dependencies>on <install-type>SHARED_LIB
+            <location>$(LIB_DIR)
+          ;
+
+    explicit install-binaries install-libraries ;
+  }
+
+  rule install_data ( name : files * : directories ? ) {
+
+    target = [ path.join $(DATA_DIR) $(directories) ] ;
+
+    install $(name)
+          : $(files)
+          : <location>$(target)
+          ;
+  }
+
+  alias install-tools
+       : /tools/$(tools)//install
+       ;
+
+  extensions = mcrl2 pnml fsm ;
+
+  # Install examples
+  install examples
+       : [ glob ./examples/*.$(extensions) ./examples/*/*.$(extensions) ./examples/*/*/*.$(extensions) ]
+       : <location>$(DATA_DIR)
+         <install-source-root>.
+       ;
 }
 
 # Feature to mark tools as experimental
@@ -139,51 +204,3 @@ rule import_libraries {
         ;
 }
 
-# Install when requested
-if install in [ MATCH "^--(install)" "^(install)" : [ modules.peek : ARGV ] ] {
-
-  # Custom rule to install a tool executable with the libraries it depends on
-  rule install_with_libraries ( tool * : property * ) {
-
-    stage install
-          : $(tool)
-          : <install-dependencies>on <install-type>SHARED_LIB
-            <install-type>EXE
-            <dll-path>$(LIB_DIR)
-            $(property)
-          : <location>$(LIB_DIR)
-          ;
-  }
-
-  rule install_data ( name : files * : directories ? ) {
-
-    target = [ path.join $(DATA_DIR) $(directories) ] ;
-
-    install $(name)
-          : $(files)
-          : <location>$(target)
-          ;
-  }
-
-  alias install-tools
-       : /tools/$(tools)//install
-       ;
-
-  extensions = mcrl2 pnml fsm ;
-
-  # Install examples
-  install examples
-       : [ glob ./examples/*.$(extensions) ./examples/*/*.$(extensions) ./examples/*/*/*.$(extensions) ]
-       : <location>$(DATA_DIR)
-         <install-source-root>.
-       ;
-}
-else {
-  # Dummy rule
-  rule install_with_libraries ( tool * : property * ) {
-  }
-
-  # Dummy rule
-  rule install_data ( name : files * : directories ? ) {
-  }
-}

@@ -26,7 +26,7 @@ project boost
       # 'tag' rule below.
       <tag>@$(__name__).tag
     : usage-requirements <include>.
-    : build-dir bin
+    : build-dir $(TOP)/bin
     ;
 
 # Decides which libraries are to be installed by looking at --with-<library>
