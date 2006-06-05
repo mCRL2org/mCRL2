@@ -145,25 +145,14 @@ if install in [ MATCH "^--(install)" "^(install)" : [ modules.peek : ARGV ] ] {
   # Custom rule to install a tool executable with the libraries it depends on
   rule install_with_libraries ( tool * : property * ) {
 
-    alias install
-          : install-libraries
-            install-binaries
-          : $(property)
-          ;
- 
-    install install-binaries
-          : $(tool)
-          : <dll-path>$(LIB_DIR)
-            <location>$(BIN_DIR)
-          ;
- 
-    install install-libraries
+    stage install
           : $(tool)
           : <install-dependencies>on <install-type>SHARED_LIB
+            <install-type>EXE
+            <dll-path>$(LIB_DIR)
+            $(property)
           : <location>$(LIB_DIR)
           ;
- 
-    explicit install install-binaries install-libraries ;
   }
 
   rule install_data ( name : files * : directories ? ) {
