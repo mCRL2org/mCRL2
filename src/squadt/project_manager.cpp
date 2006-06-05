@@ -204,7 +204,7 @@ namespace squadt {
    *      - f(p) = 1 + f(max i : f(p.inputs[i].generator))
    **/
   void project_manager::sort_processors() {
-    unsigned short number = 0; /* The number of */
+    unsigned int number = 0; /* The number of */
 
     std::map < processor*, unsigned short > weights;
 
@@ -248,7 +248,7 @@ namespace squadt {
           }
 
           if (!k.valid()) {
-            weights[(*i).get()] = 1 + maximum_weight;
+            weights[(*i).get()] = 1 + std::max(maximum_weight, number);
           }
         }
       }
