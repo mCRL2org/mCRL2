@@ -1,8 +1,7 @@
 project sip
     : source-location
        ../source
-    : build-dir
-       .
+    : build-dir $(BUILD_TOP)
     : requirements
        <threading>multi
        <include>$(BOOST)
@@ -21,13 +20,13 @@ alias messenger
 
 lib sip_common
     : common.cpp
-      exception.cpp
+      sip_exception.cpp
       report.cpp
       object.cpp
       layout.cpp
       layout_elements.cpp
     : <library>/libraries/xml2pp//text_reader
-      <library>/boost/thread//boost_thread
+      <dependency>/boost/thread//boost_thread
     : # no default build
     : <library>/boost/thread//boost_thread
     ;

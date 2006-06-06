@@ -32,18 +32,20 @@ namespace asio {
 namespace detail {
 namespace socket_ops {
 
+static int local_errno=0;
+
 inline int get_error()
 {
 #if defined(BOOST_WINDOWS)
   return WSAGetLastError();
 #else // defined(BOOST_WINDOWS)
-  return errno;
+  return local_errno;
 #endif // defined(BOOST_WINDOWS)
 }
 
 inline void set_error(int error)
 {
-  errno = error;
+  local_errno = error;
 #if defined(BOOST_WINDOWS)
   WSASetLastError(error);
 #endif // defined(BOOST_WINDOWS)
@@ -53,7 +55,7 @@ template <typename ReturnType>
 inline ReturnType error_wrapper(ReturnType return_value)
 {
 #if defined(BOOST_WINDOWS)
-  errno = WSAGetLastError();
+  local_errno = WSAGetLastError();
 #endif // defined(BOOST_WINDOWS)
   return return_value;
 }

@@ -2,12 +2,19 @@
 #define __LIN_TYPES_H
 
 #include <stdbool.h>
+#include <string>
+
+using namespace std;
 
 //Type definitions for all linearisers
 
-typedef enum { lmStack, lmRegular, lmRegular2, lmAlternative } t_lin_method;
 //t_lin_method represents the available linearisation methods
+typedef enum { lmStack, lmRegular, lmRegular2, lmAlternative } t_lin_method;
 
+//t_phase represents the phases at which the program should be able to stop
+typedef enum { phNone, phParse, phTypeCheck, phAlphaRed, phDataImpl } t_phase;
+
+//t_lin_options represents the options of the lineariser
 typedef struct {
   t_lin_method lin_method;
   bool no_intermediate_cluster;
@@ -19,7 +26,11 @@ typedef struct {
   bool nofreevars;
   bool nosumelm;
   bool nodeltaelimination;
+  bool opt_check_only;
+  t_phase opt_end_phase;
+  bool opt_noalpha;
+  string infilename;
+  string outfilename;
 } t_lin_options;
-//t_lin_options represents the options of the lineariser
 
 #endif //__LIN_TYPES_H

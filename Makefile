@@ -1,26 +1,31 @@
 -include config
 
 # Creates an application bundle on Mac OS X
-%.app: src/%
-	/Developer/Tools/Rez -t APPL -o $^ sample.r
+%.app: $(bindir)/%
+	/Developer/Tools/Rez -t APPL -o $^ src/sample.r
 	/Developer/Tools/SetFile -a C $^
 	install -d $@/Contents/MacOS
-	install Info.plist $@/Contents/Info.plist
+	install src/$*/$*.plist $@/Contents/Info.plist
 	install -d $@/Contents/Resources
-	install xsim.icns $@/Contents/Resources/xsim.icns
-	ln -f $(bindir)/$^ $@/Contents/MacOS/xsim
+	install src/$*/$*.icns $@/Contents/Resources/xsim.icns
+	ln -f $^ $@/Contents/MacOS/$*
+	cp -f src/$*/$*.icns $@/Contents/Resources/$*.icns
 
 .PHONY: all install clean distclean distribution
 
 all: config $(BJAM)
 	@$(BOOST_BUILD)
 
-install: $(BJAM)
+install-local: $(BJAM)
 	@$(BOOST_BUILD) --install
 	@$(MAKE) -C src/doc install
 
+install: install-local install-app
+
 ifeq ($(HOST_OS),MACOSX)
-install: xsim.app ltsgraph.app ltsview.app squadt.app
+install-app: xsim.app ltsgraph.app ltsview.app squadt.app
+else
+install-app:
 endif
 
 clean:

@@ -1,7 +1,14 @@
+// #define ENABLE_SQUADT_CONNECTIVITY
+
+
 #define NAME "mcrl22lpe"
 #define VERSION "0.2.1"
 #define INFILEEXT ".mcrl2"
 #define OUTFILEEXT ".lpe"
+
+#ifdef ENABLE_SQUADT_CONNECTIVITY
+#include <sip/tool.h>
+#endif
 
 #include <assert.h>
 #include <stdbool.h>
@@ -12,7 +19,6 @@
 #include <aterm2.h>
 #include <string.h>
 #include <cstdio>
-#include <string>
 #include <fstream>
 #include "lin_types.h"
 #include "lin_std.h"
@@ -29,23 +35,15 @@
 
 using namespace std;
 
-//Type definitions
-
-typedef enum { phNone, phParse, phTypeCheck, phAlphaRed, phDataImpl } t_phase;
-//t_phase represents the phases at which the program should be able to stop
-
 //Functions used by the main program
-static ATermAppl linearise_file(string &infilename, t_lin_options lin_options,
-  t_phase end_phase, bool alpha);
+static ATermAppl linearise_file(t_lin_options &lin_options);
 static void AltIllegalOptWarning(char opt);
 static void PrintMoreInfo(char *Name);
 static void PrintVersion(void);
 static void PrintHelp(char *Name);
 static void PrintLinMethod(FILE *stream, t_lin_method lin_method);
 
-//Main program
-
-int main(int argc, char *argv[])
+static int parse_command_line(int argc, char *argv[],t_lin_options &lin_options)
 { 
   //declarations for getopt
   bool lm_chosen = false;
@@ -174,10 +172,10 @@ int main(int argc, char *argv[])
         break;
       case 'h': /* help */
         PrintHelp(argv[0]);
-        return 0;
+        return 1;
       case VersionOption: /* version */
         PrintVersion();
-        return 0;
+        return 1;
       case 'q': /* quiet */
         gsSetQuietMsg();
         break;
@@ -235,14 +233,7 @@ int main(int argc, char *argv[])
     }
   }
 
-  //initialise ATerm library
-  ATerm stack_bottom;
-  ATinit(argc,argv,&stack_bottom);
-  //enable constructor functions
-  gsEnableConstructorFunctions();
-
   //set linearisation parameters
-  t_lin_options lin_options;
   lin_options.lin_method = opt_lin_method;
   lin_options.final_cluster = opt_final_cluster;
   lin_options.no_intermediate_cluster = opt_no_intermediate_cluster;
@@ -253,36 +244,272 @@ int main(int argc, char *argv[])
   lin_options.nofreevars = opt_nofreevars;
   lin_options.nosumelm = opt_nosumelm;
   lin_options.nodeltaelimination = opt_nodeltaelimination;
+  lin_options.opt_check_only = opt_check_only;
+  lin_options.opt_end_phase = opt_end_phase;
+  lin_options.opt_noalpha = opt_noalpha;
+  lin_options.infilename = infilename;
+  lin_options.outfilename = outfilename;
+  return 0;  // main can continue
+}
+
+#ifdef ENABLE_SQUADT_CONNECTIVITY
+
+static bool get_squadt_parameters(int argc, 
+                                  char *argv[],
+                                  t_lin_options &lin_options,
+                                  sip::tool::communicator &tc)
+{
+  std::string infilename;
+  const unsigned int lpd_file_for_input=0;
+  cerr << "Ready to start configuration\n";
+  sip::tool::capabilities& cp = tc.get_tool_capabilities();
+  cp.add_input_combination(lpd_file_for_input, "Transformation", "mcrl2");
+  if (tc.activate(argc,argv)) 
+  { bool valid = false;
+    /* Static configuration cycle */
+    while (!valid) 
+    {
+      /* Wait for configuration data to be sent 
+       * (either a previous configuration, or only an input combination) */
+      sip::configuration::sptr configuration = tc.await_configuration();
+      /* Validate configuration specification, 
+       * should contain a file name of an LPD that is to be read as input */
+      valid  = configuration.get() != 0;
+      valid &= configuration->object_exists(lpd_file_for_input);
+      if (valid) 
+      { /* An object with the correct id exists, assume the URI is relative 
+           (i.e. a file name in the local file system) */
+        infilename = configuration->get_object(lpd_file_for_input)->get_location();
+        tc.set_configuration(configuration);
+      }
+      else 
+      { sip::report report;
+        report.set_error("Invalid input combination!");
+        tc.send_report(report);
+        exit(1);
+      }
+    }
+
+    /* Send the controller the signal that we're ready to rumble 
+     * (no further configuration necessary) */
+    tc.send_accept_configuration();
+
+    /* Wait for start message */
+    
+    cerr << "Ready to accept configuration " << infilename << "\n";
+    tc.await_message(sip::send_signal_start);
+
+    using namespace sip;
+    using namespace sip::layout;
+    using namespace sip::layout::elements;
+
+    tool_display::sptr display(new layout::tool_display);
+    layout::manager::aptr layout_manager = layout::vertical_box::create();
+
+
+    layout_manager->add(new label(" "),layout::left);
+    // box to select the outputfile
+    layout::horizontal_box* outputfilename_box = new layout::horizontal_box();
+    layout_manager->add(outputfilename_box);
+    outputfilename_box->add(new label("Output file name: "),middle);
+    assert(infilename.size()>6);  // infilename has the shape "... .mcrl2"
+    std::string suggestedoutfilename(infilename,0,infilename.size()-6);
+    suggestedoutfilename=suggestedoutfilename + ".lpe";
+    text_field* outfilenamefield=new text_field(suggestedoutfilename);
+    outputfilename_box->add(outfilenamefield,middle); // Geeft vooralsnog een xml parseerfout.
+    // outputfilename_box->add(new label(suggestedoutfilename),middle);
+
+    layout_manager->add(new label(" "),layout::left);
+    // box to select the linearisation method
+    horizontal_box* linearisation_method_box = new horizontal_box();
+    layout_manager->add(linearisation_method_box);
+    linearisation_method_box->add(new label("Linearisation method: "),middle);
+    radio_button *select_regular=new radio_button("Regular");
+    // linearisation_method_box->add(select_regular,middle);
+    radio_button *select_regular2=new radio_button("Regular2",select_regular);
+    // linearisation_method_box->add(select_regular2,middle);
+    radio_button *select_stack=new radio_button("Stack",select_regular2);
+    // linearisation_method_box->add(select_stack,middle);
+    radio_button *select_expansion=new radio_button("Expansion",select_stack);
+    // linearisation_method_box->add(select_expansion,middle);
+
+    layout_manager->add(new label(" "),layout::left);
+    // two columns to select the linearisation options of the tool
+    layout::horizontal_box* option_columns = new layout::horizontal_box();
+    layout_manager->add(option_columns);
+    // left option column
+    vertical_box* left_option_column = new vertical_box();
+    option_columns->add(left_option_column,top);
+    checkbox* clusterintermediate = new checkbox("Intermediate clustering",true);
+    left_option_column->add(clusterintermediate,layout::left);
+    checkbox* clusterfinal = new checkbox("Final clustering",true);
+    left_option_column->add(clusterfinal,layout::left);
+    checkbox* newstate = new checkbox("Use enumerated states",false);
+    left_option_column->add(newstate,layout::left);
+    checkbox* binary = new checkbox("Encode enumerated types by booleans ",false);
+    left_option_column->add(binary,layout::left);
+    checkbox* statenames = new checkbox("use informative statenames ",false);
+    left_option_column->add(statenames,layout::left);
+    // right option column
+    layout::vertical_box* right_option_column = new layout::vertical_box();
+    option_columns->add(right_option_column,top);
+    checkbox* norewrite = new checkbox("Do not rewrite",true);
+    right_option_column->add(norewrite,layout::left);
+    checkbox* noalpha = new checkbox("Do not apply alphabet axioms",false);
+    right_option_column->add(noalpha,layout::left);
+    checkbox* nosumelm = new checkbox("Do not apply sum elimination",false);
+    right_option_column->add(nosumelm,layout::left);
+    checkbox* nodeltaelm = new checkbox("Do not apply delta elimination",false);
+    right_option_column->add(nodeltaelm,layout::left);
+    checkbox* nofreevars = new checkbox("Suppress generating free variables",false);
+    right_option_column->add(nofreevars,layout::left);
+
+    layout_manager->add(new label(" "),layout::left);
+    layout_manager->add(new label("Determine output phase"),layout::left);
+    // Determine which phases the linearizer will go through. Default is all.
+    horizontal_box *phases_box = new horizontal_box();
+    layout_manager->add(phases_box);
+    radio_button *all_phases=new radio_button("Linearize");
+    // phases_box->add(all_phases,middle);
+    radio_button *parse_phase=new radio_button("Parse input",all_phases);
+    // phases_box->add(parse_phase,middle);
+    radio_button *typecheck_phase=new radio_button("Typecheck input",parse_phase);
+    // phases_box->add(parse_phase,middle);
+    radio_button *alpha_phase=new radio_button("Apply alphabet axioms",typecheck_phase);
+    // phases_box->add(alpha_phase,middle);
+    radio_button *data_phase=new radio_button("Implement data",alpha_phase);
+    // phases_box->add(data_phase,middle);
+
+
+    // The ok button must be put at the rightmost lowermost place
+
+    horizontal_box* okay_box = new horizontal_box();
+    layout_manager->add(okay_box,layout::right);
+    button* okay_button = new button("OK");
+    okay_box->add(okay_button,layout::bottom);
+    
+    layout_manager->add(new label(" "),layout::left);
+
+    cerr << "Configuration sent\n";
+    display->set_top_manager(layout_manager);
+
+    tc.send_display_layout(display);
+    cerr << "Configuration sent1\n";
+
+    okay_button->await_change();
+
+    lin_options.infilename=infilename;
+
+    if (select_regular->is_selected())
+    { lin_options.lin_method = lmRegular;
+    }
+    else if (select_regular2->is_selected())
+    { lin_options.lin_method = lmRegular2;
+    }
+    else if (select_stack->is_selected())
+    { lin_options.lin_method = lmStack;
+    }
+    else if (select_expansion->is_selected())
+    { lin_options.lin_method = lmAlternative;
+    }
+    lin_options.final_cluster = clusterfinal->get_status();
+    lin_options.no_intermediate_cluster = clusterintermediate->get_status();
+    lin_options.newstate = newstate->get_status();
+    lin_options.binary = binary->get_status();
+    lin_options.statenames = statenames->get_status();
+    lin_options.norewrite = norewrite->get_status();
+    lin_options.nofreevars = nofreevars->get_status();
+    lin_options.nosumelm = nosumelm->get_status();
+    lin_options.nodeltaelimination = nodeltaelm->get_status();
+    
+    lin_options.opt_check_only = !(all_phases->is_selected());
+    
+    if (lin_options.opt_check_only)
+    { if (parse_phase->is_selected())
+      { lin_options.opt_end_phase = phParse;
+      }
+      else if (typecheck_phase->is_selected())
+      { lin_options.opt_end_phase = phTypeCheck;
+      }
+      else if (alpha_phase->is_selected())
+      { lin_options.opt_end_phase = phAlphaRed;
+      }
+      else if (data_phase->is_selected())
+      { lin_options.opt_end_phase = phDataImpl;
+      }
+    }
+    else
+    { lin_options.opt_end_phase=phNone;
+    }
+
+        
+    // lin_options.opt_end_phase = opt_end_phase;
+    lin_options.opt_noalpha = noalpha->get_status();
+    lin_options.infilename = infilename;
+    lin_options.outfilename=outfilenamefield->get_text();
+
+
+    cerr << "Configuration sent2\n";
+
+    return 0;
+  }
+  else 
+  {
+    return parse_command_line(argc,argv,lin_options);
+  }
+}
+#endif
+
+
+// Main 
+
+int main(int argc, char *argv[])
+{
+  bool terminate=0;
+  t_lin_options lin_options;
+#ifdef ENABLE_SQUADT_CONNECTIVITY
+  sip::tool::communicator tc;
+  terminate=get_squadt_parameters(argc,argv,lin_options,tc);
+#else
+  terminate=parse_command_line(argc,argv,lin_options);
+#endif
+
+  if (terminate) exit(0);
+
+  //initialise ATerm library
+  ATerm stack_bottom;
+  ATinit(argc,argv,&stack_bottom);
+  //enable constructor functions
+  gsEnableConstructorFunctions();
 
   //linearise infilename with options lin_options
-  ATermAppl result =
-    linearise_file(infilename, lin_options,
-      opt_check_only?phTypeCheck:opt_end_phase, !opt_noalpha);
+  ATermAppl result =linearise_file(lin_options);
+
   if (result == NULL) {
     return 1;
   }
-  if (opt_check_only) {
-    if (infilename == "") {
+  if (lin_options.opt_check_only) {
+    if (lin_options.infilename == "") {
       fprintf(stdout, "stdin");
     } else {
-      fprintf(stdout, "The file '%s'", infilename.c_str());
+      fprintf(stdout, "The file '%s'", lin_options.infilename.c_str());
     }
     fprintf(stdout, " contains a well-formed mCRL2 specification.\n");
     return 0;
   } else {
     //store the result
-    if (outfilename == "") {
+    if (lin_options.outfilename == "") {
       gsVerboseMsg("saving result to stdout...\n");
       ATwriteToBinaryFile((ATerm) result, stdout);
       fprintf(stdout, "\n");
     } else { //outfilename != NULL
       //open output filename
-      FILE *outstream = fopen(outfilename.c_str(), "wb");
+      FILE *outstream = fopen(lin_options.outfilename.c_str(), "wb");
       if (outstream == NULL) {
-        gsErrorMsg("cannot open output file '%s'\n", outfilename.c_str());
+        gsErrorMsg("cannot open output file '%s'\n", lin_options.outfilename.c_str());
         return 1;
       }
-      gsVerboseMsg("saving result to '%s'...\n", outfilename.c_str());
+      gsVerboseMsg("saving result to '%s'...\n", lin_options.outfilename.c_str());
       ATwriteToBinaryFile((ATerm) result, outstream);
       fclose(outstream);
     }
@@ -290,23 +517,23 @@ int main(int argc, char *argv[])
   return 0;
 }
 
-ATermAppl linearise_file(string &infilename, t_lin_options lin_options,
-  t_phase end_phase, bool alpha)
+ATermAppl linearise_file(t_lin_options &lin_options)
 {
   ATermAppl result = NULL;
+  bool end_phase = lin_options.opt_check_only?phTypeCheck:lin_options.opt_end_phase;
   //parse specification
-  if (infilename == "") {
+  if (lin_options.infilename == "") {
     //parse specification from stdin
     gsVerboseMsg("parsing input from stdin...\n");
     result = parse_specification(cin);
   } else {
     //parse specification from infilename
-    ifstream instream(infilename.c_str(), ifstream::in|ifstream::binary);
+    ifstream instream(lin_options.infilename.c_str(), ifstream::in|ifstream::binary);
     if (!instream.is_open()) {
-      gsErrorMsg("cannot open input file '%s'\n", infilename.c_str());
+      gsErrorMsg("cannot open input file '%s'\n", lin_options.infilename.c_str());
       return NULL;
     }
-    gsVerboseMsg("parsing input file '%s'...\n", infilename.c_str());
+    gsVerboseMsg("parsing input file '%s'...\n", lin_options.infilename.c_str());
     result = parse_specification(instream);
     instream.close();
   }
@@ -330,7 +557,7 @@ ATermAppl linearise_file(string &infilename, t_lin_options lin_options,
     return result;
   }
   //perform alphabet reductions 
-  if (alpha) {
+  if (!lin_options.opt_noalpha) {
     gsVerboseMsg("performing alphabet reductions...\n");
     result = gsAlpha(result);
     if (result == NULL)

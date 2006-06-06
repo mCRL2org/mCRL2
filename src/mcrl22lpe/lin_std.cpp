@@ -73,9 +73,9 @@ typedef struct specificationbasictype {
 } specificationbasictype;
 
 
-typedef struct string {
+typedef struct localstring {
   char s[STRINGLENGTH];
-  struct string *next; } string;
+  struct localstring *next; } localstring;
 
 static int canterminatebody(
               ATermAppl t,
@@ -143,7 +143,7 @@ typedef enum { none,
                act, 
                proc, 
                variable, 
-               sort, 
+               sorttype, 
                multiact } objecttype;
 typedef enum { unknown, 
                mCRL, 
@@ -316,9 +316,9 @@ static int variablesequal(ATermList t1, ATermList t2,
   return 0; 
 }
 
-static string *emptystringlist =NULL;
+static localstring *emptystringlist =NULL;
 
-static void release_string(string *c)
+static void release_string(localstring *c)
 {
   
   c->next = emptystringlist;
@@ -326,12 +326,12 @@ static void release_string(string *c)
   strncpy(&c->s[0],"",STRINGLENGTH);
 } 
 
-static string *new_string(char *s)
+static localstring *new_string(char *s)
 {
-  string *c;
+  localstring *c;
   
   if (emptystringlist == NULL) {
-    { c = (string *)malloc(sizeof(string));
+    { c = (localstring *)malloc(sizeof(localstring));
       if (c==NULL) return NULL;}
   } else {
     c = emptystringlist;
@@ -424,7 +424,7 @@ static int existsort(ATermAppl sortterm)
     { 
       return 0;
     }
-    if (objectdata[n].object==sort) return 1;
+    if (objectdata[n].object==sorttype) return 1;
     return 0;
   }
 
@@ -477,7 +477,7 @@ static void insertsort(ATermAppl sortterm, specificationbasictype *spec)
     newobject(n);
 
     objectdata[n].objectname=sortterm;
-    objectdata[n].object=sort;
+    objectdata[n].object=sorttype;
     objectdata[n].constructor=0;
     return;
   }
@@ -516,7 +516,7 @@ static long insertConstructorOrFunction(ATermAppl constructor,objecttype type)
   objectdata[n].objectname=constructor;
   objectdata[n].targetsort=getTargetSort(t);
   m=objectIndex(objectdata[n].targetsort);
-  assert(objectdata[m].object==sort);
+  assert(objectdata[m].object==sorttype);
   if (type==func) objectdata[m].constructor=1;
   objectdata[n].object=type;
   return n;
@@ -1499,7 +1499,7 @@ static ATermAppl fresh_name(char *name)
      in that case a new name has to be generated. The result
      is of type ATermAppl, because the string is generally used
      in this form. */
-  string *str;
+  localstring *str;
   int i;
   str=new_string(name);
   ATerm stringterm=(ATerm)gsString2ATermAppl(str->s);

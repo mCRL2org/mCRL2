@@ -3,7 +3,7 @@ OBJECTS            =
 
 # Creates an application bundle on Mac OS X
 %.app: src/%
-	/Developer/Tools/Rez -t APPL -o $^ sample.r
+	/Developer/Tools/Rez -t APPL -o $^ src/sample.r
 	/Developer/Tools/SetFile -a C $^
 	install -d $@/Contents/MacOS
 	install Info.plist $@/Contents/Info.plist

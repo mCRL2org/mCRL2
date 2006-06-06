@@ -1,8 +1,7 @@
 project transport
     : source-location
        ../source
-    : build-dir
-       .
+    : build-dir $(BUILD_TOP)
     : requirements
        <include>$(BOOST)
        <include>../..
@@ -14,7 +13,7 @@ project transport
 
 lib transport
     : transporter.cpp
-      exception.cpp
+      transport_exception.cpp
       socket_listener.cpp
       socket_transceiver.cpp
     : <dependency>/boost/thread//boost_thread
