@@ -36,7 +36,7 @@ namespace socket_ops {
 // the variable errno. Therefore, it has
 // been replaced by a local errno.
 
-static int local errno = 0;
+static int localerrno = 0;
 
 inline int get_error()
 {
