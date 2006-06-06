@@ -129,6 +129,7 @@ int main(int argc, char **argv)
   else
     gsVerboseMsg("reading input from '%s'...\n", infilename);
   ATermAppl result = (ATermAppl) ATreadFromFile(instream);
+  ATprotectAppl(&result); // ATerms in main are not safe
   if ( result == NULL )
   {
     if (instream == stdin) {
@@ -195,6 +196,7 @@ int main(int argc, char **argv)
       fclose(outstream);
     }
   }
+  ATunprotectAppl(&result);
   free(infilename);
   free(outfilename);
   return 0;
