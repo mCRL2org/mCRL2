@@ -641,10 +641,48 @@ int main(int argc, char **argv)
     { "aut",             no_argument,       NULL, 1   },
     { "svc",             no_argument,       NULL, 2   },
     { "no-info",         no_argument,       NULL, 3   },
+// aterm lib options
+    { "at-help",          no_argument,       NULL, 10  },
+    { "at-verbose",       no_argument,       NULL, 11  },
+    { "at-silent",        no_argument,       NULL, 12  },
+    { "at-low-memory",    no_argument,       NULL, 13  },
+    { "at-termtable",     required_argument, NULL, 14  },
+    { "at-hashinfo",      no_argument,       NULL, 15  },
+    { "at-check",         no_argument,       NULL, 16  },
+    { "at-afuntable",     required_argument, NULL, 17  },
+    { "at-print-gc-time", no_argument,       NULL, 18  },
+    { "at-print-gc-info", no_argument,       NULL, 19  },
     { 0, 0, 0, 0 }
   };
 
-  ATinit(argc,argv,&Spec);
+
+  // handle the aterm options
+  {
+    short a_argc=1;
+    char *a_argv[10];
+    a_argv[0]=argv[0];
+
+    for(int i=1;i<argc;i++){
+      char *oa1="--at-afuntable";
+      char *oa2="--at-termtable";
+      if(strncmp(argv[i],oa1,strlen(oa1)-1) || strncmp(argv[i],oa2,strlen(oa2)-1)){
+        //fprintf(stderr,"at argument %s\n",argv[i]);
+        a_argv[a_argc++]=argv[i]+1;
+        i++;
+        if(i==argc) break;
+        a_argv[a_argc++]=argv[i];
+        continue;
+      }
+
+      if(strncmp(argv[i],"--at-",5)){
+        //fprintf(stderr, "at argument %s\n",argv[i]);
+        a_argv[a_argc++]=argv[i]+1;
+      }  
+    } 
+  
+    ATinit(a_argc,a_argv,&Spec);
+  }
+  // end handle aterm lib options 
 
   int opt;
   while ( (opt = getopt_long(argc,argv,sopts,lopts,NULL)) != -1 )
