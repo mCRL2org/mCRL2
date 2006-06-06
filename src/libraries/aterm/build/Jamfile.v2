@@ -38,3 +38,7 @@ alias atermpp
          <library>aterm
        ;
 
+alias headers
+       : [ glob ../include/*.h ]
+       ;
+

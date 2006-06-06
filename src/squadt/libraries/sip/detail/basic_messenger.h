@@ -98,7 +98,7 @@ namespace sip {
       private:
 
         /** \brief Helper function that services the handlers */
-        inline void   service_handlers(const message_ptr&, const basic_transceiver*, handler_type);
+        inline void   service_handlers(const message_ptr, const basic_transceiver*, handler_type);
 
         /** \brief Helper function that delivers an incoming message directly to a waiter */
         inline static void   deliver_to_waiter(const message_ptr&, const basic_transceiver*, message_ptr&);

@@ -6,6 +6,7 @@
 #include <boost/asio.hpp>
 #include <boost/weak_ptr.hpp>
 #include <boost/shared_ptr.hpp>
+#include <boost/shared_array.hpp>
 #include <boost/thread/mutex.hpp>
 
 #include <transport/transporter.h>
@@ -49,7 +50,7 @@ namespace transport {
       private:
 
         /** \brief The input buffer */
-        char*                            buffer;
+        boost::shared_array < char >     buffer;
 
         /** \brief The local endpoint of a connection */
         asio::ipv4::tcp::socket          socket;
@@ -131,8 +132,8 @@ namespace transport {
     /**
      * @param o a transporter to deliver data to
      **/
-    inline socket_transceiver::socket_transceiver(transporter* o) : basic_transceiver(o), socket(scheduler.io_service), send_count(0) {
-      buffer = new char[input_buffer_size];
+    inline socket_transceiver::socket_transceiver(transporter* o) : basic_transceiver(o),
+                buffer(new char[input_buffer_size]), socket(scheduler.io_service), send_count(0) {
     }
 
     /**
@@ -195,8 +196,6 @@ namespace transport {
       if (0 < send_count) {
         send_monitor.wait(s);
       }
-
-      delete[] buffer;
     }
   }
 }

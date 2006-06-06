@@ -133,6 +133,12 @@ else {
        : <location>$(DATA_DIR)
          <install-source-root>.
        ;
+
+  # Aterm header files for compiling rewriter
+  install headers
+       : /libraries/aterm//headers 
+       : <location>$(INCLUDE_DIR)/aterm
+       ;
 }
 
 # Feature to mark tools as experimental

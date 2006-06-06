@@ -72,7 +72,7 @@ namespace transport {
       virtual void deliver(std::istream&, basic_transceiver*) = 0;
 
       /** \brief Abstract function for the delivery of streamed data to the client program */
-      virtual void deliver(const std::string&, basic_transceiver*) = 0;
+      virtual void deliver(std::string const&, basic_transceiver*) = 0;
 
       /** \brief Associate a connection with this transporter */
       void associate(const basic_transceiver::ptr&);

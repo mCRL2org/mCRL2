@@ -303,7 +303,7 @@ namespace sip {
      * @param h the handler to call
      **/
     template < class M >
-    inline void basic_messenger< M >::service_handlers(const message_ptr& m, const basic_transceiver* o, handler_type h) {
+    inline void basic_messenger< M >::service_handlers(const message_ptr m, const basic_transceiver* o, handler_type h) {
       boost::mutex::scoped_lock w(waiter_lock);
 
       h(m, o);

@@ -23,7 +23,7 @@ namespace transport {
         socket.set_option(socket_base::keep_alive(true));
         socket.set_option(socket_base::linger(false, 0));
 
-        socket.async_receive(asio::buffer(buffer, input_buffer_size), 0, 
+        socket.async_receive(asio::buffer(buffer.get(), input_buffer_size), 0, 
                         boost::bind(&socket_transceiver::handle_receive, this, w, _1));
       }
     }
@@ -53,7 +53,7 @@ namespace transport {
         socket.set_option(socket_base::linger(false, 0));
 
         if (!e) {
-          socket.async_receive(asio::buffer(buffer, input_buffer_size), 0,
+          socket.async_receive(asio::buffer(buffer.get(), input_buffer_size), 0,
                           boost::bind(&socket_transceiver::handle_receive, this, w, _1));
 
           /* Make sure the scheduler is running */
@@ -124,11 +124,9 @@ namespace transport {
         boost::mutex::scoped_lock l(s->operation_lock);
 
         if (!e) {
-          std::string data(buffer);
+          basic_transceiver::deliver(std::string(buffer.get()));
 
-          basic_transceiver::deliver(data);
-
-          socket.async_receive(asio::buffer(buffer, input_buffer_size), 0,
+          socket.async_receive(asio::buffer(buffer.get(), input_buffer_size), 0,
                                   boost::bind(&socket_transceiver::handle_receive, this, w, _1));
        
           /* Make sure the scheduler is running */
