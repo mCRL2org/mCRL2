@@ -32,18 +32,26 @@ namespace asio {
 namespace detail {
 namespace socket_ops {
 
+// workaround because the mac does not understand
+// the variable errno. Therefore, it has
+// been replaced by a local errno.
+
+static int local errno = 0;
+
 inline int get_error()
 {
 #if defined(BOOST_WINDOWS)
   return WSAGetLastError();
 #else // defined(BOOST_WINDOWS)
-  return errno;
+//  return errno;
+  return localerrno;
 #endif // defined(BOOST_WINDOWS)
 }
 
 inline void set_error(int error)
 {
-  errno = error;
+  localerrno = error;
+//  errno = error;
 #if defined(BOOST_WINDOWS)
   WSASetLastError(error);
 #endif // defined(BOOST_WINDOWS)
@@ -53,7 +61,8 @@ template <typename ReturnType>
 inline ReturnType error_wrapper(ReturnType return_value)
 {
 #if defined(BOOST_WINDOWS)
-  errno = WSAGetLastError();
+//  errno = WSAGetLastError();
+  localerrno = WSAGetLastError();
 #endif // defined(BOOST_WINDOWS)
   return return_value;
 }
