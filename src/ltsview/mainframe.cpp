@@ -19,6 +19,7 @@ BEGIN_EVENT_TABLE( MainFrame, wxFrame )
   EVT_MENU  ( wxID_EXIT, MainFrame::onExit )
   EVT_MENU  ( wxID_RESET, MainFrame::onResetView )
   EVT_MENU  ( myID_DISPLAY_STATES, MainFrame::onDisplayStates )
+  EVT_MENU  ( myID_DISPLAY_WIREFRAME, MainFrame::onDisplayWireframe )
   EVT_TOOL  ( myID_PAN, MainFrame::onActivateTool )
   EVT_TOOL  ( myID_ROTATE, MainFrame::onActivateTool )
   EVT_TOOL  ( myID_SELECT, MainFrame::onActivateTool )
@@ -72,6 +73,8 @@ void MainFrame::setupMenuBar()
   viewMenu->AppendSeparator();
   viewMenu->AppendCheckItem( myID_DISPLAY_STATES, wxT("Display &states"),
       wxT("Show/hide individual states") );
+  viewMenu->AppendCheckItem( myID_DISPLAY_WIREFRAME, wxT("Display &wireframe"),
+      wxT("Show as wireframe") );
   
   menuBar->Append( fileMenu, wxT("&File") );
   menuBar->Append( viewMenu, wxT("&View") );
@@ -196,7 +199,7 @@ void MainFrame::setupSettingsPanel( wxPanel* panel )
 {
   wxStaticBoxSizer* parSizer = new wxStaticBoxSizer( wxVERTICAL, panel, wxT("Parameters") );
 
-  wxFlexGridSizer* parsubSizer = new wxFlexGridSizer( 5, 2, 0, 0 );
+  wxFlexGridSizer* parsubSizer = new wxFlexGridSizer( 7, 2, 0, 0 );
   parsubSizer->AddGrowableCol( 0 );
   for ( int i = 0 ; i < 5 ; ++i )
   {
@@ -257,6 +260,15 @@ void MainFrame::setupSettingsPanel( wxPanel* panel )
   parsubSizer->Add( new wxStaticText( panel, wxID_ANY, 
 	wxT("\302\272") ), 0, flags, 0 );
   */
+  innerbranchtiltSpinCtrl = new wxSpinCtrl( panel, myID_SETTINGS_CONTROL,
+      wxEmptyString, wxDefaultPosition );
+  innerbranchtiltSpinCtrl->SetRange( 0, 90 );
+  innerbranchtiltSpinCtrl->SetMinSize( spinctrlSize );
+  innerbranchtiltSpinCtrl->SetMaxSize( spinctrlSize );
+  parsubSizer->Add( new wxStaticText( panel, wxID_ANY, 
+	wxT("Inner branch tilt:") ), 0, lflags, border );
+  parsubSizer->Add( innerbranchtiltSpinCtrl, 0, rflags, border );
+
   outerbranchtiltSpinCtrl = new wxSpinCtrl( panel, myID_SETTINGS_CONTROL,
       wxEmptyString, wxDefaultPosition );
   outerbranchtiltSpinCtrl->SetRange( 0, 90 );
@@ -289,6 +301,10 @@ void MainFrame::setupSettingsPanel( wxPanel* panel )
   parsubSizer->Add( levelDivCheckBox, 0, flags, border );
   */
   // Setup the Colors panel
+  newStyleCheckBox = new wxCheckBox( panel, myID_SETTINGS_CONTROL,
+      wxT("New style") );
+  parsubSizer->Add( newStyleCheckBox, 0, lflags, border );
+
   
   wxStaticBoxSizer* colSizer = new wxStaticBoxSizer( wxVERTICAL, panel, wxT("Colours") );
   
@@ -505,6 +521,11 @@ void MainFrame::onDisplayStates( wxCommandEvent& /*event*/ )
   mediator->toggleDisplayStates();
 }
 
+void MainFrame::onDisplayWireframe( wxCommandEvent& /*event*/ )
+{
+  mediator->toggleDisplayWireframe();
+}
+
 void MainFrame::onColorButton( wxCommandEvent& /*event*/ )
 {
   mediator->applySettings();
@@ -639,11 +660,13 @@ VisSettings MainFrame::getVisSettings() const
 //    branchspreadSpinCtrl->GetValue(),
 //    clusterheightSpinCtrl->GetValue(),
     downC,
+    innerbranchtiltSpinCtrl->GetValue(),
     intC1,
     intC2,
 //    levelDivCheckBox->GetValue(),
     longinterpolateCheckBox->GetValue(),
     markC,
+    newStyleCheckBox->GetValue(),
     nodesizeSpinCtrl->GetValue(),
     outerbranchtiltSpinCtrl->GetValue(),
     qualitySpinCtrl->GetValue(),
@@ -666,12 +689,14 @@ void MainFrame::setVisSettings( VisSettings ss )
 	ss.upEdgeColor.g, ss.upEdgeColor.b ) );
   markButton->SetBackgroundColour( wxColour( ss.markedColor.r,
 	ss.markedColor.g, ss.markedColor.b ) );
+  innerbranchtiltSpinCtrl->SetValue( ss.innerBranchTilt );
   interpolate1Button->SetBackgroundColour( wxColour( ss.interpolateColor1.r,
 	ss.interpolateColor1.g, ss.interpolateColor1.b ) );
   interpolate2Button->SetBackgroundColour( wxColour( ss.interpolateColor2.r,
 	ss.interpolateColor2.g, ss.interpolateColor2.b ) );
   longinterpolateCheckBox->SetValue( ss.longInterpolation );
   transparencySpinCtrl->SetValue( 100 - (int)(ss.alpha * 100) );
+  newStyleCheckBox->SetValue( ss.newStyle );
   nodesizeSpinCtrl->SetValue( ss.nodeSize );
   backpointerSpinCtrl->SetValue( ss.backpointerCurve );
 //  clusterheightSpinCtrl->SetValue( ss.clusterHeight );

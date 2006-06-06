@@ -357,3 +357,9 @@ void LTSViewApp::toggleDisplayStates()
   visualizer->toggleDisplayStates();
   glCanvas->display();
 }
+
+void LTSViewApp::toggleDisplayWireframe()
+{
+  visualizer->toggleDisplayWireframe();
+  glCanvas->display();
+}

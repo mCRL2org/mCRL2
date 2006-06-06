@@ -20,5 +20,6 @@ namespace IDs
   const int myID_MARK_TRANSITIONS = myID_REMOVE_RULE + 1;
   const int myID_PARAMETER_CHOICE = myID_MARK_TRANSITIONS + 1;
   const int myID_DISPLAY_STATES = myID_PARAMETER_CHOICE + 1;
+  const int myID_DISPLAY_WIREFRAME = myID_DISPLAY_STATES + 1;
 }
 #endif

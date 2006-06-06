@@ -7,8 +7,8 @@ bool Distance_desc::operator()(const Primitive* p1, const Primitive* p2) const
 
 VisSettings Visualizer::defaultVisSettings =
 {
-  0.6f, { 120, 120, 120 }, 0.3f, /*100, 1.2f,*/ RGB_WHITE, RGB_WHITE,
-  { 0, 0, 255 }, /*false,*/ false, { 255, 0, 0 }, 0.1f, 30, 12, RGB_WHITE,
+  0.6f, { 120, 120, 120 }, 0.3f, /*100, 1.2f,*/ RGB_WHITE, 0, RGB_WHITE,
+  { 0, 0, 255 }, /*false,*/ false, { 255, 0, 0 }, true, 0.1f, 30, 12, RGB_WHITE,
   { 0, 0, 255 }
 };
 
@@ -26,6 +26,7 @@ Visualizer::Visualizer( Mediator* owner )
   refreshPrimitives = false;
   refreshStates = false;
   displayStates = false;
+  displayWireframe = false;
   statesDisplayList = 0;
 }
 
@@ -129,6 +130,12 @@ bool Visualizer::setVisSettings( VisSettings vs )
     refreshPrimitives = true;
   }
 
+  if ( oldSettings.innerBranchTilt != vs.innerBranchTilt ||
+       oldSettings.newStyle != vs.newStyle )
+  {
+    refreshPrimitives = true;
+  }
+
   if ( oldSettings.outerBranchTilt != vs.outerBranchTilt )
   {
     refreshStates = true;
@@ -141,6 +148,11 @@ bool Visualizer::setVisSettings( VisSettings vs )
 void Visualizer::toggleDisplayStates()
 {
   displayStates = !displayStates;
+}
+
+void Visualizer::toggleDisplayWireframe()
+{
+  displayWireframe = !displayWireframe;
 }
 
 void Visualizer::computeClusterHeight()
@@ -158,6 +170,11 @@ void Visualizer::computeClusterHeight()
 void Visualizer::drawLTS( Point3D viewpoint )
 {
   if ( lts == NULL ) return;
+
+  if ( displayWireframe )
+    glPolygonMode( GL_FRONT, GL_LINE );
+  else
+    glPolygonMode( GL_FRONT, GL_FILL );
 
   if ( displayStates && refreshStates )
   {
@@ -236,8 +253,11 @@ void Visualizer::drawLTS( Point3D viewpoint )
 	  delta_col.s = (hsv2.s - hsv1.s) / (lts->getNumberOfRanks() - 1);
 	  delta_col.v = (hsv2.v - hsv1.v) / (lts->getNumberOfRanks() - 1);
 	  
-	  drawSubtree( lts->getInitialState()->getCluster(), true, hsv1,
-	      delta_col );
+	  if ( visSettings.newStyle )
+	    drawSubtreeNew( lts->getInitialState()->getCluster(), hsv1, delta_col );
+	  else 
+	    drawSubtree( lts->getInitialState()->getCluster(), true, hsv1,
+		delta_col );
 	  break;
       }
     glPopMatrix();
@@ -276,8 +296,8 @@ void Visualizer::computeBoundsInfo()
 {
   boundingCylH = 0.0f;
   boundingCylW = 0.0f;
-  sin_obt = float( sin( visSettings.outerBranchTilt * PI / 180.0 ) );
-  cos_obt = float( cos( visSettings.outerBranchTilt * PI / 180.0 ) );
+  sin_obt = float( sin( degToRad( visSettings.outerBranchTilt ) ) );
+  cos_obt = float( cos( degToRad( visSettings.outerBranchTilt ) ) );
   computeSubtreeBounds( lts->getInitialState()->getCluster(), boundingCylW,
       boundingCylH );
 }
@@ -343,12 +363,6 @@ void Visualizer::drawSubtree( Cluster* root, bool topClosed, HSV_Color col,
       glMultMatrixf( M );
       setColor( HSVtoRGB( col ), visSettings.alpha );
       glutSolidSphere( root->getTopRadius(), visSettings.quality, visSettings.quality );
-      /*Point3D b1 = { 0,0,1 };
-      Point3D b2 = { 2,0,1 };
-      Point3D b3 = { 2,0,2 };
-      drawTube( root->getTopRadius(), root->getTopRadius(), HSVtoRGB( col ),
-	  HSVtoRGB( col ), b1, b2, b3 );
-      */
       glPopMatrix();
     glEndList();
 
@@ -375,7 +389,7 @@ void Visualizer::drawSubtree( Cluster* root, bool topClosed, HSV_Color col,
     glNewList( displist, GL_COMPILE );
       glPushMatrix();
       glMultMatrixf( M );
-      drawCylinder( root->getTopRadius(), root->getBaseRadius(),
+      drawCylinder( root->getTopRadius(), root->getBaseRadius(), clusterHeight,
 	  HSVtoRGB(col), HSVtoRGB(desccol), topClosed, descendants.size() > 1 );
       glPopMatrix();
     glEndList();
@@ -406,17 +420,15 @@ void Visualizer::drawSubtree( Cluster* root, bool topClosed, HSV_Color col,
       }
       else
       {
-	glTranslatef( 0.0f, 0.0f, clusterHeight );
 	glRotatef( -desc->getPosition(), 0.0f, 0.0f, 1.0f );
-	glTranslatef( root->getBaseRadius(), 0.0f, 0.0f );
+	glTranslatef( root->getBaseRadius(), 0.0f, clusterHeight );
 	glRotatef( visSettings.outerBranchTilt, 0.0f, 1.0f, 0.0f );
 
 	drawSubtree( desc, true, desccol, delta_col );
 	
 	glRotatef( -visSettings.outerBranchTilt, 0.0f, 1.0f, 0.0f );
-	glTranslatef( -root->getBaseRadius(), 0.0f, 0.0f );
+	glTranslatef( -root->getBaseRadius(), 0.0f, -clusterHeight );
 	glRotatef( desc->getPosition(), 0.0f, 0.0f, 1.0f );
-	glTranslatef( 0.0f, 0.0f, -clusterHeight );
       }
     }
   }
@@ -463,13 +475,14 @@ void Visualizer::drawSubtreeMarkStates( Cluster* root, bool topClosed )
       if ( root->hasMarkedState() )
       {
 	drawCylinder( root->getTopRadius(), root->getBaseRadius(),
-	    visSettings.markedColor, RGB_WHITE, topClosed, descendants.size() >
-	    1 );
+	    clusterHeight, visSettings.markedColor, RGB_WHITE, topClosed,
+	    descendants.size() > 1 );
       }
       else
       {
 	drawCylinder( root->getTopRadius(), root->getBaseRadius(),
-	    RGB_WHITE, RGB_WHITE, topClosed, descendants.size() > 1 );
+	    clusterHeight, RGB_WHITE, RGB_WHITE, topClosed, descendants.size() >
+	    1 );
       }
       glPopMatrix();
     glEndList();
@@ -500,17 +513,15 @@ void Visualizer::drawSubtreeMarkStates( Cluster* root, bool topClosed )
       }
       else
       {
-	glTranslatef( 0.0f, 0.0f, clusterHeight );
 	glRotatef( -desc->getPosition(), 0.0f, 0.0f, 1.0f );
-	glTranslatef( root->getBaseRadius(), 0.0f, 0.0f );
+	glTranslatef( root->getBaseRadius(), 0.0f, clusterHeight );
 	glRotatef( visSettings.outerBranchTilt, 0.0f, 1.0f, 0.0f );
 
 	drawSubtreeMarkStates( desc, true );
 	
 	glRotatef( -visSettings.outerBranchTilt, 0.0f, 1.0f, 0.0f );
-	glTranslatef( -root->getBaseRadius(), 0.0f, 0.0f );
+	glTranslatef( -root->getBaseRadius(), 0.0f, -clusterHeight );
 	glRotatef( desc->getPosition(), 0.0f, 0.0f, 1.0f );
-	glTranslatef( 0.0f, 0.0f, -clusterHeight );
       }
     }
   }
@@ -557,13 +568,14 @@ void Visualizer::drawSubtreeMarkDeadlocks( Cluster* root, bool topClosed )
       if ( root->hasDeadlock() )
       {
 	drawCylinder( root->getTopRadius(), root->getBaseRadius(),
-	    visSettings.markedColor, RGB_WHITE, topClosed, descendants.size() >
-	    1 );
+	    clusterHeight, visSettings.markedColor, RGB_WHITE, topClosed,
+	    descendants.size() > 1 );
       }
       else
       {
 	drawCylinder( root->getTopRadius(), root->getBaseRadius(),
-	    RGB_WHITE, RGB_WHITE, topClosed, descendants.size() > 1 );
+	    clusterHeight, RGB_WHITE, RGB_WHITE, topClosed, descendants.size() >
+	    1 );
       }
       glPopMatrix();
     glEndList();
@@ -594,17 +606,15 @@ void Visualizer::drawSubtreeMarkDeadlocks( Cluster* root, bool topClosed )
       }
       else
       {
-	glTranslatef( 0.0f, 0.0f, clusterHeight );
 	glRotatef( -desc->getPosition(), 0.0f, 0.0f, 1.0f );
-	glTranslatef( root->getBaseRadius(), 0.0f, 0.0f );
+	glTranslatef( root->getBaseRadius(), 0.0f, clusterHeight );
 	glRotatef( visSettings.outerBranchTilt, 0.0f, 1.0f, 0.0f );
 
 	drawSubtreeMarkDeadlocks( desc, true );
 	
 	glRotatef( -visSettings.outerBranchTilt, 0.0f, 1.0f, 0.0f );
-	glTranslatef( -root->getBaseRadius(), 0.0f, 0.0f );
+	glTranslatef( -root->getBaseRadius(), 0.0f, -clusterHeight );
 	glRotatef( desc->getPosition(), 0.0f, 0.0f, 1.0f );
-	glTranslatef( 0.0f, 0.0f, -clusterHeight );
       }
     }
   }
@@ -651,13 +661,14 @@ void Visualizer::drawSubtreeMarkTransitions( Cluster* root, bool topClosed )
       if ( root->hasMarkedTransition() )
       {
 	drawCylinder( root->getTopRadius(), root->getBaseRadius(),
-	    visSettings.markedColor, RGB_WHITE, topClosed, descendants.size() >
-	    1);
+	    clusterHeight, visSettings.markedColor, RGB_WHITE, topClosed,
+	    descendants.size() > 1);
       }
       else
       {
 	drawCylinder( root->getTopRadius(), root->getBaseRadius(),
-	    RGB_WHITE, RGB_WHITE, topClosed, descendants.size() > 1 );
+	    clusterHeight, RGB_WHITE, RGB_WHITE, topClosed, descendants.size() >
+	    1 );
       }
       glPopMatrix();
     glEndList();
@@ -687,17 +698,177 @@ void Visualizer::drawSubtreeMarkTransitions( Cluster* root, bool topClosed )
       }
       else
       {
-	glTranslatef( 0.0f, 0.0f, clusterHeight );
 	glRotatef( -desc->getPosition(), 0.0f, 0.0f, 1.0f );
-	glTranslatef( root->getBaseRadius(), 0.0f, 0.0f );
+	glTranslatef( root->getBaseRadius(), 0.0f, clusterHeight );
 	glRotatef( visSettings.outerBranchTilt, 0.0f, 1.0f, 0.0f );
 	
 	drawSubtreeMarkTransitions( desc, true );
 	
 	glRotatef( -visSettings.outerBranchTilt, 0.0f, 1.0f, 0.0f );
-	glTranslatef( -root->getBaseRadius(), 0.0f, 0.0f );
+	glTranslatef( -root->getBaseRadius(), 0.0f, -clusterHeight );
 	glRotatef( desc->getPosition(), 0.0f, 0.0f, 1.0f );
+      }
+    }
+  }
+}
+
+// draw the subtree with cluster *root as the root of the tree in the NEW style
+// apply coloring based on interpolation settings
+void Visualizer::drawSubtreeNew( Cluster* root, HSV_Color col, HSV_Color
+    delta_col )
+{
+  if ( root == lts->getInitialState()->getCluster() )
+  {
+    glRotatef( 180.0f, 1.0f, 0.0f, 0.0f );
+    GLfloat M[16];
+    glGetFloatv( GL_MODELVIEW_MATRIX, M );
+    GLuint displist = glGenLists( 1 );
+    glNewList( displist, GL_COMPILE );
+      glPushMatrix();
+      glMultMatrixf( M );
+      setColor( HSVtoRGB( col ), visSettings.alpha );
+      drawHemisphere( root->getTopRadius() ); 
+      glPopMatrix();
+    glEndList();
+
+    Primitive* p = new Primitive;
+    glPushMatrix();
+      glTranslatef( 0.0f, 0.0f, 0.5f * root->getTopRadius() );
+      glGetFloatv( GL_MODELVIEW_MATRIX, M );
+    glPopMatrix();
+    p->worldCoordinate.x = M[12];
+    p->worldCoordinate.y = M[13];
+    p->worldCoordinate.z = M[14];
+    p->displayList = displist;
+    primitives.push_back( p );
+    glRotatef( -180.0f, 1.0f, 0.0f, 0.0f );
+  }
+  
+  if ( !root->hasDescendants() )
+  {
+    GLfloat M[16];
+    glGetFloatv( GL_MODELVIEW_MATRIX, M );
+    GLuint displist = glGenLists( 1 );
+    glNewList( displist, GL_COMPILE );
+      glPushMatrix();
+      glMultMatrixf( M );
+      setColor( HSVtoRGB( col ), visSettings.alpha );
+      drawHemisphere( root->getTopRadius() ); 
+      glPopMatrix();
+    glEndList();
+
+    Primitive* p = new Primitive;
+    glPushMatrix();
+      glTranslatef( 0.0f, 0.0f, 0.5f * root->getTopRadius() );
+      glGetFloatv( GL_MODELVIEW_MATRIX, M );
+    glPopMatrix();
+    p->worldCoordinate.x = M[12];
+    p->worldCoordinate.y = M[13];
+    p->worldCoordinate.z = M[14];
+    p->displayList = displist;
+    primitives.push_back( p );
+  }
+  else
+  {
+    HSV_Color desccol = 
+      { col.h + delta_col.h, col.s + delta_col.s, col.v + delta_col.v };
+    if ( desccol.h < 0.0f ) desccol.h += 360.0f;
+    else if ( desccol.h >= 360.0f ) desccol.h -= 360.0f;
+
+    RGB_Color col_rgb = HSVtoRGB(col);
+    RGB_Color desccol_rgb = HSVtoRGB(desccol);
+    float ibt_rad = degToRad( visSettings.innerBranchTilt );
+    float obt_rad = degToRad( visSettings.outerBranchTilt );
+    
+    vector< Cluster* > descendants;
+    root->getDescendants( descendants );
+    
+    vector< Cluster* >::iterator descit;
+    for ( descit = descendants.begin() ; descit != descendants.end() ; ++descit )
+    {
+      Cluster* desc = *descit;
+      
+      if ( desc->getPosition() < -0.9f )
+      {
+	GLfloat M[16];
+	glGetFloatv( GL_MODELVIEW_MATRIX, M );
+	GLuint displist = glGenLists( 1 );
+	glNewList( displist, GL_COMPILE );
+	  glPushMatrix();
+	  glMultMatrixf( M );
+	  drawCylinder( root->getTopRadius(), desc->getTopRadius(),
+	      clusterHeight, col_rgb, desccol_rgb, false, false );
+	  glPopMatrix();
+	glEndList();
+
+	Primitive* p = new Primitive;
+	glPushMatrix();
+	  glTranslatef( 0.0f, 0.0f, 0.5f * clusterHeight );
+	  glGetFloatv( GL_MODELVIEW_MATRIX, M );
+	glPopMatrix();
+	p->worldCoordinate.x = M[12];
+	p->worldCoordinate.y = M[13];
+	p->worldCoordinate.z = M[14];
+	p->displayList = displist;
+	primitives.push_back( p );
+
+	glTranslatef( 0.0f, 0.0f, clusterHeight );
+	
+	drawSubtreeNew( desc, desccol, delta_col );
+	
 	glTranslatef( 0.0f, 0.0f, -clusterHeight );
+      }
+      else
+      {
+	float M1[16] = {1,0,0,0, 0,1,0,0, 0,0,1,0, 0,0,0,1};
+	
+	myRotatef( degToRad( -desc->getPosition() ), 0.0f, 0.0f, 1.0f, M1 );
+	myTranslatef( 0.5f * clusterHeight * sin( ibt_rad ), 0.0f, 0.5f *
+	    clusterHeight * cos( ibt_rad ), M1 );
+	Point3D b1 = { M1[3], M1[7], M1[11] };
+	
+	myTranslatef( -0.5f * clusterHeight * sin( ibt_rad ), 0.0f, -0.5f *
+	    clusterHeight * cos( ibt_rad ), M1 );
+	myTranslatef( root->getBaseRadius(), 0.0f, clusterHeight, M1 );
+	Point3D b3 = { M1[3], M1[7], M1[11] };
+	
+	myTranslatef( -0.5f * clusterHeight * sin( obt_rad ), 0.0f, -0.5f *
+	    clusterHeight * cos( obt_rad ), M1 );
+	Point3D b2 = { M1[3], M1[7], M1[11] };
+	
+	Point3D center;
+
+	GLfloat M[16];
+	glGetFloatv( GL_MODELVIEW_MATRIX, M );
+	GLuint displist = glGenLists( 1 );
+	glNewList( displist, GL_COMPILE );
+	  glPushMatrix();
+	  glMultMatrixf( M );
+	  drawTubeInterpolate( root->getTopRadius(), desc->getTopRadius(),
+	      col_rgb, desccol_rgb, b1, b2, b3, center );
+	  glPopMatrix();
+	glEndList();
+
+	Primitive* p = new Primitive;
+	glPushMatrix();
+	  glTranslatef( center.x, center.y, center.z );
+	  glGetFloatv( GL_MODELVIEW_MATRIX, M );
+	glPopMatrix();
+	p->worldCoordinate.x = M[12];
+	p->worldCoordinate.y = M[13];
+	p->worldCoordinate.z = M[14];
+	p->displayList = displist;
+	primitives.push_back( p );
+
+	glRotatef( -desc->getPosition(), 0.0f, 0.0f, 1.0f );
+	glTranslatef( root->getBaseRadius(), 0.0f, clusterHeight );
+	glRotatef( visSettings.outerBranchTilt, 0.0f, 1.0f, 0.0f );
+  
+	drawSubtreeNew( desc, desccol, delta_col );
+	
+	glRotatef( -visSettings.outerBranchTilt, 0.0f, 1.0f, 0.0f );
+	glTranslatef( -root->getBaseRadius(), 0.0f, -clusterHeight );
+	glRotatef( desc->getPosition(), 0.0f, 0.0f, 1.0f );
       }
     }
   }
@@ -736,17 +907,15 @@ void Visualizer::drawStates( Cluster* root )
     }
     else
     {
-      glTranslatef( 0.0f, 0.0f, clusterHeight );
       glRotatef( -(**descit).getPosition(), 0.0f, 0.0f, 1.0f );
-      glTranslatef( root->getBaseRadius(), 0.0f, 0.0f );
+      glTranslatef( root->getBaseRadius(), 0.0f, clusterHeight );
       glRotatef( visSettings.outerBranchTilt, 0.0f, 1.0f, 0.0f );
 
       drawStates( *descit );
       
       glRotatef( -visSettings.outerBranchTilt, 0.0f, 1.0f, 0.0f );
-      glTranslatef( -root->getBaseRadius(), 0.0f, 0.0f );
+      glTranslatef( -root->getBaseRadius(), 0.0f, -clusterHeight );
       glRotatef( (**descit).getPosition(), 0.0f, 0.0f, 1.0f );
-      glTranslatef( 0.0f, 0.0f, -clusterHeight );
     }
   }
 }
@@ -789,17 +958,15 @@ void Visualizer::drawStatesMarkStates( Cluster* root )
     }
     else
     {
-      glTranslatef( 0.0f, 0.0f, clusterHeight );
       glRotatef( -(**descit).getPosition(), 0.0f, 0.0f, 1.0f );
-      glTranslatef( root->getBaseRadius(), 0.0f, 0.0f );
+      glTranslatef( root->getBaseRadius(), 0.0f, clusterHeight );
       glRotatef( visSettings.outerBranchTilt, 0.0f, 1.0f, 0.0f );
 
       drawStatesMarkStates( *descit );
       
       glRotatef( -visSettings.outerBranchTilt, 0.0f, 1.0f, 0.0f );
-      glTranslatef( -root->getBaseRadius(), 0.0f, 0.0f );
+      glTranslatef( -root->getBaseRadius(), 0.0f, -clusterHeight );
       glRotatef( (**descit).getPosition(), 0.0f, 0.0f, 1.0f );
-      glTranslatef( 0.0f, 0.0f, -clusterHeight );
     }
   }
 }
@@ -843,17 +1010,15 @@ void Visualizer::drawStatesMarkDeadlocks( Cluster* root )
     }
     else
     {
-      glTranslatef( 0.0f, 0.0f, clusterHeight );
       glRotatef( -(**descit).getPosition(), 0.0f, 0.0f, 1.0f );
-      glTranslatef( root->getBaseRadius(), 0.0f, 0.0f );
+      glTranslatef( root->getBaseRadius(), 0.0f, clusterHeight );
       glRotatef( visSettings.outerBranchTilt, 0.0f, 1.0f, 0.0f );
 
       drawStatesMarkDeadlocks( *descit );
       
       glRotatef( -visSettings.outerBranchTilt, 0.0f, 1.0f, 0.0f );
-      glTranslatef( -root->getBaseRadius(), 0.0f, 0.0f );
+      glTranslatef( -root->getBaseRadius(), 0.0f, -clusterHeight );
       glRotatef( (**descit).getPosition(), 0.0f, 0.0f, 1.0f );
-      glTranslatef( 0.0f, 0.0f, -clusterHeight );
     }
   }
 }
@@ -866,11 +1031,11 @@ void Visualizer::setColor( RGB_Color c, float alpha )
 // draws a cylinder around z-axis with given base radius, top radius, height,
 // color at base, color at top, closed base if baseclosed and closed top if
 // topclosed
-void Visualizer::drawCylinder( float baserad, float toprad, RGB_Color basecol,
-      RGB_Color topcol, bool baseclosed, bool topclosed )
+void Visualizer::drawCylinder( float baserad, float toprad, float height,
+    RGB_Color basecol, RGB_Color topcol, bool baseclosed, bool topclosed )
 {
   int slices = visSettings.quality;
-  float nxg = clusterHeight;
+  float nxg = height;
   float nzg = baserad - toprad;
   float r = sqrt( nxg*nxg + nzg*nzg );
   nxg = nxg / r;
@@ -919,7 +1084,7 @@ void Visualizer::drawCylinder( float baserad, float toprad, RGB_Color basecol,
   {
     glNormal3f( nx[j], ny[j], nzg );
     glColor4f( c2r, c2g, c2b, visSettings.alpha );
-    glVertex3f( toprad * ctab[j], toprad * stab[j], clusterHeight );
+    glVertex3f( toprad * ctab[j], toprad * stab[j], height );
     glColor4f( c1r, c1g, c1b, visSettings.alpha );
     glVertex3f( baserad * ctab[j], baserad * stab[j], 0.0f );
   }
@@ -930,16 +1095,16 @@ void Visualizer::drawCylinder( float baserad, float toprad, RGB_Color basecol,
     glBegin( GL_TRIANGLE_FAN );
     glNormal3f( 0.0, 0.0, 1.0 );
     glColor4f( c2r, c2g, c2b, visSettings.alpha );
-    glVertex3f( 0.0, 0.0, clusterHeight );
+    glVertex3f( 0.0, 0.0, height );
     for ( int j = 0 ; j <= slices ; ++j )
     {
-      glVertex3f( toprad * ctab[j], toprad * stab[j], clusterHeight );
+      glVertex3f( toprad * ctab[j], toprad * stab[j], height );
     }
     glEnd();
   }
 }
 
-void Visualizer::drawHemisphere( float r, RGB_Color col )
+void Visualizer::drawHemisphere( float r )
 {
   int n = visSettings.quality;
   int i,j;
@@ -974,7 +1139,6 @@ void Visualizer::drawHemisphere( float r, RGB_Color col )
   }
    
   float ex,ey,ez,px,py,pz;
-  glColor4f( col.r / 255.0f, col.g / 255.0f, col.b / 255.0f, visSettings.alpha );
 
   // draw the hemisphere by drawing rings that stand upright on top of the
   // (x,y)-plane
@@ -1027,69 +1191,90 @@ void Visualizer::drawHemisphere( float r, RGB_Color col )
   }
 }
 
-// draws a tube around the first half of a cubic Bezier curve of which begin
-// point b0 is in the origin. The coordinates of the other points are given as
-// parameters, as are the base radius, top radius, base color and top color.
-// Coordinates of b1, b2 and b3 are assumed to be relative to the current origin
-// (not world coordinates).
-void Visualizer::drawTube( float baserad, float toprad, RGB_Color basecol,
-      RGB_Color topcol, Point3D b1, Point3D b2, Point3D b3 )
+// Draws a tube around a cubic Bezier curve of which begin point b0 is in the
+// origin. The coordinates of the other points are given as parameters, as are
+// the base radius, top radius, base color and top color. The center of the tube
+// will be stored in the center parameter. Coordinates of b1, b2, b3 and center
+// are relative to the current origin (not world coordinates).
+// The color of the tube is interpolated between basecol and topcol over the
+// length of the tube.
+void Visualizer::drawTubeInterpolate( float baserad, float toprad, RGB_Color basecol,
+      RGB_Color topcol, Point3D b1, Point3D b2, Point3D b3, Point3D &center )
 {
-  // N is the number of tube stacks that we have to draw
-  // as we draw only half a tube, N is the quality setting divided by 2
-  // if this setting is odd, we deliberately  miss a segment to make sure that a
-  // segment ends precisely halfway through the curve
-  int N = visSettings.quality / 2;
+  int N = visSettings.quality + visSettings.quality % 2;
 
+  // compute the coordinates of the center of the tube (i.e. at t = 0.5)
+  center.x = 0.375f*b1.x + 0.375f*b2.x + 0.125f*b3.x;
+  center.y = 0.375f*b1.y + 0.375f*b2.y + 0.125f*b3.y;
+  center.z = 0.375f*b1.z + 0.375f*b2.z + 0.125f*b3.z;
+  
+  vector< float > t;
+  vector< float > it;
   vector< Point3D > curve;	// stores the curve's vertex coordinates
   vector< Point3D > curve_der;	// stores the derivatives in those vertices
+  vector< float > color_r;	// stores the tube's colors (red)
+  vector< float > color_g;	// stores the tube's colors (green)
+  vector< float > color_b;	// stores the tube's colors (blue)
+  vector< float > radius;	// stores the tube's radii
+
+  float basecol_fr = basecol.r / 255.0f;
+  float basecol_fg = basecol.g / 255.0f;
+  float basecol_fb = basecol.b / 255.0f;
+  float topcol_fr = topcol.r / 255.0f;
+  float topcol_fg = topcol.g / 255.0f;
+  float topcol_fb = topcol.b / 255.0f;
   
-  // compute the vertex coordinates of the curve
-  float d_t = 0.5f / N;
-  float t  = 0.0f;
-  float it = 1.0f;
+  bool odd_segs = (visSettings.quality % 2 == 1);
+  float delta_t = 1.0f / visSettings.quality;
+  // precompute the coordinates, derivatives, colors and radii
   for ( int i = 0 ; i <= N ; i++ )
   {
+    // compute t and its "inverse", 1-t
+    float t = i * delta_t;
+    if ( odd_segs )
+    {
+      if ( i > N / 2 )	      t -= delta_t;
+      else if ( i == N / 2 )  t = 0.5f;
+    }
+    float it = 1.0f - t;
+    
+    // compute the coordinates of b(t)
     float fac1 = 3*t*it*it;
     float fac2 = 3*t*t*it;
     float fac3 = t*t*t;
-    
     Point3D bt =
       { fac1*b1.x + fac2*b2.x + fac3*b3.x,
 	fac1*b1.y + fac2*b2.y + fac3*b3.y,
 	fac1*b1.z + fac2*b2.z + fac3*b3.z };
     curve.push_back( bt );
-    t  += d_t;
-    it -= d_t;
-  }
-
-  // compute the derivative of the curve in each of the vertices
-  t  = 0.0f;
-  it = 1.0f;
-  for ( int i = 0 ; i <= N ; i++ )
-  {
-    float fac1 = 3*it*it;
-    float fac2 = 6*t*it;
-    float fac3 = 3*t*t;
     
+    // compute the derivative in b(t) as a normalised direction vector
+    fac1 = 3*it*it;
+    fac2 = 6*t*it;
+    fac3 = 3*t*t;
     Point3D bt_der =
       { fac1*b1.x + fac2*(b2.x-b1.x) + fac3*(b3.x-b2.x),
         fac1*b1.y + fac2*(b2.y-b1.y) + fac3*(b3.y-b2.y),
         fac1*b1.z + fac2*(b2.z-b1.z) + fac3*(b3.z-b2.z) };
-    
     // normalise the vector
-    float len = sqrt( bt_der.x*bt_der.x + bt_der.y*bt_der.y +
-	bt_der.z*bt_der.z );
+    float len = sqrt( bt_der.x*bt_der.x +
+		      bt_der.y*bt_der.y +
+		      bt_der.z*bt_der.z );
     if ( len != 0 )
     {
       bt_der.x = bt_der.x / len;
       bt_der.y = bt_der.y / len;
       bt_der.z = bt_der.z / len;
     }
-	       
     curve_der.push_back( bt_der );
-    t  += d_t;
-    it -= d_t;
+    
+    // compute the color of the tube in b(t)
+    color_r.push_back( it*basecol_fr + t*topcol_fr );
+    color_g.push_back( it*basecol_fg + t*topcol_fg );
+    color_b.push_back( it*basecol_fb + t*topcol_fb );
+
+    // compute the radius of the tube in b(t)
+    radius.push_back( it*baserad + t*toprad );
   }
 
   // precompute sine and cosine functions
@@ -1103,7 +1288,7 @@ void Visualizer::drawTube( float baserad, float toprad, RGB_Color basecol,
     stab.push_back( sin( ang ) );
     ang += delta_ang;
   }
-  
+
   float M[16];
   float rot_ang1;
   float rot_ang2;
@@ -1130,7 +1315,8 @@ void Visualizer::drawTube( float baserad, float toprad, RGB_Color basecol,
       for ( int k = 0 ; k < 16 ; k++ ) M[k] = (k % 5 == 0) ? 1 : 0;
       myTranslatef( curve[i+1].x, curve[i+1].y, curve[i+1].z, M );
       myRotatef( rot_ang2, -curve_der[i+1].y, curve_der[i+1].x, 0.0f, M );
-      myTranslatef( baserad*ctab[j], baserad*stab[j], 0.0f, M );
+      myTranslatef( radius[i+1]*ctab[j], radius[i+1]*stab[j], 0.0f, M );
+      glColor4f( color_r[i+1], color_g[i+1], color_b[i+1], visSettings.alpha );
       glVertex3f( M[3], M[7], M[11] );
       
       // compute the normal vector for vertex (i,j)
@@ -1143,7 +1329,139 @@ void Visualizer::drawTube( float baserad, float toprad, RGB_Color basecol,
       for ( int k = 0 ; k < 16 ; k++ ) M[k] = (k % 5 == 0) ? 1 : 0;
       myTranslatef( curve[i].x, curve[i].y, curve[i].z, M );
       myRotatef( rot_ang1, -curve_der[i].y, curve_der[i].x, 0.0f, M );
-      myTranslatef( baserad*ctab[j], baserad*stab[j], 0.0f, M );
+      myTranslatef( radius[i]*ctab[j], radius[i]*stab[j], 0.0f, M );
+      glColor4f( color_r[i], color_g[i], color_b[i], visSettings.alpha );
+      glVertex3f( M[3], M[7], M[11] );
+    }
+    glEnd();
+  }
+}
+
+// As drawTubeInterpolate, but the color of the first half of the tube is
+// basecol and that of the second half is topcol.
+void Visualizer::drawTubeSplit( float baserad, float toprad, RGB_Color basecol,
+      RGB_Color topcol, Point3D b1, Point3D b2, Point3D b3, Point3D &center )
+{
+  int N = visSettings.quality + visSettings.quality % 2;
+
+  // compute the coordinates of the center of the tube (i.e. at t = 0.5)
+  center.x = 0.375f*b1.x + 0.375f*b2.x + 0.125f*b3.x;
+  center.y = 0.375f*b1.y + 0.375f*b2.y + 0.125f*b3.y;
+  center.z = 0.375f*b1.z + 0.375f*b2.z + 0.125f*b3.z;
+  
+  vector< float > t;
+  vector< float > it;
+  vector< Point3D > curve;	// stores the curve's vertex coordinates
+  vector< Point3D > curve_der;	// stores the derivatives in those vertices
+  vector< float > radius;	// stores the tube's radii
+
+  bool odd_segs = (visSettings.quality % 2 == 1);
+  float delta_t = 1.0f / visSettings.quality;
+  // precompute the coordinates, derivatives, colors and radii
+  for ( int i = 0 ; i <= N ; i++ )
+  {
+    // compute t and its "inverse", 1-t
+    float t = i * delta_t;
+    if ( odd_segs )
+    {
+      if ( i > N / 2 )	      t -= delta_t;
+      else if ( i == N / 2 )  t = 0.5f;
+    }
+    float it = 1.0f - t;
+    
+    // compute the coordinates of b(t)
+    float fac1 = 3*t*it*it;
+    float fac2 = 3*t*t*it;
+    float fac3 = t*t*t;
+    Point3D bt =
+      { fac1*b1.x + fac2*b2.x + fac3*b3.x,
+	fac1*b1.y + fac2*b2.y + fac3*b3.y,
+	fac1*b1.z + fac2*b2.z + fac3*b3.z };
+    curve.push_back( bt );
+    
+    // compute the derivative in b(t) as a normalised direction vector
+    fac1 = 3*it*it;
+    fac2 = 6*t*it;
+    fac3 = 3*t*t;
+    Point3D bt_der =
+      { fac1*b1.x + fac2*(b2.x-b1.x) + fac3*(b3.x-b2.x),
+        fac1*b1.y + fac2*(b2.y-b1.y) + fac3*(b3.y-b2.y),
+        fac1*b1.z + fac2*(b2.z-b1.z) + fac3*(b3.z-b2.z) };
+    // normalise the vector
+    float len = sqrt( bt_der.x*bt_der.x +
+		      bt_der.y*bt_der.y +
+		      bt_der.z*bt_der.z );
+    if ( len != 0 )
+    {
+      bt_der.x = bt_der.x / len;
+      bt_der.y = bt_der.y / len;
+      bt_der.z = bt_der.z / len;
+    }
+    curve_der.push_back( bt_der );
+    
+    // compute the radius of the tube in b(t)
+    radius.push_back( it*baserad + t*toprad );
+  }
+
+  // precompute sine and cosine functions
+  vector< float > ctab;
+  vector< float > stab;
+  float delta_ang = 2.0f * PI / visSettings.quality;
+  float ang = 0.0f;
+  for ( int j = 0 ; j <= visSettings.quality ; j++ )
+  {
+    ctab.push_back( cos( ang ) );
+    stab.push_back( sin( ang ) );
+    ang += delta_ang;
+  }
+
+  float M[16];
+  float rot_ang1;
+  float rot_ang2;
+
+  // draw the rings
+  glColor4f( basecol.r/255.0f, basecol.g/255.0f, basecol.b/255.0f,
+      visSettings.alpha );
+  for ( int i = 0 ; i < N / 2 ; i++ )
+  {
+    if ( i == N / 2 )
+    {
+      glColor4f( topcol.r/255.0f, topcol.g/255.0f, topcol.b/255.0f,
+	  visSettings.alpha );
+    }
+    // compute the angle over which we have to rotate to align the z-axis with
+    // vertex i's direction vector (i.e. derivative) (note that we use the fact
+    // that the derivative vector is normalised)
+    rot_ang1 = acos( curve_der[i].z );
+    rot_ang2 = acos( curve_der[i+1].z );
+    
+    glBegin( GL_QUAD_STRIP );
+    for ( int j = 0 ; j <= visSettings.quality ; j++ )
+    {
+      // compute the normal vector for vertex (i+1,j)
+      for ( int k = 0 ; k < 16 ; k++ ) M[k] = (k % 5 == 0) ? 1 : 0;
+      myRotatef( rot_ang2, -curve_der[i+1].y, curve_der[i+1].x, 0.0f, M );
+      myTranslatef( ctab[j], stab[j], 0.0f, M );
+      glNormal3f( M[3], M[7], M[11] );
+
+      // compute the coordinates of vertex (i+1,j)
+      for ( int k = 0 ; k < 16 ; k++ ) M[k] = (k % 5 == 0) ? 1 : 0;
+      myTranslatef( curve[i+1].x, curve[i+1].y, curve[i+1].z, M );
+      myRotatef( rot_ang2, -curve_der[i+1].y, curve_der[i+1].x, 0.0f, M );
+      myTranslatef( radius[i+1]*ctab[j], radius[i+1]*stab[j], 0.0f, M );
+      glVertex3f( M[3], M[7], M[11] );
+      
+      // compute the normal vector for vertex (i,j)
+      for ( int k = 0 ; k < 16 ; k++ ) M[k] = (k % 5 == 0) ? 1 : 0;
+      myRotatef( rot_ang1, -curve_der[i].y, curve_der[i].x, 0.0f, M );
+      myTranslatef( ctab[j], stab[j], 0.0f, M );
+      glNormal3f( M[3], M[7], M[11] );
+      
+      // compute the coordinates of vertex (i,j)
+      for ( int k = 0 ; k < 16 ; k++ ) M[k] = (k % 5 == 0) ? 1 : 0;
+      myTranslatef( curve[i].x, curve[i].y, curve[i].z, M );
+      myRotatef( rot_ang1, -curve_der[i].y, curve_der[i].x, 0.0f, M );
+      myTranslatef( radius[i]*ctab[j], radius[i]*stab[j], 0.0f, M );
       glVertex3f( M[3], M[7], M[11] );
     }
     glEnd();

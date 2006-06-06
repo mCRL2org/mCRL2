@@ -53,6 +53,7 @@ class LTSViewApp : public wxApp, public Mediator
     void	  setMatchAnyMarkRule( bool b );
     void	  setRankStyle( RankStyle rs );
     void	  toggleDisplayStates();
+    void	  toggleDisplayWireframe();
     void	  unmarkAction( string label );
 };
 

@@ -107,3 +107,8 @@ int Utils::roundToInt( double f )
   modf( f + 0.5, &intpart );
   return static_cast< int > ( intpart );
 }
+
+float Utils::degToRad( float deg )
+{
+  return deg * PI / 180.0f;
+}

@@ -45,11 +45,13 @@ namespace Utils
 //    int	      branchSpread;
 //    float     clusterHeight;
     RGB_Color downEdgeColor;
+    int	      innerBranchTilt;
     RGB_Color interpolateColor1;
     RGB_Color interpolateColor2;
 //    bool      levelDividers;
     bool      longInterpolation;
     RGB_Color markedColor;
+    bool      newStyle;
     float     nodeSize;
     int	      outerBranchTilt;
     int	      quality;
@@ -71,5 +73,6 @@ namespace Utils
   HSV_Color RGBtoHSV( RGB_Color c );
   RGB_Color HSVtoRGB( HSV_Color c );
   int roundToInt( double f );
+  float degToRad( float deg );
 }
 #endif

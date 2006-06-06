@@ -42,6 +42,7 @@ class Visualizer
     float		  cos_obt;
     static VisSettings	  defaultVisSettings;
     bool		  displayStates;
+    bool		  displayWireframe;
     LTS*		  lts;
     MarkStyle		  markStyle;
     Mediator*		  mediator;
@@ -56,9 +57,9 @@ class Visualizer
 
     void computeSubtreeBounds( Cluster* root, float &boundWidth, float
 	&boundHeight );
-    void drawCylinder( float baserad, float toprad, RGB_Color basecol, RGB_Color
-	topcol, bool baseclosed, bool topclosed );
-    void drawHemisphere( float rad, RGB_Color col );
+    void drawCylinder( float baserad, float toprad, float height, RGB_Color
+	basecol, RGB_Color topcol, bool baseclosed, bool topclosed );
+    void drawHemisphere( float rad );
     void drawStates( Cluster* root );
     void drawStatesMarkStates( Cluster* root );
     void drawStatesMarkDeadlocks( Cluster* root );
@@ -67,8 +68,11 @@ class Visualizer
     void drawSubtreeMarkDeadlocks( Cluster* root, bool topClosed );
     void drawSubtreeMarkStates( Cluster* root, bool topClosed );
     void drawSubtreeMarkTransitions( Cluster* root, bool topClosed );
-    void drawTube( float baserad, float toprad, RGB_Color basecol, RGB_Color
-	topcol, Point3D b1, Point3D b2, Point3D b3 );
+    void drawSubtreeNew( Cluster* root, HSV_Color col, HSV_Color delta_col );
+    void drawTubeInterpolate( float baserad, float toprad, RGB_Color basecol,
+	RGB_Color topcol, Point3D b1, Point3D b2, Point3D b3, Point3D &center );
+    void drawTubeSplit( float baserad, float toprad, RGB_Color basecol,
+	RGB_Color topcol, Point3D b1, Point3D b2, Point3D b3, Point3D &center );
     void myRotatef( float theta, float ax, float ay, float az, float M[] );
     void myTranslatef( float tx, float ty, float tz, float M[] );
     void setColor( RGB_Color c, float alpha );
@@ -92,5 +96,6 @@ class Visualizer
     void	setRankStyle( RankStyle rs );
     bool	setVisSettings( VisSettings vs );
     void	toggleDisplayStates();
+    void	toggleDisplayWireframe();
 };
 #endif

@@ -37,6 +37,7 @@ class MainFrame : public wxFrame
     void	onAddMarkRuleButton( wxCommandEvent& event );
     void	onColorButton( wxCommandEvent& event );
     void	onDisplayStates( wxCommandEvent& event );
+    void	onDisplayWireframe( wxCommandEvent& event );
     void	onExit( wxCommandEvent& event );
     void	onOpen( wxCommandEvent& event );
     void	onRankStyle( wxCommandEvent& event );
@@ -69,6 +70,7 @@ class MainFrame : public wxFrame
     wxColorButton*    downEdgeButton;
     wxString	      filename;
     GLCanvas*	      glCanvas;
+    wxSpinCtrl*	      innerbranchtiltSpinCtrl;
     wxColorButton*    interpolate1Button;
     wxColorButton*    interpolate2Button;
 //    wxCheckBox*	      levelDivCheckBox;
@@ -81,6 +83,7 @@ class MainFrame : public wxFrame
     wxCheckListBox*   markTransitionsListBox;
     wxRadioButton*    markTransitionsRadio;
     Mediator*	      mediator;
+    wxCheckBox*	      newStyleCheckBox;
     wxColorButton*    nodeButton;
     wxSpinCtrlFloat*  nodesizeSpinCtrl;
     wxRadioButton*    nomarksRadio;
