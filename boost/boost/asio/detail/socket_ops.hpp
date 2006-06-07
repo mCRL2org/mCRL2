@@ -35,34 +35,40 @@ namespace socket_ops {
 // workaround because the mac does not understand
 // the variable errno. Therefore, it has
 // been replaced by a local errno.
-
+#if defined(__MACH__) && defined(__APPLE__)
 static int localerrno = 0;
+
+inline int get_error() {
+  return localerrno;
+}
+inline void set_error(int error) {
+  localerrno = error;
+}
+#else
 
 inline int get_error()
 {
 #if defined(BOOST_WINDOWS)
   return WSAGetLastError();
 #else // defined(BOOST_WINDOWS)
-//  return errno;
-  return localerrno;
+  return errno;
 #endif // defined(BOOST_WINDOWS)
 }
 
 inline void set_error(int error)
 {
-  localerrno = error;
-//  errno = error;
+  errno = error;
 #if defined(BOOST_WINDOWS)
   WSASetLastError(error);
 #endif // defined(BOOST_WINDOWS)
 }
+#endif
 
 template <typename ReturnType>
 inline ReturnType error_wrapper(ReturnType return_value)
 {
 #if defined(BOOST_WINDOWS)
-//  errno = WSAGetLastError();
-  localerrno = WSAGetLastError();
+  errno = WSAGetLastError();
 #endif // defined(BOOST_WINDOWS)
   return return_value;
 }
