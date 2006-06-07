@@ -10,7 +10,6 @@
 #include <string>
 
 #include <boost/bind.hpp>
-#include <boost/noncopyable.hpp>
 
 #include <sip/controller.h>
 
@@ -45,7 +44,7 @@ namespace squadt {
    *    act as a proxy, and in the future do load balancing for a number
    *    executors that may run on different machines
    **/
-  class tool_manager : public sip::controller::communicator, public boost::noncopyable {
+  class tool_manager : public sip::controller::communicator {
     friend class processor;
  
     public:
@@ -62,13 +61,13 @@ namespace squadt {
     private:
  
       /** \brief Numeric type for instance identification */
-      typedef long int                                                       instance_identifier;
+      typedef long int                                                        instance_identifier;
 
       /** \brief Maps an instance identifier to its associated task */
-      typedef std::map < instance_identifier, execution::task_monitor::ptr > instance_list;
+      typedef std::map < instance_identifier, execution::task_monitor::sptr > instance_list;
 
       /** \brief Maps a task to its associated process */
-      typedef std::list < execution::task_monitor::ptr >                     validated_instance_list;
+      typedef std::list < execution::task_monitor::sptr >                     validated_instance_list;
 
     private:
  

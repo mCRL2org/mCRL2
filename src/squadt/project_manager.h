@@ -187,7 +187,7 @@ namespace squadt {
       f.erase(f.begin());
     }
 
-    p->append_output(f, s.string());
+    p->append_output(f, d);
 
     processors.push_back(p);
 

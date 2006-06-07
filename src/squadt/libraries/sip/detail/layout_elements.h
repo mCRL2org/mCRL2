@@ -330,6 +330,15 @@ namespace sip {
           /** \brief Constructor for a button */
           inline progress_bar(const unsigned int, const unsigned int, const unsigned int);
 
+          /** \brief Sets the current value of the progess bar */
+          inline void set_value(unsigned int);
+     
+          /** \brief Sets the minimum value of the progess bar */
+          inline void set_minimum(unsigned int);
+     
+          /** \brief Sets the minimum value of the progess bar */
+          inline void set_maximum(unsigned int);
+     
           /** \brief Gets the current value of the progess bar */
           inline unsigned int get_value() const;
      
@@ -353,6 +362,27 @@ namespace sip {
        **/
       inline progress_bar::progress_bar(const unsigned int min, const unsigned int max, const unsigned int c)
               : minimum(min), maximum(max), current(c) {
+      }
+
+      /**
+       * @param[in] v the new value
+       **/
+      inline void progress_bar::set_value(unsigned int v) {
+        current = v;
+      }
+
+      /**
+       * @param[in] v the new value
+       **/
+      inline void progress_bar::set_minimum(unsigned int v) {
+        minimum = v;
+      }
+
+      /**
+       * @param[in] v the new value
+       **/
+      inline void progress_bar::set_maximum(unsigned int v) {
+        maximum = v;
       }
 
       inline unsigned int progress_bar::get_value() const {

@@ -124,7 +124,7 @@ namespace transport {
         boost::mutex::scoped_lock l(s->operation_lock);
 
         if (!e) {
-          basic_transceiver::deliver(std::string(buffer.get()), input_buffer_size);
+          basic_transceiver::deliver(std::string(buffer.get()));
 
           socket.async_receive(asio::buffer(buffer.get(), input_buffer_size), 0,
                                   boost::bind(&socket_transceiver::handle_receive, this, w, _1));

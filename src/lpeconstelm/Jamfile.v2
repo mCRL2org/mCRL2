@@ -8,7 +8,6 @@ project lpeconstelm
 exe lpeconstelm
        : lpeconstelm.cpp
          /libraries/temporary//print
-         /libraries/sip//sipt
          /libraries/lpe//lpe
        : <source>/boost/program_options//boost_program_options
          <source>/boost/filesystem//boost_filesystem

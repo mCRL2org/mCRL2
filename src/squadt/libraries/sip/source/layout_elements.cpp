@@ -9,7 +9,7 @@ namespace sip {
        * @param[out] o the stream to which to write the result
        **/
       void label::write_structure(std::ostream& o) const {
-        o << "<label id=\"" << id << "\" text=\"" << text << "\"/>";
+        o << "<label id=\"" << id << "\">" << text << "</label>";
       }
 
       /**
@@ -19,9 +19,15 @@ namespace sip {
        * \post reader points to after the associated end tag of the box
        **/
       void label::read_structure(xml2pp::text_reader& r) {
-        r.get_attribute(&text, "text");
-
         r.read();
+
+        if (!r.is_empty_element()) {
+          r.get_value(&text);
+
+          r.read();
+        }
+
+        r.skip_end_element("label");
 
         current_event_handler->process(this);
       }
@@ -133,7 +139,8 @@ namespace sip {
        * @param[out] o the stream to which to write the result
        **/
       void text_field::write_structure(std::ostream& o) const {
-        o << "<text-field id=\"" << id << "\" text=\"" << text << "\">";
+        o << "<text-field id=\"" << id << "\">"
+          << "<text>" << text << "</text>";
 
         type->write(o);
 
@@ -147,9 +154,19 @@ namespace sip {
        * \post reader points to after the associated end tag of the box
        **/
       void text_field::read_structure(xml2pp::text_reader& r) {
-        r.get_attribute(&text, "text");
+        r.read();
+
+        if (r.is_element("text") && !r.is_end_element()) {
+          r.read();
+
+          r.get_value(&text);
+
+          r.read();
+        }
 
         r.read(2);
+
+        r.skip_end_element("text-field");
 
         current_event_handler->process(this);
       }

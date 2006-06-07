@@ -133,7 +133,9 @@ namespace transport {
      * @param o a transporter to deliver data to
      **/
     inline socket_transceiver::socket_transceiver(transporter* o) : basic_transceiver(o),
-                buffer(new char[input_buffer_size]), socket(scheduler.io_service), send_count(0) {
+                buffer(new char[input_buffer_size + 1]), socket(scheduler.io_service), send_count(0) {
+
+      buffer[input_buffer_size] = '\0';
     }
 
     /**

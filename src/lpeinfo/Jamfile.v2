@@ -8,7 +8,6 @@ project lpeinfo
 exe lpeinfo
        : lpeinfo.cpp
        : <source>/libraries/temporary//print
-         <source>/libraries/sip//sipt
          <source>/libraries/lpe//lpe
          <source>/boost/program_options//boost_program_options
          <source>/boost/filesystem//boost_filesystem
