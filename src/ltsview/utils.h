@@ -39,8 +39,8 @@ namespace Utils
   {
     float     alpha;
     RGB_Color backgroundColor;
-    float     backpointerCurve;
-//    int	      branchRotation;
+//    float     backpointerCurve;
+    float     branchRotation;
 //    int	      branchScale;
 //    int	      branchSpread;
 //    float     clusterHeight;

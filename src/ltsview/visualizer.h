@@ -71,10 +71,11 @@ class Visualizer
     void drawSubtreeMarkDeadlocks( Cluster* root, bool topClosed );
     void drawSubtreeMarkStates( Cluster* root, bool topClosed );
     void drawSubtreeMarkTransitions( Cluster* root, bool topClosed );
-    void drawSubtreeNew( Cluster* root, HSV_Color col, HSV_Color delta_col );
-    void drawSubtreeNewMarkDeadlocks( Cluster* root );
-    void drawSubtreeNewMarkStates( Cluster* root );
-    void drawSubtreeNewMarkTransitions( Cluster* root );
+    void drawSubtreeNew( Cluster* root, HSV_Color col, HSV_Color delta_col,
+	float rot );
+    void drawSubtreeNewMarkDeadlocks( Cluster* root, float rot );
+    void drawSubtreeNewMarkStates( Cluster* root, float rot );
+    void drawSubtreeNewMarkTransitions( Cluster* root, float rot );
     void drawTubeInterpolate( float baserad, float toprad, RGB_Color basecol,
 	RGB_Color topcol, Point3D b1, Point3D b2, Point3D b3, Point3D &center );
     void drawTubeSplit( float baserad, float toprad, RGB_Color basecol,

@@ -220,12 +220,12 @@ void MainFrame::setupSettingsPanel( wxPanel* panel )
 	wxT("Node size:") ), 0, lflags, border );
   parsubSizer->Add( nodesizeSpinCtrl, 0, rflags, border );
   
-  backpointerSpinCtrl = new wxSpinCtrlFloat( panel, myID_SETTINGS_CONTROL,
-      0.0f, 1000.0f, 0.1f, 0.0f, wxDefaultPosition, spinctrlSize  );
-  backpointerSpinCtrl->SetSizeHints( spinctrlSize, spinctrlSize );
+  branchrotationSpinCtrl = new wxSpinCtrlFloat( panel, myID_SETTINGS_CONTROL,
+      0.0f, 360.0f, 0.1f, 0.0f, wxDefaultPosition, spinctrlSize  );
+  branchrotationSpinCtrl->SetSizeHints( spinctrlSize, spinctrlSize );
   parsubSizer->Add( new wxStaticText( panel, wxID_ANY, 
-	wxT("Backpointer curve:") ), 0, lflags, border );
-  parsubSizer->Add( backpointerSpinCtrl, 0, rflags, border );
+	wxT("Branch rotation:") ), 0, lflags, border );
+  parsubSizer->Add( branchrotationSpinCtrl, 0, rflags, border );
   
   /*clusterheightSpinCtrl = new wxSpinCtrlFloat( panel, myID_SETTINGS_CONTROL,
       0.0f, 1000.0f, 0.1f, 0.0f, wxDefaultPosition, spinctrlSize  );
@@ -654,8 +654,8 @@ VisSettings MainFrame::getVisSettings() const
   {
     (100-transparencySpinCtrl->GetValue()) / 100.0f,
     bgC,
-    backpointerSpinCtrl->GetValue(),
-//    branchrotationSpinCtrl->GetValue(),
+//    backpointerSpinCtrl->GetValue(),
+    branchrotationSpinCtrl->GetValue(),
 //    branchscaleSpinCtrl->GetValue(),
 //    branchspreadSpinCtrl->GetValue(),
 //    clusterheightSpinCtrl->GetValue(),
@@ -698,14 +698,14 @@ void MainFrame::setVisSettings( VisSettings ss )
   transparencySpinCtrl->SetValue( 100 - (int)(ss.alpha * 100) );
   newStyleCheckBox->SetValue( ss.newStyle );
   nodesizeSpinCtrl->SetValue( ss.nodeSize );
-  backpointerSpinCtrl->SetValue( ss.backpointerCurve );
+//  backpointerSpinCtrl->SetValue( ss.backpointerCurve );
 //  clusterheightSpinCtrl->SetValue( ss.clusterHeight );
 //  branchspreadSpinCtrl->SetValue( ss.branchSpread );
   outerbranchtiltSpinCtrl->SetValue( ss.outerBranchTilt );
   qualitySpinCtrl->SetValue( ss.quality );
 //  levelDivCheckBox->SetValue( ss.levelDividers );
   //branchscaleSpinCtrl->SetValue( ss.branchScale );
-  //branchrotationSpinCtrl->SetValue( ss.branchRotation );
+  branchrotationSpinCtrl->SetValue( ss.branchRotation );
 }
 
 void MainFrame::createProgressDialog( const string title, const string text )
