@@ -4102,7 +4102,7 @@ if test "${enable_squadt_support+set}" = set; then
   enableval="$enable_squadt_support"
 
 fi;
-if ! test $disable_squadt_support; then
+if test $enable_squadt_support; then
   BUILD_VARIANT="--disable-squadt-support ${BUILD_VARIANT}"
 fi
 

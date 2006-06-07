@@ -250,7 +250,7 @@ AC_ARG_ENABLE(
     [do not compile squadt support in tools]
   )
 )
-if ! test $disable_squadt_support; then
+if test $enable_squadt_support; then
   BUILD_VARIANT="--disable-squadt-support ${BUILD_VARIANT}"
 fi
 

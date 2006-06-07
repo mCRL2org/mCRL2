@@ -30,15 +30,15 @@ endif
 
 clean:
 	@$(MAKE) -C src/doc clean
-	@$(RM) -rf bin
-	@$(RM) -r autom4te.cache config.log *.o *~ core core.*
+	$(RM) -rf bin/*
+	$(RM) -r autom4te.cache config.log *.o *~ core core.*
 
 distclean:
-	@${MAKE} -C src distclean
-	@$(MAKE) -C src/doc distclean
-	@$(RM) -r autom4te.cache config.log *.o *.app *~ core core.* \
-	         bin config.status config config.jam src/setup.h \
-		 src/mcrl2_revision.h boost/tools/jam/bin boost/tools/jam/bootstrap
+	@${MAKE} -C src/doc distclean
+	$(RM) -r autom4te.cache *.o *.app *~ core core.*
+	$(RM) -r config.log config.status config config.jam src/setup.h src/mcrl2_revision.h
+	$(RM) -rf bin boost/tools/jam/bin boost/tools/jam/bootstrap
+
 
 $(BJAM):
 	@$(MAKE) -C boost bjam
