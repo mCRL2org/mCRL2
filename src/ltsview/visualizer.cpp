@@ -328,8 +328,8 @@ void Visualizer::computeSubtreeBounds( Cluster* root, float &boundWidth, float
   {
     vector< Cluster* > descendants;
     root->getDescendants( descendants );
-    vector< Cluster* >::iterator descit;
-    for ( descit = descendants.begin() ; descit != descendants.end() ; ++descit )
+    for ( vector< Cluster* >::iterator descit = descendants.begin() ; descit !=
+	descendants.end() ; ++descit )
     {
       Cluster* desc = *descit;
       
@@ -415,8 +415,8 @@ void Visualizer::drawSubtree( Cluster* root, bool topClosed, HSV_Color col,
     p->displayList = displist;
     primitives.push_back( p );
 
-    vector< Cluster* >::iterator descit;
-    for ( descit = descendants.begin() ; descit != descendants.end() ; ++descit )
+    for ( vector< Cluster* >::iterator descit = descendants.begin() ; descit !=
+	descendants.end() ; ++descit )
     {
       Cluster* desc = *descit;
       
@@ -508,8 +508,8 @@ void Visualizer::drawSubtreeMarkStates( Cluster* root, bool topClosed )
     p->displayList = displist;
     primitives.push_back( p );
     
-    vector< Cluster* >::iterator descit;
-    for ( descit = descendants.begin() ; descit != descendants.end() ; ++descit )
+    for ( vector< Cluster* >::iterator descit = descendants.begin() ; descit !=
+	descendants.end() ; ++descit )
     {
       Cluster* desc = *descit;
       
@@ -601,8 +601,8 @@ void Visualizer::drawSubtreeMarkDeadlocks( Cluster* root, bool topClosed )
     p->displayList = displist;
     primitives.push_back( p );
       
-    vector< Cluster* >::iterator descit;
-    for ( descit = descendants.begin() ; descit != descendants.end() ; ++descit )
+    for ( vector< Cluster* >::iterator descit = descendants.begin() ; descit !=
+	descendants.end() ; ++descit )
     {
       Cluster* desc = *descit;
       
@@ -694,8 +694,8 @@ void Visualizer::drawSubtreeMarkTransitions( Cluster* root, bool topClosed )
     p->displayList = displist;
     primitives.push_back( p );
     
-    vector< Cluster* >::iterator descit;
-    for ( descit = descendants.begin() ; descit != descendants.end() ; ++descit )
+    for ( vector< Cluster* >::iterator descit = descendants.begin() ; descit !=
+	descendants.end() ; ++descit )
     {
       Cluster* desc = *descit;
       
@@ -793,8 +793,8 @@ void Visualizer::drawSubtreeNew( Cluster* root, HSV_Color col, HSV_Color
     vector< Cluster* > descendants;
     root->getDescendants( descendants );
     
-    vector< Cluster* >::iterator descit;
-    for ( descit = descendants.begin() ; descit != descendants.end() ; ++descit )
+    for ( vector< Cluster* >::iterator descit = descendants.begin() ; descit !=
+	descendants.end() ; ++descit )
     {
       Cluster* desc = *descit;
       
@@ -953,8 +953,8 @@ void Visualizer::drawSubtreeNewMarkStates( Cluster* root )
     vector< Cluster* > descendants;
     root->getDescendants( descendants );
     
-    vector< Cluster* >::iterator descit;
-    for ( descit = descendants.begin() ; descit != descendants.end() ; ++descit )
+    for ( vector< Cluster* >::iterator descit = descendants.begin() ; descit !=
+	descendants.end() ; ++descit )
     {
       Cluster* desc = *descit;
       
@@ -1117,8 +1117,8 @@ void Visualizer::drawSubtreeNewMarkDeadlocks( Cluster* root )
     vector< Cluster* > descendants;
     root->getDescendants( descendants );
     
-    vector< Cluster* >::iterator descit;
-    for ( descit = descendants.begin() ; descit != descendants.end() ; ++descit )
+    for ( vector< Cluster* >::iterator descit = descendants.begin() ; descit !=
+	descendants.end() ; ++descit )
     {
       Cluster* desc = *descit;
       
@@ -1281,8 +1281,8 @@ void Visualizer::drawSubtreeNewMarkTransitions( Cluster* root )
     vector< Cluster* > descendants;
     root->getDescendants( descendants );
     
-    vector< Cluster* >::iterator descit;
-    for ( descit = descendants.begin() ; descit != descendants.end() ; ++descit )
+    for ( vector< Cluster* >::iterator descit = descendants.begin() ; descit !=
+	descendants.end() ; ++descit )
     {
       Cluster* desc = *descit;
       
@@ -1541,10 +1541,10 @@ void Visualizer::drawCylinder( float baserad, float toprad, float height,
   nxg = nxg / r;
   nzg = nzg / r;
 
-  vector< float > ctab;
-  vector< float > stab;
-  vector< float > nx;
-  vector< float > ny;
+  vector< float > ctab( slices+1 );
+  vector< float > stab( slices+1 );
+  vector< float > nx( slices+1 );
+  vector< float > ny( slices+1 );
   
   float delta = 2.0f * PI / slices;
   float alf = 0.0f;
@@ -1552,10 +1552,10 @@ void Visualizer::drawCylinder( float baserad, float toprad, float height,
   {
     float cos_alf = cos(alf);
     float sin_alf = sin(alf);
-    ctab.push_back( cos_alf );
-    stab.push_back( sin_alf );
-    nx.push_back( cos_alf * nxg );
-    ny.push_back( sin_alf * nxg );
+    ctab[i] = cos_alf;
+    stab[i] = sin_alf;
+    nx[i] = cos_alf * nxg;
+    ny[i] = sin_alf * nxg;
     alf += delta;
   }
 
@@ -1617,10 +1617,10 @@ void Visualizer::drawCylinderInterpolate( float baserad, float toprad, float
   nxg = nxg / r;
   nzg = nzg / r;
 
-  vector< float > ctab;
-  vector< float > stab;
-  vector< float > nx;
-  vector< float > ny;
+  vector< float > ctab( slices+1 );
+  vector< float > stab( slices+1 );
+  vector< float > nx( slices+1 );
+  vector< float > ny( slices+1 );
   
   float delta = 2.0f * PI / slices;
   float alf = 0.0f;
@@ -1628,10 +1628,10 @@ void Visualizer::drawCylinderInterpolate( float baserad, float toprad, float
   {
     float cos_alf = cos(alf);
     float sin_alf = sin(alf);
-    ctab.push_back( cos_alf );
-    stab.push_back( sin_alf );
-    nx.push_back( cos_alf * nxg );
-    ny.push_back( sin_alf * nxg );
+    ctab[i] = cos_alf;
+    stab[i] = sin_alf;
+    nx[i] = cos_alf * nxg;
+    ny[i] = sin_alf * nxg;
     alf += delta;
   }
 
@@ -1666,10 +1666,10 @@ void Visualizer::drawCylinderSplit( float baserad, float toprad, float
   nxg = nxg / r;
   nzg = nzg / r;
 
-  vector< float > ctab;
-  vector< float > stab;
-  vector< float > nx;
-  vector< float > ny;
+  vector< float > ctab( slices+1 );
+  vector< float > stab( slices+1 );
+  vector< float > nx( slices+1 );
+  vector< float > ny( slices+1 );
   
   float delta = 2.0f * PI / slices;
   float alf = 0.0f;
@@ -1677,10 +1677,10 @@ void Visualizer::drawCylinderSplit( float baserad, float toprad, float
   {
     float cos_alf = cos(alf);
     float sin_alf = sin(alf);
-    ctab.push_back( cos_alf );
-    stab.push_back( sin_alf );
-    nx.push_back( cos_alf * nxg );
-    ny.push_back( sin_alf * nxg );
+    ctab[i] = cos_alf;
+    stab[i] = sin_alf;
+    nx[i] = cos_alf * nxg;
+    ny[i] = sin_alf * nxg;
     alf += delta;
   }
 
@@ -1713,25 +1713,25 @@ void Visualizer::drawHemisphere( float r )
   int n = visSettings.quality;
   
   // precompute the cosines and sines that are needed during drawing
-  vector< float > cos_theta1;
-  vector< float > sin_theta1;
+  vector< float > cos_theta1( n+1 );
+  vector< float > sin_theta1( n+1 );
   float delta = 0.5f * PI / n;
   float theta = 0.0f;
   for ( int j = 0 ; j <= n ; j++ )
   {
-    cos_theta1.push_back( cos( theta ) );
-    sin_theta1.push_back( sin( theta ) );
+    cos_theta1[j] = cos( theta );
+    sin_theta1[j] = sin( theta );
     theta += delta;
   }
   
-  vector< float > cos_theta2;
-  vector< float > sin_theta2;
+  vector< float > cos_theta2( n+1 );
+  vector< float > sin_theta2( n+1 );
   delta = 2.0f * PI / n;
   theta = 0.0f;
   for ( int i = 0 ; i <= n ; i++ )
   {
-    cos_theta2.push_back( cos( theta ) );
-    sin_theta2.push_back( sin( theta ) );
+    cos_theta2[i] = cos( theta );
+    sin_theta2[i] = sin( theta );
     theta += delta;
   }
    
@@ -1772,25 +1772,25 @@ void Visualizer::drawSphere( float r, int n )
   if ( n <= 0 ) n = visSettings.quality;
   
   // precompute the cosines and sines that are needed during drawing
-  vector< float > cos_theta1;
-  vector< float > sin_theta1;
+  vector< float > cos_theta1( n+1 );
+  vector< float > sin_theta1( n+1 );
   float delta = PI / n;
   float theta = -0.5f * PI;
   for ( int j = 0 ; j <= n ; j++ )
   {
-    cos_theta1.push_back( cos( theta ) );
-    sin_theta1.push_back( sin( theta ) );
+    cos_theta1[j] = cos( theta );
+    sin_theta1[j] = sin( theta );
     theta += delta;
   }
   
-  vector< float > cos_theta2;
-  vector< float > sin_theta2;
+  vector< float > cos_theta2( n+1 );
+  vector< float > sin_theta2( n+1 );
   delta = 2.0f * PI / n;
   theta = 0.0f;
   for ( int i = 0 ; i <= n ; i++ )
   {
-    cos_theta2.push_back( cos( theta ) );
-    sin_theta2.push_back( sin( theta ) );
+    cos_theta2[i] = cos( theta );
+    sin_theta2[i] = sin( theta );
     theta += delta;
   }
    
@@ -1843,14 +1843,12 @@ void Visualizer::drawTubeInterpolate( float baserad, float toprad, RGB_Color bas
   center.y = 0.375f*b1.y + 0.375f*b2.y + 0.125f*b3.y;
   center.z = 0.375f*b1.z + 0.375f*b2.z + 0.125f*b3.z;
   
-  vector< float > t;
-  vector< float > it;
-  vector< Point3D > curve;	// stores the curve's vertex coordinates
-  vector< Point3D > curve_der;	// stores the derivatives in those vertices
-  vector< float > color_r;	// stores the tube's colors (red)
-  vector< float > color_g;	// stores the tube's colors (green)
-  vector< float > color_b;	// stores the tube's colors (blue)
-  vector< float > radius;	// stores the tube's radii
+  vector< Point3D > curve( N+1 );	// stores the curve's vertex coordinates
+  vector< Point3D > curve_der( N+1 );	// stores the derivatives in those vertices
+  vector< float > color_r( N+1 );	// stores the tube's colors (red)
+  vector< float > color_g( N+1 );	// stores the tube's colors (green)
+  vector< float > color_b( N+1 );	// stores the tube's colors (blue)
+  vector< float > radius( N+1 );	// stores the tube's radii
 
   float basecol_fr = basecol.r / 255.0f;
   float basecol_fg = basecol.g / 255.0f;
@@ -1881,7 +1879,7 @@ void Visualizer::drawTubeInterpolate( float baserad, float toprad, RGB_Color bas
       { fac1*b1.x + fac2*b2.x + fac3*b3.x,
 	fac1*b1.y + fac2*b2.y + fac3*b3.y,
 	fac1*b1.z + fac2*b2.z + fac3*b3.z };
-    curve.push_back( bt );
+    curve[i] = bt;
     
     // compute the derivative in b(t) as a normalised direction vector
     fac1 = 3*it*it;
@@ -1901,26 +1899,26 @@ void Visualizer::drawTubeInterpolate( float baserad, float toprad, RGB_Color bas
       bt_der.y = bt_der.y / len;
       bt_der.z = bt_der.z / len;
     }
-    curve_der.push_back( bt_der );
+    curve_der[i] = bt_der;
     
     // compute the color of the tube in b(t)
-    color_r.push_back( it*basecol_fr + t*topcol_fr );
-    color_g.push_back( it*basecol_fg + t*topcol_fg );
-    color_b.push_back( it*basecol_fb + t*topcol_fb );
+    color_r[i] = it*basecol_fr + t*topcol_fr;
+    color_g[i] = it*basecol_fg + t*topcol_fg;
+    color_b[i] = it*basecol_fb + t*topcol_fb;
 
     // compute the radius of the tube in b(t)
-    radius.push_back( it*baserad + t*toprad );
+    radius[i] = it*baserad + t*toprad;
   }
 
   // precompute sine and cosine functions
-  vector< float > ctab;
-  vector< float > stab;
+  vector< float > ctab( visSettings.quality + 1 );
+  vector< float > stab( visSettings.quality + 1 );
   float delta_ang = 2.0f * PI / visSettings.quality;
   float ang = 0.0f;
   for ( int j = 0 ; j <= visSettings.quality ; j++ )
   {
-    ctab.push_back( cos( ang ) );
-    stab.push_back( sin( ang ) );
+    ctab[j] = cos( ang );
+    stab[j] = sin( ang );
     ang += delta_ang;
   }
 
@@ -1984,11 +1982,9 @@ void Visualizer::drawTubeSplit( float baserad, float toprad, RGB_Color basecol,
   center.y = 0.375f*b1.y + 0.375f*b2.y + 0.125f*b3.y;
   center.z = 0.375f*b1.z + 0.375f*b2.z + 0.125f*b3.z;
   
-  vector< float > t;
-  vector< float > it;
-  vector< Point3D > curve;	// stores the curve's vertex coordinates
-  vector< Point3D > curve_der;	// stores the derivatives in those vertices
-  vector< float > radius;	// stores the tube's radii
+  vector< Point3D > curve( N+1 );	// stores the curve's vertex coordinates
+  vector< Point3D > curve_der( N+1 );	// stores the derivatives in those vertices
+  vector< float > radius( N+1 );	// stores the tube's radii
 
   bool odd_segs = (visSettings.quality % 2 == 1);
   float delta_t = 1.0f / visSettings.quality;
@@ -2012,7 +2008,7 @@ void Visualizer::drawTubeSplit( float baserad, float toprad, RGB_Color basecol,
       { fac1*b1.x + fac2*b2.x + fac3*b3.x,
 	fac1*b1.y + fac2*b2.y + fac3*b3.y,
 	fac1*b1.z + fac2*b2.z + fac3*b3.z };
-    curve.push_back( bt );
+    curve[i] = bt;
     
     // compute the derivative in b(t) as a normalised direction vector
     fac1 = 3*it*it;
@@ -2032,21 +2028,21 @@ void Visualizer::drawTubeSplit( float baserad, float toprad, RGB_Color basecol,
       bt_der.y = bt_der.y / len;
       bt_der.z = bt_der.z / len;
     }
-    curve_der.push_back( bt_der );
+    curve_der[i] = bt_der;
     
     // compute the radius of the tube in b(t)
-    radius.push_back( it*baserad + t*toprad );
+    radius[i] = it*baserad + t*toprad;
   }
 
   // precompute sine and cosine functions
-  vector< float > ctab;
-  vector< float > stab;
+  vector< float > ctab( visSettings.quality + 1 );
+  vector< float > stab( visSettings.quality + 1 );
   float delta_ang = 2.0f * PI / visSettings.quality;
   float ang = 0.0f;
   for ( int j = 0 ; j <= visSettings.quality ; j++ )
   {
-    ctab.push_back( cos( ang ) );
-    stab.push_back( sin( ang ) );
+    ctab[j] = cos( ang );
+    stab[j] = sin( ang );
     ang += delta_ang;
   }
 
