@@ -655,7 +655,6 @@ int main(int argc, char **argv)
     { 0, 0, 0, 0 }
   };
 
-
   // handle the aterm options
   {
     short a_argc=1;
@@ -663,21 +662,16 @@ int main(int argc, char **argv)
     a_argv[0]=argv[0];
 
     for(int i=1;i<argc;i++){
-      char *oa1="--at-afuntable";
-      char *oa2="--at-termtable";
-      if(strncmp(argv[i],oa1,strlen(oa1)-1) || strncmp(argv[i],oa2,strlen(oa2)-1)){
-        //fprintf(stderr,"at argument %s\n",argv[i]);
-        a_argv[a_argc++]=argv[i]+1;
+      if(strncmp(argv[i],"--at-",5)!=0) continue;
+
+      //fprintf(stderr, "at argument %s\n",argv[i]);
+      a_argv[a_argc++]=argv[i]+1;
+
+      if(strcmp(argv[i],"--at-afuntable")==0 || strcmp(argv[i],"--at-termtable")==0){
         i++;
         if(i==argc) break;
-        a_argv[a_argc++]=argv[i];
-        continue;
+        else a_argv[a_argc++]=argv[i];
       }
-
-      if(strncmp(argv[i],"--at-",5)){
-        //fprintf(stderr, "at argument %s\n",argv[i]);
-        a_argv[a_argc++]=argv[i]+1;
-      }  
     } 
   
     ATinit(a_argc,a_argv,&Spec);
