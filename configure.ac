@@ -202,7 +202,6 @@ else
   BUILD_VARIANT="release"
 fi
 AC_SUBST([BFLAGS],[])
-AC_SUBST([BUILD_VARIANT],[])
 
 AC_ARG_ENABLE(
   [profile],
@@ -227,7 +226,7 @@ AC_ARG_WITH(
   )
 )
 if test $enable_static; then
-  BUILD_VARIANT="${BUILD_VARIANT} link=static"
+  BUILD_VARIANT="link=static ${BUILD_VARIANT}"
 fi
 
 # Check whether dymbol table stripping from binaries is requested
@@ -242,6 +241,18 @@ if test $enable_experimental; then
   BUILD_EXPERIMENTAL="experimental"
 fi
 AC_SUBST([BUILD_EXPERIMENTAL])
+
+# Check whether optimization must be suppressed
+AC_ARG_ENABLE(
+  [squadt_support],
+  AC_HELP_STRING(
+    [--disable-squadt-support],
+    [do not compile squadt support in tools]
+  )
+)
+if ! test $disable_squadt_support; then
+  BUILD_VARIANT="--disable-squadt-support ${BUILD_VARIANT}"
+fi
 
 # Check for ATerm library and header files
 AC_ARG_WITH(
@@ -444,6 +455,8 @@ if test "x$exec_prefix" = xNONE
 then
   exec_prefix='${prefix}'
 fi
+
+AC_SUBST([BUILD_VARIANT],[])
 
 includedir="$includedir/mcrl2"
 datadir="$datadir/mcrl2"

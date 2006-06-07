@@ -238,7 +238,7 @@ namespace squadt {
       throw (exception::exception(exception::unexpected_instance_identifier));
     }
 
-    execution::task_monitor::ptr p = instances[id];
+    execution::task_monitor::sptr p = instances[id];
 
     relay_connection(p.get(), const_cast < transport::transceiver::basic_transceiver* > (o));
 

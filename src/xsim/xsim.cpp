@@ -57,7 +57,7 @@ XSim::XSim()
 bool XSim::OnInit()
 {
   /* Whether to replace free variables in the LPE with dummies */
-  bool        dummies = false;
+  bool dummies = false;
 
   /* The rewrite strategy that will be used */
   RewriteStrategy rewrite_strategy = GS_REWR_INNER;
@@ -67,8 +67,8 @@ bool XSim::OnInit()
 
   gsEnableConstructorFunctions();
 
-  if (connection_established) {
 #ifdef ENABLE_SQUADT_CONNECTIVITY
+  if (connection_established) {
     bool valid = false;
 
     /* Static configuration cycle */
@@ -100,9 +100,9 @@ bool XSim::OnInit()
 
     /* Wait for start message */
     tc.await_message(sip::send_signal_start);
-#endif
   }
   else {
+#endif
     wxCmdLineParser cmdln(argc,argv);
     cmdln.AddSwitch(wxT("h"),wxT("help"),wxT("displays this message"));
     cmdln.AddSwitch(wxT("y"),wxT("dummy"),wxT("replace free variables in the LPE with dummy values"));
@@ -139,7 +139,9 @@ bool XSim::OnInit()
     if ( cmdln.GetParamCount() > 0 ) {
       lpd_file_argument = std::string(cmdln.GetParam(0).fn_str());
     }
+#ifdef ENABLE_SQUADT_CONNECTIVITY
   }
+#endif
 
   XSimMain *frame = new XSimMain( NULL, -1, wxT("XSim"), wxPoint(-1,-1), wxSize(500,400) );
 

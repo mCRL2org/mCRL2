@@ -31,7 +31,7 @@ namespace squadt {
       public:
  
         /** \brief Convenience type for hiding shared pointer implementation */
-        typedef boost::shared_ptr < task_monitor > ptr;
+        typedef boost::shared_ptr < task_monitor > sptr;
 
       protected:
  
@@ -49,6 +49,9 @@ namespace squadt {
 
         /** \brief Monitor for waiting until process has registered */
         mutable boost::shared_ptr < boost::condition >  register_condition;
+        
+        /** \brief Thread for event delivery */
+        static boost::thread                            delivery_thread;
 
       protected:
  
@@ -69,7 +72,7 @@ namespace squadt {
       private:
  
         /** \brief The event handler that have been registered */
-        handler_map handlers;
+        handler_map                      handlers;
 
       private:
  
@@ -242,8 +245,6 @@ namespace squadt {
      **/
     inline void task_monitor::service_handlers(const event_type e) {
       std::pair < handler_map::iterator, handler_map::iterator > p = handlers.equal_range(e);
-
-      handler_map::iterator i = p.first;
 
       while (p.first != p.second) {
         if ((*(p.first)).second()) {

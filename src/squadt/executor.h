@@ -34,7 +34,7 @@ namespace squadt {
       private:
 
         /** Convenient short-hand type */
-        typedef std::pair < command, task_monitor::ptr > command_pair;
+        typedef std::pair < command, task_monitor::sptr > command_pair;
 
       private:
 
@@ -53,13 +53,13 @@ namespace squadt {
         inline void start_process(const command&);
     
         /** \brief Start a new process with a listener */
-        inline void start_process(const command&, task_monitor::ptr&);
+        inline void start_process(const command&, task_monitor::sptr&);
 
         /** \brief handler that is invoked when a process is terminated */
         inline void handle_process_termination(process* p);
   
         /** \brief handler that is invoked when a process is terminated */
-        inline void handle_process_termination(process* p, task_monitor::ptr& s);
+        inline void handle_process_termination(process* p, task_monitor::sptr& s);
   
         /** \brief Start processing commands if the queue contains any waiters */
         inline void start_delayed();
@@ -122,7 +122,7 @@ namespace squadt {
      * @param[in] c the command to execute
      * @param[in] l reference to a process listener
      **/
-    inline void executor::start_process(const command& c, task_monitor::ptr& l) {
+    inline void executor::start_process(const command& c, task_monitor::sptr& l) {
       process::ptr p(new process(boost::bind(&executor::handle_process_termination, this, _1, l), l));
 
       if (l.get() != 0) {
@@ -176,7 +176,7 @@ namespace squadt {
      * @param p a pointer to a process object
      * @param l a pointer to a listener for process state changes
      **/
-    void executor::handle_process_termination(process* p, task_monitor::ptr& l) {
+    void executor::handle_process_termination(process* p, task_monitor::sptr& l) {
       remove(p);
  
       start_delayed();

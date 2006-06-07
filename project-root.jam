@@ -146,10 +146,13 @@ feature tool_type : basic experimental : optional incidental ;
 
 feature squadt_support : disable enable : composite optional incidental ;
 
-feature.compose <squadt_support>enable
-      : <define>ENABLE_SQUADT_CONNECTIVITY
-        <library>/libraries/sip//sipt
-      ;
+# Disable squadt support in tools
+if ! squadt in [ MATCH "^--disable-(squadt)-support" : [ modules.peek : ARGV ] ] {
+  feature.compose <squadt_support>enable
+        : <define>ENABLE_SQUADT_CONNECTIVITY
+          <library>/libraries/sip//sipt
+        ;
+}
 
 # Feature for linking to the xml2 library
 feature xml2 : none interface library : composite incidental link-incompatible ;
