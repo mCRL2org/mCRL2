@@ -2006,11 +2006,21 @@ ATermAppl gsAlpha(ATermAppl Spec){
       
       bool good=false;
       if(P){
-	//check
+        ATermAppl parallel=ATAgetArgument(body,1);
+	if(!gsIsMerge(parallel)) goto nP_checked;
+        ATermAppl parallel_left=ATAgetArgument(parallel,0);    
+        if(!gsIsProcess(parallel_left)) goto nP_checked;
+        ATermAppl parallel_right=ATAgetArgument(parallel,1);
+        if(!gsIsProcess(parallel_right)) goto nP_checked;
+        if(!ATisEqual(P,ATAgetArgument(parallel_left,0))) goto nP_checked;
+        //more checks
 	good=true;
       }
 
+      nP_checked:
+
       if(good){
+        gsVerboseMsg("proc: %T is a recursive parallel process in n-parallel pCRL format\n\n", p);
 	ATtablePut(props,(ATerm)p,(ATerm)ATmakeAppl2(props_afun,(ATerm)npCRL_aterm,(ATerm)rec_aterm));
 	ATtablePut(subs_npCRL,(ATerm)p,(ATerm)ATmakeList0());
       }
