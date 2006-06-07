@@ -21,13 +21,12 @@ lib aterm
          memory.c
          tafio.c
          version.c
-       : <link>shared
-         <address-model>64:<define>AT_64BIT
-         <cflags>-fPIC
-         <toolset>darwin:<cflags>"-fPIC -fno-common"
+       : <address-model>64:<define>AT_64BIT
+         <link>shared:<cflags>-fPIC
+         <link>shared,<toolset>darwin:<cflags>"-fPIC -fno-common"
        :
        : <address-model>64:<define>AT_64BIT
-         <toolset>darwin:<linkflags>"-undefined dynamic_lookup"
+         <link>shared,<toolset>darwin:<linkflags>"-undefined dynamic_lookup"
        ;
 
 alias atermpp
