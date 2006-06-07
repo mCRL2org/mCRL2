@@ -59,6 +59,10 @@ class Visualizer
 	&boundHeight );
     void drawCylinder( float baserad, float toprad, float height, RGB_Color
 	basecol, RGB_Color topcol, bool baseclosed, bool topclosed );
+    void drawCylinderInterpolate( float baserad, float toprad, float height,
+	RGB_Color basecol, RGB_Color topcol );
+    void drawCylinderSplit( float baserad, float toprad, float height, RGB_Color
+	basecol, RGB_Color topcol );
     void drawHemisphere( float rad );
     void drawStates( Cluster* root );
     void drawStatesMarkStates( Cluster* root );
@@ -69,6 +73,9 @@ class Visualizer
     void drawSubtreeMarkStates( Cluster* root, bool topClosed );
     void drawSubtreeMarkTransitions( Cluster* root, bool topClosed );
     void drawSubtreeNew( Cluster* root, HSV_Color col, HSV_Color delta_col );
+    void drawSubtreeNewMarkDeadlocks( Cluster* root );
+    void drawSubtreeNewMarkStates( Cluster* root );
+    void drawSubtreeNewMarkTransitions( Cluster* root );
     void drawTubeInterpolate( float baserad, float toprad, RGB_Color basecol,
 	RGB_Color topcol, Point3D b1, Point3D b2, Point3D b3, Point3D &center );
     void drawTubeSplit( float baserad, float toprad, RGB_Color basecol,
