@@ -38,7 +38,7 @@ P_cs(pid:Pos,t:Time,x:Time)=
 
 ID(id:Nat) = sum n:Nat.set(n).ID(n) + get(id).ID(id);
 
-nP(p:Pos)=(p>1) -> (P(p)||nP(max(p-1,1))),P(1);
+nP(p:Pos)=(p>1) -> (P(p)||nP(max(p-1,1)))<>P(1);
 
 init hide({__get,__set},allow({cs_in,cs_out,__get,__set},comm({get|_get->__get,set|_set->__set},allow({cs_in,cs_out,get|_get,set|_set},nP(n)||ID(0)))));
 
