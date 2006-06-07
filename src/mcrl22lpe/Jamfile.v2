@@ -12,7 +12,6 @@ exe mcrl22lpe
          /libraries/parser//alpha
          /libraries/temporary//print
          /libraries/temporary//rewrite
-         /libraries/sip//sipt
        : <source>/root//mcrl2_revision
          <squadt_support>enable
        ;
