@@ -1,5 +1,3 @@
-#define GLUT_DISABLE_ATEXIT_HACK
-
 #include "ltsviewapp.h"
 
 IMPLEMENT_APP_NO_MAIN( LTSViewApp )
@@ -45,13 +43,9 @@ extern "C" int WINAPI WinMain(HINSTANCE hInstance,
                                   wxCmdLineArgType lpCmdLine,             
                                   int nCmdShow) {                                                                     
   ATerm stackbot;
-  int   c = 0;
-  char* v = "";
 
-  // initialise the ATerm and glut libraries
+  // initialise the ATerm library
   ATinit(NULL,NULL,&stackbot); // XXX args?
-
-  glutInit(&c, &v);
 
   return wxEntry(hInstance, hPrevInstance, lpCmdLine, nCmdShow);    
 }
@@ -59,10 +53,8 @@ extern "C" int WINAPI WinMain(HINSTANCE hInstance,
 int main(int argc, char **argv) {
   ATerm stackbot;
 
-  // initialise the ATerm and glut libraries
+  // initialise the ATerm library
   ATinit(argc,argv,&stackbot);
-
-  glutInit(&argc, argv);
 
   return wxEntry(argc, argv);
 }

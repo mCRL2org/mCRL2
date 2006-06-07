@@ -372,7 +372,7 @@ void Visualizer::drawSubtree( Cluster* root, bool topClosed, HSV_Color col,
       glPushMatrix();
       glMultMatrixf( M );
       setColor( HSVtoRGB( col ), visSettings.alpha );
-      glutSolidSphere( root->getTopRadius(), visSettings.quality, visSettings.quality );
+      drawSphere( root->getTopRadius() );
       glPopMatrix();
     glEndList();
 
@@ -460,7 +460,7 @@ void Visualizer::drawSubtreeMarkStates( Cluster* root, bool topClosed )
 	setColor( visSettings.markedColor, visSettings.alpha );
       else
 	setColor( RGB_WHITE, visSettings.alpha );
-      glutSolidSphere( root->getTopRadius(), visSettings.quality, visSettings.quality );
+      drawSphere( root->getTopRadius() );
       glPopMatrix();
     glEndList();
 
@@ -553,7 +553,7 @@ void Visualizer::drawSubtreeMarkDeadlocks( Cluster* root, bool topClosed )
 	setColor( visSettings.markedColor, visSettings.alpha );
       else
 	setColor( RGB_WHITE, visSettings.alpha );
-      glutSolidSphere( root->getTopRadius(), visSettings.quality, visSettings.quality );
+      drawSphere( root->getTopRadius() );
       glPopMatrix();
     glEndList();
 
@@ -646,7 +646,7 @@ void Visualizer::drawSubtreeMarkTransitions( Cluster* root, bool topClosed )
 	setColor( visSettings.markedColor, visSettings.alpha );
       else
 	setColor( RGB_WHITE, visSettings.alpha );
-      glutSolidSphere( root->getTopRadius(), visSettings.quality, visSettings.quality );
+      drawSphere( root->getTopRadius() );
       glPopMatrix();
     glEndList();
 
@@ -1382,12 +1382,12 @@ void Visualizer::drawStates( Cluster* root )
 	++s_it )
   {
     if ( (**s_it).getPosition() < -0.9f )
-      glutSolidSphere( visSettings.nodeSize, 4, 4 );
+      drawSphere( visSettings.nodeSize, 4 );
     else
     {
       glRotatef( -(**s_it).getPosition(), 0.0f, 0.0f, 1.0f );
       glTranslatef( root->getTopRadius(), 0.0f, 0.0f );
-      glutSolidSphere( visSettings.nodeSize, 4, 4 );
+      drawSphere( visSettings.nodeSize, 4 );
       glTranslatef( -root->getTopRadius(), 0.0f, 0.0f );
       glRotatef( (**s_it).getPosition(), 0.0f, 0.0f, 1.0f );
     }
@@ -1433,12 +1433,12 @@ void Visualizer::drawStatesMarkStates( Cluster* root )
       setColor( RGB_WHITE, 1.0f );
 
     if ( (**s_it).getPosition() < -0.9f )
-      glutSolidSphere( visSettings.nodeSize, 4, 4 );
+      drawSphere( visSettings.nodeSize, 4 );
     else
     {
       glRotatef( -(**s_it).getPosition(), 0.0f, 0.0f, 1.0f );
       glTranslatef( root->getTopRadius(), 0.0f, 0.0f );
-      glutSolidSphere( visSettings.nodeSize, 4, 4 );
+      drawSphere( visSettings.nodeSize, 4 );
       glTranslatef( -root->getTopRadius(), 0.0f, 0.0f );
       glRotatef( (**s_it).getPosition(), 0.0f, 0.0f, 1.0f );
     }
@@ -1484,12 +1484,12 @@ void Visualizer::drawStatesMarkDeadlocks( Cluster* root )
       setColor( RGB_WHITE, 1.0f );
 
     if ( (**s_it).getPosition() < -0.9f )
-      glutSolidSphere( visSettings.nodeSize, 4, 4 );
+      drawSphere( visSettings.nodeSize, 4 );
     else
     {
       glRotatef( -(**s_it).getPosition(), 0.0f, 0.0f, 1.0f );
       glTranslatef( root->getTopRadius(), 0.0f, 0.0f );
-      glutSolidSphere( visSettings.nodeSize, 4, 4 );
+      drawSphere( visSettings.nodeSize, 4 );
       glTranslatef( -root->getTopRadius(), 0.0f, 0.0f );
       glRotatef( (**s_it).getPosition(), 0.0f, 0.0f, 1.0f );
     }
@@ -1711,59 +1711,51 @@ void Visualizer::drawCylinderSplit( float baserad, float toprad, float
 void Visualizer::drawHemisphere( float r )
 {
   int n = visSettings.quality;
-  int i,j;
   
-  // rotate around the z-axis first to ensure that one vertex of the base of the
-  // hemisphere is always at angle 0 in the (x,y)-plane (i.e. in point (r,0,0)).
-  // This way, the hemisphere will always fit nicely onto other objects in the
-  // scene (like cylinders) no matter what the value of n is.
-  float rot = 0.0f;
-  while ( rot <= 90.0f ) rot += 360.0f / (float)n;
-  rot -= 360.0f / (float)n;
-  glRotatef( 90 - rot, 0.0f, 0.0f, 1.0f );
-
-  // precompute the cosines and sines that are needed during drawing and put
-  // them in vectors (this is done for efficiency: every (co)sine used is
-  // now computed exactly once).
+  // precompute the cosines and sines that are needed during drawing
   vector< float > cos_theta1;
   vector< float > sin_theta1;
-  for ( j = 0 ; j <= n / 2 ; j++ )
+  float delta = 0.5f * PI / n;
+  float theta = 0.0f;
+  for ( int j = 0 ; j <= n ; j++ )
   {
-    float theta1 = j * 2.0f * PI / n - 0.5f * PI;
-    cos_theta1.push_back( cos( theta1 ) );
-    sin_theta1.push_back( sin( theta1 ) );
+    cos_theta1.push_back( cos( theta ) );
+    sin_theta1.push_back( sin( theta ) );
+    theta += delta;
   }
   
   vector< float > cos_theta2;
   vector< float > sin_theta2;
-  for ( i = 0 ; i <= n ; i++ )
+  delta = 2.0f * PI / n;
+  theta = 0.0f;
+  for ( int i = 0 ; i <= n ; i++ )
   {
-    cos_theta2.push_back( cos( i * PI / n ) );
-    sin_theta2.push_back( sin( i * PI / n ) );
+    cos_theta2.push_back( cos( theta ) );
+    sin_theta2.push_back( sin( theta ) );
+    theta += delta;
   }
    
   float ex,ey,ez,px,py,pz;
 
-  // draw the hemisphere by drawing rings that stand upright on top of the
-  // (x,y)-plane
-  for ( j = 0 ; j < n / 2 ; j++ )
+  // draw the hemisphere by drawing rings around the z-axis
+  for ( int j = 0 ; j < n ; j++ )
   {
     glBegin(GL_QUAD_STRIP);
-    for ( i = 0 ; i <= n ; i++ )
+    for ( int i = 0 ; i <= n ; i++ )
     {
-      ex = cos_theta1[j] * cos_theta2[i];
-      ey = sin_theta1[j];
-      ez = cos_theta1[j] * sin_theta2[i];
+      ex = cos_theta1[j+1] * cos_theta2[i];
+      ey = cos_theta1[j+1] * sin_theta2[i];
+      ez = sin_theta1[j+1];
       px = r * ex;
       py = r * ey;
       pz = r * ez;
 
       glNormal3f( ex, ey, ez );
       glVertex3f( px, py, pz );
-
-      ex = cos_theta1[j+1] * cos_theta2[i];
-      ey = sin_theta1[j+1];
-      ez = cos_theta1[j+1] * sin_theta2[i];
+      
+      ex = cos_theta1[j] * cos_theta2[i];
+      ey = cos_theta1[j] * sin_theta2[i];
+      ez = sin_theta1[j];
       px = r * ex;
       py = r * ey;
       pz = r * ez;
@@ -1773,21 +1765,60 @@ void Visualizer::drawHemisphere( float r )
     }
     glEnd();
   }
+}
+
+void Visualizer::drawSphere( float r, int n )
+{
+  if ( n <= 0 ) n = visSettings.quality;
   
-  // if n is odd, then we have to draw one more polygon, namely the one that is
-  // enclosed by the outermost circle of the last ring and the (x,y)-plane
-  if ( n % 2 == 1 )
+  // precompute the cosines and sines that are needed during drawing
+  vector< float > cos_theta1;
+  vector< float > sin_theta1;
+  float delta = PI / n;
+  float theta = -0.5f * PI;
+  for ( int j = 0 ; j <= n ; j++ )
   {
-    j = n / 2;
-    glBegin(GL_POLYGON );
-    for ( i = n ; i >= 0 ; i-- )
+    cos_theta1.push_back( cos( theta ) );
+    sin_theta1.push_back( sin( theta ) );
+    theta += delta;
+  }
+  
+  vector< float > cos_theta2;
+  vector< float > sin_theta2;
+  delta = 2.0f * PI / n;
+  theta = 0.0f;
+  for ( int i = 0 ; i <= n ; i++ )
+  {
+    cos_theta2.push_back( cos( theta ) );
+    sin_theta2.push_back( sin( theta ) );
+    theta += delta;
+  }
+   
+  float ex,ey,ez,px,py,pz;
+
+  // draw the sphere by drawing rings around the z-axis
+  for ( int j = 0 ; j < n ; j++ )
+  {
+    glBegin(GL_QUAD_STRIP);
+    for ( int i = 0 ; i <= n ; i++ )
     {
-      ex = cos_theta1[j] * cos_theta2[i];
-      ey = sin_theta1[j];
-      ez = cos_theta1[j] * sin_theta2[i];
+      ex = cos_theta1[j+1] * cos_theta2[i];
+      ey = cos_theta1[j+1] * sin_theta2[i];
+      ez = sin_theta1[j+1];
       px = r * ex;
       py = r * ey;
       pz = r * ez;
+
+      glNormal3f( ex, ey, ez );
+      glVertex3f( px, py, pz );
+      
+      ex = cos_theta1[j] * cos_theta2[i];
+      ey = cos_theta1[j] * sin_theta2[i];
+      ez = sin_theta1[j];
+      px = r * ex;
+      py = r * ey;
+      pz = r * ez;
+
       glNormal3f( ex, ey, ez );
       glVertex3f( px, py, pz );
     }

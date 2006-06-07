@@ -35,7 +35,6 @@ exe ltsview
         visualizer.cpp
         utils.cpp
         fsm
-        GLUT
         /libraries/wx_extension//wx_extension
         /libraries/temporary//lowlevel
         /libraries/aterm//aterm

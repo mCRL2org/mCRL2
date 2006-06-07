@@ -7,11 +7,9 @@
 #ifdef __APPLE__
     #include <OpenGL/gl.h>
     #include <OpenGL/glu.h>
-    #include <GLUT/glut.h>
 #else
     #include <GL/gl.h>
     #include <GL/glu.h>
-    #include <GL/glut.h>
 #endif
 #include "utils.h"
 #include "lts.h"
@@ -64,6 +62,7 @@ class Visualizer
     void drawCylinderSplit( float baserad, float toprad, float height, RGB_Color
 	basecol, RGB_Color topcol );
     void drawHemisphere( float rad );
+    void drawSphere( float rad, int n = 0 );
     void drawStates( Cluster* root );
     void drawStatesMarkStates( Cluster* root );
     void drawStatesMarkDeadlocks( Cluster* root );

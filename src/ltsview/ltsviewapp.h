@@ -3,11 +3,6 @@
 #include <wx/wx.h>
 #include <wx/cmdline.h>
 #include <wx/filename.h>
-#ifdef __APPLE__
-    #include <GLUT/glut.h>
-#else
-    #include <GL/glut.h>
-#endif
 #include <string>
 #include <iostream>
 #include "aterm1.h"
