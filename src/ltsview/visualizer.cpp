@@ -7,7 +7,7 @@ bool Distance_desc::operator()(const Primitive* p1, const Primitive* p2) const
 
 VisSettings Visualizer::defaultVisSettings =
 {
-  0.6f, { 120, 120, 120 }, 360.0f / (1+sqrt(5)), /*100, 1.2f,*/ RGB_WHITE, 0, RGB_WHITE,
+  0.6f, { 120, 120, 120 }, 111, /*100, 1.2f,*/ RGB_WHITE, 0, RGB_WHITE,
   { 0, 0, 255 }, /*false,*/ false, { 255, 0, 0 }, true, 0.1f, 30, 12, RGB_WHITE,
   { 0, 0, 255 }
 };
@@ -136,7 +136,7 @@ bool Visualizer::setVisSettings( VisSettings vs )
     refreshPrimitives = true;
   }
 
-  if ( fabs( oldSettings.branchRotation - vs.branchRotation ) > 0.01f ) 
+  if ( oldSettings.branchRotation != vs.branchRotation ) 
   {
     refreshStates = true;
     refreshPrimitives = true;
@@ -190,14 +190,14 @@ void Visualizer::drawLTS( Point3D viewpoint )
       switch ( markStyle )
       {
 	case MARK_STATES:
-	  drawStatesMarkStates( lts->getInitialState()->getCluster() );
+	  drawStatesMarkStates( lts->getInitialState()->getCluster(), 0 );
 	  break;
 	case MARK_DEADLOCKS:
-	  drawStatesMarkDeadlocks( lts->getInitialState()->getCluster() );
+	  drawStatesMarkDeadlocks( lts->getInitialState()->getCluster(), 0 );
 	  break;
 	default:
 	  setColor( visSettings.stateColor, 1.0f );
-	  drawStates( lts->getInitialState()->getCluster() );
+	  drawStates( lts->getInitialState()->getCluster(), 0 );
 	  break;
       }
     glEndList();
@@ -222,28 +222,27 @@ void Visualizer::drawLTS( Point3D viewpoint )
       {
 	case MARK_DEADLOCKS:
 	  if ( visSettings.newStyle )
-	    drawSubtreeNewMarkDeadlocks( lts->getInitialState()->getCluster(),
-		0.0f );
+	    drawSubtreeNewMarkDeadlocks( lts->getInitialState()->getCluster(), 0
+		);
 	  else
 	    drawSubtreeMarkDeadlocks( lts->getInitialState()->getCluster(),
-		true );
+		true, 0 );
 	  break;
 	  
 	case MARK_STATES:
 	  if ( visSettings.newStyle )
-	    drawSubtreeNewMarkStates( lts->getInitialState()->getCluster(), 0.0f
-		);
+	    drawSubtreeNewMarkStates( lts->getInitialState()->getCluster(), 0);
 	  else
-	    drawSubtreeMarkStates( lts->getInitialState()->getCluster(), true );
+	    drawSubtreeMarkStates( lts->getInitialState()->getCluster(), true, 0 );
 	  break;
 
 	case MARK_TRANSITIONS:
 	  if ( visSettings.newStyle )
 	    drawSubtreeNewMarkTransitions( lts->getInitialState()->getCluster(),
-		0.0f);
+		0);
 	  else
 	    drawSubtreeMarkTransitions( lts->getInitialState()->getCluster(),
-		true );
+		true, 0 );
 	  break;
 
 	case NO_MARKS:
@@ -273,10 +272,10 @@ void Visualizer::drawLTS( Point3D viewpoint )
 	  
 	  if ( visSettings.newStyle )
 	    drawSubtreeNew( lts->getInitialState()->getCluster(), hsv1,
-		delta_col, 0.0f );
+		delta_col, 0 );
 	  else 
 	    drawSubtree( lts->getInitialState()->getCluster(), true, hsv1,
-		delta_col );
+		delta_col, 0 );
 	  break;
       }
     glPopMatrix();
@@ -370,7 +369,7 @@ void Visualizer::computeSubtreeBounds( Cluster* root, float &boundWidth, float
 // draws the subtree with cluster *root as the root of the tree
 // applies coloring based on interpolation settings
 void Visualizer::drawSubtree( Cluster* root, bool topClosed, HSV_Color col,
-    HSV_Color delta_col )
+    HSV_Color delta_col, int rot )
 {
   if ( !root->hasDescendants() )
   {
@@ -401,6 +400,10 @@ void Visualizer::drawSubtree( Cluster* root, bool topClosed, HSV_Color col,
     
     vector< Cluster* > descendants;
     root->getDescendants( descendants );
+    
+    int desc_rot = rot + visSettings.branchRotation;
+    if ( desc_rot < 0 ) desc_rot += 360;
+    else if ( desc_rot >= 360 ) desc_rot -= 360;
     
     GLfloat M[16];
     glGetFloatv( GL_MODELVIEW_MATRIX, M );
@@ -433,21 +436,22 @@ void Visualizer::drawSubtree( Cluster* root, bool topClosed, HSV_Color col,
       {
 	glTranslatef( 0.0f, 0.0f, clusterHeight );
 	
-	drawSubtree( desc, false, desccol, delta_col );
+	drawSubtree( desc, false, desccol, delta_col, (descendants.size() > 1) ?
+	    desc_rot : rot );
 	
 	glTranslatef( 0.0f, 0.0f, -clusterHeight );
       }
       else
       {
-	glRotatef( -desc->getPosition(), 0.0f, 0.0f, 1.0f );
+	glRotatef( -desc->getPosition()-rot, 0.0f, 0.0f, 1.0f );
 	glTranslatef( root->getBaseRadius(), 0.0f, clusterHeight );
 	glRotatef( visSettings.outerBranchTilt, 0.0f, 1.0f, 0.0f );
 
-	drawSubtree( desc, true, desccol, delta_col );
+	drawSubtree( desc, true, desccol, delta_col, desc_rot );
 	
 	glRotatef( -visSettings.outerBranchTilt, 0.0f, 1.0f, 0.0f );
 	glTranslatef( -root->getBaseRadius(), 0.0f, -clusterHeight );
-	glRotatef( desc->getPosition(), 0.0f, 0.0f, 1.0f );
+	glRotatef( desc->getPosition()+rot, 0.0f, 0.0f, 1.0f );
       }
     }
   }
@@ -455,7 +459,7 @@ void Visualizer::drawSubtree( Cluster* root, bool topClosed, HSV_Color col,
 
 // draws the subtree with cluster *root as the root of the tree
 // applies coloring based on marked states
-void Visualizer::drawSubtreeMarkStates( Cluster* root, bool topClosed )
+void Visualizer::drawSubtreeMarkStates( Cluster* root, bool topClosed, int rot )
 {
   if ( !root->hasDescendants() )
   {
@@ -484,6 +488,10 @@ void Visualizer::drawSubtreeMarkStates( Cluster* root, bool topClosed )
   {
     vector< Cluster* > descendants;
     root->getDescendants( descendants );
+    
+    int desc_rot = rot + visSettings.branchRotation;
+    if ( desc_rot < 0 ) desc_rot += 360;
+    else if ( desc_rot >= 360 ) desc_rot -= 360;
     
     GLfloat M[16];
     glGetFloatv( GL_MODELVIEW_MATRIX, M );
@@ -526,21 +534,22 @@ void Visualizer::drawSubtreeMarkStates( Cluster* root, bool topClosed )
       {
 	glTranslatef( 0.0f, 0.0f, clusterHeight );
 	
-	drawSubtreeMarkStates( desc, false );
+	drawSubtreeMarkStates( desc, false, (descendants.size() > 1) ?
+	    desc_rot : rot );
 	
 	glTranslatef( 0.0f, 0.0f, -clusterHeight );
       }
       else
       {
-	glRotatef( -desc->getPosition(), 0.0f, 0.0f, 1.0f );
+	glRotatef( -desc->getPosition()-rot, 0.0f, 0.0f, 1.0f );
 	glTranslatef( root->getBaseRadius(), 0.0f, clusterHeight );
 	glRotatef( visSettings.outerBranchTilt, 0.0f, 1.0f, 0.0f );
 
-	drawSubtreeMarkStates( desc, true );
+	drawSubtreeMarkStates( desc, true, desc_rot );
 	
 	glRotatef( -visSettings.outerBranchTilt, 0.0f, 1.0f, 0.0f );
 	glTranslatef( -root->getBaseRadius(), 0.0f, -clusterHeight );
-	glRotatef( desc->getPosition(), 0.0f, 0.0f, 1.0f );
+	glRotatef( desc->getPosition()+rot, 0.0f, 0.0f, 1.0f );
       }
     }
   }
@@ -548,7 +557,8 @@ void Visualizer::drawSubtreeMarkStates( Cluster* root, bool topClosed )
 
 // draws the subtree with cluster *root as the root of the tree
 // applies coloring based on deadlocks
-void Visualizer::drawSubtreeMarkDeadlocks( Cluster* root, bool topClosed )
+void Visualizer::drawSubtreeMarkDeadlocks( Cluster* root, bool topClosed, int
+    rot )
 {
   if ( !root->hasDescendants() )
   {
@@ -577,6 +587,10 @@ void Visualizer::drawSubtreeMarkDeadlocks( Cluster* root, bool topClosed )
   {
     vector< Cluster* > descendants;
     root->getDescendants( descendants );
+    
+    int desc_rot = rot + visSettings.branchRotation;
+    if ( desc_rot < 0 ) desc_rot += 360;
+    else if ( desc_rot >= 360 ) desc_rot -= 360;
     
     GLfloat M[16];
     glGetFloatv( GL_MODELVIEW_MATRIX, M );
@@ -619,21 +633,22 @@ void Visualizer::drawSubtreeMarkDeadlocks( Cluster* root, bool topClosed )
       {
 	glTranslatef( 0.0f, 0.0f, clusterHeight );
 
-	drawSubtreeMarkDeadlocks( desc, false );
+	drawSubtreeMarkDeadlocks( desc, false, (descendants.size() > 1) ?
+	    desc_rot : rot );
 
 	glTranslatef( 0.0f, 0.0f, -clusterHeight );
       }
       else
       {
-	glRotatef( -desc->getPosition(), 0.0f, 0.0f, 1.0f );
+	glRotatef( -desc->getPosition()-rot, 0.0f, 0.0f, 1.0f );
 	glTranslatef( root->getBaseRadius(), 0.0f, clusterHeight );
 	glRotatef( visSettings.outerBranchTilt, 0.0f, 1.0f, 0.0f );
 
-	drawSubtreeMarkDeadlocks( desc, true );
+	drawSubtreeMarkDeadlocks( desc, true, desc_rot );
 	
 	glRotatef( -visSettings.outerBranchTilt, 0.0f, 1.0f, 0.0f );
 	glTranslatef( -root->getBaseRadius(), 0.0f, -clusterHeight );
-	glRotatef( desc->getPosition(), 0.0f, 0.0f, 1.0f );
+	glRotatef( desc->getPosition()+rot, 0.0f, 0.0f, 1.0f );
       }
     }
   }
@@ -641,7 +656,8 @@ void Visualizer::drawSubtreeMarkDeadlocks( Cluster* root, bool topClosed )
 
 // draws the subtree with cluster *root as the root of the tree
 // applies coloring based on marked transitions
-void Visualizer::drawSubtreeMarkTransitions( Cluster* root, bool topClosed )
+void Visualizer::drawSubtreeMarkTransitions( Cluster* root, bool topClosed, int
+    rot )
 {
   if ( !root->hasDescendants() )
   {
@@ -670,6 +686,10 @@ void Visualizer::drawSubtreeMarkTransitions( Cluster* root, bool topClosed )
   {
     vector< Cluster* > descendants;
     root->getDescendants( descendants );
+    
+    int desc_rot = rot + visSettings.branchRotation;
+    if ( desc_rot < 0 ) desc_rot += 360;
+    else if ( desc_rot >= 360 ) desc_rot -= 360;
     
     GLfloat M[16];
     glGetFloatv( GL_MODELVIEW_MATRIX, M );
@@ -712,20 +732,21 @@ void Visualizer::drawSubtreeMarkTransitions( Cluster* root, bool topClosed )
       {
 	// descendant is centered
 	glTranslatef( 0.0f, 0.0f, clusterHeight );
-	drawSubtreeMarkTransitions( desc, false );
+	drawSubtreeMarkTransitions( desc, false, (descendants.size() > 1) ?
+	    desc_rot : rot );
 	glTranslatef( 0.0f, 0.0f, -clusterHeight );
       }
       else
       {
-	glRotatef( -desc->getPosition(), 0.0f, 0.0f, 1.0f );
+	glRotatef( -desc->getPosition()-rot, 0.0f, 0.0f, 1.0f );
 	glTranslatef( root->getBaseRadius(), 0.0f, clusterHeight );
 	glRotatef( visSettings.outerBranchTilt, 0.0f, 1.0f, 0.0f );
 	
-	drawSubtreeMarkTransitions( desc, true );
+	drawSubtreeMarkTransitions( desc, true, desc_rot );
 	
 	glRotatef( -visSettings.outerBranchTilt, 0.0f, 1.0f, 0.0f );
 	glTranslatef( -root->getBaseRadius(), 0.0f, -clusterHeight );
-	glRotatef( desc->getPosition(), 0.0f, 0.0f, 1.0f );
+	glRotatef( desc->getPosition()+rot, 0.0f, 0.0f, 1.0f );
       }
     }
   }
@@ -734,7 +755,7 @@ void Visualizer::drawSubtreeMarkTransitions( Cluster* root, bool topClosed )
 // draw the subtree with cluster *root as the root of the tree in the NEW style
 // apply coloring based on interpolation settings
 void Visualizer::drawSubtreeNew( Cluster* root, HSV_Color col, HSV_Color
-    delta_col, float rot )
+    delta_col, int rot )
 {
   if ( root == lts->getInitialState()->getCluster() )
   {
@@ -799,9 +820,9 @@ void Visualizer::drawSubtreeNew( Cluster* root, HSV_Color col, HSV_Color
     float ibt_rad = degToRad( visSettings.innerBranchTilt );
     float obt_rad = degToRad( visSettings.outerBranchTilt );
 
-    float desc_rot = rot + visSettings.branchRotation;
-    if ( desc_rot < 0.0f ) desc_rot += 360.0f;
-    else if ( desc_rot >= 360.0f ) desc_rot -= 360.0f;
+    int desc_rot = rot + visSettings.branchRotation;
+    if ( desc_rot < 0 ) desc_rot += 360;
+    else if ( desc_rot >= 360 ) desc_rot -= 360;
     
     vector< Cluster* > descendants;
     root->getDescendants( descendants );
@@ -904,7 +925,7 @@ void Visualizer::drawSubtreeNew( Cluster* root, HSV_Color col, HSV_Color
 
 // draws the subtree with cluster *root as the root of the tree in the NEW style
 // applies coloring based on marked states
-void Visualizer::drawSubtreeNewMarkStates( Cluster* root, float rot )
+void Visualizer::drawSubtreeNewMarkStates( Cluster* root, int rot )
 {
   RGB_Color color;
   if ( root->hasMarkedState() )
@@ -968,9 +989,9 @@ void Visualizer::drawSubtreeNewMarkStates( Cluster* root, float rot )
     float ibt_rad = degToRad( visSettings.innerBranchTilt );
     float obt_rad = degToRad( visSettings.outerBranchTilt );
     
-    float desc_rot = rot + visSettings.branchRotation;
-    if ( desc_rot < 0.0f ) desc_rot += 360.0f;
-    else if ( desc_rot >= 360.0f ) desc_rot -= 360.0f;
+    int desc_rot = rot + visSettings.branchRotation;
+    if ( desc_rot < 0 ) desc_rot += 360;
+    else if ( desc_rot >= 360 ) desc_rot -= 360;
     
     vector< Cluster* > descendants;
     root->getDescendants( descendants );
@@ -1075,7 +1096,7 @@ void Visualizer::drawSubtreeNewMarkStates( Cluster* root, float rot )
 
 // draws the subtree with cluster *root as the root of the tree in the NEW style
 // applies coloring based on deadlocks
-void Visualizer::drawSubtreeNewMarkDeadlocks( Cluster* root, float rot )
+void Visualizer::drawSubtreeNewMarkDeadlocks( Cluster* root, int rot )
 {
   RGB_Color color;
   if ( root->hasDeadlock() )
@@ -1141,9 +1162,9 @@ void Visualizer::drawSubtreeNewMarkDeadlocks( Cluster* root, float rot )
     float ibt_rad = degToRad( visSettings.innerBranchTilt );
     float obt_rad = degToRad( visSettings.outerBranchTilt );
     
-    float desc_rot = rot + visSettings.branchRotation;
-    if ( desc_rot < 0.0f ) desc_rot += 360.0f;
-    else if ( desc_rot >= 360.0f ) desc_rot -= 360.0f;
+    int desc_rot = rot + visSettings.branchRotation;
+    if ( desc_rot < 0 ) desc_rot += 360;
+    else if ( desc_rot >= 360 ) desc_rot -= 360;
     
     vector< Cluster* > descendants;
     root->getDescendants( descendants );
@@ -1248,7 +1269,7 @@ void Visualizer::drawSubtreeNewMarkDeadlocks( Cluster* root, float rot )
 
 // draws the subtree with cluster *root as the root of the tree in the NEW style
 // applies coloring based on marked transitions
-void Visualizer::drawSubtreeNewMarkTransitions( Cluster* root, float rot )
+void Visualizer::drawSubtreeNewMarkTransitions( Cluster* root, int rot )
 {
   RGB_Color color;
   if ( root->hasMarkedTransition() )
@@ -1314,9 +1335,9 @@ void Visualizer::drawSubtreeNewMarkTransitions( Cluster* root, float rot )
     float ibt_rad = degToRad( visSettings.innerBranchTilt );
     float obt_rad = degToRad( visSettings.outerBranchTilt );
     
-    float desc_rot = rot + visSettings.branchRotation;
-    if ( desc_rot < 0.0f ) desc_rot += 360.0f;
-    else if ( desc_rot >= 360.0f ) desc_rot -= 360.0f;
+    int desc_rot = rot + visSettings.branchRotation;
+    if ( desc_rot < 0 ) desc_rot += 360;
+    else if ( desc_rot >= 360 ) desc_rot -= 360;
     
     vector< Cluster* > descendants;
     root->getDescendants( descendants );
@@ -1419,7 +1440,7 @@ void Visualizer::drawSubtreeNewMarkTransitions( Cluster* root, float rot )
   }
 }
 
-void Visualizer::drawStates( Cluster* root )
+void Visualizer::drawStates( Cluster* root, int rot )
 {
   vector< State* > c_ss;
   root->getStates( c_ss );
@@ -1438,6 +1459,10 @@ void Visualizer::drawStates( Cluster* root )
     }
   }
 
+  int desc_rot = rot + visSettings.branchRotation;
+  if ( desc_rot < 0 ) desc_rot += 360;
+  else if ( desc_rot >= 360 ) desc_rot -= 360;
+  
   vector< Cluster* > descs;
   root->getDescendants( descs );
   for ( vector< Cluster* >::iterator descit = descs.begin() ;
@@ -1447,25 +1472,25 @@ void Visualizer::drawStates( Cluster* root )
     {
       // descendant is centered
       glTranslatef( 0.0f, 0.0f, clusterHeight );
-      drawStates( *descit );
+      drawStates( *descit, (descs.size() > 1) ? desc_rot : rot );
       glTranslatef( 0.0f, 0.0f, -clusterHeight );
     }
     else
     {
-      glRotatef( -(**descit).getPosition(), 0.0f, 0.0f, 1.0f );
+      glRotatef( -(**descit).getPosition()-rot, 0.0f, 0.0f, 1.0f );
       glTranslatef( root->getBaseRadius(), 0.0f, clusterHeight );
       glRotatef( visSettings.outerBranchTilt, 0.0f, 1.0f, 0.0f );
 
-      drawStates( *descit );
+      drawStates( *descit, desc_rot );
       
       glRotatef( -visSettings.outerBranchTilt, 0.0f, 1.0f, 0.0f );
       glTranslatef( -root->getBaseRadius(), 0.0f, -clusterHeight );
-      glRotatef( (**descit).getPosition(), 0.0f, 0.0f, 1.0f );
+      glRotatef( (**descit).getPosition()+rot, 0.0f, 0.0f, 1.0f );
     }
   }
 }
 
-void Visualizer::drawStatesMarkStates( Cluster* root )
+void Visualizer::drawStatesMarkStates( Cluster* root, int rot )
 {
   vector< State* > c_ss;
   root->getStates( c_ss );
@@ -1489,6 +1514,10 @@ void Visualizer::drawStatesMarkStates( Cluster* root )
     }
   }
 
+  int desc_rot = rot + visSettings.branchRotation;
+  if ( desc_rot < 0 ) desc_rot += 360;
+  else if ( desc_rot >= 360 ) desc_rot -= 360;
+  
   vector< Cluster* > descs;
   root->getDescendants( descs );
   for ( vector< Cluster* >::iterator descit = descs.begin() ;
@@ -1498,25 +1527,25 @@ void Visualizer::drawStatesMarkStates( Cluster* root )
     {
       // descendant is centered
       glTranslatef( 0.0f, 0.0f, clusterHeight );
-      drawStatesMarkStates( *descit );
+      drawStatesMarkStates( *descit, (descs.size() > 1) ? desc_rot : rot );
       glTranslatef( 0.0f, 0.0f, -clusterHeight );
     }
     else
     {
-      glRotatef( -(**descit).getPosition(), 0.0f, 0.0f, 1.0f );
+      glRotatef( -(**descit).getPosition()-rot, 0.0f, 0.0f, 1.0f );
       glTranslatef( root->getBaseRadius(), 0.0f, clusterHeight );
       glRotatef( visSettings.outerBranchTilt, 0.0f, 1.0f, 0.0f );
 
-      drawStatesMarkStates( *descit );
+      drawStatesMarkStates( *descit, desc_rot );
       
       glRotatef( -visSettings.outerBranchTilt, 0.0f, 1.0f, 0.0f );
       glTranslatef( -root->getBaseRadius(), 0.0f, -clusterHeight );
-      glRotatef( (**descit).getPosition(), 0.0f, 0.0f, 1.0f );
+      glRotatef( (**descit).getPosition()+rot, 0.0f, 0.0f, 1.0f );
     }
   }
 }
 
-void Visualizer::drawStatesMarkDeadlocks( Cluster* root )
+void Visualizer::drawStatesMarkDeadlocks( Cluster* root, int rot )
 {
   vector< State* > c_ss;
   root->getStates( c_ss );
@@ -1540,6 +1569,10 @@ void Visualizer::drawStatesMarkDeadlocks( Cluster* root )
     }
   }
 
+  int desc_rot = rot + visSettings.branchRotation;
+  if ( desc_rot < 0 ) desc_rot += 360;
+  else if ( desc_rot >= 360 ) desc_rot -= 360;
+  
   vector< Cluster* > descs;
   root->getDescendants( descs );
   for ( vector< Cluster* >::iterator descit = descs.begin() ;
@@ -1549,21 +1582,21 @@ void Visualizer::drawStatesMarkDeadlocks( Cluster* root )
     {
       glTranslatef( 0.0f, 0.0f, clusterHeight );
       
-      drawStatesMarkDeadlocks( *descit );
+      drawStatesMarkDeadlocks( *descit, (descs.size() > 1) ? desc_rot : rot );
       
       glTranslatef( 0.0f, 0.0f, -clusterHeight );
     }
     else
     {
-      glRotatef( -(**descit).getPosition(), 0.0f, 0.0f, 1.0f );
+      glRotatef( -(**descit).getPosition()-rot, 0.0f, 0.0f, 1.0f );
       glTranslatef( root->getBaseRadius(), 0.0f, clusterHeight );
       glRotatef( visSettings.outerBranchTilt, 0.0f, 1.0f, 0.0f );
 
-      drawStatesMarkDeadlocks( *descit );
+      drawStatesMarkDeadlocks( *descit, desc_rot );
       
       glRotatef( -visSettings.outerBranchTilt, 0.0f, 1.0f, 0.0f );
       glTranslatef( -root->getBaseRadius(), 0.0f, -clusterHeight );
-      glRotatef( (**descit).getPosition(), 0.0f, 0.0f, 1.0f );
+      glRotatef( (**descit).getPosition()+rot, 0.0f, 0.0f, 1.0f );
     }
   }
 }

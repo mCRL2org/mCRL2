@@ -220,8 +220,9 @@ void MainFrame::setupSettingsPanel( wxPanel* panel )
 	wxT("Node size:") ), 0, lflags, border );
   parsubSizer->Add( nodesizeSpinCtrl, 0, rflags, border );
   
-  branchrotationSpinCtrl = new wxSpinCtrlFloat( panel, myID_SETTINGS_CONTROL,
-      0.0f, 360.0f, 0.1f, 0.0f, wxDefaultPosition, spinctrlSize  );
+  branchrotationSpinCtrl = new wxSpinCtrl( panel, myID_SETTINGS_CONTROL,
+      wxEmptyString, wxDefaultPosition );
+  branchrotationSpinCtrl->SetRange( 0, 360 );
   branchrotationSpinCtrl->SetSizeHints( spinctrlSize, spinctrlSize );
   parsubSizer->Add( new wxStaticText( panel, wxID_ANY, 
 	wxT("Branch rotation:") ), 0, lflags, border );

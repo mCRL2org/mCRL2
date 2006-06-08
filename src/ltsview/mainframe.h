@@ -63,7 +63,7 @@ class MainFrame : public wxFrame
     void	updateProgressDialog( int val, string msg );
   private:
     wxColorButton*    backgroundButton;
-    wxSpinCtrlFloat*  branchrotationSpinCtrl;
+    wxSpinCtrl*	      branchrotationSpinCtrl;
 //    wxSpinCtrl*	      branchspreadSpinCtrl;
 //    wxSpinCtrlFloat*  clusterheightSpinCtrl;
     wxString	      directory;
