@@ -21,7 +21,6 @@ project
        : requirements
           <cxxflags>-std=c++98
           <define>_FILE_OFFSET_BITS=64
-          <address-model>64:<define>AT_64BIT
           <toolset>darwin:<linkflags>"-undefined dynamic_lookup"
        : default-build
           <address-model>$(ADDRESS_MODEL)
