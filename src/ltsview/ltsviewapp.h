@@ -42,6 +42,8 @@ class LTSViewApp : public wxApp, public Mediator
     RGB_Color	  getBackgroundColor() const;
     float	  getHalfStructureHeight() const;
     void	  markAction( string label );
+    void	  notifyRenderingFinished();
+    void	  notifyRenderingStarted();
     virtual bool  OnInit();
     void	  openFile( string fileName );
     void	  removeMarkRule( const int index );

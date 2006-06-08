@@ -48,6 +48,7 @@ MainFrame::MainFrame( Mediator* owner )
 
   SetIcon( wxIcon( main_window ) );
 
+  CreateStatusBar();
   setupMenuBar();
   setupToolBar();
   setupMainArea();
@@ -800,4 +801,16 @@ void MainFrame::setActionLabels( vector< ATerm > &labels )
   }
   strLabels.Sort();
   markTransitionsListBox->Set( strLabels );
+}
+
+void MainFrame::startRendering()
+{
+  SetStatusText( wxT("Rendering...") );
+  Update();
+}
+
+void MainFrame::stopRendering()
+{
+  SetStatusText( wxT("") );
+  Update();
 }

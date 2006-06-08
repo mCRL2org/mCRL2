@@ -22,6 +22,8 @@ class Mediator
     virtual RGB_Color getBackgroundColor() const = 0;
     virtual float     getHalfStructureHeight() const = 0;
     virtual void      markAction( string label ) = 0;
+    virtual void      notifyRenderingFinished() = 0;
+    virtual void      notifyRenderingStarted() = 0;
     virtual void      openFile( string fileName ) = 0;
     virtual void      removeMarkRule( const int index ) = 0;
     virtual void      setMatchAnyMarkRule( bool b ) = 0;

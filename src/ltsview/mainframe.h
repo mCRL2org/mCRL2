@@ -60,6 +60,8 @@ class MainFrame : public wxFrame
     void	setNumberInfo( int nstates, int ntransitions, int nclusters, int nranks );
     void	setVisSettings( VisSettings ss );
     void	showMessage( string title, string text );
+    void	startRendering();
+    void	stopRendering();
     void	updateProgressDialog( int val, string msg );
   private:
     wxColorButton*    backgroundButton;

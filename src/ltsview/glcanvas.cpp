@@ -129,6 +129,7 @@ void GLCanvas::display()
 {
   if ( displayAllowed )
   {
+    mediator->notifyRenderingStarted();
     SetCurrent();
     glPushMatrix();
       glLoadIdentity(); 
@@ -173,6 +174,7 @@ void GLCanvas::display()
       
       SwapBuffers();
     glPopMatrix();
+    mediator->notifyRenderingFinished();
   }
 }
 

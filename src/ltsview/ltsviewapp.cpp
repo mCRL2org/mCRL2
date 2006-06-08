@@ -355,3 +355,13 @@ void LTSViewApp::toggleDisplayWireframe()
   visualizer->toggleDisplayWireframe();
   glCanvas->display();
 }
+
+void LTSViewApp::notifyRenderingStarted()
+{
+  mainFrame->startRendering();
+}
+
+void LTSViewApp::notifyRenderingFinished()
+{
+  mainFrame->stopRendering();
+}
