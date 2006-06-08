@@ -62,14 +62,14 @@ _ = " " ;
 
 actions link bind LIBRARIES
 {
-    $(CONFIG_COMMAND) -L/usr/local/lib   -framework QuickTime -framework IOKit -framework Carbon -framework Cocoa -framework System  -lwx_macd_core-2.6 -lwx_base_carbond-2.6 -lwx_macd_gl-2.6 -undefined dynamic_lookup -L"$(LINKPATH)" -o "$(<)" "$(>)" "$(LIBRARIES)" -l$(FINDLIBS-SA) -l$(FINDLIBS-ST) -framework$(_)$(FRAMEWORK) $(OPTIONS)
+    $(CONFIG_COMMAND)  -L"$(LINKPATH)" -o "$(<)" "$(>)" "$(LIBRARIES)" -l$(FINDLIBS-SA) -l$(FINDLIBS-ST) -framework$(_)$(FRAMEWORK) $(OPTIONS) $(USER_OPTIONS)
     $(NEED_STRIP)strip $(NEED_STRIP)"$(<)"
 }
 
 actions link.dll bind LIBRARIES
 {
     # Temporary change to make boost build work
-    $(CONFIG_COMMAND) -dynamiclib -L/usr/local/lib   -framework QuickTime -framework IOKit -framework Carbon -framework Cocoa -framework System  -lwx_macd_core-2.6 -lwx_base_carbond-2.6 -lwx_macd_gl-2.6 -undefined dynamic_lookup -L"$(LINKPATH)" -o "$(<)" "$(>)" "$(LIBRARIES)" -l$(FINDLIBS-SA) -l$(FINDLIBS-ST) -framework$(_)$(FRAMEWORK) $(OPTIONS) 
+    $(CONFIG_COMMAND) -dynamiclib -L"$(LINKPATH)" -o "$(<)" "$(>)" "$(LIBRARIES)" -l$(FINDLIBS-SA) -l$(FINDLIBS-ST) -framework$(_)$(FRAMEWORK) $(OPTIONS) $(USER_OPTIONS)
 }
 
 actions piecemeal archive

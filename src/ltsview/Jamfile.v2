@@ -34,11 +34,12 @@ exe ltsview
         fileloader.cpp
         visualizer.cpp
         utils.cpp
-        fsm
-        /libraries/wx_extension//wx_extension
-        /libraries/temporary//lowlevel
-        /libraries/aterm//aterm
-      : <implicit-dependency>fsm
+      : <library>fsm
+        <library>OpenGL
+        <library>/libraries/wx_extension//wx_extension
+        <library>/libraries/temporary//lowlevel
+        <library>/libraries/aterm//aterm
+        <implicit-dependency>fsm
         <wx>gl
       ;
 
