@@ -32,9 +32,9 @@ class Trace
 		ATermAppl getTime();
 
 		void load(std::istream &is, TraceFormat tf = tfUnknown);
-		void load(std::string &filename, TraceFormat tf = tfUnknown);
+		bool load(std::string &filename, TraceFormat tf = tfUnknown);
 		void save(std::ostream &os, TraceFormat tf = tfMcrl2);
-		void save(std::string &filename, TraceFormat tf = tfMcrl2);
+		bool save(std::string &filename, TraceFormat tf = tfMcrl2);
 
 	private:
 		ATermAppl *states;

@@ -1649,7 +1649,7 @@ void RewriterCompilingInnermost::CompileRewriteSystem(ATermAppl DataEqnSpec)
       "static AFun dataapplAFun;\n"
       "static AFun opidAFun;\n"
          );
-  for (int i=0; i<=max_arity; i++)
+  for (int i=0; i<=(max_arity==0?1:max_arity); i++)
   {
   fprintf(f,      "static AFun appl%i;\n",i);
   fprintf(f,  "typedef ATermAppl (*ftype%i)(",i);
@@ -2129,25 +2129,43 @@ void RewriterCompilingInnermost::CompileRewriteSystem(ATermAppl DataEqnSpec)
          );
 
   fclose(f);
-  fprintf(stderr,"Compiling rewriter...");fflush(stderr);
+  gsVerboseMsg("compiling rewriter...\n");
   sprintf(t,INNERC_COMPILE_COMMAND,s);
+  gsVerboseMsg("%s\n",t);
   system(t);
+  gsVerboseMsg("linking rewriter...\n");
   sprintf(t,INNERC_LINK_COMMAND,s,s);
+  gsVerboseMsg("%s\n",t);
   system(t);
-  fprintf(stderr,"done.\n");
 
   sprintf(t,"./%s.so",s);
   if ( (h = dlopen(t,RTLD_NOW)) == NULL )
   {
-    fprintf(stderr,"error opening dll\n%s\n",dlerror());
+    gsErrorMsg("cannot load rewriter: %s\n",dlerror());
     exit(1);
   }
   so_rewr_init = (void (*)()) dlsym(h,"rewrite_init");
+  if ( so_rewr_init    == NULL ) gsErrorMsg("%s\n",dlerror());
   so_rewr = (ATermAppl (*)(ATermAppl)) dlsym(h,"rewrite");
+  if ( so_rewr         == NULL ) gsErrorMsg("%s\n",dlerror());
   so_set_subst = (void (*)(ATermAppl, ATerm)) dlsym(h,"set_subst");
+  if ( so_set_subst    == NULL ) gsErrorMsg("%s\n",dlerror());
   so_get_subst = (ATerm (*)(ATermAppl)) dlsym(h,"get_subst");
+  if ( so_get_subst    == NULL ) gsErrorMsg("%s\n",dlerror());
   so_clear_subst = (void (*)(ATermAppl)) dlsym(h,"clear_subst");
+  if ( so_clear_subst  == NULL ) gsErrorMsg("%s\n",dlerror());
   so_clear_substs = (void (*)()) dlsym(h,"clear_substs");
+  if ( so_clear_substs == NULL ) gsErrorMsg("%s\n",dlerror());
+  if ( (so_rewr_init    == NULL ) ||
+       (so_rewr         == NULL ) ||
+       (so_set_subst    == NULL ) ||
+       (so_get_subst    == NULL ) ||
+       (so_clear_subst  == NULL ) ||
+       (so_clear_substs == NULL ) )
+  {
+    gsErrorMsg("cannot load rewriter functions\n");
+    exit(1);
+  }
 
   so_rewr_init();
 

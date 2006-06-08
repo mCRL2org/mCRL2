@@ -289,7 +289,7 @@ static bool occurs_in(ATermAppl name, ATermList ma)
   return false;
 }
 
-static void save_trace(string &filename, ATerm state, ATermTable backpointers, NextState *nstate, ATerm extra_state = NULL, ATermAppl extra_transition = NULL)
+static bool save_trace(string &filename, ATerm state, ATermTable backpointers, NextState *nstate, ATerm extra_state = NULL, ATermAppl extra_transition = NULL)
 {
   ATerm s = state;
   ATerm ns;
@@ -315,7 +315,7 @@ static void save_trace(string &filename, ATerm state, ATermTable backpointers, N
     trace.setState(nstate->makeStateVector(ATgetFirst(e)));
   }
   
-  trace.save(filename);
+  return trace.save(filename);
 }
 
 static void check_action_trace(ATerm OldState, ATermAppl Transition, ATerm NewState)
@@ -334,11 +334,16 @@ static void check_action_trace(ATerm OldState, ATermAppl Transition, ATerm NewSt
           stringstream ss;
           ss << basefilename << "_act_" << tracecnt << "_" << ATgetName(ATgetAFun(trace_actions[j])) << ".trc";
           string sss(ss.str());
-          save_trace(sss,OldState,backpointers,nstate,NewState,Transition);
+          bool saved_ok = save_trace(sss,OldState,backpointers,nstate,NewState,Transition);
 
           if ( detect_action || gsVerbose )
           {
-            gsfprintf(stderr,"detect: action '%P' found and saved to '%s_act_%lu_%P.trc'.\n",trace_actions[j],basefilename,tracecnt,trace_actions[j]);
+            if ( saved_ok )
+            {
+              gsfprintf(stderr,"detect: action '%P' found and saved to '%s_act_%lu_%P.trc'.\n",trace_actions[j],basefilename,tracecnt,trace_actions[j]);
+            } else {
+              gsfprintf(stderr,"detect: action '%P' found, but could not be saved to '%s_act_%lu_%P.trc'.\n",trace_actions[j],basefilename,tracecnt,trace_actions[j]);
+            }
             fflush(stderr);
           }
           tracecnt++;
@@ -361,11 +366,16 @@ static void check_deadlock_trace(ATerm state)
       stringstream ss;
       ss << basefilename << "_dlk_" << tracecnt << ".trc";
       string sss(ss.str());
-      save_trace(sss,state,backpointers,nstate);
+      bool saved_ok = save_trace(sss,state,backpointers,nstate);
 
       if ( detect_deadlock || gsVerbose )
       {
-        fprintf(stderr,"deadlock-detect: deadlock found and saved to '%s_dlk_%lu.trc'.\n",basefilename,tracecnt);
+        if ( saved_ok )
+        {
+          fprintf(stderr,"deadlock-detect: deadlock found and saved to '%s_dlk_%lu.trc'.\n",basefilename,tracecnt);
+        } else {
+          fprintf(stderr,"deadlock-detect: deadlock found, but could not be saved to '%s_dlk_%lu.trc'.\n",basefilename,tracecnt);
+        }
         fflush(stderr);
       }
       tracecnt++;

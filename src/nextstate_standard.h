@@ -82,6 +82,8 @@ class NextStateStandard : public NextState
 		ns_info info;
 		unsigned int next_id;
 		unsigned int current_id;
+		
+		bool stateAFun_made;
 
 		bool clean_up_enum_obj;
 		bool usedummies;

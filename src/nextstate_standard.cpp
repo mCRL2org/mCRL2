@@ -151,6 +151,13 @@ ATermAppl NextStateStandard::getStateArgument(ATerm state, int index)
 
 ATermAppl NextStateStandard::makeStateVector(ATerm state)
 {
+	if ( !stateAFun_made )
+	{
+		stateAFun_made = true;
+		info.stateAFun = ATmakeAFun("STATE",info.statelen,ATfalse);
+		ATprotectAFun(info.stateAFun);
+	}
+
 	// XXX can be done more efficiently in some cases
 	for (int i=0; i<info.statelen; i++)
 	{
@@ -390,8 +397,11 @@ NextStateStandard::NextStateStandard(ATermAppl spec, bool allow_free_vars, int s
 	info.statelen = ATgetLength(pars);
 	if ( info.stateformat == GS_STATE_VECTOR )
 	{
+		stateAFun_made = true;
 		info.stateAFun = ATmakeAFun("STATE",info.statelen,ATfalse);
 		ATprotectAFun(info.stateAFun);
+	} else {
+		stateAFun_made = false;
 	}
 
 	info.procvars = ATLgetArgument(ATAgetArgument(current_spec,5),1);
@@ -492,7 +502,10 @@ NextStateStandard::~NextStateStandard()
 	ATunprotectAFun(info.pairAFun);
 
 	ATunprotectList(&pars);
-	ATunprotectAFun(info.stateAFun);
+	if ( stateAFun_made )
+	{
+		ATunprotectAFun(info.stateAFun);
+	}
 
 	ATunprotectList(&info.procvars);
 	
@@ -627,14 +640,21 @@ ATermAppl NextStateGeneratorStandard::rewrActionArgs(ATermAppl act)
 
 void NextStateGeneratorStandard::SetTreeStateVars(ATerm tree, ATermList *vars)
 {
-	if ( (ATgetType(tree) == AT_APPL) && ATisEqualAFun(ATgetAFun((ATermAppl) tree),info.pairAFun) )
+	if ( ATgetType(tree) == AT_APPL )
 	{
-		SetTreeStateVars(ATgetArgument((ATermAppl) tree,0),vars);
-		SetTreeStateVars(ATgetArgument((ATermAppl) tree,1),vars);
-	} else {
-		info.rewr_obj->setSubstitution((ATermAppl) ATgetFirst(*vars),tree);
-		*vars = ATgetNext(*vars);
+		if ( ATisEqual(tree,info.nil) )
+		{
+			return;
+		} else if ( ATisEqualAFun(ATgetAFun((ATermAppl) tree),info.pairAFun) )
+		{
+			SetTreeStateVars(ATgetArgument((ATermAppl) tree,0),vars);
+			SetTreeStateVars(ATgetArgument((ATermAppl) tree,1),vars);
+			return;
+		}
 	}
+
+	info.rewr_obj->setSubstitution((ATermAppl) ATgetFirst(*vars),tree);
+	*vars = ATgetNext(*vars);
 }
 
 NextStateGeneratorStandard::NextStateGeneratorStandard(ATerm State, ns_info &Info, unsigned int identifier)

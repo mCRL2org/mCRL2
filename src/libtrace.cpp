@@ -351,13 +351,20 @@ void Trace::load(istream &is, TraceFormat tf)
 	}
 }
 
-void Trace::load(string &filename, TraceFormat tf)
+bool Trace::load(string &filename, TraceFormat tf)
 {
 	ifstream is(filename.c_str(),ifstream::binary|ifstream::in);
+
+	if ( !is.is_open() )
+	{
+		return false;
+	}
 
 	load(is, tf);
 
 	is.close();
+
+	return true;
 }
 
 void Trace::saveMcrl2(ostream &os)
@@ -420,11 +427,17 @@ void Trace::save(ostream &os, TraceFormat tf)
 	}
 }
 
-void Trace::save(string &filename, TraceFormat tf)
+bool Trace::save(string &filename, TraceFormat tf)
 {
 	ofstream os(filename.c_str(),ofstream::binary|ofstream::out|ofstream::trunc);
+	if ( !os.is_open() )
+	{
+		return false;
+	}
 
 	save(os, tf);
 
 	os.close();
+
+	return true;
 }

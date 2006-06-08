@@ -6202,7 +6202,11 @@ R_SLDFLAGS=$R_SLDFLAGS
 
 
 if test $BUILD_ATERM; then
-  IATERM_CPPFLAGS="-I$INCLUDE_DIR/aterm"
+  if test "$ADDRESS_MODEL" = "64"; then
+    IATERM_CPPFLAGS="-DAT_64BIT -I$INCLUDE_DIR/aterm"
+  else
+    IATERM_CPPFLAGS="-I$INCLUDE_DIR/aterm"
+  fi
 
   IATERM_LDFLAGS="-L$LIB_DIR -lATerm"
 
