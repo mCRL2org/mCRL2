@@ -21,7 +21,6 @@ class LTSViewApp : public wxApp, public Mediator
 {
   private:
     int		      currentJobNr;
-    FileLoader*	      fileLoader;
     GLCanvas*	      glCanvas;
     vector< string >  jobNames;
     LTS*	      lts;
@@ -44,6 +43,7 @@ class LTSViewApp : public wxApp, public Mediator
     void	  markAction( string label );
     void	  notifyRenderingFinished();
     void	  notifyRenderingStarted();
+    virtual int   OnExit();
     virtual bool  OnInit();
     void	  openFile( string fileName );
     void	  removeMarkRule( const int index );

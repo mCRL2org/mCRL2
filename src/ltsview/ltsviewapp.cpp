@@ -5,7 +5,6 @@ IMPLEMENT_APP_NO_MAIN( LTSViewApp )
 bool LTSViewApp::OnInit()
 {
   mainFrame	  = new MainFrame( this );
-  fileLoader	  = new FileLoader( this );
   visualizer	  = new Visualizer( this );
   lts		  = NULL;
   glCanvas	  = mainFrame->getGLCanvas();
@@ -60,6 +59,13 @@ int main(int argc, char **argv) {
 }
 #endif
 
+int LTSViewApp::OnExit()
+{
+  if ( lts != NULL ) delete lts;
+  delete visualizer;
+  return 0;
+}
+
 void LTSViewApp::openFile( string fileName )
 {
   glCanvas->disableDisplay();
@@ -69,7 +75,7 @@ void LTSViewApp::openFile( string fileName )
   LTS* newlts = new LTS( this );
   try
   {
-    fileLoader->loadFile( fileName, newlts );
+    FileLoader::loadFile( fileName, newlts );
   }
   catch ( string msg )
   {

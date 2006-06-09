@@ -1,14 +1,5 @@
 #include "fileloader.h"
 
-FileLoader::FileLoader( Mediator* owner )
-{
-  mediator = owner;
-}
-
-FileLoader::~FileLoader()
-{
-}
-
 void FileLoader::loadFile( const string fileName, LTS* const lts )
 // pre: lts points to an empty LTS object
 {

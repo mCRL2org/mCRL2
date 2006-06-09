@@ -14,12 +14,9 @@ using namespace std;
 class FileLoader
 {
   public:
-    FileLoader( Mediator* owner );
-    ~FileLoader();
-    void loadFile( const string fileName, LTS* const lts );
+    static void loadFile( const string fileName, LTS* const lts );
   private:
-    Mediator* mediator;
-    void loadFSMFile( const string fileName, LTS* const lts );
+    static void loadFSMFile( const string fileName, LTS* const lts );
 };
 
 #endif // LOADER_H

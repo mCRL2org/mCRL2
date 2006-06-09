@@ -28,17 +28,7 @@ GLCanvas::GLCanvas( Mediator* owner, wxWindow* parent, wxWindowID id,
         : wxGLCanvas( parent, id, pos, size, wxSUNKEN_BORDER )
 {
   mediator = owner;
-}
-
-GLCanvas::~GLCanvas()
-{
-}
-
-void GLCanvas::initialize()
-{
-  setActiveTool( myID_SELECT );
   displayAllowed = true;
-  
   angleX = 0.0f;
   angleY = 0.0f;
   moveVector.x = 0.0f;
@@ -47,14 +37,21 @@ void GLCanvas::initialize()
   startPosZ = 0.0f;
   startPosZDefault = 0.0f;
   farClippingPlane = 0.0f;
-  
+
+  setActiveTool( myID_SELECT );
+}
+
+GLCanvas::~GLCanvas()
+{
+}
+
+void GLCanvas::initialize()
+{
   SetCurrent();
 
   glDepthFunc( GL_LEQUAL );
   glShadeModel( GL_SMOOTH );
 
-  glPolygonMode( GL_FRONT, GL_LINE );
-  
   GLfloat gray[] = { 0.35f, 0.35f, 0.35f, 1.0f };
   GLfloat light_pos[] = { 50.0f, 50.0f, 50.0f, 1.0f };
   glEnable( GL_NORMALIZE );
