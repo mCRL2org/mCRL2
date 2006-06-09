@@ -8,6 +8,9 @@ path-constant BUILD_TOP       : ./bin ;
 path-constant BOOST           : ./boost ;
 path-constant REVISION_HEADER : ./src/mcrl2_revision.h ;
 
+# Deployment target for Mac OS X
+modules.poke : MACOSX_DEPLOYMENT_TARGET : 10.3 ;
+
 if ! [ path.exists $(TOP)/config.jam ] {
   ECHO "Please configure your source tree!" ;
 
@@ -45,7 +48,6 @@ tools = [ MATCH src/(.*)/.* : [ glob src/*/Jamfile.v2 src/*/build/Jamfile.v2 ] ]
 
 # Register tool projects
 for tool in $(tools) {
-  # Make tool project known under a nice name
   use-project /tools/$(tool) : src/$(tool) ;
 }
 
@@ -53,7 +55,6 @@ libraries = [ MATCH src/libraries/(.*)/build/.* : [ glob src/libraries/*/build/J
 
 # Register library projects
 for library in $(libraries) {
-  # Make tool project known under a nice name
   use-project /libraries/$(library) : src/libraries/$(library)/build ;
 }
 
