@@ -40,6 +40,11 @@
     ATermAppl v_variable_1, v_variable_2, v_expression_1, v_expression_2;
     bool v_next_1 = true, v_next_2 = true;
 
+    v_variable_1 = 0;
+    v_variable_2 = 0;
+    v_expression_1 = 0;
+    v_expression_2 = 0;
+
     while (!ATisEmpty(a_variables)) {
       v_variable = ATAgetFirst(a_variables);
       a_variables = ATgetNext(a_variables);
@@ -88,6 +93,11 @@
     ATermAppl v_assignment_1, v_assignment_2;
     ATermAppl v_variable_1, v_variable_2, v_expression_1, v_expression_2;
     bool v_next_1 = true, v_next_2 = true;
+
+    v_variable_1 = 0;
+    v_variable_2 = 0;
+    v_expression_1 = 0;
+    v_expression_2 = 0;
 
     while (!ATisEmpty(a_variables)) {
       v_variable = ATAgetFirst(a_variables);
@@ -244,6 +254,15 @@
           gsfprintf(stderr, ".");
           v_summand_number++;
           continue;
+        } else if (f_commutes[(f_number_of_summands * v_summand_number) + a_summand_number] == -1) {
+          if (f_check_all) {
+            gsfprintf(stderr, "-");
+          } else {
+            gsfprintf(stderr, "Not confluent with summand %d.", v_summand_number);
+          }
+          v_summand_number++;
+          v_is_confluent = false;
+          continue;
         }
 
         if (f_disjointness_checker.disjoint(v_summand_number, a_summand_number)) {
@@ -262,6 +281,7 @@
             f_commutes[(f_number_of_summands * a_summand_number) + v_summand_number] = 1;
           } else {
             v_is_confluent = false;
+            f_commutes[(f_number_of_summands * a_summand_number) + v_summand_number] = -1;
             if (f_check_all) {
               gsfprintf(stderr, "-");
             } else {
@@ -368,6 +388,7 @@
         v_lpe = add_ctau_action(v_lpe);
       }
       free(f_commutes);
+      f_commutes = 0;
 
       return v_lpe;
     }
