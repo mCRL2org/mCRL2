@@ -433,6 +433,14 @@ static int existsort(ATermAppl sortterm)
   return 0;
 }
 
+static int existsorts(ATermList sorts)
+{ for( ; (!ATisEmpty(sorts)) ; sorts=ATgetNext(sorts))
+  { if (!existsort(ATAgetFirst(sorts)))
+    return 0;
+  }
+  return 1;
+}
+
 static void insertsort(ATermAppl sortterm, specificationbasictype *spec)
 { 
 
@@ -5511,7 +5519,8 @@ static ATermList getActionSorts(ATermList actionlist)
 
   for(resultsorts=ATempty ; actionlist!=ATempty ; 
                   actionlist=ATgetNext(actionlist))
-  { resultsorts=ATconcat(
+  { 
+    resultsorts=ATconcat(
                    ATLgetArgument(
                          ATAgetArgument(ATAgetFirst(actionlist),0),
                          1),
@@ -5571,7 +5580,8 @@ static ATermList cluster_actions(
       }
 
       if (binary==0)
-      { enumeratedtype=generate_enumerateddatatype(
+      { 
+        enumeratedtype=generate_enumerateddatatype(
                       n,actionsorts,getsorts(pars),spec); 
       }
       else 
@@ -6174,7 +6184,8 @@ static ATermAppl rename_action(ATermList renamings, ATermAppl action)
   for ( ; renamings!=ATempty ; renamings=ATgetNext(renamings))
   { ATermAppl renaming=ATAgetFirst(renamings);
     if (strequal(s,ATSgetArgument(renaming,0)))
-    { return gsMakeAction(
+    { assert(existsorts(ATLgetArgument(actionId,1)));
+      return gsMakeAction(
                    gsMakeActId(
                          gsString2ATermAppl(ATSgetArgument(renaming,1)),
                          ATLgetArgument(actionId,1)),
@@ -6424,7 +6435,8 @@ static ATermAppl can_communicate(ATermList m,ATermList C)
       if (rhs==gsMakeTau())
       { return gsMakeNil();
       }
-      return gsMakeActId(rhs,ATLgetArgument(ATAgetFirst(m),1));
+      assert(existsorts(ATLgetArgument(ATAgetArgument(ATAgetFirst(m),0),1)));
+      return gsMakeActId(rhs,ATLgetArgument(ATAgetArgument(ATAgetFirst(m),0),1));
     }
   }
   return NULL;

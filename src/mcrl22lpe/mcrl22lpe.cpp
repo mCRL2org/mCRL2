@@ -261,7 +261,7 @@ static bool get_squadt_parameters(int argc,
 {
   std::string infilename;
   const unsigned int lpd_file_for_input=0;
-  cerr << "Ready to start configuration\n";
+
   sip::tool::capabilities& cp = tc.get_tool_capabilities();
   cp.add_input_combination(lpd_file_for_input, "Transformation", "mcrl2");
   if (tc.activate(argc,argv)) 
@@ -306,11 +306,10 @@ static bool get_squadt_parameters(int argc,
     tool_display::sptr display(new layout::tool_display);
     layout::manager::aptr layout_manager = layout::vertical_box::create();
 
-
     layout_manager->add(new label(" "),layout::left);
     // box to select the outputfile
     layout::horizontal_box* outputfilename_box = new layout::horizontal_box();
-    layout_manager->add(outputfilename_box);
+    layout_manager->add(outputfilename_box,layout::left);
     outputfilename_box->add(new label("Output file name: "),middle);
     assert(infilename.size()>6);  // infilename has the shape "... .mcrl2"
     std::string suggestedoutfilename(infilename,0,infilename.size()-6);
@@ -325,13 +324,13 @@ static bool get_squadt_parameters(int argc,
     layout_manager->add(linearisation_method_box);
     linearisation_method_box->add(new label("Linearisation method: "),middle);
     radio_button *select_regular=new radio_button("Regular");
-    // linearisation_method_box->add(select_regular,middle);
+    linearisation_method_box->add(select_regular,middle);
     radio_button *select_regular2=new radio_button("Regular2",select_regular);
-    // linearisation_method_box->add(select_regular2,middle);
+    linearisation_method_box->add(select_regular2,middle);
     radio_button *select_stack=new radio_button("Stack",select_regular2);
-    // linearisation_method_box->add(select_stack,middle);
+    linearisation_method_box->add(select_stack,middle);
     radio_button *select_expansion=new radio_button("Expansion",select_stack);
-    // linearisation_method_box->add(select_expansion,middle);
+    linearisation_method_box->add(select_expansion,middle);
 
     layout_manager->add(new label(" "),layout::left);
     // two columns to select the linearisation options of the tool
@@ -370,15 +369,15 @@ static bool get_squadt_parameters(int argc,
     horizontal_box *phases_box = new horizontal_box();
     layout_manager->add(phases_box);
     radio_button *all_phases=new radio_button("Linearize");
-    // phases_box->add(all_phases,middle);
+    phases_box->add(all_phases,middle);
     radio_button *parse_phase=new radio_button("Parse input",all_phases);
-    // phases_box->add(parse_phase,middle);
+    phases_box->add(parse_phase,middle);
     radio_button *typecheck_phase=new radio_button("Typecheck input",parse_phase);
-    // phases_box->add(parse_phase,middle);
+    phases_box->add(parse_phase,middle);
     radio_button *alpha_phase=new radio_button("Apply alphabet axioms",typecheck_phase);
-    // phases_box->add(alpha_phase,middle);
+    phases_box->add(alpha_phase,middle);
     radio_button *data_phase=new radio_button("Implement data",alpha_phase);
-    // phases_box->add(data_phase,middle);
+    phases_box->add(data_phase,middle);
 
 
     // The ok button must be put at the rightmost lowermost place
@@ -453,10 +452,8 @@ static bool get_squadt_parameters(int argc,
 
     return 0;
   }
-  else 
-  {
-    return parse_command_line(argc,argv,lin_options);
-  }
+  // else squadt is not active, so parse the commandline
+  return parse_command_line(argc,argv,lin_options);
 }
 #endif
 
@@ -520,7 +517,7 @@ int main(int argc, char *argv[])
 ATermAppl linearise_file(t_lin_options &lin_options)
 {
   ATermAppl result = NULL;
-  bool end_phase = lin_options.opt_check_only?phTypeCheck:lin_options.opt_end_phase;
+  t_phase end_phase = lin_options.opt_check_only?phTypeCheck:lin_options.opt_end_phase;
   //parse specification
   if (lin_options.infilename == "") {
     //parse specification from stdin
@@ -542,6 +539,7 @@ ATermAppl linearise_file(t_lin_options &lin_options)
     gsErrorMsg("parsing failed\n");
     return NULL;
   }
+
   if (end_phase == phParse) {
     return result;
   }
