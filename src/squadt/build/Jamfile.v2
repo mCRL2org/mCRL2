@@ -35,6 +35,8 @@ alias install
         install-schemas
       ;
 
+explicit install ;
+
 install_with_libraries install-squadt : squadt ;
 
 install_data install-images : [ glob pixmaps/logo.jpg ] : images ;
