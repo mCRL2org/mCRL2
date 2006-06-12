@@ -8,12 +8,12 @@ project text_reader
        <include>../..
     ;
 
-obj text_reader.o
-    : exception.cpp
+lib xml2pp 
+    : xml2pp_exception.cpp
     ;
 
 alias text_reader
-    : text_reader.o
+    : xml2pp
     :
     :
     : <library>/site-config//xml2
