@@ -217,66 +217,101 @@ void Visualizer::drawLTS( Point3D viewpoint )
     
     glPushMatrix();
       glLoadIdentity();
-
-      switch ( markStyle )
+      if ( visSettings.newStyle )
       {
-	case MARK_DEADLOCKS:
-	  if ( visSettings.newStyle )
-	    drawSubtreeNewMarkDeadlocks( lts->getInitialState()->getCluster(), 0
-		);
-	  else
-	    drawSubtreeMarkDeadlocks( lts->getInitialState()->getCluster(),
-		true, 0 );
-	  break;
-	  
-	case MARK_STATES:
-	  if ( visSettings.newStyle )
+	sin_ibt = float( sin( degToRad( visSettings.innerBranchTilt ) ) );
+	cos_ibt = float( cos( degToRad( visSettings.innerBranchTilt ) ) );
+	sin_obt = float( sin( degToRad( visSettings.outerBranchTilt ) ) );
+	cos_obt = float( cos( degToRad( visSettings.outerBranchTilt ) ) );
+	switch ( markStyle )
+	{
+	  case MARK_DEADLOCKS:
+	    drawSubtreeNewMarkDeadlocks( lts->getInitialState()->getCluster(),
+		0);
+	    break;
+	    
+	  case MARK_STATES:
 	    drawSubtreeNewMarkStates( lts->getInitialState()->getCluster(), 0);
-	  else
-	    drawSubtreeMarkStates( lts->getInitialState()->getCluster(), true, 0 );
-	  break;
+	    break;
 
-	case MARK_TRANSITIONS:
-	  if ( visSettings.newStyle )
+	  case MARK_TRANSITIONS:
 	    drawSubtreeNewMarkTransitions( lts->getInitialState()->getCluster(),
 		0);
-	  else
+	    break;
+
+	  case NO_MARKS:
+	  default:
+	    // coloring based on interpolation settings, so compute delta_col,
+	    // i.e. the color difference between clusters at consecutive levels in
+	    // the structure.
+	    RGB_Color rgb1 = visSettings.interpolateColor1;
+	    RGB_Color rgb2 = visSettings.interpolateColor2;
+	    HSV_Color hsv1 = RGBtoHSV( rgb1 );
+	    HSV_Color hsv2 = RGBtoHSV( rgb2 );
+	    if ( rgb1.r == rgb1.g && rgb1.g == rgb1.b ) hsv1.h = hsv2.h;
+	    if ( rgb2.r == rgb2.g && rgb2.g == rgb2.b ) hsv2.h = hsv1.h;
+	    float delta_h1 = hsv2.h - hsv1.h;
+	    float delta_h2 = ((delta_h1 < 0.0f) ? 1.0f : -1.0f) * (360.0f - fabs(delta_h1));
+	    
+	    delta_h1 /= (lts->getNumberOfRanks() - 1);
+	    delta_h2 /= (lts->getNumberOfRanks() - 1);
+	    
+	    if ( visSettings.longInterpolation )
+	      delta_col.h = ( fabs(delta_h1) < fabs(delta_h2) ) ? delta_h2 : delta_h1;
+	    else
+	      delta_col.h = ( fabs(delta_h1) < fabs(delta_h2) ) ? delta_h1 : delta_h2;
+	    delta_col.s = (hsv2.s - hsv1.s) / (lts->getNumberOfRanks() - 1);
+	    delta_col.v = (hsv2.v - hsv1.v) / (lts->getNumberOfRanks() - 1);
+	    
+	    drawSubtreeNew( lts->getInitialState()->getCluster(), hsv1, 0 );
+	    break;
+	}
+      }
+      else
+      {
+	switch ( markStyle )
+	{
+	  case MARK_DEADLOCKS:
+	    drawSubtreeMarkDeadlocks( lts->getInitialState()->getCluster(),
+		true, 0 );
+	    break;
+	    
+	  case MARK_STATES:
+	    drawSubtreeMarkStates( lts->getInitialState()->getCluster(), true, 0 );
+	    break;
+
+	  case MARK_TRANSITIONS:
 	    drawSubtreeMarkTransitions( lts->getInitialState()->getCluster(),
 		true, 0 );
-	  break;
+	    break;
 
-	case NO_MARKS:
-	default:
-	  // coloring based on interpolation settings, so compute delta_col,
-	  // i.e. the color difference between clusters at consecutive levels in
-	  // the structure.
-	  RGB_Color rgb1 = visSettings.interpolateColor1;
-	  RGB_Color rgb2 = visSettings.interpolateColor2;
-	  HSV_Color hsv1 = RGBtoHSV( rgb1 );
-	  HSV_Color hsv2 = RGBtoHSV( rgb2 );
-	  if ( rgb1.r == rgb1.g && rgb1.g == rgb1.b ) hsv1.h = hsv2.h;
-	  if ( rgb2.r == rgb2.g && rgb2.g == rgb2.b ) hsv2.h = hsv1.h;
-	  float delta_h1 = hsv2.h - hsv1.h;
-	  float delta_h2 = ((delta_h1 < 0.0f) ? 1.0f : -1.0f) * (360.0f - fabs(delta_h1));
-	  
-	  delta_h1 /= (lts->getNumberOfRanks() - 1);
-	  delta_h2 /= (lts->getNumberOfRanks() - 1);
-	  
-	  HSV_Color delta_col;
-	  if ( visSettings.longInterpolation )
-	    delta_col.h = ( fabs(delta_h1) < fabs(delta_h2) ) ? delta_h2 : delta_h1;
-	  else
-	    delta_col.h = ( fabs(delta_h1) < fabs(delta_h2) ) ? delta_h1 : delta_h2;
-	  delta_col.s = (hsv2.s - hsv1.s) / (lts->getNumberOfRanks() - 1);
-	  delta_col.v = (hsv2.v - hsv1.v) / (lts->getNumberOfRanks() - 1);
-	  
-	  if ( visSettings.newStyle )
-	    drawSubtreeNew( lts->getInitialState()->getCluster(), hsv1,
-		delta_col, 0 );
-	  else 
-	    drawSubtree( lts->getInitialState()->getCluster(), true, hsv1,
-		delta_col, 0 );
-	  break;
+	  case NO_MARKS:
+	  default:
+	    // coloring based on interpolation settings, so compute delta_col,
+	    // i.e. the color difference between clusters at consecutive levels in
+	    // the structure.
+	    RGB_Color rgb1 = visSettings.interpolateColor1;
+	    RGB_Color rgb2 = visSettings.interpolateColor2;
+	    HSV_Color hsv1 = RGBtoHSV( rgb1 );
+	    HSV_Color hsv2 = RGBtoHSV( rgb2 );
+	    if ( rgb1.r == rgb1.g && rgb1.g == rgb1.b ) hsv1.h = hsv2.h;
+	    if ( rgb2.r == rgb2.g && rgb2.g == rgb2.b ) hsv2.h = hsv1.h;
+	    float delta_h1 = hsv2.h - hsv1.h;
+	    float delta_h2 = ((delta_h1 < 0.0f) ? 1.0f : -1.0f) * (360.0f - fabs(delta_h1));
+	    
+	    delta_h1 /= (lts->getNumberOfRanks() - 1);
+	    delta_h2 /= (lts->getNumberOfRanks() - 1);
+	    
+	    if ( visSettings.longInterpolation )
+	      delta_col.h = ( fabs(delta_h1) < fabs(delta_h2) ) ? delta_h2 : delta_h1;
+	    else
+	      delta_col.h = ( fabs(delta_h1) < fabs(delta_h2) ) ? delta_h1 : delta_h2;
+	    delta_col.s = (hsv2.s - hsv1.s) / (lts->getNumberOfRanks() - 1);
+	    delta_col.v = (hsv2.v - hsv1.v) / (lts->getNumberOfRanks() - 1);
+	    
+	    drawSubtree( lts->getInitialState()->getCluster(), true, hsv1, 0 );
+	    break;
+	}
       }
     glPopMatrix();
     refreshPrimitives = false;
@@ -339,14 +374,12 @@ void Visualizer::computeSubtreeBounds( Cluster* root, float &boundWidth, float
     for ( vector< Cluster* >::iterator descit = descendants.begin() ; descit !=
 	descendants.end() ; ++descit )
     {
-      Cluster* desc = *descit;
-      
-      if ( desc->getPosition() < -0.9f )
+      if ( (**descit).getPosition() < -0.9f )
       {
 	// descendant is centered
 	float descWidth = 0.0f;
 	float descHeight = 0.0f;
-	computeSubtreeBounds( desc, descWidth, descHeight );
+	computeSubtreeBounds( *descit, descWidth, descHeight );
 	boundWidth = max( boundWidth, descWidth );
 	boundHeight = max( boundHeight, descHeight );
       }
@@ -354,7 +387,7 @@ void Visualizer::computeSubtreeBounds( Cluster* root, float &boundWidth, float
       {
 	float descWidth = 0.0f;
 	float descHeight = 0.0f;
-	computeSubtreeBounds( desc, descWidth, descHeight );
+	computeSubtreeBounds( *descit, descWidth, descHeight );
 	boundWidth = max( boundWidth, root->getBaseRadius() + descHeight *
 	    sin_obt + descWidth * cos_obt );
 	boundHeight = max( boundHeight, descHeight * cos_obt + descWidth *
@@ -368,8 +401,8 @@ void Visualizer::computeSubtreeBounds( Cluster* root, float &boundWidth, float
 
 // draws the subtree with cluster *root as the root of the tree
 // applies coloring based on interpolation settings
-void Visualizer::drawSubtree( Cluster* root, bool topClosed, HSV_Color col,
-    HSV_Color delta_col, int rot )
+void Visualizer::drawSubtree( Cluster* root, bool topClosed, HSV_Color col, int
+    rot )
 {
   if ( !root->hasDescendants() )
   {
@@ -430,28 +463,25 @@ void Visualizer::drawSubtree( Cluster* root, bool topClosed, HSV_Color col,
     for ( vector< Cluster* >::iterator descit = descendants.begin() ; descit !=
 	descendants.end() ; ++descit )
     {
-      Cluster* desc = *descit;
-      
-      if ( desc->getPosition() < -0.9f )
+      if ( (**descit).getPosition() < -0.9f )
       {
 	glTranslatef( 0.0f, 0.0f, clusterHeight );
 	
-	drawSubtree( desc, false, desccol, delta_col, (descendants.size() > 1) ?
-	    desc_rot : rot );
+	drawSubtree( *descit, false, desccol, (descendants.size()>1)?desc_rot:rot );
 	
 	glTranslatef( 0.0f, 0.0f, -clusterHeight );
       }
       else
       {
-	glRotatef( -desc->getPosition()-rot, 0.0f, 0.0f, 1.0f );
+	glRotatef( -(**descit).getPosition()-rot, 0.0f, 0.0f, 1.0f );
 	glTranslatef( root->getBaseRadius(), 0.0f, clusterHeight );
 	glRotatef( visSettings.outerBranchTilt, 0.0f, 1.0f, 0.0f );
 
-	drawSubtree( desc, true, desccol, delta_col, desc_rot );
+	drawSubtree( *descit, true, desccol, desc_rot );
 	
 	glRotatef( -visSettings.outerBranchTilt, 0.0f, 1.0f, 0.0f );
 	glTranslatef( -root->getBaseRadius(), 0.0f, -clusterHeight );
-	glRotatef( desc->getPosition()+rot, 0.0f, 0.0f, 1.0f );
+	glRotatef( (**descit).getPosition()+rot, 0.0f, 0.0f, 1.0f );
       }
     }
   }
@@ -528,28 +558,26 @@ void Visualizer::drawSubtreeMarkStates( Cluster* root, bool topClosed, int rot )
     for ( vector< Cluster* >::iterator descit = descendants.begin() ; descit !=
 	descendants.end() ; ++descit )
     {
-      Cluster* desc = *descit;
-      
-      if ( desc->getPosition() < -0.9f )
+      if ( (**descit).getPosition() < -0.9f )
       {
 	glTranslatef( 0.0f, 0.0f, clusterHeight );
 	
-	drawSubtreeMarkStates( desc, false, (descendants.size() > 1) ?
+	drawSubtreeMarkStates( *descit, false, (descendants.size() > 1) ?
 	    desc_rot : rot );
 	
 	glTranslatef( 0.0f, 0.0f, -clusterHeight );
       }
       else
       {
-	glRotatef( -desc->getPosition()-rot, 0.0f, 0.0f, 1.0f );
+	glRotatef( -(**descit).getPosition()-rot, 0.0f, 0.0f, 1.0f );
 	glTranslatef( root->getBaseRadius(), 0.0f, clusterHeight );
 	glRotatef( visSettings.outerBranchTilt, 0.0f, 1.0f, 0.0f );
 
-	drawSubtreeMarkStates( desc, true, desc_rot );
+	drawSubtreeMarkStates( *descit, true, desc_rot );
 	
 	glRotatef( -visSettings.outerBranchTilt, 0.0f, 1.0f, 0.0f );
 	glTranslatef( -root->getBaseRadius(), 0.0f, -clusterHeight );
-	glRotatef( desc->getPosition()+rot, 0.0f, 0.0f, 1.0f );
+	glRotatef( (**descit).getPosition()+rot, 0.0f, 0.0f, 1.0f );
       }
     }
   }
@@ -627,28 +655,26 @@ void Visualizer::drawSubtreeMarkDeadlocks( Cluster* root, bool topClosed, int
     for ( vector< Cluster* >::iterator descit = descendants.begin() ; descit !=
 	descendants.end() ; ++descit )
     {
-      Cluster* desc = *descit;
-      
-      if ( desc->getPosition() < -0.9f )
+      if ( (**descit).getPosition() < -0.9f )
       {
 	glTranslatef( 0.0f, 0.0f, clusterHeight );
 
-	drawSubtreeMarkDeadlocks( desc, false, (descendants.size() > 1) ?
+	drawSubtreeMarkDeadlocks( *descit, false, (descendants.size() > 1) ?
 	    desc_rot : rot );
 
 	glTranslatef( 0.0f, 0.0f, -clusterHeight );
       }
       else
       {
-	glRotatef( -desc->getPosition()-rot, 0.0f, 0.0f, 1.0f );
+	glRotatef( -(**descit).getPosition()-rot, 0.0f, 0.0f, 1.0f );
 	glTranslatef( root->getBaseRadius(), 0.0f, clusterHeight );
 	glRotatef( visSettings.outerBranchTilt, 0.0f, 1.0f, 0.0f );
 
-	drawSubtreeMarkDeadlocks( desc, true, desc_rot );
+	drawSubtreeMarkDeadlocks( *descit, true, desc_rot );
 	
 	glRotatef( -visSettings.outerBranchTilt, 0.0f, 1.0f, 0.0f );
 	glTranslatef( -root->getBaseRadius(), 0.0f, -clusterHeight );
-	glRotatef( desc->getPosition()+rot, 0.0f, 0.0f, 1.0f );
+	glRotatef( (**descit).getPosition()+rot, 0.0f, 0.0f, 1.0f );
       }
     }
   }
@@ -726,27 +752,25 @@ void Visualizer::drawSubtreeMarkTransitions( Cluster* root, bool topClosed, int
     for ( vector< Cluster* >::iterator descit = descendants.begin() ; descit !=
 	descendants.end() ; ++descit )
     {
-      Cluster* desc = *descit;
-      
-      if ( desc->getPosition() < -0.9f )
+      if ( (**descit).getPosition() < -0.9f )
       {
 	// descendant is centered
 	glTranslatef( 0.0f, 0.0f, clusterHeight );
-	drawSubtreeMarkTransitions( desc, false, (descendants.size() > 1) ?
+	drawSubtreeMarkTransitions( *descit, false, (descendants.size() > 1) ?
 	    desc_rot : rot );
 	glTranslatef( 0.0f, 0.0f, -clusterHeight );
       }
       else
       {
-	glRotatef( -desc->getPosition()-rot, 0.0f, 0.0f, 1.0f );
+	glRotatef( -(**descit).getPosition()-rot, 0.0f, 0.0f, 1.0f );
 	glTranslatef( root->getBaseRadius(), 0.0f, clusterHeight );
 	glRotatef( visSettings.outerBranchTilt, 0.0f, 1.0f, 0.0f );
 	
-	drawSubtreeMarkTransitions( desc, true, desc_rot );
+	drawSubtreeMarkTransitions( *descit, true, desc_rot );
 	
 	glRotatef( -visSettings.outerBranchTilt, 0.0f, 1.0f, 0.0f );
 	glTranslatef( -root->getBaseRadius(), 0.0f, -clusterHeight );
-	glRotatef( desc->getPosition()+rot, 0.0f, 0.0f, 1.0f );
+	glRotatef( (**descit).getPosition()+rot, 0.0f, 0.0f, 1.0f );
       }
     }
   }
@@ -754,8 +778,7 @@ void Visualizer::drawSubtreeMarkTransitions( Cluster* root, bool topClosed, int
 
 // draw the subtree with cluster *root as the root of the tree in the NEW style
 // apply coloring based on interpolation settings
-void Visualizer::drawSubtreeNew( Cluster* root, HSV_Color col, HSV_Color
-    delta_col, int rot )
+void Visualizer::drawSubtreeNew( Cluster* root, HSV_Color col, int rot )
 {
   if ( root == lts->getInitialState()->getCluster() )
   {
@@ -815,23 +838,13 @@ void Visualizer::drawSubtreeNew( Cluster* root, HSV_Color col, HSV_Color
     if ( desccol.h < 0.0f ) desccol.h += 360.0f;
     else if ( desccol.h >= 360.0f ) desccol.h -= 360.0f;
 
-    RGB_Color col_rgb = HSVtoRGB(col);
-    RGB_Color desccol_rgb = HSVtoRGB(desccol);
-    float ibt_rad = degToRad( visSettings.innerBranchTilt );
-    float obt_rad = degToRad( visSettings.outerBranchTilt );
-
     int desc_rot = rot + visSettings.branchRotation;
     if ( desc_rot < 0 ) desc_rot += 360;
     else if ( desc_rot >= 360 ) desc_rot -= 360;
     
-    vector< Cluster* > descendants;
-    root->getDescendants( descendants );
-    
-    for ( vector< Cluster* >::iterator descit = descendants.begin() ; descit !=
-	descendants.end() ; ++descit )
+    for ( int i = 0 ; i < root->getNumberOfDescendants() ; i++ )
     {
-      Cluster* desc = *descit;
-      
+      Cluster* desc = root->getDescendant( i );
       if ( desc->getPosition() < -0.9f )
       {
 	Point3D b1 = { 0.0f, 0.0f, 0.5f*clusterHeight };
@@ -845,7 +858,7 @@ void Visualizer::drawSubtreeNew( Cluster* root, HSV_Color col, HSV_Color
 	  glPushMatrix();
 	  glMultMatrixf( M );
 	  drawTubeInterpolate( root->getTopRadius(), desc->getTopRadius(),
-	      col_rgb, desccol_rgb, b1, b2, b3, center );
+	      HSVtoRGB(col), HSVtoRGB(desccol), b1, b2, b3, center );
 	  glPopMatrix();
 	glEndList();
 
@@ -862,7 +875,7 @@ void Visualizer::drawSubtreeNew( Cluster* root, HSV_Color col, HSV_Color
 
 	glTranslatef( 0.0f, 0.0f, clusterHeight );
 	
-	drawSubtreeNew( desc, desccol, delta_col, (descendants.size() > 1) ?
+	drawSubtreeNew( desc, desccol, (root->getNumberOfDescendants() > 1) ?
 	    desc_rot : rot );
 	
 	glTranslatef( 0.0f, 0.0f, -clusterHeight );
@@ -872,17 +885,17 @@ void Visualizer::drawSubtreeNew( Cluster* root, HSV_Color col, HSV_Color
 	float M1[16] = {1,0,0,0, 0,1,0,0, 0,0,1,0, 0,0,0,1};
 	
 	myRotatef( degToRad( -desc->getPosition()-rot ), 0.0f, 0.0f, 1.0f, M1 );
-	myTranslatef( 0.5f * clusterHeight * sin( ibt_rad ), 0.0f, 0.5f *
-	    clusterHeight * cos( ibt_rad ), M1 );
+	myTranslatef( 0.5f * clusterHeight * sin_ibt, 0.0f, 0.5f * clusterHeight
+	    * cos_ibt, M1 );
 	Point3D b1 = { M1[3], M1[7], M1[11] };
 	
-	myTranslatef( -0.5f * clusterHeight * sin( ibt_rad ), 0.0f, -0.5f *
-	    clusterHeight * cos( ibt_rad ), M1 );
+	myTranslatef( -0.5f * clusterHeight * sin_ibt, 0.0f, -0.5f *
+	    clusterHeight * cos_ibt, M1 );
 	myTranslatef( root->getBaseRadius(), 0.0f, clusterHeight, M1 );
 	Point3D b3 = { M1[3], M1[7], M1[11] };
 	
-	myTranslatef( -0.5f * clusterHeight * sin( obt_rad ), 0.0f, -0.5f *
-	    clusterHeight * cos( obt_rad ), M1 );
+	myTranslatef( -0.5f * clusterHeight * sin_obt, 0.0f, -0.5f *
+	    clusterHeight * cos_obt, M1 );
 	Point3D b2 = { M1[3], M1[7], M1[11] };
 	
 	Point3D center;
@@ -894,7 +907,7 @@ void Visualizer::drawSubtreeNew( Cluster* root, HSV_Color col, HSV_Color
 	  glPushMatrix();
 	  glMultMatrixf( M );
 	  drawTubeInterpolate( root->getTopRadius(), desc->getTopRadius(),
-	      col_rgb, desccol_rgb, b1, b2, b3, center );
+	      HSVtoRGB(col), HSVtoRGB(desccol), b1, b2, b3, center );
 	  glPopMatrix();
 	glEndList();
 
@@ -913,7 +926,7 @@ void Visualizer::drawSubtreeNew( Cluster* root, HSV_Color col, HSV_Color
 	glTranslatef( root->getBaseRadius(), 0.0f, clusterHeight );
 	glRotatef( visSettings.outerBranchTilt, 0.0f, 1.0f, 0.0f );
   
-	drawSubtreeNew( desc, desccol, delta_col, desc_rot );
+	drawSubtreeNew( desc, desccol, desc_rot );
 	
 	glRotatef( -visSettings.outerBranchTilt, 0.0f, 1.0f, 0.0f );
 	glTranslatef( -root->getBaseRadius(), 0.0f, -clusterHeight );
@@ -986,21 +999,13 @@ void Visualizer::drawSubtreeNewMarkStates( Cluster* root, int rot )
   }
   else
   {
-    float ibt_rad = degToRad( visSettings.innerBranchTilt );
-    float obt_rad = degToRad( visSettings.outerBranchTilt );
-    
     int desc_rot = rot + visSettings.branchRotation;
     if ( desc_rot < 0 ) desc_rot += 360;
     else if ( desc_rot >= 360 ) desc_rot -= 360;
     
-    vector< Cluster* > descendants;
-    root->getDescendants( descendants );
-    
-    for ( vector< Cluster* >::iterator descit = descendants.begin() ; descit !=
-	descendants.end() ; ++descit )
+    for ( int i = 0 ; i < root->getNumberOfDescendants() ; i++ )
     {
-      Cluster* desc = *descit;
-      
+      Cluster* desc = root->getDescendant( i );
       if ( desc->getPosition() < -0.9f )
       {
 	Point3D b1 = { 0.0f, 0.0f, 0.5f*clusterHeight };
@@ -1032,7 +1037,7 @@ void Visualizer::drawSubtreeNewMarkStates( Cluster* root, int rot )
 
 	glTranslatef( 0.0f, 0.0f, clusterHeight );
 	
-	drawSubtreeNewMarkStates( desc, (descendants.size() > 1) ?
+	drawSubtreeNewMarkStates( desc, (root->getNumberOfDescendants() > 1) ?
 	    desc_rot : rot );
 	
 	glTranslatef( 0.0f, 0.0f, -clusterHeight );
@@ -1042,17 +1047,17 @@ void Visualizer::drawSubtreeNewMarkStates( Cluster* root, int rot )
 	float M1[16] = {1,0,0,0, 0,1,0,0, 0,0,1,0, 0,0,0,1};
 	
 	myRotatef( degToRad( -desc->getPosition()-rot ), 0.0f, 0.0f, 1.0f, M1 );
-	myTranslatef( 0.5f * clusterHeight * sin( ibt_rad ), 0.0f, 0.5f *
-	    clusterHeight * cos( ibt_rad ), M1 );
+	myTranslatef( 0.5f * clusterHeight * sin_ibt, 0.0f, 0.5f * clusterHeight
+	    * cos_ibt, M1 );
 	Point3D b1 = { M1[3], M1[7], M1[11] };
 	
-	myTranslatef( -0.5f * clusterHeight * sin( ibt_rad ), 0.0f, -0.5f *
-	    clusterHeight * cos( ibt_rad ), M1 );
+	myTranslatef( -0.5f * clusterHeight * sin_ibt, 0.0f, -0.5f *
+	    clusterHeight * cos_ibt, M1 );
 	myTranslatef( root->getBaseRadius(), 0.0f, clusterHeight, M1 );
 	Point3D b3 = { M1[3], M1[7], M1[11] };
 	
-	myTranslatef( -0.5f * clusterHeight * sin( obt_rad ), 0.0f, -0.5f *
-	    clusterHeight * cos( obt_rad ), M1 );
+	myTranslatef( -0.5f * clusterHeight * sin_obt, 0.0f, -0.5f *
+	    clusterHeight * cos_obt, M1 );
 	Point3D b2 = { M1[3], M1[7], M1[11] };
 	
 	Point3D center;
@@ -1159,21 +1164,13 @@ void Visualizer::drawSubtreeNewMarkDeadlocks( Cluster* root, int rot )
   }
   else
   {
-    float ibt_rad = degToRad( visSettings.innerBranchTilt );
-    float obt_rad = degToRad( visSettings.outerBranchTilt );
-    
     int desc_rot = rot + visSettings.branchRotation;
     if ( desc_rot < 0 ) desc_rot += 360;
     else if ( desc_rot >= 360 ) desc_rot -= 360;
     
-    vector< Cluster* > descendants;
-    root->getDescendants( descendants );
-    
-    for ( vector< Cluster* >::iterator descit = descendants.begin() ; descit !=
-	descendants.end() ; ++descit )
+    for ( int i = 0 ; i < root->getNumberOfDescendants() ; i++ )
     {
-      Cluster* desc = *descit;
-      
+      Cluster* desc = root->getDescendant( i );
       if ( desc->getPosition() < -0.9f )
       {
 	Point3D b1 = { 0.0f, 0.0f, 0.5f*clusterHeight };
@@ -1205,8 +1202,8 @@ void Visualizer::drawSubtreeNewMarkDeadlocks( Cluster* root, int rot )
 
 	glTranslatef( 0.0f, 0.0f, clusterHeight );
 	
-	drawSubtreeNewMarkDeadlocks( desc, (descendants.size() > 1) ?
-	    desc_rot : rot );
+	drawSubtreeNewMarkDeadlocks( desc, (root->getNumberOfDescendants() > 1)
+	    ?  desc_rot : rot );
 	
 	glTranslatef( 0.0f, 0.0f, -clusterHeight );
       }
@@ -1215,17 +1212,17 @@ void Visualizer::drawSubtreeNewMarkDeadlocks( Cluster* root, int rot )
 	float M1[16] = {1,0,0,0, 0,1,0,0, 0,0,1,0, 0,0,0,1};
 	
 	myRotatef( degToRad( -desc->getPosition()-rot ), 0.0f, 0.0f, 1.0f, M1 );
-	myTranslatef( 0.5f * clusterHeight * sin( ibt_rad ), 0.0f, 0.5f *
-	    clusterHeight * cos( ibt_rad ), M1 );
+	myTranslatef( 0.5f * clusterHeight * sin_ibt, 0.0f, 0.5f * clusterHeight
+	    * cos_ibt, M1 );
 	Point3D b1 = { M1[3], M1[7], M1[11] };
 	
-	myTranslatef( -0.5f * clusterHeight * sin( ibt_rad ), 0.0f, -0.5f *
-	    clusterHeight * cos( ibt_rad ), M1 );
+	myTranslatef( -0.5f * clusterHeight * sin_ibt, 0.0f, -0.5f *
+	    clusterHeight * cos_ibt, M1 );
 	myTranslatef( root->getBaseRadius(), 0.0f, clusterHeight, M1 );
 	Point3D b3 = { M1[3], M1[7], M1[11] };
 	
-	myTranslatef( -0.5f * clusterHeight * sin( obt_rad ), 0.0f, -0.5f *
-	    clusterHeight * cos( obt_rad ), M1 );
+	myTranslatef( -0.5f * clusterHeight * sin_obt, 0.0f, -0.5f *
+	    clusterHeight * cos_obt, M1 );
 	Point3D b2 = { M1[3], M1[7], M1[11] };
 	
 	Point3D center;
@@ -1236,9 +1233,9 @@ void Visualizer::drawSubtreeNewMarkDeadlocks( Cluster* root, int rot )
 	glNewList( displist, GL_COMPILE );
 	  glPushMatrix();
 	  glMultMatrixf( M );
-	  drawTubeSplit( root->getTopRadius(), desc->getTopRadius(),
-	      color, (desc->hasDeadlock()) ? visSettings.markedColor :
-	      RGB_WHITE, b1, b2, b3, center );
+	  drawTubeSplit( root->getTopRadius(), desc->getTopRadius(), color,
+	      (desc->hasDeadlock()) ? visSettings.markedColor : RGB_WHITE, b1,
+	      b2, b3, center );
 	  glPopMatrix();
 	glEndList();
 
@@ -1332,21 +1329,13 @@ void Visualizer::drawSubtreeNewMarkTransitions( Cluster* root, int rot )
   }
   else
   {
-    float ibt_rad = degToRad( visSettings.innerBranchTilt );
-    float obt_rad = degToRad( visSettings.outerBranchTilt );
-    
     int desc_rot = rot + visSettings.branchRotation;
     if ( desc_rot < 0 ) desc_rot += 360;
     else if ( desc_rot >= 360 ) desc_rot -= 360;
     
-    vector< Cluster* > descendants;
-    root->getDescendants( descendants );
-    
-    for ( vector< Cluster* >::iterator descit = descendants.begin() ; descit !=
-	descendants.end() ; ++descit )
+    for ( int i = 0 ; i < root->getNumberOfDescendants() ; i++ )
     {
-      Cluster* desc = *descit;
-      
+      Cluster* desc = root->getDescendant( i );
       if ( desc->getPosition() < -0.9f )
       {
 	Point3D b1 = { 0.0f, 0.0f, 0.5f*clusterHeight };
@@ -1378,8 +1367,8 @@ void Visualizer::drawSubtreeNewMarkTransitions( Cluster* root, int rot )
 
 	glTranslatef( 0.0f, 0.0f, clusterHeight );
 	
-	drawSubtreeNewMarkTransitions( desc, (descendants.size() > 1) ?
-	    desc_rot : rot );
+	drawSubtreeNewMarkTransitions( desc, (root->getNumberOfDescendants() >
+	      1) ?  desc_rot : rot );
 	
 	glTranslatef( 0.0f, 0.0f, -clusterHeight );
       }
@@ -1388,17 +1377,17 @@ void Visualizer::drawSubtreeNewMarkTransitions( Cluster* root, int rot )
 	float M1[16] = {1,0,0,0, 0,1,0,0, 0,0,1,0, 0,0,0,1};
 	
 	myRotatef( degToRad( -desc->getPosition()-rot ), 0.0f, 0.0f, 1.0f, M1 );
-	myTranslatef( 0.5f * clusterHeight * sin( ibt_rad ), 0.0f, 0.5f *
-	    clusterHeight * cos( ibt_rad ), M1 );
+	myTranslatef( 0.5f * clusterHeight * sin_ibt, 0.0f, 0.5f * clusterHeight
+	    * cos_ibt, M1 );
 	Point3D b1 = { M1[3], M1[7], M1[11] };
 	
-	myTranslatef( -0.5f * clusterHeight * sin( ibt_rad ), 0.0f, -0.5f *
-	    clusterHeight * cos( ibt_rad ), M1 );
+	myTranslatef( -0.5f * clusterHeight * sin_ibt, 0.0f, -0.5f *
+	    clusterHeight * cos_ibt, M1 );
 	myTranslatef( root->getBaseRadius(), 0.0f, clusterHeight, M1 );
 	Point3D b3 = { M1[3], M1[7], M1[11] };
 	
-	myTranslatef( -0.5f * clusterHeight * sin( obt_rad ), 0.0f, -0.5f *
-	    clusterHeight * cos( obt_rad ), M1 );
+	myTranslatef( -0.5f * clusterHeight * sin_obt, 0.0f, -0.5f *
+	    clusterHeight * cos_obt, M1 );
 	Point3D b2 = { M1[3], M1[7], M1[11] };
 	
 	Point3D center;
@@ -1463,29 +1452,27 @@ void Visualizer::drawStates( Cluster* root, int rot )
   if ( desc_rot < 0 ) desc_rot += 360;
   else if ( desc_rot >= 360 ) desc_rot -= 360;
   
-  vector< Cluster* > descs;
-  root->getDescendants( descs );
-  for ( vector< Cluster* >::iterator descit = descs.begin() ;
-	descit != descs.end() ; ++descit )
+  for ( int i = 0 ; i < root->getNumberOfDescendants() ; i++ )
   {
-    if ( (**descit).getPosition() < -0.9f )
+    Cluster* desc = root->getDescendant( i );
+    if ( desc->getPosition() < -0.9f )
     {
       // descendant is centered
       glTranslatef( 0.0f, 0.0f, clusterHeight );
-      drawStates( *descit, (descs.size() > 1) ? desc_rot : rot );
+      drawStates( desc, (root->getNumberOfDescendants() > 1) ? desc_rot : rot );
       glTranslatef( 0.0f, 0.0f, -clusterHeight );
     }
     else
     {
-      glRotatef( -(**descit).getPosition()-rot, 0.0f, 0.0f, 1.0f );
+      glRotatef( -desc->getPosition()-rot, 0.0f, 0.0f, 1.0f );
       glTranslatef( root->getBaseRadius(), 0.0f, clusterHeight );
       glRotatef( visSettings.outerBranchTilt, 0.0f, 1.0f, 0.0f );
 
-      drawStates( *descit, desc_rot );
+      drawStates( desc, desc_rot );
       
       glRotatef( -visSettings.outerBranchTilt, 0.0f, 1.0f, 0.0f );
       glTranslatef( -root->getBaseRadius(), 0.0f, -clusterHeight );
-      glRotatef( (**descit).getPosition()+rot, 0.0f, 0.0f, 1.0f );
+      glRotatef( desc->getPosition()+rot, 0.0f, 0.0f, 1.0f );
     }
   }
 }
@@ -1518,29 +1505,28 @@ void Visualizer::drawStatesMarkStates( Cluster* root, int rot )
   if ( desc_rot < 0 ) desc_rot += 360;
   else if ( desc_rot >= 360 ) desc_rot -= 360;
   
-  vector< Cluster* > descs;
-  root->getDescendants( descs );
-  for ( vector< Cluster* >::iterator descit = descs.begin() ;
-	descit != descs.end() ; ++descit )
+  for ( int i = 0 ; i < root->getNumberOfDescendants() ; i++ ) 
   {
-    if ( (**descit).getPosition() < -0.9f )
+    Cluster* desc = root->getDescendant( i );
+    if ( desc->getPosition() < -0.9f )
     {
       // descendant is centered
       glTranslatef( 0.0f, 0.0f, clusterHeight );
-      drawStatesMarkStates( *descit, (descs.size() > 1) ? desc_rot : rot );
+      drawStatesMarkStates( desc, (root->getNumberOfDescendants() > 1) ?
+	  desc_rot : rot );
       glTranslatef( 0.0f, 0.0f, -clusterHeight );
     }
     else
     {
-      glRotatef( -(**descit).getPosition()-rot, 0.0f, 0.0f, 1.0f );
+      glRotatef( -desc->getPosition()-rot, 0.0f, 0.0f, 1.0f );
       glTranslatef( root->getBaseRadius(), 0.0f, clusterHeight );
       glRotatef( visSettings.outerBranchTilt, 0.0f, 1.0f, 0.0f );
 
-      drawStatesMarkStates( *descit, desc_rot );
+      drawStatesMarkStates( desc, desc_rot );
       
       glRotatef( -visSettings.outerBranchTilt, 0.0f, 1.0f, 0.0f );
       glTranslatef( -root->getBaseRadius(), 0.0f, -clusterHeight );
-      glRotatef( (**descit).getPosition()+rot, 0.0f, 0.0f, 1.0f );
+      glRotatef( desc->getPosition()+rot, 0.0f, 0.0f, 1.0f );
     }
   }
 }
@@ -1573,30 +1559,29 @@ void Visualizer::drawStatesMarkDeadlocks( Cluster* root, int rot )
   if ( desc_rot < 0 ) desc_rot += 360;
   else if ( desc_rot >= 360 ) desc_rot -= 360;
   
-  vector< Cluster* > descs;
-  root->getDescendants( descs );
-  for ( vector< Cluster* >::iterator descit = descs.begin() ;
-	descit != descs.end() ; ++descit )
+  for ( int i = 0 ; i < root->getNumberOfDescendants() ; i++ )
   {
-    if ( (**descit).getPosition() < -0.9f )
+    Cluster* desc = root->getDescendant( i );
+    if ( desc->getPosition() < -0.9f )
     {
       glTranslatef( 0.0f, 0.0f, clusterHeight );
       
-      drawStatesMarkDeadlocks( *descit, (descs.size() > 1) ? desc_rot : rot );
+      drawStatesMarkDeadlocks( desc, (root->getNumberOfDescendants() > 1) ?
+	  desc_rot : rot );
       
       glTranslatef( 0.0f, 0.0f, -clusterHeight );
     }
     else
     {
-      glRotatef( -(**descit).getPosition()-rot, 0.0f, 0.0f, 1.0f );
+      glRotatef( -desc->getPosition()-rot, 0.0f, 0.0f, 1.0f );
       glTranslatef( root->getBaseRadius(), 0.0f, clusterHeight );
       glRotatef( visSettings.outerBranchTilt, 0.0f, 1.0f, 0.0f );
 
-      drawStatesMarkDeadlocks( *descit, desc_rot );
+      drawStatesMarkDeadlocks( desc, desc_rot );
       
       glRotatef( -visSettings.outerBranchTilt, 0.0f, 1.0f, 0.0f );
       glTranslatef( -root->getBaseRadius(), 0.0f, -clusterHeight );
-      glRotatef( (**descit).getPosition()+rot, 0.0f, 0.0f, 1.0f );
+      glRotatef( desc->getPosition()+rot, 0.0f, 0.0f, 1.0f );
     }
   }
 }

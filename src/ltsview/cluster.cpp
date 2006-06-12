@@ -62,6 +62,16 @@ Cluster* Cluster::getAncestor() const
   return ancestor;
 }
 
+int Cluster::getNumberOfDescendants() const
+{
+  return descendants.size();
+}
+
+Cluster* Cluster::getDescendant( int i ) const
+{
+  return descendants[i];
+}
+
 void Cluster::getDescendants( vector< Cluster* > &cs ) const
 {
   cs = descendants;

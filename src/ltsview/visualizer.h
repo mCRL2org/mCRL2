@@ -37,8 +37,10 @@ class Visualizer
     float		  boundingCylH;
     float		  boundingCylW;
     float		  clusterHeight;
+    float		  cos_ibt;
     float		  cos_obt;
     static VisSettings	  defaultVisSettings;
+    HSV_Color		  delta_col;
     bool		  displayStates;
     bool		  displayWireframe;
     LTS*		  lts;
@@ -48,6 +50,7 @@ class Visualizer
     RankStyle		  rankStyle;
     bool		  refreshPrimitives;
     bool		  refreshStates;
+    float		  sin_ibt;
     float		  sin_obt;
     GLuint		  statesDisplayList;
     Point3D		  viewpoint;
@@ -66,13 +69,11 @@ class Visualizer
     void drawStates( Cluster* root, int rot );
     void drawStatesMarkStates( Cluster* root, int rot );
     void drawStatesMarkDeadlocks( Cluster* root, int rot );
-    void drawSubtree( Cluster* root, bool topClosed, HSV_Color col, HSV_Color
-	delta_col, int rot );
+    void drawSubtree( Cluster* root, bool topClosed, HSV_Color col, int rot );
     void drawSubtreeMarkDeadlocks( Cluster* root, bool topClosed, int rot );
     void drawSubtreeMarkStates( Cluster* root, bool topClosed, int rot );
     void drawSubtreeMarkTransitions( Cluster* root, bool topClosed, int rot );
-    void drawSubtreeNew( Cluster* root, HSV_Color col, HSV_Color delta_col,
-	int rot );
+    void drawSubtreeNew( Cluster* root, HSV_Color col, int rot );
     void drawSubtreeNewMarkDeadlocks( Cluster* root, int rot );
     void drawSubtreeNewMarkStates( Cluster* root, int rot );
     void drawSubtreeNewMarkTransitions( Cluster* root, int rot );

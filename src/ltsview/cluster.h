@@ -52,7 +52,9 @@ class Cluster
     void      computeSizeAndDescendantPositions();
     Cluster*  getAncestor() const;
     float     getBaseRadius() const;
+    Cluster*  getDescendant( int i ) const;
     void      getDescendants( vector< Cluster* > &cs ) const;
+    int	      getNumberOfDescendants() const;
     float     getPosition() const;
     float     getTopRadius() const;
     float     getSize() const;
