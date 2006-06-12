@@ -29,8 +29,14 @@ exe squadt
         <wx>basic
       ;
 
-install_with_libraries install : squadt ;
+alias install
+      : install-squadt
+        install-images
+        install-schemas
+      ;
 
-install_data images : [ glob pixmaps/logo.jpg ] : images ;
-install_data schemas : [ glob schemas/*.xsd ] : schemas ;
+install_with_libraries install-squadt : squadt ;
+
+install_data install-images : [ glob pixmaps/logo.jpg ] : images ;
+install_data install-schemas : [ glob schemas/*.xsd ] : schemas ;
 
