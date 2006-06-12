@@ -1,4 +1,4 @@
--include build/config
+-include build/config.mk
 
 # Creates an application bundle on Mac OS X
 %.app: $(bindir)/%

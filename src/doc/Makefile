@@ -1,4 +1,4 @@
--include ../../build/config
+-include ../../build/config.mk
 
 SOURCE_OBJECTS = $(wildcard %.xml)
 
