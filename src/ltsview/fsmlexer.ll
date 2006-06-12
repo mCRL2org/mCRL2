@@ -24,7 +24,6 @@ Number     [0]|([1-9][0-9]*)
 "("	  { posNo += fsmleng; return LPAR; }
 ")"	  { posNo += fsmleng; return RPAR; }
 "->"	  { posNo += fsmleng; return ARROW; }
-","	  { posNo += fsmleng; return COMMA; }
 "fan_in"  { posNo += fsmleng; return FANIN; }
 "fan_out" { posNo += fsmleng; return FANOUT; }
 "node_nr" { posNo += fsmleng; return NODENR; }

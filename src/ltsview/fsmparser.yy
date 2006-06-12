@@ -33,10 +33,10 @@ char* intToCString(int i);
 
 %start fsm_file
 
-%token EOLN SECSEP LPAR RPAR FANIN FANOUT NODENR COMMA ARROW
+%token EOLN SECSEP LPAR RPAR FANIN FANOUT NODENR ARROW
 %token <number> NUMBER
 %token <aterm> ID QUOTED
-%type  <aterm> type_name action
+%type  <aterm> type_name type_name1 action
 
 %%
 
@@ -76,8 +76,6 @@ param :
 	;
 
 cardinality :
-	/* empty */
-	|
 	LPAR NUMBER RPAR
 	;
 	
@@ -98,15 +96,20 @@ type_name :
 	/* empty */
 	  { $$ = ATmakeAppl0( ATmakeAFun( "", 0, ATfalse ) ) }
 	|
-	ID
+	type_name1
 	  { $$ = $1 }
-	|
-	type_name ARROW type_name
+	| 
+	type_name ARROW type_name1
 	  {
 	    string result = static_cast<string> ( ATwriteToString( (ATerm)$1 ) )
 	      + "->" + static_cast<string> ( ATwriteToString( (ATerm)$3 ) );
 	    $$ = ATmakeAppl0( ATmakeAFun( result.c_str(), 0, ATfalse ) )
 	  }
+	;
+
+type_name1 :
+	ID
+	  { $$ = $1 }
 	|
 	LPAR type_name RPAR
 	  {
@@ -115,6 +118,7 @@ type_name :
 	    $$ = ATmakeAppl0( ATmakeAFun( result.c_str(), 0, ATfalse ) )
 	  }
 	;
+
 
 type_values :
 	/* empty */
@@ -129,14 +133,18 @@ type_value :
 	;
 
 type_def_ignore : 
-	type_name_ignore 
+	type_name_ignore
 	type_values_ignore
 	;
 
 type_name_ignore :
 	/* empty */
-	| ID
-	| type_name_ignore ARROW type_name_ignore
+	| type_name_ignore1
+	| type_name_ignore ARROW type_name_ignore1
+	;
+
+type_name_ignore1 :
+	ID
 	| LPAR type_name_ignore RPAR
 	;
 
