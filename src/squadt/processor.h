@@ -220,25 +220,25 @@ namespace squadt {
       inline bool consistent_inputs() const;
 
       /** \brief Start tool configuration, with callback on completion */
-      void configure(const tool::input_combination*, const boost::filesystem::path&, boost::function < void () >);
+      void configure(const tool::input_combination*, std::string const&, const boost::filesystem::path&, boost::function < void () >);
 
       /** \brief Start tool configuration */
-      void configure(const tool::input_combination*, const boost::filesystem::path&);
+      void configure(const tool::input_combination*, std::string const&, const boost::filesystem::path&);
  
       /** \brief Start tool configuration */
-      void configure();
+      void configure(std::string const&);
  
       /** \brief Start tool (re)configuration */
-      void reconfigure(boost::function < void () >);
+      void reconfigure(std::string const&, boost::function < void () >);
  
       /** \brief Start tool reconfiguration */
-      void reconfigure();
+      void reconfigure(std::string const&);
  
       /** \brief Start processing: generate outputs from inputs */
-      void process(boost::function < void () >);
+      void process(std::string const&, boost::function < void () >);
  
       /** \brief Start processing: generate outputs from inputs */
-      void process();
+      void process(std::string const&);
  
       /** \brief Get the object for the tool associated with this processor */
       inline void set_tool(tool::sptr&);

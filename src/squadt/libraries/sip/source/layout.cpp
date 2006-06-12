@@ -94,62 +94,17 @@ namespace sip {
       }
     }
 
-    element::aptr element::static_read_structure(std::string& input) {
-      xml2pp::text_reader r(input);
-
-      /* Read structure data */
-      return (static_read_structure(r));
-    }
-
-    element::aptr element::static_read_structure(xml2pp::text_reader& r) {
-      using namespace sip::layout::elements;
-
-      std::string name(r.element_name());
-
-      layout::element::aptr new_element;
-
-      if (name == "label") {
-        new_element = element::aptr(new label());
-      }
-      else if (name == "button") {
-        new_element = element::aptr(new button());
-      }
-      else if (name == "radio-button") {
-        new_element = element::aptr(new radio_button());
-      }
-      else if (name == "checkbox") {
-        new_element = element::aptr(new checkbox());
-      }
-      else if (name == "progress-bar") {
-        new_element = element::aptr(new progress_bar());
-      }
-      else if (name == "text-field") {
-        new_element = element::aptr(new text_field());
-      }
-
-      if (new_element.get() != 0) {
-        /* Read abstract element specific data */
-        new_element->read(r);
-        new_element->read_structure(r);
-      }
-      else { /* Assume layout manager */
-        new_element = manager::static_read_structure(r);
-      }
-
-      return (new_element);
-    }
-
-    manager::aptr manager::static_read_structure(xml2pp::text_reader& r) {
+    manager::aptr manager::static_read_structure(element::read_context& r) {
       using sip::exception::exception;
 
-      std::string name(r.element_name());
+      std::string name(r.reader.element_name());
 
       layout::manager::aptr new_element;
 
       if (name == "box-layout-manager") {
         std::string type;
 
-        r.get_attribute(&type, "type");
+        r.reader.get_attribute(&type, "type");
 
         if (type == "vertical") {
           new_element = manager::aptr(new vertical_box());
@@ -256,24 +211,24 @@ namespace sip {
      * \pre reader should point to a box-layout-manager element (of type horizontal)
      * \post reader points to after the associated end tag of the box
      **/
-    void box::read_structure(xml2pp::text_reader& r) {
+    void box::read_structure(element::read_context& r) {
       constraints current_constraints = manager::default_constraints;
 
       clear();
 
-      if (!r.is_empty_element()) {
-        r.read();
+      if (!r.reader.is_empty_element()) {
+        r.reader.read();
 
-        while (!r.is_end_element("box-layout-manager")) {
-          if (r.is_element("layout-constraints")) {
-            current_constraints.read(r);
+        while (!r.reader.is_end_element("box-layout-manager")) {
+          if (r.reader.is_element("layout-constraints")) {
+            current_constraints.read(r.reader);
           }
 
           children.push_back(children_list::value_type(element::static_read_structure(r).release(), current_constraints));
         }
       }
 
-      r.read();
+      r.reader.read();
     }
 
     /**
@@ -303,7 +258,9 @@ namespace sip {
       r.read();
 
       if (!r.is_end_element("display-layout")) {
-        display->set_top_manager(layout::manager::static_read_structure(r));
+        element::read_context c(r);
+
+        display->set_top_manager(layout::manager::static_read_structure(c));
       }
 
       return (display);
@@ -331,14 +288,6 @@ namespace sip {
     tool_display::constant_elements tool_display::update(xml2pp::text_reader& r) {
       tool_display::constant_elements changed_elements;
 
-      /* TODO
-       *
-       * read_structure may invoke event
-       *   - controller side 
-       *      * event schedules a (G)UI update
-       *   - tool side 
-       *      * event handling is provided on the tool developer
-       **/
       try {
         while (r.valid()) {
           sip::layout::element::identifier id;
@@ -349,7 +298,9 @@ namespace sip {
           element* t = top_manager->find(id);
 
           if (t != 0) {
-            t->read_structure(r);
+            sip::layout::element::read_context c(r);
+
+            t->read_structure(c);
 
             changed_elements.push_back(t);
           }

@@ -5,9 +5,9 @@ project lpeformcheck
 
 exe lpeformcheck
        : lpeformcheck.cpp
-         /libraries/prover//prover
-       : <source>/root//mcrl2_revision
+       : <source>/site-config//mcrl2_revision.h
+         <source>/libraries/prover//prover
          <include>.
        ;
 
-install_with_libraries lpeformcheck ;
+install_with_libraries install : lpeformcheck ;

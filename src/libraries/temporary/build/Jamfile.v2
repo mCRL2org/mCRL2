@@ -9,8 +9,6 @@ project temporary
           <include>../../..
        ;
 
-include $(TOP)/config.jam ;
-
 # The following lines are to make this build stand-alone
 lib trace
        : libtrace.cpp
@@ -58,9 +56,6 @@ lib lowlevel
        : <library>/libraries/aterm//aterm
        ;
 
-lib m  : : <name>"m" ;
-lib dl : : <name>"dl" ;
-
 lib rewrite
        : librewrite_c.cpp
          librewrite.cpp
@@ -71,9 +66,9 @@ lib rewrite
        : <dependency>/libraries/aterm//aterm
        :
        : <library>/libraries/aterm//aterm 
-         <library>m
-         <os>MACOSX:<library>dl
-         <os>LINUX:<library>dl
+         <library>/site-config//m
+         <os>MACOSX:<library>/site-config//dl
+         <os>LINUX:<library>/site-config//dl
        ;
 
 lib print

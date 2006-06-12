@@ -12,8 +12,8 @@ exe lpedataelm
          /libraries/temporary//print
          /libraries/temporary//struct
        : <source>/boost/program_options//boost_program_options
-         <source>/root//mcrl2_revision
+         <source>/site-config//mcrl2_revision.h
          <include>.
        ;
 
-install_with_libraries lpedataelm ;
+install_with_libraries install : lpedataelm ;

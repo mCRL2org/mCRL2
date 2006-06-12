@@ -36,11 +36,16 @@ namespace sip {
 
     private:
 
-      /** Convenience type for container for options */
+      /** \brief Convenience type for container for options */
       typedef std::map < option::sptr, option_constraint >  option_list;
 
-      /** Convenience type for container for objects */
+      /** \brief Convenience type for container for objects */
       typedef std::list < object::sptr >                    object_list;
+
+    private:
+
+      /** \brief Default Constructor */
+      inline configuration();
 
     public:
 
@@ -58,18 +63,21 @@ namespace sip {
     private:
 
       /** \brief The list of configuration options */
-      option_list options;
+      option_list   options;
 
       /** \brief The list of input/output objects */
-      object_list objects;
+      object_list   objects;
 
-      /** \brief Points to an object that contains describes the main input file and the selected tool_category */
-      std::pair < object::sptr, tool_category > input_combination;
+      /** \brief The selected category in which the tool operates */
+      tool_category category;
+
+      /** \brief Whether the configuration is complete (or initial) */
+      bool          completed;
 
     public:
 
       /** \brief Constructor */
-      inline configuration();
+      inline configuration(tool_category);
 
       /** \brief Returns whether the configuration is empty or not */
       inline bool is_empty() const;
@@ -82,6 +90,15 @@ namespace sip {
 
       /** \brief Remove an option from the configuration */
       inline void remove_option(const option::identifier);
+
+      /** \brief Set the state of the configuration */
+      inline void set_completed(bool);
+
+      /** \brief Get the state of the configuration (whether it is complete or not) */
+      inline bool is_complete();
+
+      /** \brief The category in which the tool operates */
+      inline tool_category get_category() const;
 
       /** \brief Get an option by its id */
       inline option::sptr get_option(const option::identifier) const;
@@ -147,7 +164,10 @@ namespace sip {
     return (s);
   }
 
-  inline configuration::configuration() {
+  inline configuration::configuration() : completed(false) {
+  }
+
+  inline configuration::configuration(tool_category c) : category(c), completed(false) {
   }
 
   inline bool configuration::is_empty() const {
@@ -205,6 +225,21 @@ namespace sip {
     options.erase(i);
   }
 
+  inline configuration::tool_category configuration::get_category() const {
+    return (category);
+  }
+
+  /**
+   * @param[in] b set the state of the configuration
+   **/
+  inline void configuration::set_completed(bool b) {
+    completed = b;
+  }
+
+  inline bool configuration::is_complete() {
+    return (completed);
+  }
+
   /**
    * @param id an identifier for the option
    **/
@@ -239,40 +274,21 @@ namespace sip {
    * @param output the stream to which the output is written
    **/
   inline void configuration::write(std::ostream& output) const {
-    output << "<configuration>";
+    output << "<configuration";
+
+    if (completed) {
+      output << " complete=\"true\"";
+    }
 
     /* Add input combination */
-    if (input_combination.first.get() != 0) {
-      output << "<input-combination category=\"" << input_combination.second
-             << "\" format=\"" << input_combination.first->format;
-     
-      if (!input_combination.first->location.empty()) {
-        output << "\" location=\"" << input_combination.first;
-      }
-     
-      output << "\">";
-    }
+    output << " category=\"" << category << "\">";
 
-    {
-            option_list::const_iterator i = options.begin();
-      const option_list::const_iterator b = options.end();
-     
-      while (i != b) {
+    for (option_list::const_iterator i = options.begin(); i != options.end(); ++i) {
         (*i).first->write(output);
-     
-        ++i;
-      }
     }
 
-    {
-            object_list::const_iterator i = objects.begin();
-      const object_list::const_iterator b = objects.end();
-     
-      while (i != b) {
+    for (object_list::const_iterator i = objects.begin(); i != objects.end(); ++i) {
         (*i)->write(output);
-     
-        ++i;
-      }
     }
 
     output << "</configuration>";
@@ -428,25 +444,11 @@ namespace sip {
 
     assert(reader.is_element("configuration"));
 
+    c->completed = reader.get_attribute("complete");
+
+    reader.get_attribute(&c->category, "category");
+
     reader.read();
-
-    /* Read input combination */
-    if (reader.is_element("input-combination")) {
-      object::storage_format format;
-      object::uri            location;
-
-      reader.get_attribute(&c->input_combination.second, "category");
-      reader.get_attribute(&format, "format");
-      reader.get_attribute(&location, "location");
-
-      c->input_combination.first = object::sptr(new object (0, format, location));
-
-      reader.read();
-
-      if (reader.is_end_element() && reader.is_element("input-combination")) {
-        reader.read();
-      }
-    }
 
     while (!(reader.is_end_element() && reader.is_element("configuration"))) {
       /* Current element must be <option> */

@@ -11,38 +11,36 @@ path-constant REVISION_HEADER : ./src/mcrl2_revision.h ;
 # Deployment target for Mac OS X
 modules.poke : MACOSX_DEPLOYMENT_TARGET : 10.3 ;
 
-if ! [ path.exists $(TOP)/config.jam ] {
+if ! [ path.exists $(TOP)/build/config.jam ] {
   ECHO "Please configure your source tree!" ;
 
   exit ;
 }
 
-include $(TOP)/config.jam ;
+include $(TOP)/build/config.jam ;
 
 project
        : build-dir $(BUILD_TOP)
        : requirements
           <cxxflags>-std=c++98
           <define>_FILE_OFFSET_BITS=64
-          <toolset>darwin:<linkflags>"-undefined dynamic_lookup"
+          <toolset>darwin,<link>shared:<linkflags>"-undefined dynamic_lookup"
        : default-build
           <address-model>$(ADDRESS_MODEL)
           <variant>$(BUILD_VARIANT)
        ;
 
 # The known sub projects
-use-project /root                      : . ;
+use-project /site-config               : build ;
 use-project /libraries/md5pp           : src/squadt/libraries/md5pp/build ;
 use-project /libraries/transport       : src/squadt/libraries/transport/build ;
 use-project /libraries/sip             : src/squadt/libraries/sip/build ;
 use-project /libraries/xml2pp          : src/squadt/libraries/xml2pp/build ;
-use-project /boost/program_options     : boost/libs/program_options/build ;
-use-project /boost/filesystem          : boost/libs/filesystem/build ;
-use-project /boost/thread              : boost/libs/thread/build ;
 
-alias mcrl2_revision
-       : $(REVISION_HEADER)
-       ;
+# Register boost libraries
+for library in [ MATCH boost/libs/(.*)/build/Jamfile.v2 : [ glob boost/libs/*/build/Jamfile.v2 ] ] {
+  use-project /boost/$(library) : boost/libs/$(library)/build ;
+}
 
 tools = [ MATCH src/(.*)/.* : [ glob src/*/Jamfile.v2 src/*/build/Jamfile.v2 ] ] ;
 
@@ -58,6 +56,65 @@ for library in $(libraries) {
   use-project /libraries/$(library) : src/libraries/$(library)/build ;
 }
 
+# Feature to mark tools as basic experimental or deprecated
+feature status : basic experimental deprecated : composite optional incidental propagated ;
+
+if ! experimental in [ MATCH "^--enable-(experimental)" : [ modules.peek : ARGV ] ] {
+  feature.compose <status>experimental : <build>no ;
+}
+
+if ! deprecated in [ MATCH "^--enable-(deprecated)" : [ modules.peek : ARGV ] ] {
+  feature.compose <status>deprecated   : <build>no ;
+}
+
+feature squadt_support : disable enable : composite optional incidental ;
+
+# Disable squadt support in tools
+if ! squadt in [ MATCH "^--disable-(squadt)-support" : [ modules.peek : ARGV ] ] {
+  feature.compose <squadt_support>enable
+        : <define>ENABLE_SQUADT_CONNECTIVITY
+          <library>/libraries/sip//sip_tool
+          <xml2>interface
+        ;
+}
+
+# Feature for linking to the xml2 library
+feature xml2 : none interface library : composite incidental optional link-incompatible ;
+
+if $(XML2_CPPFLAGS) {
+  feature.compose <xml2>interface : <cxxflags>"$(XML2_CPPFLAGS)" ;
+  feature.compose <xml2>library
+        : <linkflags>"$(XML2_LDFLAGS)"
+          <cxxflags>"$(XML2_CPPFLAGS)"
+        ;
+}
+else {
+  feature.compose <xml2>interface : <build>no ;
+  feature.compose <xml2>library   : <build>no ;
+}
+
+# Feature for linking to wx widget libraries
+feature wx : none interface basic gl : composite incidental optional link-incompatible ;
+
+if $(WX_CPPFLAGS) {
+  feature.compose <wx>interface
+        : <cxxflags>"$(WX_CPPFLAGS)"
+        ;
+  feature.compose <wx>basic
+        : <linkflags>"$(WX_BASE_LDFLAGS)"
+          <cxxflags>"$(WX_CPPFLAGS)"
+        ;
+  feature.compose <wx>gl
+        : <linkflags>"$(WX_GL_LDFLAGS)"
+          <cxxflags>"$(WX_CPPFLAGS)"
+        ;
+}
+else {
+  feature.compose <wx>interface : <build>no ;
+  feature.compose <wx>basic     : <build>no ;
+  feature.compose <wx>gl        : <build>no ;
+}
+
 # Install when requested
 if ! install in [ MATCH "^--(install)" "^(install)" : [ modules.peek : ARGV ] ] {
 
@@ -67,7 +124,7 @@ if ! install in [ MATCH "^--(install)" "^(install)" : [ modules.peek : ARGV ] ] 
   }
 
   # Dummy rule
-  rule install_with_libraries ( tool * : property * ) {
+  rule install_with_libraries ( name : tool * : property * ) {
   }
 
   # Dummy rule
@@ -77,29 +134,30 @@ if ! install in [ MATCH "^--(install)" "^(install)" : [ modules.peek : ARGV ] ] 
 else {
 
   # Custom rule to install a tool executable with the libraries it depends on
-  rule install_with_libraries ( tools * : properties * ) {
+  rule install_with_libraries ( name : tools * : properties * ) {
 
-    alias install
-          : install-libraries
-            install-binaries
+    alias $(name)
+          : $(name)-libraries
+            $(name)-binaries
           : $(properties)
           ;
 
-    stage install-binaries
+    stage $(name)-binaries
           : $(tools)
-          : <install-dependencies>on
-            <install-type>EXE
-            <dll-path>$(LIB_DIR)
+          : <dll-path>$(LIB_DIR)
             <location>$(BIN_DIR)
+            $(properties)
           ;
 
-    stage install-libraries
+    stage $(name)-libraries
           : $(tools)
           : <install-dependencies>on <install-type>SHARED_LIB
             <location>$(LIB_DIR)
+            <os>NT:<location>$(BIN_DIR)
+            $(properties)
           ;
 
-    explicit install-binaries install-libraries ;
+    explicit $(tools) $(name)-binaries $(name)-libraries ;
   }
 
   rule install_data ( name : files * : directories ? ) {
@@ -132,84 +190,8 @@ else {
        ;
 }
 
-# Feature to mark tools as experimental
-feature tool_type : basic experimental : optional incidental ;
-
-feature squadt_support : disable enable : composite optional incidental ;
-
-# Disable squadt support in tools
-if ! squadt in [ MATCH "^--disable-(squadt)-support" : [ modules.peek : ARGV ] ] {
-  feature.compose <squadt_support>enable
-        : <define>ENABLE_SQUADT_CONNECTIVITY
-          <library>/libraries/sip//sipt
-        ;
-}
-
-# Feature for linking to the xml2 library
-feature xml2 : none interface library : composite incidental link-incompatible ;
-
-feature.compose <xml2>interface
-      : <cxxflags>"$(XML2_CPPFLAGS)"
-      ;
-feature.compose <xml2>library
-      : <linkflags>"$(XML2_LDFLAGS)"
-        <cxxflags>"$(XML2_CPPFLAGS)"
-      ;
-
-# Feature for linking to wx widget libraries
-feature wx : none interface basic gl : composite incidental link-incompatible ;
-
-feature.compose <wx>interface
-      : <cxxflags>"$(WX_CPPFLAGS)"
-      ;
-feature.compose <wx>basic
-      : <linkflags>"$(WX_BASE_LDFLAGS)"
-        <cxxflags>"$(WX_CPPFLAGS)"
-      ;
-feature.compose <wx>gl
-      : <linkflags>"$(WX_GL_LDFLAGS)"
-        <cxxflags>"$(WX_CPPFLAGS)"
-      ;
-
-# OpenGL, GLU and GLUT libraries names
-rule import_libraries {
-  switch [ os.name ] {
-    case "NT" :
-      lib OpenGL : : <name>"opengl32" ;
-      lib GLU    : OpenGL : <name>"glu32" ;
-      lib GLUT   : OpenGL : <name>"glut32" ;
-    case "MACOSX" :
-      alias OpenGL : : : : <framework>"OpenGL" ;
-      alias GLUT   : OpenGL : : : <framework>"GLUT" ;
-      alias GLU    : OpenGL : : : ;
-    case * :
-      lib OpenGL : : <name>"GL" ;
-      lib GLU    : OpenGL : <name>"GLU" ;
-      lib GLUT   : OpenGL : <name>"glut" ;
-  }
-
-  lib z  : : <name>"z" ;
-
-  lib m  : : <name>"m" ;
-
-  lib dl : : <name>"dl" ;
-
-  lib xml2
-        :
-        : <name>"xml2"
-        :
-        : <cxxflags>"$(XML2_CPPFLAGS)"
-          <library>z
-          <library>m
-        ;
-}
-
-# The SVN revision number with which tools will be tagged
 if [ path.exists $(TOP)/utility/revision.jam ] {
-  include $(TOP)/utility/revision.jam ; 
+  include $(TOP)/utility/revision.jam ;
 
-  make $(REVISION_HEADER)
-       : maximum_revision
-       : run_maximum_revision
-       ;
+  import_revision ;
 }

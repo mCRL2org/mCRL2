@@ -22,13 +22,14 @@ exe squadt
         gui_dialog_project.cpp
         gui_dialog_processor.cpp
         gui_miscellaneous.cpp
-        /libraries/md5pp//md5pp
-        /libraries/sip//sipc
-        /boost/filesystem//boost_filesystem
-      : <wx>basic
+      : <source>/site-config//mcrl2_revision.h
+        <library>/libraries/md5pp//md5pp
+        <library>/libraries/sip//sip_controller
+        <library>/boost/filesystem//boost_filesystem
+        <wx>basic
       ;
 
-install_with_libraries squadt ;
+install_with_libraries install : squadt ;
 
 install_data images : [ glob pixmaps/logo.jpg ] : images ;
 install_data schemas : [ glob schemas/*.xsd ] : schemas ;

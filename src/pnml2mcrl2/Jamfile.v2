@@ -7,11 +7,11 @@ project pnml2mcrl2
 
 exe pnml2mcrl2
        : pnml2mcrl2.cpp
-         /libraries/temporary//print
-         /libraries/parser//parser
-       : <source>/root//mcrl2_revision
+       : <source>/site-config//mcrl2_revision.h
+         <source>/libraries/temporary//print
+         <source>/libraries/parser//parser
          <include>.
          <xml2>library
        ;
 
-install_with_libraries pnml2mcrl2 ;
+install_with_libraries install : pnml2mcrl2 ;

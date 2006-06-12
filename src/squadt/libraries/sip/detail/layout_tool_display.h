@@ -1,12 +1,11 @@
-#ifndef LAYOUT_TOOL_DISPLAY
-#define LAYOUT_TOOL_DISPLAY
+#ifndef LAYOUT_TOOL_DISPLAY_H
+#define LAYOUT_TOOL_DISPLAY_H
 
 #include <iosfwd>
 
 #include "sip/detail/basic_datatype.h"
 #include "sip/detail/layout_base.h"
 #include "sip/detail/layout_manager.h"
-#include "sip/detail/layout_elements.h"
 
 namespace sip {
   namespace layout {

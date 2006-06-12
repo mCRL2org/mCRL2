@@ -9,8 +9,8 @@ exe lperewr
        : lperewr.cpp
          /libraries/temporary//print
          /libraries/temporary//rewrite
-       : <source>/root//mcrl2_revision
+       : <source>/site-config//mcrl2_revision.h
          <include>.
        ;
 
-install_with_libraries lperewr ;
+install_with_libraries install : lperewr ;

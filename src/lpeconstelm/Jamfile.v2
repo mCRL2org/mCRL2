@@ -11,10 +11,10 @@ exe lpeconstelm
          /libraries/lpe//lpe
        : <source>/boost/program_options//boost_program_options
          <source>/boost/filesystem//boost_filesystem
-         <source>/root//mcrl2_revision
+         <source>/site-config//mcrl2_revision.h
          <squadt_support>enable
          <include>.
        ;
 
-install_with_libraries lpeconstelm ;
+install_with_libraries install : lpeconstelm ;
 

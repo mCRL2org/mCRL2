@@ -7,7 +7,7 @@ project wx_extension
           <include>..
        ;
 
-include $(TOP)/config.jam ;
+include $(TOP)/build/config.jam ;
 
 obj spinctrlfloat.o
       : spinctrlfloat.cpp

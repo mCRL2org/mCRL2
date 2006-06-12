@@ -156,7 +156,7 @@ namespace squadt {
           wxSizer*    s = main_panel->GetSizer();
          
           s->Show(screen0, false, true);
-          s->Show(screen1, true);
+          s->Show(screen1, true, true);
 
           SetTitle(wxT("Project storage"));
 

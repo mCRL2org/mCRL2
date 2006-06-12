@@ -1,7 +1,4 @@
-# Relative path to the root of the source tree
-TREE_ROOT = ../../
-
--include ../../config
+-include ../../build/config
 
 SOURCE_OBJECTS = $(wildcard %.xml)
 

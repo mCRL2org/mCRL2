@@ -10,13 +10,13 @@ exe ltsgraph
          graph_frame.cpp
          node.cpp
          edge.cpp
-         /libraries/wx_extension//wx_extension
-       : <source>/libraries/temporary//print
+       : <source>/libraries/wx_extension//wx_extension
+         <source>/libraries/temporary//print
          <source>/libraries/lts//lts
-         <source>/root//mcrl2_revision
+         <source>/site-config//mcrl2_revision.h
          <include>.
          <wx>basic
        ;
 
-install_with_libraries ltsgraph ;
+install_with_libraries install : ltsgraph ;
 

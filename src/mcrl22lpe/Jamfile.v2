@@ -12,7 +12,7 @@ exe mcrl22lpe
          /libraries/parser//alpha
          /libraries/temporary//print
          /libraries/temporary//rewrite
-       : <source>/root//mcrl2_revision
+       : <source>/site-config//mcrl2_revision.h
          <squadt_support>enable
        ;
 
@@ -23,8 +23,8 @@ exe lin
          /libraries/parser//alpha
          /libraries/temporary//print
          /libraries/temporary//rewrite
-       : <source>/root//mcrl2_revision
-         <tool_type>experimental
+       : <source>/site-config//mcrl2_revision.h
+         <status>experimental
        ;
 
 exe alpha
@@ -33,8 +33,9 @@ exe alpha
          /libraries/parser//alpha
          /libraries/temporary//print
          /libraries/temporary//rewrite
-       : <source>/root//mcrl2_revision
-         <tool_type>experimental
+       : <source>/site-config//mcrl2_revision.h
+         <status>experimental
        ;
 
-install_with_libraries mcrl22lpe lin alpha ;
+install_with_libraries install : mcrl22lpe : <status>experimental:<dependency>install-experimental ;
+install_with_libraries install-experimental : lin alpha : <status>experimental ;

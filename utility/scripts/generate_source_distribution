@@ -122,10 +122,6 @@ if (! test -e "${archive_name}.bz2"); then
 
   cp ${SOURCE_BASE}/project-root.jam mcrl2/project-root.jam
 
-  echo -e "else {"\
-          "\n  constant REVISION_NUMBER : ${revision} ;"\
-          "\n}" >> mcrl2/project-root.jam
-
   tar rf ${archive_name} mcrl2/project-root.jam
 
   unlink mcrl2/project-root.jam

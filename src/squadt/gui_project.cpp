@@ -301,7 +301,7 @@ namespace squadt {
         case cmID_REBUILD:
           p->flush_outputs();
 
-          p->process();
+          p->process(manager->get_project_directory());
           break;
         case cmID_CLEAN:
           p->flush_outputs();
@@ -337,7 +337,8 @@ namespace squadt {
                                 " : " + boost::filesystem::path(t->location).leaf()).c_str(), wxConvLocal));
 
             /* Start tool configuration phase */
-            p->reconfigure(boost::bind(&project::process_reconfiguration, this, object_view->GetItemParent(s), p));
+            p->reconfigure(manager->get_project_directory(),
+                        boost::bind(&project::process_reconfiguration, this, object_view->GetItemParent(s), p));
           break;
         default: {
             /* Assume that a tool was selected */
@@ -355,7 +356,8 @@ namespace squadt {
                                 " : " + boost::filesystem::path(t->location).leaf()).c_str(), wxConvLocal));
 
             /* Start tool configuration phase */
-            tp->configure(menu_item->input_combination, boost::filesystem::path(t->location), boost::bind(&project::process_configuration, this, s, tp));
+            tp->configure(menu_item->input_combination, manager->get_project_directory(),
+                        boost::filesystem::path(t->location), boost::bind(&project::process_configuration, this, s, tp));
           }
           break;
       }

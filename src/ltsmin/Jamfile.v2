@@ -14,8 +14,8 @@ exe ltsmin
          /libraries/temporary//struct
          /libraries/temporary//rewrite
          /libraries/svc//svc
-       : <source>/root//mcrl2_revision
+       : <source>/site-config//mcrl2_revision.h
          <include>.
        ;
 
-install_with_libraries ltsmin ;
+install_with_libraries install : ltsmin ;

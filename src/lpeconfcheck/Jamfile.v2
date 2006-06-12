@@ -5,9 +5,9 @@ project lpeconfcheck
 
 exe lpeconfcheck
        : lpeconfcheck.cpp
-       : <source>/root//mcrl2_revision
+       : <source>/site-config//mcrl2_revision.h
          <source>/libraries/prover//prover
          <include>.
        ;
 
-install_with_libraries lpeconfcheck ;
+install_with_libraries install : lpeconfcheck ;

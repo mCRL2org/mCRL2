@@ -20,8 +20,6 @@ lib fsm
         <dependency>/libraries/aterm//aterm
       ;
 
-import_libraries ;
-
 exe ltsview
       : ltsviewapp.cpp
         mainframe.cpp
@@ -35,7 +33,7 @@ exe ltsview
         visualizer.cpp
         utils.cpp
       : <library>fsm
-        <library>OpenGL
+        <library>/site-config//OpenGL
         <library>/libraries/wx_extension//wx_extension
         <library>/libraries/temporary//lowlevel
         <library>/libraries/aterm//aterm
@@ -43,5 +41,5 @@ exe ltsview
         <wx>gl
       ;
 
-install_with_libraries ltsview ;
+install_with_libraries install : ltsview ;
 

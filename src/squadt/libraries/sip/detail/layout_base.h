@@ -1,21 +1,27 @@
 #ifndef LAYOUT_BASE_H
 #define LAYOUT_BASE_H
 
-#include <iostream>
-#include <sstream>
 #include <memory>
+#include <map>
 
 #include <boost/function.hpp>
 
 #include <xml2pp/text_reader.h>
 
 #include <sip/detail/layout_mediator.h>
-#include <sip/detail/object.h>
 
 namespace sip {
+  namespace tool {
+    class communicator;
+  }
+
   namespace layout {
 
     class basic_event_handler;
+
+    class read_context;
+
+    class element;
 
     /** \brief Abstract base class for layout elements */
     class element {
@@ -30,6 +36,33 @@ namespace sip {
 
         /** \brief Convenience type for hiding auto pointer implementation */
         typedef std::auto_ptr < element >   aptr;
+
+        /**
+         * \brief Wrapper class for deserialisation
+         **/
+        class read_context {
+
+          private:
+
+            /** \brief A map for id to element lookup */
+            std::map < const element::identifier, element* > id_to_element;
+
+          public:
+
+            /** \brief A xml2pp::text_reader object */
+            xml2pp::text_reader&                  reader;
+
+          public:
+
+            /** \brief Constructor */
+            inline read_context(xml2pp::text_reader&);
+
+            /** \brief Relates an identifier to an element */
+            inline void relate_id_to_element(const element::identifier, element*);
+
+            /** \brief Get the element for an identifier **/
+            inline element* element_for_id(const element::identifier id);
+        };
 
       private:
 
@@ -47,10 +80,7 @@ namespace sip {
       protected:
 
         /** \brief writes the element level attributes to stream */
-        inline void write_attributes(std::ostream&) const;
-
-        /** \brief Resets private members to defaults */
-        inline void clear();
+        void write_attributes(std::ostream&) const;
 
       public:
 
@@ -58,34 +88,37 @@ namespace sip {
         element();
 
         /** \brief Set the elements id */
-        inline void set_id(element::identifier);
+        void set_id(element::identifier);
 
         /** \brief Get the elements id */
-        inline element::identifier get_id();
+        element::identifier get_id();
 
         /** \brief Recursively serialises the state of the object to a stream */
         virtual void write_structure(std::ostream&) const = 0; 
 
         /** \brief Gets a complete structure specification for a layout element */
-        inline std::string get_state() const;
+        std::string get_state() const;
 
         /** \brief Reads element specific data */
-        virtual void read(xml2pp::text_reader&); 
+        virtual void read(read_context&); 
 
         /** \brief Recursively builds the state of the object */
         static element::aptr static_read_structure(std::string&); 
 
         /** \brief Recursively builds the state of the object */
-        static element::aptr static_read_structure(xml2pp::text_reader&); 
+        static element::aptr static_read_structure(read_context&); 
 
         /** \brief Recursively builds the state of the object */
-        virtual void read_structure(xml2pp::text_reader&) = 0; 
+        virtual void read_structure(read_context&) = 0; 
 
         /** \brief Set the callback function that is used to instantiate a layout element */
         virtual mediator::wrapper_aptr instantiate(layout::mediator*) = 0;
 
         /** \brief Synchronise with instantiation that is part of a (G)UI */
         virtual void update(layout::mediator*, mediator::wrapper*) const;
+
+        /** \brief Immediately send an update using a tool communicator */
+        static void update(tool::communicator*, layout::element const*);
 
         /** \brief Awaits the next change event */
         void await_change() const;
@@ -100,64 +133,24 @@ namespace sip {
         virtual ~element() = 0;
     };
 
-    inline element::element() : id(reinterpret_cast < element::identifier > (this)), current_event_handler(&global_event_handler) {
-    }
-
-    inline element::~element() {
-    }
-
-    inline void element::clear() {
-      id = 0;
+    inline element::read_context::read_context(xml2pp::text_reader& r) : reader(r) {
     }
 
     /**
-     * @param[in] o the stream to write to
+     * @param[in] id the id for which to return the element
+     * @param[in] e the element
      **/
-    inline void element::write_attributes(std::ostream& o) const {
-      if (id != 0) {
-        o << " id=\"" << id << "\"";
-      }
+    inline void element::read_context::relate_id_to_element(const element::identifier id, element* e) {
+      id_to_element[id] = e;
     }
 
     /**
-     * @param[in] i the identifier of the wanted element
+     * @param[in] id the id for which to return the element
+     *
+     * \pre element must exist in id_to_element
      **/
-    inline void element::set_id(element::identifier i) {
-      id = i;
-    }
-
-    inline element::identifier element::get_id() {
-      return(id);
-    }
-
-    /**
-     * @param[in] r the xml2pp text reader to read from
-     **/
-    inline void element::read(xml2pp::text_reader& r) {
-      r.get_attribute(&id, "id");
-    }
-
-    inline std::string element::get_state() const {
-      std::ostringstream s;
-    
-      write_structure(s);
-    
-      return (s.str());
-    }
-
-    /**
-     * @param[in] i the identifier of the wanted element
-     **/
-    inline element* element::find(element::identifier i) {
-      return ((i == id) ? this : 0);
-    }
-
-    /**
-     * @param[in] m the mediator object to use
-     * @param[in] t pointer to the associated (G)UI object
-     **/
-    inline void element::update(layout::mediator* m, layout::mediator::wrapper* t) const {
-      std::cerr << "No specific update method implemented!\n";
+    inline element* element::read_context::element_for_id(const element::identifier id) {
+      return(id_to_element[id]);
     }
   }
 }

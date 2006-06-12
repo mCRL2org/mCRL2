@@ -1,4 +1,4 @@
--include config
+-include build/config
 
 # Creates an application bundle on Mac OS X
 %.app: $(bindir)/%
@@ -13,7 +13,7 @@
 
 .PHONY: all install clean distclean distribution
 
-all: config $(BJAM)
+all: $(BJAM)
 	@$(BOOST_BUILD)
 
 install-local: $(BJAM)
@@ -36,9 +36,8 @@ clean:
 distclean:
 	@${MAKE} -C src/doc distclean
 	$(RM) -r autom4te.cache *.o *.app *~ core core.*
-	$(RM) -r config.log config.status config config.jam src/setup.h src/mcrl2_revision.h
+	$(RM) -r config.log config.status build/config build/config.jam src/setup.h
 	$(RM) -rf bin boost/tools/jam/bin boost/tools/jam/bootstrap
-
 
 $(BJAM):
 	@$(MAKE) -C boost bjam
@@ -46,8 +45,7 @@ $(BJAM):
 revision: $(BJAM)
 	@$(BOOST_BUILD) mcrl2_revision
 
-ifeq (,$(findstring $(MAKECMDGOALS),clean distclean revision))
-
-config:
+ifeq (,$(BJAM) $(findstring $(MAKECMDGOALS),clean distclean revision))
 	$(error Please configure the source tree first.)
 endif
+

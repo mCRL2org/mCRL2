@@ -238,7 +238,7 @@ AC_ARG_ENABLE(
   )
 )
 if test $enable_experimental; then
-  BUILD_EXPERIMENTAL="experimental"
+  BUILD_EXPERIMENTAL="--enable-experimental"
 fi
 AC_SUBST([BUILD_EXPERIMENTAL])
 
@@ -502,6 +502,6 @@ AC_MSG_NOTICE()
 AC_MSG_NOTICE(Some tools will not be built if any of these libraries are missing.)
 AC_MSG_NOTICE()
 
-AC_CONFIG_FILES([boost/tools/build/v2/user-config.jam src/setup.h config config.jam])
+AC_CONFIG_FILES([boost/tools/build/v2/user-config.jam build/config build/config.jam src/setup.h])
 AC_OUTPUT
 

@@ -2,6 +2,7 @@
 #define COMMAND_H
 
 #include <boost/shared_array.hpp>
+#include <boost/filesystem/operations.hpp>
 
 namespace squadt {
   namespace execution {
@@ -21,6 +22,9 @@ namespace squadt {
   
         /** \brief path to the program that is to be executed */
         const std::string            executable;
+
+        /** \brief path to the working directory of the tool */
+        const std::string            working_directory;
   
         /** \brief the arguments to the command */
         std::vector < std::string >  arguments;
@@ -29,6 +33,12 @@ namespace squadt {
   
         /** \brief Constructor */
         inline command(const std::string&);
+
+        /** \brief Constructor with working directory */
+        inline command(const std::string&, std::string const&);
+
+        /** \brief Gets the working directory */
+        inline std::string get_working_directory() const;
   
         /** \brief Adds an argument */
         inline void append_argument(const std::string&);
@@ -41,11 +51,23 @@ namespace squadt {
     };
   
     /**
-     * @param e a complete path to an executable of the program that is to be executed
+     * @param e[in] a complete path to an executable of the program that is to be executed
      **/
-    inline command::command(const std::string& e) : executable(e) {
+    inline command::command(const std::string& e) : executable(e),
+                working_directory(boost::filesystem::current_path().native_file_string()) {
     }
-  
+
+    /**
+     * @param e[in] a complete path to an executable of the program that is to be executed
+     * @param w[in] path to the working directory for this tool
+     **/
+    inline command::command(const std::string& e, std::string const& w) : executable(e), working_directory(w) {
+    }
+
+    inline std::string command::get_working_directory() const {
+      return (working_directory);
+    }
+
     /**
      * @param a a single argument
      **/

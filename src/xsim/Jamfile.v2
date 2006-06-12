@@ -19,7 +19,7 @@ exe xsim
        : <library>/libraries/temporary//trace
          <library>/libraries/temporary//nextstate
          <library>/libraries/temporary//print
-         <source>/root//mcrl2_revision
+         <source>/site-config//mcrl2_revision.h
          <squadt_support>enable
          <wx>basic
        ;
@@ -28,8 +28,8 @@ exe sim
        : sim.cpp
        : <library>/libraries/temporary//nextstate
          <library>/libraries/temporary//print
-         <source>/root//mcrl2_revision
+         <source>/site-config//mcrl2_revision.h
        ;
 
-install_with_libraries xsim sim ;
+install_with_libraries install : xsim sim ;
 

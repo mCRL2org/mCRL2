@@ -118,7 +118,7 @@ namespace sip {
         virtual void add(element*, visibility const&) = 0;
 
         /** \brief Recursively builds the state of the object */
-        static aptr static_read_structure(xml2pp::text_reader&); 
+        static aptr static_read_structure(read_context&); 
 
         /** \brief Instantiate a layout element, through a mediator */
         virtual mediator::wrapper_aptr instantiate(layout::mediator*) = 0;
@@ -153,7 +153,7 @@ namespace sip {
       private:
 
         /** \brief Read back a layout structure in XML format */
-        void read_structure(xml2pp::text_reader& r);
+        void read_structure(read_context& r);
 
       public:
 
@@ -341,8 +341,6 @@ namespace sip {
     }
 
     inline void box::clear() {
-      element::clear();
-
       children.clear();
     }
 

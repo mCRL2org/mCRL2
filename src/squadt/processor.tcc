@@ -277,75 +277,83 @@ namespace squadt {
 
   /**
    * @param[in] ic the input combination that is to be used
-   * @param[in] l the file that serves as main input
+   * @param[in] w the path to the directory in which to run the tool
+   * @param[in] l absolute path to the file that serves as main input
    * @param[in] h a function object that is invoked when configuration has completed
    *
    * \attention This function is non-blocking
    **/
-  inline void processor::configure(const tool::input_combination* ic, const boost::filesystem::path& l, boost::function < void() > h) {
-    configure(ic, l);
+  inline void processor::configure(const tool::input_combination* ic, std::string const& w, const boost::filesystem::path& l, boost::function < void() > h) {
+    configure(ic, w, l);
 
     current_monitor->once_on_completion(h);
   }
 
   /**
    * @param[in] ic the input combination that is to be used
-   * @param[in] l the file that serves as main input
+   * @param[in] w the path to the directory in which to run the tool
+   * @param[in] l absolute path to the file that serves as main input
    *
    * \attention This function is non-blocking
    **/
-  inline void processor::configure(const tool::input_combination* ic, const boost::filesystem::path& l) {
+  inline void processor::configure(const tool::input_combination* ic, std::string const& w, const boost::filesystem::path& l) {
     selected_input_combination = const_cast < tool::input_combination* > (ic);
 
-    sip::configuration::sptr c(new sip::configuration);
+    sip::configuration::sptr c(new sip::configuration(selected_input_combination->category));
 
     c->add_input(ic->identifier, ic->format, l.string());
 
     current_monitor->set_configuration(c);
 
-    configure();
+    configure(w);
   }
 
   /**
+   * @param[in] w the path to the directory in which to run the tool
+   *
    * \attention This function is non-blocking
    **/
-  inline void processor::reconfigure(boost::function < void() > h) {
+  inline void processor::reconfigure(std::string const& w, boost::function < void() > h) {
     current_monitor->once_on_completion(h);
 
-    reconfigure();
+    reconfigure(w);
   }
 
   /**
+   * @param[in] w the path to the directory in which to run the tool
+   *
    * \pre The existing configuration must contain the input object matching the selected input combination
    *
    * \attention This function is non-blocking
    **/
-  inline void processor::reconfigure() {
-    sip::configuration::sptr c(new sip::configuration);
+  inline void processor::reconfigure(std::string const& w) {
+    sip::configuration::sptr c(new sip::configuration(selected_input_combination->category));
 
     c->add_object(current_monitor->get_configuration()->get_object(selected_input_combination->identifier));
 
     current_monitor->set_configuration(c);
 
-    configure();
+    configure(w);
   }
 
   /**
+   * @param[in] w the path to the directory in which to run the tool
+   *
    * \pre The existing configuration must contain the input object matching the selected input combination
    *
    * \attention This function is non-blocking
    **/
-  inline void processor::configure() {
-    global_tool_manager->execute(*tool_descriptor, boost::dynamic_pointer_cast < execution::task_monitor, monitor > (current_monitor), true);
+  inline void processor::configure(std::string const& w) {
+    global_tool_manager->execute(*tool_descriptor, w, boost::dynamic_pointer_cast < execution::task_monitor, monitor > (current_monitor), true);
 
     current_monitor->once_on_completion(boost::bind(&processor::process_configuration, this));
     current_monitor->start_pilot();
   }
 
-  inline void processor::process(boost::function < void () > h) {
-    process();
-
+  inline void processor::process(std::string const& w, boost::function < void () > h) {
     current_monitor->once_on_completion(h);
+
+    process(w);
   }
 
   /**
@@ -353,8 +361,8 @@ namespace squadt {
    *
    * \pre the configure member must have been called
    **/
-  inline void processor::process() {
-    global_tool_manager->execute(*tool_descriptor, boost::dynamic_pointer_cast < execution::task_monitor, monitor > (current_monitor), false);
+  inline void processor::process(std::string const& w) {
+    global_tool_manager->execute(*tool_descriptor, w, boost::dynamic_pointer_cast < execution::task_monitor, monitor > (current_monitor), false);
 
     current_monitor->once_on_completion(boost::bind(&processor::process_configuration, this));
     current_monitor->start_pilot();

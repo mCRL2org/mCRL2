@@ -1,3 +1,5 @@
+import feature : feature ;
+
 project sip
     : source-location
        ../source
@@ -16,35 +18,36 @@ alias messenger
     : # no default build
     : <library>/libraries/transport//transport
       <library>/boost/thread//boost_thread
+      <library>/libraries/xml2pp//text_reader
     ;
 
-lib sip_common
-    : common.cpp
+feature sip_side : controller tool : composite ;
+
+feature.compose <sip_side>controller : <define>CONTROLLER_SIDE ;
+feature.compose <sip_side>tool       : <define>TOOL_SIDE ;
+
+lib sip_controller
+    : controller.cpp
+      common.cpp
       sip_exception.cpp
       report.cpp
       object.cpp
       layout.cpp
+      layout_base.cpp
       layout_elements.cpp
-    : <library>/libraries/xml2pp//text_reader
-      <dependency>/boost/thread//boost_thread
-    : # no default build
-    : <library>/boost/thread//boost_thread
+    : <sip_side>controller
+      <library>messenger
     ;
 
-lib sipc
-    : controller.cpp
-      sip_common
-      messenger
-    :
-    :
-    : <library>/libraries/sip//sip_common
-    ;
-
-lib sipt
+lib sip_tool
     : tool.cpp
-      sip_common
-      messenger
-    :
-    :
-    : <library>/libraries/sip//sip_common
+      common.cpp
+      sip_exception.cpp
+      report.cpp
+      object.cpp
+      layout.cpp
+      layout_base.cpp
+      layout_elements.cpp
+    : <sip_side>tool
+      <library>messenger
     ;

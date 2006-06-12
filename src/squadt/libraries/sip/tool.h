@@ -7,6 +7,7 @@
 #include <sip/detail/tool_capabilities.h>
 #include <sip/detail/controller_capabilities.h>
 #include <sip/detail/layout_tool_display.h>
+#include <sip/detail/layout_elements.h>
 #include <sip/detail/schemes.h>
 #include <sip/detail/report.h>
 
@@ -20,6 +21,8 @@ namespace sip {
     class communicator : public sip::messenger {
       template < typename M >
       friend void messaging::scheme< M >::connect(basic_messenger< M >*) const;
+
+      friend class layout::element;
  
       private:
 
@@ -54,6 +57,9 @@ namespace sip {
         /** \brief Handler for incoming data resulting from user interaction with the display relayed by the controller */
         void accept_display_data(const sip::messenger::message_ptr&, layout::tool_display::sptr);
 
+        /** \brief Send data to update the state of the last communicated display layout */
+        void send_display_data(layout::element const*);
+ 
       public:
  
         /** \brief Default constructor */
@@ -76,10 +82,6 @@ namespace sip {
 
         /** \brief Signal that the current configuration is complete enough for the tool to start processing */
         void send_accept_configuration(const sip::configuration&);
- 
-        /** \brief Send data to update the state of the last communicated display layout */
-        template < typename E >
-        void send_display_data(E const*);
  
         /** \brief Send a layout specification for the display space reserved for this tool */
         void send_display_layout(layout::tool_display::sptr);
@@ -150,16 +152,6 @@ namespace sip {
  
     inline bool communicator::is_active() const {
       return (current_status != status_inactive);
-    }
-
-    /**
-     * @param[in] e pointer to a sip layout element of which the data is to be sent
-     **/
-    template < typename E >
-    void communicator::send_display_data(E const* e) {
-      message m(e->read_state());
-
-      send_message(m);
     }
   }
 }

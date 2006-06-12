@@ -290,15 +290,6 @@ static bool get_squadt_parameters(int argc,
       }
     }
 
-    /* Send the controller the signal that we're ready to rumble 
-     * (no further configuration necessary) */
-    tc.send_accept_configuration();
-
-    /* Wait for start message */
-    
-    cerr << "Ready to accept configuration " << infilename << "\n";
-    tc.await_message(sip::send_signal_start);
-
     using namespace sip;
     using namespace sip::layout;
     using namespace sip::layout::elements;
@@ -315,10 +306,11 @@ static bool get_squadt_parameters(int argc,
     std::string suggestedoutfilename(infilename,0,infilename.size()-6);
     suggestedoutfilename=suggestedoutfilename + ".lpe";
     text_field* outfilenamefield=new text_field(suggestedoutfilename);
-    outputfilename_box->add(outfilenamefield,middle); // Geeft vooralsnog een xml parseerfout.
+    outputfilename_box->add(outfilenamefield,middle);
     // outputfilename_box->add(new label(suggestedoutfilename),middle);
 
     layout_manager->add(new label(" "),layout::left);
+
     // box to select the linearisation method
     horizontal_box* linearisation_method_box = new horizontal_box();
     layout_manager->add(linearisation_method_box);
@@ -373,7 +365,7 @@ static bool get_squadt_parameters(int argc,
     radio_button *parse_phase=new radio_button("Parse input",all_phases);
     phases_box->add(parse_phase,middle);
     radio_button *typecheck_phase=new radio_button("Typecheck input",parse_phase);
-    phases_box->add(parse_phase,middle);
+    phases_box->add(typecheck_phase,middle);
     radio_button *alpha_phase=new radio_button("Apply alphabet axioms",typecheck_phase);
     phases_box->add(alpha_phase,middle);
     radio_button *data_phase=new radio_button("Implement data",alpha_phase);
@@ -449,6 +441,15 @@ static bool get_squadt_parameters(int argc,
 
 
     cerr << "Configuration sent2\n";
+    /* Send the controller the signal that we're ready to rumble 
+     * (no further configuration necessary) */
+    tc.send_accept_configuration();
+
+    /* Wait for start message */
+    
+    cerr << "Ready to accept configuration " << infilename << "\n";
+    tc.await_message(sip::send_signal_start);
+
 
     return 0;
   }

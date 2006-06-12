@@ -2,6 +2,7 @@
 
 #include <sip/tool.h>
 #include <sip/detail/message.h>
+#include <sip/detail/layout_base.h>
 #include <sip/detail/basic_messenger.tcc>
 #include <sip/detail/command_line_interface.tcc>
 
@@ -157,6 +158,19 @@ namespace sip {
       report.set_error(e);
 
       send_report(report);
+    }
+
+    /**
+     * @param[in] e pointer to a sip layout element of which the data is to be sent
+     **/
+    void communicator::send_display_data(layout::element const* e) {
+      std::ostringstream c;
+
+      e->write_structure(c);
+
+      message m(c.str());
+
+      send_message(m);
     }
  
     /**

@@ -409,9 +409,12 @@ namespace squadt {
        * @param[in] b whether the button is selected or not
        **/
       mediator::wrapper_aptr tool_display_mediator::build_radio_button(layout::element const* e, std::string const& s, bool b) {
-        wxRadioButton* t = new wxRadioButton(current_window, wxID_ANY, wxString(s.c_str(), wxConvLocal));
+        wxRadioButton* t = new wxRadioButton(current_window, wxID_ANY, wxString(s.c_str(), wxConvLocal), wxDefaultPosition, 
+                wxDefaultSize, static_cast < layout::elements::radio_button const* > (e)->is_first_in_group() ? wxRB_GROUP : 0);
 
-        t->SetValue(b);
+        if (static_cast < layout::elements::radio_button const* > (e)->is_selected()) {
+          t->SetValue(true);
+        }
      
         /* Connect change event */
         change_event_handler->associate(t, e);
@@ -500,7 +503,7 @@ namespace squadt {
        * @param[in] s the text of the label
        **/
       mediator::wrapper_aptr tool_display_mediator::build_text_field(layout::element const* e, std::string const& s) {
-        wxTextCtrl* t = new wxTextCtrl(current_window, wxID_ANY, wxString(s.c_str(), wxConvLocal));
+        wxTextCtrl* t = new wxTextCtrl(current_window, wxID_ANY, wxString(s.c_str(), wxConvLocal), wxDefaultPosition, wxSize(200,-1));
      
         /* Connect change event */
         change_event_handler->associate(t, e);

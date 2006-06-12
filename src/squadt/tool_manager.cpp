@@ -128,14 +128,15 @@ namespace squadt {
 
   /**
    * @param t the tool that is to be run
-   * @param p the processor that should be passed the feedback of execution
+   * @param p the monitor that should be passed the feedback of execution
    * @param b whether or not to circumvent the executor restriction mechanism
+   * @param w the directory in which execution should take place
    **/
   template < typename T >
-  void tool_manager::execute(tool& t, T p, bool b) {
+  void tool_manager::execute(tool& t, std::string const& w, T p, bool b) {
     instance_identifier id = free_identifier++;
 
-    execution::command c(t.get_location());
+    execution::command c(t.get_location(), w);
 
     c.append_argument(boost::str(boost::format(socket_connect_pattern)
                             % get_local_host().name() % default_tcp_port));
@@ -195,7 +196,8 @@ namespace squadt {
     /* Create extractor object, that will retrieve the data from the running tool process */
     boost::shared_ptr < extractor > e(new extractor(t));
 
-    execute(t, boost::dynamic_pointer_cast < execution::task_monitor, extractor > (e), false);
+    execute(t, boost::filesystem::current_path().native_file_string(),
+               boost::dynamic_pointer_cast < execution::task_monitor, extractor > (e), false);
 
     execution::process::ptr p(e->get_process(true));
 

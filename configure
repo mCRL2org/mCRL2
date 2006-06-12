@@ -4092,7 +4092,7 @@ if test "${enable_experimental+set}" = set; then
 
 fi;
 if test $enable_experimental; then
-  BUILD_EXPERIMENTAL="experimental"
+  BUILD_EXPERIMENTAL="--enable-experimental"
 fi
 
 
@@ -6204,10 +6204,11 @@ R_SLDFLAGS=$R_SLDFLAGS
 if test $BUILD_ATERM; then
   if test "$ADDRESS_MODEL" = "64"; then
     IATERM_CPPFLAGS="-DAT_64BIT -I$INCLUDE_DIR/aterm"
+
   else
     IATERM_CPPFLAGS="-I$INCLUDE_DIR/aterm"
-  fi
 
+  fi
   IATERM_LDFLAGS="-L$LIB_DIR -lATerm"
 
 else
@@ -6224,7 +6225,7 @@ echo "$as_me: Some tools will not be built if any of these libraries are missing
 { echo "$as_me:$LINENO: " >&5
 echo "$as_me: " >&6;}
 
-                                        ac_config_files="$ac_config_files boost/tools/build/v2/user-config.jam src/setup.h config config.jam"
+                                        ac_config_files="$ac_config_files boost/tools/build/v2/user-config.jam build/config build/config.jam src/setup.h"
 
 cat >confcache <<\_ACEOF
 # This file is a shell script that caches the results of configure
@@ -6777,9 +6778,9 @@ do
   case "$ac_config_target" in
   # Handling of arguments.
   "boost/tools/build/v2/user-config.jam" ) CONFIG_FILES="$CONFIG_FILES boost/tools/build/v2/user-config.jam" ;;
+  "build/config" ) CONFIG_FILES="$CONFIG_FILES build/config" ;;
+  "build/config.jam" ) CONFIG_FILES="$CONFIG_FILES build/config.jam" ;;
   "src/setup.h" ) CONFIG_FILES="$CONFIG_FILES src/setup.h" ;;
-  "config" ) CONFIG_FILES="$CONFIG_FILES config" ;;
-  "config.jam" ) CONFIG_FILES="$CONFIG_FILES config.jam" ;;
   *) { { echo "$as_me:$LINENO: error: invalid argument: $ac_config_target" >&5
 echo "$as_me: error: invalid argument: $ac_config_target" >&2;}
    { (exit 1); exit 1; }; };;

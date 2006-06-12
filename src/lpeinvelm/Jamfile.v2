@@ -6,8 +6,8 @@ project lpeinvelm
 exe lpeinvelm
        : lpeinvelm.cpp
          /libraries/prover//prover
-       : <source>/root//mcrl2_revision
+       : <source>/site-config//mcrl2_revision.h
          <include>.
        ;
 
-install_with_libraries lpeinvelm ;
+install_with_libraries install : lpeinvelm ;

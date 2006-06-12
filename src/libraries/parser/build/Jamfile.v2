@@ -1,6 +1,3 @@
-import bison ;
-import lex ;
-
 project parser
        : source-location ../source
        : build-dir $(BUILD_TOP)
@@ -10,13 +7,18 @@ project parser
           <include>../include
        ;
 
+import lex : lex ;
+import bison : bison ;
+
 lib parser
        : mcrl2parser.yy
          mcrl2lexer.ll
          libparse.cpp
          typecheck.cpp
          dataimpl.cpp
-       : <dependency>/libraries/aterm//aterm
+       : <bison.prefix>"mcrl2"
+         <flex.prefix>"mcrl2"
+         <dependency>/libraries/aterm//aterm
          <dependency>/libraries/temporary//print
          <dependency>/libraries/temporary//rewrite
        :

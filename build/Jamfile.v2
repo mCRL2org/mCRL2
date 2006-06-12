@@ -1,0 +1,62 @@
+import os : name ;
+import modules ;
+
+project site-config
+       : build-dir $(BUILD_TOP)
+       ;
+
+include $(TOP)/build/config.jam ;
+
+if [ path.exists $(TOP)/utility/revision.jam ] {
+  include $(TOP)/utility/revision.jam ;
+
+  import_revision ;
+}
+else {
+  rule import_revision {
+  }
+}
+
+alias mcrl2_revision.h
+      : $(REVISION_HEADER) 
+      :
+      :
+      : <include>$(TOP)/src
+      ;
+
+# OpenGL, GLU and GLUT libraries names
+switch [ os.name ] {
+  case "NT" :
+    lib OpenGL : : <name>"opengl32" ;
+    lib GLU    : OpenGL : <name>"glu32" ;
+    lib GLUT   : OpenGL : <name>"glut32" ;
+  case "MACOSX" :
+    alias OpenGL : : : : <framework>"OpenGL" ;
+    alias GLUT   : OpenGL : : : <framework>"GLUT" ;
+    alias GLU    : OpenGL : : : ;
+  case * :
+    lib OpenGL : : <name>"GL" ;
+    lib GLU    : OpenGL : <name>"GLU" ;
+    lib GLUT   : OpenGL : <name>"glut" ;
+}
+
+# Helper rules to extract library names from strings delivered by pkgconfig or wx-config and friends
+rule extract_library_names ( string ) {
+  return [ MATCH "^-l(.*)" : $($(string)) ] ;
+}
+
+lib z  : : <name>"z" ;
+
+lib m  : : <name>"m" ;
+
+lib dl : : <name>"dl" ;
+
+lib xml2
+      :
+      : <name>"xml2"
+      :
+      : <cxxflags>"$(XML2_CPPFLAGS)"
+        <library>z
+        <library>m
+      ;
+

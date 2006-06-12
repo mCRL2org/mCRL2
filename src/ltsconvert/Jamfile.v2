@@ -13,8 +13,8 @@ exe ltsconvert
          /libraries/temporary//rewrite
          /libraries/lts//lts
          /libraries/svc//svc
-       : <source>/root//mcrl2_revision
+       : <source>/site-config//mcrl2_revision.h
          <include>.
        ;
 
-install_with_libraries ltsconvert ;
+install_with_libraries install : ltsconvert ;

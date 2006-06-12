@@ -7,11 +7,11 @@ project lpe2torx
 
 exe lpe2torx
        : lpe2torx.cpp
-         /libraries/temporary//print
-         /libraries/temporary//dataelm
-         /libraries/temporary//nextstate
-       : <source>/root//mcrl2_revision
+       : <source>/site-config//mcrl2_revision.h
+         <source>/libraries/temporary//print
+         <source>/libraries/temporary//dataelm
+         <source>/libraries/temporary//nextstate
          <include>.
        ;
 
-install_with_libraries lpe2torx ;
+install_with_libraries install : lpe2torx ;

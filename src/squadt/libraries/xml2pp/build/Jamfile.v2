@@ -8,8 +8,6 @@ project text_reader
        <include>../..
     ;
 
-import_libraries ;
-
 obj text_reader.o
     : exception.cpp
     ;
@@ -18,6 +16,5 @@ alias text_reader
     : text_reader.o
     :
     :
-    :
-      <library>xml2
+    : <library>/site-config//xml2
     ;

@@ -31,7 +31,7 @@ namespace squadt {
     }
  
     /**
-     * @param c the command to execute
+     * @param c[in] the command to execute
      **/
     void process::operator() (const command& c) {
       boost::shared_array < char const* > arguments(c.argument_array());
@@ -39,6 +39,9 @@ namespace squadt {
       identifier = fork();
 
       if (identifier == 0) {
+        /* Change working directory to the project directory */
+        chdir(c.get_working_directory().c_str());
+
         execv(c.executable.c_str(), const_cast < char* const* > (arguments.get()));
       }
 
