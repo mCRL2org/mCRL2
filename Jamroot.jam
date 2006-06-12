@@ -8,6 +8,9 @@ path-constant BUILD_TOP       : ./bin ;
 path-constant BOOST           : ./boost ;
 path-constant REVISION_HEADER : ./src/mcrl2_revision.h ;
 
+# Activate header chache
+modules.poke : HCACHEFILE : .jamdeps ;
+
 # Deployment target for Mac OS X
 modules.poke : MACOSX_DEPLOYMENT_TARGET : 10.3 ;
 

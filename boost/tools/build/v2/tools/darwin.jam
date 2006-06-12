@@ -62,13 +62,12 @@ _ = " " ;
 
 actions link bind LIBRARIES
 {
-    $(CONFIG_COMMAND)  -L"$(LINKPATH)" -o "$(<)" "$(>)" "$(LIBRARIES)" -l$(FINDLIBS-SA) -l$(FINDLIBS-ST) -framework$(_)$(FRAMEWORK) $(OPTIONS) $(USER_OPTIONS)
+    $(CONFIG_COMMAND) -L"$(LINKPATH)" -o "$(<)" "$(>)" "$(LIBRARIES)" -l$(FINDLIBS-SA) -l$(FINDLIBS-ST) -framework$(_)$(FRAMEWORK) $(OPTIONS) $(USER_OPTIONS)
     $(NEED_STRIP)strip $(NEED_STRIP)"$(<)"
 }
 
 actions link.dll bind LIBRARIES
 {
-    # Temporary change to make boost build work
     $(CONFIG_COMMAND) -dynamiclib -L"$(LINKPATH)" -o "$(<)" "$(>)" "$(LIBRARIES)" -l$(FINDLIBS-SA) -l$(FINDLIBS-ST) -framework$(_)$(FRAMEWORK) $(OPTIONS) $(USER_OPTIONS)
 }
 

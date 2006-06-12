@@ -10,13 +10,13 @@ exe maximum_revision
 
 explicit maximum_revision ;
 
-actions quietly ignore run_maximum_revision {
+actions quietly run_maximum_revision {
   $(>) --cpp-file $(<)
 }
 
 # The SVN revision number with which tools will be tagged
 rule import_revision {
-  make $(REVISION_HEADER) : /site-config//maximum_revision : run_maximum_revision ;
+  make $(REVISION_HEADER) : maximum_revision : run_maximum_revision ;
 }
 
 EXPORT $(__name__) : run_maximum_revision import_revision ;

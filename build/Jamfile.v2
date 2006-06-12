@@ -7,22 +7,7 @@ project site-config
 
 include $(TOP)/build/config.jam ;
 
-if [ path.exists $(TOP)/utility/revision.jam ] {
-  include $(TOP)/utility/revision.jam ;
-
-  import_revision ;
-}
-else {
-  rule import_revision {
-  }
-}
-
-alias mcrl2_revision.h
-      : $(REVISION_HEADER) 
-      :
-      :
-      : <include>$(TOP)/src
-      ;
+alias mcrl2_revision.h : : : : <include>$(TOP)/src ;
 
 # OpenGL, GLU and GLUT libraries names
 switch [ os.name ] {
