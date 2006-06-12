@@ -37,7 +37,7 @@ documentation: all
 	@install -d $(mandir)/man$*
 	@for f in $(filter %.$*,$(OBJECTS)); do\
 	  if test -f $$f; then\
-	    c="$(INSTALL) -m 644 $$f $(mandir)/man$*";\
+	    c="install -m 644 $$f $(mandir)/man$*";\
 	    echo $$c;\
 	    $$c;\
 	  fi;\
