@@ -339,7 +339,7 @@ static bool get_squadt_parameters(int argc,
     left_option_column->add(newstate,layout::left);
     checkbox* binary = new checkbox("Encode enumerated types by booleans ",false);
     left_option_column->add(binary,layout::left);
-    checkbox* statenames = new checkbox("use informative statenames ",false);
+    checkbox* statenames = new checkbox("Use informative statenames ",false);
     left_option_column->add(statenames,layout::left);
     // right option column
     layout::vertical_box* right_option_column = new layout::vertical_box();
@@ -360,15 +360,15 @@ static bool get_squadt_parameters(int argc,
     // Determine which phases the linearizer will go through. Default is all.
     horizontal_box *phases_box = new horizontal_box();
     layout_manager->add(phases_box);
-    radio_button *all_phases=new radio_button("Linearize");
+    radio_button *all_phases=new radio_button("None");
     phases_box->add(all_phases,middle);
-    radio_button *parse_phase=new radio_button("Parse input",all_phases);
+    radio_button *parse_phase=new radio_button("Parsing",all_phases);
     phases_box->add(parse_phase,middle);
-    radio_button *typecheck_phase=new radio_button("Typecheck input",parse_phase);
+    radio_button *typecheck_phase=new radio_button("Typechecking",parse_phase);
     phases_box->add(typecheck_phase,middle);
-    radio_button *alpha_phase=new radio_button("Apply alphabet axioms",typecheck_phase);
+    radio_button *alpha_phase=new radio_button("Alphabet reductions",typecheck_phase);
     phases_box->add(alpha_phase,middle);
-    radio_button *data_phase=new radio_button("Implement data",alpha_phase);
+    radio_button *data_phase=new radio_button("Data implementation",alpha_phase);
     phases_box->add(data_phase,middle);
 
 
