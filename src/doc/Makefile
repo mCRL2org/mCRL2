@@ -23,7 +23,7 @@ MAN_INSTALL_TARGETS = $(patsubst %,%.install,$(MAN_OBJECT_SUFFIXES))
 all: $(USE_XMLTO)
 
 clean:
-	rm $(addprefix *.,$(MAN_OBJECT_SUFFIXES)) *.txt *.html
+	rm -f $(addprefix *.,$(MAN_OBJECT_SUFFIXES)) *.txt *.html
 
 distclean: clean
 
