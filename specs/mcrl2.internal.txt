@@ -1,8 +1,11 @@
-// Date: 13-04-2006
+// Date: 12-06-2006
 // This document describes the internal format of the mCRL2 language and the
 // corresponding mu-calculus formulas. Here:
-// - three phases of implementation are distinguised, namely type checking (tc),
-//   data implementation (di) and linearisation (lin)
+// - the following phases of implementation are distinguised:
+//   tc : type checking
+//   di : data implementation
+//   lin: linearisation
+//   fi : formula implementation
 // - (+p)/(-p) at the end of a branch means that this branch is added/removed at
 //   the end of phase p 
 // - <String> is an arbitrary non-empty string excluding the keywords:
@@ -186,12 +189,61 @@
 
 //multiaction or delta
 <MultActOrDelta>
-               ::= MultAct(<Action>*)
+               ::= <MultAct>
                  | Delta
 
-//Assignment
+//multiaction
+<MultAct>      ::= MultAct(<Action>*)
+
+//assignment
 <Assignment>   ::= Assignment(<DataVarId>, <DataExpr>)
 
 //process expressions or data expression
 <Init>         ::= Init(<DataVarId>*, <ProcExpr>)                        (-lin)
                  | LPEInit(<DataVarId>*, <Assignment>*)                  (+lin)
+
+
+//Mu-calculus formulas
+//--------------------
+
+//state formula
+<StateFrm>     ::= <DataExpr>
+                 | StateTrue
+                 | StateFalse                                            (- fi)
+                 | StateNot(<StateFrm>)
+                 | StateAnd(<StateFrm>, <StateFrm>)
+                 | StateOr(<StateFrm>, <StateFrm>)                       (- fi)
+                 | StateImp(<StateFrm>, <StateFrm>)                      (- fi)
+                 | StateForall(<DataVarId>+, <StateFrm>)
+                 | StateExists(<DataVarId>+, <StateFrm>)                 (- fi)
+                 | StateMust(<RegFrm>, <StateFrm>)
+                 | StateMay(<RegFrm>, <StateFrm>)                        (- fi)
+                 | StateDelay                                            (- fi)
+                 | StateDelayTimed(<DataExpr>)
+                 | StateVar(<String>, <DataExpr>*)
+                 | StateNu(<String>, <DataVarIdInit>*, <StateFrm>)
+                 | StateMu(<String>, <DataVarIdInit>*, <StateFrm>)       (- fi)
+
+//data variable identifier and initialisation
+<DataVarIdInit>::= DataVarIdInit(<String>, <SortExpr>, <DataExpr>)
+
+//regular formula
+<RegFrm>       ::= <ActFrm>
+                 | RegNil                                                (- fi)
+                 | RegSeq(<RegFrm>, <RegFrm>)                            (- fi)
+                 | RegAlt(<RegFrm>, <RegFrm>)                            (- fi)
+                 | RegTrans(<RegFrm>)                                    (- fi)
+                 | RegTransOrNil(<RegFrm>)                               (- fi)
+
+//action formula
+<ActFrm>       ::= <MultAct>
+                 | <DataExpr>
+                 | ActTrue
+                 | ActFalse                                              (- fi)
+                 | ActNot(<ActFrm>)
+                 | ActAnd(<ActFrm>, <ActFrm>)
+                 | ActOr(<ActFrm>, <ActFrm>)                             (- fi)
+                 | ActImp(<ActFrm>, <ActFrm>)                            (- fi)
+                 | ActForall(<DataVarId>+, <ActFrm>)
+                 | ActExists(<DataVarId>+, <ActFrm>)                     (- fi)
+                 | ActAt(<ActFrm>, <DataExpr>)
