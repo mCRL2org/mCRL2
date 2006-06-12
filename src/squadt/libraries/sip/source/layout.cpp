@@ -290,7 +290,7 @@ namespace sip {
 
       try {
         while (r.valid()) {
-          sip::layout::element::identifier id;
+          sip::layout::element::identifier id = 0;
 
           r.get_attribute(&id, "id");
 

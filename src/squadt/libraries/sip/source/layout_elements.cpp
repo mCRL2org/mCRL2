@@ -243,7 +243,7 @@ namespace sip {
        * \todo connect to associated radio buttons
        **/
       void radio_button::read_structure(read_context& r) {
-        element::identifier connected_to;
+        element::identifier connected_to = 0;
 
         r.reader.get_attribute(&label, "label");
         r.reader.get_attribute(&connected_to, "connected");
