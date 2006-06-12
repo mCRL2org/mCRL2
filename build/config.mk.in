@@ -5,6 +5,7 @@ BJAM               = @abs_top_srcdir@/boost/tools/jam/bin/bjam
 BOOST_BUILD       := $(BJAM) @BUILD_VARIANT@ @BUILD_EXPERIMENTAL@
 
 USE_XMLTO          = @USE_XMLTO@
+XMLTO              = @XMLTO@
 
 # Installation directories
 prefix             = @prefix@

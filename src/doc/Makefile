@@ -23,7 +23,7 @@ MAN_INSTALL_TARGETS = $(patsubst %,%.install,$(MAN_OBJECT_SUFFIXES))
 all: $(USE_XMLTO)
 
 clean:
-	$(RM) $(addprefix *.,$(MAN_OBJECT_SUFFIXES)) *.txt *.html
+	rm $(addprefix *.,$(MAN_OBJECT_SUFFIXES)) *.txt *.html
 
 distclean: clean
 
@@ -34,7 +34,7 @@ install: all $(MAN_INSTALL_TARGETS)
 documentation: all
 
 %.install:
-	@$(INSTALL) -d $(mandir)/man$*
+	@install -d $(mandir)/man$*
 	@for f in $(filter %.$*,$(OBJECTS)); do\
 	  if test -f $$f; then\
 	    c="$(INSTALL) -m 644 $$f $(mandir)/man$*";\
