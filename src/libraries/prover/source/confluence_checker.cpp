@@ -37,13 +37,8 @@
     ATermAppl v_result = gsMakeDataExprTrue();
     ATermAppl v_variable;
     ATermAppl v_assignment_1, v_assignment_2;
-    ATermAppl v_variable_1, v_variable_2, v_expression_1, v_expression_2;
+    ATermAppl v_variable_1 = 0, v_variable_2 = 0, v_expression_1 = 0, v_expression_2 = 0;
     bool v_next_1 = true, v_next_2 = true;
-
-    v_variable_1 = 0;
-    v_variable_2 = 0;
-    v_expression_1 = 0;
-    v_expression_2 = 0;
 
     while (!ATisEmpty(a_variables)) {
       v_variable = ATAgetFirst(a_variables);
@@ -91,13 +86,8 @@
     ATermAppl v_result = gsMakeDataExprTrue();
     ATermAppl v_variable;
     ATermAppl v_assignment_1, v_assignment_2;
-    ATermAppl v_variable_1, v_variable_2, v_expression_1, v_expression_2;
+    ATermAppl v_variable_1 = 0, v_variable_2 = 0, v_expression_1 = 0, v_expression_2 = 0;
     bool v_next_1 = true, v_next_2 = true;
-
-    v_variable_1 = 0;
-    v_variable_2 = 0;
-    v_expression_1 = 0;
-    v_expression_2 = 0;
 
     while (!ATisEmpty(a_variables)) {
       v_variable = ATAgetFirst(a_variables);

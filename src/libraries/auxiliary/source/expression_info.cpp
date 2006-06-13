@@ -10,22 +10,17 @@
   // Class Expression_Info - Functions declared public --------------------------------------------
 
     Expression_Info::Expression_Info() {
-      f_greater_than_int = gsMakeOpIdGT(gsMakeSortIdInt());
-      f_greater_than_real = gsMakeOpIdGT(gsMakeSortIdReal());
-      f_greater_than_or_equal_int = gsMakeOpIdGTE(gsMakeSortIdInt());
-      f_greater_than_or_equal_real = gsMakeOpIdGTE(gsMakeSortIdReal());
-      f_less_than_int = gsMakeOpIdLT(gsMakeSortIdInt());
-      f_less_than_real = gsMakeOpIdLT(gsMakeSortIdReal());
-      f_less_than_or_equal_int = gsMakeOpIdLTE(gsMakeSortIdInt());
-      f_less_than_or_equal_real = gsMakeOpIdLTE(gsMakeSortIdReal());
-      f_plus_int = gsMakeOpIdAdd(gsMakeSortIdInt(), gsMakeSortIdInt());
-      f_plus_real = gsMakeOpIdAdd(gsMakeSortIdReal(), gsMakeSortIdReal());
-      f_unary_minus_int = gsMakeOpIdNeg(gsMakeSortIdInt());
-      f_unary_minus_real = gsMakeOpIdNeg(gsMakeSortIdReal());
-      f_binary_minus_int = gsMakeOpIdSubt(gsMakeSortIdInt());
-      f_binary_minus_real = gsMakeOpIdSubt(gsMakeSortIdReal());
-      f_multiplication_int = gsMakeOpIdMult(gsMakeSortIdInt());
-      f_multiplication_real = gsMakeOpIdMult(gsMakeSortIdReal());
+      f_greater_than = gsMakeOpIdNameGT();
+      f_greater_than_or_equal = gsMakeOpIdNameGTE();
+      f_less_than = gsMakeOpIdNameLT();
+      f_less_than_or_equal = gsMakeOpIdNameLTE();
+      f_plus = gsMakeOpIdNameAdd();
+      f_unary_minus = gsMakeOpIdNameNeg();
+      f_binary_minus = gsMakeOpIdNameSubt();
+      f_multiplication = gsMakeOpIdNameMult();
+      f_add_c = gsMakeOpIdNameAddC();
+      f_true = gsMakeOpIdTrue();
+      f_false = gsMakeOpIdFalse();
     }
 
     // --------------------------------------------------------------------------------------------
@@ -78,7 +73,7 @@
 
     // --------------------------------------------------------------------------------------------
 
-    bool Expression_Info::is_greater_than_int(ATermAppl a_expression) {
+    bool Expression_Info::is_greater_than(ATermAppl a_expression) {
       ATermAppl v_term;
 
       if (gsIsDataAppl(a_expression)) {
@@ -86,7 +81,8 @@
         if (gsIsDataAppl(v_term)) {
           v_term = ATAgetArgument(v_term, 0);
           if (gsIsOpId(v_term)) {
-            return v_term == f_greater_than_int;
+            v_term = ATAgetArgument(v_term, 0);
+            return v_term == f_greater_than;
           }
         }
       }
@@ -95,7 +91,7 @@
 
     // --------------------------------------------------------------------------------------------
 
-    bool Expression_Info::is_greater_than_real(ATermAppl a_expression) {
+    bool Expression_Info::is_greater_than_or_equal(ATermAppl a_expression) {
       ATermAppl v_term;
 
       if (gsIsDataAppl(a_expression)) {
@@ -103,7 +99,8 @@
         if (gsIsDataAppl(v_term)) {
           v_term = ATAgetArgument(v_term, 0);
           if (gsIsOpId(v_term)) {
-            return v_term == f_greater_than_real;
+            v_term = ATAgetArgument(v_term, 0);
+            return v_term == f_greater_than_or_equal;
           }
         }
       }
@@ -112,7 +109,7 @@
 
     // --------------------------------------------------------------------------------------------
 
-    bool Expression_Info::is_greater_than_or_equal_int(ATermAppl a_expression) {
+    bool Expression_Info::is_less_than(ATermAppl a_expression) {
       ATermAppl v_term;
 
       if (gsIsDataAppl(a_expression)) {
@@ -120,7 +117,8 @@
         if (gsIsDataAppl(v_term)) {
           v_term = ATAgetArgument(v_term, 0);
           if (gsIsOpId(v_term)) {
-            return v_term == f_greater_than_or_equal_int;
+            v_term = ATAgetArgument(v_term, 0);
+            return v_term == f_less_than;
           }
         }
       }
@@ -129,7 +127,7 @@
 
     // --------------------------------------------------------------------------------------------
 
-    bool Expression_Info::is_greater_than_or_equal_real(ATermAppl a_expression) {
+    bool Expression_Info::is_less_than_or_equal(ATermAppl a_expression) {
       ATermAppl v_term;
 
       if (gsIsDataAppl(a_expression)) {
@@ -137,7 +135,8 @@
         if (gsIsDataAppl(v_term)) {
           v_term = ATAgetArgument(v_term, 0);
           if (gsIsOpId(v_term)) {
-            return v_term == f_greater_than_or_equal_real;
+            v_term = ATAgetArgument(v_term, 0);
+            return v_term == f_less_than_or_equal;
           }
         }
       }
@@ -146,7 +145,7 @@
 
     // --------------------------------------------------------------------------------------------
 
-    bool Expression_Info::is_less_than_int(ATermAppl a_expression) {
+    bool Expression_Info::is_plus(ATermAppl a_expression) {
       ATermAppl v_term;
 
       if (gsIsDataAppl(a_expression)) {
@@ -154,7 +153,8 @@
         if (gsIsDataAppl(v_term)) {
           v_term = ATAgetArgument(v_term, 0);
           if (gsIsOpId(v_term)) {
-            return v_term == f_less_than_int;
+            v_term = ATAgetArgument(v_term, 0);
+            return v_term == f_plus;
           }
         }
       }
@@ -163,98 +163,14 @@
 
     // --------------------------------------------------------------------------------------------
 
-    bool Expression_Info::is_less_than_real(ATermAppl a_expression) {
-      ATermAppl v_term;
-
-      if (gsIsDataAppl(a_expression)) {
-        v_term = ATAgetArgument(a_expression, 0);
-        if (gsIsDataAppl(v_term)) {
-          v_term = ATAgetArgument(v_term, 0);
-          if (gsIsOpId(v_term)) {
-            return v_term == f_less_than_real;
-          }
-        }
-      }
-      return false;
-    }
-
-    // --------------------------------------------------------------------------------------------
-
-    bool Expression_Info::is_less_than_or_equal_int(ATermAppl a_expression) {
-      ATermAppl v_term;
-
-      if (gsIsDataAppl(a_expression)) {
-        v_term = ATAgetArgument(a_expression, 0);
-        if (gsIsDataAppl(v_term)) {
-          v_term = ATAgetArgument(v_term, 0);
-          if (gsIsOpId(v_term)) {
-            return v_term == f_less_than_or_equal_int;
-          }
-        }
-      }
-      return false;
-    }
-
-    // --------------------------------------------------------------------------------------------
-
-    bool Expression_Info::is_less_than_or_equal_real(ATermAppl a_expression) {
-      ATermAppl v_term;
-
-      if (gsIsDataAppl(a_expression)) {
-        v_term = ATAgetArgument(a_expression, 0);
-        if (gsIsDataAppl(v_term)) {
-          v_term = ATAgetArgument(v_term, 0);
-          if (gsIsOpId(v_term)) {
-            return v_term == f_less_than_or_equal_real;
-          }
-        }
-      }
-      return false;
-    }
-
-    // --------------------------------------------------------------------------------------------
-
-    bool Expression_Info::is_plus_int(ATermAppl a_expression) {
-      ATermAppl v_term;
-
-      if (gsIsDataAppl(a_expression)) {
-        v_term = ATAgetArgument(a_expression, 0);
-        if (gsIsDataAppl(v_term)) {
-          v_term = ATAgetArgument(v_term, 0);
-          if (gsIsOpId(v_term)) {
-            return v_term == f_plus_int;
-          }
-        }
-      }
-      return false;
-    }
-
-    // --------------------------------------------------------------------------------------------
-
-    bool Expression_Info::is_plus_real(ATermAppl a_expression) {
-      ATermAppl v_term;
-
-      if (gsIsDataAppl(a_expression)) {
-        v_term = ATAgetArgument(a_expression, 0);
-        if (gsIsDataAppl(v_term)) {
-          v_term = ATAgetArgument(v_term, 0);
-          if (gsIsOpId(v_term)) {
-            return v_term == f_plus_real;
-          }
-        }
-      }
-      return false;
-    }
-
-    // --------------------------------------------------------------------------------------------
-
-    bool Expression_Info::is_unary_minus_int(ATermAppl a_expression) {
+    bool Expression_Info::is_unary_minus(ATermAppl a_expression) {
       ATermAppl v_term;
 
       if (gsIsDataAppl(a_expression)) {
         v_term = ATAgetArgument(a_expression, 0);
         if (gsIsOpId(v_term)) {
-          return v_term == f_unary_minus_int;
+          v_term = ATAgetArgument(v_term, 0);
+          return v_term == f_unary_minus;
         }
       }
       return false;
@@ -262,21 +178,7 @@
 
     // --------------------------------------------------------------------------------------------
 
-    bool Expression_Info::is_unary_minus_real(ATermAppl a_expression) {
-      ATermAppl v_term;
-
-      if (gsIsDataAppl(a_expression)) {
-        v_term = ATAgetArgument(a_expression, 0);
-        if (gsIsOpId(v_term)) {
-          return v_term == f_unary_minus_real;
-        }
-      }
-      return false;
-    }
-
-    // --------------------------------------------------------------------------------------------
-
-    bool Expression_Info::is_binary_minus_int(ATermAppl a_expression) {
+    bool Expression_Info::is_binary_minus(ATermAppl a_expression) {
       ATermAppl v_term;
 
       if (gsIsDataAppl(a_expression)) {
@@ -284,7 +186,8 @@
         if (gsIsDataAppl(v_term)) {
           v_term = ATAgetArgument(v_term, 0);
           if (gsIsOpId(v_term)) {
-            return v_term == f_binary_minus_int;
+            v_term = ATAgetArgument(v_term, 0);
+            return v_term == f_binary_minus;
           }
         }
       }
@@ -293,7 +196,7 @@
 
     // --------------------------------------------------------------------------------------------
 
-    bool Expression_Info::is_binary_minus_real(ATermAppl a_expression) {
+    bool Expression_Info::is_multiplication(ATermAppl a_expression) {
       ATermAppl v_term;
 
       if (gsIsDataAppl(a_expression)) {
@@ -301,7 +204,8 @@
         if (gsIsDataAppl(v_term)) {
           v_term = ATAgetArgument(v_term, 0);
           if (gsIsOpId(v_term)) {
-            return v_term == f_binary_minus_real;
+            v_term = ATAgetArgument(v_term, 0);
+            return v_term == f_multiplication;
           }
         }
       }
@@ -310,32 +214,19 @@
 
     // --------------------------------------------------------------------------------------------
 
-    bool Expression_Info::is_multiplication_int(ATermAppl a_expression) {
+    bool Expression_Info::is_add_c(ATermAppl a_expression) {
       ATermAppl v_term;
 
       if (gsIsDataAppl(a_expression)) {
         v_term = ATAgetArgument(a_expression, 0);
         if (gsIsDataAppl(v_term)) {
           v_term = ATAgetArgument(v_term, 0);
-          if (gsIsOpId(v_term)) {
-            return v_term == f_multiplication_int;
-          }
-        }
-      }
-      return false;
-    }
-
-    // --------------------------------------------------------------------------------------------
-
-    bool Expression_Info::is_multiplication_real(ATermAppl a_expression) {
-      ATermAppl v_term;
-
-      if (gsIsDataAppl(a_expression)) {
-        v_term = ATAgetArgument(a_expression, 0);
-        if (gsIsDataAppl(v_term)) {
-          v_term = ATAgetArgument(v_term, 0);
-          if (gsIsOpId(v_term)) {
-            return v_term == f_multiplication_real;
+          if (gsIsDataAppl(v_term)) {
+            v_term = ATAgetArgument(v_term, 0);
+            if (gsIsOpId(v_term)) {
+              v_term = ATAgetArgument(v_term, 0);
+              return v_term == f_add_c;
+            }
           }
         }
       }
@@ -359,32 +250,17 @@
 
     // --------------------------------------------------------------------------------------------
 
-    bool Expression_Info::is_real_variable(ATermAppl a_expression) {
-      ATermAppl v_term;
-
-      if (gsIsDataVarId(a_expression)) {
-        v_term = ATAgetArgument(a_expression, 1);
-        return v_term == gsMakeSortIdReal();
-      }
-      return false;
-    }
-
-    // --------------------------------------------------------------------------------------------
-
-    bool Expression_Info::is_int_variable(ATermAppl a_expression) {
-      ATermAppl v_term;
-
-      if (gsIsDataVarId(a_expression)) {
-        v_term = ATAgetArgument(a_expression, 1);
-        return v_term == gsMakeSortIdInt();
-      }
-      return false;
-    }
-
-    // --------------------------------------------------------------------------------------------
-
     bool Expression_Info::is_variable(ATermAppl a_expression) {
       if (gsIsDataVarId(a_expression)) {
+        return true;
+      }
+      return false;
+    }
+
+    // --------------------------------------------------------------------------------------------
+
+    bool Expression_Info::is_constant(ATermAppl a_expression) {
+      if (gsIsOpId(a_expression)) {
         return true;
       }
       return false;
@@ -398,8 +274,26 @@
 
     // --------------------------------------------------------------------------------------------
 
-    bool Expression_Info::is_constant(ATermAppl a_expression) {
-      return gsIsOpId(a_expression);
+    bool Expression_Info::is_nat_constant(ATermAppl a_expression) {
+      return gsIsNatConstant(a_expression);
+    }
+
+    // --------------------------------------------------------------------------------------------
+
+    bool Expression_Info::is_pos_constant(ATermAppl a_expression) {
+      return gsIsPosConstant(a_expression);
+    }
+
+    // --------------------------------------------------------------------------------------------
+
+    bool Expression_Info::is_true(ATermAppl a_expression) {
+      return a_expression == f_true;
+    }
+
+    // --------------------------------------------------------------------------------------------
+
+    bool Expression_Info::is_false(ATermAppl a_expression) {
+      return a_expression == f_false;
     }
 
     // --------------------------------------------------------------------------------------------

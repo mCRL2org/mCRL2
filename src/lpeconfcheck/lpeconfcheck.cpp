@@ -86,6 +86,8 @@
         "                                  - 'jitty' for the jitty rewrite strategy\n"
         "                                  - 'jittyc' for the compiled jitty rewrite\n"
         "                                    strategy.\n"
+        "                                  By default, the jitty rewrite strategy is\n"
+        "                                  used.\n"
         "  -t, --time-limit=SECONDS        Spend at most the specified number of\n"
         "                                  SECONDS on proving a single formula.\n"
         "  -z --smt-solver=SOLVER          Use the specified SOLVER to remove\n"

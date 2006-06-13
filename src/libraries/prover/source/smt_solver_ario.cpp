@@ -12,12 +12,6 @@ using namespace redi;
 // Class SMT_Solver_Ario --------------------------------------------------------------------------
   // Class SMT_Solver_Ario - Functions declared public --------------------------------------------
 
-    SMT_Solver_Ario::SMT_Solver_Ario() {
-
-    }
-
-    // --------------------------------------------------------------------------------------------
-
     bool SMT_Solver_Ario::is_satisfiable(ATermList a_formula) {
       translate(a_formula);
 
@@ -31,7 +25,7 @@ using namespace redi;
         cout << "Unsatisfiable\n\n" << endl;
         return false;
       } else if (v_string_out == "sat") {
-        cout << "Satisfiable or undeterminable\n\n" << endl;
+        cout << "Satisfiable\n\n" << endl;
         return true;
       } else {
         gsErrorMsg("Ario cannot determine whether this formula is satisfiable or not.\n");

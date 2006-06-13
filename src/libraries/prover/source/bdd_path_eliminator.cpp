@@ -22,9 +22,7 @@
       v_false_path = ATinsert(a_path, (ATerm) gsMakeDataExprNot(f_bdd_info.get_guard(a_bdd)));
       v_false_branch_enabled = f_smt_solver->is_satisfiable(v_false_path);
 
-      if (!v_true_branch_enabled && !v_false_branch_enabled) {
-        return gsMakeOpIdFalse();
-      } else if (!v_true_branch_enabled) {
+      if (!v_true_branch_enabled) {
         return aux_simplify(f_bdd_info.get_false_branch(a_bdd), v_false_path);
       } else if (!v_false_branch_enabled) {
         return aux_simplify(f_bdd_info.get_true_branch(a_bdd), v_true_path);

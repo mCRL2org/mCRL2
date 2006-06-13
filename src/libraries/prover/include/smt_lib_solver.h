@@ -12,15 +12,21 @@
 
 class SMT_LIB_Solver: public SMT_Solver {
   private:
-    ATermIndexedSet f_variables;
-    ATermIndexedSet f_operators;
     ATermIndexedSet f_sorts;
-    void declare_variables();
-    void declare_operators();
+    ATermIndexedSet f_operators;
+    ATermIndexedSet f_variables;
+    ATermIndexedSet f_nat_variables;
+    ATermIndexedSet f_pos_variables;
+    bool f_bool2pred;
     void declare_sorts();
-    void produce_notes_for_operators();
+    void declare_operators();
+    void declare_variables();
+    void declare_predicates();
     void produce_notes_for_sorts();
-    void translate_clause(ATermAppl a_clause);
+    void produce_notes_for_operators();
+    void produce_notes_for_predicates();
+    void translate_clause(ATermAppl a_clause, bool a_expecting_predicate);
+    void add_bool2pred_and_translate_clause(ATermAppl a_clause);
     void translate_not(ATermAppl a_clause);
     void translate_equality(ATermAppl a_clause);
     void translate_inequality(ATermAppl a_clause);
@@ -32,26 +38,31 @@ class SMT_LIB_Solver: public SMT_Solver {
     void translate_unary_minus(ATermAppl a_clause);
     void translate_binary_minus(ATermAppl a_clause);
     void translate_multiplication(ATermAppl a_clause);
+    void translate_add_c(ATermAppl a_clause);
     void translate_unknown_operator(ATermAppl a_clause);
-    void translate_real_variable(ATermAppl a_clause);
-    void translate_int_variable(ATermAppl a_clause);
+    void translate_variable(ATermAppl a_clause);
     void translate_nat_variable(ATermAppl a_clause);
     void translate_pos_variable(ATermAppl a_clause);
-    void translate_unknown_variable(ATermAppl a_clause);
     void translate_int_constant(ATermAppl a_clause);
     void translate_nat_constant(ATermAppl a_clause);
     void translate_pos_constant(ATermAppl a_clause);
-    void translate_unknown_constant(ATermAppl a_clause);
+    void translate_true();
+    void translate_false();
+    void translate_constant(ATermAppl a_clause);
+    void add_nat_clauses();
+    void add_pos_clauses();
   protected:
     Expression_Info f_expression_info;
     Sort_Info f_sort_info;
     std::string f_benchmark;
+    std::string f_sorts_notes;
+    std::string f_operators_notes;
+    std::string f_predicates_notes;
     std::string f_extrasorts;
     std::string f_operators_extrafuns;
     std::string f_variables_extrafuns;
+    std::string f_extrapreds;
     std::string f_formula;
-    std::string f_operators_notes;
-    std::string f_sorts_notes;
     void translate(ATermList a_formula);
   public:
     SMT_LIB_Solver();

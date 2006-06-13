@@ -9,7 +9,6 @@
 
 class SMT_Solver_CVC_Lite: public SMT_LIB_Solver {
   public:
-    SMT_Solver_CVC_Lite();
     bool is_satisfiable(ATermList a_formula);
 };
 

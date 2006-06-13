@@ -12,12 +12,6 @@ using namespace redi;
 // Class SMT_Solver_CVC_Lite ----------------------------------------------------------------------
   // Class SMT_Solver_CVC_Lite - Functions declared public ----------------------------------------
 
-    SMT_Solver_CVC_Lite::SMT_Solver_CVC_Lite() {
-
-    }
-
-    // --------------------------------------------------------------------------------------------
-
     bool SMT_Solver_CVC_Lite::is_satisfiable(ATermList a_formula) {
       translate(a_formula);
 
@@ -33,8 +27,11 @@ using namespace redi;
       } else if (v_string_out == "Satisfiable.") {
         cout << "Satisfiable\n\n" << endl;
         return true;
+      } else if (v_string_out == "Unknown.") {
+        cout << "Unknown\n\n" << endl;
+        return true;
       } else {
-        gsErrorMsg("CVC Lite cannot determine whether this formula is satisfiable or not.");
+        gsErrorMsg("CVC Lite cannot determine whether this formula is satisfiable or not.\n");
         exit(1);
       }
     }

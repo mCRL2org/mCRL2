@@ -11,7 +11,10 @@
 
     Sort_Info::Sort_Info() {
       f_sort_id_int = gsMakeSortIdInt();
+      f_sort_id_nat = gsMakeSortIdNat();
+      f_sort_id_pos = gsMakeSortIdPos();
       f_sort_id_real = gsMakeSortIdReal();
+      f_sort_id_bool = gsMakeSortIdBool();
     }
 
     // --------------------------------------------------------------------------------------------
@@ -34,8 +37,26 @@
 
     // --------------------------------------------------------------------------------------------
 
+    bool Sort_Info::is_sort_nat(ATermAppl a_sort_expression) {
+      return a_sort_expression == f_sort_id_nat;
+    }
+
+    // --------------------------------------------------------------------------------------------
+
+    bool Sort_Info::is_sort_pos(ATermAppl a_sort_expression) {
+      return a_sort_expression == f_sort_id_pos;
+    }
+
+    // --------------------------------------------------------------------------------------------
+
     bool Sort_Info::is_sort_real(ATermAppl a_sort_expression) {
       return a_sort_expression == f_sort_id_real;
+    }
+
+    // --------------------------------------------------------------------------------------------
+
+    bool Sort_Info::returns_bool(ATermAppl a_sort_expression) {
+      return gsGetSortExprResult(a_sort_expression) == f_sort_id_bool;
     }
 
     // --------------------------------------------------------------------------------------------

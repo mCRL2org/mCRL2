@@ -9,7 +9,6 @@
 
 class SMT_Solver_Ario: public SMT_LIB_Solver {
   public:
-    SMT_Solver_Ario();
     virtual bool is_satisfiable(ATermList a_formula);
 };
 
