@@ -77,6 +77,7 @@ Number     "0"|([1-9][0-9]*)
 "sort_expr" { process_string(); return TAG_SORT_EXPR; }
 "data_expr" { process_string(); return TAG_DATA_EXPR; }
 "proc_expr" { process_string(); return TAG_PROC_EXPR; }
+"state_frm" { process_string(); return TAG_STATE_FRM; }
 
 "||_"      { process_string(); return LMERGE; }
 "->"       { process_string(); return ARROW; }
@@ -155,6 +156,7 @@ hide       { process_string(); return HIDE; }
 rename     { process_string(); return RENAME; }
 comm       { process_string(); return COMM; }
 
+eval       { process_string(); return EVAL; }
 mu         { process_string(); return MU; }
 nu         { process_string(); return NU; }
 delay      { process_string(); return DELAY; }

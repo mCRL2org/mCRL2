@@ -220,7 +220,7 @@
                  | StateMay(<RegFrm>, <StateFrm>)
                  | StateDelay
                  | StateDelayTimed(<DataExpr>)
-                 | StateVar(<String>, <DataExpr>*)                       (+ tc)
+                 | StateVar(<String>, <DataExpr>*)
                  | StateNu(<String>, <DataVarIdInit>*, <StateFrm>)
                  | StateMu(<String>, <DataVarIdInit>*, <StateFrm>)
 

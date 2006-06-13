@@ -57,7 +57,7 @@ ATermAppl gsSpecEltsToSpec(ATermList SpecElts);
 //terminals
 //---------
 
-%token <appl> TAG_SPEC TAG_SORT_EXPR TAG_DATA_EXPR TAG_PROC_EXPR
+%token <appl> TAG_SPEC TAG_SORT_EXPR TAG_DATA_EXPR TAG_PROC_EXPR TAG_STATE_FRM
 %token <appl> LMERGE ARROW LTE GTE CONS SNOC CONCAT EQ NEQ AND BARS IMP BINIT
 %token <appl> ELSE
 %token <appl> STAR PLUS MINUS EQUALS DOT COMMA COLON SEMICOLON QMARK EXCLAM AT
@@ -67,7 +67,7 @@ ATermAppl gsSpecEltsToSpec(ATermList SpecElts);
 %token <appl> BOOL POS NAT INT REAL LIST SET BAG
 %token <appl> CTRUE CFALSE DIV MOD IN LAMBDA FORALL EXISTS WHR END 
 %token <appl> DELTA TAU SUM BLOCK ALLOW HIDE RENAME COMM
-%token <appl> MU NU DELAY NIL
+%token <appl> EVAL MU NU DELAY NIL
 %token <appl> ID NUMBER
 
 //non-terminals
@@ -78,14 +78,14 @@ ATermAppl gsSpecEltsToSpec(ATermList SpecElts);
 %type <appl> eqn_decl act_spec proc_spec proc_decl initialisation sort_expr
 %type <appl> sort_expr_arrow domain_no_arrow_elt sort_expr_struct
 %type <appl> struct_constructor recogniser struct_projection sort_expr_primary
-%type <appl> sort_constant sort_constructor data_expr data_expr_whr whr_decl
-%type <appl> data_expr_quant data_expr_imp data_expr_imp_rhs data_expr_and
-%type <appl> data_expr_and_rhs data_expr_eq data_expr_eq_rhs data_expr_rel
-%type <appl> data_expr_cons data_expr_snoc data_expr_concat data_expr_add
-%type <appl> data_expr_div data_expr_mult data_expr_prefix
-%type <appl> data_expr_quant_prefix data_expr_postfix data_expr_primary
-%type <appl> data_constant data_enumeration bag_enum_elt data_comprehension
-%type <appl> data_var_decl
+%type <appl> sort_constant sort_constructor
+%type <appl> data_expr data_expr_whr whr_decl data_expr_quant data_expr_imp
+%type <appl> data_expr_imp_rhs data_expr_and data_expr_and_rhs data_expr_eq
+%type <appl> data_expr_eq_rhs data_expr_rel data_expr_cons data_expr_snoc
+%type <appl> data_expr_concat data_expr_add data_expr_div data_expr_mult
+%type <appl> data_expr_prefix data_expr_quant_prefix data_expr_postfix
+%type <appl> data_expr_primary data_constant data_enumeration
+%type <appl> bag_enum_elt data_comprehension data_var_decl
 %type <appl> proc_expr proc_expr_choice proc_expr_sum proc_expr_merge
 %type <appl> proc_expr_merge_rhs proc_expr_binit proc_expr_binit_rhs
 %type <appl> proc_expr_cond proc_expr_cond_la proc_expr_seq
@@ -94,6 +94,12 @@ ATermAppl gsSpecEltsToSpec(ATermList SpecElts);
 %type <appl> proc_expr_sync_wo_cond proc_expr_sync_rhs
 %type <appl> proc_expr_sync_rhs_wo_cond proc_expr_primary proc_constant
 %type <appl> act_proc_ref proc_quant mult_act_name ren_expr comm_expr
+%type <appl> state_frm state_frm_quant state_frm_imp state_frm_imp_rhs
+%type <appl> state_frm_and state_frm_and_rhs state_frm_prefix
+%type <appl> state_frm_quant_prefix state_frm_postfix state_frm_primary
+%type <appl> data_var_decl_init
+%type <appl> reg_frm reg_frm_seq reg_frm_alt reg_frm_postfix reg_frm_primary
+%type <appl> act_frm
 
 %type <list> spec_elts sorts_decls_scs sorts_decl ids_cs domain ops_decls_scs
 %type <list> ops_decl eqn_sect eqn_decls_scs data_vars_decls_scs data_vars_decl
@@ -102,6 +108,7 @@ ATermAppl gsSpecEltsToSpec(ATermList SpecElts);
 %type <list> struct_projections_cs whr_decls_cs data_exprs_cs bag_enum_elts_cs
 %type <list> act_names_set ren_expr_set ren_exprs_cs comm_expr_set comm_exprs_cs
 %type <list> mult_act_names_set mult_act_names_cs ids_bs
+%type <list> fixpoint_params data_var_decl_inits_cs
 
 %%
 
@@ -123,6 +130,11 @@ start:
       spec_tree = $$;
     }
   | TAG_PROC_EXPR proc_expr
+    {
+      $$ = $2;
+      spec_tree = $$;
+    }
+  | TAG_STATE_FRM state_frm
     {
       $$ = $2;
       spec_tree = $$;
@@ -1699,6 +1711,348 @@ mult_act_names_cs:
     {
       $$ = ATinsert($1, (ATerm) $3);
       gsDebugMsg("parsed multi action names\n  %T\n", $$);
+    }
+  ;
+
+//state formula
+state_frm:
+  state_frm_quant
+    {
+      $$ = $1;
+      gsDebugMsg("parsed state formula\n  %T\n", $$);
+    }
+  ;
+
+//quantification
+state_frm_quant:
+  state_frm_imp
+    {
+      $$ = $1;
+    }
+  | FORALL data_vars_decls_cs DOT state_frm_quant
+    {
+      $$ = gsMakeStateForall($2, $4);
+      gsDebugMsg("parsed quantification\n  %T\n", $$);
+    }
+  | EXISTS data_vars_decls_cs DOT state_frm_quant
+    {
+      $$ = gsMakeStateExists($2, $4);
+      gsDebugMsg("parsed quantification\n  %T\n", $$);
+    }
+  | NU ID fixpoint_params DOT state_frm_quant
+    {
+      $$ = gsMakeStateNu($2, $3, $5);
+      gsDebugMsg("parsed quantification\n  %T\n", $$);
+    }
+  | MU ID fixpoint_params DOT state_frm_quant
+    {
+      $$ = gsMakeStateMu($2, $3, $5);
+      gsDebugMsg("parsed quantification\n  %T\n", $$);
+    }
+  ;
+
+//parameters of a fixpoint variable declaration
+fixpoint_params:
+  /* empty */
+    {
+      $$ = ATmakeList0();
+      gsDebugMsg("parsed fixpoint parameters\n  %T\n", $$);
+    }
+  | LPAR data_var_decl_inits_cs RPAR
+    {
+      $$ = ATreverse($2);
+      gsDebugMsg("parsed fixpoint parameters\n  %T\n", $$);
+    }
+  ;
+
+//one or more declarations of a data variable with an
+//initialisation, separated by comma's
+data_var_decl_inits_cs:
+  data_var_decl_init
+    {
+      $$ = ATmakeList1((ATerm) $1);
+      gsDebugMsg("parsed data variable declaration and initialisations\n  %T\n", $$);
+    }
+  | data_var_decl_inits_cs COMMA data_var_decl_init
+    {
+      $$ = ATinsert($1, (ATerm) $3);
+      gsDebugMsg("parsed data variable declaration and initialisations\n  %T\n", $$);
+    }
+  ;
+
+//data variable declaration and initialisation
+data_var_decl_init:
+  ID COLON sort_expr EQUALS data_expr
+    {
+      $$ = gsMakeDataVarIdInit($1, $3, $5);
+      gsDebugMsg("parsed data variable declaration and initialisation\n  %T\n", $$);
+    }
+  ;
+
+//implication (right associative)
+state_frm_imp:
+  state_frm_and
+    {
+      $$ = $1;
+    }
+  | state_frm_and IMP state_frm_imp_rhs
+    {
+      $$ = gsMakeStateImp($1, $3);
+      gsDebugMsg("parsed implication\n  %T\n", $$);
+    }
+  ;
+
+//right argument of implication
+state_frm_imp_rhs:
+  state_frm_imp
+    {
+      $$ = $1;
+    }
+  | FORALL data_vars_decls_cs DOT state_frm_imp_rhs
+    {
+      $$ = gsMakeStateForall($2, $4);
+      gsDebugMsg("parsed quantification\n  %T\n", $$);
+    }
+  | EXISTS data_vars_decls_cs DOT state_frm_imp_rhs
+    {
+      $$ = gsMakeStateExists($2, $4);
+      gsDebugMsg("parsed quantification\n  %T\n", $$);
+    }
+  | NU ID fixpoint_params DOT state_frm_imp_rhs
+    {
+      $$ = gsMakeStateNu($2, $3, $5);
+      gsDebugMsg("parsed quantification\n  %T\n", $$);
+    }
+  | MU ID fixpoint_params DOT state_frm_imp_rhs
+    {
+      $$ = gsMakeStateMu($2, $3, $5);
+      gsDebugMsg("parsed quantification\n  %T\n", $$);
+    }
+  ;
+
+//conjunction and disjunction (right associative)
+state_frm_and:
+  state_frm_prefix
+    {
+      $$ = $1;
+    }
+  | state_frm_prefix AND state_frm_and_rhs
+    {
+      $$ = gsMakeStateAnd($1, $3);
+      gsDebugMsg("parsed conjunction\n  %T\n", $$);
+    }
+  | state_frm_prefix BARS state_frm_and_rhs
+    {
+      $$ = gsMakeStateOr($1, $3);
+      gsDebugMsg("parsed disjunction\n  %T\n", $$);
+    }
+  ;
+
+//right argument of conjunction and disjunction
+state_frm_and_rhs:
+  state_frm_prefix
+    {
+      $$ = $1;
+    }
+  | FORALL data_vars_decls_cs DOT state_frm_and_rhs
+    {
+      $$ = gsMakeStateForall($2, $4);
+      gsDebugMsg("parsed quantification\n  %T\n", $$);
+    }
+  | EXISTS data_vars_decls_cs DOT state_frm_and_rhs
+    {
+      $$ = gsMakeStateExists($2, $4);
+      gsDebugMsg("parsed quantification\n  %T\n", $$);
+    }
+  | NU ID fixpoint_params DOT state_frm_and_rhs
+    {
+      $$ = gsMakeStateNu($2, $3, $5);
+      gsDebugMsg("parsed quantification\n  %T\n", $$);
+    }
+  | MU ID fixpoint_params DOT state_frm_and_rhs
+    {
+      $$ = gsMakeStateMu($2, $3, $5);
+      gsDebugMsg("parsed quantification\n  %T\n", $$);
+    }
+  ;
+
+//prefix state formula
+state_frm_prefix:
+  state_frm_postfix
+    {
+      $$ = $1;
+    }
+  | EXCLAM state_frm_quant_prefix
+    {
+      $$ = gsMakeStateNot($2);
+      gsDebugMsg("parsed prefix state formula\n  %T\n", $$);
+    }
+  | LBRACK reg_frm RBRACK state_frm_quant_prefix
+    {
+      $$ = gsMakeStateMust($2, $4);
+      gsDebugMsg("parsed prefix state formula\n  %T\n", $$);
+    }
+  | LANG reg_frm RANG state_frm_quant_prefix
+    {
+      $$ = gsMakeStateMay($2, $4);
+      gsDebugMsg("parsed prefix state formula\n  %T\n", $$);
+    }
+  | DELAY AT data_expr_prefix
+    {
+      $$ = gsMakeStateDelayTimed($3);
+      gsDebugMsg("parsed prefix state formula\n  %T\n", $$);
+    }
+  ;
+
+//quantifier or prefix state formula
+state_frm_quant_prefix:
+  state_frm_prefix
+    {
+      $$ = $1;
+    }
+  | FORALL data_vars_decls_cs DOT state_frm_quant_prefix
+    {
+      $$ = gsMakeStateForall($2, $4);
+      gsDebugMsg("parsed quantification\n  %T\n", $$);
+    }
+  | EXISTS data_vars_decls_cs DOT state_frm_quant_prefix
+    {
+      $$ = gsMakeStateExists($2, $4);
+      gsDebugMsg("parsed quantification\n  %T\n", $$);
+    }
+  | NU ID fixpoint_params DOT state_frm_quant_prefix
+    {
+      $$ = gsMakeStateNu($2, $3, $5);
+      gsDebugMsg("parsed quantification\n  %T\n", $$);
+    }
+  | MU ID fixpoint_params DOT state_frm_quant_prefix
+    {
+      $$ = gsMakeStateMu($2, $3, $5);
+      gsDebugMsg("parsed quantification\n  %T\n", $$);
+    }
+  ;
+
+//postfix state formula
+state_frm_postfix:
+  state_frm_primary
+    {
+      $$ = $1;
+    }
+  | EVAL LPAR data_expr RPAR
+    {
+      $$ = $3;
+      gsDebugMsg("parsed postfix state formula\n  %T\n", $$);
+    }
+  | ID LPAR data_exprs_cs RPAR
+    {
+      $$ = gsMakeStateVar($1, ATreverse($3));
+      gsDebugMsg("parsed postfix state formula\n  %T\n", $$);
+    }
+  ;
+
+//primary state formula
+state_frm_primary:
+  ID
+    {
+      $$ = gsMakeStateVar($1, ATmakeList0());
+      gsDebugMsg("parsed primary state formula\n  %T\n", $$);
+    }
+  | CTRUE
+    {
+      $$ = gsMakeStateTrue();
+      gsDebugMsg("parsed primary state formula\n  %T\n", $$);
+    }
+  | CFALSE
+    {
+      $$ = gsMakeStateFalse();
+      gsDebugMsg("parsed primary state formula\n  %T\n", $$);
+    }
+  | DELAY
+    {
+      $$ = gsMakeStateDelay();
+      gsDebugMsg("parsed primary state formula\n  %T\n", $$);
+    }
+  | LPAR state_frm RPAR
+    {
+      $$ = $2;
+    }
+  ;
+
+//regular formula
+reg_frm:
+  reg_frm_seq
+    {
+      $$ = $1;
+      gsDebugMsg("parsed regular formula\n  %T\n", $$);
+    }
+  ;
+
+reg_frm_seq:
+  reg_frm_alt
+    {
+      $$ = $1;
+    }
+  | reg_frm_alt DOT reg_frm_seq
+    {
+      $$ = gsMakeRegSeq($1, $3);
+      gsDebugMsg("parsed sequential composition\n  %T\n", $$);
+    }
+  ;
+
+reg_frm_alt:
+  reg_frm_postfix
+    {
+      $$ = $1;
+    }
+  | reg_frm_postfix PLUS reg_frm_alt
+    {
+      $$ = gsMakeRegAlt($1, $3);
+      gsDebugMsg("parsed alternative composition\n  %T\n", $$);
+    }
+  ;
+
+//postfix regular formula
+reg_frm_postfix:
+  reg_frm_primary
+    {
+      $$ = $1;
+    }
+  | reg_frm STAR
+    {
+      $$ = gsMakeRegTransOrNil($1);
+      gsDebugMsg("parsed postfix regular formula\n  %T\n", $$);
+    }
+  | reg_frm PLUS
+    {
+      $$ = gsMakeRegTrans($1);
+      gsDebugMsg("parsed postfix regular formula\n  %T\n", $$);
+    }
+  ;
+
+//primary regular formula
+reg_frm_primary:
+  NIL
+    {
+      $$ = gsMakeRegNil();
+      gsDebugMsg("parsed primary regular formula\n  %T\n", $$);
+    }
+  | act_frm
+    {
+      $$ = $1;
+      gsDebugMsg("parsed primary regular formula\n  %T\n", $$);
+    }   
+  | LPAR state_frm RPAR
+    {
+      $$ = $2;
+    }
+  ;
+
+//action formula TODO
+act_frm:
+  DELTA
+    {
+      $$ = gsMakeNil();
+      gsDebugMsg("parsed action formula\n  %T\n", $$);
     }
   ;
 
