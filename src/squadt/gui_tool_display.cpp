@@ -399,7 +399,7 @@ namespace squadt {
        **/
       void tool_display_mediator::update_button(mediator::wrapper* w, std::string const& s) {
         wxButton* t = static_cast < wxButton* > (static_cast < wrapper* > (w)->release_window());
-
+std::cerr << "update_button\n";
         t->SetLabel(wxString(s.c_str(), wxConvLocal));
       }
 
@@ -671,10 +671,10 @@ namespace squadt {
         delete content;
       }
 
+      current_layout = l;
+
       event_handler.clear();
       event_handler.get_monitor()->set_display_data_handler(current_layout, boost::bind(&GUI::tool_display::schedule_layout_update, this, _1));
-
-      current_layout = l;
 
       std::auto_ptr < wxSizer > root(new wxBoxSizer(wxVERTICAL));
 

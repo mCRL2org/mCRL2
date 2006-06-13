@@ -74,7 +74,7 @@ namespace sip {
      **/
     void communicator::activate_display_layout_handler(display_layout_handler_function h) {
       /* Remove any previous handlers */
-      clear_handlers(sip::send_display_data);
+      clear_handlers(sip::send_display_layout);
 
       add_handler(sip::send_display_layout, boost::bind(&communicator::display_layout_handler, this, _1, h));
 

@@ -168,7 +168,7 @@ namespace sip {
 
       e->write_structure(c);
 
-      message m(c.str());
+      message m(c.str(), sip::send_display_data);
 
       send_message(m);
     }
