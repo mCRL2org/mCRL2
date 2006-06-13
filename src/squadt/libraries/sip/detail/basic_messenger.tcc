@@ -200,11 +200,10 @@ namespace sip {
 
             message_ptr m(new message(new_string, t));
 std::cerr << "message " << getpid() << " (" << new_string << ")\n";
-            typename handler_map::iterator h = handlers.find(t);
 
-            if (h != handlers.end()) {
+            if (handlers.find(sip::any) != handlers.end() || handlers.find(t) != handlers.end()) {
               /* Service handler */
-              boost::thread thread(boost::bind(&basic_messenger< M >::service_handlers, this, m, o, (*h).second));
+              boost::thread thread(boost::bind(&basic_messenger< M >::service_handlers, this, m, o));
             }
             else {
               /* Put message into queue */
@@ -303,15 +302,32 @@ std::cerr << "message " << getpid() << " (" << new_string << ")\n";
      * @param h the handler to call
      **/
     template < class M >
-    inline void basic_messenger< M >::service_handlers(const message_ptr m, const basic_transceiver* o, handler_type h) {
-      boost::mutex::scoped_lock w(waiter_lock);
-
-      h(m, o);
-
+    inline void basic_messenger< M >::service_handlers(const message_ptr m, const basic_transceiver* o) {
       typename M::type_identifier_t id = m->get_type();
 
-      /* Unblock all possible waiter */
-      if (0 < waiters.count(id)) {
+      typename handler_map::iterator i = handlers.find(sip::any);
+      typename handler_map::iterator j = handlers.find(id);
+
+      boost::mutex::scoped_lock w(waiter_lock);
+
+      if (j != handlers.end()) {
+        (*j).second(m, o);
+      }
+      if (id != any && i != handlers.end()) {
+        (*i).second(m, o);
+      }
+
+      /* Unblock all possible waiters */
+      if (id != any && 0 < waiters.count(sip::any)) {
+        boost::mutex::scoped_lock l(waiters[id]->mutex);
+
+        if (0 < waiters.count(id)) {
+          waiters[id]->condition.notify_all();
+        }
+
+        waiters[sip::any]->condition.notify_all();
+      }
+      else if (0 < waiters.count(id)) {
         boost::mutex::scoped_lock l(waiters[id]->mutex);
 
         waiters[id]->condition.notify_all();

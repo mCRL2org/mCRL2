@@ -98,7 +98,7 @@ namespace sip {
       private:
 
         /** \brief Helper function that services the handlers */
-        inline void   service_handlers(const message_ptr, const basic_transceiver*, handler_type);
+        inline void   service_handlers(const message_ptr, const basic_transceiver*);
 
         /** \brief Helper function that delivers an incoming message directly to a waiter */
         inline static void   deliver_to_waiter(const message_ptr&, const basic_transceiver*, message_ptr&);
@@ -117,7 +117,7 @@ namespace sip {
         /** \brief Queues incoming messages */
         virtual void deliver(const std::string&, basic_transceiver*);
  
-        /* \brief Wait until the next message arrives */
+        /* \brief Wait until the next message of a certain type arrives */
         const message_ptr await_message(typename M::type_identifier_t);
  
         /** \brief Send a message */

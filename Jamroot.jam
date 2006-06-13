@@ -9,7 +9,7 @@ path-constant BOOST           : ./boost ;
 path-constant REVISION_HEADER : ./src/mcrl2_revision.h ;
 
 # Activate header cache
-modules.poke : HCACHEFILE : .jamdeps ;
+#modules.poke : HCACHEFILE : .jamdeps ;
 
 if ! [ path.exists $(TOP)/build/config.jam ] {
   ECHO "Please configure your source tree!" ;
