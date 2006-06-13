@@ -593,7 +593,7 @@ void PRINT_FUNC(PrintPart_Appl)(PRINT_OUTTYPE OutStream,
     }
     PRINT_FUNC(PrintPart_Appl)(OutStream, ATAgetArgument(Part, 1),
       pp_format, ShowSorts, 0);
-  } else if (gsIsDataVarIdOpId(Part) || gsIsOpId(Part) || gsIsDataVarId(Part) ||
+  } else if (gsIsId(Part) || gsIsOpId(Part) || gsIsDataVarId(Part) ||
       gsIsDataAppl(Part) || gsIsDataApplProd(Part)) {
     //print data expression
     PRINT_FUNC(dbg_prints)("printing data expression\n");
@@ -708,7 +708,7 @@ void PRINT_FUNC(PrintPart_Appl)(PRINT_OUTTYPE OutStream,
         PRINT_FUNC(fprints)(OutStream, "-");
         PRINT_FUNC(PrintPart_Appl)(OutStream, ATAelementAt(Args, 0),
           pp_format, ShowSorts, 11);
-      } else if (gsIsDataVarIdOpId(Part)) {
+      } else if (gsIsId(Part)) {
         //print untyped data variable or operation identifier
         PRINT_FUNC(dbg_prints)("printing untyped data variable or operation identifier\n");
         PRINT_FUNC(PrintPart_Appl)(OutStream, ATAgetArgument(Part, 0),
@@ -1273,7 +1273,7 @@ bool gsHasConsistentContext(const ATermTable DataVarDecls,
         Result = (ATisEqual(VarDecl, CorVarDecl) == ATtrue);
       }
     }
-  } else if (gsIsOpId(Part) || gsIsDataVarIdOpId(Part))  {
+  } else if (gsIsOpId(Part) || gsIsId(Part))  {
     //Part may be an operation; check that its name does not occur in
     //DataVarDecls
     Result = (ATtableGet(DataVarDecls, ATgetArgument(Part, 0)) == NULL);

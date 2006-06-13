@@ -126,7 +126,7 @@ static AFun gsAFunSortArrowProd;
 static AFun gsAFunSortArrow;
 static AFun gsAFunStructCons;
 static AFun gsAFunStructProj;
-static AFun gsAFunDataVarIdOpId;
+static AFun gsAFunId;
 static AFun gsAFunDataApplProd;
 static AFun gsAFunDataAppl;
 static AFun gsAFunNumber;
@@ -322,7 +322,7 @@ void gsEnableConstructorFunctions(void)
     gsAFunSortArrow        = ATmakeAFun("SortArrow", 2, ATfalse);
     gsAFunStructCons       = ATmakeAFun("StructCons", 3, ATfalse);
     gsAFunStructProj       = ATmakeAFun("StructProj", 2, ATfalse);
-    gsAFunDataVarIdOpId    = ATmakeAFun("DataVarIdOpId", 1, ATfalse);
+    gsAFunId    = ATmakeAFun("Id", 1, ATfalse);
     gsAFunDataApplProd     = ATmakeAFun("DataApplProd", 2, ATfalse);
     gsAFunDataAppl         = ATmakeAFun("DataAppl", 2, ATfalse);
     gsAFunNumber           = ATmakeAFun("Number", 2, ATfalse);
@@ -511,7 +511,7 @@ void gsEnableConstructorFunctions(void)
     ATprotectAFun(gsAFunSortArrow);
     ATprotectAFun(gsAFunStructCons);
     ATprotectAFun(gsAFunStructProj);
-    ATprotectAFun(gsAFunDataVarIdOpId);
+    ATprotectAFun(gsAFunId);
     ATprotectAFun(gsAFunDataApplProd);
     ATprotectAFun(gsAFunDataAppl);
     ATprotectAFun(gsAFunNumber);
@@ -880,10 +880,10 @@ ATermAppl gsMakeStructProj(ATermAppl ProjNameOrNil, ATermAppl SortExpr)
     (ATerm) SortExpr);
 }
 
-ATermAppl gsMakeDataVarIdOpId(ATermAppl Name)
+ATermAppl gsMakeId(ATermAppl Name)
 {
   assert(gsConstructorFunctionsEnabled);
-  return ATmakeAppl1(gsAFunDataVarIdOpId, (ATerm) Name);
+  return ATmakeAppl1(gsAFunId, (ATerm) Name);
 }
 
 ATermAppl gsMakeDataApplProd(ATermAppl DataExpr, ATermList DataArgs)
@@ -1436,9 +1436,9 @@ bool gsIsStructProj(ATermAppl Term) {
   return ATgetAFun(Term) == gsAFunStructProj;
 }
 
-bool gsIsDataVarIdOpId(ATermAppl Term) {
+bool gsIsId(ATermAppl Term) {
   assert(gsConstructorFunctionsEnabled);
-  return ATgetAFun(Term) == gsAFunDataVarIdOpId;
+  return ATgetAFun(Term) == gsAFunId;
 }
 
 bool gsIsDataApplProd(ATermAppl Term) {

@@ -781,7 +781,7 @@ data_expr_imp:
     }
   | data_expr_and IMP data_expr_imp_rhs
     {
-      $$ = gsMakeDataApplProd(gsMakeDataVarIdOpId($2),
+      $$ = gsMakeDataApplProd(gsMakeId($2),
         ATmakeList2((ATerm) $1, (ATerm) $3));
       gsDebugMsg("parsed implication\n  %T\n", $$);
     }
@@ -813,13 +813,13 @@ data_expr_and:
     }
   | data_expr_eq AND data_expr_and_rhs
     {
-      $$ = gsMakeDataApplProd(gsMakeDataVarIdOpId($2),
+      $$ = gsMakeDataApplProd(gsMakeId($2),
         ATmakeList2((ATerm) $1, (ATerm) $3));
       gsDebugMsg("parsed conjunction\n  %T\n", $$);
     }
   | data_expr_eq BARS data_expr_and_rhs
     {
-      $$ = gsMakeDataApplProd(gsMakeDataVarIdOpId($2),
+      $$ = gsMakeDataApplProd(gsMakeId($2),
         ATmakeList2((ATerm) $1, (ATerm) $3));
       gsDebugMsg("parsed disjunction\n  %T\n", $$);
     }
@@ -851,13 +851,13 @@ data_expr_eq:
     }
   | data_expr_rel EQ data_expr_eq_rhs
     {
-      $$ = gsMakeDataApplProd(gsMakeDataVarIdOpId($2),
+      $$ = gsMakeDataApplProd(gsMakeId($2),
         ATmakeList2((ATerm) $1, (ATerm) $3));
       gsDebugMsg("parsed equality expression\n  %T\n", $$);
     }
   | data_expr_rel NEQ data_expr_eq_rhs
     {
-      $$ = gsMakeDataApplProd(gsMakeDataVarIdOpId($2),
+      $$ = gsMakeDataApplProd(gsMakeId($2),
         ATmakeList2((ATerm) $1, (ATerm) $3));
       gsDebugMsg("parsed equality expression\n  %T\n", $$);
     }
@@ -889,31 +889,31 @@ data_expr_rel:
     }
   | data_expr_cons GTE data_expr_cons
     {
-      $$ = gsMakeDataApplProd(gsMakeDataVarIdOpId($2),
+      $$ = gsMakeDataApplProd(gsMakeId($2),
         ATmakeList2((ATerm) $1, (ATerm) $3));
       gsDebugMsg("parsed relational expression\n  %T\n", $$);
     }
   | data_expr_cons LTE data_expr_cons
     {
-      $$ = gsMakeDataApplProd(gsMakeDataVarIdOpId($2),
+      $$ = gsMakeDataApplProd(gsMakeId($2),
         ATmakeList2((ATerm) $1, (ATerm) $3));
       gsDebugMsg("parsed relational expression\n  %T\n", $$);
     }
   | data_expr_cons RANG data_expr_cons
     {
-      $$ = gsMakeDataApplProd(gsMakeDataVarIdOpId($2),
+      $$ = gsMakeDataApplProd(gsMakeId($2),
         ATmakeList2((ATerm) $1, (ATerm) $3));
       gsDebugMsg("parsed relational expression\n  %T\n", $$);
     }
   | data_expr_cons LANG data_expr_cons
     {
-      $$ = gsMakeDataApplProd(gsMakeDataVarIdOpId($2),
+      $$ = gsMakeDataApplProd(gsMakeId($2),
         ATmakeList2((ATerm) $1, (ATerm) $3));
       gsDebugMsg("parsed relational expression\n  %T\n", $$);
     }
   | data_expr_cons IN data_expr_cons
     {
-      $$ = gsMakeDataApplProd(gsMakeDataVarIdOpId($2),
+      $$ = gsMakeDataApplProd(gsMakeId($2),
         ATmakeList2((ATerm) $1, (ATerm) $3));
       gsDebugMsg("parsed relational expression\n  %T\n", $$);
     }
@@ -927,7 +927,7 @@ data_expr_cons:
     }
   | data_expr_add CONS data_expr_cons
     {
-      $$ = gsMakeDataApplProd(gsMakeDataVarIdOpId($2),
+      $$ = gsMakeDataApplProd(gsMakeId($2),
         ATmakeList2((ATerm) $1, (ATerm) $3));
       gsDebugMsg("parsed list cons expression\n  %T\n", $$);
     }
@@ -941,7 +941,7 @@ data_expr_snoc:
     }
   | data_expr_snoc SNOC data_expr_add
     {
-      $$ = gsMakeDataApplProd(gsMakeDataVarIdOpId($2),
+      $$ = gsMakeDataApplProd(gsMakeId($2),
         ATmakeList2((ATerm) $1, (ATerm) $3));
       gsDebugMsg("parsed list snoc expression\n  %T\n", $$);
     }
@@ -955,7 +955,7 @@ data_expr_concat:
     }
   | data_expr_concat CONCAT data_expr_add
     {
-      $$ = gsMakeDataApplProd(gsMakeDataVarIdOpId($2),
+      $$ = gsMakeDataApplProd(gsMakeId($2),
         ATmakeList2((ATerm) $1, (ATerm) $3));
       gsDebugMsg("parsed list concat expression\n  %T\n", $$);
     }
@@ -969,13 +969,13 @@ data_expr_add:
     }
   | data_expr_add PLUS data_expr_div
     {
-      $$ = gsMakeDataApplProd(gsMakeDataVarIdOpId($2),
+      $$ = gsMakeDataApplProd(gsMakeId($2),
         ATmakeList2((ATerm) $1, (ATerm) $3));
       gsDebugMsg("parsed addition or set union\n  %T\n", $$);
     }
   | data_expr_add MINUS data_expr_div
     {
-      $$ = gsMakeDataApplProd(gsMakeDataVarIdOpId($2),
+      $$ = gsMakeDataApplProd(gsMakeId($2),
         ATmakeList2((ATerm) $1, (ATerm) $3));
       gsDebugMsg("parsed subtraction or set difference\n  %T\n", $$);
     }
@@ -989,13 +989,13 @@ data_expr_div:
     }
   | data_expr_div DIV data_expr_mult
     {
-      $$ = gsMakeDataApplProd(gsMakeDataVarIdOpId($2),
+      $$ = gsMakeDataApplProd(gsMakeId($2),
         ATmakeList2((ATerm) $1, (ATerm) $3));
       gsDebugMsg("parsed div expression\n  %T\n", $$);
     }
   | data_expr_div MOD data_expr_mult
     {
-      $$ = gsMakeDataApplProd(gsMakeDataVarIdOpId($2),
+      $$ = gsMakeDataApplProd(gsMakeId($2),
         ATmakeList2((ATerm) $1, (ATerm) $3));
       gsDebugMsg("parsed mod expression\n  %T\n", $$);
     }
@@ -1009,13 +1009,13 @@ data_expr_mult:
     }
   | data_expr_mult STAR data_expr_prefix
     {
-      $$ = gsMakeDataApplProd(gsMakeDataVarIdOpId($2),
+      $$ = gsMakeDataApplProd(gsMakeId($2),
         ATmakeList2((ATerm) $1, (ATerm) $3));
       gsDebugMsg("parsed multiplication or set intersection\n  %T\n", $$);
     }
   | data_expr_mult DOT data_expr_prefix
     {
-      $$ = gsMakeDataApplProd(gsMakeDataVarIdOpId($2),
+      $$ = gsMakeDataApplProd(gsMakeId($2),
         ATmakeList2((ATerm) $1, (ATerm) $3));
       gsDebugMsg("parsed list at expression\n  %T\n", $$);
     }
@@ -1029,17 +1029,17 @@ data_expr_prefix:
     }
   | EXCLAM data_expr_quant_prefix
     {
-      $$ = gsMakeDataApplProd(gsMakeDataVarIdOpId($1), ATmakeList1((ATerm) $2));
+      $$ = gsMakeDataApplProd(gsMakeId($1), ATmakeList1((ATerm) $2));
       gsDebugMsg("parsed prefix data expression\n  %T\n", $$);
     }
   | MINUS data_expr_prefix
     {
-      $$ = gsMakeDataApplProd(gsMakeDataVarIdOpId($1), ATmakeList1((ATerm) $2));
+      $$ = gsMakeDataApplProd(gsMakeId($1), ATmakeList1((ATerm) $2));
       gsDebugMsg("parsed prefix data expression\n  %T\n", $$);
     }
   | HASH data_expr_prefix
     {
-      $$ = gsMakeDataApplProd(gsMakeDataVarIdOpId($1), ATmakeList1((ATerm) $2));
+      $$ = gsMakeDataApplProd(gsMakeId($1), ATmakeList1((ATerm) $2));
       gsDebugMsg("parsed prefix data expression\n  %T\n", $$);
     }
   ;
@@ -1093,7 +1093,7 @@ data_exprs_cs:
 data_expr_primary:
   ID
     {
-      $$ = gsMakeDataVarIdOpId($1);
+      $$ = gsMakeId($1);
       gsDebugMsg("parsed primary data expression\n  %T\n", $$);
     }
   | data_constant
@@ -1118,12 +1118,12 @@ data_expr_primary:
 data_constant:
   CTRUE
     {
-      $$ = gsMakeDataVarIdOpId($1);
+      $$ = gsMakeId($1);
       gsDebugMsg("parsed data constant\n  %T\n", $$);
     }
   | CFALSE
     {
-      $$ = gsMakeDataVarIdOpId($1);
+      $$ = gsMakeId($1);
       gsDebugMsg("parsed data constant\n  %T\n", $$);
     }
   | NUMBER
@@ -1133,12 +1133,12 @@ data_constant:
     }
   | PBRACK
     {
-      $$ = gsMakeDataVarIdOpId($1);
+      $$ = gsMakeId($1);
       gsDebugMsg("parsed data constant\n  %T\n", $$);
     }
   | PBRACE
     {
-      $$ = gsMakeDataVarIdOpId($1);
+      $$ = gsMakeId($1);
       gsDebugMsg("parsed data constant\n  %T\n", $$);
     }
   ;

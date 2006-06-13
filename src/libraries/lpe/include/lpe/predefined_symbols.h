@@ -212,12 +212,12 @@ using atermpp::function_symbol;
     }
 
     inline
-    function_symbol func_DataVarIdOpId()
+    function_symbol func_Id()
     {
-      static AFun f = ATmakeAFun("DataVarIdOpId", 1, ATfalse);
+      static AFun f = ATmakeAFun("Id", 1, ATfalse);
       return function_symbol(f);
       //ATprotectAFun(f);
-      //static ATermAppl a = gsMakeDataVarIdOpId(0);
+      //static ATermAppl a = gsMakeId(0);
       //return function_symbol(ATgetAFun(a));
     }
 

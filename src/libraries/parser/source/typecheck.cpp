@@ -1765,7 +1765,7 @@ static ATermAppl gstcTraverseVarConsTypeD(ATermTable DeclaredVars, ATermTable Al
     return gstcUnArrowProd(ArgumentTypes,NewType);
   }  
 
-  if(gsIsDataVarIdOpId(*DataTerm)||gsIsOpId(*DataTerm)){
+  if(gsIsId(*DataTerm)||gsIsOpId(*DataTerm)){
     ATermAppl Name=ATAgetArgument(*DataTerm,0);
     ATermAppl Type=ATAtableGet(DeclaredVars,(ATerm)Name);
     if(Type){
@@ -1855,7 +1855,7 @@ static ATermAppl gstcTraverseVarConsTypeD(ATermTable DeclaredVars, ATermTable Al
     
 static ATermAppl gstcTraverseVarConsTypeDN(int nFactPars, ATermTable DeclaredVars, ATermTable AllowedVars, ATermAppl *DataTerm, ATermAppl PosType, ATermTable FreeVars){
   gsDebugMsg("gstcTraverseVarConsTypeDN: DataTerm %T with PosType %T, nFactPars %d\n",*DataTerm,PosType,nFactPars);    
-  if(gsIsDataVarIdOpId(*DataTerm)||gsIsOpId(*DataTerm)){
+  if(gsIsId(*DataTerm)||gsIsOpId(*DataTerm)){
     ATermAppl Name=ATAgetArgument(*DataTerm,0);
     ATermAppl Type=ATAtableGet(DeclaredVars,(ATerm)Name);
     if(Type){

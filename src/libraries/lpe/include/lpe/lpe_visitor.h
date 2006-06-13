@@ -112,8 +112,8 @@ class lpe_visitor
     virtual void leave_String(aterm_appl t) {}
     virtual void visit_NumberString(aterm_appl t) {}
     virtual void leave_NumberString(aterm_appl t) {}
-    virtual void visit_DataVarIdOpId(aterm_appl t) {}
-    virtual void leave_DataVarIdOpId(aterm_appl t) {}
+    virtual void visit_Id(aterm_appl t) {}
+    virtual void leave_Id(aterm_appl t) {}
     virtual void visit_DataApplProd(aterm_appl t) {}
     virtual void leave_DataApplProd(aterm_appl t) {}
     virtual void visit_DataAppl(aterm_appl t) {}
@@ -591,7 +591,7 @@ class lpe_visitor
       {
         if (t.function().name() == "DataVarId") walk_DataVarId<Stop>(t, stop);
         else if (t.function().name() == "OpId") walk_OpId<Stop>(t, stop);
-        else if (t.function().name() == "DataVarIdOpId") walk_DataVarIdOpId<Stop>(t, stop);
+        else if (t.function().name() == "Id") walk_Id<Stop>(t, stop);
         else if (t.function().name() == "DataApplProd") walk_DataApplProd<Stop>(t, stop);
         else if (t.function().name() == "DataAppl") walk_DataAppl<Stop>(t, stop);
         else if (t.function().name() == "Number") walk_Number<Stop>(t, stop);
@@ -613,7 +613,7 @@ class lpe_visitor
       assert(t.type() == AT_APPL);
       if (t.function().name() == "DataVarId") walk_DataVarId(t);
       else if (t.function().name() == "OpId") walk_OpId(t);
-      else if (t.function().name() == "DataVarIdOpId") walk_DataVarIdOpId(t);
+      else if (t.function().name() == "Id") walk_Id(t);
       else if (t.function().name() == "DataApplProd") walk_DataApplProd(t);
       else if (t.function().name() == "DataAppl") walk_DataAppl(t);
       else if (t.function().name() == "Number") walk_Number(t);
@@ -1045,7 +1045,7 @@ class lpe_visitor
       {
         if (t.function().name() == "DataVarId") walk_DataVarId<Stop>(t, stop);
         else if (t.function().name() == "OpId") walk_OpId<Stop>(t, stop);
-        else if (t.function().name() == "DataVarIdOpId") walk_DataVarIdOpId<Stop>(t, stop);
+        else if (t.function().name() == "Id") walk_Id<Stop>(t, stop);
         else if (t.function().name() == "DataApplProd") walk_DataApplProd<Stop>(t, stop);
         else if (t.function().name() == "DataAppl") walk_DataAppl<Stop>(t, stop);
         else if (t.function().name() == "Number") walk_Number<Stop>(t, stop);
@@ -1066,7 +1066,7 @@ class lpe_visitor
       assert(t.type() == AT_APPL);
       if (t.function().name() == "DataVarId") walk_DataVarId(t);
       else if (t.function().name() == "OpId") walk_OpId(t);
-      else if (t.function().name() == "DataVarIdOpId") walk_DataVarIdOpId(t);
+      else if (t.function().name() == "Id") walk_Id(t);
       else if (t.function().name() == "DataApplProd") walk_DataApplProd(t);
       else if (t.function().name() == "DataAppl") walk_DataAppl(t);
       else if (t.function().name() == "Number") walk_Number(t);
@@ -1376,31 +1376,31 @@ class lpe_visitor
     }
 
     template <typename Stop>
-    void walk_DataVarIdOpId(aterm_appl t, const Stop& stop)
+    void walk_Id(aterm_appl t, const Stop& stop)
     {
       assert(t.type() == AT_APPL);
-      assert(t.function().name() == "DataVarIdOpId");
+      assert(t.function().name() == "Id");
       aterm_list l = t.argument_list();
       assert(l.size() == 1);
       aterm_list::iterator i = l.begin();
-      visit_DataVarIdOpId(t);
+      visit_Id(t);
       if (!stop(t))
       {
         walk_String<Stop>((*i++).to_aterm_appl(), stop);
        }
-      leave_DataVarIdOpId(t);
+      leave_Id(t);
     }
 
-    void walk_DataVarIdOpId(aterm_appl t)
+    void walk_Id(aterm_appl t)
     {
       assert(t.type() == AT_APPL);
-      assert(t.function().name() == "DataVarIdOpId");
+      assert(t.function().name() == "Id");
       aterm_list l = t.argument_list();
       assert(l.size() == 1);
       aterm_list::iterator i = l.begin();
-      visit_DataVarIdOpId(t);
+      visit_Id(t);
       walk_String((*i++).to_aterm_appl());
-      leave_DataVarIdOpId(t);
+      leave_Id(t);
     }
 
     template <typename Stop>

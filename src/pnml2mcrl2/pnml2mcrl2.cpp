@@ -982,13 +982,13 @@
     // generate the processes
     //==================================================
  
-    ATermAppl OpAdd=gsMakeDataVarIdOpId(gsMakeOpIdNameAdd());
-    ATermAppl OpSubt=gsMakeDataVarIdOpId(gsMakeOpIdNameSubt());
-    ATermAppl OpMax=gsMakeDataVarIdOpId(gsMakeOpIdNameMax());
-    ATermAppl OpMin=gsMakeDataVarIdOpId(gsMakeOpIdNameMin());
-    ATermAppl OpGT=gsMakeDataVarIdOpId(gsMakeOpIdNameGT());
-    ATermAppl OpLTE=gsMakeDataVarIdOpId(gsMakeOpIdNameLTE());
-    ATermAppl OpAnd=gsMakeDataVarIdOpId(gsMakeOpIdNameAnd());
+    ATermAppl OpAdd=gsMakeId(gsMakeOpIdNameAdd());
+    ATermAppl OpSubt=gsMakeId(gsMakeOpIdNameSubt());
+    ATermAppl OpMax=gsMakeId(gsMakeOpIdNameMax());
+    ATermAppl OpMin=gsMakeId(gsMakeOpIdNameMin());
+    ATermAppl OpGT=gsMakeId(gsMakeOpIdNameGT());
+    ATermAppl OpLTE=gsMakeId(gsMakeOpIdNameLTE());
+    ATermAppl OpAnd=gsMakeId(gsMakeOpIdNameAnd());
     ATermAppl Number0=gsMakeNumber(gsString2ATermAppl("0"),gsMakeSortIdNat());
     ATermAppl Number1=gsMakeNumber(gsString2ATermAppl("1"),gsMakeSortIdPos());
     
@@ -2063,12 +2063,12 @@
     // calculate its value n input arcs - m out arcs, take into account the inhibitor and reset arcs.
     ATermAppl VarX=gsMakeDataVarId(ATmakeAppl0(ATmakeAFunId("x")),gsMakeSortIdNat());;
     ATermAppl Number0=gsMakeNumber(gsString2ATermAppl("0"),gsMakeSortIdNat());
-    ATermAppl OpAdd=gsMakeDataVarIdOpId(gsMakeOpIdNameAdd());
-    ATermAppl OpSubt=gsMakeDataVarIdOpId(gsMakeOpIdNameSubt());
-    //ATermAppl OpMax=gsMakeDataVarIdOpId(gsMakeOpIdNameMax());
-    ATermAppl OpLTE=gsMakeDataVarIdOpId(gsMakeOpIdNameLTE());
-    ATermAppl OpEq=gsMakeDataVarIdOpId(gsMakeOpIdNameEq());
-    ATermAppl OpInt2Nat=gsMakeDataVarIdOpId(gsMakeOpIdNameInt2Nat());
+    ATermAppl OpAdd=gsMakeId(gsMakeOpIdNameAdd());
+    ATermAppl OpSubt=gsMakeId(gsMakeOpIdNameSubt());
+    //ATermAppl OpMax=gsMakeId(gsMakeOpIdNameMax());
+    ATermAppl OpLTE=gsMakeId(gsMakeOpIdNameLTE());
+    ATermAppl OpEq=gsMakeId(gsMakeOpIdNameEq());
+    ATermAppl OpInt2Nat=gsMakeId(gsMakeOpIdNameInt2Nat());
     for(ATermList Lt=ATtableKeys(context.trans_name);!ATisEmpty(Lt);Lt=ATgetNext(Lt)){
       ATermAppl TransID=ATAgetFirst(Lt);
       
@@ -2191,12 +2191,12 @@
 //     AFun CurrentPlaceAIId=ATappendAFun(CurrentPlaceId,"_ai_");
 //     AFun CurrentPlaceARRId=ATappendAFun(CurrentPlaceId,"_arr_");
 //     AFun CurrentPlaceAIRId=ATappendAFun(CurrentPlaceId,"_air_");
-//     ATermAppl OpAdd=gsMakeDataVarIdOpId(gsMakeOpIdNameAdd());
-//     ATermAppl OpSubt=gsMakeDataVarIdOpId(gsMakeOpIdNameSubt());
-//     //ATermAppl OpMax=gsMakeDataVarIdOpId(gsMakeOpIdNameMax());
-//     ATermAppl OpLTE=gsMakeDataVarIdOpId(gsMakeOpIdNameLTE());
-//     ATermAppl OpEq=gsMakeDataVarIdOpId(gsMakeOpIdNameEq());
-//     ATermAppl OpInt2Nat=gsMakeDataVarIdOpId(gsMakeOpIdNameInt2Nat());
+//     ATermAppl OpAdd=gsMakeId(gsMakeOpIdNameAdd());
+//     ATermAppl OpSubt=gsMakeId(gsMakeOpIdNameSubt());
+//     //ATermAppl OpMax=gsMakeId(gsMakeOpIdNameMax());
+//     ATermAppl OpLTE=gsMakeId(gsMakeOpIdNameLTE());
+//     ATermAppl OpEq=gsMakeId(gsMakeOpIdNameEq());
+//     ATermAppl OpInt2Nat=gsMakeId(gsMakeOpIdNameInt2Nat());
 //     ATermAppl Number0=gsMakeNumber(gsString2ATermAppl("0"),gsMakeSortIdNat());
     
 //     for(int j=m;j>-1;j--){

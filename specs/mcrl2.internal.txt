@@ -1,4 +1,4 @@
-// Date: 12-06-2006
+// Date: 13-06-2006
 // This document describes the internal format of the mCRL2 language and the
 // corresponding mu-calculus formulas. Here:
 // - the following phases of implementation are distinguised:
@@ -85,7 +85,7 @@
 //----------------
 
 //data expression
-<DataExpr>     ::= DataVarIdOpId(<String>)                               (- tc)
+<DataExpr>     ::= Id(<String>)                                          (- tc)
                  | <DataVarId>                                           (+ tc)
                  | <OpId>                                                (+ tc)
                  | DataApplProd(<DataExpr>, <DataExpr>+)                 (- di)
@@ -209,20 +209,20 @@
 //state formula
 <StateFrm>     ::= <DataExpr>
                  | StateTrue
-                 | StateFalse                                            (- fi)
+                 | StateFalse
                  | StateNot(<StateFrm>)
                  | StateAnd(<StateFrm>, <StateFrm>)
-                 | StateOr(<StateFrm>, <StateFrm>)                       (- fi)
-                 | StateImp(<StateFrm>, <StateFrm>)                      (- fi)
+                 | StateOr(<StateFrm>, <StateFrm>)
+                 | StateImp(<StateFrm>, <StateFrm>)
                  | StateForall(<DataVarId>+, <StateFrm>)
-                 | StateExists(<DataVarId>+, <StateFrm>)                 (- fi)
+                 | StateExists(<DataVarId>+, <StateFrm>)
                  | StateMust(<RegFrm>, <StateFrm>)
-                 | StateMay(<RegFrm>, <StateFrm>)                        (- fi)
-                 | StateDelay                                            (- fi)
+                 | StateMay(<RegFrm>, <StateFrm>)
+                 | StateDelay
                  | StateDelayTimed(<DataExpr>)
-                 | StateVar(<String>, <DataExpr>*)
+                 | StateVar(<String>, <DataExpr>*)                       (+ tc)
                  | StateNu(<String>, <DataVarIdInit>*, <StateFrm>)
-                 | StateMu(<String>, <DataVarIdInit>*, <StateFrm>)       (- fi)
+                 | StateMu(<String>, <DataVarIdInit>*, <StateFrm>)
 
 //data variable identifier and initialisation
 <DataVarIdInit>::= DataVarIdInit(<String>, <SortExpr>, <DataExpr>)
@@ -239,11 +239,11 @@
 <ActFrm>       ::= <MultAct>
                  | <DataExpr>
                  | ActTrue
-                 | ActFalse                                              (- fi)
+                 | ActFalse
                  | ActNot(<ActFrm>)
                  | ActAnd(<ActFrm>, <ActFrm>)
-                 | ActOr(<ActFrm>, <ActFrm>)                             (- fi)
-                 | ActImp(<ActFrm>, <ActFrm>)                            (- fi)
+                 | ActOr(<ActFrm>, <ActFrm>)
+                 | ActImp(<ActFrm>, <ActFrm>)
                  | ActForall(<DataVarId>+, <ActFrm>)
-                 | ActExists(<DataVarId>+, <ActFrm>)                     (- fi)
+                 | ActExists(<DataVarId>+, <ActFrm>)
                  | ActAt(<ActFrm>, <DataExpr>)

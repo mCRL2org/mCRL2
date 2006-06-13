@@ -71,7 +71,7 @@ ATermAppl gsMakeSortArrow(ATermAppl SortExprDomain, ATermAppl SortExprResult);
 ATermAppl gsMakeStructCons(ATermAppl ConsName, ATermList StructProjs,
   ATermAppl RecNameOrNil); 
 ATermAppl gsMakeStructProj(ATermAppl ProjNameOrNil, ATermAppl SortExpr);
-ATermAppl gsMakeDataVarIdOpId(ATermAppl Name);
+ATermAppl gsMakeId(ATermAppl Name);
 ATermAppl gsMakeDataApplProd(ATermAppl DataExpr, ATermList DataArgs);
 ATermAppl gsMakeDataAppl(ATermAppl DataExpr, ATermAppl DataArg);
 ATermAppl gsMakeNumber(ATermAppl Number, ATermAppl SortExprOrUnknown);
@@ -172,7 +172,7 @@ bool gsIsSortArrowProd(ATermAppl Term);
 bool gsIsSortArrow(ATermAppl Term);
 bool gsIsStructCons(ATermAppl Term);
 bool gsIsStructProj(ATermAppl Term);
-bool gsIsDataVarIdOpId(ATermAppl Term);
+bool gsIsId(ATermAppl Term);
 bool gsIsDataApplProd(ATermAppl Term);
 bool gsIsDataAppl(ATermAppl Term);
 bool gsIsNumber(ATermAppl Term);
