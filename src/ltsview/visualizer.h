@@ -39,6 +39,7 @@ class Visualizer
     float		  clusterHeight;
     float		  cos_ibt;
     float		  cos_obt;
+    vector< float >	  cos_tab;
     static VisSettings	  defaultVisSettings;
     HSV_Color		  delta_col;
     bool		  displayStates;
@@ -52,6 +53,7 @@ class Visualizer
     bool		  refreshStates;
     float		  sin_ibt;
     float		  sin_obt;
+    vector< float >	  sin_tab;
     GLuint		  statesDisplayList;
     Point3D		  viewpoint;
     VisSettings		  visSettings;
@@ -69,14 +71,14 @@ class Visualizer
     void drawStates( Cluster* root, int rot );
     void drawStatesMarkStates( Cluster* root, int rot );
     void drawStatesMarkDeadlocks( Cluster* root, int rot );
-    void drawSubtree( Cluster* root, bool topClosed, HSV_Color col, int rot );
-    void drawSubtreeMarkDeadlocks( Cluster* root, bool topClosed, int rot );
-    void drawSubtreeMarkStates( Cluster* root, bool topClosed, int rot );
-    void drawSubtreeMarkTransitions( Cluster* root, bool topClosed, int rot );
-    void drawSubtreeNew( Cluster* root, HSV_Color col, int rot );
-    void drawSubtreeNewMarkDeadlocks( Cluster* root, int rot );
-    void drawSubtreeNewMarkStates( Cluster* root, int rot );
-    void drawSubtreeNewMarkTransitions( Cluster* root, int rot );
+    void drawSubtree( Cluster* root, HSV_Color col, int rot );
+    void drawSubtreeMarkDeadlocks( Cluster* root, int rot );
+    void drawSubtreeMarkStates( Cluster* root, int rot );
+    void drawSubtreeMarkTransitions( Cluster* root, int rot );
+    void drawSubtreeOld( Cluster* root, bool topClosed, HSV_Color col, int rot );
+    void drawSubtreeOldMarkDeadlocks( Cluster* root, bool topClosed, int rot );
+    void drawSubtreeOldMarkStates( Cluster* root, bool topClosed, int rot );
+    void drawSubtreeOldMarkTransitions( Cluster* root, bool topClosed, int rot );
     void drawTubeInterpolate( float baserad, float toprad, RGB_Color basecol,
 	RGB_Color topcol, Point3D b1, Point3D b2, Point3D b3, Point3D &center );
     void drawTubeSplit( float baserad, float toprad, RGB_Color basecol,
@@ -84,6 +86,7 @@ class Visualizer
     void myRotatef( float theta, float ax, float ay, float az, float M[] );
     void myTranslatef( float tx, float ty, float tz, float M[] );
     void setColor( RGB_Color c, float alpha );
+    void updateGeometryTables();
   
   public:
     Visualizer( Mediator* owner );
