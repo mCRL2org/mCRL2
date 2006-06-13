@@ -20,6 +20,11 @@
 #include "libtrace.h"
 #include "libdataelm.h"
 
+// Squadt protocol interface
+#ifdef ENABLE_SQUADT_CONNECTIVITY
+#include <sip/tool.h>
+#endif
+
 #include "mcrl2_revision.h"
 
 using namespace std;
@@ -28,9 +33,9 @@ using namespace std;
 #define OF_AUT    1
 #define OF_SVC    2
 
-static ATermAppl *parse_action_list(char *s, int *len)
+static ATermAppl *parse_action_list(const char *s, int *len)
 {
-  char *p;
+  const char *p;
 
   *len = 0;
   p = s;
@@ -61,12 +66,12 @@ static ATermAppl *parse_action_list(char *s, int *len)
   return r;
 }
 
-static void print_help_suggestion(FILE *f, char *Name)
+static void print_help_suggestion(FILE *f, const char *Name)
 {
   fprintf(f,"Try '%s --help' for more information.\n",Name);
 }
 
-static void print_help(FILE *f, char *Name)
+static void print_help(FILE *f, const char *Name)
 {
   fprintf(f,
     "Usage: %s [OPTION]... INFILE [OUTFILE]\n"
@@ -90,26 +95,24 @@ static void print_help(FILE *f, char *Name)
     "  -c, --vector          store state in a vector (fastest, default)\n"
     "  -r, --tree            store state in a tree (for memory efficiency)\n"
     "  -l, --max=NUM         explore at most NUM states\n"
-    "      --deadlock        synonym for --deadlock-detect\n"
-    "  -d, --deadlock-detect detect deadlocks (i.e. for every deadlock a message is\n"
+    "  -d, --deadlock        detect deadlocks (i.e. for every deadlock a message is\n"
     "                        printed)\n"
-    "  -e, --deadlock-trace  write trace to each deadlock state to a file\n"
-    "  -D, --detect=NAME*    detect actions from NAME* (i.e. print a message for\n"
+    "  -a, --action=NAME*    detect actions from NAME* (i.e. print a message for\n"
     "                        every occurrence)\n"
-    "  -t, --trace=NAME*     write trace to each state that is reached with an\n"
-    "                        action from NAME* to a file\n"
+    "  -t, --trace[=NUM]     write at most NUM traces to states detected with the\n"
+    "                        --deadlock or --action options\n"
+    "                        (NUM is 10 by default)\n"
     "  -p, --priority=NAME   give priority to action NAME (i.e. if it is\n"
     "                        possible to execute an action NAME in some state,\n"
     "                        than make it the only executable action from that\n"
     "                        state)\n"
-    "  -n, --max-traces=NUM  save no more than NUM trace files when using the\n"
-    "                        options -e/--deadlock-trace or -t/--trace\n"
-    "  -m, --monitor         print detailed status of generation\n"
     "  -R, --rewriter=NAME   use rewriter NAME (default 'inner')\n"
     "      --aut             force OUTFILE to be in the aut format (implies\n"
     "                        --no-info, see below)\n"
     "      --svc             force OUTFILE to be in the svc format\n"
-    "      --no-info         do not add state information to OUTFILE\n",
+    "      --no-info         do not add state information to OUTFILE\n"
+    "      --init-tsize=NUM  set the initial size of the internally used hash\n"
+    "                        tables (default is 10000)\n",
     Name);
 }
 
@@ -134,12 +137,9 @@ static bool outinfo = true;
 static unsigned long max_states = ULONG_MAX;
 static char *priority_action = NULL;
 static bool trace = false;
-static bool trace_deadlock = false;
-static bool trace_action = false;
 static int num_trace_actions = 0;
 static ATermAppl *trace_actions = NULL;
-static unsigned long max_traces = ULONG_MAX;
-static bool monitor = false;
+static unsigned long max_traces = 10;
 static bool detect_deadlock = false;
 static bool detect_action = false;
 
@@ -167,7 +167,7 @@ SVCfile svcf;
 SVCfile *svc = &svcf;
 SVCparameterIndex svcparam = 0;
 
-static void open_lts(char *filename)
+static void open_lts(const char *filename)
 {
   switch ( outformat )
   {
@@ -184,9 +184,11 @@ static void open_lts(char *filename)
       gsVerboseMsg("writing state space in SVC format to '%s'.\n",filename);
       {
         SVCbool b;
+        char *t = strdup(filename);
 
         b = outinfo?SVCfalse:SVCtrue;
-        SVCopen(svc,filename,SVCwrite,&b); // XXX check result
+        SVCopen(svc,t,SVCwrite,&b); // XXX check result
+        free(t);
         SVCsetCreator(svc,NAME);
         if (outinfo)
           SVCsetType(svc, "mCRL2+info");
@@ -320,36 +322,33 @@ static bool save_trace(string &filename, ATerm state, ATermTable backpointers, N
 
 static void check_action_trace(ATerm OldState, ATermAppl Transition, ATerm NewState)
 {
+  // if ( detect_action )
   for (int j=0; j<num_trace_actions; j++)
   {
     if ( occurs_in(trace_actions[j],ATLgetArgument(Transition,0)) )
     {
-      if ( trace_action )
+      if ( trace && (tracecnt < max_traces) )
       {
-        if ( tracecnt < max_traces )
+        if ( basefilename == NULL )
         {
-          if ( basefilename == NULL )
-          {
-          }
-          stringstream ss;
-          ss << basefilename << "_act_" << tracecnt << "_" << ATgetName(ATgetAFun(trace_actions[j])) << ".trc";
-          string sss(ss.str());
-          bool saved_ok = save_trace(sss,OldState,backpointers,nstate,NewState,Transition);
-
-          if ( detect_action || gsVerbose )
-          {
-            if ( saved_ok )
-            {
-              gsfprintf(stderr,"detect: action '%P' found and saved to '%s_act_%lu_%P.trc'.\n",trace_actions[j],basefilename,tracecnt,trace_actions[j]);
-            } else {
-              gsfprintf(stderr,"detect: action '%P' found, but could not be saved to '%s_act_%lu_%P.trc'.\n",trace_actions[j],basefilename,tracecnt,trace_actions[j]);
-            }
-            fflush(stderr);
-          }
-          tracecnt++;
         }
-      } else //if ( detect_action )
-      {
+        stringstream ss;
+        ss << basefilename << "_act_" << tracecnt << "_" << ATgetName(ATgetAFun(trace_actions[j])) << ".trc";
+        string sss(ss.str());
+        bool saved_ok = save_trace(sss,OldState,backpointers,nstate,NewState,Transition);
+
+        if ( detect_action || gsVerbose )
+        {
+          if ( saved_ok )
+          {
+            gsfprintf(stderr,"detect: action '%P' found and saved to '%s_act_%lu_%P.trc'.\n",trace_actions[j],basefilename,tracecnt,trace_actions[j]);
+          } else {
+            gsfprintf(stderr,"detect: action '%P' found, but could not be saved to '%s_act_%lu_%P.trc'.\n",trace_actions[j],basefilename,tracecnt,trace_actions[j]);
+          }
+          fflush(stderr);
+        }
+        tracecnt++;
+      } else {
         gsfprintf(stderr,"detect: action '%P' found.\n",trace_actions[j]);
         fflush(stderr);
       }
@@ -359,9 +358,9 @@ static void check_action_trace(ATerm OldState, ATermAppl Transition, ATerm NewSt
 
 static void check_deadlock_trace(ATerm state)
 {
-  if ( trace_deadlock )
+  if ( detect_deadlock )
   {
-    if ( tracecnt < max_traces )
+    if ( trace && (tracecnt < max_traces) )
     {
       stringstream ss;
       ss << basefilename << "_dlk_" << tracecnt << ".trc";
@@ -379,10 +378,10 @@ static void check_deadlock_trace(ATerm state)
         fflush(stderr);
       }
       tracecnt++;
+    } else  {
+      fprintf(stderr,"deadlock-detect: deadlock found.\n");
+      fflush(stderr);
     }
-  } else if ( detect_deadlock ) {
-    fprintf(stderr,"deadlock-detect: deadlock found.\n");
-    fflush(stderr);
   }
 }
 
@@ -510,6 +509,82 @@ static ATerm get_repr(ATerm state)
   return v;
 }
 
+#ifdef ENABLE_SQUADT_CONNECTIVITY
+sip::tool::communicator tc;
+
+static sip::layout::tool_display::sptr status_display;
+static sip::layout::manager::aptr layout_manager;
+static sip::layout::manager::aptr labels;
+static sip::layout::elements::label *lb_level;
+static sip::layout::elements::label *lb_explored;
+static sip::layout::elements::label *lb_seen;
+static sip::layout::elements::label *lb_transitions;
+static sip::layout::elements::progress_bar *progbar;
+static void create_status_display(sip::tool::communicator &tc)
+{
+  using namespace sip;
+  using namespace sip::layout;
+  using namespace sip::layout::elements;
+
+  status_display = sip::layout::tool_display::sptr(new layout::tool_display);
+
+  /* Create and add the top layout manager */
+  layout_manager = layout::vertical_box::create();
+  labels = layout::horizontal_box::create();
+
+  /* First column */
+  layout::vertical_box* column1 = new layout::vertical_box();
+  layout::vertical_box* column2 = new layout::vertical_box();
+
+  label* lb_level_text = new label("Level:");
+  lb_level = new label("0");
+  label* lb_explored_text = new label("States explored:");
+  lb_explored = new label("0");
+  label* lb_seen_text = new label("States seen:");
+  lb_seen = new label("0");
+  label* lb_transitions_text = new label("Transitions:");
+  lb_transitions = new label("0");
+
+  column1->add(lb_level_text, layout::left);
+  column2->add(lb_level, layout::right);
+  column1->add(lb_explored_text, layout::left);
+  column2->add(lb_explored, layout::right);
+  column1->add(lb_seen_text, layout::left);
+  column2->add(lb_seen, layout::right);
+  column1->add(lb_transitions_text, layout::left);
+  column2->add(lb_transitions, layout::right);
+
+  progbar = new progress_bar(0,0,0);
+
+  /* Attach columns*/
+  labels->add(column1, margins(0,5,0,5));
+  labels->add(column2, margins(0,5,0,5));
+  layout_manager->add(&*labels, margins(0,5,0,5));
+  layout_manager->add(progbar, margins(0,5,0,5));
+
+  status_display->set_top_manager(layout_manager);
+
+  tc.send_display_layout(status_display);
+}
+
+static void update_status_display(unsigned int level, unsigned int explored, unsigned int seen, unsigned int transitions)
+{
+  fprintf(stderr,"sending new status...\n");
+  char buf[21];
+  sprintf(buf,"%u",level);
+  lb_level->set_text(buf,&tc);
+  sprintf(buf,"%u",explored);
+  lb_explored->set_text(buf,&tc);
+  sprintf(buf,"%u",seen);
+  lb_seen->set_text(buf,&tc);
+  sprintf(buf,"%u",transitions);
+  lb_transitions->set_text(buf,&tc);
+  progbar->set_maximum(seen,&tc);
+  progbar->set_value(explored,&tc);
+  fprintf(stderr,"done\n");
+}
+#endif
+
 
 static bool generate_lts()
 {
@@ -519,6 +594,12 @@ static bool generate_lts()
   ATbool new_state;
   unsigned long current_state = ATindexedSetPut(states,state,&new_state);
   num_states++;
+
+#ifdef ENABLE_SQUADT_CONNECTIVITY
+  if (tc.is_active()) {
+    update_status_display(level,current_state,num_states,trans);
+  }
+#endif
 
   bool err = false;
   if ( max_states != 0 )
@@ -580,7 +661,12 @@ static bool generate_lts()
       }
 
       current_state++;
-      if ( (monitor || gsVerbose) && ((current_state%1000) == 0) )
+#ifdef ENABLE_SQUADT_CONNECTIVITY
+      if ( tc.is_active() && ((current_state%200) == 0) ) {
+        update_status_display(level,current_state,num_states,trans);
+      }
+#endif
+      if ( gsVerbose && ((current_state%1000) == 0) )
       {
         fprintf(stderr,
           "monitor: currently at level %lu with %lu state%s and %lu transition%s explored and %lu state%s seen.\n",
@@ -595,7 +681,12 @@ static bool generate_lts()
       }
       if ( current_state == nextlevelat )
       {
-        if ( monitor )
+#ifdef ENABLE_SQUADT_CONNECTIVITY
+        if (tc.is_active()) {
+          update_status_display(level,current_state,num_states,trans);
+        }
+#endif
+        if ( gsVerbose )
         {
           fprintf(stderr,
             "monitor: level %lu done. (%lu state%s, %lu transition%s)\n",
@@ -619,15 +710,132 @@ static bool generate_lts()
 }
 
 
+#ifdef ENABLE_SQUADT_CONNECTIVITY
+static const unsigned int lpd_file_for_input_no_lts = 0;
+static const unsigned int lpd_file_for_input_lts = 1;
+static const unsigned int lts_file_for_output = 2;
+
+static const unsigned int option_max_states = 0;
+static const unsigned int option_max_traces = 1;
+static const unsigned int option_state_format_tree = 2;
+static const unsigned int option_rewr_strat = 3;
+static const unsigned int option_out_info = 4;
+static const unsigned int option_confluence_reduction = 5;
+static const unsigned int option_trace = 6;
+static const unsigned int option_detect_deadlock = 7;
+static const unsigned int option_removeunused = 8;
+static const unsigned int option_usedummies = 9;
+
+static bool validate_configuration(sip::configuration &c)
+{
+  return c.is_complete() && (
+      c.object_exists(lpd_file_for_input_no_lts) ||
+      (c.object_exists(lpd_file_for_input_lts) &&
+       c.object_exists(lts_file_for_output))
+      );
+}
+
+/* Communicate the basic configuration display, and wait until the ok button was pressed */
+void set_basic_configuration_display(sip::tool::communicator& tc, bool make_lts) {
+  using namespace sip;
+  using namespace sip::layout;
+  using namespace sip::layout::elements;
+
+  //status_display = sip::layout::tool_display::sptr(new layout::tool_display);
+  //layout::tool_display::sptr display(status_display);
+  layout::tool_display::sptr display(new layout::tool_display);
+
+  /* Create and add the top layout manager */
+  layout::manager::aptr layout_manager = layout::horizontal_box::create();
+
+  /* First column */
+  layout::vertical_box* column = new layout::vertical_box();
+
+  checkbox* cb_aut = make_lts?(new checkbox("generate aut file instead of svc", false)):NULL;
+/*  checkbox* cb_out_info = new checkbox("save state information in svc file", true);
+  checkbox* cb_usedummies = new checkbox("substitute dummy values for free variables", true);
+  checkbox* cb_removeunused = new checkbox("remove unused parts of data specification", true);
+  checkbox* cb_deadlock = new checkbox("detect deadlocks", false);
+  checkbox* cb_trace = new checkbox("save deadlock traces", false);
+  checkbox* cb_confluence = new checkbox("apply on-the-fly confluence reduction", true);
+  checkbox* cb_state_format_tree = new checkbox("use memory efficient state representation", false);
+//  textbox* tb_max_states = new checkbox("4294967296", sip::datatype::standard_integer);
+//  textbox* tb_max_traces = new checkbox("10", sip::datatype::standard_integer);
+  radio_button* rb_rewr_strat_inner = new radio_button("innermost",NULL,true);
+  radio_button* rb_rewr_strat_jitty = new radio_button("JITty",rb_rewr_strat_inner,false);
+  radio_button* rb_rewr_strat_innerc = new radio_button("compiling innermost",rb_rewr_strat_inner,false);
+  radio_button* rb_rewr_strat_jittyc = new radio_button("compiling JITty",rb_rewr_strat_inner,false);*/
+
+  if ( make_lts )
+    column->add(cb_aut, layout::left);
+/*  column->add(cb_out_info, layout::left);
+  column->add(cb_usedummies, layout::left);
+  column->add(cb_removeunused, layout::left);
+  column->add(cb_deadlock, layout::left);
+  column->add(cb_trace, layout::left);
+  column->add(cb_confluence, layout::left);
+  column->add(cb_state_format_tree, layout::left);
+  column->add(rb_rewr_strat_inner, layout::left);
+  column->add(rb_rewr_strat_jitty, layout::left);
+  column->add(rb_rewr_strat_innerc, layout::left);
+  column->add(rb_rewr_strat_jittyc, layout::left);*/
+
+  button* okay_button = new button("Ok");
+
+  column->add(okay_button, layout::right);
+
+  /* Attach columns*/
+  layout_manager->add(column, margins(0,5,0,5));
+
+  display->set_top_manager(layout_manager);
+
+  tc.send_display_layout(display);
+
+  /* Wait until the ok button was pressed */
+  okay_button->await_change();
+
+  /* Update the current configuration */
+  sip::configuration& c = tc.get_configuration();
+
+  if ( make_lts )
+  {
+    std::string input_file_name = c.get_object(lpd_file_for_input_lts)->get_location();
+    /* Add output file to the configuration */
+    c.add_output(lts_file_for_output, (cb_aut->get_status()?"aut":"svc"), input_file_name + (cb_aut->get_status()?".aut":".svc"));
+  }
+
+  c.set_completed(true);
+
+  /* Values for the options */
+/*  c.add_option(option_out_info).append_argument(sip::datatype::standard_boolean, cb_out_info->get_status());
+  c.add_option(option_usedummies).append_argument(sip::datatype::standard_boolean, cb_usedummies->get_status());
+  c.add_option(option_removeunused).append_argument(sip::datatype::standard_boolean, cb_removeunused->get_status());
+  c.add_option(option_detect_deadlock).append_argument(sip::datatype::standard_boolean, cb_deadlock->get_status());
+  c.add_option(option_trace).append_argument(sip::datatype::standard_boolean, cb_trace->get_status());
+  c.add_option(option_confluence_reduction).append_argument(sip::datatype::standard_boolean, cb_confluence->get_status());
+  c.add_option(option_state_format_tree).append_argument(sip::datatype::standard_boolean, cb_state_format_tree->get_status());*/
+//  c.add_option(option_max_states).append_argument(sip::datatype::standard_integer, tb_confluence->get_text());
+//  c.add_option(option_max_traces).append_argument(sip::datatype::standard_integer, tb_confluence->get_text());
+//  if ( rb_rewr_strat_inner->is_selected() ) c.add_options(option_rewr_strat).append_argument(sip::datatype::integer, GS_REWR_INNER);
+//  if ( rb_rewr_strat_jitty->is_selected() ) c.add_options(option_rewr_strat).append_argument(sip::datatype::integer, GS_REWR_JITTY);
+//  if ( rb_rewr_strat_innerc->is_selected() ) c.add_options(option_rewr_strat).append_argument(sip::datatype::integer, GS_REWR_INNERC);
+//  if ( rb_rewr_strat_jittyc->is_selected() ) c.add_options(option_rewr_strat).append_argument(sip::datatype::integer, GS_REWR_JITTYC);
+
+  tc.clear_display();
+}
+#endif
+
 ////////////////////////////////////////////////////////////////////////////////
 //                               main function                                //
 ////////////////////////////////////////////////////////////////////////////////
 
 int main(int argc, char **argv)
 {
+  string spec_fn, lts_fn;
   FILE *SpecStream;
   ATerm Spec;
-  #define sopts "hqvfyucrl:deD:t:n:mp:R:"
+  unsigned long initial_table_size = 10000;
+  #define sopts "hqvfyucrl:da:t::p:R:"
   struct option lopts[] = {
     { "help",            no_argument,       NULL, 'h' },
     { "version",         no_argument,       NULL, 0   },
@@ -641,16 +849,15 @@ int main(int argc, char **argv)
     { "max",             required_argument, NULL, 'l' },
     { "deadlock",        no_argument,       NULL, 'd' },
     { "deadlock-detect", no_argument,       NULL, 'd' },
-    { "deadlock-trace",  no_argument,       NULL, 'e' },
-    { "detect",          required_argument, NULL, 'D' },
-    { "trace",           required_argument, NULL, 't' },
-    { "max-traces",      required_argument, NULL, 'n' },
-    { "monitor",         no_argument,       NULL, 'm' },
+    { "action",          required_argument, NULL, 'a' },
+    { "action-detect",   required_argument, NULL, 'a' },
+    { "trace",           optional_argument, NULL, 't' },
     { "priority",        required_argument, NULL, 'p' },
     { "rewriter",        required_argument, NULL, 'R' },
     { "aut",             no_argument,       NULL, 1   },
     { "svc",             no_argument,       NULL, 2   },
     { "no-info",         no_argument,       NULL, 3   },
+    { "init-tsize",      required_argument, NULL, 4   },
 // aterm lib options
     { "at-help",          no_argument,       NULL, 10  },
     { "at-verbose",       no_argument,       NULL, 11  },
@@ -668,10 +875,11 @@ int main(int argc, char **argv)
   // handle the aterm options
   {
     short a_argc=1;
-    char *a_argv[10];
+    char *a_argv[11];
     a_argv[0]=argv[0];
 
-    for(int i=1;i<argc;i++){
+    for(int i=1; (i<argc) && (a_argc<11); i++)
+    {
       if(strncmp(argv[i],"--at-",5)!=0) continue;
 
       //fprintf(stderr, "at argument %s\n",argv[i]);
@@ -688,6 +896,89 @@ int main(int argc, char **argv)
   }
   // end handle aterm lib options 
 
+#ifdef ENABLE_SQUADT_CONNECTIVITY
+  gsSetVerboseMsg();
+
+  /* Get tool capabilities in order to modify settings */
+  sip::tool::capabilities& cp = tc.get_tool_capabilities();
+
+  /* The tool has only one main input combination it takes an LPE and then behaves as a reporter */
+  cp.add_input_combination(lpd_file_for_input_no_lts, "Reporting", "lpe");
+  cp.add_input_combination(lpd_file_for_input_lts, "Transformation", "lpe");
+
+  /* On purpose we do not catch exceptions */
+  if (tc.activate(argc,argv)) {
+    bool valid = false;
+    bool make_lts = false;
+
+    /* Static configuration cycle */
+    while (!valid) {
+      /* Wait for configuration data to be send (either a previous configuration, or only an input combination) */
+      sip::configuration::sptr configuration = tc.await_configuration();
+
+      /* Validate configuration specification, should contain a file name of an LPD that is to be read as input */
+      valid  = configuration.get() != 0;
+      bool valid_0 = configuration->object_exists(lpd_file_for_input_no_lts);
+      bool valid_1 = configuration->object_exists(lpd_file_for_input_lts);
+      valid &= valid_0 | valid_1;
+      make_lts = valid_1;
+
+      if (valid) {
+        /* An object with the correct id exists, assume the URI is relative (i.e. a file name in the local file system) */
+        spec_fn = configuration->get_object(valid_0?lpd_file_for_input_no_lts:lpd_file_for_input_lts)->get_location();
+        tc.set_configuration(configuration);
+      } else {
+        sip::report report;
+
+        report.set_error("Invalid input combination!");
+
+        tc.send_report(report);
+      }
+    }
+    
+    if (!validate_configuration(tc.get_configuration())) {
+      /* Configuration is incomplete or incorrect; prompt the user */
+
+      /* Draw a configuration layout in the tool display */
+      set_basic_configuration_display(tc,make_lts);
+     
+      /* Static configuration cycle (phase 2: gather user input) */
+      if (!validate_configuration(tc.get_configuration())) {
+        /* Wait for configuration data to be send (either a previous configuration, or only an input combination) */
+        tc.send_error_report("Fatal error: the configuration is invalid");
+     
+        exit(1);
+      }
+    }
+
+    /* Send the controller the signal that we're ready to rumble (no further configuration necessary) */
+    tc.send_accept_configuration();
+
+    /* Wait for start message */
+    gsVerboseMsg("waiting for start signal...\n");
+    tc.await_message(sip::send_signal_start);
+    gsVerboseMsg("starting execution...\n");
+
+    sip::configuration c = tc.get_configuration();
+
+    if ( c.object_exists(lts_file_for_output) )
+    {
+      lts_fn = c.get_object(lts_file_for_output)->get_location();
+    }
+
+//    max_states = boost::any_cast <int> (*(c.get_option(option_max_states)->get_value_iterator()));
+//    max_traces = boost::any_cast <int> (*(c.get_option(option_max_traces)->get_value_iterator()));
+//    strat = boost::any_cast <int> (*(c.get_option(option_rewr_strat)->get_value_iterator()));
+/*    stateformat = (boost::any_cast <bool> (*(c.get_option(option_state_format_tree)->get_value_iterator())))?GS_STATE_TREE:GS_STATE_VECTOR;
+    outinfo = boost::any_cast <bool> (*(c.get_option(option_out_info)->get_value_iterator()));
+    confluence_reduction = boost::any_cast <bool> (*(c.get_option(option_confluence_reduction)->get_value_iterator()));
+    trace = boost::any_cast <bool> (*(c.get_option(option_trace)->get_value_iterator()));
+    detect_deadlock = boost::any_cast <bool> (*(c.get_option(option_detect_deadlock)->get_value_iterator()));
+    removeunused = boost::any_cast <bool> (*(c.get_option(option_removeunused)->get_value_iterator()));
+    usedummies = boost::any_cast <bool> (*(c.get_option(option_usedummies)->get_value_iterator()));*/
+  }
+  else {
+#endif
   int opt;
   while ( (opt = getopt_long(argc,argv,sopts,lopts,NULL)) != -1 )
   {
@@ -732,30 +1023,22 @@ int main(int argc, char **argv)
       case 'd':
         detect_deadlock = true;
         break;
-      case 'e':
-        trace = true;
-        trace_deadlock = true;
-        break;
-      case 'D':
+      case 'a':
         detect_action = true;
         trace_actions = parse_action_list(optarg,&num_trace_actions);
         break;
       case 't':
         trace = true;
-        trace_action = true;
-        trace_actions = parse_action_list(optarg,&num_trace_actions);
-        break;
-      case 'n':
-        if ( (optarg[0] >= '0') && (optarg[0] <= '9') )
+        if ( optarg != NULL )
         {
-          max_traces = strtoul(optarg,NULL,0);
-        } else {
-          gsErrorMsg("invalid argument to -n/--max-traces\n",optarg);
-          return 1;
+          if ( (optarg[0] >= '0') && (optarg[0] <= '9') )
+          {
+            max_traces = strtoul(optarg,NULL,0);
+          } else {
+            gsErrorMsg("invalid argument to -t/--trace\n",optarg);
+            return 1;
+          }
         }
-        break;
-      case 'm':
-        monitor = true;
         break;
       case 'p':
         priority_action = strdup(optarg);
@@ -777,10 +1060,30 @@ int main(int argc, char **argv)
       case 3:
         outinfo = false;
         break;
+      case 4:
+        if ( (optarg[0] >= '0') && (optarg[0] <= '9') )
+        {
+          initial_table_size = strtoul(optarg,NULL,0);
+        } else {
+          gsErrorMsg("invalid argument to --init-tsize\n",optarg);
+          return 1;
+        }
+        break;
       default:
         break;
     }
   }
+  if ( argc-optind >= 1 )
+  {
+    spec_fn = argv[optind];
+  }
+  if ( argc-optind > 1 )
+  {
+    lts_fn = argv[optind+1];
+  }
+#ifdef ENABLE_SQUADT_CONNECTIVITY
+  }
+#endif
   if ( quiet && verbose )
   {
     gsErrorMsg("options -q/--quiet and -v/--verbose cannot be used together\n");
@@ -791,35 +1094,28 @@ int main(int argc, char **argv)
   if ( verbose )
     gsSetVerboseMsg();
   
-  if ( detect_action && trace_action )
-  { // because of possibly incompatible action list arguments (XXX)
-    gsWarningMsg("options -D/--detect and -t/--trace cannot be used together\n");
-    return 1;
-  }
-
-  if ( argc-optind < 1 )
+  if ( spec_fn == "" )
   {
     print_help_suggestion(stderr,argv[0]);
     return 1;
   }
-  char *SpecFileName = argv[optind];
-  if ( (SpecStream = fopen(SpecFileName, "rb")) == NULL )
+  if ( (SpecStream = fopen(spec_fn.c_str(), "rb")) == NULL )
   {
-    gsErrorMsg("could not open input file '%s' for reading: ", SpecFileName);
+    gsErrorMsg("could not open input file '%s' for reading: ", spec_fn.c_str());
     perror(NULL);
     return 1;
   }
-  gsVerboseMsg("reading LPE from '%s'\n", SpecFileName);
+  gsVerboseMsg("reading LPE from '%s'\n", spec_fn.c_str());
   Spec = ATreadFromFile(SpecStream);
   if ( Spec == NULL )
   {
-    gsErrorMsg("could not read LPE from '%s'\n", SpecFileName);
+    gsErrorMsg("could not read LPE from '%s'\n", spec_fn.c_str());
     return 1;
   }
   assert(Spec != NULL);
   gsEnableConstructorFunctions();
   if (!gsIsSpecV1((ATermAppl) Spec)) {
-    gsErrorMsg("'%s' does not contain an LPE\n", SpecFileName);
+    gsErrorMsg("'%s' does not contain an LPE\n", spec_fn.c_str());
     return 1;
   }
 
@@ -829,13 +1125,11 @@ int main(int argc, char **argv)
     Spec = (ATerm) removeUnusedData((ATermAppl) Spec);
   }
 
-  if ( argc-optind > 1 )
+  if ( lts_fn != "" )
   {
     if ( outformat == OF_UNKNOWN )
     {
-      char *s;
-
-      s = strrchr(argv[optind+1],'.');
+      char *s = strrchr(lts_fn.c_str(),'.');
       if ( s == NULL )
       {
         gsWarningMsg("no extension given for output file; writing state space in SVC format\n",s);
@@ -855,7 +1149,7 @@ int main(int argc, char **argv)
       }
     }
 
-    open_lts(argv[optind+1]);
+    open_lts(lts_fn.c_str());
   } else {
     outformat = OF_UNKNOWN;
     gsVerboseMsg("not saving state space.\n");
@@ -863,7 +1157,7 @@ int main(int argc, char **argv)
 
   gsVerboseMsg("initialising...\n");
   
-  basefilename = strdup(SpecFileName);
+  basefilename = strdup(spec_fn.c_str());
   char *s = strrchr(basefilename,'.');
   if ( s != NULL )
   {
@@ -874,11 +1168,11 @@ int main(int argc, char **argv)
   ATprotectAppl(&term_nil);
   afun_pair = ATmakeAFun("pair",2,ATfalse);
   ATprotectAFun(afun_pair);
-  states = ATindexedSetCreate(10000,50);
+  states = ATindexedSetCreate(initial_table_size,50);
   
   if ( trace )
   {
-    backpointers = ATtableCreate(10000,50);
+    backpointers = ATtableCreate(initial_table_size,50);
   } else {
     backpointers = NULL;
   }
@@ -889,12 +1183,20 @@ int main(int argc, char **argv)
   {
     gsVerboseMsg("prioritising action '%s'...\n",priority_action);
     nstate->prioritise(priority_action);
-    representation = ATtableCreate(10000,50);
+    representation = ATtableCreate(initial_table_size,50);
   }
 
   num_states = 0;
   trans = 0;
   level = 1;
+
+#ifdef ENABLE_SQUADT_CONNECTIVITY
+  if (tc.is_active()) {
+    gsVerboseMsg("creating status display...\n");
+    create_status_display(tc);
+    gsVerboseMsg("done\n");
+  }
+#endif
 
   bool err = generate_lts();
 
@@ -903,8 +1205,17 @@ int main(int argc, char **argv)
 
   close_lts();
 
-  if ( !err && (monitor || gsVerbose))
+  if ( !err && gsVerbose )
   {
+#ifdef ENABLE_SQUADT_CONNECTIVITY
+    if (tc.is_active()) {
+      sip::report report;
+
+      report.set_comment("done with state space generation");
+
+      tc.send_report(report);
+    } else {
+#endif
     fprintf(stderr,
       "done with state space generation (%lu level%s, %lu state%s and %lu transition%s).\n",
       level-1,
@@ -914,5 +1225,8 @@ int main(int argc, char **argv)
       trans,
       (trans==1)?"":"s"
     );
+#ifdef ENABLE_SQUADT_CONNECTIVITY
+    }
+#endif
   }
 }

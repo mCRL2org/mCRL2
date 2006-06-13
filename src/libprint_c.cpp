@@ -50,6 +50,12 @@ int gsvfprintf(FILE *stream, const char *format, va_list args)
     }
 
     s = fmt;
+    *s++ = *p++;
+    if ( *p == '%' )
+    {
+	    fputc('%',stream);
+	    continue;
+    }
     while (!isalpha((int) *p))	/* parse formats %-20s, etc. */
       *s++ = *p++;
     while ( (*p) == 'l' || (*p) == 'h' || (*p) == 'j' || (*p) == 'L' || (*p) == 'j' || (*p) == 'z' || (*p) == 't' )
