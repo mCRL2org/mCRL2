@@ -285,9 +285,7 @@ namespace sip {
      *
      * \return vector of pointers to elements that have been updated
      **/
-    tool_display::constant_elements tool_display::update(xml2pp::text_reader& r) {
-      tool_display::constant_elements changed_elements;
-
+    void tool_display::update(xml2pp::text_reader& r, std::vector < sip::layout::element const* >& elements) {
       try {
         while (r.valid()) {
           sip::layout::element::identifier id = 0;
@@ -302,7 +300,7 @@ namespace sip {
 
             t->read_structure(c);
 
-            changed_elements.push_back(t);
+            elements.push_back(t);
           }
           else {
             std::string name = r.element_name();
@@ -318,8 +316,6 @@ namespace sip {
       catch (xml2pp::exception::exception* e) {
         std::cerr << e->what();
       }
-
-      return (changed_elements);
     }
   }
 }

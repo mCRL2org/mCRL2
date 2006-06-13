@@ -12,23 +12,6 @@
 namespace sip {
   namespace layout {
 
-    /** \brief Type for the margins that should be observed around the element */
-    struct margins {
-      unsigned short top;    ///< top margin in pixels
-      unsigned short right;  ///< right margin in pixels
-      unsigned short bottom; ///< bottom margin in pixels
-      unsigned short left;   ///< left margin in pixels
-
-      /** \brief Constructor */
-      inline margins(const unsigned short = 0, const unsigned short = 0, const unsigned short = 0, const unsigned short = 0);
-
-      /** \brief Compares for equality */
-      inline bool operator==(margins const&) const;
-
-      /** \brief Compares for inequality */
-      inline bool operator!=(margins const&) const;
-    };
-
     /** \brief Type for element visibility */
     enum visibility {
       visible,       ///< the element is visible
@@ -48,6 +31,23 @@ namespace sip {
       left = 3,   ///< element is put as much to the left as possible
       center = 4, ///< element is centered
       right = 5   ///< element is put as much to the right as possible
+    };
+
+    /** \brief Type for the margins that should be observed around the element */
+    struct margins {
+      unsigned short top;    ///< top margin in pixels
+      unsigned short right;  ///< right margin in pixels
+      unsigned short bottom; ///< bottom margin in pixels
+      unsigned short left;   ///< left margin in pixels
+
+      /** \brief Constructor */
+      inline margins(const unsigned short = 0, const unsigned short = 0, const unsigned short = 0, const unsigned short = 0);
+
+      /** \brief Compares for equality */
+      inline bool operator==(margins const&) const;
+
+      /** \brief Compares for inequality */
+      inline bool operator!=(margins const&) const;
     };
 
     /** \brief Base class for layout constraint containers */

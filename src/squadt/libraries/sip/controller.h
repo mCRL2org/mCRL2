@@ -44,7 +44,7 @@ namespace sip {
         typedef boost::function < void (sip::layout::tool_display::sptr) >                     display_layout_handler_function;
 
         /** \brief Function type that for communicating display layouts */
-        typedef boost::function < void (sip::layout::tool_display::constant_elements const&) > display_data_handler_function;
+        typedef boost::function < void (std::vector < sip::layout::element const* > const&) >  display_data_handler_function;
 
       protected:
 

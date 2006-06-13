@@ -131,22 +131,19 @@ namespace squadt {
       }
 
       /**
-       * @param b whether to show output_objects
+       * @param[in] b whether to show output_objects
        **/
       inline void processor_details::show_output_objects(bool b) {
         output_objects->Show(b);
       }
 
       /**
-       * @param n the new name
+       * @param[in] n the new name
        **/
       inline void processor_details::set_name(wxString n) {
         name->SetValue(n);
       }
 
-      /**
-       * @param n the new name
-       **/
       inline wxString processor_details::get_name() {
         return (name->GetValue());
       }

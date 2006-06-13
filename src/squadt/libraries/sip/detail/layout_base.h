@@ -29,13 +29,13 @@ namespace sip {
       public:
 
         /** \brief Type used for element identification */
-        typedef long                        identifier;
+        typedef long                           identifier;
 
         /** \brief Function type for event handlers */
-        typedef boost::function < void () > event_handler;
+        typedef boost::function < void () >    event_handler;
 
         /** \brief Convenience type for hiding auto pointer implementation */
-        typedef std::auto_ptr < element >   aptr;
+        typedef std::auto_ptr < element >      aptr;
 
         /**
          * \brief Wrapper class for deserialisation

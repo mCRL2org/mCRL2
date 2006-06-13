@@ -3,9 +3,9 @@
 #---------------------------------------------------------------------------
 # Project related configuration options
 #---------------------------------------------------------------------------
-PROJECT_NAME           = "libXML 2 (subset) C++ api"
+PROJECT_NAME           = "C++ api to a C MD5 implementation"
 PROJECT_NUMBER         = 
-OUTPUT_DIRECTORY       = /home/jwulp/work/mCRL2-holidays/MCRL2/trunk/src/squadt/libraries/xml2pp/doc/
+OUTPUT_DIRECTORY       = .
 CREATE_SUBDIRS         = NO
 OUTPUT_LANGUAGE        = English
 USE_WINDOWS_ENCODING   = NO
@@ -25,7 +25,7 @@ ABBREVIATE_BRIEF       = "The $name class" \
 ALWAYS_DETAILED_SEC    = NO
 INLINE_INHERITED_MEMB  = NO
 FULL_PATH_NAMES        = YES
-STRIP_FROM_PATH        = /home/jwulp/work/mCRL2-holidays/MCRL2/trunk/src/squadt/documentation/api/
+STRIP_FROM_PATH        = 
 STRIP_FROM_INC_PATH    = 
 SHORT_NAMES            = NO
 JAVADOC_AUTOBRIEF      = NO
@@ -44,7 +44,7 @@ SUBGROUPING            = YES
 # Build related configuration options
 #---------------------------------------------------------------------------
 EXTRACT_ALL            = NO
-EXTRACT_PRIVATE        = YES
+EXTRACT_PRIVATE        = NO
 EXTRACT_STATIC         = YES
 EXTRACT_LOCAL_CLASSES  = YES
 EXTRACT_LOCAL_METHODS  = NO
@@ -82,8 +82,8 @@ WARN_LOGFILE           =
 #---------------------------------------------------------------------------
 # configuration options related to the input files
 #---------------------------------------------------------------------------
-INPUT                  = /home/jwulp/work/mCRL2-holidays/MCRL2/trunk/src/squadt/libraries/xml2pp \
-                         /home/jwulp/work/mCRL2-holidays/MCRL2/trunk/src/squadt/libraries/exception/exception.h
+INPUT                  = ../ \
+                         ../../exception/exception.h
 FILE_PATTERNS          = *.c \
                          *.cc \
                          *.cxx \
@@ -124,10 +124,9 @@ FILE_PATTERNS          = *.c \
                          *.PHP3 \
                          *.M \
                          *.MM \
-                         *.PY \
-                         *.tcc
+                         *.PY
 RECURSIVE              = YES
-EXCLUDE                = /home/jwulp/work/mCRL2-holidays/MCRL2/trunk/src/squadt/libraries/xml2pp/test/
+EXCLUDE                = ../test
 EXCLUDE_SYMLINKS       = NO
 EXCLUDE_PATTERNS       = 
 EXAMPLE_PATH           = 

@@ -94,9 +94,6 @@ namespace squadt {
     return (system_settings_path.native_file_string());
   }
 
-  /**
-   * @param[in] n a complete path relative to the path to the system settings path
-   **/
   inline std::string settings_manager::path_to_default_binaries() const {
     return (TOOL_DIRECTORY);
   }

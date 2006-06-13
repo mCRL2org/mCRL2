@@ -20,7 +20,7 @@ namespace sip {
       /**
        * @param[in] t the text of the label
        **/
-      void label::change_text(std::string t) {
+      void label::set_text(std::string t) {
         text = t;
       }
      
@@ -28,8 +28,8 @@ namespace sip {
        * @param[in] t the text of the label
        * @param[in] t the tool communicator to use for sending the update
        **/
-      void label::change_text(std::string t, tool::communicator* c) {
-        change_text(t);
+      void label::set_text(std::string t, tool::communicator* c) {
+        set_text(t);
 
         element::update(c, this);
       }
@@ -88,7 +88,7 @@ namespace sip {
       /**
        * @param[in] l the label for the button
        **/
-      void button::change_label(std::string l) {
+      void button::set_label(std::string l) {
         label = l;
       }
 
@@ -96,8 +96,8 @@ namespace sip {
        * @param[in] l the label for the button
        * @param[in] t the tool communicator to use for sending the update
        **/
-      void button::change_label(std::string l, tool::communicator* t) {
-        change_label(l);
+      void button::set_label(std::string l, tool::communicator* t) {
+        set_label(l);
 
         element::update(t, this);
       }

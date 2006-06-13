@@ -51,15 +51,15 @@ namespace squadt {
     };
   
     /**
-     * @param e[in] a complete path to an executable of the program that is to be executed
+     * @param[in] e a complete path to an executable of the program that is to be executed
      **/
     inline command::command(const std::string& e) : executable(e),
                 working_directory(boost::filesystem::current_path().native_file_string()) {
     }
 
     /**
-     * @param e[in] a complete path to an executable of the program that is to be executed
-     * @param w[in] path to the working directory for this tool
+     * @param[in] e a complete path to an executable of the program that is to be executed
+     * @param[in] w path to the working directory for this tool
      **/
     inline command::command(const std::string& e, std::string const& w) : executable(e), working_directory(w) {
     }

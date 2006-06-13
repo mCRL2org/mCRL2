@@ -171,7 +171,7 @@ namespace squadt {
     assert(exists(s) && !is_directory(s) && native(d));
 
     path           destination_path = directory / path(d.empty() ? s.leaf() : d);
-    processor::ptr p = processor::create();
+    processor::ptr p                = processor::create();
 
     if (s != destination_path) {
       copy_file(s, destination_path);
@@ -187,7 +187,7 @@ namespace squadt {
       f.erase(f.begin());
     }
 
-    p->append_output(f, d);
+    p->append_output(f, destination_path.leaf());
 
     processors.push_back(p);
 

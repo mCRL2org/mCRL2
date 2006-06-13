@@ -3,9 +3,9 @@
 #---------------------------------------------------------------------------
 # Project related configuration options
 #---------------------------------------------------------------------------
-PROJECT_NAME           = SQuADT
+PROJECT_NAME           = "libXML 2 (subset) C++ api"
 PROJECT_NUMBER         = 
-OUTPUT_DIRECTORY       = /home/jwulp/work/mCRL2-holidays/MCRL2/trunk/src/squadt/documentation
+OUTPUT_DIRECTORY       = .
 CREATE_SUBDIRS         = NO
 OUTPUT_LANGUAGE        = English
 USE_WINDOWS_ENCODING   = NO
@@ -46,7 +46,7 @@ SUBGROUPING            = YES
 EXTRACT_ALL            = NO
 EXTRACT_PRIVATE        = YES
 EXTRACT_STATIC         = YES
-EXTRACT_LOCAL_CLASSES  = NO
+EXTRACT_LOCAL_CLASSES  = YES
 EXTRACT_LOCAL_METHODS  = NO
 HIDE_UNDOC_MEMBERS     = YES
 HIDE_UNDOC_CLASSES     = YES
@@ -62,8 +62,8 @@ SORT_BRIEF_DOCS        = YES
 SORT_BY_SCOPE_NAME     = YES
 GENERATE_TODOLIST      = YES
 GENERATE_TESTLIST      = YES
-GENERATE_BUGLIST       = NO
-GENERATE_DEPRECATEDLIST= NO
+GENERATE_BUGLIST       = YES
+GENERATE_DEPRECATEDLIST= YES
 ENABLED_SECTIONS       = 
 MAX_INITIALIZER_LINES  = 30
 SHOW_USED_FILES        = YES
@@ -82,8 +82,8 @@ WARN_LOGFILE           =
 #---------------------------------------------------------------------------
 # configuration options related to the input files
 #---------------------------------------------------------------------------
-INPUT                  = /home/jwulp/work/mCRL2-holidays/MCRL2/trunk/src/squadt \
-                         /home/jwulp/work/mCRL2-holidays/MCRL2/trunk/src/squadt/libraries/exception/
+INPUT                  = ../ \
+                         ../../exception/exception.h
 FILE_PATTERNS          = *.c \
                          *.cc \
                          *.cxx \
@@ -127,14 +127,9 @@ FILE_PATTERNS          = *.c \
                          *.PY \
                          *.tcc
 RECURSIVE              = YES
-EXCLUDE                = /home/jwulp/work/mCRL2-holidays/MCRL2/trunk/src/squadt/bindings/ \
-                         /home/jwulp/work/mCRL2-holidays/MCRL2/trunk/src/squadt/libraries/md5pp/ \
-                         /home/jwulp/work/mCRL2-holidays/MCRL2/trunk/src/squadt/libraries/sip/ \
-                         /home/jwulp/work/mCRL2-holidays/MCRL2/trunk/src/squadt/libraries/transport/ \
-                         /home/jwulp/work/mCRL2-holidays/MCRL2/trunk/src/squadt/libraries/xml2pp/ \
-                         /home/jwulp/work/mCRL2-holidays/MCRL2/trunk/src/squadt/squadt.cpp
+EXCLUDE                = ../test/
 EXCLUDE_SYMLINKS       = NO
-EXCLUDE_PATTERNS       = gui_resources*
+EXCLUDE_PATTERNS       = 
 EXAMPLE_PATH           = 
 EXAMPLE_PATTERNS       = *
 EXAMPLE_RECURSIVE      = NO

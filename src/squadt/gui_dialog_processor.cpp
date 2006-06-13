@@ -14,6 +14,7 @@ namespace squadt {
   namespace GUI {
     namespace dialog {
 
+      /** \brief SI prefixes for binary multiples */
       const char* prefixes_for_binary_multiples[7] = { "", "Ki", "Mi", "Gi", "Ti", "Pi", "Ei" };
 
       boost::format time_format("%s %sB");

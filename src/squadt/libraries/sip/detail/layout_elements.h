@@ -37,10 +37,10 @@ namespace sip {
           label(std::string);
      
           /** \brief Change the text */
-          void change_text(std::string);
+          void set_text(std::string);
      
           /** \brief Change the text, and send update */
-          void change_text(std::string, tool::communicator* t);
+          void set_text(std::string, tool::communicator* t);
      
           /** \brief Instantiate a layout element, through a mediator */
           layout::mediator::wrapper_aptr instantiate(layout::mediator*);
@@ -74,10 +74,10 @@ namespace sip {
           button(std::string);
 
           /** \brief Change the label */
-          void change_label(std::string);
+          void set_label(std::string);
      
           /** \brief Change the label, and send update */
-          void change_label(std::string, tool::communicator* t);
+          void set_label(std::string, tool::communicator* t);
      
           /** \brief Instantiate a layout element, through a mediator */
           layout::mediator::wrapper_aptr instantiate(layout::mediator*);

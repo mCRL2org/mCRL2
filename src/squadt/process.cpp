@@ -31,7 +31,7 @@ namespace squadt {
     }
  
     /**
-     * @param c[in] the command to execute
+     * @param[in] c the command to execute
      **/
     void process::operator() (const command& c) {
       boost::shared_array < char const* > arguments(c.argument_array());

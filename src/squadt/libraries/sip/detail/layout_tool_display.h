@@ -55,7 +55,7 @@ namespace sip {
         mediator::wrapper_aptr instantiate(mediator* m) const;
 
         /** \brief Update (part of) the layout structure based on data read from an xml2pp text reader */
-        constant_elements update(xml2pp::text_reader&);
+        void update(xml2pp::text_reader&, std::vector < sip::layout::element const* >& elements);
     };
 
     inline tool_display::tool_display() : visible(true) {

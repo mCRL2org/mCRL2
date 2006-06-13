@@ -310,6 +310,7 @@ namespace squadt {
 
   /**
    * @param[in] w the path to the directory in which to run the tool
+   * @param[in] h a function object that is invoked when configuration has completed
    *
    * \attention This function is non-blocking
    **/

@@ -178,9 +178,11 @@ namespace sip {
      * @param[out] d tool display on which to execute changes
      **/
     void communicator::accept_display_data(const sip::messenger::message_ptr& m, layout::tool_display::sptr d) {
+      std::vector < sip::layout::element const* > elements;
+      
       xml2pp::text_reader reader(m->to_string().c_str());
 
-      d->update(reader);
+      d->update(reader, elements);
     }
 
     const configuration::sptr communicator::await_configuration() {
