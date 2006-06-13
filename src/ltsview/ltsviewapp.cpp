@@ -10,6 +10,7 @@ bool LTSViewApp::OnInit()
   glCanvas	  = mainFrame->getGLCanvas();
   
   mainFrame->setVisSettings( visualizer->getVisSettings() );
+  SetTopWindow( mainFrame );
   mainFrame->Show( true );
   glCanvas->initialize();
 

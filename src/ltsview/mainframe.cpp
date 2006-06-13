@@ -806,11 +806,11 @@ void MainFrame::setActionLabels( vector< ATerm > &labels )
 void MainFrame::startRendering()
 {
   SetStatusText( wxT("Rendering...") );
-  Update();
+  GetStatusBar()->Update();
 }
 
 void MainFrame::stopRendering()
 {
   SetStatusText( wxT("") );
-  Update();
+  GetStatusBar()->Update();
 }
