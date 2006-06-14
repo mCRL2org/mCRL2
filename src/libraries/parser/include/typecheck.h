@@ -1,14 +1,49 @@
 #include <aterm2.h>
+#include "lpe/specification.h"
 
 //Global preconditions:
 //- the ATerm library has been initialised
 
-ATermAppl gsTypeCheck(ATermAppl Spec);
-/*Pre: spec represents a specification that adheres to the initial internal
- *     ATerm structure.
+ATermAppl type_check_specification(ATermAppl spec);
+/*Pre: spec represents an mCRL2 specification that adheres to the initial
+ *     internal ATerm structure.
  *Post:spec is type checked.
- *Ret: if the type checking went ok, an equivalent version of spec is returned
+ *Ret: if type checking went ok, an equivalent version of spec is returned
  *     that adheres to the internal ATerm structure after type checking.
- *     if something went wrong, an appriopriate error message is printed and
+ *     if something went wrong, an appropriate error message is printed and
+ *     NULL is returned.
+ */
+
+ATermAppl type_check_data_expr(ATermAppl data_expr, lpe::specification &lpe_spec);
+/*Pre: data_expr represents an mCRL2 data expression that adheres to the
+ *     initial internal ATerm structure.
+ *     lpe_spec represents an LPE specification
+ *Post:data_expr is type checked using the declaration from lpe_spec
+ *Ret: if type checking went ok, an equivalent version of data_expr is returned
+ *     that adheres to the internal ATerm structure after type checking.
+ *     if something went wrong, an appropriate error message is printed and
+ *     NULL is returned.
+ */
+
+ATermAppl type_check_mult_act(ATermAppl mult_act, lpe::specification &lpe_spec);
+/*Pre: mult_act represents an mCRL2 multi-action that adheres to the initial
+ *     internal ATerm structure.
+ *     lpe_spec represents an LPE specification
+ *Post:mult_act is type checked using the declarations from lpe_spec
+ *Ret: if type checking went ok, an equivalent version of mult_act is returned
+ *     that adheres to the internal ATerm structure after type checking.
+ *     if something went wrong, an appropriate error message is printed and
+ *     NULL is returned.
+ */
+
+ATermAppl type_check_state_formula(ATermAppl state_formula, lpe::specification &lpe_spec);
+/*Pre: state_formula represents an mCRL2 state formula that adheres to the
+ *     initial internal ATerm structure.
+ *     lpe_spec represents an LPE specification
+ *Post:state_formula is type checked using the declarations from lpe_spec
+ *Ret: if type checking went ok, an equivalent version of state_formula is
+ *     returned that adheres to the internal ATerm structure after type
+ *     checking.
+ *     if something went wrong, an appropriate error message is printed and
  *     NULL is returned.
  */

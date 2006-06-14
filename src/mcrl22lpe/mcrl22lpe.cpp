@@ -546,7 +546,7 @@ ATermAppl linearise_file(t_lin_options &lin_options)
   }
   //type check the result
   gsVerboseMsg("type checking...\n");
-  result = gsTypeCheck(result);
+  result = type_check_specification(result);
   if (result == NULL) 
   {
     gsErrorMsg("type checking failed\n");

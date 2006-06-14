@@ -173,8 +173,6 @@ static ATermAppl gstcMatchSetBagOpUnionDiffIntersect(ATermAppl Type);
 static ATermAppl gstcMatchSetOpSetCompl(ATermAppl Type);
 static ATermAppl gstcMatchBagOpBag2Set(ATermAppl Type);
 static ATermAppl gstcMatchBagOpBagCount(ATermAppl Type);
-// end prototypes
-
 
 static ATermAppl gstcFoldSortRefs(ATermAppl Spec);
 //Pre: Spec is a specification that adheres to the internal syntax after
@@ -196,6 +194,87 @@ static void gstcSplitSortDecls(ATermList SortDecls, ATermList *PSortIds,
 //Pre: SortDecls is a list of SortId's and SortRef's
 //Post:*PSortIds and *PSortRefs contain the SortId's and SortRef's from
 //     SortDecls, in the same order
+
+//type checking functions
+//-----------------------
+
+ATermAppl type_check_specification(ATermAppl input)
+{
+  ATermAppl Result=NULL;
+  gsDebugMsg ("type checking phase started\n");
+  gstcDataInit();
+
+  gsDebugMsg ("type checking read-in phase started\n");
+  
+  if(gstcReadInSorts(ATLgetArgument(ATAgetArgument(input,0),0))) {
+  // Check sorts for loops
+  // Unwind sorts to enable equiv and subtype relations
+  if(gstcReadInConstructors()) {
+  if(gstcReadInFuncs(ATconcat(ATLgetArgument(ATAgetArgument(input,1),0),
+			       ATLgetArgument(ATAgetArgument(input,2),0)))) {
+  body.equations=ATLgetArgument(ATAgetArgument(input,3),0);
+  if(gstcReadInActs(ATLgetArgument(ATAgetArgument(input,4),0))) {
+  if(gstcReadInProcsAndInit(ATLgetArgument(ATAgetArgument(input,5),0),
+			     ATAgetArgument(ATAgetArgument(input,6),1))) {
+  gsDebugMsg ("type checking read-in phase finished\n");
+  
+  gsDebugMsg ("type checking transform ActProc+VarConst phase started\n");
+  if(gstcTransformVarConsTypeData()){
+  if(gstcTransformActProcVarConst()){
+  gsDebugMsg ("type checking transform ActProc+VarConst phase finished\n");
+
+  Result=ATsetArgument(input,(ATerm)gsMakeDataEqnSpec(body.equations),3);
+  Result=ATsetArgument(Result,(ATerm)gsMakeProcEqnSpec(gstcWriteProcs(ATLgetArgument(ATAgetArgument(input,5),0))),5);
+  Result=ATsetArgument(Result,(ATerm)gsMakeInit(ATmakeList0(),
+    ATAtableGet(body.proc_bodies,(ATerm)INIT_KEY())),6);
+
+  Result=gstcFoldSortRefs(Result);
+
+  gsDebugMsg ("type checking phase finished\n");
+  }}}}}}}
+
+  if (Result != NULL) {
+    gsDebugMsg("return %T\n", Result);
+  } 
+  else {
+    gsDebugMsg("return NULL\n");
+  }
+  gstcDataDestroy();
+  return Result;
+}
+
+ATermAppl type_check_data_expr(ATermAppl data_expr, lpe::specification &lpe_spec)
+{
+  //check correctness of the data expression in data_expr using
+  //the LPE specification in lpe_spec
+  return NULL;
+}
+
+ATermAppl type_check_mult_act(ATermAppl mult_act, lpe::specification &lpe_spec)
+{
+  //check correctness of the multi-action in mult_act using
+  //the LPE specification in lpe_spec
+  return NULL;
+}
+
+ATermAppl type_check_state_formula(ATermAppl state_formula, lpe::specification &lpe_spec)
+{
+  //check correctness of the state formula in state_formula using
+  //the LPE specification in lpe_spec as follows:
+  //- determine type of the actions according to the definitions
+  //  in lpe_spec
+  //- determine type of the data expressions according to the
+  //  definitions in lpe_spec
+  //- check for name conflicts of data variable names in forall, exists, mu and nu quantifiers
+  //- check for monotonicity of fixpoint variables
+  //TODO in decreasing order of urgency
+  return NULL;
+}
+
+//local functions
+//---------------
+
+// fold functions
 
 void gstcSplitSortDecls(ATermList SortDecls, ATermList *PSortIds,
   ATermList *PSortRefs)
@@ -324,52 +403,6 @@ ATermList gstcFoldSortRefsInSortRefs(ATermList SortRefs)
   return SortRefs;
 }
 
-// Main function
-ATermAppl gsTypeCheck (ATermAppl input){	
-  ATermAppl Result=NULL;
-  gsDebugMsg ("type checking phase started\n");
-  gstcDataInit();
-
-  gsDebugMsg ("type checking read-in phase started\n");
-  
-  if(gstcReadInSorts(ATLgetArgument(ATAgetArgument(input,0),0))) {
-  // Check soorts for loops
-  // Unwind sorts to enable equiv and subtype relations
-  if(gstcReadInConstructors()) {
-  if(gstcReadInFuncs(ATconcat(ATLgetArgument(ATAgetArgument(input,1),0),
-			       ATLgetArgument(ATAgetArgument(input,2),0)))) {
-  body.equations=ATLgetArgument(ATAgetArgument(input,3),0);
-  if(gstcReadInActs(ATLgetArgument(ATAgetArgument(input,4),0))) {
-  if(gstcReadInProcsAndInit(ATLgetArgument(ATAgetArgument(input,5),0),
-			     ATAgetArgument(ATAgetArgument(input,6),1))) {
-  gsDebugMsg ("type checking read-in phase finished\n");
-  
-  gsDebugMsg ("type checking transform ActProc+VarConst phase started\n");
-  if(gstcTransformVarConsTypeData()){
-  if(gstcTransformActProcVarConst()){
-  gsDebugMsg ("type checking transform ActProc+VarConst phase finished\n");
-
-  Result=ATsetArgument(input,(ATerm)gsMakeDataEqnSpec(body.equations),3);
-  Result=ATsetArgument(Result,(ATerm)gsMakeProcEqnSpec(gstcWriteProcs(ATLgetArgument(ATAgetArgument(input,5),0))),5);
-  Result=ATsetArgument(Result,(ATerm)gsMakeInit(ATmakeList0(),
-    ATAtableGet(body.proc_bodies,(ATerm)INIT_KEY())),6);
-
-  Result=gstcFoldSortRefs(Result);
-
-  gsDebugMsg ("type checking phase finished\n");
-  }}}}}}}
-
-  if (Result != NULL) {
-    gsDebugMsg("return %T\n", Result);
-  } 
-  else {
-    gsDebugMsg("return NULL\n");
-  }
-  gstcDataDestroy();
-  return Result;
-}
-
-// ============ Static functions
 // ========= main processing functions
 void gstcDataInit(void){
   gssystem.constants=ATtableCreate(63,50);

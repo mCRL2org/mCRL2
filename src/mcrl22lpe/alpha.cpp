@@ -141,7 +141,7 @@ int main(int argc, char **argv)
 		} else {
 			Spec = parse_specification(cin);
 		}
-		Spec = gsTypeCheck(Spec);
+		Spec = type_check_specification(Spec);
 	}
 	if ( Spec == NULL )
 	{

@@ -19,10 +19,12 @@ lib parser
        : <bison.prefix>"mcrl2"
          <flex.prefix>"mcrl2"
          <dependency>/libraries/aterm//aterm
+         <dependency>/libraries/lpe//lpe
          <dependency>/libraries/temporary//print
          <dependency>/libraries/temporary//rewrite
        :
        : <library>/libraries/aterm//aterm
+         <library>/libraries/lpe//lpe
          <library>/libraries/temporary//print
          <library>/libraries/temporary//rewrite
        ;

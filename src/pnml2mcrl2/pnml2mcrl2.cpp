@@ -1911,7 +1911,7 @@
     
     gsDebugMsg("The result of conversion is: %T\n",Spec);
 
-    Spec=gsTypeCheck(Spec);
+    Spec = type_check_specification(Spec);
 
     if(Spec){
       OutStream = stdout;

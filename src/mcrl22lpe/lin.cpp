@@ -135,7 +135,7 @@ int main(int argc, char **argv)
                 }
                 //type check specification
                 gsVerboseMsg("type checking...\n");
-                Spec = gsTypeCheck(Spec);
+                Spec = type_check_specification(Spec);
                 if (Spec == NULL) {
                   gsErrorMsg("type checking failed\n");
                   return 1;
