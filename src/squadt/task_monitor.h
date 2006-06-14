@@ -247,11 +247,13 @@ namespace squadt {
       std::pair < handler_map::iterator, handler_map::iterator > p = handlers.equal_range(e);
 
       while (p.first != p.second) {
-        if ((*(p.first)).second()) {
-          handlers.erase(p.first);
-        }
+        handler_map::iterator c = p.first;
 
         ++(p.first);
+
+        if ((*(c)).second()) {
+          handlers.erase(c);
+        }
       }
     }
 

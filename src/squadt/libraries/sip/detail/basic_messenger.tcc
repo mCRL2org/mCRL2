@@ -199,7 +199,7 @@ namespace sip {
             t = M::extract_type(new_string);
 
             message_ptr m(new message(new_string, t));
-std::cerr << "message " << getpid() << " (" << new_string << ")\n";
+std::cerr << getpid() << ": message (type " << t << ")" << " (" << new_string << ")\n";
 
             if (handlers.find(sip::any) != handlers.end() || handlers.find(t) != handlers.end()) {
               /* Service handler */

@@ -293,6 +293,12 @@ namespace sip {
           r.get_attribute(&id, "id");
 
           /* Find the element that is to be changed */
+          if (top_manager.get() == 0) {
+            std::cerr << "Warning : update operation on empty layout!\n";
+
+            break;
+          }
+
           element* t = top_manager->find(id);
 
           if (t != 0) {
