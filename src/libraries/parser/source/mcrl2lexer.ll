@@ -73,10 +73,11 @@ Number     "0"|([1-9][0-9]*)
 
 "%".*      { col_nr += YYLeng(); /* comment */ }
 
-"spec" { process_string(); return TAG_SPEC; }
 "sort_expr" { process_string(); return TAG_SORT_EXPR; }
 "data_expr" { process_string(); return TAG_DATA_EXPR; }
+"mult_act"  { process_string(); return TAG_MULT_ACT; }
 "proc_expr" { process_string(); return TAG_PROC_EXPR; }
+"spec"      { process_string(); return TAG_SPEC; }
 "state_frm" { process_string(); return TAG_STATE_FRM; }
 
 "||_"      { process_string(); return LMERGE; }
@@ -156,7 +157,7 @@ hide       { process_string(); return HIDE; }
 rename     { process_string(); return RENAME; }
 comm       { process_string(); return COMM; }
 
-eval       { process_string(); return EVAL; }
+val        { process_string(); return VAL; }
 mu         { process_string(); return MU; }
 nu         { process_string(); return NU; }
 delay      { process_string(); return DELAY; }

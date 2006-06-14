@@ -120,7 +120,7 @@
                 | Unknown                                                (- tc)
 
 //process expression
-<ProcExpr>    ::= ActionProcess(<String>, <DataExpr>*)                   (- tc)
+<ProcExpr>    ::= ParamId(<String>, <DataExpr>*)                         (- tc)
                 | <Action>                                               (+ tc)
                 | Process(<ProcVarId>, <DataExpr>*)                      (+ tc)
                 | Delta

@@ -712,10 +712,10 @@
 
     ATermAppl sync;
     if (ATgetLength(Ids) > 1) {
-      sync = gsMakeSync(pn2gsSyncIn(ATgetNext(Ids)), gsMakeActionProcess(ATmakeAppl0(ATgetAFun(ATgetFirst(Ids))), ATmakeList0()));
+      sync = gsMakeSync(pn2gsSyncIn(ATgetNext(Ids)), gsMakeParamId(ATmakeAppl0(ATgetAFun(ATgetFirst(Ids))), ATmakeList0()));
     } else {
       // ATgetLength(Ids) == 1, since the input-list is not-empty!
-      sync = gsMakeActionProcess(ATmakeAppl0(ATgetAFun(ATgetFirst(Ids))), ATmakeList0());
+      sync = gsMakeParamId(ATmakeAppl0(ATgetAFun(ATgetFirst(Ids))), ATmakeList0());
     }
     return sync;
   }
@@ -729,10 +729,10 @@
 
     ATermAppl sync;
     if (ATgetLength(Ids) > 1) {
-      sync = gsMakeSync(pn2gsSyncOut(ATgetNext(Ids)), gsMakeActionProcess(ATmakeAppl0(ATprependAFun("_", ATgetAFun(ATgetFirst(Ids)))), ATmakeList0()));
+      sync = gsMakeSync(pn2gsSyncOut(ATgetNext(Ids)), gsMakeParamId(ATmakeAppl0(ATprependAFun("_", ATgetAFun(ATgetFirst(Ids)))), ATmakeList0()));
     } else {
       // ATgetLength(Ids) == 1, since the input-list is not-empty!
-      sync = gsMakeActionProcess(ATmakeAppl0(ATprependAFun("_", ATgetAFun(ATgetFirst(Ids)))), ATmakeList0());
+      sync = gsMakeParamId(ATmakeAppl0(ATprependAFun("_", ATgetAFun(ATgetFirst(Ids)))), ATmakeList0());
     }
     return sync;
   }
@@ -787,7 +787,7 @@
       // Transition has no incoming arcs and no outgoing arcs
       gsDebugMsg("No in and no out for trans: %T\n", (ATerm)CurrentTrans);
       // create T_ti
-      Process = gsMakeActionProcess(MonitorAction, ATmakeList0());
+      Process = gsMakeParamId(MonitorAction, ATmakeList0());
       EquationList = ATinsert(EquationList, (ATerm)gsMakeProcEqn(ATmakeList0(), gsMakeProcVarId(CurrentTrans, ATmakeList0()), ATmakeList0(), Process));
       gsDebugMsg("Process: %T created.\n", CurrentTrans);
       
@@ -795,7 +795,7 @@
       // Transition has incoming arcs but no outgoing arcs
       gsDebugMsg("In and no out for trans: %T\n", (ATerm)CurrentTrans);
       // create T_ti
-      Process = gsMakeSync(gsMakeActionProcess(CurrentTransIn, ATmakeList0()), gsMakeActionProcess(MonitorAction, ATmakeList0()));
+      Process = gsMakeSync(gsMakeParamId(CurrentTransIn, ATmakeList0()), gsMakeParamId(MonitorAction, ATmakeList0()));
       EquationList = ATinsert(EquationList, (ATerm)gsMakeProcEqn(ATmakeList0(), gsMakeProcVarId(CurrentTrans, ATmakeList0()), ATmakeList0(), Process));
       gsDebugMsg("Process: %T created.\n", CurrentTrans);
       // create T_ti_in
@@ -807,7 +807,7 @@
       // Transition has outgoing arcs but no incoming arcs
       gsDebugMsg("Out and no in for trans: %T\n", (ATerm)CurrentTrans);
       // create T_ti
-      Process = gsMakeSync(gsMakeActionProcess(CurrentTransOut, ATmakeList0()), gsMakeActionProcess(MonitorAction, ATmakeList0()));
+      Process = gsMakeSync(gsMakeParamId(CurrentTransOut, ATmakeList0()), gsMakeParamId(MonitorAction, ATmakeList0()));
       EquationList = ATinsert(EquationList, (ATerm)gsMakeProcEqn(ATmakeList0(), gsMakeProcVarId(CurrentTrans, ATmakeList0()), ATmakeList0(), Process));
       gsDebugMsg("Process: %T created.\n", CurrentTrans);
       // create T_ti_out
@@ -819,7 +819,7 @@
       // Transition has incoming arcs and outgoing arcs
       gsDebugMsg("In and out for trans: %T\n", (ATerm)CurrentTrans);
       // create T_ti
-      Process = gsMakeSync(gsMakeSync(gsMakeActionProcess(CurrentTransIn, ATmakeList0()), gsMakeActionProcess(CurrentTransOut, ATmakeList0())), gsMakeActionProcess(MonitorAction, ATmakeList0()));
+      Process = gsMakeSync(gsMakeSync(gsMakeParamId(CurrentTransIn, ATmakeList0()), gsMakeParamId(CurrentTransOut, ATmakeList0())), gsMakeParamId(MonitorAction, ATmakeList0()));
       EquationList = ATinsert(EquationList, (ATerm)gsMakeProcEqn(ATmakeList0(), gsMakeProcVarId(CurrentTrans, ATmakeList0()), ATmakeList0(), Process));
       gsDebugMsg("Process: %T created.\n", CurrentTrans);
       // create T_ti_in
@@ -843,10 +843,10 @@
 
     ATermAppl choice;
     if (ATgetLength(Ids) > 1) {
-      choice = gsMakeChoice(gsMakeActionProcess(ATmakeAppl0(ATgetAFun(ATgetFirst(Ids))), ATmakeList0()), pn2gsChoiceIn(ATgetNext(Ids)));
+      choice = gsMakeChoice(gsMakeParamId(ATmakeAppl0(ATgetAFun(ATgetFirst(Ids))), ATmakeList0()), pn2gsChoiceIn(ATgetNext(Ids)));
     } else {
       // ATgetLength(Ids) == 1, since the input-list is not-empty!
-      choice = gsMakeActionProcess(ATmakeAppl0(ATgetAFun(ATgetFirst(Ids))), ATmakeList0());
+      choice = gsMakeParamId(ATmakeAppl0(ATgetAFun(ATgetFirst(Ids))), ATmakeList0());
     }
     return choice;
   }
@@ -860,10 +860,10 @@
 
     ATermAppl choice;
     if (ATgetLength(Ids) > 1) {
-      choice = gsMakeChoice(gsMakeActionProcess(ATmakeAppl0(ATprependAFun("_", ATgetAFun(ATgetFirst(Ids)))), ATmakeList0()), pn2gsChoiceOut(ATgetNext(Ids)));
+      choice = gsMakeChoice(gsMakeParamId(ATmakeAppl0(ATprependAFun("_", ATgetAFun(ATgetFirst(Ids)))), ATmakeList0()), pn2gsChoiceOut(ATgetNext(Ids)));
     } else {
       // ATgetLength(Ids) == 1, since the input-list is not-empty!
-      choice = gsMakeActionProcess(ATmakeAppl0(ATprependAFun("_", ATgetAFun(ATgetFirst(Ids)))), ATmakeList0());
+      choice = gsMakeParamId(ATmakeAppl0(ATprependAFun("_", ATgetAFun(ATgetFirst(Ids)))), ATmakeList0());
     }
     return choice;
   }
@@ -1018,21 +1018,21 @@
       // create first sum-sub-process
       SumVars = ATmakeList1((ATerm)SumVar0);
       CondIf0 = pn2gsMakeDataApplProd2(OpLTE,SumVar0,MaxConcIn);
-      CondThan0 = gsMakeSeq(gsMakeActionProcess(CurrentPlaceAdd, ATmakeList1((ATerm)SumVar0)), gsMakeActionProcess(CurrentPlace, ATmakeList1((ATerm)pn2gsMakeDataApplProd2(OpAdd,SumVar0,ProcVar))));
+      CondThan0 = gsMakeSeq(gsMakeParamId(CurrentPlaceAdd, ATmakeList1((ATerm)SumVar0)), gsMakeParamId(CurrentPlace, ATmakeList1((ATerm)pn2gsMakeDataApplProd2(OpAdd,SumVar0,ProcVar))));
       SubProcess0 = gsMakeSum(SumVars, gsMakeCond(CondIf0, CondThan0, gsMakeDelta()));
       gsDebugMsg("Parameter %T is %d a Sum\n", SubProcess0, gsIsSum(SubProcess0));
 
       // create second sum-sub-process
       SumVars = ATmakeList1((ATerm)SumVar1);
       CondIf1 = pn2gsMakeDataApplProd2(OpLTE,SumVar1, pn2gsMakeDataApplProd2(OpMin, MaxConcOut, ProcVar));
-      CondThan1 = gsMakeSeq(gsMakeActionProcess(CurrentPlaceRem, ATmakeList1((ATerm)SumVar1)), gsMakeActionProcess(CurrentPlace, ATmakeList1((ATerm)pn2gsMakeDataApplProd2(OpMax,Number0, pn2gsMakeDataApplProd2(OpSubt,ProcVar,SumVar1)))));
+      CondThan1 = gsMakeSeq(gsMakeParamId(CurrentPlaceRem, ATmakeList1((ATerm)SumVar1)), gsMakeParamId(CurrentPlace, ATmakeList1((ATerm)pn2gsMakeDataApplProd2(OpMax,Number0, pn2gsMakeDataApplProd2(OpSubt,ProcVar,SumVar1)))));
       SubProcess1 = gsMakeSum(SumVars, gsMakeCond(CondIf1, CondThan1, gsMakeDelta()));
       gsDebugMsg("Parameter %T is %d a Sum\n", SubProcess1, gsIsSum(SubProcess1));
 
       // create third sum-sub-process
       SumVars = ATmakeList2((ATerm)SumVar0, (ATerm)SumVar1);
       CondIf2 = pn2gsMakeDataApplProd2(OpAnd, CondIf0, CondIf1);
-      CondThan2 = gsMakeSeq(gsMakeSync(gsMakeActionProcess(CurrentPlaceAdd, ATmakeList1((ATerm)SumVar0)), gsMakeActionProcess(CurrentPlaceRem, ATmakeList1((ATerm)SumVar1))), gsMakeActionProcess(CurrentPlace, ATmakeList1((ATerm)pn2gsMakeDataApplProd2(OpMax,Number0,pn2gsMakeDataApplProd2(OpSubt,pn2gsMakeDataApplProd2(OpAdd,SumVar0,ProcVar), SumVar1)))));
+      CondThan2 = gsMakeSeq(gsMakeSync(gsMakeParamId(CurrentPlaceAdd, ATmakeList1((ATerm)SumVar0)), gsMakeParamId(CurrentPlaceRem, ATmakeList1((ATerm)SumVar1))), gsMakeParamId(CurrentPlace, ATmakeList1((ATerm)pn2gsMakeDataApplProd2(OpMax,Number0,pn2gsMakeDataApplProd2(OpSubt,pn2gsMakeDataApplProd2(OpAdd,SumVar0,ProcVar), SumVar1)))));
       SubProcess2 = gsMakeSum(SumVars, gsMakeCond(CondIf2, CondThan2, gsMakeDelta()));
       gsDebugMsg("Parameter %T is %d a Sum\n", SubProcess2, gsIsSum(SubProcess2));
 
@@ -1046,8 +1046,8 @@
       /* Creation of P_pi_add */
       ATermAppl ProcVar = pn2gsPlaceParameterPos(gsATermAppl2String(CurrentPlaceAdd));
       ATermAppl CondIf = pn2gsMakeDataApplProd2(OpGT,ProcVar, Number1);
-      ATermAppl CondThan = gsMakeSync(gsMakeActionProcess(CurrentPlaceIn, ATmakeList0()), gsMakeActionProcess(CurrentPlaceAdd, ATmakeList1((ATerm)pn2gsMakeDataApplProd2(OpMax,Number1, pn2gsMakeDataApplProd2(OpSubt,ProcVar, Number1)))));
-      ATermAppl CondElse = gsMakeActionProcess(CurrentPlaceIn, ATmakeList0());
+      ATermAppl CondThan = gsMakeSync(gsMakeParamId(CurrentPlaceIn, ATmakeList0()), gsMakeParamId(CurrentPlaceAdd, ATmakeList1((ATerm)pn2gsMakeDataApplProd2(OpMax,Number1, pn2gsMakeDataApplProd2(OpSubt,ProcVar, Number1)))));
+      ATermAppl CondElse = gsMakeParamId(CurrentPlaceIn, ATmakeList0());
       ATermAppl Process = gsMakeCond(CondIf, CondThan, CondElse);
       EquationList = ATinsert(EquationList, (ATerm)gsMakeProcEqn(ATmakeList0(), gsMakeProcVarId(CurrentPlaceAdd, ATmakeList1((ATerm)gsMakeSortIdPos())), ATmakeList1((ATerm)ProcVar), Process));
       gsDebugMsg("Process: %T created.\n", CurrentPlaceAdd);
@@ -1069,8 +1069,8 @@
       /* Creation of P_pi_rem */
       ATermAppl ProcVar = pn2gsPlaceParameterPos(gsATermAppl2String(CurrentPlaceRem));
       ATermAppl CondIf = pn2gsMakeDataApplProd2(OpGT,ProcVar, Number1);
-      ATermAppl CondThan = gsMakeSync(gsMakeActionProcess(CurrentPlaceOut, ATmakeList0()), gsMakeActionProcess(CurrentPlaceRem, ATmakeList1((ATerm)pn2gsMakeDataApplProd2(OpMax, Number1, pn2gsMakeDataApplProd2(OpSubt,ProcVar, Number1)))));
-      ATermAppl CondElse = gsMakeActionProcess(CurrentPlaceOut, ATmakeList0());
+      ATermAppl CondThan = gsMakeSync(gsMakeParamId(CurrentPlaceOut, ATmakeList0()), gsMakeParamId(CurrentPlaceRem, ATmakeList1((ATerm)pn2gsMakeDataApplProd2(OpMax, Number1, pn2gsMakeDataApplProd2(OpSubt,ProcVar, Number1)))));
+      ATermAppl CondElse = gsMakeParamId(CurrentPlaceOut, ATmakeList0());
       ATermAppl Process = gsMakeCond(CondIf, CondThan, CondElse);
       EquationList = ATinsert(EquationList, (ATerm)gsMakeProcEqn(ATmakeList0(), gsMakeProcVarId(CurrentPlaceRem, ATmakeList1((ATerm)gsMakeSortIdPos())), ATmakeList1((ATerm)ProcVar), Process));
       gsDebugMsg("Process: %T created.\n", CurrentPlaceRem);
@@ -1175,10 +1175,10 @@
     ATermAppl merge;
     char * CurrentElement = ATgetName(ATgetAFun(ATgetFirst(Ids)));
     if (ATgetLength(Ids) > 1) {
-      merge = gsMakeMerge(gsMakeActionProcess(ATmakeAppl0(ATmakeAFun(CurrentElement, 0, ATtrue)), ATmakeList1((ATerm)pn2gsPlaceParameterNat(CurrentElement))), pn2gsMerge(ATgetNext(Ids)));
+      merge = gsMakeMerge(gsMakeParamId(ATmakeAppl0(ATmakeAFun(CurrentElement, 0, ATtrue)), ATmakeList1((ATerm)pn2gsPlaceParameterNat(CurrentElement))), pn2gsMerge(ATgetNext(Ids)));
     } else {
       // ATgetLength(Ids) == 1, since the input-list is not-empty!
-      merge = gsMakeActionProcess(ATmakeAppl0(ATmakeAFun(CurrentElement, 0, ATtrue)), ATmakeList1((ATerm)pn2gsPlaceParameterNat(CurrentElement)));
+      merge = gsMakeParamId(ATmakeAppl0(ATmakeAFun(CurrentElement, 0, ATtrue)), ATmakeList1((ATerm)pn2gsPlaceParameterNat(CurrentElement)));
     }
     return merge;
   }
@@ -1292,7 +1292,7 @@
       ProcessList = ATinsert(ProcessList, (ATerm)gsMakeProcEqn(ATmakeList0(), gsMakeProcVarId(gsString2ATermAppl("Trans"), ATmakeList0()), ATmakeList0(), gsMakeDelta()));
     } else {
       // there are transitions
-      ProcessList = ATinsert(ProcessList, (ATerm)gsMakeProcEqn(ATmakeList0(), gsMakeProcVarId(gsString2ATermAppl("Trans"), ATmakeList0()), ATmakeList0(), gsMakeSeq(pn2gsChoiceIn(context.transitions), gsMakeActionProcess(gsString2ATermAppl("Trans"), ATmakeList0()))));
+      ProcessList = ATinsert(ProcessList, (ATerm)gsMakeProcEqn(ATmakeList0(), gsMakeProcVarId(gsString2ATermAppl("Trans"), ATmakeList0()), ATmakeList0(), gsMakeSeq(pn2gsChoiceIn(context.transitions), gsMakeParamId(gsString2ATermAppl("Trans"), ATmakeList0()))));
     }
     gsDebugMsg("Process Trans created.\n");
     
@@ -1308,7 +1308,7 @@
 			   gsMakeBlock(pn2gsBlockList(AllArcs),
 					  gsMakeComm(pn2gsCommList(AllArcs),
 						     gsMakeMerge(
-							     gsMakeActionProcess(gsString2ATermAppl("Trans"),ATmakeList0()),
+							     gsMakeParamId(gsString2ATermAppl("Trans"),ATmakeList0()),
 							     pn2gsMerge(context.places) 
 								 ))));
     }
@@ -1317,11 +1317,11 @@
       //....
       //  hide(I2,block(H2,comm(C2,
       //    hide(I1,block(H1,comm(C1,Trans||P1)))||P2)))||...Pn)))
-      Process=gsMakeActionProcess(gsString2ATermAppl("Trans"), ATmakeList0());
+      Process=gsMakeParamId(gsString2ATermAppl("Trans"), ATmakeList0());
       for(ATermList Places=ATtableKeys(context.place_process_name);!ATisEmpty(Places);Places=ATgetNext(Places)){
 	ATermAppl PlaceID=ATAgetFirst(Places);
 	ATermAppl Place=ATAtableGet(context.place_process_name,(ATerm)PlaceID);
-	Process=gsMakeMerge(Process,gsMakeActionProcess(Place,ATmakeList1((ATerm)pn2gsPlaceParameterNat(ATgetName(ATgetAFun(Place))))));
+	Process=gsMakeMerge(Process,gsMakeParamId(Place,ATmakeList1((ATerm)pn2gsPlaceParameterNat(ATgetName(ATgetAFun(Place))))));
 
 	ATermList AssocArcs=ATmakeList0(); // in and out arcs of the place
 	{
@@ -1357,7 +1357,7 @@
     // NetID = PetriNet("...")
     // "..." is the initial marking of all places
 
-    Process = gsMakeActionProcess(gsString2ATermAppl("PetriNet"), pn2gsInitialMarkings(ATtableKeys(context.place_mark), context.place_mark));
+    Process = gsMakeParamId(gsString2ATermAppl("PetriNet"), pn2gsInitialMarkings(ATtableKeys(context.place_mark), context.place_mark));
     ProcessList = ATinsert(ProcessList, (ATerm)gsMakeProcEqn(ATmakeList0(), gsMakeProcVarId(NetID, ATmakeList0()), ATmakeList0(), Process));
     gsDebugMsg("Process %T created.\n", NetID);
 
@@ -1756,7 +1756,7 @@
     gsDebugMsg("Conversion Succesful!");
     gsDebugMsg("\n\n====================\n\n");
 
-    return gsMakeSpecV1(gsMakeSortSpec(ATmakeList0()), gsMakeConsSpec(ATmakeList0()), gsMakeMapSpec(ATmakeList0()), gsMakeDataEqnSpec(ATmakeList0()), gsMakeActSpec(Actions), gsMakeProcEqnSpec(ProcEqns), gsMakeInit(ATmakeList0(),gsMakeActionProcess(ATAgetArgument(Spec, 3), ATmakeList0())));
+    return gsMakeSpecV1(gsMakeSortSpec(ATmakeList0()), gsMakeConsSpec(ATmakeList0()), gsMakeMapSpec(ATmakeList0()), gsMakeDataEqnSpec(ATmakeList0()), gsMakeActSpec(Actions), gsMakeProcEqnSpec(ProcEqns), gsMakeInit(ATmakeList0(),gsMakeParamId(ATAgetArgument(Spec, 3), ATmakeList0())));
   }
 
   /*               */
@@ -2137,7 +2137,7 @@
       }
       
       ATermAppl LeftName=ATmakeAppl0(ATappendAFun(AR,ATgetName(ATgetAFun(TransID))));
-      ATermAppl Left=gsMakeActionProcess(LeftName,ATmakeList0());//make name P_pi_ar_i_j
+      ATermAppl Left=gsMakeParamId(LeftName,ATmakeList0());//make name P_pi_ar_i_j
       ATermAppl RightExpr=VarX;  //x;
       int d=nIn-nOut;
       if(!reset) {
@@ -2149,7 +2149,7 @@
 	else RightExpr=Number0;
       }
 
-      ATermAppl Right=gsMakeActionProcess(CurrentPlace,ATmakeList1((ATerm)RightExpr));//make P_pi(max(x+i-j,0))
+      ATermAppl Right=gsMakeParamId(CurrentPlace,ATmakeList1((ATerm)RightExpr));//make P_pi(max(x+i-j,0))
       ATermAppl Summand=gsMakeSeq(Left,Right);
       
       //condition
@@ -2216,8 +2216,8 @@
 // 										    ATgetName(NumberIId)),
 // 								       "_"),
 // 							  ATgetName(NumberJId)));
-// 	ATermAppl Left=gsMakeActionProcess(LeftName,ATmakeList0());//make name P_pi_ar_i_j
-// 	ATermAppl LeftResets=gsMakeActionProcess(LeftNameResets,ATmakeList0());//make name P_pi_arr_i_j
+// 	ATermAppl Left=gsMakeParamId(LeftName,ATmakeList0());//make name P_pi_ar_i_j
+// 	ATermAppl LeftResets=gsMakeParamId(LeftNameResets,ATmakeList0());//make name P_pi_arr_i_j
 	
 // 	ATermAppl RightExpr=VarX;  //x;
 // 	{
@@ -2225,8 +2225,8 @@
 // 	  if(d>0) RightExpr=pn2gsMakeDataApplProd2(OpAdd,RightExpr,gsMakeNumber(ATmakeAppl0(ATmakeAFunInt0(d)),gsMakeSortIdPos()));//RightExpr=RightExpr+d;
 // 	  else if(d<0) RightExpr=gsMakeDataApplProd(OpInt2Nat,ATmakeList1((ATerm)pn2gsMakeDataApplProd2(OpSubt,RightExpr,gsMakeNumber(ATmakeAppl0(ATmakeAFunInt0(-d)),gsMakeSortIdPos()))));//RightExpr=max(RightExpr-d,0);
 // 	}
-// 	ATermAppl Right=gsMakeActionProcess(CurrentPlace,ATmakeList1((ATerm)RightExpr));//make P_pi(max(x+i-j,0))
-// 	ATermAppl RightResets=gsMakeActionProcess(CurrentPlace,ATmakeList1((ATerm)Number0));//make P_pi(0)
+// 	ATermAppl Right=gsMakeParamId(CurrentPlace,ATmakeList1((ATerm)RightExpr));//make P_pi(max(x+i-j,0))
+// 	ATermAppl RightResets=gsMakeParamId(CurrentPlace,ATmakeList1((ATerm)Number0));//make P_pi(0)
 // 	ATermAppl Sec=gsMakeSeq(Left,Right);
 // 	ATermAppl SecResets=gsMakeSeq(LeftResets,RightResets);
 // 	if(i>0 || j>0){
@@ -2282,14 +2282,14 @@
 // 	AFun NumberIId=ATmakeAFunInt0(i);
 // 	ATermAppl LeftName=ATmakeAppl0(ATappendAFun(CurrentPlaceAIId,ATgetName(NumberIId)));
 // 	ATermAppl LeftNameResets=ATmakeAppl0(ATappendAFun(CurrentPlaceAIRId,ATgetName(NumberIId)));
-// 	ATermAppl Left=gsMakeActionProcess(LeftName,ATmakeList0());//make name P_pi_ai_i
-// 	ATermAppl LeftResets=gsMakeActionProcess(LeftNameResets,ATmakeList0());//make name P_pi_ai_i
+// 	ATermAppl Left=gsMakeParamId(LeftName,ATmakeList0());//make name P_pi_ai_i
+// 	ATermAppl LeftResets=gsMakeParamId(LeftNameResets,ATmakeList0());//make name P_pi_ai_i
 	
 // 	ATermAppl RightExpr=VarX;  //x;
 // 	if(i>0) RightExpr=pn2gsMakeDataApplProd2(OpAdd,RightExpr,gsMakeNumber(ATmakeAppl0(ATmakeAFunInt0(i)),gsMakeSortIdPos()));//RightExpr=RightExpr+i;
 	
-// 	ATermAppl Right=gsMakeActionProcess(CurrentPlace,ATmakeList1((ATerm)RightExpr));//make P_pi(x+i)
-// 	ATermAppl RightResets=gsMakeActionProcess(CurrentPlace,ATmakeList1((ATerm)Number0));//make P_pi(x+i)
+// 	ATermAppl Right=gsMakeParamId(CurrentPlace,ATmakeList1((ATerm)RightExpr));//make P_pi(x+i)
+// 	ATermAppl RightResets=gsMakeParamId(CurrentPlace,ATmakeList1((ATerm)Number0));//make P_pi(x+i)
 // 	ATermAppl Sec=gsMakeSeq(Left,Right);
 // 	ATermAppl SecResets=gsMakeSeq(LeftResets,RightResets);
 // 	if(Summand) Summand=gsMakeChoice(Sec,Summand);
@@ -2421,7 +2421,7 @@ static ATermList pn2gsGetActionLists(int n, ATermList ActList){
     //input : list of action names
     ATermAppl Res=NULL;
     for(;!ATisEmpty(ActionList);ActionList=ATgetNext(ActionList)){
-      ATermAppl CurAct=gsMakeActionProcess(ATAgetFirst(ActionList),ATmakeList0());
+      ATermAppl CurAct=gsMakeParamId(ATAgetFirst(ActionList),ATmakeList0());
       if(Res) Res=gsMakeSync(CurAct,Res);
       else Res=CurAct;
     }

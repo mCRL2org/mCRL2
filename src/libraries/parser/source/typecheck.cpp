@@ -1285,7 +1285,7 @@ static ATermAppl gstcTraverseActProcVarConstP(ATermTable Vars, ATermAppl ProcTer
   int n = ATgetArity(ProcSymbol);
   if(n==0) return ProcTerm;
 
-  if(gsIsActionProcess(ProcTerm)){
+  if(gsIsParamId(ProcTerm)){
     return gstcRewrActProc(Vars,ProcTerm);
   }
 

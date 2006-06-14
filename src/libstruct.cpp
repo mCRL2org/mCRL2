@@ -141,7 +141,7 @@ static AFun gsAFunWhr;
 static AFun gsAFunUnknown;
 static AFun gsAFunBagEnumElt;
 static AFun gsAFunWhrDecl;
-static AFun gsAFunActionProcess;
+static AFun gsAFunParamId;
 static AFun gsAFunProcess;
 static AFun gsAFunTau;
 static AFun gsAFunSum;
@@ -337,7 +337,7 @@ void gsEnableConstructorFunctions(void)
     gsAFunUnknown          = ATmakeAFun("Unknown", 0, ATfalse);
     gsAFunBagEnumElt       = ATmakeAFun("BagEnumElt", 2, ATfalse);
     gsAFunWhrDecl          = ATmakeAFun("WhrDecl", 2, ATfalse);
-    gsAFunActionProcess    = ATmakeAFun("ActionProcess", 2, ATfalse);
+    gsAFunParamId    = ATmakeAFun("ParamId", 2, ATfalse);
     gsAFunProcess          = ATmakeAFun("Process", 2, ATfalse);
     gsAFunTau              = ATmakeAFun("Tau", 0, ATfalse);
     gsAFunSum              = ATmakeAFun("Sum", 2, ATfalse);
@@ -526,7 +526,7 @@ void gsEnableConstructorFunctions(void)
     ATprotectAFun(gsAFunUnknown);
     ATprotectAFun(gsAFunBagEnumElt);
     ATprotectAFun(gsAFunWhrDecl);
-    ATprotectAFun(gsAFunActionProcess);
+    ATprotectAFun(gsAFunParamId);
     ATprotectAFun(gsAFunProcess);
     ATprotectAFun(gsAFunTau);
     ATprotectAFun(gsAFunSum);
@@ -973,10 +973,10 @@ ATermAppl gsMakeWhrDecl(ATermAppl Name, ATermAppl DataExpr)
   return ATmakeAppl2(gsAFunWhrDecl, (ATerm) Name, (ATerm) DataExpr);
 }
 
-ATermAppl gsMakeActionProcess(ATermAppl Name, ATermList DataExprs)
+ATermAppl gsMakeParamId(ATermAppl Name, ATermList DataExprs)
 {
   assert(gsConstructorFunctionsEnabled);
-  return ATmakeAppl2(gsAFunActionProcess, (ATerm) Name, (ATerm) DataExprs);
+  return ATmakeAppl2(gsAFunParamId, (ATerm) Name, (ATerm) DataExprs);
 }
 
 ATermAppl gsMakeProcess(ATermAppl ProcId, ATermList DataExprs)
@@ -1511,9 +1511,9 @@ bool gsIsWhrDecl(ATermAppl Term) {
   return ATgetAFun(Term) == gsAFunWhrDecl;
 }
 
-bool gsIsActionProcess(ATermAppl Term) {
+bool gsIsParamId(ATermAppl Term) {
   assert(gsConstructorFunctionsEnabled);
-  return ATgetAFun(Term) == gsAFunActionProcess;
+  return ATgetAFun(Term) == gsAFunParamId;
 }
 
 bool gsIsProcess(ATermAppl Term) {

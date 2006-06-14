@@ -803,7 +803,7 @@ void PRINT_FUNC(PrintPart_Appl)(PRINT_OUTTYPE OutStream,
     PRINT_FUNC(fprints)(OutStream, " = ");
     PRINT_FUNC(PrintPart_Appl)(OutStream, ATAgetArgument(Part, 1),
       pp_format, ShowSorts, 0);
-  } else if (gsIsActionProcess(Part) || gsIsAction(Part) || gsIsProcess(Part)) {
+  } else if (gsIsParamId(Part) || gsIsAction(Part) || gsIsProcess(Part)) {
     //print action or process reference
     PRINT_FUNC(dbg_prints)("printing action or process reference\n");
     PRINT_FUNC(PrintPart_Appl)(OutStream, ATAgetArgument(Part, 0),

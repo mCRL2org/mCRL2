@@ -42,12 +42,12 @@ using atermpp::function_symbol;
     }
 
     inline
-    function_symbol func_ActionProcess()
+    function_symbol func_ParamId()
     {
-      static AFun f = ATmakeAFun("ActionProcess", 2, ATfalse);
+      static AFun f = ATmakeAFun("ParamId", 2, ATfalse);
       return function_symbol(f);
       //ATprotectAFun(f);
-      //static ATermAppl a = gsMakeActionProcess(0,0);
+      //static ATermAppl a = gsMakeParamId(0,0);
       //return function_symbol(ATgetAFun(a));
     }
 

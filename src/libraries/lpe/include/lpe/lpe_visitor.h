@@ -160,8 +160,8 @@ class lpe_visitor
     virtual void leave_SortArrow(aterm_appl t) {}
     virtual void visit_Unknown(aterm_appl t) {}
     virtual void leave_Unknown(aterm_appl t) {}
-    virtual void visit_ActionProcess(aterm_appl t) {}
-    virtual void leave_ActionProcess(aterm_appl t) {}
+    virtual void visit_ParamId(aterm_appl t) {}
+    virtual void leave_ParamId(aterm_appl t) {}
     virtual void visit_Process(aterm_appl t) {}
     virtual void leave_Process(aterm_appl t) {}
     virtual void visit_Tau(aterm_appl t) {}
@@ -1180,7 +1180,7 @@ class lpe_visitor
       if (!stop(t))
       {
         if (t.function().name() == "Action") walk_Action<Stop>(t, stop);
-        else if (t.function().name() == "ActionProcess") walk_ActionProcess<Stop>(t, stop);
+        else if (t.function().name() == "ParamId") walk_ParamId<Stop>(t, stop);
         else if (t.function().name() == "Process") walk_Process<Stop>(t, stop);
         else if (t.function().name() == "Delta") walk_Delta<Stop>(t, stop);
         else if (t.function().name() == "Tau") walk_Tau<Stop>(t, stop);
@@ -1206,7 +1206,7 @@ class lpe_visitor
     {
       assert(t.type() == AT_APPL);
       if (t.function().name() == "Action") walk_Action(t);
-      else if (t.function().name() == "ActionProcess") walk_ActionProcess(t);
+      else if (t.function().name() == "ParamId") walk_ParamId(t);
       else if (t.function().name() == "Process") walk_Process(t);
       else if (t.function().name() == "Delta") walk_Delta(t);
       else if (t.function().name() == "Tau") walk_Tau(t);
@@ -2176,14 +2176,14 @@ class lpe_visitor
     }
 
     template <typename Stop>
-    void walk_ActionProcess(aterm_appl t, const Stop& stop)
+    void walk_ParamId(aterm_appl t, const Stop& stop)
     {
       assert(t.type() == AT_APPL);
-      assert(t.function().name() == "ActionProcess");
+      assert(t.function().name() == "ParamId");
       aterm_list l = t.argument_list();
       assert(l.size() == 2);
       aterm_list::iterator i = l.begin();
-      visit_ActionProcess(t);
+      visit_ParamId(t);
       if (!stop(t))
       {
         walk_String<Stop>((*i++).to_aterm_appl(), stop);
@@ -2192,23 +2192,23 @@ class lpe_visitor
           for (aterm_list::iterator i = x.begin(); i != x.end(); ++i) walk_DataExpr<Stop>((*i).to_aterm_appl(), stop);
         }
        }
-      leave_ActionProcess(t);
+      leave_ParamId(t);
     }
 
-    void walk_ActionProcess(aterm_appl t)
+    void walk_ParamId(aterm_appl t)
     {
       assert(t.type() == AT_APPL);
-      assert(t.function().name() == "ActionProcess");
+      assert(t.function().name() == "ParamId");
       aterm_list l = t.argument_list();
       assert(l.size() == 2);
       aterm_list::iterator i = l.begin();
-      visit_ActionProcess(t);
+      visit_ParamId(t);
       walk_String((*i++).to_aterm_appl());
       {
         aterm_list x = (*i++).to_aterm_list();
         for (aterm_list::iterator i = x.begin(); i != x.end(); ++i) walk_DataExpr((*i).to_aterm_appl());
       }
-      leave_ActionProcess(t);
+      leave_ParamId(t);
     }
 
     template <typename Stop>
