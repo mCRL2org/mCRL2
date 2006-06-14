@@ -261,13 +261,14 @@ ATermAppl type_check_state_formula(ATermAppl state_formula, lpe::specification &
 {
   //check correctness of the state formula in state_formula using
   //the LPE specification in lpe_spec as follows:
-  //- determine type of the actions according to the definitions
-  //  in lpe_spec
-  //- determine type of the data expressions according to the
-  //  definitions in lpe_spec
-  //- check for name conflicts of data variable names in forall, exists, mu and nu quantifiers
-  //- check for monotonicity of fixpoint variables
-  //TODO in decreasing order of urgency
+  //1) determine the types of actions according to the definitions
+  //   in lpe_spec
+  //2) determine the types of data expressions according to the
+  //   definitions in lpe_spec
+  //3) check for name conflicts of data variable declarations in
+  //   forall, exists, mu and nu quantifiers
+  //4) check for monotonicity of fixpoint variables
+  //TODO in decreasing order of urgency: 1 & 2 => 3 & 4.
   return NULL;
 }
 
