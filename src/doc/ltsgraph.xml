@@ -1,35 +1,30 @@
 <?xml version="1.0"?>
 
 <!DOCTYPE refentry PUBLIC "-//OASIS//DTD DocBook XML V4.3//EN" "http://www.oasis-open.org/docbook/xml/4.3/docbookx.dtd"[
-<!ENTITY sim "<function>sim</function>">
-<!ENTITY xsim "<function>xsim</function>">
+<!ENTITY ltsgraph "<function>ltsgraph</function>">
 <!ENTITY option "<parameter>OPTION</parameter>">
 <!ENTITY infile "<parameter>INFILE</parameter>">
 <!ENTITY name "<parameter>NAME</parameter>">
 <!ENTITY inner "<parameter>inner</parameter>">
 <!ENTITY opt_h "<option>-h</option>">
-<!ENTITY opt_y "<option>-y</option>">
-<!ENTITY opt_R "<option>-R</option>">
 <!ENTITY opt_help "<option>--help</option>">
-<!ENTITY opt_dummy "<option>--dummy</option>">
-<!ENTITY opt_rewriter "<option>--rewriter</option>">
 ]>
 
-<refentry id="xsim">
+<refentry id="ltsgraph">
 
 <refmeta>
-  <refentrytitle>xsim</refentrytitle>
+  <refentrytitle>ltsgraph</refentrytitle>
   <manvolnum>1</manvolnum>
 </refmeta>
 
 <refnamediv>
-  <refname>&xsim;</refname>
-  <refpurpose>simulate LPEs</refpurpose>
+  <refname>&ltsgraph;</refname>
+  <refpurpose>draw graphs</refpurpose>
 </refnamediv>
 
 <refsynopsisdiv>
   <cmdsynopsis>
-    <command>&xsim;</command>
+    <command>&ltsgraph;</command>
     <arg choice="plain" rep="repeat"><arg choice="opt">&option;</arg></arg>
     <arg choice="opt">&infile;
     </arg>
@@ -39,50 +34,38 @@
 <refsect1>
   <title>Description</title>
   <para>
-    The &xsim; tool simulates the linear process equation (LPE) in &infile; using
-    a graphical user interface. If &infile; is not supplied the simulator starts
-    without an LPE. The interface consists of two parts. In the top
-    part every transition that is possible from the current state, is listed
-    including the changes to the state vector that would result from executing
-    that transition. A transition can be executed by double clicking it. In the
-    bottom part, the state vector of the current state is shown.
+    The &ltsgraph; tool draw a graph in &infile; using
+    a graphical user interface. If &infile; is not supplied the tool starts
+    without a drawing. The interface consists of two parts. In the left part
+    the drawing area and in the right part the options panel. Information
+    about the current draw are available in the upper right part. Information
+    about the drawing area size, the node currently selected and the file
+    currently opened are available on the status bar. 
   </para>
   <para>
-    Apart from basic simulation, &xsim; provides the following additional
+    Apart from basic draw, &ltsgraph; provides the following additional
     functionalities:
     <itemizedlist>
       <listitem>
-	<para>A trace can be loaded from a <option>.trc</option> file. Also, the
-	  action trace executed so far can be saved to a <option>.trc</option>
-	  file.</para>
+	<para>Nodes can be dragged and dropped by the left click.</para>
       </listitem>
 
       <listitem>
-	<para>Loaded traces and random traces can be played automatically.</para>
+	<para>Graphs layout can be optimize thanks to an algorithm. This is accessible
+	 from the Draw menu or the button on the right panel. Algorithm parameters can
+	 be modified on the right panel. </para>
       </listitem>
 
       <listitem>
-	<para>The action trace executed so far can be shown in a separate
-	  window.</para>
+	<para>Nodes can be fixed by the right click. Nodes fixed can still be dragged 
+	and dropped but the optimize algorithm can not move such nodes.</para>
       </listitem>
 
       <listitem>
-	<para>A plugin can be loaded dynamically. This plugin connects to the
-	  running &xsim; application and can respond to actions taken in the
-	  basic &xsim; interface. This functionality can be used by plugins
-	  that provide a visual representation of the system being simulated to
-	  keep that visual representation up-to-date with the current state in
-	  the basic &xsim; interface. Such plugins can give the user a better
-	  overview / understanding of what is going on in the system being
-	  simulated.
+	<para>A layout can be export to a PostScript or a LaTeX file.
 	</para>
       </listitem>
 
-      <listitem>
-	<para>
-	  Various options can be set.
-	</para>
-      </listitem>
     </itemizedlist>
   </para>
 </refsect1>
@@ -102,41 +85,14 @@
     </listitem>
   </varlistentry>
 
-  <varlistentry>
-    <term>&opt_y;</term>
-    <term>&opt_dummy;</term>
-    <listitem>
-      <para>
-        Replace free variables in the LPE with dummy values
-      </para>
-    </listitem>
-  </varlistentry>
-
-  <varlistentry>
-    <term>&opt_R;</term>
-    <term>&opt_rewriter;=&name;</term>
-    <listitem>
-      <para>
-	Use rewriter &name;. Default is &inner;
-      </para>
-    </listitem>
-  </varlistentry>
-
   </variablelist>
-</para>
-</refsect1>
-
-<refsect1>
-<title>See also</title>
-<para>
-For a simulator that uses a command-line interface, see the &sim; tool. 
 </para>
 </refsect1>
 
 <refsect1>
 <title>Author</title>
 <para>
-  Written by Muck van Weerdenburg and Jeroen van der Wulp. Please send all
+  Written by Didier Le Lann and Jeroen van der Wulp. Please send all
   complaints, comments and bug reports to <email>bug@mcrl2.org</email>.
 </para>
 </refsect1>
