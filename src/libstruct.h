@@ -242,6 +242,7 @@ bool gsIsActAt(ATermAppl Term);
 ATermAppl gsMakeSortIdNameBool();
 ATermAppl gsMakeSortIdNamePos();
 ATermAppl gsMakeSortIdNameNat();
+ATermAppl gsMakeSortIdNameNatPair();
 ATermAppl gsMakeSortIdNameInt();
 ATermAppl gsMakeSortIdNameReal();
 
@@ -261,6 +262,7 @@ ATermAppl gsMakeOpIdName1();
 ATermAppl gsMakeOpIdNameCDub();
 ATermAppl gsMakeOpIdName0();
 ATermAppl gsMakeOpIdNameCNat();
+ATermAppl gsMakeOpIdNameCPair();
 ATermAppl gsMakeOpIdNameCNeg();
 ATermAppl gsMakeOpIdNameCInt();
 ATermAppl gsMakeOpIdNameCReal();
@@ -296,6 +298,11 @@ ATermAppl gsMakeOpIdNameMult();
 ATermAppl gsMakeOpIdNameMultIR();
 ATermAppl gsMakeOpIdNameDiv();
 ATermAppl gsMakeOpIdNameMod();
+ATermAppl gsMakeOpIdNameFirst();
+ATermAppl gsMakeOpIdNameLast();
+ATermAppl gsMakeOpIdNameDivMod();
+ATermAppl gsMakeOpIdNameGDivMod();
+ATermAppl gsMakeOpIdNameGGDivMod();
 ATermAppl gsMakeOpIdNameExp();
 ATermAppl gsMakeOpIdNameEven();
 ATermAppl gsMakeOpIdNameEmptyList();
@@ -338,6 +345,9 @@ ATermAppl gsMakeSortIdPos(void);
 ATermAppl gsMakeSortIdNat(void);
 //Ret: Sort identifier for `Nat'
 
+ATermAppl gsMakeSortIdNatPair(void);
+//Ret: Sort identifier for `NatPair'
+
 ATermAppl gsMakeSortIdInt(void);
 //Ret: Sort identifier for `Int'
 
@@ -354,6 +364,9 @@ ATermAppl gsMakeSortExprPos(void);
 
 ATermAppl gsMakeSortExprNat(void);
 //Ret: Sort expression for `Nat'
+
+ATermAppl gsMakeSortExprNatPair(void);
+//Ret: Sort expression for `NatPair'
 
 ATermAppl gsMakeSortExprInt(void);
 //Ret: Sort expression for `Int'
@@ -460,6 +473,9 @@ ATermAppl gsMakeOpId0(void);
 ATermAppl gsMakeOpIdCNat(void);
 //Ret: Operation identifier for the creation of a natural number from a
 //     positive number
+
+ATermAppl gsMakeOpIdCPair(void);
+//Ret: Operation identifier for the creation of a pair of natural numbers
 
 ATermAppl gsMakeOpIdCNeg(void);
 //Ret: Operation identifier for the negation of a positive number
@@ -608,6 +624,34 @@ ATermAppl gsMakeOpIdMod(ATermAppl SortExpr);
 //Pre: SortExpr is Pos, Nat or Int
 //Ret: Operation identifier for `remainder after division', which has sort
 //     SortExpr -> Pos -> Nat
+
+ATermAppl gsMakeOpIdDivMod();
+//Ret: Operation identifier for `quotient and remainder after division',
+//     which has sort Pos -> Pos -> NatPair
+//     Specification:
+//     divmod(p, q) = <p div q, p mod q>
+
+ATermAppl gsMakeOpIdGDivMod();
+//Ret: Operation identifier for `generalised quotient and remainder after division',
+//     which has sort NatPair -> Bool -> Pos -> NatPair
+//     Specification:
+//       gdivmod(< m, n >, b, p)  =  if  l <  p  ->  < 2*m  , l >
+//                                   []  l >= p  ->  < 2*m+1, l-p >
+//                                   fi whr l = 2*n + b end
+
+ATermAppl gsMakeOpIdGGDivMod();
+//Ret: Operation identifier for `generalised generalised quotient and remainder after division',
+//     which has sort Nat -> Nat -> Pos -> NatPair
+//     Specification:
+//       ggdivmod(m, n, p)  =  if  m <  p  ->  < 2*n  , m >
+//                             []  m >= p  ->  < 2*n+1, m-p >
+//                             fi
+
+ATermAppl gsMakeOpIdFirst();
+//Ret: Operation identifier for 'first' of sort NatPair -> Nat
+
+ATermAppl gsMakeOpIdLast();
+//Ret: Operation identifier for 'last' of sort NatPair -> Nat
 
 ATermAppl gsMakeOpIdExp(ATermAppl SortExpr);
 //Pre: SortExpr is Pos, Nat, Int or Real
@@ -825,6 +869,10 @@ ATermAppl gsMakeDataExprCNat(ATermAppl DataExpr);
 //Pre: DataExpr is a data expression of sort Pos 
 //Ret: DataExpr as a data expression of sort Nat
 
+ATermAppl gsMakeDataExprCPair(ATermAppl DataExprFst, ATermAppl DataExprLst);
+//Pre: DataExprFst and DataExprLst are data expressions of sort Nat
+//Ret: Data expression for the pair of DataExprFst and DataExprLst
+
 ATermAppl gsMakeDataExprCNeg(ATermAppl DataExpr);
 //Pre: DataExpr is a data expression of sort Pos 
 //Ret: Data expression for the negation of DataExpr
@@ -1008,10 +1056,37 @@ ATermAppl gsMakeDataExprMod(ATermAppl DataExprLHS, ATermAppl DataExprRHS);
 //     DataExprRHS is a data expression of sort Pos, which we denote by p
 //Ret: Data expression for x mod p of sort Nat
 
+ATermAppl gsMakeDataExprDivMod(ATermAppl DataExprLHS, ATermAppl DataExprRHS);
+//Pre: DataExprLHS and DataExprRHS are data expressions of sort Pos
+//Ret: Data expression for quotient and remainder after division,
+//     of sort NatPair
+
+ATermAppl gsMakeDataExprGDivMod(ATermAppl DataExprPair, ATermAppl DataExprBool,
+  ATermAppl DataExprPos);
+//Pre: DataExprPair, DataExprBool and DataExprPos are data
+//     expressions of sort NatPair, Bool and Pos, respectively
+//Ret: Data expression for the generalised quotient and remainder
+//     after division, of sort NatPair
+
+ATermAppl gsMakeDataExprGGDivMod(ATermAppl DataExprNat1, ATermAppl DataExprNat2,
+  ATermAppl DataExprPos);
+//Pre: DataExprNat1, DataExprNat2 and DataExprPos are data
+//     expressions of sort Nat, Nat and Pos, respectively
+//Ret: Data expression for the generalised generalised quotient and remainder
+//     after division, of sort NatPair
+
 ATermAppl gsMakeDataExprExp(ATermAppl DataExprLHS, ATermAppl DataExprRHS);
 //Pre: DataExprLHS is a data expression of sort Nat or Int
 //     DataExprRHS is a data expression of sort Pos
 //Ret: Data expression for the exponentiation of DataExprLHS and DataExprRHS
+
+ATermAppl gsMakeDataExprFirst(ATermAppl DataExpr);
+//Pre: DataExpr is a data expression of sort NatPair
+//Ret: Data expression for 'first', of sort Nat
+
+ATermAppl gsMakeDataExprLast(ATermAppl DataExpr);
+//Pre: DataExpr is a data expression of sort NatPair
+//Ret: Data expression for 'last', of sort Nat
 
 ATermAppl gsMakeDataExprEven(ATermAppl DataExpr);
 //Pre: DataExpr is a data expression of sort Nat, which we denote by n
