@@ -114,6 +114,8 @@ namespace squadt {
         send_start_signal();
 
         await_message(sip::message_signal_done);
+
+        send_message(sip::message_request_termination);
       }
       else {
         /* End tool execution */

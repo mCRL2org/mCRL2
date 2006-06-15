@@ -225,14 +225,14 @@ namespace squadt {
         context_menu.Append(cmID_CLEAN, wxT("Clean"));
       }
 
+      context_menu.AppendSeparator();
+
       /* wxWidgets identifier for menu items */
       int identifier = cmID_TOOLS;
 
       main::tool_registry->by_format(t.format, bind(&project::add_to_context_menu, this, t.format, _1, &context_menu, &identifier));
 
-      context_menu.AppendSeparator();
-
-      if (!context_menu.FindItemByPosition(1 + generated * 2)->IsSeparator()) {
+      if (!context_menu.FindItemByPosition(1 + generated * 3)->IsSeparator()) {
         context_menu.InsertSeparator(1 + generated * 3);
       }
 

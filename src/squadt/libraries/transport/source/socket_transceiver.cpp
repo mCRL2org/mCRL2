@@ -194,7 +194,6 @@ std::cerr << getpid() << ": message sent  (" << d << ")\n";
         boost::shared_array < char > buffer(new char[d.size() + 1]);
 
         d.copy(buffer.get(), d.size(), 0);
-        buffer[d.size()] = 0;
 
         asio::async_write(socket, asio::buffer(buffer.get(), d.size()), 
                       boost::bind(&socket_transceiver::handle_write, this, w, buffer, _1));
@@ -217,7 +216,7 @@ std::cerr << getpid() << ": message sent  (" << d << ")\n";
         s << d.rdbuf();
 
         /* The null character is added so that the buffer on the receiving end does not have to be cleared every time */
-        boost::shared_array < char > buffer(new char[s.str().size()]);
+        boost::shared_array < char > buffer(new char[s.str().size() + 1]);
 
         s.str().copy(buffer.get(), s.str().size(), 0);
 
