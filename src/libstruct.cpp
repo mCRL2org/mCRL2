@@ -3515,7 +3515,7 @@ ATermAppl gsMakeDataExprGGDivMod(ATermAppl DataExprNat1, ATermAppl DataExprNat2,
   assert(ATisEqual(gsGetSort(DataExprNat1), gsMakeSortExprNat()));
   assert(ATisEqual(gsGetSort(DataExprNat2), gsMakeSortExprNat()));
   assert(ATisEqual(gsGetSort(DataExprPos), gsMakeSortExprPos()));
-  return gsMakeDataAppl3(gsMakeOpIdGDivMod(), DataExprNat1, DataExprNat2,
+  return gsMakeDataAppl3(gsMakeOpIdGGDivMod(), DataExprNat1, DataExprNat2,
     DataExprPos);
 }
 

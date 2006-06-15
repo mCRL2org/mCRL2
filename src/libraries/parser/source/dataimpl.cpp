@@ -1747,6 +1747,10 @@ void gsImplSortPos(TDataDecls *PDataDecls)
 
 void gsImplSortNat(TDataDecls *PDataDecls)
 {
+  //add implementation of sort NatPair, if necessary
+  if (ATindexOf(PDataDecls->Sorts, (ATerm) gsMakeSortIdNatPair(), 0) == -1) {
+    gsImplSortNatPair(PDataDecls);
+  }
   //Declare sort Nat
   PDataDecls->Sorts = ATinsert(PDataDecls->Sorts, (ATerm) gsMakeSortIdNat());
   //Declare constructors for sort Nat
@@ -1946,6 +1950,34 @@ void gsImplSortNat(TDataDecls *PDataDecls)
       (ATerm) gsMakeDataEqn(pql,nil, 
          gsMakeDataExprMult(gsMakeDataExprCNat(p), gsMakeDataExprCNat(q)),
          gsMakeDataExprCNat(gsMakeDataExprMult(p, q))),
+      //exponentiation (Pos -> Nat -> Pos)
+      (ATerm) gsMakeDataEqn(pl, nil, gsMakeDataExprExp(p, zero), one),
+      (ATerm) gsMakeDataEqn(pl, nil,
+         gsMakeDataExprExp(p, gsMakeDataExprCNat(one)), p),
+      (ATerm) gsMakeDataEqn(pql,nil, 
+         gsMakeDataExprExp(p, gsMakeDataExprCNat(gsMakeDataExprCDub(f, q))),
+         gsMakeDataExprExp(gsMakeDataExprMultIR(f, one, p, p),
+           gsMakeDataExprCNat(q))),
+      (ATerm) gsMakeDataEqn(pql,nil, 
+         gsMakeDataExprExp(p, gsMakeDataExprCNat(gsMakeDataExprCDub(t, q))),
+         gsMakeDataExprMultIR(f, one, p,
+           gsMakeDataExprExp(gsMakeDataExprMultIR(f, one, p, p),
+             gsMakeDataExprCNat(q)))),
+      //exponentiation (Nat -> Nat -> Nat)
+      (ATerm) gsMakeDataEqn(nl, nil, gsMakeDataExprExp(n, zero),
+        gsMakeDataExprCNat(one)),
+      (ATerm) gsMakeDataEqn(pl, nil,
+         gsMakeDataExprExp(zero, gsMakeDataExprCNat(p)), zero),
+      (ATerm) gsMakeDataEqn(pnl, nil,
+         gsMakeDataExprExp(gsMakeDataExprCNat(p), n),
+         gsMakeDataExprCNat(gsMakeDataExprExp(p, n))),
+      //even (Nat -> Bool)
+      (ATerm) gsMakeDataEqn(el, nil, gsMakeDataExprEven(zero), t),
+      (ATerm) gsMakeDataEqn(pl, nil,
+        gsMakeDataExprEven(gsMakeDataExprCNat(one)), f),
+      (ATerm) gsMakeDataEqn(bpl, nil,
+        gsMakeDataExprEven(gsMakeDataExprCNat(gsMakeDataExprCDub(b, p))),
+        gsMakeDataExprNot(b)),
       //quotient after division (Pos -> Pos -> Nat)
       (ATerm) gsMakeDataEqn(pql, nil,         
          gsMakeDataExprDiv(p, q),
@@ -1982,40 +2014,8 @@ void gsImplSortNat(TDataDecls *PDataDecls)
       (ATerm) gsMakeDataEqn(pl, nil, gsMakeDataExprMod(zero, p), zero),
       (ATerm) gsMakeDataEqn(pql,nil, 
          gsMakeDataExprMod(gsMakeDataExprCNat(p), q),
-         gsMakeDataExprMod(p, q)),
-      //exponentiation (Pos -> Nat -> Pos)
-      (ATerm) gsMakeDataEqn(pl, nil, gsMakeDataExprExp(p, zero), one),
-      (ATerm) gsMakeDataEqn(pl, nil,
-         gsMakeDataExprExp(p, gsMakeDataExprCNat(one)), p),
-      (ATerm) gsMakeDataEqn(pql,nil, 
-         gsMakeDataExprExp(p, gsMakeDataExprCNat(gsMakeDataExprCDub(f, q))),
-         gsMakeDataExprExp(gsMakeDataExprMultIR(f, one, p, p),
-           gsMakeDataExprCNat(q))),
-      (ATerm) gsMakeDataEqn(pql,nil, 
-         gsMakeDataExprExp(p, gsMakeDataExprCNat(gsMakeDataExprCDub(t, q))),
-         gsMakeDataExprMultIR(f, one, p,
-           gsMakeDataExprExp(gsMakeDataExprMultIR(f, one, p, p),
-             gsMakeDataExprCNat(q)))),
-      //exponentiation (Nat -> Nat -> Nat)
-      (ATerm) gsMakeDataEqn(nl, nil, gsMakeDataExprExp(n, zero),
-        gsMakeDataExprCNat(one)),
-      (ATerm) gsMakeDataEqn(pl, nil,
-         gsMakeDataExprExp(zero, gsMakeDataExprCNat(p)), zero),
-      (ATerm) gsMakeDataEqn(pnl, nil,
-         gsMakeDataExprExp(gsMakeDataExprCNat(p), n),
-         gsMakeDataExprCNat(gsMakeDataExprExp(p, n))),
-      //even (Nat -> Bool)
-      (ATerm) gsMakeDataEqn(el, nil, gsMakeDataExprEven(zero), t),
-      (ATerm) gsMakeDataEqn(pl, nil,
-        gsMakeDataExprEven(gsMakeDataExprCNat(one)), f),
-      (ATerm) gsMakeDataEqn(bpl, nil,
-        gsMakeDataExprEven(gsMakeDataExprCNat(gsMakeDataExprCDub(b, p))),
-        gsMakeDataExprNot(b))
+         gsMakeDataExprMod(p, q))
     ), PDataDecls->DataEqns);
-  //add implementation of sort NatPair, if necessary
-  if (ATindexOf(PDataDecls->Sorts, (ATerm) gsMakeSortIdNatPair(), 0) == -1) {
-    gsImplSortNatPair(PDataDecls);
-  }
 }
 
 void gsImplSortNatPair(TDataDecls *PDataDecls)
