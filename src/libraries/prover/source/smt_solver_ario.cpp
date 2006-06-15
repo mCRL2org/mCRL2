@@ -12,6 +12,25 @@ using namespace redi;
 // Class SMT_Solver_Ario --------------------------------------------------------------------------
   // Class SMT_Solver_Ario - Functions declared public --------------------------------------------
 
+    SMT_Solver_Ario::SMT_Solver_Ario() {
+      string v_string_err;
+
+      pstream v_pstream("ario", pstreams::pstdin | pstreams::pstderr | pstreams::pstdout);
+      getline(v_pstream.err(), v_string_err);
+      if (v_string_err == "....................................") {
+        gsVerboseMsg("The SMT solver Ario is available.\n");
+      } else {
+        gsErrorMsg(
+          "The SMT solver Ario is not available.\n"
+          "Consult the manual of the tool you are using for instructions on how to obtain Ario.\n"
+        );
+        exit(1);
+      }
+      v_pstream.close();
+    }
+
+    // --------------------------------------------------------------------------------------------
+
     bool SMT_Solver_Ario::is_satisfiable(ATermList a_formula) {
       translate(a_formula);
 
@@ -20,15 +39,14 @@ using namespace redi;
 
       string v_string_out;
       getline(v_pstream.out(), v_string_out);
-      cout << "\n\nopgevangen via stdout: " << v_string_out << endl;
       if (v_string_out == "unsat") {
-        cout << "Unsatisfiable\n\n" << endl;
+        gsVerboseMsg("The formula is unsatisfiable.\n");
         return false;
       } else if (v_string_out == "sat") {
-        cout << "Satisfiable\n\n" << endl;
+        gsVerboseMsg("The formula is satisfiable.\n");
         return true;
       } else {
-        gsErrorMsg("Ario cannot determine whether this formula is satisfiable or not.\n");
+        gsErrorMsg("Ario reported an error while solving the formula.\n");
         exit(1);
       }
     }

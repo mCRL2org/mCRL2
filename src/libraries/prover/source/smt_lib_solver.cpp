@@ -84,7 +84,7 @@ using namespace std;
               v_sort = 0;
             }
             if (f_sort_info.is_sort_arrow(v_sort_domain)) {
-              gsErrorMsg("Function is of an unacceptable type.\n");
+              gsErrorMsg("Function %P cannot be translated to the SMT-LIB format.\n", v_operator);
               exit(1);
             }
             if (f_sort_info.is_sort_int(v_sort_domain)) {
@@ -220,7 +220,8 @@ using namespace std;
       f_predicates_notes = "";
       if (f_bool2pred) {
         f_predicates_notes =
-          "  :notes \"bool2pred was introduced, because the smt-lib format cannot deal with booleans directly.\"\n";
+          "  :notes \"bool2pred was introduced, because the smt-lib format cannot deal\"\n"
+          "  :notes \"with boolean variables or functions returning boolean values.\"\n";
       }
     }
 
@@ -570,9 +571,9 @@ using namespace std;
         translate_nat_constant(a_clause);
       } else if (f_expression_info.is_pos_constant(a_clause)) {
         translate_pos_constant(a_clause);
-      } else if (f_expression_info.is_true(a_clause)) {
+      } else if (f_expression_info.is_true(a_clause) && a_expecting_predicate) {
         translate_true();
-      } else if (f_expression_info.is_false(a_clause)) {
+      } else if (f_expression_info.is_false(a_clause) && a_expecting_predicate) {
         translate_false();
       } else if (f_expression_info.is_variable(a_clause)) {
         if (a_expecting_predicate) {
@@ -593,8 +594,7 @@ using namespace std;
       } else if (f_expression_info.is_constant(a_clause)) {
         translate_constant(a_clause);
       } else {
-        gsprintf("Clause: %T\n", a_clause);
-        gsErrorMsg("Unable to recognize the current clause.\n");
+        gsErrorMsg("Unable to handle the current clause (%T).\n", a_clause);
         exit(1);
       }
     }
@@ -648,7 +648,7 @@ using namespace std;
       f_bool2pred = false;
 
       f_formula = "  :formula (and";
-      gsprintf("Formula: %P\n", a_formula);
+      gsVerboseMsg("Formula to be solved: %P\n", a_formula);
       while (!ATisEmpty(a_formula)) {
         v_clause = ATAgetFirst(a_formula);
         a_formula = ATgetNext(a_formula);
@@ -669,7 +669,7 @@ using namespace std;
         "(benchmark nameless\n" + f_sorts_notes + f_operators_notes + f_predicates_notes +
         f_extrasorts + f_operators_extrafuns + f_variables_extrafuns + f_extrapreds + f_formula +
         ")\n";
-      gsprintf(f_benchmark.c_str());
+      gsVerboseMsg("Corresponding benchmark:\n%s", f_benchmark.c_str());
     }
 
   // Class SMT_LIB_Solver - Functions declared public ---------------------------------------------

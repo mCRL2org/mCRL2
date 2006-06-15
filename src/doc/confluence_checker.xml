@@ -12,6 +12,7 @@
 <!ENTITY type_char_pointer "<type>char*</type>">
 <!ENTITY type_aterm "<type>ATerm</type>">
 <!ENTITY type_aterm_appl "<type>ATermAppl</type>">
+<!ENTITY type_smt_solver_type "<type>SMT_Solver_Type</type>">
 <!ENTITY type_rewrite_strategy "<type>RewriteStrategy</type>">
 
 <!ENTITY confluence_checker_constructor "<function>Confluence_Checker::Confluence_Checker</function>">
@@ -19,13 +20,15 @@
 <!ENTITY confluence_checker_check_confluence_and_mark "<function>Confluence_Checker::check_confluence_and_mark</function>">
 
 <!ENTITY par_rewrite_strategy "<parameter>a_rewrite_strategy</parameter>">
+<!ENTITY par_path_eliminator "<parameter>a_path_eliminator</parameter>">
+<!ENTITY par_solver_type "<parameter>a_solver_type</parameter>">
 <!ENTITY par_time_limit "<parameter>a_time_limit</parameter>">
 <!ENTITY par_lpe "<parameter>a_lpe</parameter>">
 <!ENTITY par_no_marking "<parameter>a_no_marking</parameter>">
 <!ENTITY par_check_all "<parameter>a_check_all</parameter>">
 <!ENTITY par_counter_example "<parameter>a_counter_example</parameter>">
 <!ENTITY par_dot_file_name "<parameter>a_dot_file_name</parameter>">
-<!ENTITY par_invariant "<parameter>a_inariant</parameter>">
+<!ENTITY par_invariant "<parameter>a_invariant</parameter>">
 <!ENTITY par_summand_number "<parameter>a_summand_number</parameter>">
 
 <!ENTITY strat_jitty "<constant>GS_REWR_JITTY</constant>">
@@ -51,7 +54,9 @@
   <funcdef>&confluence_checker_constructor;</funcdef>
   <paramdef>
     &type_rewrite_strategy; &par_rewrite_strategy; = &strat_jitty;,
-    &type_int; &par_time_limit; = 0,
+    &type_int; &par_time_limit;,
+    &type_bool; &par_path_eliminator;,
+    &type_smt_solver_type; &par_solver_type;,
     &type_aterm_appl; &par_lpe;,
     &type_bool; &par_no_marking;,
     &type_bool; &par_check_all;,
@@ -149,7 +154,8 @@
 <para>
   The class &class_confluence_checker; uses an instance of the class &class_bdd_prover; and an instance of the class &class_disjointness_checker;
   to determine which tau-summands of an mCRL2 LPE are confluent. Confluent tau's will be marked as ctau. The constructor
-  &confluence_checker_constructor; initializes the BDD based prover with the parameters &par_rewrite_strategy; and &par_time_limit;, and the data
+  &confluence_checker_constructor; initializes the BDD based prover with the parameters &par_rewrite_strategy;, &par_path_eliminator;,
+  &par_solver_type; and &par_time_limit;, and the data
   specification of the LPE passed as parameter &par_lpe;. In case the parameter &par_dot_file_name; differs from 0, a dot file of the resulting
   BDD is written for summands that could not be proven confluent.
   The function &confluence_checker_check_confluence_and_mark; returns an LPE with all confluent tau's marked as ctau, unless the parameter
@@ -160,6 +166,8 @@
   When checking if a tau-summand is confluent, a confluence condition as described above will be created for each of the summands. If the parameter
   &par_check_all; is set, all of these confluence conditions will be checked. If the parameter is not set, the checking will stop as soon as one
   condition is encountered that is not a tautology.
+  When the parameter &par_dot_file_name; differs from 0, a .dot file of the BDD of the confluence condition will be saved for each pair of summands
+  that cannot be proven confluent. The string passed as parameter &par_dot_file_name; is used as a prefix for those files.
 </para>
 
 </refsect1>

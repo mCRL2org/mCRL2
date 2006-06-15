@@ -22,6 +22,8 @@ class Confluence_Checker {
     char* f_dot_file_name;
     int f_number_of_summands;
     int* f_commutes;
+    void save_dot_file(int a_summand_number_1, int a_summand_number_2);
+    void print_counter_example();
     ATermAppl check_confluence_and_mark_summand(ATermAppl a_invariant, ATermAppl a_summand, int a_summand_number, bool& a_is_marked);
   public:
     Confluence_Checker(

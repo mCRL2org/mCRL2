@@ -20,6 +20,7 @@
       char* f_lpe_file_name;
       bool f_counter_example;
       bool f_witness;
+      char* f_dot_file_name;
       RewriteStrategy f_strategy;
       int f_time_limit;
       bool f_path_eliminator;
@@ -53,11 +54,15 @@
         "  -l, --lpe=LPE                   Use the mCRL2 LPE as found in LPE as input.\n"
         "  -c, --counter-example           Give a valuation for which the current\n"
         "                                  formula does not hold, in case the current\n"
-        "                                  formulas is neither a contradiction nor a\n"
+        "                                  formula is neither a contradiction nor a\n"
         "                                  tautology.\n"
         "  -w, --witness                   Give a valuation for which the current\n"
         "                                  formula holds, in case the current formula\n"
         "                                  is neither a contradiction nor a tautology.\n"
+        "  -p, --print-dot=PREFIX          Save a .dot file of the resulting BDD if it\n"
+        "                                  is impossible to determine whether a formula\n"
+        "                                  is a contradiction or a tautology. PREFIX\n"
+        "                                  will be used as prefix of the output files.\n"
         "  -h, --help                      Display this help and terminate.\n"
         "      --version                   Display version information and terminate.\n"
         "  -q, --quiet                     Do not display warning messages.\n"
@@ -104,6 +109,7 @@
       f_lpe_file_name = 0;
       f_counter_example = false;
       f_witness = false;
+      f_dot_file_name = 0;
       f_strategy = GS_REWR_JITTY;
       f_time_limit = 0;
       f_path_eliminator = false;
@@ -119,13 +125,14 @@
     // --------------------------------------------------------------------------------------------
 
     void LPE_Form_Check::get_options(int a_argc, char* a_argv[]) {
-      char* v_short_options = "f:l:cwhqvdr:t:z:";
+      char* v_short_options = "f:l:cwp:hqvdr:t:z:";
 
       struct option v_long_options[] = {
         {"formulas",         required_argument, 0, 'f'},
         {"lpe",              required_argument, 0, 'l'},
         {"counter-example",  no_argument,       0, 'c'},
         {"witness",          no_argument,       0, 'w'},
+        {"print-dot",        required_argument, 0, 'p'},
         {"help",             no_argument,       0, 'h'},
         {"version",          no_argument,       0, 0x1},
         {"quiet",            no_argument,       0, 'q'},
@@ -153,6 +160,9 @@
             break;
           case 'w':
             f_witness = true;
+            break;
+          case 'p':
+            f_dot_file_name = strdup(optarg);
             break;
           case 'h':
             print_help();
@@ -233,7 +243,9 @@
         exit(1);
       } else {
         ATermAppl v_data_equations = ATAgetArgument(v_lpe, 3);
-        Formula_Checker v_formula_checker(f_strategy, f_time_limit, f_path_eliminator, f_solver_type, v_data_equations, f_counter_example, f_witness);
+        Formula_Checker v_formula_checker(
+          f_strategy, f_time_limit, f_path_eliminator, f_solver_type, v_data_equations, f_counter_example, f_witness, f_dot_file_name
+        );
 
         v_formula_checker.check_formulas(v_formulas);
       }

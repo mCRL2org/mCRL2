@@ -26,6 +26,7 @@
       bool f_simplify_all;
       bool f_all_violations;
       bool f_counter_example;
+      char* f_dot_file_name;
       bool f_path_eliminator;
       SMT_Solver_Type f_solver_type;
       RewriteStrategy f_strategy;
@@ -74,12 +75,17 @@
         "                                  instead of just eliminating the summands\n"
         "                                  whose conditions in conjunction with the\n"
         "                                  invariant are contradictions.\n"
-        "  -y, --all-violations            Do not terminate as soon as a violation of\n"
-        "                                  the invariant is found, but report all\n"
-        "                                  violations instead.\n"
+        "  -y, --all-violations            Do not terminate as soon as a single\n"
+        "                                  violation of the invariant is found, but\n"
+        "                                  report all violations instead.\n"
         "  -c, --counter-example           Display a valuation indicating why the\n"
-        "                                  invariant is violated, for all found\n"
-        "                                  violations of the invariant.\n"
+        "                                  invariant could possibly be violated if it is\n"
+        "                                  uncertain whether a summand violates the\n"
+        "                                  invariant.\n"
+        "  -p, --print-dot=PREFIX          Save a .dot file of the resulting BDD if it\n"
+        "                                  is impossible to determine whether a summand\n"
+        "                                  violates the invariant. PREFIX will be used\n"
+        "                                  as prefix of the output files.\n"
         "  -h, --help                      Display this help and terminate.\n"
         "      --version                   Display version information and terminate.\n"
         "  -q, --quiet                     Do not display warning messages.\n"
@@ -131,6 +137,7 @@
       f_simplify_all = false;
       f_all_violations = false;
       f_counter_example = false;
+      f_dot_file_name = 0;
       f_strategy = GS_REWR_JITTY;
       f_time_limit = 0;
       f_path_eliminator = false;
@@ -146,7 +153,7 @@
     // --------------------------------------------------------------------------------------------
 
     void LPE_Inv_Elm::get_options(int a_argc, char* a_argv[]) {
-      char* v_short_options = "i:l:o:s:neaychqvdr:t:z:";
+      char* v_short_options = "i:l:o:s:neaycp:hqvdr:t:z:";
 
       f_tool_command = a_argv[0];
 
@@ -160,6 +167,7 @@
         {"simplify-all",     no_argument,       0, 'a'},
         {"all-violation",    no_argument,       0, 'y'},
         {"counter-example",  no_argument,       0, 'c'},
+        {"print-dot",        required_argument, 0, 'p'},
         {"help",             no_argument,       0, 'h'},
         {"version",          no_argument,       0, 0x1},
         {"quiet",            no_argument,       0, 'q'},
@@ -206,6 +214,9 @@
             break;
           case 'c':
             f_counter_example = true;
+            break;
+          case 'p':
+            f_dot_file_name = strdup(optarg);
             break;
           case 'h':
             print_help();
@@ -296,7 +307,9 @@
 
     bool LPE_Inv_Elm::check_invariant() {
       if (!f_no_check) {
-        Invariant_Checker v_invariant_checker(f_strategy, f_time_limit, f_path_eliminator, f_solver_type, f_lpe, f_counter_example, f_all_violations);
+        Invariant_Checker v_invariant_checker(
+          f_strategy, f_time_limit, f_path_eliminator, f_solver_type, f_lpe, f_counter_example, f_all_violations, f_dot_file_name
+        );
 
         return v_invariant_checker.check_invariant(f_invariant);
       } else {

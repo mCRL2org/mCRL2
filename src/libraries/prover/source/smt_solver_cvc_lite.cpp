@@ -12,6 +12,25 @@ using namespace redi;
 // Class SMT_Solver_CVC_Lite ----------------------------------------------------------------------
   // Class SMT_Solver_CVC_Lite - Functions declared public ----------------------------------------
 
+    SMT_Solver_CVC_Lite::SMT_Solver_CVC_Lite() {
+      string v_string_out;
+
+      pstream v_pstream("cvcl -h", pstreams::pstdin | pstreams::pstderr | pstreams::pstdout);
+      getline(v_pstream.out(), v_string_out);
+      if (v_string_out == "Usage: cvcl [options]") {
+        gsVerboseMsg("The SMT solver CVC Lite is available.\n");
+      } else {
+        gsErrorMsg(
+          "The SMT solver CVC Lite is not available.\n"
+          "Consult the manual of the tool you are using for instructions on how to obtain CVC Lite.\n"
+        );
+        exit(1);
+      }
+      v_pstream.close();
+    }
+
+    // --------------------------------------------------------------------------------------------
+
     bool SMT_Solver_CVC_Lite::is_satisfiable(ATermList a_formula) {
       translate(a_formula);
 
@@ -20,18 +39,17 @@ using namespace redi;
 
       string v_string_out;
       getline(v_pstream.out(), v_string_out);
-      cout << "\n\nopgevangen via stdout: " << v_string_out << endl;
       if (v_string_out == "Unsatisfiable.") {
-        cout << "Unsatisfiable\n\n" << endl;
+        gsVerboseMsg("The formula is unsatisfiable\n");
         return false;
       } else if (v_string_out == "Satisfiable.") {
-        cout << "Satisfiable\n\n" << endl;
+        gsVerboseMsg("The formula is satisfiable\n");
         return true;
       } else if (v_string_out == "Unknown.") {
-        cout << "Unknown\n\n" << endl;
+        gsVerboseMsg("CVC Lite cannot determine whether this formula is satisfiable or not.\n");
         return true;
       } else {
-        gsErrorMsg("CVC Lite cannot determine whether this formula is satisfiable or not.\n");
+        gsErrorMsg("CVC Lite reported an error while solving the formula.\n");
         exit(1);
       }
     }

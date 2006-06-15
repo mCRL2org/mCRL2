@@ -149,7 +149,9 @@
       if (!f_processed) {
         build_bdd();
         f_bdd = f_rewriter->fromRewriteFormat(f_internal_bdd);
+        gsVerboseMsg("Simplifying the BDD:\n");
         f_bdd = f_bdd_simplifier->simplify(f_bdd);
+        gsVerboseMsg("Resulting BDD: %P\n", f_bdd);
         if (f_bdd_info.is_true(f_bdd)) {
           f_tautology = answer_yes;
           f_contradiction = answer_no;

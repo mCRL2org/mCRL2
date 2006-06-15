@@ -67,8 +67,9 @@
     </listitem>
   </itemizedlist>
   An instance of the class &class_disjointness_checker; is created using the constructor &disjointness_checker_constructor;. The parameter
-  &par_process_equations; is used to determine the set of used variables and the set of changed variables for all summands. The function
-  &disjointness_checker_disjoint; indicates whether two summands are syntactically disjoint.
+  &par_process_equations; is used to pass the summands to be checked for disjointness. The function
+  &disjointness_checker_disjoint; indicates whether the two summands with numbers &par_summand_number_1; and &par_summand_number_2; are
+  syntactically disjoint.
 </para>
 </refsect1>
 

@@ -13,6 +13,7 @@
 <!ENTITY type_int "<type>int</type>">
 <!ENTITY type_atermappl "<type>ATermAppl</type>">
 <!ENTITY type_rewrite_strategy "<type>RewriteStrategy</type>">
+<!ENTITY type_smt_solver_type "<type>SMT_Solver_Type</type>">
 
 <!ENTITY prover_set_formula "<function>Prover::set_formula</function>">
 
@@ -26,13 +27,16 @@
 
 <!ENTITY par_equations "<parameter>a_equations</parameter>">
 <!ENTITY par_rewrite_strategy "<parameter>a_rewrite_strategy</parameter>">
+<!ENTITY par_path_eliminator "<parameter>a_path_eliminator</parameter>">
+<!ENTITY par_solver_type "<parameter>a_solver_type</parameter>">
 <!ENTITY par_time_limit "<parameter>a_time_limit</parameter>">
 <!ENTITY par_reverse "<parameter>a_reverse</parameter>">
 <!ENTITY par_full "<parameter>a_full</parameter>">
 
-<!ENTITY strat_jitty "<constant>GS_REWR_JITTY</constant>">
-
+<!ENTITY const_strat_jitty "<constant>GS_REWR_JITTY</constant>">
+<!ENTITY const_solver_type_ario "<constant>solver_type_ario</constant>">
 <!ENTITY const_true "<constant>true</constant>">
+<!ENTITY const_false "<constant>false</constant>">
 ]>
 
 <refentry id="bdd_prover">
@@ -53,8 +57,10 @@
   <funcdef>&bdd_prover_constructor;</funcdef>
   <paramdef>
     &type_atermappl; &par_equations;,
-    &type_rewrite_strategy; &par_rewrite_strategy; = &strat_jitty;,
+    &type_rewrite_strategy; &par_rewrite_strategy; = &const_strat_jitty;,
     &type_int; &par_time_limit; = 0,
+    &type_bool; &par_path_eliminator; = &const_false;,
+    &type_smt_solver_type; &par_solver_type; = &const_solver_type_ario;,
     &type_bool; &par_reverse; = &const_true;,
     &type_bool; &par_full; = &const_true;
   </paramdef>
@@ -89,9 +95,12 @@
 <refsect1>
 <title>Description</title>
 <para>
-  The class &class_bdd_prover; implements the abstract functions of its base class &class_prover;. An entity of the class &class_bdd_prover; uses
-  binary decision diagrams to determine if a given formula is a tautology or a contradiction. The resulting BDD can be retreived using the function
-  &bdd_prover_get_bdd;.
+  The class &class_bdd_prover; implements the abstract functions of its base class &class_prover;. Those functions are described in the manual
+  for the class &class_prover;. An entity of the class &class_bdd_prover; uses binary decision diagrams to determine if a given formula is a
+  tautology or a contradiction. The resulting BDD can be retreived using the function &bdd_prover_get_bdd;.
+  The constructor has two additional parameters, &par_path_eliminator; and &par_solver_type;. The parameter &par_path_eliminator; can be used to
+  enable the use of an SMT solver to eliminate inconsistent paths from BDD's. The parameter &par_solver_type; can be used to indicate which SMT
+  solver should be used for this task.
 </para>
 </refsect1>
 

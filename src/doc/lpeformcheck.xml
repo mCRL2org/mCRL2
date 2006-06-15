@@ -5,22 +5,27 @@
 <!ENTITY option "<parameter>OPTION</parameter>">
 <!ENTITY formulas "<parameter>FORMULAS</parameter>">
 <!ENTITY lpe "<parameter>LPE</parameter>">
+<!ENTITY prefix "<parameter>PREFIX</parameter>">
 <!ENTITY strategy "<parameter>STRATEGY</parameter>">
 <!ENTITY seconds "<parameter>SECONDS</parameter>">
+<!ENTITY solver "<parameter>SOLVER</parameter>">
 <!ENTITY opt_f "<option>-f</option>">
 <!ENTITY opt_l "<option>-l</option>">
 <!ENTITY opt_c "<option>-c</option>">
 <!ENTITY opt_w "<option>-w</option>">
+<!ENTITY opt_p "<option>-p</option>">
 <!ENTITY opt_h "<option>-h</option>">
 <!ENTITY opt_q "<option>-q</option>">
 <!ENTITY opt_v "<option>-v</option>">
 <!ENTITY opt_d "<option>-d</option>">
 <!ENTITY opt_r "<option>-r</option>">
 <!ENTITY opt_t "<option>-t</option>">
+<!ENTITY opt_z "<option>-z</option>">
 <!ENTITY opt_formulas "<option>--formulas</option>">
 <!ENTITY opt_lpe "<option>--lpe</option>">
 <!ENTITY opt_counter_example "<option>--counter-example</option>">
 <!ENTITY opt_witness "<option>--witness</option>">
+<!ENTITY opt_print_dot "<option>--print-dot</option>">
 <!ENTITY opt_help "<option>--help</option>">
 <!ENTITY opt_version "<option>--version</option>">
 <!ENTITY opt_quiet "<option>--quiet</option>">
@@ -28,10 +33,13 @@
 <!ENTITY opt_debug "<option>--debug</option>">
 <!ENTITY opt_rewrite_strategy "<option>--rewrite-strategy</option>">
 <!ENTITY opt_time_limit "<option>--time-limit</option>">
-<!ENTITY strat_inner_string "<constant>inner</constant>">
-<!ENTITY strat_innerc_string "<constant>innerc</constant>">
-<!ENTITY strat_jitty_string "<constant>jitty</constant>">
-<!ENTITY strat_jittyc_string "<constant>jittyc</constant>">
+<!ENTITY opt_smt_solver "<option>--smt-solver</option>">
+<!ENTITY strat_inner_string "<constant>'inner'</constant>">
+<!ENTITY strat_innerc_string "<constant>'innerc'</constant>">
+<!ENTITY strat_jitty_string "<constant>'jitty'</constant>">
+<!ENTITY strat_jittyc_string "<constant>'jittyc'</constant>">
+<!ENTITY solver_ario_string "<constant>'ario'</constant>">
+<!ENTITY solver_cvc_lite_string "<constant>'cvc-lite'</constant>">
 <!ENTITY stdin "<constant>stdin</constant>">
 ]>
 
@@ -80,6 +88,13 @@
     formulas are indeed tautologies or contradictions.
   </para>
 
+  <para>
+    The &lpeformcheck; tool uses a BDD based prover to check the formulas. In some cases
+    it may be useful to use an SMT solver to assist the prover. The SMT solver can further
+    reduce BDDs by removing inconsistent paths. A specific SMT solver can be chosen using
+    the option &opt_smt_solver;=&solver;.
+  </para>
+
 </refsect1>
 
 <refsect1>
@@ -115,7 +130,7 @@
       <para>
         Give a valuation for which the current
         formula does not hold, in case the current
-        formulas is neither a contradiction nor a
+        formula is neither a contradiction nor a
         tautology
       </para>
     </listitem>
@@ -129,6 +144,18 @@
         Give a valuation for which the current
         formula holds, in case the current formula
         is neither a contradiction nor a tautology
+      </para>
+    </listitem>
+  </varlistentry>
+
+  <varlistentry>
+    <term>&opt_p;</term>
+    <term>&opt_print_dot;=&prefix;</term>
+    <listitem>
+      <para>
+        Save a .dot file of the resulting BDD if
+        it is impossible to determine whether a
+        formula is a contradiction or a tautology
       </para>
     </listitem>
   </varlistentry>
@@ -211,6 +238,7 @@
             </para>
           </listitem>
         </itemizedlist>
+        By default, the jitty rewrite strategy is used
       </para>
     </listitem>
   </varlistentry>
@@ -222,6 +250,29 @@
       <para>
         Spend at most the specified number of &seconds; on proving
         a single formula
+      </para>
+    </listitem>
+  </varlistentry>
+
+  <varlistentry>
+    <term>&opt_z;</term>
+    <term>&opt_smt_solver;=&solver;</term>
+    <listitem>
+      <para>
+        Use the specified &solver; to remove inconsistent paths from BDDs:
+        <itemizedlist spacing='compact'>
+          <listitem>
+            <para>
+              &solver_ario_string; for the SMT solver Ario
+            </para>
+          </listitem>
+          <listitem>
+            <para>
+              &solver_cvc_lite_string; for the SMT solver CVC Lite
+            </para>
+          </listitem>
+        </itemizedlist>
+        By default, no path elimination is applied
       </para>
     </listitem>
   </varlistentry>

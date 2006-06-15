@@ -224,17 +224,36 @@
 // Class Confluence_Checker -----------------------------------------------------------------------
   // Class Confluence_Checker - Functions declared private ----------------------------------------
 
+    void Confluence_Checker::save_dot_file(int a_summand_number_1, int a_summand_number_2) {
+      char* v_file_name;
+      char* v_file_name_suffix;
+
+      if (f_dot_file_name != 0) {
+        v_file_name_suffix = (char*) malloc((number_of_digits(a_summand_number_1) + number_of_digits(a_summand_number_2) + 7) * sizeof(char));
+        sprintf(v_file_name_suffix, "-%d-%d.dot", a_summand_number_1, a_summand_number_2);
+        v_file_name = (char*) malloc((strlen(f_dot_file_name) + strlen(v_file_name_suffix) + 1) * sizeof(char));
+        strcpy(v_file_name, f_dot_file_name);
+        strcat(v_file_name, v_file_name_suffix);
+        f_bdd2dot.output_bdd(f_bdd_prover.get_bdd(), v_file_name);
+      }
+    }
+
+    // --------------------------------------------------------------------------------------------
+
+    void Confluence_Checker::print_counter_example() {
+      if (f_counter_example) {
+        gsfprintf(stderr, "\n  Counter-example: %P\n", f_bdd_prover.get_counter_example());
+      }
+    }
+
+    // --------------------------------------------------------------------------------------------
+
     ATermAppl Confluence_Checker::check_confluence_and_mark_summand(ATermAppl a_invariant, ATermAppl a_summand, int a_summand_number, bool& a_is_marked) {
       ATermList v_variables = ATLgetArgument(ATAgetArgument(f_lpe, 5), 1);
       ATermList v_summands = ATLgetArgument(ATAgetArgument(f_lpe, 5), 2);
-      ATermAppl v_summand;
-      ATermAppl v_marked_summand;
-      ATermAppl v_multi_actions_or_delta;
-      ATermAppl v_condition;
+      ATermAppl v_summand, v_marked_summand, v_multi_actions_or_delta, v_condition;
       int v_summand_number = 1;
       bool v_is_confluent = true;
-      char* v_file_name;
-      char* v_file_name_suffix;
 
       while (!ATisEmpty(v_summands) && (v_is_confluent || f_check_all)) {
         v_summand = ATAgetFirst(v_summands);
@@ -277,17 +296,8 @@
             } else {
               gsfprintf(stderr, "Not confluent with summand %d.", v_summand_number);
             }
-            if (f_counter_example) {
-              gsfprintf(stderr, "\n  Counter-example: %P\n", f_bdd_prover.get_counter_example());
-            }
-            if (f_dot_file_name != 0) {
-              v_file_name_suffix = (char*) malloc((number_of_digits(a_summand_number) + number_of_digits(v_summand_number) + 7) * sizeof(char));
-              sprintf(v_file_name_suffix, "-%d-%d.dot", a_summand_number, v_summand_number);
-              v_file_name = (char*) malloc((strlen(f_dot_file_name) + strlen(v_file_name_suffix) + 1) * sizeof(char));
-              strcpy(v_file_name, f_dot_file_name);
-              strcat(v_file_name, v_file_name_suffix);
-              f_bdd2dot.output_bdd(f_bdd_prover.get_bdd(), v_file_name);
-            }
+            print_counter_example();
+            save_dot_file(a_summand_number, v_summand_number);
           }
         } else {
           gsfprintf(stderr, "!", v_summand_number);

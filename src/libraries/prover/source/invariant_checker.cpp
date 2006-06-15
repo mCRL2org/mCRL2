@@ -10,6 +10,35 @@
 // Class Invariant_Checker ------------------------------------------------------------------------
   // Class Invariant_Checker - Functions declared private -----------------------------------------
 
+    void Invariant_Checker::print_counter_example() {
+      if (f_counter_example) {
+        gsfprintf(stderr, "  Counter-example: %P\n", f_bdd_prover.get_counter_example());
+      }
+    }
+
+    // --------------------------------------------------------------------------------------------
+
+    void Invariant_Checker::save_dot_file(int a_summand_number) {
+      char* v_file_name;
+      char* v_file_name_suffix;
+
+      if (f_dot_file_name != 0) {
+        if (a_summand_number == -1) {
+          v_file_name_suffix = (char*) malloc(10 * sizeof(char));
+          v_file_name_suffix = "-init.dot";
+        } else {
+          v_file_name_suffix = (char*) malloc((number_of_digits(a_summand_number) + 6) * sizeof(char));
+          sprintf(v_file_name_suffix, "-%d.dot", a_summand_number);
+        }
+        v_file_name = (char*) malloc((strlen(f_dot_file_name) + strlen(v_file_name_suffix) + 1) * sizeof(char));
+        strcpy(v_file_name, f_dot_file_name);
+        strcat(v_file_name, v_file_name_suffix);
+        f_bdd2dot.output_bdd(f_bdd_prover.get_bdd(), v_file_name);
+      }
+    }
+
+    // --------------------------------------------------------------------------------------------
+
     bool Invariant_Checker::check_init(ATermAppl a_invariant) {
       ATermList v_assignments = ATLgetArgument(f_init, 1);
       ATermAppl v_assignment;
@@ -32,9 +61,8 @@
         return true;
       } else {
         if (f_bdd_prover.is_contradiction() != answer_yes) {
-          if (f_counter_example) {
-            gsfprintf(stderr, "  Counter-example: %P\n", f_bdd_prover.get_counter_example());
-          }
+          print_counter_example();
+          save_dot_file(-1);
         }
         return false;
       }
@@ -71,9 +99,8 @@
       } else {
         gsfprintf(stderr, "The invariant does not hold for summand %d.\n", a_summand_number);
         if (f_bdd_prover.is_contradiction() != answer_yes) {
-          if (f_counter_example) {
-            gsfprintf(stderr, "  Counter-example: %P\n", f_bdd_prover.get_counter_example());
-          }
+          print_counter_example();
+          save_dot_file(a_summand_number);
         }
         return false;
       }
@@ -100,7 +127,7 @@
 
     Invariant_Checker::Invariant_Checker(
       RewriteStrategy a_rewrite_strategy, int a_time_limit, bool a_path_eliminator, SMT_Solver_Type a_solver_type, ATermAppl a_lpe,
-      bool a_counter_example, bool a_all
+      bool a_counter_example, bool a_all, char* a_dot_file_name
     ):
       f_bdd_prover(ATAgetArgument(a_lpe, 3), a_rewrite_strategy, a_time_limit, a_path_eliminator, a_solver_type)
     {
@@ -108,6 +135,11 @@
       f_summands = ATLgetArgument(ATAgetArgument(a_lpe, 5), 2);
       f_counter_example = a_counter_example;
       f_all = a_all;
+      if (a_dot_file_name == 0) {
+        f_dot_file_name = 0;
+      } else {
+        f_dot_file_name = strdup(a_dot_file_name);
+      }
     }
 
     // --------------------------------------------------------------------------------------------

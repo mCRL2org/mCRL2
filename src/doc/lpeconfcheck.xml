@@ -10,6 +10,7 @@
 <!ENTITY prefix "<parameter>PREFIX</parameter>">
 <!ENTITY strategy "<parameter>STRATEGY</parameter>">
 <!ENTITY seconds "<parameter>SECONDS</parameter>">
+<!ENTITY solver "<parameter>SOLVER</parameter>">
 <!ENTITY opt_i "<option>-i</option>">
 <!ENTITY opt_s "<option>-s</option>">
 <!ENTITY opt_n "<option>-n</option>">
@@ -23,6 +24,7 @@
 <!ENTITY opt_d "<option>-d</option>">
 <!ENTITY opt_r "<option>-r</option>">
 <!ENTITY opt_t "<option>-t</option>">
+<!ENTITY opt_z "<option>-z</option>">
 <!ENTITY opt_invariant "<option>--invariant</option>">
 <!ENTITY opt_summand "<option>--summand</option>">
 <!ENTITY opt_no_check "<option>--no-check</option>">
@@ -37,10 +39,13 @@
 <!ENTITY opt_debug "<option>--debug</option>">
 <!ENTITY opt_rewrite_strategy "<option>--rewrite-strategy</option>">
 <!ENTITY opt_time_limit "<option>--time-limit</option>">
+<!ENTITY opt_smt_solver "<option>--smt-solver</option>">
 <!ENTITY strat_inner_string "<constant>inner</constant>">
 <!ENTITY strat_innerc_string "<constant>innerc</constant>">
 <!ENTITY strat_jitty_string "<constant>jitty</constant>">
 <!ENTITY strat_jittyc_string "<constant>jittyc</constant>">
+<!ENTITY solver_ario_string "<constant>'ario'</constant>">
+<!ENTITY solver_cvc_lite_string "<constant>'cvc-lite'</constant>">
 <!ENTITY stdin "<constant>stdin</constant>">
 <!ENTITY stdout "<constant>stdout</constant>">
 ]>
@@ -94,8 +99,8 @@
       =>
       (ci(gj(d, ej), ei) /\ cj(gi(d, ei), ej) /\ fi(d, ei) == fi(gj(d, ej), ei) /\ gi(gj(d, ej), ei) == gj(gi(d, ei), ej))
     </literallayout>
-    where inv() is the invariant specified using the option &opt_invariant;. In case ai is also a tau-action, the formula
-    above can be weakened to the following:
+    where inv() is the invariant specified using the option &opt_invariant;. In case ai is also a tau-action, this formula
+    can be weakened to the following:
     <literallayout>
       (inv(d) /\ ci(d, ei) /\ cj(d, ej))
       =>
@@ -104,14 +109,20 @@
   </para>
 
   <para>
-    The tool will generate the confluence conditions mentioned above for a number of
-    summands and tries to prove that they are tautologies using a prover for
+    The tool will generate these confluence conditions for a number of
+    summands and tries to prove that they are tautologies using a BDD based prover for
     propositional formulas. Because of the limitations of the prover used to check
     these conditions, &lpeconfcheck; may indicate that a tau-summand is not confluent
     even though it is. The option &opt_verbose; gives insight into what the prover is
     doing and can be used to see if rewrite rules have to be added to the specification
     in order to enable the prover to determine that certain condition are indeed
     tautologies.
+  </para>
+
+  <para>
+    In some cases it may be useful to use an SMT solver to assist the prover. The SMT
+    solver can further reduce BDDs by removing inconsistent paths. A specific SMT solver
+    can be chosen using the option &opt_smt_solver;=&solver;.
   </para>
 
   <para>
@@ -153,7 +164,7 @@
       <listitem>
         <para>
           If summand number 1 has been proven confluent with summand number 2, summand
-          number 2 is obviously confluent with summand number 1. This method of checking
+          number 2 is also confluent with summand number 1. This method of checking
           confluence is called checking confluence by symmetry. If two summands are
           confluent by symmetry, &lpeconfcheck; indicates this by printing a dot ('.').
         </para>
@@ -247,7 +258,7 @@
       </para>
     </listitem>
   </varlistentry>
-  
+
   <varlistentry>
     <term>&opt_h;</term>
     <term>&opt_help;</term>
@@ -326,6 +337,7 @@
             </para>
           </listitem>
         </itemizedlist>
+        By default, the jitty rewrite strategy is used
       </para>
     </listitem>
   </varlistentry>
@@ -337,6 +349,29 @@
       <para>
         Spend at most the specified number of &seconds; on proving
         a single formula
+      </para>
+    </listitem>
+  </varlistentry>
+
+  <varlistentry>
+    <term>&opt_z;</term>
+    <term>&opt_smt_solver;=&solver;</term>
+    <listitem>
+      <para>
+        Use the specified &solver; to remove inconsistent paths from BDDs:
+        <itemizedlist spacing='compact'>
+          <listitem>
+            <para>
+              &solver_ario_string; for the SMT solver Ario
+            </para>
+          </listitem>
+          <listitem>
+            <para>
+              &solver_cvc_lite_string; for the SMT solver CVC Lite
+            </para>
+          </listitem>
+        </itemizedlist>
+        By default, no path elimination is applied
       </para>
     </listitem>
   </varlistentry>
