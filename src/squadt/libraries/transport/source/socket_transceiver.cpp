@@ -53,6 +53,11 @@ namespace transport {
         socket.set_option(socket_base::linger(false, 0));
 
         if (!e) {
+          /* Clear buffer */
+          for (unsigned int i = 0; i < input_buffer_size; ++i) {
+            buffer[i] = 0;
+          }
+
           socket.async_receive(asio::buffer(buffer.get(), input_buffer_size), 0,
                           boost::bind(&socket_transceiver::handle_receive, this, w, _1));
 
@@ -126,6 +131,11 @@ namespace transport {
         if (!e) {
           basic_transceiver::deliver(std::string(buffer.get()));
 
+          /* Clear buffer */
+          for (unsigned int i = 0; i < input_buffer_size; ++i) {
+            buffer[i] = 0;
+          }
+
           socket.async_receive(asio::buffer(buffer.get(), input_buffer_size), 0,
                                   boost::bind(&socket_transceiver::handle_receive, this, w, _1));
        
@@ -147,7 +157,7 @@ namespace transport {
     /**
      * @param e reference to an asio error object
      **/
-    void socket_transceiver::handle_write(socket_transceiver::wptr w, const asio::error& e) {
+    void socket_transceiver::handle_write(socket_transceiver::wptr w, boost::shared_array < char >, const asio::error& e) {
       socket_transceiver::ptr s = w.lock();
 
       if (!w.expired()) {
@@ -175,12 +185,19 @@ namespace transport {
       if (w.get() != 0) {
         boost::mutex::scoped_lock k(send_lock);
 
+std::cerr << getpid() << ": message sent  (" << d << ")\n";
         ++send_count;
 
         boost::mutex::scoped_lock l(operation_lock);
 
-        asio::async_write(socket, asio::buffer(d.c_str(), d.length() + 1), 
-                      boost::bind(&socket_transceiver::handle_write, this, w, _1));
+        /* The null character is added so that the buffer on the receiving end does not have to be cleared every time */
+        boost::shared_array < char > buffer(new char[d.size() + 1]);
+
+        d.copy(buffer.get(), d.size(), 0);
+        buffer[d.size()] = 0;
+
+        asio::async_write(socket, asio::buffer(buffer.get(), d.size()), 
+                      boost::bind(&socket_transceiver::handle_write, this, w, buffer, _1));
       }
     }
 
@@ -199,8 +216,13 @@ namespace transport {
 
         s << d.rdbuf();
 
-        asio::async_write(socket, asio::buffer(s.str().c_str(), s.str().length() + 1), 
-                      boost::bind(&socket_transceiver::handle_write, this, w, _1));
+        /* The null character is added so that the buffer on the receiving end does not have to be cleared every time */
+        boost::shared_array < char > buffer(new char[s.str().size()]);
+
+        s.str().copy(buffer.get(), s.str().size(), 0);
+
+        asio::async_write(socket, asio::buffer(buffer.get(), s.str().size()), 
+                      boost::bind(&socket_transceiver::handle_write, this, w, buffer, _1));
       }
     }
   }

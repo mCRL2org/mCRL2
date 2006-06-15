@@ -439,7 +439,6 @@ static bool get_squadt_parameters(int argc,
     lin_options.infilename = infilename;
     lin_options.outfilename=outfilenamefield->get_text();
 
-
     cerr << "Configuration sent2\n";
     /* Send the controller the signal that we're ready to rumble 
      * (no further configuration necessary) */
@@ -448,7 +447,7 @@ static bool get_squadt_parameters(int argc,
     /* Wait for start message */
     
     cerr << "Ready to accept configuration " << infilename << "\n";
-    tc.await_message(sip::send_signal_start);
+    tc.await_message(sip::message_signal_start);
 
 
     return 0;
@@ -512,6 +511,13 @@ int main(int argc, char *argv[])
       fclose(outstream);
     }
   }
+
+#ifdef ENABLE_SQUADT_CONNECTIVITY
+  tc.send_signal_done();
+
+  tc.await_message(sip::message_request_termination);
+#endif
+
   return 0;
 }
 

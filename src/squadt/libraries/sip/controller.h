@@ -138,7 +138,7 @@ namespace sip {
      **/
     template < typename E >
     void communicator::send_display_data(E const* e) {
-      message m(e->get_state(), sip::send_display_data);
+      message m(e->get_state(), sip::message_display_data);
 
       send_message(m);
     }

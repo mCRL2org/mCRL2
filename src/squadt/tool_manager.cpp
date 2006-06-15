@@ -40,7 +40,7 @@ namespace squadt {
     add_listener();
 
     /* Set handler for incoming instance identification messages */
-    add_handler(sip::send_instance_identifier, boost::bind(&tool_manager::handle_relay_connection, this, _1, _2));
+    add_handler(sip::message_instance_identifier, boost::bind(&tool_manager::handle_relay_connection, this, _1, _2));
   }
 
   void tool_manager::write(std::ostream& stream) const {

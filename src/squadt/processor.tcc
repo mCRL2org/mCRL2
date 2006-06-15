@@ -110,8 +110,10 @@ namespace squadt {
       send_configuration();
      
       /* Wait until configuration is accepted, or the tool has terminated */
-      if (await_message(sip::send_accept_configuration).get() != 0 && b) {
+      if (await_message(sip::message_accept_configuration).get() != 0 && b) {
         send_start_signal();
+
+        await_message(sip::message_signal_done);
       }
       else {
         /* End tool execution */

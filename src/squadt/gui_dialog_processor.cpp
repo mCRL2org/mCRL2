@@ -58,7 +58,9 @@ namespace squadt {
 
         for (squadt::processor::input_object_iterator i = target_processor->get_input_iterator(); i.valid(); ++i) {
           if (*i != 0) {
-            path p((*i)->location);
+            path p(project_store.fn_str());
+            
+            p = p / path((*i)->location);
 
             input_objects->InsertItem(row, wxString(p.leaf().c_str(), wxConvLocal));
 
@@ -93,7 +95,9 @@ namespace squadt {
 
         for (squadt::processor::output_object_iterator i = target_processor->get_output_iterator(); i.valid(); ++i) {
           if (*i != 0) {
-            path p((*i)->location);
+            path p(project_store.fn_str());
+            
+            p = p / path((*i)->location);
 
             output_objects->InsertItem(row, wxString(p.leaf().c_str(), wxConvLocal));
 

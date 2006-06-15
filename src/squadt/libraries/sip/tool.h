@@ -89,6 +89,9 @@ namespace sip {
         /** \brief Sends the empty layout specification for the display space */
         void clear_display();
  
+        /** \brief Send a signal that the tool has finished its last operation */
+        void send_signal_done();
+ 
         /** \brief Send a signal that the tool is about to terminate */
         void send_signal_termination();
  

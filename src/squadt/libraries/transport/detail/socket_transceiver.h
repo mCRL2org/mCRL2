@@ -1,6 +1,8 @@
 #ifndef SOCKET_TRANSCEIVER_H
 #define SOCKET_TRANSCEIVER_H
 
+#include <memory>
+
 #include <boost/bind.hpp>
 #include <boost/function.hpp>
 #include <boost/asio.hpp>
@@ -97,7 +99,7 @@ namespace transport {
         void handle_receive(wptr, const asio::error&);
 
         /** \brief Process results from a write operation on the socket */
-        void handle_write(wptr, const asio::error&);
+        void handle_write(wptr, boost::shared_array < char >, const asio::error&);
 
       public:
 

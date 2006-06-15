@@ -92,6 +92,10 @@ bool XSim::OnInit()
         report.set_error("Invalid input combination!");
 
         tc.send_report(report);
+
+        tc.send_signal_done();
+
+        tc.await_message(sip::message_request_termination);
       }
     }
 
@@ -99,7 +103,7 @@ bool XSim::OnInit()
     tc.send_accept_configuration();
 
     /* Wait for start message */
-    tc.await_message(sip::send_signal_start);
+    tc.await_message(sip::message_signal_start);
   }
   else {
 #endif

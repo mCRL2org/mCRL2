@@ -23,7 +23,7 @@ namespace sip {
       boost::mutex::scoped_lock w(waiter_lock);
 
       // Unblock all waiters
-      const message_ptr m(new message());
+      const message_ptr m(new message(M::message_unknown));
 
       for (typename waiter_map::const_iterator i = waiters.begin(); i != waiters.end(); ++i) {
         boost::mutex::scoped_lock l((*i).second->mutex);
@@ -122,7 +122,7 @@ namespace sip {
     template < class M >
     void basic_messenger< M >::deliver(const std::string& data, basic_transceiver* o) {
       std::string::const_iterator i = data.begin();
- 
+
       while (i != data.end()) {
         std::string::const_iterator j = i;
  
@@ -189,19 +189,17 @@ namespace sip {
           }
 
           if (!message_open) {
-            typename M::type_identifier_t t;
-
             /* End message sequence matched; move message from buffer to queue  */
             std::string new_string;
 
             new_string.swap(buffer);
 
-            t = M::extract_type(new_string);
+            typename M::type_identifier_t t = M::extract_type(new_string);
 
             message_ptr m(new message(new_string, t));
 std::cerr << getpid() << ": message (type " << t << ")" << " (" << new_string << ")\n";
 
-            if (handlers.find(sip::any) != handlers.end() || handlers.find(t) != handlers.end()) {
+            if (handlers.find(M::message_any) != handlers.end() || handlers.find(t) != handlers.end()) {
               /* Service handler */
               boost::thread thread(boost::bind(&basic_messenger< M >::service_handlers, this, m, o));
             }
@@ -234,7 +232,7 @@ std::cerr << getpid() << ": message (type " << t << ")" << " (" << new_string <<
            
             if (n != std::string::npos) {
               /* Skip message tag */
-              i += n + tag_open.size();
+              i = data.begin() + n + tag_open.size();
            
               message_open = true;
             }
@@ -305,7 +303,7 @@ std::cerr << getpid() << ": message (type " << t << ")" << " (" << new_string <<
     inline void basic_messenger< M >::service_handlers(const message_ptr m, const basic_transceiver* o) {
       typename M::type_identifier_t id = m->get_type();
 
-      typename handler_map::iterator i = handlers.find(sip::any);
+      typename handler_map::iterator i = handlers.find(M::message_any);
       typename handler_map::iterator j = handlers.find(id);
 
       boost::mutex::scoped_lock w(waiter_lock);
@@ -313,19 +311,19 @@ std::cerr << getpid() << ": message (type " << t << ")" << " (" << new_string <<
       if (j != handlers.end()) {
         (*j).second(m, o);
       }
-      if (id != any && i != handlers.end()) {
+      if (id != M::message_any && i != handlers.end()) {
         (*i).second(m, o);
       }
 
       /* Unblock all possible waiters */
-      if (id != any && 0 < waiters.count(sip::any)) {
+      if (id != M::message_any && 0 < waiters.count(M::message_any)) {
         boost::mutex::scoped_lock l(waiters[id]->mutex);
 
         if (0 < waiters.count(id)) {
           waiters[id]->condition.notify_all();
         }
 
-        waiters[sip::any]->condition.notify_all();
+        waiters[M::message_any]->condition.notify_all();
       }
       else if (0 < waiters.count(id)) {
         boost::mutex::scoped_lock l(waiters[id]->mutex);

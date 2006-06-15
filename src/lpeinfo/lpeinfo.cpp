@@ -142,7 +142,7 @@ int main(int ac, char** av) {
     tc.send_accept_configuration();
 
     /* Wait for start message */
-    tc.await_message(sip::send_signal_start);
+    tc.await_message(sip::message_signal_start);
   }
   else {
     parse_command_line(ac,av);
@@ -220,6 +220,10 @@ int main(int ac, char** av) {
       report.set_error(error);
 
       tc.send_report(report);
+
+      tc.send_signal_done();
+
+      tc.await_message(sip::message_request_termination);
     }
     else {
       std::cerr << error;

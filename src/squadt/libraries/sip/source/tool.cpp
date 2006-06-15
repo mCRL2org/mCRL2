@@ -17,7 +17,7 @@ namespace sip {
                                              current_tool_capabilities() {
  
       /* Register event handlers for some message types */
-      add_handler(sip::request_tool_capabilities, boost::bind(&communicator::reply_tool_capabilities, this));
+      add_handler(sip::message_request_tool_capabilities, boost::bind(&communicator::reply_tool_capabilities, this));
     }
  
     /**
@@ -45,7 +45,7 @@ namespace sip {
         instance_identifier = e.get_identifier();
  
         /* Identify the tool instance to the controller */
-        sip::message m(sip::send_instance_identifier);
+        sip::message m(sip::message_instance_identifier);
  
         std::ostringstream s;
  
@@ -66,13 +66,13 @@ namespace sip {
  
     /* Request details about the amount of space that the controller currently has reserved for this tool */
     void communicator::request_controller_capabilities() {
-      message m(sip::request_controller_capabilities);
+      message m(sip::message_request_controller_capabilities);
  
       send_message(m);
  
       /* Await the reply */
       do {
-        message_ptr p = await_message(sip::reply_controller_capabilities);
+        message_ptr p = await_message(sip::message_reply_controller_capabilities);
  
         if (p.get() != 0) {
           xml2pp::text_reader reader(p->to_string().c_str());
@@ -86,14 +86,14 @@ namespace sip {
  
     /* Send a specification of the tools capabilities */
     void communicator::reply_tool_capabilities() {
-      message m(current_tool_capabilities.write(), sip::reply_tool_capabilities);
+      message m(current_tool_capabilities.write(), sip::message_reply_tool_capabilities);
  
       send_message(m);
     }
  
     /* Send a specification of the current configuration (it may change during tool execution) */
     void communicator::send_accept_configuration() {
-      message m(current_configuration->write(), sip::send_accept_configuration);
+      message m(current_configuration->write(), sip::message_accept_configuration);
  
       send_message(m);
     }
@@ -102,7 +102,7 @@ namespace sip {
      * @param[in] c the configuration object that specifies the accepted configuration
      **/
     void communicator::send_accept_configuration(const sip::configuration& c) {
-      message m(c.write(), sip::send_accept_configuration);
+      message m(c.write(), sip::message_accept_configuration);
  
       send_message(m);
     }
@@ -116,35 +116,42 @@ namespace sip {
      * accordingly when data is received.
      **/
     void communicator::send_display_layout(layout::tool_display::sptr d) {
-      message m(d->write(), sip::send_display_layout);
+      message m(d->write(), sip::message_display_layout);
 
       send_message(m);
 
-      clear_handlers(sip::send_display_data);
+      clear_handlers(sip::message_display_data);
 
-      add_handler(sip::send_display_data, boost::bind(&communicator::accept_display_data, this, _1, d));
+      add_handler(sip::message_display_data, boost::bind(&communicator::accept_display_data, this, _1, d));
     }
 
     void communicator::clear_display() {
       layout::tool_display display;
 
-      clear_handlers(sip::send_display_data);
+      clear_handlers(sip::message_display_data);
 
-      message m(display.write(), sip::send_display_layout);
+      message m(display.write(), sip::message_display_layout);
 
       send_message(m);
     }
 
     /* Send a signal that the tool is about to terminate */
+    void communicator::send_signal_done() {
+      message m(sip::message_signal_done);
+ 
+      send_message(m);
+    }
+
+    /* Send a signal that the tool is about to terminate */
     void communicator::send_signal_termination() {
-      message m(sip::send_signal_termination);
+      message m(sip::message_signal_termination);
  
       send_message(m);
     }
  
     /* Send a status report to the controller */
     void communicator::send_report(sip::report const& r) {
-      message m(r.write(), sip::send_report);
+      message m(r.write(), sip::message_report);
  
       send_message(m);
     }
@@ -168,7 +175,7 @@ namespace sip {
 
       e->write_structure(c);
 
-      message m(c.str(), sip::send_display_data);
+      message m(c.str(), sip::message_display_data);
 
       send_message(m);
     }
@@ -186,7 +193,7 @@ namespace sip {
     }
 
     const configuration::sptr communicator::await_configuration() {
-      const sip::messenger::message_ptr m = await_message(sip::send_configuration);
+      const sip::messenger::message_ptr m = await_message(sip::message_offer_configuration);
 
       return (sip::configuration::read(m->to_string()));
     }

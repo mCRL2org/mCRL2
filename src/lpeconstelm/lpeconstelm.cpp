@@ -1153,7 +1153,7 @@ int main(int ac, char** av) {
     tc.send_accept_configuration();
 
     /* Wait for start message */
-    tc.await_message(sip::send_signal_start);
+    tc.await_message(sip::message_signal_start);
   }
   else {
     parse_command_line(ac,av,constelm);
@@ -1165,7 +1165,27 @@ int main(int ac, char** av) {
   constelm.filter();
   constelm.output(); 
 
+#ifdef ENABLE_SQUADT_CONNECTIVITY
+  if (tc.is_active()) {
+    sip::report report;
+
+    report.set_comment("done with state space generation");
+
+    tc.send_report(report);
+
+    tc.send_signal_done();
+
+    gsRewriteFinalise();
+
+    tc.await_message(sip::message_request_termination);
+
+  }
+  else {
+    gsRewriteFinalise();
+  } 
+#else
   gsRewriteFinalise();
+#endif
 
   return 0;
 }

@@ -28,8 +28,8 @@ namespace sip {
       using namespace boost;
  
       /* set default handlers for delivery events */
-      add_handler(sip::request_controller_capabilities, bind(&communicator::reply_controller_capabilities, this));
-      add_handler(sip::send_accept_configuration, bind(&communicator::store_configuration, this, _1));
+      add_handler(sip::message_request_controller_capabilities, bind(&communicator::reply_controller_capabilities, this));
+      add_handler(sip::message_accept_configuration, bind(&communicator::store_configuration, this, _1));
     }
 
     communicator::~communicator() {
@@ -37,34 +37,34 @@ namespace sip {
  
     /* Reply details about the amount of reserved display space */
     void communicator::reply_controller_capabilities() {
-      message m(current_controller_capabilities.write(), sip::reply_controller_capabilities);
+      message m(current_controller_capabilities.write(), sip::message_reply_controller_capabilities);
  
       send_message(m);
     }
  
     /* Request a tool what input configurations it has available */
     void communicator::request_tool_capabilities() {
-      message m(sip::request_tool_capabilities);
+      message m(sip::message_request_tool_capabilities);
  
       send_message(m);
     }
  
     /* Send the selected input configuration */
     void communicator::send_configuration() {
-      message m(current_configuration->write(), sip::send_configuration);
+      message m(current_configuration->write(), sip::message_offer_configuration);
  
       send_message(m);
     }
  
     /* Request a tool to terminate */
     void communicator::request_termination() {
-      message m(sip::request_termination);
+      message m(sip::message_request_termination);
  
       send_message(m);
     }
  
     void communicator::send_start_signal() {
-      message m(sip::send_signal_start);
+      message m(sip::message_signal_start);
  
       send_message(m);
     }
@@ -74,9 +74,9 @@ namespace sip {
      **/
     void communicator::activate_display_layout_handler(display_layout_handler_function h) {
       /* Remove any previous handlers */
-      clear_handlers(sip::send_display_layout);
+      clear_handlers(sip::message_display_layout);
 
-      add_handler(sip::send_display_layout, boost::bind(&communicator::display_layout_handler, this, _1, h));
+      add_handler(sip::message_display_layout, boost::bind(&communicator::display_layout_handler, this, _1, h));
 
       current_layout_handler = h;
     }
@@ -89,9 +89,9 @@ namespace sip {
      **/
     void communicator::activate_display_data_handler(sip::layout::tool_display::sptr d, display_data_handler_function h) {
       /* Remove any previous handlers */
-      clear_handlers(sip::send_display_data);
+      clear_handlers(sip::message_display_data);
 
-      add_handler(sip::send_display_data, boost::bind(&communicator::display_data_handler, this, _1, d, h));
+      add_handler(sip::message_display_data, boost::bind(&communicator::display_data_handler, this, _1, d, h));
 
       current_data_handler = h;
     }

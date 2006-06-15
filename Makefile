@@ -36,7 +36,7 @@ clean:
 distclean:
 	@${MAKE} -C src/doc distclean
 	$(RM) -r autom4te.cache *.o *.app *~ core core.*
-	$(RM) -r config.log config.status build/config build/config.jam src/setup.h
+	$(RM) -r config.log config.status build/config.mk build/config.jam src/setup.h
 	$(RM) -rf bin boost/tools/jam/bin boost/tools/jam/bootstrap
 
 $(BJAM):

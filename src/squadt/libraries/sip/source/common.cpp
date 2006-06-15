@@ -1,4 +1,5 @@
 #include <sip/detail/configuration.h>
+#include <sip/detail/common.h>
 
 namespace sip {
 
@@ -7,6 +8,14 @@ namespace sip {
 
   /** The required constraint, option (with possible arguments) must be present */
   const configuration::option_constraint configuration::constrain_required = {1,1};
+
+  /** \brief The type identifier for messages of which the type is not known */
+  template <>
+  const message::type_identifier_t message::message_unknown = message_unknown;
+ 
+  /** \brief The type identifier for messages of any type */
+  template <>
+  const message::type_identifier_t message::message_any     = message_any;
 
   namespace datatype {
 

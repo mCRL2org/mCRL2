@@ -559,7 +559,7 @@ static void create_status_display(sip::tool::communicator &tc)
   /* Attach columns*/
   labels->add(column1, margins(0,5,0,5));
   labels->add(column2, margins(0,5,0,5));
-  layout_manager->add(&*labels, margins(0,5,0,5));
+  layout_manager->add(labels.get(), margins(0,5,0,5));
   layout_manager->add(progbar, margins(0,5,0,5));
 
   status_display->set_top_manager(layout_manager);
@@ -956,7 +956,7 @@ int main(int argc, char **argv)
 
     /* Wait for start message */
     gsVerboseMsg("waiting for start signal...\n");
-    tc.await_message(sip::send_signal_start);
+    tc.await_message(sip::message_signal_start);
     gsVerboseMsg("starting execution...\n");
 
     sip::configuration c = tc.get_configuration();
@@ -1214,6 +1214,11 @@ int main(int argc, char **argv)
       report.set_comment("done with state space generation");
 
       tc.send_report(report);
+
+      tc.send_signal_done();
+
+      tc.await_message(sip::message_request_termination);
+
     } else {
 #endif
     fprintf(stderr,
