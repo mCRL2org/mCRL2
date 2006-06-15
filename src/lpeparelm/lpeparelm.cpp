@@ -459,6 +459,10 @@ void parse_command_line(int ac, char** av, ParElmObj& parelm) {
   parelm.setVerbose(vm.count("verbose"));
   parelm.setDebug(vm.count("debug"));
 
+  if (vm.count("file_names")){
+    file_names = vm["file_names"].as< std::vector< std::string > >();
+  }
+
   if (file_names.size() == 0){
     /* Read from standard input */
     if (!parelm.readStream()) {
@@ -579,7 +583,6 @@ int main(int ac, char** av) {
     gsRewriteFinalise();
 
     tc.await_message(sip::message_request_termination);
-
   }
   else {
     gsRewriteFinalise();
