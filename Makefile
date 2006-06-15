@@ -11,7 +11,7 @@
 	ln -f $^ $@/Contents/MacOS/$*
 	cp -f src/$*/$*.icns $@/Contents/Resources/$*.icns
 
-.PHONY: all install clean distclean distribution
+.PHONY: all install clean distclean reposclean distribution
 
 all: $(BJAM)
 	@$(BOOST_BUILD)
@@ -38,6 +38,9 @@ distclean:
 	$(RM) -r autom4te.cache *.o *.app *~ core core.*
 	$(RM) -r config.log config.status build/config.mk build/config.jam src/setup.h
 	$(RM) -rf bin boost/tools/jam/bin boost/tools/jam/bootstrap
+
+reposclean: distclean
+	$(RM) src/mcrl2_revision.h
 
 $(BJAM):
 	@$(MAKE) -C boost bjam
