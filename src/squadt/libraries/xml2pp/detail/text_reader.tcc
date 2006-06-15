@@ -174,6 +174,26 @@ namespace xml2pp {
    *
    * \return whether the attribute was present
    **/
+  template <>
+  inline bool text_reader::get_attribute(double* d, const char* n) {
+    char* temporary = (char*) xmlTextReaderGetAttribute(reader, reinterpret_cast < const xmlChar* > (n));
+    bool  return_value = temporary != NULL;
+
+    if (return_value) {
+      sscanf(temporary, "%lf", d);
+    }
+
+    xmlFree(temporary);
+
+    return (return_value);
+  }
+
+  /**
+   * @param[out] d the variable that should hold the result 
+   * @param[in] n the name of the attribute which value to get
+   *
+   * \return whether the attribute was present
+   **/
   template < typename T >
   inline bool text_reader::get_attribute(T* d, const char* n) {
     char* temporary    = (char*) xmlTextReaderGetAttribute(reader, reinterpret_cast < const xmlChar* > (n));
