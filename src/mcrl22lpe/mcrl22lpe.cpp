@@ -513,9 +513,12 @@ int main(int argc, char *argv[])
   }
 
 #ifdef ENABLE_SQUADT_CONNECTIVITY
-  tc.send_signal_done();
+  if (tc.is_active())
+  {
+    tc.send_signal_done();
 
-  tc.await_message(sip::message_request_termination);
+    tc.await_message(sip::message_request_termination);
+  }
 #endif
 
   return 0;
