@@ -30,6 +30,7 @@
 
 #include "node.h"
 #include "edge.h"
+#include "export_latex.h"
 
 #define INITIAL_WIN_HEIGHT 780
 #define INITIAL_WIN_WIDTH  1024
@@ -44,10 +45,11 @@ const int ID_CHECK_NODE    = wxID_HIGHEST + 2;
 const int ID_CHECK_EDGE    = wxID_HIGHEST + 3;
 const int ID_BUTTON_OPTI   = wxID_HIGHEST + 4;
 const int ID_EXPORT_PS     = wxID_HIGHEST + 5;
-
+const int ID_EXPORT_LATEX  = wxID_HIGHEST + 6;
 
 
 class ViewPort;
+class ExportToLatex;
 
 class GraphFrame : public wxFrame
 {
@@ -57,6 +59,7 @@ public:
   void Init(wxString LTSfile);
 	void Draw(wxPaintDC * myDC);
 	void ExportPostScript(wxCommandEvent& event);
+	void ExportLatex(wxCommandEvent& event);
 	void Resize(wxSize);
 	void ReplaceAfterDrag(wxPoint);
 	void FixNode(int num);
@@ -79,10 +82,11 @@ public:
 
 private:
   bool StopOpti;
-  
   double EdgeStiffness;   //stiffness of the edge
   double NodeStrength;   //Strength of the electrical repulsion
   double NaturalLength;
+
+	string inputFileName;
 
   ViewPort * leftPanel;
 	wxPanel * rightPanel;
@@ -92,6 +96,7 @@ private:
   wxMenu * draw;
   wxMenuItem * openItem;
   wxMenuItem * exportPsItem;
+  wxMenuItem * exportLatexItem;
   wxMenuItem * quitItem;
   wxMenuItem * optimizeGraph;
   wxMenuItem * stopOptimize;
@@ -111,7 +116,7 @@ private:
 	wxCheckBox * ckNodeLabels;
 	wxCheckBox * ckEdgeLabels;
 
-	wxButton * btnOptiStop;
+	wxButton * btnOptiStop;	
 
 DECLARE_EVENT_TABLE()
 };

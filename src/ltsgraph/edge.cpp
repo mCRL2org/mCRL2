@@ -11,10 +11,8 @@ const double triangle_height = 8.0;
 
 const wxColour color = "BLACK";
 
-Edge::Edge(Node* _N1, Node* _N2, wxString _lbl) : lbl(_lbl) 
+Edge::Edge(Node* _N1, Node* _N2, wxString _lbl) : N1(_N1), N2(_N2), lbl(_lbl) 
 { 
-	N1=_N1;
-  N2=_N2;
 	lbl.Replace(wxT("\""), wxT(""), true);
 }
 
@@ -104,6 +102,11 @@ Node* Edge::Get_N2() {
 
 double Edge::GetXpos1() {
   return N1->GetX();
+}
+
+string Edge::Get_lbl() {
+	string st_lbl = string(lbl.fn_str());
+	return st_lbl;
 }
 
 double Edge::GetYpos1() {

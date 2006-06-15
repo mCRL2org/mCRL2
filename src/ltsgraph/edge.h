@@ -25,6 +25,7 @@ public:
   void OnPaint(wxDC * ptrDC);
   Node* Get_N1();
   Node* Get_N2();
+	string Get_lbl();
 
   double GetXpos1();
   double GetYpos1();

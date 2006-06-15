@@ -2,8 +2,8 @@
 
 void print_help() {
   cout << "Usage: ltsgraph [INFILE]\n"
-       << "Draw graphs in a graphical environment. If INFILE (LTS file : *.aut or *.svc) is supplied it will be\n"
-       << "draw into the tool.\n"
+       << "Draw graphs in a graphical environment. If INFILE (LTS file : *.aut or *.svc) is supplied \n"
+       << "the tool will use this file as input for drawing.\n"
        << "\n"
 	   << "Use left click to drag the nodes and right click to fix the nodes. \n"
 	   << "\n"
@@ -30,12 +30,12 @@ bool OnInit() {
 	    return FALSE;
     }
 
-	GraphFrame *frame;
+		GraphFrame *frame;
 	
-	frame = new GraphFrame(wxT("ltsgraph"), wxPoint(150, 150), wxSize(INITIAL_WIN_WIDTH, INITIAL_WIN_HEIGHT));
-	frame->Show(TRUE);
+		frame = new GraphFrame(wxT("ltsgraph"), wxPoint(150, 150), wxSize(INITIAL_WIN_WIDTH, INITIAL_WIN_HEIGHT));
+		frame->Show(TRUE);
     if ( cmdln.GetParamCount() > 0 ) 
-		frame->Init(cmdln.GetParam(0));
+			frame->Init(cmdln.GetParam(0));
 
 
     return TRUE;

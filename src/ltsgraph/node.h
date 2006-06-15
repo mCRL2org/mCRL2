@@ -26,8 +26,9 @@ public:
   unsigned int Get_num();
   double GetX(); 
   double GetY();
+	string Get_lbl();
   void SetXY(double, double);
-	void forceSetXY(double, double);//set the x and y even if node is locked
+	void forceSetXY(double, double);//set the x and y even if the node is locked
   bool IsLocked();
   void Lock();
   void Unlock();

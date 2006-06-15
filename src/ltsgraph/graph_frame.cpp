@@ -3,6 +3,7 @@
 BEGIN_EVENT_TABLE(GraphFrame, wxFrame)
   EVT_MENU(wxID_OPEN, GraphFrame::OnOpen)
 	EVT_MENU(ID_EXPORT_PS, GraphFrame::ExportPostScript)
+	EVT_MENU(ID_EXPORT_LATEX, GraphFrame::ExportLatex)
   EVT_MENU(wxID_EXIT, GraphFrame::OnQuit)
   EVT_MENU(ID_OPTIMIZE, GraphFrame::OnOptimize)
   EVT_MENU(ID_STOP_OPTIMIZE, GraphFrame::OnStopOptimize)
@@ -169,9 +170,10 @@ void GraphFrame::CreateMenu() {
     
   //file
   file = new wxMenu;
-  openItem     = file->Append( wxID_OPEN, wxT("&Open...\tCTRL-o"), wxT("") );
-	exportPsItem = file->Append( ID_EXPORT_PS, wxT("Export to &PostScript\tCTRL-p"), wxT("") );
-  quitItem     = file->Append( wxID_EXIT, wxT("&Quit\tCTRL-q"), wxT("") );
+  openItem        = file->Append( wxID_OPEN, wxT("&Open...\tCTRL-o"), wxT("") );
+	exportPsItem    = file->Append( ID_EXPORT_PS, wxT("Export to &PostScript\tCTRL-p"), wxT("") );
+	exportLatexItem = file->Append( ID_EXPORT_LATEX, wxT("Export to &Latex\tCTRL-l"), wxT("") );
+  quitItem        = file->Append( wxID_EXIT, wxT("&Quit\tCTRL-q"), wxT("") );
   menu->Append( file, wxT("&File") );
 
   //draw
@@ -185,6 +187,8 @@ void GraphFrame::CreateMenu() {
 
 	optimizeGraph->Enable(false);
 	stopOptimize->Enable(false);
+	exportLatexItem->Enable(false);
+	exportPsItem->Enable(false);
 }
 
 void GraphFrame::CreateStatusBar() {
@@ -240,9 +244,9 @@ void GraphFrame::OnOptimize( wxCommandEvent& /* event */ ) {
 
 void GraphFrame::OnStopOptimize( wxCommandEvent& /* event */ ) {
 	stopOptimize->Enable(false);
-	StopOpti = true;
 	optimizeGraph->Enable(true);
 	btnOptiStop->SetLabel(wxT("Optimize"));
+	StopOpti = true;
 }
 
 void GraphFrame::OnCheckNode( wxCommandEvent& /* event */ ) {
@@ -255,6 +259,7 @@ void GraphFrame::OnCheckNode( wxCommandEvent& /* event */ ) {
 		for (size_t i = 0; i < vectNode.size(); i++)  
 			vectNode[i]->HideLabels();
 	}
+	Refresh();
 
 }
 
@@ -268,7 +273,7 @@ void GraphFrame::OnCheckEdge( wxCommandEvent& /* event */ ) {
 		for (size_t i = 0; i < vectEdge.size(); i++)  
 			vectEdge[i]->HideLabels();
 	}
-
+	Refresh();
 }
 
 void GraphFrame::OnBtnOpti( wxCommandEvent& event ) {
@@ -305,6 +310,10 @@ void GraphFrame::Init(wxString LTSfile) {
 
 			//Fill status bar
 			FillStatusBar(LTSfile,2);	
+
+			//initialize file name
+			inputFileName = st_LTSfile.substr( st_LTSfile.find_last_of( '/' ) + 1 ); //without path
+			inputFileName = inputFileName.substr( 0, inputFileName.find_last_of( '.' ) ); //without extension
 
       //initialize vectNode
 
@@ -351,6 +360,8 @@ void GraphFrame::Init(wxString LTSfile) {
 			optimizeGraph->Enable(true);
 			stopOptimize->Enable(false);
 			btnOptiStop->Enable(true);
+			exportLatexItem->Enable(true);
+			exportPsItem->Enable(true);
       Refresh();
     }
     else 
@@ -371,7 +382,7 @@ bool GraphFrame::OptimizeDrawing(double precision)
   double arraySumForceX[vectNode.size()];
   double arraySumForceY[vectNode.size()];
 
-  double WindowWidth = (double)leftPanel->Get_Width();
+  double WindowWidth  = (double)leftPanel->Get_Width();
   double WindowHeight = (double)leftPanel->Get_Height();
 
   // Reset the forces to 0, to begin with.
@@ -534,8 +545,9 @@ void GraphFrame::ExportPostScript( wxCommandEvent& /* event */ ) {
 		wxPrintData pd;
 		pd.SetFilename(_("test.ps"));
     pd.SetPrintMode(wxPRINT_MODE_FILE);
+
     wxPostScriptDC myDC(pd);
-		myDC.StartDoc(wxT("pri*nting..."));
+		myDC.StartDoc(wxT("printing..."));
 		//pd.SetFontMetricPath(wxT("afm/"));
 		
 
@@ -559,6 +571,44 @@ void GraphFrame::ExportPostScript( wxCommandEvent& /* event */ ) {
     }
 
 		myDC.EndDoc();
+}
+
+void GraphFrame::ExportLatex( wxCommandEvent& /* event */ ) {
+
+	vector<nodeLatex> vectNodeLatex;
+	vector<edgeLatex> vectEdgeLatex;
+
+	nodeLatex StructNodeLatex;
+	edgeLatex StructEdgeLatex;
+
+	for (size_t n = 0; n < vectNode.size(); n++) {
+			StructNodeLatex.num = vectNode[n]->Get_num();
+			StructNodeLatex.x   = vectNode[n]->GetX();
+			StructNodeLatex.y   = vectNode[n]->GetY();
+			StructNodeLatex.lbl = vectNode[n]->Get_lbl();
+
+			vectNodeLatex.push_back(StructNodeLatex);
+	}
+
+
+	for (size_t n = 0; n < vectEdge.size(); n++) {
+			StructEdgeLatex.numNode1 = vectEdge[n]->Get_N1()->Get_num();
+			StructEdgeLatex.numNode2 = vectEdge[n]->Get_N2()->Get_num();
+			StructEdgeLatex.lbl      = vectEdge[n]->Get_lbl();
+
+			vectEdgeLatex.push_back(StructEdgeLatex);
+	}
+	
+	//char * test = (char *)inputFileName.c_str();
+
+ 	ExportToLatex * ltx = new ExportToLatex(strcat((char *)inputFileName.c_str(),".tex"),vectNodeLatex,vectEdgeLatex);
+ 	if (ltx->Generate()) {
+		wxMessageBox(wxT("Export successful"),wxT("Information"),wxOK| wxICON_INFORMATION);
+	}
+	else {
+		wxMessageBox(wxT("Export unsuccessful"),wxT("Error"),wxOK | wxICON_ERROR);
+	}
+
 }
 
 void GraphFrame::Resize(wxSize sz2) {
