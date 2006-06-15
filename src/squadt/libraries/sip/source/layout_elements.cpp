@@ -185,6 +185,16 @@ namespace sip {
         selected = true;
       }
 
+      radio_button const* radio_button::get_selected() const {
+        radio_button const* r = this;
+
+        while (!r->selected) {
+          r = r->connection;
+        }
+
+        return (r);
+      }
+
       bool radio_button::is_first_in_group() const {
         return (first);
       }

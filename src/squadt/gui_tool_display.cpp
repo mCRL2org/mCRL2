@@ -702,6 +702,8 @@ std::cerr << "update_button\n";
       }
       catch (...) {
         /* Consider every exception a failure to correctly read the layout, and bail */
+        std::cerr << "fatal: layout translation of layout specification failed!";
+
         remove();
       }
     }
