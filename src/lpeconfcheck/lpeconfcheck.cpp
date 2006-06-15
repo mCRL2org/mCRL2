@@ -283,7 +283,9 @@
 
     bool LPE_Conf_Check::check_invariant() {
       if (!f_no_check && f_invariant_file_name != 0) {
-        Invariant_Checker v_invariant_checker(f_strategy, f_time_limit, f_path_eliminator, f_solver_type, f_lpe, false, false);
+        Invariant_Checker v_invariant_checker(
+          f_strategy, f_time_limit, f_path_eliminator, f_solver_type, f_lpe, false, false, f_dot_file_name
+        );
 
         return v_invariant_checker.check_invariant(f_invariant);
       } else {
