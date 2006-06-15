@@ -1,3 +1,5 @@
+#include <stdint.h>
+#include <stddef.h>
 #include "libprint_c.h"
 
 #define PRINT_C
@@ -53,87 +55,144 @@ int gsvfprintf(FILE *stream, const char *format, va_list args)
     *s++ = *p++;
     if ( *p == '%' )
     {
-	    fputc('%',stream);
-	    continue;
+      fputc('%',stream);
+      continue;
     }
-    while (!isalpha((int) *p))	/* parse formats %-20s, etc. */
+    while (!isalpha((int) *p))  /* parse formats %-20s, etc. */
       *s++ = *p++;
-    while ( (*p) == 'l' || (*p) == 'h' || (*p) == 'j' || (*p) == 'L' || (*p) == 'j' || (*p) == 'z' || (*p) == 't' )
-      *s++ = *p++;
+    bool islonglong = false;
+    bool islong = false;
+    bool islongdouble = false;
+    bool isintmax = false;
+    bool issize = false;
+    bool isptrdiff = false;
+    switch ( *p )
+    {
+      case 'l':
+        *s++ = *p++;
+        if ( (*p) == 'l' )
+        {
+          *s++ = *p++;
+          islonglong = true;
+        } else {
+          islong = true;
+        }
+        break;
+      case 'h':
+        *s++ = *p++;
+        if ( (*p) == 'h' )
+          *s++ = *p++;
+        break;
+      case 'L':
+        *s++ = *p++;
+        islongdouble = true;
+        break;
+      case 'j':
+        *s++ = *p++;
+        isintmax = true;
+        break;
+      case 'z':
+        *s++ = *p++;
+        issize = true;
+        break;
+      case 't':
+        *s++ = *p++;
+        isptrdiff = true;
+        break;
+      default:
+        break;
+    }
     *s++ = *p;
     *s = '\0';
 
     switch (*p)
     {
       case 'c':
+        fprintf(stream, fmt, va_arg(args, int));
+        break;
+
       case 'd':
       case 'i':
       case 'o':
       case 'u':
       case 'x':
       case 'X':
-	fprintf(stream, fmt, va_arg(args, int));
-	break;
+        if ( islong )
+          fprintf(stream, fmt, va_arg(args, long int));
+        else if ( islonglong )
+          fprintf(stream, fmt, va_arg(args, long long int));
+        else if ( isintmax )
+          fprintf(stream, fmt, va_arg(args, intmax_t));
+        else if ( issize )
+          fprintf(stream, fmt, va_arg(args, size_t));
+        else if ( isptrdiff )
+          fprintf(stream, fmt, va_arg(args, ptrdiff_t));
+        else
+          fprintf(stream, fmt, va_arg(args, int));
+        break;
 
+      case 'a':
+      case 'A':
       case 'e':
       case 'E':
       case 'f':
       case 'g':
       case 'G':
-	fprintf(stream, fmt, va_arg(args, double));
-	break;
+        if ( islongdouble )
+          fprintf(stream, fmt, va_arg(args, long double));
+        else
+          fprintf(stream, fmt, va_arg(args, double));
+        break;
 
       case 'n':
       case 'p':
-	fprintf(stream, fmt, va_arg(args, void *));
-	break;
+        fprintf(stream, fmt, va_arg(args, void *));
+        break;
 
-      case 'a':
-      case 'A':
       case 's':
-	fprintf(stream, fmt, va_arg(args, char *));
-	break;
+        fprintf(stream, fmt, va_arg(args, char *));
+        break;
 
-	/*
-	 * MCRL2 specifics start here: "%P" to pretty print an ATerm using
-         * the advanced method
-	 */
+      /*
+       * MCRL2 specifics start here: "%P" to pretty print an ATerm using
+       * the advanced method
+       */
       case 'P':
-	PrintPart_C(stream, va_arg(args, ATerm), ppDefault);
-	break;
+        PrintPart_C(stream, va_arg(args, ATerm), ppDefault);
+        break;
 
-	/*
-	 * ATerm specifics start here: "%T" to print an ATerm; "%F" to
-	 * print an AFun
-	 *
-	 * Commented out are:
-	 * "%I" to print a list; "%N" to print a single ATerm node;
-	 * "%H" to print the MD5 sum of a ATerm
-	 */
+      /*
+       * ATerm specifics start here: "%T" to print an ATerm; "%F" to
+       * print an AFun
+       *
+       * Commented out are:
+       * "%I" to print a list; "%N" to print a single ATerm node;
+       * "%H" to print the MD5 sum of a ATerm
+       */
       case 'T':
-	fmt[strlen(fmt)-1] = 't';
-	ATfprintf(stream, fmt, va_arg(args, ATerm));
-	break;
+        fmt[strlen(fmt)-1] = 't';
+        ATfprintf(stream, fmt, va_arg(args, ATerm));
+        break;
 /*      case 'I':
-	fmt[strlen(fmt)-1] = 'l';
-	ATfprintf(stream, fmt, va_arg(args, ATermList));
-	break;*/
+        fmt[strlen(fmt)-1] = 'l';
+        ATfprintf(stream, fmt, va_arg(args, ATermList));
+        break;*/
       case 'F':
-	fmt[strlen(fmt)-1] = 'y';
-	ATfprintf(stream, fmt, va_arg(args, AFun));
-	break;
+        fmt[strlen(fmt)-1] = 'y';
+        ATfprintf(stream, fmt, va_arg(args, AFun));
+        break;
 /*      case 'N':
-	fmt[strlen(fmt)-1] = 'n';
-	ATfprintf(stream, fmt, va_arg(args, ATerm));
-	break;
+        fmt[strlen(fmt)-1] = 'n';
+        ATfprintf(stream, fmt, va_arg(args, ATerm));
+        break;
       case 'H':
-	fmt[strlen(fmt)-1] = 'h';
-	ATfprintf(stream, fmt, va_arg(args, ATerm));
-	break;*/
+        fmt[strlen(fmt)-1] = 'h';
+        ATfprintf(stream, fmt, va_arg(args, ATerm));
+        break;*/
 
       default:
-	fputc(*p, stream);
-	break;
+        fputc(*p, stream);
+        break;
     }
   }
   return result;

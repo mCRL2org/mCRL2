@@ -4,7 +4,9 @@
 #include <stdio.h>
 #include <errno.h>
 #include <stdlib.h>
+#include <time.h>
 #include <limits.h>
+#include <stdint.h>
 #include <string.h>
 #include <getopt.h>
 #include <aterm2.h>
@@ -19,6 +21,11 @@
 #include "librewrite.h"
 #include "libtrace.h"
 #include "libdataelm.h"
+#include <memory.h> // AT_hashnumber
+
+#ifndef ULLONG_MAX
+#define ULLONG_MAX	18446744073709551615ULL
+#endif
 
 // Squadt protocol interface
 #ifdef ENABLE_SQUADT_CONNECTIVITY
@@ -32,6 +39,40 @@ using namespace std;
 #define OF_UNKNOWN  0
 #define OF_AUT    1
 #define OF_SVC    2
+
+enum exploration_strategy { es_none, es_breadth, es_depth, es_random };
+
+static exploration_strategy str_to_expl_strat(const char *s)
+{
+  if ( !strcmp(s,"b") || !strcmp(s,"breadth") )
+  {
+    return es_breadth;
+  }
+  if ( !strcmp(s,"d") || !strcmp(s,"depth") )
+  {
+    return es_depth;
+  }
+  if ( !strcmp(s,"r") || !strcmp(s,"random") )
+  {
+    return es_random;
+  }
+  return es_none;
+}
+
+static const char *expl_strat_to_str(exploration_strategy es)
+{
+  switch ( es )
+  {
+    case es_breadth:
+      return "breadth";
+    case es_depth:
+      return "depth";
+    case es_random:
+      return "random";
+    default:
+      return "unknown";
+  }
+}
 
 static ATermAppl *parse_action_list(const char *s, int *len)
 {
@@ -82,37 +123,49 @@ static void print_help(FILE *f, const char *Name)
     "by an option). If the extension is unknown, the aut format will be used.\n"
     "\n"
     "Mandatory arguments to long options are mandatory for short options too.\n"
-    "  -h, --help            display this help message\n"
-    "      --version         display version information\n"
-    "  -q, --quiet           do not print any unrequested information\n"
-    "  -v, --verbose         display extra information about the state space\n"
-    "                        generation\n"
-    "  -f, --freevar         do not replace free variables in the LPE with dummy\n"
-    "                        values\n"
-    "  -y, --dummy           replace free variables in the LPE with dummy values\n"
-    "                        (default)\n"
-    "  -u, --unused-data     do not remove unused parts of the data specification\n"
-    "  -c, --vector          store state in a vector (fastest, default)\n"
-    "  -r, --tree            store state in a tree (for memory efficiency)\n"
-    "  -l, --max=NUM         explore at most NUM states\n"
-    "  -d, --deadlock        detect deadlocks (i.e. for every deadlock a message is\n"
-    "                        printed)\n"
-    "  -a, --action=NAME*    detect actions from NAME* (i.e. print a message for\n"
-    "                        every occurrence)\n"
-    "  -t, --trace[=NUM]     write at most NUM traces to states detected with the\n"
-    "                        --deadlock or --action options\n"
-    "                        (NUM is 10 by default)\n"
-    "  -p, --priority=NAME   give priority to action NAME (i.e. if it is\n"
+    "  -h, --help               display this help message\n"
+    "      --version            display version information\n"
+    "  -q, --quiet              do not print any unrequested information\n"
+    "  -v, --verbose            display extra information about the state space\n"
+    "                           generation\n"
+    "  -f, --freevar            do not replace free variables in the LPE with dummy\n"
+    "                           values\n"
+    "  -y, --dummy              replace free variables in the LPE with dummy values\n"
+    "                           (default)\n"
+    "  -u, --unused-data        do not remove unused parts of the data specification\n"
+    "  -c, --vector             store state in a vector (fastest, default)\n"
+    "  -r, --tree               store state in a tree (for memory efficiency)\n"
+    "  -b, --bit-hash[=NUM]     use bit hashing to store states and store at most NUM\n"
+    "                           states; note that this option may cause states to be\n"
+    "                           mistaken for others\n"
+    "  -l, --max=NUM            explore at most NUM states\n"
+    "  -d, --deadlock           detect deadlocks (i.e. for every deadlock a message\n"
+    "                           is printed)\n"
+    "  -a, --action=NAME*       detect actions from NAME* (i.e. print a message for\n"
+    "                           every occurrence)\n"
+    "  -t, --trace[=NUM]        write at most NUM traces to states detected with the\n"
+    "                           --deadlock or --action options\n"
+    "                           (NUM is 10 by default)\n"
+    "  -C, --confluence[=NAME]  apply on-the-fly confluence reduction with NAME the\n"
+    "                           confluent tau action\n"
+/*    "  -p, --priority=NAME   give priority to action NAME (i.e. if it is\n"
     "                        possible to execute an action NAME in some state,\n"
     "                        than make it the only executable action from that\n"
-    "                        state)\n"
-    "  -R, --rewriter=NAME   use rewriter NAME (default 'inner')\n"
-    "      --aut             force OUTFILE to be in the aut format (implies\n"
-    "                        --no-info, see below)\n"
-    "      --svc             force OUTFILE to be in the svc format\n"
-    "      --no-info         do not add state information to OUTFILE\n"
-    "      --init-tsize=NUM  set the initial size of the internally used hash\n"
-    "                        tables (default is 10000)\n",
+    "                        state)\n"*/
+    "  -s, --strategy=NAME      use strategy NAME to explore the state space with;\n"
+    "                           the following strategies are available:\n"
+    "                             b, breadth   breadth-first search (default)\n"
+    "                             d, depth     depth-first search\n"
+    "                             r, random    random search\n"
+    "  -R, --rewriter=NAME      use rewriter NAME (default 'inner');\n"
+    "                           available rewriters are inner, jitty, innerc and\n"
+    "                           jittyc\n"
+    "      --aut                force OUTFILE to be in the aut format (implies\n"
+    "                           --no-info, see below)\n"
+    "      --svc                force OUTFILE to be in the svc format\n"
+    "      --no-info            do not add state information to OUTFILE\n"
+    "      --init-tsize=NUM     set the initial size of the internally used hash\n"
+    "                           tables (default is 10000)\n",
     Name);
 }
 
@@ -134,7 +187,7 @@ static bool removeunused = true;
 static int stateformat = GS_STATE_VECTOR;
 static int outformat = OF_UNKNOWN;
 static bool outinfo = true;
-static unsigned long max_states = ULONG_MAX;
+static unsigned long long max_states = ULLONG_MAX;
 static char *priority_action = NULL;
 static bool trace = false;
 static int num_trace_actions = 0;
@@ -142,15 +195,22 @@ static ATermAppl *trace_actions = NULL;
 static unsigned long max_traces = 10;
 static bool detect_deadlock = false;
 static bool detect_action = false;
+static exploration_strategy expl_strat = es_breadth;
+static bool bithashing = false;
+static unsigned long *bithashtable;
+static unsigned long long bithashsize = 209715200; // ~25 MB
 
 static NextState *nstate;
   
 static ATermAppl term_nil;
 static AFun afun_pair;
 static ATermIndexedSet states;
-static unsigned long num_states;
-static unsigned long trans;
+static unsigned long long num_states;
+static unsigned long long trans;
 static unsigned long level;
+static unsigned long long num_found_same;
+static unsigned long long current_state;
+static unsigned long long initial_state;
 
 static ATermTable backpointers;
 
@@ -217,7 +277,7 @@ static void save_initial_state(ATerm state)
         {
           SVCsetInitialState(svc,SVCnewState(svc,(ATerm) nstate->makeStateVector(state),&b));
         } else {
-          SVCsetInitialState(svc,SVCnewState(svc,(ATerm) ATmakeInt(0),&b));
+          SVCsetInitialState(svc,SVCnewState(svc,(ATerm) ATmakeInt(initial_state),&b));
         }
       }
       break;
@@ -226,12 +286,16 @@ static void save_initial_state(ATerm state)
   }
 }
 
-static void save_transition(unsigned long from, ATermAppl action, unsigned long to)
+static void save_transition(unsigned long long idx_from, ATerm from, ATermAppl action, unsigned long long idx_to, ATerm to)
 {
   switch ( outformat )
   {
     case OF_AUT:
-      gsfprintf(aut,"(%lu,\"%P\",%lu)\n",from,action,to);
+      if ( idx_from == initial_state )
+        idx_from = 0;
+      if ( idx_to == initial_state )
+        idx_to = 0;
+      gsfprintf(aut,"(%llu,\"%P\",%llu)\n",idx_from,action,idx_to);
       fflush(aut);
       break;
     case OF_SVC:
@@ -239,16 +303,16 @@ static void save_transition(unsigned long from, ATermAppl action, unsigned long 
       {
         SVCbool b;
         SVCputTransition(svc,
-          SVCnewState(svc,(ATerm) nstate->makeStateVector(ATindexedSetGetElem(states,from)),&b),
+          SVCnewState(svc,(ATerm) nstate->makeStateVector(from),&b),
           SVCnewLabel(svc,(ATerm) ATmakeAppl2(afun_pair,(ATerm) action,(ATerm) term_nil),&b),
-          SVCnewState(svc,(ATerm) nstate->makeStateVector(ATindexedSetGetElem(states,to)),&b),
+          SVCnewState(svc,(ATerm) nstate->makeStateVector(to),&b),
           svcparam);
       } else {
         SVCbool b;
         SVCputTransition(svc,
-          SVCnewState(svc,(ATerm) ATmakeInt(from),&b),
+          SVCnewState(svc,(ATerm) ATmakeInt(idx_from),&b),
           SVCnewLabel(svc,(ATerm) ATmakeAppl2(afun_pair,(ATerm) action,(ATerm) term_nil),&b),
-          SVCnewState(svc,(ATerm) ATmakeInt(to),&b),
+          SVCnewState(svc,(ATerm) ATmakeInt(idx_to),&b),
           svcparam);
       }
       break;
@@ -263,7 +327,7 @@ static void close_lts()
   {
     case OF_AUT:
       rewind(aut);
-      fprintf(aut,"des (0,%lu,%lu)",trans,num_states);
+      fprintf(aut,"des (0,%llu,%llu)",trans,num_states);
       fclose(aut);
       break;
     case OF_SVC:
@@ -567,17 +631,17 @@ static void create_status_display(sip::tool::communicator &tc)
   tc.send_display_layout(status_display);
 }
 
-static void update_status_display(unsigned int level, unsigned int explored, unsigned int seen, unsigned int transitions)
+static void update_status_display(unsigned long level, unsigned long long explored, unsigned long long seen, unsigned long long num_found_same, unsigned long long transitions)
 {
   fprintf(stderr,"sending new status...\n");
   char buf[21];
-  sprintf(buf,"%u",level);
+  sprintf(buf,"%lu",level);
   lb_level->set_text(buf,&tc);
-  sprintf(buf,"%u",explored);
+  sprintf(buf,"%llu",explored);
   lb_explored->set_text(buf,&tc);
-  sprintf(buf,"%u",seen);
+  sprintf(buf,"%llu",seen);
   lb_seen->set_text(buf,&tc);
-  sprintf(buf,"%u",transitions);
+  sprintf(buf,"%llu",transitions);
   lb_transitions->set_text(buf,&tc);
   progbar->set_maximum(seen,&tc);
   progbar->set_value(explored,&tc);
@@ -585,125 +649,312 @@ static void update_status_display(unsigned int level, unsigned int explored, uns
 }
 #endif
 
+static unsigned long long calc_hash(ATerm state)
+{
+  return AT_hashnumber(state) % bithashsize;
+}
+
+static bool get_bithash(unsigned long long i)
+{
+  return (( bithashtable[i/(8*sizeof(unsigned long))] >> (i%(8*sizeof(unsigned long))) ) & 1) == 1;
+}
+
+static void set_bithash(unsigned long long i)
+{
+  bithashtable[i/(8*sizeof(unsigned long))] |=  1 << (i%(8*sizeof(unsigned long)));
+}
+
+static unsigned long long add_state(ATerm state, bool *is_new)
+{
+  if ( bithashing )
+  {
+    unsigned long long i = calc_hash(state);
+    *is_new = !get_bithash(i);
+    set_bithash(i);
+    return i;
+  } else {
+    ATbool new_state;
+    unsigned long i = ATindexedSetPut(states,state,&new_state);
+    *is_new = (new_state == ATtrue);
+    return i;
+  }
+}
+
+static unsigned long long state_index(ATerm state)
+{
+  if ( bithashing )
+  {
+    assert(get_bithash(calc_hash(state)));
+    return calc_hash(state);
+  } else {
+    return ATindexedSetGetIndex(states,state);
+  }
+}
+
+static bool add_transition(ATerm from, ATermAppl action, ATerm to)
+{
+  bool new_state;
+  unsigned long long i;
+
+  to = get_repr(to);
+  i = add_state(to, &new_state);
+
+  if ( new_state )
+  {
+    if ( num_states < max_states )
+    {
+            num_states++;
+            if ( trace )
+            {
+                    ATtablePut(backpointers, to, (ATerm) ATmakeList2(from,(ATerm) action));
+            }
+    }
+  } else {
+    num_found_same++;
+  }
+
+  if ( bithashing || (i < num_states) )
+  {
+    check_action_trace(from,action,to);
+
+    save_transition(state_index(from),from,action,i,to);
+    trans++;
+  }
+
+  return new_state;
+}
 
 static bool generate_lts()
 {
   ATerm state = get_repr(nstate->getInitialState());
   save_initial_state(state);
 
-  ATbool new_state;
-  unsigned long current_state = ATindexedSetPut(states,state,&new_state);
+  bool new_state;
+  initial_state = add_state(state,&new_state);
+  current_state = 0;
   num_states++;
 
 #ifdef ENABLE_SQUADT_CONNECTIVITY
   if (tc.is_active()) {
-    update_status_display(level,current_state,num_states,trans);
+    update_status_display(level,current_state,num_states,0,trans);
   }
 #endif
 
   bool err = false;
   if ( max_states != 0 )
   {
-    unsigned long nextlevelat = 1;
-    unsigned long prevtrans = 0;
-    unsigned long prevcurrent = 0;
+    unsigned long long nextlevelat = 1;
+    unsigned long long prevtrans = 0;
+    unsigned long long prevcurrent = 0;
+    num_found_same = 0;
     tracecnt = 0;
-    gsVerboseMsg("generating state space...\n");
+    gsVerboseMsg("generating state space with '%s' strategy...\n",expl_strat_to_str(expl_strat));
 
-    NextStateGenerator *nsgen = NULL;
-    while ( current_state < num_states )
+    if ( expl_strat == es_random )
     {
-      state = ATindexedSetGetElem(states,current_state);
-      bool deadlockstate = true;
-
-      nsgen = nstate->getNextStates(state,nsgen);
-      ATermAppl Transition;
-      ATerm NewState;
-      while ( nsgen->next(&Transition,&NewState) )
+      srand((unsigned)time(NULL));
+      NextStateGenerator *nsgen = NULL;
+      while ( current_state < max_states )
       {
-        ATbool new_state;
-        unsigned long i;
+        ATermList tmp_trans = ATmakeList0();
+        ATermList tmp_states = ATmakeList0();
+        ATermAppl Transition;
+        ATerm NewState;
 
-        NewState = get_repr(NewState);
-        i = ATindexedSetPut(states, NewState, &new_state);
+        nsgen = nstate->getNextStates(state,nsgen);
+        while ( nsgen->next(&Transition,&NewState) )
+        {
+          tmp_trans = ATinsert(tmp_trans,(ATerm) Transition);
+          tmp_states = ATinsert(tmp_states,NewState);
+        }
+
+        int len = ATgetLength(tmp_trans);
+        if ( len > 0 )
+        {
+          int i = rand()%len;
+          while ( i > 0 )
+          {
+            tmp_trans = ATgetNext(tmp_trans);
+            tmp_states = ATgetNext(tmp_states);
+            i--;
+          }
+          add_transition(state,(ATermAppl) ATgetFirst(tmp_trans),ATgetFirst(tmp_states));
+          state = ATgetFirst(tmp_states);
+        } else {
+          check_deadlock_trace(state);
+          break;
+        }
+
+        current_state++;
+#ifdef ENABLE_SQUADT_CONNECTIVITY
+        if ( tc.is_active() && ((current_state%200) == 0) ) {
+          update_status_display(level,current_state,num_states,num_found_same,trans);
+        }
+#endif
+        if ( gsVerbose && ((current_state%1000) == 0) )
+        {
+          fprintf(stderr,
+            "monitor: currently explored %llu transition%s and encountered %llu unique state%s.\n",
+            trans,
+            (trans==1)?"":"s",
+            num_states,
+            (num_states==1)?"":"s"
+          );
+        }
+      }
+      delete nsgen;
+    } else if ( expl_strat == es_breadth )
+    {
+      NextStateGenerator *nsgen = NULL;
+      while ( current_state < num_states )
+      {
+        state = ATindexedSetGetElem(states,current_state);
+        bool deadlockstate = true;
+  
+        nsgen = nstate->getNextStates(state,nsgen);
+        ATermAppl Transition;
+        ATerm NewState;
+        while ( nsgen->next(&Transition,&NewState) )
+        {
+          if ( add_transition(state,Transition,NewState) )
+          {
+            deadlockstate = false;
+          }
+        }
+        
+        if ( nsgen->errorOccurred() )
+        {
+          err = true;
+          break;
+        }
+        if ( deadlockstate )
+        {
+          check_deadlock_trace(state);
+        }
+  
+        current_state++;
+#ifdef ENABLE_SQUADT_CONNECTIVITY
+        if ( tc.is_active() && ((current_state%200) == 0) ) {
+          update_status_display(level,current_state,num_states,num_found_same,trans);
+        }
+#endif
+        if ( gsVerbose && ((current_state%1000) == 0) )
+        {
+          fprintf(stderr,
+            "monitor: currently at level %lu with %llu state%s and %llu transition%s explored and %llu state%s seen.\n",
+            level,
+            current_state,
+            (current_state==1)?"":"s",
+            trans,
+            (trans==1)?"":"s",
+            num_states,
+            (num_states==1)?"":"s"
+          );
+        }
+        if ( current_state == nextlevelat )
+        {
+#ifdef ENABLE_SQUADT_CONNECTIVITY
+          if (tc.is_active()) {
+            update_status_display(level,current_state,num_states,num_found_same,trans);
+          }
+#endif
+          if ( gsVerbose )
+          {
+            fprintf(stderr,
+              "monitor: level %lu done. (%llu state%s, %llu transition%s)\n",
+              level,current_state-prevcurrent,
+              ((current_state-prevcurrent)==1)?"":"s",
+              trans-prevtrans,
+              ((trans-prevtrans)==1)?"":"s"
+            );
+            fflush(stderr);
+          }
+          level++;
+          nextlevelat = num_states;
+          prevcurrent = current_state;
+          prevtrans = trans;
+        }
+      }
+      delete nsgen;
+    } else if ( expl_strat == es_depth )
+    {
+      unsigned int nsgens_size = 128;
+      NextStateGenerator **nsgens = (NextStateGenerator **) malloc(nsgens_size*sizeof(NextStateGenerator *));
+      nsgens[0] = nstate->getNextStates(state);
+      for (unsigned int i=1; i<nsgens_size; i++)
+      {
+        nsgens[i] = NULL;
+      }
+      unsigned int nsgens_num = 1;
+
+      bool deadlockstate = true;
+      while ( nsgens_num > 0 )
+      {
+        NextStateGenerator *nsgen = nsgens[nsgens_num-1];
+        state = nsgen->get_state();
+        ATermAppl Transition;
+        ATerm NewState;
+        bool new_state = false;
+        if ( nsgen->next(&Transition,&NewState) )
+        {
+          if ( add_transition(state,Transition,NewState) )
+          {
+            new_state = true;
+            deadlockstate = false;
+            if ( nsgens_num == nsgens_size )
+            {
+              nsgens_size = nsgens_size*2;
+              nsgens = (NextStateGenerator **) realloc(nsgens,nsgens_size*sizeof(NextStateGenerator *));
+              for (unsigned int i=nsgens_num; i<nsgens_size; i++)
+              {
+                nsgens[i] = NULL;
+              }
+            }
+            nsgens[nsgens_num] = nstate->getNextStates(NewState,nsgens[nsgens_num]);
+            nsgens_num++;
+          }
+        } else {
+          nsgens_num--;
+        }
+        
+        if ( nsgen->errorOccurred() )
+        {
+          err = true;
+          break;
+        }
+        if ( deadlockstate )
+        {
+          check_deadlock_trace(state);
+        }
 
         if ( new_state )
         {
-          if ( num_states < max_states )
+          current_state++;
+#ifdef ENABLE_SQUADT_CONNECTIVITY
+          if ( tc.is_active() && ((current_state%200) == 0) ) {
+            update_status_display(level,current_state,num_states,num_found_same,trans);
+          }
+#endif
+          if ( gsVerbose && ((current_state%1000) == 0) )
           {
-                  num_states++;
-                  if ( trace )
-                  {
-                          ATtablePut(backpointers, NewState, (ATerm) ATmakeList2(state,(ATerm) Transition));
-                  }
+            fprintf(stderr,
+              "monitor: currently explored %llu state%s and %llu transition%s.\n",
+              current_state,
+              (current_state==1)?"":"s",
+              trans,
+              (trans==1)?"":"s"
+            );
           }
         }
-
-        if ( i < num_states )
-        {
-          deadlockstate = false; // XXX is this ok here, or should it be outside the if?
-
-          check_action_trace(state,Transition,NewState);
-
-          save_transition(current_state,Transition,i);
-          trans++;
-        }
-      }
-      
-      if ( nsgen->errorOccurred() )
-      {
-        err = true;
-        break;
-      }
-      if ( deadlockstate )
-      {
-        check_deadlock_trace(state);
       }
 
-      current_state++;
-#ifdef ENABLE_SQUADT_CONNECTIVITY
-      if ( tc.is_active() && ((current_state%200) == 0) ) {
-        update_status_display(level,current_state,num_states,trans);
-      }
-#endif
-      if ( gsVerbose && ((current_state%1000) == 0) )
+      for (unsigned int i=0; i<nsgens_size; i++)
       {
-        fprintf(stderr,
-          "monitor: currently at level %lu with %lu state%s and %lu transition%s explored and %lu state%s seen.\n",
-          level,
-          current_state,
-          (current_state==1)?"":"s",
-          trans,
-          (trans==1)?"":"s",
-          num_states,
-          (num_states==1)?"":"s"
-        );
+        delete nsgens[i];
       }
-      if ( current_state == nextlevelat )
-      {
-#ifdef ENABLE_SQUADT_CONNECTIVITY
-        if (tc.is_active()) {
-          update_status_display(level,current_state,num_states,trans);
-        }
-#endif
-        if ( gsVerbose )
-        {
-          fprintf(stderr,
-            "monitor: level %lu done. (%lu state%s, %lu transition%s)\n",
-            level,current_state-prevcurrent,
-            ((current_state-prevcurrent)==1)?"":"s",
-            trans-prevtrans,
-            ((trans-prevtrans)==1)?"":"s"
-          );
-          fflush(stderr);
-        }
-        level++;
-        nextlevelat = num_states;
-        prevcurrent = current_state;
-        prevtrans = trans;
-      }
+    } else {
+      gsErrorMsg("unknown exploration strategy\n");
     }
-    delete nsgen;
   }
   
   return err;
@@ -835,7 +1086,7 @@ int main(int argc, char **argv)
   FILE *SpecStream;
   ATerm Spec;
   unsigned long initial_table_size = 10000;
-  #define sopts "hqvfyucrl:da:t::p:R:"
+  #define sopts "hqvfyucrbl:da:t::C::R:s:"
   struct option lopts[] = {
     { "help",            no_argument,       NULL, 'h' },
     { "version",         no_argument,       NULL, 0   },
@@ -846,13 +1097,15 @@ int main(int argc, char **argv)
     { "unused-data",     no_argument,       NULL, 'u' },
     { "vector",          no_argument,       NULL, 'c' },
     { "tree",            no_argument,       NULL, 'r' },
+    { "bit-hash",        optional_argument, NULL, 'b' },
     { "max",             required_argument, NULL, 'l' },
     { "deadlock",        no_argument,       NULL, 'd' },
     { "deadlock-detect", no_argument,       NULL, 'd' },
     { "action",          required_argument, NULL, 'a' },
     { "action-detect",   required_argument, NULL, 'a' },
     { "trace",           optional_argument, NULL, 't' },
-    { "priority",        required_argument, NULL, 'p' },
+    { "confluence",      optional_argument, NULL, 'C' },
+    { "strategy",        required_argument, NULL, 's' },
     { "rewriter",        required_argument, NULL, 'R' },
     { "aut",             no_argument,       NULL, 1   },
     { "svc",             no_argument,       NULL, 2   },
@@ -897,8 +1150,6 @@ int main(int argc, char **argv)
   // end handle aterm lib options 
 
 #ifdef ENABLE_SQUADT_CONNECTIVITY
-  gsSetVerboseMsg();
-
   /* Get tool capabilities in order to modify settings */
   sip::tool::capabilities& cp = tc.get_tool_capabilities();
 
@@ -908,6 +1159,8 @@ int main(int argc, char **argv)
 
   /* On purpose we do not catch exceptions */
   if (tc.activate(argc,argv)) {
+    gsSetVerboseMsg();
+
     bool valid = false;
     bool make_lts = false;
 
@@ -1011,10 +1264,23 @@ int main(int argc, char **argv)
       case 'r':
         stateformat = GS_STATE_TREE;
         break;
+      case 'b':
+        bithashing = true;
+        if ( optarg != NULL )
+        {
+          if ( (optarg[0] >= '0') && (optarg[0] <= '9') )
+          {
+            bithashsize = strtoull(optarg,NULL,0);
+          } else {
+            gsErrorMsg("invalid argument to -b/--bit-hash\n",optarg);
+            return 1;
+          }
+        }
+        break;
       case 'l':
         if ( (optarg[0] >= '0') && (optarg[0] <= '9') )
         {
-          max_states = strtoul(optarg,NULL,0);
+          max_states = strtoull(optarg,NULL,0);
         } else {
           gsErrorMsg("invalid argument to -l/--max\n",optarg);
           return 1;
@@ -1040,8 +1306,21 @@ int main(int argc, char **argv)
           }
         }
         break;
-      case 'p':
-        priority_action = strdup(optarg);
+      case 'C':
+        if ( optarg != NULL )
+        {
+          priority_action = strdup(optarg);
+        } else {
+          priority_action = strdup("tau");
+        }
+        break;
+      case 's':
+        expl_strat = str_to_expl_strat(optarg);
+        if ( expl_strat == es_none )
+        {
+          gsErrorMsg("invalid exploration strategy '%s'\n",optarg);
+          return 1;
+        }
         break;
       case 'R':
         strat = RewriteStrategyFromString(optarg);
@@ -1088,6 +1367,17 @@ int main(int argc, char **argv)
   {
     gsErrorMsg("options -q/--quiet and -v/--verbose cannot be used together\n");
     return 1;
+  }
+  if ( bithashing && trace )
+  {
+    gsErrorMsg("options -b/--bit-hash and -t/--trace cannot be used together\n");
+    return 1;
+  }
+  if ( bithashing && (expl_strat == es_breadth) )
+  {
+    gsWarningMsg("options -b/--bit-hash and breadth-first search cannot be used together\n");
+    gsWarningMsg("using depth-first search instead\n");
+    expl_strat = es_depth;
   }
   if ( quiet )
     gsSetQuietMsg();
@@ -1168,7 +1458,17 @@ int main(int argc, char **argv)
   ATprotectAppl(&term_nil);
   afun_pair = ATmakeAFun("pair",2,ATfalse);
   ATprotectAFun(afun_pair);
-  states = ATindexedSetCreate(initial_table_size,50);
+  if ( bithashing )
+  {
+    bithashtable = (unsigned long *) malloc(bithashsize/8); // sizeof(unsigned int) * bithashsize/(8*sizeof(unsigned int))
+    if ( bithashtable == NULL )
+    {
+      gsErrorMsg("cannot create bit hash table\n");
+      return 1;
+    }
+  } else {
+    states = ATindexedSetCreate(initial_table_size,50);
+  }
   
   if ( trace )
   {
@@ -1181,7 +1481,7 @@ int main(int argc, char **argv)
   
   if ( priority_action != NULL )
   {
-    gsVerboseMsg("prioritising action '%s'...\n",priority_action);
+    gsVerboseMsg("applying confluence reduction with tau action '%s'...\n",priority_action);
     nstate->prioritise(priority_action);
     representation = ATtableCreate(initial_table_size,50);
   }
@@ -1221,15 +1521,36 @@ int main(int argc, char **argv)
 
     } else {
 #endif
-    fprintf(stderr,
-      "done with state space generation (%lu level%s, %lu state%s and %lu transition%s).\n",
-      level-1,
-      (level==2)?"":"s",
-      num_states,
-      (num_states==1)?"":"s",
-      trans,
-      (trans==1)?"":"s"
-    );
+    if ( expl_strat == es_random )
+    {
+      fprintf(stderr,
+        "done with random walk of %llu transition%s (visited %llu unique state%s).\n",
+        trans,
+        (trans==1)?"":"s",
+        num_states,
+        (num_states==1)?"":"s"
+      );
+    } else if ( expl_strat == es_breadth )
+    {
+      fprintf(stderr,
+        "done with state space generation (%lu level%s, %llu state%s and %llu transition%s).\n",
+        level-1,
+        (level==2)?"":"s",
+        num_states,
+        (num_states==1)?"":"s",
+        trans,
+        (trans==1)?"":"s"
+      );
+    } else if ( expl_strat == es_depth )
+    {
+      fprintf(stderr,
+        "done with state space generation (%llu state%s and %llu transition%s).\n",
+        num_states,
+        (num_states==1)?"":"s",
+        trans,
+        (trans==1)?"":"s"
+      );
+    }
 #ifdef ENABLE_SQUADT_CONNECTIVITY
     }
 #endif

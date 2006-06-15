@@ -788,3 +788,8 @@ bool NextStateGeneratorStandard::errorOccurred()
 {
 	return error;
 }
+
+ATerm NextStateGeneratorStandard::get_state()
+{
+	return cur_state;
+}

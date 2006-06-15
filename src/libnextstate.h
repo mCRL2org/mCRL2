@@ -17,6 +17,8 @@ class NextStateGenerator
 
 		virtual bool next(ATermAppl *Transition, ATerm *State, bool *prioritised = NULL) = 0;
 		virtual bool errorOccurred() = 0;
+
+		virtual ATerm get_state() = 0;
 };
 
 class NextState

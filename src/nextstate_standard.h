@@ -36,6 +36,8 @@ class NextStateGeneratorStandard : public NextStateGenerator
 		
 		void reset(ATerm State);
 
+		ATerm get_state();
+
 	private:
 		ns_info info;
 		unsigned int id;
