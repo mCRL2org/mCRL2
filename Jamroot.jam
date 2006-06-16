@@ -22,10 +22,11 @@ include $(TOP)/build/config.jam ;
 project
        : build-dir $(BUILD_TOP)
        : requirements
-          <cxxflags>-std=c++98
           <define>_FILE_OFFSET_BITS=64
           <toolset>darwin,<link>shared:<linkflags>"-undefined dynamic_lookup"
           <toolset>darwin:<define>__darwin__
+          <toolset>darwin:<cxxflags>"-std=c++98 -ansi"
+          <toolset>gcc:<cxxflags>"-std=c++98 -ansi"
        : default-build
           <address-model>$(ADDRESS_MODEL)
           <variant>$(BUILD_VARIANT)

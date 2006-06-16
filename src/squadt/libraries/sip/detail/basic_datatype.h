@@ -313,6 +313,16 @@ namespace sip {
     }
 
     template <>
+    inline std::string basic_datatype::convert(long int const& s) {
+      return (integer::convert(s));
+    }
+
+    template <>
+    inline std::string basic_datatype::convert(double const& s) {
+      return (real::convert(s));
+    }
+
+    template <>
     inline std::string basic_datatype::convert(std::string const& s) {
       return (s);
     }
@@ -462,7 +472,7 @@ namespace sip {
         o << "\" maximum=\"" << maximum;
       }
 
-      o << "/>";
+      o << "\"/>";
     }
 
     /**
@@ -509,7 +519,7 @@ namespace sip {
     inline bool integer::validate(std::string const& s) const {
       long int b;
 
-      return (sscanf(s.c_str(), "%ld", &b) != 1);
+      return (sscanf(s.c_str(), "%ld", &b) == 1);
     }
 
     /************************************************************************
@@ -623,7 +633,7 @@ namespace sip {
     inline bool real::validate(std::string const& s) const {
       double b;
 
-      return (sscanf(s.c_str(), "%lf", &b) != 1);
+      return (sscanf(s.c_str(), "%lf", &b) == 1);
     }
 
     /************************************************************************
@@ -682,7 +692,7 @@ namespace sip {
     inline void enumeration::private_write(std::ostream& o, std::string const& v) const {
       assert(validate(v));
 
-      o << "<enumeration value=\"" << v << "\"/>";
+      o << "<enumeration value=\"" << v << "\">";
 
       for (std::vector < std::string >::const_iterator i = values.begin(); i != values.end(); ++i) {
         o << "<element value=\"" << *i << "\"/>";

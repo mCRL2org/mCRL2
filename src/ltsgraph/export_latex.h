@@ -29,7 +29,7 @@ public:
 private:
 
 	string EscSpecChar(string);//To escape special characters
-	string ExportToLatex::str_replace(string to_replace, string replace_by, string replace_in);
+	string str_replace(string to_replace, string replace_by, string replace_in);
 
 	const char * filename;
 	string LatexCode;

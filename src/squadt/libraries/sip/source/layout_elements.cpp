@@ -475,7 +475,7 @@ namespace sip {
        **/
       text_field::text_field(const std::string& s, basic_datatype::sptr t) : text(s), type(t) {
       }
-     
+
       /**
        * @param[in] s the new text
        **/
