@@ -87,6 +87,7 @@ namespace xml2pp {
   }
 
   inline void reader_wrapper::set_schema(boost::filesystem::path const& n) throw () {
+#ifdef SCHEMA_VALIDATION_ENABLED
     if (xmlTextReaderReadState(reader) != XML_TEXTREADER_MODE_INITIAL) {
       throw (exception::exception(exception::illegal_operation_after_first_read));
     }
@@ -94,6 +95,7 @@ namespace xml2pp {
       /* Error schema file, abort ... */
       throw (exception::exception(exception::unable_to_open_file, n.native_file_string()));
     }
+#endif
   }
 
   /**
@@ -153,7 +155,11 @@ namespace xml2pp {
     std::string return_value;
 
     if (!xmlTextReaderIsEmptyElement(reader)) {
-      return_value = reinterpret_cast < char const* > (xmlTextReaderConstValue(reader));
+      char const* temporary = reinterpret_cast < char const* > (xmlTextReaderConstValue(reader));
+
+      if (temporary != 0) {
+        return_value = temporary;
+      }
     }
 
     return (return_value);

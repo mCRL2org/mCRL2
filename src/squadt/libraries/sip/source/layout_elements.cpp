@@ -65,7 +65,7 @@ namespace sip {
       void label::read_structure(read_context& r) {
         r.reader.next_element();
 
-        if (!r.reader.is_empty_element()) {
+        if (!r.reader.is_empty_element() && !r.reader.is_element("label")) {
           r.reader.get_value(&text);
 
           r.reader.next_element();
@@ -144,7 +144,7 @@ namespace sip {
       /**
        * @param[in] c the label for the button
        **/
-      radio_button::radio_button(std::string c, bool s) : label(c), connection(this), selected(s), first(true) {
+      radio_button::radio_button(std::string c) : label(c), connection(this), selected(true), first(true) {
       }
 
       /**
@@ -365,7 +365,7 @@ namespace sip {
        * \pre minimum <= v <= maximum
        **/
       void progress_bar::set_value(unsigned int v) {
-        current = v - minimum;
+        current = v;
       }
 
       /**
@@ -532,15 +532,24 @@ namespace sip {
       void text_field::read_structure(read_context& r) {
         r.reader.next_element();
 
-        if (r.reader.is_element("text") && !r.reader.is_end_element()) {
-          r.reader.next_element();
+        if (r.reader.is_element("text")) {
+          if (!r.reader.is_end_element()) {
+            r.reader.next_element();
 
-          r.reader.get_value(&text);
+            if (!r.reader.is_end_element()) { 
+              r.reader.get_value(&text);
 
-          r.reader.next_element();
+              r.reader.next_element();
+            }
+
+            r.reader.skip_end_element("text");
+          }
         }
 
-        r.reader.next_element(2);
+        if (!r.reader.is_end_element("text")) {
+          /* Assume datatype specification */
+          type = basic_datatype::read(r.reader).first;
+        }
 
         r.reader.skip_end_element("text-field");
 

@@ -399,7 +399,7 @@ namespace squadt {
        **/
       void tool_display_mediator::update_button(mediator::wrapper* w, std::string const& s) {
         wxButton* t = static_cast < wxButton* > (static_cast < wrapper* > (w)->release_window());
-std::cerr << "update_button\n";
+
         t->SetLabel(wxString(s.c_str(), wxConvLocal));
       }
 
@@ -475,9 +475,9 @@ std::cerr << "update_button\n";
        * @param[in] max the current value
        **/
       mediator::wrapper_aptr tool_display_mediator::build_progress_bar(layout::element const* e, unsigned int const& min, unsigned int const& max, unsigned int const& c) {
-        wxGauge* t = new wxGauge(current_window, wxID_ANY, max - min);
+        wxGauge* t = new wxGauge(current_window, wxID_ANY, max - min, wxDefaultPosition, wxDefaultSize, wxGA_HORIZONTAL);
      
-        t->SetValue(c);
+        t->SetValue(c - min);
      
         /* Connect change event */
         change_event_handler->associate(t, e);
@@ -495,7 +495,7 @@ std::cerr << "update_button\n";
         wxGauge* t = static_cast < wxGauge* > (static_cast < wrapper* > (w)->release_window());
 
         t->SetRange(max - min);
-        t->SetValue(c);
+        t->SetValue(c - min);
       }
 
       /**

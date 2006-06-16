@@ -127,7 +127,7 @@ namespace sip {
         public:
      
           /** \brief Alternative constructor for a button */
-          radio_button(std::string, bool = false);
+          radio_button(std::string);
 
           /** \brief Alternative constructor for a button */
           radio_button(std::string, radio_button*, bool = false);

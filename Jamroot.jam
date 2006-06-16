@@ -25,6 +25,7 @@ project
           <cxxflags>-std=c++98
           <define>_FILE_OFFSET_BITS=64
           <toolset>darwin,<link>shared:<linkflags>"-undefined dynamic_lookup"
+          <toolset>darwin:<define>__darwin__
        : default-build
           <address-model>$(ADDRESS_MODEL)
           <variant>$(BUILD_VARIANT)

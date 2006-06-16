@@ -51,6 +51,8 @@ namespace squadt {
       SetSizer(new wxBoxSizer(wxVERTICAL));
 
       SetSize(wxSize(800, 600));
+
+      Raise();
     }
 
     void main::set_menu_bar() {
@@ -140,6 +142,8 @@ namespace squadt {
       project_view = p;
 
       GetSizer()->Add(project_view, 1, wxEXPAND);
+
+      Layout();
 
       p->load_views();
 

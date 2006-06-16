@@ -163,7 +163,9 @@ namespace squadt {
           Connect(wxEVT_COMMAND_TREE_SEL_CHANGED, wxTreeEventHandler(dialog::new_project::on_selection_changed));
           Connect(wxEVT_COMMAND_BUTTON_CLICKED, wxCommandEventHandler(dialog::new_project::on_button_clicked1));
 
-          Layout();
+          s->Layout();
+
+          Refresh();
 
           /* Trigger event to set the widget enabledness/visibility right */
           on_selection_changed(e);
@@ -359,9 +361,9 @@ namespace squadt {
 
         button_accept->Enable(selection_is_valid);
 
-        Layout();
+        s->Layout();
 
-        /* Circumvent refresh bug on wxGTK by explicitly using refresh */
+        /* Circumvent refresh bug in wxGTK by explicitly using refresh */
         directory_selector->Refresh();
       }
 

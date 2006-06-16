@@ -141,6 +141,7 @@ namespace squadt {
 
       SetMinimumPaneSize(1);
       SplitVertically(object_view, process_display_view);
+      SetSashPosition(250);
 
       process_display_view->SetSizer(new wxBoxSizer(wxVERTICAL));
       process_display_view->SetScrollRate(10, 10);

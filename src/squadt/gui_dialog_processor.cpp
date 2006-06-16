@@ -208,6 +208,8 @@ namespace squadt {
         tool_selector->DeleteChildren(tool_selector->GetRootItem());
 
         main::tool_registry->by_format(f, boost::bind(&processor_details::add_to_tool_list, this, _1));
+
+        Refresh();
       }
 
       void processor_details::add_to_tool_list(const miscellaneous::tool_selection_helper::tools_by_category::value_type& p) {

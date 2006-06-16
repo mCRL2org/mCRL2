@@ -32,20 +32,6 @@ namespace asio {
 namespace detail {
 namespace socket_ops {
 
-// workaround because the mac does not understand
-// the variable errno. Therefore, it has
-// been replaced by a local errno.
-#if defined(__MACH__) && defined(__APPLE__)
-static int localerrno = 0;
-
-inline int get_error() {
-  return localerrno;
-}
-inline void set_error(int error) {
-  localerrno = error;
-}
-#else
-
 inline int get_error()
 {
 #if defined(BOOST_WINDOWS)
@@ -62,7 +48,6 @@ inline void set_error(int error)
   WSASetLastError(error);
 #endif // defined(BOOST_WINDOWS)
 }
-#endif
 
 template <typename ReturnType>
 inline ReturnType error_wrapper(ReturnType return_value)

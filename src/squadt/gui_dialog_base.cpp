@@ -46,6 +46,8 @@ namespace squadt {
         s->Add(ss, 0, wxALIGN_RIGHT|wxALL, 5);
 
         SetSizer(s);
+
+        CentreOnParent();
       }
 
       basic::~basic() {
