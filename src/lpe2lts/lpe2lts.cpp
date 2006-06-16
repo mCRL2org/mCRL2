@@ -37,7 +37,9 @@
 using namespace std;
 
 #define DEFAULT_MAX_STATES ULLONG_MAX
-#define DEFAULT_MAX_TRACES 10
+#define DEFAULT_MAX_TRACES 10UL
+#define DEFAULT_BITHASHSIZE 209715200ULL // ~25 MB 
+#define DEFAULT_INIT_TSIZE 10000UL 
 
 #define OF_UNKNOWN  0
 #define OF_AUT    1
@@ -201,7 +203,7 @@ static bool detect_action = false;
 static exploration_strategy expl_strat = es_breadth;
 static bool bithashing = false;
 static unsigned long *bithashtable;
-static unsigned long long bithashsize = 209715200; // ~25 MB
+static unsigned long long bithashsize = DEFAULT_BITHASHSIZE;
 
 static NextState *nstate;
   
@@ -951,6 +953,11 @@ static bool generate_lts()
           }
         }
       }
+#ifdef ENABLE_SQUADT_CONNECTIVITY
+      if ( tc.is_active() ) {
+        update_status_display(level,current_state,num_states,num_found_same,trans);
+      }
+#endif
 
       for (unsigned int i=0; i<nsgens_size; i++)
       {
@@ -970,18 +977,32 @@ static const unsigned int lpd_file_for_input_no_lts = 0;
 static const unsigned int lpd_file_for_input_lts = 1;
 static const unsigned int lts_file_for_output = 2;
 
-static const unsigned int option_max_states = 0;
-static const unsigned int option_max_traces = 1;
-static const unsigned int option_state_format_tree = 2;
-static const unsigned int option_rewr_strat = 3;
-static const unsigned int option_out_info = 4;
-static const unsigned int option_confluence_reduction = 5;
-static const unsigned int option_trace = 6;
-static const unsigned int option_detect_deadlock = 7;
-static const unsigned int option_removeunused = 8;
-static const unsigned int option_usedummies = 9;
-static const unsigned int option_expl_strat = 10;
-static const unsigned int option_bithashing = 11;
+enum lpe2lts_options {
+  option_out_info,
+
+  option_usedummies,
+  option_state_format_tree,
+  option_removeunused,
+
+  option_rewr_strat,
+
+  option_expl_strat,
+  
+  option_detect_deadlock,
+  option_detect_actions,
+  option_trace,
+  option_max_traces,
+  
+  option_confluence_reduction,
+  option_confluent_tau,
+  
+  option_max_states,
+  
+  option_bithashing,
+  option_bithashsize,
+  
+  option_init_tsize
+};
 
 static bool validate_configuration(sip::configuration &c)
 {
@@ -1008,47 +1029,90 @@ void set_basic_configuration_display(sip::tool::communicator& tc, bool make_lts)
   /* First column */
   layout::vertical_box* column = new layout::vertical_box();
 
-  checkbox* cb_aut = make_lts?(new checkbox("generate aut file", false)):NULL;
-/*  checkbox* cb_out_info = new checkbox("save state information", true);
-  checkbox* cb_usedummies = new checkbox("fill in free variables", true);
-  checkbox* cb_removeunused = new checkbox("remove unused data", true);
-  checkbox* cb_deadlock = new checkbox("detect deadlocks", false);
-  checkbox* cb_trace = new checkbox("save deadlock traces", false);
-  checkbox* cb_confluence = new checkbox("confluence reduction", false);
-  checkbox* cb_state_format_tree = new checkbox("memory efficient state repr.", false);
-  checkbox* cb_bithashing = new checkbox("bit hashing", false);
+  
   char buf[21];
-  sprintf(buf,"%llu\n",DEFAULT_MAX_STATES);
-  text_field* tf_max_states = new text_field(buf, sip::datatype::standard_string);
-  sprintf(buf,"%u\n",DEFAULT_MAX_TRACES);
-  text_field* tf_max_traces = new text_field(buf, sip::datatype::standard_string);
+
+  checkbox* cb_aut = make_lts?(new checkbox("generate aut file", false)):NULL;
+  checkbox* cb_out_info = new checkbox("save state information", true);
+  
+  checkbox* cb_usedummies = new checkbox("fill in free variables", true);
+  checkbox* cb_state_format_tree = new checkbox("memory efficient state repr.", false);
+  checkbox* cb_removeunused = new checkbox("remove unused data", true);
+  
+  label* lb_rewr_strat = new label("Rewriter:");
   radio_button* rb_rewr_strat_inner = new radio_button("innermost");
   radio_button* rb_rewr_strat_jitty = new radio_button("JITty",rb_rewr_strat_inner,false);
   radio_button* rb_rewr_strat_innerc = new radio_button("compiling innermost",rb_rewr_strat_inner,false);
   radio_button* rb_rewr_strat_jittyc = new radio_button("compiling JITty",rb_rewr_strat_inner,false);
+  
+  label* lb_expl_strat = new label("Strategy:");
   radio_button* rb_expl_strat_breadth = new radio_button("breadth-first");
   radio_button* rb_expl_strat_depth = new radio_button("depth-first",rb_expl_strat_breadth,false);
-  radio_button* rb_expl_strat_random = new radio_button("random",rb_expl_strat_breadth,false);*/
+  radio_button* rb_expl_strat_random = new radio_button("random",rb_expl_strat_breadth,false);
+  
+  checkbox* cb_deadlock = new checkbox("detect deadlocks", false);
+  label* lb_actions = new label("detect actions:");
+  text_field* tf_actions = new text_field("", sip::datatype::standard_string);
+  checkbox* cb_trace = new checkbox("save action/deadlock traces", false);
+  label* lb_max_traces = new label("at most:");
+  sprintf(buf,"%lu",DEFAULT_MAX_TRACES);
+  text_field* tf_max_traces = new text_field(buf, sip::datatype::standard_integer);
+  
+  checkbox* cb_confluence = new checkbox("confluence reduction", false);
+  text_field* tf_conf_tau = new text_field("tau", sip::datatype::standard_string);
+  
+  
+  label* lb_max_states = new label("maximum number of states:");
+  sprintf(buf,"%llu",DEFAULT_MAX_STATES);
+  text_field* tf_max_states = new text_field(buf, sip::datatype::standard_integer);
+
+  checkbox* cb_bithashing = new checkbox("bit hashing", false);
+  label* lb_bithashsize = new label("states:");
+  sprintf(buf,"%llu",DEFAULT_BITHASHSIZE);
+  text_field* tf_bithashsize = new text_field(buf, sip::datatype::standard_integer);
+
+  label* lb_init_tsize = new label("initial table size:");
+  sprintf(buf,"%lu",DEFAULT_INIT_TSIZE);
+  text_field* tf_init_tsize = new text_field(buf, sip::datatype::standard_integer);
 
   if ( make_lts )
     column->add(cb_aut, layout::left);
-/*  column->add(cb_out_info, layout::left);
+  column->add(cb_out_info, layout::left);
+
   column->add(cb_usedummies, layout::left);
-  column->add(cb_removeunused, layout::left);
-  column->add(cb_deadlock, layout::left);
-  column->add(cb_trace, layout::left);
-  column->add(cb_confluence, layout::left);
   column->add(cb_state_format_tree, layout::left);
-  column->add(cb_bithashing, layout::left);
-  column->add(tf_max_states, layout::left);
-  column->add(tf_max_traces, layout::left);
+  column->add(cb_removeunused, layout::left);
+
+  column->add(lb_rewr_strat, layout::left);
   column->add(rb_rewr_strat_inner, layout::left);
   column->add(rb_rewr_strat_jitty, layout::left);
   column->add(rb_rewr_strat_innerc, layout::left);
   column->add(rb_rewr_strat_jittyc, layout::left);
+
+  column->add(lb_expl_strat, layout::left);
   column->add(rb_expl_strat_breadth, layout::left);
   column->add(rb_expl_strat_depth, layout::left);
-  column->add(rb_expl_strat_random, layout::left);*/
+  column->add(rb_expl_strat_random, layout::left);
+
+  column->add(cb_deadlock, layout::left);
+  column->add(lb_actions, layout::left);
+  column->add(tf_actions, layout::left);
+  column->add(cb_trace, layout::left);
+  column->add(lb_max_traces, layout::left);
+  column->add(tf_max_traces, layout::left);
+
+  column->add(cb_confluence, layout::left);
+  column->add(tf_conf_tau, layout::left);
+
+  column->add(lb_max_states, layout::left);
+  column->add(tf_max_states, layout::left);
+
+  column->add(cb_bithashing, layout::left);
+  column->add(lb_bithashsize, layout::left);
+  column->add(tf_bithashsize, layout::left);
+
+  column->add(lb_init_tsize, layout::left);
+  column->add(tf_init_tsize, layout::left);
 
   button* okay_button = new button("Ok");
 
@@ -1067,33 +1131,47 @@ void set_basic_configuration_display(sip::tool::communicator& tc, bool make_lts)
   /* Update the current configuration */
   sip::configuration& c = tc.get_configuration();
 
+  /* Values for the options */
   if ( make_lts )
   {
     std::string input_file_name = c.get_object(lpd_file_for_input_lts)->get_location();
     /* Add output file to the configuration */
     c.add_output(lts_file_for_output, (cb_aut->get_status()?"aut":"svc"), input_file_name + (cb_aut->get_status()?".aut":".svc"));
   }
+  c.add_option(option_out_info).append_argument(sip::datatype::standard_boolean, cb_out_info->get_status());
 
-  c.set_completed(true);
-
-  /* Values for the options */
-/*  c.add_option(option_out_info).append_argument(sip::datatype::standard_boolean, cb_out_info->get_status());
   c.add_option(option_usedummies).append_argument(sip::datatype::standard_boolean, cb_usedummies->get_status());
-  c.add_option(option_removeunused).append_argument(sip::datatype::standard_boolean, cb_removeunused->get_status());
-  c.add_option(option_detect_deadlock).append_argument(sip::datatype::standard_boolean, cb_deadlock->get_status());
-  c.add_option(option_trace).append_argument(sip::datatype::standard_boolean, cb_trace->get_status());
-  c.add_option(option_confluence_reduction).append_argument(sip::datatype::standard_boolean, cb_confluence->get_status());
   c.add_option(option_state_format_tree).append_argument(sip::datatype::standard_boolean, cb_state_format_tree->get_status());
-  c.add_option(option_bithashing).append_argument(sip::datatype::standard_boolean, cb_bithashing->get_status());
-  c.add_option(option_max_states).append_argument(sip::datatype::standard_string, tf_max_states->get_text());
+  c.add_option(option_removeunused).append_argument(sip::datatype::standard_boolean, cb_removeunused->get_status());
+  
+  if ( rb_rewr_strat_inner->is_selected() ) c.add_option(option_rewr_strat).append_argument(sip::datatype::standard_integer, (long int) GS_REWR_INNER);
+  if ( rb_rewr_strat_jitty->is_selected() ) c.add_option(option_rewr_strat).append_argument(sip::datatype::standard_integer, (long int) GS_REWR_JITTY);
+  if ( rb_rewr_strat_innerc->is_selected() ) c.add_option(option_rewr_strat).append_argument(sip::datatype::standard_integer, (long int) GS_REWR_INNERC);
+  if ( rb_rewr_strat_jittyc->is_selected() ) c.add_option(option_rewr_strat).append_argument(sip::datatype::standard_integer, (long int) GS_REWR_JITTYC);
+  
+  if ( rb_expl_strat_breadth->is_selected() ) c.add_option(option_expl_strat).append_argument(sip::datatype::standard_integer, (long int) es_breadth);
+  if ( rb_expl_strat_depth->is_selected() ) c.add_option(option_expl_strat).append_argument(sip::datatype::standard_integer, (long int) es_depth);
+  if ( rb_expl_strat_random->is_selected() ) c.add_option(option_expl_strat).append_argument(sip::datatype::standard_integer, (long int) es_random);
+  if ( rb_expl_strat_breadth->is_selected() ) printf("breadth selected\n");
+  if ( rb_expl_strat_depth->is_selected() ) printf("depth selected\n");
+  if ( rb_expl_strat_random->is_selected() ) printf("random selected\n");
+
+  c.add_option(option_detect_deadlock).append_argument(sip::datatype::standard_boolean, cb_deadlock->get_status());
+  c.add_option(option_detect_actions).append_argument(sip::datatype::standard_string, tf_actions->get_text());
+  c.add_option(option_trace).append_argument(sip::datatype::standard_boolean, cb_trace->get_status());
   c.add_option(option_max_traces).append_argument(sip::datatype::standard_string, tf_max_traces->get_text());
-  if ( rb_rewr_strat_inner->is_selected() ) c.add_option(option_rewr_strat).append_argument(sip::datatype::standard_integer, (int) GS_REWR_INNER);
-  if ( rb_rewr_strat_jitty->is_selected() ) c.add_option(option_rewr_strat).append_argument(sip::datatype::standard_integer, (int) GS_REWR_JITTY);
-  if ( rb_rewr_strat_innerc->is_selected() ) c.add_option(option_rewr_strat).append_argument(sip::datatype::standard_integer, (int) GS_REWR_INNERC);
-  if ( rb_rewr_strat_jittyc->is_selected() ) c.add_option(option_rewr_strat).append_argument(sip::datatype::standard_integer, (int) GS_REWR_JITTYC);
-  if ( rb_expl_strat_breadth->is_selected() ) c.add_option(option_expl_strat).append_argument(sip::datatype::standard_integer, (int) es_breadth);
-  if ( rb_expl_strat_depth->is_selected() ) c.add_option(option_expl_strat).append_argument(sip::datatype::standard_integer, (int) es_depth);
-  if ( rb_expl_strat_random->is_selected() ) c.add_option(option_expl_strat).append_argument(sip::datatype::standard_integer, (int) es_random);*/
+  
+  c.add_option(option_confluence_reduction).append_argument(sip::datatype::standard_boolean, cb_confluence->get_status());
+  c.add_option(option_confluent_tau).append_argument(sip::datatype::standard_string, tf_conf_tau->get_text());
+  
+  c.add_option(option_max_states).append_argument(sip::datatype::standard_string, tf_max_states->get_text());
+  
+  c.add_option(option_bithashing).append_argument(sip::datatype::standard_boolean, cb_bithashing->get_status());
+  c.add_option(option_bithashsize).append_argument(sip::datatype::standard_string, tf_bithashsize->get_text());
+  
+  c.add_option(option_init_tsize).append_argument(sip::datatype::standard_string, tf_init_tsize->get_text());
+  
+  c.set_completed(true);
 
   tc.clear_display();
 }
@@ -1108,8 +1186,8 @@ int main(int argc, char **argv)
   string spec_fn, lts_fn;
   FILE *SpecStream;
   ATerm Spec;
-  unsigned long initial_table_size = 10000;
-  #define sopts "hqvfyucrbl:da:t::C::R:s:"
+  unsigned long initial_table_size = DEFAULT_INIT_TSIZE;
+  #define sopts "hqvfyucrb::l:da:t::C::R:s:"
   struct option lopts[] = {
     { "help",            no_argument,       NULL, 'h' },
     { "version",         no_argument,       NULL, 0   },
@@ -1242,16 +1320,39 @@ int main(int argc, char **argv)
       lts_fn = c.get_object(lts_file_for_output)->get_location();
     }
 
-//    max_states = boost::any_cast <int> (*(c.get_option(option_max_states)->get_value_iterator()));
-//    max_traces = boost::any_cast <int> (*(c.get_option(option_max_traces)->get_value_iterator()));
-//    strat = boost::any_cast <int> (*(c.get_option(option_rewr_strat)->get_value_iterator()));
-/*    stateformat = (boost::any_cast <bool> (*(c.get_option(option_state_format_tree)->get_value_iterator())))?GS_STATE_TREE:GS_STATE_VECTOR;
     outinfo = boost::any_cast <bool> (*(c.get_option(option_out_info)->get_value_iterator()));
-    //confluence_reduction = boost::any_cast <bool> (*(c.get_option(option_confluence_reduction)->get_value_iterator()));
-    trace = boost::any_cast <bool> (*(c.get_option(option_trace)->get_value_iterator()));
-    detect_deadlock = boost::any_cast <bool> (*(c.get_option(option_detect_deadlock)->get_value_iterator()));
+
+    usedummies = boost::any_cast <bool> (*(c.get_option(option_usedummies)->get_value_iterator()));
+    stateformat = (boost::any_cast <bool> (*(c.get_option(option_state_format_tree)->get_value_iterator())))?GS_STATE_TREE:GS_STATE_VECTOR;
     removeunused = boost::any_cast <bool> (*(c.get_option(option_removeunused)->get_value_iterator()));
-    usedummies = boost::any_cast <bool> (*(c.get_option(option_usedummies)->get_value_iterator()));*/
+    
+    max_traces = strtoul((boost::any_cast <string> (*(c.get_option(option_max_traces)->get_value_iterator()))).c_str(),NULL,0);
+
+    strat = (RewriteStrategy) boost::any_cast <long int> (*(c.get_option(option_rewr_strat)->get_value_iterator()));
+    
+    expl_strat = (exploration_strategy) boost::any_cast <long int> (*(c.get_option(option_expl_strat)->get_value_iterator()));
+    
+    detect_deadlock = boost::any_cast <bool> (*(c.get_option(option_detect_deadlock)->get_value_iterator()));
+    string s = boost::any_cast <string> (*(c.get_option(option_detect_actions)->get_value_iterator()));
+    if ( s != "" )
+    {
+      detect_action = true;
+      trace_actions = parse_action_list(s.c_str(),&num_trace_actions);
+    }
+    trace = boost::any_cast <bool> (*(c.get_option(option_trace)->get_value_iterator()));
+    max_traces = strtoul((boost::any_cast <string> (*(c.get_option(option_max_traces)->get_value_iterator()))).c_str(),NULL,0);
+    
+    if ( boost::any_cast <bool> (*(c.get_option(option_confluence_reduction)->get_value_iterator())) )
+    {
+	    priority_action = strdup((boost::any_cast <string> (*(c.get_option(option_confluent_tau)->get_value_iterator()))).c_str());
+    }
+    
+    max_states = strtoull((boost::any_cast <string> (*(c.get_option(option_max_states)->get_value_iterator()))).c_str(),NULL,0);
+    
+    bithashing = boost::any_cast <bool> (*(c.get_option(option_bithashing)->get_value_iterator()));
+    bithashsize = strtoull((boost::any_cast <string> (*(c.get_option(option_bithashsize)->get_value_iterator()))).c_str(),NULL,0);
+    
+    initial_table_size = strtoul((boost::any_cast <string> (*(c.get_option(option_init_tsize)->get_value_iterator()))).c_str(),NULL,0);
   }
   else {
 #endif
