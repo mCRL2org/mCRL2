@@ -290,9 +290,6 @@ namespace sip {
         public:
      
           /** \brief Constructor */
-          explicit text_field(const std::string& i, basic_datatype::sptr);
-
-          /** \brief Constructor */
           text_field(const std::string& i, basic_datatype::sptr& = standard_string);
 
           /** \brief Set the text */

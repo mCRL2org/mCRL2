@@ -470,13 +470,6 @@ namespace sip {
       }
      
       /**
-       * @param[in] s the initial content of the text control
-       * @param[in] t the a type description object for validation purposes
-       **/
-      text_field::text_field(const std::string& s, basic_datatype::sptr t) : text(s), type(t) {
-      }
-
-      /**
        * @param[in] s the new text
        **/
       void text_field::set_text(std::string s) {
@@ -518,7 +511,7 @@ namespace sip {
         o << "<text-field id=\"" << id << "\">"
           << "<text>" << text << "</text>";
 
-        type->write(o);
+        type->write(o, text);
 
         o << "</text-field>";
       }

@@ -5,7 +5,7 @@
 #include <climits>
 #include <cfloat>
 #include <string>
-#include <ostream>
+#include <iostream>
 #include <utility>
 
 #include <boost/any.hpp>
@@ -518,7 +518,7 @@ namespace sip {
      **/
     inline bool integer::validate(std::string const& s) const {
       long int b;
-
+std::cerr << "validating(" << s << ")\n";
       return (sscanf(s.c_str(), "%ld", &b) == 1);
     }
 
