@@ -36,6 +36,9 @@
 
 using namespace std;
 
+#define DEFAULT_MAX_STATES ULLONG_MAX
+#define DEFAULT_MAX_TRACES 10
+
 #define OF_UNKNOWN  0
 #define OF_AUT    1
 #define OF_SVC    2
@@ -187,12 +190,12 @@ static bool removeunused = true;
 static int stateformat = GS_STATE_VECTOR;
 static int outformat = OF_UNKNOWN;
 static bool outinfo = true;
-static unsigned long long max_states = ULLONG_MAX;
+static unsigned long long max_states = DEFAULT_MAX_STATES;
 static char *priority_action = NULL;
 static bool trace = false;
 static int num_trace_actions = 0;
 static ATermAppl *trace_actions = NULL;
-static unsigned long max_traces = 10;
+static unsigned long max_traces = DEFAULT_MAX_TRACES;
 static bool detect_deadlock = false;
 static bool detect_action = false;
 static exploration_strategy expl_strat = es_breadth;
@@ -816,10 +819,8 @@ static bool generate_lts()
         ATerm NewState;
         while ( nsgen->next(&Transition,&NewState) )
         {
-          if ( add_transition(state,Transition,NewState) )
-          {
-            deadlockstate = false;
-          }
+          deadlockstate = false;
+          add_transition(state,Transition,NewState);
         }
         
         if ( nsgen->errorOccurred() )
@@ -895,12 +896,13 @@ static bool generate_lts()
         ATermAppl Transition;
         ATerm NewState;
         bool new_state = false;
+        bool deadlockstate_new = false;
         if ( nsgen->next(&Transition,&NewState) )
         {
+          deadlockstate = false;
           if ( add_transition(state,Transition,NewState) )
           {
             new_state = true;
-            deadlockstate = false;
             if ( nsgens_num == nsgens_size )
             {
               nsgens_size = nsgens_size*2;
@@ -912,6 +914,7 @@ static bool generate_lts()
             }
             nsgens[nsgens_num] = nstate->getNextStates(NewState,nsgens[nsgens_num]);
             nsgens_num++;
+            deadlockstate_new = true;
           }
         } else {
           nsgens_num--;
@@ -926,6 +929,7 @@ static bool generate_lts()
         {
           check_deadlock_trace(state);
         }
+        deadlockstate = deadlockstate_new;
 
         if ( new_state )
         {
@@ -976,6 +980,8 @@ static const unsigned int option_trace = 6;
 static const unsigned int option_detect_deadlock = 7;
 static const unsigned int option_removeunused = 8;
 static const unsigned int option_usedummies = 9;
+static const unsigned int option_expl_strat = 10;
+static const unsigned int option_bithashing = 11;
 
 static bool validate_configuration(sip::configuration &c)
 {
@@ -1002,20 +1008,27 @@ void set_basic_configuration_display(sip::tool::communicator& tc, bool make_lts)
   /* First column */
   layout::vertical_box* column = new layout::vertical_box();
 
-  checkbox* cb_aut = make_lts?(new checkbox("generate aut file instead of svc", false)):NULL;
-/*  checkbox* cb_out_info = new checkbox("save state information in svc file", true);
-  checkbox* cb_usedummies = new checkbox("substitute dummy values for free variables", true);
-  checkbox* cb_removeunused = new checkbox("remove unused parts of data specification", true);
+  checkbox* cb_aut = make_lts?(new checkbox("generate aut file", false)):NULL;
+/*  checkbox* cb_out_info = new checkbox("save state information", true);
+  checkbox* cb_usedummies = new checkbox("fill in free variables", true);
+  checkbox* cb_removeunused = new checkbox("remove unused data", true);
   checkbox* cb_deadlock = new checkbox("detect deadlocks", false);
   checkbox* cb_trace = new checkbox("save deadlock traces", false);
-  checkbox* cb_confluence = new checkbox("apply on-the-fly confluence reduction", true);
-  checkbox* cb_state_format_tree = new checkbox("use memory efficient state representation", false);
-//  textbox* tb_max_states = new checkbox("4294967296", sip::datatype::standard_integer);
-//  textbox* tb_max_traces = new checkbox("10", sip::datatype::standard_integer);
-  radio_button* rb_rewr_strat_inner = new radio_button("innermost",NULL,true);
+  checkbox* cb_confluence = new checkbox("confluence reduction", false);
+  checkbox* cb_state_format_tree = new checkbox("memory efficient state repr.", false);
+  checkbox* cb_bithashing = new checkbox("bit hashing", false);
+  char buf[21];
+  sprintf(buf,"%llu\n",DEFAULT_MAX_STATES);
+  text_field* tf_max_states = new text_field(buf, sip::datatype::standard_string);
+  sprintf(buf,"%u\n",DEFAULT_MAX_TRACES);
+  text_field* tf_max_traces = new text_field(buf, sip::datatype::standard_string);
+  radio_button* rb_rewr_strat_inner = new radio_button("innermost");
   radio_button* rb_rewr_strat_jitty = new radio_button("JITty",rb_rewr_strat_inner,false);
   radio_button* rb_rewr_strat_innerc = new radio_button("compiling innermost",rb_rewr_strat_inner,false);
-  radio_button* rb_rewr_strat_jittyc = new radio_button("compiling JITty",rb_rewr_strat_inner,false);*/
+  radio_button* rb_rewr_strat_jittyc = new radio_button("compiling JITty",rb_rewr_strat_inner,false);
+  radio_button* rb_expl_strat_breadth = new radio_button("breadth-first");
+  radio_button* rb_expl_strat_depth = new radio_button("depth-first",rb_expl_strat_breadth,false);
+  radio_button* rb_expl_strat_random = new radio_button("random",rb_expl_strat_breadth,false);*/
 
   if ( make_lts )
     column->add(cb_aut, layout::left);
@@ -1026,10 +1039,16 @@ void set_basic_configuration_display(sip::tool::communicator& tc, bool make_lts)
   column->add(cb_trace, layout::left);
   column->add(cb_confluence, layout::left);
   column->add(cb_state_format_tree, layout::left);
+  column->add(cb_bithashing, layout::left);
+  column->add(tf_max_states, layout::left);
+  column->add(tf_max_traces, layout::left);
   column->add(rb_rewr_strat_inner, layout::left);
   column->add(rb_rewr_strat_jitty, layout::left);
   column->add(rb_rewr_strat_innerc, layout::left);
-  column->add(rb_rewr_strat_jittyc, layout::left);*/
+  column->add(rb_rewr_strat_jittyc, layout::left);
+  column->add(rb_expl_strat_breadth, layout::left);
+  column->add(rb_expl_strat_depth, layout::left);
+  column->add(rb_expl_strat_random, layout::left);*/
 
   button* okay_button = new button("Ok");
 
@@ -1064,13 +1083,17 @@ void set_basic_configuration_display(sip::tool::communicator& tc, bool make_lts)
   c.add_option(option_detect_deadlock).append_argument(sip::datatype::standard_boolean, cb_deadlock->get_status());
   c.add_option(option_trace).append_argument(sip::datatype::standard_boolean, cb_trace->get_status());
   c.add_option(option_confluence_reduction).append_argument(sip::datatype::standard_boolean, cb_confluence->get_status());
-  c.add_option(option_state_format_tree).append_argument(sip::datatype::standard_boolean, cb_state_format_tree->get_status());*/
-//  c.add_option(option_max_states).append_argument(sip::datatype::standard_integer, tb_confluence->get_text());
-//  c.add_option(option_max_traces).append_argument(sip::datatype::standard_integer, tb_confluence->get_text());
-//  if ( rb_rewr_strat_inner->is_selected() ) c.add_options(option_rewr_strat).append_argument(sip::datatype::integer, GS_REWR_INNER);
-//  if ( rb_rewr_strat_jitty->is_selected() ) c.add_options(option_rewr_strat).append_argument(sip::datatype::integer, GS_REWR_JITTY);
-//  if ( rb_rewr_strat_innerc->is_selected() ) c.add_options(option_rewr_strat).append_argument(sip::datatype::integer, GS_REWR_INNERC);
-//  if ( rb_rewr_strat_jittyc->is_selected() ) c.add_options(option_rewr_strat).append_argument(sip::datatype::integer, GS_REWR_JITTYC);
+  c.add_option(option_state_format_tree).append_argument(sip::datatype::standard_boolean, cb_state_format_tree->get_status());
+  c.add_option(option_bithashing).append_argument(sip::datatype::standard_boolean, cb_bithashing->get_status());
+  c.add_option(option_max_states).append_argument(sip::datatype::standard_string, tf_max_states->get_text());
+  c.add_option(option_max_traces).append_argument(sip::datatype::standard_string, tf_max_traces->get_text());
+  if ( rb_rewr_strat_inner->is_selected() ) c.add_option(option_rewr_strat).append_argument(sip::datatype::standard_integer, (int) GS_REWR_INNER);
+  if ( rb_rewr_strat_jitty->is_selected() ) c.add_option(option_rewr_strat).append_argument(sip::datatype::standard_integer, (int) GS_REWR_JITTY);
+  if ( rb_rewr_strat_innerc->is_selected() ) c.add_option(option_rewr_strat).append_argument(sip::datatype::standard_integer, (int) GS_REWR_INNERC);
+  if ( rb_rewr_strat_jittyc->is_selected() ) c.add_option(option_rewr_strat).append_argument(sip::datatype::standard_integer, (int) GS_REWR_JITTYC);
+  if ( rb_expl_strat_breadth->is_selected() ) c.add_option(option_expl_strat).append_argument(sip::datatype::standard_integer, (int) es_breadth);
+  if ( rb_expl_strat_depth->is_selected() ) c.add_option(option_expl_strat).append_argument(sip::datatype::standard_integer, (int) es_depth);
+  if ( rb_expl_strat_random->is_selected() ) c.add_option(option_expl_strat).append_argument(sip::datatype::standard_integer, (int) es_random);*/
 
   tc.clear_display();
 }
@@ -1224,7 +1247,7 @@ int main(int argc, char **argv)
 //    strat = boost::any_cast <int> (*(c.get_option(option_rewr_strat)->get_value_iterator()));
 /*    stateformat = (boost::any_cast <bool> (*(c.get_option(option_state_format_tree)->get_value_iterator())))?GS_STATE_TREE:GS_STATE_VECTOR;
     outinfo = boost::any_cast <bool> (*(c.get_option(option_out_info)->get_value_iterator()));
-    confluence_reduction = boost::any_cast <bool> (*(c.get_option(option_confluence_reduction)->get_value_iterator()));
+    //confluence_reduction = boost::any_cast <bool> (*(c.get_option(option_confluence_reduction)->get_value_iterator()));
     trace = boost::any_cast <bool> (*(c.get_option(option_trace)->get_value_iterator()));
     detect_deadlock = boost::any_cast <bool> (*(c.get_option(option_detect_deadlock)->get_value_iterator()));
     removeunused = boost::any_cast <bool> (*(c.get_option(option_removeunused)->get_value_iterator()));
