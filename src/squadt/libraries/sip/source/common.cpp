@@ -1,3 +1,5 @@
+#define IMPORT_STATIC_MEMBERS
+
 #include <sip/detail/configuration.h>
 #include <sip/detail/common.h>
 
@@ -16,11 +18,5 @@ namespace sip {
   /** \brief The type identifier for messages of any type */
   template <>
   const message::type_identifier_t message::message_any     = message_any;
-
-  namespace datatype {
-
-    std::string boolean::true_string  = "true";
-    std::string boolean::false_string = "false";
-  }
 }
 

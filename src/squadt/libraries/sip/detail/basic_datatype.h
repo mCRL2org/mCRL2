@@ -5,7 +5,7 @@
 #include <climits>
 #include <cfloat>
 #include <string>
-#include <iostream>
+#include <ostream>
 #include <utility>
 
 #include <boost/any.hpp>
@@ -56,7 +56,11 @@ namespace sip {
         virtual ~basic_datatype() = 0;
     };
 
-    /** \brief Derived datatype specifier for enumerations */
+    /**
+     * \brief Derived datatype specifier for enumerations
+     *
+     * An enumeration is a finite set of alternatives.
+     **/
     class enumeration : public basic_datatype {
 
       private:
@@ -64,18 +68,27 @@ namespace sip {
         /** \brief The possible values in the domain */
         std::vector < std::string > values;
 
+        /** \brief Index into values of the default value for elements of the specified type */
+        size_t default_value;
+
       private:
         
+        /** \brief Constructor */
+        enumeration();
+
+        /** \brief Constructor */
+        enumeration(std::string s);
+
         /** \brief Write method that does all the work */
         void private_write(std::ostream& o, std::string const& s) const;
 
       public:
 
         /** \brief Add value */
-        void add_value(std::string);
+        void add_value(std::string, bool = false);
 
         /** \brief Convenience function for shared pointer instances */
-        static basic_datatype::sptr create();
+        static basic_datatype::sptr create(std::string s);
 
         /** \brief Reconstruct a type from XML stream */
         static std::pair < basic_datatype::sptr, std::string > read(xml2pp::text_reader&);
@@ -96,21 +109,47 @@ namespace sip {
         inline bool validate(std::string const& value) const;
     };
 
-    /** \brief Derived datatype specifier for integers (finite using long int) */
+    /**
+     * \brief Derived datatype specifier for integer number ranges (finite using long int)
+     * 
+     * The range is specified by a minimum and a maximum. The minimum, of
+     * course, must be smaller than the maximum. The default value is taken to
+     * be the minimum, unless it is specified at construction time.
+     **/
     class integer : public basic_datatype {
 
       private:
 
-        /** The minimum integer value */
+        /** \brief The minimum integer value in the range */
         long int minimum;
 
-        /** The maximum integer value */
+        /** \brief The maximum integer value in the range */
         long int maximum;
+
+        /** \brief The default value for elements of the specified type */
+        const long int default_value;
+
+      public:
+
+        /** The set of integers, bounded by implementation limits only */
+        static basic_datatype::sptr standard;
+
+        /** The set of natural numbers, bounded by implementation limits only */
+        static basic_datatype::sptr naturals;
+
+        /** The set of positive numbers, bounded by implementation limits only */
+        static basic_datatype::sptr positives;
+
+        /** \brief Implementation dependent limitation (minimum value) */
+        static const long int implementation_minimum;
+
+        /** \brief Implementation dependent limitation (maximum value) */
+        static const long int implementation_maximum;
 
       private:
 
         /** \brief Constructor */
-        integer(long int minimum = LONG_MIN, long int maximum = LONG_MAX);
+        integer(long int = implementation_minimum, long int = implementation_minimum, long int = implementation_maximum);
 
         /** \brief Write method that does all the work */
         void private_write(std::ostream& o, std::string const& s) const;
@@ -118,7 +157,7 @@ namespace sip {
       public:
 
         /** \brief Convenience function for shared pointer instances */
-        static basic_datatype::sptr create(long int minimum = LONG_MIN, long int maximum = LONG_MAX);
+        static basic_datatype::sptr create(long int d = implementation_minimum, long int = implementation_minimum, long int = implementation_maximum);
 
         /** \brief Reconstruct a type from XML stream */
         static std::pair < basic_datatype::sptr, std::string > read(xml2pp::text_reader&);
@@ -139,21 +178,50 @@ namespace sip {
         inline bool validate(std::string const& value) const;
     };
 
-    /** \brief Derived datatype specifier for integers (finite using double) */
+    /**
+     * \brief Derived datatype specifier for real number ranges (finite using double)
+     *
+     * The range is specified by a minimum and a maximum. The minimum, of
+     * course, must be smaller than the maximum. The default value is taken to
+     * be the minimum, unless it is specified at construction time.
+     **/
     class real : public basic_datatype {
 
       private:
 
-        /** The minimum integer value */
+        /** \brief The minimum integer value in the range */
         double minimum;
 
-        /** The maximum integer value */
+        /** \brief The maximum integer value in the range */
         double maximum;
+
+        /** \brief The default value for elements of the specified type */
+        const double default_value;
+
+      public:
+
+        /** The set of real numbers, bounded by implementation limits only */
+        static basic_datatype::sptr standard;
+
+        /** The set of real numbers [0 ... 1], bounded by implementation limits only */
+        static basic_datatype::sptr probability;
+
+        /** The set of non negative real numbers [0 ... ), bounded by implementation limits only */
+        static basic_datatype::sptr non_negatives;
+
+        /** The set of non negative real numbers (0 ... ), bounded by implementation limits only */
+        static basic_datatype::sptr positives;
+
+        /** \brief Implementation dependent limitation (minimum value) */
+        static const double implementation_minimum;
+
+        /** \brief Implementation dependent limitation (maximum value) */
+        static const double implementation_maximum;
 
       private:
 
         /** \brief Constructor */
-        real(double minimum = DBL_MIN, double maximum = DBL_MAX);
+        real(double d = implementation_minimum, double = implementation_minimum, double = implementation_maximum);
 
         /** \brief Write method that does all the work */
         void private_write(std::ostream& o, std::string const& s) const;
@@ -161,7 +229,7 @@ namespace sip {
       public:
 
         /** \brief Convenience function for shared pointer instances */
-        static basic_datatype::sptr create(double minimum = DBL_MIN, double maximum = DBL_MAX);
+        static basic_datatype::sptr create(double d = implementation_minimum, double minimum = implementation_minimum, double maximum = implementation_maximum);
 
         /** \brief Reconstruct a type from XML stream */
         static std::pair < basic_datatype::sptr, std::string > read(xml2pp::text_reader&);
@@ -188,15 +256,21 @@ namespace sip {
     /** \brief Derived datatype specifier for booleans */
     class boolean : public basic_datatype {
 
-      private:
+      public:
 
         /** \brief The string that represents true */
-        static std::string true_string;
+        static const std::string true_string;
 
         /** \brief The string that represents false */
-        static std::string false_string;
+        static const std::string false_string;
+
+        /** \brief Instance of a Boolean */
+        static basic_datatype::sptr standard;
 
       private:
+
+        /** \brief Constructor */
+        boolean();
 
         /** \brief Write method that does all the work */
         void private_write(std::ostream& o, std::string const& s) const;
@@ -239,18 +313,32 @@ namespace sip {
         /** \brief The maximum length a string of this type has */
         unsigned int maximum_length;
 
+        /** \brief The default value for elements of the specified type */
+        const std::string default_value;
+
+      public:
+
+        /** \brief Instance of a string (without limitations except the implementation limits) */
+        static basic_datatype::sptr standard;
+
+        /** \brief The empty string */
+        static const std::string empty;
+
+        /** \brief The maximum length a string may have */
+        static const unsigned int implementation_maximum_length;
+
       private:
+
+        /** \brief Constructor */
+        inline string(std::string const& = empty, unsigned int minimum = 0, unsigned int maximum = implementation_maximum_length); 
 
         /** \brief Write method that does all the work */
         void private_write(std::ostream& o, std::string const& s) const;
 
       public:
 
-        /** \brief Constructor */
-        inline string(unsigned int minimum = 0, unsigned int maximum = 0); 
-
         /** \brief Convenience function for shared pointer instances */
-        static basic_datatype::sptr create(unsigned int = 0, unsigned int = 0);
+        static basic_datatype::sptr create(std::string const& = empty, unsigned int = 0, unsigned int = implementation_maximum_length);
 
         /** \brief Reconstruct a type from XML stream */
         static std::pair < basic_datatype::sptr, std::string > read(xml2pp::text_reader&);
@@ -331,8 +419,16 @@ namespace sip {
      * Implementation of Boolean
      ************************************************************************/
 
-    /** Instance of a Boolean */
-    static basic_datatype::sptr standard_boolean(new boolean());
+#ifdef IMPORT_STATIC_MEMBERS
+    basic_datatype::sptr boolean::standard;
+
+    const std::string boolean::true_string  = "true";
+
+    const std::string boolean::false_string = "false";
+#endif
+
+    inline boolean::boolean() {
+    }
 
     /**
      * @param[in] r the xml2pp text reader from which to read
@@ -343,16 +439,16 @@ namespace sip {
       /* Current element must be <string> */
       assert(r.is_element("boolean"));
 
-      std::string p = (r.get_attribute_as_string("value") == true_string) ? true_string : false_string;
+      bool b = r.get_attribute("value");
 
       r.next_element();
       r.skip_end_element("boolean");
 
-      return (make_pair(boolean::create(), p));
+      return (make_pair(boolean::standard, (b) ? true_string : false_string));
     }
 
     inline basic_datatype::sptr boolean::create() {
-      return (standard_boolean);
+      return (boolean::standard);
     }
 
     /**
@@ -360,7 +456,13 @@ namespace sip {
      * @param[in] v an optional (valid) instance
      **/
     inline void boolean::private_write(std::ostream& o, std::string const& v) const {
-      o << "<boolean value=\"" << v << "\"/>";
+      o << "<boolean";
+      
+      if (v == true_string) {
+        o << "value=\"" << v << "\"";
+      }
+
+      o << "/>";
     }
 
     /**
@@ -412,24 +514,33 @@ namespace sip {
      * Implementation of Integer
      ************************************************************************/
 
-    /** Instance of an integer datatype */
-    static basic_datatype::sptr standard_integer  = integer::create();
-    static basic_datatype::sptr standard_natural  = integer::create(0);
-    static basic_datatype::sptr standard_positive = integer::create(1);
+#ifdef IMPORT_STATIC_MEMBERS
+    basic_datatype::sptr integer::standard(new integer());
+    basic_datatype::sptr integer::naturals(new integer(0));
+    basic_datatype::sptr integer::positives(new integer(1));
+
+    /** \brief Implementation dependent limitation (minimum value) */
+    const long int integer::implementation_minimum = LONG_MIN;
+
+    /** \brief Implementation dependent limitation (maximum value) */
+    const long int integer::implementation_maximum = LONG_MAX;
+#endif
 
     /**
      * @param[in] min the minimum value in the domain
      * @param[in] max the maximum value in the domain
+     * @param[in] d the default value in the domain
      **/
-    inline integer::integer(long int min, long int max) : minimum(min), maximum(max) {
+    inline integer::integer(long int d, long int min, long int max) : minimum(min), maximum(max), default_value(d) {
     }
 
     /**
      * @param[in] min the minimum value in the domain
      * @param[in] max the maximum value in the domain
+     * @param[in] d the default value in the domain
      **/
-    inline basic_datatype::sptr integer::create(long int min, long int max) {
-      return (basic_datatype::sptr(new integer(min, max)));
+    inline basic_datatype::sptr integer::create(long int d, long int min, long int max) {
+      return (basic_datatype::sptr(new integer(min, max, d)));
     }
 
     /**
@@ -438,8 +549,8 @@ namespace sip {
      * \pre The current element must be \<integer\>
      **/
     inline std::pair < basic_datatype::sptr, std::string > integer::read(xml2pp::text_reader& r) {
-      long int minimum = LONG_MIN;
-      long int maximum = LONG_MAX;
+      long int minimum = implementation_minimum;
+      long int maximum = implementation_maximum;
 
       /* Current element must be <integer> */
       assert(r.is_element("integer"));
@@ -447,12 +558,16 @@ namespace sip {
       r.get_attribute(&minimum, "minimum");
       r.get_attribute(&minimum, "maximum");
 
+      long int default_value = minimum;
+
+      r.get_attribute(&default_value, "default");
+
       std::string p = r.get_attribute_as_string("value");
 
       r.next_element();
       r.skip_end_element("integer");
 
-      return (make_pair(integer::create(minimum, maximum), p));
+      return (make_pair(integer::create(minimum, maximum, default_value), p));
     }
 
     /**
@@ -460,19 +575,25 @@ namespace sip {
      * @param[in] v an optional (valid) instance
      **/
     inline void integer::private_write(std::ostream& o, std::string const& v) const {
-      assert(validate(v));
+      o << "<real";
 
-      o << "<integer value=\"" << std::dec << v;
+      if (!v.empty()) {
+        o << " value=\"" << std::dec << v << "\"";
+      }
 
       if (minimum != LONG_MIN) {
-        o << "\" minimum=\"" << minimum;
+        o << " minimum=\"" << minimum << "\"";
       }
         
       if (maximum != LONG_MAX) {
-        o << "\" maximum=\"" << maximum;
+        o << " maximum=\"" << maximum << "\"";
       }
 
-      o << "\"/>";
+      if (default_value != minimum) {
+        o << " default=\"" << default_value << "\"";
+      }
+
+      o << "/>";
     }
 
     /**
@@ -518,7 +639,7 @@ namespace sip {
      **/
     inline bool integer::validate(std::string const& s) const {
       long int b;
-std::cerr << "validating(" << s << ")\n";
+
       return (sscanf(s.c_str(), "%ld", &b) == 1);
     }
 
@@ -526,24 +647,34 @@ std::cerr << "validating(" << s << ")\n";
      * Implementation of Real 
      ************************************************************************/
 
-    static basic_datatype::sptr standard_real              = real::create();
-    static basic_datatype::sptr standard_real_probability  = real::create(0,1);
-    static basic_datatype::sptr standard_non_negative_real = real::create(0);
-    static basic_datatype::sptr standard_positive_real     = real::create(1);
+#ifdef IMPORT_STATIC_MEMBERS
+    basic_datatype::sptr real::standard(new real());
+    basic_datatype::sptr real::probability(new real(0,1));
+    basic_datatype::sptr real::non_negatives(new real(0));
+    basic_datatype::sptr real::positives(new real(1));
+
+    /** \brief Implementation dependent limitation (minimum value) */
+    const double real::implementation_minimum = DBL_MIN;
+
+    /** \brief Implementation dependent limitation (maximum value) */
+    const double real::implementation_maximum = DBL_MAX;
+#endif
 
     /**
      * @param[in] min the minimum value in the domain
      * @param[in] max the maximum value in the domain
+     * @param[in] d the default value in the domain
      **/
-    inline real::real(double min, double max) : minimum(min), maximum(max) {
+    inline real::real(double d, double min, double max) : minimum(min), maximum(max), default_value(d) {
     }
 
     /**
      * @param[in] min the minimum value in the domain
      * @param[in] max the maximum value in the domain
+     * @param[in] d the default value in the domain
      **/
-    inline basic_datatype::sptr real::create(double min, double max) {
-      return (basic_datatype::sptr(new real(min, max)));
+    inline basic_datatype::sptr real::create(double d, double min, double max) {
+      return (basic_datatype::sptr(new real(min, max, d)));
     }
 
     /**
@@ -552,14 +683,18 @@ std::cerr << "validating(" << s << ")\n";
      * \pre The current element must be \<real\>
      **/
     inline std::pair < basic_datatype::sptr, std::string > real::read(xml2pp::text_reader& r) {
-      double minimum = DBL_MIN;
-      double maximum = DBL_MAX;
+      double minimum = implementation_minimum;
+      double maximum = implementation_maximum;
 
       /* Current element must be <integer> */
       assert(r.is_element("real"));
 
       r.get_attribute(&minimum, "minimum");
       r.get_attribute(&minimum, "maximum");
+
+      double default_value = minimum;
+
+      r.get_attribute(&default_value, "default");
 
       std::string p = r.get_attribute_as_string("value");
 
@@ -574,16 +709,22 @@ std::cerr << "validating(" << s << ")\n";
      * @param[in] v an optional (valid) instance
      **/
     inline void real::private_write(std::ostream& o, std::string const& v) const {
-      assert(validate(v));
+      o << "<real";
 
-      o << "<real value=\"" << std::dec << v;
+      if (!v.empty()) {
+        o << " value=\"" << std::dec << v << "\"";
+      }
 
       if (minimum != DBL_MIN) {
-        o << "\" minimum=\"" << minimum;
+        o << " minimum=\"" << minimum << "\"";
       }
         
       if (maximum != DBL_MAX) {
-        o << "\" maximum=\"" << maximum;
+        o << " maximum=\"" << maximum << "\"";
+      }
+
+      if (default_value != minimum) {
+        o << " default=\"" << default_value << "\"";
       }
 
       o << "/>";
@@ -643,18 +784,32 @@ std::cerr << "validating(" << s << ")\n";
     /**
      * @param[in] any string s
      **/
-    inline void enumeration::add_value(std::string s) {
+    inline enumeration::enumeration(std::string s) : default_value(0) {
+      values.push_back(s);
+    }
+
+    inline enumeration::enumeration() : default_value(0) {
+    }
+
+    /**
+     * @param[in] any string s
+     * @param[in] b whether this element should now be marked as the default
+     **/
+    inline void enumeration::add_value(std::string s, bool b) {
       if (std::find(values.begin(), values.end(), s) == values.end()) {
         values.push_back(s);
+
+        if (b) {
+          default_value = values.size() - 1;
+        }
       }
     }
 
     /**
-     * @param[in] min the minimum value in the domain
-     * @param[in] max the maximum value in the domain
+     * @param[in] s the first (default) element
      **/
-    inline basic_datatype::sptr enumeration::create() {
-      return (basic_datatype::sptr(new enumeration));
+    inline basic_datatype::sptr enumeration::create(std::string s) {
+      return (basic_datatype::sptr(new enumeration(s)));
     }
 
     /**
@@ -666,12 +821,14 @@ std::cerr << "validating(" << s << ")\n";
       /* Current element must be <enumeration> */
       assert(r.is_element("enumeration"));
 
+      boost::shared_ptr < enumeration > new_enumeration(new enumeration);
+      
+      r.get_attribute(&new_enumeration->default_value, "default");
+
       std::string p = r.get_attribute_as_string("value");
 
       r.next_element();
 
-      boost::shared_ptr < enumeration > new_enumeration(new enumeration);
-      
       while (!r.is_end_element("enumeration")) {
         /* Assume element */
         new_enumeration->add_value(r.get_attribute_as_string("value"));
@@ -682,6 +839,10 @@ std::cerr << "validating(" << s << ")\n";
 
       r.skip_end_element("enumeration");
 
+      if (p.empty()) {
+        p = new_enumeration->values[new_enumeration->default_value];
+      }
+
       return (make_pair(boost::static_pointer_cast < basic_datatype, enumeration > (new_enumeration), p));
     }
 
@@ -690,9 +851,13 @@ std::cerr << "validating(" << s << ")\n";
      * @param[in] v an optional (valid) instance
      **/
     inline void enumeration::private_write(std::ostream& o, std::string const& v) const {
-      assert(validate(v));
+      o << "<enumeration value=\"" << v;
 
-      o << "<enumeration value=\"" << v << "\">";
+      if (default_value != 0) {
+        o << "\" default=\"" << default_value;
+      }
+
+      o << "\">";
 
       for (std::vector < std::string >::const_iterator i = values.begin(); i != values.end(); ++i) {
         o << "<element value=\"" << *i << "\"/>";
@@ -744,39 +909,59 @@ std::cerr << "validating(" << s << ")\n";
      * Implementation of String
      ************************************************************************/
 
-    /** Instance of a string (without limitations) */
-    static basic_datatype::sptr standard_string(new string());
+#ifdef IMPORT_STATIC_MEMBERS
+    const std::string  string::empty;
+
+    const unsigned int string::implementation_maximum_length = UINT_MAX;
+
+    basic_datatype::sptr string::standard(new string());
+#endif
 
     /**
      * @param[in] minimum the minimum length
      * @param[in] maximum the maximum length
+     * @param[in] d the default value
      **/
-    inline string::string(unsigned int minimum, unsigned int maximum) : minimum_length(minimum), maximum_length(maximum_length) {
+    inline string::string(std::string const& d, unsigned int minimum, unsigned int maximum) :
+                minimum_length(minimum), maximum_length(maximum_length), default_value(d) {
     }
 
     /**
      * @param[in] minimum the minimum length
      * @param[in] maximum the maximum length
+     * @param[in] d the default value
      **/
-    inline basic_datatype::sptr string::create(unsigned int minimum, unsigned maximum) {
-      return (standard_boolean);
+    inline basic_datatype::sptr string::create(std::string const& d, unsigned int minimum, unsigned int maximum) {
+      if (d.empty() && minimum == 0 && maximum == implementation_maximum_length) {
+        return (string::standard);
+      }
+      else {
+        return (string::create(d, minimum, maximum));
+      }
     }
 
     /** \pre The current element must be \<string\>  */
     inline std::pair < basic_datatype::sptr, std::string > string::read(xml2pp::text_reader& r) {
       unsigned int minimum = 0;
-      unsigned int maximum = 0;
+      unsigned int maximum = implementation_maximum_length;
+      std::string  default_value;
 
       /* Current element must be <string> */
       assert(r.is_element("string"));
 
+      r.get_attribute(&default_value, "default");
+
       r.get_attribute(&minimum, "minimum-length");
       r.get_attribute(&maximum, "maximum-length");
+
+      std::string value = default_value;
+
+      r.get_attribute(&value, "default");
 
       r.next_element();
       r.skip_end_element("string");
 
-      return (std::make_pair((minimum == 0 && maximum == 0) ? standard_string : string::create(minimum, maximum), r.get_attribute_as_string("value")));
+      return (std::make_pair(string::create(default_value, minimum, maximum), value));
     }
 
     inline void string::set_maximum_length(unsigned int m) {
@@ -792,8 +977,6 @@ std::cerr << "validating(" << s << ")\n";
      * @param[in] s an optional (valid) instance
      **/
     inline void string::private_write(std::ostream& o, std::string const& s) const {
-      assert(validate(s));
-
       o << "<string";
 
       if (minimum_length != 0) {
@@ -801,6 +984,10 @@ std::cerr << "validating(" << s << ")\n";
       }
       if (maximum_length != 0) {
         o << " maximum-length=\"" << maximum_length << "\"";
+      }
+
+      if (!default_value.empty()) {
+        o << "\" default=\"" << default_value;
       }
 
       if (!s.empty()) {

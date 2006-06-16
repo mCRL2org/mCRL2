@@ -459,7 +459,7 @@ namespace sip {
       }
 
       text_field::text_field() {
-        type = standard_string;
+        type = string::standard;
       }
 
       /**
@@ -504,6 +504,7 @@ namespace sip {
       void text_field::update(layout::mediator* m, layout::mediator::wrapper* t) const {
         m->update_text_field(t, text);
       }
+
       /**
        * @param[out] o the stream to which to write the result
        **/

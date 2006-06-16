@@ -1015,11 +1015,11 @@ void set_basic_configuration_display(sip::tool::communicator& tc) {
 
   /* Values for the options */
   c.add_option(option_remove_single_element_sorts).
-        append_argument(sip::datatype::standard_boolean, remove_single_element_sorts->get_status());
+        append_argument(sip::datatype::boolean::standard, remove_single_element_sorts->get_status());
   c.add_option(option_remove_unvisited_summands).
-        append_argument(sip::datatype::standard_boolean, remove_unvisited_summands->get_status());
+        append_argument(sip::datatype::boolean::standard, remove_unvisited_summands->get_status());
   c.add_option(option_ignore_summand_conditions).
-        append_argument(sip::datatype::standard_boolean, ignore_summand_conditions->get_status());
+        append_argument(sip::datatype::boolean::standard, ignore_summand_conditions->get_status());
 }
 
 /* Checks whether the configuration is complete and valid */

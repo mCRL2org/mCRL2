@@ -50,7 +50,7 @@ namespace squadt {
 
       SetSizer(new wxBoxSizer(wxVERTICAL));
 
-      SetSize(wxSize(800, 600));
+      SetSize(wxSize(1024, 768));
 
       Raise();
     }

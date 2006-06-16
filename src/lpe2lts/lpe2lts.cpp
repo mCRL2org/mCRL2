@@ -1052,28 +1052,28 @@ void set_basic_configuration_display(sip::tool::communicator& tc, bool make_lts)
   
   checkbox* cb_deadlock = new checkbox("detect deadlocks", false);
   label* lb_actions = new label("detect actions:");
-  text_field* tf_actions = new text_field("", sip::datatype::standard_string);
+  text_field* tf_actions = new text_field("", sip::datatype::string::standard);
   checkbox* cb_trace = new checkbox("save action/deadlock traces", false);
   label* lb_max_traces = new label("at most:");
   sprintf(buf,"%lu",DEFAULT_MAX_TRACES);
-  text_field* tf_max_traces = new text_field(buf, sip::datatype::standard_integer);
+  text_field* tf_max_traces = new text_field(buf, sip::datatype::integer::standard);
   
   checkbox* cb_confluence = new checkbox("confluence reduction", false);
-  text_field* tf_conf_tau = new text_field("tau", sip::datatype::standard_string);
+  text_field* tf_conf_tau = new text_field("tau", sip::datatype::string::standard);
   
   
   label* lb_max_states = new label("maximum number of states:");
   sprintf(buf,"%llu",DEFAULT_MAX_STATES);
-  text_field* tf_max_states = new text_field(buf, sip::datatype::standard_integer);
+  text_field* tf_max_states = new text_field(buf, sip::datatype::integer::standard);
 
   checkbox* cb_bithashing = new checkbox("bit hashing", false);
   label* lb_bithashsize = new label("states:");
   sprintf(buf,"%llu",DEFAULT_BITHASHSIZE);
-  text_field* tf_bithashsize = new text_field(buf, sip::datatype::standard_integer);
+  text_field* tf_bithashsize = new text_field(buf, sip::datatype::integer::standard);
 
   label* lb_init_tsize = new label("initial table size:");
   sprintf(buf,"%lu",DEFAULT_INIT_TSIZE);
-  text_field* tf_init_tsize = new text_field(buf, sip::datatype::standard_integer);
+  text_field* tf_init_tsize = new text_field(buf, sip::datatype::integer::standard);
 
   if ( make_lts )
     column->add(cb_aut, layout::left);
@@ -1138,38 +1138,38 @@ void set_basic_configuration_display(sip::tool::communicator& tc, bool make_lts)
     /* Add output file to the configuration */
     c.add_output(lts_file_for_output, (cb_aut->get_status()?"aut":"svc"), input_file_name + (cb_aut->get_status()?".aut":".svc"));
   }
-  c.add_option(option_out_info).append_argument(sip::datatype::standard_boolean, cb_out_info->get_status());
+  c.add_option(option_out_info).append_argument(sip::datatype::boolean::standard, cb_out_info->get_status());
 
-  c.add_option(option_usedummies).append_argument(sip::datatype::standard_boolean, cb_usedummies->get_status());
-  c.add_option(option_state_format_tree).append_argument(sip::datatype::standard_boolean, cb_state_format_tree->get_status());
-  c.add_option(option_removeunused).append_argument(sip::datatype::standard_boolean, cb_removeunused->get_status());
+  c.add_option(option_usedummies).append_argument(sip::datatype::boolean::standard, cb_usedummies->get_status());
+  c.add_option(option_state_format_tree).append_argument(sip::datatype::boolean::standard, cb_state_format_tree->get_status());
+  c.add_option(option_removeunused).append_argument(sip::datatype::boolean::standard, cb_removeunused->get_status());
   
-  if ( rb_rewr_strat_inner->is_selected() ) c.add_option(option_rewr_strat).append_argument(sip::datatype::standard_integer, (long int) GS_REWR_INNER);
-  if ( rb_rewr_strat_jitty->is_selected() ) c.add_option(option_rewr_strat).append_argument(sip::datatype::standard_integer, (long int) GS_REWR_JITTY);
-  if ( rb_rewr_strat_innerc->is_selected() ) c.add_option(option_rewr_strat).append_argument(sip::datatype::standard_integer, (long int) GS_REWR_INNERC);
-  if ( rb_rewr_strat_jittyc->is_selected() ) c.add_option(option_rewr_strat).append_argument(sip::datatype::standard_integer, (long int) GS_REWR_JITTYC);
+  if ( rb_rewr_strat_inner->is_selected() ) c.add_option(option_rewr_strat).append_argument(sip::datatype::integer::standard, (long int) GS_REWR_INNER);
+  if ( rb_rewr_strat_jitty->is_selected() ) c.add_option(option_rewr_strat).append_argument(sip::datatype::integer::standard, (long int) GS_REWR_JITTY);
+  if ( rb_rewr_strat_innerc->is_selected() ) c.add_option(option_rewr_strat).append_argument(sip::datatype::integer::standard, (long int) GS_REWR_INNERC);
+  if ( rb_rewr_strat_jittyc->is_selected() ) c.add_option(option_rewr_strat).append_argument(sip::datatype::integer::standard, (long int) GS_REWR_JITTYC);
   
-  if ( rb_expl_strat_breadth->is_selected() ) c.add_option(option_expl_strat).append_argument(sip::datatype::standard_integer, (long int) es_breadth);
-  if ( rb_expl_strat_depth->is_selected() ) c.add_option(option_expl_strat).append_argument(sip::datatype::standard_integer, (long int) es_depth);
-  if ( rb_expl_strat_random->is_selected() ) c.add_option(option_expl_strat).append_argument(sip::datatype::standard_integer, (long int) es_random);
+  if ( rb_expl_strat_breadth->is_selected() ) c.add_option(option_expl_strat).append_argument(sip::datatype::integer::standard, (long int) es_breadth);
+  if ( rb_expl_strat_depth->is_selected() ) c.add_option(option_expl_strat).append_argument(sip::datatype::integer::standard, (long int) es_depth);
+  if ( rb_expl_strat_random->is_selected() ) c.add_option(option_expl_strat).append_argument(sip::datatype::integer::standard, (long int) es_random);
   if ( rb_expl_strat_breadth->is_selected() ) printf("breadth selected\n");
   if ( rb_expl_strat_depth->is_selected() ) printf("depth selected\n");
   if ( rb_expl_strat_random->is_selected() ) printf("random selected\n");
 
-  c.add_option(option_detect_deadlock).append_argument(sip::datatype::standard_boolean, cb_deadlock->get_status());
-  c.add_option(option_detect_actions).append_argument(sip::datatype::standard_string, tf_actions->get_text());
-  c.add_option(option_trace).append_argument(sip::datatype::standard_boolean, cb_trace->get_status());
-  c.add_option(option_max_traces).append_argument(sip::datatype::standard_string, tf_max_traces->get_text());
+  c.add_option(option_detect_deadlock).append_argument(sip::datatype::boolean::standard, cb_deadlock->get_status());
+  c.add_option(option_detect_actions).append_argument(sip::datatype::string::standard, tf_actions->get_text());
+  c.add_option(option_trace).append_argument(sip::datatype::boolean::standard, cb_trace->get_status());
+  c.add_option(option_max_traces).append_argument(sip::datatype::string::standard, tf_max_traces->get_text());
   
-  c.add_option(option_confluence_reduction).append_argument(sip::datatype::standard_boolean, cb_confluence->get_status());
-  c.add_option(option_confluent_tau).append_argument(sip::datatype::standard_string, tf_conf_tau->get_text());
+  c.add_option(option_confluence_reduction).append_argument(sip::datatype::boolean::standard, cb_confluence->get_status());
+  c.add_option(option_confluent_tau).append_argument(sip::datatype::string::standard, tf_conf_tau->get_text());
   
-  c.add_option(option_max_states).append_argument(sip::datatype::standard_string, tf_max_states->get_text());
+  c.add_option(option_max_states).append_argument(sip::datatype::string::standard, tf_max_states->get_text());
   
-  c.add_option(option_bithashing).append_argument(sip::datatype::standard_boolean, cb_bithashing->get_status());
-  c.add_option(option_bithashsize).append_argument(sip::datatype::standard_string, tf_bithashsize->get_text());
+  c.add_option(option_bithashing).append_argument(sip::datatype::boolean::standard, cb_bithashing->get_status());
+  c.add_option(option_bithashsize).append_argument(sip::datatype::string::standard, tf_bithashsize->get_text());
   
-  c.add_option(option_init_tsize).append_argument(sip::datatype::standard_string, tf_init_tsize->get_text());
+  c.add_option(option_init_tsize).append_argument(sip::datatype::string::standard, tf_init_tsize->get_text());
   
   c.set_completed(true);
 
