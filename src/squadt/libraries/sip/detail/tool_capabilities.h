@@ -189,7 +189,7 @@ namespace sip {
       if (r.is_element("capabilities")) {
         version v = {0,0};
  
-        r.read();
+        r.next_element();
  
         assert (r.is_element("protocol-version"));
  
@@ -198,13 +198,13 @@ namespace sip {
  
         capabilities::ptr c(new capabilities(v));
  
-        r.read();
+        r.next_element();
         r.skip_end_element("protocol-version");
  
         if (r.is_element("interactivity")) {
           c->interactive = r.get_attribute("level");
  
-          r.read();
+          r.next_element();
           r.skip_end_element("interactivity");
         }
  
@@ -219,7 +219,7 @@ namespace sip {
  
           c->input_combinations.insert(ic);
  
-          r.read();
+          r.next_element();
           r.skip_end_element("input-configuration");
         }
  

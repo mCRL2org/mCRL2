@@ -49,41 +49,41 @@ namespace sip {
   report* report::read(xml2pp::text_reader& r) throw () {
     report* l = new report();
 
-    r.read();
+    r.next_element();
 
     assert(r.is_element("report"));
 
-    r.read();
+    r.next_element();
 
     /* Next element is one of : error, comment, output or configuration (or the end tag of report) */
     while (!r.is_end_element()) {
       if (r.is_element("error")) {
         std::string temporary;
 
-        r.read();
+        r.next_element();
 
         if (!r.is_end_element()) {
           r.get_value(&temporary);
 
-          r.read();
+          r.next_element();
         }
 
-        r.read();
+        r.next_element();
 
         l->set_error(temporary);
       }
       else if (r.is_element("comment")) {
         std::string temporary;
 
-        r.read();
+        r.next_element();
 
         if (!r.is_end_element()) {
           r.get_value(&temporary);
 
-          r.read();
+          r.next_element();
         }
 
-        r.read();
+        r.next_element();
 
         l->set_comment(temporary);
       }

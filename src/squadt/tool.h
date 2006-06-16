@@ -2,6 +2,7 @@
 #define TOOL_H
 
 #include <string>
+#include <iostream>
 
 #include <xml2pp/text_reader.h>
 #include <sip/detail/tool_capabilities.h>
@@ -105,7 +106,7 @@ namespace squadt {
     }
 
     if (!r.is_end_element()) {
-      r.read();
+      r.next_element();
 
       sip::tool::capabilities::ptr c = sip::tool::capabilities::read(r);
       

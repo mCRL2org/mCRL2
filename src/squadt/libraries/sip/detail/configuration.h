@@ -448,7 +448,7 @@ namespace sip {
 
     reader.get_attribute(&c->category, "category");
 
-    reader.read();
+    reader.next_element();
 
     while (!(reader.is_end_element() && reader.is_element("configuration"))) {
       /* Current element must be <option> */

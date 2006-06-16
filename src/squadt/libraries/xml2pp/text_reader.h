@@ -1,109 +1,145 @@
 #ifndef XML2PP_TEXT_READER_H
 #define XML2PP_TEXT_READER_H
 
-#include <iosfwd>
-#include <exception>
 #include <string>
-#include <cstdlib>
-#include <iostream>
+#include <memory>
 
 #include <boost/noncopyable.hpp>
+#include <boost/shared_ptr.hpp>
+#include <boost/filesystem/path.hpp>
 
 #include <xml2pp/detail/exception.h>
 
 namespace xml2pp {
 
-  extern "C" {
-    #include <libxml/xmlreader.h>
-  }
+  class reader_wrapper;
 
   /** \brief A C++ wrapper around xmlTextReader from libxml2 */
   class text_reader : public boost::noncopyable {
-    private:
-      /** \brief The XML text reader from libxml2 */
-      xmlTextReaderPtr   reader;
 
-      /** \brief Whether the end-of-stream was reached */
-      bool               past_end_of_stream;
+    private:
+
+      /** \brief Wrapper around a libXML2 text reader (Pimpl idiom) */
+      boost::shared_ptr < reader_wrapper > wrapped_reader;
 
     public:
 
-      /** \brief Wrapper class to allow distinction between input strings and file names */
-      template < typename T >
-      class file_name {
-        /** \brief The name of the file */
-        const T name;
-
-        public:
-          /** \brief Constructor */
-          inline file_name(const T& n);
-
-          /** \brief Returns a C string that represents the file name */
-          inline const char* get() const;
-      };
-
       /** \brief Constructor for reading from a file */
-      template < typename T >
-      text_reader(const file_name< T >&) throw ();
+      text_reader(boost::filesystem::path const&);
 
       /** \brief Constructor for reading an in memory document */
-      template < typename T >
-      text_reader(const T& document) throw ();
+      text_reader(const char* document);
+
+      /** \brief Constructor for reading an in memory document */
+      text_reader(std::string const& document);
 
       /** \brief Constructor for reading part of an in memory document */
-      template < typename T >
-      text_reader(const T& document, const size_t prefix_length) throw ();
+      text_reader(const char* document, const size_t prefix_length);
 
-      /** \brief descructor */
-      ~text_reader();
+      /** \brief Constructor for reading part of an in memory document */
+      text_reader(std::string const& document, const size_t prefix_length);
 
       /** \brief Set schema for validation purposes */
-      template < typename T >
-      inline void set_schema(const file_name< T >&) throw ();
+      void set_schema(boost::filesystem::path const&);
 
       /** \brief Advances to the next element in the XML document tree */
-      inline void read(unsigned int = 0) throw ();
-
-      /** \brief Returns the name of the current element */
-      inline std::string element_name();
-
-      /** \brief Get the value of an attribute as ... (second argument remains unchanged if the attribute is not present) */
-      inline bool get_attribute(std::string* string, const char* attribute_name);
-
-      /** \brief Get the value of an attribute as ... (second argument remains unchanged if the attribute is not present) */
-      template < typename T >
-      inline bool get_attribute(T*, const char*);
-
-      /** \brief Returns whether the attribute is present or not */
-      inline bool get_attribute(const char*);
+      void next_element(unsigned int = 0);
 
       /** \brief Returns the value of a named attribute attribute as a string */
-      inline std::string get_attribute_string_value(const char*) const;
+      std::string get_attribute_as_string(const char*) const;
 
-      /** \brief Get the value of an element as ... */
-      inline bool get_value(std::string*);
+      /** \brief Returns whether the attribute is present or not (or true/false) */
+      bool get_attribute(const char*);
 
-      /** \brief Get the value of an element as ... */
-      template < typename T >
-      inline bool get_value(T*);
+      /** \brief Get the value of an attribute as ... (no change if the attribute is not present) */
+      bool get_attribute(std::string* string, const char* attribute_name);
+
+      /** \brief Get the value of an attribute as ... (no change if the attribute is not present) */
+      bool get_attribute(char*, const char*);
+
+      /** \brief Get the value of an attribute as ... (no change if the attribute is not present) */
+      bool get_attribute(unsigned char*, const char*);
+
+      /** \brief Get the value of an attribute as ... (no change if the attribute is not present) */
+      bool get_attribute(short int*, const char*);
+
+      /** \brief Get the value of an attribute as ... (no change if the attribute is not present) */
+      bool get_attribute(short unsigned int*, const char*);
+
+      /** \brief Get the value of an attribute as ... (no change if the attribute is not present) */
+      bool get_attribute(int*, const char*);
+
+      /** \brief Get the value of an attribute as ... (no change if the attribute is not present) */
+      bool get_attribute(unsigned int*, const char*);
+
+      /** \brief Get the value of an attribute as ... (no change if the attribute is not present) */
+      bool get_attribute(long int*, const char*);
+
+      /** \brief Get the value of an attribute as ... (no change if the attribute is not present) */
+      bool get_attribute(long unsigned int*, const char*);
+
+      /** \brief Get the value of an attribute as ... (no change if the attribute is not present) */
+      bool get_attribute(float*, const char*);
+
+      /** \brief Get the value of an attribute as ... (no change if the attribute is not present) */
+      bool get_attribute(double*, const char*);
+
+      /** \brief Get the value of an element as a string */
+      std::string get_value_as_string() const;
+
+      /** \brief Get the value of an element as a string */
+      void get_value(std::string*) const;
+
+      /** \brief Get the value of an element as a single char */
+      void get_value(char*) const;
+
+      /** \brief Get the value of an element as a single unsigned char */
+      void get_value(unsigned char*) const;
+
+      /** \brief Get the value of an element as a single int */
+      void get_value(short int*) const;
+
+      /** \brief Get the value of an element as a single unsigned int */
+      void get_value(short unsigned int*) const;
+
+      /** \brief Get the value of an element as a single int */
+      void get_value(int*) const;
+
+      /** \brief Get the value of an element as a single unsigned int */
+      void get_value(unsigned int*) const;
+
+      /** \brief Get the value of an element as a single long int */
+      void get_value(long int*) const;
+
+      /** \brief Get the value of an element as a single unsigned long int */
+      void get_value(long unsigned int*) const;
+
+      /** \brief Get the value of an element as a single float */
+      void get_value(float*) const;
+
+      /** \brief Get the value of an element as a single double */
+      void get_value(double*) const;
+
+      /** \brief Returns the name of the current element */
+      std::string element_name() const;
 
       /** \brief Whether the current element matches element_name */
-      inline bool is_element(const char*);
+      bool is_element(const char*) const;
 
       /** \brief Whether the current element is an end of element tag */
-      inline bool is_end_element();
+      bool is_end_element() const;
 
       /** \brief Whether the current element is an end of element tag */
-      inline bool is_end_element(const char*);
+      bool is_end_element(const char*) const;
 
       /** \brief Skips to the next position if the current element is an end of element tag */
-      inline bool skip_end_element(const char*);
+      bool skip_end_element(const char*);
 
       /** \brief Whether the current element is empty */
-      inline bool is_empty_element();
+      bool is_empty_element() const;
 
       /** \brief Whether the reader currently points to a valid element */
-      inline bool valid();
+      bool valid() const;
   };
 }
 

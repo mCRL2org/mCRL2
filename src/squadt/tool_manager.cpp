@@ -7,7 +7,7 @@
 #include <boost/filesystem/convenience.hpp>
 #include <boost/ref.hpp>
 
-#include <xml2pp/detail/text_reader.tcc>
+#include <xml2pp/text_reader.h>
 
 #include "executor.h"
 #include "tool_manager.h"
@@ -92,15 +92,15 @@ namespace squadt {
    * @param n the name of the file to read from
    **/
   tool_manager::ptr tool_manager::read(const std::string& n) {
-    xml2pp::text_reader::file_name< std::string > f(n);
+    bf::path p(n);
 
-    if (!bf::exists(bf::path(f.get()))) {
-      throw (exception::exception(exception::failed_loading_object, "squadt tool catalog", f.get()));
+    if (!bf::exists(p)) {
+      throw (exception::exception(exception::failed_loading_object, "squadt tool catalog", p.native_file_string()));
     }
 
-    xml2pp::text_reader reader(f);
+    xml2pp::text_reader reader(p);
 
-    reader.set_schema(xml2pp::text_reader::file_name< std::string >(
+    reader.set_schema(bf::path(
                             global_settings_manager->path_to_schemas(
                                     settings_manager::append_schema_suffix(
                                             settings_manager::tool_catalog_base_name))));
@@ -116,7 +116,7 @@ namespace squadt {
     tool_manager::ptr new_tool_manager(new tool_manager());
  
     /* Read root element (tool-catalog) */
-    r.read();
+    r.next_element();
 
     while (!r.is_end_element("tool-catalog")) {
       /* Add a new tool to the list of tools */

@@ -12,7 +12,7 @@
 
 #include <sip/detail/exception.h>
 
-#include <xml2pp/detail/text_reader.tcc>
+#include <xml2pp/text_reader.h>
 
 namespace sip {
 
@@ -333,9 +333,9 @@ namespace sip {
       /* Current element must be <string> */
       assert(r.is_element("boolean"));
 
-      std::string p = (r.get_attribute_string_value("value") == true_string) ? true_string : false_string;
+      std::string p = (r.get_attribute_as_string("value") == true_string) ? true_string : false_string;
 
-      r.read();
+      r.next_element();
       r.skip_end_element("boolean");
 
       return (make_pair(boolean::create(), p));
@@ -437,9 +437,9 @@ namespace sip {
       r.get_attribute(&minimum, "minimum");
       r.get_attribute(&minimum, "maximum");
 
-      std::string p = r.get_attribute_string_value("value");
+      std::string p = r.get_attribute_as_string("value");
 
-      r.read();
+      r.next_element();
       r.skip_end_element("integer");
 
       return (make_pair(integer::create(minimum, maximum), p));
@@ -551,9 +551,9 @@ namespace sip {
       r.get_attribute(&minimum, "minimum");
       r.get_attribute(&minimum, "maximum");
 
-      std::string p = r.get_attribute_string_value("value");
+      std::string p = r.get_attribute_as_string("value");
 
-      r.read();
+      r.next_element();
       r.skip_end_element("real");
 
       return (make_pair(real::create(minimum, maximum), p));
@@ -656,17 +656,17 @@ namespace sip {
       /* Current element must be <enumeration> */
       assert(r.is_element("enumeration"));
 
-      std::string p = r.get_attribute_string_value("value");
+      std::string p = r.get_attribute_as_string("value");
 
-      r.read();
+      r.next_element();
 
       boost::shared_ptr < enumeration > new_enumeration(new enumeration);
       
       while (!r.is_end_element("enumeration")) {
         /* Assume element */
-        new_enumeration->add_value(r.get_attribute_string_value("value"));
+        new_enumeration->add_value(r.get_attribute_as_string("value"));
 
-        r.read();
+        r.next_element();
         r.skip_end_element("element");
       }
 
@@ -763,10 +763,10 @@ namespace sip {
       r.get_attribute(&minimum, "minimum-length");
       r.get_attribute(&maximum, "maximum-length");
 
-      r.read();
+      r.next_element();
       r.skip_end_element("string");
 
-      return (std::make_pair((minimum == 0 && maximum == 0) ? standard_string : string::create(minimum, maximum), r.get_attribute_string_value("value")));
+      return (std::make_pair((minimum == 0 && maximum == 0) ? standard_string : string::create(minimum, maximum), r.get_attribute_as_string("value")));
     }
 
     inline void string::set_maximum_length(unsigned int m) {

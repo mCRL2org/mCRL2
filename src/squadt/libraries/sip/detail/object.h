@@ -7,7 +7,7 @@
 
 #include <boost/shared_ptr.hpp>
 
-#include <xml2pp/detail/text_reader.tcc>
+#include <xml2pp/text_reader.h>
 #include <sip/detail/exception.h>
 #include <sip/detail/option.h>
 
@@ -173,7 +173,7 @@ namespace sip {
      
       r.get_attribute(&new_location, "location");
      
-      r.read();
+      r.next_element();
       r.skip_end_element("object");
      
       return (object::sptr(new object(id, new_format, new_location, static_cast < object::type > (i))));

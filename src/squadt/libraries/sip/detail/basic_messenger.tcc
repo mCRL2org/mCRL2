@@ -1,6 +1,7 @@
 #include <algorithm>
 #include <functional>
 #include <sstream>
+#include <iostream>
 
 #include <boost/ref.hpp>
 #include <boost/bind.hpp>

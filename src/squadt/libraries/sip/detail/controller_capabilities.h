@@ -146,7 +146,7 @@ namespace sip {
       if (r.is_element("capabilities")) {
         version v = {0,0};
  
-        r.read();
+        r.next_element();
  
         assert (r.is_element("protocol-version"));
  
@@ -155,7 +155,7 @@ namespace sip {
  
         capabilities::ptr c(new capabilities(v));
  
-        r.read();
+        r.next_element();
         r.skip_end_element("protocol-version");
  
         assert (r.is_element("display-dimensions"));
@@ -164,7 +164,7 @@ namespace sip {
         r.get_attribute(&c->current_dimensions.y, "y");
         r.get_attribute(&c->current_dimensions.z, "z");
  
-        r.read();
+        r.next_element();
  
         return (c);
       }

@@ -63,12 +63,12 @@ namespace sip {
        * \post reader points to after the associated end tag of the box
        **/
       void label::read_structure(read_context& r) {
-        r.reader.read();
+        r.reader.next_element();
 
         if (!r.reader.is_empty_element()) {
           r.reader.get_value(&text);
 
-          r.reader.read();
+          r.reader.next_element();
         }
 
         r.reader.skip_end_element("label");
@@ -133,7 +133,7 @@ namespace sip {
       void button::read_structure(read_context& r) {
         r.reader.get_attribute(&label, "label");
 
-        r.reader.read();
+        r.reader.next_element();
 
         current_event_handler->process(this);
       }
@@ -272,7 +272,7 @@ namespace sip {
           connection = reinterpret_cast < radio_button* > (connected_to);
         }
 
-        r.reader.read();
+        r.reader.next_element();
 
         current_event_handler->process(this);
       }
@@ -342,7 +342,7 @@ namespace sip {
 
         status = r.reader.get_attribute("status");
 
-        r.reader.read();
+        r.reader.next_element();
 
         current_event_handler->process(this);
       }
@@ -453,7 +453,7 @@ namespace sip {
         r.reader.get_attribute(&maximum, "maximum");
         r.reader.get_attribute(&current, "current");
 
-        r.reader.read();
+        r.reader.next_element();
 
         current_event_handler->process(this);
       }
@@ -530,17 +530,17 @@ namespace sip {
        * \post reader points to after the associated end tag of the box
        **/
       void text_field::read_structure(read_context& r) {
-        r.reader.read();
+        r.reader.next_element();
 
         if (r.reader.is_element("text") && !r.reader.is_end_element()) {
-          r.reader.read();
+          r.reader.next_element();
 
           r.reader.get_value(&text);
 
-          r.reader.read();
+          r.reader.next_element();
         }
 
-        r.reader.read(2);
+        r.reader.next_element(2);
 
         r.reader.skip_end_element("text-field");
 

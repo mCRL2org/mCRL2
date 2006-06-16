@@ -7,7 +7,7 @@
 #include <ostream>
 #include <sstream>
 
-#include <xml2pp/detail/text_reader.tcc>
+#include <xml2pp/text_reader.h>
 
 namespace sip {
   namespace messaging {

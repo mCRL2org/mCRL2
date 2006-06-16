@@ -214,7 +214,7 @@ namespace sip {
       option::sptr o(new option(id));
 
       if (!r.is_empty_element()) {
-        r.read();
+        r.next_element();
      
         while (!r.is_end_element()) {
           using namespace sip::datatype;
@@ -224,7 +224,7 @@ namespace sip {
         }
       }
 
-      r.read();
+      r.next_element();
 
       return (o);
     }

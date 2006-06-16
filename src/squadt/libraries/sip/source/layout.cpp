@@ -1,3 +1,4 @@
+#include <iostream>
 #include <utility>
 
 #include <sip/detail/layout_manager.h>
@@ -142,17 +143,17 @@ namespace sip {
      * @param[in] r a xml2pp text reader
      **/
     void constraints::read(xml2pp::text_reader& r) {
-      alignment_horizontal = text_to_horizontal_alignment(r.get_attribute_string_value("horizontal-alignment"));
-      alignment_vertical   = text_to_vertical_alignment(r.get_attribute_string_value("vertical-alignment"));
+      alignment_horizontal = text_to_horizontal_alignment(r.get_attribute_as_string("horizontal-alignment"));
+      alignment_vertical   = text_to_vertical_alignment(r.get_attribute_as_string("vertical-alignment"));
 
       r.get_attribute(&margin.top, "margin-top");
       r.get_attribute(&margin.left, "margin-left");
       r.get_attribute(&margin.bottom, "margin-bottom");
       r.get_attribute(&margin.right, "margin-right");
 
-      visible = text_to_visibility(r.get_attribute_string_value("visibility"));
+      visible = text_to_visibility(r.get_attribute_as_string("visibility"));
 
-      r.read();
+      r.next_element();
     }
 
     /**
@@ -217,7 +218,7 @@ namespace sip {
       clear();
 
       if (!r.reader.is_empty_element()) {
-        r.reader.read();
+        r.reader.next_element();
 
         while (!r.reader.is_end_element("box-layout-manager")) {
           if (r.reader.is_element("layout-constraints")) {
@@ -228,7 +229,7 @@ namespace sip {
         }
       }
 
-      r.reader.read();
+      r.reader.next_element();
     }
 
     /**
@@ -255,7 +256,7 @@ namespace sip {
 
       display->visible = r.get_attribute("visible");
 
-      r.read();
+      r.next_element();
 
       if (!r.is_end_element("display-layout")) {
         element::read_context c(r);
@@ -312,10 +313,10 @@ namespace sip {
             std::string name = r.element_name();
 
             while (r.valid() && !r.is_end_element(name.c_str())) {
-              r.read();
+              r.next_element();
             }
 
-            r.read();
+            r.next_element();
           }
         }
       }

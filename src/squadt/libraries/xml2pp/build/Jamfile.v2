@@ -9,12 +9,11 @@ project text_reader
     ;
 
 lib xml2pp 
-    : xml2pp_exception.cpp
+    : text_reader.cpp
+      xml2pp_exception.cpp
+    : <dependency>/boost/filesystem//boost_filesystem
+      <xml2>library
+    :
+    : <library>/boost/filesystem//boost_filesystem
     ;
 
-alias text_reader
-    : xml2pp
-    :
-    :
-    : <library>/site-config//xml2
-    ;

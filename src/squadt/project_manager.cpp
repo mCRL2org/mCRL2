@@ -7,7 +7,7 @@
 #include <boost/ref.hpp>
 #include <boost/filesystem/operations.hpp>
 
-#include <xml2pp/detail/text_reader.tcc>
+#include <xml2pp/text_reader.h>
 
 #include "project_manager.h"
 #include "settings_manager.tcc"
@@ -110,15 +110,14 @@ namespace squadt {
    * \pre directory/<|settings_manager::project_definition_base_name|> must exist
    **/
   void project_manager::read() {
-    xml2pp::text_reader::file_name< std::string > f(settings_manager::path_concatenate(directory, settings_manager::project_definition_base_name));
+    bf::path p(settings_manager::path_concatenate(directory, settings_manager::project_definition_base_name));
 
-    assert(bf::exists(f.get()) && !bf::is_directory(f.get()));
+    assert(bf::exists(p) && !bf::is_directory(p));
 
     try {
-      xml2pp::text_reader reader(f);
+      xml2pp::text_reader reader(p);
 
-      reader.set_schema(xml2pp::text_reader::file_name< std::string >(
-                            global_settings_manager->path_to_schemas(
+      reader.set_schema(bf::path(global_settings_manager->path_to_schemas(
                                     settings_manager::append_schema_suffix(
                                             settings_manager::project_definition_base_name)).c_str()));
 
@@ -133,31 +132,30 @@ namespace squadt {
    * @param[in] l a path to a project file
    **/
   project_manager::ptr project_manager::read(const std::string& l) {
-    xml2pp::text_reader::file_name< std::string > f(settings_manager::path_concatenate(l, settings_manager::project_definition_base_name));
+    bf::path p(settings_manager::path_concatenate(l, settings_manager::project_definition_base_name));
 
-    if (!bf::exists(bf::path(f.get()))) {
-      throw (exception::exception(exception::failed_loading_object, "SQuADT project", f.get()));
+    if (!bf::exists(p)) {
+      throw (exception::exception(exception::failed_loading_object, "SQuADT project", p.native_file_string()));
     }
 
-    project_manager::ptr p(new project_manager());
+    project_manager::ptr m(new project_manager());
 
     try {
-      xml2pp::text_reader reader(f);
+      xml2pp::text_reader reader(p);
 
-      reader.set_schema(xml2pp::text_reader::file_name< std::string >(
-                              global_settings_manager->path_to_schemas(
+      reader.set_schema(bf::path(global_settings_manager->path_to_schemas(
                                       settings_manager::append_schema_suffix(
                                               settings_manager::project_definition_base_name)).c_str()));
      
-      p->read(reader);
+      m->read(reader);
 
-      p->directory = l;
+      m->directory = l;
     }
     catch (...) {
       throw;
     }
 
-    return (p);
+    return (m);
   }
 
   /**
@@ -165,14 +163,14 @@ namespace squadt {
    **/
   void project_manager::read(xml2pp::text_reader& r) {
     /* Advance beyond project element */
-    r.read(1);
+    r.next_element(1);
 
     if (r.is_element("description") && !r.is_empty_element()) {
-      r.read();
+      r.next_element();
 
       r.get_value(&description);
 
-      r.read(2);
+      r.next_element(2);
     }
 
     processor::id_conversion_map c;

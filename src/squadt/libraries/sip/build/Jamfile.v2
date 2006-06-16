@@ -18,7 +18,7 @@ alias messenger
     : # no default build
     : <library>/libraries/transport//transport
       <library>/boost/thread//boost_thread
-      <library>/libraries/xml2pp//text_reader
+      <library>/libraries/xml2pp//xml2pp
     ;
 
 feature sip_side : controller tool : composite ;

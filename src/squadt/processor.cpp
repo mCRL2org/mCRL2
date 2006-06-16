@@ -1,6 +1,6 @@
 #include <boost/filesystem/operations.hpp>
 
-#include <xml2pp/detail/text_reader.tcc>
+#include <xml2pp/text_reader.h>
 #include <sip/controller.h>
 
 #include "task_monitor.h"
@@ -192,7 +192,7 @@ namespace squadt {
       }
     }
 
-    r.read();
+    r.next_element();
 
     if (r.is_element("configuration")) {
       c->current_monitor->set_configuration(sip::configuration::read(r));
@@ -211,7 +211,7 @@ namespace squadt {
         c->inputs.push_back(object_descriptor::wptr(m[id]));
       }
 
-      r.read();
+      r.next_element();
 
       r.skip_end_element("input");
     }
@@ -242,7 +242,7 @@ namespace squadt {
       n->generator = c;
       n->checksum.read(temporary.c_str());
 
-      r.read();
+      r.next_element();
 
       r.skip_end_element("output");
     }
