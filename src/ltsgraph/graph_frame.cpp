@@ -62,9 +62,6 @@ void GraphFrame::BuildLayout() {
 
 	int rightPanelWidth = INITIAL_WIN_WIDTH - (INITIAL_WIN_WIDTH / 4 + 15);
 
-// 	wxSize rightPanelSize(rightPanelWidth,INITIAL_WIN_HEIGHT);
-// 	wxSize leftPanelSize(INITIAL_WIN_WIDTH-rightPanelWidth,INITIAL_WIN_HEIGHT);
-
 	wxSplitterWindow * sw = new wxSplitterWindow(this, wxID_ANY, wxDefaultPosition, wxDefaultSize, wxDEFAULT_FRAME_STYLE & !wxSP_PERMIT_UNSPLIT);
 	
   leftPanel = new ViewPort( sw, wxDefaultPosition, wxDefaultSize, wxRAISED_BORDER );
@@ -144,7 +141,7 @@ void GraphFrame::BuildLayout() {
 	othersSettingsSizer->Add(ckEdgeLabels, 0, lflags, 4 );
 
 	wxFlexGridSizer* bottomRightSizer = new wxFlexGridSizer( 1, 2, 0, 0 );
-	spinNodeRadius = new wxSpinCtrl(rightPanel, wxID_ANY, wxT("test"), wxDefaultPosition, wxDefaultSize, wxSP_ARROW_KEYS, 2, 50, 10);
+	spinNodeRadius = new wxSpinCtrl(rightPanel, wxID_ANY, wxT(""), wxDefaultPosition, wxDefaultSize, wxSP_ARROW_KEYS, 2, 50, 10);
 	bottomRightSizer->Add( new wxStaticText( rightPanel, wxID_ANY,	wxT("State radius") ), 0, lflags, 4 );
 	bottomRightSizer->Add(spinNodeRadius, 0, rflags, 3 );
 
@@ -171,8 +168,10 @@ void GraphFrame::CreateMenu() {
   //file
   file = new wxMenu;
   openItem        = file->Append( wxID_OPEN, wxT("&Open...\tCTRL-o"), wxT("") );
-	exportPsItem    = file->Append( ID_EXPORT_PS, wxT("Export to &PostScript\tCTRL-p"), wxT("") );
-	exportLatexItem = file->Append( ID_EXPORT_LATEX, wxT("Export to &Latex\tCTRL-l"), wxT("") );
+	exports = new wxMenu;
+	file->Append(wxID_ANY,wxT("&Export"),exports);
+	exportPsItem    = exports->Append( ID_EXPORT_PS, wxT("Export to &PostScript\tCTRL-p"), wxT("") );
+	exportLatexItem = exports->Append( ID_EXPORT_LATEX, wxT("Export to &Latex\tCTRL-l"), wxT("") );
   quitItem        = file->Append( wxID_EXIT, wxT("&Quit\tCTRL-q"), wxT("") );
   menu->Append( file, wxT("&File") );
 
@@ -293,7 +292,7 @@ void GraphFrame::Init(wxString LTSfile) {
   string st_LTSfile = string(LTSfile.fn_str());
 
     //read lts file
-  lts mylts;
+  	lts mylts;
     if (mylts.read_from(st_LTSfile)) 
     {
 
@@ -342,7 +341,7 @@ void GraphFrame::Init(wxString LTSfile) {
       for(unsigned int i=0; (ti.more()); i++) 
       {
         wxString * Slbl_Edge = new wxString(ATwriteToString(mylts.label_value(ti.label())), wxConvLocal);
-  
+
         for (size_t n = 0; n < vectNode.size(); n++) { 
 					if (vectNode[n]->Get_num() == ti.from()) { 
 						for (size_t m = 0; m < vectNode.size(); m++) { 
@@ -541,21 +540,19 @@ void GraphFrame::Draw(wxPaintDC * myDC) {
 }
 
 void GraphFrame::ExportPostScript( wxCommandEvent& /* event */ ) {
+	
+
+		string str(inputFileName);
+		str.append(".ps");
+		wxString wx_str(str.c_str(), wxConvLocal);
 
 		wxPrintData pd;
-		pd.SetFilename(_("test.ps"));
+		pd.SetFilename(wx_str);
     pd.SetPrintMode(wxPRINT_MODE_FILE);
 
     wxPostScriptDC myDC(pd);
-		myDC.StartDoc(wxT("printing..."));
-		//pd.SetFontMetricPath(wxT("afm/"));
-		
+		myDC.StartDoc(wx_str);
 
-		
-	
-		//wxPostScriptDC * myDC = new wxPostScriptDC();
-
-// 		wxPostScriptDC * myDC = new wxPostScriptDC(wxT("./test.ps"), true, this);
 
 		//fix a bug (the size status text disappeared)
  		wxSize size = wxSize(leftPanel->Get_Width(), leftPanel->Get_Height());
@@ -571,6 +568,9 @@ void GraphFrame::ExportPostScript( wxCommandEvent& /* event */ ) {
     }
 
 		myDC.EndDoc();
+
+		wxMessageBox(wxT("Export finished"),wxT("Information"),wxOK| wxICON_INFORMATION);
+
 }
 
 void GraphFrame::ExportLatex( wxCommandEvent& /* event */ ) {
@@ -599,8 +599,6 @@ void GraphFrame::ExportLatex( wxCommandEvent& /* event */ ) {
 			vectEdgeLatex.push_back(StructEdgeLatex);
 	}
 	
-	//char * test = (char *)inputFileName.c_str();
-
  	ExportToLatex * ltx = new ExportToLatex(strcat((char *)inputFileName.c_str(),".tex"),vectNodeLatex,vectEdgeLatex);
  	if (ltx->Generate()) {
 		wxMessageBox(wxT("Export successful"),wxT("Information"),wxOK| wxICON_INFORMATION);
@@ -674,7 +672,7 @@ wxString GraphFrame::GetInfoWinSize(wxSize sz2) const {
 
 	wxString text;
 
-	text.Printf(wxT("Windows size: %d * %d"), sz2.GetWidth(), sz2.GetHeight());
+	text.Printf(wxT("Window size: %d * %d"), sz2.GetWidth(), sz2.GetHeight());
 	
 	return  text;
 

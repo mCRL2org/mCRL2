@@ -94,6 +94,7 @@ private:
   wxMenuBar * menu;
   wxMenu * file;
   wxMenu * draw;
+	wxMenu * exports;
   wxMenuItem * openItem;
   wxMenuItem * exportPsItem;
   wxMenuItem * exportLatexItem;

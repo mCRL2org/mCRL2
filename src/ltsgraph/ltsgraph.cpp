@@ -34,9 +34,9 @@ bool OnInit() {
 	
 		frame = new GraphFrame(wxT("ltsgraph"), wxPoint(150, 150), wxSize(INITIAL_WIN_WIDTH, INITIAL_WIN_HEIGHT));
 		frame->Show(TRUE);
-    if ( cmdln.GetParamCount() > 0 ) 
-			frame->Init(cmdln.GetParam(0));
 
+    if ( cmdln.GetParamCount() > 0 )
+			frame->Init(cmdln.GetParam(0));	
 
     return TRUE;
 }
