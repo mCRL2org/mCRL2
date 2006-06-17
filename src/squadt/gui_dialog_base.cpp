@@ -47,6 +47,8 @@ namespace squadt {
 
         SetSizer(s);
 
+        button_accept->SetDefault();
+
         CentreOnParent();
       }
 

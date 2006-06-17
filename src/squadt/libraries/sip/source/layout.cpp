@@ -280,6 +280,7 @@ namespace sip {
 
     /**
      * @param[in] r an xml2pp text reader that should point to state descriptions
+     * @param[in] elements a vector with the elements that should be updated
      *
      * Looks up an element by its id and calls the read_structure on this
      * member to read its new state from the text reader.

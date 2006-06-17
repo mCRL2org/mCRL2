@@ -80,8 +80,10 @@ namespace squadt {
         inline void execute(const command&, T = process::default_monitor, bool = false);
     
         /** \brief Terminate a specific process */
-        template < typename T >
-        inline void terminate(T);
+        inline void terminate(process*);
+    
+        /** \brief Terminate a specific process */
+        inline void terminate(process::wptr);
     
         /** \brief Terminate all processes */
         inline void terminate_all();
@@ -126,7 +128,7 @@ namespace squadt {
       process::ptr p(new process(boost::bind(&executor::handle_process_termination, this, _1, l), l));
 
       if (l.get() != 0) {
-        l->set_process(p);
+        l->attach_process(p);
       }
 
       processes.push_back(p);
@@ -158,9 +160,19 @@ namespace squadt {
     /**
      * @param[in] p a weak pointer (or reference to) to the process that should be terminated
      **/
-    template < typename T >
-    inline void executor::terminate(T p) {
+    inline void executor::terminate(process* p) {
       p->terminate();
+    }
+ 
+    /**
+     * @param[in] p a shared pointer (or reference to) to the process that should be terminated
+     **/
+    inline void executor::terminate(process::wptr p) {
+      process::ptr w = p.lock();
+
+      if (w.get() != 0) {
+        w->terminate();
+      }
     }
  
     /**

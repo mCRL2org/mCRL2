@@ -34,6 +34,9 @@ namespace squadt {
          typedef boost::weak_ptr < process >            wptr;
 
          /** \brief Convenience type to hide shared pointer implementation */
+         typedef boost::shared_ptr < process >          sptr;
+
+         /** \brief Convenience type to hide shared pointer implementation */
          typedef boost::shared_ptr < process >          ptr;
 
          /** \brief Convenience type to hide shared pointer implementation */

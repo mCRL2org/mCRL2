@@ -28,16 +28,16 @@ namespace xml2pp {
       text_reader(boost::filesystem::path const&);
 
       /** \brief Constructor for reading an in memory document */
-      text_reader(const char* document);
+      text_reader(const char*);
 
       /** \brief Constructor for reading an in memory document */
-      text_reader(std::string const& document);
+      text_reader(std::string const&);
 
       /** \brief Constructor for reading part of an in memory document */
-      text_reader(const char* document, const size_t prefix_length);
+      text_reader(const char*, const size_t prefix_length);
 
       /** \brief Constructor for reading part of an in memory document */
-      text_reader(std::string const& document, const size_t prefix_length);
+      text_reader(std::string const&, const size_t prefix_length);
 
       /** \brief Set schema for validation purposes */
       void set_schema(boost::filesystem::path const&);

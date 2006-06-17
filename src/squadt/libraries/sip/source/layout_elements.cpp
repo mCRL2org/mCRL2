@@ -26,7 +26,7 @@ namespace sip {
      
       /**
        * @param[in] t the text of the label
-       * @param[in] t the tool communicator to use for sending the update
+       * @param[in] c the tool communicator to use for sending the update
        **/
       void label::set_text(std::string t, tool::communicator* c) {
         set_text(t);
@@ -170,7 +170,6 @@ namespace sip {
       }
      
       /**
-       * @param[in] s the label for the button
        * @param[in] b whether or not to unselect connected radio buttons
        **/
       void radio_button::set_selected(bool b) {
@@ -200,7 +199,6 @@ namespace sip {
       }
 
       /**
-       * @param[in] s the label for the button
        * @param[in] t the tool communicator to use for sending the update
        **/
       void radio_button::set_selected(tool::communicator* t) {

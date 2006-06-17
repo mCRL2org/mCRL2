@@ -89,7 +89,7 @@ namespace squadt {
         inline static bool perpetual_handler_wrapper(boost::function < void () >);
 
         /** \brief Associates a process with this listener */
-        inline void set_process(const process::ptr& p);
+        inline void attach_process(const process::ptr& p);
  
         /** \brief Execute event handlers */
         void service_handlers(event_type e);
@@ -101,6 +101,9 @@ namespace squadt {
  
         /** \brief Gets a pointer to the associated process */
         inline process::ptr get_process(const bool b = false) const;
+
+        /** \brief Terminate an associated process */
+        inline void terminate_process();
 
         /** \brief Blocks untill the process has registered */
         inline void await_process() const;
@@ -140,6 +143,7 @@ namespace squadt {
     }
 
     inline task_monitor::~task_monitor() {
+      terminate_process();
     }
 
     inline void task_monitor::disconnect(execution::process*) {
@@ -151,7 +155,7 @@ namespace squadt {
     /**
      * @param[in] p shared pointer to the process
      **/
-    inline void task_monitor::set_process(const process::ptr& p) {
+    inline void task_monitor::attach_process(const process::ptr& p) {
       assert(p.get() != 0);
 
       boost::mutex::scoped_lock l(register_lock);
@@ -161,6 +165,21 @@ namespace squadt {
       if (register_condition.get() != 0) {
         /* Wake up waiting threads */
         register_condition->notify_all();
+      }
+    }
+
+    /** \brief Terminates a running process */
+    inline void task_monitor::terminate_process() {
+      if (associated_process.get() != 0) {
+        send_message(sip::message_signal_termination);
+
+        transporter::disconnect();
+
+        sleep(1);
+
+        associated_process->terminate();
+
+        associated_process.reset();
       }
     }
 

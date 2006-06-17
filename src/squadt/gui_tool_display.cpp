@@ -228,7 +228,7 @@ namespace squadt {
        **/
       void tool_display_mediator::attach_to_vertical_box(mediator::wrapper_aptr d, sip::layout::constraints const* c) {
         wrapper* sd     = static_cast < wrapper* > (d.get());
-        int      flags  = wxLEFT|wxRIGHT;
+        int      flags  = wxLEFT|wxRIGHT|wxEXPAND;
      
         layout::constraints const& cr = *(static_cast < layout::constraints const* > (c));
      
@@ -276,7 +276,7 @@ namespace squadt {
        **/
       void tool_display_mediator::attach_to_horizontal_box(mediator::wrapper_aptr d, sip::layout::constraints const* c) {
         wrapper* sd     = static_cast < wrapper* > (d.get());
-        int      flags  = wxTOP|wxBOTTOM;
+        int      flags  = wxTOP|wxBOTTOM|wxEXPAND;
      
         sip::layout::constraints const& cr = *(static_cast < layout::constraints const* > (c));
      
@@ -381,7 +381,7 @@ namespace squadt {
           t = new wxButton(current_window, wxID_CANCEL);
         }
         else {
-          t = new wxButton(current_window, wxID_ANY, wxString(s.c_str(), wxConvLocal));
+          t = new wxButton(current_window, wxID_ANY, wxString(s.c_str(), wxConvLocal), wxDefaultPosition, wxButton::GetDefaultSize());
         }
      
         /* Connect change event */
@@ -643,6 +643,9 @@ namespace squadt {
         }
       }
       else {
+        /* End tool execution, if it was still running */
+        event_handler.get_monitor()->terminate_process();
+
         remove();
       }
     }

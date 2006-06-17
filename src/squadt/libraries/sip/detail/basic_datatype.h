@@ -77,7 +77,7 @@ namespace sip {
         enumeration();
 
         /** \brief Constructor */
-        enumeration(std::string s);
+        enumeration(std::string const& s);
 
         /** \brief Write method that does all the work */
         void private_write(std::ostream& o, std::string const& s) const;
@@ -85,7 +85,7 @@ namespace sip {
       public:
 
         /** \brief Add value */
-        void add_value(std::string, bool = false);
+        void add_value(std::string const&, bool = false);
 
         /** \brief Convenience function for shared pointer instances */
         static basic_datatype::sptr create(std::string s);
@@ -395,21 +395,25 @@ namespace sip {
       throw (sip::exception::exception(exception::message_unknown_type, r.element_name()));
     }
 
+    /** \brief Converts a boolean */
     template <>
     inline std::string basic_datatype::convert(bool const& s) {
       return (boolean::convert(s));
     }
 
+    /** \brief Converts a long int */
     template <>
     inline std::string basic_datatype::convert(long int const& s) {
       return (integer::convert(s));
     }
 
+    /** \brief Converts a double */
     template <>
     inline std::string basic_datatype::convert(double const& s) {
       return (real::convert(s));
     }
 
+    /** \brief Converts a string */
     template <>
     inline std::string basic_datatype::convert(std::string const& s) {
       return (s);
@@ -420,7 +424,7 @@ namespace sip {
      ************************************************************************/
 
 #ifdef IMPORT_STATIC_MEMBERS
-    basic_datatype::sptr boolean::standard;
+    basic_datatype::sptr boolean::standard(new boolean());
 
     const std::string boolean::true_string  = "true";
 
@@ -459,7 +463,7 @@ namespace sip {
       o << "<boolean";
       
       if (v == true_string) {
-        o << "value=\"" << v << "\"";
+        o << " value=\"" << v << "\"";
       }
 
       o << "/>";
@@ -504,7 +508,7 @@ namespace sip {
     }
 
     /**
-     * @param[in] any string s
+     * @param[in] s any string
      **/
     inline bool boolean::validate(std::string const& s) const {
       return (s == true_string || s == false_string);
@@ -635,7 +639,7 @@ namespace sip {
     }
 
     /**
-     * @param[in] any string s
+     * @param[in] s any string
      **/
     inline bool integer::validate(std::string const& s) const {
       long int b;
@@ -769,7 +773,7 @@ namespace sip {
     }
 
     /**
-     * @param[in] any string s
+     * @param[in] s any string
      **/
     inline bool real::validate(std::string const& s) const {
       double b;
@@ -782,9 +786,9 @@ namespace sip {
      ************************************************************************/
 
     /**
-     * @param[in] any string s
+     * @param[in] s any string
      **/
-    inline enumeration::enumeration(std::string s) : default_value(0) {
+    inline enumeration::enumeration(std::string const& s) : default_value(0) {
       values.push_back(s);
     }
 
@@ -792,10 +796,10 @@ namespace sip {
     }
 
     /**
-     * @param[in] any string s
+     * @param[in] s any string
      * @param[in] b whether this element should now be marked as the default
      **/
-    inline void enumeration::add_value(std::string s, bool b) {
+    inline void enumeration::add_value(std::string const& s, bool b) {
       if (std::find(values.begin(), values.end(), s) == values.end()) {
         values.push_back(s);
 
@@ -899,7 +903,7 @@ namespace sip {
     }
 
     /**
-     * @param[in] any string s
+     * @param[in] s any string
      **/
     inline bool enumeration::validate(std::string const& s) const {
       return (std::find(values.begin(), values.end(), s) != values.end());

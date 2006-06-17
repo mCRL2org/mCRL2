@@ -3,6 +3,7 @@
 namespace xml2pp {
   namespace exception {
 
+    /** Messages for exceptions */
     template < >
     const char* const exception::descriptions[] = {
       "Unable to read specified file: `%1%'!",

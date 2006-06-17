@@ -17,9 +17,10 @@ namespace xml2pp {
 
     private:
 
+      /** \brief Pointer to the instance of the XML text reader */
       xmlTextReaderPtr reader;
 
-      /* For libxml2 initialisation in multi-threaded applications*/
+      /** \brief For libxml2 initialisation in multi-threaded applications*/
       static bool      initialised;
 
       /** \brief Whether the end-of-stream was reached */
@@ -231,7 +232,7 @@ namespace xml2pp {
    * @param[in] d the document that is to be parsed
    * @param[in] l the length of a prefix of d that is to be taken as the document
    **/
-  text_reader::text_reader(const std::string& d, const size_t l) {
+  text_reader::text_reader(std::string const& d, const size_t l) {
     wrapped_reader.reset(new reader_wrapper(xmlReaderForMemory(d.c_str(), l, "", 0, 0)));
   }
 

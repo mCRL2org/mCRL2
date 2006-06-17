@@ -298,7 +298,6 @@ std::cerr << getpid() << ": message (type " << t << ")" << " (" << new_string <<
      *
      * @param m reference to the pointer to a message to deliver
      * @param o the transceiver that delivered the message
-     * @param h the handler to call
      **/
     template < class M >
     inline void basic_messenger< M >::service_handlers(const message_ptr m, const basic_transceiver* o) {

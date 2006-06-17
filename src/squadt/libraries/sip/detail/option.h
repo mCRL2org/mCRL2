@@ -142,25 +142,37 @@ namespace sip {
   }
 
   inline void option::append_type(datatype::basic_datatype::sptr& t) {
+    assert(t.get() != 0);
+
     arguments.push_back(std::make_pair(t, ""));
   }
 
   inline void option::append_type(datatype::basic_datatype::sptr t) {
+    assert(t.get() != 0);
+
     arguments.push_back(std::make_pair(t, ""));
   }
 
   template < typename T >
   inline void option::append_argument(datatype::basic_datatype::sptr t, T d) {
+    assert(t.get() != 0);
+
     arguments.push_back(std::make_pair(t, t.get()->convert(d)));
   }
 
+  /**
+   * @param[in] t pointer to the data type definition
+   * @param[in] d data that is valid w.r.t. the data type
+   **/
   template < >
   inline void option::append_argument(datatype::basic_datatype::sptr t, std::string d) {
+    assert(t.get() != 0);
+
     arguments.push_back(std::make_pair(t, d));
   }
 
   inline void option::bind_argument(const size_t n, std::string s) {
-    // TODO validate whether string can be interpretted as type: types[instances.size()]
+    // TODO validate whether string can be interpreted as type: types[instances.size()]
     type_value_list::iterator i = arguments.begin();
 
     boost::next(i, n);
