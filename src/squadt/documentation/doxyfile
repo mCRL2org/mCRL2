@@ -83,7 +83,7 @@ WARN_LOGFILE           =
 # configuration options related to the input files
 #---------------------------------------------------------------------------
 INPUT                  = ../ \
-                         ../libraries/exception/
+                         ../libraries/exception
 FILE_PATTERNS          = *.c \
                          *.cc \
                          *.cxx \
@@ -128,10 +128,10 @@ FILE_PATTERNS          = *.c \
                          *.tcc
 RECURSIVE              = YES
 EXCLUDE                = ../bindings/ \
-                         ../libraries/md5pp/ \
-                         ../libraries/sip/ \
-                         ../libraries/transport/ \
-                         ../libraries/xml2pp/ \
+                         ../libraries/md5pp \
+                         ../libraries/sip \
+                         ../libraries/transport \
+                         ../libraries/xml2pp \
                          ../squadt.cpp
 EXCLUDE_SYMLINKS       = NO
 EXCLUDE_PATTERNS       = gui_resources*

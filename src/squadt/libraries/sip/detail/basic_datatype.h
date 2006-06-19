@@ -940,7 +940,7 @@ namespace sip {
         return (string::standard);
       }
       else {
-        return (string::create(d, minimum, maximum));
+        return (basic_datatype::sptr(new string(d, minimum, maximum)));
       }
     }
 

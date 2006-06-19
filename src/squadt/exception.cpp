@@ -2,6 +2,8 @@
 
 namespace squadt {
   namespace exception {
+
+    /** \brief Descriptions for error messages */
     template < >
     const char* const exception::descriptions[] = {
       "Cannot write to user settings directory ('%s').",

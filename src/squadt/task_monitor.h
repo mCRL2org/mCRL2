@@ -175,8 +175,6 @@ namespace squadt {
 
         transporter::disconnect();
 
-        sleep(1);
-
         associated_process->terminate();
 
         associated_process.reset();
