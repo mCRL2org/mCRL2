@@ -12,6 +12,7 @@ lib xml2pp
     : text_reader.cpp
       xml2pp_exception.cpp
     : <dependency>/boost/filesystem//boost_filesystem
+      <toolset>darwin,<link>shared:<undefined>dynamic_lookup
       <xml2>library
     :
     : <library>/boost/filesystem//boost_filesystem

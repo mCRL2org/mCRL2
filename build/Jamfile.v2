@@ -41,7 +41,6 @@ lib xml2
       : <name>"xml2"
       :
       : <cxxflags>"$(XML2_CPPFLAGS)"
-        <library>z
-        <library>m
+        <linkflags>"$(XML2_LDFLAGS)"
       ;
 

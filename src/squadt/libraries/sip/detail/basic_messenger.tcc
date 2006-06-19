@@ -1,3 +1,6 @@
+#ifndef BASIC_MESSENGER_TCC
+#define BASIC_MESSENGER_TCC
+
 #include <algorithm>
 #include <functional>
 #include <sstream>
@@ -411,3 +414,6 @@ std::cerr << getpid() << ": message (type " << t << ")" << " (" << new_string <<
     }
   }
 }
+
+#endif
+

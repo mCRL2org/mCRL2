@@ -152,6 +152,14 @@ namespace sip {
       inline static configuration::sptr read(xml2pp::text_reader&) throw ();
   };
 
+#ifdef IMPORT_STATIC_MEMBERS
+  /** The optional constraint, option is either not present or only present once */
+  const configuration::option_constraint configuration::constrain_optional = {0,1};
+
+  /** The required constraint, option (with possible arguments) must be present */
+  const configuration::option_constraint configuration::constrain_required = {1,1};
+#endif
+
   /**
    * \brief Operator for writing to stream
    *

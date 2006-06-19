@@ -17,6 +17,7 @@ lib transport
       socket_listener.cpp
       socket_transceiver.cpp
     : <dependency>/boost/thread//boost_thread
+      <toolset>darwin,<link>shared:<undefined>dynamic_lookup
       <threading>multi
     :
     : <threading>multi

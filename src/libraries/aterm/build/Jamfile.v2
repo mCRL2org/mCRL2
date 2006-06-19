@@ -26,7 +26,7 @@ lib aterm
          <link>shared,<toolset>darwin:<cflags>"-fPIC -fno-common"
        :
        : <address-model>64:<define>AT_64BIT
-         <link>shared,<toolset>darwin:<linkflags>"-undefined dynamic_lookup"
+         <toolset>darwin,<link>shared:<undefined>dynamic_lookup
        ;
 
 alias atermpp

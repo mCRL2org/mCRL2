@@ -145,5 +145,7 @@ namespace sip {
   }
 }
 
+#include <sip/detail/basic_messenger.tcc>
+
 #endif
 

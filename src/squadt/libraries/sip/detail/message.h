@@ -23,7 +23,7 @@ namespace sip {
      *   a value D that is used as the default message type identifier
      *   a value A that is used as any (the wildcard) message type
      */
-    template < class M, M D = static_cast < M > (0), M A = static_cast < M > (1) >
+    template < class M, M D, M A >
     class message {
       friend class basic_messenger < message < M, D, A > >;
 
@@ -85,6 +85,14 @@ namespace sip {
         inline void set_content(std::istream&);
     };
  
+    /** \brief The type identifier for messages of which the type is not known */
+    template < class M, M D, M A >
+    const M message< M, D, A >::message_unknown = D;
+
+    /** \brief The type identifier for messages of any type */
+    template < class M, M D, M A >
+    const M message< M, D, A >::message_any     = A;
+
     /**
      * @param t a message type identifier
      **/

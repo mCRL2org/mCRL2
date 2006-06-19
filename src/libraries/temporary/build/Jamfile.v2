@@ -67,7 +67,6 @@ lib rewrite
        :
        : <library>/libraries/aterm//aterm 
          <library>/site-config//m
-         <os>MACOSX:<library>/site-config//dl
          <os>LINUX:<library>/site-config//dl
        ;
 

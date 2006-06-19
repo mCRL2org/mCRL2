@@ -159,5 +159,6 @@ namespace sip {
   }
 }
 
-#endif
+#include <sip/detail/basic_messenger.tcc>
 
+#endif
