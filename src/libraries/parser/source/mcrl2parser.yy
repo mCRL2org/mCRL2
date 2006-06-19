@@ -1921,7 +1921,7 @@ state_frm_and:
 
 //right argument of conjunction and disjunction
 state_frm_and_rhs:
-  state_frm_prefix
+  state_frm_and
     {
       $$ = $1;
     }
@@ -2153,7 +2153,12 @@ reg_frm_primary_naf:
 
 //primary regular formula
 reg_frm_primary:
-  NIL
+  act_frm
+    {
+      $$ = $1;
+      gsDebugMsg("parsed regular formula\n  %T\n", $$);
+    }   
+  | NIL
     {
       $$ = gsMakeRegNil();
       gsDebugMsg("parsed primary regular formula\n  %T\n", $$);

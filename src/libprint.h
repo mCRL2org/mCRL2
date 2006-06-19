@@ -13,13 +13,15 @@
 void PrintPart_CXX(std::ostream &OutStream, const ATerm Part,
   t_pp_format pp_format);
 /*Pre: OutStream points to a stream to which can be written
-       Part is an ATerm containing a part of a mCRL2 specification
+       Part is an ATerm containing a part of a mCRL2 specification or state
+       formula
   Post:A textual representation of Part is written to OutStream using method
        pp_format
 */
 
 std::string PrintPart_CXX(const ATerm Part, t_pp_format pp_format);
-/*Pre: Part is an ATerm containing a part of a mCRL2 specification
+/*Pre: Part is an ATerm containing a part of a mCRL2 specification or state
+       formula
   Ret: A textual representation of Part pretty printed using method pp_format
 */
 

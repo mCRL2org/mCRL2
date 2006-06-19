@@ -126,6 +126,9 @@
 //Action
 <Action>       ::= Action(<ActId>, <DataExpr>*)
 
+//action identifier
+<ActId>        ::= ActId(<String>, <SortExpr>*)
+
 
 //Process expressions
 //-------------------
@@ -150,9 +153,6 @@
                  | Merge(<ProcExpr>, <ProcExpr>)
                  | LMerge(<ProcExpr>, <ProcExpr>)
                  | Choice(<ProcExpr>, <ProcExpr>)
-
-//action identifier
-<ActId>        ::= ActId(<String>, <SortExpr>*)
 
 //process identifier
 <ProcVarId>    ::= ProcVarId(<String>, <SortExpr>*)

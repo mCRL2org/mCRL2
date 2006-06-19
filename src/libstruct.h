@@ -1,3 +1,6 @@
+//This file describes the functions that can be used for the internal ATerm
+//structure.
+
 #include <stdbool.h>
 #include <aterm2.h>
 
@@ -7,8 +10,8 @@ extern "C" {
 
 //Global precondition: the ATerm library has been initialised
 
-//Functions for the internal ATerm structure
-//------------------------------------------
+//Conversion between strings and quoted ATermAppl's
+//-------------------------------------------------
 
 ATermAppl gsString2ATermAppl(const char *s);
 //Ret: quoted constant s, if s != NULL
@@ -25,11 +28,22 @@ ATermAppl gsFreshString2ATermAppl(const char *s, ATerm Term, bool TryNoSuffix);
 //     "sk" as a quoted ATermAppl constant, where k is the smallest natural
 //     number such that "sk" does not occur in Term, otherwise
 
+
+//Enabling constructor functions
+//------------------------------
+
+bool gsConstructorFunctionsEnabled(void);
+//Ret:  the constructor creator and recogniser functions are enabled
+
+//gsEnableConstrucorFunctions() should be called before calling any of the
+//remaining functions in this file.
 void gsEnableConstructorFunctions(void);
-//Pre : the ATerm has been initialised
 //Post: the constructor creator and recogniser functions are enabled
 
-//Creation of all constructor elements of the internal ATerm structure.
+
+//Creation of all constructor elements of the internal structure
+//--------------------------------------------------------------
+
 ATermAppl gsMakeSpecV1(
   ATermAppl SortSpec, ATermAppl ConsSpec, ATermAppl MapSpec,
   ATermAppl DataEqnSpec, ATermAppl ActSpec, ATermAppl ProcEqnSpec,
@@ -139,7 +153,9 @@ ATermAppl gsMakeActExists(ATermList DataVarIds, ATermAppl ActFrm);
 ATermAppl gsMakeActAt(ATermAppl ActFrm, ATermAppl DataExpr);
 
 
-//Recognisers of all constructor elements of the internal ATerm structure.
+//Recognisers of all constructor elements of the internal structure
+//-----------------------------------------------------------------
+
 bool gsIsSpecV1(ATermAppl Term);
 bool gsIsSortSpec(ATermAppl Term);
 bool gsIsConsSpec(ATermAppl Term);
@@ -238,7 +254,19 @@ bool gsIsActForall(ATermAppl Term);
 bool gsIsActExists(ATermAppl Term);
 bool gsIsActAt(ATermAppl Term);
 
+//Sort expressions
+//----------------
+
+bool gsIsSortExpr(ATermAppl Term);
+//Pre: Term is not NULL
+//Ret: Term is a sort expression
+
+bool gsIsSortExprOrUnknown(ATermAppl Term);
+//Pre: Term is not NULL
+//Ret: Term is a sort expression or unknown
+
 //Creation of names for system sort identifiers
+
 ATermAppl gsMakeSortIdNameBool();
 ATermAppl gsMakeSortIdNamePos();
 ATermAppl gsMakeSortIdNameNat();
@@ -246,7 +274,115 @@ ATermAppl gsMakeSortIdNameNatPair();
 ATermAppl gsMakeSortIdNameInt();
 ATermAppl gsMakeSortIdNameReal();
 
+
+//Creation of sort identifiers for system defined sorts
+
+ATermAppl gsMakeSortIdBool(void);
+//Ret: Sort identifier for `Bool'
+
+ATermAppl gsMakeSortIdPos(void);
+//Ret: Sort identifier for `Pos'
+
+ATermAppl gsMakeSortIdNat(void);
+//Ret: Sort identifier for `Nat'
+
+ATermAppl gsMakeSortIdNatPair(void);
+//Ret: Sort identifier for `NatPair'
+
+ATermAppl gsMakeSortIdInt(void);
+//Ret: Sort identifier for `Int'
+
+ATermAppl gsMakeSortIdReal(void);
+//Ret: Sort identifier for `Real'
+
+
+//Creation of sort expressions for system defined sorts
+
+ATermAppl gsMakeSortExprBool(void);
+//Ret: Sort expression for `Bool'
+
+ATermAppl gsMakeSortExprPos(void);
+//Ret: Sort expression for `Pos'
+
+ATermAppl gsMakeSortExprNat(void);
+//Ret: Sort expression for `Nat'
+
+ATermAppl gsMakeSortExprNatPair(void);
+//Ret: Sort expression for `NatPair'
+
+ATermAppl gsMakeSortExprInt(void);
+//Ret: Sort expression for `Int'
+
+ATermAppl gsMakeSortExprReal(void);
+//Ret: Sort expression for `Real'
+
+
+//Auxiliary functions concerning sort expressions
+
+ATermAppl gsMakeSortArrow2(ATermAppl SortExprDom1, ATermAppl SortExprDom2,
+  ATermAppl SortExprResult);
+//Pre: SortExprDom1, SortExprDom2 and SortExprResult are sort expressions
+//Ret: Internal representation of the sort expression
+//     SortExprDom1 -> SortExprDom2 -> SortExprResult, where -> is right
+//     associative.
+
+ATermAppl gsMakeSortArrow3(ATermAppl SortExprDom1, ATermAppl SortExprDom2,
+  ATermAppl SortExprDom3, ATermAppl SortExprResult);
+//Pre: SortExprDom1, SortExprDom2, SortExprDom3 and SortExprResult are sort
+//     expressions
+//Ret: Internal representation of the sort expression
+//     SortExprDom1 -> SortExprDom2 -> SortExprDom3 -> SortExprResult,
+//     where -> is right associative.
+
+ATermAppl gsMakeSortArrow4(ATermAppl SortExprDom1, ATermAppl SortExprDom2,
+  ATermAppl SortExprDom3, ATermAppl SortExprDom4, ATermAppl SortExprResult);
+//Pre: SortExprDom1, SortExprDom2, SortExprDom3, SortExprDom4 and
+//     SortExprResult are sort expressions
+//Ret: Internal representation of the sort expression
+//     SortExprDom1 -> SortExprDom2 -> SortExprDom3 -> SortExprDom4 ->
+//       SortExprResult, where -> is right associative.
+
+ATermAppl gsMakeSortArrowList(ATermList SortExprDomain,
+  ATermAppl SortExprResult);
+//Pre: SortExprDomain is of the form [e_0, ..., e_n], where n is a natural
+//     number and each e_i, 0 <= i <= n, is a sort expression.
+//     SortExprResult is a sort expression, which we denote by e.
+//Ret: Internal representation of the sort expression e_0 -> ... -> e_n -> e,
+//     where -> is right associative.
+
+ATermAppl gsGetSortExprResult(ATermAppl SortExpr);
+//Pre: SortExpr is a sort expression
+//ret: the result of the sort expression
+
+ATermList gsGetSortExprDomain(ATermAppl SortExpr);
+//Pre: SortExpr is a sort expression
+//Ret: the domain of the sort expression
+
+
+//Data expressions
+//----------------
+
+bool gsIsDataExpr(ATermAppl Term);
+//Pre: Term is not NULL
+//Ret: Term is a data expression
+
+ATermAppl gsGetSort(ATermAppl DataExpr);
+//Pre: DataExpr is a data expression
+//Ret: the sort of DataExpr, if the sort can be inferred from the sort
+//     information in DataExpr
+//     Unknown, otherwise
+
+ATermAppl gsGetDataExprHead(ATermAppl DataExpr);
+//Pre: DataExpr is a data expression
+//ret: the head of the data expression
+
+ATermList gsGetDataExprArgs(ATermAppl DataExpr);
+//Pre: DataExpr is a data expression
+//Ret: the arguments of the data expression
+
+
 //Creation of names for system operation identifiers
+
 ATermAppl gsMakeOpIdNameTrue();
 ATermAppl gsMakeOpIdNameFalse();
 ATermAppl gsMakeOpIdNameNot();
@@ -258,9 +394,9 @@ ATermAppl gsMakeOpIdNameNeq();
 ATermAppl gsMakeOpIdNameIf();
 ATermAppl gsMakeOpIdNameForall();
 ATermAppl gsMakeOpIdNameExists();
-ATermAppl gsMakeOpIdName1();
+ATermAppl gsMakeOpIdNameC1();
 ATermAppl gsMakeOpIdNameCDub();
-ATermAppl gsMakeOpIdName0();
+ATermAppl gsMakeOpIdNameC0();
 ATermAppl gsMakeOpIdNameCNat();
 ATermAppl gsMakeOpIdNameCPair();
 ATermAppl gsMakeOpIdNameCNeg();
@@ -335,93 +471,8 @@ ATermAppl gsMakeOpIdNameBagUnion();
 ATermAppl gsMakeOpIdNameBagDiff();
 ATermAppl gsMakeOpIdNameBagIntersect();
 
-//Creation of sort identifiers for system defined sorts.
-ATermAppl gsMakeSortIdBool(void);
-//Ret: Sort identifier for `Bool'
-
-ATermAppl gsMakeSortIdPos(void);
-//Ret: Sort identifier for `Pos'
-
-ATermAppl gsMakeSortIdNat(void);
-//Ret: Sort identifier for `Nat'
-
-ATermAppl gsMakeSortIdNatPair(void);
-//Ret: Sort identifier for `NatPair'
-
-ATermAppl gsMakeSortIdInt(void);
-//Ret: Sort identifier for `Int'
-
-ATermAppl gsMakeSortIdReal(void);
-//Ret: Sort identifier for `Real'
-
-
-//Creation of sort expressions for system defined sorts.
-ATermAppl gsMakeSortExprBool(void);
-//Ret: Sort expression for `Bool'
-
-ATermAppl gsMakeSortExprPos(void);
-//Ret: Sort expression for `Pos'
-
-ATermAppl gsMakeSortExprNat(void);
-//Ret: Sort expression for `Nat'
-
-ATermAppl gsMakeSortExprNatPair(void);
-//Ret: Sort expression for `NatPair'
-
-ATermAppl gsMakeSortExprInt(void);
-//Ret: Sort expression for `Int'
-
-ATermAppl gsMakeSortExprReal(void);
-//Ret: Sort expression for `Real'
-
-
-//Auxiliary functions concerning sort expressions
-ATermAppl gsMakeSortArrow2(ATermAppl SortExprDom1, ATermAppl SortExprDom2,
-  ATermAppl SortExprResult);
-//Pre: SortExprDom1, SortExprDom2 and SortExprResult are sort expressions
-//Ret: Internal representation of the sort expression
-//     SortExprDom1 -> SortExprDom2 -> SortExprResult, where -> is right
-//     associative.
-
-ATermAppl gsMakeSortArrow3(ATermAppl SortExprDom1, ATermAppl SortExprDom2,
-  ATermAppl SortExprDom3, ATermAppl SortExprResult);
-//Pre: SortExprDom1, SortExprDom2, SortExprDom3 and SortExprResult are sort
-//     expressions
-//Ret: Internal representation of the sort expression
-//     SortExprDom1 -> SortExprDom2 -> SortExprDom3 -> SortExprResult,
-//     where -> is right associative.
-
-ATermAppl gsMakeSortArrow4(ATermAppl SortExprDom1, ATermAppl SortExprDom2,
-  ATermAppl SortExprDom3, ATermAppl SortExprDom4, ATermAppl SortExprResult);
-//Pre: SortExprDom1, SortExprDom2, SortExprDom3, SortExprDom4 and
-//     SortExprResult are sort expressions
-//Ret: Internal representation of the sort expression
-//     SortExprDom1 -> SortExprDom2 -> SortExprDom3 -> SortExprDom4 ->
-//       SortExprResult, where -> is right associative.
-
-ATermAppl gsMakeSortArrowList(ATermList SortExprDomain,
-  ATermAppl SortExprResult);
-//Pre: SortExprDomain is of the form [e_0, ..., e_n], where n is a natural
-//     number and each e_i, 0 <= i <= n, is a sort expression.
-//     SortExprResult is a sort expression, which we denote by e.
-//Ret: Internal representation of the sort expression e_0 -> ... -> e_n -> e,
-//     where -> is right associative.
-
-ATermAppl gsGetSortExprResult(ATermAppl SortExpr);
-//Pre: SortExpr is a sort expression
-//ret: the result of the sort expression
-
-ATermList gsGetSortExprDomain(ATermAppl SortExpr);
-//Pre: SortExpr is a sort expression
-//Ret: the domain of the sort expression
-
-ATermAppl gsGetSort(ATermAppl DataExpr);
-//Pre: DataExpr is a data expression
-//Ret: the sort of DataExpr, if the sort can be inferred from the sort
-//     information in DataExpr
-//     Unknown, otherwise
-
 //Creation of operation identifiers for system defined operations.
+
 ATermAppl gsMakeOpIdTrue(void);
 //Ret: Operation identifier for `true'
 
@@ -461,13 +512,13 @@ ATermAppl gsMakeOpIdExists(ATermAppl SortExpr);
 //Ret: Operation identifier for the existential quantification over sort
 //     SortExpr
 
-ATermAppl gsMakeOpId1(void);
+ATermAppl gsMakeOpIdC1(void);
 //Ret: Operation identifier for the Pos constructor `1'
 
 ATermAppl gsMakeOpIdCDub(void);
 //Ret: Operation identifier for the Pos constructor `double and add a bit'
 
-ATermAppl gsMakeOpId0(void);
+ATermAppl gsMakeOpIdC0(void);
 //Ret: Operation identifier for the Nat constructor `0'
 
 ATermAppl gsMakeOpIdCNat(void);
@@ -804,7 +855,9 @@ ATermAppl gsMakeOpIdSet2Bag(ATermAppl SortExprDom,
 //Ret: Operation identifier for set to bag conversion of sort S -> T,
 //     where S and T stand for SortExprDom and SortExprResult
      
+
 //Creation of data expressions for system defined operations.
+
 ATermAppl gsMakeDataExprTrue(void);
 //Ret: Data expression for `true'
 
@@ -852,7 +905,7 @@ ATermAppl gsMakeDataExprIf(ATermAppl DataExprCond, ATermAppl DataExprThen,
 //     must be different from Unknown
 //Ret: Data expression for `if(DataExprCond, DataExprThen, DataExprIf)'
 
-ATermAppl gsMakeDataExpr1(void);
+ATermAppl gsMakeDataExprC1(void);
 //Ret: Data expression for `1' of sort Pos
 
 ATermAppl gsMakeDataExprCDub(ATermAppl DataExprBit, ATermAppl DataExprPos);
@@ -862,7 +915,7 @@ ATermAppl gsMakeDataExprCDub(ATermAppl DataExprBit, ATermAppl DataExprPos);
 //       |true|  = 1
 //       |false| = 0
 
-ATermAppl gsMakeDataExpr0(void);
+ATermAppl gsMakeDataExprC0(void);
 //Ret: Data expression for `0' of sort Nat
 
 ATermAppl gsMakeDataExprCNat(ATermAppl DataExpr);
@@ -1308,17 +1361,37 @@ int gsIntValue_int(const ATermAppl IntConstant);
 //Pre: IntConstant is a data expression of sort Int built from constructors only
 //Ret: The value of IntExpr
 
-ATermAppl gsGetDataExprHead(ATermAppl DataExpr);
-//Pre: DataExpr is a data expression
-//ret: the head of the data expression
 
-ATermList gsGetDataExprArgs(ATermAppl DataExpr);
-//Pre: DataExpr is a data expression
-//Ret: the arguments of the data expression
+//Multiactions
+//------------
 
 ATermAppl gsSortMultAct(ATermAppl MultAct);
 //Pre: MultAct is a multiaction
 //Ret: the sorted variant of the argument
+
+
+//Process expressions
+//-------------------
+
+bool gsIsProcExpr(ATermAppl Term);
+//Pre: Term is not NULL
+//Ret: Term is a process expression
+
+
+//Mu-calculus formulas
+//--------------------
+
+bool gsIsStateFrm(ATermAppl Term);
+//Pre: Term is not NULL
+//Ret: Term is a state formula
+
+bool gsIsRegFrm(ATermAppl Term);
+//Pre: Term is not NULL
+//Ret: Term is a regular formula
+
+bool gsIsActFrm(ATermAppl Term);
+//Pre: Term is not NULL
+//Ret: Term is a action formula
 
 #ifdef __cplusplus
 }

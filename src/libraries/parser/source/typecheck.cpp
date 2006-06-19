@@ -257,7 +257,7 @@ ATermAppl type_check_mult_act(ATermAppl mult_act, lpe::specification &lpe_spec)
   return NULL;
 }
 
-ATermAppl type_check_state_formula(ATermAppl state_formula, lpe::specification &lpe_spec)
+ATermAppl type_check_state_formula(ATermAppl state_frm, lpe::specification &lpe_spec)
 {
   //check correctness of the state formula in state_formula using
   //the LPE specification in lpe_spec as follows:
@@ -269,7 +269,7 @@ ATermAppl type_check_state_formula(ATermAppl state_formula, lpe::specification &
   //   forall, exists, mu and nu quantifiers
   //4) check for monotonicity of fixpoint variables
   //TODO in decreasing order of urgency: 1 & 2 => 3 & 4.
-  return NULL;
+  return state_frm;
 }
 
 //local functions

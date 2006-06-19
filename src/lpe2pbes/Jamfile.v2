@@ -1,0 +1,18 @@
+project lpe2pbes
+       : source-location .
+       : build-dir $(BUILD_TOP)
+       : requirements
+          <include>$(BOOST)
+       ;
+
+exe lpe2pbes
+       : lpe2pbes.cpp
+         /libraries/lpe//lpe
+         /libraries/parser//parser
+         /libraries/temporary//print
+         /libraries/temporary//rewrite
+       : <source>/site-config//mcrl2_revision.h
+         <include>.
+       ;
+
+install_with_libraries install : lpe2pbes ;
