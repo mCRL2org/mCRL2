@@ -13,6 +13,7 @@ exe lpe2pbes
          /libraries/temporary//rewrite
        : <source>/site-config//mcrl2_revision.h
          <include>.
+         <status>experimental
        ;
 
 install_with_libraries install : lpe2pbes ;
