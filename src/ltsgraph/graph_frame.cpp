@@ -603,7 +603,7 @@ void GraphFrame::ExportLatex( wxCommandEvent& /* event */ ) {
 			vectEdgeLatex.push_back(StructEdgeLatex);
 	}
 	
- 	ExportToLatex * ltx = new ExportToLatex(strcat((char *)inputFileName.c_str(),".tex"),vectNodeLatex,vectEdgeLatex);
+ 	ExportToLatex * ltx = new ExportToLatex(strcat((char *)inputFileName.c_str(),".tex"),vectNodeLatex,vectEdgeLatex,leftPanel->Get_Height());
  	if (ltx->Generate()) {
 		wxMessageBox(wxT("Export successful"),wxT("Information"),wxOK| wxICON_INFORMATION);
 	}

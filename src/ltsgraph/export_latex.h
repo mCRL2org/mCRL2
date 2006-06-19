@@ -22,7 +22,7 @@ typedef struct {
 class ExportToLatex
 {
 public:
-	ExportToLatex(const char * _filename, vector<nodeLatex> _node, vector<edgeLatex> _edge);
+	ExportToLatex(const char * _filename, vector<nodeLatex> _node, vector<edgeLatex> _edge, int _height);
 	bool Generate();
 	
 
@@ -37,8 +37,8 @@ private:
 	vector<nodeLatex> node;
 	vector<edgeLatex> edge;
 
-	int height;
-	int width;
+	int height; //height of the drawing area
+
 
 };
 

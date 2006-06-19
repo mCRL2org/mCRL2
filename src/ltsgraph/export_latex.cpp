@@ -5,8 +5,8 @@
 
 #include <boost/format.hpp>
 
-ExportToLatex::ExportToLatex(const char * _filename, vector<nodeLatex> _node, vector<edgeLatex> _edge) : 
-		filename(_filename) , node(_node), edge(_edge)
+ExportToLatex::ExportToLatex(const char * _filename, vector<nodeLatex> _node, vector<edgeLatex> _edge, int _height) : 
+		filename(_filename) , node(_node), edge(_edge), height(_height)
 {}
 
 bool ExportToLatex::Generate() {
@@ -21,7 +21,7 @@ bool ExportToLatex::Generate() {
 	for (unsigned int i=0; i<node.size(); i++) {
 		boost::format f("\\rput(%1%,%2%){\\circlenode{%3%}{%4%}} \n");
 		double nodeX = (node[i].x)/50;
-		double nodeY = (node[i].y)/50;
+		double nodeY = (height - node[i].y)/50;
 		f%nodeX%nodeY%node[i].num%node[i].num;
 		LatexCode += boost::str(f);
 	}
