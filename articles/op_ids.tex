@@ -508,6 +508,7 @@
 \newcommand{\srtnat}{\f{Nat}}
 \newcommand{\srtint}{\f{Int}}
 \newcommand{\srtreal}{\f{Real}}
+\newcommand{\srtnatpair}{\f{NatPair}}
 
 % mCRL Operations
 \newcommand{\opzeronat}{{0n}}
@@ -608,12 +609,12 @@ Name          & \text{Type}                          & Description & Ext. repr.\
 \verb+false+  & \srtbool                              & false        & constant\\
 \verb+!+      & \srtbool \To \srtbool                 & logical negation
                                                                      & prefix\\
-\verb+&&+     & \srtbool \times \srtbool \To \srtbool & conjunction  & infix\\
-\verb+||+     & \srtbool \times \srtbool \To \srtbool & disjunction  & infix\\
-\verb+=>+     & \srtbool \times \srtbool \To \srtbool & implication  & infix\\
-\verb+==+     & S \times S \To \srtbool               & equality     & infix\\
-\verb+!=+     & S \times S \To \srtbool               & inequality   & infix\\
-\verb+if+     & \srtbool \times S \times S \To S
+\verb+&&+     & \srtbool \To \srtbool \To \srtbool & conjunction  & infix\\
+\verb+||+     & \srtbool \To \srtbool \To \srtbool & disjunction  & infix\\
+\verb+=>+     & \srtbool \To \srtbool \To \srtbool & implication  & infix\\
+\verb+==+     & S \To S \To \srtbool               & equality     & infix\\
+\verb+!=+     & S \To S \To \srtbool               & inequality   & infix\\
+\verb+if+     & \srtbool \To S \To S \To S
 & conditional of sort \frm{S} & functional\\
 \verb+forall+$^*$ & (S \To \srtbool) \To \srtbool
 & universal quantification over \frm{S} & functional\\
@@ -647,10 +648,10 @@ in the hierarchy by the type checker, e.g.\ $-1 + 0$ becomes $-1 +
 \begin{tabular}{l|L|l|l}
 Name        & \text{Type}                  & Description      & Ext. repr.\\
 \hline
-\verb+@1+$^*$     & \srtpos                & 1                    & number\\
+\verb+@c1+$^*$    & \srtpos                & 1                    & number\\
 \verb+@cDub+$^*$  & \srtbool \To \srtpos \To \srtpos
                                            & double and add a bit & number\\
-\verb+@0+$^*$     & \srtnat                & 0                    & number\\
+\verb+@c0+$^*$    & \srtnat                & 0                    & number\\
 \verb+@cNat+$^*$  & \srtpos \To \srtnat    & create natural from positive
                                                                   & number\\
 \verb+@cNeg+$^*$  & \srtpos \To \srtint    & negate positive      & number\\
@@ -660,16 +661,16 @@ Name        & \text{Type}                  & Description      & Ext. repr.\\
                                                                   & number\\
 \verb+A2B+        & A \To B                & convert \frm{A} to \frm{B}
                                                                   & functional\\
-\verb+<=+         & A \times A \To \srtbool& less than or equal   & infix\\
-\verb-<-          & A \times A \To \srtbool& less than            & infix\\
-\verb+>=+         & A \times A \To \srtbool& greater than or equal& infix\\
-\verb->-          & A \times A \To \srtbool& greater than         & infix\\
-\verb+max+        & \sub{A}{\f{PNI}} \times \sub{B}{\f{PNI}} \To
+\verb+<=+         & A \To A \To \srtbool& less than or equal   & infix\\
+\verb-<-          & A \To A \To \srtbool& less than            & infix\\
+\verb+>=+         & A \To A \To \srtbool& greater than or equal& infix\\
+\verb->-          & A \To A \To \srtbool& greater than         & infix\\
+\verb+max+        & \sub{A}{\f{PNI}} \To \sub{B}{\f{PNI}} \To
                     \sub{A}{\f{PNI}} \cap \sub{B}{\f{PNI}}
                                            & maximum              & functional\\
-\verb+max+        & \srtreal \times \srtreal \To \srtreal      
+\verb+max+        & \srtreal \To \srtreal \To \srtreal      
                                            & maximum              & functional\\
-\verb+min+        & A \times A \To A       & minimum              & functional\\
+\verb+min+        & A \To A \To A       & minimum              & functional\\
 \verb+abs+        & \sub{A}{\f{PNR}} \To \sub{A}{\f{PNR}}
                                            & absolute value       & functional\\
 \verb+abs+        & \srtint \To \srtnat    & absolute value       & functional\\
@@ -682,32 +683,57 @@ Name        & \text{Type}                  & Description      & Ext. repr.\\
                                            & predecessor     & functional\\
 \verb+@dub+$^*$   & \srtbool \To \sub{A}{\f{PNI}} \To \sub{A}{\f{PNI}}
                                            & double and add a bit & functional\\
-\verb-+-          & \sub{A}{\f{PN}} \times \sub{B}{\f{PN}} \To
+\verb-+-          & \sub{A}{\f{PN}} \To \sub{B}{\f{PN}} \To
                     \sub{A}{\f{PN}} \cap \sub{B}{\f{PN}}
                                            & addition             & infix\\
-\verb-+-          & \sub{A}{\f{IR}} \times \sub{A}{\f{IR}} \To \sub{A}{\f{IR}}
+\verb-+-          & \sub{A}{\f{IR}} \To \sub{A}{\f{IR}} \To \sub{A}{\f{IR}}
                                            & addition             & infix\\
 \verb+@addc+$^*$  & \srtbool \To \srtpos \To \srtpos \To \srtpos
                                            & addition with carry  & functional\\
-\verb+-+          & A \times A \To A \cup \srtint & subtraction   & infix\\
-\verb+@gtesubt+$^*$ & \sub{A}{\f{PN}} \times \sub{A}{\f{PN}} \To \srtnat
+\verb+-+          & A \To A \To A \cup \srtint & subtraction   & infix\\
+\verb+@gtesubt+$^*$ & \sub{A}{\f{PN}} \To \sub{A}{\f{PN}} \To \srtnat
                                            & GTE subtraction      & functional\\
 \verb+@gtesubtb+$^*$ & \srtbool \To \srtpos \To \srtpos \To \srtnat
                                     & GTE subtraction with borrow & functional\\
-\verb+*+          & A \times A \To A       & multiplication       & infix\\
+\verb+*+          & A \To A \To A       & multiplication       & infix\\
 \verb+@multir+$^*$& \srtbool \To \srtpos \To & multiplication with& functional\\
            &\hfill \srtpos \To \srtpos \To \srtpos &\hfill intermediate result\\
-\verb+div+   & \sub{A}{\f{PNI}} \times \srtpos \To \sub{A}{\f{PNI}} \cup \srtnat
+\verb+div+   & \sub{A}{\f{PNI}} \To \srtpos \To \sub{A}{\f{PNI}} \cup \srtnat
                                         & quotient after division & infix\\
-\verb+mod+        & \sub{A}{\f{PNI}} \times \srtpos \To \srtnat
+\verb+mod+        & \sub{A}{\f{PNI}} \To \srtpos \To \srtnat
                                        & remainder after division & infix\\
-\verb+exp+        & A \times \srtnat \To A & exponentation        & functional\\
+\verb+exp+        & A \To \srtnat \To A & exponentation        & functional\\
 \verb+@even+$^*$  & \srtnat \To \srtbool   & even                 & functional\\
 \end{tabular}
 \caption{System identifiers for numbers}
 \label{tab:ptc:numbers}
 \end{table}
-\newpage
+
+For the implementation of sort $\srtnat$, an auxiliary sort $\srtnatpair$ is
+needed to represent pairs of natural numbers. The system identifiers for this
+sort are listed in table~\ref{tab:ptc:natpair}.
+
+\begin{table}[!htb]
+\centering
+\begin{tabular}{l|L|l|l}
+Name        & \text{Type}                  & Description      & Ext. repr.\\
+\hline
+\verb+@cPair+$^*$ & \srtnat \To \srtnat \To \srtnatpair
+                                            & pair of two natural numbers & functional\\
+\verb+@first+$^*$  & \srtnatpair \to \srtnat & first element of the pair  & functional\\
+\verb+@last+$^*$   & \srtnatpair \to \srtnat & last element of the pair   & functional\\
+\verb+@divmod+$^*$ & \srtpos \To \srtpos \To \srtnatpair
+                                           & div/mod  & functional\\
+\verb+@gdivmod+$^*$ & \srtnatpair \To 
+                                           & generalised div/mod  & functional\\
+                    & \hfill \srtbool \To \srtpos \To \srtnatpair & &\\
+\verb+@ggdivmod+$^*$ & \srtnat \To \srtnat \To \srtpos \To \srtnatpair
+                                           & gen.\ gen.\ div/mod  & functional\\
+\end{tabular}
+\caption{System identifiers for pairs of natural numbers}
+\label{tab:ptc:natpair}
+\end{table}
+
 \subsection*{Lists}
 
 The system identifiers for lists are listed in table~\ref{tab:ptc:lists}. Here,
@@ -720,17 +746,17 @@ Name & \text{Type} & Description & Ext. repr.\\
 \hline
 \verb+[]+    & \fa{List}{S}
 & empty list                     & constant\\
-\verb+in+    & S \times \fa{List}{S} \To \srtbool
+\verb+in+    & S \To \fa{List}{S} \To \srtbool
 & element test       & infix\\
 \verb+#+     & \fa{List}{S} \To \srtnat
 & size of a list                 & prefix\\
-\verb+|>+    & S \times \fa{List}{S} \To \fa{List}{S}
+\verb+|>+    & S \To \fa{List}{S} \To \fa{List}{S}
 & element at the head of a list  & infix\\
-\verb+<|+    & \fa{List}{S} \times S \To \fa{List}{S}
+\verb+<|+    & \fa{List}{S} \To S \To \fa{List}{S}
 & element at the tail of a list  & infix\\
-\verb-++-    & \fa{List}{S} \times \fa{List}{S} \To \fa{List}{S}
+\verb-++-    & \fa{List}{S} \To \fa{List}{S} \To \fa{List}{S}
 & concatenation                  & infix\\
-\verb+.+     & \fa{List}{S} \times \srtnat \To S
+\verb+.+     & \fa{List}{S} \To \srtnat \To S
 & element at position            & infix\\
 \verb+head+ & \fa{List}{S} \To S
 & first element of a list        & functional\\
@@ -745,6 +771,7 @@ Name & \text{Type} & Description & Ext. repr.\\
 \label{tab:ptc:lists}
 \end{table}
 
+\newpage
 \subsection*{Sets}
 
 The system identifiers for sets are listed in table~\ref{tab:ptc:sets}. Here,
@@ -759,17 +786,17 @@ Name & \text{Type} & Description & Ext. repr.\\
 & set comprehension & set comprehension\\
 \verb+{}+      & \fa{Set}{S}
 & empty set          & constant\\
-\verb+in+      & S \times \fa{Set}{S} \To \srtbool
+\verb+in+      & S \To \fa{Set}{S} \To \srtbool
 & element test       & infix\\
-\verb-<=-      & \fa{Set}{S} \times \fa{Set}{S} \To \srtbool
+\verb-<=-      & \fa{Set}{S} \To \fa{Set}{S} \To \srtbool
 & subset             & infix\\
-\verb-<-      & \fa{Set}{S} \times \fa{Set}{S} \To \srtbool
+\verb-<-      & \fa{Set}{S} \To \fa{Set}{S} \To \srtbool
 & proper subset      & infix\\
-\verb-+-       & \fa{Set}{S} \times \fa{Set}{S} \To \fa{Set}{S}
+\verb-+-       & \fa{Set}{S} \To \fa{Set}{S} \To \fa{Set}{S}
 & union              & infix\\
-\verb+-+       & \fa{Set}{S} \times \fa{Set}{S} \To \fa{Set}{S}
+\verb+-+       & \fa{Set}{S} \To \fa{Set}{S} \To \fa{Set}{S}
 & difference         & infix\\
-\verb+*+       & \fa{Set}{S} \times \fa{Set}{S} \To \fa{Set}{S}
+\verb+*+       & \fa{Set}{S} \To \fa{Set}{S} \To \fa{Set}{S}
 & intersection       & infix\\
 \verb+!+       & \fa{Set}{S} \To \fa{Set}{S}
 & complement         & prefix\\
@@ -777,7 +804,7 @@ Name & \text{Type} & Description & Ext. repr.\\
 \caption{System identifiers for sets}
 \label{tab:ptc:sets}
 \end{table}
-\newpage
+
 \subsection*{Bags}
 
 The system identifiers for bags are listed in table~\ref{tab:ptc:bags}. Here,
@@ -796,19 +823,19 @@ Name & \text{Type} & Description & Ext. repr.\\
 & convert set to bag & functional\\
 \verb+{}+      & \fa{Bag}{S}
 & empty bag          & constant\\
-\verb+count+   & S \times \fa{Bag}{S} \To \srtnat
+\verb+count+   & S \To \fa{Bag}{S} \To \srtnat
 & multiplicity   & infix\\
-\verb+in+      & S \times \fa{Bag}{S} \To \srtbool
+\verb+in+      & S \To \fa{Bag}{S} \To \srtbool
 & element test       & infix\\
-\verb-<=-      & \fa{Bag}{S} \times \fa{Bag}{S} \To \srtbool
+\verb-<=-      & \fa{Bag}{S} \To \fa{Bag}{S} \To \srtbool
 & subbag             & infix\\
-\verb+<+       & \fa{Bag}{S} \times \fa{Bag}{S} \To \srtbool
+\verb+<+       & \fa{Bag}{S} \To \fa{Bag}{S} \To \srtbool
 & proper subbag      & infix\\
-\verb-+-       & \fa{Bag}{S} \times \fa{Bag}{S} \To \fa{Bag}{S}
+\verb-+-       & \fa{Bag}{S} \To \fa{Bag}{S} \To \fa{Bag}{S}
 & union              & infix\\
-\verb+-+       & \fa{Bag}{S} \times \fa{Bag}{S} \To \fa{Bag}{S}
+\verb+-+       & \fa{Bag}{S} \To \fa{Bag}{S} \To \fa{Bag}{S}
 & difference         & infix\\
-\verb+*+       & \fa{Bag}{S} \times \fa{Bag}{S} \To \fa{Bag}{S}
+\verb+*+       & \fa{Bag}{S} \To \fa{Bag}{S} \To \fa{Bag}{S}
 & intersection       & infix\\
 \end{tabular}
 \caption{System identifiers for bags}
@@ -824,7 +851,7 @@ A lambda expression is of the form
 \end{equation}
 with context variables \frm{x_{-m}{:}S_{-m}, \ldots, x_{-1}{:}S_{-1}} occurring
 in \frm{e}. A system identifier for this expression is \verb+lambda@k+$^*$, of
-type \frm{S_{-m} \times \cdots \times S_{-1} \To S_{0} \To \cdots \To S_{n} \To
+type \frm{S_{-m} \To \cdots \To S_{-1} \To S_{0} \To \cdots \To S_{n} \To
 S}. Here, \frm{S} is the type of \frm{e} and \frm{k} is a natural number that
 ensures the uniqueness of the identifier. Expression~\eqref{eq:lambda} is
 implemented by an application of \verb+lambda@k+ to terms of sort \frm{S_{-m},

@@ -2,7 +2,7 @@
 all     : 
 
 clean   :
-	rm -f *.dvi *.log *.aux *.toc *.out *.blg *.bbl *.ps
+	rm -f *.dvi *.log *.aux *.toc *.out *.blg *.bbl *.ps *.pdf
 
 #LaTeX rules
 %.dvi   : %.tex
@@ -15,4 +15,4 @@ clean   :
 	ps2pdf $^
 
 %.pdf   : %.tex
-	pdflatex $^
+	texi2dvi -p $^
