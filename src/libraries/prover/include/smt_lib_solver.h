@@ -12,6 +12,16 @@
 
 class SMT_LIB_Solver: public SMT_Solver {
   private:
+    Expression_Info f_expression_info;
+    Sort_Info f_sort_info;
+    std::string f_sorts_notes;
+    std::string f_operators_notes;
+    std::string f_predicates_notes;
+    std::string f_extrasorts;
+    std::string f_operators_extrafuns;
+    std::string f_variables_extrafuns;
+    std::string f_extrapreds;
+    std::string f_formula;
     ATermIndexedSet f_sorts;
     ATermIndexedSet f_operators;
     ATermIndexedSet f_variables;
@@ -39,6 +49,7 @@ class SMT_LIB_Solver: public SMT_Solver {
     void translate_binary_minus(ATermAppl a_clause);
     void translate_multiplication(ATermAppl a_clause);
     void translate_add_c(ATermAppl a_clause);
+    void translate_c_nat(ATermAppl a_clause);
     void translate_unknown_operator(ATermAppl a_clause);
     void translate_variable(ATermAppl a_clause);
     void translate_nat_variable(ATermAppl a_clause);
@@ -52,17 +63,7 @@ class SMT_LIB_Solver: public SMT_Solver {
     void add_nat_clauses();
     void add_pos_clauses();
   protected:
-    Expression_Info f_expression_info;
-    Sort_Info f_sort_info;
     std::string f_benchmark;
-    std::string f_sorts_notes;
-    std::string f_operators_notes;
-    std::string f_predicates_notes;
-    std::string f_extrasorts;
-    std::string f_operators_extrafuns;
-    std::string f_variables_extrafuns;
-    std::string f_extrapreds;
-    std::string f_formula;
     void translate(ATermList a_formula);
   public:
     SMT_LIB_Solver();

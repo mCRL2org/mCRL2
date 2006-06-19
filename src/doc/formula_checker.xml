@@ -11,7 +11,9 @@
 <!ENTITY type_aterm "<type>ATerm</type>">
 <!ENTITY type_aterm_appl "<type>ATermAppl</type>">
 <!ENTITY type_aterm_list "<type>ATermList</type>">
+<!ENTITY type_smt_solver_type "<type>SMT_Solver_Type</type>">
 <!ENTITY type_rewrite_strategy "<type>RewriteStrategy</type>">
+<!ENTITY type_char_string "<type>char*</type>">
 
 <!ENTITY formula_checker_constructor "<function>Formula_Checker::Formula_Checker</function>">
 <!ENTITY formula_checker_destructor "<function>Formula_Checker::~Formula_Checker</function>">
@@ -19,10 +21,13 @@
 
 <!ENTITY par_rewrite_strategy "<parameter>a_rewrite_strategy</parameter>">
 <!ENTITY par_time_limit "<parameter>a_time_limit</parameter>">
+<!ENTITY par_path_eliminator "<parameter>a_path_eliminator</parameter>">
+<!ENTITY par_solver_type "<parameter>a_solver_type</parameter>">
 <!ENTITY par_data_equations "<parameter>a_data_equations</parameter>">
 <!ENTITY par_counter_example "<parameter>a_counter_example</parameter>">
 <!ENTITY par_witness "<parameter>a_witness</parameter>">
 <!ENTITY par_formulas "<parameter>a_formulas</parameter>">
+<!ENTITY par_dot_file_name "<parameter>a_dot_file_name</parameter>">
 
 <!ENTITY strat_jitty "<constant>GS_REWR_JITTY</constant>">
 
@@ -46,11 +51,14 @@
 <funcprototype>
   <funcdef>&formula_checker_constructor;</funcdef>
   <paramdef>
-    &type_rewrite_strategy; &par_rewrite_strategy; = &strat_jitty;,
-    &type_int; &par_time_limit; = 0,
+    &type_rewrite_strategy; &par_rewrite_strategy;,
+    &type_int; &par_time_limit;,
+    &type_bool; &par_path_eliminator;,
+    &type_smt_solver_type; &par_solver_type;,
     &type_aterm_appl; &par_data_equations;,
     &type_bool; &par_counter_example;,
-    &type_bool; &par_witness;
+    &type_bool; &par_witness;,
+    &type_char_string; &par_dot_file_name;
   </paramdef>
 </funcprototype>
 <funcprototype>
@@ -68,7 +76,8 @@
 <title>Description</title>
 <para>
   The class &class_formula_checker; uses an instance of the class &class_bdd_prover; to prove a number of propositional formulas. The prover is
-  initialized with the parameters &par_rewrite_strategy; and &par_time_limit;, and the data specification passed as parameter &par_data_equations;.
+  initialized with the parameters &par_rewrite_strategy;, &par_time_limit;, &par_path_eliminator;, &par_solver_type;, &par_dot_file_name;, and
+  the data specification passed as parameter &par_data_equations;.
   If the parameter &par_counter_example; is set, a so called counter example is printed to &stderr; each time a formula is encountered that is
   neither a contradiction nor a tautology. A counter example is a valuation for which
   the formula does not hold. If the parameter &par_witness; is set, a so called witness is printed to &stderr; each time such a formula is

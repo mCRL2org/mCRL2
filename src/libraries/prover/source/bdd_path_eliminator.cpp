@@ -3,6 +3,8 @@
 
 #include "bdd_path_eliminator.h"
 #include "libstruct.h"
+#include "libprint_c.h"
+#include "time.h"
 
 // Class BDD_Path_Eliminator ----------------------------------------------------------------------
   // Class BDD_Path_Eliminator - functions declared private ---------------------------------------
@@ -12,6 +14,11 @@
       ATermList v_false_path;
       bool v_true_branch_enabled;
       bool v_false_branch_enabled;
+
+      if (f_deadline != 0 && (f_deadline - time(0)) < 0) {
+        gsDebugMsg("The time limit has passed.\n");
+        return a_bdd;
+      }
 
       if (f_bdd_info.is_true(a_bdd) || f_bdd_info.is_false(a_bdd)) {
         return a_bdd;

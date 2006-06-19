@@ -249,7 +249,7 @@
             break;
           case 't':
             sscanf(optarg, "%d", &f_time_limit);
-            if (f_time_limit < 0) {
+            if (f_time_limit <= 0) {
               gsErrorMsg("The time-limit must be greater than or equal to one.\n");
               exit(0);
             }

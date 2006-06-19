@@ -28,6 +28,7 @@
 <!ENTITY par_check_all "<parameter>a_check_all</parameter>">
 <!ENTITY par_counter_example "<parameter>a_counter_example</parameter>">
 <!ENTITY par_dot_file_name "<parameter>a_dot_file_name</parameter>">
+<!ENTITY par_generate_invariants "<parameter>a_generate_invariants</parameter>">
 <!ENTITY par_invariant "<parameter>a_invariant</parameter>">
 <!ENTITY par_summand_number "<parameter>a_summand_number</parameter>">
 
@@ -62,6 +63,7 @@
     &type_bool; &par_check_all;,
     &type_bool; &par_counter_example;,
     &type_char_pointer; &par_dot_file_name;
+    &type_bool; &par_generate_invariants;
   </paramdef>
 </funcprototype>
 <funcprototype>
@@ -114,6 +116,11 @@
         tautology using a prover for propositional formulas. If two summands are
         proven confluent using the prover, the class &class_confluence_checker;
         indicates this by printing a plus sign ('+').
+        If the parameter &par_generate_invariants; is set, the class &class_confluence_checker;
+        will try to prove that the reduced confluence condition is an invariant of the LPE,
+        in case the confluence condition is not a tautology. If the reduced confluence
+        condition is indeed an invariant, the two summands are proven confluent.
+        The class &class_confluence_checker; indicates this by printing an 'i'.
       </para>
     </listitem>
     <listitem>
@@ -156,8 +163,7 @@
   to determine which tau-summands of an mCRL2 LPE are confluent. Confluent tau's will be marked as ctau. The constructor
   &confluence_checker_constructor; initializes the BDD based prover with the parameters &par_rewrite_strategy;, &par_path_eliminator;,
   &par_solver_type; and &par_time_limit;, and the data
-  specification of the LPE passed as parameter &par_lpe;. In case the parameter &par_dot_file_name; differs from 0, a dot file of the resulting
-  BDD is written for summands that could not be proven confluent.
+  specification of the LPE passed as parameter &par_lpe;.
   The function &confluence_checker_check_confluence_and_mark; returns an LPE with all confluent tau's marked as ctau, unless the parameter
   &par_no_marking; was set. In case the parameter &par_no_marking; was set, the confluent tau's will not be marked, only the results of the
   confluence checking will be displayed. If the parameter &par_counter_example; is set, a so called counter example is printed to &stderr; each
@@ -168,6 +174,8 @@
   condition is encountered that is not a tautology.
   When the parameter &par_dot_file_name; differs from 0, a .dot file of the BDD of the confluence condition will be saved for each pair of summands
   that cannot be proven confluent. The string passed as parameter &par_dot_file_name; is used as a prefix for those files.
+  If the parameter &par_generate_invariants; is set, an invariant checker is used to check if the reduced confluence condition is an invariant of
+  the LPE passed as parameter &par_lpe;. If the reduced confluence condition is an invariant, the two summands are confluent.
 </para>
 
 </refsect1>

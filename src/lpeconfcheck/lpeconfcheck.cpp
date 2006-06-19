@@ -19,6 +19,7 @@
       char* f_input_file_name;
       char* f_output_file_name;
       int f_summand_number;
+      bool f_negation;
       bool f_no_check;
       bool f_no_marking;
       bool f_check_all;
@@ -57,6 +58,9 @@
         "Mandatory arguments to long options are mandatory for short options too.\n"
         "  -i, --invariant=INVARIANT       Use the formula in internal mCRL2 format as\n"
         "                                  found in INVARIANT as invariant.\n"
+        "  -g. --generate-invariants       Try to prove that the reduced confluence\n"
+        "                                  condition is an invariant of the LPE, in case\n"
+        "                                  the confluence condition is not a tautology.\n"
         "  -s, --summand=NUMBER            Check the summand with number NUMBER only.\n"
         "  -n, --no-check                  Do not check if the invariant holds before\n"
         "                                  checking for confluence.\n"
@@ -119,6 +123,7 @@
       f_input_file_name = 0;
       f_output_file_name = 0;
       f_summand_number = 0;
+      f_negation = false;
       f_no_check = false;
       f_no_marking = false;
       f_check_all = false;
@@ -139,12 +144,13 @@
     // --------------------------------------------------------------------------------------------
 
     void LPE_Conf_Check::get_options(int a_argc, char* a_argv[]) {
-      char* v_short_options = "i:s:nmacp:hqvdr:t:z:";
+      char* v_short_options = "i:gs:nmacp:hqvdr:t:z:";
 
       f_tool_command = a_argv[0];
 
       struct option v_long_options[] = {
         {"invariant",        required_argument, 0, 'i'},
+        {"negation",         no_argument,       0, 'g'},
         {"summand",          required_argument, 0, 's'},
         {"no-check",         no_argument,       0, 'n'},
         {"no-marking",       no_argument,       0, 'm'},
@@ -167,6 +173,9 @@
         switch (v_option) {
           case 'i':
             f_invariant_file_name = strdup(optarg);
+            break;
+          case 'g':
+            f_negation = true;
             break;
           case 's':
             sscanf(optarg, "%d", &f_summand_number);
@@ -223,7 +232,7 @@
             break;
           case 't':
             sscanf(optarg, "%d", &f_time_limit);
-            if (f_time_limit < 0) {
+            if (f_time_limit <= 0) {
               gsErrorMsg("The time-limit must be greater than or equal to one.\n");
               exit(0);
             }
@@ -300,7 +309,7 @@
 
     void LPE_Conf_Check::check_confluence_and_mark() {
       Confluence_Checker v_confluence_checker(
-        f_strategy, f_time_limit, f_path_eliminator, f_solver_type, f_lpe, f_no_marking, f_check_all, f_counter_example, f_dot_file_name
+        f_strategy, f_time_limit, f_path_eliminator, f_solver_type, f_lpe, f_no_marking, f_check_all, f_counter_example, f_dot_file_name, f_negation
       );
 
       if (f_invariant == 0) {

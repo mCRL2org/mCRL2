@@ -10,7 +10,9 @@
 <!ENTITY type_int "<type>int</type>">
 <!ENTITY type_aterm "<type>ATerm</type>">
 <!ENTITY type_aterm_appl "<type>ATermAppl</type>">
+<!ENTITY type_smt_solver_type "<type>SMT_Solver_Type</type>">
 <!ENTITY type_rewrite_strategy "<type>RewriteStrategy</type>">
+<!ENTITY type_char_string "<type>char*</type>">
 
 <!ENTITY invariant_checker_constructor "<function>Invariant_Checker::Invariant_Checker</function>">
 <!ENTITY invariant_checker_destructor "<function>Invariant_Checker::~Invariant_Checker</function>">
@@ -18,10 +20,13 @@
 
 <!ENTITY par_rewrite_strategy "<parameter>a_rewrite_strategy</parameter>">
 <!ENTITY par_time_limit "<parameter>a_time_limit</parameter>">
+<!ENTITY par_path_eliminator "<parameter>a_path_eliminator</parameter>">
+<!ENTITY par_solver_type "<parameter>a_solver_type</parameter>">
 <!ENTITY par_lpe "<parameter>a_lpe</parameter>">
 <!ENTITY par_counter_example "<parameter>a_counter_example</parameter>">
 <!ENTITY par_all "<parameter>a_all</parameter>">
 <!ENTITY par_invariant "<parameter>a_invariant</parameter>">
+<!ENTITY par_dot_file_name "<parameter>a_dot_file_name</parameter>">
 
 <!ENTITY strat_jitty "<constant>GS_REWR_JITTY</constant>">
 <!ENTITY stderr "<constant>stderr</constant>">
@@ -46,9 +51,12 @@
   <paramdef>
     &type_rewrite_strategy; &par_rewrite_strategy;,
     &type_int; &par_time_limit;,
+    &type_bool; &par_path_eliminator;,
+    &type_smt_solver_type; &par_solver_type;,
     &type_aterm_appl; &par_lpe;,
     &type_bool; &par_counter_example;,
-    &type_bool; &par_all;
+    &type_bool; &par_all;,
+    &type_char_string; &par_dot_file_name;
   </paramdef>
 </funcprototype>
 <funcprototype>
@@ -68,8 +76,9 @@
 <title>Description</title>
 <para>
   The class &class_invariant_checker; uses an instance of the class &class_bdd_prover; to check whether a formula is a valid invariant of an mCRL2
-  LPE. The constructor &invariant_checker_constructor; initializes the BDD based prover with the parameters &par_rewrite_strategy; and
-  &par_time_limit;, and with the data specification of the LPE passed as parameter &par_lpe;. If the parameter &par_counter_example; is set, a so
+  LPE. The constructor &invariant_checker_constructor; initializes the BDD based prover with the parameters &par_rewrite_strategy;,
+  &par_time_limit;, &par_path_eliminator;, &par_solver_type;, &par_dot_file_name;, and with the data specification of the LPE passed as parameter
+  &par_lpe;. If the parameter &par_counter_example; is set, a so
   called counter example will be printed to &stderr; when a summand is encountered that violates the invariant. A counter example is a valuation
   for which the formula to be proven does not
   hold. If the parameter &par_all; is set, the invariant checker will not stop as soon as a violation of the invariant is found, but will report

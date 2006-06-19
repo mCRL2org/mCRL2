@@ -19,6 +19,7 @@
       f_binary_minus = gsMakeOpIdNameSubt();
       f_multiplication = gsMakeOpIdNameMult();
       f_add_c = gsMakeOpIdNameAddC();
+      f_c_nat = gsMakeOpIdNameCNat();
       f_true = gsMakeOpIdTrue();
       f_false = gsMakeOpIdFalse();
     }
@@ -228,6 +229,21 @@
               return v_term == f_add_c;
             }
           }
+        }
+      }
+      return false;
+    }
+
+    // --------------------------------------------------------------------------------------------
+
+    bool Expression_Info::is_c_nat(ATermAppl a_expression) {
+      ATermAppl v_term;
+
+      if (gsIsDataAppl(a_expression)) {
+        v_term = ATAgetArgument(a_expression, 0);
+        if (gsIsOpId(v_term)) {
+          v_term = ATAgetArgument(v_term, 0);
+          return v_term == f_c_nat;
         }
       }
       return false;

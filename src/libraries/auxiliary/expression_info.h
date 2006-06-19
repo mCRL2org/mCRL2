@@ -17,6 +17,7 @@ class Expression_Info {
     ATermAppl f_binary_minus;
     ATermAppl f_multiplication;
     ATermAppl f_add_c;
+    ATermAppl f_c_nat;
     ATermAppl f_true;
     ATermAppl f_false;
   public:
@@ -33,6 +34,7 @@ class Expression_Info {
     bool is_binary_minus(ATermAppl a_expression);
     bool is_multiplication(ATermAppl a_expression);
     bool is_add_c(ATermAppl a_expression);
+    bool is_c_nat(ATermAppl a_expression);
     bool is_operator(ATermAppl a_expression);
     bool is_variable(ATermAppl a_expression);
     bool is_constant(ATermAppl a_expression);

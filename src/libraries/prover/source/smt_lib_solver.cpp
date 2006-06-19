@@ -396,6 +396,15 @@ using namespace std;
 
     // --------------------------------------------------------------------------------------------
 
+    void SMT_LIB_Solver::translate_c_nat(ATermAppl a_clause) {
+      ATermAppl v_clause;
+
+      v_clause = f_expression_info.get_argument(a_clause, 0);
+      translate_clause(v_clause, false);
+    }
+
+    // --------------------------------------------------------------------------------------------
+
     void SMT_LIB_Solver::translate_unknown_operator(ATermAppl a_clause) {
       int v_number_of_arguments;
       int v_operator_number;
@@ -565,6 +574,8 @@ using namespace std;
         translate_multiplication(a_clause);
       } else if (f_expression_info.is_add_c(a_clause)) {
         translate_add_c(a_clause);
+      } else if (f_expression_info.is_c_nat(a_clause)) {
+        translate_c_nat(a_clause);
       } else if (f_expression_info.is_int_constant(a_clause)) {
         translate_int_constant(a_clause);
       } else if (f_expression_info.is_nat_constant(a_clause)) {

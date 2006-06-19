@@ -10,6 +10,7 @@
 #include "libprint_c.h"
 #include "libstruct.h"
 #include "time.h"
+#include "stdlib.h"
 
 // Class BDD_Prover -------------------------------------------------------------------------------
   // Class BDD_Prover - Functions declared private ------------------------------------------------
@@ -21,6 +22,8 @@
 
       ATerm v_previous_1 = 0;
       ATerm v_previous_2 = 0;
+
+      gsVerboseMsg("Formula: %P\n", f_formula);
 
       f_internal_bdd = f_rewriter->toRewriteFormat(f_formula);
       f_internal_bdd = f_rewriter->rewriteInternal(f_internal_bdd);
@@ -146,12 +149,18 @@
     // --------------------------------------------------------------------------------------------
 
     void BDD_Prover::update_answers() {
+      int v_new_time_limit;
+
       if (!f_processed) {
         build_bdd();
-        f_bdd = f_rewriter->fromRewriteFormat(f_internal_bdd);
-        gsVerboseMsg("Simplifying the BDD:\n");
-        f_bdd = f_bdd_simplifier->simplify(f_bdd);
-        gsVerboseMsg("Resulting BDD: %P\n", f_bdd);
+        v_new_time_limit = f_deadline - time(0);
+        if (v_new_time_limit > 0 || f_time_limit == 0) {
+          f_bdd = f_rewriter->fromRewriteFormat(f_internal_bdd);
+          gsVerboseMsg("Simplifying the BDD:\n");
+          f_bdd_simplifier->set_time_limit(std::max(v_new_time_limit, 0));
+          f_bdd = f_bdd_simplifier->simplify(f_bdd);
+          gsVerboseMsg("Resulting BDD: %P\n", f_bdd);
+        }
         if (f_bdd_info.is_true(f_bdd)) {
           f_tautology = answer_yes;
           f_contradiction = answer_no;

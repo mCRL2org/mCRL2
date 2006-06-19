@@ -10,7 +10,9 @@
 <!ENTITY type_int "<type>int</type>">
 <!ENTITY type_aterm "<type>ATerm</type>">
 <!ENTITY type_aterm_appl "<type>ATermAppl</type>">
+<!ENTITY type_smt_solver_type "<type>SMT_Solver_Type</type>">
 <!ENTITY type_rewrite_strategy "<type>RewriteStrategy</type>">
+<!ENTITY type_char_string "<type>char*</type>">
 
 <!ENTITY invariant_eliminator_constructor "<function>Invariant_Eliminator::Invariant_Eliminator</function>">
 <!ENTITY invariant_eliminator_destructor "<function>Invariant_Eliminator::~Invariant_Eliminator</function>">
@@ -18,10 +20,13 @@
 
 <!ENTITY par_rewrite_strategy "<parameter>a_rewrite_strategy</parameter>">
 <!ENTITY par_time_limit "<parameter>a_time_limit</parameter>">
+<!ENTITY par_path_eliminator "<parameter>a_path_eliminator</parameter>">
+<!ENTITY par_solver_type "<parameter>a_solver_type</parameter>">
 <!ENTITY par_lpe "<parameter>a_lpe</parameter>">
 <!ENTITY par_simplify_all "<parameter>a_simplify_all</parameter>">
 <!ENTITY par_invariant "<parameter>a_invariant</parameter>">
 <!ENTITY par_summand_number "<parameter>a_summand_number</parameter>">
+<!ENTITY par_dot_file_name "<parameter>a_dot_file_name</parameter>">
 
 <!ENTITY strat_jitty "<constant>GS_REWR_JITTY</constant>">
 ]>
@@ -45,8 +50,11 @@
   <paramdef>
     &type_rewrite_strategy; &par_rewrite_strategy;,
     &type_int; &par_time_limit;,
+    &type_bool; &par_path_eliminator;,
+    &type_smt_solver_type; &par_solver_type;,
     &type_aterm_appl; &par_lpe;,
-    &type_bool; &par_simplify_all;
+    &type_bool; &par_simplify_all;,
+    &type_char_string; &par_dot_file_name;
   </paramdef>
 </funcprototype>
 <funcprototype>
@@ -67,12 +75,14 @@
 <title>Description</title>
 <para>
   The class &class_invariant_eliminator; uses an instance of the class &class_bdd_prover; to simplify or eliminate summands of an mCRL2 LPE. The
-  constructor &invariant_eliminator_constructor; initializes the BDD based prover with the parameters &par_rewrite_strategy; and &par_time_limit;,
+  constructor &invariant_eliminator_constructor; initializes the BDD based prover with the parameters &par_rewrite_strategy;, &par_time_limit;,
+  &par_path_eliminator;, &par_solver_type;, &par_dot_file_name;,
   and with the data specification of the LPE passed as parameter &par_lpe;. If parameter &par_simplify_all; is set, the conditions of all summands
   of the LPE are simplified when calling function &invariant_eliminator_simplify;. If the parameter &par_simplify_all; is not set, only the
-  summands whose condition in conjunction with the invariant prove to be a contradiction are eliminated. The function &invariant_eliminator_simplify;
-  returns the LPE after simplification or elimination using the invariant passed as parameter &par_invariant;. If &par_summand_number; differs from 0,
-  only the summand with the number passed as parameter &par_summand_number; will be eliminated or simplified.
+  summands whose condition in conjunction with the invariant prove to be a contradiction are eliminated. The function
+  &invariant_eliminator_simplify;
+  returns the LPE after simplification or elimination using the invariant passed as parameter &par_invariant;. If &par_summand_number;
+  differs from 0, only the summand with the number passed as parameter &par_summand_number; will be eliminated or simplified.
 </para>
 <para>
   Given an LPE,

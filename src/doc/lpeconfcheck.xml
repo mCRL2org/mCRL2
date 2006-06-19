@@ -12,6 +12,7 @@
 <!ENTITY seconds "<parameter>SECONDS</parameter>">
 <!ENTITY solver "<parameter>SOLVER</parameter>">
 <!ENTITY opt_i "<option>-i</option>">
+<!ENTITY opt_g "<option>-g</option>">
 <!ENTITY opt_s "<option>-s</option>">
 <!ENTITY opt_n "<option>-n</option>">
 <!ENTITY opt_m "<option>-m</option>">
@@ -26,10 +27,11 @@
 <!ENTITY opt_t "<option>-t</option>">
 <!ENTITY opt_z "<option>-z</option>">
 <!ENTITY opt_invariant "<option>--invariant</option>">
+<!ENTITY opt_generate_invariants "<option>--generate-invariants</option>">
 <!ENTITY opt_summand "<option>--summand</option>">
 <!ENTITY opt_no_check "<option>--no-check</option>">
-<!ENTITY opt_no_marking "<option>--no_marking</option>">
-<!ENTITY opt_check_all "<option>--check_all</option>">
+<!ENTITY opt_no_marking "<option>--no-marking</option>">
+<!ENTITY opt_check_all "<option>--check-all</option>">
 <!ENTITY opt_counter_example "<option>--counter-example</option>">
 <!ENTITY opt_print_dot "<option>--print-dot</option>">
 <!ENTITY opt_help "<option>--help</option>">
@@ -136,6 +138,10 @@
           generating the confluence condition and then checking if this condition is a
           tautology using the prover. If two summands are proven confluent using the
           prover, &lpeconfcheck; indicates this by printing a plus sign ('+').
+          If the option &opt_generate_invariants; is used, the &lpeconfcheck; tool will try to prove
+          that the reduced confluence condition is an invariant of the LPE, in case the confluence condition
+          is not a tautology. If the reduced confluence condition is indeed an invariant, the
+          two summands are proven confluent. &lpeconfcheck; indicates this by printing an 'i'.
         </para>
       </listitem>
       <listitem>
@@ -185,6 +191,18 @@
       <para>
         Use the formula in internal mCRL2 format as
         found in &invariant; as invariant
+      </para>
+    </listitem>
+  </varlistentry>
+
+  <varlistentry>
+    <term>&opt_g;</term>
+    <term>&opt_generate_invariants;</term>
+    <listitem>
+      <para>
+        Try to prove that the reduced confluence
+        condition is an invariant of the LPE, in case
+        the confluence condition is not a tautology.
       </para>
     </listitem>
   </varlistentry>
