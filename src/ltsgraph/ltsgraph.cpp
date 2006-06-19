@@ -5,8 +5,8 @@ void print_help() {
        << "Draw graphs in a graphical environment. If INFILE (LTS file : *.aut or *.svc) is supplied \n"
        << "the tool will use this file as input for drawing.\n"
        << "\n"
-	   << "Use left click to drag the nodes and right click to fix the nodes. \n"
-	   << "\n"
+	   	 << "Use left click to drag the nodes and right click to fix the nodes. \n"
+	   	 << "\n"
        << "Mandatory arguments to long options are mandatory for short options too.\n"
        << "  -h, --help            display this help message\n";
 }   

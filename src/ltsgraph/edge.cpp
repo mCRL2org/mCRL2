@@ -14,6 +14,7 @@ const wxColour color = "BLACK";
 Edge::Edge(Node* _N1, Node* _N2, wxString _lbl) : N1(_N1), N2(_N2), lbl(_lbl) 
 { 
 	lbl.Replace(wxT("\""), wxT(""), true);
+	labelsVisible = true;
 }
 
 

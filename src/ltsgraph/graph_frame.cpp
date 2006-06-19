@@ -39,7 +39,7 @@ GraphFrame::GraphFrame(const wxString& title, const wxPoint& pos, const wxSize& 
         BCG_INIT();
     #endif
 
-  StopOpti = false;
+  StopOpti = true;
 
 
 	// values below are reset later when the right panel is setuped
@@ -159,6 +159,8 @@ void GraphFrame::BuildLayout() {
 
 	Layout();
 
+	sw->UpdateSize();
+
 }
 
 void GraphFrame::CreateMenu() {
@@ -203,9 +205,10 @@ void GraphFrame::CreateStatusBar() {
 }
 
 void GraphFrame::OnOpen( wxCommandEvent& /* event */ ) {
+	StopOpti = true;
+	btnOptiStop->SetLabel(wxT("Optimize"));
 	wxFileDialog dialog( this, wxT("Select a LTS file..."), wxT(""), wxT(""), wxT("*.aut |*.aut|*.svc|*.svc|All files|*"));
 	if ( dialog.ShowModal() == wxID_OK ) {
-		StopOpti = true;
 		vectEdge.clear();
 		vectNode.clear();
 		Init(dialog.GetPath());
@@ -238,7 +241,6 @@ void GraphFrame::OnOptimize( wxCommandEvent& /* event */ ) {
 	while (!OptimizeDrawing(0.0) && !StopOpti) {
 		wxTheApp->Yield(true); // to allow user to interrupt optimizing
 	}
-	StopOpti = false;
 }
 
 void GraphFrame::OnStopOptimize( wxCommandEvent& /* event */ ) {
@@ -320,7 +322,9 @@ void GraphFrame::Init(wxString LTSfile) {
         
       wxString tmp;
       int randX = leftPanel->Get_Width()  - 2*CircleRadius;
-      int randY = leftPanel->Get_Height() - 4*CircleRadius;    
+      int randY = leftPanel->Get_Height() - 4*CircleRadius;
+
+ 
       for(unsigned int i=0; si.more(); i++) 
       {
 					tmp.sprintf(wxT("%d"), *si);
