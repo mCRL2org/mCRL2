@@ -16,8 +16,8 @@
 % General layout
 % --------------
 
-%add headings
-\pagestyle{headings}
+%no headings
+\pagestyle{empty}
 
 % increase pagewidth
 \addtolength{\textwidth}{10mm}
@@ -250,7 +250,7 @@
 % -------------------
 
 % to: ->
-\newcommand{\To}{\ensuremath{\rightarrow}}
+%\newcommand{\To}{\ensuremath{\rightarrow}}
 
 % function application symbol: .
 \newcommand{\fap}{\ensuremath{\!\cdot\!}}
@@ -485,7 +485,7 @@
 % -------------
 
 % higher-order sorts: S^->
-\newcommand{\hos}[1]{\ensuremath{#1^{\To}}}
+\newcommand{\hos}[1]{\ensuremath{#1^{\to}}}
 
 % operations: Omega
 \newcommand{\ops}{\frm{\Omega}}
@@ -685,50 +685,52 @@ Many-sorted algebras are mathematical models of data types. We describe the synt
 A signature \frm{\Sigma} is a structure \frm{(S, \ops)}, where \frm{S} is a set of \emph{sorts} and \frm{\ops} a set of \emph{operations}. A sort denotes a type and an operation denotes a function. From the given set of sorts \frm{S}, we can generate the set \frm{\hos{S}} of \emph{higher-order sorts}. This set is inductively defined as follows:
 \begin{edefinitions}
 \item \frm{S \subseteq \hos{S}};
-\item if \frm{s_{0}, \ldots, s_{k}, s \in \hos{S}} with \frm{k \geq 0}, then \frm{(s_{0} \times \cdots \times s_{k} \To s) \in \hos{S}}.
+\item if \frm{s, s' \in \hos{S}} then \frm{(s \to s') \in \hos{S}}.
 \end{edefinitions}
 
 \noindent
-To increase readability, the outer parentheses of a sort \frm{s \in \hos{S}} may be dropped. The number of parentheses may be further reduced by making \frm{\To} right-associative, i.e.\ \frm{s \To t \To u} should be read as \frm{s \To (t \To u)}. To distinguish the two parts of the above definition of higher-order sorts, we will call \frm{S} the set of \emph{basic} sorts, and \frm{\sdiff{\hos{S}}{S}} the set of \emph{function} sorts.
+To increase readability, the outer parentheses of a sort \frm{s \in \hos{S}} may be dropped. The number of parentheses may be further reduced by making \frm{\to} right-associative, i.e.\ \frm{s \to t \to u} should be read as \frm{s \to (t \to u)}. To distinguish the two parts of the above definition of higher-order sorts, we will call \frm{S} the set of \emph{basic} sorts, and \frm{\sdiff{\hos{S}}{S}} the set of \emph{function} sorts.
 
-An operation is a pair \frm{n: s}, where \frm{s \in \hos{S}}. Here \frm{n} is called the operation name, and \frm{s} its sort. If no ambiguity arises, we will write \frm{n} instead of \frm{n: s}. Note that in contrast to first-order algebraic specifications, each operation is a constant. Also note that each constant \frm{n: \To s} from first-order specifications is written as \frm{n: s} in higher-order specifications.
+An operation is a pair \frm{n: s}, where \frm{s \in \hos{S}}. Here \frm{n} is called the operation name, and \frm{s} its sort. If no ambiguity arises, we will write \frm{n} instead of \frm{n: s}. Note that in contrast to first-order algebraic specifications, each operation is a constant. Also note that each constant \frm{n: \to s} from first-order specifications is written as \frm{n: s} in higher-order specifications.
 
-A many-sorted algebra assigns a meaning to a signature. A total algebra \frm{A} for a signature \frm{\Sigma = (S,\ops)} assigns a carrier set \frm{\amean{s}{A}} to each sort \frm{s \in \hos{S}} and a total function \frm{\amean{n: s}{A}}, yielding an element of type \frm{\amean{s}{A}}, to each operation \frm{n: s \in \ops}. This algebra is also called a \frm{\Sigma}-algebra. Carrier sets for purely higher-order sorts are required to behave as monotonic functions. For this purpose, we introduce function \frm{\mean{\_}^{A}_{s}} for each \frm{s \in \hos{S}}. For these functions, we have the following requirements:
+A many-sorted algebra assigns a meaning to a signature. A total algebra \frm{A} for a signature \frm{\Sigma = (S,\ops)} assigns a carrier set \frm{\amean{s}{A}} to each sort \frm{s \in \hos{S}} and a total function \frm{\amean{n: s}{A}}, yielding an element of type \frm{\amean{s}{A}}, to each operation \frm{n: s \in \ops}. This algebra is also called a \frm{\Sigma}-algebra. We may write \frm{\amean{n}{A}} for \frm{\amean{n: s}{A}} when \frm{s} is clear from the context. 
+
+Carrier sets for purely higher-order sorts are required to behave as monotonic functions. For this purpose, we introduce function \frm{\mean{\_}^{A}_{s}} for each \frm{s \in \hos{S}}. For these functions, we have the following requirements:
 \begin{edefinitions}
-\item for \frm{s \in S}, function \frm{\mean{\_}^{A}_{s}: \amean{s}{A} \To \amean{s}{A}} is the identity.
-\item for \frm{q = (s_{0} \times \cdots \times s_{n} \To s) \in \hos{S}}, function \frm{\mean{\_}^{A}_{q}: \amean{q}{A} \To ((\amean{s_{0}}{A} \times \cdots \times \amean{s_{n}}{A}) \To \amean{s}{A})} is an order-embedding. This means that the domain of \frm{\mean{\_}^{A}_{q}}, viz.\ \frm{\amean{q}{A}}, is isomorphic to its range, and that this range is a subset of the set of monotonic functions from \frm{\amean{s_{0}}{A} \times \cdots \times \amean{s_{n}}{A}} to \frm{\amean{s}{A}}.
+\item for \frm{s \in S}, function \frm{\mean{\_}^{A}_{s}: \amean{s}{A} \to \amean{s}{A}} is the identity.
+\item for \frm{(s \to s') \in \hos{S}}, function \frm{\mean{\_}^{A}_{s \to s'}: \amean{s \to s'}{A} \to (\amean{s}{A} \to \amean{s'}{A})} is an order-embedding. This means that the domain of \frm{\mean{\_}^{A}_{s \to s'}}, viz.\ \frm{\amean{s \to s'}{A}}, is isomorphic to its range, and that this range is a subset of the set of monotonic functions from \frm{\amean{s}{A}} to \frm{\amean{s'}{A}}.
 \end{edefinitions}
 
 \noindent
-Note that the definition of \frm{\mean{\_}^{A}_{q}} becomes trivial when \frm{q} is given the usual semantics, i.e.\ \frm{\amean{q}{A} = \amean{s_{0}}{A} \times \cdots \times \amean{s_{n}}{A} \To \amean{s}{A}}. Then the condition for \frm{\mean{\_}^{A}_{q}} is trivially satisfied by the identity.
+Note that the definition of \frm{\mean{\_}^{A}_{s \to s'}} becomes trivial when \frm{s \to s'} is given the usual semantics, i.e.\ \frm{\amean{s \to s'}{A} = \amean{s}{A} \to \amean{s'}{A}}. Then the condition for \frm{\mean{\_}^{A}_{s \to s'}} is trivially satisfied by the identity.
 
 \begin{example}
-Suppose we have a signature \frm{\Sigma = (S, \ops)}, with sorts \frm{S = \set{\f{Nat}}} and operations \frm{\ops = \set{\f{zero}: \f{Nat}, \f{succ}: \f{Nat} \To \f{Nat}, \f{add}: \f{Nat} \times \f{Nat} \To \f{Nat}}}. We give semantics to this by \frm{\Sigma}-algebra \frm{A}, where:
+Suppose we have a signature \frm{\Sigma = (S, \ops)}, with sorts \frm{S = \set{\f{Nat}}} and operations \frm{\ops = \set{\f{zero}: \f{Nat}, \f{succ}: \f{Nat} \to \f{Nat}, \f{add}: \f{Nat} \to (\f{Nat} \to \f{Nat})}}. We give semantics to this by \frm{\Sigma}-algebra \frm{A}, where:
 \[\begin{tightarray}{lll@{\qquad}lll}
-\amean{\f{Nat}}{A}                            & = & \nat
+\amean{\f{Nat}}{A}                           & = & \nat
 & \amean{\f{zero}}{A} & = & 0\\
-\amean{\f{Nat} \To \f{Nat}}{A}                & = & \nat \To \nat
+\amean{\f{Nat} \to \f{Nat}}{A}               & = & \nat \to \nat
 & \amean{\f{succ}}{A} & = & \labst{n}{\nat}{(n+1)}\\
-\amean{\f{Nat} \times \f{Nat} \To \f{Nat}}{A} & = & \nat \times \nat \To \nat
-& \amean{\f{add}}{A} & = & \labst{(m,n)}{\nat \times \nat}{(m+n)}\\
+\amean{\f{Nat} \to (\f{Nat} \to \f{Nat})}{A} & = & \nat \to (\nat \to \nat)
+& \amean{\f{add}}{A} & = & \labst{m}{\nat}{\labst{n}{\nat}{(m+n)}}\\
 \end{tightarray}\]
 
 \noindent
 Because we gave the usual interpretations to the sorts of \frm{\f{succ}} and \frm{\f{add}}, all relevant \frm{\mean{\_}^{A}} are chosen to be the identity.
 
-Note that we could also have chosen the following interpretation for \frm{\f{Nat} \times \f{Nat} \To \f{Nat}} and \frm{\f{add}}:
+Note that we could also have chosen the following interpretation for \frm{\f{Nat} \to \f{Nat} \to \f{Nat}} and \frm{\f{add}}:
 \[\begin{tightarray}{lll@{\qquad}lll}
-\amean{\f{Nat} \times \f{Nat} \To \f{Nat}}{A} & = & \nat \To (\nat \To \nat)
-& \amean{\f{add}}{A} & = & \labst{m}{\nat}{\labst{n}{\nat}{(m+n)}}\\
+\amean{\f{Nat} \to (\f{Nat} \to \f{Nat})}{A} & = & \nat \times \nat \to \nat
+& \amean{\f{add}}{A} & = & \labst{(m,n)}{\nat \times \nat}{(m+n)}\\
 \end{tightarray}\]
-The corresponding \frm{\mean{\_}^{A}} function may still be the identity, because \frm{\nat \To (\nat \To \nat)} is isomorphic to \frm{\nat \times \nat \To \nat}. \qed
+The corresponding \frm{\mean{\_}^{A}} function may still be the identity, because \frm{\nat \times \nat \to \nat} is isomorphic to \frm{\nat \to (\nat \to \nat)}. \qed
 \end{example}
 
 \noindent
-\frm{\Sigma}-algebras can be mapped to each other by means of \emph{homomorphisms}. A homomorphism is a mapping from the carrier sets of a \frm{\Sigma}-algebra \frm{A} to the carrier sets of a \frm{\Sigma}-algebra \frm{B}, that respects the functions of \frm{A}. For signature \frm{\Sigma = (S, \ops)}, a homomorphism \frm{h: A \To B} is a family \frm{h = (h_{s})_{s \in \hos{S}}} of monotonic functions \frm{h_{s} : \amean{s}{A} \To \amean{s}{B}} such that the following conditions hold:
+\frm{\Sigma}-algebras can be mapped to each other by means of \emph{homomorphisms}. A homomorphism is a mapping from the carrier sets of a \frm{\Sigma}-algebra \frm{A} to the carrier sets of a \frm{\Sigma}-algebra \frm{B}, that respects the functions of \frm{A}. For signature \frm{\Sigma = (S, \ops)}, a homomorphism \frm{h: A \to B} is a family \frm{h = (h_{s})_{s \in \hos{S}}} of monotonic functions \frm{h_{s} : \amean{s}{A} \to \amean{s}{B}} such that the following conditions hold:
 \begin{edefinitions}
-\item for all \frm{f \in \amean{q}{A}} and \frm{x_{i} \in \amean{s_{i}}{A}}, with \frm{s_{i} \in \hos{S}}, \frm{0 \leq i \leq n} and \frm{q = \frm{s_{0} \times \cdots \times s_{n} \To s}}, we have
-\[\fa{h_{s}}{\fa{\mean{f}^{A}_{q}}{x_{0}, \ldots, x_{n}}} = \fa{\mean{\fa{h_{q}}{f}}^{B}_{q}}{\fa{h_{s_{0}}}{x_{0}}, \ldots, \fa{h_{s_{n}}}{x_{n}}}\]
+\item for all \frm{f \in \amean{s \to s'}{A}} and \frm{x \in \amean{s}{A}}, we have
+\[\fa{h_{s'}}{\fa{\mean{f}^{A}_{s \to s'}}{x}} = \fa{\mean{\fa{h_{s \to s'}}{f}}^{B}_{s \to s'}}{\fa{h_{s}}{x}}\]
 \item for all \frm{\op \in \ops} of sort \frm{s}, we have
 \[\fa{h_{s}}{\amean{\op}{A}} = \amean{\op}{B}\]
 \end{edefinitions}
@@ -745,54 +747,50 @@ From a signature and a set of variables, we can construct \emph{terms}. The set 
 \begin{edefinitions}
 \item \frm{X_{s} \subseteq \tsx{s}};
 \item if \frm{n: s \in \ops}, then \frm{n \in \tsx{s}};
-\item if \frm{t_{1}, \ldots, t_{k}} with \frm{k \geq 1} are terms of sorts \frm{s_{1}, \ldots, s_{k}}, respectively, and \frm{f} is a term of sort \frm{(s_{1} \times \cdots \times s_{k} \To s)}, then \frm{f(t_{1}, \ldots, t_{k}) \in \tsx{s}}.
+\item if \frm{t} is a term of sorts \frm{s' \to s} and \frm{u} is a term of sort \frm{s'}, then \frm{t(u) \in \tsx{s}}.
 \end{edefinitions}
 
 \noindent
-The set \frm{\termv{\Sigma}{\emptyset}} is called the set of \emph{ground terms}. We will write this as \frm{\term{\Sigma}}. A signature \frm{\Sigma} is called \emph{sensible} if \frm{\terms{\Sigma}{s}} contains at least one element, for every \frm{s \in S}. In the sequel, we assume that every signature is sensible. For notational convenience, we denote the variables of a term \frm{t \in \termv{\Sigma}{X}} by the set \frm{\fa{Var}{t}}. Note that if \frm{\fa{Var}{t} = \emptyset}, then \frm{t \in \term{\Sigma}}.
+The set \frm{\termv{\Sigma}{\emptyset}} is called the set of \emph{ground terms}. We will write this as \frm{\term{\Sigma}}. A signature \frm{\Sigma} is called \emph{sensible} if \frm{\terms{\Sigma}{s}} contains at least one element, for every \frm{s \in S^\to}. In the sequel, we assume that every signature is sensible. For notational convenience, we denote the variables of a term \frm{t \in \termv{\Sigma}{X}} by the set \frm{\fa{Var}{t}}. Note that if \frm{\fa{Var}{t} = \emptyset}, then \frm{t \in \term{\Sigma}}.
 
-In order to define the semantics of terms, we introduce the notion of an \emph{assignment}. An assignment of \frm{X} for a \frm{\Sigma}-algebra \frm{A} is a family \frm{\alpha = (\alpha_{s})_{s \in S}} of total functions \frm{\alpha_{s}: X_{s} \To \amean{s}{A}}. We denote this by \frm{\alpha: X \To A}.
+In order to define the semantics of terms, we introduce the notion of an \emph{assignment}. An assignment of \frm{X} for a \frm{\Sigma}-algebra \frm{A} is a family \frm{\alpha = (\alpha_{s})_{s \in S^\to}} of total functions \frm{\alpha_{s}: X_{s} \to \amean{s}{A}}. We denote this by \frm{\alpha: X \to A}.
 
-A meaning is given to a term \frm{t \in \termv{\Sigma}{X}} using a \frm{\Sigma}-algebra \frm{A} and an assignment \frm{\alpha: X \To A}. It is called the \emph{value} of \frm{t} for \frm{\alpha} and it is denoted by \frm{\ameanv{t}{A}{\alpha}}. We define this notion inductively on the structure of \frm{t}:
+A meaning is given to a term \frm{t \in \termv{\Sigma}{X}} using a \frm{\Sigma}-algebra \frm{A} and an assignment \frm{\alpha: X \to A}. It is called the \emph{value} of \frm{t} for \frm{\alpha} and it is denoted by \frm{\ameanv{t}{A}{\alpha}}. We define this notion inductively on the structure of \frm{t}:
 \begin{edefinitions}
 \item \frm{\ameanv{x}{A}{\alpha} = \alpha_{s}(x)}, 
-  where \frm{x \in \frm{X_{s}}} and \frm{s \in S};
-\item \frm{\ameanv{c}{A}{\alpha} = \amean{\op}{A}}, where \frm{\op = (c: \To s) \in \ops};
-\item \frm{\ameanv{f(t_{1}, \ldots, t_{k})}{A}{\alpha} 
-  = \amean{\op}{A}(\ameanv{t_{1}}{A}{\alpha}, \ldots,  \ameanv{t_{k}}{A}{\alpha})},\\
-  where \frm{\op = (f: s_{1} \times \cdots \times s_{k} \To s) \in \ops}, \frm{k \geq 1}
-  and \frm{t_{i} \in \tsx{s_{i}}}, for \frm{1 \leq i \leq k}.
+  where \frm{x \in \frm{X_{s}}} and \frm{s \in S^\to};
+\item \frm{\ameanv{n}{A}{\alpha} = \amean{\op}{A}}, where \frm{\op = n: s \in \ops};
+\item \frm{\ameanv{t(u)}{A}{\alpha} = \mean{\amean{t}{A}}^{A}_{s' \to s}(\amean{u}{A})}, where \frm{t \in \tsx{s' \to s}} and \frm{u \in \tsx{s'}}.
 \end{edefinitions}
 
 To increase the readibility of terms, we allow operations to be written in \emph{infix} and \emph{mixfix} notation. In the definition of operations in these notations, we use underscores to indicate the placement of parameters. The number of parentheses can be reduced by allowing the use of \emph{priorities}. Note that we do not add these concepts to the theory, but only use them to increase readability.
 
-We conclude our treatment of many-sorted algebras with the syntactic notion of \emph{substitutions}. For a signature \frm{\Sigma = (S, \ops)} and associated sets of variables \frm{X} and \frm{Y}, a substitution is a family \frm{\sigma = (\sigma_{s})_{s \in S}} of functions \frm{\sigma_{s}: X_{s} \To \termvs{\Sigma}{Y}{s}}. We denote this by \frm{\sigma: X \To \termv{\Sigma}{Y}}. If \frm{Y} is empty, then the substitution is called a \emph{ground} substitution. The application of a substitution \frm{\sigma} to a term is defined inductively as follows:
+We conclude our treatment of many-sorted algebras with the syntactic notion of \emph{substitutions}. For a signature \frm{\Sigma = (S, \ops)} and associated sets of variables \frm{X} and \frm{Y}, a substitution is a family \frm{\sigma = (\sigma_{s})_{s \in S^\to}} of functions \frm{\sigma_{s}: X_{s} \to \termvs{\Sigma}{Y}{s}}. We denote this by \frm{\sigma: X \to \termv{\Sigma}{Y}}. If \frm{Y} is empty, then the substitution is called a \emph{ground} substitution. The application of a substitution \frm{\sigma} to a term is defined inductively as follows:
 \begin{edefinitions}
-\item \frm{x\sigma = \fa{\sigma_{s}}{x}}, where \frm{x \in \frm{X_{s}}} and \frm{s \in S};
-\item \frm{c\sigma = c}, where \frm{c: \To s \in \ops};
-\item \frm{f(t_{1}, \ldots, t_{k})\sigma = f(t_{1}\sigma, \ldots, t_{k}\sigma)}, 
-  where \frm{f: s_{1} \times \cdots \times s_{k} \To s \in \ops}, \frm{t_{i} \in \tsx{s_{i}}} and \frm{s_{i} \in S}, for \frm{1 \leq i \leq k} and \frm{k \geq 1}.
+\item \frm{x\sigma = \fa{\sigma_{s}}{x}}, where \frm{x \in \frm{X_{s}}} and \frm{s \in S^\to};
+\item \frm{n\sigma = n}, where \frm{n: \to s \in \ops};
+\item \frm{(t(u))\sigma = t\sigma(u\sigma)}.
 \end{edefinitions}
-If \frm{\sigma} is the identity except for one variable \frm{x}, we may denote \frm{\sigma} by \frm{[x := \fa{\sigma}{x}]}.
+If \frm{\sigma} is the identity except for one variable \frm{x}, we may denote \frm{\sigma} by \frm{[\fa{\sigma}{x}/x]}.
 
-The syntactic notion of substitution is closely related to the semantic notion of assignments, i.e.\ assignments may simulate substitutions. For all signatures \frm{\Sigma}, associated sets of variables \frm{X} and \frm{Y}, substitutions \frm{\sigma: X \To \termv{\Sigma}{Y}}, \frm{\Sigma}-algebras \frm{A}, assignments \frm{\beta: Y \To A}, and terms \frm{t \in \termv{\Sigma}{X}}, we have:
+The syntactic notion of substitution is closely related to the semantic notion of assignments, i.e.\ assignments may simulate substitutions. For all signatures \frm{\Sigma}, associated sets of variables \frm{X} and \frm{Y}, substitutions \frm{\sigma: X \to \termv{\Sigma}{Y}}, \frm{\Sigma}-algebras \frm{A}, assignments \frm{\beta: Y \to A}, and terms \frm{t \in \termv{\Sigma}{X}}, we have:
 \[\ameanv{t\sigma}{A}{\beta} = \ameanv{t}{A}{\alpha}\]
-where assignment \frm{\alpha: X \To A} is defined by \frm{\fa{\alpha}{x} = \ameanv{\fa{\sigma}{x}}{A}{\beta}}, for all \frm{x \in X}.
+where assignment \frm{\alpha: X \to A} is defined by \frm{\fa{\alpha}{x} = \ameanv{\fa{\sigma}{x}}{A}{\beta}}, for all \frm{x \in X}.
 
 \section{Equational logic}
 
 Many-sorted algebras are characterised by means of equational logic. First we describe the syntax and semantics of formulas in the equational logic. After that we introduce the notions of logical consequence and logic calculus with which formulas can be related.
 
-\subsubsection{Formulae and satisfaction}
+\subsection{Formulae and satisfaction}
 
 The formulas of equational logic are determined by the signature of many-sorted algebras. For each signature \frm{\Sigma = (S, \ops)} and associated set of variables \frm{X}, the set of formulas \frm{\ELs} is:
-\[\scompr{t = u}{\text{\frm{t,u \in \tsx{s}} and \frm{s \in S}}}\]
+\[\scompr{t = u}{\text{\frm{t,u \in \tsx{s}} and \frm{s \in S^\to}}}\]
 A formula \frm{t = u} is usually called a \emph{\frm{\Sigma}-equation}. If \frm{t} and \frm{u} are ground terms, then it is also called a \emph{ground equation}.
 
-The semantics of a formula is expressed by a \emph{satisfaction} relation. For a \frm{\Sigma}-algebra \frm{A}, a sort \frm{s \in S} and terms \frm{t,u \in \tsx{s}}, the satisfaction relation \frm{\vEL} is defined by:
+The semantics of a formula is expressed by a \emph{satisfaction} relation. For a \frm{\Sigma}-algebra \frm{A}, a sort \frm{s \in S^\to} and terms \frm{t,u \in \tsx{s}}, the satisfaction relation \frm{\vEL} is defined by:
 \[\begin{tightarray}{l@{\hspace{2em}}L@{\hspace{2em}}l}
   A \vEL t = u & iff & \ameanv{t}{A}{\alpha} = \ameanv{u}{A}{\alpha}
-  \textrm{, for all assignments \frm{\alpha: X \To A}}
+  \textrm{, for all assignments \frm{\alpha: X \to A}}
 \end{tightarray}\]
 If \frm{A \vEL t = u}, we say that \frm{t = u} is \emph{valid} in \frm{A}.
 
@@ -851,11 +849,14 @@ There are many possibilities in defining the set of inference rules \frm{\infEC}
       & \frm{t,u,v \in \termv{\Sigma}{X}}\\
   (substitution) 
     & \infPC{t = u}{t\sigma = u\sigma}
-      & \frm{t,u \in \termv{\Sigma}{X}} and \frm{\sigma:X \To \termv{\Sigma}{Y}}\\
+      & \frm{t,u \in \termv{\Sigma}{X}} and \frm{\sigma:X \to \termv{\Sigma}{Y}}\\
   (congruence)   
-    & \infPC{t = u}{v[y := t] = v[y := u]} 
+    & \infPC{t = u}{v[t/y] = v[u/y]} 
       & \frm{t,u \in \termv{\Sigma}{X}}, \frm{v \in \termv{\Sigma}{X \cup \{y\}}} and 
-        \frm{y \not \in X}
+        \frm{y \not \in X}\\
+  (extensionality)     
+    & \infPC{t(x) = u(x)}{t = u}
+      & \frm{t,u \in \termv{\Sigma}{X}}, \frm{x \in X}\\
 \end{tightarray}\]
 \setlength{\extrarowheight}{0mm}
 \setlength{\mathindent}{10mm}
@@ -863,56 +864,56 @@ There are many possibilities in defining the set of inference rules \frm{\infEC}
 \noindent
 The set \frm{E} serves the same purpose as in the logical consequence \frm{E \vEL e}. For this reason, we write \frm{\dEC e} as \frm{E \dEC e}. This is pronounced as `\frm{e} is derivable from \frm{E}'.
 
-\begin{remark}
-From the notion of derivability, we can see that our congruence rule is a harmless restriction of the congruence rule of~\cite{Loeckx:1996}, which has \frm{k} premises instead of 1, with \frm{k \geq 1}. We can always simulate this general rule by \frm{m} applications of our rule and \frm{n} applications of the substitution rule, for certain \frm{m,n} with \frm{m+n=k}. \frm{\Box}
-\end{remark}
+%\begin{remark}
+%From the notion of derivability, we can see that our congruence rule is a harmless restriction of the congruence rule of~\cite{Loeckx:1996}, which has \frm{k} premises instead of 1, with \frm{k \geq 1}. We can always simulate this general rule by \frm{m} applications of our rule and \frm{n} applications of the substitution rule, for certain \frm{m,n} with \frm{m+n=k}. \frm{\Box}
+%\end{remark}
+%
+%\noindent
+%We often show the derivability of an equation in a \emph{calculational style}. Such a derivation has the following form, where \frm{t_{i} \in \termv{\Sigma}{X}} with \frm{0 \leq i \leq n}:
+%\begin{derivation}
+%  \expr{t_{0}}
+%  \tran{=}{hint why \frm{E \dEC t_{0} = t_{1}}}
+%  \expr{t_{1}}
+%  \\*\>$=$\\\>\ \vdots\\\>$=$\\
+%  \expr{t_{n-1}}
+%  \tran{=}{hint why \frm{E \dEC t_{n-1} = t_{n}}}
+%  \expr{t_{n}}
+%\end{derivation}
+%
+%\noindent
+%The goal of this derivation is to show \frm{E \dEC t_{0} = t_{n}}. This is done as follows. Each hint explains why \frm{E \dEC t_{i} = t_{i+1}}, for all \frm{i} with \frm{0 \leq i < n}. Then we can derive \frm{t_{0} = t_{n}} by applying the transitivity rule \frm{n-1} times. 
+%
+%In order to control the size of derivations, the applications of the reflexivity, symmetry, substitution and congruence rules are left implicit in the hints. We also allow multiple applications of the transitivity rule in one derivation step.
+%
+%\subsection{Soundness and completeness}
+%
+%Logical consequence and derivability are closely related. This is expressed by the notions of \emph{soundness} and \emph{completeness}. Soundness states that every \frm{\Sigma}-equation that can be derived from a set of \frm{\Sigma}-equations is also a logical consequence of this set.
+%
+%\begin{theorem}
+%\label{th:soundess}
+%For all equations \frm{e \in \ELs} and sets of equations \frm{E \subseteq \ELs}, we have:
+%\[\begin{tightarray}{L@{\quad}l@{\quad}L@{\quad}l}
+%  if & E \dEC e & then & E \vEL e
+%\end{tightarray}\]
+%\end{theorem}
+%\begin{proof}
+%See the proof of theorem~5.67 of~\cite{Loeckx:1996}.
+%\end{proof}
+%
+%\noindent
+%Completeness states the opposite, namely that every \frm{\Sigma}-equation that is a logical consequence of a set of \frm{\Sigma}-equations can also be derived from that set.
+%\begin{theorem}
+%\label{th:completeness}
+%For all equations \frm{e \in \ELs} and sets of equations \frm{E \subseteq \ELs}, we have:
+%\[\begin{tightarray}{L@{\quad}l@{\quad}L@{\quad}l}
+%  if & E \vEL e & then & E \dEC e
+%\end{tightarray}\]
+%\end{theorem}
+%\begin{proof}
+%See the proof of theorem~5.68 of~\cite{Loeckx:1996}.
+%\end{proof}
 
-\noindent
-We often show the derivability of an equation in a \emph{calculational style}. Such a derivation has the following form, where \frm{t_{i} \in \termv{\Sigma}{X}} with \frm{0 \leq i \leq n}:
-\begin{derivation}
-  \expr{t_{0}}
-  \tran{=}{hint why \frm{E \dEC t_{0} = t_{1}}}
-  \expr{t_{1}}
-  \\*\>$=$\\\>\ \vdots\\\>$=$\\
-  \expr{t_{n-1}}
-  \tran{=}{hint why \frm{E \dEC t_{n-1} = t_{n}}}
-  \expr{t_{n}}
-\end{derivation}
-
-\noindent
-The goal of this derivation is to show \frm{E \dEC t_{0} = t_{n}}. This is done as follows. Each hint explains why \frm{E \dEC t_{i} = t_{i+1}}, for all \frm{i} with \frm{0 \leq i < n}. Then we can derive \frm{t_{0} = t_{n}} by applying the transitivity rule \frm{n-1} times. 
-
-In order to control the size of derivations, the applications of the reflexivity, symmetry, substitution and congruence rules are left implicit in the hints. We also allow multiple applications of the transitivity rule in one derivation step.
-
-\subsection{Soundness and completeness}
-
-Logical consequence and derivability are closely related. This is expressed by the notions of \emph{soundness} and \emph{completeness}. Soundness states that every \frm{\Sigma}-equation that can be derived from a set of \frm{\Sigma}-equations is also a logical consequence of this set.
-
-\begin{theorem}
-\label{th:soundess}
-For all equations \frm{e \in \ELs} and sets of equations \frm{E \subseteq \ELs}, we have:
-\[\begin{tightarray}{L@{\quad}l@{\quad}L@{\quad}l}
-  if & E \dEC e & then & E \vEL e
-\end{tightarray}\]
-\end{theorem}
-\begin{proof}
-See the proof of theorem~5.67 of~\cite{Loeckx:1996}.
-\end{proof}
-
-\noindent
-Completeness states the opposite, namely that every \frm{\Sigma}-equation that is a logical consequence of a set of \frm{\Sigma}-equations can also be derived from that set.
-\begin{theorem}
-\label{th:completeness}
-For all equations \frm{e \in \ELs} and sets of equations \frm{E \subseteq \ELs}, we have:
-\[\begin{tightarray}{L@{\quad}l@{\quad}L@{\quad}l}
-  if & E \vEL e & then & E \dEC e
-\end{tightarray}\]
-\end{theorem}
-\begin{proof}
-See the proof of theorem~5.68 of~\cite{Loeckx:1996}.
-\end{proof}
-
-\bibliographystyle{alpha}
-\bibliography{hoas}
+%\bibliographystyle{alpha}
+%\bibliography{hoas}
 
 \end{document}
