@@ -49,7 +49,9 @@ source_files="mcrl2/articles \
               mcrl2/config.sub \
               mcrl2/config.jam.in \
               mcrl2/install-sh \
-              mcrl2/config.in \
+              mcrl2/build/config.mk.in \
+              mcrl2/build/config.jam.in \
+              mcrl2/build/Jamfile.v2 \
               mcrl2/Makefile \
               mcrl2/examples \
               mcrl2/test.y \
