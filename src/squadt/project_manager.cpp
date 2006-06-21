@@ -30,7 +30,7 @@ namespace squadt {
    * project description file in it, then such a file is created and all files
    * in the directory are imported into the project.
    **/
-  project_manager::project_manager(const boost::filesystem::path& l) : directory(l) {
+  project_manager::project_manager(const boost::filesystem::path& l) : store(l) {
     using namespace boost;
 
     assert(!l.empty());
@@ -79,7 +79,7 @@ namespace squadt {
   }
 
   void project_manager::write() const {
-    std::ofstream project_stream(settings_manager::path_concatenate(directory,
+    std::ofstream project_stream(settings_manager::path_concatenate(store,
              settings_manager::project_definition_base_name).c_str(), std::ios::out | std::ios::trunc);
  
     write(project_stream);
@@ -110,7 +110,7 @@ namespace squadt {
    * \pre directory/<|settings_manager::project_definition_base_name|> must exist
    **/
   void project_manager::read() {
-    bf::path p(settings_manager::path_concatenate(directory, settings_manager::project_definition_base_name));
+    bf::path p(settings_manager::path_concatenate(store, settings_manager::project_definition_base_name));
 
     assert(bf::exists(p) && !bf::is_directory(p));
 
@@ -149,7 +149,7 @@ namespace squadt {
      
       m->read(reader);
 
-      m->directory = l;
+      m->store = l;
     }
     catch (...) {
       throw;

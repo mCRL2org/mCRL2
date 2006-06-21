@@ -75,6 +75,9 @@ namespace iterator_wrapper {
 
       /** \brief Get the element that is currently referenced */
       inline S* operator*() const;
+
+      /** \brief Get an actual pointer instance */
+      inline typename T::value_type pointer() const; 
   };
 
   /**
@@ -143,6 +146,9 @@ namespace iterator_wrapper {
 
       /** \brief Get the element that is currently referenced */
       inline S* operator*() const;
+
+      /** \brief Get an actual pointer instance */
+      inline typename T::value_type pointer(); 
   };
 
   /**
@@ -243,6 +249,16 @@ namespace iterator_wrapper {
   template < typename T, typename S, typename I >
   inline S* indirect_iterator< T, S, I >::get_pointer(std::auto_ptr < S >& i) {
     return (i.get());
+  }
+
+  template < typename T, typename S, typename I >
+  inline typename T::value_type constant_indirect_iterator< T, S, I >::pointer() const {
+    return (*iterator);
+  }
+
+  template < typename T, typename S, typename I >
+  inline typename T::value_type indirect_iterator< T, S, I >::pointer() {
+    return (*iterator);
   }
 }
 

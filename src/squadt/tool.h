@@ -60,10 +60,10 @@ namespace squadt {
       inline const sip::tool::capabilities::ptr get_capabilities() const;
 
       /** \brief Get the location to for this tool */
-      inline std::string& get_location();
+      inline std::string const& get_location();
 
       /** \brief Get the name of this tool */
-      inline std::string& get_name();
+      inline std::string const& get_name();
 
       /** \brief Find a specific input combination of this tool, if it exists */
       inline input_combination const* find_input_combination(const tool_category&, const storage_format&) const;
@@ -124,11 +124,11 @@ namespace squadt {
     return (capabilities);
   }
 
-  inline std::string& tool::get_location() {
+  inline std::string const& tool::get_location() {
     return (location);
   }
 
-  inline std::string& tool::get_name() {
+  inline std::string const& tool::get_name() {
     return (name);
   }
 

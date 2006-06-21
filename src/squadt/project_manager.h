@@ -1,6 +1,7 @@
 #ifndef PROJECT_MANAGER_H_
 #define PROJECT_MANAGER_H_
 
+#include <set>
 #include <vector>
 
 #include <boost/filesystem/path.hpp>
@@ -47,7 +48,7 @@ namespace squadt {
     private:
 
       /** \brief The location of the project store */
-      boost::filesystem::path      directory;
+      boost::filesystem::path      store;
 
       /** \brief A description of the project */
       std::string                  description;
@@ -66,7 +67,7 @@ namespace squadt {
       /** \brief Sorts the processor list */
       void sort_processors();
 
-      /** \brief Read project information from project_directory */
+      /** \brief Read project information from project_store */
       void read();
  
       /** \brief Read configuration with an XML text reader */
@@ -81,7 +82,7 @@ namespace squadt {
       inline std::string get_name() const;
 
       /** \brief Get the path to the project store */
-      inline std::string get_project_directory() const;
+      inline std::string get_project_store() const;
 
       /** \brief Recursively add all files in a directory to the project */
       void import_directory(const boost::filesystem::path&);
@@ -98,7 +99,7 @@ namespace squadt {
       /** \brief Get the description */
       inline const std::string& get_description() const;
 
-      /** \brief Read project information from project_directory */
+      /** \brief Read project information from project_store */
       static project_manager::ptr read(const std::string&);
  
       /** \brief Writes project configuration to the project file */
@@ -111,8 +112,11 @@ namespace squadt {
       inline void add(processor::ptr&);
 
       /** \brief Remove a processor and all processors that depend one one of its outputs */
-      inline void remove(processor*);
+      inline void remove(processor*, bool = true);
  
+      /** \brief Removes all files that cannot be recreated by any of the processors */
+      void clean_store(processor* p, bool b);
+
       /** \brief Make all specifications in the project up to date */
       void update();
   };
@@ -128,7 +132,7 @@ namespace squadt {
   }
 
   inline std::string project_manager::get_name() const {
-    return (directory.leaf());
+    return (store.leaf());
   }
 
   /**
@@ -142,8 +146,8 @@ namespace squadt {
     return (description);
   }
 
-  inline std::string project_manager::get_project_directory() const {
-    return (directory.native_directory_string());
+  inline std::string project_manager::get_project_store() const {
+    return (store.native_directory_string());
   }
 
   inline project_manager::processor_iterator project_manager::get_processor_iterator() const {
@@ -163,14 +167,14 @@ namespace squadt {
    *
    * Note that:
    *  - when d is empty, the original filename will be maintained
-   *  - when the file is already in the project directory it is not copied
+   *  - when the file is already in the project store it is not copied
    **/
   inline processor::ptr project_manager::import_file(const boost::filesystem::path& s, const std::string& d) {
     using namespace boost::filesystem;
 
     assert(exists(s) && !is_directory(s) && native(d));
 
-    path           destination_path = directory / path(d.empty() ? s.leaf() : d);
+    path           destination_path = store / path(d.empty() ? s.leaf() : d);
     processor::ptr p                = processor::create();
 
     if (s != destination_path) {
@@ -199,17 +203,39 @@ namespace squadt {
    *
    * \attention all processors with inconsistent inputs are also removed
    **/
-  inline void project_manager::remove(processor* p) {
+  inline void project_manager::remove(processor* p, bool b) {
     processor_list::iterator i = processors.begin();
 
     while (i != processors.end()) {
       if ((*i).get() == p || !((*i)->consistent_inputs())) {
-        (*i)->flush_outputs();
+        if (((*i).get() == p) && b) {
+          (*i)->flush_outputs();
+        }
 
         i = processors.erase(i);
       }
       else {
         ++i;
+      }
+    }
+  }
+
+  inline void project_manager::clean_store(processor* p, bool b) {
+    namespace bf = boost::filesystem;
+
+    std::set < std::string > objects;
+
+    for (processor_list::iterator i = processors.begin(); i != processors.end(); ++i) {
+      for (processor::output_object_iterator j = (*i)->get_output_iterator(); j.valid(); ++j) {
+        objects.insert(bf::path((*j)->location).leaf());
+      }
+    }
+
+    for (bf::directory_iterator i(store); i != bf::directory_iterator(); ++i) {
+      if (objects.find((*i).leaf()) == objects.end()) {
+        if (bf::exists((*i).leaf()) && !bf::is_directory((*i).leaf()) && !bf::symbolic_link_exists((*i).leaf())) {
+          bf::remove((*i).leaf());
+        }
       }
     }
   }
