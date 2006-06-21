@@ -16,4 +16,4 @@ exe lpe2pbes
          <status>experimental
        ;
 
-install_with_libraries install : lpe2pbes ;
+install_with_libraries install : lpe2pbes : <status>experimental ;
