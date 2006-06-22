@@ -40,6 +40,7 @@ GraphFrame::GraphFrame(const wxString& title, const wxPoint& pos, const wxSize& 
     #endif
 
   StopOpti = true;
+  StoppedOpti = true;
 
 
 	// values below are reset later when the right panel is setuped
@@ -158,7 +159,6 @@ void GraphFrame::BuildLayout() {
   SetSizer(winSizer);
 
 	Layout();
-
 	sw->UpdateSize();
 
 }
@@ -205,7 +205,8 @@ void GraphFrame::CreateStatusBar() {
 }
 
 void GraphFrame::OnOpen( wxCommandEvent& /* event */ ) {
-	StopOpti = true;
+	StopOpti    = true;
+	StoppedOpti = true;
 	btnOptiStop->SetLabel(wxT("Optimize"));
 	wxFileDialog dialog( this, wxT("Select a LTS file..."), wxT(""), wxT(""), wxT("*.aut |*.aut|*.svc|*.svc|All files|*"));
 	if ( dialog.ShowModal() == wxID_OK ) {
@@ -223,9 +224,11 @@ void GraphFrame::OnQuit( wxCommandEvent& /* event */ ) {
 void GraphFrame::OnClose(wxCloseEvent& /*event*/) {
   StopOpti = true;
 
-  while(!StopOpti) {
-    wxTheApp->Yield(true); // to allow user to interrupt optimizing
-  }
+std::cerr << "closeing";
+//  while(!StoppedOpti) {
+//    wxTheApp->Yield(true); // to allow user to interrupt optimizing
+//  }
+  SetEvtHandlerEnabled(false);
 
   static_cast < wxSplitterWindow* > (leftPanel->GetParent())->Unsplit(leftPanel);
   delete leftPanel;
@@ -238,9 +241,14 @@ void GraphFrame::OnOptimize( wxCommandEvent& /* event */ ) {
 	stopOptimize->Enable(true);
 	btnOptiStop->SetLabel(wxT("Stop    "));
 	StopOpti = false;
+	StoppedOpti = false;
 	while (!OptimizeDrawing(0.0) && !StopOpti) {
+std::cerr << "running'";
 		wxTheApp->Yield(true); // to allow user to interrupt optimizing
 	}
+
+	StoppedOpti = true;
+std::cerr << "end'";
 }
 
 void GraphFrame::OnStopOptimize( wxCommandEvent& /* event */ ) {
@@ -290,6 +298,8 @@ void GraphFrame::OnBtnOpti( wxCommandEvent& event ) {
 
 //init vectNode & vectEdge
 void GraphFrame::Init(wxString LTSfile) {
+
+  leftPanel->sz = leftPanel->GetSize();
 
   string st_LTSfile = string(LTSfile.fn_str());
 
@@ -524,7 +534,6 @@ bool GraphFrame::OptimizeDrawing(double precision)
   Refresh();
 
   return achieved_precision<precision;
-
 }
 
 void GraphFrame::Draw(wxPaintDC * myDC) {

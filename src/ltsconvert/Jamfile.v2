@@ -7,9 +7,7 @@ project ltsconvert
 
 exe ltsconvert
        : ltsconvert.cpp
-         /libraries/temporary//lowlevel
          /libraries/temporary//print
-         /libraries/temporary//struct
          /libraries/temporary//rewrite
          /libraries/lts//lts
          /libraries/svc//svc
@@ -17,4 +15,14 @@ exe ltsconvert
          <include>.
        ;
 
-install_with_libraries install : ltsconvert ;
+exe svc2fsm
+       : svc2fsm.cpp
+         /libraries/temporary//print
+         /libraries/aterm//aterm
+         /libraries/svc//svc
+       : <source>/site-config//mcrl2_revision.h
+         <status>deprecated
+       ;
+
+install_with_libraries install : ltsconvert : <status>deprecated:<use>install-deprecated ;
+install_with_libraries install-deprecated : svc2fsm : <status>deprecated ;

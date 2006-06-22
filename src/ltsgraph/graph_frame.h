@@ -55,14 +55,14 @@ class GraphFrame : public wxFrame
 {
 public:
   GraphFrame(const wxString& title, const wxPoint& pos, const wxSize& size, long style = wxDEFAULT_FRAME_STYLE);
-	void BuildLayout();
+  void BuildLayout();
   void Init(wxString LTSfile);
-	void Draw(wxPaintDC * myDC);
-	void ExportPostScript(wxCommandEvent& event);
-	void ExportLatex(wxCommandEvent& event);
-	void Resize(wxSize);
-	void ReplaceAfterDrag(wxPoint);
-	void FixNode(int num);
+  void Draw(wxPaintDC * myDC);
+  void ExportPostScript(wxCommandEvent& event);
+  void ExportLatex(wxCommandEvent& event);
+  void Resize(wxSize);
+  void ReplaceAfterDrag(wxPoint);
+  void FixNode(int num);
   void OnOpen(wxCommandEvent& event);
   void OnQuit(wxCommandEvent& event);//When the user clicks on the Quit menu
   void OnClose(wxCloseEvent& event);//When the user clicks on the cross of the window
@@ -82,6 +82,7 @@ public:
 
 private:
   bool StopOpti;
+  bool StoppedOpti;
   double EdgeStiffness;   //stiffness of the edge
   double NodeStrength;   //Strength of the electrical repulsion
   double NaturalLength;

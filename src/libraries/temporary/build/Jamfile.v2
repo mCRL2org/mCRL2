@@ -35,11 +35,9 @@ lib dataelm
 lib nextstate
        : libnextstate.cpp
          nextstate_standard.cpp
-       : <dependency>/libraries/aterm//aterm
-         <dependency>/libraries/temporary//enum
+       : <dependency>/libraries/temporary//enum
        :
-       : <library>/libraries/aterm//aterm
-         <library>/libraries/temporary//enum
+       : <library>/libraries/temporary//enum
        ;
 
 lib struct

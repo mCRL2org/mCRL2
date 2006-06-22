@@ -6,9 +6,9 @@ project auxiliary
        : source-location ../source
        : build-dir $(BUILD_TOP)
        : requirements
-          <include>..
+          <include>../include
        : usage-requirements
-          <include>..
+          <include>../include
        ;
 
 lib auxiliary
