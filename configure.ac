@@ -77,14 +77,14 @@ if test -z $FLEX; then
   AC_MSG_ERROR([cannot find flex])
 fi
 AC_MSG_CHECKING([whether flex option c++ is available])
-if $FLEX -I -o/dev/null test.l &> /dev/null; then
+if $FLEX -I -o/dev/null build/test.l &> /dev/null; then
   AC_MSG_RESULT([yes]);
 else
   AC_MSG_RESULT([no])
   AC_MSG_ERROR([flex option c++ not available; please upgrade to flex 2.5.4a-12 or later]);
 fi
 AC_MSG_CHECKING([whether flex C++ scanner can be used])
-$FLEX -I -otest.cpp test.l
+$FLEX -I -otest.cpp build/test.l
 if $CXX -c test.cpp -o /dev/null &> /dev/null; then
   flex_usable="yes"
 fi
@@ -102,14 +102,14 @@ if test -z $BISON; then
   AC_MSG_ERROR([cannot find bison])
 fi
 AC_MSG_CHECKING([whether bison option %glr-parser is available])
-if $BISON test.y -o/dev/null &> /dev/null; then
+if $BISON build/test.y -o/dev/null &> /dev/null; then
   AC_MSG_RESULT([yes]);
 else
   AC_MSG_RESULT([no])
   AC_MSG_ERROR([bison option %glr-parser not available; please upgrade to bison 2.0 or later]);
 fi
 AC_MSG_CHECKING([whether bison GLR parser can be used])
-$BISON test.y -o test.cpp
+$BISON build/test.y -o test.cpp
 if $CXX -c test.cpp -o /dev/null &> /dev/null; then
   glr_usable="yes"
 fi
