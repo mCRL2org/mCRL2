@@ -24,9 +24,13 @@ lib aterm
        : <address-model>64:<define>AT_64BIT
          <link>shared:<cflags>-fPIC
          <link>shared,<toolset>darwin:<cflags>"-fPIC -fno-common"
+         <toolset>msvc:<define>WIN32
+         <toolset>msvc:<include>/libraries/auxiliary//nt_compatibility
        :
        : <address-model>64:<define>AT_64BIT
          <toolset>darwin,<link>shared:<undefined>dynamic_lookup
+         <toolset>msvc:<define>WIN32
+         <toolset>msvc:<include>/libraries/auxiliary//nt_compatibility
        ;
 
 alias atermpp

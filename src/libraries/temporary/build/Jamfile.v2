@@ -1,4 +1,4 @@
-# This build file has no status and is not portable it serves to (re)build tools with squadt connectivity
+# This build file has no status it is what it is called: temporary
 
 project temporary
        : source-location ../../..
@@ -9,7 +9,6 @@ project temporary
           <include>../../..
        ;
 
-# The following lines are to make this build stand-alone
 lib trace
        : libtrace.cpp
        : <dependency>/libraries/aterm//aterm
