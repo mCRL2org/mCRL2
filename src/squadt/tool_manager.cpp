@@ -139,7 +139,7 @@ namespace squadt {
     execution::command c(t.get_location(), w);
 
     c.append_argument(boost::str(boost::format(socket_connect_pattern)
-                            % get_local_host().name() % default_tcp_port));
+                            % get_local_host() % default_tcp_port));
     c.append_argument(boost::str(boost::format(identifier_pattern)
                             % id));
 

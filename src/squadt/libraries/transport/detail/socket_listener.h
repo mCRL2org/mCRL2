@@ -4,7 +4,7 @@
 #include <boost/asio.hpp>
 #include <boost/bind.hpp>
 #include <boost/shared_ptr.hpp>
-#include <boost/asio/ipv4/address.hpp>
+#include <boost/asio/ip/address.hpp>
 
 #include <transport/detail/listener.tcc>
 #include <transport/detail/socket_transceiver.h>
@@ -16,25 +16,25 @@ namespace transport {
       public:
 
         /** Convenience type */
-        typedef asio::ipv4::address address;
+        typedef boost::asio::ip::address   address;
 
       private:
 
         /** \brief The socket listener */
-        asio::ipv4::tcp::acceptor   acceptor;
+        boost::asio::ip::tcp::acceptor     acceptor;
 
         /** \brief For mutual exclusive event handling */
-        asio::locking_dispatcher    dispatcher;
+        boost::asio::strand                dispatcher;
 
       private:
 
         /** \brief Handler for incoming socket connections */
-        void handle_accept(const asio::error&, transceiver::socket_transceiver::ptr, basic_listener::ptr);
+        void handle_accept(const boost::asio::error&, transceiver::socket_transceiver::ptr, basic_listener::ptr);
 
       public:
 
         /** \brief Constructor */
-        socket_listener(transport::transporter& m, const address& address, const long port = 0);
+        socket_listener(transport::transporter& m, const address& address, const short port = 0);
 
         /** \brief Activate the listener */
         void activate(basic_listener::ptr);

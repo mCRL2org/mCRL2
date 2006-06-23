@@ -193,7 +193,7 @@ namespace transport {
     }
   }
 
-  transporter::host transporter::get_local_host() {
+  transporter::host_name transporter::get_local_host() {
     return (socket_transceiver::get_local_host());
   }
 }

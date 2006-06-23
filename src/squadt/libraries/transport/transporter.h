@@ -6,8 +6,8 @@
 #include <list>
 #include <istream>
 
-#include <boost/asio/ipv4/address.hpp>
-#include <boost/asio/ipv4/host.hpp>
+#include <boost/asio/ip/address.hpp>
+#include <boost/asio/ip/host_name.hpp>
 #include <boost/noncopyable.hpp>
 #include <boost/thread/recursive_mutex.hpp>
 
@@ -50,10 +50,10 @@ namespace transport {
       typedef std::list < basic_listener::ptr >       listener_list;
 
       /** IP version 4 address verifier (refer to the asio documentation) */
-      typedef asio::ipv4::address                     address;
+      typedef boost::asio::ip::address                address;
 
       /** IP version 4 address verifier (refer to the asio documentation) */
-      typedef asio::ipv4::host                        host;
+      typedef std::string                             host_name;
 
     private:
 
@@ -92,7 +92,7 @@ namespace transport {
       void connect(transporter&);
 
       /** \brief Creates socket connection to another transporter object (using a loopback connection by default) */
-      void connect(const address& = address::loopback(), const long port = 0);
+      void connect(const address& = boost::asio::ip::address_v4::loopback(), const long port = 0);
 
       /** \brief Creates socket connection to another transporter object (using a loopback connection by default) */
       void connect(const std::string& host_name, const long port = 0);
@@ -110,7 +110,7 @@ namespace transport {
       inline void relay_connection(transporter*, basic_transceiver*);
 
       /** \brief Activate a socket listener */
-      void add_listener(const address& = address::any(), const long port = 0);
+      void add_listener(const address& = boost::asio::ip::address_v4::any(), const long port = 0);
 
       /** \brief Activate a socket listener by its number */
       void remove_listener(size_t number = 0);
@@ -121,11 +121,11 @@ namespace transport {
       /** \brief Communicate data from a stream with all peers */
       inline void send(std::istream&);
 
+      /** \brief Returns an object with the local hosts name and addresses */
+      static host_name get_local_host();
+
       /** \brief The number of active listeners */
       inline size_t number_of_listeners() const;
-
-      /** \brief Returns an object with the local hosts name and addresses */
-      static host get_local_host();
 
       /** \brief The number of active connections */
       inline size_t number_of_connections() const;

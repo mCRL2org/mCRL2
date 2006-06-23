@@ -4,10 +4,8 @@
 #
 # The set of files in this directory was compiled by running:
 #
-#   bcp --scan $(find ./ -name '*.cpp' -or -name '*.h' -and -not -name 'boost' | grep --invert-match -e "boost") \
-#      --boost=<path-to-boost-source> ./boost
-#   bcp --scan $(find <path-to-asio-headers> -name '*.cpp' -or -name '*.h' -or -name '*.hpp') \
-#      --boost=<path-to-boost-source> ./boost
+#   bcp --scan $(find ./ ../boost/boost/asio -name '*.cpp' -or -name '*.h' -or -name '*.hpp') \
+#      --boost=<path-to-boost-sources> /tmp/boost_subset
 #
 # from the trunk/src directory.
 #

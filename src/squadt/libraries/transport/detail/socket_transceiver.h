@@ -24,30 +24,30 @@ namespace transport {
   
       public:
         /** \brief IP version 4 address verifier (refer to the asio documentation) */
-        typedef asio::ipv4::address                      address;
+        typedef boost::asio::ip::address                  address;
 
         /** \brief IP version 4 host class (refer to the asio documentation) */
-        typedef asio::ipv4::host                         host;
+        typedef std::string                               host_name;
 
         /** \brief Convenience type to hide the boost shared pointer implementation */
-        typedef boost::shared_ptr < socket_transceiver > ptr;
+        typedef boost::shared_ptr < socket_transceiver >  ptr;
 
         /** \brief Convenience type to hide the boost shared pointer implementation */
-        typedef boost::weak_ptr < socket_transceiver >   wptr;
+        typedef boost::weak_ptr < socket_transceiver >    wptr;
 
       private:
 
         /** \brief Host name resolver */
-        static asio::ipv4::host_resolver resolver;
+        static boost::asio::ip::tcp::resolver   resolver;
 
         /** \brief Scheduler for asynchronous socket communication */
-        static socket_scheduler          scheduler;
+        static socket_scheduler                 scheduler;
 
         /** \brief Default port for socket connections */
-        static long                      default_port;
+        static short                            default_port;
 
         /** \brief Size of the input buffer */
-        static unsigned int              input_buffer_size;
+        static unsigned int                     input_buffer_size;
 
       private:
 
@@ -55,7 +55,7 @@ namespace transport {
         boost::shared_array < char >     buffer;
 
         /** \brief The local endpoint of a connection */
-        asio::ipv4::tcp::socket          socket;
+        boost::asio::ip::tcp::socket     socket;
  
         /** \brief Used to make operations: read, write and disconnect mutually exclusive */
         boost::mutex                     operation_lock;
@@ -78,10 +78,10 @@ namespace transport {
         inline socket_transceiver(transporter* o);
 
         /** \brief Wrapper for connect() that ensures establishes that the object is not freed yet */
-        void connect(const std::string&, const long, ptr);
+        void connect(const std::string&, const short, ptr);
 
         /** \brief Wrapper for connect() that ensures establishes that the object is not freed yet */
-        void connect(const address&, const long, ptr);
+        void connect(const address&, const short, ptr);
 
         /** \brief Send a string input stream to the peer */
         void send(const std::string&, ptr);
@@ -96,10 +96,10 @@ namespace transport {
         void activate(ptr);
 
         /** \brief Read from the socket */
-        void handle_receive(wptr, const asio::error&);
+        void handle_receive(wptr, const boost::asio::error&);
 
         /** \brief Process results from a write operation on the socket */
-        void handle_write(wptr, boost::shared_array < char >, const asio::error&);
+        void handle_write(wptr, boost::shared_array < char >, const boost::asio::error&);
 
       public:
 
@@ -107,7 +107,7 @@ namespace transport {
         static inline socket_transceiver::ptr create(transporter*);
 
         /** \brief Returns an object with the local hosts name and addresses */
-        static host get_local_host();
+        static host_name get_local_host();
 
         /** \brief Send a string input stream to the peer */
         void send(const std::string&);
@@ -116,10 +116,10 @@ namespace transport {
         void send(std::istream&);
 
         /** \brief Wrapper for connect() that ensures establishes that the object is not freed yet */
-        inline void connect(const std::string&, const long = default_port);
+        inline void connect(const std::string&, const short = default_port);
 
         /** \brief Wrapper for connect() that ensures establishes that the object is not freed yet */
-        inline void connect(const address& = address::any(), const long = default_port);
+        inline void connect(const address& = boost::asio::ip::address_v4::any(), const short = default_port);
 
         /** \brief Terminate the connection with the peer */
         inline void disconnect(basic_transceiver::ptr);
@@ -154,14 +154,14 @@ namespace transport {
     /**
      * \attention Wrapper for the similar looking private function
      **/
-    inline void socket_transceiver::connect(const address& a, const long p) {
+    inline void socket_transceiver::connect(const address& a, const short p) {
       connect(a, p, this_ptr.lock());
     }
 
     /**
      * \attention Wrapper for the similar looking private function
      **/
-    inline void socket_transceiver::connect(const std::string& a, const long p) {
+    inline void socket_transceiver::connect(const std::string& a, const short p) {
       connect(a, p, this_ptr.lock());
     }
 

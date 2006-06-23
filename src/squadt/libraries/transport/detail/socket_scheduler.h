@@ -28,7 +28,7 @@ namespace transport {
         bool                                active;
 
         /** \brief The io_service */
-        asio::io_service                    io_service;
+        boost::asio::io_service             io_service;
 
         /** \brief The thread in which the scheduling takes place */
         boost::shared_ptr < boost::thread > thread;
