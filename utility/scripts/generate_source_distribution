@@ -53,10 +53,10 @@ source_files="mcrl2/articles \
               mcrl2/build/config.mk.in \
               mcrl2/build/config.jam.in \
               mcrl2/build/Jamfile.v2 \
+              mcrl2/build/test.l \
+              mcrl2/build/test.y \
               mcrl2/Makefile \
               mcrl2/examples \
-              mcrl2/test.y \
-              mcrl2/test.l \
               mcrl2/tests \
               mcrl2/specs \
               mcrl2/.vim \
