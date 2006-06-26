@@ -244,6 +244,19 @@ if test $enable_experimental; then
 fi
 AC_SUBST([BUILD_EXPERIMENTAL])
 
+# Check whether dymbol table stripping from binaries is requested
+AC_ARG_ENABLE(
+  [deprecated],
+  AC_HELP_STRING(
+    [--enable-deprecated],
+    [also build deprecated tools]
+  )
+)
+if test $enable_experimental; then
+  BUILD_DEPRECATED="--enable-deprecated"
+fi
+AC_SUBST([BUILD_DEPRECATED])
+
 # Check whether optimization must be suppressed
 AC_ARG_ENABLE(
   [squadt_support],
