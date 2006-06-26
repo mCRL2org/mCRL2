@@ -4,7 +4,7 @@
 //Global preconditions:
 //- the ATerm library has been initialised
 
-ATermAppl type_check_specification(ATermAppl spec);
+ATermAppl type_check_spec(ATermAppl spec);
 /*Pre: spec represents an mCRL2 specification that adheres to the initial
  *     internal ATerm structure.
  *Post:spec is type checked.
@@ -36,7 +36,7 @@ ATermAppl type_check_mult_act(ATermAppl mult_act, lpe::specification &lpe_spec);
  *     NULL is returned.
  */
 
-ATermAppl type_check_state_formula(ATermAppl state_formula, lpe::specification &lpe_spec);
+ATermAppl type_check_state_frm(ATermAppl state_formula, lpe::specification &lpe_spec);
 /*Pre: state_formula represents an mCRL2 state formula that adheres to the
  *     initial internal ATerm structure.
  *     lpe_spec represents an LPE specification

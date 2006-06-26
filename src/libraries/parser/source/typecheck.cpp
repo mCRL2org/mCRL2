@@ -198,7 +198,7 @@ static void gstcSplitSortDecls(ATermList SortDecls, ATermList *PSortIds,
 //type checking functions
 //-----------------------
 
-ATermAppl type_check_specification(ATermAppl input)
+ATermAppl type_check_spec(ATermAppl input)
 {
   ATermAppl Result=NULL;
   gsDebugMsg ("type checking phase started\n");
@@ -257,7 +257,7 @@ ATermAppl type_check_mult_act(ATermAppl mult_act, lpe::specification &lpe_spec)
   return NULL;
 }
 
-ATermAppl type_check_state_formula(ATermAppl state_frm, lpe::specification &lpe_spec)
+ATermAppl type_check_state_frm(ATermAppl state_frm, lpe::specification &lpe_spec)
 {
   //check correctness of the state formula in state_formula using
   //the LPE specification in lpe_spec as follows:

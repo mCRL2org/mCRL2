@@ -2755,20 +2755,44 @@ ATermAppl gsImplFunctionSorts(ATermAppl Spec)
   return Spec;
 }
 
-ATermAppl gsImplementData(ATermAppl Spec)
+ATermAppl implement_data_spec(ATermAppl spec)
 {
-  int occ = gsCount((ATerm) gsMakeUnknown(), (ATerm) Spec);
+  int occ = gsCount((ATerm) gsMakeUnknown(), (ATerm) spec);
   if (occ > 0) {
     gsErrorMsg("specification contains %d unknown type%s\n", occ, (occ != 1)?"s":"");
     return NULL;
   }
-  Spec = gsImplExprs(Spec);
-  Spec = gsImplSortRefs(Spec);
-  Spec = gsImplFunctionSorts(Spec);
-  return Spec;
+  spec = gsImplExprs(spec);
+  spec = gsImplSortRefs(spec);
+  spec = gsImplFunctionSorts(spec);
+  return spec;
 }
 
-ATermAppl implement_data_state_formula(ATermAppl state_frm,
+ATermAppl implement_data_data_expr(ATermAppl data_expr,
+  lpe::specification &lpe_spec)
+{
+  int occ = gsCount((ATerm) gsMakeUnknown(), (ATerm) data_expr);
+  if (occ > 0) {
+    gsErrorMsg("specification contains %d unknown type%s\n", occ, (occ != 1)?"s":"");
+    return NULL;
+  }
+  //TODO
+  return data_expr;
+}
+
+ATermAppl implement_data_mult_act(ATermAppl mult_act,
+  lpe::specification &lpe_spec)
+{
+  int occ = gsCount((ATerm) gsMakeUnknown(), (ATerm) mult_act);
+  if (occ > 0) {
+    gsErrorMsg("specification contains %d unknown type%s\n", occ, (occ != 1)?"s":"");
+    return NULL;
+  }
+  //TODO
+  return mult_act;
+}
+
+ATermAppl implement_data_state_frm(ATermAppl state_frm,
   lpe::specification &lpe_spec)
 {
   int occ = gsCount((ATerm) gsMakeUnknown(), (ATerm) state_frm);

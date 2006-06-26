@@ -532,7 +532,7 @@ ATermAppl linearise_file(t_lin_options &lin_options)
   if (lin_options.infilename == "") {
     //parse specification from stdin
     gsVerboseMsg("parsing input from stdin...\n");
-    result = parse_specification(cin);
+    result = parse_spec(cin);
   } else {
     //parse specification from infilename
     ifstream instream(lin_options.infilename.c_str(), ifstream::in|ifstream::binary);
@@ -541,7 +541,7 @@ ATermAppl linearise_file(t_lin_options &lin_options)
       return NULL;
     }
     gsVerboseMsg("parsing input file '%s'...\n", lin_options.infilename.c_str());
-    result = parse_specification(instream);
+    result = parse_spec(instream);
     instream.close();
   }
   if (result == NULL) 
@@ -555,7 +555,7 @@ ATermAppl linearise_file(t_lin_options &lin_options)
   }
   //type check the result
   gsVerboseMsg("type checking...\n");
-  result = type_check_specification(result);
+  result = type_check_spec(result);
   if (result == NULL) 
   {
     gsErrorMsg("type checking failed\n");
@@ -579,7 +579,7 @@ ATermAppl linearise_file(t_lin_options &lin_options)
   }
   //implement standard data types and type constructors on the result
   gsVerboseMsg("implementing standard data types and type constructors...\n");
-  result = gsImplementData(result);
+  result = implement_data_spec(result);
   if (result == NULL) 
   {
     gsErrorMsg("data implementation failed\n");

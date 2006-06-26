@@ -127,7 +127,7 @@ int main(int argc, char **argv)
                 }
                 //parse specification
                 gsVerboseMsg("parsing input file '%s'...\n", argv[optind]);
-                Spec = parse_specification(SpecStream);
+                Spec = parse_spec(SpecStream);
 		SpecStream.close();
                 if (Spec == NULL) {
                   gsErrorMsg("parsing failed\n");
@@ -135,14 +135,14 @@ int main(int argc, char **argv)
                 }
                 //type check specification
                 gsVerboseMsg("type checking...\n");
-                Spec = type_check_specification(Spec);
+                Spec = type_check_spec(Spec);
                 if (Spec == NULL) {
                   gsErrorMsg("type checking failed\n");
                   return 1;
                 }
                 //implement standard data types and type constructors
                 gsVerboseMsg("implementing standard data types and type constructors...\n");
-                Spec = gsImplementData(Spec);
+                Spec = implement_data_spec(Spec);
                 if (Spec == NULL) {
                   gsErrorMsg("data implementation failed\n");
                   return 1;

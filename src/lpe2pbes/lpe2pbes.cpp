@@ -85,7 +85,7 @@ int main(int argc, char **argv)
     gsErrorMsg("cannot open formula file '%s'\n", formfilename.c_str());
     return 1;
   }
-  ATermAppl result = parse_state_formula(formstream);
+  ATermAppl result = parse_state_frm(formstream);
   formstream.close();
   if (result == NULL) {
     gsErrorMsg("parsing failed\n");
@@ -94,7 +94,7 @@ int main(int argc, char **argv)
 
   //type check formula
   gsVerboseMsg("type checking...\n");
-  result = type_check_state_formula(result, lpe_spec);
+  result = type_check_state_frm(result, lpe_spec);
   if (result == NULL) {
     gsErrorMsg("type checking failed\n");
     return 1;
@@ -102,7 +102,7 @@ int main(int argc, char **argv)
 
   //implement standard data types and type constructors on the result
   gsVerboseMsg("implementing standard data types and type constructors...\n");
-  result = implement_data_state_formula(result, lpe_spec);
+  result = implement_data_state_frm(result, lpe_spec);
   if (result == NULL) {
     gsErrorMsg("data implementation failed\n");
     return 1;

@@ -136,12 +136,12 @@ int main(int argc, char **argv)
 				fprintf(stderr,"error: cannot open input file '%s'\n",argv[optind]);
 				return 1;
 			}
-			Spec = parse_specification(is);
+			Spec = parse_spec(is);
 			is.close();
 		} else {
-			Spec = parse_specification(cin);
+			Spec = parse_spec(cin);
 		}
-		Spec = type_check_specification(Spec);
+		Spec = type_check_spec(Spec);
 	}
 	if ( Spec == NULL )
 	{
