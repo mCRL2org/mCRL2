@@ -49,6 +49,8 @@ namespace boost {
 namespace asio {
 namespace detail {
 
+#define EV_OOBAND EV_FLAG1
+
 template <bool Own_Thread>
 class kqueue_reactor
   : public boost::asio::io_service::service

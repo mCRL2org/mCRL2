@@ -13,11 +13,12 @@ namespace transport {
      * @param a the address to listen on
      * @param p the port to listen on
      **/
-    socket_listener::socket_listener(transporter& m, const address& a, const short p) :
+    socket_listener::socket_listener(transporter& m, const address& a, const short int p) :
       basic_listener(m), acceptor(socket_transceiver::scheduler.io_service), dispatcher(socket_transceiver::scheduler.io_service)  {
       using namespace boost::asio;
 
-      ip::tcp::endpoint endpoint(ip::address(a), (p == 0) ? socket_transceiver::default_port : p);
+      ip::address address(a);
+      ip::tcp::endpoint endpoint(address, (p == 0) ? socket_transceiver::default_port : p);
 
       acceptor.open(endpoint.protocol());
       acceptor.set_option(socket_base::reuse_address(true));
