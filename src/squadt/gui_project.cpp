@@ -431,11 +431,11 @@ namespace squadt {
       if (tn.get() != 0 && te.get()) {
         namespace bf = boost::filesystem;
 
-        wxString options[3] = { wxT("Rename the new object to something that not cause conflicts"),
-                                wxT("Remove the conflicting object (and associated objects)"),
-                                wxT("Remove the existing object (and associated objects)")};
+        wxString options[3] = { wxT("Rename to something that does not cause conflicts"),
+                                wxT("Remove the conflicting file (and associated files)"),
+                                wxT("Remove the existing object (and associated files)")};
 
-        boost::format message("An object `%s' produced by %s conflicts with objects already present in the project store.\n\n"
+        boost::format message("A file `%s' produced by %s conflicts with objects already present in the project store.\n\n"
                                 "Choose the preferred method of resolution:");
 
         message % bf::path(n->location).leaf() % tn->get_tool()->get_name();
@@ -455,7 +455,7 @@ namespace squadt {
                                       wxT("*") + wxString(bf::extension(bf::path(std::string(file_name.fn_str()))).c_str(), wxConvLocal), wxSAVE);
 
             if (d.ShowModal() == wxCANCEL) {
-              wxMessageDialog(0, wxT("Cancelled, removing new objects instead!"), wxT("Notification"), wxOK).ShowModal();
+              wxMessageDialog(0, wxT("Cancelled, removing new files instead!"), wxT("Notification"), wxOK).ShowModal();
 
               manager->remove(tn.get(), false);
             }
@@ -463,7 +463,7 @@ namespace squadt {
               std::string new_name(d.GetFilename().fn_str());
 
               if (std::string(file_name.fn_str()) == new_name) {
-                wxMessageDialog(0, wxT("Same name, replacing existing objects instead!"), wxT("Notification"), wxOK).ShowModal();
+                wxMessageDialog(0, wxT("Same name, replacing existing files instead!"), wxT("Notification"), wxOK).ShowModal();
 
                 manager->remove(te.get());
               }
@@ -491,7 +491,9 @@ namespace squadt {
           }
         }
         else {
-          std::cerr << "This should be dead code!\n";
+          wxMessageDialog(0, wxT("Cancelled, removing new files instead!"), wxT("Notification"), wxOK).ShowModal();
+
+          manager->remove(tn.get(), false);
         }
       }
     }

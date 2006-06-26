@@ -56,7 +56,8 @@ namespace sip {
         horizontal_alignment alignment_horizontal; ///< how the element is aligned horizontally
         vertical_alignment   alignment_vertical;   ///< how the element is aligned vertically
         margins              margin;               ///< the margins that should be observed around the element
-        visibility           visible;              ///< whether the element affects layout and is visible
+        visibility           visible;              ///< whether or not the element affects layout and is visible
+        bool                 grow;                 ///< whether or not to expand the control to fill available space
        
         /** \brief Constructor */
         inline constraints(vertical_alignment const&, horizontal_alignment const&, margins const&, visibility const&);
@@ -72,6 +73,9 @@ namespace sip {
 
         /** \brief Read back a layout constraint, in XML format */
         void read(xml2pp::text_reader&);
+
+        /** \brief Whether the control is allowed to grow */
+        inline void set_growth(bool b);
 
         /** \brief Compares for equality */
         inline bool operator==(constraints const&) const;
@@ -274,15 +278,19 @@ namespace sip {
     }
 
     inline constraints::constraints(vertical_alignment const& av, horizontal_alignment const& ah, margins const& m, visibility const& v) :
-                                                alignment_horizontal(ah), alignment_vertical(av), margin(m), visible(v) {
+                                                alignment_horizontal(ah), alignment_vertical(av), margin(m), visible(v), grow(false) {
     }
 
     inline constraints::constraints(vertical_alignment const& av, margins const& m, visibility const& v) :
-                                                alignment_horizontal(center), alignment_vertical(av), margin(m), visible(v) {
+                                                alignment_horizontal(center), alignment_vertical(av), margin(m), visible(v), grow(false) {
     }
 
     inline constraints::constraints(horizontal_alignment const& ah, margins const& m, visibility const& v) :
-                                                alignment_horizontal(ah), alignment_vertical(middle), margin(m), visible(v) {
+                                                alignment_horizontal(ah), alignment_vertical(middle), margin(m), visible(v), grow(false) {
+    }
+
+    inline void constraints::set_growth(bool b) {
+      grow = b;
     }
 
     /**
@@ -313,14 +321,20 @@ namespace sip {
      * @param[in] c the constraints object to compare against
      **/
     inline bool constraints::operator==(constraints const& c) const {
-      return (alignment_horizontal == c.alignment_horizontal && alignment_vertical == c.alignment_vertical && margin == c.margin && visible == c.visible);
+      return (alignment_horizontal == c.alignment_horizontal &&
+              alignment_vertical == c.alignment_vertical &&
+              margin == c.margin && visible == c.visible &&
+              grow == c.grow);
     }
 
     /**
      * @param[in] c the constraints object to compare against
      **/
     inline bool constraints::operator!=(constraints const& c) const {
-      return (alignment_horizontal != c.alignment_horizontal || alignment_vertical != c.alignment_vertical || margin != c.margin || visible != c.visible);
+      return (alignment_horizontal != c.alignment_horizontal ||
+              alignment_vertical != c.alignment_vertical ||
+              margin != c.margin || visible != c.visible ||
+              grow != c.grow);
     }
 
     inline box::box() {
@@ -348,7 +362,7 @@ namespace sip {
      * @param[in] e a pointer to a layout element
      **/
     inline void box::add(element* e) {
-      children.push_back(children_list::value_type(e, default_constraints));
+      add(e, default_constraints);
     }
 
     /**
@@ -356,7 +370,11 @@ namespace sip {
      * @param[in] c the layout constraints to observe
      **/
     inline void box::add(element* e, constraints const& c) {
-      children.push_back(children_list::value_type(e, c));
+      constraints cn = c;
+      
+      cn.set_growth(e->get_grow());
+
+      children.push_back(children_list::value_type(e, cn));
     }
 
     /**
@@ -366,7 +384,7 @@ namespace sip {
      * @param[in] v whether the element is visible and has an effect on other elements that occupy the box
      **/
     inline void vertical_box::add(element* e, alignment const& a, margins const& m, visibility const& v) {
-      children.push_back(children_list::value_type(e, constraints(middle, a, m, v)));
+      box::add(e, constraints(middle, a, m, v));
     }
 
     /**
@@ -376,7 +394,7 @@ namespace sip {
      * @param[in] v whether the element is visible and has an effect on other elements that occupy the box
      **/
     inline void horizontal_box::add(element* e, alignment const& a, margins const& m, visibility const& v) {
-      children.push_back(children_list::value_type(e, constraints(a, center, m, v)));
+      box::add(e, constraints(a, center, m, v));
     }
 
     /**
@@ -385,7 +403,7 @@ namespace sip {
      * @param[in] v whether the element is visible and has an effect on other elements that occupy the box
      **/
     inline void box::add(element* e, margins const& m, visibility const& v) {
-      children.push_back(children_list::value_type(e, constraints(middle, center, m, v)));
+      box::add(e, constraints(middle, center, m, v));
     }
 
     /**
@@ -393,7 +411,7 @@ namespace sip {
      * @param[in] v whether the element is visible and has an effect on other elements that occupy the box
      **/
     inline void box::add(element* e, visibility const& v) {
-      children.push_back(children_list::value_type(e, constraints(middle, center, manager::default_margins, v)));
+      box::add(e, constraints(middle, center, manager::default_margins, v));
     }
 
     /**

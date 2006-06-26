@@ -374,10 +374,10 @@ static bool get_squadt_parameters(int argc,
 
     // The ok button must be put at the rightmost lowermost place
 
-    horizontal_box* okay_box = new horizontal_box();
-    layout_manager->add(okay_box,layout::right);
+    vertical_box* okay_box = new vertical_box();
+    layout_manager->add(okay_box);
     button* okay_button = new button("OK");
-    okay_box->add(okay_button,layout::bottom);
+    okay_box->add(okay_button, layout::right);
     
     layout_manager->add(new label(" "),layout::left);
 

@@ -66,7 +66,7 @@ namespace sip {
 
       private:
 
-        /** brief The global event handler for all element objects, unless they adopt another one */
+        /** \brief The global event handler for all element objects, unless they adopt another one */
         static basic_event_handler  global_event_handler;
 
       protected:
@@ -74,8 +74,11 @@ namespace sip {
         /** \brief Unique identifier for an element object */
         identifier id;
 
-        /** brief The current event handler for this object */
+        /** \brief The current event handler for this object */
         basic_event_handler*        current_event_handler;
+
+        /** \brief Whether or not the element should grow */
+        bool                        grow;
 
       protected:
 
@@ -98,6 +101,12 @@ namespace sip {
 
         /** \brief Gets a complete structure specification for a layout element */
         std::string get_state() const;
+
+        /** \brief Set whether the element is allowed to grow or not */
+        void set_grow(bool b);
+
+        /** \brief Get whether the element is allowed to grow or not */
+        bool get_grow();
 
         /** \brief Reads element specific data */
         virtual void read(read_context&); 
@@ -132,6 +141,14 @@ namespace sip {
         /** \brief Abstract destructor */
         virtual ~element() = 0;
     };
+
+    inline void element::set_grow(bool b) {
+      grow = b;
+    }
+
+    inline bool element::get_grow() {
+      return (grow);
+    }
 
     inline element::read_context::read_context(xml2pp::text_reader& r) : reader(r) {
     }

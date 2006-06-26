@@ -77,12 +77,14 @@ namespace sip {
       }
 
       button::button() {
+        set_grow(false);
       }
 
       /**
        * @param[in] c the label for the button
        **/
       button::button(std::string c) : label(c) {
+        set_grow(false);
       }
      
       /**

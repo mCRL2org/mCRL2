@@ -228,12 +228,14 @@ namespace squadt {
        **/
       void tool_display_mediator::attach_to_vertical_box(mediator::wrapper_aptr d, sip::layout::constraints const* c) {
         wrapper* sd     = static_cast < wrapper* > (d.get());
-        int      flags  = wxLEFT|wxRIGHT|wxEXPAND;
+        int      flags  = wxLEFT|wxRIGHT;
      
         layout::constraints const& cr = *(static_cast < layout::constraints const* > (c));
      
-        using sip::layout::box;
-     
+        if (cr.grow) {
+          flags |= wxEXPAND;
+        }
+
         switch (cr.alignment_horizontal) {
           case layout::left:
             flags |= wxALIGN_LEFT;
@@ -276,10 +278,14 @@ namespace squadt {
        **/
       void tool_display_mediator::attach_to_horizontal_box(mediator::wrapper_aptr d, sip::layout::constraints const* c) {
         wrapper* sd     = static_cast < wrapper* > (d.get());
-        int      flags  = wxTOP|wxBOTTOM|wxEXPAND;
-     
+        int      flags  = wxTOP|wxBOTTOM;
+
         sip::layout::constraints const& cr = *(static_cast < layout::constraints const* > (c));
-     
+
+        if (cr.grow) {
+          flags |= wxEXPAND;
+        }
+
         switch (cr.alignment_vertical) {
           case sip::layout::top:
             flags |= wxALIGN_TOP;
@@ -291,26 +297,26 @@ namespace squadt {
             flags |= wxALIGN_CENTER;
             break;
         }
-     
+
         wxSizer* sizer = static_cast < wrapper* > (data.get())->get_sizer();
-     
+
         if (0 < cr.margin.left) {
           sizer->AddSpacer(cr.margin.left);
         }
-     
+
         wxSizerItem* new_sizer_item;
-     
+
         if (sd->wraps_window()) {
           new_sizer_item = sizer->Add(sd->release_window(), 0, flags, (cr.margin.top + cr.margin.bottom) >> 1);
         }
         else {
           new_sizer_item = sizer->Add(sd->release_sizer(), 0, flags, (cr.margin.top + cr.margin.bottom) >> 1);
         }
-     
+
         if (0 < cr.margin.right) {
           sizer->AddSpacer(cr.margin.right);
         }
-     
+
         if (cr.visible == sip::layout::hidden) {
           new_sizer_item->Show(false);
         }

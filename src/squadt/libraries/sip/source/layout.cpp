@@ -136,7 +136,8 @@ namespace sip {
         << "\" margin-left=\"" << margin.left
         << "\" margin-bottom=\"" << margin.bottom
         << "\" margin-right=\"" << margin.right
-        << "\" visibility=\"" << visibility_to_text[visible] << "\"/>";
+        << "\" visibility=\"" << visibility_to_text[visible]
+        << "\" grow=\"" << grow << "\"/>";
     }
 
     /**
@@ -152,6 +153,8 @@ namespace sip {
       r.get_attribute(&margin.right, "margin-right");
 
       visible = text_to_visibility(r.get_attribute_as_string("visibility"));
+
+      grow = r.get_attribute("grow");
 
       r.next_element();
     }

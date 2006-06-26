@@ -13,7 +13,8 @@
 namespace sip {
   namespace layout {
 
-    element::element() : id(reinterpret_cast < element::identifier > (this)), current_event_handler(&global_event_handler) {
+    element::element() : id(reinterpret_cast < element::identifier > (this)),
+                current_event_handler(&global_event_handler), grow(true) {
     }
 
     element::~element() {
