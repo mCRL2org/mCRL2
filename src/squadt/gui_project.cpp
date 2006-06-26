@@ -349,7 +349,7 @@ namespace squadt {
             cmMenuItem* menu_item = reinterpret_cast < cmMenuItem* > (menu->FindItem(e.GetId()));
 
             /* Create a temporary processor */
-            processor::sptr tp = processor::create(menu_item->the_tool);
+            processor::sptr tp = processor::create(*manager, menu_item->the_tool);
 
             /* Attach the new processor by relating it to p */
             tp->append_input(t);

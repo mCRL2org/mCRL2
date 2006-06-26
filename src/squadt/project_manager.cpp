@@ -30,7 +30,7 @@ namespace squadt {
    * project description file in it, then such a file is created and all files
    * in the directory are imported into the project.
    **/
-  project_manager::project_manager(const boost::filesystem::path& l) : store(l) {
+  project_manager::project_manager(const boost::filesystem::path& l) : store(l), count(0) {
     using namespace boost;
 
     assert(!l.empty());
@@ -94,7 +94,8 @@ namespace squadt {
     /* Write header */
     s << "<?xml version=\"1.0\" encoding=\"utf-8\"?>\n"
       << "<project xmlns:xsi=\"http://www.w3.org/2001/XMLSchema-instance\""
-      << " xsi:noNamespaceSchemaLocation=\"project.xsd\" version=\"1.0\">\n";
+      << " xsi:noNamespaceSchemaLocation=\"project.xsd\" version=\"1.0\" count=\""
+      << count << "\">\n";
 
     if (!description.empty()) {
       s << "<description>" << description << "</description>\n";
@@ -163,6 +164,8 @@ namespace squadt {
    **/
   void project_manager::read(xml2pp::text_reader& r) {
     /* Advance beyond project element */
+    r.get_attribute(&count, "count");
+
     r.next_element(1);
 
     if (r.is_element("description") && !r.is_empty_element()) {
@@ -177,7 +180,7 @@ namespace squadt {
 
     /* Read processors */
     while (r.is_element("processor")) {
-      processors.push_back(processor::read(c, r));
+      processors.push_back(processor::read(*this, c, r));
     }
 
     sort_processors();

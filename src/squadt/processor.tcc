@@ -9,6 +9,7 @@
 
 #include "task_monitor.h"
 #include "processor.h"
+#include "project_manager.h"
 
 namespace squadt {
 
@@ -25,25 +26,6 @@ namespace squadt {
 
     /* Set the handler for incoming layout messages */
     activate_display_data_handler(sip::layout::tool_display::sptr(), on_state_change);
-  }
-
-  inline processor::sptr processor::create() {
-    processor::sptr n(new processor());
-
-    n->this_object = processor::wptr(n);
-
-    return (n);
-  }
-
-  /**
-   * @param[in] t the tool to use
-   **/
-  inline processor::sptr processor::create(tool::sptr t) {
-    processor::sptr n(new processor(t));
-
-    n->this_object = processor::wptr(n);
-
-    return (n);
   }
 
   /**
@@ -108,7 +90,7 @@ namespace squadt {
 
     if (connected) {
       send_configuration();
-     
+
       /* Wait until configuration is accepted, or the tool has terminated */
       if (await_message(sip::message_accept_configuration).get() != 0 && b) {
         send_start_signal();
@@ -134,16 +116,6 @@ namespace squadt {
     p.write(s);
 
     return (s);
-  }
-
-  inline processor::processor() : current_monitor(new monitor(*this)) {
-  }
-
-  /**
-   * @param[in] t the tool descriptor of the tool that is to be used to produce the output from the input
-   **/
-  inline processor::processor(tool::sptr t) :
-                tool_descriptor(t), current_monitor(new monitor(*this)) {
   }
 
   inline processor::~processor() {
@@ -294,22 +266,17 @@ namespace squadt {
   }
 
   /**
-   * @param[in] ic the input combination that is to be used
    * @param[in] w the path to the directory in which to run the tool
-   * @param[in] l absolute path to the file that serves as main input
+   *
+   * \pre The existing configuration must contain the input object matching the selected input combination
    *
    * \attention This function is non-blocking
    **/
-  inline void processor::configure(const tool::input_combination* ic, std::string const& w, const boost::filesystem::path& l) {
-    selected_input_combination = const_cast < tool::input_combination* > (ic);
+  inline void processor::configure(std::string const& w) {
+    global_tool_manager->execute(*tool_descriptor, w, boost::dynamic_pointer_cast < execution::task_monitor, monitor > (current_monitor), true);
 
-    sip::configuration::sptr c(new sip::configuration(selected_input_combination->category));
-
-    c->add_input(ic->identifier, ic->format, l.string());
-
-    current_monitor->set_configuration(c);
-
-    configure(w);
+    current_monitor->once_on_completion(boost::bind(&processor::process_configuration, this));
+    current_monitor->start_pilot();
   }
 
   /**
@@ -339,20 +306,6 @@ namespace squadt {
     current_monitor->set_configuration(c);
 
     configure(w);
-  }
-
-  /**
-   * @param[in] w the path to the directory in which to run the tool
-   *
-   * \pre The existing configuration must contain the input object matching the selected input combination
-   *
-   * \attention This function is non-blocking
-   **/
-  inline void processor::configure(std::string const& w) {
-    global_tool_manager->execute(*tool_descriptor, w, boost::dynamic_pointer_cast < execution::task_monitor, monitor > (current_monitor), true);
-
-    current_monitor->once_on_completion(boost::bind(&processor::process_configuration, this));
-    current_monitor->start_pilot();
   }
 
   inline void processor::process(std::string const& w, boost::function < void () > h) {

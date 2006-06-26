@@ -26,6 +26,8 @@ namespace squadt {
 
   using iterator_wrapper::constant_indirect_iterator;
 
+  class project_manager;
+
   /**
    * \brief A processor represents a tool configuration.
    *
@@ -187,14 +189,17 @@ namespace squadt {
 
       /** \brief The selected input combination of the tool */
       tool::input_combination const* selected_input_combination;
+
+      /** \brief The associated project manager */
+      project_manager*               manager;
  
     private:
 
       /** \brief Basic constructor */
-      inline processor();
+      inline processor(project_manager&);
 
       /** \brief Constructor with callback handler */
-      inline processor(tool::sptr);
+      inline processor(project_manager&, tool::sptr);
 
       /** \brief Manually sets the output status */
       inline void set_output_status(const processor::output_status);
@@ -208,10 +213,10 @@ namespace squadt {
     public:
 
       /** \brief Factory method for creating instances of this object */
-      inline static processor::sptr create();
+      static processor::sptr create(project_manager&);
  
       /** \brief Factory method for creating instances of this object */
-      inline static processor::sptr create(tool::sptr);
+      static processor::sptr create(project_manager&, tool::sptr);
  
       /** \brief Check the inputs with respect to the outputs and adjust status accordingly */
       bool check_status(bool);
@@ -259,7 +264,7 @@ namespace squadt {
       inline const monitor::sptr get_monitor();
 
       /** \brief Read from XML using a libXML2 reader */
-      static processor::sptr read(id_conversion_map&, xml2pp::text_reader&) throw ();
+      static processor::sptr read(project_manager&, id_conversion_map&, xml2pp::text_reader&) throw ();
 
       /** \brief Write as XML to stream */
       void write(std::ostream& stream = std::cout) const;

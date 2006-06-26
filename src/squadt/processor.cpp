@@ -1,4 +1,5 @@
 #include <boost/filesystem/operations.hpp>
+#include <boost/format.hpp>
 
 #include <xml2pp/text_reader.h>
 #include <sip/controller.h>
@@ -20,6 +21,59 @@ namespace squadt {
 
   void processor::monitor::display_data_change_dummy(sip::layout::tool_display::constant_elements const&) {
     std::cerr << "No custom display state change event handler connected!" << std::endl;
+  }
+
+  inline processor::processor(project_manager& p) : current_monitor(new monitor(*this)), manager(&p) {
+  }
+
+  /**
+   * @param[in] t the tool descriptor of the tool that is to be used to produce the output from the input
+   **/
+  inline processor::processor(project_manager& p, tool::sptr t) :
+    tool_descriptor(t), current_monitor(new monitor(*this)), manager(&p) {
+  }
+
+  /**
+   * @param[in] p the associated project manager
+   **/
+  processor::sptr processor::create(project_manager& p) {
+    processor::sptr n(new processor(p));
+
+    n->this_object = processor::wptr(n);
+
+    return (n);
+  }
+
+  /**
+   * @param[in] p the associated project manager
+   * @param[in] t the tool to use
+   **/
+  processor::sptr processor::create(project_manager& p, tool::sptr t) {
+    processor::sptr n(new processor(p, t));
+
+    n->this_object = processor::wptr(n);
+
+    return (n);
+  }
+  
+  /**
+   * @param[in] ic the input combination that is to be used
+   * @param[in] w the path to the directory in which to run the tool
+   * @param[in] l absolute path to the file that serves as main input
+   *
+   * \attention This function is non-blocking
+   **/
+  void processor::configure(const tool::input_combination* ic, std::string const& w, const boost::filesystem::path& l) {
+    selected_input_combination = const_cast < tool::input_combination* > (ic);
+
+    sip::configuration::sptr c(new sip::configuration(selected_input_combination->category));
+
+    c->set_output_prefix(boost::str(boost::format("%s_%04X") % (boost::filesystem::basename(l)) % manager->get_unique_count()));
+    c->add_input(ic->identifier, ic->format, l.string());
+
+    current_monitor->set_configuration(c);
+
+    configure(w);
   }
 
   /**
@@ -166,14 +220,15 @@ namespace squadt {
   }
 
   /**
-   * @param r an XML text reader object to read from
-   * @param m a map that is used to associate shared pointers to processors with identifiers
+   * @param[in] p reference to the associated project_manager object
+   * @param[in] r an XML text reader object to read from
+   * @param[in] m a map that is used to associate shared pointers to processors with identifiers
    *
    * \pre must point to a processor element
    * \attention the same map m must be used to read back all processor instances that were written with write()
    **/
-  processor::sptr processor::read(id_conversion_map& m, xml2pp::text_reader& r) throw () {
-    processor::sptr c = create();
+  processor::sptr processor::read(project_manager& p, id_conversion_map& m, xml2pp::text_reader& r) throw () {
+    processor::sptr c = create(p);
     std::string     temporary;
 
     if (r.get_attribute(&temporary, "tool-name")) {

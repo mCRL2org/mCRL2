@@ -16,7 +16,7 @@ lib fsm
       : fsmparser.yy
       : <bison.prefix>"fsm"
         <implicit-dependency>fsmlexer.cpp
-        <dependency>/libraries/temporary//lowlevel
+        <dependency>/libraries/temporary//mcrl2_basic
         <dependency>/libraries/aterm//aterm
       ;
 
@@ -35,7 +35,7 @@ exe ltsview
       : <library>fsm
         <library>/site-config//OpenGL
         <library>/libraries/wx_extension//wx_extension
-        <library>/libraries/temporary//lowlevel
+        <library>/libraries/temporary//mcrl2_basic
         <library>/libraries/aterm//aterm
         <implicit-dependency>fsm
         <wx>gl

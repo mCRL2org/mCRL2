@@ -1011,7 +1011,7 @@ void set_basic_configuration_display(sip::tool::communicator& tc) {
   std::string input_file_name  = c.get_object(lpd_file_for_input)->get_location();
 
   /* Add output file to the configuration */
-  c.add_output(lpd_file_for_output, "lpe", input_file_name + ".lpe");
+  c.add_output(lpd_file_for_output, "lpe", c.get_output_name(".lpe"));
 
   /* Values for the options */
   c.add_option(option_remove_single_element_sorts).

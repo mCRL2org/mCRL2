@@ -7,6 +7,7 @@
 #include <boost/filesystem/path.hpp>
 #include <boost/filesystem/convenience.hpp>
 #include <boost/filesystem/operations.hpp>
+#include <boost/cstdint.hpp>
 #include <boost/noncopyable.hpp>
 
 #include <iterator_wrapper/indirect_iterator.h>
@@ -45,6 +46,9 @@ namespace squadt {
       /** \brief Constant that is used to specify to keep the existing file name (see import_file method) */
       static const std::string                                         maintain_old_name;
 
+      /** \brief Finite type for counting the number of added processors */
+      typedef uint16_t                                                 processor_count; 
+
     private:
 
       /** \brief The location of the project store */
@@ -55,6 +59,9 @@ namespace squadt {
  
       /** \brief The list of processors for this project */
       processor_list               processors;
+
+      /** \brief Count of the number of processors added to the project */
+      processor_count              count;
  
     private:
 
@@ -92,6 +99,9 @@ namespace squadt {
 
       /** \brief Get a reference to the list of processors in this project */
       inline processor_iterator get_processor_iterator() const;
+
+      /** \brief Get the count value */
+      inline processor_count get_unique_count();
 
       /** \brief Get the description */
       inline void set_description(const std::string&);
@@ -142,6 +152,10 @@ namespace squadt {
     description = d;
   }
 
+  inline project_manager::processor_count project_manager::get_unique_count() {
+    return (++count);
+  }
+
   inline const std::string& project_manager::get_description() const {
     return (description);
   }
@@ -175,7 +189,7 @@ namespace squadt {
     assert(exists(s) && !is_directory(s) && native(d));
 
     path           destination_path = store / path(d.empty() ? s.leaf() : d);
-    processor::ptr p                = processor::create();
+    processor::ptr p                = processor::create(*this);
 
     if (s != destination_path) {
       copy_file(s, destination_path);

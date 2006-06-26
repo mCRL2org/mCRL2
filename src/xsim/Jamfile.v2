@@ -18,7 +18,7 @@ exe xsim
          xsimtrace.cpp
        : <library>/libraries/temporary//trace
          <library>/libraries/temporary//nextstate
-         <library>/libraries/temporary//print
+         <library>/libraries/temporary//mcrl2_basic
          <source>/site-config//mcrl2_revision.h
          <squadt_support>enable
          <wx>basic
@@ -27,7 +27,7 @@ exe xsim
 exe sim
        : sim.cpp
        : <library>/libraries/temporary//nextstate
-         <library>/libraries/temporary//print
+         <library>/libraries/temporary//mcrl2_basic
          <source>/site-config//mcrl2_revision.h
        ;
 

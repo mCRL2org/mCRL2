@@ -540,7 +540,7 @@ int main(int ac, char** av) {
         std::string input_file_name = configuration->get_object(lpd_file_for_input)->get_location();
 
         /* Add output file to the configuration */
-        configuration->add_output(lpd_file_for_output, "lpe", input_file_name + ".lpe");
+        configuration->add_output(lpd_file_for_output, "lpe", configuration->get_output_name(".lpe"));
 
         /* An object with the correct id exists, assume the URI is relative (i.e. a file name in the local file system) */
         tc.set_configuration(configuration);

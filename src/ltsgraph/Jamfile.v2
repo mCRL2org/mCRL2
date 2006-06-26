@@ -12,7 +12,7 @@ exe ltsgraph
          node.cpp
          edge.cpp
        : <source>/libraries/wx_extension//wx_extension
-         <source>/libraries/temporary//print
+         <source>/libraries/temporary//mcrl2_basic
          <source>/libraries/lts//lts
          <source>/site-config//mcrl2_revision.h
          <include>.

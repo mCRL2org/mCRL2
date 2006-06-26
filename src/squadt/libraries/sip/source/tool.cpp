@@ -195,7 +195,9 @@ namespace sip {
     const configuration::sptr communicator::await_configuration() {
       const sip::messenger::message_ptr m = await_message(sip::message_offer_configuration);
 
-      return (sip::configuration::read(m->to_string()));
+      current_configuration = sip::configuration::read(m->to_string());
+
+      return (current_configuration);
     }
   }
 }

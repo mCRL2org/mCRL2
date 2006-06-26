@@ -9,8 +9,7 @@ exe lpe2pbes
        : lpe2pbes.cpp
          /libraries/lpe//lpe
          /libraries/parser//parser
-         /libraries/temporary//print
-         /libraries/temporary//rewrite
+         /libraries/temporary//mcrl2_basic
        : <source>/site-config//mcrl2_revision.h
          <include>.
          <status>experimental

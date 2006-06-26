@@ -16,10 +16,10 @@ lib auxiliary
          utilities.cpp
          expression_info.cpp
          sort_info.cpp
-       : <dependency>/libraries/temporary//print
+       : <dependency>/libraries/temporary//mcrl2_basic
          <include>../include
        :
-       : <library>/libraries/temporary//print
+       : <library>/libraries/temporary//mcrl2_basic
          <include>../include
        ;
 

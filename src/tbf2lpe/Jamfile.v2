@@ -8,8 +8,7 @@ project tbf2lpe
 exe tbf2lpe
        : tbf2lpe.cpp
          lpetrans.cpp
-         /libraries/temporary//print
-         /libraries/temporary//rewrite
+         /libraries/temporary//mcrl2_basic
        : <source>/site-config//mcrl2_revision.h
          <include>.
        ;

@@ -7,7 +7,7 @@ project tracepp
 
 exe tracepp
        : tracepp.cpp
-         /libraries/temporary//print
+         /libraries/temporary//mcrl2_basic
          /libraries/temporary//trace
        : <source>/site-config//mcrl2_revision.h
          <include>.

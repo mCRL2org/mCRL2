@@ -74,6 +74,9 @@ namespace sip {
       /** \brief Whether the configuration is complete (or initial) */
       bool          completed;
 
+      /** \brief Prefix for output objects */
+      std::string   output_prefix;
+
     public:
 
       /** \brief Constructor */
@@ -96,6 +99,15 @@ namespace sip {
 
       /** \brief Get the state of the configuration (whether it is complete or not) */
       inline bool is_complete();
+
+      /** \brief Set the prefix for output files */
+      inline void set_output_prefix(std::string const&);
+
+      /** \brief Get the prefix for output files */
+      inline std::string get_output_prefix();
+
+      /** \brief Prepends the output prefix to the argument to form a valid file name */
+      inline std::string get_output_name(std::string const&);
 
       /** \brief The category in which the tool operates */
       inline tool_category get_category() const;
@@ -249,6 +261,24 @@ namespace sip {
   }
 
   /**
+   * @param[in] p the string to set as output prefix
+   **/
+  inline void configuration::set_output_prefix(std::string const& p) {
+    output_prefix = p;
+  }
+
+  inline std::string configuration::get_output_prefix() {
+    return (output_prefix);
+  }
+
+  /**
+   * @param[in] n suffix of the name
+   **/
+  inline std::string configuration::get_output_name(std::string const& n) {
+    return (output_prefix + n);
+  }
+
+  /**
    * @param id an identifier for the option
    **/
   inline option::sptr configuration::get_option(const option::identifier id) const {
@@ -287,6 +317,8 @@ namespace sip {
     if (completed) {
       output << " complete=\"true\"";
     }
+
+    output << " output-prefix=\"" << output_prefix << "\"";
 
     /* Add input combination */
     output << " category=\"" << category << "\">";
@@ -452,7 +484,8 @@ namespace sip {
 
     assert(reader.is_element("configuration"));
 
-    c->completed = reader.get_attribute("complete");
+    c->completed     = reader.get_attribute("complete");
+    c->output_prefix = reader.get_attribute_as_string("output-prefix");
 
     reader.get_attribute(&c->category, "category");
 
