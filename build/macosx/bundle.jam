@@ -3,7 +3,7 @@ import notfile ;
 
 # Creates an application bundle on Mac OS X
 rule make_bundle ( target : executable info icon ) {
-  if [ modules.peek : OS ] = LINUX {
+  if [ modules.peek : OS ] = MACOSX {
     notfile $(target) : register_application : $(executable) ;
 
     common.MkDir $(target)/Contents ;
