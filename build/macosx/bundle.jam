@@ -1,0 +1,24 @@
+import common ;
+import notfile ;
+
+# Creates an application bundle on Mac OS X
+rule make_bundle ( target : executable info icon ) {
+  if [ modules.peek : OS ] = LINUX {
+    notfile $(target) : register_application : $(executable) ;
+
+    common.MkDir $(target)/Contents ;
+    common.copy $(TOP)/build/macosx/PkgInfo $(target)/Contents/PkgInfo ;
+    common.copy $(info) $(target)/Contents/Info.plist ;
+    common.MkDir $(target)/Contents/MacOS ;
+    common.copy $(executable) $(target)/Contents/MacOS ;
+    common.MkDir $(target)/Contents/Resources ;
+    common.copy $(icon) $(target)/Contents/Resources ;
+  }
+}
+
+actions quietly register_application {
+  /Developer/Tools/Rez -t APPL -o $(>) $(TOP)/build/sample.r
+  /Developer/Tools/SetFile -a C $(>)
+}
+
+EXPORT $(__name__) : register_application make_bundle ;

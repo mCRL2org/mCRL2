@@ -33,3 +33,7 @@ exe sim
 
 install_with_libraries install : xsim sim ;
 
+include $(TOP)/build/macosx/bundle.jam ;
+
+make_bundle xsim.app : xsim xsim.plist xsim.icns ;
+
