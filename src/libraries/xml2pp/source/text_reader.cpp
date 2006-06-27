@@ -1,5 +1,19 @@
-#ifndef XML2PP_TEXT_READER_TCC
-#define XML2PP_TEXT_READER_TCC
+/*======================================================================
+//
+// Copyright (c) 2005 2006 TU/e
+//
+// author     : Jeroen van der Wulp <J.v.d.Wulp@tue.nl>
+//
+// Use, modification and distribution is subject to the Boost Software
+// License, Version 1.0. (See accompanying file LICENSE_1_0.txt or copy at
+// http://www.boost.org/LICENSE_1_0.txt)
+//
+// About :
+// 
+//  This is a C++ interface wrapper around the XMLTextReader functionality
+//  provided by the gnome libxml2 library.
+//
+//=====================================================================*/
 
 #include <cstring>
 #include <cstdio>
@@ -529,5 +543,4 @@ namespace xml2pp {
     return (wrapped_reader->valid());
   }
 }
-#endif
 

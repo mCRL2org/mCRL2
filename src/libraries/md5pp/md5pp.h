@@ -1,3 +1,15 @@
+/*======================================================================
+//
+// Copyright (c) 2005 2006 TU/e
+//
+// author     : Jeroen van der Wulp <J.v.d.Wulp@tue.nl>
+//
+// Use, modification and distribution is subject to the Boost Software
+// License, Version 1.0. (See accompanying file LICENSE_1_0.txt or copy at
+// http://www.boost.org/LICENSE_1_0.txt)
+//
+//=====================================================================*/
+
 #ifndef MD5PP_H
 #define MD5PP_H
 
