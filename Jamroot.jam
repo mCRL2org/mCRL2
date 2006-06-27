@@ -5,6 +5,7 @@ import os : name ;
 
 path-constant TOP             : . ;
 path-constant BUILD_TOP       : ./bin ;
+path-constant BOOST_ROOT      : ./boost ;
 path-constant BOOST           : ./boost ;
 path-constant REVISION_HEADER : ./src/mcrl2_revision.h ;
 
@@ -34,10 +35,8 @@ project
 
 # The known sub projects
 use-project /site-config               : build ;
-use-project /libraries/md5pp           : src/squadt/libraries/md5pp/build ;
 use-project /libraries/transport       : src/squadt/libraries/transport/build ;
 use-project /libraries/sip             : src/squadt/libraries/sip/build ;
-use-project /libraries/xml2pp          : src/squadt/libraries/xml2pp/build ;
 
 # Register boost libraries
 for library in [ MATCH boost/libs/(.*)/build/Jamfile.v2 : [ glob boost/libs/*/build/Jamfile.v2 ] ] {
