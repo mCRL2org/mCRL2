@@ -41,5 +41,13 @@ exe ltsview
         <wx>gl
       ;
 
-install_with_libraries install : ltsview ;
+install_with_libraries install : ltsview : <os>MACOSX:<dependency>ltsview-bundle ;
+
+import os ;
+
+if [ os.name ] = MACOSX {
+  include $(TOP)/build/macosx/bundle.jam ;
+
+  make_bundle $(TOP)/ltsview : ltsview ltsview.plist ltsview.icns ;
+}
 

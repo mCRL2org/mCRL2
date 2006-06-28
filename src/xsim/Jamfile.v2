@@ -31,13 +31,13 @@ exe sim
          <source>/site-config//mcrl2_revision.h
        ;
 
-install_with_libraries install : xsim sim ;
+install_with_libraries install : xsim sim : <os>MACOSX:<dependency>xsim-bundle ;
 
 import os ;
 
-if os.name = MACOSX {
+if [ os.name ] = MACOSX {
   include $(TOP)/build/macosx/bundle.jam ;
 
-  make_bundle xsim.app : xsim ./xsim.plist ./xsim.icns ;
+  make_bundle $(TOP)/xsim : xsim xsim.plist xsim.icns ;
 }
 

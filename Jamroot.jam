@@ -24,7 +24,6 @@ project
        : build-dir $(BUILD_TOP)
        : requirements
           <define>_FILE_OFFSET_BITS=64
-          <toolset>darwin,<link>shared:<linkflags>"-undefined dynamic_lookup"
           <toolset>darwin:<define>__darwin__
           <toolset>darwin:<cxxflags>"-std=c++98 -ansi"
           <toolset>gcc:<cxxflags>"-std=c++98 -ansi"
@@ -135,19 +134,19 @@ if ! install in [ MATCH "^--(install)" "^(install)" : [ modules.peek : ARGV ] ] 
 else {
 
   # Custom rule to install a tool executable with the libraries it depends on
-  rule install_with_libraries ( name : tools * : properties * ) {
+  rule install_with_libraries ( name : tools * : requirements * ) {
 
     alias $(name)
           : $(name)-libraries
             $(name)-binaries
-          : $(properties)
+          : $(requirements)
           ;
 
     stage $(name)-binaries
           : $(tools)
           : <dll-path>$(LIB_DIR)
             <location>$(BIN_DIR)
-            $(properties)
+            $(requirements)
           ;
 
     stage $(name)-libraries
@@ -155,7 +154,6 @@ else {
           : <install-dependencies>on <install-type>SHARED_LIB
             <location>$(LIB_DIR)
             <os>NT:<location>$(BIN_DIR)
-            $(properties)
           ;
 
     explicit $(tools) $(name)-binaries $(name)-libraries ;

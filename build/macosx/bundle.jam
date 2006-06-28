@@ -1,22 +1,60 @@
+import os ;
 import common ;
 import notfile ;
+import path ;
+
+actions quietly prepare {
+  cd $(<:D)
+
+  /Developer/Tools/Rez -t APPL -o $(<:B) $(TOP)/build/macosx/sample.r
+  /Developer/Tools/SetFile -a C $(<:B)
+}
 
 # Creates an application bundle on Mac OS X
-rule make_bundle ( target : executable info icon ) {
-  notfile $(target) : register_application : $(executable) ;
+rule make_bundle ( target : executable info icon : requirements * ) {
 
-  common.MkDir $(target)/Contents ;
-  common.copy $(TOP)/build/macosx/PkgInfo $(target)/Contents/PkgInfo ;
-  common.copy $(info) $(target)/Contents/Info.plist ;
-  common.MkDir $(target)/Contents/MacOS ;
-  common.copy $(executable) $(target)/Contents/MacOS ;
-  common.MkDir $(target)/Contents/Resources ;
-  common.copy $(icon) $(target)/Contents/Resources ;
+  local base_target     = [ path.basename $(target) ] ;
+  local base_executable = [ path.basename $(executable) ] ;
+
+  if ! [ path.exists $(target).app/Contents/MacOS/$(executable) ]  {
+
+    notfile $(target).app/Contents/MacOS/$(executable)
+         : @prepare
+         : $(executable)
+         ;
+
+    make $(target).app/Contents/Info.plist
+         : $(info)
+         : common.copy
+         ;
+
+    explicit $(target).app/Contents/MacOS/$(executable) $(target).app/Contents/Info.plist ;
+
+    install $(base_executable)-bundle
+         : $(executable)
+         : <dependency>$(target).app/Contents/MacOS/$(executable)
+         : <dependency>$(target).app/Contents/Info.plist
+           <dependency>$(base_executable)-info
+           <dependency>$(base_executable)-icon
+           <location>$(target).app/Contents/MacOS
+           $(requirements)
+         ;
+
+    install $(base_executable)-info
+         : $(TOP)/build/macosx/PkgInfo
+         : <location>$(target).app/Contents
+         ;
+
+    install $(base_executable)-icon
+         : $(icon)
+         : <location>$(target).app/Contents/Resources
+         ;
+
+    explicit $(base_executable)-info $(base_executable)-icon $(base_executable)-bundle ;
+  }
+  else {
+    alias $(base_executable)-bundle : : : ;
+  }
 }
 
-actions quietly register_application {
-  /Developer/Tools/Rez -t APPL -o $(>) $(TOP)/build/macosx/sample.r
-  /Developer/Tools/SetFile -a C $(>)
-}
-
-EXPORT $(__name__) : register_application make_bundle ;
+EXPORT $(__name__) : prepare make_bundle ;

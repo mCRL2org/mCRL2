@@ -17,15 +17,20 @@ exe squadt
         <wx>basic
       ;
 
-alias install
-      : install-squadt
-        install-images
-        install-schemas
-      ;
+install_with_libraries install
+	: squadt
+        : <dependency>install-images
+          <dependency>install-schemas
+          <os>MACOSX:<dependency>squadt-bundle
+        ;
 
-explicit install ;
+import os ;
 
-install_with_libraries install-squadt : squadt ;
+if [ os.name ] = MACOSX {
+  include $(TOP)/build/macosx/bundle.jam ;
+
+  make_bundle $(TOP)/squadt : squadt squadt.plist squadt.icns ;
+}
 
 install_data install-images : [ glob pixmaps/logo.jpg ] : images ;
 install_data install-schemas : [ glob schemas/*.xsd ] : schemas ;

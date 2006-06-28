@@ -1,13 +1,13 @@
 #define NAME "lpe2lts"
 #define VERSION "0.5"
 
-#include <stdio.h>
-#include <errno.h>
-#include <stdlib.h>
-#include <time.h>
-#include <limits.h>
+#include <cstdio>
+#include <cerrno>
+#include <cstdlib>
+#include <ctime>
+#include <climits>
+#include <cstring>
 #include <stdint.h>
-#include <string.h>
 #include <getopt.h>
 #include <aterm2.h>
 #include <assert.h>

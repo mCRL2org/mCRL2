@@ -6,11 +6,7 @@ project ltsgraph
        ;
 
 exe ltsgraph
-       : ltsgraph.cpp
-         graph_frame.cpp
-         export_latex.cpp
-         node.cpp
-         edge.cpp
+       : [ glob *.cpp ]
        : <source>/libraries/wx_extension//wx_extension
          <source>/libraries/mcrl2_basic//mcrl2_basic
          <source>/libraries/lts//lts
@@ -19,5 +15,13 @@ exe ltsgraph
          <wx>basic
        ;
 
-install_with_libraries install : ltsgraph ;
+install_with_libraries install : ltsgraph : <os>MACOSX:<dependency>ltsgraph-bundle ;
+
+import os ;
+
+if [ os.name ] = MACOSX {
+  include $(TOP)/build/macosx/bundle.jam ;
+
+  make_bundle $(TOP)/ltsgraph : ltsgraph ltsgraph.plist ltsgraph.icns ;
+}
 
