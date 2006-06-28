@@ -34,7 +34,6 @@ project
 
 # The known sub projects
 use-project /site-config               : build ;
-use-project /boost/quickbook           : boost/tools/quickbook ;
 use-project /libraries/transport       : src/squadt/libraries/transport/build ;
 use-project /libraries/sip             : src/squadt/libraries/sip/build ;
 
