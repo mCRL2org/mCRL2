@@ -85,7 +85,6 @@ class Visualizer
 	RGB_Color topcol, Point3D b1, Point3D b2, Point3D b3, Point3D &center );
     void myRotatef( float theta, float ax, float ay, float az, float M[] );
     void myTranslatef( float tx, float ty, float tz, float M[] );
-    void setColor( RGB_Color c, float alpha );
     void updateGeometryTables();
   
   public:
@@ -95,7 +94,6 @@ class Visualizer
     void	computeBoundsInfo();
     void	computeClusterHeight();
     void	drawLTS( Point3D viewpoint );
-    RGB_Color	getBackgroundColor() const;
     float	getBoundingCylinderHeight() const;
     float	getBoundingCylinderWidth() const;
     float	getHalfStructureHeight() const;

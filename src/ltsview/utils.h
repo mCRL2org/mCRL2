@@ -14,12 +14,14 @@ namespace Utils
 
   struct RGB_Color
   {
-    unsigned char r;
-    unsigned char g;
-    unsigned char b;
+    float r;
+    float g;
+    float b;
   }; 
 
-  const RGB_Color RGB_WHITE = { 255, 255, 255 };
+  const RGB_Color RGB_WHITE = { 1.0f, 1.0f, 1.0f };
+  const RGB_Color RGB_BLUE  = { 0.0f, 0.0f, 1.0f };
+  const RGB_Color RGB_RED   = { 1.0f, 0.0f, 0.0f };
 
   struct HSV_Color
   {
@@ -38,7 +40,6 @@ namespace Utils
   struct VisSettings
   {
     float     alpha;
-    RGB_Color backgroundColor;
 //    float     backpointerCurve;
     int	      branchRotation;
 //    int	      branchScale;
@@ -67,12 +68,16 @@ namespace Utils
     vector< bool >  valueSet;
   };
   
-  bool operator==( RGB_Color, RGB_Color );
-  bool operator!=( RGB_Color, RGB_Color );
-  
-  HSV_Color RGBtoHSV( RGB_Color c );
-  RGB_Color HSVtoRGB( HSV_Color c );
-  int roundToInt( double f );
-  float degToRad( float deg );
+  bool operator==( RGB_Color c1, RGB_Color c2 );
+  bool operator!=( RGB_Color c1, RGB_Color c2 );
+  Point3D operator+( Point3D p1, Point3D p2 );
+  Point3D operator-( Point3D p1, Point3D p2 );
+  Point3D operator*( float s, Point3D p );
+  float length( Point3D p );
+  HSV_Color operator+( HSV_Color c1, HSV_Color c2 );
+  HSV_Color RGB_to_HSV( RGB_Color c );
+  RGB_Color HSV_to_RGB( HSV_Color c );
+  int round_to_int( double f );
+  float deg_to_rad( float deg );
 }
 #endif

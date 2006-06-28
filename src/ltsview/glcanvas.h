@@ -30,6 +30,8 @@ class GLCanvas: public wxGLCanvas
     void      display();
     void      enableDisplay();
     void      disableDisplay();
+    RGB_Color getBackgroundColor() const;
+    RGB_Color getDefaultBackgroundColor() const { return defaultBGColor; }
     void      initialize();
     void      onMouseDown( wxMouseEvent& event );
     void      onMouseEnter( wxMouseEvent& event );
@@ -42,6 +44,7 @@ class GLCanvas: public wxGLCanvas
     void      resetView();
     void      reshape();
     void      setActiveTool( int t );
+    void      setBackgroundColor( RGB_Color c ) { glClearColor(c.r,c.g,c.b,1); }
     void      setDefaultPosition( float structWidth, float structHeight );
 
   private:
@@ -49,6 +52,7 @@ class GLCanvas: public wxGLCanvas
     float     angleX;
     float     angleY;
     int	      currentTool;
+    RGB_Color defaultBGColor;
     float     startPosZ;
     float     startPosZDefault;
     bool      displayAllowed;

@@ -610,52 +610,15 @@ void MainFrame::onMarkTransition( wxCommandEvent& event )
 
 VisSettings MainFrame::getVisSettings() const
 {
-  RGB_Color bgC =
-  {
-    backgroundButton->GetBackgroundColour().Red(),
-    backgroundButton->GetBackgroundColour().Green(),
-    backgroundButton->GetBackgroundColour().Blue()
-  };
-  RGB_Color downC =
-  {
-    downEdgeButton->GetBackgroundColour().Red(),
-    downEdgeButton->GetBackgroundColour().Green(),
-    downEdgeButton->GetBackgroundColour().Blue()
-  };
-  RGB_Color intC1 =
-  {
-    interpolate1Button->GetBackgroundColour().Red(),
-    interpolate1Button->GetBackgroundColour().Green(),
-    interpolate1Button->GetBackgroundColour().Blue()
-  };
-  RGB_Color intC2 =
-  {
-    interpolate2Button->GetBackgroundColour().Red(),
-    interpolate2Button->GetBackgroundColour().Green(),
-    interpolate2Button->GetBackgroundColour().Blue()
-  };
-  RGB_Color markC =
-  {
-    markButton->GetBackgroundColour().Red(),
-    markButton->GetBackgroundColour().Green(),
-    markButton->GetBackgroundColour().Blue()
-  };
-  RGB_Color stateC =
-  {
-    nodeButton->GetBackgroundColour().Red(),
-    nodeButton->GetBackgroundColour().Green(),
-    nodeButton->GetBackgroundColour().Blue()
-  };
-  RGB_Color upC =
-  {
-    upEdgeButton->GetBackgroundColour().Red(),
-    upEdgeButton->GetBackgroundColour().Green(),
-    upEdgeButton->GetBackgroundColour().Blue()
-  };
+  RGB_Color downC = wxC_to_RGB( downEdgeButton->GetBackgroundColour() );
+  RGB_Color intC1 = wxC_to_RGB( interpolate1Button->GetBackgroundColour() );
+  RGB_Color intC2 = wxC_to_RGB( interpolate2Button->GetBackgroundColour() );
+  RGB_Color markC = wxC_to_RGB( markButton->GetBackgroundColour() );
+  RGB_Color stateC = wxC_to_RGB( nodeButton->GetBackgroundColour() );
+  RGB_Color upC = wxC_to_RGB( upEdgeButton->GetBackgroundColour() );
   VisSettings result =
   {
     (100-transparencySpinCtrl->GetValue()) / 100.0f,
-    bgC,
 //    backpointerSpinCtrl->GetValue(),
     branchrotationSpinCtrl->GetValue(),
 //    branchscaleSpinCtrl->GetValue(),
@@ -679,23 +642,25 @@ VisSettings MainFrame::getVisSettings() const
   return result;
 }
 
+RGB_Color MainFrame::getBackgroundColor() const
+{
+  return wxC_to_RGB( backgroundButton->GetBackgroundColour() );
+}
+
+void MainFrame::setBackgroundColor( RGB_Color c )
+{
+  backgroundButton->SetBackgroundColour( RGB_to_wxC( c ) );
+}
+
 void MainFrame::setVisSettings( VisSettings ss )
 {
-  backgroundButton->SetBackgroundColour( wxColour( ss.backgroundColor.r,
-  	ss.backgroundColor.g, ss.backgroundColor.b ) );
-  nodeButton->SetBackgroundColour( wxColour( ss.stateColor.r,
-	ss.stateColor.g, ss.stateColor.b ) );
-  downEdgeButton->SetBackgroundColour( wxColour( ss.downEdgeColor.r,
-	ss.downEdgeColor.g, ss.downEdgeColor.b ) );
-  upEdgeButton->SetBackgroundColour( wxColour( ss.upEdgeColor.r,
-	ss.upEdgeColor.g, ss.upEdgeColor.b ) );
-  markButton->SetBackgroundColour( wxColour( ss.markedColor.r,
-	ss.markedColor.g, ss.markedColor.b ) );
+  nodeButton->SetBackgroundColour( RGB_to_wxC( ss.stateColor ) );
+  downEdgeButton->SetBackgroundColour( RGB_to_wxC( ss.downEdgeColor ) );
+  upEdgeButton->SetBackgroundColour( RGB_to_wxC( ss.upEdgeColor ) );
+  markButton->SetBackgroundColour( RGB_to_wxC( ss.markedColor ) );
   innerbranchtiltSpinCtrl->SetValue( ss.innerBranchTilt );
-  interpolate1Button->SetBackgroundColour( wxColour( ss.interpolateColor1.r,
-	ss.interpolateColor1.g, ss.interpolateColor1.b ) );
-  interpolate2Button->SetBackgroundColour( wxColour( ss.interpolateColor2.r,
-	ss.interpolateColor2.g, ss.interpolateColor2.b ) );
+  interpolate1Button->SetBackgroundColour( RGB_to_wxC( ss.interpolateColor1 ));
+  interpolate2Button->SetBackgroundColour( RGB_to_wxC( ss.interpolateColor2 ));
   longinterpolateCheckBox->SetValue( ss.longInterpolation );
   transparencySpinCtrl->SetValue( 100 - (int)(ss.alpha * 100) );
   newStyleCheckBox->SetValue( ss.newStyle );
@@ -813,4 +778,19 @@ void MainFrame::stopRendering()
 {
   SetStatusText( wxT("") );
   GetStatusBar()->Update();
+}
+
+wxColour MainFrame::RGB_to_wxC( RGB_Color c ) const
+{
+  unsigned char r = static_cast<unsigned char>( round_to_int( c.r * 255.0f ) );
+  unsigned char g = static_cast<unsigned char>( round_to_int( c.g * 255.0f ) );
+  unsigned char b = static_cast<unsigned char>( round_to_int( c.b * 255.0f ) );
+  return wxColour( r, g, b );
+}
+
+RGB_Color MainFrame::wxC_to_RGB( wxColour c ) const
+{
+  RGB_Color result = 
+  { c.Red() / 255.0f, c.Green() / 255.0f, c.Blue() / 255.0f };
+  return result;
 }

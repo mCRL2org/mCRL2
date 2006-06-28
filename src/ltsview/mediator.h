@@ -19,7 +19,6 @@ class Mediator
     virtual void      applySettings() = 0;
     virtual void      drawLTS( Point3D viewpoint ) = 0;
     virtual void      editMarkRule( const int index ) = 0;
-    virtual RGB_Color getBackgroundColor() const = 0;
     virtual float     getHalfStructureHeight() const = 0;
     virtual void      markAction( string label ) = 0;
     virtual void      notifyRenderingFinished() = 0;

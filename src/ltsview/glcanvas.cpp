@@ -37,6 +37,9 @@ GLCanvas::GLCanvas( Mediator* owner, wxWindow* parent, wxWindowID id,
   startPosZ = 0.0f;
   startPosZDefault = 0.0f;
   farClippingPlane = 0.0f;
+  defaultBGColor.r = 0.4f; 
+  defaultBGColor.g = 0.4f; 
+  defaultBGColor.b = 0.4f; 
 
   setActiveTool( myID_SELECT );
 }
@@ -75,8 +78,7 @@ void GLCanvas::initialize()
   glEnable( GL_CULL_FACE );
   glCullFace( GL_BACK );
   
-  RGB_Color bgColor = mediator->getBackgroundColor();
-  glClearColor( bgColor.r / 255.0, bgColor.g / 255.0, bgColor.b / 255.0, 1.0 );
+  glClearColor( defaultBGColor.r, defaultBGColor.g, defaultBGColor.b, 1 );
   glClearDepth( 1.0 );
   glClear( GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT );
   SwapBuffers();
@@ -101,6 +103,14 @@ void GLCanvas::setDefaultPosition( float structWidth, float structHeight )
   startPosZDefault = max( minZ1, minZ2 );
   farClippingPlane = max( farClippingPlane, 2.0f * startPosZDefault );
   reshape();
+}
+
+RGB_Color GLCanvas::getBackgroundColor() const
+{
+  GLfloat bgc[4];
+  glGetFloatv( GL_COLOR_CLEAR_VALUE, bgc );
+  RGB_Color result = { bgc[0], bgc[1], bgc[2] };
+  return result;
 }
 
 void GLCanvas::resetView()
@@ -132,10 +142,6 @@ void GLCanvas::display()
     glPushMatrix();
       glLoadIdentity(); 
     
-      // clear the canvas with the background color
-      RGB_Color bgColor = mediator->getBackgroundColor();
-      glClearColor( bgColor.r / 255.0, bgColor.g / 255.0, bgColor.b / 255.0, 1.0
-	  );
       glClear( GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT );
      
       // apply panning and zooming transformations

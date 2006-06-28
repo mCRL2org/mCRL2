@@ -30,6 +30,7 @@ class MainFrame : public wxFrame
     MainFrame( Mediator* owner );
     void	addMarkRule( wxString str );
     void	createProgressDialog( const string title, const string text );
+    RGB_Color   getBackgroundColor() const;
     GLCanvas*	getGLCanvas() const;
     VisSettings	getVisSettings() const;
     void	loadTitle();
@@ -54,6 +55,7 @@ class MainFrame : public wxFrame
     void	replaceMarkRule( int index, wxString str );
     void	resetMarkRules();
     void	setActionLabels( vector< ATerm > &labels );
+    void	setBackgroundColor( RGB_Color c );
     void	setFileInfo( wxFileName fn );
     void	setMarkedStatesInfo( int number );
     void	setMarkedTransitionsInfo( int number );
@@ -108,6 +110,8 @@ class MainFrame : public wxFrame
     void setupMarkPanel( wxPanel* panel );
     void setupSettingsPanel( wxPanel* panel );
     void setupToolBar();
+    wxColour  RGB_to_wxC( RGB_Color c ) const;
+    RGB_Color wxC_to_RGB( wxColour c ) const;
 
     DECLARE_EVENT_TABLE()
 };

@@ -1,5 +1,5 @@
 #include "utils.h"
-
+  
 bool Utils::operator==( RGB_Color c1, RGB_Color c2 )
 {
   return c1.r == c2.r && c1.g == c2.g && c1.b == c2.b;
@@ -10,38 +10,71 @@ bool Utils::operator!=( RGB_Color c1, RGB_Color c2 )
   return !( c1 == c2 );
 }
 
-Utils::HSV_Color Utils::RGBtoHSV( RGB_Color c )
+Utils::Point3D Utils::operator+( Point3D p1, Point3D p2 )
 {
-  float r = c.r / 255.0f;
-  float g = c.g / 255.0f;
-  float b = c.b / 255.0f;
+  Point3D result = { p1.x + p2.x, p1.y + p2.y, p1.z + p2.z };
+  return result;
+}
+
+Utils::Point3D Utils::operator-( Point3D p1, Point3D p2 )
+{
+  Point3D result = { p1.x - p2.x, p1.y - p2.y, p1.z - p2.z };
+  return result;
+}
+
+Utils::Point3D Utils::operator*( float s, Point3D p )
+{
+  Point3D result = { s*p.x, s*p.y, s*p.z };
+  return result;
+}
+
+float Utils::length( Point3D p )
+{
+  return sqrt( p.x*p.x + p.y*p.y + p.z*p.z );
+}
+
+Utils::HSV_Color Utils::operator+( HSV_Color c1, HSV_Color c2 )
+{
+  HSV_Color result = { c1.h + c2.h, c1.s + c2.s, c1.v + c2.v };
+  if ( result.h < 0.0f ) result.h += 360.0f;
+  else if ( result.h >= 360.0f ) result.h -= 360.0f;
+  return result;
+}
+
+float Utils::deg_to_rad( float deg )
+{
+  return deg * Utils::PI / 180.0f;
+}
+
+Utils::HSV_Color Utils::RGB_to_HSV( RGB_Color c )
+{
   float* minval;
   float* maxval;
-  if ( r < g )
+  if ( c.r < c.g )
   {
-    maxval = (b < g) ? &g : &b;
-    minval = (r < b) ? &r : &b;
+    maxval = (c.b < c.g) ? &c.g : &c.b;
+    minval = (c.r < c.b) ? &c.r : &c.b;
   }
   else
   {
-    maxval = (b < r) ? &r : &b;
-    minval = (g < b) ? &g : &b;
+    maxval = (c.b < c.r) ? &c.r : &c.b;
+    minval = (c.g < c.b) ? &c.g : &c.b;
   }
   
   HSV_Color result;
   float diff = *maxval - *minval;
-  unsigned char min_uc = min( c.r, min( c.g, c.b ) );
-  unsigned char max_uc = max( c.r, max( c.g, c.b ) );
+  float min_uc = min( c.r, min( c.g, c.b ) );
+  float max_uc = max( c.r, max( c.g, c.b ) );
   if ( max_uc == min_uc )
     result.h = 0.0f;
-  else if ( maxval == &r )
-    result.h = 60.0f * (g-b) / diff;
-  else if ( maxval == &g )
-    result.h = 60.0f * (b-r) / diff + 120.0f;
+  else if ( maxval == &c.r )
+    result.h = 60.0f * (c.g-c.b) / diff;
+  else if ( maxval == &c.g )
+    result.h = 60.0f * (c.b-c.r) / diff + 120.0f;
   else
-    result.h = 60.0f * (r-g) / diff + 240.0f;
+    result.h = 60.0f * (c.r-c.g) / diff + 240.0f;
 
-  if ( max_uc == 0 ) 
+  if ( max_uc == 0.0f ) 
     result.s = 0.0f;
   else
     result.s = diff / *maxval;
@@ -49,66 +82,55 @@ Utils::HSV_Color Utils::RGBtoHSV( RGB_Color c )
   return result;
 }
 
-Utils::RGB_Color Utils::HSVtoRGB( HSV_Color c )
+Utils::RGB_Color Utils::HSV_to_RGB( HSV_Color c )
 {
   int hi = int( c.h / 60.0f ) % 6;
   float f = c.h / 60.0f - hi;
   float p = c.v * ( 1 - c.s );
   float q = c.v * ( 1 - f * c.s );
   float t = c.v * ( 1 - (1 - f) * c.s );
-  float fr = 0.0f;
-  float fg = 0.0f;
-  float fb = 0.0f;
+  RGB_Color result;
   switch ( hi )
   {
     case 0:
-      fr = c.v;
-      fg = t;
-      fb = p;
+      result.r = c.v;
+      result.g = t;
+      result.b = p;
       break;
     case 1:
-      fr = q;
-      fg = c.v;
-      fb = p;
+      result.r = q;
+      result.g = c.v;
+      result.b = p;
       break;
     case 2:
-      fr = p;
-      fg = c.v;
-      fb = t;
+      result.r = p;
+      result.g = c.v;
+      result.b = t;
       break;
     case 3:
-      fr = p;
-      fg = q;
-      fb = c.v;
+      result.r = p;
+      result.g = q;
+      result.b = c.v;
       break;
     case 4:
-      fr = t;
-      fg = p;
-      fb = c.v;
+      result.r = t;
+      result.g = p;
+      result.b = c.v;
       break;
     case 5:
-      fr = c.v;
-      fg = p;
-      fb = q;
+      result.r = c.v;
+      result.g = p;
+      result.b = q;
       break;
     default:
       break;
   }
-  RGB_Color result;
-  result.r = (unsigned char) roundToInt( fr * 255.0f );
-  result.g = (unsigned char) roundToInt( fg * 255.0f );
-  result.b = (unsigned char) roundToInt( fb * 255.0f );
   return result;
 }
 
-int Utils::roundToInt( double f )
+int Utils::round_to_int( double f )
 {
   double intpart;
   modf( f + 0.5, &intpart );
-  return static_cast< int > ( intpart );
-}
-
-float Utils::degToRad( float deg )
-{
-  return deg * PI / 180.0f;
+  return static_cast< int > (intpart);
 }

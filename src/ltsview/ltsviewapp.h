@@ -38,7 +38,6 @@ class LTSViewApp : public wxApp, public Mediator
     void	  applySettings();
     void	  drawLTS( Point3D viewpoint );
     void	  editMarkRule( const int index );
-    RGB_Color	  getBackgroundColor() const;
     float	  getHalfStructureHeight() const;
     void	  markAction( string label );
     void	  notifyRenderingFinished();

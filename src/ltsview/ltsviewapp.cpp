@@ -9,10 +9,11 @@ bool LTSViewApp::OnInit()
   lts		  = NULL;
   glCanvas	  = mainFrame->getGLCanvas();
   
-  mainFrame->setVisSettings( visualizer->getVisSettings() );
   SetTopWindow( mainFrame );
   mainFrame->Show( true );
   glCanvas->initialize();
+  mainFrame->setVisSettings( visualizer->getVisSettings() );
+  mainFrame->setBackgroundColor( glCanvas->getBackgroundColor() );
 
   // parse command line and check for specified input file
   wxCmdLineEntryDesc cmdLineDesc[] = 
@@ -139,6 +140,7 @@ void LTSViewApp::openFile( string fileName )
   mainFrame->setMarkedStatesInfo( 0 );
   mainFrame->setMarkedTransitionsInfo( 0 );
   mainFrame->setVisSettings( visualizer->getVisSettings() );
+  mainFrame->setBackgroundColor( glCanvas->getBackgroundColor() );
 }
 
 void LTSViewApp::applyRanking( RankStyle rs )
@@ -164,19 +166,21 @@ void LTSViewApp::drawLTS( Point3D viewpoint )
 void LTSViewApp::applyDefaultSettings()
 {
   mainFrame->setVisSettings( visualizer->getDefaultVisSettings() );
+  mainFrame->setBackgroundColor( glCanvas->getDefaultBackgroundColor() );
   applySettings();
 }
 
 void LTSViewApp::applySettings()
 {
   bool refreshBoundCyl = visualizer->setVisSettings( mainFrame->getVisSettings() );
-  if ( lts != NULL )
+  glCanvas->setBackgroundColor( mainFrame->getBackgroundColor() );
+  if ( refreshBoundCyl )
   {
-    if ( refreshBoundCyl ) visualizer->computeBoundsInfo();
-    glCanvas->display();
-    glCanvas->setDefaultPosition( visualizer->getBoundingCylinderWidth(),
-	visualizer->getBoundingCylinderHeight() );
+    visualizer->computeBoundsInfo();
   }
+  glCanvas->display();
+  glCanvas->setDefaultPosition( visualizer->getBoundingCylinderWidth(),
+      visualizer->getBoundingCylinderHeight() );
 }
 
 void LTSViewApp::setRankStyle( RankStyle rs )
@@ -227,6 +231,7 @@ void LTSViewApp::setRankStyle( RankStyle rs )
 	  lts->getNumberOfTransitions(), lts->getNumberOfClusters(),
 	  lts->getNumberOfRanks() );
       mainFrame->setVisSettings( visualizer->getVisSettings() );
+      mainFrame->setBackgroundColor( glCanvas->getBackgroundColor() );
     }
   }
 }
@@ -296,11 +301,6 @@ void LTSViewApp::activateMarkRule( const int index, const bool activate )
 float LTSViewApp::getHalfStructureHeight() const
 {
   return visualizer->getHalfStructureHeight();
-}
-
-RGB_Color LTSViewApp::getBackgroundColor() const
-{
-  return visualizer->getBackgroundColor();
 }
 
 void LTSViewApp::setMatchAnyMarkRule( bool b )
