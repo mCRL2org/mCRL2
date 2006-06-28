@@ -3,6 +3,7 @@ project lts
        : build-dir $(BUILD_TOP)
        : requirements
           <include>../include
+          <include>../../..
        : usage-requirements
           <include>../include
        ;
@@ -12,7 +13,7 @@ lib lts
          liblts_fsm.cpp
          liblts_dot.cpp
          liblts_red.cpp
-       : <dependency>/libraries/temporary//mcrl2_basic
+       : <dependency>/libraries/mcrl2_basic//mcrl2_basic
          <dependency>/libraries/svc//svc
          <dependency>/libraries/aterm//atermpp
          <dependency>/libraries/lpe//lpe

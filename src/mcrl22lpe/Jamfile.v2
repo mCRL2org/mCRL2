@@ -10,7 +10,7 @@ exe mcrl22lpe
          lin_alt.cpp
          /libraries/parser//parser
          /libraries/parser//alpha
-         /libraries/temporary//mcrl2_basic
+         /libraries/mcrl2_basic//mcrl2_basic
        : <source>/site-config//mcrl2_revision.h
          <squadt_support>enable
        ;
@@ -20,7 +20,7 @@ exe lin
          lin_alt.cpp
          /libraries/parser//parser
          /libraries/parser//alpha
-         /libraries/temporary//mcrl2_basic
+         /libraries/mcrl2_basic//mcrl2_basic
        : <source>/site-config//mcrl2_revision.h
          <status>experimental
        ;
@@ -29,7 +29,7 @@ exe alpha
        : alpha.cpp
          /libraries/parser//parser
          /libraries/parser//alpha
-         /libraries/temporary//mcrl2_basic
+         /libraries/mcrl2_basic//mcrl2_basic
        : <source>/site-config//mcrl2_revision.h
          <status>experimental
        ;

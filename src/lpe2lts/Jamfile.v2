@@ -9,7 +9,7 @@ exe lpe2lts
        : lpe2lts.cpp
          /libraries/temporary//dataelm
          /libraries/temporary//nextstate
-         /libraries/temporary//mcrl2_basic
+         /libraries/mcrl2_basic//mcrl2_basic
          /libraries/temporary//trace
          /libraries/lts//lts
        : <source>/site-config//mcrl2_revision.h

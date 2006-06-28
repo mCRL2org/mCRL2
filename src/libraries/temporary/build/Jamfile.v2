@@ -12,16 +12,18 @@ project temporary
 lib trace
        : libtrace.cpp
        : <dependency>/libraries/aterm//aterm
+         <dependency>/libraries/mcrl2_basic//mcrl2_basic
        :
-       : <library>/libraries/aterm//aterm
+       : <library>/libraries/mcrl2_basic//mcrl2_basic
        ;
 
 lib enum
        : libenum.cpp
          enum_standard.cpp
        : <dependency>/libraries/aterm//aterm
+         <dependency>/libraries/mcrl2_basic//mcrl2_basic
        :
-       : <library>/libraries/aterm//aterm
+       : <library>/libraries/mcrl2_basic//mcrl2_basic
        ;
 
 lib dataelm
@@ -39,62 +41,3 @@ lib nextstate
        : <library>/libraries/temporary//enum
        ;
 
-local STRUCT_SOURCES = libstruct ; 
-
-lib struct
-       : $(STRUCT_SOURCES).o
-       : <dependency>/libraries/aterm//aterm
-       :
-       : <library>/libraries/aterm//aterm
-       ;
-
-local LOWLEVEL_SOURCES = liblowlevel ; 
-
-lib lowlevel
-       : $(LOWLEVEL_SOURCES).o
-       : <dependency>/libraries/aterm//aterm
-       :
-       : <library>/libraries/aterm//aterm
-       ;
-
-local REWRITE_SOURCES = librewrite librewrite_c rewr_inner rewr_jitty rewr_innerc rewr_jittyc ;
-
-lib rewrite
-       : $(REWRITE_SOURCES).o
-       : <dependency>/libraries/aterm//aterm
-       :
-       : <library>/libraries/aterm//aterm 
-         <library>/site-config//m
-         <os>LINUX:<library>/site-config//dl
-       ;
-
-local PRINT_SOURCES = libprint libprint_c ;
-
-lib print
-       : $(PRINT_SOURCES).o
-       : <dependency>/libraries/temporary//lowlevel
-         <dependency>/libraries/temporary//rewrite
-         <dependency>/libraries/temporary//struct
-       :
-       : <library>/libraries/temporary//lowlevel
-         <library>/libraries/temporary//rewrite
-         <library>/libraries/temporary//struct
-       ;
-
-local MCRL2_BASIC_SOURCES = $(LOWLEVEL_SOURCES) $(PRINT_SOURCES) $(REWRITE_SOURCES) $(STRUCT_SOURCES) ;
-
-for object in $(MCRL2_BASIC_SOURCES) {
-  obj $(object).o
-      : $(object).cpp
-      : <dependency>/libraries/aterm//aterm
-      ;
-}
-
-lib mcrl2_basic
-       : $(MCRL2_BASIC_SOURCES).o
-       : <dependency>/libraries/aterm//aterm
-       :
-       : <library>/libraries/aterm//aterm
-         <library>/site-config//m
-         <os>LINUX:<library>/site-config//dl
-       ;

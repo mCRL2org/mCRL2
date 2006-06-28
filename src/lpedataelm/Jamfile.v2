@@ -8,7 +8,7 @@ project lpedataelm
 exe lpedataelm
        : lpedataelm.cpp
          /libraries/temporary//dataelm
-         /libraries/temporary//mcrl2_basic
+         /libraries/mcrl2_basic//mcrl2_basic
        : <source>/boost/program_options//boost_program_options
          <source>/site-config//mcrl2_revision.h
          <include>.

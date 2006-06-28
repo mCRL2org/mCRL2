@@ -8,7 +8,7 @@ project pnml2mcrl2
 exe pnml2mcrl2
        : pnml2mcrl2.cpp
        : <source>/site-config//mcrl2_revision.h
-         <source>/libraries/temporary//mcrl2_basic
+         <source>/libraries/mcrl2_basic//mcrl2_basic
          <source>/libraries/parser//parser
          <include>.
          <xml2>library

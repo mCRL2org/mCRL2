@@ -274,7 +274,7 @@ PACKAGE_STRING='mCRL2 toolset 0.2'
 PACKAGE_BUGREPORT='bug@mcrl2.org'
 
 ac_default_prefix=$HOME
-ac_unique_file="src/liblowlevel.h"
+ac_unique_file="src/setup.h.in"
 # Factoring default headers for most tests.
 ac_includes_default="\
 #include <stdio.h>

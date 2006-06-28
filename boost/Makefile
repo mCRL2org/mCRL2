@@ -1,11 +1,11 @@
-# Seperate Makefile for recursive make.
+# Makefile for bjam bootstrap
 #
 # Nobody is supposed to change anything to any part of the boost sources
 #
 # The set of files in this directory was compiled by running:
 #
 #   bcp --scan $(find ./ ../boost/boost/asio -name '*.cpp' -or -name '*.h' -or -name '*.hpp') \
-#      --boost=<path-to-boost-sources> /tmp/boost_subset
+#       --boost=<path-to-boost-sources> /tmp/boost_subset
 #
 # from the trunk/src directory.
 #
@@ -37,18 +37,9 @@ endif
 
 .PHONY: all bjam install clean distclean
 
-all: build_completed
-
-build_completed: $(BJAM)
-	touch build_completed
+all: $(BJAM)
 
 bjam: $(BJAM)
-
-boost_filesystem: $(BJAM)
-	$(BJAM) $(BJAM_ARGUMENTS) --with-filesystem
-
-boost_program_options: $(BJAM)
-	$(BJAM) $(BJAM_ARGUMENTS) --with-program_options
 
 $(BJAM):
 	@cd tools/jam; $(BJAM_BUILD)
@@ -58,5 +49,5 @@ install: all
 clean:
 
 distclean:
-	@-$(RM) -rf bin bin.v2 lib build_completed tools/jam/bin tools/jam/bootstrap
+	@-$(RM) -rf bin bin.v2 lib tools/jam/bin tools/jam/bootstrap
 

@@ -8,7 +8,7 @@ project lpeparelm
 exe lpeparelm
        : lpeparelm.cpp
        : <source>/boost/program_options//boost_program_options
-         <source>/libraries/temporary//mcrl2_basic
+         <source>/libraries/mcrl2_basic//mcrl2_basic
          <source>/libraries/lpe//lpe
          <source>/boost/filesystem//boost_filesystem
          <source>/site-config//mcrl2_revision.h

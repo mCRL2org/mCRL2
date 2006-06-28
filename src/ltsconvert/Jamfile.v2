@@ -7,7 +7,7 @@ project ltsconvert
 
 exe ltsconvert
        : ltsconvert.cpp
-         /libraries/temporary//mcrl2_basic
+         /libraries/mcrl2_basic//mcrl2_basic
          /libraries/lts//lts
          /libraries/svc//svc
        : <source>/site-config//mcrl2_revision.h
@@ -16,7 +16,7 @@ exe ltsconvert
 
 exe svc2fsm
        : svc2fsm.cpp
-         /libraries/temporary//mcrl2_basic
+         /libraries/mcrl2_basic//mcrl2_basic
          /libraries/aterm//aterm
          /libraries/svc//svc
        : <source>/site-config//mcrl2_revision.h

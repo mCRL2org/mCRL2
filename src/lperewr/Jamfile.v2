@@ -7,7 +7,7 @@ project lperewr
 
 exe lperewr
        : lperewr.cpp
-         /libraries/temporary//mcrl2_basic
+         /libraries/mcrl2_basic//mcrl2_basic
        : <source>/site-config//mcrl2_revision.h
          <include>.
        ;

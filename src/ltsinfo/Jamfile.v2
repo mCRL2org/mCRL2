@@ -7,7 +7,7 @@ project ltsinfo
 
 exe ltsinfo
        : ltsinfo.cpp
-         /libraries/temporary//mcrl2_basic
+         /libraries/mcrl2_basic//mcrl2_basic
          /libraries/lts//lts
          /libraries/svc//svc
        : <source>/site-config//mcrl2_revision.h

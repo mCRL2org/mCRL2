@@ -20,18 +20,18 @@ lib parser
          <flex.prefix>"mcrl2"
          <dependency>/libraries/aterm//aterm
          <dependency>/libraries/lpe//lpe
-         <dependency>/libraries/temporary//mcrl2_basic
+         <dependency>/libraries/mcrl2_basic//mcrl2_basic
        :
        : <library>/libraries/aterm//aterm
          <library>/libraries/lpe//lpe
-         <library>/libraries/temporary//mcrl2_basic
+         <library>/libraries/mcrl2_basic//mcrl2_basic
        ;
 
 lib alpha
        : libalpha.cpp
        : <dependency>/libraries/aterm//aterm
-         <dependency>/libraries/temporary//mcrl2_basic
+         <dependency>/libraries/mcrl2_basic//mcrl2_basic
        :
        : <library>/libraries/aterm//aterm
-         <library>/libraries/temporary//mcrl2_basic
+         <library>/libraries/mcrl2_basic//mcrl2_basic
        ;

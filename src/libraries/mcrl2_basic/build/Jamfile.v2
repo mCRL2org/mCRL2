@@ -1,0 +1,88 @@
+project mcrl2_basic
+       : source-location ../source
+       : build-dir $(BUILD_TOP)
+       : requirements
+          <include>../include
+          <include>../../../
+       : usage-requirements
+          <include>../include
+       ;
+
+rule prepend ( prefix : elements * ) {
+  return $(prefix)$(elements) ;
+}
+
+local STRUCT_SOURCES = [ prepend struct/ : libstruct ] ; 
+
+lib struct
+       : $(STRUCT_SOURCES).o
+       : <dependency>/libraries/aterm//aterm
+         <include>../include/struct
+       :
+       : <library>/libraries/aterm//aterm
+         <include>../include/struct
+       ;
+
+local LOWLEVEL_SOURCES = [ prepend lowlevel/ : liblowlevel ] ; 
+
+lib lowlevel
+       : $(LOWLEVEL_SOURCES).o
+       : <dependency>/libraries/aterm//aterm
+         <include>../include/lowlevel
+       :
+       : <library>/libraries/aterm//aterm
+         <include>../include/lowlevel
+       ;
+
+local REWRITE_SOURCES = [ prepend rewrite/ : librewrite librewrite_c rewr_inner rewr_jitty rewr_innerc rewr_jittyc ] ;
+
+lib rewrite
+       : $(REWRITE_SOURCES).o
+       : <dependency>/libraries/aterm//aterm
+         <include>../include/rewrite
+       :
+       : <library>/libraries/aterm//aterm 
+         <library>/site-config//m
+         <include>../include/rewrite
+         <os>LINUX:<library>/site-config//dl
+       ;
+
+local PRINT_SOURCES = [ prepend print/ : libprint libprint_c ] ;
+
+lib print
+       : $(PRINT_SOURCES).o
+       : <dependency>lowlevel
+         <dependency>rewrite
+         <dependency>struct
+       :
+       : <library>lowlevel
+         <library>rewrite
+         <library>struct
+         <include>../include/print
+       ;
+
+local MCRL2_BASIC_SOURCES = $(LOWLEVEL_SOURCES) $(PRINT_SOURCES) $(REWRITE_SOURCES) $(STRUCT_SOURCES) ;
+
+for object in $(MCRL2_BASIC_SOURCES) {
+  obj $(object).o
+      : $(object).cpp
+      : <include>../include/print
+        <include>../include/rewrite
+        <include>../include/lowlevel
+        <include>../include/struct
+        <dependency>/libraries/aterm//aterm
+      ;
+}
+
+lib mcrl2_basic
+       : $(MCRL2_BASIC_SOURCES).o
+       : <dependency>/libraries/aterm//aterm
+       :
+       : <library>/libraries/aterm//aterm
+         <library>/site-config//m
+         <include>../include/print
+         <include>../include/rewrite
+         <include>../include/lowlevel
+         <include>../include/struct
+         <os>LINUX:<library>/site-config//dl
+       ;

@@ -1,7 +1,7 @@
 AC_INIT([mCRL2 toolset], [0.2], [bug@mcrl2.org])
 AC_CANONICAL_HOST
 AC_PREFIX_DEFAULT([$HOME])
-AC_CONFIG_SRCDIR([src/liblowlevel.h])
+AC_CONFIG_SRCDIR([src/setup.h.in])
 
 # Default toolset to use with Boost.Build
 BJAM_TOOLSET="gcc"

@@ -7,7 +7,7 @@ project lpepp
 
 exe lpepp
        : lpepp.cpp
-       : <library>/libraries/temporary//mcrl2_basic
+       : <library>/libraries/mcrl2_basic//mcrl2_basic
          <source>/site-config//mcrl2_revision.h
          <include>.
        ;

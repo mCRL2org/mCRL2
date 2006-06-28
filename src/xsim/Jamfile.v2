@@ -18,7 +18,7 @@ exe xsim
          xsimtrace.cpp
        : <library>/libraries/temporary//trace
          <library>/libraries/temporary//nextstate
-         <library>/libraries/temporary//mcrl2_basic
+         <library>/libraries/mcrl2_basic//mcrl2_basic
          <source>/site-config//mcrl2_revision.h
          <squadt_support>enable
          <wx>basic
@@ -27,13 +27,17 @@ exe xsim
 exe sim
        : sim.cpp
        : <library>/libraries/temporary//nextstate
-         <library>/libraries/temporary//mcrl2_basic
+         <library>/libraries/mcrl2_basic//mcrl2_basic
          <source>/site-config//mcrl2_revision.h
        ;
 
 install_with_libraries install : xsim sim ;
 
-include $(TOP)/build/macosx/bundle.jam ;
+import os ;
 
-make_bundle xsim.app : xsim xsim.plist xsim.icns ;
+if os.name = MACOSX {
+  include $(TOP)/build/macosx/bundle.jam ;
+
+  make_bundle xsim.app : xsim ./xsim.plist ./xsim.icns ;
+}
 

@@ -9,7 +9,7 @@ exe ltsmin
        : ltsmin.cpp
          ltsmindata.cpp
          ltsminkernel.cpp
-         /libraries/temporary//mcrl2_basic
+         /libraries/mcrl2_basic//mcrl2_basic
          /libraries/svc//svc
        : <source>/site-config//mcrl2_revision.h
          <include>.

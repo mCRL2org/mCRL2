@@ -7,7 +7,7 @@ project lpeconstelm
 
 exe lpeconstelm
        : lpeconstelm.cpp
-         /libraries/temporary//mcrl2_basic
+         /libraries/mcrl2_basic//mcrl2_basic
          /libraries/lpe//lpe
        : <source>/boost/program_options//boost_program_options
          <source>/boost/filesystem//boost_filesystem
@@ -18,3 +18,17 @@ exe lpeconstelm
 
 install_with_libraries install : lpeconstelm ;
 
+import boostbook ;
+import quickbook ;
+
+quickbook doc
+       : atermpp.qbk
+       : <implicit-dependency>/boost/quickbook//quickbook
+       ;
+
+explicit doc documentation ;
+
+boostbook documentation
+       : lpeconstelm.xml
+       : <format>man
+       ;
