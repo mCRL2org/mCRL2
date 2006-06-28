@@ -1,3 +1,5 @@
+import notfile ;
+
 # The SVN revision number with which tools will be tagged
 exe maximum_revision
       : $(TOP)/utility/maximum_revision.cpp
@@ -11,12 +13,15 @@ exe maximum_revision
 explicit maximum_revision ;
 
 actions quietly run_maximum_revision {
-  $(>) --cpp-file $(<)
+  $(>) --cpp-file $(<:G=).h
 }
 
 # The SVN revision number with which tools will be tagged
 rule import_revision {
-  make $(REVISION_HEADER) : maximum_revision : run_maximum_revision ;
+  notfile $(REVISION_HEADER)
+        : @run_maximum_revision
+        : maximum_revision
+        ;
 }
 
 EXPORT $(__name__) : run_maximum_revision import_revision ;
