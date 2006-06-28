@@ -3,6 +3,7 @@
 <!DOCTYPE refentry PUBLIC "-//OASIS//DTD DocBook XML V4.2//EN" "http://www.oasis-open.org/docbook/xml/4.2/docbookx.dtd"[
 <!ENTITY class_bdd_prover "<classname>BDD_Prover</classname>">
 <!ENTITY class_formula_checker "<classname>Formula_Checker</classname>">
+<!ENTITY class_bdd2dot "<classname>BDD2Dot</classname>">
 
 <!ENTITY type_virtual "<type>virtual</type>">
 <!ENTITY type_void "<type>void</type>">
@@ -16,7 +17,6 @@
 <!ENTITY type_char_string "<type>char*</type>">
 
 <!ENTITY formula_checker_constructor "<function>Formula_Checker::Formula_Checker</function>">
-<!ENTITY formula_checker_destructor "<function>Formula_Checker::~Formula_Checker</function>">
 <!ENTITY formula_checker_check_formulas "<function>Formula_Checker::check_formulas</function>">
 
 <!ENTITY par_rewrite_strategy "<parameter>a_rewrite_strategy</parameter>">
@@ -32,6 +32,19 @@
 <!ENTITY strat_jitty "<constant>GS_REWR_JITTY</constant>">
 
 <!ENTITY stderr "<constant>stderr</constant>">
+
+<!ENTITY solver_ario "<constant>ario</constant>">
+<!ENTITY solver_cvc_lite "<constant>cvc-lite</constant>">
+<!ENTITY link_ario "<uri>http://www.eecs.umich.edu/~ario/</uri>">
+<!ENTITY link_cvc "<uri>http://www.cs.nyu.edu/acsys/cvcl/</uri>">
+
+<!ENTITY const_strat_jitty "<constant>GS_REWR_JITTY</constant>">
+<!ENTITY const_strat_jittyc "<constant>GS_REWR_JITTYC</constant>">
+<!ENTITY const_strat_inner "<constant>GS_REWR_INNER</constant>">
+<!ENTITY const_strat_innerc "<constant>GS_REWR_INNERC</constant>">
+<!ENTITY const_solver_type_ario "<constant>solver_type_ario</constant>">
+<!ENTITY const_true "<constant>true</constant>">
+<!ENTITY const_false "<constant>false</constant>">
 ]>
 
 <refentry id="formula_checker">
@@ -43,27 +56,21 @@
 
 <refnamediv>
 <refname>formula_checker</refname>
-<refpurpose>a class that can check propositional formulas</refpurpose>
+<refpurpose>a class that checks propositional formulas</refpurpose>
 </refnamediv>
 
 <refsynopsisdiv>
 <funcsynopsis>
 <funcprototype>
   <funcdef>&formula_checker_constructor;</funcdef>
-  <paramdef>
-    &type_rewrite_strategy; &par_rewrite_strategy;,
-    &type_int; &par_time_limit;,
-    &type_bool; &par_path_eliminator;,
-    &type_smt_solver_type; &par_solver_type;,
-    &type_aterm_appl; &par_data_equations;,
-    &type_bool; &par_counter_example;,
-    &type_bool; &par_witness;,
-    &type_char_string; &par_dot_file_name;
-  </paramdef>
-</funcprototype>
-<funcprototype>
-  <funcdef>&type_virtual; &formula_checker_destructor;</funcdef>
-  <paramdef>&type_void;</paramdef>
+  <paramdef>&type_rewrite_strategy; &par_rewrite_strategy;</paramdef>
+  <paramdef>&type_int; &par_time_limit;</paramdef>
+  <paramdef>&type_bool; &par_path_eliminator;</paramdef>
+  <paramdef>&type_smt_solver_type; &par_solver_type;</paramdef>
+  <paramdef>&type_aterm_appl; &par_data_equations;</paramdef>
+  <paramdef>&type_bool; &par_counter_example;</paramdef>
+  <paramdef>&type_bool; &par_witness;</paramdef>
+  <paramdef>&type_char_string; &par_dot_file_name;</paramdef>
 </funcprototype>
 <funcprototype>
   <funcdef>&type_void; &formula_checker_check_formulas;</funcdef>
@@ -75,16 +82,44 @@
 <refsect1>
 <title>Description</title>
 <para>
+  The class &class_formula_checker; is initialized with a specification of data equations in internal mCRL2 format using the constructor
+  &formula_checker_constructor;.
+  After initialization, the function &formula_checker_check_formulas; can be called any number of times to check whether the propositional formulas
+  in internal mCRL2 format in the list passed as parameter &par_formulas; are tautologies or contradictions.
+</para>
+<para>
   The class &class_formula_checker; uses an instance of the class &class_bdd_prover; to prove a number of propositional formulas. The prover is
-  initialized with the parameters &par_rewrite_strategy;, &par_time_limit;, &par_path_eliminator;, &par_solver_type;, &par_dot_file_name;, and
-  the data specification passed as parameter &par_data_equations;.
-  If the parameter &par_counter_example; is set, a so called counter example is printed to &stderr; each time a formula is encountered that is
-  neither a contradiction nor a tautology. A counter example is a valuation for which
-  the formula does not hold. If the parameter &par_witness; is set, a so called witness is printed to &stderr; each time such a formula is
+  initialized with the parameters &par_rewrite_strategy;, &par_time_limit;,
+  &par_path_eliminator;, &par_solver_type; and &par_data_equations;. The
+  parameter &par_rewrite_strategy; specifies which rewrite strategy is used by the prover's rewriter. It can be set to either
+  &const_strat_inner;, &const_strat_innerc;, &const_strat_jitty; or &const_strat_jittyc;. The parameter &par_time_limit; specifies the maximum
+  amount of time in seconds to be spent by the prover on proving a single formula. If &par_time_limit; is set to 0, no time limit will be enforced.
+  The parameter &par_path_eliminator; specifies whether or not path elimination is applied. When path elimination is applied, the prover uses an
+  SMT solver to remove inconsistent paths from BDDs. The parameter &par_solver_type; specifies which SMT solver is used for path elimination.
+  Either the SMT solver &solver_ario; or &solver_cvc_lite; can be used. To use one of these solvers, the directory containing the corresponding
+  executable must be in the path. On June the 20th of 2006, Ario was available on &link_ario; and CVC Lite was available on &link_cvc;.
+  If the parameter &par_path_eliminator; is set to &const_false;, the parameter &par_solver_type; is ignored.
+  The parameter &par_time_limit; specifies the data equations used by the prover's rewriter.
+</para>
+<para>
+  The parameter &par_dot_file_name;
+  specifies whether a file in dot format of the resulting BDD is saved each time the prover cannot determine whether a formula is a contradiction
+  or a tautology. If the parameter is set to 0, no .dot files are saved. If a string is passed as parameter &par_dot_file_name;, this string will
+  be used as the prefix of the filenames. An instance of the class &class_bdd2dot; is used to save these files in dot format.
+</para>
+<para>
+  If the parameter &par_counter_example; is set to &const_true;, a so called counter example is printed to &stderr; each time a formula is
+  encountered that is neither a contradiction nor a tautology. A counter example is a valuation for which
+  the formula does not hold.
+</para>
+<para>
+  If the parameter &par_witness; is set to &const_false;, a so called witness is printed to &stderr; each time such a formula is
   encountered. A witness is a valuation for which the formula holds.
+</para>
+<para>
   The function &formula_checker_check_formulas; prints information to &stderr; indicating whether the formulas in the list of formulas passed as
-  parameter &par_formulas;
-  are tautologies or contradictions. In some cases the BDD based prover may be unable to determine whether a formula is a tautology or a
+  parameter &par_formulas; are tautologies or contradictions.
+  In some cases the BDD based prover may be unable to determine whether a formula is a tautology or a
   contradiction. If this is the case, the function &formula_checker_check_formulas; will print information to &stderr; indicating this fact.
 </para>
 </refsect1>
@@ -95,7 +130,13 @@
   The following precondition has to be satisfied for &formula_checker_constructor;:
   <itemizedlist>
     <listitem>
-      <para>the parameter &par_data_equations; is a specification of data equations in internal mCRL2 format.</para>
+      <para>the argument passed as parameter &par_data_equations; is a specification of data equations in internal mCRL2 format</para>
+    </listitem>
+    <listitem>
+      <para>
+        the argument passed as parameter &par_time_limit; is greater than or equal to 0. If the argument is equal to 0, no time limit will be
+        enforced
+      </para>
     </listitem>
   </itemizedlist>
 </para>
@@ -103,7 +144,7 @@
 The following precondition has to be satisfied for &formula_checker_check_formulas;:
 <itemizedlist>
   <listitem>
-    <para>the parameter &par_formulas; is a list of propositional formulas in internal mCRL2 format.</para>
+    <para>the parameter &par_formulas; is a list of propositional formulas in internal mCRL2 format</para>
   </listitem>
 </itemizedlist>
 </para>

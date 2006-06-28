@@ -36,7 +36,7 @@ class Prover {
     );
     virtual ~Prover();
     void set_formula(ATermAppl a_formula);
-    void set_time_limit(int a_seconds);
+    void set_time_limit(int a_time_limit);
     virtual Answer is_tautology() = 0;
     virtual Answer is_contradiction() = 0;
     virtual ATermAppl get_witness() = 0;

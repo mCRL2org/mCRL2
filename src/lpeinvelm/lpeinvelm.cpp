@@ -50,28 +50,24 @@
 
     void LPE_Inv_Elm::print_help() {
       fprintf(stderr,
-        "Usage: %s [OPTION]... [--invariant=INVARIANT] [--lpe=LPE] [--output=OUTPUT]\n"
+        "Usage: %s [OPTION]... [INFILE [OUTFILE]] {--invariant=INVARIANT}\n"
         "This tool checks whether the invariant in internal mCRL2 format as found in\n"
-        "INVARIANT holds for the mCRL2 LPE as found in LPE. If the invariant holds, it\n"
-        "will eliminate all summands of the LPE that are proven to be unreachable using\n"
-        "the invariant. It can also be used to simplify the conditions of the summands\n"
-        "of the given LPE. The resulting LPE is written to the file named OUTPUT.\n"
-        "At least one of the arguments --invariant=INVARIANT or --lpe=LPE is required.\n"
-        "If only one is given, stdin is used as the other input.\n"
-        "If --ouput=OUTPUT is not used, the resulting LPE is written to stdout.\n"
+        "INVARIANT holds for the mCRL2 LPE as found in INFILE. If the invariant holds,\n"
+        "the tool eliminates all summands of the LPE whose condition violates the\n"
+        "invariant. It can also be used to simplify the conditions of the summands of\n"
+        "the given LPE. The resulting LPE is written to the file named OUTFILE.\n"
+        "If INFILE is not specified, the LPE is read from stdin. If OUTFILE is not\n"
+        "specified, the resulting LPE is written to stdout.\n"
         "\n"
         "Mandatory arguments to long options are mandatory for short options too.\n"
         "  -i, --invariant=INVARIANT       Use the formula in internal mCRL2 format as\n"
         "                                  found in INVARIANT as invariant.\n"
-        "  -l, --lpe=LPE                   Use the mCRL2 LPE as found in LPE as input.\n"
-        "  -o, --output=OUPUT              Write the resulting LPE to the file named\n"
-        "                                  OUTPUT.\n"
         "  -s, --summand=NUMBER            Eliminate or simplify the summand with number\n"
         "                                  NUMBER only.\n"
         "  -n, --no-check                  Do not check if the invariant holds before\n"
         "                                  eliminating unreachable summands.\n"
         "  -e, --no-elimination            Do not eliminate or simplify summands.\n"
-        "  -a, --simplify-all              Simplify the conditions of all summands,\n"
+        "  -l, --simplify-all              Simplify the conditions of all summands,\n"
         "                                  instead of just eliminating the summands\n"
         "                                  whose conditions in conjunction with the\n"
         "                                  invariant are contradictions.\n"
@@ -94,15 +90,15 @@
         "  -r, --rewrite-strategy=STRATEGY Use the specified STRATEGY as rewrite\n"
         "                                  strategy:\n"
         "                                  - 'inner' for the innermost rewrite strategy\n"
-        "                                  - 'innerc' for the compiled innermost\n"
-        "                                    rewrite strategy\n"
+        "                                  - 'innerc' for the compiled innermost rewrite\n"
+        "                                    strategy\n"
         "                                  - 'jitty' for the jitty rewrite strategy\n"
         "                                  - 'jittyc' for the compiled jitty rewrite\n"
         "                                    strategy.\n"
         "                                  By default, the jitty rewrite strategy is\n"
         "                                  used.\n"
-        "  -t, --time-limit=SECONDS        Spend at most the specified number of\n"
-        "                                  SECONDS on proving a single formula.\n"
+        "  -t, --time-limit=SECONDS        Spend at most the specified number of SECONDS\n"
+        "                                  on proving a single formula.\n"
         "  -z --smt-solver=SOLVER          Use the specified SOLVER to remove\n"
         "                                  inconsistent paths from BDDs:\n"
         "                                  - 'ario' for the SMT solver Ario\n"
@@ -153,18 +149,16 @@
     // --------------------------------------------------------------------------------------------
 
     void LPE_Inv_Elm::get_options(int a_argc, char* a_argv[]) {
-      char* v_short_options = "i:l:o:s:neaycp:hqvdr:t:z:";
+      char* v_short_options = "i:s:nelycp:hqvdr:t:z:";
 
       f_tool_command = a_argv[0];
 
       struct option v_long_options[] = {
         {"invariant",        required_argument, 0, 'i'},
-        {"lpe",              required_argument, 0, 'l'},
-        {"output",           required_argument, 0, 'o'},
         {"summand",          required_argument, 0, 's'},
         {"no-check",         no_argument,       0, 'n'},
         {"no-elimination",   no_argument,       0, 'e'},
-        {"simplify-all",     no_argument,       0, 'a'},
+        {"simplify-all",     no_argument,       0, 'l'},
         {"all-violation",    no_argument,       0, 'y'},
         {"counter-example",  no_argument,       0, 'c'},
         {"print-dot",        required_argument, 0, 'p'},
@@ -185,12 +179,6 @@
           case 'i':
             f_invariant_file_name = strdup(optarg);
             break;
-          case 'l':
-            f_lpe_file_name = strdup(optarg);
-            break;
-          case 'o':
-            f_output_file_name = strdup(optarg);
-            break;
           case 's':
             sscanf(optarg, "%d", &f_summand_number);
             if (f_summand_number < 1) {
@@ -206,7 +194,7 @@
           case 'e':
             f_no_elimination = true;
             break;
-          case 'a':
+          case 'l':
             f_simplify_all = true;
             break;
           case 'y':
@@ -274,17 +262,20 @@
       }
 
       int v_number_of_remaining_arguments = a_argc - optind;
-      if (v_number_of_remaining_arguments > 0) {
+      if (v_number_of_remaining_arguments > 2) {
         gsErrorMsg("%s: too many arguments\n", NAME);
         print_more_info();
         exit(1);
+      } else {
+        if (v_number_of_remaining_arguments > 0) {
+          f_lpe_file_name = strdup(a_argv[optind]);
+          if (v_number_of_remaining_arguments == 2) {
+            f_output_file_name = strdup(a_argv[optind + 1]);
+          }
+        }
       }
-      if ((f_invariant_file_name == 0) and (f_lpe_file_name == 0)) {
-        gsErrorMsg(
-          "%s: at least one of the options --invariant=INVARIANT or "
-          "--lpe=LPE has to be used.\n",
-          NAME
-        );
+      if (f_invariant_file_name == 0) {
+        gsErrorMsg("%s: a file containing an invariant must be specified using the option --invariant=INVARIANT.\n", NAME);
         print_more_info();
         exit(1);
       }
@@ -308,7 +299,7 @@
     bool LPE_Inv_Elm::check_invariant() {
       if (!f_no_check) {
         Invariant_Checker v_invariant_checker(
-          f_strategy, f_time_limit, f_path_eliminator, f_solver_type, f_lpe, f_counter_example, f_all_violations, f_dot_file_name
+          f_lpe, f_strategy, f_time_limit, f_path_eliminator, f_solver_type, f_counter_example, f_all_violations, f_dot_file_name
         );
 
         return v_invariant_checker.check_invariant(f_invariant);
@@ -322,7 +313,7 @@
 
     void LPE_Inv_Elm::simplify() {
       if (!f_no_elimination) {
-        Invariant_Eliminator v_invariant_eliminator(f_strategy, f_time_limit, f_path_eliminator, f_solver_type, f_lpe, f_simplify_all);
+        Invariant_Eliminator v_invariant_eliminator(f_lpe, f_strategy, f_time_limit, f_path_eliminator, f_solver_type, f_simplify_all);
 
         f_lpe = v_invariant_eliminator.simplify(f_invariant, f_summand_number);
       }

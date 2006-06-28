@@ -21,14 +21,14 @@ class Formula_Checker {
     void save_dot_file(int a_formula_number);
   public:
     Formula_Checker(
-      RewriteStrategy a_rewrite_strategy,
-      int a_time_limit,
-      bool a_path_eliminator,
-      SMT_Solver_Type a_solver_type,
       ATermAppl a_data_equations,
-      bool a_counter_example,
-      bool a_witness,
-      char* a_dot_file_name
+      RewriteStrategy a_rewrite_strategy = GS_REWR_JITTY,
+      int a_time_limit = 0,
+      bool a_path_eliminator = false,
+      SMT_Solver_Type a_solver_type = solver_type_ario,
+      bool a_counter_example = false,
+      bool a_witness = false,
+      char* a_dot_file_name = 0
     );
     ~Formula_Checker();
     void check_formulas(ATermList a_formulas);

@@ -3,6 +3,7 @@
 <!DOCTYPE refentry PUBLIC "-//OASIS//DTD DocBook XML V4.2//EN" "http://www.oasis-open.org/docbook/xml/4.2/docbookx.dtd"[
 <!ENTITY class_bdd_prover "<classname>BDD_Prover</classname>">
 <!ENTITY class_invariant_eliminator "<classname>Invariant_Eliminator</classname>">
+<!ENTITY class_bdd2dot "<classname>BDD2Dot</classname>">
 
 <!ENTITY type_virtual "<type>virtual</type>">
 <!ENTITY type_void "<type>void</type>">
@@ -15,7 +16,6 @@
 <!ENTITY type_char_string "<type>char*</type>">
 
 <!ENTITY invariant_eliminator_constructor "<function>Invariant_Eliminator::Invariant_Eliminator</function>">
-<!ENTITY invariant_eliminator_destructor "<function>Invariant_Eliminator::~Invariant_Eliminator</function>">
 <!ENTITY invariant_eliminator_simplify "<function>Invariant_Eliminator::simplify</function>">
 
 <!ENTITY par_rewrite_strategy "<parameter>a_rewrite_strategy</parameter>">
@@ -28,7 +28,21 @@
 <!ENTITY par_summand_number "<parameter>a_summand_number</parameter>">
 <!ENTITY par_dot_file_name "<parameter>a_dot_file_name</parameter>">
 
-<!ENTITY strat_jitty "<constant>GS_REWR_JITTY</constant>">
+<!ENTITY solver_ario "<constant>ario</constant>">
+<!ENTITY solver_cvc_lite "<constant>cvc-lite</constant>">
+
+<!ENTITY link_ario "<uri>http://www.eecs.umich.edu/~ario/</uri>">
+<!ENTITY link_cvc "<uri>http://www.cs.nyu.edu/acsys/cvcl/</uri>">
+
+<!ENTITY const_strat_jitty "<constant>GS_REWR_JITTY</constant>">
+<!ENTITY const_strat_jittyc "<constant>GS_REWR_JITTYC</constant>">
+<!ENTITY const_strat_inner "<constant>GS_REWR_INNER</constant>">
+<!ENTITY const_strat_innerc "<constant>GS_REWR_INNERC</constant>">
+<!ENTITY const_solver_type_ario "<constant>solver_type_ario</constant>">
+<!ENTITY const_true "<constant>true</constant>">
+<!ENTITY const_false "<constant>false</constant>">
+
+<!ENTITY stderr "<constant>stderr</constant>">
 ]>
 
 <refentry id="invariant_eliminator">
@@ -40,33 +54,25 @@
 
 <refnamediv>
 <refname>invariant_eliminator</refname>
-<refpurpose>a class that can eliminate or simplify summands of an mCRL2 LPE using an invariant</refpurpose>
+<refpurpose>a class that uses an invariant to eliminate or simplify summands of an mCRL2 LPE</refpurpose>
 </refnamediv>
 
 <refsynopsisdiv>
 <funcsynopsis>
 <funcprototype>
   <funcdef>&invariant_eliminator_constructor;</funcdef>
-  <paramdef>
-    &type_rewrite_strategy; &par_rewrite_strategy;,
-    &type_int; &par_time_limit;,
-    &type_bool; &par_path_eliminator;,
-    &type_smt_solver_type; &par_solver_type;,
-    &type_aterm_appl; &par_lpe;,
-    &type_bool; &par_simplify_all;,
-    &type_char_string; &par_dot_file_name;
-  </paramdef>
-</funcprototype>
-<funcprototype>
-  <funcdef>&invariant_eliminator_destructor;</funcdef>
-  <paramdef>&type_void;</paramdef>
+  <paramdef>&type_aterm_appl; &par_lpe;</paramdef>
+  <paramdef>&type_rewrite_strategy; &par_rewrite_strategy; = &const_strat_jitty;</paramdef>
+  <paramdef>&type_int; &par_time_limit; = 0</paramdef>
+  <paramdef>&type_bool; &par_path_eliminator; = &const_false;</paramdef>
+  <paramdef>&type_smt_solver_type; &par_solver_type; = &const_solver_type_ario;</paramdef>
+  <paramdef>&type_bool; &par_simplify_all; = &const_false;</paramdef>
+  <paramdef>&type_char_string; &par_dot_file_name; = 0</paramdef>
 </funcprototype>
 <funcprototype>
   <funcdef>&type_aterm_appl; &invariant_eliminator_simplify;</funcdef>
-  <paramdef>
-    &type_aterm_appl; &par_invariant;,
-    &type_int; &par_summand_number;
-  </paramdef>
+  <paramdef>&type_aterm_appl; &par_invariant;</paramdef>
+  <paramdef>&type_int; &par_summand_number; = 0</paramdef>
 </funcprototype>
 </funcsynopsis>
 </refsynopsisdiv>
@@ -74,15 +80,40 @@
 <refsect1>
 <title>Description</title>
 <para>
+  The class &class_invariant_eliminator; is initialized with an LPE using the constructor &invariant_eliminator_constructor;. After initialization,
+  the method &invariant_eliminator_simplify; can be called any number of times to simplify or eliminate the summands of this LPE using an
+  invariant. A new instance of the class &class_invariant_eliminator; has to be created for each new LPE that has to be processed.
+</para>
+<para>
   The class &class_invariant_eliminator; uses an instance of the class &class_bdd_prover; to simplify or eliminate summands of an mCRL2 LPE. The
   constructor &invariant_eliminator_constructor; initializes the BDD based prover with the parameters &par_rewrite_strategy;, &par_time_limit;,
-  &par_path_eliminator;, &par_solver_type;, &par_dot_file_name;,
-  and with the data specification of the LPE passed as parameter &par_lpe;. If parameter &par_simplify_all; is set, the conditions of all summands
-  of the LPE are simplified when calling function &invariant_eliminator_simplify;. If the parameter &par_simplify_all; is not set, only the
-  summands whose condition in conjunction with the invariant prove to be a contradiction are eliminated. The function
-  &invariant_eliminator_simplify;
-  returns the LPE after simplification or elimination using the invariant passed as parameter &par_invariant;. If &par_summand_number;
-  differs from 0, only the summand with the number passed as parameter &par_summand_number; will be eliminated or simplified.
+  &par_path_eliminator;, &par_solver_type;, and the data specification of the LPE passed as parameter &par_lpe;. The
+  parameter &par_rewrite_strategy; specifies which rewrite strategy is used by the prover's rewriter. It can be set to either
+  &const_strat_inner;, &const_strat_innerc;, &const_strat_jitty; or &const_strat_jittyc;. The parameter &par_time_limit; specifies the maximum
+  amount of time in seconds to be spent by the prover on proving a single formula. If &par_time_limit; is set to 0, no time limit will be enforced.
+  The parameter &par_path_eliminator; specifies whether or not path elimination is applied. When path elimination is applied, the prover uses an
+  SMT solver to remove inconsistent paths from BDDs. The parameter &par_solver_type; specifies which SMT solver is used for path elimination. 
+  Either the SMT solver &solver_ario; or
+  &solver_cvc_lite; can be used. To use one of these solvers, the directory containing the corresponding executable must be in the path.
+  On June the 20th of 2006, Ario was available on &link_ario; and CVC Lite was available on &link_cvc;.
+  If the parameter &par_path_eliminator; is set to &const_false;, the parameter &par_solver_type; is ignored.
+</para>
+<para>
+  The parameter &par_dot_file_name;
+  specifies whether a file in dot format of the resulting BDD is saved each time the prover cannot determine whether a formula is a contradiction
+  or a tautology. If the parameter is set to 0, no .dot files are saved. If a string is passed as parameter &par_dot_file_name;, this string will
+  be used as the prefix of the filenames. An instance of the class &class_bdd2dot; is used to save these files in dot format.
+</para>
+<para>
+  If the parameter &par_simplify_all; is set to &const_false;, the summands whose conditions in conjunction with the invariant prove to be a
+  contradiction are eliminated. If parameter &par_simplify_all; is set to &const_true;, in addition to removing those summands, the conditions of
+  all other summands of the LPE are simplified when calling method &invariant_eliminator_simplify;.
+</para>
+<para>
+  The method &invariant_eliminator_simplify; returns the LPE passed as parameter &par_lpe; of the constructor after simplification or elimination
+  using the invariant passed as parameter &par_invariant;. If &par_summand_number; differs from 0, only the summand with the number passed as
+  parameter &par_summand_number; will be eliminated or simplified. One instance of the class &class_invariant_eliminator; can check any number of
+  invariants on the same LPE. For each new LPE to be checked, a new instance of the class has to be created.
 </para>
 <para>
   Given an LPE,
@@ -95,27 +126,40 @@
   <literallayout>
     inv(d) /\ ci(d, ei)
   </literallayout>
-  for each of the summands or for the chosen summand only, where inv() is the invariant passed as parameter &par_invariant;. If such a formula is a
-  contradiction according to the prover, the corresponding summand will be eliminated. If the parameter &par_simplify_all; is set, the condition of
-  each summand is replaced by the BDD obtained from the prover after proving that summand's formula.
+  for each of the summands or for the chosen summand only, where <literal>inv()</literal> is the invariant passed as parameter &par_invariant;. If
+  such a formula is a contradiction according to the prover, the corresponding summand will be eliminated. If the parameter &par_simplify_all; is
+  set, the condition of each summand is replaced by the BDD obtained from the prover after proving that summand's formula.
 </para>
 </refsect1>
 
 <refsect1>
 <title>Preconditions</title>
 <para>
-  The following precondition has to be satisfied for &invariant_eliminator_constructor;:
+  The following preconditions have to be satisfied for &invariant_eliminator_constructor;:
   <itemizedlist>
     <listitem>
-      <para>the parameter &par_lpe; is a valid mCRL2 LPE</para>
+      <para>the argument passed as parameter &par_lpe; is a valid mCRL2 LPE</para>
+    </listitem>
+    <listitem>
+      <para>
+        the argument passed as parameter &par_time_limit; is greater than or equal to 0. If the argument is equal to 0, no time limit will be
+        enforced
+      </para>
     </listitem>
   </itemizedlist>
 </para>
 <para>
-The following precondition has to be satisfied for &invariant_eliminator_simplify;:
+The following preconditions have to be satisfied for &invariant_eliminator_simplify;:
 <itemizedlist>
   <listitem>
-    <para>the parameter &par_invariant; is a valid formula in internal mCRL2 format</para>
+    <para>the argument passed as parameter &par_invariant; is a valid formula in internal mCRL2 format</para>
+  </listitem>
+  <listitem>
+    <para>
+      the argument passed as parameter &par_summand_number; is greater than or equal to 0. If the argument is equal to 0, all summands are checked
+      to see whether they can be simplified or eliminated. If the argument is greater than the number of summands, no summand will be simplified or
+      eliminated
+    </para>
   </listitem>
 </itemizedlist>
 </para>

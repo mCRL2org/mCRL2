@@ -29,7 +29,7 @@
   // Class Invariant_Eliminator - Functions declared public ---------------------------------------
 
     Invariant_Eliminator::Invariant_Eliminator(
-      RewriteStrategy a_rewrite_strategy, int a_time_limit, bool a_path_eliminator, SMT_Solver_Type a_solver_type, ATermAppl a_lpe, bool a_simplify_all
+      ATermAppl a_lpe, RewriteStrategy a_rewrite_strategy, int a_time_limit, bool a_path_eliminator, SMT_Solver_Type a_solver_type, bool a_simplify_all
     ):
       f_bdd_prover(ATAgetArgument(a_lpe, 3), a_rewrite_strategy, a_time_limit)
     {

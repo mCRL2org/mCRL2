@@ -19,7 +19,7 @@
       char* f_input_file_name;
       char* f_output_file_name;
       int f_summand_number;
-      bool f_negation;
+      bool f_generate_invariants;
       bool f_no_check;
       bool f_no_marking;
       bool f_check_all;
@@ -50,8 +50,8 @@
       fprintf(stderr,
         "Usage: %s [OPTION]... [INFILE [OUTFILE]]\n"
         "This tool checks which tau-summands of the mCRL2 LPE as found in INFILE are\n"
-        "confluent and marks these. The resulting LPE is written to the file named\n"
-        "OUTFILE.\n"
+        "confluent and marks them by renaming them to ctau. The resulting LPE is\n"
+        "written to the file named OUTFILE.\n"
         "If INFILE is not specified, the LPE is read from stdin. If OUTFILE is not\n"
         "specified, the resulting LPE is written to stdout.\n"
         "\n"
@@ -64,19 +64,22 @@
         "  -s, --summand=NUMBER            Check the summand with number NUMBER only.\n"
         "  -n, --no-check                  Do not check if the invariant holds before\n"
         "                                  checking for confluence.\n"
-        "  -m, --no-marking                Do not mark the confluent tau-summands.\n"
-        "                                  Since there are no changes made to the LPE,\n"
-        "                                  nothing is written to OUTFILE.\n"
-        "  -a, --check-all                 Do not stop checking summands on detection\n"
-        "                                  of the first non-confluence.\n"
+        "  -m, --no-marking                Do not mark the confluent tau-summands. Since\n"
+        "                                  there are no changes made to the LPE, nothing\n"
+        "                                  is written to OUTFILE.\n"
+        "  -a, --check-all                 Check the confluence of tau-summands\n"
+        "                                  regarding all other summands, instead of\n"
+        "                                  continuing with the next tau-summand as soon\n"
+        "                                  as a summand is encountered that is not\n"
+        "                                  confluent with the current tau-summand.\n"
         "  -c, --counter-example           Give a valuation for which the confluence\n"
         "                                  condition does not hold, in case the\n"
         "                                  encountered condition is neither a\n"
         "                                  contradiction nor a tautolgy.\n"
-        "  -p, --print-dot=PREFIX          Save a .dot file of the resulting BDD in\n"
-        "                                  case two summands cannot be proven\n"
-        "                                  confluent. PREFIX will be used as prefix\n"
-        "                                  of the output files.\n"
+        "  -p, --print-dot=PREFIX          Save a .dot file of the resulting BDD in case\n"
+        "                                  two summands cannot be proven confluent.\n"
+        "                                  PREFIX will be used as prefix of the output\n"
+        "                                  files.\n"
         "  -h, --help                      Display this help and terminate.\n"
         "      --version                   Display version information and terminate.\n"
         "  -q, --quiet                     Do not display warning messages.\n"
@@ -85,15 +88,15 @@
         "  -r, --rewrite-strategy=STRATEGY Use the specified STRATEGY as rewrite\n"
         "                                  strategy:\n"
         "                                  - 'inner' for the innermost rewrite strategy\n"
-        "                                  - 'innerc' for the compiled innermost\n"
-        "                                    rewrite strategy\n"
+        "                                  - 'innerc' for the compiled innermost rewrite\n"
+        "                                    strategy\n"
         "                                  - 'jitty' for the jitty rewrite strategy\n"
         "                                  - 'jittyc' for the compiled jitty rewrite\n"
         "                                    strategy.\n"
         "                                  By default, the jitty rewrite strategy is\n"
         "                                  used.\n"
-        "  -t, --time-limit=SECONDS        Spend at most the specified number of\n"
-        "                                  SECONDS on proving a single formula.\n"
+        "  -t, --time-limit=SECONDS        Spend at most the specified number of SECONDS\n"
+        "                                  on proving a single formula.\n"
         "  -z --smt-solver=SOLVER          Use the specified SOLVER to remove\n"
         "                                  inconsistent paths from BDDs:\n"
         "                                  - 'ario' for the SMT solver Ario\n"
@@ -123,7 +126,7 @@
       f_input_file_name = 0;
       f_output_file_name = 0;
       f_summand_number = 0;
-      f_negation = false;
+      f_generate_invariants = false;
       f_no_check = false;
       f_no_marking = false;
       f_check_all = false;
@@ -175,7 +178,7 @@
             f_invariant_file_name = strdup(optarg);
             break;
           case 'g':
-            f_negation = true;
+            f_generate_invariants = true;
             break;
           case 's':
             sscanf(optarg, "%d", &f_summand_number);
@@ -293,7 +296,7 @@
     bool LPE_Conf_Check::check_invariant() {
       if (!f_no_check && f_invariant_file_name != 0) {
         Invariant_Checker v_invariant_checker(
-          f_strategy, f_time_limit, f_path_eliminator, f_solver_type, f_lpe, false, false, f_dot_file_name
+          f_lpe, f_strategy, f_time_limit, f_path_eliminator, f_solver_type, false, false, f_dot_file_name
         );
 
         return v_invariant_checker.check_invariant(f_invariant);
@@ -309,7 +312,8 @@
 
     void LPE_Conf_Check::check_confluence_and_mark() {
       Confluence_Checker v_confluence_checker(
-        f_strategy, f_time_limit, f_path_eliminator, f_solver_type, f_lpe, f_no_marking, f_check_all, f_counter_example, f_dot_file_name, f_negation
+        f_lpe, f_strategy, f_time_limit, f_path_eliminator, f_solver_type, f_no_marking, f_check_all, f_counter_example, f_generate_invariants,
+        f_dot_file_name
       );
 
       if (f_invariant == 0) {

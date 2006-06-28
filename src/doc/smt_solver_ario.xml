@@ -1,0 +1,96 @@
+<?xml version="1.0"?>
+
+<!DOCTYPE refentry PUBLIC "-//OASIS//DTD DocBook XML V4.2//EN" "http://www.oasis-open.org/docbook/xml/4.2/docbookx.dtd"[
+<!ENTITY class_smt_solver_ario "<classname>SMT_Solver_Ario</classname>">
+<!ENTITY class_smt_lib_solver "<classname>SMT_LIB_Solver</classname>">
+
+<!ENTITY type_virtual "<type>virtual</type>">
+<!ENTITY type_abstract "<type>abstract</type>">
+<!ENTITY type_const "<type>const</type>">
+<!ENTITY type_void "<type>void</type>">
+<!ENTITY type_bool "<type>bool</type>">
+<!ENTITY type_pchar "<type>char*</type>">
+<!ENTITY type_int "<type>int</type>">
+<!ENTITY type_string "<type>std::string</type>">
+<!ENTITY type_atermappl "<type>ATermAppl</type>">
+<!ENTITY type_atermlist "<type>ATermList</type>">
+<!ENTITY type_smt_solver_type "<type>SMT_Solver_Type</type>">
+
+<!ENTITY smt_solver_ario_constructor "<function>SMT_Solver_Ario::SMT_Solver_Ario</function>">
+<!ENTITY smt_solver_ario_is_satisfiable "<function>SMT_Solver_Ario::is_satisfiable</function>">
+
+<!ENTITY solver_ario "<constant>ario</constant>">
+<!ENTITY solver_cvc_lite "<constant>cvc-lite</constant>">
+<!ENTITY link_ario "<uri>http://www.eecs.umich.edu/~ario/</uri>">
+<!ENTITY link_cvc "<uri>http://www.cs.nyu.edu/acsys/cvcl/</uri>">
+
+<!ENTITY par_formula "<parameter>a_formula</parameter>">
+<!ENTITY par_bdd "<parameter>a_bdd</parameter>">
+
+<!ENTITY const_solver_type_ario "<constant>solver_type_ario</constant>">
+]>
+
+<refentry id="smt_solver_ario">
+
+<refmeta>
+<refentrytitle>smt_solver_ario</refentrytitle>
+<manvolnum>7</manvolnum>
+</refmeta>
+
+<refnamediv>
+<refname>smt_solver_ario</refname>
+<refpurpose>a class that uses the SMT solver Ario to solve propositional formulas</refpurpose>
+</refnamediv>
+
+<refsynopsisdiv>
+<funcsynopsis>
+  <funcprototype>
+    <funcdef>&smt_solver_ario_constructor;</funcdef>
+    <void/>
+  </funcprototype>
+  <funcprototype>
+    <funcdef>&type_virtual; &type_bool; &smt_solver_ario_is_satisfiable;</funcdef>
+    <paramdef>&type_atermlist; &par_formula;</paramdef>
+</funcprototype>
+</funcsynopsis>
+</refsynopsisdiv>
+
+<refsect1>
+<title>Description</title>
+<para>
+  The class &class_smt_solver_ario; inherits from the class &class_smt_lib_solver;. It uses the SMT solver &solver_ario; to determine
+  the satisfiability of propositional formulas. To use the solver &solver_ario;, the directory containing the corresponding
+  executable must be in the path. On June the 20th of 2006, &solver_ario; was available on &link_ario;.
+</para>
+<para>
+  The constructor &smt_solver_ario_constructor; checks if &solver_ario;'s executable is indeed available and reports an error if it is not.
+</para>
+<para>
+  The method &smt_solver_ario_is_satisfiable; receives a propositional formula in conjunctive normal form as parameter &par_formula; and
+  indicates whether or not this formula is satisfiable.
+</para>
+</refsect1>
+
+<refsect1>
+<title>Preconditions</title>
+<para>
+  The following precondition has to be satisfied for &smt_solver_ario_is_satisfiable;:
+  <itemizedlist>
+    <listitem>
+      <para>
+        The argument passed as parameter &par_formula; is a list of propositional formulas in internal mCRL2 format. The argument represents a
+        formula in conjunctive normal form, where the elements of the list represent the clauses
+      </para>
+    </listitem>
+  </itemizedlist>
+</para>
+</refsect1>
+
+<refsect1>
+<title>Author</title>
+<para>
+  Written by Luc Engelen. Please send all complaints, comments and bug reports to <email>bug@mcrl2.org</email>.
+</para>
+</refsect1>
+
+</refentry>

@@ -4,7 +4,7 @@
 <!ENTITY lpeformcheck "<function>lpeformcheck</function>">
 <!ENTITY option "<parameter>OPTION</parameter>">
 <!ENTITY formulas "<parameter>FORMULAS</parameter>">
-<!ENTITY lpe "<parameter>LPE</parameter>">
+<!ENTITY infile "<parameter>INFILE</parameter>">
 <!ENTITY prefix "<parameter>PREFIX</parameter>">
 <!ENTITY strategy "<parameter>STRATEGY</parameter>">
 <!ENTITY seconds "<parameter>SECONDS</parameter>">
@@ -22,7 +22,6 @@
 <!ENTITY opt_t "<option>-t</option>">
 <!ENTITY opt_z "<option>-z</option>">
 <!ENTITY opt_formulas "<option>--formulas</option>">
-<!ENTITY opt_lpe "<option>--lpe</option>">
 <!ENTITY opt_counter_example "<option>--counter-example</option>">
 <!ENTITY opt_witness "<option>--witness</option>">
 <!ENTITY opt_print_dot "<option>--print-dot</option>">
@@ -40,7 +39,11 @@
 <!ENTITY strat_jittyc_string "<constant>'jittyc'</constant>">
 <!ENTITY solver_ario_string "<constant>'ario'</constant>">
 <!ENTITY solver_cvc_lite_string "<constant>'cvc-lite'</constant>">
+<!ENTITY solver_ario "<constant>ario</constant>">
+<!ENTITY solver_cvc_lite "<constant>cvc-lite</constant>">
 <!ENTITY stdin "<constant>stdin</constant>">
+<!ENTITY link_ario "<uri>http://www.eecs.umich.edu/~ario/</uri>">
+<!ENTITY link_cvc "<uri>http://www.cs.nyu.edu/acsys/cvcl/</uri>">
 ]>
 
 <refentry id="lpeformcheck">
@@ -59,8 +62,8 @@
   <cmdsynopsis>
     <command>&lpeformcheck;</command>
     <arg choice="plain" rep="repeat"><arg choice="opt">&option;</arg></arg>
-    <arg choice="opt">&opt_formulas;=&formulas;</arg>
-    <arg choice="opt">&opt_lpe;=&lpe;</arg>
+    <arg choice="opt">&infile;</arg>
+    <arg choice="req">&opt_formulas;=&formulas;</arg>
   </cmdsynopsis>
 </refsynopsisdiv>
 
@@ -69,30 +72,31 @@
   <para>
     All formulas in the list of formulas in internal mCRL2 format as found in
     &formulas; are checked using the data specification of the mCRL2 LPE as found in
-    &lpe;. The &lpeformcheck; tool will indicate whether each formula is a tautology or a
+    &infile;. The &lpeformcheck; tool indicates whether each formula is a tautology or a
     contradiction. If the tool is unable to determine whether a formula is a
-    tautology or a contradiction, it will indicate this fact.
+    tautology or a contradiction, it indicates this fact.
   </para>
 
   <para>
-    At least one of the arguments &opt_formulas; or &opt_lpe; is required. If only
-    one is given, &stdin; is used as the other input.
+    If &infile; is not specified, the LPE is read from &stdin;.
   </para>
 
   <para>
-    Because of limitations of the prover used to check the formulas,
-    &lpeformcheck; may indicate that a formula is not a tautology or a contradiction
-    even though it is. The option &opt_verbose; gives insight into what the prover
-    is doing and can be used to see if rewrite rules have to be added to the
-    specification in order to enable the prover to determine that certain
-    formulas are indeed tautologies or contradictions.
+    In some cases &lpeformcheck; is unable to determine whether a
+    formula is a tautology or a contradiction. The option &opt_verbose; gives
+    insight into what the prover used by the tool is doing and can be used to see if
+    rewrite rules have to be added to the specification in order to enable the prover
+    to determine that certain formulas are indeed tautologies or contradictions.
   </para>
 
   <para>
     The &lpeformcheck; tool uses a BDD based prover to check the formulas. In some cases
     it may be useful to use an SMT solver to assist the prover. The SMT solver can further
     reduce BDDs by removing inconsistent paths. A specific SMT solver can be chosen using
-    the option &opt_smt_solver;=&solver;.
+    the option &opt_smt_solver;=&solver;. Either the SMT solver &solver_ario; or
+    &solver_cvc_lite; can be used. To use one of these solvers, the directory containing the
+    corresponding executable must be in the path.
+    On June the 20th of 2006, Ario was available on &link_ario; and CVC Lite was available on &link_cvc;.
   </para>
 
 </refsect1>
@@ -109,16 +113,6 @@
         <para>
           Use the list of formulas in internal mCRL2 format as found in
           &formulas; as input
-        </para>
-      </listitem>
-    </varlistentry>
-
-    <varlistentry>
-      <term>&opt_l;</term>
-      <term>&opt_lpe;=&lpe;</term>
-      <listitem>
-        <para>
-          Use the mCRL2 LPE as found in &lpe; as input
         </para>
       </listitem>
     </varlistentry>

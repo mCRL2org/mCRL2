@@ -1,0 +1,90 @@
+<?xml version="1.0"?>
+
+<!DOCTYPE refentry PUBLIC "-//OASIS//DTD DocBook XML V4.2//EN" "http://www.oasis-open.org/docbook/xml/4.2/docbookx.dtd"[
+<!ENTITY class_smt_lib_solver "<classname>SMT_LIB_Solver</classname>">
+<!ENTITY class_smt_solver "<classname>SMT_Solver</classname>">
+
+<!ENTITY type_virtual "<type>virtual</type>">
+<!ENTITY type_abstract "<type>abstract</type>">
+<!ENTITY type_const "<type>const</type>">
+<!ENTITY type_void "<type>void</type>">
+<!ENTITY type_bool "<type>bool</type>">
+<!ENTITY type_pchar "<type>char*</type>">
+<!ENTITY type_int "<type>int</type>">
+<!ENTITY type_string "<type>std::string</type>">
+<!ENTITY type_atermappl "<type>ATermAppl</type>">
+<!ENTITY type_atermlist "<type>ATermList</type>">
+<!ENTITY type_smt_solver_type "<type>SMT_Solver_Type</type>">
+
+<!ENTITY smt_lib_solver_translate "<function>SMT_LIB_Solver::translate</function>">
+
+<!ENTITY solver_ario "<constant>ario</constant>">
+<!ENTITY solver_cvc_lite "<constant>cvc-lite</constant>">
+<!ENTITY link_ario "<uri>http://www.eecs.umich.edu/~ario/</uri>">
+<!ENTITY link_cvc "<uri>http://www.cs.nyu.edu/acsys/cvcl/</uri>">
+
+<!ENTITY par_formula "<parameter>a_formula</parameter>">
+<!ENTITY par_bdd "<parameter>a_bdd</parameter>">
+
+<!ENTITY var_benchmark "<varname>f_benchmark</varname>">
+
+<!ENTITY const_solver_type_ario "<constant>solver_type_ario</constant>">
+]>
+
+<refentry id="smt_lib_solver">
+
+<refmeta>
+<refentrytitle>smt_lib_solver</refentrytitle>
+<manvolnum>7</manvolnum>
+</refmeta>
+
+<refnamediv>
+<refname>smt_lib_solver</refname>
+<refpurpose>a class that translates formulas in internal mCRL2 format to benchmarks in the SMT-LIB format</refpurpose>
+</refnamediv>
+
+<refsynopsisdiv>
+  <funcsynopsis>
+    <funcprototype>
+      <funcdef>&type_void; &smt_lib_solver_translate;</funcdef>
+      <paramdef>&type_atermlist; &par_formula;</paramdef>
+    </funcprototype>
+  </funcsynopsis>
+</refsynopsisdiv>
+
+<refsect1>
+<title>Description</title>
+<para>
+  The class &class_smt_lib_solver; is a base class for SMT solvers that read the SMT-LIB format [Silvio Ranise and Cesare Tinelli. The SMT-LIB
+  Standard: Version 1.1. Technical Report, Department of Computer Science, The University of Iowa, 2005. (Available at
+  goedel.cs.uiowa.edu/smtlib)]. It inherits from the class &class_smt_solver;.
+</para>
+<para>
+  The method &smt_lib_solver_translate; receives a propositional formula in conjunctive normal form as parameter &par_formula; and translates it to
+  a benchmark in SMT-LIB format. The result is saved as field &type_string; &var_benchmark;.
+</para>
+</refsect1>
+
+<refsect1>
+<title>Preconditions</title>
+<para>
+  The following precondition has to be satisfied for &smt_lib_solver_translate;:
+  <itemizedlist>
+    <listitem>
+      <para>
+        The argument passed as parameter &par_formula; is a list of propositional formulas in internal mCRL2 format. The argument represents a
+        formula in conjunctive normal form, where the elements of the list represent the clauses
+      </para>
+    </listitem>
+  </itemizedlist>
+</para>
+</refsect1>
+
+<refsect1>
+<title>Author</title>
+<para>
+  Written by Luc Engelen. Please send all complaints, comments and bug reports to <email>bug@mcrl2.org</email>.
+</para>
+</refsect1>
+
+</refentry>

@@ -11,7 +11,6 @@
 <!ENTITY type_aterm_appl "<type>ATermAppl</type>">
 
 <!ENTITY disjointness_checker_constructor "<function>Disjointness_Checker::Disjointness_Checker</function>">
-<!ENTITY disjointness_checker_destructor "<function>Disjointness_Checker::~Disjointness_Checker</function>">
 <!ENTITY disjointness_checker_disjoint "<function>Disjointness_Checker::disjoint</function>">
 
 <!ENTITY par_process_equations "<parameter>a_process_equations</parameter>">
@@ -28,7 +27,7 @@
 
 <refnamediv>
 <refname>disjointness_checker</refname>
-<refpurpose>a class that can indicate whether two summands of an mCRL2 LPE are syntactically disjoint</refpurpose>
+<refpurpose>a class that indicates whether two summands of an mCRL2 LPE are syntactically disjoint</refpurpose>
 </refnamediv>
 
 <refsynopsisdiv>
@@ -36,10 +35,6 @@
 <funcprototype>
   <funcdef>&disjointness_checker_constructor;</funcdef>
   <paramdef>&type_aterm_appl; &par_process_equations;</paramdef>
-</funcprototype>
-<funcprototype>
-  <funcdef>&type_virtual; &disjointness_checker_destructor;</funcdef>
-  <paramdef>&type_void;</paramdef>
 </funcprototype>
 <funcprototype>
   <funcdef>&type_bool; &disjointness_checker_disjoint;</funcdef>
@@ -79,7 +74,15 @@
 The following precondition has to be satisfied for &disjointness_checker_constructor;:
 <itemizedlist>
   <listitem>
-    <para>the parameter &par_process_equations; is a specification of process equations in mCRL2 format</para>
+    <para>
+      the argument passed as parameter &par_process_equations; is a specification of process equations in mCRL2 format
+    </para>
+  </listitem>
+  <listitem>
+    <para>
+      the arguments passed as parameters &par_summand_number_1; and &par_summand_number_2; correspond to summands in the proces equations
+      passed as parameter &par_process_equations;. They lie in the interval from and including 1 upto and including the highest summand number
+    </para>
   </listitem>
 </itemizedlist>
 </para>

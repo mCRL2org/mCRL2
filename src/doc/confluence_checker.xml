@@ -3,7 +3,9 @@
 <!DOCTYPE refentry PUBLIC "-//OASIS//DTD DocBook XML V4.2//EN" "http://www.oasis-open.org/docbook/xml/4.2/docbookx.dtd"[
 <!ENTITY class_bdd_prover "<classname>BDD_Prover</classname>">
 <!ENTITY class_confluence_checker "<classname>Confluence_Checker</classname>">
+<!ENTITY class_invariant_checker "<classname>Invariant_Checker</classname>">
 <!ENTITY class_disjointness_checker "<classname>Disjointness_Checker</classname>">
+<!ENTITY class_bdd2dot "<classname>BDD2Dot</classname>">
 
 <!ENTITY type_virtual "<type>virtual</type>">
 <!ENTITY type_void "<type>void</type>">
@@ -16,7 +18,6 @@
 <!ENTITY type_rewrite_strategy "<type>RewriteStrategy</type>">
 
 <!ENTITY confluence_checker_constructor "<function>Confluence_Checker::Confluence_Checker</function>">
-<!ENTITY confluence_checker_destructor "<function>Confluence_Checker::~Confluence_Checker</function>">
 <!ENTITY confluence_checker_check_confluence_and_mark "<function>Confluence_Checker::check_confluence_and_mark</function>">
 
 <!ENTITY par_rewrite_strategy "<parameter>a_rewrite_strategy</parameter>">
@@ -32,9 +33,26 @@
 <!ENTITY par_invariant "<parameter>a_invariant</parameter>">
 <!ENTITY par_summand_number "<parameter>a_summand_number</parameter>">
 
+<!ENTITY solver_ario "<constant>ario</constant>">
+<!ENTITY solver_cvc_lite "<constant>cvc-lite</constant>">
+
+<!ENTITY link_ario "<uri>http://www.eecs.umich.edu/~ario/</uri>">
+<!ENTITY link_cvc "<uri>http://www.cs.nyu.edu/acsys/cvcl/</uri>">
+
 <!ENTITY strat_jitty "<constant>GS_REWR_JITTY</constant>">
 
 <!ENTITY stderr "<constant>stderr</constant>">
+
+<!ENTITY const_strat_jitty "<constant>GS_REWR_JITTY</constant>">
+<!ENTITY const_strat_jittyc "<constant>GS_REWR_JITTYC</constant>">
+<!ENTITY const_strat_inner "<constant>GS_REWR_INNER</constant>">
+<!ENTITY const_strat_innerc "<constant>GS_REWR_INNERC</constant>">
+<!ENTITY const_true "<constant>true</constant>">
+<!ENTITY const_false "<constant>false</constant>">
+
+<!ENTITY inv "<literal>inv()</literal>">
+<!ENTITY tau "<literal>tau</literal>">
+<!ENTITY ctau "<literal>ctau</literal>">
 ]>
 
 <refentry id="confluence_checker">
@@ -46,29 +64,25 @@
 
 <refnamediv>
 <refname>confluence_checker</refname>
-<refpurpose>a class that can check which summands of an mCRL2 LPE are confluent</refpurpose>
+<refpurpose>
+  a class that checks which &tau;-summands of an mCRL2 LPE are confluent and marks them by renaming their &tau;-actions to &ctau;
+</refpurpose>
 </refnamediv>
 
 <refsynopsisdiv>
 <funcsynopsis>
 <funcprototype>
   <funcdef>&confluence_checker_constructor;</funcdef>
-  <paramdef>
-    &type_rewrite_strategy; &par_rewrite_strategy; = &strat_jitty;,
-    &type_int; &par_time_limit;,
-    &type_bool; &par_path_eliminator;,
-    &type_smt_solver_type; &par_solver_type;,
-    &type_aterm_appl; &par_lpe;,
-    &type_bool; &par_no_marking;,
-    &type_bool; &par_check_all;,
-    &type_bool; &par_counter_example;,
-    &type_char_pointer; &par_dot_file_name;
-    &type_bool; &par_generate_invariants;
-  </paramdef>
-</funcprototype>
-<funcprototype>
-  <funcdef>&confluence_checker_destructor;</funcdef>
-  <paramdef>&type_void;</paramdef>
+  <paramdef>&type_aterm_appl; &par_lpe;</paramdef>
+  <paramdef>&type_rewrite_strategy; &par_rewrite_strategy; = &strat_jitty;</paramdef>
+  <paramdef>&type_int; &par_time_limit;</paramdef>
+  <paramdef>&type_bool; &par_path_eliminator;</paramdef>
+  <paramdef>&type_smt_solver_type; &par_solver_type;</paramdef>
+  <paramdef>&type_bool; &par_no_marking;</paramdef>
+  <paramdef>&type_bool; &par_check_all;</paramdef>
+  <paramdef>&type_bool; &par_counter_example;</paramdef>
+  <paramdef>&type_bool; &par_generate_invariants;</paramdef>
+  <paramdef>&type_char_pointer; &par_dot_file_name;</paramdef>
 </funcprototype>
 <funcprototype>
   <funcdef>&confluence_checker_check_confluence_and_mark;</funcdef>
@@ -88,15 +102,15 @@
             + sum ej: Ej. cj(d, ej) -> tau . P(gj(d, ej))
             + ...;
   </literallayout>
-  tau-summand j is confluent with summand i if the following condition holds
-  for all d: D, for all ei: Ei and for all ej: Ej:
+  &tau;-summand <literal>j</literal> is confluent with summand <literal>i</literal> if the following condition holds
+  for all <literal>d: D</literal>, for all <literal>ei: Ei</literal> and for all <literal>ej: Ej</literal>:
   <literallayout>
     (inv(d) /\ ci(d, ei) /\ cj(d, ej))
     =>
     (ci(gj(d, ej), ei) /\ cj(gi(d, ei), ej) /\ fi(d, ei) == fi(gj(d, ej), ei) /\ gi(gj(d, ej), ei) == gj(gi(d, ei), ej))
   </literallayout>
-  where inv() is the invariant specified using the parameter &par_invariant; of the function &confluence_checker_check_confluence_and_mark;.
-  In case ai is also a tau-action, the formula above can be weakened to the following:
+  where &inv; is the invariant specified using the parameter &par_invariant; of the function &confluence_checker_check_confluence_and_mark;.
+  In case <literal>ai</literal> is also a &tau;-action, the formula above can be weakened to the following:
   <literallayout>
     (inv(d) /\ ci(d, ei) /\ cj(d, ej))
     =>
@@ -111,16 +125,11 @@
   <itemizedlist spacing='compact'>
     <listitem>
       <para>
-        The most time consuming way of checking the confluence of two summands is
-        generating the confluence condition and then checking if this condition is a
-        tautology using a prover for propositional formulas. If two summands are
-        proven confluent using the prover, the class &class_confluence_checker;
-        indicates this by printing a plus sign ('+').
-        If the parameter &par_generate_invariants; is set, the class &class_confluence_checker;
-        will try to prove that the reduced confluence condition is an invariant of the LPE,
-        in case the confluence condition is not a tautology. If the reduced confluence
-        condition is indeed an invariant, the two summands are proven confluent.
-        The class &class_confluence_checker; indicates this by printing an 'i'.
+        If summand number 1 has been proven confluent with summand number 2, summand
+        number 2 is obviously confluent with summand number 1. This method of checking
+        confluence is called checking confluence by symmetry. If two summands are
+        confluent by symmetry, the class &class_confluence_checker; indicates this by
+        printing a dot ('.').
       </para>
     </listitem>
     <listitem>
@@ -148,45 +157,96 @@
     </listitem>
     <listitem>
       <para>
-        If summand number 1 has been proven confluent with summand number 2, summand
-        number 2 is obviously confluent with summand number 1. This method of checking
-        confluence is called checking confluence by symmetry. If two summands are
-        confluent by symmetry, the class &class_confluence_checker; indicates this by
-        printing a dot ('.').
+        The most time consuming way of checking the confluence of two summands is
+        generating the confluence condition and then checking if this condition is a
+        tautology using a prover for propositional formulas. If two summands are
+        proven confluent using the prover, the class &class_confluence_checker;
+        indicates this by printing a plus sign ('+').
+        If the parameter &par_generate_invariants; is set to &const_true;, the class
+        &class_confluence_checker;
+        will try to prove that the reduced confluence condition is an invariant of the LPE,
+        in case the confluence condition is not a tautology. If the reduced confluence
+        condition is indeed an invariant, the two summands are proven confluent.
+        The class &class_confluence_checker; indicates this by printing an 'i'.
       </para>
     </listitem>
   </itemizedlist>
 </para>
 
 <para>
-  The class &class_confluence_checker; uses an instance of the class &class_bdd_prover; and an instance of the class &class_disjointness_checker;
-  to determine which tau-summands of an mCRL2 LPE are confluent. Confluent tau's will be marked as ctau. The constructor
-  &confluence_checker_constructor; initializes the BDD based prover with the parameters &par_rewrite_strategy;, &par_path_eliminator;,
-  &par_solver_type; and &par_time_limit;, and the data
-  specification of the LPE passed as parameter &par_lpe;.
-  The function &confluence_checker_check_confluence_and_mark; returns an LPE with all confluent tau's marked as ctau, unless the parameter
-  &par_no_marking; was set. In case the parameter &par_no_marking; was set, the confluent tau's will not be marked, only the results of the
-  confluence checking will be displayed. If the parameter &par_counter_example; is set, a so called counter example is printed to &stderr; each
-  time the prover
+  The class &class_confluence_checker; uses an instance of the class &class_bdd_prover;, an instance of the class &class_disjointness_checker; and
+  an instance of the class &class_invariant_checker;
+  to determine which &tau;-summands of an mCRL2 LPE are confluent. Confluent &tau;-summands will be marked by renaming their &tau;-actions to
+  &ctau;. The constructor &confluence_checker_constructor; initializes the BDD based prover with the parameters &par_rewrite_strategy;,
+  &par_time_limit;,
+  &par_path_eliminator;, &par_solver_type; and the data specification of the LPE passed as parameter &par_lpe;. The
+  parameter &par_rewrite_strategy; specifies which rewrite strategy is used by the prover's rewriter. It can be set to either
+  &const_strat_inner;, &const_strat_innerc;, &const_strat_jitty; or &const_strat_jittyc;. The parameter &par_time_limit; specifies the maximum
+  amount of time in seconds to be spent by the prover on proving a single formula. If &par_time_limit; is set to 0, no time limit will be enforced.
+  The parameter &par_path_eliminator; specifies whether or not path elimination is applied. When path elimination is applied, the prover uses an
+  SMT solver to remove inconsistent paths from BDDs. The parameter &par_solver_type; specifies which SMT solver is used for path elimination. 
+  Either the SMT solver &solver_ario; or &solver_cvc_lite; can be used. To use one of these solvers, the directory containing the corresponding
+  executable must be in the path. On June the 20th of 2006, Ario was available on &link_ario; and CVC Lite was available on &link_cvc;.
+  If the parameter &par_path_eliminator; is set to &const_false;, the parameter &par_solver_type; is ignored.
+</para>
+<para>
+  The parameter &par_dot_file_name;
+  specifies whether a file in dot format of the resulting BDD is saved each time the prover cannot determine whether a formula is a contradiction
+  or a tautology. If the parameter is set to 0, no .dot files are saved. If a string is passed as parameter &par_dot_file_name;, this string will
+  be used as the prefix of the filenames. An instance of the class &class_bdd2dot; is used to save these files in dot format.
+</para>
+<para>
+  If the parameter &par_counter_example; is set to &const_true;, a so called counter example is printed to &stderr; each time the prover
   indicates that two summands are not confluent. A counter example is a valuation for which the confluence condition to be proven does not hold.
-  When checking if a tau-summand is confluent, a confluence condition as described above will be created for each of the summands. If the parameter
-  &par_check_all; is set, all of these confluence conditions will be checked. If the parameter is not set, the checking will stop as soon as one
-  condition is encountered that is not a tautology.
-  When the parameter &par_dot_file_name; differs from 0, a .dot file of the BDD of the confluence condition will be saved for each pair of summands
-  that cannot be proven confluent. The string passed as parameter &par_dot_file_name; is used as a prefix for those files.
+</para>
+<para>
+  If the parameter &par_check_all; is set to &const_true;, the confluence of the &tau;-summands regarding all other summands will be checked.
+  If the parameter is set to &const_false;, &class_confluence_checker; continues with the next &tau;-summand as soon as a summand is encountered
+  that is not confluent with the current &tau;-summand.
+</para>
+<para>
   If the parameter &par_generate_invariants; is set, an invariant checker is used to check if the reduced confluence condition is an invariant of
   the LPE passed as parameter &par_lpe;. If the reduced confluence condition is an invariant, the two summands are confluent.
 </para>
-
+<para>
+  The function &confluence_checker_check_confluence_and_mark; returns an LPE with all &tau;-actions of confluent &tau;-summands renamed to &ctau;,
+  unless the parameter &par_no_marking; is set to &const_true;. In case the parameter &par_no_marking; was set to &const_true;, the confluent
+  tau-summands will not be marked, only the results of the confluence checking will be displayed.
+</para>
+<para>
+  If there already is an action named &ctau; present in the LPE passed as parameter &par_lpe;, an error will be reported.
+</para>
 </refsect1>
 
 <refsect1>
 <title>Preconditions</title>
 <para>
+  The following precondition has to be satisfied for &confluence_checker_constructor;:
+  <itemizedlist>
+    <listitem>
+      <para>the argument passed as parameter &par_lpe; is a valid mCRL2 LPE</para>
+    </listitem>
+    <listitem>
+      <para>
+        the argument passed as parameter &par_time_limit; is greater than or equal to 0. If the argument is equal to 0, no time limit will be
+        enforced
+      </para>
+    </listitem>
+  </itemizedlist>
+</para>
+<para>
   The following precondition has to be satisfied for &confluence_checker_check_confluence_and_mark;:
   <itemizedlist>
     <listitem>
-      <para>&par_invariant; is an &type_aterm_appl; representing a propositional formula</para>
+      <para>
+        the argument passed as parameter &par_invariant; is a valid formula in internal mCRL2 format
+      </para>
+    </listitem>
+    <listitem>
+      <para>
+        the argument passed as parameter &par_summand_number; corresponds with a summands of the LPE passed as parameter &par_lpe;.
+        It lies in the interval from and including 1 upto and including the highest summand number
+      </para>
     </listitem>
   </itemizedlist>
 </para>

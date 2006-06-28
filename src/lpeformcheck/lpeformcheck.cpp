@@ -39,19 +39,17 @@
 
     void LPE_Form_Check::print_help() {
       fprintf(stderr,
-        "Usage: %s [OPTION]... [--formulas=FORMULAS] [--lpe=LPE]\n"
+        "Usage: %s [OPTION]... [INFILE] {--formulas=FORMULAS}\n"
         "All formulas in the list of formulas in internal mCRL2 format as found in\n"
         "FORMULAS are checked using the data specification of the mCRL2 LPE as found in\n"
-        "LPE. The tool will indicate whether each formula is a tautology or a\n"
+        "INFILE. The tool indicates whether each formula is a tautology or a\n"
         "contradiction. If the tool is unable to determine whether a formula is a\n"
-        "tautology or a contradiction, it will indicate this fact.\n"
-        "At least one of the arguments --formulas or --lpe is required. If only\n"
-        "one is given, stdin is used as the other input.\n"
+        "tautology or a contradiction, it indicates this fact.\n"
+        "If INFILE is not specified, the LPE is read from stdin.\n"
         "\n"
         "Mandatory arguments to long options are mandatory for short options too.\n"
         "  -f, --formulas=FORMULAS         Use the list of formulas in internal mCRL2\n"
         "                                  format as found in FORMULAS as input.\n"
-        "  -l, --lpe=LPE                   Use the mCRL2 LPE as found in LPE as input.\n"
         "  -c, --counter-example           Give a valuation for which the current\n"
         "                                  formula does not hold, in case the current\n"
         "                                  formula is neither a contradiction nor a\n"
@@ -71,15 +69,15 @@
         "  -r, --rewrite-strategy=STRATEGY Use the specified STRATEGY as rewrite\n"
         "                                  strategy:\n"
         "                                  - 'inner' for the innermost rewrite strategy\n"
-        "                                  - 'innerc' for the compiled innermost\n"
-        "                                    rewrite strategy\n"
+        "                                  - 'innerc' for the compiled innermost rewrite\n"
+        "                                    strategy\n"
         "                                  - 'jitty' for the jitty rewrite strategy\n"
         "                                  - 'jittyc' for the compiled jitty rewrite\n"
         "                                    strategy.\n"
         "                                  By default, the jitty rewrite strategy is\n"
         "                                  used.\n"
-        "  -t, --time-limit=SECONDS        Spend at most the specified number of\n"
-        "                                  SECONDS on proving a single formula.\n"
+        "  -t, --time-limit=SECONDS        Spend at most the specified number of SECONDS\n"
+        "                                  on proving a single formula.\n"
         "  -z --smt-solver=SOLVER          Use the specified SOLVER to remove\n"
         "                                  inconsistent paths from BDDs:\n"
         "                                  - 'ario' for the SMT solver Ario\n"
@@ -125,11 +123,10 @@
     // --------------------------------------------------------------------------------------------
 
     void LPE_Form_Check::get_options(int a_argc, char* a_argv[]) {
-      char* v_short_options = "f:l:cwp:hqvdr:t:z:";
+      char* v_short_options = "f:cwp:hqvdr:t:z:";
 
       struct option v_long_options[] = {
         {"formulas",         required_argument, 0, 'f'},
-        {"lpe",              required_argument, 0, 'l'},
         {"counter-example",  no_argument,       0, 'c'},
         {"witness",          no_argument,       0, 'w'},
         {"print-dot",        required_argument, 0, 'p'},
@@ -151,9 +148,6 @@
         switch (v_option) {
           case 'f':
             f_formulas_file_name = strdup(optarg);
-            break;
-          case 'l':
-            f_lpe_file_name = strdup(optarg);
             break;
           case 'c':
             f_counter_example = true;
@@ -220,13 +214,17 @@
       }
 
       int v_number_of_remaining_arguments = a_argc - optind;
-      if (v_number_of_remaining_arguments > 0) {
+      if (v_number_of_remaining_arguments > 1) {
         gsErrorMsg("%s: too many arguments\n", NAME);
         print_more_info();
         exit(1);
+      } else {
+        if (v_number_of_remaining_arguments == 1) {
+          f_lpe_file_name = strdup(a_argv[optind]);
+        }
       }
-      if ((f_formulas_file_name == 0) and (f_lpe_file_name == 0)) {
-        gsErrorMsg("%s: at least one of the options --formulas=FORMULAS or --lpe=LPE has to be used.\n", NAME);
+      if (f_formulas_file_name == 0) {
+        gsErrorMsg("%s: a file containing a list of formulas must be specified using the option --formulas=FORMULAS.\n", NAME);
         print_more_info();
         exit(1);
       }
@@ -245,7 +243,7 @@
       } else {
         ATermAppl v_data_equations = ATAgetArgument(v_lpe, 3);
         Formula_Checker v_formula_checker(
-          f_strategy, f_time_limit, f_path_eliminator, f_solver_type, v_data_equations, f_counter_example, f_witness, f_dot_file_name
+          v_data_equations, f_strategy, f_time_limit, f_path_eliminator, f_solver_type, f_counter_example, f_witness, f_dot_file_name
         );
 
         v_formula_checker.check_formulas(v_formulas);

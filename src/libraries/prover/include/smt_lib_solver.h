@@ -48,8 +48,15 @@ class SMT_LIB_Solver: public SMT_Solver {
     void translate_unary_minus(ATermAppl a_clause);
     void translate_binary_minus(ATermAppl a_clause);
     void translate_multiplication(ATermAppl a_clause);
+    void translate_max(ATermAppl a_clause);
+    void translate_min(ATermAppl a_clause);
+    void translate_abs(ATermAppl a_clause);
+    void translate_succ(ATermAppl a_clause);
+    void translate_pred(ATermAppl a_clause);
     void translate_add_c(ATermAppl a_clause);
     void translate_c_nat(ATermAppl a_clause);
+    void translate_c_int(ATermAppl a_clause);
+    void translate_c_real(ATermAppl a_clause);
     void translate_unknown_operator(ATermAppl a_clause);
     void translate_variable(ATermAppl a_clause);
     void translate_nat_variable(ATermAppl a_clause);

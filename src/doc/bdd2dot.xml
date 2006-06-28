@@ -1,0 +1,86 @@
+<?xml version="1.0"?>
+
+<!DOCTYPE refentry PUBLIC "-//OASIS//DTD DocBook XML V4.2//EN" "http://www.oasis-open.org/docbook/xml/4.2/docbookx.dtd"[
+<!ENTITY class_bdd2dot "<classname>BDD2Dot</classname>">
+
+<!ENTITY type_virtual "<type>virtual</type>">
+<!ENTITY type_abstract "<type>abstract</type>">
+<!ENTITY type_const "<type>const</type>">
+<!ENTITY type_void "<type>void</type>">
+<!ENTITY type_bool "<type>bool</type>">
+<!ENTITY type_pchar "<type>char*</type>">
+<!ENTITY type_int "<type>int</type>">
+<!ENTITY type_string "<type>std::string</type>">
+<!ENTITY type_atermappl "<type>ATermAppl</type>">
+<!ENTITY type_atermlist "<type>ATermList</type>">
+<!ENTITY type_smt_solver_type "<type>SMT_Solver_Type</type>">
+
+<!ENTITY bdd2dot_output_bdd "<function>BDD2Dot::output_bdd</function>">
+
+<!ENTITY solver_ario "<constant>ario</constant>">
+<!ENTITY solver_cvc_lite "<constant>cvc-lite</constant>">
+<!ENTITY link_ario "<uri>http://www.eecs.umich.edu/~ario/</uri>">
+<!ENTITY link_cvc "<uri>http://www.cs.nyu.edu/acsys/cvcl/</uri>">
+
+<!ENTITY par_file_name "<parameter>a_file_name</parameter>">
+<!ENTITY par_bdd "<parameter>a_bdd</parameter>">
+
+<!ENTITY const_true "<constant>true</constant>">
+<!ENTITY const_false "<constant>false</constant>">
+<!ENTITY if_then_else "<constant>if-then-else</constant>">
+]>
+
+<refentry id="bdd2dot">
+
+<refmeta>
+<refentrytitle>bdd2dot</refentrytitle>
+<manvolnum>7</manvolnum>
+</refmeta>
+
+<refnamediv>
+<refname>bdd2dot</refname>
+<refpurpose>a class that reads a binary decision diagram and writes this BDD to a file in dot format</refpurpose>
+</refnamediv>
+
+<refsynopsisdiv>
+<funcsynopsis>
+<funcprototype>
+  <funcdef>&type_void; &bdd2dot_output_bdd;</funcdef>
+  <paramdef>&type_atermappl; &par_bdd;</paramdef>
+  <paramdef>&type_atermappl; &par_file_name;</paramdef>
+</funcprototype>
+</funcsynopsis>
+</refsynopsisdiv>
+
+<refsect1>
+<title>Description</title>
+<para>
+  The class &class_bdd2dot; offers the ability to write binary decision diagrams to dot files. The method &bdd2dot_output_bdd; receives a
+  binary decision diagram as parameter &par_bdd; and writes it to a file in dot format with the name passed as parameter &par_file_name;.
+</para>
+</refsect1>
+
+<refsect1>
+<title>Preconditions</title>
+<para>
+  The following precondition has to be satisfied for &bdd2dot_output_bdd;:
+  <itemizedlist>
+    <listitem>
+      <para>
+        The argument passed as parameter &par_bdd; is a data expression in internal mCRL2 format with the following restrictions: It either
+        represents the constant &const_true; or the constant &const_false;, or it is an &if_then_else; expression with a propositional formula
+        as guard, and a then-branch and an else-branch that again follow these restrictions
+      </para>
+    </listitem>
+  </itemizedlist>
+</para>
+</refsect1>
+
+<refsect1>
+<title>Author</title>
+<para>
+  Written by Luc Engelen. Please send all complaints, comments and bug reports to <email>bug@mcrl2.org</email>.
+</para>
+</refsect1>
+
+</refentry>

@@ -16,8 +16,15 @@ class Expression_Info {
     ATermAppl f_unary_minus;
     ATermAppl f_binary_minus;
     ATermAppl f_multiplication;
+    ATermAppl f_max;
+    ATermAppl f_min;
+    ATermAppl f_abs;
+    ATermAppl f_succ;
+    ATermAppl f_pred;
     ATermAppl f_add_c;
     ATermAppl f_c_nat;
+    ATermAppl f_c_int;
+    ATermAppl f_c_real;
     ATermAppl f_true;
     ATermAppl f_false;
   public:
@@ -33,8 +40,15 @@ class Expression_Info {
     bool is_unary_minus(ATermAppl a_expression);
     bool is_binary_minus(ATermAppl a_expression);
     bool is_multiplication(ATermAppl a_expression);
+    bool is_max(ATermAppl a_expression);
+    bool is_min(ATermAppl a_expression);
+    bool is_abs(ATermAppl a_expression);
+    bool is_succ(ATermAppl a_expression);
+    bool is_pred(ATermAppl a_expression);
     bool is_add_c(ATermAppl a_expression);
     bool is_c_nat(ATermAppl a_expression);
+    bool is_c_int(ATermAppl a_expression);
+    bool is_c_real(ATermAppl a_expression);
     bool is_operator(ATermAppl a_expression);
     bool is_variable(ATermAppl a_expression);
     bool is_constant(ATermAppl a_expression);

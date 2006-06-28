@@ -85,6 +85,6 @@
 
     // --------------------------------------------------------------------------------------------
 
-    void Prover::set_time_limit(int a_seconds) {
-      f_time_limit = a_seconds;
+    void Prover::set_time_limit(int a_time_limit) {
+      f_time_limit = a_time_limit;
     }

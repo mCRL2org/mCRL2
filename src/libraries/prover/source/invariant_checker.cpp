@@ -114,7 +114,7 @@
       bool v_result = true;
       int v_summand_number = 1;
 
-      while (!ATisEmpty(v_summands) && (f_all || v_result) ) {
+      while (!ATisEmpty(v_summands) && (f_all_violations || v_result) ) {
         v_summand = ATAgetFirst(v_summands);
         v_result = check_summand(a_invariant, v_summand, v_summand_number) && v_result;
         v_summands = ATgetNext(v_summands);
@@ -126,15 +126,15 @@
   // Class Invariant_Checker - Functions declared public --------------------------------------------
 
     Invariant_Checker::Invariant_Checker(
-      RewriteStrategy a_rewrite_strategy, int a_time_limit, bool a_path_eliminator, SMT_Solver_Type a_solver_type, ATermAppl a_lpe,
-      bool a_counter_example, bool a_all, char* a_dot_file_name
+      ATermAppl a_lpe, RewriteStrategy a_rewrite_strategy, int a_time_limit, bool a_path_eliminator, SMT_Solver_Type a_solver_type,
+      bool a_counter_example, bool a_all_violations, char* a_dot_file_name
     ):
       f_bdd_prover(ATAgetArgument(a_lpe, 3), a_rewrite_strategy, a_time_limit, a_path_eliminator, a_solver_type)
     {
       f_init = ATAgetArgument(a_lpe, 6);
       f_summands = ATLgetArgument(ATAgetArgument(a_lpe, 5), 2);
       f_counter_example = a_counter_example;
-      f_all = a_all;
+      f_all_violations = a_all_violations;
       if (a_dot_file_name == 0) {
         f_dot_file_name = 0;
       } else {
@@ -159,7 +159,7 @@
         gsfprintf(stderr, "The invariant does not hold for the initial state.\n");
         v_result = false;
       }
-      if ((f_all || v_result)) {
+      if ((f_all_violations || v_result)) {
         if (check_summands(a_invariant)) {
           gsVerboseMsg("The invariant holds for all summands.\n");
         } else {

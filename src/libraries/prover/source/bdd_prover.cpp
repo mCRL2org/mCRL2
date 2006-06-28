@@ -48,7 +48,7 @@
     // --------------------------------------------------------------------------------------------
 
     ATerm BDD_Prover::bdd_down(ATerm a_formula, int a_indent) {
-      if (f_time_limit != 0 && (f_deadline - time(0)) < 0) {
+      if (f_time_limit != 0 && (f_deadline - time(0)) <= 0) {
         gsDebugMsg("The time limit has passed.\n");
         return a_formula;
       }
@@ -209,13 +209,10 @@
   // Class BDD_Prover - Functions declared public -------------------------------------------------
 
     BDD_Prover::BDD_Prover(
-      ATermAppl a_equations, RewriteStrategy a_rewrite_strategy, int a_time_limit, bool a_path_eliminator,
-      SMT_Solver_Type a_solver_type, bool a_reverse, bool a_full
+      ATermAppl a_equations, RewriteStrategy a_rewrite_strategy, int a_time_limit, bool a_path_eliminator, SMT_Solver_Type a_solver_type
     ):
       Prover(a_equations, a_rewrite_strategy, a_time_limit)
     {
-      f_reverse = a_reverse;
-      f_full = a_full;
       f_info->set_reverse(f_reverse);
       f_info->set_full(f_full);
       gsDebugMsg(
@@ -230,6 +227,8 @@
       } else {
         f_bdd_simplifier = new BDD_Simplifier();
       }
+      f_reverse = true;
+      f_full = true;
     }
 
     // --------------------------------------------------------------------------------------------

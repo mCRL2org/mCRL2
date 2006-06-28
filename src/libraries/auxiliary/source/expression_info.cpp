@@ -18,8 +18,15 @@
       f_unary_minus = gsMakeOpIdNameNeg();
       f_binary_minus = gsMakeOpIdNameSubt();
       f_multiplication = gsMakeOpIdNameMult();
+      f_max = gsMakeOpIdNameMax();
+      f_min = gsMakeOpIdNameMin();
+      f_abs = gsMakeOpIdNameAbs();
+      f_succ = gsMakeOpIdNameSucc();
+      f_pred = gsMakeOpIdNamePred();
       f_add_c = gsMakeOpIdNameAddC();
       f_c_nat = gsMakeOpIdNameCNat();
+      f_c_int = gsMakeOpIdNameCInt();
+      f_c_real = gsMakeOpIdNameCReal();
       f_true = gsMakeOpIdTrue();
       f_false = gsMakeOpIdFalse();
     }
@@ -215,6 +222,87 @@
 
     // --------------------------------------------------------------------------------------------
 
+    bool Expression_Info::is_max(ATermAppl a_expression) {
+      ATermAppl v_term;
+
+      if (gsIsDataAppl(a_expression)) {
+        v_term = ATAgetArgument(a_expression, 0);
+        if (gsIsDataAppl(v_term)) {
+          v_term = ATAgetArgument(v_term, 0);
+          if (gsIsOpId(v_term)) {
+            v_term = ATAgetArgument(v_term, 0);
+            return v_term == f_max;
+          }
+        }
+      }
+      return false;
+    }
+
+    // --------------------------------------------------------------------------------------------
+
+    bool Expression_Info::is_min(ATermAppl a_expression) {
+      ATermAppl v_term;
+
+      if (gsIsDataAppl(a_expression)) {
+        v_term = ATAgetArgument(a_expression, 0);
+        if (gsIsDataAppl(v_term)) {
+          v_term = ATAgetArgument(v_term, 0);
+          if (gsIsOpId(v_term)) {
+            v_term = ATAgetArgument(v_term, 0);
+            return v_term == f_min;
+          }
+        }
+      }
+      return false;
+    }
+
+    // --------------------------------------------------------------------------------------------
+
+    bool Expression_Info::is_abs(ATermAppl a_expression) {
+      ATermAppl v_term;
+
+      if (gsIsDataAppl(a_expression)) {
+        v_term = ATAgetArgument(a_expression, 0);
+        if (gsIsOpId(v_term)) {
+          v_term = ATAgetArgument(v_term, 0);
+          return v_term == f_abs;
+        }
+      }
+      return false;
+    }
+
+    // --------------------------------------------------------------------------------------------
+
+    bool Expression_Info::is_succ(ATermAppl a_expression) {
+      ATermAppl v_term;
+
+      if (gsIsDataAppl(a_expression)) {
+        v_term = ATAgetArgument(a_expression, 0);
+        if (gsIsOpId(v_term)) {
+          v_term = ATAgetArgument(v_term, 0);
+          return v_term == f_succ;
+        }
+      }
+      return false;
+    }
+
+    // --------------------------------------------------------------------------------------------
+
+    bool Expression_Info::is_pred(ATermAppl a_expression) {
+      ATermAppl v_term;
+
+      if (gsIsDataAppl(a_expression)) {
+        v_term = ATAgetArgument(a_expression, 0);
+        if (gsIsOpId(v_term)) {
+          v_term = ATAgetArgument(v_term, 0);
+          return v_term == f_pred;
+        }
+      }
+      return false;
+    }
+
+    // --------------------------------------------------------------------------------------------
+
     bool Expression_Info::is_add_c(ATermAppl a_expression) {
       ATermAppl v_term;
 
@@ -244,6 +332,36 @@
         if (gsIsOpId(v_term)) {
           v_term = ATAgetArgument(v_term, 0);
           return v_term == f_c_nat;
+        }
+      }
+      return false;
+    }
+
+    // --------------------------------------------------------------------------------------------
+
+    bool Expression_Info::is_c_int(ATermAppl a_expression) {
+      ATermAppl v_term;
+
+      if (gsIsDataAppl(a_expression)) {
+        v_term = ATAgetArgument(a_expression, 0);
+        if (gsIsOpId(v_term)) {
+          v_term = ATAgetArgument(v_term, 0);
+          return v_term == f_c_int;
+        }
+      }
+      return false;
+    }
+
+    // --------------------------------------------------------------------------------------------
+
+    bool Expression_Info::is_c_real(ATermAppl a_expression) {
+      ATermAppl v_term;
+
+      if (gsIsDataAppl(a_expression)) {
+        v_term = ATAgetArgument(a_expression, 0);
+        if (gsIsOpId(v_term)) {
+          v_term = ATAgetArgument(v_term, 0);
+          return v_term == f_c_real;
         }
       }
       return false;

@@ -1,0 +1,87 @@
+<?xml version="1.0"?>
+
+<!DOCTYPE refentry PUBLIC "-//OASIS//DTD DocBook XML V4.2//EN" "http://www.oasis-open.org/docbook/xml/4.2/docbookx.dtd"[
+<!ENTITY class_bdd_simplifier "<classname>BDD_Simplifier</classname>">
+
+<!ENTITY type_virtual "<type>virtual</type>">
+<!ENTITY type_abstract "<type>abstract</type>">
+<!ENTITY type_const "<type>const</type>">
+<!ENTITY type_void "<type>void</type>">
+<!ENTITY type_bool "<type>bool</type>">
+<!ENTITY type_pchar "<type>char*</type>">
+<!ENTITY type_int "<type>int</type>">
+<!ENTITY type_string "<type>std::string</type>">
+<!ENTITY type_atermappl "<type>ATermAppl</type>">
+<!ENTITY type_atermlist "<type>ATermList</type>">
+<!ENTITY type_smt_solver_type "<type>SMT_Solver_Type</type>">
+
+<!ENTITY bdd_simplifier_simplify "<function>BDD_Simplifier::simplify</function>">
+
+<!ENTITY solver_ario "<constant>ario</constant>">
+<!ENTITY solver_cvc_lite "<constant>cvc-lite</constant>">
+<!ENTITY link_ario "<uri>http://www.eecs.umich.edu/~ario/</uri>">
+<!ENTITY link_cvc "<uri>http://www.cs.nyu.edu/acsys/cvcl/</uri>">
+
+<!ENTITY par_formula "<parameter>a_formula</parameter>">
+<!ENTITY par_bdd "<parameter>a_bdd</parameter>">
+
+<!ENTITY const_true "<constant>true</constant>">
+<!ENTITY const_false "<constant>false</constant>">
+<!ENTITY if_then_else "<constant>if-then-else</constant>">
+<!ENTITY const_solver_type_ario "<constant>solver_type_ario</constant>">
+]>
+
+<refentry id="bdd_simplifier">
+
+<refmeta>
+<refentrytitle>bdd_simplifier</refentrytitle>
+<manvolnum>7</manvolnum>
+</refmeta>
+
+<refnamediv>
+<refname>bdd_simplifier</refname>
+<refpurpose>a base class for BDD simplifiers that attempt to reduce the size of binary decision diagrams</refpurpose>
+</refnamediv>
+
+<refsynopsisdiv>
+<funcsynopsis>
+<funcprototype>
+  <funcdef>&type_virtual; &type_atermappl; &bdd_simplifier_simplify;</funcdef>
+  <paramdef>&type_atermappl; &par_bdd;</paramdef>
+</funcprototype>
+</funcsynopsis>
+</refsynopsisdiv>
+
+<refsect1>
+<title>Description</title>
+<para>
+  The class &class_bdd_simplifier; is a base class for BDD simplifiers. The method &bdd_simplifier_simplify; receives a BDD as parameter
+  &par_bdd; and tries to find an equivalent BDD that is smaller. It returns the reduced BDD if such a BDD is found. If a reduced BDD is not found,
+  the original BDD is returned.
+</para>
+</refsect1>
+
+<refsect1>
+<title>Preconditions</title>
+<para>
+  The following precondition has to be satisfied for &bdd_simplifier_simplify;:
+  <itemizedlist>
+    <listitem>
+      <para>
+        The argument passed as parameter &par_bdd; is a data expression in internal mCRL2 format with the following restrictions: It either
+        represents the constant &const_true; or the constant &const_false;, or it is an &if_then_else; expression with a propositional formula
+        as guard, and a then-branch and an else-branch that again follow these restrictions
+      </para>
+    </listitem>
+  </itemizedlist>
+</para>
+</refsect1>
+
+<refsect1>
+<title>Author</title>
+<para>
+  Written by Luc Engelen. Please send all complaints, comments and bug reports to <email>bug@mcrl2.org</email>.
+</para>
+</refsect1>
+
+</refentry>

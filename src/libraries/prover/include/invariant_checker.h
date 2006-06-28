@@ -16,7 +16,7 @@ class Invariant_Checker {
     ATermAppl f_init;
     ATermList f_summands;
     bool f_counter_example;
-    bool f_all;
+    bool f_all_violations;
     char* f_dot_file_name;
     void print_counter_example();
     void save_dot_file(int a_summand_number);
@@ -25,14 +25,14 @@ class Invariant_Checker {
     bool check_summands(ATermAppl a_invariant);
   public:
     Invariant_Checker(
-      RewriteStrategy a_rewrite_strategy,
-      int a_time_limit,
-      bool a_path_eliminator,
-      SMT_Solver_Type a_solver_type,
       ATermAppl a_lpe,
-      bool a_counter_example,
-      bool a_all,
-      char* a_dot_file_name
+      RewriteStrategy a_rewrite_strategy = GS_REWR_JITTY,
+      int a_time_limit = 0,
+      bool a_path_eliminator = false,
+      SMT_Solver_Type a_solver_type = solver_type_ario,
+      bool a_counter_example = false,
+      bool a_all_violations = false,
+      char* a_dot_file_name = 0
     );
     ~Invariant_Checker();
     bool check_invariant(ATermAppl a_invariant);

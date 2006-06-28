@@ -30,16 +30,16 @@ class Confluence_Checker {
     ATermAppl check_confluence_and_mark_summand(ATermAppl a_invariant, ATermAppl a_summand, int a_summand_number, bool& a_is_marked);
   public:
     Confluence_Checker(
-      RewriteStrategy a_rewrite_strategy,
-      int a_time_limit,
-      bool a_path_eliminator,
-      SMT_Solver_Type a_solver_type,
       ATermAppl a_lpe,
-      bool a_no_marking,
-      bool a_check_all,
-      bool a_counter_example,
-      char* a_dot_file_name,
-      bool a_generate_invariants
+      RewriteStrategy a_rewrite_strategy = GS_REWR_JITTY,
+      int a_time_limit = 0,
+      bool a_path_eliminator = false,
+      SMT_Solver_Type a_solver_type = solver_type_ario,
+      bool a_no_marking = false,
+      bool a_check_all = false,
+      bool a_counter_example = false,
+      bool a_generate_invariants = false,
+      char* a_dot_file_name = 0
     );
     ~Confluence_Checker();
     ATermAppl check_confluence_and_mark(ATermAppl a_invariant, int a_summand_number);

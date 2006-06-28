@@ -375,6 +375,79 @@ using namespace std;
 
     // --------------------------------------------------------------------------------------------
 
+    void SMT_LIB_Solver::translate_max(ATermAppl a_clause) {
+      ATermAppl v_clause_1, v_clause_2;
+
+      v_clause_1 = f_expression_info.get_argument(a_clause, 0);
+      v_clause_2 = f_expression_info.get_argument(a_clause, 1);
+      f_formula = f_formula + "(ite (>= ";
+      translate_clause(v_clause_1, false);
+      f_formula = f_formula + " ";
+      translate_clause(v_clause_2, false);
+      f_formula = f_formula + ") ";
+      translate_clause(v_clause_1, false);
+      f_formula = f_formula + " ";
+      translate_clause(v_clause_2, false);
+      f_formula = f_formula + ")";
+    }
+
+    // --------------------------------------------------------------------------------------------
+
+    void SMT_LIB_Solver::translate_min(ATermAppl a_clause) {
+      ATermAppl v_clause_1, v_clause_2;
+
+      v_clause_1 = f_expression_info.get_argument(a_clause, 0);
+      v_clause_2 = f_expression_info.get_argument(a_clause, 1);
+      f_formula = f_formula + "(ite (<= ";
+      translate_clause(v_clause_1, false);
+      f_formula = f_formula + " ";
+      translate_clause(v_clause_2, false);
+      f_formula = f_formula + ") ";
+      translate_clause(v_clause_1, false);
+      f_formula = f_formula + " ";
+      translate_clause(v_clause_2, false);
+      f_formula = f_formula + ")";
+    }
+
+    // --------------------------------------------------------------------------------------------
+
+    void SMT_LIB_Solver::translate_abs(ATermAppl a_clause) {
+      ATermAppl v_clause;
+
+      v_clause = f_expression_info.get_argument(a_clause, 0);
+      f_formula = f_formula + "(ite (< 0 ";
+      translate_clause(v_clause, false);
+      f_formula = f_formula + ") ~";
+      translate_clause(v_clause, false);
+      f_formula = f_formula + " ";
+      translate_clause(v_clause, false);
+      f_formula = f_formula + ")";
+    }
+
+    // --------------------------------------------------------------------------------------------
+
+    void SMT_LIB_Solver::translate_succ(ATermAppl a_clause) {
+      ATermAppl v_clause;
+
+      v_clause = f_expression_info.get_argument(a_clause, 0);
+      f_formula = f_formula + "(+ ";
+      translate_clause(v_clause, false);
+      f_formula = f_formula + " 1)";
+    }
+
+    // --------------------------------------------------------------------------------------------
+
+    void SMT_LIB_Solver::translate_pred(ATermAppl a_clause) {
+      ATermAppl v_clause;
+
+      v_clause = f_expression_info.get_argument(a_clause, 0);
+      f_formula = f_formula + "(- ";
+      translate_clause(v_clause, false);
+      f_formula = f_formula + " 1)";
+    }
+
+    // --------------------------------------------------------------------------------------------
+
     void SMT_LIB_Solver::translate_add_c(ATermAppl a_clause) {
       ATermAppl v_clause_1, v_clause_2, v_clause_3;
 
@@ -397,6 +470,24 @@ using namespace std;
     // --------------------------------------------------------------------------------------------
 
     void SMT_LIB_Solver::translate_c_nat(ATermAppl a_clause) {
+      ATermAppl v_clause;
+
+      v_clause = f_expression_info.get_argument(a_clause, 0);
+      translate_clause(v_clause, false);
+    }
+
+    // --------------------------------------------------------------------------------------------
+
+    void SMT_LIB_Solver::translate_c_int(ATermAppl a_clause) {
+      ATermAppl v_clause;
+
+      v_clause = f_expression_info.get_argument(a_clause, 0);
+      translate_clause(v_clause, false);
+    }
+
+    // --------------------------------------------------------------------------------------------
+
+    void SMT_LIB_Solver::translate_c_real(ATermAppl a_clause) {
       ATermAppl v_clause;
 
       v_clause = f_expression_info.get_argument(a_clause, 0);
@@ -572,10 +663,24 @@ using namespace std;
         translate_binary_minus(a_clause);
       } else if (f_expression_info.is_multiplication(a_clause)) {
         translate_multiplication(a_clause);
+      } else if (f_expression_info.is_max(a_clause)) {
+        translate_max(a_clause);
+      } else if (f_expression_info.is_min(a_clause)) {
+        translate_min(a_clause);
+      } else if (f_expression_info.is_abs(a_clause)) {
+        translate_abs(a_clause);
+      } else if (f_expression_info.is_succ(a_clause)) {
+        translate_succ(a_clause);
+      } else if (f_expression_info.is_pred(a_clause)) {
+        translate_pred(a_clause);
       } else if (f_expression_info.is_add_c(a_clause)) {
         translate_add_c(a_clause);
       } else if (f_expression_info.is_c_nat(a_clause)) {
         translate_c_nat(a_clause);
+      } else if (f_expression_info.is_c_int(a_clause)) {
+        translate_c_int(a_clause);
+      } else if (f_expression_info.is_c_real(a_clause)) {
+        translate_c_real(a_clause);
       } else if (f_expression_info.is_int_constant(a_clause)) {
         translate_int_constant(a_clause);
       } else if (f_expression_info.is_nat_constant(a_clause)) {

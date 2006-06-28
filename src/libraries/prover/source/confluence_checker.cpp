@@ -286,7 +286,7 @@
           v_condition = get_confluence_condition(a_invariant, a_summand, v_summand, v_variables);
           f_bdd_prover.set_formula(v_condition);
           if (f_bdd_prover.is_tautology() == answer_yes) {
-            gsfprintf(stderr, "+", v_summand_number);
+            gsfprintf(stderr, "+");
             f_commutes[(f_number_of_summands * a_summand_number) + v_summand_number] = 1;
           } else {
             if (f_generate_invariants) {
@@ -294,7 +294,7 @@
               gsVerboseMsg("Checking invariant: %P\n", v_new_invariant);
               if (f_invariant_checker.check_invariant(v_new_invariant)) {
                 gsVerboseMsg("Invariant holds\n");
-                gsfprintf(stderr, "i", v_summand_number);
+                gsfprintf(stderr, "i");
                 f_commutes[(f_number_of_summands * a_summand_number) + v_summand_number] = 1;
               } else {
                 gsVerboseMsg("Invariant doesn't hold\n");
@@ -327,7 +327,7 @@
       }
 
       if (v_is_confluent) {
-        gsfprintf(stderr, "Confluent with all summands.", v_summand_number);
+        gsfprintf(stderr, "Confluent with all summands.");
         a_is_marked = true;
         v_marked_summand = ATsetArgument(a_summand, (ATerm) gsMakeMultAct(ATmakeList1((ATerm) make_ctau_action())), 2);
         return v_marked_summand;
@@ -339,11 +339,11 @@
   // Class Confluence_Checker - Functions declared public -----------------------------------------
 
     Confluence_Checker::Confluence_Checker(
-      RewriteStrategy a_rewrite_strategy, int a_time_limit, bool a_path_eliminator, SMT_Solver_Type a_solver_type, ATermAppl a_lpe,
-      bool a_no_marking, bool a_check_all, bool a_counter_example, char* a_dot_file_name, bool a_generate_invariants
+      ATermAppl a_lpe, RewriteStrategy a_rewrite_strategy, int a_time_limit, bool a_path_eliminator, SMT_Solver_Type a_solver_type,
+      bool a_no_marking, bool a_check_all, bool a_counter_example, bool a_generate_invariants, char* a_dot_file_name
     ):
       f_disjointness_checker(ATAgetArgument(a_lpe, 5)),
-      f_invariant_checker(a_rewrite_strategy, a_time_limit, a_path_eliminator, a_solver_type, a_lpe, false, false, 0),
+      f_invariant_checker(a_lpe, a_rewrite_strategy, a_time_limit, a_path_eliminator, a_solver_type, false, false, 0),
       f_bdd_prover(ATAgetArgument(a_lpe, 3), a_rewrite_strategy, a_time_limit, a_path_eliminator, a_solver_type)
     {
       if (has_ctau_action(a_lpe)) {
@@ -393,7 +393,7 @@
           if (!gsIsDelta(v_multi_actions_or_delta)) {
             v_multi_actions = ATLgetArgument(v_multi_actions_or_delta, 0);
             if (ATisEmpty(v_multi_actions)) {
-              gsfprintf(stderr, "tau summand %2d: ", v_summand_number);
+              gsfprintf(stderr, "tau-summand %2d: ", v_summand_number);
               v_marked_summand = check_confluence_and_mark_summand(a_invariant, v_summand, v_summand_number, v_is_marked);
               gsfprintf(stderr, "\n");
             }

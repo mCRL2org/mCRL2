@@ -16,12 +16,12 @@ class Invariant_Eliminator {
     ATermAppl simplify_summand(ATermAppl a_invariant, ATermAppl a_summand, int a_summand_number);
   public:
     Invariant_Eliminator(
-      RewriteStrategy a_rewrite_strategy,
-      int a_time_limit,
-      bool a_path_eliminator,
-      SMT_Solver_Type a_solver_type,
       ATermAppl a_lpe,
-      bool a_simplify_all
+      RewriteStrategy a_rewrite_strategy = GS_REWR_JITTY,
+      int a_time_limit = 0,
+      bool a_path_eliminator = false,
+      SMT_Solver_Type a_solver_type = solver_type_ario,
+      bool a_simplify_all = false
     );
     ~Invariant_Eliminator();
     ATermAppl simplify(ATermAppl a_invariant, int a_summand_number);

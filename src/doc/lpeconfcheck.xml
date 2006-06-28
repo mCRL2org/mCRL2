@@ -48,8 +48,16 @@
 <!ENTITY strat_jittyc_string "<constant>jittyc</constant>">
 <!ENTITY solver_ario_string "<constant>'ario'</constant>">
 <!ENTITY solver_cvc_lite_string "<constant>'cvc-lite'</constant>">
+<!ENTITY solver_ario "<constant>ario</constant>">
+<!ENTITY solver_cvc_lite "<constant>cvc-lite</constant>">
 <!ENTITY stdin "<constant>stdin</constant>">
 <!ENTITY stdout "<constant>stdout</constant>">
+<!ENTITY const_true "<constant>true</constant>">
+<!ENTITY link_ario "<uri>http://www.eecs.umich.edu/~ario/</uri>">
+<!ENTITY link_cvc "<uri>http://www.cs.nyu.edu/acsys/cvcl/</uri>">
+<!ENTITY inv "<literal>inv()</literal>">
+<!ENTITY tau "<literal>tau</literal>">
+<!ENTITY ctau "<literal>ctau</literal>">
 ]>
 
 <refentry id="lpeconfcheck">
@@ -61,7 +69,7 @@
 
 <refnamediv>
   <refname>lpeconfcheck</refname>
-  <refpurpose>check which summands of an LPE are confluent and mark them</refpurpose>
+  <refpurpose>check which &tau;-summands of an LPE are confluent and mark them by renaming their &tau;-actions to &ctau;</refpurpose>
 </refnamediv>
 
 <refsynopsisdiv>
@@ -75,9 +83,9 @@
 <refsect1>
   <title>Description</title>
   <para>
-    The &lpeconfcheck; tool checks which tau-summands of the mCRL2 LPE as found
-    in &infile; are confluent and marks these. The resulting LPE is written to
-    the file named &outfile;.
+    The &lpeconfcheck; tool checks which &tau;-summands of the mCRL2 LPE as found
+    in &infile; are confluent and marks them by renaming their &tau;-actions to &ctau;. The
+    resulting LPE is written to the file named &outfile;.
   </para>
 
   <para>
@@ -94,27 +102,29 @@
               + sum ej: Ej. cj(d, ej) -> tau . P(gj(d, ej))
               + ...;
     </literallayout>
-    tau-summand j is confluent with summand i if the following condition holds
-    for all d: D, for all ei: Ei and for all ej: Ej:
+    &tau;-summand <literal>j</literal> is confluent with summand <literal>i</literal> if the following condition holds
+    for all <literal>d: D</literal>, for all <literal>ei: Ei</literal> and for all <literal>ej: Ej</literal>:
     <literallayout>
       (inv(d) /\ ci(d, ei) /\ cj(d, ej))
       =>
       (ci(gj(d, ej), ei) /\ cj(gi(d, ei), ej) /\ fi(d, ei) == fi(gj(d, ej), ei) /\ gi(gj(d, ej), ei) == gj(gi(d, ei), ej))
     </literallayout>
-    where inv() is the invariant specified using the option &opt_invariant;. In case ai is also a tau-action, this formula
-    can be weakened to the following:
+    where &inv; is the invariant specified using the option &opt_invariant;. In case <literal>ai</literal>
+    is also a &tau;-action, this formula can be weakened to the following:
     <literallayout>
       (inv(d) /\ ci(d, ei) /\ cj(d, ej))
       =>
       (gi(d, ei) == gj(d, ej) \/ (ci(gj(d, ej), ei) /\ cj(gi(d, ei), ej) /\ gi(gj(d, ej), ei) == gj(gi(d, ei), ej)))
     </literallayout>
+    If the option &opt_invariant; is not used, the invariant is equal to &const_true;.
   </para>
 
   <para>
-    The tool will generate these confluence conditions for a number of
-    summands and tries to prove that they are tautologies using a BDD based prover for
-    propositional formulas. Because of the limitations of the prover used to check
-    these conditions, &lpeconfcheck; may indicate that a tau-summand is not confluent
+    The tool will generate these confluence conditions for all
+    &tau;-summands
+    and tries to prove that they are tautologies using a BDD based prover for
+    propositional formulas. In some cases &lpeconfcheck; indicates that a
+    &tau;-summand is not confluent
     even though it is. The option &opt_verbose; gives insight into what the prover is
     doing and can be used to see if rewrite rules have to be added to the specification
     in order to enable the prover to determine that certain condition are indeed
@@ -124,7 +134,10 @@
   <para>
     In some cases it may be useful to use an SMT solver to assist the prover. The SMT
     solver can further reduce BDDs by removing inconsistent paths. A specific SMT solver
-    can be chosen using the option &opt_smt_solver;=&solver;.
+    can be chosen using the option &opt_smt_solver;=&solver;. Either the SMT solver &solver_ario; or
+    &solver_cvc_lite; can be used. To use one of these solvers, the directory containing the
+    corresponding executable must be in the path.
+    On June the 20th of 2006, Ario was available on &link_ario; and CVC Lite was available on &link_cvc;.
   </para>
 
   <para>
@@ -134,14 +147,10 @@
     <itemizedlist spacing='compact'>
       <listitem>
         <para>
-          The most time consuming way of checking the confluence of two summands is
-          generating the confluence condition and then checking if this condition is a
-          tautology using the prover. If two summands are proven confluent using the
-          prover, &lpeconfcheck; indicates this by printing a plus sign ('+').
-          If the option &opt_generate_invariants; is used, the &lpeconfcheck; tool will try to prove
-          that the reduced confluence condition is an invariant of the LPE, in case the confluence condition
-          is not a tautology. If the reduced confluence condition is indeed an invariant, the
-          two summands are proven confluent. &lpeconfcheck; indicates this by printing an 'i'.
+          If summand number 1 has been proven confluent with summand number 2, summand
+          number 2 is also confluent with summand number 1. This method of checking
+          confluence is called checking confluence by symmetry. If two summands are
+          confluent by symmetry, &lpeconfcheck; indicates this by printing a dot ('.').
         </para>
       </listitem>
       <listitem>
@@ -169,13 +178,20 @@
       </listitem>
       <listitem>
         <para>
-          If summand number 1 has been proven confluent with summand number 2, summand
-          number 2 is also confluent with summand number 1. This method of checking
-          confluence is called checking confluence by symmetry. If two summands are
-          confluent by symmetry, &lpeconfcheck; indicates this by printing a dot ('.').
+          The most time consuming way of checking the confluence of two summands is
+          generating the confluence condition and then checking if this condition is a
+          tautology using the prover. If two summands are proven confluent using the
+          prover, &lpeconfcheck; indicates this by printing a plus sign ('+').
+          If the option &opt_generate_invariants; is used, the &lpeconfcheck; tool will try to prove
+          that the reduced confluence condition is an invariant of the LPE, in case the confluence condition
+          is not a tautology. If the reduced confluence condition is indeed an invariant, the
+          two summands are proven confluent. &lpeconfcheck; indicates this by printing an 'i'.
         </para>
       </listitem>
     </itemizedlist>
+  </para>
+  <para>
+    If there already is an action named &ctau; present in the LPE as found in &infile;, an error will be reported.
   </para>
 </refsect1>
 
@@ -233,7 +249,7 @@
     <term>&opt_no_marking;</term>
     <listitem>
       <para>
-        Do not mark the confluent tau-summands.
+        Do not mark the confluent &tau;-summands.
         Since there are no changes made to the LPE,
         nothing is written to &outfile;
       </para>
@@ -245,8 +261,9 @@
     <term>&opt_check_all;</term>
     <listitem>
       <para>
-        Do not stop checking summands on detection
-        of the first non-confluence
+        Check the confluence of the &tau;-summands regarding all other summands, instead of
+        continuing with the next &tau;-summand as soon as a summand is
+        encountered that is not confluent with the current &tau;-summand
       </para>
     </listitem>
   </varlistentry>

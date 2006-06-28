@@ -1,0 +1,101 @@
+<?xml version="1.0"?>
+
+<!DOCTYPE refentry PUBLIC "-//OASIS//DTD DocBook XML V4.2//EN" "http://www.oasis-open.org/docbook/xml/4.2/docbookx.dtd"[
+<!ENTITY class_bdd_path_eliminator "<classname>BDD_Path_Eliminator</classname>">
+<!ENTITY class_bdd_simplifier "<classname>BDD_Simplifier</classname>">
+
+<!ENTITY type_virtual "<type>virtual</type>">
+<!ENTITY type_abstract "<type>abstract</type>">
+<!ENTITY type_const "<type>const</type>">
+<!ENTITY type_void "<type>void</type>">
+<!ENTITY type_bool "<type>bool</type>">
+<!ENTITY type_pchar "<type>char*</type>">
+<!ENTITY type_int "<type>int</type>">
+<!ENTITY type_string "<type>std::string</type>">
+<!ENTITY type_atermappl "<type>ATermAppl</type>">
+<!ENTITY type_atermlist "<type>ATermList</type>">
+<!ENTITY type_smt_solver_type "<type>SMT_Solver_Type</type>">
+
+<!ENTITY bdd_path_eliminator_constructor "<function>BDD_Path_Eliminator::BDD_Path_Eliminator</function>">
+<!ENTITY bdd_path_eliminator_simplify "<function>BDD_Path_Eliminator::simplify</function>">
+
+<!ENTITY solver_ario "<constant>ario</constant>">
+<!ENTITY solver_cvc_lite "<constant>cvc-lite</constant>">
+<!ENTITY link_ario "<uri>http://www.eecs.umich.edu/~ario/</uri>">
+<!ENTITY link_cvc "<uri>http://www.cs.nyu.edu/acsys/cvcl/</uri>">
+
+<!ENTITY par_formula "<parameter>a_formula</parameter>">
+<!ENTITY par_bdd "<parameter>a_bdd</parameter>">
+<!ENTITY par_solver_type "<parameter>a_solver_type</parameter>">
+
+<!ENTITY const_true "<constant>true</constant>">
+<!ENTITY const_false "<constant>false</constant>">
+<!ENTITY if_then_else "<constant>if-then-else</constant>">
+<!ENTITY const_solver_type_ario "<constant>solver_type_ario</constant>">
+]>
+
+<refentry id="bdd_path_eliminator">
+
+<refmeta>
+<refentrytitle>bdd_path_eliminator</refentrytitle>
+<manvolnum>7</manvolnum>
+</refmeta>
+
+<refnamediv>
+<refname>bdd_path_eliminator</refname>
+<refpurpose>a class that eliminates inconsistent paths from binary decision diagrams</refpurpose>
+</refnamediv>
+
+<refsynopsisdiv>
+<funcsynopsis>
+<funcprototype>
+  <funcdef>&bdd_path_eliminator_constructor;</funcdef>
+  <paramdef>&type_smt_solver_type; &par_solver_type;</paramdef>
+</funcprototype>
+<funcprototype>
+  <funcdef>&type_virtual; &type_atermappl; &bdd_path_eliminator_simplify;</funcdef>
+  <paramdef>&type_atermappl; &par_bdd;</paramdef>
+</funcprototype>
+</funcsynopsis>
+</refsynopsisdiv>
+
+<refsect1>
+<title>Description</title>
+<para>
+  The class &class_bdd_path_eliminator; inherits from the class &class_bdd_simplifier;. It uses an SMT solver to eliminate inconsistent paths from
+  BDDs. The parameter &par_solver_type; of the constructor &bdd_path_eliminator_constructor; is used to indicate which SMT solver should be used
+  for this task. A path in a BDD is constructed by selecting a set of guards as follows: starting at the root node, one of the two edges at each
+  guard is followed until a leaf is reached. Each time the &const_true;-edge is chosen, the guard is added to the set. Each time the
+  &const_false;-edge is chosen, the negation of the guard is added to the set. If the conjunction of all elements in this set is a
+  contradiction, the path is inconsistent.
+</para>
+<para>
+  The method &bdd_path_eliminator_simplify; receives a BDD as parameter &par_bdd; and returns the equivalent BDD from which all inconsistent
+  paths have been removed.
+</para>
+</refsect1>
+
+<refsect1>
+<title>Preconditions</title>
+<para>
+  The following precondition has to be satisfied for &bdd_path_eliminator_simplify;:
+  <itemizedlist>
+    <listitem>
+      <para>
+        The argument passed as parameter &par_bdd; is a data expression in internal mCRL2 format with the following restrictions: It either
+        represents the constant &const_true; or the constant &const_false;, or it is an &if_then_else; expression with a propositional formula
+        as guard, and a then-branch and an else-branch that again follow these restrictions
+      </para>
+    </listitem>
+  </itemizedlist>
+</para>
+</refsect1>
+
+<refsect1>
+<title>Author</title>
+<para>
+  Written by Luc Engelen. Please send all complaints, comments and bug reports to <email>bug@mcrl2.org</email>.
+</para>
+</refsect1>
+
+</refentry>

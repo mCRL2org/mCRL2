@@ -3,6 +3,7 @@
 <!DOCTYPE refentry PUBLIC "-//OASIS//DTD DocBook XML V4.2//EN" "http://www.oasis-open.org/docbook/xml/4.2/docbookx.dtd"[
 <!ENTITY class_prover "<classname>Prover</classname>">
 <!ENTITY class_bdd_prover "<classname>BDD_Prover</classname>">
+<!ENTITY class_bdd_path_eliminator "<classname>BDD_Path_Eliminator</classname>">
 
 <!ENTITY type_virtual "<type>virtual</type>">
 <!ENTITY type_abstract "<type>abstract</type>">
@@ -18,7 +19,6 @@
 <!ENTITY prover_set_formula "<function>Prover::set_formula</function>">
 
 <!ENTITY bdd_prover_constructor "<function>BDD_Prover::BDD_Prover</function>">
-<!ENTITY bdd_prover_destructor "<function>BDD_Prover::~BDD_Prover</function>">
 <!ENTITY bdd_prover_is_tautology "<function>BDD_Prover::is_tautology</function>">
 <!ENTITY bdd_prover_is_contradiction "<function>BDD_Prover::is_contradiction</function>">
 <!ENTITY bdd_prover_get_bdd "<function>BDD_Prover::get_bdd</function>">
@@ -33,10 +33,23 @@
 <!ENTITY par_reverse "<parameter>a_reverse</parameter>">
 <!ENTITY par_full "<parameter>a_full</parameter>">
 
+<!ENTITY solver_ario "<constant>ario</constant>">
+<!ENTITY solver_cvc_lite "<constant>cvc-lite</constant>">
+
+<!ENTITY link_ario "<uri>http://www.eecs.umich.edu/~ario/</uri>">
+<!ENTITY link_cvc "<uri>http://www.cs.nyu.edu/acsys/cvcl/</uri>">
+
 <!ENTITY const_strat_jitty "<constant>GS_REWR_JITTY</constant>">
+<!ENTITY const_strat_jittyc "<constant>GS_REWR_JITTYC</constant>">
+<!ENTITY const_strat_inner "<constant>GS_REWR_INNER</constant>">
+<!ENTITY const_strat_innerc "<constant>GS_REWR_INNERC</constant>">
 <!ENTITY const_solver_type_ario "<constant>solver_type_ario</constant>">
 <!ENTITY const_true "<constant>true</constant>">
 <!ENTITY const_false "<constant>false</constant>">
+
+<!ENTITY answer_yes "<constant>answer_yes</constant>">
+<!ENTITY answer_no "<constant>answer_no</constant>">
+<!ENTITY answer_undefined "<constant>answer_undefined</constant>">
 ]>
 
 <refentry id="bdd_prover">
@@ -48,26 +61,18 @@
 
 <refnamediv>
 <refname>bdd_prover</refname>
-<refpurpose>a class of mCRL2 provers that use BDD's to prove propositional formulas</refpurpose>
+<refpurpose>a class of mCRL2 provers that use binary decision diagrams to prove propositional formulas</refpurpose>
 </refnamediv>
 
 <refsynopsisdiv>
 <funcsynopsis>
 <funcprototype>
   <funcdef>&bdd_prover_constructor;</funcdef>
-  <paramdef>
-    &type_atermappl; &par_equations;,
-    &type_rewrite_strategy; &par_rewrite_strategy; = &const_strat_jitty;,
-    &type_int; &par_time_limit; = 0,
-    &type_bool; &par_path_eliminator; = &const_false;,
-    &type_smt_solver_type; &par_solver_type; = &const_solver_type_ario;,
-    &type_bool; &par_reverse; = &const_true;,
-    &type_bool; &par_full; = &const_true;
-  </paramdef>
-</funcprototype>
-<funcprototype>
-  <funcdef>&type_virtual; &bdd_prover_destructor;</funcdef>
-  <paramdef>&type_void;</paramdef>
+  <paramdef>&type_atermappl; &par_equations;</paramdef>
+  <paramdef>&type_rewrite_strategy; &par_rewrite_strategy; = &const_strat_jitty;</paramdef>
+  <paramdef>&type_int; &par_time_limit; = 0</paramdef>
+  <paramdef>&type_bool; &par_path_eliminator; = &const_false;</paramdef>
+  <paramdef>&type_smt_solver_type; &par_solver_type; = &const_solver_type_ario;</paramdef>
 </funcprototype>
 <funcprototype>
   <funcdef>&type_virtual; &type_bool; &bdd_prover_is_tautology;</funcdef>
@@ -95,24 +100,60 @@
 <refsect1>
 <title>Description</title>
 <para>
-  The class &class_bdd_prover; implements the abstract functions of its base class &class_prover;. Those functions are described in the manual
-  for the class &class_prover;. An entity of the class &class_bdd_prover; uses binary decision diagrams to determine if a given formula is a
-  tautology or a contradiction. The resulting BDD can be retreived using the function &bdd_prover_get_bdd;.
-  The constructor has two additional parameters, &par_path_eliminator; and &par_solver_type;. The parameter &par_path_eliminator; can be used to
-  enable the use of an SMT solver to eliminate inconsistent paths from BDD's. The parameter &par_solver_type; can be used to indicate which SMT
-  solver should be used for this task.
+  A prover uses a rewriter to rewrite parts of the formulas it manipulates. The constructor &bdd_prover_constructor; initializes the prover's
+  rewriter with the data equations in internal mCRL2 format passed as parameter
+  &par_equations; and the rewrite strategy passed as parameter &par_rewrite_strategy;. The parameter &par_rewrite_strategy; can be set to either
+  &const_strat_inner;, &const_strat_innerc;, &const_strat_jitty; or &const_strat_jittyc;. To limit the number of seconds spent on proving a single
+  formula, a time limit can be set. If the time limit is set to 0, no time limit will be enforced.
+  The constructor &bdd_prover_constructor; has two additional parameters, &par_path_eliminator; and &par_solver_type;. The parameter
+  &par_path_eliminator; can be used to enable the use of an instance of the class &class_bdd_path_eliminator;. Instances of this class use an SMT
+  solver to eliminate inconsistent paths from BDDs. The parameter &par_solver_type;
+  can be used to indicate which SMT solver should be used for this task. Either the SMT solver &solver_ario; or &solver_cvc_lite; can be used.
+  To use one of these solvers, the directory containing the corresponding
+  executable must be in the path. On June the 20th of 2006, Ario was available on &link_ario; and CVC Lite was available on &link_cvc;.
+  If the parameter &par_path_eliminator; is set to &const_false;, the parameter &par_solver_type; is ignored and no instance of the class
+  &class_bdd_path_eliminator; is initialized.
+</para>
+<para>
+  The formula to be handled is set using the method &prover_set_formula; inherited from the class &class_prover;. An entity of the class
+  &class_bdd_prover; uses binary decision diagrams to determine if a given formula is a tautology or a contradiction. The
+  resulting BDD can be retreived using the method &bdd_prover_get_bdd;.
+</para>
+<para>
+  The methods &bdd_prover_is_tautology; and &bdd_prover_is_contradiction; indicate whether or not a formula is a tautology or a
+  contradiction. These methods will return &answer_yes;, &answer_no; or &answer_undefined;.
+</para>
+<para>
+  If a formula is neither a tautology nor a contradiction according to the prover, a so called witness or counter example can be returned by the
+  methods &bdd_prover_get_witness; and &bdd_prover_get_counter_example;. A witness is a valuation for which the formula holds, a counter example
+  is a valuation for which it does not hold.
 </para>
 </refsect1>
 
 <refsect1>
 <title>Preconditions</title>
 <para>
-The following precondition has to be satisfied for &bdd_prover_get_bdd;:
-<itemizedlist>
-  <listitem>
-    <para>the function &prover_set_formula; has been called</para>
-  </listitem>
-</itemizedlist>
+  The following precondition has to be satisfied for &bdd_prover_constructor;:
+  <itemizedlist>
+    <listitem>
+      <para>
+        the argument passed as parameter &par_time_limit; is greater than or equal to 0. If the argument is equal to 0, no time limit will be
+        enforced
+      </para>
+    </listitem>
+    <listitem>
+      <para>the argument passed as parameter &par_equations; is a specification of data equations in internal mCRL2 format</para>
+    </listitem>
+  </itemizedlist>
+</para>
+<para>
+  The following precondition has to be satisfied for &bdd_prover_is_tautology;, &bdd_prover_is_contradiction;,
+  &bdd_prover_get_bdd;, &bdd_prover_get_witness; and &bdd_prover_get_counter_example;:
+  <itemizedlist>
+    <listitem>
+      <para>the method &prover_set_formula; has been called</para>
+    </listitem>
+  </itemizedlist>
 </para>
 </refsect1>
 
