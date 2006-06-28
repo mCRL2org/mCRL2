@@ -71,7 +71,7 @@ namespace squadt {
     sip::configuration::sptr c(sip::controller::communicator::new_configuration(*selected_input_combination));
 
     /* Establish what prefix, if any, was used */
-    ic.identifier
+//    ic.identifier TODO
 
     c->set_output_prefix(boost::str(boost::format("%s%04X") % (boost::filesystem::basename(l)) % manager->get_unique_count()));
 
