@@ -6407,77 +6407,345 @@ static ATermList addActionCondition(
   return S;
 }
 
-static ATermAppl can_communicate(ATermList m,ATermList C)
+
+// Type and variables for a somewhat more efficient storage of the
+// communication function
+typedef struct {
+  ATermList lhs;
+  ATermAppl rhs;
+  ATermList tmp;
+} comm_entry;
+static comm_entry *comm_table = NULL;
+static int comm_table_size = 0;
+static int comm_table_num = 0;
+
+static ATermAppl can_communicate(ATermList m)
 { /* this function indicates whether the actions in m
      consisting of actions and data occur in C, such that
      a communication can take place. If not NULL is delivered,
      otherwise the resulting action is the result. If the
      resulting action is tau, or nil, the result is nil. */
-  
-  for( ; C!=ATempty ; C=ATgetNext(C))
-  { ATermAppl commExpr=ATAgetFirst(C);
-    assert(gsIsCommExpr(commExpr));
-    ATermList lhs=ATLgetArgument(ATAgetArgument(commExpr,0),0);
-    int canCommunicate=1;
-    ATermList mwalker=m;
-    for( ; ((lhs!=ATempty) && (mwalker!=ATempty)) ; lhs=ATgetNext(lhs))
-    { 
-      ATermAppl actionname=ATAgetArgument(ATAgetArgument(ATAgetFirst(mwalker),0),0);
-      ATermAppl commname=ATAgetFirst(lhs);
-      if (actionname!=commname)
-      { canCommunicate=0;
-        break;
+ 
+  // first copy the left-hand sides of communications for use
+  for(int i=0; i<comm_table_num; i++)
+  {
+    comm_table[i].tmp = comm_table[i].lhs;
+  }
+
+  // m must match a lhs; check every action
+  ATermList mwalker=m;
+  while ( mwalker != ATempty )
+  {
+    ATermAppl actionname=ATAgetArgument(ATAgetArgument(ATAgetFirst(mwalker),0),0);
+
+    // check every lhs for actionname
+    bool comm_ok = false;
+    for(int i=0; i<comm_table_num; i++)
+    {
+      if ( comm_table[i].tmp == NULL ) // lhs i does not match
+      {
+        continue;
       }
-      mwalker=ATgetNext(mwalker);
+      if ( ATisEmpty(comm_table[i].tmp) ) // lhs cannot match actionname
+      {
+        comm_table[i].tmp = NULL;
+        continue;
+      }
+      if ( actionname != ATAgetFirst(comm_table[i].tmp) )
+      {
+        // no match
+        comm_table[i].tmp = NULL;
+      } else {
+        // possible match; on to next action
+        comm_table[i].tmp = ATgetNext(comm_table[i].tmp);
+        comm_ok = true;
+      }
     }
-    if ((canCommunicate) && (mwalker==ATempty) && (lhs==ATempty))
-    { ATermAppl rhs=ATAgetArgument(commExpr,1);
-      if (rhs==gsMakeTau())
-      { return gsMakeNil();
+    if ( !comm_ok ) // no (possibly) matching lhs
+    {
+      return NULL;
+    }
+
+    // next action in m
+    mwalker=ATgetNext(mwalker);
+  }
+
+  // there is a lhs containing m; find it
+  for (int i=0; i<comm_table_num; i++)
+  {
+    // lhs i matches only if comm_table[i] is empty
+    if ( (comm_table[i].tmp != NULL) && ATisEmpty(comm_table[i].tmp) )
+    {
+      if ( comm_table[i].rhs == gsMakeTau() )
+      {
+        return gsMakeNil();
       }
       assert(existsorts(ATLgetArgument(ATAgetArgument(ATAgetFirst(m),0),1)));
-      return gsMakeActId(rhs,ATLgetArgument(ATAgetArgument(ATAgetFirst(m),0),1));
+      return gsMakeActId(comm_table[i].rhs,ATLgetArgument(ATAgetArgument(ATAgetFirst(m),0),1));
     }
   }
+
+  // no match
   return NULL;
 }
 
-static bool might_communicate(ATermList m,ATermList C)
-{ /* this function indicates whether the actions in m
+//static bool might_communicate(ATermList m, ATermList n)
+//{
+  /* this function indicates whether the actions in m
      consisting of actions and data occur in C, such that
      a communication might take place (i.e. m is a subbag
      of the lhs of a communication in C). */
  
-  for( ; C!=ATempty ; C=ATgetNext(C))
-  { ATermAppl commExpr=ATAgetFirst(C);
-    assert(gsIsCommExpr(commExpr));
-    ATermList lhs=ATLgetArgument(ATAgetArgument(commExpr,0),0);
-    ATermList mwalker=m;
-    for( ; ((lhs!=ATempty) && (mwalker!=ATempty)) ; lhs=ATgetNext(lhs))
-    { 
-      ATermAppl actionname=ATAgetArgument(ATAgetArgument(ATAgetFirst(mwalker),0),0);
-      ATermAppl commname=ATAgetFirst(lhs);
-      if (actionname==commname)
-        mwalker=ATgetNext(mwalker);
+/*  ATermList rest[comm_table_num];
+
+  for(int i=0; i<comm_table_num; i++)
+  {
+    comm_table[i].tmp = comm_table[i].lhs;
+    rest[i] = n;
+  }
+
+  // m must be contained in a lhs; check every action
+  ATermList mwalker=m;
+  while ( mwalker != ATempty )
+  {
+    ATermAppl actionname=ATAgetArgument(ATAgetArgument(ATAgetFirst(mwalker),0),0);
+    
+    // check every lhs for actionname
+    bool comm_ok = false;
+    for(int i=0; i<comm_table_num; i++)
+    {
+      if ( ATisEmpty(comm_table[i].tmp) )
+      {
+        continue;
+      }
+
+      ATermAppl commname;
+      while ( actionname != (commname = ATAgetFirst(comm_table[i].tmp)) )
+      {
+        if ( ATisEmpty(rest[i]) )
+        {
+          rest[i] = NULL;
+          comm_table[i].tmp = ATmakeList0();
+          break;
+        }
+        ATermAppl restname;
+        while ( commname != (restname = ATAgetArgument(ATAgetArgument(ATAgetFirst(rest[i]),0),0)) )
+        {
+          rest[i] = ATgetNext(rest[i]);
+          if ( ATisEmpty(rest[i]) )
+          {
+            rest[i] = NULL;
+            break;
+          }
+        }
+        if ( rest[i] != NULL )
+        {
+          rest[i] = ATgetNext(rest[i]);
+          comm_table[i].tmp = ATgetNext(comm_table[i].tmp);
+        } else {
+          comm_table[i].tmp = ATmakeList0();
+        }
+        if ( ATisEmpty(comm_table[i].tmp) )
+        {
+          break;
+        }
+      }
+      if ( actionname == commname )
+      {
+        comm_table[i].tmp = ATgetNext(comm_table[i].tmp);
+        comm_ok = true;
+      } else {
+        rest[i] = NULL;
+      }
     }
-    if (mwalker==ATempty)
-    { return true;
+    if ( !comm_ok )
+    {
+      return false;
+    }
+    mwalker=ATgetNext(mwalker);
+  }
+  for(int i=0; i<comm_table_num; i++)
+  {
+    if ( rest[i] == NULL )
+      continue;
+    while ( !ATisEmpty(comm_table[i].tmp) )
+    {
+      if ( ATisEmpty(rest[i]) )
+      {
+        rest[i] = NULL;
+        break;
+      }
+      ATermAppl commname = ATAgetFirst(comm_table[i].tmp);
+      ATermAppl restname;
+      while ( commname != (restname = ATAgetArgument(ATAgetArgument(ATAgetFirst(rest[i]),0),0)) )
+      {
+        rest[i] = ATgetNext(rest[i]);
+        if ( ATisEmpty(rest[i]) )
+        {
+          rest[i] = NULL;
+          break;
+        }
+      }
+      if ( commname != restname )
+      {
+        break;
+      }
+      rest[i] = ATgetNext(rest[i]);
+      comm_table[i].tmp = ATgetNext(comm_table[i].tmp);
+    }
+    if ( rest[i] == NULL )
+    {
+      continue;
+    }
+    if ( ATisEmpty(comm_table[i].tmp) )
+    {
+      return true;
     }
   }
   return false;
+}*/
+  
+static bool might_communicate(ATermList m, ATermList n = NULL)
+{ /* this function indicates whether the actions in m
+     consisting of actions and data occur in C, such that
+     a communication might take place (i.e. m is a subbag
+     of the lhs of a communication in C).
+     if n != NULL, then all actions of a matching communication
+     that are not in m should be in n (i.e. there must be a
+     subbag o of n such that m+o can communicate. */
+ 
+  // first copy the left-hand sides of communications for use
+  for(int i=0; i<comm_table_num; i++)
+  {
+    comm_table[i].tmp = comm_table[i].lhs;
+  }
+
+  // m must be contained in a lhs; check every action
+  ATermList mwalker=m;
+  while ( mwalker != ATempty )
+  {
+    ATermAppl actionname=ATAgetArgument(ATAgetArgument(ATAgetFirst(mwalker),0),0);
+    
+    // check every lhs for actionname
+    bool comm_ok = false;
+    for(int i=0; i<comm_table_num; i++)
+    {
+      if ( comm_table[i].tmp == NULL )
+      {
+        continue;
+      }
+      if ( ATisEmpty(comm_table[i].tmp) ) // actionname not in here; ignore lhs
+      {
+        comm_table[i].tmp = NULL;
+        continue;
+      }
+
+      ATermAppl commname;
+      while ( actionname != (commname = ATAgetFirst(comm_table[i].tmp)) )
+      {
+        if ( n != NULL )
+        {
+          // action is not in m, so it should be in n
+          // but all actions in m come before n
+          comm_table[i].tmp = NULL;
+          break;
+        } else {
+          // ignore actions that are not in m
+          comm_table[i].tmp = ATgetNext(comm_table[i].tmp);
+          if ( ATisEmpty(comm_table[i].tmp) )
+          {
+            comm_table[i].tmp = NULL;
+            break;
+          }
+        }
+      }
+      if ( actionname == commname ) // actionname found
+      {
+        comm_table[i].tmp = ATgetNext(comm_table[i].tmp);
+        comm_ok = true;
+      }
+    }
+    if ( !comm_ok )
+    {
+      return false;
+    }
+    
+    // next action in m
+    mwalker=ATgetNext(mwalker);
+  }
+
+  if ( n == NULL )
+  {
+    // there is a matching lhs
+    return true;
+  } else {
+    // the rest of actions of lhs that are not in m should be in n
+
+    // rest[i] contains the part of n in which lhs i has to find matching actions
+    ATermList rest[comm_table_num];
+    for(int i=0; i<comm_table_num; i++)
+    {
+      rest[i] = n;
+    }
+
+    // check every lhs
+    for(int i=0; i<comm_table_num; i++)
+    {
+      if ( comm_table[i].tmp == NULL ) // lhs i did not contain m
+      {
+	      continue;
+      }
+      // as long as there are still unmatch actions in lhs i...
+      while ( !ATisEmpty(comm_table[i].tmp) )
+      {
+        // .. find them in rest[i]
+        if ( ATisEmpty(rest[i]) ) // no luck
+        {
+          rest[i] = NULL;
+          break;
+        }
+        // get first action in lhs i
+        ATermAppl commname = ATAgetFirst(comm_table[i].tmp);
+        ATermAppl restname;
+        // find it in rest[i]
+        while ( commname != (restname = ATAgetArgument(ATAgetArgument(ATAgetFirst(rest[i]),0),0)) )
+        {
+          rest[i] = ATgetNext(rest[i]);
+          if ( ATisEmpty(rest[i]) ) // no more
+          {
+            rest[i] = NULL;
+            break;
+          }
+        }
+        if ( commname != restname ) // action was not found
+        {
+          break;
+        }
+        // action found; try next
+        rest[i] = ATgetNext(rest[i]);
+        comm_table[i].tmp = ATgetNext(comm_table[i].tmp);
+      }
+
+      if ( rest[i] != NULL ) // lhs was found in rest[i]
+      {
+        return true;
+      }
+    }
+
+    // no lhs completely matches
+    return false;
+  }
 }
   
 
-static ATermList makeMultiActionConditionList(
+static ATermList makeMultiActionConditionList_aux(
                    ATermList multiaction,
-                   ATermList communications,
                    ATermList r);
 
 static ATermList phi(ATermList m,
                      ATermList d,
                      ATermList w,
                      ATermList n,
-                     ATermList C,
                      ATermList r)
 { /* phi is a function that yields a list of pairs
      indicating how the actions in m|w|n can communicate.
@@ -6489,15 +6757,15 @@ static ATermList phi(ATermList m,
      and C contains a list of multiaction action pairs indicating
      possible commmunications */
 
-  if (!might_communicate(m,C))
+  if (!might_communicate(m,n))
   { return ATempty;
   }
 
   if (n==ATempty)
-  { ATermAppl c=can_communicate(m,C); /* returns NULL if no communication
+  { ATermAppl c=can_communicate(m); /* returns NULL if no communication
                                          is possible */
     if (c!=NULL)
-    { ATermList T=makeMultiActionConditionList(w,C,r);
+    { ATermList T=makeMultiActionConditionList_aux(w,r);
       return addActionCondition(
                    ((ATAgetArgument(c,0)==gsMakeNil())?NULL:gsMakeAction(c,d)),
                    gsMakeDataExprTrue(),
@@ -6510,32 +6778,32 @@ static ATermList phi(ATermList m,
   /* if n=[a(f)] \oplus o */
   ATermAppl firstaction=ATAgetFirst(n);
   ATermList o=ATgetNext(n);
-  ATermList T=phi(ATappend(m,(ATerm)firstaction),d,w,o,C,r);
+  ATermList T=phi(ATappend(m,(ATerm)firstaction),d,w,o,r);
   return addActionCondition(
                 NULL,
                 pairwiseMatch(d,ATLgetArgument(firstaction,1)),
                 T,
-                phi(m,d,ATappend(w,(ATerm)firstaction),o,C,r));
+                phi(m,d,ATappend(w,(ATerm)firstaction),o,r));
 }
 
-static bool xi(ATermList alpha, ATermList beta, ATermList C)
+static bool xi(ATermList alpha, ATermList beta)
 {
   if ( ATisEmpty(beta) )
   {
-    return can_communicate(alpha,C);
+    return can_communicate(alpha);
   } else {
     ATerm a = ATgetFirst(beta);
     ATermList l = ATinsert(alpha,a);
     beta = ATgetNext(beta);
 
-    if ( can_communicate(l,C) )
+    if ( can_communicate(l) )
     {
       return true;
-    } else if ( might_communicate(l,C) )
+    } else if ( might_communicate(l,beta) )
     {
-      return xi(l,beta,C) || xi(alpha,beta,C);
+      return xi(l,beta) || xi(alpha,beta);
     } else {
-      return xi(alpha,beta,C);
+      return xi(alpha,beta);
     }
   }
 }
@@ -6549,7 +6817,7 @@ static ATermAppl makeNegatedConjunction(ATermList S)
   return result; 
 }
 
-static ATermList psi(ATermList alpha, ATermList C)
+static ATermList psi(ATermList alpha)
 {
   ATermList l = ATmakeList0();
   while ( !ATisEmpty(alpha) )
@@ -6559,7 +6827,7 @@ static ATermList psi(ATermList alpha, ATermList C)
 
     while ( !ATisEmpty(beta) )
     {
-      if ( might_communicate(ATinsert(a,ATgetFirst(beta)),C) && xi(ATinsert(a,ATgetFirst(beta)),ATgetNext(beta),C) )
+      if ( might_communicate(ATinsert(a,ATgetFirst(beta)),ATgetNext(beta)) && xi(ATinsert(a,ATgetFirst(beta)),ATgetNext(beta)) )
       {
         // sort and remove duplicates??
         l = ATinsert(l,
@@ -6574,16 +6842,15 @@ static ATermList psi(ATermList alpha, ATermList C)
   return l;
 }
 
-static ATermList makeMultiActionConditionList(
+static ATermList makeMultiActionConditionList_aux(
                    ATermList multiaction,
-                   ATermList communications,
                    ATermList r = NULL)
 { /* This is the function gamma(m,C,r) provided
      by Muck van Weerdenburg in Calculation of 
      Communication with open terms [1]. */
-  
+
   if (multiaction==ATempty)
-  {  return ATinsertA(ATempty,linMakeTuple(ATempty,(r==NULL)?gsMakeDataExprTrue():makeNegatedConjunction(psi(r,communications))));
+  {  return ATinsertA(ATempty,linMakeTuple(ATempty,(r==NULL)?gsMakeDataExprTrue():makeNegatedConjunction(psi(r))));
   }
 
   ATermAppl firstaction=ATAgetFirst(multiaction);
@@ -6593,14 +6860,51 @@ static ATermList makeMultiActionConditionList(
                   ATLgetArgument(firstaction,1),
                   ATempty,
                   remainingmultiaction,
-                  communications,
                   r);
-  ATermList T=makeMultiActionConditionList(
+  ATermList T=makeMultiActionConditionList_aux(
                   remainingmultiaction,
-                  communications,
                   (r==NULL)?ATmakeList1((ATerm) firstaction):ATinsertA(r,firstaction));
   return addActionCondition(firstaction,gsMakeDataExprTrue(),T,S);
 
+}
+
+static void ATunprotectCommTable(comm_entry *t)
+{
+  ATunprotectArray((ATerm *) t);
+}
+
+static void ATprotectCommTable(comm_entry *t, int s)
+{
+  ATprotectArray((ATerm *) t, s);
+}
+
+static ATermList makeMultiActionConditionList(
+                   ATermList multiaction,
+                   ATermList communications)
+{
+  comm_table_num = ATgetLength(communications);
+  if ( comm_table_size < comm_table_num )
+  {
+    comm_table_size = comm_table_num;
+    if ( comm_table != NULL )
+    {
+      ATunprotectCommTable(comm_table);
+    }
+    comm_table = (comm_entry *) realloc(comm_table,comm_table_size*sizeof(comm_entry));
+    memset(comm_table,0,comm_table_size*sizeof(comm_entry));
+    ATprotectCommTable(comm_table,comm_table_num*3);
+  }
+  ATermList l = communications;
+  for (int i=0; i<comm_table_num; i++)
+  {
+    ATermAppl a = (ATermAppl) ATgetFirst(l);
+    comm_table[i].lhs = (ATermList) ATgetArgument((ATermAppl) ATgetArgument(a,0),0);
+    comm_table[i].rhs = (ATermAppl) ATgetArgument(a,1);
+    comm_table[i].tmp = NULL;
+    l = ATgetNext(l);
+  }
+
+  return makeMultiActionConditionList_aux(multiaction);
 }
 
 static void ApplySumElimination(ATermList *sumvars,
