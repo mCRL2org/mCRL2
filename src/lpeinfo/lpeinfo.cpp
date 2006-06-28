@@ -126,8 +126,6 @@ int main(int ac, char** av) {
       if (valid) {
         /* An object with the correct id exists, assume the URI is relative (i.e. a file name in the local file system) */
         file_name = configuration->get_object(lpd_file_for_input)->get_location();
-
-        tc.set_configuration(configuration);
       }
       else {
         sip::report report;

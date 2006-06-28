@@ -8,6 +8,7 @@
 
 #include <boost/bind.hpp>
 #include <boost/shared_ptr.hpp>
+#include <boost/noncopyable.hpp>
 
 #include <iterator_wrapper/indirect_iterator.h>
 
@@ -17,8 +18,10 @@
 namespace sip {
 
   /** \brief This class models a tool configuration */
-  class configuration {
+  class configuration : public boost::noncopyable {
     friend class report;
+    friend class sip::tool::communicator;
+    friend class sip::controller::communicator;
 
     public:
 
@@ -71,16 +74,18 @@ namespace sip {
       /** \brief The selected category in which the tool operates */
       tool_category category;
 
-      /** \brief Whether the configuration is complete (or initial) */
-      bool          completed;
+      /** \brief Whether or not the tool accepted this configuration in the past */
+      bool          fresh;
 
       /** \brief Prefix for output objects */
       std::string   output_prefix;
 
-    public:
+    private:
 
       /** \brief Constructor */
       inline configuration(tool_category);
+
+    public:
 
       /** \brief Returns whether the configuration is empty or not */
       inline bool is_empty() const;
@@ -94,11 +99,8 @@ namespace sip {
       /** \brief Remove an option from the configuration */
       inline void remove_option(const option::identifier);
 
-      /** \brief Set the state of the configuration */
-      inline void set_completed(bool);
-
-      /** \brief Get the state of the configuration (whether it is complete or not) */
-      inline bool is_complete();
+      /** \brief Get the state of the configuration */
+      inline bool is_fresh();
 
       /** \brief Set the prefix for output files */
       inline void set_output_prefix(std::string const&);
@@ -184,10 +186,10 @@ namespace sip {
     return (s);
   }
 
-  inline configuration::configuration() : completed(false) {
+  inline configuration::configuration() : fresh(true) {
   }
 
-  inline configuration::configuration(tool_category c) : category(c), completed(false) {
+  inline configuration::configuration(tool_category c) : category(c), fresh(true) {
   }
 
   inline bool configuration::is_empty() const {
@@ -249,15 +251,8 @@ namespace sip {
     return (category);
   }
 
-  /**
-   * @param[in] b set the state of the configuration
-   **/
-  inline void configuration::set_completed(bool b) {
-    completed = b;
-  }
-
-  inline bool configuration::is_complete() {
-    return (completed);
+  inline bool configuration::is_fresh() {
+    return (fresh);
   }
 
   /**
@@ -314,8 +309,8 @@ namespace sip {
   inline void configuration::write(std::ostream& output) const {
     output << "<configuration";
 
-    if (completed) {
-      output << " complete=\"true\"";
+    if (fresh) {
+      output << " fresh=\"true\"";
     }
 
     output << " output-prefix=\"" << output_prefix << "\"";
@@ -484,7 +479,10 @@ namespace sip {
 
     assert(reader.is_element("configuration"));
 
-    c->completed     = reader.get_attribute("complete");
+    if (reader.get_attribute("fresh")) {
+      c->fresh = true;
+    }
+
     c->output_prefix = reader.get_attribute_as_string("output-prefix");
 
     reader.get_attribute(&c->category, "category");

@@ -81,6 +81,9 @@ namespace sip {
  
         /** \brief Request the list of basic input configurations */
         void request_tool_capabilities();
+
+        /** \brief Creates a new configuration object based on a given input_combination */
+        static configuration::sptr new_configuration(sip::tool::capabilities::input_combination const&);
  
         /** \brief Send a specification of a (perhaps partial) configuration */
         void send_configuration();

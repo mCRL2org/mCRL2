@@ -299,7 +299,9 @@ namespace squadt {
    * \attention This function is non-blocking
    **/
   inline void processor::reconfigure(std::string const& w) {
-    sip::configuration::sptr c(new sip::configuration(selected_input_combination->category));
+    assert(selected_input_combination != 0);
+
+    sip::configuration::sptr c(sip::controller::communicator::new_configuration(*selected_input_combination));
 
     c->add_object(current_monitor->get_configuration()->get_object(selected_input_combination->identifier));
 

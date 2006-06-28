@@ -1119,10 +1119,7 @@ int main(int ac, char** av) {
       valid  = configuration.get() != 0;
       valid &= configuration->object_exists(lpd_file_for_input);
 
-      if (valid) {
-        tc.set_configuration(configuration);
-      }
-      else {
+      if (!valid) {
         tc.send_error_report("Invalid input combination!");
 
         exit(1);

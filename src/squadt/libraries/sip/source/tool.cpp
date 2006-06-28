@@ -93,6 +93,8 @@ namespace sip {
  
     /* Send a specification of the current configuration (it may change during tool execution) */
     void communicator::send_accept_configuration() {
+      current_configuration->fresh = false;
+
       message m(current_configuration->write(), sip::message_accept_configuration);
  
       send_message(m);
@@ -101,7 +103,9 @@ namespace sip {
     /**
      * @param[in] c the configuration object that specifies the accepted configuration
      **/
-    void communicator::send_accept_configuration(const sip::configuration& c) {
+    void communicator::send_accept_configuration(sip::configuration& c) {
+      c.fresh = false;
+
       message m(c.write(), sip::message_accept_configuration);
  
       send_message(m);

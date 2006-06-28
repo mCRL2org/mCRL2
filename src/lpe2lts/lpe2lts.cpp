@@ -1006,7 +1006,7 @@ enum lpe2lts_options {
 
 static bool validate_configuration(sip::configuration &c)
 {
-  return c.is_complete() && (
+  return (
       c.object_exists(lpd_file_for_input_no_lts) ||
       (c.object_exists(lpd_file_for_input_lts) &&
        c.object_exists(lts_file_for_output))
@@ -1136,7 +1136,7 @@ void set_basic_configuration_display(sip::tool::communicator& tc, bool make_lts)
   {
     std::string input_file_name = c.get_object(lpd_file_for_input_lts)->get_location();
     /* Add output file to the configuration */
-    c.add_output(lts_file_for_output, (cb_aut->get_status()?"aut":"svc"), input_file_name + (cb_aut->get_status()?".aut":".svc"));
+    c.add_output(lts_file_for_output, (cb_aut->get_status()?"aut":"svc"), c.get_output_name(cb_aut->get_status()?".aut":".svc"));
   }
   c.add_option(option_out_info).append_argument(sip::datatype::boolean::standard, cb_out_info->get_status());
 
@@ -1171,8 +1171,6 @@ void set_basic_configuration_display(sip::tool::communicator& tc, bool make_lts)
   
   c.add_option(option_init_tsize).append_argument(sip::datatype::string::standard, tf_init_tsize->get_text());
   
-  c.set_completed(true);
-
   tc.clear_display();
 }
 #endif
@@ -1280,7 +1278,6 @@ int main(int argc, char **argv)
       if (valid) {
         /* An object with the correct id exists, assume the URI is relative (i.e. a file name in the local file system) */
         spec_fn = configuration->get_object(valid_0?lpd_file_for_input_no_lts:lpd_file_for_input_lts)->get_location();
-        tc.set_configuration(configuration);
       } else {
         sip::report report;
 
@@ -1289,8 +1286,10 @@ int main(int argc, char **argv)
         tc.send_report(report);
       }
     }
+
+    sip::configuration& cf = tc.get_configuration();
     
-    if (!validate_configuration(tc.get_configuration())) {
+    if (cf.is_fresh()) {
       /* Configuration is incomplete or incorrect; prompt the user */
 
       /* Draw a configuration layout in the tool display */
@@ -1313,7 +1312,7 @@ int main(int argc, char **argv)
     tc.await_message(sip::message_signal_start);
     gsVerboseMsg("starting execution...\n");
 
-    sip::configuration c = tc.get_configuration();
+    sip::configuration& c = tc.get_configuration();
 
     if ( c.object_exists(lts_file_for_output) )
     {

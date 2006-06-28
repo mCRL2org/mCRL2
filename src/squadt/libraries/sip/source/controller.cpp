@@ -24,6 +24,15 @@ namespace sip {
       set_status(status_configured);
     }
  
+    /**
+     * @param[in] c the input combination on which to base the new configuration
+     **/
+    configuration::sptr communicator::new_configuration(sip::tool::capabilities::input_combination const& c) {
+      sip::configuration::sptr nc(new sip::configuration(c.category));
+
+      return (nc);
+    }
+ 
     communicator::communicator() : current_status(status_initialising) {
       using namespace boost;
  

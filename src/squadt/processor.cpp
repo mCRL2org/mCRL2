@@ -64,11 +64,17 @@ namespace squadt {
    * \attention This function is non-blocking
    **/
   void processor::configure(const tool::input_combination* ic, std::string const& w, const boost::filesystem::path& l) {
+    assert(ic != 0);
+
     selected_input_combination = const_cast < tool::input_combination* > (ic);
 
-    sip::configuration::sptr c(new sip::configuration(selected_input_combination->category));
+    sip::configuration::sptr c(sip::controller::communicator::new_configuration(*selected_input_combination));
 
-    c->set_output_prefix(boost::str(boost::format("%s_%04X") % (boost::filesystem::basename(l)) % manager->get_unique_count()));
+    /* Establish what prefix, if any, was used */
+    ic.identifier
+
+    c->set_output_prefix(boost::str(boost::format("%s%04X") % (boost::filesystem::basename(l)) % manager->get_unique_count()));
+
     c->add_input(ic->identifier, ic->format, l.string());
 
     current_monitor->set_configuration(c);

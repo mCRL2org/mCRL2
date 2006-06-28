@@ -541,9 +541,6 @@ int main(int ac, char** av) {
 
         /* Add output file to the configuration */
         configuration->add_output(lpd_file_for_output, "lpe", configuration->get_output_name(".lpe"));
-
-        /* An object with the correct id exists, assume the URI is relative (i.e. a file name in the local file system) */
-        tc.set_configuration(configuration);
       }
       else {
         tc.send_error_report("Invalid input combination!");

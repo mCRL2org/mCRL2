@@ -18,17 +18,3 @@ exe lpeconstelm
 
 install_with_libraries install : lpeconstelm ;
 
-import boostbook ;
-import quickbook ;
-
-quickbook doc
-       : atermpp.qbk
-       : <implicit-dependency>/boost/quickbook//quickbook
-       ;
-
-explicit doc documentation ;
-
-boostbook documentation
-       : lpeconstelm.xml
-       : <format>man
-       ;

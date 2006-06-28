@@ -280,7 +280,6 @@ static bool get_squadt_parameters(int argc,
       { /* An object with the correct id exists, assume the URI is relative 
            (i.e. a file name in the local file system) */
         infilename = configuration->get_object(lpd_file_for_input)->get_location();
-        tc.set_configuration(configuration);
       }
       else 
       { sip::report report;

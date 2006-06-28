@@ -702,6 +702,7 @@ namespace squadt {
 
           Show(true);
 
+          GetParent()->GetSizer()->RecalcSizes();
           GetParent()->Layout();
           GetParent()->FitInside();
         }

@@ -60,6 +60,12 @@ namespace sip {
         /** \brief Send data to update the state of the last communicated display layout */
         void send_display_data(layout::element const*);
  
+        /** \brief Signal that the current configuration is complete enough for the tool to start processing */
+        void send_accept_configuration(sip::configuration&);
+ 
+        /** \brief Set the current tool configuration object */
+        inline void set_configuration(configuration::sptr);
+ 
       public:
  
         /** \brief Default constructor */
@@ -80,9 +86,6 @@ namespace sip {
         /** \brief Signal that the current configuration is complete enough for the tool to start processing */
         void send_accept_configuration();
 
-        /** \brief Signal that the current configuration is complete enough for the tool to start processing */
-        void send_accept_configuration(const sip::configuration&);
- 
         /** \brief Send a layout specification for the display space reserved for this tool */
         void send_display_layout(layout::tool_display::sptr);
  
@@ -106,9 +109,6 @@ namespace sip {
  
         /** \brief Get the current tool configuration object be sent when a request is received */
         inline configuration& get_configuration();
- 
-        /** \brief Set the current tool configuration object */
-        inline void set_configuration(configuration::sptr);
  
         /** \brief Get the last communicated set of controller capabilities */
         inline const controller::capabilities::ptr get_controller_capabilities() const;

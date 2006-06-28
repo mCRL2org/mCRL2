@@ -6,22 +6,10 @@ project squadt
     <include>../libraries
     <cxxflags>-std=c++98 ;
 
+
+
 exe squadt
-      : squadt.cpp
-        exception.cpp
-        settings_manager.cpp
-        tool_manager.cpp
-        project_manager.cpp
-        processor.cpp
-        process.cpp
-        gui_main.cpp
-        gui_project.cpp
-        gui_resources.cpp
-        gui_dialog_base.cpp
-        gui_tool_display.cpp
-        gui_dialog_project.cpp
-        gui_dialog_processor.cpp
-        gui_miscellaneous.cpp
+      : [ glob *.cpp ]
       : <source>/site-config//mcrl2_revision.h
         <library>/libraries/md5pp//md5pp
         <library>/libraries/sip//sip_controller
