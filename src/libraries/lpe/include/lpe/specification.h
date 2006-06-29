@@ -206,20 +206,40 @@ class specification: public aterm_wrapper
     sort_list sorts()
     { return m_sorts; }
 
+    /// Sets the sequence of sorts.
+    ///
+    void set_sorts(sort_list sorts)
+    { m_sorts = sorts; }
+
     /// Returns the sequence of constructors.
     ///
     function_list constructors()
     { return m_constructors; }
+
+    /// Sets the sequence of constructors.
+    ///
+    void set_constructors(function_list constructors)
+    { m_constructors = constructors; }
 
     /// Returns the sequence of mappings.
     ///
     function_list mappings()
     { return m_mappings; }
 
+    /// Sets the sequence of mappings.
+    ///
+    void set_mappings(function_list mappings)
+    { m_mappings = mappings; }
+
     /// Returns the sequence of data equations.
     ///
     data_equation_list equations()
     { return m_equations; }
+
+    /// Sets the sequence of data equations.
+    ///
+    void set_equations(data_equation_list equations)
+    { m_equations = equations; }
 
     /// Returns the sequence of actions.
     ///

@@ -8,12 +8,22 @@
 #include "liblowlevel.h"
 #include "libprint_c.h"
 
+
 //local declarations
+//------------------
+
 
 static ATermAppl impl_exprs_spec(ATermAppl spec);
 //Pre: spec is a specification that adheres to the internal syntax after
 //     type checking in which sort references are maximally folded
 //Ret: spec in which all expressions are implemented
+
+static ATermAppl impl_exprs(ATermAppl expr, lpe::specification &lpe_spec);
+//Pre: expr represents a part of the internal syntax after type checking
+//     in which sort references are maximally folded
+//     lpe_spec represents an LPE specification
+//Post:the datatypes of expr are implemented as in lpe_spec
+//Ret: expr in which all expressions are implemented
 
 static ATermAppl impl_sort_refs(ATermAppl spec);
 //Pre: spec is a specification that adheres to the internal syntax after
@@ -25,10 +35,18 @@ static ATermAppl impl_sort_refs(ATermAppl spec);
 //       sort reference with e as a rhs, e is replaced by n in spec;
 //       otherwise, n is replaced by e in spec
 
-static ATermAppl impl_function_sorts(ATermAppl spec);
+static ATermAppl impl_function_sorts_spec(ATermAppl spec);
 //Pre: spec is a specification that adheres to the internal syntax after
 //     data implementation
-//Ret: spec in which an implementation is added for each function sort
+//Ret: spec in which an implementation is added for each function
+//     sort occurring in spec that has not already been implemented
+
+static void impl_function_sorts(ATermAppl expr, lpe::specification &lpe_spec);
+//Pre: expr represents a part of the internal syntax after data
+//     implementation
+//     lpe_spec represents an LPE specification
+//Post:an implementation is added to spec for each function sort
+//     occurring in expr and lpe_spec that has not already been implemented
 
 typedef struct {
   ATermList sorts;
@@ -46,6 +64,12 @@ static ATermAppl add_data_decls(ATermAppl spec, t_data_decls data_decls);
 //Pre: spec is a specification that adheres to the internal syntax of an
 //     arbitary phase
 //Ret: spec in which the data declarations from data_decls are added
+
+static t_data_decls get_data_decls(lpe::specification &lpe_spec);
+//Ret: data declarations of lpe_spec
+
+static void set_data_decls(lpe::specification &lpe_spec, t_data_decls data_decls);
+//Ret: lpe_spec in which the data declarations are replaced by data_decls
 
 static ATermAppl impl_exprs_appl(ATermAppl part, ATermList *p_substs,
   t_data_decls *p_data_decls);
@@ -70,15 +94,6 @@ static ATermList impl_exprs_list(ATermList parts, ATermList *p_substs,
 //     the context of part
 //Ret: parts in which:
 //     - all substitutions of *p_substs are performed on the elements of parts
-//     - each substituted element is implemented, where the new data
-//       declarations are stored in *p_data_decls
-
-static void impl_function_sort(ATermAppl sort_arrow, t_data_decls *p_data_decls);
-//Pre: sort_arrow is an arrow sort that adheres to the internal syntax after
-//     data implementation
-//     p_data_decls represents a pointer to new data declarations, induced by
-//     the context of part
-//Ret: spec in which an implementation is added for each function sort
 //     - each substituted element is implemented, where the new data
 //       declarations are stored in *p_data_decls
 
@@ -111,9 +126,9 @@ static void get_free_vars_list(ATermList data_exprs, ATermList bound_vars,
 //Post:*p_free_vars is extended with the free variables in data_exprs that did not
 //     already occur in *p_free_vars or bound_vars
 
-static ATermList get_function_sorts(ATermAppl spec);
-//Pre: spec is a specification
-//Ret: a list of all function sorts occurring in spec, where each element is
+static ATermList get_function_sorts(ATermAppl expr);
+//Pre: expr adheres to the internal format
+//Ret: a list of all function sorts occurring in expr, where each element is
 //     unique
 
 static void get_function_sorts_appl(ATermAppl part, ATermList *p_func_sorts);
@@ -127,6 +142,13 @@ static void get_function_sorts_list(ATermList parts, ATermList *p_func_sorts);
 //     *p_func_sorts represents the function sorts that are already found
 //Post:*p_funct_sorts is extended with the function sorts in parts that did not
 //     already occur in *p_func_sorts
+
+static void impl_function_sort(ATermAppl sort_arrow, t_data_decls *p_data_decls);
+//Pre: sort_arrow is an arrow sort that adheres to the internal syntax after
+//     data implementation
+//     p_data_decls represents a pointer to new data declarations, induced by
+//     the context of part
+//Post:an implementation of function sort sort_arrow is added to *p_data_decls
 
 static ATermAppl apply_op_id_to_vars(ATermAppl op_id, ATermList *p_args,
                                    ATermList *p_vars, ATerm context);
@@ -197,30 +219,6 @@ static ATermAppl impl_sort_arrow_prod(ATermAppl sort_arrow_prod);
 //     after data implementation
 //Ret: an implementation of sort_arrow_prod
   
-static void impl_sort_bool(t_data_decls *p_data_decls);
-//Pre: p_data_decls represents a pointer to new data declarations
-//Post:an implementation of sort Bool is added to *p_data_decls
-
-static void impl_sort_pos(t_data_decls *p_data_decls);
-//Pre: p_data_decls represents a pointer to new data declarations
-//Post:an implementation of sort Pos is added to *p_data_decls
-
-static void impl_sort_nat(t_data_decls *p_data_decls);
-//Pre: p_data_decls represents a pointer to new data declarations
-//Post:an implementation of sort Nat is added to *p_data_decls
-
-static void impl_sort_nat_pair(t_data_decls *p_data_decls);
-//Pre: p_data_decls represents a pointer to new data declarations
-//Post:an implementation of sort PairNat is added to *p_data_decls
-
-static void impl_sort_int(t_data_decls *p_data_decls);
-//Pre: p_data_decls represents a pointer to new data declarations
-//Post:an implementation of sort Int is added to *p_data_decls
-
-static void impl_sort_real(t_data_decls *p_data_decls);
-//Pre: p_data_decls represents a pointer to new data declarations
-//Post:an implementation of sort Real is added to *p_data_decls
-
 static void split_sort_decls(ATermList sort_decls, ATermList *p_sort_ids,
   ATermList *p_sort_refs);
 //Pre: sort_decls is a list of sort_id's and sort_ref's
@@ -281,23 +279,102 @@ static bool is_bag_sort_id(ATermAppl sort_expr);
 ////Ret: data_expr is an operation identifier for the implementation of a lambda
 ////     abstraction
 
+static void impl_sort_bool(t_data_decls *p_data_decls);
+//Pre: p_data_decls represents a pointer to new data declarations
+//Post:an implementation of sort Bool is added to *p_data_decls
+
+static void impl_sort_pos(t_data_decls *p_data_decls);
+//Pre: p_data_decls represents a pointer to new data declarations
+//Post:an implementation of sort Pos is added to *p_data_decls
+
+static void impl_sort_nat(t_data_decls *p_data_decls);
+//Pre: p_data_decls represents a pointer to new data declarations
+//Post:an implementation of sort Nat is added to *p_data_decls
+
+static void impl_sort_nat_pair(t_data_decls *p_data_decls);
+//Pre: p_data_decls represents a pointer to new data declarations
+//Post:an implementation of sort PairNat is added to *p_data_decls
+
+static void impl_sort_int(t_data_decls *p_data_decls);
+//Pre: p_data_decls represents a pointer to new data declarations
+//Post:an implementation of sort Int is added to *p_data_decls
+
+static void impl_sort_real(t_data_decls *p_data_decls);
+//Pre: p_data_decls represents a pointer to new data declarations
+//Post:an implementation of sort Real is added to *p_data_decls
+
+
 //implementation
+//--------------
+
+
+ATermAppl implement_data_spec(ATermAppl spec)
+{
+  int occ = gsCount((ATerm) gsMakeUnknown(), (ATerm) spec);
+  if (occ > 0) {
+    gsErrorMsg("specification contains %d unknown type%s\n", occ, (occ != 1)?"s":"");
+    return NULL;
+  }
+  spec = impl_exprs_spec(spec);
+  spec = impl_sort_refs(spec);
+  spec = impl_function_sorts_spec(spec);
+  return spec;
+}
+
+ATermAppl implement_data_data_expr(ATermAppl data_expr,
+  lpe::specification &lpe_spec)
+{
+  int occ = gsCount((ATerm) gsMakeUnknown(), (ATerm) data_expr);
+  if (occ > 0) {
+    gsErrorMsg("specification contains %d unknown type%s\n", occ, (occ != 1)?"s":"");
+    return NULL;
+  }
+  data_expr = impl_exprs(data_expr, lpe_spec);
+  impl_function_sorts(data_expr, lpe_spec);
+  return data_expr;
+}
+
+ATermAppl implement_data_mult_act(ATermAppl mult_act,
+  lpe::specification &lpe_spec)
+{
+  int occ = gsCount((ATerm) gsMakeUnknown(), (ATerm) mult_act);
+  if (occ > 0) {
+    gsErrorMsg("specification contains %d unknown type%s\n", occ, (occ != 1)?"s":"");
+    return NULL;
+  }
+  mult_act = impl_exprs(mult_act, lpe_spec);
+  impl_function_sorts(mult_act, lpe_spec);
+  return mult_act;
+}
+
+ATermAppl implement_data_state_frm(ATermAppl state_frm,
+  lpe::specification &lpe_spec)
+{
+  int occ = gsCount((ATerm) gsMakeUnknown(), (ATerm) state_frm);
+  if (occ > 0) {
+    gsErrorMsg("specification contains %d unknown type%s\n", occ, (occ != 1)?"s":"");
+    return NULL;
+  }
+  state_frm = impl_exprs(state_frm, lpe_spec);
+  impl_function_sorts(state_frm, lpe_spec);
+  return state_frm;
+}
 
 ATermAppl impl_exprs_spec(ATermAppl spec)
 {
   assert(gsIsSpecV1(spec));
   //implement system sort and data expressions occurring in spec
-  ATermList substs   = ATmakeList0();
+  ATermList substs     = ATmakeList0();
   t_data_decls data_decls;
-  data_decls.sorts    = ATmakeList0();
+  data_decls.sorts     = ATmakeList0();
   data_decls.cons_ops  = ATmakeList0();
-  data_decls.ops      = ATmakeList0();
+  data_decls.ops       = ATmakeList0();
   data_decls.data_eqns = ATmakeList0();
   spec = impl_exprs_appl(spec, &substs, &data_decls);
   //perform substitutions on data declarations
-  data_decls.sorts    = gsSubstValues_List(substs, data_decls.sorts, true);
-  data_decls.cons_ops  = gsSubstValues_List(substs, data_decls.cons_ops, true);
-  data_decls.ops      = gsSubstValues_List(substs, data_decls.ops, true);
+  data_decls.sorts     = gsSubstValues_List(substs, data_decls.sorts,     true);
+  data_decls.cons_ops  = gsSubstValues_List(substs, data_decls.cons_ops,  true);
+  data_decls.ops       = gsSubstValues_List(substs, data_decls.ops,       true);
   data_decls.data_eqns = gsSubstValues_List(substs, data_decls.data_eqns, true);
   //add implementation of sort Pos and Bool
   impl_sort_pos(&data_decls);
@@ -305,6 +382,110 @@ ATermAppl impl_exprs_spec(ATermAppl spec)
   //add new data declarations to spec
   spec = add_data_decls(spec, data_decls);
   return spec;
+}
+
+static ATermAppl impl_exprs(ATermAppl expr, lpe::specification &lpe_spec)
+{
+  //implement system sort and data expressions occurring in expr
+  ATermList substs     = ATmakeList0();
+  t_data_decls data_decls = get_data_decls(lpe_spec);
+  expr = impl_exprs_appl(expr, &substs, &data_decls);
+  //perform substitutions on data declarations
+  data_decls.sorts     = gsSubstValues_List(substs, data_decls.sorts,     true);
+  data_decls.cons_ops  = gsSubstValues_List(substs, data_decls.cons_ops,  true);
+  data_decls.ops       = gsSubstValues_List(substs, data_decls.ops,       true);
+  data_decls.data_eqns = gsSubstValues_List(substs, data_decls.data_eqns, true);
+  //update data declarations in lpe_spec
+  set_data_decls(lpe_spec, data_decls);
+  return expr;
+}
+
+ATermAppl impl_sort_refs(ATermAppl spec)
+{
+  assert(gsIsSpecV1(spec));
+  //get sort declarations
+  ATermAppl sort_spec = ATAgetArgument(spec, 0);
+  ATermList sort_decls = ATLgetArgument(sort_spec, 0);
+  //split sort declarations in sort id's and sort references
+  ATermList sort_ids = NULL;
+  ATermList sort_refs = NULL;
+  split_sort_decls(sort_decls, &sort_ids, &sort_refs);
+  //replace the sort declarations in spec by the sort_ids, the list of
+  //identifiers
+  sort_spec = ATsetArgument(sort_spec, (ATerm) sort_ids, 0);  
+  spec = ATsetArgument(spec, (ATerm) sort_spec, 0);
+  //make list of substitutions from sort_refs, the list of sort references
+  ATermList substs = ATmakeList0();
+  while (!ATisEmpty(sort_refs))
+  {
+    ATermAppl sort_ref = ATAgetFirst(sort_refs);
+    ATermAppl lhs = gsMakeSortId(ATAgetArgument(sort_ref, 0));
+    ATermAppl rhs = ATAgetArgument(sort_ref, 1);
+    //if rhs is the first occurrence of an implementation of a type constructor
+    //at the rhs of a sort reference, add rhs := lhs; otherwise add lhs := rhs
+    ATermAppl subst;
+    if (is_struct_sort_id(rhs) || is_list_sort_id(rhs) || is_set_sort_id(rhs) ||
+      is_bag_sort_id(rhs))
+    {
+      subst = gsMakeSubst_Appl(rhs, lhs);
+    } else {
+      subst = gsMakeSubst_Appl(lhs, rhs);
+    }
+    substs = ATinsert(substs, (ATerm) subst);
+    //perform substitution on the remaining elements of sort_refs
+    sort_refs = ATgetNext(sort_refs);    
+    sort_refs = gsSubstValues_List(ATmakeList1((ATerm) subst), sort_refs, true);
+  }
+  //perform substitutions on spec
+  spec = gsSubstValues_Appl(substs, spec, true);
+  return spec;
+}
+
+ATermAppl impl_function_sorts_spec(ATermAppl spec)
+{
+  assert(gsIsSpecV1(spec));
+  //get function sorts occurring in spec
+  ATermList func_sorts = get_function_sorts(spec);
+  //get operation declarations
+  ATermAppl op_spec = ATAgetArgument(spec, 2);
+  ATermList op_decls = ATLgetArgument(op_spec, 0);
+  //initalise data declarations
+  t_data_decls data_decls;
+  data_decls.sorts     = ATmakeList0();
+  data_decls.cons_ops  = ATmakeList0();
+  data_decls.ops       = ATmakeList0();
+  data_decls.data_eqns = ATmakeList0();
+  //implement function sorts that are not already implemented
+  while (!ATisEmpty(func_sorts))
+  {
+    ATermAppl func_sort = ATAgetFirst(func_sorts);
+    if (ATindexOf(op_decls, (ATerm) gsMakeOpIdEq(func_sort), 0) == -1) {
+      impl_function_sort(func_sort, &data_decls);
+    }
+    func_sorts = ATgetNext(func_sorts);
+  }
+  spec = add_data_decls(spec, data_decls);
+  return spec;
+}
+
+void impl_function_sorts(ATermAppl expr, lpe::specification &lpe_spec)
+{
+  //get function sorts occurring in expr and in lpe_spec
+  ATermList func_sorts = get_function_sorts((ATermAppl) lpe_spec);
+  func_sorts = ATconcat(get_function_sorts(expr), func_sorts);
+  //get data declarations from lpe_spec
+  t_data_decls data_decls = get_data_decls(lpe_spec);
+  //implement function sorts that are not already implemented
+  while (!ATisEmpty(func_sorts))
+  {
+    ATermAppl func_sort = ATAgetFirst(func_sorts);
+    if (ATindexOf(data_decls.ops, (ATerm) gsMakeOpIdEq(func_sort), 0) == -1) {
+      impl_function_sort(func_sort, &data_decls);
+    }
+    func_sorts = ATgetNext(func_sorts);
+  }
+  //update data declarations in lpe_spec
+  set_data_decls(lpe_spec, data_decls);
 }
 
 bool data_decls_is_initialised(t_data_decls data_decls)
@@ -344,6 +525,25 @@ ATermAppl add_data_decls(ATermAppl spec, t_data_decls data_decls)
   spec = ATsetArgument(spec, (ATerm) data_eqn_spec, 3);
   //return the new specification
   return spec;
+}
+
+static t_data_decls get_data_decls(lpe::specification &lpe_spec)
+{
+  t_data_decls data_decls;
+  data_decls.sorts     = (ATermList) lpe_spec.sorts();
+  data_decls.cons_ops  = (ATermList) lpe_spec.constructors();
+  data_decls.ops       = (ATermList) lpe_spec.mappings();
+  data_decls.data_eqns = (ATermList) lpe_spec.equations();
+  return data_decls;
+}
+
+static void set_data_decls(lpe::specification &lpe_spec, t_data_decls data_decls)
+{
+  assert(data_decls_is_initialised(data_decls));
+  lpe_spec.set_sorts(lpe::sort_list(data_decls.sorts));
+  lpe_spec.set_constructors(lpe::function_list(data_decls.cons_ops));
+  lpe_spec.set_mappings(lpe::function_list(data_decls.ops));
+  lpe_spec.set_equations(lpe::data_equation_list(data_decls.data_eqns));
 }
 
 ATermAppl impl_exprs_appl(ATermAppl part, ATermList *p_substs,
@@ -703,10 +903,10 @@ void get_free_vars_list(ATermList data_exprs, ATermList bound_vars,
   }
 }
  
-ATermList get_function_sorts(ATermAppl spec)
+ATermList get_function_sorts(ATermAppl expr)
 {
   ATermList func_sorts = ATmakeList0();
-  get_function_sorts_appl(spec, &func_sorts);
+  get_function_sorts_appl(expr, &func_sorts);
   return func_sorts;
 }
 
@@ -736,6 +936,46 @@ void get_function_sorts_list(ATermList parts, ATermList *p_func_sorts)
   }
 }
  
+void impl_function_sort(ATermAppl sort_arrow, t_data_decls *p_data_decls)
+{
+  assert(gsIsSortArrow(sort_arrow));
+  //Declare operations for sort sort_arrow
+  p_data_decls->ops = ATconcat(ATmakeList(3,
+      (ATerm) gsMakeOpIdEq(sort_arrow),
+      (ATerm) gsMakeOpIdNeq(sort_arrow),
+      (ATerm) gsMakeOpIdIf(sort_arrow)
+    ), p_data_decls->ops);
+  //Declare data equations for sort sort_arrow
+  ATermAppl f_sort_arrow = gsMakeDataVarId(gsString2ATermAppl("f"), sort_arrow);
+  ATermAppl g_sort_arrow = gsMakeDataVarId(gsString2ATermAppl("g"), sort_arrow);
+  ATermAppl b = gsMakeDataVarId(gsString2ATermAppl("b"), gsMakeSortExprBool());
+  ATermAppl nil = gsMakeNil();
+  ATermAppl t = gsMakeDataExprTrue();
+  ATermAppl f = gsMakeDataExprFalse();
+  ATermList fl = ATmakeList1((ATerm) f_sort_arrow);
+  ATermList fgl = ATmakeList2((ATerm) f_sort_arrow, (ATerm) g_sort_arrow);
+  ATermList bfl = ATmakeList2((ATerm) b, (ATerm) f_sort_arrow);
+  p_data_decls->data_eqns = ATconcat(ATmakeList(5,
+      //equality (sort_arrow -> sort_arrow -> Bool)
+      (ATerm) gsMakeDataEqn(fl, nil,
+        gsMakeDataExprEq(f_sort_arrow, f_sort_arrow), t),
+      //inequality (sort_arrow -> sort_arrow -> Bool)
+      (ATerm) gsMakeDataEqn(fgl,nil,
+        gsMakeDataExprNeq(f_sort_arrow, g_sort_arrow), 
+        gsMakeDataExprNot(gsMakeDataExprEq(f_sort_arrow, g_sort_arrow))),
+      //conditional (Bool -> sort_arrow -> sort_arrow -> sort_arrow)
+      (ATerm) gsMakeDataEqn(fgl,nil,
+        gsMakeDataExprIf(t, f_sort_arrow, g_sort_arrow),
+        f_sort_arrow),
+      (ATerm) gsMakeDataEqn(fgl,nil,
+        gsMakeDataExprIf(f, f_sort_arrow, g_sort_arrow),
+        g_sort_arrow),
+      (ATerm) gsMakeDataEqn(bfl,nil,
+        gsMakeDataExprIf(b, f_sort_arrow, f_sort_arrow),
+        f_sort_arrow)
+    ), p_data_decls->data_eqns);
+}
+
 ATermAppl apply_op_id_to_vars(ATermAppl op_id, ATermList *p_args,
   ATermList *p_vars, ATerm context)
 {
@@ -1500,6 +1740,111 @@ ATermAppl impl_sort_bag(ATermAppl sort_bag, ATermList *p_substs,
     impl_sort_nat(p_data_decls);
   }
   return sort_id;
+}
+
+ATermAppl make_fresh_struct_sort_id(ATerm term)
+{
+  return gsMakeSortId(gsFreshString2ATermAppl(struct_prefix, term, false));
+}
+ 
+ATermAppl make_fresh_list_sort_id(ATerm term)
+{
+  return gsMakeSortId(gsFreshString2ATermAppl(list_prefix, term, false));
+}
+
+ATermAppl make_fresh_set_sort_id(ATerm term)
+{
+  return gsMakeSortId(gsFreshString2ATermAppl(set_prefix, term, false));
+}
+
+ATermAppl make_fresh_bag_sort_id(ATerm term)
+{
+  return gsMakeSortId(gsFreshString2ATermAppl(bag_prefix, term, false));
+}
+
+ATermAppl make_fresh_lambda_op_id(ATermAppl sort_expr, ATerm term)
+{
+  return gsMakeOpId(gsFreshString2ATermAppl(lambda_prefix, term, false),
+    sort_expr);
+}
+
+bool is_struct_sort_id(ATermAppl sort_expr)
+{
+  if (gsIsSortId(sort_expr)) {
+    return strncmp(
+      struct_prefix,
+      ATgetName(ATgetAFun(ATAgetArgument(sort_expr, 0))),
+      strlen(struct_prefix)) == 0;
+  } else {
+    return false;
+  }
+}
+
+bool is_list_sort_id(ATermAppl sort_expr)
+{
+  if (gsIsSortId(sort_expr)) {
+    return strncmp(
+      list_prefix,
+      ATgetName(ATgetAFun(ATAgetArgument(sort_expr, 0))),
+      strlen(list_prefix)) == 0;
+  } else {
+    return false;
+  }
+}
+
+bool is_set_sort_id(ATermAppl sort_expr)
+{
+  if (gsIsSortId(sort_expr)) {
+    return strncmp(
+      set_prefix,
+      ATgetName(ATgetAFun(ATAgetArgument(sort_expr, 0))),
+      strlen(set_prefix)) == 0;
+  } else {
+    return false;
+  }
+}
+
+bool is_bag_sort_id(ATermAppl sort_expr)
+{
+  if (gsIsSortId(sort_expr)) {
+    return strncmp(
+      bag_prefix,
+      ATgetName(ATgetAFun(ATAgetArgument(sort_expr, 0))),
+      strlen(bag_prefix)) == 0;
+  } else {
+    return false;
+  }
+}
+
+//bool is_lambda_op_id(ATermAppl data_expr)
+//{
+//  if (gsIsOpId(data_expr)) {
+//    return strncmp(
+//      lambda_prefix,
+//      ATgetName(ATgetAFun(ATAgetArgument(data_expr, 0))),
+//      strlen(lambda_prefix)) == 0;
+//  } else {
+//    return false;
+//  }
+//}
+
+void split_sort_decls(ATermList sort_decls, ATermList *p_sort_ids,
+  ATermList *p_sort_refs)
+{
+  ATermList sort_ids = ATmakeList0();
+  ATermList sort_refs = ATmakeList0();
+  while (!ATisEmpty(sort_decls))
+  {
+    ATermAppl sortDecl = ATAgetFirst(sort_decls);
+    if (gsIsSortRef(sortDecl)) {
+      sort_refs = ATinsert(sort_refs, (ATerm) sortDecl);
+    } else { //gsIsSortId(sortDecl)
+      sort_ids = ATinsert(sort_ids, (ATerm) sortDecl);
+    }
+    sort_decls = ATgetNext(sort_decls);
+  }
+  *p_sort_ids = ATreverse(sort_ids);  
+  *p_sort_refs = ATreverse(sort_refs);
 }
 
 void impl_sort_bool(t_data_decls *p_data_decls)
@@ -2548,258 +2893,4 @@ void impl_sort_real(t_data_decls *p_data_decls)
   if (ATindexOf(p_data_decls->sorts, (ATerm) gsMakeSortIdInt(), 0) == -1) {
     impl_sort_int(p_data_decls);
   }
-}
-
-void impl_function_sort(ATermAppl sort_arrow, t_data_decls *p_data_decls)
-{
-  assert(gsIsSortArrow(sort_arrow));
-  //Declare operations for sort sort_arrow
-  p_data_decls->ops = ATconcat(ATmakeList(3,
-      (ATerm) gsMakeOpIdEq(sort_arrow),
-      (ATerm) gsMakeOpIdNeq(sort_arrow),
-      (ATerm) gsMakeOpIdIf(sort_arrow)
-    ), p_data_decls->ops);
-  //Declare data equations for sort sort_arrow
-  ATermAppl f_sort_arrow = gsMakeDataVarId(gsString2ATermAppl("f"), sort_arrow);
-  ATermAppl g_sort_arrow = gsMakeDataVarId(gsString2ATermAppl("g"), sort_arrow);
-  ATermAppl b = gsMakeDataVarId(gsString2ATermAppl("b"), gsMakeSortExprBool());
-  ATermAppl nil = gsMakeNil();
-  ATermAppl t = gsMakeDataExprTrue();
-  ATermAppl f = gsMakeDataExprFalse();
-  ATermList fl = ATmakeList1((ATerm) f_sort_arrow);
-  ATermList fgl = ATmakeList2((ATerm) f_sort_arrow, (ATerm) g_sort_arrow);
-  ATermList bfl = ATmakeList2((ATerm) b, (ATerm) f_sort_arrow);
-  p_data_decls->data_eqns = ATconcat(ATmakeList(5,
-      //equality (sort_arrow -> sort_arrow -> Bool)
-      (ATerm) gsMakeDataEqn(fl, nil,
-        gsMakeDataExprEq(f_sort_arrow, f_sort_arrow), t),
-      //inequality (sort_arrow -> sort_arrow -> Bool)
-      (ATerm) gsMakeDataEqn(fgl,nil,
-        gsMakeDataExprNeq(f_sort_arrow, g_sort_arrow), 
-        gsMakeDataExprNot(gsMakeDataExprEq(f_sort_arrow, g_sort_arrow))),
-      //conditional (Bool -> sort_arrow -> sort_arrow -> sort_arrow)
-      (ATerm) gsMakeDataEqn(fgl,nil,
-        gsMakeDataExprIf(t, f_sort_arrow, g_sort_arrow),
-        f_sort_arrow),
-      (ATerm) gsMakeDataEqn(fgl,nil,
-        gsMakeDataExprIf(f, f_sort_arrow, g_sort_arrow),
-        g_sort_arrow),
-      (ATerm) gsMakeDataEqn(bfl,nil,
-        gsMakeDataExprIf(b, f_sort_arrow, f_sort_arrow),
-        f_sort_arrow)
-    ), p_data_decls->data_eqns);
-}
-
-ATermAppl make_fresh_struct_sort_id(ATerm term)
-{
-  return gsMakeSortId(gsFreshString2ATermAppl(struct_prefix, term, false));
-}
- 
-ATermAppl make_fresh_list_sort_id(ATerm term)
-{
-  return gsMakeSortId(gsFreshString2ATermAppl(list_prefix, term, false));
-}
-
-ATermAppl make_fresh_set_sort_id(ATerm term)
-{
-  return gsMakeSortId(gsFreshString2ATermAppl(set_prefix, term, false));
-}
-
-ATermAppl make_fresh_bag_sort_id(ATerm term)
-{
-  return gsMakeSortId(gsFreshString2ATermAppl(bag_prefix, term, false));
-}
-
-ATermAppl make_fresh_lambda_op_id(ATermAppl sort_expr, ATerm term)
-{
-  return gsMakeOpId(gsFreshString2ATermAppl(lambda_prefix, term, false),
-    sort_expr);
-}
-
-bool is_struct_sort_id(ATermAppl sort_expr)
-{
-  if (gsIsSortId(sort_expr)) {
-    return strncmp(
-      struct_prefix,
-      ATgetName(ATgetAFun(ATAgetArgument(sort_expr, 0))),
-      strlen(struct_prefix)) == 0;
-  } else {
-    return false;
-  }
-}
-
-bool is_list_sort_id(ATermAppl sort_expr)
-{
-  if (gsIsSortId(sort_expr)) {
-    return strncmp(
-      list_prefix,
-      ATgetName(ATgetAFun(ATAgetArgument(sort_expr, 0))),
-      strlen(list_prefix)) == 0;
-  } else {
-    return false;
-  }
-}
-
-bool is_set_sort_id(ATermAppl sort_expr)
-{
-  if (gsIsSortId(sort_expr)) {
-    return strncmp(
-      set_prefix,
-      ATgetName(ATgetAFun(ATAgetArgument(sort_expr, 0))),
-      strlen(set_prefix)) == 0;
-  } else {
-    return false;
-  }
-}
-
-bool is_bag_sort_id(ATermAppl sort_expr)
-{
-  if (gsIsSortId(sort_expr)) {
-    return strncmp(
-      bag_prefix,
-      ATgetName(ATgetAFun(ATAgetArgument(sort_expr, 0))),
-      strlen(bag_prefix)) == 0;
-  } else {
-    return false;
-  }
-}
-
-//bool is_lambda_op_id(ATermAppl data_expr)
-//{
-//  if (gsIsOpId(data_expr)) {
-//    return strncmp(
-//      lambda_prefix,
-//      ATgetName(ATgetAFun(ATAgetArgument(data_expr, 0))),
-//      strlen(lambda_prefix)) == 0;
-//  } else {
-//    return false;
-//  }
-//}
-
-ATermAppl impl_sort_refs(ATermAppl spec)
-{
-  assert(gsIsSpecV1(spec));
-  //get sort declarations
-  ATermAppl sort_spec = ATAgetArgument(spec, 0);
-  ATermList sort_decls = ATLgetArgument(sort_spec, 0);
-  //split sort declarations in sort id's and sort references
-  ATermList sort_ids = NULL;
-  ATermList sort_refs = NULL;
-  split_sort_decls(sort_decls, &sort_ids, &sort_refs);
-  //replace the sort declarations in spec by the sort_ids, the list of
-  //identifiers
-  sort_spec = ATsetArgument(sort_spec, (ATerm) sort_ids, 0);  
-  spec = ATsetArgument(spec, (ATerm) sort_spec, 0);
-  //make list of substitutions from sort_refs, the list of sort references
-  ATermList substs = ATmakeList0();
-  while (!ATisEmpty(sort_refs))
-  {
-    ATermAppl sort_ref = ATAgetFirst(sort_refs);
-    ATermAppl lhs = gsMakeSortId(ATAgetArgument(sort_ref, 0));
-    ATermAppl rhs = ATAgetArgument(sort_ref, 1);
-    //if rhs is the first occurrence of an implementation of a type constructor
-    //at the rhs of a sort reference, add rhs := lhs; otherwise add lhs := rhs
-    ATermAppl subst;
-    if (is_struct_sort_id(rhs) || is_list_sort_id(rhs) || is_set_sort_id(rhs) ||
-      is_bag_sort_id(rhs))
-    {
-      subst = gsMakeSubst_Appl(rhs, lhs);
-    } else {
-      subst = gsMakeSubst_Appl(lhs, rhs);
-    }
-    substs = ATinsert(substs, (ATerm) subst);
-    //perform substitution on the remaining elements of sort_refs
-    sort_refs = ATgetNext(sort_refs);    
-    sort_refs = gsSubstValues_List(ATmakeList1((ATerm) subst), sort_refs, true);
-  }
-  //perform substitutions on spec
-  spec = gsSubstValues_Appl(substs, spec, true);
-  return spec;
-}
-
-void split_sort_decls(ATermList sort_decls, ATermList *p_sort_ids,
-  ATermList *p_sort_refs)
-{
-  ATermList sort_ids = ATmakeList0();
-  ATermList sort_refs = ATmakeList0();
-  while (!ATisEmpty(sort_decls))
-  {
-    ATermAppl sortDecl = ATAgetFirst(sort_decls);
-    if (gsIsSortRef(sortDecl)) {
-      sort_refs = ATinsert(sort_refs, (ATerm) sortDecl);
-    } else { //gsIsSortId(sortDecl)
-      sort_ids = ATinsert(sort_ids, (ATerm) sortDecl);
-    }
-    sort_decls = ATgetNext(sort_decls);
-  }
-  *p_sort_ids = ATreverse(sort_ids);  
-  *p_sort_refs = ATreverse(sort_refs);
-}
-
-ATermAppl impl_function_sorts(ATermAppl spec)
-{
-  assert(gsIsSpecV1(spec));
-  //implement function sorts occurring in spec
-  ATermList func_sorts = get_function_sorts(spec);
-  t_data_decls data_decls;
-  data_decls.sorts = ATmakeList0();
-  data_decls.cons_ops = ATmakeList0();
-  data_decls.ops = ATmakeList0();
-  data_decls.data_eqns = ATmakeList0();
-  while (!ATisEmpty(func_sorts))
-  {
-    impl_function_sort(ATAgetFirst(func_sorts), &data_decls);
-    func_sorts = ATgetNext(func_sorts);
-  }
-  spec = add_data_decls(spec, data_decls);
-  return spec;
-}
-
-ATermAppl implement_data_spec(ATermAppl spec)
-{
-  int occ = gsCount((ATerm) gsMakeUnknown(), (ATerm) spec);
-  if (occ > 0) {
-    gsErrorMsg("specification contains %d unknown type%s\n", occ, (occ != 1)?"s":"");
-    return NULL;
-  }
-  spec = impl_exprs_spec(spec);
-  spec = impl_sort_refs(spec);
-  spec = impl_function_sorts(spec);
-  return spec;
-}
-
-ATermAppl implement_data_data_expr(ATermAppl data_expr,
-  lpe::specification &lpe_spec)
-{
-  int occ = gsCount((ATerm) gsMakeUnknown(), (ATerm) data_expr);
-  if (occ > 0) {
-    gsErrorMsg("specification contains %d unknown type%s\n", occ, (occ != 1)?"s":"");
-    return NULL;
-  }
-  //TODO
-  return data_expr;
-}
-
-ATermAppl implement_data_mult_act(ATermAppl mult_act,
-  lpe::specification &lpe_spec)
-{
-  int occ = gsCount((ATerm) gsMakeUnknown(), (ATerm) mult_act);
-  if (occ > 0) {
-    gsErrorMsg("specification contains %d unknown type%s\n", occ, (occ != 1)?"s":"");
-    return NULL;
-  }
-  //TODO
-  return mult_act;
-}
-
-ATermAppl implement_data_state_frm(ATermAppl state_frm,
-  lpe::specification &lpe_spec)
-{
-  int occ = gsCount((ATerm) gsMakeUnknown(), (ATerm) state_frm);
-  if (occ > 0) {
-    gsErrorMsg("specification contains %d unknown type%s\n", occ, (occ != 1)?"s":"");
-    return NULL;
-  }
-  //TODO
-  return state_frm;
 }
