@@ -243,18 +243,36 @@ ATermAppl type_check_spec(ATermAppl input)
   return Result;
 }
 
+ATermAppl type_check_sort_expr(ATermAppl sort_expr, lpe::specification &lpe_spec)
+{
+  //check correctness of the sort expression in sort_expr using
+  //the LPE specification in lpe_spec
+  gsWarningMsg("type checking of sort expressions is not yet implemented\n");
+  return sort_expr;
+}
+
 ATermAppl type_check_data_expr(ATermAppl data_expr, lpe::specification &lpe_spec)
 {
   //check correctness of the data expression in data_expr using
   //the LPE specification in lpe_spec
-  return NULL;
+  gsWarningMsg("type checking of data expressions is not yet implemented\n");
+  return data_expr;
 }
 
 ATermAppl type_check_mult_act(ATermAppl mult_act, lpe::specification &lpe_spec)
 {
   //check correctness of the multi-action in mult_act using
   //the LPE specification in lpe_spec
-  return NULL;
+  gsWarningMsg("type checking of multiactions is not yet implemented\n");
+  return mult_act;
+}
+
+ATermAppl type_check_proc_expr(ATermAppl proc_expr, lpe::specification &lpe_spec)
+{
+  //check correctness of the process expression in proc_expr using
+  //the LPE specification in lpe_spec
+  gsWarningMsg("type checking of process expressions is not yet implemented\n");
+  return proc_expr;
 }
 
 ATermAppl type_check_state_frm(ATermAppl state_frm, lpe::specification &lpe_spec)
@@ -269,6 +287,7 @@ ATermAppl type_check_state_frm(ATermAppl state_frm, lpe::specification &lpe_spec
   //   forall, exists, mu and nu quantifiers
   //4) check for monotonicity of fixpoint variables
   //TODO in decreasing order of urgency: 1 & 2 => 3 & 4.
+  gsWarningMsg("type checking of state formulas is not yet implemented\n");
   return state_frm;
 }
 

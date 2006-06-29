@@ -14,6 +14,17 @@ ATermAppl type_check_spec(ATermAppl spec);
  *     NULL is returned.
  */
 
+ATermAppl type_check_sort_expr(ATermAppl sort_expr, lpe::specification &lpe_spec);
+/*Pre: sort_expr represents an mCRL2 sort expression that adheres to the
+ *     initial internal ATerm structure.
+ *     lpe_spec represents an LPE specification
+ *Post:sort_expr is type checked using the declaration from lpe_spec
+ *Ret: if type checking went ok, an equivalent version of sort_expr is returned
+ *     that adheres to the internal ATerm structure after type checking.
+ *     if something went wrong, an appropriate error message is printed and
+ *     NULL is returned.
+ */
+
 ATermAppl type_check_data_expr(ATermAppl data_expr, lpe::specification &lpe_spec);
 /*Pre: data_expr represents an mCRL2 data expression that adheres to the
  *     initial internal ATerm structure.
@@ -31,6 +42,17 @@ ATermAppl type_check_mult_act(ATermAppl mult_act, lpe::specification &lpe_spec);
  *     lpe_spec represents an LPE specification
  *Post:mult_act is type checked using the declarations from lpe_spec
  *Ret: if type checking went ok, an equivalent version of mult_act is returned
+ *     that adheres to the internal ATerm structure after type checking.
+ *     if something went wrong, an appropriate error message is printed and
+ *     NULL is returned.
+ */
+
+ATermAppl type_check_proc_expr(ATermAppl proc_expr, lpe::specification &lpe_spec);
+/*Pre: proc_expr represents an mCRL2 proc expression that adheres to the
+ *     initial internal ATerm structure.
+ *     lpe_spec represents an LPE specification
+ *Post:proc_expr is type checked using the declaration from lpe_spec
+ *Ret: if type checking went ok, an equivalent version of proc_expr is returned
  *     that adheres to the internal ATerm structure after type checking.
  *     if something went wrong, an appropriate error message is printed and
  *     NULL is returned.
