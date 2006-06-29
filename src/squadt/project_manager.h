@@ -213,7 +213,8 @@ namespace squadt {
   }
 
   /**
-   * @param p pointer to the processor that is to be removed
+   * @param[in] p pointer to the processor that is to be removed
+   * @param[in] b whether or not to remove the associated files
    *
    * \attention all processors with inconsistent inputs are also removed
    **/

@@ -11,6 +11,8 @@
 
 namespace squadt {
 
+  using namespace boost::filesystem;
+
   void processor::monitor::status_change_dummy(output_status) {
     std::cerr << "No custom status change event handler connected!" << std::endl;
   }
@@ -27,6 +29,7 @@ namespace squadt {
   }
 
   /**
+   * @param[in] p the associated project manager
    * @param[in] t the tool descriptor of the tool that is to be used to produce the output from the input
    **/
   inline processor::processor(project_manager& p, tool::sptr t) :
@@ -71,7 +74,7 @@ namespace squadt {
     sip::configuration::sptr c(sip::controller::communicator::new_configuration(*selected_input_combination));
 
     /* Establish what prefix, if any, was used */
-//    ic.identifier TODO
+//    ic.identifier 
 
     c->set_output_prefix(boost::str(boost::format("%s%04X") % (boost::filesystem::basename(l)) % manager->get_unique_count()));
 
@@ -96,8 +99,6 @@ namespace squadt {
    * @param[in] r whether to check recursively or not
    **/
   inline bool processor::check_status(const bool r) {
-    using namespace boost::filesystem;
-
     if (current_output_status == up_to_date) {
       output_status new_status = current_output_status;
      
@@ -218,6 +219,7 @@ namespace squadt {
       s << "<output id=\"" << std::dec << reinterpret_cast < unsigned long > ((*i).get())
         << "\" format=\"" << (*i)->format
         << "\" location=\"" << (*i)->location
+        << "\" identifier=\"" << std::dec << (*i)->identifier
         << "\" digest=\"" << (*i)->checksum
         << "\" timestamp=\"" << std::dec << (*i)->timestamp << "\"/>\n";
     }
@@ -294,6 +296,7 @@ namespace squadt {
 
       if (!(b && r.get_attribute(&n->format, "format")
               && r.get_attribute(&n->location, "location")
+              && r.get_attribute(&n->identifier, "identifier")
               && r.get_attribute(&temporary, "digest")
               && r.get_attribute(&n->timestamp, "timestamp"))) {
 
@@ -314,8 +317,6 @@ namespace squadt {
   }
 
   void processor::flush_outputs() {
-    using namespace boost::filesystem;
-
     set_output_status(non_existent);
 
     /* Make sure any output objects are removed from storage */
@@ -326,6 +327,176 @@ namespace squadt {
         remove(p);
       }
     }
+  }
+
+  /**
+   * @param o a pointer to the object to find
+   **/
+  const processor::object_descriptor::sptr processor::find_output(object_descriptor* o) const {
+    output_list::const_iterator i = std::find_if(outputs.begin(), outputs.end(),
+                boost::bind(std::equal_to < object_descriptor* >(), o, 
+                               boost::bind(&object_descriptor::sptr::get, _1)));
+                               
+    if (i != outputs.end()) {
+      return (*i);
+    }
+
+    object_descriptor::sptr s;
+
+    return (s);
+  }
+
+  /**
+   * @param o a pointer to the object to find
+   **/
+  const processor::object_descriptor::sptr processor::find_input(object_descriptor* o) const {
+    for (input_list::const_iterator i = inputs.begin(); i != inputs.end(); ++i) {
+      object_descriptor::sptr s = (*i).lock();
+
+      if (s.get() == o) {
+        return (s);
+      }
+    }
+                               
+    object_descriptor::sptr s;
+
+    return (s);
+  }
+
+  /**
+   * @param[in] id a pointer to the object to find
+   **/
+  const processor::object_descriptor::sptr processor::find_output(const unsigned int id) const {
+    for (output_list::const_iterator i = outputs.begin(); i != outputs.end(); ++i) {
+      if ((*i)->identifier == id) {
+
+        return (*i);
+      }
+    }
+
+    object_descriptor::sptr s;
+
+    return (s);
+  }
+
+  /**
+   * @param[in] id the id of the object to find
+   **/
+  const processor::object_descriptor::sptr processor::find_input(const unsigned int id) const {
+    for (input_list::const_iterator i = inputs.begin(); i != inputs.end(); ++i) {
+      object_descriptor::sptr s = (*i).lock();
+
+      if (s.get() != 0 && s->identifier == id) {
+        return (s);
+      }
+    }
+                               
+    object_descriptor::sptr s;
+
+    return (s);
+  }
+
+  /**
+   * @param o the name of the input object to find
+   **/
+  const processor::object_descriptor::sptr processor::find_output(std::string const& o) const {
+    for (output_list::const_iterator i = outputs.begin(); i != outputs.end(); ++i) {
+      if ((*i)->location == o) {
+
+        return (*i);
+      }
+    }
+
+    object_descriptor::sptr s;
+
+    return (s);
+  }
+
+  /**
+   * @param o the name of the input object to find
+   **/
+  const processor::object_descriptor::sptr processor::find_input(std::string const& o) const {
+    for (input_list::const_iterator i = inputs.begin(); i != inputs.end(); ++i) {
+      object_descriptor::sptr s = (*i).lock();
+
+      if (s.get() != 0 && s->location == o) {
+        return (s);
+      }
+    }
+                               
+    object_descriptor::sptr s;
+
+    return (s);
+  }
+
+  /**
+   * @param[in] o the name (location) of the object to change
+   * @param[in] n the new name (location) of the object
+   **/
+  void processor::rename_object(object_descriptor::sptr const& o, std::string const& n) {
+
+    if (o.get() != 0) {
+      path source(o->location);
+      path target(n);
+
+      if (exists(source) && source != target) {
+        if (exists(target)) {
+          remove(target);
+        }
+
+        rename(source, target);
+      }
+
+      o->location = n;
+
+      /* TODO update configuration */
+      sip::configuration::sptr c = current_monitor->get_configuration();
+
+      sip::object::sptr object(c->get_output(o->identifier));
+
+      if (object.get() != 0) {
+        object->set_location(n);
+      }
+    }
+  }
+
+  /**
+   * @param[in] c a reference to a configuration object
+   **/
+  void processor::process_configuration(sip::configuration::sptr const& c) {
+    /* Extract information about output objects from the configuration */
+    for (sip::configuration::object_iterator i = c->get_object_iterator(); i.valid(); ++i) {
+      if ((*i)->get_type() == sip::object::output) {
+        object_descriptor::sptr o = find_output((*i)->get_id());
+
+        if (o.get() == 0) {
+          /* Output not registered yet */
+          append_output(*(*i));
+        }
+        else {
+          if ((*i)->get_location() != o->location) {
+            /* Output already known, but filenames do not match */
+            remove(path(o->location));
+          }
+
+          replace_output(o, *(*i));
+        }
+      }
+    }
+  }
+
+  bool processor::consistent_inputs() const {
+    input_list::const_iterator i = inputs.begin();
+
+    while (i != inputs.end()) {
+      if ((*i).lock().get() == 0) {
+        return false;
+      }
+
+      ++i;
+    }
+
+    return (true);
   }
 }
 

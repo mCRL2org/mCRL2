@@ -2,10 +2,12 @@
 
 namespace transport {
 
-  template < >
-  const char* const exception::descriptions[] = {
-    "Listener failed connection attempt!",
-    "Transceiver failed send or receive!"
-  };
+  namespace exception {
+    template < >
+    const char* const exception::descriptions[] = {
+      "Listener failed connection attempt!",
+      "Transceiver failed send or receive!"
+    };
+  }
 }
 

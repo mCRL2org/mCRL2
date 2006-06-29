@@ -65,11 +65,12 @@ namespace squadt {
 
       /** \brief Type to hold information about output objects */
       struct object_descriptor {
-        processor::wptr       generator;      ///< The process responsible for generating this object
-        storage_format        format;         ///< The used storage format
-        std::string           location;       ///< The location of the object
-        md5pp::compact_digest checksum;       ///< The digest for the completed object
-        std::time_t           timestamp;      ///< The last time the file was modified just before the last checksum was computed
+        processor::wptr         generator;      ///< The process responsible for generating this object
+        storage_format          format;         ///< The used storage format
+        std::string             location;       ///< The location of the object
+        unsigned int            identifier;     ///< The identifier of the associated output object in a configuration
+        md5pp::compact_digest   checksum;       ///< The digest for the completed object
+        std::time_t             timestamp;      ///< The last time the file was modified just before the last checksum was computed
 
         /** \brief Convenience type for hiding shared pointer implementation */
         typedef boost::shared_ptr < object_descriptor >  sptr;
@@ -208,8 +209,17 @@ namespace squadt {
       inline void process_configuration();
 
       /** \brief Extracts useful information from a configuration object */
-      inline void process_configuration(sip::configuration::sptr const& c);
+      void process_configuration(sip::configuration::sptr const& c);
 
+      /** \brief Find an object descriptor for a given pointer to an object */
+      const object_descriptor::sptr find_output(std::string const&) const;
+ 
+      /** \brief Find an object descriptor for a given pointer to an object */
+      const object_descriptor::sptr find_input(std::string const&) const;
+ 
+      /** \brief Find an object descriptor for a given name and rename if it exists */
+      void rename_object(object_descriptor::sptr const&, std::string const&);
+ 
     public:
 
       /** \brief Factory method for creating instances of this object */
@@ -222,7 +232,7 @@ namespace squadt {
       bool check_status(bool);
 
       /** \brief Validate whether the inputs to this process are not dangling pointers */
-      inline bool consistent_inputs() const;
+      bool consistent_inputs() const;
 
       /** \brief Start tool configuration, with callback on completion */
       void configure(const tool::input_combination*, std::string const&, const boost::filesystem::path&, boost::function < void () >);
@@ -279,7 +289,22 @@ namespace squadt {
       inline void append_input(object_descriptor::wptr);
  
       /** \brief Find an object descriptor for a given pointer to an object */
-      inline const object_descriptor::sptr find_output(object_descriptor*);
+      const object_descriptor::sptr find_output(object_descriptor*) const;
+ 
+      /** \brief Find an object descriptor for a given pointer to an object */
+      const object_descriptor::sptr find_input(object_descriptor*) const;
+ 
+      /** \brief Find an object descriptor for a given pointer to an object (by id) */
+      const object_descriptor::sptr find_output(const unsigned int) const;
+ 
+      /** \brief Find an object descriptor for a given pointer to an object (by id) */
+      const object_descriptor::sptr find_input(const unsigned int) const;
+ 
+      /** \brief Find an object descriptor for a given name and rename if it exists */
+      void rename_output(std::string const&, std::string const&);
+ 
+      /** \brief Find an object descriptor for a given name and rename if it exists */
+      void rename_input(std::string const&, std::string const&);
  
       /** \brief Get output objects */
       inline output_object_iterator get_output_iterator() const;
@@ -292,6 +317,9 @@ namespace squadt {
  
       /** \brief Add an output object */
       inline void append_output(sip::object const&);
+
+      /** \brief Add an output object */
+      inline void replace_output(object_descriptor::sptr, sip::object const&);
 
       /** \brief Pretty prints the fields of the specification */
       void print(std::ostream& stream = std::cerr) const;

@@ -25,10 +25,11 @@
 
 #define cmID_REMOVE    (wxID_HIGHEST + 1)
 #define cmID_REBUILD   (wxID_HIGHEST + 2)
-#define cmID_CLEAN     (wxID_HIGHEST + 3)
-#define cmID_CONFIGURE (wxID_HIGHEST + 4)
-#define cmID_DETAILS   (wxID_HIGHEST + 5)
-#define cmID_TOOLS     (wxID_HIGHEST + 6)
+#define cmID_RENAME    (wxID_HIGHEST + 3)
+#define cmID_CLEAN     (wxID_HIGHEST + 4)
+#define cmID_CONFIGURE (wxID_HIGHEST + 5)
+#define cmID_DETAILS   (wxID_HIGHEST + 6)
+#define cmID_TOOLS     (wxID_HIGHEST + 7)
 
 namespace squadt {
   namespace GUI {
@@ -155,6 +156,7 @@ namespace squadt {
       /* Connect event handlers */
       object_view->Connect(wxEVT_COMMAND_TREE_ITEM_MENU, wxTreeEventHandler(project::on_tree_item_activate), 0, this);
       object_view->Connect(wxEVT_COMMAND_TREE_ITEM_ACTIVATED, wxTreeEventHandler(project::on_tree_item_activate), 0, this);
+      object_view->Connect(wxEVT_COMMAND_TREE_END_LABEL_EDIT, wxTreeEventHandler(project::on_object_name_edited), 0, this);
 
       Connect(wxEVT_COMMAND_MENU_SELECTED, wxCommandEventHandler(project::on_context_menu_select));
     }
@@ -189,6 +191,17 @@ namespace squadt {
       }
     }
 
+    /**
+     * @param e a reference to a tree event object
+     **/
+    void project::on_object_name_edited(wxTreeEvent& e) {
+      wxTreeItemId                       s = e.GetItem();
+      processor::sptr                    p = reinterpret_cast < object_data* > (object_view->GetItemData(s))->get_processor();
+      processor::object_descriptor::sptr t = reinterpret_cast < object_data* > (object_view->GetItemData(s))->get_object();
+
+      p->rename_output(t->location, std::string(e.GetLabel().fn_str()));
+    }
+
     void project::add() {
       dialog::add_to_project dialog(this, wxString(manager->get_project_store().c_str(), wxConvLocal));
 
@@ -209,7 +222,7 @@ namespace squadt {
     }
 
     /**
-     * @param t a storage format for which to add tools to the menu
+     * @param n an object_data object used to establish which tools to add to the menu
      **/
     void project::spawn_context_menu(object_data& n) {
       using namespace boost;
@@ -218,6 +231,7 @@ namespace squadt {
 
       wxMenu  context_menu;
 
+      context_menu.Append(cmID_RENAME, wxT("Rename"));
       context_menu.Append(cmID_REMOVE, wxT("Remove"));
 
       if (generated) {
@@ -235,8 +249,8 @@ namespace squadt {
 
       context_menu.AppendSeparator();
 
-      if (!context_menu.FindItemByPosition(1 + generated * 3)->IsSeparator()) {
-        context_menu.InsertSeparator(1 + generated * 3);
+      if (!context_menu.FindItemByPosition(2 + generated * 3)->IsSeparator()) {
+        context_menu.InsertSeparator(2 + generated * 3);
       }
 
       context_menu.Append(cmID_DETAILS, wxT("Details"));
@@ -301,6 +315,10 @@ namespace squadt {
 
           object_view->Delete(s);
           break;
+        case cmID_RENAME: {
+            object_view->EditLabel(s);
+          }
+          break;
         case cmID_REBUILD:
           p->flush_outputs();
 
@@ -330,7 +348,6 @@ namespace squadt {
             }
 
             if (dialog.ShowModal()) {
-              object_view->SetItemText(s, dialog.get_name());
             }
           }
           break;
@@ -421,8 +438,9 @@ namespace squadt {
     }
 
     /**
+     * @param[in] s the tree item to which the new processor may be attached
      * @param[in] e the existing object (already part of the project)
-     * @param[in] o the new object
+     * @param[in] n the new object
      **/
     void project::resolve_conflict(wxTreeItemId s, processor::object_descriptor::sptr e, processor::object_descriptor::sptr n) {
       processor::sptr te = e->generator.lock(); // Existing

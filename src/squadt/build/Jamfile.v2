@@ -2,9 +2,11 @@ project squadt
   : source-location ..
   : build-dir $(BUILD_TOP) 
   : requirements
+    <threading>multi
     <include>../..
     <include>../libraries
-    <cxxflags>-std=c++98 ;
+    <cxxflags>-std=c++98
+  ;
 
 
 

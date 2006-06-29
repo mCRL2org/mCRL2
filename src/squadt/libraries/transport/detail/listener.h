@@ -23,7 +23,7 @@ namespace transport {
         transport::transporter& owner;
 
         /** \brief Associates the owner with the connection */
-        inline void associate(boost::shared_ptr < transceiver::basic_transceiver >);
+        inline void associate(transceiver::basic_transceiver::ptr);
 
       public:
 

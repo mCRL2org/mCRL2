@@ -31,7 +31,7 @@ namespace transport {
     }
 
     /**
-     * @param o a pointer to the owner
+     * @param t a pointer to the owner
      **/
     inline void basic_transceiver::handle_disconnect(basic_transceiver* t) {
       /* Remove instance from the list of connections */

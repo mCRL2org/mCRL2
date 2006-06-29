@@ -74,7 +74,7 @@ namespace transport {
       }
       else {
         /* Some other error occurred, abort... */
-        throw (exception(exception_identifier::listener_failure));
+        throw (exception::exception(exception::listener_failure));
       }
 
       /* Make sure the scheduler is running */

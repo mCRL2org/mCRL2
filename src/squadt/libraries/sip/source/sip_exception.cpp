@@ -3,6 +3,7 @@
 namespace sip {
   namespace exception {
 
+    /** \brief Messages for exceptions */
     template < >
     const char* const exception::descriptions[] = {
       "Functionality not yet implemented!",

@@ -172,18 +172,20 @@ namespace squadt {
     inputs.push_back(p);
   }
 
-  inline const processor::object_descriptor::sptr processor::find_output(object_descriptor* o) {
-    object_descriptor::sptr s;
+  /**
+   * @param o the name (location) of the object to change
+   * @param n the new name (location) of the object
+   **/
+  inline void processor::rename_input(std::string const& o, std::string const& n) {
+    rename_object(find_output(o), n);
+  }
 
-    output_list::const_iterator i = std::find_if(outputs.begin(), outputs.end(),
-                boost::bind(std::equal_to < object_descriptor* >(), o, 
-                               boost::bind(&object_descriptor::sptr::get, _1)));
-                               
-    if (i != outputs.end()) {
-      s = *i;
-    }
-
-    return (s);
+  /**
+   * @param o the name (location) of the object to change
+   * @param n the new name (location) of the object
+   **/
+  inline void processor::rename_output(std::string const& o, std::string const& n) {
+    rename_object(find_output(o), n);
   }
 
   inline processor::output_object_iterator processor::get_output_iterator() const {
@@ -206,49 +208,50 @@ namespace squadt {
   }
 
   /**
-   * @param f the storage format that l uses
-   * @param l a URI (local path) to where the file is stored
+   * @param[in] f the storage format that l uses
+   * @param[in] l a URI (local path) to where the file is stored
    **/
   inline void processor::append_output(const storage_format& f, const std::string& l) {
     object_descriptor::sptr p = object_descriptor::sptr(new object_descriptor);
 
-    p->format    = f;
-    p->location  = l;
-    p->timestamp = time(0);
+    p->format     = f;
+    p->location   = l;
+    p->identifier = 0;
+    p->timestamp  = time(0);
     p->checksum.zero_out();
 
     append_output(p);
   }
 
   /**
-   * @param o a sip::object object that describes an output object
+   * @param[in] o a sip::object object that describes an output object
    **/
   inline void processor::append_output(sip::object const& o) {
     object_descriptor::sptr p = object_descriptor::sptr(new object_descriptor);
 
-    p->format    = o.get_format();
-    p->location  = o.get_location();
-    p->timestamp = time(0);
+    p->format     = o.get_format();
+    p->location   = o.get_location();
+    p->identifier = o.get_id();
+    p->timestamp  = time(0);
     p->checksum.zero_out();
 
     append_output(p);
   }
 
-  inline void processor::process_configuration() {
-    process_configuration(current_monitor->get_configuration());
+  /**
+   * @param[in] p the object descriptor that should be replaced
+   * @param[in] o a sip::object object that describes an output object
+   **/
+  inline void processor::replace_output(object_descriptor::sptr p, sip::object const& o) {
+    p->format     = o.get_format();
+    p->location   = o.get_location();
+    p->identifier = o.get_id();
+    p->timestamp  = time(0);
+    p->checksum.zero_out();
   }
 
-  /**
-   * @param c a reference to a configuration object
-   **/
-  inline void processor::process_configuration(sip::configuration::sptr const& c) {
-    /* Extract information about output objects from the configuration */
-    for (sip::configuration::object_iterator i = current_monitor->get_configuration()->get_object_iterator(); i.valid(); ++i) {
-      if ((*i)->get_type() == sip::object::output) {
-        /* TODO check and replace existing outputs */
-        append_output(*(*i));
-      }
-    }
+  inline void processor::process_configuration() {
+    process_configuration(current_monitor->get_configuration());
   }
 
   /**
@@ -334,20 +337,6 @@ namespace squadt {
 
   inline const unsigned int processor::number_of_outputs() const {
     return (outputs.size());
-  }
-
-  inline bool processor::consistent_inputs() const {
-    input_list::const_iterator i = inputs.begin();
-
-    while (i != inputs.end()) {
-      if ((*i).lock().get() == 0) {
-        return false;
-      }
-
-      ++i;
-    }
-
-    return (true);
   }
 
   inline const processor::output_status processor::get_output_status() const {

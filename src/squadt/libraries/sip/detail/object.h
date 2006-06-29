@@ -65,10 +65,10 @@ namespace sip {
     private:
 
       /** \brief The format used for storing this object */
-      const storage_format format;
+      storage_format       format;
 
       /** \brief The format used for storing this object */
-      const uri            location;
+      uri                  location;
 
       /** \brief The type of this object */
       type                 _type;
@@ -94,11 +94,17 @@ namespace sip {
       /** \brief Returns the objects type */
       inline const type get_type() const;
 
-      /** \brief Returns the objects storage format */
+      /** \brief Returns the object storage format */
       inline const storage_format get_format() const;
 
-      /** \brief Returns the objects uri */
+      /** \brief Sets the object storage format */
+      inline void set_format(object::storage_format const&);
+
+      /** \brief Returns the object location */
       inline const uri get_location() const;
+
+      /** \brief Sets the object location */
+      inline void set_location(object::uri const&);
 
       /** \brief Write to XML stream */
       inline void write(std::ostream&) const;
@@ -119,8 +125,16 @@ namespace sip {
     return (format);
   }
 
+  inline void object::set_format(object::storage_format const& f) {
+    format = f;
+  }
+
   inline const object::uri object::get_location() const {
     return (location);
+  }
+
+  inline void object::set_location(object::uri const& l) {
+    location = l;
   }
 
   inline void object::write(std::ostream& output) const {
