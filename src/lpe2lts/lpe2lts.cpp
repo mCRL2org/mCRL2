@@ -21,7 +21,6 @@
 #include "librewrite.h"
 #include "libtrace.h"
 #include "libdataelm.h"
-#include <memory.h> // AT_hashnumber
 
 #ifndef ULLONG_MAX
 #define ULLONG_MAX	18446744073709551615ULL
@@ -654,9 +653,40 @@ static void update_status_display(unsigned long level, unsigned long long explor
 }
 #endif
 
+// 96 bit mix function of Robert Jenkins
+#define mix(a,b,c) \
+  { a -= b; a -= c; a ^= (c>>13); \
+    b -= c; b -= a; b ^= (a<<8);  \
+    c -= a; c -= b; c ^= (b>>13); \
+    a -= b; a -= c; a ^= (c>>12); \
+    b -= c; b -= a; b ^= (a<<16); \
+    c -= a; c -= b; c ^= (b>>5);  \
+    a -= b; a -= c; a ^= (c>>3);  \
+    b -= c; b -= a; b ^= (a<<10); \
+    c -= a; c -= b; c ^= (b>>15); \
+  }
+
+static ATermIndexedSet statevalues = NULL;
 static unsigned long long calc_hash(ATerm state)
 {
-  return AT_hashnumber(state) % bithashsize;
+  unsigned long a = 0x9e3779b9, b = 0x65e3083a, c = 0xa45f7582;
+  unsigned int statelen = ATgetArity(ATgetAFun(state));
+
+  if ( statevalues == NULL )
+  {
+    statevalues = ATindexedSetCreate(1024,50);
+  }
+
+  for (unsigned int i=0; i<statelen; i+=3)
+  {
+    ATbool isnew;
+    a += ATindexedSetPut(statevalues,ATgetArgument(state,i  ),&isnew);
+    b += (i+1<statelen)?ATindexedSetPut(statevalues,ATgetArgument(state,i+1),&isnew):i;
+    c += (i+2<statelen)?ATindexedSetPut(statevalues,ATgetArgument(state,i+2),&isnew):i;
+    mix(a,b,c);
+  }
+
+  return (a^b^c) % bithashsize;
 }
 
 static bool get_bithash(unsigned long long i)
