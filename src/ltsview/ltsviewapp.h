@@ -48,6 +48,7 @@ class LTSViewApp : public wxApp, public Mediator
     void	  removeMarkRule( const int index );
     void	  setMatchAnyMarkRule( bool b );
     void	  setRankStyle( RankStyle rs );
+    void	  setVisStyle( VisStyle vs );
     void	  toggleDisplayStates();
     void	  toggleDisplayWireframe();
     void	  unmarkAction( string label );

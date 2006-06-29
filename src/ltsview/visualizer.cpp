@@ -7,8 +7,8 @@ bool Distance_desc::operator()(const Primitive* p1, const Primitive* p2) const
 
 VisSettings Visualizer::defaultVisSettings =
 {
-  0.6f, 111, /*100, 1.2f,*/ RGB_WHITE, 0, RGB_WHITE, RGB_BLUE, /*false,*/ false,
-  RGB_RED, true, 0.1f, 30, 12, RGB_WHITE, RGB_BLUE
+  1.0f, 111, /*100, 1.2f,*/ RGB_WHITE, 0, RGB_WHITE, RGB_BLUE, /*false,*/ false,
+  RGB_RED, 0.1f, 30, 12, RGB_WHITE, RGB_BLUE
 };
 
 Visualizer::Visualizer( Mediator* owner )
@@ -27,11 +27,32 @@ Visualizer::Visualizer( Mediator* owner )
   cos_obt = float( cos( deg_to_rad( visSettings.outerBranchTilt ) ) );
   
   rankStyle = ITERATIVE;
+  visStyle = CONES;
   refreshPrimitives = false;
   refreshStates = false;
   displayStates = false;
   displayWireframe = false;
   statesDisplayList = 0;
+  
+  cos_theta1_s.assign( 5, 0.0f );
+  sin_theta1_s.assign( 5, 0.0f );
+  cos_theta2_s.assign( 5, 0.0f );
+  sin_theta2_s.assign( 5, 0.0f );
+  
+  float delta_theta1 = 0.5f  * PI;
+  float delta_theta2 = 0.25f * PI;
+  float theta1 = 0.0f;
+  float theta2 = -0.5f * PI;
+  
+  for ( int i = 0 ; i <= 4 ; i++ )
+  {
+    cos_theta1_s[i] = cos( theta1 );
+    sin_theta1_s[i] = sin( theta1 );
+    cos_theta2_s[i] = cos( theta2 );
+    sin_theta2_s[i] = sin( theta2 );
+    theta1 += delta_theta1;
+    theta2 += delta_theta2;
+  }
 }
 
 Visualizer::~Visualizer()
@@ -48,6 +69,11 @@ Visualizer::~Visualizer()
 RankStyle Visualizer::getRankStyle() const
 {
   return rankStyle;
+}
+
+VisStyle Visualizer::getVisStyle() const
+{
+  return visStyle;
 }
 
 VisSettings Visualizer::getDefaultVisSettings() const
@@ -83,6 +109,13 @@ void Visualizer::setMarkStyle( MarkStyle ms )
   refreshStates = true;
 }
 
+void Visualizer::setVisStyle( VisStyle vs )
+{
+  visStyle = vs;
+  refreshPrimitives = true;
+  refreshStates = true;
+}
+
 void Visualizer::setRankStyle( RankStyle rs )
 {
   rankStyle = rs;
@@ -109,8 +142,7 @@ bool Visualizer::setVisSettings( VisSettings vs )
     refreshStates = true;
   }
   
-  if ( fabs( oldSettings.alpha - vs.alpha ) > 0.01f ||
-       oldSettings.newStyle != vs.newStyle )
+  if ( fabs( oldSettings.alpha - vs.alpha ) > 0.01f )
   {
     refreshPrimitives = true;
   }
@@ -225,97 +257,138 @@ void Visualizer::drawLTS( Point3D viewpoint )
     
     glPushMatrix();
       glLoadIdentity();
-      if ( visSettings.newStyle )
+      switch ( visStyle )
       {
-	switch ( markStyle )
-	{
-	  case MARK_DEADLOCKS:
-	    drawSubtreeMarkDeadlocks( lts->getInitialState()->getCluster(),
-		0);
-	    break;
-	    
-	  case MARK_STATES:
-	    drawSubtreeMarkStates( lts->getInitialState()->getCluster(), 0);
-	    break;
+	case ATOMIUM:
+	  switch ( markStyle )
+	  {
+	    case MARK_DEADLOCKS:
+	      drawSubtreeAMarkDeadlocks( lts->getInitialState()->getCluster(), 0
+		  );
+	      break;
+	      
+	    case MARK_STATES:
+	      drawSubtreeAMarkStates( lts->getInitialState()->getCluster(), 0 );
+	      break;
 
-	  case MARK_TRANSITIONS:
-	    drawSubtreeMarkTransitions( lts->getInitialState()->getCluster(),
-		0);
-	    break;
+	    case MARK_TRANSITIONS:
+	      drawSubtreeAMarkTransitions( lts->getInitialState()->getCluster(),
+		  0 );
+	      break;
 
-	  case NO_MARKS:
-	  default:
-	    // coloring based on interpolation settings, so compute delta_col,
-	    // i.e. the color difference between clusters at consecutive levels in
-	    // the structure.
-	    RGB_Color rgb1 = visSettings.interpolateColor1;
-	    RGB_Color rgb2 = visSettings.interpolateColor2;
-	    HSV_Color hsv1 = RGB_to_HSV( rgb1 );
-	    HSV_Color hsv2 = RGB_to_HSV( rgb2 );
-	    if ( rgb1.r == rgb1.g && rgb1.g == rgb1.b ) hsv1.h = hsv2.h;
-	    if ( rgb2.r == rgb2.g && rgb2.g == rgb2.b ) hsv2.h = hsv1.h;
-	    float delta_h1 = hsv2.h - hsv1.h;
-	    float delta_h2 = ((delta_h1 < 0.0f) ? 1.0f : -1.0f) * (360.0f - fabs(delta_h1));
-	    
-	    delta_h1 /= (lts->getNumberOfRanks() - 1);
-	    delta_h2 /= (lts->getNumberOfRanks() - 1);
-	    
-	    if ( visSettings.longInterpolation )
-	      delta_col.h = ( fabs(delta_h1) < fabs(delta_h2) ) ? delta_h2 : delta_h1;
-	    else
-	      delta_col.h = ( fabs(delta_h1) < fabs(delta_h2) ) ? delta_h1 : delta_h2;
-	    delta_col.s = (hsv2.s - hsv1.s) / (lts->getNumberOfRanks() - 1);
-	    delta_col.v = (hsv2.v - hsv1.v) / (lts->getNumberOfRanks() - 1);
-	    
-	    drawSubtree( lts->getInitialState()->getCluster(), hsv1, 0 );
-	    break;
-	}
-      }
-      else
-      {
-	switch ( markStyle )
-	{
-	  case MARK_DEADLOCKS:
-	    drawSubtreeOldMarkDeadlocks( lts->getInitialState()->getCluster(),
-		true, 0 );
-	    break;
-	    
-	  case MARK_STATES:
-	    drawSubtreeOldMarkStates( lts->getInitialState()->getCluster(), true, 0 );
-	    break;
+	    case NO_MARKS:
+	    default:
+	      drawSubtreeA( lts->getInitialState()->getCluster(), 0 );
+	  }
+	  break;
 
-	  case MARK_TRANSITIONS:
-	    drawSubtreeOldMarkTransitions( lts->getInitialState()->getCluster(),
-		true, 0 );
-	    break;
+	case ORGANIC:
+	  switch ( markStyle )
+	  {
+	    case MARK_DEADLOCKS:
+	      drawSubtreeOMarkDeadlocks( lts->getInitialState()->getCluster(),
+		  0);
+	      break;
+	      
+	    case MARK_STATES:
+	      drawSubtreeOMarkStates( lts->getInitialState()->getCluster(), 0);
+	      break;
 
-	  case NO_MARKS:
-	  default:
-	    // coloring based on interpolation settings, so compute delta_col,
-	    // i.e. the color difference between clusters at consecutive levels in
-	    // the structure.
-	    RGB_Color rgb1 = visSettings.interpolateColor1;
-	    RGB_Color rgb2 = visSettings.interpolateColor2;
-	    HSV_Color hsv1 = RGB_to_HSV( rgb1 );
-	    HSV_Color hsv2 = RGB_to_HSV( rgb2 );
-	    if ( rgb1.r == rgb1.g && rgb1.g == rgb1.b ) hsv1.h = hsv2.h;
-	    if ( rgb2.r == rgb2.g && rgb2.g == rgb2.b ) hsv2.h = hsv1.h;
-	    float delta_h1 = hsv2.h - hsv1.h;
-	    float delta_h2 = ((delta_h1 < 0.0f) ? 1.0f : -1.0f) * (360.0f - fabs(delta_h1));
-	    
-	    delta_h1 /= (lts->getNumberOfRanks() - 1);
-	    delta_h2 /= (lts->getNumberOfRanks() - 1);
-	    
-	    if ( visSettings.longInterpolation )
-	      delta_col.h = ( fabs(delta_h1) < fabs(delta_h2) ) ? delta_h2 : delta_h1;
-	    else
-	      delta_col.h = ( fabs(delta_h1) < fabs(delta_h2) ) ? delta_h1 : delta_h2;
-	    delta_col.s = (hsv2.s - hsv1.s) / (lts->getNumberOfRanks() - 1);
-	    delta_col.v = (hsv2.v - hsv1.v) / (lts->getNumberOfRanks() - 1);
-	    
-	    drawSubtreeOld( lts->getInitialState()->getCluster(), true, hsv1, 0 );
-	    break;
-	}
+	    case MARK_TRANSITIONS:
+	      drawSubtreeOMarkTransitions( lts->getInitialState()->getCluster(),
+		  0);
+	      break;
+
+	    case NO_MARKS:
+	    default:
+	      // coloring based on interpolation settings, so compute delta_col,
+	      // i.e. the color difference between clusters at consecutive
+	      // levels in the structure.
+	      RGB_Color rgb1 = visSettings.interpolateColor1;
+	      RGB_Color rgb2 = visSettings.interpolateColor2;
+	      HSV_Color hsv1 = RGB_to_HSV( rgb1 );
+	      HSV_Color hsv2 = RGB_to_HSV( rgb2 );
+	      if ( rgb1.r == rgb1.g && rgb1.g == rgb1.b ) hsv1.h = hsv2.h;
+	      if ( rgb2.r == rgb2.g && rgb2.g == rgb2.b ) hsv2.h = hsv1.h;
+	      float delta_h1 = hsv2.h - hsv1.h;
+	      float delta_h2 = ((delta_h1 < 0.0f) ? 1.0f : -1.0f) * (360.0f -
+		  fabs(delta_h1));
+	      
+	      delta_h1 /= (lts->getNumberOfRanks() - 1);
+	      delta_h2 /= (lts->getNumberOfRanks() - 1);
+	      
+	      if ( visSettings.longInterpolation )
+	      {
+		delta_col.h = ( fabs(delta_h1) < fabs(delta_h2) ) ? delta_h2 :
+		  delta_h1;
+	      }
+	      else
+	      {
+		delta_col.h = ( fabs(delta_h1) < fabs(delta_h2) ) ? delta_h1 :
+		  delta_h2;
+	      }
+	      delta_col.s = (hsv2.s - hsv1.s) / (lts->getNumberOfRanks() - 1);
+	      delta_col.v = (hsv2.v - hsv1.v) / (lts->getNumberOfRanks() - 1);
+	      
+	      drawSubtreeO( lts->getInitialState()->getCluster(), hsv1, 0 );
+	      break;
+	  }
+	  break;
+
+	case CONES:
+	default:
+	  switch ( markStyle )
+	  {
+	    case MARK_DEADLOCKS:
+	      drawSubtreeCMarkDeadlocks( lts->getInitialState()->getCluster(),
+		  true, 0 );
+	      break;
+	      
+	    case MARK_STATES:
+	      drawSubtreeCMarkStates( lts->getInitialState()->getCluster(),
+		  true, 0 );
+	      break;
+
+	    case MARK_TRANSITIONS:
+	      drawSubtreeCMarkTransitions( lts->getInitialState()->getCluster(),
+		  true, 0 );
+	      break;
+
+	    case NO_MARKS:
+	    default:
+	      // coloring based on interpolation settings, so compute delta_col,
+	      // i.e. the color difference between clusters at consecutive
+	      // levels in the structure.
+	      RGB_Color rgb1 = visSettings.interpolateColor1;
+	      RGB_Color rgb2 = visSettings.interpolateColor2;
+	      HSV_Color hsv1 = RGB_to_HSV( rgb1 );
+	      HSV_Color hsv2 = RGB_to_HSV( rgb2 );
+	      if ( rgb1.r == rgb1.g && rgb1.g == rgb1.b ) hsv1.h = hsv2.h;
+	      if ( rgb2.r == rgb2.g && rgb2.g == rgb2.b ) hsv2.h = hsv1.h;
+	      float delta_h1 = hsv2.h - hsv1.h;
+	      float delta_h2 = ((delta_h1 < 0.0f) ? 1.0f : -1.0f) * (360.0f -
+		  fabs(delta_h1));
+	      
+	      delta_h1 /= (lts->getNumberOfRanks() - 1);
+	      delta_h2 /= (lts->getNumberOfRanks() - 1);
+	      
+	      if ( visSettings.longInterpolation )
+	      {
+		delta_col.h = ( fabs(delta_h1) < fabs(delta_h2) ) ? delta_h2 :
+		  delta_h1;
+	      }
+	      else
+	      {
+		delta_col.h = ( fabs(delta_h1) < fabs(delta_h2) ) ? delta_h1 :
+		  delta_h2;
+	      }
+	      delta_col.s = (hsv2.s - hsv1.s) / (lts->getNumberOfRanks() - 1);
+	      delta_col.v = (hsv2.v - hsv1.v) / (lts->getNumberOfRanks() - 1);
+	      
+	      drawSubtreeC( lts->getInitialState()->getCluster(), true, hsv1, 0 );
+	      break;
+	  }
+	  break;
       }
     glPopMatrix();
     refreshPrimitives = false;
@@ -360,18 +433,26 @@ void Visualizer::computeBoundsInfo()
   }
 }
 
-
 void Visualizer::updateGeometryTables()
 {
-  cos_tab.assign( visSettings.quality + 1, 0.0f );
-  sin_tab.assign( visSettings.quality + 1, 0.0f );
-  float delta_ang = 2.0f * PI / visSettings.quality;
-  float ang = 0.0f;
+  cos_theta1.assign( visSettings.quality + 1, 0.0f );
+  sin_theta1.assign( visSettings.quality + 1, 0.0f );
+  cos_theta2.assign( visSettings.quality + 1, 0.0f );
+  sin_theta2.assign( visSettings.quality + 1, 0.0f );
+  
+  float delta_theta1 = 2.0f * PI / visSettings.quality;
+  float delta_theta2 = PI / visSettings.quality;
+  float theta1 = 0.0f;
+  float theta2 = -0.5f * PI;
+  
   for ( int i = 0 ; i <= visSettings.quality ; i++ )
   {
-    cos_tab[i] = cos( ang );
-    sin_tab[i] = sin( ang );
-    ang += delta_ang;
+    cos_theta1[i] = cos( theta1 );
+    sin_theta1[i] = sin( theta1 );
+    cos_theta2[i] = cos( theta2 );
+    sin_theta2[i] = sin( theta2 );
+    theta1 += delta_theta1;
+    theta2 += delta_theta2;
   }
 }
 
@@ -418,9 +499,437 @@ void Visualizer::computeSubtreeBounds( Cluster* root, float &boundWidth, float
   }
 }
 
-// draw the subtree with cluster *root as the root of the tree in the NEW style
-// apply coloring based on interpolation settings
-void Visualizer::drawSubtree( Cluster* root, HSV_Color col, int rot )
+// ------------- ATOMIUM -------------------------------------------------------
+
+void Visualizer::drawSubtreeA( Cluster* root, int rot )
+{
+  int desc_rot = rot + visSettings.branchRotation;
+  if ( desc_rot < 0 ) desc_rot += 360;
+  else if ( desc_rot >= 360 ) desc_rot -= 360;
+    
+  for ( int i = 0 ; i < root->getNumberOfDescendants() ; i++ )
+  {
+    Cluster* desc = root->getDescendant( i );
+    if ( desc->getPosition() < -0.9f )
+    {
+      glTranslatef( 0.0f, 0.0f, clusterHeight );
+      
+      drawSubtreeA( desc, (root->getNumberOfDescendants() > 1) ? desc_rot : rot
+	  );
+      
+      glTranslatef( 0.0f, 0.0f, -clusterHeight );
+      
+      GLfloat M[16];
+      glGetFloatv( GL_MODELVIEW_MATRIX, M );
+      GLuint displist = glGenLists( 1 );
+      glNewList( displist, GL_COMPILE );
+	glPushMatrix();
+	glMultMatrixf( M );
+	glColor4f( 1.0f, 1.0f, 0.0f, visSettings.alpha );
+	drawCylinder( 0.1f, 0.1f, clusterHeight );
+	glPopMatrix();
+      glEndList();
+
+      Primitive* p = new Primitive;
+      glPushMatrix();
+	glTranslatef( 0.0f, 0.0f, 0.5f * clusterHeight );
+	glGetFloatv( GL_MODELVIEW_MATRIX, M );
+      glPopMatrix();
+      p->worldCoordinate.x = M[12];
+      p->worldCoordinate.y = M[13];
+      p->worldCoordinate.z = M[14];
+      p->displayList = displist;
+      primitives.push_back( p );
+    }
+    else
+    {
+      glRotatef( -desc->getPosition()-rot, 0.0f, 0.0f, 1.0f );
+      glTranslatef( root->getBaseRadius(), 0.0f, clusterHeight );
+      glRotatef( visSettings.outerBranchTilt, 0.0f, 1.0f, 0.0f );
+
+      drawSubtreeA( desc, desc_rot );
+
+      glRotatef( -visSettings.outerBranchTilt, 0.0f, 1.0f, 0.0f );
+      glTranslatef( -root->getBaseRadius(), 0.0f, -clusterHeight );
+
+      float theta = rad_to_deg( atan( root->getBaseRadius()/clusterHeight ) );
+      glRotatef( theta, 0.0f, 1.0f, 0.0f );
+
+      float height = sqrt( clusterHeight*clusterHeight +
+	  root->getBaseRadius()*root->getBaseRadius() );
+      GLfloat M[16];
+      glGetFloatv( GL_MODELVIEW_MATRIX, M );
+      GLuint displist = glGenLists( 1 );
+      glNewList( displist, GL_COMPILE );
+	glPushMatrix();
+	glMultMatrixf( M );
+	glColor4f( 1.0f, 1.0f, 0.0f, visSettings.alpha );
+	drawCylinder( 0.1f, 0.1f, height );
+	glPopMatrix();
+      glEndList();
+
+      Primitive* p = new Primitive;
+      glPushMatrix();
+	glTranslatef( 0.0f, 0.0f, 0.5f * height);
+	glGetFloatv( GL_MODELVIEW_MATRIX, M );
+      glPopMatrix();
+      p->worldCoordinate.x = M[12];
+      p->worldCoordinate.y = M[13];
+      p->worldCoordinate.z = M[14];
+      p->displayList = displist;
+      primitives.push_back( p );
+      
+      glRotatef( -theta, 0.0f, 1.0f, 0.0f );
+      glRotatef( desc->getPosition()+rot, 0.0f, 0.0f, 1.0f );
+    }
+  }
+  float r = pow( root->getTopRadius()*root->getTopRadius()*0.1, 0.33 );
+  GLfloat M[16];
+  glGetFloatv( GL_MODELVIEW_MATRIX, M );
+  GLuint displist = glGenLists( 1 );
+  glNewList( displist, GL_COMPILE );
+    glPushMatrix();
+    glMultMatrixf( M );
+    if ( root == lts->getInitialState()->getCluster() )
+      glColor4f( 0.0f, 1.0f, 0.0f, visSettings.alpha );
+    else
+      glColor4f( 0.0f, 0.0f, 1.0f, visSettings.alpha );
+    drawSphere( r ); 
+    glPopMatrix();
+  glEndList();
+
+  Primitive* p = new Primitive;
+  p->worldCoordinate.x = M[12];
+  p->worldCoordinate.y = M[13];
+  p->worldCoordinate.z = M[14];
+  p->displayList = displist;
+  primitives.push_back( p );
+}
+
+void Visualizer::drawSubtreeAMarkStates( Cluster* root, int rot )
+{
+  int desc_rot = rot + visSettings.branchRotation;
+  if ( desc_rot < 0 ) desc_rot += 360;
+  else if ( desc_rot >= 360 ) desc_rot -= 360;
+    
+  for ( int i = 0 ; i < root->getNumberOfDescendants() ; i++ )
+  {
+    Cluster* desc = root->getDescendant( i );
+    if ( desc->getPosition() < -0.9f )
+    {
+      glTranslatef( 0.0f, 0.0f, clusterHeight );
+      
+      drawSubtreeAMarkStates( desc, (root->getNumberOfDescendants() > 1) ?
+	  desc_rot : rot);
+      
+      glTranslatef( 0.0f, 0.0f, -clusterHeight );
+      
+      GLfloat M[16];
+      glGetFloatv( GL_MODELVIEW_MATRIX, M );
+      GLuint displist = glGenLists( 1 );
+      glNewList( displist, GL_COMPILE );
+	glPushMatrix();
+	glMultMatrixf( M );
+	glColor4f( 1.0f, 1.0f, 1.0f, visSettings.alpha );
+	drawCylinder( 0.1f, 0.1f, clusterHeight );
+	glPopMatrix();
+      glEndList();
+
+      Primitive* p = new Primitive;
+      glPushMatrix();
+	glTranslatef( 0.0f, 0.0f, 0.5f * clusterHeight );
+	glGetFloatv( GL_MODELVIEW_MATRIX, M );
+      glPopMatrix();
+      p->worldCoordinate.x = M[12];
+      p->worldCoordinate.y = M[13];
+      p->worldCoordinate.z = M[14];
+      p->displayList = displist;
+      primitives.push_back( p );
+    }
+    else
+    {
+      glRotatef( -desc->getPosition()-rot, 0.0f, 0.0f, 1.0f );
+      glTranslatef( root->getBaseRadius(), 0.0f, clusterHeight );
+      glRotatef( visSettings.outerBranchTilt, 0.0f, 1.0f, 0.0f );
+
+      drawSubtreeAMarkStates( desc, desc_rot );
+
+      glRotatef( -visSettings.outerBranchTilt, 0.0f, 1.0f, 0.0f );
+      glTranslatef( -root->getBaseRadius(), 0.0f, -clusterHeight );
+
+      float theta = rad_to_deg( atan( root->getBaseRadius()/clusterHeight ) );
+      glRotatef( theta, 0.0f, 1.0f, 0.0f );
+
+      float height = sqrt( clusterHeight*clusterHeight +
+	  root->getBaseRadius()*root->getBaseRadius() );
+      GLfloat M[16];
+      glGetFloatv( GL_MODELVIEW_MATRIX, M );
+      GLuint displist = glGenLists( 1 );
+      glNewList( displist, GL_COMPILE );
+	glPushMatrix();
+	glMultMatrixf( M );
+	glColor4f( 1.0f, 1.0f, 1.0f, visSettings.alpha );
+	drawCylinder( 0.1f, 0.1f, height  );
+	glPopMatrix();
+      glEndList();
+
+      Primitive* p = new Primitive;
+      glPushMatrix();
+	glTranslatef( 0.0f, 0.0f, 0.5f * height);
+	glGetFloatv( GL_MODELVIEW_MATRIX, M );
+      glPopMatrix();
+      p->worldCoordinate.x = M[12];
+      p->worldCoordinate.y = M[13];
+      p->worldCoordinate.z = M[14];
+      p->displayList = displist;
+      primitives.push_back( p );
+      
+      glRotatef( -theta, 0.0f, 1.0f, 0.0f );
+      glRotatef( desc->getPosition()+rot, 0.0f, 0.0f, 1.0f );
+      
+    }
+  }
+  float r = pow( root->getTopRadius()*root->getTopRadius()*0.1, 0.33 );
+  GLfloat M[16];
+  glGetFloatv( GL_MODELVIEW_MATRIX, M );
+  GLuint displist = glGenLists( 1 );
+  glNewList( displist, GL_COMPILE );
+    glPushMatrix();
+    glMultMatrixf( M );
+    if ( root->hasMarkedState() )
+      glColor4f( visSettings.markedColor.r, visSettings.markedColor.g,
+	  visSettings.markedColor.b, visSettings.alpha );
+    else
+      glColor4f( 1.0f, 1.0f, 1.0f, visSettings.alpha );
+    drawSphere( r ); 
+    glPopMatrix();
+  glEndList();
+
+  Primitive* p = new Primitive;
+  p->worldCoordinate.x = M[12];
+  p->worldCoordinate.y = M[13];
+  p->worldCoordinate.z = M[14];
+  p->displayList = displist;
+  primitives.push_back( p );
+}
+
+void Visualizer::drawSubtreeAMarkDeadlocks( Cluster* root, int rot )
+{
+  int desc_rot = rot + visSettings.branchRotation;
+  if ( desc_rot < 0 ) desc_rot += 360;
+  else if ( desc_rot >= 360 ) desc_rot -= 360;
+    
+  for ( int i = 0 ; i < root->getNumberOfDescendants() ; i++ )
+  {
+    Cluster* desc = root->getDescendant( i );
+    if ( desc->getPosition() < -0.9f )
+    {
+      glTranslatef( 0.0f, 0.0f, clusterHeight );
+      
+      drawSubtreeAMarkDeadlocks( desc, (root->getNumberOfDescendants() > 1) ?
+	  desc_rot : rot);
+      
+      glTranslatef( 0.0f, 0.0f, -clusterHeight );
+      
+      GLfloat M[16];
+      glGetFloatv( GL_MODELVIEW_MATRIX, M );
+      GLuint displist = glGenLists( 1 );
+      glNewList( displist, GL_COMPILE );
+	glPushMatrix();
+	glMultMatrixf( M );
+	glColor4f( 1.0f, 1.0f, 1.0f, visSettings.alpha );
+	drawCylinder( 0.1f, 0.1f, clusterHeight );
+	glPopMatrix();
+      glEndList();
+
+      Primitive* p = new Primitive;
+      glPushMatrix();
+	glTranslatef( 0.0f, 0.0f, 0.5f * clusterHeight );
+	glGetFloatv( GL_MODELVIEW_MATRIX, M );
+      glPopMatrix();
+      p->worldCoordinate.x = M[12];
+      p->worldCoordinate.y = M[13];
+      p->worldCoordinate.z = M[14];
+      p->displayList = displist;
+      primitives.push_back( p );
+    }
+    else
+    {
+      glRotatef( -desc->getPosition()-rot, 0.0f, 0.0f, 1.0f );
+      glTranslatef( root->getBaseRadius(), 0.0f, clusterHeight );
+      glRotatef( visSettings.outerBranchTilt, 0.0f, 1.0f, 0.0f );
+
+      drawSubtreeAMarkDeadlocks( desc, desc_rot );
+
+      glRotatef( -visSettings.outerBranchTilt, 0.0f, 1.0f, 0.0f );
+      glTranslatef( -root->getBaseRadius(), 0.0f, -clusterHeight );
+
+      float theta = rad_to_deg( atan( root->getBaseRadius()/clusterHeight ) );
+      glRotatef( theta, 0.0f, 1.0f, 0.0f );
+
+      float height = sqrt( clusterHeight*clusterHeight +
+	  root->getBaseRadius()*root->getBaseRadius() );
+      GLfloat M[16];
+      glGetFloatv( GL_MODELVIEW_MATRIX, M );
+      GLuint displist = glGenLists( 1 );
+      glNewList( displist, GL_COMPILE );
+	glPushMatrix();
+	glMultMatrixf( M );
+	glColor4f( 1.0f, 1.0f, 1.0f, visSettings.alpha );
+	drawCylinder( 0.1f, 0.1f, height  );
+	glPopMatrix();
+      glEndList();
+
+      Primitive* p = new Primitive;
+      glPushMatrix();
+	glTranslatef( 0.0f, 0.0f, 0.5f * height);
+	glGetFloatv( GL_MODELVIEW_MATRIX, M );
+      glPopMatrix();
+      p->worldCoordinate.x = M[12];
+      p->worldCoordinate.y = M[13];
+      p->worldCoordinate.z = M[14];
+      p->displayList = displist;
+      primitives.push_back( p );
+      
+      glRotatef( -theta, 0.0f, 1.0f, 0.0f );
+      glRotatef( desc->getPosition()+rot, 0.0f, 0.0f, 1.0f );
+      
+    }
+  }
+  float r = pow( root->getTopRadius()*root->getTopRadius()*0.1, 0.33 );
+  GLfloat M[16];
+  glGetFloatv( GL_MODELVIEW_MATRIX, M );
+  GLuint displist = glGenLists( 1 );
+  glNewList( displist, GL_COMPILE );
+    glPushMatrix();
+    glMultMatrixf( M );
+    if ( root->hasDeadlock() )
+      glColor4f( visSettings.markedColor.r, visSettings.markedColor.g,
+	  visSettings.markedColor.b, visSettings.alpha );
+    else
+      glColor4f( 1.0f, 1.0f, 1.0f, visSettings.alpha );
+    drawSphere( r ); 
+    glPopMatrix();
+  glEndList();
+
+  Primitive* p = new Primitive;
+  p->worldCoordinate.x = M[12];
+  p->worldCoordinate.y = M[13];
+  p->worldCoordinate.z = M[14];
+  p->displayList = displist;
+  primitives.push_back( p );
+}
+
+void Visualizer::drawSubtreeAMarkTransitions( Cluster* root, int rot )
+{
+  int desc_rot = rot + visSettings.branchRotation;
+  if ( desc_rot < 0 ) desc_rot += 360;
+  else if ( desc_rot >= 360 ) desc_rot -= 360;
+    
+  for ( int i = 0 ; i < root->getNumberOfDescendants() ; i++ )
+  {
+    Cluster* desc = root->getDescendant( i );
+    if ( desc->getPosition() < -0.9f )
+    {
+      glTranslatef( 0.0f, 0.0f, clusterHeight );
+      
+      drawSubtreeAMarkTransitions( desc, (root->getNumberOfDescendants() > 1) ?
+	  desc_rot : rot);
+      
+      glTranslatef( 0.0f, 0.0f, -clusterHeight );
+      
+      GLfloat M[16];
+      glGetFloatv( GL_MODELVIEW_MATRIX, M );
+      GLuint displist = glGenLists( 1 );
+      glNewList( displist, GL_COMPILE );
+	glPushMatrix();
+	glMultMatrixf( M );
+	glColor4f( 1.0f, 1.0f, 1.0f, visSettings.alpha );
+	drawCylinder( 0.1f, 0.1f, clusterHeight );
+	glPopMatrix();
+      glEndList();
+
+      Primitive* p = new Primitive;
+      glPushMatrix();
+	glTranslatef( 0.0f, 0.0f, 0.5f * clusterHeight );
+	glGetFloatv( GL_MODELVIEW_MATRIX, M );
+      glPopMatrix();
+      p->worldCoordinate.x = M[12];
+      p->worldCoordinate.y = M[13];
+      p->worldCoordinate.z = M[14];
+      p->displayList = displist;
+      primitives.push_back( p );
+    }
+    else
+    {
+      glRotatef( -desc->getPosition()-rot, 0.0f, 0.0f, 1.0f );
+      glTranslatef( root->getBaseRadius(), 0.0f, clusterHeight );
+      glRotatef( visSettings.outerBranchTilt, 0.0f, 1.0f, 0.0f );
+
+      drawSubtreeAMarkTransitions( desc, desc_rot );
+
+      glRotatef( -visSettings.outerBranchTilt, 0.0f, 1.0f, 0.0f );
+      glTranslatef( -root->getBaseRadius(), 0.0f, -clusterHeight );
+
+      float theta = rad_to_deg( atan( root->getBaseRadius()/clusterHeight ) );
+      glRotatef( theta, 0.0f, 1.0f, 0.0f );
+
+      float height = sqrt( clusterHeight*clusterHeight +
+	  root->getBaseRadius()*root->getBaseRadius() );
+      GLfloat M[16];
+      glGetFloatv( GL_MODELVIEW_MATRIX, M );
+      GLuint displist = glGenLists( 1 );
+      glNewList( displist, GL_COMPILE );
+	glPushMatrix();
+	glMultMatrixf( M );
+	glColor4f( 1.0f, 1.0f, 1.0f, visSettings.alpha );
+	drawCylinder( 0.1f, 0.1f, height );
+	glPopMatrix();
+      glEndList();
+
+      Primitive* p = new Primitive;
+      glPushMatrix();
+	glTranslatef( 0.0f, 0.0f, 0.5f * height);
+	glGetFloatv( GL_MODELVIEW_MATRIX, M );
+      glPopMatrix();
+      p->worldCoordinate.x = M[12];
+      p->worldCoordinate.y = M[13];
+      p->worldCoordinate.z = M[14];
+      p->displayList = displist;
+      primitives.push_back( p );
+      
+      glRotatef( -theta, 0.0f, 1.0f, 0.0f );
+      glRotatef( desc->getPosition()+rot, 0.0f, 0.0f, 1.0f );
+      
+    }
+  }
+  float r = pow( root->getTopRadius()*root->getTopRadius()*0.1, 0.33 );
+  GLfloat M[16];
+  glGetFloatv( GL_MODELVIEW_MATRIX, M );
+  GLuint displist = glGenLists( 1 );
+  glNewList( displist, GL_COMPILE );
+    glPushMatrix();
+    glMultMatrixf( M );
+    if ( root->hasMarkedTransition() )
+      glColor4f( visSettings.markedColor.r, visSettings.markedColor.g,
+	  visSettings.markedColor.b, visSettings.alpha );
+    else
+      glColor4f( 1.0f, 1.0f, 1.0f, visSettings.alpha );
+    drawSphere( r ); 
+    glPopMatrix();
+  glEndList();
+
+  Primitive* p = new Primitive;
+  p->worldCoordinate.x = M[12];
+  p->worldCoordinate.y = M[13];
+  p->worldCoordinate.z = M[14];
+  p->displayList = displist;
+  primitives.push_back( p );
+}
+
+// ------------- ORGANIC -------------------------------------------------------
+
+void Visualizer::drawSubtreeO( Cluster* root, HSV_Color col, int rot )
 {
   if ( root == lts->getInitialState()->getCluster() )
   {
@@ -490,7 +999,7 @@ void Visualizer::drawSubtree( Cluster* root, HSV_Color col, int rot )
       {
 	glTranslatef( 0.0f, 0.0f, clusterHeight );
 	
-	drawSubtree( desc, desccol, (root->getNumberOfDescendants() > 1) ?
+	drawSubtreeO( desc, desccol, (root->getNumberOfDescendants() > 1) ?
 	    desc_rot : rot );
 	
 	glTranslatef( 0.0f, 0.0f, -clusterHeight );
@@ -527,7 +1036,7 @@ void Visualizer::drawSubtree( Cluster* root, HSV_Color col, int rot )
 	glTranslatef( root->getBaseRadius(), 0.0f, clusterHeight );
 	glRotatef( visSettings.outerBranchTilt, 0.0f, 1.0f, 0.0f );
   
-	drawSubtree( desc, desccol, desc_rot );
+	drawSubtreeO( desc, desccol, desc_rot );
 	
 	glRotatef( -visSettings.outerBranchTilt, 0.0f, 1.0f, 0.0f );
 	glTranslatef( -root->getBaseRadius(), 0.0f, -clusterHeight );
@@ -563,7 +1072,8 @@ void Visualizer::drawSubtree( Cluster* root, HSV_Color col, int rot )
 
 	Primitive* p = new Primitive;
 	glPushMatrix();
-	  glTranslatef( center.x, center.y, center.z );
+	  glTranslatef( 0.5f * root->getBaseRadius(), 0.0f, 0.5f * clusterHeight
+	      );
 	  glGetFloatv( GL_MODELVIEW_MATRIX, M );
 	glPopMatrix();
 	p->worldCoordinate.x = M[12];
@@ -571,14 +1081,13 @@ void Visualizer::drawSubtree( Cluster* root, HSV_Color col, int rot )
 	p->worldCoordinate.z = M[14];
 	p->displayList = displist;
 	primitives.push_back( p );
+	
       }
     }
   }
 }
 
-// draws the subtree with cluster *root as the root of the tree in the NEW style
-// applies coloring based on marked states
-void Visualizer::drawSubtreeMarkStates( Cluster* root, int rot )
+void Visualizer::drawSubtreeOMarkStates( Cluster* root, int rot )
 {
   RGB_Color color;
   if ( root->hasMarkedState() )
@@ -650,7 +1159,7 @@ void Visualizer::drawSubtreeMarkStates( Cluster* root, int rot )
       {
 	glTranslatef( 0.0f, 0.0f, clusterHeight );
 	
-	drawSubtreeMarkStates( desc, (root->getNumberOfDescendants() > 1) ?
+	drawSubtreeOMarkStates( desc, (root->getNumberOfDescendants() > 1) ?
 	    desc_rot : rot );
 	
 	glTranslatef( 0.0f, 0.0f, -clusterHeight );
@@ -688,7 +1197,7 @@ void Visualizer::drawSubtreeMarkStates( Cluster* root, int rot )
 	glTranslatef( root->getBaseRadius(), 0.0f, clusterHeight );
 	glRotatef( visSettings.outerBranchTilt, 0.0f, 1.0f, 0.0f );
   
-	drawSubtreeMarkStates( desc, desc_rot );
+	drawSubtreeOMarkStates( desc, desc_rot );
 	
 	glRotatef( -visSettings.outerBranchTilt, 0.0f, 1.0f, 0.0f );
 	glTranslatef( -root->getBaseRadius(), 0.0f, -clusterHeight );
@@ -738,9 +1247,7 @@ void Visualizer::drawSubtreeMarkStates( Cluster* root, int rot )
   }
 }
 
-// draws the subtree with cluster *root as the root of the tree in the NEW style
-// applies coloring based on deadlocks
-void Visualizer::drawSubtreeMarkDeadlocks( Cluster* root, int rot )
+void Visualizer::drawSubtreeOMarkDeadlocks( Cluster* root, int rot )
 {
   RGB_Color color;
   if ( root->hasDeadlock() )
@@ -814,7 +1321,7 @@ void Visualizer::drawSubtreeMarkDeadlocks( Cluster* root, int rot )
       {
 	glTranslatef( 0.0f, 0.0f, clusterHeight );
 	
-	drawSubtreeMarkDeadlocks( desc, (root->getNumberOfDescendants() > 1)
+	drawSubtreeOMarkDeadlocks( desc, (root->getNumberOfDescendants() > 1)
 	    ?  desc_rot : rot );
 	
 	glTranslatef( 0.0f, 0.0f, -clusterHeight );
@@ -852,7 +1359,7 @@ void Visualizer::drawSubtreeMarkDeadlocks( Cluster* root, int rot )
 	glTranslatef( root->getBaseRadius(), 0.0f, clusterHeight );
 	glRotatef( visSettings.outerBranchTilt, 0.0f, 1.0f, 0.0f );
   
-	drawSubtreeMarkDeadlocks( desc, desc_rot );
+	drawSubtreeOMarkDeadlocks( desc, desc_rot );
 	
 	glRotatef( -visSettings.outerBranchTilt, 0.0f, 1.0f, 0.0f );
 	glTranslatef( -root->getBaseRadius(), 0.0f, -clusterHeight );
@@ -902,9 +1409,7 @@ void Visualizer::drawSubtreeMarkDeadlocks( Cluster* root, int rot )
   }
 }
 
-// draws the subtree with cluster *root as the root of the tree in the NEW style
-// applies coloring based on marked transitions
-void Visualizer::drawSubtreeMarkTransitions( Cluster* root, int rot )
+void Visualizer::drawSubtreeOMarkTransitions( Cluster* root, int rot )
 {
   RGB_Color color;
   if ( root->hasMarkedTransition() )
@@ -978,7 +1483,7 @@ void Visualizer::drawSubtreeMarkTransitions( Cluster* root, int rot )
       {
 	glTranslatef( 0.0f, 0.0f, clusterHeight );
 	
-	drawSubtreeMarkTransitions( desc, (root->getNumberOfDescendants() >
+	drawSubtreeOMarkTransitions( desc, (root->getNumberOfDescendants() >
 	      1) ?  desc_rot : rot );
 	
 	glTranslatef( 0.0f, 0.0f, -clusterHeight );
@@ -1016,7 +1521,7 @@ void Visualizer::drawSubtreeMarkTransitions( Cluster* root, int rot )
 	glTranslatef( root->getBaseRadius(), 0.0f, clusterHeight );
 	glRotatef( visSettings.outerBranchTilt, 0.0f, 1.0f, 0.0f );
   
-	drawSubtreeMarkTransitions( desc, desc_rot );
+	drawSubtreeOMarkTransitions( desc, desc_rot );
 	
 	glRotatef( -visSettings.outerBranchTilt, 0.0f, 1.0f, 0.0f );
 	glTranslatef( -root->getBaseRadius(), 0.0f, -clusterHeight );
@@ -1066,9 +1571,9 @@ void Visualizer::drawSubtreeMarkTransitions( Cluster* root, int rot )
   }
 }
 
-// draws the subtree with cluster *root as the root of the tree
-// applies coloring based on interpolation settings
-void Visualizer::drawSubtreeOld( Cluster* root, bool topClosed, HSV_Color col, int
+// ------------- CONES ---------------------------------------------------------
+
+void Visualizer::drawSubtreeC( Cluster* root, bool topClosed, HSV_Color col, int
     rot )
 {
   if ( !root->hasDescendants() )
@@ -1107,7 +1612,7 @@ void Visualizer::drawSubtreeOld( Cluster* root, bool topClosed, HSV_Color col, i
       {
 	glTranslatef( 0.0f, 0.0f, clusterHeight );
 	
-	drawSubtreeOld( desc, false, desccol, (root->getNumberOfDescendants()>1)?desc_rot:rot );
+	drawSubtreeC( desc, false, desccol, (root->getNumberOfDescendants()>1)?desc_rot:rot );
 	
 	glTranslatef( 0.0f, 0.0f, -clusterHeight );
       }
@@ -1117,7 +1622,7 @@ void Visualizer::drawSubtreeOld( Cluster* root, bool topClosed, HSV_Color col, i
 	glTranslatef( root->getBaseRadius(), 0.0f, clusterHeight );
 	glRotatef( visSettings.outerBranchTilt, 0.0f, 1.0f, 0.0f );
 
-	drawSubtreeOld( desc, true, desccol, desc_rot );
+	drawSubtreeC( desc, true, desccol, desc_rot );
 	
 	glRotatef( -visSettings.outerBranchTilt, 0.0f, 1.0f, 0.0f );
 	glTranslatef( -root->getBaseRadius(), 0.0f, -clusterHeight );
@@ -1149,9 +1654,7 @@ void Visualizer::drawSubtreeOld( Cluster* root, bool topClosed, HSV_Color col, i
   }
 }
 
-// draws the subtree with cluster *root as the root of the tree
-// applies coloring based on marked states
-void Visualizer::drawSubtreeOldMarkStates( Cluster* root, bool topClosed, int rot )
+void Visualizer::drawSubtreeCMarkStates( Cluster* root, bool topClosed, int rot )
 {
   if ( !root->hasDescendants() )
   {
@@ -1224,7 +1727,7 @@ void Visualizer::drawSubtreeOldMarkStates( Cluster* root, bool topClosed, int ro
       {
 	glTranslatef( 0.0f, 0.0f, clusterHeight );
 	
-	drawSubtreeOldMarkStates( *descit, false, (descendants.size() > 1) ?
+	drawSubtreeCMarkStates( *descit, false, (descendants.size() > 1) ?
 	    desc_rot : rot );
 	
 	glTranslatef( 0.0f, 0.0f, -clusterHeight );
@@ -1235,7 +1738,7 @@ void Visualizer::drawSubtreeOldMarkStates( Cluster* root, bool topClosed, int ro
 	glTranslatef( root->getBaseRadius(), 0.0f, clusterHeight );
 	glRotatef( visSettings.outerBranchTilt, 0.0f, 1.0f, 0.0f );
 
-	drawSubtreeOldMarkStates( *descit, true, desc_rot );
+	drawSubtreeCMarkStates( *descit, true, desc_rot );
 	
 	glRotatef( -visSettings.outerBranchTilt, 0.0f, 1.0f, 0.0f );
 	glTranslatef( -root->getBaseRadius(), 0.0f, -clusterHeight );
@@ -1245,9 +1748,7 @@ void Visualizer::drawSubtreeOldMarkStates( Cluster* root, bool topClosed, int ro
   }
 }
 
-// draws the subtree with cluster *root as the root of the tree
-// applies coloring based on deadlocks
-void Visualizer::drawSubtreeOldMarkDeadlocks( Cluster* root, bool topClosed, int
+void Visualizer::drawSubtreeCMarkDeadlocks( Cluster* root, bool topClosed, int
     rot )
 {
   if ( !root->hasDescendants() )
@@ -1321,7 +1822,7 @@ void Visualizer::drawSubtreeOldMarkDeadlocks( Cluster* root, bool topClosed, int
       {
 	glTranslatef( 0.0f, 0.0f, clusterHeight );
 
-	drawSubtreeOldMarkDeadlocks( *descit, false, (descendants.size() > 1) ?
+	drawSubtreeCMarkDeadlocks( *descit, false, (descendants.size() > 1) ?
 	    desc_rot : rot );
 
 	glTranslatef( 0.0f, 0.0f, -clusterHeight );
@@ -1332,7 +1833,7 @@ void Visualizer::drawSubtreeOldMarkDeadlocks( Cluster* root, bool topClosed, int
 	glTranslatef( root->getBaseRadius(), 0.0f, clusterHeight );
 	glRotatef( visSettings.outerBranchTilt, 0.0f, 1.0f, 0.0f );
 
-	drawSubtreeOldMarkDeadlocks( *descit, true, desc_rot );
+	drawSubtreeCMarkDeadlocks( *descit, true, desc_rot );
 	
 	glRotatef( -visSettings.outerBranchTilt, 0.0f, 1.0f, 0.0f );
 	glTranslatef( -root->getBaseRadius(), 0.0f, -clusterHeight );
@@ -1342,9 +1843,7 @@ void Visualizer::drawSubtreeOldMarkDeadlocks( Cluster* root, bool topClosed, int
   }
 }
 
-// draws the subtree with cluster *root as the root of the tree
-// applies coloring based on marked transitions
-void Visualizer::drawSubtreeOldMarkTransitions( Cluster* root, bool topClosed, int
+void Visualizer::drawSubtreeCMarkTransitions( Cluster* root, bool topClosed, int
     rot )
 {
   if ( !root->hasDescendants() )
@@ -1418,7 +1917,7 @@ void Visualizer::drawSubtreeOldMarkTransitions( Cluster* root, bool topClosed, i
       {
 	// descendant is centered
 	glTranslatef( 0.0f, 0.0f, clusterHeight );
-	drawSubtreeOldMarkTransitions( *descit, false, (descendants.size() > 1) ?
+	drawSubtreeCMarkTransitions( *descit, false, (descendants.size() > 1) ?
 	    desc_rot : rot );
 	glTranslatef( 0.0f, 0.0f, -clusterHeight );
       }
@@ -1428,7 +1927,7 @@ void Visualizer::drawSubtreeOldMarkTransitions( Cluster* root, bool topClosed, i
 	glTranslatef( root->getBaseRadius(), 0.0f, clusterHeight );
 	glRotatef( visSettings.outerBranchTilt, 0.0f, 1.0f, 0.0f );
 	
-	drawSubtreeOldMarkTransitions( *descit, true, desc_rot );
+	drawSubtreeCMarkTransitions( *descit, true, desc_rot );
 	
 	glRotatef( -visSettings.outerBranchTilt, 0.0f, 1.0f, 0.0f );
 	glTranslatef( -root->getBaseRadius(), 0.0f, -clusterHeight );
@@ -1438,6 +1937,8 @@ void Visualizer::drawSubtreeOldMarkTransitions( Cluster* root, bool topClosed, i
   }
 }
 
+// ------------- STATES --------------------------------------------------------
+
 void Visualizer::drawStates( Cluster* root, int rot )
 {
   vector< State* > c_ss;
@@ -1446,12 +1947,12 @@ void Visualizer::drawStates( Cluster* root, int rot )
 	++s_it )
   {
     if ( (**s_it).getPosition() < -0.9f )
-      drawSphere( visSettings.nodeSize, 4 );
+      drawSphereState();
     else
     {
       glRotatef( -(**s_it).getPosition(), 0.0f, 0.0f, 1.0f );
       glTranslatef( root->getTopRadius(), 0.0f, 0.0f );
-      drawSphere( visSettings.nodeSize, 4 );
+      drawSphereState();
       glTranslatef( -root->getTopRadius(), 0.0f, 0.0f );
       glRotatef( (**s_it).getPosition(), 0.0f, 0.0f, 1.0f );
     }
@@ -1499,12 +2000,12 @@ void Visualizer::drawStatesMarkStates( Cluster* root, int rot )
       glColor4f( 1.0f, 1.0f, 1.0f, 1.0f );
 
     if ( (**s_it).getPosition() < -0.9f )
-      drawSphere( visSettings.nodeSize, 4 );
+      drawSphereState();
     else
     {
       glRotatef( -(**s_it).getPosition(), 0.0f, 0.0f, 1.0f );
       glTranslatef( root->getTopRadius(), 0.0f, 0.0f );
-      drawSphere( visSettings.nodeSize, 4 );
+      drawSphereState();
       glTranslatef( -root->getTopRadius(), 0.0f, 0.0f );
       glRotatef( (**s_it).getPosition(), 0.0f, 0.0f, 1.0f );
     }
@@ -1553,12 +2054,12 @@ void Visualizer::drawStatesMarkDeadlocks( Cluster* root, int rot )
       glColor4f( 1.0f, 1.0f, 1.0f, 1.0f );
 
     if ( (**s_it).getPosition() < -0.9f )
-      drawSphere( visSettings.nodeSize, 4 );
+      drawSphereState();
     else
     {
       glRotatef( -(**s_it).getPosition(), 0.0f, 0.0f, 1.0f );
       glTranslatef( root->getTopRadius(), 0.0f, 0.0f );
-      drawSphere( visSettings.nodeSize, 4 );
+      drawSphereState();
       glTranslatef( -root->getTopRadius(), 0.0f, 0.0f );
       glRotatef( (**s_it).getPosition(), 0.0f, 0.0f, 1.0f );
     }
@@ -1595,9 +2096,32 @@ void Visualizer::drawStatesMarkDeadlocks( Cluster* root, int rot )
   }
 }
 
+// ------------- PRIMITIVES ----------------------------------------------------
+
+// draws a cylinder around z-axis with given base radius, top radius and height
+void Visualizer::drawCylinder( float baserad, float toprad, float height )
+{
+  int slices = visSettings.quality;
+  float nxg = height;
+  float nzg = baserad - toprad;
+  float r = sqrt( nxg*nxg + nzg*nzg );
+  nxg = nxg / r;
+  nzg = nzg / r;
+
+  glBegin( GL_QUAD_STRIP );
+  for ( int i = 0 ; i <= slices ; ++i )
+  {
+    glNormal3f( cos_theta1[i] * nxg, sin_theta1[i] * nxg, nzg );
+    glVertex3f( toprad * cos_theta1[i], toprad * sin_theta1[i], height );
+    glVertex3f( baserad * cos_theta1[i], baserad * sin_theta1[i], 0.0f );
+  }
+  glEnd();
+}
+
 // draws a cylinder around z-axis with given base radius, top radius, height,
 // color at base, color at top, closed base if baseclosed and closed top if
-// topclosed
+// topclosed and interpolates between the given colors over the length of the
+// cylinder
 void Visualizer::drawCylinder( float baserad, float toprad, float height,
     RGB_Color basecol, RGB_Color topcol, bool baseclosed, bool topclosed )
 {
@@ -1616,7 +2140,7 @@ void Visualizer::drawCylinder( float baserad, float toprad, float height,
     glVertex3f( 0.0, 0.0, 0.0 );
     for ( int j = slices ; j >= 0 ; --j )
     {
-      glVertex3f( baserad * cos_tab[j], baserad * sin_tab[j], 0.0f );
+      glVertex3f( baserad * cos_theta1[j], baserad * sin_theta1[j], 0.0f );
     }
     glEnd();
   }
@@ -1624,11 +2148,11 @@ void Visualizer::drawCylinder( float baserad, float toprad, float height,
   glBegin( GL_QUAD_STRIP );
   for ( int j = 0 ; j <= slices ; ++j )
   {
-    glNormal3f( cos_tab[j] * nxg, sin_tab[j] * nxg, nzg );
+    glNormal3f( cos_theta1[j] * nxg, sin_theta1[j] * nxg, nzg );
     glColor4f( topcol.r, topcol.g, topcol.b, visSettings.alpha );
-    glVertex3f( toprad * cos_tab[j], toprad * sin_tab[j], height );
+    glVertex3f( toprad * cos_theta1[j], toprad * sin_theta1[j], height );
     glColor4f( basecol.r, basecol.g, basecol.b, visSettings.alpha );
-    glVertex3f( baserad * cos_tab[j], baserad * sin_tab[j], 0.0f );
+    glVertex3f( baserad * cos_theta1[j], baserad * sin_theta1[j], 0.0f );
   }
   glEnd();
 
@@ -1640,39 +2164,14 @@ void Visualizer::drawCylinder( float baserad, float toprad, float height,
     glVertex3f( 0.0, 0.0, height );
     for ( int j = 0 ; j <= slices ; ++j )
     {
-      glVertex3f( toprad * cos_tab[j], toprad * sin_tab[j], height );
+      glVertex3f( toprad * cos_theta1[j], toprad * sin_theta1[j], height );
     }
     glEnd();
   }
 }
 
-// draws a cylinder around z-axis with given base radius, top radius, height,
-// color at base, color at top and interpolates between the given colors over
-// the length of the cylinder
-void Visualizer::drawCylinderInterpolate( float baserad, float toprad, float
-    height, RGB_Color basecol, RGB_Color topcol )
-{
-  int slices = visSettings.quality;
-  float nxg = height;
-  float nzg = baserad - toprad;
-  float r = sqrt( nxg*nxg + nzg*nzg );
-  nxg = nxg / r;
-  nzg = nzg / r;
-
-  glBegin( GL_QUAD_STRIP );
-  for ( int j = 0 ; j <= slices ; ++j )
-  {
-    glNormal3f( cos_tab[j] * nxg, sin_tab[j] * nxg, nzg );
-    glColor4f( topcol.r, topcol.g, topcol.b, visSettings.alpha );
-    glVertex3f( toprad * cos_tab[j], toprad * sin_tab[j], height );
-    glColor4f( basecol.r, basecol.g, basecol.b, visSettings.alpha );
-    glVertex3f( baserad * cos_tab[j], baserad * sin_tab[j], 0.0f );
-  }
-  glEnd();
-}
-
-// As drawCylinderInterpolate, but the color of the bottom half of the cylinder
-// is basecol and that of the top half is topcol.
+// As drawCylinder, but the color of the bottom half of the cylinder is basecol
+// and that of the top half is topcol.
 void Visualizer::drawCylinderSplit( float baserad, float toprad, float
     height, RGB_Color basecol, RGB_Color topcol )
 {
@@ -1689,9 +2188,9 @@ void Visualizer::drawCylinderSplit( float baserad, float toprad, float
   glBegin( GL_QUAD_STRIP );
   for ( int j = 0 ; j <= slices ; ++j )
   {
-    glNormal3f( nxg * cos_tab[j], nxg * sin_tab[j], nzg );
-    glVertex3f( demirad * cos_tab[j], demirad * sin_tab[j], demiheight );
-    glVertex3f( baserad * cos_tab[j], baserad * sin_tab[j], 0.0f );
+    glNormal3f( nxg * cos_theta1[j], nxg * sin_theta1[j], nzg );
+    glVertex3f( demirad * cos_theta1[j], demirad * sin_theta1[j], demiheight );
+    glVertex3f( baserad * cos_theta1[j], baserad * sin_theta1[j], 0.0f );
   }
   glEnd();
 
@@ -1699,9 +2198,9 @@ void Visualizer::drawCylinderSplit( float baserad, float toprad, float
   glBegin( GL_QUAD_STRIP );
   for ( int j = 0 ; j <= slices ; ++j )
   {
-    glNormal3f( nxg * cos_tab[j], nxg * sin_tab[j], nzg );
-    glVertex3f( toprad * cos_tab[j], toprad * sin_tab[j], height );
-    glVertex3f( demirad * cos_tab[j], demirad * sin_tab[j], demiheight );
+    glNormal3f( nxg * cos_theta1[j], nxg * sin_theta1[j], nzg );
+    glVertex3f( toprad * cos_theta1[j], toprad * sin_theta1[j], height );
+    glVertex3f( demirad * cos_theta1[j], demirad * sin_theta1[j], demiheight );
   }
   glEnd();
 }
@@ -1712,14 +2211,14 @@ void Visualizer::drawHemisphere( float r )
   int ndiv2 = n/2;
   
   // precompute the cosines and sines that are needed during drawing
-  vector< float > cos_theta1( ndiv2 + 1 );
-  vector< float > sin_theta1( ndiv2 + 1 );
+  vector< float > cos_theta3( ndiv2 + 1 );
+  vector< float > sin_theta3( ndiv2 + 1 );
   float delta = 0.5f * PI / ndiv2;
   float theta = 0.0f;
   for ( int j = 0 ; j <= ndiv2 ; j++ )
   {
-    cos_theta1[j] = cos( theta );
-    sin_theta1[j] = sin( theta );
+    cos_theta3[j] = cos( theta );
+    sin_theta3[j] = sin( theta );
     theta += delta;
   }
   
@@ -1731,9 +2230,9 @@ void Visualizer::drawHemisphere( float r )
     glBegin(GL_QUAD_STRIP);
     for ( int i = 0 ; i <= n ; i++ )
     {
-      ex = cos_theta1[j+1] * cos_tab[i];
-      ey = cos_theta1[j+1] * sin_tab[i];
-      ez = sin_theta1[j+1];
+      ex = cos_theta3[j+1] * cos_theta1[i];
+      ey = cos_theta3[j+1] * sin_theta1[i];
+      ez = sin_theta3[j+1];
       px = r * ex;
       py = r * ey;
       pz = r * ez;
@@ -1741,9 +2240,9 @@ void Visualizer::drawHemisphere( float r )
       glNormal3f( ex, ey, ez );
       glVertex3f( px, py, pz );
       
-      ex = cos_theta1[j] * cos_tab[i];
-      ey = cos_theta1[j] * sin_tab[i];
-      ez = sin_theta1[j];
+      ex = cos_theta3[j] * cos_theta1[i];
+      ey = cos_theta3[j] * sin_theta1[i];
+      ez = sin_theta3[j];
       px = r * ex;
       py = r * ey;
       pz = r * ez;
@@ -1755,33 +2254,19 @@ void Visualizer::drawHemisphere( float r )
   }
 }
 
-void Visualizer::drawSphere( float r, int n )
+void Visualizer::drawSphere( float r )
 {
-  if ( n <= 0 ) n = visSettings.quality;
-  
-  // precompute the cosines and sines that are needed during drawing
-  vector< float > cos_theta1( n+1 );
-  vector< float > sin_theta1( n+1 );
-  float delta = PI / n;
-  float theta = -0.5f * PI;
-  for ( int j = 0 ; j <= n ; j++ )
-  {
-    cos_theta1[j] = cos( theta );
-    sin_theta1[j] = sin( theta );
-    theta += delta;
-  }
-  
   float ex,ey,ez,px,py,pz;
 
   // draw the sphere by drawing rings around the z-axis
-  for ( int j = 0 ; j < n ; j++ )
+  for ( int j = 0 ; j < visSettings.quality ; j++ )
   {
     glBegin(GL_QUAD_STRIP);
-    for ( int i = 0 ; i <= n ; i++ )
+    for ( int i = 0 ; i <= visSettings.quality ; i++ )
     {
-      ex = cos_theta1[j+1] * cos_tab[i];
-      ey = cos_theta1[j+1] * sin_tab[i];
-      ez = sin_theta1[j+1];
+      ex = cos_theta2[j+1] * cos_theta1[i];
+      ey = cos_theta2[j+1] * sin_theta1[i];
+      ez = sin_theta2[j+1];
       px = r * ex;
       py = r * ey;
       pz = r * ez;
@@ -1789,9 +2274,44 @@ void Visualizer::drawSphere( float r, int n )
       glNormal3f( ex, ey, ez );
       glVertex3f( px, py, pz );
       
-      ex = cos_theta1[j] * cos_tab[i];
-      ey = cos_theta1[j] * sin_tab[i];
-      ez = sin_theta1[j];
+      ex = cos_theta2[j] * cos_theta1[i];
+      ey = cos_theta2[j] * sin_theta1[i];
+      ez = sin_theta2[j];
+      px = r * ex;
+      py = r * ey;
+      pz = r * ez;
+
+      glNormal3f( ex, ey, ez );
+      glVertex3f( px, py, pz );
+    }
+    glEnd();
+  }
+}
+
+void Visualizer::drawSphereState()
+{
+  float ex,ey,ez,px,py,pz;
+  float r = visSettings.nodeSize;
+
+  // draw the sphere by drawing rings around the z-axis
+  for ( int j = 0 ; j < 4 ; j++ )
+  {
+    glBegin(GL_QUAD_STRIP);
+    for ( int i = 0 ; i <= 4 ; i++ )
+    {
+      ex = cos_theta2_s[j+1] * cos_theta1_s[i];
+      ey = cos_theta2_s[j+1] * sin_theta1_s[i];
+      ez = sin_theta2_s[j+1];
+      px = r * ex;
+      py = r * ey;
+      pz = r * ez;
+
+      glNormal3f( ex, ey, ez );
+      glVertex3f( px, py, pz );
+      
+      ex = cos_theta2_s[j] * cos_theta1_s[i];
+      ey = cos_theta2_s[j] * sin_theta1_s[i];
+      ez = sin_theta2_s[j];
       px = r * ex;
       py = r * ey;
       pz = r * ez;
@@ -1887,28 +2407,28 @@ void Visualizer::drawTubeInterpolate( float baserad, float toprad, RGB_Color bas
       // compute the normal vector for vertex (i+1,j)
       for ( int k = 0 ; k < 16 ; k++ ) M[k] = (k % 5 == 0) ? 1 : 0;
       myRotatef( rot_ang2, -curve_der[i+1].y, curve_der[i+1].x, 0.0f, M );
-      myTranslatef( cos_tab[j], sin_tab[j], 0.0f, M );
+      myTranslatef( cos_theta1[j], sin_theta1[j], 0.0f, M );
       glNormal3f( M[3], M[7], M[11] );
 
       // compute the coordinates of vertex (i+1,j)
       for ( int k = 0 ; k < 16 ; k++ ) M[k] = (k % 5 == 0) ? 1 : 0;
       myTranslatef( curve[i+1].x, curve[i+1].y, curve[i+1].z, M );
       myRotatef( rot_ang2, -curve_der[i+1].y, curve_der[i+1].x, 0.0f, M );
-      myTranslatef( radius[i+1]*cos_tab[j], radius[i+1]*sin_tab[j], 0.0f, M );
+      myTranslatef( radius[i+1]*cos_theta1[j], radius[i+1]*sin_theta1[j], 0.0f, M );
       glColor4f( color_r[i+1], color_g[i+1], color_b[i+1], visSettings.alpha );
       glVertex3f( M[3], M[7], M[11] );
       
       // compute the normal vector for vertex (i,j)
       for ( int k = 0 ; k < 16 ; k++ ) M[k] = (k % 5 == 0) ? 1 : 0;
       myRotatef( rot_ang1, -curve_der[i].y, curve_der[i].x, 0.0f, M );
-      myTranslatef( cos_tab[j], sin_tab[j], 0.0f, M );
+      myTranslatef( cos_theta1[j], sin_theta1[j], 0.0f, M );
       glNormal3f( M[3], M[7], M[11] );
       
       // compute the coordinates of vertex (i,j)
       for ( int k = 0 ; k < 16 ; k++ ) M[k] = (k % 5 == 0) ? 1 : 0;
       myTranslatef( curve[i].x, curve[i].y, curve[i].z, M );
       myRotatef( rot_ang1, -curve_der[i].y, curve_der[i].x, 0.0f, M );
-      myTranslatef( radius[i]*cos_tab[j], radius[i]*sin_tab[j], 0.0f, M );
+      myTranslatef( radius[i]*cos_theta1[j], radius[i]*sin_theta1[j], 0.0f, M );
       glColor4f( color_r[i], color_g[i], color_b[i], visSettings.alpha );
       glVertex3f( M[3], M[7], M[11] );
     }
@@ -1992,27 +2512,27 @@ void Visualizer::drawTubeSplit( float baserad, float toprad, RGB_Color basecol,
       // compute the normal vector for vertex (i+1,j)
       for ( int k = 0 ; k < 16 ; k++ ) M[k] = (k % 5 == 0) ? 1 : 0;
       myRotatef( rot_ang2, -curve_der[i+1].y, curve_der[i+1].x, 0.0f, M );
-      myTranslatef( cos_tab[j], sin_tab[j], 0.0f, M );
+      myTranslatef( cos_theta1[j], sin_theta1[j], 0.0f, M );
       glNormal3f( M[3], M[7], M[11] );
 
       // compute the coordinates of vertex (i+1,j)
       for ( int k = 0 ; k < 16 ; k++ ) M[k] = (k % 5 == 0) ? 1 : 0;
       myTranslatef( curve[i+1].x, curve[i+1].y, curve[i+1].z, M );
       myRotatef( rot_ang2, -curve_der[i+1].y, curve_der[i+1].x, 0.0f, M );
-      myTranslatef( radius[i+1]*cos_tab[j], radius[i+1]*sin_tab[j], 0.0f, M );
+      myTranslatef( radius[i+1]*cos_theta1[j], radius[i+1]*sin_theta1[j], 0.0f, M );
       glVertex3f( M[3], M[7], M[11] );
       
       // compute the normal vector for vertex (i,j)
       for ( int k = 0 ; k < 16 ; k++ ) M[k] = (k % 5 == 0) ? 1 : 0;
       myRotatef( rot_ang1, -curve_der[i].y, curve_der[i].x, 0.0f, M );
-      myTranslatef( cos_tab[j], sin_tab[j], 0.0f, M );
+      myTranslatef( cos_theta1[j], sin_theta1[j], 0.0f, M );
       glNormal3f( M[3], M[7], M[11] );
       
       // compute the coordinates of vertex (i,j)
       for ( int k = 0 ; k < 16 ; k++ ) M[k] = (k % 5 == 0) ? 1 : 0;
       myTranslatef( curve[i].x, curve[i].y, curve[i].z, M );
       myRotatef( rot_ang1, -curve_der[i].y, curve_der[i].x, 0.0f, M );
-      myTranslatef( radius[i]*cos_tab[j], radius[i]*sin_tab[j], 0.0f, M );
+      myTranslatef( radius[i]*cos_theta1[j], radius[i]*sin_theta1[j], 0.0f, M );
       glVertex3f( M[3], M[7], M[11] );
     }
     glEnd();

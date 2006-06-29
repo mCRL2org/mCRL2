@@ -39,7 +39,10 @@ class Visualizer
     float		  clusterHeight;
     float		  cos_ibt;
     float		  cos_obt;
-    vector< float >	  cos_tab;
+    vector< float >	  cos_theta1;
+    vector< float >	  cos_theta2;
+    vector< float >	  cos_theta1_s;
+    vector< float >	  cos_theta2_s;
     static VisSettings	  defaultVisSettings;
     HSV_Color		  delta_col;
     bool		  displayStates;
@@ -53,32 +56,40 @@ class Visualizer
     bool		  refreshStates;
     float		  sin_ibt;
     float		  sin_obt;
-    vector< float >	  sin_tab;
+    vector< float >	  sin_theta1;
+    vector< float >	  sin_theta2;
+    vector< float >	  sin_theta1_s;
+    vector< float >	  sin_theta2_s;
     GLuint		  statesDisplayList;
     Point3D		  viewpoint;
     VisSettings		  visSettings;
+    VisStyle		  visStyle;
 
     void computeSubtreeBounds( Cluster* root, float &boundWidth, float
 	&boundHeight );
+    void drawCylinder( float baserad, float toprad, float height );
     void drawCylinder( float baserad, float toprad, float height, RGB_Color
 	basecol, RGB_Color topcol, bool baseclosed, bool topclosed );
-    void drawCylinderInterpolate( float baserad, float toprad, float height,
-	RGB_Color basecol, RGB_Color topcol );
     void drawCylinderSplit( float baserad, float toprad, float height, RGB_Color
 	basecol, RGB_Color topcol );
     void drawHemisphere( float rad );
-    void drawSphere( float rad, int n = 0 );
+    void drawSphere( float rad );
+    void drawSphereState();
     void drawStates( Cluster* root, int rot );
     void drawStatesMarkStates( Cluster* root, int rot );
     void drawStatesMarkDeadlocks( Cluster* root, int rot );
-    void drawSubtree( Cluster* root, HSV_Color col, int rot );
-    void drawSubtreeMarkDeadlocks( Cluster* root, int rot );
-    void drawSubtreeMarkStates( Cluster* root, int rot );
-    void drawSubtreeMarkTransitions( Cluster* root, int rot );
-    void drawSubtreeOld( Cluster* root, bool topClosed, HSV_Color col, int rot );
-    void drawSubtreeOldMarkDeadlocks( Cluster* root, bool topClosed, int rot );
-    void drawSubtreeOldMarkStates( Cluster* root, bool topClosed, int rot );
-    void drawSubtreeOldMarkTransitions( Cluster* root, bool topClosed, int rot );
+    void drawSubtreeA( Cluster* root, int rot );
+    void drawSubtreeAMarkDeadlocks( Cluster* root, int rot );
+    void drawSubtreeAMarkStates( Cluster* root, int rot );
+    void drawSubtreeAMarkTransitions( Cluster* root, int rot );
+    void drawSubtreeC( Cluster* root, bool topClosed, HSV_Color col, int rot );
+    void drawSubtreeCMarkDeadlocks( Cluster* root, bool topClosed, int rot );
+    void drawSubtreeCMarkStates( Cluster* root, bool topClosed, int rot );
+    void drawSubtreeCMarkTransitions( Cluster* root, bool topClosed, int rot );
+    void drawSubtreeO( Cluster* root, HSV_Color col, int rot );
+    void drawSubtreeOMarkDeadlocks( Cluster* root, int rot );
+    void drawSubtreeOMarkStates( Cluster* root, int rot );
+    void drawSubtreeOMarkTransitions( Cluster* root, int rot );
     void drawTubeInterpolate( float baserad, float toprad, RGB_Color basecol,
 	RGB_Color topcol, Point3D b1, Point3D b2, Point3D b3, Point3D &center );
     void drawTubeSplit( float baserad, float toprad, RGB_Color basecol,
@@ -96,14 +107,16 @@ class Visualizer
     void	drawLTS( Point3D viewpoint );
     float	getBoundingCylinderHeight() const;
     float	getBoundingCylinderWidth() const;
+    VisSettings getDefaultVisSettings() const;
     float	getHalfStructureHeight() const;
     RankStyle	getRankStyle() const;
-    VisSettings getDefaultVisSettings() const;
     VisSettings getVisSettings() const;
+    VisStyle	getVisStyle() const;
     void	setLTS( LTS* l );
     void	setMarkStyle( MarkStyle ms );
     void	setRankStyle( RankStyle rs );
     bool	setVisSettings( VisSettings vs );
+    void	setVisStyle( VisStyle vs );
     void	toggleDisplayStates();
     void	toggleDisplayWireframe();
 };

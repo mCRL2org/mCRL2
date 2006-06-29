@@ -236,6 +236,15 @@ void LTSViewApp::setRankStyle( RankStyle rs )
   }
 }
 
+void LTSViewApp::setVisStyle( VisStyle vs )
+{
+  if ( visualizer->getVisStyle() != vs )
+  {
+    visualizer->setVisStyle( vs );
+    glCanvas->display();
+  }
+}
+
 void LTSViewApp::addMarkRule()
 {
   if ( lts != NULL )

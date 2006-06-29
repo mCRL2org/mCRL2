@@ -10,7 +10,8 @@ namespace IDs
   const int myID_PAN    = myID_ZOOM + 1;
   const int myID_ROTATE = myID_PAN + 1;
   const int myID_RANK_STYLE = myID_ROTATE + 1;
-  const int myID_COLOR_BUTTON = myID_RANK_STYLE + 1;
+  const int myID_VIS_STYLE = myID_RANK_STYLE + 1;
+  const int myID_COLOR_BUTTON = myID_VIS_STYLE + 1;
   const int myID_SETTINGS_CONTROL = myID_COLOR_BUTTON + 1;
   const int myID_MARK_RADIOBUTTON = myID_SETTINGS_CONTROL + 1;
   const int myID_MARK_ANYALL = myID_MARK_RADIOBUTTON + 1;

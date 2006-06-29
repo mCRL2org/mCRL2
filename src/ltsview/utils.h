@@ -11,6 +11,7 @@ namespace Utils
 
   enum RankStyle { ITERATIVE, CYCLIC };
   enum MarkStyle { NO_MARKS, MARK_DEADLOCKS, MARK_STATES, MARK_TRANSITIONS };
+  enum VisStyle	 { CONES, ORGANIC, ATOMIUM };
 
   struct RGB_Color
   {
@@ -22,6 +23,7 @@ namespace Utils
   const RGB_Color RGB_WHITE = { 1.0f, 1.0f, 1.0f };
   const RGB_Color RGB_BLUE  = { 0.0f, 0.0f, 1.0f };
   const RGB_Color RGB_RED   = { 1.0f, 0.0f, 0.0f };
+  const RGB_Color RGB_YELLOW= { 1.0f, 1.0f, 0.0f };
 
   struct HSV_Color
   {
@@ -52,7 +54,6 @@ namespace Utils
 //    bool      levelDividers;
     bool      longInterpolation;
     RGB_Color markedColor;
-    bool      newStyle;
     float     nodeSize;
     int	      outerBranchTilt;
     int	      quality;
@@ -79,5 +80,6 @@ namespace Utils
   RGB_Color HSV_to_RGB( HSV_Color c );
   int round_to_int( double f );
   float deg_to_rad( float deg );
+  float rad_to_deg( float rad );
 }
 #endif

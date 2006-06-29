@@ -25,6 +25,7 @@ BEGIN_EVENT_TABLE( MainFrame, wxFrame )
   EVT_TOOL  ( myID_SELECT, MainFrame::onActivateTool )
   EVT_TOOL  ( myID_ZOOM, MainFrame::onActivateTool )
   EVT_CHOICE( myID_RANK_STYLE, MainFrame::onRankStyle )
+  EVT_CHOICE( myID_VIS_STYLE, MainFrame::onVisStyle )
   EVT_BUTTON( myID_COLOR_BUTTON, MainFrame::onColorButton )
   EVT_SPINCTRL( myID_SETTINGS_CONTROL, MainFrame::onSpinSettingChanged )
   EVT_CHECKBOX( myID_SETTINGS_CONTROL, MainFrame::onCommandSettingChanged )
@@ -198,8 +199,31 @@ void MainFrame::setupRightPanel( wxPanel* panel )
 
 void MainFrame::setupSettingsPanel( wxPanel* panel )
 {
-  wxStaticBoxSizer* parSizer = new wxStaticBoxSizer( wxVERTICAL, panel, wxT("Parameters") );
+  wxStaticBoxSizer* parSizer = new wxStaticBoxSizer( wxVERTICAL, panel,
+      wxT("Parameters") );
 
+  int lflags = wxALIGN_LEFT | wxALIGN_CENTER_VERTICAL | wxALL; 
+  int rflags = wxALIGN_RIGHT | wxALIGN_CENTER_VERTICAL | wxALL; 
+  int border = 3;
+
+  wxFlexGridSizer* styleSizer = new wxFlexGridSizer( 2, 2, 0, 0 );
+  styleSizer->AddGrowableCol( 0 );
+  styleSizer->AddGrowableCol( 1 );
+  styleSizer->Add( new wxStaticText( panel, wxID_ANY, wxT("Rank style:") ),
+      1, lflags, border );
+  wxString rs_choices[2] = { wxT("Iterative"), wxT("Cyclic") };
+  wxChoice* rankstyleChoice = new wxChoice( panel, myID_RANK_STYLE,
+      wxDefaultPosition, wxDefaultSize, 2, rs_choices );
+  rankstyleChoice->SetSelection( 0 );
+  styleSizer->Add( rankstyleChoice, 1, lflags, border );
+  styleSizer->Add( new wxStaticText( panel, wxID_ANY,
+	wxT("Visualisation style:") ), 1, lflags, border );
+  wxString vs_choices[3] = { wxT("Cones"), wxT("Organic"), wxT("Atomium") };
+  wxChoice* visstyleChoice = new wxChoice( panel, myID_VIS_STYLE,
+      wxDefaultPosition, wxDefaultSize, 3, vs_choices );
+  visstyleChoice->SetSelection( 0 );
+  styleSizer->Add( visstyleChoice, 1, lflags, border );
+  
   wxFlexGridSizer* parsubSizer = new wxFlexGridSizer( 7, 2, 0, 0 );
   parsubSizer->AddGrowableCol( 0 );
   for ( int i = 0 ; i < 5 ; ++i )
@@ -208,10 +232,6 @@ void MainFrame::setupSettingsPanel( wxPanel* panel )
   }
   parSizer->Add( parsubSizer, 1, wxEXPAND | wxALL, 0 );
   
-  int lflags = wxALIGN_LEFT | wxALIGN_CENTER_VERTICAL | wxALL; 
-  int rflags = wxALIGN_RIGHT | wxALIGN_CENTER_VERTICAL | wxALL; 
-  int border = 3;
-
   wxSize spinctrlSize( 50, -1 );
 
   nodesizeSpinCtrl = new wxSpinCtrlFloat( panel, myID_SETTINGS_CONTROL,
@@ -302,11 +322,8 @@ void MainFrame::setupSettingsPanel( wxPanel* panel )
 	wxT("Show level dividers") );
   parsubSizer->Add( levelDivCheckBox, 0, flags, border );
   */
-  // Setup the Colors panel
-  newStyleCheckBox = new wxCheckBox( panel, myID_SETTINGS_CONTROL,
-      wxT("New style") );
-  parsubSizer->Add( newStyleCheckBox, 0, lflags, border );
 
+  // Setup the Colors panel
   
   wxStaticBoxSizer* colSizer = new wxStaticBoxSizer( wxVERTICAL, panel, wxT("Colours") );
   
@@ -387,22 +404,10 @@ void MainFrame::setupSettingsPanel( wxPanel* panel )
   panelSizer->AddGrowableRow( 1 );
   //panelSizer->AddGrowableRow( 2 );
   //panelSizer->AddGrowableRow( 3 );
+  panelSizer->Add( styleSizer, 0, wxEXPAND | wxALL, border );
   panelSizer->Add( parSizer, 1, wxEXPAND | wxALL, 5 );
   panelSizer->Add( colSizer, 1, wxEXPAND | wxALL, 5 );
 
-  wxFlexGridSizer* rankstyleSizer = new wxFlexGridSizer( 1, 2, 0, 0 );
-  rankstyleSizer->AddGrowableCol( 0 );
-  rankstyleSizer->AddGrowableCol( 1 );
-  //rankstyleSizer->AddGrowableRow( 0 );
-  rankstyleSizer->Add( new wxStaticText( panel, wxID_ANY, wxT("Rank style:") ),
-      1, lflags, border );
-  wxString choices[2] = { wxT("Iterative"), wxT("Cyclic") };
-  wxChoice* rankstyleChoice = new wxChoice( panel, myID_RANK_STYLE,
-      wxDefaultPosition, wxDefaultSize, 2, choices );
-  rankstyleChoice->SetSelection( 0 );
-  rankstyleSizer->Add( rankstyleChoice, 1, lflags, border );
-  
-  panelSizer->Add( rankstyleSizer, 0, wxEXPAND | wxALL, border );
   panelSizer->Add( new wxButton( panel, wxID_RESET, wxT("Default settings")
 	), 0, lflags, border );
   panelSizer->Fit( panel );
@@ -511,6 +516,16 @@ void MainFrame::onRankStyle( wxCommandEvent& event )
     mediator->setRankStyle( ITERATIVE );
   else
     mediator->setRankStyle( CYCLIC );
+}
+
+void MainFrame::onVisStyle( wxCommandEvent& event )
+{
+  if ( event.GetSelection() == 0 )
+    mediator->setVisStyle( CONES );
+  else if ( event.GetSelection() == 1 )
+    mediator->setVisStyle( ORGANIC );
+  else
+    mediator->setVisStyle( ATOMIUM );
 }
 
 void MainFrame::onResetView( wxCommandEvent& /*event*/ )
@@ -631,7 +646,6 @@ VisSettings MainFrame::getVisSettings() const
 //    levelDivCheckBox->GetValue(),
     longinterpolateCheckBox->GetValue(),
     markC,
-    newStyleCheckBox->GetValue(),
     nodesizeSpinCtrl->GetValue(),
     outerbranchtiltSpinCtrl->GetValue(),
     qualitySpinCtrl->GetValue(),
@@ -663,7 +677,6 @@ void MainFrame::setVisSettings( VisSettings ss )
   interpolate2Button->SetBackgroundColour( RGB_to_wxC( ss.interpolateColor2 ));
   longinterpolateCheckBox->SetValue( ss.longInterpolation );
   transparencySpinCtrl->SetValue( 100 - (int)(ss.alpha * 100) );
-  newStyleCheckBox->SetValue( ss.newStyle );
   nodesizeSpinCtrl->SetValue( ss.nodeSize );
 //  backpointerSpinCtrl->SetValue( ss.backpointerCurve );
 //  clusterheightSpinCtrl->SetValue( ss.clusterHeight );

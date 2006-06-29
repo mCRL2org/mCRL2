@@ -46,6 +46,11 @@ float Utils::deg_to_rad( float deg )
   return deg * Utils::PI / 180.0f;
 }
 
+float Utils::rad_to_deg( float rad )
+{
+  return rad * 180.0f / Utils::PI;
+}
+
 Utils::HSV_Color Utils::RGB_to_HSV( RGB_Color c )
 {
   float* minval;

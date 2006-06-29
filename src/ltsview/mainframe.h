@@ -42,6 +42,7 @@ class MainFrame : public wxFrame
     void	onExit( wxCommandEvent& event );
     void	onOpen( wxCommandEvent& event );
     void	onRankStyle( wxCommandEvent& event );
+    void	onVisStyle( wxCommandEvent& event );
     void	onRemoveMarkRuleButton( wxCommandEvent& event );
     void	onResetButton( wxCommandEvent& event );
     void	onResetView( wxCommandEvent& event );
@@ -87,7 +88,6 @@ class MainFrame : public wxFrame
     wxCheckListBox*   markTransitionsListBox;
     wxRadioButton*    markTransitionsRadio;
     Mediator*	      mediator;
-    wxCheckBox*	      newStyleCheckBox;
     wxColorButton*    nodeButton;
     wxSpinCtrlFloat*  nodesizeSpinCtrl;
     wxRadioButton*    nomarksRadio;

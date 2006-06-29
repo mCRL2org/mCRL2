@@ -27,6 +27,7 @@ class Mediator
     virtual void      removeMarkRule( const int index ) = 0;
     virtual void      setMatchAnyMarkRule( bool b ) = 0;
     virtual void      setRankStyle( RankStyle rs ) = 0;
+    virtual void      setVisStyle( VisStyle vs ) = 0;
     virtual void      toggleDisplayStates() = 0;
     virtual void      toggleDisplayWireframe() = 0;
     virtual void      unmarkAction( string label ) = 0;
