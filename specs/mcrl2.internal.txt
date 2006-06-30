@@ -5,7 +5,7 @@
 //   tc : type checking
 //   di : data implementation
 //   lin: linearisation
-//   fi : formula implementation
+//   rft: regular formula translation
 // - (+p)/(-p) at the end of a branch means that this branch is added/removed at
 //   the end of phase p 
 // - <String> is an arbitrary non-empty string excluding the keywords:
@@ -237,11 +237,11 @@
 
 //regular formula
 <RegFrm>       ::= <ActFrm>
-                 | RegNil                                                (- fi)
-                 | RegSeq(<RegFrm>, <RegFrm>)                            (- fi)
-                 | RegAlt(<RegFrm>, <RegFrm>)                            (- fi)
-                 | RegTrans(<RegFrm>)                                    (- fi)
-                 | RegTransOrNil(<RegFrm>)                               (- fi)
+                 | RegNil                                                (-rft)
+                 | RegSeq(<RegFrm>, <RegFrm>)                            (-rft)
+                 | RegAlt(<RegFrm>, <RegFrm>)                            (-rft)
+                 | RegTrans(<RegFrm>)                                    (-rft)
+                 | RegTransOrNil(<RegFrm>)                               (-rft)
 
 //action formula
 <ActFrm>       ::= <MultAct>

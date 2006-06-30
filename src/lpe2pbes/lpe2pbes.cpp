@@ -1,5 +1,5 @@
 #define NAME "lpe2pbes"
-#define VERSION "0.2"
+#define VERSION "0.3"
 
 #include <stdio.h>
 #include <errno.h>
@@ -18,22 +18,32 @@
 #include "libparse.h"
 #include "typecheck.h"
 #include "dataimpl.h"
+#include "regfrmtrans.h"
 #include "lpe/specification.h"
+#include "libpbes.h"
 
 #include "mcrl2_revision.h"
 
 using namespace std;
 
 //Type definitions
+//----------------
+
+//t_phase represents the phases at which the program should be able to stop
+typedef enum { PH_NONE, PH_PARSE, PH_TYPE_CHECK, PH_DATA_IMPL, PH_REG_FRM_TRANS } t_phase;
+
 //t_tool_options represents the options of the tool 
 typedef struct {
   bool pretty;
+  t_phase end_phase;
   string formfilename;
   string infilename;
   string outfilename;
 } t_tool_options;
 
 //Functions used by the main program
+//----------------------------------
+
 static t_tool_options parse_command_line(int argc, char **argv);
 //Post: The command line options are parsed.
 //      The program has aborted with a suitable error code, if:
@@ -41,74 +51,41 @@ static t_tool_options parse_command_line(int argc, char **argv);
 //      - non-standard behaviour was requested (help or version)
 //Ret:  the parsed command line options
 
-static void print_help(char *Name);
+static ATermAppl create_pbes(t_tool_options tool_options);
+//Pre:  tool_options.formfilename contains a state formula
+//      tool_options.infilename contains an LPE ("" indicates stdin)
+//      tool_options.end_phase indicates at which phase conversion stops
+//Ret:  if end_phase == PH_NONE, the PBES generated from the state formula and
+//      the LPE
+//      if end_phase != PH_NONE, the state formula after phase end_phase
+//      NULL, if something went wrong
+
+static void print_help(char *name);
 static void print_version(void);
-static void print_more_info(char *Name);
+static void print_more_info(char *name);
 
 //Main program
+//------------
 
 int main(int argc, char **argv)
 {
   //parse command line
   t_tool_options tool_options = parse_command_line(argc, argv);
-  string infilename = tool_options.infilename;
-  string outfilename = tool_options.outfilename;
-  string formfilename = tool_options.formfilename;
-  bool opt_pretty = tool_options.pretty;
 
   //initialise ATerm library
   ATerm stackbot;
   ATinit(argc,argv,&stackbot);
   gsEnableConstructorFunctions();
 
-  //open infilename
-  lpe::specification lpe_spec = lpe::specification();
-  if (infilename == "") {
-    if (!lpe_spec.load("-")) {
-      gsErrorMsg("cannot open LPE from stdin\n");
-      return 1;
-    }
-  } else {
-    if (!lpe_spec.load(infilename)) {
-      gsErrorMsg("cannot open LPE from '%s'\n", infilename.c_str());
-      return 1;
-    }
-  }
-
-  //check if lpe_spec is an LPE
-  //XXX need soundness check
-
-  //parse formula from formfilename
-  gsVerboseMsg("parsing formula from '%s'...\n", formfilename.c_str());
-  ifstream formstream(formfilename.c_str(), ifstream::in|ifstream::binary);
-  if (!formstream.is_open()) {
-    gsErrorMsg("cannot open formula file '%s'\n", formfilename.c_str());
-    return 1;
-  }
-  ATermAppl result = parse_state_frm(formstream);
-  formstream.close();
+  //process state formula
+  ATermAppl result = create_pbes(tool_options);
   if (result == NULL) {
-    gsErrorMsg("parsing failed\n");
-    return 1;
-  }
-
-  //type check formula
-  gsVerboseMsg("type checking...\n");
-  result = type_check_state_frm(result, lpe_spec);
-  if (result == NULL) {
-    gsErrorMsg("type checking failed\n");
-    return 1;
-  }
-
-  //implement standard data types and type constructors on the result
-  gsVerboseMsg("implementing standard data types and type constructors...\n");
-  result = implement_data_state_frm(result, lpe_spec);
-  if (result == NULL) {
-    gsErrorMsg("data implementation failed\n");
     return 1;
   }
 
   //store the result
+  string outfilename = tool_options.outfilename;
+  bool opt_pretty = tool_options.pretty;
   if (outfilename == "") {
     gsVerboseMsg("saving result to stdout...\n");
     PrintPart_CXX(cout, (ATerm) result, opt_pretty?ppDefault:ppInternal);
@@ -130,12 +107,14 @@ static t_tool_options parse_command_line(int argc, char **argv)
 {
   t_tool_options tool_options;
   //declarations for getopt
+  t_phase opt_end_phase;
   bool opt_pretty = false;
   string formfilename = "";
-  #define SHORT_OPTIONS "f:ehqvd"
+  #define SHORT_OPTIONS "f:p:ehqvd"
   #define VERSION_OPTION CHAR_MAX + 1
   struct option long_options[] = {
     { "formula",   required_argument,  NULL,  'f' },
+    { "end-phase", required_argument, NULL, 'p' },
     { "external",  no_argument,        NULL,  'e' },
     { "help",      no_argument,        NULL,  'h' },
     { "version",   no_argument,        NULL,  VERSION_OPTION },
@@ -150,6 +129,20 @@ static t_tool_options parse_command_line(int argc, char **argv)
     switch (option) {
       case 'f': /* formula */
         formfilename = optarg;
+        break;
+      case 'p': /* end-phase */
+        if (strcmp(optarg, "pa") == 0) {
+          opt_end_phase = PH_PARSE;
+        } else if (strcmp(optarg, "tc") == 0) {
+          opt_end_phase = PH_TYPE_CHECK;
+        } else if (strcmp(optarg, "di") == 0) {
+          opt_end_phase = PH_DATA_IMPL;
+        } else if (strcmp(optarg, "rft") == 0) {
+          opt_end_phase = PH_REG_FRM_TRANS;
+        } else {
+          gsErrorMsg("option -p has illegal argument '%s'\n", optarg);
+          exit(1);
+        }
         break;
       case 'e': /* pretty */
         opt_pretty = true;
@@ -206,6 +199,7 @@ static t_tool_options parse_command_line(int argc, char **argv)
       */      
     }
   }
+  tool_options.end_phase    = opt_end_phase;
   tool_options.pretty       = opt_pretty;
   tool_options.formfilename = formfilename;
   tool_options.infilename   = infilename;
@@ -213,7 +207,92 @@ static t_tool_options parse_command_line(int argc, char **argv)
   return tool_options;
 }
 
-static void print_help(char *Name)
+ATermAppl create_pbes(t_tool_options tool_options)
+{
+  string infilename = tool_options.infilename;
+  string outfilename = tool_options.outfilename;
+  string formfilename = tool_options.formfilename;
+  t_phase end_phase = tool_options.end_phase;
+
+  //open infilename
+  lpe::specification lpe_spec = lpe::specification();
+  if (infilename == "") {
+    if (!lpe_spec.load("-")) {
+      gsErrorMsg("cannot open LPE from stdin\n");
+      return NULL;
+    }
+  } else {
+    if (!lpe_spec.load(infilename)) {
+      gsErrorMsg("cannot open LPE from '%s'\n", infilename.c_str());
+      return NULL;
+    }
+  }
+
+  //check if lpe_spec is an LPE
+  //XXX need soundness check
+
+  //parse formula from formfilename
+  gsVerboseMsg("parsing formula from '%s'...\n", formfilename.c_str());
+  ifstream formstream(formfilename.c_str(), ifstream::in|ifstream::binary);
+  if (!formstream.is_open()) {
+    gsErrorMsg("cannot open formula file '%s'\n", formfilename.c_str());
+    return NULL;
+  }
+  ATermAppl result = parse_state_frm(formstream);
+  formstream.close();
+  if (result == NULL) {
+    gsErrorMsg("parsing failed\n");
+    return NULL;
+  }
+  if (end_phase == PH_PARSE) {
+    return result;
+  }
+
+  //type check formula
+  gsVerboseMsg("type checking...\n");
+  result = type_check_state_frm(result, lpe_spec);
+  if (result == NULL) {
+    gsErrorMsg("type checking failed\n");
+    return NULL;
+  }
+  if (end_phase == PH_TYPE_CHECK) {
+    return result;
+  }
+
+  //implement standard data types and type constructors on the result
+  gsVerboseMsg("implementing standard data types and type constructors...\n");
+  result = implement_data_state_frm(result, lpe_spec);
+  if (result == NULL) {
+    gsErrorMsg("data implementation failed\n");
+    return NULL;
+  }
+  if (end_phase == PH_DATA_IMPL) {
+    return result;
+  }
+
+  //translate regular formulas in terms of state and action formulas
+  gsVerboseMsg("translating regular formulas in terms of state and action formulas...\n");
+  result = translate_reg_frms(result);
+  if (result == NULL) {
+    gsErrorMsg("regular formula translation failed\n");
+    return NULL;
+  }
+  if (end_phase == PH_REG_FRM_TRANS) {
+    return result;
+  }
+
+  //generate PBES from state formula and LPE
+  gsVerboseMsg("generating PBES from state formula and LPE...\n");
+  result = create_pbes(result, lpe_spec);
+  if (result == NULL) {
+    return NULL;
+  }
+
+  return result;
+}
+
+
+static void print_help(char *name)
 {
   fprintf(stderr,
     "Usage: %s [OPTION]... -f FILE [INFILE [OUTFILE]]\n"
@@ -224,13 +303,17 @@ static void print_help(char *Name)
     "\n"
     "Mandatory arguments to long options are mandatory for short options too.\n"
     "  -f, --formula=FILE    use the state formula from FILE\n"
+    "  -p, --end-phase=PHASE stop conversion after phase PHASE and output the\n"
+    "                        result; PHASE can be 'pa' (parse), 'tc' (type check),\n"
+    "                        'di' (data implementation) or 'rft' (regular formula\n"
+    "                        translation)\n"
     "  -e, --external        return the result in the external format\n"
     "  -h, --help            display this help message and terminate\n"
     "      --version         display version information and terminate\n"
     "  -q, --quiet           do not display warning messages\n"
     "  -v, --verbose         display concise intermediate messages\n"
     "  -d, --debug           display detailed intermediate messages\n",
-    Name
+    name
   );
 }
 
@@ -239,7 +322,7 @@ void print_version(void)
   fprintf(stderr,"%s %s (revision %d)\n", NAME, VERSION, REVISION);
 }
 
-void print_more_info(char *Name)
+void print_more_info(char *name)
 {
-  fprintf(stderr, "Use %s --help for options\n", Name);
+  fprintf(stderr, "Use %s --help for options\n", name);
 }

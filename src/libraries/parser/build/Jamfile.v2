@@ -16,6 +16,7 @@ lib parser
          libparse.cpp
          typecheck.cpp
          dataimpl.cpp
+         regfrmtrans.cpp
        : <bison.prefix>"mcrl2"
          <flex.prefix>"mcrl2"
          <dependency>/libraries/aterm//aterm
