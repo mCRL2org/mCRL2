@@ -23,9 +23,10 @@ BEGIN_EVENT_TABLE( GLCanvas, wxGLCanvas )
     EVT_ERASE_BACKGROUND( GLCanvas::OnEraseBackground )
 END_EVENT_TABLE()
 
-GLCanvas::GLCanvas( Mediator* owner, wxWindow* parent, wxWindowID id,
-    const wxPoint &pos, const wxSize &size )
-        : wxGLCanvas( parent, id, pos, size, wxSUNKEN_BORDER )
+GLCanvas::GLCanvas( Mediator* owner, wxWindow* parent, const wxSize &size, int*
+    attribList )
+	: wxGLCanvas( parent, wxID_ANY, wxDefaultPosition, size,
+	    wxSUNKEN_BORDER, wxT(""), attribList )
 {
   mediator = owner;
   displayAllowed = true;
@@ -98,10 +99,8 @@ void GLCanvas::setDefaultPosition( float structWidth, float structHeight )
 {
   // structWidth is the radius of the smallest cylinder that contains the entire
   // structure; structHeight is the height of that cylinder
-  float minZ1 = 0.5f * structHeight / float( tan( PI / 6.0 ) ) + structWidth;
-  float minZ2 = 0.0f;
-  startPosZDefault = max( minZ1, minZ2 );
-  farClippingPlane = max( farClippingPlane, 2.0f * startPosZDefault );
+  startPosZDefault = 0.5f * structHeight / float( tan( PI / 6.0 ) ) + structWidth;
+  farClippingPlane = startPosZDefault + structWidth;
   reshape();
 }
 
@@ -191,7 +190,7 @@ void GLCanvas::reshape()
   glViewport( 0, 0, width, height );
   glMatrixMode( GL_PROJECTION );
     glLoadIdentity();
-    gluPerspective( 60.0f, (GLfloat)(width) / (GLfloat)(height), 0.1f,
+    gluPerspective( 60.0f, (GLfloat)(width) / (GLfloat)(height), 1.0f,
 	farClippingPlane );
   glMatrixMode( GL_MODELVIEW );
 }

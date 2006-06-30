@@ -72,6 +72,7 @@ class Visualizer
 	basecol, RGB_Color topcol, bool baseclosed, bool topclosed );
     void drawCylinderSplit( float baserad, float toprad, float height, RGB_Color
 	basecol, RGB_Color topcol );
+    void drawEllipsoid( float d, float h );
     void drawHemisphere( float rad );
     void drawSphere( float rad );
     void drawSphereState();

@@ -125,12 +125,13 @@ void MainFrame::setupMainArea()
 
   int w; int h;
   rightPanel->GetSize( &w, &h );
-  glCanvas = new GLCanvas( mediator, this );
+  int attribList[] = { WX_GL_RGBA, WX_GL_DOUBLEBUFFER };
+  glCanvas = new GLCanvas( mediator, this, wxSize( h, h ), attribList );
   glCanvas->SetSizeHints( h, h );
-  glCanvas->SetSize( h, h );
   
   mainSizer->Add( glCanvas, 1, wxALIGN_CENTER | wxEXPAND | wxALL, 0 );
   mainSizer->Add( rightPanel, 1, wxALIGN_CENTER | wxEXPAND | wxALL, 0 );
+  
   mainSizer->Fit( this );
   SetSizer( mainSizer );
   Layout();
@@ -308,6 +309,13 @@ void MainFrame::setupSettingsPanel( wxPanel* panel )
   parsubSizer->Add( new wxStaticText( panel, wxID_ANY, 
 	wxT("Rendering quality:") ), 0, lflags, border );
   parsubSizer->Add( qualitySpinCtrl, 0, rflags, border );
+  
+  ellipsoidSpinCtrl = new wxSpinCtrlFloat( panel, myID_SETTINGS_CONTROL,
+      0.1f, 10.0f, 0.1f, 0.0f, wxDefaultPosition, spinctrlSize );
+  ellipsoidSpinCtrl->SetSizeHints( spinctrlSize, spinctrlSize );
+  parsubSizer->Add( new wxStaticText( panel, wxID_ANY, 
+	wxT("Ellipsoid threshold:") ), 0, lflags, border );
+  parsubSizer->Add( ellipsoidSpinCtrl, 0, rflags, border );
   /*
   qualitySlider = new wxSlider( panel, myID_SETTINGS_CONTROL, 4, 4, 100,
       wxDefaultPosition, wxSize( 100, -1 ), wxSL_HORIZONTAL | wxSL_LABELS |
@@ -640,6 +648,7 @@ VisSettings MainFrame::getVisSettings() const
 //    branchspreadSpinCtrl->GetValue(),
 //    clusterheightSpinCtrl->GetValue(),
     downC,
+    ellipsoidSpinCtrl->GetValue(),
     innerbranchtiltSpinCtrl->GetValue(),
     intC1,
     intC2,
@@ -670,6 +679,7 @@ void MainFrame::setVisSettings( VisSettings ss )
 {
   nodeButton->SetBackgroundColour( RGB_to_wxC( ss.stateColor ) );
   downEdgeButton->SetBackgroundColour( RGB_to_wxC( ss.downEdgeColor ) );
+  ellipsoidSpinCtrl->SetValue( ss.ellipsoidThreshold );
   upEdgeButton->SetBackgroundColour( RGB_to_wxC( ss.upEdgeColor ) );
   markButton->SetBackgroundColour( RGB_to_wxC( ss.markedColor ) );
   innerbranchtiltSpinCtrl->SetValue( ss.innerBranchTilt );

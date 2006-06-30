@@ -73,6 +73,7 @@ class MainFrame : public wxFrame
 //    wxSpinCtrlFloat*  clusterheightSpinCtrl;
     wxString	      directory;
     wxColorButton*    downEdgeButton;
+    wxSpinCtrlFloat*  ellipsoidSpinCtrl;
     wxString	      filename;
     GLCanvas*	      glCanvas;
     wxSpinCtrl*	      innerbranchtiltSpinCtrl;

@@ -33,6 +33,15 @@ float Utils::length( Point3D p )
   return sqrt( p.x*p.x + p.y*p.y + p.z*p.z );
 }
 
+void Utils::normalize( Point3D &p )
+{
+  float len = length( p );
+  if ( len != 0.0f )
+  {
+    p = (1.0f / len) * p;
+  }
+}
+
 Utils::HSV_Color Utils::operator+( HSV_Color c1, HSV_Color c2 )
 {
   HSV_Color result = { c1.h + c2.h, c1.s + c2.s, c1.v + c2.v };

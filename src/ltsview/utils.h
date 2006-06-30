@@ -48,6 +48,7 @@ namespace Utils
 //    int	      branchSpread;
 //    float     clusterHeight;
     RGB_Color downEdgeColor;
+    float     ellipsoidThreshold;
     int	      innerBranchTilt;
     RGB_Color interpolateColor1;
     RGB_Color interpolateColor2;
@@ -75,6 +76,7 @@ namespace Utils
   Point3D operator-( Point3D p1, Point3D p2 );
   Point3D operator*( float s, Point3D p );
   float length( Point3D p );
+  void  normalize( Point3D &p );
   HSV_Color operator+( HSV_Color c1, HSV_Color c2 );
   HSV_Color RGB_to_HSV( RGB_Color c );
   RGB_Color HSV_to_RGB( HSV_Color c );

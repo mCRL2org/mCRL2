@@ -7,8 +7,8 @@ bool Distance_desc::operator()(const Primitive* p1, const Primitive* p2) const
 
 VisSettings Visualizer::defaultVisSettings =
 {
-  1.0f, 111, /*100, 1.2f,*/ RGB_WHITE, 0, RGB_WHITE, RGB_BLUE, /*false,*/ false,
-  RGB_RED, 0.1f, 30, 12, RGB_WHITE, RGB_BLUE
+  1.0f, 111, RGB_WHITE, 1.0f, 0, RGB_WHITE, RGB_BLUE, false, RGB_RED, 0.1f, 30,
+  12, RGB_WHITE, RGB_BLUE
 };
 
 Visualizer::Visualizer( Mediator* owner )
@@ -142,7 +142,8 @@ bool Visualizer::setVisSettings( VisSettings vs )
     refreshStates = true;
   }
   
-  if ( fabs( oldSettings.alpha - vs.alpha ) > 0.01f )
+  if ( fabs( oldSettings.alpha - vs.alpha ) > 0.01f ||
+       fabs( oldSettings.ellipsoidThreshold - vs.ellipsoidThreshold ) > 0.01f )
   {
     refreshPrimitives = true;
   }
@@ -583,7 +584,7 @@ void Visualizer::drawSubtreeA( Cluster* root, int rot )
       glRotatef( desc->getPosition()+rot, 0.0f, 0.0f, 1.0f );
     }
   }
-  float r = pow( root->getTopRadius()*root->getTopRadius()*0.1, 0.33 );
+  
   GLfloat M[16];
   glGetFloatv( GL_MODELVIEW_MATRIX, M );
   GLuint displist = glGenLists( 1 );
@@ -594,7 +595,17 @@ void Visualizer::drawSubtreeA( Cluster* root, int rot )
       glColor4f( 0.0f, 1.0f, 0.0f, visSettings.alpha );
     else
       glColor4f( 0.0f, 0.0f, 1.0f, visSettings.alpha );
-    drawSphere( r ); 
+
+    float r = pow( root->getTopRadius()*root->getTopRadius()*0.1, 0.33 );
+    float h = visSettings.ellipsoidThreshold * clusterHeight;
+    if ( r > h )
+    {
+      drawEllipsoid( sqrt( r*r*r / h ), h );
+    }
+    else
+    {
+      drawSphere( r );
+    }
     glPopMatrix();
   glEndList();
 
@@ -689,7 +700,7 @@ void Visualizer::drawSubtreeAMarkStates( Cluster* root, int rot )
       
     }
   }
-  float r = pow( root->getTopRadius()*root->getTopRadius()*0.1, 0.33 );
+  
   GLfloat M[16];
   glGetFloatv( GL_MODELVIEW_MATRIX, M );
   GLuint displist = glGenLists( 1 );
@@ -701,7 +712,17 @@ void Visualizer::drawSubtreeAMarkStates( Cluster* root, int rot )
 	  visSettings.markedColor.b, visSettings.alpha );
     else
       glColor4f( 1.0f, 1.0f, 1.0f, visSettings.alpha );
-    drawSphere( r ); 
+
+    float r = pow( root->getTopRadius()*root->getTopRadius()*0.1, 0.33 );
+    float h = visSettings.ellipsoidThreshold * clusterHeight;
+    if ( r > h )
+    {
+      drawEllipsoid( pow( r*r*r / h, 0.33f ), h );
+    }
+    else
+    {
+      drawSphere( r );
+    }
     glPopMatrix();
   glEndList();
 
@@ -796,7 +817,7 @@ void Visualizer::drawSubtreeAMarkDeadlocks( Cluster* root, int rot )
       
     }
   }
-  float r = pow( root->getTopRadius()*root->getTopRadius()*0.1, 0.33 );
+  
   GLfloat M[16];
   glGetFloatv( GL_MODELVIEW_MATRIX, M );
   GLuint displist = glGenLists( 1 );
@@ -808,7 +829,17 @@ void Visualizer::drawSubtreeAMarkDeadlocks( Cluster* root, int rot )
 	  visSettings.markedColor.b, visSettings.alpha );
     else
       glColor4f( 1.0f, 1.0f, 1.0f, visSettings.alpha );
-    drawSphere( r ); 
+
+    float r = pow( root->getTopRadius()*root->getTopRadius()*0.1, 0.33 );
+    float h = visSettings.ellipsoidThreshold * clusterHeight;
+    if ( r > h )
+    {
+      drawEllipsoid( pow( r*r*r / h, 0.33f ), h );
+    }
+    else
+    {
+      drawSphere( r );
+    }
     glPopMatrix();
   glEndList();
 
@@ -903,7 +934,7 @@ void Visualizer::drawSubtreeAMarkTransitions( Cluster* root, int rot )
       
     }
   }
-  float r = pow( root->getTopRadius()*root->getTopRadius()*0.1, 0.33 );
+
   GLfloat M[16];
   glGetFloatv( GL_MODELVIEW_MATRIX, M );
   GLuint displist = glGenLists( 1 );
@@ -915,7 +946,17 @@ void Visualizer::drawSubtreeAMarkTransitions( Cluster* root, int rot )
 	  visSettings.markedColor.b, visSettings.alpha );
     else
       glColor4f( 1.0f, 1.0f, 1.0f, visSettings.alpha );
-    drawSphere( r ); 
+
+    float r = pow( root->getTopRadius()*root->getTopRadius()*0.1, 0.33 );
+    float h = visSettings.ellipsoidThreshold * clusterHeight;
+    if ( r > h )
+    {
+      drawEllipsoid( pow( r*r*r / h, 0.33f ), h );
+    }
+    else
+    {
+      drawSphere( r );
+    }
     glPopMatrix();
   glEndList();
 
@@ -2288,6 +2329,40 @@ void Visualizer::drawSphere( float r )
   }
 }
 
+void Visualizer::drawEllipsoid( float d, float h )
+{
+  float ex,ey,ez,px,py,pz;
+
+  // draw the sphere by drawing rings around the z-axis
+  for ( int j = 0 ; j < visSettings.quality ; j++ )
+  {
+    glBegin(GL_QUAD_STRIP);
+    for ( int i = 0 ; i <= visSettings.quality ; i++ )
+    {
+      ex = cos_theta2[j+1] * cos_theta1[i];
+      ey = cos_theta2[j+1] * sin_theta1[i];
+      ez = sin_theta2[j+1];
+      px = d * ex;
+      py = d * ey;
+      pz = h * ez;
+
+      glNormal3f( ex, ey, ez );
+      glVertex3f( px, py, pz );
+      
+      ex = cos_theta2[j] * cos_theta1[i];
+      ey = cos_theta2[j] * sin_theta1[i];
+      ez = sin_theta2[j];
+      px = d * ex;
+      py = d * ey;
+      pz = h * ez;
+
+      glNormal3f( ex, ey, ez );
+      glVertex3f( px, py, pz );
+    }
+    glEnd();
+  }
+}
+
 void Visualizer::drawSphereState()
 {
   float ex,ey,ez,px,py,pz;
@@ -2371,12 +2446,8 @@ void Visualizer::drawTubeInterpolate( float baserad, float toprad, RGB_Color bas
     fac2 = 6*t*it;
     fac3 = 3*t*t;
     Point3D bt_der = fac1*b1 + fac2*(b2-b1) + fac3*(b3-b2);
-    // normalise the vector
-    float len = length( bt_der );
-    if ( len != 0 )
-    {
-      bt_der = (1 / len) * bt_der;
-    }
+    // normalize the vector
+    normalize( bt_der );
     curve_der[i] = bt_der;
     
     // compute the color of the tube in b(t)
@@ -2407,8 +2478,10 @@ void Visualizer::drawTubeInterpolate( float baserad, float toprad, RGB_Color bas
       // compute the normal vector for vertex (i+1,j)
       for ( int k = 0 ; k < 16 ; k++ ) M[k] = (k % 5 == 0) ? 1 : 0;
       myRotatef( rot_ang2, -curve_der[i+1].y, curve_der[i+1].x, 0.0f, M );
-      myTranslatef( cos_theta1[j], sin_theta1[j], 0.0f, M );
-      glNormal3f( M[3], M[7], M[11] );
+      myTranslatef( radius[i+1]*cos_theta1[j], radius[i+1]*sin_theta1[j], 0.0f, M );
+      Point3D n2 = { M[3], M[7], M[11] };
+      normalize( n2 );
+      glNormal3f( n2.x, n2.y, n2.z );
 
       // compute the coordinates of vertex (i+1,j)
       for ( int k = 0 ; k < 16 ; k++ ) M[k] = (k % 5 == 0) ? 1 : 0;
@@ -2421,8 +2494,10 @@ void Visualizer::drawTubeInterpolate( float baserad, float toprad, RGB_Color bas
       // compute the normal vector for vertex (i,j)
       for ( int k = 0 ; k < 16 ; k++ ) M[k] = (k % 5 == 0) ? 1 : 0;
       myRotatef( rot_ang1, -curve_der[i].y, curve_der[i].x, 0.0f, M );
-      myTranslatef( cos_theta1[j], sin_theta1[j], 0.0f, M );
-      glNormal3f( M[3], M[7], M[11] );
+      myTranslatef( radius[i]*cos_theta1[j], radius[i]*sin_theta1[j], 0.0f, M );
+      Point3D n1 = { M[3], M[7], M[11] };
+      normalize( n1 );
+      glNormal3f( n1.x, n1.y, n1.z );
       
       // compute the coordinates of vertex (i,j)
       for ( int k = 0 ; k < 16 ; k++ ) M[k] = (k % 5 == 0) ? 1 : 0;
@@ -2476,12 +2551,8 @@ void Visualizer::drawTubeSplit( float baserad, float toprad, RGB_Color basecol,
     fac2 = 6*t*it;
     fac3 = 3*t*t;
     Point3D bt_der = fac1*b1 + fac2*(b2-b1) + fac3*(b3-b2);
-    // normalise the vector
-    float len = length( bt_der );
-    if ( len != 0 )
-    {
-      bt_der = (1 / len) * bt_der;
-    }
+    // normalize the vector
+    normalize( bt_der );
     curve_der[i] = bt_der;
     
     // compute the radius of the tube in b(t)
