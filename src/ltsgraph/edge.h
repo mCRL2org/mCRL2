@@ -32,6 +32,7 @@ public:
   double GetXpos2();
   double GetYpos2();
 
+	bool LabelVisible();
 	void ShowLabels();
 	void HideLabels();
 

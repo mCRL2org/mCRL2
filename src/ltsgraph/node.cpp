@@ -7,6 +7,7 @@ Node::Node(unsigned int _num, double _posX, double _posY, wxString _lbl, bool _i
              posX(_posX), posY(_posY), lbl(_lbl), num(_num), initState(_initState)
 {
   locked = false;
+	labelsVisible = true;
 }
 
 void Node::OnPaint(wxDC * ptrDC) 
@@ -71,12 +72,20 @@ bool Node::IsLocked(){
   return locked;
 }
 
+bool Node::IsInitState(){
+  return initState;
+}
+
 void Node::Lock() {
   locked = true;
 }
 
 void Node::Unlock() {
   locked = false;
+}
+
+bool Node::LabelVisible() {
+	return labelsVisible;
 }
 
 void Node::ShowLabels() {

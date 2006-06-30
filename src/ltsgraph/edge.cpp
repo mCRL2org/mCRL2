@@ -18,7 +18,6 @@ Edge::Edge(Node* _N1, Node* _N2, wxString _lbl) : N1(_N1), N2(_N2), lbl(_lbl)
 }
 
 
-
 void Edge::OnPaint(wxDC * ptrDC) 
 {
     //Calculate triangle coord
@@ -49,7 +48,7 @@ void Edge::OnPaint(wxDC * ptrDC)
     double lenY3 = sin(gamma_p3) * ArrowSideLength;
     
     // coord correcting depend on position 
-    if (GetXpos2() > GetXpos1()) 
+    if (GetXpos2() >= GetXpos1()) 
     {
       lenX1 = -lenX1;
       lenY1 = -lenY1;
@@ -120,6 +119,10 @@ double Edge::GetXpos2() {
 
 double Edge::GetYpos2() {
   return N2->GetY();
+}
+
+bool Edge::LabelVisible() {
+	return labelsVisible;
 }
 
 void Edge::ShowLabels() {

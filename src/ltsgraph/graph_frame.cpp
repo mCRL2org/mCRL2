@@ -4,6 +4,7 @@ BEGIN_EVENT_TABLE(GraphFrame, wxFrame)
   EVT_MENU(wxID_OPEN, GraphFrame::OnOpen)
 	EVT_MENU(ID_EXPORT_PS, GraphFrame::ExportPostScript)
 	EVT_MENU(ID_EXPORT_LATEX, GraphFrame::ExportLatex)
+	EVT_MENU(ID_BACKUP_CREATE, GraphFrame::CreateBackup)
   EVT_MENU(wxID_EXIT, GraphFrame::OnQuit)
   EVT_MENU(ID_OPTIMIZE, GraphFrame::OnOptimize)
   EVT_MENU(ID_STOP_OPTIMIZE, GraphFrame::OnStopOptimize)
@@ -174,6 +175,7 @@ void GraphFrame::CreateMenu() {
 	file->Append(wxID_ANY,wxT("&Export"),exports);
 	exportPsItem    = exports->Append( ID_EXPORT_PS, wxT("Export to &PostScript\tCTRL-p"), wxT("") );
 	exportLatexItem = exports->Append( ID_EXPORT_LATEX, wxT("Export to &Latex\tCTRL-l"), wxT("") );
+	backupCreate    = file->Append( ID_BACKUP_CREATE, wxT("&Create a backup\tCTRL-c"), wxT("") );
   quitItem        = file->Append( wxID_EXIT, wxT("&Quit\tCTRL-q"), wxT("") );
   menu->Append( file, wxT("&File") );
 
@@ -190,6 +192,7 @@ void GraphFrame::CreateMenu() {
 	stopOptimize->Enable(false);
 	exportLatexItem->Enable(false);
 	exportPsItem->Enable(false);
+	backupCreate->Enable(false);
 }
 
 void GraphFrame::CreateStatusBar() {
@@ -208,7 +211,8 @@ void GraphFrame::OnOpen( wxCommandEvent& /* event */ ) {
 	StopOpti    = true;
 	StoppedOpti = true;
 	btnOptiStop->SetLabel(wxT("Optimize"));
-	wxFileDialog dialog( this, wxT("Select a LTS file..."), wxT(""), wxT(""), wxT("*.aut |*.aut|*.svc|*.svc|All files|*"));
+	wxFileDialog dialog( this, wxT("Select a LTS file (.aut .svc) or a backup file (.ltsgraph)..."), wxT(""), wxT(""), 
+											wxT("*.aut |*.aut|*.svc|*.svc|*.ltsgraph|*.ltsgraph|All files|*"));
 	if ( dialog.ShowModal() == wxID_OK ) {
 		vectEdge.clear();
 		vectNode.clear();
@@ -224,7 +228,7 @@ void GraphFrame::OnQuit( wxCommandEvent& /* event */ ) {
 void GraphFrame::OnClose(wxCloseEvent& /*event*/) {
   StopOpti = true;
 
-std::cerr << "closeing";
+//std::cerr << "closeing" << std::endl;
 //  while(!StoppedOpti) {
 //    wxTheApp->Yield(true); // to allow user to interrupt optimizing
 //  }
@@ -243,12 +247,12 @@ void GraphFrame::OnOptimize( wxCommandEvent& /* event */ ) {
 	StopOpti = false;
 	StoppedOpti = false;
 	while (!OptimizeDrawing(0.0) && !StopOpti) {
-std::cerr << "running'";
+//std::cerr << "running'";
 		wxTheApp->Yield(true); // to allow user to interrupt optimizing
 	}
 
 	StoppedOpti = true;
-std::cerr << "end'";
+//std::cerr << "end'";
 }
 
 void GraphFrame::OnStopOptimize( wxCommandEvent& /* event */ ) {
@@ -295,102 +299,111 @@ void GraphFrame::OnBtnOpti( wxCommandEvent& event ) {
 
 }
 
-
 //init vectNode & vectEdge
 void GraphFrame::Init(wxString LTSfile) {
 
-  leftPanel->sz = leftPanel->GetSize();
+  	//leftPanel->sz = leftPanel->GetSize();
 
-  string st_LTSfile = string(LTSfile.fn_str());
+  	string st_LTSfile = string(LTSfile.fn_str());
 
-    //read lts file
-  	lts mylts;
-    if (mylts.read_from(st_LTSfile)) 
-    {
+		//Find extension
+		string ext = st_LTSfile.substr(st_LTSfile.find_last_of( '.' )+1);
 
-			//Information about graph
-			wxString text;
-			text.Printf(wxT("%u"),mylts.initial_state());
-			initialStateLabel->SetLabel(text);
-			text.Printf(wxT("%u"),mylts.num_states());
-			numberOfStatesLabel->SetLabel(text);
-			text.Printf(wxT("%u"),mylts.num_transitions());
-			numberOfTransitionsLabel->SetLabel(text);
-			text.Printf(wxT("%u"),mylts.num_labels());
-			numberOfLabelsLabel->SetLabel(text);
+		//initialize file name
+		inputFileName = st_LTSfile.substr( st_LTSfile.find_last_of( '/' ) + 1 ); //without path
+		inputFileName = inputFileName.substr( 0, inputFileName.find_last_of( '.' ) ); //without extension
 
-			//Fill status bar
-			FillStatusBar(LTSfile,2);	
+		if (ext != "ltsgraph") {
 
-			//initialize file name
-			inputFileName = st_LTSfile.substr( st_LTSfile.find_last_of( '/' ) + 1 ); //without path
-			inputFileName = inputFileName.substr( 0, inputFileName.find_last_of( '.' ) ); //without extension
+			//read lts file
+			lts mylts;
+			if (mylts.read_from(st_LTSfile)) 
+			{
+	
+				//Information about graph
+				wxString text;
+				text.Printf(wxT("%u"),mylts.initial_state());
+				initialStateLabel->SetLabel(text);
+				text.Printf(wxT("%u"),mylts.num_states());
+				numberOfStatesLabel->SetLabel(text);
+				text.Printf(wxT("%u"),mylts.num_transitions());
+				numberOfTransitionsLabel->SetLabel(text);
+				text.Printf(wxT("%u"),mylts.num_labels());
+				numberOfLabelsLabel->SetLabel(text);
+	
+				//Fill status bar
+				FillStatusBar(LTSfile,2);	
+	
+				//initialize vectNode
+	
+				state_iterator si = mylts.get_states();
+					
+				wxString tmp;
+				int randX = leftPanel->Get_Width()  - 2*CircleRadius;
+				int randY = leftPanel->Get_Height() - 4*CircleRadius;
+	
+	
+				for(unsigned int i=0; si.more(); i++) 
+				{
+						tmp.sprintf(wxT("%d"), *si);
+						wxString * Slbl_Node = new wxString(tmp);
 
-      //initialize vectNode
+						vectNode.push_back( new Node(*si, GenRandom(randX), GenRandom(randY), *Slbl_Node, (mylts.initial_state() == *si) ));
 
-      state_iterator si = mylts.get_states();
-        
-      wxString tmp;
-      int randX = leftPanel->Get_Width()  - 2*CircleRadius;
-      int randY = leftPanel->Get_Height() - 4*CircleRadius;
-
+						delete Slbl_Node;
+					++ si;
+				}   
+				//NaturalLength = (400 / vectNode.size())+8;
+			
+				//initialize vectEdge
+	
+				transition_iterator ti = mylts.get_transitions();
+			
+				for(unsigned int i=0; (ti.more()); i++) 
+				{
+					wxString * Slbl_Edge = new wxString(ATwriteToString(mylts.label_value(ti.label())), wxConvLocal);
+	
+					for (size_t n = 0; n < vectNode.size(); n++) { 
+						if (vectNode[n]->Get_num() == ti.from()) { 
+							for (size_t m = 0; m < vectNode.size(); m++) { 
+									if (vectNode[m]->Get_num() == ti.to()) 
+										vectEdge.push_back(new Edge(vectNode[n],vectNode[m],*Slbl_Edge));
+							}
+						}
+						//Init circle radius
+						vectNode[n]->SetRadius(CircleRadius);
+					}
+			
+					delete Slbl_Edge;       
+					++ ti;
+				}
+				optimizeGraph->Enable(true);
+				stopOptimize->Enable(false);
+				btnOptiStop->Enable(true);
+				exportLatexItem->Enable(true);
+				exportPsItem->Enable(true);
+				backupCreate->Enable(true);
+				Refresh();
+			}
+			else 
+			{
+				cout << "Error : cannot read " << st_LTSfile << endl;
+				exit(0);
+			}
+		}
+		else { //restore a backup
+			
+			RestoreBackup();
  
-      for(unsigned int i=0; si.more(); i++) 
-      {
-					tmp.sprintf(wxT("%d"), *si);
-					wxString * Slbl_Node = new wxString(tmp);
-					if (mylts.initial_state() == *si)
-						vectNode.push_back( new Node(*si, GenRandom(randX), GenRandom(randY), *Slbl_Node, true));
-					else
-						vectNode.push_back( new Node(*si, GenRandom(randX), GenRandom(randY), *Slbl_Node, false));
-					delete Slbl_Node;
-        ++ si;
-      }   
-      //NaturalLength = (400 / vectNode.size())+8;
-    
-      //initialize vectEdge
-
-      transition_iterator ti = mylts.get_transitions();
-    
-      for(unsigned int i=0; (ti.more()); i++) 
-      {
-        wxString * Slbl_Edge = new wxString(ATwriteToString(mylts.label_value(ti.label())), wxConvLocal);
-
-        for (size_t n = 0; n < vectNode.size(); n++) { 
-					if (vectNode[n]->Get_num() == ti.from()) { 
-						for (size_t m = 0; m < vectNode.size(); m++) { 
-								if (vectNode[m]->Get_num() == ti.to()) 
-               		vectEdge.push_back(new Edge(vectNode[n],vectNode[m],*Slbl_Edge));
-            }
-          }
-					//Init circle radius
-					vectNode[n]->SetRadius(CircleRadius);
-        }
-    
-        delete Slbl_Edge;       
-        ++ ti;
-      }
-			optimizeGraph->Enable(true);
-			stopOptimize->Enable(false);
-			btnOptiStop->Enable(true);
-			exportLatexItem->Enable(true);
-			exportPsItem->Enable(true);
-      Refresh();
-    }
-    else 
-    {
-      cout << "Error : cannot read " << st_LTSfile << endl;
-      exit(0);
-    }
+		}
 }
 
-bool GraphFrame::OptimizeDrawing(double precision) 
-{
+bool GraphFrame::OptimizeDrawing(double precision) {
 
   EdgeStiffness = spinEdgeStiffness->GetValue();
-  NodeStrength = spinNodeStrength->GetValue();
+  NodeStrength  = spinNodeStrength->GetValue();
   NaturalLength = spinNaturalLength->GetValue();
-	CircleRadius = spinNodeRadius->GetValue();
+	CircleRadius  = spinNodeRadius->GetValue();
 	
   double arraySumForceX[vectNode.size()];
   double arraySumForceY[vectNode.size()];
@@ -619,6 +632,69 @@ void GraphFrame::ExportLatex( wxCommandEvent& /* event */ ) {
 	else {
 		wxMessageBox(wxT("Export unsuccessful"),wxT("Error"),wxOK | wxICON_ERROR);
 	}
+
+}
+
+void GraphFrame::CreateBackup(wxCommandEvent& event) {
+
+	LtsgraphBackup bckp(leftPanel->GetSize());
+
+	bckp.SetLayout(vectNode, vectEdge);
+	bckp.SetInformation(initialStateLabel->GetLabel(), 
+											numberOfStatesLabel->GetLabel(), 
+											numberOfTransitionsLabel->GetLabel(), 
+											numberOfLabelsLabel->GetLabel()
+											);
+	bckp.SetAlgoSettings(spinEdgeStiffness->GetValue(), spinNodeStrength->GetValue(), spinNaturalLength->GetValue());
+	bckp.SetOtherSettings(spinNodeRadius->GetValue(), ckNodeLabels->IsChecked(), ckEdgeLabels->IsChecked());
+
+	if (bckp.Backup(inputFileName)) {
+		wxMessageBox(wxT("Backup successful"),wxT("Information"),wxOK| wxICON_INFORMATION);
+	}
+	else {
+		wxMessageBox(wxT("Backup unsuccessful"),wxT("Error"),wxOK | wxICON_ERROR);
+	}
+		
+				
+}
+
+void GraphFrame::RestoreBackup() {
+
+	LtsgraphBackup bckp(leftPanel->GetSize());
+	if (bckp.Restore(inputFileName)) {
+
+		FillStatusBar(wxT(""),2);		
+
+		initialStateLabel->SetLabel(bckp.GetInitialState());  
+		numberOfStatesLabel->SetLabel(bckp.GetNumStates()); 
+		numberOfTransitionsLabel->SetLabel(bckp.GetNumTransitions()); 
+		numberOfLabelsLabel->SetLabel(bckp.GetNumLabels()); 
+
+		spinEdgeStiffness->SetValue(bckp.GetEdgeStiffness());
+		spinNodeStrength->SetValue(bckp.GetNodeStrength());
+		spinNaturalLength->SetValue(bckp.GetNaturalLength());
+	
+		spinNodeRadius->SetValue(bckp.GetStateRadius());
+		ckNodeLabels->SetValue(bckp.GetStateLabel());
+		ckEdgeLabels->SetValue(bckp.GetTransitionLabel());
+
+		vectEdge.clear();
+		vectNode.clear();
+		vectEdge = bckp.GetVectEdge();
+		vectNode = bckp.GetVectNode();
+		
+		
+		optimizeGraph->Enable(true);
+		stopOptimize->Enable(false);
+		btnOptiStop->Enable(true);
+
+	}
+	else
+		wxMessageBox(wxT("Restore unsuccessful"),wxT("Error"),wxOK | wxICON_ERROR);
+	
+	
+	Refresh();
+
 
 }
 
