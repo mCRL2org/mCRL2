@@ -43,6 +43,7 @@ static void PrintVersion(void);
 static void PrintHelp(char *Name);
 static void PrintLinMethod(FILE *stream, t_lin_method lin_method);
 
+
 static int parse_command_line(int argc, char *argv[],t_lin_options &lin_options)
 { 
   //declarations for getopt
@@ -254,45 +255,35 @@ static int parse_command_line(int argc, char *argv[],t_lin_options &lin_options)
 
 #ifdef ENABLE_SQUADT_CONNECTIVITY
 
-static bool get_squadt_parameters(int argc, 
-                                  char *argv[],
-                                  t_lin_options &lin_options,
-                                  sip::tool::communicator &tc)
-{
-  std::string infilename;
-  const unsigned int lpd_file_for_input=0;
+enum mcrl22lpe_options {
+       option_input_mcrl2_file_name,
+       option_output_lpe_file_name,
+       option_linearisation_method,
+       option_final_cluster,
+       option_intermediate_cluster,
+       option_no_alpha,
+       option_newstate,
+       option_binary,
+       option_statenames,
+       option_no_rewrite,
+       option_no_freevars,
+       option_no_sumelm,
+       option_no_deltaelm,
+       option_end_phase,
+       option_quiet,
+       option_verbose,
+       option_debug };
 
-  sip::tool::capabilities& cp = tc.get_tool_capabilities();
-  cp.add_input_combination(lpd_file_for_input, "Transformation", "mcrl2");
-  if (tc.activate(argc,argv)) 
-  { bool valid = false;
-    /* Static configuration cycle */
-    while (!valid) 
-    {
-      /* Wait for configuration data to be sent 
-       * (either a previous configuration, or only an input combination) */
-      sip::configuration::sptr configuration = tc.await_configuration();
-      /* Validate configuration specification, 
-       * should contain a file name of an LPD that is to be read as input */
-      valid  = configuration.get() != 0;
-      valid &= configuration->object_exists(lpd_file_for_input);
-      if (valid) 
-      { /* An object with the correct id exists, assume the URI is relative 
-           (i.e. a file name in the local file system) */
-        infilename = configuration->get_object(lpd_file_for_input)->get_location();
-      }
-      else 
-      { sip::report report;
-        report.set_error("Invalid input combination!");
-        tc.send_report(report);
-        exit(1);
-      }
-    }
-
+static void get_configuration_parameters_via_squadt_display
+               (sip::tool::communicator& tc) 
+{ /* get parameters via the squadt display and set the
+     configuration which is sent back to squadt */
     using namespace sip;
     using namespace sip::layout;
     using namespace sip::layout::elements;
 
+    sip::configuration &configuration=tc.get_configuration();
+    std::string infilename = configuration.get_object(option_input_mcrl2_file_name)->get_location();
     tool_display::sptr display(new layout::tool_display);
     layout::manager::aptr layout_manager = layout::vertical_box::create();
 
@@ -332,7 +323,7 @@ static bool get_squadt_parameters(int argc,
     option_columns->add(left_option_column,top);
     checkbox* clusterintermediate = new checkbox("Intermediate clustering",true);
     left_option_column->add(clusterintermediate,layout::left);
-    checkbox* clusterfinal = new checkbox("Final clustering",true);
+    checkbox* clusterfinal = new checkbox("Final clustering",false);
     left_option_column->add(clusterfinal,layout::left);
     checkbox* newstate = new checkbox("Use enumerated states",false);
     left_option_column->add(newstate,layout::left);
@@ -355,23 +346,33 @@ static bool get_squadt_parameters(int argc,
     right_option_column->add(nofreevars,layout::left);
 
     layout_manager->add(new label(" "),layout::left);
-    layout_manager->add(new label("Determine output phase"),layout::left);
+    layout_manager->add(new label("Stop after"),layout::left);
     // Determine which phases the linearizer will go through. Default is all.
     horizontal_box *phases_box = new horizontal_box();
     layout_manager->add(phases_box);
-    radio_button *all_phases=new radio_button("None");
+    radio_button *all_phases=new radio_button("Linearizing");
     phases_box->add(all_phases,middle);
-    radio_button *parse_phase=new radio_button("Parsing",all_phases);
-    phases_box->add(parse_phase,middle);
-    radio_button *typecheck_phase=new radio_button("Typechecking",parse_phase);
-    phases_box->add(typecheck_phase,middle);
-    radio_button *alpha_phase=new radio_button("Alphabet reductions",typecheck_phase);
-    phases_box->add(alpha_phase,middle);
-    radio_button *data_phase=new radio_button("Data implementation",alpha_phase);
+    radio_button *data_phase=new radio_button("Data implementation",all_phases);
     phases_box->add(data_phase,middle);
+    radio_button *alpha_phase=new radio_button("Alphabet reductions",data_phase);
+    phases_box->add(alpha_phase,middle);
+    radio_button *typecheck_phase=new radio_button("Typechecking",alpha_phase);
+    phases_box->add(typecheck_phase,middle);
+    radio_button *parse_phase=new radio_button("Parsing",typecheck_phase);
+    phases_box->add(parse_phase,middle);
 
-
-    // The ok button must be put at the rightmost lowermost place
+    layout_manager->add(new label(" "),layout::left);
+    layout_manager->add(new label("Report level"),layout::left);
+    horizontal_box *report_level_box = new horizontal_box();
+    layout_manager->add(report_level_box);
+    radio_button *normal_mode=new radio_button("Normal");
+    report_level_box->add(normal_mode,middle);
+    radio_button *verbose_mode=new radio_button("Verbose",normal_mode);
+    report_level_box->add(verbose_mode,middle);
+    radio_button *debug_mode=new radio_button("Debug",verbose_mode);
+    report_level_box->add(debug_mode,middle);
+    radio_button *quiet_mode=new radio_button("Quiet",debug_mode);
+    report_level_box->add(quiet_mode,middle);
 
     vertical_box* okay_box = new vertical_box();
     layout_manager->add(okay_box);
@@ -380,73 +381,199 @@ static bool get_squadt_parameters(int argc,
     
     layout_manager->add(new label(" "),layout::left);
 
-    cerr << "Configuration sent\n";
     display->set_top_manager(layout_manager);
 
     tc.send_display_layout(display);
-    cerr << "Configuration sent1\n";
 
+    /* Wait for the OK button to be pressed */
     okay_button->await_change();
 
-    lin_options.infilename=infilename;
+    /* set the squadt configuration to be sent back, such
+     * that mcrl22lpe can be restarted later with exactly
+     * the same parameters
+     */
+
+    configuration.add_output(option_output_lpe_file_name,"lpe",outfilenamefield->get_text());
 
     if (select_regular->is_selected())
-    { lin_options.lin_method = lmRegular;
+    { configuration.add_option(option_linearisation_method).
+          append_argument(sip::datatype::integer::standard,(long int)lmRegular);
     }
     else if (select_regular2->is_selected())
-    { lin_options.lin_method = lmRegular2;
+    { configuration.add_option(option_linearisation_method).
+          append_argument(sip::datatype::integer::standard,(long int)lmRegular2);
     }
     else if (select_stack->is_selected())
-    { lin_options.lin_method = lmStack;
+    { configuration.add_option(option_linearisation_method).
+          append_argument(sip::datatype::integer::standard,(long int)lmStack);
     }
     else if (select_expansion->is_selected())
-    { lin_options.lin_method = lmAlternative;
+    { configuration.add_option(option_linearisation_method).
+          append_argument(sip::datatype::integer::standard,(long int)lmAlternative);
     }
-    lin_options.final_cluster = clusterfinal->get_status();
-    lin_options.no_intermediate_cluster = clusterintermediate->get_status();
-    lin_options.newstate = newstate->get_status();
-    lin_options.binary = binary->get_status();
-    lin_options.statenames = statenames->get_status();
-    lin_options.norewrite = norewrite->get_status();
-    lin_options.nofreevars = nofreevars->get_status();
-    lin_options.nosumelm = nosumelm->get_status();
-    lin_options.nodeltaelimination = nodeltaelm->get_status();
+
+    configuration.add_option(option_final_cluster).
+          append_argument(sip::datatype::boolean::standard,(bool)clusterfinal->get_status());
+    configuration.add_option(option_intermediate_cluster).
+          append_argument(sip::datatype::boolean::standard,(bool)clusterintermediate->get_status());
+    configuration.add_option(option_no_alpha).
+          append_argument(sip::datatype::boolean::standard,(bool)noalpha->get_status());
+    configuration.add_option(option_newstate).
+          append_argument(sip::datatype::boolean::standard,(bool)newstate->get_status());
+    configuration.add_option(option_binary).
+          append_argument(sip::datatype::boolean::standard,(bool)binary->get_status());
+    configuration.add_option(option_statenames).
+          append_argument(sip::datatype::boolean::standard,(bool)statenames->get_status());
+    configuration.add_option(option_no_rewrite).
+          append_argument(sip::datatype::boolean::standard,(bool)norewrite->get_status());
+    configuration.add_option(option_no_freevars).
+          append_argument(sip::datatype::boolean::standard,(bool)nofreevars->get_status());
+    configuration.add_option(option_no_sumelm).
+          append_argument(sip::datatype::boolean::standard,(bool)nosumelm->get_status());
+    configuration.add_option(option_no_deltaelm).
+          append_argument(sip::datatype::boolean::standard,(bool)nodeltaelm->get_status());
     
-    lin_options.opt_check_only = !(all_phases->is_selected());
     
-    if (lin_options.opt_check_only)
-    { if (parse_phase->is_selected())
-      { lin_options.opt_end_phase = phParse;
-      }
-      else if (typecheck_phase->is_selected())
-      { lin_options.opt_end_phase = phTypeCheck;
-      }
-      else if (alpha_phase->is_selected())
-      { lin_options.opt_end_phase = phAlphaRed;
-      }
-      else if (data_phase->is_selected())
-      { lin_options.opt_end_phase = phDataImpl;
-      }
+    if (parse_phase->is_selected())
+    { configuration.add_option(option_end_phase).
+                append_argument(sip::datatype::integer::standard,(long int)phParse);
+    }
+    else if (typecheck_phase->is_selected())
+    { configuration.add_option(option_end_phase).
+                append_argument(sip::datatype::integer::standard,(long int)phTypeCheck);
+    }
+    else if (alpha_phase->is_selected())
+    { configuration.add_option(option_end_phase).
+                append_argument(sip::datatype::integer::standard,(long int)phAlphaRed);
+    }
+    else if (data_phase->is_selected())
+    { configuration.add_option(option_end_phase).
+                append_argument(sip::datatype::integer::standard,(long int)phDataImpl);
     }
     else
-    { lin_options.opt_end_phase=phNone;
+    { configuration.add_option(option_end_phase).
+                append_argument(sip::datatype::integer::standard,(long int)phNone);
     }
 
-        
-    // lin_options.opt_end_phase = opt_end_phase;
-    lin_options.opt_noalpha = noalpha->get_status();
-    lin_options.infilename = infilename;
-    lin_options.outfilename=outfilenamefield->get_text();
+    configuration.add_option(option_debug).
+                append_argument(sip::datatype::boolean::standard,(bool)debug_mode->is_selected());
 
-    cerr << "Configuration sent2\n";
+    configuration.add_option(option_verbose).
+                append_argument(sip::datatype::boolean::standard,(bool)verbose_mode->is_selected());
+
+    configuration.add_option(option_quiet).
+                      append_argument(sip::datatype::boolean::standard,(bool)debug_mode->is_selected());
+
+
     /* Send the controller the signal that we're ready to rumble 
      * (no further configuration necessary) */
+    tc.clear_display();
     tc.send_accept_configuration();
+}
+
+static bool get_squadt_parameters(int argc, 
+                                  char *argv[],
+                                  t_lin_options &lin_options,
+                                  sip::tool::communicator &tc)
+{
+  std::string infilename;
+  /* Maak dit een enumerated type */
+
+  sip::tool::capabilities& cp = tc.get_tool_capabilities();
+  cp.add_input_combination(option_input_mcrl2_file_name, "Transformation", "mcrl2");
+  if (tc.activate(argc,argv)) 
+  { bool valid = false;
+    /* Static configuration cycle */
+    while (!valid) 
+    {
+      /* Wait for configuration data to be sent 
+       * (either a previous configuration, or only an input combination) */
+      sip::configuration::sptr configuration = tc.await_configuration();
+      /* Validate configuration specification, 
+       * should contain a file name of an LPD that is to be read as input */
+      valid  = configuration.get() != 0;
+      valid &= configuration->object_exists(option_input_mcrl2_file_name);
+      if (!valid) 
+      { 
+        gsErrorMsg("Bad configuration data received from SQUADT\n");
+        exit(1);
+      }
+    }
+
+    sip::configuration& configuration=tc.get_configuration();
+    if (configuration.is_fresh())
+    { get_configuration_parameters_via_squadt_display(tc);
+    }
+    
+    /* put the configuration data from squadt
+     * into the lin_options structure to be used
+     * during the linearisation */   
+
+    if (configuration.object_exists(option_input_mcrl2_file_name))    
+    { lin_options.infilename=configuration.get_object(option_input_mcrl2_file_name)->get_location();
+    }
+    else
+    { gsErrorMsg("Configuration from SQUADT does not contain input file name\n");
+    }
+
+    if (configuration.object_exists(option_output_lpe_file_name) )    
+    { lin_options.outfilename=configuration.get_object(option_output_lpe_file_name)->get_location();
+    }
+    else
+    { gsErrorMsg("Configuration from SQUADT does not contain output file name\n");
+    }
+
+    if (configuration.option_exists(option_linearisation_method))
+    { lin_options.lin_method = (t_lin_method)
+          boost::any_cast <long int>(*(configuration.get_option(option_linearisation_method)->get_value_iterator()));
+    }
+    else 
+    { gsErrorMsg("Configuration from SQUADT does not contain linearisation method\n");
+    } 
+
+    lin_options.final_cluster = 
+        boost::any_cast <bool> (*(configuration.get_option(option_final_cluster)->get_value_iterator()));
+    lin_options.no_intermediate_cluster = 
+        boost::any_cast <bool> (*(configuration.get_option(option_intermediate_cluster)->get_value_iterator()));
+    lin_options.opt_noalpha = 
+        boost::any_cast <bool> (*(configuration.get_option(option_no_alpha)->get_value_iterator()));
+    lin_options.newstate = 
+        boost::any_cast <bool> (*(configuration.get_option(option_newstate)->get_value_iterator()));
+    lin_options.binary = 
+        boost::any_cast <bool> (*(configuration.get_option(option_binary)->get_value_iterator()));
+    lin_options.statenames = 
+        boost::any_cast <bool> (*(configuration.get_option(option_statenames)->get_value_iterator()));
+    lin_options.norewrite = 
+        boost::any_cast <bool> (*(configuration.get_option(option_no_rewrite)->get_value_iterator()));
+    lin_options.nofreevars = 
+        boost::any_cast <bool> (*(configuration.get_option(option_no_freevars)->get_value_iterator()));
+    lin_options.nosumelm = 
+        boost::any_cast <bool> (*(configuration.get_option(option_no_sumelm)->get_value_iterator()));
+    lin_options.nodeltaelimination = 
+        boost::any_cast <bool> (*(configuration.get_option(option_no_deltaelm)->get_value_iterator()));
+    
+    lin_options.opt_end_phase=(t_phase)
+        boost::any_cast <long int> (*(configuration.get_option(option_end_phase)->get_value_iterator()));
+
+    lin_options.opt_check_only = (lin_options.opt_end_phase!=phNone);
+    
+    // lin_options.opt_end_phase = opt_end_phase;
+
+    if (boost::any_cast <bool> (*(configuration.get_option(option_debug)->get_value_iterator())))
+    { gsSetDebugMsg();
+    }
+
+    if (boost::any_cast <bool> (*(configuration.get_option(option_verbose)->get_value_iterator())))
+    { gsSetVerboseMsg();
+    }
+
+    if (boost::any_cast <bool> (*(configuration.get_option(option_quiet)->get_value_iterator())))
+    { gsSetQuietMsg();
+    }
 
     /* Wait for start message */
     
-    cerr << "Ready to accept configuration " << infilename << "\n";
-    tc.await_message(sip::message_signal_start);
+    // tc.await_message(sip::message_signal_start);
 
 
     return 0;
@@ -469,6 +596,7 @@ int main(int argc, char *argv[])
 #else
   terminate=parse_command_line(argc,argv,lin_options);
 #endif
+
 
   if (terminate) exit(0);
 
