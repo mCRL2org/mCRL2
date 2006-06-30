@@ -7,7 +7,6 @@
 #include <ctime>
 #include <climits>
 #include <cstring>
-#include <stdint.h>
 #include <getopt.h>
 #include <aterm2.h>
 #include <assert.h>
@@ -22,9 +21,8 @@
 #include "libtrace.h"
 #include "libdataelm.h"
 
-#ifndef ULLONG_MAX
-#define ULLONG_MAX	18446744073709551615ULL
-#endif
+#include <boost/lexical_cast.hpp>
+#include <boost/cstdint.hpp>
 
 // Squadt protocol interface
 #ifdef ENABLE_SQUADT_CONNECTIVITY
@@ -1376,10 +1374,12 @@ int main(int argc, char **argv)
 	    priority_action = strdup((boost::any_cast <string> (*(c.get_option(option_confluent_tau)->get_value_iterator()))).c_str());
     }
     
-    max_states = strtoull((boost::any_cast <string> (*(c.get_option(option_max_states)->get_value_iterator()))).c_str(),NULL,0);
+    max_states = boost::lexical_cast < unsigned long long > ((
+        boost::any_cast <string> (*(c.get_option(option_max_states)->get_value_iterator()))));
     
     bithashing = boost::any_cast <bool> (*(c.get_option(option_bithashing)->get_value_iterator()));
-    bithashsize = strtoull((boost::any_cast <string> (*(c.get_option(option_bithashsize)->get_value_iterator()))).c_str(),NULL,0);
+    bithashsize = boost::lexical_cast < unsigned long long > (
+        (boost::any_cast <string> (*(c.get_option(option_bithashsize)->get_value_iterator()))));
     
     initial_table_size = strtoul((boost::any_cast <string> (*(c.get_option(option_init_tsize)->get_value_iterator()))).c_str(),NULL,0);
   }
@@ -1423,7 +1423,7 @@ int main(int argc, char **argv)
         {
           if ( (optarg[0] >= '0') && (optarg[0] <= '9') )
           {
-            bithashsize = strtoull(optarg,NULL,0);
+            bithashsize = boost::lexical_cast < unsigned long long > (optarg);
           } else {
             gsErrorMsg("invalid argument to -b/--bit-hash\n",optarg);
             return 1;
@@ -1433,7 +1433,7 @@ int main(int argc, char **argv)
       case 'l':
         if ( (optarg[0] >= '0') && (optarg[0] <= '9') )
         {
-          max_states = strtoull(optarg,NULL,0);
+          max_states = boost::lexical_cast < unsigned long long > (optarg);
         } else {
           gsErrorMsg("invalid argument to -l/--max\n",optarg);
           return 1;

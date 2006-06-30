@@ -24,6 +24,7 @@ lib aterm
        : <address-model>64:<define>AT_64BIT
          <link>shared:<cflags>-fPIC
          <link>shared,<toolset>darwin:<cflags>"-fPIC -fno-common"
+         <os>NT:<link>static
          <toolset>msvc:<define>WIN32
          <toolset>msvc:<include>../../auxiliary/include/nt_compatibility
        :
