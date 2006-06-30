@@ -724,6 +724,61 @@ static unsigned long long state_index(ATerm state)
   }
 }
 
+
+static ATerm *queue_get = NULL;
+static ATerm *queue_put = NULL;
+static unsigned int queue_size = 0;
+static unsigned int queue_get_pos = 0;
+static unsigned int queue_get_count = 0;
+static unsigned int queue_put_count = 0;
+
+static void add_to_queue(ATerm state)
+{
+  if ( queue_put_count == queue_size )
+  {
+    if ( queue_size == 0 )
+    {
+      queue_size = 128;
+    } else {
+      queue_size = queue_size * 2;
+      ATunprotectArray(queue_get);
+      ATunprotectArray(queue_put);
+    }
+    queue_get = (ATerm *) realloc(queue_get, queue_size*sizeof(ATerm));
+    queue_put = (ATerm *) realloc(queue_put, queue_size*sizeof(ATerm));
+    for (unsigned int i=queue_put_count; i<queue_size; i++)
+    {
+      queue_get[i] = NULL;
+      queue_put[i] = NULL;
+    }
+    ATprotectArray(queue_get,queue_size);
+    ATprotectArray(queue_put,queue_size);
+  }
+
+  queue_put[queue_put_count++] = state;
+}
+
+static ATerm get_from_queue()
+{
+  if ( queue_get_pos == queue_get_count )
+  {
+    return NULL;
+  } else {
+    return queue_get[queue_get_pos++];
+  }
+}
+
+static void swap_queues()
+{
+  ATerm *t = queue_get;
+  queue_get = queue_put;
+  queue_put = t;
+  queue_get_pos = 0;
+  queue_get_count = queue_put_count;
+  queue_put_count = 0;
+}
+
+
 static bool add_transition(ATerm from, ATermAppl action, ATerm to)
 {
   bool new_state;
@@ -839,9 +894,20 @@ static bool generate_lts()
     } else if ( expl_strat == es_breadth )
     {
       NextStateGenerator *nsgen = NULL;
+      if ( bithashing )
+      {
+        add_to_queue(state);
+        swap_queues();
+      }
       while ( current_state < num_states )
       {
-        state = ATindexedSetGetElem(states,current_state);
+        if ( bithashing )
+        {
+          state = get_from_queue();
+	  assert(state != NULL);
+        } else {
+          state = ATindexedSetGetElem(states,current_state);
+        }
         bool deadlockstate = true;
   
         nsgen = nstate->getNextStates(state,nsgen);
@@ -850,7 +916,11 @@ static bool generate_lts()
         while ( nsgen->next(&Transition,&NewState) )
         {
           deadlockstate = false;
-          add_transition(state,Transition,NewState);
+          bool b = add_transition(state,Transition,NewState);
+          if ( bithashing && b )
+          {
+            add_to_queue(NewState);
+          }
         }
         
         if ( nsgen->errorOccurred() )
@@ -884,6 +954,10 @@ static bool generate_lts()
         }
         if ( current_state == nextlevelat )
         {
+          if ( bithashing )
+          {
+            swap_queues();
+          }
 #ifdef ENABLE_SQUADT_CONNECTIVITY
           if (tc.is_active()) {
             update_status_display(level,current_state,num_states,num_found_same,trans);
@@ -1371,7 +1445,7 @@ int main(int argc, char **argv)
     
     if ( boost::any_cast <bool> (*(c.get_option(option_confluence_reduction)->get_value_iterator())) )
     {
-	    priority_action = strdup((boost::any_cast <string> (*(c.get_option(option_confluent_tau)->get_value_iterator()))).c_str());
+      priority_action = strdup((boost::any_cast <string> (*(c.get_option(option_confluent_tau)->get_value_iterator()))).c_str());
     }
     
     max_states = boost::lexical_cast < unsigned long long > ((
@@ -1525,12 +1599,6 @@ int main(int argc, char **argv)
   {
     gsErrorMsg("options -b/--bit-hash and -t/--trace cannot be used together\n");
     return 1;
-  }
-  if ( bithashing && (expl_strat == es_breadth) )
-  {
-    gsWarningMsg("options -b/--bit-hash and breadth-first search cannot be used together\n");
-    gsWarningMsg("using depth-first search instead\n");
-    expl_strat = es_depth;
   }
   if ( quiet )
     gsSetQuietMsg();
