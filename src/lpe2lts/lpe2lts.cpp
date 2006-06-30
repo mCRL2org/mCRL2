@@ -22,7 +22,9 @@
 #include "libdataelm.h"
 
 #include <boost/lexical_cast.hpp>
-#include <boost/cstdint.hpp>
+#ifndef ULLONG_MAX
+#define ULLONG_MAX      18446744073709551615ULL
+#endif
 
 // Squadt protocol interface
 #ifdef ENABLE_SQUADT_CONNECTIVITY
@@ -89,6 +91,11 @@ static ATermAppl *parse_action_list(const char *s, int *len)
   }
 
   ATermAppl *r = (ATermAppl *) malloc((*len)*sizeof(ATermAppl));
+  if ( r == NULL )
+  {
+    gsErrorMsg("not enough memory to store action list\n");
+    exit(1);
+  }
   for (int i=0; i<(*len); i++)
   {
     r[i] = NULL;
@@ -731,11 +738,16 @@ static unsigned int queue_size = 0;
 static unsigned int queue_get_pos = 0;
 static unsigned int queue_get_count = 0;
 static unsigned int queue_put_count = 0;
+static bool queue_size_fixed = false;
 
 static void add_to_queue(ATerm state)
 {
   if ( queue_put_count == queue_size )
   {
+    if ( queue_size_fixed )
+    {
+      return;
+    }
     if ( queue_size == 0 )
     {
       queue_size = 128;
@@ -744,8 +756,34 @@ static void add_to_queue(ATerm state)
       ATunprotectArray(queue_get);
       ATunprotectArray(queue_put);
     }
-    queue_get = (ATerm *) realloc(queue_get, queue_size*sizeof(ATerm));
-    queue_put = (ATerm *) realloc(queue_put, queue_size*sizeof(ATerm));
+    ATerm *tmp;
+    tmp = (ATerm *) realloc(queue_get, queue_size*sizeof(ATerm));
+    if ( tmp == NULL )
+    {
+      gsWarningMsg("cannot store all unexplored states (more than %lu); dropping some states from now on\n",queue_put_count);
+      queue_size = queue_put_count;
+      ATprotectArray(queue_get,queue_size);
+      ATprotectArray(queue_put,queue_size);
+      queue_size_fixed = true;
+      return;
+    }
+    queue_get = tmp;
+    tmp = (ATerm *) realloc(queue_put, queue_size*sizeof(ATerm));
+    if ( tmp == NULL )
+    {
+      gsWarningMsg("cannot store all unexplored states (more than %lu); dropping some states from now on\n",queue_put_count);
+      tmp = (ATerm *) realloc(queue_get, queue_size*sizeof(ATerm));
+      if ( tmp != NULL )
+      {
+        queue_get = tmp;
+      }
+      queue_size = queue_put_count;
+      ATprotectArray(queue_get,queue_size);
+      ATprotectArray(queue_put,queue_size);
+      queue_size_fixed = true;
+      return;
+    }
+    queue_put = tmp;
     for (unsigned int i=queue_put_count; i<queue_size; i++)
     {
       queue_get[i] = NULL;
@@ -985,6 +1023,11 @@ static bool generate_lts()
     {
       unsigned int nsgens_size = 128;
       NextStateGenerator **nsgens = (NextStateGenerator **) malloc(nsgens_size*sizeof(NextStateGenerator *));
+      if ( nsgens == NULL )
+      {
+        gsErrorMsg("cannot create state stack\n");
+        exit(1);
+      }
       nsgens[0] = nstate->getNextStates(state);
       for (unsigned int i=1; i<nsgens_size; i++)
       {
@@ -1011,6 +1054,11 @@ static bool generate_lts()
             {
               nsgens_size = nsgens_size*2;
               nsgens = (NextStateGenerator **) realloc(nsgens,nsgens_size*sizeof(NextStateGenerator *));
+              if ( nsgens == NULL )
+              {
+                gsErrorMsg("cannot enlarge state stack\n");
+                exit(1);
+              }
               for (unsigned int i=nsgens_num; i<nsgens_size; i++)
               {
                 nsgens[i] = NULL;
