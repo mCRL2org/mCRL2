@@ -135,6 +135,25 @@ namespace squadt {
     tool_descriptor = t;
   }
 
+  inline const processor::object_descriptor::sptr processor::find_initial_object() const {
+    if (number_of_inputs() != 0) {
+      object_descriptor::sptr o(inputs[0]);
+
+      assert(o.get() != 0);
+
+      processor::sptr a(o->generator.lock());
+
+      assert(a.get() != 0);
+
+      return (a->find_initial_object());
+    }
+    else {
+      assert(0 < number_of_outputs());
+
+      return (outputs[0]);
+    }
+  }
+
   /**
    * @param[in] i the input combination to set
    **/

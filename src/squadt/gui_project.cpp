@@ -249,8 +249,8 @@ namespace squadt {
 
       context_menu.AppendSeparator();
 
-      if (!context_menu.FindItemByPosition(2 + generated * 3)->IsSeparator()) {
-        context_menu.InsertSeparator(2 + generated * 3);
+      if (!context_menu.FindItemByPosition(generated ? 5 : 2)->IsSeparator()) {
+        context_menu.InsertSeparator(generated ? 5 : 2);
       }
 
       context_menu.Append(cmID_DETAILS, wxT("Details"));

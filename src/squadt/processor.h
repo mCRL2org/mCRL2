@@ -188,12 +188,12 @@ namespace squadt {
       /** \brief The current task that is running or about to run */
       monitor::sptr                  current_monitor;
 
-      /** \brief The selected input combination of the tool */
-      tool::input_combination const* selected_input_combination;
-
       /** \brief The associated project manager */
       project_manager*               manager;
  
+      /** \brief The selected input combination of the tool */
+      tool::input_combination const* selected_input_combination;
+
     private:
 
       /** \brief Basic constructor */
@@ -219,6 +219,9 @@ namespace squadt {
  
       /** \brief Find an object descriptor for a given name and rename if it exists */
       void rename_object(object_descriptor::sptr const&, std::string const&);
+
+      /** \brief Get the most original (main) input */
+      const object_descriptor::sptr find_initial_object() const;
  
     public:
 

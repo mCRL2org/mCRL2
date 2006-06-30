@@ -25,7 +25,7 @@ namespace squadt {
     std::cerr << "No custom display state change event handler connected!" << std::endl;
   }
 
-  inline processor::processor(project_manager& p) : current_monitor(new monitor(*this)), manager(&p) {
+  inline processor::processor(project_manager& p) : current_monitor(new monitor(*this)), manager(&p), selected_input_combination(0) {
   }
 
   /**
@@ -33,7 +33,7 @@ namespace squadt {
    * @param[in] t the tool descriptor of the tool that is to be used to produce the output from the input
    **/
   inline processor::processor(project_manager& p, tool::sptr t) :
-    tool_descriptor(t), current_monitor(new monitor(*this)), manager(&p) {
+    tool_descriptor(t), current_monitor(new monitor(*this)), manager(&p), selected_input_combination(0) {
   }
 
   /**
@@ -67,16 +67,15 @@ namespace squadt {
    * \attention This function is non-blocking
    **/
   void processor::configure(const tool::input_combination* ic, std::string const& w, const boost::filesystem::path& l) {
+    using namespace boost;
+
     assert(ic != 0);
 
     selected_input_combination = const_cast < tool::input_combination* > (ic);
 
     sip::configuration::sptr c(sip::controller::communicator::new_configuration(*selected_input_combination));
 
-    /* Establish what prefix, if any, was used */
-//    ic.identifier 
-
-    c->set_output_prefix(boost::str(boost::format("%s%04X") % (boost::filesystem::basename(l)) % manager->get_unique_count()));
+    c->set_output_prefix(str(format("%s%04X") % (basename(find_initial_object()->location)) % manager->get_unique_count()));
 
     c->add_input(ic->identifier, ic->format, l.string());
 
@@ -449,13 +448,15 @@ namespace squadt {
 
       o->location = n;
 
-      /* TODO update configuration */
+      /* Update configuration */
       sip::configuration::sptr c = current_monitor->get_configuration();
 
-      sip::object::sptr object(c->get_output(o->identifier));
+      if (c.get() != 0) {
+        sip::object::sptr object(c->get_output(o->identifier));
 
-      if (object.get() != 0) {
-        object->set_location(n);
+        if (object.get() != 0) {
+          object->set_location(n);
+        }
       }
     }
   }

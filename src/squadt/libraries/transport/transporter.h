@@ -6,14 +6,21 @@
 #include <list>
 #include <istream>
 
-#include <boost/asio/ip/address.hpp>
-#include <boost/asio/ip/host_name.hpp>
 #include <boost/noncopyable.hpp>
 #include <boost/thread/recursive_mutex.hpp>
 
 #include <transport/detail/exception.h>
 #include <transport/detail/transceiver.h>
 #include <transport/detail/listener.h>
+
+/* Predeclare boost::asio::ip::address */
+namespace boost {
+  namespace asio {
+    namespace ip {
+      class address;
+    }
+  }
+}
 
 /*
  * Socket/Direct communication abstraction
@@ -43,17 +50,23 @@ namespace transport {
 
     public:
 
-      /** Convenience type to hide the shared pointer */
+      /** \brief Convenience type to hide the shared pointer */
       typedef std::list < basic_transceiver::ptr >    connection_list;
 
-      /** Convenience type to hide the shared pointer */
+      /** \brief Convenience type to hide the shared pointer */
       typedef std::list < basic_listener::ptr >       listener_list;
 
-      /** IP version 4 address verifier (refer to the asio documentation) */
+      /** \brief IP version 4 address verifier (refer to the asio documentation) */
       typedef boost::asio::ip::address                address;
 
-      /** IP version 4 address verifier (refer to the asio documentation) */
+      /** \brief Type for host names */
       typedef std::string                             host_name;
+
+      /** \brief Address of the loopback interface */
+      static const address                            loopback;
+
+      /** \brief Address of any interface */
+      static const address                            any;
 
     private:
 
@@ -92,10 +105,10 @@ namespace transport {
       void connect(transporter&);
 
       /** \brief Creates socket connection to another transporter object (using a loopback connection by default) */
-      void connect(const address& = boost::asio::ip::address_v4::loopback(), const long port = 0);
+      void connect(address const& = loopback, const long port = 0);
 
       /** \brief Creates socket connection to another transporter object (using a loopback connection by default) */
-      void connect(const std::string& host_name, const long port = 0);
+      void connect(std::string const& host_name, const long port = 0);
 
       /** \brief Disconnect all */
       void disconnect();
@@ -110,7 +123,7 @@ namespace transport {
       inline void relay_connection(transporter*, basic_transceiver*);
 
       /** \brief Activate a socket listener */
-      void add_listener(const address& = boost::asio::ip::address_v4::any(), const long port = 0);
+      void add_listener(address const& = any, const long port = 0);
 
       /** \brief Activate a socket listener by its number */
       void remove_listener(size_t number = 0);

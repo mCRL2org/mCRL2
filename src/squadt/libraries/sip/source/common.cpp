@@ -1,6 +1,7 @@
 #define IMPORT_STATIC_MEMBERS
 
 #include <sip/detail/configuration.h>
+#include <sip/detail/object.h>
 #include <sip/detail/common.h>
 
 namespace sip {

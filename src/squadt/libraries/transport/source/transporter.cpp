@@ -1,6 +1,7 @@
 #include <algorithm>
 #include <functional>
 
+#include <boost/asio/ip/address.hpp>
 #include <boost/bind.hpp>
 #include <boost/ref.hpp>
 
@@ -13,6 +14,10 @@ namespace transport {
 
   using namespace transceiver;
   using namespace listener;
+
+  const transporter::address transporter::loopback = boost::asio::ip::address_v4::loopback();
+
+  const transporter::address transporter::any      = boost::asio::ip::address_v4::any();
 
   transporter::~transporter() {
     using namespace boost;

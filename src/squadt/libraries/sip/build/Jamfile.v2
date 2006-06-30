@@ -31,7 +31,6 @@ lib sip_controller
       common.cpp
       sip_exception.cpp
       report.cpp
-      object.cpp
       layout.cpp
       layout_base.cpp
       layout_elements.cpp
@@ -44,7 +43,6 @@ lib sip_tool
       common.cpp
       sip_exception.cpp
       report.cpp
-      object.cpp
       layout.cpp
       layout_base.cpp
       layout_elements.cpp

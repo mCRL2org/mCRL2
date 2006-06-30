@@ -304,29 +304,29 @@ namespace sip {
   }
 
   /**
-   * @param output the stream to which the output is written
+   * @param out the stream to which the output is written
    **/
-  inline void configuration::write(std::ostream& output) const {
-    output << "<configuration";
+  inline void configuration::write(std::ostream& out) const {
+    out << "<configuration";
 
     if (fresh) {
-      output << " fresh=\"true\"";
+      out << " fresh=\"true\"";
     }
 
-    output << " output-prefix=\"" << output_prefix << "\"";
+    out << " output-prefix=\"" << output_prefix << "\"";
 
     /* Add input combination */
-    output << " category=\"" << category << "\">";
+    out << " category=\"" << category << "\">";
 
     for (option_list::const_iterator i = options.begin(); i != options.end(); ++i) {
-        (*i).first->write(output);
+        (*i).first->write(out);
     }
 
     for (object_list::const_iterator i = objects.begin(); i != objects.end(); ++i) {
-        (*i)->write(output);
+        (*i)->write(out);
     }
 
-    output << "</configuration>";
+    out << "</configuration>";
   }
 
   /**
