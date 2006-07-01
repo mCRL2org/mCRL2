@@ -101,8 +101,9 @@ namespace squadt {
       s << "<description>" << description << "</description>\n";
     }
  
-    std::for_each(processors.begin(), processors.end(),
-                    boost::bind(&processor::write, _1, boost::ref(s)));
+    BOOST_FOREACH(processor_list::value_type p, processors) {
+      p->write(s);
+    }
  
     s << "</project>\n";
   }

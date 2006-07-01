@@ -338,7 +338,7 @@ namespace squadt {
             }
             else {
               /* Add the main input (must exist) */
-              dialog.populate_tool_list(t->format);
+              dialog.populate_tool_list(p->get_input_combination()->format);
 
               if (p->get_tool().get() != 0) {
                 dialog.select_tool(p->get_input_combination(), p->get_tool()->get_name());

@@ -5,6 +5,7 @@
 #include <utility>
 
 #include <boost/bind.hpp>
+#include <boost/foreach.hpp>
 #include <boost/function.hpp>
 #include <boost/shared_ptr.hpp>
 #include <boost/thread/thread.hpp>
@@ -147,7 +148,9 @@ namespace sip {
    
       std::pair < handler_map::const_iterator, handler_map::const_iterator > p = handlers.equal_range(id);
    
-      std::for_each(p.first, p.second, boost::bind(&handler_map::value_type::second, _1));
+      BOOST_FOREACH(handler_map::value_type p, handlers.equal_range(id)) {
+        p.second();
+      }
     }
    
     /**

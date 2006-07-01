@@ -40,9 +40,9 @@ namespace squadt {
         wxBoxSizer*       t = new wxBoxSizer(wxVERTICAL);
         wxBoxSizer*       u = new wxBoxSizer(wxHORIZONTAL);
 
-        name = new wxTextCtrl(main_panel, wxID_ANY, wxT(""));
+        name = new wxStaticText(main_panel, wxID_ANY, wxT(""));
 
-        u->Add(new wxStaticText(main_panel, wxID_ANY, wxT("Name :")));
+        u->Add(new wxStaticText(main_panel, wxID_ANY, wxT("Main input : ")));
         u->AddSpacer(5);
         u->Add(name, 1, wxEXPAND);
 

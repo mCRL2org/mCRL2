@@ -4,6 +4,7 @@
 #include <boost/asio/ip/address.hpp>
 #include <boost/bind.hpp>
 #include <boost/ref.hpp>
+#include <boost/foreach.hpp>
 
 #include <transport/detail/transceiver.tcc>
 #include <transport/detail/socket_listener.h>
@@ -28,7 +29,9 @@ namespace transport {
     disconnect();
   
     /* Clean up listeners */
-    std::for_each(listeners.begin(),listeners.end(),bind(&basic_listener::shutdown, bind(&shared_ptr < basic_listener >::get, _1)));
+    BOOST_FOREACH(listener_list::value_type i, listeners) {
+      i->shutdown();
+    }
   }
 
   /**

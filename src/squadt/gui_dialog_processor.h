@@ -41,7 +41,7 @@ namespace squadt {
           wxTreeCtrl*             tool_selector;
 
           /** \brief Text field that contains a name */
-          wxTextCtrl*             name;
+          wxStaticText*           name;
 
           /** \brief The list of input objects */
           wxListCtrl*             input_objects;
@@ -141,11 +141,11 @@ namespace squadt {
        * @param[in] n the new name
        **/
       inline void processor_details::set_name(wxString n) {
-        name->SetValue(n);
+        name->SetLabel(n);
       }
 
       inline wxString processor_details::get_name() {
-        return (name->GetValue());
+        return (name->GetLabel());
       }
     }
   }

@@ -3,6 +3,8 @@
 #include "tool.h"
 #include "tool_manager.h"
 
+#include <boost/foreach.hpp>
+
 namespace squadt {
   namespace miscellaneous {
 
@@ -42,9 +44,9 @@ namespace squadt {
       categories_by_format::const_iterator i = categories_for_format.find(f);
 
       if (i != categories_for_format.end()) {
-        const tools_by_category& t = (*i).second;
-
-        std::for_each(t.begin(), t.end(), a);
+        BOOST_FOREACH(tools_by_category::value_type c, (*i).second) {
+          a(c);
+        }
       }
     }
   }

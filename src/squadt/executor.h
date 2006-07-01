@@ -11,6 +11,7 @@
 #include <boost/bind.hpp>
 #include <boost/weak_ptr.hpp>
 #include <boost/shared_ptr.hpp>
+#include <boost/foreach.hpp>
 
 #include "task_monitor.h"
 
@@ -143,7 +144,9 @@ namespace squadt {
     
       delayed_commands.clear();
     
-      std::for_each(processes.begin(), processes.end(), boost::bind(&process::terminate, _1));
+      BOOST_FOREACH(process::ptr p, processes) {
+        p->terminate();
+      }
     }
  
     /* Start processing commands if the queue contains any waiters */

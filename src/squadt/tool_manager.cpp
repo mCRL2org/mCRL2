@@ -6,6 +6,7 @@
 #include <boost/filesystem/operations.hpp>
 #include <boost/filesystem/convenience.hpp>
 #include <boost/ref.hpp>
+#include <boost/foreach.hpp>
 
 #include <xml2pp/text_reader.h>
 
@@ -151,9 +152,9 @@ namespace squadt {
   void tool_manager::query_tools() {
     using namespace boost;
 
-    std::for_each(tools.begin(), tools.end(),
-                    bind(&tool_manager::query_tool, this, 
-                                    bind(&tool::sptr::operator*, _1)));
+    BOOST_FOREACH(tool_list::value_type t, tools) {
+      query_tool(*t);
+    }
   }
 
   /**

@@ -5,6 +5,8 @@
 #include "gui_project.h"
 #include "gui_tool_display.h"
 
+#include <boost/foreach.hpp>
+
 #include <wx/button.h>
 #include <wx/checkbox.h>
 #include <wx/event.h>
@@ -726,7 +728,9 @@ namespace squadt {
 
       tool_display_mediator m(this, &event_handler);
 
-      std::for_each(l.begin(), l.end(), boost::bind(&state_change_handler::update, &event_handler, &m, _1));
+      BOOST_FOREACH(sip::layout::element const* i, l) {
+        event_handler.update(&m, i);
+      }
     }
 
     /**
