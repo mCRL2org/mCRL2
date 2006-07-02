@@ -86,12 +86,12 @@ namespace sip {
     };
  
     /** \brief The type identifier for messages of which the type is not known */
-    template < class M, M D, M A >
-    const M message< M, D, A >::message_unknown = D;
+//    template < class M, M D, M A >
+//    const M message< M, D, A >::message_unknown = D;
 
     /** \brief The type identifier for messages of any type */
-    template < class M, M D, M A >
-    const M message< M, D, A >::message_any     = A;
+//    template < class M, M D, M A >
+//    const M message< M, D, A >::message_any     = A;
 
     /**
      * @param t a message type identifier

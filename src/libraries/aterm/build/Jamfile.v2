@@ -22,9 +22,9 @@ lib aterm
          tafio.c
          version.c
        : <address-model>64:<define>AT_64BIT
-         <link>shared:<cflags>-fPIC
-         <link>shared,<toolset>darwin:<cflags>"-fPIC -fno-common"
-         <os>NT:<link>static
+         <toolset>darwin,<link>shared:<cflags>"-fPIC -fno-common"
+         <toolset>gcc,<os>NT,<link>shared:<cflags>""
+         <toolset>gcc,<os>LINUX,<link>shared:<cflags>-fPIC
          <toolset>msvc:<define>WIN32
          <toolset>msvc:<include>../../auxiliary/include/nt_compatibility
        :

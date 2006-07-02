@@ -26,7 +26,9 @@ project
           <define>_FILE_OFFSET_BITS=64
           <toolset>darwin:<define>__darwin__
           <toolset>darwin:<cxxflags>"-std=c++98 -ansi"
-          <toolset>gcc:<cxxflags>"-std=c++98 -ansi"
+          <os>CYGWIN,<toolset>gcc:<runtime-link>static
+          <os>CYGWIN,<toolset>gcc:<link>static
+          <os>LINUX,<toolset>gcc:<cxxflags>"-std=c++98 -ansi"
        : default-build
           <address-model>$(ADDRESS_MODEL)
           <variant>$(BUILD_VARIANT)

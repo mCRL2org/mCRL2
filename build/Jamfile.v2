@@ -15,6 +15,10 @@ switch [ os.name ] {
     lib OpenGL : : <name>"opengl32" ;
     lib GLU    : OpenGL : <name>"glu32" ;
     lib GLUT   : OpenGL : <name>"glut32" ;
+  case "CYGWIN" :
+    lib OpenGL : : <name>"opengl32" ;
+    lib GLU    : OpenGL : <name>"glu32" ;
+    lib GLUT   : OpenGL : <name>"glut32" ;
   case "MACOSX" :
     alias OpenGL : : : : <framework>"OpenGL" ;
     alias GLUT   : OpenGL : : : <framework>"GLUT" ;
@@ -35,6 +39,11 @@ lib z  : : <name>"z" ;
 lib m  : : <name>"m" ;
 
 lib dl : : <name>"dl" ;
+
+alias winsock : winsock32 ws2_32 ;
+
+lib winsock32 : : <name>"wsock32" ;
+lib ws2_32 : : <name>"ws2_32" ;
 
 lib xml2
       :

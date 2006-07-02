@@ -5,7 +5,6 @@ project squadt
     <threading>multi
     <include>../..
     <include>../libraries
-    <cxxflags>-std=c++98
   ;
 
 
