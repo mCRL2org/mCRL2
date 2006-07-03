@@ -1,14 +1,9 @@
-project src/lpe/example
+project libraries/lpe/example
    : requirements
-       <include>../..
-       <toolset>msvc:<include>../../nt
-       <toolset>msvc:<define>NO_DYNLOAD
-       <include>../../../../boost
-       <source>../../build//mcrl-gs
-       <source>/boost/filesystem//boost_filesystem
+       <include>$(BOOST)
+       <source>/libraries/mcrl2_basic//mcrl2_basic
+       <source>/libraries/lpe//lpe
        <source>/boost/program_options//boost_program_options
-       <os>LINUX:<linkflags>-ldl
-       <define>REVISION="1.0"
        <define>BOOST_ALL_NO_LIB    # do not use automatic library selection
    ;
 
@@ -16,22 +11,12 @@ exe constructors    : constructors.cpp : ;
 exe spec            : spec.cpp  : ;
 exe substitute      : substitute.cpp : ;
 exe filter_template : filter_template.cpp : ;
-exe lpeupdate       : lpeupdate.cpp : ;
-exe lpeconstelm     : lpeconstelm.cpp : ;
-exe lpeparelm       : lpeparelm.cpp : ;
-exe lpeinfo         : lpeinfo.cpp : ;
-
-exe haha : haha.cpp : ;
-exe term : term.cpp : ;
 
 install dist
    :
-     term
-     haha
      constructors
      spec
      substitute
-     lpeupdate
      filter_template
    :
    ;

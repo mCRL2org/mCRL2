@@ -45,6 +45,7 @@ lib rewrite
          <library>/site-config//m
          <include>../include/rewrite
          <os>LINUX:<library>/site-config//dl
+         <toolset>msvc:<define>NO_DYNLOAD
        ;
 
 local PRINT_SOURCES = [ prepend print/ : libprint libprint_c ] ;
