@@ -16,6 +16,6 @@ lib xml2pp
       <xml2>library
     :
     : <library>/boost/filesystem//boost_filesystem
-      <library>/site-config//xml2
+      <link>static:<library>/site-config//xml2
     ;
 
