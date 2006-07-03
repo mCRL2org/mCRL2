@@ -1,0 +1,16 @@
+# mCRL2 regression-testing Jamfile
+
+project status
+    : source-location ../test
+    : requirements <hardcode-dll-paths>true  
+      <include>../boost
+      <define>BOOST_ALL_NO_LIB
+    ;
+        
+import testing ;
+
+# Tests from Jamfiles in individual library test subdirectories
+# Please keep these in alphabetic order by test-suite name
+
+build-project ../src/libraries/aterm/test ;  # test-suite aterm
+build-project ../src/libraries/lpe/test ;    # test-suite lpe

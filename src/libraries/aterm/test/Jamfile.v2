@@ -1,0 +1,19 @@
+import testing ;
+
+project libraries/aterm/test
+   : requirements
+       <include>$(BOOST)
+       <source>/libraries/lpe//lpe
+       <define>BOOST_ALL_NO_LIB    # do not use automatic library selection
+   ;
+
+test-suite aterm
+    :
+      [ run make_match_test.cpp ]
+      [ run aterm_list_test.cpp ]
+      [ run aterm_test.cpp ]
+      [ run function_test.cpp ]
+      [ run make_term.cpp ]
+      [ run constructors.cpp ]
+      [ run is_quoted.cpp ]
+    ;

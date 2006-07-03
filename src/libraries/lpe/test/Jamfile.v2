@@ -1,0 +1,15 @@
+import testing ;
+
+project libraries/lpe/test
+   : requirements
+       <include>$(BOOST)
+       <source>/libraries/mcrl2_basic//mcrl2_basic
+       <source>/libraries/lpe//lpe
+       <source>/boost/program_options//boost_program_options
+       <define>BOOST_ALL_NO_LIB    # do not use automatic library selection
+   ;
+
+test-suite lpe
+    :
+      [ run data_expression.cpp ]
+    ;
