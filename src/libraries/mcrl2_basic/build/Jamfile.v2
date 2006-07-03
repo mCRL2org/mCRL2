@@ -4,6 +4,7 @@ project mcrl2_basic
        : requirements
           <include>../include
           <include>../../../
+          <toolset>msvc:<define>NO_DYNLOAD
        : usage-requirements
           <include>../include
        ;
@@ -42,10 +43,10 @@ lib rewrite
          <include>../include/rewrite
        :
        : <library>/libraries/aterm//aterm 
-         <library>/site-config//m
+         <os>LINUX:<library>/site-config//m
+         <os>CYGWIN:<library>/site-config//m
          <include>../include/rewrite
          <os>LINUX:<library>/site-config//dl
-         <toolset>msvc:<define>NO_DYNLOAD
        ;
 
 local PRINT_SOURCES = [ prepend print/ : libprint libprint_c ] ;
@@ -80,7 +81,8 @@ lib mcrl2_basic
        : <dependency>/libraries/aterm//aterm
        :
        : <library>/libraries/aterm//aterm
-         <library>/site-config//m
+         <os>LINUX:<library>/site-config//m
+         <os>CYGWIN:<library>/site-config//m
          <include>../include/print
          <include>../include/rewrite
          <include>../include/lowlevel

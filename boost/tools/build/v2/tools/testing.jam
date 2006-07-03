@@ -185,8 +185,8 @@ local rule get-library-name ( path )
 {
     # Path is in normalized form, so all slashes are forward.
 
-    local match1 = [ MATCH /libs/(.*)/(test|example) : $(path) ] ;
-    local match2 = [ MATCH /libs/(.*)$ : $(path) ] ;
+    local match1 = [ MATCH /src/libraries/(.*)/(test|example) : $(path) ] ;
+    local match2 = [ MATCH /src/libraries/(.*)$ : $(path) ] ;
     local match3 = [ MATCH (/status$) : $(path) ] ;
 
     if $(match1) { return $(match1[0]) ; }
