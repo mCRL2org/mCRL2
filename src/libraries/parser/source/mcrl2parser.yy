@@ -885,6 +885,11 @@ mult_act:
       $$ = gsMakeMultAct(ATreverse($1));
       gsDebugMsg("parsed multi-action\n  %T\n", $$);
     }
+  | TAU
+    {
+      $$ = gsMakeMultAct(ATmakeList0());
+      gsDebugMsg("parsed multi-action\n  %T\n", $$);
+    }
   ; 
 
 //one or more parameterised id's, separated by bars
