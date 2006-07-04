@@ -811,6 +811,7 @@ static ATbool gstcReadInActs (ATermList Acts){
       }
     }
     ATtablePut(context.actions,(ATerm)ActName,(ATerm)Types);
+    gsDebugMsg("Read-in Act Name %T, Types %T\n",ActName,Types);
   }
  
   return Result;
@@ -1303,7 +1304,7 @@ static ATermAppl gstcRewrActProc(ATermTable Vars, ATermAppl ProcTerm){
 
       ATermAppl CastedNewPosType=gstcUpCastNumericType(PosType,NewPosType,&Par);
       if(!CastedNewPosType)
-	{gsErrorMsg("Cannot cast %P to %P (while typechecking %P)\n",NewPosType,PosType,Par);return NULL;}
+	{gsErrorMsg("Cannot cast %P to %P (while typechecking %P in %P)\n",NewPosType,PosType,Par,ProcTerm);return NULL;}
       
       NewPars=ATinsert(NewPars,(ATerm)Par);
       CastedPosTypeList=ATinsert(CastedPosTypeList,(ATerm)CastedNewPosType);
