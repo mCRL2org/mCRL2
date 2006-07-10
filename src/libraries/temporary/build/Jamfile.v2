@@ -1,12 +1,12 @@
 # This build file has no status it is what it is called: temporary
 
 project temporary
-       : source-location ../../..
+       : source-location ../source
        : build-dir $(BUILD_TOP)
        : requirements
-          <include>../../..
+          <include>../include
        : usage-requirements
-          <include>../../..
+          <include>../include
        ;
 
 lib trace

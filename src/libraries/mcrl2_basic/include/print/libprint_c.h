@@ -1,6 +1,8 @@
 #include <stdio.h>
 #include <aterm2.h>
 #include <ctype.h>
+#include <assert.h>
+#include <malloc.h>
 #include "libprint_types.h"
 #include "liblowlevel.h"
 
@@ -30,14 +32,58 @@ int gsvfprintf(FILE *stream, const char *format, va_list args);
 //- '%T' for the normal printing of ATerm's 
 //- '%F' for the printing of AFun's
 
+// The default message handler (defined in lowlevel.cpp)
+extern void (*custom_message_handler)(gsMessageType, char*);
+
+// Helper function (wrapper around gsvfprintf) for printing to string
+static void handler_wrapper(gsMessageType t, char *Format, ...) {
+  FILE* stream = tmpfile();
+
+  assert(stream);
+
+  va_list Args;
+  va_start(Args, Format);
+  gsvfprintf(stream, Format, Args);
+  va_end(Args);
+
+  size_t n = ftell(stream);
+
+  fflush(stream);
+  rewind(stream);
+
+  char* output  = (char*) malloc((n + 1) * sizeof(char));
+  char* current = output;
+
+  while (0 < n--) {
+    *current = (char) fgetc(stream);
+
+    ++current;
+  }
+
+  *current = '\0';
+
+  fclose(stream);
+
+  custom_message_handler(t, output);
+
+  free(output);
+}
+
 inline static void gsErrorMsg(char *Format, ...)
 //Post: "error: " is printed to stderr followed by Format, where the remaining
 //      parameters are used as gsprintf arguments to Format.
 {
-  fprintf(stderr, "error: ");
   va_list Args;
   va_start(Args, Format);
-  gsvfprintf(stderr, Format, Args);
+
+  if (custom_message_handler) {
+    handler_wrapper(gs_error, Format, Args);
+  }
+  else {
+    fprintf(stderr, "error: ");
+    gsvfprintf(stderr, Format, Args);
+  }
+
   va_end(Args);
 }
 
@@ -47,10 +93,17 @@ inline static void gsWarningMsg(char *Format, ...)
 //      as gsprintf arguments to Format.
 {
   if (gsWarning) {
-    fprintf(stderr, "warning: ");
     va_list Args;
     va_start(Args, Format);
-    gsvfprintf(stderr, Format, Args);
+
+    if (custom_message_handler) {
+      handler_wrapper(gs_warning, Format, Args);
+    }
+    else {
+      fprintf(stderr, "warning: ");
+      gsvfprintf(stderr, Format, Args);
+    }
+
     va_end(Args);
   }
 }
@@ -63,7 +116,14 @@ inline static void gsVerboseMsg(char *Format, ...)
   if (gsVerbose) {
     va_list Args;
     va_start(Args, Format);
-    gsvfprintf(stderr, Format, Args);
+
+    if (custom_message_handler) {
+      handler_wrapper(gs_info, Format, Args);
+    }
+    else {
+      gsvfprintf(stderr, Format, Args);
+    }
+
     va_end(Args);
   }
 }

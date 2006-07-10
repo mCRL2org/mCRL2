@@ -1,7 +1,7 @@
 #Redefine default definitions using autoconf
 HOST_OS            = @HOST_OS@
 
-BJAM               = @abs_top_srcdir@/boost/tools/jam/bin/bjam
+BJAM               = @abs_top_srcdir@/bin/bjam
 BOOST_BUILD       := $(BJAM) @BUILD_VARIANT@ @BUILD_EXPERIMENTAL@ @BUILD_DEPRECATED@
 
 USE_XMLTO          = @USE_XMLTO@

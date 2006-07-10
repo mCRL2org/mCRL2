@@ -55,6 +55,11 @@ rule make_bundle ( target : executable info icon : requirements * ) {
   else {
     alias $(base_executable)-bundle : : : ;
   }
+
+  notfile prepare_executable 
+       : @prepare
+       : $(executable)
+       ;
 }
 
 EXPORT $(__name__) : prepare make_bundle ;

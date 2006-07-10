@@ -63,13 +63,19 @@ void gsSetVerboseMsg(void);
 
 void gsSetDebugMsg(void);
 //Post: Printing of warnings, verbose information and extended debugging
-//      information during program executation is enabled.
+//      information during program execution is enabled.
 
 extern bool gsWarning;
 extern bool gsVerbose;
 extern bool gsDebug;
 
-//ATerm library work arounds
+// Type for message distinction (by purpose)
+enum gsMessageType {gs_info, gs_warning, gs_error};
+
+// Replaces message_handler by the function pointer passed as argument
+void gsSetCustomMessageHandler(void (*)(gsMessageType, char*));
+
+//ATerm library workarounds
 //--------------------------
 //
 //To eliminate downcasts in the rest of the code, we introduce wrappers around

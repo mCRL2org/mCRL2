@@ -59,6 +59,14 @@ void gsSetDebugMsg(void)
   gsDebug   = true;
 }
 
+// Function pointer for a custom message printing routine
+void (*custom_message_handler)(gsMessageType, char*) = 0;
+
+// Sets custom_message_handler a custom message printing routine
+void gsSetCustomMessageHandler(void (*h)(gsMessageType, char*)) {
+  custom_message_handler = h;
+}
+
 //ATerm libary work arounds
 //-------------------------
 

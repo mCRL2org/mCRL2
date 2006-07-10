@@ -1,12 +1,15 @@
 -include build/config.mk
 
-# Creates an application bundle on Mac OS X
-.PHONY: all install clean distclean reposclean distribution
+BJAM   = bin/bjam
+CONFIG = build/config.mk
 
-all: $(BJAM)
+# Creates an application bundle on Mac OS X
+.PHONY: all bjam install clean distclean reposclean distribution
+
+all: $(CONFIG) $(BJAM)
 	@$(BOOST_BUILD)
 
-install: $(BJAM)
+install:  $(CONFIG) $(BJAM)
 	@$(BOOST_BUILD) --install
 	@$(MAKE) -C src/doc install
 
@@ -19,18 +22,15 @@ distclean:
 	@${MAKE} -C src/doc distclean
 	$(RM) -r autom4te.cache *.o *.app *~ core core.*
 	$(RM) -r config.log config.status build/config.mk build/config.jam src/setup.h
-	$(RM) -rf bin boost/tools/jam/bin boost/tools/jam/bootstrap
+	$(RM) -rf bin
 
 reposclean: distclean
 	$(RM) src/mcrl2_revision.h
 
-$(BJAM):
-	@$(MAKE) -C boost bjam
-
 revision: $(BJAM)
 	@$(BOOST_BUILD) mcrl2_revision
 
-ifeq (,$(BJAM) $(findstring $(MAKECMDGOALS),clean distclean revision))
-	$(error Please configure the source tree first.)
-endif
+include build/bjam.mk
 
+build/config.mk:
+	$(error Please run configure first.)

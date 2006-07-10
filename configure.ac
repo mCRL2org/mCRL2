@@ -461,7 +461,7 @@ else
   AC_MSG_NOTICE(libXML2       :  MISSING)
 fi
 
-#evaluate some location variables for use with bjam
+#evaluate some location variables for use with Boost Build
 if test "x$prefix" = xNONE
 then
   prefix=$ac_default_prefix
