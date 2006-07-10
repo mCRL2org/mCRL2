@@ -39,17 +39,16 @@ documentation: all
 	@install -d $(mandir)/man$*
 	@for f in $(filter %.$*,$(OBJECTS)); do\
 	  if test -f $$f; then\
-	    c="install -m 644 $$f $(mandir)/man$*";\
-	    echo $$c;\
-	    $$c;\
+	    echo "Installing $(mandir)/man$*/$$f";\
+	    install -m 644 $$f $(mandir)/man$*;\
 	  fi;\
 	done
 
 %.1 %.2 %.3 %.4 %.5 %.6 %.7 %.8 %.9: %.xml
-	xmlto man $<
+	@xmlto man $<
 
 %.html: %.xml
-	xmlto xhtml-nochunks $<
+	@xmlto xhtml-nochunks $<
 
 %.txt: %.xml
-	xmlto txt $<
+	@xmlto txt $<
